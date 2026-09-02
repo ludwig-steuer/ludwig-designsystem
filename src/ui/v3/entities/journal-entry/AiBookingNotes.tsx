@@ -84,8 +84,8 @@ export function AiBookingNotes({
   /** Blockierende Befunde des Judge. */
   errors?: string[];
 }) {
-  const auffaellig = verdict === "flag" || errors.length > 0;
-  const [open, setOpen] = useState(auffaellig);
+  const flagged = verdict === "flag" || errors.length > 0;
+  const [open, setOpen] = useState(flagged);
 
   // Ein bestätigter Satz ohne Befund braucht keinen Kasten: der Vorschlag ist
   // die Aussage, nicht seine Begründung.
@@ -101,7 +101,7 @@ export function AiBookingNotes({
           style={{ transform: open ? "rotate(90deg)" : undefined, transition: "transform 180ms" }}
         />
         <span className="ki__title">
-          KI-Buchungshinweise{auffaellig ? ": Bitte manuell prüfen" : ""}
+          KI-Buchungshinweise{flagged ? ": Bitte manuell prüfen" : ""}
         </span>
         <span className={`confdot confdot--${confidence}`} title={KONFIDENZ_TEXT[confidence]} />
         {verdict ? <StatusBadge axis="judge" status={verdict} info={false} /> : null}

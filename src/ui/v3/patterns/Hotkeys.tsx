@@ -5,24 +5,24 @@ import { useEffect, useState } from "react";
 import { Dialog } from "../primitives/Dialog";
 
 /**
- * Tastatur (F123 T123.2, UX-Guidelines V14).
+ * Keyboard (F123 T123.2, UX guidelines V14).
  *
- * Hotkeys sind ein **Zusatzweg, nie der einzige**: jede Taste steht sichtbar
- * am Knopf, den sie auslöst (`Button hotkey="A"`), und jede Handlung geht
- * auch mit der Maus. Die Zielgruppe öffnet Ludwig alle zwei bis vier Wochen —
- * eine Anwendung, die man auswendig können muss, ist für sie unbedienbar.
+ * Hotkeys are an **additional path, never the only one**: every key is shown
+ * on the button it triggers (`Button hotkey="A"`), and every action also
+ * works with the mouse. The target group opens Ludwig every two to four
+ * weeks — an application you have to know by heart is unusable for them.
  *
  * Inside form fields the user types text, not commands: `INPUT`,
- * `TEXTAREA`, `SELECT` und `contenteditable` sind ausgenommen.
+ * `TEXTAREA`, `SELECT` and `contenteditable` are excluded.
  */
 
 export interface HotkeyBinding {
   /** The key as printed on the button: "A", "J", "?", "1". */
   key: string;
-  /** Was sie tut — die Zeile in der Legende. */
+  /** What it does — the line in the legend. */
   label: string;
   handler: () => void;
-  /** Mit Ctrl/⌘. Für seltene Sprünge, damit die Ziffern frei bleiben. */
+  /** With Ctrl/⌘. For rare jumps, so the digits stay free. */
   meta?: boolean;
 }
 
@@ -55,8 +55,8 @@ export function useHotkeys(bindings: readonly HotkeyBinding[], enabled = true) {
 }
 
 /**
- * Die Legende hinter `?`. Sie ist **Zusatz, nicht Quelle** — wer sie nie
- * öffnet, findet jede Taste am Knopf.
+ * The legend behind `?`. It is an **addition, not the source** — whoever
+ * never opens it still finds every key on its button.
  *
  * @when    Every screen with more than three keys, opened with `?`.
  * @instead As the source of truth for keys — the key is shown on the button.
@@ -66,7 +66,7 @@ export function HotkeyLegend({
   defaultOpen = false,
 }: {
   groups: { title: string; keys: { key: string; label: string }[] }[];
-  /** Nur für Storybook und Tests — im Produkt öffnet `?`. */
+  /** Storybook and tests only — in the product `?` opens it. */
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);

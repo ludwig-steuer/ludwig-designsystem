@@ -12,27 +12,28 @@ import {
 } from "lucide-react";
 
 /**
- * Das Prozessbild eines Stapels — **eine** Komponente in drei Größen
+ * The process picture of a batch — **one** component in three sizes
  * (F119 §3, F114 §1.1).
  *
- * Zehn Zustände sind für die Sachbearbeiterin zu viele Punkte. Überall
- * dasselbe Bild aus vier Phasen mit Baton; der Rohzustand steht als
- * Unterzeile darunter, wo Platz ist.
+ * Ten states are too many dots for the clerk. The same picture of four phases
+ * with a baton everywhere; the raw state sits below it as a sub-line wherever
+ * there is room.
  *
- *  - `ProcessMini` in der Listenzeile — vier Segmente, aktives gefüllt.
- *  - `ProcessStepper` im Detail-Kopf — mit Rohzuständen, Besitzer, Schleifen.
- *  - `BatonBar` im Log — die Zeitachse, eingefärbt nach Besitzer.
+ *  - `ProcessMini` in the list row — four segments, the active one filled.
+ *  - `ProcessStepper` in the detail header — with raw states, owner, loops.
+ *  - `BatonBar` in the log — the timeline, colored by owner.
  *
- * Der **Baton** ist Icon *und* Wort, nie nur Farbe: „Kanzlei" als
- * blauer Punkt liest niemand, der die Legende nicht kennt.
+ * The **baton** is icon *and* word, never color alone: „Kanzlei" as a blue
+ * dot is unreadable for anyone who does not know the legend.
  *
- * **Rot nur** auf `failed` und auf „überfällig". Alles andere bleibt neutral —
- * sonst stumpft die Farbe ab und der eine Fall, der brennt, fällt nicht auf.
+ * **Red only** on `failed` and on „überfällig". Everything else stays
+ * neutral — otherwise the color goes dull and the one case that is burning
+ * does not stand out.
  *
- * Die Komponente **leitet nichts ab**: Phasen und Besitzer kommen fertig als
- * Prop aus `modules/datev-export/domain/batch-process.ts`. `@/ui` importiert
- * kein Feature-Modul (`web-ui-offen.md` P20 B1) — und eine Primitive, die
- * ihre eigene Fachlogik mitbringt, ist keine Primitive mehr.
+ * The component **derives nothing**: phases and owner arrive ready-made as
+ * props from `modules/datev-export/domain/batch-process.ts`. `@/ui` imports no
+ * feature module (`web-ui-offen.md` P20 B1) — and a primitive that brings its
+ * own domain logic is no longer a primitive.
  */
 
 export type ProcessPhaseStatus = "done" | "active" | "pending" | "failed";
@@ -41,9 +42,9 @@ export interface ProcessPhase {
   key: string;
   /** „Buchen", „Prüfen", … */
   label: string;
-  /** Wer in dieser Phase arbeitet. */
+  /** Who works in this phase. */
   sub: string;
-  /** Die Rohzustände dahinter — die Unterzeile im Stepper. */
+  /** The raw states behind it — the sub-line in the stepper. */
   states: readonly string[];
   status: ProcessPhaseStatus;
 }
@@ -61,7 +62,7 @@ export type BatonKey =
 export interface BatonMeta {
   key: BatonKey;
   label: string;
-  /** CSS-Variable, nie ein Hex-Literal. */
+  /** CSS variable, never a hex literal. */
   color: string;
 }
 
@@ -77,7 +78,7 @@ const OWNER_ICON: Record<BatonKey, LucideIcon> = {
 };
 
 /**
- * Vier Segmente für die Listenzeile.
+ * Four segments for the list row.
  *
  * @when    Process state in the list row.
  */
@@ -92,8 +93,8 @@ export function ProcessMini({ phases }: { phases: readonly ProcessPhase[] }) {
 }
 
 /**
- * Wer den Stapel gerade hat. `alarm` färbt rot — dafür gibt es genau zwei
- * Gründe: eine überfällige Nachforderung und ein gescheiterter Export.
+ * Who currently holds the batch. `alarm` colors it red — there are exactly two
+ * reasons for that: an overdue follow-up request and a failed export.
  *
  * @when    Who currently holds the batch — icon and word.
  * @instead Entity status → StatusBadge.
@@ -106,7 +107,7 @@ export function Baton({
 }: {
   owner: BatonMeta;
   alarm?: boolean;
-  /** Zusatz hinter dem Wort, z. B. „Durchgang 3 läuft seit 14 Min." */
+  /** Addition after the word, e.g. „Durchgang 3 läuft seit 14 Min." */
   detail?: ReactNode;
   size?: number;
 }) {
@@ -123,16 +124,16 @@ export function Baton({
 }
 
 export interface ProcessLoops {
-  /** Wie oft die Kanzlei zurückgegeben hat. */
+  /** How often the practice has sent it back. */
   returned: number;
-  /** Wie oft ein Belegeingang den Stapel geweckt hat. */
+  /** How often an incoming document has woken the batch. */
   reopened: number;
 }
 
 /**
- * Der Stepper im Detail-Kopf. Schleifen werden gezählt und verlinken ins Log —
- * ein Stapel, der viermal zurückging, sieht anders aus als einer, der
- * durchlief.
+ * The stepper in the detail header. Loops are counted and link into the log —
+ * a batch that went back four times looks different from one that ran
+ * straight through.
  *
  * @when    Process state in the detail header with raw states and loops.
  * @instead Steps of a review → StepRail.
@@ -150,7 +151,7 @@ export function ProcessStepper({
   alarm?: boolean;
   loops?: ProcessLoops;
   logHref?: string;
-  /** Phasen-Schlüssel → Zeitpunkt des Eintritts (fertig formatiert). */
+  /** Phase key → time of entry (already formatted). */
   phaseSince?: Partial<Record<string, string>>;
 }) {
   const parts = [
@@ -187,19 +188,19 @@ export function ProcessStepper({
 
 export interface BatonSegment {
   owner: BatonMeta;
-  /** Anteil an der Gesamtdauer (0…1). */
+  /** Share of the total duration (0…1). */
   share: number;
-  /** Tooltip: Besitzer, von–bis, Dauer. */
+  /** Tooltip: owner, from–to, duration. */
   title: string;
 }
 
 /**
- * The baton bar above the log: the timeline from opening until now,
- * je Abschnitt eingefärbt nach Besitzer.
+ * The baton bar above the log: the timeline from opening until now, each
+ * section colored by owner.
  *
- * Das ist der eine Blick, der „warum hat der August drei Wochen gedauert?"
- * beantwortet — zwei Tage Agent, neun Tage Warten auf den Mandanten, ein Tag
- * Kanzlei.
+ * This is the one glance that answers „warum hat der August drei Wochen
+ * gedauert?" — two days agent, nine days waiting for the client, one day
+ * practice.
  *
  * @when    Timeline above the log, colored by owner.
  */

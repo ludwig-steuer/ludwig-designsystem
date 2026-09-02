@@ -5,20 +5,20 @@ import { StateIcon } from "./Review";
 import { Card, CardHead, HeadRow, Table } from "../primitives/Table";
 
 /**
- * „Sieht der Monat aus wie sonst?" als Tabelle (F123 T123.5, Design `DR:599–629`).
+ * „Sieht der Monat aus wie sonst?" as a table (F123 T123.5, design `DR:599–629`).
  *
- * Four month columns, an average, a deviation. The row carries its
- * Zustands-Icon links: offen, quittiert oder zu jung für eine Aussage.
+ * Four month columns, an average, a deviation. The row carries its state icon
+ * on the left: open, acknowledged, or too young for a statement.
  *
- * Die Farbstufe rechnet die Domain (`deviationTone`), nicht diese Komponente —
- * dieselbe Skala steht in Schritt 1 und Schritt 6, und sie soll an einer
- * Stelle geändert werden können.
+ * The color step is computed by the domain (`deviationTone`), not by this
+ * component — the same scale is used in step 1 and step 6, and it must be
+ * changeable in one place.
  */
 
 export interface ComparisonRow {
   key: string;
   label: string;
-  /** `count` zeigt Stückzahlen, `amount` Euro. */
+  /** `count` shows item counts, `amount` euros. */
   unit: "count" | "amount";
   m3: number | null;
   m2: number | null;
@@ -27,18 +27,18 @@ export interface ComparisonRow {
   current: number;
   deviationPct: number | null;
   tone: CellTone;
-  /** Die Rechnung im Klartext — der Tooltip. */
+  /** The calculation in plain words — the tooltip. */
   explanation: string;
   flagged: boolean;
   tooYoung: boolean;
   acknowledged?: boolean;
 }
 
-const ZAHL = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
+const NUM = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
 
-function zelle(v: number | null, unit: "count" | "amount") {
+function cell(v: number | null, unit: "count" | "amount") {
   if (v === null) return <span className="v2num v2muted">—</span>;
-  return unit === "amount" ? <AmountCell value={v} /> : <span className="v2num">{ZAHL.format(v)}</span>;
+  return unit === "amount" ? <AmountCell value={v} /> : <span className="v2num">{NUM.format(v)}</span>;
 }
 
 /**
@@ -56,23 +56,23 @@ export function ComparisonTable({
 }: {
   title: string;
   sub?: string;
-  /** Die drei Vormonate, in derselben Reihenfolge wie `m3`…`m1`. */
+  /** The three previous months, in the same order as `m3`…`m1`. */
   monatsLabels: [string, string, string, string];
   rows: ComparisonRow[];
   selectedKey?: string;
   onSelect?: (key: string) => void;
   empty?: string;
 }) {
-  const auffaellig = rows.filter((r) => r.flagged && !r.acknowledged).length;
+  const flagged = rows.filter((r) => r.flagged && !r.acknowledged).length;
   return (
     <Card>
       <CardHead
         title={title}
         sub={
           sub ??
-          (auffaellig === 0
+          (flagged === 0
             ? "Nichts auffällig gegen die letzten drei Monate"
-            : `${auffaellig} auffällig gegen die letzten drei Monate`)
+            : `${flagged} auffällig gegen die letzten drei Monate`)
         }
       />
       <Table cols="20px minmax(0,1.4fr) 96px 96px 96px 104px 104px 88px" minWidth={860}>
@@ -90,7 +90,7 @@ export function ComparisonTable({
           <div className="v2tbl__empty">{empty}</div>
         ) : (
           rows.map((r) => {
-            const inhalt = (
+            const content = (
               <>
                 <span style={{ display: "flex", justifyContent: "center" }}>
                   <StateIcon
@@ -109,11 +109,11 @@ export function ComparisonTable({
                   />
                 </span>
                 <span className="v2main">{r.label}</span>
-                {zelle(r.m3, r.unit)}
-                {zelle(r.m2, r.unit)}
-                {zelle(r.m1, r.unit)}
-                {r.tooYoung ? <span className="v2num v2muted">—</span> : zelle(r.avg, r.unit)}
-                {zelle(r.current, r.unit)}
+                {cell(r.m3, r.unit)}
+                {cell(r.m2, r.unit)}
+                {cell(r.m1, r.unit)}
+                {r.tooYoung ? <span className="v2num v2muted">—</span> : cell(r.avg, r.unit)}
+                {cell(r.current, r.unit)}
                 <DeviationCell
                   pct={r.tooYoung ? null : r.deviationPct}
                   tone={r.acknowledged ? "muted" : r.tone}
@@ -121,11 +121,11 @@ export function ComparisonTable({
                 />
               </>
             );
-            // Nur was auffällt, hat ein Detail — der Rest ist eine Auskunft.
+            // Only what stands out has a detail — the rest is plain information.
             if (!onSelect || !r.flagged) {
               return (
                 <div className="v2tbl__row" key={r.key} title={r.explanation}>
-                  {inhalt}
+                  {content}
                 </div>
               );
             }
@@ -144,7 +144,7 @@ export function ComparisonTable({
                   }
                 }}
               >
-                {inhalt}
+                {content}
               </div>
             );
           })

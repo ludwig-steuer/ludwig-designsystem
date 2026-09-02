@@ -2,35 +2,35 @@ import { Link } from "../primitives/Link";
 import type { ReactNode } from "react";
 
 /**
- * Rahmen-Bausteine (F123 T123.2): Schritt-Rail, Screen-Kopf,
- * Fortschrittsleiste, Zu-klein-Sperre.
+ * Frame building blocks (F123 T123.2): step rail, screen header,
+ * progress bar, too-small lock.
  *
- * Generisch: der Rail kennt keine Stapelabnahme, er kennt Zeilen mit Ton und
- * Zähler. Was gezählt wird, rechnet der Aufrufer.
+ * Generic: the rail knows nothing about batch review, it knows rows with a
+ * tone and a counter. What is counted is computed by the caller.
  */
 
 export type RailTone = "neutral" | "open" | "done" | "blocked" | "dimmed";
 
 export interface RailItem {
   key: string;
-  /** Die Nummer vor dem Label — zugleich die Sprungtaste. */
+  /** The number in front of the label — at the same time the jump key. */
   index: number;
   label: string;
   sub: string;
   tone: RailTone;
-  /** „3 von 18 offen", „bereit" — `null`, wo es nichts zu zählen gibt. */
+  /** „3 von 18 offen", „bereit" — `null` where there is nothing to count. */
   counterText: string | null;
   href: string | null;
-  /** Warum die Zeile nicht anklickbar ist. Pflicht bei `href === null`. */
+  /** Why the row is not clickable. Required when `href === null`. */
   disabledReason?: string;
   current?: boolean;
 }
 
 /**
- * Der Rail ist ein **Vorschlag, kein Zwang**: jeder erreichbare Schritt ist
- * jederzeit anklickbar. Der Punkt links trägt die Ampel, der Zähler darunter
- * sagt, wie viel dort liegt — beides zusammen, weil Farbe allein kein Signal
- * ist (UX-Guidelines V7).
+ * The rail is a **suggestion, not a constraint**: every reachable step is
+ * clickable at any time. The dot on the left carries the traffic light, the
+ * counter below it says how much is waiting there — both together, because
+ * color alone is not a signal (UX-Guidelines V7).
  *
  * @when    Multi-step review with a traffic light and counter per step, on the left.
  * @instead Two to four views → Tabs. Process phases of a batch → ProcessStepper.
@@ -50,14 +50,14 @@ export function StepRail({
     <nav className="abn__rail" aria-label={ariaLabel}>
       {head}
       {items.map((it) => (
-        <RailZeile key={it.key} item={it} />
+        <RailRow key={it.key} item={it} />
       ))}
       {foot}
     </nav>
   );
 }
 
-function RailZeile({ item }: { item: RailItem }) {
+function RailRow({ item }: { item: RailItem }) {
   const cls =
     `abn__step abn__step--${item.tone}` +
     (item.current ? " is-current" : "") +
@@ -89,10 +89,10 @@ function RailZeile({ item }: { item: RailItem }) {
 }
 
 /**
- * Der Kopf eines Schritts: Overline, Überschrift, Lead — und rechts der Weg
- * vor und zurück. Die Nummer steht in der Overline, nicht in der Überschrift:
- * „Vollständigkeit" ist die Antwort auf „wo bin ich?", „1 · Vollständigkeit"
- * ist eine Kopfzeile.
+ * The header of a step: overline, title, lead — and on the right the way
+ * forward and back. The number belongs in the overline, not in the title:
+ * „Vollständigkeit" answers „wo bin ich?", „1 · Vollständigkeit" is a
+ * header line.
  *
  * @when    Header of every step in the rail: overline, title, lead, way forward and back.
  */
@@ -110,7 +110,7 @@ export function StepHeader({
   lead?: string;
   prevHref?: string | null;
   nextHref?: string | null;
-  /** „Weiter zu Schritt 5" — wohin es geht, nicht bloß „Weiter". */
+  /** „Weiter zu Schritt 5" — where it leads, not merely „Weiter". */
   nextLabel?: string;
   actions?: ReactNode;
 }) {
@@ -121,9 +121,9 @@ export function StepHeader({
           <div className="lw-overline">{overline}</div>
           <h1>{title}</h1>
         </div>
-        {/* Vorwärts ist die Handlung, rückwärts die Ausweichmöglichkeit:
-            „Weiter" trägt die Primärfarbe und sagt, wohin es geht; „Zurück"
-            bleibt ein schmuckloser Sekundär-Knopf ohne Ziel im Text. */}
+        {/* Forward is the action, backward the way out: „Weiter" carries the
+            primary color and says where it leads; „Zurück" stays a plain
+            secondary button with no destination in its text. */}
         <div className="abn__screenhead__nav">
           {actions}
           {prevHref ? (
@@ -152,7 +152,7 @@ export function StepHeader({
 }
 
 /**
- * „41 von 118 Punkten" — schmale Leiste über alle Schritte.
+ * „41 von 118 Punkten" — narrow bar across all steps.
  *
  * @when    Progress of a step in the header, number plus bar.
  */

@@ -9,12 +9,12 @@ import { Textarea } from "./Form";
 /**
  * An action that needs a reason (F123 §2.6).
  *
- * Ersetzt `window.prompt`. Der Browser-Prompt war bequem und dreimal falsch:
- * it cannot be styled, carries no context (a reason for what?),
- * und auf keinem Screenshot ist nachvollziehbar, was dort stand.
+ * Replaces `window.prompt`. The browser prompt was convenient and wrong
+ * three times over: it cannot be styled, carries no context (a reason for
+ * what?), and no screenshot shows what it said.
  *
  * The reason is **optional** by default — where it is required (reversal,
- * Ablehnung), setzt der Aufrufer `required`.
+ * rejection), the caller sets `required`.
  *
  * @when    Action whose reason belongs in the audit log (return, cancel, reject).
  * @instead Confirmation without a reason → Dialog.
@@ -52,7 +52,7 @@ export function ReasonDialog({
 }) {
   const [reason, setReason] = useState("");
 
-  function schliessen() {
+  function close() {
     setReason("");
     onClose();
   }
@@ -60,13 +60,13 @@ export function ReasonDialog({
   return (
     <Dialog
       open={open}
-      onClose={schliessen}
+      onClose={close}
       title={title}
       kicker={kicker}
       size="sm"
       footer={
         <>
-          <Button variant="secondary" size="sm" onClick={schliessen}>
+          <Button variant="secondary" size="sm" onClick={close}>
             Abbrechen
           </Button>
           <Button

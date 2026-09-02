@@ -12,19 +12,19 @@ import {
 import type { ReactNode } from "react";
 
 /**
- * v2-Prüfbausteine (F123 T123.1): Zustands-Icon, Checklist, Prüfpunkte,
- * Messages.
+ * v2 review building blocks (F123 T123.1): state icon, checklist, check
+ * items, messages.
  *
- * Gemeinsame Regel: **passed ist eine Zeile, nicht zwanzig.** Was in
- * Ordnung ist, wird zusammengefasst; eine eigene Zeile bekommt nur, was open,
- * gewarnt oder gescheitert ist (UX-Guidelines L7). Sonst sucht die Prüferin ihre drei
- * Probleme zwischen zwanzig grünen Haken.
+ * Shared rule: **passed is one line, not twenty.** Whatever is in order is
+ * summarized; only what is open, warned or failed gets a line of its own
+ * (UX guidelines L7). Otherwise the reviewer hunts for her three problems
+ * among twenty green check marks.
  */
 
-/* ── Zustands-Icon ───────────────────────────────────────────────────────
- * Das Design zeichnet die Zustände als Sonderzeichen (○ ✓ ✎ ↩ ? ⊘). Ludwig
- * setzt Lucide: ein Unicode-Glyph rendert je nach Schrift anders und hat
- * keinen Namen für die Vorlesehilfe (UX-Guidelines §2).
+/* ── State icon ──────────────────────────────────────────────────────────
+ * The design draws the states as special characters (○ ✓ ✎ ↩ ? ⊘). Ludwig
+ * uses Lucide: a Unicode glyph renders differently depending on the font and
+ * has no name for the screen reader (UX guidelines §2).
  */
 
 export type StateKind =
@@ -39,11 +39,11 @@ export type StateKind =
   | "info";
 
 const ICONS = {
-  open: { Icon: Circle, tone: "muted", label: "open" },
+  open: { Icon: Circle, tone: "muted", label: "offen" },
   done: { Icon: CheckCircle2, tone: "success", label: "erledigt" },
   edited: { Icon: PencilLine, tone: "info", label: "bearbeitet" },
   returned: { Icon: Undo2, tone: "warning", label: "zurückgegeben" },
-  question: { Icon: HelpCircle, tone: "warning", label: "Frage open" },
+  question: { Icon: HelpCircle, tone: "warning", label: "Frage offen" },
   skipped: { Icon: CircleSlash, tone: "muted", label: "übersprungen" },
   warning: { Icon: AlertTriangle, tone: "warning", label: "Warnung" },
   error: { Icon: XCircle, tone: "danger", label: "Fehler" },
@@ -80,19 +80,19 @@ export interface ChecklistRow {
   key: string;
   state: StateKind;
   label: string;
-  /** „3 von 18" — die echte Menge, nie eine erfundene „0 von 1". */
+  /** „3 von 18" — the real quantity, never an invented „0 von 1". */
   counter?: string;
   counterAlarm?: boolean;
-  /** Anteil 0…1; ohne Wert bleibt die Spalte leer. */
+  /** Share 0…1; without a value the column stays empty. */
   progress?: number | null;
-  /** Wohin die Zeile springt („→ Schritt 4: Zahlungen"). */
+  /** Where the row jumps to („→ Schritt 4: Zahlungen"). */
   jump?: string;
 }
 
 /**
- * Die Prüfliste eines Gates (Design `PruefChecklist.dc.html`): Prüfung ·
- * Stand · Fortschritt · Sprung. Das Detail rechts baut der Aufrufer mit
- * `ChecklisteDetail` in einem `MasterDetail`.
+ * The check list of a gate (design `PruefChecklist.dc.html`): check · status
+ * · progress · jump. The caller builds the detail pane on the right, usually
+ * inside a `MasterDetail`.
  *
  * @when    Checklist of a gate: check, status, progress, jump.
  * @instead Items to work through → TodoList.
@@ -118,14 +118,14 @@ export function Checklist({
           <span>Sprung</span>
         </div>
         {rows.map((r) => (
-          <ChecklistZeile key={r.key} row={r} active={r.key === activeKey} onPick={onPick} />
+          <ChecklistLine key={r.key} row={r} active={r.key === activeKey} onPick={onPick} />
         ))}
       </div>
     </div>
   );
 }
 
-function ChecklistZeile({
+function ChecklistLine({
   row,
   active,
   onPick,
@@ -175,18 +175,18 @@ function ChecklistZeile({
   );
 }
 
-/* ── Prüfpunkte ─────────────────────────────────────────────────────────── */
+/* ── Check items ───────────────────────────────────────────────────────── */
 
 export interface CheckItem {
   code: string;
-  /** Was geprüft wird, als Frage — „Stimmt der Steuersatz zum Beleg?" */
+  /** What is checked, as a question — „Stimmt der Steuersatz zum Beleg?" */
   question: string;
-  /** Warum das Ergebnis so ist. Immer gefüllt, sonst ist die Stufe ein Orakel. */
+  /** Why the result is what it is. Always filled, otherwise the level is an oracle. */
   reason: string;
   state: "green" | "yellow" | "red" | "open";
-  /** Sprung an die Stelle, an der sich der Punkt klären lässt. */
+  /** Jump to the place where the item can be resolved. */
   jump?: ReactNode;
-  /** Das Gate: ein roter oder gelber Punkt muss abgehakt werden. */
+  /** The gate: a red or yellow item has to be checked off. */
   gate?: ReactNode;
 }
 
@@ -198,10 +198,10 @@ const PP_ICON: Record<CheckItem["state"], StateKind> = {
 };
 
 /**
- * Prüfpunkte als Akkordeon. Bestandene stehen zusammengefasst in einer Zeile;
- * offene, gewarnte und gescheiterte einzeln, jeweils mit Begründung.
+ * Check items as an accordion. Passed ones are summarized in a single line;
+ * open, warned and failed ones individually, each with a reason.
  *
- * @when    Individual checks of a booking entry with reasons; passed ones in a single line.
+ * @when    Individual checks of a journal entry with reasons; passed ones in a single line.
  * @instead Error that blocks saving → Messages.
  */
 export function CheckItems({ items }: { items: CheckItem[] }) {
@@ -240,17 +240,17 @@ export interface Message {
   key: string;
   level: "error" | "warning" | "hint";
   text: ReactNode;
-  /** Warnungen brauchen eine Quittung oder einen Weg zur Behebung. */
+  /** Warnings need an acknowledgement or a way to fix them. */
   actions?: ReactNode;
 }
 
 /**
- * Fehler blockieren, Warnungen brauchen eine Quittung, Hinweise stehen nur da.
- * Die Stufe steckt in `level` — der Aufrufer wählt nicht die Farbe, sondern
- * die Bedeutung.
+ * Errors block, warnings need an acknowledgement, hints just stand there.
+ * The level sits in `level` — the caller does not choose the color but the
+ * meaning.
  *
- * @when    Error, warning or hint about a booking entry or form.
- * @instead Note not tied to a booking entry → Callout.
+ * @when    Error, warning or hint about a journal entry or form.
+ * @instead Note not tied to a journal entry → Callout.
  */
 export function Messages({ items }: { items: Message[] }) {
   if (items.length === 0) return null;

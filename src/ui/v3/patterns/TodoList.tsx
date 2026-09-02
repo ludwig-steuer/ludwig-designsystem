@@ -6,15 +6,15 @@ import { useHotkeys } from "./Hotkeys";
 import { StateIcon, type StateKind } from "./Review";
 
 /**
- * Das Grundmuster jedes Prüfschritts (F123 T123.2, Leitbrief §8).
+ * The basic pattern of every review step (F123 T123.2, Leitbrief §8).
  *
- * Eine Liste von Punkten, jeder mit Zustands-Icon, Titel, Sekundärzeile und
- * Marken rechts. `J`/`K` gehen durch die Liste, `Enter` öffnet das Detail.
- * Nach einer Aktion springt die Auswahl zum **nächsten offenen** Punkt —
- * damit die Prüferin nicht nach jedem Haken zurück zur Liste muss.
+ * A list of items, each with a state icon, title, secondary line and badges on
+ * the right. `J`/`K` move through the list, `Enter` opens the detail. After an
+ * action the selection jumps to the **next open** item — so the reviewer does
+ * not have to return to the list after every tick.
  *
- * Der Sprung ist abschaltbar (`autoAdvance`): wer eine Liste durchsieht statt
- * abzuarbeiten, will die Auswahl behalten.
+ * The jump can be switched off (`autoAdvance`): whoever scans a list instead
+ * of working through it wants to keep the selection.
  */
 
 export interface TodoItem {
@@ -22,22 +22,22 @@ export interface TodoItem {
   state: StateKind;
   title: string;
   sub?: string;
-  /** Der Zahlenblock rechts — Betrag, Menge, Saldo. Rechtsbündig, tabellarisch. */
+  /** The number block on the right — amount, quantity, balance. Right-aligned, tabular. */
   right?: React.ReactNode;
   badges?: React.ReactNode;
-  /** Blockiert dieser Punkt die Freigabe? Nur zur Sortierung/Filterung. */
+  /** Does this item block the release? Only for sorting/filtering. */
   blocking?: boolean;
 }
 
 export interface TodoGroup {
   label: string;
-  /** Rechts im Gruppenkopf statt der bloßen Anzahl — z.B. „3 Posten · 4.812 €". */
+  /** On the right in the group header instead of the bare count — e.g. „3 Posten · 4.812 €". */
   meta?: React.ReactNode;
   items: TodoItem[];
 }
 
-/** Was als „offen" gilt — der Sprung überspringt alles andere. */
-const OFFEN: ReadonlySet<StateKind> = new Set<StateKind>([
+/** What counts as "open" — the jump skips everything else. */
+const OPEN: ReadonlySet<StateKind> = new Set<StateKind>([
   "open",
   "warning",
   "error",
@@ -45,7 +45,7 @@ const OFFEN: ReadonlySet<StateKind> = new Set<StateKind>([
 ]);
 
 export function isOpen(state: StateKind): boolean {
-  return OFFEN.has(state);
+  return OPEN.has(state);
 }
 
 /**
@@ -63,27 +63,27 @@ export function TodoList({
   groups: TodoGroup[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  /** `Enter` oder Klick auf einen bereits gewählten Punkt. */
+  /** `Enter` or a click on an already selected item. */
   onOpen?: (id: string) => void;
   emptyText?: string;
   hotkeys?: boolean;
 }) {
-  const flach = useMemo(() => groups.flatMap((g) => g.items), [groups]);
+  const flat = useMemo(() => groups.flatMap((g) => g.items), [groups]);
 
-  const springe = useCallback(
+  const jumpTo = useCallback(
     (delta: number) => {
-      if (flach.length === 0) return;
-      const i = flach.findIndex((it) => it.id === selectedId);
-      const next = i < 0 ? 0 : (i + delta + flach.length) % flach.length;
-      onSelect(flach[next]!.id);
+      if (flat.length === 0) return;
+      const i = flat.findIndex((it) => it.id === selectedId);
+      const next = i < 0 ? 0 : (i + delta + flat.length) % flat.length;
+      onSelect(flat[next]!.id);
     },
-    [flach, selectedId, onSelect],
+    [flat, selectedId, onSelect],
   );
 
   const bindings = useMemo(
     () => [
-      { key: "j", label: "Nächster Punkt", handler: () => springe(1) },
-      { key: "k", label: "Voriger Punkt", handler: () => springe(-1) },
+      { key: "j", label: "Nächster Punkt", handler: () => jumpTo(1) },
+      { key: "k", label: "Voriger Punkt", handler: () => jumpTo(-1) },
       {
         key: "Enter",
         label: "Punkt öffnen",
@@ -92,11 +92,11 @@ export function TodoList({
         },
       },
     ],
-    [springe, selectedId, onOpen],
+    [jumpTo, selectedId, onOpen],
   );
   useHotkeys(bindings, hotkeys);
 
-  if (flach.length === 0) {
+  if (flat.length === 0) {
     return (
       <div className="v2lp">
         <div className="v2lp__empty">{emptyText}</div>
@@ -140,9 +140,9 @@ export function TodoList({
 }
 
 /**
- * Der nächste offene Punkt nach `afterId` — die Grundlage des Weiterspringens.
- * Gibt `null` zurück, wenn nichts mehr offen ist; dann bleibt die Auswahl
- * stehen und der Screen zeigt seinen Erfolgs-Leerzustand.
+ * The next open item after `afterId` — the basis of the auto-advance.
+ * Returns `null` when nothing is open any more; the selection then stays put
+ * and the screen shows its success empty state.
  */
 export function nextOpen(items: readonly TodoItem[], afterId: string | null): string | null {
   if (items.length === 0) return null;
