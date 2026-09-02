@@ -33,7 +33,7 @@ export interface RailItem {
  * ist (UX-Guidelines V7).
  *
  * @when    Multi-step review with a traffic light and counter per step, on the left.
- * @instead Two to four views → Tabs. Process phases of a batch → Prozessbild.
+ * @instead Two to four views → Tabs. Process phases of a batch → ProcessStepper.
  */
 export function StepRail({
   items,

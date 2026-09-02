@@ -16,14 +16,14 @@ import {
  * (F119 §3, F114 §1.1).
  *
  * Zehn Zustände sind für die Sachbearbeiterin zu viele Punkte. Überall
- * dasselbe Bild aus vier Phasen mit Staffelstab; der Rohzustand steht als
+ * dasselbe Bild aus vier Phasen mit Baton; der Rohzustand steht als
  * Unterzeile darunter, wo Platz ist.
  *
- *  - `ProzessMini` in der Listenzeile — vier Segmente, aktives gefüllt.
- *  - `ProzessStepper` im Detail-Kopf — mit Rohzuständen, Besitzer, Schleifen.
- *  - `StaffelLeiste` im Log — die Zeitachse, eingefärbt nach Besitzer.
+ *  - `ProcessMini` in der Listenzeile — vier Segmente, aktives gefüllt.
+ *  - `ProcessStepper` im Detail-Kopf — mit Rohzuständen, Besitzer, Schleifen.
+ *  - `BatonBar` im Log — die Zeitachse, eingefärbt nach Besitzer.
  *
- * Der **Staffelstab** ist Icon *und* Wort, nie nur Farbe: „Kanzlei" als
+ * Der **Baton** ist Icon *und* Wort, nie nur Farbe: „Kanzlei" als
  * blauer Punkt liest niemand, der die Legende nicht kennt.
  *
  * **Rot nur** auf `failed` und auf „überfällig". Alles andere bleibt neutral —
@@ -35,9 +35,9 @@ import {
  * ihre eigene Fachlogik mitbringt, ist keine Primitive mehr.
  */
 
-export type ProzessPhaseStatus = "done" | "active" | "pending" | "failed";
+export type ProcessPhaseStatus = "done" | "active" | "pending" | "failed";
 
-export interface ProzessPhase {
+export interface ProcessPhase {
   key: string;
   /** „Buchen", „Prüfen", … */
   label: string;
@@ -45,10 +45,10 @@ export interface ProzessPhase {
   sub: string;
   /** Die Rohzustände dahinter — die Unterzeile im Stepper. */
   states: readonly string[];
-  status: ProzessPhaseStatus;
+  status: ProcessPhaseStatus;
 }
 
-export type StaffelstabKey =
+export type BatonKey =
   | "agent"
   | "bereit"
   | "mandant"
@@ -58,14 +58,14 @@ export type StaffelstabKey =
   | "spiegel"
   | "niemand";
 
-export interface StaffelstabMeta {
-  key: StaffelstabKey;
+export interface BatonMeta {
+  key: BatonKey;
   label: string;
   /** CSS-Variable, nie ein Hex-Literal. */
   color: string;
 }
 
-const OWNER_ICON: Record<StaffelstabKey, LucideIcon> = {
+const OWNER_ICON: Record<BatonKey, LucideIcon> = {
   agent: Bot,
   bereit: Hourglass,
   mandant: UserRound,
@@ -81,7 +81,7 @@ const OWNER_ICON: Record<StaffelstabKey, LucideIcon> = {
  *
  * @when    Process state in the list row.
  */
-export function ProzessMini({ phases }: { phases: readonly ProzessPhase[] }) {
+export function ProcessMini({ phases }: { phases: readonly ProcessPhase[] }) {
   return (
     <span className="pz-mini" title={phases.map((p) => p.label).join(" → ")}>
       {phases.map((p) => (
@@ -98,13 +98,13 @@ export function ProzessMini({ phases }: { phases: readonly ProzessPhase[] }) {
  * @when    Who currently holds the batch — icon and word.
  * @instead Entity status → StatusBadge.
  */
-export function Staffelstab({
+export function Baton({
   owner,
   alarm = false,
   detail,
   size = 13,
 }: {
-  owner: StaffelstabMeta;
+  owner: BatonMeta;
   alarm?: boolean;
   /** Zusatz hinter dem Wort, z. B. „Durchgang 3 läuft seit 14 Min." */
   detail?: ReactNode;
@@ -122,7 +122,7 @@ export function Staffelstab({
   );
 }
 
-export interface ProzessLoops {
+export interface ProcessLoops {
   /** Wie oft die Kanzlei zurückgegeben hat. */
   returned: number;
   /** Wie oft ein Belegeingang den Stapel geweckt hat. */
@@ -137,7 +137,7 @@ export interface ProzessLoops {
  * @when    Process state in the detail header with raw states and loops.
  * @instead Steps of a review → StepRail.
  */
-export function ProzessStepper({
+export function ProcessStepper({
   phases,
   owner,
   alarm = false,
@@ -145,10 +145,10 @@ export function ProzessStepper({
   logHref,
   phaseSince,
 }: {
-  phases: readonly ProzessPhase[];
-  owner: StaffelstabMeta;
+  phases: readonly ProcessPhase[];
+  owner: BatonMeta;
   alarm?: boolean;
-  loops?: ProzessLoops;
+  loops?: ProcessLoops;
   logHref?: string;
   /** Phasen-Schlüssel → Zeitpunkt des Eintritts (fertig formatiert). */
   phaseSince?: Partial<Record<string, string>>;
@@ -168,7 +168,7 @@ export function ProzessStepper({
             <div className="raw">{p.states.join(" · ")}</div>
             {p.status === "active" || p.status === "failed" ? (
               <div className="now">
-                <Staffelstab owner={owner} alarm={alarm} />
+                <Baton owner={owner} alarm={alarm} />
               </div>
             ) : p.status === "done" && phaseSince?.[p.key] ? (
               <div className="who">seit {phaseSince[p.key]}</div>
@@ -185,8 +185,8 @@ export function ProzessStepper({
   );
 }
 
-export interface StaffelAbschnitt {
-  owner: StaffelstabMeta;
+export interface BatonSegment {
+  owner: BatonMeta;
   /** Anteil an der Gesamtdauer (0…1). */
   share: number;
   /** Tooltip: Besitzer, von–bis, Dauer. */
@@ -194,7 +194,7 @@ export interface StaffelAbschnitt {
 }
 
 /**
- * Die Staffel-Leiste über dem Log: die Zeitachse von der Eröffnung bis jetzt,
+ * The baton bar above the log: the timeline from opening until now,
  * je Abschnitt eingefärbt nach Besitzer.
  *
  * Das ist der eine Blick, der „warum hat der August drei Wochen gedauert?"
@@ -203,14 +203,14 @@ export interface StaffelAbschnitt {
  *
  * @when    Timeline above the log, colored by owner.
  */
-export function StaffelLeiste({ abschnitte }: { abschnitte: readonly StaffelAbschnitt[] }) {
-  if (abschnitte.length === 0) return null;
-  const legend = new Map<string, StaffelstabMeta>();
-  for (const a of abschnitte) if (!legend.has(a.owner.key)) legend.set(a.owner.key, a.owner);
+export function BatonBar({ segments }: { segments: readonly BatonSegment[] }) {
+  if (segments.length === 0) return null;
+  const legend = new Map<string, BatonMeta>();
+  for (const a of segments) if (!legend.has(a.owner.key)) legend.set(a.owner.key, a.owner);
   return (
     <div>
       <div className="pz-staffel">
-        {abschnitte.map((a, i) => (
+        {segments.map((a, i) => (
           <span
             key={i}
             title={a.title}

@@ -128,17 +128,17 @@ export { ComparisonTable, type ComparisonRow } from "./patterns/ComparisonTable"
 
 /* Prozess */
 export {
-  ProzessMini,
-  ProzessStepper,
-  Staffelstab,
-  StaffelLeiste,
-  type ProzessLoops,
-  type ProzessPhase,
-  type ProzessPhaseStatus,
-  type StaffelAbschnitt,
-  type StaffelstabKey,
-  type StaffelstabMeta,
-} from "./patterns/Prozessbild";
+  ProcessMini,
+  ProcessStepper,
+  Baton,
+  BatonBar,
+  type ProcessLoops,
+  type ProcessPhase,
+  type ProcessPhaseStatus,
+  type BatonSegment,
+  type BatonKey,
+  type BatonMeta,
+} from "./patterns/Process";
 
 /* ── Entitäten ── Konto */
 export {
