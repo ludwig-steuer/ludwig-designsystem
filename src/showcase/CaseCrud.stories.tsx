@@ -225,12 +225,12 @@ function Page() {
               ]}
             />
             {current.summary ? (
-              <Todo spec="0019" name="Markdown">
+              <Todo spec="0022" name="Markdown">
                 Die Zusammenfassung kommt als Markdown vom Classifier. Ohne
                 Renderer steht sie hier als roher Text: „{current.summary}"
               </Todo>
             ) : null}
-            <Todo spec="0020" name="Timeline">
+            <Todo spec="0023" name="Timeline">
               Belegeingang, Bank-Ereignisse, Klärungen und Buchungen als ein
               Strang — heute siebenmal verschieden gebaut, im v3-Backlog unter
               „Später" geführt.
@@ -309,7 +309,7 @@ function Page() {
           <Field label="Zusammenfassung">
             <Textarea defaultValue={editing?.summary ?? ""} rows={3} />
           </Field>
-          <Todo spec="0021" name="DateField">
+          <Todo spec="0024" name="DateField">
             Eröffnungsdatum und Frist brauchen ein Datumsfeld; 14 Dateien bauen
             es heute selbst.
           </Todo>
