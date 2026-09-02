@@ -89,3 +89,37 @@ diesem Repo und steht in `docs/design-guidelines.md`.
 MD
 
 echo "$n Dokumente gespiegelt nach docs/ludwig/"
+
+# --- Drift-Wache für die Design-Doku ----------------------------------------
+# Die gehört uns und wird NICHT überschrieben. Solange die alten Fassungen
+# drüben liegen, kann dort jemand ergänzen — das bliebe sonst unbemerkt.
+# Beim Einbinden als Submodule fallen die Quellen weg und die Wache schweigt.
+STAMPS="$REPO/.design-doc-stamps"
+declare -a OWNED=(
+  "docs/ludwig-UX-guidelines-v2.md|design-guidelines.md"
+  "apps/web/DESIGN.md|ton-und-sprache.md"
+)
+
+drift=0
+for pair in "${OWNED[@]}"; do
+  src="$APP/${pair%%|*}"
+  name="${pair##*|}"
+  [ -f "$src" ] || continue                 # drüben weg -> nichts zu wachen
+  now="$(shasum -a 256 "$src" | cut -d' ' -f1)"
+  was="$(grep "^$name " "$STAMPS" 2>/dev/null | cut -d' ' -f2 || true)"
+  if [ -z "$was" ]; then
+    printf '%s %s\n' "$name" "$now" >> "$STAMPS"
+  elif [ "$was" != "$now" ]; then
+    drift=1
+    echo
+    echo "  ACHTUNG: ${pair%%|*} hat sich in ludwig/app geändert."
+    echo "           Diese Datei gehört jetzt uns (docs/$name) — die Änderung"
+    echo "           drüben ist NICHT eingeflossen. Vergleichen:"
+    echo "             diff \"$src\" \"$REPO/docs/$name\""
+    echo "           Danach den Stand quittieren:"
+    echo "             sed -i '' \"s|^$name .*|$name $now|\" .design-doc-stamps"
+  fi
+done
+[ $drift -eq 0 ] && echo "Design-Doku: keine Änderung drüben."
+
+exit 0

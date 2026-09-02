@@ -55,6 +55,12 @@ Die Fassungen der beiden Design-Dokumente, die noch in `ludwig/app` liegen,
 sind die alten. Sie werden beim Einbinden als Submodule durch einen Zeiger
 hierher ersetzt — bis dahin nur hier ändern.
 
+Falls dort doch jemand ergänzt: `pnpm sync:ludwig` merkt es und sagt, welche
+Datei betroffen ist und wie sich der Unterschied ansehen lässt. Übernommen
+wird nichts automatisch — die Design-Doku gehört diesem Repo. Der Abgleich
+läuft über `.design-doc-stamps`; nach dem Übernehmen den Stand quittieren
+(das Script zeigt den passenden Befehl).
+
 ## Die Ludwig-Interfaces
 
 `src/ludwig/` ist eine **Kopie** des Datenmodells aus `ludwig/app/apps/web`:
