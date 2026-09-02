@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { VergleichsTabelle, type VergleichsZeile } from "./VergleichsTabelle";
+import { ComparisonTable, type ComparisonRow } from "./ComparisonTable";
 
-const meta: Meta<typeof VergleichsTabelle> = {
-  title: "v3/Patterns/Prüfen/VergleichsTabelle",
-  component: VergleichsTabelle,
+const meta: Meta<typeof ComparisonTable> = {
+  title: "v3/Patterns/Prüfen/ComparisonTable",
+  component: ComparisonTable,
 };
 export default meta;
-type Story = StoryObj<typeof VergleichsTabelle>;
+type Story = StoryObj<typeof ComparisonTable>;
 
 const MONATE: [string, string, string, string] = ["Mai", "Jun", "Jul", "Aug"];
 
-const ZEILEN: VergleichsZeile[] = [
+const ZEILEN: ComparisonRow[] = [
   {
     key: "miete", label: "Miete", unit: "amount",
     m3: 1700, m2: 1700, m1: 1700, avg: 1700, current: 1800, deviationPct: 5.9, tone: "warning",
@@ -41,24 +41,24 @@ const ZEILEN: VergleichsZeile[] = [
 ];
 
 /** Auffällige Zeilen sind klickbar und tragen ihr Icon; quittierte werden grau. */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: function Render() {
     const [sel, setSel] = useState<string | undefined>("miete");
     return (
-      <VergleichsTabelle title="Konten gegen Vormonate" monatsLabels={MONATE} rows={ZEILEN} selectedKey={sel} onSelect={setSel} />
+      <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONATE} rows={ZEILEN} selectedKey={sel} onSelect={setSel} />
     );
   },
 };
 
 /** Ohne `onSelect` ist die Tabelle eine Auskunft — keine Zeile ist klickbar. */
-export const NurAuskunft: Story = {
-  render: () => <VergleichsTabelle title="Konten gegen Vormonate" monatsLabels={MONATE} rows={ZEILEN} />,
+export const ReadOnly: Story = {
+  render: () => <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONATE} rows={ZEILEN} />,
 };
 
 /** Nichts auffällig: der Untertitel sagt es, die Zeilen bleiben ruhig. */
-export const NichtsAuffaellig: Story = {
+export const NothingFlagged: Story = {
   render: () => (
-    <VergleichsTabelle
+    <ComparisonTable
       title="Konten gegen Vormonate"
       monatsLabels={MONATE}
       rows={ZEILEN.map((z) => ({ ...z, flagged: false, acknowledged: false, tone: z.tooYoung ? "muted" : "neutral" }))}
@@ -67,8 +67,8 @@ export const NichtsAuffaellig: Story = {
 };
 
 /** Leer: kein Vormonat, keine Zeile — und ein Satz, der das sagt. */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
-    <VergleichsTabelle title="Konten gegen Vormonate" monatsLabels={MONATE} rows={[]} empty="Noch kein Vormonat zum Vergleichen." />
+    <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONATE} rows={[]} empty="Noch kein Vormonat zum Vergleichen." />
   ),
 };

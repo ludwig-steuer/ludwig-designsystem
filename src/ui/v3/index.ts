@@ -124,7 +124,7 @@ export {
   type CheckItem,
   type StateKind,
 } from "./patterns/Review";
-export { VergleichsTabelle, type VergleichsZeile } from "./patterns/VergleichsTabelle";
+export { ComparisonTable, type ComparisonRow } from "./patterns/ComparisonTable";
 
 /* Prozess */
 export {

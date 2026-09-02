@@ -7,7 +7,7 @@ import { Card, CardHead, HeadRow, Table } from "../primitives/Table";
 /**
  * „Sieht der Monat aus wie sonst?" als Tabelle (F123 T123.5, Design `DR:599–629`).
  *
- * Vier Monatsspalten, ein Schnitt, eine Abweichung. Die Zeile trägt ihr
+ * Four month columns, an average, a deviation. The row carries its
  * Zustands-Icon links: offen, quittiert oder zu jung für eine Aussage.
  *
  * Die Farbstufe rechnet die Domain (`deviationTone`), nicht diese Komponente —
@@ -15,7 +15,7 @@ import { Card, CardHead, HeadRow, Table } from "../primitives/Table";
  * Stelle geändert werden können.
  */
 
-export interface VergleichsZeile {
+export interface ComparisonRow {
   key: string;
   label: string;
   /** `count` zeigt Stückzahlen, `amount` Euro. */
@@ -45,7 +45,7 @@ function zelle(v: number | null, unit: "count" | "amount") {
  * @when    Monthly values against three previous months, deviation per row.
  * @instead Single value without history → KpiTile.
  */
-export function VergleichsTabelle({
+export function ComparisonTable({
   title,
   sub,
   monatsLabels,
@@ -58,7 +58,7 @@ export function VergleichsTabelle({
   sub?: string;
   /** Die drei Vormonate, in derselben Reihenfolge wie `m3`…`m1`. */
   monatsLabels: [string, string, string, string];
-  rows: VergleichsZeile[];
+  rows: ComparisonRow[];
   selectedKey?: string;
   onSelect?: (key: string) => void;
   empty?: string;
