@@ -15,7 +15,12 @@ import { AccountField, type AccountCandidate, type AccountGroup } from "../accou
 import { AiBookingNotes } from "./AiBookingNotes";
 
 /**
- * Der eine Buchungssatz-Editor (F123 T123.3, Design `JournalEntryEditor.dc.html`).
+ * Der eine Buchungssatz-Editor (F123 T123.3).
+ *
+ * Gebaut nach dem F123-Artboard, das nicht mit ausgeliefert wurde. Das
+ * F109-Pendant liegt unter `reference/f109-buchungsreview/` — ein zweiter
+ * Entwurf derselben Komponente, abgeglichen am 2026-09-03: an drei Stellen
+ * weiter als dieser Stand (Aufgaben 0002, 0004, 0005), sonst nicht.
  *
  * **Eine Komponente für Anzeigen und Bearbeiten.** Der Modus wechselt, das
  * Raster bleibt — wer eine Buchung gelesen hat, findet beim Korrigieren

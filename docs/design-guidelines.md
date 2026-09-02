@@ -277,10 +277,7 @@ Zellen liegen unter `primitives/`; Arbeitsfläche · Prüfen · Rahmen · Prozes
 | Rahmen | `SchrittRail` · `SchrittKopf` · `FortschrittLeiste` · `useHotkeys` · `HotkeyLegende` |
 | Buchung | `BuchungssatzEditor` (Anzeige **und** Bearbeiten) · `KIBuchungshinweise` |
 
-**Noch zu bauen** (Stufe nach R21 vor dem ersten Commit festlegen):
-
-- [ ] `FilterLeiste` — I4; heute acht v1-Varianten (`AccountFilterForm`, `InvoiceFilterForm`, `CaseListFilters` …). `FilterChips` deckt den Chip-Teil ab, nicht die Formularzeile.
-- [ ] `Kopfzeile` (PageHeader v2, kompakter) · `Werteliste` (Key-Value außerhalb einer Karte; `FieldList` deckt die Karte ab)
+**Noch zu bauen:** vollständig mit Status je Baustein in §11.7 (Soll-Katalog).
 
 **Bleibt Alt-Mechanik, bekommt v2-Optik** (nicht verhandelbar, F123 §2.4):
 `StatusBadge` + Registry · `StatusHeader`/`Tooltip` · `Drawer`/`UrlDrawer`-Rahmen
@@ -365,6 +362,150 @@ Erledigt: K1–K3, A2, A3, A1, 17 `#B07B2C`-Literale auf den Token.
 2. `FilterLeiste` — der Rest des F123-Sets steht (§11.2).
 3. Rückbau P17, B2.
 4. Welle 1 Seite für Seite (Prüfliste §10), dann Welle 2 (vorher `[year]/datev` teilen), 3, 4.
+
+### 11.7 Soll-Katalog — alle Bausteine eines vollen Redesigns (Stand 2026-09-03)
+
+Was ein volles Redesign liefern muss, nach R21-Stufen; Kompositionen (Stufe 4/5)
+sind Seiten und stehen in §11.4. Quellen: v1-Inventar
+(`docs/reference/datenmodell/ui-repraesentationen.md` §1), v2-Set (§11.2),
+Familienregel §4.4 des Inventars, Design-Kit (`design/Ludwig Design System v2/ui_kits/app`).
+Status: **v2** vorhanden · **Optik** bleibt Alt-Mechanik, bekommt v2-Optik (F123 §2.4)
+· **heben** v1 vorhanden, nach v2 heben (R21 Regelweg) · **fehlt** neu bauen ·
+**prüfen** Bedarf offen · **—** kein Bedarf.
+
+#### 0 Grundlagen (kein Baustein, aber Lieferumfang)
+
+| Grundlage | Ist | Status |
+|---|---|---|
+| Tokens: Farbe, Schrift, Raum, Radius, Schatten, Bewegung, Fokus | `tokens.css`, `v2.css` | v2 |
+| Icon-Set Lucide 16/20/24, Stroke 1.5, nie ohne Wort | 12 Dateien mit Unicode-Icons (§11.5) | heben |
+| Marke: Wordmark, Mark, Light-Variante | `design/…/assets` | v2 |
+| Ein Formatter: Betrag (`tnum`, Vorzeichen), Datum/Zeit Europe/Berlin, Kontonummer/BU mono | `Cells.tsx`, `booking/format.ts`; 82 `toLocale*`-Stellen | heben (T7) |
+| Zwei Register: produktiv (13.5–14 px) · lesend (16 px) | A1 | v2; lesend prüfen |
+
+#### Rahmen (Shell, außerhalb der Stufen)
+
+| Baustein | Ist (v1) | Status |
+|---|---|---|
+| AppShell: Sidebar 240 px · Top-Bar 56 px · Content `--space-8` | `AppShell.tsx` | heben |
+| Sidebar mit Hauptnavigation (Punkt mit Zähler) | `Sidebar.tsx`, `mandant-nav.ts` | heben |
+| Top-Bar: Mandant · Suche · UserMenu | `TopBar.tsx` | heben |
+| Mandanten-Block (Anzeige + Link auf `/clients`, R13) | `MandantBand`, `MandantSwitcher` | heben |
+| Wirtschaftsjahr-Wahl | `YearSwitcher`, `RememberClientYear` | heben |
+| UserMenu + Rollen-Badge | `UserMenu`, `RoleBadge` | heben |
+| Experiment-Kennzeichnung | `ExperimentBadge`, `ExperimentMandantBanner` | heben |
+| Bereitschafts-/Deckungs-Banner je Mandant | `ReadinessBanner`, `EmbeddingCoverageBanner` | heben → `StatusCallout` |
+| Sperre unter 1280 px (L1) | `.abn__toosmall` nur in der Abnahme | heben app-weit |
+| Marketing-Header 72 px · Portal-Rahmen | `ui_kits/marketing`; `client-portal` | prüfen (Register, F111 B6) |
+
+#### Stufe 1 — Primitives
+
+| Gruppe | Baustein | Ist (v1) | Status |
+|---|---|---|---|
+| Aktion | `Button` (primary/secondary/tertiary/danger × sm/md, `href`, `hotkey`) | v1 `Button` | v2 |
+| Aktion | `KeyButton` · `ActionBar` · `RowActions` | — | v2 |
+| Aktion | Zeilen-/Überlaufmenü (Popover + Einträge) | `DocActionsMenu`, `UserMenu`, `FeedbackRowActions` | fehlt |
+| Aktion | Kopieren-Knopf | `CopyTextButton` (datev-truth) | heben |
+| Aktion | Link `v2link`/`v2link--quiet` | CSS-Klasse | v2 |
+| Navigation | `Tabs` (Zähler, `alarm`) | `TabBar` + 6 Inline-Kopien (P8) | v2; Kopien heben |
+| Navigation | `Segmented` · `FilterChips` · `SearchInput` | — | v2 |
+| Navigation | `FilterLeiste` (Formularzeile, Stand in URL, „gefiltert: … · Zurücksetzen", I4) | 8 Varianten (`AccountFilterForm`, `InvoiceFilterForm`, `CaseListFilters` …) | fehlt |
+| Navigation | `Kopfzeile` (Titel, Zähler, Aktionen; kompakter als v1) | `PageHeader` | fehlt |
+| Navigation | `Pagination` | v1 Re-Export | Optik |
+| Fläche | `Card`/`CardHead`/`CardFoot` | `Section`/`SectionHead`/`SectionFilters` | v2; v1 ersetzen |
+| Fläche | `KpiTile`/`KpiGrid` | `Stat`/`StatGrid` | v2; v1 ersetzen |
+| Fläche | `FieldList` (surface/soft) · `ProseCard` | — | v2 |
+| Fläche | `Werteliste` (Schlüssel-Wert außerhalb einer Karte) | `KeyValueGrid` (clients) | fehlt |
+| Fläche | `Callout` · `StatusCallout` | `ContextHint`, `ChecklistRow` (clients); Kit `LudwigNote` | v2; v1 ersetzen |
+| Fläche | `Banner` | v1 Re-Export | Optik |
+| Fläche | Leerzustand linksbündig, ein Satz mit Zahl (L6) | `EmptyState` (zentriert), 27 `.v2tbl__empty` | heben; `EmptyRow` v2 |
+| Fläche | `Dialog` · `GrundDialog` | v1 `Dialog`; 31× `window.confirm()` (I2) | v2; Aufrufer heben |
+| Fläche | `Drawer`/`UrlDrawer`-Rahmen (`.lwdrawer`, Wächter-Test) | `Drawer`, `DrawerFooter`, `UrlDrawer` | Optik |
+| Fläche | `Tooltip` | v1 | Optik |
+| Fläche | Hinweis nach Aktion (Toast, nicht blockierend) | `ActionNotice` (sachverhalt); Kit `Toast`/`ToastStack` | fehlt |
+| Fläche | Ladefläche für Karte/Detail (Skeleton) | Kit `Skeleton`; v2 `TableLoading` nur Tabelle | fehlt |
+| Formular | `Field` · `Input` · `Textarea` · `Select` · `Checkbox` (Label sichtbar, Fehler als Text, Pflicht, I8) | — | v2 |
+| Formular | Radio-Gruppe (Antwortoptionen I6) | — | fehlt |
+| Formular | Schalter (Toggle) | `ClientActiveToggle`; Kit `Toggle` | fehlt |
+| Formular | Datum | `Input type="date"` | v2; Format prüfen |
+| Formular | Betragsfeld (`tnum`, Komma, Vorzeichen) | inline im `BuchungssatzEditor` | fehlt als Primitive |
+| Formular | `Combobox` generisch (Suche, Kandidaten nach Herkunft, Tastatur) | `KontoCombobox`, `CreditorCombobox`; v2 `KontoFeld` entitätsgebunden | fehlt (Basis für `KontoFeld`/`PartnerFeld`) |
+| Formular | Inline-Bearbeitung (Klick → Feld → Speichern/Abbrechen) | `SourceDocDateEditor`, `CaseSummaryEditor`, `CaseKindEditor` | fehlt |
+| Formular | Dateiablage (Drop-Zone, Liste, Fortschritt) | `InvoiceUploader`, `CaseDocumentUploaderModal`; Kit `UploadZone` | fehlt |
+| Tabelle | `Table`/`HeadRow`/`Row`/`GroupRow`/`EmptyRow` | — | v2 |
+| Tabelle | `ClickRow` (`href`, `v2rowlink`, I11) · `ExpandableRow` | 120 `<Row>`, 6 mit Ziel | v2; Listen heben |
+| Tabelle | `SelectionBar` + `SelectCell` (I5) | — | v2 |
+| Tabelle | `AmountCell` · `ProgressCell` · `DotStatus` · `Timestamp` · `AbweichungsZelle` | — | v2 |
+| Tabelle | `TableLoading` · `ErrorRow` (I7) | — | v2 |
+| Tabelle | `StatusHeader` (Spaltenkopf mit Legende, Z4) | v1; 7× `<th>Status</th>` | Optik; Reste heben |
+| Tabelle | Sortierbarer Spaltenkopf | — | prüfen |
+| Tabelle | Mono-Zelle (Kontonummer, BU, DATEV-Code) | `v2num` | v2 |
+| Tabelle | `LongText` | v1 Re-Export | Optik |
+| Zustand | `StatusBadge` + Registry · `StatusInfoButton`/`-Dialog` · `EntityStatusBadgeButton`/`FlowModal` | `@/ui/status` | Optik (Pill, Füllung nur hier) |
+| Zustand | `Badge kind=…` ohne Status-Achse | 126 Stellen | heben: Achse → Registry, sonst `DotStatus`/`FilterChips` |
+| Zustand | `StateIcon` (9 Zustände) | — | v2 |
+| Zustand | Konfidenz (Punkt · Band · Meter) | `ConfidenceDot`/`Meter`/`Band`, `Confidence` (invoices) | heben → eine Primitive, `KIBuchungshinweise` nutzt sie |
+| Text | `Markdown` | v1 | Optik |
+| Text | `HotkeyLegende`/Kbd | — | v2 |
+| Text | Zeit relativ (`TimeAgo`) | v1 | heben → `Timestamp` absolut (T7) |
+| Daten | Balken je Monat | `MonthlyBarChart` | heben |
+| Daten | Sparkline (KPI-Kachel) | Kit Dashboard | prüfen (Dashboard) |
+
+#### Stufe 2 — Patterns
+
+| Baustein | Ist (v1) | Status |
+|---|---|---|
+| `MasterDetail`/`ListPane`/`DetailPane` (L2, `?sel=`) | — | v2 |
+| `SchrittRail`/`SchrittKopf`/`FortschrittLeiste` · `useHotkeys` | `closing/StepNav` | v2; `StepNav` heben |
+| `TodoListe` · `Checkliste`/`Pruefpunkte`/`Meldungen` · `VergleichsTabelle` | `CasePlausibilityTab`, `FindingsList` | v2; v1 heben |
+| `ProzessMini`/`ProzessStepper`/`Staffelstab`/`StaffelLeiste` | — | v2 |
+| Verarbeitungsfortschritt (Schritte mit Zustand, Retry) | `PipelineStepper`, `ProcessingProgress`, `JobStatusMonitor`, `SourceDocPipelineTab` | heben → `ProzessStepper` |
+| Wizard (Schritte, Zurück/Weiter, Zusammenfassung) | `Wizard`, `CsvImportWizard`, `DatevExportWizard`, `OnboardingWizard` | heben |
+| Verlauf/Zeitleiste (Zeit · Akteur · Ereignis · Diff) | `CycleTimeline`, `HistorieTab`, `SourceDocVerlaufTab`, `VerlaufTab`, `EventStack`; Kit `AuditTrail` | fehlt |
+| Log-Ansicht, Sichten Verlauf/Protokoll/Technik | `LogTable`/`LogView`/`LogEntry`/`LogBadges`/`LogPayloadCell` | Optik |
+| Frage mit Antwortoptionen (Handlungen + Freitext, I6, S13) | `RaiseClarificationForm` | fehlt |
+| Kommentar-/Notizstrang | `CaseCommentForm`, `ClientAgentNotesPanel` | prüfen |
+| Nächster Schritt mit Zahl (I10) | inline in der Abnahme | heben |
+| Sammelaktion | `SelectionBar` | v2 |
+
+#### Stufe 3 — Entitäten (Familie nach §4.4 des Inventars: Cell · Row · Card · View · Editor · Picker)
+
+| Entität | Gebrauchte Varianten | Ist (v1) | Status |
+|---|---|---|---|
+| Mandant | Cell (Name · Nr) · Row (Liste) · Card (Stammdaten-Kopf) · Picker (Switcher); Editoren bleiben | `OnboardingStateBadge`, `MandantBand`, `ReadinessBanner`, 9 Editoren | heben; Cell/Row/Card fehlen |
+| Kanzlei | Row · View · Editor | `TenantCreateForm`, `Integration*Form`, `NotificationSubscriptionsPanel`, `BridgeHealthStatus` | heben |
+| Nutzer / Mitgliedschaft | Row · Rollen-Badge · Editor | `RoleBadge`, `InviteUserForm`, `UserEditForm`, `AgentTokenManager`; Login = lesend | heben; Row fehlt |
+| Wirtschaftsjahr | Picker · Zeitachse · Editor | `YearSwitcher`, `CycleTimeline`, `CycleCreateForm` | heben |
+| Sach-/Personenkonto | Cell (`KontoRef`) · Row · View (Kontenblatt) · Picker · Klassen-Badge | `AccountRef`, `AccountsTableRow`, `AccountsGroupedTable`, `AccountLedgerDrawer`, `KontoCombobox`, `AccountClassBadge` | Picker v2 (`KontoFeld`); Rest heben |
+| Geschäftspartner | Cell · Row · View (Tabs) · Picker (`PartnerFeld`) · Editor · Vorschlagsliste | `CreditorCombobox`, `PartnerTabsBar`, 5 Tabs, `AcceptCreditorForm`, `CreditorProposalsReview` | heben; Cell/Row/Picker fehlen |
+| Zahlungskonto | Row · Card · Editor | `PaymentAccount*Form`, `PaymentChannelActivitySection` | heben |
+| Beleg | Cell · Row (Liste, Posteingang) · Card · View (+ Drawer) · Vorschau · Editor (Klassifikation, Datum, Abschluss) · Belegart-Renderer (B4) | `BelegSummary`, `BelegPreview`, `BelegDrawer`, `SourceDocFactsCard`, `DocTabsBar`, `DocActionsMenu`, `ClassificationEditor`, `SourceDocDateEditor`, `DocCompletionControl`, `DocumentInbox`, `StuckDocumentsTable`, `BelegeTab` | heben; Belegart-Renderer fehlt |
+| Rechnung | Card · View-Teile · Editor (Extraktions-Korrektur) · Prüfbefunde → `Pruefpunkte` · Pipeline → `ProzessStepper` · Logs → Log-Ansicht | `GlanceCard`, `InvoiceSidebar`, 4 Tabs, `ExtractionCorrectionCard`, 3 Buttons, `PipelineStepper`, `FindingsList`, 3 Log-Tabellen, `InvoiceListNav`/`TabsBar` | heben; geht in der Beleg-Familie auf (B4) |
+| Rechnungsposition | Row | `PositionenTab` | heben |
+| Vertrag | Row · View | `ContractDetail` | heben |
+| Kontoauszugsposition | Cell (Verwendungszweck) · Row (Sachverhalts-Indikator, Klärung, DATEV-Haken) · View (+ Drawer) | `PurposeDisplay`, `CaseIndicatorBadges`, `ClarBubble`, `DatevMatchTick`, `KontoauszugView`, `BankTransactionDetail`/`Drawer`, `BankTransactionAssignmentTable` | heben |
+| Bank-Import | Wizard · Ergebnis-Card · Sync-Panel | `CsvImportWizard`, `IntegrationSyncPanel`, `ImportResultSummary` | heben |
+| Ereignis | Row/Stapel im Sachverhalt | `EventStack` (30 Hex-Literale) | heben |
+| Sachverhalt | Cell · Row · Card (Kopf) · View · Editor (Zusammenfassung, Art) · Tabs · Filter → `FilterLeiste` · Plausibilität → `Pruefpunkte` · Zuordnung · Historie → Verlauf | `CaseCell`, `CaseRow`, `Hero`, `SachverhaltScreen`, `CaseOverviewBox`, `CaseSummary`/`KindEditor`, `CaseTabsBar`/`CaseListTabsBar`, `CaseListFilters`, 4 Tabs, `CloseCasesPanel`, `PortalCaseList` | heben |
+| Klärung | Chip/Row (offen, Frist) · Frage stellen · Antwort → Pattern · Kommentar · Mail-Panel | `ClarificationsBanner`, `ClarBubble`, `RaiseClarificationForm`, `CaseCommentForm`, `DocumentRequestMailPanel` | heben; Antwortoptionen fehlen |
+| Erwartung | Chip/Row mit Frist | — | fehlt (§3.1) |
+| Ausgleichs-Zuordnung | Row/Paar Rechnung ↔ Zahlung mit Differenz | — (abgeleiteter Text) | fehlt (§3.1) |
+| Buchungssatz | Row · View (Anzeige-Modus des Editors) · Card (kompakt im Sachverhalt) · Editor · KI-Hinweise · Freigabe → `ActionBar` · Drawer (DATEV/Ludwig/Rohzeile) | `BuchungenTabelle` (v2), `JournalEntryView`, `JournalEntryDetail`, `BookingProposalView`/`Compact`, `ManualBookingDrawer`, `BookingRationale`, `RationaleSources`, `BookingApproveBar`, `BookingStatusBadge`, `CreditorRecentBookingsCard`, 3 Drawer | teils v2 (`BuchungssatzEditor`, `KIBuchungshinweise`); View/Card heben |
+| Buchungszeile | Row (`EditorRow`) · Picker Steuerschlüssel · Picker Konto | `BookingLineRow`, `TaxKeySelect`, `KontoCombobox` | teils v2; `SteuerschluesselFeld` fehlt |
+| DATEV-OPOS | Row (Posten) · GroupRow (Altersklasse) | inline in `opos/page` | fehlt (§3.2 Nr. 1) |
+| DATEV-Snapshot | Card (Datum, WJ, Umfang, Ergebnis) | — | fehlt (§3.2 Nr. 5) |
+| DATEV-Spiegelbuchung | View · Vergleich → `VergleichsTabelle` · Kopieren | `DatevEntryDetail`, `CaseDatevTruthTab`, `StapelVergleich`, `ReplayVergleich`, `CopyTextButton` | heben |
+| DATEV-Export-Stapel | Row · View · Wizard · Download · RowActions | Stapel-Subsite (v2); `DatevExportWizard`, `ExportBatch*`, `OpenExportOverview`, `DatevExportTabs` | v2; Rest Rückbau (F118) |
+| Wiederkehr-Regel | Row · Editor | `modules/recurring-rules/ui` | heben |
+| Konvention | Row · Editor | `ClientAgentNotesPanel`, `PostingTextConventionEditor`, `TradeNamesEditor` | heben |
+| Buchungslauf | View (Run-Detail) · Schritte → `SchrittRail` · Panel | `ProcessingPanel`, `StepNav`, `agent-runs/[runId]` (695 Z.) | heben |
+| Audit-Ereignis | Row → Log-Ansicht · Produktbefund-Zeile | `AuditLogTable`, `FeedbackRowActions` | Optik |
+| Job | Drawer · Monitor → `StatusBadge` + `Timestamp` | `TaskDetail`, `JobStatusMonitor`, `ResetRunButton` | heben |
+| Entschiedene Belegnummer | inline | — | — |
+
+**Nicht im Katalog, weil Rückbau** (§11.4): `[year]/review` + 5 Unterseiten
+(P17) · `/settings/components` (B2) · `export`-Archiv (F118) · `agent-runs`
+(Redirect). Was dort an Bausteinen steckt, wird nicht gehoben.
 
 ## 12 Werte-Protokoll (Quelle der Wahrheit: `tokens.css`, `v2.css`)
 

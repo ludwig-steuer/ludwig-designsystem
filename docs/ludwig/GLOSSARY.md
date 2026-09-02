@@ -2090,7 +2090,7 @@ Spalten mit DB-`CHECK`-Constraints, die kein eigenständiges Geschäftskonzept r
 - English: `reconciliation`
 - German: `Abgleich`
 - Definition: Der deterministische Vergleich DATEV-Spiegel ↔ Ludwig direkt im Import-Lauf (Python, kein LLM): Match-Kaskade je Mirror-Satz (primär `LudwigAI-Sachverhalt`) + OPOS-Abgleich. Ergebnis: `match_state` am Satz + Case-Hints im Report.
-- Data type: workflow step (F21-T21.3) + `client_datev_mirror_entries.match_state` (`matched_ludwig | mirrored_local | new_unprocessed | unclear`) + `client_datev_snapshots.reconciliation_report`.
+- Data type: workflow step (F21-T21.3) + `client_datev_mirror_entries.match_state` (`matched_ludwig | matched_split | matched_corrected | new_unprocessed | unclear | disappeared | disappeared_committed`) + `client_datev_snapshots.reconciliation_report`.
 - Notes: `list_reconciliation_items` ist eine Query auf `match_state`, keine eigene Tabelle. Baseline für den Monatslauf: Snapshot frisch + `unclear` leer/adressiert + Case-Hints abgearbeitet.
 
 ### Mengengerüst
