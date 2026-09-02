@@ -21,7 +21,7 @@ pnpm storybook     # http://localhost:6107
 ```
 src/ui/v3/          Das Design-System — hier wird entwickelt.
   primitives/         kein Fachwort (Button, Table, Field, Dialog …)
-  patterns/           Arbeitsflächen-Muster (MasterDetail, SchrittRail …)
+  patterns/           Arbeitsflächen-Muster (MasterDetail, StepRail …)
   entities/<name>/    Darstellungsfamilie genau einer Entität
 src/ui/legacy/        Vorübergehend: Bausteine aus der App, noch nicht
                       eingeordnet (StatusBadge, Banner, Pagination,
@@ -44,7 +44,7 @@ Storybook-Titel tragen den **Inhalt**. Fünf Regeln, sonst nichts:
 | **Datei** | Eine Datei je Komponentenfamilie, PascalCase, benannt wie die Familie: `Button.tsx` (Button, KeyButton), `Table.tsx` (Card, Table, Row …). Kein Sammelbecken. |
 | **Story** | `<Name>.stories.tsx` daneben, Titel `v3/<Stufe>/<Gruppe>/<Name>`. Die Gruppen sind dieselben Wörter wie die Kommentare in `src/ui/v3/index.ts`: Aktion, Navigation, Formular, Dialog, Fläche, Tabelle · Arbeitsfläche, Rahmen, Prüfen, Prozess · je Entität ihr Name. |
 | **Wann** | Jeder Export trägt im JSDoc, auf Englisch, `@when` (der Fall, für den er da ist) und `@instead` (der Nachbarfall und wohin der gehört: `… → MasterDetail`). Das ist die Antwort auf „was nehme ich?" — greppbar und im Editor-Hover. |
-| **Entitäten** | Name = Entität + Form: `KontoFeld`, `KontoZeile`, `BuchungssatzEditor`. Die Formen stehen in `docs/ludwig/ui-repraesentationen.md`; ihre Größe ist ableitbar, nicht gespeichert — XS Inline, Badge · S Zeile, Auswahl, Kopf · M Karte, Vorschau · L Detail, Drawer, Liste · XL Editor. |
+| **Entitäten** | Name = Entität + Form: `AccountField`, `KontoZeile`, `JournalEntryEditor`. Die Formen stehen in `docs/ludwig/ui-repraesentationen.md`; ihre Größe ist ableitbar, nicht gespeichert — XS Inline, Badge · S Zeile, Auswahl, Kopf · M Karte, Vorschau · L Detail, Drawer, Liste · XL Editor. |
 | **Sprache** | Code nur Englisch: Bezeichner, Kommentare, JSDoc, `@when`/`@instead`, Story-Exportnamen. Deutsch nur in Nutzer-Strings und Storybook-Titeln. Fachbegriffe: englischer GLOSSARY-Name im Code, deutscher im UI. |
 | **Wachstum** | `primitives/` bleibt flach. `patterns/` bekommt Themen-Unterordner, sobald es mehr als etwa 15 Dateien sind. `entities/` ist per Definition nach Inhalt sortiert. |
 

@@ -26,7 +26,7 @@ Drei Stufen, Importe **nur abwärts**:
 
 - `src/ui/v3/primitives/` — kein Fachwort. Button, Table, Field, Dialog.
 - `src/ui/v3/patterns/` — Arbeitsflächen-Muster, kennt Prozessbegriffe.
-  MasterDetail, SchrittRail, TodoListe.
+  MasterDetail, StepRail, TodoList.
 - `src/ui/v3/entities/<entität>/` — Darstellungsfamilie **genau einer** Entität.
 
 Primitives kennen keine Patterns, Patterns keine Entitäten. Fachliche
@@ -54,8 +54,8 @@ Begriff dort, ist das ein Befund — melden, nicht selbst einen erfinden.
 Typen für Fachdaten kommen aus `src/ludwig/` (gespiegeltes Datenmodell),
 nicht als lokale Neudefinition.
 
-**Entitäten heißen Entität + Form**: `KontoFeld`, `KontoZeile`, `KontoKarte`,
-`BuchungssatzEditor`. Die Formen sind die aus `docs/ludwig/ui-repraesentationen.md`;
+**Entitäten heißen Entität + Form**: `AccountField`, `KontoZeile`, `KontoKarte`,
+`JournalEntryEditor`. Die Formen sind die aus `docs/ludwig/ui-repraesentationen.md`;
 keine T-Shirt-Größe im Namen — die Größe folgt aus der Form:
 
 | Größe | Formen |
@@ -76,7 +76,7 @@ da ist, und der Nachbarfall mit Verweis. Das ist die Antwort auf „was nehme ic
  * Master-Detail: Liste links, Detail rechts.
  *
  * @when    Picking from a list, working on the selected item on the right.
- * @instead Single confirmation without a list → Dialog. Sequence of steps → SchrittRail.
+ * @instead Single confirmation without a list → Dialog. Sequence of steps → StepRail.
  */
 export function MasterDetail(…)
 ```

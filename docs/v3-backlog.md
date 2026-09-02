@@ -49,7 +49,7 @@ Warum diese Reihenfolge:
 
 `Werteliste` und `FieldList` grenzen sich so ab: `FieldList` gehört in die
 Karte, `Werteliste` steht frei — in Drawer, Detail, Zusammenfassung.
-`Auswahlfeld` ist die Basis, aus der `KontoFeld` die Konto-Variante wird.
+`Auswahlfeld` ist die Basis, aus der `AccountField` die Konto-Variante wird.
 
 ## Später — echter Bedarf, aber kein Blocker
 
@@ -72,7 +72,7 @@ Karte, `Werteliste` steht frei — in Drawer, Detail, Zusammenfassung.
   Erst wenn der Ordner leer ist, ist v3 vollständig (siehe `legacy/README.md`).
 - **`.v2tbl__empty` ist zentriert** (`v3.css`) — Verstoß gegen V3 „nichts
   zentriert". Die Guidelines markieren ihn als „im v2-Set **sofort**".
-- **`KIBuchungshinweise` hat keine Story.** Einziger v3-Export ohne eine.
+- **`AiBookingNotes` hat keine Story.** Einziger v3-Export ohne eine.
 - **Sammeldateien**: `Surface.tsx` und `Interactive.tsx` sind bereits in
   Einzeldateien aufgelöst; `Cells.tsx` (7 Exporte), `Form.tsx` (5), `Nav.tsx`
   (4) und `Table.tsx` (8) sind es noch nicht. Konsequent wäre dieselbe
@@ -98,5 +98,5 @@ Ebenso die Entitäten-Familien, die §11.3 als „v2 fehlt" führt: `CaseCell`
 (Sachverhalt), die Buchungs-Anzeigen (`JournalEntryView`, `AccountRef`,
 `RationaleSources`, `ConfidenceMeter`/`ConfidenceDot`, `BookingProposalView`/
 `-Compact`, `BookingLineRow`) und die Beleg-Familie (`BelegPreview`,
-`BelegSummary`). `BuchungssatzEditor` deckt den Editor ab, nicht die
+`BelegSummary`). `JournalEntryEditor` deckt den Editor ab, nicht die
 Anzeige-Varianten.

@@ -94,7 +94,7 @@ gemeinsames Markup-Vokabular bilden. Die Datei heißt nach der Familie.
 - Jede Prop bekommt in der Tabelle die Story, die sie beweist. Eine Prop ohne
   Story-Nachweis ist entweder überflüssig oder die Story fehlt.
 - „Kann nicht" ist Teil der Schnittstelle: was die Komponente bewusst nicht
-  tut (wie `BuchungssatzEditor`: kein zweiter Satz je Ereignis).
+  tut (wie `JournalEntryEditor`: kein zweiter Satz je Ereignis).
 
 ## 6. Stories ableiten
 
