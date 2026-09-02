@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` — Erweiterung eines vorhandenen Exports |
 | Klassen-Test | entfällt — keine neue Komponente |
 | Quelle | Knopf-Erhebung `ludwig/app` vom 2026-09-03 (441 `.tsx`, 11 Stylesheets) |
@@ -39,7 +39,7 @@ Server-Component; `loading` ist ein Wert, den der Aufrufer übergibt.
 | `loading` | `boolean` | nein | Handlung läuft: gesperrt, `aria-busy`, Spinner vor dem Text | `Loading` |
 | `loadingLabel` | `string` | nein | Ersetzt die Beschriftung, solange `loading` — „Speichere …" | `Loading` |
 | `fullWidth` | `boolean` | nein | Volle Breite, Inhalt zentriert — Login, Formularabschluss | `FullWidth` |
-| `size` | `"xs" \| "sm" \| "md"` | nein | `xs` ≈ 26 px für Knöpfe in dichten Zellen und Editoren | `Sizes` |
+| `size` | `"xs" \| "sm" \| "md"` | nein | `xs` ≈ 26 px für dichte Zellen und Editoren; in der Tabellenzeile nur `xs`/`sm` | `SizesInRow` |
 
 `icon` (links) bleibt unverändert. `icon` und `iconEnd` dürfen zusammen
 gesetzt sein — die App hat einen solchen Fall (`.balchip`: Haken links,
@@ -65,8 +65,9 @@ Bleibt Server-Component.
 - **`fullWidth`:** `width: 100%`, Inhalt zentriert. In einer `ActionBar`
   wirkungslos, weil die ihre Knöpfe selbst anordnet.
 - **`xs`:** ≈ 26 px, Schrift eine Stufe kleiner. Für Zellen und Editoren, nicht
-  für Seitenaktionen. Alle Größen bleiben mit `sm`/`md` in einer Zeile
-  ausrichtbar (V1: der Knopf drückt die Zeile nicht auf).
+  für Seitenaktionen. In die Tabellenzeile gehören nur `xs` und `sm` — `md`
+  drückt sie auf, was V1 verbietet („der Chip wird kleiner, nicht die Zeile
+  größer"). Die Story `SizesInRow` zeigt beides nebeneinander.
 
 ## Stories
 
@@ -78,7 +79,7 @@ kommen dazu.
 | `IconEnd` | Pfeil rechts („Weiter zu Schritt 5"), Chevron rechts, und einmal beides |
 | `Loading` | mit und ohne `loadingLabel`, neben einem Ruhezustand zum Vergleich |
 | `FullWidth` | Login-Fall, Inhalt zentriert |
-| `Sizes` | `xs`/`sm`/`md` nebeneinander in einer Tabellenzeile — die Zeile wächst nicht |
+| `SizesInRow` | `xs`/`sm` fügen sich in die Zeile, `md` drückt sie auf — der Nachweis, welche Größe wohin gehört |
 
 Nicht anwendbar: keine neuen Zustände; `Leer` und `LeerNachFilter` gelten für
 einen Knopf nie.
@@ -101,7 +102,7 @@ Variabel (aus dieser Spec):
 - [ ] Der Spinner dreht gleichmäßig und lässt den Knopf nicht springen (Story `Loading`, im Browser geprüft)
 - [ ] `iconEnd` steht rechts vom Text, der Hotkey bleibt ganz rechts (Story `IconEnd`)
 - [ ] `icon` und `iconEnd` zusammen funktionieren (Story `IconEnd`)
-- [ ] `xs`, `sm` und `md` in einer Tabellenzeile lassen die Zeilenhöhe unverändert (Story `Sizes`, Regel V1)
+- [ ] `xs` und `sm` lassen die Zeilenhöhe unverändert; `md` drückt sie sichtbar auf und ist damit als Zeilen-Größe ausgeschlossen (Story `SizesInRow`, Regel V1)
 - [ ] `fullWidth` zentriert den Inhalt (Story `FullWidth`)
 - [ ] Die Datei trägt weiterhin kein `"use client"`
 - [ ] Ersetzt den Textwechsel in `ConfirmReviewButton.tsx` und das Inline-`padding` in `CaseSummaryEditor.tsx:68` ohne Funktionsverlust

@@ -1276,3 +1276,34 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   color: var(--color-text-muted);
 }
 .v2empty__actions { display: flex; gap: var(--space-2); }
+
+/* --------------------------------------------------- Knopf: Erweiterungen */
+/* xs für dichte Zellen und Editoren. Liegt zwischen den beiden v1-Klassen,
+   die dafür heute per Inline-Style nachgebaut werden (.vconfirm 11px,
+   .rcard__edit 12px). Drückt die Tabellenzeile nicht auf (V1). */
+.v2btn--xs { font-size: 12px; line-height: 16px; padding: 4px 10px; }
+
+/* Vollbreit statt größer — Ludwig kennt kein CTA-Format über md hinaus. */
+.v2btn--full { width: 100%; justify-content: center; }
+
+/* Der erste Spinner des Design-Systems. Gleichmäßig, ohne Springen (§2);
+   steht nie allein, sondern immer neben einem Wort (V7). */
+@keyframes v2spin {
+  to { transform: rotate(360deg); }
+}
+.v2spin {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  opacity: 0.7;
+  animation: v2spin 700ms linear infinite;
+}
+.v2btn--xs .v2spin { width: 12px; height: 12px; border-width: 1.5px; }
+
+/* Wer weniger Bewegung wünscht, bekommt sie nicht (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  .v2spin { animation-duration: 2.4s; }
+}
