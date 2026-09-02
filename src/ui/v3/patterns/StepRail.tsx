@@ -102,6 +102,8 @@ export function StepHeader({
   lead,
   prevHref,
   nextHref,
+  onPrev,
+  onNext,
   nextLabel,
   actions,
 }: {
@@ -110,10 +112,23 @@ export function StepHeader({
   lead?: string;
   prevHref?: string | null;
   nextHref?: string | null;
+  /** Alternative to `prevHref` for a step held in client state. */
+  onPrev?: (() => void) | null;
+  /** Alternative to `nextHref` for a step held in client state. */
+  onNext?: (() => void) | null;
   /** „Weiter zu Schritt 5" — where it leads, not merely „Weiter". */
   nextLabel?: string;
   actions?: ReactNode;
 }) {
+  // A step that lives in client state (an unsaved form, a wizard inside a
+  // dialog) cannot be a link. Without a callback path such a page used to get
+  // two dead buttons it could not switch off; now it passes `onPrev`/`onNext`
+  // instead, and a page that navigates elsewhere entirely passes neither and
+  // gets no navigation at all.
+  const hasPrev = Boolean(prevHref) || Boolean(onPrev);
+  const hasNext = Boolean(nextHref) || Boolean(onNext);
+  const showNav = hasPrev || hasNext;
+
   return (
     <div className="abn__screenhead">
       <div className="abn__screenhead__row">
@@ -123,31 +138,57 @@ export function StepHeader({
         </div>
         {/* Forward is the action, backward the way out: „Weiter" carries the
             primary color and says where it leads; „Zurück" stays a plain
-            secondary button with no destination in its text. */}
-        <div className="abn__screenhead__nav">
-          {actions}
-          {prevHref ? (
-            <Link className="v2btn v2btn--secondary v2btn--sm" href={prevHref}>
-              ← Zurück
-            </Link>
-          ) : (
-            <span className="v2btn v2btn--secondary v2btn--sm" aria-disabled style={{ opacity: 0.4 }}>
-              ← Zurück
-            </span>
-          )}
-          {nextHref ? (
-            <Link className="v2btn v2btn--primary v2btn--sm" href={nextHref}>
-              {nextLabel ?? "Weiter"} →
-            </Link>
-          ) : (
-            <span className="v2btn v2btn--primary v2btn--sm" aria-disabled style={{ opacity: 0.4 }}>
-              {nextLabel ?? "Weiter"} →
-            </span>
-          )}
-        </div>
+            secondary button with no destination in its text.
+            The disabled state stays for the first and the last step — there
+            the place has to hold, or the header jumps (guidelines §2). */}
+        {actions || showNav ? (
+          <div className="abn__screenhead__nav">
+            {actions}
+            {showNav ? <StepNav href={prevHref} onClick={onPrev} variant="secondary">← Zurück</StepNav> : null}
+            {showNav ? (
+              <StepNav href={nextHref} onClick={onNext} variant="primary">
+                {nextLabel ?? "Weiter"} →
+              </StepNav>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       {lead ? <p className="abn__screenhead__lead">{lead}</p> : null}
     </div>
+  );
+}
+
+/** One of the two header steps: link, button, or the held-open disabled place. */
+function StepNav({
+  href,
+  onClick,
+  variant,
+  children,
+}: {
+  href?: string | null;
+  onClick?: (() => void) | null;
+  variant: "primary" | "secondary";
+  children: ReactNode;
+}) {
+  const cls = `v2btn v2btn--${variant} v2btn--sm`;
+  if (href) {
+    return (
+      <Link className={cls} href={href}>
+        {children}
+      </Link>
+    );
+  }
+  if (onClick) {
+    return (
+      <button type="button" className={cls} onClick={onClick}>
+        {children}
+      </button>
+    );
+  }
+  return (
+    <span className={cls} aria-disabled style={{ opacity: 0.4 }}>
+      {children}
+    </span>
   );
 }
 

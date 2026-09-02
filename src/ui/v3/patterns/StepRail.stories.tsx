@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { useState } from "react";
 import { ProgressBar, StepHeader, StepRail, type RailItem } from "./StepRail";
 
 const meta: Meta<typeof StepRail> = { title: "v3/Patterns/Frame/StepRail", component: StepRail };
@@ -88,6 +89,47 @@ export const ScreenHeaderEdge: Story = {
         prevHref={null}
         nextHref="#"
         nextLabel="Vollständigkeit"
+      />
+    </div>
+  ),
+};
+
+/**
+ * Ein Schritt, der im Client-State liegt — ungespeichertes Formular, Assistent
+ * im Dialog — kann kein Link sein. Dafür `onPrev`/`onNext`: derselbe Kopf,
+ * derselbe Platz, nur Knöpfe statt Links. Vorher blieben einer Seite ohne
+ * `href` zwei tote, nicht abschaltbare Knöpfe.
+ */
+export const ScreenHeaderCallbacks: Story = {
+  render: function Render() {
+    const [step, setStep] = useState(3);
+    return (
+      <div style={{ maxWidth: 900 }}>
+        <StepHeader
+          overline={`Schritt ${step} von 10`}
+          title="Buchungen"
+          lead="Der Schritt steht im Zustand der Seite, nicht in der URL."
+          onPrev={step > 0 ? () => setStep((v) => v - 1) : null}
+          onNext={step < 10 ? () => setStep((v) => v + 1) : null}
+          nextLabel="Weiter"
+        />
+      </div>
+    );
+  },
+};
+
+/**
+ * Eine Seite, die ihre Schrittwahl ganz woanders trägt, gibt weder `href` noch
+ * Callback — dann steht im Kopf gar keine Navigation, statt zweier Attrappen.
+ */
+export const ScreenHeaderWithoutNav: Story = {
+  render: () => (
+    <div style={{ maxWidth: 900 }}>
+      <StepHeader
+        overline="Schritt 3 von 10"
+        title="Buchungen"
+        lead="Weiter und Zurück stehen unten in der ActionBar."
+        actions={<ProgressBar done={41} total={118} />}
       />
     </div>
   ),

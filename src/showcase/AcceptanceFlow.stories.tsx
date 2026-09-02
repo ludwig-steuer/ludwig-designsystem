@@ -129,25 +129,10 @@ function Page() {
           overline={`Schritt ${step} von 10`}
           title={STEPS[step]!.label}
           lead={STEPS[step]!.sub}
+          onPrev={step > 0 ? () => setStep((v) => v - 1) : null}
+          onNext={step < 10 ? () => setStep((v) => v + 1) : null}
+          nextLabel={step < 10 ? STEPS[step + 1]!.label : undefined}
           actions={<TodoInline spec="0008" name="OverflowMenu" />}
-        />
-
-        <Todo spec="—" name="StepHeader navigiert nur per href">
-          `prevHref`/`nextHref` sind Links; ohne sie zeigt der Kopf zwei tote,
-          ausgegraute Knöpfe, die sich nicht abschalten lassen. Eine Seite, die
-          den Schritt im Client-State hält — jede mit ungespeichertem Formular —
-          kann ihn so nicht benutzen. Die Schrittwahl steht hier deshalb
-          daneben, statt im Kopf.
-        </Todo>
-
-        <ActionBar
-          secondary={
-            <Button variant="tertiary" onClick={() => setStep((s) => Math.max(0, s - 1))}>
-              Zurück
-            </Button>
-          }
-          primary={<Button onClick={() => setStep((s) => Math.min(10, s + 1))}>Weiter</Button>}
-          info={`Schritt ${step} von 10`}
         />
 
         {step === 0 ? (

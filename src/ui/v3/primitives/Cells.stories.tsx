@@ -146,3 +146,40 @@ export const DeviationScale: Story = {
     </Card>
   ),
 };
+
+/**
+ * `null` ist ein Wert, kein Fehler: ein offener Sachverhalt hat noch keine
+ * Summe. `AmountCell` und `Timestamp` zeigen dafür denselben Gedankenstrich —
+ * sonst schreibt jeder Aufrufer dieselbe Fallunterscheidung, und `0,00 €`
+ * fängt an, „noch nicht bekannt" zu bedeuten.
+ *
+ * Die Null daneben beweist die Abgrenzung: sie ist ein Betrag und wird als
+ * einer gezeigt.
+ */
+export const UnknownValues: Story = {
+  render: () => (
+    <Frame sub="unbekannt gegen null">
+      <Row>
+        <span>Musterfirma GmbH</span>
+        <AmountCell value={1475.6} />
+        <ProgressCell share={1} label="1 / 1" />
+        <DotStatus tone="success" label="gebucht" />
+        <Timestamp iso="2026-08-26T09:12:00Z" />
+      </Row>
+      <Row>
+        <span>Sachverhalt ohne Summe</span>
+        <AmountCell value={null} />
+        <ProgressCell share={0} label="0 / 3" />
+        <DotStatus tone="warning" label="offen" />
+        <Timestamp iso={null} />
+      </Row>
+      <Row>
+        <span>Umbuchung, saldenneutral</span>
+        <AmountCell value={0} />
+        <ProgressCell share={1} label="1 / 1" />
+        <DotStatus tone="success" label="gebucht" />
+        <Timestamp iso="2026-08-30T11:00:00Z" />
+      </Row>
+    </Frame>
+  ),
+};

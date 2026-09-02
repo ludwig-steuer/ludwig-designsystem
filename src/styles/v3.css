@@ -119,10 +119,10 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   line-height: 1.6;
 }
 
-/* Leerzustand innerhalb der Karte — der ehrliche Platzhalter (F118 §8). */
+/* Leerzustand innerhalb der Karte — der ehrliche Platzhalter (F118 §8).
+   Linksbündig wie jeder Inhalt: V3 zentriert nichts. */
 .v2tbl__empty {
   padding: 30px 18px;
-  text-align: center;
   color: var(--color-text-subtle);
   font-size: 13px;
 }
@@ -849,7 +849,7 @@ select.v2in { padding-right: 26px; }
 .v2lp__title { font-size: 13.5px; font-weight: 600; color: var(--color-text); display: flex; gap: 8px; align-items: center; }
 .v2lp__sub { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
 .v2lp__badges { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; flex-shrink: 0; }
-.v2lp__empty { padding: 30px 16px; text-align: center; font-size: 13px; color: var(--color-text-subtle); }
+.v2lp__empty { padding: 30px 16px; font-size: 13px; color: var(--color-text-subtle); }
 
 .v2dp {
   background: var(--color-surface);

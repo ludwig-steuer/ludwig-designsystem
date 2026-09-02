@@ -183,7 +183,7 @@ function Page() {
                   {c.title ?? `${CASE_KIND_LABEL[c.kind]}: ${c.counterpartyName ?? "unbekannt"}`}
                 </button>
                 <span>{c.counterpartyName}</span>
-                {c.totalAmount === null ? <span className="v2muted">—</span> : <AmountCell value={c.totalAmount} />}
+                <AmountCell value={c.totalAmount} />
                 <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} />
                 <RowActions>
                   <Button size="xs" variant="tertiary" onClick={() => setEditing(c)}>
@@ -218,31 +218,22 @@ function Page() {
               rows={[
                 ["Art", CASE_KIND_LABEL[current.kind]],
                 ["Gegenpartei", current.counterpartyName ?? "—"],
-                [
-                  "Betrag",
-                  current.totalAmount === null ? "—" : <AmountCell key="a" value={current.totalAmount} />,
-                ],
+                ["Betrag", <AmountCell key="a" value={current.totalAmount} />],
                 ["Zuständig", current.disposition ?? "—"],
                 ["Eröffnet", <Timestamp key="t" iso={current.openedAt} />],
                 ["Export", current.exportStatus ?? "kein Bezug"],
               ]}
             />
             {current.summary ? (
-              <Todo spec="—" name="Markdown">
+              <Todo spec="0019" name="Markdown">
                 Die Zusammenfassung kommt als Markdown vom Classifier. Ohne
                 Renderer steht sie hier als roher Text: „{current.summary}"
               </Todo>
             ) : null}
-            <Todo spec="—" name="Verlauf (Timeline)">
+            <Todo spec="0020" name="Timeline">
               Belegeingang, Bank-Ereignisse, Klärungen und Buchungen als ein
               Strang — heute siebenmal verschieden gebaut, im v3-Backlog unter
               „Später" geführt.
-            </Todo>
-            <Todo spec="—" name="AmountCell nimmt kein null">
-              `CaseListItem.totalAmount` ist `number | null`, `AmountCell`
-              verlangt `number | string`. `Timestamp` daneben behandelt `null`
-              selbst und zeigt „—". Beide Zellen sollten sich gleich verhalten;
-              hier steht dafür zweimal eine lokale Fallunterscheidung.
             </Todo>
             <Todo spec="0005" name="Disclosure">
               Regelwerk, Erwartungen und Rohdaten hängen als aufklappbare
@@ -318,7 +309,7 @@ function Page() {
           <Field label="Zusammenfassung">
             <Textarea defaultValue={editing?.summary ?? ""} rows={3} />
           </Field>
-          <Todo spec="—" name="Datumsfeld">
+          <Todo spec="0021" name="DateField">
             Eröffnungsdatum und Frist brauchen ein Datumsfeld; 14 Dateien bauen
             es heute selbst.
           </Todo>

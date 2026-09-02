@@ -20,7 +20,13 @@ export type CellTone = "neutral" | "muted" | "success" | "warning" | "warning-st
  * really is an alarm (balance difference, open remainder), the caller sets
  * `tone` itself.
  *
- * @when    Every amount in a table cell.
+ * `null` is a value the column has to carry: plenty of amounts in the data
+ * model are `number | null` (an open case has no total yet). It renders the
+ * same em dash `Timestamp` uses for a missing date — otherwise every caller
+ * writes the same local conditional, and `0,00 €` starts standing in for
+ * „not known yet".
+ *
+ * @when    Every amount in a table cell, known or not.
  * @instead Amount in the page header → KpiTile.
  */
 export function AmountCell({
@@ -29,11 +35,15 @@ export function AmountCell({
   tone = "neutral",
   title,
 }: {
-  value: number | string;
+  /** `null` means unknown — rendered as „—", never as zero. */
+  value: number | string | null;
   currency?: string | null;
   tone?: CellTone;
   title?: string;
 }) {
+  // Explicitly against null, not falsy: 0 is an amount, and „0,00 €" is a
+  // statement — „nothing was booked" is not the same as „we do not know".
+  if (value === null) return <span className="v2muted">—</span>;
   const text =
     typeof value === "number"
       ? new Intl.NumberFormat("de-DE", {
