@@ -15,7 +15,7 @@ import { useEffect, useRef, type ReactNode } from "react";
  * ohne Blur).
  *
  * @when    Confirmation with consequences (cancel, delete, approve) or a short form that accompanies an action.
- * @instead Details of an item → MasterDetail. Action that needs a reason → GrundDialog.
+ * @instead Details of an item → MasterDetail. Action that needs a reason → ReasonDialog.
  */
 export function Dialog({
   open,

@@ -1,16 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { GrundDialog } from "./GrundDialog";
+import { ReasonDialog } from "./ReasonDialog";
 
-const meta: Meta<typeof GrundDialog> = { title: "v3/Primitives/Dialog/GrundDialog", component: GrundDialog };
+const meta: Meta<typeof ReasonDialog> = { title: "v3/Primitives/Dialog/ReasonDialog", component: ReasonDialog };
 export default meta;
-type Story = StoryObj<typeof GrundDialog>;
+type Story = StoryObj<typeof ReasonDialog>;
 
 const nichts = () => {};
 
 /** Grund optional, Vorschläge als Chips — ein Klick statt Tippen. */
-export const Offen: Story = {
+export const Open: Story = {
   render: () => (
-    <GrundDialog
+    <ReasonDialog
       open
       onClose={nichts}
       onConfirm={nichts}
@@ -20,14 +20,14 @@ export const Offen: Story = {
       chips={["Beleg fehlt", "Konto falsch", "Betrag weicht ab"]}
     >
       Der Agent bekommt den Stapel mit diesem Grund zurück und arbeitet ihn neu auf.
-    </GrundDialog>
+    </ReasonDialog>
   ),
 };
 
 /** Pflichtgrund und roter Knopf: Storno ist nicht umkehrbar. */
-export const Pflichtgrund: Story = {
+export const ReasonRequired: Story = {
   render: () => (
-    <GrundDialog
+    <ReasonDialog
       open
       required
       onClose={nichts}
@@ -39,14 +39,14 @@ export const Pflichtgrund: Story = {
       confirmVariant="danger"
     >
       Die Buchung 2026-0008 wird storniert. Der Grund steht im Protokoll.
-    </GrundDialog>
+    </ReasonDialog>
   ),
 };
 
 /** Läuft: der Knopf ist gesperrt, bis die Antwort da ist. */
-export const Laeuft: Story = {
+export const Pending: Story = {
   render: () => (
-    <GrundDialog
+    <ReasonDialog
       open
       pending
       onClose={nichts}
@@ -56,6 +56,6 @@ export const Laeuft: Story = {
       confirmLabel="Zurückgeben"
     >
       Wird übertragen …
-    </GrundDialog>
+    </ReasonDialog>
   ),
 };

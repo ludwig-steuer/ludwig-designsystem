@@ -61,7 +61,7 @@ export { Field, Input, Textarea, Select, Checkbox } from "./primitives/Form";
 
 /* Dialog */
 export { Dialog } from "./primitives/Dialog";
-export { GrundDialog } from "./primitives/GrundDialog";
+export { ReasonDialog } from "./primitives/ReasonDialog";
 
 /* Fläche */
 export { KpiTile, KpiGrid } from "./primitives/KpiTile";

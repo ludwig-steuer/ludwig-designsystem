@@ -17,7 +17,7 @@ interface DialogProps {
  * Markup-Konvention gespiegelt aus `CaseDocumentUploaderModal`
  * (role="dialog", fixed inset:0, Backdrop rgba(15,17,22,0.55), zIndex 1000).
  */
-/** @deprecated seit F123 — nutze `@/ui/v3` — `Dialog` (Drawer-Anatomie, Scrim mit Blur) oder `GrundDialog` für Handlungen mit Begründung. */
+/** @deprecated seit F123 — nutze `@/ui/v3` — `Dialog` (Drawer-Anatomie, Scrim mit Blur) oder `ReasonDialog` für Handlungen mit Begründung. */
 export function Dialog({ open, onClose, title, children, maxWidth = 560 }: DialogProps) {
   useEffect(() => {
     if (!open) return;

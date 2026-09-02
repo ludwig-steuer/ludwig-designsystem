@@ -7,38 +7,38 @@ import { Dialog } from "./Dialog";
 import { Textarea } from "./Form";
 
 /**
- * Eine Handlung, die einen Grund braucht (F123 §2.6).
+ * An action that needs a reason (F123 §2.6).
  *
  * Ersetzt `window.prompt`. Der Browser-Prompt war bequem und dreimal falsch:
- * er lässt sich nicht gestalten, trägt keinen Kontext (wofür ist der Grund?),
+ * it cannot be styled, carries no context (a reason for what?),
  * und auf keinem Screenshot ist nachvollziehbar, was dort stand.
  *
- * Der Grund ist per Voreinstellung **optional** — wo er Pflicht ist (Storno,
+ * The reason is **optional** by default — where it is required (reversal,
  * Ablehnung), setzt der Aufrufer `required`.
  *
  * @when    Action whose reason belongs in the audit log (return, cancel, reject).
  * @instead Confirmation without a reason → Dialog.
  */
-export function GrundDialog({
+export function ReasonDialog({
   open,
   onClose,
   onConfirm,
   title,
   kicker,
-  /** Wofür der Grund ist — steht über dem Feld. */
+  /** What the reason is for — sits above the field. */
   children,
   label = "Grund (optional)",
   placeholder = "Steht später im Protokoll.",
   confirmLabel = "Bestätigen",
   confirmVariant = "primary",
   required = false,
-  /** Vorschläge, die den Grund füllen — ein Klick statt Tippen. */
+  /** Suggestions that fill the reason — one click instead of typing. */
   chips,
   pending = false,
 }: {
   open: boolean;
   onClose: () => void;
-  onConfirm: (grund: string) => void;
+  onConfirm: (reason: string) => void;
   title: string;
   kicker?: string;
   children?: ReactNode;
@@ -50,10 +50,10 @@ export function GrundDialog({
   chips?: string[];
   pending?: boolean;
 }) {
-  const [grund, setGrund] = useState("");
+  const [reason, setReason] = useState("");
 
   function schliessen() {
-    setGrund("");
+    setReason("");
     onClose();
   }
 
@@ -72,10 +72,10 @@ export function GrundDialog({
           <Button
             variant={confirmVariant}
             size="sm"
-            disabled={pending || (required && grund.trim().length === 0)}
+            disabled={pending || (required && reason.trim().length === 0)}
             onClick={() => {
-              onConfirm(grund.trim());
-              setGrund("");
+              onConfirm(reason.trim());
+              setReason("");
             }}
           >
             {confirmLabel}
@@ -91,7 +91,7 @@ export function GrundDialog({
               type="button"
               className="v2chip"
               key={c}
-              onClick={() => setGrund(grund ? `${grund} · ${c}` : c)}
+              onClick={() => setReason(reason ? `${reason} · ${c}` : c)}
             >
               {c}
             </button>
@@ -101,8 +101,8 @@ export function GrundDialog({
       <label className="v2field">
         <span className="v2field__label">{required ? label.replace(" (optional)", "") : label}</span>
         <Textarea
-          value={grund}
-          onChange={(e) => setGrund(e.target.value)}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
           placeholder={placeholder}
           autoFocus
         />
