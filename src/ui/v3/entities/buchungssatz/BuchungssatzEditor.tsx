@@ -11,7 +11,7 @@ import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 
 import { Button } from "../../primitives/Button";
 import { Dialog } from "../../primitives/Dialog";
-import { KontoFeld, type KontoKandidat, type KontoGruppe } from "../konto/KontoFeld";
+import { AccountField, type AccountCandidate, type AccountGroup } from "../account/AccountField";
 import { KIBuchungshinweise } from "./KIBuchungshinweise";
 
 /**
@@ -58,7 +58,7 @@ export interface EditorRow {
   text: string;
   kost1?: string;
   /** Kandidaten für das Konto-Feld dieser Zeile. */
-  candidates?: Partial<Record<KontoGruppe, KontoKandidat[]>>;
+  candidates?: Partial<Record<AccountGroup, AccountCandidate[]>>;
   /** Zeile ist gelöscht, aber rücknehmbar. */
   removed?: boolean;
 }
@@ -105,7 +105,7 @@ export interface BuchungssatzEditorProps {
    * Editor rät keinen Rahmen.
    */
   accountFramework?: string | null;
-  onSearchAccounts?: (query: string) => Promise<KontoKandidat[]>;
+  onSearchAccounts?: (query: string) => Promise<AccountCandidate[]>;
   onSave?: (rows: EditorRow[], reason: string) => void | Promise<void>;
   onCancel?: () => void;
   onEdit?: () => void;
@@ -550,7 +550,7 @@ function Zeile({
   loeschbar: boolean;
   onChange: (patch: Partial<EditorRow>) => void;
   onRemove: () => void;
-  onSearchAccounts?: (q: string) => Promise<KontoKandidat[]>;
+  onSearchAccounts?: (q: string) => Promise<AccountCandidate[]>;
   onOpenLedger?: (konto: string) => void;
   onOpenTaxKey?: (bu: string) => void;
 }) {
@@ -603,7 +603,7 @@ function Zeile({
               <option value="94">94</option>
               <option value="40">40</option>
             </select>
-            <KontoFeld
+            <AccountField
               value={row.konto}
               onChange={(konto) => onChange({ konto })}
               candidates={row.candidates ?? {}}

@@ -16,7 +16,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
  * Sachbearbeiterinnen tippen beides.
  */
 
-export interface KontoKandidat {
+export interface AccountCandidate {
   /** Die Kontonummer. In Ludwig immer identisch zur DATEV-Nummer. */
   number: string;
   name: string;
@@ -24,9 +24,9 @@ export interface KontoKandidat {
   reason?: string;
 }
 
-export type KontoGruppe = "agent" | "partner" | "aehnlich" | "belegposition" | "alle";
+export type AccountGroup = "agent" | "partner" | "aehnlich" | "belegposition" | "alle";
 
-export const KONTO_GRUPPEN_LABEL: Record<KontoGruppe, string> = {
+export const ACCOUNT_GROUP_LABEL: Record<AccountGroup, string> = {
   agent: "Vorschlag des Agenten",
   partner: "Zuletzt bei dieser Gegenpartei",
   aehnlich: "Ähnliche Belege",
@@ -34,13 +34,13 @@ export const KONTO_GRUPPEN_LABEL: Record<KontoGruppe, string> = {
   alle: "Alle Konten",
 };
 
-const REIHENFOLGE: KontoGruppe[] = ["agent", "partner", "aehnlich", "belegposition", "alle"];
+const REIHENFOLGE: AccountGroup[] = ["agent", "partner", "aehnlich", "belegposition", "alle"];
 
 /**
  * @when    Choosing an account, with candidates from agent, partner, similar and document line.
  * @instead Short fixed list → Select.
  */
-export function KontoFeld({
+export function AccountField({
   value,
   onChange,
   candidates,
@@ -52,19 +52,19 @@ export function KontoFeld({
   value: string;
   onChange: (number: string) => void;
   /** Kandidaten je Gruppe. Leere Gruppen werden nicht gezeigt. */
-  candidates: Partial<Record<KontoGruppe, KontoKandidat[]>>;
+  candidates: Partial<Record<AccountGroup, AccountCandidate[]>>;
   /**
    * Volltextsuche über den Kontenrahmen. Ohne Loader filtert das Feld nur die
    * mitgegebenen Kandidaten — kein stiller Fallback auf „nichts gefunden".
    */
-  onSearch?: (query: string) => Promise<KontoKandidat[]>;
+  onSearch?: (query: string) => Promise<AccountCandidate[]>;
   placeholder?: string;
   invalid?: boolean;
   ariaLabel?: string;
 }) {
   const [query, setQuery] = useState(value);
   const [open, setOpen] = useState(false);
-  const [treffer, setTreffer] = useState<KontoKandidat[] | null>(null);
+  const [treffer, setTreffer] = useState<AccountCandidate[] | null>(null);
   const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => setQuery(value), [value]);
@@ -96,20 +96,20 @@ export function KontoFeld({
 
   const gruppen = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const passt = (k: KontoKandidat) =>
+    const passt = (k: AccountCandidate) =>
       q.length === 0 || k.number.toLowerCase().includes(q) || k.name.toLowerCase().includes(q);
     const aus = REIHENFOLGE.map((g) => ({
       key: g,
-      label: KONTO_GRUPPEN_LABEL[g],
+      label: ACCOUNT_GROUP_LABEL[g],
       items: (candidates[g] ?? []).filter(passt),
     })).filter((g) => g.items.length > 0);
     if (treffer && treffer.length > 0) {
-      aus.push({ key: "alle" as KontoGruppe, label: KONTO_GRUPPEN_LABEL.alle, items: treffer });
+      aus.push({ key: "alle" as AccountGroup, label: ACCOUNT_GROUP_LABEL.alle, items: treffer });
     }
     return aus;
   }, [candidates, query, treffer]);
 
-  function waehle(k: KontoKandidat) {
+  function waehle(k: AccountCandidate) {
     onChange(k.number);
     setQuery(k.number);
     setOpen(false);

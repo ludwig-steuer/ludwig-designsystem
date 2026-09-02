@@ -14,7 +14,7 @@ import type {
  * unverändert funktionieren.
  *
  * @when    Every input with label, hint and error text.
- * @instead Account selection → KontoFeld. Read-only → FieldList.
+ * @instead Account selection → AccountField. Read-only → FieldList.
  */
 
 export function Field({
@@ -62,7 +62,7 @@ export function Textarea({
 
 /**
  * @when    Choice from a few fixed values.
- * @instead Account → KontoFeld. Switching views → Segmented.
+ * @instead Account → AccountField. Switching views → Segmented.
  */
 export function Select({
   invalid,

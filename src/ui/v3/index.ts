@@ -142,11 +142,11 @@ export {
 
 /* ── Entitäten ── Konto */
 export {
-  KontoFeld,
-  KONTO_GRUPPEN_LABEL,
-  type KontoGruppe,
-  type KontoKandidat,
-} from "./entities/konto/KontoFeld";
+  AccountField,
+  ACCOUNT_GROUP_LABEL,
+  type AccountGroup,
+  type AccountCandidate,
+} from "./entities/account/AccountField";
 
 /* Buchungssatz — die eine Buchungs-Oberfläche */
 export {
