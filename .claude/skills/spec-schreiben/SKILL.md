@@ -19,7 +19,7 @@ Ablauf und Status: `docs/backlog/README.md`.
 | Was fehlt der App und wie oft? | `docs/v3-backlog.md` (gezählte Nutzung) |
 | Welche Form hat die Entität schon? | `docs/ludwig/ui-repraesentationen.md` |
 | Wie heißt das Ding? | `docs/ludwig/GLOSSARY.md` — englisch im Code, deutsch im Label |
-| Welche Typen gibt es? | `src/ludwig/` — nie lokal neu definieren |
+| Welche Typen gibt es? | `src/ludwig/` — die App gibt das Datenmodell vor, nie lokal neu definieren |
 | Welche Gestaltungsregel gilt? | `docs/design-guidelines.md` (V/L/T/Z/I), Prüfliste §9 |
 
 Wartet in `src/ui/legacy/` ein Baustein dafür, ist die Aufgabe „einordnen",
@@ -88,6 +88,18 @@ gemeinsames Markup-Vokabular bilden. Die Datei heißt nach der Familie.
   als lokale Map.
 - Typen aus `src/ludwig/`; ein Prop-Typ, den es dort nicht gibt, ist ein
   Befund für die App, keine lokale Definition.
+- **Das Datenmodell der App hat Vorrang.** Die Interfaces in `src/ludwig/`
+  sind die Vorgabe, nicht der Entwurf: eine Komponente, deren Props sich dort
+  nicht bedienen lassen, ist falsch geschnitten — auch wenn eine
+  Design-Vorlage sie so zeigt. Frei ist die **Darstellung**, nicht die
+  Struktur. Weicht die Vorlage ab, nennt die Spec beides: was sie zeigt und
+  welches Feld aus `src/ludwig/` es trägt.
+- **Optionen ja, eigene Wahrheit nein.** Zusätzliche Props, Varianten und
+  Formen darf das Set anbieten — gerade bei entitätsspezifischen Formen, wo
+  die App heute nur eine Ansicht kennt. Sie sind Angebote auf demselben
+  Datenmodell. Fehlt für eine Option ein Feld, ist das ein Befund für
+  `ludwig/app`, keine lokale Erfindung und kein Grund, die Option zu
+  streichen.
 - Zwei Booleans, die sich ausschließen → ein Enum. Mehr als drei Booleans → Zuschnitt prüfen (§4).
 - Daten und Loader kommen als Props. Die Komponente ruft nichts, lädt nichts,
   kennt kein Modul.
