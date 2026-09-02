@@ -12,12 +12,12 @@ import { Dialog } from "../primitives/Dialog";
  * auch mit der Maus. Die Zielgruppe öffnet Ludwig alle zwei bis vier Wochen —
  * eine Anwendung, die man auswendig können muss, ist für sie unbedienbar.
  *
- * In Eingabefeldern tippt die Nutzerin Text, keine Befehle: `INPUT`,
+ * Inside form fields the user types text, not commands: `INPUT`,
  * `TEXTAREA`, `SELECT` und `contenteditable` sind ausgenommen.
  */
 
 export interface HotkeyBinding {
-  /** Die Taste, wie sie am Knopf steht: „A", „J", „?", „1". */
+  /** The key as printed on the button: "A", "J", "?", "1". */
   key: string;
   /** Was sie tut — die Zeile in der Legende. */
   label: string;
@@ -26,7 +26,7 @@ export interface HotkeyBinding {
   meta?: boolean;
 }
 
-function inEingabe(target: EventTarget | null): boolean {
+function isTyping(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
   return !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
 }
@@ -39,7 +39,7 @@ export function useHotkeys(bindings: readonly HotkeyBinding[], enabled = true) {
   useEffect(() => {
     if (!enabled) return;
     function onKey(e: KeyboardEvent) {
-      if (inEingabe(e.target)) return;
+      if (isTyping(e.target)) return;
       if (e.altKey) return;
       const meta = e.ctrlKey || e.metaKey;
       const hit = bindings.find(
@@ -61,11 +61,11 @@ export function useHotkeys(bindings: readonly HotkeyBinding[], enabled = true) {
  * @when    Every screen with more than three keys, opened with `?`.
  * @instead As the source of truth for keys — the key is shown on the button.
  */
-export function HotkeyLegende({
-  gruppen,
+export function HotkeyLegend({
+  groups,
   defaultOpen = false,
 }: {
-  gruppen: { titel: string; tasten: { key: string; label: string }[] }[];
+  groups: { title: string; keys: { key: string; label: string }[] }[];
   /** Nur für Storybook und Tests — im Produkt öffnet `?`. */
   defaultOpen?: boolean;
 }) {
@@ -79,11 +79,11 @@ export function HotkeyLegende({
       <p style={{ marginTop: 0 }}>
         Jede dieser Handlungen geht auch mit der Maus — die Taste steht am jeweiligen Knopf.
       </p>
-      {gruppen.map((g) => (
-        <div key={g.titel} style={{ marginTop: "var(--space-4)" }}>
-          <div className="lw-overline">{g.titel}</div>
-          {g.tasten.map((t) => (
-            <div className="v2fields__row" key={`${g.titel}-${t.key}`}>
+      {groups.map((g) => (
+        <div key={g.title} style={{ marginTop: "var(--space-4)" }}>
+          <div className="lw-overline">{g.title}</div>
+          {g.keys.map((t) => (
+            <div className="v2fields__row" key={`${g.title}-${t.key}`}>
               <span>{t.label}</span>
               <span>{t.key}</span>
             </div>

@@ -2,31 +2,31 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { ActionBar } from "../primitives/ActionBar";
 import { Button } from "../primitives/Button";
-import { HotkeyLegende, useHotkeys } from "./Hotkeys";
+import { HotkeyLegend, useHotkeys } from "./Hotkeys";
 
-const meta: Meta<typeof HotkeyLegende> = { title: "v3/Patterns/Rahmen/HotkeyLegende", component: HotkeyLegende };
+const meta: Meta<typeof HotkeyLegend> = { title: "v3/Patterns/Rahmen/HotkeyLegend", component: HotkeyLegend };
 export default meta;
-type Story = StoryObj<typeof HotkeyLegende>;
+type Story = StoryObj<typeof HotkeyLegend>;
 
-const GRUPPEN = [
+const GROUPS = [
   {
-    titel: "Liste",
-    tasten: [
+    title: "Liste",
+    keys: [
       { key: "J", label: "Nächster Punkt" },
       { key: "K", label: "Voriger Punkt" },
       { key: "Enter", label: "Detail öffnen" },
     ],
   },
   {
-    titel: "Handlung",
-    tasten: [
+    title: "Handlung",
+    keys: [
       { key: "A", label: "Bestätigen" },
       { key: "R", label: "Zurück an den Agenten" },
     ],
   },
   {
-    titel: "Navigation",
-    tasten: [
+    title: "Navigation",
+    keys: [
       { key: "1 – 9", label: "Zum Schritt" },
       { key: "?", label: "Diese Legende" },
     ],
@@ -34,10 +34,10 @@ const GRUPPEN = [
 ];
 
 /** Die Legende offen — so sieht sie aus, wenn jemand `?` drückt. */
-export const Offen: Story = { render: () => <HotkeyLegende gruppen={GRUPPEN} defaultOpen /> };
+export const Open: Story = { render: () => <HotkeyLegend groups={GROUPS} defaultOpen /> };
 
 /** Im Einsatz: die Taste steht am Knopf, die Legende liegt hinter `?`. Drücken Sie A. */
-export const AmKnopf: Story = {
+export const OnButton: Story = {
   render: function Render() {
     const [n, setN] = useState(0);
     const zaehlen = () => setN((v) => v + 1);
@@ -52,7 +52,7 @@ export const AmKnopf: Story = {
           }
           info={n === 0 ? "Noch nichts bestätigt — Taste A oder Klick." : `${n}× bestätigt.`}
         />
-        <HotkeyLegende gruppen={GRUPPEN} />
+        <HotkeyLegend groups={GROUPS} />
       </div>
     );
   },

@@ -111,7 +111,7 @@ export {
   type RailItem,
   type RailTone,
 } from "./patterns/Rahmen";
-export { useHotkeys, HotkeyLegende, type HotkeyBinding } from "./patterns/Hotkeys";
+export { useHotkeys, HotkeyLegend, type HotkeyBinding } from "./patterns/Hotkeys";
 
 /* Prüfen */
 export {
