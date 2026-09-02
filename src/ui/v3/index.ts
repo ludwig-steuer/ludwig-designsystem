@@ -105,12 +105,12 @@ export {
 
 /* Rahmen */
 export {
-  SchrittRail,
-  SchrittKopf,
-  FortschrittLeiste,
+  StepRail,
+  StepHeader,
+  ProgressBar,
   type RailItem,
   type RailTone,
-} from "./patterns/Rahmen";
+} from "./patterns/StepRail";
 export { useHotkeys, HotkeyLegend, type HotkeyBinding } from "./patterns/Hotkeys";
 
 /* Prüfen */

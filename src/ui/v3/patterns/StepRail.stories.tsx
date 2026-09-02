@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { FortschrittLeiste, SchrittKopf, SchrittRail, type RailItem } from "./Rahmen";
+import { ProgressBar, StepHeader, StepRail, type RailItem } from "./StepRail";
 
-const meta: Meta<typeof SchrittRail> = { title: "v3/Patterns/Rahmen/SchrittRail", component: SchrittRail };
+const meta: Meta<typeof StepRail> = { title: "v3/Patterns/Rahmen/StepRail", component: StepRail };
 export default meta;
-type Story = StoryObj<typeof SchrittRail>;
+type Story = StoryObj<typeof StepRail>;
 
-const SCHRITTE: RailItem[] = [
+const STEPS: RailItem[] = [
   { key: "0", index: 0, label: "Ergebnis des Stapels", sub: "Was der Agent geschafft hat", tone: "neutral", counterText: null, href: "#" },
   { key: "1", index: 1, label: "Vollständigkeit", sub: "Belege, Bank, Salden", tone: "done", counterText: "erledigt", href: "#" },
   { key: "2", index: 2, label: "Rückfragen", sub: "Fragen, Overrides", tone: "open", counterText: "2 von 5 offen", href: "#" },
@@ -19,9 +19,9 @@ const SCHRITTE: RailItem[] = [
   { key: "10", index: 10, label: "Nachlese", sub: "Was DATEV anders gemacht hat", tone: "dimmed", counterText: null, href: null, disabledReason: "Die Nachlese füllt sich, sobald DATEV den Stapel gespiegelt hat." },
 ];
 
-const Rahmen = ({ items }: { items: RailItem[] }) => (
+const RailLayout = ({ items }: { items: RailItem[] }) => (
   <div style={{ display: "grid", gridTemplateColumns: "224px minmax(0,1fr)", gap: 24 }}>
-    <SchrittRail
+    <StepRail
       ariaLabel="Prüfschritte"
       items={items}
       head={
@@ -38,13 +38,13 @@ const Rahmen = ({ items }: { items: RailItem[] }) => (
  * Der Rail sagt auf einen Blick, wo Arbeit liegt: Ampel am Punkt, Menge im
  * Zähler. Rot gibt es nur, wo die Freigabe wirklich gesperrt ist.
  */
-export const MitAmpelUndZaehlern: Story = { render: () => <Rahmen items={SCHRITTE} /> };
+export const WithTonesAndCounters: Story = { render: () => <RailLayout items={STEPS} /> };
 
 /** Alles abgearbeitet — der Rail ist grün, Schritt 8 sagt „bereit". */
-export const AllesErledigt: Story = {
+export const AllDone: Story = {
   render: () => (
-    <Rahmen
-      items={SCHRITTE.map((s) =>
+    <RailLayout
+      items={STEPS.map((s) =>
         s.tone === "dimmed" || s.tone === "neutral"
           ? s
           : { ...s, tone: "done" as const, counterText: s.index === 8 ? "bereit" : "erledigt" },
@@ -54,34 +54,34 @@ export const AllesErledigt: Story = {
 };
 
 /** Frisch angelegt: noch nichts gerechnet, also auch kein Zähler. */
-export const NochNichtsGerechnet: Story = {
+export const NothingComputedYet: Story = {
   render: () => (
-    <Rahmen items={SCHRITTE.map((s) => ({ ...s, tone: "neutral" as const, counterText: null }))} />
+    <RailLayout items={STEPS.map((s) => ({ ...s, tone: "neutral" as const, counterText: null }))} />
   ),
 };
 
 /** Der Screen-Kopf: Nummer in der Overline, die Sache in der Überschrift. */
-export const ScreenKopf: Story = {
+export const ScreenHeader: Story = {
   render: () => (
     <div style={{ maxWidth: 900 }}>
-      <SchrittKopf
+      <StepHeader
         overline="Schritt 3 · Buchungsvorschläge"
         title="Buchungsvorschläge"
         lead="Stimmen die Vorschläge?"
         prevHref="#"
         nextHref="#"
         nextLabel="Weiter zu Schritt 4"
-        actions={<FortschrittLeiste done={41} total={118} />}
+        actions={<ProgressBar done={41} total={118} />}
       />
     </div>
   ),
 };
 
 /** Am Anfang und am Ende ist der jeweilige Weg gesperrt, nicht versteckt. */
-export const ScreenKopfAmRand: Story = {
+export const ScreenHeaderEdge: Story = {
   render: () => (
     <div style={{ maxWidth: 900 }}>
-      <SchrittKopf
+      <StepHeader
         overline="Schritt 0 · Ergebnis des Stapels"
         title="Abnahme Buchungsstapel"
         lead="Abnahme für August 2026 · 01.08.2026 – 31.08.2026 · Musterfirma GmbH"

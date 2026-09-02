@@ -135,7 +135,7 @@ export interface ProzessLoops {
  * durchlief.
  *
  * @when    Process state in the detail header with raw states and loops.
- * @instead Steps of a review → SchrittRail.
+ * @instead Steps of a review → StepRail.
  */
 export function ProzessStepper({
   phases,

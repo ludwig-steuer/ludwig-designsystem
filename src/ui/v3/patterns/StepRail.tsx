@@ -35,7 +35,7 @@ export interface RailItem {
  * @when    Multi-step review with a traffic light and counter per step, on the left.
  * @instead Two to four views → Tabs. Process phases of a batch → Prozessbild.
  */
-export function SchrittRail({
+export function StepRail({
   items,
   head,
   foot,
@@ -96,7 +96,7 @@ function RailZeile({ item }: { item: RailItem }) {
  *
  * @when    Header of every step in the rail: overline, title, lead, way forward and back.
  */
-export function SchrittKopf({
+export function StepHeader({
   overline,
   title,
   lead,
@@ -156,7 +156,7 @@ export function SchrittKopf({
  *
  * @when    Progress of a step in the header, number plus bar.
  */
-export function FortschrittLeiste({
+export function ProgressBar({
   done,
   total,
   label = "Punkte",

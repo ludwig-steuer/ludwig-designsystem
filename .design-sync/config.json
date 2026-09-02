@@ -10,9 +10,6 @@
     "MasterDetail": {
       "cardMode": "column"
     },
-    "SchrittRail": {
-      "cardMode": "column"
-    },
     "TodoListe": {
       "cardMode": "column"
     },
@@ -43,6 +40,9 @@
       ]
     },
     "Checklist": {
+      "cardMode": "column"
+    },
+    "StepRail": {
       "cardMode": "column"
     }
   },

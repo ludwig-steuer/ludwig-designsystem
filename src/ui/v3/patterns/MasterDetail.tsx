@@ -13,7 +13,7 @@ import type { CSSProperties, ReactNode } from "react";
  * eigenen Such-Parameter (`?sel=`), nicht in den Drawer-Parameter (R8).
  *
  * @when    Picking from a list, working on the selected item on the right.
- * @instead Single confirmation without a list → Dialog. Sequence of steps → SchrittRail.
+ * @instead Single confirmation without a list → Dialog. Sequence of steps → StepRail.
  */
 export function MasterDetail({
   list,
