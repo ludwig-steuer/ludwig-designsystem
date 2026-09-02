@@ -11,8 +11,8 @@ import type { ReactNode } from "react";
  * Auswahl-Leiste über dem Spaltenkopf — innerhalb der Karte, nicht im
  * Seitenkopf (Baukasten §4). Erscheint erst, wenn etwas ausgewählt ist.
  *
- * @when    Handlungen auf mehrere gewählte Zeilen zugleich.
- * @instead Handlung an genau einer Zeile → RowActions.
+ * @when    Actions on several selected rows at once.
+ * @instead Action on exactly one row → RowActions.
  */
 export function SelectionBar({
   count,
@@ -40,7 +40,7 @@ export function SelectionBar({
 /**
  * Auswahl-Kästchen als erste Zelle einer Zeile.
  *
- * @when    Erste Zelle jeder auswählbaren Zeile, zusammen mit SelectionBar.
+ * @when    First cell of every selectable row, together with SelectionBar.
  */
 export function SelectCell({
   checked,

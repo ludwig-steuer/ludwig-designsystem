@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
  * nutzt das, um die DATEV-Seite von der Ludwig-Seite zu trennen, ohne eine
  * zweite Überschrift zu brauchen.
  *
- * @when    Stammdaten und Eigenschaften einer Sache, nur lesend.
- * @instead Werte, die bearbeitet werden → Field. Viele gleichartige Sätze → Table.
+ * @when    Master data and properties of an item, read-only.
+ * @instead Values that get edited → Field. Many records of the same kind → Table.
  */
 export function FieldList({
   title,

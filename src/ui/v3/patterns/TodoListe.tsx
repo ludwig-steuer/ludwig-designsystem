@@ -49,8 +49,8 @@ export function istOffen(state: ZustandsIcon): boolean {
 }
 
 /**
- * @when    Prüfschritt mit Punkten, die abgearbeitet werden; Sprung zum nächsten offenen.
- * @instead Reine Auskunft ohne Abarbeiten → Table. Prüfliste eines Gates → Checkliste.
+ * @when    Review step with items to work through; jumps to the next open one.
+ * @instead Pure information, nothing to work through → Table. Checklist of a gate → Checkliste.
  */
 export function TodoListe({
   groups,

@@ -65,15 +65,15 @@ keine T-Shirt-Größe im Namen — die Größe folgt aus der Form:
 
 ## Wann und nicht
 
-Jeder Export trägt im JSDoc zwei Zeilen — der Fall, für den er da ist, und der
-Nachbarfall mit Verweis. Das ist die Antwort auf „was nehme ich?", greppbar:
+Jeder Export trägt im JSDoc zwei Zeilen **auf Englisch** — der Fall, für den er
+da ist, und der Nachbarfall mit Verweis. Das ist die Antwort auf „was nehme ich?", greppbar:
 
 ```ts
 /**
  * Master-Detail: Liste links, Detail rechts.
  *
- * @when    Auswahl aus einer Liste, Arbeit am gewählten Element rechts.
- * @instead Einzelbestätigung ohne Liste → Dialog. Schrittfolge → SchrittRail.
+ * @when    Picking from a list, working on the selected item on the right.
+ * @instead Single confirmation without a list → Dialog. Sequence of steps → SchrittRail.
  */
 export function MasterDetail(…)
 ```

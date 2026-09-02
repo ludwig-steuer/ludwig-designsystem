@@ -59,7 +59,7 @@ const TONE_VAR: Record<string, string> = {
 };
 
 /**
- * @when    Zustand eines Punkts in Liste oder Zeile, immer mit Wort daneben.
+ * @when    State of an item in a list or row, always with a word next to it.
  */
 export function StateIcon({ state, title }: { state: ZustandsIcon; title?: string }) {
   const { Icon, tone, label } = ICONS[state];
@@ -94,8 +94,8 @@ export interface ChecklistRow {
  * Stand · Fortschritt · Sprung. Das Detail rechts baut der Aufrufer mit
  * `ChecklisteDetail` in einem `MasterDetail`.
  *
- * @when    Prüfliste eines Gates: Prüfung, Stand, Fortschritt, Sprung.
- * @instead Punkte zum Abarbeiten → TodoListe.
+ * @when    Checklist of a gate: check, status, progress, jump.
+ * @instead Items to work through → TodoListe.
  */
 export function Checkliste({
   rows,
@@ -201,8 +201,8 @@ const PP_ICON: Record<Pruefpunkt["state"], ZustandsIcon> = {
  * Prüfpunkte als Akkordeon. Bestandene stehen zusammengefasst in einer Zeile;
  * offene, gewarnte und gescheiterte einzeln, jeweils mit Begründung.
  *
- * @when    Einzelprüfungen eines Satzes mit Begründung; bestandene in einer Zeile.
- * @instead Fehler, der das Speichern blockiert → Meldungen.
+ * @when    Individual checks of a booking entry with reasons; passed ones in a single line.
+ * @instead Error that blocks saving → Meldungen.
  */
 export function Pruefpunkte({ items }: { items: Pruefpunkt[] }) {
   const bestanden = items.filter((i) => i.state === "green");
@@ -249,8 +249,8 @@ export interface Meldung {
  * Die Stufe steckt in `level` — der Aufrufer wählt nicht die Farbe, sondern
  * die Bedeutung.
  *
- * @when    Fehler, Warnung, Hinweis zu einem Satz oder Formular.
- * @instead Hinweis ohne Bezug zu einem Satz → Callout.
+ * @when    Error, warning or hint about a booking entry or form.
+ * @instead Note not tied to a booking entry → Callout.
  */
 export function Meldungen({ items }: { items: Meldung[] }) {
   if (items.length === 0) return null;

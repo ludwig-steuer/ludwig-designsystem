@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 /**
  * Fließtext in einer Karte: Versalien-Kopf, 13,5 px Text.
  *
- * @when    Längere Erklärung oder Bericht, der gelesen wird.
- * @instead Kurzer Hinweis im Fluss → Callout. Label/Wert-Paare → FieldList.
+ * @when    Longer explanation or report meant to be read.
+ * @instead Short note in the flow → Callout. Label/value pairs → FieldList.
  */
 export function ProseCard({ title, children }: { title: string; children: ReactNode }) {
   return (

@@ -49,8 +49,8 @@ function inner(icon: ReactNode, children: ReactNode, hotkey?: string) {
 }
 
 /**
- * @when    Jede Handlung mit Wort: `md` in Kopf-Karte und Aktionsleiste, `sm` in Zeile und Karte.
- * @instead Sprung zu einer Seite im Fließtext → Link. Mehrere Handlungen nebeneinander → ActionBar.
+ * @when    Every action with a word: `md` in header card and action bar, `sm` in rows and cards.
+ * @instead Jump to a page within prose → Link. Several actions side by side → ActionBar.
  */
 export function Button(props: ButtonProps | ButtonLinkProps) {
   const { variant = "secondary", size = "md", icon, hotkey, children, className } = props;
@@ -76,7 +76,7 @@ export function Button(props: ButtonProps | ButtonLinkProps) {
  * Reine Bequemlichkeit für Aktionsleisten, in denen jede Handlung eine Taste
  * hat; identisch gerendert zu `Button`.
  *
- * @when    Aktionsleisten, in denen jede Handlung eine Taste hat.
+ * @when    Action bars where every action has a key.
  */
 export function KeyButton(props: (ButtonProps | ButtonLinkProps) & { hotkey: string }) {
   return <Button {...props} />;

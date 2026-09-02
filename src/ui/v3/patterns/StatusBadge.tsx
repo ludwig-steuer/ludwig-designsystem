@@ -1,9 +1,7 @@
-// Direkt statt über das Barrel: `@/ui/components` exportiert `AppShell`
-// und `UserMenu` und zieht damit `@/modules/auth` mit (P22).
-import { Badge } from "@/ui/legacy/components/primitives/Badge";
-import { AXIS_LABEL, ENTITY_ICON } from "./entity-icons";
-import { StatusInfoButton } from "./StatusInfoButton";
-import { resolveStage, resolveStatus, type StatusAxis } from "./status-registry";
+import { Badge } from "../primitives/Badge";
+import { AXIS_LABEL, ENTITY_ICON } from "@/ui/legacy/status/entity-icons";
+import { StatusInfoButton } from "@/ui/legacy/status/StatusInfoButton";
+import { resolveStage, resolveStatus, type StatusAxis } from "@/ui/legacy/status/status-registry";
 
 export interface StatusBadgeProps {
   /** Welche Status-Achse — bestimmt Label, Farbe und Erklärung. */
@@ -35,6 +33,11 @@ export interface StatusBadgeProps {
  *
  * Der Chip bleibt server-tauglich; nur das (i) ist ein Client-Island. Für die
  * klickbare Variante mit Flow-Modal gibt es `EntityStatusBadgeButton`.
+ *
+ * @when    Ein Zustand aus einer Status-Achse (beleg, sachverhalt, buchung,
+ *          job …). Die einzige erlaubte Status-Darstellung (R1).
+ * @instead Eine Eigenschaft ohne Achse — Art, Rolle, Zähler → Badge.
+ *          Ein Zustand mit Erklärsatz und Handlung → StatusCallout.
  */
 export function StatusBadge({
   axis,
@@ -62,7 +65,7 @@ export function StatusBadge({
       className={className}
       style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
     >
-      <Badge kind={desc.kind}>
+      <Badge tone={desc.kind}>
         {showIcon && Icon ? (
           <Icon
             size={12.5}

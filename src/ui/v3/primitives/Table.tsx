@@ -19,8 +19,8 @@ import type { CSSProperties, ReactNode } from "react";
 /* ── Karte ──────────────────────────────────────────────────────────── */
 
 /**
- * @when    Jede Tabelle und jede abgegrenzte Fläche mit Kopf.
- * @instead Fließtext → ProseCard. Kennzahl → KpiTile.
+ * @when    Every table and every bounded surface with a header.
+ * @instead Prose → ProseCard. Key figure → KpiTile.
  */
 export function Card({
   children,
@@ -68,8 +68,8 @@ export function CardFoot({ children }: { children: ReactNode }) {
  * Grid-Tabelle. `cols` ist ein `grid-template-columns`-Wert, `minWidth`
  * erzwingt horizontales Scrollen statt Quetschen (viele Spalten).
  *
- * @when    Gleichartige Sätze in Spalten, auch bei drei Zeilen.
- * @instead Label/Wert-Paare → FieldList. Klick tut etwas im Client → ClickRow, ExpandableRow.
+ * @when    Records of the same kind in columns, even with three rows.
+ * @instead Label/value pairs → FieldList. Click does something client-side → ClickRow, ExpandableRow.
  */
 export function Table({
   cols,
@@ -104,8 +104,8 @@ export function HeadRow({ children }: { children: ReactNode }) {
  * Datenzeile. Mit `href` wird sie ein Link (ganze Zeile klickbar), sonst ein
  * `div`. Ein `onClick` gehört in einen Client-Wrapper des Aufrufers.
  *
- * @when    Datenzeile; mit `href` ist die ganze Zeile ein Link.
- * @instead Klick ohne URL → ClickRow.
+ * @when    Data row; with `href` the whole row is a link.
+ * @instead Click without a URL → ClickRow.
  */
 export function Row({
   children,

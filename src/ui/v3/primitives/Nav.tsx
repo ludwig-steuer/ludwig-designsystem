@@ -20,8 +20,8 @@ export interface TabItem {
 }
 
 /**
- * @when    Sichten mit je eigenem Inhalt, eine aktiv; Zähler und Alarm am Reiter.
- * @instead Gleiche Daten, andere Sortierung oder Dichte → Segmented. Eingrenzen → FilterChips.
+ * @when    Views with their own content, one active; counter and alarm on the tab.
+ * @instead Same data, different order or density → Segmented. Narrowing down → FilterChips.
  */
 export function Tabs({
   items,
@@ -82,8 +82,8 @@ export interface SegmentOption {
 /**
  * Segment-Schalter für gleichrangige Sichten auf dieselben Daten (Log).
  *
- * @when    Gleichrangige Sichten auf dieselben Daten (Log: nach Zeit, nach Besitzer).
- * @instead Sichten mit eigenem Inhalt → Tabs.
+ * @when    Equal views of the same data (log: by time, by owner).
+ * @instead Views with their own content → Tabs.
  */
 export function Segmented({
   options,
@@ -131,8 +131,8 @@ export interface ChipOption {
  * Filter-Chips, gruppiert nach Dimension — über der Karte, nie im Kartenkopf
  * (Baukasten §6). Die Gruppen-Überschrift sagt, wonach gefiltert wird.
  *
- * @when    Eingrenzen nach Dimension, über der Karte.
- * @instead Im Kartenkopf. Volltext → SearchInput.
+ * @when    Narrowing down by dimension, above the card.
+ * @instead In the card header. Full text → SearchInput.
  */
 export function FilterChips({
   label,
@@ -177,7 +177,7 @@ export function FilterChips({
 }
 
 /**
- * @when    Volltextsuche über die Zeilen einer Karte.
+ * @when    Full-text search across the rows of a card.
  */
 export function SearchInput({
   placeholder,

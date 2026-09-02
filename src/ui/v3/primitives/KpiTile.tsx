@@ -6,8 +6,8 @@ import type { CSSProperties, ReactNode } from "react";
  * Abgrenzung zu `Stat`/`StatGrid` der App: das ist die Dashboard-Kachel
  * (32 px Serif, Schatten). Auf Detailseiten steht diese hier.
  *
- * @when    Eine Zahl mit Label im Kopf einer Detailseite; mehrere im `KpiGrid`.
- * @instead Zahl in einer Tabellenspalte → AmountCell. Label/Wert-Paare als Text → FieldList.
+ * @when    A number with a label in the header of a detail page; several in a `KpiGrid`.
+ * @instead Number in a table column → AmountCell. Label/value pairs as text → FieldList.
  */
 export function KpiTile({ label, value, sub }: { label: string; value: ReactNode; sub?: ReactNode }) {
   return (

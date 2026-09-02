@@ -19,8 +19,8 @@ export type CellTone = "neutral" | "muted" | "success" | "warning" | "warning-st
  * einfärben, wäre Rot Dekoration statt Signal. Wo eine Zahl wirklich alarmiert
  * (Saldendifferenz, offener Rest), setzt der Aufrufer `tone` selbst.
  *
- * @when    Jeder Betrag in einer Tabellenzelle.
- * @instead Betrag im Kopf der Seite → KpiTile.
+ * @when    Every amount in a table cell.
+ * @instead Amount in the page header → KpiTile.
  */
 export function AmountCell({
   value,
@@ -77,8 +77,8 @@ export function ProgressCell({
 /**
  * Punkt plus Wort. Kein Pill — das ist `StatusBadge` und gehört der Registry.
  *
- * @when    Zustand in einer Zelle, Farbe plus Wort.
- * @instead Entitätsstatus aus der Registry → StatusBadge.
+ * @when    State in a cell, color plus word.
+ * @instead Entity status from the registry → StatusBadge.
  */
 export function DotStatus({
   tone,
@@ -160,7 +160,7 @@ export function AbweichungsZelle({
 /**
  * Ladezustand in Zeilenhöhe — die Tabelle springt beim Eintreffen nicht.
  *
- * @when    Ladezustand innerhalb der Karte, Kopfzeilen bleiben stehen.
+ * @when    Loading state inside the card, header rows stay in place.
  */
 export function TableLoading({ rows = 3, cols = 3 }: { rows?: number; cols?: number }) {
   return (
@@ -180,7 +180,7 @@ export function TableLoading({ rows = 3, cols = 3 }: { rows?: number; cols?: num
 /**
  * Der fünfte Zustand (UX-Guidelines V9): das Laden ist gescheitert, nicht leer.
  *
- * @when    Fehler beim Laden der Zeilen, mit Weg zum Wiederholen.
+ * @when    Error while loading rows, with a way to retry.
  */
 export function ErrorRow({ message, action }: { message: string; action?: ReactNode }) {
   return (

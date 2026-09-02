@@ -32,8 +32,8 @@ export interface RailItem {
  * sagt, wie viel dort liegt — beides zusammen, weil Farbe allein kein Signal
  * ist (UX-Guidelines V7).
  *
- * @when    Mehrschrittige Prüfung mit Ampel und Zähler je Schritt, links.
- * @instead Zwei bis vier Sichten → Tabs. Prozessphasen eines Stapels → Prozessbild.
+ * @when    Multi-step review with a traffic light and counter per step, on the left.
+ * @instead Two to four views → Tabs. Process phases of a batch → Prozessbild.
  */
 export function SchrittRail({
   items,
@@ -94,7 +94,7 @@ function RailZeile({ item }: { item: RailItem }) {
  * „Vollständigkeit" ist die Antwort auf „wo bin ich?", „1 · Vollständigkeit"
  * ist eine Kopfzeile.
  *
- * @when    Kopf jedes Schritts im Rail: Overline, Titel, Lead, Weg vor und zurück.
+ * @when    Header of every step in the rail: overline, title, lead, way forward and back.
  */
 export function SchrittKopf({
   overline,
@@ -154,7 +154,7 @@ export function SchrittKopf({
 /**
  * „41 von 118 Punkten" — schmale Leiste über alle Schritte.
  *
- * @when    Fortschritt eines Schritts im Kopf, Zahl plus Balken.
+ * @when    Progress of a step in the header, number plus bar.
  */
 export function FortschrittLeiste({
   done,

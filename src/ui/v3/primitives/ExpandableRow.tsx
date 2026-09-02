@@ -14,8 +14,8 @@ import { useId, useState } from "react";
 /**
  * Zeile mit `onClick` statt `href`. Ansonsten identisch zu `Row`.
  *
- * @when    Der Klick tut etwas im Client, etwa die Auswahl im MasterDetail.
- * @instead Das Ziel ist eine URL → Row mit `href`.
+ * @when    The click does something client-side, such as selecting in MasterDetail.
+ * @instead The target is a URL → Row with `href`.
  */
 export function ClickRow({
   onClick,
@@ -50,8 +50,8 @@ export function ClickRow({
  * Zeile, die sich in die Tabelle hinein aufklappt — kein Modal, kein Drawer
  * für kleine Zusatzinfos (Baukasten §7).
  *
- * @when    Eine kleine Zusatzinfo zu einer Zeile, die gelesen und wieder zugeklappt wird.
- * @instead Arbeit am Element → MasterDetail. Bestätigung mit Folgen → Dialog.
+ * @when    A small extra detail for a row that is read and collapsed again.
+ * @instead Working on the item → MasterDetail. Confirmation with consequences → Dialog.
  */
 export function ExpandableRow({
   summary,

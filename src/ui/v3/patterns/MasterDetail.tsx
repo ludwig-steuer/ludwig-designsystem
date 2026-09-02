@@ -12,8 +12,8 @@ import type { CSSProperties, ReactNode } from "react";
  * Der kanonische Ersatz für das Modal (UX-Guidelines L2) — die Auswahl gehört in einen
  * eigenen Such-Parameter (`?sel=`), nicht in den Drawer-Parameter (R8).
  *
- * @when    Auswahl aus einer Liste, Arbeit am gewählten Element rechts.
- * @instead Einzelbestätigung ohne Liste → Dialog. Schrittfolge → SchrittRail.
+ * @when    Picking from a list, working on the selected item on the right.
+ * @instead Single confirmation without a list → Dialog. Sequence of steps → SchrittRail.
  */
 export function MasterDetail({
   list,

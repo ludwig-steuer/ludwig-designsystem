@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
  * Die Reihenfolge steckt in der Komponente, damit sie nicht je Screen neu
  * verhandelt wird (Design `StapelSeite.dc.html` Z. 172–185).
  *
- * @when    Die Handlungen eines Screens oder Dialog-Fußes, genau ein primärer Weg.
- * @instead Handlungen an einer einzelnen Zeile → RowActions.
+ * @when    The actions of a screen or dialog footer, exactly one primary path.
+ * @instead Actions on a single row → RowActions.
  */
 export function ActionBar({
   primary,
@@ -35,8 +35,8 @@ export function ActionBar({
  * Zeilen-Aktionen: ein tertiärer Knopf je Handlung, rechtsbündig. Kein Kebab —
  * ein Icon ohne Wort ist für die Zielgruppe ein Rätsel (UX-Guidelines V7).
  *
- * @when    Ein bis drei Handlungen rechts in einer Tabellenzeile.
- * @instead Mehr Handlungen → die Zeile bekommt ein Detail (MasterDetail), keine längere Leiste.
+ * @when    One to three actions at the right of a table row.
+ * @instead More actions → the row gets a detail pane (MasterDetail), not a longer bar.
  */
 export function RowActions({ children }: { children: ReactNode }) {
   return <span className="v2actions">{children}</span>;

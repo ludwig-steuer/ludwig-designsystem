@@ -13,8 +13,8 @@ import type {
  * gewöhnliches Element, damit `name`/`defaultValue` in Server-Action-Formularen
  * unverändert funktionieren.
  *
- * @when    Jede Eingabe mit Label, Hinweis und Fehlertext.
- * @instead Kontenauswahl → KontoFeld. Nur lesen → FieldList.
+ * @when    Every input with label, hint and error text.
+ * @instead Account selection → KontoFeld. Read-only → FieldList.
  */
 
 export function Field({
@@ -61,8 +61,8 @@ export function Textarea({
 }
 
 /**
- * @when    Wahl aus wenigen festen Werten.
- * @instead Konto → KontoFeld. Sichten wechseln → Segmented.
+ * @when    Choice from a few fixed values.
+ * @instead Account → KontoFeld. Switching views → Segmented.
  */
 export function Select({
   invalid,
