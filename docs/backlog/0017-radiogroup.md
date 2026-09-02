@@ -7,7 +7,7 @@
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „eine aus wenigen Möglichkeiten" ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Radio-Gruppe (Antwortoptionen I6)" |
 | Ersetzt | 3 rohe `<input type="radio">` in `DatevExportWizard.tsx` und `BatchActions.tsx` |
-| Blockiert | 0023 (Frage mit Antwortoptionen), jede Wizard-Migration |
+| Blockiert | 0028 (Frage mit Antwortoptionen), jede Wizard-Migration |
 | Spec von / am | Claude, 2026-09-03 |
 
 ## Ziel
