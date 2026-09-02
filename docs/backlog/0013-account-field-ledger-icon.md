@@ -1,4 +1,4 @@
-# 0002 · AccountField — Kontenblatt-Icon
+# 0013 · AccountField — Kontenblatt-Icon
 
 | | |
 |---|---|
@@ -7,7 +7,7 @@
 | Klassen-Test | nein — „Konto" ist ein Fachwort, die Kandidatengruppen sind Buchhaltungslogik |
 | Quelle | Anfrage Owner 2026-09-03 („der Konto-Autocomplete ist auch eine extra Komponente … mit Parameter ob es ein Icon haben soll, das Icon öffnet per Klick einen Drawer mit den Kontenbuchungen") |
 | Ersetzt | `onOpenLedger` in `JournalEntryEditor` (heute eine Editor-Prop, die an jeder Kontozelle einzeln verdrahtet ist) |
-| Blockiert | 0004 (Editor) |
+| Blockiert | 0015 (Editor) |
 | Spec von / am | Claude, 2026-09-03 |
 
 ## Ziel
@@ -92,7 +92,7 @@ Variabel (aus dieser Spec):
 - [ ] Mit `onOpenLedger` und leerem `value` ist das Icon deaktiviert, nicht versteckt (`WithLedger`)
 - [ ] Icon per Tab erreichbar, `Enter` löst aus, `aria-label` nennt die Kontonummer (`WithLedger`)
 - [ ] `@when`-Zeile nennt den Weg zum Kontenblatt in einem Halbsatz
-- [ ] `JournalEntryEditor` reicht sein `onOpenLedger` an die Felder durch, statt es selbst zu zeichnen — ohne Funktionsverlust (0004)
+- [ ] `JournalEntryEditor` reicht sein `onOpenLedger` an die Felder durch, statt es selbst zu zeichnen — ohne Funktionsverlust (0015)
 
 ## Abnahme
 

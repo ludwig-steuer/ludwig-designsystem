@@ -69,8 +69,13 @@ als eine Handlung anbieten.
 - **Tastatur und Screenreader:** der Host ist eine `aria-live="polite"`-Region;
   `danger` meldet `assertive`. Der Fokus springt nicht — ein Toast unterbricht
   nicht, was die Nutzerin gerade tut.
+- **Zeigen bleibt lesbar:** Hover oder Fokus im Toast hält den Zeitablauf an,
+  danach läuft er weiter. Fünf Sekunden reichen zum Überfliegen, nicht zum
+  Lesen — wer hinsieht, soll nicht verlieren, was er gerade liest.
 - **Bewegung:** einblenden und ausblenden ohne Springen (§2 „nichts wächst,
-  nichts springt").
+  nichts springt"). Bei `prefers-reduced-motion` gar keine Bewegung, nur ein-
+  und ausblenden — die Einstellung ist eine Aussage über Übelkeit, nicht über
+  Geschmack.
 
 ## Stories
 
@@ -111,6 +116,8 @@ Variabel (aus dieser Spec):
 - [ ] Der Fokus wandert beim Erscheinen nicht (Story `Filled`, mit Tastatur geprüft)
 - [ ] Der Schließen-Knopf trägt ein Wort oder ein beschriftetes Icon (Regel T8)
 - [ ] Texte stehen im Perfekt und nennen das Objekt (Regel T3)
+- [ ] Hover und Fokus halten den Zeitablauf an, danach läuft er weiter (Story `Filled`)
+- [ ] `prefers-reduced-motion` schaltet die Bewegung ab (Story `Filled`, Devtools-Umschalter)
 
 ## Offene Fragen
 

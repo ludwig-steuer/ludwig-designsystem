@@ -11,6 +11,12 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
  *
  * What gets derived from them lives in `reference/README.md` (the trail) and
  * in `docs/backlog/` (one spec per component).
+ *
+ * Two kinds of artboard behave differently, verified 2026-09-03: the screens
+ * carry their own data and render in full, while the component artboards
+ * expect props from a canvas host and render only their frame. Both are
+ * useful — the frame still shows the grid, the columns and the wording — but
+ * do not read an empty component artboard as a bug.
  */
 
 const BASE = "/reference/f109-buchungsreview";
@@ -51,8 +57,8 @@ export const TableParts: Story = { args: { file: "Tabellen-Bausteine.dc.html", h
 /** The DATEV batch page. Not derived yet. */
 export const BatchPage: Story = { args: { file: "StapelSeite.dc.html", height: 1200 } };
 
-/** Judge verdict and confidence — landed as `AiBookingNotes`. */
+/** Judge verdict and confidence — landed as `AiBookingNotes`. Frame only. */
 export const AiNotes: Story = { args: { file: "KIBuchungshinweise.dc.html", height: 420 } };
 
-/** Per-step checklist — landed as `Review.Checklist`. */
+/** Per-step checklist — landed as `Review.Checklist`. Frame only. */
 export const CheckList: Story = { args: { file: "PruefChecklist.dc.html", height: 420 } };

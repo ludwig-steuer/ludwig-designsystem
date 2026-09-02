@@ -1,4 +1,4 @@
-# 0003 · DocumentNumberField — Belegfeld 1 mit Belegnummern-Register
+# 0014 · DocumentNumberField — Belegfeld 1 mit Belegnummern-Register
 
 | | |
 |---|---|
@@ -7,7 +7,7 @@
 | Klassen-Test | nein — Belegfeld 1 ist eine DATEV-Ausnahme, die Rangordnung der Quellen ist Buchhaltungslogik |
 | Quelle | Anfrage Owner 2026-09-03 („Belegfeld 1 sollte ein Lupenicon haben, wodurch ich einen Drawer öffnen kann — sogenannter OPOS-Browser — aus dem als Ergebnis ein Belegfeld übernommen werden kann") |
 | Ersetzt | die nackten `<input>` für `beleg1` in `JournalEntryEditor` (Zeile + Gegenkonto) |
-| Blockiert | 0004 (Editor) |
+| Blockiert | 0015 (Editor) |
 | Spec von / am | Claude, 2026-09-03 |
 
 ## Ziel
@@ -159,7 +159,7 @@ Variabel (aus dieser Spec):
 - [ ] Abweichung von `dominant` erscheint als Hinweis, nicht als Fehler (`Abweichend`)
 - [ ] `maxLength` hält bei 36, ohne stilles Abschneiden (`Rand`)
 - [ ] Tastatur ↑/↓/`Enter`/`Esc` (`Interaktiv`)
-- [ ] Ersetzt die `beleg1`-Inputs in `JournalEntryEditor` ohne Funktionsverlust (0004)
+- [ ] Ersetzt die `beleg1`-Inputs in `JournalEntryEditor` ohne Funktionsverlust (0015)
 
 ## Offene Fragen
 

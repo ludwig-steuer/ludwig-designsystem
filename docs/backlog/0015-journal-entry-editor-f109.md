@@ -1,4 +1,4 @@
-# 0004 · JournalEntryEditor — drei Nachträge aus F109
+# 0015 · JournalEntryEditor — drei Nachträge aus F109
 
 | | |
 |---|---|
@@ -8,7 +8,7 @@
 | Quelle | Anfrage Owner 2026-09-03 · Design `reference/f109-buchungsreview/BuchungssatzEditor.dc.html` und `Buchungsreview.dc.html` Z. 891 / 3092 |
 | Ersetzt | — (erweitert den bestehenden Editor) |
 | Blockiert | — |
-| Wartet auf | 0002 (Kontenblatt-Icon), 0003 (Belegfeld-Feld) |
+| Wartet auf | 0013 (Kontenblatt-Icon), 0014 (Belegfeld-Feld) |
 | Spec von / am | Claude, 2026-09-03 |
 
 ## Ziel
@@ -39,8 +39,8 @@ Warnungen; nichts davon kann der Prototyp).
 - **Zuschnitt:** zusammenlassen. Die drei teilen den Zustand des Editors
   (`rows`, `gegenkonto`) und treten nie getrennt auf; trennen erzeugte nur
   Durchreich-Props (§4). Ein Bau-Auftrag, eine Abnahme.
-- **Setzt auf:** `AccountField` (0002) fürs Gegenkonto,
-  `DocumentNumberField` (0003) für Belegfeld 1.
+- **Setzt auf:** `AccountField` (0013) fürs Gegenkonto,
+  `DocumentNumberField` (0014) für Belegfeld 1.
 
 ## 1. Journal zweispaltig
 
@@ -72,7 +72,7 @@ Konto                        Soll      Haben   BU
 
 ## 2. Belegfeld 1 in alle Zeilen übernehmen
 
-- Belegfeld 1 wird `DocumentNumberField` (0003), samt Lupe ins Register.
+- Belegfeld 1 wird `DocumentNumberField` (0014), samt Lupe ins Register.
 - Tragen die nicht gelöschten Zeilen **verschiedene** nicht-leere Werte,
   erscheint unter dem Feld ein Knopf: **„Belegfeld 1 in alle Zeilen
   übernehmen"** — gleiche Machart und gleiche Stelle wie „Rest … einsetzen"
@@ -100,7 +100,7 @@ Vorlage: `BuchungssatzEditor.dc.html` (`gkEditing`, `gkCandidates`,
 | `gegenkontoCandidates` | `Partial<Record<AccountGroup, AccountCandidate[]>>` | nein | Kandidaten fürs Gegenkonto-Feld | `GegenkontoBearbeitbar` |
 
 - Bearbeitet wird mit `AccountField` — dasselbe Feld wie in den Zeilen, damit
-  es sich gleich anfühlt und das Kontenblatt-Icon (0002) mitkommt.
+  es sich gleich anfühlt und das Kontenblatt-Icon (0013) mitkommt.
 - **S/H des Gegenkontos wird nicht bearbeitbar.** Der Prototyp bietet einen
   Umschalter mit `s`/`h`/`+`/`−`; die Seite des Gegenkontos ist aber die
   Gegenseite des Belegs und fällt aus `belegSide` — ein Umschalter dort

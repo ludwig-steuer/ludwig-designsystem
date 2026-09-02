@@ -22,8 +22,8 @@ Brief: `F109-design-brief.md` — Ablauf, Screens, Zustände, Datenkontrakt.
 
 | Artboard | Zeilen | Daraus geworden | Offen |
 |---|---:|---|---|
-| `Buchungsreview.dc.html` | 7566 | Screens 0–10 des Abnahmeprozesses, alle LIST/DETAIL → `MasterDetail`, `StepRail`, `TodoList` | Screens gehören in die App. Zweispaltiges Journal (Z. 891, 3092) → Aufgabe 0004 |
-| `BuchungssatzEditor.dc.html` | 761 | zweiter Entwurf desselben Editors (F109) — der gebaute stammt aus F123 | Gegenkonto bearbeitbar → 0004 · `flash`/`quickBanner` → 0005 |
+| `Buchungsreview.dc.html` | 7566 | Screens 0–10 des Abnahmeprozesses, alle LIST/DETAIL → `MasterDetail`, `StepRail`, `TodoList` | Screens gehören in die App. Zweispaltiges Journal (Z. 891, 3092) → Aufgabe 0015 |
+| `BuchungssatzEditor.dc.html` | 761 | zweiter Entwurf desselben Editors (F109) — der gebaute stammt aus F123 | Gegenkonto bearbeitbar → 0015 · `flash`/`quickBanner` → 0007 |
 | `Buchungseditor-Zustände.dc.html` | 276 | 20+ benannte Zustände (S1…S20+) — die Quelle für die Story-Liste des Editors | — |
 | `Tabellen-Bausteine.dc.html` | 365 | `Table`, `Cells`, `ExpandableRow`, `FilterChips` (11 Sektionen) | Paginierung (Sektion 5) liegt noch in `legacy/` |
 | `StapelSeite.dc.html` | 931 | — | ganz offen; nutzt mit 12 `x-import` den Bestand am stärksten, deshalb der billigste nächste Einstieg |
@@ -31,6 +31,13 @@ Brief: `F109-design-brief.md` — Ablauf, Screens, Zustände, Datenkontrakt.
 | `PruefChecklist.dc.html` | 82 | `patterns/Review.tsx` → `Checklist` | — |
 | `AbgleichListe.dc.html` | 28 | Canvas-Hilfsmittel, kein DS-Stoff | — |
 | `ScenarioPicker.dc.html` | 20 | Canvas-Hilfsmittel, kein DS-Stoff | — |
+
+**Zwei Arten von Artboard** (geprüft 2026-09-03): die Screens bringen ihre
+Daten mit und laufen vollständig — `Buchungsreview` rendert alle elf Schritte,
+`BuchungssatzEditor` einen ausgerechneten Satz samt Steuerzeile. Die
+Komponenten-Artboards (`PruefChecklist`, `KIBuchungshinweise`,
+`AbgleichListe`, `ScenarioPicker`) erwarten Props vom Canvas-Host und zeigen
+nur ihr Gerüst: Raster, Spalten, Wortlaut, keine Zeilen. Das ist kein Fehler.
 
 **Was die Lieferung über sich selbst verrät:** aus dem mitgegebenen
 `_ds`-Bundle benutzt sie nur `Badge` (8×) und `Button` (7×) — alles andere ist
