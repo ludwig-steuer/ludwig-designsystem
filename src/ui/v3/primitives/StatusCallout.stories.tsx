@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Button } from "./Button";
-import { StatusCallout } from "./Surface";
+import { StatusCallout } from "./StatusCallout";
 
-const meta: Meta<typeof StatusCallout> = { title: "v3/Primitives/StatusCallout", component: StatusCallout };
+const meta: Meta<typeof StatusCallout> = { title: "v3/Primitives/Fläche/StatusCallout", component: StatusCallout };
 export default meta;
 type Story = StoryObj<typeof StatusCallout>;
 

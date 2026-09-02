@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { StatusInfoDialog } from "./StatusInfoDialog";
 
 const meta: Meta<typeof StatusInfoDialog> = {
-  title: "v3/Bausteine/Status/StatusInfoDialog",
+  title: "v3/Legacy/Status/StatusInfoDialog",
   component: StatusInfoDialog,
   args: { open: true, onClose: () => {} },
 };

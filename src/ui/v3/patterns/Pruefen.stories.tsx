@@ -4,7 +4,7 @@ import { Button } from "../primitives/Button";
 import { DetailPane, MasterDetail } from "./MasterDetail";
 import { Checkliste, Meldungen, Pruefpunkte, StateIcon, type ChecklistRow } from "./Pruefen";
 
-const meta: Meta<typeof Checkliste> = { title: "v3/Patterns/Checkliste", component: Checkliste };
+const meta: Meta<typeof Checkliste> = { title: "v3/Patterns/Prüfen/Checkliste", component: Checkliste };
 export default meta;
 type Story = StoryObj<typeof Checkliste>;
 

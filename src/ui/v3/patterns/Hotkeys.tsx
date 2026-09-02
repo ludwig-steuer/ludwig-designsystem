@@ -31,6 +31,10 @@ function inEingabe(target: EventTarget | null): boolean {
   return !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
 }
 
+/**
+ * @wann  Screen mit Tasten am Knopf; ein Binding je Handlung.
+ * @nicht Als einziger Weg — jede Taste steht am Knopf (V14).
+ */
 export function useHotkeys(bindings: readonly HotkeyBinding[], enabled = true) {
   useEffect(() => {
     if (!enabled) return;
@@ -53,13 +57,19 @@ export function useHotkeys(bindings: readonly HotkeyBinding[], enabled = true) {
 /**
  * Die Legende hinter `?`. Sie ist **Zusatz, nicht Quelle** — wer sie nie
  * öffnet, findet jede Taste am Knopf.
+ *
+ * @wann  Jeder Screen mit mehr als drei Tasten, geöffnet mit `?`.
+ * @nicht Als Quelle der Tasten — die Taste steht am Knopf.
  */
 export function HotkeyLegende({
   gruppen,
+  defaultOpen = false,
 }: {
   gruppen: { titel: string; tasten: { key: string; label: string }[] }[];
+  /** Nur für Storybook und Tests — im Produkt öffnet `?`. */
+  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   useHotkeys(
     [{ key: "?", label: "Tastenlegende", handler: () => setOpen((v) => !v) }],
     true,

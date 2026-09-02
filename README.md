@@ -23,8 +23,9 @@ src/ui/v3/          Das Design-System — hier wird entwickelt.
   primitives/         kein Fachwort (Button, Table, Field, Dialog …)
   patterns/           Arbeitsflächen-Muster (MasterDetail, SchrittRail …)
   entities/<name>/    Darstellungsfamilie genau einer Entität
-src/ui/               Bausteine, auf denen v3 aufsetzt (Badge, Banner,
-                      Pagination, StatusBadge, Buchungs-Formatierung)
+src/ui/legacy/        Vorübergehend: Bausteine aus der App, noch nicht
+                      eingeordnet (StatusBadge, Banner, Pagination,
+                      Buchungs-Formatierung). Nichts Neues hinein.
 src/styles/           Tokens und Komponenten-CSS, index.css ist die Kette
 src/ludwig/           KOPIE der Ludwig-Interfaces — siehe unten
 docs/                 Designsprache (SSOT hier) + gespiegelte App-Doku
@@ -32,6 +33,19 @@ docs/                 Designsprache (SSOT hier) + gespiegelte App-Doku
 
 Importiert wird nur abwärts: Primitives kennen keine Patterns, Patterns keine
 Entitäten. Was hier liegt, kennt kein Fachmodul — Daten kommen als Props.
+
+## Ordnung im Set
+
+Die Ordner tragen die **Stufe** (daran hängt die Import-Regel), die
+Storybook-Titel tragen den **Inhalt**. Fünf Regeln, sonst nichts:
+
+| | Regel |
+|---|---|
+| **Datei** | Eine Datei je Komponentenfamilie, PascalCase, benannt wie die Familie: `Button.tsx` (Button, KeyButton), `Table.tsx` (Card, Table, Row …). Kein Sammelbecken. |
+| **Story** | `<Name>.stories.tsx` daneben, Titel `v3/<Stufe>/<Gruppe>/<Name>`. Die Gruppen sind dieselben Wörter wie die Kommentare in `src/ui/v3/index.ts`: Aktion, Navigation, Formular, Dialog, Fläche, Tabelle · Arbeitsfläche, Rahmen, Prüfen, Prozess · je Entität ihr Name. |
+| **Wann** | Jeder Export trägt im JSDoc `@wann` (der Fall, für den er da ist) und `@nicht` (der Nachbarfall und wohin der gehört: `… → MasterDetail`). Das ist die Antwort auf „was nehme ich?" — greppbar und im Editor-Hover. |
+| **Entitäten** | Name = Entität + Form: `KontoFeld`, `KontoZeile`, `BuchungssatzEditor`. Die Formen stehen in `docs/ludwig/ui-repraesentationen.md`; ihre Größe ist ableitbar, nicht gespeichert — XS Inline, Badge · S Zeile, Auswahl, Kopf · M Karte, Vorschau · L Detail, Drawer, Liste · XL Editor. |
+| **Wachstum** | `primitives/` bleibt flach. `patterns/` bekommt Themen-Unterordner, sobald es mehr als etwa 15 Dateien sind. `entities/` ist per Definition nach Inhalt sortiert. |
 
 ## Doku — wer führt was
 

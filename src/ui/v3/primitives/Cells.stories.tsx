@@ -10,7 +10,7 @@ import {
 } from "./Cells";
 import { Card, CardHead, EmptyRow, HeadRow, Row, Table } from "./Table";
 
-const meta: Meta<typeof AmountCell> = { title: "v3/Primitives/AmountCell", component: AmountCell };
+const meta: Meta<typeof AmountCell> = { title: "v3/Primitives/Tabelle/Zellen", component: AmountCell };
 export default meta;
 type Story = StoryObj<typeof AmountCell>;
 

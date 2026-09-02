@@ -15,6 +15,10 @@
  * wird nur abwärts — Primitives kennen keine Patterns, Patterns keine
  * Entitäten. Fachliche Zusammensetzungen wohnen im Modul, nicht hier.
  *
+ * Die Gruppen-Kommentare unten (Aktion, Navigation, …) sind zugleich die
+ * Storybook-Ordner: `v3/<Stufe>/<Gruppe>/<Name>`. Eine Datei je Familie,
+ * jeder Export trägt `@wann`/`@nicht` — siehe README „Ordnung im Set".
+ *
  * Tokens: `src/styles/tokens.css` ist die 1:1-Übernahme des Design-Systems,
  * Klassen und Maße stehen in `src/styles/v2.css`. Kein Hex-Wert, kein
  * Pixelmaß in einer Komponente (UX-Guidelines A5).
@@ -29,20 +33,16 @@
  * `StatusHeader`/`Tooltip` (R2) — die hängen an App-Kontext.
  */
 
-/* Karte und Tabelle */
-export { Card, CardHead, CardFoot, Table, HeadRow, Row, GroupRow, EmptyRow } from "./primitives/Table";
-
-/* Aktion */
+/* ── Primitives ── Aktion */
 export {
   Button,
   KeyButton,
-  ActionBar,
-  RowActions,
   type ButtonProps,
   type ButtonLinkProps,
   type ButtonSize,
   type ButtonVariant,
 } from "./primitives/Button";
+export { ActionBar, RowActions } from "./primitives/ActionBar";
 
 /* Navigation */
 export {
@@ -55,21 +55,22 @@ export {
   type TabItem,
 } from "./primitives/Nav";
 
-/* Fläche */
-export { KpiTile, KpiGrid, FieldList, ProseCard, StatusCallout, Callout } from "./primitives/Surface";
+/* Formular */
+export { Field, Input, Textarea, Select, Checkbox } from "./primitives/Form";
+
+/* Dialog */
 export { Dialog } from "./primitives/Dialog";
 export { GrundDialog } from "./primitives/GrundDialog";
 
-/* Formular */
-export { Field, Input, Textarea, Select, Checkbox } from "./primitives/Form";
-export {
-  KontoFeld,
-  KONTO_GRUPPEN_LABEL,
-  type KontoGruppe,
-  type KontoKandidat,
-} from "./entities/konto/KontoFeld";
+/* Fläche */
+export { KpiTile, KpiGrid } from "./primitives/KpiTile";
+export { FieldList } from "./primitives/FieldList";
+export { ProseCard } from "./primitives/ProseCard";
+export { StatusCallout } from "./primitives/StatusCallout";
+export { Callout } from "./primitives/Callout";
 
-/* Zellen */
+/* Tabelle */
+export { Card, CardHead, CardFoot, Table, HeadRow, Row, GroupRow, EmptyRow } from "./primitives/Table";
 export {
   AmountCell,
   ProgressCell,
@@ -80,9 +81,10 @@ export {
   ErrorRow,
   type CellTone,
 } from "./primitives/Cells";
+export { ClickRow, ExpandableRow } from "./primitives/ExpandableRow";
+export { SelectionBar, SelectCell } from "./primitives/Selection";
 
-/* Interaktive Zeilen und Arbeitsfläche */
-export { ClickRow, ExpandableRow, SelectionBar, SelectCell } from "./primitives/Interactive";
+/* ── Patterns ── Arbeitsfläche */
 export {
   MasterDetail,
   ListPane,
@@ -90,8 +92,15 @@ export {
   type ListGroup,
   type ListItem,
 } from "./patterns/MasterDetail";
+export {
+  TodoListe,
+  istOffen,
+  naechsterOffener,
+  type TodoGroup,
+  type TodoItem,
+} from "./patterns/TodoListe";
 
-/* Rahmen einer mehrschrittigen Prüfung */
+/* Rahmen */
 export {
   SchrittRail,
   SchrittKopf,
@@ -100,13 +109,41 @@ export {
   type RailTone,
 } from "./patterns/Rahmen";
 export { useHotkeys, HotkeyLegende, type HotkeyBinding } from "./patterns/Hotkeys";
+
+/* Prüfen */
 export {
-  TodoListe,
-  istOffen,
-  naechsterOffener,
-  type TodoGroup,
-  type TodoItem,
-} from "./patterns/TodoListe";
+  StateIcon,
+  Checkliste,
+  Pruefpunkte,
+  Meldungen,
+  type ChecklistRow,
+  type Meldung,
+  type Pruefpunkt,
+  type ZustandsIcon,
+} from "./patterns/Pruefen";
+export { VergleichsTabelle, type VergleichsZeile } from "./patterns/VergleichsTabelle";
+
+/* Prozess */
+export {
+  ProzessMini,
+  ProzessStepper,
+  Staffelstab,
+  StaffelLeiste,
+  type ProzessLoops,
+  type ProzessPhase,
+  type ProzessPhaseStatus,
+  type StaffelAbschnitt,
+  type StaffelstabKey,
+  type StaffelstabMeta,
+} from "./patterns/Prozessbild";
+
+/* ── Entitäten ── Konto */
+export {
+  KontoFeld,
+  KONTO_GRUPPEN_LABEL,
+  type KontoGruppe,
+  type KontoKandidat,
+} from "./entities/konto/KontoFeld";
 
 /* Buchungssatz — die eine Buchungs-Oberfläche */
 export {
@@ -126,45 +163,16 @@ export {
   type QuellenArt,
 } from "./entities/buchungssatz/KIBuchungshinweise";
 
-/* Vergleichen */
-export { VergleichsTabelle, type VergleichsZeile } from "./patterns/VergleichsTabelle";
-
-/* Prüfen */
-export {
-  StateIcon,
-  Checkliste,
-  Pruefpunkte,
-  Meldungen,
-  type ChecklistRow,
-  type Meldung,
-  type Pruefpunkt,
-  type ZustandsIcon,
-} from "./patterns/Pruefen";
-
-/* Prozessbild */
-export {
-  ProzessMini,
-  ProzessStepper,
-  Staffelstab,
-  StaffelLeiste,
-  type ProzessLoops,
-  type ProzessPhase,
-  type ProzessPhaseStatus,
-  type StaffelAbschnitt,
-  type StaffelstabKey,
-  type StaffelstabMeta,
-} from "./patterns/Prozessbild";
-
 /**
- * Re-Export dessen, was CSS-identisch mit dem Design ist und deshalb nicht
- * neu gebaut wird. Der Import läuft trotzdem über `@/ui/v3`, damit der Grep
+ * Legacy (`src/ui/legacy/`): CSS-identisch mit dem Design, deshalb nicht neu
+ * gebaut und noch nicht in die Dreiteilung eingeordnet. Der Import läuft trotzdem über `@/ui/v3`, damit der Grep
  * auf `@/ui/components` irgendwann leer wird.
  */
 /* Status — die eine erlaubte Status-Darstellung (R1). */
-export { StatusBadge } from "../status/StatusBadge";
-export { StatusInfoButton } from "../status/StatusInfoButton";
-export { StatusInfoDialog } from "../status/StatusInfoDialog";
+export { StatusBadge } from "../legacy/status/StatusBadge";
+export { StatusInfoButton } from "../legacy/status/StatusInfoButton";
+export { StatusInfoDialog } from "../legacy/status/StatusInfoDialog";
 
-export { Banner } from "../components/primitives/Banner";
-export { LongText } from "../components/primitives/LongText";
-export { Pagination } from "../components/Pagination";
+export { Banner } from "../legacy/components/primitives/Banner";
+export { LongText } from "../legacy/components/primitives/LongText";
+export { Pagination } from "../legacy/components/Pagination";

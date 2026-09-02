@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { FieldList } from "./Surface";
+import { FieldList } from "./FieldList";
 
-const meta: Meta<typeof FieldList> = { title: "v3/Primitives/FieldList", component: FieldList };
+const meta: Meta<typeof FieldList> = { title: "v3/Primitives/Fläche/FieldList", component: FieldList };
 export default meta;
 type Story = StoryObj<typeof FieldList>;
 

@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ActionBar, Button, RowActions } from "../index";
+import { ActionBar, RowActions } from "./ActionBar";
+import { Button } from "./Button";
 
-const meta: Meta<typeof ActionBar> = { title: "v3/Primitives/ActionBar", component: ActionBar };
+const meta: Meta<typeof ActionBar> = { title: "v3/Primitives/Aktion/ActionBar", component: ActionBar };
 export default meta;
 type Story = StoryObj<typeof ActionBar>;
 

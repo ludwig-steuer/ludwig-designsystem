@@ -2,7 +2,7 @@
 // Direkt aus der Registry, nicht über das Barrel: `@/ui/status` exportiert
 // auch `FlowModal`, und das zieht `@/modules/invoices` samt DB-Treiber in
 // jedes Bundle, das eine Zahl formatiert (P22).
-import { resolveStatus } from "@/ui/status/status-registry";
+import { resolveStatus } from "@/ui/legacy/status/status-registry";
 
 export function fmtMoney(
   amount: number | null | undefined,

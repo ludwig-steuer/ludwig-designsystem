@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { KpiGrid, KpiTile } from "./Surface";
+import { KpiGrid, KpiTile } from "./KpiTile";
 
-const meta: Meta<typeof KpiTile> = { title: "v3/Primitives/KpiTile", component: KpiTile };
+const meta: Meta<typeof KpiTile> = { title: "v3/Primitives/Fläche/KpiTile", component: KpiTile };
 export default meta;
 type Story = StoryObj<typeof KpiTile>;
 

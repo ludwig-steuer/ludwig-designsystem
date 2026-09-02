@@ -12,6 +12,9 @@ import type {
  * `Field` trägt Label, Hinweis und Fehler; die Eingabe selbst bleibt ein
  * gewöhnliches Element, damit `name`/`defaultValue` in Server-Action-Formularen
  * unverändert funktionieren.
+ *
+ * @wann  Jede Eingabe mit Label, Hinweis und Fehlertext.
+ * @nicht Kontenauswahl → KontoFeld. Nur lesen → FieldList.
  */
 
 export function Field({
@@ -57,6 +60,10 @@ export function Textarea({
   return <textarea {...rest} aria-invalid={invalid || undefined} className={inputClass({ invalid, className })} />;
 }
 
+/**
+ * @wann  Wahl aus wenigen festen Werten.
+ * @nicht Konto → KontoFeld. Sichten wechseln → Segmented.
+ */
 export function Select({
   invalid,
   className,

@@ -31,6 +31,13 @@ Drei Stufen, Importe **nur abwärts**:
 Primitives kennen keine Patterns, Patterns keine Entitäten. Fachliche
 Zusammensetzungen wohnen im Modul der App, nicht hier.
 
+**Eine Datei je Familie**, PascalCase, benannt wie die Familie: `Button.tsx`
+(Button, KeyButton), `Table.tsx` (Card, Table, Row …). Kein Sammelbecken wie
+ein `Surface.tsx` — wer die Komponente sucht, findet die Datei am Namen.
+
+`src/ui/legacy/` ist vorübergehend: Bausteine aus der App, noch nicht
+eingeordnet. Nichts Neues dorthin.
+
 Export über `src/ui/v3/index.ts`. Die Komponente kennt **kein Fachmodul**:
 Daten kommen als Props, Loader als Prop, keine Server Actions.
 
@@ -44,25 +51,61 @@ einen erfinden.
 Typen für Fachdaten kommen aus `src/ludwig/` (gespiegeltes Datenmodell),
 nicht als lokale Neudefinition.
 
+**Entitäten heißen Entität + Form**: `KontoFeld`, `KontoZeile`, `KontoKarte`,
+`BuchungssatzEditor`. Die Formen sind die aus `docs/ludwig/ui-repraesentationen.md`;
+keine T-Shirt-Größe im Namen — die Größe folgt aus der Form:
+
+| Größe | Formen |
+|---|---|
+| XS | Inline, Badge |
+| S | Zeile, Auswahl, Kopf |
+| M | Karte, Vorschau |
+| L | Detail, Drawer, Liste |
+| XL | Editor |
+
+## Wann und nicht
+
+Jeder Export trägt im JSDoc zwei Zeilen — der Fall, für den er da ist, und der
+Nachbarfall mit Verweis. Das ist die Antwort auf „was nehme ich?", greppbar:
+
+```ts
+/**
+ * Master-Detail: Liste links, Detail rechts.
+ *
+ * @wann  Auswahl aus einer Liste, Arbeit am gewählten Element rechts.
+ * @nicht Einzelbestätigung ohne Liste → Dialog. Schrittfolge → SchrittRail.
+ */
+export function MasterDetail(…)
+```
+
+Vor dem Bauen: `grep -rn "@wann" src/ui/v3` lesen. Steht der Fall schon da,
+gibt es die Komponente schon.
+
 ## Werte
 
 Kein Hex, kein Pixelmaß in der Komponente. Farben und Maße sind Tokens
 (`var(--…)` aus `tokens.css`) oder Klassen aus `v3.css`. Braucht die
 Komponente einen Wert, den es nicht gibt: Token ergänzen, nicht hart schreiben.
 
-Status **nur** über die Registry (`src/ui/status/status-registry.ts`) — keine
+Status **nur** über die Registry (`src/ui/legacy/status/status-registry.ts`) — keine
 lokale Label-Map, kein eigener Status-Text.
 
 ## Story ist Pflicht
 
 Jede Komponente bekommt `<Name>.stories.tsx` daneben, Titel
-`v3/Primitives|Patterns|Entitäten/<Entität>/<Name>`.
+`v3/<Stufe>/<Gruppe>/<Name>`. Die Gruppe ist das Wort aus dem
+Gruppen-Kommentar in `src/ui/v3/index.ts` — so zeigt der Storybook-Baum
+dieselbe Ordnung wie der Barrel:
+
+- Primitives: Aktion · Navigation · Formular · Dialog · Fläche · Tabelle
+- Patterns: Arbeitsfläche · Rahmen · Prüfen · Prozess
+- Entitäten: `v3/Entitäten/<Entität>/<Name>`
 
 **Fünf Zustände** (V9, T6) — nicht nur der Happy Path:
 gefüllt · leer · leer nach Filter · lädt · Fehler.
 
-Storybook ist die Antwort auf „wovon gibt es v3?". Was keine Story hat,
-existiert für das Design-System nicht.
+Storybook ist die Antwort auf „wovon gibt es v3?". Ein Pattern darf ohne
+Story eingecheckt werden, gilt aber erst mit Story als abgenommen.
 
 ## Abnahme
 
@@ -75,6 +118,7 @@ gesetzt". Beides wird fällig, wenn die App auf v3 migriert.
 
 Die Punkte, die am häufigsten reißen:
 
+- `@wann`/`@nicht` am Export, Datei nach der Familie benannt, Story im richtigen Ordner
 - Text links, Zahlen rechts mit `tnum`, nichts zentriert (V3)
 - Farbe nur als Kritikalitätsstufe; Rot **nur** Fehler; Vorzeichen ohne Farbe
 - Jeder farbige Zustand hat zusätzlich Wort oder Icon (V7)

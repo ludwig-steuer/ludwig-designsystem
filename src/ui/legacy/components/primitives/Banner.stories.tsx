@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Banner } from "./Banner";
 
 const meta: Meta<typeof Banner> = {
-  title: "v3/Bausteine/Banner",
+  title: "v3/Legacy/Banner",
   component: Banner,
   args: { children: "Ludwig hat 47 Belege vorkontiert." },
 };

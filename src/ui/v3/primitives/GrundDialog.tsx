@@ -15,6 +15,9 @@ import { Textarea } from "./Form";
  *
  * Der Grund ist per Voreinstellung **optional** — wo er Pflicht ist (Storno,
  * Ablehnung), setzt der Aufrufer `required`.
+ *
+ * @wann  Handlung, deren Grund ins Protokoll gehört (Rückgabe, Storno, Ablehnung).
+ * @nicht Bestätigung ohne Text → Dialog.
  */
 export function GrundDialog({
   open,

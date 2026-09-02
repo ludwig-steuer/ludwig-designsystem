@@ -58,6 +58,9 @@ const TONE_VAR: Record<string, string> = {
   info: "var(--color-accent-700)",
 };
 
+/**
+ * @wann  Zustand eines Punkts in Liste oder Zeile, immer mit Wort daneben.
+ */
 export function StateIcon({ state, title }: { state: ZustandsIcon; title?: string }) {
   const { Icon, tone, label } = ICONS[state];
   return (
@@ -90,6 +93,9 @@ export interface ChecklistRow {
  * Die Prüfliste eines Gates (Design `PruefChecklist.dc.html`): Prüfung ·
  * Stand · Fortschritt · Sprung. Das Detail rechts baut der Aufrufer mit
  * `ChecklisteDetail` in einem `MasterDetail`.
+ *
+ * @wann  Prüfliste eines Gates: Prüfung, Stand, Fortschritt, Sprung.
+ * @nicht Punkte zum Abarbeiten → TodoListe.
  */
 export function Checkliste({
   rows,
@@ -194,6 +200,9 @@ const PP_ICON: Record<Pruefpunkt["state"], ZustandsIcon> = {
 /**
  * Prüfpunkte als Akkordeon. Bestandene stehen zusammengefasst in einer Zeile;
  * offene, gewarnte und gescheiterte einzeln, jeweils mit Begründung.
+ *
+ * @wann  Einzelprüfungen eines Satzes mit Begründung; bestandene in einer Zeile.
+ * @nicht Fehler, der das Speichern blockiert → Meldungen.
  */
 export function Pruefpunkte({ items }: { items: Pruefpunkt[] }) {
   const bestanden = items.filter((i) => i.state === "green");
@@ -239,6 +248,9 @@ export interface Meldung {
  * Fehler blockieren, Warnungen brauchen eine Quittung, Hinweise stehen nur da.
  * Die Stufe steckt in `level` — der Aufrufer wählt nicht die Farbe, sondern
  * die Bedeutung.
+ *
+ * @wann  Fehler, Warnung, Hinweis zu einem Satz oder Formular.
+ * @nicht Hinweis ohne Bezug zu einem Satz → Callout.
  */
 export function Meldungen({ items }: { items: Meldung[] }) {
   if (items.length === 0) return null;

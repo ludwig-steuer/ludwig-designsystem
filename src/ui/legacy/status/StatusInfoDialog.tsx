@@ -3,8 +3,8 @@
 // Direkt statt über das Barrel: `@/ui/components` re-exportiert `log/`,
 // das seinerseits `@/ui/status` zieht — der Kreis endet über `FlowModal`
 // bei `@/modules/invoices` und dem DB-Treiber (P22).
-import { Badge } from "@/ui/components/primitives/Badge";
-import { Dialog } from "@/ui/components/primitives/Dialog";
+import { Badge } from "@/ui/legacy/components/primitives/Badge";
+import { Dialog } from "@/ui/legacy/components/primitives/Dialog";
 import { AXIS_LABEL, AXIS_SOURCE } from "./entity-icons";
 import { axisLegend, type StatusAxis } from "./status-registry";
 

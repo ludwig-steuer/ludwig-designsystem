@@ -41,6 +41,10 @@ function zelle(v: number | null, unit: "count" | "amount") {
   return unit === "amount" ? <AmountCell value={v} /> : <span className="v2num">{ZAHL.format(v)}</span>;
 }
 
+/**
+ * @wann  Monatswerte gegen drei Vormonate, Abweichung je Zeile.
+ * @nicht Einzelwert ohne Verlauf → KpiTile.
+ */
 export function VergleichsTabelle({
   title,
   sub,

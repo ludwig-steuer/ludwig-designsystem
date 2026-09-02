@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FortschrittLeiste, SchrittKopf, SchrittRail, type RailItem } from "./Rahmen";
 
-const meta: Meta<typeof SchrittRail> = { title: "v3/Patterns/SchrittRail", component: SchrittRail };
+const meta: Meta<typeof SchrittRail> = { title: "v3/Patterns/Rahmen/SchrittRail", component: SchrittRail };
 export default meta;
 type Story = StoryObj<typeof SchrittRail>;
 

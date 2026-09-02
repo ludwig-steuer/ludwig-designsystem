@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Segmented } from "./Nav";
 
-const meta: Meta<typeof Segmented> = { title: "v3/Primitives/Segmented", component: Segmented };
+const meta: Meta<typeof Segmented> = { title: "v3/Primitives/Navigation/Segmented", component: Segmented };
 export default meta;
 type Story = StoryObj<typeof Segmented>;
 

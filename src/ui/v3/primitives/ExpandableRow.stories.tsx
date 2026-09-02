@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { AmountCell, DotStatus } from "./Cells";
-import { ClickRow, ExpandableRow, SelectCell, SelectionBar } from "./Interactive";
+import { ClickRow, ExpandableRow } from "./ExpandableRow";
 import { Card, CardHead, HeadRow, Table } from "./Table";
 
-const meta: Meta<typeof ExpandableRow> = { title: "v3/Primitives/ExpandableRow", component: ExpandableRow };
+const meta: Meta<typeof ExpandableRow> = { title: "v3/Primitives/Tabelle/ExpandableRow", component: ExpandableRow };
 export default meta;
 type Story = StoryObj<typeof ExpandableRow>;
 
@@ -51,48 +51,25 @@ export const Ausklappbar: Story = {
   ),
 };
 
-/** Mehrfachauswahl: die Leiste erscheint erst, wenn etwas gewählt ist. */
-export const MitAuswahl: Story = {
+/** Klick statt Link: die Zeile wählt aus, das Detail steht daneben. */
+export const Klickbar: Story = {
   render: function Render() {
     const zeilen = [
       { key: "a", name: "Vermieter Musterstraße", betrag: 1800 },
       { key: "b", name: "Werbeagentur Nord", betrag: 420 },
       { key: "c", name: "Bürobedarf GmbH", betrag: 64.9 },
     ];
-    const [gewaehlt, setGewaehlt] = useState<string[]>(["a", "b"]);
+    const [aktiv, setAktiv] = useState("a");
     return (
       <Card>
         <CardHead title="Fehlende Belege · 3" />
-        <SelectionBar
-          count={gewaehlt.length}
-          onClear={() => setGewaehlt([])}
-          actions={
-            <button type="button" className="v2link">
-              Als nicht nötig markieren
-            </button>
-          }
-        />
-        <Table cols="24px 1.5fr 120px">
+        <Table cols="1.5fr 120px">
           <HeadRow>
-            <span />
             <span>Gegenpartei</span>
             <span className="v2num">Betrag</span>
           </HeadRow>
           {zeilen.map((z) => (
-            <ClickRow
-              key={z.key}
-              active={gewaehlt.includes(z.key)}
-              onClick={() =>
-                setGewaehlt((g) => (g.includes(z.key) ? g.filter((k) => k !== z.key) : [...g, z.key]))
-              }
-            >
-              <SelectCell
-                checked={gewaehlt.includes(z.key)}
-                label={`${z.name} auswählen`}
-                onChange={(c) =>
-                  setGewaehlt((g) => (c ? [...g, z.key] : g.filter((k) => k !== z.key)))
-                }
-              />
+            <ClickRow key={z.key} active={z.key === aktiv} onClick={() => setAktiv(z.key)}>
               <span className="v2main">{z.name}</span>
               <AmountCell value={z.betrag} />
             </ClickRow>
@@ -101,26 +78,4 @@ export const MitAuswahl: Story = {
       </Card>
     );
   },
-};
-
-/** Nichts gewählt — die Auswahl-Leiste ist nicht da, nicht nur leer. */
-export const OhneAuswahl: Story = {
-  render: () => (
-    <Card>
-      <CardHead title="Fehlende Belege · 1" />
-      <SelectionBar count={0} onClear={() => {}} actions={null} />
-      <Table cols="24px 1.5fr 120px">
-        <HeadRow>
-          <span />
-          <span>Gegenpartei</span>
-          <span className="v2num">Betrag</span>
-        </HeadRow>
-        <ClickRow onClick={() => {}}>
-          <SelectCell checked={false} label="Bürobedarf GmbH auswählen" onChange={() => {}} />
-          <span className="v2main">Bürobedarf GmbH</span>
-          <AmountCell value={64.9} />
-        </ClickRow>
-      </Table>
-    </Card>
-  ),
 };

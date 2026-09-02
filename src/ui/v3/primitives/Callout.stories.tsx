@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Callout, ProseCard } from "./Surface";
+import { Callout } from "./Callout";
 
-const meta: Meta<typeof Callout> = { title: "v3/Primitives/Callout", component: Callout };
+const meta: Meta<typeof Callout> = { title: "v3/Primitives/Fläche/Callout", component: Callout };
 export default meta;
 type Story = StoryObj<typeof Callout>;
 
@@ -18,16 +18,5 @@ export const AlleToene: Story = {
         Soll und Haben gehen um 12,40 € auseinander. Die Freigabe ist gesperrt.
       </Callout>
     </div>
-  ),
-};
-
-/** Fließtext-Karte für längere Erklärungen — Versalien-Kopf, 13.5 px Text. */
-export const AlsFliesstext: Story = {
-  render: () => (
-    <ProseCard title="Letzter Bericht">
-      Der Durchgang vom 26.08. hat 118 Sätze vorbereitet. Zwölf Punkte bleiben offen,
-      davon zwei Fragen an den Mandanten und drei Konten, die in diesem Zeitraum erstmals
-      bebucht wurden.
-    </ProseCard>
   ),
 };

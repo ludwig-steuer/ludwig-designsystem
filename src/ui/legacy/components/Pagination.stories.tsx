@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Pagination } from "./Pagination";
 
 const meta: Meta<typeof Pagination> = {
-  title: "v3/Bausteine/Pagination",
+  title: "v3/Legacy/Pagination",
   component: Pagination,
   args: { buildHref: (p: number) => `?page=${p}` },
 };

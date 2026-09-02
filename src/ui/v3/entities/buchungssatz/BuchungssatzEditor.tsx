@@ -3,11 +3,11 @@
 import { Trash2, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { fmtEuro, parseEuro } from "@/ui/booking/format";
-import { deriveTax } from "@/ui/booking/tax-assist";
+import { fmtEuro, parseEuro } from "@/ui/legacy/booking/format";
+import { deriveTax } from "@/ui/legacy/booking/tax-assist";
 // Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
 // und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
-import { StatusBadge } from "@/ui/status/StatusBadge";
+import { StatusBadge } from "@/ui/legacy/status/StatusBadge";
 
 import { Button } from "../../primitives/Button";
 import { Dialog } from "../../primitives/Dialog";
@@ -132,6 +132,10 @@ function summeBelegseite(rows: readonly EditorRow[], belegSide: Seite): number {
     .reduce((s, r) => s + parseEuro(r.umsatz), 0);
 }
 
+/**
+ * @wann  Buchungssatz anzeigen oder bearbeiten — ein Raster für beides.
+ * @nicht Ein zweiter Editor für denselben Satz.
+ */
 export function BuchungssatzEditor(props: BuchungssatzEditorProps) {
   const {
     gegenkonto,

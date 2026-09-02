@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { StatusInfoButton } from "./StatusInfoButton";
 
-const meta: Meta<typeof StatusInfoButton> = { title: "v3/Bausteine/Status/StatusInfoButton", component: StatusInfoButton };
+const meta: Meta<typeof StatusInfoButton> = { title: "v3/Legacy/Status/StatusInfoButton", component: StatusInfoButton };
 export default meta;
 type Story = StoryObj<typeof StatusInfoButton>;
 

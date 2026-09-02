@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Tabs } from "./Nav";
 
-const meta: Meta<typeof Tabs> = { title: "v3/Primitives/Tabs", component: Tabs };
+const meta: Meta<typeof Tabs> = { title: "v3/Primitives/Navigation/Tabs", component: Tabs };
 export default meta;
 type Story = StoryObj<typeof Tabs>;
 

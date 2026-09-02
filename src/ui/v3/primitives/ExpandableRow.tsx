@@ -4,17 +4,19 @@ import type { ReactNode } from "react";
 import { useId, useState } from "react";
 
 /**
- * Die Client-Zwillinge des v2-Tabellen-Baukastens (F123 T123.1).
+ * Die Client-Zwillinge von `Row` (F123 T123.1).
  *
  * `Row` und `Table` aus `./Table` sind Server-Components ohne `onClick` —
- * bewusst. Wo eine Zeile wirklich interaktiv ist (Auswahl, Ausklappen,
- * Master-Detail-Klick), steht sie hier.
- *
- * Die Arbeitsfläche `MasterDetail` wohnt seit F128 eine Stufe höher
- * (`../patterns/MasterDetail`): sie ist ein Muster, keine Primitive.
+ * bewusst. Wo eine Zeile wirklich interaktiv ist (Ausklappen, Master-Detail-
+ * Klick), steht sie hier; die Mehrfachauswahl steht in `./Selection`.
  */
 
-/** Zeile mit `onClick` statt `href`. Ansonsten identisch zu `Row`. */
+/**
+ * Zeile mit `onClick` statt `href`. Ansonsten identisch zu `Row`.
+ *
+ * @wann  Der Klick tut etwas im Client, etwa die Auswahl im MasterDetail.
+ * @nicht Das Ziel ist eine URL → Row mit `href`.
+ */
 export function ClickRow({
   onClick,
   active,
@@ -47,6 +49,9 @@ export function ClickRow({
 /**
  * Zeile, die sich in die Tabelle hinein aufklappt — kein Modal, kein Drawer
  * für kleine Zusatzinfos (Baukasten §7).
+ *
+ * @wann  Eine kleine Zusatzinfo zu einer Zeile, die gelesen und wieder zugeklappt wird.
+ * @nicht Arbeit am Element → MasterDetail. Bestätigung mit Folgen → Dialog.
  */
 export function ExpandableRow({
   summary,
@@ -84,54 +89,5 @@ export function ExpandableRow({
         </div>
       ) : null}
     </div>
-  );
-}
-
-/**
- * Auswahl-Leiste über dem Spaltenkopf — innerhalb der Karte, nicht im
- * Seitenkopf (Baukasten §4). Erscheint erst, wenn etwas ausgewählt ist.
- */
-export function SelectionBar({
-  count,
-  actions,
-  onClear,
-}: {
-  count: number;
-  actions: ReactNode;
-  onClear: () => void;
-}) {
-  if (count === 0) return null;
-  return (
-    <div className="v2selbar">
-      <span className="v2selbar__count">{count} ausgewählt</span>
-      <span className="v2selbar__actions">
-        {actions}
-        <button type="button" className="v2link v2link--quiet" onClick={onClear}>
-          Auswahl aufheben
-        </button>
-      </span>
-    </div>
-  );
-}
-
-/** Auswahl-Kästchen als erste Zelle einer Zeile. */
-export function SelectCell({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  label: string;
-}) {
-  return (
-    <input
-      type="checkbox"
-      className="v2check"
-      checked={checked}
-      aria-label={label}
-      onChange={(e) => onChange(e.target.checked)}
-      onClick={(e) => e.stopPropagation()}
-    />
   );
 }

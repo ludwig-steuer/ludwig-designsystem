@@ -13,7 +13,7 @@ import { useState } from "react";
 
 // Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
 // und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
-import { StatusBadge } from "@/ui/status/StatusBadge";
+import { StatusBadge } from "@/ui/legacy/status/StatusBadge";
 
 /**
  * Was der Agent sich gedacht hat (F123 T123.3, Design `KIBuchungshinweise.dc.html`).
@@ -62,6 +62,10 @@ const KONFIDENZ_TEXT: Record<KonfidenzStufe, string> = {
   none: "keine Angabe",
 };
 
+/**
+ * @wann  Begründung des Agenten und Einschätzung des Judge zu einem Vorschlag, eingeklappt.
+ * @nicht Meldungen zum Satz → Meldungen.
+ */
 export function KIBuchungshinweise({
   verdict,
   confidence = "none",

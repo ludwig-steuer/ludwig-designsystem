@@ -45,7 +45,7 @@
  * 4. Test in `__tests__/status-registry.test.ts` ergänzen, wenn ein
  *    Domain-Enum existiert.
  */
-import type { BadgeKind } from "@/ui/components/primitives/Badge";
+import type { BadgeKind } from "@/ui/legacy/components/primitives/Badge";
 
 /**
  * Status-Achsen der App. Namensschema: Entität, bei mehreren Achsen an

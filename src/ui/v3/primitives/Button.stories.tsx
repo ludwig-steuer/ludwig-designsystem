@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Button } from "./Button";
 
-const meta: Meta<typeof Button> = { title: "v3/Primitives/Button", component: Button };
+const meta: Meta<typeof Button> = { title: "v3/Primitives/Aktion/Button", component: Button };
 export default meta;
 type Story = StoryObj<typeof Button>;
 

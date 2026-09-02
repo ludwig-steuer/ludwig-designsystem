@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "../primitives/Button";
 import { DetailPane, ListPane, MasterDetail, type ListGroup } from "./MasterDetail";
 
-const meta: Meta<typeof MasterDetail> = { title: "v3/Patterns/MasterDetail", component: MasterDetail };
+const meta: Meta<typeof MasterDetail> = { title: "v3/Patterns/Arbeitsfläche/MasterDetail", component: MasterDetail };
 export default meta;
 type Story = StoryObj<typeof MasterDetail>;
 

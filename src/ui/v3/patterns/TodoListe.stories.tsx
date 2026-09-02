@@ -4,7 +4,7 @@ import { Button } from "../primitives/Button";
 import { DetailPane, MasterDetail } from "./MasterDetail";
 import { TodoListe, naechsterOffener, type TodoGroup } from "./TodoListe";
 
-const meta: Meta<typeof TodoListe> = { title: "v3/Patterns/TodoListe", component: TodoListe };
+const meta: Meta<typeof TodoListe> = { title: "v3/Patterns/Arbeitsfläche/TodoListe", component: TodoListe };
 export default meta;
 type Story = StoryObj<typeof TodoListe>;
 

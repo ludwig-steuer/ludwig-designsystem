@@ -1,6 +1,6 @@
 // Direkt statt über das Barrel: `@/ui/components` exportiert `AppShell`
 // und `UserMenu` und zieht damit `@/modules/auth` mit (P22).
-import { Badge } from "@/ui/components/primitives/Badge";
+import { Badge } from "@/ui/legacy/components/primitives/Badge";
 import { AXIS_LABEL, ENTITY_ICON } from "./entity-icons";
 import { StatusInfoButton } from "./StatusInfoButton";
 import { resolveStage, resolveStatus, type StatusAxis } from "./status-registry";

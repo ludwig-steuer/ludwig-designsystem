@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Checkbox, Field, Input, Select, Textarea } from "./Form";
 
-const meta: Meta<typeof Field> = { title: "v3/Primitives/Field", component: Field };
+const meta: Meta<typeof Field> = { title: "v3/Primitives/Formular/Field", component: Field };
 export default meta;
 type Story = StoryObj<typeof Field>;
 

@@ -4,7 +4,7 @@ import { Button } from "./Button";
 import { Dialog } from "./Dialog";
 import { Field, Textarea } from "./Form";
 
-const meta: Meta<typeof Dialog> = { title: "v3/Primitives/Dialog", component: Dialog };
+const meta: Meta<typeof Dialog> = { title: "v3/Primitives/Dialog/Dialog", component: Dialog };
 export default meta;
 type Story = StoryObj<typeof Dialog>;
 

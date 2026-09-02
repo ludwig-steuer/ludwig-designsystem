@@ -11,6 +11,9 @@ import type { CSSProperties, ReactNode } from "react";
  * Master-Detail: Liste links, Detail rechts und beim Scrollen stehenbleibend.
  * Der kanonische Ersatz für das Modal (UX-Guidelines L2) — die Auswahl gehört in einen
  * eigenen Such-Parameter (`?sel=`), nicht in den Drawer-Parameter (R8).
+ *
+ * @wann  Auswahl aus einer Liste, Arbeit am gewählten Element rechts.
+ * @nicht Einzelbestätigung ohne Liste → Dialog. Schrittfolge → SchrittRail.
  */
 export function MasterDetail({
   list,

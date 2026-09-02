@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cn } from "@/ui/utils/cn";
+import { cn } from "@/ui/legacy/utils/cn";
 
 export type BadgeKind = "info" | "success" | "warning" | "danger" | "neutral";
 

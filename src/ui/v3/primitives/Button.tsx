@@ -48,6 +48,10 @@ function inner(icon: ReactNode, children: ReactNode, hotkey?: string) {
   );
 }
 
+/**
+ * @wann  Jede Handlung mit Wort: `md` in Kopf-Karte und Aktionsleiste, `sm` in Zeile und Karte.
+ * @nicht Sprung zu einer Seite im Fließtext → Link. Mehrere Handlungen nebeneinander → ActionBar.
+ */
 export function Button(props: ButtonProps | ButtonLinkProps) {
   const { variant = "secondary", size = "md", icon, hotkey, children, className } = props;
   if ("href" in props && props.href !== undefined) {
@@ -71,43 +75,9 @@ export function Button(props: ButtonProps | ButtonLinkProps) {
  * Knopf, der seine Taste immer zeigt — `hotkey` ist Pflicht statt optional.
  * Reine Bequemlichkeit für Aktionsleisten, in denen jede Handlung eine Taste
  * hat; identisch gerendert zu `Button`.
+ *
+ * @wann  Aktionsleisten, in denen jede Handlung eine Taste hat.
  */
 export function KeyButton(props: (ButtonProps | ButtonLinkProps) & { hotkey: string }) {
   return <Button {...props} />;
-}
-
-/**
- * Aktionsleiste mit fester Reihenfolge: primär, sekundär, tertiär, Infotext.
- * Die Reihenfolge steckt in der Komponente, damit sie nicht je Screen neu
- * verhandelt wird (Design `StapelSeite.dc.html` Z. 172–185).
- */
-export function ActionBar({
-  primary,
-  secondary,
-  tertiary,
-  info,
-  className,
-}: {
-  primary?: ReactNode;
-  secondary?: ReactNode;
-  tertiary?: ReactNode;
-  info?: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`v2actionbar${className ? ` ${className}` : ""}`}>
-      {primary}
-      {secondary}
-      {tertiary}
-      {info ? <span className="v2actionbar__info">{info}</span> : null}
-    </div>
-  );
-}
-
-/**
- * Zeilen-Aktionen: ein tertiärer Knopf je Handlung, rechtsbündig. Kein Kebab —
- * ein Icon ohne Wort ist für die Zielgruppe ein Rätsel (UX-Guidelines V7).
- */
-export function RowActions({ children }: { children: ReactNode }) {
-  return <span className="v2actions">{children}</span>;
 }

@@ -4,7 +4,7 @@ import { StatusBadge } from "./StatusBadge";
 import { STATUS_REGISTRY, type StatusAxis } from "./status-registry";
 
 const meta: Meta<typeof StatusBadge> = {
-  title: "v3/Bausteine/Status/StatusBadge",
+  title: "v3/Legacy/Status/StatusBadge",
   component: StatusBadge,
   args: { axis: "sachverhalt", status: "open" },
 };

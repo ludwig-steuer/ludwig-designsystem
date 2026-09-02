@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { FilterChips, SearchInput } from "./Nav";
 
-const meta: Meta<typeof FilterChips> = { title: "v3/Primitives/FilterChips", component: FilterChips };
+const meta: Meta<typeof FilterChips> = { title: "v3/Primitives/Navigation/FilterChips", component: FilterChips };
 export default meta;
 type Story = StoryObj<typeof FilterChips>;
 
