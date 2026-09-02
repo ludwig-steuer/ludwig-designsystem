@@ -371,7 +371,8 @@ sind Seiten und stehen in §11.4. Quellen: v1-Inventar
 Familienregel §4.4 des Inventars, Design-Kit (`design/Ludwig Design System v2/ui_kits/app`).
 Status: **v2** vorhanden · **Optik** bleibt Alt-Mechanik, bekommt v2-Optik (F123 §2.4)
 · **heben** v1 vorhanden, nach v2 heben (R21 Regelweg) · **fehlt** neu bauen ·
-**prüfen** Bedarf offen · **—** kein Bedarf.
+**prüfen** Bedarf offen · **—** kein Bedarf. Eine Nummer in Klammern ist die
+Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 
 #### 0 Grundlagen (kein Baustein, aber Lieferumfang)
 
@@ -402,36 +403,39 @@ Status: **v2** vorhanden · **Optik** bleibt Alt-Mechanik, bekommt v2-Optik (F12
 
 | Gruppe | Baustein | Ist (v1) | Status |
 |---|---|---|---|
-| Aktion | `Button` (primary/secondary/tertiary/danger × sm/md, `href`, `hotkey`) | v1 `Button` | v2 |
+| Aktion | `Button` (primary/secondary/tertiary/danger × xs/sm/md, `href`, `hotkey`, `icon`/`iconEnd`, `loading`, `fullWidth`) | v1 `Button` | v2 (0010) |
 | Aktion | `KeyButton` · `ActionBar` · `RowActions` | — | v2 |
-| Aktion | Zeilen-/Überlaufmenü (Popover + Einträge) | `DocActionsMenu`, `UserMenu`, `FeedbackRowActions` | fehlt |
+| Aktion | Zeilen-/Überlaufmenü (Popover + Einträge) | `DocActionsMenu`, `UserMenu`, `FeedbackRowActions` | fehlt (0008) |
 | Aktion | Kopieren-Knopf | `CopyTextButton` (datev-truth) | heben |
-| Aktion | Link `v2link`/`v2link--quiet` | CSS-Klasse | v2 |
+| Aktion | `TextButton` (zwei Lautstärken, `icon`, `href`) | `.v2link`, 86 Stellen | v2 (0011) |
+| Aktion | `IconButton` (Icon ohne Wort — benannte Ausnahme zu T8) | 31 Stellen, 9 davon ohne `aria-label` | fehlt (0012) |
+| Aktion | `ActionButton` (führt aus, sperrt, zeigt Fehler, bestätigt) | 61× `useTransition` von Hand, 28× `window.confirm` | fehlt (0004) |
 | Navigation | `Tabs` (Zähler, `alarm`) | `TabBar` + 6 Inline-Kopien (P8) | v2; Kopien heben |
 | Navigation | `Segmented` · `FilterChips` · `SearchInput` | — | v2 |
-| Navigation | `FilterLeiste` (Formularzeile, Stand in URL, „gefiltert: … · Zurücksetzen", I4) | 8 Varianten (`AccountFilterForm`, `InvoiceFilterForm`, `CaseListFilters` …) | fehlt |
-| Navigation | `Kopfzeile` (Titel, Zähler, Aktionen; kompakter als v1) | `PageHeader` | fehlt |
+| Navigation | `FilterBar` (Formularzeile, Stand in URL, „gefiltert: … · Zurücksetzen", I4) | 12 Varianten (`AccountFilterForm`, `InvoiceFilterForm`, `CaseListFilters` …) | fehlt (0003) |
+| Navigation | `PageHeader` (Titel, Zähler, Aktionen; kompakter als v1) | `PageHeader` v1, 19 Dateien | fehlt (0002) |
 | Navigation | `Pagination` | v1 Re-Export | Optik |
 | Fläche | `Card`/`CardHead`/`CardFoot` | `Section`/`SectionHead`/`SectionFilters` | v2; v1 ersetzen |
 | Fläche | `KpiTile`/`KpiGrid` | `Stat`/`StatGrid` | v2; v1 ersetzen |
 | Fläche | `FieldList` (surface/soft) · `ProseCard` | — | v2 |
-| Fläche | `Werteliste` (Schlüssel-Wert außerhalb einer Karte) | `KeyValueGrid` (clients) | fehlt |
+| Fläche | `FieldList` freigestellt (Schlüssel-Wert außerhalb einer Karte) | `KeyValueGrid` (clients), 10 lokale Helfer | fehlt (0006) |
 | Fläche | `Callout` · `StatusCallout` | `ContextHint`, `ChecklistRow` (clients); Kit `LudwigNote` | v2; v1 ersetzen |
 | Fläche | `Banner` | v1 Re-Export | Optik |
-| Fläche | Leerzustand linksbündig, ein Satz mit Zahl (L6) | `EmptyState` (zentriert), 27 `.v2tbl__empty` | heben; `EmptyRow` v2 |
+| Fläche | Leerzustand linksbündig, ein Satz mit Zahl (L6) | `EmptyState`, 27 `.v2tbl__empty` | v2; Zentrierung 2026-09-03 behoben |
 | Fläche | `Dialog` · `GrundDialog` | v1 `Dialog`; 31× `window.confirm()` (I2) | v2; Aufrufer heben |
 | Fläche | `Drawer`/`UrlDrawer`-Rahmen (`.lwdrawer`, Wächter-Test) | `Drawer`, `DrawerFooter`, `UrlDrawer` | Optik |
 | Fläche | `Tooltip` | v1 | Optik |
-| Fläche | Hinweis nach Aktion (Toast, nicht blockierend) | `ActionNotice` (sachverhalt); Kit `Toast`/`ToastStack` | fehlt |
-| Fläche | Ladefläche für Karte/Detail (Skeleton) | Kit `Skeleton`; v2 `TableLoading` nur Tabelle | fehlt |
+| Fläche | Hinweis nach Aktion (Toast, nicht blockierend) | `ActionNotice` (sachverhalt); Kit `Toast`/`ToastStack` | fehlt (0007) |
+| Fläche | Ladefläche für Karte/Detail (Skeleton) | Kit `Skeleton`; v2 `TableLoading` nur Tabelle | fehlt (0016) |
+| Fläche | `Disclosure` (Aufklapper mit Kopf und Zustand) | natives `<details>/<summary>`, 34 Stellen / 20 Dateien | fehlt (0005) |
 | Formular | `Field` · `Input` · `Textarea` · `Select` · `Checkbox` (Label sichtbar, Fehler als Text, Pflicht, I8) | — | v2 |
-| Formular | Radio-Gruppe (Antwortoptionen I6) | — | fehlt |
-| Formular | Schalter (Toggle) | `ClientActiveToggle`; Kit `Toggle` | fehlt |
-| Formular | Datum | `Input type="date"` | v2; Format prüfen |
-| Formular | Betragsfeld (`tnum`, Komma, Vorzeichen) | inline im `BuchungssatzEditor` | fehlt als Primitive |
-| Formular | `Combobox` generisch (Suche, Kandidaten nach Herkunft, Tastatur) | `KontoCombobox`, `CreditorCombobox`; v2 `KontoFeld` entitätsgebunden | fehlt (Basis für `KontoFeld`/`PartnerFeld`) |
-| Formular | Inline-Bearbeitung (Klick → Feld → Speichern/Abbrechen) | `SourceDocDateEditor`, `CaseSummaryEditor`, `CaseKindEditor` | fehlt |
-| Formular | Dateiablage (Drop-Zone, Liste, Fortschritt) | `InvoiceUploader`, `CaseDocumentUploaderModal`; Kit `UploadZone` | fehlt |
+| Formular | `RadioGroup` (Antwortoptionen I6) | 3 rohe Radio-Felder in 2 Dateien | fehlt (0017) |
+| Formular | Schalter (Toggle) | `ClientActiveToggle` ist bewusst ein Knopf; `role=switch` 0× | prüfen (0018) |
+| Formular | `DateField`/`DateRangeField` | natives Datumsfeld, 14 Dateien | fehlt (0024) |
+| Formular | `AmountInput` (`tnum`, Komma, Vorzeichen) | inline im Editor, 16 Dezimal-Felder | fehlt (0019) |
+| Formular | `Combobox` generisch (Suche, Kandidaten nach Herkunft, Tastatur) | `KontoCombobox`, `CreditorCombobox`; v3 `AccountField` entitätsgebunden | fehlt (0009, Basis für `AccountField`/`PartnerField`) |
+| Formular | `InlineEdit` (Klick → Feld → Speichern/Abbrechen) | `CaseSummaryEditor`, `CaseKindEditor`, `ContractDetail` u. a., 6 Dateien | fehlt (0020) |
+| Formular | `FileDrop` (Drop-Zone, Liste, Fortschritt) | `InvoiceUploader`, `CaseDocumentUploaderModal`; Kit `UploadZone` | fehlt (0021) |
 | Tabelle | `Table`/`HeadRow`/`Row`/`GroupRow`/`EmptyRow` | — | v2 |
 | Tabelle | `ClickRow` (`href`, `v2rowlink`, I11) · `ExpandableRow` | 120 `<Row>`, 6 mit Ziel | v2; Listen heben |
 | Tabelle | `SelectionBar` + `SelectCell` (I5) | — | v2 |
@@ -439,13 +443,13 @@ Status: **v2** vorhanden · **Optik** bleibt Alt-Mechanik, bekommt v2-Optik (F12
 | Tabelle | `TableLoading` · `ErrorRow` (I7) | — | v2 |
 | Tabelle | `StatusHeader` (Spaltenkopf mit Legende, Z4) | v1; 7× `<th>Status</th>` | Optik; Reste heben |
 | Tabelle | Sortierbarer Spaltenkopf | — | prüfen |
-| Tabelle | Mono-Zelle (Kontonummer, BU, DATEV-Code) | `v2num` | v2 |
+| Tabelle | Mono-Zelle (Kontonummer, BU, DATEV-Code) | nur die CSS-Klasse `v2num`, kein Baustein | fehlt |
 | Tabelle | `LongText` | v1 Re-Export | Optik |
 | Zustand | `StatusBadge` + Registry · `StatusInfoButton`/`-Dialog` · `EntityStatusBadgeButton`/`FlowModal` | `@/ui/status` | Optik (Pill, Füllung nur hier) |
 | Zustand | `Badge kind=…` ohne Status-Achse | 126 Stellen | heben: Achse → Registry, sonst `DotStatus`/`FilterChips` |
 | Zustand | `StateIcon` (9 Zustände) | — | v2 |
 | Zustand | Konfidenz (Punkt · Band · Meter) | `ConfidenceDot`/`Meter`/`Band`, `Confidence` (invoices) | heben → eine Primitive, `KIBuchungshinweise` nutzt sie |
-| Text | `Markdown` | v1 | Optik |
+| Text | `Markdown` | v1, 5 Dateien / 12 Stellen | fehlt (0022) |
 | Text | `HotkeyLegende`/Kbd | — | v2 |
 | Text | Zeit relativ (`TimeAgo`) | v1 | heben → `Timestamp` absolut (T7) |
 | Daten | Balken je Monat | `MonthlyBarChart` | heben |
@@ -461,9 +465,9 @@ Status: **v2** vorhanden · **Optik** bleibt Alt-Mechanik, bekommt v2-Optik (F12
 | `ProzessMini`/`ProzessStepper`/`Staffelstab`/`StaffelLeiste` | — | v2 |
 | Verarbeitungsfortschritt (Schritte mit Zustand, Retry) | `PipelineStepper`, `ProcessingProgress`, `JobStatusMonitor`, `SourceDocPipelineTab` | heben → `ProzessStepper` |
 | Wizard (Schritte, Zurück/Weiter, Zusammenfassung) | `Wizard`, `CsvImportWizard`, `DatevExportWizard`, `OnboardingWizard` | heben |
-| Verlauf/Zeitleiste (Zeit · Akteur · Ereignis · Diff) | `CycleTimeline`, `HistorieTab`, `SourceDocVerlaufTab`, `VerlaufTab`, `EventStack`; Kit `AuditTrail` | fehlt |
+| `Timeline` (Zeit · Akteur · Ereignis · Diff) | `CycleTimeline`, `HistorieTab`, `SourceDocVerlaufTab`, `VerlaufTab`, `EventStack`; Kit `AuditTrail` | fehlt (0023) |
 | Log-Ansicht, Sichten Verlauf/Protokoll/Technik | `LogTable`/`LogView`/`LogEntry`/`LogBadges`/`LogPayloadCell` | Optik |
-| Frage mit Antwortoptionen (Handlungen + Freitext, I6, S13) | `RaiseClarificationForm` | fehlt |
+| `ChoicePrompt` — Frage mit Antwortoptionen (Handlungen + Freitext, I6, S13) | `RaiseClarificationForm` | fehlt (0028) |
 | Kommentar-/Notizstrang | `CaseCommentForm`, `ClientAgentNotesPanel` | prüfen |
 | Nächster Schritt mit Zahl (I10) | inline in der Abnahme | heben |
 | Sammelaktion | `SelectionBar` | v2 |
@@ -488,12 +492,12 @@ Status: **v2** vorhanden · **Optik** bleibt Alt-Mechanik, bekommt v2-Optik (F12
 | Ereignis | Row/Stapel im Sachverhalt | `EventStack` (30 Hex-Literale) | heben |
 | Sachverhalt | Cell · Row · Card (Kopf) · View · Editor (Zusammenfassung, Art) · Tabs · Filter → `FilterLeiste` · Plausibilität → `Pruefpunkte` · Zuordnung · Historie → Verlauf | `CaseCell`, `CaseRow`, `Hero`, `SachverhaltScreen`, `CaseOverviewBox`, `CaseSummary`/`KindEditor`, `CaseTabsBar`/`CaseListTabsBar`, `CaseListFilters`, 4 Tabs, `CloseCasesPanel`, `PortalCaseList` | heben |
 | Klärung | Chip/Row (offen, Frist) · Frage stellen · Antwort → Pattern · Kommentar · Mail-Panel | `ClarificationsBanner`, `ClarBubble`, `RaiseClarificationForm`, `CaseCommentForm`, `DocumentRequestMailPanel` | heben; Antwortoptionen fehlen |
-| Erwartung | Chip/Row mit Frist | — | fehlt (§3.1) |
-| Ausgleichs-Zuordnung | Row/Paar Rechnung ↔ Zahlung mit Differenz | — (abgeleiteter Text) | fehlt (§3.1) |
+| Erwartung | Chip/Row mit Frist | — | fehlt (0025, §3.1) |
+| Ausgleichs-Zuordnung | Row/Paar Rechnung ↔ Zahlung mit Differenz | — (abgeleiteter Text) | fehlt (0026, §3.1) |
 | Buchungssatz | Row · View (Anzeige-Modus des Editors) · Card (kompakt im Sachverhalt) · Editor · KI-Hinweise · Freigabe → `ActionBar` · Drawer (DATEV/Ludwig/Rohzeile) | `BuchungenTabelle` (v2), `JournalEntryView`, `JournalEntryDetail`, `BookingProposalView`/`Compact`, `ManualBookingDrawer`, `BookingRationale`, `RationaleSources`, `BookingApproveBar`, `BookingStatusBadge`, `CreditorRecentBookingsCard`, 3 Drawer | teils v2 (`BuchungssatzEditor`, `KIBuchungshinweise`); View/Card heben |
 | Buchungszeile | Row (`EditorRow`) · Picker Steuerschlüssel · Picker Konto | `BookingLineRow`, `TaxKeySelect`, `KontoCombobox` | teils v2; `SteuerschluesselFeld` fehlt |
-| DATEV-OPOS | Row (Posten) · GroupRow (Altersklasse) | inline in `opos/page` | fehlt (§3.2 Nr. 1) |
-| DATEV-Snapshot | Card (Datum, WJ, Umfang, Ergebnis) | — | fehlt (§3.2 Nr. 5) |
+| DATEV-OPOS | Row (Posten) · GroupRow (Altersklasse) | inline in `opos/page` | fehlt (0029, §3.2 Nr. 1) |
+| DATEV-Snapshot | Card (Datum, WJ, Umfang, Ergebnis) | — | fehlt (0027, §3.2 Nr. 5) |
 | DATEV-Spiegelbuchung | View · Vergleich → `VergleichsTabelle` · Kopieren | `DatevEntryDetail`, `CaseDatevTruthTab`, `StapelVergleich`, `ReplayVergleich`, `CopyTextButton` | heben |
 | DATEV-Export-Stapel | Row · View · Wizard · Download · RowActions | Stapel-Subsite (v2); `DatevExportWizard`, `ExportBatch*`, `OpenExportOverview`, `DatevExportTabs` | v2; Rest Rückbau (F118) |
 | Wiederkehr-Regel | Row · Editor | `modules/recurring-rules/ui` | heben |
@@ -501,7 +505,7 @@ Status: **v2** vorhanden · **Optik** bleibt Alt-Mechanik, bekommt v2-Optik (F12
 | Buchungslauf | View (Run-Detail) · Schritte → `SchrittRail` · Panel | `ProcessingPanel`, `StepNav`, `agent-runs/[runId]` (695 Z.) | heben |
 | Audit-Ereignis | Row → Log-Ansicht · Produktbefund-Zeile | `AuditLogTable`, `FeedbackRowActions` | Optik |
 | Job | Drawer · Monitor → `StatusBadge` + `Timestamp` | `TaskDetail`, `JobStatusMonitor`, `ResetRunButton` | heben |
-| Entschiedene Belegnummer | inline | — | — |
+| Entschiedene Belegnummer | `DocumentNumberField` (Belegfeld 1 mit Register) | inline im Editor | fehlt (0014) | — |
 
 **Nicht im Katalog, weil Rückbau** (§11.4): `[year]/review` + 5 Unterseiten
 (P17) · `/settings/components` (B2) · `export`-Archiv (F118) · `agent-runs`
