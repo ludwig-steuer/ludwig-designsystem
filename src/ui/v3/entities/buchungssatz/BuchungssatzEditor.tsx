@@ -7,7 +7,7 @@ import { fmtEuro, parseEuro } from "@/ui/legacy/booking/format";
 import { deriveTax } from "@/ui/legacy/booking/tax-assist";
 // Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
 // und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
-import { StatusBadge } from "@/ui/legacy/status/StatusBadge";
+import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 
 import { Button } from "../../primitives/Button";
 import { Dialog } from "../../primitives/Dialog";

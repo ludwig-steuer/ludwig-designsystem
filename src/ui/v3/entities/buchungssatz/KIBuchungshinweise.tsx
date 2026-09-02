@@ -13,7 +13,7 @@ import { useState } from "react";
 
 // Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
 // und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
-import { StatusBadge } from "@/ui/legacy/status/StatusBadge";
+import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 
 /**
  * Was der Agent sich gedacht hat (F123 T123.3, Design `KIBuchungshinweise.dc.html`).

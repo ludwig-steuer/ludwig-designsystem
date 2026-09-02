@@ -23,11 +23,12 @@
  * Klassen und Maße stehen in `src/styles/v2.css`. Kein Hex-Wert, kein
  * Pixelmaß in einer Komponente (UX-Guidelines A5).
  *
- * Abweichung von der App: dort liegt `StatusBadge` bewusst außerhalb des
- * Sets (`@/ui/status`). Hier wird es **mit exportiert** — R1 macht es zur
- * einen erlaubten Status-Darstellung, und was der Barrel nicht führt,
- * existiert für einen Konsumenten des Design-Systems nicht; er baut sonst
- * die lokalen Label-Maps, die R1 gerade verbietet.
+ * Abweichung von der App: dort liegt `StatusBadge` außerhalb des Sets
+ * (`@/ui/status`). Hier ist er ein Pattern — R1 macht ihn zur einen
+ * erlaubten Status-Darstellung, und was der Barrel nicht führt, existiert
+ * für einen Konsumenten des Design-Systems nicht; er baut sonst die lokalen
+ * Label-Maps, die R1 gerade verbietet. Er setzt auf `Badge` auf: dort der
+ * Ton, hier die Registry.
  *
  * Weiter draußen bleiben `Drawer`/`UrlDrawer` (Wächter-Test) und
  * `StatusHeader`/`Tooltip` (R2) — die hängen an App-Kontext.
@@ -67,6 +68,8 @@ export { KpiTile, KpiGrid } from "./primitives/KpiTile";
 export { FieldList } from "./primitives/FieldList";
 export { ProseCard } from "./primitives/ProseCard";
 export { StatusCallout } from "./primitives/StatusCallout";
+export { Badge, type BadgeTone, type BadgeProps } from "./primitives/Badge";
+export { EmptyState, type EmptyStateProps } from "./primitives/EmptyState";
 export { Callout } from "./primitives/Callout";
 
 /* Tabelle */
@@ -169,7 +172,7 @@ export {
  * auf `@/ui/components` irgendwann leer wird.
  */
 /* Status — die eine erlaubte Status-Darstellung (R1). */
-export { StatusBadge } from "../legacy/status/StatusBadge";
+export { StatusBadge, type StatusBadgeProps } from "./patterns/StatusBadge";
 export { StatusInfoButton } from "../legacy/status/StatusInfoButton";
 export { StatusInfoDialog } from "../legacy/status/StatusInfoDialog";
 

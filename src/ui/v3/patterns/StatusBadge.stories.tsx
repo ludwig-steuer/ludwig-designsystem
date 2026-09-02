@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { AXIS_LABEL } from "./entity-icons";
+import { AXIS_LABEL } from "@/ui/legacy/status/entity-icons";
 import { StatusBadge } from "./StatusBadge";
-import { STATUS_REGISTRY, type StatusAxis } from "./status-registry";
+import { STATUS_REGISTRY, type StatusAxis } from "@/ui/legacy/status/status-registry";
 
 const meta: Meta<typeof StatusBadge> = {
   title: "v3/Patterns/Prüfen/StatusBadge",
