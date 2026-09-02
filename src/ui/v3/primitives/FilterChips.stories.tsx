@@ -6,7 +6,7 @@ const meta: Meta<typeof FilterChips> = { title: "v3/Primitives/Navigation/Filter
 export default meta;
 type Story = StoryObj<typeof FilterChips>;
 
-const OPTIONEN = [
+const OPTIONS = [
   { key: "alle", label: "Alle" },
   { key: "offen", label: "Offen" },
   { key: "faellig", label: "Fällig" },
@@ -14,15 +14,15 @@ const OPTIONEN = [
 ];
 
 /** Chips stehen über der Karte, nie im Kartenkopf (Baukasten §6). */
-export const NachDimension: Story = {
+export const ByDimension: Story = {
   render: function Render() {
     const [active, setActive] = useState("offen");
-    return <FilterChips label="Stand" options={OPTIONEN} active={active} onPick={setActive} />;
+    return <FilterChips label="Stand" options={OPTIONS} active={active} onPick={setActive} />;
   },
 };
 
 /** Mit Zählern: die Nutzerin sieht vor dem Klick, ob sich der Filter lohnt. */
-export const MitZaehlern: Story = {
+export const WithCounters: Story = {
   render: function Render() {
     const [active, setActive] = useState("alle");
     return (
@@ -42,13 +42,13 @@ export const MitZaehlern: Story = {
 };
 
 /** Chips und Suche in einer Zeile — die übliche Toolbar über der Tabelle. */
-export const MitSuche: Story = {
+export const WithSearch: Story = {
   render: function Render() {
     const [active, setActive] = useState("offen");
     const [q, setQ] = useState("");
     return (
       <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "center" }}>
-        <FilterChips label="Stand" options={OPTIONEN} active={active} onPick={setActive} />
+        <FilterChips label="Stand" options={OPTIONS} active={active} onPick={setActive} />
         <SearchInput placeholder="Suche nach Gegenpartei, Betrag …" value={q} onChange={setQ} />
       </div>
     );

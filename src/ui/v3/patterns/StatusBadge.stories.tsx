@@ -11,9 +11,9 @@ const meta: Meta<typeof StatusBadge> = {
 export default meta;
 type Story = StoryObj<typeof StatusBadge>;
 
-const ACHSEN = Object.keys(STATUS_REGISTRY) as StatusAxis[];
+const AXES = Object.keys(STATUS_REGISTRY) as StatusAxis[];
 
-function AchsenBlock({ axis, info }: { axis: StatusAxis; info?: boolean }) {
+function AxisBlock({ axis, info }: { axis: StatusAxis; info?: boolean }) {
   return (
     <div style={{ marginBottom: 18 }}>
       <div style={{ fontSize: 13, color: "var(--color-text-subtle)", marginBottom: 6 }}>
@@ -29,43 +29,43 @@ function AchsenBlock({ axis, info }: { axis: StatusAxis; info?: boolean }) {
 }
 
 /**
- * **Alle** Achsen mit **allen** Ausprägungen — direkt aus der
+ * **Alle** Achsen withItems **allen** Ausprägungen — direkt aus der
  * `STATUS_REGISTRY` erzeugt, nicht von Hand gelistet. Kommt eine Achse oder
  * ein Zustand dazu, steht er beim nächsten Öffnen hier drin; eine
  * handgepflegte Liste wäre am Tag ihrer Erstellung veraltet.
  */
-export const AlleAchsen: Story = {
+export const AllAxes: Story = {
   render: () => (
     <div>
-      {ACHSEN.map((axis) => (
-        <AchsenBlock key={axis} axis={axis} />
+      {AXES.map((axis) => (
+        <AxisBlock key={axis} axis={axis} />
       ))}
     </div>
   ),
 };
 
 /** Die drei Haupt-Entitäten, die einen echten Flow haben. */
-export const Kernachsen: Story = {
+export const CoreAxes: Story = {
   render: () => (
     <div>
-      <AchsenBlock axis="beleg" />
-      <AchsenBlock axis="sachverhalt" />
-      <AchsenBlock axis="buchung" />
+      <AxisBlock axis="beleg" />
+      <AxisBlock axis="sachverhalt" />
+      <AxisBlock axis="buchung" />
     </div>
   ),
 };
 
-/** Einzelner Chip mit (i) — öffnet die Legende der ganzen Achse. */
-export const MitInfoDialog: Story = { args: { axis: "buchung", status: "proposed", info: true } };
+/** Einzelner Chip withItems (i) — öffnet die Legende der ganzen Achse. */
+export const WithInfoDialog: Story = { args: { axis: "buchung", status: "proposed", info: true } };
 
 /** Nur beim Beleg: die erreichte Pipeline-Stufe als Detail am Chip. */
-export const BelegMitStufe: Story = {
+export const DocumentWithStage: Story = {
   args: { axis: "beleg", status: "processing", stage: "preprocessed", info: false },
 };
 
 /** Unbekannter DB-Wert — die Registry fällt sichtbar zurück, statt zu lügen. */
-export const UnbekannterWert: Story = {
+export const UnknownValue: Story = {
   args: { axis: "sachverhalt", status: "gibt_es_nicht", info: false },
 };
 /** `null` (Spalte noch nicht gesetzt). */
-export const OhneWert: Story = { args: { axis: "buchung", status: null, info: false } };
+export const WithoutValue: Story = { args: { axis: "buchung", status: null, info: false } };

@@ -8,7 +8,7 @@ type Story = StoryObj<typeof Table>;
 
 const COLS = "1.6fr 120px 150px 130px";
 
-const Kopf = () => (
+const Header = () => (
   <HeadRow>
     <span>Gegenpartei</span>
     <span className="v2num">Betrag</span>
@@ -18,7 +18,7 @@ const Kopf = () => (
 );
 
 /** Jede Tabelle lebt in einer Karte: Kartenkopf, Spaltenkopf, Gruppen, Zeilen als Links. */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: () => (
     <Card>
       <CardHead
@@ -27,7 +27,7 @@ export const Gefuellt: Story = {
         actions={<button type="button" className="v2link">Alle Posten</button>}
       />
       <Table cols={COLS}>
-        <Kopf />
+        <Header />
         <GroupRow>Überfällig</GroupRow>
         <Row href="#">
           <span className="v2main">Vermieter Musterstraße</span>
@@ -41,7 +41,7 @@ export const Gefuellt: Story = {
           <DotStatus tone="warning" label="3 Tage überfällig" />
           <span>30.08.2026</span>
         </Row>
-        <GroupRow>Im Rahmen</GroupRow>
+        <GroupRow>Im Frame</GroupRow>
         <Row href="#">
           <span className="v2main">Bürobedarf GmbH</span>
           <AmountCell value={64.9} />
@@ -60,13 +60,13 @@ export const Gefuellt: Story = {
   ),
 };
 
-/** Leer: die Kopfzeilen bleiben stehen, der Leerzustand sagt, warum nichts da ist. */
-export const Leer: Story = {
+/** Leer: die Kopfzeilen bleiben stehen, der Leerzustand sagt, warum nothing da ist. */
+export const Empty: Story = {
   render: () => (
     <Card>
       <CardHead title="Offene Posten" sub="0 Posten" />
       <Table cols={COLS}>
-        <Kopf />
+        <Header />
         <EmptyRow>Keine offenen Posten — alles bezahlt.</EmptyRow>
       </Table>
     </Card>
@@ -74,25 +74,25 @@ export const Leer: Story = {
 };
 
 /** Lädt: Skelettzeilen in Spaltenbreite, kein Spinner über der Karte. */
-export const Laedt: Story = {
+export const Loading: Story = {
   render: () => (
     <Card>
       <CardHead title="Offene Posten" />
       <Table cols={COLS}>
-        <Kopf />
+        <Header />
         <TableLoading rows={4} cols={4} />
       </Table>
     </Card>
   ),
 };
 
-/** Fehler: in der Karte, mit dem Weg zurück. */
-export const Fehler: Story = {
+/** Fehler: in der Karte, withItems dem Weg zurück. */
+export const Error: Story = {
   render: () => (
     <Card>
       <CardHead title="Offene Posten" />
       <Table cols={COLS}>
-        <Kopf />
+        <Header />
         <ErrorRow
           message="Die Posten konnten nicht geladen werden."
           action={<button type="button" className="v2link">Erneut laden</button>}

@@ -11,7 +11,7 @@ type Story = StoryObj<typeof ExpandableRow>;
 const COLS = "20px 1.6fr 120px 120px";
 
 /** Die Zeile bleibt Teil der Tabelle — kein Modal für eine Zusatzinfo. */
-export const Ausklappbar: Story = {
+export const Expandable: Story = {
   render: () => (
     <Card>
       <CardHead title="Konventionen dieses Durchgangs" sub="2 Vorschläge" />
@@ -52,7 +52,7 @@ export const Ausklappbar: Story = {
 };
 
 /** Klick statt Link: die Zeile wählt aus, das Detail steht daneben. */
-export const Klickbar: Story = {
+export const Clickable: Story = {
   render: function Render() {
     const zeilen = [
       { key: "a", name: "Vermieter Musterstraße", betrag: 1800 },

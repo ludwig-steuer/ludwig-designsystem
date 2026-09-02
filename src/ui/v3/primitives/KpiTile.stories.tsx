@@ -7,10 +7,10 @@ type Story = StoryObj<typeof KpiTile>;
 
 /**
  * Die Kennzahl-Kachel einer Detailseite: 19 px Sans, Rand statt Schatten.
- * Nicht zu verwechseln mit `Stat` — das ist die Dashboard-Kachel in 32 px
+ * Nicht zu verwechseln withItems `Stat` — das ist die Dashboard-Kachel in 32 px
  * Serif und bleibt dem Dashboard.
  */
-export const SechsSpalten: Story = {
+export const SixColumns: Story = {
   render: () => (
     <KpiGrid columns={6}>
       <KpiTile label="Sätze" value="118" />
@@ -24,7 +24,7 @@ export const SechsSpalten: Story = {
 };
 
 /** Weniger Spalten für schmale Flächen — die Kachel bleibt gleich. */
-export const DreiSpalten: Story = {
+export const ThreeColumns: Story = {
   render: () => (
     <KpiGrid columns={3}>
       <KpiTile label="Erwartet" value="12" />
@@ -34,8 +34,8 @@ export const DreiSpalten: Story = {
   ),
 };
 
-/** Noch nichts gerechnet: der Strich sagt „kein Wert", nicht „null". */
-export const OhneWert: Story = {
+/** Noch nothing gerechnet: der Strich sagt „kein Wert", nicht „null". */
+export const WithoutValue: Story = {
   render: () => (
     <KpiGrid columns={3}>
       <KpiTile label="Sätze" value="—" sub="Durchgang läuft" />

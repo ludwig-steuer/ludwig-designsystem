@@ -6,7 +6,7 @@ export default meta;
 type Story = StoryObj<typeof Callout>;
 
 /** Vier Töne. Rot nur, wo etwas blockiert — sonst stumpft die Farbe ab. */
-export const AlleToene: Story = {
+export const AllTones: Story = {
   render: () => (
     <div className="v2stack">
       <Callout>Der Vorschlag stammt aus einer bestätigten Konvention vom 12.08.2026.</Callout>

@@ -10,54 +10,54 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const Reihe = ({ children }: { children: React.ReactNode }) => (
+const Cluster = ({ children }: { children: React.ReactNode }) => (
   <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", flexWrap: "wrap" }}>
     {children}
   </div>
 );
 
 /** Die fünf Tonstufen. Die Farbe sagt Dringlichkeit, das Wort sagt was (V6, V7). */
-export const Toene: Story = {
+export const Tones: Story = {
   args: { children: "Neutral" },
   render: () => (
-    <Reihe>
+    <Cluster>
       <Badge>Interner Beleg</Badge>
       <Badge tone="info">Eingangsrechnung</Badge>
       <Badge tone="success">Vollständig</Badge>
       <Badge tone="warning">Beleg fehlt</Badge>
       <Badge tone="danger">Abgelehnt</Badge>
-    </Reihe>
+    </Cluster>
   ),
 };
 
 /** Mit Punkt — wenn Zustände in einer langen Liste zählbar bleiben sollen. */
-export const MitPunkt: Story = {
+export const WithDot: Story = {
   args: { children: "Neutral" },
   render: () => (
-    <Reihe>
+    <Cluster>
       <Badge dot>Kein Befund</Badge>
       <Badge dot tone="info">Prüfung läuft</Badge>
       <Badge dot tone="success">Freigegeben</Badge>
       <Badge dot tone="warning">Rückfrage offen</Badge>
       <Badge dot tone="danger">Fehlgeschlagen</Badge>
-    </Reihe>
+    </Cluster>
   ),
 };
 
 /** Wofür sie NICHT da ist: ein Zustand aus einer Achse gehört an StatusBadge. */
-export const NebenDerZeile: Story = {
+export const NextToRow: Story = {
   args: { children: "Neutral" },
   render: () => (
-    <Reihe>
+    <Cluster>
       <span style={{ fontSize: "var(--fs-body-sm)" }}>RE-4471 · Bürobedarf Meier GmbH</span>
       <Badge tone="info">Kreditor</Badge>
       <Badge>3 Anlagen</Badge>
-    </Reihe>
+    </Cluster>
   ),
 };
 
 /** Langer Text bricht nicht um — die Plakette bleibt eine Zeile. */
-export const LangerText: Story = {
+export const LongLabel: Story = {
   args: { children: "Neutral" },
   render: () => (
     <div style={{ maxWidth: 240 }}>

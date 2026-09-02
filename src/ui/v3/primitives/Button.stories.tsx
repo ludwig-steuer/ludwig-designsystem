@@ -5,63 +5,63 @@ const meta: Meta<typeof Button> = { title: "v3/Primitives/Aktion/Button", compon
 export default meta;
 type Story = StoryObj<typeof Button>;
 
-const Reihe = ({ children }: { children: React.ReactNode }) => (
+const Cluster = ({ children }: { children: React.ReactNode }) => (
   <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>{children}</div>
 );
 
 /** Vier Rollen. `danger` nur, wo etwas verloren geht — Storno, Löschen. */
-export const Varianten: Story = {
+export const Variants: Story = {
   render: () => (
-    <Reihe>
+    <Cluster>
       <Button variant="primary">Freigeben</Button>
       <Button variant="secondary">Zurück an Agenten</Button>
       <Button variant="tertiary">Kontenblatt öffnen</Button>
       <Button variant="danger">Stornieren</Button>
-    </Reihe>
+    </Cluster>
   ),
 };
 
-/** `md` (40 px) trägt Kopf-Karte und Aktionsleiste, `sm` (32 px) die Zeile. */
-export const Groessen: Story = {
+/** `md` (40 px) trägt Header-Karte und Aktionsleiste, `sm` (32 px) die Zeile. */
+export const Sizes: Story = {
   render: () => (
-    <Reihe>
+    <Cluster>
       <Button variant="primary" size="md">Zur Abnahme</Button>
       <Button variant="primary" size="sm">Zur Abnahme</Button>
       <Button variant="secondary" size="md">Abbrechen</Button>
       <Button variant="secondary" size="sm">Abbrechen</Button>
-    </Reihe>
+    </Cluster>
   ),
 };
 
 /** Die Taste steht am Knopf, nicht nur im Legende-Overlay (V14). */
-export const MitTaste: Story = {
+export const WithKey: Story = {
   render: () => (
-    <Reihe>
+    <Cluster>
       <Button variant="primary" hotkey="A">Freigeben</Button>
       <Button variant="secondary" hotkey="R">Ablehnen</Button>
       <Button variant="tertiary" hotkey="F">Frage stellen</Button>
-    </Reihe>
+    </Cluster>
   ),
 };
 
 /** Gesperrt heißt gesperrt — nicht unsichtbar. Der Grund steht daneben. */
-export const Gesperrt: Story = {
+export const Disabled: Story = {
   render: () => (
-    <Reihe>
+    <Cluster>
       <Button variant="primary" disabled>Freigeben</Button>
       <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
         Erst wenn Schritt 8 abgehakt ist.
       </span>
-    </Reihe>
+    </Cluster>
   ),
 };
 
 /** Als Link gerendert — gleiche Optik, echtes Navigationsziel. */
-export const AlsLink: Story = {
+export const AsLink: Story = {
   render: () => (
-    <Reihe>
+    <Cluster>
       <Button variant="primary" href="#">Weiter zu Schritt 4</Button>
       <Button variant="tertiary" href="#">Protokoll herunterladen</Button>
-    </Reihe>
+    </Cluster>
   ),
 };

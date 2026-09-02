@@ -14,8 +14,8 @@ const LUDWIG: [string, string][] = [
   ["Weg", "DATEVconnect"],
 ];
 
-/** Standardton — Label/Wert-Paare in einer Karte mit Versalien-Kopf. */
-export const Gefuellt: Story = {
+/** Standardton — Label/Wert-Paare in einer Karte withItems Versalien-Header. */
+export const Filled: Story = {
   render: () => <FieldList title="Ludwig-Seite" rows={LUDWIG} />,
 };
 
@@ -23,7 +23,7 @@ export const Gefuellt: Story = {
  * `tone="soft"` tönt die Fläche. Das Design trennt damit die DATEV-Seite von
  * der Ludwig-Seite, ohne eine zweite Überschrift zu brauchen.
  */
-export const NebeneinanderMitTon: Story = {
+export const SideBySideToned: Story = {
   render: () => (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
       <FieldList title="Ludwig-Seite" rows={LUDWIG} />
@@ -41,7 +41,7 @@ export const NebeneinanderMitTon: Story = {
 };
 
 /** Leer heißt: gesagt bekommen, warum. Nicht eine Karte ohne Inhalt. */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
     <FieldList
       title="DATEV-Seite"

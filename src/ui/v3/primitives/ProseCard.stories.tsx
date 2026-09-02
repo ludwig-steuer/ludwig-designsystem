@@ -5,8 +5,8 @@ const meta: Meta<typeof ProseCard> = { title: "v3/Primitives/Fläche/ProseCard",
 export default meta;
 type Story = StoryObj<typeof ProseCard>;
 
-/** Fließtext-Karte für längere Erklärungen — Versalien-Kopf, 13,5 px Text. */
-export const Bericht: Story = {
+/** Fließtext-Karte für längere Erklärungen — Versalien-Header, 13,5 px Text. */
+export const Report: Story = {
   render: () => (
     <ProseCard title="Letzter Bericht">
       Der Durchgang vom 26.08. hat 118 Sätze vorbereitet. Zwölf Punkte bleiben offen,
@@ -17,10 +17,10 @@ export const Bericht: Story = {
 };
 
 /** Ein Absatz genügt — die Karte wächst nicht künstlich. */
-export const Kurz: Story = {
+export const Short: Story = {
   render: () => (
     <ProseCard title="Hinweis der Kanzlei">
-      Bewirtungsbelege bitte immer mit Teilnehmerliste einreichen.
+      Bewirtungsbelege bitte immer withItems Teilnehmerliste einreichen.
     </ProseCard>
   ),
 };

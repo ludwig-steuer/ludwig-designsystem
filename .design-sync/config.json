@@ -28,7 +28,7 @@
     },
     "Dialog": {
       "skip": [
-        "v3-primitives-dialog-dialog--geschlossen"
+        "v3-primitives-dialog-dialog--closed"
       ]
     },
     "LongText": {

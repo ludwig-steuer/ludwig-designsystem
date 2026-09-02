@@ -8,7 +8,7 @@ const meta: Meta<typeof TodoList> = { title: "v3/Patterns/Arbeitsfläche/TodoLis
 export default meta;
 type Story = StoryObj<typeof TodoList>;
 
-const GRUPPEN: TodoGroup[] = [
+const GROUPS: TodoGroup[] = [
   {
     label: "Fragen an die Kanzlei",
     items: [
@@ -34,11 +34,11 @@ const GRUPPEN: TodoGroup[] = [
 export const Filled: Story = {
   render: function Render() {
     const [sel, setSel] = useState<string | null>("a");
-    const alle = GRUPPEN.flatMap((g) => g.items);
+    const alle = GROUPS.flatMap((g) => g.items);
     const aktiv = alle.find((i) => i.id === sel);
     return (
       <MasterDetail
-        list={<TodoList groups={GRUPPEN} selectedId={sel} onSelect={setSel} />}
+        list={<TodoList groups={GROUPS} selectedId={sel} onSelect={setSel} />}
         detail={
           <DetailPane title={aktiv?.title} sub={aktiv?.sub}>
             <Button
@@ -63,7 +63,7 @@ export const Filled: Story = {
 export const AllDone: Story = {
   render: () => (
     <TodoList
-      groups={GRUPPEN.map((g) => ({ ...g, items: g.items.map((i) => ({ ...i, state: "done" as const })) }))}
+      groups={GROUPS.map((g) => ({ ...g, items: g.items.map((i) => ({ ...i, state: "done" as const })) }))}
       selectedId={null}
       onSelect={() => {}}
     />

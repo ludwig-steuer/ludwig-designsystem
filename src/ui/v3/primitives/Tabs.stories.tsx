@@ -12,7 +12,7 @@ function Demo({ items }: { items: React.ComponentProps<typeof Tabs>["items"] }) 
 }
 
 /** Zähler stehen gedämpft am Reiter — sie sind Beiwerk, nicht Überschrift. */
-export const MitZaehlern: Story = {
+export const WithCounters: Story = {
   render: () => (
     <Demo
       items={[
@@ -26,7 +26,7 @@ export const MitZaehlern: Story = {
 };
 
 /** `alarm` färbt den Zähler rot und macht ihn fett — nur bei echtem Rückstand. */
-export const MitAlarm: Story = {
+export const WithAlarm: Story = {
   render: () => (
     <Demo
       items={[
@@ -38,8 +38,8 @@ export const MitAlarm: Story = {
   ),
 };
 
-/** Ohne Zähler — wenn die Menge nichts aussagt (Detail-Reiter). */
-export const OhneZaehler: Story = {
+/** Ohne Zähler — wenn die Menge nothing aussagt (Detail-Reiter). */
+export const WithoutCounters: Story = {
   render: () => (
     <Demo
       items={[
@@ -55,7 +55,7 @@ export const OhneZaehler: Story = {
 };
 
 /** Alles leer: der Zähler zeigt die Null, statt zu verschwinden. */
-export const AllesLeer: Story = {
+export const AllEmpty: Story = {
   render: () => (
     <Demo
       items={[

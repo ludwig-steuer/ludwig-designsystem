@@ -5,21 +5,21 @@ const meta: Meta<typeof ReasonDialog> = { title: "v3/Primitives/Dialog/ReasonDia
 export default meta;
 type Story = StoryObj<typeof ReasonDialog>;
 
-const nichts = () => {};
+const nothing = () => {};
 
 /** Grund optional, Vorschläge als Chips — ein Klick statt Tippen. */
 export const Open: Story = {
   render: () => (
     <ReasonDialog
       open
-      onClose={nichts}
-      onConfirm={nichts}
+      onClose={nothing}
+      onConfirm={nothing}
       kicker="Rückgabe"
       title="Zurück an den Agenten"
       confirmLabel="Zurückgeben"
       chips={["Beleg fehlt", "Konto falsch", "Betrag weicht ab"]}
     >
-      Der Agent bekommt den Stapel mit diesem Grund zurück und arbeitet ihn neu auf.
+      Der Agent bekommt den Stapel withItems diesem Grund zurück und arbeitet ihn neu auf.
     </ReasonDialog>
   ),
 };
@@ -30,8 +30,8 @@ export const ReasonRequired: Story = {
     <ReasonDialog
       open
       required
-      onClose={nichts}
-      onConfirm={nichts}
+      onClose={nothing}
+      onConfirm={nothing}
       kicker="Storno"
       title="Buchung stornieren"
       label="Grund (Pflicht)"
@@ -49,8 +49,8 @@ export const Pending: Story = {
     <ReasonDialog
       open
       pending
-      onClose={nichts}
-      onConfirm={nichts}
+      onClose={nothing}
+      onConfirm={nothing}
       kicker="Rückgabe"
       title="Zurück an den Agenten"
       confirmLabel="Zurückgeben"

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ProgressBar, StepHeader, StepRail, type RailItem } from "./StepRail";
 
-const meta: Meta<typeof StepRail> = { title: "v3/Patterns/Rahmen/StepRail", component: StepRail };
+const meta: Meta<typeof StepRail> = { title: "v3/Patterns/Frame/StepRail", component: StepRail };
 export default meta;
 type Story = StoryObj<typeof StepRail>;
 
@@ -53,14 +53,14 @@ export const AllDone: Story = {
   ),
 };
 
-/** Frisch angelegt: noch nichts gerechnet, also auch kein Zähler. */
+/** Frisch angelegt: noch nothing gerechnet, also auch kein Zähler. */
 export const NothingComputedYet: Story = {
   render: () => (
     <RailLayout items={STEPS.map((s) => ({ ...s, tone: "neutral" as const, counterText: null }))} />
   ),
 };
 
-/** Der Screen-Kopf: Nummer in der Overline, die Sache in der Überschrift. */
+/** Der Screen-Header: Nummer in der Overline, die Sache in der Überschrift. */
 export const ScreenHeader: Story = {
   render: () => (
     <div style={{ maxWidth: 900 }}>

@@ -7,7 +7,7 @@ export default meta;
 type Story = StoryObj<typeof ActionBar>;
 
 /** Feste Reihenfolge: primär, sekundär, tertiär, Infotext. */
-export const Vollbesetzt: Story = {
+export const FullyStaffed: Story = {
   render: () => (
     <ActionBar
       primary={<Button variant="primary" hotkey="A">Freigeben</Button>}
@@ -18,13 +18,13 @@ export const Vollbesetzt: Story = {
   ),
 };
 
-/** Zustand ohne Handlung: nur der Hinweis, warum gerade nichts zu tun ist. */
-export const NurInfo: Story = {
+/** Zustand ohne Handlung: nur der Hinweis, warum gerade nothing zu tun ist. */
+export const InfoOnly: Story = {
   render: () => <ActionBar info="Der Agent arbeitet — Aktionen sind so lange gesperrt." />,
 };
 
 /** Erneut übertragen ist die einzige sinnvolle Handlung nach einem Fehlschlag. */
-export const NachFehlschlag: Story = {
+export const AfterFailure: Story = {
   render: () => (
     <ActionBar
       primary={<Button variant="primary">Erneut übertragen</Button>}
@@ -34,8 +34,8 @@ export const NachFehlschlag: Story = {
   ),
 };
 
-/** Zeilen-Aktionen: tertiäre Knöpfe rechtsbündig, jedes Icon mit Wort. */
-export const ZeilenAktionen: Story = {
+/** Zeilen-Aktionen: tertiäre Knöpfe rechtsbündig, jedes Icon withItems Wort. */
+export const ActionsInRow: Story = {
   render: () => (
     <RowActions>
       <button type="button" className="v2link">Öffnen</button>

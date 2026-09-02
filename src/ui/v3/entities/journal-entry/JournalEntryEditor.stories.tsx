@@ -15,12 +15,12 @@ type Story = StoryObj<typeof JournalEntryEditor>;
  * denen sich Fehler einnisten.
  */
 
-const KANDIDATEN = {
+const CANDIDATES = {
   agent: [{ number: "6815", name: "Bürobedarf", reason: "Vorschlag des Agenten" }],
   partner: [{ number: "6820", name: "Porto", reason: "zuletzt 12× bei dieser Gegenpartei" }],
 };
 
-const ZEILE: EditorRow = {
+const ROW: EditorRow = {
   id: "1",
   datum: "2026-08-21",
   umsatz: "1.475,60",
@@ -30,14 +30,14 @@ const ZEILE: EditorRow = {
   kontoName: "Bürobedarf",
   beleg1: "RE-4471",
   text: "Bürobedarf August",
-  candidates: KANDIDATEN,
+  candidates: CANDIDATES,
 };
 
-const GEGEN = { konto: "70044", name: "Bürobedarf Meier GmbH", tag: "Kreditor" };
+const AGAINST = { konto: "70044", name: "Bürobedarf Meier GmbH", tag: "Kreditor" };
 
-const BASIS = {
-  rows: [ZEILE],
-  gegenkonto: GEGEN,
+const BASE = {
+  rows: [ROW],
+  gegenkonto: AGAINST,
   belegNumber: "RE-4471",
   belegAmount: 1475.6,
   belegSide: "S" as const,
@@ -46,7 +46,7 @@ const BASIS = {
   onSearchAccounts: async () => [{ number: "6600", name: "Werbekosten" }],
 };
 
-const Rahmen = ({ children }: { children: React.ReactNode }) => (
+const Frame = ({ children }: { children: React.ReactNode }) => (
   <div className="v2card" style={{ padding: 18, maxWidth: 900 }}>
     {children}
   </div>
@@ -55,18 +55,18 @@ const Rahmen = ({ children }: { children: React.ReactNode }) => (
 /** S0 — der Regelfall: eine Zeile, Rest geht auf, nur Anzeige. */
 export const S0_Simple: Story = {
   render: () => (
-    <Rahmen>
-      <JournalEntryEditor {...BASIS} editable={false} onEdit={() => {}} />
-    </Rahmen>
+    <Frame>
+      <JournalEntryEditor {...BASE} editable={false} onEdit={() => {}} />
+    </Frame>
   ),
 };
 
-/** S1 — im Formular, mit einer Warnung, die eine Quittung braucht. */
+/** S1 — im Formular, withItems einer Warnung, die eine Quittung braucht. */
 export const S1_EditWithWarning: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         editable
         warnings={[
           {
@@ -79,83 +79,83 @@ export const S1_EditWithWarning: Story = {
         onCancel={() => {}}
         onSave={() => {}}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
-/** S2 — Split über zwei Zeilen, Vollansicht mit Währung, Beleg 2 und KOST. */
+/** S2 — Split über zwei Zeilen, Vollansicht withItems Währung, Beleg 2 und KOST. */
 export const S2_SplitFull: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         mode="voll"
         editable
         rows={[
-          { ...ZEILE, umsatz: "1.000,00", text: "Bürobedarf", kost1: "100" },
-          { ...ZEILE, id: "2", umsatz: "475,60", konto: "6845", kontoName: "EDV-Zubehör", text: "Toner", kost1: "200" },
+          { ...ROW, umsatz: "1.000,00", text: "Bürobedarf", kost1: "100" },
+          { ...ROW, id: "2", umsatz: "475,60", konto: "6845", kontoName: "EDV-Zubehör", text: "Toner", kost1: "200" },
         ]}
         onCancel={() => {}}
         onSave={() => {}}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** S3 — Automatikkonto: der Schlüssel steht am Konto, das Feld ist gesperrt. */
 export const S3_AutomaticAccount: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         editable
-        rows={[{ ...ZEILE, konto: "4400", kontoName: "Erlöse 19 % USt", buLocked: true }]}
+        rows={[{ ...ROW, konto: "4400", kontoName: "Erlöse 19 % USt", buLocked: true }]}
         hints={[{ code: "P-UST", message: "4400 ist ein Automatikkonto — der Steuerschlüssel kommt vom Konto." }]}
         onCancel={() => {}}
         onSave={() => {}}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
-/** S5 — der Betrag weicht vom Beleg ab: der Rest steht rot im Kopf. */
+/** S5 — der Betrag weicht vom Beleg ab: der Rest steht rot im Header. */
 export const S5_RemainderDoesNotBalance: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         editable
-        rows={[{ ...ZEILE, umsatz: "1.400,00" }]}
+        rows={[{ ...ROW, umsatz: "1.400,00" }]}
         warnings={[{ code: "P-BETRAG", message: "Beleg 1.475,60 €, gebucht 1.400,00 € — Abweichung 75,60 €." }]}
         onCancel={() => {}}
         onSave={() => {}}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** S10 — Zahlungssatz: Belegseite Haben, Gegenkonto Bank. */
 export const S10_Payment: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         belegSide="H"
-        rows={[{ ...ZEILE, side: "H", bu: "", konto: "70044", kontoName: "Bürobedarf Meier GmbH", text: "Zahlung RE-4471" }]}
+        rows={[{ ...ROW, side: "H", bu: "", konto: "70044", kontoName: "Bürobedarf Meier GmbH", text: "Zahlung RE-4471" }]}
         gegenkonto={{ konto: "1800", name: "Bank", tag: "Zahlungskonto" }}
         editable={false}
         onEdit={() => {}}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** S11 — gesperrt: der Grund steht da, und der eine erlaubte Ausweg. */
 export const S11_Locked: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         status="posted"
         editable={false}
         locked={{
@@ -164,18 +164,18 @@ export const S11_Locked: Story = {
           onAction: () => {},
         }}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** S12 — mehrere Fehler: Speichern bleibt gesperrt, jeder Fehler nennt sich. */
 export const S12_MultipleErrors: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         editable
-        rows={[{ ...ZEILE, umsatz: "1.400,00", konto: "" }]}
+        rows={[{ ...ROW, umsatz: "1.400,00", konto: "" }]}
         errors={[
           { code: "P-SUMME", message: "Soll 1.400,00 € gegen Haben 1.475,60 €." },
           { code: "E-KONTO", message: "Für die erste Zeile fehlt das Konto." },
@@ -183,55 +183,55 @@ export const S12_MultipleErrors: Story = {
         onCancel={() => {}}
         onSave={() => {}}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** S15 — freigegeben: Anzeige, Bearbeiten möglich, Löschen erlaubt. */
 export const S15_Released: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         status="accepted"
         editable={false}
         deletable
         onEdit={() => {}}
         onDelete={() => {}}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** S17 — gebucht: kein Bearbeiten mehr, nur noch lesen. */
 export const S17_Posted: Story = {
   render: () => (
-    <Rahmen>
-      <JournalEntryEditor {...BASIS} status="posted" editable={false} />
-    </Rahmen>
+    <Frame>
+      <JournalEntryEditor {...BASE} status="posted" editable={false} />
+    </Frame>
   ),
 };
 
-/** S18 — storniert: der Satz bleibt stehen, mit Grund. */
+/** S18 — storniert: der Satz bleibt stehen, withItems Grund. */
 export const S18_Reversed: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         status="reversed"
         editable={false}
         reversedReason="Doppelt erfasst — der Beleg lag schon an 2026-0031."
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
-/** S19 — der Judge bestätigt mit Hinweis: die Begründung ist einsehbar. */
+/** S19 — der Judge bestätigt withItems Hinweis: die Begründung ist einsehbar. */
 export const S19_JudgeWithNote: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         editable={false}
         onEdit={() => {}}
         aiReview={{
@@ -246,16 +246,16 @@ export const S19_JudgeWithNote: Story = {
           ],
         }}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** S23 — der Judge beanstandet, und es liegt zusätzlich ein Fehler an. */
 export const S23_JudgeFlaggedWithError: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         editable
         errors={[{ code: "P-UST", message: "Beleg weist 7 % aus, gebucht ist BU 9 (19 %)." }]}
         aiReview={{
@@ -269,23 +269,23 @@ export const S23_JudgeFlaggedWithError: Story = {
         onCancel={() => {}}
         onSave={() => {}}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
-/** Ohne Zeilen — der Editor sagt, dass nichts zu speichern ist. */
+/** Ohne Zeilen — der Editor sagt, dass nothing zu speichern ist. */
 export const Empty: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <JournalEntryEditor
-        {...BASIS}
+        {...BASE}
         rows={[]}
         gegenkonto={null}
         editable
-        hints={[{ code: "E-LEER", message: "Noch keine Zeile — mit „+ Zeile (Split)“ beginnen." }]}
+        hints={[{ code: "E-LEER", message: "Noch keine Zeile — withItems „+ Zeile (Split)“ beginnen." }]}
         onCancel={() => {}}
         onSave={() => {}}
       />
-    </Rahmen>
+    </Frame>
   ),
 };

@@ -6,8 +6,8 @@ const meta: Meta<typeof StatusCallout> = { title: "v3/Primitives/Fläche/StatusC
 export default meta;
 type Story = StoryObj<typeof StatusCallout>;
 
-/** Offen: der übliche Fall, neutraler Rahmen, ein primärer Weg. */
-export const Offen: Story = {
+/** Offen: der übliche Fall, neutraler Frame, ein primärer Weg. */
+export const Open: Story = {
   render: () => (
     <StatusCallout
       kicker="Offener Stapel"
@@ -18,8 +18,8 @@ export const Offen: Story = {
   ),
 };
 
-/** Wartet: der Rahmen warnt, das Wort im Kicker sagt worauf. */
-export const WartetAufMandant: Story = {
+/** Wartet: der Frame warnt, das Wort im Kicker sagt worauf. */
+export const WaitingForClient: Story = {
   render: () => (
     <StatusCallout
       tone="warning"
@@ -36,8 +36,8 @@ export const WartetAufMandant: Story = {
   ),
 };
 
-/** Fehlgeschlagen: roter Rahmen, und der erste Knopf ist der Wiederversuch. */
-export const Fehlgeschlagen: Story = {
+/** Fehlgeschlagen: roter Frame, und der erste Knopf ist der Wiederversuch. */
+export const Failed: Story = {
   render: () => (
     <StatusCallout
       tone="danger"
@@ -55,7 +55,7 @@ export const Fehlgeschlagen: Story = {
 };
 
 /** Ohne Handlung — abgeschlossene Stapel brauchen keinen Knopf. */
-export const OhneAktion: Story = {
+export const WithoutAction: Story = {
   render: () => (
     <StatusCallout
       kicker="Abgeschlossen"

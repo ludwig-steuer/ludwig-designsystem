@@ -9,9 +9,9 @@ const meta: Meta<typeof ComparisonTable> = {
 export default meta;
 type Story = StoryObj<typeof ComparisonTable>;
 
-const MONATE: [string, string, string, string] = ["Mai", "Jun", "Jul", "Aug"];
+const MONTHS: [string, string, string, string] = ["Mai", "Jun", "Jul", "Aug"];
 
-const ZEILEN: ComparisonRow[] = [
+const ROWS: ComparisonRow[] = [
   {
     key: "miete", label: "Miete", unit: "amount",
     m3: 1700, m2: 1700, m1: 1700, avg: 1700, current: 1800, deviationPct: 5.9, tone: "warning",
@@ -45,14 +45,14 @@ export const Filled: Story = {
   render: function Render() {
     const [sel, setSel] = useState<string | undefined>("miete");
     return (
-      <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONATE} rows={ZEILEN} selectedKey={sel} onSelect={setSel} />
+      <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONTHS} rows={ROWS} selectedKey={sel} onSelect={setSel} />
     );
   },
 };
 
 /** Ohne `onSelect` ist die Tabelle eine Auskunft — keine Zeile ist klickbar. */
 export const ReadOnly: Story = {
-  render: () => <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONATE} rows={ZEILEN} />,
+  render: () => <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONTHS} rows={ROWS} />,
 };
 
 /** Nichts auffällig: der Untertitel sagt es, die Zeilen bleiben ruhig. */
@@ -60,8 +60,8 @@ export const NothingFlagged: Story = {
   render: () => (
     <ComparisonTable
       title="Konten gegen Vormonate"
-      monatsLabels={MONATE}
-      rows={ZEILEN.map((z) => ({ ...z, flagged: false, acknowledged: false, tone: z.tooYoung ? "muted" : "neutral" }))}
+      monatsLabels={MONTHS}
+      rows={ROWS.map((z) => ({ ...z, flagged: false, acknowledged: false, tone: z.tooYoung ? "muted" : "neutral" }))}
     />
   ),
 };
@@ -69,6 +69,6 @@ export const NothingFlagged: Story = {
 /** Leer: kein Vormonat, keine Zeile — und ein Satz, der das sagt. */
 export const Empty: Story = {
   render: () => (
-    <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONATE} rows={[]} empty="Noch kein Vormonat zum Vergleichen." />
+    <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONTHS} rows={[]} empty="Noch kein Vormonat zum Vergleichen." />
   ),
 };

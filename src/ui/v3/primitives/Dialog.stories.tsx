@@ -24,10 +24,10 @@ function Demo({
 }
 
 /**
- * Der Dialog ist für Bestätigungen mit Folgen da — Storno, Löschen, Freigabe.
+ * Der Dialog ist für Bestätigungen withItems Folgen da — Storno, Löschen, Freigabe.
  * Details gehören ins Master-Detail, Bestehendes in den Drawer.
  */
-export const Bestaetigung: Story = {
+export const Confirmation: Story = {
   render: () => (
     <Demo
       label="Stapel stornieren"
@@ -48,7 +48,7 @@ export const Bestaetigung: Story = {
 };
 
 /** Mit Grund-Feld: eine Handlung, die eine Begründung ins Protokoll schreibt. */
-export const MitGrund: Story = {
+export const WithReason: Story = {
   render: () => (
     <Demo
       label="Zurück an den Agenten"
@@ -69,7 +69,7 @@ export const MitGrund: Story = {
 };
 
 /** Große Form für Vorschauen — etwa die Zeilenliste vor der Übergabe. */
-export const Gross: Story = {
+export const Large: Story = {
   render: () => (
     <Demo
       label="Übergabe prüfen"
@@ -89,8 +89,8 @@ export const Gross: Story = {
   ),
 };
 
-/** Geschlossen — der Normalzustand: nichts liegt über der Seite. */
-export const Geschlossen: Story = {
+/** Geschlossen — der Normalzustand: nothing liegt über der Seite. */
+export const Closed: Story = {
   render: () => (
     <Dialog open={false} onClose={() => {}} title="Unsichtbar">
       Dieser Inhalt wird nicht gerendert.

@@ -6,7 +6,7 @@ export default meta;
 type Story = StoryObj<typeof Field>;
 
 /** Label über der Eingabe, Hinweis darunter — nie als Platzhaltertext. */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: () => (
     <div className="v2stack" style={{ maxWidth: 420 }}>
       <Field label="Beleg 1" hint="Die Belegnummer, wie sie in DATEV erscheint." htmlFor="b1">
@@ -31,7 +31,7 @@ export const Gefuellt: Story = {
 };
 
 /** Fehler ersetzt den Hinweis und benennt die Bedingung, nicht nur „ungültig". */
-export const MitFehler: Story = {
+export const WithError: Story = {
   render: () => (
     <div className="v2stack" style={{ maxWidth: 420 }}>
       <Field label="Umsatz" error="Der Betrag muss größer als 0,00 € sein." htmlFor="u">
@@ -45,7 +45,7 @@ export const MitFehler: Story = {
 };
 
 /** Leer und gesperrt — der Grund steht im Hinweis, nicht im Nichts. */
-export const Gesperrt: Story = {
+export const Disabled: Story = {
   render: () => (
     <div className="v2stack" style={{ maxWidth: 420 }}>
       <Field label="Buchungstext" hint="Gesperrt, solange der Stapel in DATEV liegt." htmlFor="g">

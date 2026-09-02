@@ -13,8 +13,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Noch nichts angelegt — der Weg hinein steht als Handlung daneben. */
-export const NochNichts: Story = {
+/** Noch nothing angelegt — der Weg hinein steht als Handlung daneben. */
+export const NothingYet: Story = {
   args: {
     icon: <Inbox size={18} strokeWidth={1.5} />,
     title: "Noch keine Belege im Eingang",
@@ -25,7 +25,7 @@ export const NochNichts: Story = {
 };
 
 /** Alles erledigt — kein Handlungsbedarf, also auch keine Handlung. */
-export const AllesErledigt: Story = {
+export const AllDone: Story = {
   args: {
     icon: <FileText size={18} strokeWidth={1.5} />,
     title: "Keine offenen Sachverhalte",
@@ -34,7 +34,7 @@ export const AllesErledigt: Story = {
 };
 
 /** Nichts trifft den Filter — der Ausweg ist das Zurücksetzen, nicht das Anlegen. */
-export const LeerNachFilter: Story = {
+export const EmptyAfterFilter: Story = {
   args: {
     icon: <Filter size={18} strokeWidth={1.5} />,
     title: "Kein Beleg passt zu diesen Filtern",
@@ -43,8 +43,8 @@ export const LeerNachFilter: Story = {
   },
 };
 
-/** Ohne Rahmen und Innenabstand, wenn schon eine Karte darum liegt (L2). */
-export const InDerKarte: Story = {
+/** Ohne Frame und Innenabstand, wenn schon eine Karte darum liegt (L2). */
+export const InCard: Story = {
   args: { title: "Keine Zahlungen zugeordnet" },
   render: () => (
     <Card>
@@ -58,7 +58,7 @@ export const InDerKarte: Story = {
 };
 
 /** Ohne Icon — der Text trägt allein. */
-export const NurText: Story = {
+export const TextOnly: Story = {
   args: {
     title: "Keine Einträge",
     description: "Für die gewählte Periode liegen keine Buchungen vor.",

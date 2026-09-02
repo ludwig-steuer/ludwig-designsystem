@@ -9,14 +9,14 @@ const meta: Meta<typeof SelectionBar> = { title: "v3/Primitives/Tabelle/Selectio
 export default meta;
 type Story = StoryObj<typeof SelectionBar>;
 
-const ZEILEN = [
+const ROWS = [
   { key: "a", name: "Vermieter Musterstraße", betrag: 1800 },
   { key: "b", name: "Werbeagentur Nord", betrag: 420 },
   { key: "c", name: "Bürobedarf GmbH", betrag: 64.9 },
 ];
 
 /** Mehrfachauswahl: die Leiste erscheint erst, wenn etwas gewählt ist. */
-export const MitAuswahl: Story = {
+export const WithSelection: Story = {
   render: function Render() {
     const [gewaehlt, setGewaehlt] = useState<string[]>(["a", "b"]);
     return (
@@ -37,7 +37,7 @@ export const MitAuswahl: Story = {
             <span>Gegenpartei</span>
             <span className="v2num">Betrag</span>
           </HeadRow>
-          {ZEILEN.map((z) => (
+          {ROWS.map((z) => (
             <ClickRow
               key={z.key}
               active={gewaehlt.includes(z.key)}
@@ -63,7 +63,7 @@ export const MitAuswahl: Story = {
 };
 
 /** Nichts gewählt — die Auswahl-Leiste ist nicht da, nicht nur leer. */
-export const OhneAuswahl: Story = {
+export const WithoutSelection: Story = {
   render: () => (
     <Card>
       <CardHead title="Fehlende Belege · 1" />

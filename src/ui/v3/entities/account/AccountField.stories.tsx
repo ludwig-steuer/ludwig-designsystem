@@ -7,14 +7,14 @@ const meta: Meta<typeof AccountField> = { title: "v3/Entitäten/Konto/AccountFie
 export default meta;
 type Story = StoryObj<typeof AccountField>;
 
-const KANDIDATEN = {
+const CANDIDATES = {
   agent: [{ number: "6815", name: "Bürobedarf", reason: "aus der Position „Druckerpatronen“" }],
   partner: [{ number: "6820", name: "Porto", reason: "zuletzt 12× bei Bürobedarf GmbH" }],
   aehnlich: [{ number: "6800", name: "Sonstige Betriebsausgaben", reason: "9 vergleichbare Belege" }],
   belegposition: [{ number: "6845", name: "EDV-Zubehör", reason: "Positionstext „Toner“" }],
 };
 
-const ALLE: AccountCandidate[] = [
+const ALL: AccountCandidate[] = [
   { number: "6600", name: "Werbekosten" },
   { number: "6805", name: "Telefon" },
   { number: "6810", name: "Internet" },
@@ -35,9 +35,9 @@ export const WithCandidates: Story = {
           <AccountField
             value={v}
             onChange={setV}
-            candidates={KANDIDATEN}
+            candidates={CANDIDATES}
             onSearch={async (q) =>
-              ALLE.filter((k) => k.number.includes(q) || k.name.toLowerCase().includes(q.toLowerCase()))
+              ALL.filter((k) => k.number.includes(q) || k.name.toLowerCase().includes(q.toLowerCase()))
             }
           />
         </Field>
@@ -58,7 +58,7 @@ export const FullTextOnly: Story = {
             onChange={setV}
             candidates={{}}
             onSearch={async (q) =>
-              ALLE.filter((k) => k.number.includes(q) || k.name.toLowerCase().includes(q.toLowerCase()))
+              ALL.filter((k) => k.number.includes(q) || k.name.toLowerCase().includes(q.toLowerCase()))
             }
           />
         </Field>

@@ -4,7 +4,7 @@ import { ActionBar } from "../primitives/ActionBar";
 import { Button } from "../primitives/Button";
 import { HotkeyLegend, useHotkeys } from "./Hotkeys";
 
-const meta: Meta<typeof HotkeyLegend> = { title: "v3/Patterns/Rahmen/HotkeyLegend", component: HotkeyLegend };
+const meta: Meta<typeof HotkeyLegend> = { title: "v3/Patterns/Frame/HotkeyLegend", component: HotkeyLegend };
 export default meta;
 type Story = StoryObj<typeof HotkeyLegend>;
 
@@ -50,7 +50,7 @@ export const OnButton: Story = {
               Bestätigen
             </Button>
           }
-          info={n === 0 ? "Noch nichts bestätigt — Taste A oder Klick." : `${n}× bestätigt.`}
+          info={n === 0 ? "Noch nothing bestätigt — Taste A oder Klick." : `${n}× bestätigt.`}
         />
         <HotkeyLegend groups={GROUPS} />
       </div>

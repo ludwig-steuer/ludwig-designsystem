@@ -7,7 +7,7 @@ const meta: Meta<typeof MasterDetail> = { title: "v3/Patterns/Arbeitsfläche/Mas
 export default meta;
 type Story = StoryObj<typeof MasterDetail>;
 
-const GRUPPEN: ListGroup[] = [
+const GROUPS: ListGroup[] = [
   {
     title: "Fragen an die Kanzlei",
     count: 2,
@@ -27,7 +27,7 @@ const GRUPPEN: ListGroup[] = [
   },
 ];
 
-const TEXTE: Record<string, { title: string; sub: string; body: string }> = {
+const TEXTS: Record<string, { title: string; sub: string; body: string }> = {
   a: {
     title: "2026-0008 · Miete Musterstraße weicht ab",
     sub: "1.800,00 € statt üblich 1.700,00 € · wartet auf Antwort",
@@ -47,16 +47,16 @@ const TEXTE: Record<string, { title: string; sub: string; body: string }> = {
 
 /**
  * Der kanonische Ersatz für das Modal (L2): eine Karte für die Liste,
- * Kopfzeile je Gruppe, aktive Zeile mit Akzentleiste. Detail rechts bleibt
+ * Kopfzeile je Gruppe, aktive Zeile withItems Akzentleiste. Detail rechts bleibt
  * beim Scrollen stehen.
  */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: function Render() {
     const [sel, setSel] = useState<string | undefined>("a");
-    const d = sel ? TEXTE[sel] : undefined;
+    const d = sel ? TEXTS[sel] : undefined;
     return (
       <MasterDetail
-        list={<ListPane groups={GRUPPEN} activeKey={sel} onPick={setSel} />}
+        list={<ListPane groups={GROUPS} activeKey={sel} onPick={setSel} />}
         detail={
           <DetailPane title={d?.title} sub={d?.sub}>
             {d ? (
@@ -75,14 +75,14 @@ export const Gefuellt: Story = {
 };
 
 /** Nichts gewählt — das Detail sagt, was zu tun ist. */
-export const NichtsGewaehlt: Story = {
+export const NothingSelected: Story = {
   render: () => (
-    <MasterDetail list={<ListPane groups={GRUPPEN} />} detail={<DetailPane />} />
+    <MasterDetail list={<ListPane groups={GROUPS} />} detail={<DetailPane />} />
   ),
 };
 
 /** Leer: der Text sagt, was geprüft wurde — nicht bloß „keine Einträge". */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
     <MasterDetail
       list={
@@ -97,7 +97,7 @@ export const Leer: Story = {
 };
 
 /** Leer nach Filter: die ungefilterte Menge steht dabei. */
-export const LeerNachFilter: Story = {
+export const EmptyAfterFilter: Story = {
   render: () => (
     <MasterDetail
       list={

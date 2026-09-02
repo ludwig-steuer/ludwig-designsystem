@@ -6,7 +6,7 @@ const meta: Meta<typeof Segmented> = { title: "v3/Primitives/Navigation/Segmente
 export default meta;
 type Story = StoryObj<typeof Segmented>;
 
-const SICHTEN = [
+const VIEWS = [
   { key: "verlauf", label: "Verlauf" },
   { key: "protokoll", label: "Protokoll" },
   { key: "technik", label: "Technik" },
@@ -16,15 +16,15 @@ const SICHTEN = [
  * Für gleichrangige Sichten auf dieselben Daten — im Gegensatz zu `Tabs`,
  * die verschiedene Inhalte trennen.
  */
-export const DreiSichten: Story = {
+export const ThreeViews: Story = {
   render: function Render() {
     const [active, setActive] = useState("verlauf");
-    return <Segmented options={SICHTEN} active={active} ariaLabel="Log-Sicht" onPick={setActive} />;
+    return <Segmented options={VIEWS} active={active} ariaLabel="Log-Sicht" onPick={setActive} />;
   },
 };
 
 /** Zwei Optionen — die kleinste sinnvolle Form. */
-export const ZweiOptionen: Story = {
+export const TwoOptions: Story = {
   render: function Render() {
     const [active, setActive] = useState("betrag");
     return (

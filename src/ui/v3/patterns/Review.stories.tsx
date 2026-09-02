@@ -8,7 +8,7 @@ const meta: Meta<typeof Checklist> = { title: "v3/Patterns/Prüfen/Checklist", c
 export default meta;
 type Story = StoryObj<typeof Checklist>;
 
-const ZEILEN: ChecklistRow[] = [
+const ROWS: ChecklistRow[] = [
   { key: "1", state: "done", label: "Bank ist vollständig eingelesen", counter: "8 von 8", progress: 1 },
   { key: "2", state: "done", label: "Alle Belege des Zeitraums zugeordnet", counter: "94 von 94", progress: 1 },
   {
@@ -38,10 +38,10 @@ const ZEILEN: ChecklistRow[] = [
 export const Filled: Story = {
   render: function Render() {
     const [sel, setSel] = useState<string | undefined>("4");
-    const zeile = ZEILEN.find((z) => z.key === sel);
+    const zeile = ROWS.find((z) => z.key === sel);
     return (
       <MasterDetail
-        list={<Checklist rows={ZEILEN} activeKey={sel} onPick={setSel} />}
+        list={<Checklist rows={ROWS} activeKey={sel} onPick={setSel} />}
         detail={
           <DetailPane title={zeile?.label} sub={zeile?.counter}>
             {zeile ? (
@@ -65,16 +65,16 @@ export const Filled: Story = {
 export const AllPassed: Story = {
   render: () => (
     <Checklist
-      rows={ZEILEN.map((z) => ({ ...z, state: "done", counterAlarm: false, jump: undefined }))}
+      rows={ROWS.map((z) => ({ ...z, state: "done", counterAlarm: false, jump: undefined }))}
     />
   ),
 };
 
-/** Noch nichts gerechnet: die Zähler bleiben leer statt zu raten. */
+/** Noch nothing gerechnet: die Zähler bleiben leer statt zu raten. */
 export const Loading: Story = {
   render: () => (
     <Checklist
-      rows={ZEILEN.map((z) => ({ ...z, state: "open", counter: undefined, progress: null }))}
+      rows={ROWS.map((z) => ({ ...z, state: "open", counter: undefined, progress: null }))}
     />
   ),
 };
@@ -96,7 +96,7 @@ export const StateIcons: Story = {
 };
 
 /**
- * Prüfpunkte: bestandene in **einer** Zeile, offene einzeln mit Begründung
+ * Prüfpunkte: bestandene in **einer** Zeile, offene einzeln withItems Begründung
  * und Weg zur Klärung (L7).
  */
 export const CheckItemsMixed: Story = {

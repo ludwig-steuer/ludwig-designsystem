@@ -16,7 +16,7 @@ type Story = StoryObj<typeof AmountCell>;
 
 const COLS = "190px 110px 150px 110px 1fr";
 
-function Rahmen({ children, sub }: { children: React.ReactNode; sub?: string }) {
+function Frame({ children, sub }: { children: React.ReactNode; sub?: string }) {
   return (
     <Card>
       <CardHead title="Fehlende Belege" sub={sub} />
@@ -39,9 +39,9 @@ function Rahmen({ children, sub }: { children: React.ReactNode; sub?: string }) 
  * Jede Gutschrift wäre sonst ein Alarm. Der Ton kommt vom Aufrufer, wo die
  * Zahl wirklich etwas meint.
  */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: () => (
-    <Rahmen sub="3 Zeilen">
+    <Frame sub="3 Zeilen">
       <Row>
         <span className="v2main">Bürobedarf GmbH</span>
         <AmountCell value={64.9} />
@@ -63,43 +63,43 @@ export const Gefuellt: Story = {
         <DotStatus tone="danger" label="Blockiert" />
         <Timestamp iso={null} />
       </Row>
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** Leer: die Kopfzeilen bleiben stehen, der Text sagt, was geprüft wurde. */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <EmptyRow>Keine fehlenden Belege — alle 94 Belege des Zeitraums sind zugeordnet.</EmptyRow>
-    </Rahmen>
+    </Frame>
   ),
 };
 
-/** Leer nach Filter: der Unterschied zu „nichts da" muss lesbar sein. */
-export const LeerNachFilter: Story = {
+/** Leer nach Filter: der Unterschied zu „nothing da" muss lesbar sein. */
+export const EmptyAfterFilter: Story = {
   render: () => (
-    <Rahmen sub="gefiltert nach „überfällig“">
+    <Frame sub="gefiltert nach „überfällig“">
       <EmptyRow>
         Kein überfälliger Beleg. Ohne Filter stehen hier 3 Zeilen.
       </EmptyRow>
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** Lädt: Zeilen in Zeilenhöhe, damit die Tabelle beim Eintreffen nicht springt. */
-export const Laedt: Story = {
+export const Loading: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <TableLoading rows={3} cols={5} />
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** Fehler: das Laden ist gescheitert — das ist etwas anderes als leer. */
-export const Fehler: Story = {
+export const Error: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <ErrorRow
         message="Die Belegliste konnte nicht geladen werden."
         action={
@@ -108,7 +108,7 @@ export const Fehler: Story = {
           </button>
         }
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -124,7 +124,7 @@ export const DeviationScale: Story = {
         </HeadRow>
         <Row>
           <span>6815 · Bürobedarf</span>
-          <DeviationCell pct={8} tone="neutral" explanation="64,90 gegen Ø 60,00 = +8 % — im Rahmen." />
+          <DeviationCell pct={8} tone="neutral" explanation="64,90 gegen Ø 60,00 = +8 % — im Frame." />
         </Row>
         <Row>
           <span>6310 · Miete</span>
