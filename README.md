@@ -88,3 +88,13 @@ Script. Liegt Ludwig woanders:
 pnpm typecheck
 pnpm build         # statisches Storybook nach storybook-static/
 ```
+
+## Skills
+
+Zwei Repo-Skills tragen die Hausregeln zusammen, statt sie über vier
+Dokumente verstreut zu lassen:
+
+| Skill | Wofür |
+|---|---|
+| `v3-komponente` | Eine Komponente bauen, ändern oder abnehmen — Dreiteilung, Tokens, GLOSSARY-Namen, Ton, Story-Pflicht, Prüfliste. |
+| `aus-app-holen` | Einen weiteren Baustein aus `ludwig/app` übernehmen — Closure rechnen, Barrel-Importe entkoppeln, verifizieren. |
