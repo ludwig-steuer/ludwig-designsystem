@@ -95,7 +95,7 @@ export interface ChecklistRow {
  * `ChecklisteDetail` in einem `MasterDetail`.
  *
  * @when    Checklist of a gate: check, status, progress, jump.
- * @instead Items to work through → TodoListe.
+ * @instead Items to work through → TodoList.
  */
 export function Checklist({
   rows,

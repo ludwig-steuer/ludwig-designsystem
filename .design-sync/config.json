@@ -10,9 +10,6 @@
     "MasterDetail": {
       "cardMode": "column"
     },
-    "TodoListe": {
-      "cardMode": "column"
-    },
     "FieldList": {
       "cardMode": "column"
     },
@@ -43,6 +40,9 @@
       "cardMode": "column"
     },
     "StepRail": {
+      "cardMode": "column"
+    },
+    "TodoList": {
       "cardMode": "column"
     }
   },

@@ -44,7 +44,7 @@ const OFFEN: ReadonlySet<StateKind> = new Set<StateKind>([
   "question",
 ]);
 
-export function istOffen(state: StateKind): boolean {
+export function isOpen(state: StateKind): boolean {
   return OFFEN.has(state);
 }
 
@@ -52,7 +52,7 @@ export function istOffen(state: StateKind): boolean {
  * @when    Review step with items to work through; jumps to the next open one.
  * @instead Pure information, nothing to work through → Table. Checklist of a gate → Checklist.
  */
-export function TodoListe({
+export function TodoList({
   groups,
   selectedId,
   onSelect,
@@ -144,12 +144,12 @@ export function TodoListe({
  * Gibt `null` zurück, wenn nichts mehr offen ist; dann bleibt die Auswahl
  * stehen und der Screen zeigt seinen Erfolgs-Leerzustand.
  */
-export function naechsterOffener(items: readonly TodoItem[], afterId: string | null): string | null {
+export function nextOpen(items: readonly TodoItem[], afterId: string | null): string | null {
   if (items.length === 0) return null;
   const start = afterId ? items.findIndex((i) => i.id === afterId) : -1;
   for (let k = 1; k <= items.length; k++) {
     const it = items[(start + k + items.length) % items.length]!;
-    if (it.id !== afterId && istOffen(it.state)) return it.id;
+    if (it.id !== afterId && isOpen(it.state)) return it.id;
   }
   return null;
 }

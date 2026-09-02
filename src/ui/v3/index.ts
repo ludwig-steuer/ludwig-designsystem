@@ -96,12 +96,12 @@ export {
   type ListItem,
 } from "./patterns/MasterDetail";
 export {
-  TodoListe,
-  istOffen,
-  naechsterOffener,
+  TodoList,
+  isOpen,
+  nextOpen,
   type TodoGroup,
   type TodoItem,
-} from "./patterns/TodoListe";
+} from "./patterns/TodoList";
 
 /* Rahmen */
 export {

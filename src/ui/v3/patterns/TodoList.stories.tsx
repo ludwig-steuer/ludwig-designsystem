@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Button } from "../primitives/Button";
 import { DetailPane, MasterDetail } from "./MasterDetail";
-import { TodoListe, naechsterOffener, type TodoGroup } from "./TodoListe";
+import { TodoList, nextOpen, type TodoGroup } from "./TodoList";
 
-const meta: Meta<typeof TodoListe> = { title: "v3/Patterns/Arbeitsfläche/TodoListe", component: TodoListe };
+const meta: Meta<typeof TodoList> = { title: "v3/Patterns/Arbeitsfläche/TodoList", component: TodoList };
 export default meta;
-type Story = StoryObj<typeof TodoListe>;
+type Story = StoryObj<typeof TodoList>;
 
 const GRUPPEN: TodoGroup[] = [
   {
@@ -31,21 +31,21 @@ const GRUPPEN: TodoGroup[] = [
  * Das Grundmuster jedes Prüfschritts: Zustands-Icon, Titel, Nebenzeile.
  * `J`/`K` gehen durch die Liste, `Enter` öffnet — probieren Sie es aus.
  */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: function Render() {
     const [sel, setSel] = useState<string | null>("a");
     const alle = GRUPPEN.flatMap((g) => g.items);
     const aktiv = alle.find((i) => i.id === sel);
     return (
       <MasterDetail
-        list={<TodoListe groups={GRUPPEN} selectedId={sel} onSelect={setSel} />}
+        list={<TodoList groups={GRUPPEN} selectedId={sel} onSelect={setSel} />}
         detail={
           <DetailPane title={aktiv?.title} sub={aktiv?.sub}>
             <Button
               variant="primary"
               size="sm"
               hotkey="A"
-              onClick={() => setSel(naechsterOffener(alle, sel))}
+              onClick={() => setSel(nextOpen(alle, sel))}
             >
               Erledigt
             </Button>
@@ -60,9 +60,9 @@ export const Gefuellt: Story = {
 };
 
 /** Nichts mehr offen — der Leerzustand sagt, was geprüft wurde. */
-export const AllesErledigt: Story = {
+export const AllDone: Story = {
   render: () => (
-    <TodoListe
+    <TodoList
       groups={GRUPPEN.map((g) => ({ ...g, items: g.items.map((i) => ({ ...i, state: "done" as const })) }))}
       selectedId={null}
       onSelect={() => {}}
@@ -71,9 +71,9 @@ export const AllesErledigt: Story = {
 };
 
 /** Leer: keine Punkte, und der Text nennt den Grund. */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
-    <TodoListe
+    <TodoList
       groups={[]}
       selectedId={null}
       onSelect={() => {}}
@@ -83,9 +83,9 @@ export const Leer: Story = {
 };
 
 /** Leer nach Filter: die ungefilterte Menge steht dabei. */
-export const LeerNachFilter: Story = {
+export const EmptyAfterFilter: Story = {
   render: () => (
-    <TodoListe
+    <TodoList
       groups={[]}
       selectedId={null}
       onSelect={() => {}}
