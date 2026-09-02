@@ -54,6 +54,7 @@ Hier gepflegt, maßgeblich für jede Gestaltungsfrage:
 
 | Datei | Inhalt |
 |---|---|
+| `docs/backlog/` | Aufgaben: eine Datei je Komponente mit Spec und Abnahme (`README.md` dort erklärt den Ablauf). `docs/v3-backlog.md` ist die Erhebung, aus der Aufgaben entstehen. |
 | `docs/design-guidelines.md` | Die Designsprache: Prinzipien, Layout, Text, Zustand, Interaktion. |
 | `docs/ton-und-sprache.md` | Schneller Index: immer „Sie", Tokens, verbotene Wörter. |
 
@@ -106,10 +107,11 @@ pnpm build         # statisches Storybook nach storybook-static/
 
 ## Skills
 
-Zwei Repo-Skills tragen die Hausregeln zusammen, statt sie über vier
+Drei Repo-Skills tragen die Hausregeln zusammen, statt sie über vier
 Dokumente verstreut zu lassen:
 
 | Skill | Wofür |
 |---|---|
+| `spec-schreiben` | Eine Komponente spezifizieren, bevor sie gebaut wird — Klasse, wiederverwenden/erweitern/neu, zerlegen/zusammenlassen, Stories aus den Props abgeleitet, Abnahmekriterien. Schreibt `docs/backlog/NNNN-<slug>.md`. |
 | `v3-komponente` | Eine Komponente bauen, ändern oder abnehmen — Dreiteilung, Tokens, GLOSSARY-Namen, Ton, Story-Pflicht, Prüfliste. |
 | `aus-app-holen` | Einen weiteren Baustein aus `ludwig/app` übernehmen — Closure rechnen, Barrel-Importe entkoppeln, verifizieren. |

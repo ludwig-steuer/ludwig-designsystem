@@ -11,6 +11,7 @@ Nicht aus dem Gedächtnis arbeiten — die Wahrheit steht in vier Dateien:
 
 | Frage | Datei |
 |---|---|
+| **Auftrag und Abnahmekriterien** | `docs/backlog/NNNN-<slug>.md` — fehlt die Spec, zuerst Skill `spec-schreiben` |
 | Gestaltungsregel (V/L/T/Z/I) | `docs/design-guidelines.md` |
 | Ton, verbotene Wörter | `docs/ton-und-sprache.md` |
 | **Wie heißt das Ding?** | `docs/ludwig/GLOSSARY.md` |
@@ -111,8 +112,18 @@ Story eingecheckt werden, gilt aber erst mit Story als abgenommen.
 
 ## Abnahme
 
-Die vollständige Prüfliste steht in `docs/design-guidelines.md` §9 — beim
-Abnehmen dort durchgehen, nicht hier zusammenfassen.
+Abgenommen wird **gegen die Spec** in `docs/backlog/`: jedes Kriterium
+bekommt in der Tabelle „Abnahme" einen Nachweis — Story-ID, Befehl oder
+Screenshot — und ein Ergebnis. Wer gebaut hat, nimmt nicht selbst ab; der
+Abnehmende liest Spec und Code, nicht den Chat. Alles ✓ → Status `fertig`,
+sonst zurück auf `in Arbeit` mit den offenen Punkten.
+
+Der Abnehmende prüft zuerst die **Story-Deckung**: hat jede Prop der
+Schnittstelle ihre Story, ist jeder ausgeschlossene Zustand begründet, stimmt
+die Zahl mit der Ableitung (`spec-schreiben` §6) überein.
+
+Die vollständige Gestaltungs-Prüfliste steht in `docs/design-guidelines.md`
+§9 — dort durchgehen, nicht hier zusammenfassen.
 
 Zwei ihrer Punkte gelten der App, nicht diesem Repo, und werden hier
 übersprungen: „ersetzt ihr v1-Gegenstück (`@deprecated`)" und „in §11 auf v2
