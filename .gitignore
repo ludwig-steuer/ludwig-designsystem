@@ -12,3 +12,6 @@ storybook-static/
 .design-sync/node_modules
 .ds-sync/
 ds-bundle/
+
+# Artefakte der Browser-Prüfung (Playwright MCP) — nie ins Repo.
+.playwright-mcp/
