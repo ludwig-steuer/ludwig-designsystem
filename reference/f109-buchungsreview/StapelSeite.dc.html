@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/colors_and_type.css">
+<link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/ui_kits/app/app.css">
+<link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/ui_kits/app/components.css">
+<link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/styles.css">
+<script src="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/_ds_bundle.js"></script>
+<style>
+  body { background: var(--color-bg-soft); }
+  .tnum { font-feature-settings: "tnum" 1, "lnum" 1; font-variant-numeric: tabular-nums; }
+  .stp-row:hover { background: var(--color-bg-soft); cursor: pointer; }
+</style>
+</helmet>
+
+<div style="max-width:1440px;margin:0 auto;padding:32px 40px 96px;font-family:var(--font-sans);color:var(--color-text);">
+
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:24px;">
+    <div>
+      <div style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:4px;">Rehbein Dachtechnik GmbH</div>
+      <h1 style="margin:0;">Stapel</h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <select value="{{scenario}}" onChange="{{setScenario}}" style="font-family:var(--font-sans);font-size:13px;padding:8px 10px;border-radius:var(--radius-md);border:1px solid var(--color-border-strong);background:#fff;color:var(--color-text);">
+        <option value="normal">Szenario: Normalbetrieb (S1)</option>
+        <option value="failed">Szenario: Export fehlgeschlagen (S8)</option>
+        <option value="prepared">Szenario: Bereit, wartet auf Mandant (S14)</option>
+      </select>
+      <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Button" variant="secondary" size="md" onClick="{{toggleAnlegenHint}}" hint-size="auto,40px">Stapel anlegen</x-import>
+    </div>
+  </div>
+
+  <sc-if value="{{anlegenHint}}" hint-placeholder-val="{{false}}">
+    <div style="background:var(--color-accent-50);border:1px solid var(--color-accent-100);border-radius:var(--radius-md);padding:12px 16px;margin-bottom:20px;font-size:13.5px;color:var(--color-text);display:flex;justify-content:space-between;gap:12px;">
+      <span>Der Dialog „Stapel anlegen" (Zeitraum wählen, Server-Vorschau Nachtrag/regulär) ist in diesem Entwurf noch nicht eingebaut — hier zunächst die Datensicht.</span>
+      <button onClick="{{toggleAnlegenHint}}" style="background:none;border:none;color:var(--color-accent-700);cursor:pointer;font-size:13px;font-weight:500;">Schließen</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isList}}" hint-placeholder-val="{{true}}">
+    <div>
+      <div style="background:#fff;border:1px solid {{openCard.borderColor}};border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:20px 24px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;">
+        <div>
+          <div style="font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:{{openCard.labelColor}};margin-bottom:6px;">{{openCard.kicker}}</div>
+          <div style="font-size:17px;font-weight:600;color:var(--color-primary);margin-bottom:4px;">{{openCard.title}}</div>
+          <div style="font-size:13.5px;color:{{openCard.subColor}};">{{openCard.sub}}</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-shrink:0;">
+          <sc-if value="{{openCard.showSecondary}}" hint-placeholder-val="{{false}}">
+            <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Button" variant="secondary" size="md" onClick="{{openCard.open}}" hint-size="auto,40px">{{openCard.secondaryLabel}}</x-import>
+          </sc-if>
+          <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Button" variant="primary" size="md" onClick="{{openCard.open}}" hint-size="auto,40px">{{openCard.primaryLabel}}</x-import>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:4px;border-bottom:1px solid var(--color-border);margin-bottom:16px;">
+        <button onClick="{{pickAlle}}" style="{{tabStyleAlle}}">Alle <span class="tnum" style="opacity:0.6;">{{countAlle}}</span></button>
+        <button onClick="{{pickOffen}}" style="{{tabStyleOffen}}">Offen <span class="tnum" style="color:{{countOffenColor}};font-weight:700;">{{countOffen}}</span></button>
+        <button onClick="{{pickUnterwegs}}" style="{{tabStyleUnterwegs}}">Unterwegs <span class="tnum" style="color:{{countUnterwegsColor}};font-weight:700;">{{countUnterwegs}}</span></button>
+        <button onClick="{{pickInDatev}}" style="{{tabStyleInDatev}}">In DATEV <span class="tnum" style="opacity:0.6;">{{countInDatev}}</span></button>
+        <button onClick="{{pickNurDatev}}" style="{{tabStyleNurDatev}}">Nur DATEV <span class="tnum" style="opacity:0.6;">{{countNurDatev}}</span></button>
+      </div>
+
+      <sc-if value="{{showBatchTable}}" hint-placeholder-val="{{true}}">
+        <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--color-border);background:#FAFBFC;font-size:14px;font-weight:600;color:var(--color-text);">{{activeTabLabel}} · <span class="tnum">{{rows.length}}</span></div>
+          <div style="overflow-x:auto;">
+          <div style="min-width:1280px;">
+          <div style="display:grid;grid-template-columns:130px 1.4fr 110px 150px 190px 70px 150px 160px 150px 130px 120px;gap:10px;padding:9px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;border-bottom:1px solid var(--color-border-subtle);">
+            <span>Zeitraum</span><span>Ludwig-Stapel</span><span>Prozess</span><span>Zustand</span><span>Dran ist</span><span style="text-align:right;">Durchg.</span><span>Buchungen</span><span>⟷ DATEV-Stapel</span><span>Abweichungen</span><span>Seit</span><span></span>
+          </div>
+          <sc-for list="{{pagedRows}}" as="row" hint-placeholder-count="5">
+            <div class="stp-row" onClick="{{row.open}}" style="display:grid;grid-template-columns:130px 1.4fr 110px 150px 190px 70px 150px 160px 150px 130px 120px;gap:10px;padding:12px 18px;align-items:center;border-bottom:1px solid var(--color-border-subtle);font-size:13px;">
+              <span style="{{row.indentStyle}}">{{row.periodLabel}}<sc-if value="{{row.isSupplement}}" hint-placeholder-val="{{false}}"><div style="font-size:11px;color:var(--color-text-subtle);margin-top:2px;">↳ Nachtrag zu {{row.supplementOf}}</div></sc-if></span>
+              <span><div style="font-weight:700;color:var(--color-primary);">{{row.stapelnummer}}</div><div style="color:var(--color-text-muted);font-size:12px;">{{row.description}}</div></span>
+              <span>
+                <div style="display:flex;gap:3px;width:64px;">
+                  <sc-for list="{{row.seg}}" as="c" hint-placeholder-count="4"><span style="display:block;height:6px;flex:1;border-radius:2px;background:{{c}};"></span></sc-for>
+                </div>
+                <div style="display:flex;align-items:center;gap:5px;margin-top:5px;"><span style="width:7px;height:7px;border-radius:999px;background:{{row.ownerColor}};display:inline-block;"></span><span style="font-size:11px;color:var(--color-text-muted);">{{row.ownerLabel}}</span></div>
+              </span>
+              <span><x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Badge" tone="{{row.stateTone}}" hint-size="auto,22px">{{row.stateLabel}}</x-import></span>
+              <span style="color:{{row.dranIstColor}};font-size:12.5px;">{{row.dranIstLabel}}</span>
+              <span class="tnum" style="text-align:right;">{{row.durchgaengeLabel}}</span>
+              <span><div class="tnum" style="font-weight:600;">{{row.buchungenLabel}}</div><div style="font-size:11px;color:var(--color-text-subtle);">{{row.buchungenSub}}</div></span>
+              <span><div style="font-weight:500;">{{row.datevLabel}}</div><div style="font-size:11px;color:var(--color-text-subtle);">{{row.datevSub}}</div></span>
+              <span style="color:{{row.abwColor}};">{{row.abwLabel}}</span>
+              <span title="{{row.seitAbs}}" style="color:var(--color-text-muted);">{{row.seitLabel}}</span>
+              <span style="text-align:right;"><x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Button" variant="tertiary" size="sm" onClick="{{row.open}}" hint-size="auto,32px">{{row.actionLabel}}</x-import></span>
+            </div>
+          </sc-for>
+          </div>
+          </div>
+          <sc-if value="{{showListPagination}}" hint-placeholder-val="{{false}}">
+            <div class="pag">
+              <span class="info">{{pagInfo}}</span>
+              <sc-for list="{{pagPages}}" as="p" hint-placeholder-count="2">
+                <button class="{{p.cls}}" onClick="{{p.pick}}">{{p.label}}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showDatevOnlyTable}}" hint-placeholder-val="{{false}}">
+        <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--color-border);background:#FAFBFC;font-size:14px;font-weight:600;color:var(--color-text);">Nur DATEV · <span class="tnum">{{countNurDatev}}</span></div>
+          <div style="display:grid;grid-template-columns:1.6fr 180px 160px 100px 140px;gap:10px;padding:9px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;border-bottom:1px solid var(--color-border-subtle);">
+            <span>Bezeichnung</span><span>Herkunft</span><span>Festschreibung</span><span style="text-align:right;">Sätze</span><span style="text-align:right;">Summe</span>
+          </div>
+          <sc-for list="{{datevOnlyRows}}" as="d" hint-placeholder-count="3">
+            <div style="display:grid;grid-template-columns:1.6fr 180px 160px 100px 140px;gap:10px;padding:12px 18px;align-items:center;border-bottom:1px solid var(--color-border-subtle);font-size:13px;">
+              <span style="font-weight:500;">{{d.bezeichnung}}</span>
+              <span style="color:var(--color-text-muted);">{{d.markLabel}}</span>
+              <span><x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Badge" tone="{{d.tone}}" hint-size="auto,22px">{{d.committedLabel}}</x-import></span>
+              <span class="tnum" style="text-align:right;">{{d.entries}}</span>
+              <span class="tnum" style="text-align:right;">{{d.sum}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isDetail}}" hint-placeholder-val="{{false}}">
+    <div>
+      <button onClick="{{backToList}}" style="background:none;border:none;color:var(--color-accent-700);cursor:pointer;font-size:13.5px;font-weight:500;padding:0;margin-bottom:18px;">← Zurück zur Liste</button>
+
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:24px 28px;margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:20px;">
+          <div>
+            <h2 style="margin:0 0 8px 0;">{{det.stapelnummer}} · {{det.description}}</h2>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Badge" tone="{{det.stateTone}}" hint-size="auto,22px">{{det.stateLabel}}</x-import>
+              <div style="color:var(--color-text-muted);font-size:13.5px;">{{det.periodLabel}} <sc-if value="{{det.isSupplement}}" hint-placeholder-val="{{false}}">· Nachtrag zu {{det.supplementOf}} — schreibt den Buchungsabschluss nicht fort</sc-if></div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:6px;">Dran ist</div>
+            <div style="font-weight:600;color:{{det.dranIstColor}};">{{det.dranIstLabel}}</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:stretch;gap:0;margin-bottom:16px;">
+          <sc-for list="{{det.stepper}}" as="ph" hint-placeholder-count="4">
+            <div style="flex:1;border-top:3px solid {{ph.barColor}};padding-top:10px;position:relative;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;color:{{ph.textColor}};">{{ph.label}}</div>
+              <div style="font-size:12px;color:var(--color-text-subtle);margin-top:2px;">{{ph.sub}}</div>
+              <sc-if value="{{ph.showNote}}" hint-placeholder-val="{{false}}"><div style="font-size:11.5px;color:var(--color-text-muted);margin-top:3px;">{{ph.note}}</div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{det.hasLoops}}" hint-placeholder-val="{{false}}">
+          <div style="font-size:12px;color:var(--color-text-subtle);margin-bottom:16px;">{{det.loopsLabel}}</div>
+        </sc-if>
+
+        <div style="display:flex;align-items:center;gap:10px;padding-top:16px;border-top:1px solid var(--color-border-subtle);">
+          <sc-if value="{{det.hasPrimary}}" hint-placeholder-val="{{false}}">
+            <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Button" variant="primary" size="md" hint-size="auto,40px">{{det.primaryLabel}}</x-import>
+          </sc-if>
+          <sc-if value="{{det.hasSecondary}}" hint-placeholder-val="{{false}}">
+            <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Button" variant="secondary" size="md" hint-size="auto,40px">{{det.secondaryLabel}}</x-import>
+          </sc-if>
+          <sc-if value="{{det.hasTertiary}}" hint-placeholder-val="{{false}}">
+            <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Button" variant="tertiary" size="sm" hint-size="auto,32px">{{det.tertiaryLabel}}</x-import>
+          </sc-if>
+          <sc-if value="{{det.infoText}}" hint-placeholder-val="{{false}}">
+            <span style="font-size:13px;color:var(--color-text-muted);">{{det.infoText}}</span>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:4px;border-bottom:1px solid var(--color-border);margin-bottom:20px;">
+        <button onClick="{{pickTabUebersicht}}" style="{{tabStyleUebersicht}}">Übersicht</button>
+        <button onClick="{{pickTabDurchgaenge}}" style="{{tabStyleDurchgaenge}}">Durchgänge</button>
+        <button onClick="{{pickTabBuchungen}}" style="{{tabStyleBuchungen}}">Buchungen</button>
+        <button onClick="{{pickTabArtefakte}}" style="{{tabStyleArtefakte}}">Artefakte</button>
+        <button onClick="{{pickTabDatev}}" style="{{tabStyleDatev}}">DATEV</button>
+        <button onClick="{{pickTabLog}}" style="{{tabStyleLog}}">Log</button>
+      </div>
+
+      <sc-if value="{{isTabUebersicht}}" hint-placeholder-val="{{true}}">
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:24px;">
+          <sc-for list="{{det.kennzahlen}}" as="k" hint-placeholder-count="6">
+            <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:14px 16px;">
+              <div style="font-size:11px;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">{{k.label}}</div>
+              <div class="tnum" style="font-size:19px;font-weight:600;color:var(--color-primary);">{{k.value}}</div>
+              <sc-if value="{{k.sub}}" hint-placeholder-val="{{false}}"><div style="font-size:11.5px;color:var(--color-text-subtle);margin-top:2px;">{{k.sub}}</div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+          <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-text-muted);border-bottom:1px solid var(--color-border-subtle);padding-bottom:10px;margin-bottom:12px;">Ludwig-Seite</div>
+            <sc-for list="{{det.ludwigCard}}" as="f" hint-placeholder-count="6">
+              <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;"><span style="color:var(--color-text-muted);">{{f.label}}</span><span class="tnum" style="font-weight:500;">{{f.value}}</span></div>
+            </sc-for>
+          </div>
+          <div style="background:var(--color-bg-soft);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-text-muted);border-bottom:1px solid var(--color-border-strong);padding-bottom:10px;margin-bottom:12px;">DATEV-Seite</div>
+            <sc-if value="{{det.datevCardEmpty}}" hint-placeholder-val="{{false}}">
+              <div style="font-size:13.5px;color:var(--color-text-subtle);">{{det.datevCardEmptyText}}</div>
+            </sc-if>
+            <sc-if value="{{det.hasDatevCard}}" hint-placeholder-val="{{false}}">
+              <sc-for list="{{det.datevCard}}" as="f" hint-placeholder-count="6">
+                <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;"><span style="color:var(--color-text-muted);">{{f.label}}</span><span class="tnum" style="font-weight:500;">{{f.value}}</span></div>
+              </sc-for>
+            </sc-if>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:10px;">Letzter Bericht</div>
+          <div style="font-size:13.5px;line-height:1.6;color:var(--color-text);">{{det.letzterBericht}}</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isTabDurchgaenge}}" hint-placeholder-val="{{false}}">
+        <sc-if value="{{det.noDurchgaenge}}" hint-placeholder-val="{{false}}"><div style="color:var(--color-text-subtle);font-size:14px;padding:24px 0;">Noch keine Durchgänge in diesem Stapel.</div></sc-if>
+        <sc-for list="{{det.durchgaenge}}" as="run" hint-placeholder-count="2">
+          <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:10px;overflow:hidden;">
+            <div onClick="{{run.toggle}}" style="display:grid;grid-template-columns:60px 100px 1fr 90px 130px 1fr;gap:14px;align-items:center;padding:14px 16px;cursor:pointer;">
+              <div style="font-weight:600;color:var(--color-primary);">D{{run.nr}}</div>
+              <div style="font-size:12.5px;color:var(--color-text-muted);">{{run.art}}</div>
+              <div style="font-size:13px;">{{run.gestartet}} · {{run.dauer}}</div>
+              <div style="font-size:12.5px;color:var(--color-text-subtle);">{{run.ausloeser}}</div>
+              <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Badge" tone="{{run.tone}}" hint-size="auto,22px">{{run.abschluss}}</x-import>
+              <div style="font-size:12.5px;color:var(--color-text-muted);text-align:right;">{{run.ergebnis}}</div>
+            </div>
+            <sc-if value="{{run.expanded}}" hint-placeholder-val="{{false}}">
+              <div style="border-top:1px solid var(--color-border-subtle);padding:12px 16px;background:var(--color-bg-soft);">
+                <sc-for list="{{run.steps}}" as="s" hint-placeholder-count="3">
+                  <div style="font-size:12.5px;padding:4px 0;display:flex;gap:8px;"><span class="lw-mono" style="color:var(--color-text-muted);width:32px;">{{s.step}}</span><span style="color:{{s.gateColor}};font-weight:500;">{{s.gate}}</span><span style="color:var(--color-text-subtle);">{{s.note}}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{isTabBuchungen}}" hint-placeholder-val="{{false}}">
+        <sc-if value="{{det.buchungenHinweis}}" hint-placeholder-val="{{false}}"><div style="font-size:13px;color:var(--color-text-muted);background:var(--color-accent-50);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:14px;">{{det.buchungenHinweis}}</div></sc-if>
+        <sc-if value="{{det.noBuchungen}}" hint-placeholder-val="{{false}}"><div style="color:var(--color-text-subtle);font-size:14px;padding:24px 0;">Keine Buchungssätze in diesem Stapel.</div></sc-if>
+        <table class="stapel-tbl">
+          <thead><tr><th>Datum</th><th>Belegfeld 1</th><th>Buchungstext</th><th>Soll</th><th>Haben</th><th>USt</th><th style="text-align:right;">Betrag</th><th>Status</th><th>Sachverhalt</th><th>Durchg.</th></tr></thead>
+          <tbody>
+            <sc-for list="{{det.buchungen}}" as="b" hint-placeholder-count="5">
+              <tr style="cursor:default;">
+                <td>{{b.datum}}</td>
+                <td class="lw-mono" style="font-size:12.5px;">{{b.belegfeld1}}</td>
+                <td>{{b.text}}</td>
+                <td class="lw-mono">{{b.soll}}</td>
+                <td class="lw-mono">{{b.haben}}</td>
+                <td>{{b.ust}}</td>
+                <td class="tnum" style="text-align:right;">{{b.betrag}}</td>
+                <td><x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Badge" tone="{{b.statusTone}}" hint-size="auto,22px">{{b.statusLabel}}</x-import></td>
+                <td style="color:var(--color-accent-700);">{{b.sv}}</td>
+                <td style="color:var(--color-text-muted);">{{b.durchgang}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </sc-if>
+
+      <sc-if value="{{isTabArtefakte}}" hint-placeholder-val="{{false}}">
+        <div style="font-size:13px;color:var(--color-text-muted);margin-bottom:16px;">Sachverhalte leben über Stapel hinweg — hier steht, welche Artefakte in diesem Stapel <em>entstanden</em> sind.</div>
+        <sc-for list="{{det.artefaktGruppen}}" as="g" hint-placeholder-count="6">
+          <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:10px;">
+            <div onClick="{{g.toggle}}" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;cursor:pointer;">
+              <div style="font-weight:600;font-size:13.5px;">{{g.label}} <span class="tnum" style="color:var(--color-text-muted);font-weight:400;">({{g.count}})</span></div>
+              <span style="font-size:12px;color:var(--color-accent-700);">{{g.toggleLabel}}</span>
+            </div>
+            <sc-if value="{{g.expanded}}" hint-placeholder-val="{{false}}">
+              <div style="border-top:1px solid var(--color-border-subtle);padding:4px 16px 10px;">
+                <sc-if value="{{g.empty}}" hint-placeholder-val="{{false}}"><div style="font-size:12.5px;color:var(--color-text-subtle);padding:8px 0;">Keine.</div></sc-if>
+                <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="2">
+                  <div style="font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--color-border-subtle);display:flex;justify-content:space-between;gap:10px;">
+                    <span>{{r.text}}</span><span style="color:var(--color-text-muted);white-space:nowrap;">{{r.akteur}}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{isTabDatev}}" hint-placeholder-val="{{false}}">
+        <sc-if value="{{det.datevTabEmpty}}" hint-placeholder-val="{{false}}">
+          <div style="color:var(--color-text-subtle);font-size:14px;background:var(--color-bg-soft);border-radius:var(--radius-md);padding:24px;">{{det.datevTabEmptyText}}</div>
+        </sc-if>
+        <sc-if value="{{det.datevTabFull}}" hint-placeholder-val="{{false}}">
+          <div style="font-size:13px;color:var(--color-text-muted);margin-bottom:16px;">{{det.datevSummary}}</div>
+          <table class="stapel-tbl">
+            <thead><tr><th>Konto</th><th>Art</th><th>Ludwig</th><th>DATEV</th></tr></thead>
+            <tbody>
+              <sc-for list="{{det.vergleich}}" as="v" hint-placeholder-count="3">
+                <tr style="cursor:default;">
+                  <td style="font-weight:500;">{{v.konto}}</td>
+                  <td style="color:{{v.artColor}};">{{v.art}}</td>
+                  <td>{{v.ludwig}}</td>
+                  <td>{{v.datev}}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <sc-if value="{{det.nachleseBericht}}" hint-placeholder-val="{{false}}">
+            <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:18px 20px;margin-top:18px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:8px;">Nachlese-Bericht</div>
+              <div style="font-size:13.5px;line-height:1.6;">{{det.nachleseBericht}}</div>
+            </div>
+          </sc-if>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{isTabLog}}" hint-placeholder-val="{{false}}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div style="display:flex;gap:3px;background:var(--color-bg-soft);border-radius:var(--radius-md);padding:3px;">
+            <button onClick="{{pickSichtVerlauf}}" style="{{sichtStyleVerlauf}}">Verlauf</button>
+            <button onClick="{{pickSichtProtokoll}}" style="{{sichtStyleProtokoll}}">Protokoll</button>
+            <button onClick="{{pickSichtTechnik}}" style="{{sichtStyleTechnik}}">Technik</button>
+          </div>
+          <label style="font-size:13px;color:var(--color-text-muted);display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" checked="{{logOnlyErrors}}" onChange="{{toggleErrors}}"> nur Fehler
+          </label>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:20px;">
+          <div style="font-size:11.5px;color:var(--color-text-muted);margin-bottom:10px;">Staffel-Leiste — wo die Zeit hingegangen ist</div>
+          <div style="display:flex;height:20px;border-radius:var(--radius-sm);overflow:hidden;">
+            <sc-for list="{{det.staffel}}" as="seg" hint-placeholder-count="5">
+              <div title="{{seg.title}}" style="flex:{{seg.flex}};background:{{seg.color}};border-right:1px solid #fff;"></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;">
+            <sc-for list="{{det.staffelLegend}}" as="l" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--color-text-muted);"><span style="width:8px;height:8px;border-radius:2px;background:{{l.color}};display:inline-block;"></span>{{l.label}}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <sc-if value="{{det.noTimeline}}" hint-placeholder-val="{{false}}"><div style="color:var(--color-text-subtle);font-size:14px;padding:12px 0;">Keine Einträge in dieser Sicht.</div></sc-if>
+        <div>
+          <sc-for list="{{det.timeline}}" as="e" hint-placeholder-count="8">
+            <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--color-border-subtle);">
+              <div class="tnum" style="width:130px;flex-shrink:0;font-size:12px;color:var(--color-text-muted);">{{e.at}}</div>
+              <div style="width:150px;flex-shrink:0;font-size:12.5px;color:{{e.actorColor}};">{{e.actor}}</div>
+              <div style="flex:1;">
+                <div style="font-size:13.5px;font-weight:500;color:{{e.eventColor}};">{{e.event}} <sc-if value="{{e.code}}" hint-placeholder-val="{{false}}"><span class="lw-mono" style="font-size:11px;color:var(--color-text-subtle);font-weight:400;">{{e.code}}</span></sc-if></div>
+                <sc-if value="{{e.detail}}" hint-placeholder-val="{{false}}"><div style="font-size:12.5px;color:var(--color-text-muted);margin-top:2px;">{{e.detail}}</div></sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const STATE_META = {
+  agent: { label: 'Agent arbeitet', tone: 'neutral' },
+  prepared: { label: 'Bereit zur Prüfung', tone: 'neutral' },
+  review: { label: 'Kanzlei prüft', tone: 'info' },
+  ready: { label: 'Freigegeben', tone: 'info' },
+  exporting: { label: 'Wird übertragen', tone: 'info' },
+  inspection: { label: 'DATEV prüft', tone: 'info' },
+  confirmed: { label: 'In DATEV angekommen', tone: 'info' },
+  mirrored: { label: 'Im Spiegel, Nachlese offen', tone: 'info' },
+  closed: { label: 'Abgeschlossen', tone: 'success' },
+  failed: { label: 'Fehlgeschlagen', tone: 'danger' }
+};
+const OWNER_META = {
+  agent: { label: 'Agent', color: '#5BA4D1' },
+  agent_nachlese: { label: 'Agent · Nachlese', color: '#5BA4D1' },
+  bereit: { label: 'Bereit / niemand', color: '#C4CCD5' },
+  mandant: { label: 'Mandant (wartet)', color: '#B07B2C' },
+  kanzlei: { label: 'Kanzlei', color: '#1A3A5C' },
+  bridge: { label: 'Bridge', color: '#5C5C5C' },
+  datev: { label: 'DATEV', color: '#5C5C5C' },
+  spiegel: { label: 'Spiegel', color: '#3F7A5A' }
+};
+const PHASES = [
+  { key: 'buchen', label: 'BUCHEN', sub: 'Agent ⇄ bereit', states: ['agent', 'prepared'] },
+  { key: 'pruefen', label: 'PRÜFEN', sub: 'Kanzlei', states: ['review'] },
+  { key: 'uebertragen', label: 'ÜBERTRAGEN', sub: 'Bridge → DATEV', states: ['ready', 'exporting', 'inspection', 'failed'] },
+  { key: 'angekommen', label: 'ANGEKOMMEN', sub: 'Spiegel → Nachlese → zu', states: ['confirmed', 'mirrored', 'closed'] }
+];
+
+function eur(n) { return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
+
+class Component extends DCLogic {
+  state = {
+    scenario: 'normal', view: 'list', selectedId: null,
+    listTab: 'alle', detailTab: 'uebersicht', logSicht: 'verlauf', logOnlyErrors: false,
+    anlegenHint: false, expandedRuns: {}, expandedGroups: {}, listPage: 1
+  };
+  listPageSize = 3;
+
+  constructor(props) {
+    super(props);
+    this.data = this.buildData();
+  }
+
+  buildData() {
+    const curShared = {
+      durchgaenge: [
+        { nr: 1, art: 'Buchung', gestartet: '18.08.2026, 02:00', dauer: '31 Min.', ausloeser: 'Cron', abschluss: 'Abgeschlossen', ergebnis: '51 Vorschläge, 4 Klärungen, 2 Nachforderungen',
+          steps: [{ step: '1a', gate: 'passed', note: '' }, { step: '3f', gate: 'overridden', note: '2 Belege ohne Rechnung — als Erwartung angelegt' }, { step: '5a', gate: 'passed', note: '' }] },
+        { nr: 2, art: 'Buchung', gestartet: '26.08.2026, 02:00', dauer: '12 Min.', ausloeser: 'Cron · Rücklauf', abschluss: 'Abgeschlossen', ergebnis: '13 Sätze ergänzt/ersetzt',
+          steps: [{ step: '1a', gate: 'passed', note: '' }, { step: '5a', gate: 'passed', note: '' }] }
+      ],
+      buchungenOffen: [
+        { datum: '04.08.', belegfeld1: 'RE-2201', text: 'Bitumenbahnen Lieferung Nordbedachung GmbH', soll: '3400', haben: '70000', ust: '19', betrag: eur(3120), status: 'accepted', sv: 'SV-2026-0441', durchgang: 'D1' },
+        { datum: '05.08.', belegfeld1: '—', text: 'Kfz-Versicherung Firmenwagen August', soll: '6420', haben: '70000', ust: '—', betrag: eur(178.4), status: 'accepted', sv: 'SV-2026-0448', durchgang: 'D1' },
+        { datum: '11.08.', belegfeld1: 'RE-5512', text: 'Gerüstbau Subunternehmer Fassadensanierung', soll: '3010', haben: '70000', ust: '9', betrag: eur(5640), status: 'rejected', sv: 'SV-2026-0455', durchgang: 'D1' },
+        { datum: '13.08.', belegfeld1: 'RE-5512-K', text: 'Gerüstbau Subunternehmer, korrigiert', soll: '3010', haben: '70000', ust: '9', betrag: eur(5640), status: 'accepted', sv: 'SV-2026-0455', durchgang: 'D2' },
+        { datum: '20.08.', belegfeld1: 'RE-9012', text: 'Dachfenster Velux Nachlieferung', soll: '3400', haben: '70000', ust: '19', betrag: eur(612), status: 'proposed', sv: 'SV-2026-0470', durchgang: 'D2' },
+        { datum: '27.08.', belegfeld1: 'RE-9020', text: 'Werkzeugmiete Bohrhammer', soll: '4830', haben: '70000', ust: '19', betrag: eur(94.5), status: 'proposed', sv: 'SV-2026-0481', durchgang: 'D2' }
+      ],
+      buchungenClaimed: [
+        { datum: '04.08.', belegfeld1: 'RE-2201', text: 'Bitumenbahnen Lieferung Nordbedachung GmbH', soll: '3400', haben: '70000', ust: '19', betrag: eur(3120), status: 'accepted', sv: 'SV-2026-0441', durchgang: 'D1' },
+        { datum: '05.08.', belegfeld1: '—', text: 'Kfz-Versicherung Firmenwagen August', soll: '6420', haben: '70000', ust: '—', betrag: eur(178.4), status: 'accepted', sv: 'SV-2026-0448', durchgang: 'D1' },
+        { datum: '13.08.', belegfeld1: 'RE-5512-K', text: 'Gerüstbau Subunternehmer, korrigiert', soll: '3010', haben: '70000', ust: '9', betrag: eur(5640), status: 'accepted', sv: 'SV-2026-0455', durchgang: 'D2' },
+        { datum: '20.08.', belegfeld1: 'RE-9012', text: 'Dachfenster Velux Nachlieferung', soll: '3400', haben: '70000', ust: '19', betrag: eur(612), status: 'accepted', sv: 'SV-2026-0470', durchgang: 'D2' },
+        { datum: '27.08.', belegfeld1: 'RE-9020', text: 'Werkzeugmiete Bohrhammer', soll: '4830', haben: '70000', ust: '19', betrag: eur(94.5), status: 'accepted', sv: 'SV-2026-0481', durchgang: 'D2' }
+      ],
+      artefakte: {
+        sachverhalte: [
+          { text: 'SV-2026-0441 — Bitumenbahnen Lieferung Nordbedachung GmbH', akteur: 'Agent D1' },
+          { text: 'SV-2026-0455 — Gerüstbau Subunternehmer Fassadensanierung', akteur: 'Agent D1' },
+          { text: 'SV-2026-0470 — Dachfenster Velux Nachlieferung', akteur: 'Agent D2' }
+        ],
+        ereignisse: 58,
+        klaerungen: [
+          { text: 'Beleg fehlt: Rechnung zu Lieferschein 0921 (Mandant)', akteur: 'Agent D1' },
+          { text: 'Gerüstbau: 9% oder 19% USt korrekt? (Kanzlei)', akteur: 'Agent D1' }
+        ],
+        notizen: [{ text: 'Juli hatte die Jahresabrechnung Versicherung, August nicht', akteur: 'M. Vogt' }],
+        regeln: [{ text: 'Leasing Firmenwagen monatlich 486,90 €', akteur: 'Agent D1' }],
+        konventionen: [{ text: 'K-11 · Gerüstbau-Subunternehmer grundsätzlich 9% (Bauleistung §13b)', akteur: 'Agent D1, unbestätigt' }],
+        produktbefunde: [],
+        pruefquittungen: [{ text: 'Mengengerüst Belegeingang quittiert', akteur: 'M. Vogt · 26.08.2026' }],
+        belegeManuell: []
+      }
+    };
+
+    const h1 = {
+      id: 'h1', stapelnummer: '2026-0013', description: '07-2026-Rehbein', state: 'mirrored',
+      periodLabel: '01.–31.07.2026', supplementsOf: null,
+      derived: { dranIst: 'agent_nachlese', dranIstLabel: 'Agent · Nachlese läuft', seitLabel: 'seit 12.08., 06:10', seitAbs: '12.08.2026, 06:10 Uhr',
+        durchgaenge: 3, buchungen: { gesamt: 87, accepted: 87, rejected: 0, proposed: 0 }, klaerungen: { offen: 0, gesamt: 5 },
+        sachverhalte: 52, belege: { erledigt: 96, gesamt: 96 }, sumSoll: 34210.55, sumHaben: 34210.55, schleifen: { zurueck: 1, neuerBeleg: 0 } },
+      datevLink: { entries: 87, sum: eur(34210.55), abgleich: { unveraendert: 83, geaendert: 3, aufgeteilt: 1, fehlt: 0, unklar: 0, fremd: 1 } },
+      detail: {
+        ludwigCard: [
+          ['Bezeichnung', '07-2026-Rehbein'], ['Zeitraum', '01.–31.07.2026'], ['Angelegt', '03.07.2026, 21:05 (Kette)'],
+          ['Weg', 'Bridge'], ['Buchungen', '87'], ['Σ Soll/Haben', eur(34210.55)]
+        ],
+        datevCard: [
+          ['Vorgang', '9c2a71e0-…'], ['Bezeichnung', '07-2026-Rehbein'], ['Festschreibung', 'Ja'],
+          ['Sätze', '87'], ['Summe', eur(34210.55)], ['Zuletzt gesehen', '12.08.2026, 06:10']
+        ],
+        letzterBericht: 'Nachlese: 3 Sätze wurden von DATEV geändert (BU-Schlüssel für Bauleistungen nach §13b korrigiert), 1 Aufteilung der Kfz-Versicherung periodengerecht durch die Kanzlei, 1 Satz im Spiegel nicht auffindbar (vermutlich Sammelbuchung). Kommentare an den jeweiligen Sachverhalten hinterlegt, eine Konvention vorgeschlagen.',
+        durchgaenge: curShared.durchgaenge.concat([
+          { nr: 3, art: 'Nachlese', gestartet: '12.08.2026, 06:10', dauer: '14 Min.', ausloeser: 'Spiegel-Fund', abschluss: 'Abgeschlossen', ergebnis: '3 Kommentare, 1 Konventions-Vorschlag',
+            steps: [{ step: '1a', gate: 'passed', note: '' }, { step: '2a', gate: 'passed', note: '' }] }
+        ]),
+        buchungen: curShared.buchungenClaimed,
+        artefakte: curShared.artefakte,
+        datevTab: {
+          summary: '4 von 87 Sätzen weichen ab: 3 geändert, 1 aufgeteilt.',
+          vergleich: [
+            { konto: '3010 / Fremdleistungen Bau', art: 'geändert', color: 'var(--color-warning)', ludwig: 'BU 9', datev: 'BU 9, Belegfeld ergänzt' },
+            { konto: '3400 / Wareneingang', art: 'geändert', color: 'var(--color-warning)', ludwig: 'BU 9, 3.120,00 €', datev: 'BU 19, 3.120,00 €' },
+            { konto: '6420 / Kfz-Versicherung', art: 'aufgeteilt', color: 'var(--color-warning)', ludwig: '1 Satz, 178,40 €', datev: '2 Sätze, periodengerecht' },
+            { konto: '4980 / Sonstiges', art: 'von Kanzlei ergänzt', color: 'var(--color-text-muted)', ludwig: '—', datev: '1 Satz, 90,00 € (Portokasse)' }
+          ],
+          nachleseBericht: curShared.artefakte ? 'Drei Abweichungen geprüft: zwei BU-Schlüssel-Korrekturen für Bauleistungen (§13b) — DATEV hat den korrekten Schlüssel gesetzt, als Konvention K-11 übernommen — und eine periodengerechte Aufteilung der Kfz-Versicherung durch die Kanzlei. Keine deutet auf einen Fehler in der Buchung hin.' : ''
+        },
+        staffel: [
+          { besitzer: 'agent', from: 0, to: 2 }, { besitzer: 'bereit', from: 2, to: 20 }, { besitzer: 'kanzlei', from: 20, to: 62 },
+          { besitzer: 'mandant', from: 62, to: 66 }, { besitzer: 'agent', from: 66, to: 68 }, { besitzer: 'kanzlei', from: 68, to: 90 },
+          { besitzer: 'bridge', from: 90, to: 91 }, { besitzer: 'spiegel', from: 91, to: 100 }
+        ],
+        timeline: [
+          { at: '03.07. 21:10', tiefe: 1, actor: 'System', event: 'Stapel eröffnet', detail: 'Kette: 2026-0012 in DATEV angekommen' },
+          { at: '04.08. 02:00', tiefe: 1, actor: 'Agent · D1', event: 'Durchgang 1 gestartet', detail: 'Cron' },
+          { at: '04.08. 02:14', tiefe: 3, actor: 'Agent · D1', event: 'Schritt 1a → 3f', detail: 'entered 02:14:20', code: 'step' },
+          { at: '04.08. 02:19', tiefe: 2, actor: 'Agent · D1', event: 'Override 3f', detail: '1 Lieferschein ohne Rechnung — als Erwartung angelegt' },
+          { at: '04.08. 02:32', tiefe: 1, actor: 'Agent · D1', event: 'Durchgang 1 abgeschlossen', detail: '79 Vorschläge, 5 Klärungen, 1 Nachforderung' },
+          { at: '04.08. 02:32', tiefe: 1, actor: 'System', event: 'Bereit zur Prüfung', detail: 'Handover-Mail an 2 Kanzlei-User' },
+          { at: '05.08. 09:10', tiefe: 1, actor: 'S. Rehbein (Mandant)', event: 'Nachforderung beantwortet', detail: 'Lieferschein 0812 → Rechnung nachgereicht' },
+          { at: '05.08. 09:10', tiefe: 1, actor: 'System', event: 'Wieder beim Agenten: neuer Beleg', detail: 'Rechnung_0812.pdf' },
+          { at: '08.08. 16:40', tiefe: 1, actor: 'M. Vogt', event: 'Prüfung übernommen', detail: '' },
+          { at: '09.08. 02:00', tiefe: 1, actor: 'Agent · D2', event: 'Durchgang 2 gestartet', detail: 'Cron · Rücklauf' },
+          { at: '09.08. 02:07', tiefe: 2, actor: 'Agent · D2', event: 'Judge: 8 Sätze bestätigt', detail: '0 abgelehnt' },
+          { at: '09.08. 02:09', tiefe: 1, actor: 'Agent · D2', event: 'Durchgang 2 abgeschlossen', detail: '8 Sätze ergänzt, Nachforderung erledigt' },
+          { at: '09.08. 21:00', tiefe: 1, actor: 'M. Vogt', event: 'Freigegeben', detail: '87 Sätze geclaimt' },
+          { at: '09.08. 21:13', tiefe: 1, actor: 'Bridge', event: 'Übertragung gestartet', detail: '' },
+          { at: '09.08. 21:13', tiefe: 1, actor: 'DATEV', event: 'In DATEV angekommen', detail: 'Operation 9c2a71e0-… · Stapel 2026-0014 eröffnet' },
+          { at: '12.08. 06:10', tiefe: 1, actor: 'System', event: 'Im Spiegel gefunden', detail: '4 Abweichungen' },
+          { at: '12.08. 06:10', tiefe: 1, actor: 'Agent · Nachlese', event: 'Nachlese gestartet', detail: '' },
+          { at: '12.08. 06:24', tiefe: 3, actor: 'Agent · Nachlese', event: 'clarification.raised', detail: '{case: SV-2026-0330, type: bu_mismatch}', code: 'clarification.raised' }
+        ]
+      }
+    };
+
+    const h2 = {
+      id: 'h2', stapelnummer: '2026-0012', description: '06-2026-Rehbein', state: 'closed',
+      periodLabel: '01.–30.06.2026', supplementsOf: null,
+      derived: { dranIst: 'niemand', dranIstLabel: '—', seitLabel: 'seit 08.07., 09:02', seitAbs: '08.07.2026, 09:02 Uhr',
+        durchgaenge: 2, buchungen: { gesamt: 74, accepted: 74, rejected: 0, proposed: 0 }, klaerungen: { offen: 0, gesamt: 2 },
+        sachverhalte: 44, belege: { erledigt: 79, gesamt: 79 }, sumSoll: 29010, sumHaben: 29010, schleifen: { zurueck: 0, neuerBeleg: 0 } },
+      datevLink: { entries: 74, sum: eur(29010), abgleich: { unveraendert: 74, geaendert: 0, aufgeteilt: 0, fehlt: 0, unklar: 0, fremd: 0 } },
+      detail: {
+        ludwigCard: [['Bezeichnung', '06-2026-Rehbein'], ['Zeitraum', '01.–30.06.2026'], ['Weg', 'Bridge'], ['Buchungen', '74']],
+        datevCard: [['Vorgang', '5e10a3f2-…'], ['Festschreibung', 'Ja'], ['Sätze', '74'], ['Summe', eur(29010)]],
+        letzterBericht: 'Diff leer — der Stapel wurde vom Server automatisch geschlossen.',
+        durchgaenge: [
+          { nr: 1, art: 'Buchung', gestartet: '01.06.2026, 02:00', dauer: '28 Min.', ausloeser: 'Cron', abschluss: 'Abgeschlossen', ergebnis: '74 Vorschläge', steps: [{ step: '1a', gate: 'passed', note: '' }] }
+        ],
+        buchungen: [
+          { datum: '03.06.', belegfeld1: 'RE-1180', text: 'Dacheindeckung Ziegel Musterhof', soll: '3400', haben: '70000', ust: '19', betrag: eur(2410), status: 'accepted', sv: 'SV-2026-0210', durchgang: 'D1' },
+          { datum: '18.06.', belegfeld1: '—', text: 'Kfz-Steuer Firmenwagen', soll: '4520', haben: '70000', ust: '—', betrag: eur(96), status: 'accepted', sv: 'SV-2026-0224', durchgang: 'D1' }
+        ],
+        artefakte: { sachverhalte: [{ text: 'SV-2026-0210 — Dacheindeckung Ziegel Musterhof', akteur: 'Agent D1' }], ereignisse: 40, klaerungen: [], notizen: [], regeln: [], konventionen: [], produktbefunde: [], pruefquittungen: [], belegeManuell: [] },
+        datevTab: { summary: 'Diff leer — 1:1.', vergleich: [], nachleseBericht: '' },
+        staffel: [{ besitzer: 'agent', from: 0, to: 4 }, { besitzer: 'kanzlei', from: 4, to: 30 }, { besitzer: 'bridge', from: 30, to: 32 }, { besitzer: 'spiegel', from: 32, to: 100 }],
+        timeline: [
+          { at: '01.06. 02:00', tiefe: 1, actor: 'Agent · D1', event: 'Durchgang 1 abgeschlossen', detail: '74 Vorschläge' },
+          { at: '02.06. 10:00', tiefe: 1, actor: 'M. Vogt', event: 'Freigegeben', detail: '74 Sätze geclaimt' },
+          { at: '02.06. 18:02', tiefe: 1, actor: 'DATEV', event: 'In DATEV angekommen', detail: 'Operation 5e10a3f2-…' },
+          { at: '08.07. 09:02', tiefe: 1, actor: 'System', event: 'Abgeschlossen', detail: 'Diff leer' }
+        ]
+      }
+    };
+
+    const h3 = {
+      id: 'h3', stapelnummer: '2026-0006', description: '02-2026-Rehbein', state: 'confirmed', ohneZyklus: true,
+      periodLabel: '01.–28.02.2026', supplementsOf: null,
+      derived: { dranIst: 'niemand', dranIstLabel: '—', seitLabel: 'seit 02.03.2026', seitAbs: '02.03.2026, 18:00 Uhr',
+        durchgaenge: 0, buchungen: { gesamt: 0, accepted: 0, rejected: 0, proposed: 0 }, klaerungen: { offen: 0, gesamt: 0 },
+        sachverhalte: 0, belege: { erledigt: 0, gesamt: 0 }, sumSoll: 0, sumHaben: 0, schleifen: { zurueck: 0, neuerBeleg: 0 } },
+      datevLink: null,
+      detail: {
+        ludwigCard: [['Bezeichnung', '02-2026-Rehbein'], ['Weg', 'Datei-Export (EXTF)']],
+        datevCard: [], datevCardEmptyText: 'Keine Verknüpfung möglich (Datei-Export vor der Bridge).',
+        letzterBericht: 'Dieser Stapel liegt vor der Ludwig-Anbindung. Keine Durchgänge, keine Artefakte, keine Spiegel-Kante.',
+        durchgaenge: [], buchungen: [],
+        artefakte: { sachverhalte: [], ereignisse: 0, klaerungen: [], notizen: [], regeln: [], konventionen: [], produktbefunde: [], pruefquittungen: [], belegeManuell: [] },
+        datevTab: { empty: true, emptyText: 'Keine Verknüpfung möglich (Datei-Export).' },
+        staffel: [{ besitzer: 'bridge', from: 0, to: 100 }],
+        timeline: [{ at: '01.03.2026', tiefe: 1, actor: 'Kanzlei', event: 'Datei-Export (EXTF)', detail: 'Bestand vor der Bridge-Anbindung' }]
+      }
+    };
+
+    const nl1 = {
+      id: 'nl1', stapelnummer: '2026-0016', description: '06-2026-Rehbein-2', state: 'agent',
+      periodLabel: '01.–30.06.2026', supplementsOf: '2026-0012',
+      derived: { dranIst: 'agent', dranIstLabel: 'Agent · Durchgang 1 · Schritt 3c · seit 6 Min.', seitLabel: 'seit 27.08., 21:40', seitAbs: '27.08.2026, 21:40 Uhr',
+        durchgaenge: 1, buchungen: { gesamt: 0, accepted: 0, rejected: 0, proposed: 0 }, klaerungen: { offen: 0, gesamt: 0 },
+        sachverhalte: 0, belege: { erledigt: 0, gesamt: 23 }, sumSoll: 0, sumHaben: 0, schleifen: { zurueck: 0, neuerBeleg: 0 } },
+      datevLink: null,
+      detail: {
+        ludwigCard: [['Bezeichnung', '06-2026-Rehbein-2'], ['Nachtrag zu', '2026-0012'], ['Angelegt von', 'M. Vogt, 27.08.2026'], ['Belege', '23 nachgeliefert']],
+        datevCard: [], datevCardEmptyText: 'Noch nicht im Spiegel.',
+        letzterBericht: 'Durchgang läuft — der Mandant hat 23 Belege für Juni nachgeliefert.',
+        durchgaenge: [{ nr: 1, art: 'Buchung', gestartet: '27.08.2026, 21:34', dauer: 'läuft seit 6 Min.', ausloeser: 'Cron · Nachtrag', abschluss: 'In Arbeit', ergebnis: 'Schritt 3c', steps: [{ step: '1a', gate: 'passed', note: '' }, { step: '3c', gate: 'in Arbeit', note: '' }] }],
+        buchungen: [], artefakte: { sachverhalte: [], ereignisse: 0, klaerungen: [], notizen: [], regeln: [], konventionen: [], produktbefunde: [], pruefquittungen: [], belegeManuell: [] },
+        datevTab: { empty: true, emptyText: 'Noch nicht im Spiegel.' },
+        staffel: [{ besitzer: 'agent', from: 0, to: 100 }],
+        timeline: [
+          { at: '27.08. 09:40', tiefe: 1, actor: 'M. Vogt', event: 'Nachtrag angelegt', detail: '23 Belege nachgeliefert' },
+          { at: '27.08. 21:34', tiefe: 1, actor: 'Agent · D1', event: 'Durchgang 1 gestartet', detail: 'Cron' }
+        ]
+      }
+    };
+
+    const curDetailBase = {
+      durchgaenge: curShared.durchgaenge, artefakte: curShared.artefakte,
+      ludwigCard: [['Bezeichnung', '08-2026-Rehbein'], ['Zeitraum', '01.–31.08.2026'], ['Angelegt', '03.08.2026, 21:10 (Kette)'], ['Weg', 'Bridge']]
+    };
+
+    const curNormal = {
+      id: 'cur', stapelnummer: '2026-0014', description: '08-2026-Rehbein', state: 'review',
+      periodLabel: '01.–31.08.2026', supplementsOf: null,
+      derived: { dranIst: 'kanzlei', dranIstLabel: 'Kanzlei · 2 neue Belege', seitLabel: 'seit 26.08., 09:40', seitAbs: '26.08.2026, 09:40 Uhr',
+        durchgaenge: 2, buchungen: { gesamt: 64, accepted: 58, rejected: 3, proposed: 3 }, klaerungen: { offen: 3, gesamt: 6 },
+        sachverhalte: 41, belege: { erledigt: 70, gesamt: 72 }, sumSoll: 21840.1, sumHaben: 21840.1, schleifen: { zurueck: 1, neuerBeleg: 0 }, neueBelege: 2 },
+      datevLink: null,
+      detail: Object.assign({}, curDetailBase, {
+        datevCard: [], datevCardEmptyText: 'Erst ab „In DATEV angekommen" zeigt dieser Tab die Spiegel-Seite.',
+        letzterBericht: 'Durchgang 2: Rücklauf eingearbeitet, 13 Sätze ergänzt/ersetzt. 3 Klärungen an die Kanzlei, 1 Nachforderung an den Mandanten läuft.',
+        buchungen: curShared.buchungenOffen, buchungenHinweis: 'Bei der Freigabe werden nur freigegebene Sätze mitgenommen; Vorschläge und Abgelehntes wandern in den nächsten Stapel.',
+        datevTab: { empty: true, emptyText: 'Erst ab „In DATEV angekommen" zeigt dieser Tab die Spiegel-Seite.' },
+        staffel: [
+          { besitzer: 'agent', from: 0, to: 3 }, { besitzer: 'bereit', from: 3, to: 15 }, { besitzer: 'kanzlei', from: 15, to: 55 },
+          { besitzer: 'mandant', from: 55, to: 60 }, { besitzer: 'agent', from: 60, to: 63 }, { besitzer: 'kanzlei', from: 63, to: 100 }
+        ],
+        timeline: [
+          { at: '03.08. 21:10', tiefe: 1, actor: 'System', event: 'Stapel eröffnet', detail: 'Kette: 2026-0013 in DATEV angekommen' },
+          { at: '04.08. 02:00', tiefe: 1, actor: 'Agent · D1', event: 'Durchgang 1 gestartet', detail: 'Cron' },
+          { at: '04.08. 02:31', tiefe: 1, actor: 'Agent · D1', event: 'Durchgang 1 abgeschlossen', detail: '51 Vorschläge, 4 Klärungen' },
+          { at: '04.08. 02:31', tiefe: 1, actor: 'System', event: 'Bereit zur Prüfung', detail: 'Handover-Mail an 2 Kanzlei-User' },
+          { at: '06.08. 09:00', tiefe: 1, actor: 'M. Vogt', event: 'Prüfung übernommen', detail: '' },
+          { at: '12.08. 14:00', tiefe: 1, actor: 'M. Vogt', event: 'Zurück an den Agenten', detail: '1 Ablehnung, 1 Notiz' },
+          { at: '13.08. 02:00', tiefe: 1, actor: 'Agent · D2', event: 'Durchgang 2 gestartet', detail: 'Cron · Rücklauf' },
+          { at: '13.08. 02:07', tiefe: 2, actor: 'Agent · D2', event: 'Gate 3f blockiert', detail: '2 Belege ohne Buchung' },
+          { at: '13.08. 02:11', tiefe: 1, actor: 'Agent · D2', event: 'Durchgang 2 abgeschlossen', detail: '13 Sätze ergänzt/ersetzt' },
+          { at: '13.08. 02:11', tiefe: 1, actor: 'System', event: 'Bereit zur Prüfung', detail: '' },
+          { at: '26.08. 09:40', tiefe: 1, actor: 'M. Vogt', event: 'Prüfung übernommen', detail: '' },
+          { at: '27.08. 10:15', tiefe: 1, actor: 'S. Rehbein (Portal)', event: 'Neuer Beleg eingegangen', detail: 'Rechnung_Nachlieferung.pdf — wartet, bis die Kanzlei zurückgibt' },
+          { at: '27.08. 15:40', tiefe: 1, actor: 'S. Rehbein (Portal)', event: 'Neuer Beleg eingegangen', detail: 'Lieferschein_0921.pdf' }
+        ]
+      })
+    };
+
+    const curFailed = {
+      id: 'cur', stapelnummer: '2026-0014', description: '08-2026-Rehbein', state: 'failed', error: 'Konto 4830 ist Automatikkonto — BU-Schlüssel 9 nicht zulässig (Zeile 52).',
+      periodLabel: '01.–31.08.2026', supplementsOf: null,
+      derived: { dranIst: 'kanzlei', dranIstLabel: 'Kanzlei · Fehler beheben', seitLabel: 'seit 27.08., 21:14', seitAbs: '27.08.2026, 21:14 Uhr',
+        durchgaenge: 2, buchungen: { gesamt: 64, accepted: 64, rejected: 0, proposed: 0 }, klaerungen: { offen: 0, gesamt: 6 },
+        sachverhalte: 41, belege: { erledigt: 72, gesamt: 72 }, sumSoll: 23410.9, sumHaben: 23410.9, schleifen: { zurueck: 1, neuerBeleg: 0 } },
+      datevLink: null,
+      detail: Object.assign({}, curDetailBase, {
+        datevCard: [], datevCardEmptyText: 'Übertragung fehlgeschlagen — noch nicht im Spiegel.',
+        letzterBericht: 'Freigegeben und an die Bridge übergeben; die Übertragung ist mit einem DATEV-Fehler zurückgekommen.',
+        buchungen: curShared.buchungenClaimed.concat([{ datum: '27.08.', belegfeld1: 'RE-9031', text: 'Werkzeugmiete Bohrhammer, korrigiert', soll: '4830', haben: '70000', ust: '19', betrag: eur(94.5), status: 'accepted', sv: 'SV-2026-0481', durchgang: 'D2' }]),
+        datevTab: { empty: true, emptyText: 'Übertragung fehlgeschlagen — noch nicht im Spiegel.' },
+        staffel: [{ besitzer: 'agent', from: 0, to: 3 }, { besitzer: 'kanzlei', from: 3, to: 90 }, { besitzer: 'bridge', from: 90, to: 96 }, { besitzer: 'datev', from: 96, to: 100 }],
+        timeline: [
+          { at: '04.08. 02:31', tiefe: 1, actor: 'Agent · D1', event: 'Durchgang 1 abgeschlossen', detail: '51 Vorschläge' },
+          { at: '13.08. 02:11', tiefe: 1, actor: 'Agent · D2', event: 'Durchgang 2 abgeschlossen', detail: '13 Sätze ergänzt' },
+          { at: '27.08. 14:00', tiefe: 1, actor: 'M. Vogt', event: 'Freigegeben', detail: '64 Sätze geclaimt' },
+          { at: '27.08. 21:14', tiefe: 1, actor: 'Bridge', event: 'Übertragung gestartet', detail: '' },
+          { at: '27.08. 21:14', tiefe: 1, actor: 'DATEV', event: 'Fehlgeschlagen', detail: 'Konto 4830 ist Automatikkonto — BU-Schlüssel 9 nicht zulässig (Zeile 52)', severity: 'error' },
+          { at: '27.08. 21:14', tiefe: 3, actor: 'Bridge', event: 'log', detail: 'status 400, body_excerpt: „…AutomatikkontoBuSchluessel…"' }
+        ]
+      })
+    };
+
+    const curPrepared = {
+      id: 'cur', stapelnummer: '2026-0014', description: '08-2026-Rehbein', state: 'prepared',
+      periodLabel: '01.–31.08.2026', supplementsOf: null,
+      derived: { dranIst: 'mandant', dranIstLabel: 'wartet auf Mandant · 2 Nachforderungen · fällig 25.08.', seitLabel: 'seit 18.08., 02:31', seitAbs: '18.08.2026, 02:31 Uhr',
+        durchgaenge: 1, buchungen: { gesamt: 51, accepted: 48, rejected: 0, proposed: 3 }, klaerungen: { offen: 2, gesamt: 4 },
+        sachverhalte: 33, belege: { erledigt: 58, gesamt: 60 }, sumSoll: 17820.4, sumHaben: 17820.4, schleifen: { zurueck: 0, neuerBeleg: 0 },
+        nachforderungen: { offen: 2, aelteste: '18.08.2026', faellig: '25.08.2026', ueberfaellig: true, empfaenger: 1 } },
+      datevLink: null,
+      detail: Object.assign({}, curDetailBase, {
+        durchgaenge: [curShared.durchgaenge[0]], datevCard: [], datevCardEmptyText: 'Noch nicht im Spiegel.',
+        letzterBericht: 'Durchgang fertig, Handover-Mail raus. 2 Nachforderungen offen, die älteste seit 18.08. — fällig 25.08., heute überfällig.',
+        buchungen: curShared.buchungenOffen.slice(0, 4),
+        datevTab: { empty: true, emptyText: 'Noch nicht im Spiegel.' },
+        staffel: [{ besitzer: 'agent', from: 0, to: 20 }, { besitzer: 'mandant', from: 20, to: 100 }],
+        timeline: [
+          { at: '18.08. 02:00', tiefe: 1, actor: 'Agent · D1', event: 'Durchgang 1 gestartet', detail: 'Cron' },
+          { at: '18.08. 02:31', tiefe: 1, actor: 'Agent · D1', event: 'Durchgang 1 abgeschlossen', detail: '51 Vorschläge, 2 Nachforderungen' },
+          { at: '18.08. 02:31', tiefe: 1, actor: 'System', event: 'Bereit zur Prüfung', detail: 'Handover-Mail an 2 Kanzlei-User' },
+          { at: '18.08. 09:12', tiefe: 1, actor: 'System', event: 'Nachforderung an den Mandanten gesendet', detail: 'aus Ludwig · 1 Empfänger · 2 fehlende Belege' }
+        ]
+      })
+    };
+
+    return {
+      curByScenario: { normal: curNormal, failed: curFailed, prepared: curPrepared },
+      historic: [h1, h2, nl1, h3],
+      datevOnly: [
+        { bezeichnung: 'Lohn 08/2026', mark: 'LO', markLabel: 'Lohn', committed: false, entries: 9, sum: eur(14200) },
+        { bezeichnung: 'WK 08/2026', mark: 'WK', markLabel: 'Wiederkehrende Buchungen', committed: true, entries: 5, sum: eur(2140) },
+        { bezeichnung: 'Kasse Juli', mark: 'RE', markLabel: 'Manuell', committed: true, entries: 22, sum: eur(980.4) }
+      ]
+    };
+  }
+
+  getAllBatches() {
+    const cur = this.data.curByScenario[this.state.scenario];
+    return [cur].concat(this.data.historic);
+  }
+
+  getBatchById(id) { return this.getAllBatches().find(b => b.id === id); }
+
+  seg(batch) {
+    const idx = PHASES.findIndex(p => p.states.includes(batch.state));
+    return PHASES.map((p, i) => i < idx ? 'var(--color-primary)' : i === idx ? (batch.state === 'failed' ? 'var(--color-danger)' : 'var(--color-accent)') : 'var(--color-border)');
+  }
+
+  renderVals() {
+    const s = this.state;
+    const owner = OWNER_META[this.getAllBatches()[0].derived.dranIst] || OWNER_META.bereit;
+    const batches = this.getAllBatches();
+    const cur = batches[0];
+
+    const rows = batches.map(b => {
+      const meta = STATE_META[b.state];
+      const own = OWNER_META[b.derived.dranIst] || { label: '—', color: 'var(--color-border-strong)' };
+      const overdue = b.derived.nachforderungen && b.derived.nachforderungen.ueberfaellig;
+      let buchungenLabel, buchungenSub;
+      if (b.state === 'agent' || b.state === 'prepared' || b.state === 'review') {
+        buchungenLabel = String(b.derived.buchungen.gesamt);
+        buchungenSub = b.derived.buchungen.gesamt ? `${b.derived.buchungen.accepted} freigegeben · ${b.derived.buchungen.rejected} abgelehnt · ${b.derived.buchungen.proposed} Vorschlag` : '';
+      } else {
+        buchungenLabel = String(b.derived.buchungen.gesamt || (b.datevLink ? b.datevLink.entries : 0));
+        buchungenSub = '';
+      }
+      let datevLabel = '—', datevSub = '';
+      if (b.ohneZyklus) { datevLabel = 'keine Verknüpfung'; datevSub = 'Datei-Export'; }
+      else if (b.datevLink) { datevLabel = b.datevLink.sum; datevSub = b.datevLink.entries + ' Sätze'; }
+      else if (b.state === 'confirmed') { datevLabel = 'noch nicht im Spiegel'; }
+      let abwLabel = '—', abwColor = 'var(--color-text-subtle)';
+      if (b.datevLink) {
+        const a = b.datevLink.abgleich;
+        const diffN = a.geaendert + a.aufgeteilt + a.fehlt + a.unklar + a.fremd;
+        if (diffN === 0) { abwLabel = '1:1'; abwColor = 'var(--color-success)'; }
+        else { abwLabel = `${a.geaendert} geändert · ${a.fremd} fremd`; abwColor = 'var(--color-warning)'; }
+      }
+      let actionLabel = 'Öffnen';
+      if (b.state === 'prepared') actionLabel = 'Prüfung übernehmen';
+      else if (b.state === 'review') actionLabel = 'Zur Abnahme';
+      else if (b.state === 'failed') actionLabel = 'Erneut übertragen';
+      return {
+        id: b.id, open: () => this.setState({ view: 'detail', selectedId: b.id, detailTab: 'uebersicht' }),
+        periodLabel: b.periodLabel, isSupplement: !!b.supplementsOf, supplementOf: b.supplementsOf,
+        indentStyle: b.supplementsOf ? 'padding-left:28px;' : '',
+        stapelnummer: b.stapelnummer, description: b.description,
+        seg: this.seg(b), ownerColor: own.color, ownerLabel: own.label,
+        stateLabel: meta.label, stateTone: b.state === 'failed' ? 'danger' : (b.state === 'closed' ? 'success' : 'info'),
+        dranIstLabel: b.derived.dranIstLabel, dranIstColor: overdue || b.state === 'failed' ? 'var(--color-danger)' : 'var(--color-text)',
+        durchgaengeLabel: String(b.derived.durchgaenge), buchungenLabel, buchungenSub,
+        datevLabel, datevSub, abwLabel, abwColor,
+        seitLabel: b.derived.seitLabel, seitAbs: b.derived.seitAbs, actionLabel
+      };
+    });
+
+    const isOffen = st => ['agent', 'prepared', 'review'].includes(st);
+    const isUnterwegs = st => ['ready', 'exporting', 'inspection', 'failed'].includes(st);
+    const isInDatev = st => ['confirmed', 'mirrored', 'closed'].includes(st);
+    const countOffen = batches.filter(b => isOffen(b.state)).length;
+    const countUnterwegs = batches.filter(b => isUnterwegs(b.state)).length;
+    const anyOverdue = batches.some(b => b.derived.nachforderungen && b.derived.nachforderungen.ueberfaellig);
+    const anyFailed = batches.some(b => b.state === 'failed');
+
+    let visRows = rows;
+    if (s.listTab === 'offen') visRows = rows.filter(r => isOffen(batches.find(b => b.id === r.id).state));
+    else if (s.listTab === 'unterwegs') visRows = rows.filter(r => isUnterwegs(batches.find(b => b.id === r.id).state));
+    else if (s.listTab === 'in_datev') visRows = rows.filter(r => isInDatev(batches.find(b => b.id === r.id).state));
+
+    const tabBtn = (key, active) => `background:none;border:none;padding:10px 16px;font-size:13.5px;font-weight:${active ? '600' : '500'};color:${active ? 'var(--color-primary)' : 'var(--color-text-muted)'};border-bottom:2px solid ${active ? 'var(--color-primary)' : 'transparent'};cursor:pointer;`;
+
+    let openCard;
+    if (cur.state === 'prepared') {
+      openCard = { kicker: 'Bereit zur Prüfung', title: `${cur.stapelnummer} · ${cur.description}`, borderColor: 'var(--color-warning)',
+        sub: `${cur.derived.seitLabel} · ${cur.derived.nachforderungen.offen} Nachforderungen offen, fällig ${cur.derived.nachforderungen.faellig} (überfällig)`,
+        labelColor: 'var(--color-warning)', subColor: 'var(--color-danger)', showSecondary: true,
+        secondaryLabel: 'Erneut nachfordern', primaryLabel: 'Prüfung übernehmen →', open: () => this.setState({ view: 'detail', selectedId: cur.id, detailTab: 'uebersicht' }) };
+    } else if (cur.state === 'failed') {
+      openCard = { kicker: 'Fehlgeschlagen', title: `${cur.stapelnummer} · ${cur.description}`, borderColor: 'var(--color-danger)',
+        sub: `${cur.derived.seitLabel} · ${cur.error}`, labelColor: 'var(--color-danger)', subColor: 'var(--color-danger)', showSecondary: false,
+        primaryLabel: 'Öffnen →', open: () => this.setState({ view: 'detail', selectedId: cur.id, detailTab: 'uebersicht' }) };
+    } else {
+      openCard = { kicker: 'Offen', title: `${cur.stapelnummer} · ${cur.description}`, borderColor: 'var(--color-border)',
+        sub: `Kanzlei prüft ${cur.derived.seitLabel} · ${cur.derived.durchgaenge} Durchgänge · ${cur.derived.buchungen.accepted} von ${cur.derived.buchungen.gesamt} freigegeben`,
+        labelColor: 'var(--color-text-muted)', subColor: 'var(--color-text-muted)', showSecondary: false,
+        primaryLabel: 'Zur Abnahme →', open: () => this.setState({ view: 'detail', selectedId: cur.id, detailTab: 'uebersicht' }) };
+    }
+
+    let det = null;
+    if (s.view === 'detail') {
+      const b = this.getBatchById(s.selectedId) || cur;
+      const meta = STATE_META[b.state];
+      const own = OWNER_META[b.derived.dranIst] || { label: '—', color: 'var(--color-text)' };
+      const idx = PHASES.findIndex(p => p.states.includes(b.state));
+      const stepper = PHASES.map((p, i) => {
+        const status = i < idx ? 'done' : i === idx ? 'active' : 'pending';
+        const failedHere = p.key === 'uebertragen' && b.state === 'failed';
+        return {
+          label: p.label, sub: p.sub,
+          barColor: failedHere ? 'var(--color-danger)' : status !== 'pending' ? 'var(--color-primary)' : 'var(--color-border)',
+          textColor: failedHere ? 'var(--color-danger)' : status === 'pending' ? 'var(--color-text-subtle)' : 'var(--color-primary)',
+          showNote: status === 'active', note: status === 'active' ? own.label : ''
+        };
+      });
+      const loops = b.derived.schleifen;
+      const hasLoops = loops && (loops.zurueck > 0 || loops.neuerBeleg > 0);
+      const parts = [];
+      if (loops && loops.zurueck) parts.push(`↺ ${loops.zurueck}× zurück an den Agenten`);
+      if (loops && loops.neuerBeleg) parts.push(`↺ ${loops.neuerBeleg}× neuer Beleg`);
+
+      let hasPrimary = false, primaryLabel = '', hasSecondary = false, secondaryLabel = '', hasTertiary = false, tertiaryLabel = '', infoText = '';
+      if (b.state === 'agent') infoText = 'Der Agent arbeitet — keine Kanzlei-Aktion möglich.';
+      else if (b.state === 'prepared') { hasPrimary = true; primaryLabel = 'Prüfung übernehmen →'; hasSecondary = true; secondaryLabel = 'Zurück an den Agenten'; if (b.derived.nachforderungen && b.derived.nachforderungen.ueberfaellig) { hasTertiary = true; tertiaryLabel = 'Erneut nachfordern'; } }
+      else if (b.state === 'review') { hasPrimary = true; primaryLabel = 'Zur Abnahme →'; hasSecondary = true; secondaryLabel = 'Zurück an den Agenten' + (b.derived.neueBelege ? ` (${b.derived.neueBelege} neue Belege)` : ''); }
+      else if (b.state === 'failed') { hasPrimary = true; primaryLabel = 'Erneut übertragen'; hasSecondary = true; secondaryLabel = 'Abbrechen (zurück in die Prüfung)'; }
+      else if (['ready', 'exporting', 'inspection'].includes(b.state)) infoText = meta.label + ' …';
+      else if (b.state === 'mirrored') { hasPrimary = true; primaryLabel = 'Zur Nachlese →'; }
+      else if (b.state === 'closed' || b.state === 'confirmed') infoText = meta.label;
+
+      const kennzahlen = [
+        { label: 'Buchungen', value: String(b.derived.buchungen.gesamt), sub: '' },
+        { label: 'Sachverhalte', value: String(b.derived.sachverhalte), sub: '' },
+        { label: 'Klärungen', value: `${b.derived.klaerungen.offen}/${b.derived.klaerungen.gesamt}`, sub: 'offen/gesamt' },
+        { label: 'Durchgänge', value: String(b.derived.durchgaenge), sub: '' },
+        { label: 'Belege', value: `${b.derived.belege.erledigt}/${b.derived.belege.gesamt}`, sub: 'erledigt/gesamt' },
+        { label: 'Σ Soll/Haben', value: eur(b.derived.sumSoll), sub: '' }
+      ];
+
+      const durchgaenge = (b.detail.durchgaenge || []).map(r => ({
+        nr: r.nr, art: r.art, gestartet: r.gestartet, dauer: r.dauer, ausloeser: r.ausloeser,
+        abschluss: r.abschluss, tone: r.abschluss === 'In Arbeit' ? 'info' : 'success', ergebnis: r.ergebnis,
+        expanded: !!s.expandedRuns[b.id + '-' + r.nr], toggle: () => this.setState(st => ({ expandedRuns: { ...st.expandedRuns, [b.id + '-' + r.nr]: !st.expandedRuns[b.id + '-' + r.nr] } })),
+        steps: r.steps.map(st => ({ step: st.step, gate: st.gate, note: st.note, gateColor: st.gate === 'overridden' ? 'var(--color-warning)' : st.gate === 'blocked' ? 'var(--color-danger)' : 'var(--color-success)' }))
+      }));
+
+      const buchungenRows = (b.detail.buchungen || []).map(r => ({
+        datum: r.datum, belegfeld1: r.belegfeld1, text: r.text, soll: r.soll, haben: r.haben, ust: r.ust, betrag: r.betrag,
+        statusLabel: r.status === 'accepted' ? 'Freigegeben' : r.status === 'rejected' ? 'Abgelehnt' : 'Vorschlag',
+        statusTone: r.status === 'accepted' ? 'success' : r.status === 'rejected' ? 'danger' : 'neutral',
+        sv: r.sv, durchgang: r.durchgang
+      }));
+
+      const art = b.detail.artefakte || {};
+      const groupDef = [
+        ['sachverhalte', 'Sachverhalte'], ['klaerungen', 'Klärungen'], ['notizen', 'Notizen'],
+        ['regeln', 'Dauerbuchungsregeln'], ['konventionen', 'Konventionen'], ['pruefquittungen', 'Prüf-Quittungen']
+      ];
+      const artefaktGruppen = groupDef.map(([key, label]) => {
+        const rows = art[key] || [];
+        const expanded = !!s.expandedGroups[b.id + '-' + key];
+        return { key, label, count: rows.length, rows, empty: rows.length === 0, expanded,
+          toggleLabel: expanded ? 'einklappen' : 'aufklappen',
+          toggle: () => this.setState(st => ({ expandedGroups: { ...st.expandedGroups, [b.id + '-' + key]: !st.expandedGroups[b.id + '-' + key] } })) };
+      });
+
+      const dt = b.detail.datevTab || {};
+      const datevTabEmpty = !!(dt.empty || b.detail.datevCardEmptyText && !dt.vergleich);
+      const staffelTotal = (b.detail.staffel || []).reduce((s2, seg) => s2 + (seg.to - seg.from), 0) || 1;
+      const staffelSegs = (b.detail.staffel || []).map(seg => ({ flex: (seg.to - seg.from) / staffelTotal, color: OWNER_META[seg.besitzer].color, title: OWNER_META[seg.besitzer].label }));
+      const ownersUsed = [...new Set((b.detail.staffel || []).map(x => x.besitzer))];
+      const staffelLegend = ownersUsed.map(o => ({ color: OWNER_META[o].color, label: OWNER_META[o].label }));
+
+      let timeline = (b.detail.timeline || []);
+      const depthMax = s.logSicht === 'verlauf' ? 1 : s.logSicht === 'protokoll' ? 2 : 3;
+      timeline = timeline.filter(e => e.tiefe <= depthMax);
+      if (s.logOnlyErrors) timeline = timeline.filter(e => e.severity === 'error');
+      const timelineVm = timeline.map(e => ({
+        at: e.at, actor: e.actor, event: e.event, detail: e.detail, code: e.code || '',
+        actorColor: 'var(--color-text-muted)', eventColor: e.severity === 'error' ? 'var(--color-danger)' : 'var(--color-text)'
+      }));
+
+      det = {
+        stapelnummer: b.stapelnummer, description: b.description, stateLabel: meta.label,
+        stateTone: b.state === 'failed' ? 'danger' : (b.state === 'closed' ? 'success' : 'info'),
+        periodLabel: b.periodLabel, isSupplement: !!b.supplementsOf, supplementOf: b.supplementsOf,
+        dranIstLabel: b.derived.dranIstLabel, dranIstColor: b.state === 'failed' ? 'var(--color-danger)' : 'var(--color-text)',
+        stepper, hasLoops, loopsLabel: parts.join(' · '),
+        hasPrimary, primaryLabel, hasSecondary, secondaryLabel, hasTertiary, tertiaryLabel, infoText,
+        kennzahlen, ludwigCard: (b.detail.ludwigCard || []).map(([label, value]) => ({ label, value })),
+        hasDatevCard: (b.detail.datevCard || []).length > 0, datevCard: (b.detail.datevCard || []).map(([label, value]) => ({ label, value })),
+        datevCardEmpty: !(b.detail.datevCard || []).length, datevCardEmptyText: b.detail.datevCardEmptyText || '',
+        letzterBericht: b.detail.letzterBericht || '',
+        noDurchgaenge: durchgaenge.length === 0, durchgaenge,
+        noBuchungen: buchungenRows.length === 0, buchungen: buchungenRows, buchungenHinweis: b.detail.buchungenHinweis || '',
+        artefaktGruppen,
+        datevTabEmpty, datevTabEmptyText: dt.emptyText || b.detail.datevCardEmptyText || '',
+        datevTabFull: !datevTabEmpty, datevSummary: dt.summary || '',
+        vergleich: (dt.vergleich || []).map(v => ({ konto: v.konto, art: v.art, artColor: v.color, ludwig: v.ludwig, datev: v.datev })),
+        nachleseBericht: dt.nachleseBericht || '',
+        staffel: staffelSegs, staffelLegend,
+        noTimeline: timelineVm.length === 0, timeline: timelineVm
+      };
+    }
+
+    return {
+      scenario: s.scenario, setScenario: e => this.setState({ scenario: e.target.value, view: 'list', listTab: 'alle' }),
+      anlegenHint: s.anlegenHint, toggleAnlegenHint: () => this.setState(st => ({ anlegenHint: !st.anlegenHint })),
+      isList: s.view === 'list', isDetail: s.view === 'detail', backToList: () => this.setState({ view: 'list' }),
+      openCard,
+      tabStyleAlle: tabBtn('alle', s.listTab === 'alle'), tabStyleOffen: tabBtn('offen', s.listTab === 'offen'),
+      tabStyleUnterwegs: tabBtn('unterwegs', s.listTab === 'unterwegs'), tabStyleInDatev: tabBtn('in_datev', s.listTab === 'in_datev'),
+      tabStyleNurDatev: tabBtn('nur_datev', s.listTab === 'nur_datev'),
+      pickAlle: () => this.setState({ listTab: 'alle', listPage: 1 }), pickOffen: () => this.setState({ listTab: 'offen', listPage: 1 }),
+      pickUnterwegs: () => this.setState({ listTab: 'unterwegs', listPage: 1 }), pickInDatev: () => this.setState({ listTab: 'in_datev', listPage: 1 }),
+      pickNurDatev: () => this.setState({ listTab: 'nur_datev', listPage: 1 }),
+      countAlle: batches.length, countOffen, countOffenColor: anyOverdue ? 'var(--color-danger)' : 'var(--color-text-muted)',
+      countUnterwegs, countUnterwegsColor: anyFailed ? 'var(--color-danger)' : 'var(--color-text-muted)',
+      countInDatev: batches.filter(b => isInDatev(b.state)).length, countNurDatev: this.data.datevOnly.length,
+      showBatchTable: s.listTab !== 'nur_datev', showDatevOnlyTable: s.listTab === 'nur_datev',
+      activeTabLabel: { alle: 'Alle Stapel', offen: 'Offen', unterwegs: 'Unterwegs', in_datev: 'In DATEV' }[s.listTab] || 'Alle Stapel',
+      rows: visRows,
+      pagedRows: visRows.slice((s.listPage - 1) * this.listPageSize, s.listPage * this.listPageSize),
+      showListPagination: visRows.length > this.listPageSize,
+      pagInfo: `Zeige ${Math.min((s.listPage - 1) * this.listPageSize + 1, visRows.length)}–${Math.min(s.listPage * this.listPageSize, visRows.length)} von ${visRows.length}`,
+      pagPages: (() => {
+        const total = Math.max(1, Math.ceil(visRows.length / this.listPageSize));
+        const cur = Math.min(s.listPage, total);
+        const arr = [];
+        arr.push({ label: '‹', cls: 'page', pick: () => this.setState({ listPage: Math.max(1, cur - 1) }) });
+        for (let i = 1; i <= total; i++) arr.push({ label: String(i), cls: i === cur ? 'page active' : 'page', pick: () => this.setState({ listPage: i }) });
+        arr.push({ label: '›', cls: 'page', pick: () => this.setState({ listPage: Math.min(total, cur + 1) }) });
+        return arr;
+      })(),
+      datevOnlyRows: this.data.datevOnly.map(d => ({ bezeichnung: d.bezeichnung, markLabel: d.markLabel, tone: d.committed ? 'success' : 'neutral', committedLabel: d.committed ? 'Festgeschrieben' : 'Offen', entries: d.entries, sum: d.sum })),
+      det,
+      isTabUebersicht: s.detailTab === 'uebersicht', isTabDurchgaenge: s.detailTab === 'durchgaenge',
+      isTabBuchungen: s.detailTab === 'buchungen', isTabArtefakte: s.detailTab === 'artefakte',
+      isTabDatev: s.detailTab === 'datev', isTabLog: s.detailTab === 'log',
+      tabStyleUebersicht: tabBtn('uebersicht', s.detailTab === 'uebersicht'), tabStyleDurchgaenge: tabBtn('durchgaenge', s.detailTab === 'durchgaenge'),
+      tabStyleBuchungen: tabBtn('buchungen', s.detailTab === 'buchungen'), tabStyleArtefakte: tabBtn('artefakte', s.detailTab === 'artefakte'),
+      tabStyleDatev: tabBtn('datev', s.detailTab === 'datev'), tabStyleLog: tabBtn('log', s.detailTab === 'log'),
+      pickTabUebersicht: () => this.setState({ detailTab: 'uebersicht' }), pickTabDurchgaenge: () => this.setState({ detailTab: 'durchgaenge' }),
+      pickTabBuchungen: () => this.setState({ detailTab: 'buchungen' }), pickTabArtefakte: () => this.setState({ detailTab: 'artefakte' }),
+      pickTabDatev: () => this.setState({ detailTab: 'datev' }), pickTabLog: () => this.setState({ detailTab: 'log' }),
+      sichtStyleVerlauf: tabBtn('verlauf', s.logSicht === 'verlauf').replace('padding:10px 16px', 'padding:6px 12px').replace('border-bottom:2px solid transparent', 'border-radius:var(--radius-sm);border-bottom:none;background:' + (s.logSicht === 'verlauf' ? '#fff' : 'none')),
+      sichtStyleProtokoll: tabBtn('protokoll', s.logSicht === 'protokoll').replace('padding:10px 16px', 'padding:6px 12px').replace('border-bottom:2px solid transparent', 'border-radius:var(--radius-sm);border-bottom:none;background:' + (s.logSicht === 'protokoll' ? '#fff' : 'none')),
+      sichtStyleTechnik: tabBtn('technik', s.logSicht === 'technik').replace('padding:10px 16px', 'padding:6px 12px').replace('border-bottom:2px solid transparent', 'border-radius:var(--radius-sm);border-bottom:none;background:' + (s.logSicht === 'technik' ? '#fff' : 'none')),
+      pickSichtVerlauf: () => this.setState({ logSicht: 'verlauf' }), pickSichtProtokoll: () => this.setState({ logSicht: 'protokoll' }), pickSichtTechnik: () => this.setState({ logSicht: 'technik' }),
+      logOnlyErrors: s.logOnlyErrors, toggleErrors: () => this.setState(st => ({ logOnlyErrors: !st.logOnlyErrors }))
+    };
+  }
+}
+</script>
+</body>
+</html>

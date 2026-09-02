@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/colors_and_type.css">
+  <script src="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/_ds_bundle.js"></script>
+  <style>body{margin:0;}@keyframes ludwigDrawerIn{from{transform:translateX(24px);opacity:0;}to{transform:translateX(0);opacity:1;}}</style>
+</helmet>
+
+<div ref="{{ setRootRef }}" onKeyDown="{{ onRootKeyDown }}" tabIndex="-1" style="{{ rootStyle }}">
+
+  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:12.5px;color:var(--color-text-muted);">{{ belegLabel }}{{ belegAmountText }}</span>
+      <sc-if value="{{ statusBadge }}" hint-placeholder-val="{{ false }}">
+        <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Badge" from="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/_ds_bundle.js" tone="{{ statusBadge.tone }}" hint-size="auto,20px">{{ statusBadge.label }}</x-import>
+      </sc-if>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:16px;">
+      <sc-if value="{{ showRest }}" hint-placeholder-val="{{ true }}">
+        <span style="font-size:12.5px;font-weight:700;color:{{ restColor }};font-family:var(--font-mono);">Rest {{ restText }} {{ restIcon }}</span>
+      </sc-if>
+      <sc-if value="{{ canToggleMode }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ toggleMode }}" style-hover="text-decoration:underline;" style="background:none;border:none;color:var(--color-accent);font-size:12.5px;cursor:pointer;padding:0;font-weight:600;">{{ modeToggleLabel }}</button>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ isReversed }}" hint-placeholder-val="{{ false }}">
+    <div style="background:var(--color-warning-bg);border:1px solid var(--color-warning);border-radius:var(--radius-md);padding:16px 18px;">
+      <div style="font-size:13.5px;font-weight:600;color:var(--color-text);margin-bottom:4px;">Diese Buchung wurde storniert.</div>
+      <div style="font-size:12.5px;color:var(--color-text-muted);">Der Vorschlag bleibt im Journal sichtbar; für den Sachverhalt wurde keine Buchung ausgeführt.<sc-if value="{{ reversedReason }}" hint-placeholder-val="{{ false }}"> Grund: {{ reversedReason }}</sc-if></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ drawer.open }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ drawer.close }}" style="position:fixed;inset:0;background:rgba(20,36,56,0.35);z-index:40;">
+      <div onClick="{{ drawer.stop }}" style="position:absolute;top:0;right:0;bottom:0;width:400px;background:#fff;box-shadow:-8px 0 24px rgba(20,36,56,0.14);padding:22px 24px;overflow-y:auto;box-sizing:border-box;animation:ludwigDrawerIn 200ms cubic-bezier(0.2,0,0,1);">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;">
+          <div style="font-size:15px;font-weight:600;color:var(--color-text);">{{ drawer.title }}</div>
+          <button onClick="{{ drawer.close }}" title="Schließen" style-hover="color:var(--color-danger);" style="background:none;border:none;font-size:18px;line-height:1;cursor:pointer;color:var(--color-text-subtle);">×</button>
+        </div>
+        <sc-if value="{{ drawer.isLedger }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);margin-bottom:10px;">Letzte Buchungen</div>
+          <div style="display:grid;grid-template-columns:84px 1fr 96px;gap:6px 10px;font-size:13px;font-family:var(--font-mono);color:var(--color-text-muted);">
+            <sc-for list="{{ drawer.ledgerRows }}" as="lr" hint-placeholder-count="3">
+              <span>{{ lr.date }}</span><span>{{ lr.beleg }}</span><span style="text-align:right;">{{ lr.amount }}</span>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ drawer.isBu }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ drawer.buRows }}" as="bu" hint-placeholder-count="6">
+            <div style="display:flex;gap:10px;padding:6px 6px;border-radius:var(--radius-sm);background:{{ bu.active ? 'var(--color-accent-50)' : 'transparent' }};">
+              <span style="font-family:var(--font-mono);font-weight:700;color:var(--color-text);flex:0 0 32px;">{{ bu.code }}</span>
+              <span style="font-size:13px;color:var(--color-text-muted);">{{ bu.info }}</span>
+            </div>
+          </sc-for>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ locked }}" hint-placeholder-val="{{ false }}">
+    <div style="background:var(--color-bg-soft);border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:16px 18px;">
+      <div style="font-size:13.5px;font-weight:600;color:var(--color-text);margin-bottom:4px;">{{ lockedReason }}</div>
+      <div style="font-size:12.5px;color:var(--color-text-muted);margin-bottom:12px;">Dieser Satz kann nicht bearbeitet werden.</div>
+      <button onClick="{{ onCancelClick }}" style-hover="background:var(--color-primary-600);" style="background:var(--color-primary-700);color:#fff;border:none;border-radius:var(--radius-md);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">{{ lockedActionLabel }}</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showReadOnly }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <div style="display:grid;grid-template-columns:{{ gridCols }};gap:8px;padding:0 4px 6px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);border-bottom:1px solid var(--color-border);margin-bottom:6px;">
+        <span>Datum</span>
+        <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}"><span>Whg.</span></sc-if>
+        <span>Umsatz</span><span>S/H</span><span>BU</span><span>Konto</span><span>Beleg 1</span>
+        <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}"><span>Beleg 2</span></sc-if>
+        <span>Text</span>
+        <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}"><span>KOST</span></sc-if>
+      </div>
+
+      <sc-for list="{{ rows }}" as="row" hint-placeholder-count="1">
+        <div style="padding:5px 8px;margin:0 -8px;background:{{ row.rowBg }};border-radius:var(--radius-sm);">
+          <div style="display:grid;grid-template-columns:{{ gridCols }};gap:8px;align-items:center;font-size:13px;">
+            <span style="font-family:var(--font-mono);font-size:12.5px;">{{ row.datum }}</span>
+            <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}"><span style="font-family:var(--font-mono);font-size:12.5px;color:var(--color-text-muted);">{{ row.currency }}</span></sc-if>
+            <span style="text-align:right;font-family:var(--font-mono);padding:6px 8px;">{{ row.umsatz }}</span>
+            <span style="text-align:center;font-weight:700;color:var(--color-text-muted);">{{ row.side }}</span>
+            <span style="font-family:var(--font-mono);color:var(--color-text-muted);">{{ row.bu }}</span>
+            <span style="display:flex;align-items:center;gap:5px;min-width:0;">
+              <span style="font-family:var(--font-mono);flex:0 0 auto;">{{ row.konto }}</span>
+              <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--color-text-subtle);">{{ row.kontoName }}</span>
+              <button onClick="{{ row.onOpenLedger }}" title="Buchungen auf diesem Konto ansehen" style-hover="color:var(--color-accent);" style="background:none;border:none;color:var(--color-text-subtle);cursor:pointer;padding:2px;display:flex;flex:0 0 auto;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              </button>
+            </span>
+            <span style="font-family:var(--font-mono);font-size:12.5px;">{{ row.beleg1 }}</span>
+            <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px;">{{ row.beleg2 }}</span></sc-if>
+            <span>{{ row.text }}</span>
+            <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px;">{{ row.kost1 }}</span></sc-if>
+          </div>
+          <div style="font-size:11.5px;color:var(--color-text-subtle);padding:2px 4px 0;">
+            <sc-if value="{{ row.taxBu }}" hint-placeholder-val="{{ false }}"><button onClick="{{ row.onOpenBuDrawer }}" title="BU-Schlüssel erklären" style-hover="text-decoration:underline;" style="background:none;border:none;padding:0;color:var(--color-accent);font-size:11.5px;cursor:pointer;font-family:var(--font-mono);font-weight:600;">BU {{ row.taxBu }}</button> </sc-if>{{ row.taxNote }}
+          </div>
+        </div>
+      </sc-for>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-top:4px;border-top:1px solid var(--color-border-subtle);font-size:12px;color:var(--color-text-muted);">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span>an</span>
+          <span style="font-weight:700;color:var(--color-text-muted);font-size:11px;">{{ gegenkontoSide }}</span>
+          <strong style="color:var(--color-text);font-weight:600;">{{ gegenkontoText }}</strong>
+          <button onClick="{{ onOpenGkLedger }}" title="Buchungen auf diesem Konto ansehen" style-hover="color:var(--color-accent);" style="background:none;border:none;color:var(--color-text-subtle);cursor:pointer;padding:2px;display:flex;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          </button>
+        </div>
+        <span style="font-family:var(--font-mono);white-space:nowrap;"><strong style="color:var(--color-text);font-weight:700;">{{ gegenkontoAmountText }}</strong></span>
+      </div>
+
+      <div style="background:var(--color-bg-soft);border-radius:var(--radius-md);padding:10px 12px;margin-top:8px;font-size:12px;font-family:var(--font-mono);color:var(--color-text-muted);">
+        <button onClick="{{ toggleJournal }}" style-hover="color:var(--color-accent);" style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:6px;width:100%;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-family:var(--font-sans);">
+          <span style="display:inline-block;transform:rotate({{ journalArrowDeg }});transition:transform .12s;">▸</span> Journal
+        </button>
+        <sc-if value="{{ journalOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:64px 18px 90px 1fr;gap:3px 10px;margin-top:6px;">
+            <sc-for list="{{ journalRows }}" as="jr" hint-placeholder-count="3">
+              <span>{{ jr.konto }}</span><span>{{ jr.side }}</span><span style="text-align:right;">{{ jr.amountText }}</span><span style="color:var(--color-text-subtle);">{{ jr.name }}</span>
+            </sc-for>
+          </div>
+          <div style="margin-top:6px;color:{{ balanceColor }};font-weight:700;">Σ S {{ sumSollText }} {{ balanceIcon }} Σ H {{ sumHabenText }}</div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ aiReview }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="KIBuchungshinweise" confidence="{{ aiReview.confidence }}" verdict="{{ aiReview.verdict }}" rationale="{{ aiReview.rationale }}" judge-reasoning="{{ aiReview.judgeReasoning }}" sources="{{ aiReview.sources }}" errors="{{ errors }}" hint-size="100%,60px"></dc-import>
+      </sc-if>
+
+      <sc-if value="{{ hasErrors }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ errors }}" as="err" hint-placeholder-count="1">
+          <div style="font-size:12.5px;color:var(--color-danger);padding:6px 4px 0;"><strong>Fehler</strong> — {{ err.message }}</div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ hasWarnings }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ warnings }}" as="w" hint-placeholder-count="1">
+          <div style="font-size:12.5px;color:var(--color-warning);padding:6px 4px 0;"><strong>Warnung</strong> — {{ w.message }}</div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ hasHints }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ hints }}" as="h" hint-placeholder-count="1">
+          <div style="font-size:12px;color:var(--color-text-subtle);padding:6px 4px 0;">{{ h.message }}</div>
+        </sc-for>
+      </sc-if>
+
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid var(--color-border);">
+        <sc-if value="{{ canReverse }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ openReverseModal }}" title="Buchung entfernen" style-hover="color:var(--color-danger);border-color:var(--color-danger);" style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:8px 12px;font-size:13px;color:var(--color-text-muted);cursor:pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
+            Löschen
+          </button>
+        </sc-if>
+        <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ onEditClick }}" style-hover="background:var(--color-bg-soft);" style="background:#fff;color:var(--color-primary);border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">Buchung bearbeiten</button>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showForm }}" hint-placeholder-val="{{ true }}">
+    <div>
+
+      <div style="display:grid;grid-template-columns:{{ gridCols }};gap:8px;padding:0 4px 6px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);border-bottom:1px solid var(--color-border);margin-bottom:6px;">
+        <span>Datum</span>
+        <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}"><span>Whg.</span></sc-if>
+        <span>Umsatz</span><span>S/H</span><span>BU</span><span>Konto</span><span>Beleg 1</span>
+        <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}"><span>Beleg 2</span></sc-if>
+        <span>Text</span>
+        <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}"><span>KOST</span></sc-if>
+      </div>
+
+      <sc-for list="{{ rows }}" as="row" hint-placeholder-count="1">
+        <div style="padding:4px 8px;margin:0 -8px;background:{{ row.rowBg }};border-radius:var(--radius-sm);">
+        <sc-if value="{{ row.deleted }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--color-bg-soft);border:1px dashed var(--color-border-strong);border-radius:var(--radius-sm);padding:8px 12px;">
+            <span style="font-size:12.5px;color:var(--color-text-subtle);">Zeile entfernt</span>
+            <button onClick="{{ row.onUndo }}" style-hover="text-decoration:underline;" style="background:none;border:none;color:var(--color-accent);font-size:12.5px;cursor:pointer;padding:0;font-weight:600;">Löschen rückgängig machen</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ !row.deleted }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:{{ gridCols }};gap:8px;align-items:center;">
+            <input data-editable="1" value="{{ row.datum }}" onChange="{{ row.onDatum }}" style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px 8px;font-size:12.5px;font-family:var(--font-mono);width:100%;box-sizing:border-box;" />
+            <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}">
+              <select data-editable="1" value="{{ row.currency }}" onChange="{{ row.onCurrency }}" style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px 4px;font-size:12.5px;width:100%;box-sizing:border-box;">
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+                <option value="CHF">CHF</option>
+              </select>
+            </sc-if>
+            <input data-editable="1" onFocus="{{ row.onUmsatzFocus }}" onBlur="{{ row.onUmsatzBlur }}" value="{{ row.umsatz }}" onChange="{{ row.onUmsatz }}" style="text-align:right;font-family:var(--font-mono);font-size:13px;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px 8px;width:100%;box-sizing:border-box;background:var(--color-bg-soft);" />
+            <button data-editable="1" onClick="{{ row.onToggleSide }}" onKeyDown="{{ row.onSideKeyDown }}" title="S/H umschalten (S, H, + oder −)" style-hover="border-color:var(--color-accent);" style="border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);background:{{ row.sideBg }};color:{{ row.sideColor }};font-weight:700;font-size:13px;padding:6px 0;cursor:pointer;width:100%;">{{ row.side }}</button>
+            <select data-editable="1" value="{{ row.bu }}" onChange="{{ row.onBu }}" disabled="{{ row.buLocked }}" title="{{ row.buTitle }}" style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px 4px;font-size:13px;width:100%;box-sizing:border-box;background:{{ row.buBg }};">
+              <option value="">—</option>
+              <option value="9">9</option>
+              <option value="8">8</option>
+              <option value="3">3</option>
+              <option value="2">2</option>
+              <option value="94">94</option>
+              <option value="40">40</option>
+            </select>
+            <div style="position:relative;">
+              <div style="display:flex;align-items:center;gap:4px;border:1px solid {{ row.kontoBorder }};border-radius:var(--radius-sm);padding:2px 6px;background:#fff;box-sizing:border-box;">
+                <input data-editable="1" value="{{ row.konto }}" onChange="{{ row.onKonto }}" onFocus="{{ row.onKontoFocus }}" onBlur="{{ row.onKontoBlur }}" title="{{ row.kontoName }}" style="border:none;outline:none;width:52px;flex:0 0 auto;font-family:var(--font-mono);font-size:13px;padding:4px 0;background:var(--color-accent-50);" />
+                <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--color-text-subtle);">{{ row.kontoName }}</span>
+                <button onClick="{{ row.onOpenLedger }}" title="Buchungen auf diesem Konto ansehen" style-hover="color:var(--color-accent);" style="background:none;border:none;color:var(--color-text-subtle);cursor:pointer;padding:2px;display:flex;flex:0 0 auto;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+              </div>
+              <sc-if value="{{ row.showCandidates }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;z-index:5;top:100%;left:0;right:0;display:flex;flex-direction:column;gap:2px;background:#fff;border:1px solid var(--color-border-strong);border-radius:var(--radius-md);box-shadow:var(--shadow-md);padding:6px;margin-top:2px;">
+                  <sc-for list="{{ row.candidates }}" as="cand" hint-placeholder-count="3">
+                    <button onMouseDown="{{ cand.onPick }}" style-hover="background:var(--color-bg-soft);" style="background:none;border:none;text-align:left;border-radius:var(--radius-sm);padding:5px 8px;font-size:12px;cursor:pointer;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="color:var(--color-text-subtle);">{{ cand.groupLabel }} ·</span> {{ cand.chip }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <input data-editable="1" value="{{ row.beleg1 }}" onChange="{{ row.onBeleg1 }}" style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px 8px;font-size:12.5px;font-family:var(--font-mono);width:100%;box-sizing:border-box;" />
+            <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}">
+              <input data-editable="1" value="{{ row.beleg2 }}" onChange="{{ row.onBeleg2 }}" style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px 8px;font-size:12.5px;width:100%;box-sizing:border-box;" />
+            </sc-if>
+            <input data-editable="1" value="{{ row.text }}" onChange="{{ row.onText }}" style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px 8px;font-size:13px;width:100%;box-sizing:border-box;" />
+            <sc-if value="{{ isVoll }}" hint-placeholder-val="{{ false }}">
+              <input data-editable="1" value="{{ row.kost1 }}" onChange="{{ row.onKost1 }}" style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px 8px;font-size:12.5px;width:100%;box-sizing:border-box;" />
+            </sc-if>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 4px 2px 2px;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+              <sc-if value="{{ row.showFillRest }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ row.onFillRest }}" title="Restbetrag in dieses Feld übernehmen" style-hover="text-decoration:underline;" style="background:none;border:none;color:var(--color-accent);font-size:11.5px;cursor:pointer;padding:0;white-space:nowrap;">Rest {{ row.fillRestLabel }} einsetzen</button>
+              </sc-if>
+              <sc-if value="{{ row.taxBu }}" hint-placeholder-val="{{ false }}"><button onClick="{{ row.onOpenBuDrawer }}" title="BU-Schlüssel erklären" style-hover="text-decoration:underline;" style="background:none;border:none;padding:0;color:var(--color-accent);font-size:11.5px;cursor:pointer;font-family:var(--font-mono);font-weight:600;">BU {{ row.taxBu }}</button> </sc-if>
+              <span style="font-size:11.5px;color:var(--color-text-subtle);">{{ row.taxNote }}</span>
+            </div>
+            <sc-if value="{{ row.canRemove }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ row.onRemove }}" title="Zeile entfernen" style-hover="color:var(--color-danger);" style="background:none;border:none;color:var(--color-text-subtle);cursor:pointer;padding:2px;display:flex;flex:0 0 auto;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
+              </button>
+            </sc-if>
+          </div>
+        </sc-if>
+        </div>
+      </sc-for>
+
+      <button onClick="{{ addRow }}" title="Weitere Zeile für einen Split hinzufügen" style-hover="border-color:var(--color-accent);color:var(--color-accent);" style="background:none;border:1px dashed var(--color-border-strong);border-radius:var(--radius-sm);padding:6px 12px;font-size:12.5px;color:var(--color-text-muted);cursor:pointer;margin:4px 0 4px;">+ Zeile (Split)</button>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-top:4px;border-top:1px solid var(--color-border-subtle);font-size:12px;color:var(--color-text-muted);">
+        <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+          <span>an</span>
+          <button data-editable="1" onClick="{{ onToggleGkSide }}" onKeyDown="{{ onGkSideKeyDown }}" title="S/H umschalten (S, H, + oder −)" style-hover="border-color:var(--color-accent);" style="border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);background:{{ gegenkontoSideBg }};color:{{ gegenkontoSideColor }};font-weight:700;font-size:13px;padding:5px 10px;cursor:pointer;">{{ gegenkontoSide }}</button>
+          <sc-if value="{{ !gkEditing }}" hint-placeholder-val="{{ true }}">
+            <strong style="color:var(--color-text);font-weight:600;">{{ gegenkontoText }}</strong>
+          </sc-if>
+          <sc-if value="{{ gkEditing }}" hint-placeholder-val="{{ false }}">
+            <div style="position:relative;flex:1;min-width:180px;max-width:280px;">
+              <div style="display:flex;align-items:center;gap:4px;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:2px 6px;background:#fff;box-sizing:border-box;">
+                <input data-editable="1" value="{{ gkKonto }}" onChange="{{ onGkKontoChange }}" onFocus="{{ onGkKontoFocus }}" onBlur="{{ onGkKontoBlur }}" style="border:none;outline:none;width:52px;flex:0 0 auto;font-family:var(--font-mono);font-size:13px;padding:4px 0;background:var(--color-accent-50);" />
+                <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--color-text-subtle);">{{ gkName }}</span>
+              </div>
+              <sc-if value="{{ gkShowCandidates }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;z-index:5;top:100%;left:0;right:0;display:flex;flex-direction:column;gap:2px;background:#fff;border:1px solid var(--color-border-strong);border-radius:var(--radius-md);box-shadow:var(--shadow-md);padding:6px;margin-top:2px;">
+                  <sc-for list="{{ gkCandidates }}" as="cand" hint-placeholder-count="3">
+                    <button onMouseDown="{{ cand.onPick }}" style-hover="background:var(--color-bg-soft);" style="background:none;border:none;text-align:left;border-radius:var(--radius-sm);padding:5px 8px;font-size:12px;cursor:pointer;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="color:var(--color-text-subtle);">{{ cand.groupLabel }} ·</span> {{ cand.chip }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <button onClick="{{ onOpenGkLedger }}" title="Buchungen auf diesem Konto ansehen" style-hover="color:var(--color-accent);" style="background:none;border:none;color:var(--color-text-subtle);cursor:pointer;padding:2px;display:flex;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          </button>
+          <button onClick="{{ toggleGkEdit }}" title="Gegenkonto ändern" style-hover="color:var(--color-accent);" style="background:none;border:none;color:var(--color-text-subtle);cursor:pointer;padding:2px;display:flex;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+          </button>
+        </div>
+        <span style="font-family:var(--font-mono);white-space:nowrap;"><strong style="color:var(--color-text);font-weight:700;">{{ gegenkontoAmountText }}</strong></span>
+      </div>
+
+      <div style="background:var(--color-bg-soft);border-radius:var(--radius-md);padding:10px 12px;margin-top:8px;font-size:12px;font-family:var(--font-mono);color:var(--color-text-muted);">
+        <div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);margin-bottom:6px;font-family:var(--font-sans);">Journal (wird gespeichert)</div>
+        <div style="display:grid;grid-template-columns:64px 18px 90px 1fr;gap:3px 10px;">
+          <sc-for list="{{ journalRows }}" as="jr" hint-placeholder-count="3">
+            <span>{{ jr.konto }}</span><span>{{ jr.side }}</span><span style="text-align:right;">{{ jr.amountText }}</span><span style="color:var(--color-text-subtle);">{{ jr.name }}</span>
+          </sc-for>
+        </div>
+        <div style="margin-top:6px;color:{{ balanceColor }};font-weight:700;">Σ S {{ sumSollText }} {{ balanceIcon }} Σ H {{ sumHabenText }}</div>
+      </div>
+
+      <sc-if value="{{ aiReview }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="KIBuchungshinweise" confidence="{{ aiReview.confidence }}" verdict="{{ aiReview.verdict }}" rationale="{{ aiReview.rationale }}" judge-reasoning="{{ aiReview.judgeReasoning }}" sources="{{ aiReview.sources }}" errors="{{ errors }}" hint-size="100%,60px"></dc-import>
+      </sc-if>
+
+      <sc-if value="{{ hasErrors }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:12px;">
+          <sc-for list="{{ errors }}" as="err" hint-placeholder-count="1">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;background:var(--color-danger-bg);border:1px solid var(--color-danger);border-radius:var(--radius-md);padding:8px 12px;font-size:12.5px;color:var(--color-text);margin-bottom:6px;">
+              <span><strong style="color:var(--color-danger);">Fehler</strong> — {{ err.message }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasWarnings }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:8px;">
+          <sc-for list="{{ warnings }}" as="w" hint-placeholder-count="1">
+            <label style="display:flex;align-items:baseline;gap:8px;background:var(--color-warning-bg);border:1px solid var(--color-warning);border-radius:var(--radius-md);padding:8px 12px;font-size:12.5px;color:var(--color-text);margin-bottom:6px;cursor:pointer;">
+              <input type="checkbox" checked="{{ w.acked }}" onChange="{{ w.onAck }}" style="margin-top:2px;" />
+              <span><strong style="color:var(--color-warning);">Warnung</strong> — {{ w.message }} <sc-if value="{{ w.fixLabel }}" hint-placeholder-val="{{ false }}"><a href="javascript:void(0)" onClick="{{ w.onFix }}" style-hover="text-decoration:none;" style="color:var(--color-accent);text-decoration:underline;">{{ w.fixLabel }}</a></sc-if></span>
+            </label>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasHints }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:8px;">
+          <sc-for list="{{ hints }}" as="h" hint-placeholder-count="1">
+            <div style="font-size:12px;color:var(--color-text-subtle);padding:4px 4px;">{{ h.message }}</div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ quickBanner }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;background:var(--color-accent-50);border:1px solid var(--color-accent);border-radius:var(--radius-md);padding:8px 12px;font-size:12.5px;color:var(--color-text);margin-top:8px;">
+          <span>{{ quickBanner }}</span>
+          <button onClick="{{ dismissQuick }}" style-hover="text-decoration:underline;" style="background:none;border:none;color:var(--color-accent);cursor:pointer;font-size:12px;">Ok</button>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-top:14px;">
+        <label style="font-size:12px;color:var(--color-text-muted);white-space:nowrap;">Grund der Änderung (optional)</label>
+        <input value="{{ saveReason }}" onChange="{{ onSaveReasonChange }}" placeholder="z. B. Konto korrigiert" style="flex:1;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px 8px;font-size:12.5px;color:var(--color-text);box-sizing:border-box;" />
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:12px;border-top:1px solid var(--color-border);flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
+          <button onClick="{{ onQuickK }}" style-hover="color:var(--color-accent);" style="background:none;border:none;color:var(--color-text-muted);font-size:12px;cursor:pointer;padding:0;">Alt+K Klärungskonto</button>
+          <button onClick="{{ onQuickW }}" style-hover="color:var(--color-accent);" style="background:none;border:none;color:var(--color-text-muted);font-size:12px;cursor:pointer;padding:0;">Alt+W wie letzte Buchung</button>
+          <button onClick="{{ onQuickP }}" style-hover="color:var(--color-accent);" style="background:none;border:none;color:var(--color-text-muted);font-size:12px;cursor:pointer;padding:0;">Alt+P Privatanteil</button>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <sc-if value="{{ canReverse }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ openReverseModal }}" title="Buchung entfernen" style-hover="color:var(--color-danger);border-color:var(--color-danger);" style="display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:8px 12px;font-size:13px;color:var(--color-text-muted);cursor:pointer;white-space:nowrap;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
+              Löschen
+            </button>
+          </sc-if>
+          <button onClick="{{ onCancelClick }}" style-hover="background:var(--color-bg-soft);" style="background:none;border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:8px 14px;font-size:13px;color:var(--color-text-muted);cursor:pointer;white-space:nowrap;">Abbrechen · Esc</button>
+          <button onClick="{{ onSaveClick }}" disabled="{{ saveDisabled }}" style-hover="{{ saveHover }}" style="background:{{ saveBg }};color:#fff;border:none;border-radius:var(--radius-md);padding:8px 16px;font-size:13px;font-weight:600;cursor:{{ saveCursor }};white-space:nowrap;">Speichern &amp; freigeben · Ctrl+↵{{ saveCounterText }}</button>
+        </div>
+      </div>
+
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ flash }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;bottom:-14px;right:22px;background:var(--color-primary-700);color:#fff;font-size:12px;padding:5px 12px;border-radius:var(--radius-md);box-shadow:var(--shadow-md);">{{ flash }}</div>
+  </sc-if>
+
+  <sc-if value="{{ reverseModal.open }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ reverseModal.close }}" style="position:fixed;inset:0;background:rgba(20,36,56,0.45);backdrop-filter:blur(8px);z-index:50;display:flex;align-items:center;justify-content:center;">
+      <div onClick="{{ reverseModal.stop }}" style="background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:24px 26px;width:400px;box-sizing:border-box;">
+        <div style="font-size:15px;font-weight:600;color:var(--color-text);margin-bottom:8px;">Buchung entfernen?</div>
+        <p style="font-size:13px;color:var(--color-text-muted);line-height:1.5;margin:0 0 14px;">Möchten Sie diese Buchung wirklich entfernen? Der Status ändert sich zu „Storniert" — die Buchung bleibt im Journal sichtbar und wird nicht gelöscht.</p>
+        <label style="display:block;font-size:12px;color:var(--color-text-muted);margin-bottom:6px;">Grund (optional)</label>
+        <input value="{{ reverseModal.reason }}" onChange="{{ reverseModal.onReasonChange }}" placeholder="z. B. doppelt erfasst" style="width:100%;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px 10px;font-size:13px;color:var(--color-text);box-sizing:border-box;margin-bottom:18px;" />
+        <div style="display:flex;justify-content:flex-end;gap:8px;">
+          <button onClick="{{ reverseModal.close }}" style-hover="background:var(--color-bg-soft);" style="background:none;border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:8px 14px;font-size:13px;color:var(--color-text-muted);cursor:pointer;">Abbrechen</button>
+          <button onClick="{{ reverseModal.confirm }}" style-hover="background:#8F3632;" style="background:var(--color-danger);color:#fff;border:none;border-radius:var(--radius-md);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">Buchung stornieren</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 900, &quot;height&quot;: 520}, &quot;mode&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;einfach&quot;, &quot;options&quot;: [&quot;einfach&quot;, &quot;voll&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Ansicht&quot;}, &quot;editable&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Ansicht&quot;}, &quot;framed&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Ansicht&quot;}, &quot;status&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;proposed&quot;, &quot;options&quot;: [&quot;proposed&quot;, &quot;accepted&quot;, &quot;posted&quot;, &quot;reversed&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Status&quot;}, &quot;deletable&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Status&quot;}, &quot;reversedReason&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Status&quot;}, &quot;aiReview&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;{confidence: string, verdict: string, rationale?: string, judgeReasoning?: string, sources?: any[]} | null&quot;},
+&quot;onDelete&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;(reason: string | null) =&gt; void&quot;}, &quot;onSave&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;(rows: any[], reason: string | null) =&gt; void&quot;}, &quot;onCancel&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;() =&gt; void&quot;}, &quot;onEdit&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;() =&gt; void&quot;}}">
+
+const TAX_RATE = { '9': 0.19, '8': 0.07, '3': 0.19, '2': 0.07, '94': 0 };
+const TAX_ACCOUNT = { '9': '1406', '8': '1401', '3': '3806', '2': '3801' };
+const BU_LABEL = { '9': 'VSt 19%', '8': 'VSt 7%', '3': 'USt 19%', '2': 'USt 7%', '94': '§13b', '40': 'Automatik aufheben' };
+const BU_INFO = {
+  '9': 'Vorsteuer 19 % — abziehbare Vorsteuer auf Inlandsleistungen zum Regelsteuersatz.',
+  '8': 'Vorsteuer 7 % — abziehbare Vorsteuer auf Inlandsleistungen zum ermäßigten Satz.',
+  '3': 'Umsatzsteuer 19 % — Ausgangsumsatz zum Regelsteuersatz.',
+  '2': 'Umsatzsteuer 7 % — Ausgangsumsatz zum ermäßigten Satz.',
+  '94': '§ 13b UStG — Reverse Charge, Steuerschuldnerschaft des Leistungsempfängers.',
+  '40': 'Automatik aufheben — hebt die automatische Versteuerung eines Automatikkontos für diese Buchung auf.',
+};
+const ACCOUNT_DIRECTORY = [
+  { account: '6815', name: 'Bürobedarf' }, { account: '6805', name: 'Telefon' }, { account: '0650', name: 'Büroeinrichtung' },
+  { account: '4400', name: 'Kreditkartenumsätze · Automatik 19 %' }, { account: '1590', name: 'Klärung / durchlaufende Posten' },
+  { account: '2130', name: 'Nicht abziehbare Betriebsausgaben' }, { account: '4650', name: 'Bewirtung 70 % abziehbar' },
+  { account: '6300', name: 'Fremdleistungen' }, { account: '6310', name: 'Miete' }, { account: '6320', name: 'Nebenkosten' },
+  { account: '6855', name: 'Nebenkosten des Geldverkehrs' }, { account: '70044', name: 'Bürobedarf Meier GmbH' }, { account: '1200', name: 'Bank' },
+];
+
+function parseAmount(str) {
+  if (typeof str === 'number') return str;
+  const n = parseFloat(String(str || '0').replace(/\./g, '').replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+function fmtAmount(n) {
+  return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function mockLedger(konto) {
+  const seed = String(konto || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 1;
+  return [
+    { date: '29.07.2026', beleg: 'RE-' + (1000 + seed % 900), amount: fmtAmount(40 + seed % 60) },
+    { date: '30.06.2026', beleg: 'RE-' + (1000 + seed % 700), amount: fmtAmount(20 + seed % 40) },
+    { date: '28.05.2026', beleg: 'RE-' + (1000 + seed % 500), amount: fmtAmount(60 + seed % 80) },
+  ];
+}
+
+const DEFAULT_ROWS = [
+  { id: 'r1', datum: '04.08.2026', currency: 'EUR', umsatz: '1.475,60', side: 'S', bu: '9', buLocked: false, konto: '6815', kontoName: 'Bürobedarf', beleg1: 'RE-4471', beleg2: '', text: 'Bürobedarf Meier 08/26', kost1: '100',
+    candidates: [
+      { groupLabel: 'Agent', chip: '6815 · Bürobedarf', account: '6815', name: 'Bürobedarf' },
+      { groupLabel: 'Partner', chip: '6815 · 6× · zuletzt 29.07.', account: '6815', name: 'Bürobedarf' },
+      { groupLabel: 'Ähnlich', chip: '0650 · Büroeinrichtung', account: '0650', name: 'Büroeinrichtung' },
+    ] },
+];
+
+class Component extends DCLogic {
+  state = { mode: null, rows: null, ack: {}, focusKonto: null, quickBanner: null, flash: null, drawer: null, gkEditing: false, gkOverride: null, gkSideOverride: null, journalOpen: false, gkFocus: false, saveReason: '', reverseModalOpen: false, reverseReason: '' };
+
+  componentDidMount() {
+    this.setState({ mode: this.props.mode || 'einfach', rows: this.cloneRows() });
+  }
+
+  cloneRows() {
+    const src = this.props.rows || DEFAULT_ROWS;
+    return src.map((r, i) => ({ ...r, id: r.id || ('r' + i), datum: r.datum || this.props.dateText || '04.08.2026', currency: r.currency || 'EUR' }));
+  }
+
+  setRootRef = (el) => { this.rootRef = el; };
+
+  toggleMode = () => this.setState((s) => ({ mode: s.mode === 'voll' ? 'einfach' : 'voll' }));
+
+  focusNext(el) {
+    if (!this.rootRef) return;
+    const items = Array.from(this.rootRef.querySelectorAll('[data-editable="1"]'));
+    const idx = items.indexOf(el);
+    if (idx > -1 && items[idx + 1]) items[idx + 1].focus();
+  }
+
+  onRootKeyDown = (e) => {
+    if (this.props.locked || this.props.status === 'reversed' || this.props.status === 'posted') return;
+    const key = e.key;
+    if (e.altKey) {
+      const k = key.toLowerCase();
+      if (k === 'v') { e.preventDefault(); this.toggleMode(); return; }
+      if (k === 'k') { e.preventDefault(); this.quick('Zeile auf Klärungskonto 1590 gesetzt — Kommentar erforderlich, Frist 30.09.'); return; }
+      if (k === 'w') { e.preventDefault(); this.quick('Letzte Buchung dieser Gegenpartei übernommen: Konto, BU und Textmuster.'); return; }
+      if (k === 'p') { e.preventDefault(); this.quick('Privatanteil abgespalten — 30 % auf Privatkonto, Steuer nur auf den betrieblichen Teil.'); return; }
+    }
+    if (e.ctrlKey && key === 'Enter') { e.preventDefault(); this.save(); return; }
+    if (key === 'Escape') { e.preventDefault(); this.cancel(); return; }
+    if (key === 'Enter' && e.target && e.target.getAttribute && e.target.getAttribute('data-editable') === '1') {
+      e.preventDefault();
+      this.focusNext(e.target);
+    }
+  };
+
+  quick = (msg) => this.setState({ quickBanner: msg });
+  dismissQuick = () => this.setState({ quickBanner: null });
+
+  setRow(id, field, value) {
+    this.setState((s) => ({
+      rows: s.rows
+        .filter((r) => !(r._deleted && r.id !== id))
+        .map((r) => r.id === id ? { ...r, [field]: value } : r),
+    }));
+  }
+
+  addRow = () => this.setState((s) => {
+    const rows = s.rows.filter((r) => !r._deleted);
+    const base = rows[0] || {};
+    const nid = 'r' + (rows.length + 1) + '_' + Date.now();
+    return { rows: [...rows, { id: nid, datum: base.datum || this.props.dateText || '04.08.2026', currency: base.currency || 'EUR', umsatz: '', side: base.side || 'S', bu: '', buLocked: false, konto: '', kontoName: '', beleg1: base.beleg1 || '', beleg2: '', text: '', kost1: '', candidates: [] }] };
+  });
+  removeRow = (id) => this.setState((s) => ({ rows: s.rows.map((r) => r.id === id ? { ...r, _deleted: true } : r) }));
+  undoRemove = (id) => this.setState((s) => ({ rows: s.rows.map((r) => r.id === id ? { ...r, _deleted: false } : r) }));
+
+  toggleAck = (code) => this.setState((s) => ({ ack: { ...s.ack, [code]: !s.ack[code] } }));
+
+  openLedger = (konto, name) => this.setState({ drawer: { type: 'ledger', konto, name } });
+  openBuDrawer = (code) => this.setState({ drawer: { type: 'bu', code } });
+  closeDrawer = () => this.setState({ drawer: null });
+  toggleGkEdit = () => this.setState({ gkEditing: !this.state.gkEditing });
+  toggleJournal = () => this.setState((s) => ({ journalOpen: !s.journalOpen }));
+  toggleGkSide = () => this.setState((s) => {
+    const def = (this.props.belegSide === 'S') ? 'H' : 'S';
+    const cur = s.gkSideOverride || def;
+    return { gkSideOverride: cur === 'S' ? 'H' : 'S' };
+  });
+  setGkField = (field, value) => this.setState((s) => ({ gkOverride: { ...(s.gkOverride || this.props.gegenkonto || {}), [field]: value } }));
+  onGkKontoFocus = (e) => { if (e && e.target && e.target.select) e.target.select(); this.setState({ gkFocus: true }); };
+  onGkKontoBlur = () => setTimeout(() => this.setState((st) => st.gkFocus ? { gkFocus: false } : null), 150);
+
+  save = () => {
+    if (this.saveDisabled) return;
+    if (this.props.onSave) this.props.onSave(this.state.rows, this.state.saveReason || null);
+    else { this.setState({ flash: 'Gespeichert und freigegeben.' }); setTimeout(() => this.setState({ flash: null }), 1600); }
+  };
+  cancel = () => {
+    if (this.props.onCancel) this.props.onCancel();
+    else { this.setState({ flash: 'Abgebrochen — Vorschlag unverändert.' }); setTimeout(() => this.setState({ flash: null }), 1400); }
+  };
+  openReverseModal = () => this.setState({ reverseModalOpen: true, reverseReason: '' });
+  closeReverseModal = () => this.setState({ reverseModalOpen: false });
+  confirmReverse = () => {
+    const reason = this.state.reverseReason || null;
+    if (this.props.onDelete) this.props.onDelete(reason);
+    else { this.setState({ flash: 'Status auf „Storniert" gesetzt.' }); setTimeout(() => this.setState({ flash: null }), 1800); }
+    this.setState({ reverseModalOpen: false });
+  };
+
+  renderVals() {
+    const s = this.state;
+    const rows = s.rows || this.cloneRows();
+    const mode = s.mode || this.props.mode || 'einfach';
+    const isVoll = mode === 'voll';
+    const gegenkonto = s.gkOverride || this.props.gegenkonto || { konto: '70044', name: 'Bürobedarf Meier GmbH' };
+    const belegSide = this.props.belegSide || 'S';
+    const belegAmount = this.props.belegAmount != null ? this.props.belegAmount : parseAmount('1.475,60');
+    const locked = this.props.locked || null;
+    const status = this.props.status || null;
+    const STATUS_META = {
+      proposed: { label: 'Vorschlag', tone: 'neutral' },
+      accepted: { label: 'Freigegeben', tone: 'success' },
+      posted: { label: 'Gebucht', tone: 'info' },
+      reversed: { label: 'Storniert', tone: 'warning' },
+    };
+    const statusBadge = status ? STATUS_META[status] : null;
+    const isReversed = status === 'reversed';
+    const isPosted = status === 'posted';
+    const canReverse = !!(this.props.onDelete || this.props.deletable) && !isReversed;
+
+    const gkSideDefault = belegSide === 'S' ? 'H' : 'S';
+    const gegenkontoSide = s.gkSideOverride || gkSideDefault;
+
+    const activeRows = rows.filter((r) => !r._deleted);
+    let netBeleg = 0;
+    const journalRows = [];
+    activeRows.forEach((r) => {
+      const amt = parseAmount(r.umsatz);
+      const rate = TAX_RATE[r.bu] || 0;
+      if (rate > 0) {
+        const netto = amt / (1 + rate);
+        const steuer = amt - netto;
+        journalRows.push({ konto: r.konto || '—', name: r.kontoName || '', side: r.side, amountText: fmtAmount(netto) });
+        journalRows.push({ konto: TAX_ACCOUNT[r.bu], name: BU_LABEL[r.bu], side: r.side, amountText: fmtAmount(steuer) });
+      } else {
+        journalRows.push({ konto: r.konto || '—', name: r.kontoName || '', side: r.side, amountText: fmtAmount(amt) });
+      }
+      netBeleg += (r.side === belegSide ? amt : -amt);
+    });
+    journalRows.push({ konto: gegenkonto.konto, name: gegenkonto.name, side: gegenkontoSide, amount: Math.abs(netBeleg), amountText: fmtAmount(Math.abs(netBeleg)) });
+
+    const sumSoll = journalRows.filter((j) => j.side === 'S').reduce((a, j) => a + parseAmount(j.amountText), 0);
+    const sumHaben = journalRows.filter((j) => j.side === 'H').reduce((a, j) => a + parseAmount(j.amountText), 0);
+    const balanced = Math.abs(sumSoll - sumHaben) < 0.005;
+
+    const rest = belegAmount - netBeleg;
+    const restOk = Math.abs(rest) < 0.005;
+
+    const errors = (this.props.errors || []).slice();
+    if (!restOk) errors.push({ code: 'E-ANCHOR', message: 'Rest zum Beleg ' + fmtAmount(rest) + ' — Betrag stimmt nicht mit dem Beleg überein.' });
+    if (!balanced) errors.push({ code: 'E-BALANCE', message: 'Soll und Haben sind nicht ausgeglichen.' });
+
+    const warnings = (this.props.warnings || []).map((w) => ({
+      ...w, acked: !!s.ack[w.code],
+      onAck: () => this.toggleAck(w.code),
+      onFix: w.fix ? () => { w.fix(this); } : null,
+    }));
+
+    const gridCols = isVoll
+      ? '92px 64px 116px 30px 46px minmax(150px,1fr) 96px 80px minmax(160px,1.3fr) 56px'
+      : '92px 116px 30px 46px minmax(150px,1fr) 96px minmax(160px,1.3fr)';
+
+    const saveBlocked = errors.length > 0 || warnings.some((w) => !w.acked);
+    const isEditable = this.props.editable !== false;
+    const framed = this.props.framed !== false;
+    const rootStyle = framed
+      ? 'position:relative;background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px 22px 18px;font-family:var(--font-sans);color:var(--color-text);outline:none;min-width:740px;overflow-x:auto;box-sizing:border-box;'
+      : 'position:relative;font-family:var(--font-sans);color:var(--color-text);outline:none;min-width:680px;overflow-x:auto;box-sizing:border-box;';
+    const belegNumber = this.props.belegNumber !== undefined ? this.props.belegNumber : 'RE-4471';
+    const belegLabel = belegNumber ? ('Beleg ' + belegNumber + ' · ') : '';
+    const headerDateText = (activeRows[0] && activeRows[0].datum) || this.props.dateText || '04.08.2026';
+
+    return {
+      rootStyle,
+      showForm: !locked && !isReversed && isEditable,
+      showReadOnly: !locked && !isReversed && !isEditable,
+      statusBadge, isReversed, isPosted,
+      reversedReason: this.props.reversedReason || '',
+      canEdit: !isPosted,
+      canReverse,
+      openReverseModal: this.openReverseModal,
+      saveReason: s.saveReason || '',
+      onSaveReasonChange: (e) => this.setState({ saveReason: e.target.value }),
+      reverseModal: {
+        open: !!s.reverseModalOpen,
+        reason: s.reverseReason || '',
+        onReasonChange: (e) => this.setState({ reverseReason: e.target.value }),
+        close: this.closeReverseModal,
+        confirm: this.confirmReverse,
+        stop: (e) => e.stopPropagation(),
+      },
+      onEditClick: () => {
+        if (this.props.onEdit) this.props.onEdit();
+        else { this.setState({ flash: 'Bearbeiten würde in den Editor-Modus wechseln (Prop editable=true).' }); setTimeout(() => this.setState({ flash: null }), 1800); }
+      },
+      dateText: headerDateText,
+      belegNumber, belegLabel,
+      belegAmountText: fmtAmount(belegAmount),
+      showRest: isVoll || !restOk,
+      restText: (rest >= 0 ? '' : '−') + fmtAmount(Math.abs(rest)),
+      restColor: restOk ? 'var(--color-success)' : 'var(--color-danger)',
+      restIcon: restOk ? '✓' : '',
+      locked: locked, lockedReason: locked ? locked.reason : '', lockedActionLabel: locked ? (locked.actionLabel || 'Storno + Neu') : '',
+      modeToggleLabel: isVoll ? 'Einfach ◂' : 'Voll ▸',
+      canToggleMode: !locked && !isReversed && !isPosted,
+      toggleMode: this.toggleMode,
+      isVoll, gridCols,
+      addRow: this.addRow,
+      rows: rows.map((r, i) => {
+        const rowBg = i % 2 === 1 ? 'var(--color-bg-soft)' : 'transparent';
+        if (r._deleted) return { id: r.id, deleted: true, rowBg, onUndo: () => this.undoRemove(r.id) };
+        const isAuto = !!r.buLocked;
+        const query = (r.konto || '').trim();
+        let candList;
+        if (query) {
+          const q = query.toLowerCase();
+          candList = ACCOUNT_DIRECTORY.filter((a) => a.account.startsWith(query) || a.name.toLowerCase().includes(q)).slice(0, 6)
+            .map((a) => ({ groupLabel: 'Alle Konten', chip: a.account + ' · ' + a.name, account: a.account, name: a.name }));
+        } else {
+          candList = r.candidates || [];
+        }
+        const showCandidates = s.focusKonto === r.id && candList.length > 0;
+        const rate = TAX_RATE[r.bu] || 0;
+        const amt = parseAmount(r.umsatz);
+        let taxNote = ''; let taxBu = '';
+        if (isAuto) taxNote = 'Automatik — Steuer entsteht ohne BU · Brutto ' + fmtAmount(amt);
+        else if (rate > 0) {
+          const netto = amt / (1 + rate); const steuer = amt - netto;
+          taxNote = 'Netto ' + fmtAmount(netto) + ' · ' + (r.bu === '9' || r.bu === '8' ? 'VSt ' : 'USt ') + fmtAmount(steuer) + ' → ' + TAX_ACCOUNT[r.bu] + ' · Brutto ' + fmtAmount(amt);
+          taxBu = r.bu;
+        }
+        const showFillRest = Math.abs(rest) > 0.005;
+        const onFillRest = () => this.setRow(r.id, 'umsatz', fmtAmount(amt + (r.side === belegSide ? rest : -rest)));
+        return {
+          id: r.id, deleted: false, rowBg,
+          datum: r.datum, onDatum: (e) => this.setRow(r.id, 'datum', e.target.value),
+          currency: r.currency, onCurrency: (e) => this.setRow(r.id, 'currency', e.target.value),
+          umsatz: r.umsatz, onUmsatz: (e) => this.setRow(r.id, 'umsatz', e.target.value),
+          onUmsatzFocus: (e) => e.target.select(),
+          onUmsatzBlur: (e) => this.setRow(r.id, 'umsatz', fmtAmount(parseAmount(e.target.value))),
+          side: r.side, sideBg: r.side === 'S' ? 'var(--color-bg-soft)' : '#fff', sideColor: r.side === 'S' ? 'var(--color-primary)' : 'var(--color-text)',
+          onToggleSide: () => this.setRow(r.id, 'side', r.side === 'S' ? 'H' : 'S'),
+          onSideKeyDown: (e) => { const k = e.key.toLowerCase(); if (k === 's' || k === '+') { e.preventDefault(); this.setRow(r.id, 'side', 'S'); } else if (k === 'h' || k === '-') { e.preventDefault(); this.setRow(r.id, 'side', 'H'); } },
+          bu: r.bu, buLocked: isAuto, buBg: isAuto ? 'var(--color-bg-soft)' : '#fff', buTitle: isAuto ? 'Automatikkonto — Steuer entsteht ohne BU' : 'Steuerschlüssel',
+          onBu: (e) => this.setRow(r.id, 'bu', e.target.value),
+          konto: r.konto, kontoBorder: 'var(--color-border)', kontoName: r.kontoName || '',
+          onKonto: (e) => this.setRow(r.id, 'konto', e.target.value),
+          onKontoFocus: (e) => { if (e && e.target && e.target.select) e.target.select(); this.setState({ focusKonto: r.id }); },
+          onKontoBlur: () => setTimeout(() => this.setState((st) => st.focusKonto === r.id ? { focusKonto: null } : null), 150),
+          onOpenLedger: () => this.openLedger(r.konto, r.kontoName),
+          beleg1: r.beleg1, onBeleg1: (e) => this.setRow(r.id, 'beleg1', e.target.value),
+          beleg2: r.beleg2, onBeleg2: (e) => this.setRow(r.id, 'beleg2', e.target.value),
+          text: r.text, onText: (e) => this.setRow(r.id, 'text', e.target.value),
+          kost1: r.kost1, onKost1: (e) => this.setRow(r.id, 'kost1', e.target.value),
+          taxNote, taxBu, onOpenBuDrawer: () => this.openBuDrawer(taxBu), showFillRest, fillRestLabel: fmtAmount(Math.abs(rest)), onFillRest,
+          canRemove: activeRows.length > 1, onRemove: () => this.removeRow(r.id),
+          showCandidates,
+          candidates: candList.map((c) => ({
+            ...c,
+            onPick: () => {
+              const m = String(c.chip || '').match(/^(\S+)\s*·\s*(.*)$/);
+              const acc = c.account || (m ? m[1] : r.konto);
+              const nm = c.name || (m ? m[2] : '');
+              this.setRow(r.id, 'konto', acc);
+              this.setRow(r.id, 'kontoName', nm);
+              this.setState({ focusKonto: null });
+            },
+          })),
+        };
+      }),
+      gegenkontoText: gegenkonto.konto + ' ' + gegenkonto.name,
+      gegenkontoAmountText: fmtAmount(Math.abs(netBeleg)),
+      gegenkontoSide, gegenkontoSideBg: gegenkontoSide === 'S' ? 'var(--color-bg-soft)' : '#fff', gegenkontoSideColor: gegenkontoSide === 'S' ? 'var(--color-primary)' : 'var(--color-text)',
+      onToggleGkSide: this.toggleGkSide,
+      onGkSideKeyDown: (e) => { const k = e.key.toLowerCase(); if (k === 's' || k === '+') { e.preventDefault(); this.setState({ gkSideOverride: 'S' }); } else if (k === 'h' || k === '-') { e.preventDefault(); this.setState({ gkSideOverride: 'H' }); } },
+      gkEditing: s.gkEditing, gkKonto: gegenkonto.konto, gkName: gegenkonto.name,
+      onGkKontoChange: (e) => this.setGkField('konto', e.target.value),
+      onGkNameChange: (e) => this.setGkField('name', e.target.value),
+      onGkKontoFocus: this.onGkKontoFocus, onGkKontoBlur: this.onGkKontoBlur,
+      gkShowCandidates: s.gkFocus && (() => {
+        const q = (gegenkonto.konto || '').trim();
+        return q ? ACCOUNT_DIRECTORY.some((a) => a.account.startsWith(q) || a.name.toLowerCase().includes(q.toLowerCase())) : ACCOUNT_DIRECTORY.length > 0;
+      })(),
+      gkCandidates: (() => {
+        const q = (gegenkonto.konto || '').trim();
+        const list = q ? ACCOUNT_DIRECTORY.filter((a) => a.account.startsWith(q) || a.name.toLowerCase().includes(q.toLowerCase())) : ACCOUNT_DIRECTORY;
+        return list.slice(0, 6).map((a) => ({ groupLabel: 'Alle Konten', chip: a.account + ' · ' + a.name, onPick: () => { this.setGkField('konto', a.account); this.setGkField('name', a.name); this.setState({ gkFocus: false }); } }));
+      })(),
+      toggleGkEdit: this.toggleGkEdit,
+      onOpenGkLedger: () => this.openLedger(gegenkonto.konto, gegenkonto.name),
+      drawer: {
+        open: !!s.drawer,
+        isLedger: !!s.drawer && s.drawer.type === 'ledger',
+        isBu: !!s.drawer && s.drawer.type === 'bu',
+        title: s.drawer ? (s.drawer.type === 'ledger' ? (s.drawer.konto + ' ' + s.drawer.name) : 'BU-Schlüssel') : '',
+        ledgerRows: (s.drawer && s.drawer.type === 'ledger') ? mockLedger(s.drawer.konto) : [],
+        buRows: Object.keys(BU_INFO).map((code) => ({ code, info: BU_INFO[code], active: !!s.drawer && s.drawer.type === 'bu' && s.drawer.code === code })),
+        close: this.closeDrawer,
+        stop: (e) => e.stopPropagation(),
+      },
+      journalRows,
+      journalOpen: isEditable || s.journalOpen, journalArrowDeg: (isEditable || s.journalOpen) ? '90deg' : '0deg', toggleJournal: this.toggleJournal,
+      sumSollText: fmtAmount(sumSoll), sumHabenText: fmtAmount(sumHaben),
+      balanceColor: balanced ? 'var(--color-success)' : 'var(--color-danger)', balanceIcon: balanced ? '=' : '≠',
+      hasErrors: errors.length > 0, errors,
+      aiReview: this.props.aiReview || null,
+      hasWarnings: warnings.length > 0, warnings,
+      hasHints: (this.props.hints || []).length > 0, hints: this.props.hints || [],
+      quickBanner: s.quickBanner, dismissQuick: this.dismissQuick,
+      onQuickK: () => this.quick('Zeile auf Klärungskonto 1590 gesetzt — Kommentar erforderlich, Frist 30.09.'),
+      onQuickW: () => this.quick('Letzte Buchung dieser Gegenpartei übernommen: Konto, BU und Textmuster.'),
+      onQuickP: () => this.quick('Privatanteil abgespalten — 30 % auf Privatkonto, Steuer nur auf den betrieblichen Teil.'),
+      saveDisabled: saveBlocked,
+      saveBg: saveBlocked ? 'var(--color-border-strong)' : 'var(--color-primary-700)',
+      saveHover: saveBlocked ? '' : 'background:var(--color-primary-600);',
+      saveCursor: saveBlocked ? 'not-allowed' : 'pointer',
+      saveCounterText: errors.length > 0 ? (' · ' + errors.length + ' Fehler') : (warnings.some((w) => !w.acked) ? (' · ' + warnings.filter((w) => !w.acked).length + ' Warnungen') : ''),
+      onSaveClick: this.save, onCancelClick: this.cancel,
+      flash: s.flash,
+      setRootRef: this.setRootRef, onRootKeyDown: this.onRootKeyDown,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

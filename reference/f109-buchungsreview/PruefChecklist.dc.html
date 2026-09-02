@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:start;">
+  <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+    <div style="display:grid;grid-template-columns:20px 1fr 76px 100px 150px;gap:12px;align-items:center;padding:8px 18px;background:var(--color-bg-soft);border-bottom:1px solid var(--color-border);">
+      <span></span>
+      <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;">Prüfung</span>
+      <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;text-align:right;">Stand</span>
+      <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;">Fortschritt</span>
+      <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;">Sprung</span>
+    </div>
+    <sc-for list="{{ rows }}" as="row" hint-placeholder-count="6">
+      <div onClick="{{ row.select }}" style-hover="background:var(--color-bg-soft);" style="cursor:{{ row.cursor }};display:grid;grid-template-columns:20px 1fr 76px 100px 150px;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--color-border-subtle);background:{{ row.rowBg }};">
+        <span style="text-align:center;color:{{ row.iconColor }};font-weight:700;font-size:14px;">{{ row.icon }}</span>
+        <span style="font-size:13.5px;color:var(--color-text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.label }}</span>
+        <span style="font-size:12.5px;font-variant-numeric:tabular-nums;font-weight:{{ row.counterWeight }};color:{{ row.counterColor }};text-align:right;white-space:nowrap;">{{ row.counterText }}</span>
+        <sc-if value="{{ row.hasBar }}" hint-placeholder-val="{{ false }}">
+          <div style="width:88px;height:6px;background:var(--color-bg-soft);border-radius:999px;overflow:hidden;"><div style="height:100%;background:{{ row.barColor }};width:{{ row.barPct }}%;"></div></div>
+        </sc-if>
+        <sc-if value="{{ row.hasJump }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:11.5px;color:var(--color-accent-700);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">→ {{ row.jumpLabel }}</span>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:18px 20px;">
+    <sc-if value="{{ detail.hasSelection }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:13px;font-weight:600;color:var(--color-text);margin-bottom:4px;">{{ detail.label }}</div>
+      <div style="font-size:12px;color:var(--color-text-subtle);margin-bottom:14px;">{{ detail.counterText }}</div>
+
+      <sc-if value="{{ detail.isOk }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px;color:var(--color-text-muted);">{{ detail.okText }}</div>
+      </sc-if>
+
+      <sc-if value="{{ detail.isInfo }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px;color:var(--color-text-muted);">{{ detail.infoText }}</div>
+      </sc-if>
+
+      <sc-if value="{{ detail.showItems }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-bottom:14px;">
+          <sc-for list="{{ detail.items }}" as="it" hint-placeholder-count="2">
+            <div onClick="{{ it.jump }}" style-hover="text-decoration:underline;" style="cursor:pointer;padding:8px 0;border-top:1px solid var(--color-border-subtle);">
+              <div style="font-size:13px;color:var(--color-text);">{{ it.label }}</div>
+              <div style="font-size:12px;color:var(--color-text-subtle);margin-top:1px;">{{ it.problem }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ detail.showOverflow }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px;color:var(--color-text-muted);margin-bottom:14px;">{{ detail.overflowText }}</div>
+      </sc-if>
+
+      <sc-if value="{{ detail.showAck }}" hint-placeholder-val="{{ false }}">
+        <div style="border-top:1px solid var(--color-border-subtle);padding-top:12px;">
+          <textarea value="{{ grundText }}" onChange="{{ setGrundText }}" placeholder="Grund (optional)" style="width:100%;box-sizing:border-box;min-height:48px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font-sans);padding:8px 10px;margin-bottom:8px;resize:vertical;"></textarea>
+          <button onClick="{{ detail.acknowledge }}" style-hover="background:var(--color-primary-600);" style="background:var(--color-primary-700);color:#fff;border:none;border-radius:var(--radius-md);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;">Quittieren · A</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ detail.showAcked }}" hint-placeholder-val="{{ false }}">
+        <div style="border-top:1px solid var(--color-border-subtle);padding-top:12px;font-size:13px;color:var(--color-text);">
+          <span style="color:var(--color-warning);font-weight:600;">? Quittiert</span> — {{ detail.ackNote }}
+        </div>
+      </sc-if>
+    </sc-if>
+    <sc-if value="{{ detail.noSelection }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:13px;color:var(--color-text-subtle);">Zeile wählen für das Detail.</div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;rows&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any[]&quot;},&quot;detail&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any&quot;},&quot;grundText&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;setGrundText&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(e:any)=&gt;void&quot;}}"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/colors_and_type.css">
+  <script src="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/_ds_bundle.js"></script>
+</helmet>
+
+<sc-if value="{{ visible }}" hint-placeholder-val="{{ true }}">
+<div style="border:1px solid {{ borderColor }};border-radius:var(--radius-md);overflow:hidden;margin-top:8px;font-family:var(--font-sans);">
+  <div style="background:{{ headerBg }};padding:7px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+    <button onClick="{{ toggle }}" style-hover="opacity:0.75;" style="{{ titleStyle }}display:flex;align-items:center;gap:6px;background:none;border:none;padding:0;cursor:pointer;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;font-family:var(--font-sans);text-align:left;">
+      <span style="display:inline-block;transform:rotate({{ arrowDeg }});transition:transform .12s;flex:0 0 auto;">▸</span> {{ headerTitle }}
+    </button>
+    <div style="display:flex;align-items:center;gap:8px;flex:0 0 auto;">
+      <span title="{{ confidenceLabel }}" style="display:inline-block;width:8px;height:8px;border-radius:999px;background:{{ confidenceColor }};flex:0 0 auto;"></span>
+      <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Badge" from="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/_ds_bundle.js" tone="{{ verdictTone }}" hint-size="auto,20px">{{ verdictLabel }}</x-import>
+    </div>
+  </div>
+
+  <div style="background:{{ bodyBg }};padding:10px 12px;">
+    <sc-if value="{{ showSummary }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:12px;color:var(--color-text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ judgeReasoning }}</div>
+    </sc-if>
+
+    <sc-if value="{{ expanded }}" hint-placeholder-val="{{ false }}">
+      <div>
+
+        <sc-if value="{{ hasErrors }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:12px;">
+            <sc-for list="{{ errorItems }}" as="err" hint-placeholder-count="1">
+              <div style="font-size:12.5px;color:var(--color-text);background:var(--color-danger-bg);border:1px solid var(--color-danger);border-radius:var(--radius-sm);padding:6px 10px;margin-bottom:4px;"><strong style="color:var(--color-danger);">Fehler</strong> — {{ err.message }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasRationale }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+            <span style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);">Begründung des Vorschlags</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--color-text-muted);background:var(--color-bg-soft);border-radius:var(--radius-pill);padding:2px 8px;">
+              <span style="display:inline-block;width:7px;height:7px;border-radius:999px;background:{{ confidenceColor }};"></span>{{ confidenceChipLabel }}
+            </span>
+          </div>
+          <div style="font-size:12.5px;color:var(--color-text);line-height:1.55;background:#fff;border:1px solid var(--color-border-subtle);border-radius:var(--radius-sm);padding:9px 11px;margin-bottom:12px;height:6.4em;overflow-y:auto;box-sizing:border-box;">{{ rationale }}</div>
+        </sc-if>
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+          <span style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);">Einschätzung des Judge</span>
+          <x-import component-from-global-scope="LudwigDesignSystemV2Final_019dd9.Badge" from="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/_ds_bundle.js" tone="{{ verdictTone }}" hint-size="auto,20px">{{ verdictLabel }}</x-import>
+        </div>
+        <div style="font-size:12.5px;color:var(--color-text);line-height:1.55;background:#fff;border:1px solid var(--color-border-subtle);border-radius:var(--radius-sm);padding:9px 11px;margin-bottom:12px;height:6.4em;overflow-y:auto;box-sizing:border-box;">{{ judgeReasoning }}</div>
+
+        <sc-if value="{{ hasSources }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);margin-bottom:6px;">Quellen</div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <sc-for list="{{ sourceItems }}" as="src" hint-placeholder-count="2">
+              <a href="{{ src.href }}" target="{{ src.target }}" style-hover="text-decoration:underline;color:var(--color-accent-700);" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--color-accent-700);font-size:12.5px;padding:3px 0;">
+                <span style="display:flex;flex:0 0 auto;color:var(--color-text-subtle);" dangerouslySetInnerHTML="{{ src.icon }}"></span>
+                <span style="color:var(--color-text-subtle);font-weight:600;flex:0 0 auto;width:44px;">{{ src.kindLabel }}</span>
+                <span>{{ src.label }}</span>
+              </a>
+            </sc-for>
+          </div>
+        </sc-if>
+
+      </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 720, &quot;height&quot;: 160}, &quot;confidence&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;green&quot;, &quot;options&quot;: [&quot;green&quot;, &quot;yellow&quot;, &quot;orange&quot;, &quot;red&quot;, &quot;none&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Daten&quot;}, &quot;verdict&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;confirm&quot;, &quot;options&quot;: [&quot;confirm&quot;, &quot;confirm_with_note&quot;, &quot;adjust&quot;, &quot;flag&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Daten&quot;}, &quot;rationale&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Daten&quot;}, &quot;judgeReasoning&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Daten&quot;}, &quot;sources&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;Array&lt;{kind: string, label: string, href?: string}&gt;&quot;}, &quot;errors&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;Array&lt;{message: string} | string&gt;&quot;}}">
+
+const ICONS = {
+  bank: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h18"></path><path d="M6 18v-7"></path><path d="M10 18v-7"></path><path d="M14 18v-7"></path><path d="M18 18v-7"></path><path d="M12 2 3 7h18Z"></path></svg>',
+  beleg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2Z"></path><path d="M14 2v6h6"></path><path d="M9 13h6"></path><path d="M9 17h6"></path></svg>',
+  rule: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 2 2 4-4"></path><path d="m3 17 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 18h8"></path></svg>',
+  law: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><path d="M5 8h4l-2 6a2.5 2.5 0 0 1-4 0Z"></path><path d="M15 8h4l-2 6a2.5 2.5 0 0 1-4 0Z"></path><path d="M3 21h18"></path><path d="M5 8 12 3l7 5"></path></svg>',
+  web: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c2.5 2.7 4 6 4 9s-1.5 6.3-4 9c-2.5-2.7-4-6-4-9s1.5-6.3 4-9Z"></path></svg>',
+};
+const KIND_LABEL = { bank: 'Bank', beleg: 'Beleg', rule: 'Regel', law: 'Gesetz', web: 'Web' };
+
+const CONFIDENCE_META = {
+  green: { label: 'Ursprungs-Konfidenz: hoch', chip: 'hoch', color: 'var(--color-success)' },
+  yellow: { label: 'Ursprungs-Konfidenz: mittel', chip: 'mittel', color: 'oklch(74% 0.12 95)' },
+  orange: { label: 'Ursprungs-Konfidenz: gering', chip: 'gering', color: 'var(--color-warning)' },
+  red: { label: 'Ursprungs-Konfidenz: sehr gering', chip: 'sehr gering', color: 'var(--color-danger)' },
+  none: { label: 'Keine Konfidenzangabe (Regel-/Hand-/Altbuchung)', chip: 'keine Angabe', color: 'var(--color-border-strong)' },
+};
+
+const VERDICT_META = {
+  confirm: { label: 'Bestätigt', tone: 'success', flag: false },
+  confirm_with_note: { label: 'Bestätigt mit Hinweis', tone: 'success', flag: false },
+  adjust: { label: 'Angepasst', tone: 'success', flag: false },
+  flag: { label: 'Zur Prüfung', tone: 'info', flag: true },
+};
+
+class Component extends DCLogic {
+  state = { expanded: null };
+
+  componentDidMount() {
+    const meta = VERDICT_META[this.props.verdict] || VERDICT_META.confirm;
+    const hasErrors = (this.props.errors || []).length > 0;
+    this.setState({ expanded: meta.flag || hasErrors });
+  }
+
+  toggle = () => this.setState((s) => ({ expanded: !s.expanded }));
+
+  renderVals() {
+    const verdict = this.props.verdict || 'confirm';
+    const vmeta = VERDICT_META[verdict] || VERDICT_META.confirm;
+    const confidence = this.props.confidence || 'none';
+    const cmeta = CONFIDENCE_META[confidence] || CONFIDENCE_META.none;
+    const errors = this.props.errors || [];
+    const hasErrors = errors.length > 0;
+    const expanded = this.state.expanded === null ? (vmeta.flag || hasErrors) : this.state.expanded;
+    const isFlag = vmeta.flag;
+    const rationale = this.props.rationale || '';
+    const judgeReasoning = this.props.judgeReasoning || '';
+    const sources = this.props.sources || [];
+
+    return {
+      visible: verdict !== 'confirm' || hasErrors,
+      borderColor: hasErrors ? 'var(--color-danger)' : isFlag ? 'var(--color-accent)' : 'var(--color-border)',
+      headerBg: hasErrors ? 'var(--color-danger-bg)' : isFlag ? 'var(--color-accent-50)' : 'var(--color-bg-soft)',
+      bodyBg: hasErrors ? '#fff' : isFlag ? '#fff' : 'var(--color-bg-soft)',
+      headerTitle: (isFlag || hasErrors) ? 'KI-Buchungshinweise: Bitte manuell prüfen' : 'KI-Buchungshinweise',
+      titleStyle: 'color:' + ((isFlag || hasErrors) ? 'var(--color-text)' : 'var(--color-text-subtle)') + ';',
+      hasErrors,
+      errorItems: errors.map((e) => ({ message: typeof e === 'string' ? e : e.message })),
+      arrowDeg: expanded ? '90deg' : '0deg',
+      toggle: this.toggle,
+      confidenceColor: cmeta.color,
+      confidenceLabel: cmeta.label,
+      confidenceChipLabel: cmeta.chip,
+      verdictLabel: vmeta.label,
+      verdictTone: vmeta.tone,
+      showSummary: !expanded && !!judgeReasoning,
+      expanded,
+      judgeReasoning,
+      rationale,
+      hasRationale: !!rationale,
+      hasSources: sources.length > 0,
+      sourceItems: sources.map((s) => ({
+        kindLabel: KIND_LABEL[s.kind] || s.kind,
+        icon: { __html: ICONS[s.kind] || ICONS.web },
+        label: s.label || '',
+        href: s.href || 'javascript:void(0)',
+        target: s.href ? '_blank' : undefined,
+      })),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

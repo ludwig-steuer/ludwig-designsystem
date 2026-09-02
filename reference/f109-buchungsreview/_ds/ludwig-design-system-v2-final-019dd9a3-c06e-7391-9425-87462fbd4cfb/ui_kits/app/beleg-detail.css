@@ -1,0 +1,494 @@
+/* ==========================================================================
+   Ludwig — Beleg-Detail Varianten
+   Geteilte Bausteine: PDF-Renderer, Header-Block, Positions-Tabelle,
+   Interpretation-Panel, Aktionsleiste.
+   Layout-Varianten (.bdv-a / .bdv-b / .bdv-c) bauen darauf auf.
+   ========================================================================== */
+
+/* --- Wrapper innerhalb eines Artboards --------------------------------- */
+.bdv {
+  display: grid;
+  height: 100%;
+  background: #FAFBFC;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  overflow: hidden;
+}
+
+/* --- Sticky Header über volle Breite ----------------------------------- */
+.bdv-head {
+  grid-column: 1 / -1;
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  padding: 14px 24px;
+  display: flex; align-items: center; gap: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(20,36,56,0.03);
+  z-index: 5;
+}
+.bdv-head__back {
+  width: 32px; height: 32px; border-radius: 6px;
+  border: 1px solid var(--color-border); background: #fff;
+  cursor: pointer; color: var(--color-text-muted);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all 120ms;
+  flex-shrink: 0;
+}
+.bdv-head__back:hover { background: var(--color-bg-soft); color: var(--color-text); }
+.bdv-head__title { flex: 1; min-width: 0; }
+.bdv-head__title h1 {
+  margin: 0; font-size: 17px; font-weight: 600; color: var(--color-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.bdv-head__meta { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.bdv-head__meta .sep { color: var(--color-border-strong); }
+.bdv-head__meta .mono { font-family: var(--font-mono); font-size: 11.5px; }
+.bdv-head__actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
+
+/* --- PDF Renderer (Original-Beleg) ------------------------------------- */
+.bdv-pdf {
+  background: #ECEFF3;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex; align-items: flex-start; justify-content: center;
+  border-right: 1px solid var(--color-border);
+}
+.bdv-pdf__page {
+  width: 100%; max-width: 520px;
+  aspect-ratio: 1 / 1.41;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(20,36,56,0.10), 0 12px 32px rgba(20,36,56,0.10);
+  padding: 36px 36px;
+  font-size: 10.5px; line-height: 1.55;
+  color: #2D2D2D;
+  border-radius: 2px;
+  position: relative;
+}
+.bdv-pdf__toolbar {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; gap: 4px; align-items: center;
+  padding: 6px 8px; margin: -24px -24px 16px;
+  background: rgba(236, 239, 243, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px; color: var(--color-text-muted);
+}
+.bdv-pdf__tool {
+  padding: 4px 8px; border-radius: 4px; cursor: pointer;
+  display: inline-flex; gap: 6px; align-items: center;
+  border: 1px solid transparent; background: transparent;
+  font: 12px var(--font-sans); color: var(--color-text-muted);
+}
+.bdv-pdf__tool:hover { background: #fff; border-color: var(--color-border); color: var(--color-text); }
+.bdv-pdf__tool.mono { font-family: var(--font-mono); font-size: 11px; }
+.bdv-pdf__page h4 { margin: 0; font-size: 12px; font-weight: 600; color: #1A3A5C; }
+.bdv-pdf__page small { color: #5C5C5C; font-size: 9.5px; }
+.bdv-pdf__page table.invoice { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 10px; }
+.bdv-pdf__page table.invoice th { text-align: left; padding: 5px 4px; font-size: 9px; color: #5C5C5C; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #DDE2E8; }
+.bdv-pdf__page table.invoice td { padding: 7px 4px; border-bottom: 1px solid #ECEFF3; }
+.bdv-pdf__page table.invoice td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.bdv-pdf__totals { display: flex; justify-content: flex-end; gap: 24px; padding: 14px 0 0; margin-top: 10px; border-top: 1px solid #DDE2E8; }
+.bdv-pdf__totals dl { margin: 0; font-size: 10px; }
+.bdv-pdf__totals dt { color: #5C5C5C; }
+.bdv-pdf__totals dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.bdv-pdf__totals dl.is-grand { font-weight: 600; color: #1A3A5C; font-size: 11px; }
+
+/* --- Karten/Sections --------------------------------------------------- */
+.bdv-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.bdv-card__h {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex; align-items: center; gap: 10px;
+  background: #fff;
+}
+.bdv-card__h .small {
+  font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--color-text-subtle); font-weight: 600;
+  flex: 1;
+}
+.bdv-card__h h3 {
+  margin: 0; font-size: 14px; font-weight: 600; color: var(--color-text);
+  flex: 1;
+}
+.bdv-card__body { padding: 14px 18px; }
+.bdv-card__body--tight { padding: 4px 18px 10px; }
+.bdv-card__body--flush { padding: 0; }
+
+.bdv-toggle {
+  appearance: none; border: none; background: transparent;
+  cursor: pointer; color: var(--color-text-muted);
+  display: inline-flex; align-items: center; gap: 4px;
+  font: 11.5px var(--font-sans); font-weight: 500;
+  padding: 2px 6px; border-radius: 4px;
+  transition: all 120ms;
+}
+.bdv-toggle:hover { background: var(--color-bg-soft); color: var(--color-text); }
+.bdv-toggle .chev { transition: transform 180ms cubic-bezier(.2,0,0,1); display: inline-flex; }
+.bdv-toggle.is-open .chev { transform: rotate(180deg); }
+
+/* --- Header-Block (Kreditor + Belegfakten) ----------------------------- */
+.bdv-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+  padding: 14px 18px 16px;
+}
+.bdv-fact { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.bdv-fact .lbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; }
+.bdv-fact .val { font-size: 13px; color: var(--color-text); font-weight: 500; }
+.bdv-fact .val.mono { font-family: var(--font-mono); font-size: 12px; }
+.bdv-fact .val.amount { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--color-primary); }
+.bdv-fact .val a { color: var(--color-accent-700); text-decoration: none; border-bottom: 1px dotted rgba(46,120,168,0.5); }
+.bdv-fact .val a:hover { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+
+.bdv-totals {
+  margin: 8px 0 0;
+  padding: 14px 18px;
+  border-top: 1px solid var(--color-border-subtle);
+  background: #FAFBFC;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+.bdv-totals .lbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; margin-bottom: 4px; }
+.bdv-totals .val { font-family: var(--font-sans); font-variant-numeric: tabular-nums; font-weight: 500; color: var(--color-text); font-size: 14px; }
+.bdv-totals .val.is-grand { color: var(--color-primary); font-size: 18px; font-family: var(--font-serif); font-weight: 500; }
+
+.bdv-flag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--color-bg-sunken); color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  font-size: 11px; font-weight: 500;
+}
+.bdv-flag.is-on { background: #E3F0F8; color: #2E78A8; border-color: #C7DFEC; }
+.bdv-flag .dot { width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
+
+.bdv-ocr {
+  margin: 0;
+  padding: 14px 18px;
+  background: #FAFBFC;
+  border-top: 1px solid var(--color-border-subtle);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  white-space: pre-wrap;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+/* --- Positionen-Tabelle ----------------------------------------------- */
+.bdv-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.bdv-tbl thead th {
+  font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--color-text-subtle); font-weight: 600;
+  padding: 9px 14px; text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  background: #FAFBFC;
+  white-space: nowrap;
+}
+.bdv-tbl thead th.num { text-align: right; }
+.bdv-tbl tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  vertical-align: middle;
+}
+.bdv-tbl tbody tr:last-child td { border-bottom: none; }
+.bdv-tbl tbody td.pos { color: var(--color-text-muted); font-variant-numeric: tabular-nums; width: 40px; }
+.bdv-tbl tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.bdv-tbl tbody td.tax { color: var(--color-text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bdv-tbl tbody td .desc { color: var(--color-text); font-weight: 500; }
+
+.bdv-src {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 1px 7px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 500;
+  white-space: nowrap;
+  border: 1px solid;
+}
+.bdv-src .dot { width: 5px; height: 5px; border-radius: 999px; background: currentColor; }
+.bdv-src.src-extracted { background: #EBF2EE; color: #3F7A5A; border-color: #D5E3DB; }
+.bdv-src.src-virtual_fallback { background: #F5EEE0; color: #B07B2C; border-color: #E8DCBE; }
+.bdv-src.src-virtual_aggregate { background: #E3F0F8; color: #2E78A8; border-color: #C7DFEC; }
+
+/* --- Interpretation-Panel --------------------------------------------- */
+.bdv-interp {
+  background: #fff;
+  border: 1px solid #C7DFEC;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 0 4px rgba(59,143,196,0.06), 0 2px 8px rgba(59,143,196,0.08);
+}
+.bdv-interp__h {
+  padding: 14px 18px;
+  background: linear-gradient(180deg, #F4F9FC 0%, #FAFBFC 100%);
+  border-bottom: 1px solid #C7DFEC;
+  display: flex; align-items: center; gap: 12px;
+}
+.bdv-interp__mark {
+  width: 28px; height: 28px;
+  background: linear-gradient(180deg, #2B5C8E 0%, #1A3A5C 100%);
+  border-radius: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(26,58,92,0.25), inset 0 1px 0 rgba(255,255,255,0.18);
+  position: relative;
+}
+.bdv-interp__mark::before { content: ""; position: absolute; width: 2px; height: 13px; background: #fff; left: 13px; top: 6px; }
+.bdv-interp__mark::after  { content: ""; position: absolute; width: 9px; height: 2px; background: #fff; left: 13px; top: 11px; }
+.bdv-interp__title { flex: 1; }
+.bdv-interp__title .small { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #2E78A8; font-weight: 600; }
+.bdv-interp__title h3 { margin: 1px 0 0; font-size: 14px; font-weight: 600; color: var(--color-text); }
+
+/* Konfidenz-Anzeige (groß) */
+.bdv-conf {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: grid; grid-template-columns: 1fr auto; gap: 8px 12px;
+  align-items: center;
+}
+.bdv-conf__lbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; }
+.bdv-conf__pct { font-family: var(--font-serif); font-weight: 500; font-size: 28px; color: var(--color-primary); font-variant-numeric: tabular-nums; line-height: 1; }
+.bdv-conf__bar {
+  grid-column: 1 / -1;
+  height: 6px; border-radius: 999px;
+  background: var(--color-bg-sunken);
+  overflow: hidden;
+  position: relative;
+}
+.bdv-conf__fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: linear-gradient(90deg, #2E78A8 0%, #3B8FC4 100%);
+  border-radius: 999px;
+}
+.bdv-conf__hint { grid-column: 1 / -1; font-size: 12px; color: var(--color-text-muted); }
+
+/* Buchungsvorschlag (Soll/Haben) */
+.bdv-account {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+.bdv-account__col { display: flex; flex-direction: column; gap: 4px; }
+.bdv-account__col .lbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; }
+.bdv-account__col .konto {
+  font-family: var(--font-mono); font-size: 14px; font-weight: 500;
+  color: var(--color-primary);
+}
+.bdv-account__col .name { font-size: 12.5px; color: var(--color-text-muted); }
+.bdv-account__cat {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--color-border-subtle);
+  display: flex; gap: 8px; align-items: baseline;
+  font-size: 12.5px;
+}
+.bdv-account__cat .lbl { color: var(--color-text-subtle); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+.bdv-account__cat .val { color: var(--color-text); }
+
+.bdv-buchungstext {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.bdv-buchungstext .lbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; }
+.bdv-buchungstext .val {
+  font-family: var(--font-mono); font-size: 13px;
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 4px;
+  padding: 8px 10px;
+  color: var(--color-text);
+}
+
+/* Klärungsfragen + Review-Items */
+.bdv-list { padding: 12px 18px; border-bottom: 1px solid var(--color-border-subtle); }
+.bdv-list__lbl {
+  font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--color-text-subtle); font-weight: 600;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.bdv-list__lbl .pill {
+  font-size: 10px; padding: 1px 6px; border-radius: 999px;
+  background: var(--color-bg-sunken); color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums; font-weight: 600; letter-spacing: 0;
+  text-transform: none;
+}
+.bdv-list ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.bdv-list li {
+  display: flex; gap: 10px;
+  font-size: 12.5px; line-height: 1.5; color: var(--color-text);
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-subtle);
+  background: #FAFBFC;
+}
+.bdv-list li::before {
+  content: ""; width: 6px; height: 6px; border-radius: 999px;
+  background: var(--color-text-subtle); margin-top: 7px; flex-shrink: 0;
+}
+.bdv-list--klaerung li { background: #FBF7EE; border-color: #E8DCBE; }
+.bdv-list--klaerung li::before { background: #B07B2C; }
+.bdv-list--review li { background: #F4F9FC; border-color: #C7DFEC; }
+.bdv-list--review li::before { background: #2E78A8; }
+
+.bdv-reasoning {
+  padding: 12px 18px;
+  font-family: var(--font-serif);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: #FAFBFC;
+}
+.bdv-reasoning .src {
+  margin-top: 10px;
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  color: var(--color-text-subtle);
+}
+
+/* --- Aktionsleiste ----------------------------------------------------- */
+.bdv-actions {
+  padding: 12px 20px;
+  border-top: 1px solid var(--color-border);
+  background: #fff;
+  display: flex; gap: 8px; align-items: center;
+  flex-shrink: 0;
+}
+.bdv-actions .spacer { flex: 1; }
+.bdv-actions .btn-danger {
+  background: #fff; color: #A8403C;
+  border: 1px solid #E5C9C7;
+}
+.bdv-actions .btn-danger:hover { background: #F4E6E5; border-color: #A8403C; }
+
+/* ==========================================================================
+   VARIANTE A — Klassisch gestapelt (PDF | Sidebar mit allen Sections)
+   ========================================================================== */
+.bdv-a {
+  grid-template-columns: 1fr 480px;
+  grid-template-rows: auto 1fr auto;
+}
+.bdv-a .bdv-pdf { grid-row: 2; grid-column: 1; }
+.bdv-a .bdv-side {
+  grid-row: 2; grid-column: 2;
+  background: #FAFBFC;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 18px 20px;
+}
+.bdv-a .bdv-actions { grid-row: 3; grid-column: 1 / -1; justify-content: flex-end; }
+
+/* ==========================================================================
+   VARIANTE B — Tabs (PDF | Tab-Bereich mit Übersicht/Positionen/Analyse/OCR)
+   ========================================================================== */
+.bdv-b {
+  grid-template-columns: 1fr 520px;
+  grid-template-rows: auto 1fr auto;
+}
+.bdv-b .bdv-pdf { grid-row: 2; grid-column: 1; }
+.bdv-b .bdv-tabwrap {
+  grid-row: 2; grid-column: 2;
+  display: flex; flex-direction: column;
+  background: #fff;
+  overflow: hidden;
+}
+.bdv-b__tabs {
+  display: flex;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: #fff;
+  flex-shrink: 0;
+  gap: 2px;
+  overflow-x: auto;
+}
+.bdv-b__tab {
+  appearance: none; background: transparent; border: none;
+  padding: 12px 14px;
+  font: 500 13px var(--font-sans); color: var(--color-text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  display: inline-flex; align-items: center; gap: 8px;
+  white-space: nowrap;
+  transition: color 120ms;
+}
+.bdv-b__tab:hover { color: var(--color-text); }
+.bdv-b__tab.is-active { color: var(--color-primary); border-bottom-color: var(--color-primary); font-weight: 600; }
+.bdv-b__tab .pill {
+  font-size: 10.5px; padding: 1px 6px; border-radius: 999px;
+  background: var(--color-bg-sunken); color: var(--color-text-muted);
+  font-weight: 500;
+}
+.bdv-b__tab.is-active .pill { background: #E3F0F8; color: #2E78A8; }
+.bdv-b__panel {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  background: #FAFBFC;
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.bdv-b .bdv-actions { grid-row: 3; grid-column: 1 / -1; justify-content: flex-end; }
+
+/* ==========================================================================
+   VARIANTE C — Drei Spalten (PDF | Fakten | Ludwig-Analyse)
+   Interpretation immer sichtbar, ideal für breite Bildschirme.
+   ========================================================================== */
+.bdv-c {
+  grid-template-columns: minmax(0, 1fr) 360px 380px;
+  grid-template-rows: auto 1fr auto;
+}
+.bdv-c .bdv-pdf { grid-row: 2; grid-column: 1; }
+.bdv-c .bdv-col-mid {
+  grid-row: 2; grid-column: 2;
+  background: #fff;
+  overflow-y: auto;
+  border-right: 1px solid var(--color-border);
+  display: flex; flex-direction: column;
+}
+.bdv-c .bdv-col-right {
+  grid-row: 2; grid-column: 3;
+  background: linear-gradient(180deg, #F4F9FC 0%, #FAFBFC 100%);
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+.bdv-c__sec {
+  border-bottom: 1px solid var(--color-border);
+}
+.bdv-c__sec:last-child { border-bottom: none; }
+.bdv-c__sec-h {
+  padding: 12px 18px;
+  display: flex; align-items: center; gap: 10px;
+  background: #FAFBFC;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.bdv-c__sec-h .small {
+  font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--color-text-subtle); font-weight: 600;
+}
+.bdv-c__sec-h h4 { margin: 0; font-size: 13px; font-weight: 600; color: var(--color-text); }
+.bdv-c__sec-body { padding: 0; }
+.bdv-c__sec-body--padded { padding: 14px 18px; }
+
+.bdv-c .bdv-col-right .bdv-c__sec {
+  border-color: rgba(199, 223, 236, 0.7);
+}
+.bdv-c .bdv-col-right .bdv-c__sec-h {
+  background: rgba(255,255,255,0.5);
+  border-color: rgba(199, 223, 236, 0.7);
+}
+.bdv-c .bdv-col-right .bdv-c__sec-h .small { color: #2E78A8; }
+.bdv-c .bdv-actions { grid-row: 3; grid-column: 1 / -1; justify-content: flex-end; }
+
+/* Wenn Variante C den Header-Block kompakter darstellt */
+.bdv-c .bdv-facts { grid-template-columns: 1fr; gap: 10px 0; padding: 14px 18px; }
+.bdv-c .bdv-totals { grid-template-columns: 1fr; gap: 10px; padding: 12px 18px; }

@@ -1,0 +1,23 @@
+/* ==========================================================================
+   Ludwig Design System — single entry point.
+
+   Link THIS file and you get the full system: design tokens + fonts
+   (colors_and_type.css) plus the product, auth and marketing UI kits.
+   Consuming a single kit? Link colors_and_type.css + that kit's CSS instead.
+
+   Not aggregated here on purpose:
+   - preview/_card.css   → preview-card chrome only
+   - sachverhalt-screen/ → a deliverable's local copies, not system sources
+   ========================================================================== */
+
+/* Foundation — tokens, type scale, @font-face / webfont import */
+@import url('colors_and_type.css');
+
+/* Product app UI kit */
+@import url('ui_kits/app/app.css');
+@import url('ui_kits/app/components.css');
+@import url('ui_kits/app/beleg-detail.css');
+
+/* Auth + marketing UI kits */
+@import url('ui_kits/auth/auth.css');
+@import url('ui_kits/marketing/marketing.css');

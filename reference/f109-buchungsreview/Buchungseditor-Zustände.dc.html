@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/colors_and_type.css">
+  <script src="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/_ds_bundle.js"></script>
+  <style>body{margin:0;}</style>
+</helmet>
+
+<sc-if value="{{ tooSmall }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:var(--color-bg-soft);z-index:1000;display:flex;align-items:center;justify-content:center;font-family:var(--font-sans);">
+    <div style="max-width:360px;text-align:center;padding:32px;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:14px;"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L14.71 3.86a2 2 0 0 0-3.42 0Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <div style="font-size:16px;font-weight:600;color:var(--color-text);margin-bottom:6px;">Bildschirm zu klein</div>
+      <div style="font-size:13.5px;color:var(--color-text-muted);line-height:1.5;">Diese Ansicht benötigt mehr Platz. Bitte vergrößern Sie das Browserfenster oder verwenden Sie einen größeren Bildschirm.</div>
+    </div>
+  </div>
+</sc-if>
+
+<div style="min-height:100vh;background:var(--color-bg-soft);font-family:var(--font-sans);color:var(--color-text);display:flex;">
+
+  <div style="width:220px;flex:0 0 220px;position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 16px;border-right:1px solid var(--color-border);">
+    <div style="font-family:var(--font-serif);font-weight:600;font-size:18px;color:var(--color-primary);margin-bottom:2px;">Ludwig</div>
+    <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:18px;">Buchungseditor · Zustände</div>
+    <a href="#s16" style="display:block;font-size:12.5px;color:var(--color-text-muted);text-decoration:none;padding:5px 6px;border-radius:var(--radius-sm);margin-bottom:1px;" style-hover="color:var(--color-accent);">S16 · Alte Tabelle (Vergleich)</a>
+    <sc-for list="{{ scenarios }}" as="sc" hint-placeholder-count="12">
+      <a href="{{ sc.href }}" style="display:block;font-size:12.5px;color:var(--color-text-muted);text-decoration:none;padding:5px 6px;border-radius:var(--radius-sm);margin-bottom:1px;" style-hover="color:var(--color-accent);">{{ sc.navLabel }}</a>
+    </sc-for>
+  </div>
+
+  <div style="flex:1;min-width:0;padding:32px 40px 80px;max-width:1080px;">
+    <h1 style="font-family:var(--font-serif);font-size:26px;font-weight:600;color:var(--color-primary);margin:0 0 6px;">Buchungseditor — alle Zustände</h1>
+    <p style="font-size:14px;color:var(--color-text-muted);margin:0 0 32px;max-width:68ch;">Referenz zur Abstimmung, kein Ablauf. Jede Karte ist derselbe Editor (<code>BuchungssatzEditor</code>), mit unterschiedlichen Daten belegt — Tastaturnavigation funktioniert in jeder Karte einzeln (Tab, Enter, Alt+V, Alt+K/W/P, Ctrl+↵, Esc).</p>
+
+    <div id="s16" style="margin-bottom:40px;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;color:#fff;background:var(--color-text-subtle);border-radius:999px;padding:2px 9px;">S16</span>
+        <span style="font-size:14.5px;font-weight:600;color:var(--color-text);">Alte Tabellen-Darstellung (nur zum Vergleich)</span>
+      </div>
+      <p style="font-size:12.5px;color:var(--color-text-subtle);margin:0 0 10px;">So sah die Nur-Anzeige vorher aus — statische Tabelle, kein Konto-Link zu Buchungen, kein BU-Drawer. Zum Vergleich mit S14, um die Buchhalterin zu fragen, welche Darstellung sie bevorzugt.</p>
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:24px 26px;max-width:900px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
+          <div style="display:flex;align-items:baseline;gap:10px;">
+            <span style="font-size:16px;font-weight:600;color:var(--color-primary);">Satz A</span>
+            <span style="font-size:12.5px;color:var(--color-text-muted);">12.08.2026 · Eingangsrechnungen</span>
+          </div>
+          <span style="font-size:12px;font-weight:600;color:var(--color-text-subtle);">offen</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:6px;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--color-border);">
+              <th style="width:16px;"></th>
+              <th style="text-align:left;padding:6px 8px;color:var(--color-text-subtle);font-weight:600;">Konto</th>
+              <th style="text-align:right;padding:6px 8px;color:var(--color-text-subtle);font-weight:600;">Soll</th>
+              <th style="text-align:right;padding:6px 8px;color:var(--color-text-subtle);font-weight:600;">Haben</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--color-text-subtle);font-weight:600;">BU</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--color-text-subtle);font-weight:600;">Belegfeld 1</th>
+              <th style="text-align:left;padding:6px 8px;color:var(--color-text-subtle);font-weight:600;">Text</th>
+              <th style="width:22px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--color-border-subtle);">
+              <td style="padding:5px 4px;"><span style="display:inline-block;width:7px;height:7px;border-radius:999px;background:var(--color-warning);"></span></td>
+              <td style="padding:5px 8px;white-space:nowrap;"><button style-hover="color:var(--color-accent-800);" style="background:none;border:none;padding:0;cursor:pointer;font-family:var(--font-mono);font-size:12.5px;color:var(--color-accent-700);text-decoration:underline;display:inline-block;width:42px;text-align:left;">6815</button><span style="font-size:12.5px;color:var(--color-text);">Bürobedarf</span></td>
+              <td style="padding:5px 8px;text-align:right;font-variant-numeric:tabular-nums;">157,41</td>
+              <td style="padding:5px 8px;text-align:right;font-variant-numeric:tabular-nums;"></td>
+              <td style="padding:5px 8px;"><button style-hover="color:var(--color-accent-800);" style="background:none;border:none;padding:0;cursor:pointer;color:var(--color-accent-700);text-decoration:underline;font-size:12.5px;">9 (19 %)</button></td>
+              <td style="padding:5px 8px;font-family:var(--font-mono);font-size:12px;color:var(--color-text-muted);"></td>
+              <td style="padding:5px 8px;color:var(--color-text-muted);">Büromaterial</td>
+              <td style="padding:5px 4px;text-align:center;"><button title="Weitere Informationen" style-hover="background:var(--color-bg-soft);" style="background:none;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);width:18px;height:18px;line-height:1;padding:0;cursor:pointer;color:var(--color-text-muted);font-size:12px;">⤢</button></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-border-subtle);opacity:0.65;">
+              <td style="padding:5px 4px;"></td>
+              <td style="padding:5px 8px;white-space:nowrap;"><button style-hover="color:var(--color-accent-800);" style="background:none;border:none;padding:0;cursor:pointer;font-family:var(--font-mono);font-size:12.5px;color:var(--color-accent-700);text-decoration:underline;display:inline-block;width:42px;text-align:left;">1406</button><span style="font-size:12.5px;color:var(--color-text);">Vorsteuer 19 %</span></td>
+              <td style="padding:5px 8px;text-align:right;font-variant-numeric:tabular-nums;">29,91</td>
+              <td style="padding:5px 8px;text-align:right;font-variant-numeric:tabular-nums;"></td>
+              <td style="padding:5px 8px;"></td>
+              <td style="padding:5px 8px;font-family:var(--font-mono);font-size:12px;color:var(--color-text-muted);"></td>
+              <td style="padding:5px 8px;color:var(--color-text-muted);"></td>
+              <td style="padding:5px 4px;text-align:center;"></td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--color-border-subtle);">
+              <td style="padding:5px 4px;"></td>
+              <td style="padding:5px 8px;white-space:nowrap;"><button style-hover="color:var(--color-accent-800);" style="background:none;border:none;padding:0;cursor:pointer;font-family:var(--font-mono);font-size:12.5px;color:var(--color-accent-700);text-decoration:underline;display:inline-block;width:42px;text-align:left;">70001</button><span style="font-size:12.5px;color:var(--color-text);">Sonnen GmbH</span></td>
+              <td style="padding:5px 8px;text-align:right;font-variant-numeric:tabular-nums;"></td>
+              <td style="padding:5px 8px;text-align:right;font-variant-numeric:tabular-nums;">187,32</td>
+              <td style="padding:5px 8px;"></td>
+              <td style="padding:5px 8px;font-family:var(--font-mono);font-size:12px;color:var(--color-text-muted);">RE-4471</td>
+              <td style="padding:5px 8px;color:var(--color-text-muted);"></td>
+              <td style="padding:5px 4px;text-align:center;"></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td style="padding:5px 8px;font-size:12px;color:var(--color-text-subtle);font-weight:600;">Summe</td>
+              <td style="padding:5px 8px;text-align:right;font-size:12px;color:var(--color-text-subtle);font-weight:600;font-variant-numeric:tabular-nums;">187,32</td>
+              <td style="padding:5px 8px;text-align:right;font-size:12px;color:var(--color-text-subtle);font-weight:600;font-variant-numeric:tabular-nums;">187,32</td>
+              <td colspan="4"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin:14px 0 4px;">
+          <div style="border:1px solid var(--color-warning);background:var(--color-warning-bg);border-radius:var(--radius-md);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;">
+            <div style="min-width:0;">
+              <div style="font-size:12.5px;font-weight:700;color:var(--color-warning);">P-KONTO <span style="font-weight:400;color:var(--color-text);">Konto in der Historie uneinheitlich verwendet</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <sc-for list="{{ scenarios }}" as="sc" hint-placeholder-count="12">
+      <div id="{{ sc.id }}" style="margin-bottom:40px;">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px;">
+          <span style="font-size:11px;font-weight:700;color:#fff;background:var(--color-primary);border-radius:999px;padding:2px 9px;">{{ sc.tag }}</span>
+          <span style="font-size:14.5px;font-weight:600;color:var(--color-text);">{{ sc.title }}</span>
+        </div>
+        <p style="font-size:12.5px;color:var(--color-text-subtle);margin:0 0 10px;">{{ sc.desc }}</p>
+        <dc-import name="BuchungssatzEditor" satz-label="{{ sc.data.satzLabel }}" kind="{{ sc.data.kind }}" date-text="{{ sc.data.dateText }}" beleg-number="{{ sc.data.belegNumber }}" beleg-amount="{{ sc.data.belegAmount }}" beleg-side="{{ sc.data.belegSide }}" gegenkonto="{{ sc.data.gegenkonto }}" rows="{{ sc.data.rows }}" warnings="{{ sc.data.warnings }}" errors="{{ sc.data.errors }}" hints="{{ sc.data.hints }}" locked="{{ sc.data.locked }}" mode="{{ sc.data.mode }}" editable="{{ sc.data.editable }}" status="{{ sc.data.status }}" deletable="{{ sc.data.deletable }}" reversed-reason="{{ sc.data.reversedReason }}" ai-review="{{ sc.data.aiReview }}" hint-size="900px,420px"></dc-import>
+      </div>
+    </sc-for>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+function row(overrides) {
+  return { id: 'r1', umsatz: '1.475,60', side: 'S', bu: '9', buLocked: false, konto: '6815', kontoName: 'Bürobedarf', beleg1: 'RE-4471', beleg2: '', text: 'Bürobedarf Meier 08/26', kost1: '100', candidates: [], ...overrides };
+}
+
+const SCENARIOS = [
+  { id: 's0', tag: 'S0', title: 'Einfach-Ansicht, Normalfall', desc: 'Eine Zeile, Gegenkonto als Chip, berechnete Steuer als Text. Löschen (Mülleimer) ist hier aktiv (deletable) — öffnet den Storno-Dialog.',
+    data: { mode: 'einfach', status: 'proposed', deletable: true, rows: [row()] } },
+
+  { id: 's1', tag: 'S1', title: 'Konto tauschen', desc: 'Kandidaten-Gruppen unter dem Feld, zwei Warnungen mit Quittung, Speichern erst danach aktiv.',
+    data: { mode: 'einfach', rows: [row({ konto: '0650', kontoName: 'Büroeinrichtung', beleg1: 'RE-4471', text: 'Schreibtisch Meier RE-4471',
+      candidates: [ { groupLabel: 'Agent', chip: '6815 · Bürobedarf' }, { groupLabel: 'Ähnlich', chip: '0650 · Büroeinrichtung' }, { groupLabel: 'Beleg-Position', chip: '0650 · Investition' } ] })],
+      warnings: [
+        { code: 'W-FIRST-USE', message: '0650 in den letzten 12 Monaten nur 1× bebucht.' },
+        { code: 'W-PRECEDENT', message: 'Partner-Historie: 6× 6815 — Abweichung wird als Hinweis an den Agenten vermerkt.' },
+      ] } },
+
+  { id: 's2', tag: 'S2', title: 'Split auf zwei Konten', desc: 'Voll-Ansicht, zweite Zeile, Restbetrag zählt bis 0 herunter.',
+    data: { mode: 'voll', rows: [
+      row({ id: 'r1', umsatz: '1.000,00', konto: '6815', kontoName: 'Bürobedarf', text: 'Bürobedarf Meier 08/26' }),
+      row({ id: 'r2', umsatz: '475,60', bu: '9', konto: '0650', kontoName: 'Büroeinrichtung', text: 'Schreibtisch Anteil' }),
+    ] } },
+
+  { id: 's3', tag: 'S3', title: 'BU auf Automatikkonto', desc: 'BU-Feld gesperrt, Konto verrechnet die Steuer selbst — kein Schlüssel nötig.',
+    data: { mode: 'einfach', rows: [row({ bu: '9', buLocked: true, konto: '4400', kontoName: 'Kreditkartenumsätze · Automatik 19 %', text: 'Kartenabrechnung 08/26' })] } },
+
+  { id: 's4', tag: 'S4', title: '§ 13b nachziehen', desc: 'Beleg nennt Reverse Charge, Buchung ohne BU 94 — Warnung mit Fix, danach 13b-Zeile sichtbar.',
+    data: { mode: 'einfach', rows: [row({ bu: '', konto: '6300', kontoName: 'Fremdleistungen', beleg1: 'RE-EU-201', text: 'Beratung Reverse Charge' })],
+      warnings: [ { code: 'W-13B', message: 'Beleg nennt Reverse Charge, Buchung ohne 13b-Schlüssel.', fixLabel: 'BU 94 vorschlagen' } ] } },
+
+  { id: 's5', tag: 'S5', title: 'Betrag ≠ Beleg', desc: 'Rest ≠ 0 als Fehler, „aus Beleg übernehmen" als Fix.',
+    data: { mode: 'einfach', belegAmount: 1475.60, rows: [row({ umsatz: '1.240,00', text: 'Bürobedarf Meier 08/26' })] } },
+
+  { id: 's6', tag: 'S6', title: 'Belegfeld-Schreibweise', desc: 'Kandidaten RE4471 / RE-4471, Klammer-Hinweis auf den Zahlungssatz.',
+    data: { mode: 'einfach', rows: [row({ beleg1: 'RE4471' })],
+      warnings: [ { code: 'W-DOC-NUM', message: 'Beleg 1 „RE4471" ≠ Rechnung „RE-4471".', fixLabel: 'übernehmen' } ],
+      hints: [ { message: 'Klammer: Zahlungssatz je-198P verweist auf dieselbe Belegnummer.' } ] } },
+
+  { id: 's7', tag: 'S7', title: 'Klärungskonto (Alt+K)', desc: 'Pflichtkommentar, Frist, kein BU, Sachverhalt bleibt offen.',
+    data: { mode: 'einfach', rows: [row({ bu: '', buLocked: true, konto: '1590', kontoName: 'Klärung / durchlaufende Posten', text: 'KLÄRUNG: Kartenabrechnung 08/26 ohne Beleg' })],
+      hints: [ { message: 'Erwartung „Klärungskonto auflösen bis 30.09.2026" wird am Sachverhalt angelegt.' } ] } },
+
+  { id: 's8', tag: 'S8', title: 'Wie letzte Buchung (Alt+W)', desc: 'Konto, BU und Textmuster der letzten Buchung dieser Gegenpartei vorausgefüllt.',
+    data: { mode: 'einfach', rows: [row({ text: 'wie zuletzt: Meier Bürobedarf 07/26' })],
+      hints: [ { message: 'Übernommen aus der letzten Buchung von Meier GmbH, 29.07.2026.' } ] } },
+
+  { id: 's9', tag: 'S9', title: 'Privatanteil (Alt+P)', desc: 'Zweite Zeile auf das Privatkonto, Steuer nur auf den betrieblichen Teil.',
+    data: { mode: 'voll', rows: [
+      row({ id: 'r1', umsatz: '70,00', bu: '9', konto: '4650', kontoName: 'Bewirtung 70 % abziehbar', text: 'Bewirtung Kunde — betrieblich' }),
+      row({ id: 'r2', umsatz: '30,00', bu: '', konto: '2130', kontoName: 'Nicht abziehbare Betriebsausgaben', text: 'Bewirtung Kunde — Privatanteil 30 %' }),
+    ] } },
+
+  { id: 's10', tag: 'S10', title: 'Zahlungssatz mit Rest', desc: 'Bank gegen offenen Posten, Rest ≠ 0 — Wege Teilzahlung, Skonto oder Klärung.',
+    data: { mode: 'voll', kind: 'Zahlung', belegNumber: 'Auszug 08/2026', belegAmount: 1800.00, belegSide: 'H',
+      gegenkonto: { konto: '1200', name: 'Bank', tag: 'Geldkonto' },
+      rows: [ row({ id: 'r1', umsatz: '1.700,00', bu: '', side: 'S', konto: '70044', kontoName: 'Bürobedarf Meier GmbH', text: 'Ausgleich RE-4471' }) ] } },
+
+  { id: 's11', tag: 'S11', title: 'Gesperrter Satz', desc: 'Read-only mit Banner und Grund, Weg über Storno + Neu.',
+    data: { locked: { reason: 'Im DATEV-Stapel 2026-08-01 (Status exported) — nicht änderbar.', actionLabel: 'Storno + Neu' } } },
+
+  { id: 's12', tag: 'S12', title: 'Mehrere Fehler', desc: 'Zusammenfassung mit mehreren Fehlern, Speichern inaktiv mit Zähler.',
+    data: { mode: 'voll', belegAmount: 1475.60, rows: [ row({ bu: '3', konto: '4400', buLocked: true, umsatz: '1.000,00', text: 'Testfall' }) ] } },
+
+  { id: 's13', tag: 'S13', title: 'Klärungskonto nicht konfiguriert', desc: 'Alt+K zeigt einen Einrichtungs-Hinweis statt eines Sachkontos zu raten.',
+    data: { mode: 'einfach', rows: [row()],
+      hints: [ { message: 'Kein Klärungskonto konfiguriert — Alt+K würde „Klärungskonto einrichten" statt eines Kontos zeigen.' } ] } },
+
+  { id: 's14', tag: 'S14', title: 'Nur-Anzeige (editable=false)', desc: 'Gleiche Struktur wie der Editor, aber ohne Formularfelder — für bereits freigegebene Sätze oder reine Übersicht. Konto-Links und „Bearbeiten" bleiben aktiv.',
+    data: { mode: 'einfach', editable: false, rows: [row()] } },
+
+  { id: 's15', tag: 'S15', title: 'Status: Freigegeben (accepted)', desc: 'Reviewer hat freigegeben — Badge „Freigegeben", weiterhin bearbeitbar (Korrektur öffnet den Editor erneut) und weiterhin stornierbar.',
+    data: { mode: 'einfach', status: 'accepted', deletable: true, editable: false, rows: [row()] } },
+
+  { id: 's17', tag: 'S17', title: 'Status: Gebucht (posted)', desc: 'Festgeschrieben — Badge „Gebucht", kein Bearbeiten mehr möglich, nur noch stornierbar über den Mülleimer.',
+    data: { mode: 'einfach', status: 'posted', deletable: true, editable: false, rows: [row()] } },
+
+  { id: 's18', tag: 'S18', title: 'Status: Storniert (reversed)', desc: 'Durch eine Storno-Buchung aufgehoben — reiner Hinweis-Zustand mit Grund, keine Aktionen mehr.',
+    data: { status: 'reversed', reversedReason: 'Doppelt erfasst, siehe RE-4472.', rows: [row()] } },
+
+  { id: 's19', tag: 'S19', title: 'Prüfzustand: Bestätigt (grün, eingeklappt)', desc: 'Judge bestätigt den Vorschlag, Ursprungs-Konfidenz hoch — „KI-Buchungshinweise" liegt eingeklappt unter dem Journal, nichts zu tun.',
+    data: { mode: 'einfach', editable: false, rows: [row({ konto: '1617', kontoName: 'Corporate Card A. Anders # 8088', text: 'Corporate Card A. Anders # 8088' })],
+      aiReview: { confidence: 'green', verdict: 'confirm',
+        judgeReasoning: 'Zwei-Zeilen-OPOS-Split exakt gegen historisch bestätigte offene Posten — Konto 81250 mit starker Präzedenz (40 Buchungen).',
+        rationale: 'Beleg und Zahlungssatz stimmen exakt überein, Konto entspricht der Historie dieser Gegenpartei.',
+        sources: [ { kind: 'bank', label: 'Kartenumsatz 29.07.2026 · 29,78 €', href: '#' }, { kind: 'beleg', label: 'Beleg RE-2026-0140.pdf', href: '#' } ] } } },
+
+  { id: 's20', tag: 'S20', title: 'Prüfzustand: Bestätigt mit Hinweis (grün, eingeklappt)', desc: 'Judge bestätigt, vermerkt aber eine Auffälligkeit als Hinweis — bleibt trotzdem eingeklappt, da nichts zu entscheiden ist.',
+    data: { mode: 'einfach', editable: false, rows: [row({ konto: '4920', kontoName: 'Telefon', text: 'Telefon M-net Juli' })],
+      aiReview: { confidence: 'orange', verdict: 'confirm_with_note',
+        judgeReasoning: 'Kein Beleg hochgeladen — Betrag weicht vom Vormonat deutlich ab (+119 €), Konto und Buchungslogik sind trotzdem stimmig.',
+        rationale: 'Konto entspricht der Kontenhistorie des Mandanten für M-net-Rechnungen.',
+        sources: [ { kind: 'bank', label: 'Lastschrift 29.07.2026 · 498,49 €', href: '#' }, { kind: 'rule', label: 'Konvention „M-net → 4920"', href: '#' } ] } } },
+
+  { id: 's21', tag: 'S21', title: 'Prüfzustand: Angepasst (grün, eingeklappt)', desc: 'Judge hat einen Wert korrigiert (Feldkorrektur), das Ergebnis ist trotzdem unauffällig.',
+    data: { mode: 'einfach', editable: false, rows: [row({ beleg1: '0', text: 'Aufwendungen für Lizenzen' })],
+      aiReview: { confidence: 'yellow', verdict: 'adjust',
+        judgeReasoning: 'Belegfeld 1 zur Konsistenz auf „0" gesetzt.',
+        rationale: 'Ursprünglicher Vorschlag übernahm eine Rechnungsnummer ins Belegfeld, die nicht dem Kanzlei-Muster entspricht — auf „0" korrigiert.',
+        sources: [ { kind: 'rule', label: 'Belegfeld-Konvention Lizenzsoftware', href: '#' } ] } } },
+
+  { id: 's22', tag: 'S22', title: 'Prüfzustand: Zur Prüfung markiert (ausgeklappt, alle Quellenarten)', desc: 'Judge markiert den Satz zur Prüfung — Panel liegt standardmäßig ausgeklappt, dezent hervorgehoben (kein Rot/Orange), mit Begründung und allen Quellenarten.',
+    data: { mode: 'einfach', editable: false, rows: [row({ konto: '4900', kontoName: 'Fortbildungskosten', text: 'Fortbildung Belegdeckung unklar' })],
+      aiReview: { confidence: 'orange', verdict: 'flag',
+        judgeReasoning: 'Struktur und Kontenwahl sind richtig — die Schwäche liegt in der Belegdeckung, die Rechnung deckt nur einen Teil des Buchungsbetrags ab.',
+        rationale: 'Vorschlag stützt sich auf das Zahlungsmuster der letzten drei Monate, da der vollständige Beleg fehlt.',
+        sources: [
+          { kind: 'bank', label: 'Überweisung 12.08.2026 · 690,00 €', href: '#' },
+          { kind: 'beleg', label: 'Teilbeleg RE-2026-0258.pdf (60 % der Summe)', href: '#' },
+          { kind: 'rule', label: 'Kanzlei-Konvention „Fortbildung ohne Vollbeleg"', href: '#' },
+          { kind: 'law', label: '§ 4 Abs. 4 EStG — Betriebsausgabenabzug', href: '#' },
+          { kind: 'web', label: 'Rückfrage: Seminaranbieter bestätigt Teilzahlung per E-Mail', href: '' },
+        ] } } },
+
+  { id: 's23', tag: 'S23', title: 'Prüfzustand: Zur Prüfung + Fehler', desc: 'Wie S22, aber der Satz hat zusätzlich einen harten Fehler (Rest ≠ Beleg) — der Fehler erscheint auch im „KI-Buchungshinweise"-Panel, das deshalb rot markiert und ausgeklappt bleibt.',
+    data: { mode: 'einfach', editable: true, belegAmount: 1475.60, rows: [row({ umsatz: '1.240,00', text: 'Bürobedarf Meier 08/26' })],
+      aiReview: { confidence: 'orange', verdict: 'flag',
+        judgeReasoning: 'Kontenwahl plausibel, aber der gebuchte Betrag passt nicht zum Beleg — vor Freigabe prüfen.',
+        rationale: 'Vorschlag wurde aus dem Zahlungssatz abgeleitet, weicht aber vom hochgeladenen Beleg ab.',
+        sources: [ { kind: 'beleg', label: 'Beleg RE-4471.pdf · 1.475,60 €', href: '#' } ] } } },
+];
+
+class Component extends DCLogic {
+  state = { winW: null, winH: null };
+  componentDidMount() {
+    this._onResize = () => this.setState({ winW: window.innerWidth, winH: window.innerHeight });
+    window.addEventListener('resize', this._onResize);
+    this._onResize();
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._onResize);
+  }
+  renderVals() {
+    const s = this.state;
+    return {
+      tooSmall: (s.winW || window.innerWidth) < 1100 || (s.winH || window.innerHeight) < 650,
+      scenarios: SCENARIOS.map((sc) => ({ id: sc.id, tag: sc.tag, title: sc.title, desc: sc.desc, data: sc.data, href: '#' + sc.id, navLabel: sc.tag + ' · ' + sc.title })),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

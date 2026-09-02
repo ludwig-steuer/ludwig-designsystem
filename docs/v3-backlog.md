@@ -65,6 +65,31 @@ Karte, `Werteliste` steht frei — in Drawer, Detail, Zusammenfassung.
 | `Ladeanzeige` außerhalb der Tabelle | 3 | `primitives` |
 | `KopierenKnopf` · `Schalter` · `Radiogruppe` · `Trennlinie` · `Avatar` · `Brotkrume` | 3 / 2 / 2 / 6 / 3 / 2 | `primitives` |
 
+## Knöpfe — eigene Erhebung vom 2026-09-03
+
+441 `.tsx` und 11 Stylesheets gezählt. Der `Button` deckt Variante, Größe,
+Icon links, Hotkey und `href` ab; sechs Fähigkeiten fehlen:
+
+| Was | Belegt | Aufgabe |
+|---|---:|---|
+| Textknopf-Form (`.v2link`, `pad 0`, Hover unterstrichen) | **86** | 0011 |
+| `loading` — heute 81× als `{pending ? "Speichere …" : …}` | **81** | 0010 |
+| Icon-only (9 davon ohne `aria-label`) | **31** | 0012 |
+| `size="xs"` — heute 21 Inline-`padding`-Overrides | **21** | 0010 |
+| `iconEnd` — nicht per `className` umgehbar | **10** | 0010 |
+| `fullWidth` | 3 + 6 Zeilenknöpfe | 0010 |
+
+Kein Bedarf: `size="lg"` (**0** Belege — der Login-Knopf ist nicht größer,
+sondern vollbreit), `variant="warning"` als Knopf (0), `SplitButton` (0).
+
+Zwei Nebenbefunde: das Repo hat **keinen einzigen Spinner** und keine
+Keyframes dafür — 0010 bringt ihn mit. Und `ActionBar` wird **0×** benutzt,
+`RowActions` **1×** (dort handgeschrieben als `<span className="v2actions">`):
+kein Lückenschluss am Knopf, sondern ein Adoptionsproblem der Migration.
+
+Nicht zu vergessen bei der Umstellung: `.btn` ist heute **37 px**, `.btn-sm`
+**30 px** — `.v2btn--md`/`--sm` sind 40/32. 398 Knöpfe wachsen um 2–3 px.
+
 ## Aufräumen im eigenen Haus
 
 - **`legacy/` leeren.** Fünf Bausteine warten dort auf ihre Einordnung:

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/colors_and_type.css">
+  <link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/ui_kits/app/app.css">
+  <link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/ui_kits/app/components.css">
+  <link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/ui_kits/app/beleg-detail.css">
+  <link rel="stylesheet" href="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/styles.css">
+  <script src="_ds/ludwig-design-system-v2-final-019dd9a3-c06e-7391-9425-87462fbd4cfb/_ds_bundle.js"></script>
+  <style>
+    .tb-chev { display:inline-block; width:7px; height:7px; border-right:1.5px solid var(--color-text-muted); border-bottom:1.5px solid var(--color-text-muted); transform:rotate(-45deg); transition:transform var(--duration-base) var(--ease-standard); }
+    .tb-chev.open { transform:rotate(45deg); }
+    .tb-row:hover { background:var(--color-bg-soft); }
+    .tb-anchor:target { scroll-margin-top:24px; }
+  </style>
+</helmet>
+
+<div style="display:flex;min-height:100vh;background:var(--color-bg-soft);">
+  <!-- TOC -->
+  <div style="width:236px;flex:0 0 auto;background:#fff;border-right:1px solid var(--color-border);padding:28px 18px;position:sticky;top:0;height:100vh;overflow-y:auto;">
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-subtle);font-weight:700;margin-bottom:4px;">Ludwig · Baukasten</div>
+    <h4 style="margin:0 0 20px;">Tabellen &amp; Listen</h4>
+    <nav style="display:flex;flex-direction:column;gap:2px;font-size:13px;">
+      <a href="#grundbaustein" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">1. Grundbaustein</a>
+      <a href="#zwischen" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">2. Zwischenüberschriften</a>
+      <a href="#inline-aktionen" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">3. Inline-Aktionen</a>
+      <a href="#tabellen-aktionen" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">4. Aktionen (ganze Tabelle)</a>
+      <a href="#paginierung" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">5. Paginierung</a>
+      <a href="#filter" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">6. Filter</a>
+      <a href="#ausklappbar" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">7. Ausklappbare Zeilen</a>
+      <a href="#streifen" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">8. Streifen (Zebra)</a>
+      <a href="#datenpunkte" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">9. Datenpunkt-Typen</a>
+      <a href="#listenansicht" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">10. Liste + Detail</a>
+      <a href="#anwendung" style="padding:6px 8px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;">11. Anwendung im Produkt</a>
+    </nav>
+  </div>
+
+  <!-- MAIN -->
+  <div style="flex:1;min-width:0;padding:40px 56px 120px;max-width:1180px;">
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-subtle);font-weight:600;margin-bottom:8px;">Referenz für Buchungsreview &amp; Prüfroutinen</div>
+    <h1 style="margin:0 0 10px;">Tabellen- und Listen-Bausteine</h1>
+    <p style="max-width:70ch;color:var(--color-text-muted);margin:0 0 40px;">Ein Baukasten für alle Ausprägungen, die in der Buchungsreview vorkommen — von der einfachen Tabellenkarte bis zur Listenansicht mit Detail. Ziel: jede Tabelle und jede Liste hat einen klaren Rahmen mit Kopfzeile. Keine frei schwebenden Zeilen ohne Header.</p>
+
+    <!-- 1. GRUNDBAUSTEIN -->
+    <section id="grundbaustein" class="tb-anchor" style="margin-bottom:56px;">
+      <h2 style="margin:0 0 6px;">1. Grundbaustein — Tabellenkarte</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 18px;">Jede Tabelle lebt in einer Karte: Kartenkopf (Titel + Kontext), Spaltenkopf (Feldnamen), Zeilen, optional Kartenfuß. Kein Fall ohne diesen Rahmen — auch nicht bei nur drei Zeilen.</p>
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FAFBFC;">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--color-text);">Offene Auszüge</div>
+            <div style="font-size:12px;color:var(--color-text-subtle);margin-top:1px;">Periode 08/2026 · 3 Konten</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.4fr 100px 120px 120px;gap:8px;padding:9px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;border-bottom:1px solid var(--color-border-subtle);">
+          <span>Konto</span><span>Auszüge</span><span style="text-align:right;">Anfangssaldo</span><span style="text-align:right;">Endsaldo</span>
+        </div>
+        <div class="tb-row" style="display:grid;grid-template-columns:1.4fr 100px 120px 120px;gap:8px;padding:12px 18px;align-items:center;border-bottom:1px solid var(--color-border-subtle);font-size:13.5px;color:var(--color-text);">
+          <span style="font-weight:500;">Geschäftskonto Sparkasse</span><span style="color:var(--color-text-muted);">4 / 4</span><span style="text-align:right;font-variant-numeric:tabular-nums;">12.480,55 €</span><span style="text-align:right;font-variant-numeric:tabular-nums;">14.102,10 €</span>
+        </div>
+        <div class="tb-row" style="display:grid;grid-template-columns:1.4fr 100px 120px 120px;gap:8px;padding:12px 18px;align-items:center;border-bottom:1px solid var(--color-border-subtle);font-size:13.5px;color:var(--color-text);">
+          <span style="font-weight:500;">Kreditkarte Amex</span><span style="color:var(--color-text-muted);">1 / 1</span><span style="text-align:right;font-variant-numeric:tabular-nums;">−820,40 €</span><span style="text-align:right;font-variant-numeric:tabular-nums;">−612,15 €</span>
+        </div>
+        <div class="tb-row" style="display:grid;grid-template-columns:1.4fr 100px 120px 120px;gap:8px;padding:12px 18px;align-items:center;font-size:13.5px;color:var(--color-text);">
+          <span style="font-weight:500;">Kasse</span><span style="color:var(--color-text-muted);">1 / 1</span><span style="text-align:right;font-variant-numeric:tabular-nums;">180,00 €</span><span style="text-align:right;font-variant-numeric:tabular-nums;">204,50 €</span>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:12.5px;color:var(--color-text-subtle);">Regel: Kartenkopf und Spaltenkopf immer vorhanden — auch wenn nur eine Zeile folgt. Letzte Zeile ohne Trennlinie.</div>
+    </section>
+
+    <!-- 2. ZWISCHENÜBERSCHRIFTEN -->
+    <section id="zwischen" class="tb-anchor" style="margin-bottom:56px;">
+      <h2 style="margin:0 0 6px;">2. Zwischenüberschriften — gruppierte Zeilen</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 18px;">Wenn Zeilen zu Gruppen gehören (z. B. Mengengerüst nach Konto, Belege nach Fälligkeit), trennt eine volle Zeile mit Gruppenlabel — nicht Fettdruck in der ersten Spalte.</p>
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--color-border);background:#FAFBFC;">
+          <div style="font-size:14px;font-weight:600;color:var(--color-text);">Mengengerüst · 2 auffällig</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.6fr 110px 110px 100px;gap:8px;padding:9px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;border-bottom:1px solid var(--color-border-subtle);">
+          <span>Konto</span><span style="text-align:right;">Ø 3 Monate</span><span style="text-align:right;">Aktuell</span><span>Abweichung</span>
+        </div>
+        <div style="padding:7px 18px;font-size:11px;font-weight:700;color:var(--color-text-muted);background:var(--color-bg-soft);border-bottom:1px solid var(--color-border-subtle);border-top:1px solid var(--color-border-subtle);text-transform:uppercase;letter-spacing:0.04em;">Aufwand · Bürokosten</div>
+        <div class="tb-row" style="display:grid;grid-template-columns:1.6fr 110px 110px 100px;gap:8px;padding:12px 18px;align-items:center;border-bottom:1px solid var(--color-border-subtle);font-size:13.5px;">
+          <span>6815 · Bürobedarf</span><span style="text-align:right;font-variant-numeric:tabular-nums;">18 Belege</span><span style="text-align:right;font-variant-numeric:tabular-nums;">41 Belege</span><span style="color:var(--color-warning);font-weight:600;">+128 %</span>
+        </div>
+        <div style="padding:7px 18px;font-size:11px;font-weight:700;color:var(--color-text-muted);background:var(--color-bg-soft);border-bottom:1px solid var(--color-border-subtle);border-top:1px solid var(--color-border-subtle);text-transform:uppercase;letter-spacing:0.04em;">Ertrag · Erlöse</div>
+        <div class="tb-row" style="display:grid;grid-template-columns:1.6fr 110px 110px 100px;gap:8px;padding:12px 18px;align-items:center;font-size:13.5px;">
+          <span>4400 · Erlöse 19 %</span><span style="text-align:right;font-variant-numeric:tabular-nums;">62.400 €</span><span style="text-align:right;font-variant-numeric:tabular-nums;">31.100 €</span><span style="color:var(--color-danger);font-weight:600;">−50 %</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. INLINE-AKTIONEN -->
+    <section id="inline-aktionen" class="tb-anchor" style="margin-bottom:56px;">
+      <h2 style="margin:0 0 6px;">3. Inline-Aktionen</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 18px;">Aktionen, die sich auf eine Zeile beziehen, stehen rechtsbündig in der Zeile selbst — als Text-Link-Buttons, nicht als Icon-Rätsel. Zwei sichtbar, Rest im Zeilenmenü.</p>
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="display:grid;grid-template-columns:1.6fr 130px 1fr 168px;gap:8px;padding:9px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;border-bottom:1px solid var(--color-border-subtle);">
+          <span>Gegenpartei</span><span style="text-align:right;">Betrag</span><span>Zweck</span><span style="text-align:right;">Aktionen</span>
+        </div>
+        <div class="tb-row" style="display:grid;grid-template-columns:1.6fr 130px 1fr 168px;gap:8px;padding:11px 18px;align-items:center;border-bottom:1px solid var(--color-border-subtle);font-size:13.5px;">
+          <span style="font-weight:500;">Vermieter Musterstraße</span><span style="text-align:right;font-variant-numeric:tabular-nums;">1.800,00 €</span><span style="color:var(--color-text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Miete 08/2026</span>
+          <span style="display:flex;gap:14px;justify-content:flex-end;">
+            <button style-hover="text-decoration:underline;" style="background:none;border:none;padding:0;font-size:12.5px;font-weight:600;color:var(--color-accent-700);cursor:pointer;">Zuordnen</button>
+            <button style-hover="text-decoration:underline;" style="background:none;border:none;padding:0;font-size:12.5px;color:var(--color-text-muted);cursor:pointer;">Zurückstellen</button>
+          </span>
+        </div>
+        <div class="tb-row" style="display:grid;grid-template-columns:1.6fr 130px 1fr 168px;gap:8px;padding:11px 18px;align-items:center;font-size:13.5px;">
+          <span style="font-weight:500;">Bürobedarf GmbH</span><span style="text-align:right;font-variant-numeric:tabular-nums;">64,90 €</span><span style="color:var(--color-text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Rechnung 3120</span>
+          <span style="display:flex;gap:14px;justify-content:flex-end;">
+            <button style-hover="text-decoration:underline;" style="background:none;border:none;padding:0;font-size:12.5px;font-weight:600;color:var(--color-accent-700);cursor:pointer;">Zuordnen</button>
+            <button style-hover="text-decoration:underline;" style="background:none;border:none;padding:0;font-size:12.5px;color:var(--color-text-muted);cursor:pointer;">Zurückstellen</button>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. TABELLEN-AKTIONEN -->
+    <section id="tabellen-aktionen" class="tb-anchor" style="margin-bottom:56px;">
+      <h2 style="margin:0 0 6px;">4. Aktionen für die ganze Tabelle</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 18px;">Massenaktionen (Auswahl über mehrere Zeilen) und tabellenweite Aktionen (Export, Anfordern) leben in einer eigenen Zeile über dem Spaltenkopf — innerhalb der Karte, nicht im Seitenkopf.</p>
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FAFBFC;">
+          <div style="font-size:14px;font-weight:600;color:var(--color-text);">Fehlende Belege · 5</div>
+          <button style-hover="background:var(--color-primary-600);" style="background:var(--color-primary-700);color:#fff;border:none;border-radius:var(--radius-md);padding:6px 13px;font-size:12.5px;font-weight:600;cursor:pointer;">Nachforderungsmail vorbereiten</button>
+        </div>
+        <div style="padding:9px 18px;border-bottom:1px solid var(--color-border-subtle);display:flex;align-items:center;gap:12px;background:var(--color-accent-50);">
+          <span style="font-size:12.5px;font-weight:600;color:var(--color-accent-700);">2 ausgewählt</span>
+          <span style="display:flex;gap:12px;margin-left:auto;">
+            <button style-hover="text-decoration:underline;" style="background:none;border:none;padding:0;font-size:12.5px;font-weight:600;color:var(--color-accent-700);cursor:pointer;">Als nicht nötig markieren</button>
+            <button style-hover="text-decoration:underline;" style="background:none;border:none;padding:0;font-size:12.5px;color:var(--color-text-muted);cursor:pointer;">Auswahl aufheben</button>
+          </span>
+        </div>
+        <div style="display:grid;grid-template-columns:24px 1.5fr 120px 1fr;gap:8px;padding:9px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;border-bottom:1px solid var(--color-border-subtle);">
+          <span></span><span>Gegenpartei</span><span style="text-align:right;">Betrag</span><span>Frist</span>
+        </div>
+        <div class="tb-row" style="display:grid;grid-template-columns:24px 1.5fr 120px 1fr;gap:8px;padding:11px 18px;align-items:center;border-bottom:1px solid var(--color-border-subtle);font-size:13.5px;">
+          <input type="checkbox" checked="{{ true }}" style="margin:0;" /><span style="font-weight:500;">Vermieter Musterstraße</span><span style="text-align:right;font-variant-numeric:tabular-nums;">1.800,00 €</span><span style="color:var(--color-warning);">seit 4 Tagen fällig</span>
+        </div>
+        <div class="tb-row" style="display:grid;grid-template-columns:24px 1.5fr 120px 1fr;gap:8px;padding:11px 18px;align-items:center;font-size:13.5px;">
+          <input type="checkbox" checked="{{ true }}" style="margin:0;" /><span style="font-weight:500;">Werbeagentur Nord</span><span style="text-align:right;font-variant-numeric:tabular-nums;">420,00 €</span><span style="color:var(--color-text-muted);">fällig in 3 Tagen</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. PAGINIERUNG -->
+    <section id="paginierung" class="tb-anchor" style="margin-bottom:56px;">
+      <h2 style="margin:0 0 6px;">5. Paginierung</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 18px;">Kartenfuß, immer sichtbar sobald mehr als eine Seite existiert. Info-Text links, Seiten rechts. Bestehende <span style="font-family:var(--font-mono);">.pag</span>-Klasse aus <span style="font-family:var(--font-mono);">components.css</span> verwenden.</p>
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--color-border);background:#FAFBFC;font-size:14px;font-weight:600;color:var(--color-text);">Buchungssätze · Periode 08/2026</div>
+        <div style="padding:34px 18px;text-align:center;color:var(--color-text-subtle);font-size:13px;">118 Zeilen (Inhalt gekürzt für dieses Beispiel)</div>
+        <div class="pag">
+          <span class="info">Zeige 21–40 von 118</span>
+          <button class="page" onClick="{{ pagPrev }}">‹</button>
+          <button class="page">1</button>
+          <button class="page active">{{ pagPage }}</button>
+          <button class="page">3</button>
+          <span class="ellipsis">…</span>
+          <button class="page">6</button>
+          <button class="page" onClick="{{ pagNext }}">›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. FILTER -->
+    <section id="filter" class="tb-anchor" style="margin-bottom:56px;">
+      <h2 style="margin:0 0 6px;">6. Filter</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 18px;">Filter-Chips gruppiert nach Dimension, außerhalb der Karte direkt über der Tabelle — nie in den Kartenkopf gemischt. Aktiver Chip: gefüllt in Primär.</p>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span style="font-size:11px;color:var(--color-text-subtle);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Status</span>
+          <sc-for list="{{ filterChips }}" as="c" hint-placeholder-count="4">
+            <button onClick="{{ c.pick }}" style="border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};border-radius:999px;padding:4px 11px;font-size:12px;font-weight:600;cursor:pointer;">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <input type="text" placeholder="Suche nach Gegenpartei, Betrag …" style="border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:6px 11px;font-size:12.5px;min-width:220px;" />
+      </div>
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--color-border);background:#FAFBFC;font-size:14px;font-weight:600;color:var(--color-text);">Ergebnis · gefiltert nach „{{ activeFilterLabel }}"</div>
+        <div style="padding:30px 18px;text-align:center;color:var(--color-text-subtle);font-size:13px;">Beispielhaft leer — Filterzustand demonstriert Chip-Reaktion oben.</div>
+      </div>
+    </section>
+
+    <!-- 7. AUSKLAPPBARE ZEILEN -->
+    <section id="ausklappbar" class="tb-anchor" style="margin-bottom:56px;">
+      <h2 style="margin:0 0 6px;">7. Ausklappbare Zeilen (Toggle, offen/geschlossen)</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 18px;">Zeile bleibt Teil der Tabelle, ein Chevron dreht sich beim Öffnen (45°, 180 ms, Standard-Ease). Der Inhalt darunter ist eine volle Zeile mit leicht abgesetztem Hintergrund — kein Modal, keine Drawer für kleine Zusatzinfos.</p>
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="display:grid;grid-template-columns:20px 1.6fr 120px 100px;gap:8px;padding:9px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;border-bottom:1px solid var(--color-border-subtle);">
+          <span></span><span>Konvention</span><span style="text-align:right;">Betroffen</span><span>Status</span>
+        </div>
+        <sc-for list="{{ toggleRows }}" as="row" hint-placeholder-count="2">
+          <div>
+            <div class="tb-row" onClick="{{ row.toggle }}" style="cursor:pointer;display:grid;grid-template-columns:20px 1.6fr 120px 100px;gap:8px;padding:12px 18px;align-items:center;border-bottom:1px solid var(--color-border-subtle);font-size:13.5px;">
+              <span class="tb-chev {{ row.chevClass }}"></span><span style="font-weight:500;">{{ row.title }}</span><span style="text-align:right;font-variant-numeric:tabular-nums;">{{ row.affected }}</span><span style="color:{{ row.statusColor }};font-weight:600;">{{ row.statusLabel }}</span>
+            </div>
+            <sc-if value="{{ row.isOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:14px 18px 16px 46px;background:var(--color-bg-soft);border-bottom:1px solid var(--color-border-subtle);font-size:13px;color:var(--color-text-muted);line-height:1.6;">{{ row.detail }}</div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- 8. STREIFEN -->
+    <section id="streifen" class="tb-anchor" style="margin-bottom:56px;">
+      <h2 style="margin:0 0 6px;">8. Streifen (Zebra-Tabelle)</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 8px;">Zur Vollständigkeit dokumentiert — <strong>im Produkt nicht verwenden.</strong> Das Ludwig-Brief schließt Zebra-Streifen aus; Trennung entsteht über schmale horizontale Linien, nicht über Hintergrundwechsel.</p>
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;opacity:0.75;">
+        <div style="padding:10px 18px;background:var(--color-danger-bg);color:var(--color-danger);font-size:12px;font-weight:600;border-bottom:1px solid var(--color-border);">Nicht empfohlen — nur als Referenz</div>
+        <div style="display:grid;grid-template-columns:1.6fr 120px;gap:8px;padding:9px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-text-subtle);font-weight:600;">
+          <span>Konto</span><span style="text-align:right;">Saldo</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.6fr 120px;gap:8px;padding:10px 18px;font-size:13.5px;background:#fff;">
+          <span>1200 · Bank</span><span style="text-align:right;font-variant-numeric:tabular-nums;">14.102,10 €</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.6fr 120px;gap:8px;padding:10px 18px;font-size:13.5px;background:var(--color-bg-soft);">
+          <span>1600 · Kreditkarte</span><span style="text-align:right;font-variant-numeric:tabular-nums;">−612,15 €</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.6fr 120px;gap:8px;padding:10px 18px;font-size:13.5px;background:#fff;">
+          <span>1000 · Kasse</span><span style="text-align:right;font-variant-numeric:tabular-nums;">204,50 €</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. DATENPUNKT-TYPEN -->
+    <section id="datenpunkte" class="tb-anchor" style="margin-bottom:56px;">
+      <h2 style="margin:0 0 6px;">9. Datenpunkt-Typen</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 18px;">Die Bausteine, aus denen sich jede Tabellenspalte zusammensetzt.</p>
+      <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="min-width:1020px;overflow-x:auto;">
+        <div style="display:grid;grid-template-columns:190px 100px 110px 150px 110px 210px 110px;gap:10px;padding:9px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.03em;color:var(--color-text-subtle);font-weight:600;border-bottom:1px solid var(--color-border-subtle);">
+          <span>Hauptinfo</span><span style="text-align:right;">Zahl</span><span style="text-align:right;">Betrag</span><span>Fortschritt</span><span>Status</span><span>Mehrzeilig</span><span style="text-align:right;">Aktion</span>
+        </div>
+        <div class="tb-row" style="display:grid;grid-template-columns:190px 100px 110px 150px 110px 210px 110px;gap:10px;padding:12px 18px;align-items:center;border-bottom:1px solid var(--color-border-subtle);font-size:13px;">
+          <span><div style="font-weight:600;color:var(--color-text);">Bürobedarf GmbH</div><div style="font-size:11.5px;color:var(--color-text-subtle);">Rechnung 3120</div></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;">41</span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;">64,90 €</span>
+          <span><div style="height:6px;background:var(--color-bg-sunken);border-radius:999px;overflow:hidden;"><div style="height:100%;width:72%;background:var(--color-accent);"></div></div><div style="font-size:11px;color:var(--color-text-subtle);margin-top:3px;">72 %</div></span>
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--color-success);"><span style="width:6px;height:6px;border-radius:999px;background:var(--color-success);"></span>Geprüft</span>
+          <span style="font-size:12.5px;color:var(--color-text-muted);line-height:1.4;">Kandidat gefunden, Beleg noch nicht zugeordnet.</span>
+          <span style="text-align:right;"><button style-hover="text-decoration:underline;" style="background:none;border:none;padding:0;font-size:12.5px;font-weight:600;color:var(--color-accent-700);cursor:pointer;">Öffnen</button></span>
+        </div>
+        <div class="tb-row" style="display:grid;grid-template-columns:190px 100px 110px 150px 110px 210px 110px;gap:10px;padding:12px 18px;align-items:center;font-size:13px;">
+          <span><div style="font-weight:600;color:var(--color-text);">Vermieter Musterstraße</div><div style="font-size:11.5px;color:var(--color-text-subtle);">Miete 08/2026</div></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;">3</span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;color:var(--color-danger);">−1.800,00 €</span>
+          <span><div style="height:6px;background:var(--color-bg-sunken);border-radius:999px;overflow:hidden;"><div style="height:100%;width:20%;background:var(--color-warning);"></div></div><div style="font-size:11px;color:var(--color-text-subtle);margin-top:3px;">20 %</div></span>
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--color-warning);"><span style="width:6px;height:6px;border-radius:999px;background:var(--color-warning);"></span>Offen</span>
+          <span style="font-size:12.5px;color:var(--color-text-muted);line-height:1.4;">Abweichung zur Regel (1.700 €). Rückfrage an Mandant läuft.</span>
+          <span style="text-align:right;"><button style-hover="text-decoration:underline;" style="background:none;border:none;padding:0;font-size:12.5px;font-weight:600;color:var(--color-accent-700);cursor:pointer;">Öffnen</button></span>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. LISTENANSICHT + DETAIL -->
+    <section id="listenansicht" class="tb-anchor" style="margin-bottom:56px;">
+      <h2 style="margin:0 0 6px;">10. Listenansicht mit Detail (Master-Detail)</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 18px;">Canonischer Ersatz für frei schwebende Karten-Zeilen: Die Liste ist <strong>eine</strong> Karte mit Kopfzeile pro Gruppe, Zeilen durch Trennlinien statt eigenem Rahmen, aktive Zeile mit Akzent-Leiste links. Detail rechts, gleiche Kartenhöhe.</p>
+      <div style="display:grid;grid-template-columns:360px minmax(0,1fr);gap:20px;align-items:flex-start;">
+        <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--color-border);background:#FAFBFC;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-subtle);font-weight:700;">Fragen an die Kanzlei · 2</div>
+          <div onClick="{{ selectMaster0 }}" style="cursor:pointer;padding:13px 16px;border-bottom:1px solid var(--color-border-subtle);border-left:3px solid {{ master0Active }};background:{{ master0Bg }};">
+            <div style="font-size:13.5px;font-weight:600;color:var(--color-text);">2026-0008 · Miete Musterstraße abweicht</div>
+            <div style="font-size:12px;color:var(--color-text-muted);margin-top:2px;">1.800,00 € statt üblich 1.700,00 € · wartet auf Antwort</div>
+          </div>
+          <div onClick="{{ selectMaster1 }}" style="cursor:pointer;padding:13px 16px;border-left:3px solid {{ master1Active }};background:{{ master1Bg }};">
+            <div style="font-size:13.5px;font-weight:600;color:var(--color-text);">2026-0014 · Beleg zu Kreditkarte fehlt</div>
+            <div style="font-size:12px;color:var(--color-text-muted);margin-top:2px;">64,90 € · seit 6 Tagen offen</div>
+          </div>
+          <div style="padding:12px 16px;border-top:1px solid var(--color-border);background:#FAFBFC;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-subtle);font-weight:700;">Overrides des Agenten · 1</div>
+          <div style="padding:13px 16px;font-size:13.5px;font-weight:600;color:var(--color-text);">S07 · Kontenzuordnung überschrieben</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:22px 24px;min-height:220px;">
+          <div style="font-size:16px;font-weight:600;color:var(--color-text);margin-bottom:4px;">{{ masterDetail.title }}</div>
+          <div style="font-size:12.5px;color:var(--color-text-muted);margin-bottom:16px;">{{ masterDetail.sub }}</div>
+          <p style="font-size:14px;line-height:1.6;color:var(--color-text);margin:0;">{{ masterDetail.body }}</p>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:12.5px;color:var(--color-text-subtle);">Vorher: jede Zeile eigene Box mit eigenem Rahmen, keine Kopfzeile, kein Gruppen-Rahmen. Nachher: eine Karte, ein Rahmen, Kopfzeile pro Gruppe.</div>
+    </section>
+
+    <!-- 11. ANWENDUNG -->
+    <section id="anwendung" class="tb-anchor" style="margin-bottom:40px;">
+      <h2 style="margin:0 0 6px;">11. Anwendung im Produkt</h2>
+      <p style="max-width:68ch;color:var(--color-text-muted);margin:0 0 10px;">Direkt betroffen: <strong>Fehlende Belege</strong> (Schritt 1) und <strong>Rückfragen</strong> (Schritt 2) in der Buchungsreview — beide hatten schwebende Zeilen ohne Kartenrahmen bzw. ohne Kopfzeile. Fix angewendet: Muster 1 (Grundbaustein) für die Beleg-Tabelle, Muster 10 (Liste + Detail) für die drei Rückfragen-Gruppen.</p>
+      <a href="Buchungsreview.dc.html" style="font-size:13px;font-weight:600;color:var(--color-accent-700);">→ Zur Buchungsreview</a>
+    </section>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    pagPage: 2,
+    activeFilterId: 'offen',
+    toggleOpen: { a: false, b: false },
+    masterSelected: 0,
+  };
+
+  filterDefs = [
+    { id: 'alle', label: 'Alle' },
+    { id: 'offen', label: 'Offen' },
+    { id: 'faellig', label: 'Fällig' },
+    { id: 'erledigt', label: 'Erledigt' },
+  ];
+
+  toggleDefs = [
+    { id: 'a', title: 'Bewirtungsbelege pauschal 70 % abziehen', affected: '12 Sätze', statusColor: 'var(--color-warning)', statusLabel: 'Entscheidung offen', detail: 'Betrifft alle Bewirtungsbuchungen im Zeitraum. Bisher wurde Fall für Fall entschieden — eine Konvention würde künftige Durchgänge automatisch vorkontieren.' },
+    { id: 'b', title: 'Kleinbetragsrechnungen ohne Steuersatz auf 19 % setzen', affected: '4 Sätze', statusColor: 'var(--color-success)', statusLabel: 'Entschieden', detail: 'Am 12.08.2026 von Frau Berger bestätigt. Gilt ab sofort für alle folgenden Perioden dieses Mandanten.' },
+  ];
+
+  masterDefs = [
+    { title: '2026-0008 · Miete Musterstraße abweicht', sub: '1.800,00 € statt üblich 1.700,00 € · wartet auf Antwort', body: 'Für August 2026 wurden 1.800,00 € Miete überwiesen, die bisherige Regel geht von 1.700,00 € aus. Bitte bestätigen Sie die neue Miethöhe oder weisen Sie auf einen Fehler hin.' },
+    { title: '2026-0014 · Beleg zu Kreditkarte fehlt', sub: '64,90 € · seit 6 Tagen offen', body: 'Zur Kreditkartenbuchung vom 21.08.2026 über 64,90 € liegt noch kein Beleg vor. Bürobedarf GmbH als Gegenpartei erkannt.' },
+  ];
+
+  renderVals() {
+    const filterChips = this.filterDefs.map((f) => ({
+      label: f.label,
+      pick: () => this.setState({ activeFilterId: f.id }),
+      bg: f.id === this.state.activeFilterId ? 'var(--color-primary-700)' : '#fff',
+      color: f.id === this.state.activeFilterId ? '#fff' : 'var(--color-text-muted)',
+      border: f.id === this.state.activeFilterId ? 'var(--color-primary-700)' : 'var(--color-border-strong)',
+    }));
+
+    const toggleRows = this.toggleDefs.map((t) => ({
+      title: t.title, affected: t.affected, statusColor: t.statusColor, statusLabel: t.statusLabel, detail: t.detail,
+      isOpen: !!this.state.toggleOpen[t.id],
+      chevClass: this.state.toggleOpen[t.id] ? 'open' : '',
+      toggle: () => this.setState((s) => ({ toggleOpen: { ...s.toggleOpen, [t.id]: !s.toggleOpen[t.id] } })),
+    }));
+
+    return {
+      pagPage: this.state.pagPage,
+      pagPrev: () => this.setState((s) => ({ pagPage: Math.max(1, s.pagPage - 1) })),
+      pagNext: () => this.setState((s) => ({ pagPage: Math.min(6, s.pagPage + 1) })),
+      filterChips,
+      activeFilterLabel: this.filterDefs.find((f) => f.id === this.state.activeFilterId).label,
+      toggleRows,
+      masterItems: this.masterDefs,
+      selectMaster0: () => this.setState({ masterSelected: 0 }),
+      selectMaster1: () => this.setState({ masterSelected: 1 }),
+      master0Active: this.state.masterSelected === 0 ? 'var(--color-accent)' : 'transparent',
+      master1Active: this.state.masterSelected === 1 ? 'var(--color-accent)' : 'transparent',
+      master0Bg: this.state.masterSelected === 0 ? 'var(--color-accent-50)' : '#fff',
+      master1Bg: this.state.masterSelected === 1 ? 'var(--color-accent-50)' : '#fff',
+      masterDetail: this.masterDefs[this.state.masterSelected],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -15,7 +15,10 @@ const config: StorybookConfig = {
     name: "@storybook/nextjs-vite",
     options: {},
   },
-  staticDirs: ["../public"],
+  // `reference/` liegt neben `src/`, wird aber als Vorlage gebraucht: die
+  // Artboards laufen dort unverändert, wie geliefert (eigenes `support.js`,
+  // eigenes `_ds`-Bundle) und werden nur eingebettet, nie nachgebaut.
+  staticDirs: ["../public", { from: "../reference", to: "/reference" }],
   viteFinal: (config) => {
     config.plugins = [...(config.plugins ?? []), serverActionsStub()];
     return config;
