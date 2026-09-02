@@ -45,6 +45,7 @@ Storybook-Titel tragen den **Inhalt**. Fünf Regeln, sonst nichts:
 | **Story** | `<Name>.stories.tsx` daneben, Titel `v3/<Stufe>/<Gruppe>/<Name>`. Die Gruppen sind dieselben Wörter wie die Kommentare in `src/ui/v3/index.ts`: Aktion, Navigation, Formular, Dialog, Fläche, Tabelle · Arbeitsfläche, Rahmen, Prüfen, Prozess · je Entität ihr Name. |
 | **Wann** | Jeder Export trägt im JSDoc, auf Englisch, `@when` (der Fall, für den er da ist) und `@instead` (der Nachbarfall und wohin der gehört: `… → MasterDetail`). Das ist die Antwort auf „was nehme ich?" — greppbar und im Editor-Hover. |
 | **Entitäten** | Name = Entität + Form: `KontoFeld`, `KontoZeile`, `BuchungssatzEditor`. Die Formen stehen in `docs/ludwig/ui-repraesentationen.md`; ihre Größe ist ableitbar, nicht gespeichert — XS Inline, Badge · S Zeile, Auswahl, Kopf · M Karte, Vorschau · L Detail, Drawer, Liste · XL Editor. |
+| **Sprache** | Code nur Englisch: Bezeichner, Kommentare, JSDoc, `@when`/`@instead`, Story-Exportnamen. Deutsch nur in Nutzer-Strings und Storybook-Titeln. Fachbegriffe: englischer GLOSSARY-Name im Code, deutscher im UI. |
 | **Wachstum** | `primitives/` bleibt flach. `patterns/` bekommt Themen-Unterordner, sobald es mehr als etwa 15 Dateien sind. `entities/` ist per Definition nach Inhalt sortiert. |
 
 ## Doku — wer führt was

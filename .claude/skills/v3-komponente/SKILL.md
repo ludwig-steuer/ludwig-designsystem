@@ -43,10 +43,12 @@ Daten kommen als Props, Loader als Prop, keine Server Actions.
 
 ## Namen
 
-Prop-, Typ- und Label-Namen werden im `GLOSSARY.md` **nachgeschlagen, nicht
-erfunden**. Kanzlei statt Tenant, Mandant statt Client, Kreditor statt
-Creditor. Fehlt ein Begriff dort, ist das ein Befund — melden, nicht selbst
-einen erfinden.
+**Code nur Englisch** (siehe `CLAUDE.md`): Bezeichner, Props, Typen,
+Kommentare, JSDoc, Story-Exportnamen. Deutsch nur in Strings, die Nutzer
+sehen. Fachbegriffe werden im `GLOSSARY.md` **nachgeschlagen, nicht
+erfunden**: der englische Name in den Code, der deutsche ins UI — im Label
+steht Kanzlei, Mandant, Kreditor, nicht Tenant, Client, Creditor. Fehlt ein
+Begriff dort, ist das ein Befund — melden, nicht selbst einen erfinden.
 
 Typen für Fachdaten kommen aus `src/ludwig/` (gespiegeltes Datenmodell),
 nicht als lokale Neudefinition.
