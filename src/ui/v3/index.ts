@@ -161,10 +161,10 @@ export {
  * auf `@/ui/components` irgendwann leer wird.
  */
 /* Status — die eine erlaubte Status-Darstellung (R1). */
-export { StatusBadge } from "@/ui/status/StatusBadge";
-export { StatusInfoButton } from "@/ui/status/StatusInfoButton";
-export { StatusInfoDialog } from "@/ui/status/StatusInfoDialog";
+export { StatusBadge } from "../status/StatusBadge";
+export { StatusInfoButton } from "../status/StatusInfoButton";
+export { StatusInfoDialog } from "../status/StatusInfoDialog";
 
-export { Banner } from "@/ui/components/primitives/Banner";
-export { LongText } from "@/ui/components/primitives/LongText";
-export { Pagination } from "@/ui/components/Pagination";
+export { Banner } from "../components/primitives/Banner";
+export { LongText } from "../components/primitives/LongText";
+export { Pagination } from "../components/Pagination";

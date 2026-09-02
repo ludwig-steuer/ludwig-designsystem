@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "../v3/primitives/Link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Props {

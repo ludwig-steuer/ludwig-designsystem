@@ -2,3 +2,13 @@ node_modules/
 storybook-static/
 *.tsbuildinfo
 .DS_Store
+
+# design-sync (Erklärung: .design-sync/config.json, NOTES.md, conventions.md,
+# previews/ und overrides/ sind bewusst NICHT ignoriert — sie tragen die Fixes
+# in den nächsten Sync.)
+.design-sync/sb-reference/
+.design-sync/learnings/
+.design-sync/.cache/
+.design-sync/node_modules
+.ds-sync/
+ds-bundle/

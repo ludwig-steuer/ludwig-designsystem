@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "./Link";
 
 /**
  * v2-Navigation (F123 T123.1): Reiter, Segment-Schalter, Filter-Chips, Suche.

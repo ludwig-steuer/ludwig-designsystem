@@ -1,0 +1,54 @@
+{
+  "projectId": "ce52c33e-6f5f-4cab-9c92-b9d3e8e62984",
+  "shape": "storybook",
+  "pkg": "@ludwig/designsystem",
+  "globalName": "LudwigDS",
+  "storybookStatic": ".design-sync/sb-reference",
+  "storybookConfigDir": ".storybook",
+  "buildCmd": "",
+  "overrides": {
+    "Checkliste": {
+      "cardMode": "column"
+    },
+    "MasterDetail": {
+      "cardMode": "column"
+    },
+    "SchrittRail": {
+      "cardMode": "column"
+    },
+    "TodoListe": {
+      "cardMode": "column"
+    },
+    "FieldList": {
+      "cardMode": "column"
+    },
+    "KpiTile": {
+      "cardMode": "column"
+    },
+    "StatusCallout": {
+      "cardMode": "column"
+    },
+    "Tabs": {
+      "cardMode": "column"
+    },
+    "StatusInfoDialog": {
+      "cardMode": "single",
+      "primaryStory": "Sachverhalt"
+    },
+    "Dialog": {
+      "skip": [
+        "v3-primitives-dialog--geschlossen"
+      ]
+    },
+    "LongText": {
+      "skip": [
+        "v3-bausteine-longtext--kurz"
+      ]
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md",
+  "guidelinesGlob": [
+    "docs/*.md",
+    "docs/ludwig/GLOSSARY.md"
+  ]
+}
