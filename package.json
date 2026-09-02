@@ -2,6 +2,9 @@
   "name": "@ludwig/designsystem",
   "version": "0.1.0",
   "private": true,
+  "main": "./src/ui/v3/index.ts",
+  "types": "./src/ui/v3/index.ts",
+  "exports": { ".": "./src/ui/v3/index.ts", "./styles.css": "./src/styles/index.css" },
   "description": "Ludwig Design System v3 — die wiederverwendbaren UI-Bausteine, unabhängig von der App entwickelbar.",
   "scripts": {
     "storybook": "storybook dev --port 6107",

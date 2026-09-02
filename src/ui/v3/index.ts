@@ -19,9 +19,14 @@
  * Klassen und Maße stehen in `src/styles/v2.css`. Kein Hex-Wert, kein
  * Pixelmaß in einer Komponente (UX-Guidelines A5).
  *
- * Was bewusst **nicht** hier liegt: `StatusBadge` + Status-Registry (R1),
- * `Drawer`/`UrlDrawer` (Wächter-Test), `StatusHeader`/`Tooltip` (R2). Die
- * bleiben `@/ui/components` bzw. `@/ui/status`.
+ * Abweichung von der App: dort liegt `StatusBadge` bewusst außerhalb des
+ * Sets (`@/ui/status`). Hier wird es **mit exportiert** — R1 macht es zur
+ * einen erlaubten Status-Darstellung, und was der Barrel nicht führt,
+ * existiert für einen Konsumenten des Design-Systems nicht; er baut sonst
+ * die lokalen Label-Maps, die R1 gerade verbietet.
+ *
+ * Weiter draußen bleiben `Drawer`/`UrlDrawer` (Wächter-Test) und
+ * `StatusHeader`/`Tooltip` (R2) — die hängen an App-Kontext.
  */
 
 /* Karte und Tabelle */
@@ -155,6 +160,11 @@ export {
  * neu gebaut wird. Der Import läuft trotzdem über `@/ui/v3`, damit der Grep
  * auf `@/ui/components` irgendwann leer wird.
  */
+/* Status — die eine erlaubte Status-Darstellung (R1). */
+export { StatusBadge } from "@/ui/status/StatusBadge";
+export { StatusInfoButton } from "@/ui/status/StatusInfoButton";
+export { StatusInfoDialog } from "@/ui/status/StatusInfoDialog";
+
 export { Banner } from "@/ui/components/primitives/Banner";
 export { LongText } from "@/ui/components/primitives/LongText";
 export { Pagination } from "@/ui/components/Pagination";

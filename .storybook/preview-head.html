@@ -1,9 +1,5 @@
-<!-- Dieselben Schriften wie in der App (dort via next/font/google).
-     Die Token-Variablen in tokens.css lesen `--font-*-loaded` mit
-     Fallback auf den Familiennamen — den setzen wir hier direkt. -->
+<!-- Die Schriften selbst lädt `src/styles/index.css` (@import) — sie müssen in
+     der Style-Kette stehen, weil außerhalb von Storybook nur die geladen wird.
+     Hier bleiben nur die Verbindungs-Hints, die den Abruf beschleunigen. -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-  rel="stylesheet"
-/>

@@ -1,3 +1,9 @@
+/* Die Schriften. In der App lädt sie next/font/google und setzt
+   `--font-*-loaded`; hier muss die Kette selbst dafür sorgen — alles, was
+   diese Datei nicht erreicht, rendert später in Systemschrift.
+   (@import muss vor allen anderen Regeln stehen.) */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+
 /* Dieselbe Kette wie das App-Layout — ohne die seitenspezifischen Styles,
    die kein Design-System-Baustein braucht. */
 
