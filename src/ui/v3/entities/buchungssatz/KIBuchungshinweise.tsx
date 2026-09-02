@@ -64,7 +64,7 @@ const KONFIDENZ_TEXT: Record<KonfidenzStufe, string> = {
 
 /**
  * @when    The agent's rationale and the judge's verdict on a proposal, collapsed by default.
- * @instead Messages about the booking entry → Meldungen.
+ * @instead Messages about the booking entry → Messages.
  */
 export function KIBuchungshinweise({
   verdict,

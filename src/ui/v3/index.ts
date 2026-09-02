@@ -116,14 +116,14 @@ export { useHotkeys, HotkeyLegend, type HotkeyBinding } from "./patterns/Hotkeys
 /* Prüfen */
 export {
   StateIcon,
-  Checkliste,
-  Pruefpunkte,
-  Meldungen,
+  Checklist,
+  CheckItems,
+  Messages,
   type ChecklistRow,
-  type Meldung,
-  type Pruefpunkt,
-  type ZustandsIcon,
-} from "./patterns/Pruefen";
+  type Message,
+  type CheckItem,
+  type StateKind,
+} from "./patterns/Review";
 export { VergleichsTabelle, type VergleichsZeile } from "./patterns/VergleichsTabelle";
 
 /* Prozess */

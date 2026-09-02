@@ -66,7 +66,7 @@ export interface EditorRow {
 export interface EditorMeldung {
   code: string;
   message: string;
-  /** Was den Befund behebt — der Knopf steht an der Meldung. */
+  /** Was den Befund behebt — der Knopf steht an der Message. */
   fixLabel?: string;
   onFix?: () => void;
 }

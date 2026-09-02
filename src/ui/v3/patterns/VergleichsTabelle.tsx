@@ -1,7 +1,7 @@
 "use client";
 
 import { DeviationCell, AmountCell, type CellTone } from "../primitives/Cells";
-import { StateIcon } from "./Pruefen";
+import { StateIcon } from "./Review";
 import { Card, CardHead, HeadRow, Table } from "../primitives/Table";
 
 /**

@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from "react";
 
 import { useHotkeys } from "./Hotkeys";
-import { StateIcon, type ZustandsIcon } from "./Pruefen";
+import { StateIcon, type StateKind } from "./Review";
 
 /**
  * Das Grundmuster jedes Prüfschritts (F123 T123.2, Leitbrief §8).
@@ -19,7 +19,7 @@ import { StateIcon, type ZustandsIcon } from "./Pruefen";
 
 export interface TodoItem {
   id: string;
-  state: ZustandsIcon;
+  state: StateKind;
   title: string;
   sub?: string;
   /** Der Zahlenblock rechts — Betrag, Menge, Saldo. Rechtsbündig, tabellarisch. */
@@ -37,20 +37,20 @@ export interface TodoGroup {
 }
 
 /** Was als „offen" gilt — der Sprung überspringt alles andere. */
-const OFFEN: ReadonlySet<ZustandsIcon> = new Set<ZustandsIcon>([
+const OFFEN: ReadonlySet<StateKind> = new Set<StateKind>([
   "open",
   "warning",
   "error",
   "question",
 ]);
 
-export function istOffen(state: ZustandsIcon): boolean {
+export function istOffen(state: StateKind): boolean {
   return OFFEN.has(state);
 }
 
 /**
  * @when    Review step with items to work through; jumps to the next open one.
- * @instead Pure information, nothing to work through → Table. Checklist of a gate → Checkliste.
+ * @instead Pure information, nothing to work through → Table. Checklist of a gate → Checklist.
  */
 export function TodoListe({
   groups,

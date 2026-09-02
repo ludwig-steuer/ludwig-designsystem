@@ -7,9 +7,6 @@
   "storybookConfigDir": ".storybook",
   "buildCmd": "",
   "overrides": {
-    "Checkliste": {
-      "cardMode": "column"
-    },
     "MasterDetail": {
       "cardMode": "column"
     },
@@ -44,6 +41,9 @@
       "skip": [
         "v3-legacy-longtext--kurz"
       ]
+    },
+    "Checklist": {
+      "cardMode": "column"
     }
   },
   "readmeHeader": ".design-sync/conventions.md",

@@ -12,11 +12,11 @@ import {
 import type { ReactNode } from "react";
 
 /**
- * v2-Prüfbausteine (F123 T123.1): Zustands-Icon, Checkliste, Prüfpunkte,
- * Meldungen.
+ * v2-Prüfbausteine (F123 T123.1): Zustands-Icon, Checklist, Prüfpunkte,
+ * Messages.
  *
- * Gemeinsame Regel: **bestanden ist eine Zeile, nicht zwanzig.** Was in
- * Ordnung ist, wird zusammengefasst; eine eigene Zeile bekommt nur, was offen,
+ * Gemeinsame Regel: **passed ist eine Zeile, nicht zwanzig.** Was in
+ * Ordnung ist, wird zusammengefasst; eine eigene Zeile bekommt nur, was open,
  * gewarnt oder gescheitert ist (UX-Guidelines L7). Sonst sucht die Prüferin ihre drei
  * Probleme zwischen zwanzig grünen Haken.
  */
@@ -27,7 +27,7 @@ import type { ReactNode } from "react";
  * keinen Namen für die Vorlesehilfe (UX-Guidelines §2).
  */
 
-export type ZustandsIcon =
+export type StateKind =
   | "open"
   | "done"
   | "edited"
@@ -39,16 +39,16 @@ export type ZustandsIcon =
   | "info";
 
 const ICONS = {
-  open: { Icon: Circle, tone: "muted", label: "offen" },
+  open: { Icon: Circle, tone: "muted", label: "open" },
   done: { Icon: CheckCircle2, tone: "success", label: "erledigt" },
   edited: { Icon: PencilLine, tone: "info", label: "bearbeitet" },
   returned: { Icon: Undo2, tone: "warning", label: "zurückgegeben" },
-  question: { Icon: HelpCircle, tone: "warning", label: "Frage offen" },
+  question: { Icon: HelpCircle, tone: "warning", label: "Frage open" },
   skipped: { Icon: CircleSlash, tone: "muted", label: "übersprungen" },
   warning: { Icon: AlertTriangle, tone: "warning", label: "Warnung" },
   error: { Icon: XCircle, tone: "danger", label: "Fehler" },
   info: { Icon: Info, tone: "info", label: "Hinweis" },
-} as const satisfies Record<ZustandsIcon, { Icon: typeof Circle; tone: string; label: string }>;
+} as const satisfies Record<StateKind, { Icon: typeof Circle; tone: string; label: string }>;
 
 const TONE_VAR: Record<string, string> = {
   muted: "var(--color-text-subtle)",
@@ -61,7 +61,7 @@ const TONE_VAR: Record<string, string> = {
 /**
  * @when    State of an item in a list or row, always with a word next to it.
  */
-export function StateIcon({ state, title }: { state: ZustandsIcon; title?: string }) {
+export function StateIcon({ state, title }: { state: StateKind; title?: string }) {
   const { Icon, tone, label } = ICONS[state];
   return (
     <Icon
@@ -74,11 +74,11 @@ export function StateIcon({ state, title }: { state: ZustandsIcon; title?: strin
   );
 }
 
-/* ── Checkliste ─────────────────────────────────────────────────────────── */
+/* ── Checklist ─────────────────────────────────────────────────────────── */
 
 export interface ChecklistRow {
   key: string;
-  state: ZustandsIcon;
+  state: StateKind;
   label: string;
   /** „3 von 18" — die echte Menge, nie eine erfundene „0 von 1". */
   counter?: string;
@@ -97,7 +97,7 @@ export interface ChecklistRow {
  * @when    Checklist of a gate: check, status, progress, jump.
  * @instead Items to work through → TodoListe.
  */
-export function Checkliste({
+export function Checklist({
   rows,
   activeKey,
   onPick,
@@ -177,7 +177,7 @@ function ChecklistZeile({
 
 /* ── Prüfpunkte ─────────────────────────────────────────────────────────── */
 
-export interface Pruefpunkt {
+export interface CheckItem {
   code: string;
   /** Was geprüft wird, als Frage — „Stimmt der Steuersatz zum Beleg?" */
   question: string;
@@ -190,7 +190,7 @@ export interface Pruefpunkt {
   gate?: ReactNode;
 }
 
-const PP_ICON: Record<Pruefpunkt["state"], ZustandsIcon> = {
+const PP_ICON: Record<CheckItem["state"], StateKind> = {
   green: "done",
   yellow: "warning",
   red: "error",
@@ -202,21 +202,21 @@ const PP_ICON: Record<Pruefpunkt["state"], ZustandsIcon> = {
  * offene, gewarnte und gescheiterte einzeln, jeweils mit Begründung.
  *
  * @when    Individual checks of a booking entry with reasons; passed ones in a single line.
- * @instead Error that blocks saving → Meldungen.
+ * @instead Error that blocks saving → Messages.
  */
-export function Pruefpunkte({ items }: { items: Pruefpunkt[] }) {
-  const bestanden = items.filter((i) => i.state === "green");
-  const offen = items.filter((i) => i.state !== "green");
+export function CheckItems({ items }: { items: CheckItem[] }) {
+  const passed = items.filter((i) => i.state === "green");
+  const open = items.filter((i) => i.state !== "green");
   return (
     <div className="v2pp">
-      {bestanden.length > 0 ? (
+      {passed.length > 0 ? (
         <div className="v2pp__ok">
           <StateIcon state="done" />
-          {bestanden.length} von {items.length} Prüfpunkten bestanden
-          <span className="v2pp__code">{bestanden.map((b) => b.code).join(" ")}</span>
+          {passed.length} von {items.length} Prüfpunkten bestanden
+          <span className="v2pp__code">{passed.map((b) => b.code).join(" ")}</span>
         </div>
       ) : null}
-      {offen.map((i) => (
+      {open.map((i) => (
         <div className="v2pp__row" key={i.code}>
           <StateIcon state={PP_ICON[i.state]} />
           <span style={{ flex: "1 1 auto", minWidth: 0 }}>
@@ -234,9 +234,9 @@ export function Pruefpunkte({ items }: { items: Pruefpunkt[] }) {
   );
 }
 
-/* ── Meldungen ──────────────────────────────────────────────────────────── */
+/* ── Messages ──────────────────────────────────────────────────────────── */
 
-export interface Meldung {
+export interface Message {
   key: string;
   level: "error" | "warning" | "hint";
   text: ReactNode;
@@ -252,7 +252,7 @@ export interface Meldung {
  * @when    Error, warning or hint about a booking entry or form.
  * @instead Note not tied to a booking entry → Callout.
  */
-export function Meldungen({ items }: { items: Meldung[] }) {
+export function Messages({ items }: { items: Message[] }) {
   if (items.length === 0) return null;
   return (
     <div>

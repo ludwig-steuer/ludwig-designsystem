@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Button } from "../primitives/Button";
 import { DetailPane, MasterDetail } from "./MasterDetail";
-import { Checkliste, Meldungen, Pruefpunkte, StateIcon, type ChecklistRow } from "./Pruefen";
+import { Checklist, Messages, CheckItems, StateIcon, type ChecklistRow } from "./Review";
 
-const meta: Meta<typeof Checkliste> = { title: "v3/Patterns/Prüfen/Checkliste", component: Checkliste };
+const meta: Meta<typeof Checklist> = { title: "v3/Patterns/Prüfen/Checklist", component: Checklist };
 export default meta;
-type Story = StoryObj<typeof Checkliste>;
+type Story = StoryObj<typeof Checklist>;
 
 const ZEILEN: ChecklistRow[] = [
   { key: "1", state: "done", label: "Bank ist vollständig eingelesen", counter: "8 von 8", progress: 1 },
@@ -35,13 +35,13 @@ const ZEILEN: ChecklistRow[] = [
  * Die Prüfliste eines Gates: Prüfung · Stand · Fortschritt · Sprung. Der
  * Stand nennt die **echte** Menge — nie eine erfundene „0 von 1".
  */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: function Render() {
     const [sel, setSel] = useState<string | undefined>("4");
     const zeile = ZEILEN.find((z) => z.key === sel);
     return (
       <MasterDetail
-        list={<Checkliste rows={ZEILEN} activeKey={sel} onPick={setSel} />}
+        list={<Checklist rows={ZEILEN} activeKey={sel} onPick={setSel} />}
         detail={
           <DetailPane title={zeile?.label} sub={zeile?.counter}>
             {zeile ? (
@@ -61,26 +61,26 @@ export const Gefuellt: Story = {
   },
 };
 
-/** Alles bestanden — der Leerzustand ist hier ein Erfolg, kein Nichts. */
-export const AllesBestanden: Story = {
+/** Alles passed — der Leerzustand ist hier ein Erfolg, kein Nichts. */
+export const AllPassed: Story = {
   render: () => (
-    <Checkliste
+    <Checklist
       rows={ZEILEN.map((z) => ({ ...z, state: "done", counterAlarm: false, jump: undefined }))}
     />
   ),
 };
 
 /** Noch nichts gerechnet: die Zähler bleiben leer statt zu raten. */
-export const Laedt: Story = {
+export const Loading: Story = {
   render: () => (
-    <Checkliste
+    <Checklist
       rows={ZEILEN.map((z) => ({ ...z, state: "open", counter: undefined, progress: null }))}
     />
   ),
 };
 
 /** Die neun Zustands-Icons — Lucide statt Sonderzeichen (V7). */
-export const ZustandsIcons: Story = {
+export const StateIcons: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 20, flexWrap: "wrap", fontSize: 12 }}>
       {(["open", "done", "edited", "returned", "question", "skipped", "warning", "error", "info"] as const).map(
@@ -99,10 +99,10 @@ export const ZustandsIcons: Story = {
  * Prüfpunkte: bestandene in **einer** Zeile, offene einzeln mit Begründung
  * und Weg zur Klärung (L7).
  */
-export const PruefpunkteGemischt: Story = {
+export const CheckItemsMixed: Story = {
   render: () => (
     <div className="v2card">
-      <Pruefpunkte
+      <CheckItems
         items={[
           { code: "P01", question: "Ist der Beleg lesbar?", reason: "OCR ohne Fehlstellen.", state: "green" },
           { code: "P02", question: "Stimmt das Datum zum Zeitraum?", reason: "21.08.2026 liegt in 08/2026.", state: "green" },
@@ -134,11 +134,11 @@ export const PruefpunkteGemischt: Story = {
   ),
 };
 
-/** Alle bestanden: eine Zeile, kein Scrollen durch zwanzig grüne Haken. */
-export const PruefpunkteAlleGruen: Story = {
+/** Alle passed: eine Zeile, kein Scrollen durch zwanzig grüne Haken. */
+export const CheckItemsAllGreen: Story = {
   render: () => (
     <div className="v2card">
-      <Pruefpunkte
+      <CheckItems
         items={Array.from({ length: 12 }, (_, i) => ({
           code: `P${String(i + 1).padStart(2, "0")}`,
           question: "Beispielprüfung",
@@ -151,18 +151,18 @@ export const PruefpunkteAlleGruen: Story = {
 };
 
 /** Keine Prüfpunkte — auch das ist eine Aussage, kein leerer Kasten. */
-export const PruefpunkteLeer: Story = {
+export const CheckItemsEmpty: Story = {
   render: () => (
     <div className="v2card">
-      <Pruefpunkte items={[]} />
+      <CheckItems items={[]} />
     </div>
   ),
 };
 
 /** Fehler blockieren, Warnungen brauchen eine Quittung, Hinweise stehen nur da. */
-export const MeldungenDreiStufen: Story = {
+export const MessagesThreeLevels: Story = {
   render: () => (
-    <Meldungen
+    <Messages
       items={[
         {
           key: "e1",
