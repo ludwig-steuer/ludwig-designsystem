@@ -17,7 +17,7 @@
  *
  * Die Gruppen-Kommentare unten (Aktion, Navigation, …) sind zugleich die
  * Storybook-Ordner: `v3/<Stufe>/<Gruppe>/<Name>`. Eine Datei je Familie,
- * jeder Export trägt `@wann`/`@nicht` — siehe README „Ordnung im Set".
+ * jeder Export trägt `@when`/`@instead` — siehe README „Ordnung im Set".
  *
  * Tokens: `src/styles/tokens.css` ist die 1:1-Übernahme des Design-Systems,
  * Klassen und Maße stehen in `src/styles/v2.css`. Kein Hex-Wert, kein

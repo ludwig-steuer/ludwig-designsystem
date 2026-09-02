@@ -72,13 +72,13 @@ Nachbarfall mit Verweis. Das ist die Antwort auf „was nehme ich?", greppbar:
 /**
  * Master-Detail: Liste links, Detail rechts.
  *
- * @wann  Auswahl aus einer Liste, Arbeit am gewählten Element rechts.
- * @nicht Einzelbestätigung ohne Liste → Dialog. Schrittfolge → SchrittRail.
+ * @when    Auswahl aus einer Liste, Arbeit am gewählten Element rechts.
+ * @instead Einzelbestätigung ohne Liste → Dialog. Schrittfolge → SchrittRail.
  */
 export function MasterDetail(…)
 ```
 
-Vor dem Bauen: `grep -rn "@wann" src/ui/v3` lesen. Steht der Fall schon da,
+Vor dem Bauen: `grep -rn "@when" src/ui/v3` lesen. Steht der Fall schon da,
 gibt es die Komponente schon.
 
 ## Werte
@@ -118,7 +118,7 @@ gesetzt". Beides wird fällig, wenn die App auf v3 migriert.
 
 Die Punkte, die am häufigsten reißen:
 
-- `@wann`/`@nicht` am Export, Datei nach der Familie benannt, Story im richtigen Ordner
+- `@when`/`@instead` am Export, Datei nach der Familie benannt, Story im richtigen Ordner
 - Text links, Zahlen rechts mit `tnum`, nichts zentriert (V3)
 - Farbe nur als Kritikalitätsstufe; Rot **nur** Fehler; Vorzeichen ohne Farbe
 - Jeder farbige Zustand hat zusätzlich Wort oder Icon (V7)

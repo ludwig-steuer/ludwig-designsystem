@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 /**
  * Kleine Hinweisbox im Fluss — kein Banner, kein Dialog.
  *
- * @wann  Ein Satz Kontext an der Stelle, an der er gebraucht wird.
- * @nicht Zustand einer Sache → StatusCallout. Fehler zu einem Satz → Meldungen.
+ * @when    Ein Satz Kontext an der Stelle, an der er gebraucht wird.
+ * @instead Zustand einer Sache → StatusCallout. Fehler zu einem Satz → Meldungen.
  */
 export function Callout({
   tone = "accent",

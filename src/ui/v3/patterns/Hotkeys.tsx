@@ -32,8 +32,8 @@ function inEingabe(target: EventTarget | null): boolean {
 }
 
 /**
- * @wann  Screen mit Tasten am Knopf; ein Binding je Handlung.
- * @nicht Als einziger Weg — jede Taste steht am Knopf (V14).
+ * @when    Screen mit Tasten am Knopf; ein Binding je Handlung.
+ * @instead Als einziger Weg — jede Taste steht am Knopf (V14).
  */
 export function useHotkeys(bindings: readonly HotkeyBinding[], enabled = true) {
   useEffect(() => {
@@ -58,8 +58,8 @@ export function useHotkeys(bindings: readonly HotkeyBinding[], enabled = true) {
  * Die Legende hinter `?`. Sie ist **Zusatz, nicht Quelle** — wer sie nie
  * öffnet, findet jede Taste am Knopf.
  *
- * @wann  Jeder Screen mit mehr als drei Tasten, geöffnet mit `?`.
- * @nicht Als Quelle der Tasten — die Taste steht am Knopf.
+ * @when    Jeder Screen mit mehr als drei Tasten, geöffnet mit `?`.
+ * @instead Als Quelle der Tasten — die Taste steht am Knopf.
  */
 export function HotkeyLegende({
   gruppen,

@@ -14,8 +14,8 @@ import { useEffect, useRef, type ReactNode } from "react";
  * Ersetzt `Dialog` aus `@/ui/components` (12-px-Radius, dunkler Backdrop
  * ohne Blur).
  *
- * @wann  Bestätigung mit Folgen (Storno, Löschen, Freigabe) oder ein kurzes Formular, das eine Handlung begleitet.
- * @nicht Details einer Sache → MasterDetail. Handlung mit Begründung → GrundDialog.
+ * @when    Bestätigung mit Folgen (Storno, Löschen, Freigabe) oder ein kurzes Formular, das eine Handlung begleitet.
+ * @instead Details einer Sache → MasterDetail. Handlung mit Begründung → GrundDialog.
  */
 export function Dialog({
   open,

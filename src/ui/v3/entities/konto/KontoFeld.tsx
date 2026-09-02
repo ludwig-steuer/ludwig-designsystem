@@ -37,8 +37,8 @@ export const KONTO_GRUPPEN_LABEL: Record<KontoGruppe, string> = {
 const REIHENFOLGE: KontoGruppe[] = ["agent", "partner", "aehnlich", "belegposition", "alle"];
 
 /**
- * @wann  Konto wählen, mit Kandidaten aus Agent, Partner, Ähnlich und Belegposition.
- * @nicht Feste kurze Liste → Select.
+ * @when    Konto wählen, mit Kandidaten aus Agent, Partner, Ähnlich und Belegposition.
+ * @instead Feste kurze Liste → Select.
  */
 export function KontoFeld({
   value,

@@ -79,7 +79,7 @@ const OWNER_ICON: Record<StaffelstabKey, LucideIcon> = {
 /**
  * Vier Segmente für die Listenzeile.
  *
- * @wann  Prozessstand in der Listenzeile.
+ * @when    Prozessstand in der Listenzeile.
  */
 export function ProzessMini({ phases }: { phases: readonly ProzessPhase[] }) {
   return (
@@ -95,8 +95,8 @@ export function ProzessMini({ phases }: { phases: readonly ProzessPhase[] }) {
  * Wer den Stapel gerade hat. `alarm` färbt rot — dafür gibt es genau zwei
  * Gründe: eine überfällige Nachforderung und ein gescheiterter Export.
  *
- * @wann  Wer den Stapel gerade hat — Icon und Wort.
- * @nicht Entitätsstatus → StatusBadge.
+ * @when    Wer den Stapel gerade hat — Icon und Wort.
+ * @instead Entitätsstatus → StatusBadge.
  */
 export function Staffelstab({
   owner,
@@ -134,8 +134,8 @@ export interface ProzessLoops {
  * ein Stapel, der viermal zurückging, sieht anders aus als einer, der
  * durchlief.
  *
- * @wann  Prozessstand im Detail-Kopf mit Rohzuständen und Schleifen.
- * @nicht Schritte einer Prüfung → SchrittRail.
+ * @when    Prozessstand im Detail-Kopf mit Rohzuständen und Schleifen.
+ * @instead Schritte einer Prüfung → SchrittRail.
  */
 export function ProzessStepper({
   phases,
@@ -201,7 +201,7 @@ export interface StaffelAbschnitt {
  * beantwortet — zwei Tage Agent, neun Tage Warten auf den Mandanten, ein Tag
  * Kanzlei.
  *
- * @wann  Zeitachse über dem Log, eingefärbt nach Besitzer.
+ * @when    Zeitachse über dem Log, eingefärbt nach Besitzer.
  */
 export function StaffelLeiste({ abschnitte }: { abschnitte: readonly StaffelAbschnitt[] }) {
   if (abschnitte.length === 0) return null;

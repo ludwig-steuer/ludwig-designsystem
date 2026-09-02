@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
  * Nebenzeile, Aktionen rechts. Der Ton färbt Rahmen, Kicker und Nebenzeile —
  * das Wort im Kicker sagt dasselbe noch einmal (UX-Guidelines V7).
  *
- * @wann  Der Kopf einer Sache, deren Zustand die Seite bestimmt (Stapel, Periode).
- * @nicht Hinweis im Fluss → Callout. Seitenweite Meldung → Banner.
+ * @when    Der Kopf einer Sache, deren Zustand die Seite bestimmt (Stapel, Periode).
+ * @instead Hinweis im Fluss → Callout. Seitenweite Meldung → Banner.
  */
 export function StatusCallout({
   tone = "neutral",

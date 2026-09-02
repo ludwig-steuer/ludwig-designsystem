@@ -42,8 +42,8 @@ function zelle(v: number | null, unit: "count" | "amount") {
 }
 
 /**
- * @wann  Monatswerte gegen drei Vormonate, Abweichung je Zeile.
- * @nicht Einzelwert ohne Verlauf → KpiTile.
+ * @when    Monatswerte gegen drei Vormonate, Abweichung je Zeile.
+ * @instead Einzelwert ohne Verlauf → KpiTile.
  */
 export function VergleichsTabelle({
   title,

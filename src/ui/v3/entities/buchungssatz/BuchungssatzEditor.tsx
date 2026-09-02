@@ -133,8 +133,8 @@ function summeBelegseite(rows: readonly EditorRow[], belegSide: Seite): number {
 }
 
 /**
- * @wann  Buchungssatz anzeigen oder bearbeiten — ein Raster für beides.
- * @nicht Ein zweiter Editor für denselben Satz.
+ * @when    Buchungssatz anzeigen oder bearbeiten — ein Raster für beides.
+ * @instead Ein zweiter Editor für denselben Satz.
  */
 export function BuchungssatzEditor(props: BuchungssatzEditorProps) {
   const {

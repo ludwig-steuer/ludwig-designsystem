@@ -63,8 +63,8 @@ const KONFIDENZ_TEXT: Record<KonfidenzStufe, string> = {
 };
 
 /**
- * @wann  Begründung des Agenten und Einschätzung des Judge zu einem Vorschlag, eingeklappt.
- * @nicht Meldungen zum Satz → Meldungen.
+ * @when    Begründung des Agenten und Einschätzung des Judge zu einem Vorschlag, eingeklappt.
+ * @instead Meldungen zum Satz → Meldungen.
  */
 export function KIBuchungshinweise({
   verdict,
