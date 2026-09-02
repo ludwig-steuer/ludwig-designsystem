@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, eine Handlung im Fließtext ist fachfrei |
 | Quelle | Knopf-Erhebung `ludwig/app` vom 2026-09-03 — `.v2link` 70 Stellen, `.v2link--quiet` 16 |
@@ -112,4 +112,15 @@ Variabel (aus dieser Spec):
 |---|---|---|
 | | | |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: — · Gebaut: Claude, 2026-09-03 ·
+Offene Punkte für den Abnehmenden:
+
+1. `.v2link` steht fest auf `12.5px` (Bestand, 86 Stellen hängen dran) — die
+   Spec sagt „die Schriftgröße kommt aus dem Umfeld". Im Fließtext (Story
+   `Filled`) ist er dadurch eine halbe Stufe kleiner als der Satz. Auf
+   `font-size: inherit` umstellen wäre eine Änderung an allen Bestandsstellen
+   und gehört in eine eigene Aufgabe.
+2. Das Kriterium „ersetzt `className="v2link"` in `StapelZeilenmenue.tsx`"
+   zielt auf `ludwig/app` und wird dort fällig — wie die beiden App-Punkte der
+   Prüfliste §9. Hier ersetzt ist `SelectionBar`; 25 weitere rohe `v2link`
+   stehen noch in `JournalEntryEditor.tsx` und in fünf Story-Dateien.

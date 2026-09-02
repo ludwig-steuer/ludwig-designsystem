@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { TextButton } from "./TextButton";
 
 /**
  * Mehrfachauswahl in einer Tabelle (F123 T123.1): Kästchen in der Zeile,
@@ -29,9 +30,9 @@ export function SelectionBar({
       <span className="v2selbar__count">{count} ausgewählt</span>
       <span className="v2selbar__actions">
         {actions}
-        <button type="button" className="v2link v2link--quiet" onClick={onClear}>
+        <TextButton tone="quiet" onClick={onClear}>
           Auswahl aufheben
-        </button>
+        </TextButton>
       </span>
     </div>
   );

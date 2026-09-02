@@ -43,6 +43,12 @@ export {
   type ButtonSize,
   type ButtonVariant,
 } from "./primitives/Button";
+export {
+  TextButton,
+  type TextButtonProps,
+  type TextButtonLinkProps,
+  type TextButtonTone,
+} from "./primitives/TextButton";
 export { ActionBar, RowActions } from "./primitives/ActionBar";
 
 /* Navigation */

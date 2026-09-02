@@ -150,8 +150,16 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   font: 600 12.5px var(--font-sans);
   color: var(--color-accent-700); cursor: pointer; text-decoration: none;
 }
-.v2link:hover { text-decoration: underline; }
+.v2link:hover:not(:disabled) { text-decoration: underline; }
 .v2link--quiet { font-weight: 400; color: var(--color-text-muted); }
+/* Mit Icon eine Zeile, sonst bleibt er inline im Fließtext. */
+.v2link--icon { display: inline-flex; align-items: center; gap: var(--space-1); }
+.v2link:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+.v2link:disabled { opacity: 0.5; cursor: not-allowed; }
 
 
 /* ==========================================================================
