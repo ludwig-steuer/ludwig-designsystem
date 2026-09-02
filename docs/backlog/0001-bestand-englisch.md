@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | offen |
+| Status | abgenommen |
 | Stufe | alle drei (`primitives/`, `patterns/`, `entities/`) |
 | Klassen-Test | entfällt — Umbenennung, keine neue Komponente |
 | Quelle | Regel „Code nur Englisch" (`CLAUDE.md`, Owner 2026-09-03) |
@@ -105,6 +105,48 @@ umbenennen oder gar nicht.
 
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| Barrel ohne deutschen Namen | 114 Exporte durchgesehen, Regex auf 30 deutsche Wortstämme | erfüllt |
+| Keine deutschen Dateinamen | `find src/ui/v3 -name '*.tsx'` | erfüllt |
+| Keine deutschen Story-Exporte | `grep -rhoE '^export const'` über v3 | erfüllt |
+| JSDoc, Kommentare, interne Namen englisch | 8 Dateien, ~65 Blöcke; Diff geprüft: nur Kommentar- und Bezeichnerzeilen | erfüllt |
+| Nutzer-Strings unverändert deutsch | Diff-Filter über alle Stringliterale | erfüllt, **nach Korrektur** (siehe unten) |
+| Typecheck und Build grün, Story-Zahl gleich | 139 Stories vor und nach jeder Welle | erfüllt |
+| Sync-Config zeigt auf existierende Namen/IDs | Abgleich der Overrides gegen `storybook-static/index.json` | erfüllt, nach zwei Korrekturen |
+| README, Skills, v3-backlog auf neuen Namen | Commit 74df043 | erfüllt |
+| Je Datei ein Commit, jeder für sich grün | 11 Commits; zwei mussten nachgebessert werden (`--amend`) | erfüllt |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude, 2026-09-03
+
+**Drei Nutzer-Strings wurden von Ersetzungsregeln beschädigt und repariert.**
+Wortgrenzen allein schützen nicht vor Treffern in sichtbarem Text:
+
+| Regel | Traf zusätzlich | Wirkung |
+|---|---|---|
+| `bestanden` → `passed` | „von 12 Prüfpunkten bestanden" | sichtbarer Text |
+| `Seite` → `Side` | „Ludwig-Seite", „DATEV-Seite" (FieldList) | sichtbare Kartentitel |
+| `offen` → `open` | `label: "offen"`, `label: "Frage offen"` (ICONS in Review) | title-/aria-label-Attribut |
+
+Der dritte fiel erst beim JSDoc-Durchgang auf, unabhängig von zwei Prüfern
+gemeldet. Lehre für die nächste Umbenennung: Ersetzungen laufen nie über
+Stringliterale — entweder die Regel schließt sie aus, oder der Diff wird
+Zeile für Zeile gegen die Stringliterale geprüft, bevor committet wird.
+
+**Bewusst ausgenommen**
+
+- `src/ui/legacy/` — laut Umfang nicht Teil der Aufgabe. Eine versehentlich
+  geänderte Datei (`LongText.stories.tsx`) wurde zurückgesetzt.
+- Die Werte des Typs `BatonKey` (`"kanzlei"`, `"mandant"`, `"niemand"` …) und
+  die gleichnamigen Story-Fixtures: Werte sind Domäne, nicht im Umfang.
+- `docs/ludwig/*` und `design-guidelines.md`: beschreiben die App, dort heißen
+  die Komponenten weiter `SchrittRail` und `KontoFeld`.
+- `Seite` → `Side` steht nicht im Umbenennungs-Skript: das Wort kommt in
+  sichtbaren Labels vor und wird beim Umstieg von Hand geprüft.
+
+**Nachgelagert entstanden:** `scripts/rename-to-v3.mjs` — das Suchen-Ersetzen
+für den Tag, an dem die App auf v3 umsteigt. Es fasst nur Dateien an, die aus
+dem Set importieren, und lässt generische Namen (`Meldung`, `Pruefpunkt`,
+`gruppen` …) unangetastet: ein Probelauf gegen `ludwig/app` zeigte, dass
+`Meldung` dort zu 95 % in fremden Kommentaren steht und `Pruefpunkt` ein
+eigener Domänen-Typ der App ist.
+
+Offene Punkte: keine.
