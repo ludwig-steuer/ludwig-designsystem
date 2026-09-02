@@ -1,0 +1,21 @@
+/* Dieselbe Kette wie das App-Layout — ohne die seitenspezifischen Styles,
+   die kein Design-System-Baustein braucht. */
+
+/* Design-Tokens (CSS-Variablen) — die 1:1-Übernahme aus dem Design. */
+@import "./tokens.css";
+
+/* App-Chrome (Buttons, Tabellen, Karten, Tabs). */
+@import "./app-chrome.css";
+
+/* Generische Komponenten (Empty, Banner, Toast, Drawer, Pagination). */
+@import "./components.css";
+
+/* Buchungs-Komponenten (Buchungssatz, Editor-Drawer, Combobox). */
+@import "./booking.css";
+
+/* v3-Bausteine (Tabellen/Listen des Design-Systems). */
+@import "./v3.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

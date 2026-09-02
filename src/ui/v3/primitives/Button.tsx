@@ -1,0 +1,113 @@
+import Link from "next/link";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+
+/**
+ * v2-Knöpfe (F123 T123.1, Design `_ds` React-`Button` + `StapelSeite.dc.html`).
+ *
+ * Zwei Größen, weil das Design nur zwei kennt: `md` (40 px) trägt Kopf-Karte
+ * und Aktionsleiste, `sm` (32 px) trägt Zeilen- und Kartenaktionen. Alles
+ * andere — Radius, Farbe, Innenabstand — steht in `v2.css`.
+ *
+ * Server-Component: `href` rendert einen `Link`, `onClick` gehört in einen
+ * Client-Wrapper des Aufrufers.
+ */
+
+export type ButtonVariant = "primary" | "secondary" | "tertiary" | "danger";
+export type ButtonSize = "sm" | "md";
+
+type Common = {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  icon?: ReactNode;
+  /**
+   * Die Taste, die dieselbe Handlung auslöst. Sie steht **am Knopf**, nicht
+   * nur im Legende-Overlay — die Zielgruppe öffnet Ludwig alle zwei bis vier
+   * Wochen und soll die Tastatur nicht auswendig lernen müssen (UX-Guidelines V14).
+   */
+  hotkey?: string;
+  children: ReactNode;
+  className?: string;
+};
+
+export type ButtonProps = Common &
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "className"> & { href?: undefined };
+
+export type ButtonLinkProps = Common & { href: string; target?: string; download?: boolean | string };
+
+function classes(variant: ButtonVariant, size: ButtonSize, className?: string) {
+  return `v2btn v2btn--${variant} v2btn--${size}${className ? ` ${className}` : ""}`;
+}
+
+function inner(icon: ReactNode, children: ReactNode, hotkey?: string) {
+  return (
+    <>
+      {icon}
+      <span>{children}</span>
+      {hotkey ? <span className="v2btn__key">· {hotkey}</span> : null}
+    </>
+  );
+}
+
+export function Button(props: ButtonProps | ButtonLinkProps) {
+  const { variant = "secondary", size = "md", icon, hotkey, children, className } = props;
+  if ("href" in props && props.href !== undefined) {
+    const { href, target, download } = props;
+    return (
+      <Link href={href} target={target} download={download} className={classes(variant, size, className)}>
+        {inner(icon, children, hotkey)}
+      </Link>
+    );
+  }
+  const { variant: _v, size: _s, icon: _i, hotkey: _h, children: _c, className: _cl, href: _href, ...rest } =
+    props as ButtonProps;
+  return (
+    <button type="button" {...rest} className={classes(variant, size, className)}>
+      {inner(icon, children, hotkey)}
+    </button>
+  );
+}
+
+/**
+ * Knopf, der seine Taste immer zeigt — `hotkey` ist Pflicht statt optional.
+ * Reine Bequemlichkeit für Aktionsleisten, in denen jede Handlung eine Taste
+ * hat; identisch gerendert zu `Button`.
+ */
+export function KeyButton(props: (ButtonProps | ButtonLinkProps) & { hotkey: string }) {
+  return <Button {...props} />;
+}
+
+/**
+ * Aktionsleiste mit fester Reihenfolge: primär, sekundär, tertiär, Infotext.
+ * Die Reihenfolge steckt in der Komponente, damit sie nicht je Screen neu
+ * verhandelt wird (Design `StapelSeite.dc.html` Z. 172–185).
+ */
+export function ActionBar({
+  primary,
+  secondary,
+  tertiary,
+  info,
+  className,
+}: {
+  primary?: ReactNode;
+  secondary?: ReactNode;
+  tertiary?: ReactNode;
+  info?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`v2actionbar${className ? ` ${className}` : ""}`}>
+      {primary}
+      {secondary}
+      {tertiary}
+      {info ? <span className="v2actionbar__info">{info}</span> : null}
+    </div>
+  );
+}
+
+/**
+ * Zeilen-Aktionen: ein tertiärer Knopf je Handlung, rechtsbündig. Kein Kebab —
+ * ein Icon ohne Wort ist für die Zielgruppe ein Rätsel (UX-Guidelines V7).
+ */
+export function RowActions({ children }: { children: ReactNode }) {
+  return <span className="v2actions">{children}</span>;
+}

@@ -1,0 +1,1236 @@
+/* ==========================================================================
+   Ludwig v2 — Tabellen- und Listen-Bausteine
+   Quelle: claude-design `Tabellen-Bausteine.dc.html` (F118 §4).
+
+   Kompakter als der Bestand (`.section` / `.tbl` in app-chrome.css): Grid statt
+   <table>, 13.5px statt 14px, Spaltenkopf in 11.5px. Beide Sets leben
+   nebeneinander, bis alles migriert ist — die Trennung läuft über den
+   Import-Pfad (`@/ui/v2` gegen `@/ui/components`), nicht über Datei-Suffixe.
+
+   Farben kommen ausschließlich aus `tokens.css` (= `colors_and_type.css` des
+   Design-Systems). Kein zweites Farbsystem.
+   ========================================================================== */
+
+/* --- Karte: der Rahmen jeder Tabelle und jeder Liste -------------------- */
+.v2card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* Kartenkopf — immer vorhanden, auch bei drei Zeilen. */
+.v2card__h {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-head);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.v2card__h .title { font-size: 14px; font-weight: 600; color: var(--color-text); }
+.v2card__h .sub { font-size: 12px; color: var(--color-text-subtle); margin-top: 1px; }
+.v2card__h .actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+
+/* Kartenfuß — Paginierung nutzt weiter `.pag` aus components.css. */
+.v2card__f {
+  padding: 12px 18px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-head);
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+
+/* --- Tabelle: Grid statt <table> --------------------------------------- */
+/* `--v2-cols` setzt der Aufrufer (Table-Komponente), `--v2-min` optional für
+   horizontales Scrollen bei vielen Spalten. */
+.v2tbl { --v2-cols: 1fr; }
+.v2tbl__scroll { overflow-x: auto; }
+.v2tbl__inner { min-width: var(--v2-min, 0); }
+
+.v2tbl__head,
+.v2tbl__row {
+  display: grid;
+  grid-template-columns: var(--v2-cols);
+  gap: 10px;
+  padding: 12px 18px;
+  align-items: center;
+}
+
+.v2tbl__head {
+  padding: 9px 18px;
+  font-size: 11.5px;
+  letter-spacing: 0.01em;
+  color: var(--color-text-subtle);
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.v2tbl__row {
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 13.5px;
+  color: var(--color-text);
+}
+/* Letzte Zeile ohne Trennlinie (Baukasten-Regel 1). */
+.v2tbl__row:last-child { border-bottom: none; }
+.v2tbl__row.is-clickable { cursor: pointer; transition: background var(--duration-fast) var(--ease-standard); }
+.v2tbl__row.is-clickable:hover { background: var(--color-bg-soft); }
+/* Aktive Zeile im Master-Detail: 3-px-Akzentleiste links (Baukasten §10). */
+.v2tbl__row.is-active { background: var(--color-accent-50); border-left: 3px solid var(--color-accent); padding-left: 15px; }
+
+/* Zeile als Link — der Rahmen bleibt ein Grid, der Text erbt die Farbe. */
+a.v2tbl__row { text-decoration: none; color: inherit; }
+
+/* Zeile mit eigenen Aktionen: der Link mit `.v2rowlink` deckt die ganze Zeile
+   ab. So ist das Ziel überall in der Zeile klickbar, ohne <a> in <a> — und der
+   Link trägt weiter seinen eigenen Text, also braucht es kein aria-label. Was
+   sonst noch klickbar ist (zweiter Link, Zeilenmenü), liegt darüber. */
+.v2tbl__row:has(.v2rowlink) {
+  position: relative;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+.v2tbl__row:has(.v2rowlink):hover { background: var(--color-bg-soft); }
+.v2rowlink::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.v2tbl__row:has(.v2rowlink) a:not(.v2rowlink),
+.v2tbl__row:has(.v2rowlink) button { position: relative; z-index: 2; }
+
+/* Zwischenüberschrift über eine volle Zeile — nicht Fettdruck in Spalte 1. */
+.v2tbl__group {
+  padding: 7px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-bg-soft);
+  border-top: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Aufgeklappter Inhalt unter einer Zeile — kein Modal, kein Drawer. */
+.v2tbl__detail {
+  padding: 14px 18px 16px 46px;
+  background: var(--color-bg-soft);
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* Leerzustand innerhalb der Karte — der ehrliche Platzhalter (F118 §8). */
+.v2tbl__empty {
+  padding: 30px 18px;
+  text-align: center;
+  color: var(--color-text-subtle);
+  font-size: 13px;
+}
+
+/* --- Zellen-Bausteine (Baukasten §9) ----------------------------------- */
+.v2num { text-align: right; font-variant-numeric: tabular-nums lining-nums; }
+.v2main { font-weight: 600; color: var(--color-text); }
+.v2sub { font-size: 11.5px; color: var(--color-text-subtle); }
+.v2muted { color: var(--color-text-muted); }
+
+/* Chevron für ausklappbare Zeilen (45°, 180 ms). */
+.v2chev {
+  display: inline-block; width: 7px; height: 7px;
+  border-right: 1.5px solid var(--color-text-muted);
+  border-bottom: 1.5px solid var(--color-text-muted);
+  transform: rotate(-45deg);
+  transition: transform var(--duration-base) var(--ease-standard);
+}
+.v2chev.is-open { transform: rotate(45deg); }
+
+/* Inline-Aktionen: Text-Link-Buttons rechtsbündig, kein Icon-Rätsel. */
+.v2actions { display: flex; gap: 14px; justify-content: flex-end; align-items: center; }
+.v2link {
+  background: none; border: none; padding: 0;
+  font: 600 12.5px var(--font-sans);
+  color: var(--color-accent-700); cursor: pointer; text-decoration: none;
+}
+.v2link:hover { text-decoration: underline; }
+.v2link--quiet { font-weight: 400; color: var(--color-text-muted); }
+
+
+/* ==========================================================================
+   Stapelabnahme — der Rahmen (F118 T118.3)
+
+   Der Designer kannte Ludwigs Rahmen nicht: sein Entwurf ist eine
+   Vollbild-Anwendung mit eigenem Kopf. In Ludwig bleiben App-Header und
+   Mandanten-Sidebar stehen; der Schritt-Rail ist eine ZWEITE, schmalere
+   Spalte innerhalb der Arbeitsfläche (F118 §1).
+   ========================================================================== */
+
+.abn {
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+/* --- Schritt-Rail ------------------------------------------------------ */
+.abn__rail {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.abn__step {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 9px 10px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+.abn__step:hover { background: var(--color-bg-sunken); }
+.abn__step.is-current { background: var(--color-surface); box-shadow: var(--shadow-xs); }
+.abn__step.is-dimmed { opacity: 0.45; pointer-events: none; }
+
+.abn__step .dot {
+  width: 8px; height: 8px; border-radius: var(--radius-pill);
+  margin-top: 6px; flex: 0 0 auto;
+  background: var(--color-border-strong);
+}
+/* Die Ampel: der Punkt sagt, wie es um den Schritt steht — der Zähler
+   darunter sagt es noch einmal in Worten (UX-Guidelines V7). */
+.abn__step--open .dot { background: var(--color-accent-600); }
+.abn__step--done .dot { background: var(--color-success); }
+.abn__step--blocked .dot { background: var(--color-danger); }
+.abn__step--neutral .dot { background: var(--color-border-strong); }
+.abn__step.is-readonly .dot { background: var(--color-border-strong); }
+
+.abn__step .count {
+  display: block; margin-top: 3px;
+  font-size: 11px; font-variant-numeric: tabular-nums lining-nums;
+  color: var(--color-text-subtle);
+}
+.abn__step--open .count { color: var(--color-accent-700); }
+.abn__step--done .count { color: var(--color-success); }
+.abn__step--blocked .count { color: var(--color-danger); font-weight: 600; }
+
+.abn__step .label {
+  display: block;
+  font-size: 13px; line-height: 1.35; color: var(--color-text);
+}
+.abn__step.is-current .label { font-weight: 600; color: var(--color-primary); }
+.abn__step .question {
+  display: block;
+  font-size: 11px; color: var(--color-text-subtle); margin-top: 2px; line-height: 1.3;
+}
+
+.abn__railhead {
+  padding: 0 4px 12px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 8px;
+}
+
+/* --- Rücklauf-Korb ----------------------------------------------------- */
+.abn__korb {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+.abn__korb a {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 9px 12px;
+  font-size: 13px; color: var(--color-text); text-decoration: none;
+}
+.abn__korb a:hover { background: var(--color-bg-soft); }
+.abn__korb .count { font-weight: 700; color: var(--color-text-subtle); }
+.abn__korb .count.has-items { color: var(--color-warning); }
+
+/* --- Stapel-Kopf ------------------------------------------------------- */
+.abn__kopf {
+  /* Sticky: die Stapelnummer und der Zustand müssen auf jedem Schritt und in
+     jeder Scrollposition lesbar bleiben — sie sind der Kontext jeder
+     Entscheidung auf dieser Seite. */
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.abn__kopf .line1 {
+  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+}
+.abn__kopf .nr {
+  font-family: var(--font-mono); font-weight: 700;
+  color: var(--color-primary); font-size: 15px;
+}
+.abn__kopf .line2 {
+  font-size: 12.5px; color: var(--color-text-subtle); margin-top: 6px;
+}
+
+/* Bildschirm zu klein — kein Vorschau-Artefakt, sondern eine echte Grenze.
+   Schwelle auf Ludwigs Innenbreite umgerechnet: Sidebar (240) + Rail (224)
+   + zwei Spalten Arbeitsfläche brauchen zusammen rund 1280 px. */
+.abn__toosmall { display: none; }
+@media (max-width: 1279px) {
+  /* Sperre, nicht Hinweis: unter 1280 px liegen Rail, Liste und Detail
+     übereinander — geprüft wird dann nicht mehr, sondern geraten. */
+  .abn__toosmall {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    min-height: 60vh;
+    padding: var(--space-8);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+  .abn__toosmall .t { font-size: 16px; font-weight: 600; color: var(--color-text); }
+  .abn__toosmall .s { font-size: 13.5px; color: var(--color-text-muted); max-width: 46ch; }
+  .abn { display: none; }
+}
+
+/* --- Freigabe-Checkliste (Schritt 8) ----------------------------------- */
+.chk__bar {
+  height: 6px; border-radius: var(--radius-pill);
+  background: var(--color-bg-sunken); overflow: hidden;
+}
+.chk__bar span { display: block; height: 100%; background: var(--color-border-strong); }
+.chk__bar.is-blocked span { background: var(--color-danger); }
+.chk__bar.is-warn span { background: var(--color-warning); }
+.chk__bar.is-ok span { background: var(--color-success); }
+
+.chk__mark { font-weight: 700; font-size: 14px; }
+.chk__mark.is-blocked { color: var(--color-danger); }
+.chk__mark.is-warn { color: var(--color-warning); }
+.chk__mark.is-ok { color: var(--color-success); }
+.chk__mark.is-info { color: var(--color-text-subtle); }
+
+.chk__exits { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+
+/* Druckansicht: nur die Checkliste, ohne Rahmen der App. */
+@media print {
+  .app__sidebar, .app__top, .abn__rail, .abn__kopf, .chk__exits, .v2card__h .actions { display: none !important; }
+  .abn { grid-template-columns: minmax(0, 1fr); }
+  .v2card { border: none; box-shadow: none; }
+}
+
+/* ==========================================================================
+   Prozessbild (F119 §3) — dasselbe Bild in drei Größen
+
+   Vier Phasen mit Staffelstab. Zehn Zustände sind für die Sachbearbeiterin zu
+   viele Punkte; der Rohzustand steht als Unterzeile darunter. Rot gibt es nur
+   auf `failed` und auf „überfällig" — alles andere bleibt neutral, sonst
+   stumpft die Farbe ab.
+   ========================================================================== */
+
+/* --- Mini-Strip: vier Segmente in der Listenzeile ---------------------- */
+.pz-mini { display: flex; gap: 3px; width: 64px; }
+.pz-mini span {
+  display: block; height: 6px; flex: 1;
+  border-radius: 2px; background: var(--color-border);
+}
+.pz-mini span.is-done { background: var(--color-primary); }
+.pz-mini span.is-active { background: var(--color-accent); }
+.pz-mini span.is-failed { background: var(--color-danger); }
+
+/* --- Staffelstab: wer hat den Stapel — Icon UND Wort ------------------- */
+.pz-owner {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; color: var(--color-text-muted);
+}
+.pz-owner.is-alarm { color: var(--color-danger); font-weight: 600; }
+.pz-owner svg { flex: 0 0 auto; }
+
+/* --- Stepper: vier Phasen im Detail-Kopf -------------------------------- */
+.pz-stepper { display: flex; align-items: stretch; gap: 0; }
+.pz-stepper > div { flex: 1; border-top: 3px solid var(--color-border); padding-top: 10px; padding-right: 12px; }
+.pz-stepper > div.is-done,
+.pz-stepper > div.is-active { border-top-color: var(--color-primary); }
+.pz-stepper > div.is-failed { border-top-color: var(--color-danger); }
+
+.pz-stepper .phase {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--color-text-subtle);
+}
+.pz-stepper > div.is-done .phase,
+.pz-stepper > div.is-active .phase { color: var(--color-primary); }
+.pz-stepper > div.is-failed .phase { color: var(--color-danger); }
+.pz-stepper .who { font-size: 12px; color: var(--color-text-subtle); margin-top: 2px; }
+.pz-stepper .raw { font-size: 11px; color: var(--color-text-subtle); margin-top: 3px; font-family: var(--font-mono); }
+.pz-stepper .now { margin-top: 4px; }
+
+/* Schleifen werden gezählt, nicht versteckt. */
+.pz-loops { font-size: 12px; color: var(--color-text-muted); margin-top: 8px; }
+.pz-loops a { color: var(--color-accent-700); text-decoration: none; }
+.pz-loops a:hover { text-decoration: underline; }
+
+/* --- Staffel-Leiste: wo ist die Zeit hingegangen ----------------------- */
+.pz-staffel { display: flex; height: 20px; border-radius: var(--radius-sm); overflow: hidden; }
+.pz-staffel > span { display: block; border-right: 1px solid var(--color-surface); min-width: 2px; }
+.pz-staffel-legend { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+.pz-staffel-legend > span { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--color-text-muted); }
+.pz-staffel-legend i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+
+/* ── Eingabefelder ──────────────────────────────────────────────────────────
+ * Tailwinds Preflight nimmt `input` den Rahmen; ohne eine eigene Regel ist ein
+ * Textfeld optisch nicht von Fließtext zu unterscheiden. Eine Klasse für alle
+ * v2-Formulare, statt in jedem Dialog dieselben vier Zeilen inline.
+ */
+.v2in {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 13.5px;
+  padding: 6px 10px;
+}
+.v2in:focus {
+  outline: none;
+  border-color: var(--color-primary-700);
+  box-shadow: 0 0 0 3px rgba(59, 143, 196, 0.14);
+}
+
+
+/* ==========================================================================
+   Ludwig v2 — generisches Primitiven-Set (F123 T123.1)
+
+   Quelle: `Tabellen-Bausteine.dc.html` §4–§10, `StapelSeite.dc.html`,
+   `PruefChecklist.dc.html`, `_ds/ui_kits/app/components.css`.
+
+   Regel UX-Guidelines A5: Hex-Werte und Pixelmaße stehen hier — nie in der Komponente.
+   Farben ausschließlich aus `tokens.css`.
+   ========================================================================== */
+
+/* --- Stapel: der Ersatz für die nie definierte Klasse `stack` ----------- */
+.v2stack { display: flex; flex-direction: column; gap: var(--space-4); }
+
+/* --- Knopf -------------------------------------------------------------
+ * Das Design-System setzt zwei Größen: md (40 px hoch) für Kopf-Karte und
+ * Aktionsleiste, sm (32 px) für Zeilen- und Kartenaktionen. Höhe kommt aus
+ * Zeilenhöhe + Innenabstand, nicht aus `height` — sonst reißt der Knopf bei
+ * zwei Zeilen Text.
+ */
+.v2btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--duration-fast) var(--ease-standard),
+              border-color var(--duration-fast) var(--ease-standard);
+}
+.v2btn--md { font-size: 14px; line-height: 20px; padding: 9px 16px; }
+.v2btn--sm { font-size: 13px; line-height: 18px; padding: 6px 13px; }
+
+.v2btn--primary {
+  background: var(--color-primary-700);
+  color: var(--color-text-on-dark);
+  box-shadow: var(--shadow-xs);
+}
+.v2btn--primary:hover:not(:disabled) { background: var(--color-primary-600); }
+
+.v2btn--secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+}
+.v2btn--secondary:hover:not(:disabled) { background: var(--color-bg-soft); }
+
+.v2btn--tertiary { background: none; color: var(--color-accent-700); }
+.v2btn--tertiary:hover:not(:disabled) { background: var(--color-accent-50); }
+
+.v2btn--danger {
+  background: var(--color-danger);
+  color: var(--color-text-on-dark);
+  box-shadow: var(--shadow-xs);
+}
+.v2btn--danger:hover:not(:disabled) { filter: brightness(1.08); }
+
+.v2btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.v2btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.v2btn svg { flex: 0 0 auto; }
+
+/* Die Taste steht am Knopf, nicht nur im Legende-Overlay (UX-Guidelines V14). */
+.v2btn__key { font-weight: 500; opacity: 0.7; }
+
+/* --- Aktionsleiste: feste Reihenfolge primär → sekundär → tertiär → Info */
+.v2actionbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.v2actionbar__info { font-size: 13px; color: var(--color-text-muted); }
+
+/* --- Reiter (Unterstrich) ---------------------------------------------- */
+.v2tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--color-border); }
+.v2tab {
+  background: none; border: none; cursor: pointer; text-decoration: none;
+  padding: 10px 16px;
+  font-family: var(--font-sans); font-size: 13.5px; font-weight: 500;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.v2tab:hover { color: var(--color-text); }
+.v2tab.is-active { font-weight: 600; color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.v2tab:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.v2tab .n { font-variant-numeric: tabular-nums lining-nums; opacity: 0.6; }
+.v2tab .n.is-alarm { opacity: 1; font-weight: 700; color: var(--color-danger); }
+
+/* --- Segment-Schalter --------------------------------------------------- */
+.v2seg {
+  display: inline-flex; gap: 3px;
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+.v2seg__btn {
+  background: none; border: none; cursor: pointer; text-decoration: none;
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;
+  color: var(--color-text-muted);
+}
+.v2seg__btn.is-active { background: var(--color-surface); color: var(--color-primary); box-shadow: var(--shadow-xs); }
+.v2seg__btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+
+/* --- Filter-Chips ------------------------------------------------------- */
+.v2chips { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.v2chips__label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--color-text-subtle);
+}
+.v2chip {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-pill);
+  padding: 4px 11px;
+  font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.v2chip:hover { background: var(--color-bg-soft); }
+.v2chip.is-active {
+  background: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+  color: var(--color-text-on-dark);
+}
+.v2chip:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.v2chip .n { font-variant-numeric: tabular-nums lining-nums; opacity: 0.75; }
+
+/* --- Kennzahl-Kachel ---------------------------------------------------- */
+.v2kpigrid { display: grid; grid-template-columns: repeat(var(--v2-kpi-cols, 6), minmax(0, 1fr)); gap: var(--space-4); }
+.v2kpi {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+.v2kpi__label {
+  font-size: 11px; color: var(--color-text-muted);
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
+}
+.v2kpi__val {
+  font-size: 19px; font-weight: 600; color: var(--color-primary);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.v2kpi__sub { font-size: 11.5px; color: var(--color-text-subtle); margin-top: 2px; }
+
+/* --- Feldliste ---------------------------------------------------------- */
+.v2fields {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+.v2fields--soft { background: var(--color-bg-soft); }
+.v2fields__h {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: 10px; margin-bottom: 12px;
+}
+.v2fields--soft .v2fields__h { border-bottom-color: var(--color-border-strong); }
+.v2fields__row {
+  display: flex; justify-content: space-between; gap: var(--space-4);
+  font-size: 13.5px; padding: 5px 0;
+}
+.v2fields__row > span:first-child { color: var(--color-text-muted); }
+.v2fields__row > span:last-child { font-weight: 500; font-variant-numeric: tabular-nums lining-nums; text-align: right; }
+.v2fields__empty { font-size: 13.5px; color: var(--color-text-subtle); }
+
+/* --- Fließtext-Karte ---------------------------------------------------- */
+.v2prose {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+.v2prose__h {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--color-text-muted); margin-bottom: 10px;
+}
+.v2prose__body { font-size: 13.5px; line-height: 1.6; color: var(--color-text); }
+
+/* --- Zustands-Kopfkarte -------------------------------------------------
+ * Ausnahme von „Rand ODER Schatten": das Design setzt beides, weil der
+ * farbige Rand den Zustand trägt und der Schatten die Karte vom Seitengrund
+ * abhebt.
+ */
+.v2callout {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 20px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-5);
+}
+.v2callout--warning { border-color: var(--color-warning); }
+.v2callout--danger { border-color: var(--color-danger); }
+.v2callout__kicker {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--color-text-subtle); margin-bottom: 6px;
+}
+.v2callout--warning .v2callout__kicker { color: var(--color-warning); }
+.v2callout--danger .v2callout__kicker { color: var(--color-danger); }
+.v2callout__title { font-size: 17px; font-weight: 600; color: var(--color-primary); margin-bottom: 4px; }
+.v2callout__sub { font-size: 13.5px; color: var(--color-text-muted); }
+.v2callout--warning .v2callout__sub { color: var(--color-warning); }
+.v2callout--danger .v2callout__sub { color: var(--color-danger); }
+.v2callout__actions { display: flex; gap: 10px; flex-shrink: 0; }
+
+/* --- Hinweisbox --------------------------------------------------------- */
+.v2note {
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  background: var(--color-accent-50);
+  color: var(--color-text);
+  border: 1px solid var(--color-accent-100);
+}
+.v2note--soft { background: var(--color-bg-soft); border-color: var(--color-border); color: var(--color-text-muted); }
+.v2note--danger { background: var(--color-danger-bg); border-color: var(--color-danger); color: var(--color-danger); }
+.v2note--warning { background: var(--color-warning-bg); border-color: var(--color-warning); color: var(--color-warning); }
+
+/* --- Dialog -------------------------------------------------------------
+ * Anatomie des Drawers aus dem Design-System (`.dr__h/.dr__body/.dr__foot`),
+ * nur zentriert statt seitlich. Nur für Bestätigungen mit Folgen (L3) —
+ * Details gehören ins Master-Detail oder in den Drawer.
+ */
+.v2scrim {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(20, 36, 56, 0.30);
+  backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-6);
+}
+.v2dlg {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-height: calc(100vh - 2 * var(--space-6));
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.v2dlg--sm { max-width: 420px; }
+.v2dlg--md { max-width: 560px; }
+.v2dlg--lg { max-width: 760px; }
+.v2dlg__h {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-head);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.v2dlg__kicker {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--color-text-subtle); margin-bottom: 3px;
+}
+.v2dlg__title { font-size: 15px; font-weight: 600; color: var(--color-text); }
+.v2dlg__close {
+  background: none; border: none; cursor: pointer; padding: 2px;
+  color: var(--color-text-muted); line-height: 0;
+  border-radius: var(--radius-sm);
+}
+.v2dlg__close:hover { color: var(--color-text); background: var(--color-bg-soft); }
+.v2dlg__body { padding: 18px; overflow-y: auto; font-size: 13.5px; line-height: 1.55; color: var(--color-text); }
+.v2dlg__foot {
+  padding: 12px 18px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-head);
+  display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+}
+
+/* --- Formular ------------------------------------------------------------ */
+.v2field { display: flex; flex-direction: column; gap: 4px; }
+.v2field__label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.v2field__hint { font-size: 12px; color: var(--color-text-subtle); }
+.v2field__err { font-size: 12px; color: var(--color-danger); font-weight: 500; }
+.v2in--invalid { border-color: var(--color-danger); }
+.v2in--invalid:focus { border-color: var(--color-danger); box-shadow: 0 0 0 3px var(--color-danger-bg); }
+textarea.v2in { min-height: 64px; resize: vertical; line-height: 1.5; }
+select.v2in { padding-right: 26px; }
+.v2check {
+  width: 14px; height: 14px; margin: 0;
+  accent-color: var(--color-primary-700);
+  border: 1px solid var(--color-border-control);
+  cursor: pointer;
+}
+.v2checkline { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--color-text); cursor: pointer; }
+.v2search { min-width: 220px; font-size: 12.5px; }
+
+/* --- Auswahl-Leiste über dem Spaltenkopf --------------------------------- */
+.v2selbar {
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-accent-50);
+  display: flex; align-items: center; gap: 12px;
+}
+.v2selbar__count { font-size: 12.5px; font-weight: 600; color: var(--color-accent-700); }
+.v2selbar__actions { display: flex; gap: 12px; margin-left: auto; }
+
+/* --- Zell-Bausteine (Baukasten §9) --------------------------------------- */
+.v2num--danger { color: var(--color-danger); }
+.v2num--warning { color: var(--color-warning); }
+.v2num--warning-strong { color: var(--color-warning-strong); }
+.v2num--success { color: var(--color-success); }
+.v2num--muted { color: var(--color-text-muted); }
+
+.v2bar { display: block; height: 6px; background: var(--color-bg-sunken); border-radius: var(--radius-pill); overflow: hidden; }
+.v2bar__fill { display: block; height: 100%; background: var(--color-accent); }
+.v2bar__fill--warning { background: var(--color-warning); }
+.v2bar__fill--danger { background: var(--color-danger); }
+.v2bar__fill--success { background: var(--color-success); }
+.v2bar__label { display: block; font-size: 11px; color: var(--color-text-subtle); margin-top: 3px; }
+
+.v2dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.v2dot i { width: 6px; height: 6px; border-radius: var(--radius-pill); flex: 0 0 auto; background: currentColor; }
+.v2dot--neutral { color: var(--color-text-muted); }
+.v2dot--info { color: var(--color-accent-700); }
+.v2dot--success { color: var(--color-success); }
+.v2dot--warning { color: var(--color-warning); }
+.v2dot--danger { color: var(--color-danger); }
+
+/* Ladezustand: Zeilen in Zeilenhöhe, damit die Tabelle nicht springt. */
+.v2skel {
+  height: 11px; border-radius: var(--radius-sm);
+  background: var(--color-bg-sunken);
+  animation: v2pulse 1.4s var(--ease-standard) infinite;
+}
+@keyframes v2pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) { .v2skel { animation: none; } }
+
+/* Fehlerzustand einer Tabelle — der fünfte Zustand (UX-Guidelines V9). */
+.v2tbl__error {
+  padding: 24px 18px;
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-size: 13px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+
+/* --- Master-Detail -------------------------------------------------------
+ * Der Ersatz für das Modal (L2): Liste links, Detail rechts, Detail bleibt
+ * beim Scrollen stehen. Auswahl über `?sel=` — nicht über den Drawer-Param.
+ */
+.v2md { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--space-5); align-items: start; }
+.v2md__detail { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+/* Umgekehrtes Gewicht: schmale Liste links, breites Detail rechts — für
+ * Schritte, in denen das Detail der Arbeitsplatz ist und die Liste nur die
+ * Auswahl trägt (Design `DR:757`, Schritt 2). Das Detail steht dann nicht
+ * mehr fest: es ist der lange Teil der Seite. */
+.v2md--detail-breit { grid-template-columns: minmax(0, 440px) minmax(0, 1fr); }
+.v2md--detail-breit .v2md__detail { position: static; max-height: none; overflow: visible; }
+
+/* --- Klappbarer Gruppenkopf ---------------------------------------------
+ * Über einer Tabelle oder Liste: Chevron, Label, Anzahl links, Befund rechts.
+ * Design `DR:2151` — lange Kontenlisten sind nur zugeklappt lesbar.
+ */
+.v2grpbtn {
+  display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 10px 14px;
+  background: var(--color-surface-head);
+  border: none; border-bottom: 1px solid var(--color-border);
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--color-text);
+  text-align: left; cursor: pointer;
+}
+.v2grpbtn:hover { background: var(--color-bg-soft); }
+/* Zugeklappt hängt sonst eine Trennlinie ohne Inhalt darunter. */
+.v2grpbtn[aria-expanded="false"] { border-bottom: none; }
+.v2grpbtn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.v2grpbtn__chev { display: inline-block; width: 12px; font-size: 11px; color: var(--color-text-subtle); }
+.v2grpbtn__n { font-size: 12px; font-weight: 400; color: var(--color-text-subtle); }
+.v2grpbtn__flag { font-size: 11px; font-weight: 600; color: var(--color-danger); }
+
+/* --- Verlaufsbalken -----------------------------------------------------
+ * Vier Monate als Balken neben denselben vier Zahlen: die Zahl sagt wie viel,
+ * der Balken sagt in welche Richtung es geht. Der laufende Monat trägt den
+ * Akzent, die Vormonate bleiben grau.
+ */
+.v2spark { display: flex; align-items: flex-end; gap: 3px; height: 56px; }
+.v2spark__b { flex: 1; min-height: 2px; border-radius: 2px 2px 0 0; background: var(--color-border-strong); }
+.v2spark__b.is-now { background: var(--color-accent-600); }
+.v2spark__ax { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--color-text-subtle); margin-top: 4px; }
+
+/* --- Vorgelegte Handlung ------------------------------------------------
+ * Regel S13: wo der Möglichkeitsraum klar ist, legt Ludwig die Handlungen vor
+ * statt ein leeres Feld hinzustellen. Eine Zeile je Handlung, volle Breite,
+ * links ausgerichtet — der Text ist die Handlung, kein Stichwort.
+ * Design `DR:2064`.
+ */
+.v2opt {
+  display: block; width: 100%; text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 9px 12px;
+  font: inherit; font-size: 13px; color: var(--color-text);
+  cursor: pointer;
+}
+.v2opt + .v2opt { margin-top: 8px; }
+.v2opt:hover { background: var(--color-bg-soft); }
+.v2opt:disabled { opacity: 0.5; cursor: default; }
+.v2opt:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.v2opt--sel { border-color: var(--color-accent); background: var(--color-accent-50); font-weight: 600; }
+
+.v2lp {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.v2lp__grp {
+  padding: 12px 16px;
+  background: var(--color-surface-head);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--color-text-subtle);
+  display: flex; justify-content: space-between; gap: 8px;
+}
+.v2lp__grp + .v2lp__grp,
+.v2lp__item + .v2lp__grp { border-top: 1px solid var(--color-border); }
+.v2lp__item {
+  display: block; width: 100%; text-align: left;
+  background: none; border: none; cursor: pointer; text-decoration: none;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  border-left: 3px solid transparent;
+}
+.v2lp__item:last-child { border-bottom: none; }
+.v2lp__item:hover { background: var(--color-bg-soft); }
+.v2lp__item.is-active { border-left-color: var(--color-accent); background: var(--color-accent-50); }
+.v2lp__item:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.v2lp__title { font-size: 13.5px; font-weight: 600; color: var(--color-text); display: flex; gap: 8px; align-items: center; }
+.v2lp__sub { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+.v2lp__badges { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.v2lp__empty { padding: 30px 16px; text-align: center; font-size: 13px; color: var(--color-text-subtle); }
+
+.v2dp {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  min-height: 220px;
+}
+.v2dp__title { font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 4px; }
+.v2dp__sub { font-size: 12.5px; color: var(--color-text-muted); margin-bottom: var(--space-4); }
+.v2dp__empty { font-size: 13px; color: var(--color-text-subtle); }
+
+/* --- Prüf-Checkliste ----------------------------------------------------- */
+.v2chk__icon { display: flex; justify-content: center; }
+/* „106 von 118" darf nicht umbrechen — die Spalte ist knapp bemessen. */
+.v2chk__stand { white-space: nowrap; }
+.v2chk__jump { font-size: 11.5px; color: var(--color-accent-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2chk__label { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* --- Prüfpunkte (Akkordeon) ----------------------------------------------
+ * Bestandene Punkte stehen zusammen in EINER Zeile (UX-Guidelines L7); nur was offen,
+ * gewarnt oder gescheitert ist, bekommt eine eigene Zeile.
+ */
+.v2pp { display: flex; flex-direction: column; }
+.v2pp__ok {
+  padding: 10px 16px;
+  font-size: 12.5px; color: var(--color-success);
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: flex; align-items: center; gap: 8px;
+}
+.v2pp__row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 13px;
+}
+.v2pp__row:last-child { border-bottom: none; }
+.v2pp__q { font-weight: 500; color: var(--color-text); }
+.v2pp__why { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; line-height: 1.5; }
+.v2pp__code { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-subtle); }
+
+/* --- Meldungen: Fehler blockieren, Warnungen brauchen eine Quittung ------- */
+.v2msg { display: flex; align-items: flex-start; gap: 8px; padding: 9px 12px; font-size: 12.5px; line-height: 1.5; border-radius: var(--radius-md); }
+.v2msg + .v2msg { margin-top: 6px; }
+.v2msg--error { background: var(--color-danger-bg); color: var(--color-danger); }
+.v2msg--warning { background: var(--color-warning-bg); color: var(--color-warning); }
+.v2msg--hint { background: var(--color-bg-soft); color: var(--color-text-muted); }
+.v2msg__body { flex: 1 1 auto; min-width: 0; }
+.v2msg__actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+.v2msg svg { flex: 0 0 auto; margin-top: 1px; }
+
+/* --- Kontenauswahl mit Kandidaten ---------------------------------------- */
+.v2kf { position: relative; }
+.v2kf .v2in { width: 100%; box-sizing: border-box; }
+.v2kf__pop {
+  position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0;
+  max-height: 320px; overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+.v2kf__grp {
+  padding: 7px 12px;
+  background: var(--color-surface-head);
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--color-text-subtle);
+  position: sticky; top: 0;
+}
+.v2kf__opt {
+  display: grid; grid-template-columns: 68px 1fr; gap: 4px 10px; align-items: baseline;
+  width: 100%; text-align: left;
+  background: none; border: none; cursor: pointer;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-family: var(--font-sans); font-size: 13px; color: var(--color-text);
+}
+.v2kf__opt:hover { background: var(--color-bg-soft); }
+.v2kf__opt.is-active { background: var(--color-accent-50); }
+.v2kf__opt:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.v2kf__num { font-variant-numeric: tabular-nums lining-nums; font-weight: 600; }
+.v2kf__why { grid-column: 2; font-size: 11.5px; color: var(--color-text-subtle); }
+.v2kf__empty { padding: 18px 12px; font-size: 13px; color: var(--color-text-subtle); }
+
+/* --- Screen-Kopf je Schritt (F123 T123.2) ------------------------------- */
+.abn__screenhead { margin-bottom: var(--space-5); }
+.abn__screenhead__row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--space-4);
+}
+.abn__screenhead h1 {
+  font-size: 26px; font-weight: 600; line-height: 1.2;
+  margin: 2px 0 0; color: var(--color-text);
+}
+.abn__screenhead__nav { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.abn__screenhead__lead {
+  margin: 8px 0 0;
+  font-size: 13.5px; line-height: 1.55; color: var(--color-text-muted);
+  max-width: 68ch;
+}
+
+/* --- Fortschritt über alle Schritte -------------------------------------- */
+.abn__progress { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.abn__progress__text {
+  font-size: 12px; color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums lining-nums; white-space: nowrap;
+}
+
+/* --- Todo-Zeile: Zustands-Icon vor Titel und Nebenzeile ------------------- */
+.v2todo { display: flex; align-items: flex-start; gap: 10px; }
+.v2todo__ico { flex: 0 0 auto; margin-top: 1px; line-height: 0; }
+/* Der Zahlenblock rechts in einer Listenzeile: rechtsbündig und tabellarisch,
+ * damit Beträge untereinander vergleichbar bleiben (Design `DR:1997`). */
+.v2todo__right {
+  margin-left: auto; flex: 0 0 auto; text-align: right;
+  font-size: 13.5px; font-weight: 600; color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Marke ---------------------------------------------------------------
+ * Ein Wort in einer Pille. Der Ton kodiert die Kritikalität und nichts
+ * anderes (UX-Guidelines A7) — nie den Wert oder sein Vorzeichen.
+ */
+.v2pill {
+  display: inline-flex; align-items: center; white-space: nowrap;
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  font-size: 10.5px; font-weight: 700;
+  background: var(--color-bg-sunken); color: var(--color-text-subtle);
+}
+.v2pill--info { background: var(--color-accent-50); color: var(--color-accent-700); }
+.v2pill--warning { background: var(--color-warning-bg); color: var(--color-warning); }
+.v2pill--danger { background: var(--color-danger-bg); color: var(--color-danger); }
+
+/* --- KI-Buchungshinweise (F123 T123.3) ----------------------------------- */
+.ki {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-soft);
+  margin-top: var(--space-3);
+}
+.ki__h {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: none; border: none; cursor: pointer;
+  padding: 9px 12px;
+  font-family: var(--font-sans); font-size: 12.5px; color: var(--color-text);
+  text-align: left;
+}
+.ki__h:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.ki__title { font-weight: 600; margin-right: auto; }
+.ki__body { padding: 0 12px 12px 34px; }
+.ki__block + .ki__block { margin-top: var(--space-3); }
+.ki__text {
+  margin: 4px 0 0;
+  font-size: 13px; line-height: 1.55; color: var(--color-text);
+  max-height: 6.4em; overflow-y: auto;
+}
+.ki__src {
+  display: flex; align-items: baseline; gap: 6px;
+  padding: 4px 0;
+  font-size: 12.5px; color: var(--color-text-muted); text-decoration: none;
+}
+a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
+.ki__art {
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--color-text-subtle);
+}
+.ki__quote { font-style: italic; color: var(--color-text-subtle); }
+.ki__src svg { align-self: center; flex: 0 0 auto; }
+
+/* ==========================================================================
+   Buchungssatz-Editor (F123 T123.3)
+
+   Spaltenordnung ist DATEV: Datum · [Whg.] · Umsatz · S/H · BU · Konto ·
+   Beleg 1 · [Beleg 2] · Text · [KOST]. Anzeigen und Bearbeiten teilen sich
+   dasselbe Raster — sonst muss die Prüferin beim Korrigieren neu suchen.
+   ========================================================================== */
+
+.bse { font-size: 13px; }
+
+.bse__kopf {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 10px; margin-bottom: 10px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.bse__beleg { font-weight: 600; color: var(--color-text); }
+.bse__rest {
+  font-family: var(--font-mono); font-size: 12.5px; font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.bse__rest.is-ok { color: var(--color-success); }
+.bse__rest.is-off { color: var(--color-danger); }
+
+.bse__tbl { --bse-cols: 1fr; }
+.bse__head,
+.bse__cells {
+  display: grid;
+  grid-template-columns: var(--bse-cols);
+  gap: 6px;
+  align-items: center;
+}
+.bse__head {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--color-text-subtle); font-weight: 600;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.bse__row { padding: 6px 0; border-bottom: 1px solid var(--color-border-subtle); }
+.bse__row .v2in { padding: 4px 7px; font-size: 12.5px; width: 100%; box-sizing: border-box; }
+.bse__konto { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bse__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* S/H ist ein Schalter, kein Select: zwei Werte, ein Klick. */
+.bse__sh {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 4px 0;
+  font-family: var(--font-sans); font-size: 12.5px; font-weight: 700;
+  color: var(--color-primary); cursor: pointer;
+}
+.bse__sh:hover { background: var(--color-bg-soft); }
+
+/* Die abgeleitete Steuerzeile und der Rest-Anker stehen UNTER der Zeile —
+   sie sind Folge der Eingabe, nicht selbst Eingabe. */
+.bse__note {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  margin-top: 3px;
+  font-size: 11.5px; color: var(--color-text-subtle);
+}
+
+.bse__removed {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 12.5px; color: var(--color-text-subtle);
+}
+.bse__removed .v2link { display: inline-flex; align-items: center; gap: 4px; }
+
+.bse__gegen {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-weight: 500;
+}
+.bse__gegen__label { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.bse__tag {
+  font-size: 11px; color: var(--color-accent-700);
+  background: var(--color-accent-50); border-radius: var(--radius-pill);
+  padding: 1px 8px;
+}
+
+.bse__rowactions { display: flex; gap: 16px; flex-wrap: wrap; padding: 9px 0; }
+
+.bse__journal { margin-top: var(--space-3); }
+.bse__journal__h {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: none; border: none; cursor: pointer;
+  padding: 7px 0;
+  font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;
+  color: var(--color-text-muted); text-align: left;
+}
+.bse__journal__body { border-top: 1px solid var(--color-border-subtle); }
+.bse__journal__row {
+  display: grid; grid-template-columns: 70px minmax(0, 1fr) 30px 110px; gap: 8px;
+  padding: 5px 0; font-size: 12.5px;
+}
+
+.bse__foot {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: var(--space-4); padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+/* ==========================================================================
+   Schritt 3 der Stapelabnahme — „Stimmen die Vorschläge?"
+   Design: `Buchungsreview.dc.html` → Screen 3 (Einzelfälle · Wiederkehrende ·
+   Liste). Die Maße stehen hier, damit in den Komponenten kein Pixelwert
+   auftaucht (UX-Guidelines A5).
+   ========================================================================== */
+
+/* --- Fall-Navigation über dem Flow: ‹ 12 von 118 › + Sicht + Buckets ----- */
+.s3head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-5); flex-wrap: wrap;
+}
+.s3nav { display: flex; align-items: center; gap: 14px; }
+.s3nav__pos { font-size: 13.5px; color: var(--color-text-muted); white-space: nowrap; }
+.s3nav__btn {
+  width: 32px; height: 32px; flex: 0 0 auto;
+  border-radius: var(--radius-md); border: 1px solid var(--color-border-strong);
+  background: var(--color-surface); color: var(--color-text);
+  font-size: 15px; line-height: 1; cursor: pointer;
+}
+.s3nav__btn:hover:not(:disabled) { background: var(--color-bg-soft); }
+.s3nav__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.s3nav__btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+/* --- Der Fall-Kopf: Nummer, Titel, Betrag, Profil-Chips ------------------ */
+.s3case { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-5); }
+.s3case__title { font-size: 24px; font-weight: 600; color: var(--color-text); }
+.s3case__sub { font-size: 14.5px; color: var(--color-text-muted); margin-top: 4px; }
+.s3case__chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 420px; }
+
+/* --- Zwei Zonen: links der Buchungssatz, rechts sein Kontext -------------
+   Die Buchungsspalte hat Vorrang; unter 1160 px fällt der Kontext darunter,
+   statt den Satz zu quetschen — die Spaltenordnung des Satzes ist die
+   DATEV-gewohnte und darf nicht umbrechen. */
+.s3grid {
+  display: grid; grid-template-columns: minmax(0, 1fr) 440px;
+  gap: var(--space-6); align-items: start;
+}
+@media (max-width: 1160px) { .s3grid { grid-template-columns: minmax(0, 1fr); } }
+.s3zones { display: flex; flex-direction: column; gap: var(--space-4); position: sticky; top: 16px; }
+@media (max-width: 1160px) { .s3zones { position: static; } }
+
+/* Kopf einer Kontext-Zone: Überschrift links, ihre Öffner rechts. */
+.s3zone__h {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; margin-bottom: var(--space-3);
+}
+.s3zone__h__acts { display: flex; gap: 8px; flex-shrink: 0; }
+.s3zone__name { font-size: 15px; font-weight: 600; color: var(--color-text); }
+.s3zone__line { font-size: 12.5px; color: var(--color-text-muted); margin-top: 2px; }
+.s3zone__grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: 12.5px;
+}
+.s3zone__grid > span:nth-child(odd) { color: var(--color-text-muted); }
+
+/* Eine USt-Prüfzeile: Punkt, Frage, Ergebnis. */
+.s3vat { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; }
+.s3vat > i {
+  width: 7px; height: 7px; border-radius: var(--radius-pill);
+  margin-top: 5px; flex: 0 0 auto; background: currentColor;
+}
+.s3vat__label { font-size: 12.5px; color: var(--color-text-muted); }
+.s3vat__result { font-size: 12.5px; color: var(--color-text); font-weight: 600; }
+
+/* Notiz-Eintrag in der Zone „Notizen". */
+.s3note { border-top: 1px solid var(--color-border-subtle); padding: 10px 0; }
+.s3note__h { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
+.s3note__who { font-size: 12px; font-weight: 600; color: var(--color-text); }
+.s3note__when { font-size: 11.5px; color: var(--color-text-subtle); }
+.s3note__body { font-size: 12.5px; color: var(--color-text-muted); line-height: 1.5; }
+
+/* --- Die Entscheidungsleiste: bleibt am unteren Rand stehen -------------
+   Sie ist im Blick, während oben gescrollt wird — wer 118 Sätze abnimmt,
+   soll den Weg zum Knopf nicht scrollen. */
+.s3bar {
+  position: sticky; bottom: 0; z-index: 5;
+  background: var(--color-surface); border-top: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4) var(--space-5);
+  margin: 0 calc(-1 * var(--space-5));
+  display: flex; flex-direction: column; gap: var(--space-3);
+}
+.s3bar__row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap; }
+.s3bar__acts { display: flex; gap: 10px; flex-wrap: wrap; }
+.s3bar__info { font-size: 12px; color: var(--color-text-subtle); }
+.s3bar__sums { display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; font-size: 12px; color: var(--color-text-subtle); }
+
+/* Das aufgeklappte Kommentarfeld über der Leiste — Chips, Text, Bestätigen. */
+.s3form {
+  border: 1px solid var(--color-accent-600); background: var(--color-accent-50);
+  border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5);
+}
+.s3form__title { font-size: 13.5px; font-weight: 600; margin-bottom: var(--space-3); }
+
+/* --- Prüfpunkt mit Quittung: der Haken gehört an den Befund -------------- */
+.s3cp {
+  display: flex; gap: 10px; align-items: flex-start;
+  border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+.s3cp + .s3cp { margin-top: 6px; }
+.s3cp--warning { border-color: var(--color-warning); background: var(--color-warning-bg); }
+.s3cp--danger { border-color: var(--color-danger); background: var(--color-danger-bg); }
+.s3cp--open { border-color: var(--color-border-strong); background: var(--color-bg-soft); }
+.s3cp__code { font-size: 12.5px; font-weight: 700; font-family: var(--font-mono); }
+.s3cp--warning .s3cp__code { color: var(--color-warning); }
+.s3cp--danger .s3cp__code { color: var(--color-danger); }
+.s3cp--open .s3cp__code { color: var(--color-text-subtle); }
+.s3cp__q { font-weight: 400; color: var(--color-text); }
+.s3cp__why { font-size: 12.5px; color: var(--color-text-muted); margin-top: 3px; }
+
+/* --- Wiederkehrende: der Regel-Block neben den Sätzen -------------------- */
+.s3wk__detail { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+@media (max-width: 1160px) { .s3wk__detail { grid-template-columns: minmax(0, 1fr); } }
+.s3wk__acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: var(--space-4); }
+.s3wk__acts .is-right { margin-left: auto; }
+.s3wk__light { text-align: center; font-size: 13px; line-height: 1; }

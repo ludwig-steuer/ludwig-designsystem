@@ -1,0 +1,13 @@
+/* Generiert von scripts/sync-ludwig.sh — nicht von Hand bearbeiten. */
+export * from "./domain/acceptance-quality";
+export * from "./domain/acceptance-triage";
+export * from "./domain/case";
+export * from "./domain/convention";
+export * from "./domain/document-number";
+export * from "./domain/payment-term";
+export * from "./domain/payroll-payment";
+export * from "./domain/proposal-batch-spread";
+export * from "./domain/rationale-source";
+export * from "./domain/tabs";
+export * from "./domain/tax-keys";
+export * from "./domain/vat-rules";

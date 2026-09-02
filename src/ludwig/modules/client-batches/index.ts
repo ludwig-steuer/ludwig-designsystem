@@ -1,0 +1,3 @@
+/* Generiert von scripts/sync-ludwig.sh — nicht von Hand bearbeiten. */
+export * from "./domain/extf-batch";
+export * from "./domain/extf-masterdata";
