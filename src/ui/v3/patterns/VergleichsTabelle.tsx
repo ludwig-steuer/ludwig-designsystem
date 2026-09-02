@@ -1,6 +1,6 @@
 "use client";
 
-import { AbweichungsZelle, AmountCell, type CellTone } from "../primitives/Cells";
+import { DeviationCell, AmountCell, type CellTone } from "../primitives/Cells";
 import { StateIcon } from "./Pruefen";
 import { Card, CardHead, HeadRow, Table } from "../primitives/Table";
 
@@ -114,7 +114,7 @@ export function VergleichsTabelle({
                 {zelle(r.m1, r.unit)}
                 {r.tooYoung ? <span className="v2num v2muted">—</span> : zelle(r.avg, r.unit)}
                 {zelle(r.current, r.unit)}
-                <AbweichungsZelle
+                <DeviationCell
                   pct={r.tooYoung ? null : r.deviationPct}
                   tone={r.acknowledged ? "muted" : r.tone}
                   explanation={r.explanation}

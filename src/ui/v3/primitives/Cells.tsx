@@ -127,16 +127,16 @@ export function Timestamp({ iso, prefix }: { iso: string | Date | null; prefix?:
 }
 
 /**
- * Abweichung gegen den Vormonatsschnitt. Die vier Stufen (0–15 % · 15–50 % ·
+ * Deviation against the previous months' average. The four steps (0-15% · 15-50% ·
  * 50–100 % · ab 100 %) rechnet **eine** Domain-Funktion aus; die Zelle malt
  * nur. Der Tooltip trägt die Rechnung, damit die Zahl kein Orakel ist.
  */
-export function AbweichungsZelle({
+export function DeviationCell({
   pct,
   tone,
   explanation,
 }: {
-  /** Abweichung in Prozent; `null` = zu jung für einen Vergleich. */
+  /** Deviation in percent; `null` = too recent to compare. */
   pct: number | null;
   tone: CellTone;
   explanation: string;

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
-  AbweichungsZelle,
+  DeviationCell,
   AmountCell,
   DotStatus,
   ErrorRow,
@@ -113,7 +113,7 @@ export const Fehler: Story = {
 };
 
 /** Die vier Stufen der Abweichungsskala (L7) — Schwellen aus der Domain. */
-export const Abweichungsskala: Story = {
+export const DeviationScale: Story = {
   render: () => (
     <Card>
       <CardHead title="Abweichung gegen den Vormonatsschnitt" />
@@ -124,23 +124,23 @@ export const Abweichungsskala: Story = {
         </HeadRow>
         <Row>
           <span>6815 · Bürobedarf</span>
-          <AbweichungsZelle pct={8} tone="neutral" explanation="64,90 gegen Ø 60,00 = +8 % — im Rahmen." />
+          <DeviationCell pct={8} tone="neutral" explanation="64,90 gegen Ø 60,00 = +8 % — im Rahmen." />
         </Row>
         <Row>
           <span>6310 · Miete</span>
-          <AbweichungsZelle pct={-31} tone="warning" explanation="1.180 gegen Ø 1.700 = −31 %." />
+          <DeviationCell pct={-31} tone="warning" explanation="1.180 gegen Ø 1.700 = −31 %." />
         </Row>
         <Row>
           <span>6805 · Telefon</span>
-          <AbweichungsZelle pct={74} tone="warning-strong" explanation="348 gegen Ø 200 = +74 %." />
+          <DeviationCell pct={74} tone="warning-strong" explanation="348 gegen Ø 200 = +74 %." />
         </Row>
         <Row>
           <span>6600 · Werbung</span>
-          <AbweichungsZelle pct={420} tone="danger" explanation="2.100 gegen Ø 404 = +420 %." />
+          <DeviationCell pct={420} tone="danger" explanation="2.100 gegen Ø 404 = +420 %." />
         </Row>
         <Row>
           <span>6820 · Porto</span>
-          <AbweichungsZelle pct={null} tone="neutral" explanation="Nur ein Vormonat — keine Bewertung." />
+          <DeviationCell pct={null} tone="neutral" explanation="Nur ein Vormonat — keine Bewertung." />
         </Row>
       </Table>
     </Card>

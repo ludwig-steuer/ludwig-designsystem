@@ -79,7 +79,7 @@ export {
   ProgressCell,
   DotStatus,
   Timestamp,
-  AbweichungsZelle,
+  DeviationCell,
   TableLoading,
   ErrorRow,
   type CellTone,
