@@ -16,7 +16,7 @@ import { useState } from "react";
 import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 
 /**
- * Was der Agent sich gedacht hat (F123 T123.3, Design `KIBuchungshinweise.dc.html`).
+ * Was der Agent sich gedacht hat (F123 T123.3, Design `AiBookingNotes.dc.html`).
  *
  * Drei Dinge, die heute nirgends zusammen stehen: die **Begründung des
  * Vorschlags** (`agent_rationale`), die **Einschätzung des Judge**
@@ -32,9 +32,9 @@ import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 export type JudgeVerdict = "confirm" | "confirm_with_note" | "adjust" | "flag";
 
 /** Woher eine Aussage kommt. Icon **und** Wort — ein Icon allein ist ein Rätsel. */
-export type QuellenArt = "bank" | "beleg" | "regel" | "gesetz" | "web";
+export type SourceKind = "bank" | "beleg" | "regel" | "gesetz" | "web";
 
-const QUELLE: Record<QuellenArt, { Icon: LucideIcon; label: string }> = {
+const QUELLE: Record<SourceKind, { Icon: LucideIcon; label: string }> = {
   bank: { Icon: Banknote, label: "Bank" },
   beleg: { Icon: FileText, label: "Beleg" },
   regel: { Icon: Ruler, label: "Regel" },
@@ -42,9 +42,9 @@ const QUELLE: Record<QuellenArt, { Icon: LucideIcon; label: string }> = {
   web: { Icon: Globe, label: "Web" },
 };
 
-export interface KIQuelle {
+export interface AiSource {
   key: string;
-  art: QuellenArt;
+  art: SourceKind;
   label: string;
   /** Wörtliches Zitat aus der Quelle, wenn es eines gibt. */
   quote?: string | null;
@@ -52,9 +52,9 @@ export interface KIQuelle {
 }
 
 /** Die Konfidenz des Vorschlags — vier Stufen plus „keine Angabe". */
-export type KonfidenzStufe = "green" | "yellow" | "orange" | "red" | "none";
+export type ConfidenceLevel = "green" | "yellow" | "orange" | "red" | "none";
 
-const KONFIDENZ_TEXT: Record<KonfidenzStufe, string> = {
+const KONFIDENZ_TEXT: Record<ConfidenceLevel, string> = {
   green: "Ursprungs-Konfidenz hoch",
   yellow: "Ursprungs-Konfidenz mittel",
   orange: "Ursprungs-Konfidenz gering",
@@ -66,7 +66,7 @@ const KONFIDENZ_TEXT: Record<KonfidenzStufe, string> = {
  * @when    The agent's rationale and the judge's verdict on a proposal, collapsed by default.
  * @instead Messages about the booking entry → Messages.
  */
-export function KIBuchungshinweise({
+export function AiBookingNotes({
   verdict,
   confidence = "none",
   rationale,
@@ -75,12 +75,12 @@ export function KIBuchungshinweise({
   errors = [],
 }: {
   verdict: JudgeVerdict | null;
-  confidence?: KonfidenzStufe;
+  confidence?: ConfidenceLevel;
   /** `agent_rationale` — warum der Agent so gebucht hat. */
   rationale?: string | null;
   /** `reasoning_short` des Judge. */
   judgeReasoning?: string | null;
-  sources?: KIQuelle[];
+  sources?: AiSource[];
   /** Blockierende Befunde des Judge. */
   errors?: string[];
 }) {

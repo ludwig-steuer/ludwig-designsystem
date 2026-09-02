@@ -150,21 +150,21 @@ export {
 
 /* Buchungssatz — die eine Buchungs-Oberfläche */
 export {
-  BuchungssatzEditor,
-  type BuchungssatzEditorProps,
-  type EditorMeldung,
+  JournalEntryEditor,
+  type JournalEntryEditorProps,
+  type EditorMessage,
   type EditorMode,
   type EditorRow,
   type EditorStatus,
-  type Seite,
-} from "./entities/buchungssatz/BuchungssatzEditor";
+  type Side,
+} from "./entities/journal-entry/JournalEntryEditor";
 export {
-  KIBuchungshinweise,
+  AiBookingNotes,
   type JudgeVerdict,
-  type KIQuelle,
-  type KonfidenzStufe,
-  type QuellenArt,
-} from "./entities/buchungssatz/KIBuchungshinweise";
+  type AiSource,
+  type ConfidenceLevel,
+  type SourceKind,
+} from "./entities/journal-entry/AiBookingNotes";
 
 /**
  * Legacy (`src/ui/legacy/`): CSS-identisch mit dem Design, deshalb nicht neu

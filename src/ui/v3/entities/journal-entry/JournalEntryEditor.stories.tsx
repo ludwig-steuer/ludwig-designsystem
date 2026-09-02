@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { BuchungssatzEditor, type EditorRow } from "./BuchungssatzEditor";
+import { JournalEntryEditor, type EditorRow } from "./JournalEntryEditor";
 
-const meta: Meta<typeof BuchungssatzEditor> = {
-  title: "v3/Entitäten/Buchungssatz/BuchungssatzEditor",
-  component: BuchungssatzEditor,
+const meta: Meta<typeof JournalEntryEditor> = {
+  title: "v3/Entitäten/Buchungssatz/JournalEntryEditor",
+  component: JournalEntryEditor,
 };
 export default meta;
-type Story = StoryObj<typeof BuchungssatzEditor>;
+type Story = StoryObj<typeof JournalEntryEditor>;
 
 /**
  * Die 24 Zustände aus `Buchungseditor-Zustände.dc.html`. Sie sind hier
@@ -53,19 +53,19 @@ const Rahmen = ({ children }: { children: React.ReactNode }) => (
 );
 
 /** S0 — der Regelfall: eine Zeile, Rest geht auf, nur Anzeige. */
-export const S0_Einfach: Story = {
+export const S0_Simple: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor {...BASIS} editable={false} onEdit={() => {}} />
+      <JournalEntryEditor {...BASIS} editable={false} onEdit={() => {}} />
     </Rahmen>
   ),
 };
 
 /** S1 — im Formular, mit einer Warnung, die eine Quittung braucht. */
-export const S1_BearbeitenMitWarnung: Story = {
+export const S1_EditWithWarning: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         editable
         warnings={[
@@ -84,10 +84,10 @@ export const S1_BearbeitenMitWarnung: Story = {
 };
 
 /** S2 — Split über zwei Zeilen, Vollansicht mit Währung, Beleg 2 und KOST. */
-export const S2_SplitVoll: Story = {
+export const S2_SplitFull: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         mode="voll"
         editable
@@ -103,10 +103,10 @@ export const S2_SplitVoll: Story = {
 };
 
 /** S3 — Automatikkonto: der Schlüssel steht am Konto, das Feld ist gesperrt. */
-export const S3_Automatikkonto: Story = {
+export const S3_AutomaticAccount: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         editable
         rows={[{ ...ZEILE, konto: "4400", kontoName: "Erlöse 19 % USt", buLocked: true }]}
@@ -119,10 +119,10 @@ export const S3_Automatikkonto: Story = {
 };
 
 /** S5 — der Betrag weicht vom Beleg ab: der Rest steht rot im Kopf. */
-export const S5_RestGehtNichtAuf: Story = {
+export const S5_RemainderDoesNotBalance: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         editable
         rows={[{ ...ZEILE, umsatz: "1.400,00" }]}
@@ -135,10 +135,10 @@ export const S5_RestGehtNichtAuf: Story = {
 };
 
 /** S10 — Zahlungssatz: Belegseite Haben, Gegenkonto Bank. */
-export const S10_Zahlung: Story = {
+export const S10_Payment: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         belegSide="H"
         rows={[{ ...ZEILE, side: "H", bu: "", konto: "70044", kontoName: "Bürobedarf Meier GmbH", text: "Zahlung RE-4471" }]}
@@ -151,10 +151,10 @@ export const S10_Zahlung: Story = {
 };
 
 /** S11 — gesperrt: der Grund steht da, und der eine erlaubte Ausweg. */
-export const S11_Gesperrt: Story = {
+export const S11_Locked: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         status="posted"
         editable={false}
@@ -169,10 +169,10 @@ export const S11_Gesperrt: Story = {
 };
 
 /** S12 — mehrere Fehler: Speichern bleibt gesperrt, jeder Fehler nennt sich. */
-export const S12_MehrereFehler: Story = {
+export const S12_MultipleErrors: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         editable
         rows={[{ ...ZEILE, umsatz: "1.400,00", konto: "" }]}
@@ -188,10 +188,10 @@ export const S12_MehrereFehler: Story = {
 };
 
 /** S15 — freigegeben: Anzeige, Bearbeiten möglich, Löschen erlaubt. */
-export const S15_Freigegeben: Story = {
+export const S15_Released: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         status="accepted"
         editable={false}
@@ -204,19 +204,19 @@ export const S15_Freigegeben: Story = {
 };
 
 /** S17 — gebucht: kein Bearbeiten mehr, nur noch lesen. */
-export const S17_Gebucht: Story = {
+export const S17_Posted: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor {...BASIS} status="posted" editable={false} />
+      <JournalEntryEditor {...BASIS} status="posted" editable={false} />
     </Rahmen>
   ),
 };
 
 /** S18 — storniert: der Satz bleibt stehen, mit Grund. */
-export const S18_Storniert: Story = {
+export const S18_Reversed: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         status="reversed"
         editable={false}
@@ -227,10 +227,10 @@ export const S18_Storniert: Story = {
 };
 
 /** S19 — der Judge bestätigt mit Hinweis: die Begründung ist einsehbar. */
-export const S19_JudgeMitHinweis: Story = {
+export const S19_JudgeWithNote: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         editable={false}
         onEdit={() => {}}
@@ -251,10 +251,10 @@ export const S19_JudgeMitHinweis: Story = {
 };
 
 /** S23 — der Judge beanstandet, und es liegt zusätzlich ein Fehler an. */
-export const S23_JudgeBeanstandetMitFehler: Story = {
+export const S23_JudgeFlaggedWithError: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         editable
         errors={[{ code: "P-UST", message: "Beleg weist 7 % aus, gebucht ist BU 9 (19 %)." }]}
@@ -274,10 +274,10 @@ export const S23_JudgeBeanstandetMitFehler: Story = {
 };
 
 /** Ohne Zeilen — der Editor sagt, dass nichts zu speichern ist. */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
     <Rahmen>
-      <BuchungssatzEditor
+      <JournalEntryEditor
         {...BASIS}
         rows={[]}
         gegenkonto={null}

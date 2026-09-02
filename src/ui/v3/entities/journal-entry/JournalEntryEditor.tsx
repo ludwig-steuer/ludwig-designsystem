@@ -12,10 +12,10 @@ import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 import { Button } from "../../primitives/Button";
 import { Dialog } from "../../primitives/Dialog";
 import { AccountField, type AccountCandidate, type AccountGroup } from "../account/AccountField";
-import { KIBuchungshinweise } from "./KIBuchungshinweise";
+import { AiBookingNotes } from "./AiBookingNotes";
 
 /**
- * Der eine Buchungssatz-Editor (F123 T123.3, Design `BuchungssatzEditor.dc.html`).
+ * Der eine Buchungssatz-Editor (F123 T123.3, Design `JournalEntryEditor.dc.html`).
  *
  * **Eine Komponente für Anzeigen und Bearbeiten.** Der Modus wechselt, das
  * Raster bleibt — wer eine Buchung gelesen hat, findet beim Korrigieren
@@ -38,7 +38,7 @@ import { KIBuchungshinweise } from "./KIBuchungshinweise";
 
 export type EditorMode = "einfach" | "voll";
 export type EditorStatus = "proposed" | "accepted" | "posted" | "reversed";
-export type Seite = "S" | "H";
+export type Side = "S" | "H";
 
 export interface EditorRow {
   id: string;
@@ -46,7 +46,7 @@ export interface EditorRow {
   currency?: string;
   /** Brutto, deutsches Format („1.475,60"). */
   umsatz: string;
-  side: Seite;
+  side: Side;
   /** DATEV-BU-Schlüssel („9", „8", „94", …) oder leer. */
   bu: string;
   /** Automatikkonten setzen den Schlüssel selbst — dann ist das Feld gesperrt. */
@@ -63,7 +63,7 @@ export interface EditorRow {
   removed?: boolean;
 }
 
-export interface EditorMeldung {
+export interface EditorMessage {
   code: string;
   message: string;
   /** Was den Befund behebt — der Knopf steht an der Message. */
@@ -76,18 +76,18 @@ export interface EditorAiReview {
   confidence?: "green" | "yellow" | "orange" | "red" | "none";
   rationale?: string | null;
   judgeReasoning?: string | null;
-  sources?: React.ComponentProps<typeof KIBuchungshinweise>["sources"];
+  sources?: React.ComponentProps<typeof AiBookingNotes>["sources"];
   errors?: string[];
 }
 
-export interface BuchungssatzEditorProps {
+export interface JournalEntryEditorProps {
   rows: EditorRow[];
   /** Das Gegenkonto — die Zeile, die den Satz ausgleicht. */
   gegenkonto: { konto: string; name: string; tag?: string } | null;
   /** Beleg, gegen den der Rest gerechnet wird. */
   belegNumber?: string | null;
   belegAmount?: number | null;
-  belegSide?: Seite;
+  belegSide?: Side;
   status: EditorStatus;
   editable: boolean;
   mode?: EditorMode;
@@ -95,9 +95,9 @@ export interface BuchungssatzEditorProps {
   locked?: { reason: string; actionLabel?: string; onAction?: () => void } | null;
   reversedReason?: string | null;
   deletable?: boolean;
-  errors?: EditorMeldung[];
-  warnings?: EditorMeldung[];
-  hints?: EditorMeldung[];
+  errors?: EditorMessage[];
+  warnings?: EditorMessage[];
+  hints?: EditorMessage[];
   aiReview?: EditorAiReview | null;
   /**
    * Kontenrahmen des Wirtschaftsjahres (`skr03`/`skr04`) — schaltet die
@@ -126,7 +126,7 @@ const STATUS_TEXT: Record<EditorStatus, string> = {
 };
 
 /** Die Summe der Zeilen auf der Belegseite — daraus fällt der Rest. */
-function summeBelegseite(rows: readonly EditorRow[], belegSide: Seite): number {
+function summeBelegseite(rows: readonly EditorRow[], belegSide: Side): number {
   return rows
     .filter((r) => !r.removed && r.side === belegSide)
     .reduce((s, r) => s + parseEuro(r.umsatz), 0);
@@ -136,7 +136,7 @@ function summeBelegseite(rows: readonly EditorRow[], belegSide: Seite): number {
  * @when    Viewing or editing a booking entry — one grid for both.
  * @instead A second editor for the same booking entry.
  */
-export function BuchungssatzEditor(props: BuchungssatzEditorProps) {
+export function JournalEntryEditor(props: JournalEntryEditorProps) {
   const {
     gegenkonto,
     belegNumber,
@@ -375,7 +375,7 @@ export function BuchungssatzEditor(props: BuchungssatzEditorProps) {
       />
 
       {aiReview ? (
-        <KIBuchungshinweise
+        <AiBookingNotes
           verdict={aiReview.verdict}
           confidence={aiReview.confidence}
           rationale={aiReview.rationale}
@@ -583,7 +583,7 @@ function Zeile({
               type="button"
               className="bse__sh"
               onClick={() => onChange({ side: row.side === "S" ? "H" : "S" })}
-              aria-label={`Seite: ${row.side === "S" ? "Soll" : "Haben"}`}
+              aria-label={`Side: ${row.side === "S" ? "Soll" : "Haben"}`}
             >
               {row.side}
             </button>
@@ -700,12 +700,12 @@ function Journal({
   rows: readonly EditorRow[];
   /** Die Zeile, die den Satz ausgleicht — sie steht oben separat, gehört aber dazu. */
   gegenkonto: { konto: string; name: string } | null;
-  belegSide: Seite;
+  belegSide: Side;
   accountFramework?: string | null;
   open: boolean;
   onToggle: () => void;
 }) {
-  const zeilen: { konto: string; name: string; side: Seite; amount: number }[] = [];
+  const zeilen: { konto: string; name: string; side: Side; amount: number }[] = [];
   for (const r of rows) {
     const brutto = parseEuro(r.umsatz);
     const steuer = deriveTax(
@@ -782,9 +782,9 @@ function Meldungsblock({
   editable,
   onQuittieren,
 }: {
-  errors: EditorMeldung[];
-  warnings: EditorMeldung[];
-  hints: EditorMeldung[];
+  errors: EditorMessage[];
+  warnings: EditorMessage[];
+  hints: EditorMessage[];
   quittiert: ReadonlySet<string>;
   editable: boolean;
   onQuittieren: (code: string) => void;
