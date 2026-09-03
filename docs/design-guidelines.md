@@ -17,7 +17,13 @@ Tabellen statt Prosa, jede Regel mit erkennbarem Verstoß.
 > dieses Dokument > `design/Ludwig Design System v2/README.md` (Marken-Brief)
 > Design-Artboards (`~/dev/ludwig/design-ergebnis/`, nicht im Repo).
 **Nicht hier:** Hex-Werte, Pixelmaße, Kontrastzahlen (A5) — nur in `tokens.css`
-(Farbe + Kontrastwert als Kommentar am Token) und `v2.css` (Maße). Code-Regeln
+(Farbe + Kontrastwert als Kommentar am Token) und `v2.css` (Maße).
+**Eine benannte Ausnahme zu A5** (Owner, 2026-09-03, Aufgabe 0030): der
+Anwendungsrahmen in `src/styles/app-chrome.css` behält seine rohen Hex- und
+`rgba()`-Werte. Die dunkle Seitenleiste mit Verlauf ist die eine Fläche, die
+bewusst außerhalb der Palette steht; sie auf Tokens zu ziehen hieße, Tokens
+für eine einzige Fläche zu erfinden. Die Ausnahme gilt **nur** für diese
+Datei — jede Komponente und jedes andere Stylesheet bleibt bei Tokens. Code-Regeln
 der Web-App (Module, Drawer-Katalog, Tests): `docs/topics/web-ui.md` R1–R17,
 `apps/web/AGENTS.md`.
 **Stand 2026-08-30:** A1–A7 entschieden (A7 noch nicht umgesetzt, §11.5) ·
