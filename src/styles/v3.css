@@ -970,6 +970,35 @@ select.v2in { padding-right: 26px; }
 .v2msg__actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
 .v2msg svg { flex: 0 0 auto; margin-top: 1px; }
 
+/* --- Popover-Familie (0038): Popover, Tooltip, HoverCard ------------------
+   Keine Stapelreihenfolge nötig — das Feld liegt im Top Layer des Browsers.
+   `inset: auto` hebt die Zentrierung auf, die der Browser einem Popover gibt —
+   Ort und Kante rechnet der Hook beim Öffnen aus. */
+.v2pop__anchor { display: inline-flex; }
+.v2pop {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  max-width: min(92vw, 42ch);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+/* Ein Satz, kein Absatz: was breiter wird, ist eine HoverCard. */
+.v2pop--tip {
+  max-width: 32ch;
+  padding: var(--space-1) var(--space-2);
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+/* Die Karte bringt ihren eigenen Innenabstand mit (FieldList, Card). */
+.v2pop--card { padding: var(--space-3); }
+
 /* --- Kontenauswahl mit Kandidaten ---------------------------------------- */
 .v2kf { position: relative; }
 .v2kf .v2in { width: 100%; box-sizing: border-box; }
