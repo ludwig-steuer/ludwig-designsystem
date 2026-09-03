@@ -2047,3 +2047,59 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   display: inline-flex; align-items: center; justify-content: center;
   color: var(--color-text-subtle); opacity: 0.35; cursor: default;
 }
+
+/* ── EntityHeader (0048) ──────────────────────────────────────────────────
+   Die Karte über einer Akte. Jede Zeile verschwindet samt Abstand, wenn ihr
+   Slot leer ist — deshalb sitzen die Abstände an den Zeilen, nicht als
+   `gap` am Container. Rand, kein Schatten (§9). */
+.v2ehead {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+.v2ehead__top { display: flex; align-items: flex-start; gap: var(--space-4); }
+.v2ehead__ico {
+  flex: 0 0 auto; line-height: 0; color: var(--color-text-subtle);
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-md);
+  padding: 9px;
+}
+.v2ehead__id { min-width: 0; margin-right: auto; }
+.v2ehead__over {
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--color-text-subtle); margin-bottom: 3px;
+}
+.v2ehead__title {
+  display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
+  font-size: 19px; font-weight: 600; color: var(--color-text); line-height: 1.25;
+}
+/* Die Meta-Zeile ist Layout, keine Komponente: umbrechende Reihe mit
+   Trennern, die der Aufrufer aus Badge, Link und InlineEdit füllt. */
+.v2ehead__meta {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 5px var(--space-3);
+  margin-top: 7px;
+  font-size: 12.5px; color: var(--color-text-muted);
+}
+.v2ehead__meta > * + *::before {
+  content: "·";
+  margin-right: var(--space-3);
+  color: var(--color-border-strong);
+}
+.v2ehead__metric { flex: 0 0 auto; text-align: right; }
+.v2ehead__metric__label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+.v2ehead__metric__value { font-size: 20px; font-weight: 600; line-height: 1.2; margin-top: 2px; }
+.v2ehead__actions { flex: 0 0 auto; display: flex; align-items: center; gap: var(--space-3); }
+.v2ehead__summary {
+  margin-top: var(--space-4);
+  font-size: 13.5px; line-height: 1.5; color: var(--color-text-muted);
+}
+.v2ehead__facts {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: var(--border-1-subtle);
+}

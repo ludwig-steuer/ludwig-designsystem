@@ -177,6 +177,7 @@ Top-Bar 56 px mit Border-Bottom · Content-Padding `--space-8`, max
 | **Z4 Spaltenkopf** | Nie „Status"/„Zustand": spezifisches Label („Abgleich", „Verarbeitung") + (i) über `StatusHeader` mit `axisLegend(achse)` (R2). | `<th>Status</th>`, handgeschriebene Legende. |
 | **Z5 Prozess ist Ableitung** | Prozessbild (Phasen) und Staffelstab (wer ist dran, Icon **und** Wort) werden aus dem Zustand berechnet (`domain/<x>-process.ts`, Deckungstest gegen die Achse), nie gespeichert. `ProzessMini`/`ProzessStepper`/`Staffelstab`/`StaffelLeiste` (`@/ui/v2`) kennen kein Fachmodul — Phasen und Besitzer kommen als Props. | Zweites Feld „phase"; Prozessbild importiert ein Modul. |
 | **Z6 Log = ein Strom, drei Sichten** | Verlauf (Sachbearbeiterin) · Protokoll (jeder Zustandswechsel) · Technik (auch Agent-Schritte), plus Fehlerfilter; Dauer zwischen Wechseln als `StaffelLeiste`, eingefärbt nach Besitzer, berechnet, nicht gespeichert. Darstellung über `LogTable`/`LogView` (R7). | Gespeicherte Dauer; ein eigenes Log-Modell je Screen. |
+| **Z7 Ein Prozessbild für alle Ketten** | Jede mehrstufige Kette mit Achse (Beleg, Sachverhalt, Onboarding, Buchungslauf, Stapel, Abgleich) zeigt dieselbe Familie: `ProzessMini` in der Zeile, `ProzessStepper` im Kopf, `StaffelLeiste` im Log, `Staffelstab` überall dort, wo „dran ist" eine Frage ist. Der **Rahmen** (`StepRail`/`Progress`) sagt, wo *ich* in meiner Arbeit stehe — das Prozessbild, wo das *Objekt* steht; beides bleibt getrennt. | Eigener Stepper je Modul (`PipelineStepper` …); Zuständigkeit nur als Badge oder Fließtext; Wizard-Schritte als Prozessbild verkleidet. |
 
 **Neue Achse, in dieser Reihenfolge:** (1) State-Tabelle in `topics/<thema>.md`
 · (2) Enum/DB-CHECK · (3) Registry-Map + Block-Kommentar · (4) `AXIS_LABEL`/
@@ -373,7 +374,7 @@ Erledigt: K1–K3, A2, A3, A1, 17 `#B07B2C`-Literale auf den Token.
 
 Was ein volles Redesign liefern muss, nach R21-Stufen; Kompositionen (Stufe 4/5)
 sind Seiten und stehen in §11.4. Quellen: v1-Inventar
-(`docs/reference/datenmodell/ui-repraesentationen.md` §1), v2-Set (§11.2),
+(`docs/ui-repraesentationen.md` §1), v2-Set (§11.2),
 Familienregel §4.4 des Inventars, Design-Kit (`design/Ludwig Design System v2/ui_kits/app`).
 Status: **v2** vorhanden · **Optik** bleibt Alt-Mechanik, bekommt v2-Optik (F123 §2.4)
 · **heben** v1 vorhanden, nach v2 heben (R21 Regelweg) · **fehlt** neu bauen ·
@@ -447,6 +448,9 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Tabelle | `SelectionBar` + `SelectCell` (I5) | — | v2 |
 | Tabelle | `AmountCell` · `DotStatus` · `Timestamp` · `AbweichungsZelle` | — | v2 |
 | Daten | `Progress` (Anteil als Balken, `share` oder `done`/`total`, sm/md/lg, `inline`) · `BarChart` | — | v2 (0045, 0046, 0041) |
+| Tabelle | `RawRecord` · `RawValue` (alle Felder einer DB-Zeile, Wert nach Typ) | 2× `RohdatenTab`, `fmtRawValue` im Drawer | v2 (0051) |
+| Navigation | `RecordPager` (ein Datensatz aus einem Vorrat, „3 von 117", `J`/`K`) | Kopfzeile in `sachverhalt/parts.tsx` | v2 (0047) |
+| Rahmen | `EntityHeader` (Karte über einer Akte: Symbol, Titel, ein Zustand, Kennzahl, Fakten) | `Hero` in `sachverhalt/parts.tsx` (155 Z.) | v2 (0048) |
 | Tabelle | `TableLoading` · `ErrorRow` (I7) | — | v2 |
 | Tabelle | `StatusHeader` (Spaltenkopf mit Legende, Z4) | v1; 7× `<th>Status</th>` | Optik; Reste heben |
 | Tabelle | Sortierbarer Spaltenkopf | — | prüfen |
@@ -572,7 +576,7 @@ erstellt) · F109/F114 Design-Briefs, F111 UI-Inventar, F118 §2, F123.
 
 - Regel geändert → hier **umschreiben**, nicht anhängen (git ist die Historie).
 - Neue Achse, neuer Baustein, migrierte Seite → §7-Reihenfolge, §11 Häkchen,
-  Story `v2/…`, `docs/reference/datenmodell/ui-repraesentationen.md`.
+  Story `v2/…`, `docs/ui-repraesentationen.md`.
 - Wird ein Prinzip abgelehnt, wird es hier gelöscht; Code-Regeln, die daraus
   folgen, stehen in `docs/topics/web-ui.md` (R-Format) und verweisen hierher.
 - `make docs-audit` prüft Verweise.

@@ -173,6 +173,7 @@ export {
 } from "./patterns/TodoList";
 
 /* Rahmen */
+export { EntityHeader } from "./patterns/EntityHeader";
 export {
   StepRail,
   StepHeader,
