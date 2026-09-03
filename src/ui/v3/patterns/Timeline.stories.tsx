@@ -69,7 +69,14 @@ export const MitLabels: Story = {
       <Timeline
         entries={CASE.map((e) => ({
           ...e,
-          kind: { Beleg: "document_received", Zahlung: "payment_in", Rückfrage: "clarification", Buchungsvorschlag: "booking_proposed" }[e.kind] ?? e.kind,
+          kind: e.kind
+            ? ({
+                Beleg: "document_received",
+                Zahlung: "payment_in",
+                Rückfrage: "clarification",
+                Buchungsvorschlag: "booking_proposed",
+              }[e.kind] ?? e.kind)
+            : undefined,
         }))}
         kindLabels={{
           document_received: "Beleg",
@@ -180,6 +187,54 @@ export const ImEinsatz: Story = {
           <Timeline entries={CASE} />
         </div>
       </Card>
+    </div>
+  ),
+};
+
+/**
+ * Der Eintrag, der rechts im Detail offen steht (0040): `selectedId` markiert
+ * genau einen — Fläche **und** `aria-current`, denn Farbe steht nie allein.
+ */
+export const Selected: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <Timeline entries={CASE} selectedId={CASE[1]!.id} onOpen={() => {}} />
+    </div>
+  ),
+};
+
+/**
+ * Kalendertag statt Zeitstempel: `event_date` und `due_date` sind
+ * `date`-Spalten — „26.08.2026 00:00" wäre eine Lüge. Ein `at` der Form
+ * `YYYY-MM-DD` zeigt keine Uhrzeit, `dateTime` trägt den Tag (0040).
+ */
+export const DayOnly: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <Timeline
+        groupBy="none"
+        entries={[
+          { id: "d1", at: "2026-08-28", title: "Rechnung RE-4471 · Bürobedarf Meier GmbH", kind: "Beleg" },
+          { id: "d2", at: "2026-08-26T14:12:00Z", title: "Buchungsvorschlag angelegt", kind: "Vorschlag", actor: "Agent" },
+        ]}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Ohne `kind` und ohne `actor` bleibt der Eintrag **einzeilig** — die zweite
+ * Zeile würde sonst das Icon in Worten wiederholen (0040).
+ */
+export const WithoutKind: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <Timeline
+        entries={[
+          { id: "n1", at: "2026-08-28", title: "Beleg fehlt: Bürobedarf Meier GmbH" },
+          { id: "n2", at: "2026-08-27", title: "Zahlung an Stadtwerke Musterstadt" },
+        ]}
+      />
     </div>
   ),
 };

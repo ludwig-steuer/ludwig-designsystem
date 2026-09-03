@@ -221,6 +221,15 @@ export {
   type AccountCandidate,
 } from "./entities/account/AccountField";
 
+/* Sachverhalt — der Verlauf über Ereignisse, Klärungen, Erwartungen (0040) */
+export {
+  CaseTimeline,
+  type CaseTimelineEntry,
+  type CaseTimelineEvent,
+  type CaseTimelineClarification,
+  type CaseTimelineExpectation,
+} from "./entities/accounting-case/CaseTimeline";
+
 /* Buchungssatz — die eine Buchungs-Oberfläche */
 export {
   JournalEntryEditor,

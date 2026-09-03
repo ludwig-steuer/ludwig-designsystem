@@ -114,6 +114,24 @@ Nach §6: 3 Zustände + 2 Enums + 1 Callback + 1 „im Einsatz" + 1 Rand = 8.
 | `MitLuecke` | 14 Tage ohne Ereignis, die Lückenzeile |
 | `ImEinsatz` | im Sachverhalts-Detail unter der `FieldList` |
 
+## Erweiterung 2026-09-03 · für den Verlauf des Sachverhalts (0040)
+
+Fünf kleine Zusätze, keiner ändert bestehendes Verhalten:
+
+| Prop | Warum |
+|---|---|
+| `selectedId?: string \| null` | der Eintrag, der rechts im Detail offen steht: Fläche **und** `aria-current` (Farbe steht nie allein, V7) |
+| `at` als Kalendertag `YYYY-MM-DD` | `event_date` und `due_date` sind `date`-Spalten — „26.08.2026 00:00" wäre eine Lüge; dann steht keine Uhrzeit, `dateTime` trägt den Tag |
+| `kind?` optional | ohne `kind` und ohne `actor` entfällt die zweite Zeile; sie würde sonst das Icon in Worten wiederholen |
+| `icon?: ReactNode` | ein Icon der Art vor dem Titel; `state`/`StateIcon` trägt Prüfzustände, keine Arten |
+| `dim?: boolean` | ersetzte, zurückgezogene, historische Einträge treten zurück (`v2muted`), bleiben aber lesbar und wählbar |
+
+Dazu eine Korrektur am Bestand: `right` (Betrag, Badge) stand **im**
+`TextButton` — ohne Abstand zum Titel und als Teil des Klickziels. Es steht
+jetzt daneben; der Knopf trägt nur den Titel.
+
+Neue Stories: `Selected`, `DayOnly`, `WithoutKind`.
+
 ## Abnahme
 
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |

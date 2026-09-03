@@ -19,14 +19,25 @@ import { StateIcon, type StateKind } from "./Review";
 
 export interface TimelineItem {
   id: string;
-  /** ISO point in time. An event without a time does not belong in a strand. */
+  /**
+   * When it happened: an ISO timestamp, or a calendar day `YYYY-MM-DD` where
+   * the source column is a date. „26.08.2026 00:00" would be a lie — a day
+   * shows no time (0040).
+   */
   at: string;
   /** What happened — one sentence, not a paragraph. */
   title: string;
-  /** Kind of event, in the caller's words: „Beleg", „Zahlung", „Rückfrage". */
-  kind: string;
+  /**
+   * Kind of event, in the caller's words: „Beleg", „Zahlung", „Rückfrage".
+   * Without it — and without `actor` — the entry has no second line.
+   */
+  kind?: string;
   /** Who caused it: „Agent", „Kanzlei", „System". */
   actor?: string;
+  /** Icon of the kind, in front of the title; carries its word as `title`. */
+  icon?: ReactNode;
+  /** Superseded, withdrawn, historic: the entry steps back but stays readable. */
+  dim?: boolean;
   /** Longer text, folded away. */
   detail?: ReactNode;
   /** Amount, number, account — what hangs on this event. */
@@ -58,6 +69,9 @@ const TIME = new Intl.DateTimeFormat("de-DE", {
   minute: "2-digit",
 });
 
+/** A date column, not a timestamp: `2026-08-26`. */
+const DAY_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Below this a gap is normal work; above it, it is worth saying. */
 const GAP_DAYS = 7;
@@ -82,6 +96,7 @@ export function Timeline({
   kindLabels,
   loading,
   onOpen,
+  selectedId,
 }: {
   /** Unsorted is fine — the component sorts by `at`. */
   entries: TimelineItem[];
@@ -96,6 +111,8 @@ export function Timeline({
   loading?: boolean;
   /** Without it an entry is text, not a control. */
   onOpen?: (id: string) => void;
+  /** The entry that is open next to the strand — marked, `aria-current`. */
+  selectedId?: string | null;
 }) {
   if (loading) return <Skeleton lines={4} label="Verlauf wird geladen …" />;
   if (entries.length === 0) {
@@ -138,6 +155,7 @@ export function Timeline({
         onOpen={onOpen}
         showDate={groupBy === "none"}
         kindLabels={kindLabels}
+        selected={selectedId != null && e.id === selectedId}
       />,
     );
   }
@@ -150,38 +168,42 @@ function Entry({
   onOpen,
   showDate,
   kindLabels,
+  selected,
 }: {
   item: TimelineItem;
   onOpen?: (id: string) => void;
   showDate: boolean;
   kindLabels?: Record<string, string>;
+  selected: boolean;
 }) {
+  const dayOnly = DAY_ONLY.test(item.at);
   const when = new Date(item.at);
-  const head = (
-    <>
-      <span className="v2tl__title">{item.title}</span>
-      {item.right}
-    </>
-  );
+  // Only the title is the target: an amount and a badge are statements, not
+  // ways — and inside the button they would stand without a gap.
+  const title = <span className="v2tl__title">{item.title}</span>;
+  // A kind without a word, and no actor: then the second line would repeat the
+  // icon in text — the entry stays one line (0040).
+  const second = item.kind ? `${kindLabels?.[item.kind] ?? item.kind}${item.actor ? ` · ${item.actor}` : ""}` : item.actor;
   return (
-    <div className="v2tl__item">
-      <time className="v2tl__when" dateTime={when.toISOString()} title={DAY.format(when)}>
-        {showDate ? `${DATE.format(when)} ` : ""}
-        {TIME.format(when)}
+    <div
+      className={`v2tl__item${selected ? " is-current" : ""}${item.dim ? " v2muted" : ""}`}
+      aria-current={selected ? "true" : undefined}
+    >
+      <time
+        className="v2tl__when"
+        dateTime={dayOnly ? item.at : when.toISOString()}
+        title={DAY.format(when)}
+      >
+        {dayOnly ? (showDate ? DATE.format(when) : "") : `${showDate ? `${DATE.format(when)} ` : ""}${TIME.format(when)}`}
       </time>
       <div>
         <div className="v2tl__head">
+          {item.icon}
           {item.state ? <StateIcon state={item.state} /> : null}
-          {onOpen ? (
-            <TextButton onClick={() => onOpen(item.id)}>{head}</TextButton>
-          ) : (
-            head
-          )}
+          {onOpen ? <TextButton onClick={() => onOpen(item.id)}>{title}</TextButton> : title}
+          {item.right}
         </div>
-        <div className="v2tl__who">
-          {kindLabels?.[item.kind] ?? item.kind}
-          {item.actor ? ` · ${item.actor}` : ""}
-        </div>
+        {second ? <div className="v2tl__who">{second}</div> : null}
         {item.detail ? (
           <div className="v2tl__detail">
             <Disclosure summary="Einzelheiten" tone="quiet">

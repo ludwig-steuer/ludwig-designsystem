@@ -746,7 +746,7 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 61;
   width: var(--drawer-md);
   background: var(--color-surface);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-drawer);
   display: flex; flex-direction: column;
   transform: translateX(100%);
   transition: transform var(--duration-slow) var(--ease-standard);
@@ -1167,6 +1167,25 @@ select.v2in { padding-right: 26px; }
 .v2kf__num { font-variant-numeric: tabular-nums lining-nums; font-weight: 600; }
 .v2kf__why { grid-column: 2; font-size: 11.5px; color: var(--color-text-subtle); }
 .v2kf__empty { padding: 18px 12px; font-size: 13px; color: var(--color-text-subtle); }
+
+/* Ruhend steht Nummer und Name im Feld (0013): der Wert ist die Nummer, die
+   Wahl prüft man am Namen. Der Text des Feldes wird dafür durchsichtig, die
+   Schicht darüber trägt beides — der Tabstopp bleibt das Feld selbst. */
+.v2kf__box { position: relative; display: flex; }
+.v2kf__in--ruhend { color: transparent; }
+.v2kf__in--ledger { padding-right: 30px; }
+.v2kf__shown {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: 6px 10px;
+  font-size: var(--fs-ui); line-height: var(--lh-ui);
+  color: var(--color-text);
+  pointer-events: none; overflow: hidden;
+}
+.v2kf__in--ledger ~ .v2kf__shown { padding-right: 30px; }
+/* Der lange Kontoname kürzt sich, statt das Feld aufzubrechen. */
+.v2kf__nm { color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2kf__ledger { position: absolute; top: 0; bottom: 0; right: 3px; display: flex; align-items: center; }
 
 /* Der Schritt-Kopf hat kein eigenes Markup mehr: `StepHeader` komponiert
    `PageHeader` (0002 A6), seine eigenen Klassen sind damit gelöscht —
@@ -1797,6 +1816,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2tl__when { color: var(--color-text-muted); font-variant-numeric: tabular-nums lining-nums; }
 .v2tl__who { color: var(--color-text-muted); font-size: 12.5px; }
 .v2tl__title { color: var(--color-text); }
+/* Der Eintrag, der rechts im Detail offen steht (0040). Neben der Fläche
+   trägt er `aria-current` — Farbe ist nie das einzige Signal (V7). */
+.v2tl__item.is-current { background: var(--color-accent-50); border-radius: var(--radius-sm); }
+.v2tl__item.is-current .v2tl__title { font-weight: 600; }
+/* Das Art-Icon vor dem Titel: einfarbig, die Farbe trägt der Badge (V6). */
+.v2tl__kind { display: inline-flex; color: var(--color-text-muted); }
+/* Betrag und Badge sitzen rechts vom Titel, nicht in ihm — sie bekommen ihren
+   eigenen Abstand und bleiben aus dem Klickziel heraus (0040). */
+.v2tl__head > .v2amount { margin-left: auto; }
 .v2tl__detail { margin-top: 2px; color: var(--color-text-muted); font-size: 12.5px; }
 
 /* --- ChoicePrompt (0028) — Frage mit Antwortoptionen ---------------------- */
