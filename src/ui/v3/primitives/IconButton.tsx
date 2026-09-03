@@ -39,8 +39,10 @@ function classes(size: IconButtonSize, tone: IconButtonTone, className?: string)
 }
 
 /**
- * @when    Close cross, pager arrow, sidebar collapse — an icon everyone reads
- *          the same way, with a labelled way to the same goal nearby.
+ * @when    All three hold: the action is conventional and readable without
+ *          prior knowledge (close, page, collapse), it is reversible and
+ *          harmless, and a labelled second way to the same goal exists.
+ *          Named exception to T8 — see `design-guidelines.md` §6 T8.
  * @instead Any action with a word → Button. An action inside running text →
  *          TextButton. Several row actions behind one icon → OverflowMenu.
  */

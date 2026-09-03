@@ -22,6 +22,11 @@ export type ParsedAmount = number | null | "invalid";
  * when exactly three digits follow it — otherwise it is the decimal point
  * people typed on a numeric keypad.
  *
+ * @when    Turning what someone typed into a number — inside this field, and
+ *          wherever else an amount arrives as text (import, paste, URL).
+ * @instead Formatting a number for display → `formatMoney` in
+ *          `src/ludwig/shared/money.ts`.
+ *
  * ponytail: lives here until `src/ludwig/shared/money.ts` gets the counterpart
  * to `formatMoney` — see spec 0019, „Befund für ludwig/app".
  */

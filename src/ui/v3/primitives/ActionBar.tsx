@@ -34,9 +34,12 @@ export function ActionBar({
 /**
  * Zeilen-Aktionen: ein tertiärer Knopf je Handlung, rechtsbündig. Kein Kebab —
  * ein Icon ohne Wort ist für die Zielgruppe ein Rätsel (UX-Guidelines V7).
+ * Die benannte Ausnahme zu T8 (§6, Aufgabe 0012) deckt das Kebab **nicht**:
+ * es ist weder konventionell genug noch folgenlos.
  *
  * @when    One to three actions at the right of a table row.
- * @instead More actions → the row gets a detail pane (MasterDetail), not a longer bar.
+ * @instead More actions → OverflowMenu with a visible word next to the two
+ *          frequent ones, or a detail pane (MasterDetail) — not a longer bar.
  */
 export function RowActions({ children }: { children: ReactNode }) {
   return <span className="v2actions">{children}</span>;
