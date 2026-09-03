@@ -443,7 +443,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Tabelle | `TableLoading` · `ErrorRow` (I7) | — | v2 |
 | Tabelle | `StatusHeader` (Spaltenkopf mit Legende, Z4) | v1; 7× `<th>Status</th>` | Optik; Reste heben |
 | Tabelle | Sortierbarer Spaltenkopf | — | prüfen |
-| Tabelle | Mono-Zelle (Kontonummer, BU, DATEV-Code) | nur die CSS-Klasse `v2num`, kein Baustein | fehlt |
+| Tabelle | `MonoCell` (Kontonummer, BU, DATEV-Code) | vorher nur die CSS-Klasse `v2num` | v2 |
 | Tabelle | `LongText` | v1 Re-Export | Optik |
 | Zustand | `StatusBadge` + Registry · `StatusInfoButton`/`-Dialog` · `EntityStatusBadgeButton`/`FlowModal` | `@/ui/status` | Optik (Pill, Füllung nur hier) |
 | Zustand | `Badge kind=…` ohne Status-Achse | 126 Stellen | heben: Achse → Registry, sonst `DotStatus`/`FilterChips` |

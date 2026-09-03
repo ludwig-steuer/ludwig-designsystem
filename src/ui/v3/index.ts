@@ -117,6 +117,7 @@ export {
   DeviationCell,
   TableLoading,
   ErrorRow,
+  MonoCell,
   type CellTone,
 } from "./primitives/Cells";
 export { ClickRow, ExpandableRow } from "./primitives/ExpandableRow";

@@ -1640,3 +1640,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2mk__more::-webkit-details-marker { display: none; }
 .v2mk__more:hover { text-decoration: underline; }
 .v2mk--clamp[open] .v2mk__more { color: var(--color-text-muted); font-weight: 400; }
+
+/* --- MonoCell — Kontonummer, BU-Schlüssel, DATEV-Code --------------------- */
+/* Es gab dafür bisher nur `.v2num` (tabellarische Ziffern, rechtsbündig) —
+   das ist die Regel für Beträge, nicht für Schlüssel. Ein Konto liest man
+   Ziffer für Ziffer und vergleicht es mit dem Beleg: dafür Mono, links. */
+.v2mono {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--color-text);
+}
+.v2mono--muted { color: var(--color-text-muted); }

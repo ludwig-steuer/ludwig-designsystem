@@ -202,3 +202,29 @@ export function ErrorRow({ message, action }: { message: string; action?: ReactN
     </div>
   );
 }
+
+/**
+ * Account number, tax key, DATEV code — read digit by digit and compared with
+ * the document. Monospaced and left-aligned, which is what tells it apart from
+ * `AmountCell`: an amount is right-aligned and never monospaced.
+ *
+ * @when    A key made of digits or codes in a cell.
+ * @instead An amount → AmountCell. A state → DotStatus or StatusBadge.
+ */
+export function MonoCell({
+  value,
+  tone = "neutral",
+  title,
+}: {
+  /** `null` renders the em dash, never an empty cell. */
+  value: string | number | null;
+  tone?: "neutral" | "muted";
+  title?: string;
+}) {
+  if (value === null || value === "") return <span className="v2muted">—</span>;
+  return (
+    <span className={`v2mono${tone === "muted" ? " v2mono--muted" : ""}`} title={title}>
+      {value}
+    </span>
+  );
+}

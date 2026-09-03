@@ -4,6 +4,7 @@ import {
   AmountCell,
   DotStatus,
   ErrorRow,
+  MonoCell,
   ProgressCell,
   TableLoading,
   Timestamp,
@@ -181,5 +182,53 @@ export const UnknownValues: Story = {
         <Timestamp iso="2026-08-30T11:00:00Z" />
       </Row>
     </Frame>
+  ),
+};
+
+/**
+ * Schlüssel statt Beträge: Kontonummer, BU-Schlüssel, DATEV-Code. Mono und
+ * links — der Unterschied zu `AmountCell`, die rechts steht und proportional
+ * setzt. Bisher gab es dafür nur eine CSS-Klasse.
+ */
+export const Mono: Story = {
+  render: () => (
+    <Card>
+      <Table cols="120px 120px 100px 1fr">
+        <HeadRow>
+          <th>Sollkonto</th>
+          <th>Habenkonto</th>
+          <th>BU</th>
+          <th>Belegfeld 1</th>
+        </HeadRow>
+        <Row>
+          <td>
+            <MonoCell value="6815" />
+          </td>
+          <td>
+            <MonoCell value="70021" />
+          </td>
+          <td>
+            <MonoCell value={9} title="19 % Vorsteuer" />
+          </td>
+          <td>
+            <MonoCell value="RE-4471" />
+          </td>
+        </Row>
+        <Row>
+          <td>
+            <MonoCell value="1200" />
+          </td>
+          <td>
+            <MonoCell value="70044" />
+          </td>
+          <td>
+            <MonoCell value={null} />
+          </td>
+          <td>
+            <MonoCell value="AZ-2026-08-14" tone="muted" />
+          </td>
+        </Row>
+      </Table>
+    </Card>
   ),
 };
