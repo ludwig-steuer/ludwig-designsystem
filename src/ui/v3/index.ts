@@ -78,12 +78,15 @@ export {
   type SegmentOption,
   type TabItem,
 } from "./primitives/Nav";
+export { FilterBar } from "./primitives/FilterBar";
 
 /* Formular */
 export { Field, Input, Textarea, Select, Checkbox } from "./primitives/Form";
 export { RadioGroup, type RadioOption } from "./primitives/RadioGroup";
 export { AmountInput, parseAmount, type ParsedAmount } from "./primitives/AmountInput";
 export { InlineEdit, type InlineEditInputProps } from "./primitives/InlineEdit";
+export { Combobox, type ComboboxOption } from "./primitives/Combobox";
+export { FileDrop, type DroppedFile } from "./primitives/FileDrop";
 
 /* Dialog */
 export { Dialog } from "./primitives/Dialog";

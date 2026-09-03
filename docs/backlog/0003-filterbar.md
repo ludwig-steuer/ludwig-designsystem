@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede Liste wird eingegrenzt |
 | Quelle | `docs/v3-backlog.md` — Blocker #4 (12 Eigenbauten in 12 Dateien) |

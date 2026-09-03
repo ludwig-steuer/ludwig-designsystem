@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, aus vielen Werten einen suchen ist fachfrei |
 | Quelle | `docs/v3-backlog.md` — „Danach" (3 Eigenbauten neben `AccountField`) |
