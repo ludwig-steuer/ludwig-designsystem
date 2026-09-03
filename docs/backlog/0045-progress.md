@@ -184,8 +184,11 @@ Anmerkung 2). Storybook-Nachweise aus dem laufenden Dev-Server auf Port 6107.
    „1 von 3" wurde „1 VON 3". `v3.css:882–885` setzt jetzt `font-weight: 400`,
    `text-transform: none`, `letter-spacing: normal` — ein Stand ist ein Wert,
    keine Überschrift. Die Größen-Modifier sind unverändert.
-3. **0046 hebt eine Zuschnitt-Entscheidung von hier wieder auf.** Während der
-   Abnahme entstand `docs/backlog/0046-progress-inline.md` und ergänzt genau
-   das `inline`-Prop, das die Einordnung oben (Z. 30–32) ausgeschlossen hatte.
-   Das ist eine Entscheidung von 0046 und wird dort abgenommen; die Zeilen
-   dieser Tabelle beziehen sich auf den Stand `2272fe4` + `3dce35f`.
+3. **0046 hebt eine Zuschnitt-Entscheidung von hier wieder auf.** Noch
+   während dieser Abnahme entstand `docs/backlog/0046-progress-inline.md` und
+   ergänzte in `bd1eb6a` genau das `inline`-Prop, das die Einordnung oben
+   (Z. 30–32) ausgeschlossen hatte. Das ist eine Entscheidung von 0046 und
+   wird dort abgenommen; jede Zeile der Tabelle oben bezieht sich auf den
+   Stand `2272fe4` + `3dce35f`, also auf 0045 ohne `inline`. Dieselbe
+   Parallelität hat den Text dieser Abnahme mit in `bd1eb6a` gezogen — der
+   Inhalt ist derselbe, nur die Commit-Zuordnung stimmt nicht.
