@@ -1,3 +1,4 @@
+import { Kbd } from "./Kbd";
 import { Link } from "./Link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
@@ -78,7 +79,7 @@ function inner(
       {loading ? <span className="v2spin" aria-hidden="true" /> : icon}
       <span>{loading && loadingLabel ? loadingLabel : children}</span>
       {loading ? null : iconEnd}
-      {hotkey ? <span className="v2btn__key">· {hotkey}</span> : null}
+      {hotkey ? <Kbd>{hotkey}</Kbd> : null}
     </>
   );
 }

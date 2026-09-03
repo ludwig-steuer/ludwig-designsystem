@@ -13,7 +13,8 @@ export type DisclosureTone = "default" | "quiet";
 
 /**
  * @when    Secondary content that has a place but not the first look — raw
- *          data, a rule set, a long list under a summary.
+ *          data, a rule set, a long list under a summary; with `group` a set
+ *          of sections of which only one stays open.
  * @instead Two things side by side, one selected → MasterDetail. A decision
  *          that must be made now → Dialog. Steps in order → StepRail.
  */
@@ -23,6 +24,7 @@ export function Disclosure({
   children,
   defaultOpen,
   tone = "default",
+  group,
 }: {
   /** Says what is inside, in half a sentence — never „Details" (T2). */
   summary: ReactNode;
@@ -31,9 +33,18 @@ export function Disclosure({
   children: ReactNode;
   defaultOpen?: boolean;
   tone?: DisclosureTone;
+  /**
+   * Fold-outs sharing a `group` close each other — native `name` on
+   * `<details>`, which is why this needs no state either.
+   */
+  group?: string;
 }) {
   return (
-    <details className={`v2disc${tone === "quiet" ? " v2disc--quiet" : ""}`} open={defaultOpen}>
+    <details
+      className={`v2disc${tone === "quiet" ? " v2disc--quiet" : ""}`}
+      open={defaultOpen}
+      name={group}
+    >
       <summary className="v2disc__sum">
         <ChevronRight className="v2disc__chev" size={14} strokeWidth={1.5} aria-hidden="true" />
         <span>{summary}</span>

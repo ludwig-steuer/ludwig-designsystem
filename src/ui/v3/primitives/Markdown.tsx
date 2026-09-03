@@ -211,7 +211,9 @@ function Inline({ toks }: { toks: InlineTok[] }): ReactElement {
 }
 
 /**
- * @when    Text someone else wrote — an agent's reasoning, a note, a playbook.
+ * @when    Text someone else wrote — an agent's reasoning, a note, a playbook;
+ *          with `maxHeight` clamped („Ganz lesen") or, with
+ *          `overflow="scroll"`, a reader of fixed height.
  * @instead Text we write ourselves → plain JSX. A value with a label →
  *          FieldList. A table of data → Table.
  */
@@ -219,6 +221,7 @@ export function Markdown({
   text,
   variant = "full",
   maxHeight,
+  overflow = "clamp",
   className,
   flow,
 }: {
@@ -228,6 +231,12 @@ export function Markdown({
   variant?: "full" | "inline";
   /** Above this height it fades out and offers „Ganz lesen". */
   maxHeight?: number;
+  /**
+   * What happens at `maxHeight`, and only there: `clamp` fades out and offers
+   * „Ganz lesen", `scroll` keeps the height and scrolls inside — the reader in
+   * a drawer or a detail pane, where the head stays put.
+   */
+  overflow?: "clamp" | "scroll";
   className?: string;
   /**
    * Ignore hard line breaks of the source (running text). For documents that
@@ -246,6 +255,21 @@ export function Markdown({
   }
 
   const body = <div className="v2mk__body">{parseMarkdown(text).map(renderBlock(flow))}</div>;
+
+  if (maxHeight && overflow === "scroll") {
+    // The reader: the height holds, the text scrolls inside. `tabIndex` so the
+    // arrow keys reach it — a block of text nobody can focus cannot be read
+    // with the keyboard (V10, V11).
+    return (
+      <div
+        className={`v2mk v2mk--scroll${className ? ` ${className}` : ""}`}
+        style={{ "--v2mk-max": `${maxHeight}px` } as CSSProperties}
+        tabIndex={0}
+      >
+        {body}
+      </div>
+    );
+  }
 
   if (maxHeight) {
     // Native `<details>`: fading and „Ganz lesen" without a single line of

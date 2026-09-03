@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { ActionBar } from "./ActionBar";
 import { Button } from "./Button";
 import { PageHeader } from "./PageHeader";
 import { StatusBadge } from "../patterns/StatusBadge";
@@ -43,7 +44,12 @@ export const WithMeta: Story = {
   ),
 };
 
-/** Genau ein primärer Weg; der Rest ist sekundär. */
+/**
+ * Die Handlungen stehen in einer `ActionBar` — genau ein `variant="primary"`,
+ * die Reihenfolge primär → sekundär → tertiär kommt aus ihr und wird nicht je
+ * Seite neu verhandelt. Die Prop bleibt `ReactNode`; diese Story ist die
+ * Regel, nicht der Typ (0002 A6).
+ */
 export const WithActions: Story = {
   render: () => (
     <PageHeader
@@ -51,12 +57,14 @@ export const WithActions: Story = {
       title="Stapel 2026-08 · Bürobedarf"
       description="142 Sätze, davon 38 ungeprüft."
       actions={
-        <>
-          <Button size="sm">Als CSV laden</Button>
-          <Button size="sm" variant="primary" hotkey="A">
-            Stapel abnehmen
-          </Button>
-        </>
+        <ActionBar
+          primary={
+            <Button size="sm" variant="primary" hotkey="A">
+              Stapel abnehmen
+            </Button>
+          }
+          secondary={<Button size="sm">Als CSV laden</Button>}
+        />
       }
     />
   ),
@@ -110,12 +118,14 @@ export const InUse: Story = {
         meta={<StatusBadge axis="buchung" status="proposed" />}
         description="142 Sätze, davon 38 ungeprüft. Zwei Sätze über 1.000,00 € tragen einen Befund."
         actions={
-          <>
-            <Button size="sm">Als CSV laden</Button>
-            <Button size="sm" variant="primary" hotkey="A">
-              Stapel abnehmen
-            </Button>
-          </>
+          <ActionBar
+            primary={
+              <Button size="sm" variant="primary" hotkey="A">
+                Stapel abnehmen
+              </Button>
+            }
+            secondary={<Button size="sm">Als CSV laden</Button>}
+          />
         }
       />
       <Card>

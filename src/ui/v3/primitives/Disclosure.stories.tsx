@@ -91,3 +91,23 @@ export const InUse: Story = {
     </div>
   ),
 };
+
+/**
+ * Ein `group` je Satz von Abschnitten: der offene schließt, sobald ein anderer
+ * aufgeht. Das kann das native `<details name>` — keine Zeile Zustand.
+ */
+export const Accordion: Story = {
+  render: () => (
+    <div style={{ maxWidth: 520 }}>
+      <Disclosure summary="Wie Ludwig auf 6815 gekommen ist" group="begruendung">
+        14 gleichartige Buchungen des Kreditors in sechs Monaten; die Rechnung nennt Schreibwaren.
+      </Disclosure>
+      <Disclosure summary="Warum nicht 6820" group="begruendung" defaultOpen>
+        Fachliteratur trägt eine eigene Position; auf der Rechnung steht keine.
+      </Disclosure>
+      <Disclosure summary="Warum Steuerschlüssel 9" group="begruendung">
+        Der ausgewiesene Satz ist 19 %; der Kreditor rechnet ohne Reverse-Charge ab.
+      </Disclosure>
+    </div>
+  ),
+};

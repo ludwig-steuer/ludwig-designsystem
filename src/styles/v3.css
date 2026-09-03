@@ -408,7 +408,7 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 .v2in:focus {
   outline: none;
   border-color: var(--color-primary-700);
-  box-shadow: 0 0 0 3px rgba(59, 143, 196, 0.14);
+  box-shadow: 0 0 0 3px var(--color-focus-ring-soft);
 }
 
 
@@ -474,8 +474,35 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 .v2btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .v2btn svg { flex: 0 0 auto; }
 
-/* Die Taste steht am Knopf, nicht nur im Legende-Overlay (UX-Guidelines V14). */
-.v2btn__key { font-weight: 500; opacity: 0.7; }
+/* --- Taste (0035) ---------------------------------------------------------
+   Die Taste steht an ihrer Handlung, nicht nur im Legende-Overlay (V14).
+   Rand `--color-border-control` (3.45:1), weil der Rand das ist, was eine
+   Taste als Taste lesbar macht — V10 verlangt dafür 3:1.
+   Im Knopf trägt sie dessen Farbe: eine helle Fläche auf dem primären Knopf
+   wäre ein Fremdkörper, `currentColor` bleibt in jeder Variante stimmig. */
+.v2kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 0 var(--space-1);
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-soft);
+  color: var(--color-text-muted);
+  font-size: 11.5px;
+  line-height: 18px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+/* 0.85 statt der 0.7 des alten `.v2btn__key`: darunter fällt der Rand auf dem
+   tertiären Knopf unter 3:1 (V10, gemessen 2.67:1 gegen `--color-bg-soft`). */
+.v2btn .v2kbd {
+  border-color: currentColor;
+  background: transparent;
+  color: inherit;
+  opacity: 0.85;
+}
 
 /* --- Aktionsleiste: feste Reihenfolge primär → sekundär → tertiär → Info */
 .v2actionbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -704,6 +731,48 @@ select.v2in { padding-right: 26px; }
 }
 .v2checkline { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--color-text); cursor: pointer; }
 .v2search { min-width: 220px; font-size: 12.5px; }
+
+/* --- Feld mit Beigabe (0036) ---------------------------------------------
+   Der Rahmen liegt an der Gruppe, das Feld gibt seinen ab: sonst stehen zwei
+   Rahmen ineinander. Fokus, Fehler und Sperre erbt die Gruppe vom Feld über
+   `:focus-within` und `:has()` — kein Zustand, kein JavaScript. */
+.v2ing {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+  cursor: text;
+}
+.v2ing:focus-within {
+  border-color: var(--color-primary-700);
+  box-shadow: 0 0 0 3px var(--color-focus-ring-soft);
+}
+.v2ing:has(.v2in--invalid) { border-color: var(--color-danger); }
+.v2ing:has(.v2in--invalid):focus-within { box-shadow: 0 0 0 3px var(--color-danger-bg); }
+.v2ing:has(:disabled) { background: var(--color-bg-soft); opacity: 0.6; cursor: not-allowed; }
+.v2ing .v2in {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+.v2ing .v2in:focus { box-shadow: none; }
+.v2ing__pre,
+.v2ing__suf {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
 
 /* --- Auswahl-Leiste über dem Spaltenkopf --------------------------------- */
 .v2selbar {
@@ -935,22 +1004,9 @@ select.v2in { padding-right: 26px; }
 .v2kf__why { grid-column: 2; font-size: 11.5px; color: var(--color-text-subtle); }
 .v2kf__empty { padding: 18px 12px; font-size: 13px; color: var(--color-text-subtle); }
 
-/* --- Screen-Kopf je Schritt (F123 T123.2) ------------------------------- */
-.abn__screenhead { margin-bottom: var(--space-5); }
-.abn__screenhead__row {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: var(--space-4);
-}
-.abn__screenhead h1 {
-  font-size: 26px; font-weight: 600; line-height: 1.2;
-  margin: 2px 0 0; color: var(--color-text);
-}
-.abn__screenhead__nav { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-.abn__screenhead__lead {
-  margin: 8px 0 0;
-  font-size: 13.5px; line-height: 1.55; color: var(--color-text-muted);
-  max-width: 68ch;
-}
+/* Der Schritt-Kopf hat kein eigenes Markup mehr: `StepHeader` komponiert
+   `PageHeader` (0002 A6), seine eigenen Klassen sind damit gelöscht —
+   ein Seitenkopf, eine Optik. */
 
 /* --- Fortschritt über alle Schritte -------------------------------------- */
 .abn__progress { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
@@ -1629,6 +1685,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2mk--inline { display: inline; }
 /* Klappe ohne Zustand: der Knopf steht unter dem Text, der Text blendet aus. */
 .v2mk--clamp { display: flex; flex-direction: column; }
+/* Chrome ≥ 131 versteckt den Inhalt eines geschlossenen `details` über
+   `::details-content { content-visibility: hidden }` — damit blieb vom
+   geblendeten Anriss nichts übrig außer „Ganz lesen" (gemessen in Chrome 152,
+   2026-09-03). Hier ist der Anriss der Sinn der Sache. */
+.v2mk--clamp::details-content { content-visibility: visible; block-size: auto; }
 .v2mk--clamp .v2mk__body { order: 1; max-height: var(--v2mk-max); overflow: hidden;
   -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent);
   mask-image: linear-gradient(to bottom, #000 65%, transparent); }
@@ -1640,6 +1701,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2mk__more::-webkit-details-marker { display: none; }
 .v2mk__more:hover { text-decoration: underline; }
 .v2mk--clamp[open] .v2mk__more { color: var(--color-text-muted); font-weight: 400; }
+
+/* Der Reader (A5, 0022): die Höhe hält, der Text scrollt innen — kein
+   Ausblenden, kein „Ganz lesen". Der Bereich ist fokussierbar, sonst
+   erreichen ihn die Pfeiltasten nicht (V10, V11). */
+.v2mk--scroll { max-height: var(--v2mk-max); overflow-y: auto; }
+.v2mk--scroll:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 
 /* --- MonoCell — Kontonummer, BU-Schlüssel, DATEV-Code --------------------- */
 /* Es gab dafür bisher nur `.v2num` (tabellarische Ziffern, rechtsbündig) —

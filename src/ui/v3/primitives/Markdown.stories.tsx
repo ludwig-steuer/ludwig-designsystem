@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Markdown } from "./Markdown";
 import { ProseCard } from "./ProseCard";
+import { DetailPane } from "../patterns/MasterDetail";
 
 const meta: Meta<typeof Markdown> = { title: "v3/Primitives/Fläche/Markdown", component: Markdown };
 export default meta;
@@ -32,7 +33,7 @@ konto: 6815
 `;
 
 /** Ein echter Agentenbericht: Überschrift, Liste, Tabelle, Zitat, Code, Link. */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: () => (
     <div style={{ maxWidth: 560 }}>
       <Markdown text={REPORT} />
@@ -41,7 +42,7 @@ export const Gefuellt: Story = {
 };
 
 /** `null` und Leerraum rendern **nichts** — kein leerer Kasten, kein „—". */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
     <div style={{ maxWidth: 560, display: "grid", gap: "var(--space-3)" }}>
       <div style={{ border: "1px dashed var(--color-border)", padding: 10 }}>
@@ -58,7 +59,7 @@ export const Leer: Story = {
 };
 
 /** `inline` lässt nur Betonung, Code und Links — für Zelle und Zeile. */
-export const Varianten: Story = {
+export const Variants: Story = {
   render: () => {
     const t = "Konto **6815** laut Regel `bueromaterial-meier`, siehe [Kontenblatt](#).";
     return (
@@ -104,7 +105,7 @@ Schreibwaren und zwei Druckerpatronen.`;
 };
 
 /** `maxHeight` blendet aus und bietet „Ganz lesen" — ohne eine Zeile Zustand. */
-export const Lang: Story = {
+export const Long: Story = {
   render: () => (
     <div style={{ maxWidth: 560 }}>
       <Markdown text={REPORT + "\n" + REPORT} maxHeight={220} />
@@ -117,7 +118,7 @@ export const Lang: Story = {
  * ein Bild wird nicht geladen. Ohne rote Meldung — ein Agent, der so etwas
  * schreibt, ist kein Anlass für eine Warnung an die Buchhalterin.
  */
-export const Unsicher: Story = {
+export const Unsafe: Story = {
   render: () => (
     <div style={{ maxWidth: 560 }}>
       <Markdown
@@ -136,12 +137,31 @@ export const Unsicher: Story = {
 };
 
 /** Im Einsatz: als Begründung am Sachverhalt, in der `ProseCard`. */
-export const ImEinsatz: Story = {
+export const InUse: Story = {
   render: () => (
     <div style={{ maxWidth: 560 }}>
       <ProseCard title="Begründung des Agenten">
         <Markdown text={REPORT} />
       </ProseCard>
+    </div>
+  ),
+};
+
+/**
+ * Der Reader: feste Höhe, der Kopf des Details bleibt stehen, der Bericht
+ * scrollt innen. Kein Ausblenden, kein „Ganz lesen" — so liest man einen
+ * ganzen Lauf im Drawer. Der Textbereich nimmt den Fokus, damit die
+ * Pfeiltasten ihn scrollen.
+ */
+export const Reader: Story = {
+  render: () => (
+    <div style={{ maxWidth: 560 }}>
+      <DetailPane
+        title="Bericht des Laufs · Stapel 2026-08"
+        sub="Musterbau GmbH · 142 Sätze · abgeschlossen am 31.08.2026"
+      >
+        <Markdown text={[REPORT, REPORT, REPORT].join("\n")} maxHeight={260} overflow="scroll" />
+      </DetailPane>
     </div>
   ),
 };

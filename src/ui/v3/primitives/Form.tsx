@@ -77,6 +77,43 @@ export function Select({
   );
 }
 
+/**
+ * A field with something attached (0036): a magnifier in front, a unit, a key
+ * or a copy button behind it.
+ *
+ * The group is a `<label>`, so a click on a decorative addition puts the
+ * cursor into the field without a line of JavaScript — and the focus ring
+ * belongs to the whole group (`:focus-within`), not to the input alone. A
+ * purely decorative addition gets `aria-hidden` from the caller, otherwise it
+ * ends up in the accessible name of the field.
+ *
+ * @when    A unit, an icon or a key that belongs to the field itself — „%",
+ *          „Tage", the magnifier of a search, „⌘K".
+ * @instead Label, hint and error text around the field → Field. An amount that
+ *          formats itself → AmountInput. A period with two dates →
+ *          DateRangeField.
+ */
+export function InputGroup({
+  prefix,
+  suffix,
+  children,
+}: {
+  /** In front of the field: icon or text. */
+  prefix?: ReactNode;
+  /** Behind the field: unit, `Kbd`, an `IconButton`. */
+  suffix?: ReactNode;
+  /** Exactly one `Input`, `SearchInput` or `AmountInput`. */
+  children: ReactNode;
+}) {
+  return (
+    <label className="v2ing">
+      {prefix ? <span className="v2ing__pre">{prefix}</span> : null}
+      {children}
+      {suffix ? <span className="v2ing__suf">{suffix}</span> : null}
+    </label>
+  );
+}
+
 /** Kontrollkästchen mit Beschriftung — das Kästchen allein ist kein Ziel. */
 export function Checkbox({
   label,

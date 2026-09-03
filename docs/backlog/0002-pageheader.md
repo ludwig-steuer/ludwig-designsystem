@@ -69,6 +69,44 @@ eigenen Client-Wrapper mit, wenn sie einen brauchen.
   rutschen die Aktionen unter den Titel, nicht in eine zweite Spalte.
 - **Text links** (V3), keine Versalien (A2), Titel ohne Punkt (T3).
 
+## Erweiterung A6 · ein Seitenkopf, eine Knopf-Ordnung
+
+Aus `docs/backlog/0034-shadcn-abgleich.md` §A6 (Nachschub zum shadcn-Abgleich:
+„ein Seitenkopf mit drei optionalen Blöcken um die Überschrift"). Der Wunsch
+ist gebaut — `overline`, `title`, `description`, `meta`, `actions`, `back`
+stehen alle hier. Was fehlt, ist die **Konsequenz**: `StepHeader`
+(`patterns/StepRail.tsx`) rendert denselben Kopf mit eigenem Markup
+(`abn__screenhead*`, ein anderes `h1`, eine eigene Knopfzeile). Zwei Köpfe,
+zwei Optiken. Und die feste Knopf-Ordnung, die der Nachschub sich wünscht,
+existiert als `ActionBar` („exactly one primary path"), wird aber weder von
+der `PageHeader`-Story noch von `StepHeader` benutzt.
+
+Regel §3.1 (der Fall ist gedeckt) plus §4 („Durchreich-Markup löschen"):
+**keine neue Prop, keine neue Komponente.**
+
+- `StepHeader` komponiert `PageHeader`: `overline` → `overline`, `title` →
+  `title`, `lead` → `description`, und die Handlungen gehen als **eine**
+  `ActionBar` in `actions` — die Schritt-Navigation (← Zurück · Weiter zu
+  Schritt n →) steht hinter den übergebenen `actions`, die Reihenfolge
+  primär → sekundär → tertiär kommt aus `ActionBar`, nicht aus jeder Seite
+  neu. Die Klassen `abn__screenhead*` werden aus `v3.css` gelöscht.
+- `PageHeader`: JSDoc und die Story `WithActions` zeigen `actions` als
+  `<ActionBar>` mit genau einem `variant="primary"`. Die Prop bleibt
+  `ReactNode` — ein Typ, der nur `ActionBar` zuließe, wäre in TypeScript
+  Schein; die Story ist die Regel.
+- `StepHeader` behält seine Props (`prevHref`/`nextHref`/`onPrev`/`onNext`/
+  `nextLabel`/`actions`) und seine Stories unverändert; nur das Markup
+  darunter wechselt.
+
+**Kriterien (A6):**
+
+- [ ] `grep -rc "abn__screenhead" src/styles/v3.css src/ui/v3` = 0
+- [ ] `StepHeader` und `PageHeader` rendern dasselbe `h1` (`.v2phead__title`) —
+      beide Stories nebeneinander angesehen
+- [ ] Die Story `WithActions` benutzt `ActionBar` mit genau einem primären Knopf
+- [ ] Die Tasten der Abnahme-Schritte (`useHotkeys`) sind unverändert (Story
+      `v3/Patterns/Frame/StepRail`)
+
 ## Stories
 
 Titel `v3/Primitives/Fläche/PageHeader`. Abgeleitet nach §6: 1 Zustand

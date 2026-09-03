@@ -69,6 +69,9 @@
   /* Focus ring */
   --color-focus:          #3B8FC4;
   --color-focus-ring:     rgba(59, 143, 196, 0.32);
+  /* Weicher Ring innen am Feldrahmen (Eingabe im Fokus). Dekorativ: den
+     Kontrast trägt der Rahmen selbst (--color-primary-700, 9.4:1) — WCAG 1.4.11 */
+  --color-focus-ring-soft: rgba(59, 143, 196, 0.14);
 
   /* ====================================================================
      TYPOGRAPHY — Families

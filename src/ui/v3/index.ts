@@ -67,6 +67,7 @@ export {
   type MenuItemTone,
 } from "./primitives/OverflowMenu";
 export { ActionBar, RowActions } from "./primitives/ActionBar";
+export { Kbd } from "./primitives/Kbd";
 
 /* Rahmen — die Shell, außerhalb der Stufen (Soll-Katalog §11.7) */
 export { AppShell, TopBar } from "./primitives/AppShell";
@@ -90,7 +91,7 @@ export {
 } from "./primitives/NavList";
 
 /* Formular */
-export { Field, Input, Textarea, Select, Checkbox } from "./primitives/Form";
+export { Field, Input, InputGroup, Textarea, Select, Checkbox } from "./primitives/Form";
 export { RadioGroup, type RadioOption } from "./primitives/RadioGroup";
 export { AmountInput, parseAmount, type ParsedAmount } from "./primitives/AmountInput";
 export { InlineEdit, type InlineEditInputProps } from "./primitives/InlineEdit";

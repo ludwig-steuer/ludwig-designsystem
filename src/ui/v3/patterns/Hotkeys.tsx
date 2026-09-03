@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { Dialog } from "../primitives/Dialog";
+import { Kbd } from "../primitives/Kbd";
 
 /**
  * Keyboard (F123 T123.2, UX guidelines V14).
@@ -85,7 +86,7 @@ export function HotkeyLegend({
           {g.keys.map((t) => (
             <div className="v2fields__row" key={`${g.title}-${t.key}`}>
               <span>{t.label}</span>
-              <span>{t.key}</span>
+              <Kbd>{t.key}</Kbd>
             </div>
           ))}
         </div>

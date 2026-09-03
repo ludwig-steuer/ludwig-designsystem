@@ -1,4 +1,6 @@
+import { ActionBar } from "../primitives/ActionBar";
 import { Link } from "../primitives/Link";
+import { PageHeader } from "../primitives/PageHeader";
 import type { ReactNode } from "react";
 
 /**
@@ -94,7 +96,13 @@ function RailRow({ item }: { item: RailItem }) {
  * „Vollständigkeit" answers „wo bin ich?", „1 · Vollständigkeit" is a
  * header line.
  *
+ * It is a `PageHeader` (0002 A6), not a second head with its own markup: a
+ * step of the review is a page like any other. What it adds is the way
+ * forward and back, and those go into an `ActionBar` — the order primary →
+ * secondary → tertiary comes from there and is not renegotiated per screen.
+ *
  * @when    Header of every step in the rail: overline, title, lead, way forward and back.
+ * @instead A page that is not a step of a rail → PageHeader directly.
  */
 export function StepHeader({
   overline,
@@ -129,32 +137,38 @@ export function StepHeader({
   const hasNext = Boolean(nextHref) || Boolean(onNext);
   const showNav = hasPrev || hasNext;
 
+  // Forward is the action, backward the way out: „Weiter" carries the primary
+  // color and says where it leads; „Zurück" stays a plain secondary button
+  // with no destination in its text. The disabled state stays for the first
+  // and the last step — there the place has to hold, or the header jumps
+  // (guidelines §2).
   return (
-    <div className="abn__screenhead">
-      <div className="abn__screenhead__row">
-        <div style={{ minWidth: 0 }}>
-          <div className="lw-overline">{overline}</div>
-          <h1>{title}</h1>
-        </div>
-        {/* Forward is the action, backward the way out: „Weiter" carries the
-            primary color and says where it leads; „Zurück" stays a plain
-            secondary button with no destination in its text.
-            The disabled state stays for the first and the last step — there
-            the place has to hold, or the header jumps (guidelines §2). */}
-        {actions || showNav ? (
-          <div className="abn__screenhead__nav">
-            {actions}
-            {showNav ? <StepNav href={prevHref} onClick={onPrev} variant="secondary">← Zurück</StepNav> : null}
-            {showNav ? (
-              <StepNav href={nextHref} onClick={onNext} variant="primary">
-                {nextLabel ?? "Weiter"} →
-              </StepNav>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-      {lead ? <p className="abn__screenhead__lead">{lead}</p> : null}
-    </div>
+    <PageHeader
+      overline={overline}
+      title={title}
+      description={lead}
+      actions={
+        actions || showNav ? (
+          <ActionBar
+            primary={
+              showNav ? (
+                <StepNav href={nextHref} onClick={onNext} variant="primary">
+                  {nextLabel ?? "Weiter"} →
+                </StepNav>
+              ) : null
+            }
+            secondary={
+              showNav ? (
+                <StepNav href={prevHref} onClick={onPrev} variant="secondary">
+                  ← Zurück
+                </StepNav>
+              ) : null
+            }
+            tertiary={actions}
+          />
+        ) : null
+      }
+    />
   );
 }
 

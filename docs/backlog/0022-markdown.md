@@ -54,9 +54,10 @@ wären an zwölf Aufrufstellen zwölfmal zu treffen — und einmal zu vergessen.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `text` | `string \| null` | ja | Der Markdown-Quelltext. `null` rendert nichts, keinen Leerzustand | `Gefuellt`, `Leer` |
-| `variant` | `"full" \| "inline"` | nein | `full` (Default) erlaubt Blockelemente; `inline` nur Betonung, Code und Links — für eine Zelle oder eine Zeile | `Varianten` |
-| `maxHeight` | `number` | nein | Ab dieser Höhe wird geblendet und „Ganz lesen" angeboten | `Lang` |
+| `text` | `string \| null` | ja | Der Markdown-Quelltext. `null` rendert nichts, keinen Leerzustand | `Filled`, `Empty` |
+| `variant` | `"full" \| "inline"` | nein | `full` (Default) erlaubt Blockelemente; `inline` nur Betonung, Code und Links — für eine Zelle oder eine Zeile | `Variants` |
+| `maxHeight` | `number` | nein | Ab dieser Höhe wird geblendet und „Ganz lesen" angeboten | `Long` |
+| `overflow` | `"clamp" \| "scroll"` | nein | Nur mit `maxHeight`. `clamp` (Default) blendet aus und bietet „Ganz lesen" wie bisher; `scroll` hält die Höhe und scrollt innen — der Reader in Drawer und Detail (Erweiterung A5) | `Reader` |
 
 Keine Ludwig-Typen — das ist der Klassen-Test. Der Aufrufer gibt einen String,
 egal aus welchem Feld.
@@ -81,23 +82,74 @@ egal aus welchem Feld.
 - Server-Component, wenn die gewählte Bibliothek es zulässt: der Text ist
   statisch, er braucht keinen Zustand.
 
+## Erweiterung A5 · der Reader
+
+Aus `docs/backlog/0034-shadcn-abgleich.md` §A5 (shadcn-Abgleich, Zeile „Scroll
+Area"): ein **scrollbarer** Markdown-Reader ist im Storybook nicht zu finden.
+`maxHeight` blendet heute aus und bietet „Ganz lesen" — richtig für die
+Zusammenfassung in einer Liste, falsch für den Bericht eines Laufs in einem
+Drawer mit fester Höhe: dort soll der Kopf stehen bleiben und der Text innen
+scrollen.
+
+Regel §3.2: **eine** Prop, und ein Enum statt eines zweiten Booleans neben
+`maxHeight` (§5) — `clamp` und `scroll` schließen sich aus.
+
+- `overflow="scroll"` setzt `overflow-y: auto` auf den Textkörper und erzeugt
+  **keine** Maske und **kein** `<details>`/`summary` („Ganz lesen" entfällt).
+- Der Scrollbereich ist per Tastatur erreichbar (`tabindex=0`), damit die
+  Pfeiltasten ihn scrollen — ein Textblock ohne Fokus ist mit der Tastatur
+  nicht zu lesen (V10/V11).
+- Ohne `maxHeight` ist `overflow` wirkungslos; das steht in der `@when`-Zeile.
+- Im selben Zug bekommen die Story-Exporte in `Markdown.stories.tsx`
+  englische Namen (`Gefuellt` → `Filled`, `Leer` → `Empty`, `Varianten` →
+  `Variants`, `Lang` → `Long`, `Unsicher` → `Unsafe`, `ImEinsatz` → `InUse`) —
+  `CLAUDE.md`: Story-Exportnamen sind englisch, und die Datei wird ohnehin
+  angefasst.
+
 ## Stories
 
 Nach §6: 2 anwendbare Zustände + 1 Enum (`variant`) + 0 Callbacks + 1 „im
-Einsatz" + 1 Rand + 1 Sicherheit = 6.
+Einsatz" + 1 Rand + 1 Sicherheit = 6, mit der Erweiterung A5 (`overflow`) = 7;
+dazu die bereits gebaute `Flow` (Befund aus der Abnahme, Punkt 2).
 
 | Story | Beweist |
 |---|---|
-| `Gefuellt` | echter Agentenbericht: Überschrift, Aufzählung, Tabelle, Code |
-| `Leer` | `null` und `"   "` rendern nichts |
-| `Varianten` | `full` und `inline` nebeneinander am selben Text |
-| `Lang` | `maxHeight` blendet und bietet „Ganz lesen" |
-| `Unsicher` | Roh-HTML, `javascript:`-Link, Bild-URL — nichts davon wirkt |
-| `ImEinsatz` | in `ProseCard`, wie am Sachverhalt |
+| `Filled` | echter Agentenbericht: Überschrift, Aufzählung, Tabelle, Code |
+| `Empty` | `null` und `"   "` rendern nichts |
+| `Variants` | `full` und `inline` nebeneinander am selben Text |
+| `Long` | `maxHeight` blendet und bietet „Ganz lesen" (`overflow="clamp"`) |
+| `Reader` | `overflow="scroll"`: fester Rahmen, Kopf steht, Text scrollt innen (A5) |
+| `Unsafe` | Roh-HTML, `javascript:`-Link, Bild-URL — nichts davon wirkt |
+| `InUse` | in `ProseCard`, wie am Sachverhalt |
 
-Nicht anwendbar: `Laedt` (der Text ist da oder nicht) · `LeerNachFilter`
-(nichts wird gefiltert) · `Fehler` (unlesbares Markdown gibt es nicht — im
+Nicht anwendbar: `Loading` (der Text ist da oder nicht) · `EmptyAfterFilter`
+(nichts wird gefiltert) · `Error` (unlesbares Markdown gibt es nicht — im
 Zweifel steht der Quelltext da).
+
+## Befund beim Bauen von A5 (2026-09-03)
+
+**Der `clamp`-Anriss war in aktuellem Chrome unsichtbar.** Seit Chrome 131
+versteckt der Browser den Inhalt eines geschlossenen `<details>` über
+`::details-content { content-visibility: hidden }`; die Story `Long` zeigte
+deshalb nur noch „Ganz lesen" und darüber nichts — obwohl `.v2mk__body`
+weiterhin 220 px Layouthöhe hatte (gemessen in Chrome 152). Behoben mit einer
+Zeile in `v3.css`:
+`.v2mk--clamp::details-content { content-visibility: visible; block-size: auto; }`.
+Kein JavaScript, keine geänderte Schnittstelle; Browser ohne dieses
+Pseudoelement lassen die Regel fallen.
+
+## Abnahmekriterien der Erweiterung A5
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] `overflow="scroll"` erzeugt `overflow-y: auto` und **keine** Maske, kein
+      `summary` „Ganz lesen" (Story `Reader`, DOM-Probe)
+- [ ] `clamp`-Verhalten aus dieser Spec unverändert (Story `Long`)
+- [ ] Tastatur: der Scrollbereich ist fokussierbar (`tabindex=0`), Pfeiltasten
+      scrollen ihn (Story `Reader`, im Browser beobachtet)
+- [ ] `overflow` ohne `maxHeight` ändert nichts — kein Rahmen, keine Höhe
+- [ ] Alle Story-Exporte in `Markdown.stories.tsx` englisch
+      (`grep -E "^export const (Gefuellt|Leer|Varianten|Lang|Unsicher|ImEinsatz)"` leer)
+- [ ] Server-Component: die Datei trägt weiterhin kein `"use client"`
 
 ## Abnahme
 
