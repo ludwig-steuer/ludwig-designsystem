@@ -2147,3 +2147,33 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   border-top: var(--border-1-subtle);
   background: var(--color-surface-head);
 }
+
+/* --- Beleg-Drawer (0052) ------------------------------------------------- */
+/* Das Original zuerst und groß (Zone 2): auf großen Schirmen mehr Beleg,
+   ohne dass Kern-Fakten und Fuß aus dem Bild fallen. */
+.v2doc__orig {
+  width: 100%;
+  height: clamp(320px, 62vh, 900px);
+  border: var(--border-1);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-sunken);
+}
+/* Kennung und Zustand nebeneinander in der Kopf-Zweitzeile. */
+.v2doc__ident { display: inline-flex; align-items: center; gap: var(--space-2); }
+/* Überschrift über den Kern-Fakten — kleiner als der Drawer-Titel, damit die
+   Zone erkennbar ist, ohne eine zweite Ebene aufzumachen. */
+.v2doc__h {
+  font-size: var(--fs-ui-2xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  margin-bottom: var(--space-2);
+}
+/* Zone 4 — die Grenze des Schnellblicks, gedämpft und ohne Kasten. */
+.v2doc__limit {
+  margin: 0;
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  color: var(--color-text-muted);
+}

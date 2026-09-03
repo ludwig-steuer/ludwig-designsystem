@@ -231,6 +231,16 @@ export {
   type AccountCandidate,
 } from "./entities/account/AccountField";
 
+/* Beleg — die Nachschlag-Form neben der Arbeit (0052) */
+export {
+  DocumentDrawer,
+  type DocumentQuickView,
+} from "./entities/document/DocumentDrawer";
+export {
+  DocumentFacts,
+  type DocumentFactsVM,
+} from "./entities/document/DocumentFacts";
+
 /* Sachverhalt — der Verlauf über Ereignisse, Klärungen, Erwartungen (0040) */
 export {
   CaseTimeline,
