@@ -43,7 +43,7 @@ const toNumber = (s: string | number | null | undefined) => {
  *
  * Beträge sind **brutto**, wie auf dem Beleg. Die Steuerzeile leitet der
  * Editor ab und zeigt sie unter der Zeile — sie wird beim Speichern erzeugt
- * (`ui/booking/tax-assist.ts`), nicht getippt.
+ * (`./tax-assist.ts`), nicht getippt.
  *
  * Was der Editor **nicht** kann: mehrere Sätze je Ereignis. `saveEventBooking`
  * konsolidiert auf einen Satz; der „+ weiterer Buchungssatz"-Knopf des Designs

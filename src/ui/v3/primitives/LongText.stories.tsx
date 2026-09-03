@@ -5,15 +5,15 @@ const meta: Meta<typeof LongText> = { title: "v3/Primitives/Werte/LongText", com
 export default meta;
 type Story = StoryObj<typeof LongText>;
 
-const KURZ = "Wartung der Heizungsanlage, Rechnung 2026-0412.";
-const LANG =
+const SHORT = "Wartung der Heizungsanlage, Rechnung 2026-0412.";
+const LONG =
   "Wartung der Heizungsanlage im Objekt Hauptstraße 14, einschließlich Austausch der Umwälzpumpe, " +
   "Spülung des Heizkreises und Prüfung der Ausdehnungsgefäße. Die Arbeiten wurden am 14.03.2026 " +
   "abgenommen; die Rechnung weist zusätzlich eine Anfahrtspauschale und Kleinmaterial aus, das " +
   "nach Rücksprache mit dem Mandanten auf dasselbe Aufwandskonto gebucht wird.";
 
 /** Unter `max` Zeichen wird der Text unverändert gerendert. */
-export const Short: Story = { args: { children: KURZ } };
+export const Short: Story = { args: { children: SHORT } };
 /** Darüber als Teaser mit „mehr ▾" — hält die Tabellenzeile in Form. */
-export const Clamped: Story = { args: { children: LANG } };
-export const CustomLimit: Story = { args: { children: LANG, max: 60 } };
+export const Clamped: Story = { args: { children: LONG } };
+export const CustomLimit: Story = { args: { children: LONG, max: 60 } };

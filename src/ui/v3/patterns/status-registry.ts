@@ -838,9 +838,9 @@ const BUCHUNG_ORIGIN: Record<string, StatusDescriptor> = {
 
 /**
  * Ampel je **Buchungssatz** — **keine Spalte**, sondern gebandet aus
- * `client_journal_entry.proposal_confidence` (`entryConfLevel` in
+ * `client_journal_entry.proposal_confidence` (`entryConfLevel` in der App,
  * `ui/booking/format.ts`: ≥85 grün, ≥70 gelb, ≥50 orange, <50 rot; manuell
- * gebucht = grün). Dieselbe Ableitung speist Abnahme-UI und Triage.
+ * gebucht = grün; im Design-System gibt es die Ableitung nicht). Dieselbe Ableitung speist Abnahme-UI und Triage.
  *
  * Owner-Entscheid 2026-08-29: Bewertung nur auf Satzebene, der Mensch liest
  * den Satz ohnehin ganz. Die frühere Zeilen-Ampel

@@ -13,9 +13,9 @@
  * (1+satz)), steuer = brutto − netto → Netto + Steuer = Brutto per
  * Konstruktion, keine Kettenrundung, keine Cent-Drift.
  *
- * Hinweis zur Kopplung: `@/ui/booking` hält sich sonst frei von
- * accounting-cases-Imports (siehe `types.ts`). Hier werden bewusst NUR pure
- * Konstanten/Lookups aus `domain/tax-keys` verwendet (Steuerkonten je SKR) —
+ * Hinweis zur Kopplung: die Buchungs-Helfer halten sich sonst frei von
+ * accounting-cases-Imports. Hier werden bewusst NUR pure Konstanten und
+ * Lookups aus `domain/tax-keys` verwendet (Steuerkonten je SKR) —
  * dieselbe Wahrheit, die auch Agent-Submit und EXTF-Export nutzen; eine Kopie
  * würde bei der nächsten Kontenänderung driften.
  */
