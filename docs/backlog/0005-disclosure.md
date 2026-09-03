@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Details ausklappen ist fachfrei |
 | Quelle | `docs/v3-backlog.md` — „Danach" (34 Stellen in 20 Dateien) |

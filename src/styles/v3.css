@@ -1315,3 +1315,88 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 @media (prefers-reduced-motion: reduce) {
   .v2spin { animation-duration: 2.4s; }
 }
+
+/* ==========================================================================
+   Bausteine aus dem Soll-Katalog (Aufgaben 0016, 0012, 0005, 0017, 0019)
+
+   Angehängt statt einsortiert: an dieser Datei arbeiten mehrere Sitzungen
+   parallel, und ein Block am Ende kollidiert nicht mit ihren Änderungen.
+   ========================================================================== */
+
+/* --- Skeleton (0016) — die Ladefläche außerhalb der Tabelle --------------- */
+.v2skelgroup { display: grid; gap: var(--space-2); }
+.v2skel--card { height: 96px; border-radius: var(--radius-md); }
+.v2skel--field { height: 32px; border-radius: var(--radius-sm); }
+
+/* --- IconButton (0012) — Icon ohne Wort, benannte Ausnahme zu T8 ---------- */
+.v2ibtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard);
+}
+.v2ibtn--sm { width: 24px; height: 24px; }
+.v2ibtn--md { width: 28px; height: 28px; }
+.v2ibtn--lg { width: 32px; height: 32px; }
+.v2ibtn:hover:not(:disabled) { background: var(--color-bg-soft); color: var(--color-text); }
+.v2ibtn--surface {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+.v2ibtn--surface:hover:not(:disabled) { background: var(--color-bg-soft); }
+.v2ibtn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.v2ibtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* --- Disclosure (0005) — der Aufklapper ---------------------------------- */
+.v2disc { border-top: 1px solid var(--color-border-subtle); }
+.v2disc__sum {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2);
+  font-size: 13.5px; font-weight: 500; color: var(--color-text);
+  cursor: pointer; list-style: none;
+  border-radius: var(--radius-sm);
+}
+.v2disc__sum::-webkit-details-marker { display: none; }
+.v2disc__sum:hover { background: var(--color-bg-soft); }
+.v2disc__sum:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.v2disc__chev {
+  flex: 0 0 auto; color: var(--color-text-muted);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.v2disc[open] > .v2disc__sum .v2disc__chev { transform: rotate(90deg); }
+.v2disc__count { color: var(--color-text-muted); font-weight: 400; }
+.v2disc__body { padding: 0 var(--space-2) var(--space-3); font-size: 13.5px; line-height: 1.55; }
+.v2disc--quiet > .v2disc__sum { color: var(--color-text-muted); font-weight: 400; }
+
+/* --- RadioGroup (0017) — eine aus wenigen Möglichkeiten ------------------- */
+.v2radiogrp { display: flex; flex-direction: column; gap: 2px; border: none; padding: 0; margin: 0; }
+/* Die Legende ist das Label der Gruppe und steht immer allein in der ersten
+   Zeile — auch wenn die Optionen danach nebeneinander laufen. */
+.v2radiogrp > legend { float: left; width: 100%; margin-bottom: 4px; padding: 0; }
+.v2radiogrp > legend + * { clear: both; }
+.v2radiogrp--horizontal { flex-direction: row; flex-wrap: wrap; gap: var(--space-4); }
+.v2radioline {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 8px; border-radius: var(--radius-sm);
+  font-size: 13.5px; color: var(--color-text); cursor: pointer;
+}
+.v2radioline:hover { background: var(--color-bg-soft); }
+.v2radioline--disabled { opacity: 0.5; cursor: not-allowed; }
+.v2radioline--disabled:hover { background: none; }
+.v2radio {
+  width: 14px; height: 14px; margin: 2px 0 0;
+  accent-color: var(--color-primary-700);
+  cursor: pointer;
+}
+.v2radioline__hint { display: block; font-size: 12px; color: var(--color-text-subtle); margin-top: 1px; }
+
+/* --- AmountInput (0019) — Ziffern rechts, tabellarisch -------------------- */
+/* `sm` ist die Editor-Dichte, dieselben Maße wie die Zeile im Buchungseditor. */
+.v2in--sm { padding: 4px 7px; font-size: 12.5px; }
+.v2in--amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums lining-nums;
+}

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „lädt noch" ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Ladefläche für Karte/Detail (Skeleton)" · `v3-backlog.md` „Ladeanzeige außerhalb der Tabelle" (3) |
