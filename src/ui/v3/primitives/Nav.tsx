@@ -15,6 +15,12 @@ export interface TabItem {
   label: string;
   /** Zähler rechts am Reiter — gedämpft, bei `alarm` rot und fett. */
   count?: number;
+  /**
+   * Punkt anstelle des Zählers (0049): es gibt etwas, aber es lässt sich
+   * nicht zählen. Steht auch `count`, gewinnt die Zahl — zweimal dasselbe
+   * zu sagen hilft niemandem.
+   */
+  dot?: boolean;
   alarm?: boolean;
   href?: string;
 }
@@ -41,9 +47,11 @@ export function Tabs({
         const body = (
           <>
             {it.label}
-            {it.count === undefined ? null : (
+            {it.count !== undefined ? (
               <span className={`n${it.alarm && it.count > 0 ? " is-alarm" : ""}`}>{it.count}</span>
-            )}
+            ) : it.dot ? (
+              <span className={`v2tab__dot${it.alarm ? " is-alarm" : ""}`} aria-hidden="true" />
+            ) : null}
           </>
         );
         return it.href ? (

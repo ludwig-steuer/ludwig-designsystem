@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { useState } from "react";
+import { Popover } from "../primitives/Popover";
 import { AXIS_LABEL } from "./entity-icons";
 import { StatusBadge } from "./StatusBadge";
-import { STATUS_REGISTRY, type StatusAxis } from "./status-registry";
+import { STATUS_REGISTRY, axisLegend, type StatusAxis } from "./status-registry";
 
 const meta: Meta<typeof StatusBadge> = {
   title: "v3/Patterns/Prüfen/StatusBadge",
@@ -69,3 +71,56 @@ export const UnknownValue: Story = {
 };
 /** `null` (Spalte noch nicht gesetzt). */
 export const WithoutValue: Story = { args: { axis: "buchung", status: null, info: false } };
+
+/**
+ * `chevron` (0049): der Chip als Auslöser eines Menüs. Die Folgezustände
+ * kommen aus `axisLegend(axis, only)` — die Registry beschreibt Zustände,
+ * **keine Übergänge**, also nennt der Aufrufer die erlaubten. Das
+ * `aria-haspopup` sitzt am Auslöser, nicht am Chip: `Popover` setzt es dort
+ * selbst, und ein zweites am Chip wäre eine falsche Behauptung.
+ */
+export const StatusMenu: Story = {
+  render: function Render() {
+    const [status, setStatus] = useState("open");
+    const [open, setOpen] = useState(false);
+    // Was von hier aus erreichbar ist — die Entscheidung des Aufrufers.
+    const next = axisLegend("sachverhalt", [
+      "needs_clarification",
+      "waiting_for_documents",
+      "closed_accepted",
+      "closed_rejected",
+    ]);
+    return (
+      <div style={{ display: "grid", gap: 16, justifyItems: "start" }}>
+        <Popover
+          open={open}
+          onOpenChange={setOpen}
+          trigger={
+            <button type="button" className="v2btn v2btn--tertiary v2btn--sm">
+              <StatusBadge axis="sachverhalt" status={status} info={false} chevron />
+            </button>
+          }
+        >
+          <div style={{ display: "grid", gap: 2, minWidth: 260 }}>
+            {next.map((it) => (
+              <button
+                key={it.value}
+                type="button"
+                className="v2menu__item"
+                onClick={() => {
+                  setStatus(it.value);
+                  setOpen(false);
+                }}
+              >
+                <StatusBadge axis="sachverhalt" status={it.value} info={false} />
+              </button>
+            ))}
+          </div>
+        </Popover>
+        <p style={{ fontSize: 12.5, color: "var(--color-text-muted)", margin: 0 }}>
+          Gewählt: <code>{status}</code>
+        </p>
+      </div>
+    );
+  },
+};

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { AlertTriangle, CircleCheck, Clock } from "lucide-react";
 import { Button } from "./Button";
 import { StatusCallout } from "./StatusCallout";
 
@@ -62,5 +63,40 @@ export const WithoutAction: Story = {
       title="Periode 07/2026 · Musterfirma GmbH"
       sub="Am 04.08. in DATEV übernommen und abgestimmt."
     />
+  ),
+};
+
+/**
+ * `icon` (0049): die Leiste „Nächste Aktion" trägt links ein Symbol, das den
+ * Ton mitspricht. Das Wort im Kicker bleibt trotzdem stehen — Farbe und
+ * Symbol sind nie die einzige Auskunft (V7).
+ */
+export const NextAction: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12 }}>
+      <StatusCallout
+        icon={<CircleCheck size={20} strokeWidth={1.5} />}
+        kicker="Nächste Aktion"
+        title="Buchung freigeben"
+        sub="Alle Belege liegen vor, die Steuer stimmt."
+        actions={<Button variant="primary" size="sm">Freigeben</Button>}
+      />
+      <StatusCallout
+        tone="warning"
+        icon={<Clock size={20} strokeWidth={1.5} />}
+        kicker="Nächste Aktion"
+        title="Rückfrage beantworten"
+        sub="Seit 6 Tagen offen — der Mandant wartet."
+        actions={<Button variant="secondary" size="sm">Zur Rückfrage</Button>}
+      />
+      <StatusCallout
+        tone="danger"
+        icon={<AlertTriangle size={20} strokeWidth={1.5} />}
+        kicker="Nächste Aktion"
+        title="Beleg fehlt"
+        sub="Ohne Beleg kann der Sachverhalt nicht gebucht werden."
+        actions={<Button variant="secondary" size="sm">Beleg anfordern</Button>}
+      />
+    </div>
   ),
 };

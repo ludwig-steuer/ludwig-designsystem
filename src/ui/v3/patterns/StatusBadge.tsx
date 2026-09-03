@@ -1,3 +1,5 @@
+import { ChevronDown } from "lucide-react";
+
 import { Badge } from "../primitives/Badge";
 import { AXIS_LABEL, ENTITY_ICON } from "./entity-icons";
 import { StatusInfoButton } from "./StatusInfoButton";
@@ -17,6 +19,12 @@ export interface StatusBadgeProps {
    * klickbar ist (z.B. `EntityStatusBadgeButton`).
    */
   info?: boolean;
+  /**
+   * A chevron behind the label, for a chip that opens a menu of follow-up
+   * states (0049). Markup only — the `aria-haspopup`/`aria-expanded`
+   * relation belongs on the trigger, and `Popover` already sets it there.
+   */
+  chevron?: boolean;
   className?: string;
 }
 
@@ -45,6 +53,7 @@ export function StatusBadge({
   stage,
   showIcon = true,
   info = true,
+  chevron = false,
   className,
 }: StatusBadgeProps) {
   const desc = resolveStatus(axis, status);
@@ -74,6 +83,14 @@ export function StatusBadge({
           />
         ) : null}
         {desc.label}
+        {chevron ? (
+          <ChevronDown
+            size={12}
+            strokeWidth={1.5}
+            style={{ marginLeft: 3, verticalAlign: "-2px", opacity: 0.7 }}
+            aria-hidden="true"
+          />
+        ) : null}
       </Badge>
       {stageDesc ? (
         <span style={{ fontSize: 11.5, color: "var(--color-text-muted)" }}>

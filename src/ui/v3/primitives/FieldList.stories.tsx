@@ -96,3 +96,38 @@ export const BareWithoutTitle: Story = {
     </div>
   ),
 };
+
+/**
+ * `layout="row"` (0049): die Faktenzeile eines Detailkopfs. Vier kurze
+ * Antworten nebeneinander, Label über Wert — untereinander würden sie den
+ * Kopf doppelt so hoch machen. Das zweite Beispiel ist auf 340 px verengt und
+ * zeigt den Umbruch: die Zeile bricht, sie scrollt nicht.
+ */
+export const FactsRow: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 20 }}>
+      <FieldList
+        tone="bare"
+        layout="row"
+        rows={[
+          ["Eröffnet", "26.08.2026"],
+          ["Status", "laufend"],
+          ["Personenkonto", "70044 · Bürobedarf Meier GmbH"],
+          ["Geschäftspartner", "DomainFactory GmbH"],
+        ]}
+      />
+      <div style={{ maxWidth: 340, border: "1px dashed var(--color-border)", padding: 12 }}>
+        <FieldList
+          tone="bare"
+          layout="row"
+          rows={[
+            ["Eröffnet", "26.08.2026"],
+            ["Status", "laufend"],
+            ["Personenkonto", "70044"],
+            ["Geschäftspartner", "DomainFactory GmbH"],
+          ]}
+        />
+      </div>
+    </div>
+  ),
+};

@@ -41,18 +41,26 @@ export function Card({
 export function CardHead({
   title,
   sub,
+  icon,
+  meta,
   actions,
 }: {
   title: ReactNode;
   sub?: ReactNode;
+  /** Symbol left of title and sub-line (0049) — says which entity this card is about. */
+  icon?: ReactNode;
+  /** Right of the title, **before** the actions (0049) — „1 Ereignis", a count, a date. */
+  meta?: ReactNode;
   actions?: ReactNode;
 }) {
   return (
     <div className="v2card__h">
+      {icon ? <span className="v2card__ico">{icon}</span> : null}
       <div>
         <div className="title">{title}</div>
         {sub ? <div className="sub">{sub}</div> : null}
       </div>
+      {meta ? <div className="v2card__meta">{meta}</div> : null}
       {actions ? <div className="actions">{actions}</div> : null}
     </div>
   );

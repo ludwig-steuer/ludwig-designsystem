@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { BookOpen, Layers } from "lucide-react";
 import { AmountCell, DotStatus, ErrorRow, TableLoading } from "./Cells";
 import { Card, CardFoot, CardHead, EmptyRow, GroupRow, HeadRow, Row, Table } from "./Table";
+import { TextButton } from "./TextButton";
 
 const meta: Meta<typeof Table> = { title: "v3/Primitives/Tabelle/Table", component: Table };
 export default meta;
@@ -99,5 +101,50 @@ export const Error: Story = {
         />
       </Table>
     </Card>
+  ),
+};
+
+/**
+ * `icon` und `meta` am `CardHead` (0049): das Symbol sagt, um welche Entität
+ * es geht, `meta` trägt den Zusatz — und zwar **vor** den Aktionen. Die
+ * Aktion bleibt außen, wo die Hand sie sucht.
+ */
+export const CardHeadIconMeta: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12, maxWidth: 620 }}>
+      <Card>
+        <CardHead
+          icon={<Layers size={16} strokeWidth={1.5} />}
+          title="Timeline"
+          sub="Ereignisse, Klärungen, Erwartungen"
+          meta="1 Ereignis"
+          actions={<TextButton>Alle zeigen</TextButton>}
+        />
+        <Table cols="1fr 120px">
+          <Row>
+            <span className="v2main">Eingangsrechnung erfasst</span>
+            <AmountCell value={1475.6} />
+          </Row>
+        </Table>
+      </Card>
+      <Card>
+        <CardHead icon={<BookOpen size={16} strokeWidth={1.5} />} title="Detail" meta="Beleg RE-4471" />
+        <Table cols="1fr 120px">
+          <Row>
+            <span className="v2main">Bürobedarf August</span>
+            <AmountCell value={1475.6} />
+          </Row>
+        </Table>
+      </Card>
+      <Card>
+        <CardHead title="Ohne Symbol und Zusatz" sub="unverändert zum Bestand" />
+        <Table cols="1fr 120px">
+          <Row>
+            <span className="v2main">Zeile</span>
+            <AmountCell value={42} />
+          </Row>
+        </Table>
+      </Card>
+    </div>
   ),
 };

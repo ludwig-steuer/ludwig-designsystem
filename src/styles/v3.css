@@ -1984,3 +1984,42 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   color: var(--color-text);
 }
 .v2raw__empty { margin: 0; font-size: 12.5px; color: var(--color-text-muted); }
+
+/* ── Fünf Lücken am Detailkopf (0049) ─────────────────────────────────────
+   Alles Erweiterungen bestehender Bausteine, kein neuer. */
+
+/* 1 · FieldList `layout="row"`: die Paare nebeneinander, Label über Wert —
+   die Faktenzeile eines Detailkopfs. Umbruch statt Scrollen, weil vier kurze
+   Antworten in einer Zeile stehen sollen, aber nicht müssen. */
+.v2fields--cols { display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-6); }
+.v2fields--cols .v2fields__h { flex-basis: 100%; }
+.v2fields--cols .v2fields__row { display: block; padding: 0; }
+.v2fields--cols .v2fields__row > span:first-child {
+  display: block;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+.v2fields--cols .v2fields__row > span:last-child {
+  display: block; text-align: left; margin-top: 2px;
+}
+
+/* 3 · StatusCallout `icon`: links vom Kicker, in der Farbe des Tons. Der
+   Textblock schiebt die Aktionen nach rechts, damit das Symbol am Text bleibt
+   und nicht in der Mitte hängt. */
+.v2callout__ico { flex: 0 0 auto; align-self: start; line-height: 0; margin-top: 3px; color: var(--color-text-subtle); }
+.v2callout--warning .v2callout__ico { color: var(--color-warning); }
+.v2callout--danger .v2callout__ico { color: var(--color-danger); }
+.v2callout__ico + div { margin-right: auto; }
+
+/* 4 · Tabs `dot`: da, aber nicht zählbar. Nimmt die Stelle des Zählers ein. */
+.v2tab__dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: var(--radius-pill);
+  background: currentColor; opacity: 0.55;
+}
+.v2tab__dot.is-alarm { background: var(--color-danger); opacity: 1; }
+
+/* 5 · CardHead `icon` und `meta`: Symbol vor dem Titel, Zusatz rechts VOR den
+   Aktionen — die Aktion bleibt außen, wo die Hand sie sucht. */
+.v2card__ico { flex: 0 0 auto; line-height: 0; color: var(--color-text-subtle); }
+.v2card__h > div:not(.actions):not(.v2card__meta) { margin-right: auto; min-width: 0; }
+.v2card__meta { font-size: 12px; color: var(--color-text-subtle); flex-shrink: 0; }

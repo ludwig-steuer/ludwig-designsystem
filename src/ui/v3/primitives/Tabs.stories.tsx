@@ -65,3 +65,23 @@ export const AllEmpty: Story = {
     />
   ),
 };
+
+/**
+ * `dot` (0049): „da, aber nicht zählbar". Der Reiter „Saldo & Konten" hat
+ * keinen Zähler — ein Saldo ist keine Menge —, soll aber sagen, dass etwas
+ * drinsteht. Der letzte Reiter zeigt die Regel: steht auch `count`, gewinnt
+ * die Zahl. Zweimal dasselbe zu sagen hilft niemandem.
+ */
+export const TabsWithDot: Story = {
+  render: () => (
+    <Demo
+      items={[
+        { key: "uebersicht", label: "Übersicht" },
+        { key: "rueckfragen", label: "Rückfragen", count: 2, alarm: true },
+        { key: "saldo", label: "Saldo & Konten", dot: true },
+        { key: "plausi", label: "Plausibilität", dot: true, alarm: true },
+        { key: "historie", label: "Historie", count: 12, dot: true },
+      ]}
+    />
+  ),
+};
