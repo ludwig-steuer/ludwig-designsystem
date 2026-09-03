@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` — Erweiterung eines vorhandenen Exports |
 | Klassen-Test | entfällt — keine neue Komponente |
 | Quelle | `docs/v3-backlog.md` — „Danach": `Werteliste`, 10 lokale `Row({label})`-Helfer + 10 `<dl>` |

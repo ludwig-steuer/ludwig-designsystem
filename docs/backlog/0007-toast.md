@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede Handlung braucht eine Quittung |
 | Quelle | `docs/v3-backlog.md` — „Danach": **keine Implementierung**, 43 Dateien mit Ad-hoc-Rückmeldung |

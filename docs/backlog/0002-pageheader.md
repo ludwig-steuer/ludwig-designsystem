@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede Seite hat einen Kopf |
 | Quelle | `docs/v3-backlog.md` — Blocker #2 (19 Dateien / 22 Stellen) |

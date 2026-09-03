@@ -87,6 +87,8 @@ export { Badge, type BadgeTone, type BadgeProps } from "./primitives/Badge";
 export { EmptyState, type EmptyStateProps } from "./primitives/EmptyState";
 export { Callout } from "./primitives/Callout";
 export { Disclosure, type DisclosureTone } from "./primitives/Disclosure";
+export { PageHeader } from "./primitives/PageHeader";
+export { ToastHost, useToast, type Toast, type ToastTone } from "./primitives/Toast";
 export { Skeleton, type SkeletonVariant } from "./primitives/Skeleton";
 
 /* Tabelle */

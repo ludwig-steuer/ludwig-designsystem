@@ -1400,3 +1400,56 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   text-align: right;
   font-variant-numeric: tabular-nums lining-nums;
 }
+
+/* --- PageHeader (0002) — der Anker jeder Seite --------------------------- */
+.v2phead { display: grid; gap: var(--space-2); padding-bottom: var(--space-4); }
+.v2phead__back {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12.5px; color: var(--color-text-muted); text-decoration: none;
+  width: fit-content; border-radius: var(--radius-sm);
+}
+.v2phead__back:hover { color: var(--color-text); text-decoration: underline; }
+.v2phead__back:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.v2phead__main {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--space-4); flex-wrap: wrap;
+}
+.v2phead__over {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--color-text-subtle); margin-bottom: 2px;
+}
+.v2phead__titlerow { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.v2phead__title { font-size: 20px; font-weight: 600; color: var(--color-text); margin: 0; line-height: 1.25; }
+.v2phead__desc { font-size: 13.5px; color: var(--color-text-muted); margin: 4px 0 0; max-width: 68ch; }
+.v2phead__acts { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+
+/* --- FieldList tone="bare" (0006) — die Werteliste ohne Fläche ------------ */
+.v2fields--bare { background: none; border: none; border-radius: 0; padding: 0; }
+.v2fields--bare .v2fields__row { padding-left: 0; padding-right: 0; }
+.v2fields--bare .v2fields__h { padding-left: 0; padding-right: 0; background: none; }
+
+/* --- Toast (0007) — die flüchtige Rückmeldung ---------------------------- */
+.v2toasts {
+  position: fixed; right: var(--space-5); bottom: var(--space-5);
+  display: flex; flex-direction: column; gap: var(--space-2);
+  z-index: 60; max-width: min(380px, calc(100vw - 2 * var(--space-5)));
+}
+.v2toast {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-success);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  font-size: 13.5px; line-height: 1.45; color: var(--color-text);
+  animation: v2toastin var(--duration-base) var(--ease-standard);
+}
+.v2toast--warning { border-left-color: var(--color-warning); }
+.v2toast--danger { border-left-color: var(--color-danger); }
+.v2toast__text { flex: 1 1 auto; }
+.v2toast__acts { display: flex; align-items: center; gap: var(--space-3); flex: 0 0 auto; }
+@keyframes v2toastin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .v2toast { animation: none; }
+}

@@ -51,3 +51,48 @@ export const Empty: Story = {
     />
   ),
 };
+
+/**
+ * `bare` stellt dieselben Zeilen frei: keine Fläche, kein Rahmen, kein
+ * Innenabstand — für Drawer und Detail, wo die Karte schon außen herum steht.
+ */
+export const Bare: Story = {
+  render: () => (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-6)" }}>
+      <FieldList
+        title="Stammdaten (surface)"
+        rows={[
+          ["Kreditor", "Bürobedarf Meier GmbH"],
+          ["Personenkonto", "70021"],
+          ["Zahlungsziel", "14 Tage netto"],
+        ]}
+      />
+      <FieldList
+        title="Stammdaten (bare)"
+        tone="bare"
+        rows={[
+          ["Kreditor", "Bürobedarf Meier GmbH"],
+          ["Personenkonto", "70021"],
+          ["Zahlungsziel", "14 Tage netto"],
+        ]}
+      />
+    </div>
+  ),
+};
+
+/** Ohne `title` entfällt die Kopfzeile — und der Platz, wo sie stünde. */
+export const BareWithoutTitle: Story = {
+  render: () => (
+    <div style={{ maxWidth: 360 }}>
+      <FieldList
+        tone="bare"
+        rows={[
+          ["Belegdatum", "26.08.2026"],
+          ["Belegnummer", "RE-4471"],
+          ["Bruttobetrag", "1.249,90 €"],
+          ["Steuerschlüssel", "9 — 19 % Vorsteuer"],
+        ]}
+      />
+    </div>
+  ),
+};
