@@ -86,6 +86,7 @@ export { RadioGroup, type RadioOption } from "./primitives/RadioGroup";
 export { AmountInput, parseAmount, type ParsedAmount } from "./primitives/AmountInput";
 export { InlineEdit, type InlineEditInputProps } from "./primitives/InlineEdit";
 export { Combobox, type ComboboxOption } from "./primitives/Combobox";
+export { DateField, DateRangeField, type DatePreset } from "./primitives/DateField";
 export { FileDrop, type DroppedFile } from "./primitives/FileDrop";
 
 /* Dialog */
@@ -104,6 +105,7 @@ export { Disclosure, type DisclosureTone } from "./primitives/Disclosure";
 export { PageHeader } from "./primitives/PageHeader";
 export { ToastHost, useToast, type Toast, type ToastTone } from "./primitives/Toast";
 export { Skeleton, type SkeletonVariant } from "./primitives/Skeleton";
+export { Markdown, parseInline, parseMarkdown } from "./primitives/Markdown";
 
 /* Tabelle */
 export { Card, CardHead, CardFoot, Table, HeadRow, Row, GroupRow, EmptyRow } from "./primitives/Table";
@@ -158,6 +160,12 @@ export {
   type StateKind,
 } from "./patterns/Review";
 export { ComparisonTable, type ComparisonRow } from "./patterns/ComparisonTable";
+export { Timeline, type TimelineItem } from "./patterns/Timeline";
+export {
+  ChoicePrompt,
+  type ChoiceOption,
+  type ChoiceAnswer,
+} from "./patterns/ChoicePrompt";
 
 /* Prozess */
 export {

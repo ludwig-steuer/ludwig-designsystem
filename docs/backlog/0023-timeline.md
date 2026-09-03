@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `patterns/` |
 | Klassen-Test | ja, sobald es dort Vorgänge mit Historie gibt — „Ereignisse in der Zeit" kennt kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Verlauf` (Zeitstrahl — **heute siebenmal verschieden**), 7 Stellen · Showcase `src/showcase/CaseCrud.stories.tsx` |

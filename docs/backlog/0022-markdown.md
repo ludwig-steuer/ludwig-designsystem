@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | ja, unverändert — „fremd erzeugter Fließtext, sicher dargestellt" hat kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Markdown` (KI-Texte, Notizen), 5 Dateien / 12 Stellen · Showcase `src/showcase/CaseCrud.stories.tsx` (Zusammenfassung des Sachverhalts) |

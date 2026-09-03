@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | ja, unverändert — ein Datum hat kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Datumsfeld` / `Zeitraumfeld`, **14 Dateien** · Showcase `src/showcase/CaseCrud.stories.tsx` (Frist, Eröffnungsdatum) |
