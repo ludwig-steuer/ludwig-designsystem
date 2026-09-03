@@ -26,7 +26,7 @@ für eine einzige Fläche zu erfinden. Die Ausnahme gilt **nur** für diese
 Datei — jede Komponente und jedes andere Stylesheet bleibt bei Tokens. Code-Regeln
 der Web-App (Module, Drawer-Katalog, Tests): `docs/topics/web-ui.md` R1–R17,
 `apps/web/AGENTS.md`.
-**Stand 2026-08-30:** A1–A7 entschieden (A7 noch nicht umgesetzt, §11.5) ·
+**Stand 2026-09-03:** A1–A9 entschieden (A7/A9 noch nicht umgesetzt, §11.5) ·
 V1–V14, L1–L7, T1–T9, Z1–Z6, I1–I10 zur Abnahme (§13). Ersetzt `F122-v2-designsprache.md`,
 `F122-v2-token-werte.md`, `F122-v2-inventar.md` (konsolidiert, gelöscht).
 
@@ -70,8 +70,8 @@ Alles Folgende gilt dem produktiven Register, wenn nicht anders gesagt.
 | Tabelle | Trennlinien `--color-border-subtle`, keine Zebra-Streifen, keine Gitter (V4). Maße `v2.css`. |
 | Radius | sm Inputs/Tags · md Buttons/Karten · lg große Karten/Dialoge · xl nur Hero · pill nur Status-Badge. Nichts „cuddly". |
 | Schatten | `--shadow-xs…lg`, sparsam: Menü, Popover, Dialog. Karten bevorzugen Rand. |
-| Icon | Lucide, Stroke 1.5 px, `currentColor`, 16/20/24 px, **nur funktional, nie ohne Wort**. Keine Emoji, keine Unicode-Icons (✓ ✗ ⚠ ●), keine farbigen/gefüllten/animierten Icons (Ausnahme Füllung im Status-Badge). |
-| Bewegung | Fade, Translate-Y 4–8 px, Höhe beim Ausklappen; `--duration-fast/base/slow`, `--ease-standard`. Kein Skalieren, Federn, Parallax, Glanz (V12). |
+| Icon | Lucide, Stroke 1.5 px, `currentColor`, **Leiter je Register** (A8): produktiv 12/14/16 px, lesend 16/20/24 px — das Icon folgt der Schriftstufe, nie umgekehrt. **Nur funktional, nie ohne Wort**. Keine Emoji, keine Unicode-Icons (✓ ✗ ⚠ ●), keine farbigen/gefüllten/animierten Icons (Ausnahme Füllung im Status-Badge). |
+| Bewegung | Fade, Translate-Y 4–8 px, Höhe beim Ausklappen; `--duration-fast/base/slow`, `--ease-standard`. Kein Skalieren, Federn, Parallax, Glanz (V12). **Jede Transition und Animation respektiert `prefers-reduced-motion: reduce`** — aus oder auf Fade reduziert: ein Skeleton pulsiert dann nicht, ein Toast erscheint ohne Weg. |
 | Hover | **Jedes klickbare Element hat einen Hover-Zustand** — Zeile, Karte, Tab, Chip, Icon-Knopf, Link. Hintergrund eine Tonstufe (Link: Unterstreichung); nichts wächst, nichts springt. Ohne Hover-Antwort ist ein Element nicht klickbar; umgekehrt bekommt nichts Hover, was nicht klickt. |
 | Fokus | `:focus-visible` mit `--color-focus`, 2 px + Offset, nie abgeschaltet (V10). |
 | Ebenen | Backdrop-Blur nur Dialog-Overlay; kein Glassmorphism, keine Texturen, keine Illustrationen. |
@@ -211,10 +211,10 @@ Registry-Entscheid im Handoff, nicht still im Screen (F123 §2.4).
 - [ ] Farbe nur als Kritikalitätsstufe, Rot nur Fehler, Vorzeichen ohne Farbe (V6, L7, A7)
 - [ ] Jeder farbige Zustand hat Wort oder Icon (V7); Status nur über Registry (Z2–Z4)
 - [ ] Fünf Zustände: gefüllt · leer · leer nach Filter · lädt · Fehler, drei Leertexte (V9, T6)
-- [ ] Kontrast: Text ≥ 4.5:1, Rahmen/Icons/Fokus ≥ 3:1; Fokusring sichtbar (V10)
+- [ ] Kontrast: Text ≥ 4.5:1, Rahmen/Icons/Fokus ≥ 3:1; Fokusring sichtbar; Bewegung respektiert `prefers-reduced-motion` (V10, §2)
 - [ ] Hauptweg per Tastatur, Taste sichtbar; kein Icon ohne Wort (V11, V14, T8)
 - [ ] Jedes klickbare Element antwortet auf Hover; Listenzeile mit Detail ist ganz klickbar (§2, I11)
-- [ ] Icons Lucide 1.5 px; keine Emoji/Unicode-Icons, keine Versalien (§2, T9, A2)
+- [ ] Icons Lucide 1.5 px, Maß aus der Leiter des Registers (A8); keine Emoji/Unicode-Icons, keine Versalien (§2, T9, A2)
 - [ ] Karte: Rand **oder** Schatten; linksbündig; kein Modal, wo Detail oder Drawer geht (L2–L4)
 - [ ] Texte nach T1–T5 (Sie, Imperativ, GLOSSARY-Begriffe)
 - [ ] **Story** unter `v2/Primitives|Patterns|Entitäten/<Entität>/<Name>` mit allen fünf Zuständen (Storybook ist die Antwort auf „wovon gibt es v2?")
@@ -361,7 +361,7 @@ Erledigt: K1–K3, A2, A3, A1, 17 `#B07B2C`-Literale auf den Token.
 | Stories mit Präfix `v2/` | 0 von 64 Story-Dateien | §9 |
 | `--color-border-control` an Feldern anwenden | nur definiert | I8 |
 | `--color-success` auf `success-bg` 4.46:1 | am `success-bg` korrigieren | V10 |
-| `warning-strong` auf die Skala zurückführen | **Erledigt (F123):** `--color-warning-strong: #9C5021` in `tokens.css` (5.85:1 auf `bg`, 5.40:1 auf `bg-soft`), `.v2num--warning-strong` in `v2.css`, Stufen in `deviationTone()` (`stapelabnahme/domain/vergleich.ts`) — die einzige Stelle, an der 15/50/100 % stehen | A7/§3 |
+| `warning-strong` von der Skala nehmen (A7, bestätigt A9) | **Offen.** F123 hatte ihn stattdessen mit neuem Wert „zurückgeführt" — der Widerspruch zu A7, den A9 auflöst. Rückbau ist eine eigene Aufgabe: `--color-warning-strong` in `tokens.css`, `.v2num--warning-strong` in `v2.css`, `CellTone` in `Cells.tsx`, `AbweichungsTon`/`deviationTone()` (`stapelabnahme/domain/vergleich.ts`, die einzige Stelle mit 15/50/100 %) auf die vier Stufen Debug/Hinweis/Warnung/Fehler. Bis dahin zeigt 0055 den Token als „entfällt". | A7/A9/§3 |
 
 ### 11.6 Reihenfolge
 
@@ -385,9 +385,9 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 
 | Grundlage | Ist | Status |
 |---|---|---|
-| Tokens: Farbe, Schrift, Raum, Radius, Schatten, Bewegung, Fokus | `tokens.css`, `v2.css` | v2 |
-| Icon-Set Lucide 16/20/24, Stroke 1.5, nie ohne Wort | 12 Dateien mit Unicode-Icons (§11.5) | heben |
-| Marke: Wordmark, Mark, Light-Variante | `design/…/assets` | v2 |
+| Tokens: Farbe, Schrift, Raum, Radius, Schatten, Bewegung, Fokus; Konventionen Hover/Zustand/Ebenen | `tokens.css`, `v2.css`; Nachweis Schrift 0037, Farbe/Raum/Icons 0055 | v2 (0037, 0055) |
+| Icon-Set Lucide, Leiter je Register (A8), Stroke 1.5, nie ohne Wort | 12 Dateien mit Unicode-Icons (§11.5); in `src/ui/v3` Maße 12.5/13/15 und Strokes 1.75/2 neben der Leiter | heben (0055 zeigt) |
+| Marke: Wordmark, Mark, Light-Variante | `reference/design-system-v2/assets/`; Storybook schreibt „Ludwig" als Text | v2 (0056) |
 | Ein Formatter: Betrag (`tnum`, Vorzeichen), Datum/Zeit Europe/Berlin, Kontonummer/BU mono | `src/ui/v3/format.ts` + `Amount`/`Time`/`MonoCell`; in der App noch 7 Betrags-, 9 Datums-Formatierer und 83 `toLocale*`-Stellen | v2 (0032, 0033); App-Seite offen (T7, P24) |
 | Zwei Register: produktiv (13.5–14 px) · lesend (16 px) | A1 | v2; lesend prüfen |
 
@@ -561,6 +561,9 @@ außerhalb `tokens.css` ist der Test (§11.5).
 | **A5** | Sprache und Ausprägung getrennt: Regeln nennen Rollen/Token-Namen, Zahlen nur im Code. Ein Hex-Wert in einer Regel ist ein Verstoß. |
 | **A6** | Kein Bestandsschutz: Token-, Klassen-, Primitiven-Änderungen wirken app-weit sofort; v1 wird nachgezogen, bevor ein Endnutzer es sieht. Kein Shim, keine v1-Variante. |
 | **A7** | Farbe kodiert **Kritikalität, nie einen Wert**. Eine Skala Fehler · Warnung · Hinweis · Debug, je genau eine Farbkategorie, technisch und fachlich dieselbe (§3). Folgen: negative Beträge nur Vorzeichen + `tnum` (`AmountCell.tone` Default ohne Farbe); L7 auf die vier Stufen; `--color-warning-strong` entfällt (§11.5). |
+| | Owner 2026-09-03 (Review 0055) |
+| **A8** | **Icon-Leiter je Register:** produktiv 12/14/16 px, lesend 16/20/24 px, Stroke 1.5. Das Icon folgt der Schriftstufe seines Registers; 16/20/24 aus dem Marken-Brief galt dem lesenden Register mit 16-px-Text. Abweichler in `src/ui/v3` (12.5, 13, 15; Stroke 1.75, 2) werden beim nächsten Anfassen der Komponente auf die Leiter gezogen, nicht in Masse. |
+| **A9** | **A7 bestätigt:** `--color-warning-strong` entfällt. §11.5 hatte ihn als „zurückgeführt" gemeldet — das war der Widerspruch. Rückbau (Token, Klasse, `CellTone`, `deviationTone()` auf Debug/Hinweis/Warnung/Fehler) ist eine eigene Aufgabe; bis dahin zeigt 0055 den Token als „entfällt". |
 
 ## 14 Quellen
 
