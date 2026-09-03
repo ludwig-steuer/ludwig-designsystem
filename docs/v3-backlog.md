@@ -1,6 +1,10 @@
 # v3 — was noch fehlt
 
 Erhoben am 2026-09-03 gegen `ludwig/app/apps/web/src` (219 Komponentendateien).
+**Stand 2026-09-03, abends:** die beiden ersten Gruppen sind gebaut — was
+dort steht, ist die Erhebung von morgens und bleibt als Beleg der Zahlen
+stehen; der Status je Baustein steht im Soll-Katalog `design-guidelines.md`
+§11.7 und in `docs/backlog/`.
 Zahlen sind gezählt, nicht geschätzt: „Dateien" = Dateien mit Import,
 „Stellen" = JSX-Vorkommen.
 
@@ -9,6 +13,12 @@ Maßgeblich bleiben `design-guidelines.md` §11 (Inventar) und R21 (Dreiteilung)
 `entities/<x>/` gehört genau einer Entität.
 
 ## Zuerst — ohne diese fünf kommt keine Seitenmigration voran
+
+**Alle fünf stehen** (2026-09-03): `Badge` und `EmptyState` waren beim
+Erheben schon da — die Zeilen 1 und 3 waren bereits überholt, offen war an
+`EmptyState` nur die Zentrierung (behoben). `PageHeader` ist 0002,
+`FilterBar` 0003, `ActionButton` 0004; den Bestätigungsdialog trägt
+`ActionButton` mit `confirm`, statt dass es einen eigenen Baustein gibt.
 
 | # | Baustein | Heute | Nutzung | Stufe |
 |---:|---|---|---:|---|
@@ -39,6 +49,10 @@ Warum diese Reihenfolge:
 
 ## Danach — von den Detail- und Drawer-Umzügen der Welle 1 gebraucht
 
+**Alle fünf stehen** (2026-09-03): `Disclosure` 0005, `FieldList tone="bare"`
+0006 (statt einer zweiten DescriptionList), `Toast` 0007, `OverflowMenu` 0008,
+`Combobox` 0009.
+
 | Baustein | Heute | Nutzung | Stufe |
 |---|---|---:|---|
 | **`Aufklapper`** (Disclosure) | natives `<details>/<summary>` | 34 Stellen / 20 Dateien | `primitives` |
@@ -52,6 +66,12 @@ Karte, `Werteliste` steht frei — in Drawer, Detail, Zusammenfassung.
 `Auswahlfeld` ist die Basis, aus der `AccountField` die Konto-Variante wird.
 
 ## Später — echter Bedarf, aber kein Blocker
+
+Davon stehen seit 2026-09-03: `Timeline` (0023), `Markdown` (0022),
+`DateField`/`DateRangeField` (0024), `FileDrop` (0021), `Skeleton` (0016).
+Offen bleiben `Assistent` (Wizard), `Rohdaten`, `Balkendiagramm`,
+`KopierenKnopf`, `Schalter` (0018 — Bedarf nicht belegt, erst entscheiden),
+`Trennlinie`, `Avatar`, `Brotkrume`.
 
 | Baustein | Nutzung | Stufe |
 |---|---:|---|
@@ -97,11 +117,14 @@ Nicht zu vergessen bei der Umstellung: `.btn` ist heute **37 px**, `.btn-sm`
   Erst wenn der Ordner leer ist, ist v3 vollständig (siehe `legacy/README.md`).
 - **`.v2tbl__empty` ist zentriert** (`v3.css`) — Verstoß gegen V3 „nichts
   zentriert". Die Guidelines markieren ihn als „im v2-Set **sofort**".
-- **`AiBookingNotes` hat keine Story.** Einziger v3-Export ohne eine.
+- **`AiBookingNotes` hat keine Story.** Einziger v3-Export ohne eine (Stand
+  2026-09-03 unverändert).
 - **Sammeldateien**: `Surface.tsx` und `Interactive.tsx` sind bereits in
   Einzeldateien aufgelöst; `Cells.tsx` (7 Exporte), `Form.tsx` (5), `Nav.tsx`
   (4) und `Table.tsx` (8) sind es noch nicht. Konsequent wäre dieselbe
   Auflösung — jede Komponente eine Datei, jede mit ihrer Story daneben.
+  Stand 2026-09-03: `Cells.tsx` 8 Exporte (neu: `MonoCell`), `Table.tsx` 8,
+  `Form.tsx` 5, `Nav.tsx` 4.
 
 ## Bleibt Alt-Mechanik, bekommt nur v3-Optik
 
