@@ -113,6 +113,8 @@ Zweifel steht der Quelltext da).
 | `maxHeight` blendet und bietet „Ganz lesen" (Offene Frage 2) | `--lang`: `.v2mk__body` auf `max-height: 220px` mit `linear-gradient`-Maske; Klick auf `summary` „Ganz lesen" → `open`, Höhe 220 → 918 px, ohne eine Zeile Zustand (natives `details`) | ✓ |
 | `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
 
+**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): Links tragen `target="_blank"`, `title` mit dem Ziel und `rel="noopener noreferrer"`; `javascript:` kommt im DOM nicht vor.
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
 (1) Der Abschnitt „Der Punkt" verlangt drei Dinge von einem Link — `rel`,
 **neuer Tab** und **sichtbares Ziel**. Umgesetzt ist nur `rel`: es gibt kein

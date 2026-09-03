@@ -18,6 +18,16 @@ Nutzung. Sie ist die Quelle für neue Aufgaben, aber keine Aufgabe selbst.
 
 Wer baut, nimmt nicht selbst ab. Der Abnehmende liest die Spec, nicht den Chat.
 
+**Kriterien, die auf `ludwig/app` zielen** („ersetzt `<alt>` in `<Datei>`"),
+werden hier **nicht** erfüllt — dieses Repo ist das ausgelagerte
+Design-System, die Ablösung in der App ist ein eigener Schritt. Der Skill
+`v3-komponente` überspringt aus demselben Grund schon zwei Punkte der festen
+Prüfliste (§9: „ersetzt ihr v1-Gegenstück", „in §11 auf v2 gesetzt"); für die
+variablen Kriterien gilt dasselbe. Der Abnehmende trägt sie als **offen (App)**
+ein, nicht als ✗, und der Status kann trotzdem `fertig` werden. Sonst bliebe
+jede Aufgabe hier hängen, bis die App migriert ist — und die wartet auf die
+Bausteine.
+
 ## Status
 
 `offen` → `spec` → `in Arbeit` → `Abnahme` → `fertig`. Der Status steht in

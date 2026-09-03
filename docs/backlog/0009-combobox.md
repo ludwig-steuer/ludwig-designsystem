@@ -110,6 +110,8 @@ Nicht anwendbar: keine — alle fünf Zustände treffen zu.
 | `AccountField` bleibt unverändert und grün | `git log -- src/ui/v3/entities/account/AccountField.tsx` → letzter Commit `9bf1291` (Umbenennung 0001), kein Eingriff aus dieser Runde; `git status` zeigt nur `docs/backlog/*` | ✓ |
 | `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
 
+**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): Der hervorgehobene Treffer bleibt beim Wandern im Sichtfeld (acht ArrowDown-Schritte, `scrollTop` 0 bis 26, jedes Mal vollständig sichtbar); Story `Grouped` zeigt den flachen Fall ohne `group` (7 Optionen, 0 Gruppenköpfe).
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
 (1) Story `Grouped` nachziehen — eine Liste **ohne** `group` neben einer mit,
 sonst ist „ohne sie flache Liste" unbelegt. (2) Entprellung und Wettlauf-Schutz

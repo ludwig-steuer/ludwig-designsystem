@@ -84,6 +84,8 @@ Nicht anwendbar: `LeerNachFilter` — es gibt keinen Filter.
 | Ersetzt die Drop-Zone in `InvoiceUploader.tsx` ohne Funktionsverlust | Vergleich mit `app/apps/web/src/modules/files/ui/InvoiceUploader.tsx`: Zone, Klick, Drag, Tastaturweg, Hinweiszeile, Dateiliste, Größe, Fortschritt und Entfernen sind gedeckt — die stille Ablehnung des Originals wird sogar zum genannten Grund. Nicht abbildbar ist der **Zustand je Datei**: `DroppedFile` kennt nur `progress` und `error`, das Original zeigt sechs Schrittwörter (`wartend`, `Upload-URL`, `Upload NN %`, `Bestätigung`, `Registrieren`, `Bereit`/`Duplikat`) und je Datei einen Link „Beleg öffnen →" | ✗ |
 | `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
 
+**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): `accept` greift auch beim Ablegen: simulierter Drop von `notiz.txt` gegen `application/pdf,image/*` erzeugt „Format nicht vorgesehen", `beleg.pdf` und `foto.png` gehen durch, 21 MB fällt an der Größe.
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
 (1) `accept` auch beim Ablegen prüfen und die abgelehnte Datei mit Grund in die
 Liste stellen — sonst ist die Story `Rejected` für den Formatfall gestellt und

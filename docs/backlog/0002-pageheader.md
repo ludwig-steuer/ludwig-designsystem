@@ -126,6 +126,8 @@ Variabel (aus dieser Spec):
 | Server-Component: kein `"use client"` | `grep -n "use client" src/ui/v3/primitives/PageHeader.tsx` → keine Zeile | ✓ |
 | Ersetzt `PageHeader` der App ohne Funktionsverlust | App-Datei gelesen: Props `title`, `sub`, `actions` — gedeckt durch `title`, `description`, `actions`; der Rest kommt hinzu. Der Umzug in `ludwig/app` selbst steht noch aus | ✓ |
 
+**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): Story `LongTitle` rendert den umbrechenden Titel ohne horizontalen Überlauf (`scrollWidth <= clientWidth`).
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: Der in §6
 abgeleitete Randfall „langer Titel" hat keinen Nachweis — `InUse` braucht
 einen Titel über 80 Zeichen oder es fehlt eine eigene Story dafür.

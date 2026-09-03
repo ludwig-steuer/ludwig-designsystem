@@ -127,6 +127,8 @@ Nach §6: 3 Zustände + 2 Enums + 1 Callback + 1 „im Einsatz" + 1 Rand = 8.
 | Ersetzt `CycleTimeline` ohne Funktionsverlust | Vergleich mit `app/apps/web/src/modules/cycles/ui/CycleTimeline.tsx`: Das ist keine Zeitleiste im Sinn dieser Spec, sondern eine **waagerechte Kartenreihe der Buchungsjahre** (`role="list"`, feste Kartenbreite, `overflow-x`, ganze Karte als `next/link`, `aria-current="page"` auf dem aktiven Jahr, drei Zählwerte je Karte, und bei leerer Liste rendert sie `null` statt eines Leertexts). `Timeline` kennt weder `href` noch Karten und rendert `emptyText` — ein Ersatz ist es nicht | ✗ |
 | `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
 
+**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): Vier `<time dateTime=…>`-Elemente statt eigener Formatierung (`span.v2tl__when` 0×), `kindLabels` übersetzt `clarification` zu „Rückfrage" usw.
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
 (1) Zeiten auf `Timestamp` umstellen oder — falls die langen Gruppenköpfe das
 verhindern — `Timestamp` um die nötigen Formate erweitern; heute steht im DOM

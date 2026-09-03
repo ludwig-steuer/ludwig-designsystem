@@ -96,4 +96,6 @@ zeigt `Skeleton`, 0016).
 | Minus ist schwarz wie jede andere Ziffer | `--signs`: „-312,40 €" in `rgb(45, 45, 45)`, identisch zum positiven Feld darunter | ✓ |
 | Ersetzt das Betragsfeld in `ExtractionCorrectionCard.tsx` | Kein `AmountInput`-Import in `ludwig/app` (`grep`) | ✗ |
 
+**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): `parseAmount` hat `@when`/`@instead`.
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die 16 Fundorte in `ludwig/app` sind nicht umgestellt; `parseAmount` ist ein Export ohne `@when`/`@instead`; das Label erbt die Versalien aus `.v2field__label` (A2).

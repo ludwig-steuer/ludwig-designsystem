@@ -116,6 +116,8 @@ Variabel (aus dieser Spec):
 | Ersetzt `CaseSummaryEditor.tsx` ohne Funktionsverlust | App-Datei gelesen: `isEditing`, Draft, `useTransition`, Fehler, mehrzeiliges Feld — alles gedeckt (`multiline` + `renderInput` mit `Textarea`); der Platzhalter kommt über `renderInput`. Zusätzlich: sichtbare Beschriftung statt Bleistift-Icon ohne Wort. Der Umzug selbst steht aus | ✓ |
 | Story-Deckung der Schnittstelle (Spalte „Nachweis (Story)") | `--pending` benutzt die Prop `pending` nicht, sondern das langsame `onSave`; `--error` benutzt die Prop `error` nicht, sondern den Wurf aus `onSave`. Beide Props sind damit unbelegt; `renderValue` ist statt in `Filled` nur in `WithTextarea` zu sehen | ✗ |
 
+**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): Die Stories `Pending` und `Error` zeigen beide Wege — die Prop und den aus `onSave` geworfenen Fall.
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
 
 1. `pending` und `error` — die von außen gesteuerten Wege — hat keine Story.

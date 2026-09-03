@@ -86,6 +86,8 @@ kein Fall für dieses Pattern), `LeerNachFilter`.
 | Ersetzt `RaiseClarificationForm.tsx` ohne Funktionsverlust | Vergleich mit `app/apps/web/src/modules/accounting-cases/ui/sachverhalt/RaiseClarificationForm.tsx`: Frage, Freitext, Absenden, Laufzustand und Fehler sind gedeckt, Strg+Enter kommt neu hinzu. Nicht gedeckt: das Formular ist **eingeklappt** (Auslöser-Knopf „Rückfrage stellen"), es hat neben dem Text **zwei weitere Eingaben** (Empfänger-Select mit Hinweiszeile, die mit der Auswahl wechselt, und den Schalter „Blockiert die Buchung") und einen **Abbrechen**-Weg, der den Entwurf behält | ✗ |
 | `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
 
+**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): Strg+Enter sendet mit Fokus auf einem Radio, ohne Textfeld im Baum; `defaultOptionId` ist vorbelegt.
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
 (1) Strg+Enter gehört an das Pattern, nicht an das Freitextfeld — sonst muss die
 Taste am Knopf verschwinden, wenn `freeText` fehlt. (2) Die Story `Filled` soll

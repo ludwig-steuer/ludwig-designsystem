@@ -137,6 +137,8 @@ Variabel (aus dieser Spec):
 | `danger`-Einträge am Wort erkennbar (V7) | `--variants`: „Vorschlag verwerfen" mit Papierkorb-Icon, „Buchung stornieren" gesperrt mit Grund im `title` — die Farbe kommt zum Wort dazu, nicht statt seiner | ✓ |
 | Ersetzt `DocActionsMenu` inklusive `aria-label` | App-Datei gelesen: `children`-only, Auslöser „⋯" mit `aria-label="Weitere Aktionen"` → hier sichtbares Wort „Mehr". Unterschied fürs Umziehen: das App-Panel wächst nach Inhalt (`min-width 260`, `max-width min(620px,90vw)`), weil der Klassifikations-Editor darin aufklappt; hier sind es feste 208 px und 320 px Höhe mit Scrollen. Der Umzug selbst steht aus | ✓ |
 
+**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): Klappe bleibt im Fenster (gemessen `left 8 / right 216` bei 1440 px, ebenso bei 700 und 360 px); ein gewählter Eintrag — auch ein `href` — schließt sie; das 4-px-Maß steht im CSS, in der Komponente nur `EDGE`.
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
 
 1. **Die Klappe bleibt nicht im sichtbaren Bereich** — bei `align="end"` und

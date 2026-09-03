@@ -113,4 +113,6 @@ Nicht anwendbar: `Leer`, `Laedt`, `Fehler`, `LeerNachFilter`.
 | Ersetzt das Schließen-Kreuz in `v3/primitives/Dialog.tsx` | `Dialog.tsx:73` weiter rohes `<button className="v2dlg__close">` mit eigenem `aria-label` | ✗ |
 | Räumt mindestens eine der neun Stellen ohne `aria-label` in `ludwig/app` auf | Kein `IconButton`-Import in `ludwig/app` (`grep`) | ✗ |
 
+**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): T8 in `design-guidelines.md` trägt jetzt die benannte Ausnahme mit den drei Bedingungen; die `@when`-Zeile nennt alle drei; `RowActions` verweist darauf, dass das Kebab nicht darunter fällt.
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die T8-Ausnahme fehlt im SSOT; der `Button.tsx`-Kommentar fehlt; `Dialog.tsx` und die App sind nicht umgestellt; Bedingung 2 fehlt in der `@when`-Zeile.
