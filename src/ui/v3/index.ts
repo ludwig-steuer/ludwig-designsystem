@@ -9,7 +9,7 @@
  * Was hier liegt, kennt **kein Fachmodul**: Daten kommen als Props, Loader
  * als Prop, keine Server Actions, keine Modul-Importe.
  *
- * Drei Stufen, drei Ordner (F128, `web-ui.md` R21): `primitives/` (kein
+ * Drei Stufen, drei Ordner (F128, `web-ui-regeln.md` R21): `primitives/` (kein
  * Fachwort), `patterns/` (Arbeitsflächen-Muster, kennt Prozessbegriffe),
  * `entities/<entität>/` (Darstellungsfamilie genau einer Entität). Importiert
  * wird nur abwärts — Primitives kennen keine Patterns, Patterns keine

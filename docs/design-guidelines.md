@@ -24,7 +24,8 @@ Anwendungsrahmen in `src/styles/app-chrome.css` behält seine rohen Hex- und
 bewusst außerhalb der Palette steht; sie auf Tokens zu ziehen hieße, Tokens
 für eine einzige Fläche zu erfinden. Die Ausnahme gilt **nur** für diese
 Datei — jede Komponente und jedes andere Stylesheet bleibt bei Tokens. Code-Regeln
-der Web-App (Module, Drawer-Katalog, Tests): `docs/topics/web-ui.md` R1–R17,
+der Oberfläche: die Design-Anteile in `docs/web-ui-regeln.md` (R2, R3, R4, R7,
+R9, R15, R18, R21), das Fachliche drüben in `docs/topics/web-ui.md` und
 `apps/web/AGENTS.md`.
 **Stand 2026-09-03:** A1–A9 entschieden (A7/A9 noch nicht umgesetzt, §11.5) ·
 V1–V14, L1–L7, T1–T9, Z1–Z6, I1–I10 zur Abnahme (§13). Ersetzt `F122-v2-designsprache.md`,
@@ -203,7 +204,7 @@ Registry-Entscheid im Handoff, nicht still im Screen (F123 §2.4).
 
 ## 9 Prüfliste je Komponente (v2-fertig)
 
-- [ ] Liegt unter `apps/web/src/ui/v2/{primitives|patterns|entities/<entität>}/` — eine Stufe, Importe nur abwärts (`web-ui.md` R21); Export über `@/ui/v2`, kennt kein Fachmodul
+- [ ] Liegt unter `apps/web/src/ui/v2/{primitives|patterns|entities/<entität>}/` — eine Stufe, Importe nur abwärts (`web-ui-regeln.md` R21); Export über `@/ui/v2`, kennt kein Fachmodul
 - [ ] **Ersetzt** ihr v1-Gegenstück (`@deprecated`), steht nicht daneben (A6, F123 §2.2)
 - [ ] Kein Hex, kein px außerhalb `v2.css`, keine lokale Label-Map, kein eigener Status-Text (V13, A5)
 - [ ] Text links, Zahlen rechts mit `tnum`, nichts zentriert (V3)
@@ -266,7 +267,7 @@ Klassen ohne React-Gesicht (`v2.css`, gewollt): `v2num` · `v2sub` · `v2main` �
 ### 11.2 Stand des v2-Sets
 
 **Gebaut (F123 T123.1/T123.2/T123.3, alle mit Story `v2/…`).** Verortung seit
-F128 (`web-ui.md` R21): Aktion · Navigation · Fläche · Formular · Tabelle und die
+F128 (`web-ui-regeln.md` R21): Aktion · Navigation · Fläche · Formular · Tabelle und die
 Zellen liegen unter `primitives/`; Arbeitsfläche · Prüfen · Rahmen · Prozessbild
 · `VergleichsTabelle` unter `patterns/`; `KontoFeld` unter `entities/konto/`,
 `BuchungssatzEditor` + `KIBuchungshinweise` unter `entities/buchungssatz/`.
@@ -581,5 +582,6 @@ erstellt) · F109/F114 Design-Briefs, F111 UI-Inventar, F118 §2, F123.
 - Neue Achse, neuer Baustein, migrierte Seite → §7-Reihenfolge, §11 Häkchen,
   Story `v2/…`, `docs/ui-repraesentationen.md`.
 - Wird ein Prinzip abgelehnt, wird es hier gelöscht; Code-Regeln, die daraus
-  folgen, stehen in `docs/topics/web-ui.md` (R-Format) und verweisen hierher.
+  folgen, stehen im R-Format — die Design-Anteile in `docs/web-ui-regeln.md`,
+  das Fachliche in `docs/topics/web-ui.md` — und verweisen hierher.
 - `make docs-audit` prüft Verweise.

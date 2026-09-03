@@ -82,6 +82,7 @@ Offen bleiben `Assistent` (Wizard), `Rohdaten`, `Balkendiagramm`,
 | `Markdown` (KI-Texte, Notizen) | 5 / 12 | `primitives` |
 | `Dateiablage` (Upload/Dropzone) | 5 | `patterns` |
 | `Balkendiagramm` | 4 / 5 | `primitives` |
+| `Sparkline` (4–12 Werte in der KPI-Kachel) · `Altersstruktur` (OPOS-Buckets) — die zwei Formen aus P23, die weder `BarChart` (0041) noch `Progress` (0045/0046) abdecken | `v2spark` inline in `Schritt6Liste.tsx` (`aria-hidden`, ohne Text-Alternative); OPOS-Alter heute nur als Tabelle | `primitives` |
 | `Prozessbild` (`ProcessMini`/`ProcessStepper`/`Baton`/`RelayBar` — wie weit und wer ist dran, beides aus dem Zustand abgeleitet) | 2 Dateien nutzen die Familie, **6 Ketten** haben je eine eigene Darstellung (`PipelineStepper`, `ProcessingProgress`, `JobStatusMonitor`, `SourceDocPipelineTab`, `CycleTimeline`, `FlowModal`) | `patterns` |
 | `Ladeanzeige` außerhalb der Tabelle | 3 | `primitives` |
 | `KopierenKnopf` · `Schalter` · `Radiogruppe` · `Trennlinie` · `Avatar` · `Brotkrume` | 3 / 2 / 2 / 6 / 3 / 2 | `primitives` |

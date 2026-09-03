@@ -426,7 +426,7 @@ Bausteine, gepflegt an zwei Stellen von Hand. Empfehlung in §4.3.
 
 ### B3 — Tab-Leisten: eine Regel, acht Umsetzungen (Schwere: mittel)
 
-`web-ui.md` R9 schreibt die `TabBar`-Primitive vor. Gehalten wird sie von
+`web-ui-regeln.md` R9 schreibt die `TabBar`-Primitive vor. Gehalten wird sie von
 **einer** der acht Leisten:
 
 | Komponente | Zeilen | nutzt `TabBar` |
@@ -463,7 +463,7 @@ weiterhin leer.
 
 ### B5 — Log-Ansichten: die Regel greift zur Hälfte (Schwere: niedrig)
 
-`web-ui.md` R7 verlangt eine geteilte Log-Darstellung. `LogTable`/`LogView`
+`web-ui-regeln.md` R7 verlangt eine geteilte Log-Darstellung. `LogTable`/`LogView`
 existieren und werden benutzt — aber `AuditLogTable` (122 Zeilen, eigener
 Expand-State), `InvoiceTracesTable` und `ExtractionLogsTable` bringen jeweils
 eigene Spaltendefinitionen mit. Zwei davon (`InvoiceTracesTable`,
@@ -543,7 +543,7 @@ brauchen.
 Modul gebraucht, gehört sie in die geteilte Schicht. Modul-`ui/` behält
 Screen-Kompositionen (Tabs, Filter, Formulare, Wizards).
 
-**Ort für die Dauer der v2-Migration (F128, `web-ui.md` R21):**
+**Ort für die Dauer der v2-Migration (F128, `web-ui-regeln.md` R21):**
 `src/ui/v2/entities/<entität>/` — dort steht die Stufe im Pfad und der
 Wächter-Test hält die Import-Richtung. `src/ui/<entität>/` (Bestand: `ui/case`,
 `ui/beleg`, `ui/booking`) bleibt der v1-Ort und stirbt mit der Migration; ist
@@ -610,7 +610,7 @@ die Antwort ohne Seitenwechsel passt — der Kontext dahinter bleibt sichtbar.
 Er ist keine vierte Größe, sondern eine **Hülle um XL-Inhalt**: er lädt, fängt
 Fehler, öffnet den Rahmen und zeigt darin die Kern-Fakten aus derselben
 Komponente wie die Vollansicht — plus genau einen Ausgang dorthin. Name,
-Aufbau und die vier Zustände: `web-ui.md` R15 (Muster `BelegDrawer`, F113).
+Aufbau und die vier Zustände: `web-ui-regeln.md` R15 (Muster `BelegDrawer`, F113).
 
 ### 4.5 Vorschlag für neue R-Regeln in `docs/topics/web-ui.md`
 
