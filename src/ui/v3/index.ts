@@ -91,6 +91,7 @@ export {
 } from "./primitives/NavList";
 
 export { Pagination } from "./primitives/Pagination";
+export { RecordPager } from "./primitives/RecordPager";
 
 /* Formular */
 export { Field, Input, InputGroup, Textarea, Select, Checkbox } from "./primitives/Form";

@@ -2023,3 +2023,27 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2card__ico { flex: 0 0 auto; line-height: 0; color: var(--color-text-subtle); }
 .v2card__h > div:not(.actions):not(.v2card__meta) { margin-right: auto; min-width: 0; }
 .v2card__meta { font-size: 12px; color: var(--color-text-subtle); flex-shrink: 0; }
+
+/* ── RecordPager (0047) ───────────────────────────────────────────────────
+   Rückweg, Pfeil, Zählung, Pfeil — eine Zeile, die sich beim Blättern nicht
+   bewegt: die Ziffern sind tabellarisch, und ein Pfeil am Ende des Vorrats
+   bleibt stehen, statt zu verschwinden. */
+.v2pager { display: inline-flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+.v2pager__back {
+  display: inline-flex; align-items: center; gap: 2px;
+  font-size: 12.5px; margin-right: var(--space-2);
+}
+.v2pager__count {
+  font-size: 12.5px; color: var(--color-text-muted); white-space: nowrap;
+  font-variant-numeric: tabular-nums lining-nums;
+  min-width: 6ch; text-align: center;
+}
+.v2pager__step { display: inline-flex; align-items: center; gap: 3px; }
+/* Der aktive Pfeil ist die Hauptaktion der Leiste — 117 Fälle lang. Er trägt
+   deshalb die Textfarbe, nicht die gedämpfte des `IconButton`. */
+.v2pager .v2ibtn:not(.v2pager__off) { color: var(--color-text); }
+/* Inaktiv, nicht weg: derselbe Platz, sichtbar blasser, kein Zeiger. */
+.v2pager__off {
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--color-text-subtle); opacity: 0.35; cursor: default;
+}
