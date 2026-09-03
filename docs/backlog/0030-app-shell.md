@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Seitenleiste plus Kopfzeile plus Inhalt ist fachfrei |
 | Quelle | Soll-Katalog §11.7 „Rahmen (Shell)" · Anfrage vom 2026-09-03 („Sidebar/TopBar fehlt mir") |
@@ -94,14 +94,16 @@ navigieren, die Navigation kennen (das ist 0031), oder eine Rolle auswerten.
 
 Titel `v3/Primitives/Rahmen/AppShell` — **neue Gruppe „Rahmen"** im Barrel,
 wie im Katalog („Rahmen (Shell), außerhalb der Stufen"). Abgeleitet nach §6:
-1 Zustand + 0 Enums + 1 Layout-Boolean (`collapsed`) + 0 Callbacks
-+ 1 „im Einsatz" + 1 Rand (schmales Fenster) = 4.
+1 Zustand + 0 Enums + 1 Layout-Boolean (`collapsed`) + 1 Rundlauf (der
+Aufrufer hält den Zustand — genau das ist zu zeigen) + 1 „im Einsatz"
++ 1 Rand (schmales Fenster) = 5.
 
 | Story | Beweist |
 |---|---|
 | `Filled` | Raster mit Seitenleisten-Attrappe, Kopfzeile und Inhalt |
 | `Collapsed` | 64-px-Leiste, der Inhalt wächst |
-| `Narrow` | die Sperre unter 1280 px, im schmalen Rahmen |
+| `Interactive` | der Aufrufer schaltet um; die Shell merkt sich nichts |
+| `Narrow` | die Sperre unter 1280 px, in einem 900 px breiten Rahmen |
 | `InUse` | vollständig: Navigation (0031), `PageHeader` und eine `Card` darin |
 
 Nicht anwendbar: `Leer` (eine Shell ohne Inhalt ist kein Zustand, sondern ein

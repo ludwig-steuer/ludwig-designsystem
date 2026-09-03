@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, eine gegliederte Navigationsliste ist fachfrei |
 | Quelle | Soll-Katalog §11.7 „Sidebar mit Hauptnavigation (Punkt mit Zähler)" · Anfrage vom 2026-09-03 |

@@ -394,15 +394,15 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 
 | Baustein | Ist (v1) | Status |
 |---|---|---|
-| AppShell: Sidebar 240 px · Top-Bar 56 px · Content `--space-8` | `AppShell.tsx` | heben |
-| Sidebar mit Hauptnavigation (Punkt mit Zähler) | `Sidebar.tsx`, `mandant-nav.ts` | heben |
-| Top-Bar: Mandant · Suche · UserMenu | `TopBar.tsx` | heben |
+| `AppShell` + `TopBar`: Sidebar 240 px · Top-Bar 56 px · Content | `AppShell.tsx`, `TopBar.tsx` | v2 (0030) |
+| `NavList` — Hauptnavigation (Abschnitte, aktiv, Zähler) | `Sidebar.tsx`, `mandant-nav.ts` | v2 (0031); die Gliederung bleibt in der App |
+| Top-Bar-**Füllung**: Mandant · Suche · UserMenu | `TopBar.tsx` | heben (die Hülle ist 0030) |
 | Mandanten-Block (Anzeige + Link auf `/clients`, R13) | `MandantBand`, `MandantSwitcher` | heben |
 | Wirtschaftsjahr-Wahl | `YearSwitcher`, `RememberClientYear` | heben |
 | UserMenu + Rollen-Badge | `UserMenu`, `RoleBadge` | heben |
 | Experiment-Kennzeichnung | `ExperimentBadge`, `ExperimentMandantBanner` | heben |
 | Bereitschafts-/Deckungs-Banner je Mandant | `ReadinessBanner`, `EmbeddingCoverageBanner` | heben → `StatusCallout` |
-| Sperre unter 1280 px (L1) | `.abn__toosmall` nur in der Abnahme | heben app-weit |
+| Sperre unter 1280 px (L1) | in `AppShell` (0030); `.abn__toosmall` war nur in der Abnahme | v2 (0030) |
 | Marketing-Header 72 px · Portal-Rahmen | `ui_kits/marketing`; `client-portal` | prüfen (Register, F111 B6) |
 
 #### Stufe 1 — Primitives

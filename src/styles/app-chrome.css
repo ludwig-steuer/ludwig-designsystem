@@ -725,3 +725,40 @@ body { background: #FAFBFC; }
 .lw-note .mark::before { content: ""; width: 2px; height: 11px; background: #fff; }
 .lw-note .mark::after { content: ""; width: 8px; height: 2px; background: #fff; margin-left: -2px; margin-top: 4px; }
 .lw-note .label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #2E78A8; font-weight: 600; margin-bottom: 2px; }
+
+/* ==========================================================================
+   Ergänzungen für die v3-Bausteine AppShell (0030) und NavList (0031).
+
+   Diese Datei ist die benannte Ausnahme zu A5 (Owner, 2026-09-03): der
+   Anwendungsrahmen behält seine rohen Hex- und rgba()-Werte. Neue Regeln
+   halten sich trotzdem an Tokens, wo es welche gibt — die Ausnahme ist
+   erlaubt, nicht verpflichtend.
+   ========================================================================== */
+
+/* Sperre unter 1280 px (L1): darunter liegen Rail, Liste und Detail
+   übereinander, und dann wird nicht mehr geprüft, sondern geraten. */
+.app__toonarrow { display: none; }
+@media (max-width: 1279px) {
+  .app__toonarrow {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: var(--space-2); padding: var(--space-8);
+    background: var(--color-surface); color: var(--color-text);
+    font-size: 13.5px; line-height: 1.55; text-align: center;
+  }
+  .app__toonarrow strong { font-size: 15px; }
+  .app__toonarrow span { max-width: 46ch; color: var(--color-text-muted); }
+}
+
+/* Eintrag ohne Icon: der erste Buchstabe hält den Platz, damit eingeklappt
+   kein leerer Knopf steht. */
+.sb__navinitial {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px;
+  font-size: 12px; font-weight: 600; text-transform: none;
+}
+/* Roadmap-Eintrag: sichtbar, nicht klickbar. */
+.sb__navitem.is-future { opacity: 0.45; cursor: not-allowed; }
+.sb__navitem.is-future:hover { background: none; }
+/* Ein rufender Zähler trägt zusätzlich das Wort im `title` (V7). */
+.sb__navitem .count.is-alarm { background: rgba(193, 92, 76, 0.28); color: #F2C9C1; }

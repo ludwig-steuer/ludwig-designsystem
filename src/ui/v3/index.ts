@@ -68,6 +68,9 @@ export {
 } from "./primitives/OverflowMenu";
 export { ActionBar, RowActions } from "./primitives/ActionBar";
 
+/* Rahmen — die Shell, außerhalb der Stufen (Soll-Katalog §11.7) */
+export { AppShell, TopBar } from "./primitives/AppShell";
+
 /* Navigation */
 export {
   Tabs,
@@ -79,6 +82,12 @@ export {
   type TabItem,
 } from "./primitives/Nav";
 export { FilterBar } from "./primitives/FilterBar";
+export {
+  NavList,
+  activeHref,
+  type NavItem,
+  type NavSection,
+} from "./primitives/NavList";
 
 /* Formular */
 export { Field, Input, Textarea, Select, Checkbox } from "./primitives/Form";
