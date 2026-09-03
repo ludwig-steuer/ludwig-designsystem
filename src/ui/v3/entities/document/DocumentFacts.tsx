@@ -51,8 +51,11 @@ export function DocumentFacts({ facts }: { facts: DocumentFactsVM }) {
       <Amount key="gross" value={facts.gross ?? null} currency={facts.currency ?? "EUR"} />,
     ],
   ];
-  // A summary is a paragraph, not a value — it only takes a row when it exists.
-  if (facts.summary) rows.push(["Zusammenfassung", facts.summary]);
+  // A summary is a paragraph, not a value: it keeps its row, but the text runs
+  // left and without `tnum` — the field column aligns numbers right (V3).
+  if (facts.summary) {
+    rows.push(["Zusammenfassung", <p className="v2doc__prose" key="sum">{facts.summary}</p>]);
+  }
 
   return <FieldList tone="bare" rows={rows} />;
 }

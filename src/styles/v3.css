@@ -2151,12 +2151,25 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* --- Beleg-Drawer (0052) ------------------------------------------------- */
 /* Das Original zuerst und groß (Zone 2): auf großen Schirmen mehr Beleg,
    ohne dass Kern-Fakten und Fuß aus dem Bild fallen. */
+.v2doc__orig,
+.v2doc__origskel {
+  height: clamp(320px, 62vh, 900px);
+  border-radius: var(--radius-lg);
+}
 .v2doc__orig {
   width: 100%;
-  height: clamp(320px, 62vh, 900px);
   border: var(--border-1);
-  border-radius: var(--radius-lg);
   background: var(--color-bg-sunken);
+}
+/* Der Ladezustand nimmt die Form des Inhalts an, nicht die eines Kastens. */
+.v2doc__origskel { display: block; width: 100%; }
+/* Fließtext in einer Feldzeile: links, ohne Ziffernstellung — die Spalte
+   richtet sonst Zahlen rechts aus (V3). */
+.v2doc__prose {
+  margin: 0;
+  text-align: left;
+  font-variant-numeric: normal;
+  line-height: var(--lh-ui);
 }
 /* Kennung und Zustand nebeneinander in der Kopf-Zweitzeile. */
 .v2doc__ident { display: inline-flex; align-items: center; gap: var(--space-2); }

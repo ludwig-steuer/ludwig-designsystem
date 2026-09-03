@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — erste Runde: Schritte 1, 2 und 4 gebaut, Schritt 3 ausgelassen |
+| Status | in Arbeit — erste Runde nachzubessern: M1 Zusammenfassung rechtsbündig · M2 Ladefläche nicht in der Form des Inhalts · M3 keine Story für „Beleg ohne Vorschau" (siehe Abnahme); Schritt 3 (CaseDrawer) bleibt ausgelassen |
 | Stufe | `entities/<entität>/` je Drawer; der Rahmen steht als `primitives/Drawer` (0042) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → das **Zonen-Schema** ja (fachfrei, deshalb Regel, nicht Komponente); der **einzelne Drawer** nein, er zeigt eine Ludwig-Entität → `entities/` |
 | Quelle | Design-Brief `F143-entitaets-drawer-design-brief.md` aus `ludwig/app/docs/backlog/` (Owner 2026-09-03), hier von v2-Gestaltungsauftrag auf v3-Entwicklungsaufgabe umgeschrieben · `docs/v3-backlog.md` (Drawer-Familie, 29 Importstellen) |
@@ -10,7 +10,7 @@
 | Blockiert | die Drawer-Umzüge der Welle 1 · jeden Verweis, der heute kein Ziel hat (0013 Kontenblatt-Icon, 0014 OPOS-Browser) |
 | Setzt voraus | 0042 `Drawer` (Abnahme) · je Entität deren `View` und die kleineren Formen — für den ersten Drawer 0050 `CaseDetailView` |
 | Spec von / am | Claude, 2026-09-03 |
-| Gebaut von / am | Claude, 2026-09-04 |
+| Gebaut von / am | Claude, 2026-09-04 · nachgebessert 2026-09-04 (drei Punkte der ersten Abnahme) |
 
 ## Was sich gegenüber F143 ändert
 
@@ -139,7 +139,8 @@ stehen · 300 ms Ausblenden). Dazu:
 
 ## Stories — das Drawer-Preview der Familie
 
-Titel `v3/Entities/<Entität>/<Entity>Drawer`, damit die Form in der
+Titel `v3/Entitäten/<Entität>/<Entity>Drawer` (deutsch wie alle Storybook-Titel,
+CLAUDE.md; 2026-09-04 hier korrigiert), damit die Form in der
 Storybook-Gruppe der Entität **neben** Cell, Row, Card, View und Editor steht.
 Genau das ist das „Drawer-Preview" neben den Größen-Previews.
 
@@ -237,17 +238,90 @@ Fakten-Komponente der Familie (Vorlage `ui/beleg/BelegSummary.tsx`, Verhalten
 übernommen, Optik nicht); der spätere `DocumentView` importiert sie, statt sie
 zu wiederholen. Drei eigene Stories.
 
-**Befund für `ludwig/app` und das GLOSSARY.** Die Spec legt `DocumentDrawer`
-fest, das `GLOSSARY.md` führt den Beleg aber als **`source doc`**
-(`client_source_docs`, „Quelle (Dokument)"); `document` ist dort kein
-Eintrag. Gebaut ist nach Spec — wer die Familie später ausbaut, sollte
-`Document…` gegen `SourceDoc…` entscheiden, bevor sechs Dateien den Namen
-tragen. Keine Entscheidung dieses Auftrags.
+**~~Befund zum GLOSSARY~~ — zurückgezogen.** Beim Bauen notiert, das
+`GLOSSARY.md` kenne nur `source doc` und nicht `document`; die Abnahme hat
+das widerlegt: `### Receipt / document` führt „English: `document`,
+`receipt`" (Zeile 787). `DocumentDrawer` und `DocumentFacts` tragen also
+Hausbegriffe, die Umbenennungsfrage stellt sich nicht.
+
+## Nachbesserung (2026-09-04)
+
+Die erste Abnahme fand drei Mängel; alle drei sind behoben:
+
+1. **Zusammenfassung stand rechtsbündig** (V3): `.v2fields__row > span:last-child`
+   richtet rechts aus und setzt `tnum` — richtig für Werte, falsch für einen
+   Satz. Der Text steht jetzt in `.v2doc__prose` (links, ohne Ziffernstellung),
+   die Zeile bleibt. Nachzusehen in `DocumentFacts` → `Filled`.
+2. **Ladezustand hatte nicht die Form des Inhalts**: statt eines 96-px-Kastens
+   steht dort jetzt die Originalfläche in ihrer echten Höhe
+   (`.v2doc__origskel`, dieselbe `clamp`-Höhe wie `.v2doc__orig`) plus fünf
+   Faktenzeilen. Nachzusehen in `Laedt`.
+3. **Zone 2 ohne Vorschau hatte keine Story**: neu `OhneVorschau` — ein
+   TIFF-Scan, der Grund steht als Satz, kein Platzhalter an der Stelle des
+   Belegs. Damit sind es sechs Drawer-Stories statt fünf.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Geprüft gegen Spec und Code, ohne Chatverlauf. Stand `61d21ee` (HEAD).
+Browser: Storybook auf `:6107`, alle acht Stories aufgerufen, Zonen und
+Zustände im DOM gemessen statt am Quelltext geraten.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Fest**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `tsc --noEmit` ohne Ausgabe; `pnpm build` Exit 0, „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/document/DocumentDrawer.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Beleg/DocumentDrawer` — dieselbe Form wie Konto, Sachverhalt, Buchungssatz | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `DocumentDrawer.tsx:45–51`, `DocumentFacts.tsx:38–43`; TSX-Kommentare englisch, CSS-Kommentare deutsch wie der gesamte Bestand in `v3.css` | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | in beiden `.tsx` kein Hex und kein px; die Treffer der Story liegen im Data-URI, der den PDF-Inhalt simuliert. Zustand über `StatusBadge axis="beleg"` → `BELEG_PROCESSING.processed` (`status-registry.ts:182`) | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | fünf Drawer-Stories: `Geoeffnet`, `Laedt`, `Fehler`, `NichtGefunden`, `ImKontext` | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | durchgegangen; ein Punkt fällt durch: „Text links, Zahlen rechts, nichts zentriert" (V3) — siehe **M1**. Versalien in `.v2doc__h` sind regelkonform („Versalien nur für Überschriften, nie für eine Zeile, die einen Wert trägt", 0051). Kontrast gemessen: Überschrift 4.88:1, Grenzsatz 6.69:1, Feldlabel 6.69:1 auf `--color-surface` | ✗ |
+| Im Browser angesehen, nicht nur gebaut | acht Stories, Rundlauf `onOpenFull` → Text erscheint, Escape und Kreuz schließen, Fokus kehrt auf „Ansehen" zurück | ✓ |
+
+**Variabel**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Regel 5 in `entitaet-analysieren` §7, Drawer-Zeile in `TEMPLATE.md` | SKILL.md §7 Nr. 5 (Z. 246–253) — wortgleich zur Spec, dazu der Satz „View beantwortet alle Fragen, Drawer die eine" und die Bau-Reihenfolge „der Drawer folgt dem View" (Z. 260–265). `docs/entitaeten/TEMPLATE.md`, Formen-Tabelle: Zeile `<Entity>Drawer`, Größe L, Grund „5 — nachgeschlagen aus `<verweisende Ansicht>` heraus" | ✓ |
+| Zonen 1, 2, 3, 4, 5 in dieser Reihenfolge (`Geoeffnet`) | DOM-Messung: `v2drawer__h` y=0 · `v2doc__orig` y=101 · `v2doc__h` y=783 · `v2fields--bare` y=808 · `v2doc__limit` y=978 · `v2drawer__foot` y=1017 | ✓ |
+| Zone 3 verwendet dieselbe Komponente wie der View | `DocumentDrawer.tsx:12` importiert `DocumentFacts`; im Drawer steht keine zweite Feldliste. Die zweite Hälfte des Kriteriums („der View importiert dieselbe") ist heute nicht beweisbar — einen `DocumentView` gibt es nicht. Geprüft, soweit prüfbar | ✓ |
+| Der Fuß trägt genau eine Aktion, und die führt in die Vollansicht | im Fuß genau ein `<button>`: „Vollständige Belegansicht öffnen"; Klick setzt den `onOpenFull`-Text der Story | ✓ |
+| Kein Schreibpfad | keine Prop ändert Daten (`open`, `onClose`, `reference`, `record`, `loading`, `error`, `onOpenFull`); im offenen Drawer `input,textarea,select,[contenteditable]` = 0; auch `DocumentFacts` ist rein lesend | ✓ |
+| Vier Zustände in der Vorrangfolge `error` → `loading` → `record === null` → Inhalt | `DrawerBody` prüft in dieser Reihenfolge (`DocumentDrawer.tsx:117–137`). `Laedt` setzt `record` **und** `loading` und zeigt die Fläche — `loading` schlägt `record`; `Fehler` setzt `record={null}` und zeigt den Fehler, nicht den Leertext | ✓ |
+| Der Fehlertext enthält `reference` wörtlich | „Beleg **RE-4471** konnte nicht geladen werden: Die Ablage antwortet nicht (Zeitüberschreitung nach 30 Sekunden)." | ✓ |
+| Baut auf 0042 auf, definiert weder Scrim noch Kopf noch Fußleiste selbst | die Komponente rendert nur `<Drawer title meta size footer>`; `.v2doc*` fasst Original, Zonen-Überschrift und Grenzsatz an, nichts vom Rahmen. Leerer Fuß verschwindet über `.v2drawer__foot:empty` aus 0042 | ✓ |
+| Hinter dem offenen Drawer bleibt der Kontext sichtbar (`ImKontext`) | gemessen bei 1219 px Fenster: Drawer x=119, Breite 1100 (`--drawer-lg` = `min(1100px, 94vw)`). Belegnummern-Spalte und Kartenkopf „Sachverhalt 118 · Belege" stehen hinter dem Scrim; nach dem Schließen steht der Fokus wieder auf „Ansehen" | ✓ |
+| `@instead` schickt weiter | „Every question about the document … → DocumentView. A decision that has to be made now → Dialog. One sentence about it → Popover." — alle drei Ziele, dazu `DocumentFacts` | ✓ |
+| Ersetzt `BelegDrawer` in `apps/web/src/ui/drawers/` ohne Funktionsverlust | dieses Repo ist das ausgelagerte Set; die Ablösung ist ein eigener Schritt (`docs/backlog/README.md`) | offen (App) |
+
+**Die beiden Urteile zum „Stand der ersten Runde"**
+
+| Frage | Nachweis | Ergebnis |
+|---|---|---|
+| Ist das Auslassen von Schritt 3 (`CaseDrawer`) stichhaltig? | selbst geprüft: `docs/backlog/0050-case-detail-view.md` steht auf `Status: spec — blockiert`, Blocker „erst das Entitätsprofil, dann bauen" (Owner 2026-09-03); `docs/entitaeten/` enthält nur `TEMPLATE.md`; `entities/accounting-case/` enthält nur `CaseTimeline`. Ohne Profil steht die Rang-Reihenfolge bis L nicht fest, und genau die ist Zone 3. Offene Frage 1 der Spec setzt „Beleg zuerst" als Default und den Sachverhalt ausdrücklich hinter 0050. **Die geschriebene Begründung trägt allerdings nicht allein:** „ohne View keine Zone-3-Komponente" galt für den Beleg genauso — dort wurde sie trotzdem gebaut. Tragend ist das fehlende Entitätsprofil, nicht der fehlende View | ✓ |
+| Ist `DocumentFacts` gerechtfertigt oder Scope-Ausweitung? | gerechtfertigt, keine Ausweitung. Das Kriterium „Zone 3 verwendet **dieselbe** Komponente wie der View" verlangt genau dieses geteilte Stück; der Alternativweg — vier `FieldList`-Zeilen im Drawer — ist der zweite Satz Feldzeilen, den das Kriterium verbietet, und einen `DocumentView` zu bauen wäre die größere Ausweitung. Sie liegt in `entities/`, nicht in `primitives/` (die Zwei-Verwendungen-Regel aus `spec-schreiben` §3 greift nicht), hat eine Vorlage in der App (`ui/beleg/BelegSummary.tsx`), `@when`/`@instead`, drei Stories und keinen Schreibpfad. **Nachzutragen:** sie ist ohne eigene Spec entstanden — ihre Schnittstelle `DocumentFactsVM` ist außer hier nirgends abgenommen | ✓ |
+| Sind die drei zusätzlichen `DocumentFacts`-Stories angemessen? | ja. `Filled` (alle Punkte), `Unvollstaendig` (Geviertstrich, die Zeile bleibt stehen), `InUse` (in der Karte, wie sie im Drawer und später im View sitzt) — das ist die Story-Formel für die eine Prop `facts` in ihren drei Lagen, nicht mehr | ✓ |
+
+**Mängel (nachbesserbar)**
+
+| # | Mangel | Nachbesserung |
+|---|---|---|
+| M1 | Die Zusammenfassung steht rechtsbündig. `DocumentFacts.tsx:55` hängt den Fließtext als `FieldList`-Zeile an; `.v2fields__row > span:last-child` setzt `text-align: right` und `tabular-nums`. In `DocumentFacts--filled` (520 px) bricht der Satz um und steht flatterlinks — Verstoß gegen §9 „Text links, Zahlen rechts, nichts zentriert" (V3). Der Kommentar in Z. 54 („A summary is a paragraph, not a value") sieht das Problem und baut es trotzdem | den Satz als eigenen Absatz **unter** die Feldzeilen setzen, nicht in die Wertspalte |
+| M2 | Die Ladefläche hat nicht die Form des Inhalts. `DocumentDrawer.tsx:126` rendert ein einzelnes `Skeleton variant="card"` — `.v2skel--card` ist 96 px hoch — in einen Körper, dessen Inhalt rund 666 px Original plus fünf Feldzeilen ist. Story `Laedt`: ein kleiner Balken über gut 800 px Weiß. Die Zustandstabelle der Spec verlangt „ruhige Fläche **in der Form des Inhalts**" | zwei Flächen: eine hohe für Zone 2, `Skeleton lines={4}` für Zone 3 |
+| M3 | Der Fall „Beleg ohne Vorschau" hat keine Story. `previewUrl: null` und `previewUnavailableReason` (`DocumentDrawer.tsx:35–38`, Zweig Z. 144–148) sind der einzige Zonen-2-Zweig, den keine der acht Stories zeigt — und Zone 2 ist der Punkt, an dem gerade dieser Drawer sich beweisen soll. Die Hausregel „je Prop die Story, die sie beweist" ist für zwei Felder unerfüllt | eine sechste Drawer-Story `OhneVorschau` mit `previewUrl: null` und gesetztem Grund |
+
+**Befunde (kein Mangel, gehören woanders hin)**
+
+- **Der GLOSSARY-Befund der Bauphase stimmt nicht.** `docs/ludwig/GLOSSARY.md` führt sehr wohl `### Receipt / document` — „English: `document`, `receipt` · German: `Beleg`, `Dokument`". `Document…` ist damit ein Hausbegriff und braucht keine Entscheidung gegen `SourceDoc…`; wer sie doch aufmacht, führt sie gegen `### Source document supertype`, nicht gegen ein Loch im GLOSSARY.
+- **Die Spec schreibt den Storybook-Titel falsch.** Oben steht `v3/Entities/<Entität>/…`; richtig und gebaut ist `v3/Entitäten/…` (CLAUDE.md: Storybook-Titel deutsch, und alle vier anderen Familien machen es so). Die Spec-Zeile gehört korrigiert, nicht der Code.
+- `.v2doc__h` wiederholt `.v2fields__h` bis auf die Trennlinie. Beim zweiten Drawer zusammen mit der `EntityDrawer`-Frage (offene Frage 3) einsammeln.
+- **Offene Frage 2 ist noch nicht wirklich beantwortet.** `--drawer-lg` = `min(1100px, 94vw)`: bei 1219 px Fenster bleiben 119 px Kontext, bei den 1280 px aus L1 wären es 180. Der Default lautet „bleibt, bis das echte PDF klemmt" — die Story zeigt eine synthetische HTML-Seite, ein echtes PDF hat den Wert noch nicht geprüft.
+- `.v2drawer` bewegt sich über eine `transform`-Transition ohne `prefers-reduced-motion`-Ausnahme (`v3.css:750–759`). Das gehört zu 0042 (Status `Abnahme`), nicht hierher.
+- Commit `61d21ee` hat `.claude/skills/entitaet-analysieren/SKILL.md` und `docs/entitaeten/TEMPLATE.md` **vollständig** neu aufgenommen — beide lagen ungetrackt vor. Inhaltlich richtig, aber rund 400 Zeilen fremder Text hängen jetzt an dieser Aufgabe.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-04 · Offene Punkte: **nicht
+abgenommen** — M1 (Zusammenfassung rechtsbündig, V3), M2 (Ladefläche nicht in der
+Form des Inhalts), M3 (keine Story für „Beleg ohne Vorschau"). Danach ist die
+erste Runde fertig. Unabhängig davon bleiben: Schritt 3 `CaseDrawer` (wartet auf
+das Entitätsprofil `accounting-case` und 0050) und die Ablösung von
+`BelegDrawer` in `ludwig/app` — **offen (App)**.

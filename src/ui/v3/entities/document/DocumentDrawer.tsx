@@ -123,7 +123,16 @@ function DrawerBody({
       </Callout>
     );
   }
-  if (loading) return <Skeleton variant="card" label="Beleg wird geladen …" />;
+  if (loading) {
+    // The shape of the content, not a generic box: the original takes the same
+    // height it will take, the facts the same five lines.
+    return (
+      <>
+        <span className="v2skel v2doc__origskel" aria-hidden="true" />
+        <Skeleton lines={5} label="Beleg wird geladen …" />
+      </>
+    );
+  }
   if (!record) {
     return (
       <EmptyState

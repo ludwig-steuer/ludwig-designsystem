@@ -80,6 +80,37 @@ export const Geoeffnet: Story = {
   },
 };
 
+/**
+ * Zone 2 is the one zone a document can lose: a fax, a photo the converter
+ * refused, a file still on its way. It says **why** there is nothing to see —
+ * and gets no grey placeholder box in place of the document.
+ */
+export const OhneVorschau: Story = {
+  render: () => (
+    <DocumentDrawer
+      open
+      onClose={() => {}}
+      reference="RE-4468"
+      record={{
+        title: "Beleg · Bürodienst Nord",
+        status: "review_needed",
+        originalFileName: "scan-4468.tiff",
+        previewUrl: null,
+        previewUnavailableReason:
+          "Das Format TIFF lässt sich nicht im Browser anzeigen. Die Datei liegt unverändert in der Ablage.",
+        facts: {
+          vendor: "Bürodienst Nord",
+          invoiceNumber: "RE-4468",
+          invoiceDate: "2026-08-24",
+          gross: 318,
+          currency: "EUR",
+        },
+      }}
+      onOpenFull={() => {}}
+    />
+  ),
+};
+
 /** `loading` beats `record`: the head stands, the body is a quiet surface. */
 export const Laedt: Story = {
   render: () => (
