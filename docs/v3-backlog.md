@@ -115,8 +115,9 @@ Nicht zu vergessen bei der Umstellung: `.btn` ist heute **37 px**, `.btn-sm`
 - **`legacy/` leeren.** Fünf Bausteine warten dort auf ihre Einordnung:
   StatusBadge + Registry, Banner, LongText, Pagination, Buchungs-Formatierung.
   Erst wenn der Ordner leer ist, ist v3 vollständig (siehe `legacy/README.md`).
-- **`.v2tbl__empty` ist zentriert** (`v3.css`) — Verstoß gegen V3 „nichts
-  zentriert". Die Guidelines markieren ihn als „im v2-Set **sofort**".
+- ~~**`.v2tbl__empty` ist zentriert**~~ — behoben am 2026-09-03, zusammen mit
+  `.v2lp__empty`. Zentriert bleibt nur die Vollbild-Sperre unter 1280 px, und
+  die ist kein Inhalt.
 - **`AiBookingNotes` hat keine Story.** Einziger v3-Export ohne eine (Stand
   2026-09-03 unverändert).
 - **Sammeldateien**: `Surface.tsx` und `Interactive.tsx` sind bereits in
