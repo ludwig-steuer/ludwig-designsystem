@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `patterns/` — Gruppe Prozess, neben `Timeline` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, sobald sie ein Protokoll führt — Zeit, Schwere, Akteur, Meldung, Details sind fachfrei |
 | Quelle | Anfrage Owner 2026-09-03 („Logbrowser, aber auch Log Rows … fachlich und technisch … prinzipiell immer ein filterbarer zeitlicher Verlauf … eher Tabellenformat") · App-Inventar `ludwig-UX-guidelines-v2.md` §11.2 („Log-Ansicht, Sichten Verlauf/Protokoll/Technik → Optik") und **Z6** („Log = ein Strom, drei Sichten") · `web-ui-regeln.md` **R7** („Log-Ansichten teilen die Darstellung, nicht die Herkunft") · Befund **B5** in `ui-repraesentationen.md` · Vorlage `app/apps/web/src/ui/components/log/` (5 Dateien) · Design `design/Ludwig Design System v2/preview/audit-trail.html` (Akteur-Arten Nutzer · Ludwig · System) |
@@ -223,130 +223,53 @@ Callback, kein Layout-Boolean.
 **Nicht anwendbar:** `EmptyAfterFilter` — die Liste filtert nicht (0054).
 `Error` — die Liste lädt nicht; `ErrorRow` gehört der Seite.
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] `entries` wird nach `at` sortiert, gleiche Zeit behält die Reihenfolge; `order` dreht die Richtung, Default `newest` (`Filled`, `Order`)
-- [ ] Spalten Schwere · Akteur · Quelle · Code · Bezug · Zusatz entfallen, wenn keine Zeile das Feld trägt; Zeit und Meldung stehen immer (`Edge`)
-- [ ] Schwere über `StatusBadge axis="log_level"`, ohne Info-Knopf je Zeile; alle fünf Werte sichtbar (`Levels`)
-- [ ] Akteur zeigt `label`, sonst das Registry-Label der Achse `actor_kind`, sonst den Rohwert (`Levels`)
-- [ ] Zeit über `Time`, Europe/Berlin, `dateTime`-Attribut gesetzt (`Filled`)
-- [ ] `payload` liegt eingeklappt unter der Meldung, klappt per `Enter`/`Leertaste` auf; leeres Objekt zeigt nichts (`Edge`)
-- [ ] `detail` steht in `.v2sub` unter der Meldung (`InUse`)
-- [ ] `refs` mit `href` sind `Link`, ohne `href` Text (`Filled`)
-- [ ] `right` steht rechtsbündig mit `tnum` (`InUse`)
-- [ ] `depth` verändert die Darstellung nicht (`InUse` — Zeilen aller drei Tiefen sehen gleich aus)
-- [ ] `emptyText` erscheint als `EmptyRow`; Default „Noch nichts protokolliert." (`Empty`)
-- [ ] `loading` zeigt `Skeleton` (`Loading`)
-- [ ] Keine Kürzung der Meldung; 300 Zeichen brechen um (`Edge`)
-- [ ] Kein `"use client"` in `Log.tsx`
-- [ ] `.v2log*` steht in `v3.css` ohne Hex und px
-- [ ] `Timeline` verliert „an audit trail" in `@when` und verweist in `@instead` auf `LogList` („many rows, severity, payload, filtering → LogList"); `LogList` verweist zurück („the story of one object with gaps → Timeline")
-- [ ] Tut bewusst nicht: filtern, laden, Spalten frei definieren, Zeilen öffnen — Aufrufer löst es mit 0054, Props, `Table`, `MasterDetail`
-- [ ] Ersetzt `LogView`/`LogTable`/`LogEntry`/`LogBadges`/`LogPayloadCell`, `AuditLogTable`, `InvoiceTracesTable`, `ExtractionLogsTable` und `STEP_LOG_COLUMNS` ohne Funktionsverlust — **offen (App)**, siehe `docs/backlog/README.md`
-
-## Befunde für `ludwig/app`
-
-1. **`ops_extraction_logs.level`** schreibt `INFO`/`WARN`/`ERROR` — ein
-   fremder Wertebereich zur Achse `log_level` (`LogBadges.levelKind`
-   normalisiert lokal). Der Mapper normalisiert weiter; sauber wäre der
-   Schreibpfad im Workflows-Service.
-2. **`outcome` ist keine Schwere.** `platform_audit_events.outcome`
-   (success · partial · failure) und `level` sind zwei Achsen. Mapping
-   success → info · partial → warning · failure → error am Aufrufer; keine
-   neue Spalte, kein Registry-Umbau.
-3. **`LogLevel` fehlt als neutraler Typ.** Die einzige Union der Achse heißt
-   `InvoiceTraceLevel`. Vorschlag: `LogLevel` unter
-   `src/ludwig/modules/audit-log/domain/`, `InvoiceTraceLevel` darauf ziehen.
-4. **Registry-Achse `actor_kind` fehlt.** DB-CHECK kennt
-   `user · system · api · cli · agent`, `ActorKind` in
-   `audit-log/domain/types.ts` ebenso — aber keine State-Tabelle im Topic
-   und keine Registry-Map. Reihenfolge nach `ludwig-UX-guidelines-v2.md`
-   §„Neue Achse": State-Tabelle → Registry → `entity-icons.ts`. Bis dahin
-   siehe offene Frage 1.
-5. **`AgentRunStep` und `Job` sind nicht in `src/ludwig/` gespiegelt.** Die
-   Mapper der Lauf- und Jobs-Seiten entstehen mit dem Umzug dieser Seiten
-   (Welle 3/4), nicht hier.
-6. **Tiefe ist an den Stapel gebunden.** `batchLogDepth` (`datev-export/
-   domain/batch-log.ts`) ist die einzige Ableitung, Z6 gilt allgemein. Eine
-   Ableitung je Quelle (`auditEventDepth`, `traceDepth`), nie gespeichert.
-7. **App-`LogEntry`** fehlen `id`, `actor`, `code`, `depth`, `detail`; beim
-   Umzug übernehmen, `correlationId` bleibt Seitenwissen (`refs`-Link).
-8. **`SourceDocVerlaufTab` und `VerlaufTab`** sind Timeline-Fälle. Beim Umzug
-   der Beleg-Seiten `Timeline`, nicht `LogList`.
-
-## Offene Fragen
-
-1. **Achse `actor_kind` im Set vorziehen?** Die Registry im Set ist die
-   Kopie der App; eine Achse nur hier lässt beide auseinanderlaufen.
-   *Ohne Antwort: ja, vorziehen* — fünf Werte (Nutzer · System · API · CLI ·
-   Agent), Befund 4 meldet es der App zum Nachziehen. Alternative wäre der
-   Rohwert „system" im UI, und das verstößt gegen „Deutsch, was Nutzer sehen".
-2. **Einzelheiten unter der Meldung oder eigene Spalte?** Die Vorlage
-   (`LogPayloadCell`) hat eine Spalte „Details" mit „5 Felder".
-   *Ohne Antwort: unter der Meldung* — die Tabelle bleibt schmal, die
-   Zeile wächst nur, wo etwas drin ist; `Timeline` löst `detail` genauso.
-3. **Sortiert die Komponente oder die Query?** App-`LogView` sortiert
-   bewusst nicht („die Query weiß die Richtung"). *Ohne Antwort: die
-   Komponente* — wie `Timeline` 0023; eine Keyset-Seite ist in sich
-   sortiert und bleibt es, und zwei Quellen mischen geht nur so.
-
 ## Abnahme
+
+Zweite Runde, nach der Nachbesserung `d1a1984`. Jedes Kriterium neu geprüft —
+auch die einundzwanzig, die schon standen: die erste Runde kann sich geirrt
+haben. Gemessen im DOM unter `http://localhost:6107`, Befehle im Stand
+`d1a1984`.
 
 | Kriterium | Nachweis (Story-ID · Befehl · Codestelle) | Ergebnis |
 |---|---|---|
-| **Fest** — `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit` ohne Ausgabe; `pnpm build` → „Storybook build completed successfully", Exit 0 | ✓ |
-| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/patterns/Log.tsx` (Familie `LogEntry` + `LogList`, wie im Zuschnitt), `Log.stories.tsx` daneben, `Log.stories.tsx:11` `title: "v3/Patterns/Prozess/LogList"` — dieselbe Gruppe wie `Timeline.stories.tsx:8` und der Kommentar `/* Prozess */` in `index.ts:210`; Barrel-Export `index.ts:211` | ✓ |
-| **Fest** — Code englisch; `@when`/`@instead` an jedem Export | `Log.tsx:117–124` trägt `@when`/`@instead` an `LogList`; `LogEntry`/`LogLevel` sind Typen und folgen darin `Time.tsx` (`TimeSize` ohne `@when`). Kommentare und JSDoc englisch. **Aber** `Log.stories.tsx:79` `function Konfidenz` — der einzige deutsche Bezeichner unter allen lokalen Story-Funktionen des Sets (`grep -rhoE "^function [A-Za-zÄÖÜäöü_]+" src/ui/v3/**/*.stories.tsx`: 19 Namen, 18 englisch). README „Sprache" und `CLAUDE.md` verlangen englische Bezeichner auch in Stories | ✗ |
-| **Fest** — Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}' src/ui/v3/patterns/Log*.tsx`: nichts. px im TSX nur als `grid-template-columns`-Werte (`Log.tsx:59–68`) und `minWidth` (`:73–82`) — dieselbe Konvention wie `ComparisonTable.tsx:78` (`cols="20px minmax(0,1.4fr) 96px …"`); Story-Gerüst (`gap: 24`, `maxHeight: 420`) ist Hausbrauch (vgl. Abnahme 0030). Keine Label-Map: Schwere über `StatusBadge axis="log_level"` (`Log.tsx:190`), Akteur über `resolveStatus("actor_kind", …)` (`:114`), Legende über `axisLegend("log_level")` (`:174`) | ✓ |
-| **Fest** — Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | Sieben Exporte, genau die sieben der Spec: `Filled` (`:211`), `Empty` (`:216`), `Loading` (`:223`), `Order` (`:228`), `Levels` (`:254`), `Edge` (`:304`), `InUse` (`:527`). Je Prop der Schnittstelle eine Story: `entries` → `Filled`, `order` → `Order`, `emptyText` → `Empty`, `loading` → `Loading`. Ausgeschlossen mit Grund in der Spec: `EmptyAfterFilter` (die Liste filtert nicht → 0054), `Error` (die Liste lädt nicht → `ErrorRow` beim Aufrufer) | ✓ |
-| **Fest** — Prüfliste `design-guidelines.md` §9 durchgegangen | Vierzehn Punkte geprüft, zwei App-Punkte übersprungen (`docs/backlog/README.md`). Bestanden: Stufe/Importe (nur `primitives/` und Nachbar-Patterns, kein Fachmodul in `Log.tsx`) · keine zweite Quelle (V13) · Zeilenhöhe = `.v2tbl__row`, `.v2log__row` setzt nur `align-items: start` (V1) · Farbe nur Kritikalität, Rot nur `error`, `actor_kind` durchweg `neutral` (V6) · jeder farbige Zustand mit Wort (V7) · drei Zustände gebaut, zwei begründet ausgelassen (V9) · Kontrast `--color-text-muted` #5C5C5C ≈ 7:1 auf Weiß (V10) · Aufklappen per Tastatur, Chevron nie ohne Wort (V11/T8) · Zeile ohne Ziel bleibt stumm, kein Hover (I11) · Lucide-Icons, keine Unicode-Zeichen als Bedeutungsträger (T9) · Texte Sie/GLOSSARY (T1–T5) · Story mit allen anwendbaren Zuständen. **Ein Verstoß: V3** („Zahlen rechts") — siehe Zeile `right` unten. Anmerkungen ohne ✗: `Filled` und `Levels` zeigen die Tabelle ohne `Card` (V5), fünf von sieben Stories tun es richtig, und die Karte ist laut Spec Sache des Aufrufers; der Ladezustand ersetzt die ganze Tabelle samt Spaltenkopf (I7 „Spaltenkopf bleibt"), aber die Spec schreibt ausdrücklich `Skeleton` (0016) statt `TableLoading` vor; der Spaltenkopf „Schwere" trägt die Achse als `title` statt als (i) — `StatusHeader` gibt es im Set noch nicht (`index.ts:34`) | ✓ |
-| **Fest** — Im Browser angesehen (Storybook), nicht nur gebaut | Alle sieben Stories unter `http://localhost:6107/iframe.html?id=…` geöffnet und im DOM vermessen (Spalten, `datetime`-Attribute, Sortierreihenfolge, Fokus und Aufklappen der `<summary>`, Geometrie der Zusatz-Spalte) | ✓ |
-| `entries` nach `at` sortiert, gleiche Zeit behält die Reihenfolge; `order` dreht, Default `newest` | `Log.tsx:145–147` — `[...entries].sort(…)`, `Array.prototype.sort` ist stabil (ES2019). `Filled` übergibt zwölf Zeilen unsortiert (`Log.stories.tsx:86–208`, IDs a5, a1, a3, a2, …) und zeigt sie ohne `order`-Prop absteigend: 03.09. 10:44 → 10:10 → 09:05 …; `Order` zeigt dieselben fünf Zeilen in beide Richtungen (gemessen: `2026-09-02T14:21Z … 2026-09-01T08:02Z` gegen `08:02 … 14:21`) | ✓ |
-| Spalten Schwere · Akteur · Quelle · Code · Bezug · Zusatz entfallen ohne Träger; Zeit und Meldung stehen immer | `Log.tsx:92–109` (`carries`) und `:140` (`always`). `Edge`, Karte „Quelle ohne Schwere": Kopf misst `["Zeit","Meldung","Code"]` — vier Spalten weg. `Edge`, Karte „Ränder": eine Zeile ohne Schwere und Akteur neben zweien mit beidem, die Spalten bleiben. `Empty`: Kopf `["Zeit","Meldung"]`. `InUse`: Pipeline-Karte endet auf „Zusatz" (kein `refs`), Audit-Karte auf „Bezug" (kein `right`) | ✓ |
-| Schwere über `StatusBadge axis="log_level"`, ohne Info-Knopf je Zeile; alle fünf Werte sichtbar | `Log.tsx:190` `<StatusBadge axis="log_level" status={entry.level} info={false} />`; im DOM von `Filled` `rows.reduce(… querySelectorAll('button').length)` = **0**. `Levels` zeigt Debug · Ausführlich · Info · Warnung · Fehler untereinander. Die Achsen-Erklärung sitzt am Spaltenkopf (`Log.tsx:157`, `levelLegend()` aus `axisLegend`) — im DOM als `title` mit allen fünf Bedeutungen | ✓ |
-| Akteur zeigt `label`, sonst das Registry-Label von `actor_kind`, sonst den Rohwert | `Log.tsx:111–115`; Registry-Achse neu in `status-registry.ts:1413–1419` (fünf Werte, alle `neutral`), `AXIS_LABEL`/`AXIS_SOURCE` nachgezogen (`entity-icons.ts:80,151`), Fallback auf den Rohwert in `resolveStatus` (`status-registry.ts:1749`). `Levels` zeigt „s.fakir@kanzlei.de" (Label) · „System"/„API"/„Agent" (Registry) · „nightly-sync" (Label vor Registry) · „roboter" (Rohwert, unbekannter Wert) | ✓ |
-| Zeit über `Time`, Europe/Berlin, `dateTime`-Attribut gesetzt | `Log.tsx:185` `<Time value={entry.at} format="dateTime" size="sm" />`; `Time.tsx:39` setzt `dateTime`, `format.ts:16` `const TZ = "Europe/Berlin"`, `:82` DT_MEDIUM mit `timeZone: TZ`. Im DOM von `Filled`: `08:44Z` → Text „03.09.2026, 10:44", `datetime="2026-09-03T08:44:00.000Z"`, `title="Donnerstag, 3. September 2026 um 10:44"` | ✓ |
-| `payload` eingeklappt unter der Meldung, klappt per `Enter`/`Leertaste` auf; leeres Objekt zeigt nichts | `Log.tsx:198–204` mit `Disclosure summary="Einzelheiten" tone="quiet"`, nativ `<details>/<summary>` (`Disclosure.tsx:43–48`) — die Tastatur kommt vom Element. Im DOM von `Edge` gemessen: `summary` nimmt Fokus (`document.activeElement === summary`), `open` false → true, `<pre class="v2log__json">` mit `overflow-x: auto`, `max-height: 260px`. `hasPayload` (`Log.tsx:85–90`) filtert `{}` und `null`; die `Edge`-Zeile „Leeres Payload zeigt keine Einzelheiten." hat keine Aufklappzeile | ✓ |
-| `detail` steht in `.v2sub` unter der Meldung | `Log.tsx:197`; `InUse`, Pipeline-Karte: „Zwei Steuerblöcke — der Beleg wird gesplittet gebucht." und „Bewirtung statt Bürobedarf." stehen klein unter der Meldung (`.v2sub`, `v3.css:133`) | ✓ |
-| `refs` mit `href` sind `Link`, ohne `href` Text | `Log.tsx:208–219`. `Filled`, Zeile a3: `refs` = `[{RE-4471, href}, {Sachverhalt 118}]` — im DOM ein `<a href="#beleg">RE-4471</a>` und daneben „ · Sachverhalt 118" als reiner Text | ✓ |
-| `right` steht rechtsbündig mit `tnum` | `Log.tsx:220` setzt `.v2num` auf ein **inline** `<span>` **innerhalb** von `<div class="v2log__cell">` (`:226`). `.v2num` ist `text-align: right` (`v3.css:131`); auf einem Inline-Element bewegt das nichts. Im DOM von `InUse` gemessen: die Zelle liegt bei x = 1064–1184, der Konfidenz-Wert bei x = 1064–1111 (**linksbündig**), während der Kopf „Zusatz" bei 1184 rechts endet — Kopf rechts, Werte links, im Screenshot sichtbar. `tnum` vererbt sich, die Ausrichtung nicht. Verstoß gegen V3. Behebbar mit der Klasse am Zellen-`div` (`v2log__cell v2num`); der Kopf macht es `Log.tsx:155` schon richtig, weil dort der `<span>` selbst Grid-Kind ist | ✗ |
-| `depth` verändert die Darstellung nicht | `grep -n "depth" src/ui/v3/patterns/Log.tsx` → nur `:20` (Kommentar) und `:43` (Typ); kein Lesen im Rendering. `InUse`, Pipeline-Karte: `finding.vat` (Tiefe 1), `review.corrected` (2), `classify`/`propose`/`ocr.*` (3) stehen mit identischer Zeilenform nebeneinander | ✓ |
-| `emptyText` erscheint als `EmptyRow`; Default „Noch nichts protokolliert." | `Log.tsx:128` (Default) und `:164` (`<EmptyRow>`). `Empty` misst im DOM `.v2tbl__empty` = „Für diesen Beleg ist noch nichts protokolliert.", der Spaltenkopf bleibt stehen (`["Zeit","Meldung"]`, V5) | ✓ |
-| `loading` zeigt `Skeleton` | `Log.tsx:138`. `Loading` misst fünf `.v2skel` und die Vorlesezeile „Protokoll wird geladen …" | ✓ |
-| Keine Kürzung der Meldung; 300 Zeichen brechen um | `v3.css:2119` `.v2log__msg { overflow-wrap: anywhere; line-height: 1.45; }` — kein `line-clamp`, kein `text-overflow`. `Edge`, erste Zeile: die 300-Zeichen-Meldung läuft über sechs Zeilen, vollständig lesbar | ✓ |
-| Kein `"use client"` in `Log.tsx` | `grep -n '"use client"' src/ui/v3/patterns/Log.tsx` → nichts. Kein `useState`/`useEffect`; das Aufklappen ist natives `<details>` | ✓ |
-| `.v2log*` steht in `v3.css` ohne Hex und px | Hex: keins (`v3.css:2107–2133`, Farben über `var(--color-*)`, Abstände über `var(--space-*)`). **px: zwei** — `v3.css:2125` `font-size: 11.5px` und `:2130` `max-height: 260px`. Für die Schriftgröße gibt es den Token `--fs-ui-xs: 11.5px` (`tokens.css:114`), sie ist also ohne Rest ersetzbar; für die Höhe gibt es keinen Token, und rohe px sind dort Hausbrauch (`v3.css:1102`, `:1977`). Die Spec sagt „nur Tokens", das Kriterium „ohne px" — am Wortlaut gemessen nicht erfüllt | ✗ |
-| `Timeline` verliert „an audit trail" in `@when` und verweist in `@instead` auf `LogList`; `LogList` verweist zurück | `Timeline.tsx:86–91` — `@when` endet jetzt auf „a document, a run.", `@instead` beginnt mit „Many rows, severity, payload, filtering → LogList; the Timeline tells the story, the Log proves it." Rückverweis in `Log.tsx:121–123`: „The story of one object, where a gap is a statement → Timeline" | ✓ |
-| Tut bewusst nicht: filtern, laden, Spalten frei definieren, Zeilen öffnen | Die Schnittstelle (`Log.tsx:130–137`) kennt nur `entries`, `order`, `emptyText`, `loading` — keinen Filter, keine Spaltenliste, kein `href`/`onSelect`. `Row` wird ohne `href` gerendert (`:224`), bleibt also stumm (I11). Verweise: `Log.tsx:19–20` auf `LogBrowser` (0054) für die Tiefe, `:123` auf `Table` (eigene Spalten) und `MasterDetail` (Arbeiten an einer Zeile) | ✓ |
-| Ersetzt `LogView`/`LogTable`/`LogEntry`/`LogBadges`/`LogPayloadCell`, `AuditLogTable`, `InvoiceTracesTable`, `ExtractionLogsTable` und `STEP_LOG_COLUMNS` ohne Funktionsverlust | Zielt auf `ludwig/app`, nicht auf dieses Repo (`docs/backlog/README.md`). Hier belegt `InUse`, dass die Zeile die echten Typen trägt: `InvoiceTraceEntry` und Extraktions-Log in **einer** Liste (`Log.stories.tsx:536–539`), `AuditEvent` mit `batchLogDepth` (`:18–36`, `:543`) — inklusive der Normalisierung `WARN` → `warning` (`:70`, im DOM als „Warnung" sichtbar) | offen (App) |
+| **Fest** — `pnpm typecheck` und `pnpm build` grün | Nach der Nachbesserung erneut gelaufen: `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0; `pnpm build` → „Storybook build completed successfully", Exit 0 (nur die bekannte Chunk-Size-Warnung von Vite) | ✓ |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/patterns/Log.tsx` (Familie `LogEntry` + `LogList`), `Log.stories.tsx` daneben, `Log.stories.tsx:11` `title: "v3/Patterns/Prozess/LogList"` — dieselbe Gruppe wie `Timeline`; Barrel `index.ts:211` `export { LogList, type LogEntry, type LogLevel }` | ✓ |
+| **Fest** — Code englisch; `@when`/`@instead` an jedem Export | **Nachgebessert.** `Konfidenz` → `Confidence` (`Log.stories.tsx:79`, Aufruf `:52`). Alle Bezeichner beider Dateien durchgezählt (`grep -nE "^(export )?(function\|const\|type\|interface) …"`): `hasPayload`, `carries`, `actorText`, `levelLegend`, `LogRow`, `COLUMNS`, `MIN_WIDTH` / `fromAuditEvent`, `fromInvoiceTrace`, `fromExtractionLog`, `Confidence`, `AUDIT`, `LEVELS`, `ACTORS`, `LONG`, `WIDE_PAYLOAD`, `MANY`, `TRACES`, `EXTRACTION`, `AUDIT_EVENTS` — kein deutsches Wort mehr; Deutsch nur noch in Strings, die Nutzer sehen. `@when`/`@instead` an `LogList` (`Log.tsx:117–124`); `LogEntry`/`LogLevel` sind Typen und folgen darin `Time.tsx` (`TimeSize` ohne `@when`) | ✓ |
+| **Fest** — Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | Kein Hex in `Log.tsx`/`Log.stories.tsx`. px im TSX nur im `cols`-Grid-Template (`Log.tsx:59–68`) und in `MIN_WIDTH` (`:73–82`) — die `Table`-Schnittstelle nimmt ein Grid-Template entgegen, ein Token kann dort nicht stehen; dieselbe Konvention wie `ComparisonTable.tsx:78`. Story-Gerüst (`gap: 24`, `maxHeight: 420`) ist Hausbrauch. Keine Label-Map: `StatusBadge axis="log_level"` (`:190`), `resolveStatus("actor_kind", …)` (`:114`), `axisLegend("log_level")` (`:174`) | ✓ |
+| **Fest** — Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | Sieben Exporte, genau die sieben der Spec: `Filled` (`:211`), `Empty` (`:216`), `Loading` (`:223`), `Order` (`:228`), `Levels` (`:254`), `Edge` (`:304`), `InUse` (`:527`); alle sieben im Browser geöffnet, alle rendern. Je Prop eine Story (`entries`, `order`, `emptyText`, `loading`). Ausgeschlossen mit Grund: `EmptyAfterFilter` (filtert nicht → 0054), `Error` (lädt nicht → `ErrorRow` beim Aufrufer) | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 durchgegangen | Neu durchgegangen, zwei App-Punkte übersprungen (`docs/backlog/README.md`). **V3 ist jetzt erfüllt** — der einzige Verstoß der ersten Runde ist behoben (Zeile `right` unten). V1: `.v2log__row` setzt nur `align-items: start`, das Padding kommt von `.v2tbl__row` (`Table.tsx:130`); in `InUse` gemessen 47 px für die schlichte Zeile, höher nur wo `detail` oder Payload steht. V6/V7: `Levels` misst `bdg-neutral` für Debug und Ausführlich, Farbe erst ab `info` (`bdg-info`/`bdg-warning`/`bdg-danger`), jeder Badge mit Wort. V11/T8: Aufklappen per Tastatur, Chevron nie ohne Wort. I11: Zeile ohne Ziel, kein Hover. Kein `text-align: center` im `.v2log*`-Block. Anmerkungen ohne ✗: vier der sieben Stories (`Filled`, `Empty`, `Loading`, `Levels`) zeigen die Tabelle ohne `Card` — die erste Runde zählte hier falsch („fünf von sieben tun es richtig"; es sind drei: `Order`, `Edge`, `InUse`). Kein ✗, weil V5 eine Seitenregel ist und die Spec die Karte ausdrücklich dem Aufrufer überlässt. Der Ladezustand ersetzt Tabelle samt Spaltenkopf (I7), die Spec schreibt aber `Skeleton` (0016) vor; der Kopf „Schwere" trägt die Achse als `title` statt als (i), weil es `StatusHeader` im Set noch nicht gibt | ✓ |
+| **Fest** — Im Browser angesehen (Storybook), nicht nur gebaut | Alle sieben Story-IDs unter `http://localhost:6107/iframe.html?id=…` geöffnet und vermessen: Spaltenköpfe, `datetime`-Attribute, Sortierfolge, `getBoundingClientRect` der Zusatz-Spalte, `getComputedStyle` von `.v2log__json`, echte Tastendrücke auf dem `<summary>`; Screenshot von `InUse` | ✓ |
+| `entries` nach `at` sortiert, gleiche Zeit behält die Reihenfolge; `order` dreht, Default `newest` | `Log.tsx:145–147`. `Filled` übergibt zwölf Zeilen unsortiert (`Log.stories.tsx:86–208`) und zeigt sie ohne `order`-Prop absteigend: `2026-09-03T08:44Z → 08:10 → 07:05 → … → 2026-09-01T08:02Z`. `Order`: dieselben fünf Zeilen, Karte 1 (Default) `14:21Z … 08:02Z`, Karte 2 (`oldest`) `08:02Z … 14:21Z`. Gleiche Zeit: keine Story hat zwei identische `at`, deshalb den Sortierausdruck der Komponente im Browser mit vier Zeilen (drei davon zeitgleich) nachgestellt — Ergebnis `abdc` (newest) und `cabd` (oldest): die Gleichzeitigen behalten in beide Richtungen ihre Eingabefolge (`Array.prototype.sort` ist stabil, ES2019) | ✓ |
+| Spalten Schwere · Akteur · Quelle · Code · Bezug · Zusatz entfallen ohne Träger; Zeit und Meldung stehen immer | `Log.tsx:92–109` (`carries`) und `:140` (`always`). Köpfe gemessen — `Edge`/„Ränder": `[Zeit, Schwere, Akteur, Quelle, Meldung, Code]`, Schwere und Akteur bleiben, obwohl Zeile `e2` beide nicht trägt; `Edge`/„Quelle ohne Schwere": `[Zeit, Meldung, Code]`, fünf Spalten weg; `Edge`/„200 Zeilen": `[Zeit, Schwere, Akteur, Meldung, Code]`; `Empty`: `[Zeit, Meldung]`; `InUse`: Pipeline endet auf „Zusatz" (kein `refs`), Audit auf „Bezug" (kein `right`). Anmerkung: „Verhalten" nennt einen Test `log-entry-columns.test.ts` — den gibt es nicht, das Repo hat überhaupt keinen Test-Runner (kein `test`-Skript, keine `*.test.ts`); die Regel steht als `carries()` in der Komponente, und kein Abnahmekriterium fordert den Test | ✓ |
+| Schwere über `StatusBadge axis="log_level"`, ohne Info-Knopf je Zeile; alle fünf Werte sichtbar | `Log.tsx:190` mit `info={false}`; in `Filled` und `Levels` je **0** `<button>` in allen Zeilen. `Levels` zeigt Debug · Ausführlich · Info · Warnung · Fehler untereinander. Die Achsen-Erklärung sitzt am Spaltenkopf (`Log.tsx:157`, `levelLegend()`) — im DOM ein `title` mit allen fünf Bedeutungen | ✓ |
+| Akteur zeigt `label`, sonst das Registry-Label von `actor_kind`, sonst den Rohwert | `Log.tsx:111–115`. `Levels` misst: „s.fakir@kanzlei.de" (Label) · „System" / „API" / „Agent" (Registry) · „nightly-sync" (Label schlägt das Registry-Wort „CLI") · „roboter" (Rohwert, den die Achse nicht kennt) | ✓ |
+| Zeit über `Time`, Europe/Berlin, `dateTime`-Attribut gesetzt | `Log.tsx:185`. In `Filled` gemessen: `datetime="2026-09-03T08:44:00.000Z"`, Text „03.09.2026, 10:44", `title="Donnerstag, 3. September 2026 um 10:44"` — 08:44Z → 10:44 ist Europe/Berlin (T7), alle zwölf Zeilen tragen das Attribut | ✓ |
+| `payload` eingeklappt unter der Meldung, klappt per `Enter`/`Leertaste` auf; leeres Objekt zeigt nichts | `Log.tsx:198–204`, `Disclosure` als natives `<details>/<summary>`. In `Edge` steht **genau ein** `<details>` auf der ganzen Seite: die Zeile mit `payload: {}` (`e3`) bekommt keins, `hasPayload` (`:85–90`) greift. Echte Tastendrücke am fokussierten `summary`: `Enter` → `open` true, `Leertaste` → false. Das `<pre class="v2log__json">` trägt die 40 Schlüssel, `overflow-x` und `-y: auto` | ✓ |
+| `detail` steht in `.v2sub` unter der Meldung | `Log.tsx:197`. `InUse`, Pipeline-Karte: „Zwei Steuerblöcke — der Beleg wird gesplittet gebucht." und „Bewirtung statt Bürobedarf." stehen als `.v2sub` klein unter der Meldung | ✓ |
+| `refs` mit `href` sind `Link`, ohne `href` Text | `Log.tsx:208–219`. `Filled` hat sieben Zeilen mit Bezug; die gemischte misst als `<span><a href="#beleg">RE-4471</a></span><span> · Sachverhalt 118</span>` — Link und reiner Text nebeneinander, Trenner „ · " | ✓ |
+| `right` steht rechtsbündig mit `tnum` | **Nachgebessert und nachgemessen.** `Log.tsx:220` gibt `entry.right` roh in die Zelle, `:228` hängt `v2num` ans Grid-Kind (`v2log__cell v2num`), der Inline-`<span>` ist weg. In `InUse` gemessen: Kopf „Zusatz" x = 1059–1179, alle sechs Zusatz-Zellen x = 1059–1179, die Konfidenz-Badges 97 % · 62 % · 88 % enden bei x = 1179 — Kopf und Wert stehen bündig übereinander rechts (in der ersten Runde endeten die Werte bei 1111). `getComputedStyle` der Zelle: `text-align: right`, `font-variant-numeric: lining-nums tabular-nums`. Im Screenshot sichtbar. V3 erfüllt | ✓ |
+| `depth` verändert die Darstellung nicht | `grep -n "depth" src/ui/v3/patterns/Log.tsx` → nur `:42` (Kommentar) und `:43` (Typ); im Rendering wird es nicht gelesen. `InUse`, Pipeline-Karte: `finding.vat` (Tiefe 1), `review.corrected` (2), `classify`/`propose`/`ocr.*` (3) mit identischer Zeilenform nebeneinander | ✓ |
+| `emptyText` erscheint als `EmptyRow`; Default „Noch nichts protokolliert." | `Log.tsx:128` (Default) und `:164`. `Empty` misst `.v2tbl__empty` = „Für diesen Beleg ist noch nichts protokolliert.", der Spaltenkopf bleibt stehen (`[Zeit, Meldung]`) | ✓ |
+| `loading` zeigt `Skeleton` | `Log.tsx:138`. `Loading` misst fünf `.v2skel` in einer `.v2skelgroup` und die Vorlesezeile „Protokoll wird geladen …" in einem `aria-live`-Bereich | ✓ |
+| Keine Kürzung der Meldung; 300 Zeichen brechen um | `v3.css:2119` `.v2log__msg { overflow-wrap: anywhere; line-height: var(--lh-ui-md); }` — kein `line-clamp`, `text-overflow: clip`. `Edge`, erste Zeile: 299 Zeichen, 117 px hoch = sechs Zeilen, `scrollHeight == clientHeight`, also nichts abgeschnitten | ✓ |
+| Kein `"use client"` in `Log.tsx` | `grep -n 'use client' src/ui/v3/patterns/Log.tsx` → nichts; kein `useState`/`useEffect`, das Aufklappen ist natives `<details>` | ✓ |
+| `.v2log*` steht in `v3.css` ohne Hex und px | **Nachgebessert und nachgeprüft.** `sed -n '2107,2136p' src/styles/v3.css \| grep -E '[0-9]px\|#[0-9a-fA-F]{3,8}'` → kein Treffer. `font-size: var(--fs-ui-xs)`, `line-height: var(--lh-ui-xs)`, `.v2log__msg` `var(--lh-ui-md)` (= 1.45, derselbe Wert wie vorher). Die Höhe steht als `max-height: 15lh` — geprüft, ob das trägt und nicht bloß das Kriterium umgeht: `CSS.supports("max-height","15lh")` → true; berechnet **250.078 px** (15 × 16.675 px, das ist 11.5 px × 1.45), also praktisch die alten 260 px, nur an der eigenen Schrift gemessen statt geraten; im aufgeklappten 40-Schlüssel-Payload `scrollHeight` 700 gegen `clientHeight` 250 — der Block deckelt und scrollt wie zuvor. `lh` ist seit Chrome 109 / Safari 16.4 / Firefox 120 (2023) überall verfügbar, und wo es fehlt, entfällt nur die Deckelung: der Block wird lang, nichts bricht. Das ist eine tragfähige Lösung, keine Umgehung | ✓ |
+| `Timeline` verliert „an audit trail" in `@when` und verweist in `@instead` auf `LogList`; `LogList` verweist zurück | `Timeline.tsx:85–91` — `@when` endet auf „the history of a case, a document, a run.", „an audit trail" ist raus; `@instead` beginnt mit „Many rows, severity, payload, filtering → LogList; the Timeline tells the story, the Log proves it." Rückverweis in `Log.tsx:121–123`: „The story of one object, where a gap is a statement → Timeline" | ✓ |
+| Tut bewusst nicht: filtern, laden, Spalten frei definieren, Zeilen öffnen | Die Schnittstelle (`Log.tsx:125–137`) kennt nur `entries`, `order`, `emptyText`, `loading` — kein Filter, keine Spaltenliste, kein `href`/`onSelect`. `Row` ohne `href` (`:224`), also stumm und ohne Hover (I11). Verweise auf `LogBrowser` (0054), `Table` und `MasterDetail` in `@instead` | ✓ |
+| Ersetzt `LogView`/`LogTable`/`LogEntry`/`LogBadges`/`LogPayloadCell`, `AuditLogTable`, `InvoiceTracesTable`, `ExtractionLogsTable` und `STEP_LOG_COLUMNS` ohne Funktionsverlust | Zielt auf `ludwig/app`, nicht auf dieses Repo (`docs/backlog/README.md`). Hier belegt `InUse`, dass die Zeile die echten Typen trägt: `InvoiceTraceEntry` und Extraktions-Log in **einer** Liste, nach Sekunden ineinander sortiert (`Log.stories.tsx:536–539`), und zwölf `AuditEvent` mit `batchLogDepth` (`:18–36`, `:543`) — samt der Normalisierung `WARN` → „Warnung" (`:70`) | offen (App) |
 
-**Offene Punkte, nachbesserbar:**
+**Was die Nachbesserung `d1a1984` angerichtet hat:** nichts. `pnpm typecheck`
+und `pnpm build` sind grün, alle sieben Stories rendern, die Zeilenform ist
+unverändert — `.v2num` wanderte vom Inline-`<span>` ans Grid-Kind (Zusatz jetzt
+rechts), `Konfidenz` heißt `Confidence`, und `.v2log__json` nimmt statt zweier
+roher px die Token `--fs-ui-xs`/`--lh-ui-xs` und eine Höhe in `lh`. Der
+`line-height`-Wechsel von `1.45` auf `var(--lh-ui-md)` ist derselbe Wert; die
+Deckelung des JSON-Blocks fällt von 260 px auf 250 px.
 
-1. **Zusatz-Spalte ist linksbündig** (`Log.tsx:220`/`:226`): `.v2num` sitzt auf dem inneren `<span>`, ausrichten kann nur das Zellen-`div`. Klasse ans `div` hängen (`v2log__cell v2num`), dann stehen Kopf und Wert übereinander. Sichtbar in `InUse` (Konfidenz 97 % · 62 % · 88 %).
-2. **`function Konfidenz`** (`Log.stories.tsx:79`, verwendet `:52`) → `Confidence`. Einziger deutscher Bezeichner im Set.
-3. **`font-size: 11.5px`** in `.v2log__json` (`v3.css:2125`) → `var(--fs-ui-xs)`. Für `max-height: 260px` (`:2130`) gibt es keinen Token — entweder einen setzen oder das Kriterium auf „ohne Hex, Maße als Token, wo es einen gibt" nachziehen.
-
-**Nachbesserung 2026-09-03** (alle drei Punkte, erneute Abnahme steht aus):
-
-1. `.v2num` sitzt jetzt am Grid-Kind: `Log.tsx` gibt der Zusatz-Zelle
-   `v2log__cell v2num`, der innere `<span>` ist weg. Kopf und Wert stehen
-   übereinander rechts.
-2. `Konfidenz` → `Confidence` in `Log.stories.tsx`.
-3. `.v2log__json` nimmt `var(--fs-ui-xs)` und `var(--lh-ui-xs)`; die Höhe
-   steht als `15lh` — fünfzehn Zeilen der eigenen Schrift statt einer
-   px-Zahl. `.v2log__msg` bekommt `var(--lh-ui-md)` statt `1.45`. Im Block
-   steht kein roher Wert mehr.
-
-Erste Abnahme von / am: Claude (Abnahme-Agent), 2026-09-03 · Offene Punkte: drei — Zusatz-Spalte nicht rechtsbündig (V3-Verstoß, `Log.tsx:220`), deutscher Bezeichner `Konfidenz` (`Log.stories.tsx:79`), zwei rohe px im `.v2log*`-Block (`v3.css:2125`, `:2130`). Ein Kriterium **offen (App)**: die Ablösung von `LogView`/`AuditLogTable`/`InvoiceTracesTable`/`ExtractionLogsTable`/`STEP_LOG_COLUMNS` in `ludwig/app`. Bilanz: 21 ✓ · 3 ✗ · 1 offen (App).
+Abgenommen von / am: Claude (zweite Abnahme), 2026-09-03 · Offene Punkte:
+keine im Set. Ein Kriterium bleibt **offen (App)** — die Ablösung von
+`LogView`/`LogTable`/`LogEntry`/`LogBadges`/`LogPayloadCell`, `AuditLogTable`,
+`InvoiceTracesTable`, `ExtractionLogsTable` und `STEP_LOG_COLUMNS` in
+`ludwig/app`; sie gehört in den Migrationsschritt, nicht hierher
+(`docs/backlog/README.md`). Bilanz: **24 ✓ · 0 ✗ · 1 offen (App)**
+(erste Abnahme 2026-09-03: 21 ✓ · 3 ✗ · 1 offen (App)).
