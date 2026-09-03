@@ -2116,18 +2116,20 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 /* Die Meldung bricht um, sie wird nicht gekürzt — ein Protokoll, das man
    nicht lesen kann, ist keins. */
-.v2log__msg { overflow-wrap: anywhere; line-height: 1.45; }
+.v2log__msg { overflow-wrap: anywhere; line-height: var(--lh-ui-md); }
 
 .v2log__pay { margin-top: var(--space-1); }
 .v2log__json {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 11.5px;
-  line-height: 1.5;
+  font-size: var(--fs-ui-xs);
+  line-height: var(--lh-ui-xs);
   color: var(--color-text-muted);
   white-space: pre;
   overflow-x: auto;
-  max-height: 260px;
+  /* Rund fünfzehn Zeilen JSON — gemessen an der eigenen Schrift, nicht in px:
+     ein breites Payload scrollt, statt die Karte zu sprengen. */
+  max-height: 15lh;
   overflow-y: auto;
 }
 .v2log__refs { overflow-wrap: anywhere; }

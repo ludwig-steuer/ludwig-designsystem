@@ -217,13 +217,15 @@ function LogRow({ entry, shown }: { entry: LogEntry; shown: ColumnKey[] }) {
     ) : (
       <span className="v2muted">—</span>
     ),
-    right: <span className="v2num">{entry.right}</span>,
+    right: entry.right,
   };
 
   return (
     <Row className="v2log__row">
       {shown.map((key) => (
-        <div className="v2log__cell" key={key}>
+        // `v2num` has to sit on the grid child itself — on an inline span
+        // `text-align: right` would move nothing (V3).
+        <div className={`v2log__cell${key === "right" ? " v2num" : ""}`} key={key}>
           {cells[key]}
         </div>
       ))}

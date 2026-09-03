@@ -49,7 +49,7 @@ function fromInvoiceTrace(t: InvoiceTraceEntry): LogEntry {
     depth: t.stepKind.startsWith("finding") ? 1 : review ? 2 : 3,
     detail: t.comment ?? undefined,
     payload: t.payload,
-    right: t.confidence === null ? undefined : <Konfidenz value={t.confidence} />,
+    right: t.confidence === null ? undefined : <Confidence value={t.confidence} />,
   };
 }
 
@@ -76,7 +76,7 @@ function fromExtractionLog(l: {
 }
 
 /** The confidence in the extra cell — a share, not a state. */
-function Konfidenz({ value }: { value: number }) {
+function Confidence({ value }: { value: number }) {
   return <Badge tone="neutral">{Math.round(value * 100)} %</Badge>;
 }
 
