@@ -47,10 +47,11 @@ function Row({ name, cls, note, children }: { name: string; cls: string; note: s
  * tragen `--color-primary` (h1/h2) und `--color-text` (h3/h4) — eine Stufe
  * heller, je tiefer sie sitzt.
  *
- * **Die Klasse steht am Element**, auch an `h1`–`h4`: Tailwinds Preflight
- * (`@tailwind base` lädt in `index.css` nach `tokens.css`) setzt
- * `h1…h6 { font-size: inherit }` und schlägt damit den Element-Selektor.
- * Wirksam ist nur `.lw-h1`–`.lw-h4` — siehe Befund in 0037.
+ * **Die Klasse steht am Element**, auch an `h1`–`h4`: `tokens.css` führt seit
+ * 2026-09-03 nur noch Klassen. Element-Selektoren waren entweder wirkungslos
+ * (Tailwinds Preflight setzt `h1…h6 { font-size: inherit }` und lädt später)
+ * oder trafen fremdes Markup (`p` im Markdown-Reader). Ohne Klasse erbt ein
+ * Element die Größe seiner Fläche — was Komponenten brauchen.
  */
 export const Scale: Story = {
   render: () => (
@@ -101,6 +102,62 @@ export const Scale: Story = {
       </Row>
       <Row name="Display (lesend)" cls=".lw-display" note="nur lesendes Register — Serif, Hero">
         <div className="lw-display">Ludwig</div>
+      </Row>
+    </div>
+  ),
+};
+
+/**
+ * Die Leiter des **produktiven Registers** — die sieben Größen, aus denen jede
+ * v3-Komponente wählt (`--fs-ui-*` in `tokens.css`). Vorher stand jede Zahl
+ * einzeln in `v3.css`; wer eine Komponente baute, riet.
+ */
+export const Interface: Story = {
+  render: () => (
+    <div style={{ maxWidth: 900 }}>
+      <Row name="Seitentitel" cls="--fs-ui-xl · 20 px" note="PageHeader, einmal je Seite">
+        <span style={{ fontSize: "var(--fs-ui-xl)", lineHeight: "var(--lh-ui-xl)", fontWeight: 600 }}>
+          Stapel 2026-08 · Bürobedarf
+        </span>
+      </Row>
+      <Row name="Flächentitel" cls="--fs-ui-lg · 16 px" note="Karte, Detail, Markdown-Überschrift">
+        <span style={{ fontSize: "var(--fs-ui-lg)", lineHeight: "var(--lh-ui-lg)", fontWeight: 600 }}>
+          Ungeprüfte Sätze
+        </span>
+      </Row>
+      <Row name="Betont" cls="--fs-ui-md · 14 px" note="Knopf, hervorgehobene Zeile">
+        <span style={{ fontSize: "var(--fs-ui-md)", lineHeight: "var(--lh-ui-md)" }}>
+          Stapel abnehmen
+        </span>
+      </Row>
+      <Row name="Standard" cls="--fs-ui · 13,5 px" note="Zeile, Feld, Fließtext der Arbeitsfläche">
+        <span style={{ fontSize: "var(--fs-ui)", lineHeight: "var(--lh-ui)" }}>
+          142 Sätze, davon 38 ungeprüft. Zwei über 1.000,00 € tragen einen Befund.
+        </span>
+      </Row>
+      <Row name="Unterzeile" cls="--fs-ui-sm · 12,5 px" note="Hinweis, zweite Zeile einer Zelle">
+        <span style={{ fontSize: "var(--fs-ui-sm)", lineHeight: "var(--lh-ui-sm)", color: "var(--color-text-muted)" }}>
+          zuletzt geprüft am 31.08.2026
+        </span>
+      </Row>
+      <Row name="Beischrift" cls="--fs-ui-xs · 11,5 px" note="Taste, Achsenbeschriftung">
+        <span style={{ fontSize: "var(--fs-ui-xs)", lineHeight: "var(--lh-ui-xs)", color: "var(--color-text-subtle)" }}>
+          Sep · Okt · Nov · Dez
+        </span>
+      </Row>
+      <Row name="Feld-Label" cls="--fs-ui-2xs · 11 px" note="Versalien über dem Feld">
+        <span
+          style={{
+            fontSize: "var(--fs-ui-2xs)",
+            lineHeight: "var(--lh-ui-2xs)",
+            fontWeight: 600,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            color: "var(--color-text-muted)",
+          }}
+        >
+          Steuerschlüssel
+        </span>
       </Row>
     </div>
   ),

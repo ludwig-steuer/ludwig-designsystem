@@ -116,6 +116,29 @@ Variabel (aus dieser Spec):
    wechseln? *Ohne Antwort: behalten — 12 App-Stellen zeigen heute nur „…",
    und das sagt der Nutzerin nichts.*
 
+## Nachtrag 2026-09-03 · Optik an den App-Rahmen nachgezogen
+
+Owner-Befund: die Knöpfe im Storybook wirken neben denen der App „nicht
+kompakt und modern", der Glanz sei „altbacken" und in Ludwig längst
+herausgenommen. Verglichen mit `src/styles/app-chrome.css` §BUTTONS
+(dort steht die Fassung der App) stimmte das — `.v2btn` trug einen Schatten
+**im Ruhezustand** und war drei Pixel höher. Geändert in `v3.css`, ohne eine
+Prop anzufassen:
+
+| | vorher | jetzt |
+|---|---|---|
+| Schatten | `--shadow-xs` im Ruhezustand (primär, danger) | keiner; `--shadow-md` erst beim Hover, `--shadow-sm` beim Drücken |
+| Drücken | nichts | `translateY(0.5px)`, dunklere Fläche (`--color-primary-800`) |
+| Gewicht | 600 | 500 (wie `.btn` der App) |
+| Zeilenhöhe | fix 20 px | Faktor 1.2 |
+| Innenabstand `md` | 9 / 16 px → 40 px hoch | 8 / 14 px → **35 px** hoch |
+| Innenabstand `sm` · `xs` | 6 / 13 px · 4 / 10 px | 6 / 12 px · 4 / 9 px, Radius `--radius-md` |
+| Schriftgrößen | 14 / 13 / 12 px roh | `--fs-ui-md` / `--fs-ui` / `--fs-ui-sm` |
+| Sekundär | Text `--color-text` | Text `--color-primary`, Hover-Rand `--color-primary` |
+
+Nachweis: `v3-primitives-aktion-button--variants` und `--sizes` im Browser;
+gemessen 35 / 30 / 25 px Höhe, `box-shadow: none` im Ruhezustand, Gewicht 500.
+
 ## Abnahme
 
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |

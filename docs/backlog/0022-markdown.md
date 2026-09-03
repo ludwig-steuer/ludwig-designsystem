@@ -138,6 +138,26 @@ Zeile in `v3.css`:
 Kein JavaScript, keine geänderte Schnittstelle; Browser ohne dieses
 Pseudoelement lassen die Regel fallen.
 
+## Abgleich 2026-09-03 · Größen aus der Leiter
+
+Owner-Befund am Reader: „der Fließtext hat eine größere Schrift als die
+Bulletpoints". Ursache war nicht die Komponente, sondern `tokens.css`: die
+Regel `p, .lw-body { font-size: var(--fs-body) }` traf jeden `<p class="v2mk__p">`
+mit 16 px, während `li` die 13,5 px des Containers erbte. Der Element-Selektor
+ist raus (siehe 0037), und `Markdown` nimmt seine Größen jetzt aus der Leiter
+des produktiven Registers:
+
+| Teil | vorher | jetzt |
+|---|---|---|
+| Block, Absatz, Liste, Zitat | 13,5 px / Absatz faktisch 16 px | `--fs-ui` (13,5 px), Absatz erbt |
+| Überschriften `#`…`####` | 17 / 15,5 / 14 / 13 px | `--fs-ui-lg` / `--fs-ui-md` / `--fs-ui` / `--fs-ui-sm` |
+| Code-Block | 12 px | `--fs-ui-sm` |
+| Tabelle | 13 px | `--fs-ui` |
+| „Ganz lesen" | 12,5 px | `--fs-ui-sm` |
+
+Nachweis: `v3-primitives-fläche-markdown--filled`, gemessen — Block, Absatz,
+Listenpunkt, Zitat und Tabelle stehen alle auf 13,5 px.
+
 ## Abnahmekriterien der Erweiterung A5
 
 - [ ] `pnpm typecheck` und `pnpm build` grün

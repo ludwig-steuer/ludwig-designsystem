@@ -57,11 +57,12 @@ Inhalt, festgelegt:
 
 Titel `v3/Grundlagen/Typografie`. Abgeleitet nach §6: eine Anzeige ohne Props
 hat keine Zustände und keine Enums; es bleiben 1 Übersicht + 1 „im Einsatz"
-+ 1 Rand = 3.
++ 1 Rand = 3, dazu die Leiter des produktiven Registers = 4.
 
 | Story | Beweist |
 |---|---|
 | `Scale` | jede Klasse einmal, mit Name, Klasse und echtem Text |
+| `Interface` | die Leiter des produktiven Registers (`--fs-ui-*`) mit ihren Einsatzorten |
 | `Registers` | produktiv gegen lesend am selben Absatz (A1) |
 | `InUse` | ein Ausschnitt einer Seite: Overline, `h3`, Absatz, `.lw-caption`, Mono-Kontonummer in einer `ProseCard` |
 
@@ -90,21 +91,28 @@ Variabel (aus dieser Spec):
 - [ ] Beide Register stehen mit ihrem Geltungsbereich da (Story `Registers`)
 - [ ] Die Story steht unter `v3/Grundlagen/…`, nicht unter `Primitives`
 
-## Befund beim Bauen (2026-09-03)
+## Befund beim Bauen (2026-09-03) — und seine Behebung
 
-**`h1`–`h4` als Element-Selektor sind wirkungslos.** `src/styles/index.css`
+**`h1`–`h4` als Element-Selektor waren wirkungslos.** `src/styles/index.css`
 lädt `@tailwind base` **nach** `tokens.css`; Preflight setzt
 `h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }` und
-schlägt bei gleicher Spezifität die Regel `h1, .lw-h1 { … }`. Gemessen in
+schlug bei gleicher Spezifität die Regel `h1, .lw-h1 { … }`. Gemessen in
 `v3-grundlagen-typografie--scale`: `h1` rendert 14 px statt 40 px, `h2`–`h4`
-je 16 px statt 30/22/18 px. Wirksam sind allein die Klassen `.lw-h1`–`.lw-h4`.
+je 16 px statt 30/22/18 px.
 
-Die Story trägt deshalb die Klasse **am** Element (`<h1 className="lw-h1">`)
-und sagt es dazu — sie zeigt, was gilt, nicht was gemeint war. Die Ursache
-selbst (Reihenfolge der Style-Kette, betrifft auch `ludwig/app`) ist eine
-eigene Aufgabe: entweder `@tailwind base` vor die eigenen Stylesheets, oder
-`corePlugins.preflight: false`. Beides ändert die Optik im ganzen Set und
-gehört nicht in diese Story.
+**`p` traf fremdes Markup.** Owner-Befund am Markdown-Reader: der Absatz stand
+auf 16 px (lesendes Register), die Aufzählung daneben auf 13,5 px — denn `li`
+erbt die Größe des Containers, `p` hatte eine eigene Regel. Derselbe
+Element-Selektor, dasselbe Muster.
+
+**Behoben (2026-09-03):** `tokens.css` führt in den semantischen Typ-Regeln
+**nur noch Klassen** (`.lw-h1`–`.lw-h4`, `.lw-body`). Wer eine Stufe will,
+schreibt sie an; ohne Klasse erbt ein Element die Größe seiner Fläche — genau
+das, was eine Komponente braucht. Dazu kommt die **Leiter des produktiven
+Registers** (`--fs-ui-xl` … `--fs-ui-2xs`, mit Zeilenhöhen), aus der jede
+v3-Komponente ihre Größe nimmt, statt sie in `v3.css` einzeln zu setzen; die
+Story `Interface` zeigt sie. Nachgezogen sind bisher `Markdown` und `Button` —
+der Rest von `v3.css` folgt, sobald eine Komponente ohnehin angefasst wird.
 
 ## Offene Fragen
 

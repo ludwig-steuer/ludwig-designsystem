@@ -426,39 +426,57 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 .v2stack { display: flex; flex-direction: column; gap: var(--space-4); }
 
 /* --- Knopf -------------------------------------------------------------
- * Das Design-System setzt zwei Größen: md (40 px hoch) für Kopf-Karte und
- * Aktionsleiste, sm (32 px) für Zeilen- und Kartenaktionen. Höhe kommt aus
- * Zeilenhöhe + Innenabstand, nicht aus `height` — sonst reißt der Knopf bei
- * zwei Zeilen Text.
+ * Nachgezogen an den Rahmen der App (`app-chrome.css` §BUTTONS, Owner
+ * 2026-09-03): **flach im Ruhezustand**, Tiefe erst beim Hover, beim Drücken
+ * ein halber Pixel Weg nach unten. Der Schatten im Ruhezustand ließ jeden
+ * Primärknopf glänzen — das ist in Ludwig herausgenommen worden.
+ * Kompakter als zuvor: Gewicht 500 statt 600, Zeilenhöhe aus dem Faktor statt
+ * fixer 20 px, weniger Innenabstand (md 40 → 35 px hoch).
+ * Höhe kommt aus Zeilenhöhe + Innenabstand, nicht aus `height` — sonst reißt
+ * der Knopf bei zwei Zeilen Text.
  */
 .v2btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
   border: 1px solid transparent;
   border-radius: var(--radius-lg);
   font-family: var(--font-sans);
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 1.2;
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
   transition: background var(--duration-fast) var(--ease-standard),
-              border-color var(--duration-fast) var(--ease-standard);
+              border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-base) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
 }
-.v2btn--md { font-size: 14px; line-height: 20px; padding: 9px 16px; }
-.v2btn--sm { font-size: 13px; line-height: 18px; padding: 6px 13px; }
+.v2btn--md { font-size: var(--fs-ui-md); padding: 8px 14px; }
+.v2btn--sm { font-size: var(--fs-ui); padding: 6px 12px; border-radius: var(--radius-md); }
 
 .v2btn--primary {
   background: var(--color-primary-700);
   color: var(--color-text-on-dark);
-  box-shadow: var(--shadow-xs);
 }
-.v2btn--primary:hover:not(:disabled) { background: var(--color-primary-600); }
+.v2btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-600);
+  box-shadow: var(--shadow-md);
+}
+.v2btn--primary:active:not(:disabled) {
+  background: var(--color-primary-800);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(0.5px);
+}
 
 .v2btn--secondary {
   background: var(--color-surface);
-  color: var(--color-text);
+  color: var(--color-primary);
   border-color: var(--color-border-strong);
 }
-.v2btn--secondary:hover:not(:disabled) { background: var(--color-bg-soft); }
+.v2btn--secondary:hover:not(:disabled) {
+  background: var(--color-bg-soft);
+  border-color: var(--color-primary);
+}
+.v2btn--secondary:active:not(:disabled) { transform: translateY(0.5px); }
 
 .v2btn--tertiary { background: none; color: var(--color-accent-700); }
 .v2btn--tertiary:hover:not(:disabled) { background: var(--color-accent-50); }
@@ -466,9 +484,9 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 .v2btn--danger {
   background: var(--color-danger);
   color: var(--color-text-on-dark);
-  box-shadow: var(--shadow-xs);
 }
-.v2btn--danger:hover:not(:disabled) { filter: brightness(1.08); }
+.v2btn--danger:hover:not(:disabled) { filter: brightness(1.08); box-shadow: var(--shadow-md); }
+.v2btn--danger:active:not(:disabled) { transform: translateY(0.5px); }
 
 .v2btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .v2btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
@@ -710,6 +728,69 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   background: var(--color-surface-head);
   display: flex; justify-content: flex-end; align-items: center; gap: 10px;
 }
+
+/* --- Drawer (0042) -------------------------------------------------------
+ * Der Slide-over von rechts, aus der App übernommen (`.lwdrawer*`, 29
+ * Aufrufstellen) — dort mit Hex und px, hier ausschließlich aus Tokens.
+ * Breiten als drei Stufen (`--drawer-sm/md/lg`), damit kein Aufrufer eine
+ * eigene Zahl erfindet.
+ */
+.v2drawer__scrim {
+  position: fixed; inset: 0; z-index: 60;
+  background: var(--color-scrim);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-standard);
+}
+.v2drawer__scrim.is-open { opacity: 1; pointer-events: auto; }
+.v2drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 61;
+  width: var(--drawer-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--duration-slow) var(--ease-standard);
+}
+.v2drawer.is-open { transform: translateX(0); }
+.v2drawer--sm { width: var(--drawer-sm); }
+.v2drawer--md { width: var(--drawer-md); }
+.v2drawer--lg { width: var(--drawer-lg); }
+.v2drawer:focus-visible { outline: none; }
+.v2drawer__h {
+  flex-shrink: 0;
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: var(--border-1);
+  background: var(--color-surface-head);
+}
+.v2drawer__titl { flex: 1; min-width: 0; }
+.v2drawer__title {
+  margin: 0;
+  font-size: var(--fs-ui-lg); line-height: var(--lh-ui-lg);
+  font-weight: 600; color: var(--color-text);
+}
+.v2drawer__meta {
+  margin-top: var(--space-1);
+  font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm);
+  color: var(--color-text-muted);
+}
+/* Kopf und Fuss stehen, der Body scrollt. */
+.v2drawer__b {
+  flex: 1; min-height: 0; overflow-y: auto;
+  padding: var(--space-5);
+  display: flex; flex-direction: column; gap: var(--space-4);
+  font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text);
+}
+.v2drawer__foot {
+  flex-shrink: 0;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-top: var(--border-1);
+  background: var(--color-surface-head);
+}
+/* Footer-Slot ohne Inhalt (kein <DrawerFooter>) zeigt keine leere Leiste. */
+.v2drawer__foot:empty { display: none; }
 
 /* --- Formular ------------------------------------------------------------ */
 .v2field { display: flex; flex-direction: column; gap: 4px; }
@@ -1428,7 +1509,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* xs für dichte Zellen und Editoren. Liegt zwischen den beiden v1-Klassen,
    die dafür heute per Inline-Style nachgebaut werden (.vconfirm 11px,
    .rcard__edit 12px). Drückt die Tabellenzeile nicht auf (V1). */
-.v2btn--xs { font-size: 12px; line-height: 16px; padding: 4px 10px; }
+.v2btn--xs { font-size: var(--fs-ui-sm); padding: 4px 9px; border-radius: var(--radius-md); }
 
 /* Vollbreit statt größer — Ludwig kennt kein CTA-Format über md hinaus. */
 .v2btn--full { width: 100%; justify-content: center; }
@@ -1734,22 +1815,25 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2tl__empty { padding: var(--space-4) 0; }
 
 /* --- Markdown (0022) — Text, den nicht wir geschrieben haben -------------- */
-.v2mk { font-size: 13.5px; line-height: 1.55; color: var(--color-text); }
-.v2mk__p { margin: 0 0 11px; }
+/* Eine Größe für den ganzen Block: Absatz, Aufzählung, Zitat und Zelle erben
+   sie. Vorher stand der Absatz auf 16 px, weil `p` in `tokens.css` eine eigene
+   Regel hatte — die Aufzählung daneben erbte 13,5 px (Befund 2026-09-03). */
+.v2mk { font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text); }
+.v2mk__p { margin: 0 0 11px; font-size: inherit; line-height: inherit; }
 .v2mk__p:last-child { margin-bottom: 0; }
 .v2mk__list { margin: 0 0 11px; padding-left: 22px; list-style: revert; }
 .v2mk__list:last-child { margin-bottom: 0; }
 .v2mk__h { font-weight: 600; line-height: 1.3; margin: var(--space-6) 0 var(--space-2); }
 .v2mk__h:first-child { margin-top: 0; }
-.v2mk__h--1 { font-size: 17px; color: var(--color-primary-700); }
-.v2mk__h--2 { font-size: 15.5px; color: var(--color-primary-700); }
-.v2mk__h--3 { font-size: 14px; }
-.v2mk__h--4 { font-size: 13px; color: var(--color-text-muted); }
+.v2mk__h--1 { font-size: var(--fs-ui-lg); color: var(--color-primary-700); }
+.v2mk__h--2 { font-size: var(--fs-ui-md); color: var(--color-primary-700); }
+.v2mk__h--3 { font-size: var(--fs-ui); }
+.v2mk__h--4 { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 .v2mk__code { font-family: var(--font-mono); font-size: 0.92em; }
 .v2mk__pre {
   margin: 0 0 11px; padding: var(--space-3);
   background: var(--color-bg-sunken); border-radius: var(--radius-sm);
-  font-family: var(--font-mono); font-size: 12px; line-height: 1.5;
+  font-family: var(--font-mono); font-size: var(--fs-ui-sm); line-height: 1.5;
   overflow-x: auto;
 }
 .v2mk__quote {
@@ -1759,7 +1843,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2mk__hr { margin: var(--space-4) 0; border: 0; border-top: 1px solid var(--color-border); }
 .v2mk__tblwrap { overflow-x: auto; margin: 0 0 11px; }
-.v2mk__tbl { border-collapse: collapse; font-size: 13px; }
+.v2mk__tbl { border-collapse: collapse; font-size: var(--fs-ui); }
 .v2mk__tbl th, .v2mk__tbl td {
   padding: 5px 10px 5px 0; text-align: left; vertical-align: top;
   border-bottom: 1px solid var(--color-border-subtle);
@@ -1779,7 +1863,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2mk--clamp[open] .v2mk__body { max-height: none; -webkit-mask-image: none; mask-image: none; }
 .v2mk__more {
   order: 2; list-style: none; cursor: pointer; padding-top: var(--space-2);
-  font-size: 12.5px; font-weight: 600; color: var(--color-accent-700); width: fit-content;
+  font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-accent-700); width: fit-content;
 }
 .v2mk__more::-webkit-details-marker { display: none; }
 .v2mk__more:hover { text-decoration: underline; }

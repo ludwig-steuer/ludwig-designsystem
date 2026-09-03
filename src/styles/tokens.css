@@ -66,6 +66,9 @@
   --color-info:           var(--color-accent);
   --color-info-bg:        var(--color-accent-50);
 
+  /* Scrim hinter Dialog und Drawer. */
+  --color-scrim:          rgba(20, 36, 56, 0.30);
+
   /* Focus ring */
   --color-focus:          #3B8FC4;
   --color-focus-ring:     rgba(59, 143, 196, 0.32);
@@ -99,6 +102,17 @@
   --fs-body-sm:   14px;   --lh-body-sm:   1.50;   --tr-body-sm:    0;
   --fs-caption:   13px;   --lh-caption:   1.45;   --tr-caption:    0;
   --fs-overline:  12px;   --lh-overline:  1.40;   --tr-overline:   0.06em;
+
+  /* Produktives Register (A1, §1). Die Leiter, aus der **jede** v3-Komponente
+     ihre Größe nimmt — vorher stand jede Zahl einzeln in `v3.css`, und eine
+     neue Komponente riet. Das lesende Register bleibt bei --fs-body & Co. */
+  --fs-ui-xl:    20px;    --lh-ui-xl:   1.25;   /* Seitentitel */
+  --fs-ui-lg:    16px;    --lh-ui-lg:   1.35;   /* Karten-, Detailtitel */
+  --fs-ui-md:    14px;    --lh-ui-md:   1.45;   /* Knopf, betonte Zeile */
+  --fs-ui:       13.5px;  --lh-ui:      1.55;   /* Standard: Zeile, Feld, Fließtext */
+  --fs-ui-sm:    12.5px;  --lh-ui-sm:   1.50;   /* Unterzeile, Hinweis */
+  --fs-ui-xs:    11.5px;  --lh-ui-xs:   1.45;   /* Beischrift, Taste */
+  --fs-ui-2xs:   11px;    --lh-ui-2xs:  1.40;   /* Versalien-Label */
 
   /* ====================================================================
      SPACING — 4px base, 8px rhythm
@@ -203,6 +217,15 @@
 
 /* ==========================================================================
    SEMANTIC TYPE STYLES
+
+   **Nur Klassen, keine Element-Selektoren.** Zwei Gründe, beide gemessen
+   (2026-09-03): `h1`–`h6` schlägt Tailwinds Preflight (`font-size: inherit`),
+   das in `index.css` nach dieser Datei lädt — die Element-Regel war wirkungslos.
+   Und `p` traf fremdes Markup: im Markdown-Reader stand der Absatz auf 16 px
+   (lesendes Register), während die Aufzählung daneben 13,5 px vom Container
+   erbte. Wer eine Stufe will, schreibt sie an: `<h2 class="lw-h2">`,
+   `<p class="lw-body">`. Ohne Klasse erbt ein Element die Größe seiner Fläche
+   — genau das, was eine Komponente braucht.
    ========================================================================== */
 
 .lw-display {
@@ -214,7 +237,7 @@
   color: var(--color-primary);
 }
 
-h1, .lw-h1 {
+.lw-h1 {
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: var(--fs-h1);
@@ -223,7 +246,7 @@ h1, .lw-h1 {
   color: var(--color-primary);
 }
 
-h2, .lw-h2 {
+.lw-h2 {
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: var(--fs-h2);
@@ -232,7 +255,7 @@ h2, .lw-h2 {
   color: var(--color-primary);
 }
 
-h3, .lw-h3 {
+.lw-h3 {
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: var(--fs-h3);
@@ -241,7 +264,7 @@ h3, .lw-h3 {
   color: var(--color-text);
 }
 
-h4, .lw-h4 {
+.lw-h4 {
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: var(--fs-h4);
@@ -258,7 +281,7 @@ h4, .lw-h4 {
   color: var(--color-text);
 }
 
-p, .lw-body {
+.lw-body {
   font-family: var(--font-sans);
   font-weight: 400;
   font-size: var(--fs-body);
