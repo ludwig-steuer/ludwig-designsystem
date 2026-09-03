@@ -2103,3 +2103,31 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   padding-top: var(--space-4);
   border-top: var(--border-1-subtle);
 }
+
+/* --- Protokoll: die Log-Tabelle (0053) --------------------------------- */
+/* Die Zeile ist eine `.v2tbl__row`; sie wächst nur dort, wo eine Meldung
+   umbricht oder Einzelheiten aufgeklappt sind. Alles andere steht oben, damit
+   Zeit und Schwere neben der ersten Zeile der Meldung sitzen, nicht in ihrer
+   Mitte. */
+.v2log__row { align-items: start; }
+/* Codes wie `journal_entry.account_changed` brechen um, statt in die
+   Nachbarspalte zu laufen. */
+.v2log__cell { min-width: 0; overflow-wrap: anywhere; }
+
+/* Die Meldung bricht um, sie wird nicht gekürzt — ein Protokoll, das man
+   nicht lesen kann, ist keins. */
+.v2log__msg { overflow-wrap: anywhere; line-height: 1.45; }
+
+.v2log__pay { margin-top: var(--space-1); }
+.v2log__json {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  white-space: pre;
+  overflow-x: auto;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.v2log__refs { overflow-wrap: anywhere; }

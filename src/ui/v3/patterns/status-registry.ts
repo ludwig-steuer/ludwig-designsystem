@@ -111,6 +111,7 @@ export type StatusAxis =
   | "datev_pruefung"
   // — Betrieb —
   | "log_level"
+  | "actor_kind"
   | "health"
   | "readiness";
 
@@ -1395,6 +1396,29 @@ const LOG_LEVEL: Record<string, StatusDescriptor> = {
 };
 
 /**
+ * `platform_audit_events.actor_kind` — wer ein Ereignis ausgelöst hat.
+ * NOT NULL, DB-CHECK `user · system · api · cli · agent`; Wertebereich
+ * `ActorKind` (`modules/audit-log/domain/types.ts`).
+ *
+ * Keine Schwere und keine Rangfolge: der Akteur sagt, **wer** gehandelt hat,
+ * nicht wie schlimm es war. Deshalb tragen alle fünf Werte `neutral` — Farbe
+ * bleibt der Kritikalität vorbehalten (V6).
+ *
+ * Fallstrick: `user` heißt „ein Mensch war es", nicht „ein angemeldeter
+ * Benutzer der Kanzlei" — ein CLI-Aufruf mit Dienstkonto schreibt `cli`.
+ *
+ * Diese Achse steht **zuerst hier** (Design-System), nicht in der App:
+ * Befund 4 der Spec 0053 meldet sie zum Nachziehen.
+ */
+const ACTOR_KIND: Record<string, StatusDescriptor> = {
+  user: { label: "Nutzer", kind: "neutral", description: "Ein Mensch hat es ausgelöst — über die Oberfläche angemeldet." },
+  system: { label: "System", kind: "neutral", description: "Ein Hintergrundprozess ohne Auftraggeber: Zeitplan, Trigger, Aufräumlauf." },
+  api: { label: "API", kind: "neutral", description: "Ein Aufruf von außen über die Schnittstelle." },
+  cli: { label: "CLI", kind: "neutral", description: "Ein Kommandozeilen-Aufruf, meist mit Dienstkonto." },
+  agent: { label: "Agent", kind: "neutral", description: "Der Buchungsagent hat gehandelt — kein Mensch hat es entschieden." },
+};
+
+/**
  * Health-Check-Status — **berechnet, ephemer** (`modules/health/aggregate.ts`),
  * pro Aufruf frisch geprüft.
  *
@@ -1703,6 +1727,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   stapel_commit: STAPEL_COMMIT,
   datev_pruefung: DATEV_PRUEFUNG,
   log_level: LOG_LEVEL,
+  actor_kind: ACTOR_KIND,
   health: HEALTH,
   readiness: READINESS,
 };

@@ -77,6 +77,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   stapel_commit: "Festschreibung",
   datev_pruefung: "DATEV-Prüfung",
   log_level: "Level",
+  actor_kind: "Akteur",
   health: "Systemcheck",
   readiness: "Konfiguration",
 };
@@ -147,6 +148,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   stapel_commit: "client_datev_sequences.is_committed (boolean)",
   datev_pruefung: "client_datev_sequences.inspection_status",
   log_level: "client_invoice_traces.level",
+  actor_kind: "platform_audit_events.actor_kind",
   health: "berechnet — modules/health/aggregate.ts (ephemer)",
   readiness: "berechnet — Onboarding-Aggregat (ephemer)",
 };

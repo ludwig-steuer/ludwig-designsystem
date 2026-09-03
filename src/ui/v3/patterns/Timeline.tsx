@@ -84,9 +84,11 @@ function groupKey(iso: string, by: "day" | "month" | "none") {
 
 /**
  * @when    „Why does this stand the way it stands?" — the history of a case, a
- *          document, a run, an audit trail.
- * @instead Known steps in a fixed order → ProcessStepper or StepRail. Two
- *          states compared → ComparisonTable. Work to be done → TodoList.
+ *          document, a run.
+ * @instead Many rows, severity, payload, filtering → LogList; the Timeline
+ *          tells the story, the Log proves it. Known steps in a fixed order →
+ *          ProcessStepper or StepRail. Two states compared → ComparisonTable.
+ *          Work to be done → TodoList.
  */
 export function Timeline({
   entries,

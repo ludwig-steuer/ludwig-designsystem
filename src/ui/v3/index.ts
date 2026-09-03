@@ -208,6 +208,7 @@ export {
 } from "./patterns/ChoicePrompt";
 
 /* Prozess */
+export { LogList, type LogEntry, type LogLevel } from "./patterns/Log";
 export {
   ProcessMini,
   ProcessStepper,
