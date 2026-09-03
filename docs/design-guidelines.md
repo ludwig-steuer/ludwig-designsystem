@@ -405,37 +405,37 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 |---|---|---|---|
 | Aktion | `Button` (primary/secondary/tertiary/danger × xs/sm/md, `href`, `hotkey`, `icon`/`iconEnd`, `loading`, `fullWidth`) | v1 `Button` | v2 (0010) |
 | Aktion | `KeyButton` · `ActionBar` · `RowActions` | — | v2 |
-| Aktion | Zeilen-/Überlaufmenü (Popover + Einträge) | `DocActionsMenu`, `UserMenu`, `FeedbackRowActions` | fehlt (0008) |
+| Aktion | Zeilen-/Überlaufmenü (Popover + Einträge) | `DocActionsMenu`, `UserMenu`, `FeedbackRowActions` | v2 (0008) |
 | Aktion | Kopieren-Knopf | `CopyTextButton` (datev-truth) | heben |
 | Aktion | `TextButton` (zwei Lautstärken, `icon`, `href`) | `.v2link`, 86 Stellen | v2 (0011) |
-| Aktion | `IconButton` (Icon ohne Wort — benannte Ausnahme zu T8) | 31 Stellen, 9 davon ohne `aria-label` | fehlt (0012) |
-| Aktion | `ActionButton` (führt aus, sperrt, zeigt Fehler, bestätigt) | 61× `useTransition` von Hand, 28× `window.confirm` | fehlt (0004) |
+| Aktion | `IconButton` (Icon ohne Wort — benannte Ausnahme zu T8) | 31 Stellen, 9 davon ohne `aria-label` | v2 (0012) |
+| Aktion | `ActionButton` (führt aus, sperrt, zeigt Fehler, bestätigt) | 61× `useTransition` von Hand, 28× `window.confirm` | v2 (0004) |
 | Navigation | `Tabs` (Zähler, `alarm`) | `TabBar` + 6 Inline-Kopien (P8) | v2; Kopien heben |
 | Navigation | `Segmented` · `FilterChips` · `SearchInput` | — | v2 |
-| Navigation | `FilterBar` (Formularzeile, Stand in URL, „gefiltert: … · Zurücksetzen", I4) | 12 Varianten (`AccountFilterForm`, `InvoiceFilterForm`, `CaseListFilters` …) | fehlt (0003) |
-| Navigation | `PageHeader` (Titel, Zähler, Aktionen; kompakter als v1) | `PageHeader` v1, 19 Dateien | fehlt (0002) |
+| Navigation | `FilterBar` (Formularzeile, Stand in URL, „gefiltert: … · Zurücksetzen", I4) | 12 Varianten (`AccountFilterForm`, `InvoiceFilterForm`, `CaseListFilters` …) | v2 (0003) |
+| Navigation | `PageHeader` (Titel, Zähler, Aktionen; kompakter als v1) | `PageHeader` v1, 19 Dateien | v2 (0002) |
 | Navigation | `Pagination` | v1 Re-Export | Optik |
 | Fläche | `Card`/`CardHead`/`CardFoot` | `Section`/`SectionHead`/`SectionFilters` | v2; v1 ersetzen |
 | Fläche | `KpiTile`/`KpiGrid` | `Stat`/`StatGrid` | v2; v1 ersetzen |
 | Fläche | `FieldList` (surface/soft) · `ProseCard` | — | v2 |
-| Fläche | `FieldList` freigestellt (Schlüssel-Wert außerhalb einer Karte) | `KeyValueGrid` (clients), 10 lokale Helfer | fehlt (0006) |
+| Fläche | `FieldList` freigestellt (Schlüssel-Wert außerhalb einer Karte) | `KeyValueGrid` (clients), 10 lokale Helfer | v2 (0006) |
 | Fläche | `Callout` · `StatusCallout` | `ContextHint`, `ChecklistRow` (clients); Kit `LudwigNote` | v2; v1 ersetzen |
 | Fläche | `Banner` | v1 Re-Export | Optik |
 | Fläche | Leerzustand linksbündig, ein Satz mit Zahl (L6) | `EmptyState`, 27 `.v2tbl__empty` | v2; Zentrierung 2026-09-03 behoben |
 | Fläche | `Dialog` · `GrundDialog` | v1 `Dialog`; 31× `window.confirm()` (I2) | v2; Aufrufer heben |
 | Fläche | `Drawer`/`UrlDrawer`-Rahmen (`.lwdrawer`, Wächter-Test) | `Drawer`, `DrawerFooter`, `UrlDrawer` | Optik |
 | Fläche | `Tooltip` | v1 | Optik |
-| Fläche | Hinweis nach Aktion (Toast, nicht blockierend) | `ActionNotice` (sachverhalt); Kit `Toast`/`ToastStack` | fehlt (0007) |
-| Fläche | Ladefläche für Karte/Detail (Skeleton) | Kit `Skeleton`; v2 `TableLoading` nur Tabelle | fehlt (0016) |
-| Fläche | `Disclosure` (Aufklapper mit Kopf und Zustand) | natives `<details>/<summary>`, 34 Stellen / 20 Dateien | fehlt (0005) |
+| Fläche | Hinweis nach Aktion (Toast, nicht blockierend) | `ActionNotice` (sachverhalt); Kit `Toast`/`ToastStack` | v2 (0007) |
+| Fläche | Ladefläche für Karte/Detail (Skeleton) | Kit `Skeleton`; v2 `TableLoading` nur Tabelle | v2 (0016) |
+| Fläche | `Disclosure` (Aufklapper mit Kopf und Zustand) | natives `<details>/<summary>`, 34 Stellen / 20 Dateien | v2 (0005) |
 | Formular | `Field` · `Input` · `Textarea` · `Select` · `Checkbox` (Label sichtbar, Fehler als Text, Pflicht, I8) | — | v2 |
-| Formular | `RadioGroup` (Antwortoptionen I6) | 3 rohe Radio-Felder in 2 Dateien | fehlt (0017) |
+| Formular | `RadioGroup` (Antwortoptionen I6) | 3 rohe Radio-Felder in 2 Dateien | v2 (0017) |
 | Formular | Schalter (Toggle) | `ClientActiveToggle` ist bewusst ein Knopf; `role=switch` 0× | prüfen (0018) |
-| Formular | `DateField`/`DateRangeField` | natives Datumsfeld, 14 Dateien | fehlt (0024) |
-| Formular | `AmountInput` (`tnum`, Komma, Vorzeichen) | inline im Editor, 16 Dezimal-Felder | fehlt (0019) |
-| Formular | `Combobox` generisch (Suche, Kandidaten nach Herkunft, Tastatur) | `KontoCombobox`, `CreditorCombobox`; v3 `AccountField` entitätsgebunden | fehlt (0009, Basis für `AccountField`/`PartnerField`) |
-| Formular | `InlineEdit` (Klick → Feld → Speichern/Abbrechen) | `CaseSummaryEditor`, `CaseKindEditor`, `ContractDetail` u. a., 6 Dateien | fehlt (0020) |
-| Formular | `FileDrop` (Drop-Zone, Liste, Fortschritt) | `InvoiceUploader`, `CaseDocumentUploaderModal`; Kit `UploadZone` | fehlt (0021) |
+| Formular | `DateField`/`DateRangeField` | natives Datumsfeld, 14 Dateien | v2 (0024) |
+| Formular | `AmountInput` (`tnum`, Komma, Vorzeichen) | inline im Editor, 16 Dezimal-Felder | v2 (0019) |
+| Formular | `Combobox` generisch (Suche, Kandidaten nach Herkunft, Tastatur) | `KontoCombobox`, `CreditorCombobox`; v3 `AccountField` entitätsgebunden | v2 (0009, Basis für `AccountField`/`PartnerField`) |
+| Formular | `InlineEdit` (Klick → Feld → Speichern/Abbrechen) | `CaseSummaryEditor`, `CaseKindEditor`, `ContractDetail` u. a., 6 Dateien | v2 (0020) |
+| Formular | `FileDrop` (Drop-Zone, Liste, Fortschritt) | `InvoiceUploader`, `CaseDocumentUploaderModal`; Kit `UploadZone` | v2 (0021) |
 | Tabelle | `Table`/`HeadRow`/`Row`/`GroupRow`/`EmptyRow` | — | v2 |
 | Tabelle | `ClickRow` (`href`, `v2rowlink`, I11) · `ExpandableRow` | 120 `<Row>`, 6 mit Ziel | v2; Listen heben |
 | Tabelle | `SelectionBar` + `SelectCell` (I5) | — | v2 |
@@ -449,7 +449,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Zustand | `Badge kind=…` ohne Status-Achse | 126 Stellen | heben: Achse → Registry, sonst `DotStatus`/`FilterChips` |
 | Zustand | `StateIcon` (9 Zustände) | — | v2 |
 | Zustand | Konfidenz (Punkt · Band · Meter) | `ConfidenceDot`/`Meter`/`Band`, `Confidence` (invoices) | heben → eine Primitive, `KIBuchungshinweise` nutzt sie |
-| Text | `Markdown` | v1, 5 Dateien / 12 Stellen | fehlt (0022) |
+| Text | `Markdown` | v1, 5 Dateien / 12 Stellen | v2 (0022) |
 | Text | `HotkeyLegende`/Kbd | — | v2 |
 | Text | Zeit relativ (`TimeAgo`) | v1 | heben → `Timestamp` absolut (T7) |
 | Daten | Balken je Monat | `MonthlyBarChart` | heben |
@@ -465,9 +465,9 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | `ProzessMini`/`ProzessStepper`/`Staffelstab`/`StaffelLeiste` | — | v2 |
 | Verarbeitungsfortschritt (Schritte mit Zustand, Retry) | `PipelineStepper`, `ProcessingProgress`, `JobStatusMonitor`, `SourceDocPipelineTab` | heben → `ProzessStepper` |
 | Wizard (Schritte, Zurück/Weiter, Zusammenfassung) | `Wizard`, `CsvImportWizard`, `DatevExportWizard`, `OnboardingWizard` | heben |
-| `Timeline` (Zeit · Akteur · Ereignis · Diff) | `CycleTimeline`, `HistorieTab`, `SourceDocVerlaufTab`, `VerlaufTab`, `EventStack`; Kit `AuditTrail` | fehlt (0023) |
+| `Timeline` (Zeit · Akteur · Ereignis · Diff) | `CycleTimeline`, `HistorieTab`, `SourceDocVerlaufTab`, `VerlaufTab`, `EventStack`; Kit `AuditTrail` | v2 (0023) |
 | Log-Ansicht, Sichten Verlauf/Protokoll/Technik | `LogTable`/`LogView`/`LogEntry`/`LogBadges`/`LogPayloadCell` | Optik |
-| `ChoicePrompt` — Frage mit Antwortoptionen (Handlungen + Freitext, I6, S13) | `RaiseClarificationForm` | fehlt (0028) |
+| `ChoicePrompt` — Frage mit Antwortoptionen (Handlungen + Freitext, I6, S13) | `RaiseClarificationForm` | v2 (0028) |
 | Kommentar-/Notizstrang | `CaseCommentForm`, `ClientAgentNotesPanel` | prüfen |
 | Nächster Schritt mit Zahl (I10) | inline in der Abnahme | heben |
 | Sammelaktion | `SelectionBar` | v2 |
