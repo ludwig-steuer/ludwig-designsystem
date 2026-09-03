@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { formatAmount, formatTime, formatTimeFull } from "../format";
 
 /**
  * v2 cell building blocks (F123 T123.1, Baukasten §9) — the types a table
@@ -44,15 +45,8 @@ export function AmountCell({
   // Explicitly against null, not falsy: 0 is an amount, and „0,00 €" is a
   // statement — „nothing was booked" is not the same as „we do not know".
   if (value === null) return <span className="v2muted">—</span>;
-  const text =
-    typeof value === "number"
-      ? new Intl.NumberFormat("de-DE", {
-          style: currency ? "currency" : "decimal",
-          currency: currency ?? undefined,
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }).format(value)
-      : value;
+  // One formatter for the whole house (P24): the cell only adds its geometry.
+  const text = typeof value === "number" ? formatAmount(value, currency as never) : value;
   return (
     <span className={`v2num${tone === "neutral" ? "" : ` v2num--${tone}`}`} title={title}>
       {text}
@@ -111,28 +105,15 @@ export function DotStatus({
  * is worthless when reviewing a period, the date is not (R3, design
  * `StapelSeite.dc.html` line 99).
  */
-const BERLIN: Intl.DateTimeFormatOptions = { timeZone: "Europe/Berlin" };
-const SHORT = new Intl.DateTimeFormat("de-DE", {
-  ...BERLIN,
-  day: "2-digit",
-  month: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-const FULL = new Intl.DateTimeFormat("de-DE", {
-  ...BERLIN,
-  dateStyle: "full",
-  timeStyle: "short",
-});
-
 export function Timestamp({ iso, prefix }: { iso: string | Date | null; prefix?: string }) {
   if (!iso) return <span className="v2muted">—</span>;
   const d = typeof iso === "string" ? new Date(iso) : iso;
   if (Number.isNaN(d.getTime())) return <span className="v2muted">—</span>;
+  // The short form of `Time` (P24) — this cell is its table-shaped variant.
   return (
-    <time dateTime={d.toISOString()} title={FULL.format(d)}>
+    <time dateTime={d.toISOString()} title={formatTimeFull(iso)}>
       {prefix ? `${prefix} ` : ""}
-      {SHORT.format(d)}
+      {formatTime(iso, "dateTime", "short")}
     </time>
   );
 }

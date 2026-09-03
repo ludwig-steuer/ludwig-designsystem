@@ -387,7 +387,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Tokens: Farbe, Schrift, Raum, Radius, Schatten, Bewegung, Fokus | `tokens.css`, `v2.css` | v2 |
 | Icon-Set Lucide 16/20/24, Stroke 1.5, nie ohne Wort | 12 Dateien mit Unicode-Icons (§11.5) | heben |
 | Marke: Wordmark, Mark, Light-Variante | `design/…/assets` | v2 |
-| Ein Formatter: Betrag (`tnum`, Vorzeichen), Datum/Zeit Europe/Berlin, Kontonummer/BU mono | `Cells.tsx`, `booking/format.ts`; 82 `toLocale*`-Stellen | heben (T7) |
+| Ein Formatter: Betrag (`tnum`, Vorzeichen), Datum/Zeit Europe/Berlin, Kontonummer/BU mono | `src/ui/v3/format.ts` + `Amount`/`Time`/`MonoCell`; in der App noch 7 Betrags-, 9 Datums-Formatierer und 83 `toLocale*`-Stellen | v2 (0032, 0033); App-Seite offen (T7, P24) |
 | Zwei Register: produktiv (13.5–14 px) · lesend (16 px) | A1 | v2; lesend prüfen |
 
 #### Rahmen (Shell, außerhalb der Stufen)

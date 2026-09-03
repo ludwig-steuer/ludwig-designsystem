@@ -116,6 +116,18 @@ export { ToastHost, useToast, type Toast, type ToastTone } from "./primitives/To
 export { Skeleton, type SkeletonVariant } from "./primitives/Skeleton";
 export { Markdown, parseInline, parseMarkdown } from "./primitives/Markdown";
 
+/* Werte — ein Betrag, ein Zeitpunkt, eine Regel (P24) */
+export { Amount, type AmountProps, type AmountSize } from "./primitives/Amount";
+export { Time, Duration, type TimeSize } from "./primitives/Time";
+export {
+  formatAmount,
+  formatTime,
+  formatTimeFull,
+  formatDuration,
+  type TimeFormat,
+  type TimeLength,
+} from "./format";
+
 /* Tabelle */
 export { Card, CardHead, CardFoot, Table, HeadRow, Row, GroupRow, EmptyRow } from "./primitives/Table";
 export {

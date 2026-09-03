@@ -1652,3 +1652,16 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   color: var(--color-text);
 }
 .v2mono--muted { color: var(--color-text-muted); }
+
+/* --- Amount (0032) und Time (0033) — die Werte-Bausteine ------------------ */
+.v2amount {
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+.v2amount--sm { font-size: 12.5px; }
+.v2amount--md { font-size: 13.5px; }
+/* Die Kachel-Größe: eine Zahl, keine Überschrift — deshalb halbfett. */
+.v2amount--lg { font-size: 20px; font-weight: 600; line-height: 1.2; }
+.v2time { font-variant-numeric: tabular-nums lining-nums; }
+.v2time--sm { font-size: 12.5px; }
+.v2time--md { font-size: 13.5px; }

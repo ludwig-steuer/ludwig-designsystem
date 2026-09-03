@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Seitenleiste plus Kopfzeile plus Inhalt ist fachfrei |
 | Quelle | Soll-Katalog §11.7 „Rahmen (Shell)" · Anfrage vom 2026-09-03 („Sidebar/TopBar fehlt mir") |
@@ -139,8 +139,27 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| `pnpm typecheck` und `pnpm build` grün | `tsc --noEmit` ohne Ausgabe; „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `AppShell.tsx` trägt die Familie `AppShell` + `TopBar`, `AppShell.stories.tsx` liegt daneben; Titel `v3/Primitives/Rahmen/AppShell`; die neue Gruppe „Rahmen" steht im Barrel (`src/ui/v3/index.ts:71`) und deckt sich mit dem Story-Titel | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Bezeichner, Props und JSDoc englisch; beide Exporte (`AppShell`, `TopBar`) tragen `@when` **und** `@instead`. Deutsch nur im Sperrtext und in den Beispieltexten der Stories — genau dort, wo es hingehört | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map | `grep -nE '#[0-9a-fA-F]{3,8}\|[0-9]+px'` auf `AppShell.tsx`: nichts. Die Maße stehen in `app-chrome.css` (`.app { 240px 1fr / 56px 1fr }`, `.app--collapsed { 64px 1fr }`). Die Story trägt Inline-Zahlen (`width: 900`, `fontSize: 12.5`) — Gerüst, Hausbrauch in allen v3-Stories, und die 900 px sind der Gegenstand der Story | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | `Filled`, `Collapsed`, `Interactive`, `Narrow`, `InUse` = 5, genau die Ableitung (1 Zustand + 1 Layout-Boolean + 1 Rundlauf + 1 im Einsatz + 1 Rand). Jede Prop hat ihre Story: `sidebar`/`topbar`/`children` in `Filled`, `collapsed` in `Collapsed`. `Leer`, `Laedt`, `Fehler` sind in der Spec begründet | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | siehe die Zeilen dieser Tabelle; die zwei App-Punkte („ersetzt ihr v1-Gegenstück", „in §11 auf v2 gesetzt") nach `backlog/README.md` übersprungen — §11.7 ist im Katalog trotzdem auf „v2 (0030)" gezogen | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Storybook auf 6107, alle fünf Story-IDs geöffnet und gemessen; die Messwerte stehen in den Zeilen unten | ✓ |
+| Kein Import aus `next/*` — weder Router noch `next/image` | `grep -rn "next/" src/ui/v3`: zwei Treffer, beide Kommentarzeilen in `Link.tsx` („`next/link` würde das Bundle …"), kein `import`. Kein `usePathname`, kein `useRouter`, kein `next/image`, kein `next/link` | ✓ |
+| Kein Zugriff auf `localStorage` | `grep -rn "localStorage\|sessionStorage" src/ui/v3`: ein Treffer, der erklärende Kommentar in `AppShell.stories.tsx:81`. Im Browser in `--interactive` nach dem Umschalten: `Object.keys(localStorage)` = `["lastViewedStoryIds","@storybook/manager/store"]`, beides Storybook selbst — die Shell schreibt nichts | ✓ |
+| `collapsed` schaltet die Spalte auf 64 px, ohne dass der Inhalt springt (V12) | `--filled`: `gridTemplateColumns` = `240px 2608px`, `gridTemplateRows` = `56px 1447px`. `--collapsed`: Klasse `app app--collapsed`, `64px 2784px`, `aside` misst 64 px. `--interactive`: ein Klick auf den Umschalter des Aufrufers → `64px`, `transition: grid-template-columns 0.22s` — eine Breitenänderung, kein Aufblenden | ✓ |
+| Unter 1280 px erscheint die Sperre mit einem Satz, der den Grund nennt (L1/T6) | `--narrow`: im 900-px-Rahmen (`innerWidth` 898) ist `.app__toonarrow` `display: flex`, `z-index: 200`, Text „Zu schmal für die Prüfung. Ludwig braucht mindestens 1280 px Breite — darunter liegen Schrittleiste, Liste und Detail übereinander. Bitte vergrößern Sie das Fenster." Im vollen Fenster `display: none`. Reines CSS, kein JavaScript, keine Prop | ✓ |
+| Die Kopfzeile trägt nur Slots, keine Rolle und keinen Link | `TopBar` hat genau `crumb`, `search`, `actions`, alle `ReactNode`, und rendert `<header class="app__topbar">` mit drei `div`. Kein Fachbegriff in Namen, Props oder Typen — „role marker" steht nur im JSDoc als Beispiel dafür, was der Aufrufer einlegen kann. Kein Import aus `src/ludwig/` | ✓ |
+| Die A5-Ausnahme für `app-chrome.css` steht in `design-guidelines.md` | Kopf des Dokuments, Zeilen 21–27: „Eine benannte Ausnahme zu A5 (Owner, 2026-09-03, Aufgabe 0030) … Die Ausnahme gilt **nur** für diese Datei". Die 37 neuen CSS-Zeilen (Sperre, `sb__navinitial`, `is-future`, `count.is-alarm`) liegen alle dort | ✓ |
+| Semantik: `<header>` oben, `<main>` in der Fläche, `<nav>` bringt die Leiste mit | `--filled`, Kinder von `.app`: `ASIDE.app__sidebar`, `HEADER.app__topbar`, `MAIN.app__main`, `DIV.app__toonarrow`; das `nav[aria-label="Hauptnavigation"]` kommt aus `NavList` (0031), nicht aus der Shell | ✓ |
+| Ersetzt `AppShell.tsx` und `TopBar.tsx` in `ludwig/app` | Die Ablösung in der App ist ein eigener Schritt (`backlog/README.md`); der Soll-Katalog §11.7 steht auf „v2 (0030)", die Top-Bar-**Füllung** (Mandant, Jahr, Benutzer) ausdrücklich weiter auf „heben" | offen (App) |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: keine im Set.
+Zwei Beobachtungen ohne Handlungsbedarf: `Narrow` lädt `--in-use` in einem
+`iframe`, hängt also am Bestand einer zweiten Story — das ist der einzige Weg,
+eine Fenster-Media-Query in Storybook zu zeigen, und der Rahmen sagt seine
+Breite im Text daneben. Und `{topbar}` steht roh im Raster: wer statt `TopBar`
+etwas anderes einlegt, bekommt die Zeile unformatiert — gewollt, es ist ein Slot.
