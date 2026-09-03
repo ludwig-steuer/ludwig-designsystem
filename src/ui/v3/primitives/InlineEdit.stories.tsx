@@ -38,38 +38,53 @@ export const Empty: Story = {
   },
 };
 
-/** Während des Speicherns gesperrt, der Knopf trägt ein Wort. */
+/**
+ * Zwei Wege in denselben Zustand: links steuert der Aufrufer mit der Prop
+ * `pending` (Server Action), rechts kommt er aus dem laufenden `onSave`.
+ */
 export const Pending: Story = {
   render: function Render() {
     const [v, setV] = useState("Bürobedarf, Sammelrechnung August");
     return (
-      <div style={{ maxWidth: 460 }}>
-        <InlineEdit
-          label="Zusammenfassung"
-          value={v}
-          onSave={async (n) => {
-            await wait(3000);
-            setV(n);
-          }}
-        />
-        <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
-          Bearbeiten, ändern, Enter — das Speichern dauert hier drei Sekunden.
-        </p>
+      <div style={{ display: "grid", gap: "var(--space-6)", maxWidth: 460 }}>
+        <InlineEdit label="Von außen gesteuert" value={v} pending onSave={async () => {}} />
+        <div>
+          <InlineEdit
+            label="Aus onSave"
+            value={v}
+            onSave={async (n) => {
+              await wait(3000);
+              setV(n);
+            }}
+          />
+          <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
+            Bearbeiten, ändern, Enter — das Speichern dauert hier drei Sekunden.
+          </p>
+        </div>
       </div>
     );
   },
 };
 
-/** Nach einem Fehler steht der getippte Text noch da. */
+/**
+ * Auch der Fehler hat zwei Quellen: die Prop `error` steht sofort da, der
+ * geworfene erscheint nach dem Speichern — und lässt den getippten Text stehen.
+ */
 export const Error: Story = {
   render: () => (
-    <div style={{ maxWidth: 460 }}>
+    <div style={{ display: "grid", gap: "var(--space-6)", maxWidth: 460 }}>
       <InlineEdit
-        label="Zusammenfassung"
+        label="Fehler von außen"
+        value="Bürobedarf, Sammelrechnung August"
+        error="Der Sachverhalt ist gesperrt, solange der Stapel läuft."
+        onSave={async () => {}}
+      />
+      <InlineEdit
+        label="Fehler aus onSave"
         value="Bürobedarf, Sammelrechnung August"
         onSave={async () => {
           await wait(500);
-          throw new globalThis.Error("Der Sachverhalt ist gesperrt, solange der Stapel läuft.");
+          throw new globalThis.Error("Speichern abgelehnt: der Stapel läuft.");
         }}
       />
     </div>

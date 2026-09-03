@@ -99,43 +99,26 @@ Nicht anwendbar: `Laedt` (der Text ist da oder nicht) · `LeerNachFilter`
 (nichts wird gefiltert) · `Fehler` (unlesbares Markdown gibt es nicht — im
 Zweifel steht der Quelltext da).
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] Roh-HTML im Text erscheint nicht im DOM (`Unsicher`, Blick ins DOM)
-- [ ] `javascript:`- und `data:`-Links sind entschärft (`Unsicher`)
-- [ ] Kein `<img>` wird geladen (`Unsicher`, Netzwerk-Tab bleibt leer)
-- [ ] Externe Links tragen `rel="noopener noreferrer"` (`Gefuellt`, DOM)
-- [ ] `#` im Text erzeugt keine `h1` (`Gefuellt`, DOM)
-- [ ] Leerer Text rendert kein Element (`Leer`)
-- [ ] `inline` erzeugt keine Blockelemente (`Varianten`)
-
-## Offene Fragen
-
-1. **Welche Bibliothek?** *Ohne Antwort: `marked` plus eine Allowlist beim
-   Rendern — klein, ohne React-Abhängigkeit, damit die Komponente Server
-   bleiben kann. `react-markdown` zöge `unified` samt Kette nach.*
-2. **Zählt `maxHeight` zum ersten Wurf?** *Ohne Antwort: ja — der Lauf-Bericht
-   ist regelmäßig zu lang für eine Karte, und ohne die Blende landet er
-   ungekürzt auf der Seite.*
-3. **Tabellen erlauben?** *Ohne Antwort: ja. Der Agent stellt Vergleiche als
-   Tabelle dar, und als Text sind sie unlesbar.*
-
 ## Abnahme
 
-| Kriterium | Nachweis | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| … | … | ✓ / ✗ |
+| Roh-HTML im Text erscheint nicht im DOM | `v3-primitives-fläche-markdown--unsicher`, DOM ausgelesen: die einzigen Tags unter `#storybook-root` sind `DIV`, `P`, `A`; `script`: 0, `b`: 0. `<script>alert(1)</script>` und `<b>Roh-HTML</b>` stehen als Text da. `grep -rn dangerouslySetInnerHTML src/` findet nur die Kommentarzeile in `Markdown.tsx:10` | ✓ |
+| `javascript:`- und `data:`-Links sind entschärft | `--unsicher`: von `[Bitte hier klicken](javascript:alert(1))` bleibt der reine Text, kein `a` im DOM. `safeHref` lässt ausschließlich `http(s)://`, `mailto:`, `/` und `#` durch | ✓ |
+| Kein `<img>` wird geladen | `--unsicher`: `img`: 0 im DOM; nach Neuladen zeigen die 75 aufgezeichneten Netzwerk-Anfragen keine an `example.com` (nur Storybook-Assets und die Google-Fonts der Vorschau) | ✓ |
+| Externe Links tragen `rel="noopener noreferrer"` | `--unsicher`: `<a href="https://example.com" rel="noopener noreferrer">`. Hinweis: `Gefuellt` enthält nur `href="#"`, der externe Fall steht in `Unsicher` | ✓ |
+| `#` im Text erzeugt keine `h1` | `--gefuellt`: `h1`: 0, `h2`: 0; `## Warum 6815 …` wird `H3.v2mk__h--2` | ✓ |
+| Leerer Text rendert kein Element | `--leer`: 0 Knoten mit Klasse `v2mk`; beide gestrichelten Kästen haben leeres `innerHTML` | ✓ |
+| `inline` erzeugt keine Blockelemente | `--varianten`: `span.v2mk--inline`, `display: inline`, Kinder ausschließlich `STRONG`, `CODE`, `A`; die `full`-Fassung desselben Textes hat ein `P` | ✓ |
+| `maxHeight` blendet und bietet „Ganz lesen" (Offene Frage 2) | `--lang`: `.v2mk__body` auf `max-height: 220px` mit `linear-gradient`-Maske; Klick auf `summary` „Ganz lesen" → `open`, Höhe 220 → 918 px, ohne eine Zeile Zustand (natives `details`) | ✓ |
+| `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
+(1) Der Abschnitt „Der Punkt" verlangt drei Dinge von einem Link — `rel`,
+**neuer Tab** und **sichtbares Ziel**. Umgesetzt ist nur `rel`: es gibt kein
+`target="_blank"` und der Link zeigt seine Adresse nirgends. Entweder nachziehen
+oder die Spec auf `rel` zurücknehmen. (2) Die Komponente führt zwei Props über
+die Schnittstelle hinaus: `className` und `flow`; `flow` ändert das Verhalten
+(harte Zeilenumbrüche werden zu Leerzeichen) und hat keine Story. (3) Winzig:
+aus `[…](javascript:alert(1))` bleibt eine verwaiste Klammer im Text stehen,
+weil der Link-Ausdruck bei der ersten `)` endet.

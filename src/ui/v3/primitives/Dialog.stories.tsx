@@ -24,7 +24,7 @@ function Demo({
 }
 
 /**
- * Der Dialog ist für Bestätigungen withItems Folgen da — Storno, Löschen, Freigabe.
+ * Der Dialog ist für Bestätigungen mit Folgen da — Storno, Löschen, Freigabe.
  * Details gehören ins Master-Detail, Bestehendes in den Drawer.
  */
 export const Confirmation: Story = {

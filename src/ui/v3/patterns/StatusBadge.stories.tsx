@@ -29,7 +29,7 @@ function AxisBlock({ axis, info }: { axis: StatusAxis; info?: boolean }) {
 }
 
 /**
- * **Alle** Achsen withItems **allen** Ausprägungen — direkt aus der
+ * **Alle** Achsen mit **allen** Ausprägungen — direkt aus der
  * `STATUS_REGISTRY` erzeugt, nicht von Hand gelistet. Kommt eine Achse oder
  * ein Zustand dazu, steht er beim nächsten Öffnen hier drin; eine
  * handgepflegte Liste wäre am Tag ihrer Erstellung veraltet.
@@ -55,7 +55,7 @@ export const CoreAxes: Story = {
   ),
 };
 
-/** Einzelner Chip withItems (i) — öffnet die Legende der ganzen Achse. */
+/** Einzelner Chip mit (i) — öffnet die Legende der ganzen Achse. */
 export const WithInfoDialog: Story = { args: { axis: "buchung", status: "proposed", info: true } };
 
 /** Nur beim Beleg: die erreichte Pipeline-Stufe als Detail am Chip. */

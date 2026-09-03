@@ -73,6 +73,27 @@ export const WithBack: Story = {
   ),
 };
 
+/**
+ * Der Randfall: ein Titel, der nicht in eine Zeile passt. Er bricht um, die
+ * Aktionen rutschen darunter — nichts wird abgeschnitten, nichts überlappt.
+ */
+export const LongTitle: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <PageHeader
+        overline="Musterbau GmbH · Wirtschaftsjahr 2026"
+        title="Stapel 2026-08 · Bürobedarf, Fachliteratur und sonstiger Betriebsbedarf der Musterbau GmbH"
+        description="142 Sätze, davon 38 ungeprüft."
+        actions={
+          <Button size="sm" variant="primary">
+            Stapel abnehmen
+          </Button>
+        }
+      />
+    </div>
+  ),
+};
+
 /** Die Untergrenze: nur der Titel. Alles andere ist optional. */
 export const TitleOnly: Story = {
   render: () => <PageHeader title="Kontenblatt 6815 · Bürobedarf" />,

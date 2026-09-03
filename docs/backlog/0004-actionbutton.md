@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede Handlung, die schreibt, dauert und kann scheitern |
 | Quelle | `docs/v3-backlog.md` — Blocker #5 (61 Dateien mit `useTransition`, davon 43 mit eigener Meldung; 28 `window.confirm` in 14 Dateien) |
@@ -134,8 +134,18 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Zwei schnelle Klicks lösen genau eine Handlung aus | `v3-primitives-aktion-actionbutton--filled`: zwei Klicks 60 ms auseinander → Zähler 6 → 7, dazwischen `button.disabled === true`. (Nur zwei Klicks im selben JS-Tick lösen zweimal aus — über Maus oder Tastatur nicht erreichbar, weil jedes Klick-Ereignis eine eigene Aufgabe ist) | ✓ |
+| Während der Ausführung gesperrt, mit Wort statt bloßem Spinner (V7) | `--pending`: beide Knöpfe `disabled`, `aria-busy="true"`; mit `pendingLabel` steht „Nehme ab …", ohne bleibt die Beschriftung stehen; der Spinner steht neben dem Wort, nie allein | ✓ |
+| Fehler als Text neben dem Knopf, nicht als Dialog, nicht nur durch Farbe | `--failed`: beide Wege (`{ error }` und Wurf) zeigen den Satz rechts neben dem Knopf, kein Dialog im DOM, Knopf danach wieder bedienbar. Anmerkung: die Offene Frage 1 hatte „darunter, linksbündig" beantwortet — `.v2act` ist eine `inline-flex`-Zeile, der Text rutscht erst bei Enge unter den Knopf | ✓ |
+| Bestätigungsknopf trägt `confirmLabel`, keine Story zeigt „OK" oder „Ja" | `--with-confirm`: Fußzeile „Abbrechen" / „Stapel abnehmen"; `--with-confirm-danger`: „Buchung stornieren" | ✓ |
+| Escape bricht den Dialog ab, der Fokus kehrt auf den Knopf zurück | `--with-confirm`: Auslöser fokussiert, Dialog geöffnet, `keydown Escape` → Dialog weg, `document.activeElement === trigger` (Fokus-Ereignisse mitgeschrieben: focus → blur → focus) | ✓ |
+| Nutzt `Button` und `Dialog`, baut deren Optik nicht nach | `ActionButton.tsx:5-6` importiert beide; eigenes Markup ist nur `span.v2act` plus `span.v2act__err` | ✓ |
+| Ersetzt `ResetButton` und `ConfirmReviewButton` ohne Funktionsverlust | Beide App-Dateien gelesen: `useTransition` + `window.confirm` + Fehlertext sind gedeckt. Ihre **Erfolgsmeldung** („Reset: 3 Traces … entfernt") kann `ActionButton` bewusst nicht — sie gehört laut Spec an `Toast` (0007). Der Umzug selbst steht aus | ✓ |
+| Ersetzt `window.confirm()` an mindestens einer Stelle (I2) | `grep -rn "window.confirm" apps/web/src` in `ludwig/app` → 7 Treffer, unverändert; `ResetButton.tsx` ruft es weiter auf. Der Baustein kann es, benutzt wird er dort noch nicht | ✗ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: Der Umzug
+in `ludwig/app` fehlt — solange dort kein `window.confirm` durch den
+`confirm`-Dialog ersetzt ist, bleibt das letzte Kriterium offen. Am Baustein
+selbst ist nichts zu ändern.

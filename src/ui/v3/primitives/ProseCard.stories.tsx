@@ -20,7 +20,7 @@ export const Report: Story = {
 export const Short: Story = {
   render: () => (
     <ProseCard title="Hinweis der Kanzlei">
-      Bewirtungsbelege bitte immer withItems Teilnehmerliste einreichen.
+      Bewirtungsbelege bitte immer mit Teilnehmerliste einreichen.
     </ProseCard>
   ),
 };

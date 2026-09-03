@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „eine aus wenigen Möglichkeiten" ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Radio-Gruppe (Antwortoptionen I6)" |
@@ -75,37 +75,14 @@ Titel `v3/Primitives/Formular/RadioGroup`. Abgeleitet nach §6: 2 Zustände
 Nicht anwendbar: `Leer` (eine Gruppe ohne Optionen ist ein Programmierfehler,
 kein Zustand), `LeerNachFilter`, `Laedt` (der Aufrufer zeigt `Skeleton`, 0016).
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] Pfeiltasten wandern durch die Optionen, Tab springt aus der Gruppe (Story `Filled`, Tastaturprobe)
-- [ ] `fieldset`/`legend` im DOM, `aria-invalid` bei `error` (Story `Invalid`, Blick ins DOM)
-- [ ] Die ganze Optionszeile ist klickbar und antwortet auf Hover (Story `Filled`, Regel §2)
-- [ ] Fehler steht als Text, nicht nur als Farbe (Story `Invalid`, Regel V7)
-- [ ] Ersetzt die drei `type="radio"` in `DatevExportWizard.tsx` und `BatchActions.tsx` ohne Funktionsverlust
-
-## Offene Fragen
-
-1. Soll `hint` unter der Option oder rechts stehen? *Ohne Antwort: darunter,
-   in `--color-text-muted` — rechts bricht bei langen Sätzen.*
-2. Braucht die Gruppe eine „keine Angabe"-Option? *Ohne Antwort: nein, der
-   Aufrufer nimmt sie in `options` auf, wenn er sie braucht.*
-
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Pfeiltasten wandern durch die Optionen, Tab springt aus der Gruppe | `v3-primitives-formular-radiogroup--filled`: Pfeil-ab verschiebt Fokus und Auswahl auf die nächste Option; die Datei enthält keinen eigenen Tastatur-Code | ✓ |
+| `fieldset`/`legend` im DOM, `aria-invalid` bei `error` | `v3-primitives-formular-radiogroup--invalid`, DOM-Probe: `fieldset.v2radiogrp` mit `aria-invalid="true"`, `<legend>` „Umfang des Exports *" | ✓ |
+| Die ganze Optionszeile ist klickbar und antwortet auf Hover | Klick auf den Hinweistext der dritten Option wählt sie; `label.v2radioline` 420 px breit, `cursor: pointer`, Hover-Hintergrund `--color-bg-soft` | ✓ |
+| Fehler steht als Text, nicht nur als Farbe | `--invalid`: `.v2field__err` „Bitte wählen Sie einen Umfang, bevor der Export startet." unter der Gruppe | ✓ |
+| Ersetzt die drei `type="radio"` in `DatevExportWizard.tsx` und `BatchActions.tsx` | Kein `RadioGroup`-Import in `ludwig/app` (`grep`) | ✗ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die Umstellung in `ludwig/app` fehlt. Außerdem erbt die `<legend>` aus `.v2field__label` ein `text-transform: uppercase` und erscheint in Versalien — Verstoß gegen A2/T3; das betrifft alle Felder und gehört in `v3.css` geräumt, nicht in dieser Komponente.

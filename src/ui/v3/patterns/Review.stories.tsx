@@ -96,7 +96,7 @@ export const StateIcons: Story = {
 };
 
 /**
- * Prüfpunkte: bestandene in **einer** Zeile, offene einzeln withItems Begründung
+ * Prüfpunkte: bestandene in **einer** Zeile, offene einzeln mit Begründung
  * und Weg zur Klärung (L7).
  */
 export const CheckItemsMixed: Story = {

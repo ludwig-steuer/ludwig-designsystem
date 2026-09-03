@@ -40,6 +40,30 @@ export const Filled: Story = {
   },
 };
 
+/**
+ * Mit `group` fasst die Liste die Treffer unter Überschriften zusammen; ohne
+ * `group` ist sie flach. Beides nebeneinander — links die Herkünfte wie im
+ * `AccountField`, rechts eine schlichte Liste.
+ */
+export const Grouped: Story = {
+  render: function Render() {
+    const [a, setA] = useState<string | null>(null);
+    const [b, setB] = useState<string | null>(null);
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-6)" }}>
+        <Combobox label="Mit Gruppen" name="grp1" value={a} onChange={setA} options={ACCOUNTS} />
+        <Combobox
+          label="Flach, ohne group"
+          name="grp2"
+          value={b}
+          onChange={setB}
+          options={ACCOUNTS.map(({ group: _g, ...rest }) => rest)}
+        />
+      </div>
+    );
+  },
+};
+
 /** Leer: noch nichts gewählt, alle Optionen stehen bereit. */
 export const Empty: Story = {
   render: function Render() {

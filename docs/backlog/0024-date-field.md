@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` |
 | Klassen-Test | ja, unverändert — ein Datum hat kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Datumsfeld` / `Zeitraumfeld`, **14 Dateien** · Showcase `src/showcase/CaseCrud.stories.tsx` (Frist, Eröffnungsdatum) |
@@ -124,43 +124,17 @@ Nach §6, gemeinsam für die Familie: 2 Zustände + 1 Callback je Export +
 Nicht anwendbar: `Laedt` (ein Datumsfeld lädt nicht) · `LeerNachFilter` ·
 `Fehler` (die Prüfung macht der Browser, den Ton setzt `invalid`).
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] Innen steckt `<input type="date">`, kein eigener Kalender (`grep`, DOM)
-- [ ] Keine neue Abhängigkeit; `date-fns` reicht (`package.json` unverändert)
-- [ ] `onChange` gibt ISO, nie `26.08.2026` (`Interaktiv`)
-- [ ] `to` vor `from` wird getauscht, nicht abgewiesen (`Rand`)
-- [ ] Leeren gibt `null`, nicht `""` (`Leer`)
-- [ ] Schnellwahl löst genau ein `onChange` mit beiden Werten aus (`MitSchnellwahl`)
-- [ ] Kein Wirtschaftsjahr-Wissen in der Komponente (`grep`)
-- [ ] Ersetzt die Zeitraum-Felder in `FilterBar` (0003) ohne Funktionsverlust
-
-## Offene Fragen
-
-1. **Reicht `<input type="date">` in Safari?** *Ohne Antwort: ja. Der Kalender
-   sieht dort anders aus, die Eingabe funktioniert. Ein Nachbau brächte
-   einheitliche Optik und schlechtere Bedienbarkeit — der falsche Tausch.*
-2. **Schnellwahl auch am `DateField`?** *Ohne Antwort: nein. „Heute" spart
-   einen Klick und kostet eine Prop; wer es braucht, setzt den Wert selbst.*
-3. **Zwei Monate nebeneinander im Kalender?** *Ohne Antwort: entfällt mit dem
-   nativen Feld — und das ist der Preis, den diese Spec bewusst zahlt.*
-
 ## Abnahme
 
-| Kriterium | Nachweis | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| … | … | ✓ / ✗ |
+| Innen steckt `<input type="date">`, kein eigener Kalender | DOM aller Stories: ausschließlich `input[type=date]`, deutsche Anzeige „31.08.2026"; keine Kalender-Bibliothek im Import | ✓ |
+| Keine neue Abhängigkeit | `package.json` seit der Erstbestückung unverändert (`git log -- package.json`) | ✓ |
+| `onChange` gibt ISO, nie „26.08.2026" | `v3-primitives-formular-datefield--interaktiv` und `--rand`: Ausgabe „2026-08-01" | ✓ |
+| `to` vor `from` wird getauscht, nicht abgewiesen | `--rand`: „bis" auf 2026-08-01 gesetzt — danach steht von = 2026-08-01, bis = 2026-08-31 | ✓ |
+| Leeren gibt `null`, nicht `""` | `onChange(e.target.value \|\| null)` in `DateField`; `--leer` zeigt beide Felder leer | ✓ |
+| Schnellwahl löst genau ein `onChange` mit beiden Werten aus | `--mit-schnellwahl`: ein Klick auf „Vormonat" setzt beide Felder auf 2026-07-01 und 2026-07-31 | ✓ |
+| Kein Wirtschaftsjahr-Wissen in der Komponente | `grep`: der Begriff steht nur als Beispiel-Label im JSDoc, die Presets kommen als Prop herein | ✓ |
+| Ersetzt die Zeitraum-Felder in `FilterBar` (0003) ohne Funktionsverlust | `FilterBar.stories.tsx:26` baut den Zeitraum weiter aus zwei rohen `<Input type="date">`; `CaseCrud.stories.tsx:312` trägt noch `Todo spec="0024"` | ✗ |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: FilterBar und Showcase sind nicht umgestellt. Zwei Beobachtungen zum Nacharbeiten: die Story-Exportnamen sind deutsch (`Gefuellt`, `Interaktiv` …) — so von dieser Spec vorgegeben, aber gegen die Hausregel „Story-Exportnamen englisch"; und beim Tippen der Jahreszahl im „bis"-Feld greift der Tausch schon bei Zwischenwerten, die Werte springen dabei unter den Fingern zwischen den Feldern.

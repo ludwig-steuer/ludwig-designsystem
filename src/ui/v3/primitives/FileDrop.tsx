@@ -61,20 +61,33 @@ export function FileDrop({
   const [over, setOver] = useState(false);
   const [rejected, setRejected] = useState<DroppedFile[]>([]);
 
+  /**
+   * The file dialog filters by `accept` itself — a drop does not. Without
+   * this check the same rule would hold for one way in and not the other.
+   */
+  function accepted(file: File) {
+    if (!accept) return true;
+    return accept.split(",").some((raw) => {
+      const rule = raw.trim().toLowerCase();
+      if (!rule) return false;
+      if (rule.startsWith(".")) return file.name.toLowerCase().endsWith(rule);
+      if (rule.endsWith("/*")) return file.type.startsWith(rule.slice(0, -1));
+      return file.type.toLowerCase() === rule;
+    });
+  }
+
   function take(list: FileList | null) {
     if (!list || disabled) return;
-    const all = Array.from(list);
     const limit = maxSizeMb ? maxSizeMb * 1024 * 1024 : Infinity;
-    const bad = all.filter((f) => f.size > limit);
-    const good = all.filter((f) => f.size <= limit);
-    setRejected(
-      bad.map((f) => ({
-        id: `${f.name}-${f.size}`,
-        name: f.name,
-        size: f.size,
-        error: `Zu groß — höchstens ${maxSizeMb} MB.`,
-      })),
-    );
+    const bad: DroppedFile[] = [];
+    const good: File[] = [];
+    for (const f of Array.from(list)) {
+      const id = `${f.name}-${f.size}`;
+      if (!accepted(f)) bad.push({ id, name: f.name, size: f.size, error: `Format nicht vorgesehen — ${accept}.` });
+      else if (f.size > limit) bad.push({ id, name: f.name, size: f.size, error: `Zu groß — höchstens ${maxSizeMb} MB.` });
+      else good.push(f);
+    }
+    setRejected(bad);
     // The rest goes through: one rejected file must not stop the others.
     if (good.length > 0) onFiles(good);
   }

@@ -96,44 +96,28 @@ Titel `v3/Primitives/Formular/Combobox`. Abgeleitet nach §6: 5 Zustände
 
 Nicht anwendbar: keine — alle fünf Zustände treffen zu.
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] Pfeiltasten, Enter, Escape und Rücktaste verhalten sich wie beschrieben (Story `Interactive`, mit Tastatur geprüft)
-- [ ] Ohne `onSearch` wird lokal gefiltert, mit `onSearch` nicht (Stories `Filled` und `ServerSearch`)
-- [ ] „Kein Treffer" nennt einen Ausweg, ist nicht rot und kein Fehler (Story `NoMatch`)
-- [ ] `error` erscheint als Text am Feld, nicht nur als Farbe (Story `Invalid`, Regel V7/I8)
-- [ ] Das Label steht sichtbar über dem Feld, auch wenn `placeholder` gesetzt ist (Regel I8)
-- [ ] `group` erzeugt Überschriften, ohne sie flache Liste (Story `Grouped`)
-- [ ] Ersetzt `CreditorCombobox` ohne Funktionsverlust
-- [ ] `AccountField` bleibt unverändert und grün — sein Umbau ist eine eigene Aufgabe
-
-## Offene Fragen
-
-1. Soll die Liste beim Fokus sofort aufgehen oder erst beim Tippen? *Ohne
-   Antwort: sofort — bei 20 Optionen will man sie sehen, bei 800 hilft das
-   Tippen ohnehin.*
-2. Wie viele Treffer werden höchstens gezeigt? *Ohne Antwort: 50, mit einer
-   Zeile „… und 340 weitere — Suchbegriff verfeinern."*
-3. Braucht es eine Variante ohne `Field`-Rahmen (für Tabellenzellen)? *Ohne
-   Antwort: nein — `AccountField` löst das heute selbst; wenn es beim Umbau
-   nötig wird, ist das eine Prop dort.*
-
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Pfeiltasten, Enter, Escape und Rücktaste verhalten sich wie beschrieben | `v3-primitives-formular-combobox--interactive`, mit echter Tastatur: „tele" tippen → ein Treffer; ↓ wandert (6× ↓ → „1600 · Verbindlichkeiten" hervorgehoben); Enter wählt („Gewählt: 6805", Liste zu); Escape schließt ohne Auswahl; Rücktaste im leeren Feld setzt auf „Gewählt: nichts" | ✓ |
+| Ohne `onSearch` wird lokal gefiltert, mit `onSearch` nicht | `--interactive` (ohne `onSearch`): „tele" filtert 7 → 1 Option im DOM. `Combobox.tsx:87` gibt bei gesetztem `onSearch` unverändert `options` zurück; `--server-search` liefert die Treffer von außen nach | ✓ |
+| „Kein Treffer" nennt einen Ausweg, ist nicht rot und kein Fehler | `--no-match`: `.v2cmb__empty` = „Kein Treffer — Suchbegriff kürzen.", Farbe `rgb(113,113,113)` (`--color-text-subtle`), nicht `--color-danger` (`#A8403C`) | ✓ |
+| `error` erscheint als Text am Feld, nicht nur als Farbe (V7/I8) | `--invalid`: `.v2field__err` = „Ohne Gegenkonto lässt sich der Satz nicht buchen."; das zweite Feld ist `disabled` | ✓ |
+| Label steht sichtbar über dem Feld, auch mit `placeholder` (I8) | `--filled`: `.v2field__label` „Gegenkonto" liegt über dem Feld (Rechteck-Vergleich), `for="konto"` ↔ `id="konto"`, `placeholder="Nummer oder Name"` daneben | ✓ |
+| `group` erzeugt Überschriften, ohne sie flache Liste (Story `Grouped`) | Die Story `Grouped` **fehlt**; gebaut wurden acht Stories, aber `ServerSearch` (in der Spec nur in der Schnittstellen-Tabelle genannt) an ihrer Stelle. Überschriften sind belegt (`--interactive`: „Zuletzt gebucht", „Vorschlag des Agenten", „Alle Konten"), der flache Fall — Optionen **ohne** `group` — kommt in keiner Story vor | ✗ |
+| Ersetzt `CreditorCombobox` ohne Funktionsverlust | Vergleich mit `app/apps/web/src/modules/business-partners/ui/CreditorCombobox.tsx`: Feld, Liste, Wechsel Suchtext↔Auswahl, Ladezustand und Leertext sind gedeckt, die Tastatursteuerung kommt neu hinzu. Es fehlen die **Entprellung** (180 ms) und der **Wettlauf-Schutz** (`reqId`) des Originals: `onSearch` feuert je Tastendruck, und eine späte Antwort kann eine frühere überschreiben | ✗ |
+| `AccountField` bleibt unverändert und grün | `git log -- src/ui/v3/entities/account/AccountField.tsx` → letzter Commit `9bf1291` (Umbenennung 0001), kein Eingriff aus dieser Runde; `git status` zeigt nur `docs/backlog/*` | ✓ |
+| `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
+(1) Story `Grouped` nachziehen — eine Liste **ohne** `group` neben einer mit,
+sonst ist „ohne sie flache Liste" unbelegt. (2) Entprellung und Wettlauf-Schutz
+für `onSearch` entscheiden: in die `Combobox` holen oder in der Spec als Sache
+des Aufrufers festschreiben. (3) Der hervorgehobene Treffer wird nicht in Sicht
+gescrollt: bei sieben Optionen steht Nummer 7 nach dem letzten ↓ unterhalb der
+Blende (`scrollTop` bleibt 0) — bei den in Offene Frage 2 vorgesehenen 50
+Treffern läuft die Tastaturführung damit blind. (4) Offene Frage 2 („höchstens
+50, dazu eine Zeile ‚… und N weitere'") ist nicht umgesetzt: es wird ungekürzt
+alles gezeigt. (5) `role="listbox"`/`role="option"` ohne `aria-activedescendant`
+— Screenreader erfahren den hervorgehobenen Treffer nicht.

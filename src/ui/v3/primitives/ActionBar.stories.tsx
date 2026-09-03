@@ -34,7 +34,7 @@ export const AfterFailure: Story = {
   ),
 };
 
-/** Zeilen-Aktionen: tertiäre Knöpfe rechtsbündig, jedes Icon withItems Wort. */
+/** Zeilen-Aktionen: tertiäre Knöpfe rechtsbündig, jedes Icon mit Wort. */
 export const ActionsInRow: Story = {
   render: () => (
     <RowActions>

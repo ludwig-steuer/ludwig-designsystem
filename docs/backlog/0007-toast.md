@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede Handlung braucht eine Quittung |
 | Quelle | `docs/v3-backlog.md` — „Danach": **keine Implementierung**, 43 Dateien mit Ad-hoc-Rückmeldung |
@@ -131,8 +131,21 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Ohne `action` verschwindet der Toast nach etwa fünf Sekunden | `v3-primitives-fläche-toast--filled`: ausgelöst, nach 5,2 s `document.querySelectorAll('.v2toast').length === 0` | ✓ |
+| Mit `action` bleibt er stehen | `--persistent`: beide ausgelöst, nach 7 s steht nur noch „Der Export liegt bereit." mit „Datei herunterladen" und „Schließen" | ✓ |
+| Bei vier Auslösungen höchstens drei gleichzeitig | `--stacked`: ein Klick löst vier aus, sichtbar bleiben RE-4472/4473/4474 — der älteste weicht, der neueste steht unten | ✓ |
+| Der Host trägt `aria-live`; `danger` meldet `assertive` | `--variants`: Host `aria-live="polite"`, `success`/`warning` `role="status"`, `danger` `role="alert"` (implizit assertiv) | ✓ |
+| Der Fokus wandert beim Erscheinen nicht | `--filled`: Auslöser fokussiert, Toast erscheint, `document.activeElement` bleibt der Knopf | ✓ |
+| Schließen-Knopf trägt ein Wort (T8) | `--filled`: `TextButton` „Schließen", kein nacktes Icon in der Datei | ✓ |
+| Texte im Perfekt, mit Objekt (T3) | Alle sechs Stories gelesen: „Der Export wurde gestartet.", „Der Stapel wurde abgenommen.", „Beleg RE-4471 wurde zugeordnet." … Einzige Ausnahme „Der Export liegt bereit." (Präsens, nennt aber das Objekt) | ✓ |
+| Hover und Fokus halten den Zeitablauf an, danach läuft er weiter | `--filled`: mit Mauszeiger über dem Toast nach 6,5 s noch da; nach dem Verlassen innerhalb der nächsten Sekunden verschwunden. Fokus läuft über denselben `paused`-Zustand (`onFocus`/`onBlur` am Toast, Toast.tsx:95) | ✓ |
+| `prefers-reduced-motion` schaltet die Bewegung ab | `src/styles/v3.css:1453` — `@media (prefers-reduced-motion: reduce) { .v2toast { animation: none } }`; im Browser stand die Animation als `v2toastin 0.18s`. Der Devtools-Umschalter wurde nicht benutzt, geprüft ist die Regel | ✓ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: keine.
+Zwei Hinweise ohne Einfluss auf die Kriterien: die Live-Region wird erst mit
+dem ersten Toast in den DOM gehängt (`items.length > 0`) — Vorleser melden
+frisch eingefügte Regionen nicht immer zuverlässig; und die Entwickler-Meldung
+in `useToast` („braucht einen ToastHost über sich.") ist deutsch, obwohl sie
+kein Nutzer-String ist.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „lädt noch" ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Ladefläche für Karte/Detail (Skeleton)" · `v3-backlog.md` „Ladeanzeige außerhalb der Tabelle" (3) |
@@ -67,37 +67,14 @@ Nicht anwendbar: `Gefuellt`, `Leer`, `LeerNachFilter`, `Fehler` — die
 Komponente **ist** der Ladezustand; die anderen vier zeigt der Aufrufer mit
 `EmptyState` und `ErrorRow`.
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] Nutzt `.v2skel`, definiert keine zweite Ladefläche (Blick ins CSS)
-- [ ] `variant="card"` hält die Höhe einer echten Karte, ohne die Seite springen zu lassen (Story `InCard`, Regel V12)
-- [ ] Genau ein `sr-only`-Satz je Skeleton, die Flächen sind `aria-hidden` (Story `Lines`, Blick ins DOM)
-- [ ] Die `@when`-Zeile grenzt gegen `TableLoading` ab
-- [ ] Ersetzt den handgebauten Platzhalter in mindestens einem der drei Fundorte ohne Funktionsverlust
-
-## Offene Fragen
-
-1. Braucht `variant="field"` eine eigene Höhe je Feldgröße? *Ohne Antwort:
-   nein — eine Höhe, die zum `Input` passt.*
-2. Soll `lines` auch bei `card` gelten? *Ohne Antwort: nein — `card` ist eine
-   Fläche, keine Zeilenfolge.*
-
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Nutzt `.v2skel`, definiert keine zweite Ladefläche | `v3.css` 741 (`.v2skel`, Puls) und 1327–1329 — dort nur die Gruppe und zwei Höhen-Modifier, kein zweiter Ladestil | ✓ |
+| `variant="card"` hält die Kartenhöhe, ohne die Seite springen zu lassen | `v3-primitives-fläche-skeleton--in-card` im Browser: der Kartenkopf steht, die Fläche hält feste 96 px | ✓ |
+| Genau ein `sr-only`-Satz je Skeleton, Flächen `aria-hidden` | `v3-primitives-fläche-skeleton--lines`, DOM-Probe: ein `.sr-only` („Sachverhalt wird geladen …"), alle vier Balken `aria-hidden="true"` | ✓ |
+| Die `@when`-Zeile grenzt gegen `TableLoading` ab | `Skeleton.tsx`: `@when` nennt Karte, Detailfläche, Formularfeld; die Abgrenzung selbst steht in `@instead` („Rows inside a table → TableLoading") | ✓ |
+| Ersetzt den handgebauten Platzhalter in mindestens einem der drei Fundorte | Keine Aufrufstelle außer den eigenen Stories; in `ludwig/app` kein `Skeleton`-Import (`grep`) | ✗ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die Ablösung der handgebauten Platzhalter steht noch aus — sie liegt in `ludwig/app`, nicht in diesem Repo.

@@ -47,7 +47,7 @@ const TEXTS: Record<string, { title: string; sub: string; body: string }> = {
 
 /**
  * Der kanonische Ersatz für das Modal (L2): eine Karte für die Liste,
- * Kopfzeile je Gruppe, aktive Zeile withItems Akzentleiste. Detail rechts bleibt
+ * Kopfzeile je Gruppe, aktive Zeile mit Akzentleiste. Detail rechts bleibt
  * beim Scrollen stehen.
  */
 export const Filled: Story = {

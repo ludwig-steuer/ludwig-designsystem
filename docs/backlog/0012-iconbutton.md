@@ -100,41 +100,17 @@ Titel `v3/Primitives/Aktion/IconButton`. Abgeleitet nach §6: 1 Zustand
 
 Nicht anwendbar: `Leer`, `Laedt`, `Fehler`, `LeerNachFilter`.
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] `label` ist Pflicht — der Typecheck lehnt einen `IconButton` ohne ab
-- [ ] `label` landet als `aria-label` **und** `title` im DOM (Story `Filled`, im Inspektor geprüft)
-- [ ] `InUse` zeigt neben dem Icon-Knopf einen beschrifteten Weg für dieselbe Absicht (Bedingung 3)
-- [ ] Die `@when`-Zeile nennt die drei Bedingungen in Kurzform; `@instead` verweist für Handlungen mit Folgen auf `Button` und für Kebab auf `OverflowMenu`
-- [ ] **`design-guidelines.md` T8 trägt die Ausnahme** mit den drei Bedingungen und dem Datum des Entscheids
-- [ ] Der Kommentar in `Button.tsx` („Kein Kebab …") bleibt und verweist auf die Ausnahme
-- [ ] Ersetzt das Schließen-Kreuz in `v3/primitives/Dialog.tsx` ohne Funktionsverlust
-- [ ] Räumt mindestens eine der neun Stellen ohne `aria-label` in `ludwig/app` auf
-
-## Offene Fragen
-
-1. Drei Größen oder zwei? *Ohne Antwort: drei — die App hat heute sechs;
-   24/28/32 deckt sie ohne sichtbaren Bruch ab.*
-2. Soll `title` immer gesetzt werden, auch wenn es den Hover verdoppelt?
-   *Ohne Antwort: ja — T8 sagt „Tooltip erklärt, ersetzt kein Label", hier ist
-   er der einzige sichtbare Hinweis.*
-
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| `label` ist Pflicht — der Typecheck lehnt einen `IconButton` ohne ab | `IconButton.tsx`: `label: string` im gemeinsamen `Common`-Typ, also in beiden Union-Zweigen; `pnpm typecheck` grün | ✓ |
+| `label` landet als `aria-label` **und** `title` im DOM | `v3-primitives-aktion-iconbutton--filled`, DOM-Probe: alle drei Knöpfe tragen beides, Textinhalt leer, 28 × 28 px; Fokusring per Tab sichtbar | ✓ |
+| `InUse` zeigt neben dem Icon-Knopf einen beschrifteten Weg | `v3-primitives-aktion-iconbutton--in-use`: Schließen-Kreuz im Kopf, „Abbrechen" im Fuß | ✓ |
+| Die `@when`-Zeile nennt die drei Bedingungen; `@instead` verweist auf `Button` und `OverflowMenu` | `@when` nennt Bedingung 1 (konventionelles Icon) und Bedingung 3 (beschrifteter Weg daneben); Bedingung 2 (umkehrbar und folgenlos) fehlt. `@instead` nennt `Button` und `OverflowMenu` | ✗ |
+| `design-guidelines.md` T8 trägt die Ausnahme mit den drei Bedingungen und dem Datum | Zeile 161 unverändert — „Icon-Only-Button ohne sichtbares Wort" steht weiter als Verstoß; die Ausnahme steht nur als Katalogzeile in §11.7 | ✗ |
+| Der Kommentar „Kein Kebab …" in `Button.tsx` bleibt und verweist auf die Ausnahme | Der Satz steht in `ActionBar.tsx` bei `RowActions`, nicht in `Button.tsx`, und verweist nicht auf die Ausnahme | ✗ |
+| Ersetzt das Schließen-Kreuz in `v3/primitives/Dialog.tsx` | `Dialog.tsx:73` weiter rohes `<button className="v2dlg__close">` mit eigenem `aria-label` | ✗ |
+| Räumt mindestens eine der neun Stellen ohne `aria-label` in `ludwig/app` auf | Kein `IconButton`-Import in `ludwig/app` (`grep`) | ✗ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die T8-Ausnahme fehlt im SSOT; der `Button.tsx`-Kommentar fehlt; `Dialog.tsx` und die App sind nicht umgestellt; Bedingung 2 fehlt in der `@when`-Zeile.

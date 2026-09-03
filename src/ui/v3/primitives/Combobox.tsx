@@ -79,6 +79,12 @@ export function Combobox({
     list.style.width = `${r.width}px`;
   }, [open]);
 
+  // Walking with the arrow keys must not walk out of view — with more than a
+  // handful of options the highlighted hit would otherwise be below the fold.
+  useLayoutEffect(() => {
+    pop.current?.querySelector(".is-active")?.scrollIntoView({ block: "nearest" });
+  }, [active, open]);
+
   const chosen = options.find((o) => o.value === value) ?? null;
 
   const hits = useMemo(() => {

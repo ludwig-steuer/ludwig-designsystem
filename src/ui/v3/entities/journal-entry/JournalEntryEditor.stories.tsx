@@ -61,7 +61,7 @@ export const S0_Simple: Story = {
   ),
 };
 
-/** S1 — im Formular, withItems einer Warnung, die eine Quittung braucht. */
+/** S1 — im Formular, mit einer Warnung, die eine Quittung braucht. */
 export const S1_EditWithWarning: Story = {
   render: () => (
     <Frame>
@@ -83,7 +83,7 @@ export const S1_EditWithWarning: Story = {
   ),
 };
 
-/** S2 — Split über zwei Zeilen, Vollansicht withItems Währung, Beleg 2 und KOST. */
+/** S2 — Split über zwei Zeilen, Vollansicht mit Währung, Beleg 2 und KOST. */
 export const S2_SplitFull: Story = {
   render: () => (
     <Frame>
@@ -212,7 +212,7 @@ export const S17_Posted: Story = {
   ),
 };
 
-/** S18 — storniert: der Satz bleibt stehen, withItems Grund. */
+/** S18 — storniert: der Satz bleibt stehen, mit Grund. */
 export const S18_Reversed: Story = {
   render: () => (
     <Frame>
@@ -226,7 +226,7 @@ export const S18_Reversed: Story = {
   ),
 };
 
-/** S19 — der Judge bestätigt withItems Hinweis: die Begründung ist einsehbar. */
+/** S19 — der Judge bestätigt mit Hinweis: die Begründung ist einsehbar. */
 export const S19_JudgeWithNote: Story = {
   render: () => (
     <Frame>
@@ -282,7 +282,7 @@ export const Empty: Story = {
         rows={[]}
         gegenkonto={null}
         editable
-        hints={[{ code: "E-LEER", message: "Noch keine Zeile — withItems „+ Zeile (Split)“ beginnen." }]}
+        hints={[{ code: "E-LEER", message: "Noch keine Zeile — mit „+ Zeile (Split)“ beginnen." }]}
         onCancel={() => {}}
         onSave={() => {}}
       />

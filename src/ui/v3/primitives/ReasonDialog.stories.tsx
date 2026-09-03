@@ -19,7 +19,7 @@ export const Open: Story = {
       confirmLabel="Zurückgeben"
       chips={["Beleg fehlt", "Konto falsch", "Betrag weicht ab"]}
     >
-      Der Agent bekommt den Stapel withItems diesem Grund zurück und arbeitet ihn neu auf.
+      Der Agent bekommt den Stapel mit diesem Grund zurück und arbeitet ihn neu auf.
     </ReasonDialog>
   ),
 };

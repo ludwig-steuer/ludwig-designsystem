@@ -114,43 +114,28 @@ Nach §6: 3 Zustände + 2 Enums + 1 Callback + 1 „im Einsatz" + 1 Rand = 8.
 | `MitLuecke` | 14 Tage ohne Ereignis, die Lückenzeile |
 | `ImEinsatz` | im Sachverhalts-Detail unter der `FieldList` |
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] Unsortierte `entries` erscheinen sortiert (`Gefuellt`)
-- [ ] Kein Ereignistyp lokal definiert; `kind` ist `string` mit Registry-Prop (`grep`)
-- [ ] Zeiten über `Timestamp`, nicht über eigenes `Intl` (`grep`)
-- [ ] Lückenzeile ab sieben Tagen, mit der Zahl der Tage (`MitLuecke`)
-- [ ] Ohne `onOpen` sind Einträge nicht fokussierbar (`Gefuellt`, Tab-Weg)
-- [ ] Aufklappen verschiebt keinen anderen Eintrag (`Gefuellt`)
-- [ ] Ersetzt `CycleTimeline` ohne Funktionsverlust
-
-## Offene Fragen
-
-1. **Wie viele Ereignisse auf einmal?** *Ohne Antwort: alle übergebenen. Wer
-   kürzen will, kürzt vor der Übergabe — eine Komponente, die still weglässt,
-   ist gefährlicher als eine lange Seite.*
-2. **Sieben Tage als Lückenschwelle?** *Ohne Antwort: ja, mit `gapDays` als
-   Prop überschreibbar. Im Monatsprozess ist eine Woche Stille auffällig, im
-   Audit-Log nicht.*
-3. **`kind` färbt den Punkt — woher die Farbe?** *Ohne Antwort: über die
-   mitgegebene Registry, wie `StatusBadge` es tut. Keine Farbe ohne Wort (V6).*
-
 ## Abnahme
 
-| Kriterium | Nachweis | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| … | … | ✓ / ✗ |
+| Unsortierte `entries` erscheinen sortiert | `v3-patterns-prozess-timeline--gefuellt` (Daten in der Reihenfolge e3, e1, e4, e2 übergeben): Gruppenköpfe „Montag, 31. August 2026", „Sonntag, 30.", „Samstag, 29.", „Mittwoch, 26.", Zeiten 16:02 / 11:12 / 13:05 / 09:40 | ✓ |
+| Kein Ereignistyp lokal definiert; `kind` ist `string` mit Registry-Prop | `kind: string` ✓ und kein lokaler Ereignistyp ✓ — aber es gibt **keine** Registry-Prop. `kind` wird als roher Text ausgegeben (`.v2tl__who`), und der Punkt wird nicht nach `kind` eingefärbt; die Farbe kommt allein aus dem optionalen `state` über `StateIcon`. Damit ist die Antwort auf Offene Frage 3 nicht umgesetzt | ✗ |
+| Zeiten über `Timestamp`, nicht über eigenes `Intl` | `Timeline.tsx:37–53` legt drei eigene `Intl.DateTimeFormat` an (`DAY`, `MONTH`, `TIME`) und benutzt zusätzlich `toLocaleDateString("de-DE")`; `Timestamp` (`primitives/Cells.tsx:128`) wird nicht importiert. Im DOM steht folgerichtig **kein** `<time>`-Element (`document.querySelectorAll('time').length === 0`) | ✗ |
+| Lückenzeile ab sieben Tagen, mit der Zahl der Tage | `--mit-luecke`: zwischen dem 26.08. und dem 05.08. steht `.v2tl__gap` „20 Tage ohne Ereignis"; `GAP_DAYS = 7` | ✓ |
+| Ohne `onOpen` sind Einträge nicht fokussierbar | `--gefuellt`: kein `button`, `a` oder `[tabindex]` innerhalb `.v2tl` — nur das `summary` der eingeklappten `detail`-`Disclosure` ist ein Bedienelement. Gegenprobe `--interaktiv`: mit `onOpen` sind alle vier Einträge `TextButton`, Klick → „Geöffnet: e4" | ✓ |
+| Aufklappen verschiebt keinen anderen Eintrag | `--gefuellt`, gemessen vor/nach Klick auf „Einzelheiten": die beiden Einträge **darunter** rücken von `top` 265 → 319 und 352 → 406 px, also 54 px nach unten. Die Einträge darüber bleiben stehen. Wörtlich genommen ist das Kriterium verletzt | ✗ |
+| Ersetzt `CycleTimeline` ohne Funktionsverlust | Vergleich mit `app/apps/web/src/modules/cycles/ui/CycleTimeline.tsx`: Das ist keine Zeitleiste im Sinn dieser Spec, sondern eine **waagerechte Kartenreihe der Buchungsjahre** (`role="list"`, feste Kartenbreite, `overflow-x`, ganze Karte als `next/link`, `aria-current="page"` auf dem aktiven Jahr, drei Zählwerte je Karte, und bei leerer Liste rendert sie `null` statt eines Leertexts). `Timeline` kennt weder `href` noch Karten und rendert `emptyText` — ein Ersatz ist es nicht | ✗ |
+| `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
+(1) Zeiten auf `Timestamp` umstellen oder — falls die langen Gruppenköpfe das
+verhindern — `Timestamp` um die nötigen Formate erweitern; heute steht im DOM
+kein maschinenlesbares Datum. (2) Die Label-/Farb-Registry für `kind` fehlt
+ganz; bis sie da ist, ist „Keine Farbe ohne Wort" nur deshalb erfüllt, weil gar
+nicht gefärbt wird. (3) `gapDays` als Prop (Offene Frage 2) ist nicht gebaut,
+die Schwelle ist die Konstante `GAP_DAYS`. (4) Beim Aufklappen rücken die
+Einträge darunter nach — entweder das Kriterium auf „die Einträge **darüber**
+bleiben stehen" schärfen oder das Aufklappen anders lösen. (5) Die Spec nennt
+`Markdown` (0022) unter „Setzt auf"; `detail` ist stattdessen `ReactNode`, der
+Aufrufer bringt das Rendern mit. (6) Der Kommentar an der Story `MitLuecke`
+spricht von 21 Tagen, gerendert werden 20.

@@ -117,8 +117,15 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Jede der sechs Props verhält sich wie beschrieben, jede mit ihrer Story | `v3-primitives-fläche-pageheader--filled` (overline, title, description), `--with-meta`, `--with-actions`, `--with-back`, `--title-only` | ✓ |
+| Ohne `actions`/`meta`/`back`/`description`/`overline` nur der Titel, keine leeren Kästen | `--title-only`, DOM im Browser: `header.v2phead > div.v2phead__main > div > div.v2phead__titlerow > h1` — kein weiteres Element | ✓ |
+| Titel über 80 Zeichen bricht um, ohne die Aktionen zu verdrängen | `--in-use` trägt „Stapel 2026-08 · Bürobedarf" (27 Zeichen) — der Randfall aus der Ableitung ist in keiner Story belegt. Das Verhalten selbst stimmt: im Browser auf 107 Zeichen gesetzt → `h1` 25 → 50 px, `.v2phead__acts` unverändert an Ort und Breite, `scrollWidth == clientWidth` | ✗ |
+| `back.label` nennt das Ziel, keine Story zeigt „Zurück" | `--with-back`: „Alle Stapel"; Tabben zeigt den Fokusring (2 px, `--color-focus`) | ✓ |
+| Server-Component: kein `"use client"` | `grep -n "use client" src/ui/v3/primitives/PageHeader.tsx` → keine Zeile | ✓ |
+| Ersetzt `PageHeader` der App ohne Funktionsverlust | App-Datei gelesen: Props `title`, `sub`, `actions` — gedeckt durch `title`, `description`, `actions`; der Rest kommt hinzu. Der Umzug in `ludwig/app` selbst steht noch aus | ✓ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: Der in §6
+abgeleitete Randfall „langer Titel" hat keinen Nachweis — `InUse` braucht
+einen Titel über 80 Zeichen oder es fehlt eine eigene Story dafür.

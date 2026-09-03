@@ -37,6 +37,7 @@ export function ChoicePrompt({
   question,
   context,
   options,
+  defaultOptionId = null,
   freeText,
   submitLabel = "Antwort senden",
   onSubmit,
@@ -47,6 +48,8 @@ export function ChoicePrompt({
   /** What this is about — document, amount, row. */
   context?: ReactNode;
   options: ChoiceOption[];
+  /** Pre-selected answer — the agent's own suggestion, for instance. */
+  defaultOptionId?: string | null;
   /** Without this prop there is no text field at all. */
   freeText?: { label: string; placeholder?: string; required?: boolean };
   submitLabel?: string;
@@ -54,7 +57,7 @@ export function ChoicePrompt({
   pending?: boolean;
   error?: string;
 }) {
-  const [choice, setChoice] = useState<string | null>(null);
+  const [choice, setChoice] = useState<string | null>(defaultOptionId);
   const [text, setText] = useState("");
 
   const missingText = Boolean(freeText?.required) && !text.trim();
@@ -66,8 +69,23 @@ export function ChoicePrompt({
       ? "Bitte ergänzen Sie den Text."
       : null;
 
+  function send() {
+    if (blocked || pending) return;
+    void onSubmit({ optionId: choice, text: text.trim() || undefined });
+  }
+
   return (
-    <div className="v2ask">
+    // The key is promised at the button, so it has to work everywhere in the
+    // block — not only inside the text field (found in review, 2026-09-03).
+    <div
+      className="v2ask"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          send();
+        }
+      }}
+    >
       <div>
         <div className="v2ask__q">{question}</div>
         {context ? <div className="v2ask__ctx">{context}</div> : null}
@@ -88,12 +106,6 @@ export function ChoicePrompt({
             placeholder={freeText.placeholder}
             disabled={pending}
             onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !blocked) {
-                e.preventDefault();
-                void onSubmit({ optionId: choice, text: text.trim() || undefined });
-              }
-            }}
           />
         </Field>
       ) : null}

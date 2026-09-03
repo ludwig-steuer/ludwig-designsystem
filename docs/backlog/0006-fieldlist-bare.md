@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` — Erweiterung eines vorhandenen Exports |
 | Klassen-Test | entfällt — keine neue Komponente |
 | Quelle | `docs/v3-backlog.md` — „Danach": `Werteliste`, 10 lokale `Row({label})`-Helfer + 10 `<dl>` |
@@ -100,8 +100,16 @@ Keine.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| `tone="bare"` ohne Fläche, ohne Rahmen, ohne Innenabstand | `v3-primitives-fläche-fieldlist--bare`, gemessen im Browser: `background rgba(0,0,0,0)`, `border-top-width 0px`, `border-radius 0px`, `padding 0px` — daneben `surface` mit Weiß, 1 px Rand, `--radius-lg`, 20 px | ✓ |
+| Ohne `title` keine leere Kopfzeile | `--bare-without-title`: kein `.v2fields__h` im DOM, erstes Kind ist `.v2fields__row`, Abstand über der ersten Zeile 0 px | ✓ |
+| Zeilenabstände in allen drei Tönen identisch | `--bare`: `.v2fields__row` in beiden Listen `padding 5px 0`, Zeilenhöhe 30,25 px. Die Story stellt `surface` und `bare` nebeneinander; `soft` fehlt darin, ändert laut `v3.css:568` aber allein `background` — die Zeilenregeln sind dieselben | ✓ |
+| Die `@when`-Zeile nennt den freistehenden Fall | `FieldList.tsx:12` — „read-only — in a card (`surface`/`soft`) or free-standing inside one (`bare`)" | ✓ |
+| Bestehende Stories unverändert, Story-Zahl steigt um genau 2 | `git show 008b3d4^:…/FieldList.stories.tsx \| grep -c "^export const"` → 3, heute 5; `Filled`, `SideBySideToned`, `Empty` im Diff unberührt | ✓ |
+| Ersetzt einen lokalen `Row({label})`-Helfer ohne Funktionsverlust | App gelesen: `admin/tenants/[tenantId]/clients/[clientId]/page.tsx:953` und `dev/gallery/page.tsx:247` sind `({ label, children })` — Schlüssel/Wert, gedeckt durch `rows: [ReactNode, ReactNode][]`. Der Umzug in `ludwig/app` steht aus | ✓ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: keine.
+Hinweis: der JSDoc-Kopf von `FieldList.tsx` ist deutsch (bestand schon vor
+0006, der neue Absatz führt ihn fort) — die Hausregel will englische
+Kommentare; sauber wäre, ihn beim nächsten Anfassen der Datei zu übersetzen.

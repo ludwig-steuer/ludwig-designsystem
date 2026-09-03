@@ -1457,7 +1457,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* --- OverflowMenu (0008) — die Klappe für die selteneren Wege ------------- */
 .v2menu { position: relative; display: inline-block; }
 .v2menu__panel {
-  position: absolute; top: calc(100% + 4px); right: 0;
+  position: absolute; top: 100%; right: 0; margin-top: 4px;
   min-width: 208px; max-height: 320px; overflow-y: auto;
   padding: 4px;
   background: var(--color-surface);

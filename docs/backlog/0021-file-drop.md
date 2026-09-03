@@ -73,37 +73,21 @@ Titel `v3/Primitives/Formular/FileDrop`. Abgeleitet nach §6: 4 Zustände
 
 Nicht anwendbar: `LeerNachFilter` — es gibt keinen Filter.
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] Die Zone ist per Tastatur erreichbar und öffnet mit Enter den Dateidialog (Story `Empty`, Regel V11)
-- [ ] Beim Überziehen ändert sich nur der Hintergrund, nichts wächst (Story `Empty`, Regel V12)
-- [ ] Abgelehnte Dateien nennen den Grund, die übrigen kommen trotzdem an (Story `Rejected`)
-- [ ] Die Komponente lädt selbst nichts hoch (Blick in den Code: kein `fetch`)
-- [ ] Ersetzt die Drop-Zone in `InvoiceUploader.tsx` ohne Funktionsverlust
-
-## Offene Fragen
-
-1. Soll die Komponente eine Vorschau zeigen? *Ohne Antwort: nein — Name,
-   Größe, Zustand reichen; die Belegvorschau ist eine Entitäts-Form.*
-2. Wer entfernt eine Datei, die schon hochgeladen ist? *Ohne Antwort: der
-   Aufrufer über `onRemove`; die Komponente kennt keinen Server.*
-
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Zone per Tastatur erreichbar, Enter öffnet den Dateidialog (V11) | `v3-primitives-formular-filedrop--empty`: Tab landet auf `BUTTON.v2drop`, `:focus-visible` greift (`outline: rgb(59,143,196) solid 2px`, `outline-offset: 2px`). Die Zone ist ein echtes `<button>`, Enter löst also den Klick aus — nicht gedrückt, weil der native Dateidialog die Browser-Sitzung blockiert hätte | ✓ |
+| Beim Überziehen ändert sich nur der Hintergrund, nichts wächst (V12) | `--empty`, `dragover` ausgelöst: `background` `rgb(255,255,255)` → `rgb(244,246,248)` (Klasse `is-over`), Maße unverändert 460 × 84,25 px | ✓ |
+| Abgelehnte Dateien nennen den Grund, die übrigen kommen trotzdem an | **Größe ✓**: echter `drop` auf `--interactive` (`maxSizeMb=5`) mit drei Dateien → „riesig.pdf · 6,0 MB · Zu groß — höchstens 5 MB." in der Liste, `klein.pdf` und `tabelle.xlsx` sind durchgelaufen. **Format ✗**: `take()` prüft nur die Größe, `accept` geht ausschließlich an das native Feld — eine per Drag abgelegte Datei falschen Formats wird durchgereicht. Der Formatfehler in `--rejected` kommt aus der `files`-Prop, nicht aus der Komponente; die Spec verlangt unter „Verhalten" beides | ✗ |
+| Die Komponente lädt selbst nichts hoch | `grep fetch src/ui/v3/primitives/FileDrop.tsx` → kein Treffer; keine Server Action, kein `XMLHttpRequest` | ✓ |
+| Ersetzt die Drop-Zone in `InvoiceUploader.tsx` ohne Funktionsverlust | Vergleich mit `app/apps/web/src/modules/files/ui/InvoiceUploader.tsx`: Zone, Klick, Drag, Tastaturweg, Hinweiszeile, Dateiliste, Größe, Fortschritt und Entfernen sind gedeckt — die stille Ablehnung des Originals wird sogar zum genannten Grund. Nicht abbildbar ist der **Zustand je Datei**: `DroppedFile` kennt nur `progress` und `error`, das Original zeigt sechs Schrittwörter (`wartend`, `Upload-URL`, `Upload NN %`, `Bestätigung`, `Registrieren`, `Bereit`/`Duplikat`) und je Datei einen Link „Beleg öffnen →" | ✗ |
+| `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
+(1) `accept` auch beim Ablegen prüfen und die abgelehnte Datei mit Grund in die
+Liste stellen — sonst ist die Story `Rejected` für den Formatfall gestellt und
+nicht bewiesen. (2) `DroppedFile` um ein Zustandswort (und wahlweise eine
+Handlung je Zeile) erweitern, sonst bleibt `InvoiceUploader` beim Eigenbau.
+(3) Kleinigkeit: `aria-describedby="v2drop-hint"` ist eine feste Kennung — zwei
+`FileDrop` mit `hint` auf einer Seite erzeugen dieselbe `id` zweimal.

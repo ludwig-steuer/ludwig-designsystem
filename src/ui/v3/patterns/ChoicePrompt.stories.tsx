@@ -20,7 +20,10 @@ const OPTIONS = [
   { id: "buero", label: "Bürobedarf", hint: "Sammelkonto 6815" },
 ];
 
-/** Drei Antworten, eine gewählt — der Weg ist ein Klick. */
+/**
+ * Drei Antworten, eine schon gewählt: `defaultOptionId` trägt den Vorschlag
+ * des Agenten hinein, damit die häufigste Antwort ein Klick weniger ist.
+ */
 export const Filled: Story = {
   render: () => (
     <div style={{ maxWidth: 480 }}>
@@ -28,6 +31,7 @@ export const Filled: Story = {
         question="Wie ist die Rechnung vom Restaurant Adler einzuordnen?"
         context="RE-4483 · 128,40 € · 26.08.2026"
         options={OPTIONS}
+        defaultOptionId="bewirtung"
         onSubmit={async () => wait(400)}
       />
     </div>

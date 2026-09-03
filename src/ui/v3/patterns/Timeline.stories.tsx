@@ -58,6 +58,30 @@ export const Gefuellt: Story = {
   ),
 };
 
+/**
+ * `kind` kommt als Schlüssel aus den Daten; das deutsche Wort dazu gibt der
+ * Aufrufer. Solange `src/ludwig/` keinen Ereignistyp führt, erfindet die
+ * Komponente keine Vokabeln (Befund in der Spec).
+ */
+export const MitLabels: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <Timeline
+        entries={CASE.map((e) => ({
+          ...e,
+          kind: { Beleg: "document_received", Zahlung: "payment_in", Rückfrage: "clarification", Buchungsvorschlag: "booking_proposed" }[e.kind] ?? e.kind,
+        }))}
+        kindLabels={{
+          document_received: "Beleg",
+          payment_in: "Zahlung",
+          clarification: "Rückfrage",
+          booking_proposed: "Buchungsvorschlag",
+        }}
+      />
+    </div>
+  ),
+};
+
 /** Nichts geschehen ist eine Aussage, kein leerer Kasten. */
 export const Leer: Story = {
   render: () => (

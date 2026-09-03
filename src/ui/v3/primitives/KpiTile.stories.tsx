@@ -7,7 +7,7 @@ type Story = StoryObj<typeof KpiTile>;
 
 /**
  * Die Kennzahl-Kachel einer Detailseite: 19 px Sans, Rand statt Schatten.
- * Nicht zu verwechseln withItems `Stat` — das ist die Dashboard-Kachel in 32 px
+ * Nicht zu verwechseln mit `Stat` — das ist die Dashboard-Kachel in 32 px
  * Serif und bleibt dem Dashboard.
  */
 export const SixColumns: Story = {

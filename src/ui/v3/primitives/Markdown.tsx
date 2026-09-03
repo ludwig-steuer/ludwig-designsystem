@@ -190,7 +190,16 @@ function Inline({ toks }: { toks: InlineTok[] }): ReactElement {
             {t.v}
           </code>
         ) : t.t === "link" ? (
-          <a className="v2link" key={i} href={t.href} rel="noopener noreferrer">
+          // New tab and the target in the tooltip: the text is not ours, so
+          // nobody should follow one of its links without seeing where to.
+          <a
+            className="v2link"
+            key={i}
+            href={t.href}
+            title={t.href}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {t.v}
           </a>
         ) : (

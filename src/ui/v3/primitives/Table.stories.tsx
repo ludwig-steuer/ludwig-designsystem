@@ -86,7 +86,7 @@ export const Loading: Story = {
   ),
 };
 
-/** Fehler: in der Karte, withItems dem Weg zurück. */
+/** Fehler: in der Karte, mit dem Weg zurück. */
 export const Error: Story = {
   render: () => (
     <Card>

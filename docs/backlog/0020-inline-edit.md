@@ -107,8 +107,20 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Enter speichert, Escape bricht ab, beide Tasten sichtbar am Feld (V14) | `v3-primitives-formular-inlineedit--interactive`: Wert auf „Gutschrift" geändert, Enter → Anzeige „Gutschrift", Zähler „1× gespeichert"; danach „Verworfener Text" getippt, Escape → alter Wert steht wieder, Zähler unverändert. Hinweis unter dem Feld: „Enter speichert · Esc bricht ab", bei `--with-textarea` „Strg+Enter speichert · Esc bricht ab" (dort speichert Enter nicht, Strg+Enter schon) | ✓ |
+| Nach einem Fehler steht der getippte Text noch da | `--error`: „Neuer, sorgfältig getippter Text" eingegeben, Enter → Feld bleibt offen, `input.value` unverändert, darunter „Der Sachverhalt ist gesperrt, solange der Stapel läuft." als Text, `aria-invalid="true"` | ✓ |
+| Der Wechsel Anzeige → Feld verschiebt die Zeile nicht (V1) | `--interactive`: Beschriftung bleibt bei `top 16 px`, der Block wächst nach unten (41 → 89 px); nichts über dem Feld springt | ✓ |
+| Nichts wird ohne Klick oder Enter gespeichert (I2) | `--interactive`: Feld geändert, `blur()` plus Klick daneben → Feld bleibt offen, Zähler „noch nicht gespeichert" | ✓ |
+| Ersetzt `CaseSummaryEditor.tsx` ohne Funktionsverlust | App-Datei gelesen: `isEditing`, Draft, `useTransition`, Fehler, mehrzeiliges Feld — alles gedeckt (`multiline` + `renderInput` mit `Textarea`); der Platzhalter kommt über `renderInput`. Zusätzlich: sichtbare Beschriftung statt Bleistift-Icon ohne Wort. Der Umzug selbst steht aus | ✓ |
+| Story-Deckung der Schnittstelle (Spalte „Nachweis (Story)") | `--pending` benutzt die Prop `pending` nicht, sondern das langsame `onSave`; `--error` benutzt die Prop `error` nicht, sondern den Wurf aus `onSave`. Beide Props sind damit unbelegt; `renderValue` ist statt in `Filled` nur in `WithTextarea` zu sehen | ✗ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
+
+1. `pending` und `error` — die von außen gesteuerten Wege — hat keine Story.
+   `Pending` und `Error` zeigen nur den inneren Zustand; die Server-Action des
+   Aufrufers ist der eigentliche Fall aus der Schnittstelle.
+2. Die Komponente hat eine neunte Prop `multiline`, die in der Schnittstelle
+   der Spec fehlt. Sie ist nötig, damit Strg+Enter greift — entweder die Spec
+   nimmt sie auf oder das Verhalten hängt am `renderInput`.

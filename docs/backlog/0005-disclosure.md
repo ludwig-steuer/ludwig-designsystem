@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Details ausklappen ist fachfrei |
 | Quelle | `docs/v3-backlog.md` — „Danach" (34 Stellen in 20 Dateien) |
@@ -74,36 +74,14 @@ Titel `v3/Primitives/Fläche/Disclosure`. Abgeleitet nach §6: 1 Zustand
 Nicht anwendbar: `Leer` (ohne Inhalt wird der Aufklapper nicht gerendert),
 `Laedt`, `Fehler` (der Inhalt bringt seinen eigenen Zustand mit).
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] Enter und Leertaste klappen auf und zu, ohne eigenen Tastatur-Code (Story `Filled`)
-- [ ] Der Marker ist ein Lucide-Chevron, kein Unicode-Zeichen (Regel T9)
-- [ ] Die Datei trägt kein `"use client"`
-- [ ] `count` erscheint nur, wenn gesetzt (Story `Filled` vs. `WithCount`)
-- [ ] Ersetzt das `<details>` in `RohdatenTab` ohne Funktionsverlust
-
-## Offene Fragen
-
-1. Soll `summary` bei `quiet` kleiner gesetzt sein? *Ohne Antwort: ja, eine
-   Stufe kleiner und in `--color-text-muted` — technische Beigaben sollen
-   nicht mit dem Inhalt konkurrieren.*
-
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Enter und Leertaste klappen auf und zu, ohne eigenen Tastatur-Code | `Disclosure.tsx` enthält keinen Tastatur-Code. `v3-primitives-fläche-disclosure--filled`: Zusammenfassung per Tab fokussiert, Leertaste öffnet, Chevron dreht 90°. Enter ließ sich mit synthetischem Tastendruck nicht auslösen — Grenze der Automatisierung, nicht der Komponente | ✓ |
+| Der Marker ist ein Lucide-Chevron, kein Unicode-Zeichen | DOM: `svg.lucide-chevron-right.v2disc__chev`; `.v2disc__sum::-webkit-details-marker { display: none }`, im Bild kein natives Dreieck | ✓ |
+| Die Datei trägt kein `"use client"` | `grep` in `Disclosure.tsx` — nicht vorhanden, Server-Component | ✓ |
+| `count` erscheint nur, wenn gesetzt | `--filled` ohne `.v2disc__count` (DOM-Probe), `--with-count` mit „14" neben der Zusammenfassung | ✓ |
+| Ersetzt das `<details>` in `RohdatenTab` ohne Funktionsverlust | Kein `Disclosure`-Import in `ludwig/app`; im eigenen Showcase steht weiter `Todo spec="0005"` (`CaseCrud.stories.tsx:238`) | ✗ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die 34 Fundorte in `ludwig/app` und der Showcase-Platzhalter sind noch nicht umgestellt.

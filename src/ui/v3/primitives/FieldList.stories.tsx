@@ -14,7 +14,7 @@ const LUDWIG: [string, string][] = [
   ["Weg", "DATEVconnect"],
 ];
 
-/** Standardton — Label/Wert-Paare in einer Karte withItems Versalien-Header. */
+/** Standardton — Label/Wert-Paare in einer Karte mit Versalien-Header. */
 export const Filled: Story = {
   render: () => <FieldList title="Ludwig-Seite" rows={LUDWIG} />,
 };

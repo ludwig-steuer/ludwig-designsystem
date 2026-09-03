@@ -78,6 +78,31 @@ export const Varianten: Story = {
   },
 };
 
+/**
+ * `flow` ignoriert die harten Zeilenumbrüche der Quelle. Für Texte, die im
+ * Repo auf 80 Zeichen umbrochen liegen — ohne die Prop bliebe jeder Umbruch
+ * stehen, und das brauchen Klärungstexte, die jemand von Hand gesetzt hat.
+ */
+export const Flow: Story = {
+  render: () => {
+    const wrapped = `Der Kreditor wurde in den letzten sechs Monaten
+14-mal auf 6815 gebucht. Die Rechnung nennt
+Schreibwaren und zwei Druckerpatronen.`;
+    return (
+      <div style={{ display: "grid", gap: "var(--space-5)", maxWidth: 460 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>ohne flow</div>
+          <Markdown text={wrapped} />
+        </div>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>mit flow</div>
+          <Markdown text={wrapped} flow />
+        </div>
+      </div>
+    );
+  },
+};
+
 /** `maxHeight` blendet aus und bietet „Ganz lesen" — ohne eine Zeile Zustand. */
 export const Lang: Story = {
   render: () => (

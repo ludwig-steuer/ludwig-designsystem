@@ -26,7 +26,7 @@ const PHASES: ProcessPhase[] = [
   { key: "nachlesen", label: "Nachlesen", sub: "DATEV", states: ["mirrored", "reconciled"], status: "pending" },
 ];
 
-const withItems = (status: Record<string, ProcessPhase["status"]>) =>
+const withStatus = (status: Record<string, ProcessPhase["status"]>) =>
   PHASES.map((p) => ({ ...p, status: status[p.key] ?? p.status }));
 
 /** Im Detail-Header: vier Phasen, Rohzustände darunter, der Baton in der aktiven. */
@@ -46,7 +46,7 @@ export const InHeader: Story = {
 export const Failed: Story = {
   render: () => (
     <ProcessStepper
-      phases={withItems({ pruefen: "done", uebergeben: "failed" })}
+      phases={withStatus({ pruefen: "done", uebergeben: "failed" })}
       owner={BRIDGE}
       alarm
       phaseSince={{ buchen: "26.08.", pruefen: "29.08." }}
@@ -60,11 +60,11 @@ export const InRow: Story = {
     <div style={{ display: "grid", gridTemplateColumns: "80px 1fr", gap: "var(--space-4)", alignItems: "center" }}>
       <ProcessMini phases={PHASES} />
       <Baton owner={KANZLEI} detail="seit 3 Tagen" />
-      <ProcessMini phases={withItems({ pruefen: "done", uebergeben: "done", nachlesen: "active" })} />
+      <ProcessMini phases={withStatus({ pruefen: "done", uebergeben: "done", nachlesen: "active" })} />
       <Baton owner={DATEV} />
-      <ProcessMini phases={withItems({ pruefen: "done", uebergeben: "failed" })} />
+      <ProcessMini phases={withStatus({ pruefen: "done", uebergeben: "failed" })} />
       <Baton owner={BRIDGE} alarm detail="seit 09:40" />
-      <ProcessMini phases={withItems({ buchen: "pending", pruefen: "pending" })} />
+      <ProcessMini phases={withStatus({ buchen: "pending", pruefen: "pending" })} />
       <Baton owner={NIEMAND} />
     </div>
   ),
@@ -86,5 +86,5 @@ export const InLog: Story = {
 
 /** Frisch angelegt: keine Phase begonnen, niemand hat den Stab. */
 export const Empty: Story = {
-  render: () => <ProcessStepper phases={withItems({ buchen: "pending", pruefen: "pending" })} owner={NIEMAND} />,
+  render: () => <ProcessStepper phases={withStatus({ buchen: "pending", pruefen: "pending" })} owner={NIEMAND} />,
 };

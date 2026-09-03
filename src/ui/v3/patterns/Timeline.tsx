@@ -46,6 +46,12 @@ const MONTH = new Intl.DateTimeFormat("de-DE", {
   month: "long",
   year: "numeric",
 });
+const DATE = new Intl.DateTimeFormat("de-DE", {
+  timeZone: "Europe/Berlin",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
 const TIME = new Intl.DateTimeFormat("de-DE", {
   timeZone: "Europe/Berlin",
   hour: "2-digit",
@@ -73,6 +79,7 @@ export function Timeline({
   order = "newest",
   groupBy = "day",
   emptyText = "Noch nichts geschehen.",
+  kindLabels,
   loading,
   onOpen,
 }: {
@@ -81,6 +88,11 @@ export function Timeline({
   order?: "newest" | "oldest";
   groupBy?: "day" | "month" | "none";
   emptyText?: string;
+  /**
+   * German word per `kind`. Stays a prop until `src/ludwig/` carries an event
+   * type — the component invents no vocabulary (spec 0023, „Befund").
+   */
+  kindLabels?: Record<string, string>;
   loading?: boolean;
   /** Without it an entry is text, not a control. */
   onOpen?: (id: string) => void;
@@ -119,7 +131,15 @@ export function Timeline({
       lastGroup = key;
     }
     lastAt = e.at;
-    rows.push(<Entry key={e.id} item={e} onOpen={onOpen} showDate={groupBy === "none"} />);
+    rows.push(
+      <Entry
+        key={e.id}
+        item={e}
+        onOpen={onOpen}
+        showDate={groupBy === "none"}
+        kindLabels={kindLabels}
+      />,
+    );
   }
 
   return <div className="v2tl">{rows}</div>;
@@ -129,10 +149,12 @@ function Entry({
   item,
   onOpen,
   showDate,
+  kindLabels,
 }: {
   item: TimelineItem;
   onOpen?: (id: string) => void;
   showDate: boolean;
+  kindLabels?: Record<string, string>;
 }) {
   const when = new Date(item.at);
   const head = (
@@ -143,10 +165,10 @@ function Entry({
   );
   return (
     <div className="v2tl__item">
-      <span className="v2tl__when" title={DAY.format(when)}>
-        {showDate ? `${when.toLocaleDateString("de-DE")} ` : ""}
+      <time className="v2tl__when" dateTime={when.toISOString()} title={DAY.format(when)}>
+        {showDate ? `${DATE.format(when)} ` : ""}
         {TIME.format(when)}
-      </span>
+      </time>
       <div>
         <div className="v2tl__head">
           {item.state ? <StateIcon state={item.state} /> : null}
@@ -157,7 +179,7 @@ function Entry({
           )}
         </div>
         <div className="v2tl__who">
-          {item.kind}
+          {kindLabels?.[item.kind] ?? item.kind}
           {item.actor ? ` · ${item.actor}` : ""}
         </div>
         {item.detail ? (

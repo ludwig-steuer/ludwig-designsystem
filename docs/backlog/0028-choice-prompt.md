@@ -75,37 +75,25 @@ Titel `v3/Patterns/Prüfen/ChoicePrompt`. Abgeleitet nach §6: 4 Zustände
 Nicht anwendbar: `Leer` (eine Frage ohne Antwortoptionen ist ein Freitextfeld,
 kein Fall für dieses Pattern), `LeerNachFilter`.
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] Gesperrter Knopf nennt den Grund im Text daneben (Story `Blocked`, Regel T6)
-- [ ] Strg+Enter sendet, die Taste steht am Knopf (Story `Interactive`, Regel V14)
-- [ ] Nach einem Fehler steht die Eingabe noch da (Story `Error`)
-- [ ] Ohne `freeText`-Prop gibt es kein Textfeld (Story `Filled`, Blick ins DOM)
-- [ ] Ersetzt `RaiseClarificationForm.tsx` ohne Funktionsverlust
-
-## Offene Fragen
-
-1. Darf man Option **und** Freitext gleichzeitig senden? *Ohne Antwort: ja —
-   die Option ist die Antwort, der Text die Begründung.*
-2. Kommen die Optionen vom Agenten? *Ohne Antwort: der Aufrufer bringt sie
-   mit; das Pattern fragt nichts ab.*
-
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Gesperrter Knopf nennt den Grund im Text daneben (T6) | `v3-patterns-prüfen-choiceprompt--blocked`: Knopf `disabled`, daneben `.v2ask__why` „Wählen Sie eine Antwort oder schreiben Sie eine."; sobald eine Antwort gewählt ist, verschwindet der Satz und der Knopf wird frei (in `--with-free-text` nachgestellt) | ✓ |
+| Strg+Enter sendet, die Taste steht am Knopf (V14) | Am Knopf steht sie überall („Antwort senden · Strg+Enter"). Gesendet wird sie aber nur aus dem Freitextfeld: `--with-free-text`, Option gewählt und Text eingetragen, Strg+Enter im `textarea` → „Gesendet: bewirtung · Kunde war dabei". Der einzige `onKeyDown` der Datei sitzt am `Textarea`; `Button`/`ActionButton` melden keine Taste an (kein `addEventListener`). Ohne `freeText` — `Filled`, `Blocked`, `Pending` — verspricht der Knopf also eine Taste, die es nicht gibt. Die in der Spec genannte Story `Interactive` existiert nicht (die Story-Tabelle der Spec führt sie selbst nicht) | ✗ |
+| Nach einem Fehler steht die Eingabe noch da | `--error`: Text ins Freitextfeld gegeben, während der `Callout` „Die Rückfrage konnte nicht gesendet werden …" steht — der Text bleibt, nichts setzt den inneren Zustand zurück | ✓ |
+| Ohne `freeText`-Prop gibt es kein Textfeld | `--filled`: `textarea`-Anzahl im DOM = 0; mit der Prop (`--with-free-text`) ist genau eins da | ✓ |
+| Ersetzt `RaiseClarificationForm.tsx` ohne Funktionsverlust | Vergleich mit `app/apps/web/src/modules/accounting-cases/ui/sachverhalt/RaiseClarificationForm.tsx`: Frage, Freitext, Absenden, Laufzustand und Fehler sind gedeckt, Strg+Enter kommt neu hinzu. Nicht gedeckt: das Formular ist **eingeklappt** (Auslöser-Knopf „Rückfrage stellen"), es hat neben dem Text **zwei weitere Eingaben** (Empfänger-Select mit Hinweiszeile, die mit der Auswahl wechselt, und den Schalter „Blockiert die Buchung") und einen **Abbrechen**-Weg, der den Entwurf behält | ✗ |
+| `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
+(1) Strg+Enter gehört an das Pattern, nicht an das Freitextfeld — sonst muss die
+Taste am Knopf verschwinden, wenn `freeText` fehlt. (2) Die Story `Filled` soll
+laut Spec „eine gewählt" zeigen, zeigt aber nichts Gewähltes: die Auswahl liegt
+ausschließlich im inneren Zustand, es gibt keine Prop, sie vorzubelegen. `Filled`
+und `Blocked` rendern deshalb denselben Zustand. Dasselbe trifft `Error`, das
+mit leerem Feld startet und die Aussage „Eingabe steht noch da" nicht von selbst
+vorführt. (3) `Pending` sperrt alles, aber der Knopf trägt kein Wort für „läuft"
+— `pendingLabel` greift nur, wenn `ActionButton` seine eigene Handlung fährt,
+nicht bei `pending` von außen. (4) `RadioGroup name="choice"` ist fest verdrahtet:
+zwei `ChoicePrompt` auf einer Seite teilen sich eine Radiogruppe.

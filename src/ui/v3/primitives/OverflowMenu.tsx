@@ -26,6 +26,9 @@ import type { ButtonSize } from "./Button";
 
 export type MenuItemTone = "default" | "danger";
 
+/** Keeps the panel off the window edge. The gap below the trigger is CSS. */
+const EDGE = 8;
+
 /**
  * @when    Three or more actions on one object, of which one or two are
  *          frequent — those stay visible, the rest move in here.
@@ -51,15 +54,15 @@ export function OverflowMenu({
     const p = panel.current;
     if (!box || !p || !box.open) return;
     const r = box.getBoundingClientRect();
+    // The panel is wider than most triggers, so `end` alignment alone pushes
+    // it off screen next to a left-hand trigger (found in review, 2026-09-03).
+    // Compute the left edge, then keep it inside the window.
+    const wanted = align === "start" ? r.left : r.right - p.offsetWidth;
+    const room = window.innerWidth - p.offsetWidth - EDGE;
     p.style.position = "fixed";
-    p.style.top = `${r.bottom + 4}px`;
-    if (align === "start") {
-      p.style.left = `${r.left}px`;
-      p.style.right = "auto";
-    } else {
-      p.style.left = "auto";
-      p.style.right = `${window.innerWidth - r.right}px`;
-    }
+    p.style.top = `${r.bottom}px`;
+    p.style.right = "auto";
+    p.style.left = `${Math.max(EDGE, Math.min(wanted, room))}px`;
   }
 
   return (
@@ -69,6 +72,13 @@ export function OverflowMenu({
       className={`v2menu${align === "start" ? " v2menu--start" : ""}`}
       onKeyDown={(e) => {
         if (e.key === "Escape") e.currentTarget.removeAttribute("open");
+      }}
+      onClick={(e) => {
+        // A chosen entry closes the menu — including a jump, which would
+        // otherwise leave it standing open behind the new page.
+        if ((e.target as HTMLElement).closest(".v2menu__item")) {
+          e.currentTarget.removeAttribute("open");
+        }
       }}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {

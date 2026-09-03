@@ -128,8 +128,23 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| Der Auslöser trägt in jeder Story ein sichtbares Wort (T8) | `v3-primitives-aktion-overflowmenu--filled` / `--variants` / `--interactive` / `--in-row` / `--many-items`: „Mehr" plus Chevron; `--align-start`: „Weitere Wege". Kein nacktes Icon | ✓ |
+| Enter, Leertaste und Escape bedienen das Menü | `--filled`: `<summary>` — Enter und Leertaste sind nativ; Escape schließt (`d.open` von `true` auf `false`) über die drei Zeilen `onKeyDown` in `OverflowMenu.tsx:70`. Ganz „ohne eigenen Tastatur-Code" geht Escape nicht, `<details>` kennt es nicht | ✓ |
+| Acht Einträge laufen nicht aus dem Bild | `--many-items`: senkrecht in Ordnung (Klappe 268 px, `max-height 320px`, `overflow-y auto`). **Waagerecht nicht:** die Klappe liegt bei `left −111 px`, ihr linker Rand steht außerhalb des Fensters, die Einträge sind angeschnitten („n" statt „Beleg öffnen"). Dasselbe in `--filled` und `--variants`: `place()` rechnet `right = innerWidth − r.right` und begrenzt nicht auf den sichtbaren Bereich, obwohl das Verhalten es verlangt | ✗ |
+| `align="start"` richtet die Klappe links aus | `--align-start`: Auslöser bei `left 16`, Klappe bei `left 16`, nichts angeschnitten | ✓ |
+| `danger`-Einträge am Wort erkennbar (V7) | `--variants`: „Vorschlag verwerfen" mit Papierkorb-Icon, „Buchung stornieren" gesperrt mit Grund im `title` — die Farbe kommt zum Wort dazu, nicht statt seiner | ✓ |
+| Ersetzt `DocActionsMenu` inklusive `aria-label` | App-Datei gelesen: `children`-only, Auslöser „⋯" mit `aria-label="Weitere Aktionen"` → hier sichtbares Wort „Mehr". Unterschied fürs Umziehen: das App-Panel wächst nach Inhalt (`min-width 260`, `max-width min(620px,90vw)`), weil der Klassifikations-Editor darin aufklappt; hier sind es feste 208 px und 320 px Höhe mit Scrollen. Der Umzug selbst steht aus | ✓ |
 
-Abgenommen von / am: — · Offene Punkte: —
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
+
+1. **Die Klappe bleibt nicht im sichtbaren Bereich** — bei `align="end"` und
+   einem Auslöser nahe dem linken Rand steht sie außerhalb des Fensters
+   (`Filled`, `Variants`, `ManyItems`). `place()` braucht eine Begrenzung.
+2. Ein Klick auf einen `href`-Eintrag schließt die Klappe nicht
+   (`d.open` bleibt `true`) — die Spec hatte „ja bei `href`" entschieden.
+3. `place()` setzt den Abstand `r.bottom + 4` als Zahl in der Komponente;
+   Maße gehören nach `v3.css` (§9).
+4. `InRow`: die Zeile mit dem Menü ist 53 px hoch, die Referenzzeile daneben
+   46 px — der Auslöser (26 px) treibt die Zeilenhöhe (V1).
