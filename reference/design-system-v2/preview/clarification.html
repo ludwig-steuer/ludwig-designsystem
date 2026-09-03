@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .label-mini { margin: 14px 0 8px; }
+  svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .cd {
+    background: #fff; border: 1px solid #DDE2E8; border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(20,36,56,0.04), 0 4px 14px rgba(20,36,56,0.05);
+    overflow: hidden;
+  }
+  .cd__h {
+    padding: 14px 18px; border-bottom: 1px solid #DDE2E8;
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(180deg, #F4F9FC 0%, #FAFBFC 100%);
+  }
+  .cd__mark {
+    width: 28px; height: 28px;
+    background: linear-gradient(180deg, #2B5C8E 0%, #1A3A5C 100%);
+    border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0; position: relative;
+    box-shadow: 0 1px 2px rgba(26,58,92,0.25), inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  .cd__mark::before { content: ""; position: absolute; width: 2px; height: 13px; background: #fff; left: 13px; top: 6px; }
+  .cd__mark::after  { content: ""; position: absolute; width: 9px; height: 2px; background: #fff; left: 13px; top: 11px; }
+  .cd__title { flex: 1; }
+  .cd__title .small { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #2E78A8; font-weight: 600; }
+  .cd__title h2 { margin: 1px 0 0; font-size: 15px; font-weight: 600; color: #2D2D2D; }
+  .cd__close { background: transparent; border: none; cursor: pointer; color: #8A8A8A; padding: 4px; }
+  .cd__body { padding: 16px 18px; }
+  .cd__ctx {
+    background: #FAFBFC; border: 1px solid #ECEFF3; border-radius: 6px;
+    padding: 10px 12px; font-size: 12.5px; color: #5C5C5C;
+    margin-bottom: 14px;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 8px 12px; align-items: center;
+  }
+  .cd__ctx .doc-thumb { width: 22px; height: 28px; background: #fff; border: 1px solid #DDE2E8; border-radius: 2px; display: inline-flex; align-items: center; justify-content: center; color: #8A8A8A; }
+  .cd__ctx .doc-thumb svg { width: 11px; height: 11px; }
+  .cd__ctx strong { color: #2D2D2D; font-weight: 600; }
+  .cd__ctx .amt { font-variant-numeric: tabular-nums; color: #1A3A5C; font-weight: 600; }
+
+  .cd__field { margin-bottom: 12px; }
+  .cd__field label { display: block; font-size: 12.5px; font-weight: 500; color: #2D2D2D; margin-bottom: 4px; }
+  .cd__field textarea {
+    width: 100%; box-sizing: border-box;
+    font: 13.5px var(--font-sans); color: #2D2D2D; line-height: 1.5;
+    padding: 10px 12px; border: 1px solid #DDE2E8; border-radius: 5px; background: #fff;
+    resize: vertical; min-height: 84px; outline: none;
+    transition: border-color 120ms, box-shadow 120ms;
+  }
+  .cd__field textarea:focus { border-color: #3B8FC4; box-shadow: 0 0 0 3px rgba(59,143,196,0.18); }
+
+  .cd__opts { display: flex; flex-direction: column; gap: 6px; }
+  .cd__opt {
+    display: flex; gap: 10px; align-items: center;
+    padding: 9px 12px;
+    border: 1px solid #DDE2E8; border-radius: 5px;
+    cursor: pointer; font-size: 13px; color: #2D2D2D;
+    transition: all 120ms;
+  }
+  .cd__opt:hover { background: #FAFBFC; border-color: #C4CCD5; }
+  .cd__opt.is-checked { background: #F4F9FC; border-color: #3B8FC4; box-shadow: 0 0 0 3px rgba(59,143,196,0.10); }
+  .cd__opt .radio { width: 14px; height: 14px; border-radius: 999px; border: 1.5px solid #C4CCD5; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+  .cd__opt.is-checked .radio { border-color: #3B8FC4; }
+  .cd__opt.is-checked .radio::after { content: ""; width: 7px; height: 7px; border-radius: 999px; background: #3B8FC4; }
+  .cd__opt .acct { font-family: var(--font-mono); font-size: 12px; color: #5C5C5C; margin-left: auto; }
+
+  .cd__foot {
+    padding: 12px 18px; border-top: 1px solid #DDE2E8; background: #FAFBFC;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .cd__foot .meta { flex: 1; font-size: 12px; color: #8A8A8A; display: inline-flex; align-items: center; gap: 6px; }
+  .cd__foot .meta svg { width: 12px; height: 12px; }
+  .btn { font-family: var(--font-sans); font-weight: 500; font-size: 13px; padding: 7px 14px; border-radius: 5px; border: 1px solid transparent; cursor: pointer; }
+  .btn-primary { background: #1A3A5C; color: #fff; }
+  .btn-secondary { background: #fff; color: #1A3A5C; border-color: #C4CCD5; }
+</style>
+
+<div class="label-mini">Clarification-Dialog · Rückfrage an den Mandanten</div>
+
+<div class="cd">
+  <div class="cd__h">
+    <span class="cd__mark"></span>
+    <div class="cd__title">
+      <div class="small">Rückfrage</div>
+      <h2>Frage an Berger GmbH</h2>
+    </div>
+    <button class="cd__close"><svg viewBox="0 0 24 24" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="cd__body">
+    <div class="cd__ctx">
+      <span class="doc-thumb"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+      <div>
+        <strong>Office Mayer e.K.</strong> · Sammelrechnung 04/118 · 20.04.2026
+      </div>
+      <span class="amt">348,90 €</span>
+    </div>
+
+    <div class="cd__field">
+      <label>Frage</label>
+      <textarea>Sehr geehrte Frau Berger,
+
+bei der Rechnung von Office Mayer (Sammelrechnung 04/118) ist nicht eindeutig erkennbar, ob es sich um Bürobedarf oder Werbeartikel handelt. Können Sie das bitte zuordnen?
+
+Mit freundlichen Grüßen
+Kanzlei Hofmann</textarea>
+    </div>
+
+    <div class="cd__field">
+      <label>Antwortmöglichkeiten anbieten <span style="color:#8A8A8A; font-weight:400">(optional)</span></label>
+      <div class="cd__opts">
+        <div class="cd__opt is-checked"><span class="radio"></span><span>Bürobedarf für eigenen Gebrauch</span><span class="acct">4980</span></div>
+        <div class="cd__opt"><span class="radio"></span><span>Werbeartikel / Kundengeschenke</span><span class="acct">4610</span></div>
+        <div class="cd__opt"><span class="radio"></span><span>Etwas anderes (frei beantworten)</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="cd__foot">
+    <span class="meta">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Mandant antwortet üblicherweise innerhalb von 1–2 Tagen
+    </span>
+    <button class="btn btn-secondary">Abbrechen</button>
+    <button class="btn btn-primary">Frage senden</button>
+  </div>
+</div>
+
+</div></body></html>

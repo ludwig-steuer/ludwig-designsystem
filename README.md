@@ -41,7 +41,7 @@ Storybook-Titel tragen den **Inhalt**. Fünf Regeln, sonst nichts:
 | **Datei** | Eine Datei je Komponentenfamilie, PascalCase, benannt wie die Familie: `Button.tsx` (Button, KeyButton), `Table.tsx` (Card, Table, Row …). Kein Sammelbecken. |
 | **Story** | `<Name>.stories.tsx` daneben, Titel `v3/<Stufe>/<Gruppe>/<Name>`. Die Gruppen sind dieselben Wörter wie die Kommentare in `src/ui/v3/index.ts`: Aktion, Navigation, Formular, Dialog, Fläche, Tabelle · Arbeitsfläche, Rahmen, Prüfen, Prozess · je Entität ihr Name. |
 | **Wann** | Jeder Export trägt im JSDoc, auf Englisch, `@when` (der Fall, für den er da ist) und `@instead` (der Nachbarfall und wohin der gehört: `… → MasterDetail`). Das ist die Antwort auf „was nehme ich?" — greppbar und im Editor-Hover. |
-| **Entitäten** | Name = Entität + Form: `AccountField`, `KontoZeile`, `JournalEntryEditor`. Die Formen stehen in `docs/ludwig/ui-repraesentationen.md`; ihre Größe ist ableitbar, nicht gespeichert — XS Inline, Badge · S Zeile, Auswahl, Kopf · M Karte, Vorschau · L Detail, Drawer, Liste · XL Editor. |
+| **Entitäten** | Name = Entität + Form: `AccountField`, `KontoZeile`, `JournalEntryEditor`. Die Formen stehen in `docs/ui-repraesentationen.md`; ihre Größe ist ableitbar, nicht gespeichert — XS Inline, Badge · S Zeile, Auswahl, Kopf · M Karte, Vorschau · L Detail, Drawer, Liste · XL Editor. |
 | **Sprache** | Code nur Englisch: Bezeichner, Kommentare, JSDoc, `@when`/`@instead`, Story-Exportnamen. Deutsch nur in Nutzer-Strings und Storybook-Titeln. Fachbegriffe: englischer GLOSSARY-Name im Code, deutscher im UI. |
 | **Wachstum** | `primitives/` bleibt flach. `patterns/` bekommt Themen-Unterordner, sobald es mehr als etwa 15 Dateien sind. `entities/` ist per Definition nach Inhalt sortiert. |
 
@@ -54,6 +54,8 @@ Hier gepflegt, maßgeblich für jede Gestaltungsfrage:
 | `docs/backlog/` | Aufgaben: eine Datei je Komponente mit Spec und Abnahme (`README.md` dort erklärt den Ablauf). `docs/v3-backlog.md` ist die Erhebung, aus der Aufgaben entstehen. |
 | `docs/design-guidelines.md` | Die Designsprache: Prinzipien, Layout, Text, Zustand, Interaktion. |
 | `docs/ton-und-sprache.md` | Schneller Index: immer „Sie", Tokens, verbotene Wörter. |
+| `docs/ui-repraesentationen.md` | Das Inventar: welche Entität welche UI-Repräsentation hat, wo doppelt gebaut wurde, welche Form noch fehlt. Bis 2026-09-03 in `ludwig/app`, jetzt hier. |
+| `reference/` | Die Lieferungen, wie geliefert — Artboards, Design-Briefs und das v2-Bundle. Wird zitiert, nicht gepflegt (`reference/README.md`). |
 
 `docs/ludwig/` ist dagegen eine **Kopie** dessen, was drüben SSOT bleibt, und
 kommt über dasselbe `pnpm sync:ludwig`:
@@ -62,7 +64,6 @@ kommt über dasselbe `pnpm sync:ludwig`:
 |---|---|
 | `GLOSSARY.md` | Namens-SSOT, DE/EN je Begriff. **Bei jedem neuen Prop- oder Typnamen hier nachschlagen**, statt zu erfinden — Kanzlei statt Tenant, Mandant statt Client. |
 | `web-ui.md` | Code-Regeln R1–R21 der Web-App. |
-| `ui-repraesentationen.md` | Welche Entität welche UI-Repräsentation hat. |
 
 Die Fassungen der beiden Design-Dokumente, die noch in `ludwig/app` liegen,
 sind die alten. Sie werden beim Einbinden als Submodule durch einen Zeiger

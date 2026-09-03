@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .col h4 { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+  .yes h4 { color: #3F7A5A; }
+  .no h4 { color: #A8403C; }
+  .item { padding: 12px 14px; border-radius: 4px; font-size: 13.5px; line-height: 1.5; margin-bottom: 8px; border: 1px solid; }
+  .yes .item { background: #EBF2EE; border-color: #D5E3DB; color: #2D2D2D; }
+  .no .item { background: #F4E6E5; border-color: #E5C9C7; color: #2D2D2D; }
+  .pre { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .yes .pre { color: #3F7A5A; }
+  .no .pre { color: #A8403C; }
+</style>
+<div class="grid">
+  <div class="col yes">
+    <h4>Ludwig spricht so</h4>
+    <div class="item"><div class="pre">Status</div>Ludwig hat 47 Belege vorkontiert. Bitte prüfen.</div>
+    <div class="item"><div class="pre">Fehler</div>Beleg unvollständig. Bitte ergänzen Sie das Rechnungsdatum.</div>
+    <div class="item"><div class="pre">Anrede</div>Guten Morgen, Frau Berger.</div>
+    <div class="item"><div class="pre">CTA</div>Beleg prüfen · Export starten · Mandant anlegen</div>
+  </div>
+  <div class="col no">
+    <h4>Niemals so</h4>
+    <div class="item"><div class="pre">Status</div>🎉 Ludwig hat 47 Belege gerockt!</div>
+    <div class="item"><div class="pre">Fehler</div>Hoppla, das hat leider nicht so geklappt 😅</div>
+    <div class="item"><div class="pre">Anrede</div>Hi Anna 👋</div>
+    <div class="item"><div class="pre">CTA</div>Jetzt loslegen! · Power-Export starten · Magic Mode</div>
+  </div>
+</div>
+</div></body></html>

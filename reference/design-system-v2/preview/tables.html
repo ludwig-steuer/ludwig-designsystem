@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead th { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; padding: 10px 12px; text-align: left; border-bottom: 1px solid #DDE2E8; }
+  tbody td { padding: 12px; border-bottom: 1px solid #ECEFF3; vertical-align: middle; }
+  tbody tr:hover { background: #F4F6F8; }
+  .acct { font-family: var(--font-mono); font-size: 12.5px; color: var(--color-text); }
+  .num { font-variant-numeric: tabular-nums lining-nums; text-align: right; color: var(--color-primary); font-weight: 500; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; }
+  .b-info { background: #E3F0F8; color: #2E78A8; border-color: #C7DFEC; }
+  .b-success { background: #EBF2EE; color: #3F7A5A; border-color: #D5E3DB; }
+  .b-warning { background: #F5EEE0; color: #B07B2C; border-color: #E8DCBE; }
+  .doc { display: flex; align-items: center; gap: 10px; }
+  .doc-thumb { width: 28px; height: 36px; background: #ECEFF3; border: 1px solid #DDE2E8; border-radius: 2px; flex-shrink: 0; }
+</style>
+<table>
+  <thead>
+    <tr><th>Beleg</th><th>Datum</th><th>Konto</th><th style="text-align:right">Betrag</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><div class="doc"><div class="doc-thumb"></div><div><div style="font-weight:500">Telekom 04/2026</div><div style="font-size:12px;color:#5C5C5C">Eingangsrechnung</div></div></div></td><td>23.04.2026</td><td class="acct">4925</td><td class="num">79,90 €</td><td><span class="badge b-success">Geprüft</span></td></tr>
+    <tr><td><div class="doc"><div class="doc-thumb"></div><div><div style="font-weight:500">Berger GmbH 2026/118</div><div style="font-size:12px;color:#5C5C5C">Ausgangsrechnung</div></div></div></td><td>22.04.2026</td><td class="acct">8400</td><td class="num">12.480,00 €</td><td><span class="badge b-info">In Prüfung</span></td></tr>
+    <tr><td><div class="doc"><div class="doc-thumb"></div><div><div style="font-weight:500">Office Mayer 04/118</div><div style="font-size:12px;color:#5C5C5C">Bürobedarf</div></div></div></td><td>20.04.2026</td><td class="acct">4980</td><td class="num">348,90 €</td><td><span class="badge b-warning">Rückfrage</span></td></tr>
+  </tbody>
+</table>
+</div></body></html>

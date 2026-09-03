@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .label-mini { margin: 14px 0 8px; }
+  svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .uz {
+    background: #fff;
+    border: 1.5px dashed #C4CCD5;
+    border-radius: 8px;
+    padding: 36px 24px;
+    text-align: center;
+    transition: all 140ms cubic-bezier(.2,0,0,1);
+  }
+  .uz--active { background: #F4F9FC; border-color: #3B8FC4; border-style: solid; box-shadow: 0 0 0 4px rgba(59,143,196,0.12); }
+  .uz__ico { width: 40px; height: 40px; border-radius: 8px; background: #F4F6F8; display: inline-flex; align-items: center; justify-content: center; color: #5C5C5C; margin-bottom: 12px; }
+  .uz--active .uz__ico { background: #E3F0F8; color: #2E78A8; }
+  .uz__ico svg { width: 20px; height: 20px; }
+  .uz__title { font-size: 15px; font-weight: 600; color: #1A3A5C; margin: 0 0 4px; }
+  .uz__sub { font-size: 13px; color: #5C5C5C; margin: 0; }
+  .uz__sub a { color: #2E78A8; text-decoration: underline; cursor: pointer; }
+  .uz__hint { font-size: 11.5px; color: #8A8A8A; margin-top: 10px; }
+
+  .files { background: #fff; border: 1px solid #DDE2E8; border-radius: 8px; margin-top: 14px; overflow: hidden; }
+  .file { display: grid; grid-template-columns: auto 1fr auto auto; gap: 12px; padding: 10px 14px; align-items: center; border-bottom: 1px solid #ECEFF3; font-size: 13px; }
+  .file:last-child { border-bottom: none; }
+  .file__ico { width: 28px; height: 36px; background: #F4F6F8; border: 1px solid #DDE2E8; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; color: #5C5C5C; }
+  .file__ico svg { width: 14px; height: 14px; }
+  .file__name { font-weight: 500; color: #2D2D2D; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file__size { font-size: 11.5px; color: #8A8A8A; font-variant-numeric: tabular-nums; margin-top: 1px; }
+
+  .pipe { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #5C5C5C; }
+  .pipe .step { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 999px; background: #ECEFF3; color: #5C5C5C; }
+  .pipe .step.ok { background: #EBF2EE; color: #3F7A5A; }
+  .pipe .step.run { background: #E3F0F8; color: #2E78A8; }
+  .pipe .step.err { background: #F4E6E5; color: #A8403C; }
+  .pipe .step .dot { width: 5px; height: 5px; border-radius: 999px; background: currentColor; }
+  .pipe .step.run .dot { animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .file__action { background: transparent; border: none; cursor: pointer; color: #8A8A8A; padding: 4px; border-radius: 4px; }
+  .file__action:hover { background: #F4F6F8; color: #2D2D2D; }
+  .file__action svg { width: 14px; height: 14px; }
+</style>
+
+<div class="label-mini">UploadZone · Idle</div>
+<div class="uz">
+  <div class="uz__ico"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+  <h3 class="uz__title">Belege hierhin ziehen</h3>
+  <p class="uz__sub">oder <a>Dateien auswählen</a></p>
+  <div class="uz__hint">PDF · max. 20 MB pro Datei · mehrere Dateien gleichzeitig möglich</div>
+</div>
+
+<div class="label-mini" style="margin-top: 22px">UploadZone · Drop-Hover (aktiv)</div>
+<div class="uz uz--active">
+  <div class="uz__ico"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+  <h3 class="uz__title" style="color:#2E78A8">Loslassen zum Hochladen</h3>
+  <p class="uz__sub">3 Dateien werden übernommen</p>
+</div>
+
+<div class="label-mini" style="margin-top: 22px">UploadZone · Mit Live-Status pro Datei</div>
+<div class="files">
+  <div class="file">
+    <div class="file__ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    <div>
+      <div class="file__name">Telekom_2026_04.pdf</div>
+      <div class="file__size">428 KB</div>
+    </div>
+    <div class="pipe">
+      <span class="step ok"><span class="dot"></span>Hash</span>
+      <span class="step ok"><span class="dot"></span>OCR</span>
+      <span class="step ok"><span class="dot"></span>Extraktion</span>
+      <span class="step ok"><span class="dot"></span>Interpretation</span>
+    </div>
+    <button class="file__action" title="Entfernen"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="file">
+    <div class="file__ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    <div>
+      <div class="file__name">Office_Mayer_Sammelrechnung.pdf</div>
+      <div class="file__size">1,2 MB</div>
+    </div>
+    <div class="pipe">
+      <span class="step ok"><span class="dot"></span>Hash</span>
+      <span class="step ok"><span class="dot"></span>OCR</span>
+      <span class="step run"><span class="dot"></span>Extraktion</span>
+      <span class="step"><span class="dot"></span>Interpretation</span>
+    </div>
+    <button class="file__action" title="Entfernen"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="file">
+    <div class="file__ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    <div>
+      <div class="file__name">Stadtwerke_Q1_2026.pdf</div>
+      <div class="file__size">312 KB · Duplikat</div>
+    </div>
+    <div class="pipe">
+      <span class="step err"><span class="dot"></span>Hash bereits vorhanden</span>
+    </div>
+    <button class="file__action" title="Entfernen"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+</div>
+
+</div></body></html>

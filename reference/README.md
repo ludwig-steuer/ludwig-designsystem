@@ -16,6 +16,43 @@ erste veraltet, ohne dass es jemand merkt. Ganze Screens werden in
 Angesehen wird alles im Storybook unter **Referenz/** (`staticDirs` in
 `.storybook/main.ts` reicht `reference/` als `/reference` durch).
 
+## Design-System v2 (`design-system-v2/`, gerettet 2026-09-03)
+
+Das v2-Bundle, wie es in `ludwig/app/design/Ludwig Design System v2/` lag —
+dort am 2026-09-03 gelöscht, hier die vollständige Kopie. `apps/web/DESIGN.md`
+nannte es die „Source of truth" der v2-Optik; für v3 ist es **Referenz, nicht
+Regel** — die Regel steht in `docs/design-guidelines.md`.
+
+| Was | Wofür |
+|---|---|
+| `preview/*.html` (30) | Die visuellen Referenzblätter: Farben, Typo, Abstände, Radius/Schatten, Buttons, Inputs, Tabellen, Badges, Karten, Drawer, Wizard, Toast, Leerzustand, Charts, Ikonografie, Konfidenz, Klärung, Prüfzeile, Upload, Logo, Stimme. Der schnellste Weg zu „wie sah das gedacht aus?". |
+| `ui_kits/{app,auth,marketing}/` | Die JSX-Kits der drei Tracks samt CSS — Herkunft vieler `.v2*`-Klassen. |
+| `assets/`, `fonts/README.md` | Logo, Wortmarke, Mark; die Schriftwahl mit Begründung. |
+| `README.md`, `SKILL.md`, `PROGRESS.md` | Wie das Bundle gedacht war und wie weit es kam. |
+| `colors_and_type.css` | Die Palette vor `tokens.css`. Bei Abweichung gilt `src/styles/tokens.css`. |
+| `brief.md` | Der ursprüngliche UX-Brief (Rollen, Tracks, Screens, Login zuerst). |
+
+Ansehen im Storybook unter **Referenz/Design-System v2**. Die 30
+`preview/`-Blätter sind reines HTML/CSS und laufen offline; die drei
+`ui_kits/` holen React und Babel von unpkg und bleiben **ohne Netz leer** —
+das ist kein Fehler.
+
+Eine **Teilkopie** desselben Bundles liegt unter
+`f109-buchungsreview/_ds/` — die gehört zur F109-Lieferung und wird von deren
+Artboards geladen; nicht zusammenlegen.
+
+## Design-Briefs aus `ludwig/app` (`briefe/`)
+
+Die Briefe, aus denen Aufgaben im Backlog entstanden sind. Adressat war
+*claude design*, die Abgabe waren Artboards; im Backlog steht dieselbe Sache
+als v3-Entwicklungsaufgabe. Bei Widerspruch gilt die Aufgabe.
+
+| Brief | Daraus geworden |
+|---|---|
+| `F143-entitaets-drawer-design-brief.md` | Aufgabe `0052-entity-drawer.md` (dort steht Punkt für Punkt, was sich ändert) |
+| `F116-feldlisten-je-entitaet.md` | Grundlage der Entitäts-Profile (`docs/entitaeten/`, Skill `entitaet-analysieren`) |
+| `F89-beleg-galerie-ui-neubewertung.md` | Szenarien-Katalog der Beleg-Familie; noch keine Aufgabe |
+
 ## F109 — Buchungsreview (`f109-buchungsreview/`, geliefert 2026-08-30)
 
 Brief: `F109-design-brief.md` — Ablauf, Screens, Zustände, Datenkontrakt.

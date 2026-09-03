@@ -71,7 +71,7 @@ Davon stehen seit 2026-09-03: `Timeline` (0023), `Markdown` (0022),
 `DateField`/`DateRangeField` (0024), `FileDrop` (0021), `Skeleton` (0016).
 Offen bleiben `Assistent` (Wizard), `Rohdaten`, `Balkendiagramm`,
 `KopierenKnopf`, `Schalter` (0018 — Bedarf nicht belegt, erst entscheiden),
-`Trennlinie`, `Avatar`, `Brotkrume`.
+`Trennlinie`, `Avatar`, `Brotkrume` — und das `Prozessbild`, dessen Familie die Designsprache seit **Z7** für *jede* mehrstufige Kette verlangt (Befund `web-ui-offen.md` P25, 2026-09-03).
 
 | Baustein | Nutzung | Stufe |
 |---|---:|---|
@@ -82,6 +82,7 @@ Offen bleiben `Assistent` (Wizard), `Rohdaten`, `Balkendiagramm`,
 | `Markdown` (KI-Texte, Notizen) | 5 / 12 | `primitives` |
 | `Dateiablage` (Upload/Dropzone) | 5 | `patterns` |
 | `Balkendiagramm` | 4 / 5 | `primitives` |
+| `Prozessbild` (`ProcessMini`/`ProcessStepper`/`Baton`/`RelayBar` — wie weit und wer ist dran, beides aus dem Zustand abgeleitet) | 2 Dateien nutzen die Familie, **6 Ketten** haben je eine eigene Darstellung (`PipelineStepper`, `ProcessingProgress`, `JobStatusMonitor`, `SourceDocPipelineTab`, `CycleTimeline`, `FlowModal`) | `patterns` |
 | `Ladeanzeige` außerhalb der Tabelle | 3 | `primitives` |
 | `KopierenKnopf` · `Schalter` · `Radiogruppe` · `Trennlinie` · `Avatar` · `Brotkrume` | 3 / 2 / 2 / 6 / 3 / 2 | `primitives` |
 

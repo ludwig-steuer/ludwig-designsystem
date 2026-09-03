@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .btn {
+    font-family: var(--font-sans); font-weight: 500; font-size: 14px;
+    padding: 9px 16px; border-radius: 6px; border: 1px solid transparent;
+    cursor: pointer; line-height: 1.2; display: inline-flex; align-items: center; gap: 8px;
+    transition: all 140ms cubic-bezier(.2,0,0,1);
+  }
+  .btn-primary {
+    background: #1A3A5C; color: #fff;
+    transition: background 140ms cubic-bezier(.2,0,0,1), box-shadow 180ms cubic-bezier(.2,0,0,1);
+  }
+  .btn-primary:hover {
+    background: #224A73;
+    box-shadow:
+      0 1px 2px rgba(20,36,56,0.10),
+      0 4px 10px rgba(26,58,92,0.16),
+      0 8px 20px rgba(26,58,92,0.14);
+  }
+  .btn-primary:active { background: #14304B; }
+  .btn-secondary {
+    background: #fff; color: #1A3A5C; border-color: #C4CCD5;
+    transition: all 140ms cubic-bezier(.2,0,0,1);
+  }
+  .btn-secondary:hover { background: #F4F6F8; border-color: #1A3A5C; box-shadow: 0 1px 2px rgba(20,36,56,0.04), 0 4px 10px rgba(20,36,56,0.06); }
+  .btn-tertiary { background: transparent; color: #2E78A8; padding: 9px 8px; }
+  .btn-tertiary:hover { color: #1A3A5C; }
+  .btn-danger { background: #fff; color: #A8403C; border-color: #E5C9C7; box-shadow: 0 1px 2px rgba(168,64,60,0.06); }
+  .btn-danger:hover { background: #F4E6E5; }
+  .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 5px; }
+  .btn-lg { padding: 12px 20px; font-size: 15px; border-radius: 7px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; padding: 10px 0; }
+  .label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; min-width: 90px; }
+  svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+<div class="row">
+  <div class="label">Primary</div>
+  <button class="btn btn-primary">Beleg prüfen</button>
+  <button class="btn btn-primary" style="background:#224A73; box-shadow: 0 1px 2px rgba(20,36,56,0.10), 0 4px 10px rgba(26,58,92,0.16), 0 8px 20px rgba(26,58,92,0.14);">Hover-Zustand</button>
+  <button class="btn btn-primary" disabled>Disabled</button>
+</div>
+<div class="row">
+  <div class="label">Secondary</div>
+  <button class="btn btn-secondary">Abbrechen</button>
+  <button class="btn btn-secondary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Mandant hinzufügen</button>
+</div>
+<div class="row">
+  <div class="label">Tertiary</div>
+  <button class="btn btn-tertiary">Mehr anzeigen</button>
+  <button class="btn btn-tertiary">Vorgang öffnen →</button>
+</div>
+<div class="row">
+  <div class="label">Destruktiv</div>
+  <button class="btn btn-danger">Beleg verwerfen</button>
+</div>
+<div class="row">
+  <div class="label">Größen</div>
+  <button class="btn btn-primary btn-sm">Klein</button>
+  <button class="btn btn-primary">Standard</button>
+  <button class="btn btn-primary btn-lg">Groß</button>
+</div>
+</div></body></html>

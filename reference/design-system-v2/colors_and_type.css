@@ -1,0 +1,319 @@
+/* ==========================================================================
+   Ludwig Design System — Foundations
+   colors_and_type.css
+
+   "Kompetenz in Ruhe" — calm competence.
+   Conservative. Reliable. Structured. Precise.
+   ========================================================================== */
+
+/* --- Webfonts ---------------------------------------------------------- */
+/* Inter: humanist sans for UI + body. Excellent tabular numerals for
+   accounting figures. Source Serif 4: editorial accent for hero copy
+   and editorial moments. JetBrains Mono: account/DATEV codes. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ====================================================================
+     COLOR — Brand
+     Restricted, cool, neutral. No warm tones. No saturated accents.
+     ==================================================================== */
+
+  /* Primary — Dunkelblau. The voice of the brand.
+     Used for primary surfaces, headlines, key UI chrome. */
+  --color-primary:        #1A3A5C;
+  --color-primary-900:    #0F2438;
+  --color-primary-800:    #14304B;
+  --color-primary-700:    #1A3A5C; /* base */
+  --color-primary-600:    #224A73;
+  --color-primary-500:    #2B5C8E;
+
+  /* Accent — Mittelblau. Used sparingly for links, focus, active states. */
+  --color-accent:         #3B8FC4;
+  --color-accent-700:     #2E78A8;
+  --color-accent-600:     #3B8FC4; /* base */
+  --color-accent-500:     #5BA4D1;
+  --color-accent-100:     #E3F0F8;
+  --color-accent-50:      #F1F7FB;
+
+  /* Text — Anthrazit. Never pure black. */
+  --color-text:           #2D2D2D;
+  --color-text-muted:     #5C5C5C;
+  --color-text-subtle:    #8A8A8A;
+  --color-text-on-dark:   #FFFFFF;
+  --color-text-on-dark-muted: #B8C5D3;
+
+  /* Neutrals — cool greys, never warm. */
+  --color-bg:             #FFFFFF;
+  --color-bg-soft:        #F4F6F8; /* Hellgrau */
+  --color-bg-sunken:      #ECEFF3;
+  --color-surface:        #FFFFFF;
+  --color-surface-raised: #FFFFFF;
+
+  --color-border:         #DDE2E8;
+  --color-border-strong:  #C4CCD5;
+  --color-border-subtle:  #ECEFF3;
+
+  /* Semantic — desaturated, restrained. */
+  --color-success:        #3F7A5A;   /* muted forest */
+  --color-success-bg:     #EBF2EE;
+  --color-warning:        #B07B2C;   /* muted amber, used sparingly */
+  --color-warning-bg:     #F5EEE0;
+  --color-danger:         #A8403C;   /* muted brick */
+  --color-danger-bg:      #F4E6E5;
+  --color-info:           var(--color-accent);
+  --color-info-bg:        var(--color-accent-50);
+
+  /* Focus ring */
+  --color-focus:          #3B8FC4;
+  --color-focus-ring:     rgba(59, 143, 196, 0.32);
+
+  /* ====================================================================
+     TYPOGRAPHY — Families
+     ==================================================================== */
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif:   'Source Serif 4', 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Numerals — tabular for any monetary/account context */
+  --font-feat-tabular: "tnum" 1, "lnum" 1;
+
+  /* ====================================================================
+     TYPOGRAPHY — Scale
+     Conservative scale. Generous line-height for legibility.
+     ==================================================================== */
+  --fs-display:   56px;   --lh-display:   1.08;   --tr-display:   -0.02em;
+  --fs-h1:        40px;   --lh-h1:        1.15;   --tr-h1:        -0.018em;
+  --fs-h2:        30px;   --lh-h2:        1.22;   --tr-h2:        -0.012em;
+  --fs-h3:        22px;   --lh-h3:        1.30;   --tr-h3:        -0.006em;
+  --fs-h4:        18px;   --lh-h4:        1.35;   --tr-h4:        -0.003em;
+  --fs-body-lg:   18px;   --lh-body-lg:   1.55;   --tr-body-lg:    0;
+  --fs-body:      16px;   --lh-body:      1.55;   --tr-body:       0;
+  --fs-body-sm:   14px;   --lh-body-sm:   1.50;   --tr-body-sm:    0;
+  --fs-caption:   13px;   --lh-caption:   1.45;   --tr-caption:    0;
+  --fs-overline:  12px;   --lh-overline:  1.40;   --tr-overline:   0.06em;
+
+  /* ====================================================================
+     SPACING — 4px base, 8px rhythm
+     ==================================================================== */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ====================================================================
+     RADIUS — Restrained. Conservative profession, modest corners.
+     ==================================================================== */
+  --radius-none: 0;
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   6px;
+  --radius-xl:   10px;
+  --radius-pill: 999px;
+
+  /* ====================================================================
+     SHADOWS — Soft, layered, cool-toned.
+     Multi-layer for realistic depth (Claude/Linear-style).
+     The "rim" highlight on top sells the elevation without going glossy.
+     ==================================================================== */
+  --shadow-xs:   0 1px 2px rgba(20, 36, 56, 0.05),
+                 inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --shadow-sm:   0 1px 2px rgba(20, 36, 56, 0.06),
+                 0 2px 6px rgba(20, 36, 56, 0.05),
+                 inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shadow-md:   0 1px 2px rgba(20, 36, 56, 0.05),
+                 0 4px 10px rgba(20, 36, 56, 0.06),
+                 0 12px 24px rgba(20, 36, 56, 0.07),
+                 inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shadow-lg:   0 2px 4px rgba(20, 36, 56, 0.05),
+                 0 8px 18px rgba(20, 36, 56, 0.07),
+                 0 24px 48px rgba(20, 36, 56, 0.10),
+                 inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shadow-inset: inset 0 1px 2px rgba(20, 36, 56, 0.05);
+
+  /* Subtle glow rings — for active / focused / "Ludwig-touched" elements.
+     Cool blue, low alpha, used sparingly. */
+  --glow-accent:  0 0 0 1px rgba(59, 143, 196, 0.35),
+                  0 0 0 5px rgba(59, 143, 196, 0.12),
+                  0 4px 14px rgba(59, 143, 196, 0.18);
+  --glow-primary: 0 0 0 1px rgba(26, 58, 92, 0.25),
+                  0 6px 18px rgba(26, 58, 92, 0.22),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.18);
+
+  /* Gradients — restrained, only for hero surfaces and primary buttons. */
+  --grad-primary:    linear-gradient(180deg, #224A73 0%, #1A3A5C 60%, #14304B 100%);
+  --grad-primary-hi: linear-gradient(180deg, #2B5C8E 0%, #1A3A5C 100%);
+  --grad-hero:       radial-gradient(ellipse 80% 60% at 78% 8%, #3A6FA0 0%, #1F4670 40%, #14304B 75%, #0F2438 100%);
+  --grad-surface:    linear-gradient(180deg, #FFFFFF 0%, #FAFBFC 100%);
+  --grad-soft:       linear-gradient(180deg, #F7F9FB 0%, #ECEFF3 100%);
+  --grad-accent-tint: linear-gradient(180deg, #F4F9FC 0%, #E9F2F8 100%);
+
+  /* ====================================================================
+     BORDERS
+     ==================================================================== */
+  --border-1: 1px solid var(--color-border);
+  --border-1-strong: 1px solid var(--color-border-strong);
+  --border-1-subtle: 1px solid var(--color-border-subtle);
+
+  /* ====================================================================
+     MOTION
+     Restrained. Quick, never bouncy. Never decorative.
+     ==================================================================== */
+  --ease-standard: cubic-bezier(0.2, 0, 0.0, 1);
+  --ease-out:      cubic-bezier(0.0, 0, 0.2, 1);
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 280ms;
+
+  /* ====================================================================
+     LAYOUT
+     ==================================================================== */
+  --container-narrow: 720px;
+  --container-base:   1080px;
+  --container-wide:   1280px;
+  --content-measure:  68ch;
+}
+
+/* ==========================================================================
+   SEMANTIC TYPE STYLES
+   ========================================================================== */
+
+.lw-display {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: var(--tr-display);
+  color: var(--color-primary);
+}
+
+h1, .lw-h1 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--tr-h1);
+  color: var(--color-primary);
+}
+
+h2, .lw-h2 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--tr-h2);
+  color: var(--color-primary);
+}
+
+h3, .lw-h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--tr-h3);
+  color: var(--color-text);
+}
+
+h4, .lw-h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  letter-spacing: var(--tr-h4);
+  color: var(--color-text);
+}
+
+.lw-lede {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--fs-body-lg);
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+p, .lw-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+}
+
+.lw-body-sm {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
+  color: var(--color-text);
+}
+
+.lw-caption {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-muted);
+}
+
+.lw-overline {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--fs-overline);
+  line-height: var(--lh-overline);
+  letter-spacing: var(--tr-overline);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.lw-mono, code, kbd, samp {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  font-feature-settings: var(--font-feat-tabular);
+}
+
+.lw-numeric {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: var(--font-feat-tabular);
+}
+
+/* ==========================================================================
+   GLOBAL DEFAULTS
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--color-accent-700);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+a:hover { color: var(--color-primary); }
+
+::selection { background: var(--color-accent-100); color: var(--color-primary); }
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

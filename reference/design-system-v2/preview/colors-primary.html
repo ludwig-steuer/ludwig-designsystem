@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .sw { display: flex; flex-direction: column; gap: 6px; }
+  .sw .chip { height: 64px; border-radius: 4px; border: 1px solid rgba(20,36,56,.06); }
+  .sw .name { font-size: 12px; font-weight: 600; color: var(--color-text); }
+  .sw .hex { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-subtle); }
+  .row-section { display: flex; flex-direction: column; gap: 14px; }
+  .row-section + .row-section { margin-top: 18px; }
+  .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .header h4 { margin: 0; font-size: 13px; font-weight: 600; color: var(--color-text); }
+  .header span { font-size: 11px; color: var(--color-text-subtle); letter-spacing: 0.04em; text-transform: uppercase; }
+</style>
+<div class="row-section">
+  <div class="header"><h4>Primär — Dunkelblau</h4><span>Logo · Headlines · Buttons</span></div>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#0F2438"></div><div class="name">primary-900</div><div class="hex">#0F2438</div></div>
+    <div class="sw"><div class="chip" style="background:#14304B"></div><div class="name">primary-800</div><div class="hex">#14304B</div></div>
+    <div class="sw"><div class="chip" style="background:#1A3A5C; outline: 2px solid #1A3A5C; outline-offset:-2px"></div><div class="name">primary · base</div><div class="hex">#1A3A5C</div></div>
+    <div class="sw"><div class="chip" style="background:#224A73"></div><div class="name">primary-600</div><div class="hex">#224A73</div></div>
+    <div class="sw"><div class="chip" style="background:#2B5C8E"></div><div class="name">primary-500</div><div class="hex">#2B5C8E</div></div>
+  </div>
+</div>
+<div class="row-section">
+  <div class="header"><h4>Akzent — Mittelblau</h4><span>Links · Fokus · Aktiv</span></div>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#2E78A8"></div><div class="name">accent-700</div><div class="hex">#2E78A8</div></div>
+    <div class="sw"><div class="chip" style="background:#3B8FC4; outline: 2px solid #3B8FC4; outline-offset:-2px"></div><div class="name">accent · base</div><div class="hex">#3B8FC4</div></div>
+    <div class="sw"><div class="chip" style="background:#5BA4D1"></div><div class="name">accent-500</div><div class="hex">#5BA4D1</div></div>
+    <div class="sw"><div class="chip" style="background:#E3F0F8"></div><div class="name">accent-100</div><div class="hex">#E3F0F8</div></div>
+    <div class="sw"><div class="chip" style="background:#F1F7FB"></div><div class="name">accent-50</div><div class="hex">#F1F7FB</div></div>
+  </div>
+</div>
+</div></body></html>

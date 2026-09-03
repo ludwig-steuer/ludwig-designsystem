@@ -17,7 +17,7 @@ Ablauf und Status: `docs/backlog/README.md`.
 | Gibt es das schon? | `grep -rn "@when" src/ui/v3` — die `@when`-Zeile ist der Fall, für den ein Export da ist |
 | Was existiert für das Design-System? | Storybook-Baum (`pnpm build`, `storybook-static/index.json`) — was keine Story hat, gilt nicht als vorhanden |
 | Was fehlt der App und wie oft? | `docs/v3-backlog.md` (gezählte Nutzung) |
-| Welche Form hat die Entität schon? | `docs/ludwig/ui-repraesentationen.md` |
+| Welche Form hat die Entität schon? | `docs/ui-repraesentationen.md` |
 | Wie heißt das Ding? | `docs/ludwig/GLOSSARY.md` — englisch im Code, deutsch im Label |
 | Welche Typen gibt es? | `src/ludwig/` — die App gibt das Datenmodell vor, nie lokal neu definieren |
 | Welche Gestaltungsregel gilt? | `docs/design-guidelines.md` (V/L/T/Z/I), Prüfliste §9 |

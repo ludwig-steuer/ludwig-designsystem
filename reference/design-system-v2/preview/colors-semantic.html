@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .group { border: 1px solid #DDE2E8; border-radius: 4px; overflow: hidden; }
+  .group .top { padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .group .dot { width: 10px; height: 10px; border-radius: 999px; }
+  .group .name { font-size: 13px; font-weight: 600; color: var(--color-text); }
+  .group .body { padding: 12px 14px; border-top: 1px solid #DDE2E8; font-size: 12px; }
+  .group .row { display: flex; justify-content: space-between; }
+  .group .row + .row { margin-top: 6px; }
+  .group .hex { font-family: var(--font-mono); color: var(--color-text-subtle); }
+  .alert { margin-top: 16px; padding: 12px 14px; border-radius: 4px; font-size: 13px; line-height: 1.5; display: flex; gap: 10px; }
+  .alert .icon { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+</style>
+<div class="grid">
+  <div class="group">
+    <div class="top"><span class="dot" style="background:#3F7A5A"></span><span class="name">Erfolg</span></div>
+    <div class="body">
+      <div class="row"><span>Text</span><span class="hex">#3F7A5A</span></div>
+      <div class="row"><span>Background</span><span class="hex">#EBF2EE</span></div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="top"><span class="dot" style="background:#B07B2C"></span><span class="name">Warnung</span></div>
+    <div class="body">
+      <div class="row"><span>Text</span><span class="hex">#B07B2C</span></div>
+      <div class="row"><span>Background</span><span class="hex">#F5EEE0</span></div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="top"><span class="dot" style="background:#A8403C"></span><span class="name">Fehler</span></div>
+    <div class="body">
+      <div class="row"><span>Text</span><span class="hex">#A8403C</span></div>
+      <div class="row"><span>Background</span><span class="hex">#F4E6E5</span></div>
+    </div>
+  </div>
+</div>
+<div class="alert" style="background:#EBF2EE; color:#3F7A5A; border:1px solid #D5E3DB;">
+  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+  <span><strong style="color:#2D2D2D">47 Belege</strong> erfolgreich vorkontiert. Bereit zur Prüfung.</span>
+</div>
+</div></body></html>

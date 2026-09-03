@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .label-mini { margin: 14px 0 8px; }
+  svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .sec { background: #fff; border: 1px solid #DDE2E8; border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+  .sec__h { padding: 10px 16px; border-bottom: 1px solid #DDE2E8; display: flex; align-items: center; gap: 10px; background: #FAFBFC; }
+  .sec__h h3 { margin: 0; font-size: 13px; font-weight: 600; color: #2D2D2D; }
+  .sec__h .count { font-size: 11.5px; color: #8A8A8A; }
+  .sec__h .spacer { flex: 1; }
+
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tbl thead th { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #8A8A8A; font-weight: 600; padding: 8px 14px; text-align: left; border-bottom: 1px solid #DDE2E8; background: #fff; }
+  .tbl tbody td { padding: 9px 14px; border-bottom: 1px solid #ECEFF3; }
+  .tbl tbody tr:last-child td { border-bottom: none; }
+  .tbl .num { text-align: right; font-variant-numeric: tabular-nums; color: #1A3A5C; font-weight: 500; }
+
+  /* Skeleton */
+  .skel { display: inline-block; height: 10px; border-radius: 3px; background: linear-gradient(90deg, #ECEFF3 0%, #F4F6F8 50%, #ECEFF3 100%); background-size: 200% 100%; animation: shim 1.4s ease-in-out infinite; }
+  @keyframes shim { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* Empty inside section */
+  .empty-inline { padding: 36px 24px; text-align: center; color: #5C5C5C; font-size: 13px; }
+  .empty-inline strong { color: #1A3A5C; display: block; margin-bottom: 4px; font-size: 14px; }
+
+  /* Pagination */
+  .pag { display: flex; align-items: center; gap: 4px; padding: 10px 16px; border-top: 1px solid #DDE2E8; background: #FAFBFC; }
+  .pag .info { font-size: 12px; color: #5C5C5C; font-variant-numeric: tabular-nums; flex: 1; }
+  .pag .page {
+    min-width: 28px; height: 28px; padding: 0 8px; border-radius: 4px; border: 1px solid transparent;
+    font: 500 12px var(--font-sans); color: #5C5C5C; background: transparent;
+    cursor: pointer; font-variant-numeric: tabular-nums;
+  }
+  .pag .page:hover { background: #ECEFF3; color: #2D2D2D; }
+  .pag .page.active { background: #fff; border-color: #DDE2E8; color: #1A3A5C; font-weight: 600; box-shadow: 0 1px 2px rgba(20,36,56,0.04); }
+  .pag .nav { color: #5C5C5C; }
+  .pag .nav svg { width: 14px; height: 14px; vertical-align: middle; }
+  .pag .ellipsis { color: #8A8A8A; padding: 0 4px; }
+
+  .filter-search { position: relative; display: inline-flex; align-items: center; }
+  .filter-search input { font: 12.5px var(--font-sans); padding: 5px 10px 5px 26px; min-width: 200px; background: #fff; border: 1px solid #DDE2E8; border-radius: 4px; outline: none; }
+  .filter-search .ico { position: absolute; left: 8px; top: 7px; color: #8A8A8A; }
+  .filter-search .ico svg { width: 12px; height: 12px; }
+</style>
+
+<div class="label-mini">DataTable · Loading-Skeleton</div>
+<div class="sec">
+  <div class="sec__h"><h3>Belege · April 2026</h3><span class="count">wird geladen…</span></div>
+  <table class="tbl">
+    <thead><tr><th style="width: 50%">Beleg</th><th>Datum</th><th>Konto</th><th style="text-align: right">Betrag</th></tr></thead>
+    <tbody>
+      <tr><td><span class="skel" style="width: 60%"></span></td><td><span class="skel" style="width: 70px"></span></td><td><span class="skel" style="width: 80px"></span></td><td class="num"><span class="skel" style="width: 60px"></span></td></tr>
+      <tr><td><span class="skel" style="width: 75%"></span></td><td><span class="skel" style="width: 70px"></span></td><td><span class="skel" style="width: 80px"></span></td><td class="num"><span class="skel" style="width: 60px"></span></td></tr>
+      <tr><td><span class="skel" style="width: 50%"></span></td><td><span class="skel" style="width: 70px"></span></td><td><span class="skel" style="width: 80px"></span></td><td class="num"><span class="skel" style="width: 60px"></span></td></tr>
+      <tr><td><span class="skel" style="width: 65%"></span></td><td><span class="skel" style="width: 70px"></span></td><td><span class="skel" style="width: 80px"></span></td><td class="num"><span class="skel" style="width: 60px"></span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="label-mini">DataTable · Empty-State</div>
+<div class="sec">
+  <div class="sec__h"><h3>Belege · April 2026</h3><span class="spacer"></span><div class="filter-search"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><input value="Telekom" /></div></div>
+  <div class="empty-inline">
+    <strong>Keine Treffer</strong>
+    Für „Telekom" im Zeitraum April 2026 wurden keine Belege gefunden.
+  </div>
+</div>
+
+<div class="label-mini">DataTable · Pagination</div>
+<div class="sec">
+  <div class="sec__h"><h3>Belege · April 2026</h3><span class="count">156 Belege</span></div>
+  <table class="tbl">
+    <thead><tr><th style="width: 50%">Beleg</th><th>Datum</th><th>Konto</th><th style="text-align: right">Betrag</th></tr></thead>
+    <tbody>
+      <tr><td>Telekom Deutschland GmbH</td><td>23.04.2026</td><td>4925</td><td class="num">79,90 €</td></tr>
+      <tr><td>Berger GmbH · AR 2026/118</td><td>22.04.2026</td><td>8400</td><td class="num">12.480,00 €</td></tr>
+      <tr><td>Office Mayer e.K.</td><td>20.04.2026</td><td>4980</td><td class="num">348,90 €</td></tr>
+      <tr><td>Stadtwerke München</td><td>18.04.2026</td><td>4240</td><td class="num">1.247,50 €</td></tr>
+    </tbody>
+  </table>
+  <div class="pag">
+    <span class="info">21–40 von 156</span>
+    <button class="page nav"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <button class="page">1</button>
+    <button class="page active">2</button>
+    <button class="page">3</button>
+    <button class="page">4</button>
+    <span class="ellipsis">…</span>
+    <button class="page">8</button>
+    <button class="page nav"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </div>
+</div>
+
+</div></body></html>

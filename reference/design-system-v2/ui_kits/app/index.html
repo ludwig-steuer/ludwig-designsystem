@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Ludwig — App</title>
+  <meta name="viewport" content="width=1280">
+  <link rel="icon" type="image/svg+xml" href="../../assets/ludwig-mark.svg">
+  <link rel="stylesheet" href="app.css?v=4">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="Icons.jsx"></script>
+  <script type="text/babel" src="Primitives.jsx"></script>
+  <script type="text/babel" src="Sidebar.jsx"></script>
+  <script type="text/babel" src="TopBar.jsx"></script>
+  <script type="text/babel" src="Dashboard.jsx"></script>
+  <script type="text/babel" src="Screens.jsx"></script>
+
+  <script type="text/babel" data-presets="env,react">
+    const TENANTS = [
+      { id: "10024", num: "10024", name: "Berger GmbH",            initials: "BG", color: "#1A3A5C", open: 23 },
+      { id: "10031", num: "10031", name: "Architekturbüro Lindner", initials: "AL", color: "#2E78A8", open: 8 },
+      { id: "10047", num: "10047", name: "Hofmeier & Söhne KG",     initials: "HS", color: "#3F7A5A", open: 47 },
+      { id: "10052", num: "10052", name: "Praxis Dr. Köhler",       initials: "PK", color: "#B07B2C", open: 4 },
+      { id: "10068", num: "10068", name: "Schreinerei Weiß",       initials: "SW", color: "#5BA4D1", open: 19 },
+      { id: "10074", num: "10074", name: "Café Mariposa GbR",       initials: "CM", color: "#A8403C", open: 31 },
+    ];
+
+    function App() {
+      const [route, setRoute] = React.useState("dashboard");
+      const [beleg, setBeleg] = React.useState(null);
+      const [collapsed, setCollapsed] = React.useState(false);
+      const [activeTenant, setActiveTenant] = React.useState("10024");
+      const tenant = TENANTS.find(t => t.id === activeTenant) || TENANTS[0];
+
+      const onSelectBeleg = (b) => setBeleg(b);
+      const onBack = () => setBeleg(null);
+      const onApprove = () => { setBeleg(null); };
+
+      let crumb, content;
+      if (route === "dashboard") {
+        crumb = <><span>Kanzlei Hofmann</span> · <strong>Übersicht</strong></>;
+        content = <Dashboard onNavigate={(r) => setRoute(r)} />;
+      } else if (route === "posteingang" && beleg) {
+        crumb = <><strong>Posteingang</strong> · {beleg.name}</>;
+        content = <BelegDetail beleg={beleg} onBack={onBack} onApprove={onApprove} />;
+      } else if (route === "posteingang") {
+        crumb = <><span>{tenant.name}</span> · <strong>Posteingang</strong></>;
+        content = <Posteingang onSelectBeleg={onSelectBeleg} />;
+      } else if (route === "mandanten") {
+        crumb = <strong>Mandanten</strong>;
+        content = <Mandanten />;
+      } else if (route === "export") {
+        crumb = <><span>{tenant.name}</span> · <strong>DATEV-Export</strong></>;
+        content = <ExportView />;
+      } else {
+        crumb = <strong>{route}</strong>;
+        content = <div style={{ color: "#5C5C5C" }}>Diese Ansicht ist im UI-Kit nicht ausgearbeitet.</div>;
+      }
+
+      return (
+        <div className={"app" + (collapsed ? " app--collapsed" : "")} data-screen-label={`Ludwig · ${route}${beleg ? " · Detail" : ""}`}>
+          <Sidebar activeRoute={route} setRoute={(r) => { setRoute(r); setBeleg(null); }} mandant={tenant.name} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+          <TopBar
+            crumb={crumb}
+            role="stb"
+            tenants={TENANTS}
+            activeTenant={activeTenant}
+            onTenantChange={(id) => { setActiveTenant(id); setBeleg(null); }}
+          />
+          <main className="app__main">{content}</main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

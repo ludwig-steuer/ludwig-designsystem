@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .label-mini { margin: 14px 0 8px; }
+  svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .field label { font-size: 12.5px; font-weight: 500; color: #2D2D2D; }
+  .field .hint { font-size: 11.5px; color: #8A8A8A; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .input {
+    font-family: var(--font-sans); font-size: 13.5px; color: #2D2D2D;
+    padding: 8px 12px; border: 1px solid #DDE2E8; border-radius: 5px; background: #fff;
+    width: 100%; box-sizing: border-box; outline: none;
+    transition: border-color 120ms, box-shadow 120ms;
+  }
+  .input:focus { border-color: #3B8FC4; box-shadow: 0 0 0 3px rgba(59,143,196,0.18); }
+
+  /* Datepicker DE */
+  .dp { position: relative; }
+  .dp .input { padding-right: 32px; font-variant-numeric: tabular-nums; }
+  .dp__ico { position: absolute; right: 10px; top: 9px; color: #8A8A8A; pointer-events: none; }
+  .dp__ico svg { width: 14px; height: 14px; }
+
+  .cal {
+    margin-top: 6px; background: #fff; border: 1px solid #DDE2E8; border-radius: 6px;
+    padding: 12px; box-shadow: 0 4px 12px rgba(20,36,56,0.08);
+    width: 280px;
+  }
+  .cal__h { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 8px; }
+  .cal__h .month { font-size: 13px; font-weight: 600; color: #2D2D2D; }
+  .cal__nav { background: transparent; border: none; cursor: pointer; color: #5C5C5C; padding: 4px; border-radius: 4px; }
+  .cal__nav:hover { background: #F4F6F8; color: #2D2D2D; }
+  .cal__nav svg { width: 14px; height: 14px; }
+  .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+  .cal__dow { font-size: 10.5px; color: #8A8A8A; text-align: center; padding: 4px 0; font-weight: 600; letter-spacing: 0.04em; }
+  .cal__d { font-size: 12px; text-align: center; padding: 6px 0; border-radius: 4px; cursor: pointer; color: #2D2D2D; font-variant-numeric: tabular-nums; }
+  .cal__d:hover { background: #F4F6F8; }
+  .cal__d.muted { color: #C4CCD5; }
+  .cal__d.today { color: #2E78A8; font-weight: 600; }
+  .cal__d.selected { background: #1A3A5C; color: #fff; }
+
+  /* Money */
+  .money { position: relative; display: flex; }
+  .money .input { padding-right: 36px; text-align: right; font-variant-numeric: tabular-nums lining-nums; font-weight: 500; }
+  .money__cur { position: absolute; right: 12px; top: 9px; font-size: 13px; color: #5C5C5C; pointer-events: none; }
+
+  /* TextArea */
+  .ta { resize: vertical; min-height: 84px; line-height: 1.5; }
+  .ta__count { text-align: right; font-size: 11px; color: #8A8A8A; font-variant-numeric: tabular-nums; }
+
+  /* Select with chevron */
+  .sel { position: relative; }
+  .sel select {
+    appearance: none; -webkit-appearance: none;
+    font: 13.5px var(--font-sans); color: #2D2D2D;
+    padding: 8px 32px 8px 12px; border: 1px solid #DDE2E8; border-radius: 5px;
+    background: #fff; width: 100%; outline: none; cursor: pointer;
+  }
+  .sel select:focus { border-color: #3B8FC4; box-shadow: 0 0 0 3px rgba(59,143,196,0.18); }
+  .sel__chev { position: absolute; right: 10px; top: 9px; color: #8A8A8A; pointer-events: none; }
+  .sel__chev svg { width: 14px; height: 14px; }
+</style>
+
+<div class="label-mini">Datepicker · DE-Format dd.MM.yyyy</div>
+<div class="grid2">
+  <div class="field">
+    <label>Belegdatum</label>
+    <div class="dp">
+      <input class="input" value="23.04.2026" />
+      <span class="dp__ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+    </div>
+    <div class="hint">Format: dd.MM.yyyy</div>
+  </div>
+  <div class="field">
+    <label>Buchungsperiode</label>
+    <div class="sel">
+      <select><option>April 2026</option><option>März 2026</option><option>Februar 2026</option></select>
+      <span class="sel__chev"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+    </div>
+  </div>
+</div>
+<div class="cal">
+  <div class="cal__h">
+    <button class="cal__nav"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <span class="month">April 2026</span>
+    <button class="cal__nav"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </div>
+  <div class="cal__grid">
+    <span class="cal__dow">M</span><span class="cal__dow">D</span><span class="cal__dow">M</span><span class="cal__dow">D</span><span class="cal__dow">F</span><span class="cal__dow">S</span><span class="cal__dow">S</span>
+    <span class="cal__d muted">30</span><span class="cal__d muted">31</span><span class="cal__d">1</span><span class="cal__d">2</span><span class="cal__d">3</span><span class="cal__d">4</span><span class="cal__d">5</span>
+    <span class="cal__d">6</span><span class="cal__d">7</span><span class="cal__d">8</span><span class="cal__d">9</span><span class="cal__d">10</span><span class="cal__d">11</span><span class="cal__d">12</span>
+    <span class="cal__d">13</span><span class="cal__d">14</span><span class="cal__d">15</span><span class="cal__d">16</span><span class="cal__d">17</span><span class="cal__d">18</span><span class="cal__d">19</span>
+    <span class="cal__d">20</span><span class="cal__d">21</span><span class="cal__d">22</span><span class="cal__d selected">23</span><span class="cal__d">24</span><span class="cal__d">25</span><span class="cal__d">26</span>
+    <span class="cal__d">27</span><span class="cal__d">28</span><span class="cal__d">29</span><span class="cal__d today">30</span><span class="cal__d muted">1</span><span class="cal__d muted">2</span><span class="cal__d muted">3</span>
+  </div>
+</div>
+
+<div class="label-mini" style="margin-top: 22px">MoneyInput · Decimal · keine Float-Arithmetik</div>
+<div class="grid2">
+  <div class="field">
+    <label>Netto</label>
+    <div class="money">
+      <input class="input" value="1.247,50" />
+      <span class="money__cur">€</span>
+    </div>
+    <div class="hint">Komma als Dezimaltrenner, Punkt als Tausendertrenner</div>
+  </div>
+  <div class="field">
+    <label>Währung</label>
+    <div class="sel">
+      <select><option>EUR · €</option><option>CHF · Fr</option><option>USD · $</option></select>
+      <span class="sel__chev"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+    </div>
+  </div>
+</div>
+
+<div class="label-mini" style="margin-top: 18px">TextArea · Buchungstext</div>
+<div class="field">
+  <label>Buchungstext</label>
+  <textarea class="input ta">Mobilfunk April 2026 · Telekom Deutschland GmbH · Vertrag 28471902</textarea>
+  <div class="ta__count">76 / 240</div>
+</div>
+
+</div></body></html>

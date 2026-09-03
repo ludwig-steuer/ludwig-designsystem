@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .label-mini { margin: 14px 0 8px; }
+  svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; width: 16px; height: 16px; flex-shrink: 0; }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+
+  /* Banner — full-width inline */
+  .banner {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 6px;
+    border: 1px solid;
+    font-size: 13.5px; line-height: 1.5;
+  }
+  .banner__body { flex: 1; }
+  .banner__title { font-weight: 600; }
+  .banner__action { background: transparent; border: none; cursor: pointer; font: inherit; font-weight: 500; padding: 2px 4px; }
+  .banner__close { background: transparent; border: none; cursor: pointer; padding: 0; opacity: 0.6; }
+  .banner--info    { background: #E3F0F8; border-color: #C7DFEC; color: #2E78A8; }
+  .banner--success { background: #EBF2EE; border-color: #D5E3DB; color: #3F7A5A; }
+  .banner--warning { background: #F5EEE0; border-color: #E8DCBE; color: #B07B2C; }
+  .banner--danger  { background: #F4E6E5; border-color: #E5C9C7; color: #A8403C; }
+  .banner__action  { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+  /* Toast — floating, with shadow */
+  .toast {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: #fff;
+    border: 1px solid #DDE2E8;
+    border-radius: 6px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 2px rgba(20,36,56,0.06), 0 8px 24px rgba(20,36,56,0.10);
+    font-size: 13.5px; max-width: 420px;
+  }
+  .toast__ico { width: 22px; height: 22px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .toast__ico--success { background: #EBF2EE; color: #3F7A5A; }
+  .toast__ico--danger  { background: #F4E6E5; color: #A8403C; }
+  .toast__body { flex: 1; }
+  .toast__title { font-weight: 600; color: #2D2D2D; margin-bottom: 2px; }
+  .toast__sub   { color: #5C5C5C; font-size: 12.5px; line-height: 1.4; }
+  .toast__action { background: transparent; border: none; cursor: pointer; color: #2E78A8; font-weight: 500; font: inherit; font-weight: 500; padding: 0; }
+</style>
+
+<div class="label-mini">Banner · Inline</div>
+<div class="stack">
+  <div class="banner banner--info">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <div class="banner__body"><span class="banner__title">USt-Voranmeldung fällig:</span> Periode März 2026 muss bis 10.05.2026 übermittelt werden.</div>
+    <button class="banner__action">Jetzt prüfen →</button>
+  </div>
+  <div class="banner banner--success">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <div class="banner__body">156 Buchungen erfolgreich für DATEV exportiert.</div>
+  </div>
+  <div class="banner banner--warning">
+    <svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div class="banner__body"><span class="banner__title">3 Belege benötigen Rückfrage</span> — Ludwig konnte den Buchungstext nicht eindeutig zuordnen.</div>
+  </div>
+  <div class="banner banner--danger">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div class="banner__body"><span class="banner__title">DATEV-Verbindung unterbrochen.</span> Letzte Synchronisation: heute, 09:14.</div>
+    <button class="banner__action">Erneut versuchen</button>
+  </div>
+</div>
+
+<div class="label-mini" style="margin-top: 22px">Toast · Floating (oben rechts, 4 s)</div>
+<div class="stack">
+  <div class="toast">
+    <div class="toast__ico toast__ico--success">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="toast__body">
+      <div class="toast__title">Beleg freigegeben</div>
+      <div class="toast__sub">Telekom Deutschland GmbH · 79,90 € — auf Konto 4925 verbucht.</div>
+    </div>
+    <button class="toast__action">Rückgängig</button>
+  </div>
+  <div class="toast">
+    <div class="toast__ico toast__ico--danger">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>
+    <div class="toast__body">
+      <div class="toast__title">Upload fehlgeschlagen</div>
+      <div class="toast__sub">Rechnung_2026_04_118.pdf — Datei beschädigt oder verschlüsselt.</div>
+    </div>
+  </div>
+</div>
+
+</div></body></html>

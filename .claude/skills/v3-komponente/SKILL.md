@@ -52,7 +52,7 @@ Typen für Fachdaten kommen aus `src/ludwig/` (gespiegeltes Datenmodell),
 nicht als lokale Neudefinition.
 
 **Entitäten heißen Entität + Form**: `AccountField`, `KontoZeile`, `KontoKarte`,
-`JournalEntryEditor`. Die Formen sind die aus `docs/ludwig/ui-repraesentationen.md`;
+`JournalEntryEditor`. Die Formen sind die aus `docs/ui-repraesentationen.md`;
 keine T-Shirt-Größe im Namen — die Größe folgt aus der Form:
 
 | Größe | Formen |

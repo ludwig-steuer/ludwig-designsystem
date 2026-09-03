@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .label-mini { margin: 14px 0 8px; }
+  svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  .modal-frame {
+    background: rgba(20,36,56,0.32);
+    border-radius: 10px;
+    padding: 32px 24px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cd {
+    width: 480px; max-width: 100%;
+    background: #fff; border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(20,36,56,0.06), 0 24px 56px rgba(20,36,56,0.18);
+    overflow: hidden;
+  }
+  .cd__head {
+    padding: 16px 20px;
+    border-bottom: 1px solid #DDE2E8;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .cd__small { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #2E78A8; font-weight: 600; }
+  .cd__head h2 { margin: 2px 0 0; font-size: 16px; font-weight: 600; color: #1A3A5C; }
+  .cd__close { background: transparent; border: none; cursor: pointer; color: #8A8A8A; padding: 4px; }
+  .cd__close svg { width: 16px; height: 16px; }
+  .cd__body { padding: 18px 20px; font-size: 13.5px; color: #2D2D2D; line-height: 1.55; }
+  .cd__ref {
+    background: #F4F6F8;
+    border: 1px solid #DDE2E8;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 12px 0 14px;
+    display: flex; gap: 10px; align-items: center;
+    font-size: 12.5px;
+  }
+  .cd__ref-thumb {
+    width: 28px; height: 36px; background: #fff; border: 1px solid #DDE2E8; border-radius: 3px;
+    display: inline-flex; align-items: center; justify-content: center; color: #8A8A8A; flex-shrink: 0;
+  }
+  .cd__ref-thumb svg { width: 14px; height: 14px; }
+  .cd__ref strong { color: #1A3A5C; font-weight: 600; display: block; }
+  .cd__ref .meta { color: #5C5C5C; font-size: 11.5px; }
+  .cd__field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .cd__field label { font-size: 12.5px; font-weight: 500; color: #2D2D2D; }
+  .cd__field textarea {
+    font: inherit; font-size: 13.5px; color: #2D2D2D;
+    border: 1px solid #DDE2E8; border-radius: 5px; padding: 10px 12px;
+    resize: vertical; min-height: 80px; width: 100%; box-sizing: border-box;
+    background: #fff;
+  }
+  .cd__field textarea:focus { outline: none; border-color: #3B8FC4; box-shadow: 0 0 0 3px rgba(59,143,196,0.14); }
+  .cd__field .hint { font-size: 11.5px; color: #8A8A8A; }
+
+  .cd__opt-row { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .cd__opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 12px; border: 1px solid #DDE2E8; border-radius: 5px;
+    cursor: pointer; transition: all 120ms;
+  }
+  .cd__opt:hover { border-color: #C4CCD5; background: #FAFBFC; }
+  .cd__opt.is-selected { border-color: #3B8FC4; background: #F1F7FB; box-shadow: 0 0 0 3px rgba(59,143,196,0.10); }
+  .cd__radio { width: 14px; height: 14px; border-radius: 999px; border: 1.5px solid #C4CCD5; flex-shrink: 0; margin-top: 2px; position: relative; }
+  .cd__opt.is-selected .cd__radio { border-color: #3B8FC4; }
+  .cd__opt.is-selected .cd__radio::after { content: ""; position: absolute; inset: 2px; background: #3B8FC4; border-radius: 999px; }
+  .cd__opt-text { flex: 1; font-size: 13px; color: #2D2D2D; }
+  .cd__opt-text .acct { font-family: var(--font-mono); font-size: 12px; color: #5C5C5C; display: block; margin-top: 2px; }
+
+  .cd__foot {
+    padding: 12px 20px;
+    border-top: 1px solid #DDE2E8;
+    background: #FAFBFC;
+    display: flex; gap: 8px; justify-content: flex-end; align-items: center;
+  }
+  .cd__foot .recipient { margin-right: auto; font-size: 12px; color: #5C5C5C; display: flex; gap: 6px; align-items: center; }
+  .btn { font-family: var(--font-sans); font-weight: 500; font-size: 13px; padding: 7px 14px; border-radius: 5px; border: 1px solid transparent; cursor: pointer; }
+  .btn-primary { background: #1A3A5C; color: #fff; }
+  .btn-secondary { background: #fff; color: #1A3A5C; border-color: #C4CCD5; }
+</style>
+
+<div class="label-mini">ClarificationDialog · Rückfrage an Mandanten</div>
+
+<div class="modal-frame">
+  <div class="cd">
+    <div class="cd__head">
+      <div style="flex:1">
+        <div class="cd__small">Rückfrage an Mandant</div>
+        <h2>Konto unklar — Bürobedarf oder Werbeartikel?</h2>
+      </div>
+      <button class="cd__close"><svg viewBox="0 0 24 24" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="cd__body">
+      <div class="cd__ref">
+        <div class="cd__ref-thumb"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div>
+          <strong>Office Mayer e.K. · Sammelbestellung 04/118</strong>
+          <span class="meta">348,90 € · 20.04.2026 · Berger GmbH</span>
+        </div>
+      </div>
+
+      <div class="cd__field">
+        <label>Hinweis an den Mandanten</label>
+        <textarea>Ludwig konnte beim Buchungstext nicht eindeutig zwischen Bürobedarf und Werbeartikeln unterscheiden. Bitte wählen Sie die zutreffende Kategorie:</textarea>
+        <div class="hint">Wird per E-Mail und im Mandanten-Portal angezeigt. Antwort erscheint im Klärungs-Postfach.</div>
+      </div>
+
+      <div class="cd__field">
+        <label>Vorschlagsoptionen (optional)</label>
+        <div class="cd__opt-row">
+          <div class="cd__opt is-selected">
+            <span class="cd__radio"></span>
+            <div class="cd__opt-text">Bürobedarf für eigene Verwendung<span class="acct">4980 · Bürobedarf</span></div>
+          </div>
+          <div class="cd__opt">
+            <span class="cd__radio"></span>
+            <div class="cd__opt-text">Werbeartikel an Kunden<span class="acct">4610 · Werbekosten</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cd__foot">
+      <span class="recipient">An: Anna Berger (a.berger@berger-bau.de)</span>
+      <button class="btn btn-secondary">Abbrechen</button>
+      <button class="btn btn-primary">Anfrage senden</button>
+    </div>
+  </div>
+</div>
+
+</div></body></html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card" style="padding: 0; width: 700px; height: 460px; overflow: hidden; position: relative; background: #FAFBFC;">
+<style>
+  svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .scrim { position: absolute; inset: 0; background: rgba(20,36,56,0.30); backdrop-filter: blur(2px); }
+  .bg-list {
+    position: absolute; inset: 0; padding: 20px 24px;
+    font-family: var(--font-sans); color: #2D2D2D;
+  }
+  .bg-list h3 { margin: 0 0 14px; font-size: 15px; color: #1A3A5C; font-weight: 600; }
+  .bg-list .row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; padding: 9px 0; border-bottom: 1px solid #ECEFF3; font-size: 13px; }
+  .bg-list .row .num { font-variant-numeric: tabular-nums; color: #1A3A5C; font-weight: 500; }
+  .bg-list .row .pill { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: #E3F0F8; color: #2E78A8; }
+  .bg-list .row.active { background: rgba(255,255,255,0.4); margin: 0 -8px; padding: 9px 8px; border-radius: 4px; }
+
+  .drawer {
+    position: absolute; top: 0; right: 0; bottom: 0;
+    width: 460px;
+    background: #fff;
+    border-left: 1px solid #DDE2E8;
+    box-shadow: -8px 0 24px rgba(20,36,56,0.10), -2px 0 8px rgba(20,36,56,0.06);
+    display: flex; flex-direction: column;
+  }
+  .dr__h {
+    padding: 14px 18px; border-bottom: 1px solid #DDE2E8;
+    display: flex; align-items: center; gap: 12px;
+    background: #FAFBFC;
+  }
+  .dr__h .small { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #8A8A8A; font-weight: 600; }
+  .dr__h h2 { margin: 1px 0 0; font-size: 15px; font-weight: 600; color: #2D2D2D; }
+  .dr__h .title { flex: 1; min-width: 0; }
+  .dr__close { background: transparent; border: none; cursor: pointer; color: #5C5C5C; padding: 4px; border-radius: 4px; }
+  .dr__close:hover { background: #ECEFF3; color: #2D2D2D; }
+  .dr__close svg { width: 16px; height: 16px; }
+
+  .dr__body { flex: 1; overflow-y: auto; padding: 16px 18px; font-family: var(--font-sans); }
+  .dr__row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ECEFF3; font-size: 13px; }
+  .dr__row:last-child { border-bottom: none; }
+  .dr__row .k { color: #5C5C5C; }
+  .dr__row .v { color: #2D2D2D; font-weight: 500; }
+  .dr__row .v.mono { font-family: var(--font-mono); font-size: 12.5px; }
+  .dr__row .v.amt { font-variant-numeric: tabular-nums; color: #1A3A5C; }
+
+  .dr__sectlbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #8A8A8A; font-weight: 600; margin: 16px 0 4px; }
+
+  .dr__foot {
+    padding: 12px 18px; border-top: 1px solid #DDE2E8; background: #FAFBFC;
+    display: flex; gap: 8px; justify-content: flex-end;
+  }
+  .btn { font-family: var(--font-sans); font-weight: 500; font-size: 13px; padding: 7px 14px; border-radius: 5px; border: 1px solid transparent; cursor: pointer; }
+  .btn-primary { background: #1A3A5C; color: #fff; }
+  .btn-secondary { background: #fff; color: #1A3A5C; border-color: #C4CCD5; }
+</style>
+
+<div class="bg-list">
+  <h3>Buchungen · April 2026</h3>
+  <div class="row"><span>Telekom Deutschland GmbH</span><span class="pill">USt 19 %</span><span class="num">79,90 €</span></div>
+  <div class="row active"><span>Berger GmbH · AR 2026/118</span><span class="pill">USt 19 %</span><span class="num">12.480,00 €</span></div>
+  <div class="row"><span>Office Mayer e.K.</span><span class="pill">USt 19 %</span><span class="num">348,90 €</span></div>
+  <div class="row"><span>Stadtwerke München</span><span class="pill">USt 19 %</span><span class="num">1.247,50 €</span></div>
+  <div class="row"><span>Anwaltskanzlei Schmidt</span><span class="pill">USt 19 %</span><span class="num">890,00 €</span></div>
+</div>
+
+<div class="scrim"></div>
+
+<div class="drawer">
+  <div class="dr__h">
+    <div class="title">
+      <div class="small">Buchung · BU-04-118</div>
+      <h2>Berger GmbH · AR 2026/118</h2>
+    </div>
+    <button class="dr__close" title="Schließen"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="dr__body">
+    <div class="dr__sectlbl" style="margin-top: 0">Buchungssatz</div>
+    <div class="dr__row"><span class="k">Konto Soll</span><span class="v mono">1400 · Forderungen</span></div>
+    <div class="dr__row"><span class="k">Konto Haben</span><span class="v mono">8400 · Erlöse 19 %</span></div>
+    <div class="dr__row"><span class="k">USt-Schlüssel</span><span class="v">3 · 19 % USt</span></div>
+    <div class="dr__row"><span class="k">Buchungstext</span><span class="v">Ausgangsrechnung 2026/118</span></div>
+
+    <div class="dr__sectlbl">Beträge</div>
+    <div class="dr__row"><span class="k">Netto</span><span class="v amt">10.487,40 €</span></div>
+    <div class="dr__row"><span class="k">USt 19 %</span><span class="v amt">1.992,60 €</span></div>
+    <div class="dr__row"><span class="k">Brutto</span><span class="v amt" style="font-weight: 600">12.480,00 €</span></div>
+
+    <div class="dr__sectlbl">Beleg</div>
+    <div class="dr__row"><span class="k">Rechnungsdatum</span><span class="v">22.04.2026</span></div>
+    <div class="dr__row"><span class="k">Periode</span><span class="v">04 / 2026</span></div>
+    <div class="dr__row"><span class="k">Quelle</span><span class="v">PDF · Berger_AR_118.pdf</span></div>
+  </div>
+  <div class="dr__foot">
+    <button class="btn btn-secondary">Beleg öffnen</button>
+    <button class="btn btn-primary">Bearbeiten</button>
+  </div>
+</div>
+
+</div></body></html>

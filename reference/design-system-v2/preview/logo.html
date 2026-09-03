@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #DDE2E8; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(20,36,56,0.05); }
+  .cell { padding: 32px 28px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; min-height: 140px; justify-content: center; }
+  .light { background: linear-gradient(180deg,#FFFFFF 0%,#FAFBFC 100%); }
+  .dark { background: radial-gradient(ellipse at 20% 0%, #2B5C8E 0%, #1A3A5C 60%, #0F2438 100%); position: relative; }
+  .dark::after { content:""; position:absolute; inset:0; background: radial-gradient(circle at 80% 100%, rgba(91,164,209,0.18) 0%, transparent 55%); pointer-events:none; }
+  .cell .label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; position: relative; z-index: 1; }
+  .light .label { color: var(--color-text-subtle); }
+  .dark .label { color: #B8C5D3; }
+  .marks { display: flex; align-items: center; gap: 18px; margin-top: 18px; padding: 18px; border: 1px solid #DDE2E8; border-radius: 8px; background: linear-gradient(180deg,#FFFFFF 0%,#FAFBFC 100%); box-shadow: 0 1px 2px rgba(20,36,56,0.04), 0 4px 12px rgba(20,36,56,0.04); }
+  .marks .item { display: flex; flex-direction: column; gap: 6px; align-items: center; font-size: 11px; color: var(--color-text-subtle); }
+  img { position: relative; z-index: 1; }
+</style>
+<div class="grid">
+  <div class="cell light">
+    <span class="label">Wordmark · auf Hell</span>
+    <img src="../assets/ludwig-logo.svg" height="44" alt="Ludwig">
+  </div>
+  <div class="cell dark">
+    <span class="label">Wordmark · auf Dunkel</span>
+    <img src="../assets/ludwig-logo-light.svg" height="44" alt="Ludwig">
+  </div>
+</div>
+<div class="marks">
+  <div class="item"><img src="../assets/ludwig-mark.svg" width="56" height="56" alt=""><span>App-Mark · 56</span></div>
+  <div class="item"><img src="../assets/ludwig-mark.svg" width="40" height="40" alt=""><span>40</span></div>
+  <div class="item"><img src="../assets/ludwig-mark.svg" width="24" height="24" alt=""><span>24</span></div>
+  <div style="flex:1; padding-left: 12px; font-size: 13px; line-height: 1.55; color: var(--color-text-muted)">
+    Geometrisches „L" mit Bilanz-Linie als Akzent. Tiefer Verlauf gibt der Mark <strong style="color:#1A3A5C">Substanz</strong>, die Mittelblau-Linie verweist auf den <strong style="color:#1A3A5C">Buchungsschritt</strong>.
+  </div>
+</div>
+</div></body></html>

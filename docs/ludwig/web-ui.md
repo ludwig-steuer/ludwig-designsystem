@@ -53,7 +53,7 @@ dünn, Queries leben im Modul.
   Server-Roundtrip, die Storybook nicht ausführen kann.
 
 Inventar Entität × Komponente, Redundanz-Befunde und Zielstruktur:
-`docs/reference/datenmodell/ui-repraesentationen.md`.
+das Komponenten-Inventar im Design-System-Repo (`docs/design-system.md`).
 
 **Styles** unter `apps/web/src/styles/`: `tokens.css` (Farb-, Font- und
 Spacing-Tokens `--space-1…12`), `app-chrome.css` (`.section`-Card,
@@ -237,6 +237,36 @@ wählt, steht in `apps/web/AGENTS.md` §7 und wird gegen das Barrel getestet
 dass er gelesen wurde. Mandanten-Scope kommt aus dem `ClientScopeProvider`
 des Jahres-Layouts (`useClientScope()`), nicht als Prop; Server-Components
 können keinen Context lesen und nehmen ihn als `scope`-Prop.
+**Name.** Ein Klasse-A-Drawer heißt `<Entität>Drawer` — die Entität ist der
+deutsche Entitätsname der Familie (derselbe wie der Ordner
+`ui/v2/entities/<entität>/`, R21), die Datei heißt wie die Komponente, die
+Kennung ist die eine Identität dieser Entität (`sourceDocId`, `caseId`,
+Kontonummer). Zwei benannte Ausnahmen: zeigt ein Drawer eine **zweite
+Wahrheit** derselben Entität, steht die Herkunft vorn (`DatevBuchungssatzDrawer`
+neben `BuchungssatzDrawer`, R8); eine reine **Technik-Sicht** ohne Fachentität
+trägt die Sicht statt der Entität (`RawRowDrawer`). Der Drawer ist damit eine
+Darstellungsform der Entitäts-Familie neben Cell · Row · Card · View, keine
+Größe (Inventar §4.4). Bestandsnamen, die noch abweichen: `web-ui-offen.md` P26.
+
+**Aufbau — Muster `BelegDrawer`** (die Referenz; wer einen neuen Entitäts-Drawer
+baut, kopiert diesen Aufbau, nicht das Markup):
+
+1. **Kopf:** `title` = wie die Entität im Gespräch heißt (beim Beleg der
+   Lieferant), `meta` = die Kennung darunter (Rechnungsnummer, Dateiname).
+2. **Körper, in dieser Reihenfolge:** das Original zuerst und groß (die
+   PDF-Vorschau, Höhe `clamp(…, 72vh, …)` — auf großen Schirmen mehr Beleg);
+   darunter die Kern-Fakten aus **derselben** Komponente, die die Vollansicht
+   benutzt (`BelegSummary`), nie eine zweite Feldliste; zuletzt eine Zeile,
+   **was der Schnellblick nicht beantwortet** („Positionen, USt-Sätze und
+   Konto-Splitting werden in der vollständigen Belegansicht geprüft").
+3. **Fuß:** genau eine Aktion — der Weg in die Vollansicht. Ein Klasse-A-Drawer
+   schreibt nicht; wer ändern will, geht dorthin (Schreiben ist Klasse B).
+4. **Vier Zustände, alle im Drawer:** lädt · Fehler (mit der Kennung im Text) ·
+   nicht gefunden (Leerfall mit Mandantenbezug) · Inhalt. Der Wächter-Test
+   prüft Fehler- und Leerfall-Zweig strukturell.
+5. **Breite als Stufe:** `sm`, wenn eine Zeile oder eine Zahl die Antwort ist
+   (Auszugsposition), `lg`, sobald ein Dokument gezeigt wird.
+
 *Warum:* Ohne Katalog baut jeder Screen den zehnten Rahmen; ohne die harte
 Grenze wandert Screen-Logik in geteilte Hüllen.
 
@@ -260,6 +290,14 @@ Die Abnahme **baut keinen zweiten Kern nach**. Sie ruft die Kerne, die Agent
 und Stammdatenpflege ohnehin rufen (Abnahme, Klärung, Konvention, Freigabe);
 die Freigabe-Checkliste in Schritt 8 rechnet **dieselben Gates**, die der Agent
 passieren muss (`computeBatchGates`) — der Gate-Text ist der Zeilen-Text.
+Eine **Deckungslücke aus Gate 1a** (ein Datei-Import endet vor dem
+Periodenende) macht die Zeile „Kontoauszüge lückenlos" **gelb und
+quittierpflichtig**: Auszug nachliefern oder begründet quittieren, und die
+Quittung verfällt, sobald sich die Deckungsgrenze bewegt. Der Wortlaut wird aus
+den Gate-Feldern in Menschen-Sprache gebaut (`domain/deckungsluecke.ts`), für
+Schritt 1 und 8 derselbe Satz; **gerechnet wird nur im Gate**. *Warum:* der
+Agent läuft autonom und kann die Lücke nicht zurückspielen — entscheiden muss
+der Mensch (Owner 03.09.2026).
 Eigene **Oberflächen** hat sie sehr wohl: „kein zweiter Editor" heißt, dass der
 v2-Editor den alten ersetzt, nicht dass die Abnahme mit dem alten auskommen
 muss (F123 §0.2).

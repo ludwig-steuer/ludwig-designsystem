@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .label-mini { margin: 14px 0 8px; }
+  .ch {
+    background: #fff; border: 1px solid #DDE2E8; border-radius: 8px;
+    padding: 16px 18px; margin-bottom: 12px;
+  }
+  .ch__h { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+  .ch__title { font-size: 13px; font-weight: 600; color: #2D2D2D; }
+  .ch__sub { font-size: 11.5px; color: #8A8A8A; }
+  .ch__val { margin-left: auto; font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: #1A3A5C; font-variant-numeric: tabular-nums; }
+
+  /* BAR */
+  .bar { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; height: 120px; align-items: end; }
+  .bar__col { background: #1A3A5C; border-radius: 2px 2px 0 0; position: relative; min-height: 4px; }
+  .bar__col.lite { background: #C7DFEC; }
+  .bar__lbls { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; margin-top: 6px; }
+  .bar__lbl { font-size: 10.5px; color: #8A8A8A; text-align: center; font-variant-numeric: tabular-nums; }
+
+  /* LINE */
+  .line { width: 100%; height: 130px; }
+  .line .area { fill: rgba(59,143,196,0.10); }
+  .line .stroke { fill: none; stroke: #2E78A8; stroke-width: 1.75; }
+  .line .grid { stroke: #ECEFF3; stroke-width: 1; }
+  .line .axis { fill: #8A8A8A; font-size: 9.5px; font-family: var(--font-mono); }
+  .line .dot { fill: #fff; stroke: #2E78A8; stroke-width: 1.5; }
+
+  /* PIE — Donut */
+  .pie-wrap { display: grid; grid-template-columns: 140px 1fr; gap: 18px; align-items: center; }
+  .pie { width: 140px; height: 140px; }
+  .legend { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; }
+  .leg { display: grid; grid-template-columns: 12px 1fr auto auto; gap: 8px; align-items: center; }
+  .leg .sw { width: 10px; height: 10px; border-radius: 2px; }
+  .leg .name { color: #2D2D2D; }
+  .leg .pct { color: #5C5C5C; font-variant-numeric: tabular-nums; font-size: 11.5px; }
+  .leg .amt { color: #1A3A5C; font-variant-numeric: tabular-nums; font-weight: 500; }
+</style>
+
+<div class="label-mini">Bar-Chart · Tagesvolumen</div>
+<div class="ch">
+  <div class="ch__h">
+    <div>
+      <div class="ch__title">Belege pro Werktag</div>
+      <div class="ch__sub">April 2026 · letzte 12 Werktage</div>
+    </div>
+    <div class="ch__val">47 <span style="font-size: 12px; color: #5C5C5C; font-family: var(--font-sans); font-weight: 400;">heute</span></div>
+  </div>
+  <div class="bar">
+    <div class="bar__col lite" style="height: 32%"></div>
+    <div class="bar__col lite" style="height: 48%"></div>
+    <div class="bar__col lite" style="height: 65%"></div>
+    <div class="bar__col lite" style="height: 41%"></div>
+    <div class="bar__col lite" style="height: 56%"></div>
+    <div class="bar__col lite" style="height: 72%"></div>
+    <div class="bar__col lite" style="height: 38%"></div>
+    <div class="bar__col lite" style="height: 51%"></div>
+    <div class="bar__col lite" style="height: 67%"></div>
+    <div class="bar__col lite" style="height: 44%"></div>
+    <div class="bar__col lite" style="height: 78%"></div>
+    <div class="bar__col" style="height: 92%"></div>
+  </div>
+  <div class="bar__lbls">
+    <span class="bar__lbl">07.</span><span class="bar__lbl">08.</span><span class="bar__lbl">09.</span><span class="bar__lbl">10.</span>
+    <span class="bar__lbl">14.</span><span class="bar__lbl">15.</span><span class="bar__lbl">16.</span><span class="bar__lbl">17.</span>
+    <span class="bar__lbl">20.</span><span class="bar__lbl">21.</span><span class="bar__lbl">22.</span><span class="bar__lbl">23.</span>
+  </div>
+</div>
+
+<div class="label-mini" style="margin-top: 18px">Line-Chart · Verlauf USt-Voranmeldung</div>
+<div class="ch">
+  <div class="ch__h">
+    <div>
+      <div class="ch__title">Umsatzsteuer Q1/Q2 2026</div>
+      <div class="ch__sub">Monatliche Voranmeldung · Berger GmbH</div>
+    </div>
+    <div class="ch__val">12.480 <span style="font-size: 12px; color: #5C5C5C; font-family: var(--font-sans); font-weight: 400;">€ April</span></div>
+  </div>
+  <svg class="line" viewBox="0 0 600 130" preserveAspectRatio="none">
+    <line class="grid" x1="0" y1="32" x2="600" y2="32"/>
+    <line class="grid" x1="0" y1="64" x2="600" y2="64"/>
+    <line class="grid" x1="0" y1="96" x2="600" y2="96"/>
+    <path class="area" d="M30,86 L130,72 L230,58 L330,68 L430,42 L530,30 L530,120 L30,120 Z"/>
+    <path class="stroke" d="M30,86 L130,72 L230,58 L330,68 L430,42 L530,30"/>
+    <circle class="dot" cx="30" cy="86" r="3.5"/>
+    <circle class="dot" cx="130" cy="72" r="3.5"/>
+    <circle class="dot" cx="230" cy="58" r="3.5"/>
+    <circle class="dot" cx="330" cy="68" r="3.5"/>
+    <circle class="dot" cx="430" cy="42" r="3.5"/>
+    <circle class="dot" cx="530" cy="30" r="4.5" stroke-width="2"/>
+    <text class="axis" x="30"  y="128" text-anchor="middle">Nov</text>
+    <text class="axis" x="130" y="128" text-anchor="middle">Dez</text>
+    <text class="axis" x="230" y="128" text-anchor="middle">Jan</text>
+    <text class="axis" x="330" y="128" text-anchor="middle">Feb</text>
+    <text class="axis" x="430" y="128" text-anchor="middle">Mär</text>
+    <text class="axis" x="530" y="128" text-anchor="middle">Apr</text>
+  </svg>
+</div>
+
+<div class="label-mini" style="margin-top: 18px">Pie-Chart · Aufteilung Konten</div>
+<div class="ch">
+  <div class="ch__h">
+    <div>
+      <div class="ch__title">Aufwand nach Kontenkategorie</div>
+      <div class="ch__sub">April 2026 · 47 Belege · 14.230,15 €</div>
+    </div>
+  </div>
+  <div class="pie-wrap">
+    <svg class="pie" viewBox="0 0 36 36">
+      <!-- Donut: 4 segments using stroke-dasharray on r=15.9155 (circumference ≈ 100) -->
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#1A3A5C" stroke-width="6" stroke-dasharray="42 100" stroke-dashoffset="25" transform="rotate(-90 18 18)"/>
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#3B8FC4" stroke-width="6" stroke-dasharray="28 100" stroke-dashoffset="-17" transform="rotate(-90 18 18)"/>
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#5BA4D1" stroke-width="6" stroke-dasharray="18 100" stroke-dashoffset="-45" transform="rotate(-90 18 18)"/>
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#C7DFEC" stroke-width="6" stroke-dasharray="12 100" stroke-dashoffset="-63" transform="rotate(-90 18 18)"/>
+    </svg>
+    <div class="legend">
+      <div class="leg"><span class="sw" style="background:#1A3A5C"></span><span class="name">Wareneinkauf</span><span class="pct">42 %</span><span class="amt">5.976,66 €</span></div>
+      <div class="leg"><span class="sw" style="background:#3B8FC4"></span><span class="name">Raum + Energie</span><span class="pct">28 %</span><span class="amt">3.984,44 €</span></div>
+      <div class="leg"><span class="sw" style="background:#5BA4D1"></span><span class="name">Kommunikation</span><span class="pct">18 %</span><span class="amt">2.561,43 €</span></div>
+      <div class="leg"><span class="sw" style="background:#C7DFEC"></span><span class="name">Bürobedarf</span><span class="pct">12 %</span><span class="amt">1.707,62 €</span></div>
+    </div>
+  </div>
+</div>
+
+</div></body></html>

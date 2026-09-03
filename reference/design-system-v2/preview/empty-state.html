@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .empty {
+    background: #fff;
+    border: 1px solid #DDE2E8;
+    border-radius: 8px;
+    padding: 56px 32px;
+    text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .empty__ico {
+    width: 48px; height: 48px;
+    border-radius: 999px;
+    background: #F4F6F8;
+    border: 1px solid #DDE2E8;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #5C5C5C;
+  }
+  .empty__ico svg { width: 22px; height: 22px; stroke-width: 1.5; }
+  .empty__title { font-size: 16px; font-weight: 600; color: #1A3A5C; margin: 0; }
+  .empty__sub   { font-size: 13.5px; color: #5C5C5C; margin: 0; max-width: 360px; line-height: 1.5; }
+  .empty__actions { display: flex; gap: 10px; margin-top: 6px; }
+  .btn { font-family: var(--font-sans); font-weight: 500; font-size: 13px; padding: 7px 14px; border-radius: 5px; border: 1px solid transparent; cursor: pointer; }
+  .btn-primary { background: #1A3A5C; color: #fff; }
+  .btn-secondary { background: #fff; color: #1A3A5C; border-color: #C4CCD5; }
+  svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .label-mini { margin-bottom: 12px; }
+</style>
+
+<div class="label-mini">Empty-State · Liste</div>
+<div class="empty">
+  <div class="empty__ico">
+    <svg viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+  </div>
+  <h3 class="empty__title">Posteingang ist leer</h3>
+  <p class="empty__sub">Sobald neue Belege per E-Mail oder Upload eingehen, werden sie hier von Ludwig vorkontiert und zur Prüfung bereitgestellt.</p>
+  <div class="empty__actions">
+    <button class="btn btn-secondary">E-Mail-Adresse anzeigen</button>
+    <button class="btn btn-primary">Beleg hochladen</button>
+  </div>
+</div>
+
+<div class="label-mini" style="margin-top: 24px">Empty-State · Filterergebnis</div>
+<div class="empty" style="padding: 36px 24px">
+  <div class="empty__ico" style="width: 36px; height: 36px;">
+    <svg viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </div>
+  <h3 class="empty__title" style="font-size: 14.5px">Keine Treffer</h3>
+  <p class="empty__sub" style="font-size: 13px">Für „Telekom" im Zeitraum April 2026 wurden keine Belege gefunden.</p>
+  <div class="empty__actions"><button class="btn btn-secondary">Filter zurücksetzen</button></div>
+</div>
+
+</div></body></html>

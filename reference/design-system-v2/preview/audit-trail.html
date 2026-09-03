@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .label-mini { margin: 14px 0 8px; }
+  .at {
+    background: #fff; border: 1px solid #DDE2E8; border-radius: 8px;
+    padding: 18px 20px;
+  }
+  .at__h { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #8A8A8A; font-weight: 600; margin-bottom: 14px; }
+  .at__list { position: relative; padding-left: 18px; }
+  .at__list::before {
+    content: "";
+    position: absolute; left: 5px; top: 6px; bottom: 6px;
+    width: 1px; background: #DDE2E8;
+  }
+  .at__item { position: relative; padding: 6px 0 14px; font-size: 13px; line-height: 1.5; }
+  .at__item:last-child { padding-bottom: 0; }
+  .at__dot {
+    position: absolute; left: -18px; top: 9px;
+    width: 10px; height: 10px; border-radius: 999px;
+    background: #fff; border: 2px solid #C4CCD5;
+  }
+  .at__dot--ludwig { border-color: #3B8FC4; background: #3B8FC4; box-shadow: 0 0 0 3px rgba(59,143,196,0.18); }
+  .at__dot--user   { border-color: #1A3A5C; background: #1A3A5C; }
+  .at__dot--system { border-color: #C4CCD5; background: #fff; }
+  .at__row { color: #2D2D2D; }
+  .at__row strong { color: #1A3A5C; font-weight: 600; }
+  .at__row .field { font-family: var(--font-mono); font-size: 12px; background: #ECEFF3; padding: 1px 5px; border-radius: 3px; color: #2D2D2D; }
+  .at__meta { color: #8A8A8A; font-size: 12px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+</style>
+
+<div class="label-mini">Audit-Trail · Verlauf einer Buchung</div>
+
+<div class="at">
+  <div class="at__h">Verlauf · Beleg #2026-04-118</div>
+  <div class="at__list">
+    <div class="at__item">
+      <span class="at__dot at__dot--user"></span>
+      <div class="at__row"><strong>Anna Berger</strong> hat den Beleg freigegeben.</div>
+      <div class="at__meta">24.04.2026 · 14:22 · IP 192.0.2.14</div>
+    </div>
+    <div class="at__item">
+      <span class="at__dot at__dot--user"></span>
+      <div class="at__row"><strong>Anna Berger</strong> hat <span class="field">Konto</span> von <span class="field">4610 · Werbekosten</span> auf <span class="field">4980 · Bürobedarf</span> geändert.</div>
+      <div class="at__meta">24.04.2026 · 14:21</div>
+    </div>
+    <div class="at__item">
+      <span class="at__dot at__dot--ludwig"></span>
+      <div class="at__row"><strong>Ludwig</strong> hat eine Rückfrage gestellt: „Konto unklar — Bürobedarf oder Werbeartikel?"</div>
+      <div class="at__meta">23.04.2026 · 09:16</div>
+    </div>
+    <div class="at__item">
+      <span class="at__dot at__dot--ludwig"></span>
+      <div class="at__row"><strong>Ludwig</strong> hat den Beleg vorkontiert. Konfidenz: 72 %.</div>
+      <div class="at__meta">23.04.2026 · 09:14</div>
+    </div>
+    <div class="at__item">
+      <span class="at__dot at__dot--system"></span>
+      <div class="at__row">Beleg per E-Mail an <span class="field">belege@hofmann-stb.de</span> eingegangen.</div>
+      <div class="at__meta">23.04.2026 · 09:12</div>
+    </div>
+  </div>
+</div>
+
+</div></body></html>

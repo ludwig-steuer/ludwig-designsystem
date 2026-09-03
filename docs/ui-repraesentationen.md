@@ -1,5 +1,14 @@
 # UI-Repräsentationen der Kern-Entitäten — Inventar, Bewertung, Zielstruktur
 
+> **Dieses Repo führt das Inventar.** Es lag bis 2026-09-03 als
+> `docs/reference/datenmodell/ui-repraesentationen.md` in `ludwig/app` und ist
+> dort entfallen — diese Fassung ist die maßgebliche und wird hier gepflegt.
+> Deshalb liegt es **nicht** unter `docs/ludwig/` (das ist der Spiegel dessen,
+> was drüben SSOT bleibt, und wird bei `pnpm sync:ludwig` neu geschrieben).
+>
+> **Pfade im Text zeigen auf die App.** Übersetzung:
+> `apps/web/src/ui/v2` → `src/ui/v3`, `src/styles/v2.css` → `src/styles/v3.css`.
+
 **Erzeugt:** 2026-08-29 · **Auftrag:** `docs/backlog/F111-entitaeten-ui-repraesentationen.md` ·
 **Grundlage der Entitätenliste:** `docs/reference/datenmodell/datenmodell-review-2026-08-27.md` §7 ·
 **Werkbank:** `pnpm --filter @ludwig/web storybook` (Port 6106)
@@ -37,8 +46,8 @@ Story** (207 Stories, §5); die übrigen 58 sind in §5.2 mit Begründung gelist
 > **v1 und v2.** Alles in diesem Dokument beschreibt den **v1**-Bestand.
 > Das neue Set liegt unter `@/ui/v2` und ist heute auf der Stapel-Subsite
 > eingelöst; welche Bausteine, Entitäten und Seiten v2 sind oder werden,
-> steht in `docs/ludwig-UX-guidelines-v2.md §11`, die Abnahmekriterien in
-> `docs/ludwig-UX-guidelines-v2.md`. In Storybook trägt jede
+> steht in `docs/design-guidelines.md §11`, die Abnahmekriterien in
+> `docs/design-guidelines.md`. In Storybook trägt jede
 > v2-Komponente den Titel-Präfix `v2/` — dort ist die Frage „wovon haben
 > wir eine v2?" ohne gepflegte Liste zu beantworten.
 
@@ -581,15 +590,27 @@ Nach B2 stehen drei Galerien nebeneinander. Vorschlag:
 Nicht jede Entität braucht den vollen Satz. Der Standardsatz und wer ihn
 tatsächlich braucht:
 
-| Variante | Zweck | braucht |
-|---|---|---|
-| `<Entity>Cell` | Zelle in fremder Liste | Sachverhalt, Konto, Beleg, Partner |
-| `<Entity>Row` | eigene Listenzeile | alle Listen-Entitäten |
-| `<Entity>Card` | Kompakt, im Kontext einer anderen Entität | Beleg, Buchung, OPOS-Posten |
-| `<Entity>View` | volle read-only Darstellung | Buchungssatz, Sachverhalt, Beleg, Vertrag |
-| `<Entity>Drawer` | dasselbe im Slide-over, lädt selbst | siehe F113 |
-| `<Entity>Picker` | Auswahl | Konto, Kreditor, Steuerschlüssel |
-| Status-Chip | Zustand | **immer** über `StatusBadge` + Registry, nie lokal |
+Die Familie hat **zwei Achsen**: wie viel gezeigt wird (Größe) und wo es
+erscheint (Präsentation). Die Größen sind S · M · XL; die Präsentation ist
+normalerweise „im Fluss der Seite" und als zweite Möglichkeit der **Drawer**.
+
+| Variante | Größe | Zweck | braucht |
+|---|---|---|---|
+| `<Entity>Cell` | S | Zelle in fremder Liste | Sachverhalt, Konto, Beleg, Partner |
+| `<Entity>Row` | M | eigene Listenzeile | alle Listen-Entitäten |
+| `<Entity>Card` | M | Kompakt, im Kontext einer anderen Entität | Beleg, Buchung, OPOS-Posten |
+| `<Entity>View` | XL | volle read-only Darstellung | Buchungssatz, Sachverhalt, Beleg, Vertrag |
+| `<Entity>Drawer` | — | **Präsentation**, keine Größe: der Schnellblick im Slide-over, holt sich seine Daten selbst | jede Entität, nach der man mitten in einer anderen Arbeit fragt |
+| `<Entity>Picker` | — | Auswahl | Konto, Kreditor, Steuerschlüssel |
+| Status-Chip | — | Zustand | **immer** über `StatusBadge` + Registry, nie lokal |
+
+**Wann ein Drawer sinnvoll ist:** wenn die Frage nach einer Entität mitten in
+der Arbeit an einer anderen auftaucht („wie sah der Beleg noch mal aus?") und
+die Antwort ohne Seitenwechsel passt — der Kontext dahinter bleibt sichtbar.
+Er ist keine vierte Größe, sondern eine **Hülle um XL-Inhalt**: er lädt, fängt
+Fehler, öffnet den Rahmen und zeigt darin die Kern-Fakten aus derselben
+Komponente wie die Vollansicht — plus genau einen Ausgang dorthin. Name,
+Aufbau und die vier Zustände: `web-ui.md` R15 (Muster `BelegDrawer`, F113).
 
 ### 4.5 Vorschlag für neue R-Regeln in `docs/topics/web-ui.md`
 

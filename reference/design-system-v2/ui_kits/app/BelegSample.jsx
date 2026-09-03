@@ -1,0 +1,61 @@
+// Beispiel-Beleg für Beleg-Detail (alle drei Layout-Varianten teilen sich diesen)
+const BELEG_SAMPLE = {
+  id: "BL-2026-04-118",
+  kreditor: { name: "Telekom Deutschland GmbH", id: "K-10042", anschrift: "Landgrabenweg 151 · 53227 Bonn" },
+  belegnummer: "RE-2026-04-118-7732",
+  invoice_date: "23.04.2026",
+  due_date: "07.05.2026",
+  booking_date: "30.04.2026",
+  reverse_charge: false,
+  currency: "EUR",
+  subtotal_value: "67,14",
+  tax_total_value: "12,76",
+  total_value: "79,90",
+  ocr_markdown: [
+    "**Telekom Deutschland GmbH**",
+    "Landgrabenweg 151, 53227 Bonn",
+    "",
+    "Rechnung Nr. RE-2026-04-118-7732",
+    "Rechnungsdatum: 23.04.2026",
+    "",
+    "| Pos | Leistung               | Zeitraum     | Betrag |",
+    "|-----|------------------------|--------------|--------|",
+    "| 1   | Mobilfunk Business L   | 04/2026      | 39,90 € |",
+    "| 2   | Datenoption 20 GB      | 04/2026      | 19,90 € |",
+    "| 3   | Auslandsoption EU      | 04/2026      |  7,34 € |",
+    "",
+    "Nettobetrag:    67,14 €",
+    "USt 19 %:       12,76 €",
+    "Gesamt:         79,90 €",
+    "",
+    "Zahlbar bis 07.05.2026.",
+  ].join("\n"),
+  positions: [
+    { pos: 1, beschreibung: "Mobilfunk Business L", quantity: "1", unit_price: "39,90", tax_rate_percent: "19", total_price: "39,90", source: "extracted" },
+    { pos: 2, beschreibung: "Datenoption 20 GB",   quantity: "1", unit_price: "19,90", tax_rate_percent: "19", total_price: "19,90", source: "extracted" },
+    { pos: 3, beschreibung: "Auslandsoption EU",   quantity: "1", unit_price:  "7,34", tax_rate_percent: "19", total_price:  "7,34", source: "extracted" },
+    { pos: 4, beschreibung: "Rundungsdifferenz",   quantity: "1", unit_price:  "0,00", tax_rate_percent: "19", total_price:  "0,00", source: "virtual_fallback" },
+  ],
+  interpretation: {
+    confidence: 0.92,
+    soll: { konto: "4925", bezeichnung: "Telefon" },
+    haben: { konto: "1200", bezeichnung: "Bank" },
+    kategorie: "Telekommunikation · Mobilfunk",
+    buchungstext: "Telekom · Mobilfunk 04/2026",
+    klaerung: [
+      "Auslandsoption EU als regulärer Telefonaufwand verbucht. Bitte bestätigen, ob ein eigenes Konto (4926) gewünscht ist.",
+    ],
+    review: [
+      "Fälligkeitsdatum 07.05.2026 liegt nach dem Buchungsdatum 30.04.2026 — bitte ggf. Periodenabgrenzung prüfen.",
+      "Beleg ohne Bestellnummer — Zuordnung über Lieferant erfolgt.",
+    ],
+    reasoning: [
+      "Lieferant „Telekom Deutschland GmbH" ist als wiederkehrender Kreditor (K-10042) erfasst; in den letzten 12 Buchungen wurde Konto 4925 verwendet.",
+      "Buchungstext folgt dem etablierten Muster „<Lieferant> · <Leistung> <Periode>".",
+      "Steuersatz 19 % stimmt mit dem extrahierten Wert überein. Reverse-Charge nicht einschlägig (deutscher Inlandsumsatz).",
+      "Konfidenz 92 % — leichte Unsicherheit aufgrund der Auslandsoption (mögliches Sonderkonto).",
+    ].join(" "),
+  },
+};
+
+window.BELEG_SAMPLE = BELEG_SAMPLE;

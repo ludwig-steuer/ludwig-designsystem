@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Ludwig — Beleg-Detail · Optionen</title>
+  <meta name="viewport" content="width=1440">
+  <link rel="icon" type="image/svg+xml" href="../../assets/ludwig-mark.svg">
+  <link rel="stylesheet" href="app.css?v=4">
+  <link rel="stylesheet" href="beleg-detail.css?v=1">
+  <style>
+    /* Canvas-eigene Anpassungen — Beleg-Detail füllt jeweils sein Artboard */
+    body { background: #F4F6F8; }
+    .bdv-artboard {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      background: #FAFBFC;
+    }
+    /* Innerhalb des Artboards übernimmt .bdv das Layout */
+    .bdv-artboard > .bdv { flex: 1; min-height: 0; }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="BelegSample.jsx"></script>
+  <script type="text/babel" src="BelegShared.jsx"></script>
+  <script type="text/babel" src="BelegInterpretation.jsx"></script>
+  <script type="text/babel" src="BelegVariants.jsx"></script>
+
+  <script type="text/babel" data-presets="env,react">
+    function App() {
+      const beleg = window.BELEG_SAMPLE;
+      const onBack = () => {};
+      return (
+        <DesignCanvas
+          title="Beleg-Detail · Layout-Optionen"
+          subtitle="Drei Vorschläge für die Bildschirm-Aufteilung. PDF immer links, Header / Positionen / Ludwig-Interpretation rechts — unterschiedlich strukturiert."
+        >
+          <DCSection id="opt-a" title="A · Klassisch gestapelt"
+            description="Eine Spalte rechts: Header-Block, Positionen, Ludwig-Analyse von oben nach unten. Erwartbar, wenig kognitive Last, langes Scrollen.">
+            <DCArtboard id="a-default" label="Default" width={1320} height={860}>
+              <div className="bdv-artboard">
+                <BelegDetail_A beleg={beleg} onBack={onBack} />
+              </div>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="opt-b" title="B · Tabs"
+            description="Sticky Tab-Bar rechts (Übersicht · Positionen · Ludwig-Analyse · OCR). Reduziert Scroll-Last, fokussiert je Aufgabe — Klärung/Review werden nicht übersehen.">
+            <DCArtboard id="b-default" label="Default · Übersicht aktiv" width={1320} height={860}>
+              <div className="bdv-artboard">
+                <BelegDetail_B beleg={beleg} onBack={onBack} />
+              </div>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="opt-c" title="C · Drei Spalten"
+            description="PDF · Belegfakten · Ludwig-Analyse als gleichberechtigte Spalten. Konfidenz, Klärungsfragen und Review-Items immer sichtbar — geeignet für 1440 px+ Monitore.">
+            <DCArtboard id="c-default" label="Default" width={1440} height={860}>
+              <div className="bdv-artboard">
+                <BelegDetail_C beleg={beleg} onBack={onBack} />
+              </div>
+            </DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"></head>
+<body><div class="card">
+<style>
+  .label-mini { margin: 16px 0 8px; }
+  .label-mini:first-of-type { margin-top: 0; }
+  svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ====== Inline pill (3 bars) ====== */
+  .conf {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 2px 8px 2px 6px; border-radius: 999px;
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .conf .bars { display: inline-flex; gap: 1.5px; align-items: flex-end; }
+  .conf .bars i { width: 2.5px; background: currentColor; border-radius: 1px; opacity: 0.30; display: inline-block; }
+  .conf .bars i:nth-child(1) { height: 4px; }
+  .conf .bars i:nth-child(2) { height: 7px; }
+  .conf .bars i:nth-child(3) { height: 10px; }
+  .conf--high { background: #EBF2EE; color: #3F7A5A; }
+  .conf--med  { background: #F5EEE0; color: #B07B2C; }
+  .conf--low  { background: #F4E2DE; color: #A8403C; }
+  .conf--ok   { background: #E3F0F8; color: #2E78A8; }
+  .conf--high .bars i { opacity: 1; }
+  .conf--med  .bars i:nth-child(1), .conf--med .bars i:nth-child(2) { opacity: 1; }
+  .conf--low  .bars i:nth-child(1) { opacity: 1; }
+  .conf--ok   .bars i { opacity: 1; }
+
+  /* ====== Inline (in field-value contexts) ====== */
+  .row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: #fff; border: 1px solid #DDE2E8; border-radius: 6px;
+    font-size: 13px;
+  }
+  .row + .row { margin-top: 6px; }
+  .row .k { color: #5C5C5C; min-width: 110px; }
+  .row .v { flex: 1; color: #2D2D2D; font-family: var(--font-mono); font-size: 12.5px; }
+  .row .v.serif { font-family: var(--font-serif); font-size: 16px; font-variant-numeric: tabular-nums; color: #1A3A5C; }
+
+  /* ====== Large variant — for Beleg-detail header ====== */
+  .big {
+    background: #fff; border: 1px solid #DDE2E8; border-radius: 8px;
+    padding: 14px 16px;
+    display: grid; grid-template-columns: auto 1fr; gap: 14px;
+    align-items: start;
+  }
+  .big__gauge {
+    width: 56px; height: 56px;
+    position: relative;
+  }
+  .big__gauge svg { width: 56px; height: 56px; transform: rotate(-90deg); }
+  .big__gauge-track { stroke: #ECEFF3; stroke-width: 5; fill: none; }
+  .big__gauge-bar   { stroke-width: 5; fill: none; stroke-linecap: round; }
+  .big__gauge-bar--high { stroke: #3F7A5A; }
+  .big__gauge-bar--med  { stroke: #B07B2C; }
+  .big__gauge-bar--low  { stroke: #A8403C; }
+  .big__pct {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-serif); font-size: 16px; font-weight: 500; color: #1A3A5C;
+    font-variant-numeric: tabular-nums;
+  }
+  .big__body { min-width: 0; }
+  .big__head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .big__lbl  { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #8A8A8A; font-weight: 600; }
+  .big__name { font-size: 14px; font-weight: 600; color: #1A3A5C; }
+  .big__hint { font-size: 12.5px; color: #5C5C5C; line-height: 1.5; }
+
+  /* ====== Field row with confidence per value ====== */
+  .field-table { background: #fff; border: 1px solid #DDE2E8; border-radius: 6px; overflow: hidden; }
+  .field-row {
+    display: grid; grid-template-columns: 130px 1fr auto;
+    gap: 14px; align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid #ECEFF3;
+    font-size: 13px;
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-row .k { color: #5C5C5C; }
+  .field-row .v { font-family: var(--font-mono); font-size: 12.5px; color: #2D2D2D; }
+  .field-row .v.amt { font-variant-numeric: tabular-nums; color: #1A3A5C; font-weight: 500; }
+</style>
+
+<div class="label-mini">Confidence-Pill · alle Stufen</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+  <span class="conf conf--high"><span class="bars"><i></i><i></i><i></i></span>94 %</span>
+  <span class="conf conf--med"><span class="bars"><i></i><i></i><i></i></span>72 %</span>
+  <span class="conf conf--low"><span class="bars"><i></i><i></i><i></i></span>48 %</span>
+  <span class="conf conf--ok"><span class="bars"><i></i><i></i><i></i></span>Geprüft</span>
+</div>
+<div style="font-size: 11.5px; color: #8A8A8A; margin-top: 8px; line-height: 1.5;">
+  Schwellen: <strong style="color:#3F7A5A">≥ 85 %</strong> hoch · <strong style="color:#B07B2C">60–84 %</strong> mittel · <strong style="color:#A8403C">&lt; 60 %</strong> niedrig.
+  Override „Geprüft" sobald Steuerberater freigegeben hat — ersetzt die Konfidenz-Anzeige dauerhaft.
+</div>
+
+<div class="label-mini">Inline · neben Feldwerten in der Vorkontierung</div>
+<div class="field-table">
+  <div class="field-row">
+    <span class="k">Lieferant</span>
+    <span class="v">Telekom Deutschland GmbH</span>
+    <span class="conf conf--high"><span class="bars"><i></i><i></i><i></i></span>97 %</span>
+  </div>
+  <div class="field-row">
+    <span class="k">Belegdatum</span>
+    <span class="v">23.04.2026</span>
+    <span class="conf conf--high"><span class="bars"><i></i><i></i><i></i></span>99 %</span>
+  </div>
+  <div class="field-row">
+    <span class="k">Bruttobetrag</span>
+    <span class="v amt">79,90 €</span>
+    <span class="conf conf--high"><span class="bars"><i></i><i></i><i></i></span>96 %</span>
+  </div>
+  <div class="field-row">
+    <span class="k">Konto</span>
+    <span class="v">4925 · Telefon</span>
+    <span class="conf conf--med"><span class="bars"><i></i><i></i><i></i></span>78 %</span>
+  </div>
+  <div class="field-row">
+    <span class="k">Kostenstelle</span>
+    <span class="v">— nicht erkannt</span>
+    <span class="conf conf--low"><span class="bars"><i></i><i></i><i></i></span>0 %</span>
+  </div>
+</div>
+
+<div class="label-mini">Detail-Variante · für Beleg-Header (Gesamt-Konfidenz)</div>
+<div class="big">
+  <div class="big__gauge">
+    <svg viewBox="0 0 56 56">
+      <circle class="big__gauge-track" cx="28" cy="28" r="22"/>
+      <circle class="big__gauge-bar big__gauge-bar--med" cx="28" cy="28" r="22"
+              stroke-dasharray="138.23" stroke-dashoffset="38.7"/>
+    </svg>
+    <span class="big__pct">72 %</span>
+  </div>
+  <div class="big__body">
+    <div class="big__head">
+      <span class="big__lbl">Ludwig-Konfidenz</span>
+      <span class="conf conf--med" style="font-size: 9.5px; padding: 1px 7px;">mittel</span>
+    </div>
+    <div class="big__name" style="margin-bottom: 4px">Eingangsrechnung · Office Mayer e.K.</div>
+    <div class="big__hint">
+      Ludwig konnte 4 von 5 Pflichtfeldern eindeutig zuordnen. Konto bleibt unsicher
+      — Lieferant tritt sowohl als Bürobedarf-Händler als auch Werbeartikel-Lieferant auf.
+      Bitte Konto prüfen oder Mandanten-Rückfrage starten.
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 8px"></div>
+
+<div class="big">
+  <div class="big__gauge">
+    <svg viewBox="0 0 56 56">
+      <circle class="big__gauge-track" cx="28" cy="28" r="22"/>
+      <circle class="big__gauge-bar big__gauge-bar--high" cx="28" cy="28" r="22"
+              stroke-dasharray="138.23" stroke-dashoffset="8.3"/>
+    </svg>
+    <span class="big__pct">94 %</span>
+  </div>
+  <div class="big__body">
+    <div class="big__head">
+      <span class="big__lbl">Ludwig-Konfidenz</span>
+      <span class="conf conf--high" style="font-size: 9.5px; padding: 1px 7px;">hoch</span>
+    </div>
+    <div class="big__name" style="margin-bottom: 4px">Eingangsrechnung · Telekom Deutschland GmbH</div>
+    <div class="big__hint">
+      Alle Pflichtfelder eindeutig erkannt. Buchungssatz aus 12 vorherigen Buchungen
+      desselben Lieferanten abgeleitet. Bereit zur Freigabe.
+    </div>
+  </div>
+</div>
+
+</div></body></html>
