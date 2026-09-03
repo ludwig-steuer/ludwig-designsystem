@@ -11,7 +11,9 @@ import {
   Receipt,
   Repeat,
 } from "lucide-react";
+import { AppShell, TopBar } from "./AppShell";
 import { NavList, type NavSection } from "./NavList";
+import { PageHeader } from "./PageHeader";
 
 const meta: Meta<typeof NavList> = { title: "v3/Primitives/Navigation/NavList", component: NavList };
 export default meta;
@@ -49,31 +51,51 @@ const SECTIONS: NavSection[] = [
       { href: "/clients/musterbau/2026/statistics", label: "Finanz-Statistik", icon: ico(BarChart3), future: true },
     ],
   },
+  {
+    label: "Kommunikation",
+    items: [
+      { href: "/clients/musterbau/2026/clarifications", label: "Klärfälle", icon: ico(FileQuestion), count: 2 },
+    ],
+  },
 ];
+
+/**
+ * Die Leiste bringt ihre Farbe aus `app-chrome.css` mit — `.app__sidebar` ist
+ * dieselbe Fläche wie in der Shell. Ein Hex-Wert in der Story wäre ein zweiter
+ * Ton neben dem einen, den es schon gibt.
+ */
+const Rail = ({ collapsed, children }: { collapsed?: boolean; children: React.ReactNode }) => (
+  <div
+    className={`app__sidebar${collapsed ? " is-collapsed" : ""}`}
+    style={{ width: collapsed ? 64 : 240, minHeight: 520 }}
+  >
+    {children}
+  </div>
+);
 
 /** Der aktive Eintrag steht auf einer **Unterseite** — er leuchtet trotzdem,
  *  weil der längste passende Präfix gewinnt. Ein Zähler ruft, einer nicht. */
 export const Filled: Story = {
   render: () => (
-    <div style={{ width: 240, background: "#14273D", minHeight: 520 }}>
+    <Rail>
       <NavList sections={SECTIONS} activePath="/clients/musterbau/2026/cases/2026-0142" />
-    </div>
+    </Rail>
   ),
 };
 
 /** Eingeklappt bleibt das Icon; die Beschriftung wandert in den `title`. */
 export const Collapsed: Story = {
   render: () => (
-    <div className="is-collapsed" style={{ width: 64, background: "#14273D", minHeight: 520 }}>
+    <Rail collapsed>
       <NavList sections={SECTIONS} activePath="/clients/musterbau/2026/inbox" collapsed />
-    </div>
+    </Rail>
   ),
 };
 
 /** Rand: lange Beschriftung, dreistelliger Zähler, ein Eintrag ohne Icon. */
 export const Edges: Story = {
   render: () => (
-    <div style={{ width: 240, background: "#14273D", minHeight: 320 }}>
+    <Rail>
       <NavList
         activePath="/x"
         sections={[
@@ -87,6 +109,26 @@ export const Edges: Story = {
           },
         ]}
       />
-    </div>
+    </Rail>
+  ),
+};
+
+/**
+ * Im Rahmen — dort gehört sie hin: `AppShell` (0030) gibt die Spalte, die
+ * Navigation füllt sie.
+ */
+export const InShell: Story = {
+  render: () => (
+    <AppShell
+      sidebar={
+        <>
+          <div className="sb__logo">Ludwig</div>
+          <NavList sections={SECTIONS} activePath="/clients/musterbau/2026/cases" />
+        </>
+      }
+      topbar={<TopBar crumb="Musterbau GmbH · 2026 · Sachverhalte" />}
+    >
+      <PageHeader title="Sachverhalte" description="3 offen, davon einer überfällig." />
+    </AppShell>
   ),
 };

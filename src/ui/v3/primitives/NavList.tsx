@@ -116,8 +116,14 @@ function Entry({
   );
 
   if (item.future) {
+    // Collapsed the label lives in `title` — so the roadmap entry has to carry
+    // both, otherwise it is the one icon without a word (found in review).
     return (
-      <span className="sb__navitem is-future" aria-disabled="true" title="bald verfügbar">
+      <span
+        className="sb__navitem is-future"
+        aria-disabled="true"
+        title={collapsed ? `${item.label} — bald verfügbar` : "bald verfügbar"}
+      >
         {body}
       </span>
     );
