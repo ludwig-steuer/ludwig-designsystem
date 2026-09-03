@@ -112,9 +112,11 @@ Nicht zu vergessen bei der Umstellung: `.btn` ist heute **37 px**, `.btn-sm`
 
 ## Aufräumen im eigenen Haus
 
-- **`legacy/` leeren.** Fünf Bausteine warten dort auf ihre Einordnung:
-  StatusBadge + Registry, Banner, LongText, Pagination, Buchungs-Formatierung.
-  Erst wenn der Ordner leer ist, ist v3 vollständig (siehe `legacy/README.md`).
+- ~~**`legacy/` leeren**~~ — erledigt am 2026-09-03 mit 0043. Die Status-
+  Familie liegt in `patterns/`, Banner, LongText und Pagination in
+  `primitives/`, `tax-assist` bei der Buchung; `booking/format.ts`,
+  `booking/types.ts` und die drei Kopien (Badge, Dialog, `cn`) sind gelöscht.
+  Der Ordner existiert nicht mehr.
 - ~~**`.v2tbl__empty` ist zentriert**~~ — behoben am 2026-09-03, zusammen mit
   `.v2lp__empty`. Zentriert bleibt nur die Vollbild-Sperre unter 1280 px, und
   die ist kein Inhalt.

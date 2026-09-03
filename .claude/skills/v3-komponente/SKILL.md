@@ -36,9 +36,6 @@ Zusammensetzungen wohnen im Modul der App, nicht hier.
 (Button, KeyButton), `Table.tsx` (Card, Table, Row …). Kein Sammelbecken wie
 ein `Surface.tsx` — wer die Komponente sucht, findet die Datei am Namen.
 
-`src/ui/legacy/` ist vorübergehend: Bausteine aus der App, noch nicht
-eingeordnet. Nichts Neues dorthin.
-
 Export über `src/ui/v3/index.ts`. Die Komponente kennt **kein Fachmodul**:
 Daten kommen als Props, Loader als Prop, keine Server Actions.
 
@@ -90,7 +87,7 @@ Kein Hex, kein Pixelmaß in der Komponente. Farben und Maße sind Tokens
 (`var(--…)` aus `tokens.css`) oder Klassen aus `v3.css`. Braucht die
 Komponente einen Wert, den es nicht gibt: Token ergänzen, nicht hart schreiben.
 
-Status **nur** über die Registry (`src/ui/legacy/status/status-registry.ts`) — keine
+Status **nur** über die Registry (`src/ui/v3/patterns/status-registry.ts`) — keine
 lokale Label-Map, kein eigener Status-Text.
 
 ## Story ist Pflicht

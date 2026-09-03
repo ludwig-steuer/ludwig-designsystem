@@ -90,6 +90,8 @@ export {
   type NavSection,
 } from "./primitives/NavList";
 
+export { Pagination } from "./primitives/Pagination";
+
 /* Formular */
 export { Field, Input, InputGroup, Textarea, Select, Checkbox } from "./primitives/Form";
 export { RadioGroup, type RadioOption } from "./primitives/RadioGroup";
@@ -113,6 +115,7 @@ export { StatusCallout } from "./primitives/StatusCallout";
 export { Badge, type BadgeTone, type BadgeProps } from "./primitives/Badge";
 export { EmptyState, type EmptyStateProps } from "./primitives/EmptyState";
 export { Callout } from "./primitives/Callout";
+export { Banner, type BannerTone } from "./primitives/Banner";
 export { Disclosure, type DisclosureTone } from "./primitives/Disclosure";
 export { PageHeader } from "./primitives/PageHeader";
 export { ToastHost, useToast, type Toast, type ToastTone } from "./primitives/Toast";
@@ -122,6 +125,7 @@ export { Markdown, parseInline, parseMarkdown } from "./primitives/Markdown";
 /* Werte — ein Betrag, ein Zeitpunkt, eine Regel (P24) */
 export { Amount, type AmountProps, type AmountSize } from "./primitives/Amount";
 export { Time, Duration, type TimeSize } from "./primitives/Time";
+export { LongText } from "./primitives/LongText";
 export {
   formatAmount,
   formatTime,
@@ -249,16 +253,7 @@ export {
   type SourceKind,
 } from "./entities/journal-entry/AiBookingNotes";
 
-/**
- * Legacy (`src/ui/legacy/`): CSS-identisch mit dem Design, deshalb nicht neu
- * gebaut und noch nicht in die Dreiteilung eingeordnet. Der Import läuft trotzdem über `@/ui/v3`, damit der Grep
- * auf `@/ui/components` irgendwann leer wird.
- */
 /* Status — die eine erlaubte Status-Darstellung (R1). */
 export { StatusBadge, type StatusBadgeProps } from "./patterns/StatusBadge";
-export { StatusInfoButton } from "../legacy/status/StatusInfoButton";
-export { StatusInfoDialog } from "../legacy/status/StatusInfoDialog";
-
-export { Banner } from "../legacy/components/primitives/Banner";
-export { LongText } from "../legacy/components/primitives/LongText";
-export { Pagination } from "../legacy/components/Pagination";
+export { StatusInfoButton } from "./patterns/StatusInfoButton";
+export { StatusInfoDialog } from "./patterns/StatusInfoDialog";

@@ -16,6 +16,10 @@ interface StatusInfoButtonProps {
  * Das (i) neben einem Status-Chip: öffnet den gemeinsamen `StatusInfoDialog`
  * mit allen Ausprägungen dieser Achse. Winziges Client-Island, damit
  * `StatusBadge` eine Server-Komponente bleiben kann.
+ *
+ * @when    „What can this status be?" right next to the status itself.
+ * @instead The legend without a trigger → StatusInfoDialog. Help on a field
+ *          → Field `hint`. A whole page of explanation → ProseCard.
  */
 export function StatusInfoButton({ axis, current }: StatusInfoButtonProps) {
   const [open, setOpen] = useState(false);

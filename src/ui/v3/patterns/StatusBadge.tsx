@@ -1,7 +1,7 @@
 import { Badge } from "../primitives/Badge";
-import { AXIS_LABEL, ENTITY_ICON } from "@/ui/legacy/status/entity-icons";
-import { StatusInfoButton } from "@/ui/legacy/status/StatusInfoButton";
-import { resolveStage, resolveStatus, type StatusAxis } from "@/ui/legacy/status/status-registry";
+import { AXIS_LABEL, ENTITY_ICON } from "./entity-icons";
+import { StatusInfoButton } from "./StatusInfoButton";
+import { resolveStage, resolveStatus, type StatusAxis } from "./status-registry";
 
 export interface StatusBadgeProps {
   /** Welche Status-Achse — bestimmt Label, Farbe und Erklärung. */

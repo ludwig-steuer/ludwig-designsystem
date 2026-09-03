@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as S from "@ds-stories/src/ui/legacy/status/StatusInfoDialog.stories";
+import * as S from "@ds-stories/src/ui/v3/patterns/StatusInfoDialog.stories";
 
 function compose(S: any, key: string) {
   const meta: any = S.default ?? {};

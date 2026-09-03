@@ -22,9 +22,6 @@ Ablauf und Status: `docs/backlog/README.md`.
 | Welche Typen gibt es? | `src/ludwig/` — die App gibt das Datenmodell vor, nie lokal neu definieren |
 | Welche Gestaltungsregel gilt? | `docs/design-guidelines.md` (V/L/T/Z/I), Prüfliste §9 |
 
-Wartet in `src/ui/legacy/` ein Baustein dafür, ist die Aufgabe „einordnen",
-nicht „neu bauen".
-
 ## 2. Klasse bestimmen
 
 Ein Test: **„Ergäbe die Komponente auch in einer Versicherungs-App Sinn?"**

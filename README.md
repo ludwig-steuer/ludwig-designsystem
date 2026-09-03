@@ -23,9 +23,6 @@ src/ui/v3/          Das Design-System — hier wird entwickelt.
   primitives/         kein Fachwort (Button, Table, Field, Dialog …)
   patterns/           Arbeitsflächen-Muster (MasterDetail, StepRail …)
   entities/<name>/    Darstellungsfamilie genau einer Entität
-src/ui/legacy/        Vorübergehend: Bausteine aus der App, noch nicht
-                      eingeordnet (StatusBadge, Banner, Pagination,
-                      Buchungs-Formatierung). Nichts Neues hinein.
 src/styles/           Tokens und Komponenten-CSS, index.css ist die Kette
 src/ludwig/           KOPIE der Ludwig-Interfaces — siehe unten
 docs/                 Designsprache (SSOT hier) + gespiegelte App-Doku

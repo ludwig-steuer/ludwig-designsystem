@@ -3,16 +3,26 @@
 import { Trash2, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { fmtEuro, parseEuro } from "@/ui/legacy/booking/format";
-import { deriveTax } from "@/ui/legacy/booking/tax-assist";
+import { deriveTax } from "./tax-assist";
 // Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
 // und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
 import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 
+import { formatAmount } from "../../format";
+import { parseAmount } from "../../primitives/AmountInput";
 import { Button } from "../../primitives/Button";
 import { Dialog } from "../../primitives/Dialog";
 import { AccountField, type AccountCandidate, type AccountGroup } from "../account/AccountField";
 import { AiBookingNotes } from "./AiBookingNotes";
+
+// Beträge im Editor: eine Währung, ein Formatierer (T7, 0043). Der Editor
+// rechnet in Brutto und braucht aus einem Feldwert immer eine Zahl — deshalb
+// fällt `toNumber` auf 0 zurück, wo `parseAmount` `null`/`"invalid"` liefert.
+const euro = (n: number) => formatAmount(n, "EUR");
+const toNumber = (s: string | number | null | undefined) => {
+  const n = parseAmount(String(s ?? "").replace("€", ""));
+  return typeof n === "number" ? n : 0;
+};
 
 /**
  * Der eine Buchungssatz-Editor (F123 T123.3).
@@ -134,7 +144,7 @@ const STATUS_TEXT: Record<EditorStatus, string> = {
 function summeBelegseite(rows: readonly EditorRow[], belegSide: Side): number {
   return rows
     .filter((r) => !r.removed && r.side === belegSide)
-    .reduce((s, r) => s + parseEuro(r.umsatz), 0);
+    .reduce((s, r) => s + toNumber(r.umsatz), 0);
 }
 
 /**
@@ -323,7 +333,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
                 </button>
               ) : null}
             </span>
-            <span className="v2num">{fmtEuro(summe)}</span>
+            <span className="v2num">{euro(summe)}</span>
           </div>
         ) : null}
       </div>
@@ -339,7 +349,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
                 {
                   id: `neu-${Date.now()}`,
                   datum: rs[0]?.datum ?? "",
-                  umsatz: rest && rest > 0 ? fmtEuro(rest).replace(/\s?€/, "") : "",
+                  umsatz: rest && rest > 0 ? euro(rest).replace(/\s?€/, "") : "",
                   side: belegSide,
                   bu: "",
                   konto: "",
@@ -516,13 +526,13 @@ function Kopf({
     <div className="bse__kopf">
       <span className="bse__beleg">
         {belegNumber ? `Beleg ${belegNumber}` : "Ohne Belegnummer"}
-        {belegAmount == null ? "" : ` · ${fmtEuro(belegAmount)}`}
+        {belegAmount == null ? "" : ` · ${euro(belegAmount)}`}
       </span>
       <StatusBadge axis="buchung" status={status} info={false} />
       <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
         {zeigeRest ? (
           <span className={`bse__rest${Math.abs(rest!) < 0.005 ? " is-ok" : " is-off"}`}>
-            Rest {fmtEuro(rest!)}
+            Rest {euro(rest!)}
             {Math.abs(rest!) < 0.005 ? " ✓" : ""}
           </span>
         ) : null}
@@ -559,7 +569,7 @@ function Zeile({
   onOpenLedger?: (konto: string) => void;
   onOpenTaxKey?: (bu: string) => void;
 }) {
-  const brutto = parseEuro(row.umsatz);
+  const brutto = toNumber(row.umsatz);
   // Die Steuerzeile wird abgeleitet, nicht getippt — dieselbe Rechnung, die
   // beim Speichern die verknüpfte Zeile erzeugt.
   const steuer = deriveTax(
@@ -581,7 +591,7 @@ function Zeile({
               value={row.umsatz}
               onChange={(e) => onChange({ umsatz: e.target.value })}
               onFocus={(e) => e.target.select()}
-              onBlur={(e) => onChange({ umsatz: fmtEuro(parseEuro(e.target.value)).replace(/\s?€/, "") })}
+              onBlur={(e) => onChange({ umsatz: euro(toNumber(e.target.value)).replace(/\s?€/, "") })}
               aria-label="Umsatz"
             />
             <button
@@ -672,17 +682,17 @@ function Zeile({
               <>BU {row.bu}</>
             )}
             {" · Netto "}
-            {fmtEuro(steuer.net)} · {steuer.ratePercent} % {fmtEuro(steuer.tax)} →{" "}
-            {steuer.account.accountNumber} · Brutto {fmtEuro(brutto)}
+            {euro(steuer.net)} · {steuer.ratePercent} % {euro(steuer.tax)} →{" "}
+            {steuer.account.accountNumber} · Brutto {euro(brutto)}
           </span>
         ) : null}
         {editable && rest !== null && Math.abs(rest) >= 0.005 ? (
           <button
             type="button"
             className="v2link"
-            onClick={() => onChange({ umsatz: fmtEuro(parseEuro(row.umsatz) + rest).replace(/\s?€/, "") })}
+            onClick={() => onChange({ umsatz: euro(toNumber(row.umsatz) + rest).replace(/\s?€/, "") })}
           >
-            Rest {fmtEuro(rest)} einsetzen
+            Rest {euro(rest)} einsetzen
           </button>
         ) : null}
       </div>
@@ -712,7 +722,7 @@ function Journal({
 }) {
   const zeilen: { konto: string; name: string; side: Side; amount: number }[] = [];
   for (const r of rows) {
-    const brutto = parseEuro(r.umsatz);
+    const brutto = toNumber(r.umsatz);
     const steuer = deriveTax(
       { accountNumber: r.konto, taxKey: r.bu || null, amount: brutto },
       accountFramework,
@@ -735,7 +745,7 @@ function Journal({
   if (gegenkonto?.konto) {
     const summe = rows
       .filter((r) => r.side === belegSide)
-      .reduce((sum, r) => sum + parseEuro(r.umsatz), 0);
+      .reduce((sum, r) => sum + toNumber(r.umsatz), 0);
     if (summe !== 0) {
       zeilen.push({
         konto: gegenkonto.konto,
@@ -755,7 +765,7 @@ function Journal({
         <span className={`v2chev${open ? " is-open" : ""}`} />
         Journal (wird gespeichert)
         <span className="v2muted" style={{ marginLeft: "auto" }}>
-          Σ S {fmtEuro(soll)} {Math.abs(soll - haben) < 0.005 ? "=" : "≠"} Σ H {fmtEuro(haben)}
+          Σ S {euro(soll)} {Math.abs(soll - haben) < 0.005 ? "=" : "≠"} Σ H {euro(haben)}
         </span>
       </button>
       {open ? (
@@ -765,7 +775,7 @@ function Journal({
               <span>{z.konto}</span>
               <span className="v2muted">{z.name}</span>
               <span>{z.side}</span>
-              <span className="v2num">{fmtEuro(z.amount)}</span>
+              <span className="v2num">{euro(z.amount)}</span>
             </div>
           ))}
         </div>

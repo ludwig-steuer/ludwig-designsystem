@@ -23,7 +23,7 @@ import {
   type ExpectationKind,
 } from "@/ludwig/modules/accounting-cases";
 import type { Currency } from "@/ludwig/shared/money";
-import { resolveStatus } from "@/ui/legacy/status/status-registry";
+import { resolveStatus } from "../../patterns/status-registry";
 import { Amount } from "../../primitives/Amount";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Timeline, type TimelineItem } from "../../patterns/Timeline";

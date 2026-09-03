@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { LongText } from "./LongText";
 
-const meta: Meta<typeof LongText> = { title: "v3/Legacy/LongText", component: LongText };
+const meta: Meta<typeof LongText> = { title: "v3/Primitives/Werte/LongText", component: LongText };
 export default meta;
 type Story = StoryObj<typeof LongText>;
 
@@ -13,7 +13,7 @@ const LANG =
   "nach Rücksprache mit dem Mandanten auf dasselbe Aufwandskonto gebucht wird.";
 
 /** Unter `max` Zeichen wird der Text unverändert gerendert. */
-export const Kurz: Story = { args: { children: KURZ } };
+export const Short: Story = { args: { children: KURZ } };
 /** Darüber als Teaser mit „mehr ▾" — hält die Tabellenzeile in Form. */
-export const Gekappt: Story = { args: { children: LANG } };
-export const EigeneGrenze: Story = { args: { children: LANG, max: 60 } };
+export const Clamped: Story = { args: { children: LANG } };
+export const CustomLimit: Story = { args: { children: LANG, max: 60 } };

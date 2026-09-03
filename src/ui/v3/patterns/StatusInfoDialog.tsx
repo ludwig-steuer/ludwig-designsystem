@@ -1,10 +1,7 @@
 "use client";
 
-// Direkt statt über das Barrel: `@/ui/components` re-exportiert `log/`,
-// das seinerseits `@/ui/status` zieht — der Kreis endet über `FlowModal`
-// bei `@/modules/invoices` und dem DB-Treiber (P22).
-import { Badge } from "@/ui/legacy/components/primitives/Badge";
-import { Dialog } from "@/ui/legacy/components/primitives/Dialog";
+import { Badge } from "../primitives/Badge";
+import { Dialog } from "../primitives/Dialog";
 import { AXIS_LABEL, AXIS_SOURCE } from "./entity-icons";
 import { axisLegend, type StatusAxis } from "./status-registry";
 
@@ -25,12 +22,16 @@ interface StatusInfoDialogProps {
  * Inhalt kommt vollständig aus `status-registry.ts` — hier steht kein
  * einziger Statustext. Eine neue Ausprägung in der Registry erscheint
  * automatisch, ohne dass jemand diese Datei anfassen muss.
+ *
+ * @when    All values of one status axis explained, with badge and DB value.
+ * @instead One status as a chip → StatusBadge. The (i) that opens this →
+ *          StatusInfoButton. Any other confirmation → Dialog.
  */
 export function StatusInfoDialog({ axis, current, open, onClose }: StatusInfoDialogProps) {
   const items = axisLegend(axis);
 
   return (
-    <Dialog open={open} onClose={onClose} title={AXIS_LABEL[axis]} maxWidth={560}>
+    <Dialog open={open} onClose={onClose} title={AXIS_LABEL[axis]} size="md">
       <div style={{ display: "grid", gap: 14 }}>
         <div style={{ fontSize: 12.5, color: "var(--color-text-muted)", lineHeight: 1.45 }}>
           Woher der Wert kommt:{" "}
@@ -55,7 +56,7 @@ export function StatusInfoDialog({ axis, current, open, onClose }: StatusInfoDia
                 }}
               >
                 <div style={{ display: "grid", gap: 3, justifyItems: "start" }}>
-                  <Badge kind={it.kind}>{it.label}</Badge>
+                  <Badge tone={it.kind}>{it.label}</Badge>
                   <code style={{ fontSize: 11, color: "var(--color-text-muted)", opacity: 0.75 }}>
                     {it.value}
                   </code>

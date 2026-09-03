@@ -70,22 +70,14 @@ Was ein späterer Lauf wissen muss, um heutiges Debugging zu überspringen.
   kein Fix-Auftrag — eine eigene Preview, die "mehr" zeigt, würde genau die
   Treue zerstören, die geprüft wird.
 
-## Storybook-Dev-Indexer scheitert an drei Legacy-Stories
+## Storybook-Dev-Indexer (erledigt)
 
-`pnpm storybook` (Dev) liefert keinen Index: „Could not parse import/exports
-with acorn" für `legacy/components/Pagination|Banner|LongText.stories.tsx`.
-**`pnpm build` indiziert dieselben Dateien fehlerfrei** (139 Stories) — es ist
-der Dev-Indexer von Storybook 10.6, nicht der Code. Geprüft und ausgeschlossen:
-Encoding, BOM, Zeilenenden, Dateirechte, erweiterte Attribute, `satisfies`-
-statt Annotations-Form, Vite- und Storybook-Cache. Kein Unterschied zu den
-Legacy-Stories unter `status/`, die sauber indizieren.
-
-Bis das geklärt ist, geht Ansehen über den Build:
-
-```bash
-pnpm build && npx serve -s storybook-static -l 6109
-# http://localhost:6109/iframe.html?id=<story-id>&viewMode=story
-```
+`pnpm storybook` lieferte keinen Index: „Could not parse import/exports with
+acorn" für `legacy/components/Pagination|Banner|LongText.stories.tsx` — am
+Code lag es nie (`pnpm build` indizierte dieselben Dateien fehlerfrei). Mit
+dem Umzug nach `src/ui/v3/primitives/` (0043, 2026-09-03) ist es weg: der
+Dev-Server auf 6107 liefert wieder einen vollständigen Index (346 Stories).
+Ansehen geht damit wieder direkt über `pnpm storybook`.
 
 ## Offene Punkte
 

@@ -33,7 +33,7 @@
     },
     "LongText": {
       "skip": [
-        "v3-legacy-longtext--kurz"
+        "v3-primitives-werte-longtext--short"
       ]
     },
     "Checklist": {

@@ -24,7 +24,8 @@ import {
   taxAccountFor,
   vatRateForTaxKey,
 } from "@/ludwig/modules/accounting-cases/domain/tax-keys";
-import type { BookingSide } from "./types";
+/** The only thing this file needed from the deleted `booking/types.ts` (0043). */
+type BookingSide = "debit" | "credit";
 
 /** BU-Schlüssel, die der Editor als Brutto-Zeile mit abgeleiteter VSt führt. */
 const EDITOR_ASSIST_KEYS: ReadonlySet<string> = new Set(["8", "9"]);

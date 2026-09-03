@@ -45,7 +45,7 @@
  * 4. Test in `__tests__/status-registry.test.ts` ergänzen, wenn ein
  *    Domain-Enum existiert.
  */
-import type { BadgeKind } from "@/ui/legacy/components/primitives/Badge";
+import type { BadgeTone } from "../primitives/Badge";
 
 /**
  * Status-Achsen der App. Namensschema: Entität, bei mehreren Achsen an
@@ -125,7 +125,7 @@ export interface StatusDescriptor {
   /** Anzeigetext. Deutsch, knapp, ohne Satzzeichen. */
   label: string;
   /** Badge-Farbe. Einziger Weg zu Farbe — nie Hex in Komponenten. */
-  kind: BadgeKind;
+  kind: BadgeTone;
   /**
    * Erklärung für den Nutzer (Tooltip / `title`). Beantwortet „was heißt
    * das und was folgt daraus", nicht „wie heißt die Spalte".
@@ -1734,7 +1734,7 @@ export function resolveStatus(
 export function axisLegend(
   axis: StatusAxis,
   only?: readonly string[],
-): Array<{ value: string; label: string; kind: BadgeKind; meaning: string }> {
+): Array<{ value: string; label: string; kind: BadgeTone; meaning: string }> {
   const map = STATUS_REGISTRY[axis];
   const keys = only ?? Object.keys(map);
   return keys

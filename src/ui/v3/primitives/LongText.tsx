@@ -4,6 +4,11 @@
  *
  * ponytail: natives `<details>` statt State — funktioniert in Server-
  * Komponenten, ohne Client-Bundle. Styling in `.more` (app-chrome.css).
+ *
+ * @when    Plain long text in a cell or a narrow column, clamped by
+ *          character count.
+ * @instead Formatted text from elsewhere → Markdown. A section that folds
+ *          away → Disclosure.
  */
 export function LongText({ children, max = 180 }: { children: string; max?: number }) {
   const text = children.trim();

@@ -42,10 +42,10 @@ Jeder Barrel-Import wird beim Kopieren auf die **echte Quelldatei** umgebogen.
 - **Infrastruktur** (DB, Auth, Server Actions, `server-only`) kommt nie mit.
   Hängt die Komponente daran, ist sie nicht storybook-tauglich — dann gehört
   sie nicht ins Design-System, oder sie muss drüben erst entkoppelt werden.
-- **Struktur beibehalten.** Ein Baustein, auf dem v3 aufsetzt, behält seinen
-  App-Pfad unter `src/ui/legacy/` (`src/ui/legacy/status/`,
-  `src/ui/legacy/components/primitives/`) — das hält den Abgleich mit der App
-  lesbar. Was direkt v3 wird, geht in die Dreiteilung, nicht nach `legacy/`.
+- **Direkt einordnen.** Es gibt keinen Wartebereich mehr (`src/ui/legacy/`
+  ist mit 0043 aufgelöst): jeder mitgenommene Baustein landet sofort in der
+  Dreiteilung — kein Fachwort → `primitives/`, Arbeitsflächen-Muster →
+  `patterns/`, Darstellung einer Entität → `entities/<name>/`.
 
 ## 3. Mitnehmen
 

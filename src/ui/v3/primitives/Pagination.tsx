@@ -1,4 +1,4 @@
-import { Link } from "../../v3/primitives/Link";
+import { Link } from "./Link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Props {
@@ -9,6 +9,14 @@ interface Props {
   buildHref: (page: number) => string;
 }
 
+/**
+ * Page list with ellipsis plus „from–to of n" — links, not buttons, so a page
+ * stays shareable and the back button works.
+ *
+ * @when    A list longer than one page, paged over the URL.
+ * @instead Everything on one page, narrowed down → FilterBar. Loading while
+ *          scrolling does not exist here — a page number is addressable.
+ */
 export function Pagination({ page, totalPages, totalItems, pageSize, buildHref }: Props) {
   if (totalItems === 0) return null;
 
