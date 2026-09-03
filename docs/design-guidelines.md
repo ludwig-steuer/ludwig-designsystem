@@ -446,7 +446,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Tabelle | `ClickRow` (`href`, `v2rowlink`, I11) · `ExpandableRow` | 120 `<Row>`, 6 mit Ziel | v2; Listen heben |
 | Tabelle | `SelectionBar` + `SelectCell` (I5) | — | v2 |
 | Tabelle | `AmountCell` · `DotStatus` · `Timestamp` · `AbweichungsZelle` | — | v2 |
-| Daten | `Progress` (Anteil als Balken, `share` oder `done`/`total`, sm/md/lg) · `BarChart` | — | v2 (0045, 0041) |
+| Daten | `Progress` (Anteil als Balken, `share` oder `done`/`total`, sm/md/lg, `inline`) · `BarChart` | — | v2 (0045, 0046, 0041) |
 | Tabelle | `TableLoading` · `ErrorRow` (I7) | — | v2 |
 | Tabelle | `StatusHeader` (Spaltenkopf mit Legende, Z4) | v1; 7× `<th>Status</th>` | Optik; Reste heben |
 | Tabelle | Sortierbarer Spaltenkopf | — | prüfen |

@@ -223,13 +223,8 @@ export function ProgressBar({
 }) {
   if (total === 0) return null;
   return (
-    <div className="abn__progress" title={`${done} von ${total} ${label} erledigt`}>
-      <span className="abn__progress__text">
-        {done} von {total} {label}
-      </span>
-      <span style={{ width: 120 }}>
-        <Progress done={done} total={total} label={null} />
-      </span>
+    <div title={`${done} von ${total} ${label} erledigt`}>
+      <Progress done={done} total={total} label={`${done} von ${total} ${label}`} inline />
     </div>
   );
 }

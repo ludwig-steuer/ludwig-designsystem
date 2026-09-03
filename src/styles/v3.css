@@ -885,6 +885,16 @@ select.v2in { padding-right: 26px; }
 }
 .v2bar--sm { height: 4px; }
 .v2bar--lg { height: 10px; }
+/* Inline-Form (0046): die Zahl links, der Balken antwortet. Der Balken nimmt
+   den Platz, den der Aufrufer ihm lässt, und fällt sonst auf 120px zurück. */
+.v2prog--inline { display: flex; align-items: center; gap: 10px; }
+/* 120px als Eigenbreite, wächst nur, wo der Aufrufer wirklich Breite gibt:
+   `flex-basis` allein greift nicht, wo der Container schrumpft (ActionBar). */
+.v2prog--inline .v2bar { width: 120px; flex: 1 1 auto; min-width: 48px; }
+.v2prog--inline .v2bar__label {
+  margin-top: 0; white-space: nowrap;
+  font-variant-numeric: tabular-nums lining-nums;
+}
 
 .v2dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
 .v2dot i { width: 6px; height: 6px; border-radius: var(--radius-pill); flex: 0 0 auto; background: currentColor; }
@@ -1197,13 +1207,6 @@ select.v2in { padding-right: 26px; }
 /* Der Schritt-Kopf hat kein eigenes Markup mehr: `StepHeader` komponiert
    `PageHeader` (0002 A6), seine eigenen Klassen sind damit gelöscht —
    ein Seitenkopf, eine Optik. */
-
-/* --- Fortschritt über alle Schritte -------------------------------------- */
-.abn__progress { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.abn__progress__text {
-  font-size: 12px; color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums lining-nums; white-space: nowrap;
-}
 
 /* --- Todo-Zeile: Zustands-Icon vor Titel und Nebenzeile ------------------- */
 .v2todo { display: flex; align-items: flex-start; gap: 10px; }

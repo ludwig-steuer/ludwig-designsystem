@@ -126,3 +126,34 @@ export const Edge: Story = {
     </Cases>
   ),
 };
+
+/**
+ * `inline` (0046) stellt die Zahl **vor** den Balken, in eine Zeile — für
+ * Köpfe und breite Flächen, wo waagerecht Platz ist. So baut `StepRail`
+ * seinen Schritt-Fortschritt und so gehört ein Stand in einen Gruppenkopf,
+ * ohne dass der Aufrufer ein Flex-Layout schreibt.
+ */
+export const Inline: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 20, maxWidth: 460 }}>
+      <Card>
+        <CardHead title="In einer Zeile" sub="drei Größen" />
+        <div style={{ display: "grid", gap: 12, padding: "12px 16px" }}>
+          <Progress done={41} total={118} label="41 von 118 Punkte" size="sm" inline />
+          <Progress done={41} total={118} label="41 von 118 Punkte" inline />
+          <Progress done={41} total={118} label="41 von 118 Punkte" size="lg" inline />
+        </div>
+      </Card>
+      <Card>
+        {/* Der Versalienkopf einer Liste: das Label behauptet seinen Stil. */}
+        <div className="v2lp__grp">
+          <span>Fragen an die Kanzlei</span>
+          <Progress done={1} total={3} size="sm" inline />
+        </div>
+        <div style={{ padding: "12px 16px", fontSize: 12.5, color: "var(--color-text-muted)" }}>
+          Ohne Breitenangabe am Aufrufer — der Balken nimmt, was die Zeile lässt.
+        </div>
+      </Card>
+    </div>
+  ),
+};

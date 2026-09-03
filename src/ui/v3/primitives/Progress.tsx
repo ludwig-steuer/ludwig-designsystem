@@ -22,6 +22,7 @@ export function Progress({
   size = "md",
   tone = "accent",
   label,
+  inline = false,
 }: {
   /** 0…1. Higher values are clamped so the bar does not break out. */
   share?: number;
@@ -33,6 +34,9 @@ export function Progress({
   tone?: "accent" | "warning" | "danger" | "success";
   /** `null` hides the label — only where the number stands next to the bar. */
   label?: string | null;
+  /** Label before the bar in one line instead of above it (0046) — for a
+   * header or a wide surface, where there is room sideways. */
+  inline?: boolean;
 }) {
   const pct = Math.max(0, Math.min(1, share ?? (total ? (done ?? 0) / total : 0)));
   const text =
@@ -41,15 +45,25 @@ export function Progress({
       : total != null
         ? `${done ?? 0} von ${total}`
         : `${Math.round(pct * 100)} %`;
-  return (
+  const bar = (
+    <span className={`v2bar${size === "md" ? "" : ` v2bar--${size}`}`}>
+      <span
+        className={`v2bar__fill${tone === "accent" ? "" : ` v2bar__fill--${tone}`}`}
+        style={{ width: `${pct * 100}%` }}
+      />
+    </span>
+  );
+  const labelNode = text === null ? null : <span className="v2bar__label">{text}</span>;
+  // Inline reverses the order: the number is read first, the bar answers it.
+  return inline ? (
+    <span className="v2prog--inline">
+      {labelNode}
+      {bar}
+    </span>
+  ) : (
     <span>
-      <span className={`v2bar${size === "md" ? "" : ` v2bar--${size}`}`}>
-        <span
-          className={`v2bar__fill${tone === "accent" ? "" : ` v2bar__fill--${tone}`}`}
-          style={{ width: `${pct * 100}%` }}
-        />
-      </span>
-      {text === null ? null : <span className="v2bar__label">{text}</span>}
+      {bar}
+      {labelNode}
     </span>
   );
 }
