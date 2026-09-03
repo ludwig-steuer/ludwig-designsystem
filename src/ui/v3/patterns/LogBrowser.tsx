@@ -191,8 +191,8 @@ export function LogBrowser({
                   Filter zurücksetzen
                 </Button>
               ) : null}
-              {/* Blendet die Sicht allein aus, hilft Zurücksetzen nicht — dann
-                  ist der Ausweg die Sicht, in der etwas steht. */}
+              {/* When the view alone is what hides the rows, resetting helps
+                  nothing — then the way out is the view that holds them. */}
               {wider === null ? null : (
                 <Button
                   size="sm"
