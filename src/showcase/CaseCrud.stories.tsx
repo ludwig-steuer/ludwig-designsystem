@@ -3,17 +3,28 @@ import { useState } from "react";
 
 import {
   ActionBar,
+  ActionButton,
+  Amount,
+  AmountCell,
   Badge,
   Button,
   Card,
   CardFoot,
   CardHead,
+  Combobox,
+  DateField,
   Dialog,
+  Disclosure,
   EmptyState,
   Field,
   FieldList,
+  FilterBar,
   HeadRow,
   Input,
+  Markdown,
+  MenuItem,
+  OverflowMenu,
+  PageHeader,
   Pagination,
   ReasonDialog,
   Row,
@@ -23,12 +34,15 @@ import {
   Table,
   Tabs,
   Textarea,
-  AmountCell,
-  Timestamp,
+  TextButton,
+  Time,
+  Timeline,
+  ToastHost,
+  useToast,
+  type TimelineItem,
 } from "@/ui/v3";
 import { CASE_KIND, CASE_KIND_LABEL, type CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
 
-import { Todo, TodoInline } from "./Todo";
 
 /**
  * **Sachverhalt — list, detail, create, edit, delete on one page.**
@@ -40,6 +54,12 @@ import { Todo, TodoInline } from "./Todo";
  * A showcase page, not a component — nothing is exported from `@/ui/v3`, and
  * the app builds this screen itself. Where the set falls short, a `Todo`
  * marker names the backlog entry rather than local markup papering over it.
+ *
+ * **Stand 2026-09-03:** die zehn Marker dieser Seite sind bis auf einen durch
+ * echte Bausteine ersetzt — PageHeader, FilterBar, OverflowMenu, ActionButton,
+ * Combobox, DateField, Disclosure, Markdown, Timeline und Toast stehen. Was
+ * bleibt, steht als Marker da und ist damit die ehrliche Antwort auf „was
+ * fehlt dem Set noch".
  *
  * Types come from `@/ludwig/modules/accounting-cases/domain/case` — the app's
  * data model is the given, per `spec-schreiben` §5.
@@ -113,13 +133,18 @@ const CASES: CaseListItem[] = [
 
 const COLS = "104px minmax(190px, 1fr) 180px 110px 200px 210px";
 
-function Page() {
+function CasePage() {
   const [rows, setRows] = useState(CASES);
   const [tab, setTab] = useState("offen");
   const [selected, setSelected] = useState<string | null>("c1");
+  const [partner, setPartner] = useState<string | null>("p1");
+  const [openedOn, setOpenedOn] = useState<string | null>("2026-08-26");
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<CaseListItem | null>(null);
   const [deleting, setDeleting] = useState<CaseListItem | null>(null);
+
+  const [filters, setFilters] = useState(0);
+  const { show } = useToast();
 
   const visible = rows.filter((r) =>
     tab === "offen" ? !r.closedAt : tab === "geschlossen" ? !!r.closedAt : true,
@@ -128,22 +153,33 @@ function Page() {
 
   return (
     <div style={{ display: "grid", gap: "var(--space-4, 16px)", padding: "var(--space-4, 16px)" }}>
-      <Todo spec="0002" name="PageHeader">
-        „Sachverhalte · Musterfirma GmbH · Wirtschaftsjahr 2026" mit Zurück-Weg
-        und Seitenaktionen. Steht am Anfang jeder Seite und fehlt in 19 Dateien.
-      </Todo>
+      <PageHeader
+        back={{ href: "#", label: "Alle Mandanten" }}
+        overline="Musterfirma GmbH · Wirtschaftsjahr 2026"
+        title="Sachverhalte"
+        description={`${rows.length} insgesamt, ${rows.filter((r) => !r.closedAt).length} davon offen.`}
+        actions={<Button variant="primary" onClick={() => setCreating(true)}>Sachverhalt anlegen</Button>}
+      />
+
+      {/* Die Filterleiste steht über der Karte, nie im Kartenkopf (0003). */}
+      <FilterBar activeCount={filters} onReset={() => setFilters(0)}>
+        <Field label="Gegenpartei">
+          <Select defaultValue="" onChange={() => setFilters(1)}>
+            <option value="">Alle</option>
+            <option value="musterfirma">Musterfirma GmbH</option>
+            <option value="stadtwerke">Stadtwerke Musterstadt</option>
+          </Select>
+        </Field>
+        <Field label="Eröffnet ab">
+          <DateField value="2026-08-01" onChange={() => setFilters(1)} />
+        </Field>
+        <Field label="Suche">
+          <Input type="search" placeholder="Nummer, Titel oder Gegenpartei" />
+        </Field>
+      </FilterBar>
 
       <Card>
-        <CardHead
-          title="Sachverhalte"
-          sub={`${visible.length} von ${rows.length}`}
-          actions={
-            <>
-              <TodoInline spec="0003" name="FilterBar" />
-              <Button onClick={() => setCreating(true)}>Sachverhalt anlegen</Button>
-            </>
-          }
-        />
+        <CardHead title="Sachverhalte" sub={`${visible.length} von ${rows.length}`} />
 
         <Tabs
           items={[
@@ -175,21 +211,21 @@ function Page() {
             {visible.map((c) => (
               <Row key={c.caseId} active={c.caseId === selected}>
                 <span>{c.caseNumber}</span>
-                <button
-                  type="button"
-                  onClick={() => setSelected(c.caseId)}
-                  style={{ background: "none", border: 0, padding: 0, textAlign: "left", cursor: "pointer" }}
-                >
+                <TextButton onClick={() => setSelected(c.caseId)}>
                   {c.title ?? `${CASE_KIND_LABEL[c.kind]}: ${c.counterpartyName ?? "unbekannt"}`}
-                </button>
+                </TextButton>
                 <span>{c.counterpartyName}</span>
                 <AmountCell value={c.totalAmount} />
                 <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} />
                 <RowActions>
-                  <Button size="xs" variant="tertiary" onClick={() => setEditing(c)}>
-                    Bearbeiten
-                  </Button>
-                  <TodoInline spec="0008" name="OverflowMenu" />
+                  <TextButton onClick={() => setEditing(c)}>Bearbeiten</TextButton>
+                  <OverflowMenu size="xs">
+                    <MenuItem href="#">Belege ansehen</MenuItem>
+                    <MenuItem href="#">In DATEV öffnen</MenuItem>
+                    <MenuItem tone="danger" onClick={() => setDeleting(c)}>
+                      Sachverhalt schließen
+                    </MenuItem>
+                  </OverflowMenu>
                 </RowActions>
               </Row>
             ))}
@@ -218,36 +254,55 @@ function Page() {
               rows={[
                 ["Art", CASE_KIND_LABEL[current.kind]],
                 ["Gegenpartei", current.counterpartyName ?? "—"],
-                ["Betrag", <AmountCell key="a" value={current.totalAmount} />],
+                ["Betrag", <Amount key="a" value={current.totalAmount} currency="EUR" />],
                 ["Zuständig", current.disposition ?? "—"],
-                ["Eröffnet", <Timestamp key="t" iso={current.openedAt} />],
+                ["Eröffnet", <Time key="t" value={current.openedAt} />],
                 ["Export", current.exportStatus ?? "kein Bezug"],
               ]}
             />
-            {current.summary ? (
-              <Todo spec="0022" name="Markdown">
-                Die Zusammenfassung kommt als Markdown vom Classifier. Ohne
-                Renderer steht sie hier als roher Text: „{current.summary}"
-              </Todo>
-            ) : null}
-            <Todo spec="0023" name="Timeline">
-              Belegeingang, Bank-Ereignisse, Klärungen und Buchungen als ein
-              Strang — heute siebenmal verschieden gebaut, im v3-Backlog unter
-              „Später" geführt.
-            </Todo>
-            <Todo spec="0005" name="Disclosure">
-              Regelwerk, Erwartungen und Rohdaten hängen als aufklappbare
-              Abschnitte darunter; heute steht dafür natives `details`.
-            </Todo>
+            <Markdown text={current.summary ?? null} />
+            <Timeline entries={historyOf(current)} kindLabels={EVENT_LABELS} />
+            <div>
+              <Disclosure summary="Regelwerk und Erwartungen" count={2}>
+                <FieldList
+                  tone="bare"
+                  rows={[
+                    ["Wiederkehr-Regel", "greift nicht — Betrag über 500,00 €"],
+                    ["Offene Erwartung", "Beleg zur Zahlung vom 29.08.2026"],
+                  ]}
+                />
+              </Disclosure>
+              <Disclosure summary="Rohdaten des Classifiers" tone="quiet">
+                <pre style={{ margin: 0, fontSize: 12, fontFamily: "var(--font-mono)" }}>
+                  {JSON.stringify(
+                    { kind: current.kind, counterparty: current.counterpartyName, total: current.totalAmount },
+                    null,
+                    2,
+                  )}
+                </pre>
+              </Disclosure>
+            </div>
           </div>
           <ActionBar
-            primary={<Button onClick={() => setEditing(current)}>Bearbeiten</Button>}
+            primary={<Button variant="primary" onClick={() => setEditing(current)}>Bearbeiten</Button>}
             secondary={
               <Button variant="danger" onClick={() => setDeleting(current)}>
                 Schließen
               </Button>
             }
-            tertiary={<TodoInline spec="0004" name="ActionButton" />}
+            tertiary={
+              <ActionButton
+                variant="tertiary"
+                size="sm"
+                pendingLabel="Fordere an …"
+                action={async () => {
+                  await new Promise<void>((r) => setTimeout(r, 600));
+                  show({ text: "Die Beleg-Nachforderung wurde an den Mandanten gesendet." });
+                }}
+              >
+                Beleg nachfordern
+              </ActionButton>
+            }
           />
         </Card>
       ) : (
@@ -277,7 +332,13 @@ function Page() {
               Abbrechen
             </Button>
             <Button
+              variant="primary"
               onClick={() => {
+                show({
+                  text: editing
+                    ? `Sachverhalt ${editing.caseNumber} wurde gespeichert.`
+                    : "Der Sachverhalt wurde angelegt.",
+                });
                 setCreating(false);
                 setEditing(null);
               }}
@@ -300,19 +361,20 @@ function Page() {
               ))}
             </Select>
           </Field>
-          <Field label="Gegenpartei">
-            <Todo spec="0009" name="Combobox">
-              Aus tausenden Geschäftspartnern einen suchen — heute drei
-              Eigenbauten (`CreditorCombobox`, `KontoCombobox`, `TaxKeySelect`).
-            </Todo>
-          </Field>
+          <Combobox
+            label="Gegenpartei"
+            name="partner"
+            value={partner}
+            onChange={setPartner}
+            placeholder="Name oder Personenkonto"
+            options={PARTNERS}
+          />
           <Field label="Zusammenfassung">
             <Textarea defaultValue={editing?.summary ?? ""} rows={3} />
           </Field>
-          <Todo spec="0024" name="DateField">
-            Eröffnungsdatum und Frist brauchen ein Datumsfeld; 14 Dateien bauen
-            es heute selbst.
-          </Todo>
+          <Field label="Eröffnet am">
+            <DateField value={openedOn} onChange={setOpenedOn} />
+          </Field>
         </div>
       </Dialog>
 
@@ -331,6 +393,10 @@ function Page() {
               ),
             );
           }
+          show({
+            text: `Sachverhalt ${deleting?.caseNumber} wurde geschlossen.`,
+            action: { label: "Rückgängig", onClick: () => setRows(CASES) },
+          });
           setDeleting(null);
           void reason;
         }}
@@ -338,11 +404,71 @@ function Page() {
         Der Sachverhalt verschwindet aus der offenen Arbeit. Buchungen bleiben.
       </ReasonDialog>
 
-      <Todo spec="0007" name="Toast">
-        Anlegen, Speichern und Schließen quittieren heute nichts — die Handlung
-        gelingt stumm. Das ist die auffälligste Lücke dieser Seite.
-      </Todo>
     </div>
+  );
+}
+
+/**
+ * Der Verlauf eines Sachverhalts, wie ihn die App aus Ereignissen baut. Die
+ * Schlüssel sind die der Domäne, die deutschen Wörter kommen als
+ * `kindLabels` — die Komponente erfindet keine Vokabeln (0023).
+ */
+function historyOf(c: CaseListItem): TimelineItem[] {
+  return [
+    {
+      id: `${c.caseId}-open`,
+      at: c.openedAt,
+      kind: "case_opened",
+      actor: "System",
+      title: `Sachverhalt ${c.caseNumber} eröffnet`,
+      state: "info",
+    },
+    {
+      id: `${c.caseId}-doc`,
+      at: "2026-08-26T07:40:00Z",
+      kind: "document_received",
+      actor: "Mandant",
+      title: "Beleg im Posteingang angekommen",
+      state: "done",
+    },
+    {
+      id: `${c.caseId}-proposal`,
+      at: "2026-08-30T09:12:00Z",
+      kind: "booking_proposed",
+      actor: "Agent",
+      title: "Buchungsvorschlag erstellt",
+      state: "edited",
+      right: <Amount value={c.totalAmount} currency="EUR" size="sm" />,
+      detail: "14 gleichartige Buchungen in sechs Monaten; die Rechnung nennt Bürobedarf.",
+    },
+  ];
+}
+
+/**
+ * Das deutsche Wort je Ereignis-Art. Es steht hier, nicht in der Komponente:
+ * `src/ludwig/` führt keinen Ereignistyp, und `Timeline` erfindet keine
+ * Vokabeln (Befund in Spec 0023).
+ */
+const EVENT_LABELS = {
+  case_opened: "Sachverhalt",
+  document_received: "Beleg",
+  booking_proposed: "Buchungsvorschlag",
+};
+
+/** Ein Ausschnitt der Partner, wie ihn die Suche liefern würde. */
+const PARTNERS = [
+  { value: "p1", label: "Musterfirma GmbH", hint: "70021", group: "Zuletzt gebucht" },
+  { value: "p2", label: "Stadtwerke Musterstadt", hint: "70044", group: "Zuletzt gebucht" },
+  { value: "p3", label: "Bürobedarf Meier GmbH", hint: "70058", group: "Alle Partner" },
+  { value: "p4", label: "Restaurant Adler", hint: "70103", group: "Alle Partner" },
+];
+
+/** Die Seite lebt im `ToastHost` — sonst hätte die Quittung keinen Ort (0007). */
+function Page() {
+  return (
+    <ToastHost>
+      <CasePage />
+    </ToastHost>
   );
 }
 

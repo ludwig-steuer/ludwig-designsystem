@@ -3,25 +3,36 @@ import { useState } from "react";
 
 import {
   ActionBar,
+  ActionButton,
+  Amount,
   Button,
   Card,
   CardHead,
   Checklist,
+  Field,
+  FilterBar,
+  Input,
   KpiGrid,
   KpiTile,
   MasterDetail,
+  MenuItem,
+  OverflowMenu,
+  PageHeader,
   ProgressBar,
+  Select,
   StepHeader,
   StepRail,
+  ToastHost,
   TodoList,
   isOpen,
   nextOpen,
+  useToast,
   type ChecklistRow,
   type RailItem,
   type TodoItem,
 } from "@/ui/v3";
 
-import { Todo, TodoInline } from "./Todo";
+import { Todo } from "./Todo";
 
 /**
  * **Stapelabnahme — the eleven-step review, assembled from the set.**
@@ -32,6 +43,11 @@ import { Todo, TodoInline } from "./Todo";
  *
  * Where it cannot, a `Todo` marker names the backlog entry instead of local
  * markup filling in. Read the markers as the result of the test.
+ *
+ * **Stand 2026-09-03:** von acht Markern sind sechs durch echte Bausteine
+ * ersetzt. Übrig bleiben zwei, und beide sind ehrlich: 0015 (der Editor
+ * braucht sein zweispaltiges Journal) und die sieben Schritte, die dieser
+ * Test bewusst nicht nachbaut.
  *
  * Reference: `reference/f109-buchungsreview/Buchungsreview.dc.html`
  * (screens 0–10), design brief §3 and §7.
@@ -96,7 +112,9 @@ const COMPLETENESS: ChecklistRow[] = [
   { key: "vk", state: "done", label: "Verrechnungskonten auf Null", counter: "0,00 €" },
 ];
 
-function Page() {
+function AcceptancePage() {
+  const { show } = useToast();
+  const [filters, setFilters] = useState(0);
   const [step, setStep] = useState(3);
   const [selected, setSelected] = useState<string | null>(BOOKINGS[0]!.id);
   const [done, setDone] = useState<Set<string>>(new Set(["sv-2026-0142"]));
@@ -116,10 +134,11 @@ function Page() {
         items={railItems(step)}
         ariaLabel="Schritte der Stapelabnahme"
         head={
-          <Todo spec="0002" name="PageHeader">
-            Mandant, Zeitraum und Lauf-Nummer stehen über dem Rail — heute baut
-            das jede Seite selbst nach.
-          </Todo>
+          <PageHeader
+            overline="Musterbau GmbH · 2026"
+            title="Stapelabnahme"
+            description="Lauf 2026-08-31, elf Schritte."
+          />
         }
         foot={<ProgressBar done={STEPS.filter((s) => s.open === 0).length} total={STEPS.length} label="Schritte" />}
       />
@@ -132,7 +151,13 @@ function Page() {
           onPrev={step > 0 ? () => setStep((v) => v - 1) : null}
           onNext={step < 10 ? () => setStep((v) => v + 1) : null}
           nextLabel={step < 10 ? STEPS[step + 1]!.label : undefined}
-          actions={<TodoInline spec="0008" name="OverflowMenu" />}
+          actions={
+            <OverflowMenu size="sm">
+              <MenuItem href="#">Lauf-Protokoll ansehen</MenuItem>
+              <MenuItem href="#">Stapel als CSV laden</MenuItem>
+              <MenuItem tone="danger">Stapel zurück an den Agenten</MenuItem>
+            </OverflowMenu>
+          }
         />
 
         {step === 0 ? (
@@ -140,7 +165,11 @@ function Page() {
             <KpiTile label="Sachverhalte" value="52" sub="alle bearbeitet" />
             <KpiTile label="Buchungsvorschläge" value="87" sub="6 warten auf Sie" />
             <KpiTile label="Belege erledigt" value="96 / 96" sub="keine Nachforderung" />
-            <KpiTile label="Σ Soll / Haben" value="34.210,55 €" sub="ausgeglichen" />
+            <KpiTile
+              label="Σ Soll / Haben"
+              value={<Amount value={34210.55} currency="EUR" size="lg" />}
+              sub="ausgeglichen"
+            />
           </KpiGrid>
         ) : null}
 
@@ -152,47 +181,75 @@ function Page() {
         ) : null}
 
         {step === 3 ? (
-          <MasterDetail
-            list={
-              <Card>
-                <CardHead
-                  title="Buchungen"
-                  sub={`${openCount} von ${items.length} offen`}
-                  actions={<TodoInline spec="0003" name="FilterBar" />}
-                />
-                <TodoList
-                  groups={[{ label: "Sachverhalt für Sachverhalt", items }]}
-                  selectedId={selected}
-                  onSelect={setSelected}
-                />
-              </Card>
-            }
-            detail={
-              <Card>
+          <>
+            {/* Der Filter steht über der Arbeitsfläche, nicht in einer ihrer
+                Spalten — sonst wird er zum Grid-Item und schiebt das Detail
+                in die falsche Spalte (im Browser gesehen, 2026-09-03). */}
+            <FilterBar activeCount={filters} onReset={() => setFilters(0)}>
+              <Field label="Zustand">
+                <Select defaultValue="offen" onChange={() => setFilters(1)}>
+                  <option value="offen">Nur offene</option>
+                  <option value="alle">Alle</option>
+                </Select>
+              </Field>
+              <Field label="Suche">
+                <Input type="search" placeholder="Sachverhalt oder Kreditor" />
+              </Field>
+            </FilterBar>
+            <MasterDetail
+              list={
+                <Card>
+                  <CardHead title="Buchungen" sub={`${openCount} von ${items.length} offen`} />
+                  <TodoList
+                    groups={[{ label: "Sachverhalt für Sachverhalt", items }]}
+                    selectedId={selected}
+                    onSelect={setSelected}
+                  />
+                </Card>
+              }
+              detail={
+                <Card>
                 <CardHead title="Buchungssatz" sub={selected ?? "nichts gewählt"} />
                 <div style={{ display: "grid", gap: "var(--space-3)", padding: "var(--space-4, 16px)" }}>
                   <Todo spec="0015" name="JournalEntryEditor (zweispaltiges Journal)">
                     Der Editor steht bereits; Soll und Haben stehen darin noch in
-                    einer Spalte statt in zweien.
-                  </Todo>
-                  <Todo spec="0007" name="Toast">
-                    „Buchung freigegeben" hat heute keinen Ort — die Quittung
-                    fehlt, die Handlung passiert stumm.
+                    einer Spalte statt in zweien. Der letzte offene Punkt dieser
+                    Seite.
                   </Todo>
                 </div>
                 <ActionBar
                   primary={
-                    <Button onClick={accept} disabled={!selected}>
+                    <ActionButton
+                      variant="primary"
+                      disabled={!selected}
+                      pendingLabel="Gebe frei …"
+                      action={async () => {
+                        await new Promise<void>((r) => setTimeout(r, 400));
+                        accept();
+                        show({ text: "Die Buchung wurde freigegeben." });
+                      }}
+                    >
                       Freigeben
-                    </Button>
+                    </ActionButton>
                   }
                   secondary={<Button variant="tertiary">Korrigieren</Button>}
-                  tertiary={<TodoInline spec="0004" name="ActionButton" />}
+                  tertiary={
+                    <ActionButton
+                      variant="tertiary"
+                      action={async () => {
+                        await new Promise<void>((r) => setTimeout(r, 400));
+                        return { error: "Der Satz hängt an einer offenen Rückfrage." };
+                      }}
+                    >
+                      Zurückstellen
+                    </ActionButton>
+                  }
                   info={`${openCount} offen`}
                 />
               </Card>
             }
-          />
+            />
+          </>
         ) : null}
 
         {step !== 0 && step !== 1 && step !== 3 ? (
@@ -209,6 +266,15 @@ function Page() {
         ) : null}
       </div>
     </div>
+  );
+}
+
+/** Die Seite lebt im `ToastHost` — sonst hätte die Quittung keinen Ort (0007). */
+function Page() {
+  return (
+    <ToastHost>
+      <AcceptancePage />
+    </ToastHost>
   );
 }
 
