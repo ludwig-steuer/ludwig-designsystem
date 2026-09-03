@@ -101,6 +101,7 @@ export { FileDrop, type DroppedFile } from "./primitives/FileDrop";
 
 /* Dialog */
 export { Dialog } from "./primitives/Dialog";
+export { Drawer, DrawerFooter, type DrawerProps, type DrawerSize } from "./primitives/Drawer";
 export { Popover, Tooltip, HoverCard } from "./primitives/Popover";
 export { ReasonDialog } from "./primitives/ReasonDialog";
 
