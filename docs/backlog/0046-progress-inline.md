@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — offen: deutscher Codekommentar in `Progress.stories.tsx:148` (siehe Abnahme) |
+| Status | fertig |
 | Stufe | `primitives/` — Prop an `Progress` (0045), keine neue Datei |
 | Klassen-Test | entfällt: kein neuer Baustein, eine Form des vorhandenen |
 | Quelle | Sitzung 2026-09-03, Probe mit `Progress` im Gruppenkopf von `TodoList` |
@@ -95,16 +95,19 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-Geprüfter Stand: `bd1eb6a` („0046 gebaut"). Die vier Dateien sind seitdem
-weder committet noch im Arbeitsbaum geändert worden
-(`git log bd1eb6a..HEAD -- Progress.tsx Progress.stories.tsx StepRail.tsx v3.css`
-→ leer; `git status --short` auf dieselben Pfade → leer). Browser-Nachweise
-aus dem laufenden Storybook-Dev-Server auf Port 6107.
+Geprüfter Stand: `bd1eb6a` („0046 gebaut") plus `fd84283` (Nachbesserung, ein
+Kommentar — siehe die Zeile „Code englisch"). Die vier Dateien sind seit `bd1eb6a`
+nur an dieser einen Kommentarzeile geändert: `git diff bd1eb6a HEAD` auf
+`Progress.tsx`, `Progress.stories.tsx`, `StepRail.tsx` und `v3.css` zeigt `-1/+1`
+in der Story und sonst allein einen fremden Block `.v2raw*` am Ende von `v3.css`
+(`a23c004`, Aufgabe 0051, keine `.v2bar`/`.v2prog`-Selektoren — die Messwerte
+unten stehen also unverändert); `git status --short` auf dieselben Pfade → leer.
+Browser-Nachweise aus dem laufenden Storybook-Dev-Server auf Port 6107.
 
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
 | `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, Exit 0. `pnpm build` → „Storybook build completed successfully", Exit 0. Beide selbst gelaufen, im Arbeitsbaum mit den Fremdänderungen anderer Sitzungen. | ✓ |
-| Code englisch; `@when`/`@instead` am Export gepflegt | `@when`/`@instead` stehen englisch am Export (`Progress.tsx:14–16`), das neue Prop ist englisch dokumentiert (`Progress.tsx:37–39`), Bezeichner/Typen englisch, der neue Codekommentar in der Komponente englisch (`Progress.tsx:57`), Story-Exportname `Inline`. **Aber:** `Progress.stories.tsx:148` bringt einen deutschen Codekommentar mit — `{/* Der Versalienkopf einer Liste: das Label behauptet seinen Stil. */}`. Ein JSX-Kommentar wird nicht ausgegeben, ist also kein Nutzertext; CLAUDE.md verlangt „Kommentare: Englisch". In `src/ui/v3/**.tsx` sind 138 `//`-Kommentare englisch bis auf zwei Ausnahmen — die Norm ist eindeutig. Der Storybook-Dokblock darüber (`:130–135`) bleibt deutsch: der steht in der Doku-Ansicht und ist Nutzertext wie im Rest der Datei. | ✗ |
+| Code englisch; `@when`/`@instead` am Export gepflegt | `@when`/`@instead` stehen englisch am Export (`Progress.tsx:14–16`), das neue Prop ist englisch dokumentiert (`Progress.tsx:37–39`), Bezeichner/Typen englisch, der Codekommentar in der Komponente englisch (`Progress.tsx:57`), Story-Exportname `Inline`. Der in der ersten Abnahme beanstandete deutsche JSX-Kommentar ist mit `fd84283` übersetzt: `Progress.stories.tsx:148` trägt jetzt `{/* A list's all-caps group header: the label keeps its own style. */}` — nachgeprüft am 2026-09-03, `git show fd84283` ändert im TSX genau diese eine Zeile (−1/+1). Deutsch bleibt nur im Storybook-Dokblock (`:130–135`) und in den ausgegebenen Labels — beides Nutzertext. | ✓ |
 | Kein Hex, kein px im TSX | Einziges Inline-Maß der Komponente: die Prozentbreite aus `pct * 100` (`Progress.tsx:52`). `StepRail.tsx` hat sein `style={{ width: 120 }}` verloren (Diff `bd1eb6a`), die 120 px stehen jetzt in `v3.css:893`. Kein Hex in beiden Dateien. px in der neuen Story nur als Gerüst (`maxWidth: 460`, `gap`, `padding`, `Progress.stories.tsx:138–155`) — Konvention der v3-Stories: 21 px-`gap` und 7 px-`padding` in `primitives/*.stories.tsx`. | ✓ |
 | Story vorhanden | `curl localhost:6107/index.json` listet `v3-primitives-daten-fortschritt--inline` neben den vier Stories aus 0045; Quelle `Progress.stories.tsx:136`. Im Browser gerendert und gemessen. | ✓ |
 | Im Browser angesehen (Storybook), nicht nur gebaut | Vier Stories per Iframe geöffnet, gemessen und als Screenshot gesehen: `--inline`, `--labels`, `v3-patterns-frame-steprail--screen-header`, dazu `seiten-stapelabnahme--bookings` (zweiter `ProgressBar`-Aufrufer im Schienenfuß). Konsole auf `--inline`: 0 Fehler, 0 Warnungen. | ✓ |
@@ -115,18 +118,20 @@ aus dem laufenden Storybook-Dev-Server auf Port 6107.
 | Der gestapelte Standard ist unverändert (Story `Labels`) | `--labels` im DOM: Elternknoten `<span>` ohne Klasse, `display: block`, Reihenfolge Balken→Label, `margin-top: 3px`, Label 11 px, Füllungen `72%`, `34.7458%`, `0%`, `50%`. Zeichengleich mit den Werten aus der Abnahme von 0045. Der `inline`-Zweig (`Progress.tsx:58–68`) lässt den gestapelten Zweig unberührt, `inline` ist `false` per Vorgabe (`:25`). | ✓ |
 | Kehrtwende gegenüber 0045 („kein `inline`-Prop") sauber begründet | 0046 nennt die Umkehr offen (Ziel, Z. 14–29) und 0045 vermerkt sie in seiner Abnahme (`0045-progress.md:187–194`). Der Grund trägt: `bd1eb6a` löscht netto mehr als es anlegt (zwei CSS-Klassen und das Handlayout in `StepRail` weg, ein `boolean` dazu), und `docs/design-guidelines.md:449` führt die Erweiterung nach. Einschränkung: der zweite Aufrufer, der die Umkehr begründet (Gruppenkopf von `TodoList`), steht nicht im Repo — `grep -rn "<Progress" src` findet als `inline`-Aufrufer allein `StepRail.tsx:227` und die Story. Die Spec bezeichnet ihn selbst als „Probe"; der Fall ist in `Progress.stories.tsx:147–153` nachgestellt. | ✓ |
 
-**Abgenommen von / am:** zweiter Agent (nicht der bauende), 2026-09-03.
+**Abgenommen von / am:** zweiter Agent (nicht der bauende), 2026-09-03; Nachprüfung der einen nachgebesserten Zeile (`fd84283`) am selben Tag, durch denselben Abnehmenden.
 
 ### Offene Punkte
 
-1. **Deutscher Codekommentar in `Progress.stories.tsx:148`.** Einzige Zeile,
-   die das feste Kriterium „Code englisch" verletzt; nicht vom Abnehmenden
-   behoben. Nach dem Übersetzen ist die Aufgabe `fertig` — alle anderen elf
-   Zeilen stehen auf ✓.
+1. ~~Deutscher Codekommentar in `Progress.stories.tsx:148`.~~ **Erledigt** mit
+   `fd84283`, am 2026-09-03 nachgeprüft: Kommentar englisch, `pnpm typecheck`
+   erneut Exit 0, Story `--inline` im Browser unverändert (vier Inline-Blöcke,
+   Label je vorn, Balken 316/316/316/120 px, kein Kommentartext im DOM). Damit
+   steht jede Zeile der Tabelle auf ✓.
 2. **Zweiter Aufrufer fehlt noch.** `inline` hat im Repo genau einen
-   produktiven Aufrufer (`StepRail`). Der `TodoList`-Gruppenkopf, mit dem
-   0046 die Umkehr von 0045 begründet, ist bisher Probe und Story. Kein
-   Mangel dieser Aufgabe, aber der Grund steht erst, wenn er gebaut ist.
+   produktiven Aufrufer (`StepRail.tsx:227`). Der `TodoList`-Gruppenkopf, mit
+   dem 0046 die Umkehr von 0045 begründet, ist bisher Probe und Story; er wird
+   laut Nachbesserung unten mit 0050 echt. Kein Mangel dieser Aufgabe, aber
+   der Grund steht erst, wenn er gebaut ist.
 3. **Kein `role="progressbar"`.** Unverändert wie in 0045 (dort Anmerkung 1):
    solange das Label steht — und in der Inline-Form steht es immer direkt
    davor — liest ein Screenreader den Stand als Text.
