@@ -25,7 +25,7 @@ export interface Bar {
 /**
  * @when    One series over time — expense per month, entries per week — with
  *          at most one period highlighted.
- * @instead A single share of a whole → ProgressCell. One number with a
+ * @instead A single share of a whole → Progress. One number with a
  *          caption → KpiTile. Two states next to each other →
  *          ComparisonTable. Several series, axes or a tooltip → the border
  *          where a charting library starts.

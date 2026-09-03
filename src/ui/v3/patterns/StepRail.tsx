@@ -1,6 +1,7 @@
 import { ActionBar } from "../primitives/ActionBar";
 import { Link } from "../primitives/Link";
 import { PageHeader } from "../primitives/PageHeader";
+import { Progress } from "../primitives/Progress";
 import type { ReactNode } from "react";
 
 /**
@@ -221,14 +222,13 @@ export function ProgressBar({
   label?: string;
 }) {
   if (total === 0) return null;
-  const pct = Math.max(0, Math.min(1, done / total));
   return (
     <div className="abn__progress" title={`${done} von ${total} ${label} erledigt`}>
       <span className="abn__progress__text">
         {done} von {total} {label}
       </span>
-      <span className="v2bar" style={{ width: 120 }}>
-        <span className="v2bar__fill" style={{ width: `${pct * 100}%` }} />
+      <span style={{ width: 120 }}>
+        <Progress done={done} total={total} label={null} />
       </span>
     </div>
   );

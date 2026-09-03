@@ -49,7 +49,7 @@ export function Time({
 
 /**
  * @when    How long something took or has been running — a run, a step, a job.
- * @instead A point in time → Time. A share of something → ProgressCell.
+ * @instead A point in time → Time. A share of something → Progress.
  */
 export function Duration({
   seconds,

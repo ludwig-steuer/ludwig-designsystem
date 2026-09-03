@@ -5,10 +5,10 @@ import {
   DotStatus,
   ErrorRow,
   MonoCell,
-  ProgressCell,
   TableLoading,
   Timestamp,
 } from "./Cells";
+import { Progress } from "./Progress";
 import { Card, CardHead, EmptyRow, HeadRow, Row, Table } from "./Table";
 
 const meta: Meta<typeof AmountCell> = { title: "v3/Primitives/Tabelle/Zellen", component: AmountCell };
@@ -46,21 +46,21 @@ export const Filled: Story = {
       <Row>
         <span className="v2main">Bürobedarf GmbH</span>
         <AmountCell value={64.9} />
-        <ProgressCell share={0.72} />
+        <Progress share={0.72} />
         <DotStatus tone="success" label="Geprüft" />
         <Timestamp iso="2026-08-26T09:40:00Z" prefix="seit" />
       </Row>
       <Row>
         <span className="v2main">Vermieter Musterstraße</span>
         <AmountCell value={-1800} />
-        <ProgressCell share={0.2} tone="warning" />
+        <Progress share={0.2} tone="warning" />
         <DotStatus tone="warning" label="Offen" />
         <Timestamp iso="2026-08-21T14:05:00Z" prefix="seit" />
       </Row>
       <Row>
         <span className="v2main">Saldendifferenz Bank</span>
         <AmountCell value={-12.4} tone="danger" title="Auszug 8 gegen gebuchten Saldo" />
-        <ProgressCell share={1} tone="danger" />
+        <Progress share={1} tone="danger" />
         <DotStatus tone="danger" label="Blockiert" />
         <Timestamp iso={null} />
       </Row>
@@ -163,21 +163,21 @@ export const UnknownValues: Story = {
       <Row>
         <span>Musterfirma GmbH</span>
         <AmountCell value={1475.6} />
-        <ProgressCell share={1} label="1 / 1" />
+        <Progress share={1} label="1 / 1" />
         <DotStatus tone="success" label="gebucht" />
         <Timestamp iso="2026-08-26T09:12:00Z" />
       </Row>
       <Row>
         <span>Sachverhalt ohne Summe</span>
         <AmountCell value={null} />
-        <ProgressCell share={0} label="0 / 3" />
+        <Progress share={0} label="0 / 3" />
         <DotStatus tone="warning" label="offen" />
         <Timestamp iso={null} />
       </Row>
       <Row>
         <span>Umbuchung, saldenneutral</span>
         <AmountCell value={0} />
-        <ProgressCell share={1} label="1 / 1" />
+        <Progress share={1} label="1 / 1" />
         <DotStatus tone="success" label="gebucht" />
         <Timestamp iso="2026-08-30T11:00:00Z" />
       </Row>
@@ -232,3 +232,4 @@ export const Mono: Story = {
     </Card>
   ),
 };
+

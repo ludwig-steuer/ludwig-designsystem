@@ -878,6 +878,8 @@ select.v2in { padding-right: 26px; }
 .v2bar__fill--danger { background: var(--color-danger); }
 .v2bar__fill--success { background: var(--color-success); }
 .v2bar__label { display: block; font-size: 11px; color: var(--color-text-subtle); margin-top: 3px; }
+.v2bar--sm { height: 4px; }
+.v2bar--lg { height: 10px; }
 
 .v2dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
 .v2dot i { width: 6px; height: 6px; border-radius: var(--radius-pill); flex: 0 0 auto; background: currentColor; }

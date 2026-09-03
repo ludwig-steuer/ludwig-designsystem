@@ -10,6 +10,7 @@ import {
   XCircle,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { Progress } from "../primitives/Progress";
 
 /**
  * v2 review building blocks (F123 T123.1): state icon, checklist, check
@@ -145,12 +146,13 @@ function ChecklistLine({
       </span>
       <span>
         {row.progress == null ? null : (
-          <span className="v2bar">
-            <span
-              className={`v2bar__fill${row.state === "warning" ? " v2bar__fill--warning" : ""}`}
-              style={{ width: `${Math.max(0, Math.min(1, row.progress)) * 100}%` }}
-            />
-          </span>
+          // The counter to the left already carries the number, so the bar
+          // stays label-free here.
+          <Progress
+            share={row.progress}
+            tone={row.state === "warning" ? "warning" : "accent"}
+            label={null}
+          />
         )}
       </span>
       <span className="v2chk__jump">{row.jump ? `→ ${row.jump}` : ""}</span>

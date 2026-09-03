@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ProgressCell } from "./Cells";
+import { Progress } from "./Progress";
 import { TextButton } from "./TextButton";
 
 /**
@@ -139,7 +139,7 @@ export function FileDrop({
               <span className="v2dropfile__size">{humanSize(f.size)}</span>
               <span>
                 {f.progress !== undefined && f.progress < 1 ? (
-                  <ProgressCell share={f.progress} />
+                  <Progress share={f.progress} />
                 ) : onRemove && !f.error ? (
                   <TextButton tone="quiet" onClick={() => onRemove(f.id)}>
                     Entfernen

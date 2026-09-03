@@ -54,31 +54,6 @@ export function AmountCell({
   );
 }
 
-/** Progress as a bar plus a percentage — the bar alone is not readable. */
-export function ProgressCell({
-  share,
-  tone = "accent",
-  label,
-}: {
-  /** 0…1. Higher values are clamped so the bar does not break out. */
-  share: number;
-  tone?: "accent" | "warning" | "danger" | "success";
-  label?: string;
-}) {
-  const pct = Math.max(0, Math.min(1, share));
-  return (
-    <span>
-      <span className="v2bar">
-        <span
-          className={`v2bar__fill${tone === "accent" ? "" : ` v2bar__fill--${tone}`}`}
-          style={{ width: `${pct * 100}%` }}
-        />
-      </span>
-      <span className="v2bar__label">{label ?? `${Math.round(pct * 100)} %`}</span>
-    </span>
-  );
-}
-
 /**
  * Dot plus word. No pill — that is `StatusBadge` and belongs to the registry.
  *
