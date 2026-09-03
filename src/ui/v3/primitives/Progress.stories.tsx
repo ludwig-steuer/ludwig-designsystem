@@ -145,7 +145,7 @@ export const Inline: Story = {
         </div>
       </Card>
       <Card>
-        {/* Der Versalienkopf einer Liste: das Label behauptet seinen Stil. */}
+        {/* A list's all-caps group header: the label keeps its own style. */}
         <div className="v2lp__grp">
           <span>Fragen an die Kanzlei</span>
           <Progress done={1} total={3} size="sm" inline />

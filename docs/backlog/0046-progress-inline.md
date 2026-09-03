@@ -130,3 +130,15 @@ aus dem laufenden Storybook-Dev-Server auf Port 6107.
 3. **Kein `role="progressbar"`.** Unverändert wie in 0045 (dort Anmerkung 1):
    solange das Label steht — und in der Inline-Form steht es immer direkt
    davor — liest ein Screenreader den Stand als Text.
+
+## Nachbesserung (2026-09-03)
+
+Das einzige ✗ der ersten Abnahme ist behoben: der deutsche JSX-Kommentar in
+`Progress.stories.tsx:148` steht jetzt englisch. Sonst nichts geändert —
+Status zurück auf `Abnahme` zur Nachprüfung dieser einen Zeile.
+
+Der offene Punkt des Abnehmenden bleibt stehen und ist richtig: `inline` hat
+im Repo produktiv genau einen Aufrufer (`StepRail.tsx:227`); der zweite Fall,
+der die Kehrtwende begründet, ist der Gruppenkopf von `TodoList` und lebt
+bisher nur als Probe und Story. Er wird echt, sobald 0050 die
+Sachverhaltsansicht baut.
