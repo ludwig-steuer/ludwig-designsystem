@@ -877,7 +877,12 @@ select.v2in { padding-right: 26px; }
 .v2bar__fill--warning { background: var(--color-warning); }
 .v2bar__fill--danger { background: var(--color-danger); }
 .v2bar__fill--success { background: var(--color-success); }
-.v2bar__label { display: block; font-size: 11px; color: var(--color-text-subtle); margin-top: 3px; }
+/* Behauptet seinen Stil auch in einem Versalienkopf (v2lp__grp): ein Stand
+   ist ein Wert, keine Überschrift. */
+.v2bar__label {
+  display: block; font-size: 11px; color: var(--color-text-subtle); margin-top: 3px;
+  font-weight: 400; text-transform: none; letter-spacing: normal;
+}
 .v2bar--sm { height: 4px; }
 .v2bar--lg { height: 10px; }
 
