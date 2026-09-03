@@ -1937,3 +1937,50 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2time { font-variant-numeric: tabular-nums lining-nums; }
 .v2time--sm { font-size: 12.5px; }
 .v2time--md { font-size: 13.5px; }
+
+/* ── Rohdaten (0051) ──────────────────────────────────────────────────────
+   Schlüssel in Mono links, Wert rechts: eine Spalte, die man von oben nach
+   unten liest, ohne die Schreibreihenfolge der Tabelle zu kennen. Der
+   Schlüssel bricht nicht um, der Wert schon — Spaltennamen sind kurz,
+   OCR-Text ist es nicht. */
+/* Keine Versalien: das Label trägt „#2 · id=e3a1c07f" — eine ID liest man
+   Zeichen für Zeichen, und `E3A1C07F` ist nicht derselbe Wert. */
+.v2raw__label {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--color-text-subtle);
+  padding-bottom: var(--space-2);
+}
+.v2raw__list {
+  display: grid;
+  grid-template-columns: minmax(120px, 240px) minmax(0, 1fr);
+  gap: 2px var(--space-4);
+  margin: 0;
+  /* Oben ausrichten, nicht an der Grundlinie: neben einer Klappe rutschte
+     der Schlüssel sonst auf die Höhe der Zusammenfassung. */
+  align-items: start;
+}
+.v2raw__key {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  padding: 5px 0;
+  overflow-wrap: anywhere;
+}
+.v2raw__val { margin: 0; padding: 5px 0; min-width: 0; font-size: 12.5px; }
+/* Eine feine Linie je Paar — die erste Zeile braucht keine. */
+.v2raw__list > * { border-top: var(--border-1-subtle); }
+.v2raw__list > *:nth-child(-n + 2) { border-top: none; }
+.v2raw__text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.v2raw__pre {
+  margin: 0;
+  max-height: 480px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+}
+.v2raw__empty { margin: 0; font-size: 12.5px; color: var(--color-text-muted); }

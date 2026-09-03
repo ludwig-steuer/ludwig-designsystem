@@ -151,6 +151,7 @@ export {
   MonoCell,
   type CellTone,
 } from "./primitives/Cells";
+export { RawRecord, RawValue, type RawFormat } from "./primitives/RawRecord";
 export { ClickRow, ExpandableRow } from "./primitives/ExpandableRow";
 export { SelectionBar, SelectCell } from "./primitives/Selection";
 
