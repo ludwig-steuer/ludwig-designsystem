@@ -557,6 +557,11 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;
   color: var(--color-text-muted);
 }
+.v2seg__btn .n {
+  margin-left: var(--space-1);
+  font-variant-numeric: tabular-nums lining-nums;
+  opacity: 0.6;
+}
 .v2seg__btn.is-active { background: var(--color-surface); color: var(--color-primary); box-shadow: var(--shadow-xs); }
 .v2seg__btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
 
@@ -2133,3 +2138,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   overflow-y: auto;
 }
 .v2log__refs { overflow-wrap: anywhere; }
+
+/* Kopf und Fuß des Log-Browsers (0054). Der Kopf steht über der Tabelle, nie
+   im Kartenkopf (Baukasten §6); der Fuß trägt „Ältere laden". */
+.v2log__head { padding: var(--space-3) var(--space-5) 0; }
+.v2log__foot {
+  padding: var(--space-3) var(--space-5);
+  border-top: var(--border-1-subtle);
+  background: var(--color-surface-head);
+}

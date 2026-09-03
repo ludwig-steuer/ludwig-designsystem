@@ -84,13 +84,16 @@ export function Tabs({
 export interface SegmentOption {
   key: string;
   label: string;
+  /** Zähler rechts am Label — gedämpft, wie `TabItem.count`: was diese Sicht zeigt. */
+  count?: number;
   href?: string;
 }
 
 /**
  * Segment-Schalter für gleichrangige Sichten auf dieselben Daten (Log).
  *
- * @when    Equal views of the same data (log: by time, by owner).
+ * @when    Equal views of the same data (log: by time, by owner), with a
+ *          count per view where the views differ in size.
  * @instead Views with their own content → Tabs.
  */
 export function Segmented({
@@ -108,9 +111,15 @@ export function Segmented({
     <div className="v2seg" role="group" aria-label={ariaLabel}>
       {options.map((o) => {
         const cls = `v2seg__btn${o.key === active ? " is-active" : ""}`;
+        const body = (
+          <>
+            {o.label}
+            {o.count === undefined ? null : <span className="n">{o.count}</span>}
+          </>
+        );
         return o.href ? (
           <Link key={o.key} href={o.href} className={cls} aria-current={o.key === active}>
-            {o.label}
+            {body}
           </Link>
         ) : (
           <button
@@ -120,7 +129,7 @@ export function Segmented({
             aria-pressed={o.key === active}
             onClick={() => onPick?.(o.key)}
           >
-            {o.label}
+            {body}
           </button>
         );
       })}

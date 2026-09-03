@@ -209,6 +209,7 @@ export {
 
 /* Prozess */
 export { LogList, type LogEntry, type LogLevel } from "./patterns/Log";
+export { LogBrowser, type LogFilterState } from "./patterns/LogBrowser";
 export {
   ProcessMini,
   ProcessStepper,

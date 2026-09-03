@@ -2,13 +2,14 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `patterns/` — Gruppe Prozess, neben `LogList` (0053) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, sobald sie ein Protokoll hat, in dem jemand „nur die Fehler" oder „nur was Menschen taten" sehen will |
 | Quelle | Anfrage Owner 2026-09-03 („eingebettet im Logbrowser, der suchen, sortieren, filtern kann") · **Z6** in `ludwig-UX-guidelines-v2.md` („ein Strom, drei Sichten: Verlauf · Protokoll · Technik, plus Fehlerfilter") · Vorlagen: `InvoiceLogsPanel` (`modules/invoices/ui/logs`, Toggle Fachlich/Technisch/Beide + verbose), Stapel-Log (`datev-export/domain/batch-log.ts`: `BATCH_LOG_VIEWS`, `visibleInBatchLog`), Filterformular in `app/(app)/admin/audit-log/page.tsx` |
 | Ersetzt | `InvoiceLogsPanel` (222 Z.) · die Sicht-Umschaltung des Stapel-Logs auf `[year]/stapel/[batchId]` · den **lokalen** Teil des Admin-Filters (`q`, `outcome`, `actorKind`) — Zeitraum, Mandant, Ressource, Vorgang bleiben Server-Filter der Seite |
 | Blockiert | von 0053 · blockiert Welle 3 (`admin/audit-log`, `configuration/logs`), den Pipeline-Tab des Belegs, den Stapel-Log |
 | Spec von / am | Claude, 2026-09-03 |
+| Gebaut von / am | Claude, 2026-09-04 |
 
 ## Ziel
 
@@ -211,6 +212,18 @@ Variabel (aus dieser Spec):
 3. **`Segmented` erweitern oder Zähler ins Label („Verlauf · 12")?**
    *Ohne Antwort: erweitern* — `TabItem` hat `count` schon; ein Zähler im
    Label wäre eine Zahl im Text ohne `tnum` und ohne Dämpfung.
+
+## Abweichung beim Bauen
+
+**Der Leerzustand hat einen zweiten Ausweg bekommen.** Die Spec nennt als
+Aktion „Filter zurücksetzen"; sie setzt Schwere und Suche zurück und lässt
+die Sicht stehen. Blendet aber die **Sicht allein** aus — alle Zeilen sind
+Technik, die Sicht steht auf Verlauf —, dann ist dieser Knopf ohne Wirkung:
+er räumt weg, was gar nicht gesetzt ist. Der Browser zeigt deshalb, wenn eine
+tiefere Sicht Zeilen hätte, zusätzlich „Zu „Technik" wechseln" (primär, wenn
+kein Filter gesetzt ist, sonst sekundär neben dem Zurücksetzen). Ohne das
+stünde dort ein toter Knopf, und I10 verlangt den nächsten Schritt.
+Nachzusehen in `EmptyAfterFilter`.
 
 ## Abnahme
 

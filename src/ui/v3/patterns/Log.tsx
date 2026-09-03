@@ -119,8 +119,9 @@ function actorText(actor: NonNullable<LogEntry["actor"]>): string {
  *          with severity, actor, code and payload: an audit trail, the trace
  *          of a document, the steps of a run, the events of a batch.
  * @instead The story of one object, where a gap is a statement → Timeline;
- *          the Timeline tells the story, the Log proves it. Three extra
- *          columns of your own → Table. Working on a picked row → MasterDetail.
+ *          the Timeline tells the story, the Log proves it. Filtering by view,
+ *          severity or search → LogBrowser. Three extra columns of your own →
+ *          Table. Working on a picked row → MasterDetail.
  */
 export function LogList({
   entries,

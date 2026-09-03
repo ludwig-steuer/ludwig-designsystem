@@ -40,3 +40,26 @@ export const TwoOptions: Story = {
     );
   },
 };
+
+/**
+ * Mit Zähler je Sicht (0054): Der Wert steht gedämpft rechts am Label und
+ * sagt vor dem Klick, was die Sicht zeigt — im Protokoll ist „Technik"
+ * ein Vielfaches von „Verlauf".
+ */
+export const WithCounts: Story = {
+  render: function Render() {
+    const [active, setActive] = useState("protokoll");
+    return (
+      <Segmented
+        options={[
+          { key: "verlauf", label: "Verlauf", count: 12 },
+          { key: "protokoll", label: "Protokoll", count: 48 },
+          { key: "technik", label: "Technik", count: 300 },
+        ]}
+        active={active}
+        ariaLabel="Log-Sicht"
+        onPick={setActive}
+      />
+    );
+  },
+};
