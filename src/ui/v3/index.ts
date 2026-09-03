@@ -56,6 +56,16 @@ export {
   type IconButtonSize,
   type IconButtonTone,
 } from "./primitives/IconButton";
+export {
+  ActionButton,
+  type ActionResult,
+  type ConfirmSpec,
+} from "./primitives/ActionButton";
+export {
+  OverflowMenu,
+  MenuItem,
+  type MenuItemTone,
+} from "./primitives/OverflowMenu";
 export { ActionBar, RowActions } from "./primitives/ActionBar";
 
 /* Navigation */
@@ -73,6 +83,7 @@ export {
 export { Field, Input, Textarea, Select, Checkbox } from "./primitives/Form";
 export { RadioGroup, type RadioOption } from "./primitives/RadioGroup";
 export { AmountInput, parseAmount, type ParsedAmount } from "./primitives/AmountInput";
+export { InlineEdit, type InlineEditInputProps } from "./primitives/InlineEdit";
 
 /* Dialog */
 export { Dialog } from "./primitives/Dialog";

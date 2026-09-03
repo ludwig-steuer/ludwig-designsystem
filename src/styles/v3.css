@@ -1453,3 +1453,42 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 @media (prefers-reduced-motion: reduce) {
   .v2toast { animation: none; }
 }
+
+/* --- OverflowMenu (0008) — die Klappe für die selteneren Wege ------------- */
+.v2menu { position: relative; display: inline-block; }
+.v2menu__panel {
+  position: absolute; top: calc(100% + 4px); right: 0;
+  min-width: 208px; max-height: 320px; overflow-y: auto;
+  padding: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 40;
+}
+.v2menu--start .v2menu__panel { left: 0; right: auto; }
+.v2menu__item {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 6px 8px; border: none; background: none;
+  font: inherit; font-size: 13.5px; color: var(--color-text);
+  text-align: left; text-decoration: none; cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+.v2menu__item:hover:not(:disabled) { background: var(--color-bg-soft); }
+.v2menu__item:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.v2menu__item--danger { color: var(--color-danger); }
+.v2menu__item:disabled { opacity: 0.5; cursor: not-allowed; }
+.v2menu__sum::-webkit-details-marker { display: none; }
+.v2menu__sum { list-style: none; }
+
+/* --- ActionButton (0004) — Handlung, Pending, Fehler ---------------------- */
+.v2act { display: inline-flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.v2act__err { font-size: 12.5px; color: var(--color-danger); font-weight: 500; }
+
+/* --- InlineEdit (0020) — Anzeige, Feld, Speichern ------------------------- */
+.v2iedit { display: flex; flex-direction: column; gap: 4px; }
+.v2iedit__show { display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; }
+.v2iedit__value { font-size: 13.5px; color: var(--color-text); }
+.v2iedit__value--empty { color: var(--color-text-subtle); }
+.v2iedit__acts { display: flex; align-items: center; gap: var(--space-2); margin-top: 4px; }
+.v2iedit__keys { font-size: 12px; color: var(--color-text-subtle); }
