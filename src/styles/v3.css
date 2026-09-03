@@ -970,6 +970,60 @@ select.v2in { padding-right: 26px; }
 .v2msg__actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
 .v2msg svg { flex: 0 0 auto; margin-top: 1px; }
 
+/* --- Balken je Zeitabschnitt (0041) ---------------------------------------
+   Eine Reihe, deshalb keine kategoriale Palette: die Balken sind grau, weil
+   ein Wert keine Kritikalitätsstufe trägt (V6/A7); der hervorgehobene trägt
+   die Marke — und zusätzlich zur Farbe ein kräftigeres Label (V7).
+   Beide ≥ 3:1 gegen `--color-bg` (V10), Unterscheidung ΔE 21.8 normal /
+   20.1 bei Farbfehlsichtigkeit (Skill `dataviz`, validate_palette.js). */
+.v2chart { display: block; }
+.v2chart__svg { display: block; width: 100%; height: 96px; }
+.v2chart__bar { fill: var(--color-text-subtle); }
+.v2chart__bar.is-now { fill: var(--color-primary); }
+.v2chart__zero { stroke: var(--color-border-strong); stroke-width: 0.4; }
+.v2chart__ax {
+  display: flex; margin-top: 4px;
+  font-size: 10.5px; color: var(--color-text-subtle);
+}
+.v2chart__tick { flex: 1 1 0; min-width: 0; text-align: center; }
+.v2chart__tick.is-now { color: var(--color-text); font-weight: 600; }
+.v2chart__empty { margin: 0; font-size: 13px; color: var(--color-text-subtle); }
+
+/* Nur für Screenreader — die Werte als Tabelle neben dem Bild. */
+.v2vh {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* --- Befehlspalette (0039) ------------------------------------------------
+   Die Hülle ist der Dialog; hier steht nur die Liste. `cmdk` bringt Treffer,
+   Sortierung und Tastaturweg mit, keine Optik. */
+.v2cmd { display: flex; flex-direction: column; gap: var(--space-3); min-height: 280px; }
+.v2cmd__in { width: 100%; box-sizing: border-box; }
+.v2cmd__list { max-height: 320px; overflow-y: auto; }
+.v2cmd__empty { padding: var(--space-4) var(--space-2); font-size: 13px; color: var(--color-text-subtle); }
+.v2cmd__grp [cmdk-group-heading] {
+  padding: var(--space-2) var(--space-2) var(--space-1);
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+.v2cmd__item {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: 6px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px; color: var(--color-text);
+  cursor: pointer;
+}
+.v2cmd__item[data-selected="true"] { background: var(--color-bg-soft); }
+.v2cmd__item:hover { background: var(--color-bg-soft); }
+.v2cmd__jump {
+  display: flex; align-items: center; gap: var(--space-2);
+  width: 100%; color: inherit; text-decoration: none;
+}
+.v2cmd__label { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.v2cmd__hint { font-size: 12px; color: var(--color-text-subtle); }
+
 /* --- Popover-Familie (0038): Popover, Tooltip, HoverCard ------------------
    Keine Stapelreihenfolge nötig — das Feld liegt im Top Layer des Browsers.
    `inset: auto` hebt die Zentrierung auf, die der Browser einem Popover gibt —

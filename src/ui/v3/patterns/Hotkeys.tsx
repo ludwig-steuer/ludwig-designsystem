@@ -14,7 +14,9 @@ import { Kbd } from "../primitives/Kbd";
  * weeks — an application you have to know by heart is unusable for them.
  *
  * Inside form fields the user types text, not commands: `INPUT`,
- * `TEXTAREA`, `SELECT` and `contenteditable` are excluded.
+ * `TEXTAREA`, `SELECT` and `contenteditable` are excluded — **except for
+ * combinations with Ctrl/⌘**, which are no typing at all: `⌘K` has to open
+ * the command palette from inside the search field it sits next to (0039).
  */
 
 export interface HotkeyBinding {
@@ -40,9 +42,9 @@ export function useHotkeys(bindings: readonly HotkeyBinding[], enabled = true) {
   useEffect(() => {
     if (!enabled) return;
     function onKey(e: KeyboardEvent) {
-      if (isTyping(e.target)) return;
       if (e.altKey) return;
       const meta = e.ctrlKey || e.metaKey;
+      if (!meta && isTyping(e.target)) return;
       const hit = bindings.find(
         (b) => b.key.toLowerCase() === e.key.toLowerCase() && !!b.meta === meta,
       );

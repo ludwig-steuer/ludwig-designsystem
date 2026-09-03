@@ -130,6 +130,9 @@ export {
   type TimeLength,
 } from "./format";
 
+/* Daten — Reihen und Verläufe (0041) */
+export { BarChart, type Bar } from "./primitives/BarChart";
+
 /* Tabelle */
 export { Card, CardHead, CardFoot, Table, HeadRow, Row, GroupRow, EmptyRow } from "./primitives/Table";
 export {
@@ -171,6 +174,11 @@ export {
   type RailTone,
 } from "./patterns/StepRail";
 export { useHotkeys, HotkeyLegend, type HotkeyBinding } from "./patterns/Hotkeys";
+export {
+  CommandPalette,
+  type CommandGroup,
+  type CommandItem,
+} from "./patterns/CommandPalette";
 
 /* Prüfen */
 export {

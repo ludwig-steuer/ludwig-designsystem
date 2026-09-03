@@ -1,4 +1,4 @@
-import type { AnchorHTMLAttributes } from "react";
+import type { AnchorHTMLAttributes, Ref } from "react";
 
 /**
  * Der Link des Design-Systems.
@@ -13,6 +13,10 @@ import type { AnchorHTMLAttributes } from "react";
  * wird NUR diese Datei auf `next/link` umgestellt — nicht die sechs
  * Komponenten, die hier importieren.
  */
-export function Link({ href, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) {
-  return <a href={href} {...rest} />;
+export function Link({
+  href,
+  ref,
+  ...rest
+}: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string; ref?: Ref<HTMLAnchorElement> }) {
+  return <a href={href} ref={ref} {...rest} />;
 }
