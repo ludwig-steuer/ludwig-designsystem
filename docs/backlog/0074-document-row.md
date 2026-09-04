@@ -41,10 +41,36 @@ Zwei Dinge trennt die Spec dabei sauber, und das löst zugleich Befund B9
 | Frage | Wer antwortet | Warum |
 |---|---|---|
 | Wie **heißt** die Belegart? | `sourceDocType` + Rückfall `classDocumentForm`, über `sourceDocTypeLabel()` | Das ist ein reines Label. `sourceDocTypeLabel(null)` heißt „Beleg", nie „Rechnung" — die Funktion gibt es schon. |
-| Welches Feld **füllt** Rang 3 und 5? | das `detail`-Objekt — vorhanden genau dann, wenn die Subtyp-Zeile existiert | Der Diskriminator lügt in 10 von 384 Fällen. Die Subtyp-Zeile lügt nie: was sie hergibt, ist da. |
+| Welches Feld **füllt** Rang 3 und 5? | das `detail`-Objekt — **aber nur, wenn es zum Diskriminator passt** | Beide Quellen lügen, jede auf ihre Art. Siehe unten. |
 
-Damit gibt es in keiner Komponente ein `isInvoice`. Es gibt
-`detail?.kind` — und wo `detail` fehlt, greift der Rückfall.
+**Warum beide zustimmen müssen** (Befund B9 / L-35, mit der App-Seite geklärt
+am 2026-09-04). Die 10 Widersprüche sind nicht einer, sondern zwei Fälle mit
+entgegengesetzter Wahrheit — nachgerechnet:
+
+| Fall | Bestand | Wer hat recht | Wenn man dem anderen glaubt |
+|---|---|---|---|
+| `sourceDocType = "invoice"`, **keine** Rechnungs-Zeile | 7, alle vom 2026-07-31 (vor dem F87-Kern), alle erledigt | die **Zeile**: es gibt nichts zu zeigen | ein leerer Rechnungsblock mit vier Gedankenstrichen |
+| `sourceDocType = "other"`, **mit** Rechnungs-Zeile | 3, **alle drei mit gesetztem `classOverriddenAt`** — ein Mensch hat die Belegform von `invoice` auf `other` korrigiert, die Rechnungs-Zeile blieb stehen (App-seitig `P26`) | der **Diskriminator**: er ist die Korrektur, die Zeile ist der Rest | Nummer und Brutto einer Einordnung, die ein Mensch ausdrücklich verworfen hat |
+
+Daraus die Regel, konservativ und in einer Zeile:
+
+> Der Ausprägungs-Block erscheint **nur, wenn Diskriminator und Subtyp-Zeile
+> übereinstimmen**. Widersprechen sie sich, zeigt die Form allein die
+> Supertyp-Punkte — sie behauptet nichts, was eine der beiden Quellen
+> bestreitet.
+
+Technisch trägt das die Registry selbst: jeder Eintrag nennt den
+`source_doc_type`, zu dem er gehört, und die Zustimmung ist ein Vergleich —
+kein Zweig je Belegart.
+
+```ts
+const entry  = detail ? DOCUMENT_DETAILS[detail.kind] : null;
+const agrees = entry?.type === document.sourceDocType;
+```
+
+Damit gibt es in keiner Komponente ein `isInvoice`. Es gibt `agrees` — und
+wo es nicht zutrifft, greift derselbe Rückfall wie bei einem Beleg ganz ohne
+Ausprägung.
 
 ## Einordnung
 
@@ -82,11 +108,19 @@ export type DocumentDetail =
       currency?: Currency | null; contractType?: string | null };
 ```
 
-| Registry-Eintrag | `identifier(d)` → Rang 5 | `measure(d)` → Rang 3 |
-|---|---|---|
-| `invoice` | `number`, mono gesetzt | `gross` + `currency` |
-| `contract` | `subject`, mono **nicht** gesetzt (ein Satz, keine Nummer) | `amount` + `currency` |
-| *kein Eintrag* (kein `detail`) | `null` → Rückfall Dateiname | `null` → **die Stelle bleibt leer** |
+Es gibt genau **zwei** Einträge — Rechnung und Vertrag, die beiden Belegarten
+mit eigenen Fachfeldern. Kontoauszug, Kreditkartenabrechnung und
+Reisekostenabrechnung bekommen keinen: sie sind Container, ihre Struktur
+liegt am Import-Batch und an den Kind-Belegen (App-Seite 2026-09-04, L-38;
+seit dem 2026-09-04 auch als Punkt 4 im GLOSSARY-Eintrag „Source document
+supertype & specializations"). Ihre Gruppen-Eigenschaft hängt an der
+Relation und wird in 0076 gezeigt.
+
+| Registry-Eintrag | `type` (der Diskriminator, zu dem er gehört) | `identifier(d)` → Rang 5 | `measure(d)` → Rang 3 |
+|---|---|---|---|
+| `invoice` | `"invoice"` | `number`, mono gesetzt | `gross` + `currency` |
+| `contract` | `"contract"` | `subject`, mono **nicht** gesetzt (ein Satz, keine Nummer) | `amount` + `currency` |
+| *kein `detail`* **oder** `detail` widerspricht dem Diskriminator | — | `null` → Rückfall Dateiname | `null` → **die Stelle bleibt leer** |
 
 Beide Funktionen geben `null` zurück, wenn das Feld fehlt. Die Registry
 kennt **keine** UI: sie liefert Werte, nicht JSX — sonst könnte 0076 sie
@@ -102,7 +136,7 @@ anzufassen.
 | `sourceDocType` | `SourceDocType \| "declaration" \| null` | nein | Diskriminator. Die Union ist um `declaration` geweitet — der DB-CHECK und `SOURCE_DOC_TYPE_LABELS` kennen den Wert, der TS-Typ nicht (Befund B10). | `Ausprägungen` |
 | `classDocumentForm` | `string \| null` | nein | Rückfall-Schlüssel des **Labels**: trägt der Beleg nur `other`/NULL, gewinnt die Belegform („Sammel-PDF", „Lohnabrechnung"). | `Ausprägungen` |
 | `counterparty` | `string \| null` | nein | Rang 1. Je Ausprägung 50–95 % gefüllt — fehlt er, führt der Dateiname. | `Ausprägungen`, `Rand` |
-| `detail` | `DocumentDetail \| null` | nein | Rang 3 und 5. Vorhanden **genau dann, wenn die Subtyp-Zeile existiert** — nicht, wenn der Diskriminator es behauptet (B9). | `Ausprägungen` |
+| `detail` | `DocumentDetail \| null` | nein | Rang 3 und 5. Der Aufrufer setzt es, **wenn die Subtyp-Zeile existiert**; gezeigt wird es nur, wenn es zum Diskriminator passt (siehe „Warum beide zustimmen müssen"). | `Ausprägungen` |
 | `documentDate` | `string \| null` | nein | Rang 4, ISO-Tag. NULL bleibt NULL — kein Rückfall auf den Upload-Tag (GLOSSARY). | `Gefuellt` |
 | `receivedDate` | `string` | ja | Rang 7, `NOT NULL`. Sortierschlüssel der Belegliste. | `Gefuellt` |
 | `completedAt` | `string \| null` | nein | Zustand. `null` = steht noch offen. | `Zustände` |
@@ -170,7 +204,7 @@ Titel `v3/Entitäten/Beleg/Document`.
 | Story | Beweist |
 |---|---|
 | `Gefuellt` | Eine Rechnungszeile mit allem: Gegenpart, Nummer, Brutto, beide Daten, Sachverhalt, Erledigt |
-| `Ausprägungen` | **Die Kernstory.** Alle sieben `sourceDocType`-Werte plus NULL untereinander — mit Subtyp-Zeile, ohne, und die zwei B9-Ausreißer (`invoice` ohne `detail`, `other` **mit** `detail.kind = "invoice"`). Zeigt: gemeinsamer Rang, verschiedene Füller, Rückfall auf den Dateinamen, leere Maß-Stelle statt „—" |
+| `Ausprägungen` | **Die Kernstory.** Alle sieben `sourceDocType`-Werte plus NULL untereinander — mit Subtyp-Zeile, ohne, und die zwei B9-Ausreißer: `invoice` ohne `detail`, und `other` **mit** `detail.kind = "invoice"`. **Beide zeigen dasselbe** — Dateiname als Kennung, leere Maß-Stelle —, und die Story sagt in ihrem Kommentar, warum das aus entgegengesetzten Gründen richtig ist |
 | `Einordnung` | `DocumentClass` allein: alle vier Achsen, dazu die drei NULL-Fälle (Kategorie fehlt, Richtung nicht anwendbar, Charakter = `original`) — jeder zeigt **nichts**, nicht „unbekannt" |
 | `Zustände` | Die Erledigung über alle sechs `completed_via`-Werte plus „Offen", mit dem Grund im `title` |
 | `Zelle` | `DocumentCell` allein, in fremdem Markup (ein Satz, eine Buchungszeile) — mit und ohne `href` |
@@ -188,6 +222,7 @@ ausgeschlossen) + 1 je Enum-Achse (`Ausprägungen`, `Einordnung`, `Zustände`)
 |---|---|---|
 | ~~Kontoauszug, Kreditkartenabrechnung, Reisekostenabrechnung als eigene Ausprägung~~ | — | **Entfällt.** Die App-Seite hat am 2026-09-04 entschieden: keine Subtyp-Tabellen, absichtlich — die drei sind Container, keine Belege mit eigenen Fachfeldern (L-38). Sie bekommen nie einen `DocumentDetail`-Eintrag; ihre Gruppen-Eigenschaft hängt an der Relation und wird in 0076 gezeigt |
 | Aktion an der Zeile (erledigen, neu anstoßen, einreichen) | optionaler `actions?: ReactNode`-Slot | wenn 0070 die erste Liste mit Massenaktion baut; bis dahin setzt der Aufrufer sie daneben |
+| Die Zustimmungs-Regel wieder fallen lassen | nichts — der Vergleich verschwindet | wenn `P26` drüben entschieden ist (Belegform-Override räumt die Rechnungs-Zeile auf) und `L-35` null Widersprüche zählt. Bis dahin ist die Regel billig und still |
 | Auswahl (Checkbox) | `SelectionCell` des Aufrufers, nicht eine Prop hier | mit 0070 und `DataTable`s `SelectionScope` |
 | Teilbeleg-Zähler an der Zeile | `childCount?: number` | wenn ein Screen Sammel-PDFs listet — 97 % haben keine Kinder, heute wäre die Zahl fast immer 0 |
 
@@ -207,7 +242,8 @@ Variabel (aus dieser Spec):
 
 - [ ] **`grep -n "isInvoice\|=== \"invoice\"" src/ui/v3/entities/document/` findet nichts** außer den Registry-Einträgen in `document-detail.ts`
 - [ ] Ein Beleg mit `sourceDocType = "invoice"` **ohne** `detail` zeigt kein leeres Rechnungsfeld, sondern den Dateinamen als Kennung und keine Maß-Stelle (Story `Ausprägungen`)
-- [ ] Ein Beleg mit `sourceDocType = "other"` **mit** `detail.kind = "invoice"` zeigt Nummer und Brutto — unter dem Label „Sonstiger Beleg" (Story `Ausprägungen`)
+- [ ] Ein Beleg mit `sourceDocType = "other"` **mit** `detail.kind = "invoice"` zeigt **weder** Nummer **noch** Brutto — die Belegform wurde korrigiert, die Rechnungs-Zeile ist der Rest (Story `Ausprägungen`)
+- [ ] Der Vergleich ist **generisch**: er liest `type` aus dem Registry-Eintrag, er zählt keine Belegarten auf
 - [ ] `sourceDocType = null` heißt „Beleg", nie „Rechnung" (Story `Ausprägungen`)
 - [ ] `docCategory = null`, `docDirection = null` und `classDocumentKind = "original"` erzeugen **kein** Badge (Story `Einordnung`)
 - [ ] Die Erledigung steht als **Wort**, nicht als Häkchen (V7, V11) — Achse `beleg_erledigung` (Story `Zustände`)

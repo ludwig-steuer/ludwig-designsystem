@@ -178,7 +178,7 @@ Kürzung sitzt in der Mitte, die Endung bleibt lesbar.
 | Ereignis → Sachverhalt | Kind → Eltern | 12 % ohne · p50 1 · p90 1 · max 2 | Kontext | S | Inline des Sachverhalts (`CaseCell`), ein Klick | Staging |
 | Teilbelege (`parentSourceDocId`) | Kind, selbstbezüglich | 97 % ohne · p50 0 · p90 0 · max 23 | Kontext | M | Zähler (M) · Liste (L), eingebettet als `DocumentRow` | Staging · `ChildDocsCard` |
 | Sammel-Original (`parentSourceDocId`) | Eltern, selbstbezüglich | 20 % | Kontext | M | Inline mit Seitenbereich („Seiten 5–7 aus …") | Füllgrad `splitPageRange` |
-| **Dokumentgruppe** (`collectionKind` am Original **und** `parentSourceDocId` am Kind, zusammen gelesen) | beide Richtungen | 89 von 384 (23 %): 12 Originale, 77 Teilbelege — davon **54 Rechnungen**, 13 Sonstige, nur 10 Container-Deckblätter | Kontext | M | **ein** Block, der an der Relation hängt, nicht an der Belegart — die Antwort der App-Seite auf B2, an der richtigen Stelle | Staging · App-Seite 2026-09-04 |
+| **Dokumentgruppe** (`collectionKind` am Original **und** `parentSourceDocId` am Kind, zusammen gelesen) | beide Richtungen | 89 von 384 (23 %): 12 Originale, 77 Teilbelege — davon **54 Rechnungen**, 13 Sonstige, nur 10 Container-Deckblätter | Kontext | M | **ein** Block, der an der Relation hängt, nicht an der Belegart — die Antwort der App-Seite auf B2, an der richtigen Stelle. Klammer-Typ fehlt bei allen 12 Originalen (B13), der Block muss auch ohne ihn vollständig sein | Staging · App-Seite 2026-09-04 |
 | Historie (`platform_audit_events`) | ohne FK, `resource_kind ∈ {source_doc, source_doc_invoice, invoice}` | 0 % ohne · p50 2 · p90 3 · max 8 | Verantwortung | L | Liste über `LogList` — **15 Aktionsarten, 1 085 Ereignisse** über die drei Ressourcen-Arten (`source_doc` allein: 12 / 977). Wer nur auf `source_doc` filtert, verliert 10 % der Historie | Staging (nachgerechnet) |
 | Volltext (`ops_document_text`) | Kind | — | Technik | — | nie zeigen — OCR-Text, gehört der Suche, nicht der Ansicht | Schema |
 | DATEV-Stapelverzeichnis (`client_batch_account_directory`) | Kind | — | Technik | — | gehört dem DATEV-Stapel, nicht dieser Familie | Schema |
@@ -379,17 +379,32 @@ folgt mit der Detailansicht (0071), die sie ohnehin voraussetzt.
   Erledigung heute in **drei** verschiedenen Formen — Häkchen in der
   Belegliste, Häkchen in `SourceDocFamily`, Badge mit Wort nur in
   `DocCompletionControl`. V7/V11 sind in zwei von drei verletzt.
-- **B9 — Diskriminator und Subtyp-Zeile laufen auseinander.** 7 Belege
-  tragen `source_doc_type='invoice'` ohne Zeile in `…_invoices`, 3 tragen
-  `other` **mit** einer solchen Zeile (10 von 384). Solange das so ist, kann
-  keine Renderer-Registry allein auf dem Diskriminator stehen — sie muss
-  rendern, was die Subtyp-Zeile hergibt. Für die App ist das ein
-  Konsistenz-Befund (Trigger oder Constraint), für dieses Repo die
-  Begründung des Registry-Schlüssels oben. Eingetragen als L-35 in `docs/befunde-app.md`.
+- **B9 — Diskriminator und Subtyp-Zeile laufen auseinander** — *mit der
+  App-Seite geklärt am 2026-09-04.* Es sind **zwei** Fälle mit
+  entgegengesetzter Wahrheit, nicht einer:
+  - 7 Belege tragen `source_doc_type='invoice'` ohne Zeile in `…_invoices` —
+    alle vom 2026-07-31, vor dem F87-Kern, alle erledigt. Hier hat die
+    **Zeile** recht: es gibt nichts zu zeigen.
+  - 3 tragen `other` **mit** einer Zeile — und alle drei haben
+    `class_overridden_at` gesetzt: ein Mensch hat die Belegform von
+    `invoice` auf `other` korrigiert, die Rechnungs-Zeile blieb stehen
+    (App-seitig `P26`, „Belegform-Override räumt die Rechnungs-Pipeline
+    nicht auf"). Hier hat der **Diskriminator** recht: er ist die Korrektur.
+
+  Daher die Regel der Familie: **der Ausprägungs-Block erscheint nur, wenn
+  Diskriminator und Subtyp-Zeile übereinstimmen.** Widersprechen sie sich,
+  stehen allein die Supertyp-Punkte — die Form behauptet nichts, was eine
+  der beiden Quellen bestreitet. Der Vergleich ist generisch (jeder
+  Registry-Eintrag nennt seinen `source_doc_type`), kein Zweig je Belegart.
+  Sie fällt weg, sobald `P26` entschieden ist. Register: L-35.
 - **B10 — `SourceDocType` fehlt der Wert `declaration`** (beim Schreiben von
   0074 aufgefallen). DB-CHECK und `SOURCE_DOC_TYPE_LABELS` führen sieben
-  Werte, die TS-Union in `document-form-mapping.ts` sechs. 0074 weitet die
-  Union lokal und begründet es; Register-Eintrag L-44.
+  Werte, die TS-Union in `document-form-mapping.ts` sechs. *Beantwortet von
+  der App-Seite am 2026-09-04:* **Absicht** — die Union ist der Typ des
+  Mapping-**Ergebnisses** (was geschrieben wird), und `declaration` hat
+  keinen Schreiber. Lesend sind sieben Werte richtig, `SOURCE_DOC_TYPE_LABELS`
+  führt alle sieben. 0074 weitet die Union lokal; das ist bestätigt.
+  Register-Eintrag L-44, erledigt.
 - **B11 — Die Kante Beleg → Bank-Umsätze ist weich** (von der App-Seite am
   2026-09-04 bestätigt und übernommen). Es gibt zwei Wege und keinen
   Fremdschlüssel: `client_bank_transactions.raw_payload->>'source_doc_id'`
@@ -402,11 +417,19 @@ folgt mit der Detailansicht (0071), die sie ohnehin voraussetzt.
   Owner-Entscheid steht aus. **Solange das offen ist, kann keine Beleg-Form
   Zeitraum, Salden oder Zeilenzahl eines Kontoauszugs zeigen** — es steht im
   Ausbau von 0076, nicht in der Schnittstelle.
-- **B12 — Doku-Lücke im GLOSSARY** (von der App-Seite anerkannt, Satz
-  kommt): Der Eintrag „Source document supertype & specializations" sagt
-  „neue Belegart = neuer Subtyp + …", aber nicht, dass **Container-Belegarten
-  bewusst keinen Subtyp haben**. Wer die Regel wörtlich nimmt, hält den
-  Zustand für einen Fehler — so ist es dieser Analyse ergangen.
+- **B12 — Doku-Lücke im GLOSSARY — erledigt am 2026-09-04.** Der Eintrag
+  „Source document supertype & specializations" sagte „neue Belegart = neuer
+  Subtyp + …", aber nicht, dass **Container-Belegarten bewusst keinen Subtyp
+  haben**; wer die Regel wörtlich nahm, hielt den Zustand für einen Fehler —
+  so ist es dieser Analyse ergangen. Die App-Seite hat den Punkt 4 ergänzt,
+  samt Import-Batch und dem Hinweis, dass der Registry-Eintrag an der
+  Gruppen-Relation hängt.
+- **B13 — Der Klammer-Typ wird nie vergeben** (App-Seite `P28`, 2026-09-04).
+  Von 12 Sammel-Originalen tragen 8 `not_connected` und 4 gar keinen Wert;
+  keine der vier Klammer-Familien aus belege.md R25–R27 kommt vor. Ursache
+  liegt im Klassifikator, nicht in der Persistenz. **Für die Formen heißt
+  das:** der Deckblatt-Block muss ohne Klammer-Typ vollständig aussehen —
+  das ist im Bestand der Normalfall, nicht die Ausnahme.
 
 ## Offene Fragen
 

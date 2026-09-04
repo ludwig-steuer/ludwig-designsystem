@@ -56,6 +56,13 @@ für Rang 5 und `measure()` für Rang 3. Diese Aufgabe fügt den dritten hinzu:
 facts(d: DocumentDetail): FactRow[];
 ```
 
+Der Block erscheint unter derselben Bedingung wie in 0074: **nur, wenn
+Diskriminator und Subtyp-Zeile übereinstimmen** (`entry.type ===
+document.sourceDocType`). Widersprechen sie sich — 10 von 384 Belegen, aus
+zwei entgegengesetzten Gründen —, stehen allein die acht generischen Zeilen.
+Die Begründung steht in 0074 und wird hier nicht wiederholt; hier zählt nur,
+dass es **dieselbe** Regel aus **derselben** Datei ist.
+
 `FactRow` ist `{ label: string; value: ReactNode }` — die Registry liefert
 weiterhin **keine** Layout-Entscheidung, nur Paare. `DocumentFacts` reiht
 sie unter die generischen Zeilen, in derselben Reihenfolge, in der sie
@@ -100,9 +107,18 @@ Was der Block zeigt:
 
 | Der Beleg ist … | Zeile |
 |---|---|
-| ein Sammel-Original | Dokumentgruppe (Achse `dokumentgruppe`) · Zahl der Teilbelege · wie viele davon erledigt sind |
+| ein Sammel-Original **mit** Klammer-Typ | Dokumentgruppe (Achse `dokumentgruppe`) · Zahl der Teilbelege · wie viele davon erledigt sind |
+| ein Sammel-Original **ohne** Klammer-Typ (`not_connected` oder NULL) | „Unabhängige Belege" bzw. gar kein Typ-Badge — nur Zahl und Erledigungsstand der Teilbelege |
 | ein Teilbeleg | „Seiten 5–7 aus \<Original\>", mit Weg zum Original |
 | beides nicht | **kein Block** |
+
+Die zweite Zeile ist im Bestand **der Normalfall**, nicht die Ausnahme: von
+den 12 Sammel-Originalen tragen 8 `not_connected` und 4 gar keinen Wert;
+kein einziges eine der vier Klammer-Familien aus belege.md R25–R27. Die
+App-Seite hat die Ursache lokalisiert (Klassifikator liefert nie
+`credit_card_statement`/`expense_report`, erfasst als `P28`) — für uns heißt
+das: der Block muss ohne Klammer-Typ vollständig aussehen, nicht wie ein
+halb gefülltes Formular.
 
 Die Batch-Fakten eines Kontoauszugs — Zeitraum, Anfangs-/Endsaldo,
 Zeilenzahl — gehören **nicht** hierher: sie liegen an
@@ -196,7 +212,7 @@ Titel `v3/Entitäten/Beleg/DocumentFacts`.
 | `Ausprägungen` | **Die Kernstory.** Rechnung, Vertrag, Kontoauszug, Sonstiger Beleg und ein Beleg ohne Typ nebeneinander — gleiche Reihenfolge oben, verschiedene Blöcke unten, und bei den letzten dreien **kein leerer Block** |
 | `Vertrag` | Der Registry-Eintrag, den kein Bestand belegt: Laufzeit mit und ohne Enddatum, „unbefristet", buchungsrelevante Fakten mit Herkunft KI und manuell |
 | `Leer` | Ein Beleg, von dem nur Datei und Eingangsdatum bekannt sind — was steht da, und was steht bewusst nicht da |
-| `Gruppe` | Der Block an der Relation: ein Sammel-Original mit 9 Teilbelegen („4 von 9 erledigt"), ein Teilbeleg („Seiten 5–7 aus …") — und eine **Rechnung**, die Teilbeleg ist: der Fall, den ein Renderer je Belegart verfehlt hätte |
+| `Gruppe` | Der Block an der Relation, vier Fälle: ein Sammel-Original **ohne** Klammer-Typ („4 von 9 erledigt" — der Normalfall im Bestand), eines **mit**, ein Teilbeleg („Seiten 5–7 aus …") und eine **Rechnung**, die Teilbeleg ist: der Fall, den ein Renderer je Belegart verfehlt hätte |
 | `Toene` | `bare` (Drawer) und `surface` (Karte) nebeneinander |
 | `Rand` | 400-Zeichen-Zusammenfassung, 139-Zeichen-Dateiname, 868-Zeichen-Erledigungsgrund — alle drei Kürzungen, voller Text im `title` |
 | `ImEinsatz` | Im `DocumentDrawer`, neben einer Liste: Kopf, Vorschau, Fakten, Grenze, ein Ausgang — der Nachzug in einem Bild |
@@ -235,6 +251,8 @@ Variabel (aus dieser Spec):
 - [ ] `grep -n "isInvoice" src/ui/v3/entities/document/` findet nichts
 - [ ] Eine neue Belegart erfordert genau **einen** neuen Eintrag in `document-detail.ts` und keine Änderung an `DocumentFacts.tsx` — nachgewiesen, indem der Vertrags-Eintrag als letzter hinzugefügt wird und die Komponente unverändert bleibt
 - [ ] Der Gruppen-Block erscheint bei einer **Rechnung**, die Teilbeleg ist — er hängt an der Relation, nicht an der Belegart (Story `Gruppe`)
+- [ ] Ein Sammel-Original mit `collectionKind = "not_connected"` oder ohne Wert sieht **vollständig** aus, nicht wie ein halb gefülltes Formular (Story `Gruppe`)
+- [ ] Widersprechen sich Diskriminator und Subtyp-Zeile, steht **kein** Ausprägungs-Block — dieselbe Regel und dieselbe Datei wie 0074 (Story `Ausprägungen`)
 - [ ] Ein Beleg ohne `group` bekommt keinen Block, auch keinen leeren (Story `Ausprägungen`)
 - [ ] `tone` verhält sich wie Zeile 4 der Schnittstelle (Story `Toene`)
 - [ ] Alle drei Kürzungen greifen, der volle Text steht im `title` (Story `Rand`)
