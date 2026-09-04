@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → das **Zonen-Schema** ja (steht als Regel in 0052), der **Drawer** nein: er zeigt ein Ludwig-Konto → `entities/` |
 | Quelle | Entitätsprofil `docs/entitaeten/account.md` (Status `geprüft`), Formen-Zeile `AccountDrawer` (§7 Grund 5) · Anfrage Owner 2026-09-04 („next step: drawer für Konto, z.B. 1210") mit drei Entscheiden vom selben Tag · Zonen-Schema aus 0052 · `design-guidelines.md` A10 |
@@ -10,6 +10,8 @@
 | Blockiert | die 5 `<AccountRef>`-Stellen und 13 Context-Dateien der App, die heute auf den alten Drawer zeigen · 0013 (das Kontenblatt-Icon von `AccountField` bekommt endlich ein Ziel) |
 | Setzt voraus | 0042 `Drawer` (fertig) · 0066 `AccountFacts` (Zone 3) · 0067 `AccountEntryList` (Zone 3b) |
 | Spec von / am | Claude, 2026-09-04 |
+| Freigegeben | Owner, 2026-09-04 |
+| Gebaut von / am | Claude, 2026-09-04 — `AccountDrawer.tsx`, sechs Stories |
 
 ## Ziel
 
@@ -211,6 +213,14 @@ Variabel (aus dieser Spec):
    sieben. — *Ohne Antwort: `size="lg"` wie der Beleg-Drawer, `compact`. Wenn
    die Abnahme zeigt, dass sieben Spalten quetschen, trägt
    `AccountEntryList` das horizontale Scrollen schon über `Table minWidth`.*
+
+## Abweichungen von der Spec
+
+| Punkt | Spec | Gebaut | Grund |
+|---|---|---|---|
+| `meta` der Zone 1 | `Commerzbank · Sachkonto · 2.937 in DATEV, 4 nur in Ludwig` | nur der **Name**, dazu der Jahresschalter | Die Zahlen stehen zwei Zeilen tiefer in Zone 3. Im Browser stand alles doppelt — Zone 1 trägt jetzt die Identität, Zone 3 die Zahlen. |
+| Fuß-Knopf | „Volles Konto öffnen" mit Pfeil-Icon | ohne Icon | Der Knopf brach zweizeilig um. V11 verlangt kein Icon ohne Not — ein Wort allein ist regelkonform, zwei Zeilen im Fuß sind es nicht. |
+| „Mehr laden" | `onShowMore` an `AccountEntryList` | der Drawer **baut den Knopf** und gibt ihn als `more` hinein | Folge der Abweichung in 0067: die Liste bleibt Server-Component, der Drawer ist ohnehin Client. Die Drawer-Schnittstelle behält `onShowMore` unverändert. |
 
 ## Abnahme
 

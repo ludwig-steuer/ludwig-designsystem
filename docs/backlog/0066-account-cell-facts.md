@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Kontonummer, Kontenrahmen, Soll/Haben-Saldo und DATEV-Sync sind Buchhaltung |
 | Quelle | Entitätsprofil `docs/entitaeten/account.md` (Status `geprüft`, 2026-09-04), Abschnitte „Datenpunkte", „Formen" · Anfrage Owner 2026-09-04 („Drawer für Konto, z.B. 1210") |
@@ -10,6 +10,8 @@
 | Blockiert | 0067 (die Zeile nennt das Gegenkonto als Zelle) · 0068 (`AccountDrawer`, Zone 3) · 0063 (`AccountView`) |
 | Setzt voraus | nichts Offenes |
 | Spec von / am | Claude, 2026-09-04 |
+| Freigegeben | Owner, 2026-09-04 |
+| Gebaut von / am | Claude, 2026-09-04 — `Account.tsx`, sieben Stories, CSS-Block `.v2acc*` |
 
 ## Ziel
 
@@ -234,6 +236,17 @@ Variabel (aus dieser Spec):
    *Ohne Antwort: ja, mit Ellipse — die Kürzung ist ohnehin gebaut, und
    „immer beides" ist ein Owner-Entscheid. Wenn die Spalte in der Abnahme
    nicht trägt, kürzt die Spaltenbreite, nicht die Komponente.*
+
+## Abweichungen von der Spec
+
+| Punkt | Spec | Gebaut | Grund |
+|---|---|---|---|
+| Kopfzeile von `AccountFacts` | Kopf mit Nummer · Name · Rolle-Chip · Jahr über den Fakten | **entfällt**; die Rolle wurde die erste Fakten-Zeile („Kontoart") | Im ersten Browser-Durchgang stand „Commerzbank" dreimal auf einem Schirm: im Drawer-Titel, in dessen `meta` und im Fakten-Kopf; „2.937 in DATEV, 4 nur in Ludwig" zweimal. Überall, wo der Block steht, benennt schon etwas anderes das Konto — der Drawer-Titel, der Anker der `HoverCard`, der Seitenkopf des Views. |
+| `accountHref` an `AccountFacts` | macht die Nummer im Kopf zum Link | **entfällt** | Sie trug ausschließlich den entfallenen Kopf. Eine Prop ohne Wirkung ist tote Fläche. |
+| Reihenfolge der Fakten | Kopf · Saldo · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | Kontoart · Saldo · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | Folgt aus dem entfallenen Kopf; die Ränge und ihre Reihenfolge sind unverändert. |
+
+Die Abnahmekriterien zur Kopfzeile (Reihenfolge „Kopf · Saldo · …", Link im
+Kopf) sind damit gegenstandslos; die übrigen gelten unverändert.
 
 ## Abnahme
 

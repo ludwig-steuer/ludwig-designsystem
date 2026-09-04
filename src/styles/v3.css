@@ -2423,3 +2423,102 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2je__clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .v2je__empty { font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); }
+
+/* ── 0066 · Account — Zelle und Fakten eines Kontos ────────────────────────
+   Die Zelle steht in fremden Zeilen und im Fließtext: keine Fläche, kein
+   eigener Abstand, nur die Zusage, nicht umzubrechen. Mit `href` bekommt sie
+   die Linkfarbe des Sets — die Nummer bleibt dabei mono, der Name gedämpft. */
+
+.v2acc { white-space: nowrap; }
+.v2acc--link { color: var(--color-accent-700); text-decoration: none; }
+.v2acc--link:hover { text-decoration: underline; }
+.v2acc--link:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+/* Der Name wird gekürzt, nicht umgebrochen — sonst wachsen die Zeilen einer
+   Tabelle ungleich hoch. Die Kürzung macht die Komponente (NAME_LIMIT), das
+   CSS hält nur den Umbruch fest. */
+.v2acc > .v2muted { white-space: nowrap; }
+
+.v2acc__facts { display: grid; gap: var(--space-3); }
+
+/* ── 0067 · AccountEntries — die Bewegungen eines Kontos ───────────────────
+   Das Herkunfts-Zeichen ist kein Status (R1), sondern ein Hinweis: hinter
+   dieser Bewegung steht eine Ludwig-Buchung. Es trägt deshalb die gedämpfte
+   Textfarbe, keine Kritikalitätsfarbe (A7). */
+
+.v2ae { display: grid; gap: var(--space-2); }
+
+.v2ae__mark {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-muted);
+}
+
+/* Der Text kürzt, der Chip daneben schrumpft nicht mit — sonst ragt er über
+   die Nachbarspalte. */
+.v2ae__text {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.v2ae__text > *:not(.v2ae__textline) { flex-shrink: 0; }
+.v2ae__textline {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dasselbe Muster wie oben: die Kontozelle kürzt, das „+n" dahinter nicht.
+   `overflow` an einem reinen Inline-Span greift nicht — deshalb Flex. */
+.v2ae__contra {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.v2ae__contra > .v2acc {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2ae__contra > *:not(.v2acc) { flex-shrink: 0; }
+
+/* „Nur in Ludwig" steht unter dem, was in DATEV ist — Rangfolge über die
+   Textfarbe, nicht über eine Warnfarbe. Die Beträge bleiben lesbar. */
+.v2tbl__row.v2ae__row--draft { color: var(--color-text-muted); }
+
+.v2ae__more {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-1);
+}
+
+/* ── 0068 · AccountDrawer — Zonen 1 · 3 · 3b · 4 · 5 ───────────────────────
+   Der Rahmen kommt aus 0042, die Zonen aus 0066 und 0067. Hier stehen nur
+   die vier Maße, die der Drawer selbst braucht: die Kopfzeile mit dem
+   Jahresschalter rechts, der Abstand zwischen den Zonen, die Ladefläche in
+   der Form des Inhalts und der Grenzsatz. */
+
+/* Zone 1 — Name links, Jahresschalter rechts außen. */
+.v2acc__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.v2acc__meta > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.v2acc__yearpick { margin-left: auto; flex-shrink: 0; }
+
+/* Zonen 3 · 3b · 4 im Drawer-Körper. */
+.v2acc__facts + .v2ae { margin-top: var(--space-5); }
+.v2acc__limit { margin: var(--space-4) 0 0; }
+
+/* Ladefläche: erst der Fakten-Block, dann die Zeilen — kein Kasten über alles. */
+.v2acc__load { display: grid; gap: var(--space-5); }

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Soll/Haben, Gegenkonto, Belegfeld 1, DATEV-Spiegel |
 | Quelle | Entitätsprofil `docs/entitaeten/account.md` (Status `geprüft`), Abschnitte „Datenpunkte einer Bewegung", „Die Herkunft in Zahlen", „Listen" · Owner-Entscheide 2026-09-04 (eine Liste statt zwei Tabs · Symbol bei Ludwig-Bezug · kein laufender Saldo je Zeile) · `design-guidelines.md` A11/A11a |
@@ -10,6 +10,8 @@
 | Blockiert | 0068 (`AccountDrawer`, Zone 3b) · 0063 (`AccountView`, Tab „Buchungen") |
 | Setzt voraus | 0066 (`AccountCell` für das Gegenkonto) · 0057 `DataTable` (nur für die **Seite**, nicht für den Drawer — A11a) |
 | Spec von / am | Claude, 2026-09-04 |
+| Freigegeben | Owner, 2026-09-04 |
+| Gebaut von / am | Claude, 2026-09-04 — `AccountEntries.tsx`, acht Stories, CSS-Block `.v2ae*` |
 
 ## Ziel
 
@@ -271,6 +273,20 @@ Variabel (aus dieser Spec):
    führen (`?entry=<id>`). — *Ohne Antwort: nein, keine `rowHref` in dieser
    Spec. Die Seite kann sie über `DataTable`s `rowHref` selbst setzen, ohne
    dass die Spaltenfunktion davon weiß.*
+
+## Abweichungen von der Spec
+
+| Punkt | Spec | Gebaut | Grund |
+|---|---|---|---|
+| `onShowMore: () => void` | die Liste rendert den „Mehr laden"-Knopf selbst | **`more?: ReactNode`** — der Aufrufer gibt seinen Knopf hinein, den Vorratszähler daneben schreibt die Liste | Ein `onClick` macht die Komponente zur Client-Component. Die Spec verlangt eine Server-Component *und* einen Callback — das schließt sich aus. So bleibt die Liste server-tauglich, der Drawer (ohnehin `"use client"`) baut den Knopf, und die Formulierung des Zählers bleibt an einer Stelle. |
+| Leere Betragsseite | `AmountCell` je Spalte | **leer**, kein Geviertstrich | `AmountCell` liest `null` als „unbekannt" und zeigt „—". Auf welcher Seite eine Bewegung steht, sagt aber *welche* Spalte die Zahl trägt — sechs Geviertstriche in sechs Zeilen behaupten sechsmal Unwissen, das es nicht gibt. Dieselbe Regel wie im Journalblock (0044). |
+| Spaltenbreiten | Text `1fr`, Gegenkonto `1.2fr` | Text `1.6fr`, Gegenkonto `1.1fr` | Browser-Befund: mit dem `exported`-Chip in der Textzelle blieb vom Buchungstext „T…" übrig. |
+
+**Drei Befunde aus dem ersten Browser-Durchgang, behoben:** der Kontoname im
+Gegenkonto brach um und machte die Zeilenhöhen ungleich (`overflow` greift an
+einem reinen Inline-`span` nicht → Flex); der `exported`-Chip ragte über die
+Nachbarspalte (Textzelle jetzt Flex, Chip mit `flex-shrink: 0`); die leeren
+Betragsseiten zeigten Geviertstriche.
 
 ## Abnahme
 
