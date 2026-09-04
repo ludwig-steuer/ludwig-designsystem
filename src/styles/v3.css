@@ -2227,3 +2227,45 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   line-height: var(--lh-ui-sm);
   color: var(--color-text-muted);
 }
+
+/* ── 0044 · JournalEntryCompact — Zelle und Karte eines Buchungssatzes ──────
+   Die Karte übernimmt die Stapelordnung des Journalblocks aus
+   `JournalEntryEditor` (`.bse__journal__row`): Konto · Kontoname ·
+   Buchungstext · Soll · Haben, Kontonummer rechtsbündig wie im Stapel. */
+
+.v2je { display: grid; gap: var(--space-2); }
+
+/* Die Zelle steht in fremden Zeilen und in Fließtext — sie bringt keine
+   Fläche mit, nur die Zusage, nicht umzubrechen. */
+.v2je__cell { white-space: nowrap; }
+
+.v2je__caption {
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.v2je__body { border-top: 1px solid var(--color-border-subtle); }
+
+.v2je__row {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1.4fr) 104px 104px;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+}
+.v2je__row--head {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.v2je__row--sum {
+  font-weight: 600;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.v2je__clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.v2je__empty { font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); }

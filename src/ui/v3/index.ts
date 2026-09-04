@@ -282,6 +282,11 @@ export {
   type Side,
 } from "./entities/journal-entry/JournalEntryEditor";
 export {
+  JournalEntryCell,
+  JournalEntryCard,
+  type JournalLine,
+} from "./entities/journal-entry/JournalEntryCompact";
+export {
   AiBookingNotes,
   type JudgeVerdict,
   type AiSource,
