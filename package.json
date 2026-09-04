@@ -4,7 +4,11 @@
   "private": true,
   "main": "./src/ui/v3/index.ts",
   "types": "./src/ui/v3/index.ts",
-  "exports": { ".": "./src/ui/v3/index.ts", "./styles.css": "./src/styles/index.css" },
+  "exports": {
+    ".": "./src/ui/v3/index.ts",
+    "./styles.css": "./src/styles/index.css",
+    "./styles/*": "./src/styles/*"
+  },
   "description": "Ludwig Design System v3 — die wiederverwendbaren UI-Bausteine, unabhängig von der App entwickelbar.",
   "scripts": {
     "storybook": "storybook dev --port 6107",
