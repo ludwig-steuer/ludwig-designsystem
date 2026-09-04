@@ -197,6 +197,18 @@ Sieben Stories: 2 Zustände (gefüllt, unvollständig) + 3 Datenzweige, die eine
 Zeile erscheinen oder verschwinden lassen + 1 „im Einsatz" + 1 Rand. Keine
 Enum-Props, keine Callbacks, keine Layout-Booleans.
 
+## Ausbau
+
+Nachgetragen nach A12 (die Spec entstand davor). Die Liste unter „Was die
+Familie bewusst nicht kann" sind **Grenzen**, keine Vertagungen — hier steht
+nur, was später dazukommen soll.
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Kontenrahmen erklären (SKR-Klasse, Kontenfunktion) | eigener Baustein neben `AccountFacts`, keine Prop hier | ein Screen fragt „warum dieses Konto?"; heute beantwortet das niemand |
+| Zelle öffnet den Drawer über einen Callback statt `href` | `onOpen?: (number) => void` — additiv neben `href`, das bleibt der Normalweg | die App zieht den Drawer aus dem Search-Param in einen Context zurück (offene Frage 1) |
+| Fakten für mehrere Jahre nebeneinander | keine — der Jahreswechsel gehört dem Drawer (0068) | ein Screen vergleicht zwei Jahre; dann ist es `ComparisonTable`, nicht diese Familie |
+
 ## Abnahmekriterien
 
 Fest (gilt immer):

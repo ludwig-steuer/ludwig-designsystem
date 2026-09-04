@@ -231,6 +231,17 @@ Acht Stories: 4 Zustände (gefüllt, leer, lädt, Fehler) + 1 Enum-Prop
 (`variant`, beide Werte in einer Story) + 1 Callback (`onShowMore`) + 1 „im
 Einsatz" + 1 Rand. Genau die Formel aus §6.
 
+## Ausbau
+
+Nachgetragen nach A12 (die Spec entstand davor).
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Zeile führt in den Buchungssatz | keine — die Seite setzt `rowHref` an `DataTable`, die Spaltenfunktion weiß nichts davon (offene Frage 3) | die Kontoseite bekommt `?entry=<id>` |
+| Herkunfts-Filter und Suche | keine — `FilterBar` und `DataTable` an der Aufrufstelle | die Kontoseite wird gebaut (0063) |
+| Laufender Saldo je Zeile | eigene Spalte in `accountEntryColumns` | die Bewegungen kommen aus **einer** Quelle; über zwei wäre er eine Mischung (Owner-Entscheid 2026-09-04) |
+| Zeilen als Auszug drucken oder exportieren | keine — Sache der Seite | jemand fragt danach; heute niemand |
+
 ## Abnahmekriterien
 
 Fest (gilt immer):

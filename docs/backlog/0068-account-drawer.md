@@ -167,6 +167,18 @@ eine Story zu bekommen — sie sind ein Rundlauf, nicht vier.
 Nicht anwendbare Zustände: „leer nach Filter" (filtert nicht), „ungültig"
 (schreibt nicht).
 
+## Ausbau
+
+Nachgetragen nach A12 (die Spec entstand davor). Zwei Zeilen stehen bereits
+wörtlich in den offenen Fragen als „eigene kleine Änderung".
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Geschlossene Jahre kenntlich machen | ein Chip in der `meta`-Zeile, kein neuer Schalter (offene Frage 2) | jemand bucht ins falsche Jahr, weil `closed` im Schalter nicht zu sehen ist |
+| Zehn Spalten im Drawer (`full` statt `compact`) | `size="xl"` plus `variant` durchreichen | die Abnahme zeigt, dass sieben Spalten quetschen; heute trägt `Table minWidth` das Scrollen (offene Frage 3) |
+| Jahre selbst laden | keine — `years` bleibt Prop | nie; der Drawer kennt den Mandanten nicht (offene Frage 1) |
+| Bewegungen nachladen ohne Vollansicht | `onShowMore` gibt es; es fehlt nur der zweite Klick | ein Konto hat mehr Bewegungen, als der Drawer in zwei Schritten zeigt |
+
 ## Abnahmekriterien
 
 Fest (gilt immer):

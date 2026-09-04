@@ -184,6 +184,18 @@ Sortierung und Seitenwechsel sind Links: `Filled` zeigt sie statisch, in
 Storybook navigiert kein Link. Kein Rand: der DataTable formatiert nichts,
 das tun die Zellen (`AmountCell`, `Timestamp`); viele Spalten beweist `InUse`.
 
+## Ausbau
+
+Nachgetragen nach A12 (die Spec entstand davor). Quelle sind die eigenen
+offenen Fragen und die Abnahmezeile „tut bewusst nicht … Backlog".
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Spalten konfigurieren (Spaltenwähler) | `columns` bleibt die Wahrheit; dazu ein `Popover` an der Aufrufstelle, der die Auswahl in die URL schreibt — keine Prop an `DataTable` | zwei Seiten wollen von derselben Liste verschiedene Spaltensätze; heute entscheidet die Spaltenfunktion (A11) |
+| Auswahl über Seitengrenzen | `selection` müsste IDs statt Zeilen führen | eine Massenaktion trifft mehr als eine Seite |
+| Seitengröße 200 | Wert in der Liste der Seitengrößen | eine Liste braucht mehr als 100 je Seite (`MAX_PAGE_SIZE` der App, offene Frage 1) |
+| Sortierung über mehrere Spalten | `sort` als Array statt einem Paar | eine Liste hat zwei gleichrangige Ordnungen; heute reicht eine |
+
 ## Abnahmekriterien
 
 Fest (gilt immer):

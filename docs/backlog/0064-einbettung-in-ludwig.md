@@ -125,6 +125,11 @@ Dateien), **nicht pushen**. Die App hat fremde uncommittete Änderungen
    `git submodule update --init`, wie man den Pointer hebt). `CHANGELOG.md`
    unter `[Unreleased]` eine Zeile.
 
+## Ausbau
+
+Gilt nicht: keine Komponente, keine Schnittstelle (A12 betrifft Props). Was
+nach der Einbettung ansteht, steht in Teil B.
+
 ## Abnahmekriterien
 
 - [ ] DS: `pnpm typecheck` und `pnpm build` grün; `origin/main` zeigt auf den Commit
