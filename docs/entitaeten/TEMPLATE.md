@@ -9,6 +9,7 @@
 | Status-Achsen | `STATUS_REGISTRY.<achse>`, … |
 | Wichtigkeit | hoch · mittel · niedrig (Datenmodell-Review §7) |
 | Datenstand | lokal · Staging · Seeds · Nutzer — Datum, n Zeilen |
+| Rückfrage | gestellt am … · beantwortet · unbeantwortet (Defaults gelten) |
 | Analyse von / am | Agent oder Person, Datum |
 
 ## Was sie ist
@@ -55,6 +56,19 @@ Aus `ui-repraesentationen.md` §1 und den gelesenen Feldern je Komponente:
 |---|---|---|---|---|
 | `CaseRow` | Zeile | … | … | … |
 
+## Listen
+
+Je Liste ein Job-Satz („Wenn <Situation>, will <Rolle> <Ziel>, damit <Nutzen>")
+und der Tabellenschnitt. Grundgesamtheit = was die Liste definiert, Filter =
+was die Nutzerin wegnimmt.
+
+| Liste | Job | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
+|---|---|---|---|---|---|---|---|---|---|
+| `<Entity>List` „Vorrat" | Wenn … will … damit … | offene, eigener Mandant | älteste zuerst | 1–5 + Fälligkeit | Zustand, Mandant | keine | „nichts offen" (Erfolg) ≠ „keine Treffer" (Filter) | 8 · 60 | Staging · `<Screen>` |
+
+Eigene Route → zusätzlich Seitenprofil `docs/seiten/<slug>.md`; hier stehen
+nur Job und Schnitt.
+
 ## Formen
 
 | Form | Größe | Empfehlung | Grund (§7 Nr.) | zeigt (Ränge) | Relationen | setzt auf | ersetzt |
@@ -67,6 +81,16 @@ Aus `ui-repraesentationen.md` §1 und den gelesenen Feldern je Komponente:
 | `<Entity>Editor` | XL | nein | keine Punkte mit änderbar = Nutzer außer … → `InlineEdit` im View | | | | |
 
 Bau-Reihenfolge: `<Entity>Cell` → `<Entity>Row` → `<Entity>View`.
+
+## Zuschnitt
+
+| Form / Liste | Marke | Grund | Backlog |
+|---|---|---|---|
+| `<Entity>Row` | jetzt | trägt Liste und Karte | — |
+| `<Entity>List` „Archiv" | Backlog | Job nur genannt, kein Screen belegt ihn | `docs/backlog/00NN-…md` |
+| `<Entity>Editor` | verworfen | keine Punkte mit änderbar = Nutzer | — |
+
+Höchstens fünf Formen mit Marke **jetzt**.
 
 ## Befunde für `ludwig/app`
 
@@ -90,11 +114,14 @@ dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
 Prüfprompt (neue Sitzung, anderer Agent):
 
 ```
-Prüfe das Entitätsprofil docs/entitaeten/<slug>.md nach Skill entitaet-analysieren §5–§7.
+Prüfe das Entitätsprofil docs/entitaeten/<slug>.md nach Skill entitaet-analysieren §5–§9.
 Zuerst jede Zeile mit Beleg „Annahme": belege oder widerlege sie mit Füllgrad, heutiger
 Komponente oder GLOSSARY. Dann die Ränge: deck die Punkte ab Rang k ab — erkennt eine
 Sachbearbeiterin den Vorgang noch? Dann die Formen: hat jede empfohlene einen Grund aus
-§7, fehlt eine, die die App heute hat? Trag jeden Einwand in „Prüfung" ein, ändere die
+§7, fehlt eine, die die App heute hat? Dann die Listen: hat jede einen Job-Satz, und ist
+jede Ausprägung nach §8 eine eigene Komponente wert oder nur ein Prop? Zuletzt der Zuschnitt:
+sind höchstens fünf Formen „jetzt", und trägt jede Backlog-Zeile ihren Grund? Trag jeden
+Einwand in „Prüfung" ein, ändere die
 Tabellen, wo du sicher bist, und setze den Status auf „geprüft". Kundendaten bleiben in
 der Datenbank; nur SELECT.
 ```
@@ -104,7 +131,8 @@ Startprompt (neue Sitzung, nach Status `geprüft`):
 ```
 Für die Entität <Entität> (`<english name>`) liegt das geprüfte Profil unter
 docs/entitaeten/<slug>.md. Schreibe mit Skill spec-schreiben je Form eine Spec, in dieser
-Reihenfolge: <Entity>Cell, <Entity>Row, <Entity>View. Jede Spec verlinkt das Profil als
+Reihenfolge — nur die Formen mit Marke „jetzt" aus dem Abschnitt Zuschnitt:
+<Entity>Cell, <Entity>Row, <Entity>View. Was dort „Backlog" trägt, bleibt liegen. Jede Spec verlinkt das Profil als
 Quelle und nimmt Datenpunkte, Ränge, Relationen und „ersetzt" von dort, nicht aus dem
 Chat; die Punkte einer Form sind die Ränge bis zu ihrer Größe, in derselben Reihenfolge.
 Danach baut Skill v3-komponente jede Spec in derselben Reihenfolge, die größere Form

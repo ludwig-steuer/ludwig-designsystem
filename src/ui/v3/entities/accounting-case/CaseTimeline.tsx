@@ -9,7 +9,6 @@ import {
   FileText,
   History,
   MessageCircleQuestionMark,
-  MessageSquare,
   Repeat,
   SlidersHorizontal,
 } from "lucide-react";
@@ -32,8 +31,11 @@ import { Timeline, type TimelineItem } from "../../patterns/Timeline";
  * The history of a case, in one strand (0040).
  *
  * Three tables answer one question — „what happened, what is still missing?":
- * events, clarifications (questions and comments) and the expectations that
- * are still open. Today they stand in three places and every card carries five
+ * events, clarification **questions** and the expectations that are still
+ * open. Comments (`type = "comment"`) are skipped — they are context at the
+ * case, not something that happened, and 13 of 166 rows in the data are
+ * comments: in the strand they would flood the story (Owner 2026-09-04).
+ * They stay visible where they belong, in `ClarificationList` (0059). Today they stand in three places and every card carries five
  * lines; here every entry is **one** line: day · kind · title · amount · state.
  * Everything else — file, summary, journal entry, answer — belongs into the
  * detail next to the strand.
@@ -197,6 +199,8 @@ export function CaseTimeline({
   }
 
   for (const c of clarifications) {
+    // A comment is not an event — see the note at the top of this file.
+    if (c.type === "comment") continue;
     const state = clarificationState({
       answeredAt: c.answeredAt,
       deferredUntil: c.deferredUntil,
@@ -208,22 +212,16 @@ export function CaseTimeline({
       id: c.id,
       at: day(c.raisedAt),
       title: c.title,
-      icon: (
-        <KindIcon
-          of={c.type === "question" ? MessageCircleQuestionMark : MessageSquare}
-          label={word}
-        />
+      icon: <KindIcon of={MessageCircleQuestionMark} label={word} />,
+      right: (
+        <>
+          <StatusBadge axis="klaerung_status" status={state} info={false} />
+          {/* Blocking is a second axis, and only while the question is open. */}
+          {state !== "answered" && c.severity === "required" ? (
+            <StatusBadge axis="klaerung" status="required" info={false} />
+          ) : null}
+        </>
       ),
-      right:
-        c.type === "question" ? (
-          <>
-            <StatusBadge axis="klaerung_status" status={state} info={false} />
-            {/* Blocking is a second axis, and only while the question is open. */}
-            {state !== "answered" && c.severity === "required" ? (
-              <StatusBadge axis="klaerung" status="required" info={false} />
-            ) : null}
-          </>
-        ) : undefined,
     });
   }
 

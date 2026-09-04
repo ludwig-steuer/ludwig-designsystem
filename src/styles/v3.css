@@ -2228,6 +2228,116 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   color: var(--color-text-muted);
 }
 
+/* ── 0059 Klärung: Vorschau, Zeile, Liste ─────────────────────────────────
+   Eine Klärung ist kein Spaltensatz, sondern Titel, Zustand und eine
+   Meta-Zeile — deshalb eigene Blöcke statt `v2tbl`. */
+.v2cl { display: flex; flex-direction: column; }
+.v2cl__item { border-top: 1px solid var(--color-border-subtle); }
+.v2cl__item:first-child { border-top: none; }
+
+/* Die Zeile trägt drei Bänder: Sachverhalt (optional), Kopf, Meta. */
+.v2cl__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  min-width: 0;
+}
+.v2cl__item > .v2disc .v2cl__row { padding-left: 0; }
+/* Das Aufgeklappte steht unter der Zeile, nicht am Kartenrand. */
+.v2cl__item > .v2disc > .v2disc__body { padding: 0 var(--space-4) var(--space-4); }
+
+.v2cl__case { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+.v2cl__case .v2sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.v2cl__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+
+.v2cl__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  color: var(--color-text-muted);
+}
+
+.v2cl__group {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-bg-soft);
+  border-top: 1px solid var(--color-border-subtle);
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.v2cl__count { font-weight: 400; }
+
+/* Die Vorschau steht mitten im Text einer fremden Zeile. */
+.v2cl__cell { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.v2cl__cellTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── 0060 Klärungs-Karte: Frage, Verlauf, Antwort ───────────────────────── */
+.v2clc { display: flex; flex-direction: column; gap: var(--space-3); }
+.v2clc__head { display: flex; flex-direction: column; gap: var(--space-1); }
+.v2clc__title { margin: 0; font-size: var(--fs-ui); line-height: var(--lh-ui); font-weight: 600; }
+.v2clc__badges { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.v2clc__meta {
+  margin: 0;
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  color: var(--color-text-muted);
+}
+.v2clc__question { margin: 0; font-weight: 600; }
+.v2clc__prose { color: var(--color-text); }
+
+.v2clc__block { display: flex; flex-direction: column; gap: var(--space-2); }
+.v2clc__label {
+  margin: 0;
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.v2clc__sources { margin: 0; padding-left: var(--space-4); display: grid; gap: var(--space-1); }
+
+.v2clc__hist { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2); }
+.v2clc__hist > li {
+  border-left: 2px solid var(--color-border);
+  padding-left: var(--space-3);
+}
+.v2clc__histHead {
+  display: block;
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  color: var(--color-text-muted);
+}
+.v2clc__histText { margin: var(--space-1) 0 0; }
+
+.v2clc__answer { display: flex; flex-direction: column; gap: var(--space-2); }
+.v2clc__exit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  color: var(--color-text-muted);
+}
+
+/* ── 0061 Klärung stellen: der schmale Editor ───────────────────────────── */
+.v2cle { display: flex; flex-direction: column; gap: var(--space-4); }
+.v2cle__why {
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  color: var(--color-text-muted);
+}
+
 /* ── 0044 · JournalEntryCompact — Zelle und Karte eines Buchungssatzes ──────
    Die Karte übernimmt die Stapelordnung des Journalblocks aus
    `JournalEntryEditor` (`.bse__journal__row`): Konto · Kontoname ·

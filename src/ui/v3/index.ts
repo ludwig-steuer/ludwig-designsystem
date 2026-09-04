@@ -271,6 +271,29 @@ export {
   type CaseTimelineExpectation,
 } from "./entities/accounting-case/CaseTimeline";
 
+/* Klärung — die lesende Familie: Vorschau, Zeile, Liste (0059) */
+export {
+  ClarificationCell,
+  ClarificationRow,
+  ClarificationList,
+  toTodoItem,
+  type ClarificationVM,
+  type ClarificationAudience,
+} from "./entities/clarification/Clarification";
+
+export {
+  ClarificationCard,
+  type ClarificationDetailVM,
+  type ClarificationEvent,
+  type ClarificationEventKind,
+  type ClarificationSource,
+} from "./entities/clarification/ClarificationCard";
+
+export {
+  ClarificationEditor,
+  type ClarificationDraft,
+} from "./entities/clarification/ClarificationEditor";
+
 /* Buchungssatz — die eine Buchungs-Oberfläche */
 export {
   JournalEntryEditor,

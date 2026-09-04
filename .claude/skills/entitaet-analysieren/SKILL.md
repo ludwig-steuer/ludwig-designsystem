@@ -1,6 +1,6 @@
 ---
 name: entitaet-analysieren
-description: Eine Entität des Ludwig-Datenmodells für das Design-System analysieren — Tabelle, Relationen, echte Daten (nur Aggregate), heutige Darstellung — und daraus ein Entitätsprofil unter docs/entitaeten/<slug>.md schreiben, mit bewerteten Datenpunkten (Rang, ab welcher Größe XS–XL) und einer Empfehlung, welche Formen (Cell, Row, Card, View, Editor …) überhaupt gebaut werden sollen. Endet mit einem Prüfprompt und einem Startprompt für spec-schreiben und v3-komponente. Use when asked "analysiere die Entität X", "Entitätenanalyse", "was gehört bei Sachverhalt in die Zeile / Karte / Detail", "welche Formen braucht Klärung", or before specs for an entity family are written. Schreibt keine Spec und keinen Code.
+description: Eine Entität des Ludwig-Datenmodells für das Design-System analysieren — Tabelle, Relationen, echte Daten (nur Aggregate), heutige Darstellung — und daraus ein Entitätsprofil unter docs/entitaeten/<slug>.md schreiben, mit bewerteten Datenpunkten (Rang, ab welcher Größe XS–XL) und einer Empfehlung, welche Formen (Cell, Row, Card, View, Editor …) und welche Listen (je mit Job und Ausprägungen) überhaupt gebaut werden sollen, geschnitten in „jetzt“ und „Backlog“. Stellt vor dem Schnitt eine Rückfrage nach fehlenden Anwendungsfällen. Endet mit einem Prüfprompt und einem Startprompt für spec-schreiben und v3-komponente. Use when asked "analysiere die Entität X", "Entitätenanalyse", "was gehört bei Sachverhalt in die Zeile / Karte / Detail", "welche Formen braucht Klärung", or before specs for an entity family are written. Schreibt keine Spec und keinen Code.
 ---
 
 # Entität analysieren
@@ -31,6 +31,7 @@ aus dem `scripts/sync-ludwig.sh` spiegelt.
 | Status-Achsen | `src/ui/v3/patterns/status-registry.ts` → `STATUS_REGISTRY` (`sachverhalt`, `disposition`, `klaerung` …) |
 | Heutige Darstellung | `docs/ui-repraesentationen.md` §1 (Entität × Komponente × Form) und die App-Komponenten selbst |
 | Formen und Größen | Skill `v3-komponente` (Tabelle XS–XL), `ui-repraesentationen.md` §4.4 (Cell, Row, Card, View, Drawer, Picker) |
+| Wozu eine Liste da ist | `docs/seiten/<slug>.md` (Job-Satz, Fragen der Rolle, „was hier nicht hingehört") und die Routen der App: `$APP/apps/web/src/app/(app)/**/page.tsx` |
 | Echte Daten | lokale DB → Staging (nur lesen) → Seeds/Stories → Nutzer, siehe §3 |
 
 ## 1. Entität festnageln
@@ -192,7 +193,7 @@ reicht, ist der Inhalt der Zeile. Regeln:
 - Freitext ab M, gekürzt nach der p90-Länge aus §3; die Grenze steht in der
   Zeile.
 - Jede Zeile hat einen Beleg. `Annahme` ist erlaubt, muss aber dastehen —
-  der Prüfagent (§8) nimmt sich zuerst die Annahmen vor.
+  der Prüfagent (§10) nimmt sich zuerst die Annahmen vor.
 
 ## 6. Relationen bewerten
 
@@ -227,7 +228,7 @@ Die Größenleiter aus `v3-komponente` und die Namen aus
 | XS | Inline, Badge (`<Entity>Cell`) | 1–2 Punkte: Identität, Zustand |
 | S | Zeile, Auswahl, Kopf (`<Entity>Row`, `<Entity>Picker`) | Rang 1–6, Zustand, Maß; Kinder als Zähler |
 | M | Karte, Vorschau (`<Entity>Card`) | S + Erklärung + jüngstes Kind |
-| L | Detail, Drawer, Liste (`<Entity>View`, `<Entity>Drawer`) | alles ab 20 % Füllgrad, Kinder als Listen |
+| L | Detail, Drawer, Liste (`<Entity>View`, `<Entity>Drawer`, `<Entity>List`) | alles ab 20 % Füllgrad, Kinder als Listen; die Liste zeigt die Zeile und den Rahmen um sie, nicht mehr (§8) |
 | XL | Editor (`<Entity>Editor`) | L + alle Punkte mit änderbar = Nutzer |
 
 Eine Form wird **empfohlen**, wenn mindestens eins gilt — und das Profil
@@ -251,6 +252,8 @@ nennt, welches:
    der View beantwortet alle Fragen zur Entität, der Drawer beantwortet die
    eine, die woanders aufkam — und bietet für alles Weitere den Weg in den
    View an (0052).
+6. Es gibt mindestens einen **Listen-Job** (§8) → `<Entity>List`. Wie viele
+   Ausprägungen daraus werden, entscheidet §8, nicht diese Regel.
 
 Eine Form ohne Screen wird nicht empfohlen; „wäre praktisch" gilt hier so
 wenig wie in `spec-schreiben` §3. Je empfohlener Form ein Block: **zeigt**
@@ -264,17 +267,96 @@ Form komponiert die kleinere; die Zeile ist der Kopf der Karte, die Karte der
 Kopf des Details. Deshalb muss die Reihenfolge der Punkte über alle Formen
 dieselbe sein (kumulativ, §5).
 
-## 8. Dokument schreiben, Prüfung und Start vorbereiten
+Die **Liste** folgt der Zeile: sie zeigt sie, also kann sie nicht vor ihr
+entstehen. Welche und wie viele Listen es gibt, steht in §8.
+
+## 8. Listen — was die Tabelle leisten soll
+
+Eine Liste ist keine Form der Entität, sondern ein **Job**. Dieselbe
+`<Entity>Row` bedient mehrere Listen; was sie unterscheidet, steht um die
+Zeile herum: Grundgesamtheit, Sortierung, Filter, Massenaktion, Leerfall.
+Deshalb bekommt jede Liste einen Job-Satz in der Form aus
+`docs/seiten/TEMPLATE.md` — sonst baut man eine Tabelle, die alles kann und
+für nichts der kürzeste Weg ist.
+
+> Wenn **\<Situation\>**, will **\<Rolle\>** **\<Ziel\>**, damit **\<Nutzen\>**.
+
+Eine Zeile je Liste:
+
+| Liste | Job (ein Satz) | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
+|---|---|---|---|---|---|---|---|---|---|
+
+**Grundgesamtheit** ist, was die Liste *definiert* („nur offene"), **Filter**
+ist, was die Nutzerin *wegnimmt*. Nur die Grundgesamtheit rechtfertigt eine
+eigene Ausprägung — ein Filter ist ein Prop.
+
+Regeln:
+
+- **Eine Ausprägung wird eine eigene Komponente**, wenn sie einen eigenen
+  Job-Satz hat **und** sich in mindestens zwei von {Grundgesamtheit,
+  Sortierung, Filter, Massenaktion, Spaltensatz} unterscheidet. Sonst ist es
+  dieselbe Liste mit `columns`/`filter`-Prop. Zwei Zeilen-Komponenten für
+  dieselbe Entität sind in beiden Fällen falsch (R17).
+- **Spalte wird**, was die Zeile ohnehin zeigt (Ränge bis S) — plus alles,
+  wonach sortiert oder gefiltert wird. Ein Filter über ein Feld, das die
+  Zeile nicht zeigt, ist ein Befund, keine unsichtbare Spalte.
+- **Der Umfang entscheidet die Mechanik** (Zahlen aus §3): p90 unter 20
+  Zeilen → keine Pagination, kein virtuelles Scrollen, Filter im Client. Über
+  200 → `Pagination`, Serverfilter, und die Spec braucht Lade- und Fehlerfall.
+- **Leerfall ist Pflicht** und trägt den Job: „nichts offen" ist ein Erfolg,
+  „keine Treffer" ist ein Filterproblem — zwei verschiedene `EmptyState`.
+- **Subtypen bekommen keine eigene Liste**, solange die Grundgesamtheit
+  dieselbe ist; die Art wird Spalte und Filter. Eigene Liste erst, wenn der
+  Job ein anderer ist.
+- Eine Liste **mit eigener Route** braucht zusätzlich ein Seitenprofil unter
+  `docs/seiten/`. Das Entitätsprofil hält nur Job und Tabellenschnitt fest und
+  verweist darauf; Kopfzeile, Vorratszähler und Pager gehören der Seite.
+
+## 9. Rückfrage und Schnitt: jetzt oder Backlog
+
+Zwei Dinge kann die Analyse nicht aus Daten ableiten: Anwendungsfälle, die es
+heute in der App noch nicht gibt, und wie viel davon jetzt gebaut wird.
+
+**Rückfrage** — eine Nachricht, kein Dialog. Sie enthält:
+
+1. die empfohlenen Formen (§7) und Listen (§8), je mit Job-Satz und Grund,
+2. die **abgelehnten** mit Grund — Widerspruch fällt leichter als Erfindung,
+3. die eine offene Frage: „Welche Anwendungsfälle fehlen — Listen, Ansichten,
+   Auswahl-Dialoge, die heute in der App noch nicht vorkommen?",
+4. dazu höchstens drei gezielte Fragen aus §3/§5, jede mit Default.
+
+Jede Antwort wird als Beleg `Nutzer` eingetragen, nicht als `Annahme`. **Ohne
+Antwort wird trotzdem geschnitten**: die abgeleiteten Formen gelten, alles
+Unsichere geht auf den Backlog. Der Skill blockiert nicht.
+
+**Schnitt** — jede Form und jede Liste bekommt genau eine Marke:
+
+| Marke | Wann | Folge |
+|---|---|---|
+| **jetzt** | sie trägt eine andere (Cell und Row sind Bausteine von Karte, Liste, Detail) · sie existiert heute in der App und blockiert dort eine Ablösung · ihre Punkte sind ohne `Annahme` belegt | steht in der Bau-Reihenfolge des Startprompts |
+| **Backlog** | hängt an einer offenen Frage, an einem Befund für `ludwig/app` oder an einer Entität ohne eigenes Profil · ihr Job wurde nur genannt, von keinem Screen belegt · sie passt nicht mehr in die Fünf | eigene Datei `docs/backlog/NNNN-<slug>.md`, Status `offen` |
+| **verworfen** | kein Grund aus §7 Nr. 1–6 | ein Satz in der Formen-Tabelle, keine Datei |
+
+Faustregel: **höchstens fünf Formen „jetzt"**. Was darüber hinausgeht, steht
+sonst gleichzeitig auf Abnahme. Die Backlog-Datei trägt hier nur Auftrag,
+Quelle (Profil-Abschnitt) und den Grund der Vertagung — die Spec schreibt
+später `spec-schreiben`. Nummer fortlaufend aus `docs/backlog/`, sofort
+angelegt statt reserviert; hier arbeiten mehrere Sitzungen parallel.
+
+
+## 10. Dokument schreiben, Prüfung und Start vorbereiten
 
 1. `docs/entitaeten/<slug>.md` aus der Vorlage, jede Sektion gefüllt oder
    mit einem Satz gestrichen. Status `analysiert`.
 2. **Befunde für `ludwig/app`** gesammelt: fehlender GLOSSARY-Eintrag, Typ,
    Ableitung, Registry-Achse. Sie gehen an die App, nicht in den Code hier.
 3. **Offene Fragen** höchstens drei, jede mit Default („ohne Antwort: …").
-4. Abschnitt **Prüfung** bleibt leer — er gehört dem zweiten Agenten.
-5. Abschnitt **Weiter** trägt zwei Prompts wörtlich, damit sie nicht im Chat
+4. **Zuschnitt** (§9) gefüllt: je Form und Liste eine Marke; die Backlog-Dateien
+   sind angelegt und ihre Nummern stehen in der Tabelle.
+5. Abschnitt **Prüfung** bleibt leer — er gehört dem zweiten Agenten.
+6. Abschnitt **Weiter** trägt zwei Prompts wörtlich, damit sie nicht im Chat
    verloren gehen. Die Vorlage hat den Wortlaut; einsetzen: Entität, Slug,
-   empfohlene Formen in Bau-Reihenfolge.
+   die Formen mit Marke **jetzt** in Bau-Reihenfolge.
    - **Prüfprompt** — ein anderer Agent prüft Ränge und Annahmen gegen §3
      und §4 und setzt den Status auf `geprüft`.
    - **Startprompt** — setzt `geprüft` voraus und lässt `spec-schreiben` je
@@ -284,13 +366,16 @@ dieselbe sein (kumulativ, §5).
 
 ## Was dieser Skill nicht tut
 
-Er schreibt keine Spec, baut nichts, ändert weder `ludwig/app` noch
+Er schreibt keine Spec — die Backlog-Dateien aus §9 tragen nur Auftrag,
+Quelle und Grund. Er baut nichts, ändert weder `ludwig/app` noch
 `src/ludwig/`, schreibt nichts in eine Datenbank und erfindet keine
 Begriffe. Kundendaten bleiben in der Datenbank.
 
 ## Ergebnis an den Auftraggeber
 
-Fünf Zeilen, dann der Pfad und beide Prompts: Entität und Tabelle ·
+Sechs Zeilen, dann der Pfad und beide Prompts: Entität und Tabelle ·
 Datenstand (Quelle, Zeilen) · Zahl der Datenpunkte und Relationen, davon
-Annahmen · empfohlene Formen in Bau-Reihenfolge, abgelehnte mit Grund ·
-Befunde und offene Fragen mit Default.
+Annahmen · Listen mit Job-Satz · Formen **jetzt** in Bau-Reihenfolge, auf
+**Backlog** mit Nummer, **verworfen** mit Grund · Befunde und offene Fragen
+mit Default. Zuletzt die Rückfrage aus §9 — sie ist die letzte Zeile, damit
+der Auftraggeber ergänzen kann, bevor die erste Spec geschrieben wird.
