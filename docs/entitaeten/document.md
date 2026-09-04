@@ -93,11 +93,11 @@ macht es die App heute in vier von sechs Listen.
 |---|---:|---|---|---|---|
 | Rechnung `invoice` | 322 (84 %) | `…_invoices`, 318 Zeilen (315 davon an `invoice`) | Brutto (`invoice_total_value`) | Rechnungsnummer, sonst Dateiname | Netto/USt, Fälligkeit, Zahlungsziel, Leistungszeitraum, Zahlstatus, USt-IdNr., Original-Währung, Positionen |
 | Sonstiger Beleg `other` | 37 (10 %) | keine (3 Ausreißer mit Rechnungs-Zeile → B9) | — | Dateiname | nur Supertyp-Punkte; Label kommt aus der Belegform |
-| Kontoauszug `bank_statement_pdf` | 10 (3 %) | **keine** → Befund B2 | — | Dateiname | Zeitraum, Konto, Saldo — existieren nirgends |
-| Kreditkartenabrechnung `credit_card_statement` | 8 (2 %) | **keine** → Befund B2 | — | Dateiname | Zeitraum, Karte, Abrechnungspositionen |
-| Reisekostenabrechnung `travel_expense_report` | 4 (1 %) | **keine** → Befund B2 | — | Dateiname | Abrechner, Zeitraum, Erstattungssumme |
+| Kontoauszug `bank_statement_pdf` | 10 (3 %) | **keine, und keine geplant** (B2) | — | Dateiname | nichts am Beleg. Zeitraum, Salden und Zeilen liegen am Import-Batch — erreichbar erst mit B11. Nur 4 der 10 sind echte Auszüge |
+| Kreditkartenabrechnung `credit_card_statement` | 8 (2 %) | **keine, und keine geplant** (B2) | — | Dateiname | nichts am Beleg — 7 von 8 sind Deckblätter einer Dokumentgruppe, die Positionen **sind** die Kind-Belege. Der Gruppen-Block hängt an der Relation, nicht an der Belegart |
+| Reisekostenabrechnung `travel_expense_report` | 4 (1 %) | **keine, und keine geplant** (B2) | — | Dateiname | wie oben — 3 von 4 sind Deckblätter. Pauschalen ohne Einzelbeleg haben keinen Ort, das ist die Eigenbeleg-Lücke der App, kein Subtyp-Thema |
 | Vertrag `contract` | 2 (0,5 %) | `…_contracts`, **0 Zeilen** → Befund B1 | Primärbetrag (`primary_amount`) | Vertragsgegenstand (`contract_subject`), sonst Dateiname | Vertragstyp, Laufzeit (Start/Ende/Monate/unbefristet), buchungsrelevante Fakten mit Provenienz |
-| Erklärung `declaration` | 0 | **keine** → Befund B2 | — | Dateiname | Steuerart, Zeitraum, Abgabedatum — kein Schema, kein Bestand; Eintrag bleibt leer (Beleg `Schema`) |
+| Erklärung `declaration` | 0 | **keine, und keine geplant** (B2) | — | Dateiname | kein Schema, kein Bestand — und im TS-Typ fehlt der Wert ganz (B10) |
 | ohne Typ `NULL` | 1 (0,3 %) | keine | — | Dateiname | keine. `sourceDocTypeLabel(null)` heißt bewusst „Beleg", nie „Rechnung" — das ist der Default-Eintrag der Registry, kein Sonderfall |
 
 ## Schaubild
@@ -178,6 +178,7 @@ Kürzung sitzt in der Mitte, die Endung bleibt lesbar.
 | Ereignis → Sachverhalt | Kind → Eltern | 12 % ohne · p50 1 · p90 1 · max 2 | Kontext | S | Inline des Sachverhalts (`CaseCell`), ein Klick | Staging |
 | Teilbelege (`parentSourceDocId`) | Kind, selbstbezüglich | 97 % ohne · p50 0 · p90 0 · max 23 | Kontext | M | Zähler (M) · Liste (L), eingebettet als `DocumentRow` | Staging · `ChildDocsCard` |
 | Sammel-Original (`parentSourceDocId`) | Eltern, selbstbezüglich | 20 % | Kontext | M | Inline mit Seitenbereich („Seiten 5–7 aus …") | Füllgrad `splitPageRange` |
+| **Dokumentgruppe** (`collectionKind` am Original **und** `parentSourceDocId` am Kind, zusammen gelesen) | beide Richtungen | 89 von 384 (23 %): 12 Originale, 77 Teilbelege — davon **54 Rechnungen**, 13 Sonstige, nur 10 Container-Deckblätter | Kontext | M | **ein** Block, der an der Relation hängt, nicht an der Belegart — die Antwort der App-Seite auf B2, an der richtigen Stelle | Staging · App-Seite 2026-09-04 |
 | Historie (`platform_audit_events`) | ohne FK, `resource_kind ∈ {source_doc, source_doc_invoice, invoice}` | 0 % ohne · p50 2 · p90 3 · max 8 | Verantwortung | L | Liste über `LogList` — **15 Aktionsarten, 1 085 Ereignisse** über die drei Ressourcen-Arten (`source_doc` allein: 12 / 977). Wer nur auf `source_doc` filtert, verliert 10 % der Historie | Staging (nachgerechnet) |
 | Volltext (`ops_document_text`) | Kind | — | Technik | — | nie zeigen — OCR-Text, gehört der Suche, nicht der Ansicht | Schema |
 | DATEV-Stapelverzeichnis (`client_batch_account_directory`) | Kind | — | Technik | — | gehört dem DATEV-Stapel, nicht dieser Familie | Schema |
@@ -282,29 +283,67 @@ folgt mit der Detailansicht (0071), die sie ohnehin voraussetzt.
 
 ## Befunde für `ludwig/app`
 
-- **B1 — `client_source_docs_contracts` ist leer (0 Zeilen)**, obwohl 7
-  Audit-Ereignisse (`contract.fields_updated`, `contract.fields_confirmed`)
-  und eine 647-Zeilen-UI existieren. Die Vertrags-Ausprägung wird gegen das
-  Schema und `ContractDetailData` gebaut, nicht gegen Daten — jede Zeile ihres
-  Registry-Eintrags trägt deshalb den Beleg `Schema`, nicht `Staging`.
-- **B2 — Vier Belegarten haben keinen Subtyp.** Kontoauszug (10),
-  Kreditkartenabrechnung (8), Reisekostenabrechnung (4) und Erklärung (0 im
-  Bestand, aber ein gültiger Diskriminator-Wert mit Label „Erklärung") tragen einen
-  eigenen Diskriminator-Wert und einen eigenen Folgeprozess, aber keine
-  Tabelle für ihre Felder (Zeitraum, Konto, Saldo; Karte; Abrechner,
-  Erstattungssumme). Ihr Registry-Eintrag bleibt bis dahin leer — die
-  Ausprägung zeigt nur Supertyp-Punkte. Das ist kein UI-Mangel, sondern ein
-  fehlendes Stück Datenmodell.
-- **B3 — `doc_category` ist nur zu 46 % gefüllt.** Die Achse kam mit F87,
-  ein Backfill für den Altbestand fehlt. Ein Filter über die Kategorie
-  („fachlich stabil", laut GLOSSARY der empfohlene Listenfilter) sieht heute
-  die Hälfte der Belege nicht — und die Belegliste bietet genau diesen Filter
-  an. Nachgerechnet (Prüfung): von den 207 Belegen ohne Kategorie tragen
-  **153 die Form `commercial_invoice`**, weitere 25 eine ebenfalls eindeutig
-  mappende Form — 178 von 207 (86 %) sind aus `document_form` mechanisch
-  nachrechenbar. Nur `document_collection` (16), `other` (6) und `unknown`
-  (6) sind laut GLOSSARY legitim NULL. Der Backfill ist also ein Skript, kein
-  Klassifizierungslauf.
+- **B1 — `client_source_docs_contracts` ist leer (0 Zeilen)** — *beantwortet
+  von der App-Seite am 2026-09-04:* **kein Schreibpfad-Fehler.** Alle sieben
+  Audit-Ereignisse hängen an **einem** Beleg, den es nicht mehr gibt
+  (Mandanten-Wipe nach 2026-07-20; das Audit-Log ist Seitenkanal und
+  überlebt das per Design). Die zwei heutigen `contract`-Belege ohne
+  Subtyp-Zeile sind Altbestand von vor dem F87-Kern. Die Tabelle war auf
+  Staging nie produktiv befüllt — **der Vertragsrenderer wird gegen das
+  Schema gebaut, nicht gegen Daten.** Das bestätigt den Owner-Entscheid
+  (offene Frage 3) und macht die Vertrags-Stories zu erfundenen Werten mit
+  Ansage.
+- **B2 — Vier Belegarten ohne Subtyp** — *beantwortet von der App-Seite am
+  2026-09-04: **Absicht**, keine Subtyp-Tabellen geplant.* Kontoauszug,
+  Kreditkartenabrechnung und Reisekostenabrechnung sind keine Belege mit
+  eigenen Fachfeldern, sondern **Container bzw. Deckblätter**; ihre Struktur
+  liegt nicht am Beleg, sondern daneben:
+
+  | Belegart | Wo die Struktur wirklich liegt |
+  |---|---|
+  | Kontoauszug | `client_bank_import_batches` (Zeitraum, Anfangs-/Endsaldo, Auszugsnummer, Zeilenzahl, Zahlungskonto) + `client_bank_transactions`. Der Beleg ist Ablage und Provenienz (bank.md R10) |
+  | Kreditkartenabrechnung | das Deckblatt verprobt, es bucht nicht (belege.md R25–R27); die Abrechnungspositionen **sind** die Kind-Belege |
+  | Reisekostenabrechnung | dasselbe — Positionen sind Kind-Belege, die Erstattung ein Bank-Umsatz |
+
+  Dazu aus dem Bestand: von den 10 `bank_statement_pdf` sind nur 4 echte
+  Auszüge; die anderen 6 sind Zinsabrechnungen, Reconciliation-Übersichten
+  und eine Zahlungsdienstleister-Übersicht. Der Wert ist heute das
+  Sammelbecken „Bankdokument, keine Rechnung" — ein Subtyp mit Pflichtfeldern
+  wäre bei 6 von 10 leer.
+
+  **Was für dieses Repo daraus folgt — und wo wir der App-Seite
+  widersprechen:** Sie schlägt vor, der Registry-Eintrag dieser drei sei
+  „Container: Gruppe + Batch". Der Eintrag ist richtig, sein **Ort** nicht:
+  die Container-Eigenschaft hängt nicht an der Belegart. Nachgerechnet:
+
+  - 89 von 384 Belegen (23 %) stehen in einer Dokumentgruppe — 12 als
+    Original, 77 als Teilbeleg.
+  - Von den 77 Teilbelegen sind **54 Rechnungen** und 13 „Sonstige"; nur 10
+    sind Kreditkarten- oder Reisekosten-Deckblätter.
+  - Kein einziger der 10 Kontoauszüge steht in einer Gruppe.
+
+  Die Gruppe ist also eine **Relation, keine Ausprägung**. Sie bekommt
+  deshalb keinen Registry-Eintrag je Belegart, sondern **einen Block, der an
+  der Relation hängt** und für jeden Beleg mit `collectionKind` oder
+  `parentSourceDocId` erscheint — gleich welcher Art. Das trifft die Absicht
+  der App-Seite („EIN Deckblatt-Renderer für alle drei Container-Typen, kein
+  Renderer je Typ") genauer als der Vorschlag selbst.
+
+  Die Batch-Fakten (Zeitraum, Salden, Zeilenzahl, Sprung zu den
+  Auszugszeilen) gehören nicht hierher, sondern in die
+  Kontoauszugspositions-Familie — und hängen ohnehin an einer Kante, die es
+  noch nicht hart gibt (B11).
+- **B3 — `doc_category` ist nur zu 46 % gefüllt** — *beantwortet von der
+  App-Seite am 2026-09-04:* die F87-Migration ist **bewusst backfill-frei**.
+  Seit 2026-08-20 fehlt die Kategorie nur noch bei `other`-Belegen
+  (Sammel-PDF, `other`, `unknown` — 23 Stück), und das ist Absicht: **ein
+  Container hat keine Kategorie, sie entsteht je Teilbeleg.** Die restlichen
+  ~170 sind Staging-Altbestand aus Juli/August; ein Backfill über die
+  Mapping-Tabelle ist deterministisch und wird mitgenommen.
+  **Regel für dieses Repo:** ein Filter oder ein Badge über die Kategorie
+  führt NULL als „unklassifiziert / Container" — nicht als Fehler und nicht
+  als Lücke. Die Zeile zeigt dafür kein Badge (siehe Datenpunkte), der
+  Filter bekommt einen eigenen Eintrag.
 - **B4 — Die Achse `beleg` (Verarbeitung) lebt am Rechnungs-Subtyp.** Für
   einen Vertrag oder Kontoauszug gibt es dort nie einen Wert; die Achse des
   **Supertyps** ist `beleg_inbox`. Der v3-`DocumentDrawer` erwartet in
@@ -347,6 +386,27 @@ folgt mit der Detailansicht (0071), die sie ohnehin voraussetzt.
   rendern, was die Subtyp-Zeile hergibt. Für die App ist das ein
   Konsistenz-Befund (Trigger oder Constraint), für dieses Repo die
   Begründung des Registry-Schlüssels oben. Eingetragen als L-35 in `docs/befunde-app.md`.
+- **B10 — `SourceDocType` fehlt der Wert `declaration`** (beim Schreiben von
+  0074 aufgefallen). DB-CHECK und `SOURCE_DOC_TYPE_LABELS` führen sieben
+  Werte, die TS-Union in `document-form-mapping.ts` sechs. 0074 weitet die
+  Union lokal und begründet es; Register-Eintrag L-44.
+- **B11 — Die Kante Beleg → Bank-Umsätze ist weich** (von der App-Seite am
+  2026-09-04 bestätigt und übernommen). Es gibt zwei Wege und keinen
+  Fremdschlüssel: `client_bank_transactions.raw_payload->>'source_doc_id'`
+  samt `external_transaction_id = '<source_doc_id>#<n>'` (Abtipp-Weg; im
+  Bestand 79 Umsätze an 6 Belegen), und
+  `client_bank_import_batches.stored_file_id = client_source_docs.stored_file_id`
+  (Intake-Upload F133, 0 Zeilen). Der Batch trägt die Kopfdaten des
+  Kontoauszugs, kennt den Beleg aber nicht. Die App-Seite schlägt
+  `client_bank_import_batches.source_doc_id` als nullable FK vor;
+  Owner-Entscheid steht aus. **Solange das offen ist, kann keine Beleg-Form
+  Zeitraum, Salden oder Zeilenzahl eines Kontoauszugs zeigen** — es steht im
+  Ausbau von 0076, nicht in der Schnittstelle.
+- **B12 — Doku-Lücke im GLOSSARY** (von der App-Seite anerkannt, Satz
+  kommt): Der Eintrag „Source document supertype & specializations" sagt
+  „neue Belegart = neuer Subtyp + …", aber nicht, dass **Container-Belegarten
+  bewusst keinen Subtyp haben**. Wer die Regel wörtlich nimmt, hält den
+  Zustand für einen Fehler — so ist es dieser Analyse ergangen.
 
 ## Offene Fragen
 

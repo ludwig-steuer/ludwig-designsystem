@@ -186,7 +186,7 @@ ausgeschlossen) + 1 je Enum-Achse (`Ausprägungen`, `Einordnung`, `Zustände`)
 
 | Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
 |---|---|---|
-| Kontoauszug, Kreditkartenabrechnung, Reisekostenabrechnung als eigene Ausprägung | je ein Eintrag in `DocumentDetail` und in der Registry | sobald Befund L-38 entschieden ist und die Subtyp-Tabellen stehen — heute gibt es für ihre Felder keinen Ort |
+| ~~Kontoauszug, Kreditkartenabrechnung, Reisekostenabrechnung als eigene Ausprägung~~ | — | **Entfällt.** Die App-Seite hat am 2026-09-04 entschieden: keine Subtyp-Tabellen, absichtlich — die drei sind Container, keine Belege mit eigenen Fachfeldern (L-38). Sie bekommen nie einen `DocumentDetail`-Eintrag; ihre Gruppen-Eigenschaft hängt an der Relation und wird in 0076 gezeigt |
 | Aktion an der Zeile (erledigen, neu anstoßen, einreichen) | optionaler `actions?: ReactNode`-Slot | wenn 0070 die erste Liste mit Massenaktion baut; bis dahin setzt der Aufrufer sie daneben |
 | Auswahl (Checkbox) | `SelectionCell` des Aufrufers, nicht eine Prop hier | mit 0070 und `DataTable`s `SelectionScope` |
 | Teilbeleg-Zähler an der Zeile | `childCount?: number` | wenn ein Screen Sammel-PDFs listet — 97 % haben keine Kinder, heute wäre die Zahl fast immer 0 |

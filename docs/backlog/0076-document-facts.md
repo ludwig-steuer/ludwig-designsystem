@@ -66,12 +66,57 @@ kommen.
 | **jede** | Belegart · Gegenpart · Belegdatum · Eingangsdatum · Kennung · Maß · Erledigung · Zusammenfassung | — |
 | Rechnung | dieselben acht | Netto/USt · Fälligkeit · Zahlungsziel · Leistungszeitraum · Zahlstatus · USt-IdNr. des Ausstellers · Original-Währung |
 | Vertrag | dieselben acht | Vertragstyp · Laufzeit (Start–Ende, Monate, „unbefristet") · buchungsrelevante Fakten mit Herkunft (KI/manuell) |
-| Kontoauszug, Kreditkartenabrechnung, Reisekostenabrechnung, Erklärung, Sonstiger, ohne Typ | dieselben acht | **nichts** — sie haben keine Subtyp-Zeile (Befund L-38). Kein leerer Block, keine Überschrift ohne Inhalt |
+| Kontoauszug, Kreditkartenabrechnung, Reisekostenabrechnung, Erklärung, Sonstiger, ohne Typ | dieselben acht | **nichts** — sie haben keine Subtyp-Zeile, und es ist auch keine geplant (App-Seite 2026-09-04, L-38). Kein leerer Block, keine Überschrift ohne Inhalt |
+
+### Der Gruppen-Block — und warum er kein Registry-Eintrag ist
+
+Die App-Seite hat auf Befund B2 geantwortet (2026-09-04): Kontoauszug,
+Kreditkartenabrechnung und Reisekostenabrechnung bekommen **absichtlich**
+keine Subtyp-Tabelle, weil sie keine Belege mit eigenen Fachfeldern sind,
+sondern **Container bzw. Deckblätter**. Ihr Vorschlag: der Registry-Eintrag
+dieser drei sei „Container: Gruppe + Batch".
+
+Der Eintrag ist richtig, sein Ort nicht — nachgerechnet auf Staging:
+
+- 89 von 384 Belegen (23 %) stehen in einer Dokumentgruppe: 12 Originale,
+  77 Teilbelege.
+- Von den 77 Teilbelegen sind **54 Rechnungen**, 13 „Sonstige", und nur 10
+  sind Kreditkarten- oder Reisekosten-Deckblätter.
+- Kein einziger der 10 Kontoauszüge steht in einer Gruppe.
+
+Die Gruppe schneidet also **quer durch alle Belegarten**. Ein Registry-
+Eintrag je Belegart würde sie für 54 Rechnungen verfehlen und für 10
+Kontoauszüge behaupten, wo es keine gibt. Deshalb:
+
+> Der Gruppen-Block hängt an der **Relation**, nicht an der Ausprägung. Er
+> erscheint für jeden Beleg mit `collectionKind` (er ist ein Original) oder
+> `parentSourceDocId` (er ist ein Teilbeleg) — gleich welcher Art, und
+> unabhängig davon, ob eine Subtyp-Zeile da ist.
+
+Das trifft die Absicht der App-Seite („EIN Deckblatt-Renderer für alle drei
+Container-Typen, kein Renderer je Typ") genauer als ihr eigener Vorschlag.
+
+Was der Block zeigt:
+
+| Der Beleg ist … | Zeile |
+|---|---|
+| ein Sammel-Original | Dokumentgruppe (Achse `dokumentgruppe`) · Zahl der Teilbelege · wie viele davon erledigt sind |
+| ein Teilbeleg | „Seiten 5–7 aus \<Original\>", mit Weg zum Original |
+| beides nicht | **kein Block** |
+
+Die Batch-Fakten eines Kontoauszugs — Zeitraum, Anfangs-/Endsaldo,
+Zeilenzahl — gehören **nicht** hierher: sie liegen an
+`client_bank_import_batches`, und zwischen Beleg und Batch gibt es heute
+keinen Fremdschlüssel (Befund L-45, Owner-Entscheid steht aus). Sie stehen
+im Ausbau, nicht in der Schnittstelle.
 
 Der Vertrags-Eintrag entsteht gegen das **Schema** und
 `ContractDetailData`, nicht gegen Daten: `client_source_docs_contracts` hat
-im Bestand null Zeilen (Befund L-39). Owner-Entscheid 2026-09-04: lesend
-jetzt, der Editor wartet (0073). Jede Zeile der Vertrags-Stories trägt
+im Bestand null Zeilen — und das ist **kein Schreibpfad-Fehler**: die sieben
+Audit-Ereignisse hängen an einem Beleg, den es nach einem Mandanten-Wipe
+nicht mehr gibt (App-Seite 2026-09-04, L-39). Die Tabelle war auf Staging nie
+produktiv befüllt. Owner-Entscheid 2026-09-04: lesend jetzt, der Editor
+wartet (0073). Jede Zeile der Vertrags-Stories trägt
 deshalb erfundene Werte und der Eintrag einen Kommentar, der das sagt.
 
 ## Schnittstelle
@@ -83,6 +128,7 @@ gibt es genau einen Aufrufer, `DocumentDrawer`):
 |---|---|---|---|---|
 | `document` | `DocumentVM` | ja | Die Beleg-Zeile aus 0074 — dieselbe, die auch `DocumentRow` bekommt. Trägt Belegart, Gegenpart, beide Daten, Erledigung, `detail`. | `Gefuellt` |
 | `summary` | `string \| null` | nein | Zusammenfassung. Der Aufrufer wählt zwischen `classCaseSummary` (fachlich, 93 %) und `classSummary` (Belegtext, 100 %) — die Komponente kennt den Unterschied nicht und darf ihn nicht raten. Gekürzt bei 260 Zeichen. | `Gefuellt`, `Rand` |
+| `group` | `{ childCount: number; completedChildCount: number } \| { pages: string; parentTitle?: string; parentHref?: string } \| null` | nein | Der Gruppen-Block. Erste Form: der Beleg ist ein Sammel-Original. Zweite: er ist ein Teilbeleg. `null`: keins von beidem, und dann gibt es den Block nicht. | `Gruppe` |
 | `tone` | `"surface" \| "soft" \| "bare"` | nein | Wird an `FieldList` durchgereicht: `bare` im Drawer, `surface` in der Karte. | `Toene` |
 
 Dass `document` und `summary` getrennt kommen, ist Absicht: 0074s
@@ -150,20 +196,21 @@ Titel `v3/Entitäten/Beleg/DocumentFacts`.
 | `Ausprägungen` | **Die Kernstory.** Rechnung, Vertrag, Kontoauszug, Sonstiger Beleg und ein Beleg ohne Typ nebeneinander — gleiche Reihenfolge oben, verschiedene Blöcke unten, und bei den letzten dreien **kein leerer Block** |
 | `Vertrag` | Der Registry-Eintrag, den kein Bestand belegt: Laufzeit mit und ohne Enddatum, „unbefristet", buchungsrelevante Fakten mit Herkunft KI und manuell |
 | `Leer` | Ein Beleg, von dem nur Datei und Eingangsdatum bekannt sind — was steht da, und was steht bewusst nicht da |
+| `Gruppe` | Der Block an der Relation: ein Sammel-Original mit 9 Teilbelegen („4 von 9 erledigt"), ein Teilbeleg („Seiten 5–7 aus …") — und eine **Rechnung**, die Teilbeleg ist: der Fall, den ein Renderer je Belegart verfehlt hätte |
 | `Toene` | `bare` (Drawer) und `surface` (Karte) nebeneinander |
 | `Rand` | 400-Zeichen-Zusammenfassung, 139-Zeichen-Dateiname, 868-Zeichen-Erledigungsgrund — alle drei Kürzungen, voller Text im `title` |
 | `ImEinsatz` | Im `DocumentDrawer`, neben einer Liste: Kopf, Vorschau, Fakten, Grenze, ein Ausgang — der Nachzug in einem Bild |
 
-Sieben Stories: 2 anwendbare Zustände (`Gefuellt`, `Leer`; lädt und Fehler
+Acht Stories: 2 anwendbare Zustände (`Gefuellt`, `Leer`; lädt und Fehler
 oben begründet ausgeschlossen) + 1 je Enum-Achse (`Ausprägungen` für die
 Registry, `Toene` für `tone`) + 1 für den unbelegten Registry-Eintrag
-(`Vertrag`) + 1 Rand (die Komponente kürzt) + 1 „im Einsatz". Kein Callback.
+(`Vertrag`) + 1 für den Relations-Block (`Gruppe`) + 1 Rand (die Komponente kürzt) + 1 „im Einsatz". Kein Callback.
 
 ## Ausbau
 
 | Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
 |---|---|---|
-| Kontoauszug, Kreditkartenabrechnung, Reisekostenabrechnung als eigener Block | je ein `facts()`-Eintrag in der Registry | sobald Befund L-38 entschieden ist und die Subtyp-Tabellen stehen |
+| Zeitraum, Anfangs-/Endsaldo und Zeilenzahl eines Kontoauszugs | ein `batch?`-Feld am VM, gefüllt aus `client_bank_import_batches` | sobald der Fremdschlüssel Beleg → Batch steht (L-45). **Nicht** als Registry-Eintrag — die Fakten gehören der Kontoauszugspositions-Familie, hier stünde nur der Sprung dorthin |
 | Einzelwerte ändern | je ein optionaler Callback (`onSetDocumentDate`, `onComplete`) über `InlineEdit` | mit 0071 — ohne Callback bleibt der Wert lesend, das ist A12 |
 | Positionen und Vorsteuer | eigener Auftrag 0072 | wenn die Rechnungsposition ihr Profil hat |
 | Konfidenz der Einordnung als Wert statt als Prozentzahl | eine Konfidenz-Primitive | wenn der Soll-Katalog die **eine** Konfidenz-Darstellung entschieden hat (heute drei Varianten in der App) |
@@ -187,7 +234,9 @@ Variabel (aus dieser Spec):
 - [ ] Keine Zeile heißt „Rechnungsnr." oder „Lieferant" an einem Nicht-Rechnungs-Beleg (Story `Ausprägungen`)
 - [ ] `grep -n "isInvoice" src/ui/v3/entities/document/` findet nichts
 - [ ] Eine neue Belegart erfordert genau **einen** neuen Eintrag in `document-detail.ts` und keine Änderung an `DocumentFacts.tsx` — nachgewiesen, indem der Vertrags-Eintrag als letzter hinzugefügt wird und die Komponente unverändert bleibt
-- [ ] `tone` verhält sich wie Zeile 3 der Schnittstelle (Story `Toene`)
+- [ ] Der Gruppen-Block erscheint bei einer **Rechnung**, die Teilbeleg ist — er hängt an der Relation, nicht an der Belegart (Story `Gruppe`)
+- [ ] Ein Beleg ohne `group` bekommt keinen Block, auch keinen leeren (Story `Ausprägungen`)
+- [ ] `tone` verhält sich wie Zeile 4 der Schnittstelle (Story `Toene`)
 - [ ] Alle drei Kürzungen greifen, der volle Text steht im `title` (Story `Rand`)
 - [ ] `DocumentDrawer` zeigt die **Erledigung** im Kopf, nicht `axis="beleg"` (Story `ImEinsatz`)
 - [ ] `DocumentDrawer` enthält kein `<iframe>` mehr (`grep -n "iframe" src/ui/v3/entities/document/DocumentDrawer.tsx` findet nichts)
