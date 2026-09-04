@@ -73,23 +73,33 @@ export function CardFoot({ children }: { children: ReactNode }) {
 /* ── Tabelle ────────────────────────────────────────────────────────── */
 
 /**
+ * How much vertical room a row gets (0057 E9). The page decides it, never the
+ * reader — density is a design decision, not a switch (V1).
+ */
+export type TableDensity = "compact" | "default" | "wide";
+
+/**
  * Grid-Tabelle. `cols` ist ein `grid-template-columns`-Wert, `minWidth`
  * erzwingt horizontales Scrollen statt Quetschen (viele Spalten).
  *
- * @when    Records of the same kind in columns, even with three rows.
+ * @when    Records of the same kind in columns, even with three rows; `density`
+ *          when a page needs the tighter or the roomier row.
  * @instead Label/value pairs → FieldList. Click does something client-side → ClickRow, ExpandableRow.
  */
 export function Table({
   cols,
   minWidth,
+  density = "default",
   children,
 }: {
   cols: string;
   minWidth?: number;
+  /** `compact` one line per row, `wide` room for a title plus a sub-line. */
+  density?: TableDensity;
   children: ReactNode;
 }) {
   const body = (
-    <div className="v2tbl" style={{ "--v2-cols": cols } as CSSProperties}>
+    <div className="v2tbl" data-density={density} style={{ "--v2-cols": cols } as CSSProperties}>
       {children}
     </div>
   );

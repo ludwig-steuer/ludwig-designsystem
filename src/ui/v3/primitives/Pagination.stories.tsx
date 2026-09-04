@@ -15,3 +15,19 @@ export const MiddlePage: Story = { args: { page: 6, totalPages: 12, totalItems: 
 export const LastPage: Story = { args: { page: 12, totalPages: 12, totalItems: 583, pageSize: 50 } };
 /** Eine Seite: die Navigation trägt trotzdem die Mengenangabe. */
 export const SinglePage: Story = { args: { page: 1, totalPages: 1, totalItems: 18, pageSize: 50 } };
+
+/**
+ * Mit `pageSizeOptions` steht rechts der Zahlen „je Seite" (0057). Der Wechsel
+ * führt auf `buildSizeHref` — die Seite setzt dort `page: 1` mit, sonst zeigte
+ * Seite 6 bei 100 Zeilen ins Leere.
+ */
+export const WithPageSize: Story = {
+  args: {
+    page: 1,
+    totalPages: 12,
+    totalItems: 583,
+    pageSize: 50,
+    pageSizeOptions: [25, 50, 100],
+    buildSizeHref: (size: number) => `?size=${size}&page=1`,
+  },
+};

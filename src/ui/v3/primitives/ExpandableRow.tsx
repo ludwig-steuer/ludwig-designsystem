@@ -56,10 +56,17 @@ export function ClickRow({
 export function ExpandableRow({
   summary,
   children,
+  lead,
   defaultOpen = false,
 }: {
   summary: ReactNode;
   children: ReactNode;
+  /**
+   * Cells **before** the chevron — the selection checkbox, which comes first
+   * in the column order (0057, Zone 3). It stands outside `summary` because
+   * the chevron owns its own grid column between the two.
+   */
+  lead?: ReactNode;
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -80,6 +87,7 @@ export function ExpandableRow({
           }
         }}
       >
+        {lead}
         <span className={`v2chev${open ? " is-open" : ""}`} />
         {summary}
       </div>

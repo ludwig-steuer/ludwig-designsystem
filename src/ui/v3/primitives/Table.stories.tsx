@@ -148,3 +148,40 @@ export const CardHeadIconMeta: Story = {
     </div>
   ),
 };
+
+/**
+ * `density` (0057 E9): dieselben Zeilen dreimal. `default` ist die heutige
+ * Zeile, `compact` das Kontenblatt, `wide` trägt Titel und Untertitel in einer
+ * Zelle. Die Seite entscheidet das, nicht die Nutzerin (V1).
+ */
+export const Density: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 16, maxWidth: 620 }}>
+      {(["compact", "default", "wide"] as const).map((density) => (
+        <Card key={density}>
+          <CardHead title="Offene Posten" sub={density} />
+          <Table cols="1.6fr 120px" density={density}>
+            <HeadRow>
+              <span>Gegenpartei</span>
+              <span className="v2num">Betrag</span>
+            </HeadRow>
+            <Row>
+              <div>
+                <div className="v2main">Vermieter Musterstraße</div>
+                {density === "wide" ? <div className="v2sub">Miete August · fällig 21.08.2026</div> : null}
+              </div>
+              <AmountCell value={1800} />
+            </Row>
+            <Row>
+              <div>
+                <div className="v2main">Werbeagentur Nord</div>
+                {density === "wide" ? <div className="v2sub">Kampagne Sommer · fällig 30.08.2026</div> : null}
+              </div>
+              <AmountCell value={420} />
+            </Row>
+          </Table>
+        </Card>
+      ))}
+    </div>
+  ),
+};

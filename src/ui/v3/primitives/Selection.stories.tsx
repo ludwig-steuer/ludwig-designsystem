@@ -2,8 +2,17 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { AmountCell } from "./Cells";
 import { ClickRow } from "./ExpandableRow";
-import { SelectCell, SelectionBar } from "./Selection";
-import { Card, CardHead, HeadRow, Table } from "./Table";
+import {
+  SelectAllCell,
+  SelectCell,
+  SelectRowCell,
+  SelectionBar,
+  SelectionScope,
+  SelectionScopeBar,
+  type BulkAction,
+} from "./Selection";
+import { Card, CardHead, HeadRow, Row, Table } from "./Table";
+import { TextButton } from "./TextButton";
 
 const meta: Meta<typeof SelectionBar> = { title: "v3/Primitives/Tabelle/Selection", component: SelectionBar };
 export default meta;
@@ -81,5 +90,59 @@ export const WithoutSelection: Story = {
         </ClickRow>
       </Table>
     </Card>
+  ),
+};
+
+/* ── Die Insel: sie hält die Auswahl selbst (0057) ─────────────────────── */
+
+const ISLAND_ROWS = [
+  { key: "2026-0417", name: "Musterfirma GmbH", betrag: 1800 },
+  { key: "2026-0418", name: "Vermieter Musterstraße", betrag: 1450 },
+  { key: "2026-0419", name: "Werbeagentur Nord", betrag: 420 },
+  { key: "2026-0420", name: "Bürobedarf GmbH", betrag: 64.9 },
+];
+
+const ISLAND_ACTIONS: BulkAction[] = [
+  { label: "Freigeben", hotkey: "F", action: async () => {} },
+];
+
+/**
+ * `SelectionScope` hält die Auswahl, `SelectAllCell`, `SelectRowCell` und
+ * `SelectionScopeBar` lesen sie. Der Aufrufer reicht nur noch `order` und die
+ * Sammelaktionen herein — kein `useState` mehr je Seite.
+ *
+ * Zum Ausprobieren: drei Zeilen wählen, dann mit Shift auf die vierte klicken;
+ * die Kopf-Checkbox steht bei Teilauswahl auf `indeterminate`, `F` gibt frei.
+ */
+export const Island: Story = {
+  render: () => (
+    <SelectionScope order={ISLAND_ROWS.map((z) => z.key)}>
+      <Card>
+        <CardHead
+          title="Sachverhalte 2026"
+          sub="4 von 583"
+          actions={
+            <SelectionScopeBar
+              actions={ISLAND_ACTIONS}
+              fallback={<TextButton href="#neu">Sachverhalt anlegen</TextButton>}
+            />
+          }
+        />
+        <Table cols="32px 1.5fr 120px">
+          <HeadRow>
+            <SelectAllCell />
+            <span>Gegenpartei</span>
+            <span className="v2num">Betrag</span>
+          </HeadRow>
+          {ISLAND_ROWS.map((z) => (
+            <Row key={z.key}>
+              <SelectRowCell rowKey={z.key} label={`Sachverhalt ${z.key} auswählen`} />
+              <span className="v2main">{z.name}</span>
+              <AmountCell value={z.betrag} />
+            </Row>
+          ))}
+        </Table>
+      </Card>
+    </SelectionScope>
   ),
 };

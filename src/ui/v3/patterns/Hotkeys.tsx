@@ -13,10 +13,11 @@ import { Kbd } from "../primitives/Kbd";
  * works with the mouse. The target group opens Ludwig every two to four
  * weeks — an application you have to know by heart is unusable for them.
  *
- * Inside form fields the user types text, not commands: `INPUT`,
+ * Inside form fields the user types text, not commands: text fields,
  * `TEXTAREA`, `SELECT` and `contenteditable` are excluded — **except for
  * combinations with Ctrl/⌘**, which are no typing at all: `⌘K` has to open
  * the command palette from inside the search field it sits next to (0039).
+ * A checkbox is not a field you type in and stays open to keys (0057).
  */
 
 export interface HotkeyBinding {
@@ -31,7 +32,16 @@ export interface HotkeyBinding {
 
 function isTyping(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
-  return !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+  if (!el) return false;
+  if (el.isContentEditable) return true;
+  // A checkbox or a radio takes no text — `Space` is all it listens to. Whoever
+  // has just ticked three rows with the mouse holds the focus there, and the
+  // key at the bulk action has to keep working (0057 E6).
+  if (el.tagName === "INPUT") {
+    const type = (el as HTMLInputElement).type;
+    return type !== "checkbox" && type !== "radio";
+  }
+  return el.tagName === "TEXTAREA" || el.tagName === "SELECT";
 }
 
 /**

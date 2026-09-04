@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "./Form";
 import { Link } from "./Link";
 
 /**
@@ -216,5 +217,50 @@ export function SearchInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
     />
+  );
+}
+
+/**
+ * The „50 je Seite" chooser next to the page numbers (0057).
+ *
+ * It lives here and not in `Pagination` for one reason: `Pagination` takes
+ * `buildHref` as a function and therefore has to stay a Server-Component. A
+ * `<select>` that jumps on change needs a client boundary, so the two cannot
+ * share a file. `Pagination` computes the targets and passes them as plain
+ * strings — nothing but data crosses the border.
+ *
+ * @when    Next to a `Pagination`, when the page offers more than one page size.
+ * @instead Switching between views → Segmented. Narrowing the rows → FilterChips.
+ */
+export function PageSizeSelect({
+  value,
+  options,
+  label = "je Seite",
+}: {
+  value: number;
+  /** Every size with the URL it leads to — the caller resets `page` in it. */
+  options: { size: number; href: string }[];
+  label?: string;
+}) {
+  const id = `pagesize-${value}`;
+  return (
+    <span className="pag__size">
+      <Select
+        id={id}
+        value={value}
+        aria-label={`Zeilen ${label}`}
+        onChange={(e) => {
+          const hit = options.find((o) => String(o.size) === e.target.value);
+          if (hit) window.location.assign(hit.href);
+        }}
+      >
+        {options.map((o) => (
+          <option key={o.size} value={o.size}>
+            {o.size}
+          </option>
+        ))}
+      </Select>
+      <label htmlFor={id}>{label}</label>
+    </span>
   );
 }

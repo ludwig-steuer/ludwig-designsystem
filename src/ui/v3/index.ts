@@ -78,6 +78,7 @@ export {
   Segmented,
   FilterChips,
   SearchInput,
+  PageSizeSelect,
   type ChipOption,
   type SegmentOption,
   type TabItem,
@@ -141,7 +142,17 @@ export { BarChart, type Bar } from "./primitives/BarChart";
 export { Progress } from "./primitives/Progress";
 
 /* Tabelle */
-export { Card, CardHead, CardFoot, Table, HeadRow, Row, GroupRow, EmptyRow } from "./primitives/Table";
+export {
+  Card,
+  CardHead,
+  CardFoot,
+  Table,
+  HeadRow,
+  Row,
+  GroupRow,
+  EmptyRow,
+  type TableDensity,
+} from "./primitives/Table";
 export {
   AmountCell,
   DotStatus,
@@ -154,7 +165,17 @@ export {
 } from "./primitives/Cells";
 export { RawRecord, RawValue, type RawFormat } from "./primitives/RawRecord";
 export { ClickRow, ExpandableRow } from "./primitives/ExpandableRow";
-export { SelectionBar, SelectCell } from "./primitives/Selection";
+export {
+  SelectionBar,
+  SelectCell,
+  SelectionScope,
+  SelectAllCell,
+  SelectRowCell,
+  SelectionScopeBar,
+  useSelection,
+  type BulkAction,
+  type SelectionApi,
+} from "./primitives/Selection";
 
 /* ── Patterns ── Arbeitsfläche */
 export {

@@ -45,7 +45,27 @@
 /* --- Tabelle: Grid statt <table> --------------------------------------- */
 /* `--v2-cols` setzt der Aufrufer (Table-Komponente), `--v2-min` optional für
    horizontales Scrollen bei vielen Spalten. */
-.v2tbl { --v2-cols: 1fr; }
+/* Dichte (0057 E9): drei Blöcke, ein Satz Maße. `default` steht am `.v2tbl`
+   selbst, damit eine Tabelle ohne `data-density` unverändert bleibt. */
+.v2tbl {
+  --v2-cols: 1fr;
+  --v2-row-y: 12px;
+  --v2-row-fs: 13.5px;
+  --v2-head-y: 9px;
+  --v2-detail-y: 14px;
+}
+.v2tbl[data-density="compact"] {
+  --v2-row-y: 7px;
+  --v2-row-fs: 12.5px;
+  --v2-head-y: 6px;
+  --v2-detail-y: 10px;
+}
+.v2tbl[data-density="wide"] {
+  --v2-row-y: 18px;
+  --v2-row-fs: 13.5px;
+  --v2-head-y: 11px;
+  --v2-detail-y: 18px;
+}
 .v2tbl__scroll { overflow-x: auto; }
 .v2tbl__inner { min-width: var(--v2-min, 0); }
 
@@ -54,12 +74,12 @@
   display: grid;
   grid-template-columns: var(--v2-cols);
   gap: 10px;
-  padding: 12px 18px;
+  padding: var(--v2-row-y, 12px) 18px;
   align-items: center;
 }
 
 .v2tbl__head {
-  padding: 9px 18px;
+  padding: var(--v2-head-y, 9px) 18px;
   font-size: 11.5px;
   letter-spacing: 0.01em;
   color: var(--color-text-subtle);
@@ -69,11 +89,14 @@
 
 .v2tbl__row {
   border-bottom: 1px solid var(--color-border-subtle);
-  font-size: 13.5px;
+  font-size: var(--v2-row-fs, 13.5px);
   color: var(--color-text);
 }
-/* Letzte Zeile ohne Trennlinie (Baukasten-Regel 1). */
-.v2tbl__row:last-child { border-bottom: none; }
+/* Letzte Zeile ohne Trennlinie (Baukasten-Regel 1). Eine `ExpandableRow` legt
+   ihre Zeile in einen eigenen Wrapper, deshalb der zweite Selektor — sonst
+   verlöre jede aufklappbare Zeile ihre Trennlinie statt nur der letzten. */
+.v2tbl > .v2tbl__row:last-child,
+.v2tbl > :last-child > .v2tbl__row { border-bottom: none; }
 .v2tbl__row.is-clickable { cursor: pointer; transition: background var(--duration-fast) var(--ease-standard); }
 .v2tbl__row.is-clickable:hover { background: var(--color-bg-soft); }
 /* Aktive Zeile im Master-Detail: 3-px-Akzentleiste links (Baukasten §10). */
@@ -111,7 +134,7 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 
 /* Aufgeklappter Inhalt unter einer Zeile — kein Modal, kein Drawer. */
 .v2tbl__detail {
-  padding: 14px 18px 16px 46px;
+  padding: var(--v2-detail-y, 14px) 18px calc(var(--v2-detail-y, 14px) + 2px) 46px;
   background: var(--color-bg-soft);
   border-bottom: 1px solid var(--color-border-subtle);
   font-size: 13px;
@@ -860,6 +883,12 @@ select.v2in { padding-right: 26px; }
   white-space: nowrap;
 }
 
+/* --- Seitengröße neben den Seitenzahlen (0057) ---------------------------
+   `.pag` selbst steht in `components.css`; hier kommt nur die Beigabe dazu. */
+.pag__size { display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; }
+.pag__size label { font-size: 12px; color: var(--color-text-muted); }
+.pag__size .v2in { padding: 3px 24px 3px 7px; font-size: 12px; }
+
 /* --- Auswahl-Leiste über dem Spaltenkopf --------------------------------- */
 .v2selbar {
   padding: 9px 18px;
@@ -868,7 +897,15 @@ select.v2in { padding-right: 26px; }
   display: flex; align-items: center; gap: 12px;
 }
 .v2selbar__count { font-size: 12.5px; font-weight: 600; color: var(--color-accent-700); }
-.v2selbar__actions { display: flex; gap: 12px; margin-left: auto; }
+.v2selbar__actions { display: flex; gap: 12px; margin-left: auto; align-items: center; }
+/* Im Kartenkopf, an der Stelle der Kartenaktionen (0057 E5): kein zweiter
+   Balken, kein eigener Grund — die Leiste ist hier nur eine Reihe. */
+.v2selbar--inline {
+  padding: 0;
+  border-bottom: none;
+  background: transparent;
+}
+.v2selbar--inline .v2selbar__actions { margin-left: 0; }
 
 /* --- Zell-Bausteine (Baukasten §9) --------------------------------------- */
 .v2num--danger { color: var(--color-danger); }
