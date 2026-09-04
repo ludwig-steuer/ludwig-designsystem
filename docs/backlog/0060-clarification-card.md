@@ -81,7 +81,9 @@ Getrennter Typ, damit die Zeile leicht bleibt:
 | `answerKind` | `ClarificationAnswerKind` | ja | steuert die Antwortfläche | `Antworten` |
 | `answerOptions` | `readonly string[]` | nein | die Optionen; der Text **ist** der Wert (Regel S13) | `Antworten` |
 | `allowFreeText` | `boolean` | nein | zusätzliches Freitextfeld | `Antworten` |
-| `history` | `readonly ClarificationEvent[]` | nein | der Verlauf, chronologisch | `Verlauf` |
+| `raisedBy` | `ClarificationActor \| null` | nein | wer gefragt hat — `string` oder `Actor` (`@/ludwig/modules/audit-log`, Achse `actor_kind`, dieselbe Form wie `LogList`). Es gibt kein `created_by` (B7); kommt die Spalte, ändert sich an dieser Prop nichts | `Personen` |
+| `answeredBy` | `ClarificationActor \| null` | nein | wer geantwortet hat; `answered_by` ist nur zu 6 % gefüllt | `Personen` |
+| `history` | `readonly ClarificationEvent[]` | nein | der volle Verlauf aus dem Audit. **Gewinnt gegen `raisedBy`/`answeredBy`**; fehlt er, baut die Karte aus den beiden die zwei offensichtlichen Einträge — eine Darstellung, zwei Quellen | `Verlauf` |
 
 ### `ClarificationEvent` — ein Eintrag des Verlaufs
 
@@ -89,7 +91,7 @@ Getrennter Typ, damit die Zeile leicht bleibt:
 |---|---|---|---|
 | `kind` | `"raised" \| "answered" \| "resolved" \| "deferred"` | ja | entspricht `case.clarification_*` im Audit |
 | `at` | `string` | ja | ISO-Zeitpunkt |
-| `by` | `string \| null` | nein | Anzeigename; `null` heißt Agent oder System und wird als solches beschriftet, **nicht** als Gedankenstrich |
+| `by` | `ClarificationActor \| null` | nein | `string` oder `Actor`; `null` heißt Agent oder System und wird als solches beschriftet, **nicht** als Gedankenstrich. Ein `Actor` ohne `label` bekommt das Wort seiner Achse (`actor_kind`) |
 | `text` | `string \| null` | nein | Antworttext bzw. Auflösungsgrund |
 
 ### `ClarificationCard`
@@ -142,13 +144,14 @@ Titel `v3/Entitäten/Klärung/ClarificationCard`.
 | `Gefuellt` | Agenten-Frage, `mode="read"`, mit Fakten, Quellen, Kontext |
 | `Antworten` | `mode="answer"` mit `single_choice`, `yes_no` und `free_text` nebeneinander; Rundlauf über `useState` |
 | `MitEmpfehlung` | Empfehlung wird zur Vorauswahl und bleibt lesbar |
+| `Personen` | `raisedBy` als `Actor` ohne Label, `answeredBy` als String — ohne `history` |
 | `Verlauf` | drei Einträge: gestellt vom Agenten, beantwortet von einer Person, aufgelöst mit Grund — je mit Datum |
 | `VonHand` | Frage aus der Kanzlei: nur Text, keine Fakten, keine Quellen, keine Optionen |
 | `ImPortal` | `client_text`, Zielgruppe Mandant, ohne Herkunft und ohne Schwere-Badge |
 | `Laedt` | `pending` am Antwortknopf |
 | `Fehler` | `error` am Knopf, Eingabe bleibt erhalten |
 
-Acht Stories. Nicht anwendbar: `Leer` (oben begründet).
+Neun Stories. Nicht anwendbar: `Leer` (oben begründet).
 
 ## Abnahmekriterien
 
@@ -173,6 +176,8 @@ Variabel (aus dieser Spec):
       auf die Erwartung (Story `Antworten`)
 - [ ] Der Verlauf zeigt je Eintrag Art, Person und Datum; `by = null` wird zu
       „Agent" bzw. „System", nie zu „—" (Story `Verlauf`)
+- [ ] Ohne `history` bauen `raisedBy`/`answeredBy` denselben Verlauf; ein
+      `Actor` ohne `label` zeigt das Wort seiner Achse (Story `Personen`)
 - [ ] Leere Blöcke (keine Fakten, keine Quellen, keine Empfehlung) erzeugen
       keine leeren Überschriften (Story `VonHand`)
 - [ ] Ersetzt `AnswerInput` und die Portal-Kopie ohne Funktionsverlust — offen (App)

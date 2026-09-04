@@ -5,6 +5,7 @@ import { HelpCircle } from "lucide-react";
 
 import type { ClarificationAnswerKind } from "@/ludwig/modules/invoices/domain/invoice";
 import type { RationaleSourceKind } from "@/ludwig/modules/accounting-cases/domain/rationale-source";
+import type { Actor } from "@/ludwig/modules/audit-log/domain/types";
 
 import { Callout } from "../../primitives/Callout";
 import { FieldList } from "../../primitives/FieldList";
@@ -13,6 +14,7 @@ import { ReasonDialog } from "../../primitives/ReasonDialog";
 import { TextButton } from "../../primitives/TextButton";
 import { Time } from "../../primitives/Time";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { resolveStatus } from "../../patterns/status-registry";
 import { ChoicePrompt, type ChoiceAnswer } from "../../patterns/ChoicePrompt";
 import type { ClarificationVM } from "./Clarification";
 
@@ -28,9 +30,12 @@ import type { ClarificationVM } from "./Clarification";
  *     the audit (`case.clarification_raised`). The card shows 0…n entries with
  *     person and date, so it also holds once the database stores more than one
  *     answer per question (finding B8).
- *  2. **The second exit.** `resolveClarification` closes a question without an
- *     answer, with a mandatory reason. In the data an answered and a resolved
- *     question look alike — `answered_at` is set on both. Here they do not.
+ *  2. **The second exit.** `resolveClarification` closes a question without
+ *     the asked party answering: 57 times in the audit, 35 as `answered` (the
+ *     agent found the answer itself) and 22 as `obsolete`. Both set
+ *     `answered_at` and `answer_payload`; only the marker `"(gegenstandslos)"`
+ *     tells them apart. The card names the case instead of showing it as an
+ *     answer.
  *
  * The card loads nothing: labels for question kind and origin come in as
  * props, because `ludwig/app` has no catalogue for either (findings B1, B2).
@@ -53,13 +58,31 @@ const EVENT_LABEL: Record<ClarificationEventKind, string> = {
   deferred: "Zurückgestellt",
 };
 
+/**
+ * Who did it. A plain string where the caller already has a display name, or
+ * the app's own `Actor` (`kind` is a value of the axis `actor_kind`) where it
+ * has the audit row — `LogList` takes the same shape.
+ *
+ * The clarification table has no `created_by` (finding B7), so today this
+ * comes from the audit. Once the column exists, the caller passes it here and
+ * nothing about this interface changes.
+ */
+export type ClarificationActor = string | Actor;
+
+/** The name to print. Never „—": somebody acted, even if it was a machine. */
+function actorName(by: ClarificationActor | null | undefined, fallback: string): string {
+  if (!by) return fallback;
+  if (typeof by === "string") return by.trim() || fallback;
+  return by.label?.trim() || resolveStatus("actor_kind", by.kind).label;
+}
+
 /** One step in the life of a question, as the audit recorded it. */
 export interface ClarificationEvent {
   kind: ClarificationEventKind;
   /** ISO timestamp. */
   at: string;
-  /** Display name; `null` means the agent or the system, and says so. */
-  by?: string | null;
+  /** `null` means the agent or the system, and the card says so. */
+  by?: ClarificationActor | null;
   /** The answer text, or the reason it was resolved without one. */
   text?: string | null;
 }
@@ -100,6 +123,14 @@ export interface ClarificationDetailVM {
   /** The option text **is** the value (rule S13). */
   answerOptions?: readonly string[];
   allowFreeText?: boolean;
+  /**
+   * Who asked, and who answered. Both optional: the table carries neither the
+   * asker nor a display name for the answerer today. Given without `history`,
+   * the card builds the two obvious entries from them; given `history`, that
+   * wins — it is the fuller truth.
+   */
+  raisedBy?: ClarificationActor | null;
+  answeredBy?: ClarificationActor | null;
   history?: readonly ClarificationEvent[];
 }
 
@@ -139,6 +170,16 @@ export function ClarificationCard({
   const [resolving, setResolving] = useState(false);
 
   const isComment = c.type === "comment";
+  // Without a loaded audit trail, asker and answerer still make a two-step
+  // history — the same shape, so the card never has two ways to show a person.
+  const history: readonly ClarificationEvent[] =
+    c.history ??
+    ([
+      c.raisedBy ? { kind: "raised" as const, at: c.raisedAt, by: c.raisedBy } : null,
+      c.answeredAt
+        ? { kind: "answered" as const, at: c.answeredAt, by: c.answeredBy ?? null }
+        : null,
+    ].filter(Boolean) as ClarificationEvent[]);
   const options = (c.answerOptions ?? []).map((label) => ({ id: label, label }));
   // A recommendation that names an option verbatim becomes the preselection —
   // and stays visible, so the preselection has a reason next to it.
@@ -208,16 +249,15 @@ export function ClarificationCard({
         </Callout>
       ) : null}
 
-      {c.history && c.history.length > 0 ? (
+      {history.length > 0 ? (
         <Block label="Verlauf">
           <ol className="v2clc__hist">
-            {c.history.map((e, i) => (
+            {history.map((e, i) => (
               <li key={`${e.kind}-${e.at}-${i}`}>
                 <span className="v2clc__histHead">
                   <strong>{EVENT_LABEL[e.kind]}</strong>
                   {" von "}
-                  {/* „—" would claim nobody acted; the agent did. */}
-                  {e.by ?? (e.kind === "raised" ? "Agent" : "System")}
+                  {actorName(e.by, e.kind === "raised" ? "Agent" : "System")}
                   {" · "}
                   <Time value={e.at} format="dateTime" size="sm" />
                 </span>

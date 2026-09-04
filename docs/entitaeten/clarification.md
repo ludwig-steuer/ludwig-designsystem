@@ -47,11 +47,14 @@ Belegt im Kern (`clarification-core.ts`), nicht angenommen:
   Selbstbeziehung und in 0 % gesetzt. `batch-clarifications.ts` sagt es
   selbst: „Der Klärungs-**Faden** (Gegenfrage → frühere Antwort) fehlt:
   zwischen zwei Klärungen gibt es keine Kante."
-- Es gibt einen **zweiten Ausgang**: `resolveClarification` schließt ohne
-  Antwort mit Pflichtgrund („telefonisch geklärt"). 57-mal im Audit, davon
-  35-mal mit Antworttext. Eine beantwortete und eine aufgelöste Frage sehen
-  im Bestand gleich aus (`answered_at` gesetzt) — die Karte muss sie
-  auseinanderhalten.
+- Es gibt einen **zweiten Ausgang**: `resolveClarification` schließt eine
+  Frage, ohne dass die Gefragte antwortet — 57-mal im Audit, `resolution`
+  ist dabei entweder `answered` (35, der Agent hat die Antwort inzwischen
+  selbst gefunden) oder `obsolete` (22, die Frage ist gegenstandslos
+  geworden). Beide Wege setzen `answered_at` **und** `answer_payload`; bei
+  `obsolete` steht dort der Marker `"(gegenstandslos)"`. In der Tabelle
+  unterscheidbar, aber nur an diesem String — die Karte muss den Fall
+  benennen, statt ihn wie eine Antwort zu zeigen.
 - **Wer gefragt hat, steht nicht in der Tabelle.** Es gibt kein
   `created_by`; `answered_by` gibt es (6 % gefüllt, der Agent antwortet ohne
   User). Wer, wann, was — das trägt der **Audit**, und zwar vollständig:
@@ -299,15 +302,20 @@ Entschieden am 2026-09-04 (Owner): Kommentare bleiben in der Klärungsliste
 und gehen **nicht** in die Timeline. Die Erstellungsansicht wird gebaut,
 bewusst schmal. Offen bleiben:
 
-1. **Wiedervorlage: gebaut, nie benutzt** (0 von 166 Zeilen, 0 Audit-
-   Ereignisse). Fehlt der Weg im UI, oder ist das Feature faktisch tot? —
-   ohne Antwort: die Zeile zeigt den Zustand „zurückgestellt", wenn er
-   gesetzt ist, aber die Karte bekommt keinen Knopf zum Zurückstellen.
+1. ~~**Wiedervorlage: gebaut, nie benutzt**~~ — **entschieden am 2026-09-04
+   (Owner): der Weg fehlt, nicht das Feature.** Beleg: 60 offene Fragen,
+   Median 13 Tage alt, p90 31; die 57 Auflösungen sind kein Ersatz (35
+   `answered`, 22 `obsolete`, keine heißt „später"). Wird gebaut als
+   `docs/backlog/0065-clarification-defer.md` — eine Prop `onDefer` an der
+   Karte, kein neuer Baustein.
 2. **Portal**: eigene Ausprägung oder dieselbe Liste mit `text="client"`? —
    ohne Antwort: dieselbe Liste, ein Prop.
 3. **Antwortverlauf**: soll die Datenbank mehrere Antworten je Frage
    speichern (B8)? — ohne Antwort: die Karte zeigt den Verlauf aus dem Audit,
-   das Schema bleibt, wie es ist.
+   das Schema bleibt, wie es ist. Unabhängig davon entschieden (Owner
+   2026-09-04): **`created_by` wird gebraucht**; die Karte nimmt Fragesteller
+   und Antwortende schon heute als optionale Props (`string` oder `Actor`),
+   damit die Spalte später nichts an der Schnittstelle ändert.
 
 ## Prüfung
 

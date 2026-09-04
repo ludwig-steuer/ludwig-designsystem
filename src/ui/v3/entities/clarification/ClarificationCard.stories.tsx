@@ -181,6 +181,27 @@ export const MitEmpfehlung: Story = {
   ),
 };
 
+/** Without an audit trail: asker and answerer alone already make the history. */
+export const Personen: Story = {
+  render: () => (
+    <Card>
+      <CardHead title="Ohne Audit-Spur" sub="raisedBy und answeredBy als Actor bzw. String" />
+      <div style={{ padding: "var(--space-4)" }}>
+        <ClarificationCard
+          clarification={{
+            ...BASE,
+            ...AGENT_DETAIL,
+            state: "answered",
+            answeredAt: "2026-08-26T15:04:00+02:00",
+            raisedBy: { kind: "agent", id: null, label: null },
+            answeredBy: "S. Vogt",
+          }}
+        />
+      </div>
+    </Card>
+  ),
+};
+
 export const Verlauf: Story = {
   render: () => (
     <Card>
