@@ -243,15 +243,52 @@ Variabel (aus dieser Spec):
 |---|---|---|---|
 | Kopfzeile von `AccountFacts` | Kopf mit Nummer · Name · Rolle-Chip · Jahr über den Fakten | **entfällt**; die Rolle wurde die erste Fakten-Zeile („Kontoart") | Im ersten Browser-Durchgang stand „Commerzbank" dreimal auf einem Schirm: im Drawer-Titel, in dessen `meta` und im Fakten-Kopf; „2.937 in DATEV, 4 nur in Ludwig" zweimal. Überall, wo der Block steht, benennt schon etwas anderes das Konto — der Drawer-Titel, der Anker der `HoverCard`, der Seitenkopf des Views. |
 | `accountHref` an `AccountFacts` | macht die Nummer im Kopf zum Link | **entfällt** | Sie trug ausschließlich den entfallenen Kopf. Eine Prop ohne Wirkung ist tote Fläche. |
-| Reihenfolge der Fakten | Kopf · Saldo · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | Kontoart · Saldo · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | Folgt aus dem entfallenen Kopf; die Ränge und ihre Reihenfolge sind unverändert. |
+| Reihenfolge der Fakten | Kopf · Saldo · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | Kontoart · Saldo **des Jahres** · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | Folgt aus dem entfallenen Kopf; die Ränge und ihre Reihenfolge sind unverändert. |
+| Wirtschaftsjahr (Rang 4) | im entfallenen Kopf | **am Label des Saldos**: „Saldo in DATEV 2026" | Nachbesserung aus der ersten Abnahme: mit dem Kopf war das Jahr aus der Darstellung verschwunden und `fiscalYear` ein totes VM-Feld. Am Label steht es dort, wo es gebraucht wird — eine Zahl ohne Jahr ist in einer `HoverCard` wertlos —, ohne den Jahresschalter des Drawers zu doppeln. |
 
 Die Abnahmekriterien zur Kopfzeile (Reihenfolge „Kopf · Saldo · …", Link im
 Kopf) sind damit gegenstandslos; die übrigen gelten unverändert.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Geprüft gegen Spec, Code und Storybook (eigene Instanz auf Port 6121,
+DOM-Messungen im Preview-Frame). `pnpm typecheck` Exit 0, `pnpm build`
+Exit 0 (Storybook-Build durchgelaufen).
 
-Abgenommen von / am: … · Offene Punkte: …
+| Kriterium | Nachweis (Story-ID · Befehl · Messung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | beide Läufe Exit 0 | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel `v3/Entitäten/Konto/Account` | `src/ui/v3/entities/account/Account.tsx` + `.stories.tsx`; `index.json` zeigt `v3-entitäten-konto-account--*` | ✓ |
+| Code englisch; `@when`/`@instead` an **beiden** Exporten | `Account.tsx:41–42` (`AccountCell`), `:119–120` (`AccountFacts`); Bezeichner und Kommentare englisch, Deutsch nur in Labels | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-f]{3,8}|[0-9]+px" Account.tsx` findet nichts; keine `Record<…>`-Map; `StatusBadge axis="konto_typ"`/`"konto_datev_sync"` | ✓ |
+| Alle sieben Stories vorhanden; ausgeschlossene Zustände begründet | `Filled`, `Unvollstaendig`, `Personenkonto`, `NurDatev`, `SyncOffen`, `InUse`, `Edges` — 7/7; „lädt"/„Fehler"/„leer nach Filter" in der Spec begründet ausgeschlossen | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | siehe Befund 1: die verlinkte Zelle ist im Ruhezustand nicht als Link erkennbar | ✗ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle sieben Stories im Preview-Frame gerendert und gemessen | ✓ |
+| `number`/`name` wie Zeile 1–2; ohne `href` **kein** fokussierbares Element | `Filled`: Wurzel ist `<span class="v2acc">`, `querySelectorAll("a[href],button,input,select,textarea,[tabindex]")` → **0** | ✓ |
+| Mit `href` ist die Zelle ein `<a>`, kein `<button>` | `InUse`: zwei `A`-Elemente (`?konto=1210`, `?konto=4210`), `button`-Zahl im Story-Root **0** | ✓ |
+| Kontoname wird ab 40 Zeichen gekürzt, voller Name im `title` | `Edges`: gezeigt „Betriebs- und Geschäftsausstattung, ger…" (40 Zeichen inkl. Ellipse), `title` = „…, geringwertig" (48); der 37-Zeichen-Name daneben bleibt ungekürzt | ✓ |
+| Führende Nullen bleiben stehen | `Edges`: `<span class="v2mono">0420</span>` | ✓ |
+| Reihenfolge Kopf · Saldo · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | durch Abweichung 1 **gegenstandslos**. Gebaute Reihenfolge im DOM geprüft (`Personenkonto`): Kontoart · Saldo in DATEV · + 2 nur in Ludwig · Bewegungen · Geschäftspartner · Letzte Buchung; `SyncOffen` hängt DATEV-Abgleich an | ✓ (gegenstandslos) |
+| `ludwigOnlyCount === 0` lässt die Nachtrags-Zeile verschwinden | `NurDatev`: vier Zeilen, kein „0 nur in Ludwig"; `Filled` hat fünf | ✓ |
+| `syncState === "synced"` zeigt keinen zweiten Chip; `local_only` zeigt ihn | `Filled`: keine Sync-Zeile · `SyncOffen`: Zeile „DATEV-Abgleich · Nur in Ludwig" | ✓ |
+| Fehlende Werte zeigen den Geviertstrich und behalten ihre Zeile | `Unvollstaendig`: „Saldo in DATEV —", „Letzte Buchung —"; Zeilen stehen | ✓ |
+| Rolle und Sync-Zustand aus der Registry | `konto_typ.general_ledger` → „Sachkonto", `konto_datev_sync.local_only` → „Nur in Ludwig"; keine Label-Map in der Datei | ✓ |
+| `AccountFacts` rechnet nichts | `grep -nE "\.reduce\(|\.filter\(|\.sort\("` findet nichts; nur `toLocaleString` | ✓ |
+| Abweichungen von der Spec stichhaltig begründet | Abweichung 2 (`accountHref` entfällt) und 3 (Reihenfolge) tragen — A12; Abweichung 1 (Kopf entfällt) nimmt das Wirtschaftsjahr mit und lässt `fiscalYear` unbenutzt → Befund 2 | ✗ |
+| Ersetzt `AccountRef` in `ludwig/app` | Ablösung in der App ist ein eigener Schritt (`docs/backlog/README.md`) | **offen (App)** |
+
+**Abweichungen geprüft.** Abweichung 2 (`accountHref` entfällt) ist stichhaltig
+und deckt sich mit A12 („eine Prop, die nichts tut, wird nicht gebaut").
+Abweichung 3 folgt aus 1. Abweichung 1 ist nur zur Hälfte zu Ende gedacht →
+Befund 2.
+
+| # | Befund | Beleg |
+|---|---|---|
+| 1 | **Die verlinkte Zelle sieht aus wie Text.** `.v2acc--link` setzt `--color-accent-700`, aber die Kinder überschreiben es: `.v2mono` trägt `color: var(--color-text)`, der Name `.v2muted`. Gemessen in `InUse`: Nummer `rgb(45,45,45)`, Name `rgb(92,92,92)` — identisch mit der Zelle ohne `href`; ein Unterstrich kommt erst bei Hover. Die Linkfarbe der Wurzel landet auf keinem einzigen Zeichen (der CSS-Kommentar behauptet sie trotzdem). §3 Farbrollen führt `--color-accent-700` als **die** Textfarbe für „Aktion, Link". | Story `InUse`, `getComputedStyle`; `src/styles/v3.css:2444`, `:2008–2012` |
+| 2 | **Mit dem Kopf ist auch das Wirtschaftsjahr verschwunden.** `AccountFactsVM.fiscalYear` wird nirgends gerendert — im Drawer trägt es der Kopf aus 0068, in der `HoverCard` (Story `InUse`) und im künftigen `AccountView` steht der Saldo damit ohne Jahr. Das Profil führt `fiscalYear` als Rang 4 mit der Rolle „Kontext" und dem ausdrücklichen Grund „der Drawer steht außerhalb seines Kontexts". Zugleich ist das Feld nach A12 eine tote Prop. Die Dopplung war real — der Schnitt hat aber einen Punkt mitgenommen, der an zwei von drei Einsatzorten fehlt. | `Account.tsx:88–111` vs. `:122–167`; `docs/entitaeten/account.md` Rang 4; Story `InUse` |
+
+Abgenommen von / am: Claude (Abnahme), 2026-09-04 · Ergebnis: **zurück auf
+`in Arbeit`** · Offene Punkte: Befund 1 (Linkfarbe der Zelle — eine
+CSS-Zeile), Befund 2 (Jahr in `AccountFacts`: entweder eine Zeile
+„Wirtschaftsjahr" in der Feldliste oder `fiscalYear` aus dem VM nehmen und
+die Spec nachziehen).

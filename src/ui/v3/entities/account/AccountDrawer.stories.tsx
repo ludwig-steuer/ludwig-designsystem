@@ -231,6 +231,7 @@ export const EinJahr: Story = {
 export const ImKontext: Story = {
   render: () => {
     const [account, setAccount] = useState<string | null>(null);
+    const [year, setYear] = useState(2026);
     return (
       <div style={{ minHeight: 620 }}>
         <Card>
@@ -264,17 +265,26 @@ export const ImKontext: Story = {
             open
             onClose={() => setAccount(null)}
             accountNumber={account}
-            facts={{ ...FACTS, accountNumber: account, accountName: account === "1210" ? "Commerzbank" : "Miete" }}
+            facts={{
+              ...FACTS,
+              accountNumber: account,
+              accountName: account === "1210" ? "Commerzbank" : "Miete",
+              fiscalYear: year,
+            }}
             entries={ENTRIES}
             total={2937}
-            year={2026}
+            year={year}
             years={YEARS}
-            onYearChange={() => {}}
+            // A real switch, not a dead handler: the drawer changes, the
+            // table behind it keeps its year, its rows and its scroll.
+            onYearChange={setYear}
             onOpenFull={() => {}}
-            // Switching accounts replaces the content of **this** drawer: in
-            // the app the link sets the search param the UrlDrawer reads, so
-            // no second drawer stacks on top (L3).
-            accountHref={(n) => `?konto=${n}`}
+            // The contra accounts are links to the search param the app's
+            // UrlDrawer reads (L3) — in Storybook nothing routes, so the
+            // account swap is shown through the table instead: a click on the
+            // second row replaces the content of **this** drawer, no second
+            // one stacks on top.
+            accountHref={undefined}
           />
         ) : null}
       </div>

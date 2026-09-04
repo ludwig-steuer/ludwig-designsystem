@@ -2430,7 +2430,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    die Linkfarbe des Sets — die Nummer bleibt dabei mono, der Name gedämpft. */
 
 .v2acc { white-space: nowrap; }
-.v2acc--link { color: var(--color-accent-700); text-decoration: none; }
+/* Die Nummer ist der Anker und trägt deshalb die Linkfarbe — `.v2mono` setzt
+   sonst `--color-text` und die Zelle sähe im Ruhezustand aus wie Text ohne
+   Ziel (Abnahme 0066). Der Name bleibt gedämpft: er beschreibt, er verlinkt
+   nicht. */
+.v2acc--link { text-decoration: none; }
+.v2acc--link .v2mono { color: var(--color-accent-700); }
 .v2acc--link:hover { text-decoration: underline; }
 .v2acc--link:focus-visible {
   outline: 2px solid var(--color-focus);

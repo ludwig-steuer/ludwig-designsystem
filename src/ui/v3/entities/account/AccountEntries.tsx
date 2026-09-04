@@ -290,7 +290,10 @@ export function AccountEntryList({
   accountHref?: (number: string) => string;
   loading?: boolean;
   error?: { message: string; retry?: ReactNode };
-  /** Default names the year the caller passed in its title. */
+  /**
+   * Empty text. The default stays year-free („Keine Bewegungen.") because the
+   * list is not told the year; whoever knows it names it — the drawer does.
+   */
   empty?: { title: string; description?: ReactNode };
 }) {
   const columns = accountEntryColumns({ currency, variant: "compact", accountHref });
@@ -314,7 +317,9 @@ export function AccountEntryList({
         ) : entries.length === 0 ? (
           <EmptyState
             inline
-            title={empty?.title ?? "Auf diesem Konto ist nichts gebucht."}
+            // The list does not know the year, so the default must not claim
+            // „never" — the caller who knows it says so (the drawer does).
+            title={empty?.title ?? "Keine Bewegungen."}
             description={empty?.description}
           />
         ) : (

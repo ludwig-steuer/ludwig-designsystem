@@ -123,7 +123,11 @@ export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
   const rows: [ReactNode, ReactNode][] = [
     ["Kontoart", <StatusBadge key="role" axis="konto_typ" status={facts.role} info={false} />],
     [
-      "Saldo in DATEV",
+      // The year rides on the label of the number it belongs to. Without it a
+      // balance in a HoverCard says nothing about *which* year it is — and a
+      // chart of accounts exists only per fiscal year (GLOSSARY F64). A row of
+      // its own would repeat what the drawer's year switch already says.
+      `Saldo in DATEV ${facts.fiscalYear}`,
       <Amount key="bal" value={facts.datevBalance} currency={facts.currency} />,
     ],
   ];
