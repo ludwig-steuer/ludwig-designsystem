@@ -9,7 +9,7 @@
 | Status-Achsen | `beleg_inbox` (Supertyp-`status`) · `beleg` (Pipeline, lebt am **Rechnungs-Subtyp**) · `beleg_stage` · `beleg_kategorie` · `beleg_richtung` · `dokumentgruppe` |
 | Wichtigkeit | **hoch** — Kern-ER-Bild; der Rechnungs-Subtyp ebenfalls hoch, der Vertrags-Subtyp mittel (Datenmodell-Review §7) |
 | Datenstand | Staging über den Pooler, 2026-09-04, **384 Belege** (318 mit Rechnungs-Zeile, 0 mit Vertrags-Zeile), 6 Mandanten |
-| Rückfrage | gestellt am 2026-09-04, ein Punkt vorab vom Owner gesetzt: **Ausprägungen mit eigenen Datenfeldern gehören in die Vorschau** |
+| Rückfrage | gestellt und **beantwortet** am 2026-09-04 (Owner) — Ausprägungen füllen die Ränge, Vertrag lesend jetzt, keine fehlenden Anwendungsfälle |
 | Analyse von / am | Claude, 2026-09-04 (Skill `entitaet-analysieren`) |
 
 ## Was sie ist
@@ -55,6 +55,9 @@ Die Konsequenz für jede Form dieser Familie:
 > einen Rang keinen Füller, entfällt die Zeile; es gibt kein „—" für ein
 > Feld, das es bei dieser Belegart gar nicht gibt.
 
+Die Regel gilt **ab der Zeile**, nicht erst in der Karte (Owner 2026-09-04,
+offene Frage 2): schon `DocumentRow` füllt Maß und Kennung je Ausprägung.
+
 Die Registry ist im Code schon angelegt und ausdrücklich als leer vermerkt
 (`source-doc-type.ts`: „Dies ist der Keim einer Renderer-Registry"). Sie zu
 füllen ist die Arbeit dieser Familie.
@@ -93,9 +96,9 @@ sonst sähe ein Rechnungsfeld voller aus, als es für die Familie ist.
 | Gegenpart (`classCounterpartyName`) | Spalte, denormalisiert aus `class_companies` | Identität | 90 % | Belegliste (`PartnerCell`), `StuckDocumentsTable`, `BelegeTab`, `SourceDocFactsCard` | nie | 1 | XS | Füllgrad · heute in 4 Komponenten |
 | Belegart (`sourceDocType` + `classDocumentForm`) | `abgeleitet: sourceDocTypeLabel()` | Identität | 100 % | `BelegeTab`, `SourceDocFactsCard`, Inbox | Nutzer (`ClassificationEditor`) | 2 | XS | GLOSSARY „Oberbegriff ↔ Ausprägung" · Füllgrad |
 | Erledigt (`completedAt` + `completedReason` + `completedVia`) | Spalte | Zustand | 89 % | Belegliste (Spalte „Erledigt"), `DocCompletionControl` | Nutzer | — (Zustand) | XS | GLOSSARY „Document completion" |
-| Maß der Ausprägung — Brutto bzw. Primärbetrag | Subtyp | Maß | 81 % (Rechnung) · 0 % (Vertrag) | Belegliste, `BelegeTab`, `BelegSummary`, `GlanceCard` | nie | 3 | S | Füllgrad · **ausprägungsabhängig** |
+| Maß der Ausprägung — Brutto bzw. Primärbetrag | Subtyp | Maß | 81 % (Rechnung) · 0 % (Vertrag) | Belegliste, `BelegeTab`, `BelegSummary`, `GlanceCard` | nie | 3 | S | Füllgrad · **Nutzer** (Owner 2026-09-04: je Ausprägung füllen) |
 | Belegdatum (`documentDate`, bei Rechnungen `invoiceDate`) | Spalte | Zeit | 97 % | Belegliste, `BelegeTab`, `SourceDocDateEditor` | Nutzer | 4 | S | Füllgrad · GLOSSARY „NULL bleibt NULL" |
-| Kennung der Ausprägung — Rechnungsnummer bzw. Dateiname | Subtyp / `ops_stored_files` | Identität | 79 % (Rechnung) | Belegliste (`InvoiceNumberCell`), `BelegeTab`, `StuckDocumentsTable` | nie | 5 | S | Füllgrad · **ausprägungsabhängig** |
+| Kennung der Ausprägung — Rechnungsnummer bzw. Dateiname | Subtyp / `ops_stored_files` | Identität | 79 % (Rechnung) | Belegliste (`InvoiceNumberCell`), `BelegeTab`, `StuckDocumentsTable` | nie | 5 | S | Füllgrad · **Nutzer** (Owner 2026-09-04: je Ausprägung füllen) |
 | Sachverhalt (`caseNumber`) | Relation über `document_received`-Ereignis | Kontext | 88 % | Belegliste (`CaseCell`), `StuckDocumentsTable` | Server | 6 | S | Kardinalität aus §Relationen |
 | Eingangsdatum (`receivedDate`) | Spalte, `NOT NULL` | Zeit | 100 % | Belegliste (Spalte „Eingang", **Sortierschlüssel**), `StuckDocumentsTable` | Server / DATEV-Import | 7 | S | GLOSSARY „Perioden-Achse der Belegliste" |
 | Einordnung: Kategorie (`docCategory`) | Spalte, abgeleitet aus `document_form` | Zustand | **46 %** → Befund B3 | Belegliste (`ClassificationStack`) | nie (deterministisch) | — (Zustand) | S | Füllgrad · GLOSSARY „vierte orthogonale Achse" |
@@ -202,7 +205,7 @@ Schnitt nach §8 (eigene Komponente nur bei eigenem Job **und** Unterschied in
 |---|---|---|---|---|---|---|---|
 | `DocumentCell` | XS | **ja** | 3 — FK-Ziel von `client_accounting_event`; wird in fremden Zeilen genannt | 1–2 + Erledigt | — | `Badge`, `MonoCell`, `LongText` | `InvoiceNumberCell` (Belegliste), der Mono-Link in `BelegeTab` |
 | `DocumentClass` | XS | **ja** | 1 — existiert als `ClassificationStack`; die vier Achsen gehören zusammen und in eine Hand | Einordnung (4 Achsen) | — | `StatusBadge` (`beleg_kategorie`, `beleg_richtung`, `dokumentgruppe`) | `ClassificationStack` |
-| `DocumentRow` | S | **ja** | 1 — existiert in **sechs** Listen; 2 — Kind des Sachverhalts | 1–7 + Zustände | Sachverhalt als Inline, Teilbelege als Zähler | `Row`, `DocumentCell`, `DocumentClass`, `Amount`, `Time` | die Zeilen von Belegliste, `StuckDocumentsTable`, `BelegeTab`, `DocumentInbox`, `InboxInvoiceSubmissionList`, `ChildDocsCard` |
+| `DocumentRow` | S | **ja** | 1 — existiert in **sechs** Listen; 2 — Kind des Sachverhalts | 1–7 + Zustände; **Maß und Kennung je Ausprägung** | Sachverhalt als Inline, Teilbelege als Zähler | `Row`, `DocumentCell`, `DocumentClass`, `Amount`, `Time` | die Zeilen von Belegliste, `StuckDocumentsTable`, `BelegeTab`, `DocumentInbox`, `InboxInvoiceSubmissionList`, `ChildDocsCard` |
 | `DocumentPreview` | M | **ja** | 1 — existiert als `BelegPreview` und ein zweites Mal inline im v3-`DocumentDrawer` | 10 + Seitenbereich (12) | Datei, Sammel-Original | `Section`, `EmptyState` | `BelegPreview`, das `<iframe>` in `DocumentDrawer` |
 | `DocumentFacts` **umbauen** + Ausprägungs-Registry | M | **ja** | 1 — existiert dreifach (`SourceDocFactsCard`, `GlanceCard`, `ContractDetail`); der Owner-Punkt hängt hier | generisch 1–9, 11–13 · je Ausprägung ihre eigenen Punkte | Rechnungs-Detail, Vertrags-Detail als Registry-Einträge | `FieldList`, `Amount`, `Time`, `MonoCell` | `BelegSummary`, `SourceDocFactsCard`, den Fakten-Teil von `GlanceCard` und `ContractDetail` |
 | `DocumentCard` | M | **ja** | 1 — die drei Karten oben; 2 — Beleg ist Kind des Sachverhalts und erscheint in dessen Detail | Kopf (1, 2, Erledigt) + Vorschau + Fakten | wie `DocumentFacts` | `Card`, `DocumentPreview`, `DocumentFacts`, `DocumentClass` | `BelegSummary` im Kontext, `SourceDocFactsCard` |
@@ -225,7 +228,7 @@ statt der vier Rechnungs-Labels.
 | `DocumentCell` + `DocumentClass` | jetzt | Bausteine von Zeile, Karte und Liste | — |
 | `DocumentRow` | jetzt | trägt sechs Listen, ohne sie ist keine davon zu bauen | — |
 | `DocumentPreview` | jetzt | trägt Karte, Drawer und View; heute zweimal dieselbe Datei | — |
-| `DocumentFacts` (Umbau + Registry) | jetzt | der Owner-Punkt: Ausprägungen mit eigenen Feldern; heute dreimal getrennt gebaut | — |
+| `DocumentFacts` (Umbau + Registry) | jetzt | der Owner-Punkt: Ausprägungen mit eigenen Feldern; heute dreimal getrennt gebaut. Registry-Einträge jetzt: Rechnung (Daten) und Vertrag (**lesend, gegen das Schema** — Owner 2026-09-04) | — |
 | `DocumentCard` | jetzt | die eine M-Form, in der Ausprägung und Vorschau zusammenkommen | — |
 | `DocumentDrawer` nachziehen | jetzt (Teil von `DocumentFacts` und `DocumentPreview`) | er benutzt beide; sonst driften v3 und v3 auseinander | — |
 | Belegliste, Inbox, Einreichen (`DocumentColumns`) | Backlog | hängt an `DataTable` (0057) und an drei Seitenprofilen, die es noch nicht gibt | `0070` |
@@ -279,21 +282,23 @@ statt der vier Rechnungs-Labels.
 
 ## Offene Fragen
 
-1. **Fehlen Anwendungsfälle?** Welche Listen, Ansichten oder Auswahl-Dialoge
-   für Belege kommen heute in der App noch nicht vor — insbesondere für die
-   Belegarten ohne eigene Darstellung (Kontoauszug, Kreditkartenabrechnung,
-   Reisekostenabrechnung)? — *ohne Antwort:* es bleibt bei den sechs Listen
-   und den Formen oben.
-2. **Wie weit geht die Ausprägung in der Zeile?** Heute zeigt die Belegliste
-   in einer Betragsspalte nur Rechnungsbeträge; ein Vertrag hätte dort seinen
-   Primärbetrag, ein Kontoauszug nichts. Soll die Zeile den Rang „Maß" je
-   Ausprägung füllen, oder bleibt die Spalte den Rechnungen vorbehalten? —
-   *ohne Antwort:* die Zeile füllt den Rang je Ausprägung, leer bleibt leer
-   (kein „—" für ein Feld, das es bei dieser Belegart nicht gibt).
-3. **Vertrag ohne Daten:** Bauen wir die lesende Vertrags-Ausprägung jetzt
-   gegen das Schema, obwohl im Bestand 0 Verträge extrahiert sind? —
-   *ohne Antwort:* ja, aber nur lesend; der Vertrags-Editor bleibt Backlog
-   (0073), weil ohne Daten niemand prüfen kann, ob die Bearbeitung stimmt.
+Alle drei am 2026-09-04 vom Owner beantwortet — die Antworten stehen als
+Beleg `Nutzer` in den Tabellen, nicht als Annahme.
+
+1. **Fehlen Anwendungsfälle?** — *beantwortet:* nein, „reicht erstmal". Es
+   bleibt bei den sechs Listen und den Formen oben; die drei Belegarten ohne
+   eigene Darstellung bekommen keine zusätzliche Ansicht, sondern die
+   Supertyp-Punkte.
+2. **Wie weit geht die Ausprägung in die Zeile?** — *beantwortet:* **je
+   Ausprägung füllen.** Der Rang „Maß" trägt bei der Rechnung das Brutto, beim
+   Vertrag den Primärbetrag, beim Kontoauszug nichts; der Rang „Kennung"
+   trägt die Rechnungsnummer bzw. den Vertragsgegenstand. Leer bleibt leer —
+   kein „—" für ein Feld, das es bei dieser Belegart nicht gibt. Damit gilt
+   die Regel dieses Profils auch in der Zeile, nicht erst in der Karte.
+3. **Vertrag ohne Daten?** — *beantwortet:* **ja**, die lesende
+   Vertrags-Ausprägung entsteht jetzt gegen Schema und `ContractDetailData`.
+   Der Vertrags-Editor bleibt 0073, bis die Extraktion Zeilen schreibt: ohne
+   einen einzigen Vertrag im Bestand hätte die Abnahme keinen Nachweis.
 
 ## Prüfung
 
