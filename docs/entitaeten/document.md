@@ -300,8 +300,8 @@ folgt mit der Detailansicht (0071), die sie ohnehin voraussetzt.
   („fachlich stabil", laut GLOSSARY der empfohlene Listenfilter) sieht heute
   die Hälfte der Belege nicht — und die Belegliste bietet genau diesen Filter
   an. Nachgerechnet (Prüfung): von den 207 Belegen ohne Kategorie tragen
-  **153 die Form `commercial_invoice`**, weitere 26 eine ebenfalls eindeutig
-  mappende Form — 179 von 207 (86 %) sind aus `document_form` mechanisch
+  **153 die Form `commercial_invoice`**, weitere 25 eine ebenfalls eindeutig
+  mappende Form — 178 von 207 (86 %) sind aus `document_form` mechanisch
   nachrechenbar. Nur `document_collection` (16), `other` (6) und `unknown`
   (6) sind laut GLOSSARY legitim NULL. Der Backfill ist also ein Skript, kein
   Klassifizierungslauf.
@@ -346,9 +346,7 @@ folgt mit der Detailansicht (0071), die sie ohnehin voraussetzt.
   keine Renderer-Registry allein auf dem Diskriminator stehen — sie muss
   rendern, was die Subtyp-Zeile hergibt. Für die App ist das ein
   Konsistenz-Befund (Trigger oder Constraint), für dieses Repo die
-  Begründung des Registry-Schlüssels oben. *Register-Eintrag in
-  `docs/befunde-app.md` steht noch aus — die Prüfung darf keine andere Datei
-  ändern.*
+  Begründung des Registry-Schlüssels oben. Eingetragen als L-35 in `docs/befunde-app.md`.
 
 ## Offene Fragen
 
