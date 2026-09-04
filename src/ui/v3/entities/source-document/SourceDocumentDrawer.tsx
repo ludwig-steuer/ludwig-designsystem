@@ -9,7 +9,7 @@ import { Drawer } from "../../primitives/Drawer";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Skeleton } from "../../primitives/Skeleton";
 import { StatusBadge } from "../../patterns/StatusBadge";
-import { DocumentFacts, type DocumentFactsVM } from "./DocumentFacts";
+import { SourceDocumentFacts, type SourceDocumentFactsVM } from "./SourceDocumentFacts";
 
 /**
  * The document, looked up beside the work (0052).
@@ -28,10 +28,10 @@ import { DocumentFacts, type DocumentFactsVM } from "./DocumentFacts";
  * page, without a client scope.
  */
 
-export interface DocumentQuickView {
+export interface SourceDocumentQuickView {
   /** How the document is called — „Beleg · ACME GmbH". */
   title: string;
-  facts: DocumentFactsVM;
+  facts: SourceDocumentFactsVM;
   /** Signed URL of the preview; `null` means there is none. */
   previewUrl?: string | null;
   /** Why there is no preview — said in a sentence, not left blank. */
@@ -47,9 +47,9 @@ export interface DocumentQuickView {
  * @instead Every question about the document (positions, VAT, splitting) →
  *          DocumentView. A decision that has to be made now → Dialog. One
  *          sentence about it → Popover. The facts without the drawer →
- *          DocumentFacts.
+ *          SourceDocumentFacts.
  */
-export function DocumentDrawer({
+export function SourceDocumentDrawer({
   open,
   onClose,
   reference,
@@ -63,7 +63,7 @@ export function DocumentDrawer({
   /** The identifier that was looked up — it stands in the head **and** in the error and empty text. */
   reference: string;
   /** `null` means **not found**, not „still loading". */
-  record: DocumentQuickView | null;
+  record: SourceDocumentQuickView | null;
   /** Beats `record`. */
   loading?: boolean;
   /** Beats `loading`. */
@@ -110,7 +110,7 @@ function DrawerBody({
   error,
 }: {
   reference: string;
-  record: DocumentQuickView | null;
+  record: SourceDocumentQuickView | null;
   loading?: boolean;
   error?: ReactNode;
 }) {
@@ -159,7 +159,7 @@ function DrawerBody({
       {/* Zone 3: the same component the full view uses — one set of field rows. */}
       <div>
         <div className="v2doc__h">Extrahierte Belegdaten</div>
-        <DocumentFacts facts={record.facts} />
+        <SourceDocumentFacts facts={record.facts} />
       </div>
 
       {/* Zone 4: what the glance does not answer. */}

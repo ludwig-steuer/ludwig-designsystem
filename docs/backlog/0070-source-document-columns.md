@@ -3,12 +3,12 @@
 | | |
 |---|---|
 | Status | offen |
-| Stufe | `entities/document/` — `DocumentColumns` + kurze `DocumentList` |
+| Stufe | `entities/source-document/` — `SourceDocumentColumns` + kurze `SourceDocumentList` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Belegart, Einordnung und Erledigung sind Ludwig-Fachbegriffe |
-| Quelle | Entitätsprofil `docs/entitaeten/document.md`, Abschnitt „Listen" (sechs Job-Sätze) |
+| Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Abschnitt „Listen" (sechs Job-Sätze) |
 | Ersetzt | die Zeilen von Belegliste `/[year]/documents`, `StuckDocumentsTable`, `DocumentInbox`, `InboxInvoiceSubmissionList`, `BelegeTab`, `ChildDocsCard` |
 | Blockiert | die drei Beleg-Seitenprofile unter `docs/seiten/` |
-| Setzt voraus | `DocumentRow` (diese Familie), `DataTable` (0057) |
+| Setzt voraus | `SourceDocumentRow` (diese Familie), `DataTable` (0057) |
 | Spec von / am | — (Auftrag, noch keine Spec) |
 
 ## Ziel
@@ -18,7 +18,7 @@ geblättert (Belegliste des Jahres, Upload & Inbox, Beleg einreichen) — das
 ist `DataTable` mit je einem **Spaltensatz**, nicht drei Komponenten;
 Vorbild `AccountEntries` (Entscheidung A11a). Drei sind kurz (Belege am
 Sachverhalt p90 1, Teilbelege p90 0, stockende Belege ≤ 10) — das ist
-`DocumentRow` × n mit Leerfall.
+`SourceDocumentRow` × n mit Leerfall.
 
 Warum vertagt: die drei langen Listen haben je eine eigene Route und
 brauchen nach §8 des Skills `entitaet-analysieren` **je ein Seitenprofil**
@@ -28,11 +28,11 @@ würde die Liste Entscheidungen treffen, die ihr nicht gehören.
 
 ## Zuschnitt (Vorgriff, die Spec entscheidet)
 
-- `DocumentColumns` — der Spaltenkatalog, aus dem jede Seite ihren Satz
+- `SourceDocumentColumns` — der Spaltenkatalog, aus dem jede Seite ihren Satz
   wählt. Ein `variant` für die zwei Ausprägungen „stockend": in
   Verarbeitung und problematisch unterscheiden sich nur in Grundgesamtheit
   und Leerfall.
-- `DocumentList` — die kurze eingebettete Liste mit **zwei** Leerfällen:
+- `SourceDocumentList` — die kurze eingebettete Liste mit **zwei** Leerfällen:
   „kein Beleg zu erwarten" (mit Begründung, ein Erfolg) ist etwas anderes
   als „keine verbundenen Belege".
 

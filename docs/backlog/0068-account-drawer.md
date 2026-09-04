@@ -35,7 +35,7 @@ darunter dieselben Fakten, die später der View zeigt.
 | `@when`-Treffer | warum er nicht reicht |
 |---|---|
 | `Drawer` — „Looking at something existing next to a list — **an account sheet**, open items — without leaving the list" (0042) | Nennt diesen Fall wörtlich und liefert Scrim, Kopf, `meta`, Fußleiste, Escape, Fokus-Führung. Er weiß nur nicht, **was** ein Konto ist. Diese Aufgabe füllt ihn; sie definiert weder Scrim noch Kopf noch Fuß neu. |
-| `DocumentDrawer` (0052) | Der Schwesterdrawer und die Vorlage für das Zonen-Schema. Andere Entität, und Zone 2 (Original) entfällt hier ersatzlos. |
+| `SourceDocumentDrawer` (0052) | Der Schwesterdrawer und die Vorlage für das Zonen-Schema. Andere Entität, und Zone 2 (Original) entfällt hier ersatzlos. |
 | `MasterDetail` — „Picking from a list, working on the selected item on the right" | Der Nachbar für eine **Seite**, die um Liste und Detail gebaut ist. Hier ist die Arbeit die Buchung, das Konto nur nachgeschlagen. |
 | `Popover`/`HoverCard` | Ein Satz oder eine Vorschau. 2.937 Bewegungen sind keine Vorschau — aber die `HoverCard` über `AccountFacts` (0066) ist die Stufe **darunter** und bleibt. |
 | `Dialog` | Entscheidung mit Folgen. Der Drawer ist lesend. |

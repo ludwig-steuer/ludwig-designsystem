@@ -1,12 +1,12 @@
-# 0075 · Beleg-Vorschau — `DocumentPreview`
+# 0075 · Beleg-Vorschau — `SourceDocumentPreview`
 
 | | |
 |---|---|
-| Status | spec |
-| Stufe | `entities/document/` — `DocumentPreview.tsx` |
+| Status | in Arbeit |
+| Stufe | `entities/source-document/` — `SourceDocumentPreview.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **fast**: ein PDF in einem Rahmen ist kein Fachwort. Sie bleibt trotzdem Entität, weil sie zwei fachliche Regeln trägt — der Grund für eine fehlende Vorschau wird ausgesprochen statt bebildert, und ein Teilbeleg sagt, aus welchen Seiten welches Originals er stammt (`splitPageRange`, `parentSourceDocId`). Ohne die zwei wäre sie ein `<iframe>` an der Aufrufstelle. |
-| Quelle | Entitätsprofil `docs/entitaeten/document.md`, Formen-Tabelle Zeile `DocumentPreview`; Datenpunkte Rang 10 und 12 |
-| Ersetzt | `BelegPreview` (`ui/beleg/`, drei Aufrufstellen: Rechnung, Nicht-Rechnung, Vertrag) und das inline-`<iframe>` in `DocumentDrawer` (0052) |
+| Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Formen-Tabelle Zeile `SourceDocumentPreview`; Datenpunkte Rang 10 und 12 |
+| Ersetzt | `BelegPreview` (`ui/beleg/`, drei Aufrufstellen: Rechnung, Nicht-Rechnung, Vertrag) und das inline-`<iframe>` in `SourceDocumentDrawer` (0052) |
 | Blockiert | 0076 (der Drawer-Nachzug braucht sie), 0071 (View und Karte) |
 | Spec von / am | Claude, 2026-09-04 |
 
@@ -28,7 +28,7 @@ sind.
 ## Einordnung
 
 - **Wiederverwenden:** kein `@when` in `src/ui/v3` deckt „das Original einer
-  Entität, groß". `DocumentDrawer` (0052) *enthält* die Vorschau, ist aber
+  Entität, groß". `SourceDocumentDrawer` (0052) *enthält* die Vorschau, ist aber
   der Rahmen um sie, nicht sie selbst.
 - **Neu, weil:** `spec-schreiben` §3 Regel 5 — `ui-repraesentationen.md`
   führt die Form „Vorschau" für den Beleg (`BelegPreview`), und keine
@@ -36,7 +36,7 @@ sind.
   ohne die zwei fachlichen Regeln bliebe zu wenig übrig, und der zweite
   Aufrufer außerhalb der Beleg-Familie fehlt.
 - **Zuschnitt:** eine Datei, ein Export. Kein Familienmitglied von
-  `Document.tsx` — sie hat eine andere Datenquelle (die signierte URL aus
+  `SourceDocument.tsx` — sie hat eine andere Datenquelle (die signierte URL aus
   `ops_stored_files`, nicht die Beleg-Zeile) und ändert sich aus einem
   anderen Grund (§4 „Trennen", zweiter Punkt).
 - **Setzt auf:** `Card`/`CardHead`, `EmptyState`. **Nicht** `Section` — die
@@ -81,7 +81,7 @@ Zustände:
 |---|---|
 | gefüllt | Titel, Seitenzahl, ggf. Ausschnitt-Zeile; darunter das `<iframe>` in der Höhe aus `height` |
 | leer (`url = null`) | `EmptyState` **inline** mit `unavailableReason` oder dem Standardsatz „Für diesen Beleg gibt es keine Vorschau." |
-| lädt | **nicht anwendbar** — der Aufrufer zeigt `Skeleton` in der Form der Vorschau, wie `DocumentDrawer` es heute tut |
+| lädt | **nicht anwendbar** — der Aufrufer zeigt `Skeleton` in der Form der Vorschau, wie `SourceDocumentDrawer` es heute tut |
 | Fehler | **nicht anwendbar** — die Komponente ruft nichts; eine abgelaufene URL zeigt der Browser im `<iframe>` |
 | leer nach Filter | **nicht anwendbar** — es wird nichts gefiltert |
 
@@ -91,7 +91,7 @@ Rahmen.
 
 ## Stories
 
-Titel `v3/Entitäten/Beleg/DocumentPreview`.
+Titel `v3/Entitäten/Beleg/SourceDocumentPreview`.
 
 | Story | Beweist |
 |---|---|
@@ -114,6 +114,16 @@ nichts.
 | Zur Seite springen (Sammel-PDF, 27 Seiten im Maximum) | `initialPage?: number`, angehängt als `#page=n` | wenn ein Screen ein Sammel-PDF mit Split-Plan zeigt und auf ein Segment zeigen will |
 | Herunterladen | `downloadHref?: string` neben dem Titel | wenn eine Seite es anbietet — der Drawer tut es heute bewusst nicht (0052: genau ein Ausgang) |
 | Vorschau eines Bildes statt PDF | Fallunterscheidung an `contentType` | wenn Belege als JPG/PNG hochgeladen werden; heute ist alles PDF |
+
+## Für den Bau
+
+| | |
+|---|---|
+| Dateien | `src/ui/v3/entities/source-document/SourceDocumentPreview.tsx` plus Story |
+| Barrel | Abschnitt `/* Beleg — … */`, Export `SourceDocumentPreview` |
+| CSS | Präfix **`v2doc`**. `.v2doc__orig` gibt es bereits (0052) und trägt die Höhe `clamp(320px, 62vh, 900px)` — sie wird hier zur Variante `md`; `lg` kommt als zweite Klasse dazu. Neuer Abschnitt am Ende von `v3.css`, überschrieben mit `0075` |
+| Reihenfolge | unabhängig von 0074. 0076 braucht sie |
+| Nicht anfassen | `SourceDocumentDrawer.tsx` — dass er sein `<iframe>` gegen diese Komponente tauscht, ist Teil von 0076, nicht von 0075. Bis dahin stehen beide nebeneinander; das ist für die Dauer eines Arbeitspakets in Ordnung und wird dort aufgelöst |
 
 ## Abnahmekriterien
 

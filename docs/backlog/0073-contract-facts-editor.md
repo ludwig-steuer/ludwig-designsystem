@@ -3,12 +3,12 @@
 | | |
 |---|---|
 | Status | offen |
-| Stufe | `entities/document/` — Erweiterung der Vertrags-Ausprägung von `DocumentFacts` |
+| Stufe | `entities/source-document/` — Erweiterung der Vertrags-Ausprägung von `SourceDocumentFacts` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Vertragstyp und buchungsrelevante Fakten sind Ludwig-Fachbegriffe |
-| Quelle | Entitätsprofil `docs/entitaeten/document.md`, Befund B1 und offene Frage 3 |
+| Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Befund B1 und offene Frage 3 |
 | Ersetzt | `ContractDetail` (647 Zeilen, Anzeige und Bearbeitung in einem) |
 | Blockiert | nichts |
-| Setzt voraus | `DocumentFacts` mit Ausprägungs-Registry (lesende Vertrags-Fakten) |
+| Setzt voraus | `SourceDocumentFacts` mit Ausprägungs-Registry (lesende Vertrags-Fakten) |
 | Spec von / am | — (Auftrag, noch keine Spec) |
 
 ## Ziel

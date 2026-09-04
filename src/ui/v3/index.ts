@@ -270,13 +270,13 @@ export { AccountDrawer } from "./entities/account/AccountDrawer";
 
 /* Beleg — die Nachschlag-Form neben der Arbeit (0052) */
 export {
-  DocumentDrawer,
-  type DocumentQuickView,
-} from "./entities/document/DocumentDrawer";
+  SourceDocumentDrawer,
+  type SourceDocumentQuickView,
+} from "./entities/source-document/SourceDocumentDrawer";
 export {
-  DocumentFacts,
-  type DocumentFactsVM,
-} from "./entities/document/DocumentFacts";
+  SourceDocumentFacts,
+  type SourceDocumentFactsVM,
+} from "./entities/source-document/SourceDocumentFacts";
 
 /* Sachverhalt — der Verlauf über Ereignisse, Klärungen, Erwartungen (0040) */
 export {

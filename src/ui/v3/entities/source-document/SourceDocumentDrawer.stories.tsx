@@ -5,14 +5,14 @@ import { Button } from "../../primitives/Button";
 import { MonoCell } from "../../primitives/Cells";
 import { Card, CardHead, HeadRow, Row, Table } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
-import { DocumentDrawer, type DocumentQuickView } from "./DocumentDrawer";
+import { SourceDocumentDrawer, type SourceDocumentQuickView } from "./SourceDocumentDrawer";
 
-const meta: Meta<typeof DocumentDrawer> = {
-  title: "v3/Entitäten/Beleg/DocumentDrawer",
-  component: DocumentDrawer,
+const meta: Meta<typeof SourceDocumentDrawer> = {
+  title: "v3/Entitäten/Beleg/SourceDocumentDrawer",
+  component: SourceDocumentDrawer,
 };
 export default meta;
-type Story = StoryObj<typeof DocumentDrawer>;
+type Story = StoryObj<typeof SourceDocumentDrawer>;
 
 /** A one-page invoice as a data URI — no network, and the preview is real. */
 const PREVIEW = `data:text/html;charset=utf-8,${encodeURIComponent(`
@@ -39,7 +39,7 @@ const PREVIEW = `data:text/html;charset=utf-8,${encodeURIComponent(`
 <div class="total">Brutto 1.249,90 €</div>
 `)}`;
 
-const RECORD: DocumentQuickView = {
+const RECORD: SourceDocumentQuickView = {
   title: "Beleg · ACME GmbH",
   status: "processed",
   originalFileName: "RE-4471.pdf",
@@ -68,7 +68,7 @@ export const Geoeffnet: Story = {
       <div style={{ minHeight: 420 }}>
         <Button onClick={() => setOpen(true)}>Beleg ansehen</Button>
         {opened ? <p className="v2sub">{opened}</p> : null}
-        <DocumentDrawer
+        <SourceDocumentDrawer
           open={open}
           onClose={() => setOpen(false)}
           reference="RE-4471"
@@ -87,7 +87,7 @@ export const Geoeffnet: Story = {
  */
 export const OhneVorschau: Story = {
   render: () => (
-    <DocumentDrawer
+    <SourceDocumentDrawer
       open
       onClose={() => {}}
       reference="RE-4468"
@@ -114,7 +114,7 @@ export const OhneVorschau: Story = {
 /** `loading` beats `record`: the head stands, the body is a quiet surface. */
 export const Laedt: Story = {
   render: () => (
-    <DocumentDrawer
+    <SourceDocumentDrawer
       open
       onClose={() => {}}
       reference="RE-4471"
@@ -128,7 +128,7 @@ export const Laedt: Story = {
 /** The reason carries the identifier — „Fehler beim Laden" would not say which document. */
 export const Fehler: Story = {
   render: () => (
-    <DocumentDrawer
+    <SourceDocumentDrawer
       open
       onClose={() => {}}
       reference="RE-4471"
@@ -142,7 +142,7 @@ export const Fehler: Story = {
 /** `record={null}` is „not found", not „loading" — and the sentence says which key was looked up. */
 export const NichtGefunden: Story = {
   render: () => (
-    <DocumentDrawer
+    <SourceDocumentDrawer
       open
       onClose={() => {}}
       reference="RE-9999"
@@ -190,7 +190,7 @@ export const ImKontext: Story = {
             ))}
           </Table>
         </Card>
-        <DocumentDrawer
+        <SourceDocumentDrawer
           open={reference !== null}
           onClose={() => setReference(null)}
           reference={reference ?? ""}

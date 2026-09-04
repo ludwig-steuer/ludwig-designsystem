@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Status | spec |
-| Stufe | `entities/document/` — Familie `Document.tsx` (`DocumentCell`, `DocumentClass`, `DocumentRow`) plus das Registry-Modul `document-detail.ts` |
+| Status | in Arbeit |
+| Stufe | `entities/source-document/` — Familie `SourceDocument.tsx` (`SourceDocumentCell`, `SourceDocumentClass`, `SourceDocumentRow`) plus das Registry-Modul `source-source-document-detail.ts` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Belegart, Belegkategorie, Belegrichtung und Beleg-Erledigung sind Ludwig-Fachbegriffe mit eigenen Registry-Achsen |
-| Quelle | Entitätsprofil `docs/entitaeten/document.md` (Status `geprüft`), Abschnitte „Die eine Regel", „Datenpunkte" Rang 1–7, „Formen" Zeilen 1–3 · Owner-Anfrage 2026-09-04 |
+| Quelle | Entitätsprofil `docs/entitaeten/source-document.md` (Status `geprüft`), Abschnitte „Die eine Regel", „Datenpunkte" Rang 1–7, „Formen" Zeilen 1–3 · Owner-Anfrage 2026-09-04 |
 | Ersetzt | `InvoiceNumberCell`, `PartnerCell`, `ClassificationStack`, `StatusCell`, `CompletedCheck` (alle in `[year]/documents/page.tsx`), die Zeilen von `StuckDocumentsTable`, `BelegeTab`, `DocumentInbox`, `InboxInvoiceSubmissionList`, `ChildDocsCard` |
 | Blockiert | 0070 (Spaltensätze), 0071 (View und Karte), und damit alle sechs Beleg-Listen |
 | Spec von / am | Claude, 2026-09-04 |
@@ -64,7 +64,7 @@ Technisch trägt das die Registry selbst: jeder Eintrag nennt den
 kein Zweig je Belegart.
 
 ```ts
-const entry  = detail ? DOCUMENT_DETAILS[detail.kind] : null;
+const entry  = detail ? SOURCE_DOCUMENT_DETAILS[detail.kind] : null;
 const agrees = entry?.type === document.sourceDocType;
 ```
 
@@ -77,31 +77,31 @@ Ausprägung.
 - **Wiederverwenden:** kein `@when` in `src/ui/v3` deckt den Fall.
   `ClarificationCell`/`ClarificationRow` sind die formgleiche Familie einer
   **anderen** Entität; `AccountCell` nennt ein Konto, nicht einen Beleg.
-  `DocumentFacts` (0052) deckt die Größe M, nicht XS/S — und wird in 0076
+  `SourceDocumentFacts` (0052) deckt die Größe M, nicht XS/S — und wird in 0076
   umgebaut.
 - **Neu, weil:** `spec-schreiben` §3 Regel 5 — `ui-repraesentationen.md` §1
   führt für den Beleg die Formen Zelle, Zeile und Liste, und keine
   vorhandene Form deckt sie ab.
-- **Zuschnitt:** **eine Datei, drei Exporte** (§4 „Familie"): `DocumentCell`,
-  `DocumentClass` und `DocumentRow` teilen das Markup-Vokabular der
+- **Zuschnitt:** **eine Datei, drei Exporte** (§4 „Familie"): `SourceDocumentCell`,
+  `SourceDocumentClass` und `SourceDocumentRow` teilen das Markup-Vokabular der
   Beleg-Identität, die Zeile setzt beide anderen zusammen, und keiner von
   ihnen trägt eigenen Zustand. Vorbild `Clarification.tsx` (0059: Cell, Row,
-  List in einer Datei). Dazu **ein zweites Modul** `document-detail.ts` — die
-  Registry ist kein Markup und wird von 0076 mitbenutzt; sie in `Document.tsx`
-  zu legen hieße, `DocumentFacts` importiert die Zeile.
+  List in einer Datei). Dazu **ein zweites Modul** `source-source-document-detail.ts` — die
+  Registry ist kein Markup und wird von 0076 mitbenutzt; sie in `SourceDocument.tsx`
+  zu legen hieße, `SourceDocumentFacts` importiert die Zeile.
 - **Setzt auf:** `MonoCell`, `LongText`, `Amount`, `Time`, `StatusBadge`,
   `Badge`, `Row` (`Table.tsx`).
 
 ## Schnittstelle
 
-### `document-detail.ts` — die Registry
+### `source-source-document-detail.ts` — die Registry
 
 ```ts
 /**
  * Was eine Ausprägung zu den gemeinsamen Rängen beiträgt.
  * Ein neuer Belegtyp bekommt hier einen Eintrag, keinen Sonderpfad.
  */
-export type DocumentDetail =
+export type SourceDocumentDetail =
   | { kind: "invoice";  number?: string | null; gross?: number | null;
       currency?: Currency | null; processingStatus?: string | null }
   | { kind: "contract"; subject?: string | null; amount?: number | null;
@@ -127,7 +127,7 @@ kennt **keine** UI: sie liefert Werte, nicht JSX — sonst könnte 0076 sie
 nicht mit einem dritten Eintrag (`facts`) erweitern, ohne die Zeile
 anzufassen.
 
-### `DocumentVM`
+### `SourceDocumentVM`
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
@@ -136,11 +136,11 @@ anzufassen.
 | `sourceDocType` | `SourceDocType \| "declaration" \| null` | nein | Diskriminator. Die Union ist um `declaration` geweitet — der DB-CHECK und `SOURCE_DOC_TYPE_LABELS` kennen den Wert, der TS-Typ nicht (Befund B10). | `Ausprägungen` |
 | `classDocumentForm` | `string \| null` | nein | Rückfall-Schlüssel des **Labels**: trägt der Beleg nur `other`/NULL, gewinnt die Belegform („Sammel-PDF", „Lohnabrechnung"). | `Ausprägungen` |
 | `counterparty` | `string \| null` | nein | Rang 1. Je Ausprägung 50–95 % gefüllt — fehlt er, führt der Dateiname. | `Ausprägungen`, `Rand` |
-| `detail` | `DocumentDetail \| null` | nein | Rang 3 und 5. Der Aufrufer setzt es, **wenn die Subtyp-Zeile existiert**; gezeigt wird es nur, wenn es zum Diskriminator passt (siehe „Warum beide zustimmen müssen"). | `Ausprägungen` |
+| `detail` | `SourceDocumentDetail \| null` | nein | Rang 3 und 5. Der Aufrufer setzt es, **wenn die Subtyp-Zeile existiert**; gezeigt wird es nur, wenn es zum Diskriminator passt (siehe „Warum beide zustimmen müssen"). | `Ausprägungen` |
 | `documentDate` | `string \| null` | nein | Rang 4, ISO-Tag. NULL bleibt NULL — kein Rückfall auf den Upload-Tag (GLOSSARY). | `Gefuellt` |
 | `receivedDate` | `string` | ja | Rang 7, `NOT NULL`. Sortierschlüssel der Belegliste. | `Gefuellt` |
 | `completedAt` | `string \| null` | nein | Zustand. `null` = steht noch offen. | `Zustände` |
-| `completedVia` | `DocumentCompletion \| null` | nein | Grund der Erledigung, Achse `beleg_erledigung`. | `Zustände` |
+| `completedVia` | `SourceDocCompletionVia \| null` | nein | Grund der Erledigung. `null` **bei gesetztem `completedAt`** heißt „erledigt, Grund unbekannt" (61 von 384) — nicht „offen". Achse `beleg_erledigung`. | `Zustände` |
 | `completedReason` | `string \| null` | nein | Freitext im `title` der Marke, gekürzt bei 280 Zeichen. | `Zustände` |
 | `docCategory` | `DocCategory \| null` | nein | Einordnung, Achse `beleg_kategorie`. Nur zu 46 % gefüllt (B3) — NULL zeigt **nichts**, nicht „unklassifiziert". | `Einordnung` |
 | `docDirection` | `DocDirection \| null` | nein | Einordnung, Achse `beleg_richtung`. NULL heißt „nicht anwendbar" (GLOSSARY) — kein Badge. | `Einordnung` |
@@ -156,6 +156,20 @@ Typen aus `src/ludwig/modules/source-docs/domain/`: `SourceDocType`,
 `counterparty`, `doc direction`), deutsch im Label (Beleg, Gegenpart,
 Eingangsrechnung).
 
+### Zwei Dinge, die es in `src/ludwig/` noch nicht gibt
+
+Beide werden lokal definiert, strukturell deckungsgleich, mit Kommentar und
+Register-Eintrag — nicht erfunden, sondern gemeldet (`spec-schreiben` §5):
+
+| Was | Warum lokal | Register |
+|---|---|---|
+| `SourceDocCompletionVia = "booking" \| "case_closed" \| "import" \| "superseded" \| "manual" \| "no_booking_required"` | Der DB-CHECK auf `client_source_docs.completed_via` führt genau diese sechs; ein TS-Typ dafür existiert nirgends | L-47 |
+| Achse `beleg_erledigung` in der Status-Registry | Es gibt sie noch nicht — die App zeigt die Erledigung als Häkchen mit Tooltip (V7/V11 verletzt). Die Achse trägt die sechs Werte **plus `open`** für `completedAt IS NULL`; `open` ist kein Wert der Spalte, sondern ihr Fehlen | L-41 |
+
+Die Achse gehört in `src/ui/v3/patterns/status-registry.ts` — **eine geteilte
+Datei.** Sie wird als eigener Block angehängt, nicht einsortiert, und nur
+dieser Block wird gestaget.
+
 **Was die Komponenten bewusst nicht können:**
 
 - **Nichts sortieren, nichts filtern, nichts blättern.** Sechs Zeilen sind
@@ -170,7 +184,7 @@ Eingangsrechnung).
 ## Verhalten
 
 **Server-Component** — keine Interaktion außer Links, kein Zustand.
-`DocumentRow` hat bewusst **kein** `Disclosure`: anders als
+`SourceDocumentRow` hat bewusst **kein** `Disclosure`: anders als
 `ClarificationRow` gibt es beim Beleg nichts zum Aufklappen, was nicht schon
 Karte oder Drawer wäre.
 
@@ -182,7 +196,7 @@ Kürzung, aus den p90-Längen des Profils:
 | Dateiname (Zeile) | 48 Zeichen | **in der Mitte**, Endung bleibt lesbar | `title` |
 | Erledigungsgrund | 280 Zeichen | Ende | `title` der Marke |
 
-Die Mitten-Kürzung ist eine lokale Funktion in `Document.tsx` mit
+Die Mitten-Kürzung ist eine lokale Funktion in `SourceDocument.tsx` mit
 `ponytail:`-Kommentar — `LongText` klappt auf (`<details>`), das ist für
 einen Dateinamen in einer Tabellenzeile falsch. Sobald ein zweiter Aufrufer
 sie braucht, wird sie eine Primitive.
@@ -199,15 +213,15 @@ eine leere Story.
 
 ## Stories
 
-Titel `v3/Entitäten/Beleg/Document`.
+Titel `v3/Entitäten/Beleg/SourceDocument`.
 
 | Story | Beweist |
 |---|---|
 | `Gefuellt` | Eine Rechnungszeile mit allem: Gegenpart, Nummer, Brutto, beide Daten, Sachverhalt, Erledigt |
 | `Ausprägungen` | **Die Kernstory.** Alle sieben `sourceDocType`-Werte plus NULL untereinander — mit Subtyp-Zeile, ohne, und die zwei B9-Ausreißer: `invoice` ohne `detail`, und `other` **mit** `detail.kind = "invoice"`. **Beide zeigen dasselbe** — Dateiname als Kennung, leere Maß-Stelle —, und die Story sagt in ihrem Kommentar, warum das aus entgegengesetzten Gründen richtig ist |
-| `Einordnung` | `DocumentClass` allein: alle vier Achsen, dazu die drei NULL-Fälle (Kategorie fehlt, Richtung nicht anwendbar, Charakter = `original`) — jeder zeigt **nichts**, nicht „unbekannt" |
+| `Einordnung` | `SourceDocumentClass` allein: alle vier Achsen, dazu die drei NULL-Fälle (Kategorie fehlt, Richtung nicht anwendbar, Charakter = `original`) — jeder zeigt **nichts**, nicht „unbekannt" |
 | `Zustände` | Die Erledigung über alle sechs `completed_via`-Werte plus „Offen", mit dem Grund im `title` |
-| `Zelle` | `DocumentCell` allein, in fremdem Markup (ein Satz, eine Buchungszeile) — mit und ohne `href` |
+| `Zelle` | `SourceDocumentCell` allein, in fremdem Markup (ein Satz, eine Buchungszeile) — mit und ohne `href` |
 | `Rand` | Was die Kürzung tut: 139-Zeichen-Dateiname, 56-Zeichen-Gegenpart, Beleg ohne Gegenpart, ohne Belegdatum, ohne alles außer Datei und Eingang |
 | `ImEinsatz` | Sechs Zeilen untereinander in einer `Card` — der Beleg-Tab eines Sachverhalts, gemischte Belegarten |
 
@@ -220,11 +234,22 @@ ausgeschlossen) + 1 je Enum-Achse (`Ausprägungen`, `Einordnung`, `Zustände`)
 
 | Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
 |---|---|---|
-| ~~Kontoauszug, Kreditkartenabrechnung, Reisekostenabrechnung als eigene Ausprägung~~ | — | **Entfällt.** Die App-Seite hat am 2026-09-04 entschieden: keine Subtyp-Tabellen, absichtlich — die drei sind Container, keine Belege mit eigenen Fachfeldern (L-38). Sie bekommen nie einen `DocumentDetail`-Eintrag; ihre Gruppen-Eigenschaft hängt an der Relation und wird in 0076 gezeigt |
+| ~~Kontoauszug, Kreditkartenabrechnung, Reisekostenabrechnung als eigene Ausprägung~~ | — | **Entfällt.** Die App-Seite hat am 2026-09-04 entschieden: keine Subtyp-Tabellen, absichtlich — die drei sind Container, keine Belege mit eigenen Fachfeldern (L-38). Sie bekommen nie einen `SourceDocumentDetail`-Eintrag; ihre Gruppen-Eigenschaft hängt an der Relation und wird in 0076 gezeigt |
 | Aktion an der Zeile (erledigen, neu anstoßen, einreichen) | optionaler `actions?: ReactNode`-Slot | wenn 0070 die erste Liste mit Massenaktion baut; bis dahin setzt der Aufrufer sie daneben |
 | Die Zustimmungs-Regel wieder fallen lassen | nichts — der Vergleich verschwindet | wenn `P26` drüben entschieden ist (Belegform-Override räumt die Rechnungs-Zeile auf) und `L-35` null Widersprüche zählt. Bis dahin ist die Regel billig und still |
 | Auswahl (Checkbox) | `SelectionCell` des Aufrufers, nicht eine Prop hier | mit 0070 und `DataTable`s `SelectionScope` |
 | Teilbeleg-Zähler an der Zeile | `childCount?: number` | wenn ein Screen Sammel-PDFs listet — 97 % haben keine Kinder, heute wäre die Zahl fast immer 0 |
+
+## Für den Bau
+
+| | |
+|---|---|
+| Dateien | `src/ui/v3/entities/source-document/SourceDocument.tsx` (drei Exporte) und `source-document-detail.ts` (die Registry, kein JSX) — dazu `SourceDocument.stories.tsx` |
+| Barrel | `src/ui/v3/index.ts`, in den vorhandenen Abschnitt `/* Beleg — … (0052) */`; dessen Kommentar auf `(0052, 0074)` erweitern. Exportiert werden `SourceDocumentCell`, `SourceDocumentClass`, `SourceDocumentRow`, `SourceDocumentDetail`, `SourceDocumentVM` |
+| CSS | Präfix **`v2doc`** — er gehört der Entität, nicht der Komponente, und ist mit 0052 schon vergeben (`.v2doc__ident`, `__orig`, `__origskel`, `__h`, `__limit`, `__prose`). Neue Klassen als `.v2doc__row`, `.v2doc__cell`, … in einem **eigenen Abschnitt am Ende** von `src/styles/v3.css`, überschrieben mit `0074`. Nicht einsortieren: an dieser Datei arbeiten mehrere Sitzungen gleichzeitig |
+| Reihenfolge | zuerst `source-document-detail.ts` (Union + Registry + Zustimmungsregel), dann `SourceDocumentCell`/`Class`, dann `SourceDocumentRow`. Die Zeile setzt Zelle und Einordnung zusammen — nicht andersherum |
+| Blockiert nichts von | 0075 und 0076 hängen an dieser Datei, aber nicht am Storybook-Durchlauf: sie können gebaut werden, sobald `source-document-detail.ts` steht |
+| Nicht anfassen | `SourceDocumentDrawer.tsx` und `SourceDocumentFacts.tsx` — die zieht 0076 nach |
 
 ## Abnahmekriterien
 
@@ -240,13 +265,14 @@ Fest (gilt immer):
 
 Variabel (aus dieser Spec):
 
-- [ ] **`grep -n "isInvoice\|=== \"invoice\"" src/ui/v3/entities/document/` findet nichts** außer den Registry-Einträgen in `document-detail.ts`
+- [ ] **`grep -n "isInvoice\|=== \"invoice\"" src/ui/v3/entities/source-document/` findet nichts** außer den Registry-Einträgen in `source-source-document-detail.ts`
 - [ ] Ein Beleg mit `sourceDocType = "invoice"` **ohne** `detail` zeigt kein leeres Rechnungsfeld, sondern den Dateinamen als Kennung und keine Maß-Stelle (Story `Ausprägungen`)
 - [ ] Ein Beleg mit `sourceDocType = "other"` **mit** `detail.kind = "invoice"` zeigt **weder** Nummer **noch** Brutto — die Belegform wurde korrigiert, die Rechnungs-Zeile ist der Rest (Story `Ausprägungen`)
 - [ ] Der Vergleich ist **generisch**: er liest `type` aus dem Registry-Eintrag, er zählt keine Belegarten auf
 - [ ] `sourceDocType = null` heißt „Beleg", nie „Rechnung" (Story `Ausprägungen`)
 - [ ] `docCategory = null`, `docDirection = null` und `classDocumentKind = "original"` erzeugen **kein** Badge (Story `Einordnung`)
-- [ ] Die Erledigung steht als **Wort**, nicht als Häkchen (V7, V11) — Achse `beleg_erledigung` (Story `Zustände`)
+- [ ] Die Erledigung steht als **Wort**, nicht als Häkchen (V7, V11) — über die neue Achse `beleg_erledigung`, nicht über eine lokale Label-Map (Story `Zustände`)
+- [ ] `completedAt` gesetzt und `completedVia` `null` zeigt „Erledigt", nicht „Offen" (Story `Zustände`)
 - [ ] Ein 139-Zeichen-Dateiname wird in der Mitte gekürzt, die Endung bleibt lesbar, das Ganze steht im `title` (Story `Rand`)
 - [ ] Kennung fällt in dieser Kette zurück: Ausprägung → Dateiname → Kurz-ID (Story `Ausprägungen`)
 - [ ] Ersetzt `InvoiceNumberCell`, `PartnerCell`, `ClassificationStack`, `StatusCell` und `CompletedCheck` aus `[year]/documents/page.tsx` ohne Funktionsverlust
@@ -258,7 +284,12 @@ Variabel (aus dieser Spec):
   `client_source_docs.source_doc_type` erlaubt sieben Werte,
   `SOURCE_DOC_TYPE_LABELS` führt sieben („Erklärung"), der TS-Typ in
   `document-form-mapping.ts` führt sechs. Die Spec weitet die Union lokal
-  und begründet es; Register-Eintrag L-44 in `docs/befunde-app.md`.
+  und begründet es. *Nachtrag 2026-09-04: von der App-Seite als Absicht
+  bestätigt — die Union ist der Typ des Mapping-Ergebnisses, nicht des
+  Werteraums; lesend sind sieben Werte richtig. L-44 erledigt.*
+- **B14 — `completed_via` hat keinen TS-Typ.** Der DB-CHECK führt sechs
+  Werte, `src/ludwig/` keinen davon. 0074 definiert
+  `SourceDocCompletionVia` lokal; Register-Eintrag L-47.
 
 ## Abnahme
 

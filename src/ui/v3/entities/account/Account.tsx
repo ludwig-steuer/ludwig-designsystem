@@ -15,7 +15,7 @@ import { StatusBadge } from "../../patterns/StatusBadge";
  * The cell names an account inside foreign markup, the facts answer „what
  * kind of account is this?" in seven rows. The order of those rows is decided
  * **here, once**, so that the drawer (0068) and the full view (0063) cannot
- * drift apart — the same reason `DocumentFacts` exists.
+ * drift apart — the same reason `SourceDocumentFacts` exists.
  *
  * Both are server components: the way to the account sheet is an `href` over
  * a search param (L3), not a context. The app resolves it through

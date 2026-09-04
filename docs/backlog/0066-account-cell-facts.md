@@ -35,7 +35,7 @@ später im View.
 |---|---|
 | `AccountField` — „Choosing an account … and, with `onOpenLedger`, the way to its account sheet" (0013) | Deckt die **Auswahl** ab (Form Picker, S). Ein Konto zu *nennen* ist kein Auswählen: die Zelle steht in einer fertigen Zeile, hat kein Feld, keine Kandidaten, keinen Zustand. |
 | `MonoCell` — „A key made of digits or codes in a cell" | Trägt die Nummer, kennt aber nicht Name, Rolle und den Weg zum Kontenblatt. Die Zelle **setzt darauf auf**. |
-| `FieldList` — „Master data and properties of an item, read-only" | Trägt die Geometrie der Fakten, kennt aber nicht die Ordnung der Konto-Punkte und nicht die Regel, dass der Saldo zweigeteilt steht (Owner 2026-09-04). `AccountFacts` **setzt darauf auf**, wie `DocumentFacts` (0052). |
+| `FieldList` — „Master data and properties of an item, read-only" | Trägt die Geometrie der Fakten, kennt aber nicht die Ordnung der Konto-Punkte und nicht die Regel, dass der Saldo zweigeteilt steht (Owner 2026-09-04). `AccountFacts` **setzt darauf auf**, wie `SourceDocumentFacts` (0052). |
 | `HoverCard` — „A preview of what an anchor leads to — **the account behind an account number** … read without leaving the list" | Nennt genau diesen Fall — aber als **Klammer**: „the card — the „preview" form of the entity, **composed by the caller**". Der Inhalt fehlt, und das ist `AccountFacts`. |
 | `KpiTile` | Zahl mit Label im Seitenkopf, nicht sieben Fakten im Drawer. |
 

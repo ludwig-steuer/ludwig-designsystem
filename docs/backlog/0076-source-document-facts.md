@@ -1,18 +1,18 @@
-# 0076 · Belegdaten je Ausprägung — `DocumentFacts` umbauen
+# 0076 · Belegdaten je Ausprägung — `SourceDocumentFacts` umbauen
 
 | | |
 |---|---|
-| Status | spec |
-| Stufe | `entities/document/` — Umbau von `DocumentFacts.tsx` (0052), Erweiterung von `document-detail.ts` (0074), Nachzug an `DocumentDrawer.tsx` (0052) |
+| Status | in Arbeit |
+| Stufe | `entities/source-document/` — Umbau von `SourceDocumentFacts.tsx` (0052), Erweiterung von `source-source-document-detail.ts` (0074), Nachzug an `SourceDocumentDrawer.tsx` (0052) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: die Felder sind Belegfelder, und die Registry ist eine Aussage über das Ludwig-Datenmodell (Supertyp + Subtypen) |
-| Quelle | Entitätsprofil `docs/entitaeten/document.md`, Abschnitt „Die eine Regel" und „Heutige Darstellung" · Owner-Anfrage 2026-09-04 („Belege und Belegtypen sind Ausprägungen derselben Entität mit verschiedenen Datenfeldern — das sollten wir in der Vorschau berücksichtigen") |
+| Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Abschnitt „Die eine Regel" und „Heutige Darstellung" · Owner-Anfrage 2026-09-04 („Belege und Belegtypen sind Ausprägungen derselben Entität mit verschiedenen Datenfeldern — das sollten wir in der Vorschau berücksichtigen") |
 | Ersetzt | `BelegSummary` (`ui/beleg/`), `SourceDocFactsCard` (`SourceDocBelegTab.tsx`), den Fakten-Teil von `GlanceCard` (Rechnung) und von `ContractDetail` (Vertrag) |
 | Blockiert | 0071 (View und Karte), 0070 (die Listen zeigen dieselben Werte in Spaltenform) |
 | Spec von / am | Claude, 2026-09-04 |
 
 ## Ziel
 
-`DocumentFacts` ist mit 0052 als „die Kernfakten eines Belegs" gebaut worden
+`SourceDocumentFacts` ist mit 0052 als „die Kernfakten eines Belegs" gebaut worden
 und zeigt vier Zeilen: **Lieferant · Rechnungsnr. · Rechnungsdatum ·
 Brutto**. Das sind Rechnungsfelder. Ein Vertrag hat keine Rechnungsnummer,
 ein Kontoauszug keinen Bruttobetrag — sie bekommen heute vier
@@ -31,29 +31,29 @@ Block, den die Ausprägung beisteuert.**
 
 ## Einordnung
 
-- **Wiederverwenden:** `DocumentFacts` (0052) deckt den Fall zu vier
+- **Wiederverwenden:** `SourceDocumentFacts` (0052) deckt den Fall zu vier
   Fünfteln — Ort, Rahmen und die Idee „ein Satz Feldzeilen, hier einmal
   entschieden" stimmen. Falsch ist, welche Felder.
 - **Erweitert, weil:** `spec-schreiben` §3 Regel 2 — das Fehlende ist eine
   Designentscheidung, die wiederkommt (jede künftige Belegart), und sie
   lässt sich in der `@when`-Zeile in einem Halbsatz sagen. Der Umbau ist
   **kein** additives Feld, sondern ein Austausch der Feldliste: die
-  Schnittstelle `DocumentFactsVM` ändert sich, deshalb eine eigene Aufgabe
+  Schnittstelle `SourceDocumentFactsVM` ändert sich, deshalb eine eigene Aufgabe
   statt einer Zeile im Ausbau von 0052.
-- **Zuschnitt:** kein neuer Export. `DocumentFacts` bleibt eine Komponente;
-  die Ausprägung kommt aus `document-detail.ts` (0074), das um einen dritten
+- **Zuschnitt:** kein neuer Export. `SourceDocumentFacts` bleibt eine Komponente;
+  die Ausprägung kommt aus `source-source-document-detail.ts` (0074), das um einen dritten
   Registry-Eintrag `facts` wächst. Wer eine Belegart hinzufügt, fasst genau
   diese eine Datei an — und keine Komponente.
 - **Setzt auf:** `FieldList`, `Amount`, `Time`, `MonoCell`, `LongText`.
 
 ## Wie die Registry wächst
 
-`document-detail.ts` (0074) hat zwei Einträge je Ausprägung: `identifier()`
+`source-source-document-detail.ts` (0074) hat zwei Einträge je Ausprägung: `identifier()`
 für Rang 5 und `measure()` für Rang 3. Diese Aufgabe fügt den dritten hinzu:
 
 ```ts
 /** Die Feldzeilen, die es NUR bei dieser Ausprägung gibt. */
-facts(d: DocumentDetail): FactRow[];
+facts(d: SourceDocumentDetail): FactRow[];
 ```
 
 Der Block erscheint unter derselben Bedingung wie in 0074: **nur, wenn
@@ -64,7 +64,7 @@ Die Begründung steht in 0074 und wird hier nicht wiederholt; hier zählt nur,
 dass es **dieselbe** Regel aus **derselben** Datei ist.
 
 `FactRow` ist `{ label: string; value: ReactNode }` — die Registry liefert
-weiterhin **keine** Layout-Entscheidung, nur Paare. `DocumentFacts` reiht
+weiterhin **keine** Layout-Entscheidung, nur Paare. `SourceDocumentFacts` reiht
 sie unter die generischen Zeilen, in derselben Reihenfolge, in der sie
 kommen.
 
@@ -137,22 +137,22 @@ deshalb erfundene Werte und der Eintrag einen Kommentar, der das sagt.
 
 ## Schnittstelle
 
-`DocumentFactsVM` **ersetzt** die heutige (Bruch, nicht Erweiterung — heute
-gibt es genau einen Aufrufer, `DocumentDrawer`):
+`SourceDocumentFactsVM` **ersetzt** die heutige (Bruch, nicht Erweiterung — heute
+gibt es genau einen Aufrufer, `SourceDocumentDrawer`):
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `document` | `DocumentVM` | ja | Die Beleg-Zeile aus 0074 — dieselbe, die auch `DocumentRow` bekommt. Trägt Belegart, Gegenpart, beide Daten, Erledigung, `detail`. | `Gefuellt` |
+| `document` | `SourceDocumentVM` | ja | Die Beleg-Zeile aus 0074 — dieselbe, die auch `SourceDocumentRow` bekommt. Trägt Belegart, Gegenpart, beide Daten, Erledigung, `detail`. | `Gefuellt` |
 | `summary` | `string \| null` | nein | Zusammenfassung. Der Aufrufer wählt zwischen `classCaseSummary` (fachlich, 93 %) und `classSummary` (Belegtext, 100 %) — die Komponente kennt den Unterschied nicht und darf ihn nicht raten. Gekürzt bei 260 Zeichen. | `Gefuellt`, `Rand` |
 | `group` | `{ childCount: number; completedChildCount: number } \| { pages: string; parentTitle?: string; parentHref?: string } \| null` | nein | Der Gruppen-Block. Erste Form: der Beleg ist ein Sammel-Original. Zweite: er ist ein Teilbeleg. `null`: keins von beidem, und dann gibt es den Block nicht. | `Gruppe` |
 | `tone` | `"surface" \| "soft" \| "bare"` | nein | Wird an `FieldList` durchgereicht: `bare` im Drawer, `surface` in der Karte. | `Toene` |
 
 Dass `document` und `summary` getrennt kommen, ist Absicht: 0074s
-`DocumentVM` trägt keine Freitexte (eine Zeile zeigt keine drei Sätze), und
+`SourceDocumentVM` trägt keine Freitexte (eine Zeile zeigt keine drei Sätze), und
 die Wahl zwischen den beiden Zusammenfassungen ist eine
 Aufrufer-Entscheidung.
 
-Typen aus `src/ludwig/`: `DocumentVM` und `DocumentDetail` aus 0074,
+Typen aus `src/ludwig/`: `SourceDocumentVM` und `SourceDocumentDetail` aus 0074,
 `Currency` aus `shared/money`, `contractTypeLabel()` und
 `ContractBookingFact` aus `modules/contracts/domain/contract`.
 
@@ -170,20 +170,20 @@ Typen aus `src/ludwig/`: `DocumentVM` und `DocumentDetail` aus 0074,
   gelesen hat, steht als „—"; eine Rechnungsnummer an einem Kontoauszug
   steht gar nicht.
 
-## Der Nachzug an `DocumentDrawer` (0052)
+## Der Nachzug an `SourceDocumentDrawer` (0052)
 
 Im selben Arbeitsgang, weil der Drawer der einzige Aufrufer ist und sonst
 beide Fassungen nebeneinander stünden:
 
 | Was | Heute | Danach |
 |---|---|---|
-| Vorschau | inline-`<iframe>` in `DrawerBody` | `DocumentPreview` (0075), `height="md"` |
-| Fakten | vier Rechnungs-Labels | `DocumentFacts` mit der Registry |
+| Vorschau | inline-`<iframe>` in `DrawerBody` | `SourceDocumentPreview` (0075), `height="md"` |
+| Fakten | vier Rechnungs-Labels | `SourceDocumentFacts` mit der Registry |
 | Kopf-Zustand | `<StatusBadge axis="beleg" …>`, fest verdrahtet | die **Erledigung** (Achse `beleg_erledigung`) — die Achse `beleg` lebt am Rechnungs-Subtyp und hat für 16 % der Belege nie einen Wert (Befund L-42) |
 | Kopf-Kennung | `invoiceNumber ?? originalFileName ?? reference` | die Rückfallkette aus 0074 — dieselbe Regel, ein Ort |
 | Überschrift „Extrahierte Belegdaten" | fest | „Belegdaten" — bei einem Vertrag ist nichts extrahiert worden, was eine Rechnung extrahiert |
 
-`DocumentQuickView` schrumpft dabei auf `{ document, summary, previewUrl,
+`SourceDocumentQuickView` schrumpft dabei auf `{ document, summary, previewUrl,
 previewUnavailableReason, excerpt }`: Titel und Kennung leitet der Drawer aus
 `document` ab, statt sie sich geben zu lassen. Die vier Zustände des Drawers
 (Fehler → lädt → nicht gefunden → Inhalt) bleiben unangetastet.
@@ -204,7 +204,7 @@ trägt der Aufrufer (0042), leer nach Filter gibt es nicht.
 
 ## Stories
 
-Titel `v3/Entitäten/Beleg/DocumentFacts`.
+Titel `v3/Entitäten/Beleg/SourceDocumentFacts`.
 
 | Story | Beweist |
 |---|---|
@@ -215,7 +215,7 @@ Titel `v3/Entitäten/Beleg/DocumentFacts`.
 | `Gruppe` | Der Block an der Relation, vier Fälle: ein Sammel-Original **ohne** Klammer-Typ („4 von 9 erledigt" — der Normalfall im Bestand), eines **mit**, ein Teilbeleg („Seiten 5–7 aus …") und eine **Rechnung**, die Teilbeleg ist: der Fall, den ein Renderer je Belegart verfehlt hätte |
 | `Toene` | `bare` (Drawer) und `surface` (Karte) nebeneinander |
 | `Rand` | 400-Zeichen-Zusammenfassung, 139-Zeichen-Dateiname, 868-Zeichen-Erledigungsgrund — alle drei Kürzungen, voller Text im `title` |
-| `ImEinsatz` | Im `DocumentDrawer`, neben einer Liste: Kopf, Vorschau, Fakten, Grenze, ein Ausgang — der Nachzug in einem Bild |
+| `ImEinsatz` | Im `SourceDocumentDrawer`, neben einer Liste: Kopf, Vorschau, Fakten, Grenze, ein Ausgang — der Nachzug in einem Bild |
 
 Acht Stories: 2 anwendbare Zustände (`Gefuellt`, `Leer`; lädt und Fehler
 oben begründet ausgeschlossen) + 1 je Enum-Achse (`Ausprägungen` für die
@@ -230,6 +230,17 @@ Registry, `Toene` für `tone`) + 1 für den unbelegten Registry-Eintrag
 | Einzelwerte ändern | je ein optionaler Callback (`onSetDocumentDate`, `onComplete`) über `InlineEdit` | mit 0071 — ohne Callback bleibt der Wert lesend, das ist A12 |
 | Positionen und Vorsteuer | eigener Auftrag 0072 | wenn die Rechnungsposition ihr Profil hat |
 | Konfidenz der Einordnung als Wert statt als Prozentzahl | eine Konfidenz-Primitive | wenn der Soll-Katalog die **eine** Konfidenz-Darstellung entschieden hat (heute drei Varianten in der App) |
+
+## Für den Bau
+
+| | |
+|---|---|
+| Dateien | `SourceDocumentFacts.tsx` (Umbau), `source-document-detail.ts` (dritter Registry-Eintrag `facts`), `SourceDocumentDrawer.tsx` (Nachzug) — alle drei in `src/ui/v3/entities/source-document/`; Stories mit |
+| Barrel | `SourceDocumentFactsVM` weicht dem neuen VM: der Export heißt weiter `SourceDocumentFacts`, der Typ entfällt zugunsten von `SourceDocumentVM` (0074) plus den beiden übrigen Props. `SourceDocumentQuickView` schrumpft, bleibt exportiert |
+| CSS | Präfix **`v2doc`**, neuer Abschnitt am Ende von `v3.css`, überschrieben mit `0076` |
+| Setzt voraus | **0074** (`source-document-detail.ts`, `SourceDocumentVM`) und **0075** (`SourceDocumentPreview`). Ohne beide lässt sich weder die Registry erweitern noch der Drawer nachziehen |
+| Reihenfolge im Paket | erst der dritte Registry-Eintrag, dann `SourceDocumentFacts`, zuletzt der Drawer — er ist der einzige Aufrufer und beweist im Storybook, dass der Umbau trägt |
+| Achtung | 0052 ist abgenommen. Der Drawer wird geändert, nicht neu gebaut: seine vier Zustände (Fehler → lädt → nicht gefunden → Inhalt) und das Fünf-Zonen-Schema bleiben, ebenso seine acht Stories. Was sich ändert, steht in der Tabelle „Der Nachzug an `SourceDocumentDrawer` (0052)". Die Abnahme dieser Aufgabe prüft beides: das Neue **und** dass 0052 weiter erfüllt ist |
 
 ## Abnahmekriterien
 
@@ -248,16 +259,16 @@ Variabel (aus dieser Spec):
 - [ ] Die acht generischen Zeilen stehen bei **jeder** Ausprägung in derselben Reihenfolge (Story `Ausprägungen`)
 - [ ] Kontoauszug, Sonstiger Beleg und Beleg ohne Typ bekommen **keinen** Ausprägungs-Block — auch keinen leeren mit Überschrift (Story `Ausprägungen`)
 - [ ] Keine Zeile heißt „Rechnungsnr." oder „Lieferant" an einem Nicht-Rechnungs-Beleg (Story `Ausprägungen`)
-- [ ] `grep -n "isInvoice" src/ui/v3/entities/document/` findet nichts
-- [ ] Eine neue Belegart erfordert genau **einen** neuen Eintrag in `document-detail.ts` und keine Änderung an `DocumentFacts.tsx` — nachgewiesen, indem der Vertrags-Eintrag als letzter hinzugefügt wird und die Komponente unverändert bleibt
+- [ ] `grep -n "isInvoice" src/ui/v3/entities/source-document/` findet nichts
+- [ ] Eine neue Belegart erfordert genau **einen** neuen Eintrag in `source-source-document-detail.ts` und keine Änderung an `SourceDocumentFacts.tsx` — nachgewiesen, indem der Vertrags-Eintrag als letzter hinzugefügt wird und die Komponente unverändert bleibt
 - [ ] Der Gruppen-Block erscheint bei einer **Rechnung**, die Teilbeleg ist — er hängt an der Relation, nicht an der Belegart (Story `Gruppe`)
 - [ ] Ein Sammel-Original mit `collectionKind = "not_connected"` oder ohne Wert sieht **vollständig** aus, nicht wie ein halb gefülltes Formular (Story `Gruppe`)
 - [ ] Widersprechen sich Diskriminator und Subtyp-Zeile, steht **kein** Ausprägungs-Block — dieselbe Regel und dieselbe Datei wie 0074 (Story `Ausprägungen`)
 - [ ] Ein Beleg ohne `group` bekommt keinen Block, auch keinen leeren (Story `Ausprägungen`)
 - [ ] `tone` verhält sich wie Zeile 4 der Schnittstelle (Story `Toene`)
 - [ ] Alle drei Kürzungen greifen, der volle Text steht im `title` (Story `Rand`)
-- [ ] `DocumentDrawer` zeigt die **Erledigung** im Kopf, nicht `axis="beleg"` (Story `ImEinsatz`)
-- [ ] `DocumentDrawer` enthält kein `<iframe>` mehr (`grep -n "iframe" src/ui/v3/entities/document/DocumentDrawer.tsx` findet nichts)
+- [ ] `SourceDocumentDrawer` zeigt die **Erledigung** im Kopf, nicht `axis="beleg"` (Story `ImEinsatz`)
+- [ ] `SourceDocumentDrawer` enthält kein `<iframe>` mehr (`grep -n "iframe" src/ui/v3/entities/source-document/SourceDocumentDrawer.tsx` findet nichts)
 - [ ] Ersetzt `BelegSummary` und `SourceDocFactsCard` ohne Funktionsverlust; die Rechnungs- und Vertragsfelder aus `GlanceCard` und `ContractDetail` stehen als Blöcke
 - [ ] Tut bewusst nicht: Positionen, Vorsteuer, Ändern — der Aufrufer löst es mit 0072 und 0071
 

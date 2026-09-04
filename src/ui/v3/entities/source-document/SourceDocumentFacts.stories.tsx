@@ -1,20 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { Card, CardHead } from "../../primitives/Table";
-import { DocumentFacts } from "./DocumentFacts";
+import { SourceDocumentFacts } from "./SourceDocumentFacts";
 
-const meta: Meta<typeof DocumentFacts> = {
-  title: "v3/Entitäten/Beleg/DocumentFacts",
-  component: DocumentFacts,
+const meta: Meta<typeof SourceDocumentFacts> = {
+  title: "v3/Entitäten/Beleg/SourceDocumentFacts",
+  component: SourceDocumentFacts,
 };
 export default meta;
-type Story = StoryObj<typeof DocumentFacts>;
+type Story = StoryObj<typeof SourceDocumentFacts>;
 
 /** Everything known: four facts in their fixed order, the summary below them. */
 export const Filled: Story = {
   render: () => (
     <div style={{ maxWidth: 520 }}>
-      <DocumentFacts
+      <SourceDocumentFacts
         facts={{
           vendor: "ACME GmbH",
           invoiceNumber: "RE-4471",
@@ -37,7 +37,7 @@ export const Filled: Story = {
 export const Unvollstaendig: Story = {
   render: () => (
     <div style={{ maxWidth: 520 }}>
-      <DocumentFacts facts={{ invoiceNumber: "RE-4471", gross: null, currency: "EUR" }} />
+      <SourceDocumentFacts facts={{ invoiceNumber: "RE-4471", gross: null, currency: "EUR" }} />
     </div>
   ),
 };
@@ -49,7 +49,7 @@ export const InUse: Story = {
       <Card>
         <CardHead title="Beleg · ACME GmbH" sub="RE-4471" />
         <div style={{ padding: "var(--space-5)" }}>
-          <DocumentFacts
+          <SourceDocumentFacts
             facts={{
               vendor: "ACME GmbH",
               invoiceNumber: "RE-4471",

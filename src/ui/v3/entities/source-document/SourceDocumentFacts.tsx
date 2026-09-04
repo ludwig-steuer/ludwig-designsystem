@@ -21,7 +21,7 @@ import { Time } from "../../primitives/Time";
  * What every kind of document carries. Invoice-specific things — positions,
  * VAT blocks, DATEV account — stay out; they belong to the full view.
  */
-export interface DocumentFactsVM {
+export interface SourceDocumentFactsVM {
   /** Who issued it — „Lieferant" for an incoming invoice. */
   vendor?: string | null;
   /** The number on the paper, read digit by digit — mono. */
@@ -38,10 +38,10 @@ export interface DocumentFactsVM {
  * @when    The core facts of a document, read-only — in its drawer, in its
  *          view, in a preview beside something else.
  * @instead The whole document with positions and VAT → DocumentView. The
- *          document next to a list → DocumentDrawer. A single field in a row
+ *          document next to a list → SourceDocumentDrawer. A single field in a row
  *          → MonoCell, Amount, Time.
  */
-export function DocumentFacts({ facts }: { facts: DocumentFactsVM }) {
+export function SourceDocumentFacts({ facts }: { facts: SourceDocumentFactsVM }) {
   const rows: [string, React.ReactNode][] = [
     ["Lieferant", facts.vendor ?? <span className="v2muted">—</span>],
     ["Rechnungsnr.", <MonoCell key="nr" value={facts.invoiceNumber ?? null} />],

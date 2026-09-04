@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | Status | offen |
-| Stufe | `entities/invoice-line/` — eigene Entitäts-Familie, nicht Teil von `entities/document/` |
+| Stufe | `entities/invoice-line/` — eigene Entitäts-Familie, nicht Teil von `entities/source-document/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: USt-Sonderfall, Verwendungsart und Kontenkandidaten sind Ludwig-Fachbegriffe |
-| Quelle | Entitätsprofil `docs/entitaeten/document.md`, Relationen-Tabelle (Enkel über die Rechnung) |
+| Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Relationen-Tabelle (Enkel über die Rechnung) |
 | Ersetzt | `PositionenTab`, `VorsteuerTab` |
 | Blockiert | die Tabs „Positionen" und „Vorsteuer" in 0071 |
 | Setzt voraus | ein eigenes Entitätsprofil `docs/entitaeten/invoice-line.md` (Skill `entitaet-analysieren`) |

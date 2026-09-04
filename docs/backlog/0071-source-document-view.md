@@ -1,14 +1,14 @@
-# 0071 · Beleg-Detailansicht — `DocumentView`
+# 0071 · Beleg-Detailansicht — `SourceDocumentView`
 
 | | |
 |---|---|
 | Status | offen |
-| Stufe | `entities/document/` — `DocumentView` |
+| Stufe | `entities/source-document/` — `SourceDocumentView` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Pipeline, Vorsteuer und Belegart sind Ludwig-Fachbegriffe |
-| Quelle | Entitätsprofil `docs/entitaeten/document.md`, Formen-Tabelle |
+| Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Formen-Tabelle |
 | Ersetzt | `SourceDocFamily`, `InvoiceSidebar`, `DocTabsBar`, `SourceDocBelegTab`, `SourceDocPipelineTab`, `SourceDocVerlaufTab`, den Anzeige-Teil von `ContractDetail` |
 | Blockiert | nichts |
-| Setzt voraus | `DocumentCard`, `DocumentFacts` mit Ausprägungs-Registry, `DocumentPreview` (alle aus dieser Familie), `EntityHeader`, `Tabs`, `LogList` |
+| Setzt voraus | `SourceDocumentCard`, `SourceDocumentFacts` mit Ausprägungs-Registry, `SourceDocumentPreview` (alle aus dieser Familie), `EntityHeader`, `Tabs`, `LogList` |
 | Spec von / am | — (Auftrag, noch keine Spec) |
 
 ## Ziel

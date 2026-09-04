@@ -10,6 +10,7 @@
 | Blockiert | die Drawer-Umzüge der Welle 1 · jeden Verweis, der heute kein Ziel hat (0013 Kontenblatt-Icon, 0014 OPOS-Browser) |
 | Setzt voraus | 0042 `Drawer` (Abnahme) · je Entität deren `View` und die kleineren Formen — für den ersten Drawer 0050 `CaseDetailView` |
 | Spec von / am | Claude, 2026-09-03 |
+| Nachtrag 2026-09-04 | Die beiden Exporte heißen seit dem Beleg-Familien-Schnitt **`SourceDocumentDrawer`** und **`SourceDocumentFacts`**, der Ordner `entities/source-document/` (Owner: „Document ist ein Name, der oft in use ist"). Das Abnahmeprotokoll unten nennt weiter die Namen und Zeilennummern, die zur Abnahme galten — es ist ein Protokoll, kein Verweis |
 | Gebaut von / am | Claude, 2026-09-04 · nachgebessert 2026-09-04 (drei Punkte der ersten Abnahme) |
 
 ## Was sich gegenüber F143 ändert
