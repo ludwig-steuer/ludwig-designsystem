@@ -565,6 +565,8 @@ außerhalb `tokens.css` ist der Test (§11.5).
 | | Owner 2026-09-03 (Review 0055) |
 | **A8** | **Icon-Leiter je Register:** produktiv 12/14/16 px, lesend 16/20/24 px, Stroke 1.5. Das Icon folgt der Schriftstufe seines Registers; 16/20/24 aus dem Marken-Brief galt dem lesenden Register mit 16-px-Text. Abweichler in `src/ui/v3` (12.5, 13, 15; Stroke 1.75, 2) werden beim nächsten Anfassen der Komponente auf die Leiter gezogen, nicht in Masse. |
 | **A9** | **A7 bestätigt:** `--color-warning-strong` entfällt. §11.5 hatte ihn als „zurückgeführt" gemeldet — das war der Widerspruch. Rückbau (Token, Klasse, `CellTone`, `deviationTone()` auf Debug/Hinweis/Warnung/Fehler) ist eine eigene Aufgabe; bis dahin zeigt 0055 den Token als „entfällt". |
+| | Owner 2026-09-04 |
+| **A10** | **Jeder Drawer trägt den Weg in die Vollansicht** — immer, und immer an derselben Stelle: als einziger Knopf im `footer` des `Drawer` (Zone 5 des Zonen-Schemas, 0052). Ein Drawer ohne diesen Knopf ist unfertig, nicht „minimal". |
 
 ## 14 Quellen
 

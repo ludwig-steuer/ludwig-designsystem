@@ -1490,6 +1490,12 @@ const MIRROR_MATCH: Record<string, StatusDescriptor> = {
     description:
       "Die Kanzlei hat eine Ludwig-Buchung in DATEV in mehrere Buchungen aufgeteilt — die Summe der Teile entspricht dem Ludwig-Betrag.",
   },
+  matched_corrected: {
+    label: "von der Kanzlei geändert",
+    kind: "info",
+    description:
+      "DATEV-Satz gehört zu einer Ludwig-Buchung (Export-Referenz), die Kanzlei hat Betrag oder Steuerschlüssel in DATEV verändert — DATEV gilt.",
+  },
   new_unprocessed: {
     label: "DATEV-Fremdbuchung",
     kind: "info",
