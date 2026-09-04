@@ -28,6 +28,15 @@ ein, nicht als ✗, und der Status kann trotzdem `fertig` werden. Sonst bliebe
 jede Aufgabe hier hängen, bis die App migriert ist — und die wartet auf die
 Bausteine.
 
+**Befunde an `ludwig/app` gehören zusätzlich nach `docs/befunde-app.md`.** Sie
+bleiben in ihrer Spec oder ihrem Entitätsprofil stehen — dort stehen sie im
+Zusammenhang —, aber wer sie dort einträgt, trägt sie auch ins Register: eine
+Zeile, mit Quelle. Das Register ist die Übergabe an den Entwicklungsagenten
+der App; verstreut über zwanzig Aufgaben ist ein Befund für ihn unauffindbar.
+Dasselbe gilt für die Kriterien „offen (App)": ihre Ablösung steht dort in
+Abschnitt E. Wer einen Befund drüben erledigt, streicht ihn hier und nennt
+den Commit.
+
 ## Status
 
 `offen` → `spec` → `in Arbeit` → `Abnahme` → `fertig`. Der Status steht in

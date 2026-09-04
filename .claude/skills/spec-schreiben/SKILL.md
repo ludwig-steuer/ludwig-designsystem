@@ -162,7 +162,8 @@ Ein Kriterium, das nur der Autor prüfen kann („fühlt sich richtig an"), ist 
 
 Er baut nichts, ändert keinen Code und erfindet keine Begriffe. Fehlt ein
 GLOSSARY-Eintrag oder ein Typ in `src/ludwig/`, steht das als Befund in der
-Spec und geht an `ludwig/app`.
+Spec **und als Zeile in `docs/befunde-app.md`** — dem Register, das der
+Entwicklungsagent der App abarbeitet. Nur in der Spec findet er ihn nicht.
 
 ## Ergebnis an den Auftraggeber
 

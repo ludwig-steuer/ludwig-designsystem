@@ -349,7 +349,10 @@ angelegt statt reserviert; hier arbeiten mehrere Sitzungen parallel.
 1. `docs/entitaeten/<slug>.md` aus der Vorlage, jede Sektion gefüllt oder
    mit einem Satz gestrichen. Status `analysiert`.
 2. **Befunde für `ludwig/app`** gesammelt: fehlender GLOSSARY-Eintrag, Typ,
-   Ableitung, Registry-Achse. Sie gehen an die App, nicht in den Code hier.
+   Ableitung, Registry-Achse. Sie gehen an die App, nicht in den Code hier. Sie gehen **zusätzlich als Zeile
+   nach `docs/befunde-app.md`** — das Register, aus dem der
+   Entwicklungsagent der App arbeitet; in einem Profil allein sind sie für
+   ihn unauffindbar.
 3. **Offene Fragen** höchstens drei, jede mit Default („ohne Antwort: …").
 4. **Zuschnitt** (§9) gefüllt: je Form und Liste eine Marke; die Backlog-Dateien
    sind angelegt und ihre Nummern stehen in der Tabelle.
