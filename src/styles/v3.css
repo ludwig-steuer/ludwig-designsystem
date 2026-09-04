@@ -2527,3 +2527,104 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 /* Ladefläche: erst der Fakten-Block, dann die Zeilen — kein Kasten über alles. */
 .v2acc__load { display: grid; gap: var(--space-5); }
+
+/* ── 0074 · Beleg — Zelle, Einordnung, Zeile ───────────────────────────────
+   Präfix `v2doc` gehört der Entität und ist mit 0052 vergeben; hier kommen
+   die Maße der drei neuen Formen dazu. Eigener Abschnitt am Ende, nicht
+   einsortiert: an dieser Datei arbeiten mehrere Sitzungen gleichzeitig. */
+
+/* Die Zeile bringt ihr Spaltenmaß selbst mit — sie steht auch ohne `Table`
+   in einer Karte (Belege am Sachverhalt, Teilbelege). Die Reihenfolge ist die
+   der Ränge und über alle Belegarten dieselbe: Gegenpart · Maß · Belegdatum ·
+   Kennung · Sachverhalt · Eingang · Einordnung · Erledigung. */
+.v2doc__row {
+  /* Feste Maße bis auf zwei dehnbare Textspalten — keine inhaltsabhängige
+     Breite (`auto`): jede Zeile ist ein eigenes Grid, und eine lange Marke
+     verschöbe sonst alle Spalten der einen Zeile gegen die der anderen. Genau
+     das Untereinander macht eine Liste lesbar (V8). */
+  --v2-cols: minmax(140px, 1.4fr) 108px 96px minmax(110px, 1.1fr) 88px 96px
+    minmax(130px, 0.9fr) 168px;
+  /* Etwas mehr Luft als die Standardzeile: rechtsbündiges Maß und
+     linksbündiges Belegdatum stoßen sonst aneinander. */
+  gap: var(--space-4);
+}
+/* Ohne `Table` gibt es keine Regel, die der letzten Zeile die Linie nimmt. */
+.v2doc__row:last-child { border-bottom: none; }
+
+/* Rang 1 über Rang 2: der Gegenpart führt, die Belegart steht als Zweitzeile
+   darunter — dieselbe Stelle bei jeder Belegart, auch wenn dort der Dateiname
+   führt (Rang 1b). */
+.v2doc__lead { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.v2doc__lead > .v2main,
+.v2doc__lead > .v2sub,
+.v2doc__case {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Kennung und Gegenpart kürzen bereits nach Zeichen. Das hier ist das
+   Sicherheitsnetz für den Rest — und es kürzt so, dass die **Endung** stehen
+   bleibt: nur der Name schrumpft, was dahinter steht (`.pdf`) nicht. Dasselbe
+   Muster wie in der Kontozelle: ein reines `text-overflow` am Elternteil
+   schnitte genau das ab, wofür die Mitten-Kürzung da ist. */
+.v2doc__key {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+}
+.v2doc__key > *:not(.v2doc__keyname) { flex-shrink: 0; }
+.v2doc__keyname {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2doc__lead .v2rowlink { display: flex; align-items: baseline; min-width: 0; }
+/* Der Zeilen-Link erbt die Farbe: er ist die Zeile, nicht ein Wort darin. */
+.v2doc__lead .v2rowlink { color: inherit; text-decoration: none; }
+
+/* Einordnung: die Achsen, die etwas sagen, nebeneinander. Der Träger bleibt
+   auch leer stehen, damit die Spalten dahinter nicht verrutschen. */
+.v2doc__classcell { min-width: 0; }
+.v2doc__class { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); }
+
+/* Die Zelle steht mitten im Text einer fremden Zeile: Kennung, ein leiser
+   Zusatz, der Zustand. */
+.v2doc__cell {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+}
+.v2doc__cell > .v2sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Ist die Zelle ein Link, gehört die Kennung dazu — auch die gesetzte: sonst
+   sähe eine Rechnungsnummer anders aus als der Dateiname daneben. */
+.v2doc__cell.v2link .v2mono { color: inherit; }
+
+/* ── 0075 · SourceDocumentPreview — das Original im Rahmen ─────────────────
+   Die Höhe der Vorschau steht seit 0052 an `.v2doc__orig`; sie ist damit die
+   Variante `md` (Drawer). `lg` ist die Höhe für View und Karte, wo die
+   Vorschau die Seite trägt statt neben der Arbeit zu stehen. Eigener
+   Abschnitt am Ende, nicht einsortiert. */
+.v2doc__orig--lg { height: clamp(420px, 78vh, 1100px); }
+
+/* Die Vorschau sitzt in einer Karte: der Rahmen kommt von der Karte, das
+   `<iframe>` gibt seinen eigenen ab und bekommt den Innenabstand, den der
+   Kartenkopf schon hat. */
+.v2card > .v2doc__orig {
+  display: block;
+  width: calc(100% - 2 * var(--space-5));
+  margin: var(--space-5);
+  border: none;
+}
+
+/* ── 0076 · Belegdaten je Ausprägung ──────────────────────────────────────
+   Die Fakten sind bis zu drei Blöcke: die generischen Zeilen, der Block der
+   Ausprägung und der Block an der Gruppen-Relation. Sie stehen untereinander
+   mit demselben Abstand — welcher Block erscheint, entscheidet die Registry
+   bzw. die Relation, nicht das Stylesheet. Eigener Abschnitt am Ende. */
+.v2doc__facts { display: grid; gap: var(--space-5); }
+/* Freigestellt im Drawer: dort trennt die Überschrift, nicht eine Fläche. */
+.v2doc__facts .v2fields--bare + .v2fields--bare { margin-top: 0; }

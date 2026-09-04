@@ -3,13 +3,21 @@
 import { FileWarning, Maximize2 } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
+
 import { Button } from "../../primitives/Button";
 import { Callout } from "../../primitives/Callout";
 import { Drawer } from "../../primitives/Drawer";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Skeleton } from "../../primitives/Skeleton";
-import { StatusBadge } from "../../patterns/StatusBadge";
-import { SourceDocumentFacts, type SourceDocumentFactsVM } from "./SourceDocumentFacts";
+import {
+  SourceDocumentCompletion,
+  clipMiddle,
+  sourceDocumentIdentifier,
+  type SourceDocumentVM,
+} from "./SourceDocument";
+import { SourceDocumentFacts, type SourceDocumentGroup } from "./SourceDocumentFacts";
+import { SourceDocumentPreview } from "./SourceDocumentPreview";
 
 /**
  * The document, looked up beside the work (0052).
@@ -29,16 +37,28 @@ import { SourceDocumentFacts, type SourceDocumentFactsVM } from "./SourceDocumen
  */
 
 export interface SourceDocumentQuickView {
-  /** How the document is called — „Beleg · ACME GmbH". */
-  title: string;
-  facts: SourceDocumentFactsVM;
+  /**
+   * The document itself (0074). Title, identifier and state of the head are
+   * **derived** from it — the drawer no longer has them handed over, so it
+   * cannot name the document differently than the list it stands next to.
+   */
+  document: SourceDocumentVM;
+  /** The caller picks which of the two summaries this is (0076). */
+  summary?: string | null;
   /** Signed URL of the preview; `null` means there is none. */
   previewUrl?: string | null;
   /** Why there is no preview — said in a sentence, not left blank. */
   previewUnavailableReason?: string | null;
-  originalFileName?: string | null;
-  /** Registry axis `beleg` — the state belongs in the head (zone 1). */
-  status?: string | null;
+  /** „Seiten 5–7 aus …" for a document cut out of a collection PDF. */
+  excerpt?: { pages: string; parentTitle?: string; parentHref?: string } | null;
+  /** The group block of the facts — original with its parts, or one of them. */
+  group?: SourceDocumentGroup | null;
+}
+
+/** „Rechnung · ACME GmbH" — the kind of document leads, never „Beleg" for all. */
+function headTitle(document: SourceDocumentVM): string {
+  const kind = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
+  return document.counterparty ? `${kind} · ${document.counterparty}` : kind;
 }
 
 /**
@@ -77,13 +97,16 @@ export function SourceDocumentDrawer({
       onClose={onClose}
       // Zone 1: the head stands before the body is there — otherwise the
       // drawer would open onto nothing while it loads.
-      title={record?.title ?? "Beleg"}
+      title={record ? headTitle(record.document) : "Beleg"}
       meta={
         <span className="v2doc__ident">
-          {record?.facts.invoiceNumber ?? record?.originalFileName ?? reference}
-          {record?.status ? (
-            <StatusBadge axis="beleg" status={record.status} info={false} />
-          ) : null}
+          {/* The same fallback chain as the row: what the specialization fills
+              in, else the file name, else the short id — one rule, one place. */}
+          {record ? identText(record.document) : reference}
+          {/* The state of the head is the **completion**: the axis `beleg`
+              lives at the invoice subtype and never has a value for 16 % of
+              all documents (finding L-42). */}
+          {record ? <SourceDocumentCompletion document={record.document} /> : null}
         </span>
       }
       size="lg"
@@ -100,6 +123,12 @@ export function SourceDocumentDrawer({
       <DrawerBody reference={reference} record={record} loading={loading} error={error} />
     </Drawer>
   );
+}
+
+/** The identifier of the head, shortened the way card and drawer shorten (88). */
+function identText(document: SourceDocumentVM): string {
+  const ident = sourceDocumentIdentifier(document);
+  return ident.mono ? ident.value : clipMiddle(ident.value, 88);
 }
 
 /** The four states in their order of precedence: error → loading → not found → content. */
@@ -146,20 +175,32 @@ function DrawerBody({
 
   return (
     <>
-      {/* Zone 2: the thing itself, first and large. A document without a
-          preview says why — it gets no placeholder. */}
-      {record.previewUrl ? (
-        <iframe className="v2doc__orig" src={record.previewUrl} title="Beleg-Vorschau" />
-      ) : (
-        <div className="v2sub">
-          {record.previewUnavailableReason ?? "Für diesen Beleg gibt es keine Vorschau."}
-        </div>
-      )}
+      {/* Zone 2: the thing itself, first and large — the same preview the card
+          and the view use (0075), including the sentence that stands in for a
+          missing original and the excerpt of a partial document. */}
+      <SourceDocumentPreview
+        url={record.previewUrl ?? null}
+        unavailableReason={record.previewUnavailableReason}
+        title={sourceDocTypeLabel(
+          record.document.sourceDocType,
+          record.document.classDocumentForm,
+        )}
+        fileName={record.document.fileName}
+        excerpt={record.excerpt}
+        height="md"
+      />
 
-      {/* Zone 3: the same component the full view uses — one set of field rows. */}
+      {/* Zone 3: the same component the full view uses — one set of field rows.
+          „Belegdaten", not „Extrahierte Belegdaten": at a contract nothing was
+          extracted that an invoice extracts. */}
       <div>
-        <div className="v2doc__h">Extrahierte Belegdaten</div>
-        <SourceDocumentFacts facts={record.facts} />
+        <div className="v2doc__h">Belegdaten</div>
+        <SourceDocumentFacts
+          document={record.document}
+          summary={record.summary}
+          group={record.group}
+          tone="bare"
+        />
       </div>
 
       {/* Zone 4: what the glance does not answer. */}

@@ -25,6 +25,13 @@ export interface StatusBadgeProps {
    * relation belongs on the trigger, and `Popover` already sets it there.
    */
   chevron?: boolean;
+  /**
+   * Freitext dieses einen Objekts, an den Tooltip angehängt — der Grund einer
+   * Erledigung (`completed_reason`), die Notiz einer Ersetzung. Die Achse
+   * kennt ihn nicht: er gehört dem Datensatz, nicht dem Zustand. Er ersetzt
+   * nie das Wort auf der Marke (V7).
+   */
+  note?: string | null;
   className?: string;
 }
 
@@ -54,6 +61,7 @@ export function StatusBadge({
   showIcon = true,
   info = true,
   chevron = false,
+  note,
   className,
 }: StatusBadgeProps) {
   const desc = resolveStatus(axis, status);
@@ -64,6 +72,7 @@ export function StatusBadge({
     `${AXIS_LABEL[axis]}: ${desc.label}`,
     stageDesc ? `Stufe: ${stageDesc.label}` : null,
     desc.description ?? null,
+    note ?? null,
   ]
     .filter(Boolean)
     .join(" · ");

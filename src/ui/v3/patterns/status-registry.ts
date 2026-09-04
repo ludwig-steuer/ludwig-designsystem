@@ -59,6 +59,7 @@ export type StatusAxis =
   | "beleg_kategorie"
   | "dokumentgruppe"
   | "beleg_richtung"
+  | "beleg_erledigung"
   | "job"
   | "upload"
   | "dispatch"
@@ -1681,6 +1682,89 @@ const DATEV_PRUEFUNG: Record<string, StatusDescriptor> = {
   },
 };
 
+/**
+ * Erledigung eines Belegs — `client_source_docs.completed_via`, plus zwei
+ * Werte, die keine Spaltenwerte sind (angehängt mit 0074, Register L-41).
+ *
+ * Sie ist der Zustand, den **jede** Belegart trägt: die Achse `beleg`
+ * (Verarbeitung) lebt am Rechnungs-Subtyp und hat für 16 % der Belege nie
+ * einen Wert, `beleg_inbox` steht im Bestand bei 383 von 384 Belegen auf
+ * demselben Wert. „Ist der Beleg durch?" beantwortet nur diese Achse.
+ *
+ * Wertebereich: DB-CHECK auf `completed_via` (sechs Werte). Ein TS-Enum gibt
+ * es nicht; die lokale Union `SourceDocCompletionVia` in `SourceDocument.tsx`
+ * spiegelt ihn (Register L-47).
+ *
+ * Zwei Schlüssel stehen **nicht** in der Spalte, sondern sagen etwas über
+ * `completed_at`:
+ *   `open`      ← `completed_at IS NULL` — der Beleg steht noch in der
+ *                 Todo-Liste (41 von 384)
+ *   `completed` ← `completed_at` gesetzt, `completed_via` NULL: erledigt,
+ *                 Grund unbekannt (61 von 384). **Nicht** „offen".
+ *
+ * Schreiber: `DocCompletionControl` (Hand), der Buchungslauf (`booking`), der
+ * Sachverhalts-Abschluss (`case_closed`), der DATEV-Import (`import`), die
+ * Ersetzung eines Belegs (`superseded`).
+ *
+ * Fallstricke:
+ *  - **Orthogonal zum Pipeline-Status** (GLOSSARY): „Pipeline durchgelaufen"
+ *    heißt nicht „fertig", und ein erledigter Beleg kann eine abgebrochene
+ *    Pipeline haben.
+ *  - Der Freitext `completed_reason` ist der Tooltip daneben, kein eigener
+ *    Zustand — er trägt bei `manual` die Begründung des Menschen.
+ *  - Bestand (2026-09-04): booking 171 · manual 77 · no_booking_required 26 ·
+ *    superseded 7 · case_closed 1 · import 0.
+ */
+const BELEG_ERLEDIGUNG: Record<string, StatusDescriptor> = {
+  open: {
+    label: "Offen",
+    kind: "info",
+    description:
+      "An diesem Beleg ist noch etwas zu tun — er steht in der Todo-Liste der Periode. Unabhängig davon, wie weit die Verarbeitung ist.",
+  },
+  completed: {
+    label: "Erledigt",
+    kind: "success",
+    description:
+      "Der Beleg ist durch; woran er erledigt wurde, ist nicht festgehalten. Altbestand — seit F87 schreibt jeder Weg seinen Grund mit.",
+  },
+  booking: {
+    label: "Gebucht",
+    kind: "success",
+    description: "Der Beleg ist gebucht — die Buchung hat ihn beim Abschluss mit erledigt.",
+  },
+  case_closed: {
+    label: "Sachverhalt geschlossen",
+    kind: "success",
+    description:
+      "Der Sachverhalt, an dem der Beleg hängt, wurde geschlossen. Der Beleg selbst wurde nicht einzeln abgehakt.",
+  },
+  import: {
+    label: "Über Import erledigt",
+    kind: "success",
+    description:
+      "Der Beleg kam aus DATEV und war dort bereits gebucht — er ist mit dem Import erledigt, ohne eigenen Buchungslauf.",
+  },
+  superseded: {
+    label: "Ersetzt",
+    kind: "neutral",
+    description:
+      "Ein neuer Beleg hat diesen abgelöst (Korrektur, zweiter Scan). Ersetzt heißt nicht gelöscht: Datei und Historie bleiben, gebucht wird der Nachfolger.",
+  },
+  manual: {
+    label: "Von Hand erledigt",
+    kind: "success",
+    description:
+      "Jemand aus der Kanzlei hat den Beleg abgehakt. Der Grund steht als Freitext daneben.",
+  },
+  no_booking_required: {
+    label: "Keine Buchung nötig",
+    kind: "success",
+    description:
+      "Der Beleg wird nicht gebucht — Auswertung, Doppel oder ein Dokument ohne Geldfluss. Er ist damit fertig, nicht übersprungen.",
+  },
+};
+
 export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor>> = {
   beleg: BELEG_PROCESSING,
   beleg_stage: BELEG_STAGE,
@@ -1688,6 +1772,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   beleg_kategorie: BELEG_KATEGORIE,
   dokumentgruppe: DOKUMENTGRUPPE,
   beleg_richtung: BELEG_RICHTUNG,
+  beleg_erledigung: BELEG_ERLEDIGUNG,
   job: JOB_STATUS,
   upload: UPLOAD_PHASE,
   dispatch: DISPATCH_STATE,

@@ -40,19 +40,36 @@ const PREVIEW = `data:text/html;charset=utf-8,${encodeURIComponent(`
 `)}`;
 
 const RECORD: SourceDocumentQuickView = {
-  title: "Beleg · ACME GmbH",
-  status: "processed",
-  originalFileName: "RE-4471.pdf",
-  previewUrl: PREVIEW,
-  facts: {
-    vendor: "ACME GmbH",
-    invoiceNumber: "RE-4471",
-    invoiceDate: "2026-08-26",
-    gross: 1249.9,
-    currency: "EUR",
-    summary:
-      "Bürobedarf und eine Bewirtung auf einem Beleg — der Beleg wird gesplittet gebucht.",
+  // Since 0076 the drawer is handed the **document** (0074) and derives title,
+  // identifier and state from it — so it cannot name the document differently
+  // than the list it stands next to.
+  document: {
+    id: "3f2b9c14-0a77-4d2e-9f01-6b8c5e2a1d40",
+    fileName: "RE-4471.pdf",
+    sourceDocType: "invoice",
+    classDocumentForm: "commercial_invoice",
+    counterparty: "ACME GmbH",
+    detail: {
+      kind: "invoice",
+      number: "RE-4471",
+      gross: 1249.9,
+      currency: "EUR",
+      net: 908.7,
+      vat: 341.2,
+      dueDate: "2026-09-25",
+      servicePeriod: "August 2026",
+    },
+    documentDate: "2026-08-26",
+    receivedDate: "2026-08-27",
+    completedAt: "2026-08-30T09:12:00Z",
+    completedVia: "booking",
+    docCategory: "performance",
+    docDirection: "inbound",
+    classDocumentKind: "original",
   },
+  previewUrl: PREVIEW,
+  summary:
+    "Bürobedarf und eine Bewirtung auf einem Beleg — der Beleg wird gesplittet gebucht.",
 };
 
 /**
@@ -92,19 +109,21 @@ export const OhneVorschau: Story = {
       onClose={() => {}}
       reference="RE-4468"
       record={{
-        title: "Beleg · Bürodienst Nord",
-        status: "review_needed",
-        originalFileName: "scan-4468.tiff",
+        document: {
+          id: "9c22",
+          fileName: "scan-4468.tiff",
+          sourceDocType: "invoice",
+          classDocumentForm: "commercial_invoice",
+          counterparty: "Bürodienst Nord",
+          detail: { kind: "invoice", number: "RE-4468", gross: 318, currency: "EUR" },
+          documentDate: "2026-08-24",
+          receivedDate: "2026-08-25",
+          docCategory: "performance",
+          docDirection: "inbound",
+        },
         previewUrl: null,
         previewUnavailableReason:
           "Das Format TIFF lässt sich nicht im Browser anzeigen. Die Datei liegt unverändert in der Ablage.",
-        facts: {
-          vendor: "Bürodienst Nord",
-          invoiceNumber: "RE-4468",
-          invoiceDate: "2026-08-24",
-          gross: 318,
-          currency: "EUR",
-        },
       }}
       onOpenFull={() => {}}
     />

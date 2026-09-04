@@ -268,14 +268,34 @@ export {
 } from "./entities/account/AccountEntries";
 export { AccountDrawer } from "./entities/account/AccountDrawer";
 
-/* Beleg — die Nachschlag-Form neben der Arbeit (0052) */
+/* Beleg — die lesende Familie, die Vorschau, die Fakten je Ausprägung,
+   die Nachschlag-Form (0052, 0074, 0075, 0076) */
+export {
+  SourceDocumentCell,
+  SourceDocumentClass,
+  SourceDocumentRow,
+  SourceDocumentCompletion,
+  sourceDocumentIdentifier,
+  type SourceDocumentVM,
+  type SourceDocCompletionVia,
+} from "./entities/source-document/SourceDocument";
+export { SourceDocumentPreview } from "./entities/source-document/SourceDocumentPreview";
+export {
+  SOURCE_DOCUMENT_DETAILS,
+  resolveSourceDocumentDetail,
+  type SourceDocumentDetail,
+  type SourceDocumentDetailEntry,
+  type SourceDocIdentifier,
+  type SourceDocMeasure,
+  type FactRow,
+} from "./entities/source-document/source-document-detail";
 export {
   SourceDocumentDrawer,
   type SourceDocumentQuickView,
 } from "./entities/source-document/SourceDocumentDrawer";
 export {
   SourceDocumentFacts,
-  type SourceDocumentFactsVM,
+  type SourceDocumentGroup,
 } from "./entities/source-document/SourceDocumentFacts";
 
 /* Sachverhalt — der Verlauf über Ereignisse, Klärungen, Erwartungen (0040) */
