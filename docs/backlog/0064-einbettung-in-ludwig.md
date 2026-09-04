@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | — (Infrastruktur, keine Komponente) |
 | Quelle | README „Das Repo wird später als Git-Submodule in `ludwig/` eingebunden" · `app/docs/design-system.md` · Owner-Anfrage 2026-09-04 |
 | Ersetzt | in der App: `src/styles/{tokens,app-chrome,components,booking}.css` (Kopien) und `src/styles/v2.css` (bis auf 6 Klassen) |
@@ -39,6 +39,20 @@ der Restbestand der Migration (Start: 39 Dateien).
   still. Die 6 Klassen, die nur v2 kennt (`abn__progress`,
   `abn__progress__text`, `abn__screenhead`, `abn__screenhead__lead/nav/row`,
   in der App benutzt), bleiben als Rest in der App-Datei `v2.css`.
+- **Domänentypen aus der konkreten Datei, nie vom Modul-Barrel.** Der
+  Spiegel-Barrel `src/ludwig/modules/<modul>/index.ts` ist generiert und
+  exportiert mehr als der echte (`ClarificationType`, `ExpectationKind`
+  fehlen drüben) — `CaseTimeline` importiert deshalb aus
+  `…/accounting-cases/domain/case`, wie `tax-assist` aus `…/domain/tax-keys`.
+- **Die App prüft strenger** (`noUncheckedIndexedAccess`,
+  `noImplicitOverride`, `noFallthroughCasesInSwitch`) und prüft damit alles,
+  was sie aus dem Submodule kompiliert. Fünf Stellen in `LogBrowser`,
+  `AmountInput`, `Selection` sind angepasst. Offen (Owner): die Flags auch
+  hier setzen — heute stünden dann 46 Fehler in Stories, die die App nie
+  kompiliert.
+- **Styles als Subpfad exportiert** (`./styles/*` → `./src/styles/*`): mit
+  `exports` in der `package.json` wären Deep-Imports auf `src/styles/…`
+  sonst gesperrt. Die App lädt `@ludwig/designsystem/styles/<name>.css`.
 - **Nicht `styles.css` des DS importieren.** Die Kette dort lädt Google-Fonts
   und Tailwind-Base — die App hat beides schon. Die App importiert die
   Einzeldateien.
@@ -95,7 +109,7 @@ Dateien), **nicht pushen**. Die App hat fremde uncommittete Änderungen
    nutzt `sr-only`).
 6. **`apps/web/src/app/globals.css`:** die vier Imports `tokens`,
    `app-chrome`, `components`, `booking` auf
-   `@ludwig/designsystem/src/styles/<name>.css` umbiegen; die vier Kopien
+   `@ludwig/designsystem/styles/<name>.css` umbiegen; die vier Kopien
    unter `apps/web/src/styles/` löschen. `v3.css` aus dem DS an die Stelle
    von `v2.css` importieren; `v2.css` auf die 6 Rest-Klassen kürzen
    (Kommentar oben: warum der Rest, wo der Rest hingehört — die
