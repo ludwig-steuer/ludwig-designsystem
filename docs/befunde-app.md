@@ -57,6 +57,7 @@ meldet ihn hier — es erfindet keine Begriffe.
 | **L-16** | Server Actions, die `ids: string[]` nehmen (Freigabe in `cases` und Stapelabnahme) | die betroffenen Module | Freigabe läuft je Zeile; `DataTable` bringt die Auswahl mit, die Aktion fehlt (V11) | 0057 |
 | **L-36** | `documentCounterparty({ docDirection, vendorName, customerName, classCounterpartyName })` — **ein** Weg zum Namen des Gegenparts | `modules/source-docs/domain/` | drei Wege: `PartnerCell` rechnet aus Richtung + vendor/customer, `BelegeTab` nimmt `class_counterparty_name`, der v3-Drawer beschriftet ihn „Lieferant" | `entitaeten/document.md` B6 |
 | **L-37** | Registry-Achse `beleg_charakter` für `document_kind` (`original` · `credit_note` · `self_billing` · `refund` · `unknown`) | `status-registry.ts` bzw. die Achsen-Quelle der App | `DOCUMENT_KIND_LABEL` als Label-Map; die Belegliste zeigt den Wert als Badge ohne Achse. Vier Einordnungs-Achsen, drei in der Registry | `entitaeten/document.md` B5 |
+| **L-44** | `SourceDocType` fehlt der Wert `declaration` — DB-CHECK und `SOURCE_DOC_TYPE_LABELS` führen sieben Werte, die TS-Union sechs | `modules/source-docs/domain/document-form-mapping.ts` | 0074 weitet die Union lokal (`SourceDocType \| "declaration"`) und begründet es | 0074 |
 | **L-17** | `BATCH_LOG_VIEWS` als allgemeines `LOG_VIEWS` — es trägt die Wörter aus Z6, hängt aber am Stapel | `audit-log/domain/`, der Stapel importiert | stapelgebunden | 0054 |
 
 ## B · GLOSSARY

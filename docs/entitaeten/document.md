@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **geprüft** |
+| Status | **in Specs** — 0074 · 0075 · 0076 |
 | GLOSSARY | `### Source document supertype & specializations (Beleg-Supertyp)` — englisch `source document`, Ordner `entities/document/` |
 | Tabelle | `ludwig.client_source_docs` (Supertyp) + `…_invoices` · `…_contracts` (1:1-Subtypen, Class-Table-Inheritance) |
 | Typen | `src/ludwig/modules/source-docs/domain/` — `source-doc-type.ts` (`SOURCE_DOC_TYPE_LABELS`, `sourceDocTypeLabel()`), `document-form-labels.ts`, `document-form-mapping.ts` (`SourceDocType`, `DocCategory`, `DocDirection`), `tabs.ts`; `modules/contracts/domain/contract.ts` — `ContractDetailData`, `CONTRACT_TYPE_LABELS` |
@@ -267,11 +267,11 @@ folgt mit der Detailansicht (0071), die sie ohnehin voraussetzt.
 
 | Form / Liste | Marke | Grund | Backlog |
 |---|---|---|---|
-| `DocumentCell` + `DocumentClass` | jetzt | Bausteine von Zeile, Karte und Liste; `DocumentCell` trägt die Rückfallkette Kennung → Dateiname → Kurz-ID | — |
-| `DocumentRow` | jetzt | trägt sechs Listen, ohne sie ist keine davon zu bauen | — |
-| `DocumentPreview` | jetzt | trägt Karte, Drawer und View; heute zweimal dieselbe Datei | — |
-| `DocumentFacts` (Umbau + Registry) | jetzt | der Owner-Punkt: Ausprägungen mit eigenen Feldern; heute dreimal getrennt gebaut. Registry-Einträge jetzt: Rechnung (Daten) und Vertrag (**lesend, gegen das Schema** — Owner 2026-09-04) | — |
-| `DocumentDrawer` nachziehen | jetzt (Teil von `DocumentFacts` und `DocumentPreview`) | er benutzt beide; sonst driften v3 und v3 auseinander. Keine neue Form — die sechste wäre eine zu viel | — |
+| `DocumentCell` + `DocumentClass` | jetzt — **0074** | Bausteine von Zeile, Karte und Liste; `DocumentCell` trägt die Rückfallkette Kennung → Dateiname → Kurz-ID | — |
+| `DocumentRow` | jetzt — **0074** | trägt sechs Listen, ohne sie ist keine davon zu bauen | — |
+| `DocumentPreview` | jetzt — **0075** | trägt Karte, Drawer und View; heute zweimal dieselbe Datei | — |
+| `DocumentFacts` (Umbau + Registry) | jetzt — **0076** | der Owner-Punkt: Ausprägungen mit eigenen Feldern; heute dreimal getrennt gebaut. Registry-Einträge jetzt: Rechnung (Daten) und Vertrag (**lesend, gegen das Schema** — Owner 2026-09-04) | — |
+| `DocumentDrawer` nachziehen | jetzt — **0076** (Teil von `DocumentFacts` und `DocumentPreview`) | er benutzt beide; sonst driften v3 und v3 auseinander. Keine neue Form — die sechste wäre eine zu viel | — |
 | `DocumentCard` | **Backlog** | §9 lässt fünf Formen „jetzt" zu, die Liste stand auf sechs. Die Karte blockiert nichts, ihr §7-Nr.-1-Beleg ist derselbe wie der von `DocumentFacts`, und 0071 nennt sie schon als Voraussetzung — sie entsteht dort. **0071 „Setzt voraus" ist beim Aufgreifen anzupassen** | `0071` |
 | Belegliste, Inbox, Einreichen (`DocumentColumns`) | Backlog | `DataTable` (0057) ist gebaut; es fehlen die **drei** Seitenprofile (die stockenden Belege sind zwei Tabs der Belegliste, keine vierte Seite) | `0070` |
 | `DocumentView` + Seitenprofil `beleg-detail.md` | Backlog | sechs Tabs, drei davon rechnungsspezifisch; braucht ein Seitenprofil. Nimmt nach der Prüfung `DocumentCard` und die `InlineEdit`-Werte des Editors mit auf | `0071` |
