@@ -2,15 +2,16 @@
 
 | | |
 |---|---|
-| Status | analysiert |
+| Status | **geprüft** |
 | GLOSSARY | `### Source document supertype & specializations (Beleg-Supertyp)` — englisch `source document`, Ordner `entities/document/` |
 | Tabelle | `ludwig.client_source_docs` (Supertyp) + `…_invoices` · `…_contracts` (1:1-Subtypen, Class-Table-Inheritance) |
 | Typen | `src/ludwig/modules/source-docs/domain/` — `source-doc-type.ts` (`SOURCE_DOC_TYPE_LABELS`, `sourceDocTypeLabel()`), `document-form-labels.ts`, `document-form-mapping.ts` (`SourceDocType`, `DocCategory`, `DocDirection`), `tabs.ts`; `modules/contracts/domain/contract.ts` — `ContractDetailData`, `CONTRACT_TYPE_LABELS` |
 | Status-Achsen | `beleg_inbox` (Supertyp-`status`) · `beleg` (Pipeline, lebt am **Rechnungs-Subtyp**) · `beleg_stage` · `beleg_kategorie` · `beleg_richtung` · `dokumentgruppe` |
 | Wichtigkeit | **hoch** — Kern-ER-Bild; der Rechnungs-Subtyp ebenfalls hoch, der Vertrags-Subtyp mittel (Datenmodell-Review §7) |
-| Datenstand | Staging über den Pooler, 2026-09-04, **384 Belege** (318 mit Rechnungs-Zeile, 0 mit Vertrags-Zeile), 6 Mandanten |
+| Datenstand | Staging über den Pooler, 2026-09-04, **384 Belege** (318 mit Rechnungs-Zeile, 0 mit Vertrags-Zeile), 6 Mandanten. Nachgerechnet 2026-09-04 (Prüfung): alle Füllgrade, Textlängen und Kardinalitäten unten stimmen |
 | Rückfrage | gestellt und **beantwortet** am 2026-09-04 (Owner) — Ausprägungen füllen die Ränge, Vertrag lesend jetzt, keine fehlenden Anwendungsfälle |
 | Analyse von / am | Claude, 2026-09-04 (Skill `entitaet-analysieren`) |
+| Prüfung von / am | Claude, 2026-09-04 (zweiter Agent, §5–§9) — 24 Zeilen bestätigt, 11 geändert, 1 offen; siehe Abschnitt „Prüfung" |
 
 ## Was sie ist
 
@@ -50,26 +51,54 @@ Komponenten · Rechnung 21 · alle anderen Belegarten zusammen 2").
 Die Konsequenz für jede Form dieser Familie:
 
 > Die **Reihenfolge** der Datenpunkte ist über alle Belegarten dieselbe.
-> Welches Feld einen Rang füllt, entscheidet `source_doc_type` — über eine
+> Welches Feld einen Rang füllt, entscheidet die Ausprägung — über eine
 > **Registry**, nicht über ein `if (isInvoice)`. Liefert eine Ausprägung für
-> einen Rang keinen Füller, entfällt die Zeile; es gibt kein „—" für ein
-> Feld, das es bei dieser Belegart gar nicht gibt.
+> einen Rang keinen Füller, greift der **Rückfall** dieses Rangs; gibt es
+> auch den nicht, entfällt die Zeile. Es gibt kein „—" für ein Feld, das es
+> bei dieser Belegart gar nicht gibt.
 
 Die Regel gilt **ab der Zeile**, nicht erst in der Karte (Owner 2026-09-04,
 offene Frage 2): schon `DocumentRow` füllt Maß und Kennung je Ausprägung.
+
+**Der Schlüssel der Registry ist nicht `source_doc_type` allein** (Prüfung
+2026-09-04). Drei Gründe, alle nachgerechnet:
+
+1. **Diskriminator und Subtyp-Zeile stimmen in 10 von 384 Fällen nicht
+   überein** — 7 Belege tragen `invoice`, haben aber keine Rechnungs-Zeile
+   (die Registry renderte einen leeren Rechnungsblock), 3 Belege tragen
+   `other` und haben eine (die Registry verstecke Felder, die es gibt).
+   Befund B9. Die App entscheidet heute deshalb über die **Existenz der
+   Zeile**: `isInvoice = Boolean(invoice)` (`documents/[sourceDocId]/page.tsx`),
+   `availableDocTabs({ isInvoice })`.
+2. `sourceDocTypeLabel()` fällt für `other` und NULL bewusst auf das
+   **Belegform**-Label zurück („Sammel-PDF", „Lohnabrechnung") — schon das
+   Label je Ausprägung kommt aus zwei Feldern.
+3. Der Invoice-Flow der Inbox hängt ebenfalls an der Form, nicht am Typ
+   (`formQualifiesForInvoiceFlow`).
+
+Also: **Registry-Schlüssel ist `source_doc_type`, Fallback-Schlüssel die
+Belegform, und der Eintrag rendert nur, was seine Subtyp-Zeile wirklich
+liefert.**
 
 Die Registry ist im Code schon angelegt und ausdrücklich als leer vermerkt
 (`source-doc-type.ts`: „Dies ist der Keim einer Renderer-Registry"). Sie zu
 füllen ist die Arbeit dieser Familie.
 
+Der Wertebereich hat **sieben** Werte plus NULL — DB-CHECK und
+`SOURCE_DOC_TYPE_LABELS` sind deckungsgleich. Rang 5 fällt in jeder Zeile
+zuletzt auf den **Dateinamen** zurück (100 % gefüllt, siehe Datenpunkte); so
+macht es die App heute in vier von sechs Listen.
+
 | Ausprägung (`source_doc_type`) | Bestand | Subtyp-Tabelle | Rang 3 (Maß) | Rang 5 (Kennung) | eigene Punkte ab M |
 |---|---:|---|---|---|---|
-| Rechnung `invoice` | 322 (84 %) | `…_invoices`, 318 Zeilen | Brutto (`invoice_total_value`) | Rechnungsnummer | Netto/USt, Fälligkeit, Zahlungsziel, Leistungszeitraum, Zahlstatus, USt-IdNr., Original-Währung, Positionen |
-| Sonstiger Beleg `other` | 37 (10 %) | keine | — | — | nur Supertyp-Punkte |
-| Kontoauszug `bank_statement_pdf` | 10 (3 %) | **keine** → Befund B2 | — | — | Zeitraum, Konto, Saldo — existieren nirgends |
-| Kreditkartenabrechnung `credit_card_statement` | 8 (2 %) | **keine** → Befund B2 | — | — | Zeitraum, Karte, Abrechnungspositionen |
-| Reisekostenabrechnung `travel_expense_report` | 4 (1 %) | **keine** → Befund B2 | — | — | Abrechner, Zeitraum, Erstattungssumme |
-| Vertrag `contract` | 2 (0,5 %) | `…_contracts`, **0 Zeilen** → Befund B1 | Primärbetrag (`primary_amount`) | — (Vertragsgegenstand tritt an die Stelle) | Vertragstyp, Laufzeit (Start/Ende/Monate/unbefristet), buchungsrelevante Fakten mit Provenienz |
+| Rechnung `invoice` | 322 (84 %) | `…_invoices`, 318 Zeilen (315 davon an `invoice`) | Brutto (`invoice_total_value`) | Rechnungsnummer, sonst Dateiname | Netto/USt, Fälligkeit, Zahlungsziel, Leistungszeitraum, Zahlstatus, USt-IdNr., Original-Währung, Positionen |
+| Sonstiger Beleg `other` | 37 (10 %) | keine (3 Ausreißer mit Rechnungs-Zeile → B9) | — | Dateiname | nur Supertyp-Punkte; Label kommt aus der Belegform |
+| Kontoauszug `bank_statement_pdf` | 10 (3 %) | **keine** → Befund B2 | — | Dateiname | Zeitraum, Konto, Saldo — existieren nirgends |
+| Kreditkartenabrechnung `credit_card_statement` | 8 (2 %) | **keine** → Befund B2 | — | Dateiname | Zeitraum, Karte, Abrechnungspositionen |
+| Reisekostenabrechnung `travel_expense_report` | 4 (1 %) | **keine** → Befund B2 | — | Dateiname | Abrechner, Zeitraum, Erstattungssumme |
+| Vertrag `contract` | 2 (0,5 %) | `…_contracts`, **0 Zeilen** → Befund B1 | Primärbetrag (`primary_amount`) | Vertragsgegenstand (`contract_subject`), sonst Dateiname | Vertragstyp, Laufzeit (Start/Ende/Monate/unbefristet), buchungsrelevante Fakten mit Provenienz |
+| Erklärung `declaration` | 0 | **keine** → Befund B2 | — | Dateiname | Steuerart, Zeitraum, Abgabedatum — kein Schema, kein Bestand; Eintrag bleibt leer (Beleg `Schema`) |
+| ohne Typ `NULL` | 1 (0,3 %) | keine | — | Dateiname | keine. `sourceDocTypeLabel(null)` heißt bewusst „Beleg", nie „Rechnung" — das ist der Default-Eintrag der Registry, kein Sonderfall |
 
 ## Schaubild
 
@@ -93,18 +122,20 @@ sonst sähe ein Rechnungsfeld voller aus, als es für die Familie ist.
 
 | Datenpunkt | Quelle | Rolle | Füllgrad | heute in | änderbar | Rang | ab Form | Beleg |
 |---|---|---|---|---|---|---|---|---|
-| Gegenpart (`classCounterpartyName`) | Spalte, denormalisiert aus `class_companies` | Identität | 90 % | Belegliste (`PartnerCell`), `StuckDocumentsTable`, `BelegeTab`, `SourceDocFactsCard` | nie | 1 | XS | Füllgrad · heute in 4 Komponenten |
+| Gegenpart (`classCounterpartyName`) | Spalte, denormalisiert aus `class_companies` | Identität | **90 % gesamt, aber je Ausprägung: Rechnung 95 % · Kontoauszug 70 % · Kreditkarte 63 % · Sonstiger 57 % · Vertrag 50 %** | Belegliste (`PartnerCell`), `StuckDocumentsTable`, `BelegeTab`, `SourceDocFactsCard` | nie | 1 | XS | Füllgrad · heute in 4 Komponenten |
+| Dateiname (`originalFileName`) | Relation `ops_stored_files` (1:1, `NOT NULL`) | Identität | **100 % — in jeder Ausprägung** | `StuckDocumentsTable` (führende Spalte), `DocumentInbox` (führend), `InboxInvoiceSubmissionList`, Belegliste + `BelegeTab` + `BelegDrawer` als Rückfall | nie | 1b | XS | Füllgrad · vier von sechs Listen führen heute mit ihm oder fallen auf ihn zurück |
 | Belegart (`sourceDocType` + `classDocumentForm`) | `abgeleitet: sourceDocTypeLabel()` | Identität | 100 % | `BelegeTab`, `SourceDocFactsCard`, Inbox | Nutzer (`ClassificationEditor`) | 2 | XS | GLOSSARY „Oberbegriff ↔ Ausprägung" · Füllgrad |
 | Erledigt (`completedAt` + `completedReason` + `completedVia`) | Spalte | Zustand | 89 % | Belegliste (Spalte „Erledigt"), `DocCompletionControl` | Nutzer | — (Zustand) | XS | GLOSSARY „Document completion" |
 | Maß der Ausprägung — Brutto bzw. Primärbetrag | Subtyp | Maß | 81 % (Rechnung) · 0 % (Vertrag) | Belegliste, `BelegeTab`, `BelegSummary`, `GlanceCard` | nie | 3 | S | Füllgrad · **Nutzer** (Owner 2026-09-04: je Ausprägung füllen) |
 | Belegdatum (`documentDate`, bei Rechnungen `invoiceDate`) | Spalte | Zeit | 97 % | Belegliste, `BelegeTab`, `SourceDocDateEditor` | Nutzer | 4 | S | Füllgrad · GLOSSARY „NULL bleibt NULL" |
-| Kennung der Ausprägung — Rechnungsnummer bzw. Dateiname | Subtyp / `ops_stored_files` | Identität | 79 % (Rechnung) | Belegliste (`InvoiceNumberCell`), `BelegeTab`, `StuckDocumentsTable` | nie | 5 | S | Füllgrad · **Nutzer** (Owner 2026-09-04: je Ausprägung füllen) |
+| Kennung der Ausprägung — Rechnungsnummer, Vertragsgegenstand, **sonst Dateiname** | Subtyp / Rückfall `ops_stored_files` | Identität | 79 % (Rechnung) · mit Rückfall **100 %** | Belegliste (`InvoiceNumberCell`, Rückfallkette Nr. → Dateiname → Kurz-ID), `BelegeTab` (dieselbe Kette), `StuckDocumentsTable` | nie | 5 | S | Füllgrad · **Nutzer** (Owner 2026-09-04: je Ausprägung füllen) · die Rückfallkette ist in vier Listen gebaut |
 | Sachverhalt (`caseNumber`) | Relation über `document_received`-Ereignis | Kontext | 88 % | Belegliste (`CaseCell`), `StuckDocumentsTable` | Server | 6 | S | Kardinalität aus §Relationen |
 | Eingangsdatum (`receivedDate`) | Spalte, `NOT NULL` | Zeit | 100 % | Belegliste (Spalte „Eingang", **Sortierschlüssel**), `StuckDocumentsTable` | Server / DATEV-Import | 7 | S | GLOSSARY „Perioden-Achse der Belegliste" |
 | Einordnung: Kategorie (`docCategory`) | Spalte, abgeleitet aus `document_form` | Zustand | **46 %** → Befund B3 | Belegliste (`ClassificationStack`) | nie (deterministisch) | — (Zustand) | S | Füllgrad · GLOSSARY „vierte orthogonale Achse" |
 | Einordnung: Richtung (`docDirection`) | Subtyp Rechnung | Zustand | 64 % | Belegliste, `GlanceCard` | nie | — (Zustand) | S | Füllgrad · GLOSSARY „NULL = nicht anwendbar" |
 | Einordnung: Belegform (`classDocumentForm`) | Spalte | Zustand | 100 % | Belegliste, `SourceDocFactsCard`, Inbox | Nutzer (Override) | — (Zustand) | S | Füllgrad |
 | Einordnung: Beleg-Charakter (`classDocumentKind`) | Spalte | Zustand | 100 %, davon 83 % `original` | Belegliste, `SourceDocFactsCard` (nur wenn ≠ `original`) | nie | — (Zustand) | M | Füllgrad · heutige Regel „nur wenn ≠ original" |
+| Einordnungs-Zustand (`status`) | Spalte, `NOT NULL` | Zustand | 100 %, davon **99,7 % `classified`** (1 × `classification_failed`) | `DocumentInbox` (Badge, Achse `beleg_inbox`) | Server | — (Zustand) | M | Füllgrad · Achse `beleg_inbox`. Der **einzige** Zustand, den jede Ausprägung trägt (B4) — aber im Bestand fast konstant, deshalb erst ab M und nie statt der Erledigung |
 | Verarbeitung (`processingStatus`) | Subtyp Rechnung | Zustand | 83 % → Befund B4 | Belegliste (`StatusCell`), `SourceDocPipelineTab` | nie | — (Zustand) | S | Füllgrad · Achse `beleg` |
 | Zusammenfassung (`classSummary`) | Spalte | Erklärung | 100 % | `BelegSummary`, `SourceDocFactsCard`, `StuckDocumentsTable` (Tooltip) | nie | 8 | M | Füllgrad · p50 188 · p90 260 · max 400 Zeichen |
 | Sachverhalts-Zusammenfassung (`classCaseSummary`) | Spalte | Erklärung | 93 % | `SourceDocFactsCard` (schlägt `classSummary`) | nie | 9 | M | Füllgrad · p90 240 Zeichen |
@@ -118,10 +149,12 @@ sonst sähe ein Rechnungsfeld voller aus, als es für die Familie ist.
 | Ersetzt am (`supersededAt` + `supersededNote`) | Spalte | Zustand | 4 % | `ParentDocNotice` | Agent | 17 | L | Füllgrad · GLOSSARY „superseded ≠ deleted" |
 | Dokumentgruppe (`collectionKind`) | Spalte, nur am Sammeldokument | Zustand | 3 % | — (Achse `dokumentgruppe` existiert, wird nicht gezeigt) | Nutzer | 18 | L | Füllgrad |
 | Einordnungs-Fehler (`classificationError`) | Spalte | Erklärung | 0,3 % (1 Zeile) | Inbox | nie | 19 | L | Füllgrad |
+| USt-IdNr. des Gegenparts (`classCounterpartyVatId`) | Spalte, denormalisiert aus `class_companies` | Identität | 55 % | `DocumentInbox` | nie | 20 | L | Füllgrad · Spaltenkommentar „Erlaubt der Inbox-Liste eine UStID-Anzeige ohne JSON-Parse" |
 
 Ausgelassen (Technik): `id`, `client_id`, `tenant_id`, `created_at`,
-`updated_at`, `uploaded_at`, `uploaded_by` (0 % gefüllt),
-`class_overridden_by` (0 %), `completed_batch_id` (0 %), `class_companies`
+`updated_at`, `uploaded_at`, `classified_at` (Server-Stempel, 100 %),
+`uploaded_by` (0 % gefüllt), `class_overridden_by` (0 %),
+`completed_batch_id` (0 %), `class_companies`
 (die denormalisierten Felder tragen die Anzeige), `class_page_segments`
 (Maschinen-Plan), sowie am Rechnungs-Subtyp `markdown`,
 `extraction_payload_json`, `extraction_notes_json`,
@@ -130,34 +163,40 @@ Ausgelassen (Technik): `id`, `client_id`, `tenant_id`, `created_at`,
 **Freitext-Grenzen:** `classSummary` und `classCaseSummary` werden ab
 **260 Zeichen** gekürzt (p90); `completedReason` ab **280** (p90 277, max
 868 — der Grund ist ein Tooltip, kein Absatz); `classCounterpartyName` ab
-**36 Zeichen** in der Zeile (p90 33).
+**36 Zeichen** in der Zeile (p90 33); der **Dateiname** ab **48 Zeichen** in
+der Zeile (p50 44) und ab **88** in Karte und Drawer (p90 84, max 139) — die
+Kürzung sitzt in der Mitte, die Endung bleibt lesbar.
 
 ## Relationen
 
 | Relation | Richtung | Kardinalität | Rolle | ab Form | Darstellung | Beleg |
 |---|---|---|---|---|---|---|
 | Datei (`ops_stored_files`) | Eltern, 1:1 | 100 % | Identität | M | eigene Form: `DocumentPreview` (das Original selbst) | `UNIQUE (stored_file_id)` |
-| Rechnungs-Detail (`…_invoices`) | Kind, 1:0..1 | 83 % | Identität | S (Maß + Kennung) · M (voll) | **eigene Form je Ausprägung** — Registry-Eintrag | 318 von 384 |
+| Rechnungs-Detail (`…_invoices`) | Kind, 1:0..1 | 83 % | Identität | S (Maß + Kennung) · M (voll) | **eigene Form je Ausprägung** — Registry-Eintrag; **die Existenz dieser Zeile, nicht der Diskriminator, entscheidet, ob der Rechnungsblock rendert** (B9) | 318 von 384, davon 315 an `source_doc_type='invoice'` |
 | Vertrags-Detail (`…_contracts`) | Kind, 1:0..1 | **0 %** | Identität | M | Registry-Eintrag, gegen Schema gebaut | Tabelle leer, Befund B1 |
 | Rechnungspositionen (`…_invoice_lines`) | Enkel über die Rechnung | 1 % ohne · p50 1 · p90 5 · max 22 | Maß | L | Liste — eigener Auftrag, nicht in dieser Familie | Staging |
 | Ereignis → Sachverhalt | Kind → Eltern | 12 % ohne · p50 1 · p90 1 · max 2 | Kontext | S | Inline des Sachverhalts (`CaseCell`), ein Klick | Staging |
 | Teilbelege (`parentSourceDocId`) | Kind, selbstbezüglich | 97 % ohne · p50 0 · p90 0 · max 23 | Kontext | M | Zähler (M) · Liste (L), eingebettet als `DocumentRow` | Staging · `ChildDocsCard` |
 | Sammel-Original (`parentSourceDocId`) | Eltern, selbstbezüglich | 20 % | Kontext | M | Inline mit Seitenbereich („Seiten 5–7 aus …") | Füllgrad `splitPageRange` |
-| Historie (`platform_audit_events`) | ohne FK, `resource_kind = 'source_doc'` | 0 % ohne · p50 2 · p90 3 · max 8 | Verantwortung | L | Liste über `LogList` — 16 Aktionsarten, 1 065 Ereignisse | Staging |
+| Historie (`platform_audit_events`) | ohne FK, `resource_kind ∈ {source_doc, source_doc_invoice, invoice}` | 0 % ohne · p50 2 · p90 3 · max 8 | Verantwortung | L | Liste über `LogList` — **15 Aktionsarten, 1 085 Ereignisse** über die drei Ressourcen-Arten (`source_doc` allein: 12 / 977). Wer nur auf `source_doc` filtert, verliert 10 % der Historie | Staging (nachgerechnet) |
+| Volltext (`ops_document_text`) | Kind | — | Technik | — | nie zeigen — OCR-Text, gehört der Suche, nicht der Ansicht | Schema |
+| DATEV-Stapelverzeichnis (`client_batch_account_directory`) | Kind | — | Technik | — | gehört dem DATEV-Stapel, nicht dieser Familie | Schema |
 | Extraktions-Logs (`ops_extraction_logs`) | Kind | — | Technik | L | eigener Tab, nicht diese Familie | `ui-repraesentationen.md` B5 |
 
 ## Heutige Darstellung
 
 | Komponente | Form | zeigt | fehlt | zu viel |
 |---|---|---|---|---|
-| Belegliste `/[year]/documents` | Liste | Rang 1–7 + vier Einordnungs-Badges + Verarbeitung + Erledigt | nichts | — |
-| `StuckDocumentsTable` | Liste | Datei, Einordnung, Gegenpart, Eingang, Sachverhalt, Beleg-Zustand | Belegdatum (genau das Feld, das der Nutzerin fehlt) | — |
+| Belegliste `/[year]/documents` | Liste | neun Spalten in dieser Reihenfolge: **Belegnummer** (Rückfall Dateiname → Kurz-ID) · Geschäftspartner · Einordnung · Eingang · Belegdatum · Betrag · Sachverhalt · Verarbeitung · Erledigt. Sortierung fest `received_date ↓, uploaded_at ↓`, 50 je Seite | nichts | die Seite trägt vier Tabs (`alle` · `klaerung` · `verarbeitung` · `problematisch`) — die letzten beiden rendern `StuckDocumentsTable`, nicht diese Tabelle |
+| `StuckDocumentsTable` | Liste | Datei (führende Spalte, Dateiname als Linktext), Einordnung, Gegenpart, Eingang, Sachverhalt, Beleg-Zustand | das Belegdatum **als Wert** — gezeigt wird nur der Marker „ohne Belegdatum", gesetzt wird es auf der Detailseite | — |
 | `BelegeTab` (am Sachverhalt) | Liste | Nr., Typ, Gegenpartei, Belegdatum, Brutto, Verarbeitung | Erledigt | — |
 | `DocumentInbox` | Liste | Datei, Einordnung, Konfidenz, Zustand, je Zeile Aktionen | — | 983 Zeilen: Upload, Polling, Liste und Klassifikations-Editor in einer Datei |
 | `InboxInvoiceSubmissionList` | Liste | Datei, Belegform, Größe, Zustand, Einreichen | — | — |
 | `SourceDocFactsCard` (heißt im Code `SourceDocBelegTab.tsx`) | Karte | die **generischen** Punkte: Belegdatum, Eingang, Belegart, Belegform, Charakter, Gegenpartei, Konfidenz, DATEV-Ablage, Zusammenfassung | Erledigt-Zustand, Betrag | — |
 | `GlanceCard` | Karte | die **Rechnungs-Punkte**: Belegnummer, Kreditor/Kunde, Netto/USt/Brutto, Fällig, USt-IdNr., DATEV-Konto, Original-Währung, Rolle, Charakter | — | dupliziert Belegdatum, Belegart, Charakter aus der generischen Karte |
-| `ContractDetail` | Editor | die **Vertrags-Punkte**: Gegenstand, Typ, Start/Ende/Laufzeit/unbefristet, Primärbetrag, buchungsrelevante Fakten mit Provenienz | — | 647 Zeilen, Anzeige und Bearbeitung in einem |
+| `ContractDetail` | Editor | die **Vertrags-Punkte**: Gegenstand, Typ, Start/Ende/Laufzeit/unbefristet, Primärbetrag, Zusammenfassung, buchungsrelevante Fakten — je Feld ein Provenienz-Marker (`ai-high` ab 0.85 · `ai-low` · `manual` · `missing` · `untracked`) und ein „als geprüft bestätigen" | — | 647 Zeilen, Anzeige und Bearbeitung in einem; **es gibt keine lesende Vertrags-Form** |
+| `SourceDocFamily` | Karte | Original und Teilbelege einer Familie: Dateiname des Originals, je Kind Belegart + Erledigt-Haken, dazu „N von M erledigt" | — | dritte Erledigt-Darstellung neben Liste und Detail |
+| `ContractFacts` / `DocFacts` (in `SachverhaltScreen`) | Karte | verzweigt auf `docType === "contract"`: „Vertragsdaten" gegen „Extrahierte Belegdaten" | — | genau der `if`-Sonderpfad, den die Registry ersetzen soll |
 | `BelegSummary` | Karte | Lieferant, Rechnungsnr., Rechnungsdatum, Brutto, Zusammenfassung | alles Nicht-Rechnungs-hafte | die vier Labels sind Rechnungs-Labels für **jede** Belegart |
 | `BelegPreview` | Vorschau | das PDF; Titel als Prop („Vertrag" beim Vertrag) | Seitenbereich bei Teilbelegen | — |
 | **v3** `DocumentFacts` (0052) | Karte | Lieferant, Rechnungsnr., Rechnungsdatum, Brutto, Zusammenfassung | **dasselbe Problem wie `BelegSummary`** — vier Rechnungs-Labels für alle Belegarten | — |
@@ -173,7 +212,7 @@ Karte ersetzen.
 | Liste | Job (ein Satz) | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
 |---|---|---|---|---|---|---|---|---|---|
 | **Belegliste des Jahres** | Wenn ein Buchungsmonat abgeschlossen werden soll, will die Kanzlei alle Belege der Periode nach Eingangsdatum durchgehen, damit kein unerledigter Beleg im Jahr zurückbleibt. | alle Belege des Mandanten mit `received_date` im Jahr, `status <> 'deleted'` | Eingangsdatum ↓, dann Upload ↓ | 1–7 + Einordnung + Verarbeitung + Erledigt | Suche, Zeitraum, Kategorie, Partner, Sachverhalts-Status, „nur unerledigte", „offene Klärung" | keine | „keine Belege in dieser Periode" ≠ „keine Treffer" | 66 · 102 (Staging, 6 Mandanten-Jahre; echte Kanzlei um Größenordnungen mehr) | `/[year]/documents` |
-| **Stockende Belege** | Wenn die Pipeline etwas liegen lässt, will die Kanzlei sehen, welche Belege nicht weiterkommen, damit keiner still verschwindet. | zwei Ausprägungen: „in Verarbeitung" (Pipeline läuft) und „problematisch" (ohne Belegdatum oder ohne Extraktion, **jahresunabhängig**) | älteste zuerst | Datei, Einordnung, Gegenpart, Eingang, Sachverhalt, Beleg-Zustand | keine | keine (Neustart je Zeile) | „keiner stockt" = Erfolg | 6 · 10 | `StuckDocumentsTable` |
+| **Stockende Belege** | Wenn die Pipeline etwas liegen lässt, will die Kanzlei sehen, welche Belege nicht weiterkommen, damit keiner still verschwindet. | zwei Ausprägungen: „in Verarbeitung" (Pipeline läuft) und „problematisch" (ohne Belegdatum oder ohne Extraktion, **jahresunabhängig**) — **keine eigene Route, sondern zwei Tabs der Belegliste** | älteste zuerst | Datei, Einordnung, Gegenpart, Eingang, Sachverhalt, Beleg-Zustand | keine | keine (Neustart je Zeile) | „keiner stockt" = Erfolg | 6 · 10 | `StuckDocumentsTable` (`variant="stuck" \| "inflight"`) |
 | **Upload & Inbox** | Wenn ein Stapel PDFs hochgeladen wird, will die Kanzlei sofort sehen, was daraus wurde, damit sie eine Fehl-Einordnung korrigiert, bevor sie weiterläuft. | alle Belege des Mandanten, **jahresunabhängig** | Upload ↓ | Datei, Einordnung, Konfidenz, Zustand | keine | keine | „nichts hochgeladen" | 64 · 102 | `/document-inbox` |
 | **Beleg einreichen** | Wenn der Buchungszyklus läuft, will die Kanzlei die eingeordneten Rechnungen an die Verarbeitung übergeben, damit sie im Zyklus gebucht werden. | `status='classified'` **und** qualifizierende Belegform | Upload ↑ | Datei, Belegform, Größe, Zustand | keine | **Einreichen** | „nichts einzureichen" = Erfolg | klein | `/[year]/review/upload` |
 | **Belege am Sachverhalt** | Wenn jemand einen Sachverhalt prüft, will er die Belege sehen, auf denen er beruht, damit er die Buchung gegen das Papier halten kann. | Belege am Sachverhalt (über `document_received`) | Belegdatum ↑ | 1–5 + Verarbeitung | keine | keine | **zwei**: „kein Beleg zu erwarten" (mit Begründung, Erfolg) ≠ „keine verbundenen Belege" | 0 · 1 · max 20 | `BelegeTab` |
@@ -190,7 +229,9 @@ Schnitt nach §8 (eigene Komponente nur bei eigenem Job **und** Unterschied in
   Je Route zusätzlich ein Seitenprofil unter `docs/seiten/`.
 - **Stockende Belege**: zwei Ausprägungen, Unterschied nur in
   Grundgesamtheit und Leerfall → **ein** Spaltensatz mit `variant`-Prop,
-  genau wie heute.
+  genau wie heute. Und weil beide Tabs derselben Route sind, teilen sie sich
+  das Seitenprofil der Belegliste — es sind drei Seitenprofile, nicht vier
+  (Prüfung 2026-09-04).
 - **Belege am Sachverhalt** und **Teilbelege**: p90 = 1 bzw. 0, keine
   Sortierung, kein Filter, keine Pagination — das ist keine Tabelle,
   sondern `DocumentRow` × n mit Leerfall. Sie teilen sich eine kurze
@@ -203,39 +244,40 @@ Schnitt nach §8 (eigene Komponente nur bei eigenem Job **und** Unterschied in
 
 | Form | Größe | Empfehlung | Grund (§7 Nr.) | zeigt (Ränge) | Relationen | setzt auf | ersetzt |
 |---|---|---|---|---|---|---|---|
-| `DocumentCell` | XS | **ja** | 3 — FK-Ziel von `client_accounting_event`; wird in fremden Zeilen genannt | 1–2 + Erledigt | — | `Badge`, `MonoCell`, `LongText` | `InvoiceNumberCell` (Belegliste), der Mono-Link in `BelegeTab` |
+| `DocumentCell` | XS | **ja** | 3 — FK-Ziel von `client_accounting_event`; wird in fremden Zeilen genannt | 1, 1b, 2 + Erledigt — **mit der Rückfallkette Kennung → Dateiname → Kurz-ID**, wie sie vier Listen heute schon bauen | — | `Badge`, `MonoCell`, `LongText` | `InvoiceNumberCell` (Belegliste), der Mono-Link in `BelegeTab`, den Datei-Link in `StuckDocumentsTable` |
 | `DocumentClass` | XS | **ja** | 1 — existiert als `ClassificationStack`; die vier Achsen gehören zusammen und in eine Hand | Einordnung (4 Achsen) | — | `StatusBadge` (`beleg_kategorie`, `beleg_richtung`, `dokumentgruppe`) | `ClassificationStack` |
-| `DocumentRow` | S | **ja** | 1 — existiert in **sechs** Listen; 2 — Kind des Sachverhalts | 1–7 + Zustände; **Maß und Kennung je Ausprägung** | Sachverhalt als Inline, Teilbelege als Zähler | `Row`, `DocumentCell`, `DocumentClass`, `Amount`, `Time` | die Zeilen von Belegliste, `StuckDocumentsTable`, `BelegeTab`, `DocumentInbox`, `InboxInvoiceSubmissionList`, `ChildDocsCard` |
-| `DocumentPreview` | M | **ja** | 1 — existiert als `BelegPreview` und ein zweites Mal inline im v3-`DocumentDrawer` | 10 + Seitenbereich (12) | Datei, Sammel-Original | `Section`, `EmptyState` | `BelegPreview`, das `<iframe>` in `DocumentDrawer` |
+| `DocumentRow` | S | **ja** | 1 — existiert in **sechs** Listen; 2 — Kind des Sachverhalts | 1, 1b, 2–7 + Zustände; **Maß und Kennung je Ausprägung, Dateiname als Rückfall** | Sachverhalt als Inline, Teilbelege als Zähler | `Row`, `DocumentCell`, `DocumentClass`, `Amount`, `Time` | die Zeilen von Belegliste, `StuckDocumentsTable`, `BelegeTab`, `DocumentInbox`, `InboxInvoiceSubmissionList`, `ChildDocsCard` |
+| `DocumentPreview` | M | **ja** | 1 — existiert als `BelegPreview` und ein zweites Mal inline im v3-`DocumentDrawer` | 10 + Seitenbereich (12) | Datei, Sammel-Original | `EmptyState`, `Card` (**`Section` gibt es in v3 nicht** — Prüfung 2026-09-04) | `BelegPreview`, das `<iframe>` in `DocumentDrawer` |
 | `DocumentFacts` **umbauen** + Ausprägungs-Registry | M | **ja** | 1 — existiert dreifach (`SourceDocFactsCard`, `GlanceCard`, `ContractDetail`); der Owner-Punkt hängt hier | generisch 1–9, 11–13 · je Ausprägung ihre eigenen Punkte | Rechnungs-Detail, Vertrags-Detail als Registry-Einträge | `FieldList`, `Amount`, `Time`, `MonoCell` | `BelegSummary`, `SourceDocFactsCard`, den Fakten-Teil von `GlanceCard` und `ContractDetail` |
-| `DocumentCard` | M | **ja** | 1 — die drei Karten oben; 2 — Beleg ist Kind des Sachverhalts und erscheint in dessen Detail | Kopf (1, 2, Erledigt) + Vorschau + Fakten | wie `DocumentFacts` | `Card`, `DocumentPreview`, `DocumentFacts`, `DocumentClass` | `BelegSummary` im Kontext, `SourceDocFactsCard` |
+| `DocumentCard` | M | **Backlog (0071)** | 1 trifft zu, aber schwächer als es aussah: die drei Karten, auf die sie sich beruft, sind **dieselben**, die `DocumentFacts` schon ersetzt — der Beleg ist einmal gezählt, nicht zweimal. §7 Nr. 2 trägt hier nicht: am Sachverhalt steht der Beleg heute als **Zeile** (`BelegeTab`) und als **Drawer**, nicht als Karte. Sie blockiert nichts im Jetzt-Satz, und 0071 nennt sie ohnehin als Voraussetzung — also entsteht sie dort (Prüfung 2026-09-04, §9 „höchstens fünf") | Kopf (1, 1b, 2, Erledigt) + Vorschau + Fakten | wie `DocumentFacts` | `Card`, `DocumentPreview`, `DocumentFacts`, `DocumentClass` | `BelegSummary` im Kontext, `SourceDocFamily` |
 | `DocumentDrawer` | L | **gebaut (0052)** | 5 — aus Sachverhalt, Buchung und Klammer heraus nachgeschlagen | Kopf, Original, Kernfakten, Grenze, ein Ausgang | — | `Drawer`, `DocumentFacts` | `BelegDrawer` |
-| `DocumentList` + `DocumentColumns` | L | Backlog | 6 — sechs Listen-Jobs; hängt an `DataTable` (0057) | wie `DocumentRow` | — | `DataTable`, `DocumentRow`, `EmptyState` | die sechs Listen |
-| `DocumentView` | L | Backlog | 1 — die Detailseite mit sechs Tabs; braucht ein Seitenprofil | alles ab 20 % Füllgrad | Historie, Positionen, Teilbelege als Listen | `EntityHeader`, `Tabs`, `DocumentFacts`, `LogList` | `SourceDocFamily`, `InvoiceSidebar`, `DocTabsBar` |
-| `DocumentEditor` | XL | **verworfen** | kein Grund aus §7 — ein Beleg entsteht durch **Upload**, nicht durch ein Formular. Die vier von Hand änderbaren Werte (Belegdatum, Einordnung, Erledigung, DATEV-Ablage) sind Einzelwerte und gehören als `InlineEdit` in den View. | | | | |
+| `DocumentList` + `DocumentColumns` | L | Backlog | 6 — sechs Listen-Jobs; **`DataTable` (0057) ist gebaut und steht auf Abnahme** — es hängt nur noch an den drei Seitenprofilen | wie `DocumentRow` | — | `DataTable`, `DocumentRow`, `EmptyState` | die sechs Listen |
+| `DocumentView` | L | Backlog | 1 — die Detailseite mit sechs Tabs; braucht ein Seitenprofil | alles ab 20 % Füllgrad | Historie, Positionen, Teilbelege als Listen | `EntityHeader`, `Tabs`, `DocumentFacts`, `LogList`, `InlineEdit` | `SourceDocFamily`, `InvoiceSidebar`, `DocTabsBar` |
+| `DocumentEditor` | XL | **Backlog (0071)** | §7 Nr. 4 **trifft zu** (sechs Punkte mit änderbar = Nutzer) und Nr. 1 auch — die App hat dafür fünf Editoren (`DocCompletionControl`, `SourceDocDateEditor`, `ClassificationEditor`, `DatevMetaImportPanel`, `SourceDocActions`). „Verworfen" wäre nach §9 nur ohne jeden §7-Grund richtig. Der Zuschnitt bleibt wie beschrieben — kein Formular, sondern `InlineEdit` je Wert im View — aber er ist ein **Auftrag**, keine Ablehnung. 0071 muss die fünf Editoren unter „Ersetzt" aufnehmen | die Punkte mit änderbar = Nutzer, je einzeln | — | `InlineEdit`, `DocumentView` | die fünf Editoren oben |
 | `DocumentPicker` | S | **verworfen** | keine Stelle wählt einen bestehenden Beleg aus einer Liste; ein Beleg wird an den Sachverhalt **hochgeladen** (`CaseAttachDocumentButton` → `FileDrop`), nicht ausgesucht. | | | | |
 
 **Bau-Reihenfolge:** `DocumentCell` + `DocumentClass` → `DocumentRow` →
-`DocumentPreview` → `DocumentFacts` (Umbau) → `DocumentCard`. Der bereits
-gebaute `DocumentDrawer` wird im selben Zug nachgezogen: er verliert sein
-inline-`<iframe>` an `DocumentPreview` und bekommt die generischen Fakten
-statt der vier Rechnungs-Labels.
+`DocumentPreview` → `DocumentFacts` (Umbau). Das sind **fünf** Formen — die
+Grenze aus §9. Der bereits gebaute `DocumentDrawer` wird im selben Zug
+nachgezogen: er verliert sein inline-`<iframe>` an `DocumentPreview` und
+bekommt die generischen Fakten statt der vier Rechnungs-Labels. Die Karte
+folgt mit der Detailansicht (0071), die sie ohnehin voraussetzt.
 
 ## Zuschnitt
 
 | Form / Liste | Marke | Grund | Backlog |
 |---|---|---|---|
-| `DocumentCell` + `DocumentClass` | jetzt | Bausteine von Zeile, Karte und Liste | — |
+| `DocumentCell` + `DocumentClass` | jetzt | Bausteine von Zeile, Karte und Liste; `DocumentCell` trägt die Rückfallkette Kennung → Dateiname → Kurz-ID | — |
 | `DocumentRow` | jetzt | trägt sechs Listen, ohne sie ist keine davon zu bauen | — |
 | `DocumentPreview` | jetzt | trägt Karte, Drawer und View; heute zweimal dieselbe Datei | — |
 | `DocumentFacts` (Umbau + Registry) | jetzt | der Owner-Punkt: Ausprägungen mit eigenen Feldern; heute dreimal getrennt gebaut. Registry-Einträge jetzt: Rechnung (Daten) und Vertrag (**lesend, gegen das Schema** — Owner 2026-09-04) | — |
-| `DocumentCard` | jetzt | die eine M-Form, in der Ausprägung und Vorschau zusammenkommen | — |
-| `DocumentDrawer` nachziehen | jetzt (Teil von `DocumentFacts` und `DocumentPreview`) | er benutzt beide; sonst driften v3 und v3 auseinander | — |
-| Belegliste, Inbox, Einreichen (`DocumentColumns`) | Backlog | hängt an `DataTable` (0057) und an drei Seitenprofilen, die es noch nicht gibt | `0070` |
-| `DocumentView` + Seitenprofil `beleg-detail.md` | Backlog | sechs Tabs, drei davon rechnungsspezifisch; braucht erst die Karte und ein Seitenprofil | `0071` |
+| `DocumentDrawer` nachziehen | jetzt (Teil von `DocumentFacts` und `DocumentPreview`) | er benutzt beide; sonst driften v3 und v3 auseinander. Keine neue Form — die sechste wäre eine zu viel | — |
+| `DocumentCard` | **Backlog** | §9 lässt fünf Formen „jetzt" zu, die Liste stand auf sechs. Die Karte blockiert nichts, ihr §7-Nr.-1-Beleg ist derselbe wie der von `DocumentFacts`, und 0071 nennt sie schon als Voraussetzung — sie entsteht dort. **0071 „Setzt voraus" ist beim Aufgreifen anzupassen** | `0071` |
+| Belegliste, Inbox, Einreichen (`DocumentColumns`) | Backlog | `DataTable` (0057) ist gebaut; es fehlen die **drei** Seitenprofile (die stockenden Belege sind zwei Tabs der Belegliste, keine vierte Seite) | `0070` |
+| `DocumentView` + Seitenprofil `beleg-detail.md` | Backlog | sechs Tabs, drei davon rechnungsspezifisch; braucht ein Seitenprofil. Nimmt nach der Prüfung `DocumentCard` und die `InlineEdit`-Werte des Editors mit auf | `0071` |
 | Positionen (`InvoiceLines`) | Backlog | Enkel-Entität mit eigenem Profil-Bedarf (Rechnungsposition, §7 „mittel") | `0072` |
 | `ContractFacts` bearbeitbar (`ContractDetail`-Nachfolger) | Backlog | 0 Zeilen im Bestand; die **lesende** Vertrags-Ausprägung entsteht jetzt, der Editor wartet auf Daten | `0073` |
-| `DocumentEditor` | verworfen | Belege entstehen durch Upload; Einzelwerte über `InlineEdit` | — |
+| `DocumentEditor` | **Backlog** | nicht „verworfen": §7 Nr. 1 und Nr. 4 treffen beide zu (fünf Editoren in der App, sechs Punkte mit änderbar = Nutzer). Die Werte werden `InlineEdit` im View — das ist ein Zuschnitt, keine Ablehnung | `0071` |
 | `DocumentPicker` | verworfen | kein Screen wählt einen bestehenden Beleg aus | — |
 
 ## Befunde für `ludwig/app`
@@ -245,8 +287,9 @@ statt der vier Rechnungs-Labels.
   und eine 647-Zeilen-UI existieren. Die Vertrags-Ausprägung wird gegen das
   Schema und `ContractDetailData` gebaut, nicht gegen Daten — jede Zeile ihres
   Registry-Eintrags trägt deshalb den Beleg `Schema`, nicht `Staging`.
-- **B2 — Drei Belegarten haben keinen Subtyp.** Kontoauszug (10),
-  Kreditkartenabrechnung (8) und Reisekostenabrechnung (4) tragen einen
+- **B2 — Vier Belegarten haben keinen Subtyp.** Kontoauszug (10),
+  Kreditkartenabrechnung (8), Reisekostenabrechnung (4) und Erklärung (0 im
+  Bestand, aber ein gültiger Diskriminator-Wert mit Label „Erklärung") tragen einen
   eigenen Diskriminator-Wert und einen eigenen Folgeprozess, aber keine
   Tabelle für ihre Felder (Zeitraum, Konto, Saldo; Karte; Abrechner,
   Erstattungssumme). Ihr Registry-Eintrag bleibt bis dahin leer — die
@@ -255,12 +298,22 @@ statt der vier Rechnungs-Labels.
 - **B3 — `doc_category` ist nur zu 46 % gefüllt.** Die Achse kam mit F87,
   ein Backfill für den Altbestand fehlt. Ein Filter über die Kategorie
   („fachlich stabil", laut GLOSSARY der empfohlene Listenfilter) sieht heute
-  die Hälfte der Belege nicht.
+  die Hälfte der Belege nicht — und die Belegliste bietet genau diesen Filter
+  an. Nachgerechnet (Prüfung): von den 207 Belegen ohne Kategorie tragen
+  **153 die Form `commercial_invoice`**, weitere 26 eine ebenfalls eindeutig
+  mappende Form — 179 von 207 (86 %) sind aus `document_form` mechanisch
+  nachrechenbar. Nur `document_collection` (16), `other` (6) und `unknown`
+  (6) sind laut GLOSSARY legitim NULL. Der Backfill ist also ein Skript, kein
+  Klassifizierungslauf.
 - **B4 — Die Achse `beleg` (Verarbeitung) lebt am Rechnungs-Subtyp.** Für
   einen Vertrag oder Kontoauszug gibt es dort nie einen Wert; die Achse des
   **Supertyps** ist `beleg_inbox`. Der v3-`DocumentDrawer` erwartet in
-  `status` heute die Achse `beleg` — für 16 % der Belege ist das kein
-  gültiger Zustand.
+  `status` heute die Achse `beleg` (`axis="beleg"`, fest verdrahtet) — für
+  16 % der Belege ist das kein gültiger Zustand. Nachtrag aus der Prüfung:
+  `beleg_inbox` ist als Ersatz **nur die halbe Antwort** — im Bestand tragen
+  383 von 384 Belegen denselben Wert (`classified`). Der Zustand, der eine
+  Nicht-Rechnung wirklich unterscheidet, ist die **Erledigung**; sie steht
+  deshalb ab XS, `beleg_inbox` erst ab M.
 - **B5 — Der Beleg-Charakter (`document_kind`) hat keine Registry-Achse**,
   obwohl die Belegliste ihn als Badge zeigt (`ClassificationStack`) und
   `DOCUMENT_KIND_LABEL` existiert. Vier Einordnungs-Achsen, drei in der
@@ -274,11 +327,28 @@ statt der vier Rechnungs-Labels.
   Belegarten.** Der Name behauptet das Gegenteil und ist die vermutlich
   häufigste Quelle des Missverständnisses „Beleg = Rechnung". Kosmetisch,
   aber billig zu beheben.
-- **B8 — Kein Befund, eine Entscheidung für dieses Repo:** Die Erledigung
-  ist in der App bewusst **keine** Registry-Achse (binär, kein eigener
-  Werteraum) und wird als Häkchen mit Tooltip gezeigt. V7 und V11 verlangen
-  Wort statt Icon — v3 bekommt dafür die zweiwertige Achse
-  `beleg_erledigung` („Erledigt" / „Offen") in der Registry dieses Repos.
+- **B8 — Kein Befund, eine Entscheidung für dieses Repo — korrigiert in der
+  Prüfung:** Die App begründet das fehlende Registry-Eintrag damit, die
+  Erledigung sei binär und habe keinen eigenen Werteraum
+  (`COMPLETED_LEGEND`, von Hand geschrieben). **Das stimmt nicht:**
+  `completed_via` ist CHECK-beschränkt auf sechs Werte und zu 73 % gefüllt —
+  `booking` 171 · `manual` 77 · `no_booking_required` 26 · `superseded` 7 ·
+  `case_closed` 1 · NULL 61, dazu 41 offene Belege. Die v3-Achse
+  `beleg_erledigung` trägt deshalb **`completed_via` plus „Offen"** (für
+  `completed_at IS NULL`), nicht zwei Werte; der Freitext
+  `completed_reason` bleibt der Tooltip daneben. Die App zeigt die
+  Erledigung heute in **drei** verschiedenen Formen — Häkchen in der
+  Belegliste, Häkchen in `SourceDocFamily`, Badge mit Wort nur in
+  `DocCompletionControl`. V7/V11 sind in zwei von drei verletzt.
+- **B9 — Diskriminator und Subtyp-Zeile laufen auseinander.** 7 Belege
+  tragen `source_doc_type='invoice'` ohne Zeile in `…_invoices`, 3 tragen
+  `other` **mit** einer solchen Zeile (10 von 384). Solange das so ist, kann
+  keine Renderer-Registry allein auf dem Diskriminator stehen — sie muss
+  rendern, was die Subtyp-Zeile hergibt. Für die App ist das ein
+  Konsistenz-Befund (Trigger oder Constraint), für dieses Repo die
+  Begründung des Registry-Schlüssels oben. *Register-Eintrag in
+  `docs/befunde-app.md` steht noch aus — die Prüfung darf keine andere Datei
+  ändern.*
 
 ## Offene Fragen
 
@@ -295,6 +365,10 @@ Beleg `Nutzer` in den Tabellen, nicht als Annahme.
    trägt die Rechnungsnummer bzw. den Vertragsgegenstand. Leer bleibt leer —
    kein „—" für ein Feld, das es bei dieser Belegart nicht gibt. Damit gilt
    die Regel dieses Profils auch in der Zeile, nicht erst in der Karte.
+   *Präzisierung aus der Prüfung 2026-09-04:* „leer bleibt leer" gilt für das
+   **Maß**. Bei der **Kennung** greift vorher der Dateiname — die App baut
+   diese Rückfallkette heute in vier von sechs Listen, und ohne sie hätte
+   eine Nicht-Rechnung keinen Anker, an dem man sie wiedererkennt.
 3. **Vertrag ohne Daten?** — *beantwortet:* **ja**, die lesende
    Vertrags-Ausprägung entsteht jetzt gegen Schema und `ContractDetailData`.
    Der Vertrags-Editor bleibt 0073, bis die Extraktion Zeilen schreibt: ohne
@@ -302,11 +376,40 @@ Beleg `Nutzer` in den Tabellen, nicht als Annahme.
 
 ## Prüfung
 
-Gehört dem zweiten Agenten.
+Zweiter Agent, 2026-09-04, gegen Skill `entitaet-analysieren` §5–§9. Quellen:
+Staging über den Pooler (nur `SELECT`, nur Aggregate), `datenmodell.json`,
+GLOSSARY, `status-registry.ts`, `src/ludwig/modules/**/domain/`, die
+App-Komponenten unter `modules/source-docs`, `/invoices`, `/document-inbox`,
+`/contracts`.
+
+**Belege zuerst.** In den Tabellen steht **keine einzige** Zeile mit dem Beleg
+`Annahme`. Alle 24 Datenpunkt-Zeilen tragen Füllgrad, GLOSSARY-Satz,
+Spaltenkommentar, „heute in …" oder `Nutzer`; jeder dieser Werte wurde
+nachgerechnet und stimmt — Füllgrade, Textlängen (188/260/400 · 240 ·
+277/868 · 33), Seitenzahlen (1/3/27), Kardinalitäten (Teilbelege 97 %/0/0/23,
+Ereignis 12 %/1/1/2, Positionen 1 %/1/5/22), Bestand (384 · 318 · 0 · 6
+Mandanten) und der Listenumfang (66/102). Der einzige Beleg vom Grad
+`Schema` ist die **Vertrags-Ausprägung** (B1); sie ist gegen
+`client_source_docs_contracts` und `ContractDetailData` geprüft und trägt
+alle genannten Felder — der Beleg hält.
 
 | Zeile / Form | Einwand | Ergebnis | Geprüft von / am |
 |---|---|---|---|
-| | | | |
+| Regel „der Rang ist gemeinsam" | Der Registry-Schlüssel `source_doc_type` trägt nicht: Diskriminator und Rechnungs-Zeile widersprechen sich in **10 von 384** Fällen (7 `invoice` ohne Zeile, 3 `other` mit Zeile). Die App entscheidet deshalb über `isInvoice = Boolean(invoice)`, nicht über den Typ; `sourceDocTypeLabel` zieht zusätzlich die Belegform heran | **geändert** — Schlüssel ist der Typ, Fallback-Schlüssel die Belegform, gerendert wird, was die Subtyp-Zeile hergibt. Neuer Befund B9 | Claude, 2026-09-04 |
+| Ausprägungs-Tabelle | Sie deckt **sechs** Werte ab, der CHECK und `SOURCE_DOC_TYPE_LABELS` haben **sieben** (`declaration` fehlt) plus NULL (1 Beleg im Bestand). Die tragende Regel war für zwei Fälle ungeprüft | **geändert** — zwei Zeilen ergänzt; NULL ist der Default-Eintrag der Registry („Beleg"), nicht ein Sonderfall | Claude, 2026-09-04 |
+| Rang 1 (Gegenpart) | Der Füllgrad 90 % ist der Rechnungs-Durchschnitt. Je Ausprägung: Rechnung 95 %, Kontoauszug 70 %, Kreditkarte 63 %, Sonstiger Beleg 57 %, Vertrag 50 %. Zusammen mit „—" auf Rang 3 und 5 bliebe für eine Nicht-Rechnung eine Zeile aus Belegart und zwei Daten — der §5-Test „erkennt sie den Vorgang noch?" fällt für 16 % der Belege durch | **geändert** — Füllgrad je Ausprägung ausgewiesen; neuer Datenpunkt **Dateiname**, Rang 1b, ab XS, 100 % in jeder Ausprägung | Claude, 2026-09-04 |
+| Rang 5 (Kennung) | Dreimal verschieden beschrieben: Datenpunkt-Zeile „Rechnungsnummer bzw. Dateiname", Ausprägungs-Tabelle „—", offene Frage 2 „Rechnungsnummer bzw. Vertragsgegenstand". Eine Spec kann daraus nichts ableiten. Die App hat die Antwort längst: vier von sechs Listen bauen die Kette Nummer → Dateiname → Kurz-ID | **geändert** — eine Rückfallkette, überall dieselbe; „—" gestrichen | Claude, 2026-09-04 |
+| Zuschnitt | **Sechs** Formen mit Marke „jetzt" (Cell, Class, Row, Preview, Facts, Card), §9 lässt fünf zu. Die Karte beruft sich auf dieselben drei App-Karten wie `DocumentFacts` (derselbe Beleg zweimal gezählt), sie blockiert nichts, und 0071 nennt sie ohnehin als Voraussetzung | **geändert** — `DocumentCard` auf Backlog (0071); „jetzt" steht auf fünf. Der Drawer-Nachzug ist keine neue Form | Claude, 2026-09-04 |
+| `DocumentEditor` „verworfen" | §9 erlaubt „verworfen" nur, wenn **kein** §7-Grund greift. Hier greifen zwei: Nr. 4 (sechs Punkte mit änderbar = Nutzer) und Nr. 1 (`DocCompletionControl`, `SourceDocDateEditor`, `ClassificationEditor`, `DatevMetaImportPanel`, `SourceDocActions`). Der Zuschnitt („kein Formular, `InlineEdit` je Wert") ist richtig, die Marke war es nicht | **geändert** — Marke „Backlog (0071)"; 0071 muss die fünf Editoren unter „Ersetzt" aufnehmen | Claude, 2026-09-04 |
+| Supertyp-Zustand fehlt | `client_source_docs.status` (Achse `beleg_inbox`, 100 %) hatte keine Zeile, obwohl B4 ihn als **den** Supertyp-Zustand benennt und `DocumentInbox` ihn zeigt. Zugleich trägt er im Bestand für 383 von 384 Belegen denselben Wert — als Erkennungsmerkmal taugt er heute nicht | **geändert** — Zeile ergänzt, ab M; B4 um diesen Nachtrag erweitert | Claude, 2026-09-04 |
+| B8 (Erledigung) | „binär, kein eigener Werteraum" ist widerlegt: `completed_via` ist auf sechs Werte beschränkt und zu 73 % gefüllt (booking 171 · manual 77 · no_booking_required 26 · superseded 7 · case_closed 1) | **geändert** — die v3-Achse trägt `completed_via` plus „Offen"; dazu der Befund, dass die App die Erledigung dreifach und zweimal ohne Wort zeigt | Claude, 2026-09-04 |
+| Fehlende Spalten und Relationen | `class_counterparty_vat_id` (55 %, laut Spaltenkommentar in der Inbox gezeigt) und `classified_at` (100 %) standen weder als Datenpunkt noch unter „ausgelassen"; in §6 fehlten `ops_document_text` und `client_batch_account_directory` | **geändert** — VAT-ID als Rang 20 (L), `classified_at` ausgelassen, beide Relationen als Technik ergänzt | Claude, 2026-09-04 |
+| Historie | „16 Aktionsarten, 1 065 Ereignisse" — nachgerechnet sind es 12/977 unter `resource_kind='source_doc'`, zusammen mit `source_doc_invoice` (81) und `invoice` (27) **15/1 085**. Wer nur auf `source_doc` filtert, verliert 10 % | **geändert** — Zahlen und die drei Ressourcen-Arten stehen jetzt in der Zeile | Claude, 2026-09-04 |
+| Backlog-Gründe | 0070 begründet die Vertagung mit `DataTable` (0057) — die ist gebaut und steht auf Abnahme. Es bleibt der Grund „Seitenprofile fehlen", und es sind **drei**, nicht vier: die stockenden Belege sind zwei Tabs der Belegliste, keine eigene Route | **geändert** — Grund korrigiert. 0071/0072/0073 tragen ihre Gründe unverändert | Claude, 2026-09-04 |
+| `Section` in `DocumentPreview` | „setzt auf `Section`, `EmptyState`" — einen Export `Section` gibt es in `src/ui/v3` nicht | **geändert** — `EmptyState`, `Card` | Claude, 2026-09-04 |
+| Listen | Alle sechs tragen einen Job-Satz in der Form aus `docs/seiten/TEMPLATE.md`; der §8-Schnitt hält: eine `DocumentRow`, drei Spaltensätze auf `DataTable`, eine kurze `DocumentList` mit Leerfall-Prop, kein Subtyp bekommt eine eigene Liste (deckt sich mit der App: **kein** Listenfilter filtert auf `source_doc_type`) | **bestätigt**, ergänzt um Sortierung, Seitengröße 50 und die Tab-Struktur der Belegliste | Claude, 2026-09-04 |
+| `DocumentPicker` verworfen | Gegengeprüft: kein Picker, keine Combobox, kein `<select>` und kein Mehrfach-Auswahl-Zustand über `sourceDocId` in der ganzen App; jeder Weg zum Beleg am Sachverhalt ist ein Upload | **bestätigt** — §7 Nr. 3 zweite Hälfte greift nicht, „verworfen" ist richtig | Claude, 2026-09-04 |
+| Rang 1 gegen die Spaltenordnung der App | **offen.** Vier von sechs Listen führen mit der Kennung, nicht mit dem Gegenpart — nach §4 („was ein Mensch schon ausgewählt hat") spräche das für Kennung auf Rang 1. §5 sagt das Gegenteil („die Nummer ist Rang 3, der Mensch denkt Telekom, 89 €, März"). Das Profil folgt §5; die Rückfallkette entschärft den Widerspruch, hebt ihn aber nicht auf. Entscheidung gehört dem Owner, nicht der Prüfung — mit der Zeile von `DocumentRow` als Anschauungsmaterial | **offen** | Claude, 2026-09-04 |
 
 ## Weiter
 
@@ -333,16 +436,20 @@ Für die Entität Beleg (`source document`) liegt das geprüfte Profil unter
 docs/entitaeten/document.md. Schreibe mit Skill spec-schreiben je Form eine Spec, in dieser
 Reihenfolge — nur die Formen mit Marke „jetzt" aus dem Abschnitt Zuschnitt:
 DocumentCell + DocumentClass, DocumentRow, DocumentPreview, DocumentFacts (Umbau der
-bestehenden Komponente aus 0052 plus Ausprägungs-Registry), DocumentCard. Was dort
-„Backlog" trägt (0070–0073), bleibt liegen. Tragende Regel für jede Spec: die Reihenfolge
-der Datenpunkte ist über alle Belegarten dieselbe, welches Feld einen Rang füllt entscheidet
-source_doc_type über eine Registry — kein `if (isInvoice)` in einer Komponente. Jede Spec
+bestehenden Komponente aus 0052 plus Ausprägungs-Registry). Das sind fünf, mehr lässt §9
+nicht zu. Was dort „Backlog" trägt (0070–0073, darunter jetzt auch DocumentCard und der
+Editor als InlineEdit im View), bleibt liegen. Tragende Regel für jede Spec: die Reihenfolge
+der Datenpunkte ist über alle Belegarten dieselbe; welches Feld einen Rang füllt, entscheidet
+eine Registry — Schlüssel `source_doc_type` (sieben Werte plus NULL), Fallback-Schlüssel die
+Belegform, gerendert wird nur, was die Subtyp-Zeile wirklich liefert. Kein `if (isInvoice)`
+in einer Komponente, und kein „—" für ein Feld, das es bei dieser Belegart nicht gibt: die
+Kennung fällt auf den Dateinamen zurück, der in jeder Ausprägung zu 100 % dasteht. Jede Spec
 verlinkt das Profil als Quelle und nimmt Datenpunkte, Ränge, Relationen und „ersetzt" von
 dort, nicht aus dem Chat; die Punkte einer Form sind die Ränge bis zu ihrer Größe, in
 derselben Reihenfolge. Danach baut Skill v3-komponente jede Spec in derselben Reihenfolge,
 die größere Form komponiert die kleinere; im selben Zug wird DocumentDrawer (0052)
 nachgezogen — inline-<iframe> raus, DocumentPreview rein, generische Fakten statt der vier
-Rechnungs-Labels. Abgenommen wird von einem anderen Agenten gegen die Spec. Nur eigene
-Dateien stagen. Setze am Ende den Status des Profils auf „in Specs" und trage die
-Backlog-Nummern ein.
+Rechnungs-Labels, und `axis="beleg"` raus (B4). Abgenommen wird von einem anderen Agenten
+gegen die Spec. Nur eigene Dateien stagen. Setze am Ende den Status des Profils auf
+„in Specs" und trage die Backlog-Nummern ein.
 ```
