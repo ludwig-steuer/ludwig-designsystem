@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | geprüft |
+| Status | in Specs |
 | GLOSSARY | `### Ledger account (Konto)` — englisch `ledger account`, Ordner `entities/account/` (Abweichung, siehe Befund 5) |
 | Tabelle | `ludwig.client_ledger_accounts` · View `client_ledger_accounts_current` (jahresfreie Leser) · Semantik separat in `client_account_enrichment` |
 | Typen | `src/ludwig/modules/accounts/domain/account.ts` — `ACCOUNT_TYPES`, `CLEARING_ACCOUNT_TYPES`; `core/datev/main-function.ts` — `DATEV_MAIN_FUNCTION_NUMBER`; `core/datev/account-number.ts` — Kontonummern-Kanon |
@@ -226,11 +226,11 @@ Komponente mit Spaltenkonfiguration.
 
 | Form / Liste | Marke | Grund | Backlog |
 |---|---|---|---|
-| `AccountCell` | jetzt | trägt Zeile, Liste und Drawer (Gegenkonto) | — |
-| `accountEntryColumns()` | jetzt | trägt beide Listen; existiert heute dreimal von Hand (A11) | — |
-| `AccountEntryList` „Kontoauszug" | jetzt | der Listen-Job der Anfrage | — |
-| `AccountFacts` | jetzt | Zone 3 des Drawers, Kriterium aus 0052 | — |
-| `AccountDrawer` | jetzt | die Anfrage vom 2026-09-04 | — |
+| `AccountCell` | jetzt | trägt Zeile, Liste und Drawer (Gegenkonto) | Spec `docs/backlog/0066-account-cell-facts.md` |
+| `accountEntryColumns()` | jetzt | trägt beide Listen; existiert heute dreimal von Hand (A11) | Spec `docs/backlog/0067-account-entries.md` |
+| `AccountEntryList` „Kontoauszug" | jetzt | der Listen-Job der Anfrage | Spec `docs/backlog/0067-account-entries.md` |
+| `AccountFacts` | jetzt | Zone 3 des Drawers, Kriterium aus 0052 | Spec `docs/backlog/0066-account-cell-facts.md` |
+| `AccountDrawer` | jetzt | die Anfrage vom 2026-09-04 | Spec `docs/backlog/0068-account-drawer.md` |
 | `AccountRow` + `AccountList` „Kontenplan" | Backlog | eigene Route → erst Seitenprofil; wird eine Spaltendefinition auf `DataTable` (0057), keine eigene Tabelle | `docs/backlog/0062-account-list.md` |
 | `AccountView` | Backlog | vier Tabs, eigene Route, braucht Seitenprofil; `AccountFacts` ist der Teil, den er mit dem Drawer teilt | `docs/backlog/0063-account-view.md` |
 | `AccountCard` | verworfen | kein Screen | — |
