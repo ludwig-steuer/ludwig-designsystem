@@ -150,7 +150,7 @@ export function SelectionScope({
     anchor.current = key;
     setKeys((prev) => {
       const next = new Set(prev);
-      for (let i = lo; i <= hi; i++) next.add(order[i]);
+      for (const key of order.slice(lo, hi + 1)) next.add(key);
       return next;
     });
   }

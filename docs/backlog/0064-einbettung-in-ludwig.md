@@ -116,7 +116,7 @@ Dateien), **nicht pushen**. Die App hat fremde uncommittete Änderungen
 - [ ] DS: `pnpm typecheck` und `pnpm build` grün; `origin/main` zeigt auf den Commit
 - [ ] DS: kein `from "@/ui/` mehr außerhalb von Stories
 - [ ] App: `pnpm --filter @ludwig/web typecheck` grün
-- [ ] App: `pnpm --filter @ludwig/web build` grün (Turbopack löst `@/ludwig/*` aus dem Submodule auf — sonst Fallback: die 7 Imports im DS relativ auf `src/ludwig/` setzen und das im Bericht nennen)
+- [ ] App: `pnpm --filter @ludwig/web build` grün (`@/ludwig/*` aus dem Submodule löst auf — geprüft, kein Fallback nötig)
 - [ ] App: `apps/web/src/styles/{tokens,app-chrome,components,booking}.css` gelöscht, `v2.css` nur noch die 6 Rest-Klassen
 - [ ] App: kein `git add -A`; `git show --stat HEAD` zeigt nur die Dateien aus Teil B
 - [ ] Owner: eine v2-lastige Seite und die Abnahme-Seite im Browser angesehen (tokens.css hat die `h1–h4`-Elementregeln verloren; laut Messung wirkungslos, weil Preflight danach lädt — im Browser bestätigen)

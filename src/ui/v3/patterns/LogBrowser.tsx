@@ -114,7 +114,7 @@ export function LogBrowser({
   const activeCount = (severity === "all" ? 0 : 1) + (search.trim() ? 1 : 0);
   const hasLevels = entries.some((e) => e.level !== undefined);
   /** The nearest deeper view that would show something — the way out of an empty view. */
-  const wider = VIEWS.find((v) => v > view && viewCounts[v - 1] > 0) ?? null;
+  const wider = VIEWS.find((v) => v > view && (viewCounts[v - 1] ?? 0) > 0) ?? null;
 
   function change(next: Partial<LogFilterState>) {
     const state: LogFilterState = { view, severity, search, ...next };
@@ -150,7 +150,7 @@ export function LogBrowser({
             active={String(view)}
             options={VIEWS.map((v, i) => ({
               key: String(v),
-              label: viewLabels[i],
+              label: viewLabels[i] ?? "",
               count: viewCounts[i],
             }))}
             onPick={(key) => change({ view: Number(key) as 1 | 2 | 3 })}
@@ -182,7 +182,7 @@ export function LogBrowser({
       {entries.length > 0 && shown.length === 0 ? (
         <EmptyState
           inline
-          title={emptyAfterFilter(viewLabels[view - 1], severity, search, entries.length)}
+          title={emptyAfterFilter(viewLabels[view - 1] ?? "", severity, search, entries.length)}
           description="Der Filter greift nur, was geladen ist."
           action={
             <>

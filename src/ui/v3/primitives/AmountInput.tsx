@@ -38,7 +38,7 @@ export function parseAmount(raw: string): ParsedAmount {
     s = s.replace(/\./g, "").replace(",", ".");
   } else {
     const tail = s.match(/\.(\d+)$/);
-    if (tail && tail[1].length === 3) s = s.replace(/\./g, "");
+    if (tail?.[1]?.length === 3) s = s.replace(/\./g, "");
   }
   if (!/^-?\d+(\.\d+)?$/.test(s)) return "invalid";
   const n = Number(s);
