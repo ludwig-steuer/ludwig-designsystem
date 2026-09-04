@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | offen |
+| Status | verworfen (2026-09-04) — `role="switch"` kommt 0-mal vor, der einzige Kandidat `ClientActiveToggle` ist mit Absicht ein Knopf; Owner-Entscheid gegen einen Schalter |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, ein Schalter ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Schalter (Toggle)"; Design-Kit `Toggle` |

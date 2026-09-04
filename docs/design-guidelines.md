@@ -397,12 +397,12 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 |---|---|---|
 | `AppShell` + `TopBar`: Sidebar 240 px · Top-Bar 56 px · Content | `AppShell.tsx`, `TopBar.tsx` | v2 (0030) |
 | `NavList` — Hauptnavigation (Abschnitte, aktiv, Zähler) | `Sidebar.tsx`, `mandant-nav.ts` | v2 (0031); die Gliederung bleibt in der App |
-| Top-Bar-**Füllung**: Mandant · Suche · UserMenu | `TopBar.tsx` | heben (die Hülle ist 0030) |
-| Mandanten-Block (Anzeige + Link auf `/clients`, R13) | `MandantBand`, `MandantSwitcher` | heben |
-| Wirtschaftsjahr-Wahl | `YearSwitcher`, `RememberClientYear` | heben |
-| UserMenu + Rollen-Badge | `UserMenu`, `RoleBadge` | heben |
-| Experiment-Kennzeichnung | `ExperimentBadge`, `ExperimentMandantBanner` | heben |
-| Bereitschafts-/Deckungs-Banner je Mandant | `ReadinessBanner`, `EmbeddingCoverageBanner` | heben → `StatusCallout` |
+| Top-Bar-**Füllung**: Mandant · Suche · UserMenu | `TopBar.tsx` | **App-Komposition** (Owner 2026-09-04): die Slots `crumb`/`search`/`actions` von `TopBar` (0030) füllt die App |
+| Mandanten-Block (Anzeige + Link auf `/clients`, R13) | `MandantBand`, `MandantSwitcher` | **App-Komposition** (2026-09-04): `Popover` + `NavList`, Link als `TextButton` |
+| Wirtschaftsjahr-Wahl | `YearSwitcher`, `RememberClientYear` | **App-Komposition** (2026-09-04): `Popover` + `NavList`; Jahreszustand `StatusBadge` |
+| UserMenu + Rollen-Badge | `UserMenu`, `RoleBadge` | **App-Komposition** (2026-09-04): `OverflowMenu`; Rolle = `StatusBadge axis="rolle"` |
+| Experiment-Kennzeichnung | `ExperimentBadge`, `ExperimentMandantBanner` | **App-Komposition** (2026-09-04): `Badge` + `Banner` |
+| Bereitschafts-/Deckungs-Banner je Mandant | `ReadinessBanner`, `EmbeddingCoverageBanner` | **App-Komposition** (2026-09-04): `StatusCallout` / `Banner` |
 | Sperre unter 1280 px (L1) | in `AppShell` (0030); `.abn__toosmall` war nur in der Abnahme | v2 (0030) |
 | Marketing-Header 72 px · Portal-Rahmen | `ui_kits/marketing`; `client-portal` | prüfen (Register, F111 B6) |
 
@@ -413,7 +413,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Aktion | `Button` (primary/secondary/tertiary/danger × xs/sm/md, `href`, `hotkey`, `icon`/`iconEnd`, `loading`, `fullWidth`) | v1 `Button` | v2 (0010) |
 | Aktion | `KeyButton` · `ActionBar` · `RowActions` | — | v2 |
 | Aktion | Zeilen-/Überlaufmenü (Popover + Einträge) | `DocActionsMenu`, `UserMenu`, `FeedbackRowActions` | v2 (0008) |
-| Aktion | Kopieren-Knopf | `CopyTextButton` (datev-truth) | heben |
+| Aktion | Kopieren-Knopf | `CopyTextButton` (datev-truth, eine Stelle) | — (2026-09-04): `ActionButton` mit Clipboard-Aktion + `useToast` an der Aufrufstelle |
 | Aktion | `TextButton` (zwei Lautstärken, `icon`, `href`) | `.v2link`, 86 Stellen | v2 (0011) |
 | Aktion | `IconButton` (Icon ohne Wort — benannte Ausnahme zu T8) | 31 Stellen, 9 davon ohne `aria-label` | v2 (0012) |
 | Aktion | `ActionButton` (führt aus, sperrt, zeigt Fehler, bestätigt) | 61× `useTransition` von Hand, 28× `window.confirm` | v2 (0004) |
@@ -437,7 +437,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Fläche | `Disclosure` (Aufklapper mit Kopf und Zustand) | natives `<details>/<summary>`, 34 Stellen / 20 Dateien | v2 (0005) |
 | Formular | `Field` · `Input` · `Textarea` · `Select` · `Checkbox` (Label sichtbar, Fehler als Text, Pflicht, I8) | — | v2 |
 | Formular | `RadioGroup` (Antwortoptionen I6) | 3 rohe Radio-Felder in 2 Dateien | v2 (0017) |
-| Formular | Schalter (Toggle) | `ClientActiveToggle` ist bewusst ein Knopf; `role=switch` 0× | prüfen (0018) |
+| Formular | Schalter (Toggle) | `ClientActiveToggle` ist bewusst ein Knopf; `role=switch` 0× | — verworfen (0018, 2026-09-04) |
 | Formular | `DateField`/`DateRangeField` | natives Datumsfeld, 14 Dateien | v2 (0024) |
 | Formular | `AmountInput` (`tnum`, Komma, Vorzeichen) | inline im Editor, 16 Dezimal-Felder | v2 (0019) |
 | Formular | `Combobox` generisch (Suche, Kandidaten nach Herkunft, Tastatur) | `KontoCombobox`, `CreditorCombobox`; v3 `AccountField` entitätsgebunden | v2 (0009, Basis für `AccountField`/`PartnerField`) |
@@ -452,14 +452,16 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Navigation | `RecordPager` (ein Datensatz aus einem Vorrat, „3 von 117", `J`/`K`) | Kopfzeile in `sachverhalt/parts.tsx` | v2 (0047) |
 | Rahmen | `EntityHeader` (Karte über einer Akte: Symbol, Titel, ein Zustand, Kennzahl, Fakten) | `Hero` in `sachverhalt/parts.tsx` (155 Z.) | v2 (0048) |
 | Tabelle | `TableLoading` · `ErrorRow` (I7) | — | v2 |
-| Tabelle | `StatusHeader` (Spaltenkopf mit Legende, Z4) | v1; 7× `<th>Status</th>` | Optik; Reste heben |
+| Tabelle | `StatusHeader` (Spaltenkopf mit Legende, Z4) | v1 in 36 Dateien; 7× `<th>Status</th>` | spec (0077) — Owner 2026-09-04: kommt ins Set, auf `StatusInfoButton` |
 | Tabelle | Sortierbarer Spaltenkopf | — | prüfen |
 | Tabelle | `MonoCell` (Kontonummer, BU, DATEV-Code) | vorher nur die CSS-Klasse `v2num` | v2 |
 | Tabelle | `LongText` | v1 Re-Export | Optik |
-| Zustand | `StatusBadge` + Registry · `StatusInfoButton`/`-Dialog` · `EntityStatusBadgeButton`/`FlowModal` | `@/ui/status` | Optik (Pill, Füllung nur hier) |
+| Zustand | `StatusBadge` · `StatusInfoButton`/`-Dialog` | `@/ui/status` | v2 (Pill, Füllung nur hier) |
+| Zustand | Registry (`resolveStatus`, `axisLegend`, `STATUS_REGISTRY`) | `@/ui/status/status-registry.ts`, Kopie im Set | **bleibt in der App, gespiegelt** (Owner 2026-09-04, 0080) |
+| Zustand | `EntityStatusBadgeButton`/`FlowModal` | `@/ui/status` | **App-Komposition** (2026-09-04): `StatusBadge chevron` + `Dialog`; lädt per Server Action, gehört nicht ins Set |
 | Zustand | `Badge kind=…` ohne Status-Achse | 126 Stellen | heben: Achse → Registry, sonst `DotStatus`/`FilterChips` |
 | Zustand | `StateIcon` (9 Zustände) | — | v2 |
-| Zustand | Konfidenz (Punkt · Band · Meter) | `ConfidenceDot`/`Meter`/`Band`, `Confidence` (invoices) | heben → eine Primitive, `KIBuchungshinweise` nutzt sie |
+| Zustand | Konfidenz (Punkt · Wort · Prozent) | `ConfidenceDot`/`Meter`/`Band`, `Confidence` (invoices) — vier Nachbauten, drei Schwellensätze | spec (0078) — ein Pattern `Confidence`; Meter und Band entfallen, `AiBookingNotes` nutzt es |
 | Text | `Markdown` | v1, 5 Dateien / 12 Stellen | v2 (0022) |
 | Text | `HotkeyLegende`/Kbd | — | v2 |
 | Text | Zeit relativ (`TimeAgo`) | v1 | heben → `Timestamp` absolut (T7) |
@@ -475,11 +477,11 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | `TodoListe` · `Checkliste`/`Pruefpunkte`/`Meldungen` · `VergleichsTabelle` | `CasePlausibilityTab`, `FindingsList` | v2; v1 heben |
 | `ProzessMini`/`ProzessStepper`/`Staffelstab`/`StaffelLeiste` | — | v2 |
 | Verarbeitungsfortschritt (Schritte mit Zustand, Retry) | `PipelineStepper`, `ProcessingProgress`, `JobStatusMonitor`, `SourceDocPipelineTab` | heben → `ProzessStepper` |
-| Wizard (Schritte, Zurück/Weiter, Zusammenfassung) | `Wizard`, `CsvImportWizard`, `DatevExportWizard`, `OnboardingWizard` | heben |
+| Wizard (Schritte, Zurück/Weiter, Zusammenfassung) | `Wizard` (fünf lebende Aufrufer: `CsvImportWizard`, `DatevMetaImportPanel`, `OnboardingWizard`, `OnboardingReviewSteps`, `DatevExportWizard`) | spec (0079) — die Hülle, formgleich; die Abläufe bleiben in den Modulen |
 | `Timeline` (Zeit · Akteur · Ereignis · Diff) | `CycleTimeline`, `HistorieTab`, `SourceDocVerlaufTab`, `VerlaufTab`, `EventStack`; Kit `AuditTrail` | v2 (0023) |
 | Log-Ansicht, Sichten Verlauf/Protokoll/Technik | `LogTable`/`LogView`/`LogEntry`/`LogBadges`/`LogPayloadCell` | Optik |
 | `ChoicePrompt` — Frage mit Antwortoptionen (Handlungen + Freitext, I6, S13) | `RaiseClarificationForm` | v2 (0028) |
-| Kommentar-/Notizstrang | `CaseCommentForm`, `ClientAgentNotesPanel` | prüfen |
+| Kommentar-/Notizstrang | `CaseCommentForm`, `ClientAgentNotesPanel` (je eine Stelle) | prüfen — wartet auf L-27 (Faden oder Einzelantwort), Owner-Entscheid drüben |
 | Nächster Schritt mit Zahl (I10) | inline in der Abnahme | heben |
 | Sammelaktion | `SelectionBar` | v2 |
 

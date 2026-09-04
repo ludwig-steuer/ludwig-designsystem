@@ -134,9 +134,13 @@ Nicht zu vergessen bei der Umstellung: `.btn` ist heute **37 px**, `.btn-sm`
 ## Bleibt Alt-Mechanik, bekommt nur v3-Optik
 
 Nicht verhandelbar laut §11.2 — hier wird nichts neu gebaut, nur umgestylt:
-`StatusHeader` (34 Dateien / 54 Stellen, hängt an `Tooltip`) · `Tooltip`
-(2 direkte Importe, aber **11 Neubauten** in Modulen) ·
+`Tooltip` (2 direkte Importe, aber **11 Neubauten** in Modulen) ·
 `Drawer`/`UrlDrawer`-Familie (29 Importstellen) · `LogTable`/`LogView`.
+
+`StatusHeader` (36 Dateien) stand hier bis 2026-09-04 mit der Begründung
+„hängt an `Tooltip`". Seit `Tooltip` im Set ist (0038) trägt sie nicht mehr;
+Owner-Entscheid 2026-09-04: er kommt als Pattern ins Set (0077), auf
+`StatusInfoButton` statt auf einem Hover.
 
 Der `Tooltip`-Befund ist der bemerkenswerteste: elf Module haben sich einen
 eigenen gebaut, statt den vorhandenen zu nehmen.
@@ -146,6 +150,9 @@ eigenen gebaut, statt den vorhandenen zu nehmen.
 `AppShell`/`Sidebar`/`TopBar`/`UserMenu`/`MandantSwitcher`/`YearSwitcher`
 tragen Mandanten- und Jahreswechsel — Fachbegriffe. Der Anwendungsrahmen
 gehört nach `entities/` oder bleibt in der App, nicht in `primitives/`.
+**Entschieden 2026-09-04: er bleibt in der App**, als Komposition aus den
+`TopBar`-Slots, `Popover` + `NavList`, `OverflowMenu`, `StatusBadge
+axis="rolle"` und `StatusCallout` — die Liste steht in `befunde-app.md` §F.
 
 Ebenso die Entitäten-Familien, die §11.3 als „v2 fehlt" führt: `CaseCell`
 (Sachverhalt), die Buchungs-Anzeigen (`JournalEntryView`, `AccountRef`,
