@@ -3,8 +3,12 @@
 Die wiederverwendbaren UI-Bausteine von Ludwig — unabhängig von der App
 entwickelbar, mit Storybook als Werkbank.
 
-Das Repo wird später als Git-Submodule in `ludwig/` eingebunden. Bis dahin
-ist es die Quelle, aus der v3 wächst; die App fährt weiter auf ihrem `ui/v2`.
+Die App bindet das Repo als Git-Submodule unter `packages/designsystem` ein
+und importiert die Bausteine als `@ludwig/designsystem` — die Quelle, kein
+Build (Remote: `git@github.com:ludwig-steuer/ludwig-designsystem.git`, Plan:
+`docs/backlog/0064-einbettung-in-ludwig.md`). Von den Styles lädt die App die
+Einzeldateien unter `src/styles/`; `index.css` ist die Kette der Werkbank und
+lädt zusätzlich Fonts und Tailwind-Base.
 
 **Dieses Repo ist das Design-SSOT.** Designsprache, Ton und die Bausteine
 werden hier entschieden — nicht mehr in `ludwig/app/docs/`.
@@ -66,15 +70,10 @@ kommt über dasselbe `pnpm sync:ludwig`:
 | `GLOSSARY.md` | Namens-SSOT, DE/EN je Begriff. **Bei jedem neuen Prop- oder Typnamen hier nachschlagen**, statt zu erfinden — Kanzlei statt Tenant, Mandant statt Client. |
 | `web-ui.md` | Was von den Code-Regeln der Web-App fachlich ist — Beleg-Shell, Stapelabnahme, Admin-Log. Die Design-Anteile stehen in `docs/web-ui-regeln.md`, die Nummern drüben sind Lücken. |
 
-Die Fassungen der beiden Design-Dokumente, die noch in `ludwig/app` liegen,
-sind die alten. Sie werden beim Einbinden als Submodule durch einen Zeiger
-hierher ersetzt — bis dahin nur hier ändern.
-
-Falls dort doch jemand ergänzt: `pnpm sync:ludwig` merkt es und sagt, welche
-Datei betroffen ist und wie sich der Unterschied ansehen lässt. Übernommen
-wird nichts automatisch — die Design-Doku gehört diesem Repo. Der Abgleich
-läuft über `.design-doc-stamps`; nach dem Übernehmen den Stand quittieren
-(das Script zeigt den passenden Befehl).
+Die alten Fassungen der beiden Design-Dokumente sind in `ludwig/app` gelöscht;
+`docs/design-system.md` dort zeigt hierher. Die Drift-Wache in
+`sync-ludwig.sh` (`.design-doc-stamps`) schweigt deshalb — sie bleibt, falls
+eine Fassung drüben je wieder auftaucht.
 
 ## Die Ludwig-Interfaces
 

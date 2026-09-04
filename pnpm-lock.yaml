@@ -23,15 +23,6 @@ importers:
       lucide-react:
         specifier: ^1.14.0
         version: 1.39.0(react@19.2.8)
-      next:
-        specifier: ^16.0.0
-        version: 16.3.4(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      react:
-        specifier: ^19.0.0
-        version: 19.2.8
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.8(react@19.2.8)
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.6.0
@@ -54,9 +45,18 @@ importers:
       autoprefixer:
         specifier: ^10.4.20
         version: 10.5.4(postcss@8.5.26)
+      next:
+        specifier: ^16.0.0
+        version: 16.3.4(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       postcss:
         specifier: ^8.4.49
         version: 8.5.26
+      react:
+        specifier: ^19.0.0
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.8(react@19.2.8)
       storybook:
         specifier: ^10.5.10
         version: 10.6.0(@types/react@19.2.18)(react@19.2.8)

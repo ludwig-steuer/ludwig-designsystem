@@ -8,6 +8,13 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
+# Die App liegt neben dem Repo (Werkstatt) oder zwei Ebenen höher (als
+# Submodule unter app/packages/designsystem) — erster Treffer gewinnt.
+if [ -z "${LUDWIG_SRC:-}" ]; then
+  for cand in "$REPO/../app/apps/web/src" "$REPO/../../apps/web/src"; do
+    [ -d "$cand" ] && { LUDWIG_SRC="$cand"; break; }
+  done
+fi
 SRC="${LUDWIG_SRC:-$REPO/../app/apps/web/src}"
 APP="$(cd "$SRC/../../.." 2>/dev/null && pwd || true)"   # ludwig/app
 DST="$REPO/src/ludwig"

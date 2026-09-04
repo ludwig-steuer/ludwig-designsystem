@@ -1,9 +1,8 @@
 # Ludwig UX-Guidelines — Designsprache und UX (SSOT)
 
 > **Dieses Repo führt die Designsprache.** Das Dokument ist hierher gezogen und
-> wird hier gepflegt — nicht mehr in `ludwig/app/docs/`. Die Fassung, die dort
-> noch liegt, ist die alte; sie wird beim Einbinden als Submodule durch einen
-> Zeiger hierher ersetzt. Bis dahin gilt: **Änderungen nur hier.**
+> wird hier gepflegt — nicht mehr in `ludwig/app/docs/`; die alte Fassung dort
+> ist gelöscht, `docs/design-system.md` zeigt hierher. **Änderungen nur hier.**
 >
 > **Pfade im Text zeigen auf die App.** Übersetzung in dieses Repo:
 > `apps/web/src/ui/v2` → `src/ui/v3`, `src/styles/v2.css` → `src/styles/v3.css`,
