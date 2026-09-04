@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { deriveTax } from "./tax-assist";
 // Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
 // und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
-import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
+import { StatusBadge } from "../../patterns/StatusBadge";
 
 import { formatAmount } from "../../format";
 import { parseAmount } from "../../primitives/AmountInput";
