@@ -8,7 +8,6 @@ import type { ClarificationSeverity } from "@/ludwig/modules/invoices/domain/inv
 
 import { Disclosure } from "../../primitives/Disclosure";
 import { EmptyState } from "../../primitives/EmptyState";
-import { LongText } from "../../primitives/LongText";
 import { Time } from "../../primitives/Time";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import type { TodoItem } from "../../patterns/TodoList";
@@ -101,8 +100,9 @@ export function ClarificationCell({
   const target = href ?? clarification.href ?? undefined;
   const body = (
     <>
-      <span className="v2cl__cellTitle">
-        <LongText max={80}>{clarification.title}</LongText>
+      {/* One line, cut with an ellipsis; the whole question is in the hover. */}
+      <span className="v2cl__clamp" title={clarification.title}>
+        {clarification.title}
       </span>
       {stateBadges(clarification)}
     </>
@@ -155,8 +155,16 @@ export function ClarificationRow({
       ) : null}
 
       <div className="v2cl__head">
-        <span className="v2main">{c.title}</span>
-        {stateBadges(c)}
+        {/*
+          The title is cut to one line — a question runs long and would push
+          the badges around. The whole of it stays in the hover.
+        */}
+        <span className="v2main v2cl__clamp" title={c.title}>
+          {c.title}
+        </span>
+        {/* Right-aligned: the state must not move with the length of the
+            question, and down a list it becomes a column one can scan. */}
+        <span className="v2cl__state">{stateBadges(c)}</span>
       </div>
 
       <div className="v2cl__meta">
@@ -167,21 +175,29 @@ export function ClarificationRow({
             <span aria-hidden="true">·</span>
           </>
         ) : null}
-        <Time value={c.raisedAt} format="dateTime" size="sm" />
+        {/*
+          Every date says what it is. While the question is out, its **age** is
+          the pressure, so it is its age („vor 13 Tagen", exact form in the
+          hover — `age`, not `relative`, which gives up after a week); once it
+          is answered, the age of the question no longer
+          matters and the answer date takes the place (T7).
+        */}
+        {c.answeredAt ? (
+          <span>
+            Beantwortet <Time value={c.answeredAt} format="date" size="sm" />
+          </span>
+        ) : (
+          <span>
+            {c.type === "comment" ? "Notiert " : "Gefragt "}
+            <Time value={c.raisedAt} format="age" size="sm" />
+          </span>
+        )}
         {/* „Deferred" is a state nobody may have to guess from a colour (V7). */}
         {c.state === "deferred" && c.deferredUntil ? (
           <>
             <span aria-hidden="true">·</span>
             <span>
               zurückgestellt bis <Time value={c.deferredUntil} format="date" size="sm" />
-            </span>
-          </>
-        ) : null}
-        {c.answeredAt ? (
-          <>
-            <span aria-hidden="true">·</span>
-            <span>
-              beantwortet <Time value={c.answeredAt} format="date" size="sm" />
             </span>
           </>
         ) : null}

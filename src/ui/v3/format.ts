@@ -62,7 +62,7 @@ export function formatAmount(
 
 /* ── Zeitpunkte ─────────────────────────────────────────────────────────── */
 
-export type TimeFormat = "date" | "dateTime" | "relative" | "month";
+export type TimeFormat = "date" | "dateTime" | "relative" | "age" | "month";
 export type TimeLength = "short" | "medium" | "long";
 
 const DATE = new Intl.DateTimeFormat(LOCALE, {
@@ -143,9 +143,25 @@ export function formatTime(
   if (format === "date") return DATE.format(d);
   if (format === "month") return MONTH.format(d);
   if (format === "relative") return formatRelative(d, now);
+  if (format === "age") return formatAge(d, now);
   if (length === "short") return DT_SHORT.format(d);
   if (length === "long") return DT_LONG.format(d);
   return DT_MEDIUM.format(d);
+}
+
+/**
+ * How long ago, **without** falling back to a date — for things whose age is
+ * the point: an open clarification, an overdue item, a waiting expectation.
+ * `relative` gives up after a week (T7: a relative time alone is no answer
+ * when someone checks a period), but a question that has been open for
+ * thirteen days must say so; the exact time stays in the `title` of `Time`.
+ */
+function formatAge(d: Date, now: Date): string {
+  const diff = d.getTime() - now.getTime();
+  const abs = Math.abs(diff);
+  if (abs < HOUR) return RELATIVE.format(Math.round(diff / MINUTE), "minute");
+  if (abs < DAY) return RELATIVE.format(Math.round(diff / HOUR), "hour");
+  return RELATIVE.format(Math.round(diff / DAY), "day");
 }
 
 /** The full, unambiguous form — what stands in the `title` of a `Time`. */

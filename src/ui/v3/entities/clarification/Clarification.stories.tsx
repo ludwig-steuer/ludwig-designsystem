@@ -14,7 +14,9 @@ import {
 } from "./Clarification";
 
 const meta: Meta<typeof ClarificationList> = {
-  title: "v3/Entitäten/Klärung/Clarification",
+  // Named after the main export of the family file, like `Table` and
+  // `LogList` — there is no export called plain `Clarification`.
+  title: "v3/Entitäten/Klärung/ClarificationRow",
   component: ClarificationList,
   parameters: { layout: "padded" },
 };
@@ -203,6 +205,28 @@ export const ImRahmen: Story = {
       </div>
     );
   },
+};
+
+/** A question that runs past the column: cut to one line, whole in the hover. */
+export const LangeFrage: Story = {
+  render: () => (
+    <Card>
+      <CardHead title="Lange Frage" sub="gekürzt auf eine Zeile, ganzer Text im Hover" />
+      <ClarificationList
+        clarifications={[
+          {
+            ...OPEN_REQUIRED,
+            id: "long",
+            title:
+              "Der Beleg der Musterfirma GmbH weist eine Bewirtung über 68,40 € und eine " +
+              "Übernachtung über 172,00 € auf demselben Papier aus — soll die Buchung dem " +
+              "überwiegenden Anteil folgen oder wollen Sie die Positionen trennen?",
+          },
+          { ...OPEN_CLIENT, id: "short", title: "Wurde das Fahrrad weiterverkauft?" },
+        ]}
+      />
+    </Card>
+  ),
 };
 
 export const Leer: Story = {

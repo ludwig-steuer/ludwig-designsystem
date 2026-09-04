@@ -169,7 +169,9 @@ Kommentar bleibt sichtbar, wo er hingehört: in `ClarificationList` am Fall.
 
 ## Stories
 
-Titel `v3/Entitäten/Klärung/Clarification`.
+Titel `v3/Entitäten/Klärung/ClarificationRow` — die Familien-Datei trägt den
+Namen ihres Haupt-Exports, wie `Table` und `LogList`. Einen Export namens
+`Clarification` gibt es nicht.
 
 | Story | Beweist |
 |---|---|
@@ -180,9 +182,10 @@ Titel `v3/Entitäten/Klärung/Clarification`.
 | `MitKarte` | `renderDetail` + `defaultOpen` — das Aufklappen |
 | `Vorschau` | `ClarificationCell` in einer fremden Zeile (Buchungs-Begründung) |
 | `ImRahmen` | dieselben Daten durch `toTodoItem` in `TodoList` und dieselbe Klärung in `CaseTimeline`; der Kommentar fehlt im Strang und steht in der Liste |
+| `LangeFrage` | Titel über die Spaltenbreite: eine Zeile, Rest im Hover |
 | `Leer` | „Keine Rückfragen." mit Zusatz |
 
-Acht Stories, unter der Obergrenze. Nicht anwendbar: `Laedt`, `Fehler`
+Neun Stories, unter der Obergrenze. Nicht anwendbar: `Laedt`, `Fehler`
 (oben begründet), `Interaktiv` (keine Callbacks in dieser Datei).
 
 ## Abnahmekriterien
@@ -210,6 +213,11 @@ Variabel (aus dieser Spec):
 - [ ] `CaseTimeline` überspringt Klärungen mit `type="comment"` und `toTodoItem`
       gibt für sie `null` zurück — der Kommentar steht nur in der Liste (Story `ImRahmen`)
 - [ ] Zurückgestellt erscheint als Wort mit Datum, nicht nur farblich (Story `Zustaende`)
+- [ ] Der Zustand steht **rechtsbündig** und wandert nicht mit der Titellänge (Story `LangeFrage`)
+- [ ] Jedes Datum trägt sein Wort: offen „Gefragt vor …" (relativ, genaue Zeit
+      im Hover), beantwortet „Beantwortet am …" (Story `Zustaende`)
+- [ ] Der Titel wird auf eine Zeile gekürzt und steht vollständig im
+      `title`-Hover (Story `LangeFrage`)
 - [ ] Ersetzt die Zeilen aus `ClarificationsBanner`, `Schritt2Liste` und
       `PortalCaseList` ohne Funktionsverlust — offen (App)
 

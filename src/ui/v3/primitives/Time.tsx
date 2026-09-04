@@ -12,7 +12,8 @@ export type TimeSize = "sm" | "md";
 
 /**
  * @when    Every point in time that is shown: document date, timestamp, „how
- *          long ago", a month on an axis.
+ *          long ago" (`relative`, a date beyond a week), the age of something
+ *          still waiting (`age`, always in days), a month on an axis.
  * @instead A span someone picks → DateRangeField. A time span that elapsed →
  *          Duration, below. A date someone types → DateField.
  */

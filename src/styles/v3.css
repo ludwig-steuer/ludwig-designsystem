@@ -2285,7 +2285,17 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2cl__case { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
 .v2cl__case .v2sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.v2cl__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+/* Titel links, Zustand rechts: der Chip darf nicht mit der Textlänge wandern. */
+.v2cl__head { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.v2cl__state {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
+}
+/* Eine Zeile, Rest im `title`-Hover — Fragen sind länger als die Spalte. */
+.v2cl__clamp { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 
 .v2cl__meta {
   display: flex;
@@ -2313,8 +2323,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2cl__count { font-weight: 400; }
 
 /* Die Vorschau steht mitten im Text einer fremden Zeile. */
-.v2cl__cell { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }
-.v2cl__cellTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2cl__cell { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; max-width: 100%; }
 
 /* ── 0060 Klärungs-Karte: Frage, Verlauf, Antwort ───────────────────────── */
 .v2clc { display: flex; flex-direction: column; gap: var(--space-3); }
