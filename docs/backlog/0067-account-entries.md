@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Soll/Haben, Gegenkonto, Belegfeld 1, DATEV-Spiegel |
 | Quelle | Entitätsprofil `docs/entitaeten/account.md` (Status `geprüft`), Abschnitte „Datenpunkte einer Bewegung", „Die Herkunft in Zahlen", „Listen" · Owner-Entscheide 2026-09-04 (eine Liste statt zwei Tabs · Symbol bei Ludwig-Bezug · kein laufender Saldo je Zeile) · `design-guidelines.md` A11/A11a |
@@ -254,7 +254,7 @@ Variabel (aus dieser Spec):
 - [ ] Keine Zeile trägt eine Saldospalte (Story `Varianten` — auch `full` hat keine)
 - [ ] Mehrere Gegenkonten: das erste steht, der Rest als „+n" (Story `Edges`)
 - [ ] „Mehr laden" erscheint nur, solange `entries.length < total`, und nennt den Vorrat (Story `Nachladen`)
-- [ ] Leertext nennt das Jahr und trägt **keinen** Knopf (Story `Leer`)
+- [ ] Der **Aufrufer** nennt das Jahr im Leertext (Story `Leer`), der eingebaute Default bleibt jahresfrei (Schnittstellen-Zeile `empty`); der Leerzustand trägt **keinen** Knopf
 - [ ] Ladefläche hat die Form des Inhalts, Kopfzeile bleibt stehen (Story `Laedt`)
 - [ ] Dieselben Spalten laufen in `DataTable` **und** in der nackten `Table` (Story `InUse`)
 - [ ] Die Familie vereinigt nichts und sortiert nichts: kein `filter`, kein `sort`, kein `disappeared` in der Datei
@@ -280,7 +280,7 @@ Variabel (aus dieser Spec):
 |---|---|---|---|
 | `onShowMore: () => void` | die Liste rendert den „Mehr laden"-Knopf selbst | **`more?: ReactNode`** — der Aufrufer gibt seinen Knopf hinein, den Vorratszähler daneben schreibt die Liste | Ein `onClick` macht die Komponente zur Client-Component. Die Spec verlangt eine Server-Component *und* einen Callback — das schließt sich aus. So bleibt die Liste server-tauglich, der Drawer (ohnehin `"use client"`) baut den Knopf, und die Formulierung des Zählers bleibt an einer Stelle. |
 | Leere Betragsseite | `AmountCell` je Spalte | **leer**, kein Geviertstrich | `AmountCell` liest `null` als „unbekannt" und zeigt „—". Auf welcher Seite eine Bewegung steht, sagt aber *welche* Spalte die Zahl trägt — sechs Geviertstriche in sechs Zeilen behaupten sechsmal Unwissen, das es nicht gibt. Dieselbe Regel wie im Journalblock (0044). |
-| Spaltenbreiten | Text `1fr`, Gegenkonto `1.2fr` | Text `1.6fr`, Gegenkonto `1.1fr` | Browser-Befund: mit dem `exported`-Chip in der Textzelle blieb vom Buchungstext „T…" übrig. |
+| Spaltenbreiten | Text `1fr`, Gegenkonto `1.2fr`; Herkunft 20 px, Buchungszustand 110 px, DATEV 56 px | Text `1.6fr`, Gegenkonto `1.1fr`, Herkunft 24 px, Buchungszustand 132 px, DATEV 64 px | Browser-Befund: mit dem `exported`-Chip in der Textzelle blieb vom Buchungstext nur ein Buchstabe übrig. Die drei Pixelspuren wuchsen beim Bauen um 4–22 px, damit Zeichen, Chip und Kennzeichen nicht an ihrer Spurgrenze kleben — beim Schreiben der Spec geschätzt, beim Bauen gemessen. Nachgetragen in Runde 2 der Abnahme. |
 | Default-Leertext | „Auf diesem Konto ist in diesem Jahr nichts gebucht." | **„Keine Bewegungen."** | Nachbesserung aus der ersten Abnahme: die Liste bekommt das Jahr nicht, und „in diesem Jahr" ohne Jahresangabe liest sich wie „nie". Der Satz sagt jetzt nur, was die Liste weiß; der Drawer setzt den vollen Satz mit Jahr. |
 
 **Drei Befunde aus dem ersten Browser-Durchgang, behoben:** der Kontoname im
@@ -291,19 +291,21 @@ Betragsseiten zeigten Geviertstriche.
 
 ## Abnahme
 
-Geprüft gegen Spec, Code und Storybook (eigene Instanz auf Port 6121,
-DOM-Messungen im Preview-Frame). `pnpm typecheck` Exit 0, `pnpm build` Exit 0.
+Zwei Runden. Runde 1 (2026-09-04) schickte die Aufgabe mit einem ✗ zurück,
+Runde 2 prüfte die Nachbesserung aus Commit `0ae2dad` nach — Storybook auf
+Port 6122, DOM-Messungen im Preview-Frame, `pnpm typecheck` und `pnpm build`
+je Exit 0 (in beiden Runden).
 
 | Kriterium | Nachweis (Story-ID · Befehl · Messung) | Ergebnis |
 |---|---|---|
-| `pnpm typecheck` und `pnpm build` grün | beide Läufe Exit 0 | ✓ |
+| `pnpm typecheck` und `pnpm build` grün | beide Läufe Exit 0, in Runde 2 wiederholt | ✓ |
 | Datei nach der Familie benannt, Story daneben, Titel `v3/Entitäten/Konto/AccountEntries` | `AccountEntries.tsx` + `.stories.tsx`; `index.json`: `v3-entitäten-konto-accountentries--*` | ✓ |
-| Code englisch; `@when`/`@instead` an **beiden** Exporten | `AccountEntries.tsx:148–149` (`accountEntryColumns`), `:266–267` (`AccountEntryList`) | ✓ |
+| Code englisch; `@when`/`@instead` an **beiden** Exporten | `AccountEntries.tsx` an `accountEntryColumns` und `AccountEntryList` | ✓ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | kein Hex; px nur als Grid-Spurbreiten (`width: "84px"` …) wie in `Log.tsx`/`ComparisonTable.tsx`; Chips über `StatusBadge axis="buchung"`/`"buchung_datev"` | ✓ (Anmerkung 3) |
 | Alle acht Stories vorhanden; ausgeschlossene Zustände begründet | `Filled`, `Varianten`, `Nachladen`, `Leer`, `Laedt`, `Fehler`, `InUse`, `Edges` — 8/8; „leer nach Filter" begründet ausgeschlossen (die Liste filtert nicht) | ✓ |
 | Prüfliste `design-guidelines.md` §9 durchgegangen | durchgegangen; ein Fund zur Zeilenhöhe → Anmerkung 1 | ✓ |
 | Im Browser angesehen (Storybook), nicht nur gebaut | alle acht Stories gerendert, gemessen, „Mehr laden" zweimal geklickt | ✓ |
-| `accountEntryColumns()` ist eine **Funktion**, kein Wrapper um `DataTable` | `grep -n "DataTable" AccountEntries.tsx` → nur `import type { ColumnDef }` (Z. 11) und JSDoc-Prosa | ✓ |
+| `accountEntryColumns()` ist eine **Funktion**, kein Wrapper um `DataTable` | `grep -n "DataTable" AccountEntries.tsx` → nur `import type { ColumnDef }` und JSDoc-Prosa | ✓ |
 | `variant: "compact"` liefert 7 Spalten, `"full"` 10 | `Varianten`, Kopfzellen im DOM gezählt: 7 (Datum · — · Beleg · Buchungstext · Gegenkonto · Soll · Haben) und 10 (+ Stapel · Buchungszustand · DATEV) | ✓ |
 | `origin: "datev"` zeigt **kein** Zeichen in Spalte 2 | `Filled`, Zeilen 1/5/6: Zelle 2 enthält `<span></span>`, Textinhalt leer | ✓ |
 | `origin: "ludwig"` dämpft die Zeile über die Textfarbe, keine Kritikalitätsfarbe | `Filled`, `getComputedStyle`: gedämpfte Zeile `rgb(92,92,92)` = `--color-text-muted`, alle anderen `rgb(45,45,45)` = `--color-text`; keine Danger-/Warning-Fläche | ✓ |
@@ -312,32 +314,28 @@ DOM-Messungen im Preview-Frame). `pnpm typecheck` Exit 0, `pnpm build` Exit 0.
 | Keine Zeile trägt eine Saldospalte | `Varianten`: Kopfzeilen beider Varianten enthalten kein „Saldo" | ✓ |
 | Mehrere Gegenkonten: das erste steht, der Rest als „+n" | `Edges`: „0420 Betriebs- und … +3", `title` des „+3" nennt die drei übrigen; `Filled`: „4400 Erlöse 19 % USt +2" | ✓ |
 | „Mehr laden" erscheint nur, solange `entries.length < total`, und nennt den Vorrat | `Nachladen`: „Mehr laden · 3 von 2.937 Bewegungen", nach zwei Klicks „6 von 2.937"; `Filled` (ohne `total`) hat keinen Bereich `.v2ae__more` | ✓ |
-| Leertext nennt das Jahr und trägt **keinen** Knopf | `Leer`: „Auf diesem Konto ist im Wirtschaftsjahr 2026 nichts gebucht.", 0 `button`/`a` im Story-Root, Kopfzeile steht | ✓ (aber Befund 1: der **Default** der Komponente nennt es nicht) |
-| Der **Default**-Leertext der Komponente nennt das Jahr (Schnittstelle: „… in diesem Jahr nichts gebucht.") | `AccountEntries.tsx:317` sagt „Auf diesem Konto ist nichts gebucht." — ohne Jahr, undokumentierte Abweichung → Befund 1 | ✗ |
+| Leertext nennt das Jahr und trägt **keinen** Knopf | `Leer` (Runde 2 nachgemessen): „Auf diesem Konto ist im Wirtschaftsjahr 2026 nichts gebucht.", 0 `button`/`a` im Story-Root, Kopfzeile steht. Das Jahr nennt planmäßig der **Aufrufer** — die Liste kennt es nicht (siehe die nächste Zeile und Anmerkung 5) | ✓ |
+| Der **Default**-Leertext behauptet nichts, was die Liste nicht weiß | Runde 1 ✗ („Auf diesem Konto ist nichts gebucht." — las sich wie „nie"). Runde 2: `AccountEntries.tsx:322` sagt „Keine Bewegungen."; Schnittstellen-Zeile `empty` und die Abweichungs-Tabelle sind nachgezogen, der Drawer setzt weiter den vollen Satz mit Jahr (`AccountDrawer.tsx:167`) | ✓ |
 | Ladefläche hat die Form des Inhalts, Kopfzeile bleibt stehen | `Laedt`: `.v2tbl__head` mit sieben Zellen steht, darunter sechs Skelett-Zeilen zu je sieben Zellen | ✓ |
 | Dieselben Spalten laufen in `DataTable` **und** in der nackten `Table` | `InUse`: zwei `.v2tbl` im DOM mit 10 (in `DataTable`, mit Pager) und 7 Kopfzellen (im `Drawer`), eine Spaltenquelle | ✓ |
 | Die Familie vereinigt nichts und sortiert nichts | `grep -nE "\.filter\(|\.sort\(|\.reduce\("` findet nichts; „disappeared" steht nur im JSDoc, das den Ausschluss beim Aufrufer erklärt | ✓ |
-| Abweichungen von der Spec stichhaltig begründet | `more?: ReactNode`, leere Betragsseite und die zwei `fr`-Breiten sind begründet und im Browser belegt; die drei stillen Pixelbreiten fehlen in der Tabelle (Anmerkung 2) | ✓ |
+| Abweichungen von der Spec stichhaltig begründet | `more?: ReactNode`, leere Betragsseite, die zwei `fr`-Breiten und (seit Runde 2) der Default-Leertext stehen mit Grund in der Tabelle; offen bleibt allein Anmerkung 2 | ✓ |
 | Ersetzt die drei Handtabellen in `ludwig/app` | Ablösung in der App ist ein eigener Schritt (`docs/backlog/README.md`) | **offen (App)** |
 
-**Abweichungen geprüft.** `more?: ReactNode` statt `onShowMore` ist tragfähig
-begründet und in 0068 konsequent zu Ende geführt; die Formulierung des Zählers
-bleibt an einer Stelle. Die leere Betragsseite ohne Geviertstrich folgt der
-Präzedenz aus 0044 und ist im DOM belegt (`Edges`, Zeile 2: Soll-Zelle leer,
-Haben `-19,00 €`). Die zwei geänderten `fr`-Breiten sind belegt. Nicht
-stichhaltig ist nur der undokumentierte Default-Leertext.
+**Befund der ersten Runde — behoben.**
 
-| # | Befund | Beleg |
+| # | Befund (Runde 1) | Behebung, in Runde 2 nachgemessen |
 |---|---|---|
-| 1 | **Der eingebaute Leertext sagt zu viel.** Die Schnittstelle nennt als Default „Auf diesem Konto ist in diesem Jahr nichts gebucht."; gebaut ist „Auf diesem Konto ist nichts gebucht." Ohne das Jahr behauptet der Satz, auf dem Konto sei **nie** etwas gebucht worden, während nur das gezeigte Jahr leer ist. Die Abweichung steht in keiner Abweichungs-Tabelle. Der Drawer (0068) reicht immer einen eigenen Text herein, der Default greift also nur bei anderen Aufrufern — eine Wortgruppe genügt. | `AccountEntries.tsx:317`; Spec-Zeile `empty` |
+| 1 | Der Default-Leertext lautete „Auf diesem Konto ist nichts gebucht." und behauptete damit mehr, als die Liste weiß — nur das gezeigte Jahr ist leer. Die Abweichung stand in keiner Tabelle. | `AccountEntries.tsx:322` sagt „Keine Bewegungen." — jahresfrei, weil die Liste das Jahr nicht bekommt; das ist die saubere Auflösung und besser als der ursprüngliche Spec-Satz. Schnittstelle und Abweichungs-Tabelle sind nachgezogen; `Leer` und der Drawer nennen das Jahr weiterhin. |
 
 | # | Anmerkung (kein ✗) | Beleg |
 |---|---|---|
 | 1 | `Edges`, Zeile 1 ist 71 px hoch statt 35 px: der 28-stellige Beleg bricht in der 96-px-Spalte dreizeilig um (`MonoCell` kürzt nicht). Text- und Gegenkonto-Zelle kürzen sauber, die Ungleichheit kommt allein vom Beleg. V1 („Zeilenhöhe ≤ `.v2tbl__row`") reißt damit an einem Rand, den die Story selbst gewählt hat. | Story `Edges`, `getBoundingClientRect` |
-| 2 | Drei Spaltenbreiten weichen von der Spec ab, ohne in der Abweichungs-Tabelle zu stehen: Herkunft 20→24 px, Buchungszustand 110→132 px, DATEV-Kennzeichen 56→64 px. Alle drei sind unkritisch, gehören aber in die Tabelle. | `AccountEntries.tsx:169`, `:241`, `:254` |
+| 2 | **Noch offen.** Drei Spaltenbreiten weichen ab, ohne in der Abweichungs-Tabelle zu stehen: Herkunft 20→24 px, Buchungszustand 110→132 px, DATEV-Kennzeichen 56→64 px. Die Zeile „Spaltenbreiten" nennt weiterhin nur Text und Gegenkonto. Unkritisch, aber die Tabelle soll vollständig sein. | `AccountEntries.tsx:169`, `:241`, `:254` gegen die Spalten-Tabelle unter „Verhalten" |
 | 3 | `ORIGIN_TITLE` ist keine Status-Map (die Herkunft ist keine Achse), aber der Titel für `exported` formuliert die Registry-Beschreibung nach, statt sie zu nehmen — die Spec sagt „`title` wie Registry". Der Chip daneben trägt den Registry-Text bereits. | `AccountEntries.tsx:83` vs. `status-registry.ts:813` |
+| 4 | Das variable Kriterium „Leertext nennt das Jahr" steht nach der Nachbesserung neben einer Schnittstelle, deren Default das Jahr bewusst **nicht** nennt. Gemeint ist „der Aufrufer nennt das Jahr"; der Wortlaut sollte dem folgen, sonst widerspricht die Prüfliste ihrer eigenen Schnittstelle. | Kriterienliste gegen Schnittstellen-Zeile `empty` |
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-04 · Ergebnis: **zurück auf
-`in Arbeit`** · Offene Punkte: Befund 1 (Default-Leertext um „in diesem Jahr"
-ergänzen — oder die Schnittstelle ändern und die Abweichung eintragen);
-Anmerkung 2 in die Abweichungs-Tabelle nachtragen.
+Abgenommen von / am: Claude (Abnahme), 2026-09-04 (Runde 1) · 2026-09-04
+(Runde 2, nach Commit `0ae2dad`) · Ergebnis: **fertig** · Offene Punkte:
+keine blockierenden; Anmerkungen 2 und 4 sind Textpflege in dieser Spec, das
+App-Kriterium bleibt planmäßig **offen (App)**.

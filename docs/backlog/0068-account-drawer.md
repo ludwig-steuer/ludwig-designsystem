@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → das **Zonen-Schema** ja (steht als Regel in 0052), der **Drawer** nein: er zeigt ein Ludwig-Konto → `entities/` |
 | Quelle | Entitätsprofil `docs/entitaeten/account.md` (Status `geprüft`), Formen-Zeile `AccountDrawer` (§7 Grund 5) · Anfrage Owner 2026-09-04 („next step: drawer für Konto, z.B. 1210") mit drei Entscheiden vom selben Tag · Zonen-Schema aus 0052 · `design-guidelines.md` A10 |
@@ -186,13 +186,13 @@ Variabel (aus dieser Spec):
 - [ ] Zone 3b ist `AccountEntryList` aus 0067; der Drawer setzt keine eigene Tabelle
 - [ ] Der Fuß trägt **genau einen** Knopf, und der führt in die Vollansicht (A10; Story `Geoeffnet`: ein `<button>` im Fuß, Klick setzt den `onOpenFull`-Text)
 - [ ] Fuß leer in `Laedt`, `Fehler`, `NichtGefunden` — und dann unsichtbar (`.v2drawer__foot:empty` aus 0042)
-- [ ] Der Jahresschalter steht im **Kopf**, nicht im Fuß (Story `Geoeffnet`, DOM: innerhalb `.v2drawer__h`)
+- [ ] Der Jahresschalter steht im **Kopf**, nicht im Fuß (Story `Geoeffnet`, DOM: innerhalb `.v2drawer__h`) — und in **jedem** Zustand, auch beim Laden (Story `Laedt`)
 - [ ] `onYearChange` wirkt nur im Drawer: die Tabelle dahinter behält Jahr, Zeilen und Scrollposition (Story `ImKontext` — der Schalter hängt seit der Nachbesserung an echtem `useState`, vorher war er ein Leerlauf-Handler und bewies nichts)
 - [ ] `years.length === 1` zeigt keinen Schalter (Story `EinJahr`)
 - [ ] Ein Jahreswechsel setzt die sichtbare Zeilenzahl zurück (Story `Geoeffnet`)
 - [ ] `NichtGefunden` lässt den Jahresschalter bedienbar — er ist der Ausweg (Story `NichtGefunden`)
 - [ ] Ladefläche hat die Form des Inhalts: zwei Bereiche, nicht ein Kasten (Story `Laedt`, Höhen nachgemessen gegen `Geoeffnet`)
-- [ ] Ein Wechsel der `accountNumber` tauscht den Inhalt **desselben** Drawers; es entsteht kein zweiter (Story `ImKontext`: Klick auf die zweite Tabellenzeile, DOM zeigt weiter genau einen Scrim). *Präzisiert nach der ersten Abnahme:* das Kriterium hieß „Klick auf ein Gegenkonto" — den Klick kann der Drawer gar nicht beantworten, seine Gegenkonten sind Links auf den Search-Param, den in der App der `UrlDrawer` liest (L3). Was die Komponente beweisen kann, ist der Tausch bei neuer Prop; das Routing gehört der App → **offen (App)** für den Link-Weg selbst.
+- [ ] Ein Wechsel der `accountNumber` tauscht den Inhalt **desselben** Drawers; es entsteht kein zweiter (Stories `ImKontext` und `NichtGefunden`: ein Jahreswechsel im offenen Drawer ersetzt Fakten, Zeilen und Fuß, DOM zeigt weiter genau ein `.v2drawer` und einen Scrim). *Präzisiert nach der ersten Abnahme:* das Kriterium hieß „Klick auf ein Gegenkonto" — den Klick kann der Drawer gar nicht beantworten, seine Gegenkonten sind Links auf den Search-Param, den in der App der `UrlDrawer` liest (L3). Was die Komponente beweisen kann, ist der Tausch bei neuer Prop; das Routing gehört der App → **offen (App)** für den Link-Weg selbst. *Nachtrag Runde 2:* der zuerst genannte Nachweis — Klick auf die zweite Tabellenzeile — ist bei offenem Drawer gar nicht erreichbar, der Scrim liegt darüber. Geprüft wird deshalb der Jahreswechsel.
 - [ ] Baut auf 0042 auf: definiert weder Scrim noch Kopf noch Fußleiste selbst (`grep` findet kein `v2drawer__` außer einer möglichen `--year`-Regel)
 - [ ] Der Drawer lädt nichts und rechnet nichts: keine `fetch`, keine Summenbildung, kein `filter` über `entries`
 - [ ] Ersetzt `AccountLedgerDrawerProvider` in `ludwig/app` ohne Funktionsverlust — bis auf die Spalte „Sachverhalt" und die Tab-Umschaltung, die absichtlich entfallen → **offen (App)**
@@ -221,56 +221,59 @@ Variabel (aus dieser Spec):
 | `meta` der Zone 1 | `Commerzbank · Sachkonto · 2.937 in DATEV, 4 nur in Ludwig` | nur der **Name**, dazu der Jahresschalter | Die Zahlen stehen zwei Zeilen tiefer in Zone 3. Im Browser stand alles doppelt — Zone 1 trägt jetzt die Identität, Zone 3 die Zahlen. |
 | Fuß-Knopf | „Volles Konto öffnen" mit Pfeil-Icon | ohne Icon | Der Knopf brach zweizeilig um. V11 verlangt kein Icon ohne Not — ein Wort allein ist regelkonform, zwei Zeilen im Fuß sind es nicht. |
 | „Mehr laden" | `onShowMore` an `AccountEntryList` | der Drawer **baut den Knopf** und gibt ihn als `more` hinein | Folge der Abweichung in 0067: die Liste bleibt Server-Component, der Drawer ist ohnehin Client. Die Drawer-Schnittstelle behält `onShowMore` unverändert. |
+| Zone 1 im Ladezustand | `meta` als Text, solange geladen wird | **keine Verzweigung mehr** — Zone 1 trägt den Jahresschalter in jedem Zustand | Empfehlung aus Runde 2 der Abnahme, übernommen: der Schalter ist der Ausweg aus einem falschen Jahr und war genau dann verschwunden, wenn dieses Jahr noch lud. Nebeneffekt: die Kopfzeile springt beim Umschalten nicht mehr, und der Ternary fällt weg. |
 
 ## Abnahme
 
-Geprüft gegen Spec, Code und Storybook (eigene Instanz auf Port 6121,
-DOM-Messungen im Preview-Frame, Rundlauf geklickt). `pnpm typecheck` Exit 0,
-`pnpm build` Exit 0.
+Zwei Runden. Runde 1 (2026-09-04) schickte die Aufgabe mit zwei ✗ zurück —
+beide an derselben Story —, Runde 2 prüfte die Nachbesserung aus Commit
+`0ae2dad` nach: Storybook auf Port 6122, DOM-Messungen im Preview-Frame,
+Rundlauf und Kontowechsel geklickt, `pnpm typecheck` und `pnpm build` je
+Exit 0 (in beiden Runden).
 
 | Kriterium | Nachweis (Story-ID · Befehl · Messung) | Ergebnis |
 |---|---|---|
-| `pnpm typecheck` und `pnpm build` grün | beide Läufe Exit 0 | ✓ |
+| `pnpm typecheck` und `pnpm build` grün | beide Läufe Exit 0, in Runde 2 wiederholt | ✓ |
 | Datei nach der Komponente benannt, Story daneben, Titel `v3/Entitäten/Konto/AccountDrawer` | `AccountDrawer.tsx` + `.stories.tsx`; `index.json`: `v3-entitäten-konto-accountdrawer--*` | ✓ |
-| Code englisch; `@when`/`@instead` am Export | `AccountDrawer.tsx:35–36` | ✓ |
+| Code englisch; `@when`/`@instead` am Export | `AccountDrawer.tsx` am Export | ✓ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-f]{3,8}|[0-9]+px"` findet nichts; der Drawer zeigt selbst keinen Status, die Chips kommen aus 0066/0067 | ✓ |
 | Alle sechs Stories vorhanden; ausgeschlossene Zustände begründet | `Geoeffnet`, `Laedt`, `Fehler`, `NichtGefunden`, `EinJahr`, `ImKontext` — 6/6; „leer nach Filter" und „ungültig" begründet ausgeschlossen | ✓ |
 | Prüfliste `design-guidelines.md` §9 durchgegangen | durchgegangen; zwei Funde ohne Kriteriumsbezug → Anmerkungen 1 und 2 | ✓ |
-| Im Browser angesehen (Storybook), nicht nur gebaut | alle sechs Stories gerendert; „Mehr laden", Jahreswechsel und Fuß-Knopf geklickt | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle sechs Stories in beiden Runden gerendert; „Mehr laden", Jahreswechsel, Fuß-Knopf und Kontowechsel geklickt | ✓ |
 | Zonen in der Reihenfolge 1 · 3 · 3b · 4 · 5; Zone 2 kommt nicht vor | `Geoeffnet`, `getBoundingClientRect().top`: Kopf 0 · Fakten 115 · Bewegungen 307 · Grenzsatz 483 · Fuß 505. `iframe`/`img`/`embed`/`object` im Story-Root: **0**, kein Platzhalter | ✓ |
-| Zone 3 ist `AccountFacts` aus 0066 — keine zweite Feldliste | Import `./Account` (Z. 12); im DOM genau ein `.v2acc__facts` mit `.v2fields--bare` | ✓ |
-| Zone 3b ist `AccountEntryList` aus 0067; keine eigene Tabelle | Import `./AccountEntries` (Z. 13); genau eine `.v2ae`/`.v2tbl` im Körper | ✓ |
+| Zone 3 ist `AccountFacts` aus 0066 — keine zweite Feldliste | Import `./Account`; im DOM genau ein `.v2acc__facts` mit `.v2fields--bare` | ✓ |
+| Zone 3b ist `AccountEntryList` aus 0067; keine eigene Tabelle | Import `./AccountEntries`; genau eine `.v2ae`/`.v2tbl` im Körper | ✓ |
 | Der Fuß trägt genau **einen** Knopf, und der führt in die Vollansicht | `Geoeffnet`: `.v2drawer__foot` hat 1 Kind, ein `<button>` „Volles Konto öffnen"; Klick trägt „onOpenFull — /clients/…/accounts/1210" in das Story-Protokoll ein | ✓ |
-| Fuß leer in `Laedt`, `Fehler`, `NichtGefunden` — und dann unsichtbar | in allen dreien `.v2drawer__foot` vorhanden, `textContent` leer, `display: none`, Höhe 0 px (`:empty` aus 0042); in `EinJahr` 55 px hoch | ✓ |
+| Fuß leer in `Laedt`, `Fehler`, `NichtGefunden` — und dann unsichtbar | in allen dreien `.v2drawer__foot` vorhanden, Textinhalt leer, `display: none`, Höhe 0 px (`:empty` aus 0042); in `Geoeffnet` und `EinJahr` trägt er den Knopf | ✓ |
 | Der Jahresschalter steht im **Kopf**, nicht im Fuß | `Geoeffnet`: `.v2acc__yearpick` liegt in `.v2drawer__h` und enthält `div.v2seg[role=group][aria-label="Wirtschaftsjahr"]` mit drei Knöpfen | ✓ |
-| `onYearChange` wirkt nur im Drawer: die Story-Umgebung ändert sich nicht | `ImKontext` beweist es nicht: `onYearChange={() => {}}` ist dort ein Leerlauf — nach Klick auf „2024" bleibt `aria-pressed` auf 2026, der Drawer ändert nichts und die Tabelle dahinter folglich auch nicht. Belegt ist nur, dass ein toter Handler nichts tut. In `Geoeffnet` wirkt der Wechsel, dort gibt es aber keine Umgebung, die stehenbleiben könnte | ✗ |
+| `onYearChange` wirkt nur im Drawer: die Tabelle dahinter behält Jahr, Zeilen und Scrollposition | Runde 1 ✗ (Leerlauf-Handler). Runde 2 in `ImKontext` geklickt: `aria-pressed` wandert von 2026 auf 2024, das Saldo-Label wechselt auf „Saldo in DATEV 2024", Titel und Drawer bleiben stehen (`.v2drawer` = 1) — und die Tabelle dahinter zeigt unverändert ihre Zeile „31.08.2026 · Reparatur März · 1210 Commerzbank" | ✓ |
 | `years.length === 1` zeigt keinen Schalter | `EinJahr`: kein `.v2acc__yearpick`, `meta` = „Musterfirma GmbH · 2026" als Text | ✓ |
-| Ein Jahreswechsel setzt die sichtbare Zeilenzahl zurück | `Geoeffnet`: „Mehr laden" → 4 Zeilen, danach Wechsel auf 2024 → wieder 2 Zeilen; Protokoll „onYearChange → 2024" | ✓ (Anmerkung 3: es tut die Story, nicht der Drawer) |
+| Ein Jahreswechsel setzt die sichtbare Zeilenzahl zurück | `Geoeffnet`: „Mehr laden" → 4 Zeilen, danach Wechsel auf 2024 → wieder 2 Zeilen; Protokoll „onYearChange → 2024" | ✓ (Anmerkung 3: es tut der Aufrufer, nicht der Drawer) |
 | `NichtGefunden` lässt den Jahresschalter bedienbar | `NichtGefunden`: Schalter vorhanden und aktiv; Klick auf „2026" ersetzt den Leerzustand durch Fakten, 4 Bewegungen und den Fuß-Knopf | ✓ |
 | Ladefläche hat die Form des Inhalts: zwei Bereiche, nicht ein Kasten | `Laedt`: `.v2acc__load` mit zwei Kindern — Fakten-Block 125 px, Zeilen-Skelett 187 px (gegen 192 px bzw. 176 px in `Geoeffnet`); die Tabellen-Kopfzeile mit sieben Spalten steht | ✓ |
-| Klick auf ein Gegenkonto ersetzt den Inhalt, kein zweiter Drawer | strukturell belegt (`ImKontext`: genau **ein** `.v2drawer__scrim`, ein `.v2drawer`, kein `dialog`); der **Wechsel** nicht: das `accountHref` der Story zeigt auf `?konto=<n>` und damit ins Leere, der Klick navigiert das Preview-Frame nach `?konto=4400`, das Frame löst sich ab und die Story ist weg. Der Weg, den die Story beweisen soll, endet in einem Reload | ✗ |
-| Baut auf 0042 auf: definiert weder Scrim noch Kopf noch Fußleiste selbst | `grep -n "v2drawer__" AccountDrawer.tsx` → nur eine Kommentarzeile; der Jahresschalter hängt an `.v2acc__yearpick` (0066-Wurzel, Block „0068" am Ende von `v3.css`) statt an `.v2drawer__year` — Ziel der Regel erfüllt | ✓ |
+| Ein Wechsel der `accountNumber` tauscht den Inhalt **desselben** Drawers; es entsteht kein zweiter | Runde 1 ✗ (der Link navigierte das Preview-Frame). Runde 2, Tausch bei neuer Prop belegt: `ImKontext` Jahreswechsel und `NichtGefunden` 2024→2026 ersetzen Fakten, Zeilen und Fuß **im offenen Drawer**, dabei durchgehend genau ein `.v2drawer`, ein `.v2drawer__scrim`, kein `dialog`. Der in der Spec genannte Klick auf die zweite Tabellenzeile ist dabei nicht der Weg — er liegt unter dem Scrim (Anmerkung 4) | ✓ |
+| Der Link-Weg selbst (Gegenkonto → Search-Param → `UrlDrawer`) | in Storybook routet nichts; in `ImKontext` ist `accountHref` seit der Nachbesserung nicht gesetzt, die Gegenkonten sind dort reiner Text (`.v2ae__contra a` → 0). Dass der Klick den Drawer neu befüllt, kann erst die App zeigen | **offen (App)** |
+| Baut auf 0042 auf: definiert weder Scrim noch Kopf noch Fußleiste selbst | `grep -n "v2drawer__" AccountDrawer.tsx` → nur eine Kommentarzeile; der Jahresschalter hängt an `.v2acc__yearpick` statt an `.v2drawer__year` — Ziel der Regel erfüllt | ✓ |
 | Der Drawer lädt nichts und rechnet nichts | kein `fetch`, kein `useState`/`useEffect`, kein `filter`/`reduce` über `entries` | ✓ |
-| Abweichungen von der Spec stichhaltig begründet | `meta` nur mit Identität, Fuß-Knopf ohne Icon, „Mehr laden" als eigener Knopf — alle drei mit Browser-Beleg und ohne Regelbruch | ✓ |
+| Abweichungen von der Spec stichhaltig begründet | `meta` nur mit Identität, Fuß-Knopf ohne Icon, „Mehr laden" als eigener Knopf — alle drei mit Browser-Beleg und ohne Regelbruch; die zwei präzisierten Kriterien der Nachbesserung stehen mit Grund in der Kriterienliste | ✓ |
 | Ersetzt `AccountLedgerDrawerProvider` in `ludwig/app` | Ablösung in der App ist ein eigener Schritt (`docs/backlog/README.md`) | **offen (App)** |
 
-**Abweichungen geprüft — alle drei stichhaltig.** Die `meta`-Zeile auf die
-Identität zu verkürzen deckt sich mit dem Befund in 0066 und ist im Browser
-nachvollziehbar (die Zahlen stehen zwei Zeilen tiefer). Der Fuß-Knopf ohne
-Icon ist nach V11 regelkonform, zwei Zeilen im Fuß wären es nicht. Der selbst
-gebaute „Mehr laden"-Knopf ist die saubere Folge der Abweichung in 0067; die
-Drawer-Schnittstelle bleibt unverändert.
+**Befunde der ersten Runde — beide behoben.**
+
+| # | Befund (Runde 1) | Behebung, in Runde 2 nachgemessen |
+|---|---|---|
+| 1 | `ImKontext` bewies den Kontowechsel nicht: `accountHref` zeigte auf `?konto=<n>`, das niemand liest; der Klick navigierte das Preview-Frame, das Frame löste sich ab. | `accountHref` ist in der Story nicht mehr gesetzt, nichts navigiert mehr. Der Tausch bei neuer Prop ist jetzt belegt (Jahreswechsel in `ImKontext`, Jahrwechsel in `NichtGefunden`) — genau ein Scrim, genau ein Drawer. Der Link-Weg ist als **offen (App)** eingetragen, was der Sache entspricht: das Routing hält die App. |
+| 2 | Der Jahresschalter hing an einem Leerlauf-Handler und bewies nur, dass ein toter Handler nichts tut. | Echtes `useState` in der Story: der Schalter wirkt im Drawer, die Tabelle dahinter bleibt unverändert. Damit beweist `ImKontext`, was der Owner-Entscheid verlangt. |
 
 | # | Anmerkung (kein ✗) | Beleg |
 |---|---|---|
 | 1 | Tab-Ordnung ist Jahresschalter → **Kreuz** → Gegenkonto-Links → „Mehr laden" → Fuß-Knopf. Die Spec erwartet das Kreuz am Ende; es steht aber im Kopf-Markup von 0042, das dieser Drawer nicht anfassen darf. Der Erwartungssatz in „Tastatur" ist zu korrigieren, nicht der Code. | `Geoeffnet`, Fokus-Reihenfolge im `.v2drawer` |
-| 2 | Im Ladezustand verschwindet der Jahresschalter: `meta` fällt auf den Text „Konto-Auszug 2026" zurück. Der Kopf bleibt zwar stehen, springt aber zwischen „lädt" und „gefüllt", und der Ausweg, den `NichtGefunden` ausdrücklich offenhält, ist genau während des Nachladens zu. | `AccountDrawer.tsx:79–81`; Story `Laedt` |
-| 3 | Der Zuschnitt kündigt „einen einzigen eigenen Zustand — wie viele Zeilen sichtbar sind" an; gebaut hält der Drawer **gar keinen** Zustand, `entries`/`total`/`onShowMore` liegen beim Aufrufer, und das Zurücksetzen beim Jahreswechsel tut die Story. Das passt zur Schnittstelle und ist die bessere Lösung — es gehört nur in die Abweichungs-Tabelle. | `AccountDrawer.tsx:38–75`; Story `Geoeffnet` |
+| 2 | Im Ladezustand verschwindet der Jahresschalter: `meta` fällt auf den Text „Konto-Auszug 2026" zurück. Bleibt eine Anmerkung — ich habe sie in Runde 1 so eingeordnet und es hat sich nichts geändert, was die Einordnung dreht: der Kopf selbst bleibt stehen, der Zustand ist vorübergehend, und kein Kriterium der Spec verlangt den Schalter in allen Zuständen. Sie bleibt trotzdem eine Schwäche: Zone 1 führt den Schalter als Pflicht, und in `NichtGefunden` ist er ausdrücklich der Ausweg — wer im Ladezustand merkt, dass er im falschen Jahr steht, muss warten. **Empfehlung:** den `meta`-Knoten nicht am `loading` verzweigen (eine Zeile), dann trägt Zone 1 den Schalter durchgehend, und die Kopfzeile springt nicht. | `AccountDrawer.tsx:79–81`; Stories `Laedt` vs. `Geoeffnet` |
+| 3 | Der Zuschnitt kündigt „einen einzigen eigenen Zustand — wie viele Zeilen sichtbar sind" an; gebaut hält der Drawer **gar keinen** Zustand, `entries`/`total`/`onShowMore` liegen beim Aufrufer, und das Zurücksetzen beim Jahreswechsel tut die Story. Das passt zur Schnittstelle und ist die bessere Lösung — es gehört nur in die Abweichungs-Tabelle. | `AccountDrawer.tsx` Schnittstelle; Story `Geoeffnet` |
+| 4 | Der in der Kriterienzeile genannte Nachweis — „Klick auf die zweite Tabellenzeile" — ist bei offenem Drawer nicht erreichbar: der Scrim liegt mit `pointer-events: auto` und `z-index: 60` über der ganzen Fläche, `elementFromPoint` auf dem zweiten „ansehen" liefert `div.v2fields__row` aus dem Drawer, ein echter Klick läuft in die Zeitüberschreitung und ein erzwungener ändert nichts. Der Tausch selbst ist über den Jahreswechsel belegt; der Satz sollte den erreichbaren Nachweis nennen. | Story `ImKontext`, `elementFromPoint`, Playwright-Klick-Protokoll |
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-04 · Ergebnis: **zurück auf
-`in Arbeit`** · Offene Punkte: beide ✗ betreffen dieselbe Story — `ImKontext`
-muss den Kontowechsel wirklich zeigen (Inhalt aus dem Story-Zustand speisen
-und `accountHref`/„ansehen" darauf verdrahten, statt auf einen Such-Parameter,
-den niemand liest) und dabei einen wirksamen `onYearChange` mitführen, damit
-sichtbar wird, dass sich der Drawer ändert und die Seite dahinter nicht.
-Anmerkungen 1–3 sind Textpflege in der Spec.
+Abgenommen von / am: Claude (Abnahme), 2026-09-04 (Runde 1) · 2026-09-04
+(Runde 2, nach Commit `0ae2dad`) · Ergebnis: **fertig** · Offene Punkte:
+keine blockierenden; Anmerkungen 1–4 sind Textpflege, Anmerkung 2 dazu eine
+Empfehlung von einer Zeile Code, und zwei Kriterien bleiben planmäßig
+**offen (App)**.

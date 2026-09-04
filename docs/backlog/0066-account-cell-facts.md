@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Kontonummer, Kontenrahmen, Soll/Haben-Saldo und DATEV-Sync sind Buchhaltung |
 | Quelle | Entitätsprofil `docs/entitaeten/account.md` (Status `geprüft`, 2026-09-04), Abschnitte „Datenpunkte", „Formen" · Anfrage Owner 2026-09-04 („Drawer für Konto, z.B. 1210") |
@@ -251,44 +251,46 @@ Kopf) sind damit gegenstandslos; die übrigen gelten unverändert.
 
 ## Abnahme
 
-Geprüft gegen Spec, Code und Storybook (eigene Instanz auf Port 6121,
-DOM-Messungen im Preview-Frame). `pnpm typecheck` Exit 0, `pnpm build`
-Exit 0 (Storybook-Build durchgelaufen).
+Zwei Runden. Runde 1 (2026-09-04) schickte die Aufgabe mit zwei ✗ zurück,
+Runde 2 prüfte die Nachbesserung aus Commit `0ae2dad` nach — Storybook auf
+Port 6122, DOM-Messungen im Preview-Frame, `pnpm typecheck` und `pnpm build`
+je Exit 0 (in beiden Runden).
 
 | Kriterium | Nachweis (Story-ID · Befehl · Messung) | Ergebnis |
 |---|---|---|
-| `pnpm typecheck` und `pnpm build` grün | beide Läufe Exit 0 | ✓ |
+| `pnpm typecheck` und `pnpm build` grün | beide Läufe Exit 0, in Runde 2 wiederholt | ✓ |
 | Datei nach der Familie benannt, Story daneben, Titel `v3/Entitäten/Konto/Account` | `src/ui/v3/entities/account/Account.tsx` + `.stories.tsx`; `index.json` zeigt `v3-entitäten-konto-account--*` | ✓ |
-| Code englisch; `@when`/`@instead` an **beiden** Exporten | `Account.tsx:41–42` (`AccountCell`), `:119–120` (`AccountFacts`); Bezeichner und Kommentare englisch, Deutsch nur in Labels | ✓ |
+| Code englisch; `@when`/`@instead` an **beiden** Exporten | `Account.tsx` an `AccountCell` und `AccountFacts`; Bezeichner und Kommentare englisch, Deutsch nur in Labels | ✓ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-f]{3,8}|[0-9]+px" Account.tsx` findet nichts; keine `Record<…>`-Map; `StatusBadge axis="konto_typ"`/`"konto_datev_sync"` | ✓ |
 | Alle sieben Stories vorhanden; ausgeschlossene Zustände begründet | `Filled`, `Unvollstaendig`, `Personenkonto`, `NurDatev`, `SyncOffen`, `InUse`, `Edges` — 7/7; „lädt"/„Fehler"/„leer nach Filter" in der Spec begründet ausgeschlossen | ✓ |
-| Prüfliste `design-guidelines.md` §9 durchgegangen | siehe Befund 1: die verlinkte Zelle ist im Ruhezustand nicht als Link erkennbar | ✗ |
-| Im Browser angesehen (Storybook), nicht nur gebaut | alle sieben Stories im Preview-Frame gerendert und gemessen | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Runde 1 ✗ (Linkfarbe, Befund 1). Runde 2 nachgemessen: `a.v2acc .v2mono` = `rgb(46,120,168)` = `--color-accent-700` gegen `rgb(45,45,45)` in der Nachbarzelle — die verlinkte Zelle ist im Ruhezustand als Link erkennbar, Unterstrich bei Hover, Fokusring vorhanden | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle sieben Stories in beiden Runden gerendert und gemessen | ✓ |
 | `number`/`name` wie Zeile 1–2; ohne `href` **kein** fokussierbares Element | `Filled`: Wurzel ist `<span class="v2acc">`, `querySelectorAll("a[href],button,input,select,textarea,[tabindex]")` → **0** | ✓ |
 | Mit `href` ist die Zelle ein `<a>`, kein `<button>` | `InUse`: zwei `A`-Elemente (`?konto=1210`, `?konto=4210`), `button`-Zahl im Story-Root **0** | ✓ |
-| Kontoname wird ab 40 Zeichen gekürzt, voller Name im `title` | `Edges`: gezeigt „Betriebs- und Geschäftsausstattung, ger…" (40 Zeichen inkl. Ellipse), `title` = „…, geringwertig" (48); der 37-Zeichen-Name daneben bleibt ungekürzt | ✓ |
+| Kontoname wird ab 40 Zeichen gekürzt, voller Name im `title` | `Edges`: gezeigt „Betriebs- und Geschäftsausstattung, ger…" (40 Zeichen inkl. Ellipse), `title` = der volle Name (48); der 37-Zeichen-Name daneben bleibt ungekürzt | ✓ |
 | Führende Nullen bleiben stehen | `Edges`: `<span class="v2mono">0420</span>` | ✓ |
-| Reihenfolge Kopf · Saldo · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | durch Abweichung 1 **gegenstandslos**. Gebaute Reihenfolge im DOM geprüft (`Personenkonto`): Kontoart · Saldo in DATEV · + 2 nur in Ludwig · Bewegungen · Geschäftspartner · Letzte Buchung; `SyncOffen` hängt DATEV-Abgleich an | ✓ (gegenstandslos) |
+| Reihenfolge Kopf · Saldo · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | durch Abweichung 1 **gegenstandslos**. Gebaute Reihenfolge im DOM (`Personenkonto`): Kontoart · Saldo in DATEV 2026 · + 2 nur in Ludwig · Bewegungen · Geschäftspartner · Letzte Buchung; `SyncOffen` hängt DATEV-Abgleich an | ✓ (gegenstandslos) |
+| Wirtschaftsjahr (Rang 4) ist dargestellt, `fiscalYear` ist kein totes Feld (A12) | Runde 2, alle sieben Stories gemessen: das Label trägt überall das Jahr („Saldo in DATEV 2026") (`Filled`/`InUse`/`Edges` 2026, `ImKontext` folgt dem Schalter bis 2024). Den Jahresschalter des Drawers doppelt es nicht: der Schalter listet die wählbaren Jahre, das Label qualifiziert **eine** Zahl (Anmerkung 4) | ✓ |
 | `ludwigOnlyCount === 0` lässt die Nachtrags-Zeile verschwinden | `NurDatev`: vier Zeilen, kein „0 nur in Ludwig"; `Filled` hat fünf | ✓ |
 | `syncState === "synced"` zeigt keinen zweiten Chip; `local_only` zeigt ihn | `Filled`: keine Sync-Zeile · `SyncOffen`: Zeile „DATEV-Abgleich · Nur in Ludwig" | ✓ |
-| Fehlende Werte zeigen den Geviertstrich und behalten ihre Zeile | `Unvollstaendig`: „Saldo in DATEV —", „Letzte Buchung —"; Zeilen stehen | ✓ |
+| Fehlende Werte zeigen den Geviertstrich und behalten ihre Zeile | `Unvollstaendig`: „Saldo in DATEV 2026 —", „Letzte Buchung —"; Zeilen stehen | ✓ |
 | Rolle und Sync-Zustand aus der Registry | `konto_typ.general_ledger` → „Sachkonto", `konto_datev_sync.local_only` → „Nur in Ludwig"; keine Label-Map in der Datei | ✓ |
 | `AccountFacts` rechnet nichts | `grep -nE "\.reduce\(|\.filter\(|\.sort\("` findet nichts; nur `toLocaleString` | ✓ |
-| Abweichungen von der Spec stichhaltig begründet | Abweichung 2 (`accountHref` entfällt) und 3 (Reihenfolge) tragen — A12; Abweichung 1 (Kopf entfällt) nimmt das Wirtschaftsjahr mit und lässt `fiscalYear` unbenutzt → Befund 2 | ✗ |
+| Abweichungen von der Spec stichhaltig begründet | Runde 1 ✗ (Abweichung 1 nahm Rang 4 mit). Runde 2: die Abweichungs-Tabelle trägt jetzt die Zeile „Wirtschaftsjahr (Rang 4) → am Label des Saldos", der Grund deckt sich mit dem gemessenen Verhalten; Abweichungen 2 und 3 waren schon in Runde 1 tragfähig (A12) | ✓ |
 | Ersetzt `AccountRef` in `ludwig/app` | Ablösung in der App ist ein eigener Schritt (`docs/backlog/README.md`) | **offen (App)** |
 
-**Abweichungen geprüft.** Abweichung 2 (`accountHref` entfällt) ist stichhaltig
-und deckt sich mit A12 („eine Prop, die nichts tut, wird nicht gebaut").
-Abweichung 3 folgt aus 1. Abweichung 1 ist nur zur Hälfte zu Ende gedacht →
-Befund 2.
+**Befunde der ersten Runde — beide behoben.**
 
-| # | Befund | Beleg |
+| # | Befund (Runde 1) | Behebung, in Runde 2 nachgemessen |
 |---|---|---|
-| 1 | **Die verlinkte Zelle sieht aus wie Text.** `.v2acc--link` setzt `--color-accent-700`, aber die Kinder überschreiben es: `.v2mono` trägt `color: var(--color-text)`, der Name `.v2muted`. Gemessen in `InUse`: Nummer `rgb(45,45,45)`, Name `rgb(92,92,92)` — identisch mit der Zelle ohne `href`; ein Unterstrich kommt erst bei Hover. Die Linkfarbe der Wurzel landet auf keinem einzigen Zeichen (der CSS-Kommentar behauptet sie trotzdem). §3 Farbrollen führt `--color-accent-700` als **die** Textfarbe für „Aktion, Link". | Story `InUse`, `getComputedStyle`; `src/styles/v3.css:2444`, `:2008–2012` |
-| 2 | **Mit dem Kopf ist auch das Wirtschaftsjahr verschwunden.** `AccountFactsVM.fiscalYear` wird nirgends gerendert — im Drawer trägt es der Kopf aus 0068, in der `HoverCard` (Story `InUse`) und im künftigen `AccountView` steht der Saldo damit ohne Jahr. Das Profil führt `fiscalYear` als Rang 4 mit der Rolle „Kontext" und dem ausdrücklichen Grund „der Drawer steht außerhalb seines Kontexts". Zugleich ist das Feld nach A12 eine tote Prop. Die Dopplung war real — der Schnitt hat aber einen Punkt mitgenommen, der an zwei von drei Einsatzorten fehlt. | `Account.tsx:88–111` vs. `:122–167`; `docs/entitaeten/account.md` Rang 4; Story `InUse` |
+| 1 | Die verlinkte Zelle sah aus wie Text: `.v2acc--link` setzte `--color-accent-700`, `.v2mono` überschrieb es mit `--color-text`; gemessen `rgb(45,45,45)`, identisch zur Zelle ohne `href`. | `.v2acc--link .v2mono` trägt die Akzentfarbe (`v3.css`), gemessen `rgb(46,120,168)`. Dass der Name gedämpft bleibt, ist richtig: er beschreibt, der Anker ist die Nummer. |
+| 2 | `fiscalYear` wurde nirgends gerendert — der Saldo in der `HoverCard` stand ohne Jahr, das VM-Feld war nach A12 tot. | Das Jahr steht am Label des Saldos („Saldo in DATEV 2026"), in allen sieben Stories vorhanden und im Drawer dem Schalter folgend. Rang 4 ist damit dargestellt, ohne eine eigene Zeile zu kosten. |
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-04 · Ergebnis: **zurück auf
-`in Arbeit`** · Offene Punkte: Befund 1 (Linkfarbe der Zelle — eine
-CSS-Zeile), Befund 2 (Jahr in `AccountFacts`: entweder eine Zeile
-„Wirtschaftsjahr" in der Feldliste oder `fiscalYear` aus dem VM nehmen und
-die Spec nachziehen).
+| # | Anmerkung (kein ✗) | Beleg |
+|---|---|---|
+| 4 | Im Drawer erscheint das Jahr zweimal, sobald der Schalter fehlt: `EinJahr` zeigt „2026" als Text in der `meta`-Zeile (so verlangt es 0068) und zwei Zeilen tiefer im Saldo-Label. Kein Widerspruch zu Abweichung 1 — dort ging es um die doppelte **Identität** —, aber die eine Stelle, an der das Jahr redundant liest. | Story `AccountDrawer/EinJahr`, DOM: fünf Jahreszahlen im Drawer, davon zwei im Kopf-/Fakten-Paar |
+
+Abgenommen von / am: Claude (Abnahme), 2026-09-04 (Runde 1) · 2026-09-04
+(Runde 2, nach Commit `0ae2dad`) · Ergebnis: **fertig** · Offene Punkte:
+keine; Anmerkung 4 ist Textpflege, das App-Kriterium bleibt planmäßig
+**offen (App)**.

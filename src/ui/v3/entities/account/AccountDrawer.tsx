@@ -76,14 +76,18 @@ export function AccountDrawer({
   const notFound = !loading && !error && facts === null;
   const switchable = years.length > 1;
 
-  const meta: ReactNode = loading ? (
-    `Konto-Auszug ${year}`
-  ) : (
+  // The meta node does **not** branch on `loading`: zone 1 carries the year
+  // switch in every state, so the head does not jump and the switch stays
+  // reachable while the wrong year is still loading — it is the way out of it
+  // (recommendation from the second acceptance pass).
+  const meta: ReactNode = (
     <span className="v2acc__meta">
       <span>
         {/* Identity only. The numbers live in zone 3 — saying them twice is
             what the first browser pass caught. */}
-        {facts ? (facts.accountName ?? "ohne Bezeichnung") : `Konto-Auszug ${year}`}
+        {/* No year in the fallback: it is already next to it — as the switch,
+            or as plain text when there is only one year. */}
+        {facts ? (facts.accountName ?? "ohne Bezeichnung") : "Konto-Auszug"}
       </span>
       {switchable ? (
         <span className="v2acc__yearpick">
