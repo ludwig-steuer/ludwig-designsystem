@@ -53,6 +53,8 @@
   --v2-row-fs: 13.5px;
   --v2-head-y: 9px;
   --v2-detail-y: 14px;
+  /* Breite der Griff-Spalten vor den Daten: Auswahl und Chevron (0057). */
+  --v2-tbl-pick: 32px;
 }
 .v2tbl[data-density="compact"] {
   --v2-row-y: 7px;
@@ -117,7 +119,22 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 .v2tbl__row:has(.v2rowlink):hover { background: var(--color-bg-soft); }
 .v2rowlink::after { content: ""; position: absolute; inset: 0; z-index: 1; }
 .v2tbl__row:has(.v2rowlink) a:not(.v2rowlink),
+.v2tbl__row:has(.v2rowlink) input,
+.v2tbl__row:has(.v2rowlink) summary,
 .v2tbl__row:has(.v2rowlink) button { position: relative; z-index: 2; }
+
+/* Sortierbarer Spaltenkopf (0057): ein Link, kein Zustand. Er erbt Farbe und
+   Größe des Kopfes — nur der Pfeil der aktiven Spalte kommt dazu. */
+.v2sortlink {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: inherit; text-decoration: none; cursor: pointer;
+}
+.v2sortlink:hover { text-decoration: underline; }
+.v2sortlink:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
 
 /* Zwischenüberschrift über eine volle Zeile — nicht Fettdruck in Spalte 1. */
 .v2tbl__group {
@@ -956,12 +973,13 @@ select.v2in { padding-right: 26px; }
 @media (prefers-reduced-motion: reduce) { .v2skel { animation: none; } }
 
 /* Fehlerzustand einer Tabelle — der fünfte Zustand (UX-Guidelines V9). */
+/* Linksbündig wie jeder Inhalt — L4 kennt keine Ausnahme für den Fehler. */
 .v2tbl__error {
   padding: 24px 18px;
   background: var(--color-danger-bg);
   color: var(--color-danger);
   font-size: 13px;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
 }
 
 /* --- Master-Detail -------------------------------------------------------
@@ -1769,6 +1787,23 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2menu__item:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
 .v2menu__item--danger { color: var(--color-danger); }
 .v2menu__item:disabled { opacity: 0.5; cursor: not-allowed; }
+/* Eine Handlung im Menü (0057): der `ActionButton` bringt Pending, Fehler und
+   die Rückfrage mit; hier bekommt er die Form eines Menüeintrags statt die
+   eines Knopfes — ein Knopf im Knopf wäre `MenuItem` darum. */
+.v2menu__act { display: block; }
+.v2menu__act .v2btn {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 6px 8px;
+  border: none;
+  background: none;
+  box-shadow: none;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--color-text);
+}
+.v2menu__act .v2btn:hover:not(:disabled) { background: var(--color-bg-soft); }
+.v2menu__act--danger .v2btn { color: var(--color-danger); }
 .v2menu__sum::-webkit-details-marker { display: none; }
 .v2menu__sum { list-style: none; }
 

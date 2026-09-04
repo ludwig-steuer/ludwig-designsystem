@@ -179,6 +179,13 @@ export {
 
 /* ── Patterns ── Arbeitsfläche */
 export {
+  DataTable,
+  type ColumnDef,
+  type DataTableProps,
+  type ListPatch,
+  type RowAction,
+} from "./patterns/DataTable";
+export {
   MasterDetail,
   ListPane,
   DetailPane,
