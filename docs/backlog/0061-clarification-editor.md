@@ -122,6 +122,17 @@ Sieben Stories; Editor-Untergrenze (gefüllt, leer, Fehler, lädt, ungültig)
 erfüllt. „Leer" ist der Startzustand von `Gefuellt` und bekommt keine eigene
 Story — das Formular startet immer leer.
 
+## Ausbau
+
+Nach A12: keine Prop auf Vorrat, hier steht der Plan.
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Frageart wählen | `questionTypes?: readonly { value: string; label: string }[]` — ohne die Prop bleibt das Formular schmal, genau wie heute | Befund B1 ist gelöst: es gibt einen Katalog in der Domain |
+| Antwortoptionen vorgeben | `answerOptions`-Feld im Entwurf | belegt ist, dass die Kanzlei Auswahlfragen stellen will; heute stellt sie 37 Fragen, alle als Text |
+| Wiedervorlage beim Stellen setzen | keine — das gehört zur Frage, nicht zu ihrer Entstehung | nie; 0065 setzt sie an der Karte |
+| Entwurf zwischenspeichern | `value` / `onChange` statt interner State (kontrollierte Variante) | das Formular überlebt einen Seitenwechsel nicht und jemandem geht Text verloren |
+
 ## Abnahmekriterien
 
 Fest (gilt immer):

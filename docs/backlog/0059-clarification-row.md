@@ -188,6 +188,18 @@ Namen ihres Haupt-Exports, wie `Table` und `LogList`. Einen Export namens
 Neun Stories, unter der Obergrenze. Nicht anwendbar: `Laedt`, `Fehler`
 (oben begründet), `Interaktiv` (keine Callbacks in dieser Datei).
 
+## Ausbau
+
+Nach A12: keine Prop auf Vorrat, hier steht der Plan.
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Massenaktion über mehrere Fragen („alle drei an den Mandanten") | keine — die Liste wechselt dann auf `DataTable` (A11a), die Zeile bleibt | die Stapel-Abnahme bekommt eine Sammel-Handlung; heute hat keine der vier Listen eine |
+| Sortierung und Filter | keine — beides gehört der Query bzw. `DataTable` | eine der Listen bekommt eine eigene Route; dann entsteht auch ein Seitenprofil |
+| Portal als eigene Ausprägung statt `text="client"` | eine zweite Komponente, nicht eine Prop mehr | der Ton im Portal weicht nachweislich ab (offene Frage 2 des Profils) |
+| Vorschau, die die ganze Frage zeigt, ohne zu springen | `ClarificationCell` in `HoverCard` an der Aufrufstelle — keine neue Prop | die Buchungs-Begründung soll die Frage lesbar machen; heute führt sie auf die Seite |
+| Zähler „3 offen · 1 zurückgestellt" über der Liste | Markup an der Aufrufstelle, aus denselben Zeilen gerechnet | zwei Aufrufer rechnen ihn selbst |
+
 ## Abnahmekriterien
 
 Fest (gilt immer):

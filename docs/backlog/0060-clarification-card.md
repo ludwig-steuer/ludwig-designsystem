@@ -153,6 +153,18 @@ Titel `v3/Entitäten/Klärung/ClarificationCard`.
 
 Neun Stories. Nicht anwendbar: `Leer` (oben begründet).
 
+## Ausbau
+
+Nach A12: keine Prop auf Vorrat, hier steht der Plan.
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Zurückstellen | `onDefer?: (until, reason) => Promise<void>` — dieselbe Bauart wie `onResolve` | **jetzt**: Aufgabe 0065 |
+| Mehrere Antworten je Frage | keine — `history` trägt schon 0…n Einträge | das Schema bekommt einen Faden (Befund B8); die Karte ändert sich dann nicht |
+| Deutsche Wörter für Frageart und Herkunft aus der Domain | keine — `questionTypeLabel` und `originLabel` bleiben Props, der Aufrufer holt sie dann aus dem Katalog statt aus einer lokalen Map | Befunde B1/B2 sind in `ludwig/app` gelöst |
+| Beleg-Upload | keiner — seit F125 ist der fehlende Beleg eine Erwartung | nie; der Hinweis-Zweig entfällt, sobald die acht Altzeilen migriert sind (B6) |
+| Frage weiterleiten („das kann nur der Mandant beantworten") | `onReroute?: (audience) => Promise<void>` | die Abnahme braucht es; heute löst die Kanzlei das, indem sie selbst antwortet |
+
 ## Abnahmekriterien
 
 Fest (gilt immer):

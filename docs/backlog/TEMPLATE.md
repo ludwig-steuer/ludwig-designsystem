@@ -52,6 +52,15 @@ Abgeleitet nach `spec-schreiben` §6. Titel `v3/<Stufe>/<Gruppe>/<Name>`.
 
 Nicht anwendbare Zustände und warum: …
 
+## Ausbau
+
+Was diese Komponente später tragen soll, heute aber nicht kann (A12). Keine
+Prop auf Vorrat — hier steht der Plan, nicht der Platzhalter.
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| … | `on…?` / optionales Feld am VM | ein Screen fragt danach · ein Befund ist gelöst · Aufgabe NNNN |
+
 ## Abnahmekriterien
 
 Fest (gilt immer):

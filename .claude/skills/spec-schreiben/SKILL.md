@@ -152,6 +152,11 @@ Ein Kriterium, das nur der Autor prüfen kann („fühlt sich richtig an"), ist 
 3. Status `spec`. Quelle verlinken (`v3-backlog.md`-Zeile, Design-Datei, Anfrage).
 4. Offene Fragen: höchstens **drei**, jede mit Default („ohne Antwort: …"),
    damit der Bau nicht wartet.
+5. **Ausbau** (A12): was die Komponente später tragen soll, mit der Prop, die
+   es tragen würde, und dem Auslöser. Kein Platzhalter im Code — eine Prop,
+   die nichts tut, wird nicht gebaut. Verhalten kommt als optionaler
+   Callback: fehlt er, fehlt der Weg (`onResolve`, `renderDetail`,
+   `onDefer`). Leerer Abschnitt ist erlaubt, dann steht dort ein Satz warum.
 
 ## Was dieser Skill nicht tut
 
