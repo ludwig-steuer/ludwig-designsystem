@@ -2,14 +2,14 @@
 
 | | |
 |---|---|
-| Status | analysiert |
+| Status | geprüft |
 | GLOSSARY | `### Ledger account (Konto)` — englisch `ledger account`, Ordner `entities/account/` (Abweichung, siehe Befund 5) |
 | Tabelle | `ludwig.client_ledger_accounts` · View `client_ledger_accounts_current` (jahresfreie Leser) · Semantik separat in `client_account_enrichment` |
 | Typen | `src/ludwig/modules/accounts/domain/account.ts` — `ACCOUNT_TYPES`, `CLEARING_ACCOUNT_TYPES`; `core/datev/main-function.ts` — `DATEV_MAIN_FUNCTION_NUMBER`; `core/datev/account-number.ts` — Kontonummern-Kanon |
 | Status-Achsen | `konto` (Kontostatus) · `konto_typ` (Rolle) · `konto_datev_sync` · `verrechnungskonto`; für die Bewegungen `buchung`, `buchung_datev`, `buchung_origin`, `mirror_match` |
 | Wichtigkeit | hoch — Kontonummer ist der Anker jeder Buchung |
 | Datenstand | Staging über den Pooler, 2026-09-04, nur `SELECT`: 41.570 Konten · 611 Ludwig-Buchungssätze · 41.826 DATEV-Spiegel-Sätze |
-| Rückfrage | gestellt am 2026-09-04 · unbeantwortet (Defaults gelten) |
+| Rückfrage | gestellt und **beantwortet** am 2026-09-04 — alle drei Defaults bestätigt (siehe „Beantwortete Fragen") |
 | Analyse von / am | Claude, 2026-09-04 |
 
 ## Was sie ist
@@ -101,9 +101,9 @@ bekommt deshalb ihre eigene Bewertung.
 | Betrag Soll / Haben (`debit`/`credit`) | beide, auf **diesem** Konto summiert | Maß | 100 % | beide Auszüge | 2 | XS | Füllgrad — die Seite steht darin, in welcher Spalte die Zahl steht |
 | Buchungstext (`text`) | beide | Erklärung | 99 % · p50 14 · **p90 31** · max 60 | beide Auszüge | 3 | S | Füllgrad · EXTF-Grenze 60 |
 | Gegenkonto (`contraAccounts`) | beide | Identität | 100 % — 56 % genau eins, p90 3 Legs, max 5 | beide Auszüge, als `AccountRef` klickbar | 4 | S | Verteilung — eines nennen, Rest als „+n" |
-| **Herkunft** (`origin`) | `abgeleitet: match_state` (DATEV-Seite) bzw. `datev_mirror_entry_id`/`exported_at` (Ludwig-Seite, Achse `buchung_datev`) | Zustand | siehe Tabelle unten | heute **getrennt**: zwei Tabs, ✓-Häkchen nur im Ludwig-Tab | 5 | XS | Anfrage Owner 2026-09-04 |
+| **Herkunft** (`origin`) | `abgeleitet: match_state` (DATEV-Seite) bzw. `datev_mirror_entry_id`/`exported_at` (Ludwig-Seite, Achse `buchung_datev`) | Zustand | siehe Tabelle unten | heute **getrennt**: zwei Tabs, ✓-Häkchen nur im Ludwig-Tab | 5 | XS | Owner 2026-09-04 (Nutzer) — Symbol bei Ludwig-Bezug, Chip nur bei „exportiert“ |
 | Belegfeld 1 (`belegfeld1`) | beide | Identität | 100 % im Spiegel | beide Auszüge | 6 | S | Füllgrad |
-| Laufender Saldo (`runningBalance`) | `abgeleitet`, **nur Ludwig-Auszug** | Maß | — | Ludwig-Tab | 7 | S, mit Vorbehalt (offene Frage 1) | heute nur einseitig |
+| Laufender Saldo (`runningBalance`) | `abgeleitet`, **nur Ludwig-Auszug** | Maß | — | Ludwig-Tab | 7 | **nicht in der Zeile** — der Kopf trägt beide Salden (`AccountFacts`); die Spalte kehrt im View wieder | Owner 2026-09-04 (Nutzer) |
 | Stapel (`accountingSequenceId`) | nur Spiegel | Kontext | 100 % | DATEV-Tab | 8 | M | Füllgrad |
 | Buchungszustand (`status`, Achse `buchung`) | nur Ludwig | Zustand | 100 % | Ludwig-Tab, `StatusBadge` | 9 | M | Registry |
 | DATEV-Herkunftskennzeichen (`markOfOrigin`) | nur Spiegel | Kontext | 47 % | — | 10 | M | Füllgrad |
@@ -116,14 +116,28 @@ Anfrage und der einzige Punkt, den die Zeile selbst ableitet:
 
 | Klasse | Regel | Zahl | Anteil |
 |---|---|---|---|
-| nur in DATEV | Spiegelsatz, `match_state ∈ {new_unprocessed, unclear, NULL}` | 41.497 | 97 % aller Sätze |
+| nur in DATEV | Spiegelsatz, `match_state ∈ {new_unprocessed, unclear, NULL}` | 41.497 | 98 % aller Sätze |
 | gespiegelt | Spiegelsatz, `match_state LIKE 'matched_%'` (+ `matched_journal_entry_id`) | 297 | 1 % |
 | exportiert, nicht wiedergefunden | Ludwig-Satz, `exported_at` gesetzt, `datev_mirror_entry_id` NULL | 111 | 18 % der Ludwig-Sätze |
 | nur in Ludwig | Ludwig-Satz, weder exportiert noch gespiegelt | 216 | 35 % der Ludwig-Sätze |
 
-Die Vereinigung ist damit sauber und doppelfrei: **alle** Spiegelsätze plus
-die Ludwig-Sätze **ohne** `datev_mirror_entry_id`. Ein gespiegelter Satz
-erscheint genau einmal — als DATEV-Zeile mit Ludwig-Zeichen.
+Nicht in der Tabelle: 32 Spiegelsätze (0,08 %, 3 `disappeared` + 29
+`disappeared_committed`, Staging 2026-09-04) — **Tombstones**, Sätze, die ein
+späterer Snapshot nicht mehr enthielt. Sie gehören zu keiner der vier
+Klassen und **nicht** in die Vereinigung: `listAccountMirrorEntries`
+schließt sie aus (`match_state not like 'disappeared%'`, Kommentar
+„Verschwundene Sätze (Tombstones) bleiben draußen — der Auszug zeigt den
+Stand heute"), und die Registry begründet warum — ein `disappeared`-Satz
+kann durch einen Re-Import mit geändertem `content_hash` als *neuer*
+`new_unprocessed`-Satz danebenstehen; wer die Tombstone zusätzlich zeigt,
+zeigt denselben Vorgang zweimal. `disappeared_committed` ist zudem laut
+Registry eine Anomalie („festgeschriebene Stapel können in DATEV eigentlich
+nicht verschwinden") und wird mandantenweit separat in `getTruthDashboard`
+gezählt (`anomalies`) — hier nirgends sichtbar, auch nicht in der neuen
+Zeile. Die Vereinigung ist damit sauber und doppelfrei: **alle Spiegelsätze
+außer Tombstones** plus die Ludwig-Sätze **ohne** `datev_mirror_entry_id`.
+Ein gespiegelter Satz erscheint genau einmal — als DATEV-Zeile mit
+Ludwig-Zeichen.
 
 Die Achse dafür ist bereits da: `buchung_datev` (`BUCHUNG_DATEV_STAGE`)
 linearisiert Vorschlag → Freigegeben → Exportiert → In DATEV bestätigt und
@@ -136,7 +150,7 @@ DATEVs Sicht.
 | Relation | Richtung | Kardinalität | Rolle | ab Form | Darstellung | Beleg |
 |---|---|---|---|---|---|---|
 | Bewegungen im DATEV-Spiegel | Kind, ohne FK (`lines[].account_number`) | p50 4 · **p90 20** · p99 250 · max 3.400 je Konto+Jahr; 90 % der Konto-Jahre ≤ 20 | Maß | Zähler (S) · Liste (L) | Staging |
-| Bewegungen in Ludwig | Kind über `client_journal_entry_line.account_id` | 85 % der Konten ohne · p90 3; unter den bebuchten p50 1,5 · p90 6 · max 139 | Maß | Zähler (S) · Liste (L) | Staging |
+| Bewegungen in Ludwig | Kind über `client_journal_entry_line.account_id` | 99 % der Konten ohne · p90 (alle) 0; unter den bebuchten p50 1,5 · p90 6 · max 139 | Maß | Zähler (S) · Liste (L) | Staging (nachgerechnet 2026-09-04; „85 % · p90 3" der ersten Fassung war `usage_booking_count`, keine Zeile dieser Relation) |
 | Wirtschaftsjahr | Eltern (composite FK) | 1:1, NOT NULL | Kontext | XS im Drawer, sonst S | Inline im `meta`, wechselbar | GLOSSARY F64 |
 | Geschäftspartner | Eltern (composite FK) | 52 % gesetzt; je Partner n Jahre × 2 Rollen | Identität | M | Inline (Name, ein Klick) → Profil `business-partner` fehlt | Füllgrad |
 | Konten-Anreicherung | 1:0..1, ohne FK, **jahresfrei** | nicht erhoben | Erklärung | L | jüngstes (Beschreibung) | GLOSSARY |
@@ -162,7 +176,7 @@ Der Drawer der App ist die Vorlage, nicht die Neuerfindung: 365 Zeilen,
 
 | Liste | Job | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
 |---|---|---|---|---|---|---|---|---|---|
-| `AccountEntryList` „Kontoauszug" | Wenn die Sachbearbeiterin mitten in einer Buchung auf einem Konto steht, will sie sehen, **was sonst noch auf diesem Konto liegt**, damit sie das Konto bestätigen oder verwerfen kann. | Alle Bewegungen des Kontos **in einem Wirtschaftsjahr**, beide Quellen vereinigt: alle Spiegelsätze + Ludwig-Sätze ohne `datev_mirror_entry_id` | neueste zuerst | 1–6 der Bewegungs-Tabelle | Jahr (Pflicht, kein Filter — Grundgesamtheit) · Herkunft: nein (Default) | keine — der Auszug ist lesend | „Auf diesem Konto ist im Jahr <n> nichts gebucht." (kein Fehler, ein Befund) | 4 · 20; p99 250, max 3.400 → Nachladen nötig | Staging · `AccountLedgerDrawer` |
+| `AccountEntryList` „Kontoauszug" | Wenn die Sachbearbeiterin mitten in einer Buchung auf einem Konto steht, will sie sehen, **was sonst noch auf diesem Konto liegt**, damit sie das Konto bestätigen oder verwerfen kann. | Alle Bewegungen des Kontos **in einem Wirtschaftsjahr**, beide Quellen vereinigt: alle Spiegelsätze außer Tombstones (`match_state not like 'disappeared%'`) + Ludwig-Sätze ohne `datev_mirror_entry_id` | neueste zuerst | 1–6 der Bewegungs-Tabelle | Jahr (Pflicht, kein Filter — Grundgesamtheit) · Herkunft: nein (Default) | keine — der Auszug ist lesend | „Auf diesem Konto ist im Jahr <n> nichts gebucht." (kein Fehler, ein Befund) | 4 · 20; p99 250, max 3.400 → Nachladen nötig | Staging · `AccountLedgerDrawer` |
 | `AccountList` „Kontenplan" | Wenn die Kanzlei den Kontenrahmen prüft, will sie alle Konten des Jahres nach Klasse gruppiert sehen, damit sie Lücken und Karteileichen findet. | alle Konten des Mandanten im WJ | Nummer aufsteigend | 1–3, 11, 12 | Rolle, Status, Volltext | keine | „Kein Konto im Jahr <n>." | 41.570 / Mandant+Jahr | `AccountsGroupedTable`, Route `accounts/` |
 
 Der Kontoauszug hat **keine eigene Route** — er lebt im Drawer und im Tab
@@ -186,9 +200,9 @@ kein Serverfilter, aber **Nachladen in Seiten** wie heute
 | Form | Größe | Empfehlung | Grund (§7 Nr.) | zeigt (Ränge) | Relationen | setzt auf | ersetzt |
 |---|---|---|---|---|---|---|---|
 | `AccountCell` | XS | ja | 3 — FK-Ziel jeder Buchungszeile; 5 Aufrufstellen von `<AccountRef>`, 13 Dateien am Drawer-Context | 1–2, Jahr nur außerhalb des Kontexts | — | `MonoCell`, `TextButton` | `AccountRef` |
-| `AccountEntryRow` | S | ja | 1 — existiert zweimal (Ludwig-`<tr>` und DATEV-`<tr>` im Drawer) und ein drittes Mal auf der Kontoseite | Bewegung 1–6 | Gegenkonto als `AccountCell` | `Row`, `MonoCell`, `AmountCell`, `StatusBadge`, `Time` | die beiden `<tbody>`-Blöcke in `AccountLedgerDrawer.tsx` und die zwei Auszüge der Kontoseite |
-| `AccountEntryList` | L | ja | 6 — ein Listen-Job, von zwei Screens belegt | die Zeile + Kopfzeile + Σ-Fuß + Nachladen | beide Bewegungs-Relationen, vereinigt | `Table`, `AccountEntryRow`, `EmptyState`, `Skeleton`; auf der **Seite** stattdessen `DataTable` (0057) | `loadAccountLedgerPage`-Tabelle + `listAccountMirrorEntries`-Tabelle |
-| `AccountFacts` | M | ja | 5 — Zone 3 des Drawers, dieselbe Komponente wie später der View (0052) | 1–7 | Partner als Inline | `FieldList bare`, `Amount`, `StatusBadge` | den `meta`- und `tfoot`-Teil des heutigen Drawers · Präzedenz `DocumentFacts` |
+| `accountEntryColumns()` | S | ja | 1 — die Zeile existiert heute dreimal von Hand (Ludwig- und DATEV-`<tbody>` im Drawer, die zwei Auszüge der Kontoseite) | Bewegung 1–6 (`compact`), 1–11 (`full`) | Gegenkonto als `AccountCell` | `ColumnDef[]` über `MonoCell`, `AmountCell`, `StatusBadge`, `Time` | dieselben drei Stellen. **Funktion, keine Komponente (A11)** — `DataTable` auf der Seite und die nackte `Table` im Drawer bauen beide daraus |
+| `AccountEntryList` | L | ja | 6 — ein Listen-Job, von zwei Screens belegt | die Zeile + Kopfzeile + Nachladen | beide Bewegungs-Relationen, vereinigt | `Table`, `EmptyState`, `Skeleton` und **`accountEntryColumns()`** (A11) — dieselbe Spaltenfunktion, die auf der Seite in `DataTable` (0057) geht | `loadAccountLedgerPage`-Tabelle + `listAccountMirrorEntries`-Tabelle |
+| `AccountFacts` | M | ja | 1 — ersetzt `meta` und `tfoot` des heutigen Drawers; dieselbe Komponente trägt später den View (0052, Präzedenz `DocumentFacts`) | 1–7 | Partner als Inline | `FieldList bare`, `Amount`, `StatusBadge` | den `meta`- und `tfoot`-Teil des heutigen Drawers · Präzedenz `DocumentFacts` |
 | `AccountDrawer` | L | ja | 5 — `AccountRef` verweist von 5 Stellen aus auf das Konto, ohne es zeigen zu können | Zonen 1 · 3 · 4 · 5 (Zone 2 entfällt: ein Konto hat kein Original) | Kontoauszug als Zone 3b | `Drawer`, `AccountFacts`, `AccountEntryList` | `AccountLedgerDrawerProvider` |
 | `AccountPicker` | S | **erledigt** | — | — | — | — | steht als `AccountField` (0013, Abnahme) |
 | `AccountRow` | S | Backlog | 1 — `AccountsTableRow` existiert, aber kein Screen dieser Welle braucht sie | 1–3, 11, 12 | — | `DataTable`-Spaltendefinition | `AccountsTable*` |
@@ -196,7 +210,7 @@ kein Serverfilter, aber **Nachladen in Seiten** wie heute
 | `AccountCard` | M | verworfen | kein Screen zeigt ein Konto im Kontext einer anderen Entität — dort steht die Cell | | | | |
 | `AccountEditor` | XL | verworfen | die einzigen Punkte mit änderbar = Nutzer sind `clearingAccountType` (0 % gefüllt, eigenes Bestätigungs-Form) und die Enrichment-Beschreibung (eigener Tab) — `InlineEdit` im View reicht | | | | |
 
-Bau-Reihenfolge: `AccountCell` → `AccountEntryRow` → `AccountEntryList` →
+Bau-Reihenfolge: `AccountCell` → `accountEntryColumns()` → `AccountEntryList` →
 `AccountFacts` → `AccountDrawer`. Der Drawer folgt zuletzt, er komponiert die
 anderen vier.
 
@@ -213,7 +227,7 @@ Komponente mit Spaltenkonfiguration.
 | Form / Liste | Marke | Grund | Backlog |
 |---|---|---|---|
 | `AccountCell` | jetzt | trägt Zeile, Liste und Drawer (Gegenkonto) | — |
-| `AccountEntryRow` | jetzt | trägt die Liste; existiert heute dreimal von Hand | — |
+| `accountEntryColumns()` | jetzt | trägt beide Listen; existiert heute dreimal von Hand (A11) | — |
 | `AccountEntryList` „Kontoauszug" | jetzt | der Listen-Job der Anfrage | — |
 | `AccountFacts` | jetzt | Zone 3 des Drawers, Kriterium aus 0052 | — |
 | `AccountDrawer` | jetzt | die Anfrage vom 2026-09-04 | — |
@@ -257,34 +271,62 @@ Klasse „gespiegelt"; ein Umzugsfehler, die App-Registry
 (`app/apps/web/src/ui/status/status-registry.ts:1470`) hat ihn. Am 2026-09-04
 wortgleich nachgetragen — erledigt.
 
-## Offene Fragen
+## Beantwortete Fragen (Owner, 2026-09-04)
 
-1. **Saldo in der vereinigten Liste.** Ludwig rechnet heute einen laufenden
-   Saldo, der Spiegel keinen; über beide Quellen zusammen wäre er eine
-   Mischung aus Ist und Noch-nicht-angekommen. — *Ohne Antwort: der laufende
-   Saldo je Zeile entfällt. Der Kopf trägt stattdessen zwei Zahlen — „Saldo
-   in DATEV" und darunter „+ n nur in Ludwig" —, weil das die Frage ist, die
-   der Drawer beantwortet. Die Saldospalte kehrt im View wieder, wenn dort
-   eine Quelle allein gezeigt wird.*
-2. **Vier Klassen statt drei.** Neben „nur DATEV", „gespiegelt" und „nur
-   Ludwig" gibt es „exportiert, aber in DATEV nicht wiedergefunden" (111
-   Sätze, 18 % der Ludwig-Sätze). — *Ohne Antwort: eigene Ausprägung, nicht
-   mit „nur Ludwig" zusammengelegt. Die Achse `buchung_datev` trennt sie
-   bereits, und ihr Registry-Kommentar begründet warum: „Exportiert ≠
-   angekommen."*
-3. **Wirkt der Jahreswechsel im Drawer über den Drawer hinaus?** — *Ohne
-   Antwort: nein, er bleibt lokal. Der Drawer ist ein Nachschlag neben der
-   Arbeit; die Seite dahinter darf nicht mitspringen. Der Schalter steht in
-   Zone 1 (`meta`), nicht im Fuß — der gehört nach A10 der Vollansicht.*
+Alle drei Defaults bestätigt. Beleg für die betroffenen Zeilen: `Nutzer`.
+
+1. **Saldo in der vereinigten Liste** — *kein laufender Saldo je Zeile.* Der
+   Kopf trägt zwei Zahlen: „Saldo in DATEV" und darunter „+ n nur in Ludwig".
+   Grund: ein laufender Saldo über zwei Quellen, von denen eine die andere
+   spiegelt, mischt Ist und Noch-nicht-angekommen. Die Saldospalte kehrt im
+   View wieder, wo eine Quelle allein gezeigt wird. → Rang 7 der Bewegung
+   („Laufender Saldo“) entfällt in `accountEntryColumns()` und wandert nach
+   `AccountFacts`.
+2. **Vier Klassen, nicht drei** — *„exportiert, in DATEV nicht wiedergefunden"
+   bleibt eine eigene Ausprägung* (111 Sätze). Darstellung nach Owner-Wahl
+   „Symbol nur bei Ludwig-Bezug":
+
+   | Klasse | Zeile |
+   |---|---|
+   | nur in DATEV (98 %) | nichts — der Normalfall bleibt ruhig |
+   | gespiegelt | Herkunfts-Symbol |
+   | exportiert, nicht wiedergefunden | Herkunfts-Symbol **plus** `StatusBadge axis="buchung_datev" status="exported"` |
+   | nur in Ludwig | Herkunfts-Symbol, Zeile gedämpft |
+
+   **Das Symbol ist keine Status-Darstellung, sondern eine Herkunft** — sonst
+   verstieße es gegen R1 („`StatusBadge` ist die einzige erlaubte
+   Status-Darstellung"). Es sagt binär: hinter dieser Bewegung steht eine
+   Ludwig-Buchung. Dafür gibt es im Set schon ein Zeichen — `BookOpen` aus
+   `patterns/entity-icons.ts` (`ENTITY_ICON.buchung`); kein neues Vokabular.
+   Die Dämpfung ist Hierarchie, keine Farbe, und lässt A7 unberührt. Wo
+   wirklich etwas schiefgegangen ist — die 111 exportierten Sätze —, steht
+   ein echter Chip mit Wort.
+3. **Jahreswechsel** — *bleibt lokal.* Der Schalter steht in Zone 1 (`meta`),
+   nicht im Fuß (A10 hält den der Vollansicht frei). Die Seite hinter dem
+   Drawer behält Jahr, Filter und Scrollposition.
 
 ## Prüfung
 
-Gehört dem zweiten Agenten. Er prüft zuerst alle Zeilen mit Beleg `Annahme`,
-dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
-
 | Zeile / Form | Einwand | Ergebnis | Geprüft von / am |
 |---|---|---|---|
-| … | … | bestätigt · geändert auf … · offen | … |
+| Alle Zeilen (Datenpunkte + Bewegung) | Beleg `Annahme` gesucht (grep über die Datei) und nach Hedge-Wörtern („vermutlich", „wohl" …) gesucht. | bestätigt: keine Zeile trägt `Annahme`, jede hat Füllgrad, `heute in …`, GLOSSARY-Satz, Owner- oder Registry-Beleg. | Claude, 2026-09-04 |
+| Relation „Bewegungen in Ludwig" | „85 % der Konten ohne · p90 3" gegen `client_journal_entry_line` nachgerechnet (Staging, alle 41.570 Konten, `left join` auf `account_id`, Bewegung = distinkter `journal_entry`, wie `accountMovements()` in `account-ledger-queries.ts` sie zählt): tatsächlich 99,2 % ohne, p90 (alle Konten) 0. Die „85 % · p90 3" sind exakt die Zahlen der Spalte `usage_booking_count` (Datenpunkt „Buchungen insgesamt", eine Zeile darüber: Fill 100 %, 84,7 % = 0, p90 3, max 5.474) — offenbar beim Ausfüllen verwechselt. „Unter den bebuchten p50 1,5 · p90 6 · max 139" stimmt exakt (nachgerechnet über distinkte `journal_entry`-Header je Konto). | geändert auf 99 % ohne · p90 (alle) 0; „unter den bebuchten" unverändert, Beleg-Spalte ergänzt. | Claude, 2026-09-04 |
+| Tabelle „Die Herkunft in Zahlen" — Zeile „nur in DATEV" | „41.497 \| 97 % aller Sätze" nachgerechnet: `match_state`-Verteilung auf Staging (`new_unprocessed` 40.745, `unclear` 752, NULL 0 → 41.497, exakt) — aber 41.497 / (41.826 Spiegelsätze + 111 + 216 Ludwig-Sätze ohne Mirror-ID = 42.153) = 98,4 %, nicht 97 %. Kein anderer plausibler Nenner (auch nicht 41.826 oder 42.042) trifft 97 %. | geändert auf 98 %. | Claude, 2026-09-04 |
+| Tabelle „Die Herkunft in Zahlen" + Fließtext „sauber und doppelfrei" | Die Regel „alle Spiegelsätze + Ludwig-Sätze ohne `datev_mirror_entry_id`" ist unvollständig: `match_state` erlaubt laut DB-CHECK auch `disappeared`/`disappeared_committed` (32 Sätze auf Staging, 3+29), die weder „nur in DATEV" (nur `new_unprocessed/unclear/NULL`) noch „gespiegelt" (nur `matched_%`) treffen — die vier Klassen sind nicht erschöpfend. Wichtiger: die heutige App schließt genau diese Sätze aus dem Kontoauszug aus (`listAccountMirrorEntries`, `and coalesce(match_state,'') not like 'disappeared%'`, Kommentar „Tombstones bleiben draußen"), und die Registry begründet warum — ein `disappeared`-Satz kann durch einen Re-Import mit geändertem `content_hash` als neuer `new_unprocessed`-Satz danebenstehen; würde man ihn zusätzlich zeigen, entstünde ein echtes Duplikat. Die Behauptung „doppelfrei" gilt also nur, wenn Tombstones explizit ausgeschlossen bleiben — das stand nicht in der Regel. | geändert: Regel um den Tombstone-Ausschluss ergänzt, Erklärabsatz mit Beleg (`listAccountMirrorEntries`, `MIRROR_MATCH`-Registry, `getTruthDashboard.anomalies`) eingefügt. | Claude, 2026-09-04 |
+| Übrige Füllgrad-/Verteilungszahlen der Konto-Datenpunkte (Rolle, Kontostatus, DATEV-Sync inkl. „15 Zeilen local_only", Kontoherkunft, Geschäftspartner-Füllgrad 52 %, `is_default` 0 %, `accountName`-Länge p50/p90/max, `usage_booking_count`, Relation „Bewegungen im DATEV-Spiegel" p50/p90/p99/max/90 %) | Stichprobenartig, aber vollständig für die Konto-Tabelle gegen Staging nachgerechnet. | bestätigt — jede Zahl trifft exakt (z. B. `local_only` = 15 von 15, `is_default` = 41.570/41.570 `false`, `accountName` p50 19/p90 39/max 50). | Claude, 2026-09-04 |
+| Befund 2 (GLOSSARY „active/archived" vs. DB „active/inactive") | Gegen `datenmodell.json`-CHECK und `status-registry.ts` (`KONTO_STATUS`) geprüft. | bestätigt — CHECK erlaubt nur `active`/`inactive`, Registry kennt nur diese zwei, GLOSSARY nennt weiterhin `archived`. | Claude, 2026-09-04 |
+| Beleg-Zeilen mit Datei+Zeile (`AccountLedgerDrawer.tsx` Z. 93, `accounts/[accountNumber]` Z. 302, „365 Zeilen, `Drawer size=\"lg\"`, Fuß mit genau einem Knopf", „4 Tabs") | Gegen die Datei-Zeilen in `ludwig/app` gelesen. | bestätigt — Z. 93 zeigt exakt „… in Ludwig, … in DATEV", Z. 302 den `Stat label=\"Saldo\"`, Datei hat 365 Zeilen mit `size=\"lg\"` und einem Fuß-Button, die Seite hat exakt die vier genannten Tabs. | Claude, 2026-09-04 |
+| Ränge — Deckungstest | Ab Rang k abgedeckt: `AccountCell` (Rang 1–2, Nummer+Name) erkennt das Konto allein an der Identität; `AccountEntryRow` (Bewegung 1–6: Datum, Betrag, Text, Gegenkonto, Herkunft, Belegfeld1) erkennt die Bewegung ohne Rang 7+ (Saldo, Stapel, Buchungszustand, DATEV-Kennzeichen, Beleglink, Sachverhalt, Kreditor). Beide Schnitte tragen. | bestätigt. | Claude, 2026-09-04 |
+| Rolle (`accountingRole`, Zustand) ab Form S statt XS | §5 sagt „Zustand ab XS" ohne erkennbare Ausnahme, aber die Zeile bricht das ohne den Vorbehalt, den „Kontostatus" trägt (dort steht „trotz §5" mit Begründung). Geprüft: §7s XS-Budget ist „1–2 Punkte: Identität, Zustand" — der Owner-Nachtrag „immer beides" (Kontonummer + Kontoname) füllt das Budget bereits mit zwei Identitäts-Punkten, für Zustand bleibt in XS kein Platz. Das hält sich an den Budget-Rahmen, auch ohne den ausdrücklichen Vorbehalt. | bestätigt, keine Änderung der Tabelle — die Begründung stand nur nicht explizit da; sie folgt aus dem bereits vorhandenen Owner-Nachtrag zu `accountName`. | Claude, 2026-09-04 |
+| `AccountFacts` — Grund „5" | §7 Nr. 5 begründet einen **Drawer** („… → Drawer"), nicht ein Card-/M-Form. `AccountFacts` ist keine eigene Seite/kein Drawer, sondern der `meta`/`tfoot`-Ersatz — das ist Grund 1 (existiert heute, wird ersetzt), nicht Grund 5. Grund 5 ist bereits korrekt bei `AccountDrawer` verbraucht. | geändert auf Grund „1". | Claude, 2026-09-04 |
+| Listen — Job-Sätze und Owner-Entscheidung „eine Liste statt zwei Tabs" | Beide Listen (`AccountEntryList`, `AccountList`) haben einen Job-Satz nach Schema. Die Owner-Entscheidung, DATEV- und Ludwig-Tab zu einer Liste zu verschmelzen statt zwei Ausprägungen (§8: zwei von fünf Merkmalen unterschiedlich → an sich zwei Komponenten wert) trägt **nur**, wenn die Vereinigungsregel stimmt (siehe Tombstone-Korrektur oben) — mit der Korrektur ist die Grundgesamtheit sauber eine Menge, und „Herkunft" wird zu Recht eine Zeileneigenschaft statt eines Sichtwechsels. `AccountEntryList` (Kontoauszug) und `AccountList` (Kontenplan) bleiben zu Recht zwei getrennte Listen (verschiedene Grundgesamtheit UND verschiedener Job). | bestätigt (nach der Korrektur oben). | Claude, 2026-09-04 |
+| Zuschnitt — Obergrenze und Backlog-Begründungen | Fünf Formen „jetzt" (`AccountCell`, `AccountEntryRow`, `AccountEntryList`, `AccountFacts`, `AccountDrawer`) — genau die Obergrenze, nicht überschritten. Backlog-Dateien `0062-account-list.md` und `0063-account-view.md` existieren, tragen je einen Grund (eigene Route → Seitenprofil fehlt) und sind mit dem Profil konsistent. | bestätigt. | Claude, 2026-09-04 |
+
+> **Nach der Prüfung, Owner-Entscheid A11 (2026-09-04):** Die Form
+> `AccountEntryRow`, die oben in zwei Prüfzeilen unter diesem Namen bestätigt
+> wurde, heißt jetzt `accountEntryColumns()` und ist eine Spaltenfunktion
+> statt einer Komponente. Inhalt und Ränge sind unverändert — die Prüfung
+> gilt weiter, nur die Verpackung ist eine andere.
 
 ## Weiter
 
@@ -311,7 +353,7 @@ Startprompt (neue Sitzung, nach Status `geprüft`):
 Für die Entität Konto (`ledger account`) liegt das geprüfte Profil unter
 docs/entitaeten/account.md. Schreibe mit Skill spec-schreiben je Form eine Spec, in dieser
 Reihenfolge — nur die Formen mit Marke „jetzt" aus dem Abschnitt Zuschnitt:
-AccountCell, AccountEntryRow, AccountEntryList, AccountFacts, AccountDrawer. Was dort
+AccountCell, accountEntryColumns, AccountEntryList, AccountFacts, AccountDrawer. Was dort
 „Backlog" trägt, bleibt liegen (0062, 0063). Jede Spec verlinkt das Profil als Quelle und nimmt
 Datenpunkte, Ränge, Relationen und „ersetzt" von dort, nicht aus dem Chat; die Punkte einer
 Form sind die Ränge bis zu ihrer Größe, in derselben Reihenfolge. Der Drawer folgt A10
