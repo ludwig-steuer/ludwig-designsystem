@@ -9,7 +9,6 @@ import {
   FileText,
   Trash2,
   X,
-  type LucideIcon,
 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 

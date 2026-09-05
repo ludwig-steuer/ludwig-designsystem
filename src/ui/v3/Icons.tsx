@@ -428,10 +428,10 @@ export type IconSize = 12 | 14 | 16 | 20 | 24;
  * place — and **no** `icon` prop: a back door for any Lucide sign would turn
  * the registry into decoration.
  *
- * @when    Ein Ding aus dem Datenmodell benennen — in der Sidebar, vor einem
- *          Namen, im Kopf einer Akte.
- * @instead Eine Handlung oder ein Hinweis → ActionIcon. Ein Prüfergebnis →
- *          StateIcon (Review.tsx). Ein Zustand mit Farbe → StatusBadge.
+ * @when    Naming a thing from the data model — in the sidebar, in front of
+ *          a name, in the head of a record.
+ * @instead An action or a hint → ActionIcon. A review result → StateIcon
+ *          (Review.tsx). A state carrying colour → StatusBadge.
  */
 export function EntityIcon({
   entity,
@@ -452,8 +452,8 @@ export function EntityIcon({
  * Like `EntityIcon`: `aria-hidden`, no `label`, no `icon`. The `IconButton`
  * around it carries its own `aria-label`.
  *
- * @when    Sagen, was ein Klick tut, bevor jemand klickt.
- * @instead Ein Ding benennen → EntityIcon. Ein Prüfergebnis → StateIcon.
+ * @when    Saying what a click does, before anyone clicks.
+ * @instead Naming a thing → EntityIcon. A review result → StateIcon.
  */
 export function ActionIcon({
   action,
