@@ -2,13 +2,14 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | keine Komponente — drei Stories zu `src/styles/tokens.css` in der Gruppe `v3/Grundlagen` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Tokens und Icon-Regeln sind fachfrei |
 | Quelle | Anfrage Owner vom 2026-09-03 („Farben, Shades, Bedeutung der Farben festlegen, damit wir eine Übersicht haben") · `design-guidelines.md` §11.7 Stufe 0 · Fortsetzung von 0037 · Review 2026-09-03 mit Owner-Entscheiden A8 (Icon-Leiter) und A9 (`warning-strong`) |
 | Ersetzt | nichts — die Tokens stehen seit dem ersten Tag, nur ohne Nachweis |
 | Blockiert | jede Seitenmigration, die „welchen Ton nehme ich?" beantworten muss; die Icon-Hebung aus §11.7 Stufe 0 („12 Dateien mit Unicode-Icons"); den Rückbau von `warning-strong` (A9) |
 | Spec von / am | Claude, 2026-09-03 · Review und Ergänzung Claude, 2026-09-03 |
+| Gebaut von / am | Claude, 2026-09-04 — `Color.stories.tsx`, `Surface.stories.tsx`, `Icons.stories.tsx` |
 
 ## Ziel
 
@@ -262,10 +263,13 @@ Variabel (aus dieser Spec):
       Token ohne `var()`-Leser als „unbenutzt"; Gegenprobe für Letzteres:
       ```
       for t in $(grep -oE '^  --color-[a-z0-9-]+' src/styles/tokens.css | tr -d ' '); do
-        rg -q "var\($t\)" src/styles src/ui || echo "$t"
+        rg -q "var\($t\)" src/styles src/ui -g '!*.stories.tsx' || echo "$t"
       done
       ```
-      (heute sieben Treffer, siehe Inhalt 2)
+      **Korrigiert beim Bauen:** ohne `-g '!*.stories.tsx'` meldet die
+      Farbseite selbst jeden Token als benutzt und die Spalte wäre immer leer.
+      Die Story misst dieselbe Menge. Heute **acht** Treffer, nicht sieben:
+      `--color-surface-raised` ist dazugekommen (siehe „Beim Bauen").
 - [ ] `Criticality` nennt für jede der vier Stufen den Registry-`kind`
       (`danger`/`warning`/`info`/`neutral`) und führt `success` außerhalb der
       Skala (A7)
@@ -374,6 +378,47 @@ Offen:
    zu Raum und Fläche — der Zustand ist eine Eigenschaft der Fläche, die Farbe
    ist nur sein Mittel. Wer es anders sieht, verschiebt eine Story, keine
    Datei.*
+
+## Beim Bauen aufgefallen (2026-09-04)
+
+Die Spec hat sich an sechs Stellen bewegt. Kein Kriterium ist gefallen; die
+Abweichungen stehen hier, damit der Abnehmende sie nicht selbst suchen muss.
+
+1. **Acht Token ohne Leser, nicht sieben.** Zusätzlich zur Liste aus Befund 8
+   liest niemand `--color-surface-raised` — er hat weder Rolle in §3 noch
+   einen `var()`-Leser. Er ist derselbe Wert wie `--color-surface`.
+2. **`--color-accent-500` hat sehr wohl eine Rolle.** §3 nennt ihn wörtlich in
+   der Akzent-Reihe („`--color-accent` (`-600`), `-500`, `-100`, `-50`"). Die
+   Spec hatte ihn unter „ohne Rolle" geführt; das war ein Lesefehler. Ohne
+   Rolle sind stattdessen: `primary-500`, `primary-900`, `surface-raised`,
+   `scrim`, `focus-ring-soft` und `warning-strong` (der ohnehin entfällt).
+   `scrim` und `focus-ring-soft` nennt §2 („Ebenen", „Fokus"), nicht §3 — die
+   Story schreibt das an die Zeile.
+3. **Befund 8 bestätigt, mit Fundort.** Dass `success-bg` und `info-bg`
+   niemand liest, hat den vermuteten Grund: `.bdg-info`, `.bdg-success` und
+   `.bdg-danger` in `app-chrome.css` schreiben Fläche, Text und Rand als
+   Hex-Literale aus. Das ist der V13-Fall im eigenen Set — eigene Aufgabe.
+4. **Neuer Befund 11: `accent-700` reißt auf der Arbeitsfläche.** §12 nennt
+   4,81:1 gegen Weiß; gegen `bg-soft` sind es gemessen **4,44:1** — unter der
+   Schwelle. Es ist die *einzige* Akzentstufe, die Text tragen darf, und die
+   Arbeitsfläche ist `bg-soft`. Entweder eine Stufe dunkler oder Links auf
+   `bg-soft` ausschließen.
+5. **Neuer Befund 12: §3 widerspricht sich bei `--color-info`.** Die Tabelle
+   gibt ihm „Text: ja", er ist aber ein Alias auf `--color-accent`, dem
+   dieselbe Tabelle Text ausdrücklich verbietet (3,55:1). Gerendert wird er
+   als Text heute nirgends — die Plaketten nehmen `accent-700`. Entweder die
+   Textrolle streichen oder `--color-info` auf `accent-700` legen.
+6. **Messgrenzen der Stories.** Zwei Dinge, die der Abnehmende wissen muss,
+   damit er die Zahlen richtig liest: Die „unbenutzt"-Messung schließt
+   `*.stories.tsx` aus (sonst zählte die Farbseite sich selbst als Leser), und
+   `import.meta.glob` liefert die eigene Datei nicht mit — ein Icon, das nur
+   `Icons.stories.tsx` importiert, taucht darum nicht unter „nur in Stories"
+   auf. Deshalb importiert die Datei ausschließlich Icons, die auch im
+   Produktcode stehen; der Kebab im Falsch-Beispiel steht als Satz, nicht als
+   Zeichen.
+
+Nicht behoben, weil nicht Auftrag: die zehn Befunde der Spec und die zwei
+neuen. Sie stehen jetzt sichtbar in den Stories — das war der Zweck.
 
 ## Abnahme
 

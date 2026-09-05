@@ -54,7 +54,7 @@ export const AllDone: Story = {
   ),
 };
 
-/** Frisch angelegt: noch nothing gerechnet, also auch kein Zähler. */
+/** Frisch angelegt: noch nichts gerechnet, also auch kein Zähler. */
 export const NothingComputedYet: Story = {
   render: () => (
     <RailLayout items={STEPS.map((s) => ({ ...s, tone: "neutral" as const, counterText: null }))} />

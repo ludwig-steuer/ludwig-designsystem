@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Soll/Haben, Konto, Steuerschlüssel sind Buchhaltung, nicht Layout |
 | Quelle | Anfrage vom 2026-09-03 („eine simplere Version, um einen Buchungssatz nur anzuzeigen, ohne Extras") · `docs/v3-backlog.md` „Nicht `primitives`" (`BookingProposalView`/`-Compact`, `BookingLineRow` fehlen v3) · `docs/ui-repraesentationen.md` §4.4 (Form `Card` für „Buchung") |
@@ -258,8 +258,83 @@ Screenshot-Vergleich der Editor-Stories gehört zu diesem Schritt.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Abnahme am 2026-09-05 (zweiter Agent, gegen Spec und Code). Alle acht Stories
+auf `localhost:6107` geöffnet; Zeilen, Ausrichtung, Kürzung und Tab-Weg im DOM
+gemessen.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Story-Deckung.** Acht Stories in der Spec, acht Exporte in
+`JournalEntryCompact.stories.tsx`, acht IDs in `index.json` (`--filled`,
+`--split`, `--empty`, `--unbalanced`, `--without-names`, `--without-totals`,
+`--in-use`, `--edges`) — die Ableitung (4 Zustände + 2 Layout-Booleans + 1 „im
+Einsatz" + 1 Rand) geht auf. Jede Prop beider Exporte hat ihre Story:
+`JournalEntryCell.lines`/`currency` (`Filled`), `showNames` (`WithoutNames`) ·
+`JournalEntryCard.lines`/`currency` (`Filled`), `caption` (`InUse`), `totals`
+(`WithoutTotals`). Jede Story zeigt beide Exporte untereinander (`Pair`,
+`:30–53`), wie die Spec es verlangt. „lädt", „Fehler" und „leer nach Filter"
+sind begründet ausgeschlossen; an die Stelle von „Fehler" tritt `Unbalanced`.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `tsc --noEmit` ohne Ausgabe, Exit 0 (Anfang und Ende der Abnahme). `pnpm build` **nicht** neu gelaufen — parallele Abnahmen schreiben nach `storybook-static`; der Lauf für diesen Stand war grün: „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel `v3/Entitäten/Buchungssatz/JournalEntryCompact` | `src/ui/v3/entities/journal-entry/JournalEntryCompact.tsx` mit beiden Exporten, Story daneben; Titel stimmt und deckt sich mit der Barrel-Gruppe (`src/ui/v3/index.ts:356` „Buchungssatz — die eine Buchungs-Oberfläche", Export `:367–370`) | ✓ |
+| Code englisch; `@when`/`@instead` an **jedem** der beiden Exporte | `@when`/`@instead` an beiden ✓ (`JournalEntryCell` `:62–65`, `JournalEntryCard` `:124–127`), beide englisch und aufeinander verweisend. **Der Rest der Datei ist gemischt:** das Datei-JSDoc `:6–20` („Zelle und Karte eines Buchungssatzes (0044) — die Anzeige-Formen der Familie …"), das Interface-JSDoc `:22–25`, der Feldkommentar `:31` („Buchungstext der Zeile — Spalte 3 des Stapels") und `:35` („Ab hier gilt ein Satz als unstimmig — ein halber Cent ist Rundung") stehen auf Deutsch, während `:38`, `:45`, `:77–78`, `:83–84`, `:111–112`, `:149` und `:181` englisch sind. `CLAUDE.md` verlangt Englisch für Kommentare und JSDoc; die Datei ist am 2026-09-04 neu entstanden | ✗ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}' JournalEntryCompact.tsx` = 0, `grep -cE '[0-9]+px'` = 0. `NAME_LIMIT = 40` ist eine Zeichenzahl, `BALANCE_EPSILON = 0.005` ein Betrag — keine Maße. Keine Label-Map, kein Status: die Familie zeigt bewusst keinen (`@instead` schickt an `StatusBadge`). Die Maße stehen in `v3.css:2414–2449`, wo px erlaubt sind | ✓ |
+| Alle acht Stories vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Kontonummer und beide Betragsspalten `text-align: right`, Kontoname und Buchungstext `start`, **nichts** zentriert (0 Elemente mit `text-align: center` unter `.v2je`) · `font-variant-numeric: lining-nums tabular-nums` an jeder Zahlenzelle · keine Farbe, kein Rot — das `≠` ist ein Zeichen, kein Farbsignal · die Karte hat **weder** Rand **noch** Schatten (`border-top-width: 0px`, `box-shadow: none`); sie ist ein Ausschnitt in fremdem Markup, kein Kasten, und verletzt „Rand oder Schatten, nie beides" damit nicht · kein Icon, keine Versalien · die zwei App-Punkte übersprungen | ✓ |
+| Im Browser angesehen, nicht nur gebaut | Alle acht IDs am 2026-09-05 geöffnet, Zeileninhalte und `getComputedStyle` je Spalte gemessen, Tab-Weg geprüft. Keine Konsolenfehler | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `lines`/`currency` wie Zeile 1–2 der Schnittstelle (`Filled`) | `--filled`: Zelle „1200 Bank an 4400 Erlöse 19 % USt · 1.475,60 €", Karte mit zwei Zeilen und Σ-Zeile. `currency="EUR"` schlägt bis in `formatAmount` durch (`1.475,60 €`) | ✓ |
+| `showNames={false}` zeigt nur Nummern (`WithoutNames`) | `--without-names`: die Zelle liest „1200 an 4400 · 1.475,60 €" — die Namen „Bank" und „Erlöse 19 % USt" sind weg, die Nummern bleiben. Die Karte darunter zeigt sie weiter (die Prop gehört nur der Zelle) | ✓ |
+| `totals={false}` lässt die Σ-Zeile weg (`WithoutTotals`) | `--without-totals`: fünf Zeilen (Kopf + vier Buchungszeilen), **keine** `.v2je__row--sum`. Gegenprobe `--split` mit denselben Daten: sechs Zeilen, die letzte „Σ Soll = Σ Haben · 1.475,60 € · 1.475,60 €" (Spaltentrenner hier als · geschrieben) | ✓ |
+| `caption` steht über den Zeilen (`InUse`) | `--in-use`: `div.v2je__caption` „Buchungsvorschlag zu RE-4471" steht als erstes Kind der Karte, über der Kopfzeile | ✓ |
+| Zelle fasst Splits zusammen: eine Seite mehrzeilig → „an n Konten", beide → „n Zeilen" (`Split`) | `--split`: „1200 Bank **an 3 Konten** · 1.475,60 €", während die Karte alle vier Zeilen einzeln zeigt. `--edges` deckt den anderen Fall ab: zwei Soll- und zehn Haben-Zeilen → „**12 Zeilen** · -19,00 €" | ✓ |
+| Karte zeigt `≠` bei Differenz ≥ 0,005 und **sonst keine** Meldung (`Unbalanced`) | `--unbalanced`: Σ-Zeile „Σ Soll **≠** Σ Haben · 1.475,60 € · 1.400,00 €" — kein zweiter Text, keine Farbe, kein Badge im ganzen `.v2je`. Gegenprobe `--filled`: dasselbe Markup mit `=`. Schwelle `BALANCE_EPSILON = 0.005` (`:36`) | ✓ |
+| Leer: Zelle em-Strich, Karte „Keine Buchungszeilen." (`Empty`) | `--empty`: kein `.v2je__cell` im Baum, stattdessen `span.v2muted` mit „—" (`:79`); die Karte zeigt `div.v2je__empty` „Keine Buchungszeilen." und **keine** Kopfzeile, keinen Knopf | ✓ |
+| Langer Kontoname wird gekürzt, voller Name im `title` (`Edges`) | `--edges`, Karte: die Zelle mit „Betriebs- und Geschäftsausstattung, geringwertige Wirtschaftsgüter" hat `scrollWidth 404` bei `clientWidth 129` — also tatsächlich abgeschnitten —, `text-overflow: ellipsis` und den vollen Namen im `title`. Dasselbe für den Buchungstext (347 gegen 181). In der Zelle greift zusätzlich die Zeichenschranke `NAME_LIMIT = 40` (`:39`, `:51–56`); in dieser Story ist sie nicht zu sehen, weil `Edges` der Fall „12 Zeilen" ist und keinen Kontonamen ausgibt | ✓ |
+| Zahlen rechts mit `tnum`, Text links, nichts zentriert (`Edges`) | `--edges`, `getComputedStyle` der fünf Kopfspalten: `right, start, start, right, right`; `font-variant-numeric` der Zahlenzellen „lining-nums tabular-nums"; 0 Elemente mit `text-align: center` | ✓ |
+| Karte in Stapelordnung: Kopfzeile `Konto · Kontoname · Buchungstext · Soll Umsatz · Haben Umsatz`, Kontonummer rechtsbündig, Betrag in genau einer der beiden Spalten (`Filled`) | `--filled`, Zeilen im DOM: „Konto · Kontoname · Buchungstext · Soll Umsatz · Haben Umsatz" — dann „1200 · Bank · Reparatur März · **1.475,60 €** · (leer)" und „4400 · Erlöse 19 % USt · Reparatur März · (leer) · **1.475,60 €**" (Spaltentrenner hier als · geschrieben). Die Seite steht also in der Spalte, nicht als Kennzeichen daneben; „Konto" ist rechtsbündig | ✓ |
+| Kein Element fokussierbar — Tab läuft an der Zelle vorbei (`InUse`) | `--in-use`: fünfmal `Tab` gedrückt, `document.activeElement` bleibt jedes Mal `body`; `document.querySelectorAll('.v2tbl button, .v2tbl a, .v2tbl [tabindex]').length` = 0. Dasselbe in `--edges` | ✓ |
+| **Herauslösen:** `JournalEntryEditor` rendert sein Journal über `JournalEntryCard` (`totals={false}`); `grep -n "bse__journal__row" src` findet die Klasse nur noch in `v3.css` | Nicht gebaut. `grep -rn "bse__journal" src` trifft weiter `JournalEntryEditor.tsx:747, 748, 756, **757**, **765**, 768, **773**` — das eigene Zeilen-Markup steht unverändert dort, `JournalEntryCard` wird vom Editor nicht importiert. Der Abschnitt „Offen (nicht gebaut)" dieser Spec sagt es selbst und nennt den Grund (parallele Sitzung mit unkommittierten Änderungen in derselben Datei). Der Grund ist nachvollziehbar, das Kriterium bleibt offen — und es zielt auf dieses Repo, nicht auf die App | ✗ |
+| Steuerableitung (`deriveTax`) und Gegenkonto-Einrechnung sind **im Editor** geblieben; die Familie importiert weder `tax-assist` noch `format` aus `legacy/` | `JournalEntryCompact.tsx` hat genau drei Importe (`:1`, `:3`, `:4`): `Currency` aus `@/ludwig/shared/money`, `formatAmount` aus `../../format` (v3, nicht `legacy/`), `AmountCell`/`MonoCell` aus den Primitives. `grep -c "legacy/"` = 0, kein `deriveTax`, keine Konsolidierung — die Karte summiert nur, was dasteht (`:41–43`, `:141–143`) | ✓ |
+| Die Stories von `JournalEntryEditor` sehen nach dem Herauslösen unverändert aus | Nicht prüfbar, weil das Herauslösen nicht stattgefunden hat. (Nebenbefund: `JournalEntryEditor.tsx` und seine Story-Datei sind derzeit uncommitted verändert — ein Vergleich wäre ohnehin gegen einen wandernden Stand gelaufen) | ✗ |
+| Ersetzt `BookingProposalCompact` in `EventStack.tsx:127` ohne Funktionsverlust | Betrifft `ludwig/app`; in diesem Repo nicht erfüllbar | offen (App) |
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Die dokumentierten Abweichungen stimmen mit dem Gebauten überein.**
+  `taxKey` fehlt im Interface (`:26–33`) · die Σ-Zeile steht in der
+  Stapelordnung, nicht als Satz (`--filled`: leer | leer | „Σ Soll = Σ Haben" |
+  Betrag | Betrag) · der Betrag der Zelle nimmt die Habenseite, wenn die
+  Sollseite leer ist (`:85`, `total = sum(debits) || sum(credits)`).
+- **`Edges` ist zugleich der zweite unstimmige Satz.** Soll −19,00 € gegen
+  Haben 1.045,00 € → die Σ-Zeile trägt das `≠`, ohne dass die Story es
+  ankündigt. Kein Fehler, aber die Story beweist damit `Unbalanced` ein
+  zweites Mal.
+- **0,00 € wird als Wert gezeigt, nicht als Leere.** `--edges`, erste
+  Kartenzeile: „0,00 €" steht in der Soll-Spalte — die Karte unterschlägt die
+  Nullbuchung nicht (anders als die Zelle, die bei leeren `lines` den
+  em-Strich nimmt).
+
+Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-05
+· Status zurück auf `in Arbeit`.
+
+**Offene Punkte**
+
+1. **Das Herauslösen aus `JournalEntryEditor` fehlt weiter** — das Kriterium
+   ist eines dieses Repos, nicht der App, und der Editor trägt sein
+   `.bse__journal__row`-Markup unverändert (`:757`, `:765`, `:773`). Danach
+   fällt auch der Screenshot-Vergleich der Editor-Stories an.
+2. **Datei-JSDoc und drei weitere Kommentare in `JournalEntryCompact.tsx`
+   sind deutsch** (`:6–20`, `:22–25`, `:31`, `:35`) — `CLAUDE.md` verlangt
+   Englisch, und die Datei ist neu. Die Story-Datei daneben ist bereits
+   durchgehend englisch, die Umstellung ist also klein.
+
+Alles Übrige — beide Exporte, alle acht Stories, Stapelordnung, Kürzung,
+`≠`, Leerfall und die Zusicherung „nichts ist fokussierbar" — ist erfüllt und
+oben belegt.

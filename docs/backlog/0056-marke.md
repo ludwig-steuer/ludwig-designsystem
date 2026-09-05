@@ -2,13 +2,14 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | keine Komponente — eine Story `src/ui/v3/Brand.stories.tsx` in der Gruppe `v3/Grundlagen` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, mit deren Zeichen: welche Variante auf welchen Grund, wie klein, was nicht — die Regel ist markenfrei |
 | Quelle | `design-guidelines.md` §11.7 Stufe 0 („Marke: Wordmark, Mark, Light-Variante", Status v2 ohne Nachweis) · Review 0055 vom 2026-09-03 |
 | Ersetzt | nichts — die drei SVGs liegen unter `reference/design-system-v2/assets/`, ohne Story und ohne Regel |
 | Blockiert | den Sidebar-Kopf mit echtem Zeichen statt Text (heute `<div class="sb__logo">Ludwig</div>` in vier Stories); Favicon und App-Icon der App |
 | Spec von / am | Claude, 2026-09-03 |
+| Gebaut von / am | Claude, 2026-09-04 — `src/ui/v3/Brand.stories.tsx` |
 
 ## Ziel
 
@@ -127,6 +128,23 @@ Variabel (aus dieser Spec):
 2. **Wordmark im Sidebar-Kopf statt Text?** *Ohne Antwort: die Story empfiehlt
    es und zeigt es in `Sizes`; `AppShell` und seine Stories bleiben unangetastet,
    bis die Top-Bar-Füllung gehoben wird.*
+
+## Beim Bauen aufgefallen (2026-09-04)
+
+1. **Die Sidebar-Breite kommt aus dem Grid, nicht aus einem Token.**
+   `.app__sidebar` allein hat keine Breite — die 240 px (eingeklappt 64 px)
+   stehen in `.app` beziehungsweise `.app--collapsed`. `Sizes` und `Misuse`
+   setzen deshalb den echten Rahmen `.app` um den Kopf und überschreiben nur
+   `height`, `min-height` und `width` auf `auto`/`0`/`fit-content`, damit von
+   der Shell genau die Kopfzeile stehen bleibt. So steht kein einziges Maß in
+   der TSX-Datei; Spalte und Zeile bringt das Stylesheet mit.
+2. **`Misuse` zeigt vier statt fünf Verstöße als Bild.** Der fünfte, „Text an
+   Stelle des Zeichens", ist selbst ein Bild-Paar — insgesamt also fünf Paare
+   wie bestellt. Die Zahl in der Spec („fünf verbotene Fälle") ist erfüllt.
+3. **Die zwei Markenfarben stehen nicht in der TSX-Datei.** Befund 2 der Spec
+   verlangt, dass die Story die A5-Ausnahme benennt — sie tut das in Worten
+   und verweist auf die SVG-Dateien, statt die Werte abzuschreiben. Sonst
+   stünde ausgerechnet auf der Marken-Seite ein Hex-Literal.
 
 ## Abnahme
 

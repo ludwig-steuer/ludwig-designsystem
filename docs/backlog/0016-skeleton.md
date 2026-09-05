@@ -67,6 +67,34 @@ Nicht anwendbar: `Gefuellt`, `Leer`, `LeerNachFilter`, `Fehler` — die
 Komponente **ist** der Ladezustand; die anderen vier zeigt der Aufrufer mit
 `EmptyState` und `ErrorRow`.
 
+## Abnahmekriterien
+
+Fest (gilt immer):
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [ ] Code englisch; `@when`/`@instead` an jedem Export
+- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+
+Variabel (aus dieser Spec):
+
+- [ ] Nutzt `.v2skel`, definiert keine zweite Ladefläche (Blick ins CSS)
+- [ ] `variant="card"` hält die Höhe einer echten Karte, ohne die Seite springen zu lassen (Story `InCard`, Regel V12)
+- [ ] Genau ein `sr-only`-Satz je Skeleton, die Flächen sind `aria-hidden` (Story `Lines`, Blick ins DOM)
+- [ ] Die `@when`-Zeile grenzt gegen `TableLoading` ab
+- [ ] Ersetzt den handgebauten Platzhalter in mindestens einem der drei Fundorte ohne Funktionsverlust
+
+
+## Offene Fragen
+
+1. Braucht `variant="field"` eine eigene Höhe je Feldgröße? *Ohne Antwort:
+   nein — eine Höhe, die zum `Input` passt.*
+2. Soll `lines` auch bei `card` gelten? *Ohne Antwort: nein — `card` ist eine
+   Fläche, keine Zeilenfolge.*
+
 ## Abnahme
 
 Zweite Abnahme am 2026-09-05 (fremder Agent, gegen Spec und Code, nicht gegen

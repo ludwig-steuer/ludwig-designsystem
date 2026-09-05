@@ -70,7 +70,7 @@ export const AllPassed: Story = {
   ),
 };
 
-/** Noch nothing gerechnet: die Zähler bleiben leer statt zu raten. */
+/** Noch nichts gerechnet: die Zähler bleiben leer statt zu raten. */
 export const Loading: Story = {
   render: () => (
     <Checklist

@@ -171,6 +171,17 @@ Listenpunkt, Zitat und Tabelle stehen alle auf 13,5 px.
       (`grep -E "^export const (Gefuellt|Leer|Varianten|Lang|Unsicher|ImEinsatz)"` leer)
 - [ ] Server-Component: die Datei trägt weiterhin kein `"use client"`
 
+## Offene Fragen
+
+1. **Welche Bibliothek?** *Ohne Antwort: `marked` plus eine Allowlist beim
+   Rendern — klein, ohne React-Abhängigkeit, damit die Komponente Server
+   bleiben kann. `react-markdown` zöge `unified` samt Kette nach.*
+2. **Zählt `maxHeight` zum ersten Wurf?** *Ohne Antwort: ja — der Lauf-Bericht
+   ist regelmäßig zu lang für eine Karte, und ohne die Blende landet er
+   ungekürzt auf der Seite.*
+3. **Tabellen erlauben?** *Ohne Antwort: ja. Der Agent stellt Vergleiche als
+   Tabelle dar, und als Text sind sie unlesbar.*
+
 ## Abnahme
 
 **Zweite Abnahme, 2026-09-05** (fremder Prüfer, nicht der Erbauer). Zwei der

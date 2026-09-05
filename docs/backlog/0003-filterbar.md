@@ -91,6 +91,39 @@ Titel `v3/Primitives/Navigation/FilterBar`. Abgeleitet nach §6: 2 Zustände
 Nicht anwendbar: `Laedt` (die Hülle lädt nicht — die Liste darunter tut es),
 `Fehler` (Feldfehler stehen am Feld, I8).
 
+## Abnahmekriterien
+
+Fest (gilt immer):
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [ ] Code englisch; `@when`/`@instead` an jedem Export
+- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+
+Variabel (aus dieser Spec):
+
+- [ ] `activeCount > 0` zeigt ein Wort, nicht nur Farbe (Story `Active`, Regel V7)
+- [ ] Ohne `onReset` und `resetHref` erscheint kein Zurücksetzen (Story `Filled`)
+- [ ] Ohne `submitLabel` erscheint kein Anwenden-Knopf (Story `Filled`)
+- [ ] Sieben Felder brechen um, das Zurücksetzen bleibt am Ende (Story `ManyFields`)
+- [ ] Die Komponente importiert weder `next/navigation` noch etwas aus `@/ludwig` — Filterzustand bleibt draußen
+- [ ] Ersetzt die Formularzeile von `AccountFilterForm` ohne Funktionsverlust; die fachlichen Teile (Domänen-Typen, URL) bleiben dort
+
+
+## Offene Fragen
+
+1. Wirken Filter sofort oder erst auf Knopfdruck? *Ohne Antwort: beides
+   möglich — `submitLabel` entscheidet es je Aufrufstelle. Die App macht
+   heute beides.*
+2. Gehört die Volltextsuche in die `FilterBar` oder bleibt sie im Kartenkopf?
+   *Ohne Antwort: sie kann als `children` hinein, muss aber nicht — `SearchInput`
+   hat sein eigenes `@when` („Full-text search across the rows of a card").*
+3. Soll `activeCount` die Zahl selbst formatieren („3 Filter gesetzt")?
+   *Ohne Antwort: ja, in der Komponente — sonst schreibt es jede Seite anders.*
+
 ## Abnahme
 
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `patterns/` |
 | Klassen-Test | ja, sobald es dort Vorgänge mit Historie gibt — „Ereignisse in der Zeit" kennt kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Verlauf` (Zeitstrahl — **heute siebenmal verschieden**), 7 Stellen · Showcase `src/showcase/CaseCrud.stories.tsx` |
@@ -132,7 +132,47 @@ jetzt daneben; der Knopf trägt nur den Titel.
 
 Neue Stories: `Selected`, `DayOnly`, `WithoutKind`.
 
+## Abnahmekriterien
+
+> **Wiederhergestellt am 2026-09-05 aus `2b89c3f`.** Commit `64fbe27` hatte
+> die Abschnitte „Abnahmekriterien" und „Offene Fragen" dieser Spec (und
+> elf weiterer) beim Eintragen der Abnahme überschrieben — danach war gegen
+> nichts mehr abnehmbar. Eine Abnahme trägt nur in die Tabelle „Abnahme" ein.
+
+Fest (gilt immer):
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [ ] Code englisch; `@when`/`@instead` an jedem Export
+- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+
+Variabel (aus dieser Spec):
+
+- [ ] Unsortierte `entries` erscheinen sortiert (`Gefuellt`)
+- [ ] Kein Ereignistyp lokal definiert; `kind` ist `string` mit Registry-Prop (`grep`)
+- [ ] Zeiten über `Timestamp`, nicht über eigenes `Intl` (`grep`)
+- [ ] Lückenzeile ab sieben Tagen, mit der Zahl der Tage (`MitLuecke`)
+- [ ] Ohne `onOpen` sind Einträge nicht fokussierbar (`Gefuellt`, Tab-Weg)
+- [ ] Aufklappen verschiebt keinen anderen Eintrag (`Gefuellt`)
+- [ ] Ersetzt `CycleTimeline` ohne Funktionsverlust
+
+## Offene Fragen
+
+1. **Wie viele Ereignisse auf einmal?** *Ohne Antwort: alle übergebenen. Wer
+   kürzen will, kürzt vor der Übergabe — eine Komponente, die still weglässt,
+   ist gefährlicher als eine lange Seite.*
+2. **Sieben Tage als Lückenschwelle?** *Ohne Antwort: ja, mit `gapDays` als
+   Prop überschreibbar. Im Monatsprozess ist eine Woche Stille auffällig, im
+   Audit-Log nicht.*
+3. **`kind` färbt den Punkt — woher die Farbe?** *Ohne Antwort: über die
+   mitgegebene Registry, wie `StatusBadge` es tut. Keine Farbe ohne Wort (V6).*
+
 ## Abnahme
+
+### Erste Abnahme, 2026-09-03 (unverändert stehen gelassen)
 
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
@@ -159,3 +199,94 @@ bleiben stehen" schärfen oder das Aufklappen anders lösen. (5) Die Spec nennt
 `Markdown` (0022) unter „Setzt auf"; `detail` ist stattdessen `ReactNode`, der
 Aufrufer bringt das Rendern mit. (6) Der Kommentar an der Story `MitLuecke`
 spricht von 21 Tagen, gerendert werden 20.
+
+### Zweite Abnahme, 2026-09-05
+
+Abnahme am 2026-09-05 (zweiter Agent, gegen Spec und Code; gebaut hat jemand
+anders). Alle zwölf Stories auf `localhost:6107` geöffnet und bedient.
+
+**Vorbemerkung: die Kriterien waren weg.** Commit `64fbe27` („Abnahme B und C")
+hat beim Eintragen der Abnahme die Abschnitte „Abnahmekriterien" und „Offene
+Fragen" dieser Spec gelöscht — deshalb standen im Text noch Verweise auf
+„Offene Frage 2/3", die es nicht mehr gab. Beide Abschnitte sind aus
+`2b89c3f` wiederhergestellt (siehe Kasten dort); derselbe Commit hat dasselbe
+in elf weiteren Specs getan (0003, 0005, 0009, 0012, 0016, 0017, 0019, 0021,
+0022, 0024, 0028 — die Liste ist vollständig) — das ist ein Befund für das Set, nicht für diese Aufgabe.
+
+**Story-Deckung.** Die Spec nennt acht Stories plus die drei der Erweiterung
+(`Selected`, `DayOnly`, `WithoutKind`) = elf; `index.json` führt zwölf — die
+zwölfte ist `MitLabels` und deckt die beim Bauen dazugekommene Prop
+`kindLabels`. Jede Prop der Schnittstelle hat ihre Story: `entries`
+(`Gefuellt`) · `order` (`Reihenfolge`) · `groupBy` (`Gruppierung`) ·
+`emptyText` (`Leer`, Default) · `loading` (`Laedt`) · `onOpen` (`Interaktiv`) ·
+`selectedId` (`Selected`) · `kindLabels` (`MitLabels`) · tagesgenaues `at`
+(`DayOnly`) · `kind` optional (`WithoutKind`). **Lücke:** die beiden übrigen
+Erweiterungs-Props `icon` und `dim` haben in `Timeline.stories.tsx` keine
+Story (`grep -n "icon\|dim" src/ui/v3/patterns/Timeline.stories.tsx` leer);
+gezeigt werden sie nur in einer fremden Story-Datei
+(`CaseTimeline.stories.tsx --entry-kinds`). „leer nach Filter" und „Fehler"
+sind in der Spec begründet ausgeschlossen (die Komponente filtert nicht und
+lädt nicht).
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `tsc --noEmit` ohne Ausgabe, Exit 0 (am Anfang und am Ende der Abnahme). `pnpm build` **nicht** neu gelaufen — parallele Abnahmen schreiben nach `storybook-static`; der Lauf für diesen Stand war grün: „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/patterns/Timeline.tsx` mit `Timeline.stories.tsx` daneben ✓. **Die Gruppe stimmt nicht:** der Barrel führt `Timeline` unter `/* Prüfen */` (`src/ui/v3/index.ts:242` `/* Prüfen */` … Export `:254`, zwischen `ComparisonTable` und `ChoicePrompt`), der Story-Titel lautet `v3/Patterns/Prozess/Timeline`. Die Nachbarn halten sich beide Male aneinander (`ComparisonTable` und `ChoicePrompt` stehen im Baum unter „Prüfen", `LogList`/`LogBrowser`/`Process` aus `/* Prozess */` unter „Prozess") — `Timeline` ist der einzige Ausreißer. Entweder der Export wandert unter `/* Prozess */` oder der Titel heißt `v3/Patterns/Prüfen/Timeline` | ✗ |
+| Code englisch; `@when`/`@instead` an jedem Export | `Timeline.tsx`: ein Export, `@when`/`@instead` bei `:86–91`, Bezeichner, Kommentare und JSDoc englisch ✓. Anmerkung ohne eigenes Kriterium: die Story-Exportnamen sind deutsch (`Gefuellt`, `Laedt`, `MitLuecke` …) — so schreibt es die Spec vor, `CLAUDE.md` verlangt englische Story-Exportnamen. Befund für das Set, nicht für diese Aufgabe | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}' Timeline.tsx` = 0, `grep -cE '[0-9]+px'` = 0. Keine Label-Map: `kindLabels` ist eine Prop (`:112`), kein Objekt in der Datei. Status läuft über `StateIcon` aus `patterns/Review` (`:204`), nicht über eigene Wörter. Optik in `v3.css:1915–1954`, alles über Tokens | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | elf genannte IDs vorhanden, dazu `--mit-labels`; Ausschlüsse begründet — siehe Story-Deckung oben | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Text links, Zeit in `.v2tl__when` mit `tabular-nums` (`v3.css:1927`), nichts zentriert (`textAlign: center` = 0 im Strang) · Farbe nur über `StateIcon`/`StatusBadge`, kein farbiger Zustand ohne Wort · `.v2tl__item.is-current` hat Fläche **und** `aria-current="true"` (V7) · Icons Lucide 1,5 px (in 0040 gemessen: `stroke-width=1.5`, `width=14`) · die zwei App-Punkte nach `backlog/README.md` übersprungen. **Offen bleibt der Punkt „ein Aufklappen darf nichts verschieben"** — siehe die variable Tabelle | ✓ |
+| Im Browser angesehen, nicht nur gebaut | Alle zwölf IDs am 2026-09-05 geöffnet; `--interaktiv` mit Tab und Enter bedient (Fokus auf „Ist das Bewirtung oder Bürobedarf?", Enter → „Geöffnet: e4", zweiter Tab + Enter → „Geöffnet: e3"), `--gefuellt` aufgeklappt und die Kanten vor/nach gemessen. Keine Konsolenfehler in einer der Stories | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Unsortierte `entries` erscheinen sortiert (`Gefuellt`) | `--gefuellt`: übergeben in der Reihenfolge e3, e1, e4, e2 (`Timeline.stories.tsx:13–50`), im DOM stehen die Gruppen „Montag, 31. August 2026" → „Sonntag, 30." → „Samstag, 29." → „Mittwoch, 26." mit den Zeiten 16:02 / 11:12 / 13:05 / 09:40. Gegenprobe `--reihenfolge`: `order="oldest"` dreht die vier Gruppen exakt um | ✓ |
+| Kein Ereignistyp lokal definiert; `kind` ist `string` mit Registry-Prop | `kind?: string` (`Timeline.tsx:34`), kein `EventKind` und keine Arten-Liste in der Datei. Die Registry-Prop ist da: `kindLabels?: Record<string, string>` (`:112`), benutzt in `:188`. `--mit-labels` übergibt Schlüssel (`document_received`, `payment_in`, `clarification`, `booking_proposed`) und zeigt „Beleg", „Zahlung", „Rückfrage", „Buchungsvorschlag" — **damit ist der ✗ der Abnahme vom 2026-09-03 behoben** | ✓ |
+| Zeiten über `Timestamp`, nicht über eigenes `Intl` | Nicht behoben, nur halb: im DOM stehen jetzt vier `<time dateTime="2026-08-31T14:02:00.000Z" title="Montag, 31. August 2026">16:02</time>` (`--gefuellt`) — aber `Timestamp` (`primitives/Cells.tsx:83`) wird nicht importiert, und `Timeline.tsx:48–70` legt **vier eigene** `Intl.DateTimeFormat` an (`DAY`, `MONTH`, `DATE`, `TIME`). Zwei davon sind wörtliche Dubletten des Hausformatierers: `MONTH` (`:55–59`) = `format.ts:73`, `DATE` (`:60–65`) = `format.ts:68–72`. `src/ui/v3/format.ts:3–13` nennt sich selbst „the one formatter (P24, Aufgaben 0032 und 0033)" und begründet ihn mit „83 `toLocale*`-Aufrufe in 64 Dateien" — genau diese zweite Wahrheit steht hier wieder | ✗ |
+| Lückenzeile ab sieben Tagen, mit der Zahl der Tage (`MitLuecke`) | `--mit-luecke`: zwischen dem 26.08. und dem 05.08. steht `div.v2tl__gap` „20 Tage ohne Ereignis"; Schwelle `GAP_DAYS = 7` (`Timeline.tsx:77`). In `CaseTimeline --edge` greift dieselbe Zeile viermal (21 / 121 / 9 / 12 Tage). Anmerkung: der Kommentar über der Story (`Timeline.stories.tsx:151`) verspricht „21 Tage", gerendert werden 20 — das war schon Offener Punkt (6) der Abnahme vom 2026-09-03 und steht weiter da | ✓ |
+| Ohne `onOpen` sind Einträge nicht fokussierbar (`Gefuellt`, Tab-Weg) | `--gefuellt`: `document.querySelectorAll('.v2tl button, .v2tl a, .v2tl [tabindex]').length` = 0; einziges Bedienelement im Strang ist das `summary` der eingeklappten `Disclosure`. Gegenprobe `--interaktiv`: vier `button.v2link`, Tab landet auf dem ersten, Enter meldet „Geöffnet: e4" | ✓ |
+| Aufklappen verschiebt keinen anderen Eintrag (`Gefuellt`) | `--gefuellt`, `getBoundingClientRect().top` der vier `.v2tl__item` vor dem Klick auf „Einzelheiten": 51 / 138 / 265 / 352 px, danach 51 / 138 / **319** / **406** px. Die beiden Einträge **unter** dem aufgeklappten rücken 54 px nach unten; die darüber stehen still. Unverändert gegenüber der Abnahme vom 2026-09-03 (Offener Punkt 4) — entweder das Kriterium auf „die Einträge darüber bleiben stehen" schärfen oder die Klappe über den Strang legen | ✗ |
+| Ersetzt `CycleTimeline` ohne Funktionsverlust | Betrifft `ludwig/app` (`modules/cycles/ui/CycleTimeline.tsx`); in diesem Repo nicht erfüllbar. Zur Vormerkung steht der Vergleich der Abnahme vom 2026-09-03: `CycleTimeline` ist eine waagerechte Kartenreihe der Buchungsjahre mit `href` je Karte, `Timeline` kennt weder Karten noch `href` — der Umzug ist eine eigene Aufgabe, kein Nachziehen | offen (App) |
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **`WithoutKind` rendert ein leeres `<time>`.** Bei `groupBy="day"` und einem
+  Kalendertag als `at` bleibt der Textinhalt der Zeitspalte leer
+  (`Timeline.tsx:199`), das Datum steht nur im Gruppenkopf. Das ist richtig so
+  (die Uhrzeit wäre erfunden), das leere Element bleibt aber im Baum stehen.
+- **Der Strang trägt seinen Ladezustand selbst.** `--laedt` zeigt
+  `Skeleton lines={4}` mit `sr-only`-Text „Verlauf wird geladen …" — kein
+  Springen, und die Ansage ist da.
+- **`ImEinsatz` hält L2–L4 ein:** die `Card` hat Rand (`1px rgb(221,226,232)`)
+  und **keinen** Schatten (`box-shadow: none`).
+- **Offene Punkte (2), (3) und (5) der Abnahme vom 2026-09-03 stehen weiter
+  offen:** `gapDays` als Prop gibt es nicht (Offene Frage 2 sagt „ja, mit
+  `gapDays` überschreibbar"), und `detail` ist `ReactNode` statt `Markdown`
+  (0022) wie unter „Setzt auf" versprochen — Letzteres ist vertretbar (der
+  Aufrufer bringt das Rendern mit), gehört aber in die Spec statt in die
+  Abnahme.
+
+Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-05
+· Status zurück auf `in Arbeit`.
+
+**Offene Punkte**
+
+1. **Eigene `Intl`-Formatierer statt des Hausformatierers.** `Timeline.tsx:48–70`
+   durch `formatTime`/`Timestamp` aus `src/ui/v3/format.ts` ersetzen; fehlt
+   dort ein Format (der lange Gruppenkopf „Montag, 31. August 2026"), gehört
+   es dorthin ergänzt, nicht hierher kopiert. `MONTH` und `DATE` sind bereits
+   wörtliche Dubletten.
+2. **Aufklappen verschiebt die Einträge darunter** (54 px gemessen). Entweder
+   lösen oder das Kriterium in der Spec schärfen — so wie es dasteht, ist es
+   verletzt.
+3. **Story-Gruppe und Barrel-Gruppe widersprechen sich** (`Prozess` im Titel,
+   `/* Prüfen */` im Barrel). Eine der beiden Seiten nachziehen.
+4. **`icon` und `dim` haben keine eigene Story** in `Timeline.stories.tsx`,
+   obwohl beide Props der Erweiterung sind.
+5. **Der Kommentar an `MitLuecke` sagt 21 Tage, gerendert werden 20**
+   (`Timeline.stories.tsx:151`) — offen seit dem 2026-09-03.
+6. **`gapDays` als Prop fehlt** (Offene Frage 2 hat sie als Default zugesagt).

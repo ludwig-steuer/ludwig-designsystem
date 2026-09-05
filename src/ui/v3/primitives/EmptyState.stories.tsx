@@ -13,7 +13,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Noch nothing angelegt — der Weg hinein steht als Handlung daneben. */
+/** Noch nichts angelegt — der Weg hinein steht als Handlung daneben. */
 export const NothingYet: Story = {
   args: {
     icon: <Inbox size={18} strokeWidth={1.5} />,

@@ -100,6 +100,38 @@ Titel `v3/Primitives/Aktion/IconButton`. Abgeleitet nach §6: 1 Zustand
 
 Nicht anwendbar: `Leer`, `Laedt`, `Fehler`, `LeerNachFilter`.
 
+## Abnahmekriterien
+
+Fest (gilt immer):
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [ ] Code englisch; `@when`/`@instead` an jedem Export
+- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+
+Variabel (aus dieser Spec):
+
+- [ ] `label` ist Pflicht — der Typecheck lehnt einen `IconButton` ohne ab
+- [ ] `label` landet als `aria-label` **und** `title` im DOM (Story `Filled`, im Inspektor geprüft)
+- [ ] `InUse` zeigt neben dem Icon-Knopf einen beschrifteten Weg für dieselbe Absicht (Bedingung 3)
+- [ ] Die `@when`-Zeile nennt die drei Bedingungen in Kurzform; `@instead` verweist für Handlungen mit Folgen auf `Button` und für Kebab auf `OverflowMenu`
+- [ ] **`design-guidelines.md` T8 trägt die Ausnahme** mit den drei Bedingungen und dem Datum des Entscheids
+- [ ] Der Kommentar in `Button.tsx` („Kein Kebab …") bleibt und verweist auf die Ausnahme
+- [ ] Ersetzt das Schließen-Kreuz in `v3/primitives/Dialog.tsx` ohne Funktionsverlust
+- [ ] Räumt mindestens eine der neun Stellen ohne `aria-label` in `ludwig/app` auf
+
+
+## Offene Fragen
+
+1. Drei Größen oder zwei? *Ohne Antwort: drei — die App hat heute sechs;
+   24/28/32 deckt sie ohne sichtbaren Bruch ab.*
+2. Soll `title` immer gesetzt werden, auch wenn es den Hover verdoppelt?
+   *Ohne Antwort: ja — T8 sagt „Tooltip erklärt, ersetzt kein Label", hier ist
+   er der einzige sichtbare Hinweis.*
+
 ## Abnahme
 
 Zweite Abnahme gegen Spec und Code (fremder Agent), 2026-09-05 — die erste vom

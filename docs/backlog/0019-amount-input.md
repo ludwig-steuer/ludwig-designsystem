@@ -85,6 +85,35 @@ Titel `v3/Primitives/Formular/AmountInput`. Abgeleitet nach §6: 3 Zustände
 Nicht anwendbar: `LeerNachFilter` (kein Filterfall), `Laedt` (der Aufrufer
 zeigt `Skeleton`, 0016).
 
+## Abnahmekriterien
+
+Fest (gilt immer):
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [ ] Code englisch; `@when`/`@instead` an jedem Export
+- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+
+Variabel (aus dieser Spec):
+
+- [ ] „1234,56", „1.234,56" und „1234.56" ergeben denselben Wert (Story `Interactive`)
+- [ ] Unparsbares setzt `aria-invalid` und wird nicht auf 0 gesetzt (Story `Invalid`, Blick ins DOM)
+- [ ] `null` rendert ein leeres Feld, nicht „0,00" (Story `Empty`)
+- [ ] Ziffern stehen rechts und fluchten untereinander (Story `InEditor`, Regel V3)
+- [ ] Minus ist schwarz wie jede andere Ziffer (Story `Signs`, Regel V6)
+- [ ] Ersetzt das Betragsfeld in `ExtractionCorrectionCard.tsx` ohne Funktionsverlust
+
+
+## Offene Fragen
+
+1. Soll `onChange` auch bei jedem Tastendruck feuern? *Ohne Antwort: nein,
+   nur bei `blur` — sonst rechnet jede Karte bei jeder Ziffer neu.*
+2. Gehört der Parser in `src/ludwig/shared/money.ts`? *Ohne Antwort: ja,
+   Befund an `ludwig/app`; bis dahin lokal mit `ponytail:`-Verweis.*
+
 ## Abnahme
 
 **Zweite Abnahme, 2026-09-05** (fremder Prüfer, nicht der Erbauer). Die drei

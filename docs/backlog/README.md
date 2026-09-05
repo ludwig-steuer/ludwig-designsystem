@@ -11,6 +11,8 @@ Nutzung. Sie ist die Quelle für neue Aufgaben, aber keine Aufgabe selbst.
 
 | Schritt | Wer | Ergebnis |
 |---|---|---|
+| 0. Entität analysieren (nur `entities/`) | Skill `entitaet-analysieren` | Profil `docs/entitaeten/<slug>.md` mit bewerteten Datenpunkten und Formen-Empfehlung; von einem zweiten Agenten geprüft. Die Specs der Familie zitieren es als Quelle. |
+| 0b. Seite verstehen (nur Views) | Owner oder Agent | Seitenprofil `docs/seiten/<slug>.md`: der Job der Seite in einem Satz, die Fragen der Rolle in ihrer Reihenfolge, was nicht hingehört, Zweifel am heutigen Format. Die View-Spec zitiert es; jedes Element muss einer Frage dienen. |
 | 1. Spec schreiben | Skill `spec-schreiben` | Datei mit Klasse, Zuschnitt, Schnittstelle, Stories, Abnahmekriterien. Status `spec`. |
 | 2. Freigeben | Owner | Spec gelesen, offene Fragen entschieden. Status `in Arbeit`. |
 | 3. Bauen | Skill `v3-komponente` (Entwicklungsagent) | Komponente + Stories, `pnpm typecheck` und `pnpm build` grün. Status `Abnahme`. |

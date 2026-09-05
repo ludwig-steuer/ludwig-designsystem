@@ -38,7 +38,7 @@ export const WithAlarm: Story = {
   ),
 };
 
-/** Ohne Zähler — wenn die Menge nothing aussagt (Detail-Reiter). */
+/** Ohne Zähler — wenn die Menge nichts aussagt (Detail-Reiter). */
 export const WithoutCounters: Story = {
   render: () => (
     <Demo

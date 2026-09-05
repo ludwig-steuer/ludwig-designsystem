@@ -62,7 +62,7 @@ export const Filled: Story = {
   ),
 };
 
-/** Leer: die Kopfzeilen bleiben stehen, der Leerzustand sagt, warum nothing da ist. */
+/** Leer: die Kopfzeilen bleiben stehen, der Leerzustand sagt, warum nichts da ist. */
 export const Empty: Story = {
   render: () => (
     <Card>

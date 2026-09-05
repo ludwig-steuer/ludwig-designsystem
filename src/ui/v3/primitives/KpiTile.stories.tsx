@@ -34,7 +34,7 @@ export const ThreeColumns: Story = {
   ),
 };
 
-/** Noch nothing gerechnet: der Strich sagt „kein Wert", nicht „null". */
+/** Noch nichts gerechnet: der Strich sagt „kein Wert", nicht „null". */
 export const WithoutValue: Story = {
   render: () => (
     <KpiGrid columns={3}>

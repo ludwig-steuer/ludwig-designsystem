@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | nein — kennt drei Tabellen des Sachverhalts (Ereignis, Klärung, Erwartung); der Strang darunter ist das Pattern `Timeline` (0023) |
 | Quelle | Anfrage Owner 2026-09-03 (Sachverhalts-Detail `/clients/<slug>/<jahr>/cases/<id>`, Tab „Übersicht", Karte „Timeline") · Staging-Aggregate 2026-09-03 (§ Datenpunkte) · Entitätsprofil `docs/entitaeten/accounting-case.md` **fehlt noch** — diese Spec trägt den Verlaufs-Ausschnitt selbst; entsteht das Profil, gilt es vor |
@@ -413,8 +413,105 @@ rechts, nicht in der Zeile") bleibt.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Abnahme am 2026-09-05 (zweiter Agent, gegen Spec und Code). Alle sieben
+Stories auf `localhost:6107` geöffnet, `--interactive` und `--in-use` mit Tab
+und Enter bedient.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Story-Deckung.** Sieben Stories in der Spec, sieben Exporte in
+`CaseTimeline.stories.tsx`, sieben IDs in `index.json` (`--filled`,
+`--empty`, `--loading`, `--entry-kinds`, `--interactive`, `--in-use`,
+`--edge`) — die Ableitung (3 Zustände + 1 Callback + 1 „im Einsatz" + 1 Rand
++ 1 Ausprägungen) geht auf. Jede Prop hat ihre Story: `events`/
+`clarifications`/`expectations` (`Filled`) · `selectedId`/`onSelect`
+(`Interactive`, mit Gegenprobe ohne `onSelect` daneben) · `kindLabels`
+(`EntryKinds`) · `today` (in allen Stories fest auf `2026-09-03`) · `loading`
+(`Loading`). „leer nach Filter" und „Fehler" sind begründet ausgeschlossen.
+Die drei Ergänzungen in `patterns/Timeline.stories.tsx` sind da
+(`--selected`, `--day-only`, `--without-kind`), die bestehenden 0023-Stories
+unverändert.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `tsc --noEmit` ohne Ausgabe, Exit 0 (Anfang und Ende der Abnahme). `pnpm build` **nicht** neu gelaufen — parallele Abnahmen schreiben nach `storybook-static`; der Lauf für diesen Stand war grün: „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/entities/accounting-case/CaseTimeline.tsx`, Story daneben; Titel `v3/Entitäten/Sachverhalt/CaseTimeline` deckt sich mit der Barrel-Gruppe (`src/ui/v3/index.ts:324` „Sachverhalt — der Verlauf über Ereignisse, Klärungen, Erwartungen (0040)", Export `:326–331`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Ein Export (`CaseTimeline`, `:147`), `@when`/`@instead` bei `:140–146`; die Abgrenzung schickt an `Timeline`, `TodoList`, `ComparisonTable` und den Tab „Historie" weiter. Datei-JSDoc, Typkommentare und Inline-Kommentare durchgehend englisch | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}'` = 0, `grep -cE '[0-9]+px'` = 0. Einziges Objekt in der Datei ist `EVENT_ICON` (`:111–119`) — eine Icon-Zuordnung, keine Label-Map; die Wörter kommen aus `resolveStatus("erwartung_art"…)` (`:185`), `resolveStatus("klaerung_typ"…)` (`:211`) und der Übergangs-Prop `kindLabels` (`:232`), die die Spec ausdrücklich erlaubt (Befund 1) | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Eine Zeile je Eintrag, Text links, Betrag rechts mit `tabular-nums`, nichts zentriert · jeder farbige Zustand trägt sein Wort (`bdg-success` „Gebucht", `bdg-danger` „Eskaliert", `bdg-neutral` „Läuft") · jedes Icon trägt sein Wort als `title` **und** `aria-label`, das `svg` ist `aria-hidden` · Icons Lucide `stroke-width="1.5"`, `width="14"` · `selectedId` markiert mit Fläche **und** `aria-current` · die zwei App-Punkte übersprungen | ✓ |
+| Im Browser angesehen, nicht nur gebaut | Alle sieben IDs am 2026-09-05 geöffnet; `--interactive` mit Tab und Enter durchgespielt (drei Auswahlen: `expectation · ex-1`, `event · ev-3`, `event · ev-2`), `--edge` auf 45 Einträge und vier Lückenzeilen gezählt. Keine Konsolenfehler | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Drei Listen ergeben **einen** Strang, absteigend nach Tag; gleicher Tag: Erwartung, Klärung, Ereignis | Erste Hälfte ✓: `--filled` reiht die drei Listen in einen `.v2tl` und zählt absteigend 15.09. (Erwartung) → 31.08. → 25.08. → 12.08. → 04.08. → 28.07. **Zweite Hälfte nicht nachweisbar:** in keiner der sieben Stories fallen zwei Einträge auf denselben Tag — in `Filled` sind alle sechs Tage verschieden, in `Edge` ebenso. Die Ordnung ist im Code angelegt (Erwartungen `:177`, Klärungen `:203`, Ereignisse `:230`, dazu der stabile Sort in `Timeline.tsx:124`), aber die Story, die der Nachweis nennt, zeigt sie nicht. Ein Datum doppelt zu belegen kostet eine Zeile | ✗ |
+| Genau eine Zeile je Eintrag: kein `.v2tl__who`, keine `Disclosure`, kein Dateiname, keine Zusammenfassung, kein Vorschau-Button im Strang | `--filled` und `--entry-kinds`, DOM-Probe je Eintrag: `.v2tl__who` 0×, `details`/`summary` 0×. Der Kopf einer Zeile trägt genau vier Teile: `span.v2tl__kind` (Icon), `span.v2tl__title`, `span.v2amount--sm`, `span.bdg` — Dateiname und Zusammenfassung stehen nur im Detail der Story `InUse` | ✓ |
+| Zustände nur über `StatusBadge` mit den Achsen `ereignis`, `klaerung_status`, `klaerung`, `erwartung`; kein lokales Label-Objekt außer `kindLabels` | Alle vier Achsen im Code belegt: `erwartung` (`:197`), `klaerung_status` (`:220`), `klaerung` (`:223`), `ereignis` (`:249–252`). Im DOM von `--entry-kinds` erscheinen die Registry-Wörter mitsamt ihrer Erklärung im `title`: „Buchung (Ereignis): Gebucht · In DATEV festgeschrieben — nur noch stornierbar.", „Reife: Eskaliert · Mehrfach überfällig …". Kein zweites Label-Objekt in der Datei | ✓ |
+| `clarificationState()` und `expectationMaturity()` aus `src/ludwig/` importiert, keine zweite Ableitung | Import `:17–23` aus `@/ludwig/modules/accounting-cases/domain/case`. `grep -n "answeredAt\|dueDate <" CaseTimeline.tsx` trifft nur die Deklaration `:82` und den Aufruf `:207` — kein Vergleich, kein Datumsrechnen in der Datei. Sichtbar wird es an `--filled`: dieselbe Frage ist am 04.08. „Beantwortet", die vom 25.08. „Offen" + „Blockierend" | ✓ |
+| Erwartungen mit `resolvedAt` fehlen im DOM (`Edge`) | `--edge`: die Erwartung `x-done` trägt den Gegenpart „erledigt — steht nicht im Strang"; `document.body.innerText.includes(...)` = **false**. Von zwei Erwartungen steht nur `x-open` da (`:178`, `if (e.resolvedAt) continue`) | ✓ |
+| `selectedId` → genau ein `[aria-current="true"]`; `onSelect` liefert `{ type, … }`; ohne `onSelect` kein `button` im Strang | `--interactive`: linker Strang 6 `button`, rechter (ohne `onSelect`) **0**. Tab auf den ersten Eintrag, Enter → „Gewählt: expectation · ex-1", `[aria-current="true"]` genau 1×; nach zwei weiteren Auswahlen „event · ev-3" und „event · ev-2", die Markierung wandert mit und bleibt einzeln | ✓ |
+| Ersetztes Ereignis: gedimmt, Badge „Ersetzt", kein Buchungszustand (`Edge`) | `--edge`: `div.v2tl__item.v2muted` mit „Rechnung RE-4470 · ersetzt / 1.249,90 € / **Ersetzt**" — obwohl `state: "posted"` übergeben ist, steht „Ersetzt" statt „Gebucht" (`:251`). Genau ein Eintrag der Story ist gedimmt | ✓ |
+| `payment_out` mit Minus; `amount` 0 oder `null` ohne Betragszelle (`Edge`) | `--edge`: „Zahlung an Stadtwerke Musterstadt / **-412,00 €** / Gebucht" (übergeben wird `412`, das Vorzeichen kommt aus der Art, `:241`); „Korrektur ohne Betrag" (`amount: 0`) hat **keine** Betragszelle, der Kopf trägt nur Titel und Badge | ✓ |
+| Jedes Icon hat `title` und `aria-label` mit deutschem Wort (`EntryKinds`) | `--entry-kinds`, DOM-Probe über alle elf `span.v2tl__kind`: `role="img"`, `aria-label` = `title` = „Beleg fehlt", „Zahlung offen", „Beleg", „Zahlungseingang", „Zahlungsausgang", „Umbuchung", „Korrektur", „Sollstellung", „OP-Vortrag", „Beleg", „Frage"; das `svg` darin `aria-hidden="true"`, `stroke-width="1.5"`, `width="14"` | ✓ |
+| Lückenzeile „n Tage ohne Ereignis" bei ≥ 7 Tagen (`Edge`) | `--edge`: vier `div.v2tl__gap` — „21", „121", „9", „12 Tage ohne Ereignis". In `--filled` viermal (15 / 13 / 8 / 7 Tage), die 7 zeigt die Schwelle genau an der Kante | ✓ |
+| 0023 erweitert: `selectedId`, tagesgenaues `at` ohne Uhrzeit, `kind` optional — je eine Story; bestehende 0023-Stories unverändert | `Timeline --selected`: genau ein `.v2tl__item.is-current` mit `aria-current="true"` und Fläche `rgb(241,247,251)` · `--day-only`: `<time dateTime="2026-08-28">28.08.2026</time>` ohne Uhrzeit neben `<time dateTime="2026-08-26T14:12:00.000Z">26.08.2026 16:12</time>` · `--without-kind`: `.v2tl__who` 0×, beide Einträge einzeilig. Die acht Stories aus 0023 stehen unverändert im Baum | ✓ |
+| Tut bewusst nicht: filtern, Detail inline, nach Konto hervorheben — `InUse` zeigt das Detail rechts | `--in-use`: `MasterDetail`, links die `Card` „Verlauf", rechts `DetailPane` mit dem gewählten Eintrag (Feldliste je Art: Ereignis mit Zustand/Betrag/Datei/Zusammenfassung, Frage mit Adressat/Schwere/Antwort, Erwartung mit Art/Betrag/Eskalationsstufe). Kein Filter, kein `Segmented`, keine `dimSet` im Code. Dass statt `JournalEntryEditor`/`ChoicePrompt`/`ExpectationRow` eine `FieldList` steht, ist unter „Befunde beim Bauen" begründet | ✓ |
+| Ersetzt `Timeline`/`TimelineItem`/`EventIcon` in `SachverhaltScreen.tsx`/`parts.tsx` ohne Funktionsverlust | Betrifft `ludwig/app`; in diesem Repo nicht erfüllbar | offen (App) |
+
+**Abweichung, die in die Spec gehört: der Kommentar steht nicht im Strang**
+
+`CaseTimeline.tsx:203–205` überspringt jede Klärung mit `type === "comment"`
+und begründet das im Datei-JSDoc mit einem Owner-Entscheid vom 2026-09-04
+(„13 von 166 Zeilen sind Kommentare; im Strang würden sie die Geschichte
+überschwemmen", sie bleiben in `ClarificationList` 0059). Der Entscheid ist
+jünger als die Spec und geht ihr vor — **aber die Spec sagt weiter das
+Gegenteil**: die Tabelle „Entitäten im Verlauf" führt „Klärung — Kommentar …
+**ja, neu**", und „Ausprägungen" gibt ihm eine eigene Zeile mit dem Icon
+`MessageSquare`. Beides ist nachzuziehen; eine Abnahme ändert diese
+Abschnitte nicht.
+
+Im Bestand hinterlässt das drei Stellen, die etwas anderes behaupten, als sie
+zeigen — und die gehören dem Code, nicht der Spec:
+
+- `CaseTimeline.stories.tsx:107–109` (`Filled`) verspricht „eine beantwortete
+  und eine offene blockierende Frage, **ein Kommentar** und die offene
+  Belegerwartung"; gerendert werden sechs Einträge ohne den Kommentar.
+- `:144–145` (`EntryKinds`) verspricht „Frage **und Kommentar**"; `k10`
+  („Neuer Vertrag seit Juli.") steht nicht im DOM.
+- `:243` (`InUse`) schreibt in den `CardHead` „**7 Einträge**"; gezählt werden
+  im Browser **sechs** `.v2tl__item`. Die Zahl war vor dem Entscheid richtig.
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Die Erwartung steht oben, wo „was fehlt" hingehört.** `--filled` beginnt
+  mit dem 15.09. (Fälligkeit, Zukunft) — Offene Frage 1 ist so gebaut, wie
+  sie ohne Antwort vorgesehen war.
+- **`stateNote` hängt am Badge, nicht in der Zeile.** `--entry-kinds`, Eintrag
+  „Offener Posten (DATEV)": der `title` des umschließenden `span` trägt
+  „Vortrag aus dem Vorjahr, in DATEV bereits gebucht." — die Zeile bleibt
+  vierteilig.
+- **Der Rand hält.** `--edge` rendert 45 Einträge (44 Ereignisse + 1 offene
+  Erwartung) ohne Konsolenfehler; der 89-Zeichen-Titel bricht um, Betrag und
+  Badge bleiben einzeilig.
+- **Der lange Titel der Story `Edge` ist kürzer als angekündigt.** Die Spec
+  nennt 85 Zeichen als p90 der Klärungen; der lange Titel in `Edge` hängt am
+  Ereignis und hat 89 Zeichen — passt, ist aber an einer anderen Entität
+  gezeigt, als die Datenpunkte-Tabelle meint.
+
+Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-05
+· Status zurück auf `in Arbeit`.
+
+**Offene Punkte**
+
+1. **Kein Nachweis für die Tagesordnung.** `Filled` (oder `Edge`) braucht zwei
+   Einträge am selben Tag, damit „Erwartung vor Klärung vor Ereignis"
+   überhaupt sichtbar wird.
+2. **Spec und Code widersprechen sich beim Kommentar.** Die Abschnitte
+   „Entitäten im Verlauf" und „Ausprägungen" müssen dem Owner-Entscheid vom
+   2026-09-04 folgen (Kommentar → `ClarificationList` 0059) — durch den
+   Spec-Autor, nicht durch die Abnahme.
+3. **Drei Story-Texte behaupten den Kommentar weiter**
+   (`CaseTimeline.stories.tsx:107`, `:144`) und `InUse` zählt „7 Einträge"
+   statt sechs (`:243`).

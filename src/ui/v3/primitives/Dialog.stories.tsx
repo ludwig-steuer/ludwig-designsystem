@@ -89,7 +89,7 @@ export const Large: Story = {
   ),
 };
 
-/** Geschlossen — der Normalzustand: nothing liegt über der Seite. */
+/** Geschlossen — der Normalzustand: nichts liegt über der Seite. */
 export const Closed: Story = {
   render: () => (
     <Dialog open={false} onClose={() => {}} title="Unsichtbar">

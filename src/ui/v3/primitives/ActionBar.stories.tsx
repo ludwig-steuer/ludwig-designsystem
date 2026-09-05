@@ -18,7 +18,7 @@ export const FullyStaffed: Story = {
   ),
 };
 
-/** Zustand ohne Handlung: nur der Hinweis, warum gerade nothing zu tun ist. */
+/** Zustand ohne Handlung: nur der Hinweis, warum gerade nichts zu tun ist. */
 export const InfoOnly: Story = {
   render: () => <ActionBar info="Der Agent arbeitet — Aktionen sind so lange gesperrt." />,
 };

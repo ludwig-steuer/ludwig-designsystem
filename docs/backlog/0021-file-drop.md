@@ -73,6 +73,34 @@ Titel `v3/Primitives/Formular/FileDrop`. Abgeleitet nach §6: 4 Zustände
 
 Nicht anwendbar: `LeerNachFilter` — es gibt keinen Filter.
 
+## Abnahmekriterien
+
+Fest (gilt immer):
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [ ] Code englisch; `@when`/`@instead` an jedem Export
+- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+
+Variabel (aus dieser Spec):
+
+- [ ] Die Zone ist per Tastatur erreichbar und öffnet mit Enter den Dateidialog (Story `Empty`, Regel V11)
+- [ ] Beim Überziehen ändert sich nur der Hintergrund, nichts wächst (Story `Empty`, Regel V12)
+- [ ] Abgelehnte Dateien nennen den Grund, die übrigen kommen trotzdem an (Story `Rejected`)
+- [ ] Die Komponente lädt selbst nichts hoch (Blick in den Code: kein `fetch`)
+- [ ] Ersetzt die Drop-Zone in `InvoiceUploader.tsx` ohne Funktionsverlust
+
+
+## Offene Fragen
+
+1. Soll die Komponente eine Vorschau zeigen? *Ohne Antwort: nein — Name,
+   Größe, Zustand reichen; die Belegvorschau ist eine Entitäts-Form.*
+2. Wer entfernt eine Datei, die schon hochgeladen ist? *Ohne Antwort: der
+   Aufrufer über `onRemove`; die Komponente kennt keinen Server.*
+
 ## Abnahme
 
 **Zweite Abnahme, 2026-09-05** (fremder Prüfer, nicht der Erbauer). Der erste

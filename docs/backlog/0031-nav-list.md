@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, eine gegliederte Navigationsliste ist fachfrei |
 | Quelle | Soll-Katalog §11.7 „Sidebar mit Hauptnavigation (Punkt mit Zähler)" · Anfrage vom 2026-09-03 |
@@ -131,7 +131,9 @@ Variabel (aus dieser Spec):
 
 Zweite Abnahme am 2026-09-05 (fremder Agent, gegen Spec und Code). Sie prüft
 denselben Katalog wie die erste vom 2026-09-03 und zusätzlich, ob deren drei
-offene Punkte behoben sind.
+offene Punkte behoben sind. Sie ging in zwei Durchgängen: der erste fand einen
+Mangel am eingeklappten Zähler, der zweite am selben Tag nahm die Nachbesserung
+ab. Die Zeile dazu trägt beide Stände.
 
 **Story-Deckung.** Vier Stories in der Spec, vier Exporte in
 `NavList.stories.tsx` (`Filled`, `Collapsed`, `Edges`, `InShell`), vier IDs in
@@ -153,7 +155,7 @@ in allen. `Leer`, `Laedt`, `Fehler` sind begründet ausgeschlossen.
 | Kein Import aus `next/*` | `NavList.tsx:1–2` importiert genau zwei Dinge: `type ReactNode` aus `react` und `./Link`; `Link` ist ein schlichtes `<a>`. Kein `usePathname`, kein `useRouter`, kein `next/link` — der Pfad kommt als Prop | ✓ |
 | Auf einer Unterseite leuchtet der Präfix-Eintrag | `--filled` mit `activePath="/clients/musterbau/2026/cases/2026-0142"`: aktiv ist genau ein Eintrag, „Sachverhalte" (`/clients/musterbau/2026/cases`). „Übersicht" (`/clients/musterbau/2026`) ist ebenfalls Präfix und leuchtet **nicht** — der längste gewinnt, auch über Abschnitte hinweg (offene Frage 1) | ✓ |
 | Der aktive Eintrag trägt `aria-current="page"` und eine Fläche | `--filled`: `aria-current="page"` genau 1×; Hintergrund `rgba(255,255,255,0.10)` gegen `rgba(0,0,0,0)` der übrigen, Schrift `rgb(255,255,255)` gegen `rgb(197,210,223)`, dazu ein 2 px breiter Balken `rgb(91,164,209)` als `::before`. Fläche und Marke, nicht Farbe allein (V7) | ✓ |
-| Eingeklappt steht die Beschriftung im `title`, nichts verschwindet spurlos | **Halb behoben.** Die Beschriftung: `--collapsed`, DOM-Probe — alle **zwölf** Einträge tragen ihren `title`, `future` inbegriffen („Finanz-Statistik — bald verfügbar", `NavList.tsx:125`); `.label` und `.sb__navlabel` sind `display:none`, das Icon bleibt. **Der Zähler nicht:** `.is-collapsed .sb__navitem .count { display: none }` (`app-chrome.css:119–120`) verbirgt ihn samt seinem `title`, und der `title` des Eintrags ist nur `item.label`. Im Screenshot der eingeklappten Leiste steht neben „Posteingang" keine 12 und neben „Sachverhalte" kein Alarm — „3 offen" ist eingeklappt auf keinem Weg mehr zu erreichen. Damit verschwindet etwas spurlos | ✗ |
+| Eingeklappt steht die Beschriftung im `title`, nichts verschwindet spurlos | **Behoben, zweiter Durchgang.** `--collapsed`, DOM-Probe nach der Nachbesserung (`NavList.tsx:98–104`, Commit `92934c0`): alle **zwölf** Einträge tragen einen `title`, und die drei mit Zähler tragen die Zahl mit — „Posteingang — 12 offen“, „Sachverhalte — 3 offen“, „Klärfälle — 2 offen“; der `future`-Eintrag „Finanz-Statistik — bald verfügbar“. Dass `.is-collapsed .sb__navitem .count { display: none }` (`app-chrome.css:119–120`) die Zahl selbst verbirgt, ist damit folgenlos: ihr Wort hängt jetzt am Eintrag, nicht am verborgenen Element. **Gegenprobe aufgeklappt:** in `--filled` trägt **kein einziger** der elf `<a>` überhaupt ein `title`-Attribut (`hasAttribute('title')` = false, nicht bloß leer) — dort steht der Zähler sichtbar daneben (`display: block`, eigenes `title` „12 offen“ / „3 offen“ / „2 offen“), ein zweiter Tooltip wäre doppelt. Gleiches Bild in `--edges`. Der `future`-Eintrag sagt aufgeklappt nur „bald verfügbar“. *Erster Durchgang, zum Vergleich:* der `title` war nur `item.label`, „3 offen“ war eingeklappt auf keinem Weg erreichbar — ✗ | ✓ |
 | `future` ist kein Link und sagt warum | `--filled` und `--edges`: `<span class="sb__navitem is-future" aria-disabled="true" title="bald verfügbar">`, kein `href`, `tabIndex` −1, `opacity 0.45`, `cursor: not-allowed`, kein Hover. Im DOM von `--filled` elf `<a>` und ein `<span>` | ✓ |
 | Ein `alarm`-Zähler trägt zusätzlich ein Wort (V7) | `--filled`, „Sachverhalte": `<span class="count is-alarm" title="3 offen">3</span>` — Tonstufe `rgba(193,92,76,0.28)` **und** das Wort. Die ruhigen Zähler „12" und „2" tragen dasselbe `title`-Muster auf `rgba(255,255,255,0.08)`; die Zahl ruft nicht durch Farbe allein. (Gilt für den ausgeklappten Zustand — eingeklappt siehe die Zeile darüber) | ✓ |
 | Leere Abschnitte werden nicht gerendert | `NavList.tsx:71` gibt bei `items.length === 0` `null` zurück, die Abschnitts-Beschriftung fällt mit. Keine Story zeigt den Fall — im Code nachvollziehbar, unbelegt | ✓ |
@@ -162,27 +164,25 @@ in allen. `Leer`, `Laedt`, `Fehler` sind begründet ausgeschlossen.
 | Rand: lange Beschriftung, zweistelliger Zähler | `--edges`: „Wiederkehrende Buchungen und Regelwerk" bricht auf drei Zeilen (79 px hoch), der dreistellige Zähler 128 bleibt daneben; `scrollWidth == clientWidth` (240 == 240) — nichts läuft über, nichts wird abgeschnitten | ✓ |
 | Ersetzt das Navigations-Rendering in `Sidebar.tsx` (238 Z.) | Die Ablösung liegt in `ludwig/app`; §11.7 steht auf „v2 (0031); die Gliederung bleibt in der App" | offen (App) |
 
-**Zurück auf `in Arbeit`.** Zwei der drei offenen Punkte vom 2026-09-03 sind
-erledigt (Hex-Wert, Story `InShell`), der dritte nur zur Hälfte. Es bleibt
-**ein** Mangel:
+**Beide Durchgänge zusammengefasst.** Alle drei offenen Punkte vom 2026-09-03
+sind erledigt: der rohe Hex-Wert `#14273D` in der Story (jetzt
+`className="app__sidebar"` mit dem echten Verlauf), die fehlende Story
+`InShell`, und — nach der Nachbesserung vom 2026-09-05 — der eingeklappte
+Zähler. `pnpm typecheck` nach der Nachbesserung erneut grün (Exit 0).
 
-- **Eingeklappt verliert der Zähler jede Spur.** Die Zahl selbst darf
-  verschwinden — 64 px sind schmal —, ihr Wort darf es nicht. Heute trägt
-  `NavList.tsx:101` als `title` nur `item.label`; der `title` des Zählers
-  („3 offen") sitzt an einem `display:none`-Element und ist damit weg.
-  Derselbe Handgriff wie beim `future`-Eintrag löst es: eingeklappt den
-  Zähler an den `title` des Eintrags hängen, in der `future`-Zweigstelle
-  sinngemäß dasselbe.
+Zwei Beobachtungen ohne eigenen Punkt, für den nächsten, der die Datei anfasst:
 
-  ```ts
-  const title = collapsed
-    ? item.count === undefined
-      ? item.label
-      : `${item.label} · ${item.count} offen`
-    : undefined;
-  ```
+- Ein `future`-Eintrag **mit** Zähler ergäbe eingeklappt „… — 3 offen — bald
+  verfügbar" (`NavList.tsx:125`, dieselbe `waiting`-Größe). Der Fall ist im
+  Code richtig gelöst, aber von keiner Story gedeckt — in `SECTIONS` trägt der
+  `future`-Eintrag keinen `count`. Kein Mangel: die Spec verlangt die
+  Kombination nicht.
+- Die Abschnitts-Beschriftungen der Leiste stehen in Versalien
+  (`.sb__navlabel`, `app-chrome.css:83`) — im Screenshot „ÜBERSICHT",
+  „BUCHUNG". Verstoß gegen T3/A2, aber nicht Sache dieser Aufgabe: die
+  Klasse ist Bestand, den die Spec ausdrücklich übernimmt („Setzt auf: die
+  vorhandenen `.sb__nav*`-Klassen"). Läuft als Befund unter 0089, das seit
+  dem 2026-09-05 den vollen Umfang trägt (18 Stellen in `v3.css`, 9 in
+  `app-chrome.css`).
 
-  Ohne das ist die eingeklappte Leiste eine Reihe stummer Icons, und der
-  Alarm „3 offen" steht nirgends mehr — genau der Fall, den V14 meint.
-
-Abgenommen von / am: — (nicht abgenommen) · Geprüft von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: der eingeklappte Zähler (oben). Alles andere ✓ oder „offen (App)".
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: nur „offen (App)" — die Ablösung des Navigations-Renderings in `Sidebar.tsx` gehört nach `ludwig/app`.

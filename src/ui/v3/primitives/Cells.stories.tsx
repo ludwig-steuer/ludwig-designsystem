@@ -77,7 +77,7 @@ export const Empty: Story = {
   ),
 };
 
-/** Leer nach Filter: der Unterschied zu „nothing da" muss lesbar sein. */
+/** Leer nach Filter: der Unterschied zu „nichts da" muss lesbar sein. */
 export const EmptyAfterFilter: Story = {
   render: () => (
     <Frame sub="gefiltert nach „überfällig“">

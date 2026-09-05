@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` — Gruppe Dialog |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „etwas Bestehendes neben der Liste ansehen, ohne sie zu verlassen" ist fachfrei |
 | Quelle | Anfrage Owner 2026-09-03 („dann brauchen wir vl. erstmal einen Drawer … im Ludwig-Projekt haben wir bereits einen, den könnten wir übernehmen") · `docs/v3-backlog.md` („Drawer/UrlDrawer-Familie, 29 Importstellen") · Vorlage: `app/apps/web/src/ui/components/primitives/Drawer.tsx` |
@@ -187,8 +187,74 @@ Alle drei ohne Antwort geblieben und nach dem jeweiligen Default gebaut:
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Abnahme am 2026-09-05 (zweiter Agent, gegen Spec und Code). Alle sechs Stories
+auf `localhost:6107` geöffnet und bedient: geöffnet, mit Escape, Kreuz und
+Scrim geschlossen, gescrollt, Breiten gemessen.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Story-Deckung.** Sechs Stories in der Spec, sechs Exporte in
+`Drawer.stories.tsx`, sechs IDs in `index.json` (`--open`, `--sizes`,
+`--with-footer`, `--footer-from-body`, `--long-content`, `--in-use`) — die
+Ableitung (1 Callback-Rundlauf + 1 Enum-Prop + der Rest je Prop) geht auf und
+bleibt unter der Obergrenze 10. Jede Prop hat ihre Story: `open`/`onClose`
+(`Open`) · `title` und `meta` (`Open`) · `children` (`LongContent`) · `footer`
+(`WithFooter`, mit Gegenprobe ohne sie) · `size` (`Sizes`, alle drei Werte) ·
+`ariaLabel` (`InUse`, wo `title` kein String ist). `DrawerFooter` hat mit
+`FooterFromBody` seine eigene. `Leer`, `LaedtGerade` und `Fehler` sind
+begründet ausgeschlossen — die Hülle hat keine Daten.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `tsc --noEmit` ohne Ausgabe, Exit 0 (Anfang und Ende der Abnahme). `pnpm build` **nicht** neu gelaufen — parallele Abnahmen schreiben nach `storybook-static`; der Lauf für diesen Stand war grün: „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Drawer.tsx` mit `Drawer` und `DrawerFooter` einer Familie, `Drawer.stories.tsx` daneben; Titel `v3/Primitives/Dialog/Drawer` deckt sich mit der Barrel-Gruppe (`src/ui/v3/index.ts:111` `/* Dialog */`, Export `:113`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` an beiden Exporten ✓ (`Drawer` `:56–59`, `DrawerFooter` `:146–149`), beide englisch. **Der Rest der Datei ist es nicht:** das Datei-JSDoc `:15–26` („Der Slide-over von rechts … die eine Drawer-Hülle des Sets") und fünf weitere Kommentare stehen auf Deutsch — `:28` („Breiten-Stufen statt ad-hoc-CSS je Aufrufer"), `:33` („Escape, Klick aufs Scrim, Kreuz — alle drei Wege melden dasselbe"), `:53` („Wie lange der Knoten nach dem Schließen … steht"), `:72` („Portal-Ziel für `<DrawerFooter>`"), `:79–80` („Der Fokus muss in den Drawer …"). `CLAUDE.md` verlangt Englisch für Kommentare und JSDoc; die Datei ist am 2026-09-03 neu entstanden, die Ausnahme „bestehende Bezeichner nicht in Masse umbenennen" greift nicht. Daneben stehen in derselben Datei englische Kommentare (`:36`, `:39–43`, `:45`, `:47`) — es ist ein Mischbestand, kein Stil | ✗ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}' Drawer.tsx` = 0, `grep -cE '[0-9]+px'` = 0 (`EXIT_MS = 300` ist eine Zeitkonstante, kein Maß). Keine Map, kein Status — die Hülle kennt keine Daten. `size={16}` am Schließen-Icon ist ein Sprossenwert der Icon-Leiter (A8), wie bei `Dialog` | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Text links, Beträge rechts (`InUse`: `AmountCell` in der letzten Spalte), nichts zentriert · keine Farbe ohne Wort — der Drawer färbt nichts · `aria-modal="true"` und `role="dialog"` am Panel, `aria-label` aus dem Titel oder `ariaLabel` · Bewegung über `--duration-slow`/`--ease-standard`, nicht hart · Schließen-Kreuz mit `aria-label="Schließen"` — kein Icon ohne Wort · die zwei App-Punkte übersprungen. **Reißt beim Punkt „Fokusring/Fokusführung" (V10/V11)** — siehe die variable Tabelle | ✗ |
+| Im Browser angesehen, nicht nur gebaut | Alle sechs IDs am 2026-09-05 geöffnet und bedient; Breiten, Scrollhöhen und `document.activeElement` gemessen. Keine Konsolenfehler | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `size` liefert die drei Breiten aus `--drawer-sm/md/lg`, Default `md` (`Sizes`) | `--sizes` bei 1340 px Fenster: `sm` → 456 px (`clamp(340px, 34vw, 560px)` = 34 vw), `md` → 670 px (50 vw), `lg` → 1100 px (`min(1100px, 94vw)`). Die Klasse wandert mit (`v2drawer--sm/md/lg`), die Werte stehen in `tokens.css:217–219`. Default: `--open` und `--footer-from-body` setzen `size` nicht und stehen auf `v2drawer--md` | ✓ |
+| Alle drei Schließwege melden `onClose`: Kreuz, `Escape`, Klick aufs Scrim (`Open`) | `--open`, dreimal geöffnet und je einmal anders geschlossen: `Escape` → Knoten weg nach ~300 ms · Klick auf `.v2drawer__scrim` → zu · Klick auf `.v2drawer__h button` → zu. Alle drei laufen im Code auf dasselbe `onClose` (`:99`, `:111`, `:130`) | ✓ |
+| Fokus steht nach dem Öffnen im Drawer und kehrt beim Schließen auf den Auslöser zurück (`Open`) — **Zugewinn gegenüber der Vorlage** | **Die erste Hälfte fehlt.** `--open`, `document.activeElement` nach dem Klick auf „Kontenblatt ansehen", gemessen bei +20 / +80 / +200 / +600 / +1500 ms: jedes Mal `button.v2btn.v2btn--secondary` („Kontenblatt ansehen"), nie das Panel. Das Panel wäre erreichbar (`tabIndex=-1`; ein `aside.focus()` aus der Seite heraus setzt den Fokus sofort) — der Aufruf läuft nur zu früh: `panel.current?.focus()` steht im `requestAnimationFrame` von `:83–86`, zu diesem Zeitpunkt hat `setRender(true)` das `<aside>` noch nicht gemountet, `panel.current` ist `null`. Die zweite Hälfte stimmt nur deshalb trivial: der Fokus kehrt auf den Auslöser zurück, weil er ihn nie verlassen hat. Damit tabbt die Tastatur weiter durch die Seite hinter dem Scrim (V10/V11) — genau der Zugewinn, den die Spec als Grund für den Umzug nennt, ist nicht da | ✗ |
+| Beim Schließen gleitet der Drawer hinaus, er verschwindet nicht (`Open`) | `--open`, direkt nach `Escape`: das `aside` steht noch im Baum, `transform: matrix(1,0,0,1,508.316,0)` — es ist mitten in der Bewegung nach rechts, die `is-open`-Klasse ist weg. 400 ms später ist der Knoten fort (`EXIT_MS = 300`, `:54`) | ✓ |
+| `footer` und `DrawerFooter` belegen dieselbe Leiste; ohne beides ist keine Leiste sichtbar | `--with-footer`, „Mit Leiste": `.v2drawer__foot` `display: flex` mit „Abbrechen" und „Zuordnen". „Ohne Leiste": dasselbe Element `display: none` bei leerem `innerHTML` (`v3.css:851` `:empty`). `--footer-from-body`: die Knöpfe stehen im selben `.v2drawer__foot`, obwohl sie im Body gerendert werden — und sie teilen dessen Zustand: „Speichern" ist `disabled`, bis im `Textarea` etwas steht, danach nicht mehr | ✓ |
+| Body scrollt, Kopf und Fuß stehen (`LongContent`) | `--long-content`: `.v2drawer__b` `overflow-y: auto`, `scrollHeight` 1501 bei `clientHeight` 667. Nach `scrollTop = 800`: Kopf weiter bei `top 0`, Fußleiste weiter bei `bottom 800` (= Fensterhöhe) — beide unbewegt | ✓ |
+| `.v2drawer*` steht in `v3.css` und enthält kein Hex und kein px | Block `v3.css:790–851`: 13 Regeln, alle Farben, Abstände, Schriftgrößen, Rahmen und Zeiten über Tokens (`--color-scrim`, `--color-surface`, `--shadow-drawer`, `--space-*`, `--fs-ui-*`, `--border-1`, `--duration-*`). Kein `#`, kein `px` — `translateX(100%)` ist relativ. (Die Maße selbst stehen als `clamp`/`min` in `tokens.css`, wo sie hingehören) | ✓ |
+| Das Schließen-Kreuz ist `IconButton`, kein eigener Knopf | `Drawer.tsx:127–131` rendert `<IconButton label="Schließen" icon={<ActionIcon action="close" …>} />`; im DOM `button.v2ibtn.v2ibtn--md` mit `aria-label="Schließen"` — dieselbe Klasse wie überall sonst, kein `.v2dlg__close`-Eigenbau | ✓ |
+| `width` existiert nicht; die Vorlage hatte sie mit „nicht benutzen" markiert | `grep -n "width" src/ui/v3/primitives/Drawer.tsx` findet keine Prop; `DrawerProps` (`:31–49`) führt acht Felder, `width` ist keins davon | ✓ |
+| `@instead` schickt weiter: Entscheidung → `Dialog`, Seitenaufbau → `MasterDetail`, ein Satz → `Popover`/`HoverCard` | `Drawer.tsx:58` nennt alle drei wörtlich in dieser Reihenfolge | ✓ |
+| Ersetzt `Drawer`/`DrawerFooter` in `ui/components/primitives/Drawer.tsx` ohne Funktionsverlust | Betrifft `ludwig/app` (29 Aufrufstellen, Wächter-Test `ui/drawers/__tests__/drawer-catalog.test.ts`); in diesem Repo nicht erfüllbar | offen (App) |
+| `UrlDrawer` baut in der App weiter darauf auf, unverändert in seiner Schnittstelle | Betrifft `ludwig/app` | offen (App) |
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **`InUse` hält, was 0013 braucht.** `size="lg"` (1100 px), `title` als
+  Fragment mit `span.lw-numeric` und deshalb `ariaLabel="Kontenblatt 6815
+  Bürobedarf"` am Panel, Saldo als `meta` im Kopf, fünf Buchungszeilen in
+  einer `Table` mit vier Spalten und Beträgen rechts.
+- **Der Drawer stapelt sich nicht selbst.** In `--sizes` schaltet ein zweiter
+  Knopf nur `size` um, statt einen zweiten Drawer zu öffnen — die Story hält
+  sich an „Stapeln kann sie bewusst nicht".
+- **Auch die Story-Datei ist deutsch kommentiert** (`Drawer.stories.tsx:15–20`
+  und weitere). Das ist hier verbreitet und kein eigener Mangel dieser
+  Aufgabe, gehört aber zum selben Befund wie die Datei.
+
+Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-05
+· Status zurück auf `in Arbeit`.
+
+**Offene Punkte**
+
+1. **Der Fokus kommt beim Öffnen nicht in den Drawer.** `panel.current` ist im
+   `requestAnimationFrame` von `Drawer.tsx:83–86` noch `null`, weil das
+   `<aside>` erst nach `setRender(true)` gemountet wird. Der Fokus muss
+   gesetzt werden, wenn der Knoten steht (eigener Effect auf `render`/`shown`,
+   oder `panel` per Callback-Ref). Ohne das ist der versprochene Zugewinn
+   gegenüber der App-Vorlage nicht vorhanden.
+2. **Datei-JSDoc und fünf Kommentare in `Drawer.tsx` sind deutsch**
+   (`:15–26`, `:28`, `:33`, `:53`, `:72`, `:79–80`) — `CLAUDE.md` verlangt
+   Englisch, und die Datei ist neu.

@@ -124,6 +124,40 @@ Nach §6, gemeinsam für die Familie: 2 Zustände + 1 Callback je Export +
 Nicht anwendbar: `Laedt` (ein Datumsfeld lädt nicht) · `LeerNachFilter` ·
 `Fehler` (die Prüfung macht der Browser, den Ton setzt `invalid`).
 
+## Abnahmekriterien
+
+Fest (gilt immer):
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [ ] Code englisch; `@when`/`@instead` an jedem Export
+- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+
+Variabel (aus dieser Spec):
+
+- [ ] Innen steckt `<input type="date">`, kein eigener Kalender (`grep`, DOM)
+- [ ] Keine neue Abhängigkeit; `date-fns` reicht (`package.json` unverändert)
+- [ ] `onChange` gibt ISO, nie `26.08.2026` (`Interaktiv`)
+- [ ] `to` vor `from` wird getauscht, nicht abgewiesen (`Rand`)
+- [ ] Leeren gibt `null`, nicht `""` (`Leer`)
+- [ ] Schnellwahl löst genau ein `onChange` mit beiden Werten aus (`MitSchnellwahl`)
+- [ ] Kein Wirtschaftsjahr-Wissen in der Komponente (`grep`)
+- [ ] Ersetzt die Zeitraum-Felder in `FilterBar` (0003) ohne Funktionsverlust
+
+
+## Offene Fragen
+
+1. **Reicht `<input type="date">` in Safari?** *Ohne Antwort: ja. Der Kalender
+   sieht dort anders aus, die Eingabe funktioniert. Ein Nachbau brächte
+   einheitliche Optik und schlechtere Bedienbarkeit — der falsche Tausch.*
+2. **Schnellwahl auch am `DateField`?** *Ohne Antwort: nein. „Heute" spart
+   einen Klick und kostet eine Prop; wer es braucht, setzt den Wert selbst.*
+3. **Zwei Monate nebeneinander im Kalender?** *Ohne Antwort: entfällt mit dem
+   nativen Feld — und das ist der Preis, den diese Spec bewusst zahlt.*
+
 ## Abnahme
 
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |

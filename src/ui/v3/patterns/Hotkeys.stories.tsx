@@ -50,7 +50,7 @@ export const OnButton: Story = {
               Bestätigen
             </Button>
           }
-          info={n === 0 ? "Noch nothing bestätigt — Taste A oder Klick." : `${n}× bestätigt.`}
+          info={n === 0 ? "Noch nichts bestätigt — Taste A oder Klick." : `${n}× bestätigt.`}
         />
         <HotkeyLegend groups={GROUPS} />
       </div>

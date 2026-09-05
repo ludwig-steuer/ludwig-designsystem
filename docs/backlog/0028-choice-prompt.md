@@ -75,6 +75,34 @@ Titel `v3/Patterns/Prüfen/ChoicePrompt`. Abgeleitet nach §6: 4 Zustände
 Nicht anwendbar: `Leer` (eine Frage ohne Antwortoptionen ist ein Freitextfeld,
 kein Fall für dieses Pattern), `LeerNachFilter`.
 
+## Abnahmekriterien
+
+Fest (gilt immer):
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [ ] Code englisch; `@when`/`@instead` an jedem Export
+- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+
+Variabel (aus dieser Spec):
+
+- [ ] Gesperrter Knopf nennt den Grund im Text daneben (Story `Blocked`, Regel T6)
+- [ ] Strg+Enter sendet, die Taste steht am Knopf (Story `Interactive`, Regel V14)
+- [ ] Nach einem Fehler steht die Eingabe noch da (Story `Error`)
+- [ ] Ohne `freeText`-Prop gibt es kein Textfeld (Story `Filled`, Blick ins DOM)
+- [ ] Ersetzt `RaiseClarificationForm.tsx` ohne Funktionsverlust
+
+
+## Offene Fragen
+
+1. Darf man Option **und** Freitext gleichzeitig senden? *Ohne Antwort: ja —
+   die Option ist die Antwort, der Text die Begründung.*
+2. Kommen die Optionen vom Agenten? *Ohne Antwort: der Aufrufer bringt sie
+   mit; das Pattern fragt nichts ab.*
+
 ## Abnahme
 
 **Zweite Abnahme, 2026-09-05** (fremder Prüfer, nicht der Erbauer). Die beiden
