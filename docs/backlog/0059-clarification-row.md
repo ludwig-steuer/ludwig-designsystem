@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `entities/clarification/` — Gruppe Klärung |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: `audience`, `severity` und der Zustand „zurückgestellt" sind Ludwig-Fachbegriffe aus `STATUS_REGISTRY` |
 | Quelle | Entitätsprofil `docs/entitaeten/clarification.md` (2026-09-04) §Datenpunkte Rang 1–7, §Listen, §Formen · Owner-Rückfrage 2026-09-04 („read only, Vorschau, in verschiedenen Listviews — Timeline, Karte als Art To-do-Liste"; „Kommentare in der Klärungsfrage, nicht in der Timeline") |
@@ -255,6 +255,44 @@ Variabel (aus dieser Spec):
 
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
-| | | |
+| **Fest** — `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` am 2026-09-05, Exit 0. `pnpm build` bewusst nicht erneut gestartet (parallele Abnahmen im selben Repo); der Lauf für diesen Stand meldete „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/entities/clarification/Clarification.tsx` und `Clarification.stories.tsx`; `localhost:6107/index.json` führt alle neun unter `v3/Entitäten/Klärung/ClarificationRow` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | vier Exporte, vier Paare: `Clarification.tsx:88` (`ClarificationCell`), `:121` (`ClarificationRow`), `:222` (`ClarificationList`), `:305` (`toTodoItem`); Props, Typen und Kommentare englisch | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}|[0-9]+px'` über die drei Klärungs-Dateien: kein Treffer. Zustände nur über `StatusBadge` (`Clarification.tsx:74–82`). Einzige Map ist `AUDIENCE_LABEL` (`:34`) — `audience` ist keine Status-Achse (`status-registry.ts:71–73` kennt nur `klaerung`, `klaerung_status`, `klaerung_typ`), die Datei begründet das in einer Zeile | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | 9 von 9 in `index.json`: `…--gefuellt`, `--zustaende`, `--kommentar`, `--im-stapel`, `--mit-karte`, `--vorschau`, `--im-rahmen`, `--lange-frage`, `--leer`. `Laedt`, `Fehler`, `Interaktiv` im Abschnitt „Zustände" begründet | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | durchgegangen; ein Punkt reißt — V3 „Text links, Zahlen rechts" im aufklappbaren Rahmen, siehe die Zeile „Zustand rechtsbündig" | ✗ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle neun Stories unter `http://localhost:6107` in Chrome geöffnet und angesehen; keine Konsolenfehler | ✓ |
+| **Variabel** — Zustand, Schwere und Art nur aus `STATUS_REGISTRY` | Story `…--zustaende`: die Wörter „Offen · Zurückgestellt · Beantwortet · Blockierend · Kommentar" stimmen mit `status-registry.ts:673–698` überein; im Code steht kein Status-Text, nur `StatusBadge` mit Achse (`Clarification.tsx:74–82`) | ✓ |
+| `state` wird nicht in der Komponente gerechnet | `grep -n "clarificationState" Clarification.tsx` trifft nur den JSDoc-Satz (`:47`), keinen Aufruf; das VM trägt `state` (`:55`) | ✓ |
+| `showCase` stellt Nummer und Titel des Sachverhalts voran | Story `…--im-stapel`: „SV-2026-0184  Musterfirma GmbH · 1.800,00 €" steht über der Frage (`Clarification.tsx:142–155`) | ✓ |
+| `groupBy="audience"` erzeugt genau drei Gruppen Kanzlei · Mandant · Agent, leere Gruppen entfallen | Story `…--im-stapel`: Gruppenköpfe „Kanzlei 2 · Mandant 1 · Agent 1" in dieser Reihenfolge (`AUDIENCE_ORDER` `:41`); leere Gruppe wird zu `null` (`:271`) | ✓ |
+| Ohne `renderDetail` bleibt die Datei frei von `"use client"` | `head -1 Clarification.tsx` = `import type { ReactNode } from "react";`; die Direktive kommt in der Datei nicht vor (im Gegensatz zu `ClarificationCard.tsx:1` und `ClarificationEditor.tsx:1`) | ✓ |
+| `CaseTimeline` überspringt `type="comment"`, `toTodoItem` gibt `null` | Story `…--im-rahmen`: fünf Klärungen, davon eine Notiz — die `TodoList` zeigt „RÜCKFRAGEN 4", der Strang vier Einträge, die Liste darunter alle fünf inklusive Kommentar. Code: `CaseTimeline.tsx:203`, `Clarification.tsx:311` | ✓ |
+| Zurückgestellt erscheint als Wort mit Datum, nicht nur farblich | Story `…--zustaende`: „zurückgestellt bis 12.09.2026" in der Meta-Zeile, zusätzlich zum Badge „Zurückgestellt" (`Clarification.tsx:196–203`) | ✓ |
+| Der Zustand steht **rechtsbündig** und wandert nicht mit der Titellänge | **Ohne `detail` erfüllt:** Story `…--lange-frage`, beide `.v2cl__state` enden bei x = 1307, obwohl der eine Titel 216 Zeichen trägt und der andere 33 (im Browser gemessen). **Mit `detail` verletzt:** Story `…--mit-karte`, `.v2cl__state` endet bei 517 bzw. 466 bei einem `<summary>`, das bis 1323 reicht — der Chip klebt am Titel und wandert mit ihm. Ursache: `.v2disc__sum` ist Flex und legt die Zusammenfassung in ein nicht wachsendes `<span>` (`Disclosure.tsx:50`); `v3.css:2305` setzt für den Fall nur `padding-left`, nicht `flex: 1` auf `.v2cl__row`. Betroffen ist genau die Bauform, für die die Liste gedacht ist (`renderDetail` = die Karte aus 0060) | ✗ |
+| Jedes Datum trägt sein Wort | Story `…--zustaende`: offen „Gefragt vor 10 Tagen" (`format="age"`, genaue Zeit im Hover), beantwortet „Beantwortet 21.08.2026", Kommentar „Notiert vor 9 Tagen". Anmerkung: die Spec schreibt „Beantwortet **am** …", die Zeile lässt das „am" weg | ✓ |
+| Der Titel wird auf eine Zeile gekürzt und steht vollständig im `title`-Hover | Story `…--lange-frage`: `.v2cl__clamp` hat `scrollWidth > clientWidth` und ein `title`-Attribut mit 216 Zeichen (im Browser ausgelesen) | ✓ |
+| Ersetzt die Zeilen aus `ClarificationsBanner`, `Schritt2Liste` und `PortalCaseList` | in `ludwig/app` nicht angefasst; `grep -rl "@/ui/v2" apps/web/src` = 39 Dateien, unverändert | offen (App) |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: — (zurück in Arbeit) · Abnahme durch Claude (Abnahme-Agent), 2026-09-05
+
+Offene Punkte:
+
+1. **Der Zustand ist im aufgeklappten Rahmen nicht mehr rechtsbündig.** In
+   `ClarificationRow` mit `detail` (und damit in jeder `ClarificationList` mit
+   `renderDetail`) verliert `.v2cl__row` seine Breite, weil `.v2disc__sum` die
+   Zusammenfassung in ein nicht wachsendes `<span>` legt. Damit fällt die
+   Zustands-Spalte weg, die die Zeile ausdrücklich herstellen soll — nachweisbar
+   in Story `…--mit-karte`. Eine Regel im 0059-Block von `v3.css` (etwa
+   `flex: 1` auf `.v2cl__item > .v2disc .v2cl__row`) genügt; die Prüfung, ob sie
+   besser in `Disclosure` gehört, gehört zum Fix.
+2. Kleinigkeit ohne eigenen Mangel: die Meta-Zeile schreibt „Beantwortet
+   21.08.2026", die Spec „Beantwortet **am** …".
+
+Befund für 0040 (nicht hier geändert): die Mitbringsel-Zusage „0040 bekommt eine
+Zeile im Abschnitt ‚Abnahme' mit dem Verweis hierher" ist nicht eingelöst — die
+Abnahme-Tabelle von `0040-case-timeline.md` ist leer, der Status steht auf
+„Abnahme". Außerdem ist der JSDoc-Kopf von `CaseTimeline.tsx` beim Einfügen der
+Kommentar-Regel mitten in einen bestehenden Satz gelaufen (Zeile 38: „… in
+`ClarificationList` (0059). Today they stand in three places and every card
+carries five lines;").

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/clarification/` — Gruppe Klärung |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Zielgruppe (Kanzlei · Mandant · Agent) und Schwere sind Ludwig-Achsen |
 | Quelle | Entitätsprofil `docs/entitaeten/clarification.md` (2026-09-04) §Formen · Owner-Rückfrage 2026-09-04 („Klärungsfrage kann auch durch den User erstellt werden, also brauchen wir auch eine Erstellungsansicht, dort aber sehr vereinfacht, nur Textfelder, keine Sources oder sowas") |
@@ -171,6 +171,30 @@ Variabel (aus dieser Spec):
 
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
-| | | |
+| **Fest** — `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` am 2026-09-05, Exit 0. `pnpm build` bewusst nicht erneut gestartet (parallele Abnahmen im selben Repo); der Lauf für diesen Stand meldete „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/entities/clarification/ClarificationEditor.tsx` und `ClarificationEditor.stories.tsx`; `index.json` führt alle sieben unter `v3/Entitäten/Klärung/ClarificationEditor` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `ClarificationEditor.tsx:54–60` am Komponenten-Export; `ClarificationDraft` (`:40`) und alle Props englisch | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}|[0-9]+px'` über die Datei: kein Treffer. `AUDIENCE_OPTIONS` (`:33`) trägt Zielgruppen-Wörter und ihre Hinweise — `audience` ist keine Status-Achse; die Datei zeigt keinen Status an | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | 7 von 7 in `index.json`: `…--gefuellt`, `--kommentar`, `--zielgruppen`, `--ungueltig`, `--laedt`, `--fehler`, `--im-einsatz`. „Leer" ist begründet der Startzustand von `Gefuellt` | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | durchgegangen: Text links, keine Zentrierung, Fehler in Wort und Farbe (nicht nur Farbe), Fokusring sichtbar, Hauptweg per Tastatur mit sichtbarer Taste, kein Icon ohne Wort, keine Versalien außer den Feldkappen aus `v3.css` | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle sieben Stories unter `http://localhost:6107` geöffnet **und bedient**: in `…--gefuellt` Überschrift und Erläuterung getippt, „Blockierend" gewählt, mit Strg+Enter gesendet — die Karte „Was gesendet würde" zeigt `{"type":"question","title":…,"text":…,"audience":"client","severity":"required"}`. In `…--ungueltig` leer abgeschickt und 180 Zeichen getippt. In `…--im-einsatz` den Drawer mit `Esc` geschlossen. Keine Konsolenfehler | ✓ |
+| **Variabel** — genau ein Textfeld für die Frage; keine Trennung professional/client | ein `<Textarea>` (`:161`), sonst nur das Titel-`<Input>`; `grep -n "professional\|client_text"` trifft nur den erklärenden Kommentar `:44`. Der Entwurf in `…--gefuellt` trägt ein einziges `text` | ✓ |
+| `type="comment"` blendet Zielgruppe und Schwere aus | Story `…--kommentar`: weder „Wer soll antworten" noch „Gewicht" stehen im Formular; die Labels heißen „Worum geht es" und „Notiz", der Knopf „Notiz speichern" (`:175`, `:106` lässt die beiden Felder auch aus dem Entwurf) | ✓ |
+| `required` trägt den Satz „blockiert die Buchung …" neben sich | Story `…--zielgruppen` (und jede andere): unter „Blockierend" steht „Blockiert die Buchung, bis jemand antwortet." (`:196–199`) — das Wort steht nie allein | ✓ |
+| Titel über 140 Zeichen wird abgewiesen, mit Grund am Feld | Story `…--ungueltig`, zweite Karte: 180 Zeichen getippt → rot umrandetes Feld mit „Höchstens 140 Zeichen — kürzen Sie die Überschrift." und am Knopf „Die Überschrift ist zu lang." (`:87–97`). Beim leeren Abschicken erscheinen „Bitte geben Sie eine Überschrift an." und „Ohne Text weiß niemand, worum es geht." samt `aria-invalid="true"` an beiden Feldern | ✓ |
+| ⌘/Ctrl+Enter sendet, und die Taste steht auf dem Knopf | in `…--gefuellt` mit Strg+Enter ausgelöst, Entwurf erschien; `<kbd>Strg+Enter</kbd>` steht am Knopf (`:217`), der Handler nimmt `ctrlKey` **und** `metaKey` (`:115`). Anmerkung: die Beschriftung nennt nur „Strg", auch auf dem Mac | ✓ |
+| Keine Quellen-, Fakten- oder Optionsfelder vorhanden | `ClarificationDraft` (`:40–52`) kennt fünf Felder: `type`, `title`, `text`, `audience`, `severity`. In der Datei kein `sources`, `facts`, `answerOptions`, `questionType`, `deferred`, kein Datei-Upload | ✓ |
+| Ersetzt `RaiseClarificationForm` und `CaseCommentForm` ohne Funktionsverlust | in `ludwig/app` nicht angefasst; beide Formulare stehen unverändert | offen (App) |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: keine
+
+Zwei Anmerkungen ohne Mangel, für die nächste Berührung der Datei:
+
+1. Der Knopf zeigt fest „Strg+Enter"; auf dem Mac wäre „⌘+Enter" das Wort zur
+   Taste, die der Handler ohnehin annimmt. Das ist eine Frage an `Kbd`/`Button`,
+   nicht an diese Datei.
+2. Die Story-Tabelle kündigt für `Ungueltig` einen „180-Zeichen-Titel" an; die
+   Story stellt zwei leere Formulare hin und verlangt, dass man selbst tippt
+   (der Editor hält seinen Entwurf intern, eine Vorbelegung gäbe es erst mit der
+   kontrollierten Variante aus „Ausbau"). Der Untertitel der Karte sagt das;
+   geprüft wurde durch Tippen.

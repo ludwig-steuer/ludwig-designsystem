@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | — (Infrastruktur, keine Komponente) |
 | Quelle | README „Das Repo wird später als Git-Submodule in `ludwig/` eingebunden" · `app/docs/design-system.md` · Owner-Anfrage 2026-09-04 |
 | Ersetzt | in der App: `src/styles/{tokens,app-chrome,components,booking}.css` (Kopien) und `src/styles/v2.css` (bis auf 6 Klassen) |
@@ -142,8 +142,57 @@ nach der Einbettung ansteht, steht in Teil B.
 
 ## Abnahme
 
+Diese Aufgabe ist keine Komponente: abgenommen wird die **Verdrahtung** der
+beiden Repos, nicht eine Oberfläche. Die Kriterien mit Präfix „App" lassen sich
+in diesem Repo nicht ausführen; was von hier aus **lesend** am
+Arbeitsverzeichnis `../app` zu sehen war, steht als Beobachtung daneben.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| … | … | … |
+| DS: `pnpm typecheck` und `pnpm build` grün; `origin/main` zeigt auf den Commit | `pnpm typecheck` am 2026-09-05, Exit 0. `pnpm build` bewusst nicht erneut gestartet (parallele Abnahmen im selben Repo); der Lauf für diesen Stand meldete „Storybook build completed successfully". `git remote -v` → `git@github.com:ludwig-steuer/ludwig-designsystem.git`; `git rev-parse origin/main` = `8ac5e2e` = lokaler `HEAD` | ✓ |
+| DS: kein `from "@/ui/` mehr außerhalb von Stories | `grep -rn 'from "@/ui/' src \| grep -v '\.stories\.'` → leer; die beiden verbliebenen Treffer stehen in `src/showcase/AcceptanceFlow.stories.tsx:33` und `src/showcase/CaseCrud.stories.tsx:43`. Stichprobe Teil A/1: `entities/journal-entry/AiBookingNotes.tsx:17` und `JournalEntryEditor.tsx:9` importieren `StatusBadge` relativ | ✓ |
+| App: `pnpm --filter @ludwig/web typecheck` grün | in diesem Repo nicht ausführbar | offen (App) |
+| App: `pnpm --filter @ludwig/web build` grün | in diesem Repo nicht ausführbar | offen (App) |
+| App: `src/styles/{tokens,app-chrome,components,booking}.css` gelöscht, `v2.css` nur noch die 6 Rest-Klassen | nicht ausführbar; **beobachtet** in `../app`: `apps/web/src/styles/` enthält nur noch `beleg-detail`, `contract-review`, `kontoauszug`, `purpose`, `sachverhalt` und `v2.css`; `v2.css` hat 27 Zeilen und genau die sechs Klassen `abn__progress`, `abn__progress__text`, `abn__screenhead`, `…__lead`, `…__nav`, `…__row`. `globals.css` lädt `tokens`, `app-chrome`, `components`, `booking` und `v3.css` als `@ludwig/designsystem/styles/*` und `v2.css` **danach** | offen (App) |
+| App: kein `git add -A`; `git show --stat HEAD` zeigt nur die Dateien aus Teil B | nicht ausführbar; **beobachtet**: der Einbettungs-Commit ist `ca1379ce` auf `staging` und listet 17 Dateien — `.gitmodules`, `CHANGELOG.md`, `next.config.ts`, `apps/web/package.json`, `globals.css`, `KontoQuittung.tsx`, die vier gelöschten Style-Kopien, `v2.css`, `tailwind.config.ts`, `tsconfig.json`, `docs/design-system.md`, `packages/designsystem`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`. Keine fremde Datei darin | offen (App) |
+| Owner: eine v2-lastige Seite und die Abnahme-Seite im Browser angesehen | Owner-Schritt, in diesem Repo nicht durchführbar | offen (App) |
 
-Abgenommen von / am: … · Offene Punkte: …
+### Stimmen die Aussagen der Aufgabe heute noch?
+
+Ja — mit einer Einschränkung, die nicht die Aufgabe betrifft, sondern ihren
+Nachlauf. Nachgesehen am 2026-09-05:
+
+| Aussage von 0064 | Stand heute |
+|---|---|
+| Submodule unter `packages/designsystem`, Import-Name `@ludwig/designsystem` | eingelöst: `.gitmodules` trägt Pfad und Remote; `pnpm-workspace.yaml` listet `packages/designsystem`; `apps/web/package.json:25` hat `"@ludwig/designsystem": "workspace:*"` |
+| Quell-Konsum über `transpilePackages` | eingelöst: `apps/web/next.config.ts:21` |
+| `@/ludwig/*` löst in der App auf `./src/*` auf | eingelöst: zusätzlicher Pfad in `apps/web/tsconfig.json` |
+| Tailwind sieht die Klassen des Submodules | eingelöst: `content` enthält `../../packages/designsystem/src/ui/**/*.{ts,tsx}` |
+| `v3.css` ersetzt `v2.css` bis auf 6 Klassen | eingelöst, Zahl stimmt (siehe Tabelle oben) |
+| Rauchtest: ein `@/ui/v2`-Import gegen das Paket getauscht | eingelöst: `apps/web/src/modules/stapelabnahme/ui/KontoQuittung.tsx:6` importiert `Button` aus `@ludwig/designsystem` |
+| „Ab dann ist `grep -rl "@/ui/v2" apps/web/src` der Restbestand (Start: 39 Dateien)" | stimmt, und der Zähler steht unverändert bei **39** — die Ablösung hat noch nicht begonnen |
+
+**`apps/web/src/ui/v3` gibt es in der App nicht — und das ist richtig so.** Die
+Aufgabe hat genau das versprochen: die App bekommt **keine** eigene v3-Kopie,
+sie konsumiert die Quelle aus dem Submodule. Das Fehlen des Ordners ist der
+eingelöste Entscheid „Submodule, nicht Vendoring", kein offener Punkt. Was
+daraus folgt und der Text noch nicht sagt: **v3 ist in der App bisher nur
+verdrahtet, nicht benutzt** — ein einziger TypeScript-Import
+(`KontoQuittung.tsx`), sonst Stylesheets. Die 39 `@/ui/v2`-Dateien sind der
+ganze Rest.
+
+**Eine Beobachtung, die in der App nachzuziehen ist** (kein Mangel dieser
+Aufgabe, weil sie beim Anlegen so nicht existierte): der Zeiger des Submodules
+steht in `staging` auf `95061b3` („0064 zur Abnahme", 2026-09-04), während
+`main` hier bei `8ac5e2e` (2026-09-05) steht. Zusätzlich meldet
+`git submodule status` in der App ein `+` — der ausgecheckte Stand des
+Submodules (`cff1b5c`) weicht vom aufgezeichneten Zeiger ab. Alles, was seither
+im Set entstanden ist (0059–0061 eingeschlossen), erreicht die App erst, wenn
+jemand den Zeiger hebt und committet; `docs/design-system.md` beschreibt den
+Handgriff bereits. Beides ist read-only festgestellt, in der App wurde nichts
+angefasst.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: die
+vier App-Kriterien bleiben offen — sie gehören in eine Sitzung in `ludwig/app`
+(typecheck, build, Owner-Blick auf zwei Seiten). Auf der Seite dieses Repos ist
+nichts offen.

@@ -35,7 +35,9 @@ import { Timeline, type TimelineItem } from "../../patterns/Timeline";
  * open. Comments (`type = "comment"`) are skipped — they are context at the
  * case, not something that happened, and 13 of 166 rows in the data are
  * comments: in the strand they would flood the story (Owner 2026-09-04).
- * They stay visible where they belong, in `ClarificationList` (0059). Today they stand in three places and every card carries five
+ * They stay visible where they belong, in `ClarificationList` (0059).
+ *
+ * Today those three sources stand in three places and every card carries five
  * lines; here every entry is **one** line: day · kind · title · amount · state.
  * Everything else — file, summary, journal entry, answer — belongs into the
  * detail next to the strand.

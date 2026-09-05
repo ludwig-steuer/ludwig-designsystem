@@ -90,6 +90,11 @@ export function ChoicePrompt({
         <div className="v2ask__q">{question}</div>
         {context ? <div className="v2ask__ctx">{context}</div> : null}
       </div>
+      {/* Keine Gruppe ohne Gegenstand: bei reiner Freitext-Frage (60 % des
+          Bestands) stünde sonst eine leere `<fieldset>` mit der Legende
+          „Antwort" über dem Feld, das dieselbe Beschriftung trägt — zweimal
+          dasselbe Wort, und für einen Screenreader eine Gruppe ohne Inhalt. */}
+      {options.length === 0 ? null : (
       <RadioGroup
         name="choice"
         label="Antwort"
@@ -98,6 +103,7 @@ export function ChoicePrompt({
         onChange={setChoice}
         disabled={pending}
       />
+      )}
       {freeText ? (
         <Field label={freeText.required ? `${freeText.label} *` : freeText.label}>
           <Textarea
