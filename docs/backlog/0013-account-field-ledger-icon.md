@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/account/` |
 | Klassen-Test | nein — „Konto" ist ein Fachwort, die Kandidatengruppen sind Buchhaltungslogik |
 | Quelle | Anfrage Owner 2026-09-03 („der Konto-Autocomplete ist auch eine extra Komponente … mit Parameter ob es ein Icon haben soll, das Icon öffnet per Klick einen Drawer mit den Kontenbuchungen") · Nachtrag Owner 2026-09-03 („wir wollen im Normalzustand Konto-Nr und Name anzeigen, immer beides") |
@@ -245,3 +245,69 @@ Nachgemessen (Chromium headless, Story `NumberAndName`): ruhend steht
 - [ ] Nutzer-Strings und die Domänenwerte von `AccountGroup` sind unverändert deutsch
 - [ ] Zwei Kontofelder auf einer Seite zeigen mit `aria-controls` auf verschiedene Listen (Story `NumberAndName`, im DOM gemessen)
 - [ ] Anzeige und Tastaturweg unverändert (Stories `NumberAndName`, `WithLedger`)
+
+## Abnahme des Nachtrags, 2026-09-05
+
+Dritte Abnahme, fremder Prüfer; gebaut hat jemand anders, geprüft wurde gegen
+Spec und Code. Storybook auf `localhost:6107`, Chromium headless 1440 × 900
+über CDP gefahren — echte Tastendrücke (`Input.dispatchKeyEvent`), echte
+Zeichen (`Input.insertText`), gemessen im DOM. Alle sechs Stories geöffnet,
+keine Konsolenmeldung in einer davon. Die Story-IDs stehen hier lesbar; in der
+URL sind die Umlaute kodiert (`entitäten` → `entit%C3%A4ten`).
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0. `pnpm build` bewusst nicht gestartet: er schreibt nach `storybook-static`, und hier arbeiten mehrere Sitzungen parallel — dieselbe Begründung wie in den beiden Abnahmen davor | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/entities/account/AccountField.tsx` neben `AccountField.stories.tsx`; Titel `v3/Entitäten/Konto/AccountField` (`AccountField.stories.tsx:8`) — Entität + Form | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | jetzt vollständig, siehe die Nachtragstabelle unten. `@when`/`@instead` an `AccountField` (`AccountField.tsx:46–48`), ein Export | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\b\|[0-9]+px\|fontSize" AccountField.tsx` → keine Zeile. `ACCOUNT_GROUP_LABEL` benennt die fünf Herkunftsgruppen dieser Entität, keinen Status | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--with-candidates`, `--full-text-only`, `--no-match`, `--invalid`, `--with-ledger`, `--number-and-name`; Enum- und Layout-Boolean-Story im Abschnitt „Stories" begründet ausgeschlossen | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Nummer in der Ziffernschrift (`.v2kf__num`), Text links, nichts zentriert · Icon Lucide `width 14`, `stroke-width 1.5`, `aria-hidden`, das Wort steht im `aria-label` und im `title` des Knopfes · Fokusring bringt `IconButton` mit · kein Emoji. Der geerbte Befund steht unverändert da: `.v2kf__grp` (`v3.css:1237`) setzt `text-transform: uppercase`, die Gruppenköpfe lesen sich als Versalien — A2. Die Regel steht an 17 Stellen in `v3.css` und gehört als eigene Aufgabe ans Set, nicht hierher | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle sechs Stories geöffnet, Feld fokussiert, getippt, Icon getabbt und mit Enter ausgelöst (der Drawer ging auf); Konsole in allen dreien der geprüften Stories leer | ✓ |
+
+**Nachtrag (die vier Kriterien dieser Runde)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Kein deutscher Bezeichner und kein deutscher Kommentar mehr in `AccountField.tsx` | die zehn gerügten Namen sind weg: `grep -nE '(REIHENFOLGE\|treffer\|waehle\|liste\|gruppen\|passt\|außerhalb\|abgebrochen\|ruhend)' AccountField.tsx` → keine Zeile. `grep -nE '[äöüÄÖÜß]'` findet nur noch zwei Zeilen, und beide sind Nutzer-Text (`:39` „Ähnliche Belege", `:238` der Leertext). Der Kopf-Block (`:7–24`) und alle Kommentare sind englisch gelesen | ✓ |
+| Nutzer-Strings und die Domänenwerte von `AccountGroup` sind unverändert deutsch | `git show 4e505a9 -- AccountField.tsx` fasst weder `AccountGroup` (`:34`, `aehnlich`, `belegposition`) noch `ACCOUNT_GROUP_LABEL` (`:36–42`) an — die einzige Zeile mit diesen Namen im Diff ist die Umbenennung `REIHENFOLGE` → `GROUP_ORDER`. Im Browser stehen weiter „Vorschlag des Agenten", „Zuletzt bei dieser Gegenpartei", „Kontenblatt zu 6815", „Nummer oder Name" | ✓ |
+| Zwei Kontofelder auf einer Seite zeigen mit `aria-controls` auf verschiedene Listen | `--number-and-name`, drei Felder: `aria-controls` = `_r_0_`, `_r_1_`, `_r_2_` — drei Werte, drei verschieden (`new Set(...).size === 3`). Die feste `id="v2kf-liste"` ist durch `useId()` ersetzt (`AccountField.tsx:103`, benutzt `:188` und `:235`) | ✓ |
+| Anzeige und Tastaturweg unverändert | siehe die beiden Tabellen darunter — jedes Kriterium der ersten Abnahme neu gemessen, keins ist durch die Umbenennung verrutscht | ✓ |
+
+**Variabel — Anzeige (neu gemessen, weil die Umbenennung den Rumpf angefasst hat)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Ruhend steht Nummer **und** Name im Feld | `--number-and-name`, erstes Feld: `input.className` = `v2in v2kf__in v2kf__in--rest`, daneben `.v2kf__shown` mit `.v2kf__num` „6815" und `.v2kf__nm` „Bürobedarf". Die Klasse heißt jetzt `--rest` statt `--ruhend` (`v3.css:1260`), die Wirkung ist dieselbe | ✓ |
+| Beim Fokussieren steht der reine Suchtext da, markiert; Tippen ersetzt ihn | `--number-and-name`, erstes Feld fokussiert: `input.value` = „6815" (nicht „6815 Bürobedarf"), `selectionStart 0 / selectionEnd 4`, `.v2kf__shown` aus dem DOM, Liste offen. Danach „68" über `Input.insertText` getippt → `input.value` = „68"; die Nummer ist ersetzt, nicht ergänzt | ✓ |
+| Wert ohne bekannten Namen zeigt die Nummer allein | `--number-and-name`, zweites Feld (`value="4980"`, `candidates={{}}`): `.v2kf__shown` fehlt, `input.value` = „4980", kein „—". `AccountField.tsx:155–163` schlägt nur in `chosen` und `candidates` nach | ✓ |
+| `valueName` trägt den Namen über den ersten Render | `--with-ledger`, erstes Feld: `.v2kf__shown` = „6815Bürobedarf", ohne dass die Liste je offen war; zweites Feld (leer) hat keine. Gegenprobe `--number-and-name`, drittes Feld: `value="6825"`, `candidates={{}}`, `valueName` gesetzt → „6825 Reinigung und Pflege der Geschäftsräume" | ✓ |
+| `onChange` gibt den Kandidaten als zweites Argument zurück; bestehende Aufrufer bleiben übersetzbar | `AccountField.tsx:169–174` — `choose()` ruft `onChange(c.number, c)`; `:201–204` — `onBlur` ruft `onChange(query.trim())`, das zweite Argument bleibt `undefined`. Typ `(number: string, account?: AccountCandidate) => void` (`:73`), `pnpm typecheck` grün mit den einstelligen `setV` der Stories | ✓ |
+| Langer Kontenname bricht das Feld nicht auf | `--number-and-name` (Feldbreite 300 px, Name 39 Zeichen): alle drei `.v2kf__box` sind 34 px hoch, auch das mit dem langen Namen; `.v2kf__nm` kürzt mit Ellipse | ✓ |
+
+**Variabel — Kontenblatt**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Ohne `onOpenLedger` erscheint kein Icon und kein leerer Platz | `--with-candidates`: `.v2kf__ledger` nicht im DOM, `input.className` ohne `v2kf__in--ledger`, `padding-right` 10 px, Eingabefeld 380 px = volle Boxbreite | ✓ |
+| Mit `onOpenLedger` und leerem `value` ist das Icon deaktiviert, nicht versteckt | `--with-ledger`, zweites Feld (`value=""`): Knopf im DOM, Breite 24 px, `disabled = true`, `aria-label` = „Kontenblatt" | ✓ |
+| Icon per Tab erreichbar, `Enter` löst aus, `aria-label` nennt die Kontonummer | `--with-ledger`: Fokus ins erste Feld, `Escape`, `Tab` → `document.activeElement` = `button.v2ibtn.v2ibtn--sm` mit `aria-label="Kontenblatt zu 6815"`. `Enter` darauf → der Drawer geht auf: „Kontenblatt 6815 · Saldo 4.208,55 € · 31 Buchungen im Zeitraum". Beide Tastendrücke echt über CDP | ✓ |
+| `@when`-Zeile nennt den Weg zum Kontenblatt in einem Halbsatz | `AccountField.tsx:47`: „… — and, with `onOpenLedger`, the way to its account sheet." | ✓ |
+| `JournalEntryEditor` reicht sein `onOpenLedger` an die Felder durch (0015) | in der Spec selbst als **offen (App)** ausgewiesen und Gegenstand von 0015; `JournalEntryEditor.tsx` wird zudem gerade von einer anderen Sitzung bearbeitet | offen (App) |
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Das Kontenblatt-Zeichen** kommt über `ActionIcon action="ledger"` (0087); im
+  DOM steht `lucide-book-open-text`, `width 14`, `stroke-width 1.5` — dasselbe
+  Zeichen an derselben Stelle wie vorher.
+- **Die Story-Datei ist noch nicht mitgezogen.** `AccountField.stories.tsx`
+  trägt deutsche Bezeichner (`leer`/`setLeer`, `blatt`/`setBlatt`,
+  `bekannt`, `fremd`, `lang`, `:110–111`, `:161–163`). Das Kriterium des
+  Nachtrags nennt ausdrücklich `AccountField.tsx`, und die Story-Exportnamen
+  sind englisch; die Hausregel „Code nur Englisch" gilt aber auch dort. Kein
+  Mangel dieser Aufgabe — ein Satz für die nächste Sitzung, die die Datei
+  ohnehin öffnet.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05

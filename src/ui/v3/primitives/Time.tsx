@@ -1,7 +1,7 @@
 import { formatDuration, formatTime, formatTimeFull, type TimeFormat, type TimeLength } from "../format";
 
 /**
- * One point in time, five ways to say it — and a duration (0033, P24).
+ * One point in time, six ways to say it — and a duration (0033, P24).
  *
  * Nine formatters and 83 `toLocale*` calls said „when" in nine ways, most of
  * them without a time zone: two hours off, and before 02:00 a day off.
@@ -11,7 +11,9 @@ import { formatDuration, formatTime, formatTimeFull, type TimeFormat, type TimeL
 export type TimeSize = "sm" | "md";
 
 /**
- * @when    Every point in time that is shown: document date, timestamp, „how
+ * @when    Every point in time that is shown: document date, timestamp, the
+ *          written-out day (`date` with `long`), the clock alone where the day
+ *          already stands above it (`time`, a strand grouped by day), „how
  *          long ago" (`relative`, a date beyond a week), the age of something
  *          still waiting (`age`, always in days), a month on an axis.
  * @instead A span someone picks → DateRangeField. A time span that elapsed →

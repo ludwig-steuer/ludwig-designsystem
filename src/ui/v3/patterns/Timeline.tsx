@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { formatTime, formatTimeFull } from "../format";
+import { daysBetween, formatTime, formatTimeFull } from "../format";
 import { Disclosure } from "../primitives/Disclosure";
 import { Skeleton } from "../primitives/Skeleton";
 import { TextButton } from "../primitives/TextButton";
@@ -50,7 +50,6 @@ export interface TimelineItem {
 /** A date column, not a timestamp: `2026-08-26`. */
 const DAY_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 /** Below this a gap is normal work; above it, it is worth saying. */
 const GAP_DAYS = 7;
 
@@ -117,7 +116,7 @@ export function Timeline({
     const key = groupKey(e.at, groupBy);
     if (key && key !== lastGroup) {
       if (lastAt) {
-        const days = Math.floor(Math.abs(new Date(e.at).getTime() - new Date(lastAt).getTime()) / DAY_MS);
+        const days = daysBetween(lastAt, e.at);
         if (days >= gapDays) {
           rows.push(
             <div className="v2tl__gap" key={`gap-${e.id}`}>

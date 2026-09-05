@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `patterns/` |
 | Klassen-Test | ja, sobald es dort Vorgänge mit Historie gibt — „Ereignisse in der Zeit" kennt kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Verlauf` (Zeitstrahl — **heute siebenmal verschieden**), 7 Stellen · Showcase `src/showcase/CaseCrud.stories.tsx` |
@@ -359,3 +359,92 @@ Aufgaben — Befund, kein Mangel dieser Spec.
 - [ ] Story-Titel und Barrel-Kommentar nennen dieselbe Gruppe
 - [ ] `icon` und `dim` haben ihre Story (`IconsAndDimmed`)
 - [ ] Alle Story-Exportnamen sind englisch (`grep -n "^export const"`)
+
+## Abnahme des Nachtrags, 2026-09-05
+
+Dritte Abnahme, fremder Prüfer; gebaut hat jemand anders, geprüft wurde gegen
+Spec und Code. Storybook auf `localhost:6107`, Chromium headless 1440 × 900
+über CDP gefahren — echte Tastendrücke (`Input.dispatchKeyEvent`), Kanten mit
+`getBoundingClientRect()` gemessen. Alle dreizehn `Timeline`-Stories geöffnet,
+keine Konsolenmeldung in einer davon. Die Story-IDs stehen hier lesbar; in der
+URL ist der Umlaut kodiert (`prüfen` → `pr%C3%BCfen`).
+
+**Story-Deckung.** Die Spec nennt acht Stories plus die drei der Erweiterung
+(`Selected`, `DayOnly`, `WithoutKind`) = elf; `index.json` führt dreizehn — dazu
+`WithLabels` (`kindLabels`) und `IconsAndDimmed` (`icon`, `dim`, der Punkt 4
+der letzten Abnahme). Jede Prop der Schnittstelle hat ihre Story: `entries`
+(`Filled`) · `order` (`Order`) · `groupBy` (`Grouping`) · `emptyText` (`Empty`) ·
+`loading` (`Loading`) · `onOpen` (`Interactive`) · `selectedId` (`Selected`) ·
+`kindLabels` (`WithLabels`) · `icon`/`dim` (`IconsAndDimmed`) · tagesgenaues `at`
+(`DayOnly`) · `kind` optional (`WithoutKind`). Die einzige Prop ohne eigene
+Vorführung ist `gapDays` — siehe die Zeile in der Nachtragstabelle. „Leer nach
+Filter" und „Fehler" sind in der Spec begründet ausgeschlossen.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0. `pnpm build` bewusst nicht gestartet: er schreibt nach `storybook-static`, und hier arbeiten mehrere Sitzungen parallel | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/patterns/Timeline.tsx` mit `Timeline.stories.tsx` daneben. **Der Widerspruch der letzten Abnahme ist weg:** Barrel `/* Prüfen */` (`index.ts:242`), Export `:254`; Story-Titel `v3/Patterns/Prüfen/Timeline` (`Timeline.stories.tsx:9`), IDs im `index.json` lauten `v3-patterns-prüfen-timeline--…` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | ein Export, `@when`/`@instead` bei `Timeline.tsx:62–69`; Bezeichner, Kommentare und JSDoc englisch. Die Story-Exportnamen sind jetzt ebenfalls englisch — der Befund der letzten Abnahme ist behoben | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\b\|[0-9]+px\|fontSize" Timeline.tsx` → keine Zeile. `kindLabels` ist eine Prop (`:90`), kein Objekt in der Datei; Status läuft über `StateIcon` aus `patterns/Review` (`:191`). Optik in `v3.css:1917–1956`, alles über Tokens | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung — elf genannte plus `WithLabels` und `IconsAndDimmed` | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Text links, Zeit in `.v2tl__when` mit `tabular-nums` (`v3.css:1930`), nichts zentriert · Farbe nur über `StateIcon`, kein farbiger Zustand ohne Wort · `.v2tl__item.is-current` trägt Fläche **und** `aria-current="true"` (V7) · der zurückgezogene Eintrag ist gedämpft **und** sagt „zurückgezogen" im Wort (`IconsAndDimmed`) · Icons Lucide, `width 14`, `stroke-width 1.5` · `InUse` hat Rand ohne Schatten (L2) · die zwei App-Punkte nach `backlog/README.md` übersprungen. Der Punkt „ein Aufklappen darf nichts verschieben" ist jetzt an der geschärften Fassung geprüft und erfüllt | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | dreizehn IDs geöffnet; `--interactive` mit echtem Tab und Enter bedient (Fokus auf „Ist das Bewirtung oder Bürobedarf?", Enter → „Geöffnet: e4"), `--filled` aufgeklappt und die Kanten vor/nach gemessen, `--day-only` und `--without-kind` zusätzlich in drei Zeitzonen | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Unsortierte `entries` erscheinen sortiert (`Filled`) | `--filled`: übergeben in der Reihenfolge e3, e1, e4, e2 (`Timeline.stories.tsx:14–51`), im DOM stehen die Gruppen „Montag, 31. August 2026" → „Sonntag, 30. August 2026" → „Samstag, 29. August 2026" → „Mittwoch, 26. August 2026" mit den Zeiten 16:02 / 11:12 / 13:05 / 09:40. Gegenprobe `--order`: `oldest` dreht die vier Gruppen um | ✓ |
+| Kein Ereignistyp lokal definiert; `kind` ist `string` mit Registry-Prop | `kind?: string` (`Timeline.tsx:36`), kein `EventKind` und keine Arten-Liste in der Datei; `kindLabels?: Record<string, string>` (`:90`), benutzt `:171`. `--with-labels` übergibt `document_received`, `payment_in`, `clarification`, `booking_proposed` und zeigt „Beleg", „Zahlung", „Rückfrage", „Buchungsvorschlag" | ✓ |
+| Zeiten über den Hausformatierer, nicht über eigenes `Intl` | `grep -n "Intl\|toLocale" Timeline.tsx` → keine Zeile. Importiert werden `formatTime` und `formatTimeFull` aus `../format` (`:5`); die vier eigenen Formatierer sind weg. Gemessen `--filled`: Gruppenkopf „Montag, 31. August 2026", Zeitspalte „16:02", `title` „Montag, 31. August 2026 um 16:02", `dateTime="2026-08-31T14:02:00.000Z"` | ✓ |
+| Lückenzeile ab sieben Tagen, mit der Zahl der Tage (`WithGap`) | `--with-gap`: `div.v2tl__gap` „20 Tage ohne Ereignis" zwischen dem 26.08. und dem 05.08.; in `--filled` (größter Abstand drei Tage) steht keine Zeile. Der Kommentar über der Story (`Timeline.stories.tsx:152–157`) erklärt jetzt den Unterschied zwischen 20 vollen Tagen und 21 Kalendertagen — Offener Punkt 5 der letzten Abnahme behoben | ✓ |
+| Ohne `onOpen` sind Einträge nicht fokussierbar (`Filled`, Tab-Weg) | `--filled`: `document.querySelectorAll('.v2tl button, .v2tl a, .v2tl [tabindex]').length` = 0; einziges Bedienelement im Strang ist das `summary` der eingeklappten `Disclosure`. Gegenprobe `--interactive`: vier `button.v2link`, echter Tab landet auf dem ersten, Enter meldet „Geöffnet: e4" | ✓ |
+| Aufklappen lässt den Eintrag selbst und alles darüber stehen; die darunter rücken nach (`Filled`, gemessen) | `--filled`, `getBoundingClientRect().top` der vier `.v2tl__item` vor dem Klick auf „Einzelheiten": 50,5 / 138 / 264,8 / 352,3 px — danach 50,5 / 138 / 318,6 / 406,1 px. Der aufgeklappte ist der zweite: er bleibt bei 138, der über ihm bei 50,5, die beiden darunter rücken um 53,8 px nach. Genau das sagt das geschärfte Kriterium | ✓ |
+| Ersetzt `CycleTimeline` ohne Funktionsverlust | betrifft `ludwig/app` (`modules/cycles/ui/CycleTimeline.tsx`); in diesem Repo nicht erfüllbar. Der Vergleich der Abnahme vom 2026-09-03 steht unverändert: `CycleTimeline` ist eine waagerechte Kartenreihe der Buchungsjahre mit `href` je Karte — der Umzug ist eine eigene Aufgabe | offen (App) |
+
+**Nachtrag (die sechs Kriterien dieser Runde)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Kein `Intl.DateTimeFormat` mehr in `Timeline.tsx` | `grep -n "Intl" src/ui/v3/patterns/Timeline.tsx` → keine Zeile | ✓ |
+| Gruppenkopf, Zeitspalte und `title` kommen aus `format.ts` | `Timeline.tsx:59` — `groupKey` ruft `formatTime(iso, "date", "long")` bzw. `formatTime(iso, "month")`; `:186` — die Zeitspalte `formatTime(item.at, "time")`; `:180` — der `title` `formatTimeFull(item.at)`. Gemessen `--filled`: „Montag, 31. August 2026" · „16:02" · „Montag, 31. August 2026 um 16:02". `--grouping` zeigt den Monatskopf „August 2026" und ohne Gruppe die volle Zeile „31.08.2026 16:02" | ✓ |
+| Die zwei neuen Formen in `format.ts` sind richtig benannt, dokumentiert und keine Dublette | `TimeFormat` heißt jetzt `"date" \| "dateTime" \| "time" \| "relative" \| "age" \| "month"` (`format.ts:65`). `DATE_LONG` (`:76`, `dateStyle: "full"`) ist der ausgeschriebene Tag und unterscheidet sich von `DT_LONG` (`:94`) durch die fehlende Uhr; `CLOCK` (`:78`, `hour`/`minute`) hatte im Haus keine Entsprechung. Beide tragen einen eigenen Doc-Kommentar, und der JSDoc von `formatTime` (`:139–144`) zählt jetzt sechs Wege statt fünf. Beide erben `timeZone: TZ` und `toDate` | ✓ |
+| `gapDays` verschiebt die Schwelle, Vorgabe sieben (Story `WithGap`) | Die Vorgabe ist gemessen: `--with-gap` zeigt bei 20 Tagen eine Zeile, `--filled` bei höchstens drei Tagen keine; die Prop steht mit `gapDays = GAP_DAYS` (`Timeline.tsx:76`, `GAP_DAYS = 7` `:55`) und wirkt an genau einer Stelle, `days >= gapDays` (`:121`). **Die Verschiebung selbst ist nur im Code belegt** — `grep -rn "gapDays" src` findet außerhalb von `Timeline.tsx` allein den Kommentar der Story, keine Übergabe eines anderen Werts. Das ist der einzige Nachweis dieser Abnahme, der nicht aus dem Browser kommt; als Befund unten notiert | ✓ |
+| Story-Titel und Barrel-Kommentar nennen dieselbe Gruppe | Barrel `/* Prüfen */` (`index.ts:242`) über dem Export (`:254`, zwischen `ComparisonTable` und `ChoicePrompt`); Story-Titel `v3/Patterns/Prüfen/Timeline` | ✓ |
+| `icon` und `dim` haben ihre Story (`IconsAndDimmed`) | `--icons-and-dimmed`, drei Einträge: alle drei tragen ein Lucide-Zeichen im Kopf (`lucide-book-open` zweimal, `lucide-receipt` einmal, je `width 14`, `stroke-width 1.5`), der mittlere hat `class="v2tl__item v2muted"` und die Textfarbe `rgb(92, 92, 92)` gegen `rgb(45, 45, 45)` der beiden anderen — gedämpft, aber lesbar. Sein Wort steht daneben: „Buchungsvorschlag · zurückgezogen · Agent" (V7) | ✓ |
+| Alle Story-Exportnamen sind englisch | `grep -n "^export const" Timeline.stories.tsx`: `Filled`, `WithLabels`, `Empty`, `Loading`, `Order`, `Grouping`, `Interactive`, `WithGap`, `InUse`, `Selected`, `DayOnly`, `WithoutKind`, `IconsAndDimmed` — dreizehn, alle englisch | ✓ |
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Kein Zeitzonen-Rückschritt.** Der Verdacht war, dass ein `at` der Form
+  `YYYY-MM-DD` durch die neue Formatierung auf den Vortag rutscht. Gegenprobe
+  in drei Zonen (`TZ=Europe/Berlin`, `Pacific/Midway` −11, `Pacific/Kiritimati`
+  +14), Stories `--day-only` und `--without-kind`: „2026-08-28" steht in allen
+  drei Läufen als „28.08.2026", der Gruppenkopf als „Freitag, 28. August 2026",
+  `dateTime` bleibt „2026-08-28". `toDate` (`format.ts:115–122`) verankert den
+  Kalendertag auf 12:00 UTC, jeder Formatierer trägt `timeZone: "Europe/Berlin"`.
+- **Der `title` erfindet keine Uhr.** Für einen Kalendertag gibt
+  `formatTimeFull` „28.08.2026" statt „… um 00:00" (`format.ts:184`).
+- **Die Lückenrechnung erbt die Kalendertag-Regel nicht.** `Timeline.tsx:120`
+  rechnet mit `new Date(e.at)`, nicht mit dem `toDate` aus `format.ts`; ein
+  Kalendertag landet dort auf UTC-Mitternacht statt auf 12:00 UTC. In den
+  Stories fällt es nicht auf (die Lücken liegen zwischen Zeitstempeln), aber
+  wo Kalendertage und Zeitstempel gemischt sind, kann die Zahl der Tage um
+  eins danebenliegen und damit an der Schwelle kippen. Kleine, eigene Aufgabe.
+- **`Time.tsx` ist beim Erweitern nicht mitgezogen worden.** Der Kopf der
+  Datei sagt weiter „One point in time, five ways to say it" (`Time.tsx:4`)
+  und die `@when`-Zeile (`:14–18`) nennt die Uhr-allein-Form nicht — obwohl
+  `Time` genau den `TimeFormat` durchreicht, der jetzt sechs Werte hat. Befund
+  für 0033, kein Mangel dieser Aufgabe.
+- **`gapDays` hat keine Vorführung.** Keine Story übergibt einen anderen Wert
+  als die Vorgabe; ein zweiter `Timeline` in `WithGap` mit `gapDays={30}`
+  würde die Schwelle sichtbar machen. Ein Satz für die nächste Sitzung, die
+  die Datei ohnehin öffnet.
+- **`WithoutKind` rendert weiter ein leeres `<time>`** (`Timeline.tsx:182–187`):
+  bei `groupBy="day"` und einem Kalendertag bleibt der Textinhalt leer, das
+  Datum steht im Gruppenkopf. Richtig so — das leere Element bleibt aber im
+  Baum stehen. Unverändert seit der Abnahme vom 2026-09-05.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05

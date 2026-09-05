@@ -75,6 +75,34 @@ export const WithFreeText: Story = {
   },
 };
 
+/**
+ * Reine Freitext-Frage — 60 % des Bestands. Keine `RadioGroup`, keine zweite
+ * Beschriftung „Antwort", und der Grund neben dem gesperrten Knopf schickt
+ * niemanden nach einer Auswahl suchen, die es nicht gibt.
+ */
+export const FreeTextOnly: Story = {
+  render: function Render() {
+    const [last, setLast] = useState<ChoiceAnswer | null>(null);
+    return (
+      <div style={{ maxWidth: 480, display: "grid", gap: "var(--space-4)" }}>
+        <ChoicePrompt
+          question="Wofür war die Bewirtung am 26.08.?"
+          context="RE-4483 · 128,40 € · Restaurant Adler"
+          options={[]}
+          freeText={{ label: "Antwort", placeholder: "Anlass und Teilnehmer", required: true }}
+          onSubmit={async (a) => {
+            await wait(300);
+            setLast(a);
+          }}
+        />
+        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+          Gesendet: {last ? (last.text ?? "ohne Text") : "nichts"}
+        </div>
+      </div>
+    );
+  },
+};
+
 /** Während des Sendens ist alles gesperrt, der Knopf trägt ein Wort. */
 export const Pending: Story = {
   render: () => (

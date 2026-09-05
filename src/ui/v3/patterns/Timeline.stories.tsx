@@ -156,23 +156,35 @@ export const Interactive: Story = {
  * steht sie auf den sieben Tagen des Vorgabewerts.
  */
 export const WithGap: Story = {
-  render: () => (
-    <div style={{ maxWidth: 620 }}>
-      <Timeline
-        entries={[
-          ...CASE,
-          {
-            id: "e0",
-            at: "2026-08-05T08:00:00Z",
-            kind: "Sachverhalt",
-            actor: "System",
-            title: "Sachverhalt aus dem OPOS-Vortrag gegründet",
-            state: "info",
-          },
-        ]}
-      />
-    </div>
-  ),
+  render: () => {
+    const entries = [
+      ...CASE,
+      {
+        id: "e0",
+        at: "2026-08-05T08:00:00Z",
+        kind: "Sachverhalt",
+        actor: "System",
+        title: "Sachverhalt aus dem OPOS-Vortrag gegründet",
+        state: "info" as const,
+      },
+    ];
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-6)" }}>
+        <div>
+          <div className="lw-body-sm" style={{ marginBottom: "var(--space-3)" }}>
+            Vorgabe: ab sieben Tagen
+          </div>
+          <Timeline entries={entries} />
+        </div>
+        <div>
+          <div className="lw-body-sm" style={{ marginBottom: "var(--space-3)" }}>
+            <code>gapDays=&#123;30&#125;</code> — dieselben Ereignisse, keine Lücke
+          </div>
+          <Timeline entries={entries} gapDays={30} />
+        </div>
+      </div>
+    );
+  },
 };
 
 /** Im Einsatz: unter den Stammdaten im Sachverhalts-Detail. */

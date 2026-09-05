@@ -257,3 +257,101 @@ beides mitbrächte. Das Kriterium verlangt nur das Wort, und der Weg dahin
 führt über den `ActionButton`, der das Pending heute selbst hält — das ist
 eine Änderung an seiner Schnittstelle, nicht an dieser Datei. Gehört in die
 nächste Runde an 0004.
+
+
+## Abnahme der zweiten Nachbesserung, 2026-09-05
+
+Vierte Runde, fremder Prüfer — weder Erbauer noch einer der Vorprüfer.
+Geprüft gegen die festen Kriterien, die variablen aus der Spec und den
+Nachtrag; die Punkte der Vorrunden sind nachgemessen, nicht übernommen.
+Gemessen in einem eigenen headless Chromium (1440 × 900) auf
+`localhost:6107`; Strg+Enter als echter Tastenanschlag über CDP, und wo
+mehrere Instanzen nötig waren, sind sie zur Laufzeit in **einen** React-Baum
+gerendert und im DOM ausgelesen.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` nicht gestartet: er schreibt nach `storybook-static`, und parallel arbeiten weitere Sitzungen | ✓ (Build zitiert) |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/patterns/ChoicePrompt.tsx` mit `ChoicePrompt.stories.tsx` daneben; Titel `v3/Patterns/Prüfen/ChoicePrompt`, Gruppe „Prüfen" wie im Barrel (`src/ui/v3/index.ts:242`); Export `:256–259` | ✓ |
+| **M3 · Code englisch; `@when`/`@instead` an jedem Export** | **Reißt weiter — zwei von drei Blöcken sind übersetzt, einer nicht.** Englisch stehen jetzt `:62–63` („Two questions on one page must not deselect each other …") und `:134–138` („`ActionButton` only knows its **own** run …"). **Deutsch geblieben ist der JSX-Kommentar `ChoicePrompt.tsx:101–104`:** „Keine Gruppe ohne Gegenstand: bei reiner Freitext-Frage (60 % des Bestands) stünde sonst eine leere `<fieldset>` mit der Legende „Antwort" über dem Feld, das dieselbe Beschriftung trägt — zweimal dasselbe Wort, und für einen Screenreader eine Gruppe ohne Inhalt." Maschinell nachgeprüft: alle Kommentarblöcke der Datei ausgeschnitten und gegen eine Liste deutscher Funktionswörter gehalten — genau ein Treffer, dieser. Die `@when`/`@instead`-Zeilen stehen unverändert unmittelbar über `export function ChoicePrompt` (`:30–36`) | ✗ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}\b\|[0-9]+px\|fontSize' src/ui/v3/patterns/ChoicePrompt.tsx` → 0; die Maße stehen in `v3.css` (`.v2ask*`). Kein Status im Spiel | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--filled`, `--blocked`, `--with-free-text`, `--pending`, `--error`, `--in-case` — sechs, genau die Ableitung. `Leer` und `LeerNachFilter` sind begründet ausgeschlossen | ✓ |
+| Story-Deckung der Schnittstelle | `question` → alle, `context` → `--filled`/`--with-free-text`/`--in-case`, `options` → alle, `freeText` → `--with-free-text`, `--error`, `--in-case` (je genau ein `textarea`; `--filled` und `--blocked` haben keins), `submitLabel` → `--in-case` („Antwort an Ludwig senden"), `onSubmit` → `--with-free-text` („Gesendet: …"), `pending` → `--pending`, `error` → `--error` (`div.v2note.v2note--danger`), `defaultOptionId` → `--filled` | ✓ |
+| Prüfliste `design-guidelines.md` §9 | Die zwei App-Punkte übersprungen. Die zwei Punkte, die in der Vorrunde rissen, halten: der Ladezustand trägt ein Wort (V9/V7) und zwei Prompts stören sich nicht. Der Rest unverändert: Text links, Farbe nur am `Callout`, Fokus und Pfeiltasten aus dem nativen `<fieldset>`, kein Icon, kein Emoji, Karte in `--in-case` mit Rand ohne Schatten, Texte Sie und Imperativ. Gerissen ist die Sprache der Kommentare (M3) | ✗ (wegen M3) |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Alle sechs Stories geöffnet und ausgelesen; dazu drei weitere Instanzen zur Laufzeit gerendert (siehe Nachtrag) | ✓ |
+
+**Variabel (aus der Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Gesperrter Knopf nennt den Grund im Text daneben (T6) | `--blocked`: `<button disabled>` und daneben `.v2ask__why` „Wählen Sie eine Antwort oder schreiben Sie eine."; in `--filled` (eine Antwort vorgewählt) ist der Knopf frei und `.v2ask__why` fehlt (Anzahl 0) | ✓ |
+| Strg+Enter sendet, die Taste steht am Knopf (V14) | `--with-free-text`, **echter Tastenanschlag über CDP**: zweite Antwort geklickt, Fokus ins `textarea` gesetzt, Strg+Enter gedrückt → die Zeile unter dem Block wechselt von „Gesendet: nichts" auf „Gesendet: reise · ohne Text". Die Taste steht als `<kbd class="v2kbd">Strg+Enter</kbd>` am Knopf, in allen sechs Stories im DOM nachgesehen. `onKeyDown` sitzt am Block (`ChoicePrompt.tsx:90–95`), nicht am Feld | ✓ |
+| Nach einem Fehler steht die Eingabe noch da | `--error`: der `Callout` „Die Rückfrage konnte nicht gesendet werden — der Sachverhalt ist gesperrt." steht; im Code setzt nichts `text` oder `choice` zurück, `error` ist eine reine Anzeige-Prop | ✓ |
+| Ohne `freeText`-Prop gibt es kein Textfeld | `--filled` und `--blocked`: `textarea`-Anzahl **0**; `--with-free-text`, `--error`, `--in-case`: je **1** | ✓ |
+| Ersetzt `RaiseClarificationForm.tsx` ohne Funktionsverlust | Betrifft `ludwig/app`, hier nicht erfüllbar. Der fachliche Befund der Vorrunden bleibt: nicht gedeckt sind das eingeklappte Formular mit Auslöser-Knopf, der Empfänger-Select, der Schalter „Blockiert die Buchung" und ein Abbrechen-Weg, der den Entwurf behält | offen (App) |
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Von außen gehaltenes `pending` zeigt ein Wort am Knopf (V7) | `--pending`, Knopf ausgelesen: `<button type="button" disabled class="v2btn v2btn--primary v2btn--sm"><span>Sende …</span><kbd class="v2kbd">Strg+Enter</kbd></button>`. Statt „Antwort senden" steht dort „Sende …"; die drei Radios sind dabei `disabled` | ✓ |
+| Der Hinweis neben dem Knopf schweigt, während gesendet wird | `--pending`: `.v2ask__why`-Anzahl **0**. In `--blocked`, `--with-free-text`, `--error` und `--in-case`, wo nichts läuft, steht der Satz. Im Code `const why = pending ? null : …` (`ChoicePrompt.tsx:72–78`) | ✓ |
+| Zwei `ChoicePrompt` auf einer Seite wählen sich nicht gegenseitig ab (im Browser gemessen) | Zwei Instanzen mit denselben Optionen zur Laufzeit in einen React-Baum gerendert: die Radios der ersten tragen `name="_r_1_"`, die der zweiten `name="_r_2_"` — zwei Gruppen. Erst die erste Option der ersten Frage geklickt (`checked` `[true,false]` / `[false,false]`), dann die erste der zweiten (`[true,false]` / `[true,false]`): **beide** Antworten stehen weiter. `useId()` (`ChoicePrompt.tsx:64`), `name={groupName}` (`:107`) | ✓ |
+| Ohne Optionen erscheint keine `RadioGroup` und keine zweite Beschriftung „Antwort" | Dritte Instanz im selben Baum mit `options={[]}` und `freeText={{ label: "Anmerkung" }}`: `.v2radiogrp`-Anzahl **0**, `fieldset` **0**, `legend` **0**, genau eine Beschriftung („Anmerkung") und genau ein `textarea`. Der Zweig ist `options.length === 0 ? null : …` (`ChoicePrompt.tsx:105`) | ✓ |
+
+**Zurück auf `in Arbeit`.** Ein Mangel:
+
+1. **M3 — der deutsche JSX-Kommentar in `ChoicePrompt.tsx:101–104` steht
+   noch.** Die Nachbesserung hat zwei der drei Blöcke übersetzt (`:62–63` und
+   `:134–138`), diesen nicht: „Keine Gruppe ohne Gegenstand: bei reiner
+   Freitext-Frage (60 % des Bestands) stünde sonst eine leere `<fieldset>` …".
+   `CLAUDE.md` lässt Deutsch nur in Strings zu, die Nutzer sehen; das feste
+   Kriterium verlangt englischen Code. Der Inhalt ist richtig, nur die Sprache
+   nicht — übersetzen, wie die beiden anderen.
+
+**Befunde** (keine Mängel):
+
+2. **Ohne Optionen fragt der Hinweis weiter nach einer Antwort.** An der
+   dritten Instanz gemessen: bei `options={[]}` und leerem Freitext steht neben
+   dem gesperrten Knopf „Wählen Sie eine Antwort oder schreiben Sie eine." —
+   es gibt aber keine Antwort zu wählen, nur zu schreiben. Der Zweig ist neu
+   (aus der Abnahme von 0060) und hat noch keine eigene Story; sein Grundtext
+   ist bisher niemandem aufgefallen. Gehört zum selben Anfassen wie Befund 3.
+3. **Der Zweig „ohne Optionen" hat weiterhin keine eigene Story.** Er ist
+   belegt, aber im Storybook nicht zu sehen — unverändert aus der Vorrunde.
+4. **`pending` setzt kein `aria-busy` und zeigt keinen Spinner.** Vom Erbauer
+   aufgenommen und an 0004 verwiesen; das Kriterium verlangt nur das Wort.
+5. **`defaultOptionId` fehlt in der Schnittstelle der Spec**, und
+   `freeText.required` hat keine Story — beides unverändert aus den Vorrunden.
+6. **Die Story-JSDoc in `ChoicePrompt.stories.tsx` ist deutsch** (`:23`,
+   `:41`, `:54`, `:78`, `:92`, `:107`). Set-weiter Befund, in 0010 als eigene
+   Aufgabe abgelegt; kein Kriterium dieser Aufgabe nennt die Story-Datei.
+7. **`.v2field__label` in Versalien** — trifft hier „ANTWORT" und „ANMERKUNG".
+   Set-weit, wie in 0017.
+
+Geprüft von / am: Claude (Abnahme-Agent), 2026-09-05
+
+## Der Mangel der dritten Abnahme (2026-09-05) — behoben
+
+Von drei deutschen Kommentarblöcken waren nur zwei übersetzt; der dritte
+(`ChoicePrompt.tsx:101–104`, „Keine Gruppe ohne Gegenstand …") steht jetzt
+ebenfalls auf Englisch.
+
+**Dazu der Befund derselben Abnahme, der ein Mangel ist:** bei `options={[]}`
+stand neben dem gesperrten Knopf weiter „Wählen Sie eine Antwort oder
+schreiben Sie eine." — es gibt dort aber nichts zu wählen. Der Satz heißt in
+diesem Zweig „Schreiben Sie eine Antwort."
+
+Und der Zweig hat endlich seine Story: `FreeTextOnly` zeigt den Fall, der 60 %
+des Bestands ausmacht. Gemessen: 0 `fieldset`, 0 `legend`, ein Label
+„Antwort *", und der Grund neben dem Knopf schickt niemanden nach einer
+Auswahl suchen, die es nicht gibt.
+
+## Abnahmekriterien (Nachtrag der dritten Runde)
+
+- [ ] Kein deutscher Kommentar mehr in `ChoicePrompt.tsx` (`grep`)
+- [ ] Ohne Optionen sagt der Grund „Schreiben Sie eine Antwort." (Story `FreeTextOnly`)
+- [ ] Die Story `FreeTextOnly` zeigt weder `fieldset` noch `legend`
+

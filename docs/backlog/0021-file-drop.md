@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Dateien ablegen ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Dateiablage (Drop-Zone, Liste, Fortschritt)"; Kit `UploadZone` |
@@ -300,3 +300,71 @@ Nicht geändert: dass der Format-Grund den ganzen `hint` erbt, also auch die
 Größenangabe. Das ist gewollt — der Hinweis ist der eine Satz, in dem steht,
 was hier erlaubt ist, und eine zweite, gekürzte Fassung davon wäre eine
 zweite Wahrheit.
+
+
+## Abnahme der zweiten Nachbesserung, 2026-09-05
+
+Vierte Runde, fremder Prüfer — weder Erbauer noch einer der Vorprüfer.
+Geprüft gegen die festen Kriterien, die variablen aus der Spec und den
+Nachtrag; die Punkte der Vorrunden sind nachgemessen, nicht übernommen.
+Gemessen in einem eigenen headless Chromium (1440 × 900) auf
+`localhost:6107`; Tastenanschläge über CDP, Ablagen mit echten
+`DataTransfer`-`drop`-Ereignissen, und wo zwei Instanzen nötig waren, sind
+sie zur Laufzeit in **einen** React-Baum gerendert.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` nicht gestartet: er schreibt nach `storybook-static`, und parallel arbeiten weitere Sitzungen | ✓ (Build zitiert) |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/FileDrop.tsx` mit `FileDrop.stories.tsx` daneben; Titel `v3/Primitives/Formular/FileDrop` (`FileDrop.stories.tsx:7`), Gruppe „Formular" wie im Barrel (`src/ui/v3/index.ts:102`); Export `:109` | ✓ |
+| Code englisch (M3 der Vorrunde) | **Behoben.** Der deutsche Kommentar an `hintId` steht englisch: `FileDrop.tsx:77–78` „Two drops on one page must not carry the same `id` — otherwise the `aria-describedby` of both points at the same hint (0021)." Alle Kommentarblöcke der Datei maschinell gegen eine Liste deutscher Funktionswörter gehalten — kein Treffer. Der einzige deutsche Wortlaut in `:35–37` ist ein Zitat des alten UI-Textes in einem englischen Satz, wie in der Vorrunde ausdrücklich nicht als Verstoß gewertet | ✓ |
+| `@when`/`@instead` an jedem Export (M4 der Vorrunde) | **Behoben.** Der Block steht wieder unmittelbar über dem Export: `FileDrop.tsx:48–52` `@when` / `@instead`, direkt gefolgt von `export function FileDrop` in `:53`. Die private Hilfsfunktion `rejectionReason` (`:41`) hat jetzt ihr eigenes JSDoc (`:32–40`) und hängt dem Export nichts mehr vor. `DroppedFile` (`:15`) ist ein Typ-Export und trägt wie im ganzen Set keine `@when`-Zeilen | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}\b\|[0-9]+px\|fontSize' src/ui/v3/primitives/FileDrop.tsx` → 0; die Maße stehen in `v3.css` (`.v2drop*`, `.v2dropfile*` ab `:1903`). Kein Status im Spiel | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--empty`, `--with-files`, `--uploading`, `--rejected`, `--interactive`, `--in-card` — sechs, genau die Ableitung (4 Zustände + 1 Callback + 1 „im Einsatz"). `LeerNachFilter` mit Grund ausgeschlossen | ✓ |
+| Story-Deckung der Schnittstelle | `label`/`hint`/`accept`/`multiple`/`disabled` → `--empty` (zweite Zone `disabled`, `input` mit `accept="application/pdf,image/*"` und `multiple: true`), `files` → `--with-files`, `progress` → `--uploading`, `onFiles`/`onRemove` → `--interactive` (echt ausgelöst; nach dem Klick auf „Entfernen" verschwindet `tabelle.xlsx` aus der Liste), `maxSizeMb` → `--rejected` und `--interactive` | ✓ |
+| Prüfliste `design-guidelines.md` §9 | Die zwei App-Punkte übersprungen. Stufe `primitives/`, Importe nur abwärts (`./Progress`, `./TextButton`), kein Fachmodul ✓ · kein Hex/px/Label-Map ✓ · Name links, Größe rechts mit `tnum` (`.v2dropfile__size`: `font-variant-numeric: lining-nums tabular-nums` gemessen), nichts zentriert ✓ · Farbe nur an der Fehlerzeile, und die trägt den Grund als Wort (V7) ✓ · Fortschritt mit Prozentwort ✓ · vier Zustände gebaut, `LeerNachFilter` begründet ausgeschlossen ✓ · Fokusring `2px solid rgb(59,143,196)`, Offset 2 px, `:focus-visible` greift ✓ · Hauptweg per Tastatur belegt ✓ · Hover färbt eine Tonstufe ✓ · kein Icon, kein Emoji ✓ · Karte in `--in-card` mit Rand, ohne Schatten ✓ · Texte T1–T5: der Ablehnungsgrund ist jetzt der Satz, den die Sachbearbeiterin braucht (Nachtrag) ✓. Die zwei Punkte, die in der Vorrunde rissen (Sprache, `@when` am Export), halten | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | `--empty`, `--with-files`, `--rejected`, `--interactive` geöffnet, vermessen und bedient; echte `drop`-Ereignisse, echte Tab- und Eingabetaste | ✓ |
+
+**Variabel (aus der Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Die Zone ist per Tastatur erreichbar und öffnet mit Enter den Dateidialog (`Empty`, V11) | `--empty`, echte Tasten über CDP: **ein** Tab landet auf `button.v2drop` (`type="button"`), `:focus-visible` trifft, Fokusring `2px solid rgb(59,143,196)` mit 2 px Offset. Danach Enter gedrückt, mit `Page.setInterceptFileChooserDialog` mitgeschnitten: vorher 0, nachher **1** `Page.fileChooserOpened`, Modus `selectMultiple` | ✓ |
+| Beim Überziehen ändert sich nur der Hintergrund, nichts wächst (`Empty`, V12) | `--empty`, echtes `dragover` und `dragleave`: Klasse `v2drop` → `v2drop is-over` → `v2drop`, Hintergrund `rgb(255,255,255)` → `rgb(244,246,248)` → `rgb(255,255,255)`. Maße in allen drei Zuständen **460 × 84,25 px**, Rand 1 px `rgb(196,204,213)`, `transform: none` | ✓ |
+| Abgelehnte Dateien nennen den Grund, die übrigen kommen trotzdem an (`Rejected`) | **Format:** echter `drop` auf `--rejected` (`accept=".pdf,image/*"`) mit `buchungen.xlsx` und `ohneendung` → beide stehen mit Grund in der Liste („XLSX-Dateien nehmen wir hier nicht — …", „Diese Datei nehmen wir hier nicht — …"). **Größe:** echter `drop` auf `--interactive` (`maxSizeMb=5`) mit `riesig.pdf` (6,0 MB) und `tabelle.xlsx` → „riesig.pdf · 6,0 MB · Zu groß — höchstens 5 MB.", `tabelle.xlsx` läuft durch, trägt „Entfernen" und verschwindet auf Klick | ✓ |
+| Die Komponente lädt selbst nichts hoch (Blick in den Code: kein `fetch`) | `grep -nE 'fetch\|XMLHttpRequest\|use server\|axios' src/ui/v3/primitives/FileDrop.tsx` → kein Treffer (Exit 1) | ✓ |
+| Ersetzt die Drop-Zone in `InvoiceUploader.tsx` ohne Funktionsverlust | Betrifft `ludwig/app`; die Datei liegt nicht in diesem Repo und ist hier nicht erfüllbar. Der fachliche Befund der Vorrunden bleibt: `DroppedFile` kennt nur `progress` und `error`, das Original zeigt je Datei ein Schrittwort und einen Link „Beleg öffnen" | offen (App) |
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Der Ablehnungsgrund nennt keine MIME-Angabe (Story `Rejected`, Text im DOM) | `--rejected`, die beiden `.v2dropfile__err` ausgelesen: „Zu groß — höchstens 20 MB." und „XLSX-Dateien nehmen wir hier nicht — erlaubt ist: PDF, JPG oder PNG, höchstens 20 MB je Datei." Gegenprobe über den ganzen Story-Text: `/application\/\|image\/\*/` trifft **nicht** | ✓ |
+| Der Grund nennt die versuchte Endung und, wenn `hint` gesetzt ist, die erlaubten | Beides, und die Story zeigt jetzt genau das. `--rejected` trägt `accept=".pdf,image/*"` (am `input` ausgelesen) und `hint="PDF, JPG oder PNG, höchstens 20 MB je Datei"`. Zur Laufzeit `buchungen.xlsx` in dieselbe Zone abgelegt: `rejectionReason` erzeugt „XLSX-Dateien nehmen wir hier nicht — erlaubt ist: PDF, JPG oder PNG, höchstens 20 MB je Datei." Verglichen mit dem in der Story hinterlegten Satz (`FileDrop.stories.tsx:96–97`): `staticErr === generated` → **true**, auch die letzten zwölf Zeichen-Codes stimmen überein. Ohne Endung sagt der Grund „Diese Datei nehmen wir hier nicht — …" | ✓ |
+| Der Satz endet auf genau einen Punkt | Am erzeugten Satz gemessen: `dotCount` 1, `trailingDots` 1, letztes Zeichen `charCode 46`. Der Code deckt auch den Fall, dass der Hinweis selbst schon einen Punkt trägt: `hint.replace(/\.$/, "")` vor dem angehängten Punkt (`FileDrop.tsx:45`); ohne `hint` steht der Punkt am ersten Teil | ✓ |
+| Zwei `FileDrop` auf einer Seite tragen verschiedene `id`s (im DOM gemessen) | Zwei Instanzen mit `hint` zur Laufzeit in einen React-Baum gerendert: `aria-describedby` `_r_2_` und `_r_3_`, die beiden `.v2drop__hint` tragen dieselben, verschiedenen `id`s, `document.getElementById` liefert je den eigenen Satz („PDF, bis 20 MB" bzw. „Nur Bilder"). Zusammen mit der Zone der Story stehen drei verschiedene `id`s im Dokument. `useId()` (`FileDrop.tsx:79`) | ✓ |
+
+**Ergebnis: `fertig`.** Beide Mängel der Vorrunde sind behoben, ohne einen
+der schon erfüllten Punkte umzuwerfen; der Wortlaut der Story und der der
+Komponente sind zur Laufzeit als wörtlich gleich nachgewiesen. Offen bleibt
+allein das App-Kriterium, das `ludwig/app` betrifft.
+
+**Befunde** (keine Mängel dieser Aufgabe):
+
+1. **Die Story-JSDoc in `FileDrop.stories.tsx` ist deutsch** (`:13`, `:29`,
+   `:48`, `:66–73`, `:105`, `:129`). Die Komponente selbst ist englisch, und
+   kein Kriterium dieser Aufgabe nennt die Story-Datei. Das ist derselbe
+   set-weite Befund, den 0010 in seiner zweiten Runde als eigene Aufgabe
+   abgelegt hat.
+2. **Der Format-Grund erbt den ganzen `hint`**, also auch die Größenangabe.
+   Die Nachbesserung hält das ausdrücklich als gewollt fest — der Hinweis ist
+   der eine Satz, in dem steht, was hier erlaubt ist.
+3. **Eine abgelehnte Zeile trägt nie „Entfernen"** (`onRemove && !f.error`,
+   `FileDrop.tsx:162`). Gewollt, weil sie beim nächsten Ablegen ohnehin neu
+   gesetzt wird; die Nutzerin kann eine Ablehnung aber auch nicht wegräumen.
+4. **`.v2field__label` in Versalien** (`v3.css`) — im Bild steht „BELEGE
+   HOCHLADEN". Set-weit, wie in 0017 und in allen Vorrunden festgestellt;
+   eigene Aufgabe.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05

@@ -127,6 +127,24 @@ const DAY = 24 * HOUR;
 /** Beyond a week „vor 43 Tagen" is no answer — the date is. */
 const RELATIVE_LIMIT = 7 * DAY;
 
+/**
+ * Whole days between two points in time — what a strand needs to say „20 Tage
+ * ohne Ereignis".
+ *
+ * It lives here and not in the caller because of `toDate`: a calendar day has
+ * to be anchored at 12:00 UTC, otherwise the count tips by one as soon as a
+ * `YYYY-MM-DD` and a timestamp are compared (found in the acceptance of 0023).
+ *
+ * @when    The distance between two points in days — a gap, an age in a list.
+ * @instead How long ago something was, in words → formatTime with `age`.
+ */
+export function daysBetween(a: string | Date, b: string | Date): number {
+  const from = toDate(a);
+  const to = toDate(b);
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return 0;
+  return Math.floor(Math.abs(to.getTime() - from.getTime()) / DAY);
+}
+
 function formatRelative(d: Date, now: Date): string {
   const diff = d.getTime() - now.getTime();
   const abs = Math.abs(diff);

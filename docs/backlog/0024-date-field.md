@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | ja, unverändert — ein Datum hat kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Datumsfeld` / `Zeitraumfeld`, **14 Dateien** · Showcase `src/showcase/CaseCrud.stories.tsx` (Frist, Eröffnungsdatum) |
@@ -228,3 +228,94 @@ dieser Spec zeigen auf die neuen Namen.
 - [ ] Zwischenstufen der Jahreszahl lösen keinen Tausch aus (Story `Interactive`, gemessen)
 - [ ] Ein verdrehter Zeitraum wird beim Verlassen des Paares getauscht, nicht davor (dieselbe Story)
 - [ ] Alle Story-Exportnamen sind englisch (`grep -n "^export const" DateField.stories.tsx`)
+
+## Abnahme des Nachtrags, 2026-09-05
+
+Dritte Abnahme, fremder Prüfer; gebaut hat jemand anders, geprüft wurde gegen
+Spec und Code. Storybook auf `localhost:6107`, Chromium headless 1440 × 900
+über CDP gefahren — echte Mausklicks (`Input.dispatchMouseEvent`) und echte
+Tastendrücke (`Input.dispatchKeyEvent`), Ziffer für Ziffer ins native Feld.
+Alle sieben `DateField`-Stories und alle fünf `FilterBar`-Stories geöffnet.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0. `pnpm build` bewusst nicht gestartet: er schreibt nach `storybook-static`, und hier arbeiten mehrere Sitzungen parallel | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/DateField.tsx` mit `DateField.stories.tsx` daneben; Barrel führt beide Exporte unter `/* Formular */` (`index.ts`), Story-Titel `v3/Primitives/Formular/DateField` (`DateField.stories.tsx:10`) — dieselbe Gruppe | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | zwei Exporte, beide mit beiden Zeilen: `DateField` (`DateField.tsx:25–29`), `DateRangeField` (`:66–69`). Bezeichner, Props, Kommentare und JSDoc englisch; deutsch nur, was der Nutzer liest („Vormonat" als Beispiel im JSDoc, das Wort „bis" zwischen den Feldern) | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\b\|[0-9]+px\|fontSize" DateField.tsx` → keine Zeile. Optik in `v3.css:1913–1915` (`.v2date`, `.v2date__sep`, `.v2date__presets`), alles über Tokens; kein Status in der Komponente | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--filled`, `--empty`, `--interactive`, `--with-presets`, `--bounds`, `--edges`, `--in-use` — die sieben der Ableitung. `Lädt`, `Leer nach Filter` und `Fehler` sind im Abschnitt „Stories" begründet ausgeschlossen | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Felder linksbündig, nichts zentriert · `invalid` färbt nur den Rahmen und trägt zusätzlich `aria-invalid="true"` (`--filled`, zweites Feld: `class="v2in v2in--invalid"`) — Farbe nie allein · die Schnellwahl ist eine Reihe `TextButton`, per Tab erreichbar, mit Wort statt Icon · `min`/`max` gehen unverändert ans native Feld (`--bounds`: `min="2026-01-01"`, `max="2026-12-31"`) · kein Emoji, keine Versalien. Ein Konsolenbefund in `--in-use` gehört nicht dieser Aufgabe, siehe unten | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle sieben Stories geöffnet und bedient: getippt, mit den Pfeiltasten verstellt, Schnellwahl geklickt, das Paar verlassen, Felder geleert | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Innen steckt `<input type="date">`, kein eigener Kalender | `DateField.tsx:51–52` reicht `type="date"` an `Input` durch; im DOM aller Stories ausschließlich `input[type=date]`, keine Kalender-Bibliothek im Import. `grep -rn 'type="date"' src` findet außerhalb von `DateField.tsx` nur noch `JournalEntryEditor.tsx:567` (fremde Sitzung) und den erklärenden Kommentar in `FilterBar.stories.tsx:29` | ✓ |
+| Keine neue Abhängigkeit | `git log --oneline -3 -- package.json` → zuletzt `f58caa2` (0087) und `41a55fc`/`b9988bb` (0064); 0024 hat die Datei nie angefasst. `grep -rn "date-fns" src/ui/v3` ist leer — die Familie kommt sogar ohne die zugesagte Bibliothek aus | ✓ |
+| `onChange` gibt ISO, nie „26.08.2026" | `--interactive`: der `pre`-Kasten zeigt durchgehend ISO — `{ "datum": "2026-08-26", "from": "2026-08-01", "to": "2026-08-31" }`, nach jedem Tastendruck ebenso (`"to": "0002-08-31"` … `"2026-08-31"`). Kein Anzeigeformat im Zustand | ✓ |
+| `to` vor `from` wird getauscht, nicht abgewiesen | `--edges`: ins „bis"-Feld 01 / 08 / 2026 getippt (Segment für Segment), dann den Fokus aus dem Paar genommen → „von 2026-01-08 bis 2026-08-31". Kein Fehlertext, kein Abweisen | ✓ |
+| Leeren gibt `null`, nicht `""` | `--interactive`, erstes Feld geleert (dreimal `Backspace` über die Segmente): `input.value` = „", im Zustand steht `"datum": null` — `JSON.parse(...).datum === null`, `typeof` = `object`. `DateField.tsx:61`: `onChange(e.target.value \|\| null)` | ✓ |
+| Schnellwahl löst genau ein `onChange` mit beiden Werten aus | `--with-presets` startet mit `from = null`, `to = null`. Ein Klick auf „Laufendes Wirtschaftsjahr" → beide zugleich gesetzt: „2026-01-01 bis 2026-12-31", die Felder tragen `2026-01-01` und `2026-12-31`. Bei zwei Aufrufen wäre einer der beiden Werte `null` geblieben (jeder Aufruf trägt den anderen Wert aus seinem Render); `DateField.tsx:124` ruft `onChange(p.from, p.to)` | ✓ |
+| Kein Wirtschaftsjahr-Wissen in der Komponente | `grep -n "Wirtschaftsjahr" DateField.tsx` → eine Zeile, `:19`, und die ist das Beispiel-Label im JSDoc von `DatePreset`. Die Presets kommen als Prop (`--with-presets` übergibt sie aus der Story) | ✓ |
+| Ersetzt die Zeitraum-Felder in `FilterBar` (0003) ohne Funktionsverlust | **jetzt erfüllt.** `FilterBar.stories.tsx:32–47` (`PeriodFilter`) baut den Zeitraum über `DateRangeField` mit Zustand; gemessen in allen fünf `FilterBar`-Stories: je genau ein `.v2date` mit `aria-label="Von"`/`"Bis"` und dem Wort „bis" dazwischen, Werte `2026-08-01`/`2026-08-31`. `ManyFields` hat zusätzlich ein einzelnes `DateField` (`2026-09-15`, außerhalb des Paares). Auch der Showcase ist nachgezogen: `CaseCrud.stories.tsx:174` und `:376` nehmen `DateField`, die Marke `Todo spec="0024"` ist verschwunden | ✓ |
+
+**Nachtrag (die vier Kriterien dieser Runde)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `FilterBar.stories.tsx` benutzt `DateRangeField` und `DateField`, kein rohes `type="date"` | `grep -n "DateField\|DateRangeField" FilterBar.stories.tsx`: Import `:6`, `DateRangeField` in `PeriodFilter` `:37`, `DateField` in `ManyFields` `:107`. Kein `<Input type="date">` mehr in der Datei; die Filter heißen jetzt `CreditorFilter` und `PeriodFilter` statt `Kreditor` und `Zeitraum`. Im DOM aller fünf Stories bestätigt | ✓ |
+| Zwischenstufen der Jahreszahl lösen keinen Tausch aus (Story `Interactive`, gemessen) | `--interactive`, Ausgangslage `from 2026-08-01`, `to 2026-08-31`. Ins Jahr des „bis"-Feldes 2 · 0 · 2 · 6 getippt, nach jeder Ziffer den Zustand gelesen: `to` = `0002-08-31` → `0020-08-31` → `0202-08-31` → `2026-08-31`, `from` bleibt in allen vier Schritten `2026-08-01`. Jede der ersten drei Stufen liegt vor `from` und hätte den alten Tausch ausgelöst; nichts springt. Gegenprobe in `--edges` mit derselben Ziffernfolge: `0002-01-08` → `0020-01-08` → `0202-01-08` → `2026-01-08`, `from` unverändert `2026-08-31` | ✓ |
+| Ein verdrehter Zeitraum wird beim Verlassen des Paares getauscht, nicht davor (dieselbe Story) | `--interactive`: mit `ArrowDown` im Jahr des „bis"-Feldes auf `2025-08-31`, `2024-08-31`, `2023-08-31` heruntergestellt — alle drei verdreht, alle drei bleiben stehen (`from 2026-08-01`, `to 2023-08-31`). Der erste `Tab` springt nur ins nächste Segment desselben Feldes, der Zustand bleibt. Der zweite `Tab` verlässt das Paar → `from: 2023-08-31`, `to: 2026-08-01`, die Felder tragen dieselben Werte. Ein dritter `Tab` tauscht **nicht** noch einmal. `DateField.tsx:94–97`: `swapIfInverted` greift nur, wenn `relatedTarget` außerhalb liegt | ✓ |
+| Alle Story-Exportnamen sind englisch | `grep -n "^export const" DateField.stories.tsx`: `Filled`, `Empty`, `Interactive`, `WithPresets`, `Bounds`, `Edges`, `InUse` — sieben, alle englisch. Die Nachweise oben in dieser Spec zeigen auf die neuen Namen | ✓ |
+
+**Der Tausch über die Schnellwahl und über den Kalender**
+
+Beide Wege setzen den Wert, ohne dass jemand tippt — geprüft in
+`--with-presets`:
+
+1. Klick auf „Laufendes Wirtschaftsjahr" → `2026-01-01` / `2026-12-31`; der
+   Fokus steht danach auf dem Knopf, also **innerhalb** des Paares, und es
+   wird nichts getauscht. Richtig: der Zeitraum, den die Schnellwahl setzt,
+   ist keiner, den man korrigieren müsste.
+2. Danach im „bis"-Feld mit `ArrowDown` auf `2024-12-31` heruntergestellt —
+   derselbe Weg, den auch der native Kalender nimmt: ein vollständiger Wert,
+   ohne Zwischenstufen. Verdreht, aber im Paar → kein Tausch.
+3. Klick auf „Vormonat" in diesem verdrehten Zustand → `2026-07-01` /
+   `2026-07-31`. Der Knopf sitzt im Paar, es wird also nicht zwischendurch
+   getauscht; die Werte der Schnellwahl gewinnen unverändert.
+4. Erneut auf `2024-07-31` heruntergestellt und den Fokus aus dem Paar
+   genommen → `2024-07-31` / `2026-07-01`. Der Tausch findet statt, einmal,
+   am Ende — auch für Werte, die nie getippt wurden.
+
+Den nativen Kalender selbst öffnet ein Headless-Chromium nicht; der
+Pfeiltasten-Weg ist derselbe Code-Weg (ein vollständiger Wert je Schritt,
+Fokus bleibt im Feld) und deckt ihn ab.
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Wer mitten in der Jahreszahl das Paar verlässt, verlässt es mit dem
+  Zwischenwert** — und dann tauscht es. Das ist derselbe Fall wie ein falsch
+  getipptes Datum, kein Fehler des neuen `onBlur`.
+- **`swapIfInverted` greift nur, wenn beide Werte stehen** (`from && to`,
+  `DateField.tsx:96`). Ein halb gefüllter Zeitraum bleibt in Ruhe — geprüft in
+  `--edges`, das mit `to = null` startet.
+- **Die Anzeige „26.08.2026" ist hier nicht nachprüfbar.** Das Headless-Chromium
+  läuft mit `navigator.language = "en-US"` und zeigt deshalb MM/TT/JJJJ. Genau
+  das ist der Preis, den die Spec bewusst zahlt („Lokalisierung vom Browser");
+  der ISO-Wert im Zustand ist davon unberührt und wurde gemessen. Die deutsche
+  Anzeige steht aus der Abnahme vom 2026-09-03 belegt da.
+- **Ein Konsolenfehler in `--in-use`, der nicht dieser Aufgabe gehört.** Die
+  Story stellt eine `Table` unter die Filterleiste; React meldet
+  „In HTML, `<th>` cannot be a child of `<div>`" und dasselbe für `<td>`.
+  Ursache ist das Set: `Table`, `HeadRow` und `Row`
+  (`primitives/Table.tsx:89`, `:117`, `:128`) rendern `div`s, und rund zwanzig
+  Story-Dateien setzen `<th>`/`<td>` hinein. Das steht so seit der
+  Erstbestückung, `git show 4e505a9 -- FilterBar.stories.tsx` fasst die Tabelle
+  nicht an. Befund für das Set, eigene Aufgabe.
+- **`JournalEntryEditor.tsx:567`** trägt weiter ein rohes `<input type="date">`;
+  die Datei gehört einer parallelen Sitzung und war kein Prüfgegenstand.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05

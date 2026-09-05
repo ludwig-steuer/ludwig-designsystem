@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` — Erweiterung eines vorhandenen Exports |
 | Klassen-Test | entfällt — keine neue Komponente |
 | Quelle | Knopf-Erhebung `ludwig/app` vom 2026-09-03 (441 `.tsx`, 11 Stylesheets) |
@@ -301,3 +301,64 @@ Sieben deutsche JSDoc-Blöcke in `Button.stories.tsx` (`Variants`, `WithKey`,
 Drei davon gehören zu Stories, die diese Aufgabe selbst angelegt hat; das
 Nachtrag-Kriterium nennt die Datei ausdrücklich. Deutsch bleibt, was im Bild
 steht: die Beschriftungen der Knöpfe.
+
+
+## Abnahme der zweiten Nachbesserung, 2026-09-05
+
+Vierte Runde, fremder Prüfer — weder Erbauer noch einer der Vorprüfer.
+Geprüft gegen die festen Kriterien, die variablen aus der Spec und den
+Nachtrag; die Punkte der Vorrunden sind nachgemessen, nicht übernommen.
+Gemessen in einem eigenen headless Chromium (1440 × 900) auf
+`localhost:6107`, je Story ein eigener Lauf.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` nicht gestartet: er schreibt nach `storybook-static`, und parallel arbeiten weitere Sitzungen im Baum | ✓ (Build zitiert) |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Button.tsx` mit `Button.stories.tsx` daneben; Titel `v3/Primitives/Aktion/Button` (`Button.stories.tsx:6`), Gruppe „Aktion" wie im Barrel (`src/ui/v3/index.ts:42`, Export `:44–50`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Beide Dateien maschinell geprüft: alle `/* */`- und `//`-Blöcke ausgeschnitten und gegen eine Liste deutscher Funktionswörter gehalten — **kein Treffer** in `Button.tsx` und keiner in `Button.stories.tsx`. `Button` trägt beide Zeilen (`Button.tsx:90–97`), `KeyButton` ebenso (`:153–161`) | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}\b\|[0-9]+px\|fontSize' src/ui/v3/primitives/Button.tsx` → 0. Die Maße stehen in `v3.css`; kein Status, keine Label-Map im Knopf | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--variants`, `--sizes`, `--with-key`, `--disabled`, `--as-link`, `--icon-end`, `--loading`, `--full-width`, `--sizes-in-row` — neun. `Leer`/`LeerNachFilter` in der Spec begründet ausgeschlossen | ✓ |
+| Story-Deckung der Schnittstelle | `iconEnd` → `--icon-end`, `loading`/`loadingLabel` → `--loading`, `fullWidth` → `--full-width`, `size` → `--sizes` und `--sizes-in-row` | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Die zwei App-Punkte übersprungen (Skill `v3-komponente`). **V1** hält (Zeilen im Nachtrag). Der Rest nachgesehen: nichts zentriert, Farbe nur als Kritikalitätsstufe, Fokusring sichtbar, Lucide 1,5 px, kein Icon ohne Wort, keine Versalien, Gewicht 500 | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | `--sizes`, `--sizes-in-row`, `--loading`, `--icon-end`, `--full-width` geöffnet und vermessen; alle rendern gestylt | ✓ |
+
+**Variabel (aus der Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `loading` sperrt, setzt `aria-busy`, zeigt immer ein Wort (V7) | `--loading`, DOM-Probe: die beiden laufenden Knöpfe `disabled=true`, `aria-busy="true"`, `.v2spin` mit `aria-hidden="true"`, Beschriftung „Speichere …" bzw. unverändert „Stapel prüfen"; der ruhende Knopf ohne beides | ✓ |
+| Der Spinner dreht gleichmäßig, der Knopf springt nicht | `--loading`: `animation: 0.7s linear infinite v2spin`, 14 × 14 px; alle drei Knöpfe der Story messen **34,80 px** — laufend wie ruhend | ✓ |
+| `iconEnd` steht rechts vom Text, der Hotkey bleibt ganz rechts | `--icon-end`, Kindfolge des vierten Knopfs: `span[Volles Konto öffnen]` · `svg.lucide` · `kbd.v2kbd` | ✓ |
+| `icon` und `iconEnd` zusammen | `--icon-end`, dritter Knopf: `svg.lucide` · `span[Saldo stimmt]` · `svg.lucide` | ✓ |
+| `xs` und `sm` lassen die Zeilenhöhe unverändert; `md` drückt sie sichtbar auf (V1) | `--sizes-in-row` (Zeilen im Nachtrag gemessen) | ✓ |
+| `fullWidth` zentriert den Inhalt | `--full-width`: Elternbreite 320,00 px, beide Knöpfe 320,00 px, `justify-content: center`, Klasse `v2btn--full` | ✓ |
+| Die Datei trägt weiterhin kein `"use client"` | `grep -n '"use client"' src/ui/v3/primitives/Button.tsx` → kein Treffer | ✓ |
+| Ersetzt `ConfirmReviewButton.tsx` und das Inline-`padding` in `CaseSummaryEditor.tsx` | Beide Dateien liegen in `ludwig/app`; in diesem Repo nicht erfüllbar und nicht nachprüfbar | offen (App) |
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Eine Zeile mit `xs`- oder `sm`-Knopf ist so hoch wie eine ohne (Story `SizesInRow`, gemessen) | `--sizes-in-row`, `.v2tbl__row` nachgemessen: `xs` **47,25 px**, `sm` **47,25 px**, ohne Knopf **47,25 px**; Zellen in allen dreien 22,25 px. Die Knöpfe messen 20,25 px bei `min-height: 20.25px`, `padding-block: 0`, `vertical-align: top` und sind nicht abgeschnitten (`scrollHeight` 18 = `clientHeight` 18) | ✓ |
+| `md` drückt die Zeile weiterhin sichtbar auf (dieselbe Story) | Vierte Zeile **60,80 px** bei `border-bottom: 0px` — sie ist die letzte; mit Trennlinie 61,80 px, also 14,55 px über den anderen. Der Knopf ist 34,80 px hoch (`min-height: 0px`), die Aktionszelle 36,80 px | ✓ |
+| Außerhalb der Tabelle messen die drei Größen unverändert 35 / 30 / 25 px (Story `Sizes`) | `--sizes`: `md` **34,80 px** (Polster 8/14, `--fs-ui-md` 14 px), `sm` **30,19 px** (6/12, 13,5 px), `xs` **25,00 px** (4/9, 12,5 px), je `min-height: auto`, Gewicht 500 | ✓ |
+| Kein deutscher Kommentar mehr in `Button.tsx` und `Button.stories.tsx` (`grep`) | Behoben. Maschinelle Kommentar-Prüfung über beide Dateien: kein deutscher Block. Die sieben Blöcke, die in der Vorrunde rissen, stehen englisch da — `:14` „Four roles. `danger` only where something is lost …", `:41` „The key stands on the button …", `:52` „Locked means locked …", `:64` „Rendered as a link …", `:74` „Icon on the right …", `:95` „Running: locked, spinner …", `:108` „Full width instead of bigger …". Deutsch geblieben ist nur, was im Bild steht: die Beschriftungen der Knöpfe | ✓ |
+| `KeyButton` trägt `@when` und `@instead` | `Button.tsx:153–161`: „@when Action bars where every action has a key." / „@instead A single action whose key is optional → Button. An action that runs, can fail and may need a confirmation → ActionButton." | ✓ |
+| Die Maße im Dateikopf stimmen mit der Messung | `Button.tsx:8–13` nennt `md` 35 px, `sm` 30 px, `xs` 25 px und den Sonderfall Zeile („shrink to the height of the text next to them"); gemessen 34,80 / 30,19 / 25,00 px und in der Zeile 20,25 px = `--v2-row-fs` 13,5 px × 1,5 (`v3.css:53`, `:2762`). Auch die Story-Doku stimmt: `Button.stories.tsx:26–28` nennt dieselben drei Werte, `:120–125` nennt 47,25 px und 60,8 px — beide nachgemessen | ✓ |
+
+**Ergebnis: `fertig`.** Alle festen, alle variablen und alle
+Nachtrag-Kriterien sind erfüllt; offen bleibt allein das App-Kriterium, das
+`ludwig/app` betrifft und hier nicht erfüllbar ist.
+
+**Befunde** (keine Mängel dieser Aufgabe):
+
+1. **Rohe Pixelwerte in den Story-Inline-Styles** — `Button.stories.tsx:11`
+   (`gap: 10`) und `:57` (`fontSize: 13`). Die Komponente ist frei davon; das
+   Kriterium nennt sie, nicht die Story, und das Bild ist set-weit dasselbe.
+2. **Deutsche Story-JSDoc anderswo im Set** — unverändert aus der Vorrunde
+   (`FileDrop.stories.tsx`, `ChoicePrompt.stories.tsx`, `OverflowMenu`,
+   `Markdown`). Gehört in eine eigene Aufgabe.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05

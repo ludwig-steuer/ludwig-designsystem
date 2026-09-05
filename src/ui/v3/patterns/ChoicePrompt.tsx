@@ -72,7 +72,11 @@ export function ChoicePrompt({
   const why = pending
     ? null
     : !choice && !text.trim()
-      ? "Wählen Sie eine Antwort oder schreiben Sie eine."
+      ? // Without options there is nothing to pick, and the sentence must not
+        // send the reader looking for it (found in the review of 0028).
+        options.length === 0
+        ? "Schreiben Sie eine Antwort."
+        : "Wählen Sie eine Antwort oder schreiben Sie eine."
       : missingText
         ? "Bitte ergänzen Sie den Text."
         : null;
@@ -98,10 +102,10 @@ export function ChoicePrompt({
         <div className="v2ask__q">{question}</div>
         {context ? <div className="v2ask__ctx">{context}</div> : null}
       </div>
-      {/* Keine Gruppe ohne Gegenstand: bei reiner Freitext-Frage (60 % des
-          Bestands) stünde sonst eine leere `<fieldset>` mit der Legende
-          „Antwort" über dem Feld, das dieselbe Beschriftung trägt — zweimal
-          dasselbe Wort, und für einen Screenreader eine Gruppe ohne Inhalt. */}
+      {/* No group without a subject: on a pure free-text question (60 % of the
+          stock) there would otherwise be an empty `<fieldset>` with the legend
+          „Antwort" above a field that carries the same label — the same word
+          twice, and for a screen reader a group without content. */}
       {options.length === 0 ? null : (
       <RadioGroup
         name={groupName}

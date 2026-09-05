@@ -107,8 +107,8 @@ export const Invalid: Story = {
 export const WithLedger: Story = {
   render: function Render() {
     const [v, setV] = useState("6815");
-    const [leer, setLeer] = useState("");
-    const [blatt, setBlatt] = useState<string | null>(null);
+    const [empty, setEmpty] = useState("");
+    const [ledger, setLedger] = useState<string | null>(null);
     return (
       <div style={{ display: "grid", gap: 16, maxWidth: 380, minHeight: 420 }}>
         <Field label="Konto" hint="Das Icon führt zum Kontenblatt." htmlFor="k5">
@@ -117,23 +117,23 @@ export const WithLedger: Story = {
             valueName="Bürobedarf"
             onChange={setV}
             candidates={CANDIDATES}
-            onOpenLedger={setBlatt}
+            onOpenLedger={setLedger}
           />
         </Field>
         <Field label="Gegenkonto" hint="Ohne Wert bleibt das Icon stehen, deaktiviert." htmlFor="k6">
           <AccountField
-            value={leer}
-            onChange={setLeer}
+            value={empty}
+            onChange={setEmpty}
             candidates={{}}
-            onOpenLedger={setBlatt}
+            onOpenLedger={setLedger}
             ariaLabel="Gegenkonto"
           />
         </Field>
         <Drawer
-          open={blatt !== null}
-          onClose={() => setBlatt(null)}
+          open={ledger !== null}
+          onClose={() => setLedger(null)}
           size="lg"
-          title={`Kontenblatt ${blatt ?? ""}`}
+          title={`Kontenblatt ${ledger ?? ""}`}
           meta="Saldo 4.208,55 € · 31 Buchungen im Zeitraum"
         >
           <FieldList
@@ -158,22 +158,22 @@ export const WithLedger: Story = {
  */
 export const NumberAndName: Story = {
   render: function Render() {
-    const [bekannt, setBekannt] = useState("6815");
-    const [fremd, setFremd] = useState("4980");
-    const [lang, setLang] = useState("6825");
+    const [known, setKnown] = useState("6815");
+    const [foreign, setForeign] = useState("4980");
+    const [long, setLong] = useState("6825");
     return (
       <div style={{ display: "grid", gap: 16, maxWidth: 300, minHeight: 420 }}>
         <Field label="Name bekannt" htmlFor="k7">
-          <AccountField value={bekannt} onChange={setBekannt} candidates={CANDIDATES} />
+          <AccountField value={known} onChange={setKnown} candidates={CANDIDATES} />
         </Field>
         <Field label="Name unbekannt" hint={'Nur die Nummer — kein Platzhalter, kein „—".'} htmlFor="k8">
-          <AccountField value={fremd} onChange={setFremd} candidates={{}} />
+          <AccountField value={foreign} onChange={setForeign} candidates={{}} />
         </Field>
         <Field label="Langer Name im schmalen Feld" htmlFor="k9">
           <AccountField
-            value={lang}
+            value={long}
             valueName="Reinigung und Pflege der Geschäftsräume"
-            onChange={setLang}
+            onChange={setLong}
             candidates={{}}
             onOpenLedger={() => {}}
           />
