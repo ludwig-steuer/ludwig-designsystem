@@ -2638,3 +2638,67 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   align-items: baseline;
   gap: var(--space-1);
 }
+
+/* ── 0079 · Wizard — der Rahmen eines Ablaufs in nummerierten Schritten ────
+   Aus der App geholt (`.wz*` in `components.css`) und auf die Hausregeln
+   gezogen: Tokens statt `#fff`/`#FAFBFC`, Rand **statt** Rand plus Schatten,
+   „Schritt n" ohne Versalien (A2). Die Typografie-Regeln für `h2`/`.sub` im
+   Body kommen nicht mit — was im Schritt steht, ist Sache des Aufrufers.
+   Eigener Abschnitt am Ende, nicht einsortiert. */
+.v2wiz {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* Gleich breite Spalten: `minmax(0, 1fr)` ist das, was die Ellipse im Label
+   überhaupt greifen lässt — mit `1fr` wüchse die Spalte mit dem Wort. */
+.v2wiz__steps {
+  display: grid;
+  grid-template-columns: repeat(var(--v2wiz-steps), minmax(0, 1fr));
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-head);
+}
+.v2wiz__step {
+  display: flex; align-items: center; gap: var(--space-2); min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border-right: 1px solid var(--color-border-subtle);
+}
+.v2wiz__step:last-child { border-right: none; }
+.v2wiz__step[data-state="error"] { background: var(--color-danger-bg); }
+
+.v2wiz__num {
+  width: 24px; height: 24px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-sunken); color: var(--color-text-muted);
+  font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.v2wiz__step[data-state="done"] .v2wiz__num {
+  background: var(--color-success); color: var(--color-text-on-dark);
+}
+.v2wiz__step[data-state="active"] .v2wiz__num {
+  background: var(--color-primary); color: var(--color-text-on-dark);
+}
+.v2wiz__step[data-state="error"] .v2wiz__num {
+  background: var(--color-danger); color: var(--color-text-on-dark);
+}
+
+.v2wiz__lbl { display: flex; flex-direction: column; min-width: 0; }
+.v2wiz__n { font-size: 11px; font-weight: 600; color: var(--color-text-subtle); }
+.v2wiz__name {
+  font-size: 13px; font-weight: 500; color: var(--color-text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.v2wiz__step[data-state="active"] .v2wiz__name { color: var(--color-primary); font-weight: 600; }
+.v2wiz__step[data-state="done"] .v2wiz__name { color: var(--color-text); }
+.v2wiz__step[data-state="error"] .v2wiz__name { color: var(--color-danger); font-weight: 600; }
+
+.v2wiz__body { padding: var(--space-5) var(--space-6); min-height: 220px; }
+.v2wiz__foot {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-head);
+}

@@ -214,6 +214,12 @@ export {
   type RailItem,
   type RailTone,
 } from "./patterns/StepRail";
+export {
+  Wizard,
+  type WizardProps,
+  type WizardStep,
+  type WizardStepState,
+} from "./patterns/Wizard";
 export { useHotkeys, HotkeyLegend, type HotkeyBinding } from "./patterns/Hotkeys";
 export {
   CommandPalette,
