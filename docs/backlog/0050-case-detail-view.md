@@ -8,8 +8,8 @@
 | Quelle | Screenshot der Sachverhaltsansicht vom 2026-09-03 · `docs/seiten/sachverhalt-detail.md` |
 | Ersetzt | `SachverhaltScreen.tsx` (1815 Z.) + `parts.tsx` (522 Z.) in `modules/accounting-cases/ui/sachverhalt/` — das Gerüst, nicht die Datenbeschaffung |
 | Blockiert | die Ablösung der Sachverhaltsansicht in `ludwig/app` |
-| Voraussetzung | 0047 `RecordPager` ✓ · 0048 `EntityHeader` ✓ · 0049 ✓ (alle drei am 2026-09-03 gebaut) · **Entitätsprofil `docs/entitaeten/accounting-case.md` — fehlt** |
-| Blocker | Owner-Entscheid vom 2026-09-03: **erst das Entitätsprofil, dann bauen.** `docs/entitaeten/` enthält nur `TEMPLATE.md`. Diese Aufgabe steht sonst vollständig entschieden bereit — es ist keine Frage mehr offen, nur die Analyse fehlt. |
+| Voraussetzung | 0047 `RecordPager` ✓ · 0048 `EntityHeader` ✓ · 0049 ✓ (alle drei am 2026-09-03 gebaut) · Entitätsprofil `docs/entitaeten/accounting-case.md` — **geschrieben am 2026-09-05, Status `analysiert`**; es fehlt nur noch die fremde Prüfung |
+| Blocker | Owner-Entscheid vom 2026-09-03: **erst das Entitätsprofil, dann bauen.** Das Profil liegt seit 2026-09-05 vor und führt `CaseDetailView` im Zuschnitt mit Marke **jetzt**; sein Prüfprompt ist noch nicht gelaufen. Freigegeben wird diese Aufgabe vom Startprompt des Profils, sobald es auf `geprüft` steht — dann wird auch dieser Blocker gestrichen und das Profil als Quelle nachgetragen. |
 | Spec von / am | Claude, 2026-09-03 (Entscheidungen getroffen, nicht gebaut) |
 
 ## Ziel
