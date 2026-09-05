@@ -27,6 +27,9 @@ rm -rf "$DST"
 mkdir -p "$DST"
 
 # Pures Domänenwissen: DATEV-Regeln, geteilte Helfer, Fachtypen je Modul.
+# Dazu die Status-Registry (0080): sie liegt in der App unter `ui/status/`,
+# ist aber reines Vokabular und seit ludwig/app cf681257 importfrei — der
+# Ordner macht die Spiegelbarkeit nicht, die Import-Freiheit macht sie.
 rsync -a --prune-empty-dirs \
   --exclude='__tests__/' \
   --exclude='*.test.ts' \
@@ -35,6 +38,7 @@ rsync -a --prune-empty-dirs \
   --include='core/documents/*.ts' \
   --include='shared/*.ts' \
   --include='modules/*/domain/**.ts' \
+  --include='ui/status/status-registry.ts' \
   --exclude='*' \
   "$SRC/" "$DST/"
 

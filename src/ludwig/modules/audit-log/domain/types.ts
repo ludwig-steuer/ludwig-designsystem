@@ -5,7 +5,12 @@
  * spätere Nutzeraktionen und Hintergrundprozesse ab.
  */
 
-export type ActorKind = "user" | "system" | "api" | "cli" | "agent";
+/**
+ * `platform_audit_events.actor_kind` — DB-CHECK
+ * `platform_audit_events_actor_kind_check` (`20260701120000`).
+ */
+export const ACTOR_KINDS = ["user", "system", "api", "cli", "agent"] as const;
+export type ActorKind = (typeof ACTOR_KINDS)[number];
 
 export type AuditOutcome = "success" | "partial" | "failure";
 

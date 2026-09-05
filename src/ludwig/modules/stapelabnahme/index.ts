@@ -2,6 +2,7 @@
 export * from "./domain/bereitschaft";
 export * from "./domain/check-kinds";
 export * from "./domain/checklist";
+export * from "./domain/deckungsluecke";
 export * from "./domain/gate-zeile";
 export * from "./domain/gating";
 export * from "./domain/konten-befund";

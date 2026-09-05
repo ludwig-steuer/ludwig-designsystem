@@ -12,7 +12,12 @@
  *  - **gelb** — offen, aber nicht aus dieser Periode (Altlast) bzw. ein
  *    Gate-Hinweis ohne Blocker (ruhendes Zahlungskonto).
  *  - **grün** — nichts offen.
+ *
+ * Deckungslücken kommen über `deckungsluecke.ts` in Worte (F141) — derselbe
+ * Satz, den Schritt 8 zeigt.
  */
+
+import { deckungsLueckeAus } from "./deckungsluecke";
 
 export type BereitschaftsStand = "offen" | "hinweis" | "ok";
 
@@ -65,13 +70,20 @@ function belegPunkt(o: Record<string, unknown>, i: number): BereitschaftsPunkt {
   };
 }
 
-function kontoPunkt(o: Record<string, unknown>, i: number, hinweis: boolean): BereitschaftsPunkt {
+function kontoPunkt(
+  o: Record<string, unknown>,
+  i: number,
+  hinweis: boolean,
+  periodTo: string,
+): BereitschaftsPunkt {
   return {
     key: `konto-${hinweis ? "w" : "o"}-${i}`,
     sourceDocId: null,
     label: str(o.label) ?? str(o.accountNumber) ?? str(o.name) ?? "—",
     datum: null,
-    problem: str(o.problem) ?? "",
+    // Blocker tragen `problem`, Gate-Warnungen `warning` — ohne das zweite
+    // stand hier ein leerer Hinweis (F141).
+    problem: deckungsLueckeAus(o, periodTo)?.text ?? str(o.problem) ?? str(o.warning) ?? "",
     hinweis,
   };
 }
@@ -85,6 +97,7 @@ export function bereitschaftsZeilen(
   gate1a: GateEingang,
   gate3f: GateEingang,
   periodFrom: string,
+  periodTo: string,
 ): BereitschaftsZeile[] {
   const belege = gate3f.open.map(belegPunkt);
   // Der Gate-Zähler ist ungedeckelt, die Liste nicht. Die Aufteilung kann
@@ -94,8 +107,8 @@ export function bereitschaftsZeilen(
   const nurAltlast = periode.length === 0 && gate3f.openCount > 0;
 
   const auszugPunkte = [
-    ...gate1a.open.map((o, i) => kontoPunkt(o, i, false)),
-    ...(gate1a.warnings ?? []).map((o, i) => kontoPunkt(o, i, true)),
+    ...gate1a.open.map((o, i) => kontoPunkt(o, i, false, periodTo)),
+    ...(gate1a.warnings ?? []).map((o, i) => kontoPunkt(o, i, true, periodTo)),
   ];
 
   return [

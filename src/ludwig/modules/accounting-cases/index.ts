@@ -4,6 +4,7 @@ export * from "./domain/acceptance-triage";
 export * from "./domain/case";
 export * from "./domain/convention";
 export * from "./domain/document-number";
+export * from "./domain/mirror-hit";
 export * from "./domain/payment-term";
 export * from "./domain/payroll-payment";
 export * from "./domain/proposal-batch-spread";

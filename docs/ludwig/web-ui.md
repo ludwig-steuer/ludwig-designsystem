@@ -46,7 +46,8 @@ dünn, Queries leben im Modul.
   `LudwigEntryDrawer`, `DatevEntryDrawer`, `RawRowDrawer`); Rahmen und
   `UrlDrawer` liegen in `components/primitives` (R8).
 
-**Zum Sichten** — zwei Orte mit unterschiedlicher Aufgabe:
+**Zum Sichten** — Storybook. Die zweite Galerie (`app/dev/gallery`) ist mit
+dem Seiten-Rückbau vom 2026-09-05 entfallen, ebenso `/settings/components`:
 
 - **Storybook** (`pnpm --filter @ludwig/web storybook`, Port 6106) für die
   _reinen_ Darstellungskomponenten: 207 Stories über 64 Dateien, Zustände aus
@@ -54,8 +55,6 @@ dünn, Queries leben im Modul.
   `.storybook/server-actions-stub.ts` zieht dabei dieselbe Grenze wie Next
   (`"use server"` → Stub), sonst zöge die geteilte Schicht Drizzle in den
   Browser.
-- **`app/dev/gallery`** für alles, was **lädt** — die Drawer-Hüllen mit echtem
-  Server-Roundtrip, die Storybook nicht ausführen kann.
 
 **Styles** unter `apps/web/src/styles/`: `tokens.css` (Farb-, Font- und
 Spacing-Tokens `--space-1…12`), `app-chrome.css` (`.section`-Card,

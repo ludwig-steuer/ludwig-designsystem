@@ -303,6 +303,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
   - Quelle des Ereignisses ist die Spiegel-Buchung (`client_accounting_event.datev_mirror_entry_id`, dritte XOR-Quelle neben Beleg und Bank-Transaktion). EB-Vortrags-OPs ohne Spiegel-Buchung im abrufbaren WJ bleiben quellenlos.
   - Nicht `document_received` (kein Beleg bei uns) und nicht `accrual` (das ist die Dauerbuchungs-Sollstellung).
   - Stichtag: Replay-Cutoff des Experiment-Mandanten, sonst `as_of` des jüngsten OPOS-Snapshots. Läuft nach jedem Spiegel-Import (Onboarding- und Abgleich-Zweig), idempotent.
+  - Beim LDSV mit WK ist der Vortrag ein **Ereignis am Dauersachverhalt**: Personenkonto + Belegnummer sind EINE Identität, der Anker steht am selben Sachverhalt wie die Wiederkehr-Regel — beide Richtungen (F142), egal welcher Importer zuerst läuft.
 
 ### Belegnummern-Register (document number register)
 
@@ -813,6 +814,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
   1. **Gemeinsame Felder gehören an den Supertyp** (Gegenpartei, Summary, Datum, Status, Datei) und müssen dort verlässlich befüllt sein — nicht nur am Subtyp. (Heute verletzt: CLI-Ingest legt nur die Invoice-Subtyp-Row an, die Base-Row bleibt leer → Cases ohne Summary; Quickfix liest ersatzweise vom Subtyp. Siehe Memory `project_source_docs_base_row_missing`.)
   2. **Neue Belegart = neuer Subtyp + neuer Diskriminator-Wert + neuer Renderer-Registry-Eintrag**, NICHT Sonderpfade im bestehenden Code. Erweiterbar wie die `EntityStatusBadge`-Registry.
   3. **Reads & UI zeigen IMMER alle Belege über die Supertyp-Ebene** (Listen, Timeline, Sachverhalt). Subtypen liefern nur zusätzliche Detail-Felder zur Anreicherung. Niemals auf `invoices` filtern, wo „Belege" gemeint sind — sonst verschwinden Verträge / Bankauszüge aus der Ansicht.
+  4. **Nicht jede Belegart bekommt einen Subtyp.** Container-Belegarten — Kontoauszug (`bank_statement_pdf`), Kreditkartenabrechnung (`credit_card_statement`), Reisekostenabrechnung (`travel_expense_report`) — tragen keine eigenen Fachfelder, sondern klammern andere: ihre Struktur liegt am Import-Batch (`client_bank_import_batches`: Zeitraum, Anfangs-/Endsaldo, Auszugsnummer, Zeilenzahl) bzw. an den Kind-Belegen der Dokumentgruppe (`parent_source_doc_id` + `collection_kind`, `belege.md` R25). Für sie ist eine Subtyp-Tabelle ausdrücklich nicht vorgesehen. Der Renderer-Registry-Eintrag „Container/Deckblatt" hängt an der Gruppen-Relation, nicht an der Belegart — die Registry je Belegart führt nur Rechnung und Vertrag. (Owner-Rückfrage Design-System B2, 2026-09-04.)
 - Notes: Konkretisiert die „Datenmodell-Schichten"-Tabelle oben (Zeile „Quelle (Dokument)" / „Quelle (Subtyp Rechnung)"). Owner-Entscheidung 2026-06-03: Beleg ↔ Rechnung sprachlich/UI-seitig sauber als Oberbegriff ↔ Ausprägung führen.
 
 ### Document completion (Beleg-Erledigung)

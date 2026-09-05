@@ -33,10 +33,12 @@ export interface RecurringDerivationConfig {
   taxAccountNumbers: ReadonlySet<string>;
 }
 
-export type RecurringCandidateClass =
-  | "uebernehmen"
-  | "beendet_erkannt"
-  | "nicht_uebernehmbar";
+export const RECURRING_CANDIDATE_CLASSES = [
+  "uebernehmen",
+  "beendet_erkannt",
+  "nicht_uebernehmbar",
+] as const;
+export type RecurringCandidateClass = (typeof RECURRING_CANDIDATE_CLASSES)[number];
 
 export interface RecurringCandidateTemplateLine {
   /** Logische Sachkonto-Nummer (Aufwand/Erlös). */
