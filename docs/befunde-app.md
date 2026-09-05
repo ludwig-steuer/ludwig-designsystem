@@ -137,12 +137,42 @@ ausgelagerte Design-System ist (`docs/backlog/README.md`).
 | `DataTable` (0057) | den Tabellenteil der 13 Listenseiten, zuerst `[year]/cases/page.tsx`; die zwei v2-`SelectionBar`-Stellen | — |
 | `ClarificationCard` (0060) | `AnswerInput` und die Portal-Kopie | — |
 | Beleg-Familie (`SourceDocumentCell`/`Row`/`Preview`/`Facts`) | `BelegSummary`, `BelegPreview`, `SourceDocFactsCard`, den Fakten-Teil von `GlanceCard` und `ContractDetail`, `ClassificationStack`, `InvoiceNumberCell`, die Zeilen von sechs Listen | Positionen und Vorsteuer (0072), der Vertrags-Editor (0073), der View mit seinen sechs Tabs (0071) |
+| `StatusHeader` (0077) | `ui/components/primitives/StatusHeader.tsx` in 36 Dateien — `legend={axisLegend("x")}` wird `axis="x"` | `hint` (20 Stellen) und `legend` von Hand (8 Stellen → L-51); die Hover-Legende — das Set erklärt per Klick im `StatusInfoDialog` |
+| `Confidence` (0078) | `ConfidenceDot`, `ConfidenceMeter`/`ConfidenceBand`, `Confidence` (invoices) in zwölf Dateien; danach `.confdot`/`.conf`/`.confband` aus `app-chrome.css`/`booking.css` | Meter (drei Balken) und Band — ein Anteil als Balken ist `Progress` |
+| `Wizard` (0079) | `ui/components/wizard/Wizard.tsx` in fünf Dateien, formgleich (Import-Tausch); `settings/components` ist vorher Rückbau (F111 B2) | die `h2`/`.sub`-Typografie im Body |
+
+## F · Bleibt in der App — benannte Kompositionen (Owner 2026-09-04)
+
+Kein v3-Baustein, sondern Markup aus vorhandenen Primitives an der
+Aufrufstelle. Die Liste ist das Ziel des Grep-Zählers der App: was hier steht,
+wird nicht mehr ans Set gemeldet. Antwort auf `ludwig/app`
+`docs/backlog/F147-luecken-fuer-design-agent.md` §2 und §5.
+
+| Heute in der App | Wird in der App zu |
+|---|---|
+| Top-Bar-Füllung (`TopBar.tsx`) | `TopBar` (0030) mit `crumb` · `search` (`SearchInput`) · `actions` |
+| `MandantBand`, `MandantSwitcher` | `Popover` + `NavList`, der Link ein `TextButton` |
+| `YearSwitcher`, `RememberClientYear` | `Popover` + `NavList`; der Jahreszustand ein `StatusBadge` |
+| `UserMenu` | `OverflowMenu` |
+| `RoleBadge` | `StatusBadge axis="rolle"` — die Achse existiert |
+| `ExperimentBadge`, `ExperimentMandantBanner` | `Badge`, `Banner` |
+| `ReadinessBanner`, `EmbeddingCoverageBanner` | `StatusCallout` / `Banner` |
+| `EntityStatusBadgeButton` + `FlowModal` | `StatusBadge chevron` (0049) als Auslöser, `Dialog` mit drei `StatusBadge` und Entitäts-Icons; die Server Action `fetchFlowSnapshot` bleibt drüben |
+| `KIND_DOT_COLOR`, `BadgeKind` | `BadgeTone`, `DotStatus`, `Badge dot` — Farbe aus Tokens, keine Hex-Tabelle (V13) |
+| `TaxKeySelect` | `Select` über `TAX_KEYS` (gespiegelt in `core/datev/tax-keys.ts`) im `JournalEntryEditor` (0015) |
+| `CopyTextButton` | `ActionButton` mit Clipboard-Aktion + `useToast` |
+| `ManualBookingDrawer` | `Drawer` + `JournalEntryEditor`; die Datenbeschaffung bleibt im Modul |
+| Schalter (Toggle) | entfällt — 0018 verworfen |
+| Kommentar-/Notizstrang (`CaseCommentForm`, `ClientAgentNotesPanel`) | wartet auf L-27 |
+| Sparkline in der KPI-Kachel | wartet auf das Seitenprofil des Dashboards (Welle 2) |
 
 ## Was zuerst
 
 Wer die App anfasst, kommt am schnellsten voran, wenn er in dieser Reihenfolge
 geht — sie folgt daraus, wie viele v3-Bausteine an einem Befund hängen:
 
+0. **L-48/L-49** (Registry) — eine Typdefinition und ein kopierter Block;
+   blockiert E1.4 der App-Migration und 0080 hier.
 1. **L-15** (`sort`/`dir` in `PageRequest`) — hängt an allen 13 Listenseiten und
    damit an `DataTable`; ohne das sortiert weiterhin keine Seite.
 2. **L-09** (`ClarificationVM` ohne UI-Import) — solange die Datei
