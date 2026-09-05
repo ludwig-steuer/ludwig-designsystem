@@ -148,6 +148,19 @@ ausgelagerte Design-System ist (`docs/backlog/README.md`).
 | `StatusHeader` (0077) | `ui/components/primitives/StatusHeader.tsx` in 36 Dateien — `legend={axisLegend("x")}` wird `axis="x"` | `hint` (20 Stellen) und `legend` von Hand (8 Stellen → L-51); die Hover-Legende — das Set erklärt per Klick im `StatusInfoDialog` |
 | `Confidence` (0078) | `ConfidenceDot`, `ConfidenceMeter`/`ConfidenceBand`, `Confidence` (invoices) in zwölf Dateien; danach `.confdot`/`.conf`/`.confband` aus `app-chrome.css`/`booking.css` | Meter (drei Balken) und Band — ein Anteil als Balken ist `Progress` |
 | `Wizard` (0079) | `ui/components/wizard/Wizard.tsx` in fünf Dateien, formgleich (Import-Tausch); `settings/components` ist vorher Rückbau (F111 B2) | die `h2`/`.sub`-Typografie im Body |
+| `FilterBar` (0003) | die Formularzeile von `AccountFilterForm` | — |
+| `Skeleton` (0016) | drei handgebaute Lade-Platzhalter, dazu elf `Suspense`-Fallbacks | — |
+| `RadioGroup` (0017) | drei rohe `<input type="radio">` in `DatevExportWizard.tsx` und `BatchActions.tsx` | — |
+| `NavList` (0031) | das Navigations-Rendering in `Sidebar.tsx` (238 Z.) | die `.sb__nav*`-Klassen bleiben Bestand |
+| `CaseCell` (0095) | `ui/case/CaseCell.tsx` in `documents/page` und `StuckDocumentsTable` **und** die Kopie in `KontoauszugView` (Z. 134–172) | — |
+| `CaseRow` (0096) | die Zeile in `[year]/cases/page.tsx` samt sechs Zell-Hilfskomponenten und `CaseSummaryTooltip`, dazu `CasesTab.tsx` | — |
+| `CaseFacts` (0097) | die Faktenzeile aus `parts.tsx` `Hero`, die Portal-Meta, der Streifen aus `CaseOverviewBox` | die drei zeigen heute drei verschiedene Sätze |
+| `CaseDrawer` (0098) | **keinen Baustein — einen Seitenwechsel**: die drei Listen mit `CaseCell` öffnen künftig den Drawer | — |
+| `BankTransactionPurpose` (0099) | `PurposeDisplay.tsx` samt `purpose.css` in fünf Dateien | `KontoauszugView` bekommt sie überhaupt erst (L-59) |
+| `BankTransactionCell` (0100) | `EventStack.BankTransactionBlock`, die Auszugszeile aus `Schritt4.tsx` | — |
+| `BankTransactionRow` (0101) | die Zeile aus `KontoauszugView` und aus `BankTransactionAssignmentTable`, dazu vier Helfer aus `kontoauszug-presentation.tsx` | die dritte Route `configuration/bankkonten/[accountId]/transactions` gehört mit abgelöst (L-62) |
+| `BankTransactionFacts` (0102) | `BankTransactionDetail.tsx` samt `KV` | — |
+| `BankTransactionDrawer` (0103) | `ui/drawers/BankTransactionDrawer.tsx` | Klasse A → B: die drei Aufrufer bringen die Zeile künftig mit |
 
 ## F · Bleibt in der App — benannte Kompositionen (Owner 2026-09-04)
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **geprüft** (zweiter Agent, 2026-09-05 — Abschnitt „Prüfung") |
+| Status | **in Specs** — 0099 Purpose · 0100 Cell · 0101 Row · 0102 Facts · 0103 Drawer (alle `spec`, 2026-09-05) |
 | GLOSSARY | `### Bank transaction` — englisch `bank transaction`, Ordner `entities/bank-transaction/`. **Der deutsche Name ist strittig**, siehe Befund B1 und Offene Frage 1 |
 | Tabelle | `ludwig.client_bank_transactions`. Keine Subtypen |
 | Typen | `modules/bank-transactions/infrastructure/bank-transactions-queries.ts` — `BankTransactionAssignmentRow`, `AssignedCaseLink`, `ProposalIndicatorStatus`; `ui/PurposeDisplay.tsx` — `PurposeParts`, `derivePurposeParts()`; `ui/kontoauszug-presentation.tsx` — `ZState`, `deriveZ()`, `restOf()`, `DATEV_MATCHED_STAGES`, `datevMatchTitle()`; `ui/case-indicators.ts` — `CaseIndicator`, `deriveCaseIndicators()`. Der Spiegel hat `src/ludwig/modules/bank-transactions/domain/` — aber nur den **Import**-Typ `BankTransactionRow` (Parser-Ausgabe) und `raw-sheet`. Der **Anzeige**-Typ und alle Ableitungen fehlen (Befund B2, im Prüflauf korrigiert) |
