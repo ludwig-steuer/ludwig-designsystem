@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — dritter Durchgang; M1–M6 behoben, dazu die vier deutschen `@when`/`@instead`-Zeilen in `Icons.tsx` |
+| Status | fertig (abgenommen 2026-09-05, dritter Durchgang; offen bleibt nur die App-Zeile `mandant-nav.ts`) |
 | Stufe | **Grundlagen-Ebene** `src/ui/v3/Icons.tsx`, neben `format.ts`. Die Spec schrieb `patterns/` — warum das nicht trägt, steht unter „Entscheide des Bauenden" |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: jede App muss einmal festlegen, was „zum Objekt", „im Drawer nachschlagen" und „erklären" als Zeichen heißt; nur die Tabelle der Entitäten wäre dort eine andere |
 | Quelle | Anfrage Owner vom 2026-09-05 („Symbole sollen eine Bedeutung haben, die wir einmal festschreiben und später verwenden: welches Icon steht für welche Entität, welches heißt mehr Infos, welches navigiere zum Objekt, welches mehr Infos im Drawer") · `Icons.stories.tsx` (0055) hält das Vokabular heute nur als Story · Regeln A8, T8, T9 |
@@ -269,7 +269,7 @@ Nachweise unten stehen auf dem Stand nach der Nachbesserung.
 |---|---|---|
 | `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` selbst gelaufen, ohne Ausgabe. `pnpm build` zitiert: der Lauf des Bauenden für diesen Stand meldete „Storybook build completed successfully". Zusätzlich `pnpm check:icons`: „in Ordnung. 52 Zeichen in der Registry, 2 Datei(en) noch offen." | ✓ |
 | Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/Icons.tsx` + `Icons.stories.tsx` daneben; `title: "v3/Grundlagen/Icons"` (`Icons.stories.tsx:68`); Barrel-Gruppe „Grundlagen — das Vokabular, das jeder Baustein teilt" (`index.ts:229`) | ✓ |
-| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` an `EntityIcon` und `ActionIcon`; die zwei Tabellen tragen keins — dieselbe Form wie `STATUS_REGISTRY` (`status-registry.ts:1768`), Präzedenz trägt. Kopfkommentar, Feld-Doks und Komponenten-Prosa sind im zweiten Durchgang englisch, ebenso `scripts/check-icons.mjs`; der Kopf sagt jetzt auch, warum `label`/`meaning`/`instead` deutsch bleiben. **Rest:** die vier `@when`/`@instead`-**Zeilen selbst** sind noch deutsch (`Icons.tsx:431`, `:433`, `:455`, `:456`) — genau der Punkt, den CLAUDE.md eigens einklammert („JSDoc (auch `@when`/`@instead`)"). Im ganzen Set gibt es noch acht solcher Zeilen; vier davon sind diese, die anderen vier stehen in `StatusBadge.tsx`, `Badge.tsx`, `EmptyState.tsx` — Altdateien ohne Spec und ohne Abnahme | ✗ M5-Rest |
+| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` an `EntityIcon` und `ActionIcon`; die zwei Tabellen tragen keins — dieselbe Form wie `STATUS_REGISTRY` (`status-registry.ts:1768`), Präzedenz trägt. Kopfkommentar, Feld-Doks und Komponenten-Prosa sind englisch, ebenso `scripts/check-icons.mjs`; der Kopf sagt auch, warum `label`/`meaning`/`instead` deutsch bleiben (angezeigter Text). Die vier `@when`/`@instead`-Zeilen selbst sind im dritten Durchgang nachgezogen — `grep -n "@when\|@instead" src/ui/v3/Icons.tsx` zeigt `:431`, `:433`, `:455`, `:456` englisch. Im Set bleiben sechs deutsche solcher Zeilen, alle in `StatusBadge.tsx`, `Badge.tsx`, `EmptyState.tsx` — Altdateien ohne Spec und ohne Abnahme, die CLAUDE.md ausdrücklich ausnimmt | ✓ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | keine Farbliterale und keine CSS-Maße in `Icons.tsx`; `size` sind ausschließlich die Leiterwerte (`IconSize`, `Icons.tsx:419`); `StatusBadge` holt sein Zeichen über `AXIS_ENTITY` (`entity-icons.ts:22`) aus der Registry, keine eigene Tabelle mehr | ✓ |
 | Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `v3-grundlagen-icons--in-use` ist da und im Browser angesehen: `RowActions` mit `open` · `peek` · `more` (jedes mit Wort, T8), `EntityHeader` mit `EntityIcon accounting-case` 20 px als Kachel, zwei `StatusBadge` (Beleg, Sachverhalt) und ein `IconButton close`. Damit sind alle vier Stories der Spec vorhanden; `className` hat seinen Nachweis. Ausgeschlossene Zustände (leer, lädt, Fehler) sind unter „Verhalten" begründet | ✓ |
 | Prüfliste `design-guidelines.md` §9 durchgegangen | durchgegangen. Die CSS-Chevron ist weg (siehe „Umzug im Set"); einziger Treffer ist noch die Sprache der vier `@when`/`@instead`-Zeilen. Maße neben der Leiter stehen nur in ausgenommenen bzw. PENDING-Dateien (`Review.tsx:69` 15 px, `Process.tsx:117` Stroke 1,75, `AiBookingNotes.tsx:130` 13 px, `JournalEntryEditor.tsx:621` 13 px) — Story `Sizes` zeigt sie als „daneben", 0088 holt die von `Process` | ✓ |
@@ -303,21 +303,35 @@ Nachweise unten stehen auf dem Stand nach der Nachbesserung.
 | M2 | behoben | `ExpandableRow.tsx:92–93` nimmt `ActionIcon collapse`; im sichtbaren Fenster einen Zyklus geklickt: 0° → 90° → 0°, umkehrbar, Mittelpunkt bleibt stehen |
 | M3 | behoben | `GROUPS`, `GROUPED`, `UNGROUPED`, `Glyph` sind aus `Icons.stories.tsx` verschwunden; neun Lucide-Importe bleiben |
 | M4 | behoben | `design-guidelines.md:606` nennt `src/ui/v3/Icons.tsx` mit Grund |
-| M5 | **fast** | Datei-Kopf, Feld-Doks, Komponenten-Prosa und der Wächter sind englisch. Offen bleiben die vier `@when`/`@instead`-Zeilen selbst (`Icons.tsx:431`, `:433`, `:455`, `:456`) — CLAUDE.md nennt sie ausdrücklich |
+| M5 | behoben (zwei Durchgänge) | Datei-Kopf, Feld-Doks, Komponenten-Prosa und der Wächter im zweiten; die vier `@when`/`@instead`-Zeilen im dritten — `grep -n "@when\|@instead" src/ui/v3/Icons.tsx` zeigt vier englische Zeilen |
 | M6 | behoben | `tenant` = `Stamp` (im Set sonst unvergeben), damit ist die `Scale`-Doppelvergabe weg; der Widerspruch von `Process` steht als Aufgabe **0088** mit Auftrag, und die Wächter-Ausnahme nennt sie (`check-icons.mjs:35`) |
 
-**Offen:**
+**Der Rest des zweiten Durchgangs, nachgeprüft:** die vier `@when`/`@instead`-Zeilen
+an `EntityIcon` und `ActionIcon` sind englisch (`Icons.tsx:431`, `:433`, `:455`,
+`:456`); `type LucideIcon` ist aus `Icons.stories.tsx` verschwunden; die
+Kopfzeile „Stufe" dieser Spec nennt die Grundlagen-Ebene statt `patterns/`.
+Damit sind alle sechzehn Kriterien ✓.
 
-- **M5-Rest** — die vier `@when`/`@instead`-Zeilen an `EntityIcon` und `ActionIcon` sind noch deutsch. Das ist der Punkt, den CLAUDE.md eigens einklammert („JSDoc (auch `@when`/`@instead`)"), in einer Datei, die diese Aufgabe neu angelegt hat; die drei anderen Fundstellen im Set (`StatusBadge.tsx`, `Badge.tsx`, `EmptyState.tsx`) sind Altdateien, die nie durch eine Abnahme gingen. Vier Zeilen, ein Handgriff — danach ist die Aufgabe fertig.
-- Kleinigkeit ohne Mangel-Rang: `type LucideIcon` in `Icons.stories.tsx:12` hat nach dem Aufräumen keinen Verwender mehr.
-- offen (App): `mandant-nav.ts`.
+**Was mit der Aufgabe nicht mitgeht:**
 
-Abgenommen von / am: **noch nicht** — Status „in Arbeit" mit einem einzigen
-offenen Punkt (Claude, Abnahme-Agent, 2026-09-05, zweiter Durchgang). Fünfzehn
-von sechzehn Kriterien sind ✓; es fehlt nur die Sprache der vier
-`@when`/`@instead`-Zeilen. Wer sie übersetzt, kann ohne weitere Prüfung auf
-„fertig" setzen — der Nachweis ist
-`grep -rn "@when\|@instead" src/ui/v3/Icons.tsx`.
+- **offen (App)** — `mandant-nav.ts` bezieht seine Entitäts-Icons weiter aus
+  einer eigenen Tabelle; das ist die E-Zeile im Register der App (Befund B1).
+- **Aufgabe 0088** — solange sie offen ist, zeigt das Set Kanzlei und Mandant
+  an zwei Stellen verschieden: die Registry `Stamp` und `Briefcase`, der
+  Staffelstab in `Process.tsx` `Building2` und `UserRound`. Der Wächter nennt
+  die Aufgabe in seiner Ausnahme, die Ausnahme fällt mit ihr.
+- **Zwei PENDING-Dateien** — `SourceDocumentDrawer.tsx` und
+  `JournalEntryEditor.tsx` importieren noch direkt; die Liste schrumpft und
+  wächst nie, und eine tot gewordene Zeile meldet der Wächter als Fehler
+  (selbst ausprobiert).
+
+Abgenommen von / am: **Claude, Abnahme-Agent, 2026-09-05** (dritter Durchgang;
+gebaut hat ein anderer Agent). Nachweise in der Tabelle oben: eigene Läufe von
+`pnpm typecheck` und `pnpm check:icons`, der zitierte grüne `pnpm build`, der
+selbst rot gemachte Wächter in beiden Zweigen, und Storybook auf 6107 —
+`Entities`, `Actions`, `Sizes`, `WithWord`, `InUse` sowie zehn umgezogene
+Bausteine im Browser gemessen. · Offene Punkte: keine im Set; „offen (App)"
+`mandant-nav.ts` und die Nachfolge-Aufgabe 0088.
 
 ## Offene Fragen
 
