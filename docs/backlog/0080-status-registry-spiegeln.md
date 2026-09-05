@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — zweiter Durchgang; M1 behoben |
+| Status | fertig |
 | Stufe | `patterns/` (betrifft `status-registry.ts`, `StatusBadge`, `StatusInfoDialog`, `entity-icons.ts`, alle Konsumenten von `resolveStatus`/`axisLegend`) |
 | Klassen-Test | entfällt — keine Komponente, eine Quellen-Entscheidung |
 | Quelle | Owner-Entscheid 2026-09-04: **die Registry bleibt in der App, das Design-System spiegelt sie** über `scripts/sync-ludwig.sh` wie jeden Domänentyp. Antwort auf `ludwig/app` `F147-designsystem-abloesung.md` §5d und `F147-luecken-fuer-design-agent.md` §2 Nr. 7 |
@@ -189,3 +189,47 @@ Zwei der drei Nebenbefunde sind mit erledigt:
 (`v3-komponente`, `entitaet-analysieren`) verweisen weiter auf die gelöschte
 `src/ui/v3/patterns/status-registry.ts`. Skills ändere ich in dieser Runde
 nicht; das ist gemeldet.
+
+## Nachprüfung nach der Nachbesserung (2026-09-05, Stand `bce9224`)
+
+M1 ist behoben, und zwar an der richtigen Stelle: die Texte sind nicht besser
+formuliert, sondern **abgeschrieben**. Alles neu gerechnet, nichts aus der
+ersten Runde übernommen — zwischen den Runden ist `pnpm sync:ludwig` gelaufen,
+also musste auch der Spiegel noch einmal gegengeprüft werden.
+
+| Nachgeprüft | Nachweis | Ergebnis |
+|---|---|---|
+| **M1** — die sieben `AXIS_SOURCE`-Texte stimmen und sind aus der App übernommen | Beide Maps Schlüssel für Schlüssel gegen `apps/web/src/ui/status/entity-icons.ts` verglichen: `AXIS_LABEL` 62/62 **wortgleich**, `AXIS_SOURCE` 62/62 **wortgleich**, `ENTITY_LABEL` 3/3 — **keine einzige Abweichung mehr** (vorher 4 Labels und 8 Quelltexte). `entity-icons.ts:172` heißt jetzt „berechnet — `RecurringCandidateClass` aus der DATEV-Buchungshistorie (F91)". Nicht nur auf Gleichheit geprüft, sondern auf Richtigkeit: alle sieben decken sich mit dem Blockkommentar der jeweiligen Achse im Spiegel (`zahlungsweg` → `valid_until` ohne den erfundenen Zusatz; `mandant_betrieb` → `is_active` + `replay_cutoff_date`; `token` → `revoked_at` + `expires_at`; `bridge_datev` → `DatevApiStatus`; `vst_fakt` → `VatFact.value`; `vst_regel` → Katalog-Regel über den Fakten). Die falsche Aussage „Jahreswechsel / Vergleich der Jahre" existiert nirgends mehr (`grep` leer) | ✓ |
+| Der Spiegel hat sich durch den Sync-Lauf nicht bewegt | `diff` App-Original gegen `src/ludwig/ui/status/status-registry.ts` → **leer**, 2.122 Z.; `git status --porcelain src/ludwig` und `docs/ludwig` beide leer. Der Lauf hat bestätigt, nicht verändert | ✓ |
+| Diff alte Kopie gegen Spiegel — **blockweise neu gerechnet** | `git show ef8e053^:…` gegen den heutigen Spiegel: 55 Achsen-Blöcke alt, 62 neu, **54 zeichengleich**, einziger geänderter `PRODUKTBEFUND` (`prepared`), sieben neu. Achsen-Union: nur alt → **leer**; nur neu → genau die sieben. Label-Folge je Achse: 54 von 55 zeichengleich, die 55. `produktbefund` mit „Vorbereitet" | ✓ |
+| Die Richtigstellung zum Blocker-Absatz steht in der Abnahme | In der Zeile „Diff alte Set-Kopie gegen Spiegel" oben, wörtlich: 14 Zeilen stehen nur in der alten Kopie (`BadgeTone`-Import samt zwei Verwendungen, **eine Wertzeile** im Produktbefund, elf umformulierte Kommentare). Kein Verlust — aber „keine Zeile in die Gegenrichtung" stimmte nicht. Vom Erbauer angenommen | ✓ |
+| `pnpm typecheck` und `pnpm check:icons` | Beide am 2026-09-05 nach der Nachbesserung selbst gelaufen: Exit 0 und Exit 0 („52 Zeichen in der Registry, 2 Datei(en) noch offen") | ✓ |
+| `pnpm build` | Weiterhin nicht gestartet. **Genau gesagt:** der zitierte grüne Lauf („Storybook build completed successfully") deckt `ef8e053`, nicht `bce9224`. Der Unterschied sind zwölf Zeichenketten in `entity-icons.ts` plus Doku und Skript — keine Struktur, kein Import, kein Typ. Dass das Modul übersetzt und läuft, ist im Browser belegt: die neuen Beschriftungen stehen gerendert auf der Seite | ✓ (zitiert) |
+| Stories rendern wie vorher | `…statusbadge--all-axes` neu ausgelesen: 62 Achsen, alle Wörter und Farben der 55 alten Achsen unverändert (maschinell gegen die alte Kopie geprüft, 54/55 zeichengleich, `produktbefund` mit dem angekündigten „Vorbereitet"). Die vier geänderten Überschriften betreffen **nur neue Achsen** („Zahlungsweg-Zustand", „Betriebszustand", „Token", „Bridge") — für die 55 alten Achsen ist `AXIS_LABEL` gegenüber `ef8e053^` unverändert. `…statusinfodialog--document` zeigt Titel „Beleg", Quelle `client_source_docs_invoices.processing_status` und die fünf Werte samt Erklärtext wie zuvor | ✓ |
+| Der README-Abschnitt überlebt den Sync | Der Text steht jetzt im Heredoc (`scripts/sync-ludwig.sh:96–114`). Nachgerechnet: Heredoc-Inhalt aus dem Skript extrahiert und gegen `docs/ludwig/README.md` gehalten — **identisch**. Der nächste Sync schreibt denselben Abschnitt wieder hin, statt ihn zu löschen | ✓ |
+| Befund 1 hat eine Aufgabe | `docs/backlog/0105-entity-icons-gabelt.md` — mit dem Argument, den drei Entscheidungswegen und dem Wächter, der beide Dateien vergleicht. Bis dahin sind sie deckungsgleich, was den Wächter heute grün machen würde | ✓ |
+
+**Eine Beobachtung ohne Mangel:** mit angeglichen wurde `beleg_erledigung`, die
+einzige Achse, die dieses Repo vor der App hatte. Ihr Quelltext ist von
+„`client_source_docs.completed_via` — dazu `completed_at`, das Offen von
+Erledigt trennt" auf die App-Fassung „`client_source_docs.completed_via`
+(+ `completed_at`)" gekürzt. Beide stimmen; die Set-Fassung sagte mehr. Ohne
+Folge, weil die einzige Stelle, die die Achse zeigt, den Dialog gar nicht
+anbietet (`SourceDocument.tsx:207`, `info={false}`) und der ausführliche
+Grund im Blockkommentar der Registry steht.
+
+**Offen bleiben die zwei gemeldeten Punkte** — keiner ein Mangel dieser
+Aufgabe, beide außerhalb dessen, was in dieser Runde angefasst wird:
+
+- Befund 3: `.claude/skills/v3-komponente/SKILL.md:90` und
+  `.claude/skills/entitaet-analysieren/SKILL.md:31` verweisen weiter auf die
+  gelöschte `src/ui/v3/patterns/status-registry.ts`. Neu:
+  `@/ludwig/ui/status/status-registry`.
+- Befund 4: `design-guidelines.md:489` trägt in der Spalte „Ist (v1)" noch
+  „Kopie im Set"; der Entscheid in der Status-Spalte ist richtig.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · **fertig.** Der
+Umzug ist blockweise nachgerechnet und verlustfrei: keine Achse, kein Wert,
+keine Farbe verloren, und die Beschriftung der sieben neuen Achsen steht jetzt
+dort abgeschrieben, wo sie hingehört. Offene Punkte: Befunde 3 und 4, beide
+gemeldet und außerhalb dieser Aufgabe.
