@@ -10,27 +10,28 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { trapTab } from "./focus";
 import { IconButton } from "./IconButton";
 
 /**
- * Der Slide-over von rechts (0042) — die eine Drawer-Hülle des Sets.
+ * The slide-over from the right (0042) — the one drawer shell of the set.
  *
- * Sie ist für das **Nachschlagen neben der Arbeit** da: die Buchhalterin
- * steht in einer Liste und will zu einer Zeile etwas Bestehendes ansehen —
- * das Kontenblatt, die offenen Posten — ohne die Liste zu verlassen. Kommt
- * sie zurück, stehen Filter und Zeile noch.
+ * It is there for **looking something up next to the work**: the accountant
+ * stands in a list and wants to see something existing about one row — the
+ * account sheet, the open items — without leaving the list. When she comes
+ * back, filter and row are still there.
  *
- * Übernommen aus der App (`ui/components/primitives/Drawer.tsx`, 29
- * Aufrufstellen) mit unverändertem Verhalten; neu sind Tokens statt Hex,
- * `IconButton` statt eigenem Kreuz und die Fokus-Führung.
+ * Taken from the app (`ui/components/primitives/Drawer.tsx`, 29 call sites)
+ * with unchanged behaviour; new are tokens instead of hex, `IconButton`
+ * instead of its own cross, and the focus handling.
  */
 
-/** Breiten-Stufen statt ad-hoc-CSS je Aufrufer. Werte in `tokens.css`. */
+/** Width steps instead of ad-hoc CSS per caller. The values are in `tokens.css`. */
 export type DrawerSize = "sm" | "md" | "lg";
 
 export interface DrawerProps {
   open: boolean;
-  /** Escape, Klick aufs Scrim, Kreuz — alle drei Wege melden dasselbe. */
+  /** Escape, a click on the scrim, the cross — all three report the same. */
   onClose: () => void;
   title: ReactNode;
   /** Second line below the title — balance, period, origin. */
@@ -50,7 +51,7 @@ export interface DrawerProps {
 
 const DrawerFooterSlot = createContext<HTMLElement | null>(null);
 
-/** Wie lange der Knoten nach dem Schließen für die Ausblende-Bewegung steht. */
+/** How long the node stays after closing, for the movement out. */
 const EXIT_MS = 300;
 
 /**
@@ -69,7 +70,7 @@ export function Drawer({
 }: DrawerProps) {
   const [render, setRender] = useState(open);
   const [shown, setShown] = useState(false);
-  // Portal-Ziel für `<DrawerFooter>`; leer bleibt es per `:empty` unsichtbar.
+  // Portal target for `<DrawerFooter>`; while empty it stays invisible via `:empty`.
   const [footerSlot, setFooterSlot] = useState<HTMLElement | null>(null);
   const panel = useRef<HTMLElement>(null);
   const opener = useRef<HTMLElement | null>(null);
@@ -92,8 +93,8 @@ export function Drawer({
 
   useEffect(() => {
     if (open) {
-      // Der Fokus muss in den Drawer und beim Schließen zurück auf den
-      // Auslöser, sonst tabbt die Tastatur hinter dem Scrim weiter (V10/V11).
+      // The focus goes into the drawer and comes back to the trigger on
+      // closing; `trapTab` below keeps it inside in between (V10/V11).
       setRender(true);
       const raf = requestAnimationFrame(() => setShown(true));
       return () => cancelAnimationFrame(raf);
@@ -109,8 +110,11 @@ export function Drawer({
   useEffect(() => {
     if (!open) return;
     return () => {
+      // Not cleared here: under `reactStrictMode` the mount effect runs twice,
+      // and a cleanup that empties the marker would leave the second round
+      // without a way back (B6 of the acceptance of 0092). The next opening
+      // overwrites it.
       const back = opener.current;
-      opener.current = null;
       if (back?.isConnected) back.focus();
     };
   }, [open]);
@@ -133,7 +137,15 @@ export function Drawer({
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      // Until 0042 was accepted a second time, only the comment above claimed
+      // this: twelve Tab presses left the drawer twice per round, once onto
+      // `body` and once onto the trigger **behind** the scrim. The rule is the
+      // same one `Dialog` follows, so it comes from the same place.
+      if (e.key === "Tab") trapTab(panel.current, e);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

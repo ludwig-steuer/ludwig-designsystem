@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `patterns/` — Gruppe Rahmen |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede Anwendung hat Seiten und Handlungen |
 | Quelle | `docs/backlog/0034-shadcn-abgleich.md` §C1 (shadcn-Abgleich, Registry-Eintrag `command` = `cmdk` mit Klassen) |
@@ -284,3 +284,67 @@ vorbei.
 - [ ] Escape gibt den Fokus an das Feld zurück, aus dem heraus geöffnet wurde
 - [ ] Die Palette hält keinen eigenen Auslöser-Merker mehr (`grep`)
 - [ ] Die Beschreibung von `InUse` und der Code sagen dasselbe
+
+## Abnahme (2026-09-05, zweite Runde)
+
+Nach der Behebung der zwei offenen Punkte erneut abgenommen, dritter Agent,
+gegen Spec und Code. Gemessen in headless Chromium (1440 × 900) über CDP mit
+**echten** Tastendrücken — `⌘K` kam diesmal als `Input.dispatchKeyEvent` mit
+gesetztem Meta-Modifier an, die „Grenze der Automatisierung" aus dem Abschnitt
+„Befund beim Bauen" gilt für dieses Werkzeug nicht mehr. Alle fünf Stories
+geöffnet und bedient.
+
+**Story-Deckung.** Unverändert fünf Stories, fünf Exporte, fünf IDs in
+`index.json` (`--filled`, `--no-match`, `--interactive`, `--in-use`,
+`--edge`); die Ableitung (2 Zustände + 1 Callback + 1 „im Einsatz" + 1 Rand)
+geht auf. `Empty`, `EmptyAfterFilter`, `Loading`, `Error` sind in der Spec
+begründet ausgeschlossen.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | `tsc --noEmit`, keine Ausgabe, Exit 0 | ✓ |
+| `pnpm build` grün | **nicht neu gelaufen** — parallele Sitzung schreibt nach `storybook-static`; der Lauf für diesen Stand ist in der ersten Abnahme belegt | ✓ (übernommen) |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/patterns/CommandPalette.tsx` mit `CommandPalette.stories.tsx` daneben; Titel `v3/Patterns/Frame/CommandPalette` in `index.json`, dieselbe Gruppe wie `StepRail` und `HotkeyLegend` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Ein Export (`CommandPalette`, `:53`), `@when`/`@instead` bei `:47-52` mit Verweis auf `Combobox`, `OverflowMenu`, `NavList`. Bezeichner, Kommentare und JSDoc englisch, auch im internen `Entry` (`:97-102`) | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}'` = 0, `grep -cE '[0-9]+px'` = 0; keine Map, kein Status im Pattern | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Text links, nichts zentriert · kein Icon ohne Wort (Icon steht vor dem Label, `:106`) · Taste sichtbar am Feld (`--in-use`: `.v2ing__suf` trägt „⌘K") · Escape schließt und gibt den Fokus zurück · die zwei App-Punkte übersprungen. **Der Punkt „Hauptweg per Tastatur" (V11/V14) trägt jetzt** — die Palette ist von `⌘K` bis Enter ohne Maus bedienbar, siehe erste Zeile der variablen Tabelle | ✓ |
+| Im Browser angesehen, nicht nur gebaut | Alle fünf IDs am 2026-09-05 geöffnet: `--interactive` mit echtem `Meta+K` geöffnet, getippt, mit Enter gewählt; `--filled` gefiltert; `--no-match` (Platzhalter „Tippen Sie xyz — dann steht hier der Leertext"); `--in-use` per Klick und per `⌘K` geöffnet; `--edge` 60 Einträge, Liste 320 px hoch und in sich scrollend. Keine Konsolenfehler | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messung) | Ergebnis |
+|---|---|---|
+| `⌘K` öffnet die Palette, auch mit dem Fokus in einem `Input` | `--interactive`: Fokus in `input[aria-label="Suche"]`, echtes `Meta+K` → `[role=dialog]` = 1. `--in-use`: dasselbe aus dem `readOnly`-Suchfeld der Top-Bar heraus → `input.v2cmd__in` hat den Fokus. Grund im Code: `Hotkeys.tsx:45` (`if (!meta && isTyping(e.target)) return`) und die Bindung mit `meta: true` (`CommandPalette.tsx:68-70`) | ✓ |
+| Ein Buchstabe ohne Meta löst im Feld weiterhin nichts aus | `--interactive`: „kab" ins Seitenfeld getippt (das „k" ist genau die Taste der Bindung) → `[role=dialog]` = 0, der Wert steht im Feld | ✓ |
+| Enter auf einem `href`-Eintrag ist eine echte Navigation (`<a>`), nicht `onClick` | `--filled`, DOM-Probe: die vier Einträge der Gruppe „Seiten" enthalten je ein `<a href>` (`#cases`, `#documents`, `#accounts`, `#partners`), die drei Handlungen keins. `CommandPalette.tsx:120` klickt den Link nur an | ✓ |
+| Escape schließt und gibt den Fokus an den Trigger zurück | `--in-use`: Klick ins Suchfeld öffnet → `input.v2cmd__in`; Escape → `input.v2in.v2search[aria-label="Suche"]`, `[role=dialog]` = 0. `--interactive`: `⌘K` aus dem Seitenfeld → Escape → zurück auf dasselbe Feld. Der Weg dahin liegt jetzt in `Dialog` (`Dialog.tsx:94-99` und `:116-122`), nicht mehr in der Palette | ✓ |
+| Kein Fachwort im Pattern | `grep -ic "konto\|mandant\|beleg" src/ui/v3/patterns/CommandPalette.tsx` = 0 | ✓ |
+| `package.json` wächst um genau `cmdk` | `dependencies` zählt sieben Einträge — `clsx`, `cmdk`, `date-fns`, `decimal.js`, `lucide-react`, `tailwind-merge`, `zod`; kein Radix darunter | ✓ |
+| `keywords` finden einen Eintrag, dessen Label das Wort nicht enthält | `--filled`: „kredit" echt getippt → von sieben sichtbaren Einträgen bleibt **einer**, „Geschäftspartner · Kreditoren und Debitoren". Das Wort steht in `keywords` der Story, nicht im Label | ✓ |
+
+**Die zwei offenen Punkte der ersten Abnahme**
+
+| Punkt | Nachweis (Story-ID · Messung) | Ergebnis |
+|---|---|---|
+| 1 — Nach `⌘K` steht der Fokus im Suchfeld, nicht auf der Dialogfläche | `--interactive`: Fokus ins Seitenfeld, echtes `Meta+K` → `activeElement` ist sofort und nach 1,5 s `input.v2in.v2cmd__in`, nie `div.v2dlg`. Ohne einen Mausklick „CSV" getippt → steht im Feld, die Liste geht von drei Einträgen auf einen („Als CSV laden"), `Enter` wählt ihn, die Ergebniszeile lautet „Gewählt: Als CSV laden", `[role=dialog]` = 0 und der Fokus steht wieder im Feld davor. **Der Mangel, der die erste Abnahme trug, ist behoben** — die Ursache saß in `Dialog` und ist mit 0092 weg (`Dialog.tsx:115`) | ✓ |
+| 1b — die Palette hält keinen eigenen Auslöser-Merker mehr | `grep -n "opener\|activeElement\|wasOpen\|trigger" src/ui/v3/patterns/CommandPalette.tsx` → kein Treffer; der einzige verbliebene `useRef` (`:103`) ist der Link einer Zeile. Die Fokusrückgabe misst sich trotzdem grün (Zeile darüber) — es gibt jetzt eine Mechanik statt zwei | ✓ |
+| 2 — Die Beschreibung von `InUse` und der Code sagen dasselbe | `CommandPalette.stories.tsx:154-155`: „die Suche der Top-Bar zeigt ihre Taste und öffnet **beim Klick** — nicht beim Fokus, sonst käme man mit der Tastatur nicht mehr an ihr vorbei"; der Code daneben (`:195`) trägt `onClick={() => setOpen(true)}` und denselben Grund im Kommentar | ✓ |
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Der Rand hält weiter.** `--edge`: 60 `.v2cmd__item`, die Liste ist 320 px
+  hoch und scrollt in sich, der Fokus steht auch hier im Suchfeld.
+- **`NoMatch` beweist seinen Namen weiter erst nach dem Tippen** — der
+  Platzhalter sagt es inzwischen ausdrücklich („Tippen Sie xyz — dann steht
+  hier der Leertext"). Damit ist der Punkt aus der ersten Abnahme erledigt,
+  auch wenn kein Kriterium ihn verlangt hat.
+- **Der Erstfokus hängt an `autoFocus` des `Command.Input`** (`:81`) und damit
+  daran, dass `Dialog` ihn stehen lässt. Das ist jetzt richtig gebaut, aber es
+  ist eine Absprache zwischen zwei Dateien: wer `Dialog.tsx:115` je wieder
+  anfasst, nimmt der Palette die Tastatur. Die Story `AutoFocusChild` in 0092
+  ist der Wächter dafür.

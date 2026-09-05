@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/` — Gruppe Dialog |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „etwas Bestehendes neben der Liste ansehen, ohne sie zu verlassen" ist fachfrei |
 | Quelle | Anfrage Owner 2026-09-03 („dann brauchen wir vl. erstmal einen Drawer … im Ludwig-Projekt haben wir bereits einen, den könnten wir übernehmen") · `docs/v3-backlog.md` („Drawer/UrlDrawer-Familie, 29 Importstellen") · Vorlage: `app/apps/web/src/ui/components/primitives/Drawer.tsx` |
@@ -258,3 +258,44 @@ Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-05
 2. **Datei-JSDoc und fünf Kommentare in `Drawer.tsx` sind deutsch**
    (`:15–26`, `:28`, `:33`, `:53`, `:72`, `:79–80`) — `CLAUDE.md` verlangt
    Englisch, und die Datei ist neu.
+
+## Die zwei offenen Punkte — behoben, und ein dritter dazu
+
+**1 — der Fokus kommt in den Drawer.** Behoben mit 0092: der Aufruf saß im
+`requestAnimationFrame`, wo `panel.current` noch `null` ist, und steht jetzt
+in einem eigenen Effekt auf `render` — dort ist der Knoten da. Die Abnahme von
+0092 hat es an drei Stellen gemessen (`aside.v2drawer` bei 50/200/500 ms), die
+Rückgabe an den Auslöser ebenfalls, auch wenn der Aufrufer den Drawer
+**aushängt** statt `open` umzulegen.
+
+**2 — die deutschen Kommentare sind weg.** Datei-JSDoc, `onClose`,
+`DrawerSize`, `EXIT_MS`, das Portal-Ziel und der Fokus-Kommentar stehen auf
+Englisch. Nutzer-Strings („Schließen") bleiben deutsch.
+
+**3 — die Fokusfalle, die der Kommentar behauptet hatte, gibt es jetzt
+wirklich** (Befund B5 der Abnahme von 0092). Der Satz „sonst tabbt die
+Tastatur hinter dem Scrim weiter" stand im Code, die Falle nicht: gemessen
+verließ der Fokus den Drawer zweimal je Runde — einmal auf `body`, einmal auf
+den Auslöser **hinter** dem Scrim.
+
+`trapTab` wohnt deshalb nicht mehr in `Dialog`, sondern in
+`primitives/focus.ts`. Beide Hüllen sind Primitives und dürfen einander nicht
+importieren; und eine Regel, die zwei Bausteine verschieden auslegen, driftet.
+Dieselbe Begründung wie bei `hotkey.ts` in 0004.
+
+Nachgemessen mit **echten** Tastendrücken (CDP `Input.dispatchKeyEvent`,
+Story `InUse`): 12× Tab und 12× Shift-Tab wandern zwischen Kreuz und
+Fußzeilen-Knopf im Kreis, in keinem der 24 Schritte außerhalb von
+`aside.v2drawer`.
+
+**Nebenbei aus derselben Abnahme (B6):** weder `Dialog` noch `Drawer` löschen
+den Auslöser-Merker beim Aufräumen. Unter `reactStrictMode` läuft der
+Mount-Effekt doppelt; ein Aufräumen, das den Merker leert, nähme der zweiten
+Runde den Weg zurück. Überschrieben wird er beim nächsten Öffnen.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Tab und Shift-Tab verlassen den Drawer nicht (Story `InUse`, echte Tastendrücke)
+- [ ] `trapTab` steht in `primitives/focus.ts`, und `Dialog` wie `Drawer` benutzen dieselbe Funktion (`grep`)
+- [ ] Kein deutscher Kommentar mehr in `Drawer.tsx` (`grep`)
+- [ ] Der Auslöser-Merker wird beim Aufräumen nicht geleert (`grep opener.current = null` findet nichts)

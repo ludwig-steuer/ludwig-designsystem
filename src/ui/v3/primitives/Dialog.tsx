@@ -1,6 +1,7 @@
 "use client";
 
 import { ActionIcon } from "../Icons";
+import { trapTab } from "./focus";
 import { IconButton } from "./IconButton";
 import { useEffect, useRef, type ReactNode } from "react";
 
@@ -18,32 +19,6 @@ import { useEffect, useRef, type ReactNode } from "react";
  * @when    Confirmation with consequences (cancel, delete, approve) or a short form that accompanies an action.
  * @instead Details of an item → MasterDetail. Action that needs a reason → ReasonDialog.
  */
-
-/** Everything a keyboard can reach inside the panel, in document order. */
-const TABBABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-/**
- * Keep Tab inside the dialog. Without it the focus walks on behind the scrim,
- * and a reader is suddenly operating a page they cannot see (V10/V11).
- */
-function trapTab(panel: HTMLElement | null, e: KeyboardEvent) {
-  if (!panel) return;
-  const stops = [...panel.querySelectorAll<HTMLElement>(TABBABLE)].filter(
-    (el) => el.offsetParent !== null,
-  );
-  if (stops.length === 0) return;
-  const first = stops[0]!;
-  const last = stops[stops.length - 1]!;
-  const active = document.activeElement;
-  if (e.shiftKey && (active === first || active === panel)) {
-    e.preventDefault();
-    last.focus();
-  } else if (!e.shiftKey && active === last) {
-    e.preventDefault();
-    first.focus();
-  }
-}
 
 /**
  * Enter confirms — but not where Enter already means something else: a line
@@ -114,10 +89,12 @@ export function Dialog({
     // field for one tick and then lost it, so typing went nowhere.
     if (!active || !panel.current?.contains(active)) panel.current?.focus();
     return () => {
-      const back = opener.current;
-      opener.current = null;
       // Back where it came from — otherwise the reader lands at the top of the
-      // page after every confirmation (V10/V11).
+      // page after every confirmation (V10/V11). The marker is **not** cleared
+      // here: under `reactStrictMode` React runs the mount effect twice, and a
+      // cleanup that empties it would leave the second round without a way
+      // back (B6 of the acceptance). It is overwritten at the next opening.
+      const back = opener.current;
       if (back?.isConnected) back.focus();
     };
   }, [open]);
