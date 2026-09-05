@@ -3,6 +3,7 @@ import { useState } from "react";
 import { AmountCell } from "./Cells";
 import { EmptyState } from "./EmptyState";
 import { FilterBar } from "./FilterBar";
+import { DateField, DateRangeField } from "./DateField";
 import { Field, Input, Select } from "./Form";
 import { Card, CardHead, HeadRow, Row, Table } from "./Table";
 
@@ -13,7 +14,7 @@ const meta: Meta<typeof FilterBar> = {
 export default meta;
 type Story = StoryObj<typeof FilterBar>;
 
-const Kreditor = () => (
+const CreditorFilter = () => (
   <Field label="Kreditor">
     <Select defaultValue="">
       <option value="">Alle</option>
@@ -23,19 +24,35 @@ const Kreditor = () => (
   </Field>
 );
 
-const Zeitraum = () => (
-  <Field label="Belegdatum ab">
-    <Input type="date" defaultValue="2026-08-01" />
-  </Field>
-);
+/**
+ * The span runs through `DateRangeField` (0024), not through two raw
+ * `<input type="date">` — that is the replacement the task promised, and the
+ * bar is where it is used.
+ */
+const PeriodFilter = () => {
+  const [from, setFrom] = useState<string | null>("2026-08-01");
+  const [to, setTo] = useState<string | null>("2026-08-31");
+  return (
+    <Field label="Belegdatum">
+      <DateRangeField
+        from={from}
+        to={to}
+        onChange={(f, t) => {
+          setFrom(f);
+          setTo(t);
+        }}
+      />
+    </Field>
+  );
+};
 
 /** Ruhezustand: drei Felder, nichts gesetzt, kein Zurücksetzen. */
 export const Filled: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <FilterBar>
-        <Kreditor />
-        <Zeitraum />
+        <CreditorFilter />
+        <PeriodFilter />
         <Field label="Suche">
           <Input type="search" placeholder="Beleg oder Text" />
         </Field>
@@ -51,8 +68,8 @@ export const Active: Story = {
     return (
       <div style={{ maxWidth: 720 }}>
         <FilterBar activeCount={n} onReset={() => setN(0)}>
-          <Kreditor />
-          <Zeitraum />
+          <CreditorFilter />
+          <PeriodFilter />
           <Field label="Suche">
             <Input type="search" defaultValue="Bürobedarf" />
           </Field>
@@ -71,8 +88,8 @@ export const ServerForm: Story = {
     <div style={{ maxWidth: 720 }}>
       <form>
         <FilterBar activeCount={2} resetHref="#" submitLabel="Filtern">
-          <Kreditor />
-          <Zeitraum />
+          <CreditorFilter />
+          <PeriodFilter />
         </FilterBar>
       </form>
     </div>
@@ -84,10 +101,10 @@ export const ManyFields: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <FilterBar activeCount={5} resetHref="#">
-        <Kreditor />
-        <Zeitraum />
-        <Field label="Belegdatum bis">
-          <Input type="date" defaultValue="2026-08-31" />
+        <CreditorFilter />
+        <PeriodFilter />
+        <Field label="Fälligkeit">
+          <DateField value="2026-09-15" onChange={() => {}} />
         </Field>
         <Field label="Konto">
           <Input defaultValue="6815" style={{ width: 100 }} />
@@ -114,8 +131,8 @@ export const InUse: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <FilterBar activeCount={2} resetHref="#">
-        <Kreditor />
-        <Zeitraum />
+        <CreditorFilter />
+        <PeriodFilter />
       </FilterBar>
       <Card>
         <CardHead title="Belege" sub="0 von 142 sichtbar" />

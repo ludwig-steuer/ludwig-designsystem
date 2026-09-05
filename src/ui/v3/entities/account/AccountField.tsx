@@ -1,32 +1,33 @@
 "use client";
 
 import { ActionIcon } from "../../Icons";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { IconButton } from "../../primitives/IconButton";
 
 /**
- * Kontenauswahl mit Kandidaten (F123 T123.1).
+ * Account picker with candidates (F123 T123.1).
  *
- * Die Gruppen sind die Antwort auf „warum steht dieses Konto hier oben?":
- * **Agent** hat es vorgeschlagen, **Partner** hat es zuletzt bekommen,
- * **Ähnlich** kommt aus vergleichbaren Belegen, **Beleg-Position** steht auf
- * dem Papier, **Alle** ist der Rest des Kontenrahmens. Ohne die Gruppe wäre
- * die Reihenfolge eine Behauptung.
+ * The groups answer the question "why is this account at the top?": the
+ * **agent** suggested it, the **partner** got it last time, **similar** comes
+ * from comparable documents, **document line** is what the paper says, **all**
+ * is the rest of the chart of accounts. Without the group the order would be
+ * an assertion.
  *
- * Kennt kein Fachmodul: Kandidaten und Suche kommen als Props herein
- * (Loader als Prop). Die Volltextsuche greift über Nummer **und** Name —
- * Sachbearbeiterinnen tippen beides.
+ * Knows no module: candidates and search come in as props (the loader is a
+ * prop too). The full-text search covers number **and** name — clerks type
+ * both.
  *
- * Ruhend zeigt es Nummer **und** Name (0013): der Wert ist die Nummer, die
- * Wahl prüft man am Namen. Wer das Kontenblatt anbietet, gibt `onOpenLedger`
- * mit — den Drawer öffnet der Aufrufer, das Feld meldet nur den Wunsch.
+ * At rest it shows number **and** name (0013): the value is the number, but
+ * the choice is checked against the name. Whoever offers the account sheet
+ * passes `onOpenLedger` — the caller opens the drawer, the field only reports
+ * the wish.
  */
 
 export interface AccountCandidate {
-  /** Die Kontonummer. In Ludwig immer identisch zur DATEV-Nummer. */
+  /** The account number. In Ludwig always identical to the DATEV number. */
   number: string;
   name: string;
-  /** Warum dieses Konto vorgeschlagen wird — eine Zeile, keine Punktzahl. */
+  /** Why this account is suggested — one line, not a score. */
   reason?: string;
 }
 
@@ -40,7 +41,7 @@ export const ACCOUNT_GROUP_LABEL: Record<AccountGroup, string> = {
   alle: "Alle Konten",
 };
 
-const REIHENFOLGE: AccountGroup[] = ["agent", "partner", "aehnlich", "belegposition", "alle"];
+const GROUP_ORDER: AccountGroup[] = ["agent", "partner", "aehnlich", "belegposition", "alle"];
 
 /**
  * @when    Choosing an account, with candidates from agent, partner, similar and document line — and, with `onOpenLedger`, the way to its account sheet.
@@ -70,11 +71,12 @@ export function AccountField({
    * the name up again. On free input (no candidate hit) it stays `undefined`.
    */
   onChange: (number: string, account?: AccountCandidate) => void;
-  /** Kandidaten je Gruppe. Leere Gruppen werden nicht gezeigt. */
+  /** Candidates per group. Empty groups are not shown. */
   candidates: Partial<Record<AccountGroup, AccountCandidate[]>>;
   /**
-   * Volltextsuche über den Kontenrahmen. Ohne Loader filtert das Feld nur die
-   * mitgegebenen Kandidaten — kein stiller Fallback auf „nichts gefunden".
+   * Full-text search over the chart of accounts. Without a loader the field
+   * only filters the candidates it was given — no silent fallback to "nothing
+   * found".
    */
   onSearch?: (query: string) => Promise<AccountCandidate[]>;
   /**
@@ -89,81 +91,85 @@ export function AccountField({
   const [query, setQuery] = useState(value);
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [treffer, setTreffer] = useState<AccountCandidate[] | null>(null);
-  // Die eigene Wahl trägt den Namen; `valueName` füllt sie für den ersten
-  // Render, damit niemand die Liste öffnen muss, um zu sehen, was drinsteht.
+  const [hits, setHits] = useState<AccountCandidate[] | null>(null);
+  // The choice itself carries the name; `valueName` fills it for the first
+  // render, so nobody has to open the list to see what is in the field.
   const [chosen, setChosen] = useState<AccountCandidate | null>(
     value && valueName ? { number: value, name: valueName } : null,
   );
   const box = useRef<HTMLDivElement>(null);
+  // Two account fields on one page must not point at the same list — the
+  // id used to be a fixed literal (same defect as in 0021 and 0028).
+  const listId = useId();
 
   useEffect(() => {
     setQuery(value);
-    // Ein Wert von außen oder frei getippt gehört nicht mehr zur alten Wahl.
+    // A value from outside, or one typed freely, no longer belongs to the
+    // previous choice.
     setChosen((c) => (c && c.number === value ? c : null));
   }, [value]);
 
   useEffect(() => {
     if (!onSearch || query.trim().length < 2) {
-      setTreffer(null);
+      setHits(null);
       return;
     }
-    let abgebrochen = false;
+    let cancelled = false;
     const t = setTimeout(() => {
       void onSearch(query.trim()).then((r) => {
-        if (!abgebrochen) setTreffer(r);
+        if (!cancelled) setHits(r);
       });
     }, 180);
     return () => {
-      abgebrochen = true;
+      cancelled = true;
       clearTimeout(t);
     };
   }, [query, onSearch]);
 
   useEffect(() => {
-    const außerhalb = (e: MouseEvent) => {
+    const outside = (e: MouseEvent) => {
       if (box.current && !box.current.contains(e.target as Node)) setOpen(false);
     };
-    document.addEventListener("mousedown", außerhalb);
-    return () => document.removeEventListener("mousedown", außerhalb);
+    document.addEventListener("mousedown", outside);
+    return () => document.removeEventListener("mousedown", outside);
   }, []);
 
-  const gruppen = useMemo(() => {
+  const groups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const passt = (k: AccountCandidate) =>
-      q.length === 0 || k.number.toLowerCase().includes(q) || k.name.toLowerCase().includes(q);
-    const aus = REIHENFOLGE.map((g) => ({
+    const matches = (c: AccountCandidate) =>
+      q.length === 0 || c.number.toLowerCase().includes(q) || c.name.toLowerCase().includes(q);
+    const out = GROUP_ORDER.map((g) => ({
       key: g,
       label: ACCOUNT_GROUP_LABEL[g],
-      items: (candidates[g] ?? []).filter(passt),
+      items: (candidates[g] ?? []).filter(matches),
     })).filter((g) => g.items.length > 0);
-    if (treffer && treffer.length > 0) {
-      aus.push({ key: "alle" as AccountGroup, label: ACCOUNT_GROUP_LABEL.alle, items: treffer });
+    if (hits && hits.length > 0) {
+      out.push({ key: "alle" as AccountGroup, label: ACCOUNT_GROUP_LABEL.alle, items: hits });
     }
-    return aus;
-  }, [candidates, query, treffer]);
+    return out;
+  }, [candidates, query, hits]);
 
-  // Der Name kommt aus der Wahl oder aus den mitgegebenen Kandidaten. Ist er
-  // nirgends zu haben, steht die Nummer allein — nachgeschlagen wird nichts,
-  // das wäre eine Ladung (0013).
+  // The name comes from the choice or from the candidates that were handed
+  // in. If it is nowhere to be had, the number stands alone — nothing is
+  // looked up, that would be a load (0013).
   const name = useMemo(() => {
     if (!value) return undefined;
     if (chosen?.number === value) return chosen.name;
-    for (const liste of Object.values(candidates)) {
-      const treffer = liste?.find((k) => k.number === value);
-      if (treffer) return treffer.name;
+    for (const list of Object.values(candidates)) {
+      const hit = list?.find((c) => c.number === value);
+      if (hit) return hit.name;
     }
     return undefined;
   }, [value, chosen, candidates]);
 
-  // Ruhend: Nummer und Name. In Arbeit: der reine Suchtext, damit Tippen nicht
-  // gegen einen zusammengesetzten String läuft.
-  const ruhend = !focused && Boolean(value) && Boolean(name);
+  // At rest: number and name. While being worked on: the plain search text, so
+  // that typing does not run against a composed string.
+  const resting = !focused && Boolean(value) && Boolean(name);
 
-  function waehle(k: AccountCandidate) {
-    setChosen(k);
-    onChange(k.number, k);
-    setQuery(k.number);
+  function choose(c: AccountCandidate) {
+    setChosen(c);
+    onChange(c.number, c);
+    setQuery(c.number);
     setOpen(false);
   }
 
@@ -171,7 +177,7 @@ export function AccountField({
     <div ref={box} className="v2kf">
       <div className="v2kf__box">
         <input
-          className={`v2in v2kf__in${ruhend ? " v2kf__in--ruhend" : ""}${
+          className={`v2in v2kf__in${resting ? " v2kf__in--rest" : ""}${
             onOpenLedger ? " v2kf__in--ledger" : ""
           }${invalid ? " v2in--invalid" : ""}`}
           value={query}
@@ -179,13 +185,13 @@ export function AccountField({
           aria-expanded={open}
           aria-invalid={invalid || undefined}
           role="combobox"
-          aria-controls="v2kf-liste"
+          aria-controls={listId}
           autoComplete="off"
           placeholder={placeholder}
           onFocus={(e) => {
             setFocused(true);
             setOpen(true);
-            // Die Nummer steht markiert da, Tippen ersetzt sie.
+            // The number stands there selected; typing replaces it.
             e.target.select();
           }}
           onChange={(e) => {
@@ -198,13 +204,13 @@ export function AccountField({
           }}
           onKeyDown={(e) => {
             if (e.key === "Escape") setOpen(false);
-            if (e.key === "Enter" && open && gruppen[0]?.items[0]) {
+            if (e.key === "Enter" && open && groups[0]?.items[0]) {
               e.preventDefault();
-              waehle(gruppen[0].items[0]);
+              choose(groups[0].items[0]);
             }
           }}
         />
-        {ruhend ? (
+        {resting ? (
           <span className="v2kf__shown" aria-hidden="true">
             <span className="v2kf__num">{value}</span>
             <span className="v2kf__nm">{name}</span>
@@ -217,8 +223,8 @@ export function AccountField({
               label={value ? `Kontenblatt zu ${value}` : "Kontenblatt"}
               icon={<ActionIcon action="ledger" size={14} />}
               disabled={!value}
-              // Ohne das wandert der Fokus aus dem Feld — die Liste bliebe
-              // offen, aber der Wert wäre gemeldet, als hätte man es verlassen.
+              // Without this the focus leaves the field — the list would stay
+              // open, but the value would be reported as if it had been left.
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => onOpenLedger(value)}
             />
@@ -226,27 +232,27 @@ export function AccountField({
         ) : null}
       </div>
       {open ? (
-        <div className="v2kf__pop" id="v2kf-liste" role="listbox">
-          {gruppen.length === 0 ? (
+        <div className="v2kf__pop" id={listId} role="listbox">
+          {groups.length === 0 ? (
             <div className="v2kf__empty">
               Kein Konto zu „{query}" — weder unter den Vorschlägen noch im Kontenrahmen.
             </div>
           ) : (
-            gruppen.map((g) => (
+            groups.map((g) => (
               <div key={g.key}>
                 <div className="v2kf__grp">{g.label}</div>
-                {g.items.map((k) => (
+                {g.items.map((c) => (
                   <button
-                    key={`${g.key}-${k.number}`}
+                    key={`${g.key}-${c.number}`}
                     type="button"
                     role="option"
-                    aria-selected={k.number === value}
-                    className={`v2kf__opt${k.number === value ? " is-active" : ""}`}
-                    onClick={() => waehle(k)}
+                    aria-selected={c.number === value}
+                    className={`v2kf__opt${c.number === value ? " is-active" : ""}`}
+                    onClick={() => choose(c)}
                   >
-                    <span className="v2kf__num">{k.number}</span>
-                    <span className="v2kf__name">{k.name}</span>
-                    {k.reason ? <span className="v2kf__why">{k.reason}</span> : null}
+                    <span className="v2kf__num">{c.number}</span>
+                    <span className="v2kf__name">{c.name}</span>
+                    {c.reason ? <span className="v2kf__why">{c.reason}</span> : null}
                   </button>
                 ))}
               </div>

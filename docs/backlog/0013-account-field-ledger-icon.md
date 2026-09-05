@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `entities/account/` |
 | Klassen-Test | nein — „Konto" ist ein Fachwort, die Kandidatengruppen sind Buchhaltungslogik |
 | Quelle | Anfrage Owner 2026-09-03 („der Konto-Autocomplete ist auch eine extra Komponente … mit Parameter ob es ein Icon haben soll, das Icon öffnet per Klick einen Drawer mit den Kontenbuchungen") · Nachtrag Owner 2026-09-03 („wir wollen im Normalzustand Konto-Nr und Name anzeigen, immer beides") |
@@ -211,3 +211,37 @@ ist gebaut und belegt; es fehlt nur der Sprachschnitt.
 `ActionIcon action="ledger"`; im DOM steht weiter `lucide-book-open-text`,
 `width 14`, `stroke-width 1.5` — dasselbe Zeichen an derselben Stelle wie vor
 `f58caa2`. Nichts verschwunden, nichts gesprungen.
+
+## Der Mangel der Abnahme vom 2026-09-05 — behoben
+
+**Die Datei ist jetzt auf Englisch.** Zehn Bezeichner umbenannt
+(`REIHENFOLGE` → `GROUP_ORDER`, `treffer` → `hits`, `abgebrochen` →
+`cancelled`, `außerhalb` → `outside`, `gruppen` → `groups`, `passt` →
+`matches`, `aus` → `out`, `liste` → `list`, `ruhend` → `resting`, `waehle` →
+`choose`), dazu der Kopf-Block und die zwölf Kommentare. Nutzer-Strings
+bleiben deutsch: `ACCOUNT_GROUP_LABEL`, der Leertext, `ariaLabel`, das Label
+des Kontenblatt-Knopfes — und die Domänenwerte von `AccountGroup`
+(`aehnlich`, `belegposition`), die kein Anzeigetext sind, sondern Schlüssel
+des Bestands.
+
+Mitgenommen, weil die Datei ohnehin offen war:
+
+- Die eine deutsche Klasse heißt jetzt `.v2kf__in--rest` statt
+  `--ruhend` (eine Zeile in `v3.css`). Die übrigen `v2kf__*` sind
+  Abkürzungen ohne Sprache.
+- Die Liste trug eine feste `id="v2kf-liste"`, auf die `aria-controls`
+  zeigte — zwei Kontofelder auf einer Seite verwiesen damit auf dieselbe
+  Liste. Jetzt `useId()`, derselbe Punkt wie in 0021 und 0028. Gemessen in
+  `NumberAndName`: drei Felder, drei verschiedene `aria-controls`
+  (`_r_0_`, `_r_1_`, `_r_2_`).
+
+Nachgemessen (Chromium headless, Story `NumberAndName`): ruhend steht
+„6815 Bürobedarf" im Feld, beim Fokussieren „6815" allein und die Liste
+öffnet — das Verhalten hat sich durch die Umbenennung nicht verschoben.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Kein deutscher Bezeichner und kein deutscher Kommentar mehr in `AccountField.tsx` (`grep`)
+- [ ] Nutzer-Strings und die Domänenwerte von `AccountGroup` sind unverändert deutsch
+- [ ] Zwei Kontofelder auf einer Seite zeigen mit `aria-controls` auf verschiedene Listen (Story `NumberAndName`, im DOM gemessen)
+- [ ] Anzeige und Tastaturweg unverändert (Stories `NumberAndName`, `WithLedger`)

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | ja, unverändert — ein Datum hat kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Datumsfeld` / `Zeitraumfeld`, **14 Dateien** · Showcase `src/showcase/CaseCrud.stories.tsx` (Frist, Eröffnungsdatum) |
@@ -53,20 +53,20 @@ wäre 40 KB für einen Kalender, den der Browser mitbringt.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `value` | `string \| null` | ja | ISO `yyyy-mm-dd`, oder `null` für leer | `Gefuellt`, `Leer` |
-| `onChange` | `(value: string \| null) => void` | ja | ISO heraus, nie das Anzeigeformat | `Interaktiv` |
-| `min` / `max` | `string` | nein | ISO-Grenzen, an das `input` durchgereicht | `Grenzen` |
-| `invalid` | `boolean` | nein | Rahmen rot, ohne eigenen Text | `Gefuellt` |
+| `value` | `string \| null` | ja | ISO `yyyy-mm-dd`, oder `null` für leer | `Filled`, `Empty` |
+| `onChange` | `(value: string \| null) => void` | ja | ISO heraus, nie das Anzeigeformat | `Interactive` |
+| `min` / `max` | `string` | nein | ISO-Grenzen, an das `input` durchgereicht | `Bounds` |
+| `invalid` | `boolean` | nein | Rahmen rot, ohne eigenen Text | `Filled` |
 | `ariaLabel` | `string` | nein | — | — |
 
 ### `DateRangeField`
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `from` / `to` | `string \| null` | ja | ISO, beide einzeln leer erlaubt | `Gefuellt` |
-| `onChange` | `(from: string \| null, to: string \| null) => void` | ja | Immer beide — der Zeitraum ist ein Wert | `Interaktiv` |
-| `presets` | `DatePreset[]` | nein | Schnellwahl. **Kommt als Prop**, nicht als lokale Liste: „laufendes Wirtschaftsjahr" kennt nur die App | `MitSchnellwahl` |
-| `min` / `max` | `string` | nein | Grenzen für beide Felder | `Grenzen` |
+| `from` / `to` | `string \| null` | ja | ISO, beide einzeln leer erlaubt | `Filled` |
+| `onChange` | `(from: string \| null, to: string \| null) => void` | ja | Immer beide — der Zeitraum ist ein Wert | `Interactive` |
+| `presets` | `DatePreset[]` | nein | Schnellwahl. **Kommt als Prop**, nicht als lokale Liste: „laufendes Wirtschaftsjahr" kennt nur die App | `WithPresets` |
+| `min` / `max` | `string` | nein | Grenzen für beide Felder | `Bounds` |
 
 ```ts
 interface DatePreset {
@@ -113,13 +113,13 @@ Nach §6, gemeinsam für die Familie: 2 Zustände + 1 Callback je Export +
 
 | Story | Beweist |
 |---|---|
-| `Gefuellt` | beide Felder mit Wert, dazu `invalid` |
-| `Leer` | beide leer, `null` heraus |
-| `Interaktiv` | Rundlauf über `onChange` mit `useState`, ISO im State sichtbar |
-| `MitSchnellwahl` | drei Presets, ein Klick setzt beide Werte |
-| `Grenzen` | `min`/`max` sperren, was außerhalb liegt |
-| `Rand` | `to` vor `from` wird getauscht; Jahreswechsel; Schaltjahr |
-| `ImEinsatz` | in einer `FilterBar`-Attrappe über einer `Table` |
+| `Filled` | beide Felder mit Wert, dazu `invalid` |
+| `Empty` | beide leer, `null` heraus |
+| `Interactive` | Rundlauf über `onChange` mit `useState`, ISO im State sichtbar |
+| `WithPresets` | drei Presets, ein Klick setzt beide Werte |
+| `Bounds` | `min`/`max` sperren, was außerhalb liegt |
+| `Edges` | `to` vor `from` wird getauscht; Jahreswechsel; Schaltjahr |
+| `InUse` | in einer `FilterBar`-Attrappe über einer `Table` |
 
 Nicht anwendbar: `Laedt` (ein Datumsfeld lädt nicht) · `LeerNachFilter` ·
 `Fehler` (die Prüfung macht der Browser, den Ton setzt `invalid`).
@@ -140,10 +140,10 @@ Variabel (aus dieser Spec):
 
 - [ ] Innen steckt `<input type="date">`, kein eigener Kalender (`grep`, DOM)
 - [ ] Keine neue Abhängigkeit; `date-fns` reicht (`package.json` unverändert)
-- [ ] `onChange` gibt ISO, nie `26.08.2026` (`Interaktiv`)
-- [ ] `to` vor `from` wird getauscht, nicht abgewiesen (`Rand`)
-- [ ] Leeren gibt `null`, nicht `""` (`Leer`)
-- [ ] Schnellwahl löst genau ein `onChange` mit beiden Werten aus (`MitSchnellwahl`)
+- [ ] `onChange` gibt ISO, nie `26.08.2026` (`Interactive`)
+- [ ] `to` vor `from` wird getauscht, nicht abgewiesen (`Edges`)
+- [ ] Leeren gibt `null`, nicht `""` (`Empty`)
+- [ ] Schnellwahl löst genau ein `onChange` mit beiden Werten aus (`WithPresets`)
 - [ ] Kein Wirtschaftsjahr-Wissen in der Komponente (`grep`)
 - [ ] Ersetzt die Zeitraum-Felder in `FilterBar` (0003) ohne Funktionsverlust
 
@@ -182,4 +182,49 @@ Abnahme. Der zweite Punkt ist zusätzlich ein Wunsch an die Spec: die
 Story-Exportnamen sind deutsch, was diese Spec vorgibt und die Hausregel
 verbietet.
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: FilterBar und Showcase sind nicht umgestellt. Zwei Beobachtungen zum Nacharbeiten: die Story-Exportnamen sind deutsch (`Gefuellt`, `Interaktiv` …) — so von dieser Spec vorgegeben, aber gegen die Hausregel „Story-Exportnamen englisch"; und beim Tippen der Jahreszahl im „bis"-Feld greift der Tausch schon bei Zwischenwerten, die Werte springen dabei unter den Fingern zwischen den Feldern.
+Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: FilterBar und Showcase sind nicht umgestellt. Zwei Beobachtungen zum Nacharbeiten: die Story-Exportnamen sind deutsch (`Filled`, `Interactive` …) — so von dieser Spec vorgegeben, aber gegen die Hausregel „Story-Exportnamen englisch"; und beim Tippen der Jahreszahl im „bis"-Feld greift der Tausch schon bei Zwischenwerten, die Werte springen dabei unter den Fingern zwischen den Feldern.
+
+## Die drei offenen Punkte — behoben
+
+**1 — `FilterBar` baute den Zeitraum weiter aus rohen Feldern.** Das Kriterium
+„ersetzt die Zeitraum-Felder in `FilterBar` (0003) ohne Funktionsverlust"
+stand unerfüllt da, solange `FilterBar.stories.tsx` zwei
+`<Input type="date">` nebeneinanderstellte. Jetzt läuft der Zeitraum dort
+über `DateRangeField` (ein Wert, zwei Felder, mit Zustand) und das zweite
+Datum in `ManyFields` über `DateField`. Im ganzen Set gibt es damit außerhalb
+von `DateField.tsx` kein rohes `type="date"` mehr — bis auf
+`JournalEntryEditor.tsx:567`, das einer parallelen Sitzung gehört und als
+Befund stehen bleibt.
+
+Nebenbei englisch benannt, weil die Datei ohnehin offen war: `Kreditor` →
+`CreditorFilter`, `Zeitraum` → `PeriodFilter`.
+
+**2 — der Tausch griff schon beim Tippen.** Ein natives Datumsfeld meldet
+jede Zwischenstufe der Jahreszahl: aus „2026" werden erst 0002, 0020, 0202.
+Jede davon war „bis vor von" und löste den Tausch aus — die zwei Werte
+sprangen unter den Fingern hin und her.
+
+Der Tausch sitzt jetzt am `onBlur` des Paares und greift erst, wenn der Fokus
+es wirklich verlässt (`relatedTarget` außerhalb). Während des Tippens reicht
+das Feld seinen Wert unverändert durch.
+
+Nachgemessen (Chromium headless, Story `Interactive`): die vier Zwischenwerte
+0002/0020/0202/2026 landen unverändert im Zustand, `from` bleibt dabei
+`2026-08-01`. Danach „bis" auf den 15.07. gesetzt und den Fokus aus dem Paar
+genommen → `from: 2026-07-15`, `to: 2026-08-01`. Der Tausch findet statt,
+aber einmal und am Ende.
+
+**3 — die Story-Exportnamen waren deutsch.** Diese Spec hatte sie so
+vorgegeben; die Hausregel in `CLAUDE.md` verlangt Englisch, und der Wunsch
+aus der Abnahme war, das an der Spec zu korrigieren statt an der Regel
+vorbeizuleben. Umbenannt: `Gefuellt` → `Filled`, `Leer` → `Empty`,
+`Interaktiv` → `Interactive`, `MitSchnellwahl` → `WithPresets`, `Grenzen` →
+`Bounds`, `Rand` → `Edges`, `ImEinsatz` → `InUse`; die Nachweise oben in
+dieser Spec zeigen auf die neuen Namen.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] `FilterBar.stories.tsx` benutzt `DateRangeField` und `DateField`, kein rohes `type="date"` (`grep`)
+- [ ] Zwischenstufen der Jahreszahl lösen keinen Tausch aus (Story `Interactive`, gemessen)
+- [ ] Ein verdrehter Zeitraum wird beim Verlassen des Paares getauscht, nicht davor (dieselbe Story)
+- [ ] Alle Story-Exportnamen sind englisch (`grep -n "^export const" DateField.stories.tsx`)

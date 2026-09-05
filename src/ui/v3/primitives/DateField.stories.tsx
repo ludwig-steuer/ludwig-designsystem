@@ -20,7 +20,7 @@ const PRESETS = [
 ];
 
 /** Angezeigt wird 26.08.2026, herausgegeben `2026-08-26`. */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-4)", maxWidth: 420 }}>
       <Field label="Belegdatum">
@@ -37,7 +37,7 @@ export const Gefuellt: Story = {
 };
 
 /** Leer ist ein Wert — die offene Frist gibt `null` heraus. */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-4)", maxWidth: 420 }}>
       <Field label="Fällig am">
@@ -51,7 +51,7 @@ export const Leer: Story = {
 };
 
 /** Rundlauf: der ISO-Wert steht darunter, nicht das Anzeigeformat. */
-export const Interaktiv: Story = {
+export const Interactive: Story = {
   render: function Render() {
     const [d, setD] = useState<string | null>("2026-08-26");
     const [range, setRange] = useState<{ from: string | null; to: string | null }>({
@@ -79,7 +79,7 @@ export const Interaktiv: Story = {
 };
 
 /** Die Schnellwahl setzt beide Werte in einem `onChange`. */
-export const MitSchnellwahl: Story = {
+export const WithPresets: Story = {
   render: function Render() {
     const [range, setRange] = useState<{ from: string | null; to: string | null }>({
       from: null,
@@ -104,7 +104,7 @@ export const MitSchnellwahl: Story = {
 };
 
 /** `min`/`max` sperren, was außerhalb des Wirtschaftsjahres liegt. */
-export const Grenzen: Story = {
+export const Bounds: Story = {
   render: () => (
     <div style={{ maxWidth: 420 }}>
       <Field label="Belegdatum" hint="Nur innerhalb des Wirtschaftsjahres 2026">
@@ -115,7 +115,7 @@ export const Grenzen: Story = {
 };
 
 /** Rand: „bis" vor „von" wird getauscht, nicht abgewiesen. */
-export const Rand: Story = {
+export const Edges: Story = {
   render: function Render() {
     const [range, setRange] = useState<{ from: string | null; to: string | null }>({
       from: "2026-08-31",
@@ -142,7 +142,7 @@ export const Rand: Story = {
 };
 
 /** Im Einsatz: in der Filterleiste über der Liste. */
-export const ImEinsatz: Story = {
+export const InUse: Story = {
   render: function Render() {
     const [range, setRange] = useState<{ from: string | null; to: string | null }>({
       from: "2026-08-01",

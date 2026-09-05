@@ -1,5 +1,7 @@
 "use client";
 
+import type { FocusEvent } from "react";
+
 import { Input } from "./Form";
 import { TextButton } from "./TextButton";
 
@@ -84,21 +86,25 @@ export function DateRangeField({
   disabled?: boolean;
 }) {
   // `to` before `from` is a typo, not a statement: swap it instead of
-  // producing an error message nobody asked for.
-  function commit(nextFrom: string | null, nextTo: string | null) {
-    if (nextFrom && nextTo && nextTo < nextFrom) onChange(nextTo, nextFrom);
-    else onChange(nextFrom, nextTo);
+  // producing an error message nobody asked for. But **only once the pair is
+  // left**: a native date input reports every keystroke of the year, so
+  // "2026" passes through 0002, 0020 and 0202 — and a swap on each of them
+  // made the two values jump between the fields while someone was still
+  // typing (found in the review of 0024).
+  function swapIfInverted(e: FocusEvent<HTMLDivElement>) {
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    if (from && to && to < from) onChange(to, from);
   }
 
   return (
-    <div className="v2date">
+    <div className="v2date" onBlur={swapIfInverted}>
       <DateField
         value={from}
         min={min}
         max={max}
         disabled={disabled}
         ariaLabel="Von"
-        onChange={(v) => commit(v, to)}
+        onChange={(v) => onChange(v, to)}
       />
       <span className="v2date__sep">bis</span>
       <DateField
@@ -107,7 +113,7 @@ export function DateRangeField({
         max={max}
         disabled={disabled}
         ariaLabel="Bis"
-        onChange={(v) => commit(from, v)}
+        onChange={(v) => onChange(from, v)}
       />
       {presets && presets.length > 0 ? (
         <span className="v2date__presets">

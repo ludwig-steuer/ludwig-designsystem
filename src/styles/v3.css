@@ -1257,7 +1257,7 @@ select.v2in { padding-right: 26px; }
    Wahl prüft man am Namen. Der Text des Feldes wird dafür durchsichtig, die
    Schicht darüber trägt beides — der Tabstopp bleibt das Feld selbst. */
 .v2kf__box { position: relative; display: flex; }
-.v2kf__in--ruhend { color: transparent; }
+.v2kf__in--rest { color: transparent; }
 .v2kf__in--ledger { padding-right: 30px; }
 .v2kf__shown {
   position: absolute; inset: 0;
