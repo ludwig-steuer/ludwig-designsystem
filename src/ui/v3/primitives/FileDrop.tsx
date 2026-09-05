@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Progress } from "./Progress";
 import { TextButton } from "./TextButton";
 
@@ -34,6 +34,23 @@ function humanSize(bytes: number) {
  * @instead A single value from a form → Input. Showing a document that is
  *          already there → the document's own preview.
  */
+
+/**
+ * Why a file was turned away — in words, not in MIME.
+ *
+ * The rejected line used to read „Format nicht vorgesehen —
+ * application/pdf,image/*." That is the `accept` attribute, and it belongs to
+ * the file dialog, not in front of a clerk (T4/T5, found in the review of
+ * 0021). What she needs is the ending she just tried and where the allowed
+ * ones are written — and they are written in the `hint`, one line above.
+ */
+function rejectionReason(name: string, hint?: string): string {
+  const dot = name.lastIndexOf(".");
+  const ext = dot > 0 ? name.slice(dot + 1).toUpperCase() : null;
+  const what = ext ? `${ext}-Dateien nehmen wir hier nicht` : "Diese Datei nehmen wir hier nicht";
+  return hint ? `${what} — erlaubt ist: ${hint}` : `${what}.`;
+}
+
 export function FileDrop({
   label,
   onFiles,
@@ -58,6 +75,9 @@ export function FileDrop({
   hint?: string;
 }) {
   const input = useRef<HTMLInputElement>(null);
+  // Zwei Ablagen auf einer Seite dürfen nicht dieselbe `id` tragen — sonst
+  // zeigt `aria-describedby` beider auf denselben Hinweis (0021).
+  const hintId = useId();
   const [over, setOver] = useState(false);
   const [rejected, setRejected] = useState<DroppedFile[]>([]);
 
@@ -83,7 +103,7 @@ export function FileDrop({
     const good: File[] = [];
     for (const f of Array.from(list)) {
       const id = `${f.name}-${f.size}`;
-      if (!accepted(f)) bad.push({ id, name: f.name, size: f.size, error: `Format nicht vorgesehen — ${accept}.` });
+      if (!accepted(f)) bad.push({ id, name: f.name, size: f.size, error: rejectionReason(f.name, hint) });
       else if (f.size > limit) bad.push({ id, name: f.name, size: f.size, error: `Zu groß — höchstens ${maxSizeMb} MB.` });
       else good.push(f);
     }
@@ -111,7 +131,7 @@ export function FileDrop({
         type="button"
         className={`v2drop${over ? " is-over" : ""}`}
         disabled={disabled}
-        aria-describedby={hint ? "v2drop-hint" : undefined}
+        aria-describedby={hint ? hintId : undefined}
         onClick={() => input.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
@@ -126,7 +146,7 @@ export function FileDrop({
       >
         <span>Datei wählen oder hierher ziehen</span>
         {hint ? (
-          <span className="v2drop__hint" id="v2drop-hint">
+          <span className="v2drop__hint" id={hintId}>
             {hint}
           </span>
         ) : null}

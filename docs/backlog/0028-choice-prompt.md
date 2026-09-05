@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `patterns/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „Frage mit vorgeschlagenen Antworten" ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 2 „Frage mit Antwortoptionen (Handlungen + Freitext, I6, S13)" |
@@ -158,3 +158,33 @@ Kriterium einzeln, fest und variabel:
 
 Erste Runde (2026-09-03, Historie): ✗ an Strg+Enter (behoben) und am
 App-Kriterium; offene Punkte (1) und (2) behoben, (3) und (4) offen.
+
+
+## Mängel der Abnahme vom 2026-09-05 — behoben
+
+**M1 — im Pending trug der Knopf kein Wort.** `pendingLabel` erreicht
+`ActionButton` nur bei dessen **eigenem** Lauf; hält der Aufrufer das Pending
+(Server Action in seiner Hand), blieb der Knopf grau mit unverändertem Wort —
+und darunter stand weiter „Wählen Sie eine Antwort oder schreiben Sie eine.",
+was dem Zustand widerspricht.
+
+Zwei Änderungen: die Beschriftung trägt „Sende …", wenn `pending` von außen
+kommt, und der Hinweis daneben schweigt währenddessen. Der Satz darf nicht
+nach einer Antwort fragen, die schon unterwegs ist.
+
+**M2 — `RadioGroup name="choice"` war fest verdrahtet.** Zwei Fragen auf
+einer Seite bildeten damit **eine** Radiogruppe: die zweite wählte die erste
+ab. Jetzt `useId()`.
+
+**Nebenbei, aus der Abnahme von 0060:** die `RadioGroup` wird nicht mehr
+gerendert, wenn `options` leer ist — bei reiner Freitext-Frage (60 % des
+Bestands) stand sonst „Antwort" zweimal, einmal als Legende über einem leeren
+`fieldset`. Der Zweig hat hier noch keine eigene Story; belegt ist er über
+die Klärungs-Karten. Beim nächsten Anfassen gehört er hierher.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Von außen gehaltenes `pending` zeigt ein Wort am Knopf (V7)
+- [ ] Der Hinweis neben dem Knopf schweigt, während gesendet wird
+- [ ] Zwei `ChoicePrompt` auf einer Seite wählen sich nicht gegenseitig ab (im Browser gemessen)
+- [ ] Ohne Optionen erscheint keine `RadioGroup` und keine zweite Beschriftung „Antwort"

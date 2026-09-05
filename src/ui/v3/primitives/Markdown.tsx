@@ -49,6 +49,17 @@ function safeHref(href: string): string | null {
   return /^(https?:\/\/|mailto:|\/|#)/i.test(clean) ? clean : null;
 }
 
+/**
+ * One line of Markdown into tokens — bold, code, link, plain text.
+ *
+ * Exported because the parser is the interesting half: whoever wants to know
+ * what a text will become, without rendering it, asks here. The renderer is
+ * `Markdown`; this is what it reads.
+ *
+ * @when    Reading a Markdown line without drawing it — a preview, a length
+ *          check, a test of what a text contains.
+ * @instead Drawing it → Markdown. A whole document → parseMarkdown.
+ */
 export function parseInline(text: string): InlineTok[] {
   const out: InlineTok[] = [];
   let last = 0;
@@ -91,6 +102,13 @@ function splitRow(line: string): InlineTok[][] {
     .map((c) => parseInline(c.trim()));
 }
 
+/**
+ * A whole Markdown document into blocks — headings, paragraphs, lists,
+ * tables, code.
+ *
+ * @when    Reading a Markdown document without drawing it.
+ * @instead Drawing it → Markdown. A single line → parseInline.
+ */
 export function parseMarkdown(src: string): Block[] {
   const blocks: Block[] = [];
   const lines = src.replace(/\r\n/g, "\n").split("\n");

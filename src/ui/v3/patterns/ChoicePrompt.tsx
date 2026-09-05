@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { ReactNode } from "react";
 import { ActionButton } from "../primitives/ActionButton";
 import { Callout } from "../primitives/Callout";
@@ -59,15 +59,23 @@ export function ChoicePrompt({
 }) {
   const [choice, setChoice] = useState<string | null>(defaultOptionId);
   const [text, setText] = useState("");
+  // Zwei Fragen auf einer Seite dürfen sich nicht gegenseitig abwählen — ein
+  // fester `name` verbindet ihre Radios zu einer Gruppe (0028).
+  const groupName = useId();
 
   const missingText = Boolean(freeText?.required) && !text.trim();
   const blocked = (!choice && !text.trim()) || missingText;
   // Why it is blocked belongs next to the button, not only in a grey button.
-  const why = !choice && !text.trim()
-    ? "Wählen Sie eine Antwort oder schreiben Sie eine."
-    : missingText
-      ? "Bitte ergänzen Sie den Text."
-      : null;
+  // While the answer is on its way, the sentence would contradict it — the
+  // button says „Sende …" and the line next to it must not ask for an answer
+  // that has already been given (found in the review of 0028).
+  const why = pending
+    ? null
+    : !choice && !text.trim()
+      ? "Wählen Sie eine Antwort oder schreiben Sie eine."
+      : missingText
+        ? "Bitte ergänzen Sie den Text."
+        : null;
 
   function send() {
     if (blocked || pending) return;
@@ -96,7 +104,7 @@ export function ChoicePrompt({
           dasselbe Wort, und für einen Screenreader eine Gruppe ohne Inhalt. */}
       {options.length === 0 ? null : (
       <RadioGroup
-        name="choice"
+        name={groupName}
         label="Antwort"
         options={options.map<RadioOption>((o) => ({ value: o.id, label: o.label, hint: o.hint }))}
         value={choice}
@@ -123,11 +131,16 @@ export function ChoicePrompt({
           hotkey="Strg+Enter"
           disabled={blocked || pending}
           pendingLabel="Sende …"
+          /* `ActionButton` kennt nur seinen **eigenen** Lauf. Hält der
+             Aufrufer das Pending (Server Action in seiner Hand), bliebe der
+             Knopf sonst grau ohne Wort — genau der Fall, den V7 verbietet.
+             Deshalb trägt die Beschriftung das Wort, wenn `pending` von außen
+             kommt (0028). */
           action={async () => {
             await onSubmit({ optionId: choice, text: text.trim() || undefined });
           }}
         >
-          {submitLabel}
+          {pending ? "Sende …" : submitLabel}
         </ActionButton>
         {why ? <span className="v2ask__why">{why}</span> : null}
       </div>

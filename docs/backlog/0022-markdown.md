@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | ja, unverändert — „fremd erzeugter Fließtext, sicher dargestellt" hat kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Markdown` (KI-Texte, Notizen), 5 Dateien / 12 Stellen · Showcase `src/showcase/CaseCrud.stories.tsx` (Zusammenfassung des Sachverhalts) |
@@ -240,3 +240,24 @@ Ein fester Punkt reißt neu. Jedes Kriterium einzeln, fest und variabel:
 Erste Runde (2026-09-03, Historie): Alle Sicherheitskriterien ✓; offen waren
 `target`/sichtbares Ziel am Link (behoben), `flow` ohne Story (behoben) und die
 verwaiste Klammer (offen).
+
+
+## Mangel der Abnahme vom 2026-09-05 — behoben
+
+`parseInline` und `parseMarkdown` waren öffentliche Exporte — auch im Barrel —
+**ohne** `@when`/`@instead`. Genau dieser Punkt war in 0019 an `parseAmount`
+gerügt und dort behoben worden; hier stand er noch.
+
+Beide tragen jetzt beide Zeilen. Der Fall, für den sie da sind, ist derselbe
+wie bei `parseAmount`: die Frage „was wird aus diesem Text?", ohne ihn zu
+zeichnen — eine Vorschau, eine Längenprüfung, ein Test. Sie verweisen
+aufeinander und auf `Markdown`.
+
+Nicht geändert: dass sie heute keinen Aufrufer haben. Ein Parser ohne
+Aufrufer ist kein Fehler, solange die Frage, die er beantwortet, benannt ist —
+und das war der Mangel.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] `parseInline` und `parseMarkdown` tragen `@when` **und** `@instead` (`grep`)
+- [ ] Die Abgrenzung verweist auf `Markdown` und aufeinander

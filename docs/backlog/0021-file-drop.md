@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Dateien ablegen ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Dateiablage (Drop-Zone, Liste, Fortschritt)"; Kit `UploadZone` |
@@ -190,3 +190,24 @@ Zu tun bleibt, was oben unter 1. und 2. steht:
 
 Geprüft von / am: Claude (Abnahme-Agent), 2026-09-05 — zweite Prüfung gegen die
 wiederhergestellten Kriterien
+
+
+## Mängel der Abnahme vom 2026-09-05 — behoben
+
+**M1 — der Ablehnungsgrund zeigte einen MIME-Ausdruck.** Die Zeile las
+„Format nicht vorgesehen — application/pdf,image/*." Das ist das
+`accept`-Attribut; es gehört in den Dateidialog, nicht vor eine
+Sachbearbeiterin (T4/T5). Jetzt sagt der Grund, welche **Endung** sie gerade
+versucht hat, und verweist auf den Hinweis, in dem die erlaubten stehen:
+„PNG-Dateien nehmen wir hier nicht — erlaubt ist: PDF oder Bild, bis 10 MB."
+Ohne `hint` endet der Satz nach dem ersten Teil.
+
+**M2 — `id="v2drop-hint"` war ein festes Literal.** Zwei Ablagen auf einer
+Seite trugen dieselbe `id`, und `aria-describedby` beider zeigte auf denselben
+Hinweis. Jetzt `useId()`, wie es `Popover` und `ExpandableRow` schon machen.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Der Ablehnungsgrund nennt keine MIME-Angabe (Story `Rejected`, Text im DOM)
+- [ ] Der Grund nennt die versuchte Endung und, wenn `hint` gesetzt ist, die erlaubten
+- [ ] Zwei `FileDrop` auf einer Seite tragen verschiedene `id`s (im DOM gemessen)
