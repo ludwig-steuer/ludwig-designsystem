@@ -62,7 +62,7 @@ export function formatAmount(
 
 /* ── Zeitpunkte ─────────────────────────────────────────────────────────── */
 
-export type TimeFormat = "date" | "dateTime" | "relative" | "age" | "month";
+export type TimeFormat = "date" | "dateTime" | "time" | "relative" | "age" | "month";
 export type TimeLength = "short" | "medium" | "long";
 
 const DATE = new Intl.DateTimeFormat(LOCALE, {
@@ -72,6 +72,10 @@ const DATE = new Intl.DateTimeFormat(LOCALE, {
   year: "numeric",
 });
 const MONTH = new Intl.DateTimeFormat(LOCALE, { timeZone: TZ, month: "long", year: "numeric" });
+/** The written-out day — a group header over a strand of events. */
+const DATE_LONG = new Intl.DateTimeFormat(LOCALE, { timeZone: TZ, dateStyle: "full" });
+/** The clock alone, for a place where the day already stands above it. */
+const CLOCK = new Intl.DateTimeFormat(LOCALE, { timeZone: TZ, hour: "2-digit", minute: "2-digit" });
 const DT_SHORT = new Intl.DateTimeFormat(LOCALE, {
   timeZone: TZ,
   day: "2-digit",
@@ -133,8 +137,10 @@ function formatRelative(d: Date, now: Date): string {
 }
 
 /**
- * The five ways Ludwig says „when": the day, the day with a clock in three
- * lengths, how long ago it was, and the month for axes and group headers.
+ * The six ways Ludwig says „when": the day (`long` writes it out — „Montag,
+ * 31. August 2026"), the day with a clock in three lengths, the clock alone
+ * where the day already stands above it, how long ago it was, and the month
+ * for axes and group headers.
  */
 export function formatTime(
   value: string | Date | null,
@@ -145,7 +151,8 @@ export function formatTime(
   if (!value) return "—";
   const d = toDate(value);
   if (Number.isNaN(d.getTime())) return "—";
-  if (format === "date") return DATE.format(d);
+  if (format === "date") return length === "long" ? DATE_LONG.format(d) : DATE.format(d);
+  if (format === "time") return CLOCK.format(d);
   if (format === "month") return MONTH.format(d);
   if (format === "relative") return formatRelative(d, now);
   if (format === "age") return formatAge(d, now);

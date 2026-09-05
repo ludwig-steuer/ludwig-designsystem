@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import { EntityIcon } from "../Icons";
 import { AmountCell } from "../primitives/Cells";
 import { FieldList } from "../primitives/FieldList";
 import { Card, CardHead } from "../primitives/Table";
 import { Timeline, type TimelineItem } from "./Timeline";
 
-const meta: Meta<typeof Timeline> = { title: "v3/Patterns/Prozess/Timeline", component: Timeline };
+const meta: Meta<typeof Timeline> = { title: "v3/Patterns/Prüfen/Timeline", component: Timeline };
 export default meta;
 type Story = StoryObj<typeof Timeline>;
 
@@ -50,7 +51,7 @@ const CASE: TimelineItem[] = [
 ];
 
 /** Ein Sachverhalt über eine Woche, alle Ereignisarten. */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
       <Timeline entries={CASE} />
@@ -63,7 +64,7 @@ export const Gefuellt: Story = {
  * Aufrufer. Solange `src/ludwig/` keinen Ereignistyp führt, erfindet die
  * Komponente keine Vokabeln (Befund in der Spec).
  */
-export const MitLabels: Story = {
+export const WithLabels: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
       <Timeline
@@ -90,7 +91,7 @@ export const MitLabels: Story = {
 };
 
 /** Nichts geschehen ist eine Aussage, kein leerer Kasten. */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
       <Timeline entries={[]} />
@@ -99,7 +100,7 @@ export const Leer: Story = {
 };
 
 /** Lädt: der Platz bleibt, nichts springt. */
-export const Laedt: Story = {
+export const Loading: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
       <Timeline entries={[]} loading />
@@ -108,7 +109,7 @@ export const Laedt: Story = {
 };
 
 /** Am Sachverhalt zählt das Letzte, im Audit der Anfang. */
-export const Reihenfolge: Story = {
+export const Order: Story = {
   render: () => (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-6)" }}>
       <div>
@@ -124,7 +125,7 @@ export const Reihenfolge: Story = {
 };
 
 /** Tag, Monat oder gar nicht — ohne Gruppe trägt jede Zeile ihr Datum. */
-export const Gruppierung: Story = {
+export const Grouping: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)", maxWidth: 620 }}>
       <Timeline entries={CASE} groupBy="month" />
@@ -134,7 +135,7 @@ export const Gruppierung: Story = {
 };
 
 /** Ohne `onOpen` ist der Verlauf Text; mit ihm wird jeder Eintrag ein Weg. */
-export const Interaktiv: Story = {
+export const Interactive: Story = {
   render: function Render() {
     const [open, setOpen] = useState<string | null>(null);
     return (
@@ -148,8 +149,13 @@ export const Interaktiv: Story = {
   },
 };
 
-/** Die Lücke ist der Grund für den Strang: 21 Tage ohne Ereignis. */
-export const MitLuecke: Story = {
+/**
+ * Die Lücke ist der Grund für den Strang: zwischen dem 5. und dem 26. August
+ * liegen 20 volle Tage, und genau die zählt die Zeile — nicht die 21
+ * Kalendertage, die dazwischenliegen. `gapDays` verschiebt die Schwelle; hier
+ * steht sie auf den sieben Tagen des Vorgabewerts.
+ */
+export const WithGap: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
       <Timeline
@@ -170,7 +176,7 @@ export const MitLuecke: Story = {
 };
 
 /** Im Einsatz: unter den Stammdaten im Sachverhalts-Detail. */
-export const ImEinsatz: Story = {
+export const InUse: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
       <Card>
@@ -233,6 +239,52 @@ export const WithoutKind: Story = {
         entries={[
           { id: "n1", at: "2026-08-28", title: "Beleg fehlt: Bürobedarf Meier GmbH" },
           { id: "n2", at: "2026-08-27", title: "Zahlung an Stadtwerke Musterstadt" },
+        ]}
+      />
+    </div>
+  ),
+};
+
+/**
+ * `icon` und `dim` sind Felder des **Eintrags**, nicht Props des Strangs —
+ * deshalb eine Story für beide statt zwei: der echte Fall ist der
+ * zurückgezogene Eintrag neben dem gültigen, jeder mit dem Zeichen seiner Art.
+ * Der zurückgezogene tritt zurück, bleibt aber lesbar, und sein Wort
+ * („zurückgezogen") steht daneben — Farbe allein sagt es nicht (V7).
+ */
+export const IconsAndDimmed: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <Timeline
+        entries={[
+          {
+            id: "i1",
+            at: "2026-08-31T14:02:00Z",
+            kind: "Buchungsvorschlag",
+            actor: "Agent",
+            icon: <EntityIcon entity="journal-entry" size={14} />,
+            title: "6815 an 70021 · 1.249,90 € vorgeschlagen",
+            state: "edited",
+            right: <AmountCell value={1249.9} />,
+          },
+          {
+            id: "i2",
+            at: "2026-08-30T09:12:00Z",
+            kind: "Buchungsvorschlag · zurückgezogen",
+            actor: "Agent",
+            icon: <EntityIcon entity="journal-entry" size={14} />,
+            title: "6810 an 70021 · 1.249,90 € vorgeschlagen",
+            dim: true,
+          },
+          {
+            id: "i3",
+            at: "2026-08-26T07:40:00Z",
+            kind: "Beleg",
+            actor: "Mandant",
+            icon: <EntityIcon entity="source-document" size={14} />,
+            title: "RE-4471 im Posteingang angekommen",
+            state: "done",
+          },
         ]}
       />
     </div>

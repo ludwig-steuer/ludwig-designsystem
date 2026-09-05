@@ -1,6 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
+
+import { formatTime, formatTimeFull } from "../format";
 import { Disclosure } from "../primitives/Disclosure";
 import { Skeleton } from "../primitives/Skeleton";
 import { TextButton } from "../primitives/TextButton";
@@ -45,30 +47,6 @@ export interface TimelineItem {
   state?: StateKind;
 }
 
-const DAY = new Intl.DateTimeFormat("de-DE", {
-  timeZone: "Europe/Berlin",
-  weekday: "long",
-  day: "2-digit",
-  month: "long",
-  year: "numeric",
-});
-const MONTH = new Intl.DateTimeFormat("de-DE", {
-  timeZone: "Europe/Berlin",
-  month: "long",
-  year: "numeric",
-});
-const DATE = new Intl.DateTimeFormat("de-DE", {
-  timeZone: "Europe/Berlin",
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-});
-const TIME = new Intl.DateTimeFormat("de-DE", {
-  timeZone: "Europe/Berlin",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
 /** A date column, not a timestamp: `2026-08-26`. */
 const DAY_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -78,8 +56,7 @@ const GAP_DAYS = 7;
 
 function groupKey(iso: string, by: "day" | "month" | "none") {
   if (by === "none") return "";
-  const d = new Date(iso);
-  return by === "month" ? MONTH.format(d) : DAY.format(d);
+  return by === "month" ? formatTime(iso, "month") : formatTime(iso, "date", "long");
 }
 
 /**
@@ -96,6 +73,7 @@ export function Timeline({
   groupBy = "day",
   emptyText = "Noch nichts geschehen.",
   kindLabels,
+  gapDays = GAP_DAYS,
   loading,
   onOpen,
   selectedId,
@@ -110,6 +88,12 @@ export function Timeline({
    * type — the component invents no vocabulary (spec 0023, „Befund").
    */
   kindLabels?: Record<string, string>;
+  /**
+   * From how many days without an event the gap is worth a line. Seven is the
+   * working week: what falls inside it is normal, what stands above it is a
+   * statement. A strand of years sets it higher, a strand of one day lower.
+   */
+  gapDays?: number;
   loading?: boolean;
   /** Without it an entry is text, not a control. */
   onOpen?: (id: string) => void;
@@ -134,7 +118,7 @@ export function Timeline({
     if (key && key !== lastGroup) {
       if (lastAt) {
         const days = Math.floor(Math.abs(new Date(e.at).getTime() - new Date(lastAt).getTime()) / DAY_MS);
-        if (days >= GAP_DAYS) {
+        if (days >= gapDays) {
           rows.push(
             <div className="v2tl__gap" key={`gap-${e.id}`}>
               {days} Tage ohne Ereignis
@@ -179,7 +163,6 @@ function Entry({
   selected: boolean;
 }) {
   const dayOnly = DAY_ONLY.test(item.at);
-  const when = new Date(item.at);
   // Only the title is the target: an amount and a badge are statements, not
   // ways — and inside the button they would stand without a gap.
   const title = <span className="v2tl__title">{item.title}</span>;
@@ -193,10 +176,14 @@ function Entry({
     >
       <time
         className="v2tl__when"
-        dateTime={dayOnly ? item.at : when.toISOString()}
-        title={DAY.format(when)}
+        dateTime={dayOnly ? item.at : new Date(item.at).toISOString()}
+        title={formatTimeFull(item.at)}
       >
-        {dayOnly ? (showDate ? DATE.format(when) : "") : `${showDate ? `${DATE.format(when)} ` : ""}${TIME.format(when)}`}
+        {dayOnly
+          ? showDate
+            ? formatTime(item.at, "date")
+            : ""
+          : `${showDate ? `${formatTime(item.at, "date")} ` : ""}${formatTime(item.at, "time")}`}
       </time>
       <div>
         <div className="v2tl__head">
