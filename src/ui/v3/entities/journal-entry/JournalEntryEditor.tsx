@@ -88,7 +88,7 @@ export interface EditorMessage {
 
 export interface EditorAiReview {
   verdict: "confirm" | "confirm_with_note" | "adjust" | "flag" | null;
-  confidence?: "green" | "yellow" | "orange" | "red" | "none";
+  confidence?: React.ComponentProps<typeof AiBookingNotes>["confidence"];
   rationale?: string | null;
   judgeReasoning?: string | null;
   sources?: React.ComponentProps<typeof AiBookingNotes>["sources"];

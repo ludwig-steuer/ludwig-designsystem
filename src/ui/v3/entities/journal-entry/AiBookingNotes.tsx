@@ -13,6 +13,7 @@ import { useState } from "react";
 
 // Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
 // und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
+import { Confidence, type ConfidenceLevel } from "../../patterns/Confidence";
 import { StatusBadge } from "../../patterns/StatusBadge";
 
 /**
@@ -51,31 +52,21 @@ export interface AiSource {
   href?: string | null;
 }
 
-/** Die Konfidenz des Vorschlags — vier Stufen plus „keine Angabe". */
-export type ConfidenceLevel = "green" | "yellow" | "orange" | "red" | "none";
-
-const KONFIDENZ_TEXT: Record<ConfidenceLevel, string> = {
-  green: "Ursprungs-Konfidenz hoch",
-  yellow: "Ursprungs-Konfidenz mittel",
-  orange: "Ursprungs-Konfidenz gering",
-  red: "Ursprungs-Konfidenz sehr gering",
-  none: "keine Angabe",
-};
-
 /**
  * @when    The agent's rationale and the judge's verdict on a proposal, collapsed by default.
  * @instead Messages about the booking entry → Messages.
  */
 export function AiBookingNotes({
   verdict,
-  confidence = "none",
+  confidence = null,
   rationale,
   judgeReasoning,
   sources = [],
   errors = [],
 }: {
   verdict: JudgeVerdict | null;
-  confidence?: ConfidenceLevel;
+  /** Die Konfidenz des Vorschlags; `null` heißt kein Signal. */
+  confidence?: ConfidenceLevel | null;
   /** `agent_rationale` — warum der Agent so gebucht hat. */
   rationale?: string | null;
   /** `reasoning_short` des Judge. */
@@ -103,7 +94,7 @@ export function AiBookingNotes({
         <span className="ki__title">
           KI-Buchungshinweise{flagged ? ": Bitte manuell prüfen" : ""}
         </span>
-        <span className={`confdot confdot--${confidence}`} title={KONFIDENZ_TEXT[confidence]} />
+        <Confidence level={confidence} compact />
         {verdict ? <StatusBadge axis="judge" status={verdict} info={false} /> : null}
       </button>
 

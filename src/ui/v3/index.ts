@@ -354,11 +354,15 @@ export {
   AiBookingNotes,
   type JudgeVerdict,
   type AiSource,
-  type ConfidenceLevel,
   type SourceKind,
 } from "./entities/journal-entry/AiBookingNotes";
 
 /* Status — die eine erlaubte Status-Darstellung (R1). */
+export {
+  Confidence,
+  type ConfidenceLevel,
+  type ConfidenceProps,
+} from "./patterns/Confidence";
 export { StatusBadge, type StatusBadgeProps } from "./patterns/StatusBadge";
 export { StatusHeader, type StatusHeaderProps } from "./patterns/StatusHeader";
 export { StatusInfoButton } from "./patterns/StatusInfoButton";

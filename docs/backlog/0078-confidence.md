@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `patterns/` — Gruppe Prüfen (neben `StatusBadge`); Pattern statt Primitive, weil die Farbe und das Wort aus der Registry kommen und die in `patterns/` liegt |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede App mit Modell-Vorschlägen zeigt, wie sicher der Vorschlag ist; kennt die Achse `konfidenz`, keine Entität |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Konfidenz (Punkt · Band · Meter) → heben → eine Primitive" · `ludwig/app` `F147-luecken-fuer-design-agent.md` §4 Nr. 21 · GLOSSARY „Confidence band" |
@@ -138,6 +138,37 @@ Abgenommen von / am: … · Offene Punkte: …
 
 1. Braucht die Buchungszeile die Prozentzahl, oder reicht der Punkt? *Ohne
    Antwort: der Punkt (`compact`); die Zahl steht im Detail.*
+   **Entschieden (Bauender, 2026-09-05, Default):** der Punkt. `compact`
+   nimmt `value` trotzdem entgegen und hängt die Prozentzahl an `title` und
+   `aria-label` — sichtbar wird sie erst ohne `compact`.
 2. Vier Farbwerte oder fünf Band-Wörter auf der Achse `konfidenz`? *Ohne
    Antwort: die Achse bleibt bei vier, der Baustein folgt der Achse — L-50
    entscheidet drüben.*
+   **Entschieden (Bauender, 2026-09-05, Default):** vier. `ConfidenceLevel`
+   führt genau die vier Achsenwerte; kommt das fünfstufige Band, ändert sich
+   die Registry, nicht die Schnittstelle (siehe Ausbau).
+
+## Befund beim Bauen
+
+- **`ConfidenceLevel` steht jetzt zweimal im Repo.** Der Spiegel führt ihn
+  schon: `src/ludwig/modules/accounting-cases/domain/acceptance-triage.ts`
+  (dieselben vier Werte, `null` = keine Aussage). Der Baustein definiert ihn
+  trotzdem selbst, weil er die Werte der **Achse** zeichnet und nicht die des
+  Domänen-Enums — beide fallen erst auseinander, wenn L-50 die fünf
+  Band-Wörter auf die Achse setzt. Steht so im JSDoc. Für die App heißt das:
+  `confidenceLevel(value)` aus L-50 hat neben diesem Typ seinen Platz.
+- **`.confdot`/`.confdot--*` in `src/styles/app-chrome.css` sind im Set jetzt
+  tot** (vier Hex-Werte, `--none` mit Rand). Sie bleiben stehen, bis die App
+  ihre zwölf Stellen migriert hat — siehe „offen (App)".
+- **Keine Klasse `v2conf`.** Gegrept war sie frei — gebraucht wird sie nicht:
+  die Punkt-Farben stehen längst in `v3.css` als `.v2dot--*` über
+  `--color-success`/`--color-warning`/`--color-danger`/`--color-accent-700`,
+  und der kompakte Punkt ist dasselbe Markup ohne Wort. Für die
+  tabellarischen Ziffern reicht `.lw-numeric` aus `tokens.css`. Kein neues
+  Stylesheet-Kapitel für diese Aufgabe.
+- **Die Story `DotOnly` nutzt `StatusHeader` (0077) über der Punkt-Spalte:**
+  `konfidenz` ist eine Achse, also greift Z4 auch hier.
+- **`JournalEntryEditor.EditorAiReview.confidence` hing an einer eigenen
+  Aufzählung** mit `"none"`. Sie zeigt jetzt über
+  `React.ComponentProps<typeof AiBookingNotes>["confidence"]` auf den einen
+  Typ — dieselbe Schreibweise, die `sources` daneben schon nutzt.
