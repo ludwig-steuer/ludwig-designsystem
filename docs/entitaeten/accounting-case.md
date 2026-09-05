@@ -271,12 +271,42 @@ nach beiden entstehen.
 
 ## Prüfung
 
-Gehört dem zweiten Agenten. Er prüft zuerst alle Zeilen mit Beleg `Annahme`,
-dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
+Zweiter Agent, 2026-09-05, gegen denselben Bestand (915 Zeilen
+`ludwig.client_accounting_case`, Staging über den Pooler, nur `SELECT`,
+nur Aggregate) und gegen die genannten Dateien in `../app`. Reihenfolge wie
+im Prüfprompt: Annahmen → Belege „heute in" → Ränge → Formen → Listen →
+Zuschnitt.
+
+**Bilanz: 26 geprüfte Zeilen — 7 bestätigt · 16 geändert · 3 offen.**
 
 | Zeile / Form | Einwand | Ergebnis | Geprüft von / am |
 |---|---|---|---|
-| … | … | bestätigt · geändert auf … · offen | … |
+| **Rang 17 Gegenpartei-Seite** (die einzige `Annahme`) | Zwei Teile: der Füllgrad und „wird nirgends gezeigt" sind prüfbar, die Annahme selbst („muss überhaupt sichtbar sein") nicht | **offen** — die Tatsachen stimmen: 88 % (`debtor` 451 · `creditor` 356 · NULL 108) auf die Zeile nachgerechnet, und `counterparty_side`/`counterpartySide` kommt in **keiner** `.tsx` der App vor. Die Annahme selbst („muss überhaupt sichtbar sein") ist aus Daten nicht entscheidbar und bleibt an Offener Frage 2 hängen; der Default (Wort in L, keine Farbe) ist tragbar, weil NULL laut GLOSSARY etwas bedeutet | Claude, 2026-09-05 |
+| **Rang 1 Anzeigename**, Beleg „heute in drei Komponenten" | Die drei genannten Stellen bauen **nicht dieselbe** Kette | **geändert.** Nachgelesen: `PortalCaseList.tsx` Z. 255–256 baut `title ?? (Art: Gegenpart) ?? Art` — die dokumentierte Kette, einmal. `buildCaseOverview()` (`overview-vm.ts` Z. 708–710) baut *immer* `Art: Gegenpart` und liest `detail.title` **nie**; ein vom Nutzer gesetzter Titel ist im Kopf unsichtbar. `CaseSummaryTooltip` baut gar keine Kette, sondern nimmt `label` und `caseTitle` als getrennte Props. Vierte Fassung: `CasesTab` des Partners mit `title ?? summary ?? „—"`. Zeile umgeschrieben; die Korrektur an B1/L-52 ist **gemeldet, nicht eingetragen** (Register gehört nicht zu dieser Aufgabe) | Claude, 2026-09-05 |
+| **Rang 10 Gegenpart „ab M", Begründung „in der Zeile trägt ihn Rang 1 schon"** | Hält das in einer Zeile, deren Fall einen echten `title` hat, in dem der Gegenpart nicht vorkommt? | **geändert auf Rang 5, ab Form S.** Gegenprobe im Bestand: 483 Fälle haben einen `title`, 482 davon auch einen `counterparty_name` — und in nur **15** steckt der Gegenpart im Titel. In **467** Fällen (51 % aller 915) trägt Rang 1 ihn also nicht. Die heutige Liste zeigt ihn folgerichtig als eigene Spalte. Seitenprofil Zweifel 4 („steht dreimal") gilt dem Kopf, dessen Titel den Gegenpart per Ableitung immer enthält — in der Zeile steht er einmal. Ränge 5–9 um eins nach hinten geschoben, 11–24 unverändert | Claude, 2026-09-05 |
+| Füllgrade, Verteilungen, Textlängen aller 24 Zeilen | Sind die Zahlen aus demselben Bestand reproduzierbar? | **bestätigt** — alle nachgerechnet und identisch: `title` 53 %, `total_amount` 52 %, `currency` 63 %, `summary` 75 % (p50 231 · p90 309 · max 720), `counterparty_name` 95 % (14 · 27 · 57), `document_not_required_reason` 7 % (116 · 176 · 313), `closed_at` 26 %, `agent_run_id` 21 %, `export_batch_id` 7 %, `expected_interval` 3 %. Verteilungen von `kind`, `lifecycle_status`, `disposition`, `counterparty_side`, `document_number_mode` stimmen auf die Zahl | Claude, 2026-09-05 |
+| Rang 3, Beleg „`CaseCell` (3 fremde Listen)" | Zwei Aufrufer, nicht drei | **geändert.** `@/ui/case` → `CaseCell` wird in `documents/page.tsx` Z. 282 und `StuckDocumentsTable.tsx` Z. 102 aufgerufen. `KontoauszugView.tsx` Z. 134 definiert eine **eigene** `CaseCell` mit anderer Schnittstelle (Bankzeile statt Fall; 0/1/n Fälle; „offen"-Pille; Betrag je Fall). Für den v3-Baustein ist das die härtere Anforderung, nicht eine dritte Kopie desselben | Claude, 2026-09-05 |
+| Rang 12, Beleg „eigener Listen-Filter" | `counterpartyPartnerId` filtert die Sachverhaltsliste nicht | **geändert** — das Feld existiert in `CaseFilter`, wird aber nur von `partners/[partnerId]/page.tsx` Z. 102 gesetzt: es ist die Grundgesamtheit einer anderen Liste, kein Filter dieser | Claude, 2026-09-05 |
+| Rang 15, „heute in `FehltPanel`" | Zweiter Anzeigeort übersehen | **geändert** — auch `BelegeTab.tsx` Z. 31–35 zeigt den Grund, als Untertitel des `EmptyState` „Kein Beleg zu erwarten" | Claude, 2026-09-05 |
+| Rang 18 Anker, drei genannte Präfixe | Kommen alle drei vor? | **geändert** — im Bestand nur zwei: `mirror-opos:` 426 · `payment-collect:` 2 · `mirror-opos-pool:` 0. Die Drei stammen aus dem Spaltenkommentar, nicht aus den Daten | Claude, 2026-09-05 |
+| Rang 22 Verrechnungskonto „**0 %**" | Gerundet, nicht leer | **geändert auf „0 % (2 von 915)"** — die Aussage „im Bestand noch nicht angekommen" bleibt richtig, die Null war eine Rundung | Claude, 2026-09-05 |
+| Abnahme-Bucket fehlt in den Datenpunkten | `acceptance-triage.ts` steht unter „Typen", die Achse `triage` steht in der Registry, der Wert wird in `CloseCasesPanel` als Gruppenkopf gezeigt — aber kein Datenpunkt | **geändert** — als Rang 25 (L) nachgetragen und in die Kopfzeile „Status-Achsen" aufgenommen | Claude, 2026-09-05 |
+| Relationen, alle neun Kardinalitäten | Reproduzierbar? | **bestätigt** — Ereignisse 4 % ohne · 1 · 2 · 38; Klärungen 87 % · 0 · 1 · 6 (offen: 92 % = 0 · max 3); Erwartungen 95 % · max 2; Klammern 95 % · max 15; Belegnummern 99 % · max 1; Regel 97 % · max 1; Historie 43 % ohne · 3 · 9 · 84. Ereignis-Arten stimmen auf die Zahl. `client_journal_entry` hat **kein** `case_id` — im Schema nachgesehen, die Kante läuft über `accounting_event_id` | Claude, 2026-09-05 |
+| Heutige Darstellung: `CaseOverviewBox` | Wird sie überhaupt gerendert? | **geändert** — nein. Der einzige Verweis außerhalb der Datei ist der Barrel-Export (`modules/accounting-cases/index.ts` Z. 67); dasselbe gilt für `EventStack`. Die Detailseite baut `buildCaseOverview` + `SachverhaltScreen`. Damit trägt sie das „existiert dreifach" für `CaseFacts` nicht mit | Claude, 2026-09-05 |
+| Heutige Darstellung: `CloseCasesPanel` fehlt | Die zweitgrößte Sachverhalts-Komponente der App (941 Z.) kommt im Profil nicht vor, obwohl `ui-repraesentationen.md` §1 sie als „Liste" führt | **geändert** — als Zeile in „Heutige Darstellung" und als Liste nachgetragen. Sie ist eine Karte je Fall mit Auswahl, Gruppen-Übernahme und Gesamt-Übernahme | Claude, 2026-09-05 |
+| Heutige Darstellung: Partner-Reiter fehlt | `business-partners/ui/tabs/CasesTab.tsx` ist eine zweite handgeschriebene Sachverhaltszeile (6 Spalten, jahresübergreifend) | **geändert** — nachgetragen; sie ist der zweite Einsatzort, den `CaseRow` nach §7 Nr. 2 belegen muss | Claude, 2026-09-05 |
+| Listen: „die vier Reiter unterscheiden sich nur in der Grundgesamtheit" | Zweites Merkmal aus den fünf? | **bestätigt** — `caseOrderExprs()` liefert für alle vier `opened_at desc`; Spaltensatz, Filterzeile und (fehlende) Massenaktion sind identisch; nur die vier Leerfall-Texte gehen auseinander, und Leerfall zählt nicht zu den fünf. Eine Komponente mit Prop ist richtig | Claude, 2026-09-05 |
+| Listen: „`offen` und `schliessen` sind keine Sachverhaltslisten" | Halb falsch | **geändert** — `offen` ja (Bankzeilen), `schliessen` nein: dort steht eine Karten-Liste über Sachverhalte. `caseFilterForListTab()` gibt `null` zurück, weil die Liste über `listCloseableCasesForClient` läuft, nicht weil es keine Sachverhalte sind | Claude, 2026-09-05 |
+| Listen: Filter „Zuständigkeit" und „Geschäftspartner" | Beide Angaben falsch | **geändert** — einen Geschäftspartner-Filter gibt es in dieser Liste nicht; der Zuständigkeits-Filter steht in `CaseListFilters` Z. 108–124, schreibt `?dispo=` in die URL und **wirkt nicht**: weder `caseFilterForListTab()` noch `CaseFilter` kennen ihn. Als Befund gemeldet, nicht eingetragen | Claude, 2026-09-05 |
+| Listen: `PortalCaseList`, Umfang „nicht gemessen" | Messbar | **geändert** — `disposition='client'` trifft im Bestand **0** Zeilen. Die Karte ist durch die Komponente belegt, nicht durch Daten; für 0081 heißt das: der Leerfall ist der Normalfall | Claude, 2026-09-05 |
+| Listen: Umfang p50/p90 | Reproduzierbar? | **bestätigt** — offen je Mandant+Jahr 86 · 190 · 259, gesamt 147 · 220 · 262 über 7 Gruppen. Über 200 im p90 → `Pagination` und Serverfilter bleiben Pflicht | Claude, 2026-09-05 |
+| Formen: `CaseFacts` „existiert dreifach" | Wird dieselbe Stelle zweimal gezählt? | **geändert** — nicht zweimal gezählt, aber eine der drei ist tot (`CaseOverviewBox`). Gerendert existieren zwei, und die zeigen **verschiedene** Sätze: der Kopf vier Fakten des Falls, das Portal vier andere. `CaseFacts` bleibt „jetzt", aber die tragende Begründung ist 0052 (Drawer und View teilen eine Komponente), nicht die Zahl der Fundstellen. Zeile umgeschrieben | Claude, 2026-09-05 |
+| Formen: hat jede empfohlene einen Grund aus §7? | | **bestätigt** — `CaseCell` Nr. 3, `CaseRow` Nr. 1+2+6, `CaseFacts` Nr. 1 (+ 0052), `CaseDetailView` Nr. 1, `CaseDrawer` Nr. 5 mit drei benannten verweisenden Stellen. Beim Drawer stimmt auch die Voraussetzung „dieselbe Fakten-Komponente wie der View" mit 0052 Zone 3 überein | Claude, 2026-09-05 |
+| Formen: fehlt eine, die die App heute hat? | | **geändert** — ja: die **Karte**. Sie hat mit `CloseCasesPanel` einen zweiten, kanzleiseitigen Einsatzort, den das Profil nicht kannte. Sie bleibt trotzdem Backlog (0081): die Fünf sind voll, und beide Einsatzorte hängen an fremden Profilen. Der Grund in der Zuschnitt-Tabelle war zu schmal und ist ersetzt | Claude, 2026-09-05 |
+| Zuschnitt: höchstens fünf „jetzt"? | | **bestätigt** — fünf: `CaseCell`, `CaseRow`, `CaseFacts`, `CaseDetailView`, `CaseDrawer`. Die Bau-Reihenfolge bleibt unverändert; die Korrekturen ändern den Inhalt der Zeile (Gegenpart), nicht den Schnitt | Claude, 2026-09-05 |
+| Zuschnitt: trägt jede Backlog-Zeile ihren Grund? | | **bestätigt**, mit zwei Ergänzungen — 0081 bekam den zweiten Einsatzort, 0082 den dritten Listen-Job; zwei Zeilen (Abnahmeliste, Partner-Reiter) sind neu und hängen an 0081 bzw. 0082, ohne eigene Nummer. Backlog-Dateien wurden **nicht** angefasst | Claude, 2026-09-05 |
+| GLOSSARY-Zitate und B4 („der Eintrag ist vollständig") | Wörtlich? Vollständig? | **offen** — die vier Zitate stimmen wörtlich. Der Eintrag ist aber nicht vollständig: seine Aufzählung von `lifecycle_status` nennt fünf Werte und lässt `waiting_for_documents` aus, obwohl der CHECK der Tabelle und der Reiter „Wartet auf Unterlagen" ihn führen. Als Befund gemeldet, nicht eingetragen | Claude, 2026-09-05 |
+| Offene Frage 3 (`CasePicker`) | Prüfbar? | **offen** — die Zahlen darin stimmen (p90 190 offene Fälle je Mandant und Jahr; der `<select>` steht in `BankTransactionAssignmentTable` Z. 378–389 und zeigt genau „Nummer · Art · 40 Zeichen"), die Entscheidung gehört nach 0084. Die Trefferzeile trägt jetzt Rang 1–5 statt 1–4, weil der Gegenpart in S gerückt ist | Claude, 2026-09-05 |
 
 ## Weiter
 
@@ -318,6 +348,15 @@ Jede Spec verlinkt das Profil als Quelle und nimmt Datenpunkte, Ränge, Relation
 Größe, in derselben Reihenfolge. Die tragende Regel: Rang 1 ist der Anzeigename mit der
 Rückfallkette title → <Art>: <Gegenpart> → <Art> — er wird in EINER Funktion gebildet, die
 das Set lokal definiert und als Befund L-52 an die App meldet, nicht in drei Komponenten.
+
+Aus der Prüfung vom 2026-09-05 kommen drei Vorgaben dazu. Erstens: der Gegenpart ist Rang 5
+und gehört in die ZEILE, nicht erst in die Karte — bei 467 von 915 Fällen nennt der title
+ihn nicht, CaseRow zeigt also Rang 1–10 und CaseFacts 11–16. Zweitens: CaseCell muss den
+Fall der Bankzeile mittragen — 0 Fälle („offen", verlinkt), 1 Fall, n Fälle als Stapel mit
+Betrag; sonst löst sie KontoauszugView nicht ab. Drittens: die drei Anzeigename-Fassungen in
+der App sind nicht dieselbe Regel dreimal, sondern drei verschiedene Regeln — die Fassung im
+Kopf liest den title gar nicht; die Spec schreibt die Regel, die im Profil steht, und
+begründet die Abweichung nicht mit „so macht es die App".
 
 Danach baut Skill v3-komponente jede Spec in derselben Reihenfolge; die größere Form
 komponiert die kleinere, und CaseFacts entsteht vor dem View, weil der Drawer (0052 Zone 3)
