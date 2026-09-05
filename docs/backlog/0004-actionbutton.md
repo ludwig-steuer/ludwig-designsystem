@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede Handlung, die schreibt, dauert und kann scheitern |
 | Quelle | `docs/v3-backlog.md` — Blocker #5 (61 Dateien mit `useTransition`, davon 43 mit eigener Meldung; 28 `window.confirm` in 14 Dateien) |
@@ -167,3 +167,56 @@ Abnahmekriterium sagen „neben dem Knopf". Gebaut ist „neben, bei Enge
 darunter" (`.v2act` ist `inline-flex` mit `flex-wrap`) — das folgt dem
 Kriterium. Die Offene Frage sollte entsprechend geschlossen werden, damit die
 Spec sich nicht selbst widerspricht.
+
+## Mängel der Abnahme vom 2026-09-05 — behoben
+
+**M1 — die Taste am Knopf löste nichts aus.** `hotkey` erreichte nur
+`Button`, und der zeichnet ein `Kbd` und hört auf nichts. Eine sichtbare
+Taste ohne Wirkung ist genau der Fall, den V14 verbietet.
+
+Die Abnahme hat die Entscheidung richtig benannt, statt sie zu treffen: „wo
+gehört die Bindung hin? `useHotkeys` liegt in `patterns/`, ein Primitive darf
+es nicht importieren; ein eigener Listener würde mit einem Screen
+kollidieren, der dieselbe Taste registriert."
+
+**Entschieden so:** die geteilte Hälfte der Tastaturregel zieht **eine Ebene
+tiefer** — `primitives/hotkey.ts` mit `isTyping()`, `matchesKey()` und
+`useHotkey()`. Beide Ebenen brauchen sie: ein Screen bindet mehrere Tasten
+(`useHotkeys`, mit Legende), ein einzelner Knopf bindet die eine, die er
+druckt. `patterns/Hotkeys.tsx` behält seine Screen-API und liest die zwei
+Funktionen von dort, statt sie ein zweites Mal zu schreiben. Dasselbe Muster
+wie bei der Icon-Registry (0087), die aus demselben Grund nicht in
+`patterns/` liegt.
+
+Zur Kollision: bindet ein Screen dieselbe Taste wie ein Knopf, der sie zeigt,
+läuft der Druck zweimal. Das ist ein Fehler an der Aufrufstelle und bleibt
+**sichtbar**, weil der Knopf seine Taste druckt — zwei Stellen, die eine
+Taste beanspruchen, sind genau das, was V14 auffindbar haben will. Steht so
+im Kopfkommentar von `hotkey.ts`.
+
+Mit `confirm` öffnet die Taste den Dialog, sie überspringt ihn nicht. Eine
+Taste, die eine unumkehrbare Handlung ohne Rückfrage ausführt, wäre das
+Gegenteil dessen, wofür die Rückfrage da ist.
+
+**Nachweis:** Story `--in-use` im Browser, `keydown A` → der
+Bestätigungsdialog öffnet, der Text ändert sich. Die Taste ist auf dem Knopf
+sichtbar (`kbd` „A").
+
+**M2 — Enter bestätigt den Dialog nicht.** Die Abnahme hat ihn richtig an
+`Dialog.tsx` verwiesen, nicht an diese Aufgabe. **Erledigt mit 0092:** der
+Dialog nimmt eine `onConfirm`-Prop, Enter löst sie aus — nicht im
+`textarea`, nicht auf einem Knopf. `ActionButton` reicht sie an seinen
+Bestätigungsdialog durch.
+
+**Nicht behoben, weil außerhalb:** die Spec spricht von „28 `window.confirm`
+in 14 Dateien"; im Repo sind es heute 7 Aufrufe in 6 Dateien. Die Zahl gehört
+beim nächsten Anfassen der Spec nachgezogen — sie ändert kein Kriterium.
+
+## Abnahmekriterien (Nachtrag zu den bestehenden)
+
+- [ ] Die Taste am Knopf löst dieselbe Handlung aus wie der Klick (Story `--in-use`, `keydown`)
+- [ ] Mit `confirm` öffnet die Taste den Dialog, statt die Handlung auszuführen
+- [ ] Die Taste greift nicht, während der Bestätigungsdialog offen ist
+- [ ] Die Taste greift nicht in einem Textfeld (`isTyping`)
+- [ ] `patterns/Hotkeys.tsx` hat keine eigene `isTyping`-Kopie mehr (`grep`)
+- [ ] Enter bestätigt den Dialog (0092)

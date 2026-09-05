@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "./Button";
 import { Dialog } from "./Dialog";
+import { useHotkey } from "./hotkey";
 
 /**
  * The button that runs the action (0004).
@@ -63,6 +64,22 @@ export function ActionButton({
   const [asking, setAsking] = useState(false);
   const trigger = useRef<HTMLSpanElement>(null);
 
+  /**
+   * The key on the button does what the click does — a visible key without
+   * effect is exactly what V14 forbids, and until 0004 was reviewed this one
+   * had none: `hotkey` only reached `Button`, which draws a `Kbd` and
+   * listens to nothing.
+   *
+   * With `confirm` the key opens the dialog, it does not skip it. A key that
+   * carries out an irreversible action without asking would be the opposite
+   * of what the confirmation is for.
+   */
+  useHotkey(hotkey, () => {
+    if (pending || disabled) return;
+    if (confirm) setAsking(true);
+    else void run();
+  }, !asking);
+
   async function run() {
     if (pending) return; // two clicks, one action
     setPending(true);
@@ -103,6 +120,10 @@ export function ActionButton({
         <Dialog
           open={asking}
           onClose={closeDialog}
+          onConfirm={() => {
+            closeDialog();
+            void run();
+          }}
           title={confirm.title}
           footer={
             <>

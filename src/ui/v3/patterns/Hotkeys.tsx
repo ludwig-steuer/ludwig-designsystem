@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Dialog } from "../primitives/Dialog";
 import { Kbd } from "../primitives/Kbd";
+import { isTyping } from "../primitives/hotkey";
 
 /**
  * Keyboard (F123 T123.2, UX guidelines V14).
@@ -30,19 +31,6 @@ export interface HotkeyBinding {
   meta?: boolean;
 }
 
-function isTyping(target: EventTarget | null): boolean {
-  const el = target as HTMLElement | null;
-  if (!el) return false;
-  if (el.isContentEditable) return true;
-  // A checkbox or a radio takes no text — `Space` is all it listens to. Whoever
-  // has just ticked three rows with the mouse holds the focus there, and the
-  // key at the bulk action has to keep working (0057 E6).
-  if (el.tagName === "INPUT") {
-    const type = (el as HTMLInputElement).type;
-    return type !== "checkbox" && type !== "radio";
-  }
-  return el.tagName === "TEXTAREA" || el.tagName === "SELECT";
-}
 
 /**
  * @when    Screen with keys on buttons; one binding per action.
