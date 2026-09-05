@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „lädt noch" ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Ladefläche für Karte/Detail (Skeleton)" · `v3-backlog.md` „Ladeanzeige außerhalb der Tabelle" (3) |
@@ -69,20 +69,43 @@ Komponente **ist** der Ladezustand; die anderen vier zeigt der Aufrufer mit
 
 ## Abnahme
 
+Zweite Abnahme am 2026-09-05 (fremder Agent, gegen Spec und Code, nicht gegen
+die Erzählung). Fest gilt immer, darunter die Kriterien dieser Spec.
+
+**Story-Deckung.** Drei Stories in der Spec, drei Exporte in
+`Skeleton.stories.tsx` (`Lines`, `Variants`, `InCard`), drei IDs in
+`index.json` — die Ableitung „1 Zustand + 1 Enum + 0 Callbacks + 1 im Einsatz
+= 3" geht auf. Jede Prop hat ihre Story: `variant` in `Variants`, `lines` in
+`Lines` (`lines={4}`), `label` in `Lines` und `InCard`. Die vier
+ausgeschlossenen Zustände sind begründet — die Komponente **ist** der
+Ladezustand.
+
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| Nutzt `.v2skel`, definiert keine zweite Ladefläche | `v3.css` 741 (`.v2skel`, Puls) und 1327–1329 — dort nur die Gruppe und zwei Höhen-Modifier, kein zweiter Ladestil | ✓ |
-| `variant="card"` hält die Kartenhöhe, ohne die Seite springen zu lassen | `v3-primitives-fläche-skeleton--in-card` im Browser: der Kartenkopf steht, die Fläche hält feste 96 px | ✓ |
-| Genau ein `sr-only`-Satz je Skeleton, Flächen `aria-hidden` | `v3-primitives-fläche-skeleton--lines`, DOM-Probe: ein `.sr-only` („Sachverhalt wird geladen …"), alle vier Balken `aria-hidden="true"` | ✓ |
-| Die `@when`-Zeile grenzt gegen `TableLoading` ab | `Skeleton.tsx`: `@when` nennt Karte, Detailfläche, Formularfeld; die Abgrenzung selbst steht in `@instead` („Rows inside a table → TableLoading") | ✓ |
-| Ersetzt den handgebauten Platzhalter in mindestens einem der drei Fundorte | Keine Aufrufstelle außer den eigenen Stories; in `ludwig/app` kein `Skeleton`-Import (`grep`) | ✗ |
+| `pnpm typecheck` grün | `tsc --noEmit` ohne Ausgabe, Exit 0 (Anfang und Ende der Abnahme) | ✓ |
+| `pnpm build` grün | nicht neu gelaufen — parallele Abnahmen schreiben nach `storybook-static`. Der Lauf für diesen Stand war grün: „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Skeleton.tsx` mit einem Export, `Skeleton.stories.tsx` daneben; Titel `v3/Primitives/Fläche/Skeleton`, deckt sich mit der Barrel-Gruppe „Fläche" (`src/ui/v3/index.ts:117` … `:129`) | ✓ |
+| Code englisch; `@when`/`@instead` am Export | `Skeleton.tsx:15–17`; Bezeichner (`SkeletonVariant`, `LINE_WIDTHS`, `variant`, `lines`, `label`), Kommentare und JSDoc englisch. Deutsch nur im Default-String „Wird geladen …", der sichtbar ist | ✓ |
+| Kein Hex, kein px in der Komponente, keine lokale Label-Map, kein eigener Status-Text | `grep -cE '#[0-9a-fA-F]{3,8}' Skeleton.tsx` = 0; kein Zahlenmaß im `style` (nur `width` aus `LINE_WIDTHS`, in Prozent); keine Map, kein Status | ✓ |
+| Nutzt `.v2skel`, definiert keine zweite Ladefläche | `v3.css:980–986` (`.v2skel`, Puls `v2pulse`, `prefers-reduced-motion: reduce → animation: none`) und `v3.css:1660–1662` — dort nur die Gruppe `.v2skelgroup` und zwei Höhen-Modifier, kein zweiter Ladestil. Zeilennummern gegenüber der ersten Abnahme verschoben, Inhalt gleich | ✓ |
+| Bewegung respektiert `prefers-reduced-motion` (§2) | `v3.css:986` schaltet die Animation ab; im Browser `animation-name: v2pulse` an `.v2skel` (`--lines`) | ✓ |
+| `variant="card"` hält die Kartenhöhe, ohne die Seite springen zu lassen | `v3-primitives-fläche-skeleton--in-card` im Browser (6107): `getComputedStyle(.v2skel--card).height` = **96px**, `border-radius` 4px; der Kartenkopf „Kennzahlen" steht, darunter die Fläche | ✓ |
+| Genau ein `sr-only`-Satz je Skeleton, Flächen `aria-hidden` | `--lines`, DOM-Probe: `.sr-only` genau 1× („Sachverhalt wird geladen …"), alle vier `.v2skel` mit `aria-hidden="true"`. `--in-card`: zwei Skeletons, zwei Sätze („Offene Posten werden geladen …", „Wird geladen …") | ✓ |
+| Zeilen ungleich breit — kein Streifenmuster | `--lines`: gemessene Breiten 420 / 352,8 / 260,4 / 382,2 px aus `100% / 84% / 62% / 91%`; die Reihenfolge ist fest, nicht zufällig (`LINE_WIDTHS`, Server-Component) | ✓ |
+| Karte: Rand **oder** Schatten (§2) | `--in-card`: `.v2card` hat `border: 1px solid rgb(221,226,232)` und `box-shadow: none` | ✓ |
+| Kein Hover, kein Fokus — die Fläche ist nicht klickbar (§2) | `Skeleton.tsx` rendert nur `div`/`span`, kein `tabindex`, kein Handler; in `v3.css` keine `:hover`-Regel auf `.v2skel*` | ✓ |
+| Die `@when`-Zeile grenzt gegen `TableLoading` ab | `Skeleton.tsx:15–17`: `@when` nennt Karte, Detailfläche, Formularfeld; `@instead` „Rows inside a table → TableLoading. Nothing there at all → EmptyState. Loading failed → ErrorRow." | ✓ |
+| Im Browser angesehen, nicht nur gebaut | Alle drei IDs am 2026-09-05 auf `localhost:6107` geöffnet und gemessen: `--lines`, `--variants` (alle drei Ausprägungen nebeneinander), `--in-card` | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | siehe die Zeilen dieser Tabelle; die zwei App-Punkte („ersetzt ihr v1-Gegenstück", „in §11 auf v2 gesetzt") nach `backlog/README.md` übersprungen | ✓ |
+| Ersetzt den handgebauten Platzhalter in mindestens einem der drei Fundorte | Die drei Fundorte liegen in `ludwig/app`; dort gibt es `src/ui/v3` nicht (`apps/web/src/ui/` führt `v2`), und kein `Skeleton`-Import aus dem Set. Nach `backlog/README.md` ein Kriterium der App | offen (App) |
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die Ablösung der handgebauten Platzhalter steht noch aus — sie liegt in `ludwig/app`, nicht in diesem Repo.
+**Zur Einordnung vom 2026-09-05: sie trägt.** Der einzige ✗ der ersten
+Abnahme war tatsächlich ein App-Kriterium und ist hier nicht erfüllbar; es
+steht jetzt als **offen (App)**. Ergänzend, was die erste Abnahme noch nicht
+sehen konnte: der Baustein hat inzwischen **vier Aufrufstellen im Set** —
+`patterns/Timeline.tsx:119`, `patterns/Log.tsx:139`,
+`entities/source-document/SourceDocumentDrawer.tsx:161`,
+`entities/account/AccountDrawer.tsx:144`. Er steht also nicht mehr allein
+neben seinen eigenen Stories.
 
-**Wieder auf `Abnahme` gesetzt am 2026-09-05.** Der einzige ✗ ist ein
-App-Kriterium: die Ablösung der handgebauten Platzhalter passiert in
-`ludwig/app` und ist in diesem Repo nicht erfüllbar. Nach der heutigen Regel
-trägt so ein Kriterium das Ergebnis **offen (App)**, nicht ✗ — es hält die
-Aufgabe nicht auf. Stories und Spec sind vollständig: drei Stories in der
-Spec, drei Exporte in `Skeleton.stories.tsx`. Der nächste Abnehmer
-entscheidet.
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: nur „offen (App)" — die Ablösung der drei handgebauten Platzhalter passiert in `ludwig/app`.

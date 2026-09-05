@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „eine aus wenigen Möglichkeiten" ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Radio-Gruppe (Antwortoptionen I6)" |
@@ -77,25 +77,52 @@ kein Zustand), `LeerNachFilter`, `Laedt` (der Aufrufer zeigt `Skeleton`, 0016).
 
 ## Abnahme
 
+Zweite Abnahme am 2026-09-05 (fremder Agent, gegen Spec und Code). Fest gilt
+immer, darunter die Kriterien dieser Spec.
+
+**Story-Deckung.** Fünf Stories in der Spec, fünf Exporte in
+`RadioGroup.stories.tsx` (`Filled`, `Orientations`, `Invalid`, `Interactive`,
+`InForm`), fünf IDs in `index.json` — die Ableitung „2 Zustände + 1 Enum
++ 1 Callback + 1 im Einsatz = 5" geht auf. Jede Prop der Schnittstelle hat
+ihre Story: `name`/`label`/`options` in `Filled`, `value`/`onChange` in
+`Interactive`, `orientation` und `disabled` in `Orientations`, `error` und
+`required` in `Invalid`. `Leer`, `LeerNachFilter`, `Laedt` sind begründet
+ausgeschlossen.
+
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| Pfeiltasten wandern durch die Optionen, Tab springt aus der Gruppe | `v3-primitives-formular-radiogroup--filled`: Pfeil-ab verschiebt Fokus und Auswahl auf die nächste Option; die Datei enthält keinen eigenen Tastatur-Code | ✓ |
-| `fieldset`/`legend` im DOM, `aria-invalid` bei `error` | `v3-primitives-formular-radiogroup--invalid`, DOM-Probe: `fieldset.v2radiogrp` mit `aria-invalid="true"`, `<legend>` „Umfang des Exports *" | ✓ |
-| Die ganze Optionszeile ist klickbar und antwortet auf Hover | Klick auf den Hinweistext der dritten Option wählt sie; `label.v2radioline` 420 px breit, `cursor: pointer`, Hover-Hintergrund `--color-bg-soft` | ✓ |
-| Fehler steht als Text, nicht nur als Farbe | `--invalid`: `.v2field__err` „Bitte wählen Sie einen Umfang, bevor der Export startet." unter der Gruppe | ✓ |
-| Ersetzt die drei `type="radio"` in `DatevExportWizard.tsx` und `BatchActions.tsx` | Kein `RadioGroup`-Import in `ludwig/app` (`grep`) | ✗ |
+| `pnpm typecheck` grün | `tsc --noEmit` ohne Ausgabe, Exit 0 (Anfang und Ende der Abnahme) | ✓ |
+| `pnpm build` grün | nicht neu gelaufen — parallele Abnahmen schreiben nach `storybook-static`. Der Lauf für diesen Stand war grün: „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/RadioGroup.tsx` mit einem Export, `RadioGroup.stories.tsx` daneben; Titel `v3/Primitives/Formular/RadioGroup`, deckt sich mit der Barrel-Gruppe „Formular" (`src/ui/v3/index.ts:101` … `:104`) | ✓ |
+| Code englisch; `@when`/`@instead` am Export | `RadioGroup.tsx:24–28`; Bezeichner und JSDoc englisch, Deutsch nur in den sichtbaren Strings der Stories. `@instead` grenzt gegen `Segmented`, `Select`, `Checkbox`, `ChoicePrompt` ab | ✓ |
+| Kein Hex, kein px in der Komponente, keine lokale Label-Map, kein eigener Status-Text | `grep -cE '#[0-9a-fA-F]{3,8}' RadioGroup.tsx` = 0; kein Zahlenmaß im `style`; keine Map, kein Status. Maße in `v3.css:1708–1727` | ✓ |
+| Pfeiltasten wandern durch die Optionen, Tab springt aus der Gruppe | `--filled` im Browser: Fokus auf Option 3, **Pfeil-hoch** → `document.activeElement.value` „open", `checked` wandert von Index 2 auf 1 — Fokus **und** Auswahl. Nur ein Radio der Gruppe ist tabbierbar (`tabbableInGroup: 1`), Tab verlässt die Gruppe. `RadioGroup.tsx` enthält keinen eigenen `onKeyDown` — das ist der Browser | ✓ |
+| `fieldset`/`legend` im DOM, `aria-invalid` bei `error` | `--invalid`, DOM-Probe: `FIELDSET.v2radiogrp` mit `aria-invalid="true"`, `<legend class="v2field__label">Umfang des Exports *</legend>` | ✓ |
+| Die ganze Optionszeile ist klickbar und antwortet auf Hover | `--filled`: echter Klick auf den **Hinweistext** der dritten Option („3 Sätze, zwei über 1.000,00 €") wählt sie (`checked` Index 2, `activeElement.value` „flagged"); `label.v2radioline` misst 420 px, `cursor: pointer`, `.v2radioline:hover { background: var(--color-bg-soft) }` (`v3.css:1719`) | ✓ |
+| Fehler steht als Text, nicht nur als Farbe (V7) | `--invalid`: `.v2field__err` „Bitte wählen Sie einen Umfang, bevor der Export startet." unter der Gruppe, `color rgb(168,64,60)`; der Rand der Optionszeilen bleibt unverändert `rgb(229,231,235)` — die Farbe ist nicht der einzige Träger | ✓ |
+| Fokusring sichtbar (V10) | `--filled`: `outline: 2px solid rgb(59,143,196)` (= `--color-focus`), `outline-offset: 2px` am fokussierten Radio | ✓ |
+| `orientation="horizontal"` und `disabled` sichtbar | `--orientations`: „Betragsbasis" mit Netto/Brutto in einer Zeile (`.v2radiogrp--horizontal`, `flex-direction: row`), darunter die gesperrte Gruppe mit `opacity 0.5` und `cursor: not-allowed` | ✓ |
+| Rundlauf über `onChange` | `--interactive`: Klick auf die erste Option schreibt die Zeile darunter von „Gewählt: noch nichts" auf „Gewählt: all" | ✓ |
+| Gleicher Rhythmus wie `Field`/`Input` im Formular | `--in-form`: `Field`+`Input`, Gruppe, `ActionBar`-artige Knopfzeile untereinander im Raster `var(--space-4)`; Label-Stufe und Abstand identisch zum `Field` darüber | ✓ |
+| Text links, nichts zentriert (V3) | `grep "text-align: *center"` in `RadioGroup.tsx` und im Block `v3.css:1708–1727` = 0 | ✓ |
+| Im Browser angesehen, nicht nur gebaut | Alle fünf IDs am 2026-09-05 auf `localhost:6107` geöffnet, bedient und gemessen | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | siehe die Zeilen dieser Tabelle; die zwei App-Punkte nach `backlog/README.md` übersprungen | ✓ |
+| Ersetzt die drei `type="radio"` in `DatevExportWizard.tsx` und `BatchActions.tsx` | Beide Dateien liegen in `ludwig/app`; dort gibt es `src/ui/v3` nicht (`apps/web/src/ui/` führt `v2`), kein `RadioGroup`-Import. Nach `backlog/README.md` ein Kriterium der App | offen (App) |
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die Umstellung in `ludwig/app` fehlt. Außerdem erbt die `<legend>` aus `.v2field__label` ein `text-transform: uppercase` und erscheint in Versalien — Verstoß gegen A2/T3; das betrifft alle Felder und gehört in `v3.css` geräumt, nicht in dieser Komponente.
+**Zur Einordnung vom 2026-09-05: sie trägt, in beiden Punkten.**
 
-**Wieder auf `Abnahme` gesetzt am 2026-09-05.** Der ✗ ist ein App-Kriterium
-(die Umstellung in `ludwig/app`) und trägt nach der heutigen Regel das
-Ergebnis **offen (App)**, nicht ✗. Stories und Spec sind vollständig: fünf
-Stories in der Spec, fünf Exporte in `RadioGroup.stories.tsx`.
+1. Der einzige ✗ der ersten Abnahme war ein App-Kriterium und ist hier nicht
+   erfüllbar; es steht jetzt als **offen (App)** und hält die Aufgabe nicht auf.
+2. Der zweite offene Punkt gehört als **Befund** gewertet, nicht als Mangel
+   dieser Aufgabe — nachgeprüft und bestätigt: `.v2field__label`
+   (`src/styles/v3.css`, heute Z. 855–858) setzt `text-transform: uppercase`,
+   und die `<legend>` erbt es. Im Browser steht in `--filled` „UMFANG DES
+   EXPORTS", obwohl im DOM „Umfang des Exports" steht. Das ist ein Verstoß
+   gegen T3/A2, aber er trifft **jede** Feldbeschriftung des Sets, nicht die
+   Radiogruppe: sie schreibt die Klasse nur an, wie `Field` es auch tut. Seit
+   heute hat er eine eigene Aufgabe,
+   `docs/backlog/0089-feldbeschriftung-ohne-versalien.md` (Status `offen`),
+   die auch die Frage mitnimmt, welche Schriftstufe ein Label ohne Versalien
+   trägt. Hier: Befund, kein Mangel.
 
-Der zweite offene Punkt bleibt bestehen und ist **nicht** Sache dieser
-Aufgabe: `.v2field__label` in `src/styles/v3.css` (Z. 842–845) setzt
-`text-transform: uppercase`. Damit stehen **alle** Feldbeschriftungen des
-Sets in Versalien — Verstoß gegen T3/A2, nachgeprüft am 2026-09-05. Das ist
-eine Entscheidung über das Aussehen jedes Formulars im Set (die Label sind
-heute Overline-Typografie) und gehört in eine eigene Aufgabe, nicht in eine
-Radiogruppe. Der Abnehmer wertet es hier als Befund, nicht als Mangel.
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: nur „offen (App)" — die Umstellung der drei rohen Radios in `ludwig/app`. Die Versalien der Feldbeschriftung laufen als Befund unter 0089.

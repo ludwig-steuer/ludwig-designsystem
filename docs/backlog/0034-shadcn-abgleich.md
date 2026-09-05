@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | Sammelaufgabe: vier Primitives (`Kbd`, `InputGroup`, Popover-Familie, `BarChart`), ein Pattern (`CommandPalette`), drei Erweiterungen (`Disclosure`, `Markdown`, `StepHeader` auf `PageHeader`), eine Story (Typografie) — jedes Paket bekommt beim Bauen seine eigene Nummer |
 | Klassen-Test | je Paket unten; alle fachfrei, „Versicherungs-App" → ja |
 | Quelle | Anfrage vom 2026-09-03 („sollten wir was von shadcn übernehmen?") mit zwei Nachschüben (Markdown-Reader, PageHeader) · shadcn-Registry `@shadcn`, 61 `ui`-Einträge, Stand 2026-09-03 · `docs/v3-backlog.md` · Soll-Katalog `design-guidelines.md` §11.7 |
@@ -472,4 +472,64 @@ Pfeiltasten-Prüfung scheiterte an der Automatisierung (synthetische
 `keydown` lösen in Chrome kein natives Scrollen aus), nicht erkennbar an der
 Komponente.
 
-Abgenommen von / am: … (fremde Sitzung) · Offene Punkte: …
+### Abnahme der Sammelaufgabe (2026-09-05, fremder Agent)
+
+Die Tabellen darüber sind der Bericht des Bauens. Hier steht, was die
+Abnahme gegen die **Abnahmekriterien** dieser Datei geprüft hat — und, weil
+0034 kein Baustein ist, sondern ein Abgleich: ob ihr Ergebnis heute noch
+stimmt.
+
+**Fest**
+
+| Kriterium | Nachweis (Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Jedes in der Anfrage genannte Element hat eine Zeile im Abgleich | Abgefragt gegen die Aufzählung im Abschnitt „Ziel": Kbd · HoverCard · Tooltip · Popover · Command · Combobox · Collapsible · Accordion · Alert Dialog · Input Group · Typography · Menubar · Charts · Marker — je eine Zeile; dazu „Questionaire" und die beiden Nachschübe (Scroll Area/Markdown-Reader, Seitenkopf). Die „weiteren Formular-Elemente" sind im Absatz darunter einzeln abgehakt (Field, Label, Input, Textarea, Select, Native Select, Checkbox, Radio Group, Switch, Calendar, Spinner, Progress, Empty, Sonner, Skeleton, Button Group, Toggle Group, Item, Sidebar, Sheet/Drawer, Pagination, Separator, Avatar, Breadcrumb, Slider, Input OTP, Resizable, Carousel, Aspect Ratio, Direction, Attachment/Bubble/Message/Message-Scroller). Kein genanntes Element ohne Einordnung | ✓ |
+| Je Arbeitspaket eine eigene Spec-Datei nach `TEMPLATE.md`, bevor gebaut wird | A1 → `0035-kbd.md` · A2 → `0036-input-group.md` · A3 → `0005-disclosure.md` (Erweiterung) · A4 → `0037-typography-story.md` · A5 → `0022-markdown.md` (Erweiterung) · A6 → `0002-pageheader.md` (Erweiterung) · B1 → `0038-popover.md` · C1 → `0039-command-palette.md` · C2 → `0041-bar-chart.md`. Alle neun Dateien liegen in `docs/backlog/` | ✓ |
+| `package.json` wächst um höchstens `cmdk`; `grep -c "radix\|recharts" package.json` = 0 | Befehlsausgabe **0**. `dependencies` heute: clsx, **cmdk**, date-fns, decimal.js, lucide-react, tailwind-merge, zod — gegenüber dem Stand der Spec (clsx, date-fns, decimal.js, lucide-react, tailwind-merge, zod) genau ein Zuwachs, und zwar der eine erlaubte | ✓ |
+| `src/ui/v3` bleibt ohne Tailwind-Utility | `grep -rE 'className="(flex\|grid\|p-\|text-)' src/ui/v3` ohne Treffer | ✓ |
+
+**Variabel**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Welle A gebaut und im Storybook angesehen | Alle sechs Pakete haben ihre Story-IDs in `index.json`: `v3-primitives-aktion-kbd--filled/--in-use/--edge` · `v3-primitives-formular-inputgroup--filled/--in-use/--edge` · `v3-primitives-fläche-disclosure--accordion` · `v3-grundlagen-typografie--scale/--interface/--registers/--in-use` (`grep -c "lw-" Typography.stories.tsx` = 39, verlangt ≥ 8) · `v3-primitives-fläche-markdown--reader` · `v3-patterns-frame-steprail--screen-header` (+ `--screen-header-edge`, `--screen-header-callbacks`, `--screen-header-without-nav`) und `v3-primitives-fläche-pageheader--with-actions`. A6 zusätzlich prüfbar: `grep -rn "abn__screenhead" src/` = **0**, und `StepRail.tsx` importiert `ActionBar`. Angesehen hat sie die Sitzung, die Welle A gebaut hat; diese Abnahme hat die IDs und die Greps nachgezogen, nicht jede Story erneut geöffnet | ✓ |
+| Welle B: Popover-Familie, neun Stories, kein Feld verlässt das Fenster | Vollständig nachgeprüft — die Einzelnachweise stehen in `0038-popover.md`, Abschnitt „Abnahme" (2026-09-05). Neun Story-IDs vorhanden und einzeln im Browser bedient; an drei Rändern gemessen: `align="end"` legt die rechte Kante des Feldes auf die des Knopfes (1308 px bei 1340 px Fensterbreite), unten klappen Popover (Feldunterkante 690 ≤ Knopfoberkante 697), Tooltip (706 ≤ 712) und HoverCard (703 ≤ 708) über den Anker; in allen Fällen `inWindow: true` | ✓ |
+| Welle C: `CommandPalette` öffnet mit ⌘K aus einem Feld; `BarChart` ohne recharts | `useHotkeys` lässt Meta-Bindungen jetzt trotz `isTyping` durch — `Hotkeys.tsx:56–57`: `const meta = e.ctrlKey \|\| e.metaKey; if (!meta && isTyping(e.target)) return;`. Fünf `commandpalette`- und fünf `barchart`-IDs in `index.json`; `grep -c "recharts" package.json` = 0. Bedient hat sie die bauende Sitzung (0039, 0041); diese Abnahme hat den Hook-Code und die Abhängigkeiten geprüft | ✓ |
+
+**Stimmt der Abgleich heute noch? Ja — am 2026-09-05 gegen die Registry
+nachgezählt.**
+
+| Aussage der Spec (Stand 2026-09-03) | Prüfung 2026-09-05 (shadcn-Registry `@shadcn`) |
+|---|---|
+| „61 `ui`-Einträge" | **61** — unverändert, dieselbe Liste inklusive `kbd`, `marker`, `attachment`/`bubble`/`message`/`message-scroller`, `direction`, `native-select` |
+| Tooltip/HoverCard/Popover/Menubar/Alert Dialog/Marker auf Radix | `popover` → `cn, radix-ui`; `marker` → `cn, radix-ui` — bestätigt |
+| Command = `cmdk` | `command` → `cn, cmdk` — bestätigt |
+| Chart = `recharts@3.8.0` | `chart` → `cn, recharts@3.8.0, lucide-react` — bestätigt, bis auf die Version genau |
+| Combobox auf Base UI | `combobox` → `cn, @base-ui/react` — bestätigt; „nichts zu übernehmen" gilt weiter |
+| Kbd und Input Group ohne Abhängigkeit | `kbd` → nur `cn` — bestätigt |
+| „Marker" ohne Beschreibung, unklar was es ist | Der Registry-Eintrag trägt weiterhin keine Beschreibung; Offene Frage 2 bleibt offen |
+
+Damit tragen alle fünf Entscheidungen der Grundfrage unverändert: shadcn als
+Katalog statt als Code · kein Radix · `cmdk` als einzige neue Abhängigkeit ·
+kein `recharts` · Props-API. Nichts an der Registry hat sich seit dem
+2026-09-03 so verändert, dass eine davon neu zu treffen wäre.
+
+**Zu den Befunden dieser Datei** (nicht Teil der Abnahmekriterien, hier nur
+mit ihrem heutigen Stand):
+
+- **`useHotkeys` und Meta-Kombinationen** — erledigt in Welle C, siehe oben.
+- **`Markdown.stories.tsx` deutsche Exportnamen** — erledigt: die Datei
+  führt `--filled`, `--empty`, `--variants`, `--long`, `--unsafe`,
+  `--in-use`, `--reader`.
+- **`ActionBar` wird nicht benutzt** — im Set erledigt: `StepRail.tsx`,
+  `PageHeader.stories.tsx`, `DataTable.tsx` und weitere ziehen sie. Die
+  Adoption in `ludwig/app` bleibt ein Schritt der Migration.
+- **`Dialog` ohne Fokusfalle** — **noch ohne Nummer.** Die Datei nennt sie
+  als „eigene Aufgabe ‚Dialog auf `<dialog>`'", eine Spec dafür gibt es in
+  `docs/backlog/` bis heute nicht (`ls | grep -i dialog` ohne Treffer). Kein
+  Mangel dieser Aufgabe — Befunde sind ausdrücklich nicht Teil davon —,
+  aber der offene Faden, den 0034 hinterlässt.
+- **0009 Combobox** — Status weiterhin `Abnahme`; ihre fünf offenen Punkte
+  sind unverändert ihre eigene Arbeit.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: keine gegen die Kriterien dieser Aufgabe. Weiterzugeben: der Befund „Dialog auf natives `<dialog>`" hat noch keine Backlog-Nummer.

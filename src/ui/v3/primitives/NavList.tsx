@@ -97,8 +97,11 @@ function Entry({
 }) {
   // Collapsed the label moves into `title` — it must not vanish without a
   // trace. Without an icon the first letter stands in: an empty button is a
-  // riddle (V11).
-  const title = collapsed ? item.label : undefined;
+  // riddle (V11). The counter is hidden in the narrow rail (`app-chrome.css`),
+  // so its word has to join the entry's own — otherwise „3 offen" is gone with
+  // no way back, and the rule says nothing disappears without a trace.
+  const waiting = item.count === undefined ? "" : ` — ${item.count} offen`;
+  const title = collapsed ? `${item.label}${waiting}` : undefined;
   const mark = item.icon ?? <span className="sb__navinitial">{item.label.slice(0, 1)}</span>;
   const body = (
     <>
@@ -122,7 +125,7 @@ function Entry({
       <span
         className="sb__navitem is-future"
         aria-disabled="true"
-        title={collapsed ? `${item.label} — bald verfügbar` : "bald verfügbar"}
+        title={collapsed ? `${item.label}${waiting} — bald verfügbar` : "bald verfügbar"}
       >
         {body}
       </span>
