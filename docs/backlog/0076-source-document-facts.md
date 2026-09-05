@@ -274,14 +274,160 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| | | |
+Geprüft gegen Spec, Profil und Code, ohne Chatverlauf. Stand `000f2ad`
+(seither unverändert). Browser: Storybook auf `:6107`, alle acht Fakten-
+Stories und alle sechs Drawer-Stories aufgerufen, Feldzeilen und Zonen im DOM
+gemessen.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Fest**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, 2026-09-05. `pnpm build` **nicht ausgeführt** — der Abnahme-Auftrag verbietet ihn (parallele Sitzungen); ersatzweise laden alle vierzehn Stories, `console-check.mjs` über `--kinds`, `--in-use` und die Drawer-Story meldet 0 Konsolenmeldungen | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `SourceDocumentFacts.tsx` + `.stories.tsx`, Titel `v3/Entitäten/Beleg/SourceDocumentFacts`; der Nachzug liegt in `SourceDocumentDrawer.tsx` mit eigener Story-Datei | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `SourceDocumentFacts.tsx:57–63` und `SourceDocumentDrawer.tsx:64–70`, dazu `resolveSourceDocumentDetail` (`source-document-detail.ts:230–236`); Kommentare durchgehend englisch | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | kein Hex, kein px in den drei Dateien (die Treffer der Stories liegen im Data-URI). Zustand über `axis="beleg_erledigung"` und `axis="dokumentgruppe"`, Belegart über `sourceDocTypeLabel()`, Vertragstyp über `contractTypeLabel()`. **Eine lokale Label-Map bleibt:** die Herkunft einer buchungsrelevanten Vertragsfakt, `source-document-detail.ts:191` — siehe Mangel 1 | ✗ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | acht Stories mit den Namen der Spec (`Gefuellt`, `Ausprägungen`, `Vertrag`, `Leer`, `Gruppe`, `Toene`, `Rand`, `ImEinsatz`); lädt und Fehler sind im Abschnitt „Verhalten" dem Aufrufer zugeschrieben (0042), leer nach Filter gibt es nicht | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Werte rechts mit `tabular-nums`, die Zusammenfassung als `.v2doc__prose` links ohne Ziffernstellung (die Nachbesserung aus 0052 hält); Kontraste wie in 0074 gemessen; kein Icon ohne Wort — die Erledigung steht als Wort mit Beschreibung im `title`; Karte mit Rand ohne Schatten. **Notiz:** `.v2fields__h` setzt `text-transform: uppercase`, die Blockköpfe erscheinen als „RECHNUNG", „VERTRAG", „DOKUMENTGRUPPE", der Zonen-Kopf als „BELEGDATEN" — Versalien (A2). Das kommt aus 0006 bzw. 0052 und betrifft das ganze Set; als Befund an die Grundlagen (0055), nicht als Mangel dieser Aufgabe | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | vierzehn Story-IDs geöffnet; Feldzeilen je Ausprägung, Blockzahl, Zonenpositionen und Kürzungen gemessen | ✓ |
+
+**Variabel**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Die acht generischen Zeilen stehen bei jeder Ausprägung in derselben Reihenfolge | `--kinds`, alle sechs Karten: Belegart · Gegenpart · Belegdatum · Eingang · Kennung · [Betrag] · Erledigung · [Zusammenfassung] — die Reihenfolge ist über alle sechs identisch. „Betrag" fehlt genau dort, wo die Ausprägung keins liefert (Kontoauszug, Sonstiger, ohne Typ, Widerspruch) — das verlangt das Kriterium „kein `—` für ein Feld, das es nicht gibt"; „Zusammenfassung" fehlt, wo der Aufrufer keine setzt | ✓ |
+| Kontoauszug, Sonstiger Beleg und Beleg ohne Typ bekommen keinen Ausprägungs-Block | `--kinds`, gezählte Blöcke je Karte: Rechnung 2, Vertrag 2, Kontoauszug **1**, Sonstiger **1**, ohne Typ **1**. Kein leerer Block, keine Überschrift ohne Inhalt | ✓ |
+| Keine Zeile heißt „Rechnungsnr." oder „Lieferant" an einem Nicht-Rechnungs-Beleg | die Labels der vier Nicht-Rechnungs-Karten sind ausschließlich die generischen sechs; „Netto", „USt.", „Fällig", „Zahlungsziel", „Leistungszeitraum", „USt-IdNr. des Ausstellers" stehen nur unter „RECHNUNG" | ✓ |
+| `grep -n "isInvoice" src/ui/v3/entities/source-document/` findet nichts | ein Treffer, `source-document-detail.ts:13` — Fließtext im Modul-Kommentar, kein Zweig. In `SourceDocumentFacts.tsx` und `SourceDocumentDrawer.tsx` kommt keine Belegart als Wert vor, nur in Kommentaren | ✓ |
+| Eine neue Belegart erfordert genau **einen** neuen Registry-Eintrag, ohne Änderung an `SourceDocumentFacts.tsx` | strukturell nachgewiesen: `SOURCE_DOCUMENT_DETAILS` ist ein Mapped Type über `SourceDocumentDetail["kind"]` (`source-document-detail.ts:135–137`) — ein dritter Union-Zweig erzwingt genau einen Eintrag und sonst nichts; `SourceDocumentFacts` liest nur `detail.facts` und kennt keinen `kind`-Wert. **Der in der Spec verlangte Nachweis über die Reihenfolge ist nicht führbar:** beide Einträge kamen in einem Commit (`000f2ad`), es gibt keinen Stand „ohne Vertrag" zum Vergleichen | ✓ |
+| Der Gruppen-Block erscheint bei einer Rechnung, die Teilbeleg ist | `--group`, vierte Karte: drei Blöcke — generische Zeilen, „RECHNUNG", „DOKUMENTGRUPPE ǀ Ausschnitt = Seiten 12–13 aus Sammel-PDF vom 12.08.2026". Der Block hängt an `group`, nicht an der Belegart | ✓ |
+| Ein Sammel-Original ohne Klammer-Typ sieht vollständig aus | `--group`, erste Karte: „DOKUMENTGRUPPE" mit „Teilbelege = 9" und „Erledigt = 4 von 9", **ohne** Klammer-Zeile — kein leeres Feld, kein halb gefülltes Formular. Zweite Karte zeigt denselben Block mit der Zeile „Klammer = Kreditkartenabrechnung" | ✓ |
+| Widerspruch zwischen Diskriminator und Subtyp-Zeile: kein Ausprägungs-Block | `--kinds`, Karte „Widerspruch (B9)" (`other` mit `detail.kind = "invoice"`): ein Block, sechs generische Zeilen, Kennung = Dateiname. Dieselbe Regel und dieselbe Zeile wie 0074 (`resolveSourceDocumentDetail`) | ✓ |
+| Ein Beleg ohne `group` bekommt keinen Block | `--kinds`: keine der sechs Karten trägt einen „DOKUMENTGRUPPE"-Block; `--empty` ebenso wenig | ✓ |
+| `tone` verhält sich wie Zeile 4 der Schnittstelle | `--tones`: `bare` = `background: rgba(0,0,0,0)`, `border-top-width: 0px`, `padding: 0px`; `surface` = `rgb(255,255,255)`, `1px solid`, `padding: 20px` | ✓ |
+| Alle drei Kürzungen greifen, der volle Text steht im `title` | `--edges`: Kennung 88 Zeichen sichtbar (Mitte gekürzt, Endung lesbar), `title` 121; Zusammenfassung 259 sichtbar, `title` 356; Erledigungsgrund im `title` der Marke, auf 280 Zeichen gekürzt — so und nicht anders schreibt es die Schnittstelle von 0074 („Freitext im `title` der Marke, gekürzt bei 280 Zeichen"), der Volltext steht also bei diesem einen bewusst nirgends. **Abweichung der Story-Daten:** 356 / 121 / 776 statt der behaupteten 400 / 139 / 868 (offener Punkt 3) | ✓ |
+| `SourceDocumentDrawer` zeigt die Erledigung im Kopf, nicht `axis="beleg"` | `--in-use`: Kopf „Rechnung · ACME GmbH ǀ RE-4471 ǀ Gebucht", `title` der Marke „Erledigung: Gebucht · Der Beleg ist gebucht — …" (Achse `beleg_erledigung`). Die Kennung des Kopfes kommt aus derselben Rückfallkette wie die Zeile (`identText` → `sourceDocumentIdentifier`) | ✓ |
+| `SourceDocumentDrawer` enthält kein `<iframe>` mehr | `grep -n "iframe" …/SourceDocumentDrawer.tsx` → kein Treffer. Das `<iframe>` im DOM kommt aus `SourceDocumentPreview` (`title="Vorschau von RE-4471-ACME.pdf"`, `height="md"` → 558 px) | ✓ |
+| Ersetzt `BelegSummary`, `SourceDocFactsCard`, die Fakten von `GlanceCard` und `ContractDetail` | dieses Repo ist das ausgelagerte Set; die Ablösung ist ein eigener Schritt (`docs/backlog/README.md`). Die Felder selbst sind da: der Rechnungsblock trägt Netto, USt., Fälligkeit, Zahlungsziel, Leistungszeitraum, USt-IdNr.; der Vertragsblock Vertragstyp, Laufzeit und die buchungsrelevanten Fakten | offen (App) |
+| Tut bewusst nicht: Positionen, Vorsteuer, Ändern | keine Prop schreibt, kein Formularfeld im DOM der acht Stories; keine Positionsliste, keine Vorsteuer-Aufstellung | ✓ |
+
+**0052 ist weiter erfüllt** (die Spec verlangt diese Prüfung ausdrücklich)
+
+| Kriterium aus 0052 | Nachweis | Ergebnis |
+|---|---|---|
+| Zonen 1 · 2 · 3 · 4 · 5 in dieser Reihenfolge | `SourceDocumentFacts --in-use`: `v2drawer__h` y = 0 · `v2doc__orig` y = 172 · `v2doc__h` („BELEGDATEN") y = 265 · `v2fields--bare` y = 290 · `v2doc__limit` y = 801 · `v2drawer__foot` y = 840 | ✓ |
+| Zone 3 verwendet dieselbe Komponente wie der View | `SourceDocumentDrawer.tsx:19` importiert `SourceDocumentFacts`; im Drawer steht keine zweite Feldliste | ✓ |
+| Der Fuß trägt genau eine Aktion | ein `<button>`: „Vollständige Belegansicht öffnen" | ✓ |
+| Vier Zustände in der Vorrangfolge `error` → `loading` → `record === null` → Inhalt | `--fehler` zeigt „Beleg RE-4471 konnte nicht geladen werden: …" trotz `record = null`; `--laedt` setzt `record` **und** `loading` und zeigt die Ladefläche; `--nicht-gefunden` den Leertext mit der Kennung; `--geoeffnet` den Inhalt. Fuß leer in Fehler und Leerfall | ✓ |
+| Der Fehlertext enthält `reference` wörtlich | „Beleg **RE-4471** konnte nicht geladen werden: Die Ablage antwortet nicht (Zeitüberschreitung nach 30 Sekunden)." | ✓ |
+| Sechs Drawer-Stories bleiben | `Geoeffnet`, `OhneVorschau`, `Laedt`, `Fehler`, `NichtGefunden`, `ImKontext` — dieselben sechs wie vor `000f2ad` (`git show 000f2ad^:…` zeigt dieselben Exportnamen). Die Spec spricht von „acht Stories"; es waren sechs, keine ist verloren gegangen | ✓ |
+| Ladezustand hat die Form des Inhalts (Nachbesserung 2 der 0052-Abnahme) | gemessen bei 1440 × 900: Skelett `.v2doc__origskel` bei y = 101, 558 px, ohne Rahmen; das Original steht seit dem Nachzug bei y = 172 in einer Karte mit Kopf. Die Deckung, die die 0052-Abnahme hergestellt hatte, ist um 71 px und um den Kartenrahmen verloren — siehe Mangel 2 | ✗ |
+
+**Story-Deckung** (`spec-schreiben` §6)
+
+| Frage | Nachweis | Ergebnis |
+|---|---|---|
+| Hat jede Prop ihre Story? | `document` (alle), `summary` (`Gefuellt`, `Rand`), `group` (`Gruppe`), `tone` (`Toene`, und `bare` in fast jeder Karte) | ✓ |
+| Stimmt die Zahl mit der Ableitung? | 8 = 2 anwendbare Zustände + 2 Enum-Achsen + 1 unbelegter Registry-Eintrag + 1 Relations-Block + 1 Rand + 1 im Einsatz | ✓ |
+| Ist jeder ausgeschlossene Zustand begründet? | lädt und Fehler trägt der Aufrufer (0042), leer nach Filter gibt es nicht — beides im Abschnitt „Verhalten" | ✓ |
+
+**Mängel**
+
+1. **Lokale Label-Map für die Herkunft einer Vertragsfakt** —
+   `src/ui/v3/entities/source-document/source-document-detail.ts:191`:
+   `` `${fact.value} · ${fact.source === "manual" ? "von Hand" : "automatisch gelesen"}` ``.
+   `ProvenanceSource` ist ein echter Fachtyp
+   (`src/ludwig/modules/contracts/domain/contract.ts:7`), aber er hat weder
+   ein Label in `src/ludwig/` noch eine Achse in der Status-Registry — der
+   deutsche Text ist hier erfunden. Die feste Prüfliste verbietet genau das
+   („keine lokale Label-Map"), und 0074 zeigt den Hausweg am selben Problem:
+   Typ lokal definieren **plus** Register-Eintrag (L-47) **plus** Achse
+   (`beleg_erledigung`, L-41). Zu tun: Label nach `contract.ts` neben
+   `CONTRACT_TYPE_LABELS` oder eine Achse anlegen, und den Befund melden.
+   Sichtbar in `--contract`: „Konto = 4210 Miete · automatisch gelesen".
+2. **Die Ladefläche des Drawers hat nicht mehr die Form des Inhalts** —
+   `SourceDocumentDrawer.tsx:158–163` zeichnet weiter ein nacktes
+   `.v2doc__origskel` (y = 101, 558 px), während Zone 2 seit dem Nachzug eine
+   `Card` mit Kopf ist (Original bei y = 172, darüber „Rechnung · 3 Seiten").
+   Beim Umschlag von `Laedt` auf `Geoeffnet` springt das Original um 71 px und
+   bekommt einen Rahmen. Genau diese Deckung war Nachbesserung 2 der
+   0052-Abnahme; die Spec verlangt, dass 0052 erfüllt bleibt. Kleiner Eingriff:
+   das Skelett in dieselbe Karte setzen bzw. eine Kopfzeile davor.
+3. **Die Rand-Story behauptet Zahlen, die nicht stimmen** —
+   `SourceDocumentFacts.stories.tsx:396–398` sagt „a 400-character summary, a
+   139-character file name … and an 868-character completion reason";
+   tatsächlich sind es 356, 121 und 776 Zeichen. Das Profil nennt als
+   Höchstwerte 400 (Zusammenfassung), 139 (Dateiname) und 868 (Grund) — die
+   Story bleibt unter allen dreien. Die Kürzungen greifen trotzdem (nachgemessen
+   oben); zu ändern sind die Daten oder der Kommentar.
+
+**Offene Punkte ohne Mangel-Status**
+
+- `SourceDocumentQuickView` hat sechs Felder, die Spec nennt fünf: `group` ist
+  dazugekommen, sonst könnte der Drawer den Gruppen-Block nicht zeigen. Richtig
+  so, nur in der Spec nicht nachgetragen. Dabei fällt auf: `excerpt` (für die
+  Vorschau) und `group` in seiner Teilbeleg-Form beschreiben **dieselbe**
+  Relation; ein Aufrufer muss beide setzen und konsistent halten. Kandidat für
+  eine Zusammenlegung in 0071.
+- Der Zahlstatus einer Rechnung steht als **Datum** („Bezahlt = …"), nicht als
+  Wort — begründet im Kommentar zu `paidAt` (`source-document-detail.ts:57–62`):
+  `payment_status` hat weder Achse noch Enum. Das deckt sich mit dem Verbot der
+  lokalen Label-Map und ist die richtige Entscheidung; der Befund gehört ins
+  Register, damit die Achse irgendwann entsteht.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Ergebnis: **zurück
+auf `in Arbeit`**, drei Mängel — einer davon an der festen Prüfliste
+(Label-Map), einer an 0052 (Form des Ladezustands), einer an den Story-Daten.
+Der fachliche Kern — acht Ränge in fester Reihenfolge, Block nur bei
+Zustimmung beider Quellen, Gruppen-Block an der Relation — trägt und ist
+gemessen.
 
 **Status-Nachtrag 2026-09-05.** Gebaut ist die Aufgabe seit `000f2ad`
 („pnpm typecheck und pnpm build grün, alle 21 Stories im Browser
 angesehen. Abnahme steht aus und gehört einem anderen Agenten.") — der
 Status stand seither fälschlich auf `in Arbeit`. Er sagt jetzt, was der
 Fall ist: `Abnahme`.
+
+## Die drei Mängel der Abnahme vom 2026-09-05 — behoben
+
+**M1 — die erfundene Label-Map.** `source-document-detail.ts` schrieb „von
+Hand" und „automatisch gelesen" für `ProvenanceSource`. Beide Wörter waren
+**erfunden**: die App sagt an derselben Stelle „geprüft" (Titel „Vom Menschen
+geprüft / gesetzt") und „KI · 87 %" (`ContractDetail.tsx`, `ProvMark`,
+Z. 96–120). Zwei Namen für denselben Zustand sind der Anfang einer geteilten
+Sprache — derselbe Fehler wie in der Abnahme von 0080 M1.
+
+Jetzt stehen die Wörter der App, wörtlich kopiert, in einer benannten Funktion
+`provenance()` mit dem Vermerk, woher sie stammen. Mitgenommen: die
+Konfidenz, die die App zeigt und die hier fehlte.
+
+Dass sie überhaupt kopiert werden müssen, ist der eigentliche Befund und steht
+als **L-67** im Register: den Typ `ProvenanceSource` gibt es im Spiegel, die
+Wörter nicht. Mit einer Achse fällt `provenance()` weg und ein `StatusBadge`
+tritt an seine Stelle.
+
+**M2 — die Ladefläche hatte nicht mehr die Form des Inhalts.** Nachbesserung 2
+der 0052-Abnahme hatte diese Deckung hergestellt; mit 0075 zog das Original in
+eine Karte mit Kopf, das Skelett blieb eine nackte Fläche. Gemessen: Karte bei
+y = 101, Skelett bei 101 ohne Rahmen — das geladene Original begann bei 172,
+der Sprung war 71 px.
+
+Jetzt steht das Skelett in **derselben Karte mit demselben Kopf**: eine
+Kopfzeile in Titelhöhe, darunter die Fläche mit derselben Höhe und demselben
+Innenabstand wie das `<iframe>`.
+
+Nachgemessen (`--laedt` gegen `--geoeffnet`): Karte 101 / 101, Kopfhöhe
+51 / 51, Original y 173 / 172, Höhe 558 / 558. Ein Pixel Unterschied, statt
+71.
+
+**M3 — die Story `Rand` behauptete Zahlen, die nicht stimmten** (400/139/868
+gegen tatsächlich 356/121/776). Die Texte sind auf die genannten Längen
+gebracht und der Kommentar auf die **gemessenen** Zahlen: 401 Zeichen
+Zusammenfassung, 139 Dateiname, 871 Erledigungsgrund.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Keine erfundenen Wörter für `ProvenanceSource` — der Wortlaut ist der der App (`ContractDetail.tsx`, `ProvMark`)
+- [ ] Der Befund steht als L-67 in `docs/befunde-app.md`
+- [ ] Die Ladefläche steht in derselben Karte mit demselben Kopf wie das geladene Original (`--laedt` gegen `--geoeffnet`, gemessen)
+- [ ] Die drei Zahlen im Kommentar der Story `Rand` sind gemessen, nicht behauptet

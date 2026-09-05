@@ -381,8 +381,8 @@ export function SourceDocumentRow({ document }: { document: SourceDocumentVM }) 
       {/* Rank 7 — the sort key of the list. */}
       <Time value={document.receivedDate} format="date" size="sm" />
 
-      {/* Ein eigener Träger, weil `SourceDocumentClass` `null` zurückgeben darf:
-          eine fehlende Grid-Zelle würde alle folgenden Spalten verschieben. */}
+      {/* A carrier of its own, because `SourceDocumentClass` may return `null`:
+          a missing grid cell would shift every column after it. */}
       <span className="v2doc__classcell">
         <SourceDocumentClass document={document} />
       </span>

@@ -393,9 +393,10 @@ export const Tones: Story = {
 };
 
 /**
- * All three cuts at once: a 400-character summary, a 139-character file name
- * (cut in the middle, extension readable) and an 868-character completion
+ * All three cuts at once: a 401-character summary, a 139-character file name
+ * (cut in the middle, extension readable) and an 871-character completion
  * reason in the tooltip of the badge. Every full text is in the `title`.
+ * The three numbers are measured, not claimed (acceptance of 0076).
  */
 export const Edges: Story = {
   name: "Rand",
@@ -405,14 +406,14 @@ export const Edges: Story = {
         document={{
           ...INVOICE,
           fileName:
-            "Rechnung-2026-08-26-ACME-GmbH-Bueromaterial-und-Bewirtung-Sammelbeleg-Standort-Berlin-Mitte-Abteilung-Verwaltung-4471.pdf",
+            "Rechnung-2026-08-26-ACME-GmbH-Bueromaterial-und-Bewirtung-Sammelbeleg-Standort-Berlin-Mitte-Abteilung-Verwaltung-Kostenstelle-1200-4471.pdf",
           detail: { kind: "invoice", number: null, gross: 1249.9, currency: "EUR", net: 908.7, vat: 341.2 },
           completedVia: "manual",
           completedReason:
-            "Der Beleg wurde doppelt hochgeladen. Das Original liegt am selben Sachverhalt und ist im Zyklus 2026-08 gebucht; dieser hier ist der zweite Scan aus dem Posteingang vom 27.08., den die Kanzlei nach Rücksprache mit dem Mandanten nicht noch einmal verarbeitet hat. Die Extraktion war zu diesem Zeitpunkt bereits durchgelaufen, weshalb Nummer und Brutto identisch sind; ein Storno war nicht nötig, weil keine Buchung entstanden ist. Sollte sich später herausstellen, dass die beiden Belege doch verschiedene Vorgänge betreffen, ist der zweite Scan über die Historie wiederzufinden und kann neu angestoßen werden. Bis dahin gilt er als erledigt, ohne dass ihm eine Buchung, ein Sachverhalt oder eine DATEV-Ablage zugeordnet ist, und er erscheint in keiner der offenen Listen mehr.",
+            "Der Beleg wurde doppelt hochgeladen. Das Original liegt am selben Sachverhalt und ist im Zyklus 2026-08 gebucht; dieser hier ist der zweite Scan aus dem Posteingang vom 27.08., den die Kanzlei nach Rücksprache mit dem Mandanten nicht noch einmal verarbeitet hat. Die Extraktion war zu diesem Zeitpunkt bereits durchgelaufen, weshalb Nummer und Brutto identisch sind; ein Storno war nicht nötig, weil keine Buchung entstanden ist. Sollte sich später herausstellen, dass die beiden Belege doch verschiedene Vorgänge betreffen, ist der zweite Scan über die Historie wiederzufinden und kann neu angestoßen werden. Bis dahin gilt er als erledigt, ohne dass ihm eine Buchung, ein Sachverhalt oder eine DATEV-Ablage zugeordnet ist, und er erscheint in keiner der offenen Listen mehr. Der Vorgang ist im Import-Protokoll vom 27.08. mit der Kennung des zweiten Scans festgehalten.",
         }}
         summary={
-          "Sammelbeleg über Bürobedarf, Bewirtung und eine Reinigungspauschale. Die Bewirtung ist mit 70 / 30 zu splitten, der Bürobedarf geht vollständig auf 6815, die Reinigungspauschale gehört in den Folgemonat, weil die Leistung erst im September erbracht wird. Der Beleg trägt zusätzlich eine Skontovereinbarung, die beim Zahlungsabgleich zu berücksichtigen ist."
+          "Sammelbeleg über Bürobedarf, Bewirtung und eine Reinigungspauschale. Die Bewirtung ist mit 70 / 30 zu splitten, der Bürobedarf geht vollständig auf 6815, die Reinigungspauschale gehört in den Folgemonat, weil die Leistung erst im September erbracht wird. Der Beleg trägt zusätzlich eine Skontovereinbarung, die beim Zahlungsabgleich zu berücksichtigen ist. Der Lieferschein liegt als zweite Seite bei."
         }
       />
     </div>

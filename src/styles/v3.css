@@ -1926,8 +1926,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* Das Art-Icon vor dem Titel: einfarbig, die Farbe trägt der Badge (V6). */
 .v2tl__kind { display: inline-flex; color: var(--color-text-muted); }
 /* Betrag und Badge sitzen rechts vom Titel, nicht in ihm — sie bekommen ihren
-   eigenen Abstand und bleiben aus dem Klickziel heraus (0040). */
-.v2tl__head > .v2amount { margin-left: auto; }
+   eigenen Abstand und bleiben aus dem Klickziel heraus (0040). Sie stehen als
+   **eine** Gruppe am rechten Rand: vorher trug nur der Betrag `margin-left:
+   auto`, und eine Zeile ohne Betrag setzte ihr Badge direkt hinter den Titel. */
+.v2tl__right { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
+/* Die Betragsspalte des Sachverhalts-Verlaufs (0040): sie wird auch dann
+   belegt, wenn es keinen Betrag gibt — sonst begännen die Badges der Zeilen
+   ohne Betrag dort, wo bei den anderen die Zahl endet. */
+.v2ct__amt { min-width: 96px; display: inline-flex; justify-content: flex-end; }
+.v2ct__state { min-width: 140px; display: inline-flex; align-items: center; gap: var(--space-2); }
 .v2tl__detail { margin-top: 2px; color: var(--color-text-muted); font-size: 12.5px; }
 
 /* --- ChoicePrompt (0028) — Frage mit Antwortoptionen ---------------------- */
@@ -2249,8 +2256,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   border: var(--border-1);
   background: var(--color-bg-sunken);
 }
-/* Der Ladezustand nimmt die Form des Inhalts an, nicht die eines Kastens. */
+/* Der Ladezustand nimmt die Form des Inhalts an, nicht die eines Kastens —
+   dieselbe Karte, derselbe Kopf, dieselbe Höhe wie das geladene Original. */
 .v2doc__origskel { display: block; width: 100%; }
+/* So hoch wie der Kartentitel daneben (15 px Schrift, 1,45 Zeilen). */
+.v2doc__headskel { display: block; width: 42%; height: 22px; }
 /* Fließtext in einer Feldzeile: links, ohne Ziffernstellung — die Spalte
    richtet sonst Zahlen rechts aus (V3). */
 .v2doc__prose {
@@ -2629,7 +2639,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* Die Vorschau sitzt in einer Karte: der Rahmen kommt von der Karte, das
    `<iframe>` gibt seinen eigenen ab und bekommt den Innenabstand, den der
    Kartenkopf schon hat. */
-.v2card > .v2doc__orig {
+.v2card > .v2doc__orig,
+.v2card > .v2doc__origskel {
   display: block;
   width: calc(100% - 2 * var(--space-5));
   margin: var(--space-5);

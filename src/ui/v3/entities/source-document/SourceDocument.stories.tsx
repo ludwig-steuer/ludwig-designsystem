@@ -345,9 +345,10 @@ export const Edges: Story = {
         {
           ...INVOICE,
           id: "r1",
+          // 139 und 56 Zeichen — der Höchstfall, den der Kommentar oben nennt.
           fileName:
-            "Rechnung-2026-08-26-ACME-GmbH-Bueromaterial-und-Bewirtung-Sammelbeleg-Standort-Berlin-Mitte-Abteilung-Verwaltung-4471.pdf",
-          counterparty: "Gesellschaft für Bürobedarf und Bewirtung mbH",
+            "Rechnung-2026-08-26-ACME-GmbH-Bueromaterial-und-Bewirtung-Sammelbeleg-Standort-Berlin-Mitte-Abteilung-Verwaltung-Kostenstelle-1200-4471.pdf",
+          counterparty: "Bürobedarf und Bewirtung Musterstadt Handelsgesellschaft",
           detail: { kind: "invoice", number: null, gross: 1249.9, currency: "EUR" },
         },
         {

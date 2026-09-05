@@ -10,6 +10,7 @@ import { Callout } from "../../primitives/Callout";
 import { Drawer } from "../../primitives/Drawer";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Skeleton } from "../../primitives/Skeleton";
+import { Card, CardHead } from "../../primitives/Table";
 import {
   SourceDocumentCompletion,
   clipMiddle,
@@ -153,11 +154,18 @@ function DrawerBody({
     );
   }
   if (loading) {
-    // The shape of the content, not a generic box: the original takes the same
-    // height it will take, the facts the same five lines.
+    // The shape of the content, not a generic box: the original stands in the
+    // **same card with the same head** it will stand in once it is there
+    // (`SourceDocumentPreview`, 0075), at the same height, and the facts take
+    // the same five lines. Before this it was a bare surface at y = 101 while
+    // the loaded original starts at y = 172 — the load jumped (found in the
+    // acceptance of 0076).
     return (
       <>
-        <span className="v2skel v2doc__origskel" aria-hidden="true" />
+        <Card>
+          <CardHead title={<span className="v2skel v2doc__headskel" aria-hidden="true" />} />
+          <span className="v2skel v2doc__origskel" aria-hidden="true" />
+        </Card>
         <Skeleton lines={5} label="Beleg wird geladen …" />
       </>
     );

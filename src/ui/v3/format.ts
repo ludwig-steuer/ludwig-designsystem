@@ -100,6 +100,13 @@ const RELATIVE = new Intl.RelativeTimeFormat(LOCALE, { numeric: "auto" });
 
 /** `2026-08-26` — a calendar day, ten characters, no time, no zone. */
 const CALENDAR_DAY = /^\d{4}-\d{2}-\d{2}$/;
+/** The parts of a calendar day in Berlin — for `calendarDay` below. */
+const ISO_DAY = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 
 /**
  * A calendar day must not travel. `new Date("2026-08-26")` is UTC midnight,
@@ -138,6 +145,28 @@ const RELATIVE_LIMIT = 7 * DAY;
  * @when    The distance between two points in days — a gap, an age in a list.
  * @instead How long ago something was, in words → formatTime with `age`.
  */
+/**
+ * The calendar day a point in time falls on **in Berlin**, as `YYYY-MM-DD`.
+ *
+ * The tempting one-liner is `iso.slice(0, 10)`, and it is wrong for the two
+ * hours every night in which Berlin is already on the next day:
+ * `2026-08-25T22:30:00Z` is the 26th at 00:30 here, and the cut makes the 25th
+ * of it — a question raised at night would stand a day too early in a strand
+ * (R3, found in the acceptance of 0040).
+ *
+ * @when    A timestamp has to become the day it belongs to — grouping, a
+ *          strand that is day-exact, a key.
+ * @instead The day for a **reader** → formatTime with `date`.
+ */
+export function calendarDay(value: string | Date): string {
+  const d = toDate(value);
+  if (Number.isNaN(d.getTime())) return "";
+  const parts = ISO_DAY.formatToParts(d);
+  const at = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "";
+  return `${at("year")}-${at("month")}-${at("day")}`;
+}
+
 export function daysBetween(a: string | Date, b: string | Date): number {
   const from = toDate(a);
   const to = toDate(b);

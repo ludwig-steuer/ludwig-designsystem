@@ -1,4 +1,7 @@
-import type { ContractBookingFact } from "@/ludwig/modules/contracts/domain/contract";
+import type {
+  ContractBookingFact,
+  ProvenanceSource,
+} from "@/ludwig/modules/contracts/domain/contract";
 import { contractTypeLabel } from "@/ludwig/modules/contracts/domain/contract";
 import type { Currency } from "@/ludwig/shared/money";
 
@@ -193,19 +196,34 @@ export const SOURCE_DOCUMENT_DETAILS: {
         { label: "Vertragstyp", value: contractTypeLabel(d.contractType) },
         { label: "Laufzeit", value: term(d) },
       ];
-      // Each booking-relevant fact carries where it comes from — read
-      // automatically or entered by a person. Whoever books against it has to
-      // see the difference without opening the extraction.
+      // Each booking-relevant fact carries where it comes from — read by the
+      // model or checked by a person. Whoever books against it has to see the
+      // difference without opening the extraction.
       for (const fact of d.bookingFacts ?? []) {
-        rows.push({
-          label: fact.key,
-          value: `${fact.value} · ${fact.source === "manual" ? "von Hand" : "automatisch gelesen"}`,
-        });
+        rows.push({ label: fact.key, value: `${fact.value} · ${provenance(fact)}` });
       }
       return rows;
     },
   },
 };
+
+/**
+ * Where a booking fact comes from, in the **app's own words**: „geprüft" for
+ * what a person set or confirmed, „KI" for what the extraction read, with the
+ * confidence behind it when there is one.
+ *
+ * The words are copied verbatim from `ContractDetail.tsx` (`ProvMark`, the
+ * `manual` and `ai-high` branches), not invented here — two names for the same
+ * state are how a vocabulary splits. That they have to be copied at all is the
+ * finding: `ProvenanceSource` has no label and no axis in `src/ludwig/`
+ * (register entry L-67). With an axis this function disappears and a
+ * `StatusBadge` takes its place.
+ */
+function provenance(fact: { source: ProvenanceSource; confidence: number | null }): string {
+  if (fact.source === "manual") return "geprüft";
+  const pct = fact.confidence === null ? null : Math.round(fact.confidence * 100);
+  return pct === null ? "KI" : `KI · ${pct} %`;
+}
 
 /**
  * „15.01.2026 – 14.01.2029 · 36 Monate" · „seit 15.01.2026 · unbefristet".

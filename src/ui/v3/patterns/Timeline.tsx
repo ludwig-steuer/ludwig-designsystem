@@ -193,7 +193,13 @@ function Entry({
           {item.icon}
           {item.state ? <StateIcon state={item.state} /> : null}
           {onOpen ? <TextButton onClick={() => onOpen(item.id)}>{title}</TextButton> : title}
-          {item.right}
+          {/* The right-hand end is **one** slot, pushed to the edge as a group.
+              Before, only an `Amount` was pushed (`.v2amount { margin-left:
+              auto }`), so an entry without one set its badge straight behind
+              the title — no column at all (found in the acceptance of 0040).
+              What the columns inside the slot are is the entity's business;
+              the strand only guarantees the edge. */}
+          {item.right ? <span className="v2tl__right">{item.right}</span> : null}
         </div>
         {second ? <div className="v2tl__who">{second}</div> : null}
         {item.detail ? (

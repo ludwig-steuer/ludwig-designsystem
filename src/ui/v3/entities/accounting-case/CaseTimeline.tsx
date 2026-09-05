@@ -13,6 +13,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 
 import {
   clarificationState,
@@ -23,6 +24,7 @@ import {
 } from "@/ludwig/modules/accounting-cases/domain/case";
 import type { Currency } from "@/ludwig/shared/money";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
+import { calendarDay } from "../../format";
 import { Amount } from "../../primitives/Amount";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Timeline, type TimelineItem } from "../../patterns/Timeline";
@@ -127,14 +129,32 @@ function KindIcon({ of: Glyph, label }: { of: LucideIcon; label: string }) {
   );
 }
 
-/** The strand is day-exact: a timestamp is cut to its day (finding 5 of 0040). */
-function day(iso: string): string {
-  return iso.slice(0, 10);
-}
-
 function amountCell(value: number | null | undefined, currency: Currency, negative = false) {
   if (value === null || value === undefined || value === 0) return null;
   return <Amount value={negative ? -Math.abs(value) : value} currency={currency} size="sm" />;
+}
+
+/**
+ * The right-hand end of an entry: the amount in its own column, the badges
+ * after it.
+ *
+ * Both columns are **reserved even when they are empty**. Otherwise the badges
+ * of the rows without an amount begin where the numbers of the others end, and
+ * a wider badge pushes the number of its own row to the left — measured before
+ * this: ten amounts with their right edges spread over 86 px, and a badge at
+ * x = 349 instead of 636 (acceptance of 0040, 2026-09-05).
+ *
+ * The widths are the widest case of the stock: „Keine Buchung nötig" measures
+ * 132 px, the pair „Offen · Blockierend" 140 px with its gap. A wider one
+ * pushes its own row and nothing else.
+ */
+function rightEnd(amount: ReactNode, badges: ReactNode) {
+  return (
+    <>
+      <span className="v2ct__amt">{amount}</span>
+      <span className="v2ct__state">{badges}</span>
+    </>
+  );
 }
 
 /**
@@ -191,11 +211,9 @@ export function CaseTimeline({
       icon: (
         <KindIcon of={e.kind === "payment" ? BanknoteArrowDown : FileQuestionMark} label={word} />
       ),
-      right: (
-        <>
-          {amountCell(e.amount, e.currency)}
-          <StatusBadge axis="erwartung" status={maturity} info={false} />
-        </>
+      right: rightEnd(
+        amountCell(e.amount, e.currency),
+        <StatusBadge axis="erwartung" status={maturity} info={false} />,
       ),
     });
   }
@@ -212,17 +230,18 @@ export function CaseTimeline({
     byId.set(c.id, { type: "clarification", clarification: c });
     items.push({
       id: c.id,
-      at: day(c.raisedAt),
+      at: calendarDay(c.raisedAt),
       title: c.title,
       icon: <KindIcon of={MessageCircleQuestionMark} label={word} />,
-      right: (
+      right: rightEnd(
+        null,
         <>
           <StatusBadge axis="klaerung_status" status={state} info={false} />
           {/* Blocking is a second axis, and only while the question is open. */}
           {state !== "answered" && c.severity === "required" ? (
             <StatusBadge axis="klaerung" status="required" info={false} />
           ) : null}
-        </>
+        </>,
       ),
     });
   }
@@ -236,23 +255,21 @@ export function CaseTimeline({
       at: ev.date,
       title: ev.title,
       icon: <KindIcon of={Glyph} label={label} />,
-      right: (
-        <>
-          {amountCell(ev.amount, ev.currency, ev.kind === "payment_out")}
-          {/*
-            A superseded event is not worked on any more: it carries that state
-            instead of its booking state; the entry itself stays selectable.
-            `stateNote` („keine Buchung nötig, weil …") hangs on the badge as a
-            tooltip — in the line it would be a fifth column.
-          */}
-          <span title={ev.stateNote ?? undefined}>
-            <StatusBadge
-              axis="ereignis"
-              status={ev.superseded ? "superseded" : ev.state}
-              info={false}
-            />
-          </span>
-        </>
+      right: rightEnd(
+        amountCell(ev.amount, ev.currency, ev.kind === "payment_out"),
+        /*
+          A superseded event is not worked on any more: it carries that state
+          instead of its booking state; the entry itself stays selectable.
+          `stateNote` („keine Buchung nötig, weil …") hangs on the badge as a
+          tooltip — in the line it would be a fifth column.
+        */
+        <span title={ev.stateNote ?? undefined}>
+          <StatusBadge
+            axis="ereignis"
+            status={ev.superseded ? "superseded" : ev.state}
+            info={false}
+          />
+        </span>,
       ),
       dim: ev.superseded,
     });

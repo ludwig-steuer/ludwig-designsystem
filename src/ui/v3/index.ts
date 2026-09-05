@@ -139,6 +139,7 @@ export {
   formatTimeFull,
   formatDuration,
   daysBetween,
+  calendarDay,
   type TimeFormat,
   type TimeLength,
 } from "./format";
