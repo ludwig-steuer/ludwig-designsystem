@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` (4) · `patterns/` (1) — bestehende Bausteine, keine neuen |
 | Klassen-Test | entfällt: alle fünf sind Erweiterungen bestehender Komponenten |
 | Quelle | Screenshot der Sachverhaltsansicht vom 2026-09-03 · Abgleich Bestand ↔ Screen |
@@ -149,11 +149,38 @@ Variabel (aus dieser Spec):
 `v3-primitives-fläche-statuscallout--next-action` ·
 `v3-primitives-navigation-tabs--tabs-with-dot` ·
 `v3-primitives-tabelle-table--card-head-icon-meta`
-
 ## Abnahme
+
+Abgenommen gegen die Kriterien oben, von einem zweiten Agenten (nicht dem
+Erbauer). Grundlage: Spec, Code, DOM-Proben und die fünf neuen sowie vier
+Bestands-Stories im Browser (Chromium, Storybook auf Port 6107).
+
+**Story-Deckung** — fünf Lücken, fünf neue Props, fünf Stories, jede in der
+Story-Datei ihres Bausteins: `--facts-row` · `--status-menu` ·
+`--next-action` · `--tabs-with-dot` · `--card-head-icon-meta`. Die Story-IDs
+sind genau die, die die Spec vorhergesagt hat; `dot` liegt in
+`Tabs.stories.tsx` statt in einer `Nav.stories.tsx` (die es nicht gibt) —
+Titel und ID stimmen mit der Spec überein, also keine Lücke. Zustände sind
+hier nicht abzudecken: die Aufgabe fügt keinem Baustein einen Zustand hinzu,
+sondern je eine Darstellungs-Prop; die fünf Zustände hängen an den
+Bausteinen selbst und bleiben unberührt (unten belegt).
 
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
-| … | … | ✓ / ✗ |
+| `pnpm typecheck` grün | `pnpm typecheck` (= `tsc --noEmit`), Exit-Code 0, 2026-09-05 vor und nach der Abnahme | ✓ |
+| `pnpm build` grün | Nicht erneut gelaufen (parallele Abnahmen auf demselben Stand). Zitiert wird der Lauf für diesen Stand: „Storybook build completed successfully" | ✓ |
+| Code englisch; JSDoc der geänderten Props englisch | `FieldList.tsx:32` (`layout`), `StatusBadge.tsx:21–26` (`chevron`), `StatusCallout.tsx:20–24` (`icon`), `Nav.tsx:19–24` (`dot`, deutsch — siehe letzte Zeile), `Table.tsx:50, 52` (`icon`, `meta`) | ✓ |
+| Kein Hex, kein px im TSX; neue Maße als Tokens/Klassen in `v3.css` | Alle fünf Maße stehen im CSS-Block „Fünf Lücken am Detailkopf" (`v3.css:2088–2126`). Ausnahme: der Chevron trägt `style={{ marginLeft: 3, opacity: 0.7 }}` inline (`StatusBadge.tsx:92–95`) — dieselbe Schreibweise, die die Datei seit jeher für ihre Innenabstände nutzt (`gap: 6`, `marginRight: 4`). Als Befund gemeldet, siehe letzte Zeile | ✓ |
+| Alle fünf Stories vorhanden | `http://localhost:6107/index.json`: `v3-primitives-fläche-fieldlist--facts-row`, `v3-patterns-prüfen-statusbadge--status-menu`, `v3-primitives-fläche-statuscallout--next-action`, `v3-primitives-navigation-tabs--tabs-with-dot`, `v3-primitives-tabelle-table--card-head-icon-meta` | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Alle fünf gerendert, je ein Screenshot; `--status-menu` zusätzlich geklickt (Menü öffnet mit vier Folgezuständen), `--facts-row` bei 1440 px und bei 420 px angesehen | ✓ |
+| Jede der fünf Props hat ihren Default so, dass kein bestehender Aufrufer sich ändert | Story-Vergleich gegen die Bestands-Stories: `--fieldlist--filled` und `--bare` → 0 × `.v2fields--cols`, Zeilen weiter `display: flex` · `--statusbadge--core-axes` → 16 Chips, 0 Chevrons · `--statuscallout--open` → kein `.v2callout__ico`, Aktionen weiter 25 px vom rechten Rand wie in `--next-action` · `--tabs--with-counters` → 0 Punkte · `--table--filled` (`CardHead` ohne `icon`/`meta`) → Kinder `["DIV","actions"]`, Titel bei 18 px, identisch zur dritten Karte in `--card-head-icon-meta` | ✓ |
+| `layout="row"` stellt die Paare nebeneinander und bricht um, statt zu scrollen | `--facts-row` bei 1440 px: vier Paare, ein einziger Zeilenanfang (`top` viermal 16). Bei 420 px: drei oben, eines darunter (`top` 16/16/16/71). Computed `display: flex`, `flex-wrap: wrap`, `overflow-x: visible` — kein Scroll-Container. Label als Versalienzeile über dem Wert, Wert linksbündig | ✓ |
+| `StatusBadge` trägt kein `aria-haspopup`/`aria-expanded`; die ARIA-Beziehung steht am `Popover`-Auslöser | DOM-Probe `--status-menu`: kein `.bdg` trägt eines der beiden Attribute; der einzige Träger ist `<button class="v2btn v2btn--tertiary v2btn--sm">` mit `aria-expanded` und `aria-controls`, gesetzt von `Popover`. Klick → `aria-expanded="true"`, vier Folgezustände sichtbar. Der Chevron ist `ChevronDown` über die Icon-Registry, 12 px, `stroke-width 1.5` | ✓ |
+| Ein Reiter mit `dot` und `count` zeigt die Zahl, nicht den Punkt | `--tabs-with-dot`: Reiter „Historie" ist mit `count: 12, dot: true` gesetzt (`Tabs.stories.tsx:83`); im DOM steht `<span class="n">12</span>` und kein `.v2tab__dot`. „Saldo & Konten" und „Plausibilität" tragen den Punkt, letzterer in `--color-danger` (`alarm`) | ✓ |
+| `CardHead` ohne `icon`/`meta` rendert dasselbe Markup wie vorher | Story-Vergleich (siehe Default-Zeile): Kinder `["DIV","actions"]`, Titel bei 18 px vom linken Kartenrand — in `--table--filled` wie in der dritten Karte von `--card-head-icon-meta`. Mit `icon`/`meta`: `["v2card__ico","DIV","v2card__meta","actions"]`, `meta` links von den Aktionen | ✓ |
+| Kein neuer Export in `src/ui/v3/index.ts` | `git show 9109924 --stat -- src/ui/v3/index.ts` → leer; der Bau-Commit fasst zwölf Dateien an, `index.ts` ist keine davon | ✓ |
+| **Befund, kein Kriterium dieser Spec:** ein Reiter mit `dot` sagt der Vorlesehilfe nichts (`Nav.tsx:54`, `aria-hidden="true"`) | Der Punkt ist die einzige Auskunft „hier gibt es etwas" und ist für Screenreader unsichtbar; die Zahl daneben wird wenigstens vorgelesen. Die Spec verlangt nur den Punkt, deshalb kein Mangel — aber ein Wort am Punkt („Neues") wäre die V7-treue Fassung. Ebenso als Befund: `Nav.tsx` beschreibt `dot` auf Deutsch, während CLAUDE.md Englisch für JSDoc verlangt — die Datei ist durchgehend deutsch kommentiert und wird nicht in Masse umbenannt | Befund |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte:
+zwei Befunde ohne Kriteriumsbezug — der `dot` ohne Wort für die Vorlesehilfe
+und das inline `marginLeft: 3` am Chevron; beide gemeldet, keiner blockiert.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `patterns/` |
 | Klassen-Test | ja — Kopf einer Akte mit Symbol, Titel, Merkmalen und einer Kennzahl gibt es in jeder Sachbearbeitungs-App |
 | Quelle | Screenshot der Sachverhaltsansicht vom 2026-09-03 · `docs/seiten/sachverhalt-detail.md` Rang 1–2 |
@@ -170,11 +170,42 @@ Variabel (aus dieser Spec):
 
 `v3-patterns-rahmen-entityheader--filled` · `--minimal` · `--without-metric` ·
 `--other-entity` · `--editable` · `--in-use`
-
 ## Abnahme
+
+Abgenommen gegen die Kriterien oben, von einem zweiten Agenten (nicht dem
+Erbauer). Grundlage: Spec, Code, DOM-Proben und die sechs Stories im Browser
+(Chromium, Storybook auf Port 6107).
+
+**Story-Deckung** — sechs Stories abgeleitet, sechs vorhanden. Jede Prop hat
+ihre Story: `icon`, `overline`, `title`, `status`, `meta`, `metric`,
+`summary`, `facts`, `actions` alle in `--filled` · `metric` abwesend in
+`--without-metric` (Karte 1) und mit Ersatzlabel in Karte 2 · jeder Slot leer
+in `--minimal` · Klassen-Test in `--other-entity` · `meta` und `summary` als
+Client-Inseln in `--editable` · im Verbund in `--in-use`. Die drei
+ausgeschlossenen Zustände sind begründet (`Loading`/`Error`: der Kopf bekommt
+fertige Werte, für die Ladezeit steht `Skeleton` an der Aufrufstelle;
+`LeerNachFilter`: kein Filter) — die Begründung trägt: keine Prop lädt, keine
+filtert.
 
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
-| … | … | ✓ / ✗ |
+| `pnpm typecheck` grün | `pnpm typecheck` (= `tsc --noEmit`), Exit-Code 0, 2026-09-05 vor und nach der Abnahme | ✓ |
+| `pnpm build` grün | Nicht erneut gelaufen (parallele Abnahmen auf demselben Stand). Zitiert wird der Lauf für diesen Stand: „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/patterns/EntityHeader.tsx` + `EntityHeader.stories.tsx`; Titel `v3/Patterns/Rahmen/EntityHeader` — „Rahmen" ist eine Patterns-Gruppe aus dem Barrel | ✓ |
+| Code englisch; `@when`/`@instead` am Export | `EntityHeader.tsx:20–24`; JSDoc jeder Prop englisch, deutsche Wörter nur als Beispiel im Kommentar und in den Story-Strings | ✓ |
+| Kein Hex, kein px im TSX; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}\|[0-9]+px' src/ui/v3/patterns/EntityHeader.tsx` → keine Treffer. Die Karte kennt keinen Zustand: `status` ist ein Slot, den die Stories mit `StatusBadge` (Registry) füllen | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Stufe `patterns/`, Import nur abwärts (`FieldList` aus `primitives/`), kein Fachmodul · kein Hex/px/Label-Map · Text links, Kennzahl rechts, nichts zentriert · Farbe nur über `StatusBadge` der Aufrufer · Karte Rand ohne Schatten (unten belegt) · Icons Lucide `size=20 strokeWidth=1.5`, keine Emoji · Texte Sie/Imperativ („Beleg anhängen"), GLOSSARY-Begriffe · Story in `v3/Patterns/Rahmen/`. Ausgenommen die zwei App-Punkte (v1-`@deprecated`, §11) laut Skill. Ein Punkt bleibt als Befund offen, siehe letzte Zeile | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Alle sechs Stories in Chromium gerendert, je ein Screenshot. `--filled` zeigt Symbol, Überzeile, Titel + Status, Meta mit Trennpunkten, Kennzahl, Aktion, Zusammenfassung und vier Fakten; `--editable` den Chip mit Chevron, der ein Menü mit vier Folgezuständen öffnet | ✓ |
+| Ohne `metric` steht an der Kennzahl-Stelle nichts | DOM-Probe `--without-metric`, Karte 1: `.v2ehead__metric` existiert nicht; Kinder von `.v2ehead__top` sind `["v2ehead__ico","v2ehead__id"]`. Kein „—", kein leerer Kasten. Karte 2 zeigt die Ersatzzahl mit eigenem Label („Betrag des Belegs") | ✓ |
+| Jeder leere Slot entfernt seine Zeile samt Abstand | DOM-Probe `--minimal`: Kinder von `.v2ehead` sind nur `["v2ehead__top"]`, darin nur `["v2ehead__id"]`, darin nur `["v2ehead__title"]`. Gemessene Höhe 66 px = Titelzeile + 2 × `--space-5`; `--filled` 223 px, `--without-metric` 158 px. Die Abstände sitzen an den Zeilen (`margin-top` an `__summary`/`__facts`), nicht als `gap` am Container | ✓ |
+| `status` nimmt genau einen Knoten; kein zweiter Zustand aus eigenem Antrieb | `EntityHeader.tsx:47` `status?: ReactNode`, gerendert an genau einer Stelle (Z. 75, in `.v2ehead__title`); die Karte importiert weder Registry noch Achse | ✓ |
+| Die Faktenzeile läuft über `FieldList layout="row"` | `EntityHeader.tsx:87` `<FieldList rows={facts} tone="bare" layout="row" />`; im DOM jeder Story mit `facts` steht `.v2fields--cols`, kein eigenes Markup | ✓ |
+| Der Kopf trägt kein Sachverhalts-Wissen | `grep -niE "sachverhalt\|beleg\|case\|axis\|status-registry\|konto"` trifft nur JSDoc-Beispiele, keine Prop, keinen Default, keinen Import. `--other-entity` zeigt denselben Kopf für Sachkonto und Buchung, mit eigenem Symbol vom Aufrufer | ✓ |
+| Karte mit Rand, ohne Schatten | Computed Style in allen sechs Stories: `border-top: 1px solid`, `box-shadow: none` | ✓ |
+| Server-Component: keine `"use client"`-Direktive | `grep -n "use client" src/ui/v3/patterns/EntityHeader.tsx` → keine Treffer. `InlineEdit` und `Popover` in `--editable` sind Client-Inseln des Aufrufers | ✓ |
+| **Befund, nicht dieser Spec anzulasten:** Versalien an `.v2ehead__over` und `.v2ehead__metric__label` (`v3.css:2171, 2193`) | §9/A2 sagt „keine Versalien", das Verhalten dieser Spec sagt „Label in Versalien". Die Kleinstlabels des ganzen Sets stehen so (18 `text-transform: uppercase` in `v3.css`, lange vor 0048). Das ist eine Set-Entscheidung, kein Fehler dieses Bausteins — gemeldet, damit A2 und die Kicker-Typografie einmal zusammengeführt werden | Befund |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte:
+Versalien an den Kleinstlabels (A2 gegen die Kicker-Typografie des Sets) —
+gemeldet als Befund für das Set, kein Mangel dieses Bausteins.
