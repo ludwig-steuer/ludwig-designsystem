@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | Abnahme — zweiter Durchgang; M1–M6 der ersten Abnahme sind behoben |
 | Stufe | `patterns/` — neben `status-registry.ts` und `entity-icons.ts`; wie die Status-Registry ein Vokabular, kein Baustein. Die Entitäts-Zeilen sind Ludwig, die Handlungs-Zeilen sind fachfrei |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: jede App muss einmal festlegen, was „zum Objekt", „im Drawer nachschlagen" und „erklären" als Zeichen heißt; nur die Tabelle der Entitäten wäre dort eine andere |
 | Quelle | Anfrage Owner vom 2026-09-05 („Symbole sollen eine Bedeutung haben, die wir einmal festschreiben und später verwenden: welches Icon steht für welche Entität, welches heißt mehr Infos, welches navigiere zum Objekt, welches mehr Infos im Drawer") · `Icons.stories.tsx` (0055) hält das Vokabular heute nur als Story · Regeln A8, T8, T9 |
@@ -235,13 +235,72 @@ Variabel (aus dieser Spec):
 - [ ] `design-guidelines.md` A8/T8 verweisen auf die Registry als Quelle („welches Zeichen: `ACTION_ICON`, `ENTITY_ICON`")
 - [ ] offen (App): `mandant-nav.ts` bezieht die Entitäts-Icons aus `ENTITY_ICON`
 
+## Mängel des ersten Durchgangs — behoben
+
+Die Abnahme vom 2026-09-05 hat sechs Mängel gefunden; alle sechs sind behoben,
+die Aufgabe geht zurück in die Abnahme.
+
+| # | Mangel | Behoben durch |
+|---|---|---|
+| M1 | Die Story `InUse` fehlte — `className` hatte keinen Nachweis, und „vier Aufrufer, eine Quelle" war nirgends zu sehen | `InUse` in `Icons.stories.tsx`: `RowActions` mit `open` · `peek` · `more`, `EntityHeader` mit `EntityIcon`, zwei `StatusBadge` und ein `IconButton close` |
+| M2 | `ExpandableRow` zeichnete seinen Pfeil weiter als CSS-Form `.v2chev`; der Wächter kann das nicht melden, weil kein Import da ist, und T9 lässt einen Pfeil als Bedeutungsträger nur als Lucide-Zeichen zu | `.v2chev--icon` nimmt die gezeichneten Kanten zurück und dreht stattdessen ein `ActionIcon collapse`. Die gezeichnete Fassung bleibt, bis `JournalEntryEditor` nachzieht — die Datei gehört einer anderen Sitzung und steht ohnehin in `PENDING` |
+| M3 | Die Hand-Liste `GROUPS` stand samt `GROUPED`, `UNGROUPED` und `Glyph` als toter Code in der Story | gelöscht; dabei sind 33 ungenutzte Lucide-Importe der Story mitgefallen, es bleiben neun |
+| M4 | `design-guidelines.md` A8 nannte `patterns/Icons.tsx` — den Pfad, den der Bauende selbst verworfen hat | A8 nennt jetzt `src/ui/v3/Icons.tsx` samt Grund |
+| M5 | Kommentare und JSDoc in `Icons.tsx` und im Wächter waren deutsch, obwohl CLAUDE.md „Code englisch" verlangt | beide übersetzt. `label`, `meaning` und `instead` bleiben deutsch — das ist der Text, den die Story anzeigt, und der Kopfkommentar sagt das jetzt ausdrücklich |
+| M6 | `Process.tsx` widersprach der Registry: Kanzlei `Building2` (dort der Geschäftspartner), Mandant `UserRound` (dort der Benutzer) | Zwei Schritte. **Erstens** war der Einwand gegen `Scale` berechtigt: die Waage steht in `AiBookingNotes` schon für die Quellenart Gesetz. Die Kanzlei trägt jetzt `Stamp` — kein zweites Haus neben dem Partner und keine zweite Waage. **Zweitens** bleibt `Process` ausgenommen, aber nicht folgenlos: der Umzug ändert seinen Vertrag, weil `Process` seine Zeichen färbt und eine freie `size` nimmt — beides gibt die Registry bewusst nicht her. Das ist eine eigene Aufgabe, **0088**, angelegt und mit dem Widerspruch als Auftrag. Die Ausnahme im Wächter nennt sie beim Namen |
+
+Zwei Beobachtungen der Abnahme sind keine Mängel und bleiben stehen: der
+Wächter ist über einen Tief-Import umgehbar (kommt nirgends vor; zwei Zeilen
+Regex, wenn es je vorkommt), und die Zeile „Umzug im Set" nennt `Link`,
+`AccountCell`, `FilterBar` und `SearchInput`, die in **diesem** Repo gar kein
+Zeichen tragen — sie beschreibt den Stand in `ludwig/app`.
+
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | … |
+Zweiter Agent, 2026-09-05, gegen Spec und Code — nicht gegen den Chat.
+Storybook lief auf 6107; `pnpm build` wurde **nicht** erneut gestartet (es
+schreibt `storybook-static`, und daneben laufen andere Abnahmen).
 
-Abgenommen von / am: … · Offene Punkte: …
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` selbst gelaufen, ohne Ausgabe. `pnpm build` zitiert: der Lauf des Bauenden für diesen Stand meldete „Storybook build completed successfully". Zusätzlich `pnpm check:icons`: „in Ordnung. 52 Zeichen in der Registry, 2 Datei(en) noch offen." | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/Icons.tsx` + `Icons.stories.tsx` daneben; `title: "v3/Grundlagen/Icons"` (`Icons.stories.tsx:68`); Barrel-Gruppe „Grundlagen — das Vokabular, das jeder Baustein teilt" (`index.ts:229`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` an `EntityIcon` (`Icons.tsx:430–433`) und `ActionIcon` (`Icons.tsx:454–455`); die zwei Tabellen tragen keins — dieselbe Form wie `STATUS_REGISTRY` (`status-registry.ts:1768`), Präzedenz trägt. **Aber:** Kopfkommentar und JSDoc-Prosa der neuen Datei sind durchweg deutsch (`Icons.tsx:56–110`, Feld-Doks bei `IconEntry`, `IconSize`, `EntityIcon`), ebenso `scripts/check-icons.mjs`; die zuletzt gebauten Nachbarn sind englisch kommentiert (`Wizard.tsx:5`, `DataTable.tsx`), und CLAUDE.md verlangt Englisch für Kommentare und JSDoc. `label`/`meaning`/`instead` bleiben zu Recht deutsch — sie werden angezeigt. | ✗ M5 |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | keine Farbliterale und keine CSS-Maße in `Icons.tsx`; `size` sind ausschließlich die Leiterwerte (`IconSize`, `Icons.tsx:419`); `StatusBadge` holt sein Zeichen über `AXIS_ENTITY` (`entity-icons.ts:22`) aus der Registry, keine eigene Tabelle mehr | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `curl localhost:6107/index.json` kennt genau `v3-grundlagen-icons--sizes`, `--entities`, `--actions`, `--with-word`. **`InUse` fehlt** — die Spec verlangt sie (RowActions `open`/`peek`/`more`, `EntityHeader`, `StatusBadge`, `IconButton close`), und die Schnittstellen-Tabelle nennt sie als Nachweis für `className`; `className` hat damit keine Story. Ausgeschlossene Zustände (leer, lädt, Fehler) sind unter „Verhalten" begründet | ✗ M1 |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | durchgegangen. Treffer: Kommentarsprache (M5) und die CSS-Chevron in `ExpandableRow` (M2 — ein bedeutungstragendes Zeichen, das nicht aus Lucide kommt, T9/A8). Maße neben der Leiter stehen nur noch in ausgenommenen bzw. PENDING-Dateien (`Review.tsx:69` 15 px, `Process.tsx:117` Stroke 1,75, `AiBookingNotes.tsx:130` 13 px, `JournalEntryEditor.tsx:621` 13 px) — Story `Sizes` zeigt sie als „daneben" | ⚠ |
+| Im Browser angesehen (Storybook) | 6107 durchgesehen: `Entities` (21 Zeilen mit Zeichen, Schlüssel, Wort, Bedeutung), `Actions` (33 Bedeutungen, Abschnitt „Ein Zeichen, zwei Namen", „Nur in Stories" mit 12 Namen), `Sizes`, `WithWord`. Stichproben der umgezogenen Bausteine, im DOM ausgezählt: Dialog `Confirmation` und Drawer `Open` je `lucide-x` 16/1.5; Pagination `MiddlePage` `chevron-left`/`chevron-right` 16/1.5; Disclosure `Filled` `chevron-right` 14/1.5; DataTable `Filled` `arrow-down` 12/1.5 im sortierten Kopf + 50× `layers` 12/1.5; StatusBadge `CoreAxes` Receipt/Layers/BookOpen je 12/1.5; Wizard `States` `check` + `circle-alert` 14/1.5; StatusHeader `Filled` `info` 12/1.5; OverflowMenu `Filled` `chevron-down` 14/1.5 hinter dem Wort. Jedes Zeichen da, überall `stroke-width=1.5` und `aria-hidden=true`, nichts springt | ✓ |
+| `ENTITY_ICON` führt jede Entität mit UI-Form; Wahlen ohne Vorgabe mit Grund in der Spec | Story `Entities`: 21 Einträge. Jede Familie unter `src/ui/v3/entities/` hat ihren Schlüssel (`source-document`, `accounting-case`, `journal-entry`, `clarification`, `account` → `ledger-account`), dazu `bank-transaction` (Profil in `docs/entitaeten/`). Der Rechnungs-Subtyp der Schichten-Tabelle ist mit Grund kein eigenes Zeichen (`Icons.tsx:117`). Ohne Zeichen und ohne UI-Form bleiben `client_accounting_event` und `client_journal_entry_line` — beide haben im Set keine Form; auffällig nur, dass `invoice-line` eins bekommt und die Buchungszeile nicht. Alle acht selbst gewählten Zeichen stehen mit Grund in „Entscheide des Bauenden" | ✓ |
+| `ACTION_ICON` führt alle Schlüssel mit `label`/`meaning`; `remove`/`close` zwei Namen | Story `Actions`: 33 Bedeutungen, jede mit Wort und Satz; alle Schlüssel der Spec-Tabelle vorhanden, dazu `ledger` und `alert` mit Grund. Abschnitt „Ein Zeichen, zwei Namen" stellt `remove` und `close` nebeneinander | ✓ |
+| `size` nur 12/14/16/20/24; `strokeWidth` 1.5 und kein Prop; `aria-hidden` | `IconSize` (`Icons.tsx:419`); `strokeWidth={1.5}` fest verdrahtet in beiden Komponenten, kein Prop; `aria-hidden="true"` gesetzt. Nachweis der Leiter am Baustein steht im Abschnitt „Die Leiter" der Story `Actions` (12/14/16/20/24 über `EntityIcon`) — `Sizes` blieb die 0055-Leiter mit rohen Zeichen und misst zusätzlich, was der Code tut | ✓ |
+| Kein `icon`-Prop, kein `label`-Prop — Ausschlüsse im Kopfkommentar | `Icons.tsx:424–429`, im Kopf von `EntityIcon` (nicht im Datei-Kopf, aber dort, wo die Props stünden); `ActionIcon` verweist darauf zurück | ✓ |
+| Wächter wird rot bei einem Import an der Registry vorbei | selbst geprüft, beide Zweige, beide Änderungen zurückgenommen: (1) `import { Rocket } from "lucide-react"` in `primitives/Dialog.tsx` → „✗ primitives/Dialog.tsx importiert an der Registry vorbei: Rocket", Exit 1. (2) Eine tote `PENDING`-Zeile → „✗ primitives/Dialog.tsx steht in PENDING, importiert aber nichts mehr — Zeile streichen.", Exit 1. Der Wächter ist **strenger** als die Spec: er meldet jeden direkten Lucide-Import, nicht nur unbekannte Namen. Umgehbar bleibt nur ein Tief-Import (`lucide-react/dist/…`) oder `import * as` — beides kommt im Repo nicht vor | ✓ |
+| Umzug im Set; `grep` nennt danach nur Registry, `Review.tsx`, Grundlagen-Stories | 17 Dateien beziehen ihr Zeichen über `EntityIcon`/`ActionIcon`. Direkt aus `lucide-react` importieren außerhalb von Stories nur noch `Icons.tsx`, `Review.tsx`, die drei Vokabular-Dateien und die zwei PENDING-Dateien. **Offen:** `ExpandableRow` zeichnet seinen Chevron weiter als CSS-Form `.v2chev` (`ExpandableRow.tsx:91`, `v3.css:177`) statt `ActionIcon expand`/`collapse`, obwohl „Umzug im Set" ihn nennt — der Wächter sieht das nicht, weil kein Import da ist. (`Link`, `AccountCell`, `FilterBar`, `SearchInput` aus derselben Liste tragen in diesem Repo gar kein Zeichen; `Link` hat nie eins importiert. Da war nichts umzuziehen.) | ✗ M2 |
+| `entity-icons.ts` ohne eigenes `ENTITY_ICON`; `StatusBadge` zeigt dasselbe Zeichen | `entity-icons.ts` trägt nur noch `AXIS_ENTITY`, `AXIS_LABEL`, `ENTITY_LABEL`, `AXIS_SOURCE`; Story `StatusBadge/CoreAxes` unverändert, im DOM Receipt/Layers/BookOpen je 12 px statt vorher 12,5 — die Angleichung an A8 steht mit Grund in „Entscheide des Bauenden" | ✓ |
+| `Icons.stories.tsx` rendert aus den Tabellen; keine Hand-Liste `GROUPS` | Rendern aus der Registry: ✓ (`Object.entries(ENTITY_ICON)` bzw. `ACTION_ICON`, `Icons.stories.tsx:366/391`). **Aber `GROUPS` steht noch in der Datei** (`Icons.stories.tsx:247–288`), dazu `GROUPED`, `UNGROUPED` und `Glyph` (`289–305`) — nichts davon wird gerendert, und der Großteil der rund 40 Lucide-Importe der Story hängt nur noch daran. Die Spec führt `GROUPS` unter „Ersetzt" | ✗ M3 |
+| `design-guidelines.md` A8/T8 verweisen auf die Registry | T8 (`design-guidelines.md:167`) verweist auf `label` „in der Registry … (0087)" ✓. A8 (`:606`) verweist auf `ENTITY_ICON`/`ACTION_ICON`, nennt sie aber **`patterns/Icons.tsx`** — genau der Pfad, den der Bauende selbst verworfen hat; die Datei liegt in `src/ui/v3/Icons.tsx` | ✗ M4 |
+| `mandant-nav.ts` bezieht die Entitäts-Icons aus `ENTITY_ICON` | — | offen (App) |
+
+### Die fünf Abweichungen von der Spec
+
+| Abweichung | Urteil |
+|---|---|
+| Registry in `src/ui/v3/Icons.tsx` statt `patterns/` | **gedeckt.** Die Begründung hält nachprüfbar: acht Primitives beziehen ihr Zeichen aus der Registry (`Dialog`, `Drawer`, `Pagination`, `RecordPager`, `PageHeader`, `Combobox`, `Disclosure`, `OverflowMenu`), und nach dem Umzug importiert kein Primitive aus `patterns/` außer den zwei `useHotkeys`-Fällen (`RecordPager.tsx:5`, `Selection.tsx:5`) — die es vorher schon gab. Ein Vokabular auf der Ebene von `format.ts` passt zur Story-Gruppe „Grundlagen". Einziger Nachzug: A8 nennt noch den alten Pfad (M4) |
+| Wächter als `scripts/check-icons.mjs` statt `icons.test.ts` | **gedeckt und wirksam.** Kein Test-Runner im Repo nachgeprüft: `package.json` hat kein `test`-Script, kein `vitest`/`jest` in den Abhängigkeiten, und es gibt keine einzige `*.test.ts` außerhalb von `node_modules` — auch `stufen.test.ts`, auf das die Spec verweist, existiert nicht. Wirksamkeit selbst getestet, beide Zweige rot (siehe Tabelle); der Kommentar im Skript sagt, dass die Prüfung bei einem Runner umzieht |
+| Stories vom Wächter ausgenommen | **gedeckt.** Die Begründung ist im Produkt messbar: die Story `Actions` listet 12 Zeichen, die ausschließlich Stories importieren (`LayoutDashboard`, `PackageCheck`, `Inbox`, `Settings`, …) — Registry-Einträge dafür wären Einträge ohne Aufrufer. Dass das Abnahmekriterium („grep nennt nur …") damit auf Komponenten gemünzt zu lesen ist, steht in der Spec; die Story „Nur in Stories" ist die Gegenkontrolle, die verhindert, dass die Ausnahme unbemerkt wächst |
+| Drei Vokabular-Dateien ausgenommen | **teilweise.** `CaseTimeline` (`client_accounting_event.kind`) und `AiBookingNotes` (Quellenart) tragen: das sind Aufzählungen aus dem Datenmodell, kein Zeichen je Bedeutung. `Process.tsx` trägt **nicht**: von seinen acht Staffelstäben sind vier Dinge, die die Registry bereits benennt, und zwei widersprechen ihr — `kanzlei: Building2` (`Process.tsx:73`), obwohl die Registry für `tenant` ausdrücklich sagt „nicht `Building2`, das trägt der Geschäftspartner" (Befund B3), und `mandant: UserRound`, obwohl `UserRound` in der Registry der `user` ist und der Mandant `Briefcase` trägt. Damit steht die Drift, die 0087 beenden soll, weiter im Set. Dazu: `Scale` ist jetzt doppelt vergeben — `tenant` in der Registry und „Gesetz" in `AiBookingNotes.tsx:42`, und ausgerechnet diese Stelle dient in „Entscheide des Bauenden" als Begründung für `tenant`. Entweder die vier Akteure ziehen ihr Zeichen aus der Registry, oder die Kanzlei bekommt ein Zeichen, das noch frei ist (M6) |
+| `OverflowMenu` bekommt `expand` statt `more` | **der Bauende hat recht.** Im Browser nachgesehen: der Trigger ist ein `<summary>` mit sichtbarem Wort („Mehr") und dahinter `chevron-down` 14/1.5. T8 schließt Kebab-Menüs von der Icon-only-Ausnahme ausdrücklich aus und schickt sie an `OverflowMenu` „mit sichtbarem Wort" — ein Chevron hinter einem beschrifteten Knopf sagt „klappt auf". `more` bleibt für die Zeile, die wirklich nur drei Punkte trägt; ein Registry-Eintrag ohne heutigen Aufrufer ist hier kein Fehler, die Spec-Tabelle nennt mehrere davon |
+
+**Mängel:**
+
+- **M1** — Die Story `InUse` fehlt; damit ist die Prop `className` ohne Nachweis und die Behauptung „vier Aufrufer, eine Quelle" nirgends zu sehen.
+- **M2** — `ExpandableRow` steht in „Umzug im Set", zeichnet seinen Chevron aber weiter als CSS-Form `.v2chev` statt über `ActionIcon expand`/`collapse`; der Wächter kann das nicht melden.
+- **M3** — Die Hand-Liste `GROUPS` samt `GROUPED`, `UNGROUPED` und `Glyph` steht als toter Code in `Icons.stories.tsx`, obwohl die Spec sie unter „Ersetzt" führt.
+- **M4** — `design-guidelines.md` A8 nennt die Registry `patterns/Icons.tsx`; diesen Pfad gibt es nach dem Umzug nicht.
+- **M5** — Kommentare und JSDoc-Prosa in `Icons.tsx` und `scripts/check-icons.mjs` sind deutsch, obwohl CLAUDE.md und das Abnahmekriterium Englisch verlangen (die angezeigten `label`/`meaning`/`instead` bleiben zu Recht deutsch).
+- **M6** — `Process.tsx` widerspricht der Registry: Kanzlei = `Building2` (das Zeichen des Geschäftspartners, Befund B3), Mandant = `UserRound` (das Zeichen des Benutzers). Dazu trägt `Scale` zwei Bedeutungen (Kanzlei und „Gesetz" in `AiBookingNotes`).
+
+Abgenommen von / am: **nicht abgenommen**, zurück auf „in Arbeit" (Claude, Abnahme-Agent, 2026-09-05) · Offene Punkte: M1–M6, dazu „offen (App)" `mandant-nav.ts`.
 
 ## Offene Fragen
 
@@ -268,7 +327,7 @@ hier stehen sie mit Grund:
 
 | `EntityKey` | Zeichen | Grund |
 |---|---|---|
-| `tenant` (Kanzlei) | `Scale` | Die Sidebar hat kein Zeichen für die Kanzlei, und die Story 0055 führt für sie `Building2` — das ist in der Sidebar der Geschäftspartner (Befund B3). Zwei Häuser nebeneinander unterscheidet niemand. Die Waage ist im Set schon das Zeichen der steuerlichen Instanz (`AiBookingNotes`, Quellenart „Gesetz"), und die Kanzlei ist, wer sie anwendet |
+| `tenant` (Kanzlei) | `Stamp` | Die Sidebar hat kein Zeichen für die Kanzlei, und die Story 0055 führt für sie `Building2` — das ist in der Sidebar der Geschäftspartner (Befund B3). Zwei Häuser nebeneinander unterscheidet niemand. **Korrigiert nach der ersten Abnahme:** die erste Wahl `Scale` war ebenfalls doppelt vergeben, die Waage steht in `AiBookingNotes` für die Quellenart Gesetz. Der Stempel ist das, was eine Kanzlei tut und sonst niemand |
 | `user` | `UserRound` | Story 0055, Gruppe „Wer ist dran" — dort steht es für den Menschen |
 | `job` | `Cog` | Ein Hintergrundprozess, kein Mensch und kein Agent; `Bot` ist in `ACTION_ICON` schon der Agent |
 | `fiscal-year` | `CalendarRange` | Ein **Zeitraum**, keine Datum. `Calendar` allein läse sich als Tag |

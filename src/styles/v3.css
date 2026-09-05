@@ -183,6 +183,19 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 }
 .v2chev.is-open { transform: rotate(45deg); }
 
+/* Mit 0087 zeichnet die Zeile ihren Pfeil nicht mehr selbst — T9 lässt einen
+   Pfeil als Bedeutungsträger nur als Lucide-Zeichen zu. `--icon` nimmt die
+   gezeichneten Kanten zurück und dreht stattdessen das Zeichen darin. Die
+   gezeichnete Fassung bleibt, bis `JournalEntryEditor` nachzieht (die Datei
+   gehört gerade einer anderen Sitzung). */
+.v2chev--icon {
+  width: auto; height: auto; border: none;
+  display: inline-flex; align-items: center;
+  color: var(--color-text-muted);
+  transform: rotate(0deg);
+}
+.v2chev--icon.is-open { transform: rotate(90deg); }
+
 /* Inline-Aktionen: Text-Link-Buttons rechtsbündig, kein Icon-Rätsel. */
 .v2actions { display: flex; gap: 14px; justify-content: flex-end; align-items: center; }
 .v2link {

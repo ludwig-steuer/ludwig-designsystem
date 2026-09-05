@@ -42,9 +42,9 @@ import {
   RefreshCw,
   Repeat,
   RotateCcw,
-  Scale,
   Search,
   SlidersHorizontal,
+  Stamp,
   Trash2,
   Undo2,
   Upload,
@@ -55,58 +55,59 @@ import {
 } from "lucide-react";
 
 /**
- * # Die Icon-Registry
+ * # The icon registry
  *
- * EINE Quelle dafür, welches Zeichen was bedeutet — die Schwester der
- * Status-Registry. Wer im Set ein Icon braucht, holt es hier; ein Zeichen, das
- * die Registry nicht führt, gibt es für einen Baustein nicht (R1, sinngemäß).
+ * ONE source for what a sign means — the sister of the status registry.
+ * Whoever needs an icon in the set takes it from here; a sign the registry
+ * does not carry does not exist for a component (R1, by analogy).
  *
- * Zwei Tabellen, weil es zwei Fragen sind:
- *  - `ENTITY_ICON` — **was ist das Ding?** Schlüssel ist der englische
- *    GLOSSARY-Name in kebab-case, damit derselbe Sachverhalt in Sidebar,
- *    Zelle und Kopf dasselbe Zeichen trägt.
- *  - `ACTION_ICON` — **was passiert, wenn ich klicke?** Schlüssel ist die
- *    Bedeutung, nicht das Aussehen: `remove` und `close` teilen sich `X` und
- *    bleiben trotzdem zwei Namen, weil sie zwei Dinge sind.
+ * Two tables, because they answer two questions:
+ *  - `ENTITY_ICON` — **what is this thing?** The key is the English GLOSSARY
+ *    name in kebab-case, so the same accounting case carries the same sign in
+ *    the sidebar, in a cell and in a header.
+ *  - `ACTION_ICON` — **what happens when I click?** The key is the meaning,
+ *    not the appearance: `remove` and `close` share the `X` and stay two
+ *    names, because they are two things.
  *
- * Zustände stehen **nicht** hier. Ein Prüfergebnis ist `StateIcon`
- * (`Review.tsx`), ein Status ist `StatusBadge` mit der Farbe aus der
- * Status-Registry. Ein zweites Vokabular für dieselbe Sache wäre genau die
- * Drift, die diese Datei beendet.
+ * States do **not** live here. A review result is `StateIcon` (`Review.tsx`),
+ * a status is `StatusBadge` with its colour from the status registry. A second
+ * vocabulary for the same thing is exactly the drift this file ends.
  *
- * Drei weitere Tabellen bleiben aus demselben Grund, aus dem `StateIcon`
- * bleibt: sie beschreiben je **eine fachliche Aufzählung**, nicht ein
- * Zeichen für eine Bedeutung, und ihre Werte kommen aus dem Datenmodell.
- * Wer sie hierher zöge, müsste die Aufzählung mitziehen.
- *  - `CaseTimeline.tsx` — die Ereignisart (`client_accounting_event.kind`)
- *  - `AiBookingNotes.tsx` — die Quellenart eines Belegs für eine Aussage
- *  - `Process.tsx` — wer an der Reihe ist (Agent, Kanzlei, Mandant, System)
- * Das Wächter-Skript kennt sie namentlich; jede weitere Datei muss hierher.
+ * Three more tables stay where they are, for the same reason `StateIcon`
+ * stays: each describes one **domain enumeration** whose values come from the
+ * data model, not a sign for a meaning. Moving them here would mean moving
+ * the enumeration too.
+ *  - `CaseTimeline.tsx` — the event kind (`client_accounting_event.kind`)
+ *  - `AiBookingNotes.tsx` — the kind of source backing a statement
+ *  - `Process.tsx` — whose turn it is (agent, firm, client, system); it
+ *    contradicts this registry today and moves over with task 0088
  *
- * Jeder Eintrag trägt das deutsche Wort (`label`) — es steht neben dem
- * Zeichen, nie statt seiner (T8) — und einen Satz, wann es gilt.
+ * The guard script knows all three by name; every other file has to come here.
  *
- * ## Ein Zeichen ergänzen
- * 1. Eintrag mit `label` und `meaning` anlegen; wo es sich mit einem
- *    vorhandenen beißt, `instead` setzen.
- * 2. Story `v3/Grundlagen/Icons` rendert ihn von allein — sie liest diese
- *    Tabellen, sie pflegt keine eigene Liste.
- * 3. `pnpm check:icons` sagt, ob noch eine Datei an der Registry vorbei
- *    importiert.
+ * Every entry carries the German word (`label`) — it stands next to the sign,
+ * never instead of it (T8) — and one sentence saying when it applies. Those
+ * two are user-facing text and therefore German, unlike the comments here.
+ *
+ * ## Adding a sign
+ * 1. Add an entry with `label` and `meaning`; where it can be confused with a
+ *    neighbour, set `instead`.
+ * 2. The story `v3/Grundlagen/Icons` renders it by itself — it reads these
+ *    tables, it keeps no list of its own.
+ * 3. `pnpm check:icons` says whether a file still imports past the registry.
  */
 export interface IconEntry {
   icon: LucideIcon;
-  /** Das deutsche Wort, das neben dem Zeichen steht (T8). */
+  /** The German word that stands next to the sign (T8). */
   label: string;
-  /** Ein Satz: wann gilt dieses Zeichen? */
+  /** One sentence: when does this sign apply? */
   meaning: string;
-  /** Wohin sonst — wenn ein Nachbareintrag leicht verwechselt wird. */
+  /** Where else — when a neighbouring entry is easily confused with it. */
   instead?: string;
 }
 
 /**
- * Ein Zeichen je Entität. Die Sidebar der App ist die Vorgabe, wo sie eine
- * hat; der Rest kommt aus dem Vokabular der Story 0055.
+ * One sign per entity. The app's sidebar is the default wherever it has one;
+ * the rest comes from the vocabulary of story 0055.
  */
 export const ENTITY_ICON = {
   "source-document": {
@@ -181,11 +182,11 @@ export const ENTITY_ICON = {
     instead: "Die fremde Firma im Vorgang ist `partner`.",
   },
   tenant: {
-    icon: Scale,
+    icon: Stamp,
     label: "Kanzlei",
     meaning: "Die steuerberatende Instanz, die mehrere Mandanten führt.",
     instead:
-      "Nicht `Building2` — das trägt in der Sidebar der Geschäftspartner, und zwei Häuser nebeneinander unterscheidet niemand.",
+      "Nicht `Building2` — das trägt in der Sidebar der Geschäftspartner, und zwei Häuser nebeneinander unterscheidet niemand. Auch nicht `Scale`: die Waage steht in `AiBookingNotes` für die Quellenart „Gesetz\u201c.",
   },
   user: {
     icon: UserRound,
@@ -226,8 +227,8 @@ export const ENTITY_ICON = {
 } satisfies Record<string, IconEntry>;
 
 /**
- * Ein Zeichen je Bedeutung. Der Schlüssel sagt, was passiert — nicht, wie es
- * aussieht: `remove` und `close` teilen `X` und bleiben zwei Namen.
+ * One sign per meaning. The key says what happens, not what it looks like:
+ * `remove` and `close` share the `X` and stay two names.
  */
 export const ACTION_ICON = {
   open: {
@@ -412,20 +413,20 @@ export type EntityKey = keyof typeof ENTITY_ICON;
 export type ActionKey = keyof typeof ACTION_ICON;
 
 /**
- * Die Leiter A8: produktiv 12/14/16, lesend 16/20/24. Andere Maße gibt es
- * nicht — ein Icon, das aus der Reihe fällt, verrät nur, dass jemand die
- * Zeilenhöhe nachgebessert hat.
+ * The ladder from A8: 12/14/16 in the working register, 16/20/24 in the
+ * reading one. There are no other sizes — an icon that steps out of line only
+ * shows that somebody was patching a row height.
  */
 export type IconSize = 12 | 14 | 16 | 20 | 24;
 
 /**
- * Das Zeichen einer Entität.
+ * The sign of an entity.
  *
- * Es ist Beschriftung, kein Inhalt: `aria-hidden`, Farbe über den umgebenden
- * Text, und das Wort steht daneben (T8). Deshalb gibt es bewusst **kein**
- * `label`-Prop — eine Komponente, die das Wort mitzeichnet, verlagert T8 an
- * die falsche Stelle — und **kein** `icon`-Prop: eine Hintertür für ein
- * beliebiges Lucide-Zeichen macht die Registry zur Dekoration.
+ * It is labelling, not content: `aria-hidden`, colour from the surrounding
+ * text, and the word stands next to it (T8). That is why there is deliberately
+ * **no** `label` prop — a component that draws the word moves T8 to the wrong
+ * place — and **no** `icon` prop: a back door for any Lucide sign would turn
+ * the registry into decoration.
  *
  * @when    Ein Ding aus dem Datenmodell benennen — in der Sidebar, vor einem
  *          Namen, im Kopf einer Akte.
@@ -446,10 +447,10 @@ export function EntityIcon({
 }
 
 /**
- * Das Zeichen einer Handlung oder eines Hinweises.
+ * The sign of an action or a hint.
  *
- * Wie `EntityIcon`: `aria-hidden`, kein `label`, kein `icon`. Der `IconButton`
- * darum herum trägt sein `aria-label` selbst.
+ * Like `EntityIcon`: `aria-hidden`, no `label`, no `icon`. The `IconButton`
+ * around it carries its own `aria-label`.
  *
  * @when    Sagen, was ein Klick tut, bevor jemand klickt.
  * @instead Ein Ding benennen → EntityIcon. Ein Prüfergebnis → StateIcon.

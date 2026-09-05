@@ -1,22 +1,21 @@
 #!/usr/bin/env node
 /**
- * Wächter zur Icon-Registry (Aufgabe 0087).
+ * Guard for the icon registry (task 0087).
  *
- * Meldet jede Datei unter `src/ui/v3`, die ein Zeichen direkt aus
- * `lucide-react` importiert, statt es aus `Icons.tsx` zu holen. Das
- * ist der Mechanismus, der „einmal festschreiben, später verwenden" hält:
- * ohne ihn wandert jedes neue Icon wieder an der Registry vorbei ins Set.
+ * Reports every file under `src/ui/v3` that imports a sign straight from
+ * `lucide-react` instead of taking it from `Icons.tsx`. This is the mechanism
+ * that makes "write it down once, use it later" hold: without it every new
+ * icon walks past the registry into the set again.
  *
- * Die erlaubten Namen liest das Skript aus der Import-Liste von `Icons.tsx`
- * selbst — es gibt keine zweite Liste, die auseinanderlaufen könnte.
+ * The allowed names are read from the import list of `Icons.tsx` itself —
+ * there is no second list that could drift apart from the first.
  *
- * Aufruf: `pnpm check:icons`. Exit 1, wenn etwas vorbeigeht.
+ * Run with `pnpm check:icons`. Exits 1 when something slips past.
  *
- * ponytail: bewusst ein Skript und kein Test — dieses Repo hat keinen
- * Test-Runner (kein vitest, kein `test`-Script, `stufen.test.ts` existiert
- * nicht). Ein Runner nur für diese eine Prüfung wäre eine Abhängigkeit für
- * dreißig Zeilen. Wird das Repo je getestet, zieht die Prüfung als
- * `icons.test.ts` um und dieses Skript entfällt.
+ * ponytail: deliberately a script and not a test — this repo has no test
+ * runner (no vitest, no `test` script, no `stufen.test.ts`). A runner as a
+ * dependency for thirty lines of checking would be the wrong direction. Once
+ * the repo is tested this moves over as `icons.test.ts` and the script goes.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -26,44 +25,42 @@ const SET = join(ROOT, "src/ui/v3");
 const REGISTRY = join(SET, "Icons.tsx");
 
 /**
- * Wer darf direkt importieren:
- *  - die Registry selbst,
- *  - `Review.tsx` mit `StateIcon` — das Vokabular der Prüfzustände, bewusst
- *    eigene Tabelle (siehe Kopfkommentar von `Icons.tsx`),
- *  - die Grundlagen-Story, die das Vokabular zeigt statt es zu benutzen.
+ * Who may import directly, and why. Each of these carries one enumeration of
+ * its own — the same reason `StateIcon` keeps its table (see the head comment
+ * of `Icons.tsx`).
  */
 const EXEMPT = new Map([
-  ["Icons.tsx", "die Registry selbst"],
-  ["patterns/Review.tsx", "StateIcon — das Vokabular der neun Prüfzustände"],
-  ["patterns/Process.tsx", "wer an der Reihe ist: Agent, Kanzlei, Mandant, System"],
-  ["entities/accounting-case/CaseTimeline.tsx", "die Ereignisart (client_accounting_event.kind)"],
+  ["Icons.tsx", "the registry itself"],
+  ["patterns/Review.tsx", "StateIcon — the vocabulary of the nine review states"],
+  ["patterns/Process.tsx", "whose turn it is: agent, firm, client, system — moves over with task 0088"],
+  ["entities/accounting-case/CaseTimeline.tsx", "the event kind (client_accounting_event.kind)"],
   [
     "entities/journal-entry/AiBookingNotes.tsx",
-    "die Quellenart einer Aussage: Bank, Beleg, Regel, Gesetz, Web",
+    "the kind of source backing a statement: bank, document, rule, law, web",
   ],
 ]);
 
 /**
- * Stories zeigen das Vokabular, sie liefern es nicht aus. Sie dürfen ein
- * beliebiges Zeichen malen, um eine Sidebar oder einen Leerzustand
- * anzudeuten — die Registry auf sie auszudehnen zwänge Einträge wie
- * `LayoutDashboard`, die kein Baustein je benutzt. Was ausgeliefert wird,
- * ist die Komponente daneben, und die prüft dieses Skript.
+ * Stories show the vocabulary, they do not ship it. A story may draw any sign
+ * to sketch a sidebar or an empty state; extending the registry over them
+ * would force entries like `LayoutDashboard` that no component ever uses. What
+ * ships is the component next door, and that is what this script checks.
  */
 const isStory = (key) => key.endsWith(".stories.tsx");
 
 /**
- * Noch nicht umgezogen, mit Grund und Besitzer. Diese Liste schrumpft und
- * wächst nie: wer eine Datei umzieht, streicht ihre Zeile.
+ * Not migrated yet, each with a reason and an owner. This list only ever
+ * shrinks: whoever migrates a file deletes its line. A line that no longer
+ * imports anything is reported as an error, so a dead exemption stands out.
  */
 const PENDING = new Map([
   [
     "entities/source-document/SourceDocumentDrawer.tsx",
-    "0075/0076 in Arbeit in einer anderen Sitzung — Umzug, sobald sie fertig ist",
+    "0075/0076 in progress in another session — migrate once it is done",
   ],
   [
     "entities/journal-entry/JournalEntryEditor.tsx",
-    "uncommittete Änderungen einer anderen Sitzung — Umzug, sobald sie committet sind",
+    "uncommitted changes from another session — migrate once they are committed",
   ],
 ]);
 

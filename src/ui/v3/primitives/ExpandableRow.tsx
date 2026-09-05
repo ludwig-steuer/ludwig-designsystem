@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useId, useState } from "react";
+import { ActionIcon } from "../Icons";
 
 /**
  * Die Client-Zwillinge von `Row` (F123 T123.1).
@@ -88,7 +89,9 @@ export function ExpandableRow({
         }}
       >
         {lead}
-        <span className={`v2chev${open ? " is-open" : ""}`} />
+        <span className={`v2chev v2chev--icon${open ? " is-open" : ""}`}>
+          <ActionIcon action="collapse" size={12} />
+        </span>
         {summary}
       </div>
       {open ? (

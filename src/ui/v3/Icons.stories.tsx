@@ -2,52 +2,23 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   AlertTriangle,
-  ArrowDownLeft,
-  ArrowLeftRight,
-  ArrowUpRight,
-  Banknote,
-  BanknoteArrowDown,
-  BookOpen,
-  BookOpenText,
-  Bot,
-  Building2,
   Check,
-  CheckCircle2,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Circle,
-  CircleSlash,
-  Database,
-  FileQuestionMark,
   FileText,
-  Globe,
-  HelpCircle,
-  History,
-  Hourglass,
-  Info,
-  Layers,
-  MessageCircleQuestionMark,
-  MessageSquare,
-  Minus,
-  PencilLine,
-  Receipt,
-  Repeat,
-  Ruler,
-  Scale,
-  Share2,
-  SlidersHorizontal,
   Trash2,
-  Undo2,
-  UserRound,
   X,
-  XCircle,
   type LucideIcon,
 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
+import { RowActions } from "./primitives/ActionBar";
 import { Button } from "./primitives/Button";
 import { IconButton } from "./primitives/IconButton";
+import { TextButton } from "./primitives/TextButton";
+import { EntityHeader } from "./patterns/EntityHeader";
+import { StatusBadge } from "./patterns/StatusBadge";
 import { AXIS_LABEL } from "./patterns/entity-icons";
 import {
   ACTION_ICON,
@@ -242,66 +213,6 @@ export const Sizes: Story = {
   ),
 };
 
-/* ── Vocabulary ───────────────────────────────────────────────────────── */
-
-const GROUPS: { title: string; lead: string; icons: Record<string, LucideIcon> }[] = [
-  {
-    title: "Navigieren",
-    lead: "Wohin es weitergeht — Blättern, Vor und Zurück.",
-    icons: { ChevronLeft, ChevronRight, ChevronDown },
-  },
-  {
-    title: "Öffnen und schließen",
-    lead: "Das Kreuz schließt, das Buch öffnet das Kontenblatt.",
-    icons: { X, BookOpenText },
-  },
-  {
-    title: "Bestätigen",
-    lead: "Gewählt, erledigt. Nie ein Unicode-Häkchen (T9).",
-    icons: { Check, CheckCircle2 },
-  },
-  {
-    title: "Verwerfen und zurücknehmen",
-    lead: "Fehlgeschlagen, zurückgegeben, gelöscht, übersprungen.",
-    icons: { XCircle, Undo2, Trash2, CircleSlash },
-  },
-  {
-    title: "Informieren",
-    lead: "Hinweis, Frage, Warnung, Ruhezustand — die Stufen aus §3, als Form statt als Farbe allein (V7).",
-    icons: { Info, HelpCircle, AlertTriangle, Circle, Minus, Hourglass, PencilLine, MessageSquare, MessageCircleQuestionMark },
-  },
-  {
-    title: "Wer ist dran",
-    lead: "Der Staffelstab: Ludwig, Kanzlei, Mandant, System, weitergereicht.",
-    icons: { Bot, Building2, UserRound, Database, Share2 },
-  },
-  {
-    title: "Entität",
-    lead: "Nur die drei Haupt-Entitäten der Kette tragen ein Icon — sie spiegeln die Hauptnavigation.",
-    icons: { Receipt, Layers, BookOpen },
-  },
-  {
-    title: "Fachwelt",
-    lead: "Was in der Kanzlei passiert: Beleg, Zahlung ein und aus, Umbuchung, Korrektur, Abgrenzung, Vortrag.",
-    icons: { FileText, FileQuestionMark, Banknote, BanknoteArrowDown, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, SlidersHorizontal, Repeat, History, Globe, Ruler, Scale },
-  },
-];
-
-const GROUPED = new Set(GROUPS.flatMap((g) => Object.keys(g.icons)));
-const UNGROUPED = [...IN_PRODUCT.keys()].filter((n) => !GROUPED.has(n)).sort();
-
-function Glyph({ name, Icon }: { name: string; Icon: LucideIcon }) {
-  const where = IN_PRODUCT.get(name) ?? [];
-  return (
-    <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "flex-start", minWidth: 0 }}>
-      <Icon size={16} strokeWidth={1.5} style={{ flex: "0 0 auto", marginTop: "var(--space-1)" }} />
-      <div style={{ minWidth: 0 }}>
-        <div className="lw-mono" style={{ fontSize: "var(--fs-ui-sm)" }}>{name}</div>
-        <div style={{ ...note, overflowWrap: "anywhere" }}>{where.join(" · ") || "nicht in v3"}</div>
-      </div>
-    </div>
-  );
-}
 
 /* ── Vocabulary: gelesen aus der Registry (0087) ──────────────────────── */
 
@@ -537,6 +448,55 @@ export const WithWord: Story = {
             </div>
             <div style={note}>immer mit dem Wort daneben</div>
           </div>
+        </div>
+      </Section>
+    </div>
+  ),
+};
+
+/* ── InUse ────────────────────────────────────────────────────────────── */
+
+/**
+ * Vier Aufrufer, eine Quelle. Keiner dieser Bausteine importiert ein Zeichen
+ * selbst: die Zeilenaktionen fragen die Registry nach `open`, `peek` und
+ * `more`, der Aktenkopf nach dem Zeichen des Sachverhalts, der Status-Chip
+ * holt seins über die Achse, und der Schließen-Knopf nimmt `close`. Ändert
+ * sich ein Zeichen, ändert es sich hier an allen vier Stellen zugleich.
+ */
+export const InUse: Story = {
+  render: () => (
+    <div style={{ ...page, display: "grid", gap: "var(--space-8)", maxWidth: "var(--container-wide)" }}>
+      <Section
+        title="Zeilenaktionen"
+        lead="Drei Wege aus einer Tabellenzeile: zum Objekt, im Drawer nachschlagen, der Rest im Menü. Jedes Zeichen mit Wort (T8)."
+      >
+        <RowActions>
+          <TextButton icon={<ActionIcon action="open" size={12} />}>Öffnen</TextButton>
+          <TextButton icon={<ActionIcon action="peek" size={12} />}>Nachschlagen</TextButton>
+          <TextButton icon={<ActionIcon action="more" size={12} />}>Mehr</TextButton>
+        </RowActions>
+      </Section>
+
+      <Section
+        title="Aktenkopf"
+        lead="Das Zeichen der Entität als Kachel — dasselbe, das die Sidebar und jede Zelle tragen."
+      >
+        <EntityHeader
+          icon={<EntityIcon entity="accounting-case" size={20} />}
+          overline="Sachverhalt · 2026-0815"
+          title="Eingangsrechnung: Musterfirma GmbH"
+          status={<StatusBadge axis="sachverhalt" status="open" info={false} />}
+        />
+      </Section>
+
+      <Section
+        title="Status-Chip und Schließen"
+        lead="Der Chip holt sein Entitäts-Zeichen über die Achse aus derselben Registry; der Knopf nimmt `close` — nicht `remove`, denn hier geht ein Fenster zu."
+      >
+        <div style={{ display: "flex", gap: "var(--space-5)", alignItems: "center" }}>
+          <StatusBadge axis="beleg" status="in_progress" info={false} />
+          <StatusBadge axis="sachverhalt" status="needs_clarification" info={false} />
+          <IconButton label="Schließen" icon={<ActionIcon action="close" size={14} />} />
         </div>
       </Section>
     </div>
