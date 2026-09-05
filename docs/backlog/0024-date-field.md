@@ -137,4 +137,15 @@ Nicht anwendbar: `Laedt` (ein Datumsfeld lädt nicht) · `LeerNachFilter` ·
 | Kein Wirtschaftsjahr-Wissen in der Komponente | `grep`: der Begriff steht nur als Beispiel-Label im JSDoc, die Presets kommen als Prop herein | ✓ |
 | Ersetzt die Zeitraum-Felder in `FilterBar` (0003) ohne Funktionsverlust | `FilterBar.stories.tsx:26` baut den Zeitraum weiter aus zwei rohen `<Input type="date">`; `CaseCrud.stories.tsx:312` trägt noch `Todo spec="0024"` | ✗ |
 
+**Bleibt auf `in Arbeit` (nachgeprüft am 2026-09-05).** Anders als 0016 und
+0017 hat diese Aufgabe zwei Mängel **in diesem Repo**, nicht in `ludwig/app`:
+`FilterBar.stories.tsx` (Z. 25–29, `const Zeitraum`) baut den Zeitraum weiter
+aus einem rohen `<Input type="date">` — weder `DateField` noch
+`DateRangeField` wird dort importiert; und der Tausch `to` vor `from` greift
+schon bei Zwischenwerten, während jemand die Jahreszahl tippt. Beides sind
+Änderungen an Code, keine Papierarbeit, und beides gehört vor die nächste
+Abnahme. Der zweite Punkt ist zusätzlich ein Wunsch an die Spec: die
+Story-Exportnamen sind deutsch, was diese Spec vorgibt und die Hausregel
+verbietet.
+
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: FilterBar und Showcase sind nicht umgestellt. Zwei Beobachtungen zum Nacharbeiten: die Story-Exportnamen sind deutsch (`Gefuellt`, `Interaktiv` …) — so von dieser Spec vorgegeben, aber gegen die Hausregel „Story-Exportnamen englisch"; und beim Tippen der Jahreszahl im „bis"-Feld greift der Tausch schon bei Zwischenwerten, die Werte springen dabei unter den Fingern zwischen den Feldern.

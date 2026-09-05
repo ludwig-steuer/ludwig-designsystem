@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „lädt noch" ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Ladefläche für Karte/Detail (Skeleton)" · `v3-backlog.md` „Ladeanzeige außerhalb der Tabelle" (3) |
@@ -78,3 +78,11 @@ Komponente **ist** der Ladezustand; die anderen vier zeigt der Aufrufer mit
 | Ersetzt den handgebauten Platzhalter in mindestens einem der drei Fundorte | Keine Aufrufstelle außer den eigenen Stories; in `ludwig/app` kein `Skeleton`-Import (`grep`) | ✗ |
 
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die Ablösung der handgebauten Platzhalter steht noch aus — sie liegt in `ludwig/app`, nicht in diesem Repo.
+
+**Wieder auf `Abnahme` gesetzt am 2026-09-05.** Der einzige ✗ ist ein
+App-Kriterium: die Ablösung der handgebauten Platzhalter passiert in
+`ludwig/app` und ist in diesem Repo nicht erfüllbar. Nach der heutigen Regel
+trägt so ein Kriterium das Ergebnis **offen (App)**, nicht ✗ — es hält die
+Aufgabe nicht auf. Stories und Spec sind vollständig: drei Stories in der
+Spec, drei Exporte in `Skeleton.stories.tsx`. Der nächste Abnehmer
+entscheidet.

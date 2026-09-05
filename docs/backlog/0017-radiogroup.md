@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „eine aus wenigen Möglichkeiten" ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Radio-Gruppe (Antwortoptionen I6)" |
@@ -86,3 +86,16 @@ kein Zustand), `LeerNachFilter`, `Laedt` (der Aufrufer zeigt `Skeleton`, 0016).
 | Ersetzt die drei `type="radio"` in `DatevExportWizard.tsx` und `BatchActions.tsx` | Kein `RadioGroup`-Import in `ludwig/app` (`grep`) | ✗ |
 
 Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die Umstellung in `ludwig/app` fehlt. Außerdem erbt die `<legend>` aus `.v2field__label` ein `text-transform: uppercase` und erscheint in Versalien — Verstoß gegen A2/T3; das betrifft alle Felder und gehört in `v3.css` geräumt, nicht in dieser Komponente.
+
+**Wieder auf `Abnahme` gesetzt am 2026-09-05.** Der ✗ ist ein App-Kriterium
+(die Umstellung in `ludwig/app`) und trägt nach der heutigen Regel das
+Ergebnis **offen (App)**, nicht ✗. Stories und Spec sind vollständig: fünf
+Stories in der Spec, fünf Exporte in `RadioGroup.stories.tsx`.
+
+Der zweite offene Punkt bleibt bestehen und ist **nicht** Sache dieser
+Aufgabe: `.v2field__label` in `src/styles/v3.css` (Z. 842–845) setzt
+`text-transform: uppercase`. Damit stehen **alle** Feldbeschriftungen des
+Sets in Versalien — Verstoß gegen T3/A2, nachgeprüft am 2026-09-05. Das ist
+eine Entscheidung über das Aussehen jedes Formulars im Set (die Label sind
+heute Overline-Typografie) und gehört in eine eigene Aufgabe, nicht in eine
+Radiogruppe. Der Abnehmer wertet es hier als Befund, nicht als Mangel.

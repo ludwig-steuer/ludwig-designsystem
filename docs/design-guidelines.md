@@ -308,35 +308,64 @@ Konto; Bausteine entstehen an der Seite und wandern nach `src/ui/<entität>/`
 
 ### 11.4 Seiten (Häkchen = Prüfliste §10 bestanden)
 
+**Stand 2026-09-05.** Der Seiten-Rückbau vom Owner-Entscheid 2026-09-05 ist
+eingearbeitet: 24 Seiten sind in `ludwig/app` gelöscht und stehen deshalb in
+keiner Welle mehr. Maßgeblich ist `ludwig/app`
+`docs/backlog/seitenrueckbau-2026-09.md` — dort steht je gelöschter Seite,
+was sie konnte, und für die eine, die neu gebaut wird, worauf der Neubau
+aufsetzt. Die Module unter `apps/web/src/modules/` bleiben stehen; nur die
+Seiten sind weg.
+
 **Fertig (v2):** `[year]/stapel` · `stapel/[batchId]` · `…/abnahme` ·
 `…/abnahme/[schritt]` — mit F123 (2026-08-30) auf das Design gezogen.
 
+**Neu zu bauen — Upload & Inbox:** die einzige gelöschte Seite mit Ersatz.
+Alte Route `[clientSlug]/document-inbox`, mandantenglobal **ohne**
+Jahres-Segment. Sie war der einzige Ort, an dem ein PDF nach Ludwig kam;
+solange sie fehlt, geht das nur über `/api/intake` und die Python-CLI.
+Anforderungen, Einstiegspunkte und die drei Fallstricke (kein Jahres-Segment,
+Zustand je Zeile statt globalem Spinner, `pending_classification` sichtbar
+machen) stehen im Rückbau-Dokument, Abschnitt „Neu zu bauen: Upload & Inbox".
+
 **Welle 1 — Arbeitsfläche**
 - [ ] `[year]/cases` · [ ] `[year]/cases/[caseId]`
-- [ ] `[year]/documents` · [ ] `[clientSlug]/documents/[sourceDocId]` · [ ] `[clientSlug]/document-inbox`
-- [ ] `[year]/banks` · [ ] `[year]/banks/[accountId]` (+ `KontoauszugView`) · [ ] `[year]/banks/offen`
-- [ ] `[year]/opos` · [ ] `[year]/entries`
+- [ ] `[year]/documents`
+- [ ] `[year]/banks` · [ ] `[year]/banks/[accountId]` (+ `KontoauszugView`)
+- [ ] `[year]/opos`
 
 **Welle 2 — Kontext, Stammdaten, Auswertung**
 - [ ] `[year]` (Jahresübersicht) · [ ] `[year]/accounts` · [ ] `[year]/accounts/[accountNumber]` (846 Z.)
 - [ ] `[year]/partners` · [ ] `[year]/partners/[partnerId]`
-- [ ] `[year]/datev` (1205 Z. — vorher teilen) · [ ] `[year]/datev/stapel/[...seq]` · [ ] `[year]/documents/datev-import`
-- [ ] `[year]/recurring` · [ ] `[year]/reporting` · [ ] `[year]/document-requests` · [ ] `[year]/cycles` · [ ] `[year]/client-batches`
+- [ ] `[year]/datev` (1205 Z. — vorher teilen)
 - [ ] `/dashboard` · [ ] `/clients` (P14) · [ ] `/clients/new` · [ ] `/clients/[clientSlug]`
 
 **Welle 3 — Konfiguration und Betrieb** (Listen/Karten v2, Editoren bleiben)
-- [ ] `configuration/*` (18: Index, uebersicht, stammdaten, bankkonten + new/edit/import/transactions, kontenplan, verrechnungskonten, lieferanten, integrationen + new/[id], logs, benachrichtigungen, profil, onboarding/creditors)
-- [ ] `admin/*` (11: Übersicht, tenants + [tenantId] + clients/[clientId], users + [userId], jobs, audit-log, agent-connections, product-feedback, acceptance-quality)
+- [ ] `configuration/*` (12: Index, uebersicht, stammdaten, bankkonten + edit/import/transactions, kontenplan, verrechnungskonten, logs, profil, onboarding/creditors)
+- [ ] `admin/*` (10: Übersicht, tenants + [tenantId] + clients/[clientId], users + [userId], jobs, audit-log, agent-connections, product-feedback)
 
 **Welle 4 — Ränder**
-- [ ] `/portal/[clientSlug]` — Register prüfen (Mandant, dreimal im Jahr)
-- [ ] `[year]/agent-runs/[runId]` (695 Z.)
-- `/hilfe`, `/hilfe/glossar`, `(auth)/login` — lesend, kein v2
+- `(auth)/login` — lesend, kein v2
 
-**Rückbau statt Migration (erst rückbauen, dann migrieren):** `[year]/review`
-+ 5 Unterseiten (P17) · `[year]/agent-runs` (Redirect) · `[year]/export`,
-`export/[batchId]` (Archiv F118) · `/settings`, `/settings/components` (F111 B2)
-· `/dev/gallery` behält nur ladende Drawer-Hüllen · `/health` keine Oberfläche.
+**Rückbau statt Migration (erst rückbauen, dann migrieren):** `[year]/export`,
+`export/[batchId]` (Archiv F118) · `/settings` · `/health` keine Oberfläche.
+Die übrigen Zeilen dieser Liste sind mit dem Rückbau erledigt: `[year]/review`
++ 5 Unterseiten (P17), `[year]/agent-runs` (Redirect), `/settings/components`
+(F111 B2) und `/dev/gallery` sind gelöscht.
+
+**Die Galerie ist Storybook.** `/dev/gallery` und `/settings/components` gibt
+es nicht mehr; die Frage „wovon gibt es v3?" beantwortet dieses Repo unter
+`pnpm storybook` (Port 6107), und die ladenden Drawer-Hüllen, für die die
+App-Galerie zuständig war, gehören als Story neben ihre Komponente.
+
+**Was gelöscht ist** (aus dem Rückbau-Dokument, ersatzlos): `document-requests`
+· `recurring` · `entries` · `client-batches` · `agent-runs/[runId]` ·
+`documents/datev-import` · `cycles` · `reporting` · `datev/stapel/[seq]` ·
+`configuration/lieferanten` · `configuration/bankkonten/new` ·
+`configuration/integrationen` (+ `new`, Detail) ·
+`configuration/benachrichtigungen` · `/admin/acceptance-quality` · `/hilfe` +
+`/hilfe/glossar` · `/portal/[clientSlug]` · `/settings/components` ·
+`/dev/gallery`; dazu die Weiterleitungen ohne eigenen Inhalt (`review`,
+`agent-runs`, `banks/offen`, `documents/[sourceDocId]`, `/[slug]/documents`).
 
 ### 11.5 Sofort-Aufgaben — Befunde aus `apps/web/src` (2026-08-30)
 
@@ -523,6 +552,16 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 **Nicht im Katalog, weil Rückbau** (§11.4): `[year]/review` + 5 Unterseiten
 (P17) · `/settings/components` (B2) · `export`-Archiv (F118) · `agent-runs`
 (Redirect). Was dort an Bausteinen steckt, wird nicht gehoben.
+
+**Ohne Bildschirm seit dem Seiten-Rückbau (Owner-Entscheid 2026-09-05, siehe
+§11.4).** Diese Zeilen des Katalogs beschreiben Bausteine, deren Seite es in
+`ludwig/app` nicht mehr gibt — sie werden **nicht** gehoben, solange kein
+Neubau sie anfordert: Wiederkehr-Regel (`recurring`) · Buchungslauf
+(`agent-runs/[runId]`) · alles, was nur auf `reporting`, `cycles`,
+`client-batches`, `document-requests`, `entries`, `datev/stapel/[seq]` oder
+`configuration/integrationen` stand. Die Module dahinter bleiben stehen; die
+Regel aus `spec-schreiben` §3 gilt unverändert — eine Form ohne Screen wird
+nicht gebaut.
 
 ## 12 Werte-Protokoll (Quelle der Wahrheit: `tokens.css`, `v2.css`)
 

@@ -424,6 +424,11 @@ Das ist ein Pflaster für die Werkbank, kein Fix der Struktur — siehe §4.2.
 `/settings/components` und `/dev/gallery` zeigen überlappend dieselben
 Bausteine, gepflegt an zwei Stellen von Hand. Empfehlung in §4.3.
 
+**Erledigt (Owner-Entscheid 2026-09-05, Seiten-Rückbau).** Beide Seiten sind
+in `ludwig/app` gelöscht (`docs/backlog/seitenrueckbau-2026-09.md`). Von den
+drei Galerien bleibt eine: Storybook. Der Befund ist damit geschlossen; die
+Frage, was mit den ladenden Hüllen geschieht, beantwortet §4.3.
+
 ### B3 — Tab-Leisten: eine Regel, acht Umsetzungen (Schwere: mittel)
 
 `web-ui-regeln.md` R9 schreibt die `TabBar`-Primitive vor. Gehalten wird sie von
@@ -574,16 +579,22 @@ Wächter-Test kann die Kante verbieten — analog zum bestehenden
 
 ### 4.3 Eine Werkbank, eine Schaufensterseite
 
-Nach B2 stehen drei Galerien nebeneinander. Vorschlag:
+**Entschieden am 2026-09-05 (Owner, Seiten-Rückbau):** es bleibt **eine**
+Galerie, und das ist Storybook. `/dev/gallery` und `/settings/components` sind
+in `ludwig/app` gelöscht — der Vorschlag unten ist damit ausgeführt, härter
+als er gemeint war.
 
-- **Storybook** wird die Werkbank für alles Reine — Zustände, Varianten,
-  Controls. Dort gehört jede `pure`/`pure+i`-Komponente hin.
-- **`/dev/gallery`** behält, was Storybook nicht kann: die **ladenden** Hüllen
-  (`ui/drawers`) mit echtem Server-Roundtrip. Der Rest (Primitives, Chips)
-  kann entfallen, sobald die Storys stehen.
+- **Storybook** ist die Werkbank für alles Reine — Zustände, Varianten,
+  Controls. Dort gehört jede `pure`/`pure+i`-Komponente hin, und dort steht
+  seither auch die Antwort auf „wovon gibt es v3?".
+- **Die ladenden Hüllen** (`ui/drawers` mit echtem Server-Roundtrip) hatten in
+  `/dev/gallery` ihren Platz und haben ihn jetzt nicht mehr. Im Set trägt sie
+  die Story neben ihrer Komponente: der v3-Drawer ist Klasse B (Daten als
+  Props), sein Lade- und Fehlerzustand ist damit in Storybook darstellbar —
+  das war der eigentliche Grund, warum die App-Galerie nötig schien.
 - **`/settings/components`** (519 Zeilen, in der App für jeden Nutzer
-  erreichbar) hat nach dieser Aufteilung keine eigene Aufgabe mehr →
-  **Rückbau vorschlagen**, nicht selbst ausführen (Owner-Entscheid).
+  erreichbar) hatte nach dieser Aufteilung keine eigene Aufgabe mehr und ist
+  mit dem Rückbau weg (F111 B2).
 
 ### 4.4 Familie je Entität
 
