@@ -23,8 +23,9 @@ export const Variants: Story = {
   ),
 };
 
-/** `md` (40 px) trägt Header-Karte und Aktionsleiste, `sm` (32 px) die Zeile,
- *  `xs` (26 px) dichte Zellen und Editoren. */
+/** `md` (35 px) carries the head card and the action bar, `sm` (30 px) card
+ *  actions, `xs` (25 px) dense cells and editors. In a table row the last two
+ *  shrink to the height of the line — see `SizesInRow`. */
 export const Sizes: Story = {
   render: () => (
     <Cluster>
@@ -117,9 +118,10 @@ export const FullWidth: Story = {
 };
 
 /**
- * Welche Größe in die Zeile gehört. `xs` und `sm` fügen sich ein — die Zeile
- * bleibt so hoch wie die ohne Knopf. `md` drückt sie auf und gehört deshalb in
- * Kopf-Karte und Aktionsleiste, nicht in die Liste (V1).
+ * Which size belongs in a row. `xs` and `sm` fit in: measured at 1440 × 900
+ * all three rows below stand 47.25 px high — the one with the button and the
+ * one without. `md` pushes the row to 60.8 px and therefore belongs in the
+ * head card and the action bar, not in a list (V1).
  */
 export const SizesInRow: Story = {
   render: () => (

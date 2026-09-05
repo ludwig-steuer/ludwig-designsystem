@@ -57,10 +57,20 @@ export function ReasonDialog({
     onClose();
   }
 
+  // The same thing the primary button does, including its lock — Enter must
+  // not confirm what the button refuses (I2, 0092). Inside the reason field
+  // Enter stays a line break; `Dialog` keeps that apart.
+  function confirm() {
+    if (pending || (required && reason.trim().length === 0)) return;
+    onConfirm(reason.trim());
+    setReason("");
+  }
+
   return (
     <Dialog
       open={open}
       onClose={close}
+      onConfirm={confirm}
       title={title}
       kicker={kicker}
       size="sm"
@@ -73,10 +83,7 @@ export function ReasonDialog({
             variant={confirmVariant}
             size="sm"
             disabled={pending || (required && reason.trim().length === 0)}
-            onClick={() => {
-              onConfirm(reason.trim());
-              setReason("");
-            }}
+            onClick={confirm}
           >
             {confirmLabel}
           </Button>

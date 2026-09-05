@@ -73,21 +73,46 @@ export function Drawer({
   const [footerSlot, setFooterSlot] = useState<HTMLElement | null>(null);
   const panel = useRef<HTMLElement>(null);
   const opener = useRef<HTMLElement | null>(null);
+  // Starts at `false`, not at `open`: a drawer that is already open in its
+  // first render — the caller hooks it in instead of switching it on — would
+  // otherwise never see a change and never remember its opener (M2).
+  const wasOpen = useRef(false);
+
+  // Who opened it, read while rendering — the same reason as in `Dialog`: a
+  // child's `autoFocus` is applied in the commit, so an effect asks too late
+  // and gets a field inside the panel. Here it worked by accident as long as
+  // the panel appeared one frame later; a drawer that is open on mount had the
+  // bug (M1 of the acceptance of 0092).
+  if (open !== wasOpen.current) {
+    if (open && typeof document !== "undefined") {
+      opener.current = document.activeElement as HTMLElement | null;
+    }
+    wasOpen.current = open;
+  }
 
   useEffect(() => {
     if (open) {
       // Der Fokus muss in den Drawer und beim Schließen zurück auf den
       // Auslöser, sonst tabbt die Tastatur hinter dem Scrim weiter (V10/V11).
-      opener.current = document.activeElement as HTMLElement | null;
       setRender(true);
       const raf = requestAnimationFrame(() => setShown(true));
       return () => cancelAnimationFrame(raf);
     }
     setShown(false);
-    opener.current?.focus();
-    opener.current = null;
     const t = setTimeout(() => setRender(false), EXIT_MS);
     return () => clearTimeout(t);
+  }, [open]);
+
+  // Giving the focus back belongs in a cleanup, not in the `else` branch above:
+  // a caller who unhooks the drawer instead of setting `open` to false never
+  // renders that branch and loses the focus silently (M2).
+  useEffect(() => {
+    if (!open) return;
+    return () => {
+      const back = opener.current;
+      opener.current = null;
+      if (back?.isConnected) back.focus();
+    };
   }, [open]);
 
   /**

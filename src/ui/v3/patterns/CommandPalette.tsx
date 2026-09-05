@@ -1,7 +1,7 @@
 "use client";
 
 import { Command } from "cmdk";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import type { ReactNode } from "react";
 
 import { Dialog } from "../primitives/Dialog";
@@ -68,23 +68,6 @@ export function CommandPalette({
   useHotkeys([
     { key: "k", meta: true, label: "Befehl oder Seite suchen", handler: () => onOpenChange(!open) },
   ]);
-
-  // Escape has to lead back to where the hand was — `Dialog` sets the first
-  // focus but does not return it (finding in 0034). Who was focused has to be
-  // read **while rendering** the opening frame: the effect of `Dialog` is a
-  // child effect and runs first, and by then the focus already sits in the
-  // panel.
-  const opener = useRef<HTMLElement | null>(null);
-  const wasOpen = useRef(open);
-  if (open !== wasOpen.current) {
-    if (open && typeof document !== "undefined") {
-      opener.current = document.activeElement as HTMLElement | null;
-    }
-    wasOpen.current = open;
-  }
-  useEffect(() => {
-    if (!open) opener.current?.focus();
-  }, [open]);
 
   return (
     <Dialog

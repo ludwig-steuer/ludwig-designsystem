@@ -773,12 +773,7 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   color: var(--color-text-subtle); margin-bottom: 3px;
 }
 .v2dlg__title { font-size: 15px; font-weight: 600; color: var(--color-text); }
-.v2dlg__close {
-  background: none; border: none; cursor: pointer; padding: 2px;
-  color: var(--color-text-muted); line-height: 0;
-  border-radius: var(--radius-sm);
-}
-.v2dlg__close:hover { color: var(--color-text); background: var(--color-bg-soft); }
+/* `.v2dlg__close` ist mit 0092 entfallen: das Kreuz ist ein `IconButton`. */
 .v2dlg__body { padding: 18px; overflow-y: auto; font-size: 13.5px; line-height: 1.55; color: var(--color-text); }
 .v2dlg__foot {
   padding: 12px 18px;
@@ -2719,4 +2714,32 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   padding: var(--space-3) var(--space-6);
   border-top: 1px solid var(--color-border);
   background: var(--color-surface-head);
+}
+
+/* --- Knopf in der Tabellenzeile (V1, Mängel aus 0008 und 0010) ------------
+   „Der Chip wird kleiner, nicht die Zeile größer." Gemessen war das Gegenteil:
+   eine Zeile mit `xs`-Knopf stand 52 px hoch gegen 47 px ohne — der Knopf war
+   mit seinen 25 px höher als der Textkörper der Zeile (≈ 21 px), und die
+   Zelle wuchs mit.
+
+   Deshalb richtet sich ein Knopf **in** der Zeile nach ihrer Zeilenhöhe statt
+   nach seiner eigenen: dieselbe Höhe, die der Text der Nachbarzelle ohnehin
+   belegt. Das ist keine vierte Größe — `xs` und `sm` behalten außerhalb der
+   Tabelle ihre Maße; nur im Zeilenkontext hören sie auf, sie zu bestimmen.
+   Vorbild ist `SelectCell`, deren Zeilen bei 44–45 px bleiben.
+
+   Der Aufklappbereich ist eine Schwester der Zeile (`.v2tbl__detail`), keine
+   Zelle darin — dort gelten wieder die normalen Maße. */
+.v2tbl__row .v2btn--xs,
+.v2tbl__row .v2btn--sm {
+  padding-block: 0;
+  line-height: 1;
+  /* Genau die Zeilenhöhe des Textes daneben (1,5 × Schriftgrad) — mit
+     `border-box` steckt der Rahmen darin. Kleiner wäre erlaubt, größer nicht:
+     die Zeile darf nicht wachsen. `vertical-align: top` hält den Kasten oben
+     im Zeilenkasten, sonst käme die Unterlänge der Grundlinie noch dazu.
+     Die zwei Pixel, die eine `<td>` vom Browser mitbekommt (1 px oben, 1 px
+     unten), hat die Nachbarzelle genauso — sie fallen also nicht auf. */
+  min-height: calc(var(--v2-row-fs, 13.5px) * 1.5);
+  vertical-align: top;
 }

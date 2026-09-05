@@ -100,6 +100,8 @@ export function OverflowMenu({
 /**
  * @when    One entry inside an OverflowMenu — a jump with `href`, an action
  *          with `onClick`.
+ * @instead An action that stays visible next to the row → RowActions or
+ *          TextButton. One that runs and can fail → ActionButton in the row.
  */
 export function MenuItem({
   children,

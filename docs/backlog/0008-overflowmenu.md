@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Zeilen mit vielen Aktionen gibt es überall |
 | Quelle | `docs/v3-backlog.md` — „Danach" (8 Eigenbauten) |
@@ -44,7 +44,7 @@ Vorbild, sondern der Grund für diese Aufgabe.
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `label` | `string` | nein | Beschriftung des Auslösers, Standard „Mehr" | `Filled` |
-| `size` | `ButtonSize` | nein | wie `Button`; in Zeilen `sm` | `InRow` |
+| `size` | `ButtonSize` | nein, Default `sm` | wie `Button`; in der Zeile die flachste, `xs` | `InRow` |
 | `align` | `"start" \| "end"` | nein | Wohin die Klappe ausrichtet; Standard `end` (rechtsbündig in der Zeile) | `AlignStart` |
 | `children` | `ReactNode` | ja | Die `MenuItem`-Einträge | `Filled` |
 
@@ -182,3 +182,36 @@ direkt aus `lucide-react` und reicht sie als `MenuItem icon={…}` herein. Für
 Stories ist das mit 0087 ausdrücklich erlaubt; die Prop `icon: ReactNode`
 lässt es aber auch jedem echten Aufrufer offen, an der Registry vorbei ein
 Zeichen zu setzen.
+
+## Mängel der zweiten Abnahme (2026-09-05) — behoben
+
+**M1 — der Auslöser trieb die Zeile auf (V1).** Gemessen 52 px gegen 46 px
+ohne Menü. Der Grund lag nicht am Menü, sondern am Knopf darunter: ein
+`.v2btn--xs` ist 25 px hoch, der Textkörper einer Zeile 20,25 px — die Zelle
+wuchs mit. Derselbe Mangel stand als M1 an 0010.
+
+Behoben in `v3.css` mit einer Regel, die beide trägt: **im** Zeilenkontext
+richtet sich ein `xs`- oder `sm`-Knopf nach der Zeilenhöhe des Textes neben
+ihm statt nach seiner eigenen. Keine vierte Größe — außerhalb der Tabelle
+bleiben die Maße, wie sie waren.
+
+Nachgemessen (Chromium headless, 1440 × 900, Story `InRow`): die Zeile mit
+Menü steht 47,25 px hoch, die Referenzzeile darunter 46,25 px — der eine
+Pixel ist ihre fehlende Trennlinie als letzte Zeile, nicht das Menü. Der
+Auslöser selbst misst jetzt 20,25 px.
+
+**M2 — `@instead` fehlte an `MenuItem`.** Steht: sichtbare Handlung neben der
+Zeile → `RowActions`/`TextButton`; Handlung, die läuft und scheitern kann →
+`ActionButton` in der Zeile.
+
+**Spec und Story zusammengeführt.** Die Schnittstelle sagte „in Zeilen `sm`",
+gebaut und gezeigt ist `xs`. Die Zeile ist korrigiert: Default `sm`, in der
+Zeile die flachste. Beide halten die Zeilenhöhe jetzt ein; `xs` steht in der
+Story, weil eine Prop, die den Default zeigt, nichts beweist.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Die Zeile mit Menü ist so hoch wie die ohne (Story `InRow`, gemessen)
+- [ ] `MenuItem` trägt `@when` **und** `@instead`
+- [ ] Die Schnittstelle beschreibt `size` so, wie die Story ihn benutzt
+

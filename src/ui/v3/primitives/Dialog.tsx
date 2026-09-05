@@ -81,16 +81,49 @@ export function Dialog({
 }) {
   const panel = useRef<HTMLDivElement>(null);
   const opener = useRef<HTMLElement | null>(null);
+  // Starts at `false`, not at `open`: a dialog that is already open in its
+  // first render — the caller hooks it in instead of switching it on — would
+  // otherwise never see a change and never remember its opener (M2).
+  const wasOpen = useRef(false);
 
+  // Who opened it has to be read **while rendering** the opening frame. React
+  // applies a child's `autoFocus` during the commit, before any effect of ours
+  // runs — asked later, the answer is the field inside the panel, and the way
+  // back leads into the dialog that has just closed (M1 of the acceptance of
+  // 0092: `ReasonDialog` in `ClarificationCard`).
+  if (open !== wasOpen.current) {
+    if (open && typeof document !== "undefined") {
+      opener.current = document.activeElement as HTMLElement | null;
+    }
+    wasOpen.current = open;
+  }
+
+  // Focus in, and back out again in the cleanup — **not** in an `else` branch
+  // for `open === false`. A caller who unhooks the whole dialog instead of
+  // setting `open` to false never renders that branch, and the focus was
+  // silently lost (M2; `AccountDrawer.stories.tsx`, `ClarificationCard`).
+  // Deliberately only keyed on `open`: `onClose`/`onConfirm` usually arrive as
+  // fresh lambdas, and a cleanup on every parent render would pull the focus
+  // out of a field while someone is typing in it.
   useEffect(() => {
-    if (!open) {
+    if (!open) return;
+    const active = document.activeElement;
+    // The focus goes into the dialog — but not over a child that asked for it.
+    // Before 0092 this line ran after `autoFocus` had taken hold and pulled the
+    // focus back onto the panel: after ⌘K the CommandPalette had its search
+    // field for one tick and then lost it, so typing went nowhere.
+    if (!active || !panel.current?.contains(active)) panel.current?.focus();
+    return () => {
+      const back = opener.current;
+      opener.current = null;
       // Back where it came from — otherwise the reader lands at the top of the
       // page after every confirmation (V10/V11).
-      opener.current?.focus();
-      opener.current = null;
-      return;
-    }
-    opener.current = document.activeElement as HTMLElement | null;
+      if (back?.isConnected) back.focus();
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -107,15 +140,6 @@ export function Dialog({
       }
     };
     document.addEventListener("keydown", onKey);
-
-    // The focus goes into the dialog — but **not** over a child that asked for
-    // it. Before 0092 this line ran after `autoFocus` had already taken hold
-    // and pulled the focus back onto the panel: after ⌘K the CommandPalette
-    // had its search field focused for one tick and then lost it, so typing
-    // went nowhere and Enter closed the palette.
-    const active = document.activeElement;
-    if (!active || !panel.current?.contains(active)) panel.current?.focus();
-
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose, onConfirm]);
 

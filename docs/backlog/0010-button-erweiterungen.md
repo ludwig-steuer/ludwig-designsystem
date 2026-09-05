@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/` — Erweiterung eines vorhandenen Exports |
 | Klassen-Test | entfällt — keine neue Komponente |
 | Quelle | Knopf-Erhebung `ludwig/app` vom 2026-09-03 (441 `.tsx`, 11 Stylesheets) |
@@ -180,3 +180,38 @@ Abgenommen von / am: — (nicht abgenommen) · Geprüft von: Claude (Abnahme-Age
    25 px festhält (gemessen 34.8 / 30.2 / 25 px). Auch die Story-Doku
    `Button.stories.tsx:26–27` nennt noch 40 / 32 / 26 px.
 3. **`KeyButton` hat kein `@instead`** (`Button.tsx:150–156`).
+
+## Mängel der Abnahme vom 2026-09-05 — behoben
+
+**M1 — `xs` und `sm` drückten die Tabellenzeile auf.** Gemessen 52 px (`xs`)
+und 57,2 px (`sm`) gegen 47,3 px ohne Knopf, während der Story-Kommentar das
+Gegenteil behauptete. V1 sagt: der Chip wird kleiner, nicht die Zeile größer —
+also wurde der Knopf kleiner.
+
+Eine Regel in `v3.css`: im Zeilenkontext nimmt ein `xs`- oder `sm`-Knopf die
+Zeilenhöhe des Textes neben ihm an (`--v2-row-fs` × 1,5), ohne senkrechten
+Innenabstand und oben im Zeilenkasten ausgerichtet. Das ist **keine vierte
+Größe**: außerhalb der Tabelle bleiben 35 / 30 / 25 px unverändert. Dieselbe
+Regel behebt M1 von 0008.
+
+Nachgemessen (Chromium headless, 1440 × 900, Story `SizesInRow`): alle drei
+Zeilen — `xs`, `sm` und die ohne Knopf — stehen bei **47,25 px**; der Knopf
+misst 20,25 px. Die vierte Zeile mit `md` steht weiter bei 60,8 px und belegt
+damit, was das Kriterium verlangt: `md` gehört nicht in die Liste.
+
+**M2 — deutsche Kommentare in einer angefassten Datei.** Dateikopf und die
+`hotkey`-Prop stehen auf Englisch; der Kopf nennt jetzt drei Größen mit den
+gemessenen Maßen und den Sonderfall Zeile. `Button.stories.tsx` nannte
+40 / 32 / 26 px — korrigiert auf 35 / 30 / 25 px.
+
+**M3 — `KeyButton` hatte kein `@instead`.** Steht: eine Handlung, deren Taste
+optional ist → `Button`; eine, die läuft und scheitern kann → `ActionButton`.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Eine Zeile mit `xs`- oder `sm`-Knopf ist so hoch wie eine ohne (Story `SizesInRow`, gemessen)
+- [ ] `md` drückt die Zeile weiterhin sichtbar auf (dieselbe Story)
+- [ ] Außerhalb der Tabelle messen die drei Größen unverändert 35 / 30 / 25 px (Story `Sizes`)
+- [ ] Kein deutscher Kommentar mehr in `Button.tsx` und `Button.stories.tsx` (`grep`)
+- [ ] `KeyButton` trägt `@when` und `@instead`
+

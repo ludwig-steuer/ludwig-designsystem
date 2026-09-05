@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, ein Schließen-Kreuz ist fachfrei |
 | Quelle | Knopf-Erhebung `ludwig/app` vom 2026-09-03 — 31 Icon-only-Knöpfe, 9 davon ohne `aria-label` |
@@ -119,7 +119,7 @@ Variabel (aus dieser Spec):
 - [ ] `InUse` zeigt neben dem Icon-Knopf einen beschrifteten Weg für dieselbe Absicht (Bedingung 3)
 - [ ] Die `@when`-Zeile nennt die drei Bedingungen in Kurzform; `@instead` verweist für Handlungen mit Folgen auf `Button` und für Kebab auf `OverflowMenu`
 - [ ] **`design-guidelines.md` T8 trägt die Ausnahme** mit den drei Bedingungen und dem Datum des Entscheids
-- [ ] Der Kommentar in `Button.tsx` („Kein Kebab …") bleibt und verweist auf die Ausnahme
+- [ ] Der Kommentar „Kein Kebab …" bleibt und verweist auf die Ausnahme — er wohnt bei `RowActions` in `ActionBar.tsx`
 - [ ] Ersetzt das Schließen-Kreuz in `v3/primitives/Dialog.tsx` ohne Funktionsverlust
 - [ ] Räumt mindestens eine der neun Stellen ohne `aria-label` in `ludwig/app` auf
 
@@ -161,3 +161,15 @@ Abgenommen von / am: — (nicht abgenommen) · Geprüft von: Claude (Abnahme-Age
 2. Der Dateiname im Kriterium „Kommentar in `Button.tsx`" ist veraltet — der
    Satz wohnt seit `1e83685` bei `RowActions` in `ActionBar.tsx`. Beim nächsten
    Anfassen der Spec dort korrigieren.
+
+## Die zwei offenen Punkte — erledigt
+
+**1 — `Dialog.tsx` ist umgestellt.** Das Kreuz im Dialog-Kopf ist mit 0092 ein
+`IconButton` geworden, wie es im Drawer schon einer war; die handgebaute
+Fassung samt ihrer Klasse `.v2dlg__close` ist aus Code und Stylesheet
+verschwunden. Damit steht der Beleg, den diese Aufgabe für ihre Ausnahme
+verlangt: ein Icon ohne Wort, weil das Kreuz an dieser Stelle die dritte
+Bedingung erfüllt.
+
+**2 — der veraltete Dateiname** im Kriterium ist korrigiert: der Satz „Kein
+Kebab …" wohnt seit `1e83685` bei `RowActions` in `ActionBar.tsx`.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede Handlung, die schreibt, dauert und kann scheitern |
 | Quelle | `docs/v3-backlog.md` — Blocker #5 (61 Dateien mit `useTransition`, davon 43 mit eigener Meldung; 28 `window.confirm` in 14 Dateien) |
@@ -214,9 +214,92 @@ beim nächsten Anfassen der Spec nachgezogen — sie ändert kein Kriterium.
 
 ## Abnahmekriterien (Nachtrag zu den bestehenden)
 
-- [ ] Die Taste am Knopf löst dieselbe Handlung aus wie der Klick (Story `--in-use`, `keydown`)
-- [ ] Mit `confirm` öffnet die Taste den Dialog, statt die Handlung auszuführen
-- [ ] Die Taste greift nicht, während der Bestätigungsdialog offen ist
-- [ ] Die Taste greift nicht in einem Textfeld (`isTyping`)
-- [ ] `patterns/Hotkeys.tsx` hat keine eigene `isTyping`-Kopie mehr (`grep`)
-- [ ] Enter bestätigt den Dialog (0092)
+- [x] Die Taste am Knopf löst dieselbe Handlung aus wie der Klick (Story `--in-use`, `keydown`)
+- [x] Mit `confirm` öffnet die Taste den Dialog, statt die Handlung auszuführen
+- [x] Die Taste greift nicht, während der Bestätigungsdialog offen ist
+- [x] Die Taste greift nicht in einem Textfeld (`isTyping`)
+- [x] `patterns/Hotkeys.tsx` hat keine eigene `isTyping`-Kopie mehr (`grep`)
+- [x] Enter bestätigt den Dialog (0092)
+
+## Abnahme des Nachtrags (2026-09-05)
+
+Zweiter Agent, gelesen wurden Spec und Code. Storybook auf
+`http://localhost:6107`; jede Tastatur-Aussage in einer eigenen
+Chromium-Sitzung nachgemessen — echte Tastendrücke, ausgelesen wurden
+`document.activeElement`, `aria-busy`, `disabled` und die Zahl der
+`[role=dialog]`.
+
+| Kriterium | Nachweis (Story-ID · Datei:Zeile · Messung) | Ergebnis |
+|---|---|---|
+| **Fest:** `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0 | ✓ |
+| **Fest:** `pnpm build` grün | Nicht erneut gelaufen (parallele Sitzung baut); der Lauf für diesen Stand war grün („Storybook build completed successfully") | ✓ (übernommen) |
+| Die Taste löst dieselbe Handlung aus wie der Klick | `--in-use`: `keydown a` → Dialog, `Enter` → Dialog zu und der Knopf steht auf `aria-busy="true"`, `disabled: true`, Beschriftung „Nehme ab …". Derselbe Endzustand über Klick → Klick auf „Stapel abnehmen" — Zeichen für Zeichen dieselbe Momentaufnahme. `--variants` (ohne `confirm`): `keydown a` → „Abnehmen" sofort `aria-busy="true"`, nach 400 ms wieder frei. Die Taste steht am Knopf (`kbd` „A"); `Shift+A` greift ebenso (`hotkey.ts:40-45` vergleicht ohne Groß-/Kleinschreibung) | ✓ |
+| Mit `confirm` öffnet die Taste den Dialog, statt die Handlung auszuführen | `--in-use` nach `keydown a`: genau ein `[role=dialog]`, Titel „Stapel abnehmen?", `aria-busy` an **beiden** Knöpfen `null` — die Handlung läuft erst nach Enter oder Klick (`ActionButton.tsx:77-81`) | ✓ |
+| Die Taste greift nicht, während der Dialog offen ist | zweites `keydown a` bei offenem Dialog: weiterhin genau **ein** Dialog, kein zweiter, kein `aria-busy`. Wächter ist das dritte Argument `!asking` (`ActionButton.tsx:81`) | ✓ |
+| Die Taste greift nicht in einem Textfeld (`isTyping`) | `--in-use`: ein `<input type="text">` zur Laufzeit in die Story gesetzt und fokussiert, dann `keydown a` → 0 Dialoge, das „a" steht im Feld. `--variants`: dasselbe mit einem `<textarea>` → kein `aria-busy`, „a" im Feld (`hotkey.ts:28-37`, gelesen in `:43`) | ✓ |
+| `patterns/Hotkeys.tsx` hat keine eigene `isTyping`-Kopie mehr | `grep -rn "isTyping" src/` → vier Treffer, alle auf **eine** Quelle: Definition `primitives/hotkey.ts:28`, Verwendung `:43`, Import `patterns/Hotkeys.tsx:7`, Verwendung `:45` | ✓ |
+| Enter bestätigt den Dialog (0092) | `--in-use`: Dialog offen, Fokus auf `.v2dlg`, echtes `Enter` → Dialog zu **und** die Handlung läuft (`aria-busy="true"`, „Nehme ab …"). Zusätzlich `v3-primitives-dialog-dialog--enter-confirms`: Zähler 0 → 1; mit dem Fokus in einem `<textarea>` bleibt er bei 1 und der Dialog offen; mit dem Fokus auf „Abbrechen" bleibt er bei 1 (der Knopf schließt, `onConfirm` läuft nicht) | ✓ |
+| „Verhalten · Fokus": nach dem Schließen steht der Fokus auf dem Knopf | `--in-use`, per **Taste** geöffnet — der Knopf hatte den Fokus also nie — und mit Escape geschlossen: `document.activeElement === document.querySelector('.v2act button')`. Per Klick geöffnet dasselbe; die Handlung ist in beiden Fällen nicht gelaufen (`ActionButton.tsx:97-102`) | ✓ |
+
+### Bewertung des Entscheids: die geteilte Hälfte eine Ebene tiefer
+
+**Der Entscheid ist richtig, und die Begründung im Kopfkommentar trägt ihn.**
+„Was zählt als Tippen" ist keine Bildschirm-Sache, sondern eine Eigenschaft
+der Tastatur; sie gehört dorthin, wo beide Ebenen sie lesen dürfen, ohne dass
+ein Primitive aufwärts importiert. Beide Alternativen wären schlechter
+gewesen: ein eigener Listener in `ActionButton` hätte `isTyping` ein zweites
+Mal geschrieben — genau die Kopie, die diese Aufgabe beseitigt —, und
+`hotkey` zur Dekoration zu erklären hätte V14 an der sichtbarsten Stelle
+verletzt. Der Vergleich mit der Icon-Registry (0087) trägt: dasselbe Muster,
+derselbe Grund. `hotkey.ts:7-19` sagt das in ganzen Sätzen und am richtigen
+Ort — wer die Datei öffnet, liest zuerst, warum es sie gibt.
+
+Er ist auch für den Rest des Sets konsequent: `Button hotkey` bleibt reine
+Anzeige, und jeder heutige Aufrufer bindet seine Taste selbst — geprüft für
+`JournalEntryEditor.tsx:238`, `ClarificationEditor.tsx:114`,
+`ChoicePrompt.tsx:90`, `Selection.tsx:283`, `RecordPager.tsx:64`. Im Set
+steht keine tote Taste mehr.
+
+**Halb getragen ist der Umgang mit der Doppelbindung.** Für das *Finden*
+stimmt das Argument: zwei Stellen, die eine Taste beanspruchen, stehen im
+Code nebeneinander, und die Taste steht am Knopf — V14 will genau das
+auffindbar haben. Für die *Folge* stimmt es nicht: beide Handler laufen im
+selben `keydown`, `run()` liest `pending` aus derselben Schließung, und die
+Server-Handlung geht zweimal hinaus — das, was `if (pending) return` sonst
+verhindert. Sichtbar ist die Doppelbindung, nicht der Doppelschuss. Das ist
+kein Mangel dieser Aufgabe (die Spec nennt es zu Recht einen Fehler an der
+Aufrufstelle), aber die billige Absicherung fehlt: eine Warnung in der
+Entwicklung, wenn `useHotkey` und `useHotkeys` dieselbe Taste greifen.
+
+**Und der Umzug ist auf halbem Weg stehen geblieben.** Zwei Primitives lesen
+`useHotkeys` weiterhin aus `patterns/`: `primitives/Selection.tsx:5` und
+`primitives/RecordPager.tsx:5` — ein Import aufwärts, den `Selection.tsx:19`
+selbst als „the one import upwards" kommentiert. Wenn schon eine Ebene
+tiefer, dann `useHotkeys` gleich mit: in `hotkey.ts` gehört es fachlich
+genauso hin, in `patterns/Hotkeys.tsx` bliebe die `HotkeyLegend`, die dort
+richtig sitzt. Dann verschwindet auch, dass `useHotkeys` die Prüfkette aus
+`matchesKey` (`hotkey.ts:40-45`) noch einmal von Hand schreibt
+(`Hotkeys.tsx:43-48`) — die zweite Quelle, die 0004 eigentlich schließen
+wollte, ist nur halb geschlossen.
+
+### Befunde (kein Mangel dieser Aufgabe)
+
+1. **Die Story `--in-use` erzeugt vier React-Fehler in der Konsole.** Sie
+   legt `<th>` und `<td>` in `HeadRow` und `Row`, und die rendern `div`
+   (`Table.tsx:117` und `:151`): „In HTML, `<th>` cannot be a child of
+   `<div>`". Betrifft nur `ActionButton.stories.tsx:167-176`, stammt aus dem
+   ersten Bau (Commit `79918cd`) und ist beim nächsten Anfassen mit `<span>`
+   erledigt — so machen es `Drawer` und `AccountDrawer` in ihren Stories.
+2. **`useHotkey` bindet auf `window`, ohne zu fragen, ob etwas über dem Knopf
+   liegt.** Der eigene Bestätigungsdialog ist ausgenommen (`!asking`), ein
+   *fremder* Dialog oder Drawer auf derselben Seite nicht: dahinter bleibt
+   die Taste scharf, während `Dialog` den Tab-Lauf längst einsperrt. Nicht
+   gemessen (keine Story stellt beides nebeneinander), aus dem Code gelesen.
+3. Die Zahl aus dem Kopf („28 `window.confirm` in 14 Dateien") ist weiter
+   nicht nachgezogen — im Repo sind es 7 Aufrufe in 6 Dateien. Ändert kein
+   Kriterium.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte:
+keine, die diese Aufgabe blockieren. Die beiden App-Kriterien
+(`ResetButton`/`ConfirmReviewButton` ersetzen, `window.confirm` ablösen)
+bleiben „offen (App)" — sie werden fällig, wenn `ludwig/app` auf v3 zieht.

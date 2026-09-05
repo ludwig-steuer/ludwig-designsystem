@@ -3,14 +3,17 @@ import { Link } from "./Link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 /**
- * v2-Knöpfe (F123 T123.1, Design `_ds` React-`Button` + `StapelSeite.dc.html`).
+ * The buttons (F123 T123.1, design `_ds` React `Button` + `StapelSeite.dc.html`).
  *
- * Zwei Größen, weil das Design nur zwei kennt: `md` (40 px) trägt Kopf-Karte
- * und Aktionsleiste, `sm` (32 px) trägt Zeilen- und Kartenaktionen. Alles
- * andere — Radius, Farbe, Innenabstand — steht in `v2.css`.
+ * Three sizes: `md` (35 px) carries the head card and the action bar, `sm`
+ * (30 px) card actions, `xs` (25 px) dense cells and editors. **Inside a table
+ * row** `xs` and `sm` shrink to the height of the text next to them (0008,
+ * 0010) — the row keeps its height, the button gives way (V1); the rule for
+ * that lives in `v3.css`, not here. Everything else — radius, colour, padding
+ * — is in `v3.css` too.
  *
- * Server-Component: `href` rendert einen `Link`, `onClick` gehört in einen
- * Client-Wrapper des Aufrufers.
+ * Server component: `href` renders a `Link`, `onClick` belongs in a client
+ * wrapper of the caller.
  */
 
 export type ButtonVariant = "primary" | "secondary" | "tertiary" | "danger";
@@ -33,9 +36,9 @@ type Common = {
   /** Full width, content centred — sign-in, end of a form. */
   fullWidth?: boolean;
   /**
-   * Die Taste, die dieselbe Handlung auslöst. Sie steht **am Knopf**, nicht
-   * nur im Legende-Overlay — die Zielgruppe öffnet Ludwig alle zwei bis vier
-   * Wochen und soll die Tastatur nicht auswendig lernen müssen (UX-Guidelines V14).
+   * The key that triggers the same action. It stands **on the button**, not
+   * only in the legend overlay — the audience opens Ludwig every two to four
+   * weeks and must not have to learn the keyboard by heart (V14).
    */
   hotkey?: string;
   children: ReactNode;
@@ -148,11 +151,13 @@ export function Button(props: ButtonProps | ButtonLinkProps) {
 }
 
 /**
- * Knopf, der seine Taste immer zeigt — `hotkey` ist Pflicht statt optional.
- * Reine Bequemlichkeit für Aktionsleisten, in denen jede Handlung eine Taste
- * hat; identisch gerendert zu `Button`.
+ * A button that always shows its key — `hotkey` is required instead of
+ * optional. Pure convenience for action bars in which every action has a key;
+ * renders identically to `Button`.
  *
  * @when    Action bars where every action has a key.
+ * @instead A single action whose key is optional → Button. An action that
+ *          runs, can fail and may need a confirmation → ActionButton.
  */
 export function KeyButton(props: (ButtonProps | ButtonLinkProps) & { hotkey: string }) {
   return <Button {...props} />;

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `patterns/` — Gruppe Rahmen |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede Anwendung hat Seiten und Handlungen |
 | Quelle | `docs/backlog/0034-shadcn-abgleich.md` §C1 (shadcn-Abgleich, Registry-Eintrag `command` = `cmdk` mit Klassen) |
@@ -259,3 +259,28 @@ Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-05
 
 Kein Kriterium dieser Spec zielt auf `ludwig/app`; die Spec führt unter
 „Ersetzt" ausdrücklich „nichts".
+
+## Die zwei offenen Punkte — behoben
+
+**1 — der Erstfokus steht im Suchfeld.** Der Mangel saß nicht in der Palette,
+sondern in `Dialog`: sein Effekt zog den Fokus auf die Fläche, nachdem das
+`autoFocus` des `Command.Input` ihn schon hatte. Behoben mit 0092 — `Dialog`
+holt den Fokus nur noch, wenn er nicht ohnehin schon **im** Panel steht.
+
+Mit demselben Zug ist die Krücke aus `CommandPalette.tsx` verschwunden: der
+eigene Auslöser-Merker, den die Palette sich seit 0034 hielt, weil `Dialog` den
+Fokus nicht zurückgab. `Dialog` kann das jetzt selbst.
+
+Nachgemessen (Chromium headless, Story `Interactive`): Fokus ins Feld der
+Seite, `⌘K` → `input.v2cmd__in`; Escape → zurück auf das Feld davor.
+
+**2 — die Beschreibung von `InUse`** sagt jetzt „öffnet beim **Klick**", mit
+dem Grund dazu: beim Fokus käme man mit der Tastatur nicht mehr an der Suche
+vorbei.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Nach `⌘K` steht der Fokus im Suchfeld, nicht auf der Dialogfläche (Story `Interactive`, gemessen)
+- [ ] Escape gibt den Fokus an das Feld zurück, aus dem heraus geöffnet wurde
+- [ ] Die Palette hält keinen eigenen Auslöser-Merker mehr (`grep`)
+- [ ] Die Beschreibung von `InUse` und der Code sagen dasselbe

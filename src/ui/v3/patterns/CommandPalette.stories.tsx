@@ -151,8 +151,10 @@ export const Interactive: Story = {
 };
 
 /**
- * Im Einsatz: die Suche der Top-Bar zeigt ihre Taste und öffnet beim Fokus;
- * die Gruppen entstehen aus denselben `NavSection`, die links stehen.
+ * Im Einsatz: die Suche der Top-Bar zeigt ihre Taste und öffnet **beim
+ * Klick** — nicht beim Fokus, sonst käme man mit der Tastatur nicht mehr an
+ * ihr vorbei (Befund beim Bauen). Die Gruppen entstehen aus denselben
+ * `NavSection`, die links stehen.
  */
 export const InUse: Story = {
   render: function Render() {
