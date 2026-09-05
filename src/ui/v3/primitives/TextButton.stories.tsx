@@ -98,35 +98,35 @@ export const InRow: Story = {
     <Card>
       <Table cols="120px 1fr 140px 200px">
         <HeadRow>
-          <th>Beleg</th>
-          <th>Kreditor</th>
-          <th style={{ textAlign: "right" }}>Betrag</th>
-          <th>Aktion</th>
+          <span>Beleg</span>
+          <span>Kreditor</span>
+          <span className="v2num">Betrag</span>
+          <span>Aktion</span>
         </HeadRow>
         <Row>
-          <td>RE-4471</td>
-          <td>Bürobedarf Meier GmbH</td>
+          <span>RE-4471</span>
+          <span>Bürobedarf Meier GmbH</span>
           <AmountCell value={1249.9} />
-          <td>
+          <span>
             <span style={{ display: "flex", gap: 14 }}>
               <TextButton>Prüfen</TextButton>
               <TextButton tone="quiet">Zurückstellen</TextButton>
             </span>
-          </td>
+          </span>
         </Row>
         <Row>
-          <td>RE-4472</td>
-          <td>Ohne Knopf — die Referenzhöhe</td>
+          <span>RE-4472</span>
+          <span>Ohne Knopf — die Referenzhöhe</span>
           <AmountCell value={84.5} />
-          <td />
+          <span />
         </Row>
         <Row>
-          <td>RE-4473</td>
-          <td>Stadtwerke Musterstadt</td>
+          <span>RE-4473</span>
+          <span>Stadtwerke Musterstadt</span>
           <AmountCell value={412} />
-          <td>
+          <span>
             <TextButton>Prüfen</TextButton>
-          </td>
+          </span>
         </Row>
       </Table>
     </Card>

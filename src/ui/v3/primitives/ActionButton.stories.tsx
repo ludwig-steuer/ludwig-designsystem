@@ -165,13 +165,13 @@ export const InUse: Story = {
         <CardHead title="Stapel 2026-08 · Bürobedarf" sub="142 Sätze, 38 ungeprüft" />
         <Table cols="120px 1fr 140px">
           <HeadRow>
-            <th>Beleg</th>
-            <th>Kreditor</th>
-            <th style={{ textAlign: "right" }}>Betrag</th>
+            <span>Beleg</span>
+            <span>Kreditor</span>
+            <span className="v2num">Betrag</span>
           </HeadRow>
           <Row>
-            <td>RE-4471</td>
-            <td>Bürobedarf Meier GmbH</td>
+            <span>RE-4471</span>
+            <span>Bürobedarf Meier GmbH</span>
             <AmountCell value={1249.9} />
           </Row>
         </Table>

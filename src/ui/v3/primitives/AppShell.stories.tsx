@@ -151,18 +151,18 @@ export const InUse: Story = {
         <CardHead title="Offen" sub="3 von 148" />
         <Table cols="140px 1fr 140px">
           <HeadRow>
-            <th>Sachverhalt</th>
-            <th>Gegenpartei</th>
-            <th style={{ textAlign: "right" }}>Betrag</th>
+            <span>Sachverhalt</span>
+            <span>Gegenpartei</span>
+            <span className="v2num">Betrag</span>
           </HeadRow>
           <Row>
-            <td>2026-0142</td>
-            <td>Bürobedarf Meier GmbH</td>
+            <span>2026-0142</span>
+            <span>Bürobedarf Meier GmbH</span>
             <AmountCell value={1249.9} />
           </Row>
           <Row>
-            <td>2026-0148</td>
-            <td>Restaurant Adler</td>
+            <span>2026-0148</span>
+            <span>Restaurant Adler</span>
             <AmountCell value={128.4} />
           </Row>
         </Table>

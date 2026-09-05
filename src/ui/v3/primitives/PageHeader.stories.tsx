@@ -132,18 +132,18 @@ export const InUse: Story = {
         <CardHead title="Ungeprüfte Sätze" sub="38 von 142" />
         <Table cols="120px 1fr 140px">
           <HeadRow>
-            <th>Beleg</th>
-            <th>Kreditor</th>
-            <th style={{ textAlign: "right" }}>Betrag</th>
+            <span>Beleg</span>
+            <span>Kreditor</span>
+            <span className="v2num">Betrag</span>
           </HeadRow>
           <Row>
-            <td>RE-4471</td>
-            <td>Bürobedarf Meier GmbH</td>
+            <span>RE-4471</span>
+            <span>Bürobedarf Meier GmbH</span>
             <AmountCell value={1249.9} />
           </Row>
           <Row>
-            <td>RE-4472</td>
-            <td>Stadtwerke Musterstadt</td>
+            <span>RE-4472</span>
+            <span>Stadtwerke Musterstadt</span>
             <AmountCell value={412} />
           </Row>
         </Table>

@@ -195,38 +195,38 @@ export const Mono: Story = {
     <Card>
       <Table cols="120px 120px 100px 1fr">
         <HeadRow>
-          <th>Sollkonto</th>
-          <th>Habenkonto</th>
-          <th>BU</th>
-          <th>Belegfeld 1</th>
+          <span>Sollkonto</span>
+          <span>Habenkonto</span>
+          <span>BU</span>
+          <span>Belegfeld 1</span>
         </HeadRow>
         <Row>
-          <td>
+          <span>
             <MonoCell value="6815" />
-          </td>
-          <td>
+          </span>
+          <span>
             <MonoCell value="70021" />
-          </td>
-          <td>
+          </span>
+          <span>
             <MonoCell value={9} title="19 % Vorsteuer" />
-          </td>
-          <td>
+          </span>
+          <span>
             <MonoCell value="RE-4471" />
-          </td>
+          </span>
         </Row>
         <Row>
-          <td>
+          <span>
             <MonoCell value="1200" />
-          </td>
-          <td>
+          </span>
+          <span>
             <MonoCell value="70044" />
-          </td>
-          <td>
+          </span>
+          <span>
             <MonoCell value={null} />
-          </td>
-          <td>
+          </span>
+          <span>
             <MonoCell value="AZ-2026-08-14" tone="muted" />
-          </td>
+          </span>
         </Row>
       </Table>
     </Card>
