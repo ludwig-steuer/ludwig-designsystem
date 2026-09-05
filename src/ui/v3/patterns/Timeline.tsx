@@ -113,18 +113,22 @@ export function Timeline({
   let lastAt: string | null = null;
 
   for (const e of sorted) {
+    // The gap hangs on the distance between two events, not on the grouping.
+    // It used to sit inside the group branch, so `groupBy="none"` never showed
+    // one — and that is the mode in which the strand has the least else to
+    // say (found in the acceptance of 0107).
+    if (lastAt) {
+      const days = daysBetween(lastAt, e.at);
+      if (days >= gapDays) {
+        rows.push(
+          <div className="v2tl__gap" key={`gap-${e.id}`}>
+            {days} Tage ohne Ereignis
+          </div>,
+        );
+      }
+    }
     const key = groupKey(e.at, groupBy);
     if (key && key !== lastGroup) {
-      if (lastAt) {
-        const days = daysBetween(lastAt, e.at);
-        if (days >= gapDays) {
-          rows.push(
-            <div className="v2tl__gap" key={`gap-${e.id}`}>
-              {days} Tage ohne Ereignis
-            </div>,
-          );
-        }
-      }
       rows.push(
         <div className="v2tl__day" key={`grp-${key}`}>
           {key}

@@ -124,14 +124,31 @@ export const Order: Story = {
   ),
 };
 
-/** Tag, Monat oder gar nicht — ohne Gruppe trägt jede Zeile ihr Datum. */
+/**
+ * Tag, Monat oder gar nicht — ohne Gruppe trägt jede Zeile ihr Datum. Die
+ * Lückenzeile hängt am Abstand zweier Ereignisse, nicht an der Gruppierung:
+ * sie steht in allen drei Fassungen (0107).
+ */
 export const Grouping: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: "var(--space-6)", maxWidth: 620 }}>
-      <Timeline entries={CASE} groupBy="month" />
-      <Timeline entries={CASE} groupBy="none" />
-    </div>
-  ),
+  render: () => {
+    const withGap = [
+      ...CASE,
+      {
+        id: "e0",
+        at: "2026-08-05T08:00:00Z",
+        kind: "Sachverhalt",
+        actor: "System",
+        title: "Sachverhalt aus dem OPOS-Vortrag gegründet",
+        state: "info" as const,
+      },
+    ];
+    return (
+      <div style={{ display: "grid", gap: "var(--space-6)", maxWidth: 620 }}>
+        <Timeline entries={withGap} groupBy="month" />
+        <Timeline entries={withGap} groupBy="none" />
+      </div>
+    );
+  },
 };
 
 /** Ohne `onOpen` ist der Verlauf Text; mit ihm wird jeder Eintrag ein Weg. */

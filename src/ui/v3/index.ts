@@ -138,6 +138,7 @@ export {
   formatTime,
   formatTimeFull,
   formatDuration,
+  daysBetween,
   type TimeFormat,
   type TimeLength,
 } from "./format";
