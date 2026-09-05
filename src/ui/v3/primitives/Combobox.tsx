@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { ActionIcon } from "../Icons";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Field, Input } from "./Form";
@@ -197,7 +197,7 @@ export function Combobox({
                       onClick={() => pick(o)}
                     >
                       <span className="v2cmb__mark" aria-hidden="true">
-                        {o.value === value ? <Check size={12} strokeWidth={2} /> : null}
+                        {o.value === value ? <ActionIcon action="confirm" size={12} /> : null}
                       </span>
                       <span>
                         {o.label}

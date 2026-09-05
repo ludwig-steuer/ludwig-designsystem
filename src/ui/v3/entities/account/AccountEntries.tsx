@@ -6,7 +6,7 @@ import { AmountCell, ErrorRow, MonoCell, TableLoading } from "../../primitives/C
 import { EmptyState } from "../../primitives/EmptyState";
 import { HeadRow, Row, Table } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
-import { ENTITY_ICON } from "../../patterns/entity-icons";
+import { EntityIcon } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { AccountCell } from "./Account";
@@ -87,18 +87,16 @@ const ORIGIN_TITLE: Record<AccountEntryOrigin, string | null> = {
 /**
  * The mark is **not** a status display, so it does not break R1: it says one
  * binary thing — there is a Ludwig entry behind this movement. The set
- * already has a sign for that, `ENTITY_ICON.buchung`; nothing new is invented
+ * already has a sign for that, `EntityIcon entity="journal-entry"`; nothing new is invented
  * here. The one real chip stands where something actually went wrong, on the
  * exported entries that never arrived.
  */
 function OriginMark({ origin }: { origin: AccountEntryOrigin }) {
   const title = ORIGIN_TITLE[origin];
   if (!title) return <span />;
-  const Icon = ENTITY_ICON.buchung;
-  if (!Icon) return <span />;
   return (
     <span className="v2ae__mark" title={title} aria-label={title} role="img">
-      <Icon size={14} strokeWidth={1.5} aria-hidden />
+      <EntityIcon entity="journal-entry" size={14} />
     </span>
   );
 }

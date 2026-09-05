@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `patterns/` — neben `status-registry.ts` und `entity-icons.ts`; wie die Status-Registry ein Vokabular, kein Baustein. Die Entitäts-Zeilen sind Ludwig, die Handlungs-Zeilen sind fachfrei |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: jede App muss einmal festlegen, was „zum Objekt", „im Drawer nachschlagen" und „erklären" als Zeichen heißt; nur die Tabelle der Entitäten wäre dort eine andere |
 | Quelle | Anfrage Owner vom 2026-09-05 („Symbole sollen eine Bedeutung haben, die wir einmal festschreiben und später verwenden: welches Icon steht für welche Entität, welches heißt mehr Infos, welches navigiere zum Objekt, welches mehr Infos im Drawer") · `Icons.stories.tsx` (0055) hält das Vokabular heute nur als Story · Regeln A8, T8, T9 |
@@ -204,6 +204,11 @@ der Wächter-Test übernimmt ihn.
   Hilfe) aus `ACTION_ICON` oder bleiben App. Register: E-Zeile.
 - **B2** — Welches Zeichen der **Mandant** trägt, ist nirgends festgelegt
   (`Building2` ist in der Sidebar der Geschäftspartner). Frage 3.
+- **B3** — **`Building2` ist doppelt vergeben.** Die Sidebar
+  (`mandant-nav.ts`) führt es als **Geschäftspartner**, die Story 0055 in der
+  Gruppe „Wer ist dran" als **Kanzlei**. Die Registry folgt der Sidebar — sie
+  ist das Produkt — und gibt der Kanzlei `Scale`. Wer die Sidebar auf
+  `ENTITY_ICON` umstellt (B1), stellt damit auch das gerade.
 
 ## Abnahmekriterien
 
@@ -240,11 +245,114 @@ Abgenommen von / am: … · Offene Punkte: …
 
 ## Offene Fragen
 
+Alle drei am 2026-09-05 mit ihrem Default entschieden.
+
 1. `open` als `ArrowUpRight` und `external` als `ExternalLink` — oder beides
    `ExternalLink`, wie `Link` es heute nutzt? *Ohne Antwort: getrennt; der
    schräge Pfeil bleibt in Ludwig, der Kasten mit Pfeil verlässt es.*
-2. `peek` als `PanelRight` — oder `Eye`? *Ohne Antwort: `PanelRight`; es
-   zeigt, was passiert (ein Panel rechts), nicht was man tut.*
-3. Welches Zeichen trägt der **Mandant**, wenn `Building2` der
-   Geschäftspartner ist? *Ohne Antwort: `Briefcase` für den Mandanten,
-   `Building2` bleibt beim Partner — die Sidebar hat es so eingeführt.*
+   **Entschieden (Default):** getrennt. Beide tragen ihr `instead` und
+   verweisen aufeinander — der Unterschied ist genau der, den ein Mensch vor
+   dem Klick wissen will.
+2. `peek` als `PanelRight` — oder `Eye`? *Ohne Antwort: `PanelRight`.*
+   **Entschieden (Default):** `PanelRight`. Es zeigt, **was passiert** (ein
+   Panel rechts), nicht was man tut; `Eye` verspricht Sehen und sagt nichts
+   darüber, wo.
+3. Welches Zeichen trägt der **Mandant**? *Ohne Antwort: `Briefcase`.*
+   **Entschieden (Default):** `client` = `Briefcase`, `partner` bleibt
+   `Building2`.
+
+## Entscheide des Bauenden
+
+**Die acht Entitäten ohne Vorgabe.** Die Spec überlässt sie dem Bauenden;
+hier stehen sie mit Grund:
+
+| `EntityKey` | Zeichen | Grund |
+|---|---|---|
+| `tenant` (Kanzlei) | `Scale` | Die Sidebar hat kein Zeichen für die Kanzlei, und die Story 0055 führt für sie `Building2` — das ist in der Sidebar der Geschäftspartner (Befund B3). Zwei Häuser nebeneinander unterscheidet niemand. Die Waage ist im Set schon das Zeichen der steuerlichen Instanz (`AiBookingNotes`, Quellenart „Gesetz"), und die Kanzlei ist, wer sie anwendet |
+| `user` | `UserRound` | Story 0055, Gruppe „Wer ist dran" — dort steht es für den Menschen |
+| `job` | `Cog` | Ein Hintergrundprozess, kein Mensch und kein Agent; `Bot` ist in `ACTION_ICON` schon der Agent |
+| `fiscal-year` | `CalendarRange` | Ein **Zeitraum**, keine Datum. `Calendar` allein läse sich als Tag |
+| `integration` | `Plug` | Eine angebundene Quelle; das Kabel ist die Metapher, die die Sidebar-Sprache („Bank-Anbindung") ohnehin nutzt |
+| `recurring-rule` | `Repeat` | Story 0055, Gruppe „Fachwelt" |
+| `contract` | `FileSignature` | Ein Beleg mit Unterschrift — unterscheidet ihn vom `Receipt` des Belegs, ohne eine zweite Belegfamilie aufzumachen |
+| `invoice-line` | `List` | Eine Zeile in einer Aufstellung; bewusst schlicht, sie steht nie allein |
+
+**Zwei Einträge mehr in `ACTION_ICON`, als die Spec-Tabelle nennt** — beide
+kamen aus dem Bestand, nicht aus dem Wunsch:
+
+- `ledger` (`BookOpenText`, „Kontenblatt") — `AccountField` öffnet damit die
+  Bewegungen eines Kontos. Ohne den Eintrag hätte die Datei weiter direkt
+  importiert.
+- `alert` (`CircleAlert`, „Achtung") — `Wizard` (0079) zeigt damit den
+  gescheiterten Schritt. Die Spec verweist dafür auf 0079; der Name gehört
+  trotzdem ins Vokabular, sonst steht er nirgends.
+
+**Der Wächter ist ein Skript, kein Test.** Die Spec nennt `icons.test.ts`
+„wie `stufen.test.ts`" — beides gibt es nicht: dieses Repo hat **keinen
+Test-Runner** (kein `vitest`, kein `test`-Script, keine einzige `*.test.ts`).
+Ein Runner als Abhängigkeit für dreißig Zeilen Prüfung wäre die falsche
+Richtung. Der Wächter ist `scripts/check-icons.mjs`, Aufruf `pnpm
+check:icons`, Exit 1 mit Datei und Zeichen. Er liest die erlaubten Namen aus
+der Import-Liste von `Icons.tsx` selbst — es gibt keine zweite Liste. Bekommt
+das Repo je einen Runner, zieht die Prüfung als `icons.test.ts` um; der
+Kommentar im Skript sagt das.
+
+**Stories sind vom Wächter ausgenommen.** Eine Story *zeigt* ein Zeichen, sie
+liefert es nicht aus: `NavList.stories` deutet eine Sidebar an,
+`EmptyState.stories` einen Leerzustand. Den Wächter auf sie auszudehnen
+erzwänge Registry-Einträge wie `LayoutDashboard` und `PackageCheck`, die kein
+Baustein je benutzt — die Registry würde von ihrer eigenen Vorführung
+aufgebläht. Ausgeliefert wird die Komponente daneben, und die prüft das
+Skript. Das Abnahmekriterium „`grep` nennt danach nur `Icons.tsx`,
+`Review.tsx` und die Grundlagen-Stories" ist damit auf **Komponenten**
+gemünzt zu lesen; die Story-Datei bleibt frei.
+
+**Drei Vokabular-Dateien bleiben, wo sie sind** — aus demselben Grund, aus
+dem `StateIcon` bleibt: sie beschreiben je eine **fachliche Aufzählung**,
+deren Werte aus dem Datenmodell kommen, nicht ein Zeichen für eine Bedeutung.
+Wer sie herzöge, müsste die Aufzählung mitziehen.
+
+| Datei | Aufzählung |
+|---|---|
+| `patterns/Process.tsx` | wer an der Reihe ist: Agent, Kanzlei, Mandant, System |
+| `entities/accounting-case/CaseTimeline.tsx` | die Ereignisart (`client_accounting_event.kind`) |
+| `entities/journal-entry/AiBookingNotes.tsx` | die Quellenart einer Aussage: Bank, Beleg, Regel, Gesetz, Web |
+
+Sie stehen namentlich im Wächter und im Kopfkommentar der Registry. Jede
+weitere Datei muss in die Registry.
+
+**Die Registry liegt nicht in `patterns/`, sondern eine Ebene höher:**
+`src/ui/v3/Icons.tsx`, neben `format.ts`. Die Spec sagt `patterns/` — das
+hält nicht: acht **Primitives** brauchen ein Zeichen (`Dialog`, `Drawer`,
+`Pagination`, `RecordPager`, `PageHeader`, `Combobox`, `Disclosure`,
+`OverflowMenu`), und „Primitives kennen keine Patterns" ist eine der drei
+Regeln der Dreiteilung. Acht systematische Ausnahmen sind keine Ausnahme
+mehr, sondern eine falsche Einordnung. Ein Vokabular, das alle drei Stufen
+teilen, ist eine **Grundlage** — dieselbe Ebene, auf der `format.ts` schon
+liegt, und dieselbe, auf der die Story `v3/Grundlagen/Icons` steht. Nach dem
+Umzug importiert kein Primitive mehr aus `patterns/`, außer den zwei
+`useHotkeys`-Fällen, die es vorher schon gab.
+
+**`OverflowMenu` bekommt `expand`, nicht `more`.** Die Spec-Tabelle nennt
+`more`; das wäre `Ellipsis`. Der Trigger des `OverflowMenu` trägt aber ein
+**sichtbares Wort** und dahinter ein Chevron — genau das verlangt T8, und die
+Ausnahme für Icon-only-Knöpfe schließt Kebab-Menüs ausdrücklich aus. Ein
+Chevron an einem beschrifteten Knopf heißt „klappt auf", nicht „hier ist mehr
+verborgen". `more` bleibt in der Registry für den Fall, dass eine Zeile
+einmal wirklich nur drei Punkte trägt.
+
+**`StatusBadge` zieht sein Entitäts-Zeichen auf die Leiter.** Es stand auf
+`size 12.5` und `strokeWidth 1.75` und lief über die abgeleitete Tabelle in
+`entity-icons.ts` an der Registry vorbei. Jetzt `EntityIcon` mit `size 12`
+über `AXIS_ENTITY` — A8 sagt, Abweichler kommen beim nächsten Anfassen auf
+die Leiter, und dies war das nächste Anfassen. Damit hat die abgeleitete
+Tabelle `ENTITY_ICON` in `entity-icons.ts` keinen Aufrufer mehr und ist
+gelöscht; `AXIS_ENTITY` bleibt als die eine Abbildung Achse → Entität.
+`AccountEntries` zeichnet sein Zeichen ebenfalls über `EntityIcon`.
+
+**Noch nicht umgezogen** (`PENDING` im Wächter, je mit Grund und Datum):
+`SourceDocumentDrawer.tsx` (0075/0076 in Arbeit in einer anderen Sitzung) und
+`JournalEntryEditor.tsx` (uncommittete Änderungen einer anderen Sitzung). Die
+Liste schrumpft und wächst nie; wer eine Datei umzieht, streicht ihre Zeile.
+Der Wächter meldet eine Zeile, die nichts mehr importiert, als Fehler — eine
+tote Ausnahme fällt damit auf.

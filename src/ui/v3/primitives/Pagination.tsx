@@ -1,6 +1,6 @@
 import { Link } from "./Link";
 import { PageSizeSelect } from "./Nav";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ActionIcon } from "../Icons";
 
 interface Props {
   page: number;
@@ -58,11 +58,11 @@ export function Pagination({
       </span>
       {page > 1 ? (
         <Link href={buildHref(page - 1)} className="page" aria-label="Vorherige Seite">
-          <ChevronLeft size={16} strokeWidth={1.5} />
+          <ActionIcon action="back" size={16} />
         </Link>
       ) : (
         <span className="page" aria-disabled>
-          <ChevronLeft size={16} strokeWidth={1.5} />
+          <ActionIcon action="back" size={16} />
         </span>
       )}
       {pages.map((p, i) =>
@@ -82,11 +82,11 @@ export function Pagination({
       )}
       {page < totalPages ? (
         <Link href={buildHref(page + 1)} className="page" aria-label="Nächste Seite">
-          <ChevronRight size={16} strokeWidth={1.5} />
+          <ActionIcon action="forward" size={16} />
         </Link>
       ) : (
         <span className="page" aria-disabled>
-          <ChevronRight size={16} strokeWidth={1.5} />
+          <ActionIcon action="forward" size={16} />
         </span>
       )}
       {pageSizeOptions && buildSizeHref ? (

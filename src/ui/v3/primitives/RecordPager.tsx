@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ActionIcon } from "../Icons";
 
 import { useHotkeys } from "../patterns/Hotkeys";
 import { IconButton } from "./IconButton";
@@ -76,7 +76,7 @@ export function RecordPager(props: PagerLinkProps | PagerButtonProps) {
     <div className="v2pager">
       {back ? (
         <Link href={back.href} className="v2pager__back">
-          <ChevronLeft size={14} strokeWidth={1.5} aria-hidden="true" />
+          <ActionIcon action="back" size={14} />
           {back.label}
         </Link>
       ) : null}
@@ -107,9 +107,9 @@ function Step({
   const label = dir === "prev" ? "Vorheriger Datensatz" : "Nächster Datensatz";
   const icon =
     dir === "prev" ? (
-      <ChevronLeft size={16} strokeWidth={1.5} />
+      <ActionIcon action="back" size={16} />
     ) : (
-      <ChevronRight size={16} strokeWidth={1.5} />
+      <ActionIcon action="forward" size={16} />
     );
   const key = hotkey ? <Kbd>{hotkey}</Kbd> : null;
   const body =

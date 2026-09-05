@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ActionIcon } from "../Icons";
 import {
   createContext,
   useContext,
@@ -126,7 +126,7 @@ export function Drawer({
           </div>
           <IconButton
             label="Schließen"
-            icon={<X size={16} strokeWidth={1.5} />}
+            icon={<ActionIcon action="close" size={16} />}
             onClick={onClose}
           />
         </div>

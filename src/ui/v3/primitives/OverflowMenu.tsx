@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ActionIcon } from "../Icons";
 import { useRef } from "react";
 import type { ReactNode } from "react";
 import { Link } from "./Link";
@@ -88,7 +88,7 @@ export function OverflowMenu({
     >
       <summary className={`v2menu__sum v2btn v2btn--secondary v2btn--${size}`}>
         <span>{label}</span>
-        <ChevronDown size={14} strokeWidth={1.5} aria-hidden="true" />
+        <ActionIcon action="expand" size={14} />
       </summary>
       <div className="v2menu__panel" ref={panel}>
         {children}

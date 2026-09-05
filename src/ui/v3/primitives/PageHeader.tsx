@@ -1,4 +1,4 @@
-import { ChevronLeft } from "lucide-react";
+import { ActionIcon } from "../Icons";
 import type { ReactNode } from "react";
 import { Link } from "./Link";
 
@@ -40,7 +40,7 @@ export function PageHeader({
     <header className="v2phead">
       {back ? (
         <Link href={back.href} className="v2phead__back">
-          <ChevronLeft size={14} strokeWidth={1.5} aria-hidden="true" />
+          <ActionIcon action="back" size={14} />
           {back.label}
         </Link>
       ) : null}

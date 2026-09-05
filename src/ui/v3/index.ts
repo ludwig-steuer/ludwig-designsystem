@@ -227,6 +227,18 @@ export {
   type CommandItem,
 } from "./patterns/CommandPalette";
 
+/* Grundlagen — das Vokabular, das jeder Baustein teilt (0087) */
+export {
+  EntityIcon,
+  ActionIcon,
+  ENTITY_ICON,
+  ACTION_ICON,
+  type EntityKey,
+  type ActionKey,
+  type IconEntry,
+  type IconSize,
+} from "./Icons";
+
 /* Prüfen */
 export {
   StateIcon,

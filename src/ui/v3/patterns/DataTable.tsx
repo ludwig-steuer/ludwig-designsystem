@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ActionIcon } from "../Icons";
 import type { ReactNode } from "react";
 
 import { RowActions } from "../primitives/ActionBar";
@@ -308,7 +308,6 @@ function headCell<T>(
   }
   const active = sort?.key === col.key;
   const asc = active && sort.dir === "asc";
-  const Arrow = asc ? ArrowUp : ArrowDown;
   return (
     <span
       key={col.key}
@@ -317,7 +316,7 @@ function headCell<T>(
     >
       <Link className="v2sortlink" href={href({ sort: col.key, dir: asc ? "desc" : "asc", page: 1 })}>
         {col.header}
-        {active ? <Arrow size={12} strokeWidth={1.5} aria-hidden="true" /> : null}
+        {active ? <ActionIcon action={asc ? "sort-asc" : "sort-desc"} size={12} /> : null}
       </Link>
     </span>
   );

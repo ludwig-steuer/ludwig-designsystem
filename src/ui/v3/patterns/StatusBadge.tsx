@@ -1,7 +1,6 @@
-import { ChevronDown } from "lucide-react";
-
 import { Badge } from "../primitives/Badge";
-import { AXIS_LABEL, ENTITY_ICON } from "./entity-icons";
+import { ActionIcon, EntityIcon } from "../Icons";
+import { AXIS_ENTITY, AXIS_LABEL } from "./entity-icons";
 import { StatusInfoButton } from "./StatusInfoButton";
 import { resolveStage, resolveStatus, type StatusAxis } from "./status-registry";
 
@@ -66,7 +65,7 @@ export function StatusBadge({
 }: StatusBadgeProps) {
   const desc = resolveStatus(axis, status);
   const stageDesc = axis === "beleg" ? resolveStage(stage) : null;
-  const Icon = ENTITY_ICON[axis];
+  const entity = AXIS_ENTITY[axis];
   const raw = typeof status === "string" ? status.trim() : "";
   const title = [
     `${AXIS_LABEL[axis]}: ${desc.label}`,
@@ -84,21 +83,16 @@ export function StatusBadge({
       style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
     >
       <Badge tone={desc.kind}>
-        {showIcon && Icon ? (
-          <Icon
-            size={12.5}
-            strokeWidth={1.75}
-            style={{ marginRight: 4, verticalAlign: "-2px" }}
-          />
+        {showIcon && entity ? (
+          <span style={{ display: "inline-flex", marginRight: 4 }}>
+            <EntityIcon entity={entity} size={12} />
+          </span>
         ) : null}
         {desc.label}
         {chevron ? (
-          <ChevronDown
-            size={12}
-            strokeWidth={1.5}
-            style={{ marginLeft: 3, verticalAlign: "-2px", opacity: 0.7 }}
-            aria-hidden="true"
-          />
+          <span style={{ display: "inline-flex", marginLeft: 3, opacity: 0.7 }}>
+            <ActionIcon action="expand" size={12} />
+          </span>
         ) : null}
       </Badge>
       {stageDesc ? (

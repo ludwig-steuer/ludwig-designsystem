@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ActionIcon } from "../Icons";
 import { useEffect, useRef, type ReactNode } from "react";
 
 /**
@@ -71,7 +71,7 @@ export function Dialog({
             <div className="v2dlg__title">{title}</div>
           </div>
           <button type="button" className="v2dlg__close" onClick={onClose} aria-label="Schließen">
-            <X size={16} strokeWidth={1.5} />
+            <ActionIcon action="close" size={16} />
           </button>
         </div>
         <div className="v2dlg__body">{children}</div>

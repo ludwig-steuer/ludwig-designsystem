@@ -1,7 +1,8 @@
 "use client";
 
-import { Info } from "lucide-react";
 import { useState } from "react";
+
+import { ActionIcon } from "../Icons";
 import { AXIS_LABEL } from "./entity-icons";
 import { StatusInfoDialog } from "./StatusInfoDialog";
 import type { StatusAxis } from "./status-registry";
@@ -49,7 +50,7 @@ export function StatusInfoButton({ axis, current }: StatusInfoButtonProps) {
           opacity: 0.65,
         }}
       >
-        <Info size={12.5} strokeWidth={1.75} />
+        <ActionIcon action="info" size={12} />
       </button>
       <StatusInfoDialog axis={axis} current={current} open={open} onClose={() => setOpen(false)} />
     </>

@@ -2,23 +2,30 @@
  * Achse → Icon/Label.
  *
  * Icons gibt es NUR für die drei Haupt-Entitäten der Datenmodell-Kette; sie
- * spiegeln die Main-Navigation (`ui/components/layout/Sidebar.tsx`):
- * Receipt=Beleg, Layers=Sachverhalt, BookOpen=Buchung. So erkennt der Nutzer
- * am Badge sofort, auf welche Entität sich ein Status bezieht.
+ * spiegeln die Main-Navigation (`ui/components/layout/Sidebar.tsx`). So
+ * erkennt der Nutzer am Badge sofort, auf welche Entität sich ein Status
+ * bezieht.
+ *
+ * Welches Zeichen eine Entität trägt, steht nicht hier, sondern in der
+ * Icon-Registry (`Icons.tsx`). Diese Datei sagt nur, welche Achse welche
+ * Entität meint (`AXIS_ENTITY`); das Zeichen fällt daraus ab.
  *
  * Alle übrigen Achsen (Auftrag, Konto, Zugang, …) haben bewusst kein Icon —
  * sie stehen ohnehin in einem Kontext, der die Entität nennt (Spaltenkopf,
  * Abschnitt), und ein zweites Symbol stiftete nur Unruhe. `StatusBadge`
  * rendert deshalb einfach keins, wenn hier nichts steht.
  */
-import { BookOpen, Layers, Receipt, type LucideIcon } from "lucide-react";
+import type { EntityKey } from "../Icons";
 import type { EntityType, StatusAxis } from "./status-registry";
 
-export const ENTITY_ICON: Partial<Record<StatusAxis, LucideIcon>> = {
-  beleg: Receipt,
-  sachverhalt: Layers,
-  buchung: BookOpen,
+/** Welche Achse benennt welche Entität — der Schlüssel in die Icon-Registry. */
+export const AXIS_ENTITY: Partial<Record<StatusAxis, EntityKey>> = {
+  beleg: "source-document",
+  sachverhalt: "accounting-case",
+  buchung: "journal-entry",
 };
+
+
 
 /**
  * Klartext-Name der Achse. Führt den Tooltip an („Sachverhalt · Klärung

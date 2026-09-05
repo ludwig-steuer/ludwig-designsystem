@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { HelpCircle } from "lucide-react";
 
 import type { ClarificationAnswerKind } from "@/ludwig/modules/invoices/domain/invoice";
 import type { RationaleSourceKind } from "@/ludwig/modules/accounting-cases/domain/rationale-source";
@@ -13,6 +12,7 @@ import { Markdown } from "../../primitives/Markdown";
 import { ReasonDialog } from "../../primitives/ReasonDialog";
 import { TextButton } from "../../primitives/TextButton";
 import { Time } from "../../primitives/Time";
+import { ActionIcon } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { resolveStatus } from "../../patterns/status-registry";
 import { ChoicePrompt, type ChoiceAnswer } from "../../patterns/ChoicePrompt";
@@ -296,7 +296,7 @@ export function ClarificationCard({
           />
           {onResolve ? (
             <p className="v2clc__exit">
-              <HelpCircle size={14} strokeWidth={1.5} aria-hidden="true" />
+              <ActionIcon action="help" size={14} />
               Woanders geklärt?{" "}
               <TextButton onClick={() => setResolving(true)}>Ohne Antwort auflösen</TextButton>
             </p>

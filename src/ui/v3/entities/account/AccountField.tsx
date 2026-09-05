@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpenText } from "lucide-react";
+import { ActionIcon } from "../../Icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { IconButton } from "../../primitives/IconButton";
 
@@ -215,7 +215,7 @@ export function AccountField({
             <IconButton
               size="sm"
               label={value ? `Kontenblatt zu ${value}` : "Kontenblatt"}
-              icon={<BookOpenText size={14} strokeWidth={1.5} />}
+              icon={<ActionIcon action="ledger" size={14} />}
               disabled={!value}
               // Ohne das wandert der Fokus aus dem Feld — die Liste bliebe
               // offen, aber der Wert wäre gemeldet, als hätte man es verlassen.

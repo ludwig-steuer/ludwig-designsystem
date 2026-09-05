@@ -1,5 +1,6 @@
-import { Check, CircleAlert } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
+
+import { ActionIcon, type ActionKey } from "../Icons";
 
 /** Where a step stands. Open, on it, through it, stuck. */
 export type WizardStepState = "pending" | "active" | "done" | "error";
@@ -21,10 +22,18 @@ export interface WizardProps {
   footer?: ReactNode;
 }
 
-const STATE_ICON = {
-  done: { Icon: Check, label: "erledigt" },
-  error: { Icon: CircleAlert, label: "Fehler" },
-} as const;
+/**
+ * Zeichen und Wort je Zustand — beides aus der Icon-Registry (0087). Das Wort
+ * steht nicht daneben, sondern trägt die Plakette als `aria-label`: im Kopf
+ * einer Spalte ist für ein zweites Wort kein Platz, und ohne es wäre der
+ * Zustand nur Farbe und Form (V7).
+ */
+const STATE_ICON: Partial<Record<WizardStepState, ActionKey>> = {
+  done: "confirm",
+  error: "alert",
+};
+
+const STATE_WORD: Record<string, string> = { done: "erledigt", error: "Fehler" };
 
 /**
  * The chrome of a run in numbered steps: the steps at the top, the content of
@@ -36,9 +45,9 @@ const STATE_ICON = {
  *
  * Never color alone (V7): `done` shows a check instead of the number, `error`
  * an alert on danger, `active` the number on primary, `pending` the number
- * muted. The error icon is Lucide `CircleAlert`, not `StateIcon` from
- * `Review.tsx` — `StateIcon` paints its own color, and inside a filled danger
- * pill that would be danger on danger.
+ * muted. Both signs come from the icon registry (`confirm`, `alert`, 0087) —
+ * not from `StateIcon` in `Review.tsx`, which paints its own color and would
+ * be danger on danger inside a filled danger pill.
  *
  * @when    A linear run of steps — import, export, onboarding.
  * @instead Every step reachable at any time → StepRail. Phases the system
@@ -53,7 +62,7 @@ export function Wizard({ steps, current, states, children, footer }: WizardProps
       >
         {steps.map((step, i) => {
           const state = states[i] ?? "pending";
-          const icon = state === "done" || state === "error" ? STATE_ICON[state] : null;
+          const action = STATE_ICON[state];
           return (
             <div
               key={step.label}
@@ -61,12 +70,12 @@ export function Wizard({ steps, current, states, children, footer }: WizardProps
               data-state={state}
               aria-current={i === current ? "step" : undefined}
             >
-              <span className="v2wiz__num">
-                {icon ? (
-                  <icon.Icon size={14} strokeWidth={1.5} role="img" aria-label={icon.label} />
-                ) : (
-                  i + 1
-                )}
+              <span
+                className="v2wiz__num"
+                role={action ? "img" : undefined}
+                aria-label={action ? STATE_WORD[state] : undefined}
+              >
+                {action ? <ActionIcon action={action} size={14} /> : i + 1}
               </span>
               <span className="v2wiz__lbl">
                 <span className="v2wiz__n">Schritt {i + 1}</span>
