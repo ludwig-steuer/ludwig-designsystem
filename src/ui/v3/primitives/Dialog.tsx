@@ -6,15 +6,18 @@ import { IconButton } from "./IconButton";
 import { useEffect, useRef, type ReactNode } from "react";
 
 /**
- * v2-Dialog (F123 T123.1) — Anatomie des Design-System-Drawers (`.dr__h` /
- * `.dr__body` / `.dr__foot`), nur zentriert statt seitlich.
+ * The dialog (F123 T123.1) — the anatomy of the drawer (`.dr__h` /
+ * `.dr__body` / `.dr__foot`), only centred instead of at the side.
  *
- * **Nur für Bestätigungen mit Folgen** (Storno, Löschen, Freigabe) und für
- * kurze Formulare, die eine Handlung begleiten — Gründe, Notizen. Details
- * gehören ins Master-Detail, Bestehendes in den Drawer (UX-Guidelines L2/L3).
+ * **Only for confirmations with consequences** (reversal, deletion, approval)
+ * and for short forms that accompany an action — reasons, notes. Details
+ * belong in the master-detail, something existing in the drawer (L2/L3).
  *
- * Ersetzt `Dialog` aus `@/ui/components` (12-px-Radius, dunkler Backdrop
- * ohne Blur).
+ * Replaces `Dialog` from `@/ui/components` (12 px radius, dark backdrop
+ * without blur).
+ *
+ * It shares `trapTab` with `Drawer` (`focus.ts`): keeping the focus inside an
+ * overlay is one rule, and two bricks that state it separately drift apart.
  *
  * @when    Confirmation with consequences (cancel, delete, approve) or a short form that accompanies an action.
  * @instead Details of an item → MasterDetail. Action that needs a reason → ReasonDialog.

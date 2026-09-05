@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — zweiter Durchgang; beide Mängel behoben |
+| Status | Abnahme |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | nein — kennt drei Tabellen des Sachverhalts (Ereignis, Klärung, Erwartung); der Strang darunter ist das Pattern `Timeline` (0023) |
 | Quelle | Anfrage Owner 2026-09-03 (Sachverhalts-Detail `/clients/<slug>/<jahr>/cases/<id>`, Tab „Übersicht", Karte „Timeline") · Staging-Aggregate 2026-09-03 (§ Datenpunkte) · Entitätsprofil `docs/entitaeten/accounting-case.md` **fehlt noch** — diese Spec trägt den Verlaufs-Ausschnitt selbst; entsteht das Profil, gilt es vor |
@@ -544,3 +544,24 @@ Frage in einem halben Jahr neu stellt, findet die Antwort statt einer Lücke.
 Der Satz, der dabei fehlte, steht jetzt in der Schnittstelle: die Komponente
 **nimmt Kommentare entgegen und überspringt sie** — der Aufrufer muss nicht
 filtern.
+
+## Fremde Änderung an dieser Datei — der Verweis, den 0059 zugesagt hat
+
+`CaseTimeline.tsx` überspringt seit 0059 Klärungen mit `type === "comment"`
+(`:204–205`). Das ist **eine Regel des Strangs, keine Prop des Aufrufers**: 13
+von 166 Klärungen im Bestand sind Kommentare, und sie sind Kontext, kein
+Ereignis — der Owner hat am 2026-09-04 ausgeschlossen, sie als Sprechblase in
+den Verlauf zu setzen. Sichtbar bleiben sie, wo sie hingehören: in
+`ClarificationList` am Fall. `MessageSquare` als Import ist damit entfallen.
+
+Die Begründung steht in `docs/backlog/0059-clarification-row.md`, Abschnitt
+„Mitbringsel: `CaseTimeline` zeigt keine Kommentare mehr"; hier steht sie,
+damit wer 0040 abnimmt, die fremde Zeile nicht für einen Fehler hält.
+
+**Status-Nachtrag 2026-09-05.** Das Feld sagte
+„Abnahme — zweiter Durchgang; beide Mängel behoben" — ein Satz statt eines Status.
+`docs/backlog/README.md` sucht die offenen Aufgaben über
+`grep -l "| Status | <wert> |"`, und damit war diese hier unsichtbar. Jetzt
+`Abnahme`; die Sache dahinter ist unverändert: beide Mängel des zweiten
+Durchgangs sind behoben, die Abnahme steht aus.
+

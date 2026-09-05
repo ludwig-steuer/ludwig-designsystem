@@ -28,7 +28,12 @@ export function Disclosure({
 }: {
   /** Says what is inside, in half a sentence — never „Details" (T2). */
   summary: ReactNode;
-  /** How many entries are inside; stands next to the summary. */
+  /**
+   * How many entries are inside. It stands at the **right edge** of the
+   * summary — the summary takes the width it needs, so that a row inside it
+   * can build its own right-hand column (0059/0093 e), and a number belongs
+   * to the right (V3).
+   */
   count?: number;
   children: ReactNode;
   defaultOpen?: boolean;

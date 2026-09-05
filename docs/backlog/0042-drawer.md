@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` — Gruppe Dialog |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „etwas Bestehendes neben der Liste ansehen, ohne sie zu verlassen" ist fachfrei |
 | Quelle | Anfrage Owner 2026-09-03 („dann brauchen wir vl. erstmal einen Drawer … im Ludwig-Projekt haben wir bereits einen, den könnten wir übernehmen") · `docs/v3-backlog.md` („Drawer/UrlDrawer-Familie, 29 Importstellen") · Vorlage: `app/apps/web/src/ui/components/primitives/Drawer.tsx` |
@@ -299,3 +299,87 @@ Runde den Weg zurück. Überschrieben wird er beim nächsten Öffnen.
 - [ ] `trapTab` steht in `primitives/focus.ts`, und `Dialog` wie `Drawer` benutzen dieselbe Funktion (`grep`)
 - [ ] Kein deutscher Kommentar mehr in `Drawer.tsx` (`grep`)
 - [ ] Der Auslöser-Merker wird beim Aufräumen nicht geleert (`grep opener.current = null` findet nichts)
+
+## Abnahme des Nachtrags (2026-09-05)
+
+Zweite Abnahme, gegen Spec und Code, von einer Sitzung, die nicht gebaut hat.
+Gemessen in Chromium 153 headless über CDP auf `localhost:6107`; die
+Tab-Anschläge sind echte `Input.dispatchKeyEvent`, keine synthetischen
+Ereignisse — synthetische bewegen den Fokus nicht und hätten die Falle nicht
+prüfen können.
+
+**Story-Deckung.** Unverändert sechs Stories, sechs Exporte in
+`Drawer.stories.tsx`, sechs Kennungen in `index.json` (`--open`, `--sizes`,
+`--with-footer`, `--footer-from-body`, `--long-content`, `--in-use`). Der
+Nachtrag hat keine Prop hinzugefügt und schuldet deshalb keine Story;
+`trapTab` liegt in `primitives/focus.ts` und ist keine Komponente. `Leer`,
+`LaedtGerade` und `Fehler` bleiben begründet ausgeschlossen.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-Kennung · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` am 2026-09-05, Exit 0, keine Ausgabe. `pnpm build` bewusst nicht gestartet — mehrere Sitzungen schreiben parallel nach `storybook-static`, der Auftrag dieser Abnahme verbietet ihn; der laufende Storybook auf 6107 rendert alle sechs Kennungen fehlerfrei | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Drawer.tsx` mit `Drawer` und `DrawerFooter`, `Drawer.stories.tsx` daneben, Titel `v3/Primitives/Dialog/Drawer`. `focus.ts` ist kein Familienbruch: keine Komponente, sondern die geteilte Regel zweier Hüllen — dieselbe Bauform wie `hotkey.ts` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `grep -nE "[äöüÄÖÜß]" src/ui/v3/primitives/Drawer.tsx` liefert **eine** Zeile: `label="Schließen"` (`:177`), ein Nutzer-String. Datei-JSDoc (`:16–27`), `DrawerSize` (`:29`), `onClose` (`:34`), `footer` (`:40–44`), `EXIT_MS` (`:54`), Portal-Ziel (`:73`), Auslöser-Merker (`:77–79`, `:82–86`), Fokus-Rückgabe (`:107–109`, `:113–116`), Fokus-Eingang (`:122–130`) und die Falle (`:144–147`) stehen englisch. `@when`/`@instead` an `Drawer` (`:57–60`), `DrawerFooter` (`:195–198`) und `trapTab` (`focus.ts:27–28`) | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}'` und `grep -cE '[0-9]+px'` über `Drawer.tsx` und `focus.ts`: je 0. Keine Map, kein Status — die Hülle kennt keine Daten. `size={16}` am Schließen-Icon ist ein Sprossenwert der Icon-Leiter (A8) | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Der Punkt, der beim ersten Mal riss — „Hauptweg per Tastatur" (V10/V11) — hält jetzt: Fokus hinein, Falle, Rückgabe je gemessen (siehe Nachtrags-Tabelle). Die übrigen Punkte unverändert wie in der ersten Abnahme: Text links und Beträge rechts (`--in-use`), nichts zentriert, keine Farbe ohne Wort, `role="dialog"` mit `aria-modal="true"` und Name aus `title` oder `ariaLabel`, Bewegung über `--duration-slow`/`--ease-standard`, Schließen-Kreuz mit `aria-label`. Die zwei App-Punkte übersprungen | ✓ |
+| Im Browser angesehen, nicht nur gebaut | alle sechs Kennungen am 2026-09-05 geöffnet und bedient; dazu `AccountDrawer --geoeffnet` und `--im-kontext` als fremde Aufrufer. Keine Konsolenfehler | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-Kennung · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `size` liefert die drei Breiten aus `--drawer-sm/md/lg`, Default `md` | `--sizes`, Fenster 1440 px, alle drei nacheinander geöffnet und über das Scrim geschlossen: `sm` → 490 px (`clamp(340px, 34vw, 560px)` = 34 vw = 489,6), `md` → 720 px (50 vw), `lg` → 1100 px (`min(1100px, 94vw)`). Klasse wandert mit (`v2drawer--sm/md/lg`), Werte in `tokens.css:217–219`. Default: `--open` und `--footer-from-body` setzen `size` nicht und stehen auf `v2drawer--md` | ✓ |
+| Alle drei Schließwege melden `onClose` | `--open`: Klick auf `.v2drawer__h button` → Knoten weg · Klick auf `.v2drawer__scrim` → weg · echtes `Escape` über CDP → weg. Alle drei laufen im Code auf dasselbe `onClose` (`:141`, `:160`, `:179`) | ✓ |
+| Fokus steht nach dem Öffnen im Drawer und kehrt beim Schließen auf den Auslöser zurück | `--open`, `document.activeElement` bei 50/200/500/1200 ms nach dem Klick: viermal `aside.v2drawer`, `panel.contains(active)` wahr. Nach `Escape`: wieder `button.v2btn «Kontenblatt ansehen»`. **Auch beim Aushängen:** `AccountDrawer --im-kontext` hängt den Drawer aus, statt `open` umzulegen (`{account ? <AccountDrawer open …/> : null}`) — Auslöser `button.v2link «ansehen»`, nach `Escape` steht der Fokus wieder dort. Das trägt der Aufräum-Effekt `:110–120`, nicht ein `else`-Zweig | ✓ |
+| Beim Schließen gleitet der Drawer hinaus, er verschwindet nicht | `--open`, 80 ms nach dem Scrim-Klick: `aside` noch im Baum, `transform: matrix(1,0,0,1,493.22,0)`, `is-open` bereits weg — mitten in der Bewegung nach rechts. 500 ms später ist der Knoten fort (`EXIT_MS = 300`, `:55`) | ✓ |
+| `footer` und `DrawerFooter` belegen dieselbe Leiste; ohne beides keine Leiste | `--with-footer`, „Mit Leiste": `.v2drawer__foot` `display: flex`, Höhe 55 px, Inhalt „Abbrechen Zuordnen". „Ohne Leiste": dasselbe Element `display: none`, Höhe 0, `innerHTML` leer (`v3.css` `:empty`). `--footer-from-body`: zwei Knöpfe im `.v2drawer__foot`, **null** im Body — und sie teilen dessen Zustand („Speichern" `disabled: true`, solange das Textfeld leer ist) | ✓ |
+| Body scrollt, Kopf und Fuß stehen | `--long-content`: `.v2drawer__b` `overflow-y: auto`, `scrollHeight` 1501 bei `clientHeight` 767. Nach `scrollTop = 800` (angekommen bei 734, dem Maximum): Kopf weiter bei `top 0`, Fußleiste weiter bei `bottom 900` — beide unbewegt | ✓ |
+| `.v2drawer*` steht in `v3.css` und enthält kein Hex und kein px | Block `v3.css:791–846`, 15 Regeln. `grep -cE '#[0-9a-fA-F]{3,8}'` = 0, `grep -nE '[0-9]+px'` ohne Treffer. Die Maße stehen als `clamp`/`min` in `tokens.css`, wo sie hingehören | ✓ |
+| Das Schließen-Kreuz ist `IconButton`, kein eigener Knopf | `Drawer.tsx:176–180` rendert `<IconButton label="Schließen" …>`; im DOM `button.v2ibtn` — dieselbe Klasse wie überall sonst | ✓ |
+| `width` existiert nicht | `grep -n "width" src/ui/v3/primitives/Drawer.tsx`: kein Treffer | ✓ |
+| `@instead` schickt weiter: Entscheidung → `Dialog`, Seitenaufbau → `MasterDetail`, ein Satz → `Popover`/`HoverCard` | `Drawer.tsx:59` nennt alle drei wörtlich in dieser Reihenfolge | ✓ |
+| Ersetzt `Drawer`/`DrawerFooter` in `ui/components/primitives/Drawer.tsx` ohne Funktionsverlust | betrifft `ludwig/app`; in diesem Repo nicht erfüllbar | offen (App) |
+| `UrlDrawer` baut in der App weiter darauf auf | betrifft `ludwig/app` | offen (App) |
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Story-Kennung · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Tab und Shift-Tab verlassen den Drawer nicht (Story `InUse`, echte Tastendrücke) | `--in-use`, 12 echte Tab-Anschläge: `v2ibtn` → `v2btn` → `v2ibtn` → … im Kreis, in keinem der 12 Schritte außerhalb von `aside.v2drawer`. 12 Shift-Tab-Anschläge: dieselbe Runde rückwärts, ebenfalls nie draußen. Gegenprobe an den beiden anderen geforderten Stories: `--with-footer` (Kreuz · Abbrechen · Zuordnen, 12 Schritte, keiner draußen) und `--long-content` (Kreuz · scrollbarer Body · Schließen, 12 vorwärts und 8 rückwärts, keiner draußen) | ✓ |
+| `trapTab` steht in `primitives/focus.ts`, und `Dialog` wie `Drawer` benutzen dieselbe Funktion | `grep -rn "trapTab" src/ui/v3`: definiert in `primitives/focus.ts:30`, importiert in `Drawer.tsx:13` und `Dialog.tsx:4`, aufgerufen in `Drawer.tsx:148` und `Dialog.tsx:111`. Keine zweite Umsetzung. Gegenprobe im Browser, dass der Umzug den Dialog nicht beschädigt hat: `Dialog --keyboard-trap`, 10 echte Tab-Anschläge laufen über Kreuz, Textfeld, „Abbrechen", „Weiter" im Kreis, keiner außerhalb von `div.v2dlg` | ✓ |
+| Kein deutscher Kommentar mehr in `Drawer.tsx` | `grep -nE "[äöüÄÖÜß]" src/ui/v3/primitives/Drawer.tsx` findet nur `:177 label="Schließen"` — ein Nutzer-String, kein Kommentar. Alle elf Kommentarblöcke der Datei durchgelesen, alle englisch | ✓ |
+| Der Auslöser-Merker wird beim Aufräumen nicht geleert | `grep -rn "opener.current = null" src/ui/v3`: kein Treffer. Der Aufräum-Effekt liest ihn nur (`Drawer.tsx:117–118`, `Dialog.tsx:97–98`); überschrieben wird er beim nächsten Öffnen (`Drawer.tsx:87–92`) | ✓ |
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Die Falle macht nichts unerreichbar.** Die Frage, ob sie Bedienelemente
+  verschluckt, ist an vier Stories geprüft, indem erst alle Bedienelemente im
+  Panel aufgezählt und dann die Tabulatur mitgeschrieben wurde. `--footer-from-body`:
+  Kreuz, Textfeld, „Abbrechen" erreicht, „Speichern" übersprungen, solange es
+  `disabled` ist — richtig, `trapTab` filtert `:not([disabled])`. Der schwerste
+  Fall ist `AccountDrawer --geoeffnet` mit acht Elementen (drei Jahresknöpfe,
+  Kreuz, zwei Konto-Links, „Mehr laden", „Volles Konto öffnen"): 16 Anschläge
+  laufen sie zweimal vollständig und in Dokumentreihenfolge ab.
+- **Der scrollbare Body ist ein eigener Fokus-Halt.** In `--long-content`
+  landet der Fokus zwischen Kreuz und Fußzeile auf `div.v2drawer__b` — das
+  macht Chromium von sich aus mit scrollbaren Bereichen, und es ist gut so:
+  ohne ihn ließe sich der lange Inhalt nicht mit der Tastatur scrollen. Er steht
+  nicht in `TABBABLE` und damit nicht in der Liste, an deren Enden die Falle
+  greift; weil er in der Mitte liegt, stört das nicht.
+- **Die Grenze der Falle.** `trapTab` sammelt nur, was **im Panel** steht und
+  ein `offsetParent` hat. Ein Bedienelement, das der Inhalt in ein Portal
+  außerhalb des Panels hängt — ein `OverflowMenu` im Drawer wäre der Fall —
+  wäre mit der Tastatur nicht erreichbar. Heute tut das keine Story und kein
+  Aufrufer; wenn ein Drawer ein Menü bekommt, ist das der Punkt, an dem die
+  Falle einen zweiten Wurzelknoten braucht. `Dialog` teilt die Grenze.
+- **Die Story-Datei bleibt deutsch kommentiert** (`Drawer.stories.tsx:15–20`,
+  `:235`). Wie schon in der ersten Abnahme vermerkt: verbreitet im Repo und
+  kein Mangel dieser Aufgabe — das Kriterium nennt `Drawer.tsx`.
+- **`Dialog.tsx` trägt weiter ein deutsches Datei-JSDoc** (`:8–21`). Es ist
+  beim Umzug von `trapTab` nicht mitgezogen worden. Gehört nicht zu 0042,
+  aber zum selben Befund wie der, den 0042 gerade erledigt hat.
+
+Abgenommen von / am: **Claude (Abnahme-Agent), 2026-09-05**
