@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Zeilen mit vielen Aktionen gibt es überall |
 | Quelle | `docs/v3-backlog.md` — „Danach" (8 Eigenbauten) |
@@ -128,25 +128,57 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+Zweite Abnahme (fremder Prüfer, 2026-09-05), Tabelle neu geschrieben.
+Storybook Port 6107, Chromium 1440×900; jede der sechs Stories geöffnet, das
+Menü aufgeklappt, mit Escape geschlossen.
+
+**Fest**
+
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| Der Auslöser trägt in jeder Story ein sichtbares Wort (T8) | `v3-primitives-aktion-overflowmenu--filled` / `--variants` / `--interactive` / `--in-row` / `--many-items`: „Mehr" plus Chevron; `--align-start`: „Weitere Wege". Kein nacktes Icon | ✓ |
-| Enter, Leertaste und Escape bedienen das Menü | `--filled`: `<summary>` — Enter und Leertaste sind nativ; Escape schließt (`d.open` von `true` auf `false`) über die drei Zeilen `onKeyDown` in `OverflowMenu.tsx:70`. Ganz „ohne eigenen Tastatur-Code" geht Escape nicht, `<details>` kennt es nicht | ✓ |
-| Acht Einträge laufen nicht aus dem Bild | `--many-items`: senkrecht in Ordnung (Klappe 268 px, `max-height 320px`, `overflow-y auto`). **Waagerecht nicht:** die Klappe liegt bei `left −111 px`, ihr linker Rand steht außerhalb des Fensters, die Einträge sind angeschnitten („n" statt „Beleg öffnen"). Dasselbe in `--filled` und `--variants`: `place()` rechnet `right = innerWidth − r.right` und begrenzt nicht auf den sichtbaren Bereich, obwohl das Verhalten es verlangt | ✗ |
-| `align="start"` richtet die Klappe links aus | `--align-start`: Auslöser bei `left 16`, Klappe bei `left 16`, nichts angeschnitten | ✓ |
-| `danger`-Einträge am Wort erkennbar (V7) | `--variants`: „Vorschlag verwerfen" mit Papierkorb-Icon, „Buchung stornieren" gesperrt mit Grund im `title` — die Farbe kommt zum Wort dazu, nicht statt seiner | ✓ |
-| Ersetzt `DocActionsMenu` inklusive `aria-label` | App-Datei gelesen: `children`-only, Auslöser „⋯" mit `aria-label="Weitere Aktionen"` → hier sichtbares Wort „Mehr". Unterschied fürs Umziehen: das App-Panel wächst nach Inhalt (`min-width 260`, `max-width min(620px,90vw)`), weil der Klassifikations-Editor darin aufklappt; hier sind es feste 208 px und 320 px Höhe mit Scrollen. Der Umzug selbst steht aus | ✓ |
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0, zu Beginn und am Ende. `pnpm build` bewusst nicht gestartet (schreibt nach `storybook-static`, parallele Abnahmen); zitiert wird der grüne Lauf für diesen Stand: „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/OverflowMenu.tsx` neben `OverflowMenu.stories.tsx`; `OverflowMenu.stories.tsx:10` = `v3/Primitives/Aktion/OverflowMenu` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Englisch: ja, durchgängig. **`@instead` fehlt an `MenuItem`** (`OverflowMenu.tsx:100–104`): der Block trägt nur `@when`. `OverflowMenu` selbst hat beides (`:33–37`). Damit fehlt die Antwort auf „was nehme ich statt `MenuItem`?" genau dort, wo sie greppbar sein soll | ✗ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\b\|[0-9]+px\|fontSize" src/ui/v3/primitives/OverflowMenu.tsx` → keine Zeile. Übrig ist `const EDGE = 8` (`:30`) — kein Gestaltungsmaß, sondern der Abstand, mit dem `place()` die Klappe im Fenster hält; das rechnet JavaScript, CSS kann es nicht. Das 4-px-Maß unter dem Auslöser steht in `v3.css:1793` (`margin-top: 4px`). Kein Status im Baustein | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--filled`, `--variants`, `--align-start`, `--interactive`, `--in-row`, `--many-items` — alle sechs. `Leer`/`Laedt`/`Fehler` im Abschnitt „Stories" begründet | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Erfüllt bis auf **V1 („Zeilenhöhe ≤ `.v2tbl__row`")** — siehe die Zeile darunter. Der Rest stimmt: Hover auf Auslöser (`rgb(255,255,255)` → `rgb(244,246,248)`) und auf jedem Eintrag (`rgba(0,0,0,0)` → `rgb(244,246,248)`); Fokusring `2px solid var(--color-focus)` auf `.v2menu__item` (`v3.css:1811`); Farbe nie allein (siehe `danger`-Zeile); Icon `width 14`, `stroke-width 1.5`; kein Emoji, kein Unicode-Zeichen; Text links; keine Transition, also nichts, was `prefers-reduced-motion` verletzt | ✗ |
+| V1 im Einzelnen: der Auslöser treibt die Zeilenhöhe | `--in-row`, gemessen: die Zeile **mit** Menü ist 52 px hoch, die Referenzzeile daneben („Ohne Menü — die Referenzhöhe") 46 px. Ursache ist der Auslöser: `.v2menu__sum.v2btn--xs` ist 25 px hoch, die Aktionszelle dadurch 27 px, während die übrigen Zellen 20–22 px messen (`.v2tbl__row` hat `padding: 12px 18px`). Zum Vergleich: `v3-primitives-tabelle-selection--with-selection` bleibt mit seinen Zellen bei 44–45 px. V1 sagt „der Chip wird kleiner, nicht die Zeile größer" — der Wechsel von `sm` auf `xs` hat die Differenz seit dem 2026-09-03 nur von 7 auf 6 px gedrückt | ✗ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Alle sechs Stories geöffnet, Klappe geöffnet, mit Escape geschlossen, Einträge getabbt und geklickt | ✓ |
 
-**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): Klappe bleibt im Fenster (gemessen `left 8 / right 216` bei 1440 px, ebenso bei 700 und 360 px); ein gewählter Eintrag — auch ein `href` — schließt sie; das 4-px-Maß steht im CSS, in der Komponente nur `EDGE`.
+**Variabel**
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Der Auslöser trägt in **jeder** Story ein sichtbares Wort (T8) | `--filled`, `--variants`, `--interactive`, `--in-row`, `--many-items`: `.v2menu__sum` = „Mehr" + `svg.lucide-chevron-down`; `--align-start`: „Weitere Wege". In allen sechs steht das Wort als eigenes `<span>` im DOM, kein nacktes Icon | ✓ |
+| Enter, Leertaste und Escape bedienen das Menü ohne eigenen Tastatur-Code | `--filled`, echte Tastatur: Fokus auf `<summary>`, Enter → `details.open = true`; Leertaste → `true`; Escape → `false` (die drei Zeilen `onKeyDown`, `OverflowMenu.tsx:73–75` — `<details>` kennt Escape nicht, deshalb die eine Ausnahme). Danach wandert Tab durch die Einträge in Reihenfolge: „Beleg öffnen" → „In DATEV ansehen" → „Als PDF laden" | ✓ |
+| Acht Einträge laufen nicht aus dem Bild | `--many-items`: acht Einträge, Klappe 208×268 px bei `max-height: 320px` und `overflow-y: auto`, `scrollHeight == clientHeight` (266), also gar kein Abschneiden. Waagerecht `left 8 / right 216` bei `innerWidth 1440` — vollständig im Fenster; kein Eintrag mit `scrollWidth > clientWidth`. Dasselbe geprüft für `--filled` und `--variants` (beide `left 8`) sowie für `--interactive`/`--in-row` am rechten Rand (`right 1424` bzw. `1423`) | ✓ |
+| `align="start"` richtet die Klappe links aus | `--align-start`: Auslöser `left 16`, Klappe `left 16`, `right 224`; nichts angeschnitten | ✓ |
+| `danger`-Einträge sind zusätzlich am Wort erkennbar, nicht nur an der Farbe (V7) | `--variants`: „Vorschlag verwerfen" trägt `.v2menu__item--danger`, `color rgb(168,64,60)` (`--color-danger`) **und** das Papierkorb-Icon **und** das Verb im Text. Der gesperrte Eintrag „Buchung stornieren" ist `disabled` mit dem Grund im `title` („Erst nach dem DATEV-Export möglich"), nicht bloß ausgegraut | ✓ |
+| Ersetzt `DocActionsMenu` ohne Funktionsverlust — inklusive des dortigen `aria-label` | Der Umzug findet in `ludwig/app` statt und ist hier nicht ausführbar. Die Deckung ist unverändert wie 2026-09-03 protokolliert: das App-Menü trägt „⋯" mit `aria-label="Weitere Aktionen"`, hier steht das sichtbare Wort „Mehr" | offen (App) |
 
-1. **Die Klappe bleibt nicht im sichtbaren Bereich** — bei `align="end"` und
-   einem Auslöser nahe dem linken Rand steht sie außerhalb des Fensters
-   (`Filled`, `Variants`, `ManyItems`). `place()` braucht eine Begrenzung.
-2. Ein Klick auf einen `href`-Eintrag schließt die Klappe nicht
-   (`d.open` bleibt `true`) — die Spec hatte „ja bei `href`" entschieden.
-3. `place()` setzt den Abstand `r.bottom + 4` als Zahl in der Komponente;
-   Maße gehören nach `v3.css` (§9).
-4. `InRow`: die Zeile mit dem Menü ist 53 px hoch, die Referenzzeile daneben
-   46 px — der Auslöser (26 px) treibt die Zeilenhöhe (V1).
+Abgenommen von / am: — · Status zurück auf **in Arbeit**. Zwei Mängel:
+
+1. **Der Auslöser treibt die Zeile auf (V1).** In `--in-row` ist die Zeile mit
+   Menü 52 px hoch, die Referenzzeile 46 px — sichtbar auch im Bild. Der
+   Auslöser (`.v2btn--xs`, 25 px) ist höher als der Zeileninhalt (20–22 px).
+   Entweder braucht der Auslöser in der Zeile eine flachere Ausprägung (das
+   Vorbild ist `SelectCell`, dessen Zeilen bei 44–45 px bleiben), oder die
+   Story `InRow` zeigt nicht den Fall, für den die Prop `size` da ist. Die
+   Spec sagt zu `size`: „in Zeilen `sm`" — gebaut ist `xs`; auch das gehört
+   zusammengeführt, Spec oder Story.
+2. **`@instead` fehlt an `MenuItem`** (`OverflowMenu.tsx:100–104`). Die feste
+   Regel verlangt beide Zeilen an jedem Export. Eine Zeile genügt, etwa:
+   sichtbare Handlung neben der Zeile → `RowActions`/`TextButton`; Handlung,
+   die läuft und scheitern kann → `ActionButton` im Eintrag.
+
+Offen und **kein** Mangel: der Umzug von `DocActionsMenu` in `ludwig/app`.
+
+**Beiläufig geprüft (0087).** Der Chevron kommt jetzt über
+`ActionIcon action="expand"`; im DOM steht weiter `lucide-chevron-down`,
+`width 14`, `stroke-width 1.5` — dasselbe Zeichen wie vor `f58caa2`. Nichts
+verschwunden, nichts gesprungen. Nebenbefund fürs Set, nicht für diese Spec:
+`OverflowMenu.stories.tsx:2` holt `FileText`, `Pencil`, `Trash2` … weiter
+direkt aus `lucide-react` und reicht sie als `MenuItem icon={…}` herein. Für
+Stories ist das mit 0087 ausdrücklich erlaubt; die Prop `icon: ReactNode`
+lässt es aber auch jedem echten Aufrufer offen, an der Registry vorbei ein
+Zeichen zu setzen.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `entities/account/` |
 | Klassen-Test | nein — „Konto" ist ein Fachwort, die Kandidatengruppen sind Buchhaltungslogik |
 | Quelle | Anfrage Owner 2026-09-03 („der Konto-Autocomplete ist auch eine extra Komponente … mit Parameter ob es ein Icon haben soll, das Icon öffnet per Klick einen Drawer mit den Kontenbuchungen") · Nachtrag Owner 2026-09-03 („wir wollen im Normalzustand Konto-Nr und Name anzeigen, immer beides") |
@@ -154,8 +154,60 @@ Kontenblatt:
 
 ## Abnahme
 
-| Kriterium | Nachweis | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Erste Abnahme (fremder Prüfer, 2026-09-05). Storybook Port 6107,
+Chromium 1440×900; alle sechs `AccountField`-Stories geöffnet, das Feld
+fokussiert, getippt, das Kontenblatt-Icon per Tab und Enter ausgelöst.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0, zu Beginn und am Ende — damit ist zugleich belegt, dass die erweiterte `onChange`-Signatur bestehende Aufrufer übersetzbar lässt. `pnpm build` bewusst nicht gestartet (schreibt nach `storybook-static`, parallele Abnahmen); zitiert wird der grüne Lauf für diesen Stand: „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/entities/account/AccountField.tsx` neben `AccountField.stories.tsx`; `AccountField.stories.tsx:8` = `v3/Entitäten/Konto/AccountField` — Entität + Form, Gruppe wie im Skill | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` stehen an `AccountField` (`AccountField.tsx:46–47`), die neuen Props, ihre Typen und ihr JSDoc sind englisch. **Der Rumpf der Datei ist es nicht:** `REIHENFOLGE` (`:43`), `treffer`/`setTreffer` (`:92`), `abgebrochen` (`:111`), `außerhalb` (`:124`), `gruppen` (`:131`), `passt` (`:133`), `aus` (`:135`), `liste` (`:152`), `ruhend` (`:161`), `waehle` (`:163`) — dazu der deutsche Kopf-Block (`:8–22`) und rund ein Dutzend deutscher Kommentare, auch in den von dieser Aufgabe neu geschriebenen Stellen (`:93–94`, `:146–148`, `:159–160`, `:188`, `:220–221`). `CLAUDE.md`: „eine Datei, die ohnehin angefasst wird, bekommt englische Namen"; 0001 hatte Props, interne Namen und Kommentare ausdrücklich auf „beim Anfassen" vertagt. 0013 hat den Rumpf umgebaut und die Namen stehen lassen. Nicht betroffen sind die Werte von `AccountGroup` (`"aehnlich"`, `"belegposition"`) und die Texte in `ACCOUNT_GROUP_LABEL` — Domänenwerte und Nutzer-Strings bleiben laut 0001 deutsch | ✗ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\b\|[0-9]+px\|fontSize" src/ui/v3/entities/account/AccountField.tsx` → keine Zeile. `ACCOUNT_GROUP_LABEL` ist keine Status-Map, sondern die Benennung der fünf Herkunftsgruppen dieser Entität; ein Status kommt in der Komponente nicht vor | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--with-candidates`, `--full-text-only`, `--no-match`, `--invalid`, `--with-ledger`, `--number-and-name` — die zwei neuen der Spec plus die vier bestehenden unverändert. Enum- und Layout-Boolean-Story im Abschnitt „Stories" als „nicht anwendbar" begründet, der Rand-Fall (langer Name) sitzt bewusst in `NumberAndName` und ist dort auch belegt | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Text links, Zahlen in der Ziffernschrift (`.v2kf__num`), nichts zentriert. Fokus: das Feld und der Icon-Knopf sind per Tab erreichbar, `IconButton` bringt seinen Fokusring mit. Icon `width 14`, `stroke-width 1.5` (A8), `aria-hidden`, das Wort steht im `aria-label`/`title` des Knopfes — T8-Ausnahme greift nicht, weil hier gar kein sichtbares Wort verlangt ist: der Knopf ist konventionell, folgenlos und nicht der einzige Weg. Keine Transition in `.v2kf*`. Kein Emoji, kein Unicode-Zeichen. **Ein geerbter Befund:** `.v2kf__grp` (`v3.css:1242`) setzt `text-transform: uppercase`, die Gruppenköpfe stehen also als „ZULETZT BEI DIESER GEGENPARTEI" — A2 verlangt normale Schreibweise. Die Zeile stammt aus der Erstbestückung (`5ec5da6`), nicht aus dieser Aufgabe, und dieselbe Regel steht an 17 Stellen in `v3.css`; das gehört als eigene Aufgabe ans Set | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Alle sechs Stories geöffnet; Feld fokussiert, getippt, Kandidat gewählt, Icon getabbt und mit Enter ausgelöst (der Drawer ging auf) | ✓ |
+
+**Variabel — Anzeige**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Ruhend steht Nummer **und** Name im Feld, sobald der Name bekannt ist | `--number-and-name`, erstes Feld: `input.className` endet auf `v2kf__in--ruhend`, daneben `.v2kf__shown` mit `.v2kf__num` = „6815" und `.v2kf__nm` = „Bürobedarf", `aria-hidden="true"` (der Wert steht im `input`, die Anzeige ist Fassade). Im Bild „**6815** Bürobedarf" | ✓ |
+| Beim Fokussieren steht der reine Suchtext da, markiert; Tippen ersetzt ihn | `--number-and-name`, erstes Feld per `focus()`: `input.value` = „6815" (nicht „6815 Bürobedarf"), `selectionStart 0 / selectionEnd 4` — vollständig markiert; `.v2kf__shown` ist aus dem DOM. „68" getippt → `input.value` = „68", die Nummer ist ersetzt, nicht ergänzt | ✓ |
+| Wert ohne bekannten Namen zeigt die Nummer allein — kein Platzhalter, kein Nachschlagen | `--number-and-name`, zweites Feld (`value="4980"`, `candidates={{}}`): `.v2kf__shown` fehlt, `input.value` = „4980", kein „—", kein sichtbarer Platzhalter. `AccountField.tsx:149–157` schlägt nur in `chosen` und `candidates` nach und gibt sonst `undefined` zurück — keine Ladung | ✓ |
+| `valueName` trägt den Namen über den ersten Render | `--number-and-name`, drittes Feld: `value="6825"`, `candidates={{}}`, `valueName="Reinigung und Pflege der Geschäftsräume"` → ruhend steht „6825 Reinigung und Pflege der Geschäftsräume", ohne dass die Liste je offen war. (In `--with-ledger` ist `valueName` ebenfalls gesetzt, dort aber nicht beweiskräftig, weil die Kandidaten denselben Namen tragen) | ✓ |
+| `onChange` gibt den Kandidaten als zweites Argument zurück; bei freier Eingabe `undefined`; bestehende Aufrufer bleiben übersetzbar | `AccountField.tsx:165` — `waehle()` ruft `onChange(k.number, k)`; `AccountField.tsx:197` — `onBlur` ruft `onChange(query.trim())`, das zweite Argument bleibt `undefined`. Typ `(number: string, account?: AccountCandidate) => void` (`:72`); `pnpm typecheck` grün, die Stories übergeben weiter einen einstelligen `setV` | ✓ |
+| Langer Kontenname bricht das Feld nicht auf | `--number-and-name`, drittes Feld (Breite 300 px, Name 39 Zeichen): `.v2kf__box` bleibt 34 px hoch — dieselbe Höhe wie die beiden Felder darüber; `.v2kf__nm` hat `text-overflow: ellipsis` und kürzt („Reinigung und Pflege der Gesc…"); das Kontenblatt-Icon steht bei `right 313` innerhalb der Box (`right 316`), wird also nicht hinausgeschoben | ✓ |
+
+**Variabel — Kontenblatt**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Ohne `onOpenLedger` erscheint kein Icon und kein leerer Platz | `--with-candidates` (unverändert, ohne `onOpenLedger`): `.v2kf__ledger` nicht im DOM, `input.className` ohne `v2kf__in--ledger`, `padding-right` 10 px wie an jedem Feld, Eingabefeld 380 px = volle Boxbreite. Kein reservierter Streifen | ✓ |
+| Mit `onOpenLedger` und leerem `value` ist das Icon deaktiviert, nicht versteckt | `--with-ledger`, zweites Feld (`value=""`): der Knopf ist im DOM, Breite > 0, `disabled = true`, `aria-label` = „Kontenblatt". Das Layout springt beim ersten Zeichen also nicht | ✓ |
+| Icon per Tab erreichbar, `Enter` löst aus, `aria-label` nennt die Kontonummer | `--with-ledger`, erstes Feld: Fokus ins Feld, Escape, Tab → `document.activeElement` ist `button.v2ibtn.v2ibtn--sm` mit `aria-label="Kontenblatt zu 6815"` (und demselben Text im `title`). Enter darauf → der Drawer geht auf, im Text steht „Kontenblatt 6815 · Saldo 4.208,55 €". Bei leerem Wert heißt es nur „Kontenblatt" | ✓ |
+| `@when`-Zeile nennt den Weg zum Kontenblatt in einem Halbsatz | `AccountField.tsx:46`: „… — and, with `onOpenLedger`, the way to its account sheet." | ✓ |
+| `JournalEntryEditor` reicht sein `onOpenLedger` an die Felder durch, statt es selbst zu zeichnen (0015) | In der Spec bereits als **offen (App)** ausgewiesen; gehört zu 0015. `src/ui/v3/entities/journal-entry/JournalEntryEditor.tsx` wird zudem gerade von einer anderen Sitzung bearbeitet und war für diese Abnahme kein Prüfgegenstand | offen (App) |
+
+Abgenommen von / am: — · Status zurück auf **in Arbeit**. Ein Mangel:
+
+1. **Die Datei ist beim Umbau nicht auf Englisch mitgezogen worden.** Zehn
+   interne Bezeichner (`REIHENFOLGE`, `treffer`, `abgebrochen`, `außerhalb`,
+   `gruppen`, `passt`, `aus`, `liste`, `ruhend`, `waehle`), der Kopf-Block und
+   rund ein Dutzend Kommentare stehen weiter auf Deutsch — auch an den
+   Stellen, die 0013 selbst neu geschrieben hat. `CLAUDE.md` und der Umfang
+   von 0001 verlangen genau hier die Umbenennung: „werden je Datei beim
+   Anfassen mitgenommen". Nutzer-Strings (`ACCOUNT_GROUP_LABEL`, der
+   Leertext, `ariaLabel`) und die Domänenwerte von `AccountGroup` bleiben
+   selbstverständlich deutsch.
+
+Alles Fachliche der Aufgabe — Nummer und Name, `valueName`, das erweiterte
+`onChange`, das Kontenblatt-Icon samt Tastaturweg und deaktiviertem Zustand —
+ist gebaut und belegt; es fehlt nur der Sprachschnitt.
+
+**Beiläufig geprüft (0087).** Das Kontenblatt-Zeichen kommt jetzt über
+`ActionIcon action="ledger"`; im DOM steht weiter `lucide-book-open-text`,
+`width 14`, `stroke-width 1.5` — dasselbe Zeichen an derselben Stelle wie vor
+`f58caa2`. Nichts verschwunden, nichts gesprungen.

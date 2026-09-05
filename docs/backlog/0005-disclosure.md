@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Details ausklappen ist fachfrei |
 | Quelle | `docs/v3-backlog.md` — „Danach" (34 Stellen in 20 Dateien) |
@@ -97,14 +97,86 @@ Titel `v3/Primitives/Fläche/Disclosure`. Abgeleitet nach §6: 1 Zustand
 Nicht anwendbar: `Leer` (ohne Inhalt wird der Aufklapper nicht gerendert),
 `Laedt`, `Fehler` (der Inhalt bringt seinen eigenen Zustand mit).
 
+## Abnahmekriterien
+
+> Wiederhergestellt am 2026-09-05. Commit `64fbe27` („Abnahme B und C") hatte
+> diesen Abschnitt und die „Offenen Fragen" beim Eintragen der Abnahme-Tabelle
+> mitgelöscht; ohne sie ist die Aufgabe nicht abnehmbar. Text unverändert aus
+> `git show 703a0ab:docs/backlog/0005-disclosure.md`.
+
+Fest (gilt immer):
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [ ] Code englisch; `@when`/`@instead` an jedem Export
+- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+
+Variabel (aus dieser Spec):
+
+- [ ] Enter und Leertaste klappen auf und zu, ohne eigenen Tastatur-Code (Story `Filled`)
+- [ ] Der Marker ist ein Lucide-Chevron, kein Unicode-Zeichen (Regel T9)
+- [ ] Die Datei trägt kein `"use client"`
+- [ ] `count` erscheint nur, wenn gesetzt (Story `Filled` vs. `WithCount`)
+- [ ] Ersetzt das `<details>` in `RohdatenTab` ohne Funktionsverlust
+
+## Offene Fragen
+
+1. Soll `summary` bei `quiet` kleiner gesetzt sein? *Ohne Antwort: ja, eine
+   Stufe kleiner und in `--color-text-muted` — technische Beigaben sollen
+   nicht mit dem Inhalt konkurrieren.*
+
 ## Abnahme
+
+Zweite Abnahme (fremder Prüfer, 2026-09-05), Tabelle neu geschrieben.
+Storybook Port 6107, Chromium 1440×900.
+
+**Fest**
 
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| Enter und Leertaste klappen auf und zu, ohne eigenen Tastatur-Code | `Disclosure.tsx` enthält keinen Tastatur-Code. `v3-primitives-fläche-disclosure--filled`: Zusammenfassung per Tab fokussiert, Leertaste öffnet, Chevron dreht 90°. Enter ließ sich mit synthetischem Tastendruck nicht auslösen — Grenze der Automatisierung, nicht der Komponente | ✓ |
-| Der Marker ist ein Lucide-Chevron, kein Unicode-Zeichen | DOM: `svg.lucide-chevron-right.v2disc__chev`; `.v2disc__sum::-webkit-details-marker { display: none }`, im Bild kein natives Dreieck | ✓ |
-| Die Datei trägt kein `"use client"` | `grep` in `Disclosure.tsx` — nicht vorhanden, Server-Component | ✓ |
-| `count` erscheint nur, wenn gesetzt | `--filled` ohne `.v2disc__count` (DOM-Probe), `--with-count` mit „14" neben der Zusammenfassung | ✓ |
-| Ersetzt das `<details>` in `RohdatenTab` ohne Funktionsverlust | Kein `Disclosure`-Import in `ludwig/app`; im eigenen Showcase steht weiter `Todo spec="0005"` (`CaseCrud.stories.tsx:238`) | ✗ |
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0, zu Beginn und am Ende. `pnpm build` bewusst nicht gestartet (schreibt nach `storybook-static`, parallele Abnahmen); zitiert wird der grüne Lauf für diesen Stand: „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Disclosure.tsx` neben `Disclosure.stories.tsx`; `Disclosure.stories.tsx:7` = `v3/Primitives/Fläche/Disclosure` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Exporte: `DisclosureTone` (Typ) und `Disclosure` (`Disclosure.tsx:21`) mit `@when`/`@instead` in `Disclosure.tsx:15–20`; die `@when`-Zeile nennt den Gruppenfall in einem Halbsatz („with `group` a set of sections of which only one stays open") wie A3 verlangt. Bezeichner, Kommentare und JSDoc englisch | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\b\|[0-9]+px\|fontSize" src/ui/v3/primitives/Disclosure.tsx` → keine Zeile; kein Status im Baustein | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--filled`, `--with-count`, `--default-open`, `--variants`, `--in-use`, `--accordion` — alle sechs der Ableitung. `Leer`/`Laedt`/`Fehler` im Abschnitt „Stories" begründet | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Hover auf der Zusammenfassung: `background` wechselt von `rgba(0,0,0,0)` auf `rgb(244,246,248)` (`--color-bg-soft`), eine Tonstufe, nichts wächst. Fokus: `.v2disc__sum` ist per Tab erreichbar. Text links, nichts zentriert; keine Farbe als alleiniges Signal — `quiet` unterscheidet sich zusätzlich am Wort. Icon: `width 14`, `stroke-width 1.5`, `aria-hidden="true"`. Kein Emoji, kein Unicode-Zeichen (`/[✓✗⚠●▶▸→←]/` über `body.innerText` → `false`) | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Alle sechs Stories geöffnet und bedient: auf- und zugeklappt per Maus und per Tastatur, `Accordion` mit drei Klicks durchgespielt | ✓ |
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die 34 Fundorte in `ludwig/app` und der Showcase-Platzhalter sind noch nicht umgestellt.
+**Variabel**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| Enter und Leertaste klappen auf und zu, ohne eigenen Tastatur-Code | `Disclosure.tsx` enthält keinen `onKeyDown`/`onKeyUp` — das Aufklappen kommt vom nativen `<details>`. `--filled` mit echter Tastatur: Tab fokussiert `.v2disc__sum`; Leertaste → `details.open` `false → true → false`; Enter → `true → false`. Beide Tasten sind damit belegt (2026-09-03 war Enter „Grenze der Automatisierung" geblieben) | ✓ |
+| Der Marker ist ein Lucide-Chevron, kein Unicode-Zeichen | DOM: `svg.lucide.lucide-chevron-right.v2disc__chev`, `width 14`, `stroke-width 1.5`, `aria-hidden="true"`. `.v2disc__sum` hat `list-style: none` (`v3.css:1832`-Muster) — im Bild kein natives Dreieck. Beim Öffnen `transform: matrix(0,1,-1,0,0,0)` = 90° | ✓ |
+| Die Datei trägt kein `"use client"` | `grep -n "use client" src/ui/v3/primitives/Disclosure.tsx` → keine Zeile; Server-Component | ✓ |
+| `count` erscheint nur, wenn gesetzt | `--filled`: `.v2disc__count` nicht im DOM. `--with-count`: `.v2disc__count` = „14", steht **in** der `summary` neben dem Text, nicht darin verbaut | ✓ |
+| Ersetzt das `<details>` in `RohdatenTab` ohne Funktionsverlust | Der Umbau der 34 Fundorte findet in `ludwig/app` statt, hier nicht ausführbar. Im eigenen Repo ist der 2026-09-03 gemeldete Platzhalter weg: `grep -rn 'spec="0005"' src/` → kein Treffer | offen (App) |
+
+**Erweiterung A3**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Öffnen des dritten schließt den zweiten, ohne Klick auf ihn (Story `Accordion`) | `--accordion`, alle drei mit `name="begruendung"`. Start: `[zu, offen, zu]` (der zweite ist `defaultOpen`). Klick auf die dritte Zusammenfassung → `[zu, zu, offen]` — der zweite ist zu, ohne ihn angefasst zu haben. Klick auf die erste → `[offen, zu, zu]`. Kein Zustand in der Komponente, kein `useState` | ✓ |
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte:
+
+1. Der Umbau der 34 `<details>`-Fundorte in `ludwig/app` — hier nicht
+   erfüllbar, hält die Aufgabe nicht auf.
+2. Kein Mangel, aber notiert: die **Offene Frage 1** ist nur halb umgesetzt.
+   `quiet` steht in `--color-text-muted` (gemessen `rgb(92,92,92)` gegen
+   `rgb(45,45,45)`), aber **nicht** eine Stufe kleiner — beide
+   Zusammenfassungen sind 13.5 px. Entweder die Größe nachziehen oder die
+   Antwort in der Spec korrigieren.
+3. `.v2disc__chev` trägt `transition: transform` (`v3.css:1700`) ohne
+   `@media (prefers-reduced-motion: reduce)`. Das ist kein Sonderfall dieser
+   Aufgabe — `.v2chev`, `.v2drawer` und `.v2drawer__scrim` stehen genauso da;
+   in `v3.css` sind nur `.v2skel`, `.v2spin` und `.v2toast` abgesichert.
+   Gehört als eigene Aufgabe ans Set, nicht in diese Spec.
+
+**Beiläufig geprüft (0087).** Der Marker kommt jetzt über
+`ActionIcon action="collapse"`; im DOM steht weiter `lucide-chevron-right`,
+`width 14`, `stroke-width 1.5` — dasselbe Zeichen an derselben Stelle wie vor
+`f58caa2`. Nichts verschwunden, nichts gesprungen.
