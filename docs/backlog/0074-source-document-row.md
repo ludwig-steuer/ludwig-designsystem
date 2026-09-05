@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/source-document/` — Familie `SourceDocument.tsx` (`SourceDocumentCell`, `SourceDocumentClass`, `SourceDocumentRow`) plus das Registry-Modul `source-source-document-detail.ts` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Belegart, Belegkategorie, Belegrichtung und Beleg-Erledigung sind Ludwig-Fachbegriffe mit eigenen Registry-Achsen |
 | Quelle | Entitätsprofil `docs/entitaeten/source-document.md` (Status `geprüft`), Abschnitte „Die eine Regel", „Datenpunkte" Rang 1–7, „Formen" Zeilen 1–3 · Owner-Anfrage 2026-09-04 |
@@ -82,10 +82,14 @@ Ausprägung.
 - **Neu, weil:** `spec-schreiben` §3 Regel 5 — `ui-repraesentationen.md` §1
   führt für den Beleg die Formen Zelle, Zeile und Liste, und keine
   vorhandene Form deckt sie ab.
-- **Zuschnitt:** **eine Datei, drei Exporte** (§4 „Familie"): `SourceDocumentCell`,
-  `SourceDocumentClass` und `SourceDocumentRow` teilen das Markup-Vokabular der
-  Beleg-Identität, die Zeile setzt beide anderen zusammen, und keiner von
-  ihnen trägt eigenen Zustand. Vorbild `Clarification.tsx` (0059: Cell, Row,
+- **Zuschnitt:** **eine Datei, drei tragende Exporte** (§4 „Familie"):
+  `SourceDocumentCell`, `SourceDocumentClass` und `SourceDocumentRow` teilen
+  das Markup-Vokabular der Beleg-Identität, die Zeile setzt beide anderen
+  zusammen, und keiner von ihnen trägt eigenen Zustand. *Nachtrag 2026-09-05:
+  gebaut sind sieben — dazu kamen `SourceDocumentCompletion`,
+  `sourceDocumentIdentifier`, `clipMiddle` und der Typ `SourceDocumentVM`, alle
+  vier mit `@when`/`@instead` und von 0075/0076 mitbenutzt. Die drei sind die
+  Formen; die vier sind ihr geteiltes Handwerkszeug.* Vorbild `Clarification.tsx` (0059: Cell, Row,
   List in einer Datei). Dazu **ein zweites Modul** `source-source-document-detail.ts` — die
   Registry ist kein Markup und wird von 0076 mitbenutzt; sie in `SourceDocument.tsx`
   zu legen hieße, `SourceDocumentFacts` importiert die Zeile.
@@ -489,3 +493,78 @@ Regelbruch wie der behobene Mangel, eine Datei weiter. Englisch.
 ## Abnahmekriterien (Nachtrag der zweiten Runde)
 
 - [ ] Kein deutscher Kommentar in `SourceDocument.tsx` **und** `SourceDocument.stories.tsx` (`grep`)
+
+## Abnahme — dritter Durchgang (2026-09-05)
+
+Abgenommen gegen Spec und Code, nicht gegen den Chat. Stand `70a8e74`. Alle
+sieben Stories auf `localhost:6107` geöffnet und im Blatt gemessen
+(`measure.mjs`), die Längen der Rand-Daten am Quelltext **nachgezählt** statt
+geschätzt, die Kommentare beider Dateien Zeile für Zeile gelesen. Die
+Kriterien beider Vorrunden sind mitgeprüft — die Behebung hat davon nichts
+umgeworfen.
+
+**Story-Deckung.** Unverändert sieben Exporte, sieben IDs in `index.json`
+(`--filled`, `--kinds`, `--classification`, `--states`, `--cell`, `--edges`,
+`--in-use`); die Ableitung (1 Zustand + 3 Enum-Achsen + 1 Zusatz-Export +
+1 Rand + 1 im Einsatz) geht weiter auf, die vier ausgeschlossenen Zustände
+stehen begründet unter „Verhalten".
+
+**Nachtrag der zweiten Runde**
+
+| Kriterium | Nachweis (Datei · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Kein deutscher Kommentar in `SourceDocument.tsx` **und** `SourceDocument.stories.tsx` | beide Dateien vollständig durchgesehen: alle Doc-Blöcke und alle sieben `//`-Kommentare der Story-Datei (`:148`, `:149`, `:161`, `:170`, `:171`, `:184`, `:185`, `:348`) sind englisch. Der beanstandete `:348` heißt jetzt „`// 139 and 56 characters — the maximum the comment above claims.`" (`git show 70a8e74 -- … SourceDocument.stories.tsx`: eine Zeile). Gegenprobe über beide Dateien mit `grep -nE '^\s*(//\|\*\|/\*)'` und einem Filter auf deutsche Füllwörter (`weil\|damit\|würde\|nicht\|der\|die\|das\|ein\|und\|Zeichen\|für\|mit\|von\|ist\|sind\|wird\|aus\|beim\|zum`): **kein Treffer** | ✓ |
+
+**Nachtrag der ersten Runde (mitgeprüft)**
+
+| Kriterium | Nachweis (Datei · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Die Story `Rand` trägt 139 Zeichen Dateiname und 56 Zeichen Gegenpart | nachgezählt aus `SourceDocument.stories.tsx:349–351`: der Dateiname `"Rechnung-2026-08-26-ACME-…-Kostenstelle-1200-4471.pdf"` = **139** (auch als Codepoints 139), der Gegenpart `"Bürobedarf und Bewirtung Musterstadt Handelsgesellschaft"` = **56** (Codepoints 56, die Umlaute zählen einfach). Beide Werte sind gegenüber der zweiten Runde unverändert; der Dateiname ist zeichengleich mit dem der `Rand`-Story von 0076 | ✓ |
+| Beide werden gekürzt, der volle Text steht im `title` | `--edges`, DOM: Gegenpart sichtbar `Bürobedarf und Bewirtung Musterstad…` (36 Zeichen), `title` 56 · Dateiname sichtbar `Rechnung-2026-08-26-ACME…tenstelle-1200-4471.pdf` (48 Zeichen, in der **Mitte** geschnitten, die Endung steht), `title` 139 | ✓ |
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` **nicht** gelaufen (mehrere Sitzungen parallel, laut Auftrag untersagt); ersatzweise rendert der laufende Storybook alle sieben Stories, `console-check.mjs` über alle sieben: **0 Meldungen** | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/source-document/SourceDocument.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Beleg/SourceDocument` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` an allen sieben Exporten (`clipEnd`, `clipMiddle`, `sourceDocumentIdentifier`, `SourceDocumentCompletion`, `Cell`, `Class`, `Row`), unverändert. Kommentare beider Dateien jetzt durchgehend englisch — siehe Nachtrag | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}\b\|[0-9]+px'` über `SourceDocument.tsx` und `source-document-detail.ts`: ein Treffer, `#30581` im Kommentar zu einem TypeScript-Issue. Wörter aus `sourceDocTypeLabel()`, `formatDocumentKind()` und der Achse `beleg_erledigung` | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | `--in-use`, sechs Zeilen über fünf Belegarten, und `--edges`, vier Zeilen: die acht Spaltenkanten stehen in **jeder** Zeile beider Stories auf 35 · 340 · 464 · 576 · 819 · 923 · 1035 · 1237 (`distinctColSets` = 1) — dieselben Werte wie in beiden Vorrunden, die neuen Rand-Daten haben nichts verschoben. Zeilenhöhe 72,2 px bei Polsterung `12px 18px`; Maß-Spalte `text-align: right` mit `lining-nums tabular-nums`, nichts zentriert (0 Elemente mit `text-align: center`); die Zeile ist ganz klickbar — `elementFromPoint` bei 80 % Breite trifft `A.v2rowlink` (I11); Erledigung als **Wort** (0 `<svg>` in der Zustandsspalte über alle acht Zeilen von `--states`); kein `<button>`, kein `input`, kein `select`, kein `textarea` im DOM von `--in-use`; die zwei App-Punkte übersprungen | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle sieben IDs am 2026-09-05 geöffnet und gemessen | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `grep -n "isInvoice\|=== \"invoice\""` findet nichts außer den Registry-Einträgen | genau ein Treffer im ganzen Ordner: `source-document-detail.ts:16`, Fließtext im Modul-Kommentar („never through an `if (isInvoice)`") | ✓ |
+| `invoice` **ohne** `detail`: Dateiname als Kennung, keine Maß-Stelle | `--kinds`, Zeile 9: `Bürodienst Nord · Rechnung ǀ (leer) ǀ 30.07.2026 ǀ alt-2026-07-31-1188.pdf · Über Import erledigt` — Kennung ist der Dateiname, die Maß-Spalte leer, kein Gedankenstrich | ✓ |
+| `other` **mit** `detail.kind = "invoice"`: weder Nummer noch Brutto | `--kinds`, Zeile 10: `Filiale Mitte · Kassenabschluss ǀ (leer) ǀ 31.08.2026 ǀ Kassenabschluss-2026-08.pdf` — statt `RE-9902` und `88,40 €` | ✓ |
+| Der Vergleich ist generisch | `source-document-detail.ts`: `if (entry.type !== sourceDocType) return null;` — der Eintrag nennt seinen eigenen `type`, die Funktion zählt keine Belegarten auf | ✓ |
+| `sourceDocType = null` heißt „Beleg" | `--kinds`, Zeile 8: `scan-20260819-114233.pdf` · **Beleg** · Belegdatum „—". Daneben Zeile 6 `declaration` → „Erklärung" (die geweitete Union, B10), Zeile 7 `other` + `payroll_slip` → „Lohnabrechnung" (Rückfall auf die Belegform) | ✓ |
+| `docCategory = null`, `docDirection = null`, `classDocumentKind = "original"` erzeugen kein Badge | `--classification`, die fünf Fälle im Text: „Leistungsbeleg · Eingangsrechnung · Stornogutschrift · Auslagenabrechnung" (vier Marken) · „Kategorie fehlt (Container, B3)" → nur „Ausgangsrechnung" · „Richtung nicht anwendbar" → nur „Nachweisbeleg" · „Charakter = original" → nur „Zahlungsbeleg", kein Charakter-Badge · „Nichts eingeordnet" → gar kein Badge | ✓ |
+| Die Erledigung steht als Wort, über die Achse `beleg_erledigung` | `--states`: acht Zeilen, acht Wörter — „Offen", „Gebucht", „Sachverhalt geschlossen", „Über Import erledigt", „Ersetzt", „Von Hand erledigt", „Keine Buchung nötig", „Erledigt"; **0** `<svg>` in der Zustandsspalte; die `title` beginnen mit „Erledigung: …" und tragen den Text der Achse | ✓ |
+| `completedAt` gesetzt und `completedVia` `null` zeigt „Erledigt" | `--states`, letzte Zeile: „Erledigt", nicht „Offen" | ✓ |
+| Ein 139-Zeichen-Dateiname wird in der Mitte gekürzt, die Endung bleibt lesbar, das Ganze steht im `title` | `--edges`, Zeile 1: sichtbar 48 Zeichen mit `…` in der Mitte und `.pdf` am Ende, `title` 139 — der Höchstfall des Profils, siehe Nachtrag | ✓ |
+| Kennung fällt zurück: Ausprägung → Dateiname → Kurz-ID | `--kinds`: Rechnung → `RE-4471`, Vertrag → „Miete Lagerhalle Nord, monatlich", die Container-Arten (Kontoauszug, Kreditkartenabrechnung, Reisekostenabrechnung, Erklärung, Lohnabrechnung, ohne Typ) → Dateiname. Stufe 3 bleibt unvorführbar, weil `fileName` Pflichtfeld ist — so sagt es die Spec selbst | ✓ |
+| Ersetzt `InvoiceNumberCell`, `PartnerCell`, `ClassificationStack`, `StatusCell`, `CompletedCheck` | betrifft `ludwig/app`; in diesem Repo nicht erfüllbar | offen (App) |
+| Tut bewusst nicht: sortieren, filtern, blättern, handeln | im DOM von `--in-use` und `--edges` kein `<button>`, kein `input`, kein `select`, kein `textarea` — nur Links | ✓ |
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Das Blatt hat sich in diesem Durchgang geändert, die Zeile nicht.** Der
+  Commit `70a8e74` fasst `v3.css` an (`.v2drawer__b > *`, `.v2doc__headskel`,
+  beides für 0076). Die acht Spaltenkanten von `--in-use` und `--edges` stehen
+  danach auf denselben Werten wie in den zwei Vorrunden — die Zeile ist von der
+  Änderung nicht berührt.
+- **Die Kürzung des Gegenparts ist eine Ende-Kürzung mit Auslassungszeichen**,
+  36 Zeichen sichtbar bei einer Grenze von 36: das Zeichen `…` zählt mit. Zwei
+  Zeichen weniger Text als die Grenze verspricht — im Bild richtig, in der
+  Tabelle „Kürzung" nicht gesagt. Unverändert aus der zweiten Runde.
+- Unverändert offen aus beiden Vorrunden: der Zuschnitt-Satz der Spec sagt
+  „eine Datei, drei Exporte", gebaut sind sieben; und `.v2fields__h` /
+  `.v2doc__h` setzen weiter `text-transform: uppercase` (A2/T9) — beides
+  gehört den Grundlagen (0055), nicht dieser Aufgabe.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05

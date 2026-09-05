@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | nein — kennt drei Tabellen des Sachverhalts (Ereignis, Klärung, Erwartung); der Strang darunter ist das Pattern `Timeline` (0023) |
 | Quelle | Anfrage Owner 2026-09-03 (Sachverhalts-Detail `/clients/<slug>/<jahr>/cases/<id>`, Tab „Übersicht", Karte „Timeline") · Staging-Aggregate 2026-09-03 (§ Datenpunkte) · Entitätsprofil `docs/entitaeten/accounting-case.md` **fehlt noch** — diese Spec trägt den Verlaufs-Ausschnitt selbst; entsteht das Profil, gilt es vor |
@@ -308,7 +308,10 @@ Ausgelassen (Technik): `id`, `tenant_id`, `client_id`, `fiscal_year_id`,
 `v3/Entitäten/Sachverhalt/CaseTimeline`. Nach §6: 3 Zustände + 0 Enum-Props +
 1 Callback + 1 „im Einsatz" + 1 Rand + 1 Ausprägungen (der Schlüssel
 `kind`/`type` ist die Achse der Komponente, wie `variant` bei einem
-Primitive) = 7.
+Primitive) = 7. **Gebaut sind acht**: `SameDay` kam mit dem ersten Mangel der
+Abnahme dazu — die Tagesordnung war in keiner der sieben zu sehen. Die
+Ableitung zählt Achsen, nicht Nachweise; wo eine Abnahme einen fehlenden
+Nachweis findet, wächst die Zahl um ihn (nachgezogen 2026-09-05).
 
 | Story | Beweist |
 |---|---|
@@ -873,3 +876,105 @@ jeder Block über seiner Funktion.
 
 - [ ] `grep -rn "slice(0, 10)" src/ui/v3` findet nichts — auch nicht in Stories
 - [ ] `daysBetween` und `calendarDay` tragen je ihr eigenes `@when`/`@instead`
+
+## Abnahme — dritter Durchgang (2026-09-05)
+
+Abgenommen gegen Spec und Code, nicht gegen den Chat. Stand `70a8e74`. Alle
+acht Stories auf `localhost:6107` geöffnet und im Blatt gemessen
+(`measure.mjs`, Ausdrücke über `#storybook-root`), `--interactive` mit echten
+Tastendrücken über CDP bedient (Tab · Enter · Leertaste), `--laedt`-fremde
+Nachbarn mitgeprüft, `calendarDay` und `daysBetween` zur Laufzeit aus dem
+Barrel geholt und in **fünf** Zeitzonen des Prozesses gerechnet. Die
+Kriterien beider Vorrunden sind mitgeprüft — die Behebung hat davon nichts
+umgeworfen; genau das war in der letzten Runde dreimal schiefgegangen.
+
+**Story-Deckung.** Acht Stories im Kapitel „Stories", acht Exporte in
+`CaseTimeline.stories.tsx`, acht IDs in `index.json` (`--filled`, `--same-day`,
+`--empty`, `--loading`, `--entry-kinds`, `--interactive`, `--in-use`,
+`--edge`). Jede Prop hat ihre Story: `events`/`clarifications`/`expectations`
+(`Filled`) · `selectedId`/`onSelect` (`Interactive`, mit der Gegenprobe ohne
+`onSelect` daneben) · `kindLabels` (`EntryKinds`) · `today` (in allen acht auf
+`2026-09-03`) · `loading` (`Loading`). „leer nach Filter" und „Fehler" bleiben
+begründet ausgeschlossen. Die Ableitung im Kapitel „Stories" rechnet weiter
+mit sieben — `SameDay` kam mit M1 der ersten Abnahme dazu; die Zeile „= 7" ist
+nachzuziehen, sie ist kein Mangel am Code. Die drei Ergänzungen in
+`patterns/Timeline.stories.tsx` stehen (`--selected`, `--day-only`,
+`--without-kind`).
+
+**Nachtrag der zweiten Runde**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `grep -rn "slice(0, 10)" src/ui/v3` findet nichts — auch nicht in Stories | genau **ein** Treffer, `format.ts:158`: der Satz im Doc-Block von `calendarDay`, der vor eben diesem Schnitt warnt („The tempting one-liner is `iso.slice(0, 10)`, and it is wrong for the two hours every night …"). Er ist die Begründung, nicht der Fehler — wie in der zweiten Runde gewertet. Im Code steht kein Schnitt mehr: `CaseTimeline.stories.tsx:294` liest `formatTime(c.raisedAt, "date")`, und `--in-use` zeigt bei gewählter Frage „Rückfrage · gestellt am **25.08.2026**" statt „2026-08-25" | ✓ |
+| `daysBetween` und `calendarDay` tragen je ihr eigenes `@when`/`@instead` | `format.ts:137–147` der Block, `:148` die Funktion `daysBetween`; `:155–167` der Block, `:168` die Funktion `calendarDay`. Jeder Block trägt beide Zeilen und steht über seiner eigenen Funktion — der Fix hat die Funktion vor den fremden Block gezogen, statt den Block zu verschieben (`git show 70a8e74 -- src/ui/v3/format.ts`). Beide stehen im Barrel und sind zur Laufzeit erreichbar (siehe die Zeitzonen-Probe unten) | ✓ |
+
+**Nachtrag der ersten Runde (mitgeprüft)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Betrag und Badge stehen in jeder Zeile auf derselben Kante | in **jeder** Zeile gemessen, rechte Kante des Betrags und linke des Badge-Feldes: `--entry-kinds` (11 Zeilen) 484 / 496 · `--filled` (6) 484 / 496 · `--edge` (45) 484 / 496 · `--same-day` (3) 484 / 496 · `--in-use` (6) 811 / 823 · `--interactive` je Strang 342 / 354 (links, mit `onSelect`) und 844 / 856 (rechts, ohne). In jeder Story ein einziges Wertepaar; die rechte Kante der Zeile liegt durchweg auf 636 bzw. 963 | ✓ |
+| Eine Zeile ohne Betrag verschiebt ihr Badge nicht | dieselbe Messung, die Zeilen ohne `.v2amount`: `--filled` zwei Klärungszeilen, `--same-day` zwei Einträge, `--edge` „Korrektur ohne Betrag", `--entry-kinds` „Gehört die Rechnung auf 6815?" — alle mit `.v2ct__amt` bei 484 und Badge-Feld bei 496, wie die Zeilen mit Betrag | ✓ |
+| Kein String-Schnitt auf einem ISO-Datum mehr | siehe Nachtrag der zweiten Runde | ✓ |
+| `calendarDay` gibt den Berliner Tag, auch für 22:30 UTC und Silvester | zur Laufzeit im Blatt (`await import('/src/ui/v3/index.ts')`), den Prozess des headless Chromium jeweils mit gesetztem `TZ` gestartet — Europe/Berlin · Asia/Tokyo · Pacific/Kiritimati (+14) · Pacific/Midway (−11) · America/Los_Angeles. In **allen fünf** dieselben Werte: `2026-08-25T22:30:00Z` → **2026-08-26**, `2026-08-25T21:30:00Z` → 2026-08-25 (Kante der Sommerzeit), `2026-12-31T23:30:00Z` → **2027-01-01**, `2026-12-31T22:00:00Z` → 2026-12-31 (Kante der Winterzeit), der Tagesstring `2026-08-26` unverändert, Unsinn → `""`. `daysBetween` gleich mitgeprüft: 01.08./08.08. = 7, Tag gegen Zeitstempel = 5 | ✓ |
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` **nicht** gelaufen (mehrere Sitzungen parallel, laut Auftrag untersagt); ersatzweise übersetzt und rendert der laufende Storybook alle acht Stories, `console-check.mjs` über alle acht: **0 Meldungen** | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/accounting-case/CaseTimeline.tsx` + `CaseTimeline.stories.tsx`; Titel `v3/Entitäten/Sachverhalt/CaseTimeline` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `CaseTimeline` (`:167`) trägt beide Zeilen (`:161–166`), die vier Typen englischen JSDoc. In `format.ts` steht der Doc-Block jetzt wieder über seiner Funktion — der Mangel der zweiten Runde ist behoben, ohne einen neuen zu setzen. Bezeichner, Kommentare und Story-Exportnamen englisch, deutsch nur in sichtbaren Strings | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | in `CaseTimeline.tsx`: `grep -cE '#[0-9a-fA-F]{3,8}'` = 0, `grep -cE '[0-9]+px'` = 0, `grep -nE 'Intl\.\|toLocale'` leer. Die Maße stehen als `.v2ct__amt` (96 px) und `.v2ct__state` (140 px) im Blatt (`v3.css:1952–1953`). Einziges Objekt bleibt `EVENT_ICON`; Wörter aus `resolveStatus(…)` und der von der Spec erlaubten Übergangs-Prop `kindLabels` | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | V3 hält: Zahlen rechts in einer Spalte, `lining-nums tabular-nums`, Text links, **kein** Element mit `text-align: center` (0 gezählt) · Zeilenhöhe 34 px bei einzeiligem Titel · Farbe nur als Stufe, jeder farbige Zustand mit Wort („Gebucht", „Eskaliert", „Offen", „Blockierend", „Ersetzt") · jedes Icon mit `title` **und** `aria-label`, `svg` `aria-hidden="true"`, Lucide `stroke-width="1.5"`, `width="14"` · Fokusring nach echtem Tab-Anschlag sichtbar und gemessen: `outline 2px solid rgb(59,143,196)`, Offset 2 px, `:focus-visible` trifft · kein waagerechter Überlauf in einer der acht Stories · V13/T7 hält jetzt in Komponente **und** Story (`calendarDay`, `formatTime`) · die zwei App-Punkte übersprungen | ✓ |
+| Im Browser angesehen, nicht nur gebaut | alle acht IDs geöffnet und gemessen; `--interactive` mit echten Tastendrücken bedient; `--geoeffnet`/`--laedt` der Nachbaraufgabe 0076 mit angesehen, weil derselbe Commit das Blatt anfasst | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Drei Listen ergeben **einen** Strang, absteigend nach Tag; gleicher Tag: Erwartung, Klärung, Ereignis | `--filled`: ein `.v2tl` mit sechs `.v2tl__item`, `datetime` absteigend 2026-09-15 → 08-31 → 08-25 → 08-12 → 08-04 → 07-28. `--same-day`: drei Einträge, alle `datetime="2026-08-26"`, DOM-Reihenfolge „Beleg fehlt: Bürobedarf Meier GmbH · Fällig" → „Gehört der Laptop ins Anlagevermögen? · Offen · Blockierend" → „Rechnung RE-4471 · 1.249,90 € · Vorschlag" | ✓ |
+| Genau eine Zeile je Eintrag | `--filled`, `--same-day`, `--edge`, `--entry-kinds`, `--interactive`: `.v2tl__who` **0×**, `details`/`summary` **0×**; `--in-use`: keine Zeile enthält „.pdf" (`items.some(text.includes('.pdf'))` = false), Dateiname und Zusammenfassung stehen rechts im Detail | ✓ |
+| Zustände nur über `StatusBadge` mit den Achsen `ereignis`, `klaerung_status`, `klaerung`, `erwartung`; kein lokales Label-Objekt außer `kindLabels` | `grep -n 'axis=' CaseTimeline.tsx`: `erwartung` (`:216`), `klaerung_status` (`:239`), `klaerung` (`:242`), `ereignis` (`:268`) — mehr nicht. Im DOM von `--entry-kinds` die Registry-Wörter samt Erklärung im `title` des umschließenden `span` | ✓ |
+| `clarificationState()` und `expectationMaturity()` aus `src/ludwig/` importiert, keine zweite Ableitung | Import `:18–24` aus `@/ludwig/modules/accounting-cases/domain/case`; kein Datumsvergleich und kein `Intl` in der Datei. Sichtbar in `--filled`: dieselbe Frage am 04.08. „Beantwortet", die vom 25.08. „Offen" + „Blockierend" | ✓ |
+| Erwartungen mit `resolvedAt` fehlen im DOM (`Edge`) | `--edge`: `innerText.includes("erledigt — steht nicht im Strang")` = **false**; 45 Einträge, davon genau eine Erwartung | ✓ |
+| `selectedId` → genau ein `[aria-current="true"]`; `onSelect` liefert `{ type, … }`; ohne `onSelect` kein `button` | `--interactive`: **6** `button` im linken Strang, **0** im rechten. Echte Tastendrücke über CDP: Tab → Fokus auf `button.v2link` „Beleg fehlt: Bürobedarf Meier GmbH", Enter → „Gewählt: expectation · ex-1", `[aria-current="true"]` genau **1×**; zweimal Tab + Leertaste → „clarification · cl-3" (1×); Tab + Enter → „event · ev-2" (1×). Die Markierung wandert mit und bleibt einzeln | ✓ |
+| Ersetztes Ereignis: gedimmt, Badge „Ersetzt", kein Buchungszustand (`Edge`) | `--edge`: genau ein `.v2tl__item.v2muted` — „Rechnung RE-4470 · ersetzt / 1.249,90 € / **Ersetzt**", obwohl `state: "posted"` übergeben wird; der Eintrag bleibt wählbar | ✓ |
+| `payment_out` mit Minus; `amount` 0 oder `null` ohne Betragszelle (`Edge`) | `--edge`: „Zahlung an Stadtwerke Musterstadt / **-412,00 €**" bei übergebenen `412`; „Korrektur ohne Betrag" (`amount: 0`) ohne `.v2amount` — die Spalte bleibt belegt und ausgerichtet (Nachtrag) | ✓ |
+| Jedes Icon hat `title` und `aria-label` mit deutschem Wort (`EntryKinds`) | `--entry-kinds`, Probe über alle **elf** `span.v2tl__kind`: `role="img"`, `aria-label` = `title` = „Beleg fehlt", „Zahlung offen", „Beleg", „Zahlungseingang", „Zahlungsausgang", „Umbuchung", „Korrektur", „Sollstellung", „OP-Vortrag", „Beleg", „Frage"; `svg` je `aria-hidden="true"`, `stroke-width="1.5"`, `width="14"`, Lucide-Klassen `file-question-mark`, `banknote-arrow-down`, `file-text`, `arrow-down-left`, `arrow-up-right`, `arrow-left-right`, `sliders-horizontal`, `repeat`, `rotate-ccw-clock`, `message-circle-question-mark` | ✓ |
+| Lückenzeile „n Tage ohne Ereignis" bei ≥ 7 Tagen (`Edge`) | `--edge`: vier `.v2tl__gap` (21 · 121 · 9 · 12); `--filled` und `--in-use` je vier (15 · 13 · 8 · 7) — die 7 zeigt die Schwelle genau an der Kante; `--entry-kinds` eine (16) | ✓ |
+| 0023 erweitert: `selectedId`, tagesgenaues `at`, `kind` optional; bestehende 0023-Stories unverändert | `Timeline --selected`: genau ein `.v2tl__item.is-current` mit `aria-current="true"` · `--day-only`: `datetime="2026-08-28"` → „28.08.2026" ohne Uhrzeit neben `datetime="2026-08-26T14:12:00.000Z"` → „26.08.2026 16:12" · `--without-kind`: `.v2tl__who` 0×, beide Einträge einzeilig. Alle **dreizehn** Timeline-Stories nachgemessen: dieselbe Zahl Einträge (4 · 4 · 0 · 0 · 8 · 10 · 4 · 10 · 4 · 4 · 2 · 2 · 3), dieselben Zeiten, die rechte Gruppe bündig an der Strangkante (636 · 708/1424 · 615), kein waagerechter Überlauf | ✓ |
+| Tut bewusst nicht: filtern, Detail inline, nach Konto hervorheben | `--in-use`: `div.v2md` mit `div.v2md__detail`, links die Karte „Verlauf · 6 Einträge · Musterbau GmbH 2026" (die Zahl deckt sich mit sechs `.v2tl__item`), rechts die `FieldList` des gewählten Eintrags. Kein Filter, kein `Segmented` (`.v2seg` 0×) | ✓ |
+| Ersetzt `Timeline`/`TimelineItem`/`EventIcon` in `SachverhaltScreen.tsx`/`parts.tsx` | betrifft `ludwig/app`; in diesem Repo nicht erfüllbar (`docs/befunde-app.md`, Abschnitt E) | offen (App) |
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Der Tagesschnitt ist auch in der Story weg, aber die Uhrzeit steht weiter
+  nicht im Detail.** `--in-use` zeigt bei gewählter Frage „Rückfrage · gestellt
+  am 25.08.2026". Das ist richtig gerechnet (`cl-3` steht auf
+  `2026-08-25T16:20:00Z`, in Berlin 18:20) und liest sich deutsch statt
+  amerikanisch — die Datenpunkte-Tabelle sieht an dieser Stelle aber die
+  **Uhrzeit** vor („die Uhrzeit steht im Detail"). `formatTime(…, "dateTime")`
+  wäre der Halbsatz. Kein Kriterium, und das Detail stellt die Story, nicht die
+  Komponente.
+- **„Gedimmt" erreicht den Titel weiterhin nicht.** `--edge`, die ersetzte
+  Zeile: Container `rgb(92,92,92)`, Titel `rgb(45,45,45)` — genau wie jede
+  andere Zeile; zurück tritt nur der Betrag. Unverändert seit der zweiten
+  Abnahme, gehört dem Pattern 0023.
+- **Das Klickziel ist weiterhin nur der Titel.** `--interactive`: die sechs
+  Knöpfe messen 218 bis 279 px bei 375 px Kopfbreite (58–74 %); rechts daneben
+  reagiert nichts. Bewusst so gebaut, steht aber gegen §9/I11 — eine Frage an
+  den Owner, kein Mangel gegen ein Kriterium.
+- **Wo der Strang nach Tagen gruppiert, ist das `<time>` der Zeile leer.**
+  `Timeline --without-kind`: `<time class="v2tl__when" datetime="2026-08-28"
+  title="28.08.2026"></time>` ohne Text — der Tag steht in der Überschrift
+  `.v2tl__day` darüber, und einen Uhrzeit-Teil hat ein Kalendertag nicht.
+  Dasselbe in `--filled` von 0040. Im Bild richtig; ein `title` an einem leeren
+  Element ist trotzdem für niemanden erreichbar. Gehört 0023.
+- **Ohne `kindLabels` steht der englische Schlüssel im `aria-label`**
+  (`:250`), unverändert; bis die Registry `ereignis_art` führt (L-02).
+- **Der Rand hält.** `--edge` rendert 45 Einträge mit vier Lückenzeilen ohne
+  eine Konsolenmeldung; `--empty` zeigt einen Satz („Noch nichts geschehen."),
+  `--loading` die Skeleton-Fläche mit „Verlauf wird geladen …".
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/source-document/` — Umbau von `SourceDocumentFacts.tsx` (0052), Erweiterung von `source-source-document-detail.ts` (0074), Nachzug an `SourceDocumentDrawer.tsx` (0052) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: die Felder sind Belegfelder, und die Registry ist eine Aussage über das Ludwig-Datenmodell (Supertyp + Subtypen) |
 | Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Abschnitt „Die eine Regel" und „Heutige Darstellung" · Owner-Anfrage 2026-09-04 („Belege und Belegtypen sind Ausprägungen derselben Entität mit verschiedenen Datenfeldern — das sollten wir in der Vorschau berücksichtigen") |
@@ -574,3 +574,110 @@ null. Jetzt 180 px fest; gemessen 180 × 22.
 - [ ] Ladefläche und geladener Zustand haben dieselbe Kartenhöhe (`--laedt` gegen `--geoeffnet`)
 - [ ] Der Titel-Platzhalter ist sichtbar (`--laedt`, Breite > 0)
 - [ ] Kein anderer Drawer verliert dadurch etwas (`AccountDrawer --geoeffnet`)
+
+## Abnahme — dritter Durchgang (2026-09-05)
+
+Abgenommen gegen Spec und Code, nicht gegen den Chat. Stand `70a8e74`. Alle
+acht Fakten-Stories und die sechs Drawer-Stories auf `localhost:6107`
+geöffnet und im Blatt gemessen (`measure.mjs`), `--laedt` gegen `--geoeffnet`
+zusätzlich als Bild angesehen. Weil die Behebung eine Schicht tiefer sitzt —
+`.v2drawer__b > * { flex-shrink: 0 }` im `Drawer` (0042) — wurde **jeder**
+Drawer des Sets nachgemessen, nicht nur der des Belegs: die sechs Stories des
+Primitives (mit Klick geöffnet), die sechs von `AccountDrawer`, die sechs von
+`SourceDocumentDrawer`, dazu `ClarificationEditor --im-einsatz`,
+`SourceDocumentPreview --in-use` und `SourceDocumentFacts --in-use`; alle
+zweimal, bei 1440 × 900 und bei 1440 × 520, wo der Inhalt sicher überläuft.
+Die Kriterien beider Vorrunden sind mitgeprüft.
+
+**Story-Deckung.** Unverändert acht Fakten-Stories (`--filled`, `--kinds`,
+`--contract`, `--empty`, `--group`, `--tones`, `--edges`, `--in-use`) und
+sechs Drawer-Stories; die Ableitung (2 Zustände + 2 Enum-Achsen + 1 unbelegter
+Registry-Eintrag + 1 Relations-Block + 1 Rand + 1 im Einsatz) geht auf, lädt
+und Fehler trägt der Aufrufer (0042).
+
+**Nachtrag der zweiten Runde**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Die Vorschau steht im geladenen Zustand in voller Höhe, der Körper scrollt | `--geoeffnet` bei 1440 × 900: das `<iframe>` misst **558 px** und ist **558 px** sichtbar (kein Beschnitt an der Kartenkante), die Karte um es herum 651 px; der Körper scrollt (`scrollHeight` 1200 > `clientHeight` 760). Alle drei Kinder des Körpers tragen `flex-shrink: 0`, keins ist innerlich abgeschnitten. Vorher: 138 von 558 px. Bei 1440 × 520 dasselbe Bild — `scrollHeight` 965 > 380, das `<iframe>` bleibt 558 px hoch, der Fuß steht | ✓ |
+| Ladefläche und geladener Zustand haben dieselbe Kartenhöhe | `--laedt` gegen `--geoeffnet`, beide 1440 × 900: Karte y **101 / 101**, Höhe **651 / 651**, Kartenkopf **51 / 51**, Fläche des Originals y **173 / 172** und Höhe **558 / 558**. Ein Pixel Unterschied; die 407 px der zweiten Runde sind weg | ✓ |
+| Der Titel-Platzhalter ist sichtbar | `--laedt`: `.v2doc__headskel` misst **180 × 22** px bei y = 116 (`v3.css:2281`, feste Breite statt `42 %` von einem Träger ohne Breite). Im Bild steht ein grauer Balken im Kartenkopf, wo im geladenen Zustand „Rechnung" steht | ✓ |
+| Kein anderer Drawer verliert dadurch etwas | **21 Drawer-Zustände** gemessen. `Drawer --open`, `--sizes` (sm/md/lg), `--with-footer` (mit/ohne Leiste), `--footer-from-body`, `--long-content`, `--in-use`; `AccountDrawer --geoeffnet`, `--laedt`, `--fehler`, `--nicht-gefunden`, `--ein-jahr`, `--im-kontext`; `SourceDocumentDrawer --geoeffnet`, `--ohne-vorschau`, `--laedt`, `--fehler`, `--nicht-gefunden`, `--im-kontext`; `ClarificationEditor --im-einsatz`, `SourceDocumentPreview --in-use`, `SourceDocumentFacts --in-use`. In **keinem**: ein Kind mit eigenem Beschnitt (`scrollHeight > clientHeight` bei verstecktem Überlauf) = 0, waagerechter Überlauf des Körpers = 0, Fuß außerhalb des Drawers = 0; nach `scrollTop = scrollHeight` ist das letzte Kind überall vollständig sichtbar. Der Fall, der die Regel prüft, ist `Drawer --long-content`: 40 Kinder, `scrollHeight` 1501 gegen `clientHeight` 767, alle 21 px hoch, Fuß fest bei y = 845. Bei 1440 × 520 wiederholt: `SourceDocumentDrawer --geoeffnet` 965/380, `AccountDrawer --geoeffnet` 425/369, `ClarificationEditor --im-einsatz` 801/443, `Drawer --long-content` 1501/387 — überall scrollt der Körper, nichts staucht, nichts wird abgeschnitten. Kein Kind eines Drawer-Körpers trägt `flex-grow` oder einen eigenen Scrollbereich, dem die Regel etwas nehmen könnte | ✓ |
+
+**Nachtrag der ersten Runde (mitgeprüft)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Keine erfundenen Wörter für `ProvenanceSource` | `source-document-detail.ts:211–225`, `provenance()`: `manual` → „geprüft", sonst „KI" bzw. „KI · n %", mit dem Vermerk, dass die Wörter aus `ContractDetail.tsx` (`ProvMark`) stammen. Im DOM von `--contract`: „Konto = 4210 Miete · **KI · 92 %**", „Turnus = monatlich zum 3. Werktag · **KI · 88 %**", „Kaution = 7.200,00 € auf Verrechnungskonto · **geprüft**", „Kündigungsfrist = 3 Monate zum Jahresende · **geprüft**". Kein „von Hand", kein „automatisch gelesen" im ganzen Ordner | ✓ |
+| Der Befund steht als L-67 in `docs/befunde-app.md` | unverändert vorhanden, Abschnitt A | ✓ |
+| Die Ladefläche steht in derselben Karte mit demselben Kopf | siehe oben — jetzt deckt sich auch die Karte selbst (651 / 651 statt 617 / 210) | ✓ |
+| Die drei Zahlen im Kommentar der Story `Rand` sind gemessen, nicht behauptet | im Blatt gegengerechnet statt am Quelltext geglaubt: `--edges` liefert `title`-Längen von **139** (Dateiname) und **401** (Zusammenfassung) sowie 399 für den `title` der Erledigungsmarke, in dem der auf 280 Zeichen gekürzte Grund samt Achsentext steht. Das sind die Zahlen des Kommentars (`:396–398`) | ✓ |
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` **nicht** gelaufen (parallele Sitzungen, laut Auftrag untersagt); ersatzweise rendert der laufende Storybook alle vierzehn Stories, `console-check.mjs` über alle acht Fakten- und alle sechs Drawer-Stories: **0 Meldungen** | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `SourceDocumentFacts.tsx` + `.stories.tsx`, Titel `v3/Entitäten/Beleg/SourceDocumentFacts`; der Nachzug in `SourceDocumentDrawer.tsx` mit eigener Story-Datei | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` an `SourceDocumentFacts`, `SourceDocumentDrawer` und `resolveSourceDocumentDetail`; `provenance()` und `term()` sind modulintern und tragen erklärenden JSDoc. Kommentare der drei Dateien durchgehend englisch | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}\b\|[0-9]+px'` über `SourceDocumentFacts.tsx`, `SourceDocumentDrawer.tsx`, `source-document-detail.ts`: ein Treffer, `#30581` (TypeScript-Issue im Kommentar). Die beanstandete Label-Map ist weg; was bleibt, sind die Wörter der App in einer benannten Funktion mit Herkunftsvermerk und Register-Eintrag. Zustände über `axis="beleg_erledigung"` und `axis="dokumentgruppe"`; die neuen Maße der Behebung stehen im Blatt (`v3.css:841`, `:2281`), nicht in der Komponente | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Werte rechts mit `tabular-nums`, die Zusammenfassung als `.v2doc__prose` links; kein Icon ohne Wort — die Erledigung steht als Wort mit Beschreibung im `title`; Karte mit Rand ohne Schatten; keine Konsolenmeldung in einer der vierzehn Stories; kein waagerechter Überlauf in einem der 21 gemessenen Drawer-Zustände. Die beiden Punkte, die in der zweiten Runde an der Ladefläche rissen, halten jetzt (Nachtrag 1 und 3). Die Versalien aus `.v2fields__h` („RECHNUNG", „VERTRAG", „DOKUMENTGRUPPE", „BELEGDATEN") stehen unverändert und gehören weiter den Grundlagen (0055) | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | vierzehn Story-IDs geöffnet und gemessen, dazu neun fremde Drawer-Zustände; `--laedt` und `--geoeffnet` zusätzlich als Bild bei 1440 × 900 und beide bei 1440 × 520 nachgemessen | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Die acht generischen Zeilen stehen bei jeder Ausprägung in derselben Reihenfolge | `--kinds`, alle sechs Karten: Belegart · Gegenpart · Belegdatum · Eingang · Kennung · [Betrag] · Erledigung · [Zusammenfassung] — identisch über Rechnung, Vertrag, Kontoauszug, Sonstiger, ohne Typ und Widerspruch. „Betrag" fehlt genau dort, wo die Ausprägung keins liefert | ✓ |
+| Kontoauszug, Sonstiger Beleg und Beleg ohne Typ bekommen keinen Ausprägungs-Block | `--kinds`, Blockköpfe im ganzen Blatt: **„Rechnung" und „Vertrag", sonst keiner** — die vier übrigen Karten tragen nur die generischen Zeilen, keine leere Überschrift | ✓ |
+| Keine Zeile heißt „Rechnungsnr." oder „Lieferant" an einem Nicht-Rechnungs-Beleg | `--kinds`: „Netto", „USt.", „Fällig", „Zahlungsziel", „Leistungszeitraum", „USt-IdNr. des Ausstellers" stehen ausschließlich unter „RECHNUNG"; die anderen Karten führen nur Belegart · Gegenpart · Belegdatum · Eingang · Kennung · Erledigung | ✓ |
+| `grep -n "isInvoice"` findet nichts | ein Treffer, `source-document-detail.ts:16` — Fließtext im Modul-Kommentar | ✓ |
+| Eine neue Belegart erfordert genau einen neuen Registry-Eintrag | unverändert strukturell nachgewiesen: `SOURCE_DOCUMENT_DETAILS` ist ein Mapped Type über `SourceDocumentDetail["kind"]`; `SourceDocumentFacts` liest nur `detail.facts` und kennt keinen `kind`-Wert | ✓ |
+| Der Gruppen-Block erscheint bei einer Rechnung, die Teilbeleg ist | `--group`, vierte Karte: generische Zeilen · „RECHNUNG" · „DOKUMENTGRUPPE — Ausschnitt = Seiten 12–13 aus Sammel-PDF vom 12.08.2026". Vier Karten, fünf Blockköpfe, davon vier „Dokumentgruppe" | ✓ |
+| Ein Sammel-Original ohne Klammer-Typ sieht vollständig aus | `--group`, erste Karte: „DOKUMENTGRUPPE" mit „Teilbelege = 9" und „Erledigt = 4 von 9", **ohne** Klammer-Zeile; die zweite Karte zeigt denselben Block mit „Klammer = Kreditkartenabrechnung" und „Erledigt = 14 von 14" | ✓ |
+| Widerspruch zwischen Diskriminator und Subtyp-Zeile: kein Ausprägungs-Block | `--kinds`, Karte „Widerspruch (B9)": nur die generischen Zeilen, Kennung = `Kassenabschluss-2026-08.pdf`, keine Nummer, kein Brutto | ✓ |
+| Ein Beleg ohne `group` bekommt keinen Block | `--kinds` und `--empty`: kein „DOKUMENTGRUPPE" im ganzen Blatt; `--empty` trägt genau sechs Zeilen und keinen Blockkopf | ✓ |
+| `tone` verhält sich wie Zeile 4 der Schnittstelle | `--tones`: die zwei `bare`-Listen `background: rgba(0,0,0,0)`, `border-top-width: 0px`, `padding: 0px`; die zwei `surface`-Listen `rgb(255,255,255)`, `1px solid`, `padding: 20px` | ✓ |
+| Alle drei Kürzungen greifen, der volle Text steht im `title` | `--edges`: Kennung sichtbar 88 Zeichen (Mitte geschnitten, `.pdf` lesbar), `title` **139**; Zusammenfassung sichtbar 259, `title` **401**; Erledigungsgrund im `title` der Marke, dort auf 280 Zeichen gekürzt (399 Zeichen `title` samt Achsentext) — der Volltext des Grundes steht bewusst nirgends, so schreibt es 0074 | ✓ |
+| `SourceDocumentDrawer` zeigt die Erledigung im Kopf, nicht `axis="beleg"` | `--geoeffnet`: Kopf „Rechnung · ACME GmbH ǀ RE-4471 ǀ **Gebucht**", `title` „Erledigung: Gebucht · Der Beleg ist gebucht — die Buchung hat ihn beim Abschluss mit erledigt." `grep -n 'axis=' SourceDocumentDrawer.tsx` findet **nichts**, die Marke kommt aus `SourceDocumentCompletion` | ✓ |
+| `SourceDocumentDrawer` enthält kein `<iframe>` mehr | `grep -n "iframe" …/SourceDocumentDrawer.tsx` → kein Treffer; das `<iframe>` im DOM kommt aus `SourceDocumentPreview` (`title="Vorschau von RE-4471.pdf"`) | ✓ |
+| Ersetzt `BelegSummary`, `SourceDocFactsCard`, die Fakten von `GlanceCard` und `ContractDetail` | betrifft `ludwig/app`; in diesem Repo nicht erfüllbar. Die Felder selbst stehen (Rechnungsblock, Vertragsblock) | offen (App) |
+| Tut bewusst nicht: Positionen, Vorsteuer, Ändern | kein Formularfeld, kein Knopf in den acht Fakten-Stories; keine Positionsliste, keine Vorsteuer-Aufstellung | ✓ |
+
+**0052 ist weiter erfüllt**
+
+| Kriterium aus 0052 | Nachweis (Story-ID · Messwert) | Ergebnis |
+|---|---|---|
+| Zonen 1 · 2 · 3 · 4 · 5 in dieser Reihenfolge | `SourceDocumentDrawer --geoeffnet`: `.v2drawer__h` y = 0 (h 81) · Karte mit Vorschau y = 101 (h 651) · `.v2doc__h` („Belegdaten") y = 767 · `.v2fields` y = 792 (h 249) · `.v2doc__limit` y = 1242; der Fuß `.v2drawer__foot` steht fest bei y = 840 und scrollt nicht mit. Dieselbe Folge in `SourceDocumentFacts --in-use` | ✓ |
+| Zone 3 verwendet dieselbe Komponente wie der View | `SourceDocumentDrawer.tsx` importiert `SourceDocumentFacts`; keine zweite Feldliste im Drawer | ✓ |
+| Der Fuß trägt genau eine Aktion | ein `<button>`: „Vollständige Belegansicht öffnen" — in `--geoeffnet` und in `--in-use`; in `--fehler` und `--nicht-gefunden` ist der Fuß leer (Höhe 0) | ✓ |
+| Vier Zustände in der Vorrangfolge `error` → `loading` → `record === null` → Inhalt | `--fehler`, `--laedt`, `--nicht-gefunden`, `--geoeffnet` zeigen je ihren Zustand; `--laedt` setzt `record` **und** `loading` und zeigt die Ladefläche | ✓ |
+| Sechs Drawer-Stories bleiben | `--geoeffnet`, `--ohne-vorschau`, `--laedt`, `--fehler`, `--nicht-gefunden`, `--im-kontext` | ✓ |
+| Ladezustand hat die Form des Inhalts (Nachbesserung 2 der 0052-Abnahme) | Karte 651 / 651, Kartenkopf 51 / 51, Fläche 558 / 558, y 173 / 172 — und der Titel-Platzhalter im Kopf ist mit 180 × 22 px sichtbar. Im Bild: beide Zustände dieselbe Karte, derselbe Kopf, dieselbe Fläche | ✓ |
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Die Belegdaten stehen im geladenen Drawer unter der Falz.** Weil die
+  Vorschau ihre 651 px jetzt behält, beginnt „BELEGDATEN" bei 1440 × 900 erst
+  bei y = 767, also unter dem Fuß bei 840 — man scrollt eine halbe Fläche, um
+  die Fakten zu sehen. Das ist die Kehrseite der richtigen Entscheidung
+  (scrollen statt stauchen) und kein Mangel gegen ein Kriterium; wem die Fakten
+  wichtiger sind als die Vorschau, der stellt die Höhe der Vorschau ein
+  (`.v2doc__orig` steht auf `clamp(320px, 62vh, 900px)`) — eine Frage an den
+  Owner, keine an diese Abnahme.
+- **Der unsichere KI-Zweig der App hat hier weiterhin kein Gegenstück.**
+  `ProvMark` trennt bei 85 % Konfidenz und schreibt darunter „KI unsicher …";
+  `provenance()` kennt nur „geprüft" und „KI · n %". In den Stories fällt es
+  nicht auf (92 % und 88 %); mit der Achse aus L-67 verschwindet die Frage.
+- **Der Zahlstatus steht weiter als Datum** („Bezahlt = …"), begründet im
+  Kommentar zu `paidAt`: `payment_status` hat weder Achse noch Enum. Richtig
+  entschieden, gehört ins Register zu L-67.
+- **Die Regel des Drawers ist die richtige Schicht, und sie ist billig.**
+  `.v2drawer__b > * { flex-shrink: 0 }` betrifft alle 21 gemessenen
+  Drawer-Zustände und ändert in zwanzig davon nichts: kein Kind eines
+  Drawer-Körpers hat `flex-grow` oder einen eigenen Scrollbereich, dem das
+  Schrumpfen etwas gebracht hätte. Der Kommentar im Blatt sagt, warum sie da
+  ist — der nächste, der einen Drawer baut, findet die Antwort.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05
