@@ -2,14 +2,14 @@
 
 | | |
 |---|---|
-| Status | spec — **blockiert**, siehe Voraussetzung |
+| Status | spec — Voraussetzungen erfüllt; **Freigabe zum Bauen liegt beim Owner** |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | nein — die Reihenfolge Kopf → nächste Aktion → Strang → Detail ist die Sachverhaltslogik, keine allgemeine Form |
 | Quelle | Screenshot der Sachverhaltsansicht vom 2026-09-03 · `docs/seiten/sachverhalt-detail.md` |
 | Ersetzt | `SachverhaltScreen.tsx` (1815 Z.) + `parts.tsx` (522 Z.) in `modules/accounting-cases/ui/sachverhalt/` — das Gerüst, nicht die Datenbeschaffung |
 | Blockiert | die Ablösung der Sachverhaltsansicht in `ludwig/app` |
-| Voraussetzung | 0047 `RecordPager` ✓ · 0048 `EntityHeader` ✓ · 0049 ✓ (alle drei am 2026-09-03 gebaut) · Entitätsprofil `docs/entitaeten/accounting-case.md` — **geschrieben am 2026-09-05, Status `analysiert`**; es fehlt nur noch die fremde Prüfung |
-| Blocker | Owner-Entscheid vom 2026-09-03: **erst das Entitätsprofil, dann bauen.** Das Profil liegt seit 2026-09-05 vor und führt `CaseDetailView` im Zuschnitt mit Marke **jetzt**; sein Prüfprompt ist noch nicht gelaufen. Freigegeben wird diese Aufgabe vom Startprompt des Profils, sobald es auf `geprüft` steht — dann wird auch dieser Blocker gestrichen und das Profil als Quelle nachgetragen. |
+| Voraussetzung | 0047 `RecordPager` ✓ · 0048 `EntityHeader` ✓ · 0049 ✓ · Entitätsprofil `docs/entitaeten/accounting-case.md` ✓ (**geprüft** 2026-09-05, zweiter Agent) · `CaseFacts` (0097) — die Fakten, die `header` und `CaseDrawer` teilen |
+| Blocker | **keiner mehr.** Der Owner-Entscheid vom 2026-09-03 („erst das Entitätsprofil, dann bauen") ist eingelöst: das Profil liegt seit 2026-09-05 vor, ist von einem zweiten Agenten geprüft und führt `CaseDetailView` im Zuschnitt mit Marke **jetzt**. Der Prüflauf hat den Zuschnitt an zwei Stellen geändert — der Gegenpart steht ab Form S statt erst ab M, und der Reiter „Zum Schließen" ist eine eigene Liste — beides betrifft `CaseRow` und `CaseCard`, nicht die Slots dieser View. Die drei Entscheidungen vom 2026-09-03 gelten unverändert. **Die Freigabe zum Bauen liegt beim Owner**, nicht an einer Voraussetzung |
 | Spec von / am | Claude, 2026-09-03 (Entscheidungen getroffen, nicht gebaut) |
 
 ## Ziel

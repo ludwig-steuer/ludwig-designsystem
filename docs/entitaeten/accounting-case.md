@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **geprüft** (zweiter Agent, 2026-09-05 — siehe „Prüfung") |
+| Status | **in Specs** — 0095 CaseCell · 0096 CaseRow · 0097 CaseFacts · 0098 CaseDrawer (alle `spec`, 2026-09-05); 0050 CaseDetailView entblockt, Freigabe beim Owner |
 | GLOSSARY | `### Accounting case (Sachverhalt)` — englisch `accounting case`, Ordner `entities/accounting-case/` |
 | Tabelle | `ludwig.client_accounting_case` (Refactor 2026-05-27, vorher `ludwig.btx`). Keine Subtypen — die Art steht als `kind` in derselben Zeile |
 | Typen | `src/ludwig/modules/accounting-cases/domain/case.ts` — `CaseListItem`, `CaseLifecycle`, `CaseKind`/`CASE_KIND_LABEL`/`caseKindLabel()`, `CaseDisposition`, `CaseDocumentNumberMode`, `CaseExportStatus`/`deriveCaseExportStatus()`, `deriveClarificationLifecycle()`, `CaseFilter`, `CASE_LIST_TABS`; `acceptance-triage.ts` (Triage-Bucket), `document-number.ts`, `convention.ts` |
