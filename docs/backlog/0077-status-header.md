@@ -100,8 +100,9 @@ Nicht anwendbare Zustände: leer, lädt, Fehler (Begründung im Verhalten).
 
 ## Befunde für `ludwig/app`
 
-- **B1** — Acht Dateien schreiben die Legende von Hand (`legend={[…]}`):
-  `configuration/integrationen/page.tsx`, `admin/tenants/[tenantId]/page.tsx`,
+- **B1** — Sieben Dateien schreiben die Legende von Hand (`legend={[…]}`;
+  eine achte, `configuration/integrationen/page.tsx`, ist mit dem
+  Seiten-Rückbau vom 2026-09-05 weg): `admin/tenants/[tenantId]/page.tsx`,
   `admin/tenants/[tenantId]/clients/[clientId]/page.tsx`,
   `PaymentChannelActivitySection.tsx`, `VorsteuerTab.tsx`,
   `BridgeHealthStatus.tsx`, `AgentTokenManager.tsx`, `DatevExportSection.tsx`.
