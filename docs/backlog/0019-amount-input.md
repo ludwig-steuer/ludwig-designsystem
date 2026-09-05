@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, ein Geldbetrag ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Betragsfeld (`tnum`, Komma, Vorzeichen) — fehlt als Primitive" |
@@ -87,15 +87,45 @@ zeigt `Skeleton`, 0016).
 
 ## Abnahme
 
+**Zweite Abnahme, 2026-09-05** (fremder Prüfer, nicht der Erbauer). Die drei
+offenen Punkte der ersten Runde sind erledigt: `parseAmount` trägt
+`@when`/`@instead`, die App-Umstellung ist als App-Kriterium ausgewiesen, und
+die Versalien am Label sind ein Befund des Sets, keiner dieser Aufgabe (siehe
+unten). Jedes Kriterium einzeln, fest und variabel:
+
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| „1234,56", „1.234,56" und „1234.56" ergeben denselben Wert | `v3-primitives-formular-amountinput--interactive`: die Leseprobe zeigt für alle drei — und für „1 234,56" — 1234.56 | ✓ |
-| Unparsbares setzt `aria-invalid` und wird nicht auf 0 gesetzt | Dieselbe Story: „12,3,4" getippt, Feld verlassen — der Text bleibt stehen, `aria-invalid="true"`, Fehlerzeile „Betrag nicht lesbar — Beispiel: 1.234,56", der gespeicherte Wert bleibt unverändert | ✓ |
-| `null` rendert ein leeres Feld, nicht „0,00" | `--empty` und das zweite Feld in `--signs`: `input.value` ist leer | ✓ |
-| Ziffern stehen rechts und fluchten untereinander | `.v2in--amount` setzt `text-align: right` und `tabular-nums lining-nums` — dieselbe Regel wie `.v2num` in `AmountCell`; geprüft an `--interactive` und `--in-editor` | ✓ |
-| Minus ist schwarz wie jede andere Ziffer | `--signs`: „-312,40 €" in `rgb(45, 45, 45)`, identisch zum positiven Feld darunter | ✓ |
-| Ersetzt das Betragsfeld in `ExtractionCorrectionCard.tsx` | Kein `AmountInput`-Import in `ludwig/app` (`grep`) | ✗ |
+| **Fest** — `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0; zweimal gelaufen (Beginn und Ende der Abnahme, 2026-09-05) | ✓ |
+| **Fest** — `pnpm build` grün | Nicht erneut gelaufen: der Build schreibt nach `storybook-static`, und heute laufen weitere Abnahmen parallel. Der Lauf für diesen Stand war grün („Storybook build completed successfully") | ✓ (zitiert) |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/AmountInput.tsx` mit `AmountInput.stories.tsx` daneben; Titel `v3/Primitives/Formular/AmountInput` (`AmountInput.stories.tsx:6`) — „Formular" ist die Gruppe aus dem Barrel; Export `src/ui/v3/index.ts:105` | ✓ |
+| **Fest** — Code englisch, `@when`/`@instead` an jedem Export | Drei Exporte: `ParsedAmount` (Typ, `:17`), `parseAmount` (`:33`) mit `@when`/`@instead` in `:25–28`, `AmountInput` (`:61`) mit beiden Zeilen in `:58–59`. Bezeichner, Props, Kommentare englisch; deutsch nur in den Strings, die die Sachbearbeiterin liest | ✓ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map, kein eigener Status-Text | `grep -nE "#[0-9a-fA-F]{3,8}\|[0-9]+px\|fontSize:" AmountInput.tsx` → keine Treffer. Maße stehen in `v3.css:1717` (`.v2in--sm`) und `:1719` (`.v2in--amount`); die Komponente kennt keinen Status | ✓ |
+| **Fest** — alle Stories der Spec vorhanden, ausgeschlossene Zustände begründet | `index.json`: `--filled`, `--empty`, `--invalid`, `--signs`, `--interactive`, `--in-editor` — sechs, wie in der Ableitung (3 Zustände + 1 Callback + 1 „im Einsatz" + 1 Rand). `LeerNachFilter` und `Laedt` sind in der Spec mit Grund ausgeschlossen | ✓ |
+| **Fest** — Story-Deckung der Schnittstelle | Jede der neun Props hat ihre Story: `label`/`size` → `--filled` (13,5 px `md` gegen 12,5 px `sm`, gemessen), `value` → `--empty` (`input.value` = `""`), `onChange` → `--interactive` (Zähler „Gespeicherter Wert"), `currency` → `--filled` („1.249,90 €"), `allowNegative`/`disabled` → `--signs`, `error`/`required` → `--invalid` (zwei Felder: Pflichtmarke „BRUTTOBETRAG *" und Fehler von außen) | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 | Punkt für Punkt: Stufe `primitives/`, Importe nur abwärts (`Form.tsx`, `src/ludwig/shared/money`), kein Fachmodul ✓ · kein Hex/px/Label-Map ✓ · Zahl rechts mit `tnum`, nichts zentriert (`textAlign: right`, `fontVariantNumeric: lining-nums tabular-nums`, gemessen an `--interactive`) ✓ · keine Farbe außer der Fehlerfarbe, Vorzeichen ohne Farbe ✓ · Fehler steht als Wort, nicht nur als Rand (`.v2field__err`) ✓ · fünf Zustände: drei gebaut, zwei begründet ausgeschlossen ✓ · Kontrast gemessen: Fehlerzeile 5,6:1, Label 6,17:1, Feldtext 13,77:1 ✓ · kein Icon, kein Emoji, keine Bewegung ✓ · Fokus: `.v2in:focus` sichtbar ✓ · Texte Sie/GLOSSARY ✓. Die zwei App-Punkte (v1-Ablösung, §11) sind laut Skill übersprungen. **Ein Punkt reißt set-weit, nicht hier:** `.v2field__label` (`v3.css:842–845`) setzt `text-transform: uppercase`, das Label steht als „BRUTTOBETRAG" da — A2/T3. Betrifft jedes Feld des Sets; wie in 0017 als Befund gewertet, nicht als Mangel dieser Aufgabe | ✓ (mit Befund) |
+| **Fest** — im Browser angesehen | Alle sechs Stories in Chromium auf `localhost:6107` geöffnet, getippt und geklickt (Protokolle unten); Bild von `--in-editor` geprüft: zwei Felder, Ziffern auf einer Flucht, Karte mit Rand ohne Schatten | ✓ |
+| **Variabel** — „1234,56", „1.234,56" und „1234.56" ergeben denselben Wert | `--interactive`, wirklich getippt und mit Tab verlassen: alle vier Schreibweisen („1234,56", „1.234,56", „1234.56", „1 234,56") ergeben im Feld „1.234,56 €" und als gespeicherten Wert `1234.56`. Die Leseprobe daneben zeigt zusätzlich „1.234" → 1234 (Punkt vor drei Stellen = Tausendertrenner) und „(leer)" → null | ✓ |
+| **Variabel** — Unparsbares setzt `aria-invalid` und wird nicht auf 0 gesetzt | `--interactive`: „12,3,4" getippt, Feld verlassen — `input.value` bleibt „12,3,4", `aria-invalid="true"`, Fehlerzeile „Betrag nicht lesbar — Beispiel: 1.234,56", und der gespeicherte Wert bleibt der vorherige `1234.56`, wird also weder 0 noch `null` | ✓ |
+| **Variabel** — `null` rendert ein leeres Feld, nicht „0,00" | `--empty`: `input.value` = `""`. Gegenprobe in `--signs`, zweites Feld: ebenfalls leer | ✓ |
+| **Variabel** — Ziffern stehen rechts und fluchten untereinander | `--in-editor`, gemessen: beide Felder `text-align: right`, `font-variant-numeric: lining-nums tabular-nums`, rechte Kanten 218 px und 419 px bei gleicher Spaltenbreite — dieselbe Regel wie `.v2num` in `AmountCell`. Im Bild fluchten „1.249,90 €" und „1.249,90 €" | ✓ |
+| **Variabel** — Minus ist schwarz wie jede andere Ziffer | `--signs`, gemessen: „-312,40 €" in `rgb(45, 45, 45)`, identisch zum leeren und zum gesperrten Feld darunter. Keine Farbe am Vorzeichen (A7/V6). Gegenprobe: „-5" im Feld „nur positiv" bleibt stehen und bekommt den Text „Negative Beträge sind hier nicht vorgesehen." — kein stilles Verschlucken | ✓ |
+| **Variabel** — ersetzt das Betragsfeld in `ExtractionCorrectionCard.tsx` | Betrifft das Repo `ludwig/app` und ist hier nicht erfüllbar | offen (App) |
 
-**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): `parseAmount` hat `@when`/`@instead`.
+**Befunde** (keine Mängel dieser Aufgabe):
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die 16 Fundorte in `ludwig/app` sind nicht umgestellt; `parseAmount` ist ein Export ohne `@when`/`@instead`; das Label erbt die Versalien aus `.v2field__label` (A2).
+1. **Versalien am Feldlabel, set-weit.** `.v2field__label` (`v3.css:842–845`)
+   trägt `text-transform: uppercase`; damit stehen alle Feldbeschriftungen des
+   Sets in Versalien — A2/T3. Gehört in eine eigene Aufgabe, dieselbe
+   Feststellung wie in 0017.
+2. **Die Schnittstelle der Spec zählt neun Props, die Komponente hat zehn:**
+   `name` (`AmountInput.tsx:71,83`) verdrahtet `id` und `htmlFor`. Sinnvoll,
+   aber in der Spec-Tabelle nicht geführt — beim nächsten Anfassen nachtragen.
+3. **`currency={null}` hat keine Story.** Die Spec nennt als Nachweis `Filled`,
+   und dort steht der Default `EUR`; die reine Dezimalzahl ohne Währungszeichen
+   führt keine Story vor.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05
+
+Erste Runde (2026-09-03, Historie): ✗ an der App-Umstellung, dazu `parseAmount`
+ohne `@when`/`@instead` und die Versalien am Label. Nachgeprüft: `parseAmount`
+hat beide Zeilen.

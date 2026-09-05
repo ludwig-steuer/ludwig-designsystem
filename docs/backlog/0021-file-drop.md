@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Dateien ablegen ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Dateiablage (Drop-Zone, Liste, Fortschritt)"; Kit `UploadZone` |
@@ -75,21 +75,44 @@ Nicht anwendbar: `LeerNachFilter` — es gibt keinen Filter.
 
 ## Abnahme
 
+**Zweite Abnahme, 2026-09-05** (fremder Prüfer, nicht der Erbauer). Der erste
+✗ ist behoben — `accept` greift jetzt auch beim Ablegen. Zwei Punkte reißen
+weiter, einer davon neu. Jedes Kriterium einzeln, fest und variabel:
+
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| Zone per Tastatur erreichbar, Enter öffnet den Dateidialog (V11) | `v3-primitives-formular-filedrop--empty`: Tab landet auf `BUTTON.v2drop`, `:focus-visible` greift (`outline: rgb(59,143,196) solid 2px`, `outline-offset: 2px`). Die Zone ist ein echtes `<button>`, Enter löst also den Klick aus — nicht gedrückt, weil der native Dateidialog die Browser-Sitzung blockiert hätte | ✓ |
-| Beim Überziehen ändert sich nur der Hintergrund, nichts wächst (V12) | `--empty`, `dragover` ausgelöst: `background` `rgb(255,255,255)` → `rgb(244,246,248)` (Klasse `is-over`), Maße unverändert 460 × 84,25 px | ✓ |
-| Abgelehnte Dateien nennen den Grund, die übrigen kommen trotzdem an | **Größe ✓**: echter `drop` auf `--interactive` (`maxSizeMb=5`) mit drei Dateien → „riesig.pdf · 6,0 MB · Zu groß — höchstens 5 MB." in der Liste, `klein.pdf` und `tabelle.xlsx` sind durchgelaufen. **Format ✗**: `take()` prüft nur die Größe, `accept` geht ausschließlich an das native Feld — eine per Drag abgelegte Datei falschen Formats wird durchgereicht. Der Formatfehler in `--rejected` kommt aus der `files`-Prop, nicht aus der Komponente; die Spec verlangt unter „Verhalten" beides | ✗ |
-| Die Komponente lädt selbst nichts hoch | `grep fetch src/ui/v3/primitives/FileDrop.tsx` → kein Treffer; keine Server Action, kein `XMLHttpRequest` | ✓ |
-| Ersetzt die Drop-Zone in `InvoiceUploader.tsx` ohne Funktionsverlust | Vergleich mit `app/apps/web/src/modules/files/ui/InvoiceUploader.tsx`: Zone, Klick, Drag, Tastaturweg, Hinweiszeile, Dateiliste, Größe, Fortschritt und Entfernen sind gedeckt — die stille Ablehnung des Originals wird sogar zum genannten Grund. Nicht abbildbar ist der **Zustand je Datei**: `DroppedFile` kennt nur `progress` und `error`, das Original zeigt sechs Schrittwörter (`wartend`, `Upload-URL`, `Upload NN %`, `Bestätigung`, `Registrieren`, `Bereit`/`Duplikat`) und je Datei einen Link „Beleg öffnen →" | ✗ |
-| `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
+| **Fest** — `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0; zweimal gelaufen (Beginn und Ende der Abnahme, 2026-09-05) | ✓ |
+| **Fest** — `pnpm build` grün | Nicht erneut gelaufen (schreibt nach `storybook-static`, parallele Abnahmen). Der Lauf für diesen Stand war grün („Storybook build completed successfully") | ✓ (zitiert) |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/FileDrop.tsx` mit `FileDrop.stories.tsx` daneben; Titel `v3/Primitives/Formular/FileDrop` (`FileDrop.stories.tsx:7`); Export `src/ui/v3/index.ts:109` | ✓ |
+| **Fest** — Code englisch; `@when`/`@instead` an jedem Export | Zwei Exporte: `DroppedFile` (`:15`) und `FileDrop` (`:37`) mit `@when`/`@instead` in `:33–35`. Bezeichner, Props und Kommentare englisch | ✓ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\|[0-9]+px\|fontSize:" FileDrop.tsx` → keine Treffer; Maße in `v3.css:1873–1894` (`.v2drop*`). Kein Status im Spiel | ✓ |
+| **Fest** — alle Stories der Spec vorhanden, ausgeschlossene Zustände begründet | `index.json`: `--empty`, `--with-files`, `--uploading`, `--rejected`, `--interactive`, `--in-card` — sechs, wie in der Ableitung (4 Zustände + 1 Callback + 1 „im Einsatz"). `LeerNachFilter` ist mit Grund ausgeschlossen | ✓ |
+| **Fest** — Story-Deckung der Schnittstelle | Alle neun Props sind belegt: `label` → `--empty`, `onFiles` → `--interactive` (echte Auswahl über das native Feld, die Liste wächst), `files` → `--with-files`, `onRemove` → `--interactive` (geklickt, die Zeile verschwindet), `accept`/`multiple` (am `input` ausgelesen: `application/pdf,image/*`, `multiple: true`) und `hint` → `--empty`, `maxSizeMb` → `--rejected` und `--interactive`, `disabled` → `--empty` (zweite Zone, `disabled` am `<button>`) | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 (ohne die zwei App-Punkte) | Stufe `primitives/`, Importe nur abwärts (`Progress`, `TextButton`), kein Fachmodul ✓ · kein Hex/px/Label-Map ✓ · Text links, Größe rechts mit `tnum` (`.v2dropfile__size`: `lining-nums tabular-nums`, gemessen) ✓ · Dateizeile 6 px Polster, unter `.v2tbl__row` ✓ · Farbe nur am Fehler (Rot = Stufe Fehler), sonst grau ✓ · jeder farbige Zustand mit Wort: die rote Zeile trägt den Grund im Klartext (V7) ✓ · der Fortschritt trägt „35 %" als Wort neben dem Balken ✓ · fünf Zustände: vier gebaut, `LeerNachFilter` begründet ausgeschlossen ✓ · Kontrast gemessen: Fehlerzeile 5,6:1, Hinweis 4,88:1, Größe 6,17:1, Zonentext 13,77:1 ✓ · Fokusring `2px solid rgb(59,143,196)`, Offset 2 px ✓ · keine Transition auf `.v2drop`, `prefers-reduced-motion` gegenstandslos ✓ · Hover: `.v2drop:hover` färbt eine Tonstufe ✓ · kein Icon, kein Emoji, keine Unicode-Zeichen ✓ · Karte in `--in-card` mit Rand, ohne Schatten ✓. **Ein Punkt reißt:** die Texte T1–T5 — siehe Zeile **M1**. Set-weiter Befund: `.v2field__label` in Versalien (`v3.css:842–845`, A2/T3), wie in 0017 als Befund gewertet | ✗ (wegen M1) |
+| **Fest** — im Browser angesehen | Alle sechs Stories in Chromium auf `localhost:6107` geöffnet; echte Dateien über das native Feld ausgewählt, echte `drop`-Ereignisse mit `DataTransfer` ausgelöst, Einträge entfernt; Bild von `--in-card` geprüft | ✓ |
+| **Variabel** — Zone per Tastatur erreichbar, Enter öffnet den Dateidialog (V11) | `--empty`: ein Tab landet auf `BUTTON.v2drop`, `:focus-visible` greift (`outline: 2px solid rgb(59,143,196)`, `outline-offset: 2px`). Die Zone ist ein echtes `<button type="button">` (`FileDrop.tsx:110–111`), Enter löst also den Klick aus; nicht gedrückt, weil der native Dateidialog die Sitzung blockiert hätte. Dass derselbe Weg Dateien annimmt, ist in `--interactive` über das verdeckte `input` gezeigt | ✓ |
+| **Variabel** — beim Überziehen ändert sich nur der Hintergrund, nichts wächst (V12) | `--empty`, `dragover` ausgelöst und gemessen: `background` `rgb(255,255,255)` → `rgb(244,246,248)` (Klasse `v2drop is-over`), Maße vorher und nachher identisch 460 × 84,25 px | ✓ |
+| **Variabel** — abgelehnte Dateien nennen den Grund, die übrigen kommen trotzdem an | **Größe:** echter `drop` auf `--interactive` (`maxSizeMb=5`) mit `riesig.pdf` (6 MB) und `tabelle.xlsx` → in der Liste steht „riesig.pdf · 6,0 MB · Zu groß — höchstens 5 MB.", `tabelle.xlsx` ist durchgelaufen. **Format:** echter `drop` auf `--empty` (`accept="application/pdf,image/*"`, `maxSizeMb=20`) mit vier Dateien → abgelehnt werden nur `notiz.txt` (Format) und `scan.pdf` (21 MB, Größe), `beleg.pdf` und `foto.png` gehen durch. `accepted()` (`FileDrop.tsx:68–77`) prüft Endung, `typ/*` und exakten MIME-Typ — das ist der behobene ✗ der ersten Runde | ✓ |
+| **Variabel** — die Komponente lädt selbst nichts hoch | `grep -n "fetch\|XMLHttpRequest\|use server" FileDrop.tsx` → kein Treffer; beim Ablegen entstehen keine Netzwerk-Anfragen (in der Story beobachtet) | ✓ |
+| **M1 · Variabel** — der Ablehnungsgrund ist ein Text für die Sachbearbeiterin (T4/T5) | **Reißt.** Den einzigen Grund, den die Komponente selbst formuliert, setzt sie aus `accept` zusammen: `FileDrop.tsx:86` → `` `Format nicht vorgesehen — ${accept}.` ``. Im Browser steht damit in `--empty` nach dem Drop von `notiz.txt` wörtlich „Format nicht vorgesehen — application/pdf,image/*." — ein MIME-Ausdruck vor einer Steuerfachangestellten (T4: technische Namen nur in Technik-Sichten; T5: kein nächster Schritt). Die Story `--rejected` zeigt stattdessen „Format nicht vorgesehen — PDF, JPG oder PNG." — dieser Text kommt aus der `files`-Prop, nicht aus der Komponente. Die Story führt also eine Formulierung vor, die es im Code nicht gibt | ✗ |
+| **M2 · Fest** — eine Kennung kommt nur einmal vor | **Reißt (aus der ersten Runde übernommen, unverändert).** `aria-describedby="v2drop-hint"` (`FileDrop.tsx:114`) und `id="v2drop-hint"` (`:129`) sind feste Literale. Zwei `FileDrop` mit `hint` auf einer Seite erzeugen dieselbe `id` zweimal; die Vorlesehilfe liest dann für beide Zonen denselben Satz. Heute unauffällig, weil in `--empty` nur die erste Zone einen `hint` trägt | ✗ |
+| **Variabel** — ersetzt die Drop-Zone in `InvoiceUploader.tsx` ohne Funktionsverlust | Betrifft das Repo `ludwig/app` und ist hier nicht erfüllbar. Der fachliche Befund der ersten Runde bleibt: `DroppedFile` kennt nur `progress` und `error`, das Original zeigt je Datei ein Schrittwort und einen Link „Beleg öffnen" — solange das fehlt, kann die App die Zone nicht eins zu eins übernehmen | offen (App) |
 
-**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): `accept` greift auch beim Ablegen: simulierter Drop von `notiz.txt` gegen `application/pdf,image/*` erzeugt „Format nicht vorgesehen", `beleg.pdf` und `foto.png` gehen durch, 21 MB fällt an der Größe.
+**Zurück auf `in Arbeit`.** Zu tun:
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
-(1) `accept` auch beim Ablegen prüfen und die abgelehnte Datei mit Grund in die
-Liste stellen — sonst ist die Story `Rejected` für den Formatfall gestellt und
-nicht bewiesen. (2) `DroppedFile` um ein Zustandswort (und wahlweise eine
-Handlung je Zeile) erweitern, sonst bleibt `InvoiceUploader` beim Eigenbau.
-(3) Kleinigkeit: `aria-describedby="v2drop-hint"` ist eine feste Kennung — zwei
-`FileDrop` mit `hint` auf einer Seite erzeugen dieselbe `id` zweimal.
+1. **M1 — der Ablehnungsgrund darf keinen MIME-Ausdruck zeigen.** Entweder der
+   Aufrufer gibt die erlaubten Formate in Worten mit (eine Prop neben `accept`,
+   oder der ohnehin vorhandene `hint` trägt den Text), oder `accepted()`
+   übersetzt die Regel („PDF", „Bild"). Danach zeigt die Story `Rejected` den
+   Formatfehler so, wie die Komponente ihn erzeugt — heute ist er dort über
+   `files` gestellt.
+2. **M2 — `id` und `aria-describedby` eindeutig machen** (`useId()`), damit zwei
+   Ablagen mit `hint` auf einer Seite nebeneinander stehen können.
+
+**Befund** (kein Mangel dieser Aufgabe): `.v2field__label` (`v3.css:842–845`)
+setzt `text-transform: uppercase`; die Beschriftung erscheint als „BELEGE
+HOCHLADEN" — A2/T3, betrifft jedes Feld des Sets und gehört in eine eigene
+Aufgabe (wie in 0017 festgestellt).
+
+Erste Runde (2026-09-03, Historie): ✗ am Format-Fall (`accept` griff nicht beim
+Ablegen) und am App-Kriterium; der Format-Fall ist behoben und nachgeprüft.

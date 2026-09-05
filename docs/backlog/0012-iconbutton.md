@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, ein Schließen-Kreuz ist fachfrei |
 | Quelle | Knopf-Erhebung `ludwig/app` vom 2026-09-03 — 31 Icon-only-Knöpfe, 9 davon ohne `aria-label` |
@@ -102,17 +102,30 @@ Nicht anwendbar: `Leer`, `Laedt`, `Fehler`, `LeerNachFilter`.
 
 ## Abnahme
 
+Zweite Abnahme gegen Spec und Code (fremder Agent), 2026-09-05 — die erste vom
+2026-09-03 hatte vier ✗; drei davon sind behoben, einer steht noch. Alle sechs
+Stories im Browser auf `localhost:6107` geöffnet und im DOM vermessen.
+
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| `label` ist Pflicht — der Typecheck lehnt einen `IconButton` ohne ab | `IconButton.tsx`: `label: string` im gemeinsamen `Common`-Typ, also in beiden Union-Zweigen; `pnpm typecheck` grün | ✓ |
-| `label` landet als `aria-label` **und** `title` im DOM | `v3-primitives-aktion-iconbutton--filled`, DOM-Probe: alle drei Knöpfe tragen beides, Textinhalt leer, 28 × 28 px; Fokusring per Tab sichtbar | ✓ |
-| `InUse` zeigt neben dem Icon-Knopf einen beschrifteten Weg | `v3-primitives-aktion-iconbutton--in-use`: Schließen-Kreuz im Kopf, „Abbrechen" im Fuß | ✓ |
-| Die `@when`-Zeile nennt die drei Bedingungen; `@instead` verweist auf `Button` und `OverflowMenu` | `@when` nennt Bedingung 1 (konventionelles Icon) und Bedingung 3 (beschrifteter Weg daneben); Bedingung 2 (umkehrbar und folgenlos) fehlt. `@instead` nennt `Button` und `OverflowMenu` | ✗ |
-| `design-guidelines.md` T8 trägt die Ausnahme mit den drei Bedingungen und dem Datum | Zeile 161 unverändert — „Icon-Only-Button ohne sichtbares Wort" steht weiter als Verstoß; die Ausnahme steht nur als Katalogzeile in §11.7 | ✗ |
-| Der Kommentar „Kein Kebab …" in `Button.tsx` bleibt und verweist auf die Ausnahme | Der Satz steht in `ActionBar.tsx` bei `RowActions`, nicht in `Button.tsx`, und verweist nicht auf die Ausnahme | ✗ |
-| Ersetzt das Schließen-Kreuz in `v3/primitives/Dialog.tsx` | `Dialog.tsx:73` weiter rohes `<button className="v2dlg__close">` mit eigenem `aria-label` | ✗ |
-| Räumt mindestens eine der neun Stellen ohne `aria-label` in `ludwig/app` auf | Kein `IconButton`-Import in `ludwig/app` (`grep`) | ✗ |
+| **Story-Deckung** — jede Prop der Schnittstelle hat ihre Story | `label`/`icon` → `--filled`; `size` und `disabled` → `--sizes`; `tone` → `--tones`; `href` → `--as-link`; `onClick` → `--interactive`; Bedingung 3 → `--in-use`. Sechs Stories, genau die Ableitung der Spec, alle in `localhost:6107/index.json`. `Leer`, `Laedt`, `Fehler`, `LeerNachFilter` sind in der Spec begründet ausgeschlossen | ✓ |
+| `label` ist Pflicht — der Typecheck lehnt einen `IconButton` ohne ab | `IconButton.tsx:20` — `label: string` im gemeinsamen `Common`-Typ, also in beiden Zweigen der Union (`IconButtonProps`, `IconButtonLinkProps`); `aria-label` und `title` sind aus den durchgereichten Button-Attributen ausgeschlossen (`:29`). `pnpm typecheck` grün (Exit 0) | ✓ |
+| `label` landet als `aria-label` **und** `title` im DOM | `v3-primitives-aktion-iconbutton--filled`, DOM-Probe: alle drei Knöpfe tragen `aria-label` und `title` mit demselben Text („Dialog schließen", „Neu laden", „Seitenleiste einklappen"), Textinhalt leer, 28 × 28 px, Icon `stroke-width="1.5"`. `--as-link`: beide `<a>` ebenso. `--sizes`: 24 / 28 / 32 px, der gesperrte trägt den Grund im `title` („Gesperrt, solange der Stapel läuft") | ✓ |
+| `InUse` zeigt neben dem Icon-Knopf einen beschrifteten Weg (Bedingung 3) | `--in-use`, DOM: ein `.v2ibtn` („Dialog schließen") im Kopf, im Fuß zwei beschriftete `.v2btn` („Abbrechen", „Stornieren"); im Screenshot beides gleichzeitig sichtbar | ✓ |
+| Die `@when`-Zeile nennt die drei Bedingungen; `@instead` verweist auf `Button` und `OverflowMenu` | `IconButton.tsx:42–48`: „All three hold: the action is **conventional and readable without prior knowledge** (close, page, collapse), it is **reversible and harmless**, and a **labelled second way** to the same goal exists." — alle drei, mit Verweis auf `design-guidelines.md` §6 T8. `@instead` nennt `Button`, `TextButton` und `OverflowMenu`. Behoben gegenüber der Abnahme vom 2026-09-03 (Bedingung 2 fehlte) | ✓ |
+| `design-guidelines.md` T8 trägt die Ausnahme mit den drei Bedingungen und dem Datum | `docs/design-guidelines.md:167`: „**Eine benannte Ausnahme** (Owner, 2026-09-03, Aufgabe 0012)" mit den drei nummerierten Bedingungen, `label` bleibt Pflicht als `aria-label` **und** `title`, Kebab ausgenommen; die Verstoß-Spalte lautet jetzt „Icon-Only-Button ohne sichtbares Wort **außerhalb dieser drei Bedingungen**". Behoben gegenüber dem 2026-09-03 | ✓ |
+| Der Kommentar „Kein Kebab …" bleibt und verweist auf die Ausnahme | `src/ui/v3/primitives/ActionBar.tsx:34–38` bei `RowActions`: „Kein Kebab — ein Icon ohne Wort ist für die Zielgruppe ein Rätsel (V7). Die benannte Ausnahme zu T8 (§6, Aufgabe 0012) deckt das Kebab **nicht**: es ist weder konventionell genug noch folgenlos." Der Satz steht seit Commit `1e83685` (2026-09-03, vor dieser Aufgabe) nicht mehr in `Button.tsx`, sondern dort, wo die Zeilenaktionen wohnen — der Dateiname im Kriterium ist veraltet, die Sache ist erfüllt | ✓ |
+| Ersetzt das Schließen-Kreuz in `v3/primitives/Dialog.tsx` | `src/ui/v3/primitives/Dialog.tsx:73` trägt weiterhin ein rohes `<button type="button" className="v2dlg__close" … aria-label="Schließen">`; `grep -n IconButton src/ui/v3/primitives/Dialog.tsx` → kein Treffer. `Drawer.tsx:13,127` ist umgestellt, `Dialog.tsx` nicht | ✗ |
+| Räumt mindestens eine der neun Stellen ohne `aria-label` in `ludwig/app` auf | `grep -rl IconButton /Users/simonfakir/dev/ludwig/app/apps/web/src` → kein Treffer; in diesem Repo nicht erfüllbar | offen (App) |
 
-**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): T8 in `design-guidelines.md` trägt jetzt die benannte Ausnahme mit den drei Bedingungen; die `@when`-Zeile nennt alle drei; `RowActions` verweist darauf, dass das Kebab nicht darunter fällt.
+Abgenommen von / am: — (nicht abgenommen) · Geprüft von: Claude (Abnahme-Agent), 2026-09-05
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: die T8-Ausnahme fehlt im SSOT; der `Button.tsx`-Kommentar fehlt; `Dialog.tsx` und die App sind nicht umgestellt; Bedingung 2 fehlt in der `@when`-Zeile.
+**Offene Punkte:**
+
+1. **`Dialog.tsx` ist nicht umgestellt.** Das Kreuz im Dialog-Kopf ist
+   weiterhin handgebaut (`Dialog.tsx:73`), während `Drawer.tsx` den
+   `IconButton` schon nutzt. Das ist der einzige verbleibende Mangel; die
+   Aufgabe nennt genau diese Stelle als Beleg, dass die Ausnahme greift.
+2. Der Dateiname im Kriterium „Kommentar in `Button.tsx`" ist veraltet — der
+   Satz wohnt seit `1e83685` bei `RowActions` in `ActionBar.tsx`. Beim nächsten
+   Anfassen der Spec dort korrigieren.

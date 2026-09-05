@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` |
 | Klassen-Test | ja, unverändert — „fremd erzeugter Fließtext, sicher dargestellt" hat kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Markdown` (KI-Texte, Notizen), 5 Dateien / 12 Stellen · Showcase `src/showcase/CaseCrud.stories.tsx` (Zusammenfassung des Sachverhalts) |
@@ -173,26 +173,59 @@ Listenpunkt, Zitat und Tabelle stehen alle auf 13,5 px.
 
 ## Abnahme
 
+**Zweite Abnahme, 2026-09-05** (fremder Prüfer, nicht der Erbauer). Zwei der
+drei offenen Punkte der ersten Runde sind erledigt: Links tragen jetzt
+`target="_blank"` und ihr Ziel im `title`, und `flow` hat eine eigene Story.
+Ein fester Punkt reißt neu. Jedes Kriterium einzeln, fest und variabel:
+
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| Roh-HTML im Text erscheint nicht im DOM | `v3-primitives-fläche-markdown--unsicher`, DOM ausgelesen: die einzigen Tags unter `#storybook-root` sind `DIV`, `P`, `A`; `script`: 0, `b`: 0. `<script>alert(1)</script>` und `<b>Roh-HTML</b>` stehen als Text da. `grep -rn dangerouslySetInnerHTML src/` findet nur die Kommentarzeile in `Markdown.tsx:10` | ✓ |
-| `javascript:`- und `data:`-Links sind entschärft | `--unsicher`: von `[Bitte hier klicken](javascript:alert(1))` bleibt der reine Text, kein `a` im DOM. `safeHref` lässt ausschließlich `http(s)://`, `mailto:`, `/` und `#` durch | ✓ |
-| Kein `<img>` wird geladen | `--unsicher`: `img`: 0 im DOM; nach Neuladen zeigen die 75 aufgezeichneten Netzwerk-Anfragen keine an `example.com` (nur Storybook-Assets und die Google-Fonts der Vorschau) | ✓ |
-| Externe Links tragen `rel="noopener noreferrer"` | `--unsicher`: `<a href="https://example.com" rel="noopener noreferrer">`. Hinweis: `Gefuellt` enthält nur `href="#"`, der externe Fall steht in `Unsicher` | ✓ |
-| `#` im Text erzeugt keine `h1` | `--gefuellt`: `h1`: 0, `h2`: 0; `## Warum 6815 …` wird `H3.v2mk__h--2` | ✓ |
-| Leerer Text rendert kein Element | `--leer`: 0 Knoten mit Klasse `v2mk`; beide gestrichelten Kästen haben leeres `innerHTML` | ✓ |
-| `inline` erzeugt keine Blockelemente | `--varianten`: `span.v2mk--inline`, `display: inline`, Kinder ausschließlich `STRONG`, `CODE`, `A`; die `full`-Fassung desselben Textes hat ein `P` | ✓ |
-| `maxHeight` blendet und bietet „Ganz lesen" (Offene Frage 2) | `--lang`: `.v2mk__body` auf `max-height: 220px` mit `linear-gradient`-Maske; Klick auf `summary` „Ganz lesen" → `open`, Höhe 220 → 918 px, ohne eine Zeile Zustand (natives `details`) | ✓ |
-| `pnpm typecheck` / `pnpm build` | beide grün | ✓ |
+| **Fest** — `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0; zweimal gelaufen (Beginn und Ende der Abnahme, 2026-09-05) | ✓ |
+| **Fest** — `pnpm build` grün | Nicht erneut gelaufen (schreibt nach `storybook-static`, parallele Abnahmen). Der Lauf für diesen Stand war grün („Storybook build completed successfully") | ✓ (zitiert) |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Markdown.tsx` mit `Markdown.stories.tsx` daneben; Titel `v3/Primitives/Fläche/Markdown` (`Markdown.stories.tsx:6`) — „Fläche" ist die Gruppe aus dem Barrel; Export `src/ui/v3/index.ts:130` | ✓ |
+| **M1 · Fest** — `@when`/`@instead` an **jedem** Export | **Reißt.** Die Datei hat drei Funktions-Exporte, und alle drei stehen im Barrel (`index.ts:130`): `Markdown` (`:220`) trägt beide Zeilen (`:214–218`), `parseInline` (`:52`) und `parseMarkdown` (`:94`) tragen **keine**. Beide sind damit öffentliche Schnittstelle ohne die Antwort auf „was nehme ich?"; benutzt werden sie außerhalb der Datei nirgends (`grep -rn "parseMarkdown\|parseInline" src/` findet nur `Markdown.tsx` und die Barrel-Zeile). Derselbe Punkt wurde in 0019 an `parseAmount` gerügt und dort behoben — hier steht er noch offen | ✗ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\|[0-9]+px\|fontSize:" Markdown.tsx` → keine Treffer; die einzige Inline-Angabe ist `--v2mk-max` als Custom Property aus `maxHeight` (`:266`, `:280`). Größen in `v3.css:1952–2002`. Kein Status im Spiel | ✓ |
+| **Fest** — alle Stories der Spec vorhanden, ausgeschlossene Zustände begründet | `index.json`: `--filled`, `--empty`, `--variants`, `--flow`, `--long`, `--unsafe`, `--in-use`, `--reader` — acht: die sieben der Ableitung (2 Zustände + 1 Enum + 1 „im Einsatz" + 1 Rand + 1 Sicherheit + `Reader` aus A5) plus `Flow`. `Loading`, `EmptyAfterFilter` und `Error` sind in der Spec mit Grund ausgeschlossen | ✓ |
+| **Fest** — Story-Deckung der Schnittstelle | Alle vier Props der Spec sind belegt: `text` → `--filled` und `--empty` (dort beide Fälle, `null` und `"   "`), `variant` → `--variants` (`full` und `inline` am selben Text), `maxHeight` → `--long` und `--reader`, `overflow` → `--long` (`clamp`) und `--reader` (`scroll`). Zusätzlich ist die nicht in der Spec geführte Prop `flow` in `--flow` vorgeführt; `className` bleibt unbelegt (Befund 2) | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 (ohne die zwei App-Punkte) | Stufe `primitives/`, keine Importe außer React, kein Fachmodul ✓ · kein Hex/px/Label-Map ✓ · Text links, nichts zentriert ✓ · Farbe: nur Überschriften in `--color-primary-700`, kein semantischer Ton, kein Rot ✓ · fünf Zustände: zwei gebaut, drei begründet ausgeschlossen ✓ · Kontrast gemessen (auf `--color-bg-soft`): Absatz 12,71:1, Zitat 6,17:1, Tabellenkopf 6,17:1, Code-Block 11,94:1 ✓ · keine Bewegung, `prefers-reduced-motion` gegenstandslos ✓ · Hover: `.v2mk__more:hover` unterstreicht, `.v2link:hover` unterstreicht ✓ · Fokus: `.v2mk--scroll:focus-visible` sichtbar (im Bild geprüft) ✓ · kein Icon, kein Emoji; Unicode aus dem Agententext wird als Text gerendert, nicht als Bedeutungsträger ✓ · Karte in `--in-use` (`ProseCard`) mit Rand, ohne Schatten ✓ · Texte: die Komponente schreibt selbst nur „Ganz lesen" ✓. **Ein Punkt reißt:** `@when`/`@instead`, siehe M1 | ✗ (wegen M1) |
+| **Fest** — im Browser angesehen | Alle acht Stories in Chromium auf `localhost:6107` geöffnet, `--long` aufgeklappt, `--reader` mit der Tastatur gescrollt; Bilder von `--filled` und `--reader` geprüft | ✓ |
+| **Variabel** — Roh-HTML erscheint nicht im DOM | `--unsafe`, Tag-Zählung unter `#storybook-root`: `{DIV: 3, P: 5, A: 1}` — kein `script`, kein `b`. `<script>alert(1)</script>` und `<b>Roh-HTML</b>` stehen als Text da. `grep -rn dangerouslySetInnerHTML src/` findet nur die Kommentarzeile in `Markdown.tsx:10` | ✓ |
+| **Variabel** — `javascript:`- und `data:`-Links sind entschärft | `--unsafe`: von `[Bitte hier klicken](javascript:alert(1))` bleibt reiner Text, im DOM ist genau **ein** `<a>`, und das zeigt auf `https://example.com`. `safeHref` (`:47–50`) lässt nur `http(s)://`, `mailto:`, `/` und `#` durch | ✓ |
+| **Variabel** — kein `<img>` wird geladen | `--unsafe`: kein `IMG` in der Tag-Zählung; die aufgezeichneten Anfragen der Seite enthalten keine an `example.com`. Der Bild-Ausdruck wird nur verschluckt, sein Alt-Text bleibt (`:61`) | ✓ |
+| **Variabel** — externe Links: `rel`, neuer Tab, sichtbares Ziel | `--unsafe`: `<a href="https://example.com" target="_blank" rel="noopener noreferrer" title="https://example.com">`. Das war Punkt (1) der ersten Runde und ist damit erfüllt; das Ziel steht im `title`, also erst beim Überfahren — für den Fall „nicht klicken, ohne zu sehen wohin" reicht das | ✓ |
+| **Variabel** — `#` im Text erzeugt keine `h1` | `--filled`: `h1`-Anzahl 0, `h2`-Anzahl 0; aus `## Warum 6815 …` wird `H3.v2mk__h v2mk__h--2` (`:296`) | ✓ |
+| **Variabel** — leerer Text rendert nichts | `--empty`: kein Knoten mit Klasse `v2mk`; beide gestrichelten Kästen haben leeres `innerHTML`. Gilt für `null` und für `"   "` (`:247`) | ✓ |
+| **Variabel** — `inline` erzeugt keine Blockelemente | `--variants`: `span.v2mk--inline`, `display: inline`, Kinder ausschließlich `STRONG`, `CODE`, `A`; dieselbe Quelle als `full` hat ein `P` | ✓ |
+| **A5 · Variabel** — `overflow="scroll"` erzeugt `overflow-y: auto` und **keine** Maske, kein „Ganz lesen" | `--reader`, gemessen: `DIV.v2mk.v2mk--scroll`, `overflow-y: auto`, `max-height: 260px`, tatsächliche Höhe 260 px bei `scrollHeight` 1282 px. Auf der Seite gibt es 0 `<details>` und 0 `summary`, `maskImage` des Textkörpers ist `none` | ✓ |
+| **A5 · Variabel** — `clamp`-Verhalten unverändert | `--long`: `DETAILS.v2mk--clamp`, geschlossen ist `.v2mk__body` 220 px hoch mit `linear-gradient`-Maske; Klick auf „Ganz lesen" → `open`, Höhe 220 → 850 px, `max-height: none`, Maske weg. Die Chrome-Regel `::details-content` aus dem Befund (`v3.css:1985`) greift, der Anriss ist sichtbar | ✓ |
+| **A5 · Variabel** — der Scrollbereich ist fokussierbar, Pfeiltasten scrollen ihn | `--reader`: ein Tab landet auf `.v2mk.v2mk--scroll` (`tabIndex: 0`), der Fokusring ist im Bild zu sehen; dreimal Pfeil-ab → `scrollTop` 0 → 120. Der Kopf des `DetailPane` („Bericht des Laufs · Stapel 2026-08") bleibt dabei stehen | ✓ |
+| **A5 · Variabel** — `overflow` ohne `maxHeight` ändert nichts | `Markdown.tsx:259` und `:274`: beide Sonderzweige stehen unter `if (maxHeight …)`; ohne `maxHeight` fällt die Komponente auf `<div className="v2mk">` (`:287`) — kein Rahmen, keine Höhe, kein `tabIndex`. Die `@when`-Zeile sagt es (`:214–218`) | ✓ |
+| **A5 · Variabel** — alle Story-Exporte englisch | `grep -E "^export const (Gefuellt\|Leer\|Varianten\|Lang\|Unsicher\|ImEinsatz)" Markdown.stories.tsx` → leer. Die acht Exporte heißen `Filled`, `Empty`, `Variants`, `Flow`, `Long`, `Unsafe`, `InUse`, `Reader` | ✓ |
+| **A5 · Variabel** — Server-Component: kein `"use client"` | `sed -n 1p Markdown.tsx` → `import { Fragment } from "react";`; die Datei trägt keine `"use client"`-Zeile, alle Zweige kommen ohne Zustand aus (`<details>` statt State) | ✓ |
+| **Variabel** — Größen aus der Leiter (Abgleich 2026-09-03) | `--filled`, gemessen: Absatz 13,5 px, Listenpunkt 13,5 px, Zitat 13,5 px, Tabellenzelle 13,5 px, Code-Block 12,5 px, `h2` 14 px. Deckt sich mit `v3.css:1954–1957` (`--fs-ui-lg` / `-md` / `--fs-ui` / `-sm`) und mit der Tabelle oben | ✓ |
 
-**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): Links tragen `target="_blank"`, `title` mit dem Ziel und `rel="noopener noreferrer"`; `javascript:` kommt im DOM nicht vor.
+**Zurück auf `in Arbeit`.** Zu tun:
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
-(1) Der Abschnitt „Der Punkt" verlangt drei Dinge von einem Link — `rel`,
-**neuer Tab** und **sichtbares Ziel**. Umgesetzt ist nur `rel`: es gibt kein
-`target="_blank"` und der Link zeigt seine Adresse nirgends. Entweder nachziehen
-oder die Spec auf `rel` zurücknehmen. (2) Die Komponente führt zwei Props über
-die Schnittstelle hinaus: `className` und `flow`; `flow` ändert das Verhalten
-(harte Zeilenumbrüche werden zu Leerzeichen) und hat keine Story. (3) Winzig:
-aus `[…](javascript:alert(1))` bleibt eine verwaiste Klammer im Text stehen,
-weil der Link-Ausdruck bei der ersten `)` endet.
+1. **M1 — `parseInline` und `parseMarkdown` bekommen `@when`/`@instead`,** oder
+   sie verlassen den Barrel und werden dateiintern. Beides ist recht; heute
+   sind es zwei öffentliche Exporte ohne die Pflichtzeilen und ohne einen
+   einzigen Aufrufer.
+
+**Befunde** (keine Mängel, aber Punkte aus der ersten Runde, die stehen bleiben):
+
+2. **`className` steht nicht in der Schnittstelle der Spec** (`Markdown.tsx:240`).
+   `flow` hat mit `Flow` inzwischen eine Story, fehlt in der Tabelle aber
+   ebenfalls — beim nächsten Anfassen nachtragen.
+3. **Die verwaiste Klammer bleibt.** Aus `[…](javascript:alert(1))` steht im
+   Text „Bitte hier klicken) — …", weil der Link-Ausdruck bei der ersten `)`
+   endet (`INLINE_RE`, `:40`). Winzig, aber sichtbar in `--unsafe`.
+4. **Ein Link im Fließtext springt aus der Leiter.** `.v2link` (`v3.css:190`)
+   setzt `font: 600 12.5px` fest; in einem 13,5-px-Absatz wird der Link damit
+   kleiner und fetter als sein Satz — genau die Art Bruch, die der Abgleich
+   2026-09-03 sonst beseitigt hat. Dazu misst `--color-accent-700` (`#2E78A8`)
+   auf Weiß 4,43:1 und bleibt als normal große Textfarbe unter den 4,5:1 aus
+   V10. Beides gehört `.v2link` und dem Token, nicht dieser Komponente.
+
+Erste Runde (2026-09-03, Historie): Alle Sicherheitskriterien ✓; offen waren
+`target`/sichtbares Ziel am Link (behoben), `flow` ohne Story (behoben) und die
+verwaiste Klammer (offen).

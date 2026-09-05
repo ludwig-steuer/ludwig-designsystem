@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` — Erweiterung eines vorhandenen Exports |
 | Klassen-Test | entfällt — keine neue Komponente |
 | Quelle | Knopf-Erhebung `ludwig/app` vom 2026-09-03 (441 `.tsx`, 11 Stylesheets) |
@@ -141,8 +141,42 @@ gemessen 35 / 30 / 25 px Höhe, `box-shadow: none` im Ruhezustand, Gewicht 500.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| | | |
+Abgenommen gegen Spec und Code (zweiter Agent), 2026-09-05. Stories im
+Browser auf `localhost:6107` geöffnet und vermessen.
 
-Abgenommen von / am: — · Offene Punkte: —
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| **Story-Deckung** — jede Prop der Schnittstelle hat ihre Story | `iconEnd` → `--icon-end`; `loading`/`loadingLabel` → `--loading`; `fullWidth` → `--full-width`; `size` → `--sizes-in-row` und `--sizes`. Alle neun Stories stehen in `localhost:6107/index.json`. `Leer`/`LeerNachFilter` sind in der Spec begründet ausgeschlossen | ✓ |
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0 — zu Beginn und am Ende der Abnahme. `pnpm build` nicht erneut gelaufen: er schreibt nach `storybook-static`, und parallel laufen weitere Abnahmen; der Lauf für diesen Stand meldete „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Button.tsx` + `Button.stories.tsx`; Titel `v3/Primitives/Aktion/Button` (`Button.stories.tsx:6`), Gruppe „Aktion" wie im Barrel (`src/ui/v3/index.ts:42`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Der neue Code (Props, `classes`, `inner`) ist englisch, `Button` trägt beide Zeilen (`Button.tsx:87–94`). Nicht erfüllt: der Dateikopf `Button.tsx:5–14` und die `hotkey`-JSDoc `Button.tsx:35–39` sind weiter deutsch, obwohl 0010 die Datei angefasst hat (CLAUDE.md); `KeyButton` (`Button.tsx:150–156`) trägt nur `@when`, kein `@instead` | ✗ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,6}\b\|[0-9]+px' src/ui/v3/primitives/Button.tsx` → kein Treffer; die Maße stehen in `v3.css` (`.v2btn--xs` 1612, `.v2btn--full` 1615, `.v2spin` 1622); kein Status, keine Label-Map im Knopf | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `v3-primitives-aktion-button--icon-end`, `--loading`, `--full-width`, `--sizes-in-row` in `index.json`; die fünf alten unverändert vorhanden | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Durchgegangen; die zwei App-Punkte übersprungen (Skill `v3-komponente`, Abschnitt „Abnahme"). Gerissen ist **V1** („Chip/Button/Icon drückt die Zeile auf") — siehe die Zeile zu `SizesInRow`. Der Rest trägt: kein zentrierter Text, Farbe nur als Kritikalitätsstufe, Fokusring sichtbar, Lucide 1.5 px, kein Icon ohne Wort | ✗ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | `--loading`, `--icon-end`, `--full-width`, `--sizes-in-row`, `--with-key` in Chromium auf `localhost:6107` geöffnet, Screenshot + DOM-Probe je Story; alle rendern gestylt | ✓ |
+| `loading` sperrt den Knopf, setzt `aria-busy` und zeigt immer ein Wort neben dem Spinner (V7) | `--loading`, DOM-Probe: beide laufenden Knöpfe `disabled=true`, `aria-busy="true"`, `.v2spin` mit `aria-hidden="true"`, Beschriftung „Speichere …" bzw. unverändert „Stapel prüfen" — nie ein Spinner allein | ✓ |
+| Der Spinner dreht gleichmäßig und lässt den Knopf nicht springen | `--loading`: `animation: v2spin 0.7s linear infinite`, 14 × 14 px; alle drei Knöpfe der Story sind 34.8 px hoch — laufend wie ruhend, kein Sprung. `v3.css:1635–1637` verlängert die Dauer bei `prefers-reduced-motion` auf 2.4 s | ✓ |
+| `iconEnd` steht rechts vom Text, der Hotkey bleibt ganz rechts | `--icon-end`, Kindfolge des vierten Knopfs im DOM: `span[Volles Konto öffnen]` · `svg.lucide-arrow-right` · `kbd.v2kbd[W]` | ✓ |
+| `icon` und `iconEnd` zusammen | `--icon-end`, dritter Knopf: `svg.lucide-check` · `span[Saldo stimmt]` · `svg.lucide-chevron-down` | ✓ |
+| `xs` und `sm` lassen die Zeilenhöhe unverändert; `md` drückt sie sichtbar auf (V1) | `--sizes-in-row`, gemessene Höhen der `.v2tbl__row`: Referenzzeile ohne Knopf **47.3 px**, mit `xs` **52 px**, mit `sm` **57.2 px**, mit `md` **60.8 px**. Auch `xs` drückt die Zeile um 4.7 px auf (+10 %), `sm` um 9.9 px (+21 %); im Screenshot ist die Referenzzeile sichtbar niedriger. Der Knopf ist 25 / 30.2 / 34.8 px hoch, die Zeile hat rechnerisch 20.25 px Zeilenhöhe Platz | ✗ |
+| `fullWidth` zentriert den Inhalt | `--full-width`: beide Knöpfe 320 px breit = Breite des Elternelements, `justify-content: center`, Klasse `v2btn--full` | ✓ |
+| Die Datei trägt weiterhin kein `"use client"` | `grep -l '"use client"' src/ui/v3/primitives/Button.tsx` → kein Treffer | ✓ |
+| Ersetzt den Textwechsel in `ConfirmReviewButton.tsx` und das Inline-`padding` in `CaseSummaryEditor.tsx:68` | Beide Dateien liegen in `ludwig/app` (`apps/web/src/modules/invoices/ui/` bzw. `…/accounting-cases/ui/`); in diesem Repo nicht erfüllbar | offen (App) |
+
+Abgenommen von / am: — (nicht abgenommen) · Geprüft von: Claude (Abnahme-Agent), 2026-09-05
+
+**Offene Punkte:**
+
+1. **`xs` und `sm` drücken die Tabellenzeile auf.** Die Story `SizesInRow`
+   behauptet in ihrem Kommentar „die Zeile bleibt so hoch wie die ohne Knopf";
+   gemessen sind 52 px (`xs`) und 57.2 px (`sm`) gegen 47.3 px ohne Knopf.
+   Entweder muss der Knopf in der Zeile flacher werden (V1: „der Chip wird
+   kleiner, nicht die Zeile größer") oder das Kriterium wird auf ein Maß
+   umgeschrieben, das der Baustein halten kann.
+2. **Deutsche Kommentare in einer angefassten Datei.** `Button.tsx:5–14`
+   (Dateikopf) und `:35–39` (`hotkey`) sind deutsch. Der Kopf ist zusätzlich
+   veraltet: er nennt „zwei Größen" und „`md` (40 px) … `sm` (32 px)", während
+   die Datei jetzt drei Größen kennt und der Nachtrag dieser Spec 35 / 30 /
+   25 px festhält (gemessen 34.8 / 30.2 / 25 px). Auch die Story-Doku
+   `Button.stories.tsx:26–27` nennt noch 40 / 32 / 26 px.
+3. **`KeyButton` hat kein `@instead`** (`Button.tsx:150–156`).

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, eine Handlung im Fließtext ist fachfrei |
 | Quelle | Knopf-Erhebung `ludwig/app` vom 2026-09-03 — `.v2link` 70 Stellen, `.v2link--quiet` 16 |
@@ -108,19 +108,38 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+Abgenommen gegen Spec und Code (zweiter Agent), 2026-09-05. Alle sechs Stories
+im Browser auf `localhost:6107` geöffnet, DOM und berechnete Stile vermessen.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| | | |
+| **Story-Deckung** — jede Prop der Schnittstelle hat ihre Story | `children` → `--filled`; `tone` und `disabled` → `--tones`; `icon` → `--with-icon`; `href` → `--as-link`; `onClick` → `--interactive`; Rand → `--in-row`. Sechs Stories, genau die Ableitung der Spec; alle in `localhost:6107/index.json`. `Leer`, `Laedt`, `Fehler` sind in der Spec begründet ausgeschlossen | ✓ |
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0 — zu Beginn und am Ende der Abnahme. `pnpm build` nicht erneut gelaufen (schreibt nach `storybook-static`, parallele Abnahmen); der Lauf für diesen Stand meldete „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/TextButton.tsx` + `TextButton.stories.tsx`; Titel `v3/Primitives/Aktion/TextButton` (`TextButton.stories.tsx:9`), Gruppe „Aktion" wie im Barrel (`src/ui/v3/index.ts:52`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `TextButton.tsx` ist durchgehend englisch (Kopf, Prop-JSDoc, Bezeichner); der einzige Export trägt beide Zeilen (`TextButton.tsx:46–52`) | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,6}\b\|[0-9]+px' src/ui/v3/primitives/TextButton.tsx` → kein Treffer; Geometrie, Farbe und Hover stehen in `v3.css:187–203`; kein Status im Baustein | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `v3-primitives-aktion-textbutton--filled`, `--tones`, `--with-icon`, `--as-link`, `--interactive`, `--in-row` in `index.json` | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Durchgegangen; die zwei App-Punkte übersprungen (Skill `v3-komponente`). Text links, nichts zentriert; keine Farbe als Kategorie; Fokusring `2px solid var(--color-focus)`, Offset 2 px, per Tab geprüft; Icon nur mit Wort (`--with-icon`); kein Emoji, keine Versalien; Hover antwortet. Kontrast auf der Karte (Story `--in-row`, weiße Fläche): `rgb(46,120,168)` = 4.84:1, `quiet` `rgb(92,92,92)` = 6.49:1 | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Alle sechs Stories in Chromium auf `localhost:6107` geöffnet, Screenshot je Story; alle rendern gestylt | ✓ |
+| In einer Tabellenzeile bleibt die Zeilenhöhe unverändert (V1) | `--in-row`, gemessene `.v2tbl__row`-Höhen: Zeile mit zwei `TextButton` **47.3 px**, Referenzzeile ohne Knopf **47.3 px**, Zeile mit einem Knopf **46.3 px**. Der Knopf selbst ist 15 px hoch — er fügt sich ein, statt die Zeile aufzudrücken | ✓ |
+| Hover unterstreicht, färbt keine Fläche (§2) | `--filled`, vor dem Hover `text-decoration-line: none`, `background-color: rgba(0,0,0,0)`; nach `hover` auf denselben Knopf: `underline`, Hintergrund unverändert `rgba(0,0,0,0)`, Breite unverändert 81.9 px | ✓ |
+| Mit `href` entsteht ein `<a>`, ohne ein `<button>` | `--as-link`, DOM: beide Elemente `A` mit `href="#"`, Klasse `v2link` bzw. `v2link v2link--quiet v2link--icon`. `--tones` ohne `href`: alle vier Elemente `BUTTON` mit `type="button"` | ✓ |
+| `quiet` ist ohne Farbe am Schriftschnitt unterscheidbar (V7) | `--tones`, berechnete Stile: `default` `font-weight: 600`, `quiet` `font-weight: 400` — beide 12.5 px, der Unterschied trägt ohne Farbe | ✓ |
+| Die `@when`-Zeile grenzt gegen `Button variant="tertiary"` ab | `TextButton.tsx:49–51`: „An action with a surface, a size, a spinner → Button (`tertiary` is borderless but still has button geometry)" — die Abgrenzung steht im `@instead` des `@when`-Blocks und nennt `tertiary` beim Namen | ✓ |
+| Ersetzt `className="v2link"` in `StapelZeilenmenue.tsx` ohne Funktionsverlust | Die Datei liegt in `ludwig/app` (`apps/web/src/modules/datev-export/ui/StapelZeilenmenue.tsx`); in diesem Repo nicht erfüllbar | offen (App) |
 
-Abgenommen von / am: — · Gebaut: Claude, 2026-09-03 ·
-Offene Punkte für den Abnehmenden:
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Gebaut: Claude, 2026-09-03
 
-1. `.v2link` steht fest auf `12.5px` (Bestand, 86 Stellen hängen dran) — die
-   Spec sagt „die Schriftgröße kommt aus dem Umfeld". Im Fließtext (Story
-   `Filled`) ist er dadurch eine halbe Stufe kleiner als der Satz. Auf
-   `font-size: inherit` umstellen wäre eine Änderung an allen Bestandsstellen
-   und gehört in eine eigene Aufgabe.
-2. Das Kriterium „ersetzt `className="v2link"` in `StapelZeilenmenue.tsx`"
-   zielt auf `ludwig/app` und wird dort fällig — wie die beiden App-Punkte der
-   Prüfliste §9. Hier ersetzt ist `SelectionBar`; 25 weitere rohe `v2link`
-   stehen noch in `JournalEntryEditor.tsx` und in fünf Story-Dateien.
+**Offene Punkte** (kein Kriterium dieser Spec, gehören in eigene Aufgaben):
+
+1. Die Schriftgröße kommt **nicht** aus dem Umfeld, wie die Schnittstelle es
+   beschreibt: `.v2link` steht fest auf `12.5px` (`v3.css:190`), im Fließtext
+   der Story `--filled` (13 px) also eine halbe Stufe kleiner. Der Bauende hat
+   das gemeldet; 86 Bestandsstellen hängen daran, `font-size: inherit` ist eine
+   eigene Aufgabe.
+2. Auf `--color-bg-soft` (der Storybook-Fläche, `#f4f6f8`) misst der
+   `default`-Ton 4.47:1 — knapp unter 4.5. Auf der Karte, wo er im Produkt
+   steht, sind es 4.84:1. Betrifft `--color-accent-700`, nicht diesen Baustein.
+3. In `JournalEntryEditor.tsx` und fünf Story-Dateien stehen weiterhin rohe
+   `className="v2link"` statt `TextButton` — Aufräumarbeit im Set, kein Mangel
+   des Bausteins.

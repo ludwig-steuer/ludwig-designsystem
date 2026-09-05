@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, „einen Wert an Ort und Stelle ändern" ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Inline-Bearbeitung (Klick → Feld → Speichern/Abbrechen)" |
@@ -81,21 +81,21 @@ Nicht anwendbar: `LeerNachFilter` — es gibt keinen Filter.
 
 Fest (gilt immer):
 
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+- [x] `pnpm typecheck` und `pnpm build` grün
+- [x] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [x] Code englisch; `@when`/`@instead` an jedem Export
+- [x] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [x] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [x] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [x] Im Browser angesehen (Storybook), nicht nur gebaut
 
 Variabel (aus dieser Spec):
 
-- [ ] Enter speichert, Escape bricht ab, beide Tasten stehen sichtbar am Feld (Story `Interactive`, Regel V14)
-- [ ] Nach einem Fehler steht der getippte Text noch da (Story `Error`)
-- [ ] Der Wechsel Anzeige → Feld verschiebt die Zeile nicht (Story `Filled`, Regel V1)
-- [ ] Nichts wird ohne Klick oder Enter gespeichert (Story `Interactive`, Regel I2)
-- [ ] Ersetzt `CaseSummaryEditor.tsx` ohne Funktionsverlust
+- [x] Enter speichert, Escape bricht ab, beide Tasten stehen sichtbar am Feld (Story `Interactive`, Regel V14)
+- [x] Nach einem Fehler steht der getippte Text noch da (Story `Error`)
+- [x] Der Wechsel Anzeige → Feld verschiebt die Zeile nicht (Story `Filled`, Regel V1)
+- [x] Nichts wird ohne Klick oder Enter gespeichert (Story `Interactive`, Regel I2)
+- [ ] Ersetzt `CaseSummaryEditor.tsx` ohne Funktionsverlust — **offen (App)**
 
 ## Offene Fragen
 
@@ -107,22 +107,42 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+**Zweite Abnahme, 2026-09-05** (fremder Prüfer, nicht der Erbauer). Der ✗ der
+ersten Runde — `pending` und `error` ohne eigene Story — ist behoben: beide
+Stories zeigen jetzt je zwei Blöcke, links die Prop von außen, rechts den Weg
+über `onSave`. Jedes Kriterium einzeln, fest und variabel:
+
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| Enter speichert, Escape bricht ab, beide Tasten sichtbar am Feld (V14) | `v3-primitives-formular-inlineedit--interactive`: Wert auf „Gutschrift" geändert, Enter → Anzeige „Gutschrift", Zähler „1× gespeichert"; danach „Verworfener Text" getippt, Escape → alter Wert steht wieder, Zähler unverändert. Hinweis unter dem Feld: „Enter speichert · Esc bricht ab", bei `--with-textarea` „Strg+Enter speichert · Esc bricht ab" (dort speichert Enter nicht, Strg+Enter schon) | ✓ |
-| Nach einem Fehler steht der getippte Text noch da | `--error`: „Neuer, sorgfältig getippter Text" eingegeben, Enter → Feld bleibt offen, `input.value` unverändert, darunter „Der Sachverhalt ist gesperrt, solange der Stapel läuft." als Text, `aria-invalid="true"` | ✓ |
-| Der Wechsel Anzeige → Feld verschiebt die Zeile nicht (V1) | `--interactive`: Beschriftung bleibt bei `top 16 px`, der Block wächst nach unten (41 → 89 px); nichts über dem Feld springt | ✓ |
-| Nichts wird ohne Klick oder Enter gespeichert (I2) | `--interactive`: Feld geändert, `blur()` plus Klick daneben → Feld bleibt offen, Zähler „noch nicht gespeichert" | ✓ |
-| Ersetzt `CaseSummaryEditor.tsx` ohne Funktionsverlust | App-Datei gelesen: `isEditing`, Draft, `useTransition`, Fehler, mehrzeiliges Feld — alles gedeckt (`multiline` + `renderInput` mit `Textarea`); der Platzhalter kommt über `renderInput`. Zusätzlich: sichtbare Beschriftung statt Bleistift-Icon ohne Wort. Der Umzug selbst steht aus | ✓ |
-| Story-Deckung der Schnittstelle (Spalte „Nachweis (Story)") | `--pending` benutzt die Prop `pending` nicht, sondern das langsame `onSave`; `--error` benutzt die Prop `error` nicht, sondern den Wurf aus `onSave`. Beide Props sind damit unbelegt; `renderValue` ist statt in `Filled` nur in `WithTextarea` zu sehen | ✗ |
+| **Fest** — `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0; zweimal gelaufen (Beginn und Ende der Abnahme, 2026-09-05) | ✓ |
+| **Fest** — `pnpm build` grün | Nicht erneut gelaufen (schreibt nach `storybook-static`, parallele Abnahmen). Der Lauf für diesen Stand war grün („Storybook build completed successfully") | ✓ (zitiert) |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/InlineEdit.tsx` mit `InlineEdit.stories.tsx` daneben; Titel `v3/Primitives/Formular/InlineEdit` (`InlineEdit.stories.tsx:8`); Export `src/ui/v3/index.ts:106` | ✓ |
+| **Fest** — Code englisch; `@when`/`@instead` an jedem Export | Zwei Exporte: `InlineEditInputProps` (`:17`) und `InlineEdit` (`:30`) mit `@when`/`@instead` in `:25–28`. Props, Typen und alle Kommentare englisch; deutsch nur in „Bearbeiten", „Speichern", „Abbrechen", „Enter speichert · Esc bricht ab" | ✓ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\|[0-9]+px\|fontSize:" InlineEdit.tsx` → keine Treffer; Maße in `v3.css:1826–1831` (`.v2iedit*`). Kein Status im Spiel | ✓ |
+| **Fest** — alle Stories der Spec vorhanden, ausgeschlossene Zustände begründet | `index.json`: `--filled`, `--empty`, `--pending`, `--error`, `--interactive`, `--with-textarea` — sechs, wie in der Ableitung (4 Zustände + 1 Callback + 1 „im Einsatz"). `LeerNachFilter` ist mit Grund ausgeschlossen | ✓ |
+| **Fest** — Story-Deckung der Schnittstelle | Alle acht Props der Spec sind belegt: `label`/`value` → `--filled`, `disabled` → `--filled` (zweiter Block: Wert steht, „Bearbeiten" fehlt — `getByRole('button')` findet genau einen Knopf auf der Seite), `onSave` → `--interactive`, `renderInput` → `--with-textarea`, `renderValue` → `--with-textarea` (`whiteSpace: pre-line`), `pending` → `--pending` links (Feld `disabled`, Knopf „Speichere …"), `error` → `--error` links (Text steht im Anzeigezustand unter dem Wert). Zusätzlich zeigt jede der beiden Stories den inneren Weg daneben | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 | Punkt für Punkt: Stufe `primitives/`, Importe nur abwärts (`Button`, `Form`, `TextButton`), kein Fachmodul ✓ · kein Hex/px/Label-Map ✓ · Text links, nichts zentriert ✓ · Zeilenhöhe: der Anzeigezustand ist 41 px hoch, unter `.v2tbl__row` ✓ · keine Farbe außer der Fehlerfarbe; der Fehler steht als Satz, nicht nur rot (V7) ✓ · fünf Zustände: vier gebaut, `LeerNachFilter` begründet ausgeschlossen ✓ · Kontrast gemessen: Wert 12,71:1, Label 6,17:1, Tastenzeile `.v2iedit__keys` 4,51:1 ✓ · keine Bewegung, also `prefers-reduced-motion` gegenstandslos ✓ · Hauptweg per Tastatur mit sichtbarer Taste (eigene Zeile unten) ✓ · kein Icon ohne Wort — „Bearbeiten" steht als Wort da, kein Bleistift ✓ · Hover: `TextButton` unterstreicht (`none` → `underline`, gemessen) ✓ · Karte in `--with-textarea` mit Rand, ohne Schatten ✓ · Texte Sie/Imperativ („Beleg prüfen"-Muster: „Speichern", „Abbrechen") ✓. Die zwei App-Punkte sind laut Skill übersprungen. **Set-weiter Befund:** `.v2field__label` (`v3.css:842–845`) setzt `text-transform: uppercase`, die Beschriftung erscheint als „BELEGART" — A2/T3, betrifft jedes Feld des Sets (wie in 0017 als Befund, nicht als Mangel gewertet) | ✓ (mit Befund) |
+| **Fest** — im Browser angesehen | Alle sechs Stories in Chromium auf `localhost:6107` geöffnet, geklickt und getippt; Bild von `--with-textarea` geprüft (Karte, mehrzeiliger Wert, Anzeige → Feld) | ✓ |
+| **Variabel** — Enter speichert, Escape bricht ab, beide Tasten stehen sichtbar am Feld (V14) | `--interactive`: „Bearbeiten" geklickt, Wert auf „Gutschrift" geändert, Enter → Anzeige „Gutschrift", Zähler „1× gespeichert". Danach erneut geöffnet, „Verworfener Text" getippt, Escape → Anzeige steht wieder auf „Gutschrift", Zähler unverändert bei „1× gespeichert", nichts wurde gefragt. Unter dem Feld steht „Enter speichert · Esc bricht ab" (`.v2iedit__keys`); in `--with-textarea` steht dort „Strg+Enter speichert · Esc bricht ab" — und dort macht Enter wirklich eine Zeile (nach Enter ist das Feld noch offen, Wert „Zeile A\nZeile B"), Strg+Enter speichert | ✓ |
+| **Variabel** — nach einem Fehler steht der getippte Text noch da | `--error`, rechter Block: „Neuer, sorgfältig getippter Text" eingegeben, Enter → nach 500 ms bleibt das Feld offen, `input.value` unverändert, `aria-invalid="true"`, darunter „Speichern abgelehnt: der Stapel läuft." als Text | ✓ |
+| **Variabel** — der Wechsel Anzeige → Feld verschiebt die Zeile nicht (V1) | `--interactive`, gemessen: die Beschriftung bleibt bei `top` 16 px, der Block wächst von 41 auf 88 px — ausschließlich nach unten. Nichts über dem Feld springt | ✓ |
+| **Variabel** — nichts wird ohne Klick oder Enter gespeichert (I2) | `--interactive`: Feld auf „Nur getippt, nicht gespeichert" geändert, dann daneben geklickt (Blur) → das Feld bleibt offen, der Zähler steht weiter auf „noch nicht gespeichert". Es gibt keinen `onBlur`-Pfad in `InlineEdit.tsx` | ✓ |
+| **Variabel** — ersetzt `CaseSummaryEditor.tsx` ohne Funktionsverlust | Betrifft das Repo `ludwig/app` und ist hier nicht erfüllbar | offen (App) |
 
-**Nachprüfung der Behebung** (fremder Prüfer, 2026-09-03): Die Stories `Pending` und `Error` zeigen beide Wege — die Prop und den aus `onSave` geworfenen Fall.
+**Befunde** (keine Mängel dieser Aufgabe):
 
-Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte:
+1. **Versalien am Feldlabel, set-weit** — `.v2field__label`, `v3.css:842–845`.
+   Eigene Aufgabe, dieselbe Feststellung wie in 0017 und 0019.
+2. **Neunte Prop `multiline` fehlt in der Schnittstelle der Spec.** Sie ist
+   gebaut (`InlineEdit.tsx:39,55`), im JSDoc erklärt und in `--with-textarea`
+   vorgeführt — die Tabelle oben führt sie nicht. Beim nächsten Anfassen
+   nachtragen; der Punkt aus der ersten Runde ist damit fachlich entschieden
+   (die Taste hängt an der Prop, nicht am `renderInput`), nur nicht dokumentiert.
+3. **`renderValue` steht in der Spec als Nachweis an `Filled`,** vorgeführt wird
+   es aber in `WithTextarea`. Die Prop ist gedeckt, die Spalte zeigt auf die
+   falsche Story.
 
-1. `pending` und `error` — die von außen gesteuerten Wege — hat keine Story.
-   `Pending` und `Error` zeigen nur den inneren Zustand; die Server-Action des
-   Aufrufers ist der eigentliche Fall aus der Schnittstelle.
-2. Die Komponente hat eine neunte Prop `multiline`, die in der Schnittstelle
-   der Spec fehlt. Sie ist nötig, damit Strg+Enter greift — entweder die Spec
-   nimmt sie auf oder das Verhalten hängt am `renderInput`.
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05
+
+Erste Runde (2026-09-03, Historie): ✗ an der Story-Deckung — `pending` und
+`error` waren unbelegt. Behoben.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` — Gruppe Formular, in der Familie `Form.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, eine Einheit am Feld ist fachfrei |
 | Quelle | `docs/backlog/0034-shadcn-abgleich.md` §A2 (shadcn-Abgleich, Registry-Eintrag `input-group`, ohne Abhängigkeit) |
@@ -112,8 +112,28 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+Abgenommen gegen Spec und Code (zweiter Agent), 2026-09-05. Alle drei Stories
+im Browser auf `localhost:6107` geöffnet, geklickt und vermessen.
+
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| … | … | … |
+| **Story-Deckung** — jede Prop der Schnittstelle hat ihre Story | `prefix`, `suffix` und `children` stehen alle drei in `--filled` (Lupe davor, „%" dahinter); dazu `--in-use` und `--edge` = 3, genau die Ableitung der Spec. Alle drei in `localhost:6107/index.json`. `Empty`, `EmptyAfterFilter`, `Loading`, `Error` sind in der Spec begründet ausgeschlossen | ✓ |
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0 — zu Beginn und am Ende der Abnahme. `pnpm build` nicht erneut gelaufen (schreibt nach `storybook-static`, parallele Abnahmen); der Lauf für diesen Stand meldete „Storybook build completed successfully" | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | Der Export sitzt wie vorgesehen in der Familie `src/ui/v3/primitives/Form.tsx:96`, die Story liegt daneben (`InputGroup.stories.tsx`), Titel `v3/Primitives/Formular/InputGroup` (`:7`), Gruppe „Formular" wie im Barrel (`src/ui/v3/index.ts:103`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Der Block über `InputGroup` (`Form.tsx:80–95`) ist englisch und trägt beide Zeilen; `@instead` grenzt gegen `Field`, `AmountInput` und `DateRangeField` ab. Die Prop-JSDoc (`:101–106`) ebenfalls englisch | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,6}\b\|[0-9]+px' src/ui/v3/primitives/Form.tsx` → kein Treffer; Rahmen, Abstand, Fokus, Fehler und Sperre stehen in `v3.css:860–901`; kein Status in der Gruppe | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `v3-primitives-formular-inputgroup--filled`, `--in-use`, `--edge` in `index.json` | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Durchgegangen; die zwei App-Punkte übersprungen (Skill `v3-komponente`). Ein Rahmen statt zwei (das innere Feld gibt seinen ab, `v3.css:884–893`); Label sichtbar über `Field`, nicht als Placeholder (I8); Fehlerfarbe nie allein — der Text steht darunter (V7); Fokusring 3 px sichtbar; Icon mit `aria-hidden` beim Aufrufer; keine Versalien im Baustein selbst | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Alle drei Stories in Chromium auf `localhost:6107` geöffnet, geklickt und per Screenshot geprüft; alle rendern gestylt | ✓ |
+| Klick auf die Beigabe setzt den Fokus ins Feld | `--filled`: Klick auf `.v2ing__suf` („%") → `document.activeElement` = `INPUT[aria-label="Steuersatz"]`; Klick auf `.v2ing__pre` (Lupe) → `INPUT[aria-label="Suche"]`. Ohne JavaScript, weil die Gruppe ein `<label>` ist (`Form.tsx:109`) | ✓ |
+| Der Fokusring liegt an der Gruppe, nicht am inneren Feld | `--filled` im fokussierten Zustand: Gruppe `border-color rgb(26,58,92)` + `box-shadow 0 0 0 3px rgba(59,143,196,0.14)`; inneres Feld `box-shadow: none`, `outline: none`. Im Screenshot umschließt der Ring die ganze Gruppe samt Lupe | ✓ |
+| `invalid` am inneren Feld färbt die Gruppe | `--in-use`: die Gruppe mit `.v2in--invalid` hat `border-color rgb(168,64,60)` (`--color-danger`), die Suchgruppe daneben `rgb(196,204,213)`. Der Fehlertext von `Field` steht darunter — Farbe nie allein (V7) | ✓ |
+| `disabled` am inneren Feld graut die Beigaben mit | `--edge`, zweite Gruppe (`Input disabled`): `opacity: 0.6`, `background rgb(244,246,248)` an der Gruppe — „Konto" davor und „wird aus dem Kontenplan geführt" dahinter grauen mit, statt hell stehen zu bleiben (`v3.css:883`) | ✓ |
+| Ein langer Suffix drückt das Feld zusammen, statt aus der Gruppe zu laufen | `--edge`: Gruppe 360 px; „Tage nach Fälligkeit" 117 px → Feld 213 px; „wird aus dem Kontenplan geführt" 196 px → Feld 92 px. Beide Suffixe liegen innerhalb der Gruppe, `scrollWidth == clientWidth` (kein Überlauf) | ✓ |
+| Server-Component: die Datei trägt kein `"use client"` für diesen Export | `grep -l '"use client"' src/ui/v3/primitives/Form.tsx` → kein Treffer; `InputGroup` hat keinen Zustand und kein Ereignis | ✓ |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: keine
+
+**Randnotiz ohne Mangel:** Die Familie `Form.tsx` trägt `@when`/`@instead` nur
+an `Field`, `Select` und `InputGroup`; `Input`, `Textarea` und `Checkbox` haben
+keine — Bestand, nicht von dieser Aufgabe angefasst.
