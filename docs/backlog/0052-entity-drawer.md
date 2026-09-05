@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig — erste Runde; Schritt 3 (CaseDrawer) offen |
+| Status | fertig |
 | Stufe | `entities/<entität>/` je Drawer; der Rahmen steht als `primitives/Drawer` (0042) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → das **Zonen-Schema** ja (fachfrei, deshalb Regel, nicht Komponente); der **einzelne Drawer** nein, er zeigt eine Ludwig-Entität → `entities/` |
 | Quelle | Design-Brief `F143-entitaets-drawer-design-brief.md` aus `ludwig/app/docs/backlog/` (Owner 2026-09-03), hier von v2-Gestaltungsauftrag auf v3-Entwicklungsaufgabe umgeschrieben · `docs/v3-backlog.md` (Drawer-Familie, 29 Importstellen) |
@@ -375,3 +375,7 @@ offen. Es bleiben nur die Punkte, die nie zu dieser Runde gehörten: Schritt 3
 `CaseDrawer` (wartet auf das Entitätsprofil `accounting-case` und 0050) und die
 Ablösung von `BelegDrawer` in `ludwig/app` — **offen (App)**. Drei Befunde oben
 sind notiert, keiner blockiert.
+
+**Status-Nachtrag 2026-09-05.** Der Zusatz im Statusfeld steht jetzt hier, damit
+der Status ein Status bleibt: abgenommen ist die erste Runde; der `CaseDrawer`
+aus Schritt 3 hat mit 0098 seine eigene Spec und ist dort zu bauen.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec — Voraussetzungen erfüllt; **Freigabe zum Bauen liegt beim Owner** |
+| Status | spec |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | nein — die Reihenfolge Kopf → nächste Aktion → Strang → Detail ist die Sachverhaltslogik, keine allgemeine Form |
 | Quelle | Screenshot der Sachverhaltsansicht vom 2026-09-03 · `docs/seiten/sachverhalt-detail.md` |
@@ -144,3 +144,8 @@ Das sind eigene Bausteine hinter den Reitern; die View kennt nur ihre Slots.
 | … | … | ✓ / ✗ |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+**Status-Nachtrag 2026-09-05.** Der Zusatz im Statusfeld hat die Suche über den
+Status unbrauchbar gemacht. Er steht jetzt hier: die Voraussetzungen sind
+erfüllt, **die Freigabe zum Bauen liegt beim Owner** — Schritt 2 des Ablaufs in
+`docs/backlog/README.md`.

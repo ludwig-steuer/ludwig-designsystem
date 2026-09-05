@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig (abgenommen 2026-09-05, dritter Durchgang; offen bleibt nur die App-Zeile `mandant-nav.ts`) |
+| Status | fertig |
 | Stufe | **Grundlagen-Ebene** `src/ui/v3/Icons.tsx`, neben `format.ts`. Die Spec schrieb `patterns/` — warum das nicht trägt, steht unter „Entscheide des Bauenden" |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: jede App muss einmal festlegen, was „zum Objekt", „im Drawer nachschlagen" und „erklären" als Zeichen heißt; nur die Tabelle der Entitäten wäre dort eine andere |
 | Quelle | Anfrage Owner vom 2026-09-05 („Symbole sollen eine Bedeutung haben, die wir einmal festschreiben und später verwenden: welches Icon steht für welche Entität, welches heißt mehr Infos, welches navigiere zum Objekt, welches mehr Infos im Drawer") · `Icons.stories.tsx` (0055) hält das Vokabular heute nur als Story · Regeln A8, T8, T9 |
@@ -446,3 +446,8 @@ gelöscht; `AXIS_ENTITY` bleibt als die eine Abbildung Achse → Entität.
 Liste schrumpft und wächst nie; wer eine Datei umzieht, streicht ihre Zeile.
 Der Wächter meldet eine Zeile, die nichts mehr importiert, als Fehler — eine
 tote Ausnahme fällt damit auf.
+
+**Status-Nachtrag 2026-09-05.** Der Zusatz im Statusfeld steht jetzt hier:
+abgenommen am 2026-09-05 im dritten Durchgang; offen bleibt allein die
+App-Zeile `mandant-nav.ts`, und die gehört nach `docs/befunde-app.md`, nicht in
+den Status.

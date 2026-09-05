@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | abgenommen |
+| Status | fertig |
 | Stufe | alle drei (`primitives/`, `patterns/`, `entities/`) |
 | Klassen-Test | entfällt — Umbenennung, keine neue Komponente |
 | Quelle | Regel „Code nur Englisch" (`CLAUDE.md`, Owner 2026-09-03) |
@@ -150,3 +150,9 @@ dem Set importieren, und lässt generische Namen (`Meldung`, `Pruefpunkt`,
 eigener Domänen-Typ der App ist.
 
 Offene Punkte: keine.
+
+**Status-Nachtrag 2026-09-05.** Das Feld sagte „abgenommen" — ein Wort, das die
+Statusliste in `docs/backlog/README.md` nicht kennt (`offen` → `spec` →
+`in Arbeit` → `Abnahme` → `fertig`). Damit fand
+`grep -l "| Status | fertig |"` diese Aufgabe nicht. Der Sache nach ist sie
+fertig, also heißt sie jetzt so.

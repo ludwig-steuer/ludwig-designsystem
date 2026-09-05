@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | verworfen (2026-09-04) — `role="switch"` kommt 0-mal vor, der einzige Kandidat `ClientActiveToggle` ist mit Absicht ein Knopf; Owner-Entscheid gegen einen Schalter |
+| Status | verworfen |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, ein Schalter ist fachfrei |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Schalter (Toggle)"; Design-Kit `Toggle` |
@@ -76,3 +76,9 @@ Variabel (aus dieser Spec):
 | | | |
 
 Abgenommen von / am: — · Offene Punkte: —
+
+**Status-Nachtrag 2026-09-05.** Der Grund stand im Statusfeld selbst und hat
+die Suche über `grep -l "| Status | verworfen |"` ins Leere laufen lassen. Er
+steht jetzt hier: verworfen am 2026-09-04 — `role="switch"` kommt im Bestand
+**0-mal** vor, der einzige Kandidat `ClientActiveToggle` ist mit Absicht ein
+Knopf, und der Owner hat gegen einen Schalter entschieden.
