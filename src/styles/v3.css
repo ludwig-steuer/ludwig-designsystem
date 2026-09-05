@@ -2691,6 +2691,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   font-size: 13px; font-weight: 500; color: var(--color-text-muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+/* Auf der danger-Fläche trägt auch „Schritt n" den danger-Ton: der
+   Subtle-Ton hat sein Kontrastbudget nur auf Weiss und auf bg-soft (siehe
+   Kommentar an `--color-text-subtle`), auf `--color-danger-bg` kommt er auf
+   4,0:1 und fällt unter AA. */
+.v2wiz__step[data-state="error"] .v2wiz__n { color: var(--color-danger); }
 .v2wiz__step[data-state="active"] .v2wiz__name { color: var(--color-primary); font-weight: 600; }
 .v2wiz__step[data-state="done"] .v2wiz__name { color: var(--color-text); }
 .v2wiz__step[data-state="error"] .v2wiz__name { color: var(--color-danger); font-weight: 600; }

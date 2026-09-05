@@ -63,7 +63,7 @@ export const DotOnly: Story = {
         <HeadRow>
           <span>Gegenpartei</span>
           <span className="v2num">Betrag</span>
-          <StatusHeader axis="konfidenz" label="Sicher" />
+          <StatusHeader axis="konfidenz" label="Konfidenz" />
         </HeadRow>
         {[
           ["Musterfirma GmbH", 1800, "green", 0.94],
