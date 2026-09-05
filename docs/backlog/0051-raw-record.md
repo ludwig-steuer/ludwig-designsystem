@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | Ja, unverändert — „alle Felder eines Datensatzes, so wie sie in der DB stehen" braucht jede App mit einer Support-Sicht; kein Fachwort in Name, Props oder Texten |
 | Quelle | `docs/v3-backlog.md` „Später": `Rohdaten` (JSON/`<pre>`-Ansicht) · 17 Dateien · `primitives` — plus Anfrage vom 2026-09-03 |
@@ -140,9 +140,12 @@ auf ‚zeig mir die Zeile'"). Nachweise vom laufenden Storybook auf Port 6107,
 gemessen in einer eigenen Chromium-Instanz (1280 × 900) über DOM-Proben und
 `getComputedStyle`.
 
-**Ergebnis: zurück auf `in Arbeit`.** Ein Punkt, und der ist klein: zwei der
-`format`-Overrides in der Story `Formats` zeigen nichts, was `auto` nicht auch
-zeigt. Der Baustein selbst ist in jedem geprüften Zweig richtig.
+Abgenommen in zwei Durchgängen: erste Prüfung auf `e3c38e7` → zurück auf
+`in Arbeit`, weil zwei der `format`-Overrides in der Story `Formats` nichts
+zeigten, was `auto` nicht auch zeigt. **Nachprüfung auf `a3bc067` → behoben,
+Status `fertig`.** Am Baustein war nichts zu ändern und wurde nichts geändert
+(`git log -- src/ui/v3/primitives/RawRecord.tsx` steht unverändert auf
+`a23c004`); geändert wurden zwei Werte in der Story.
 
 ### Story-Deckung
 
@@ -170,7 +173,7 @@ ausgeschlossen.
 | Zahlen stehen ungruppiert, `boolean` als `true`/`false` | Story `--data-types`: `1234567` steht als `1234567`, nicht als `1.234.567`; `9007199254740993` unverkürzt; `true`/`false` in Mono statt „ja"/„nein". Gegenprobe `--formats`: derselbe Wert mit `format: "number"` → `1.234.567`. Die Entscheidung aus offener Frage 1 ist damit an beiden Enden belegt. | ✓ |
 | ISO-Zeitstempel gehen durch `Time`; der rohe Wert bleibt im `title` lesbar | Story `--data-types`, DOM: `<span title="2026-08-26T14:03:11Z"><time datetime="2026-08-26T14:03:11.000Z">26.08.2026, 16:03</time></span>`; beim reinen Datum `title="2026-08-26"`. `RawDate` (`:131–137`) setzt den `title`, `Time` formatiert. **Anmerkung 3:** `Time` hat für Kalendertage einen Zeitzonen-Fehler (0033) — betrifft diese Komponente mittelbar. | ✓ |
 | Werte über 100 Zeichen oder mehrzeilig hinter einer Klappe mit Zeichen- und Zeilenzahl; literale `\n` als Umbruch | Story `--long-values`, drei Klappen gelesen: `llm_prompt` → „Text · 149 Zeichen, 5 Zeilen", `ocr_markdown` → „Text · 13.620 Zeichen, 541 Zeilen", `payload` → „JSON · 271 Zeichen". Aufgeklappt misst das `<pre>` beim Prompt **5** echte Zeilen — die literalen `\n`/`\t` aus der Spalte sind aufgelöst (`unescape`, `:49–51`), `white-space: pre-wrap`, `max-height: 480px` (`v3.css:2063–2065`). Dass `ocr_markdown` ohne `format` **Text** bleibt und nicht zu Markdown wird, ist die Regel „Sie rät kein Markdown" — hier sichtbar eingehalten. | ✓ |
-| `format` überschreibt die Erkennung je Schlüssel, alle sechs Werte | **Drei von fünf Overrides beweisen etwas, zwei nicht.** Belegt: `amount_cents` `number` → `1.234.567` statt `1234567`; `ocr_markdown` `markdown` → gerenderte Überschrift und Fettung statt Text-Klappe; `payload_text` `json` → Klappe statt Inline-Text. **Nicht belegt:** `external_ref: "2026-0815"` mit `text` — der Wert passt gar nicht auf `ISO_DATE` (`:38` verlangt `\d{4}-\d{2}-\d{2}`, „2026-0815" hat nach dem Bindestrich vier Ziffern), `auto` liefert dieselbe `span.v2raw__text`; und `posted_on: "2026-08-26"` mit `date` — `auto` erkennt es ohnehin als Datum, wie `--data-types` (`h_date`) im selben Rendering zeigt. Für zwei der sechs Werte ist die Story vom Standard nicht unterscheidbar. `auto` selbst ist über `Filled`/`DataTypes` belegt. | ✗ |
+| `format` überschreibt die Erkennung je Schlüssel, alle sechs Werte | **Behoben in `a3bc067`.** Alle fünf Overrides sind jetzt vom Standard unterscheidbar, im DOM gelesen: `amount_cents` `number` → `1.234.567` statt `1234567` · `external_ref: "2026-08-26"` `text` → bleibt roh `2026-08-26` in `span.v2raw__text`, wo `auto` `26.08.2026` zeigen würde · `ocr_markdown` `markdown` → gerenderte Überschrift und Fettung statt Text-Klappe · `payload_text` `json` → Klappe „JSON · 48 Zeichen" statt Inline-Text · `posted_on: "2026-08-26 09:15:00"` `date` → `<time datetime="2026-08-26T07:15:00.000Z" title="2026-08-26 09:15:00">26.08.2026, 09:15</time>`, wo `auto` roher Text bliebe. Die beiden neuen Werte sind gezielt gewählt und gegengeprüft: `"2026-08-26"` trifft `ISO_DATE` (`:38`), `"2026-08-26 09:15:00"` trifft es **nicht** (Leerzeichen statt `T`) — headless bestätigt, `auto` liefert für den einen ein Datum und für den anderen rohen Text. Der Story-Kommentar sagt beides jetzt auch. `auto` selbst ist über `Filled`/`DataTypes` belegt. | ✓ |
 | `empty` erscheint bei `record = {}` | Story `--empty`: `p.v2raw__empty` mit „Keine Felder in dieser Zeile.", `document.querySelectorAll(".v2raw__list").length` = **0** — keine leere Tabelle darunter. Default „Keine Felder." in `:150`. | ✓ |
 | Server-Component: keine `"use client"`-Direktive | `grep -c '"use client"' src/ui/v3/primitives/RawRecord.tsx` → `0`. Kein Hook, kein Handler; Tastatur und Fokus kommen aus dem nativen `<details>` in `Disclosure`. | ✓ |
 | Neue CSS-Klassen tragen `.v2raw*` und stehen als eigener Block **am Ende** von `v3.css` mit Aufgabennummer | Zum Zeitpunkt des Baus war er das Ende: `git show a23c004:src/styles/v3.css` → Block „── Rohdaten (0051) ──" beginnt in Z. 1941, die Datei endet in Z. 1986. Heute stehen acht spätere Blöcke dahinter (0049, 0047, 0048, 0053, 0052, 0059–0061, 0044, 0066–0068, 0074–0077, 0079) — das ist der normale Anbau, kein Verstoß. Alle Klassen tragen das Präfix: `.v2raw__label`, `__list`, `__key`, `__val`, `__text`, `__pre`, `__empty`. | ✓ |
@@ -212,22 +215,17 @@ ausgeschlossen.
   `RawRecord` · `RawValue` unter „Tabelle" als „v2 (0051)" und nennt die
   abzulösenden App-Stellen.
 
-### Was zu tun ist
+### Nachbesserung (`a3bc067`)
 
-**Story `Formats` so belegen, dass der Override sichtbar wird.** Zwei
-Wertwechsel genügen:
+Der eine Mangel des ersten Durchgangs ist erledigt. Die Story `Formats`
+tauscht zwei Beispielwerte:
 
-1. `external_ref` auf einen Wert setzen, den `auto` **wirklich** als Datum
-   liest — etwa `"2026-08-15"` (die Belegnummer, die wie ein Datum aussieht;
-   die Spec meinte genau diesen Fall). Dann zeigt `text` einen Unterschied:
-   Zeichenkette statt `26.08.…`.
-2. Für `date` einen Schlüssel wählen, den `auto` nicht erkennt — etwa ein
-   Zeitstempel ohne führendes Jahr oder ein Wert mit Zusatz —, damit auch dort
-   die Erzwingung sichtbar wird. Alternativ das Kriterium in dieser Spec
-   präzisieren: `date` ist für Spalten gedacht, deren Erkennung an der
-   Regex scheitert.
+| Schlüssel | vorher | jetzt | warum das den Override beweist |
+|---|---|---|---|
+| `external_ref` | `"2026-0815"` | `"2026-08-26"` | Der alte Wert passte gar nicht auf `ISO_DATE` — `auto` hätte ihn ebenso roh gezeigt. Der neue Wert **ist** date-shaped, `format: "text"` hält ihn trotzdem roh. Genau der Fall, den die Schnittstellen-Tabelle beschreibt („eine Referenz, die wie ein Datum aussieht"). |
+| `posted_on` | `"2026-08-26"` | `"2026-08-26 09:15:00"` | Der alte Wert wurde von `auto` ohnehin als Datum erkannt. Der neue fällt mit dem Leerzeichen statt `T` durch `ISO_DATE` und wird **erst** durch `format: "date"` zum Zeitpunkt. |
 
-Danach ist das Kriterium erfüllt; am Code ist nichts zu ändern.
+Beide im Browser nachgemessen, Konsole leer.
 
 ### Anmerkungen des Abnehmenden
 
@@ -248,14 +246,26 @@ Danach ist das Kriterium erfüllt; am Code ist nichts zu ändern.
    (Overrides gelten Textspalten), aber die Verhaltens-Tabelle liest sich
    anders — beim nächsten Anfassen entweder den Zweig vorziehen oder den Satz
    auf „erzwingt die String-Behandlung **bei Zeichenketten**" schärfen.
-3. **Der Kalendertag verschiebt sich in östlichen Zeitzonen** — kein Fehler
-   dieser Aufgabe, sondern von `Time` (0033, dort als Mangel aufgenommen):
-   `formatTime("2026-08-26","date")` gibt unter `TZ=Asia/Tokyo` den
-   **25.08.2026** zurück. `RawRecord` schickt jede erkannte Datumsspalte durch
-   `Time` und erbt das. Wenn 0033 nachgebessert ist, ist auch das hier weg —
-   der rohe Wert im `title` fängt es bis dahin ab.
-4. **GLOSSARY-Befund aus der Spec steht weiter offen:** kein Eintrag für die
+3. **Der Kalendertag-Fehler ist weg** — er kam aus `Time` (0033) und ist dort
+   in `a3bc067` behoben (Anker auf 12:00 UTC). Gegengeprüft für diesen
+   Baustein: `formatTime("2026-08-26","date")` liefert unter `TZ=Asia/Tokyo`,
+   `Pacific/Kiritimati` und `Pacific/Midway` jetzt denselben `26.08.2026`, und
+   `RawRecord` erbt das über `RawDate` (`:131–137`).
+4. **Ein Zeitstempel ohne Zone hängt an der Rechner-Zone.** Beim Nachprüfen
+   aufgefallen, am neuen Wert `posted_on: "2026-08-26 09:15:00"`: ein String
+   ohne `T` und ohne Offset geht durch `new Date(...)`, und V8 liest den als
+   **lokale** Zeit. Gemessen: Berlin `26.08.2026, 09:15` · Asia/Tokyo
+   `26.08.2026, 02:15` · America/Los_Angeles `26.08.2026, 18:15`. Das **Datum**
+   bleibt überall der 26., und die Eingabe ist fachlich mehrdeutig — eine
+   Postgres-Spalte `timestamp without time zone` sieht genau so aus. Für die
+   Rohdaten-Sicht ist es zusätzlich entschärft, weil der unveränderte Wert im
+   `title` steht (nachgemessen: `title="2026-08-26 09:15:00"`). Kein Mangel
+   dieser Aufgabe und keiner der Story — notiert, weil es die einzige
+   verbliebene Stelle ist, an der eine Zeitangabe je nach Rechner anders
+   aussieht, und weil `format.ts` irgendwann entscheiden sollte, ob ein
+   zonenloser Zeitstempel als Berliner Zeit gelesen wird.
+5. **GLOSSARY-Befund aus der Spec steht weiter offen:** kein Eintrag für die
    Rohdaten-Sicht. Nicht Aufgabe dieser Abnahme, aber unerledigt.
 
-Abgenommen von / am: — · Offene Punkte: der eine unter „Was zu tun ist"
-(Story `Formats`); die vier Anmerkungen sind Befunde
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: keine
+(die Anmerkungen sind Befunde, keine Mängel dieser Aufgabe)
