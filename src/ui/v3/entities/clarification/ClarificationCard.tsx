@@ -14,7 +14,7 @@ import { TextButton } from "../../primitives/TextButton";
 import { Time } from "../../primitives/Time";
 import { ActionIcon } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
-import { resolveStatus } from "../../patterns/status-registry";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { ChoicePrompt, type ChoiceAnswer } from "../../patterns/ChoicePrompt";
 import type { ClarificationVM } from "./Clarification";
 

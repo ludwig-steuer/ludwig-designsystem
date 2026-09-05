@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **blockiert** — der Spiegel führt `beleg_erledigung` nicht, siehe Abschnitt Blocker |
+| Status | Abnahme |
 | Stufe | `patterns/` (betrifft `status-registry.ts`, `StatusBadge`, `StatusInfoDialog`, `entity-icons.ts`, alle Konsumenten von `resolveStatus`/`axisLegend`) |
 | Klassen-Test | entfällt — keine Komponente, eine Quellen-Entscheidung |
 | Quelle | Owner-Entscheid 2026-09-04: **die Registry bleibt in der App, das Design-System spiegelt sie** über `scripts/sync-ludwig.sh` wie jeden Domänentyp. Antwort auf `ludwig/app` `F147-designsystem-abloesung.md` §5d und `F147-luecken-fuer-design-agent.md` §2 Nr. 7 |
@@ -10,52 +10,22 @@
 | Blockiert | jede weitere Achse, die sonst zweimal eingetragen werden müsste; E1.4 der App-Migration |
 | Spec von / am | Claude, 2026-09-04 |
 
-## Blocker (2026-09-05)
+## Blocker (2026-09-05) — aufgelöst am selben Tag
 
-Die App hat mit `cf681257` geliefert, was L-48 und L-49 verlangten: die
-Registry ist importfrei, `actor_kind` ist übernommen, der Pfad bleibt
-`apps/web/src/ui/status/status-registry.ts`. Das Sync-Skript nimmt sie seither
-mit (`--include='ui/status/status-registry.ts'`), und `pnpm sync:ludwig` legt
-sie unter `src/ludwig/ui/status/` ab.
+Der Blocker war die Achse `beleg_erledigung`: dieses Repo hatte sie mit 0074
+angelegt (Befund L-41), die App kannte sie nicht, und die lokale Kopie zu
+löschen hätte sie mitgenommen und `SourceDocument.tsx` gebrochen.
 
-**Der letzte Schritt geht trotzdem noch nicht:** die lokale Kopie
-`src/ui/v3/patterns/status-registry.ts` kann nicht gelöscht werden, weil sie
-**eine Achse mehr** führt als der Spiegel.
+**Erledigt:** die App führt sie seit `ludwig/app` Commit `41a1a8d3` — der
+Block ist aus `3c0682f` übernommen, alle acht Schlüssel sind gleich, dazu
+`open` und `completed` als Extra-Werte, weil sie Aussagen über `completed_at`
+sind und keine Werte der Spalte. Nachgeprüft am 2026-09-05: der Block ist
+zeichengleich (`diff` über `BELEG_ERLEDIGUNG` leer).
 
-Der Diff alte Kopie gegen Spiegel zeigt genau das, was er zeigen darf — die
-sieben neuen Achsen der App (`zahlungsweg`, `mandant_betrieb`,
-`dauersachverhalt_uebernahme`, `token`, `bridge_datev`, `vst_fakt`,
-`vst_regel`), `actor_kind`, `prepared` und den Typnamen `StatusKind` — **und
-eine Zeile in die andere Richtung**:
-
-```
-7d6
-< beleg_erledigung
-```
-
-`beleg_erledigung` ist die Achse aus **L-41**, die dieses Repo mit 0074
-angelegt hat und die die App noch nicht übernommen hat (`grep -c
-beleg_erledigung` in der App: 0). Sie hat einen lebenden Aufrufer:
-`src/ui/v3/entities/source-document/SourceDocument.tsx` Z. 207 zeigt die
-Erledigung als Wort über diese Achse — genau das, was 0074 gegen das Häkchen
-der App durchgesetzt hat (V7/V11).
-
-Die Kopie zu löschen hieße also, diese Achse zu verlieren und einen
-abgenommenen Baustein zu brechen. Die Achse in den Spiegel zu schreiben
-verbietet sich: `src/ludwig/` ist eine Kopie, hier wird nie darin bearbeitet.
-Und eine lokale Ergänzung neben dem Spiegel wäre wieder die zweite Quelle,
-die diese Aufgabe gerade beendet.
-
-**Reihenfolge ist damit:** erst L-41 in der App (Achse `beleg_erledigung` mit
-ihren sechs `completed_via`-Werten plus `open`), dann `pnpm sync:ludwig`, dann
-der Rest dieser Aufgabe. Der Rest steht unverändert bereit — Importe
-umbiegen, Kopie löschen, `AXIS_LABEL`/`AXIS_SOURCE` für die sieben neuen
-Achsen nachziehen.
-
-**Was heute schon erledigt ist:** das Sync-Skript nimmt die Registry auf (mit
-Begründung im Kopf, warum der Ordner `ui/status/` die Spiegelbarkeit nicht
-verhindert), und der Spiegel liegt gezogen im Baum. Der Diff oben ist damit
-jederzeit wiederholbar.
+Der Diff alte Kopie gegen Spiegel zeigt seither **nur noch Zuwachs** — die
+sieben neuen Achsen der App (`bridge_datev`, `dauersachverhalt_uebernahme`,
+`mandant_betrieb`, `token`, `vst_fakt`, `vst_regel`, `zahlungsweg`). Keine
+Zeile in die Gegenrichtung, also keine Achse verloren.
 
 ## Ziel
 

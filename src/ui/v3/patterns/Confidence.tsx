@@ -1,6 +1,6 @@
 import { DotStatus } from "../primitives/Cells";
 import { AXIS_LABEL } from "./entity-icons";
-import { resolveStatus } from "./status-registry";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 /**
  * The banded steps of the axis `konfidenz`. What the old type in

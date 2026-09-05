@@ -12,7 +12,7 @@ import { Popover } from "../primitives/Popover";
 import { RecordPager } from "../primitives/RecordPager";
 import { EntityHeader } from "./EntityHeader";
 import { StatusBadge } from "./StatusBadge";
-import { axisLegend } from "./status-registry";
+import { axisLegend } from "@/ludwig/ui/status/status-registry";
 
 const meta: Meta<typeof EntityHeader> = { title: "v3/Patterns/Rahmen/EntityHeader", component: EntityHeader };
 export default meta;

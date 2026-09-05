@@ -2,7 +2,7 @@ import { Badge } from "../primitives/Badge";
 import { ActionIcon, EntityIcon } from "../Icons";
 import { AXIS_ENTITY, AXIS_LABEL } from "./entity-icons";
 import { StatusInfoButton } from "./StatusInfoButton";
-import { resolveStage, resolveStatus, type StatusAxis } from "./status-registry";
+import { resolveStage, resolveStatus, type StatusAxis } from "@/ludwig/ui/status/status-registry";
 
 export interface StatusBadgeProps {
   /** Welche Status-Achse — bestimmt Label, Farbe und Erklärung. */

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Popover } from "../primitives/Popover";
 import { AXIS_LABEL } from "./entity-icons";
 import { StatusBadge } from "./StatusBadge";
-import { STATUS_REGISTRY, axisLegend, type StatusAxis } from "./status-registry";
+import { STATUS_REGISTRY, axisLegend, type StatusAxis } from "@/ludwig/ui/status/status-registry";
 
 const meta: Meta<typeof StatusBadge> = {
   title: "v3/Patterns/Prüfen/StatusBadge",

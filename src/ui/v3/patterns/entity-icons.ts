@@ -16,7 +16,7 @@
  * rendert deshalb einfach keins, wenn hier nichts steht.
  */
 import type { EntityKey } from "../Icons";
-import type { EntityType, StatusAxis } from "./status-registry";
+import type { EntityType, StatusAxis } from "@/ludwig/ui/status/status-registry";
 
 /** Welche Achse benennt welche Entität — der Schlüssel in die Icon-Registry. */
 export const AXIS_ENTITY: Partial<Record<StatusAxis, EntityKey>> = {
@@ -88,6 +88,13 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   actor_kind: "Akteur",
   health: "Systemcheck",
   readiness: "Konfiguration",
+  zahlungsweg: "Zahlungsweg",
+  mandant_betrieb: "Betrieb",
+  dauersachverhalt_uebernahme: "Übernahme",
+  token: "Zugangstoken",
+  bridge_datev: "DATEV-Brücke",
+  vst_fakt: "Vorsteuer-Fakt",
+  vst_regel: "Vorsteuer-Regel",
 };
 
 /** Nur die drei Haupt-Entitäten — für Flow-Modal und Icon-Beschriftung. */
@@ -160,4 +167,11 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   actor_kind: "platform_audit_events.actor_kind",
   health: "berechnet — modules/health/aggregate.ts (ephemer)",
   readiness: "berechnet — Onboarding-Aggregat (ephemer)",
+  zahlungsweg: "abgeleitet — client_payment_accounts.valid_until gegen den offenen Buchungszyklus",
+  mandant_betrieb: "abgeleitet — platform_clients.is_active, dazu der Replay-Zustand des Mandanten",
+  dauersachverhalt_uebernahme: "abgeleitet beim Jahreswechsel — kein DB-Feld, der Vorschlag entsteht im Vergleich der Jahre",
+  token: "abgeleitet — platform_agent_tokens.revoked_at und expires_at",
+  bridge_datev: "ephemer — Antwort des Bridge-Endpunkts beim Systemcheck",
+  vst_fakt: "abgeleitet — die Vorsteuer-Prüfung je Beleg, fünf Ausprägungen",
+  vst_regel: "abgeleitet — das Ergebnis einer Vorsteuer-Regel: bestanden, gerissen, unbekannt",
 };

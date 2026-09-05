@@ -3,7 +3,7 @@
 import { Badge } from "../primitives/Badge";
 import { Dialog } from "../primitives/Dialog";
 import { AXIS_LABEL, AXIS_SOURCE } from "./entity-icons";
-import { axisLegend, type StatusAxis } from "./status-registry";
+import { axisLegend, type StatusAxis } from "@/ludwig/ui/status/status-registry";
 
 interface StatusInfoDialogProps {
   axis: StatusAxis;

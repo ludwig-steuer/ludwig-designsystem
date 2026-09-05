@@ -1,5 +1,5 @@
 import { StatusInfoButton } from "./StatusInfoButton";
-import type { StatusAxis } from "./status-registry";
+import type { StatusAxis } from "@/ludwig/ui/status/status-registry";
 
 export interface StatusHeaderProps {
   /** The axis whose values the column shows — feeds the (i) and the legend. */

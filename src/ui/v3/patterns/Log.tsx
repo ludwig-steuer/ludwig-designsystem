@@ -7,7 +7,7 @@ import { Link } from "../primitives/Link";
 import { Skeleton } from "../primitives/Skeleton";
 import { Time } from "../primitives/Time";
 import { StatusBadge } from "./StatusBadge";
-import { axisLegend, resolveStatus } from "./status-registry";
+import { axisLegend, resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 /**
  * The log as a table — one row every source maps onto (0053).

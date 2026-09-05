@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ActionIcon } from "../Icons";
 import { AXIS_LABEL } from "./entity-icons";
 import { StatusInfoDialog } from "./StatusInfoDialog";
-import type { StatusAxis } from "./status-registry";
+import type { StatusAxis } from "@/ludwig/ui/status/status-registry";
 
 interface StatusInfoButtonProps {
   axis: StatusAxis;
