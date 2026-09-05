@@ -15,24 +15,21 @@ diesem Repo und steht in `docs/design-guidelines.md`.
 ## Auch gespiegelt: die Status-Registry (0080)
 
 Seit 2026-09-05 liegt neben der Doku ein **Code**-Spiegel:
-`src/ludwig/ui/status/status-registry.ts`. Er kam aus
+`src/ludwig/ui/status/status-registry.ts`. Er kommt aus
 `apps/web/src/ui/status/status-registry.ts` und ist die **einzige** Quelle für
 Achsen, Labels, Farben und Erklärtexte jedes Status — dieses Repo hatte bis
-dahin eine eigene Kopie, die schon gegabelt war (42 Diff-Zeilen).
-
-Drei Dinge dazu:
+dahin eine eigene Kopie, die schon gegabelt war.
 
 - **Nicht hier bearbeiten.** Eine neue Achse entsteht drüben und kommt mit
   `pnpm sync:ludwig` herüber. Was das Set zusätzlich braucht, ist ein Befund
-  in `docs/befunde-app.md` — so ist die Achse `beleg_erledigung` entstanden
-  (L-41), die den Umzug bis zum 2026-09-05 aufgehalten hat.
+  in `docs/befunde-app.md` — so ist `beleg_erledigung` entstanden (L-41), die
+  den Umzug bis zum 2026-09-05 aufgehalten hat.
 - **Der Ordner `ui/status/` macht die Spiegelbarkeit nicht** — die
-  Import-Freiheit macht sie. Die Datei hat drüben keinen einzigen Import; der
-  Pfad bleibt, wo er ist, weil 81 Konsumenten im selben Ordner liegen
-  (Entscheid der App).
+  Import-Freiheit macht sie. Die Datei hat drüben keinen einzigen Import.
 - **`AXIS_LABEL`, `AXIS_SOURCE` und die Icons bleiben hier**
   (`src/ui/v3/patterns/entity-icons.ts`): sie sind Darstellung, nicht
-  Wertebereich. Kommt drüben eine Achse dazu, meldet der Typcheck die Lücke.
+  Wertebereich. Kommt drüben eine Achse dazu, meldet der Typcheck die Lücke —
+  und die Texte werden **abgeschrieben, nicht erfunden** (Abnahme 0080, M1).
 
 **Pfade darin zeigen auf die App**, nicht auf dieses Repo. Übersetzung:
 `apps/web/src/ui/v2` → `src/ui/v3` hier, `src/styles/v2.css` → `src/styles/v3.css`.
