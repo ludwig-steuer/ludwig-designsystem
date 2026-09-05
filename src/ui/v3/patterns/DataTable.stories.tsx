@@ -16,6 +16,7 @@ import { FilterChips, SearchInput } from "../primitives/Nav";
 import { TextButton } from "../primitives/TextButton";
 import { DataTable, type BulkAction, type ColumnDef, type ListPatch, type RowAction } from "./DataTable";
 import { StatusBadge } from "./StatusBadge";
+import { StatusInfoButton } from "./StatusInfoButton";
 
 const meta: Meta<typeof DataTable> = {
   title: "v3/Patterns/Arbeitsfläche/DataTable",
@@ -123,10 +124,15 @@ const AMOUNT: ColumnDef<CaseListItem> = {
 };
 
 /** Z4: kein Kopf „Status" — die Achse heißt hier Bearbeitung. */
+// Die Status-Spalte trägt ihr (i) am Kopf, nicht in jeder Zeile (Z4) — und
+// zwar über `headerAside`, damit der Knopf **neben** dem Sortier-Link steht
+// und nicht darin: ein Knopf in einem `<a>` ist ungültiges HTML (0094 b).
 const LIFECYCLE: ColumnDef<CaseListItem> = {
   key: "lifecycleStatus",
   header: "Bearbeitung",
+  headerAside: <StatusInfoButton axis="sachverhalt" />,
   width: "190px",
+  sortable: true,
   cell: (c) => <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} info={false} />,
 };
 
@@ -148,8 +154,9 @@ const SORT = { key: "openedAt", dir: "desc" } as const;
 
 /**
  * Der Normalfall: 50 von 583, sortiert nach „Eröffnet" absteigend — die
- * aktive Spalte trägt den Pfeil und `aria-sort`, „Betrag" ist ein Link ohne
- * Pfeil. Jede Zeile führt über den Overlay-Link der ersten Spalte in den
+ * aktive Spalte trägt den Pfeil, und der Link sagt den Stand in Worten
+ * („Nach Eröffnet sortieren — derzeit absteigend"). „Betrag" ist ein Link
+ * ohne Pfeil. Jede Zeile führt über den Overlay-Link der ersten Spalte in den
  * Sachverhalt, unten steht der Seitenwechsel.
  */
 export const Filled: Story = {

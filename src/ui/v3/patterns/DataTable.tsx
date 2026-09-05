@@ -55,8 +55,20 @@ import { StateIcon } from "./Review";
 export interface ColumnDef<T> {
   /** Also the sort name that goes into the URL. */
   key: string;
-  /** Normal case, no capitals (A2). */
+  /**
+   * Normal case, no capitals (A2). With `sortable` it should be a **plain
+   * string**: it becomes the word of the sort link and its spoken name.
+   * Everything that stands next to it — above all the (i) of a status column,
+   * which Z4 demands — belongs in `headerAside`, not here.
+   */
   header: ReactNode;
+  /**
+   * What stands next to the column name and must **not** be inside the sort
+   * link: the `StatusInfoButton` of a status column (Z4). A button inside an
+   * `<a>` is invalid HTML and is read out inconsistently; that it works today
+   * rests on `StatusInfoButton` stopping the click (0094 b).
+   */
+  headerAside?: ReactNode;
   /** A component or a pure function, rendered on the server. */
   cell: (row: T) => ReactNode;
   /** One grid track: „1fr" (default), „120px", „max-content". */
@@ -114,7 +126,7 @@ interface DataTableBase<T> {
   minWidth?: number;
   /** The last column, always visible (V14): ≤ 2 inline, ≥ 3 primary plus menu. */
   rowActions?: (row: T) => RowAction[];
-  /** The state out of the URL; the active column carries arrow and `aria-sort`. */
+  /** The state out of the URL; the active column carries the arrow, and the link says the state in words. */
   sort?: { key: string; dir: "asc" | "desc" };
   /**
    * The page builds the URL. Required as soon as `sort` or `pager` is set —
@@ -291,7 +303,19 @@ export function DataTable<T>(props: DataTableProps<T>) {
 /**
  * A sortable head is a link on `href({ sort, dir, page: 1 })`: the first click
  * sorts ascending, a click on the active column turns it around. Only the
- * active one carries the arrow and `aria-sort`.
+ * active one carries the arrow.
+ *
+ * **The sort state stands in the name of the link, not in `aria-sort`** (0094
+ * a). `aria-sort` only works on a `columnheader`, and `.v2tbl` is a grid of
+ * `div`s without table semantics — the attribute sat on a `<span>` and no
+ * reading aid ever saw it. Giving the family real table roles founders on
+ * three shapes in which the row **is** the control (`Row href`, the pickable
+ * `ChecklistLine`, `ExpandableRow`); that is a redesign, and it has its own
+ * task (0106). Until then the link says it in words, which is announced
+ * everywhere: „Nach Betrag sortieren — derzeit aufsteigend".
+ *
+ * `headerAside` stays outside the link: a button inside an `<a>` is invalid
+ * HTML (0094 b).
  */
 function headCell<T>(
   col: ColumnDef<T>,
@@ -303,21 +327,27 @@ function headCell<T>(
     return (
       <span key={col.key} className={cls}>
         {col.header}
+        {col.headerAside}
       </span>
     );
   }
   const active = sort?.key === col.key;
   const asc = active && sort.dir === "asc";
+  const name = typeof col.header === "string" ? col.header : col.key;
+  const state = active
+    ? `derzeit ${asc ? "aufsteigend" : "absteigend"}`
+    : "derzeit nicht sortiert";
   return (
-    <span
-      key={col.key}
-      className={cls}
-      aria-sort={active ? (asc ? "ascending" : "descending") : undefined}
-    >
-      <Link className="v2sortlink" href={href({ sort: col.key, dir: asc ? "desc" : "asc", page: 1 })}>
+    <span key={col.key} className={cls}>
+      <Link
+        className="v2sortlink"
+        href={href({ sort: col.key, dir: asc ? "desc" : "asc", page: 1 })}
+        aria-label={`Nach ${name} sortieren — ${state}`}
+      >
         {col.header}
         {active ? <ActionIcon action={asc ? "sort-asc" : "sort-desc"} size={12} /> : null}
       </Link>
+      {col.headerAside}
     </span>
   );
 }
