@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | in Arbeit |
 | Stufe | `primitives/` |
 | Klassen-Test | Ja, unverändert — „alle Felder eines Datensatzes, so wie sie in der DB stehen" braucht jede App mit einer Support-Sicht; kein Fachwort in Name, Props oder Texten |
 | Quelle | `docs/v3-backlog.md` „Später": `Rohdaten` (JSON/`<pre>`-Ansicht) · 17 Dateien · `primitives` — plus Anfrage vom 2026-09-03 |
@@ -131,83 +131,131 @@ Zustände + 1 Enum-Prop (`format`) + 0 Layout-Booleans + 0 Callbacks + 1
 Nicht anwendbar: `Lädt` und `Fehler` (lädt nichts, siehe Verhalten),
 `LeerNachFilter` (filtert nicht), `Interaktiv` (kein Callback).
 
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] `record` zeigt **alle** Schlüssel alphabetisch, keiner gefiltert oder gekürzt (Story `Filled`)
-- [ ] Jeder Zweig der Tabelle „Verhalten" rendert wie dort beschrieben (Story `DataTypes`)
-- [ ] Zahlen stehen ungruppiert, `boolean` als `true`/`false` (Story `DataTypes`)
-- [ ] ISO-Zeitstempel gehen durch `Time`; der rohe Wert bleibt im `title` lesbar (Story `DataTypes`)
-- [ ] Werte über 100 Zeichen oder mehrzeilig stehen hinter einer Klappe mit Zeichen- und Zeilenzahl; literale `\n` erscheinen als Umbruch (Story `LongValues`)
-- [ ] `format` überschreibt die Erkennung je Schlüssel, alle sechs Werte (Story `Formats`)
-- [ ] `empty` erscheint bei `record = {}` (Story `Empty`)
-- [ ] Server-Component: keine `"use client"`-Direktive in der Datei (`grep`)
-- [ ] Neue CSS-Klassen tragen `.v2raw*` und stehen als eigener Block **am Ende** von `src/styles/v3.css` mit Aufgabennummer
-- [ ] Ersetzt `RecordValue`/`RowKeyValueTable`/`CollapsibleText` in beiden `RohdatenTab.tsx` und `fmtRawValue` in `ui/drawers/server.tsx` ohne Funktionsverlust — **offen (App)**
-
-## Offene Fragen
-
-1. **Zahlen gruppieren?** Ohne Antwort: **nein** — Rohdaten stehen roh, eine
-   `1234567` als „1.234.567" wäre eine Behauptung über den Typ. Wer gruppieren
-   will, sagt `format: { amount_cents: "number" }`.
-2. **Schwelle für die Klappe bei 100 Zeichen?** Ohne Antwort: **100**, wie im
-   heutigen Beleg-Tab, als Modul-Konstante — keine Prop, bis eine zweite
-   Schwelle belegt ist.
-3. **Deutsche Klappen-Texte** („Text anzeigen · 12.480 Zeichen")? Ohne
-   Antwort: **ja** — sichtbarer Text ist deutsch (Hausregel), nur der Code ist
-   englisch.
-
-## Befunde für `ludwig/app`
-
-- Die beiden `RohdatenTab.tsx` sind Kopien voneinander; die Sachverhalt-Fassung
-  ist die ältere (keine Klappe für lange Werte, keine `HEAVY_TABLES`, `<pre>`
-  fest bei 360 px). Wer sie ablöst, löst zwei Dateien ab.
-- Drei Wahrheiten für denselben Wert: `boolean` `true` vs. „ja", Zahl
-  gruppiert vs. ungruppiert, Zeitstempel lokalisiert vs. roh — je nachdem, ob
-  man im Tab oder im Drawer schaut.
-- `GLOSSARY.md` hat keinen Eintrag für die Rohdaten-Sicht. „raw" ist dort
-  bisher nur als Gegenstück zu Stammdaten belegt (`vendor` vs. `creditor`).
-
-## Befund beim Bauen (2026-09-03)
-
-- **Versalien im `label` waren falsch.** `.v2raw__label` trug zuerst
-  `text-transform: uppercase` wie jede Überschrift im Set — aus „#1 ·
-  id=e3a1c07f" wurde „#1 · ID=E3A1C07F". Eine ID ist case-sensitive; das
-  Label steht jetzt in Mono ohne Versalien. Dieselbe Falle wie bei
-  `.v2bar__label` (0045, Commit `3dce35f`): **Versalien nur für
-  Überschriften, nie für eine Zeile, die einen Wert trägt.**
-- **`formatAmount(n, null)` taugt nicht für Zählungen.** Der Hausformatierer
-  schreibt immer zwei Nachkommastellen („12.480,00 Zeichen"). Die Datei hält
-  deshalb **einen** eigenen `Intl.NumberFormat("de-DE")` für ganze Zahlen —
-  für die Klappen-Beschriftung und für `format: "number"`. Befund für
-  `src/ui/v3/format.ts`: ein `formatCount` fehlt im Haus; kommt er, ersetzt
-  er diese Konstante.
-- **`align-items: start`, nicht `baseline`:** neben einer Klappe rutschte der
-  Schlüssel sonst auf die Höhe der Zusammenfassung statt oben zu stehen.
-- Die offenen Fragen sind wie in der Spec vorgezeichnet entschieden: Zahlen
-  ungruppiert (1), Klappe ab 100 Zeichen als Modul-Konstante (2), deutsche
-  Klappen-Texte (3).
-
-## Neue Story-IDs
-
-`v3-primitives-tabelle-rawrecord--filled` · `--data-types` · `--long-values` ·
-`--formats` · `--empty` · `--in-use` · `--single-values`
-
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Geprüft am 2026-09-05 von einem zweiten Agenten (nicht dem bauenden).
+Geprüfter Stand: `e3c38e7`; `RawRecord.tsx` und `RawRecord.stories.tsx` sind
+im Arbeitsbaum unverändert. Gebaut in `a23c004` („0051 gebaut: eine Antwort
+auf ‚zeig mir die Zeile'"). Nachweise vom laufenden Storybook auf Port 6107,
+gemessen in einer eigenen Chromium-Instanz (1280 × 900) über DOM-Proben und
+`getComputedStyle`.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Ergebnis: zurück auf `in Arbeit`.** Ein Punkt, und der ist klein: zwei der
+`format`-Overrides in der Story `Formats` zeigen nichts, was `auto` nicht auch
+zeigt. Der Baustein selbst ist in jedem geprüften Zweig richtig.
+
+### Story-Deckung
+
+`index.json` listet genau die sieben Stories unter
+`v3/Primitives/Tabelle/RawRecord`: `--filled`, `--data-types`,
+`--long-values`, `--formats`, `--empty`, `--in-use`, `--single-values` — die
+sechs abgeleiteten plus die beim Bauen ergänzte `SingleValues`, die dem
+zweiten Export seinen Nachweis gibt. Props: `record` (`Filled`), `format`
+(`Formats`, mit Einschränkung unten), `label` (`InUse`, „#1 · id=e3a1c07f"),
+`empty` (`Empty`); `RawValue.value` und `RawValue.format` (`SingleValues`).
+`Lädt`, `Fehler`, `LeerNachFilter`, `Interaktiv` sind oben begründet
+ausgeschlossen.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, Exit 0, zu Beginn und am Ende. `pnpm build` bewusst **nicht** gelaufen (parallele Abnahmen schreiben nach `storybook-static`); der Lauf für diesen Stand war grün — „Storybook build completed successfully". | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/RawRecord.tsx` und `RawRecord.stories.tsx` nebeneinander; `RawRecord.stories.tsx:6` setzt `title: "v3/Primitives/Tabelle/RawRecord"`. Barrel-Export `index.ts:171` unter der Rubrik „Tabelle". | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Zwei Exporte, beide vollständig: `RawValue` (`:78`, `@when` Z. 73–74, `@instead` Z. 75–76) und `RawRecord` (`:146`, `@when` Z. 142, `@instead` Z. 143–145). Dazu der Typ `RawFormat` (`:18`). Alles englisch — auch die Kommentare zu den Entscheidungen („an id is not a million"); deutsch nur die sichtbaren Texte („Keine Felder.", „Liste · n Einträge"), wie offene Frage 3 es entschieden hat. | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\b\|[0-9]+px" src/ui/v3/primitives/RawRecord.tsx` → keine Treffer; das einzige Maß ist `maxHeight={480}` an `Markdown` (`:82`), die Prop dieser Komponente. Maße und Farben in `v3.css:2029–2075`. Kein Status, keine Label-Map — die Komponente kennt kein Schema. | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | Sieben von sieben, siehe „Story-Deckung"; Ausschlüsse oben begründet. | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Punkt für Punkt unter dieser Tabelle. | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Alle sieben Stories geöffnet, gemessen und als Screenshot gesehen; Konsole in allen sieben leer. | ✓ |
+| `record` zeigt **alle** Schlüssel alphabetisch, keiner gefiltert oder gekürzt | Story `--filled`, DOM-Probe: **16 von 16** Schlüsseln aus `CASE_ROW`, in der Reihenfolge `case_number, client_id, closed_at, created_at, currency, disposition, external_ref, id, is_reverse_charge, metadata, needs_receipt, net_amount, period, status, summary, tags` — alphabetisch, nicht in Schreibreihenfolge. `RawRecord.tsx:161` sortiert `Object.keys`. `--data-types` zeigt, dass auch ein `undefined`-Wert seinen Schlüssel behält (`b_undefined`). | ✓ |
+| Jeder Zweig der Tabelle „Verhalten" rendert wie dort beschrieben | Story `--data-types`, zwölf Zeilen einzeln im DOM geprüft: `null`/`undefined` → `span.v2muted` „—" · `boolean` → `span.v2mono` `true`/`false` · `number` 42 und 1234567 → `span.v2mono` · `bigint` 9007199254740993 → `span.v2mono` · `2026-08-26` → `<time>` über `Time` mit `format="date"` · `2026-08-26T14:03:11Z` → `<time>` mit `dateTime` · Array → `details.v2disc--quiet` „Liste · 3 Einträge" · Objekt → `details` „JSON · 45 Zeichen" · kurzer String → `span.v2raw__text`. Zwölf von zwölf. | ✓ |
+| Zahlen stehen ungruppiert, `boolean` als `true`/`false` | Story `--data-types`: `1234567` steht als `1234567`, nicht als `1.234.567`; `9007199254740993` unverkürzt; `true`/`false` in Mono statt „ja"/„nein". Gegenprobe `--formats`: derselbe Wert mit `format: "number"` → `1.234.567`. Die Entscheidung aus offener Frage 1 ist damit an beiden Enden belegt. | ✓ |
+| ISO-Zeitstempel gehen durch `Time`; der rohe Wert bleibt im `title` lesbar | Story `--data-types`, DOM: `<span title="2026-08-26T14:03:11Z"><time datetime="2026-08-26T14:03:11.000Z">26.08.2026, 16:03</time></span>`; beim reinen Datum `title="2026-08-26"`. `RawDate` (`:131–137`) setzt den `title`, `Time` formatiert. **Anmerkung 3:** `Time` hat für Kalendertage einen Zeitzonen-Fehler (0033) — betrifft diese Komponente mittelbar. | ✓ |
+| Werte über 100 Zeichen oder mehrzeilig hinter einer Klappe mit Zeichen- und Zeilenzahl; literale `\n` als Umbruch | Story `--long-values`, drei Klappen gelesen: `llm_prompt` → „Text · 149 Zeichen, 5 Zeilen", `ocr_markdown` → „Text · 13.620 Zeichen, 541 Zeilen", `payload` → „JSON · 271 Zeichen". Aufgeklappt misst das `<pre>` beim Prompt **5** echte Zeilen — die literalen `\n`/`\t` aus der Spalte sind aufgelöst (`unescape`, `:49–51`), `white-space: pre-wrap`, `max-height: 480px` (`v3.css:2063–2065`). Dass `ocr_markdown` ohne `format` **Text** bleibt und nicht zu Markdown wird, ist die Regel „Sie rät kein Markdown" — hier sichtbar eingehalten. | ✓ |
+| `format` überschreibt die Erkennung je Schlüssel, alle sechs Werte | **Drei von fünf Overrides beweisen etwas, zwei nicht.** Belegt: `amount_cents` `number` → `1.234.567` statt `1234567`; `ocr_markdown` `markdown` → gerenderte Überschrift und Fettung statt Text-Klappe; `payload_text` `json` → Klappe statt Inline-Text. **Nicht belegt:** `external_ref: "2026-0815"` mit `text` — der Wert passt gar nicht auf `ISO_DATE` (`:38` verlangt `\d{4}-\d{2}-\d{2}`, „2026-0815" hat nach dem Bindestrich vier Ziffern), `auto` liefert dieselbe `span.v2raw__text`; und `posted_on: "2026-08-26"` mit `date` — `auto` erkennt es ohnehin als Datum, wie `--data-types` (`h_date`) im selben Rendering zeigt. Für zwei der sechs Werte ist die Story vom Standard nicht unterscheidbar. `auto` selbst ist über `Filled`/`DataTypes` belegt. | ✗ |
+| `empty` erscheint bei `record = {}` | Story `--empty`: `p.v2raw__empty` mit „Keine Felder in dieser Zeile.", `document.querySelectorAll(".v2raw__list").length` = **0** — keine leere Tabelle darunter. Default „Keine Felder." in `:150`. | ✓ |
+| Server-Component: keine `"use client"`-Direktive | `grep -c '"use client"' src/ui/v3/primitives/RawRecord.tsx` → `0`. Kein Hook, kein Handler; Tastatur und Fokus kommen aus dem nativen `<details>` in `Disclosure`. | ✓ |
+| Neue CSS-Klassen tragen `.v2raw*` und stehen als eigener Block **am Ende** von `v3.css` mit Aufgabennummer | Zum Zeitpunkt des Baus war er das Ende: `git show a23c004:src/styles/v3.css` → Block „── Rohdaten (0051) ──" beginnt in Z. 1941, die Datei endet in Z. 1986. Heute stehen acht spätere Blöcke dahinter (0049, 0047, 0048, 0053, 0052, 0059–0061, 0044, 0066–0068, 0074–0077, 0079) — das ist der normale Anbau, kein Verstoß. Alle Klassen tragen das Präfix: `.v2raw__label`, `__list`, `__key`, `__val`, `__text`, `__pre`, `__empty`. | ✓ |
+| Ersetzt `RecordValue`/`RowKeyValueTable`/`CollapsibleText` in beiden `RohdatenTab.tsx` und `fmtRawValue` in `ui/drawers/server.tsx` ohne Funktionsverlust | Liegt in `ludwig/app`, hier nicht prüfbar. | offen (App) |
+
+### Prüfliste §9, Punkt für Punkt
+
+- **Stufe und Importe** — ✓ `primitives/`, importiert nur `Disclosure`,
+  `Markdown`, `Time` — alles derselben Stufe, kein Pattern, keine Entität,
+  kein Fachmodul. `Record<string, unknown>` statt eines Typs aus `src/ludwig/`
+  ist hier der Punkt, nicht ein Versäumnis.
+- **Ersetzt ihr v1-Gegenstück (`@deprecated`)** — offen (App), siehe Tabelle.
+- **Kein Hex, kein px, keine Label-Map, kein Status-Text** — ✓ siehe Tabelle.
+- **Text links, Zahlen rechts mit `tnum`, nichts zentriert (V3)** — ✓ alles
+  links; das ist hier richtig, denn eine Roh-Zahl ist eine Zeichenkette, kein
+  Betrag. `v2mono` trägt trotzdem `tabular-nums` (gemessen), damit IDs
+  untereinander lesbar bleiben. Nichts zentriert.
+- **Zeilenhöhe ≤ `.v2tbl__row`** — ✓ `.v2raw__key`/`__val` bauen 5 px oben und
+  unten (`v3.css:2055`, `:2061`); nur eine Klappe wird höher, und die ist zu.
+- **Farbe nur als Kritikalitätsstufe** — ✓ keine Farbe außer den Textstufen;
+  Rohdaten tragen keine Kritikalität.
+- **Jeder farbige Zustand hat Wort oder Icon (V7)** — nicht anwendbar.
+- **Fünf Zustände** — ✓ gefüllt und leer gebaut, drei begründet ausgeschlossen.
+- **Kontrast** — ✓ nur `--color-text` · `-muted` · `-subtle`, alle mit
+  Kontrastkommentar in `tokens.css`.
+- **Tastatur / Hover; kein Icon ohne Wort** — ✓ die einzige Bedienung ist die
+  Klappe, und die ist ein natives `<details>`: fokussierbar, mit Enter und
+  Leertaste zu öffnen. Das Dreieck steht **neben** einem Wort („Text · 149
+  Zeichen, 5 Zeilen"), nie allein — T8 eingehalten.
+- **Icons** — keine eigenen; die Klappe bringt ihres aus `Disclosure` mit.
+- **Karte** — ✓ die Story rahmt mit `Card`/`CardHead`; das Primitive bringt
+  keine Fläche mit. Kein Modal.
+- **Texte T1–T5** — ✓ „Keine Felder.", „Liste · n Einträge", „JSON · n
+  Zeichen"; Sie-Form nicht nötig, keine Versalien. Der Befund beim Bauen zu
+  `.v2raw__label` hält: gemessen `text-transform: none`, Mono — „#1 ·
+  id=e3a1c07f" bleibt case-sensitiv.
+- **Story unter `v3/Primitives/Tabelle/RawRecord`** — ✓.
+- **In §11 auf v2 gesetzt** — ✓ `docs/design-guidelines.md:480` führt
+  `RawRecord` · `RawValue` unter „Tabelle" als „v2 (0051)" und nennt die
+  abzulösenden App-Stellen.
+
+### Was zu tun ist
+
+**Story `Formats` so belegen, dass der Override sichtbar wird.** Zwei
+Wertwechsel genügen:
+
+1. `external_ref` auf einen Wert setzen, den `auto` **wirklich** als Datum
+   liest — etwa `"2026-08-15"` (die Belegnummer, die wie ein Datum aussieht;
+   die Spec meinte genau diesen Fall). Dann zeigt `text` einen Unterschied:
+   Zeichenkette statt `26.08.…`.
+2. Für `date` einen Schlüssel wählen, den `auto` nicht erkennt — etwa ein
+   Zeitstempel ohne führendes Jahr oder ein Wert mit Zusatz —, damit auch dort
+   die Erzwingung sichtbar wird. Alternativ das Kriterium in dieser Spec
+   präzisieren: `date` ist für Spalten gedacht, deren Erkennung an der
+   Regex scheitert.
+
+Danach ist das Kriterium erfüllt; am Code ist nichts zu ändern.
+
+### Anmerkungen des Abnehmenden
+
+1. **`format: "json"` auf einen JSON-*String* verdoppelt die Kodierung.**
+   `--formats`, `payload_text` enthält `{"event":"case.created",…}` als Text.
+   `RawValue` ruft `toJson(value)` (`:85`), also `JSON.stringify` **auf die
+   Zeichenkette** — sichtbar wird
+   `"{\"event\":\"case.created\",\"amount\":124090}"`, mit Anführungszeichen
+   und escapten Quotes. Für Support ist das schlechter lesbar als der rohe
+   Wert. Der genau typische Fall ist eine TEXT-Spalte mit JSON darin, also
+   lohnt ein `JSON.parse` im `try` vor dem `stringify`. Kein Verstoß gegen den
+   Wortlaut („erzwingt die JSON-Klappe" — die kommt), deshalb kein ✗; aber ein
+   Befund, der zusammen mit dem Punkt oben erledigt werden sollte.
+2. **`format: "text"` greift erst nach den Typ-Zweigen.** `:96–111` behandelt
+   `boolean`, `number`, `Array` und `object`, bevor `:113` die
+   String-Behandlung beginnt. Ein `format: { n: "text" }` auf einer Zahl
+   liefert also weiter Mono statt String-Behandlung. In der Praxis irrelevant
+   (Overrides gelten Textspalten), aber die Verhaltens-Tabelle liest sich
+   anders — beim nächsten Anfassen entweder den Zweig vorziehen oder den Satz
+   auf „erzwingt die String-Behandlung **bei Zeichenketten**" schärfen.
+3. **Der Kalendertag verschiebt sich in östlichen Zeitzonen** — kein Fehler
+   dieser Aufgabe, sondern von `Time` (0033, dort als Mangel aufgenommen):
+   `formatTime("2026-08-26","date")` gibt unter `TZ=Asia/Tokyo` den
+   **25.08.2026** zurück. `RawRecord` schickt jede erkannte Datumsspalte durch
+   `Time` und erbt das. Wenn 0033 nachgebessert ist, ist auch das hier weg —
+   der rohe Wert im `title` fängt es bis dahin ab.
+4. **GLOSSARY-Befund aus der Spec steht weiter offen:** kein Eintrag für die
+   Rohdaten-Sicht. Nicht Aufgabe dieser Abnahme, aber unerledigt.
+
+Abgenommen von / am: — · Offene Punkte: der eine unter „Was zu tun ist"
+(Story `Formats`); die vier Anmerkungen sind Befunde

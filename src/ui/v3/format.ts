@@ -99,15 +99,20 @@ const CALENDAR_DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * A calendar day must not travel. `new Date("2026-08-26")` is UTC midnight,
- * and formatting that in another zone hands back the 25th — which is how a
- * Belegdatum turns into the day before. So the parts are read as they are
- * written, and the day is built in local time.
+ * and formatting that in Europe/Berlin hands back the 25th — which is how a
+ * Belegdatum turns into the day before.
+ *
+ * Building it in **local** time has the same fault from the other side: on a
+ * machine east of Berlin, local midnight is still the previous day there, so
+ * Tokyo showed the 25th and a new year's day showed 31 December. The day is
+ * therefore anchored at **12:00 UTC** — far enough from both edges that every
+ * offset between −11 and +12 lands on the same calendar day in Berlin.
  */
 function toDate(value: string | Date): Date {
   if (value instanceof Date) return value;
   if (CALENDAR_DAY.test(value)) {
     const [y, m, d] = value.split("-").map(Number);
-    return new Date(y!, m! - 1, d!);
+    return new Date(Date.UTC(y!, m! - 1, d!, 12));
   }
   return new Date(value);
 }
