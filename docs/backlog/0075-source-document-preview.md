@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `entities/source-document/` — `SourceDocumentPreview.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **fast**: ein PDF in einem Rahmen ist kein Fachwort. Sie bleibt trotzdem Entität, weil sie zwei fachliche Regeln trägt — der Grund für eine fehlende Vorschau wird ausgesprochen statt bebildert, und ein Teilbeleg sagt, aus welchen Seiten welches Originals er stammt (`splitPageRange`, `parentSourceDocId`). Ohne die zwei wäre sie ein `<iframe>` an der Aufrufstelle. |
 | Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Formen-Tabelle Zeile `SourceDocumentPreview`; Datenpunkte Rang 10 und 12 |
@@ -154,3 +154,9 @@ Variabel (aus dieser Spec):
 | | | |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+**Status-Nachtrag 2026-09-05.** Gebaut ist die Aufgabe seit `000f2ad`
+(„pnpm typecheck und pnpm build grün, alle 21 Stories im Browser
+angesehen. Abnahme steht aus und gehört einem anderen Agenten.") — der
+Status stand seither fälschlich auf `in Arbeit`. Er sagt jetzt, was der
+Fall ist: `Abnahme`.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `entities/source-document/` — Umbau von `SourceDocumentFacts.tsx` (0052), Erweiterung von `source-source-document-detail.ts` (0074), Nachzug an `SourceDocumentDrawer.tsx` (0052) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: die Felder sind Belegfelder, und die Registry ist eine Aussage über das Ludwig-Datenmodell (Supertyp + Subtypen) |
 | Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Abschnitt „Die eine Regel" und „Heutige Darstellung" · Owner-Anfrage 2026-09-04 („Belege und Belegtypen sind Ausprägungen derselben Entität mit verschiedenen Datenfeldern — das sollten wir in der Vorschau berücksichtigen") |
@@ -279,3 +279,9 @@ Variabel (aus dieser Spec):
 | | | |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+**Status-Nachtrag 2026-09-05.** Gebaut ist die Aufgabe seit `000f2ad`
+(„pnpm typecheck und pnpm build grün, alle 21 Stories im Browser
+angesehen. Abnahme steht aus und gehört einem anderen Agenten.") — der
+Status stand seither fälschlich auf `in Arbeit`. Er sagt jetzt, was der
+Fall ist: `Abnahme`.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `entities/source-document/` — Familie `SourceDocument.tsx` (`SourceDocumentCell`, `SourceDocumentClass`, `SourceDocumentRow`) plus das Registry-Modul `source-source-document-detail.ts` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Belegart, Belegkategorie, Belegrichtung und Beleg-Erledigung sind Ludwig-Fachbegriffe mit eigenen Registry-Achsen |
 | Quelle | Entitätsprofil `docs/entitaeten/source-document.md` (Status `geprüft`), Abschnitte „Die eine Regel", „Datenpunkte" Rang 1–7, „Formen" Zeilen 1–3 · Owner-Anfrage 2026-09-04 |
@@ -298,3 +298,9 @@ Variabel (aus dieser Spec):
 | | | |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+**Status-Nachtrag 2026-09-05.** Gebaut ist die Aufgabe seit `000f2ad`
+(„pnpm typecheck und pnpm build grün, alle 21 Stories im Browser
+angesehen. Abnahme steht aus und gehört einem anderen Agenten.") — der
+Status stand seither fälschlich auf `in Arbeit`. Er sagt jetzt, was der
+Fall ist: `Abnahme`.
