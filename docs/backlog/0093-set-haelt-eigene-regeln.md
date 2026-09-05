@@ -33,7 +33,7 @@ erlaubt 0087 das ausdrücklich, für echte Aufrufer gibt es keine Schranke. Zu
 entscheiden: bleibt `ReactNode` (und der Wächter deckt es, weil der Aufrufer
 importieren müsste), oder nimmt `MenuItem` eine `ActionKey`?
 
-**(e) `Disclosure` lässt eingebettete Flex-Zeilen nicht auf Breite wachsen.**
+**(e) `Disclosure` lässt eingebettete Flex-Zeilen nicht auf Breite wachsen.** — **erledigt am 2026-09-05** mit dem Fix zu 0059: das `<span>` heißt jetzt `.v2disc__label` und wächst; gemessen endet der Zustands-Chip am Zeilenrand statt bei x = 517.
 `.v2disc__sum` legt die Zusammenfassung in ein `<span>`, das nicht wächst
 (`Disclosure.tsx`), und `v3.css` setzt dort nur `padding-left`. Folge, gemessen
 in der Abnahme von 0059: sobald eine Klärungszeile aufklappbar ist — also in

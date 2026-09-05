@@ -338,3 +338,26 @@ Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-05
 Alles Übrige — beide Exporte, alle acht Stories, Stapelordnung, Kürzung,
 `≠`, Leerfall und die Zusicherung „nichts ist fokussierbar" — ist erfüllt und
 oben belegt.
+
+## Die zwei offenen Punkte — einer behoben, einer bleibt liegen
+
+**2 — die deutschen Kommentare sind weg.** Datei-JSDoc, der Kommentar an
+`JournalLine`, der an `text` und der an `BALANCE_EPSILON` stehen auf Englisch;
+Nutzer-Strings der Karte bleiben deutsch. Die Story-Datei war es schon.
+
+**1 — das Herauslösen aus `JournalEntryEditor` bleibt offen, und zwar mit
+Grund.** `JournalEntryEditor.tsx` und seine Story sind in dieser Arbeitskopie
+**von einer anderen Sitzung geändert**; im selben Zug wächst `v3.css` um
+`.bse__journal__row--head`, `--sum` und `.bse__journal__text` — also genau die
+Klassen, die das Herauslösen braucht. Zwei Sitzungen, die dieselbe Datei
+umbauen, erzeugen einen Konflikt, den hinterher niemand auflösen kann.
+
+Diese Aufgabe bleibt deshalb auf `in Arbeit`. Sie wird fertig, sobald die
+fremden Änderungen an `JournalEntryEditor.tsx` eingecheckt sind: dann rendert
+der Editor sein Journal über `JournalEntryCard` (`totals={false}`), und
+`grep -n "bse__journal__row" src` findet die Klasse nur noch in `v3.css`.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Kein deutscher Kommentar mehr in `JournalEntryCompact.tsx` (`grep`)
+- [ ] offen: das Herauslösen aus `JournalEntryEditor.tsx` — wartet auf die parallele Sitzung

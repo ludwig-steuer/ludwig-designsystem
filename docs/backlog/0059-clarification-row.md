@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `entities/clarification/` — Gruppe Klärung |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: `audience`, `severity` und der Zustand „zurückgestellt" sind Ludwig-Fachbegriffe aus `STATUS_REGISTRY` |
 | Quelle | Entitätsprofil `docs/entitaeten/clarification.md` (2026-09-04) §Datenpunkte Rang 1–7, §Listen, §Formen · Owner-Rückfrage 2026-09-04 („read only, Vorschau, in verschiedenen Listviews — Timeline, Karte als Art To-do-Liste"; „Kommentare in der Klärungsfrage, nicht in der Timeline") |
@@ -296,3 +296,34 @@ Abnahme-Tabelle von `0040-case-timeline.md` ist leer, der Status steht auf
 Kommentar-Regel mitten in einen bestehenden Satz gelaufen (Zeile 38: „… in
 `ClarificationList` (0059). Today they stand in three places and every card
 carries five lines;").
+
+## Die zwei offenen Punkte — behoben
+
+**1 — der Zustand steht wieder rechtsbündig, und der Fix sitzt in
+`Disclosure`.** Die Abnahme hatte beides angeboten: eine Regel im 0059-Block
+oder eine in `Disclosure`. Es ist die zweite geworden, und zwar aus dem Grund,
+den 0093 (e) nennt: `.v2disc__sum` legte die Zusammenfassung in ein `<span>`
+ohne eigene Breite, und das trifft **jede** Zeile mit rechter Spalte in einem
+`<details>` — nicht nur die Klärung. Eine Regel in der Klärung hätte den
+nächsten Fall wieder überrascht.
+
+Das `<span>` heißt jetzt `.v2disc__label` und wächst (`flex: 1 1 auto`).
+Nachgemessen (Chromium headless, Story `MitKarte`): die aufklappbare Zeile
+läuft von x = 47 bis 1415, der Zustands-Chip endet bei 1399 — am Zeilenrand,
+wie in der nicht aufklappbaren Zeile. Vorher endete er bei 517.
+
+Nebenwirkung, bewusst: `count` rückt damit an den rechten Rand der
+Zusammenfassung. Aufrufer gibt es dafür heute nur in Stories, und eine Zahl
+gehört rechts (V3).
+
+**2 — „Beantwortet am".** Die Meta-Zeile schrieb „Beantwortet 21.08.2026", die
+Spec verlangt das „am". Steht.
+
+Damit ist Punkt **(e)** von 0093 erledigt; die übrigen vier Punkte dort
+bleiben offen.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Der Zustand steht auch in der aufklappbaren Zeile am rechten Rand (Story `MitKarte`, gemessen)
+- [ ] Die Regel steht in `Disclosure`, nicht im 0059-Block (`grep .v2disc__label`)
+- [ ] Die Meta-Zeile sagt „Beantwortet am …" (Story `Zustaende`)

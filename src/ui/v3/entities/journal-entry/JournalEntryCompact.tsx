@@ -4,35 +4,35 @@ import { formatAmount } from "../../format";
 import { AmountCell, MonoCell } from "../../primitives/Cells";
 
 /**
- * Zelle und Karte eines Buchungssatzes (0044) — die Anzeige-Formen der
- * Familie, ohne den Editor.
+ * Cell and card of a journal entry (0044) — the reading forms of the family,
+ * without the editor.
  *
- * `JournalEntryEditor` deckt die volle Sicht ab (`editable={false}`) und
- * bringt Statuskopf, Meldungsblock, Beleg-Rest-Rechnung, Steuerassistenz und
- * die KI-Notizen mit. An einem Ereignis, einer Kreditor-Karte oder einer
- * Dauerbuchungs-Vorschau liest die Sachbearbeiterin davon nichts — sie will
- * wissen, **was gebucht wird**. Genau das steht hier: dieselben Zeilen,
- * dieselbe Spaltenordnung des DATEV-Stapels, fünf Blöcke weniger.
+ * `JournalEntryEditor` covers the full view (`editable={false}`) and brings
+ * a status head, a message block, the remainder against the document, the tax
+ * assistant and the AI notes. At an event, on a creditor card or in a preview
+ * of a recurring entry the clerk reads none of that — she wants to know
+ * **what is being booked**. That is what stands here: the same lines, the same
+ * column order of the DATEV batch, five blocks fewer.
  *
- * Beide Exporte rechnen nicht (keine Steuerableitung, keine
- * Gegenkonto-Konsolidierung) und prüfen nichts. Der Aufrufer liefert die
- * Zeilen, die gespeichert würden.
+ * Neither export calculates (no tax derivation, no consolidation of the
+ * contra account) and neither validates. The caller hands in the lines that
+ * would be saved.
  */
 
 /**
- * Eine Zeile des Satzes. Strukturelle Teilmenge von `BookingLineVM` der App —
- * `BookingLineVM[]` passt ohne Mapping herein.
+ * One line of the entry. Structural subset of the app's `BookingLineVM` —
+ * a `BookingLineVM[]` fits in without mapping.
  */
 export interface JournalLine {
   side: "debit" | "credit";
   accountNumber: string;
   accountName?: string | null;
   amount: number;
-  /** Buchungstext der Zeile — Spalte 3 des Stapels. */
+  /** Posting text of the line — column 3 of the batch. */
   text?: string | null;
 }
 
-/** Ab hier gilt ein Satz als unstimmig — ein halber Cent ist Rundung. */
+/** From here on an entry counts as unbalanced — half a cent is rounding. */
 const BALANCE_EPSILON = 0.005;
 
 /** Longer names are cut with an ellipsis; the full one hangs in the `title`. */

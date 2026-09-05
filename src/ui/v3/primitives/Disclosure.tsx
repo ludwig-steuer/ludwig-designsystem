@@ -47,7 +47,7 @@ export function Disclosure({
     >
       <summary className="v2disc__sum">
         <ActionIcon action="collapse" size={14} className="v2disc__chev" />
-        <span>{summary}</span>
+        <span className="v2disc__label">{summary}</span>
         {count === undefined ? null : <span className="v2disc__count">{count}</span>}
       </summary>
       <div className="v2disc__body">{children}</div>

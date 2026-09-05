@@ -184,7 +184,7 @@ export function ClarificationRow({
         */}
         {c.answeredAt ? (
           <span>
-            Beantwortet <Time value={c.answeredAt} format="date" size="sm" />
+            Beantwortet am <Time value={c.answeredAt} format="date" size="sm" />
           </span>
         ) : (
           <span>

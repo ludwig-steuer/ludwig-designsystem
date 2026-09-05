@@ -1684,6 +1684,14 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   transition: transform var(--duration-fast) var(--ease-standard);
 }
 .v2disc[open] > .v2disc__sum .v2disc__chev { transform: rotate(90deg); }
+/* Die Zusammenfassung nimmt die Breite, die übrig bleibt. Ohne das steht sie
+   in einem `<span>`, das nicht wächst — und eine Zeile darin (Klärung, 0059)
+   kann ihre rechte Spalte nicht herstellen: der Zustands-Chip endete bei
+   x = 517 statt am Zeilenrand. Betrifft jede Zeile mit rechter Spalte in
+   einem `<details>`, deshalb steht die Regel hier und nicht bei der Klärung
+   (0093 e). `count` rückt damit an den rechten Rand, wohin eine Zahl
+   ohnehin gehört. */
+.v2disc__label { flex: 1 1 auto; min-width: 0; }
 .v2disc__count { color: var(--color-text-muted); font-weight: 400; }
 .v2disc__body { padding: 0 var(--space-2) var(--space-3); font-size: 13.5px; line-height: 1.55; }
 .v2disc--quiet > .v2disc__sum { color: var(--color-text-muted); font-weight: 400; }
