@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AmountCell } from "./Cells";
-import { Card, HeadRow, Row, Table } from "./Table";
+import { Card, CardHead, HeadRow, Row, Table } from "./Table";
 import { Duration, Time } from "./Time";
+import { Timeline } from "../patterns/Timeline";
 
 const meta: Meta<typeof Time> = { title: "v3/Primitives/Werte/Time", component: Time };
 export default meta;
@@ -14,7 +15,7 @@ const L = ({ children }: { children: React.ReactNode }) => (
 const MOMENT = "2026-08-26T09:12:00+02:00";
 const vorDreiTagen = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
 
-/** Vier Arten zu sagen, wann — die absolute Zeit steht immer im `title`. */
+/** Fünf Arten zu sagen, wann — die absolute Zeit steht immer im `title`. */
 export const Formats: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
@@ -29,6 +30,10 @@ export const Formats: Story = {
       <div>
         <L>relative — zeigen Sie darauf, die absolute Zeit steht im Tooltip</L>
         <Time value={vorDreiTagen} format="relative" />
+      </div>
+      <div>
+        <L>age — wie lange etwas schon liegt, ohne Datum davor</L>
+        <Time value={vorDreiTagen} format="age" />
       </div>
       <div>
         <L>month — für Achsen und Gruppenköpfe</L>
@@ -129,41 +134,68 @@ export const Edges: Story = {
   ),
 };
 
-/** Im Einsatz: in der Tabellenzeile und als Laufzeit daneben. */
+/**
+ * Im Einsatz an beiden Orten, die die Spec nennt: in der Tabellenzeile (Zeit
+ * kurz, Laufzeit daneben) und im Verlauf, wo derselbe Baustein die Zeitpunkte
+ * der Einträge setzt. Die Spalte „Fällig" zeigt `prefix` — das Wort steht vor
+ * der Zeit und wandert nicht in den Wert.
+ */
 export const InUse: Story = {
   render: () => (
+    <div style={{ display: "grid", gap: "var(--space-6)" }}>
     <Card>
-      <Table cols="120px 1fr 140px 150px 110px">
+      <Table cols="120px 1fr 140px 150px 110px 150px">
         <HeadRow>
-          <th>Beleg</th>
-          <th>Kreditor</th>
-          <th style={{ textAlign: "right" }}>Betrag</th>
-          <th>Eingang</th>
-          <th>Verarbeitung</th>
+          <span>Beleg</span>
+          <span>Kreditor</span>
+          <span className="v2num">Betrag</span>
+          <span>Eingang</span>
+          <span>Verarbeitung</span>
+          <span>Fällig</span>
         </HeadRow>
         <Row>
-          <td>RE-4471</td>
-          <td>Bürobedarf Meier GmbH</td>
+          <span>RE-4471</span>
+          <span>Bürobedarf Meier GmbH</span>
           <AmountCell value={1249.9} />
-          <td>
+          <span>
             <Time value={MOMENT} length="short" size="sm" />
-          </td>
-          <td>
+          </span>
+          <span>
             <Duration seconds={4.2} size="sm" />
-          </td>
+          </span>
+          <span>
+            <Time value="2026-09-14" format="date" length="short" size="sm" prefix="am" />
+          </span>
         </Row>
         <Row>
-          <td>RE-4472</td>
-          <td>Stadtwerke Musterstadt</td>
+          <span>RE-4472</span>
+          <span>Stadtwerke Musterstadt</span>
           <AmountCell value={412} />
-          <td>
+          <span>
             <Time value="2026-08-29T14:05:00+02:00" length="short" size="sm" />
-          </td>
-          <td>
+          </span>
+          <span>
             <Duration seconds={840} size="sm" />
-          </td>
+          </span>
+          <span>
+            <Time value="2026-09-02" format="date" length="short" size="sm" prefix="seit" />
+          </span>
         </Row>
       </Table>
     </Card>
+
+    <Card>
+      <CardHead title="Verlauf" sub="Derselbe Baustein setzt die Zeitpunkte der Einträge" />
+      <div style={{ padding: "var(--space-5)" }}>
+        <Timeline
+          entries={[
+            { id: "e1", at: "2026-08-26", title: "Beleg eingegangen", kind: "Beleg", actor: "Mandant" },
+            { id: "e2", at: MOMENT, title: "Buchung vorgeschlagen", kind: "Buchung", actor: "Agent" },
+            { id: "e3", at: vorDreiTagen, title: "Rückfrage gestellt", kind: "Rückfrage", actor: "Kanzlei" },
+          ]}
+        />
+      </div>
+    </Card>
+    </div>
   ),
 };

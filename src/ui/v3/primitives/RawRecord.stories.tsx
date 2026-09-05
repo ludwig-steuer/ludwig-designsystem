@@ -108,6 +108,13 @@ export const LongValues: Story = {
  * `format` überschreibt die Erkennung je Schlüssel: OCR-Text als Markdown,
  * eine Referenz, die wie ein Datum aussieht, als Text — und eine Zahl, die
  * wirklich ein Betrag ist, gruppiert.
+ *
+ * Zwei der fünf Zeilen sind da, um zu beweisen, dass der Override **greift**,
+ * und tragen deshalb Werte, die `auto` anders behandeln würde: die Kennung
+ * sieht wie ein Datum aus und bleibt durch `text` trotzdem roh stehen, und
+ * der Zeitstempel mit Leerzeichen statt `T` fällt durch die `auto`-Erkennung,
+ * wird mit `date` aber als Zeitpunkt gelesen. Ein Override
+ * auf einen Wert, den `auto` ohnehin so zeigt, beweist nichts.
  */
 export const Formats: Story = {
   render: () => (
@@ -115,10 +122,10 @@ export const Formats: Story = {
       <RawRecord
         record={{
           amount_cents: 1234567,
-          external_ref: "2026-0815",
+          external_ref: "2026-08-26",
           ocr_markdown: "## Rechnung 2026-0412\n\n**DomainFactory GmbH**\n\nZahlbar in 14 Tagen.",
           payload_text: '{"event":"case.created","amount":124090}',
-          posted_on: "2026-08-26",
+          posted_on: "2026-08-26 09:15:00",
         }}
         format={{
           amount_cents: "number",
