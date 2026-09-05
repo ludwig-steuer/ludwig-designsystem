@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | fertig |
 | Stufe | `entities/clarification/` — Gruppe Klärung |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Zielgruppe, Schwere und der zweite Ausgang „ohne Antwort auflösen" sind Ludwig-Fachlogik |
 | Quelle | Entitätsprofil `docs/entitaeten/clarification.md` (2026-09-04) §Eine Antwort nicht mehrere, §Datenpunkte Rang 8–19, §Formen · Owner-Rückfrage 2026-09-04 („read only mit bereits erfolgter Antwort · zu beantworten mit Antwortoptionen und Actions · sehr unterschiedliche Quellen agent/user"; „Erstellung und Beantwortende … mit jeweils Datum") |
@@ -212,8 +212,8 @@ Variabel (aus dieser Spec):
 | Code englisch; `@when`/`@instead` an jedem Export | `ClarificationCard.tsx:146–152` am einzigen Komponenten-Export; Typen, Props und Kommentare englisch | ✓ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}|[0-9]+px'` über die Datei: kein Treffer. Zustand, Schwere und Art nur über `StatusBadge` (`:198–204`). `AUDIENCE_LABEL` (`:45`) und `EVENT_LABEL` (`:54`) betreffen keine Status-Achse | ✓ |
 | Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | 9 von 9 in `index.json`: `…--gefuellt`, `--antworten`, `--mit-empfehlung`, `--personen`, `--verlauf`, `--von-hand`, `--im-portal`, `--laedt`, `--fehler`. `Leer` begründet | ✓ |
-| Prüfliste `design-guidelines.md` §9 durchgegangen | durchgegangen; ein Punkt reißt — die doppelte, teils leere Überschrift „Antwort" in der Freitext-Fläche, siehe die Zeile darunter | ✗ |
-| Im Browser angesehen (Storybook), nicht nur gebaut | alle neun Stories unter `http://localhost:6107` geöffnet **und bedient**: in `…--antworten` die Vorauswahl von „Reisekosten (4670)" auf „Bewirtung (4650)" gewechselt, Ergänzung getippt, mit Strg+Enter gesendet (Rundlauf-Karte: „Auswahl: Bewirtung (4650) (Uebernachtung ueberwiegt, bitte splitten)"), danach „Ohne Antwort auflösen" geöffnet, Chip „telefonisch geklärt" gewählt und bestätigt (Rundlauf-Karte: „Aufgelöst: telefonisch geklärt"). **Dabei aufgefallen:** in `…--von-hand` und in der Freitext-Karte von `…--antworten` steht „ANTWORT" **zweimal** — einmal als `<legend>` über einem **leeren** `<fieldset class="v2radiogrp">`, einmal als Label des Freitextfelds (DOM ausgelesen). Ursache: `ChoicePrompt` rendert die `RadioGroup` auch bei `options = []` (`ChoicePrompt.tsx:93`), und die Karte ruft sie für `answerKind="free_text"` mit leerer Liste und `freeText.label = "Antwort"` (`ClarificationCard.tsx:280–290`) | ✗ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | durchgegangen. Der eine Punkt, der bei der ersten Abnahme riss — die doppelte, teils leere Überschrift „Antwort" —, ist behoben; Nachprüfung am 2026-09-05, siehe die Zeile darunter und den Abschnitt „Nachprüfung" | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle neun Stories unter `http://localhost:6107` geöffnet **und bedient**: in `…--antworten` die Vorauswahl von „Reisekosten (4670)" auf „Bewirtung (4650)" gewechselt, Ergänzung getippt, mit Strg+Enter gesendet (Rundlauf-Karte: „Auswahl: Bewirtung (4650) (Uebernachtung ueberwiegt, bitte splitten)"), danach „Ohne Antwort auflösen" geöffnet, Chip „telefonisch geklärt" gewählt und bestätigt (Rundlauf-Karte: „Aufgelöst: telefonisch geklärt"). **Erste Abnahme (✗):** in `…--von-hand` und in der Freitext-Karte von `…--antworten` stand „ANTWORT" zweimal — einmal als `<legend>` über einem leeren `<fieldset class="v2radiogrp">`, einmal als Label des Freitextfelds. **Nachprüfung 2026-09-05, nach dem Fix in `ChoicePrompt.tsx`:** `…--von-hand` liefert `fieldsets=0`, `radios=0`, `textareas=1` und genau ein Label „Antwort" (DOM ausgelesen), im Bild steht das Wort einmal; dasselbe in der Freitext-Karte von `…--antworten` | ✓ |
 | **Variabel** — die Antwortfläche ist `ChoicePrompt`, kein zweiter Satz Knöpfe, kein eigenes Textarea-Formular | `ClarificationCard.tsx:280`; in der ganzen Datei kein `<button>`, kein `<textarea>`, kein `<input>`. Story `…--antworten` zeigt `single_choice`, `yes_no` und `free_text` aus derselben Fläche | ✓ |
 | `onResolve` fehlt → der zweite Ausgang erscheint nicht | Story `…--gefuellt` (ohne die Prop): kein „Ohne Antwort auflösen". In `…--antworten` trägt nur die erste Karte die Prop, und nur dort steht die Zeile „Woanders geklärt? Ohne Antwort auflösen"; Karten 2–4 haben sie nicht. Code: `:297` und `:307` beide an `onResolve` gebunden | ✓ |
 | `questionTypeLabel` und `originLabel` sind Props; keine `Record<string, string>`-Map für Frageart oder Herkunft | `grep -n "Record<" ClarificationCard.tsx` → nur `AUDIENCE_LABEL` (`:45`) und `EVENT_LABEL` (`:54`); beide betreffen weder `question_type` noch `source_module`. Story `…--gefuellt` zeigt „Bewirtung oder Reisekosten · Buchungsvorschlag" aus den Props | ✓ |
@@ -222,22 +222,33 @@ Variabel (aus dieser Spec):
 | Ohne `history` bauen `raisedBy`/`answeredBy` denselben Verlauf; ein `Actor` ohne `label` zeigt das Wort seiner Achse | Story `…--personen` (kein `history`): genau zwei Einträge, „Gefragt von Agent · …" und „Beantwortet von S. Vogt · …". Das Wort „Agent" kommt aus `resolveStatus("actor_kind", "agent")` (`:76`), nicht aus einem Literal | ✓ |
 | Leere Blöcke erzeugen keine leeren Überschriften | Story `…--von-hand`: weder „Grundlage" noch „Quellen" noch „Empfehlung" stehen im DOM (`:222`, `:228`, `:246` alle konditional). Der doppelte Kopf „Antwort" stammt nicht aus diesen Blöcken, sondern aus `ChoicePrompt` — er steht in der Zeile „Im Browser angesehen" | ✓ |
 | Ersetzt `AnswerInput` und die Portal-Kopie ohne Funktionsverlust | in `ludwig/app` nicht angefasst; `AnswerInput` und `PortalCaseList` stehen unverändert | offen (App) |
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: keine
 
-Abgenommen von / am: — (zurück in Arbeit) · Abnahme durch Claude (Abnahme-Agent), 2026-09-05
+### Nachprüfung nach der Nachbesserung (2026-09-05)
 
-Offene Punkte:
+Der Mangel der ersten Abnahme ist behoben, und zwar an der Stelle, an der er
+saß: `ChoicePrompt` rendert die `RadioGroup` nur noch bei `options.length > 0`
+(`src/ui/v3/patterns/ChoicePrompt.tsx`, mit einem Kommentar, warum die Bedingung
+dort steht). Die Karte selbst ist unverändert — `git diff` auf
+`src/ui/v3/entities/clarification/` ist leer.
 
-1. **„Antwort" steht zweimal, einmal über nichts.** Sobald `answerOptions`
-   leer ist (`answerKind="free_text"`, und das sind 60 % des Bestands), rendert
-   die Karte über `ChoicePrompt` ein leeres `<fieldset>` mit der Legende
-   „Antwort" und darunter das Freitextfeld mit demselben Label. Sichtbar in
-   `…--von-hand` und in der Freitext-Karte von `…--antworten`. Die Ursache liegt
-   in `ChoicePrompt` (`:93`, `RadioGroup` ohne Bedingung) — sie gehört dort
-   gelöst (`options.length > 0`), nicht durch eine zweite Antwortfläche hier.
-   Eine leere Legende ist außerdem für Screenreader eine Beschriftung ohne
-   Gegenstand.
-2. Ohne eigenen Mangel, aber im selben Bild: ist `question` leer, reicht die
-   Karte den **Titel** an `ChoicePrompt` weiter (`:281`), sodass dieselbe Frage
-   zweimal untereinander steht — zu sehen in `…--von-hand` („Gehört der Laptop
-   ins Anlagevermögen?") und `…--im-portal`. Beim Fix von Punkt 1 mitentscheiden,
-   ob die Frage in diesem Fall unterdrückt wird.
+| Nachgeprüft | Nachweis | Ergebnis |
+|---|---|---|
+| Der leere Gruppenrahmen ist weg | Story `…--von-hand`: `fieldsets=0`, `radios=0`, `textareas=1`, Labels `["Antwort"]` — im DOM ausgelesen; im Bild steht „ANTWORT" einmal über dem Feld | ✓ |
+| Dasselbe in der Freitext-Karte | Story `…--antworten`, Karte 3 („Wie soll der Zuschuss behandelt werden?"): `fieldsets=0 radios=0 textareas=1 labels=[Antwort]` | ✓ |
+| **Keine Nebenwirkung** auf Fragen mit Optionen | dieselbe Story: Karte 1 (`single_choice`) `fieldsets=1 radios=2 textareas=1 labels=[Antwort \| Ergänzung (optional)]`, Karte 2 (`yes_no`) `fieldsets=1 radios=2 labels=[Antwort]`, Karte 4 (`document_upload`) weiterhin ganz ohne Antwortfläche | ✓ |
+| Beide Antwortwege senden weiterhin | Freitext getippt und mit Strg+Enter gesendet → Protokoll „Freitext: Als Ertragszuschuss buchen"; danach in Karte 1 „Bewirtung (4650)" gewählt und gesendet → „Auswahl: Bewirtung (4650)" | ✓ |
+| 0028 bleibt heil | alle sechs eigenen Stories von `ChoicePrompt` übergeben eine nicht leere Optionsliste (`grep -n "options=" ChoicePrompt.stories.tsx`), sind vom neuen Zweig also nicht berührt; `…--with-free-text` im Browser gegengesehen: vier Optionen plus Freitextfeld wie zuvor | ✓ |
+| `pnpm typecheck` | am 2026-09-05 nach dem Fix erneut gelaufen, Exit 0 | ✓ |
+
+Zwei Anmerkungen ohne Mangel:
+
+1. Der neue Zweig in `ChoicePrompt` — die Frage ganz ohne Optionen — hat in
+   **0028** keine eigene Story; belegt ist er nur durch `…--von-hand` und
+   `…--antworten` hier. Wenn 0028 das nächste Mal angefasst wird, gehört er dort
+   hinein.
+2. Ist `question` leer, reicht die Karte den **Titel** an `ChoicePrompt` weiter
+   (`ClarificationCard.tsx:281`), sodass dieselbe Frage zweimal untereinander
+   steht — zu sehen in `…--von-hand` („Gehört der Laptop ins Anlagevermögen?")
+   und `…--im-portal`. Das war schon bei der ersten Abnahme eine Anmerkung und
+   kein Kriterium; es bleibt eine.
