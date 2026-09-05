@@ -62,8 +62,8 @@ const SUMMARIES = [
 ];
 
 function makeCase(i: number): CaseListItem {
-  const [counterpartyName, title, kind, base] = PARTNERS[i % PARTNERS.length];
-  const lifecycleStatus = LIFECYCLES[i % LIFECYCLES.length];
+  const [counterpartyName, title, kind, base] = PARTNERS[i % PARTNERS.length]!;
+  const lifecycleStatus = LIFECYCLES[i % LIFECYCLES.length]!;
   // Sieben Stunden je Zeile rückwärts ab dem 26.08.2026 — so steht die Liste
   // absteigend nach „Eröffnet", wie `sort` es behauptet.
   const openedAt = new Date(Date.UTC(2026, 7, 26, 7, 40) - i * 7 * 3_600_000).toISOString();
@@ -74,7 +74,7 @@ function makeCase(i: number): CaseListItem {
     fiscalYear: 2026,
     kind,
     title,
-    summary: SUMMARIES[i % SUMMARIES.length],
+    summary: SUMMARIES[i % SUMMARIES.length]!,
     counterpartyName,
     currency: "EUR",
     totalAmount: base + (i % 5) * 12.5,

@@ -75,7 +75,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /** The thirty preview sheets. Switch with the `sheet` control. */
-export const Sheets: Story = { args: { sheet: SHEETS[0], height: 1200 } };
+export const Sheets: Story = { args: { sheet: SHEETS[0]!, height: 1200 } };
 
 /** The app kit: sidebar, top bar, dashboard, document detail, review. */
 export const AppKit: Story = { args: { sheet: "ui_kits/app/index.html", height: 1400 } };

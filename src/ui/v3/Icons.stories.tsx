@@ -57,7 +57,7 @@ function imported(sources: Record<string, string>): Map<string, string[]> {
   const found = new Map<string, string[]>();
   for (const [path, text] of Object.entries(sources)) {
     for (const match of text.matchAll(/import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+"lucide-react"/g)) {
-      for (const name of match[1].match(/[A-Za-z0-9_]+/g) ?? []) {
+      for (const name of match[1]!.match(/[A-Za-z0-9_]+/g) ?? []) {
         if (name === "type" || name === "LucideIcon") continue;
         found.set(name, [...new Set([...(found.get(name) ?? []), path.split("/").pop() ?? path])]);
       }

@@ -46,7 +46,7 @@ const TECH_ROWS: Array<[string, LogLevel, string]> = [
 const BATCH: LogEntry[] = Array.from({ length: 120 }, (_, i) => {
   const at = new Date(Date.UTC(2026, 8, 1, 6, 0, 0) + i * 613_000).toISOString();
   if (i % 20 === 0) {
-    const [message, level, depth, code] = STORY_ROWS[(i / 20) % STORY_ROWS.length];
+    const [message, level, depth, code] = STORY_ROWS[(i / 20) % STORY_ROWS.length]!;
     return {
       id: `b${i}`,
       at,
@@ -60,7 +60,7 @@ const BATCH: LogEntry[] = Array.from({ length: 120 }, (_, i) => {
     };
   }
   if (i % 3 === 0) {
-    const [message, level, code] = RECORD_ROWS[i % RECORD_ROWS.length];
+    const [message, level, code] = RECORD_ROWS[i % RECORD_ROWS.length]!;
     return {
       id: `b${i}`,
       at,
@@ -72,7 +72,7 @@ const BATCH: LogEntry[] = Array.from({ length: 120 }, (_, i) => {
       actor: { kind: "user", label: "buero@mandant.de" },
     };
   }
-  const [message, level, code] = TECH_ROWS[i % TECH_ROWS.length];
+  const [message, level, code] = TECH_ROWS[i % TECH_ROWS.length]!;
   return {
     id: `b${i}`,
     at,
