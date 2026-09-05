@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme — zweiter Durchgang; beide Mängel behoben |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | nein — kennt drei Tabellen des Sachverhalts (Ereignis, Klärung, Erwartung); der Strang darunter ist das Pattern `Timeline` (0023) |
 | Quelle | Anfrage Owner 2026-09-03 (Sachverhalts-Detail `/clients/<slug>/<jahr>/cases/<id>`, Tab „Übersicht", Karte „Timeline") · Staging-Aggregate 2026-09-03 (§ Datenpunkte) · Entitätsprofil `docs/entitaeten/accounting-case.md` **fehlt noch** — diese Spec trägt den Verlaufs-Ausschnitt selbst; entsteht das Profil, gilt es vor |
@@ -22,7 +22,8 @@ Badges); die Zusammenfassung wird abgeschnitten
 zwei Bildschirme.
 
 Neu: **ein** Strang mit **einer Zeile je Eintrag** — Datum · Art · Titel ·
-Betrag · Zustand — über Ereignisse, Klärungen (Fragen und Kommentare) und
+Betrag · Zustand — über Ereignisse, Klärungen (**Fragen**; Kommentare
+überspringt der Strang, siehe unten) und
 offene Erwartungen. Alles Weitere (Datei, Zusammenfassung, Buchungssatz,
 Antwort) steht rechts im Detail des ausgewählten Eintrags, wie heute schon
 beim Ereignis.
@@ -36,7 +37,7 @@ dieses Vorgangs?"
 |---|---|---|---|---|---|
 | Ereignis | `client_accounting_event` | **ja** | `event_date` (Kalendertag) | `ereignis` (Buchungszustand) | der Verlauf heute; sieben Arten, siehe Ausprägungen |
 | Klärung — Frage | `client_accounting_case_clarification`, `type='question'` | **ja, neu** | `created_at` | `klaerung_status` (Offen · Zurückgestellt · Beantwortet); dazu `klaerung` („Blockierend"), solange offen und `severity='required'` | Tabellenkommentar: „Die Historie eines Sachverhalts"; Anfrage Owner |
-| Klärung — Kommentar | dieselbe, `type='comment'` | **ja, neu** | `created_at` | kein Zustand (`klaerung_typ`: „Kontext ohne Aktion") | gehört laut Tabellenkommentar zur selben Historie |
+| Klärung — Kommentar | dieselbe, `type='comment'` | **nein** (Owner 2026-09-04) | — | — | Kontext am Sachverhalt, nichts, was geschehen ist. 13 von 166 Klärungszeilen sind Kommentare; im Strang würden sie die Geschichte zuschütten. Sie stehen in `ClarificationList` (0059). Die Komponente **nimmt sie entgegen und überspringt sie** — der Aufrufer muss nicht filtern |
 | Erwartung, offen | `client_accounting_case_expectation`, `resolved_at IS NULL` | **ja, neu** | `due_date` | `erwartung` (Reife); Art `erwartung_art` als Wort im Titel | der einzige Eintrag in der Zukunft — „was fehlt bis wann". Erledigte erscheinen nicht: das auflösende Ereignis steht schon im Strang (`resolved_by_event_id`) |
 | Buchungssatz | `client_journal_entry` | nein — **als Zustand** des Ereignisses | — | `ereignis` | ein Satz je Ereignis (die App verdichtet vorher, `mergeBookings`); der Satz selbst steht im Detail (`JournalEntryEditor`, Anzeige) |
 | Beleg · Bank-Transaktion · DATEV-Spiegelzeile | Quellen des Ereignisses (XOR) | nein — **im Ereignis** | — | — | Dateiname, Verwendungszweck, Zusammenfassung ins Detail |
@@ -81,7 +82,8 @@ dieses Vorgangs?"
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `events` | `CaseTimelineEvent[]` | ja | Ereignisse, unsortiert, ein Eintrag je Ereignis (Buchungen vorher verdichtet) | `Filled` |
-| `clarifications` | `CaseTimelineClarification[]` | nein, Default `[]` | Fragen und Kommentare | `Filled` |
+| `clarifications` | `CaseTimelineClarification[]` | nein, Default `[]` | Fragen **und** Kommentare — die Kommentare werden entgegengenommen und **übersprungen**, damit der Aufrufer nicht filtern muss | `Filled` |
+===SPLIT===
 | `expectations` | `CaseTimelineExpectation[]` | nein, Default `[]` | Erwartungen; erledigte werden ignoriert | `Filled`, `Edge` |
 | `selectedId` | `string \| null` | nein | markierter Eintrag (Id aus einer der drei Listen) | `Interactive` |
 | `onSelect` | `(entry: CaseTimelineEntry) => void` | nein | Auswahl; ohne die Prop ist der Verlauf Text, kein Bedienelement | `Interactive` |
@@ -210,7 +212,7 @@ Eine Zeile ist immer `Datum · Icon · Titel · Betrag · Zustand`. Was je Art h
 | OP-Vortrag | `open_item_carryover` | `History` | „Offener Posten (DATEV)" | `amount` | `ereignis` | 426 |
 | Ersetztes Ereignis | jede Art, `superseded` | wie die Art, gedimmt | — | — | `ereignis: superseded` **statt** des Buchungszustands — ein ersetztes Ereignis wird nicht mehr bearbeitet; der Satz steht im Detail | 0 % |
 | Frage | `clarification.type = question` | `MessageCircleQuestionMark` | `title` | — | `klaerung_status`; dazu `klaerung: required` („Blockierend") nur solange offen | 153, davon 60 offen |
-| Kommentar | `clarification.type = comment` | `MessageSquare` | `title` | — | kein Badge; Wort „Kommentar" im Tooltip (`klaerung_typ`) | 13 |
+| ~~Kommentar~~ | `clarification.type = comment` | — | — | — | **erscheint nicht** (Owner 2026-09-04). Die Zeile bleibt stehen als Erinnerung, dass die Komponente Kommentare entgegennimmt und überspringt | 13 |
 | Beleg fehlt | `expectation.kind = document` | `FileQuestionMark` | „Beleg fehlt: <Gegenpart>" — Wort aus `erwartung_art` | `expected_amount` | `erwartung` (Läuft · Fällig · Eskaliert) | 26 offen |
 | Zahlung offen | `expectation.kind = payment` | `BanknoteArrowDown` | „Zahlung offen: <Gegenpart>" | `expected_amount` | `erwartung` | 6 offen, 13 erledigt |
 
@@ -310,7 +312,8 @@ Primitive) = 7.
 
 | Story | Beweist |
 |---|---|
-| `Filled` | Musterfirma-Sachverhalt über sechs Wochen: Beleg, Zahlung, Sollstellung, eine beantwortete und eine offene blockierende Frage, ein Kommentar, eine offene Belegerwartung — unsortiert übergeben, `today` fest |
+| `Filled` | Musterfirma-Sachverhalt über sechs Wochen: Beleg, Zahlung, Sollstellung, eine beantwortete und eine offene blockierende Frage, eine offene Belegerwartung — unsortiert übergeben, `today` fest. Die Daten enthalten einen Kommentar, damit sichtbar ist, dass er **nicht** erscheint |
+| `SameDay` | Drei Einträge auf demselben Tag: Erwartung vor Klärung vor Ereignis — die Regel, die der Strang stabil sortiert |
 | `Empty` | drei leere Listen |
 | `Loading` | `loading` |
 | `EntryKinds` | alle Zeilen aus „Ausprägungen" untereinander, je einmal, mit `kindLabels` |
@@ -515,3 +518,29 @@ Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-05
 3. **Drei Story-Texte behaupten den Kommentar weiter**
    (`CaseTimeline.stories.tsx:107`, `:144`) und `InUse` zählt „7 Einträge"
    statt sechs (`:243`).
+
+## Mängel der Abnahme vom 2026-09-05 — behoben
+
+**M1 — die Sortierregel war in keiner Story sichtbar.** „Gleicher Tag →
+Erwartung vor Klärung vor Ereignis" steht im Code (`CaseTimeline.tsx`,
+Kommentar über der Sortierung), aber keine der sechs Stories belegte ein
+Datum doppelt — die Regel war unbewiesen. Neue Story **`SameDay`**: drei
+Einträge auf dem 26.08. Im Browser nachgemessen, Reihenfolge im DOM: „Beleg
+fehlt: Bürobedarf Meier GmbH · Fällig" → „Gehört der Laptop ins
+Anlagevermögen? · Offen · Blockierend" → „Rechnung RE-4471 · 1.249,90 € ·
+Vorschlag". Ohne die Regel stünde die offene Belegerwartung unter dem
+Ereignis, das sie erwartet.
+
+**M2 — die Spec behauptete an vier Stellen Kommentare im Strang.** Der
+Owner-Entscheid vom 2026-09-04 nimmt sie heraus, der Code hält sich daran,
+und nur die Spec hinkte nach: die Tabelle „Entitäten im Verlauf" führte sie
+als „ja, neu", die Ausprägungs-Tabelle gab ihnen ein Icon, das Ziel-Kapitel
+zählte sie auf, und der Story-Text versprach sie — `InUse` zählte „7
+Einträge", gerendert werden sechs.
+
+Alle vier stehen jetzt richtig, und zwar **ohne die Zeilen zu löschen**: sie
+sind durchgestrichen oder auf „nein" gesetzt, jeweils mit dem Grund. Wer die
+Frage in einem halben Jahr neu stellt, findet die Antwort statt einer Lücke.
+Der Satz, der dabei fehlte, steht jetzt in der Schnittstelle: die Komponente
+**nimmt Kommentare entgegen und überspringt sie** — der Aufrufer muss nicht
+filtern.

@@ -105,8 +105,14 @@ const EXPECTATIONS: CaseTimelineExpectation[] = [
 
 /**
  * Ein Sachverhalt über sechs Wochen: Beleg, Zahlung, Sollstellung, eine
- * beantwortete und eine offene blockierende Frage, ein Kommentar und die
- * offene Belegerwartung — unsortiert übergeben, `today` fest.
+ * beantwortete und eine offene blockierende Frage und die offene
+ * Belegerwartung — unsortiert übergeben, `today` fest.
+ *
+ * Ein Kommentar wird **übersprungen** (Owner 2026-09-04): er ist Kontext am
+ * Sachverhalt, nichts, was geschehen ist, und im Bestand sind 13 von 166
+ * Klärungszeilen Kommentare — im Strang würden sie den Verlauf zuschütten.
+ * Sie stehen in `ClarificationList` (0059). Die Daten unten enthalten einen,
+ * damit sichtbar ist, dass er nicht erscheint.
  */
 export const Filled: Story = {
   render: () => (
@@ -141,8 +147,9 @@ export const Loading: Story = {
 };
 
 /**
- * Jede Ausprägung einmal: sieben Ereignisarten, Frage und Kommentar, beide
- * Erwartungsarten — dazu ein ersetztes Ereignis. Jedes Icon trägt sein Wort.
+ * Jede Ausprägung einmal: sieben Ereignisarten, die Frage in ihren drei
+ * Ständen, beide Erwartungsarten — dazu ein ersetztes Ereignis. Jedes Icon
+ * trägt sein Wort. Der Kommentar fehlt, weil der Strang ihn überspringt.
  */
 export const EntryKinds: Story = {
   render: () => (
@@ -240,7 +247,7 @@ export const InUse: Story = {
       <MasterDetail
         list={
           <Card>
-            <CardHead title="Verlauf" sub="7 Einträge · Musterbau GmbH 2026" />
+            <CardHead title="Verlauf" sub="6 Einträge · Musterbau GmbH 2026" />
             <div style={{ padding: "var(--space-4) var(--space-5)" }}>
               <CaseTimeline
                 events={EVENTS}
@@ -313,6 +320,53 @@ function EntryDetail({ entry }: { entry: CaseTimelineEntry | null }) {
  * 85 Zeichen, Betrag 0 ohne Zelle, ein ersetztes Ereignis, eine erledigte
  * Erwartung (fehlt im Strang) und ein Zahlungsausgang mit Vorzeichen.
  */
+/**
+ * Drei Einträge auf **demselben Tag**: die Erwartung steht vor der Klärung,
+ * die Klärung vor dem Ereignis. Der Strang sortiert stabil, also überlebt
+ * diese Reihenfolge das Sortieren — ohne die Regel stünde die offene
+ * Belegerwartung unter dem Ereignis, das sie erwartet.
+ */
+export const SameDay: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <CaseTimeline
+        kindLabels={KIND_LABELS}
+        today={TODAY}
+        events={[
+          {
+            id: "sd-e",
+            kind: "document_received",
+            date: "2026-08-26",
+            title: "Rechnung RE-4471 · Bürobedarf Meier GmbH",
+            amount: 1249.9,
+            currency: "EUR",
+            state: "proposed",
+          },
+        ]}
+        clarifications={[
+          {
+            id: "sd-c",
+            type: "question",
+            severity: "required",
+            raisedAt: "2026-08-26",
+            title: "Gehört der Laptop ins Anlagevermögen?",
+          },
+        ]}
+        expectations={[
+          {
+            id: "sd-x",
+            kind: "document",
+            dueDate: "2026-08-26",
+            escalationLevel: 0,
+            counterpartyName: "Bürobedarf Meier GmbH",
+            currency: "EUR",
+          },
+        ]}
+      />
+    </div>
+  ),
+};
+
 export const Edge: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
