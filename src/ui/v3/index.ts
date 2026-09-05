@@ -30,8 +30,13 @@
  * Label-Maps, die R1 gerade verbietet. Er setzt auf `Badge` auf: dort der
  * Ton, hier die Registry.
  *
- * Weiter draußen bleiben `Drawer`/`UrlDrawer` (Wächter-Test) und
- * `StatusHeader`/`Tooltip` (R2) — die hängen an App-Kontext.
+ * `StatusHeader` ist seit 0077 hier (Owner 2026-09-04): Regel Z4 verlangt ihn
+ * an jeder Status-Spalte, also muss der Barrel den Namen führen, den die
+ * Prüfliste nennt. Er setzt auf `StatusInfoButton` auf und nimmt keine
+ * Legende von Hand — die kommt aus der Registry (Z2).
+ *
+ * Weiter draußen bleiben `Drawer`/`UrlDrawer` (Wächter-Test) und `Tooltip`
+ * (R2) — die hängen an App-Kontext.
  */
 
 /* ── Primitives ── Aktion */
@@ -355,5 +360,6 @@ export {
 
 /* Status — die eine erlaubte Status-Darstellung (R1). */
 export { StatusBadge, type StatusBadgeProps } from "./patterns/StatusBadge";
+export { StatusHeader, type StatusHeaderProps } from "./patterns/StatusHeader";
 export { StatusInfoButton } from "./patterns/StatusInfoButton";
 export { StatusInfoDialog } from "./patterns/StatusInfoDialog";

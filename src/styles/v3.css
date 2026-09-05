@@ -2628,3 +2628,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2doc__facts { display: grid; gap: var(--space-5); }
 /* Freigestellt im Drawer: dort trennt die Überschrift, nicht eine Fläche. */
 .v2doc__facts .v2fields--bare + .v2fields--bare { margin-top: 0; }
+
+/* ── 0077 · StatusHeader — das Wort und das (i) im Spaltenkopf ────────────
+   Das (i) sitzt auf der Grundlinie des Labels; Schriftgröße erbt die
+   Kopfzeile (`.v2tbl__head`), damit der Kopf einer Status-Spalte genauso
+   aussieht wie jeder andere. Eigener Abschnitt am Ende, nicht einsortiert. */
+.v2sth {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}

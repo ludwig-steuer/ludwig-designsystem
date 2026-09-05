@@ -228,7 +228,7 @@ Vor der Migration und bei der Abnahme jeder Route aus §11.4:
 - [ ] Die **Frage der Seite** in einem Satz; jede Spalte beantwortet sie; Spalten, die > 50 % leer sind, fliegen in `.v2sub` oder Detail (V8)
 - [ ] Spaltenordnung DATEV, wo DATEV eine hat; Kontonummern/BU mono (L5)
 - [ ] Jede Tabelle in einer Karte mit Kopf + Spaltenkopf (V5); Zeilen ≤ `.v2tbl__row` (V1)
-- [ ] Jede Status-Spalte `StatusHeader` + `StatusBadge`, jede Achse in der Registry mit State-Tabelle im Topic (Z1–Z4)
+- [ ] Jede Status-Spalte `StatusHeader` (`@/ui/v3`, 0077 — Wort + (i), Legende aus der Registry) + `StatusBadge`, jede Achse in der Registry mit State-Tabelle im Topic (Z1–Z4)
 - [ ] Fünf Zustände je Liste, drei Leertexte, Erledigt-Leerzustand mit Zahl (V9, T6, L6)
 - [ ] Filterstand in URL, sichtbar, zurücksetzbar (I4)
 - [ ] Detail/Drawer statt Seitenwechsel; Auswahl in URL; Drawer aus dem Katalog (L2, L3, I1, I2)
@@ -287,7 +287,7 @@ Zellen liegen unter `primitives/`; Arbeitsfläche · Prüfen · Rahmen · Prozes
 **Noch zu bauen:** vollständig mit Status je Baustein in §11.7 (Soll-Katalog).
 
 **Bleibt Alt-Mechanik, bekommt v2-Optik** (nicht verhandelbar, F123 §2.4):
-`StatusBadge` + Registry · `StatusHeader`/`Tooltip` · `Drawer`/`UrlDrawer`-Rahmen
+`StatusBadge` + Registry · `Tooltip` · `Drawer`/`UrlDrawer`-Rahmen
 (`.lwdrawer`, Wächter-Test) · `LogTable`/`LogView`.
 
 ### 11.3 Entitäten (F111 §1)
@@ -452,7 +452,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Navigation | `RecordPager` (ein Datensatz aus einem Vorrat, „3 von 117", `J`/`K`) | Kopfzeile in `sachverhalt/parts.tsx` | v2 (0047) |
 | Rahmen | `EntityHeader` (Karte über einer Akte: Symbol, Titel, ein Zustand, Kennzahl, Fakten) | `Hero` in `sachverhalt/parts.tsx` (155 Z.) | v2 (0048) |
 | Tabelle | `TableLoading` · `ErrorRow` (I7) | — | v2 |
-| Tabelle | `StatusHeader` (Spaltenkopf mit Legende, Z4) | v1 in 36 Dateien; 7× `<th>Status</th>` | spec (0077) — Owner 2026-09-04: kommt ins Set, auf `StatusInfoButton` |
+| Tabelle | `StatusHeader` (Spaltenkopf mit Legende, Z4) | v1 in 36 Dateien; 7× `<th>Status</th>` | v3 (0077) — auf `StatusInfoButton`, ohne `legend`/`hint`/`only` |
 | Tabelle | Sortierbarer Spaltenkopf | — | prüfen |
 | Tabelle | `MonoCell` (Kontonummer, BU, DATEV-Code) | vorher nur die CSS-Klasse `v2num` | v2 |
 | Tabelle | `LongText` | v1 Re-Export | Optik |

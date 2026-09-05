@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `patterns/` — Gruppe Prüfen (neben `StatusBadge`, `StatusInfoButton`) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, sobald eine Tabelle mehr als eine Zustandsachse zeigt; kennt die Achse (Registry), keine Entität |
 | Quelle | Owner-Entscheid 2026-09-04 (Antwort auf `ludwig/app` `docs/backlog/F147-luecken-fuer-design-agent.md` §2 Nr. 6) · Regel Z4 / R2 · Prüfliste `design-guidelines.md` §10 („Jede Status-Spalte `StatusHeader` + `StatusBadge`") |
@@ -146,6 +146,27 @@ Abgenommen von / am: … · Offene Punkte: …
 1. Klick statt Hover — bleibt es dabei, obwohl die App 36-mal Hover kennt?
    *Ohne Antwort: ja, Klick → Dialog; eine Mechanik für „was heißt dieser
    Zustand" im ganzen Set.*
+   **Entschieden (Bauender, 2026-09-05, Default):** Klick → Dialog. Eine
+   Legende mit zwölf Zeilen ist im Tooltip für Tastatur und Screenreader
+   nicht erreichbar; der Hover der App fällt beim Umzug weg. Steht im
+   Kopfkommentar von `StatusHeader.tsx`.
 2. Soll ein Wächter-Test verbieten, dass ein `ColumnDef.header` das nackte
    Wort „Status" trägt? *Ohne Antwort: nein — die Prüfliste §10 reicht, ein
    Test kommt, wenn es einmal durchrutscht.*
+   **Entschieden (Bauender, 2026-09-05, Default):** kein Test. Die Prüfliste
+   §10 zeigt jetzt auf diesen Baustein; ein Test kommt, wenn ein „Status"
+   einmal durchrutscht.
+
+## Befund beim Bauen
+
+- **Achse `abgleich` gibt es nicht.** Die Spec nennt sie in Story `Axes`; die
+  Registry führt `mirror_match` („DATEV-Abgleich") und `abgleich_lauf`
+  („Abgleich-Lauf"). Die Stories nehmen `mirror_match` und beschriften den
+  Kopf mit „Abgleich" — genau der Fall, für den `label` von der Achse
+  getrennt ist.
+- **Das (i) sitzt in einem sortierbaren Kopf im `<a>` von `.v2sortlink`.**
+  Interaktives in einem Link ist formal unsauber; funktional stimmt es
+  (`StatusInfoButton` stoppt Default und Propagation, Story `InDataTable`
+  nachgesehen: Dialog auf, keine Sortierung). Sauber wäre, dass `headCell`
+  nur das Label in den Link nimmt. Das ist eine Änderung an `DataTable`,
+  nicht an diesem Baustein — offener Punkt für die Abnahme.
