@@ -12,6 +12,7 @@ import { DetailPane, MasterDetail } from "../../patterns/MasterDetail";
 import { Amount } from "../../primitives/Amount";
 import { FieldList } from "../../primitives/FieldList";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { formatTime } from "../../format";
 
 const meta: Meta<typeof CaseTimeline> = {
   title: "v3/Entitäten/Sachverhalt/CaseTimeline",
@@ -290,7 +291,7 @@ function EntryDetail({ entry }: { entry: CaseTimelineEntry | null }) {
   if (entry.type === "clarification") {
     const c = entry.clarification;
     return (
-      <DetailPane title={c.title} sub={`Rückfrage · gestellt am ${c.raisedAt.slice(0, 10)}`}>
+      <DetailPane title={c.title} sub={`Rückfrage · gestellt am ${formatTime(c.raisedAt, "date")}`}>
         <FieldList
           rows={[
             ["Adressat", c.audience === "accounting" ? "Kanzlei" : "Agent"],

@@ -834,6 +834,11 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   display: flex; flex-direction: column; gap: var(--space-4);
   font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text);
 }
+/* Der Körper scrollt, also darf sein Inhalt nicht gestaucht werden: als
+   Flex-Spalte schrumpft er seine Kinder standardmäßig, und die Vorschau im
+   Beleg-Drawer stand mit 138 von 558 px da — abgeschnitten statt gescrollt
+   (gemessen in der Abnahme von 0076). */
+.v2drawer__b > * { flex-shrink: 0; }
 .v2drawer__foot {
   flex-shrink: 0;
   display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end;
@@ -2259,8 +2264,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* Der Ladezustand nimmt die Form des Inhalts an, nicht die eines Kastens —
    dieselbe Karte, derselbe Kopf, dieselbe Höhe wie das geladene Original. */
 .v2doc__origskel { display: block; width: 100%; }
-/* So hoch wie der Kartentitel daneben (15 px Schrift, 1,45 Zeilen). */
-.v2doc__headskel { display: block; width: 42%; height: 22px; }
+/* So hoch wie der Kartentitel daneben (15 px Schrift, 1,45 Zeilen). Feste
+   Breite, kein Prozentwert: der Titel-Träger im Kartenkopf wächst nicht von
+   selbst, und 42 % von null sind null — der Platzhalter war unsichtbar. */
+.v2doc__headskel { display: block; width: 180px; height: 22px; }
 /* Fließtext in einer Feldzeile: links, ohne Ziffernstellung — die Spalte
    richtet sonst Zahlen rechts aus (V3). */
 .v2doc__prose {

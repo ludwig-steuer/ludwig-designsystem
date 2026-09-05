@@ -145,6 +145,13 @@ const RELATIVE_LIMIT = 7 * DAY;
  * @when    The distance between two points in days — a gap, an age in a list.
  * @instead How long ago something was, in words → formatTime with `age`.
  */
+export function daysBetween(a: string | Date, b: string | Date): number {
+  const from = toDate(a);
+  const to = toDate(b);
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return 0;
+  return Math.floor(Math.abs(to.getTime() - from.getTime()) / DAY);
+}
+
 /**
  * The calendar day a point in time falls on **in Berlin**, as `YYYY-MM-DD`.
  *
@@ -165,13 +172,6 @@ export function calendarDay(value: string | Date): string {
   const at = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((p) => p.type === type)?.value ?? "";
   return `${at("year")}-${at("month")}-${at("day")}`;
-}
-
-export function daysBetween(a: string | Date, b: string | Date): number {
-  const from = toDate(a);
-  const to = toDate(b);
-  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return 0;
-  return Math.floor(Math.abs(to.getTime() - from.getTime()) / DAY);
 }
 
 function formatRelative(d: Date, now: Date): string {

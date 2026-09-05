@@ -345,7 +345,7 @@ export const Edges: Story = {
         {
           ...INVOICE,
           id: "r1",
-          // 139 und 56 Zeichen — der Höchstfall, den der Kommentar oben nennt.
+          // 139 and 56 characters — the maximum the comment above claims.
           fileName:
             "Rechnung-2026-08-26-ACME-GmbH-Bueromaterial-und-Bewirtung-Sammelbeleg-Standort-Berlin-Mitte-Abteilung-Verwaltung-Kostenstelle-1200-4471.pdf",
           counterparty: "Bürobedarf und Bewirtung Musterstadt Handelsgesellschaft",

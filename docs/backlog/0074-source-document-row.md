@@ -394,3 +394,98 @@ derselbe wie in der `Rand`-Story von 0076: ein Höchstfall, eine Zeichenkette.
 - [ ] Kein deutscher Kommentar mehr in `SourceDocument.tsx` (`grep`)
 - [ ] Die Story `Rand` trägt 139 Zeichen Dateiname und 56 Zeichen Gegenpart (nachgezählt)
 - [ ] Beide werden gekürzt, der volle Text steht im `title` (Story `Rand`, im DOM)
+## Abnahme — zweiter Durchgang (2026-09-05)
+
+Abgenommen gegen Spec und Code, nicht gegen den Chat. Stand `17be1ab`
+(„0040, 0074, 0076: die Spalte, der Tag und die erfundenen Wörter"). Alle
+sieben Stories auf `localhost:6107` geöffnet und im Blatt gemessen
+(`measure.mjs`), die Längen der Rand-Daten am Quelltext **nachgezählt**, nicht
+geschätzt. Geprüft wurden auch die Kriterien der Vorrunde — die Behebung hat
+davon nichts umgeworfen.
+
+**Story-Deckung.** Unverändert sieben Exporte, sieben IDs in `index.json`
+(`--filled`, `--kinds`, `--classification`, `--states`, `--cell`, `--edges`,
+`--in-use`); die Ableitung (1 Zustand + 3 Enum-Achsen + 1 Zusatz-Export +
+1 Rand + 1 im Einsatz) geht weiter auf, die vier ausgeschlossenen Zustände
+stehen begründet unter „Verhalten".
+
+**Nachtrag (die Mängel der ersten Abnahme)**
+
+| Kriterium | Nachweis (Datei · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Kein deutscher Kommentar mehr in `SourceDocument.tsx` | `SourceDocument.tsx:384–385` steht jetzt englisch („A carrier of its own, because `SourceDocumentClass` may return `null`: a missing grid cell would shift every column after it."). Über die ganze Familie gegrept — in `SourceDocument.tsx`, `source-document-detail.ts`, `SourceDocumentFacts.tsx`, `SourceDocumentDrawer.tsx`, `SourceDocumentPreview.tsx` kein deutscher Kommentar mehr | ✓ |
+| Die Story `Rand` trägt 139 Zeichen Dateiname und 56 Zeichen Gegenpart | nachgezählt aus `SourceDocument.stories.tsx:349–351`: `"Rechnung-2026-08-26-ACME-…-Kostenstelle-1200-4471.pdf"` = **139**, `"Bürobedarf und Bewirtung Musterstadt Handelsgesellschaft"` = **56** (auch als Codepoints 56, die Umlaute zählen einfach). Der Dateiname ist zeichengleich mit dem der `Rand`-Story von 0076 | ✓ |
+| Beide werden gekürzt, der volle Text steht im `title` | `--edges`, DOM: Gegenpart sichtbar `Bürobedarf und Bewirtung Musterstad…` (36 Zeichen), `title` 56; Dateiname sichtbar `Rechnung-2026-08-26-ACME…tenstelle-1200-4471.pdf` (48 Zeichen, in der **Mitte** geschnitten, die Endung steht), `title` 139 | ✓ |
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` **nicht** gelaufen (mehrere Sitzungen parallel, laut Auftrag untersagt); ersatzweise rendert der laufende Storybook alle sieben Stories, `console-check.mjs` über `--edges`, `--kinds`, `--in-use`: **0 Meldungen** | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/source-document/SourceDocument.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Beleg/SourceDocument` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` an allen sieben Exporten (unverändert). **Ein Kommentar ist wieder deutsch**, und zwar neu: `SourceDocument.stories.tsx:348` — siehe Mangel 1 | ✗ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}\b\|[0-9]+px'` über `SourceDocument.tsx` und `source-document-detail.ts`: ein Treffer, `#30581` im Kommentar zu einem TypeScript-Issue. Wörter aus `sourceDocTypeLabel()`, `formatDocumentKind()` und der Achse `beleg_erledigung` | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | `--in-use`, sechs Zeilen über fünf Belegarten: die acht Spaltenkanten stehen in **jeder** Zeile auf 35 · 340 · 464 · 576 · 819 · 923 · 1035 · 1237 — dieselben Werte wie in der ersten Abnahme, die neuen Rand-Daten haben nichts verschoben. Zahlen rechts mit `tabular-nums`, Text links, nichts zentriert; Erledigung als **Wort** (0 `<svg>` in der Zustandsspalte, über alle acht Zeilen von `--states` gezählt); kein `<button>`, kein `input` im DOM von `--in-use`; die zwei App-Punkte übersprungen | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle sieben IDs am 2026-09-05 geöffnet und gemessen | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `grep -n "isInvoice\|=== \"invoice\""` findet nichts außer den Registry-Einträgen | genau ein Treffer im Ordner: `source-document-detail.ts:16`, Fließtext im Modul-Kommentar | ✓ |
+| `invoice` **ohne** `detail`: Dateiname als Kennung, keine Maß-Stelle | `--kinds`, Zeile 9: `Bürodienst Nord · Rechnung ǀ (leer) ǀ 30.07.2026 ǀ alt-2026-07-31-1188.pdf` — Kennung ist der Dateiname, die Maß-Spalte ist leer, kein Gedankenstrich | ✓ |
+| `other` **mit** `detail.kind = "invoice"`: weder Nummer noch Brutto | `--kinds`, Zeile 10: `Filiale Mitte · Kassenabschluss ǀ (leer) ǀ 31.08.2026 ǀ Kassenabschluss-2026-08.pdf` — statt `RE-9902` und `88,40 €` | ✓ |
+| Der Vergleich ist generisch | `source-document-detail.ts`: `if (entry.type !== sourceDocType) return null;` — der Eintrag nennt seinen eigenen `type`, die Funktion zählt keine Belegarten auf | ✓ |
+| `sourceDocType = null` heißt „Beleg" | `--kinds`, Zeile 8: `scan-20260819-114233.pdf` · **Beleg** · Belegdatum „—". Daneben Zeile 6 `declaration` → „Erklärung", Zeile 7 `other` + `payroll_slip` → „Lohnabrechnung" | ✓ |
+| `docCategory = null`, `docDirection = null`, `classDocumentKind = "original"` erzeugen kein Badge | `--classification`, die fünf Fälle im Text: vier Marken · nur Richtung · nur Kategorie · nur Kategorie (bei `original`) · gar nichts („Nichts eingeordnet" ist die Beschriftung der Story, nicht ein Badge) | ✓ |
+| Die Erledigung steht als Wort, über die Achse `beleg_erledigung` | `--states`: acht Zeilen, acht Wörter — „Offen", „Gebucht", „Sachverhalt geschlossen", „Über Import erledigt", „Ersetzt", „Von Hand erledigt", „Keine Buchung nötig", „Erledigt"; **0** `<svg>` in der Zustandsspalte; die `title` beginnen mit „Erledigung: …" und tragen den Text der Achse | ✓ |
+| `completedAt` gesetzt und `completedVia` `null` zeigt „Erledigt" | `--states`, letzte Zeile: „Erledigt", `title` „… woran er erledigt wurde, ist nicht festgehalten." | ✓ |
+| Ein langer Dateiname wird in der Mitte gekürzt, die Endung bleibt lesbar, das Ganze steht im `title` | siehe Nachtrag — jetzt am Höchstfall des Profils (139 statt 121) | ✓ |
+| Kennung fällt zurück: Ausprägung → Dateiname → Kurz-ID | `--kinds`: Rechnung → `RE-4471`, Vertrag → „Miete Lagerhalle Nord, monatlich", die vier Container-Arten → Dateiname. Stufe 3 bleibt unvorführbar, weil `fileName` Pflichtfeld ist — so sagt es die Spec selbst | ✓ |
+| Ersetzt `InvoiceNumberCell`, `PartnerCell`, `ClassificationStack`, `StatusCell`, `CompletedCheck` | betrifft `ludwig/app`; in diesem Repo nicht erfüllbar | offen (App) |
+| Tut bewusst nicht: sortieren, filtern, blättern, handeln | im DOM von `--in-use` und `--kinds` kein `<button>`, kein `input`, kein `select`, kein `textarea` — nur Links | ✓ |
+
+**Mängel**
+
+1. **Ein neuer deutscher Kommentar, eine Datei weiter** —
+   `src/ui/v3/entities/source-document/SourceDocument.stories.tsx:348`:
+   „`// 139 und 56 Zeichen — der Höchstfall, den der Kommentar oben nennt.`"
+   Er ist mit der Behebung von M2 entstanden (`git show 17be1ab -- …
+   SourceDocument.stories.tsx`) und steht direkt über den Daten, deren Länge
+   die Vorrunde beanstandet hatte. `CLAUDE.md` und die feste Prüfliste
+   verlangen englische Kommentare; alle übrigen Kommentare **dieser Datei**
+   sind englisch, auch der JSDoc-Block zwei Zeilen darüber („A 139-character
+   file name is cut in the middle …"). Nachgewiesen mit
+   `grep -rnE '(//|\*).*(\bweil\b|\bdamit\b|\bZeichen\b|\bder\b)'` über
+   `entities/source-document/` — genau dieser eine Treffer in der ganzen
+   Familie. Der Mangel der Vorrunde ist behoben und derselbe Fehler eine Datei
+   weiter neu entstanden; eine Zeile.
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Der Höchstfall ist jetzt derselbe wie in 0076.** Beide `Rand`-Stories
+  tragen dieselbe 139-Zeichen-Kette; die Zeile schneidet sie auf 48, Karte und
+  Drawer auf 88 (0076). Wer die Kürzung vergleicht, vergleicht dieselbe
+  Zeichenkette — das war die Absicht der Behebung und geht auf.
+- **Die Kürzung des Gegenparts ist eine Ende-Kürzung mit Auslassungszeichen**,
+  36 Zeichen sichtbar bei einer Grenze von 36 („Gegenpart 36 Zeichen, Ende
+  abschneiden"): das Zeichen `…` zählt mit. Zwei Zeichen weniger Text als die
+  Grenze verspricht — im Bild richtig, in der Tabelle „Kürzung" nicht gesagt.
+- Unverändert offen aus der ersten Abnahme: der Zuschnitt-Satz der Spec sagt
+  „eine Datei, drei Exporte", gebaut sind sieben; und `.v2fields__h` /
+  `.v2doc__h` setzen weiter `text-transform: uppercase` (A2/T9) — beides
+  gehört den Grundlagen (0055), nicht dieser Aufgabe.
+
+Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-05
+· Status zurück auf `in Arbeit`. Ein Mangel, eine Zeile; die drei Kriterien
+des Nachtrags sind erfüllt und gemessen.
+
+## Der Mangel der zweiten Abnahme (2026-09-05) — behoben
+
+Der Kommentar, der mit der Behebung von M2 entstand, war deutsch — derselbe
+Regelbruch wie der behobene Mangel, eine Datei weiter. Englisch.
+
+## Abnahmekriterien (Nachtrag der zweiten Runde)
+
+- [ ] Kein deutscher Kommentar in `SourceDocument.tsx` **und** `SourceDocument.stories.tsx` (`grep`)

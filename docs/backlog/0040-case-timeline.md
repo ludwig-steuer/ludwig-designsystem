@@ -749,3 +749,127 @@ Bausteine über `@/ui/v3`.
 - [ ] Eine Zeile ohne Betrag verschiebt ihr Badge nicht (dieselbe Story, der Klärungs-Eintrag)
 - [ ] Kein String-Schnitt auf einem ISO-Datum mehr (`grep -n "slice(0, 10)"` findet nichts)
 - [ ] `calendarDay` gibt den Berliner Tag, auch für 22:30 UTC und Silvester
+## Abnahme — dritter Durchgang (2026-09-05)
+
+Abgenommen gegen Spec und Code, nicht gegen den Chat. Stand `17be1ab`. Alle
+acht Stories auf `localhost:6107` geöffnet und im Blatt gemessen
+(`measure.mjs`, Ausdrücke über `#storybook-root`), `--interactive` mit echten
+Tastendrücken über CDP bedient (Tab · Enter · Leertaste), `calendarDay` zur
+Laufzeit aus dem Barrel geholt und in **fünf** Zeitzonen des Prozesses
+gerechnet. Die Kriterien der beiden Vorrunden sind mitgeprüft; die Behebung
+hat davon nichts umgeworfen.
+
+**Nachtrag (die zwei Mängel der zweiten Abnahme)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Betrag und Badge stehen in jeder Zeile auf derselben Kante | in **jeder** Zeile von **fünf** Stories gemessen, rechte Kante des Betrags und linke des Badge-Feldes: `--entry-kinds` (11 Zeilen) 484 / 496 · `--filled` (6) 484 / 496 · `--edge` (45) 484 / 496 · `--same-day` (3) 484 / 496 · `--in-use` (6) 811 / 823 — in jeder Story ein einziges Wertepaar, und die rechte Kante der Zeile liegt durchweg auf 636 bzw. 963. Vorher: zehn Kanten über 86 px verteilt | ✓ |
+| Eine Zeile ohne Betrag verschiebt ihr Badge nicht | dieselbe Messung, die Zeilen ohne `.v2amount`: `--entry-kinds` „Gehört die Rechnung auf 6815?" (Badge-Paar „Offen · Blockierend") 496 · `--filled` zwei Klärungszeilen 496 · `--edge` „Korrektur ohne Betrag" 496 · `--same-day` zwei Einträge 496. Die leere Betragsspalte wird belegt (`.v2ct__amt`, 96 px), das Badge beginnt, wo es bei den anderen beginnt | ✓ |
+| Kein String-Schnitt auf einem ISO-Datum mehr | `grep -rn "slice(0, 10)" src/ui/v3/` findet **zwei** Stellen: `format.ts:151` (der Kommentar, der davor warnt — richtig so) und **`CaseTimeline.stories.tsx:293`**, wo der Schnitt weiter im Code steht. Genau diese Zeile hatte die zweite Abnahme unter Mangel 2 benannt — siehe Mangel 1 | ✗ |
+| `calendarDay` gibt den Berliner Tag, auch für 22:30 UTC und Silvester | zur Laufzeit im Blatt: `await import('/src/ui/v3/index.ts')` und dann gerechnet, den Prozess des headless Chromium jeweils mit gesetztem `TZ` gestartet (Europe/Berlin · Asia/Tokyo · Pacific/Kiritimati (+14) · Pacific/Midway (−11) · America/Los_Angeles). In **allen fünf** dieselben Werte: `2026-08-25T22:30:00Z` → **2026-08-26**, `2026-08-25T21:30:00Z` → 2026-08-25 (die Kante der Sommerzeit), `2026-12-31T23:30:00Z` → **2027-01-01**, `2026-12-31T22:00:00Z` → 2026-12-31 (die Kante der Winterzeit), `2027-01-01T00:30:00Z` → 2027-01-01, die Tagesstrings `2026-08-26` und `2027-01-01` unverändert, Unsinn → `""`. Der Schnitt hätte zweimal den Vortag geliefert (`2026-08-25`, `2026-12-31`). In `CaseTimeline.tsx:233` wird die Funktion für `raisedAt` benutzt | ✓ |
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` **nicht** gelaufen (mehrere Sitzungen parallel, laut Auftrag untersagt); ersatzweise übersetzt und rendert der laufende Storybook alle acht Stories, `console-check.mjs` über alle acht: **0 Meldungen** | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/accounting-case/CaseTimeline.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Sachverhalt/CaseTimeline` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `CaseTimeline` trägt beide Zeilen (`:160–166`), die vier Typen englischen JSDoc; die neue Hilfe `rightEnd` (`:137–158`) ist modulintern und erklärt sich. **In `format.ts` hat der Fix einen Doc-Block von seiner Funktion getrennt** — siehe Mangel 2 | ✗ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}'` = 0, `grep -cE '[0-9]+px'` = 0 in `CaseTimeline.tsx`; die neuen Maße stehen als `.v2ct__amt` / `.v2ct__state` im Blatt (`v3.css:1947–1948`), nicht in der Komponente. Einziges Objekt bleibt `EVENT_ICON`; Wörter aus `resolveStatus(…)` und der erlaubten Übergangs-Prop `kindLabels` | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | acht Exporte, acht IDs (`--filled`, `--same-day`, `--empty`, `--loading`, `--entry-kinds`, `--interactive`, `--in-use`, `--edge`); „leer nach Filter" und „Fehler" begründet ausgeschlossen. Die Ableitung im Kapitel „Stories" rechnet weiter mit sieben — unverändert nachzuziehen, kein Mangel am Code | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | V3 hält jetzt: Zahlen rechts, in einer Spalte, `tabular-nums`; nichts zentriert; Zeilenhöhe 34 px bei einzeiligem Titel. V13/T7 hält in der Komponente (`calendarDay` statt Schnitt), reißt aber noch in der Story (Mangel 1). Farbe nur als Stufe, jeder farbige Zustand mit Wort; jedes Icon mit `title` **und** `aria-label`, `svg` `aria-hidden`, Lucide `stroke-width="1.5"`, `width="14"`; Fokusring nach echten Tab-Anschlägen sichtbar; kein waagerechter Überlauf in einer der acht Stories; die zwei App-Punkte übersprungen | ✗ |
+| Im Browser angesehen, nicht nur gebaut | alle acht IDs geöffnet und gemessen; `--interactive` mit echten Tastendrücken bedient; `--filled` zusätzlich mit einer zur Laufzeit verbreiterten Badge-Gruppe gemessen (siehe „Zusätzlich gesehen") | ✓ |
+
+**Variabel (aus dieser Spec)**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Drei Listen ergeben **einen** Strang, absteigend nach Tag; gleicher Tag: Erwartung, Klärung, Ereignis | `--filled`: **ein** `.v2tl` mit sechs `.v2tl__item`, `datetime` absteigend 2026-09-15 → 08-31 → 08-25 → 08-12 → 08-04 → 07-28. `--same-day`: drei Einträge, alle mit `datetime="2026-08-26"`, DOM-Reihenfolge „Beleg fehlt: Bürobedarf Meier GmbH · Fällig" → „Gehört der Laptop ins Anlagevermögen? · Offen · Blockierend" → „Rechnung RE-4471 · 1.249,90 € · Vorschlag" | ✓ |
+| Genau eine Zeile je Eintrag | `--filled`, `--same-day`, `--edge`, `--entry-kinds`, `--interactive`: `.v2tl__who` **0×**, `details`/`summary` **0×**; `--in-use`: keine Zeile enthält „.pdf" (der Dateiname steht rechts im Detail) | ✓ |
+| Zustände nur über `StatusBadge` mit den vier Achsen; kein lokales Label-Objekt außer `kindLabels` | `erwartung` (`:216`), `klaerung_status` (`:239`), `klaerung` (`:242`), `ereignis` (`:267–271`); im DOM von `--entry-kinds` die Registry-Wörter samt Erklärung im `title` | ✓ |
+| `clarificationState()` und `expectationMaturity()` aus `src/ludwig/` importiert, keine zweite Ableitung | Import `:18–24`; kein Datumsvergleich in der Datei. Sichtbar in `--filled`: dieselbe Frage am 04.08. „Beantwortet", die vom 25.08. „Offen" + „Blockierend" | ✓ |
+| Erwartungen mit `resolvedAt` fehlen im DOM (`Edge`) | `--edge`: `innerText.includes("erledigt — steht nicht im Strang")` = **false**; 45 Einträge, davon eine Erwartung | ✓ |
+| `selectedId` → genau ein `[aria-current="true"]`; `onSelect` liefert `{ type, … }`; ohne `onSelect` kein `button` | `--interactive`: **6** `button` links, **0** rechts. Echte Tastendrücke: Tab → Fokus auf `button.v2link` „Beleg fehlt …", Enter → „Gewählt: expectation · ex-1", `[aria-current="true"]` genau **1×**; zweimal Tab + Leertaste → „clarification · cl-3"; Tab + Enter → „event · ev-2"; die Markierung wandert mit und bleibt einzeln | ✓ |
+| Ersetztes Ereignis: gedimmt, Badge „Ersetzt", kein Buchungszustand (`Edge`) | `--edge`: genau ein `.v2tl__item.v2muted` — „Rechnung RE-4470 · ersetzt / 1.249,90 € / **Ersetzt**", obwohl `state: "posted"` übergeben wird | ✓ |
+| `payment_out` mit Minus; `amount` 0 oder `null` ohne Betragszelle (`Edge`) | `--edge`: „Zahlung an Stadtwerke Musterstadt / **-412,00 €**" bei übergebenen `412`; „Korrektur ohne Betrag" (`amount: 0`) hat keine `.v2amount` — die Spalte bleibt aber belegt und ausgerichtet (Nachtrag 1) | ✓ |
+| Jedes Icon hat `title` und `aria-label` mit deutschem Wort (`EntryKinds`) | `--entry-kinds`, alle elf `span.v2tl__kind`: `role="img"`, `aria-label` = `title` = „Beleg fehlt", „Zahlung offen", „Beleg", „Zahlungseingang", „Zahlungsausgang", „Umbuchung", „Korrektur", „Sollstellung", „OP-Vortrag", „Beleg", „Frage"; `svg` je `aria-hidden="true"`, `stroke-width="1.5"`, `width="14"` | ✓ |
+| Lückenzeile „n Tage ohne Ereignis" bei ≥ 7 Tagen (`Edge`) | `--edge`: vier `.v2tl__gap` (21 · 121 · 9 · 12); `--filled` vier (15 · 13 · 8 · 7) — die 7 zeigt die Schwelle genau an der Kante | ✓ |
+| 0023 erweitert: `selectedId`, tagesgenaues `at`, `kind` optional; bestehende 0023-Stories unverändert | `Timeline --selected`: genau ein `.v2tl__item.is-current`, `aria-current="true"`, Fläche `rgb(241,247,251)` · `--day-only`: `datetime="2026-08-28"` → „28.08.2026" ohne Uhrzeit neben `datetime="2026-08-26T14:12:00.000Z"` → „26.08.2026 16:12" · `--without-kind`: `.v2tl__who` 0×. Der Fix hat `Timeline.tsx` angefasst (der Slot `.v2tl__right`), nicht die Stories: `--filled`, `--with-labels`, `--order`, `--grouping`, `--interactive`, `--with-gap`, `--in-use`, `--icons-and-dimmed` nachgemessen — dieselbe Zahl Einträge, dieselben Zeiten, die rechte Gruppe bündig an der Strangkante (636 bzw. 615), kein Überlauf | ✓ |
+| Tut bewusst nicht: filtern, Detail inline, nach Konto hervorheben | `--in-use`: `MasterDetail`, links die Karte „Verlauf · 6 Einträge · Musterbau GmbH 2026" (die Zahl deckt sich mit sechs `.v2tl__item`), rechts die `FieldList` des gewählten Eintrags mit Zustand, Betrag, Datei „RE-4471.pdf", Zusammenfassung. Kein Filter, kein `Segmented` | ✓ |
+| Ersetzt `Timeline`/`TimelineItem`/`EventIcon` in `SachverhaltScreen.tsx`/`parts.tsx` | betrifft `ludwig/app`; in diesem Repo nicht erfüllbar (`docs/befunde-app.md`, Abschnitt E) | offen (App) |
+
+**Mängel**
+
+1. **Der String-Schnitt steht noch in der Story.**
+   `src/ui/v3/entities/accounting-case/CaseTimeline.stories.tsx:293`:
+   `` sub={`Rückfrage · gestellt am ${c.raisedAt.slice(0, 10)}`} ``. Das
+   Nachtrags-Kriterium sagt wörtlich „`grep -n "slice(0, 10)"` findet nichts",
+   und Mangel 2 der zweiten Abnahme hatte diese Zeile ausdrücklich benannt
+   („Dieselbe Abkürzung steht in `CaseTimeline.stories.tsx:293`"). Behoben ist
+   nur die Komponente. Im Bild fällt es nicht auf — `cl-3` steht auf
+   `2026-08-25T16:20:00Z`, in Berlin 18:20, also derselbe Tag —, aber die
+   Story ist genau die Stelle, die den Satz „die Uhrzeit steht im Detail"
+   belegen soll, und sie zeigt „gestellt am 2026-08-25" statt einer Uhrzeit.
+   Zwei Wege: `calendarDay(c.raisedAt)` aus dem Barrel, oder — besser für die
+   Aussage der Story — `formatTime(c.raisedAt, "dateTime")`.
+
+2. **`daysBetween` hat sein `@when`/`@instead` verloren.**
+   `src/ui/v3/format.ts`: der Doc-Block von `daysBetween` steht bei `:137–147`,
+   direkt darunter folgt bei `:148–160` der Block von `calendarDay` und bei
+   `:161` dessen Funktion; `daysBetween` selbst beginnt bei `:170` **ohne
+   eigenen Kommentar**. Der Fix hat die neue Funktion zwischen Block und
+   Funktion geschoben (`git show 17be1ab -- src/ui/v3/format.ts`). Damit trägt
+   `daysBetween` im Editor keine Erklärung mehr, und die Antwort auf „was
+   nehme ich?" steht über der falschen Funktion — die feste Prüfliste verlangt
+   die zwei Zeilen an **jedem** Export. Ein Verschieben des Blocks um neun
+   Zeilen.
+
+**Zusätzlich gesehen, ohne eigenes Kriterium**
+
+- **Eine breitere Badge-Gruppe als 140 px wird sauber behandelt.** Zur
+  Laufzeit in `--filled` geprüft, indem einer Zeile ein zusätzliches Badge
+  angehängt wurde: bei 278 px Gruppenbreite bricht der rechte Slot **innerhalb
+  derselben Zeile** in eine zweite Zeile um und bleibt bündig an 636; bei
+  402 px bleibt er einzeilig und schiebt nur den Betrag dieser Zeile nach
+  links (484 → 222). **Alle anderen Zeilen bleiben unberührt** (484 / 496), die
+  rechte Kante hält, kein waagerechter Überlauf. Erst jenseits der Zeilenbreite
+  (zwei Badges über 830 px, im Bestand unerreichbar) läuft die Gruppe über die
+  Kante hinaus. Der Satz aus `rightEnd` — „a wider one pushes its own row and
+  nothing else" — stimmt.
+- **„Gedimmt" erreicht den Titel weiterhin nicht.** `--edge`, die ersetzte
+  Zeile: Container `rgb(92,92,92)`, Titel `rgb(45,45,45)` — genau wie jede
+  andere Zeile; zurück tritt nur der Betrag. Unverändert gegenüber der zweiten
+  Abnahme, gehört dem Pattern 0023.
+- **Das Klickziel ist weiterhin nur der Titel.** `--interactive`: die sechs
+  Knöpfe messen 218 bis 279 px bei 375 px Kopfbreite (58–74 %); rechts daneben
+  reagiert nichts. Bewusst so gebaut, steht aber gegen §9/I11 — eine Frage an
+  den Owner, kein Mangel gegen ein Kriterium.
+- **Ohne `kindLabels` steht der englische Schlüssel im `aria-label`**
+  (`:250`), unverändert; bis die Registry `ereignis_art` führt (L-02).
+
+Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-05
+· Status zurück auf `in Arbeit`. Zwei Mängel, beide klein und beide
+Nacharbeit am Fix selbst: die Story schneidet weiter am ISO-String, und
+`calendarDay` hat sich zwischen `daysBetween` und dessen Doc-Block gesetzt.
+Die Sache, um die es ging — die Spalte und der Berliner Tag —, ist gemessen
+in Ordnung.
+
+## Die zwei Mängel der zweiten Abnahme (2026-09-05) — behoben
+
+**M1 — der String-Schnitt stand noch in der Story.** Behoben war er in der
+Komponente, nicht in `CaseTimeline.stories.tsx:293`
+(`c.raisedAt.slice(0, 10)`) — dort schrieb er das ISO-Datum in eine Zeile für
+den Leser. Jetzt `formatTime(c.raisedAt, "date")`: derselbe Weg, und
+nebenbei liest die Zeile sich jetzt deutsch („gestellt am 26.08.2026") statt
+amerikanisch.
+
+**M2 — `daysBetween` hatte sein JSDoc verloren.** `calendarDay` war beim
+Einfügen zwischen den Doc-Block und die Funktion geraten; damit trug
+`calendarDay` die Abgrenzung von `daysBetween` und `daysBetween` gar keine.
+Dieselbe Panne wie bei `FileDrop` in 0021, zwei Runden davor. Jetzt steht
+jeder Block über seiner Funktion.
+
+## Abnahmekriterien (Nachtrag der zweiten Runde)
+
+- [ ] `grep -rn "slice(0, 10)" src/ui/v3` findet nichts — auch nicht in Stories
+- [ ] `daysBetween` und `calendarDay` tragen je ihr eigenes `@when`/`@instead`
