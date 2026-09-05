@@ -80,10 +80,7 @@ export function Drawer({
       // Auslöser, sonst tabbt die Tastatur hinter dem Scrim weiter (V10/V11).
       opener.current = document.activeElement as HTMLElement | null;
       setRender(true);
-      const raf = requestAnimationFrame(() => {
-        setShown(true);
-        panel.current?.focus();
-      });
+      const raf = requestAnimationFrame(() => setShown(true));
       return () => cancelAnimationFrame(raf);
     }
     setShown(false);
@@ -92,6 +89,21 @@ export function Drawer({
     const t = setTimeout(() => setRender(false), EXIT_MS);
     return () => clearTimeout(t);
   }, [open]);
+
+  /**
+   * The focus goes in once the panel exists. It used to sit in the
+   * `requestAnimationFrame` above, where `panel.current` is still `null` —
+   * React has not committed the render yet at that point, so the call did
+   * nothing and the focus stayed on the trigger (found in the review of 0042,
+   * fixed with 0092). Keyed on `render`, not on `open`, because that is when
+   * the ref is filled. And **not** over a child that asked for the focus
+   * itself.
+   */
+  useEffect(() => {
+    if (!render || !open) return;
+    const active = document.activeElement;
+    if (!active || !panel.current?.contains(active)) panel.current?.focus();
+  }, [render, open]);
 
   useEffect(() => {
     if (!open) return;

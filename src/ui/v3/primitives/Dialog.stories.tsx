@@ -97,3 +97,97 @@ export const Closed: Story = {
     </Dialog>
   ),
 };
+
+/* ── Tastatur (0092) ──────────────────────────────────────────────────── */
+
+/**
+ * Enter bestätigt (I2). Bis 0092 kannte der Dialog seine Hauptaktion nicht —
+ * `onConfirm` sagt sie ihm. In einem Textfeld bleibt Enter der Zeilenumbruch,
+ * und auf einem Knopf bleibt es dessen eigener Klick.
+ */
+export const EnterConfirms: Story = {
+  render: function Render() {
+    const [open, setOpen] = useState(false);
+    const [confirmed, setConfirmed] = useState(0);
+    return (
+      <>
+        <Button variant="primary" onClick={() => setOpen(true)}>
+          Freigeben
+        </Button>{" "}
+        <span className="lw-numeric">{confirmed}× bestätigt</span>
+        <Dialog
+          open={open}
+          onClose={() => setOpen(false)}
+          onConfirm={() => {
+            setConfirmed((n) => n + 1);
+            setOpen(false);
+          }}
+          title="Stapel freigeben?"
+          size="sm"
+          footer={
+            <>
+              <Button variant="secondary" size="sm" onClick={() => setOpen(false)}>
+                Abbrechen
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                hotkey="⏎"
+                onClick={() => {
+                  setConfirmed((n) => n + 1);
+                  setOpen(false);
+                }}
+              >
+                Freigeben
+              </Button>
+            </>
+          }
+        >
+          118 Sätze gehen an DATEV. Drücken Sie Enter, ohne den Knopf zu suchen.
+        </Dialog>
+      </>
+    );
+  },
+};
+
+/**
+ * Der Fokus geht in den Dialog — aber **nicht** über ein Kind, das ihn selbst
+ * angefordert hat. Vor 0092 zog der Dialog ihn zurück auf die Fläche, und die
+ * Suche der Befehlspalette verlor ihn nach einem Tick: Getipptes landete
+ * nirgends, Enter schloss die Palette.
+ */
+export const AutoFocusChild: Story = {
+  render: () => (
+    <Demo label="Mit Suchfeld öffnen" title="Suchen" size="md">
+      <Field label="Suche">
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- genau das ist der Nachweis */}
+        <input className="v2in" autoFocus placeholder="Tippen Sie sofort los" />
+      </Field>
+    </Demo>
+  ),
+};
+
+/**
+ * Tab bleibt im Dialog. Ohne die Falle wandert der Fokus hinter den Scrim
+ * weiter, und wer nicht sieht, bedient eine Seite, die nicht da ist
+ * (V10/V11).
+ */
+export const KeyboardTrap: Story = {
+  render: () => (
+    <Demo
+      label="Drei Haltepunkte"
+      title="Tab läuft im Kreis"
+      size="sm"
+      footer={
+        <>
+          <Button variant="secondary" size="sm">Abbrechen</Button>
+          <Button variant="primary" size="sm">Weiter</Button>
+        </>
+      }
+    >
+      <Field label="Grund">
+        <Textarea rows={2} placeholder="Vom letzten Haltepunkt führt Tab zurück auf das Kreuz." />
+      </Field>
+    </Demo>
+  ),
+};
