@@ -211,3 +211,92 @@ Hinweis. Jetzt `useId()`, wie es `Popover` und `ExpandableRow` schon machen.
 - [ ] Der Ablehnungsgrund nennt keine MIME-Angabe (Story `Rejected`, Text im DOM)
 - [ ] Der Grund nennt die versuchte Endung und, wenn `hint` gesetzt ist, die erlaubten
 - [ ] Zwei `FileDrop` auf einer Seite tragen verschiedene `id`s (im DOM gemessen)
+
+## Abnahme der Nachbesserung, 2026-09-05
+
+Dritte Runde, fremder Prüfer (weder Erbauer noch Vorprüfer). Geprüft gegen
+die festen und die variablen Kriterien und gegen den Nachtrag. Gemessen in
+einem eigenen headless Chromium (1440 × 900) auf `localhost:6107`; wo eine
+zweite Instanz nötig war, ist sie zur Laufzeit in denselben React-Baum
+gerendert.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| **Fest** — `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0 | ✓ |
+| **Fest** — `pnpm build` grün | Nicht gestartet: er schreibt nach `storybook-static`, und parallel arbeiten weitere Sitzungen im Baum | ✓ (zitiert) |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/FileDrop.tsx` mit `FileDrop.stories.tsx` daneben; Titel `v3/Primitives/Formular/FileDrop` (`FileDrop.stories.tsx:7`); Export `src/ui/v3/index.ts:109` | ✓ |
+| **M3 · Fest** — Code englisch | **Reißt neu.** Die Nachbesserung hat zwei deutsche Kommentarzeilen in die Komponente gesetzt: `FileDrop.tsx:78–79` „// Zwei Ablagen auf einer Seite dürfen nicht dieselbe `id` tragen — sonst zeigt `aria-describedby` beider auf denselben Hinweis (0021)." Vor `9a831fa` war die Datei durchgängig englisch; die Vorrunde hat sie ausdrücklich so protokolliert. `CLAUDE.md` lässt Deutsch nur in Strings zu, die Nutzer sehen. (Das deutsche Zitat in `:41–42` ist kein Verstoß — es zitiert den alten UI-Text in einem englischen Satz.) | ✗ |
+| **M4 · Fest** — `@when`/`@instead` an jedem Export | **Reißt neu.** Der Block mit beiden Zeilen steht in `FileDrop.tsx:32–36`, aber der Export beginnt erst in `:54`; dazwischen liegen die JSDoc (`:38–46`) und die Deklaration der privaten Hilfsfunktion `rejectionReason` (`:47`). Der Block hängt damit vor dem Helfer, nicht vor der Komponente — `export function FileDrop` trägt gar kein JSDoc mehr. `git show 9a831fa^:src/ui/v3/primitives/FileDrop.tsx` zeigt ihn noch unmittelbar über `export function FileDrop`; die Einfügung von `rejectionReason` hat ihn abgehängt. Greppbar ist er weiter, an der Komponente steht er nicht mehr | ✗ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}\b|[0-9]+px|fontSize' src/ui/v3/primitives/FileDrop.tsx` → 0; die Maße stehen in `v3.css` (`.v2drop*`). Kein Status im Spiel | ✓ |
+| **Fest** — alle Stories vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--empty`, `--with-files`, `--uploading`, `--rejected`, `--interactive`, `--in-card` — sechs, genau die Ableitung. `LeerNachFilter` mit Grund ausgeschlossen | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 | Die zwei App-Punkte übersprungen. Der Ablehnungsgrund erfüllt jetzt T4/T5 (Zeile darunter). Gerissen sind die zwei Punkte oben: Code englisch (M3) und `@when`/`@instead` am Export (M4). Der Rest unverändert wie in der Vorrunde protokolliert | ✗ (wegen M3/M4) |
+| **Fest** — im Browser angesehen | `--empty`, `--rejected` und `--interactive` geöffnet, echte `drop`-Ereignisse mit `DataTransfer` ausgelöst, die Liste ausgelesen | ✓ |
+| **Variabel** — Zone per Tastatur erreichbar, Enter öffnet den Dateidialog (V11) | Unverändert: die Zone ist ein echtes `<button type="button">` (`FileDrop.tsx:130–131`), in der Vorrunde mit gedrückter Eingabetaste belegt | ✓ |
+| **Variabel** — beim Überziehen ändert sich nur der Hintergrund, nichts wächst (V12) | Unverändert (`v2drop` → `v2drop is-over`, Maße gleich) | ✓ |
+| **Variabel** — abgelehnte Dateien nennen den Grund, die übrigen kommen trotzdem an | `--empty` (`accept="application/pdf,image/*"`, `maxSizeMb=20`, `hint` gesetzt), echter `drop` mit `buchungen.xlsx`, `notiz.txt`, `beleg.pdf`, `ohneendung`: in der Liste stehen genau die drei abgelehnten mit Grund, `beleg.pdf` läuft durch | ✓ |
+| **Variabel** — die Komponente lädt selbst nichts hoch | `grep -nE 'fetch\|XMLHttpRequest\|use server\|axios' src/ui/v3/primitives/FileDrop.tsx` → kein Treffer | ✓ |
+| **Variabel** — ersetzt die Drop-Zone in `InvoiceUploader.tsx` | Betrifft `ludwig/app`, hier nicht erfüllbar | offen (App) |
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Der Ablehnungsgrund nennt keine MIME-Angabe (Story `Rejected`, Text im DOM) | `--rejected`, `.v2dropfile__err` ausgelesen: „Zu groß — höchstens 20 MB." und „Format nicht vorgesehen — PDF, JPG oder PNG." Kein `application/…`, kein `image/*` im DOM. Gegenprobe an der Komponente selbst (`--empty`, echter `drop`): „XLSX-Dateien nehmen wir hier nicht — erlaubt ist: PDF, JPG oder PNG, höchstens 20 MB je Datei" — ebenfalls ohne MIME | ✓ |
+| Der Grund nennt die versuchte Endung und, wenn `hint` gesetzt ist, die erlaubten | Die **Komponente** tut es: `rejectionReason` (`FileDrop.tsx:47–52`) setzt Endung + `hint` zusammen; gemessen in `--empty` „XLSX-Dateien nehmen wir hier nicht — erlaubt ist: …", „TXT-Dateien nehmen wir hier nicht — …", und ohne Endung „Diese Datei nehmen wir hier nicht — …". Die **Story `Rejected`** zeigt das nicht: dort steht weiter „Format nicht vorgesehen — PDF, JPG oder PNG." aus der `files`-Prop (`FileDrop.stories.tsx:88`), also der alte Wortlaut, den die Komponente nicht mehr erzeugt, ohne versuchte Endung. Die Story setzt zudem kein `accept` (`:70–75`), kann den Formatfall also gar nicht selbst auslösen. Genau das stand als Auftrag in der Vorrunde: „danach zeigt die Story `Rejected` den Formatfehler so, wie die Komponente ihn erzeugt" | ✗ |
+| Zwei `FileDrop` auf einer Seite tragen verschiedene `id`s (im DOM gemessen) | Zwei Instanzen mit `hint` zur Laufzeit in **einen** React-Baum gerendert und im DOM gemessen: `aria-describedby` `_r_2_` und `_r_3_`, die beiden `.v2drop__hint` tragen dieselben, verschiedenen `id`s, und `document.getElementById` liefert je den eigenen Satz („PDF, bis 20 MB" bzw. „Nur Bilder"). Zusammen mit der Zone der Story stehen drei verschiedene `id`s im Dokument. `useId()` (`FileDrop.tsx:80`) greift | ✓ |
+
+**Zurück auf `in Arbeit`.** Drei Mängel:
+
+1. **M2 der Story — `Rejected` führt einen Wortlaut vor, den es im Code nicht
+   gibt.** `FileDrop.stories.tsx:88` setzt den Formatfehler über `files` auf
+   „Format nicht vorgesehen — PDF, JPG oder PNG."; die Komponente sagt
+   „XLSX-Dateien nehmen wir hier nicht — erlaubt ist: …". Der Story `accept`
+   geben und den Fehler entstehen lassen, oder wenigstens den Text der
+   Komponente einsetzen.
+2. **M3 — deutscher Kommentar in `FileDrop.tsx:78–79.`** Neu hinzugekommen,
+   in einer bis dahin englischen Datei. Übersetzen.
+3. **M4 — `@when`/`@instead` hängen nicht mehr am Export.** Der Block
+   (`FileDrop.tsx:32–36`) steht vor der privaten Hilfsfunktion; `export
+   function FileDrop` (`:54`) trägt kein JSDoc. Den Block direkt über den
+   Export zurückschieben.
+
+**Befunde** (keine Mängel):
+
+4. **Der Satz endet ohne Punkt, wenn `hint` gesetzt ist** — „… erlaubt ist:
+   PDF, JPG oder PNG, höchstens 20 MB je Datei" (`FileDrop.tsx:51`). Ohne
+   `hint` steht der Punkt. Der Text der Nachbesserung oben zitiert die Fassung
+   mit Punkt.
+5. **Der Grund erbt den ganzen `hint`.** Steht im Hinweis auch die Größe („…,
+   höchstens 20 MB je Datei"), taucht sie im Format-Grund mit auf. Lesbar,
+   aber der Satz sagt mehr, als er beantwortet.
+6. **`.v2field__label` in Versalien** (`v3.css`) — set-weit, wie in 0017 und in
+   der Vorrunde festgestellt; eigene Aufgabe.
+
+Geprüft von / am: Claude (Abnahme-Agent), 2026-09-05
+
+## Die drei Mängel der Abnahme vom 2026-09-05 (zweite Runde) — behoben
+
+**M1 — die Story `Rejected` zeigte den alten Wortlaut.** Sie reicht ihre
+Fehlersätze als `error` an den Dateien herein, statt sie von der Komponente
+erzeugen zu lassen — eine statische Story kann nichts fallen lassen. Der Satz
+lautet jetzt wörtlich so, wie `rejectionReason` ihn beim echten Ablegen
+bildet: „XLSX-Dateien nehmen wir hier nicht — erlaubt ist: PDF, JPG oder PNG,
+höchstens 20 MB je Datei." Dazu trägt die Story ein `accept`, damit die
+Ablehnung überhaupt der Fall ist, den sie zeigt, und ein Satz im Story-JSDoc
+sagt, woher der Text kommt.
+
+**M2 — der neue Kommentar an `hintId` war deutsch.** Englisch.
+
+**M3 — das `@when`/`@instead` hing vor der falschen Funktion.** Beim Einschub
+von `rejectionReason` (`9a831fa`) ist der Block zwischen JSDoc und Export
+geraten: seither trug die private Hilfsfunktion die Abgrenzung und
+`export function FileDrop` gar keine. Der Block steht wieder am Export.
+
+**Nebenbei, aus dem Befund der Abnahme:** der Satz endete ohne Punkt, sobald
+`hint` gesetzt war. Er endet jetzt immer auf einen — und wenn der Hinweis
+selbst schon einen trägt, nicht auf zwei.
+
+Nicht geändert: dass der Format-Grund den ganzen `hint` erbt, also auch die
+Größenangabe. Das ist gewollt — der Hinweis ist der eine Satz, in dem steht,
+was hier erlaubt ist, und eine zweite, gekürzte Fassung davon wäre eine
+zweite Wahrheit.

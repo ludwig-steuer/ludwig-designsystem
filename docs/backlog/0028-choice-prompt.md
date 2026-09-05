@@ -188,3 +188,72 @@ die Klärungs-Karten. Beim nächsten Anfassen gehört er hierher.
 - [ ] Der Hinweis neben dem Knopf schweigt, während gesendet wird
 - [ ] Zwei `ChoicePrompt` auf einer Seite wählen sich nicht gegenseitig ab (im Browser gemessen)
 - [ ] Ohne Optionen erscheint keine `RadioGroup` und keine zweite Beschriftung „Antwort"
+
+## Abnahme der Nachbesserung, 2026-09-05
+
+Dritte Runde, fremder Prüfer (weder Erbauer noch Vorprüfer). Geprüft gegen
+die festen und variablen Kriterien und gegen den Nachtrag. Gemessen in einem
+eigenen headless Chromium (1440 × 900) auf `localhost:6107`; wo zwei
+Instanzen nötig waren, sind sie zur Laufzeit in **einen** React-Baum
+gerendert und im DOM ausgelesen.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| **Fest** — `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0 | ✓ |
+| **Fest** — `pnpm build` grün | Nicht gestartet: er schreibt nach `storybook-static`, und parallel arbeiten weitere Sitzungen | ✓ (zitiert) |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/patterns/ChoicePrompt.tsx` mit `ChoicePrompt.stories.tsx` daneben; Titel `v3/Patterns/Prüfen/ChoicePrompt`; Export `src/ui/v3/index.ts:256–259` | ✓ |
+| **M3 · Fest** — Code englisch; `@when`/`@instead` an jedem Export | Die `@when`/`@instead`-Zeilen stehen unverändert unmittelbar über `export function ChoicePrompt` (`:36`) — der Block steht in `:30–35` — das hält. **Die Sprache reißt neu:** die Nachbesserung hat drei deutsche Kommentarblöcke in die Komponente gesetzt — `:62–63` („Zwei Fragen auf einer Seite dürfen sich nicht gegenseitig abwählen …"), `:101–104` (JSX-Kommentar „Keine Gruppe ohne Gegenstand …") und `:134–138` („`ActionButton` kennt nur seinen **eigenen** Lauf …"). Vor `9a831fa` war die Datei durchgängig englisch, die Vorrunde hat das ausdrücklich so protokolliert. `CLAUDE.md` lässt Deutsch nur in Strings zu, die Nutzer sehen | ✗ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}\b|[0-9]+px|fontSize' src/ui/v3/patterns/ChoicePrompt.tsx` → 0; die Maße stehen in `v3.css` (`.v2ask*`). Kein Status im Spiel | ✓ |
+| **Fest** — alle Stories vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--filled`, `--blocked`, `--with-free-text`, `--pending`, `--error`, `--in-case` — sechs, genau die Ableitung. `Leer` und `LeerNachFilter` sind begründet ausgeschlossen | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 | Die zwei Punkte, die in der Vorrunde rissen, halten jetzt: der Ladezustand trägt ein Wort (V9/V7) und zwei Prompts stören sich nicht. Gerissen ist die Sprache der Kommentare (M3). Der Rest unverändert: Text links, Farbe nur am `Callout`, Fokus und Pfeiltasten aus dem nativen `<fieldset>`, kein Icon, kein Emoji, Karte in `--in-case` mit Rand ohne Schatten, Texte Sie und Imperativ | ✗ (wegen M3) |
+| **Fest** — im Browser angesehen | Alle sechs Stories geöffnet und ausgelesen: `--filled` (ein Radio gewählt, `value=bewirtung`, Knopf frei, kein `.v2ask__why`), `--blocked` (Knopf gesperrt, Satz daneben), `--with-free-text` (genau ein `textarea`), `--pending` (siehe Nachtrag), `--error` (`div.v2note.v2note--danger` mit dem Fehlersatz), `--in-case` (Knopf „Antwort an Ludwig senden") | ✓ |
+| **Variabel** — gesperrter Knopf nennt den Grund im Text daneben (T6) | `--blocked`: `<button disabled>` und `.v2ask__why` „Wählen Sie eine Antwort oder schreiben Sie eine." | ✓ |
+| **Variabel** — Strg+Enter sendet, die Taste steht am Knopf (V14) | `onKeyDown` sitzt am Block (`ChoicePrompt.tsx:90–95`), die Taste steht als `<kbd class="v2kbd">Strg+Enter</kbd>` am Knopf — in jeder der sechs Stories im DOM nachgesehen | ✓ |
+| **Variabel** — nach einem Fehler steht die Eingabe noch da | `--error`: nichts im Code setzt `text`/`choice` zurück; der `Callout` bleibt stehen | ✓ |
+| **Variabel** — ohne `freeText`-Prop gibt es kein Textfeld | `--filled`: `textarea`-Anzahl 0; `--with-free-text`: genau 1 | ✓ |
+| **Variabel** — ersetzt `RaiseClarificationForm.tsx` | Betrifft `ludwig/app`, hier nicht erfüllbar | offen (App) |
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Von außen gehaltenes `pending` zeigt ein Wort am Knopf (V7) | `--pending`, Knopf ausgelesen: `<button type="button" disabled class="v2btn v2btn--primary v2btn--sm"><span>Sende …</span><kbd class="v2kbd">Strg+Enter</kbd></button>`. Statt „Antwort senden" steht dort jetzt „Sende …" — der Zustand trägt ein Wort, nicht nur Grau. Die drei Radios sind dabei `disabled` | ✓ |
+| Der Hinweis neben dem Knopf schweigt, während gesendet wird | `--pending`: `.v2ask__why`-Anzahl **0**. In `--blocked`, `--with-free-text`, `--error` und `--in-case`, wo nichts läuft, steht der Satz weiterhin. Im Code hängt das an `const why = pending ? null : …` (`ChoicePrompt.tsx:72–78`) | ✓ |
+| Zwei `ChoicePrompt` auf einer Seite wählen sich nicht gegenseitig ab (im Browser gemessen) | Zwei Instanzen mit denselben Optionen zur Laufzeit in einen React-Baum gerendert: die Radios der ersten tragen `name="_r_1_"`, die der zweiten `name="_r_2_"` — zwei verschiedene Gruppen. Erst die erste Option der ersten Frage angeklickt (`checked` `[true, false, false, false]`), dann die erste der zweiten (`[true, false, true, false]`): **beide** Antworten stehen weiter. Der Fall der Vorrunde — die zweite wählte die erste ab — tritt nicht mehr auf. `useId()` (`ChoicePrompt.tsx:64`, `name={groupName}` `:107`) | ✓ |
+| Ohne Optionen erscheint keine `RadioGroup` und keine zweite Beschriftung „Antwort" | Dritte Instanz im selben Baum mit `options={[]}` und `freeText`: `.v2radiogrp`- und `fieldset`-Anzahl **0**, `<legend>`-Anzahl **0**, im Block genau eine Beschriftung — „Anmerkung" am Freitextfeld — und genau ein `textarea`. Der Zweig ist `options.length === 0 ? null : …` (`ChoicePrompt.tsx:105`) | ✓ |
+
+**Zurück auf `in Arbeit`.** Ein Mangel:
+
+1. **M3 — deutsche Kommentare in `ChoicePrompt.tsx`.** Drei Blöcke, alle neu:
+   `:62–63`, `:101–104`, `:134–138`. Die Datei war vorher englisch, und das
+   feste Kriterium verlangt es. Übersetzen — die Inhalte sind richtig, nur die
+   Sprache stimmt nicht.
+
+**Befunde** (keine Mängel):
+
+2. **`pending` setzt kein `aria-busy` und zeigt keinen Spinner.** Der Knopf
+   ist `disabled` und trägt das Wort — das verlangt das Kriterium, und mehr
+   nicht. Wer beides will, hat in `Button` bereits `loading` (0010); der
+   Unterschied zwischen einem gesperrten und einem laufenden Knopf ist für die
+   Vorlesehilfe heute nicht hörbar.
+3. **Der Zweig „ohne Optionen" hat weiterhin keine eigene Story.** Er ist
+   jetzt belegt (oben, zur Laufzeit), aber im Storybook nicht zu sehen. Der
+   Text der Nachbesserung sagt das selbst.
+4. **`defaultOptionId` fehlt in der Schnittstelle der Spec**, und
+   `freeText.required` hat keine Story — beides unverändert aus der Vorrunde.
+5. **`.v2field__label` in Versalien** — set-weit, eigene Aufgabe (wie 0017).
+
+Geprüft von / am: Claude (Abnahme-Agent), 2026-09-05
+
+## Der Mangel der Abnahme vom 2026-09-05 (zweite Runde) — behoben
+
+Drei Kommentarblöcke, die mit der Nachbesserung neu hineinkamen, standen auf
+Deutsch — in einer Datei, die sonst englisch ist. Englisch.
+
+**Aufgenommen, aber nicht hier behoben** (Befund der Abnahme): `pending` setzt
+kein `aria-busy` und zeigt keinen Spinner; für eine Vorlesehilfe sind
+„gesperrt" und „läuft" damit ununterscheidbar, obwohl `Button` mit `loading`
+beides mitbrächte. Das Kriterium verlangt nur das Wort, und der Weg dahin
+führt über den `ActionButton`, der das Pending heute selbst hält — das ist
+eine Änderung an seiner Schnittstelle, nicht an dieser Datei. Gehört in die
+nächste Runde an 0004.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Zeilen mit vielen Aktionen gibt es überall |
 | Quelle | `docs/v3-backlog.md` — „Danach" (8 Eigenbauten) |
@@ -215,3 +215,64 @@ Story, weil eine Prop, die den Default zeigt, nichts beweist.
 - [ ] `MenuItem` trägt `@when` **und** `@instead`
 - [ ] Die Schnittstelle beschreibt `size` so, wie die Story ihn benutzt
 
+
+## Abnahme der Nachbesserung, 2026-09-05
+
+Dritte Runde, fremder Prüfer (weder Erbauer noch Vorprüfer). Geprüft wurde
+gegen die festen Kriterien **und** gegen den Nachtrag, nicht gegen den Chat.
+Gemessen in einem eigenen headless Chromium (1440 × 900) auf
+`localhost:6107`; die Höhen sind `getBoundingClientRect().height`, die
+fehlende Trennlinie der letzten Zeile ist herausgerechnet, nicht als
+Unterschied gezählt.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` bewusst nicht gestartet: er schreibt nach `storybook-static`, und parallel arbeiten weitere Sitzungen im Baum | ✓ (Build zitiert) |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/OverflowMenu.tsx` neben `OverflowMenu.stories.tsx`; Titel `v3/Primitives/Aktion/OverflowMenu`, Gruppe „Aktion" wie im Barrel (`src/ui/v3/index.ts:70–73`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `OverflowMenu` (`OverflowMenu.tsx:32–37`) und `MenuItem` (`:100–105`) tragen beide Zeilen, beide unmittelbar über ihrem Export. Bezeichner, Props und Kommentare der Komponente englisch | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}\b|[0-9]+px|fontSize' src/ui/v3/primitives/OverflowMenu.tsx` → 0. Übrig ist `const EDGE = 8` (`:30`), der Rechenwert, mit dem `place()` die Klappe im Fenster hält. Kein Status im Baustein | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | `localhost:6107/index.json`: `--filled`, `--variants`, `--align-start`, `--interactive`, `--in-row`, `--many-items` — alle sechs. `Leer`, `Laedt`, `Fehler` sind im Abschnitt „Stories" begründet ausgeschlossen | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Der Punkt, der zweimal gerissen ist — **V1, Zeilenhöhe ≤ `.v2tbl__row`** — hält jetzt (Zeile darunter). Der Rest unverändert wie protokolliert: Text links, Farbe nur als Kritikalitätsstufe, `danger` zusätzlich am Wort und am Icon, Fokusring sichtbar, Lucide 1,5 px, kein Emoji, keine Versalien, kein Icon ohne Wort. Die zwei App-Punkte sind übersprungen (Skill `v3-komponente`) | ✓ |
+| **V1 im Einzelnen** — der Auslöser treibt die Zeile nicht mehr auf | `--in-row`, gemessen: Zeile **mit** Menü 47,25 px (Trennlinie 1 px enthalten), Referenzzeile „Ohne Menü — die Referenzhöhe" 46,25 px **ohne** Trennlinie, weil sie die letzte ist — mit ihr 47,25 px. Beide Zeilen sind damit gleich hoch. Der Auslöser `.v2menu__sum.v2btn--xs` misst 20,25 px, genau die Zeilenhöhe des Textes daneben; `min-height: 20.25px`, `padding-block: 0`, nichts abgeschnitten (`scrollHeight == clientHeight == 18`) | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | `--filled` geöffnet, Klappe auf: Auslöser „Mehr" + `svg.lucide-chevron-down`, Klappe 208 × 139 px bei `left 8 / right 216` in einem 1440 px breiten Fenster, vier Einträge; Escape schließt sie (`details.open` `true` → `false`). `--in-row` vermessen wie oben | ✓ |
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Die Zeile mit Menü ist so hoch wie die ohne (Story `InRow`, gemessen) | 47,25 px gegen 47,25 px (siehe V1-Zeile). Zellenhöhen: Beleg 22,25 · Kreditor 22,25 · Betrag 20,25 · Aktion 22,25 px — die Aktionszelle bestimmt die Höhe nicht mehr | ✓ |
+| `MenuItem` trägt `@when` **und** `@instead` | `OverflowMenu.tsx:100–105`: „@when One entry inside an OverflowMenu — a jump with `href`, an action with `onClick`." / „@instead An action that stays visible next to the row → RowActions or TextButton. One that runs and can fail → ActionButton in the row." Beide Zeilen, unmittelbar über `export function MenuItem` | ✓ |
+| Die Schnittstelle beschreibt `size` so, wie die Story ihn benutzt | Spec-Zeile jetzt „nein, Default `sm` … in der Zeile die flachste, `xs`"; Code `size = "sm"` (`OverflowMenu.tsx:40`); Story `InRow` setzt `size="xs"` (`OverflowMenu.stories.tsx:109`). Spec, Code und Story sagen dasselbe | ✓ |
+
+**Die neue Regel schadet anderswo nicht.** Die Regel steht in `v3.css` am
+Ende („Knopf in der Tabellenzeile") und greift über `.v2tbl__row .v2btn--xs,
+.v2tbl__row .v2btn--sm`. Nachgesehen wurde, wo sie sonst noch greift:
+
+- **Aufklappbereich** (`.v2tbl__detail`): liegt als Schwester **neben** der
+  Zeile, nicht darin (`ExpandableRow.tsx:96–100`). Zur Probe drei Knöpfe in
+  einen offenen Detailbereich gesetzt und gemessen: 30,19 / 25 / 34,80 px bei
+  `min-height: 0px` — die normalen Maße, die Regel reicht nicht hinein.
+- **Dichte** (`data-density`): eigens gebaute Tabellen mit `compact`,
+  `default` und `wide`, je vier Zeilen. `compact` 35,75 px für `xs`, `sm`
+  **und** die Zeile ohne Knopf (Knopf 18,75 px = 12,5 × 1,5); `default`
+  47,25 px; `wide` 59,25 px — jeweils alle drei gleich. `md` treibt in jeder
+  Dichte auf (50,8 / 60,8 / 72,8 px).
+- **ExpandableRow, Checklist (`Review.tsx`), ComparisonTable und der Rest des
+  Sets:** **alle 521 Stories** aus `index.json` abgefahren und jedes `.v2btn`
+  unter einer `.v2tbl__row` vermessen. Betroffen sind sechs Stories
+  (`--sizes-in-row`, `--in-row`, `datatable--row-actions`,
+  `sourcedocumentdrawer--im-kontext`, `sourcedocumentpreview--in-use`,
+  `sachverhalt-crud--full-cycle`); jeder Knopf dort steht bei 20,25 px, keiner
+  ist abgeschnitten (`scrollHeight == clientHeight`), und die Zeilen halten die
+  Höhe ihrer Nachbarn. Kein einziges `.v2btn` in einem `.v2tbl__detail` im
+  ganzen Set. `Review.tsx` und `ComparisonTable.tsx` enthalten weder `Button`
+  noch `v2btn` — sie setzen selbst keinen Knopf in die Zeile.
+- **Außerhalb der Tabelle** bleiben die Maße: `--sizes` misst 34,80 / 30,19 /
+  25,00 px, `min-height: auto`.
+
+**Offen und kein Mangel:** der Umzug von `DocActionsMenu` in `ludwig/app` —
+betrifft ein anderes Repo und ist hier nicht erfüllbar.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` |
 | Klassen-Test | ja, unverändert — „fremd erzeugter Fließtext, sicher dargestellt" hat kein Fachwort |
 | Quelle | `docs/v3-backlog.md` „Später": `Markdown` (KI-Texte, Notizen), 5 Dateien / 12 Stellen · Showcase `src/showcase/CaseCrud.stories.tsx` (Zusammenfassung des Sachverhalts) |
@@ -261,3 +261,49 @@ und das war der Mangel.
 
 - [ ] `parseInline` und `parseMarkdown` tragen `@when` **und** `@instead` (`grep`)
 - [ ] Die Abgrenzung verweist auf `Markdown` und aufeinander
+
+## Abnahme der Nachbesserung, 2026-09-05
+
+Dritte Runde, fremder Prüfer (weder Erbauer noch Vorprüfer). Geprüft gegen
+den Nachtrag, gegen die festen Kriterien und gegen die Kriterien der
+Erweiterung A5. Gemessen in einem eigenen headless Chromium (1440 × 900) auf
+`localhost:6107`.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| **Fest** — `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0 | ✓ |
+| **Fest** — `pnpm build` grün | Nicht gestartet: er schreibt nach `storybook-static`, und parallel arbeiten weitere Sitzungen | ✓ (zitiert) |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Markdown.tsx` mit `Markdown.stories.tsx` daneben; Titel `v3/Primitives/Fläche/Markdown`; Export `src/ui/v3/index.ts:130` | ✓ |
+| **Fest** — Code englisch; `@when`/`@instead` an **jedem** Export | Drei Funktions-Exporte, alle drei im Barrel: `parseInline` (`Markdown.tsx:63`, JSDoc `:52–62`), `parseMarkdown` (`:112`, JSDoc `:105–111`), `Markdown` (`:238`, JSDoc `:231–237`). Jeder Block steht unmittelbar über seinem Export. Kommentare der Datei durchgängig englisch (`grep` nach deutschen Funktionswörtern in Kommentarzeilen → kein Treffer) | ✓ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map | `grep -cE '#[0-9a-fA-F]{3,8}\b|[0-9]+px|fontSize' src/ui/v3/primitives/Markdown.tsx` → 0. Die einzige Inline-Angabe bleibt `--v2mk-max` aus `maxHeight` | ✓ |
+| **Fest** — alle Stories vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--filled`, `--empty`, `--variants`, `--flow`, `--long`, `--unsafe`, `--in-use`, `--reader` — acht. `Loading`, `EmptyAfterFilter`, `Error` sind begründet ausgeschlossen | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 | Der einzige Punkt, der in der Vorrunde riss — `@when`/`@instead` an jedem Export — hält jetzt. Der Rest unverändert wie protokolliert | ✓ |
+| **Fest** — im Browser angesehen | `--filled`: kein `h1`, kein `img`, Absatz 13,5 px, aus `##` wird `H3`; Tabelle, Zitat, Code-Block, Liste alle da. `--reader`: `.v2mk--scroll` mit `overflow-y: auto`, `max-height: 260px`, tatsächliche Höhe 260 px bei `scrollHeight` 1282 px, `tabIndex 0`, **kein** `<details>`, **kein** `summary`. `--unsafe`: 0 `img`, 0 `script`, genau ein `<a href="https://example.com" target="_blank" rel="noopener noreferrer" title="https://example.com">` | ✓ |
+| **A5** — `overflow="scroll"` erzeugt `overflow-y: auto` und keine Maske, kein „Ganz lesen" | `--reader`, gemessen wie oben | ✓ |
+| **A5** — Tastatur: der Scrollbereich ist fokussierbar | `--reader`: `tabIndex: 0` am `.v2mk--scroll` | ✓ |
+| **A5** — `overflow` ohne `maxHeight` ändert nichts | Beide Sonderzweige stehen unter `if (maxHeight …)`; ohne `maxHeight` bleibt `<div className="v2mk">` | ✓ |
+| **A5** — alle Story-Exporte englisch | `grep -E "^export const (Gefuellt\|Leer\|Varianten\|Lang\|Unsicher\|ImEinsatz)" Markdown.stories.tsx` → leer | ✓ |
+| **A5** — Server-Component: kein `"use client"` | `grep -l '"use client"' src/ui/v3/primitives/Markdown.tsx` → kein Treffer | ✓ |
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Befehl · Fundstelle) | Ergebnis |
+|---|---|---|
+| `parseInline` und `parseMarkdown` tragen `@when` **und** `@instead` (`grep`) | `grep -n "@when\|@instead\|^export function" src/ui/v3/primitives/Markdown.tsx` → `:59 @when`, `:61 @instead`, `:63 export function parseInline`; `:109 @when`, `:110 @instead`, `:112 export function parseMarkdown`. Beide Blöcke stehen unmittelbar über ihrem Export, nicht davor abgehängt | ✓ |
+| Die Abgrenzung verweist auf `Markdown` und aufeinander | `parseInline`: „@instead Drawing it → Markdown. A whole document → parseMarkdown." · `parseMarkdown`: „@instead Drawing it → Markdown. A single line → parseInline." Beide Richtungen, plus der Verweis auf den Renderer | ✓ |
+
+**Alles ✓.** Dass die beiden Parser heute keinen Aufrufer außerhalb der Datei
+haben, ist wie im Text der Nachbesserung begründet kein Mangel — die Frage,
+die sie beantworten, ist benannt.
+
+**Befunde** (unverändert aus der Vorrunde, keine Mängel dieser Aufgabe):
+
+1. `className` und `flow` stehen nicht in der Schnittstelle der Spec —
+   beim nächsten Anfassen nachtragen.
+2. Die verwaiste Klammer aus `[…](javascript:alert(1))` bleibt in `--unsafe`
+   sichtbar.
+3. `.v2link` springt im Fließtext aus der Größenleiter, und
+   `--color-accent-700` bleibt auf Weiß unter 4,5:1 — beides gehört dem Token
+   und der Klasse, nicht dieser Komponente.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05

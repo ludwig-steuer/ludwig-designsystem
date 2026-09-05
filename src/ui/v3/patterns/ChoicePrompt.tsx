@@ -59,8 +59,8 @@ export function ChoicePrompt({
 }) {
   const [choice, setChoice] = useState<string | null>(defaultOptionId);
   const [text, setText] = useState("");
-  // Zwei Fragen auf einer Seite dürfen sich nicht gegenseitig abwählen — ein
-  // fester `name` verbindet ihre Radios zu einer Gruppe (0028).
+  // Two questions on one page must not deselect each other — a fixed `name`
+  // ties their radios into one group (0028).
   const groupName = useId();
 
   const missingText = Boolean(freeText?.required) && !text.trim();
@@ -131,11 +131,11 @@ export function ChoicePrompt({
           hotkey="Strg+Enter"
           disabled={blocked || pending}
           pendingLabel="Sende …"
-          /* `ActionButton` kennt nur seinen **eigenen** Lauf. Hält der
-             Aufrufer das Pending (Server Action in seiner Hand), bliebe der
-             Knopf sonst grau ohne Wort — genau der Fall, den V7 verbietet.
-             Deshalb trägt die Beschriftung das Wort, wenn `pending` von außen
-             kommt (0028). */
+          /* `ActionButton` only knows its **own** run. When the caller holds
+             the pending state (the server action is in their hand), the button
+             would stay grey without a word — exactly the case V7 forbids. So
+             the label carries the word when `pending` comes from outside
+             (0028). */
           action={async () => {
             await onSubmit({ optionId: choice, text: text.trim() || undefined });
           }}

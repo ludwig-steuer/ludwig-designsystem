@@ -11,7 +11,7 @@ const Cluster = ({ children }: { children: React.ReactNode }) => (
   <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>{children}</div>
 );
 
-/** Vier Rollen. `danger` nur, wo etwas verloren geht — Storno, Löschen. */
+/** Four roles. `danger` only where something is lost — reversal, deletion. */
 export const Variants: Story = {
   render: () => (
     <Cluster>
@@ -38,7 +38,7 @@ export const Sizes: Story = {
   ),
 };
 
-/** Die Taste steht am Knopf, nicht nur im Legende-Overlay (V14). */
+/** The key stands on the button, not only in the legend overlay (V14). */
 export const WithKey: Story = {
   render: () => (
     <Cluster>
@@ -49,7 +49,7 @@ export const WithKey: Story = {
   ),
 };
 
-/** Gesperrt heißt gesperrt — nicht unsichtbar. Der Grund steht daneben. */
+/** Locked means locked — not invisible. The reason stands next to it. */
 export const Disabled: Story = {
   render: () => (
     <Cluster>
@@ -61,7 +61,7 @@ export const Disabled: Story = {
   ),
 };
 
-/** Als Link gerendert — gleiche Optik, echtes Navigationsziel. */
+/** Rendered as a link — same look, a real navigation target. */
 export const AsLink: Story = {
   render: () => (
     <Cluster>
@@ -71,7 +71,7 @@ export const AsLink: Story = {
   ),
 };
 
-/** Icon rechts: der Weg nach vorn, der Chevron am Aufklapper — und einmal beides. */
+/** Icon on the right: the way forward, the chevron on a toggle — and once both. */
 export const IconEnd: Story = {
   render: () => (
     <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", flexWrap: "wrap" }}>
@@ -92,7 +92,7 @@ export const IconEnd: Story = {
   ),
 };
 
-/** Läuft gerade: gesperrt, Spinner — und immer ein Wort daneben (V7). */
+/** Running: locked, spinner — and always a word next to it (V7). */
 export const Loading: Story = {
   render: () => (
     <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", flexWrap: "wrap" }}>
@@ -105,7 +105,7 @@ export const Loading: Story = {
   ),
 };
 
-/** Vollbreit statt größer — so löst Ludwig den Haupt-Knopf einer Anmeldung. */
+/** Full width instead of bigger — how Ludwig solves the main button of a sign-in. */
 export const FullWidth: Story = {
   render: () => (
     <div style={{ maxWidth: 320, display: "grid", gap: "var(--space-2)" }}>

@@ -215,3 +215,89 @@ optional ist → `Button`; eine, die läuft und scheitern kann → `ActionButton
 - [ ] Kein deutscher Kommentar mehr in `Button.tsx` und `Button.stories.tsx` (`grep`)
 - [ ] `KeyButton` trägt `@when` und `@instead`
 
+
+## Abnahme der Nachbesserung, 2026-09-05
+
+Fremder Prüfer, weder Erbauer noch Vorprüfer. Geprüft gegen die festen
+Kriterien und gegen den Nachtrag. Gemessen in einem eigenen headless Chromium
+(1440 × 900) auf `localhost:6107`; die fehlende Trennlinie der letzten Zeile
+ist herausgerechnet, nicht als Unterschied gezählt.
+
+**Fest**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` nicht gestartet: er schreibt nach `storybook-static`, und parallel arbeiten weitere Sitzungen | ✓ (Build zitiert) |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Button.tsx` + `Button.stories.tsx`; Titel `v3/Primitives/Aktion/Button` (`Button.stories.tsx:6`), Gruppe „Aktion" wie im Barrel (`src/ui/v3/index.ts:44–50`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `Button.tsx` ist durchgängig englisch — Dateikopf (`:5–17`), `hotkey` (`:38–42`), `inner` (`:65–71`). `Button` trägt beide Zeilen (`:90–97`), `KeyButton` ebenso (`:153–161`). **`Button.stories.tsx` ist es nicht** — siehe die Nachtrag-Zeile darunter | ✗ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}\b|[0-9]+px|fontSize' src/ui/v3/primitives/Button.tsx` → 0. Die Maße stehen in `v3.css`; kein Status, keine Label-Map im Knopf | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--variants`, `--sizes`, `--with-key`, `--disabled`, `--as-link`, `--icon-end`, `--loading`, `--full-width`, `--sizes-in-row` — neun. `Leer`/`LeerNachFilter` in der Spec begründet ausgeschlossen | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Der Punkt, der gerissen war — **V1** — hält jetzt (Zeile darunter). Der Rest unverändert: kein zentrierter Text, Farbe nur als Kritikalitätsstufe, Fokusring sichtbar, Lucide 1,5 px, kein Icon ohne Wort, keine Versalien. Die zwei App-Punkte übersprungen | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | `--sizes`, `--sizes-in-row`, `--loading`, `--icon-end`, `--full-width` geöffnet und vermessen; alle rendern gestylt | ✓ |
+
+**Variabel (aus der Spec)** — die Punkte, die schon in der Vorrunde ✓ waren,
+sind nachgeprüft und unverändert:
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `loading` sperrt, setzt `aria-busy`, zeigt immer ein Wort (V7) | `--loading`: beide laufenden Knöpfe `disabled`, `aria-busy="true"`, `.v2spin` mit `aria-hidden`, Beschriftung „Speichere …" bzw. „Stapel prüfen" | ✓ |
+| Der Spinner dreht gleichmäßig, der Knopf springt nicht | `--loading`: alle drei Knöpfe 34,8 px, laufend wie ruhend | ✓ |
+| `iconEnd` rechts, Hotkey ganz rechts · `icon` und `iconEnd` zusammen | `--icon-end`: `span` · `svg.lucide-arrow-right` · `kbd.v2kbd`; dritter Knopf `svg.lucide-check` · `span` · `svg.lucide-chevron-down` | ✓ |
+| `fullWidth` zentriert den Inhalt | `--full-width`: beide Knöpfe auf Elternbreite, Inhalt zentriert | ✓ |
+| Die Datei trägt weiterhin kein `"use client"` | `grep -l '"use client"' src/ui/v3/primitives/Button.tsx` → kein Treffer | ✓ |
+| Ersetzt `ConfirmReviewButton.tsx` und das Inline-`padding` in `CaseSummaryEditor.tsx` | Beide liegen in `ludwig/app`, hier nicht erfüllbar | offen (App) |
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Eine Zeile mit `xs`- oder `sm`-Knopf ist so hoch wie eine ohne (Story `SizesInRow`, gemessen) | `--sizes-in-row`, alle drei Zeilen tragen ihre Trennlinie: `xs` **47,25 px**, `sm` **47,25 px**, ohne Knopf **47,25 px**. Zellenhöhen in jeder Zeile 22,25 px; die Knöpfe messen 20,25 px bei `min-height: 20.25px`, `padding-block: 0`, `vertical-align: top` und sind nicht abgeschnitten (`scrollHeight == clientHeight == 18`). Der Vorwurf der Vorrunde (52 / 57,2 gegen 47,3 px) ist erledigt | ✓ |
+| `md` drückt die Zeile weiterhin sichtbar auf (dieselbe Story) | Vierte Zeile: **60,80 px** ohne Trennlinie, weil sie die letzte ist — mit ihr 61,80 px, also 14,55 px über den anderen. Der Knopf ist 34,80 px hoch, `min-height: 0px`, die Aktionszelle 36,80 px. `md` bleibt damit als Zeilen-Größe ausgeschlossen | ✓ |
+| Außerhalb der Tabelle messen die drei Größen unverändert 35 / 30 / 25 px (Story `Sizes`) | `--sizes`, gemessen: `md` **34,80 px**, `sm` **30,19 px**, `xs` **25,00 px**, jeweils `min-height: auto`, Innenabstand 8 / 6 / 4 px. Deckt sich mit dem Nachtrag „Optik an den App-Rahmen nachgezogen" | ✓ |
+| Kein deutscher Kommentar mehr in `Button.tsx` und `Button.stories.tsx` (`grep`) | **Reißt.** `Button.tsx` ist sauber. `Button.stories.tsx` trägt sieben deutsche JSDoc-Zeilen: `:14` „Vier Rollen. `danger` nur, wo etwas verloren geht …", `:41` „Die Taste steht am Knopf …", `:52` „Gesperrt heißt gesperrt …", `:64` „Als Link gerendert …", `:74` „Icon rechts: der Weg nach vorn …", `:95` „Läuft gerade: gesperrt, Spinner …", `:108` „Vollbreit statt größer …". Die drei letzten stehen an Stories, die **diese Aufgabe** angelegt hat (`IconEnd`, `Loading`, `FullWidth`) — es ist also kein Altbestand. Auf Englisch stehen nur `Sizes` (`:26–28`) und `SizesInRow` (`:120–125`), die beiden, die der letzte Durchgang angefasst hat | ✗ |
+| `KeyButton` trägt `@when` und `@instead` | `Button.tsx:153–161`: „@when Action bars where every action has a key." / „@instead A single action whose key is optional → Button. An action that runs, can fail and may need a confirmation → ActionButton." | ✓ |
+
+**Die neue Regel schadet anderswo nicht.** Die Regel steht in `v3.css` am Ende
+(„Knopf in der Tabellenzeile", `.v2tbl__row .v2btn--xs, .v2tbl__row
+.v2btn--sm`). Nachgesehen:
+
+- **Aufklappbereich** (`.v2tbl__detail`) liegt neben der Zeile, nicht darin
+  (`ExpandableRow.tsx:96–100`); drei Knöpfe zur Probe hineingesetzt und
+  gemessen: 30,19 / 25,00 / 34,80 px bei `min-height: 0px` — normale Maße.
+- **Dichte:** eigens gebaute Tabellen mit `compact` / `default` / `wide`.
+  `compact` 35,75 px für `xs`, `sm` und die Zeile ohne Knopf (Knopf 18,75 px =
+  `--v2-row-fs` 12,5 × 1,5); `default` 47,25 px; `wide` 59,25 px — je alle
+  drei gleich. `md` treibt in jeder Dichte auf (50,8 / 60,8 / 72,8 px).
+- **Set-weit:** **alle 521 Stories** aus `index.json` abgefahren, jedes
+  `.v2btn` unter einer `.v2tbl__row` vermessen. Sechs Stories betroffen
+  (`--sizes-in-row`, `overflowmenu--in-row`, `datatable--row-actions`,
+  `sourcedocumentdrawer--im-kontext`, `sourcedocumentpreview--in-use`,
+  `sachverhalt-crud--full-cycle`); jeder Knopf 20,25 px, keiner abgeschnitten,
+  jede Zeile auf der Höhe ihrer Nachbarn. Kein einziges `.v2btn` in einem
+  `.v2tbl__detail` im ganzen Set. `ExpandableRow` erzeugt den Aufklappbereich
+  als Schwester der Zeile; `Review.tsx` und `ComparisonTable.tsx` enthalten
+  weder `Button` noch `v2btn`.
+
+**Zurück auf `in Arbeit`.** Ein Mangel:
+
+1. **Deutsche Story-Kommentare in `Button.stories.tsx`.** Das
+   Nachtrag-Kriterium nennt die Datei ausdrücklich; sieben JSDoc-Blöcke sind
+   noch deutsch (`:14`, `:41`, `:52`, `:64`, `:74`, `:95`, `:108`), drei davon
+   an Stories, die diese Aufgabe selbst angelegt hat. Übersetzen — der Rest
+   der Datei steht bereits auf Englisch.
+
+**Befund** (kein Mangel dieser Aufgabe): deutsche Story-JSDoc gibt es
+set-weit, auch in `OverflowMenu.stories.tsx`, `FileDrop.stories.tsx`,
+`Markdown.stories.tsx` und `ChoicePrompt.stories.tsx`. Nur hier steht die
+Datei namentlich in einem Kriterium; für die übrigen gehört das in eine eigene
+Aufgabe.
+
+Geprüft von / am: Claude (Abnahme-Agent), 2026-09-05
+
+## Der Mangel der Abnahme vom 2026-09-05 (zweite Runde) — behoben
+
+Sieben deutsche JSDoc-Blöcke in `Button.stories.tsx` (`Variants`, `WithKey`,
+`Disabled`, `AsLink`, `IconEnd`, `Loading`, `FullWidth`) stehen auf Englisch.
+Drei davon gehören zu Stories, die diese Aufgabe selbst angelegt hat; das
+Nachtrag-Kriterium nennt die Datei ausdrücklich. Deutsch bleibt, was im Bild
+steht: die Beschriftungen der Knöpfe.

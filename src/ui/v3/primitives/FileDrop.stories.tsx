@@ -63,13 +63,21 @@ export const Uploading: Story = {
   ),
 };
 
-/** Abgelehnt wird mit Grund — und die übrigen Dateien kommen trotzdem an. */
+/**
+ * Abgelehnt wird mit Grund — und die übrigen Dateien kommen trotzdem an.
+ *
+ * Die Sätze stehen hier als `error` an den Dateien, weil eine statische Story
+ * nichts fallen lassen kann; wörtlich dieselben erzeugt `rejectionReason` beim
+ * echten Ablegen. Kein MIME-Ausdruck: die Zeile nennt die **Endung**, die
+ * gerade versucht wurde, und den Hinweis mit den erlaubten (0021).
+ */
 export const Rejected: Story = {
   render: () => (
     <div style={{ maxWidth: 460 }}>
       <FileDrop
         label="Belege hochladen"
         hint="PDF, JPG oder PNG, höchstens 20 MB je Datei"
+        accept=".pdf,image/*"
         maxSizeMb={20}
         onFiles={() => {}}
         onRemove={() => {}}
@@ -85,7 +93,8 @@ export const Rejected: Story = {
             id: "3",
             name: "buchungen.xlsx",
             size: 22_400,
-            error: "Format nicht vorgesehen — PDF, JPG oder PNG.",
+            error:
+              "XLSX-Dateien nehmen wir hier nicht — erlaubt ist: PDF, JPG oder PNG, höchstens 20 MB je Datei.",
           },
         ]}
       />
