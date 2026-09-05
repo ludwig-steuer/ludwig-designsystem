@@ -140,3 +140,61 @@ Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: keine.
 Anmerkung ohne Folgen für die Abnahme: `AccountFilterForm` hat in seiner zweiten
 Zeile eine eigene rechtsbündige Gruppe (flach/gruppiert); `.v2fbar__end` gibt es
 einmal, diese Gruppe liefe beim Umbau als gewöhnliches `children` mit.
+
+### Dritte Abnahme am 2026-09-05 — gegen die wiederhergestellten Kriterien
+
+Der Commit `64fbe27` hatte „Abnahmekriterien" und „Offene Fragen" gelöscht und
+gleichzeitig die Abnahme-Tabelle eingetragen; die Abnahme vom 2026-09-03 lief
+damit gegen eine Liste, die zu dem Zeitpunkt nicht mehr im Dokument stand.
+`e6eae99` hat beide Abschnitte zurückgeholt. **Die Wiederherstellung ist
+vollständig:** `diff <(git show 64fbe27^:docs/backlog/0003-filterbar.md) docs/backlog/0003-filterbar.md`
+zeigt im Block von „## Abnahmekriterien" bis „## Abnahme" nur eine zusätzliche
+Leerzeile, sonst kein Zeichen Unterschied. Nichts nachzuholen.
+
+Diese Runde nimmt die frühere Abnahme nicht als gegeben, sondern prüft jedes
+Kriterium noch einmal — fest **und** variabel, je eine Zeile. Die alte Tabelle
+bleibt darüber stehen.
+
+**Story-Deckung.** Fünf Stories in der Spec, fünf Exporte in
+`FilterBar.stories.tsx` (`Filled`, `Active`, `ServerForm`, `ManyFields`,
+`InUse`), fünf IDs in `/index.json` — die Ableitung „2 Zustände + 0 Enum-Props
++ 0 Layout-Booleans + 1 Callback + 1 im Einsatz + 1 Rand = 5" geht auf. Jede
+Prop hat ihre Story: `children` in `Filled`, `activeCount` und `onReset` in
+`Active`, `resetHref` und `submitLabel` in `ServerForm`. Ausgeschlossen und
+begründet: `Laedt`, `Fehler`. `Leer` nennt die Spec nicht ausdrücklich unter
+den Ausschlüssen — eine Filterzeile ohne Felder ist ein Programmierfehler, und
+„leer nach Filter" zeigt `InUse` mit `EmptyState`.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| **Fest** · `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0 — am Anfang und am Ende dieser Abnahme gelaufen | ✓ |
+| **Fest** · `pnpm build` grün | nicht neu gelaufen: parallele Sitzungen schreiben nach `storybook-static`. Der Lauf für diesen Stand war grün — „Storybook build completed successfully" | ✓ |
+| **Fest** · Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/FilterBar.tsx` mit einem Export, `FilterBar.stories.tsx` daneben; Titel `v3/Primitives/Navigation/FilterBar` (`FilterBar.stories.tsx:10`) deckt sich mit der Barrel-Gruppe „Navigation" (`src/ui/v3/index.ts:80` … `:91`) | ✓ |
+| **Fest** · Code englisch; `@when`/`@instead` am Export | `FilterBar.tsx:16` und `:18`; Bezeichner (`activeCount`, `onReset`, `resetHref`, `submitLabel`, `active`), Kommentare und JSDoc englisch. Deutsch nur in den sichtbaren Strings „Filter gesetzt" (`:49`) und „Zurücksetzen" (`:54`, `:59`) | ✓ |
+| **Fest** · Kein Hex, kein px, keine lokale Label-Map, Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}' FilterBar.tsx` = 0; `grep -cE '[0-9]+px\|fontSize' FilterBar.tsx` = 0; keine Map, kein Status-Text — Maße stehen in `v3.css:1878–1883` | ✓ |
+| **Fest** · Alle Stories vorhanden; ausgeschlossene Zustände begründet | `/index.json`: `--filled`, `--active`, `--server-form`, `--many-fields`, `--in-use`; `Laedt` und `Fehler` in der Spec begründet (siehe Story-Deckung oben) | ✓ |
+| **Fest** · Prüfliste `design-guidelines.md` §9 durchgegangen | siehe die Zeilen dieser Tabelle (Kontrast, Fokus, Hover, Text links, keine Versalien, Rand-oder-Schatten); die zwei App-Punkte („ersetzt ihr v1-Gegenstück", „in §11 auf v2 gesetzt") nach `backlog/README.md` übersprungen. Versalien: `FilterBar` selbst schreibt keine Beschriftung — `.v2field__label` kommt aus `Field`, der set-weite Befund läuft unter 0089 | ✓ |
+| **Fest** · Im Browser angesehen, nicht nur gebaut | Alle fünf IDs am 2026-09-05 auf `localhost:6107` geöffnet, gemessen und bedient (Zurücksetzen geklickt) | ✓ |
+| **Variabel** · `activeCount > 0` zeigt ein Wort, nicht nur Farbe (V7) | `--active`: `.v2fbar__count` = „3 Filter gesetzt", Farbe `rgb(92,92,92)` (Kontrast 6,17:1 gegen `rgb(244,246,248)`) — die Farbe trägt nichts, das Wort alles. Klick auf „Zurücksetzen" leert `.v2fbar__end` (0 Kinder), der Satz darunter wechselt von „3 Filter wirken." auf „Alles sichtbar." | ✓ |
+| **Variabel** · Ohne `onReset` und `resetHref` erscheint kein Zurücksetzen | `--filled`: `.v2fbar__end.innerHTML` ist der leere String, 0 Kinder, kein `button`, kein `a`. Im Code sind beide Zweige doppelt bewacht (`FilterBar.tsx:52` und `:57`) — auch bei `activeCount > 0` ohne die Props erscheint nichts | ✓ |
+| **Variabel** · Ohne `submitLabel` erscheint kein Anwenden-Knopf | `--filled`: `button[type=submit]` 0×. `--server-form`: genau einer, beschriftet „Filtern"; Reihenfolge in `.v2fbar__end` = Knopf · Zähler · `a.v2link--quiet` „Zurücksetzen" | ✓ |
+| **Variabel** · Sieben Felder brechen um, das Zurücksetzen bleibt am Ende | `--many-fields` (Browser, 1200 px Fenster, Story-Rahmen 720 px): 7 `.v2field`; Umbruch in zwei Zeilen (Oberkanten ≈16–20 px: Kreditor, Belegdatum ab, Belegdatum bis, Konto — ≈85–87 px: Betrag ab, Status, Suche), `.v2fbar__end` steht darunter rechtsbündig (`right` = 736 px = rechte Kante des Rahmens) mit „5 Filter gesetzt · Zurücksetzen" | ✓ |
+| **Variabel** · Weder `next/navigation` noch etwas aus `@/ludwig` importiert | `grep -n "^import" src/ui/v3/primitives/FilterBar.tsx` → vier Zeilen: `react` (nur `type ReactNode`), `./Button`, `./Link`, `./TextButton`. Kein Router, kein Domänen-Typ, kein Zustand | ✓ |
+| **Variabel** · Ersetzt die Formularzeile von `AccountFilterForm` ohne Funktionsverlust | `AccountFilterForm.tsx` liegt in `ludwig/app` (`apps/web/src/modules/accounts/ui/`); dort gibt es kein `src/ui/v3`, `apps/web/src/ui/` führt `v2`, und kein `FilterBar`-Import. Nach `backlog/README.md` ein Kriterium der App — die Abnahme vom 2026-09-03 hatte es als ✓ geführt, was der Hausregel widerspricht | offen (App) |
+
+**Zwei Anmerkungen ohne Folge für die Abnahme.**
+
+1. `InUse` baut seine Beispieltabelle mit rohen `<th>`/`<td>` in `HeadRow`/`Row`
+   (`FilterBar.stories.tsx:123–127`, `:141–150`); beide rendern `div`. React
+   meldet dafür in der Konsole „In HTML, `<th>` cannot be a child of `<div>`".
+   Die anderen vier Stories sind konsolenrein. Es trifft die Beispieldaten der
+   Story, nicht die Komponente, und dieselbe Stelle steht so auch in
+   `DateField.stories.tsx:166–168`; die Hausregeln kennen dazu kein Kriterium.
+   Das Set schreibt sonst `<span>` (z. B. `patterns/StatusHeader.stories.tsx:36`).
+2. Der Baustein hat inzwischen eine Aufrufstelle im Set:
+   `patterns/LogBrowser.tsx:142`. Er steht nicht mehr allein neben seinen
+   eigenen Stories.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · zweite Prüfung gegen
+die wiederhergestellten Kriterien · Offene Punkte: nur „offen (App)" — die
+Ablösung der Formularzeile von `AccountFilterForm` in `ludwig/app`.

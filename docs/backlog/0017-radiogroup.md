@@ -154,3 +154,73 @@ ausgeschlossen.
    trägt. Hier: Befund, kein Mangel.
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: nur „offen (App)" — die Umstellung der drei rohen Radios in `ludwig/app`. Die Versalien der Feldbeschriftung laufen als Befund unter 0089.
+
+### Dritte Abnahme am 2026-09-05 — gegen die wiederhergestellten Kriterien
+
+Der Commit `64fbe27` hatte „Abnahmekriterien" und „Offene Fragen" gelöscht und
+zugleich die Abnahme-Tabelle eingetragen; die Abnahmen danach liefen gegen eine
+Liste, die zu dem Zeitpunkt nicht im Dokument stand. `e6eae99` hat beide
+Abschnitte zurückgeholt. **Die Wiederherstellung ist vollständig:**
+`diff <(git show 64fbe27^:docs/backlog/0017-radiogroup.md) docs/backlog/0017-radiogroup.md`
+zeigt im Block von „## Abnahmekriterien" bis „## Abnahme" nur eine zusätzliche
+Leerzeile, sonst kein Zeichen Unterschied. Nichts nachzuholen.
+
+Diese Runde übernimmt die Tabelle darüber nicht, sondern bedient und misst
+jedes Kriterium noch einmal selbst. Die alte Tabelle bleibt unberührt stehen.
+
+**Story-Deckung, unabhängig nachgezählt.** Fünf Stories in der Spec, fünf
+Exporte in `RadioGroup.stories.tsx` (`Filled:21`, `Orientations:33`,
+`Invalid:64`, `Interactive:81`, `InForm:96`), fünf IDs in `/index.json` — die
+Ableitung „2 Zustände + 1 Enum + 1 Callback + 1 im Einsatz = 5" geht auf. Jede
+Prop hat ihre Story: `name`/`label`/`options` in `Filled`, `value`/`onChange`
+in `Interactive`, `orientation` und `disabled` in `Orientations`, `error` und
+`required` in `Invalid`. `Leer`, `LeerNachFilter` und `Laedt` sind begründet
+ausgeschlossen.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| **Fest** · `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0 — am Anfang und am Ende dieser Abnahme gelaufen | ✓ |
+| **Fest** · `pnpm build` grün | nicht neu gelaufen: parallele Sitzungen schreiben nach `storybook-static`. Der Lauf für diesen Stand war grün — „Storybook build completed successfully" | ✓ |
+| **Fest** · Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/RadioGroup.tsx` mit einem Export plus dem Typ `RadioOption`, `RadioGroup.stories.tsx` daneben; Titel `v3/Primitives/Formular/RadioGroup` (`RadioGroup.stories.tsx:8`) deckt sich mit der Barrel-Gruppe „Formular" (`src/ui/v3/index.ts:102` … `:104`) | ✓ |
+| **Fest** · Code englisch; `@when`/`@instead` am Export | `RadioGroup.tsx:24` und `:26`; Bezeichner (`RadioOption`, `options`, `orientation`, `off`), Kommentare und JSDoc englisch. Deutsch nur in den sichtbaren Strings der Stories. `@instead` grenzt gegen `Segmented`, `Select`, `Checkbox` und `ChoicePrompt` ab | ✓ |
+| **Fest** · Kein Hex, kein px, keine lokale Label-Map, Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}' RadioGroup.tsx` = 0; `grep -cE '[0-9]+px\|fontSize' RadioGroup.tsx` = 0; kein `style`-Attribut, keine Map, kein Status. Alle Maße in `v3.css:1708–1727` | ✓ |
+| **Fest** · Alle Stories vorhanden; ausgeschlossene Zustände begründet | `/index.json`: `--filled`, `--orientations`, `--invalid`, `--interactive`, `--in-form`; die drei Ausschlüsse stehen begründet in der Spec | ✓ |
+| **Fest** · Prüfliste `design-guidelines.md` §9 durchgegangen | siehe die Zeilen dieser Tabelle und die Zusatzmessungen darunter (Kontrast, Fokusring, Hover, Tastatur, Text links, kein px/Hex); die zwei App-Punkte nach `backlog/README.md` übersprungen. Der eine Verstoß — Versalien in der `<legend>` — trifft jede Feldbeschriftung des Sets und läuft als eigene Aufgabe 0089, siehe unten | ✓ |
+| **Fest** · Im Browser angesehen, nicht nur gebaut | Alle fünf IDs am 2026-09-05 auf `localhost:6107` geöffnet **und bedient**: Pfeiltasten in `--filled`, Klick auf den Hinweistext in `--filled`, Klick in `--interactive`, Tab-Eintritt aus dem `Input` in `--in-form`. Keine Konsolenmeldung in allen fünf | ✓ |
+| **Variabel** · Pfeiltasten wandern durch die Optionen, Tab springt aus der Gruppe | `--filled`, Tastaturprobe: Ausgang „Nur ungeprüfte" (`open`) gewählt. Fokus auf `flagged` → **Pfeil-hoch** → `document.activeElement.value` = `open`; **Pfeil-runter** → `activeElement.value` = `flagged` und `checked` wandert von Index 1 auf 2 — Fokus **und** Auswahl, wie bei nativen Radios. **Tab** danach → `document.activeElement` ist `BODY`, `closest('.v2radiogrp')` = `null`: die Gruppe ist verlassen, nicht durchlaufen. `RadioGroup.tsx` hat keinen eigenen `onKeyDown` — das leistet der Browser | ✓ |
+| **Variabel** · `fieldset`/`legend` im DOM, `aria-invalid` bei `error` | `--invalid`, DOM-Probe: `FIELDSET.v2radiogrp` mit `aria-invalid="true"`; `<legend class="v2field__label">Umfang des Exports *</legend>`. Ohne `error` (`--filled`) fehlt das Attribut, es wird nicht auf `false` gesetzt (`RadioGroup.tsx:55`) | ✓ |
+| **Variabel** · Die ganze Optionszeile ist klickbar und antwortet auf Hover (§2) | `--filled`: `label.v2radioline` misst 420 × 51 px, `cursor: pointer`. Echter Klick auf den **Hinweistext** der dritten Option („3 Sätze, zwei über 1.000,00 €") wählt sie (`checked` Index 2, `activeElement.value` = `flagged`). Hover über die erste Zeile schaltet `background-color` von `rgba(0,0,0,0)` auf `rgb(244,246,248)` (`v3.css:1719`); die gesperrte Zeile bleibt ohne Antwort (`v3.css:1721`) | ✓ |
+| **Variabel** · Fehler steht als Text, nicht nur als Farbe (V7) | `--invalid`: `.v2field__err` trägt den Satz „Bitte wählen Sie einen Umfang, bevor der Export startet." unter der Gruppe, `color rgb(168,64,60)` (Kontrast 5,6:1 gegen `rgb(244,246,248)`). Der Rand der Optionszeilen bleibt unverändert `rgb(229,231,235)` bei Breite 0 — nichts wird rot umrandet, die Farbe ist nicht der einzige Träger | ✓ |
+| **Variabel** · Ersetzt die drei `type="radio"` in `DatevExportWizard.tsx` und `BatchActions.tsx` | Beide Dateien liegen in `ludwig/app`; dort gibt es kein `src/ui/v3` (`apps/web/src/ui/` führt `v2`) und keinen `RadioGroup`-Import. Nach `backlog/README.md` ein Kriterium der App | offen (App) |
+
+**Was diese Runde zusätzlich gemessen hat** (keine eigenen Kriterien, aber §9):
+
+| Beobachtung | Nachweis |
+|---|---|
+| Fokusring sichtbar (V10) | `--in-form`: Fokus per **Tab** aus dem `Input` in die Gruppe → `activeElement.matches(':focus-visible')` = `true`, `outline: rgb(59,143,196) solid 2px`, `outline-offset: 2px`. Der Ring kommt aus der globalen Regel `src/styles/tokens.css:360`; `v3.css` hat bewusst keine eigene `.v2radio:focus`-Regel. **Wichtig für Nachprüfer:** mit programmatischem `element.focus()` greift `:focus-visible` nicht, dann misst man `outline-style: none` — nur die Tastaturprobe ist aussagekräftig |
+| Kontrast ≥ 4,5:1 | gegen den Seitengrund `rgb(244,246,248)`: Optionstext `rgb(45,45,45)` = 12,7:1 · Legende `rgb(92,92,92)` = 6,2:1 · Hinweis `rgb(113,113,113)` = 4,5:1 · Fehlertext `rgb(168,64,60)` = 5,6:1 |
+| `orientation="horizontal"` und `disabled` | `--orientations`: „Betragsbasis" mit Netto/Brutto als `.v2radiogrp--horizontal`, `flex-direction: row`; darunter „Umfang, gesperrt" mit `fieldset.disabled = true`, Zeilen mit `opacity 0.5` und `cursor: not-allowed` |
+| Rundlauf über `onChange` | `--interactive`: Klick auf „Alle Sätze des Stapels" schreibt die Zeile darunter von „Gewählt: noch nichts" auf „Gewählt: all" |
+| Gleicher Rhythmus wie `Field`/`Input` (I6) | `--in-form`: das Raster misst `gap: 16px`; die Beschriftung des `Field` darüber und die `<legend>` der Gruppe sind stilgleich (`11px / 600`) |
+| Text links, nichts zentriert (V3) | `grep -c "textAlign" RadioGroup.tsx` = 0; im Block `v3.css:1708–1727` keine `text-align`-Regel |
+| Aufrufstellen im Set | `patterns/ChoicePrompt.tsx:98`, `entities/clarification/ClarificationEditor.tsx:122`, `:177`, `:187` |
+
+**Zur Versalien-Frage, noch einmal selbst nachgesehen.** `.v2field__label`
+(`src/styles/v3.css:855–858`) setzt `text-transform: uppercase`; die `<legend>`
+erbt es, im Browser steht in `--filled` und `--invalid` „UMFANG DES EXPORTS",
+obwohl im DOM „Umfang des Exports" steht. Das verstößt gegen T3/A2, trifft aber
+jede Feldbeschriftung des Sets, nicht die Radiogruppe — sie schreibt die Klasse
+nur an, wie `Field` es auch tut. Die Aufgabe dazu gibt es:
+`docs/backlog/0089-feldbeschriftung-ohne-versalien.md`, Status `offen`. Hier
+bleibt es Befund, kein Mangel.
+
+**Eine Korrektur an der Formulierung der zweiten Abnahme.** Dort steht „Nur ein
+Radio der Gruppe ist tabbierbar (`tabbableInGroup: 1`)". Gemessen tragen alle
+drei `input`-Elemente `tabIndex = 0`; die Tab-Reihenfolge macht der Browser
+über die Auswahl, nicht über das Attribut. Das **Verhalten** — Tab verlässt die
+Gruppe — ist oben eigens nachgewiesen; nur die Zahl war eine Fehlablesung.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · zweite Prüfung gegen
+die wiederhergestellten Kriterien · Offene Punkte: nur „offen (App)" — die
+Umstellung der drei rohen Radios in `ludwig/app`. Die Versalien der
+Feldbeschriftung laufen als Befund unter 0089.

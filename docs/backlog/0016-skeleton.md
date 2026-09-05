@@ -137,3 +137,55 @@ sehen konnte: der Baustein hat inzwischen **vier Aufrufstellen im Set** —
 neben seinen eigenen Stories.
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: nur „offen (App)" — die Ablösung der drei handgebauten Platzhalter passiert in `ludwig/app`.
+
+### Dritte Abnahme am 2026-09-05 — gegen die wiederhergestellten Kriterien
+
+Der Commit `64fbe27` hatte „Abnahmekriterien" und „Offene Fragen" gelöscht und
+zugleich die Abnahme-Tabelle eingetragen; die Abnahmen danach liefen gegen eine
+Liste, die zu dem Zeitpunkt nicht im Dokument stand. `e6eae99` hat beide
+Abschnitte zurückgeholt. **Die Wiederherstellung ist vollständig:**
+`diff <(git show 64fbe27^:docs/backlog/0016-skeleton.md) docs/backlog/0016-skeleton.md`
+zeigt im Block von „## Abnahmekriterien" bis „## Abnahme" nur eine zusätzliche
+Leerzeile, sonst kein Zeichen Unterschied. Nichts nachzuholen.
+
+Diese Runde übernimmt die Tabelle darüber nicht, sondern misst jedes Kriterium
+noch einmal selbst. Die alte Tabelle bleibt unberührt stehen.
+
+**Story-Deckung, unabhängig nachgezählt.** Drei Stories in der Spec, drei
+Exporte in `Skeleton.stories.tsx` (`Lines:10`, `Variants:19`, `InCard:39`),
+drei IDs in `/index.json` (`--lines`, `--variants`, `--in-card`) — die
+Ableitung „1 Zustand + 1 Enum + 0 Callbacks + 1 im Einsatz = 3" geht auf. Jede
+Prop hat ihre Story: `variant` in `Variants`, `lines` in `Lines` (`lines={4}`)
+und `InCard` (`lines={3}`), `label` in `Lines` und `InCard`. `Gefuellt`,
+`Leer`, `LeerNachFilter`, `Fehler` sind begründet ausgeschlossen — die
+Komponente **ist** der Ladezustand.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| **Fest** · `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0 — am Anfang und am Ende dieser Abnahme gelaufen | ✓ |
+| **Fest** · `pnpm build` grün | nicht neu gelaufen: parallele Sitzungen schreiben nach `storybook-static`. Der Lauf für diesen Stand war grün — „Storybook build completed successfully" | ✓ |
+| **Fest** · Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Skeleton.tsx` mit einem Export, `Skeleton.stories.tsx` daneben; Titel `v3/Primitives/Fläche/Skeleton` (`Skeleton.stories.tsx:5`) deckt sich mit der Barrel-Gruppe „Fläche" (`src/ui/v3/index.ts:117` … `:129`) | ✓ |
+| **Fest** · Code englisch; `@when`/`@instead` am Export | `Skeleton.tsx:15` und `:16`; Bezeichner (`SkeletonVariant`, `LINE_WIDTHS`, `variant`, `lines`, `label`), Kommentare und JSDoc englisch. Deutsch nur im sichtbaren Default „Wird geladen …" (`:22`) | ✓ |
+| **Fest** · Kein Hex, kein px, keine lokale Label-Map, Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}' Skeleton.tsx` = 0; `grep -cE '[0-9]+px\|fontSize' Skeleton.tsx` = 0 (das einzige `style` ist `width` in Prozent aus `LINE_WIDTHS`); keine Map, kein Status | ✓ |
+| **Fest** · Alle Stories vorhanden; ausgeschlossene Zustände begründet | `/index.json`: `v3-primitives-fläche-skeleton--lines`, `--variants`, `--in-card`; die vier Ausschlüsse stehen begründet in der Spec | ✓ |
+| **Fest** · Prüfliste `design-guidelines.md` §9 durchgegangen | siehe die Zeilen dieser Tabelle (Bewegung/`prefers-reduced-motion`, kein Hover ohne Klickfläche, Rand-oder-Schatten, kein px/Hex, Text links); die zwei App-Punkte nach `backlog/README.md` übersprungen. Versalien: die Komponente schreibt keine Beschriftung an | ✓ |
+| **Fest** · Im Browser angesehen, nicht nur gebaut | Alle drei IDs am 2026-09-05 auf `localhost:6107` geöffnet und vermessen; keine Konsolenmeldung in allen dreien | ✓ |
+| **Variabel** · Nutzt `.v2skel`, definiert keine zweite Ladefläche | `v3.css:980–985` trägt Höhe, Radius, Fläche und den Puls `v2pulse`; `v3.css:1660–1662` ergänzt nur `.v2skelgroup` (Raster) und die zwei Höhen-Modifier `--card`/`--field`. Kein zweiter Ladestil, keine zweite Animation. Im DOM messbar: `--lines` und die Tabellen-Zeilen von `TableLoading` tragen dieselbe Klasse | ✓ |
+| **Variabel** · `variant="card"` hält die Höhe einer echten Karte, ohne die Seite springen zu lassen (V12) | `--in-card` im Browser: `.v2skel--card` misst **96 px** hoch, `border-radius` 4 px; die Karte „Kennzahlen" ist damit 188 px hoch, während der Kartenkopf schon steht. Die Höhe ist fest verdrahtet (`v3.css:1661`) und hängt nicht von den Daten ab — daher kein Sprung beim Eintreffen | ✓ |
+| **Variabel** · Genau ein `sr-only`-Satz je Skeleton, die Flächen sind `aria-hidden` | `--lines`, DOM-Probe: genau **1** `.sr-only` („Sachverhalt wird geladen …", 1×1 px, `position: absolute`), vier `.v2skel` alle mit `aria-hidden="true"`. `--in-card`: zwei Skeletons → zwei Sätze („Offene Posten werden geladen …", „Wird geladen …"). `--variants`: drei Gruppen → drei Sätze | ✓ |
+| **Variabel** · Die `@when`-Zeile grenzt gegen `TableLoading` ab | `Skeleton.tsx:15–17`: `@when` nennt Karte, Detailfläche, Formularfeld; `@instead` „Rows inside a table → TableLoading. Nothing there at all → EmptyState. Loading failed → ErrorRow." — die Abgrenzung steht als erster Satz | ✓ |
+| **Variabel** · Ersetzt den handgebauten Platzhalter in mindestens einem der drei Fundorte | Die drei Fundorte liegen in `ludwig/app`; dort gibt es kein `src/ui/v3` (`apps/web/src/ui/` führt `v2`) und keinen `Skeleton`-Import aus dem Set. Nach `backlog/README.md` ein Kriterium der App | offen (App) |
+
+**Was diese Runde zusätzlich gemessen hat** (keine eigenen Kriterien, aber §9):
+
+| Beobachtung | Nachweis |
+|---|---|
+| Bewegung respektiert `prefers-reduced-motion` | Browser mit `reducedMotion: reduce`: `matchMedia('(prefers-reduced-motion: reduce)').matches` = `true`, `getComputedStyle('.v2skel').animationName` = **`none`**. Ohne die Einstellung: `v2pulse`. Die Regel steht in `v3.css:986` |
+| Kein Hover, kein Fokus — die Fläche ist nicht klickbar (§2) | `--lines`: 0 fokussierbare Elemente (`[tabindex]`, `button`, `a`) im Story-Baum; im geladenen CSS keine einzige `:hover`- oder `:focus`-Regel auf `.v2skel*` |
+| Zeilen ungleich breit — kein Streifenmuster | `--lines`, gemessene Breiten 420 / 352,8 / 260,4 / 382,2 px aus `100% / 84% / 62% / 91%`. Feste Reihenfolge (`LINE_WIDTHS`, `Skeleton.tsx:12`), kein Zufall — eine Server-Component muss zweimal dasselbe Markup liefern |
+| Karte: Rand **oder** Schatten (L2) | `--in-card`: beide `.v2card` mit `border: 1px solid rgb(221,226,232)` und `box-shadow: none` |
+| Aufrufstellen im Set | `patterns/Timeline.tsx:119`, `patterns/Log.tsx:139`, `entities/source-document/SourceDocumentDrawer.tsx:161`, `entities/account/AccountDrawer.tsx:144` — der Baustein steht nicht mehr allein neben seinen Stories |
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · zweite Prüfung gegen
+die wiederhergestellten Kriterien · Offene Punkte: nur „offen (App)" — die
+Ablösung der drei handgebauten Platzhalter in `ludwig/app`.

@@ -158,3 +158,62 @@ Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05
 Erste Runde (2026-09-03, Historie): ✗ an der App-Umstellung, dazu `parseAmount`
 ohne `@when`/`@instead` und die Versalien am Label. Nachgeprüft: `parseAmount`
 hat beide Zeilen.
+
+---
+
+**Nachprüfung, 2026-09-05 — gegen die wiederhergestellten Kriterien** (dritter
+Agent, weder Erbauer noch Vorprüfer). Grund: `64fbe27` hat in zwölf Specs die
+Abschnitte „Abnahmekriterien" und „Offene Fragen" **gelöscht** und zugleich die
+Abnahme-Tabelle eingetragen. Die Abnahme oben fiel damit gegen eine Liste, die
+im Dokument gar nicht mehr stand. `e6eae99` hat beide Abschnitte aus `64fbe27^`
+zurückgeholt; diese Runde prüft jedes Kriterium noch einmal am Code und im
+Browser und übernimmt das frühere Ergebnis nicht.
+
+**Wiederherstellung geprüft:**
+`diff <(git show 64fbe27^:docs/backlog/0019-amount-input.md) docs/backlog/0019-amount-input.md`
+— in „Abnahmekriterien" und „Offene Fragen" genau eine Abweichung, eine
+zusätzliche Leerzeile vor „## Offene Fragen". Sieben feste Kriterien, sechs
+variable und beide offenen Fragen stehen wortgleich wieder da. Nichts fehlt,
+nichts nachzuholen.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| **Fest** — `pnpm typecheck` grün | Zu Beginn dieser Runde: `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. Der Lauf am Ende meldet zwei Fehler, beide in `src/ui/v3/patterns/entity-icons.ts` (fehlende Achsen `zahlungsweg`, `mandant_betrieb` … gegenüber `Record<StatusAxis, string>`). Sie stammen aus einer **fremden, parallel laufenden Sitzung**, die die Status-Registry erweitert (`git diff --stat HEAD -- src/ludwig/ui/status/status-registry.ts` → 86 neue Zeilen; `src/ui/v3/patterns/status-registry.ts` steht als gelöscht im Index). `AmountInput.tsx` ist im Arbeitsbaum unverändert (`git status --porcelain` → leer) und kommt in keiner Fehlerzeile vor | ✓ (für diese Aufgabe; der offene Fehler gehört einer anderen Sitzung) |
+| **Fest** — `pnpm build` grün | Nicht erneut gelaufen: parallel laufen weitere Sitzungen, und der Build schreibt nach `storybook-static`. Zitiert wird der Lauf für diesen Stand, der grün war („Storybook build completed successfully") | ✓ (zitiert) |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/AmountInput.tsx`, daneben `AmountInput.stories.tsx`; Titel `v3/Primitives/Formular/AmountInput` (`AmountInput.stories.tsx:6`); Export `src/ui/v3/index.ts:105`. `curl -s localhost:6107/index.json` führt alle sechs Einträge unter diesem Titel | ✓ |
+| **Fest** — Code englisch; `@when`/`@instead` an jedem Export | Drei Exporte. `parseAmount` trägt beide Zeilen (`AmountInput.tsx:25–28`), `AmountInput` ebenfalls (`:58–59`). Der dritte ist der Typ `ParsedAmount` (`:17`) ohne die Zeilen — das ist die Konvention des ganzen Sets, nicht eine Lücke dieser Datei: Stichprobe `Badge.tsx`, `Toast.tsx`, `Combobox.tsx` → je 0 `@when` über einem `export type`. Bezeichner, Props, Kommentare englisch; deutsch nur in den zwei Nutzer-Strings (`:98`, `:102`) | ✓ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}\|[0-9]+px\|fontSize:' src/ui/v3/primitives/AmountInput.tsx` → keine Treffer. Maße in `v3.css:1731` (`.v2in--sm`) und `:1732` (`.v2in--amount`); Zeilennummern nach heutigem Arbeitsstand, `v3.css` wird parallel geändert. Die Komponente kennt keinen Status | ✓ |
+| **Fest** — alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--filled`, `--empty`, `--invalid`, `--signs`, `--interactive`, `--in-editor` — sechs, genau die Ableitung der Spec. `LeerNachFilter` (kein Filterfall) und `Laedt` (Aufrufer zeigt `Skeleton`) sind in der Spec begründet ausgeschlossen | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 | Punkt für Punkt am laufenden Storybook: Stufe `primitives/`, Importe nur abwärts (`./Form`, `@/ludwig/shared/money`), kein Fachmodul ✓ · kein Hex/px/Label-Map ✓ · Zahl rechts, `text-align: right` und `font-variant-numeric: lining-nums tabular-nums` an jedem Feld gemessen (`--filled`, `--in-editor`), nichts zentriert ✓ · Farbe nur am Fehler (`rgb(168,64,60)`), Vorzeichen ohne Farbe ✓ · Fehler steht als Wort (`.v2field__err`), nicht nur als Rand ✓ · fünf Zustände: drei gebaut, zwei begründet ausgeschlossen ✓ · Kontrast selbst gerechnet: Feldtext `rgb(45,45,45)` auf Weiß 13,77:1, Fehlerzeile `rgb(168,64,60)` auf Weiß 6,06:1, beide ≥ 4,5:1 ✓ · kein Icon, kein Emoji, keine Bewegung ✓ · Tastaturweg: Feld ist ein echtes `input`, mit Tab erreicht und mit Tab verlassen (der Commit-Weg der Komponente) ✓ · Texte Sie/GLOSSARY ✓. Die zwei App-Punkte (v1-Ablösung, §11) betreffen `ludwig/app`. **Zwei Punkte reißen nicht hier, sondern im Set** — Versalien am Label und die fehlende Label-Bindung, siehe Befunde B1 und B4 | ✓ (mit Befunden) |
+| **Fest** — im Browser angesehen (Storybook), nicht nur gebaut | Alle sechs Stories auf `localhost:6107` in einer eigenen Chromium-Instanz geöffnet (die MCP-Instanz war von einer parallelen Sitzung belegt), in `--interactive`, `--invalid` und `--signs` wirklich getippt, Bild von `--in-editor` angesehen: zwei Felder, Ziffern auf einer Flucht, Karte mit Rand ohne Schatten | ✓ |
+| **Variabel** — „1234,56", „1.234,56" und „1234.56" ergeben denselben Wert (`Interactive`) | In `--interactive` Zeichen für Zeichen getippt und mit Tab verlassen; abgelesen wurden `input.value` und die Anzeige „Gespeicherter Wert": „1234,56" → Feld „1.234,56 €", Wert `1234.56` · „1.234,56" → `1234.56` · „1234.56" → `1234.56` · „1 234,56" → `1234.56` · zur Gegenprobe „1.234" → `1234` (Punkt vor drei Stellen ist Tausendertrenner) und „99" → `99` | ✓ |
+| **Variabel** — Unparsbares setzt `aria-invalid` und wird nicht auf 0 gesetzt (`Invalid`, Blick ins DOM) | „12,3,4" in `--interactive` getippt und verlassen: `input.value` bleibt „12,3,4", `aria-invalid="true"`, Fehlerzeile „Betrag nicht lesbar — Beispiel: 1.234,56", und „Gespeicherter Wert" bleibt beim vorherigen `1234.56` — weder 0 noch `null`. Dasselbe in `--invalid` am Pflichtfeld nachgestellt | ✓ |
+| **Variabel** — `null` rendert ein leeres Feld, nicht „0,00" (`Empty`) | `--empty`: `input.value` = `""` **und** `placeholder` = `""` — es steht auch kein „0,00 €" als Platzhalter darin. Gegenprobe in `--signs`, zweites Feld: ebenfalls leer | ✓ |
+| **Variabel** — Ziffern stehen rechts und fluchten untereinander (`InEditor`, V3) | `--in-editor` gemessen: beide Felder `text-align: right`, `font-variant-numeric: lining-nums tabular-nums`, gleiche Breite 185 px, rechte Kanten 218 px und 419 px. Im Bild fluchten „1.249,90 €" und „1.249,90 €" Ziffer für Ziffer | ✓ |
+| **Variabel** — Minus ist schwarz wie jede andere Ziffer (`Signs`, V6) | `--signs` gemessen: „-312,40 €" in `rgb(45,45,45)` — identisch zum leeren Feld und zum gesperrten Feld darunter, keine eigene Farbe am Vorzeichen. Gegenprobe: „-5" ins Feld „nur positiv" getippt und verlassen → der Text bleibt stehen, `aria-invalid="true"`, dazu „Negative Beträge sind hier nicht vorgesehen." | ✓ |
+| **Variabel** — ersetzt das Betragsfeld in `ExtractionCorrectionCard.tsx` ohne Funktionsverlust | Betrifft `ludwig/app`; die Datei liegt nicht in diesem Repo (`find` → kein Treffer) und ist hier nicht erfüllbar | offen (App) |
+
+**Befunde dieser Runde** (keine Mängel der Aufgabe):
+
+- **B1 — Versalien am Feldlabel, set-weit.** `.v2field__label` setzt
+  `text-transform: uppercase`; im Browser gemessen steht „BRUTTOBETRAG".
+  Kommt aus `v3.css`, betrifft jedes Feld des Sets — A2/T3, eigene Aufgabe,
+  wie in 0017 und oben schon festgehalten.
+- **B2 — `name` fehlt weiter in der Schnittstellen-Tabelle.** Die Komponente
+  hat zehn Props (`AmountInput.tsx:71`), die Spec führt neun. Unverändert.
+- **B3 — `currency={null}` hat weiter keine Story.** `Filled` zeigt nur den
+  Default `EUR`; die reine Dezimalzahl führt keine Story vor. Unverändert.
+- **B4 — neu: das Label ist nicht mit dem Feld verbunden, solange `name`
+  fehlt.** `Field` rendert `<label htmlFor={htmlFor}>` als Geschwister
+  (`Form.tsx:35`); ohne `name` bleibt `htmlFor` leer und das `input` ohne `id`.
+  In `--filled` gemessen: `input.labels` ist leer, die Vorlesehilfe nennt das
+  Feld also nicht. Das ist die Bauart des gemeinsamen `Field`, nicht dieser
+  Komponente — I8 („Label sichtbar") ist erfüllt. Gehört zum selben Aufräumen
+  wie B1.
+
+**Ergebnis: alles ✓ außer dem App-Kriterium — Status bleibt `fertig`.** Die
+frühere Abnahme hätte inhaltlich gehalten: jedes einzelne wiederhergestellte
+Kriterium ist auch bei erneuter, unabhängiger Prüfung erfüllt.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 — zweite Prüfung gegen
+die wiederhergestellten Kriterien

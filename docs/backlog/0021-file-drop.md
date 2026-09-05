@@ -144,3 +144,49 @@ Aufgabe (wie in 0017 festgestellt).
 
 Erste Runde (2026-09-03, Historie): ✗ am Format-Fall (`accept` griff nicht beim
 Ablegen) und am App-Kriterium; der Format-Fall ist behoben und nachgeprüft.
+
+---
+
+**Nachprüfung, 2026-09-05 — gegen die wiederhergestellten Kriterien** (dritter
+Agent, weder Erbauer noch Vorprüfer). Grund: `64fbe27` hat in zwölf Specs
+„Abnahmekriterien" und „Offene Fragen" **gelöscht** und zugleich die
+Abnahme-Tabelle eingetragen; geprüft wurde also gegen eine Liste, die im
+Dokument nicht mehr stand. `e6eae99` hat beide Abschnitte aus `64fbe27^`
+zurückgeholt. Diese Runde prüft jedes Kriterium noch einmal am Code und im
+Browser und übernimmt das frühere Ergebnis nicht.
+
+**Wiederherstellung geprüft:**
+`diff <(git show 64fbe27^:docs/backlog/0021-file-drop.md) docs/backlog/0021-file-drop.md`
+— in „Abnahmekriterien" und „Offene Fragen" genau eine Abweichung, eine
+zusätzliche Leerzeile vor „## Offene Fragen". Sieben feste Kriterien, fünf
+variable und beide offenen Fragen stehen wortgleich wieder da. Nichts fehlt.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| **Fest** — `pnpm typecheck` grün | Zu Beginn dieser Runde: `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. Der Lauf am Ende meldet zwei Fehler, beide in `src/ui/v3/patterns/entity-icons.ts` (fehlende Achsen gegenüber `Record<StatusAxis, string>`). Sie stammen aus einer **fremden, parallel laufenden Sitzung**, die die Status-Registry erweitert (`git diff --stat HEAD -- src/ludwig/ui/status/status-registry.ts` → 86 neue Zeilen). `FileDrop.tsx` ist im Arbeitsbaum unverändert (`git status --porcelain` → leer) und kommt in keiner Fehlerzeile vor | ✓ (für diese Aufgabe; der offene Fehler gehört einer anderen Sitzung) |
+| **Fest** — `pnpm build` grün | Nicht erneut gelaufen: parallel laufen weitere Sitzungen, und der Build schreibt nach `storybook-static`. Zitiert wird der Lauf für diesen Stand, der grün war („Storybook build completed successfully") | ✓ (zitiert) |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/FileDrop.tsx`, daneben `FileDrop.stories.tsx`; Titel `v3/Primitives/Formular/FileDrop` (`FileDrop.stories.tsx:7`); Export `src/ui/v3/index.ts:109`. `curl -s localhost:6107/index.json` führt alle sechs Einträge unter diesem Titel | ✓ |
+| **Fest** — Code englisch; `@when`/`@instead` an jedem Export | Zwei Exporte: `FileDrop` mit beiden Zeilen (`FileDrop.tsx:33–35`) und das Interface `DroppedFile` (`:15`) ohne — Typ-Exporte tragen im ganzen Set keine `@when`-Zeilen (Stichprobe `Badge.tsx`, `Toast.tsx`, `Combobox.tsx`: je 0 Treffer). Bezeichner, Props, Kommentare englisch; deutsch nur in den Nutzer-Strings | ✓ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}\|[0-9]+px\|fontSize:' src/ui/v3/primitives/FileDrop.tsx` → keine Treffer; Maße in `v3.css:1886–1907` (`.v2drop*`; Zeilennummern nach heutigem Arbeitsstand, die Datei wird parallel geändert). Kein Status im Spiel | ✓ |
+| **Fest** — alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--empty`, `--with-files`, `--uploading`, `--rejected`, `--interactive`, `--in-card` — sechs, genau die Ableitung. `LeerNachFilter` ist mit Grund ausgeschlossen. Story-Deckung der Schnittstelle selbst nachgesehen: `label`/`hint`/`accept`/`multiple`/`disabled` → `--empty` (zweite Zone gesperrt, `button.disabled` im DOM), `files` → `--with-files`, `progress` → `--uploading` („35 %", „80 %" als Wort neben dem Balken), `onFiles`/`onRemove` → `--interactive` (echt ausgelöst, Liste wächst und schrumpft), `maxSizeMb` → `--rejected` und `--interactive` | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 | Stufe `primitives/`, Importe nur abwärts (`./Progress`, `./TextButton`), kein Fachmodul ✓ · kein Hex/px/Label-Map ✓ · Name links, Größe rechts mit `tnum` (`.v2dropfile__size`, `font-variant-numeric` gemessen), nichts zentriert ✓ · Farbe nur am Fehler `rgb(168,64,60)`, jede rote Zeile trägt den Grund als Wort (V7) ✓ · Fortschritt mit Prozentwort ✓ · vier Zustände gebaut, `LeerNachFilter` begründet ausgeschlossen ✓ · Kontrast selbst gerechnet: Fehlerrot auf Weiß 6,06:1, Zonentext 13,77:1 (≥ 4,5:1), Fokusring `rgb(59,143,196)` 3,55:1 (≥ 3:1) ✓ · Fokusring sichtbar, keine Bewegung auf `.v2drop` ✓ · Hauptweg per Tastatur ✓ · Hover färbt eine Tonstufe ✓ · kein Icon, kein Emoji ✓ · Karte in `--in-card` mit Rand ohne Schatten ✓. **Zwei Punkte reißen:** die Texte T1–T5 (Zeile **M1**) und die doppelte Kennung (Zeile **M2**). Set-weiter Befund ohne Bezug zu dieser Aufgabe: `.v2field__label` in Versalien — im Browser gemessen steht „BELEGE HOCHLADEN" (A2/T3, wie in 0017) | ✗ (wegen M1 und M2) |
+| **Fest** — im Browser angesehen (Storybook), nicht nur gebaut | Alle sechs Stories auf `localhost:6107` in einer eigenen Chromium-Instanz geöffnet (die MCP-Instanz war von einer parallelen Sitzung belegt); echte Dateien über den Dateidialog gewählt, echte `drop`-Ereignisse mit `DataTransfer` ausgelöst, „Entfernen" geklickt, Bilder von `--empty`, `--with-files`, `--uploading`, `--rejected` und `--in-card` angesehen | ✓ |
+| **Variabel** — die Zone ist per Tastatur erreichbar und öffnet mit Enter den Dateidialog (`Empty`, V11) | `--empty`: ein Tab landet auf `BUTTON.v2drop`, Fokusring `2px solid rgb(59,143,196)`, Offset 2 px. **Enter wurde diesmal wirklich gedrückt** — der Dateidialog öffnet, das `filechooser`-Ereignis kam an (`multiple: true`), und über diesen Weg gewählte Dateien (`beleg.pdf`, `notiz.txt`) laufen durch dieselbe Prüfung wie eine Ablage: `notiz.txt` erscheint abgelehnt in der Liste, `beleg.pdf` geht durch. Der Tastaturweg ist damit vollständig belegt, nicht nur aus dem Markup geschlossen | ✓ |
+| **Variabel** — beim Überziehen ändert sich nur der Hintergrund, nichts wächst (`Empty`, V12) | `--empty`, echtes `dragover` ausgelöst und vorher/nachher gemessen: Hintergrund `rgb(255,255,255)` → `rgb(244,246,248)` (Klasse `v2drop` → `v2drop is-over`), Maße unverändert 460 × 84,25 px | ✓ |
+| **Variabel** — abgelehnte Dateien nennen den Grund, die übrigen kommen trotzdem an (`Rejected`) | Der Mechanismus stimmt. **Format:** echter `drop` auf `--empty` (`accept="application/pdf,image/*"`, `maxSizeMb=20`) mit vier Dateien → abgelehnt nur `notiz.txt` (Format) und `scan-ordner-2026.pdf` (21,0 MB), `quittung.pdf` und `foto.png` gehen durch. **Größe:** echter `drop` auf `--interactive` (`maxSizeMb=5`) mit `riesig.pdf` (6,0 MB) und `tabelle.xlsx` → in der Liste „riesig.pdf · 6,0 MB · Zu groß — höchstens 5 MB.", `tabelle.xlsx` steht mit „Entfernen" darüber und verschwindet auf Klick. Der **Wortlaut** des Formatgrundes reißt trotzdem — siehe M1 | ✓ (Wortlaut siehe M1) |
+| **Variabel** — die Komponente lädt selbst nichts hoch (Blick in den Code: kein `fetch`) | `grep -nE 'fetch\|XMLHttpRequest\|use server\|axios' src/ui/v3/primitives/FileDrop.tsx` → keine Treffer. Gegenprobe im Browser: beim Ablegen in `--interactive` mitgeschnitten — keine einzige Netzanfrage | ✓ |
+| **M1 · Fest (§9, T4/T5)** — der Ablehnungsgrund ist ein Text für die Sachbearbeiterin | **Reißt weiter, unverändert.** `FileDrop.tsx:86` setzt den einzigen selbst formulierten Grund aus `accept` zusammen: `` `Format nicht vorgesehen — ${accept}.` ``. Im Browser steht in `--empty` nach dem Ablegen von `notiz.txt` wörtlich „Format nicht vorgesehen — application/pdf,image/*." — auf demselben Weg auch nach der Auswahl über den Dateidialog. Ein MIME-Ausdruck vor einer Steuerfachangestellten (T4), ohne nächsten Schritt (T5). `--rejected` zeigt „Format nicht vorgesehen — PDF, JPG oder PNG." — dieser Satz kommt aus der `files`-Prop der Story, nicht aus der Komponente; die Story führt eine Formulierung vor, die es im Code nicht gibt | ✗ |
+| **M2 · Fest (§9)** — eine Kennung kommt nur einmal vor | **Reißt weiter, unverändert.** `aria-describedby="v2drop-hint"` (`FileDrop.tsx:114`) und `id="v2drop-hint"` (`:129`) sind feste Literale, kein `useId()`. Im DOM nachgesehen: in `--empty`, `--with-files`, `--rejected`, `--interactive` und `--in-card` trägt der Hinweis jedes Mal dieselbe `id` `v2drop-hint`, sie hängt also nicht an der Instanz. Zwei Ablagen mit `hint` auf einer Seite erzeugen damit dieselbe `id` zweimal, und `getElementById` liefert für beide Zonen denselben Satz. Heute fällt es nur nicht auf, weil keine Story zwei Zonen mit `hint` zeigt (in `--empty` hat die zweite Zone keinen). Im Set gibt es den richtigen Weg bereits: `Popover.tsx` und `ExpandableRow.tsx` nutzen `useId` | ✗ |
+| **Variabel** — ersetzt die Drop-Zone in `InvoiceUploader.tsx` ohne Funktionsverlust | Betrifft `ludwig/app`; die Datei liegt nicht in diesem Repo (`find` → kein Treffer) und ist hier nicht erfüllbar. Der fachliche Befund der Vorrunde bleibt stehen: `DroppedFile` kennt nur `progress` und `error`, das Original zeigt je Datei ein Schrittwort und einen Link „Beleg öffnen" | offen (App) |
+
+**Ergebnis: bleibt `in Arbeit`.** Beide Mängel der Vorrunde bestehen
+unverändert; alle übrigen Kriterien sind erfüllt, das App-Kriterium ist offen.
+Zu tun bleibt, was oben unter 1. und 2. steht:
+
+1. **M1** — der Ablehnungsgrund darf keinen MIME-Ausdruck zeigen (Formate in
+   Worten mitgeben oder `accepted()` übersetzen lassen); danach zeigt `Rejected`
+   den Text, den die Komponente selbst erzeugt.
+2. **M2** — `id` und `aria-describedby` mit `useId()` eindeutig machen.
+
+Geprüft von / am: Claude (Abnahme-Agent), 2026-09-05 — zweite Prüfung gegen die
+wiederhergestellten Kriterien
