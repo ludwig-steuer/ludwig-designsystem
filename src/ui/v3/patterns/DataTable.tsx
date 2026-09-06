@@ -212,11 +212,16 @@ export function DataTable<T>(props: DataTableProps<T>) {
   // head and rows are separate grids with different content — each would size
   // the track itself. Measured in 0101 before the fix: the amount column stood
   // at three different positions across six rows and ran 111 px past the head.
+  //
+  // The actions track is fixed for the same reason. It was `max-content`, and
+  // measured at 700 px the head resolved it to 54,2 px („Aktionen") while the
+  // row resolved it to 176,4 px (two buttons) — 122 px apart. A caller whose
+  // actions are wider raises `--v2-tbl-actions` on the table.
   const cols = [
     selection ? PICK : null,
     expand ? PICK : null,
     ...columns.map((c) => c.width ?? "minmax(0, 1fr)"),
-    rowActions ? "max-content" : null,
+    rowActions ? "var(--v2-tbl-actions)" : null,
   ]
     .filter(Boolean)
     .join(" ");

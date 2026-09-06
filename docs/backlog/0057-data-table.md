@@ -300,3 +300,20 @@ Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte:
 (1) die App-Zeile bleibt offen, bis `[year]/cases` auf den DataTable zieht;
 (2) `headCell` und interaktiver Inhalt im Spaltenkopf — eigene Aufgabe, siehe
 letzte Zeile.
+
+## Nachtrag 2026-09-06 — die Aktionsspalte ist fest, nicht inhaltsbemessen
+
+Beim Umbau auf ein echtes `<table>` (0106) gemessen: die Spur der
+Aktionsspalte stand auf `max-content`, und weil Kopf und Zeile **eigene
+Grids** sind, rechnete jede Seite sie für sich. Bei 700 px löste der Kopf sie
+auf **54,2 px** auf („Aktionen"), die Zeile auf **176,4 px** (zwei Knöpfe) —
+Kopf und Zeilen endeten 122 px auseinander. Derselbe Fehler wie
+`width: "1fr"` statt `minmax(0, 1fr)`, nur eine Spalte weiter.
+
+Jetzt steht die Spur auf `var(--v2-tbl-actions)`, Vorgabe **180 px** — das
+Maß, das die gemessene Zeile braucht. Wer breitere Aktionen hat, setzt das
+Token an seiner Tabelle hoch; wer schmalere hat, setzt es herunter.
+
+**Kriterium (neu):** Kopf und Zeilen enden bei **vier** Breiten
+(1440 · 1100 · 900 · 700) an derselben Kante. Gemessen nach dem Fix:
+1405 · 1065 · 865 · 845, Kopf und Zeilen jeweils gleich.

@@ -62,6 +62,11 @@
   --v2-detail-y: 14px;
   /* Breite der Griff-Spalten vor den Daten: Auswahl und Chevron (0057). */
   --v2-tbl-pick: 32px;
+  /* Die Aktionsspalte ist **fest**, nicht inhaltsbemessen: Kopf und Zeile sind
+     eigene Grids, und `max-content` rechnete jede Seite für sich — gemessen
+     54,2 px im Kopf gegen 176,4 px in der Zeile. Wer breitere Aktionen hat,
+     setzt das Token an seiner Tabelle hoch (0106). */
+  --v2-tbl-actions: 180px;
 }
 .v2tbl[data-density="compact"] {
   --v2-row-y: 7px;
