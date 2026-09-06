@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
 | Stufe | `patterns/` — Gruppe Prozess, neben `Process` und `Timeline` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, sobald ein Schadenfall Zustände und Übergänge hat, die jemand erklärt haben will |
 | Quelle | Anfrage Owner 2026-09-04 („visuell die Statemachine anschauen, aktuellen State hervorheben, Klick erklärt den State, optional Beschreibung des Prozesses") · **Z1** und **Z3** in `design-guidelines.md` · Vorlage der Daten: `docs/topics/datev.md` R19 (Tabelle `State \| Dran ist \| Hinein durch \| Hinaus durch` für `zyklus_stapel`) und die „Übergänge:"-Blöcke in `status-registry.ts` |
@@ -316,3 +316,11 @@ Variabel (aus dieser Spec):
 | … | … | … |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Alle Bausteine vorhanden, Achsen und Reihenfolgen stimmen. Entscheide: 1 Übergänge nur in Stories · 2 kein Umschalter im `StatusInfoDialog` · 3 „dran ist" bleibt Ausbau.
+
+Vor dem Bau in die Spec: (a) Pfad überall auf `@/ludwig/ui/status/status-registry` (die Set-Kopie ist seit 0080 weg); (b) „56 Achsen" → 62; (c) die 16 Übergänge von `zyklus_stapel` (mit Labels) und die `beleg_inbox`-Übergänge als Anhang in die Spec, Quelle mit absolutem Pfad in `ludwig/app` (`docs/topics/datev.md` R19 und `docs/operations/produktbefunde.md` liegen nicht in diesem Repo); (d) `Filled`: drei Bögen oben (`prepared→review`, `exporting→confirmed`, `confirmed→closed`); (e) „Setzt auf": `AXIS_SOURCE` daher, wo `StatusInfoDialog` es holt (0105 offen).
+
+Befunde ins Register: die Befunde 1, 3 und 4 dieser Spec stehen noch nicht in `docs/befunde-app.md` — nachtragen (A, B, E).

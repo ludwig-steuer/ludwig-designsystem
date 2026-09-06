@@ -145,14 +145,12 @@ export const Interface: Story = {
           Sep · Okt · Nov · Dez
         </span>
       </Row>
-      <Row name="Feld-Label" cls="--fs-ui-2xs · 11 px" note="Versalien über dem Feld">
+      <Row name="Feld-Label" cls="--fs-ui-sm · 12,5 px" note="Über dem Feld, ohne Versalien (0089)">
         <span
           style={{
-            fontSize: "var(--fs-ui-2xs)",
-            lineHeight: "var(--lh-ui-2xs)",
+            fontSize: "var(--fs-ui-sm)",
+            lineHeight: "var(--lh-ui-sm)",
             fontWeight: 600,
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
             color: "var(--color-text-muted)",
           }}
         >

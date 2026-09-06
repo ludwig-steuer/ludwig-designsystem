@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: fünfzehn Felder genau dieser Entität, zwei davon mit Ludwig-Regeln am Nullwert |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md` (Status `geprüft`, 2026-09-05), Formen-Tabelle Zeile `CaseFacts`; Ränge 11–16, mit `all` bis 25 |
@@ -171,3 +171,11 @@ Abgenommen von / am: … · Offene Punkte: …
    aufklappen. 25 % der Fälle haben gar keine, und wer eine hat, hat im
    Median 231 Zeichen — das ist zu viel zum Wegwerfen und zu wenig für einen
    eigenen Reiter.*
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Entscheide: 1 Profilsatz gilt · 2 Betrag nicht in den Fakten (er steht im `EntityHeader metric`; im Drawer trägt ihn Zone 1, siehe 0098) · 3 Aufklappen.
+
+Vor dem Bau in die Spec: (a) B2 konkret: `CaseDetail` existiert im Spiegel **nicht** (liegt in `infrastructure/case-detail-queries.ts`, nicht `domain/`) und trägt `title` nicht — lokales `CaseFactsVM` benennen (Präzedenz `AccountFactsVM`, L-13), Befund L-68; (b) `accountHref(accountNumber)` statt Id — die Kontoroute läuft über die Nummer; (c) `Sparse` präzisieren (ohne `all` steht nur das Personenkonto als Wort); (d) Ausbau-Zeile `clearingBalance` ersetzen — das Feld existiert (F104), Anzeige mit `all`; (e) Rang 25 (Abnahme-Bucket) aus `all` nehmen, das Profil sagt selbst „gehört zur Abnahmeliste".
+
+Befunde ins Register: **L-68** — `CaseDetail` nach `domain/` heben (spiegelbar) und um `title`, `disposition`, `openClarificationsCount`, `exportStatus`, `counterpartySide`, `batchOposReference`, `createdByKind/Label`, `expectedInterval`, `agentRunId`, `exportBatchId` ergänzen (Muster L-08/L-09). Dass `title` fehlt, ist die Wurzel von L-52.

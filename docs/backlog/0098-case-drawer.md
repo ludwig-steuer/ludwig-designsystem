@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → der **Rahmen** ja (`Drawer`, 0042), der **Inhalt** nein: Zone 3 sind die Fakten dieses Vorgangs |
 | Quelle | `docs/backlog/0052-entity-drawer.md` **Schritt 3** — dort ausdrücklich auf das Entitätsprofil und 0050 vertagt · Entitätsprofil `docs/entitaeten/accounting-case.md` (Status `geprüft`), Formen-Tabelle Zeile `CaseDrawer` |
@@ -162,3 +162,11 @@ Abgenommen von / am: … · Offene Punkte: …
    Entität, und 0052 hat die Breite einmal entschieden.*
 3. Bleibt Zone 5 im Fehlerfall? *Ohne Antwort: ja — gerade dann ist der Weg
    in den View die Antwort, und ein Drawer ohne Ausgang ist eine Sackgasse.*
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Entscheide: 1 Zähler im Kopf · 2 **`size="md"`** (0052: `sm` Fakten, `md` Detail, `lg` Dokument oder Tabelle — `AccountDrawer` ist `lg` wegen der Tabelle) · 3 Zone 5 auch im Fehlerfall, als bewusste Abweichung vom `SourceDocumentDrawer` hinschreiben · Zone 1 wird um Betrag (Meta-Zeile), Art · Gegenpart und Zuständigkeit erweitert (Ränge 4–7), wie der `SourceDocumentDrawer`-Kopf · Ausgang als `onOpenFull` (Familie), nicht `viewHref`.
+
+**Gilt für 0098 und 0103 gemeinsam:** Schnittstelle nach dem 0052-Schema — `reference` (im Kopf und im Fehlertext), `record | null` = **nicht gefunden**, `loading`, `error`, `onOpenFull`; vier Zustände lädt · Fehler · nicht gefunden · Inhalt.
+
+Vor dem Bau in die Spec: Schnittstelle auf das 0052-Schema, Story `NotFound` statt `Closed`, `size="md"`, Zonen-Tabelle Zeile 1 um 4–7, Typ-Verweis auf L-68.

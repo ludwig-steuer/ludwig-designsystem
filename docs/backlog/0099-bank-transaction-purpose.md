@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
 | Stufe | `entities/bank-transaction/` — erste Datei dieser Familie |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: SEPA-Tags sind der Zahlungsverkehr dieser Domäne, und die sieben Schlüssel sind ihr Vokabular |
 | Quelle | Entitätsprofil `docs/entitaeten/bank-transaction.md` (Status `geprüft`, 2026-09-05), Formen-Tabelle Zeile `BankTransactionPurpose`; Ränge 1 und 11 |
@@ -174,3 +174,7 @@ Abgenommen von / am: … · Offene Punkte: …
 3. Kürzt `inline` auf eine Zeile oder auf eine Zeichenzahl? *Ohne Antwort:
    auf eine Zeile mit CSS-Ellipse. Eine Zeichenzahl stimmt bei einer
    Grid-Spalte nie.*
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben.** Entscheide: 1 Chips · 2 `OAMT` als letzter Chip · 3 CSS-Ellipse. Ein Satz in die Spec: `PURP_LABELS` ist eine Code-Übersetzung der SEPA-Schlüssel, kein Status — sonst liest der Abnehmende das feste Kriterium „keine lokale Label-Map" als verletzt.

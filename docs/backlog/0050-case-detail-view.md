@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | nein — die Reihenfolge Kopf → nächste Aktion → Strang → Detail ist die Sachverhaltslogik, keine allgemeine Form |
 | Quelle | Screenshot der Sachverhaltsansicht vom 2026-09-03 · `docs/seiten/sachverhalt-detail.md` |
@@ -149,3 +149,9 @@ Abgenommen von / am: … · Offene Punkte: …
 Status unbrauchbar gemacht. Er steht jetzt hier: die Voraussetzungen sind
 erfüllt, **die Freigabe zum Bauen liegt beim Owner** — Schritt 2 des Ablaufs in
 `docs/backlog/README.md`.
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Die drei Entscheidungen vom 2026-09-03 sind mit dem geprüften Profil verträglich. Entscheid zur offenen Stelle: **`CaseFacts` sitzt im `children` des ersten Reiters**; die Ränge 5–10 komponiert der Aufrufer in `EntityHeader meta`/`facts`; `disposition` („bin ich dran", Seitenprofil Rang 2) als Wort in `meta`, die Achse `sachverhalt` führt.
+
+Vor dem Bau in die Spec: (a) Profil `docs/entitaeten/accounting-case.md` in „Quelle" nachtragen; (b) Kopfzeile „Blocker" streichen; (c) den Entscheid oben als Satz in Schnittstelle/Verhalten; (d) Abschnitt „Ausbau" (A12): `CaseEditor` 0083 per `InlineEdit` im Kopf.

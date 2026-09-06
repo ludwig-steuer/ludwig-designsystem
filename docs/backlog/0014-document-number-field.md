@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
 | Stufe | `entities/document-number/` |
 | Klassen-Test | nein — Belegfeld 1 ist eine DATEV-Ausnahme, die Rangordnung der Quellen ist Buchhaltungslogik |
 | Quelle | Anfrage Owner 2026-09-03 („Belegfeld 1 sollte ein Lupenicon haben, wodurch ich einen Drawer öffnen kann — sogenannter OPOS-Browser — aus dem als Ergebnis ein Belegfeld übernommen werden kann") |
@@ -181,3 +181,13 @@ Variabel (aus dieser Spec):
 | … | … | ✓ / ✗ |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Kein eigenes Entitätsprofil — die Belegnummer ist laut `accounting-case.md` ein Kind des Sachverhalts, und die Spec stammt aus der Zeit vor der Profil-Pflicht (Ausnahme, gilt für alle Specs bis 0069).
+
+Entscheide zu den offenen Fragen: 1 ja, Nummern anderer Sachverhalte mit `caseNumber` · 2 **„—" statt leerer Zelle** (wie überall im Set) · 3 ja, Schnellübernahme als `TextButton` (T8), ruft `onChange(dominant.documentNumber)`, Rundlauf in `Diverging` mit `useState`.
+
+Vor dem Bau in die Spec: (a) Quellen-Labels: keine Registry vorhanden → Labels kommen als Prop `sourceLabel: Record<DocumentNumberSource, string>`, bis die App sie in die Domäne hebt (Befund L-71); (b) Verhalten „Feld": „wie 0002" → „wie 0013 (`AccountField`, `onOpenLedger`)", Lupe über `ActionIcon action="search"`; (c) Story-Exportnamen englisch (`Filled`, `WithRegister`, `Diverging`, `Interactive`, `Edge`, `Empty`, `EmptyAfterFilter`, `Loading`), plus ein Satz, warum das Feld kein `Empty`/`Error` hat; (d) Kopf „Ersetzt": nur die Zeile (`JournalEntryEditor.tsx:610`), das Gegenkonto hat kein Belegfeld; prüfen, ob `DocumentNumberRegister` die Liste in `CasePlausibilityTab.tsx` ersetzt; (e) `maxLength` 36 mit Quelle `core/datev/belegfeld.ts`.
+
+Befunde ins Register: **L-71** — `DOCUMENT_NUMBER_SOURCE_LABEL`/`_STATE_LABEL` ins Domain-Modul (heute lokale Map `CasePlausibilityTab.tsx:40`) und `DATEV_MAX_BELEGFELD1 = 36` in `core/datev/field-limits.ts`.

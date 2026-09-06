@@ -1,4 +1,10 @@
-/* App-only chrome on top of design tokens
+/* Keine Versalien (0089): T3 und A2 kennen keine Ausnahme, und die
+   A5-Ausnahme für diese Datei deckt rohe Hex- und rgba()-Werte, nicht die
+   Schreibweise. Neun Stellen sind auf dieselben zwei Stufen gegangen wie in
+   `v3.css`: Beschriftung 12,5 px / 600, Überzeile 11,5 px / 600. Die
+   Sperrung fällt weg — sie war für Versalien da.
+
+   App-only chrome on top of design tokens
    Philosophy: flat surfaces, soft drop-shadow for depth, gradient ONLY on:
    - Primary buttons (call-to-action)
    - Dark sidebar (visual anchor)
@@ -80,8 +86,8 @@ body { background: #FAFBFC; }
 /* Sidebar — nav */
 .sb__nav { padding: 8px 8px; flex: 1; overflow-y: auto; }
 .sb__navlabel {
-  font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
-  color: #6F8499; font-weight: 600;
+  font-size: 12.5px; font-weight: 600;
+  color: #6F8499;
   padding: 14px 12px 6px;
 }
 .sb__navitem {
@@ -358,7 +364,7 @@ body { background: #FAFBFC; }
   border-radius: 8px; padding: 18px 20px;
   box-shadow: 0 1px 2px rgba(20,36,56,0.04), 0 2px 6px rgba(20,36,56,0.04);
 }
-.stat .label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; margin-bottom: 8px; }
+.stat .label { font-size: 12.5px; font-weight: 600; color: var(--color-text-subtle); margin-bottom: 8px; }
 .stat .num { font-family: var(--font-serif); font-weight: 500; font-size: 32px; color: var(--color-primary); line-height: 1; font-variant-numeric: tabular-nums; }
 .stat .delta { font-size: 12px; color: var(--color-text-muted); margin-top: 6px; }
 
@@ -400,7 +406,7 @@ body { background: #FAFBFC; }
 
 /* Table */
 .tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-.tbl thead th { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--color-border); background: #fff; }
+.tbl thead th { font-size: 12.5px; font-weight: 600; color: var(--color-text-subtle); padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--color-border); background: #fff; }
 .tbl tbody td { padding: 12px 16px; border-bottom: 1px solid var(--color-border-subtle); vertical-align: middle; }
 .tbl tbody tr { cursor: pointer; transition: background 100ms; }
 .tbl tbody tr:hover { background: var(--color-bg-soft); }
@@ -512,15 +518,15 @@ body { background: #FAFBFC; }
 .hero__num { font-family: var(--font-mono); font-size: 12.5px; color: var(--color-text-muted); white-space: nowrap; }
 .hero__right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
 .hero__total { text-align: right; }
-.hero__total .lbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; }
+.hero__total .lbl { font-size: 11.5px; font-weight: 600; color: var(--color-text-subtle); }
 .hero__total .amt { font-family: var(--font-serif); font-weight: 500; font-size: 26px; color: var(--color-primary); line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .hero__facts { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-border-subtle); }
 .hero-fact { min-width: 0; }
-.hero-fact .lbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; margin-bottom: 3px; }
+.hero-fact .lbl { font-size: 11.5px; font-weight: 600; color: var(--color-text-subtle); margin-bottom: 3px; }
 .hero-fact .val { font-size: 13px; color: var(--color-text); font-weight: 500; }
 .hero-fact .val.mono { font-family: var(--font-mono); font-size: 12.5px; }
 .hero__summary { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-border-subtle); }
-.hero__summary > .lbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; margin-bottom: 6px; }
+.hero__summary > .lbl { font-size: 11.5px; font-weight: 600; color: var(--color-text-subtle); margin-bottom: 6px; }
 .hero__summary-text { font-size: 13.5px; line-height: 1.5; color: var(--color-text); margin: 0; }
 .hero__summary-text.muted { color: var(--color-text-subtle); font-style: italic; }
 
@@ -617,7 +623,7 @@ body { background: #FAFBFC; }
 .interp__mark::before { content: ""; position: absolute; width: 2px; height: 13px; background: #fff; left: 13px; top: 6px; }
 .interp__mark::after  { content: ""; position: absolute; width: 9px; height: 2px; background: #fff; left: 13px; top: 11px; }
 .interp__title { flex: 1; }
-.interp__title .small { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #2E78A8; font-weight: 600; }
+.interp__title .small { font-size: 11.5px; font-weight: 600; color: #2E78A8; }
 .interp__title h2 { margin: 1px 0 0; font-size: 15px; font-weight: 600; color: var(--color-text); }
 .interp__body { padding: 4px 18px 14px; }
 .interp__row {
@@ -697,7 +703,7 @@ body { background: #FAFBFC; }
   box-shadow: 0 1px 2px rgba(20,36,56,0.04), 0 4px 14px rgba(20,36,56,0.05);
 }
 .detail-h { padding: 16px 20px; border-bottom: 1px solid var(--color-border); }
-.detail-h .small { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; }
+.detail-h .small { font-size: 11.5px; font-weight: 600; color: var(--color-text-subtle); }
 .detail-h h2 { margin: 4px 0 0; font-size: 18px; font-weight: 600; color: var(--color-text); }
 .detail-body { padding: 16px 20px; }
 .detail-body .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--color-border-subtle); font-size: 13.5px; }
@@ -724,7 +730,7 @@ body { background: #FAFBFC; }
 }
 .lw-note .mark::before { content: ""; width: 2px; height: 11px; background: #fff; }
 .lw-note .mark::after { content: ""; width: 8px; height: 2px; background: #fff; margin-left: -2px; margin-top: 4px; }
-.lw-note .label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #2E78A8; font-weight: 600; margin-bottom: 2px; }
+.lw-note .label { font-size: 11.5px; font-weight: 600; color: #2E78A8; margin-bottom: 2px; }
 
 /* ==========================================================================
    Ergänzungen für die v3-Bausteine AppShell (0030) und NavList (0031).

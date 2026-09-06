@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
 | Stufe | `entities/bank-transaction/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: sie nennt eine Kontoauszugsposition und trägt deren Vorzeichen-Regel |
 | Quelle | Entitätsprofil `docs/entitaeten/bank-transaction.md` (Status `geprüft`, 2026-09-05), Formen-Tabelle Zeile `BankTransactionCell` — **im Prüflauf von „verworfen" auf „jetzt" gedreht** |
@@ -163,3 +163,9 @@ Abgenommen von / am: … · Offene Punkte: …
 3. Gehört das Zahlungskonto in die Zelle oder in den Kontext? *Ohne Antwort:
    in die Zelle, aber nur mit `account` — im Auszug setzt es die Seite, im
    Zeitstrahl weiß es sonst niemand.*
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Entscheide: 1 zwei Zeilen · 2 Datum mit Jahr · 3 Konto nur über `account`.
+
+Vor dem Bau in die Spec: (a) zweite Story `InUseGate` aus `Schritt4` (Bezeichnung · Betrag · Gate, Link in den Drawer) — der Startprompt verlangt zwei `InUse`-Stellen; (b) Kriterium „Minus ist U+2212" streichen — `formatAmount` (`de-DE`) schreibt Hyphen-Minus, „Vorzeichen ohne Farbe" bleibt; (c) **Typ-Satz für die Familie (gilt für 0100–0103):** Typen in `entities/bank-transaction/bank-transaction.ts`: `BankTransactionDetailData ⊃ BankTransactionRowData ⊃ BankTransactionCellData`, `SepaTags`, `cases: CaseLink[]` (0095) plus Ereignis-Zustand je Fall — eine Datei, keine drei Kopien (L-56).

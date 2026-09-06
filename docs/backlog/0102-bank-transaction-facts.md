@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
 | Stufe | `entities/bank-transaction/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: achtzehn Felder dieser Entität, fünf davon aus SEPA |
 | Quelle | Entitätsprofil `docs/entitaeten/bank-transaction.md` (Status `geprüft`, 2026-09-05), Formen-Tabelle Zeile `BankTransactionFacts`; Ränge 1–18 |
@@ -168,3 +168,9 @@ Abgenommen von / am: … · Offene Punkte: …
    *Ohne Antwort: je Fall. Er gehört dem Ereignis, und bei mehreren Fällen
    gibt es mehrere Ereignisse — das ist der Satz, der die ganze Familie
    trägt.*
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Entscheide: 1 Rohdaten als letzter Block, zugeklappt · 2 fünf Blöcke · 3 Buchungs-Zustand je Fall (Familienregel).
+
+Vor dem Bau in die Spec: (a) Zuordnungs-Block: `match_stage` als Rohwert der Spalte, mono, unübersetzt, ohne Ton, bis L-57 — nicht „Klartext" (R1, keine lokale Map); Kriterium entsprechend; (b) Typ-Satz aus 0100, mit dem Ereignis-Zustand je Fall, den `CaseLink` (0095) nicht trägt; (c) Story-Formel zählt `RawPayload` mit (Kosmetik).

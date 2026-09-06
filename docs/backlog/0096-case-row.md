@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | spec — zurück 2026-09-06, Zuschnitt neu nach Abschnitt „Freigabe", danach ohne zweite Runde freigegeben |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: zehn Datenpunkte einer Ludwig-Entität, drei davon aus ihren Achsen |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md` (Status `geprüft`, 2026-09-05), Formen-Tabelle Zeile `CaseRow`; Ränge 1–10 |
@@ -183,3 +183,11 @@ Abgenommen von / am: … · Offene Punkte: …
 3. Bleibt der Klärungszähler eine eigene Spalte oder wandert er als Marke an
    den Zustand? *Ohne Antwort: eigene Spalte, wie heute — sie ist
    sortierbar, eine Marke wäre es nicht.*
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: zurück — Zuschnitt neu.** Drei Gründe: (1) `CaseCell` in der Zeile ergibt Dopplung und `<a>` in `<a>` (`Row href` + Link in der Zelle + `counterpartyHref`); Hausmuster ist `SourceDocumentRow`: die Zeile teilt `case-title.ts`/`caseIdentifier()`, komponiert die Zelle nicht, der Zeilenlink liegt als `.v2rowlink` am Anzeigenamen (I11). (2) `DataTable` rendert aus `ColumnDef.cell`, nimmt keine Row-Komponente — die Hauptliste (p90 190, Pagination, Sortierung) braucht einen `ColumnDef<CaseListItem>[]`-Satz, Vorbild `accountEntryColumns`. (3) Zwei stille Abweichungen vom Profil: die Ereignis-Zähler Belege/Bank-Tx fehlen, `CaseColumn` kennt kein `fiscalYear` (Rang 20, Partner-Reiter).
+
+**Entscheid (vorab freigegeben, wenn die Neufassung dem folgt):** `caseColumns()` als `ColumnDef`-Satz mit `columns`-Auswahl als Option, plus `CaseRow` für kurze Listen (≤ 50) aus denselben Zellfunktionen — wie `AccountEntries`. Offene Fragen 1–3 mit Default. B3 (`disposition='client'`) streichen — `case.ts` sagt schon „stillgelegt". `CaseColumn` um `fiscalYear`, `documents`, `bankTransactions` erweitern oder mit Grund ausschließen. Diese Entscheidung gilt zugleich für 0101 (`BankTransactionRow`) und 0085.
+
+Befunde ins Register: **L-69** — `CaseListItem.counterpartyPartnerId` fehlt; die Zeile kann den Gegenpart nicht verlinken, obwohl 47 % aufgelöst sind.

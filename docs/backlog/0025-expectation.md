@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
 | Stufe | `entities/expectation/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, „was noch fehlt" hängt am Sachverhalt |
 | Quelle | Soll-Katalog §11.7 Stufe 3 „Erwartung — fehlt (§3.1)"; `ui-repraesentationen.md` §3.2 Nr. 2 |
@@ -122,3 +122,13 @@ Variabel (aus dieser Spec):
 | | | |
 
 Abgenommen von / am: — · Offene Punkte: —
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Grundlagen im Spiegel vollständig (`ExpectationKind`, `ExpectationMaturity`, `expectationMaturity()`, Achsen `erwartung` und `erwartung_art`). Bildschirme nach dem Seiten-Rückbau: Sachverhalt-Detail (`FehltPanel`, 0040 `InUse`) und **Abnahme-Schritt 5** (`Schritt5Liste.tsx`, baut seit F123 aus Ludwigs Erwartungen). Portal, `document-requests` und Schritt 1/2 fallen weg.
+
+Entscheide: 1 Wort hängt an `audience`, aber mit der richtigen Bedeutung — `audience` sagt, **wer die Unterlage besorgt** (`client` → „Nachforderung", `accounting` → „Erwartung"), nicht wer sie ansieht · 2 Betrag nur bei `payment` · 3 keine Frist-Handlung, das Quittieren in Schritt 5 ist ein Check.
+
+Vor dem Bau in die Spec: (a) `Ersetzt`/`Blockiert`/Kriterien auf `Schritt5Liste.tsx`, `FehltPanel.tsx`, 0040 `InUse` umschreiben; (b) Prop `currency: Currency` (L-23, wie `CaseTimeline`); (c) Typ: `ExpectationVM` in dieser Datei, strukturell gleich `ExpectationRow` der App; 0040 importiert ihn künftig (kleiner Nachtrag dort); (d) `Timestamp` → `Time`; (e) für den Chip „leer" als nicht anwendbar begründen.
+
+Befunde ins Register: **L-70** — `ExpectationRow` samt `ExpectationAudience`, `DueSource`, `ExpectationDirection` von `application/expectation-core.ts` nach `modules/accounting-cases/domain/` heben (Muster L-09).

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | offen — 2026-09-06 zurückgestellt, wartet auf einen Bildschirm, siehe Abschnitt „Freigabe" |
 | Stufe | `entities/open-item-link/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, eine Ausgleichs-Zuordnung ist Buchhaltung |
 | Quelle | Soll-Katalog §11.7 Stufe 3 „Ausgleichs-Zuordnung — fehlt (§3.1)"; `ui-repraesentationen.md` §3.2 Nr. 3 |
@@ -115,3 +115,9 @@ Variabel (aus dieser Spec):
 | | | |
 
 Abgenommen von / am: — · Offene Punkte: —
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: zurückgestellt (Status offen).** Zwei Gründe: (1) Story `Unpaid` (`payment: null`) widerspricht dem Schema — `client_open_item_links` erzwingt genau eine Zahlungsseite (Migration `20260815120000_open_item_links.sql:72–75`); eine Rechnung ohne Zahlung ist eine Erwartung (0025) oder ein OPOS (0029). (2) Kein Bildschirm liest die Klammer heute als Paar: das Sachverhalt-Detail zeigt DATEV-OPOS-Zeilen, Abnahme-Schritt 4 zeigt Gate-Zeilen, das Seitenprofil nennt die Klammer in keiner Frage. Ohne Ort greift §3 Regel 5 nur formal.
+
+Entscheid: die Zeile wird gebaut, sobald eine Seite sie braucht — Kandidat ist der Saldo-/DATEV-Reiter der Sachverhaltsansicht (0050) oder die OPOS-Seite von der Zahlung her; das entscheidet der Owner beim Seitenprofil. Bis dahin gilt: `payment` Pflicht ohne `null`, `Unpaid` streichen, `Empty`/`Error` aufnehmen oder begründen, „verwaist" als `Badge` mit Wort (V7) oder Achse als Befund, L-03 präzisieren zu „Lese-VM der Klammer in `accounting-cases/domain/`", `Timestamp` → `Time`. Nebenbefund fürs Repo: `docs/ui-repraesentationen.md` §3.1/§3.2 beschreibt die Abnahme-Schritte 4 und 5 vor F123.

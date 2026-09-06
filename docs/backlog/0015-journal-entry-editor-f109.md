@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | spec — zurück 2026-09-06, zwei Owner-Fragen im Abschnitt „Freigabe" |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | nein — Buchungssatz, Belegfeld, Gegenkonto sind Fachbegriffe |
 | Quelle | Anfrage Owner 2026-09-03 · Design `reference/f109-buchungsreview/BuchungssatzEditor.dc.html` und `Buchungsreview.dc.html` Z. 891 / 3092 |
@@ -163,3 +163,13 @@ Variabel (aus dieser Spec):
 | … | … | ✓ / ✗ |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: zurück.** §1 (Journal zweispaltig) ist im Arbeitsbaum bereits uncommittet umgesetzt, aber anders als hier beschrieben: fünf Spalten Konto · Kontoname · Buchungstext · Soll · Haben statt Konto · Soll · Haben · BU, Summenzeile ohne =/≠, und derselbe Umbau streicht die Quittungspflicht für Warnungen, die das Ziel dieser Spec als Vorsprung nennt. Der Umbau liegt seit 2026-09-06 im Stash „verwaister JournalEntryEditor-Umbau" (`git stash list`), damit 0044 die Datei anfassen kann.
+
+**Owner-Fragen, ohne die die Spec nicht neu geschrieben werden kann:** (a) Journal-Spalten: BU (Spec) oder Buchungstext (Umbau)? (b) Warnungen quittieren (Spec-Ziel) oder nicht (Umbau)?
+
+Danach: §1 gegen den entschiedenen Stand neu schreiben; §2 um `onOpenDocumentNumberRegister?: (rowId: string) => void` und die Herkunft von `dominant` ergänzen; §3 Props englisch (`onContraAccountChange`, `contraAccountCandidates`) und der 0013-Rest (der Editor reicht `onOpenLedger` an die Zeilen-Felder durch, `JournalEntryEditor.tsx:603–609`) als vierter Punkt; Stories: heute 14, mit +3 sind es 17 — Ausnahme begründen oder nach §4 trennen, `Empty` erklären, Namen englisch; Kopf „Wartet auf": 0013 ist fertig, nur 0014 bleibt.
+
+Befunde ins Register: **B** — GLOSSARY-Eintrag „Gegenkonto (contra account)" fehlt.
