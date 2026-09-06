@@ -124,7 +124,7 @@ Abgenommen von / am: — · Offene Punkte: —
 
 ## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
 
-**Urteil: freigeben mit Änderung.** Ist-Zustand exakt bestätigt (`opos/page.tsx` Z. 175–215, lokale `KIND_LABEL` und `AUSGLEICH_LEGEND`). Die Achse „Ausgleich" liefert die App über L-66 (Punkt 2 ihres laufenden Plans); bis dahin baut die Zeile die Spalte über `StatusBadge` gegen den Achsennamen aus L-66 und wird erst abgenommen, wenn der Spiegel die Achse führt — keine lokale Achse (0080).
+**Urteil: freigeben mit Änderung.** Ist-Zustand exakt bestätigt (`opos/page.tsx` Z. 175–215, lokale `KIND_LABEL` und `AUSGLEICH_LEGEND`). Die Achse heißt **`opos_ausgleich`** und steht seit `ludwig/app` 700dbcb8 im Spiegel (hier gezogen mit 994fda2) — die Zeile baut die Spalte über `StatusBadge axis="opos_ausgleich"`, keine lokale Achse (0080). Die Wartebedingung dieser Aufgabe ist damit weg.
 
 Entscheide: 1 fünf Klassen, Union zeichengleich in L-05: `notDue | d1_30 | d31_60 | d61_90 | d90plus` · 2 Mahnstufe als Wort nur > 0, bei `null` „—" · 3 keine Sachverhalts-Zahl in der Gruppe. Zuschnitt: Row + `OpenItemAgeGroup` bleiben (Gruppierung ist der Job, `DataTable` gruppiert nicht), `StatusHeader` auf der Ausgleich-Spalte; `openItemColumns` erst, wenn `opos/page` auf `DataTable` wandert.
 
