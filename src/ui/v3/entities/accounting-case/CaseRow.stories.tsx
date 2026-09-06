@@ -108,7 +108,7 @@ const FULL = caseColumns({ href, counterpartyHref });
 // Die festen Spuren (1270) plus neun Lücken à 10 und zweimal 18 Polster
 // (1396) plus der Boden des Anzeigenamens (24ch ≈ 175) — darunter scrollt die
 // Tabelle waagerecht, statt den Rang 1 auf 2 px zu quetschen.
-const MIN_WIDTH = 1570;
+const MIN_WIDTH = 1630;
 
 function Frame({
   children,

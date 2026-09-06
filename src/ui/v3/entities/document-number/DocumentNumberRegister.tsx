@@ -27,10 +27,14 @@ import type {
  * why is a list that has to be trusted, and this one has to be checkable.
  */
 
-/* `minmax(12ch, …)`: sonst fällt die erste Spur unter 760 px auf 20 px, und
+/* `minmax(160px, …)`: sonst fällt die erste Spur unter 760 px auf 20 px, und
    Nummer und Marke überschreiben die Nachbarspalte (gemessen: 13 Überläufe).
-   `minWidth` deckt die festen Spuren plus vier Lücken und das Polster. */
-const COLS = "minmax(12ch, 1fr) 220px 120px 130px 130px";
+   `minWidth` deckt die festen Spuren plus vier Lücken und das Polster.
+
+   In px, nicht in `ch`: eine `ch`-Untergrenze rechnet sich aus der
+   Schriftgröße des Elements, und Kopf und Zeile stehen auf verschiedenen
+   (12,5 gegen 13,5) — die Spur ginge auseinander (0070). */
+const COLS = "minmax(160px, 1fr) 220px 120px 130px 130px";
 const MIN_WIDTH = 780;
 
 /**

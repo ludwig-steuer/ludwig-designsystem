@@ -92,11 +92,13 @@ export function caseColumns({
     name: {
       key: "name",
       header: "Sachverhalt",
-      // `minmax(24ch, …)`, nicht `minmax(0, …)`: die neun festen Spuren
-      // ergeben mit Lücken und Polster 1396 px, und in einem 1398-px-Rahmen
-      // blieben dem Rang 1 damit **2 px** — der Name lief über seinen Nachbarn.
-      // Ein Boden zwingt die Tabelle stattdessen ins waagerechte Scrollen.
-      width: "minmax(24ch, 1fr)",
+      // Ein **Boden**, nicht `minmax(0, …)`: die neun festen Spuren ergeben
+      // mit Lücken und Polster 1396 px, und in einem 1398-px-Rahmen blieben
+      // dem Rang 1 damit **2 px**. Und in **px**, nicht in `ch`: eine
+      // `ch`-Untergrenze rechnet sich aus der Schriftgröße des Elements, und
+      // der Spaltenkopf steht auf 12,5 px, die Zeile auf 13,5 — gemessen
+      // liefen Kopf und Zeilen dadurch 6 px auseinander (0070).
+      width: "minmax(200px, 1fr)",
       sortable: true,
       cell: (c) => {
         const name = caseTitle(c);
