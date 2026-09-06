@@ -94,13 +94,13 @@ Die Reihenfolge ist die des Profils und über alle drei Sätze dieselbe;
 |---|---|---|---|
 | `DOCUMENT_LIST_COLUMNS` | Belegliste des Jahres | 1–7 + Einordnung + Verarbeitung + Erledigt | „kein unerledigter Beleg bleibt im Jahr zurück" — die Erledigung ist die Frage, alles davor die Identität |
 | `INBOX_COLUMNS` | Upload & Inbox | Dateiname · Einordnung · Konfidenz · Zustand | Der Eingang kennt weder Jahr noch Sachverhalt; der Gegenpart ist erst das **Ergebnis** der Einordnung, deshalb führt hier die Datei |
-| `SUBMIT_COLUMNS` | Beleg einreichen | Dateiname · Belegart · Größe · Zustand | Die Größe steht nur hier: 25 MB je Datei ist die Grenze, an der das Einreichen scheitert |
+| `SUBMIT_COLUMNS` | Beleg einreichen | Dateiname · **Belegform** · Größe · Erkennung | Die Größe steht nur hier: 25 MB je Datei ist die Grenze, an der das Einreichen scheitert. Die **Form** ist das Kriterium der Grundgesamtheit, nicht die Art — die beiden Achsen bleiben getrennt |
+| `STUCK_COLUMNS` | Stockende Belege, beide Ausprägungen | Gegenpart · Datei · Sachverhalt · Eingang · Einordnung · Beleg-Zustand, geführt von der **Datei** (`lead`) | „nichts verschwindet still". Eine Prop `stuckVariant` entscheidet, was die Achse `beleg_haenger` über denselben Beleg sagt — zwei Ausprägungen, ein Satz (§8) |
 
-**Zwei Punkte fehlen im Anzeige-Typ** und kommen als Befund: `confidence`
-(Achse `konfidenz`) und `sizeBytes`. Beide stehen in der App am Eingang, keiner
-im `SourceDocumentVM`. Solange sie fehlen, zeigen ihre Spalten „—" — sie
-werden **nicht** weggelassen, sonst sähe die Inbox vollständig aus, während
-sie die halbe Antwort schuldig bleibt.
+**Konfidenz und Größe stehen im Typ** — der ursprüngliche Befund (B1/L-79),
+sie fehlten dort, war falsch; `InboxEntry` trägt beide. Die Konfidenz ist dabei
+eine **Zahl** (`numeric(5,4)`) und bekommt keinen Badge: die Achse `konfidenz`
+gehört dem Buchungsvorschlag (Befund L-80). Siehe „Nach der Abnahme".
 
 ### Schnittstelle
 
@@ -145,12 +145,16 @@ Fest: typecheck · build · Datei nach der Familie · Code englisch mit
 
 Variabel:
 
-- [ ] Die Reihenfolge der Punkte ist in allen drei Sätzen dieselbe; `columns` wählt nur aus (Story `Inbox`, verdreht übergeben)
+- [ ] Die Reihenfolge der Punkte ist in allen **vier** Sätzen dieselbe; `columns` wählt nur aus (Story `Inbox`, verdreht übergeben). Welcher Punkt **führt**, sagt `lead` — das ist die einzige Abweichung, und sie ist eine Prop
 - [ ] Kopf und Zeilen enden bei **vier** Breiten an derselben Kante, kein Überlauf (gemessen)
 - [ ] Der führende Punkt kürzt mit Ellipse und hat einen Boden (`minmax`), der Rest steht fest
 - [ ] Zahlen rechts mit `tnum`, Dateiname und Kennung mono
 - [ ] Jede der vier Achsen läuft über `StatusBadge`, keine lokale Map (`grep`)
-- [ ] `confidence` und `size` zeigen „—", solange der Typ sie nicht trägt (Story `Inbox`, `Submit`)
+- [ ] `confidence` zeigt den **Anteil in Prozent**, nicht ein Achsen-Wort — die Achse `konfidenz` gehört dem Buchungsvorschlag (Story `Inbox`, Befund L-80)
+- [ ] `size` rechnet auf derselben Basis wie die Grenze, gegen die sie gelesen wird (`formatBytes`, binär wie `FileDrop`)
+- [ ] Jede Liste rollt unterhalb ihrer `minWidth` waagerecht, statt eine Spalte abzuschneiden (`sourceDocumentMinWidth`, gemessen bei 700 px)
+- [ ] Die Endung des Dateinamens bleibt **in** ihrer Zelle (Story `Edges`, gemessen)
+- [ ] Ein Betrag ohne Währung steht ohne Zeichen da (Story `Edges`)
 - [ ] Die kurze Liste unterscheidet ihre **zwei** Leerfälle (Stories `ListEmpty`, `ListNotExpected`)
 - [ ] Ein Beleg ohne Gegenpart führt mit dem Dateinamen (Story `Edges`)
 - [ ] offen (App): ersetzt die Zeilen der drei langen Listen und `BelegeTab`/`ChildDocsCard`
@@ -164,7 +168,9 @@ Variabel:
 
 ### Beim Bauen gemessen
 
-**Eine dehnbare Spur je Tabelle, und ihre Untergrenze in Pixeln.** Der erste
+**`ch` ist kein Maß für eine Spur.** (Der erste Wortlaut dieses Absatzes machte
+daraus „eine dehnbare Spur je Tabelle" — das ist widerlegt: zwei dehnbare
+Spuren mit px-Boden laufen exakt zusammen, eine mit `ch`-Boden nicht.) Der erste
 Anlauf gab dem führenden Punkt `minmax(20ch, 1fr)` und der Kennung
 `minmax(16ch, 0.8fr)`. Gemessen liefen Kopf und Zeilen **10 px** auseinander —
 und der Grund ist eine Falle, die das Set schon dreimal auf andere Weise
@@ -172,7 +178,9 @@ getroffen hat: eine `ch`-Untergrenze rechnet sich aus der **Schriftgröße des
 Elements**, und der Spaltenkopf steht auf 12,5 px, die Zeile auf 13,5. Zwei
 dehnbare Spuren teilen sich den Rest also in Kopf und Zeile verschieden.
 
-Jetzt eine dehnbare Spur mit `minmax(180px, 1fr)`, die Kennung fest. Gemessen
+Jetzt `minmax(180px, 1fr)` für den führenden Punkt, die Kennung fest — nicht
+weil zwei dehnbare Spuren ein Problem wären, sondern weil die Kennung nichts zu
+wachsen hat. Gemessen
 enden Kopf und alle Zeilen bei 1839 px, `scrollWidth − clientWidth` = 0, und
 das waagerechte Scrollen trägt der `minWidth`-Rahmen (1840 = Summe der Spuren
 plus neun Lücken plus Polster).
@@ -183,7 +191,126 @@ gemessen „Datei · Einordnung · Konfidenz · Zustand".
 
 **Vier Punkte sind in den Typ gekommen**, zwei davon aus dem Profil
 (`processingStatus`, Achse `beleg`, und `inboxStatus`, Achse `beleg_inbox` —
-der einzige Zustand, den jede Ausprägung trägt), zwei als Befund **L-79**
-(`classConfidence`, `sizeBytes`). Die zwei Befund-Spalten zeigen „—", statt
-weggelassen zu werden: eine Inbox ohne Konfidenzspalte sähe vollständig aus,
-während sie die halbe Antwort schuldig bleibt.
+der einzige Zustand, den jede Ausprägung trägt), zwei als vermeintlicher Befund
+**L-79** (`classConfidence`, `sizeBytes`) — der Befund war falsch, die App
+trägt beide längst; siehe den Abschnitt nach der Abnahme.
+
+## Nach der Abnahme vom 2026-09-07 — was sich geändert hat
+
+Die Abnahme kam **zurück** und hat dabei zwei Dinge geleistet, die eine gute
+Abnahme leistet: sie hat die zentrale Messung dieser Spec nachgerechnet und
+bestätigt (der `ch`-Befund, mit eigenen Zahlen: Kopf 12,5 px gegen Zeile
+13,5 px, 1ch = 8,25 gegen 8,531 px), und sie hat zwei Kriterien in genau der
+Story fallen sehen, die sie beweisen sollte. Was jetzt anders ist:
+
+### Der vierte Spaltensatz steht (M1)
+
+`STUCK_COLUMNS` mit der Spalte `stuckState` über der Achse `beleg_haenger` und
+`stuckVariant: "stuck" | "inflight"`. Beide Ausprägungen teilen sich einen
+Satz — sie unterscheiden sich nur in Grundgesamtheit und Leerfall, und das ist
+nach §8 eine Prop, keine zweite Komponente. Story `Stuck` zeigt beide
+untereinander: **dieselben** Spalten, zwei verschiedene Wörter über denselben
+Beleg.
+
+Damit war auch der strukturelle Widerspruch fällig, den die Abnahme benannt
+hat: der stockende Beleg führt mit der **Datei**, obwohl der Gegenpart im Satz
+steht. Die Regel „`columns` wählt aus, ordnet nicht um" bleibt — was
+dazukommt, ist eine Prop `lead`. Zwei Folgen, beide gemessen:
+
+- Die **Reihenfolge** des stockenden Satzes ist die des Katalogs
+  (Gegenpart · Datei · Sachverhalt · Eingang · Einordnung · Beleg-Zustand),
+  nicht die der Profil-Tabelle. Das ist Absicht: §7 des Profils verlangt
+  dieselbe Reihenfolge über **alle** Formen, und eine Liste, die sie für sich
+  umdreht, bricht genau das. Die Profil-Zeile beschreibt die heutige
+  App-Tabelle, nicht eine Anforderung an die Ordnung.
+- Der Gegenpart fällt **nicht mehr** auf den Dateinamen zurück, wenn die Datei
+  ohnehin ihre eigene Spalte hat — sonst stand derselbe Name zweimal in einer
+  Zeile. Gemessen im stockenden Satz, wo ein Gegenpart die Ausnahme ist.
+
+### Belegform statt Belegart beim Einreichen (M2)
+
+Die Grundgesamtheit dieser Liste ist „eingeordnet **und** qualifizierende
+Belegform" — die Form ist das Kriterium, das dort geprüft wird. Neue
+Katalogspalte `form` über `formatDocumentForm()`; `SUBMIT_COLUMNS` nimmt sie
+statt `kind`. Die beiden Achsen sind laut GLOSSARY orthogonal und bleiben es.
+
+### Die Endung des Dateinamens (M3)
+
+Die Mitten-Kürzung nach Zeichen wurde vom CSS am Ende noch einmal gekappt:
+gemessen lag „.pdf" **69 px** außerhalb seiner Zelle — in der `Edges`-Story,
+die das Gegenteil beweisen sollte. Jetzt trägt der Katalog `FileName` (Name
+und Endung in zwei Spans, nur der Name schrumpft), und `.v2doccol__lead` ist
+die Flex-Box dazu. Gemessen: die Endung endet bei 249 px in einer Zelle, die
+bei 249 px endet — bei 1440, 900 und 700 px.
+
+Ein Zwischenschritt gehört in die Lehre: der erste Versuch schrieb
+`> *:not(.v2doc__keyname) { flex-shrink: 0 }` — die Regel traf den Zeilenlink
+selbst und nagelte ihn fest; die Endung stand danach 150 px draußen. Richtig
+ist `.v2doc__keyname + *`: nur das, was **hinter** dem Namen steht.
+
+### `minWidth` ist keine Handarbeit mehr (M4)
+
+`sourceDocumentMinWidth(columns)` rechnet Spuren, Rinnen und Polster. Vorher
+setzten zwei Stories die Zahl von Hand und zwei gar nicht — gemessen verlor
+`Inbox` bei 700 px 132 px ihrer letzten Spalte, ohne Scrollweg, und die Karte
+schneidet ab. Jetzt rollt jede der vier Listen waagerecht, statt eine Spalte zu
+verschlucken (gemessen bei 700 px).
+
+### Achsenwerte, Währung, Zahlen (M5, M6, M7, M8)
+
+- Die Fixtures führten `processingStatus: "booked"` und `"extracted"` — beides
+  kennt die Achse `beleg` nicht, und die Spalte zeigte gemessen das rohe Wort
+  **„booked"**. Jetzt `processed`, `in_progress`, `review_needed`, `failed` —
+  die Spalte zeigt damit auch eine Kritikalitätsstufe.
+- `currency={m.currency ?? "EUR"}` ist weg. Die Familie schreibt eine Datei
+  weiter, dass `currency: null` eine Dezimalzahl **ohne** Währung ist; ein
+  stilles „€" auf einer Schweizer Rechnung ist eine falsche Tatsache, kein
+  Format-Vorgabewert. Story `Edges` zeigt „2.480,00" ohne Zeichen.
+- Zwei Byte-Formatierer stritten sich um die 25-MB-Grenze: der Katalog rechnete
+  dezimal, `FileDrop` binär — und die Prüfung der Grenze ist binär. Jetzt
+  einer, `formatBytes` in `format.ts`, von beiden benutzt.
+- **Die Konfidenz ist eine Zahl, keine Achse.** `class_confidence` ist
+  `numeric(5,4)`; die Achse `konfidenz`, die dem Namen nach passt, gehört dem
+  Buchungsvorschlag und hätte einer Belegklassifikation „Bitte Konto und
+  Steuerschlüssel prüfen" geantwortet. Die Spalte zeigt jetzt den Anteil als
+  Prozentzahl, rechtsbündig — so wie die Belegtabs der App ihn schon schreiben.
+  Der Typ trägt `classConfidence: number | null` statt `string`.
+
+### Die Spec selbst war an drei Stellen falsch (M8a, M16, M17)
+
+- **Das „—"-Kriterium ist gestrichen.** Es widersprach dem eigenen Abschnitt
+  „Beim Bauen gemessen": die Felder **sind** im Typ, die Spalten zeigen echte
+  Werte. Die Abwägung („eine Inbox ohne Konfidenzspalte sähe vollständig aus,
+  während sie die halbe Antwort schuldig bleibt") war richtig gestellt und
+  falsch beantwortet, weil der dritte Weg — die Spalte **füllen** — offenstand.
+- **Befund B1/L-79 stimmte nicht.** `InboxEntry` trägt beide Felder längst;
+  L-79 ist im Register zurückgezogen und auf das Durchreichen ins View-Model
+  der Belegliste eingeschränkt. Neu: **L-80** (eigene Achse für die
+  Klassifikations-Konfidenz) und **L-81** (die Hänger-Ableitung gehört in
+  `domain/`, nicht in die UI).
+- **Die Lehre aus der Messung war zur Hälfte falsch.** „Eine dehnbare Spur je
+  Tabelle" ist keine Regel — nachgemessen laufen zwei dehnbare Spuren mit
+  px-Boden exakt zusammen (Δ 0), während **eine** dehnbare Spur mit `ch`-Boden
+  schon 5,4 px auseinanderläuft. Die Regel lautet: **`ch` ist kein Maß für eine
+  Spur.** Kommentar und Spec sagen das jetzt beide.
+
+### Dazu, ohne eigene Nummer
+
+- Die vier Zustandsspalten tragen ihr **(i)** jetzt selbst (`headerAside`,
+  Z4) — vorher hängten die Stories es von Hand in ihren eigenen Kopf und
+  verdeckten die Lücke (M9). Dasselbe steht für `caseColumns` und
+  `bankTransactionColumns` noch aus.
+- Der Kopf „Zustand" heißt **„Erkennung"** (M10): Z4 verbietet das leere Wort,
+  und die Spalte sagt eine bestimmte Sache — wie weit die Einordnung kam.
+- Die Stories laufen jetzt über **`DataTable`** statt über handgebauten Kopf
+  und Zeilen (M12). Damit findet die Sortierung, die der Katalog anbietet,
+  auch statt: gemessen vier Sortier-Links im Kopf der Belegliste. Der
+  Spaltensatz wird dadurch das, was er sein soll — der Katalog **für**
+  `DataTable`, nicht daneben.
+- Deutsche Kommentare im Katalog sind englisch (M14), `sourceDocumentTracks`
+  hat `@when`/`@instead` (M15).
+
+**Offen aus der Abnahme:** M11 (`CaseCell` bekommt eine erfundene `kind`),
+M13 (Ton und Mono des führenden Punktes — die Farbe erbt jetzt, das Gewicht
+steht auf 600, der Mono-Rückfall in der Kennung steht noch aus), M18
+(Erfolgs-Icon im Leerfall der kurzen Liste). Sie gehen in die nächste Runde.

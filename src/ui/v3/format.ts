@@ -270,3 +270,21 @@ export function formatDuration(seconds: number | null): string {
   const rest = minutes % 60;
   return rest === 0 ? `${hours} Std` : `${hours} Std ${rest} Min`;
 }
+
+/**
+ * `412 kB` · `2,4 MB` — the size of a file, on the **binary** base.
+ *
+ * The base is not cosmetic: every upload limit in this set is checked as
+ * `mb * 1024 * 1024` (`FileDrop`), so a decimal MB would put a number next to
+ * the limit that the limit does not use. Measured: 26 000 000 bytes read
+ * „26,0 MB" beside a 25-MB rule that accepted the file — 24,8 MiB. One base,
+ * one number.
+ *
+ * @when    A byte count is shown to someone — list column, drop zone, facts.
+ * @instead A share of something → Progress. An amount of money → Amount.
+ */
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} kB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
+}

@@ -1,12 +1,17 @@
+import { formatDocumentForm } from "@/ludwig/modules/source-docs/domain/document-form-labels";
 import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
+import type { ReactNode } from "react";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { Amount } from "../../primitives/Amount";
 import { MonoCell } from "../../primitives/Cells";
 import { Link } from "../../primitives/Link";
 import { Time } from "../../primitives/Time";
 import { CaseCell } from "../accounting-case/CaseCell";
+import { formatBytes } from "../../format";
 import {
+  FileName,
   SourceDocumentClass,
   SourceDocumentCompletion,
   clipMiddle,
@@ -16,22 +21,27 @@ import {
 import { resolveSourceDocumentDetail } from "./source-document-detail";
 
 /**
- * The points of a document as cells — **one catalogue for three lists** (0070).
+ * The points of a document as cells — **one catalogue for four lists** (0070).
  *
- * Six lists show the same document. Three of them are long, filtered and paged
- * — the year's document list, Upload & Inbox, and „submit a document" — and
- * the profile's §8 cut decided them once: that is `DataTable` with one column
- * **set** each, not three components.
+ * Six lists show the same document. Four of them are long, filtered and paged
+ * — the year's document list, Upload & Inbox, „submit a document" and the two
+ * tabs of the stuck documents — and the profile's §8 cut decided them once:
+ * that is `DataTable` with one column **set** each, not four components. The
+ * two stuck tabs share one set with a variant, because they differ only in
+ * population and empty case.
  *
- * The order of the points is the profile's and the same in all three sets;
+ * The order of the points is the profile's and the same in every set;
  * `columns` **selects**, it never reorders. What separates the sets is which
- * question the list answers, and that is written at each set below.
+ * question the list answers, and that is written at each set below. What the
+ * order cannot decide is **which point leads** — the stuck list leads with
+ * the file although it carries the counterparty, so that is a prop.
  */
 
 export type SourceDocumentColumn =
   | "counterparty"
   | "fileName"
   | "kind"
+  | "form"
   | "amount"
   | "documentDate"
   | "identifier"
@@ -42,13 +52,15 @@ export type SourceDocumentColumn =
   | "completed"
   | "inboxState"
   | "confidence"
-  | "size";
+  | "size"
+  | "stuckState";
 
 /** Ranks 1–7 of the profile, then the states. One order for every form. */
 const ORDER: SourceDocumentColumn[] = [
   "counterparty",
   "fileName",
   "kind",
+  "form",
   "amount",
   "documentDate",
   "identifier",
@@ -58,6 +70,7 @@ const ORDER: SourceDocumentColumn[] = [
   "confidence",
   "size",
   "processing",
+  "stuckState",
   "inboxState",
   "completed",
 ];
@@ -91,12 +104,38 @@ export const INBOX_COLUMNS: SourceDocumentColumn[] = [
   "inboxState",
 ];
 
-/** Submitting: the size stands **only** here — 25 MB is where it fails. */
+/**
+ * Submitting: the size stands **only** here — 25 MB is where it fails.
+ *
+ * The second column is the **form**, not the kind. The population of this
+ * list is „`status='classified'` **and** a qualifying document form" — the
+ * form is the criterion someone checks here, and the two are different axes
+ * that the GLOSSARY keeps apart on purpose (profile „Listen").
+ */
 export const SUBMIT_COLUMNS: SourceDocumentColumn[] = [
   "fileName",
-  "kind",
+  "form",
   "size",
   "inboxState",
+];
+
+/**
+ * Stuck documents: „nothing disappears quietly." Two populations — still
+ * running (`inflight`) and stuck (`stuck`) — with the same columns and the
+ * same order; what differs is the population and the empty case, so it is
+ * **one** set with a variant, not two (profile §8).
+ *
+ * It leads with the **file**, although the counterparty is in the set: a
+ * document that gets stuck usually has no counterparty yet — that is the
+ * result of the extraction that did not happen.
+ */
+export const STUCK_COLUMNS: SourceDocumentColumn[] = [
+  "fileName",
+  "classification",
+  "counterparty",
+  "receivedDate",
+  "case",
+  "stuckState",
 ];
 
 export interface SourceDocumentColumnOptions {
@@ -105,6 +144,32 @@ export interface SourceDocumentColumnOptions {
   /** Passed through to `CaseCell`. */
   caseHref?: (caseId: string) => string;
   columns?: SourceDocumentColumn[];
+  /**
+   * Which point carries the row link. Without it the counterparty leads
+   * whenever it is in the set — which is right for four of the five sets and
+   * **wrong** for the stuck one: it leads with the file and carries the
+   * counterparty further right (profile „Listen").
+   */
+  lead?: "counterparty" | "fileName";
+  /**
+   * Which of the two stuck lists — it decides what the axis `beleg_haenger`
+   * says about the same document. Only read by the column `stuckState`.
+   */
+  stuckVariant?: StuckVariant;
+}
+
+export type StuckVariant = "stuck" | "inflight";
+
+/**
+ * The four-way table of the axis `beleg_haenger` out of its two inputs.
+ *
+ * The app writes the same four cases inline in `StuckDocumentsTable`; a
+ * derivation the UI needs belongs in `domain/` (finding L-81). Until it moves
+ * there it stands here **once**, not twice.
+ */
+function stuckState(hasInvoiceRow: boolean | undefined, variant: StuckVariant): string {
+  if (variant === "inflight") return hasInvoiceRow ? "wird_extrahiert" : "wird_klassifiziert";
+  return hasInvoiceRow ? "datum_fehlt" : "nicht_extrahiert";
 }
 
 /**
@@ -116,36 +181,58 @@ export function sourceDocumentColumns({
   href,
   caseHref,
   columns = DOCUMENT_LIST_COLUMNS,
+  lead: leadColumn,
+  stuckVariant = "stuck",
 }: SourceDocumentColumnOptions): ColumnDef<SourceDocumentVM>[] {
   const picked = new Set(columns);
-  // Whichever of the two identity points comes first carries the row link.
-  const lead: SourceDocumentColumn = picked.has("counterparty") ? "counterparty" : "fileName";
+  // Whichever of the two identity points comes first carries the row link —
+  // unless the caller says otherwise (the stuck list leads with the file).
+  const lead: SourceDocumentColumn =
+    leadColumn ?? (picked.has("counterparty") ? "counterparty" : "fileName");
 
-  const leading = (doc: SourceDocumentVM, text: string) =>
+  const leading = (doc: SourceDocumentVM, content: ReactNode) =>
     href ? (
       <Link className="v2rowlink" href={href(doc)}>
-        {text}
+        {content}
       </Link>
     ) : (
-      text
+      content
     );
 
   const defs: Record<SourceDocumentColumn, ColumnDef<SourceDocumentVM>> = {
     counterparty: {
       key: "counterparty",
       header: "Gegenpart",
-      // `px`, nicht `ch`: eine `ch`-Untergrenze rechnet sich aus der
-      // **Schriftgröße der Zelle**, und der Spaltenkopf steht auf 12,5 px, die
-      // Zeile auf 13,5. Gemessen liefen Kopf und Zeilen dadurch 10 px
-      // auseinander — mit zwei dehnbaren Spuren verteilt sich der Rest
-      // verschieden.
+      // `px`, never `ch`: a `ch` minimum is computed from the **font size of
+      // the element**, and the column head stands at 12.5 px, the row at
+      // 13.5. Measured, head and rows drifted 10 px apart. The number of
+      // flexible tracks has nothing to do with it — measured again, two
+      // flexible tracks with a px floor run exactly together (Δ 0), one
+      // flexible track with a `ch` floor drifts by 5.4 px.
       width: "minmax(180px, 1fr)",
       sortable: true,
       // Filled 50–95 % depending on the kind. Without it the file name leads —
       // it is the one point every kind of document carries.
+      // Without a counterparty the file name leads — and then as `FileName`,
+      // not as plain text: a `text-overflow` on the parent cuts off exactly
+      // what the middle cut is there to keep. Measured, „.pdf" stood 69 px
+      // outside its cell, in the story that was meant to prove the opposite.
       cell: (d) => (
         <span className="v2doccol__lead" title={d.counterparty ?? d.fileName}>
-          {leading(d, d.counterparty ?? clipMiddle(d.fileName, 48))}
+          {leading(
+            d,
+            d.counterparty ? (
+              <span className="v2doc__keyname">{d.counterparty}</span>
+            ) : picked.has("fileName") ? (
+              // The set already shows the file in its own column — falling
+              // back to it here would print the same name twice in one row.
+              // Measured in the stuck list, where a counterparty is the
+              // exception, not the rule.
+              <span className="v2muted">—</span>
+            ) : (
+              <FileName value={d.fileName} max={48} />
+            ),
+          )}
         </span>
       ),
     },
@@ -156,7 +243,11 @@ export function sourceDocumentColumns({
       sortable: true,
       cell: (d) => (
         <span className="v2doccol__lead v2mono" title={d.fileName}>
-          {lead === "fileName" ? leading(d, clipMiddle(d.fileName, 48)) : clipMiddle(d.fileName, 48)}
+          {lead === "fileName" ? (
+            leading(d, <FileName value={d.fileName} max={48} />)
+          ) : (
+            <FileName value={d.fileName} max={48} />
+          )}
         </span>
       ),
     },
@@ -165,6 +256,16 @@ export function sourceDocumentColumns({
       header: "Belegart",
       width: "170px",
       cell: (d) => sourceDocTypeLabel(d.sourceDocType, d.classDocumentForm),
+    },
+    form: {
+      key: "form",
+      header: "Belegform",
+      width: "170px",
+      // **Not** the kind. The two are separate axes (GLOSSARY): the kind is
+      // what the document is in Ludwig (invoice, contract, statement), the
+      // form is what the classifier read out of the paper — and the form is
+      // what decides whether a document qualifies for submitting.
+      cell: (d) => formatDocumentForm(d.classDocumentForm),
     },
     amount: {
       key: "amount",
@@ -176,7 +277,10 @@ export function sourceDocumentColumns({
       // contract has no gross amount, and „—" would claim it should.
       cell: (d) => {
         const m = resolveSourceDocumentDetail(d.sourceDocType, d.detail)?.measure;
-        return m ? <Amount value={m.value} currency={m.currency ?? "EUR"} /> : null;
+        // No silent EUR: the family writes it down one file over („`currency:
+        // null` is a decimal without one"), and a made-up „€" on a foreign
+        // invoice is a wrong fact, not a formatting default.
+        return m ? <Amount value={m.value} currency={m.currency} size="sm" /> : null;
       },
     },
     documentDate: {
@@ -190,9 +294,9 @@ export function sourceDocumentColumns({
     identifier: {
       key: "identifier",
       header: "Kennung",
-      // Fest, nicht dehnbar: **eine** dehnbare Spur je Tabelle. Zwei teilen
-      // den Rest, und wer den Rest teilt, teilt ihn in Kopf und Zeile
-      // verschieden, sobald ihre Mindestmaße auseinandergehen.
+      // Fixed, because nothing here has to grow: the identifier is a number
+      // of known length. (It is **not** fixed because a second flexible track
+      // would be a problem — that was the wrong lesson; see `counterparty`.)
       width: "170px",
       cell: (d) => {
         const ident = sourceDocumentIdentifier(d);
@@ -238,12 +342,16 @@ export function sourceDocumentColumns({
     classification: {
       key: "classification",
       header: "Einordnung",
+      headerAside: <StatusInfoButton axis="beleg_kategorie" />,
       width: "220px",
       cell: (d) => <SourceDocumentClass document={d} />,
     },
     processing: {
       key: "processing",
       header: "Verarbeitung",
+      // Z4: a status column carries its (i) — and it belongs **here**, not in
+      // `header`: a button inside the sort link would be invalid HTML.
+      headerAside: <StatusInfoButton axis="beleg" />,
       width: "160px",
       cell: (d) =>
         d.processingStatus ? (
@@ -255,12 +363,23 @@ export function sourceDocumentColumns({
     completed: {
       key: "completed",
       header: "Erledigt",
+      headerAside: <StatusInfoButton axis="beleg_erledigung" />,
       width: "170px",
       cell: (d) => <SourceDocumentCompletion document={d} />,
     },
+    stuckState: {
+      key: "stuckState",
+      header: "Beleg-Zustand",
+      headerAside: <StatusInfoButton axis="beleg_haenger" />,
+      width: "170px",
+      cell: (d) => <StatusBadge axis="beleg_haenger" status={stuckState(d.hasInvoiceRow, stuckVariant)} />,
+    },
     inboxState: {
       key: "inboxState",
-      header: "Zustand",
+      // **Not** „Zustand": Z4 forbids the empty word, and this column says
+      // one specific thing — how far the classification of this document got.
+      header: "Erkennung",
+      headerAside: <StatusInfoButton axis="beleg_inbox" />,
       width: "190px",
       cell: (d) =>
         d.inboxStatus ? (
@@ -273,14 +392,18 @@ export function sourceDocumentColumns({
       key: "confidence",
       header: "Konfidenz",
       width: "140px",
-      // Shows „—" while the type does not carry it (finding B1) — the column
-      // is **not** left out: an inbox without it would look complete while it
-      // owes half the answer.
+      align: "end",
+      // A **number**, not a badge. `class_confidence` is a share between 0
+      // and 1; the axis `konfidenz` that looks like it fits belongs to the
+      // booking proposal and would answer a document classification with
+      // „Bitte Konto und Steuerschlüssel prüfen". Until this axis exists
+      // (finding L-80) the share stands the way the app's own document tabs
+      // already write it.
       cell: (d) =>
-        d.classConfidence ? (
-          <StatusBadge axis="konfidenz" status={d.classConfidence} />
-        ) : (
+        d.classConfidence == null ? (
           <span className="v2muted">—</span>
+        ) : (
+          <span className="v2num">{Math.round(d.classConfidence * 100)} %</span>
         ),
     },
     size: {
@@ -299,14 +422,40 @@ export function sourceDocumentColumns({
   return ORDER.filter((c) => picked.has(c)).map((c) => defs[c]);
 }
 
-/** The grid track list for a column set — head and rows read the same string. */
+/**
+ * The grid track list for a column set — head and rows read the same string.
+ *
+ * @when    A `Table` is framed around `sourceDocumentColumns()` by hand.
+ * @instead `DataTable` builds it itself — it is the usual way.
+ */
 export function sourceDocumentTracks(columns: ColumnDef<SourceDocumentVM>[]): string {
   return columns.map((c) => c.width ?? "minmax(0, 1fr)").join(" ");
 }
 
-/** „4,2 MB" — the 25 MB limit is what this number is read against. */
-function formatBytes(bytes: number): string {
-  const mb = bytes / 1_000_000;
-  if (mb >= 1) return `${mb.toFixed(1).replace(".", ",")} MB`;
-  return `${Math.max(1, Math.round(bytes / 1000))} kB`;
+/**
+ * The width below which the table has to scroll instead of cutting a column
+ * off. Every fixed track plus the floor of every flexible one, the gutters
+ * between them and the card padding.
+ *
+ * It exists because the caller cannot know it: measured, `INBOX_COLUMNS`
+ * without a `minWidth` lost 132 px of its last column at 700 px — no
+ * scrollbar, the state simply gone, and the card clips. A number someone has
+ * to work out by hand is a number that will be wrong.
+ *
+ * @when    A document list is built and needs its `minWidth`.
+ * @instead A list whose columns never change → write the number down.
+ */
+export function sourceDocumentMinWidth(columns: ColumnDef<SourceDocumentVM>[]): number {
+  const GUTTER = 10;
+  const PADDING = 70;
+  const floor = (width: string | undefined): number => {
+    if (!width) return 0;
+    const min = /minmax\(\s*(\d+)px/.exec(width);
+    if (min?.[1]) return Number(min[1]);
+    const px = /^(\d+)px$/.exec(width.trim());
+    return px?.[1] ? Number(px[1]) : 0;
+  };
+  const tracks = columns.reduce((sum, c) => sum + floor(c.width), 0);
+  return tracks + GUTTER * Math.max(0, columns.length - 1) + PADDING;
 }
+

@@ -3222,4 +3222,17 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .pz-loop { display: inline-flex; align-items: center; gap: 3px; }
 
 /* --- Belegliste: Spaltensätze (0070) -------------------------------------- */
-.v2doccol__lead { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Wie `.v2doc__key`: der Name schrumpft, die Endung nicht. Ein reines
+   `text-overflow` am Elternteil schnitt genau die `.pdf` ab, für die die
+   Mitten-Kürzung da ist — gemessen stand sie 69 px außerhalb der Zelle. */
+.v2doccol__lead,
+.v2doccol__lead .v2rowlink { display: flex; align-items: baseline; min-width: 0; }
+/* Nur der Name schrumpft. Die Endung steht **hinter** ihm und behält ihre
+   Breite — `> *:not(.v2doc__keyname)` traf hier den Link selbst und nagelte
+   ihn fest: gemessen lag „.pdf" danach 150 px außerhalb der Zelle. */
+.v2doccol__lead .v2doc__keyname + * { flex-shrink: 0; }
+/* Der Zeilen-Link erbt die Farbe und das Gewicht des führenden Punktes: er
+   ist die Zeile, nicht ein Wort darin — dieselbe Regel wie in der Zeile
+   (`.v2doc__lead`) und im Sachverhalts-Katalog. */
+.v2doccol__lead .v2rowlink { color: inherit; text-decoration: none; }
+.v2doccol__lead { font-weight: 600; }

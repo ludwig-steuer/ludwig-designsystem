@@ -114,16 +114,29 @@ export interface SourceDocumentVM {
    */
   inboxStatus?: string | null;
   /**
-   * How sure the classification is, axis `konfidenz`. **Not in the app's view
-   * model yet** (0070 B1): it exists at the inbox, and the column shows „—"
-   * until it is handed over.
+   * How sure the classification is: `class_confidence`, `numeric(5,4)`, so a
+   * share between 0 and 1 — **a number, not an axis value**. The axis
+   * `konfidenz` looks like it fits and does not: it is the confidence of a
+   * **booking proposal** (`client_journal_entry.proposal_confidence`), and its
+   * „Bitte Konto und Steuerschlüssel prüfen" is no answer to a document
+   * classification. Until there is an axis of its own (finding L-80) the
+   * column shows the share as a percentage, the way the app's document tabs
+   * already do.
    */
-  classConfidence?: string | null;
+  classConfidence?: number | null;
   /**
-   * File size in bytes. Also missing over there (0070 B1) — it matters at
-   * exactly one place: 25 MB is where submitting fails.
+   * File size in bytes — `ops_stored_files.byte_size`, handed over with the
+   * inbox entry. It matters at exactly one place: 25 MB is where submitting
+   * fails.
    */
   sizeBytes?: number | null;
+  /**
+   * Whether the document already has an invoice row. Two booleans decide the
+   * axis `beleg_haenger` — this one and which of the two stuck lists is shown
+   * — and only the caller knows the first. Nothing else in this family reads
+   * it.
+   */
+  hasInvoiceRow?: boolean;
   /** Rank 6 — the case, as an inline mention. */
   caseNumber?: string | null;
   caseHref?: string | null;
@@ -173,7 +186,7 @@ export function clipMiddle(text: string, max: number): string {
  * half the middle cut would be pointless: the column would simply cut the
  * extension off again.
  */
-function FileName({ value, max }: { value: string; max: number }) {
+export function FileName({ value, max }: { value: string; max: number }) {
   const short = clipMiddle(value, max);
   const dot = short.lastIndexOf(".");
   const hasExtension = dot > 0 && short.length - dot <= 5;
@@ -206,7 +219,10 @@ export function sourceDocumentIdentifier(document: SourceDocumentVM): {
 } {
   const detail = resolveSourceDocumentDetail(document.sourceDocType, document.detail);
   if (detail?.identifier) return detail.identifier;
-  if (document.fileName) return { value: document.fileName, mono: false };
+  // Mono, like everywhere else a file name stands: the same name was set in
+  // mono in its own column and in proportional type here — one document, two
+  // typefaces in one row.
+  if (document.fileName) return { value: document.fileName, mono: true };
   return { value: document.id.slice(0, 8), mono: true };
 }
 

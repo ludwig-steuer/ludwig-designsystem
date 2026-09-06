@@ -2,14 +2,14 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   DOCUMENT_LIST_COLUMNS,
   INBOX_COLUMNS,
+  STUCK_COLUMNS,
   SUBMIT_COLUMNS,
   sourceDocumentColumns,
-  sourceDocumentTracks,
+  sourceDocumentMinWidth,
   type SourceDocumentColumn,
 } from "./source-document-columns";
 import type { SourceDocumentVM } from "./SourceDocument";
-import { Card, CardHead, HeadRow, Row, Table } from "../../primitives/Table";
-import { StatusInfoButton } from "../../patterns/StatusInfoButton";
+import { DataTable } from "../../patterns/DataTable";
 
 const meta: Meta = {
   title: "v3/Entitäten/Beleg/SourceDocumentColumns",
@@ -19,6 +19,8 @@ type Story = StoryObj;
 
 const href = (d: SourceDocumentVM) => `#beleg-${d.id}`;
 const caseHref = (id: string) => `#fall-${id}`;
+const listHref = (p: { sort?: string; dir?: string; page?: number }) =>
+  `#liste?sort=${p.sort ?? ""}&dir=${p.dir ?? ""}&page=${p.page ?? 1}`;
 
 const DOCS: SourceDocumentVM[] = [
   {
@@ -35,10 +37,11 @@ const DOCS: SourceDocumentVM[] = [
     docCategory: "performance",
     docDirection: "inbound",
     caseNumber: "2026-0412",
-    processingStatus: "booked",
+    processingStatus: "processed",
     inboxStatus: "classified",
-    classConfidence: "green",
+    classConfidence: 0.94,
     sizeBytes: 412_000,
+    hasInvoiceRow: true,
   },
   {
     id: "d2",
@@ -50,10 +53,11 @@ const DOCS: SourceDocumentVM[] = [
     receivedDate: "2026-09-01",
     completedAt: null,
     docCategory: "payment",
-    processingStatus: "extracted",
+    processingStatus: "in_progress",
     inboxStatus: "classified",
-    classConfidence: "yellow",
+    classConfidence: 0.71,
     sizeBytes: 2_400_000,
+    hasInvoiceRow: true,
   },
   {
     id: "d3",
@@ -66,10 +70,11 @@ const DOCS: SourceDocumentVM[] = [
     receivedDate: "2026-08-20",
     completedAt: null,
     docCategory: "foundation",
-    processingStatus: null,
+    processingStatus: "review_needed",
     inboxStatus: "classified",
-    classConfidence: "green",
+    classConfidence: 0.88,
     sizeBytes: 8_100_000,
+    hasInvoiceRow: false,
   },
   {
     id: "d4",
@@ -80,71 +85,43 @@ const DOCS: SourceDocumentVM[] = [
     documentDate: null,
     receivedDate: "2026-09-01",
     completedAt: null,
-    processingStatus: null,
+    processingStatus: "failed",
     inboxStatus: "pending_classification",
     classConfidence: null,
     sizeBytes: 19_800_000,
+    hasInvoiceRow: false,
   },
 ];
 
-function Frame({
-  title,
-  sub,
-  columns,
-  children,
-  minWidth,
-}: {
-  title: string;
-  sub: string;
-  columns: ReturnType<typeof sourceDocumentColumns>;
-  children?: React.ReactNode;
-  minWidth?: number;
-}) {
-  return (
-    <div style={{ maxWidth: 1500 }}>
-      <Card>
-        <CardHead title={title} sub={sub} />
-        <Table cols={sourceDocumentTracks(columns)} minWidth={minWidth}>
-          <HeadRow>
-            {columns.map((c) => (
-              <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
-                {c.header}
-                {c.key === "processing" ? <StatusInfoButton axis="beleg" /> : null}
-                {c.key === "completed" ? <StatusInfoButton axis="beleg_erledigung" /> : null}
-                {c.key === "inboxState" ? <StatusInfoButton axis="beleg_inbox" /> : null}
-                {c.key === "confidence" ? <StatusInfoButton axis="konfidenz" /> : null}
-              </span>
-            ))}
-          </HeadRow>
-          {children ??
-            DOCS.map((d) => (
-              <Row key={d.id}>
-                {columns.map((c) => (
-                  <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
-                    {c.cell(d)}
-                  </span>
-                ))}
-              </Row>
-            ))}
-        </Table>
-      </Card>
-    </div>
-  );
-}
+/** Everything the submit list may hold: classified, with a qualifying form. */
+const SUBMITTABLE = DOCS.filter((d) => d.inboxStatus === "classified");
+
+const PAGER = { page: 1, pageSize: 25, totalItems: 102, totalPages: 5 };
 
 /**
  * Der volle Satz der Belegliste des Jahres: zehn Punkte, der Gegenpart führt
- * und trägt den Zeilenlink, Eingang ist der Sortierschlüssel.
+ * und trägt den Zeilenlink, Eingang ist der Sortierschlüssel. Über `DataTable`,
+ * damit die Sortierung, die der Katalog anbietet, auch stattfindet.
  */
 export const DocumentList: Story = {
-  render: () => (
-    <Frame
-      title="Belege 2026"
-      sub="Musterbau GmbH · nach Eingang"
-      columns={sourceDocumentColumns({ href, caseHref })}
-      minWidth={1840}
-    />
-  ),
+  render: () => {
+    const cols = sourceDocumentColumns({ href, caseHref });
+    return (
+      <div style={{ maxWidth: 1900 }}>
+        <DataTable<SourceDocumentVM>
+          rows={DOCS}
+          columns={cols}
+          rowKey={(d) => d.id}
+          head={{ title: "Belege 2026", sub: "Musterbau GmbH · nach Eingang" }}
+          minWidth={sourceDocumentMinWidth(cols)}
+          sort={{ key: "receivedDate", dir: "desc" }}
+          href={listHref}
+          pager={PAGER}
+          empty={{ title: "In dieser Periode ist kein Beleg eingegangen." }}
+        />
+      </div>
+    );
+  },
 };
 
 /**
@@ -158,25 +135,90 @@ export const DocumentList: Story = {
 export const Inbox: Story = {
   render: () => {
     const picked: SourceDocumentColumn[] = ["inboxState", "confidence", "classification", "fileName"];
+    const cols = sourceDocumentColumns({ href, columns: picked });
     return (
-      <Frame
-        title="Upload & Inbox"
-        sub="Musterbau GmbH · jahresunabhängig"
-        columns={sourceDocumentColumns({ href, columns: picked })}
-      />
+      <div style={{ maxWidth: 1100 }}>
+        <DataTable<SourceDocumentVM>
+          rows={DOCS}
+          columns={cols}
+          rowKey={(d) => d.id}
+          head={{ title: "Upload & Inbox", sub: "Musterbau GmbH · jahresunabhängig" }}
+          minWidth={sourceDocumentMinWidth(cols)}
+          empty={{ title: "Es ist nichts hochgeladen." }}
+        />
+      </div>
     );
   },
 };
 
-/** Beleg einreichen: die Größe steht **nur** hier — 25 MB ist die Grenze. */
+/**
+ * Beleg einreichen: die Größe steht **nur** hier — 25 MB ist die Grenze — und
+ * die zweite Spalte ist die **Belegform**, nicht die Belegart. Die
+ * Grundgesamtheit ist „eingeordnet **und** qualifizierende Belegform"; die
+ * Form ist also das Kriterium, das hier geprüft wird.
+ */
 export const Submit: Story = {
-  render: () => (
-    <Frame
-      title="Beleg einreichen"
-      sub="Eingeordnet, noch nicht übergeben"
-      columns={sourceDocumentColumns({ href, columns: SUBMIT_COLUMNS })}
-    />
-  ),
+  render: () => {
+    const cols = sourceDocumentColumns({ href, columns: SUBMIT_COLUMNS });
+    return (
+      <div style={{ maxWidth: 1100 }}>
+        <DataTable<SourceDocumentVM>
+          rows={SUBMITTABLE}
+          columns={cols}
+          rowKey={(d) => d.id}
+          head={{ title: "Beleg einreichen", sub: "Eingeordnet, noch nicht übergeben" }}
+          minWidth={sourceDocumentMinWidth(cols)}
+          empty={{ title: "Es ist nichts einzureichen.", done: true }}
+        />
+      </div>
+    );
+  },
+};
+
+/**
+ * Stockende Belege, beide Ausprägungen: **derselbe** Spaltensatz, dieselbe
+ * Reihenfolge — was sich unterscheidet, ist die Grundgesamtheit und das, was
+ * die Achse `beleg_haenger` über denselben Beleg sagt. Und: hier führt die
+ * **Datei**, obwohl der Gegenpart im Satz steht — ein Beleg, der stockt, hat
+ * meist noch keinen, denn der ist das Ergebnis der ausgebliebenen Extraktion.
+ */
+export const Stuck: Story = {
+  render: () => {
+    const stuck = sourceDocumentColumns({
+      href,
+      caseHref,
+      columns: STUCK_COLUMNS,
+      lead: "fileName",
+      stuckVariant: "stuck",
+    });
+    const inflight = sourceDocumentColumns({
+      href,
+      caseHref,
+      columns: STUCK_COLUMNS,
+      lead: "fileName",
+      stuckVariant: "inflight",
+    });
+    return (
+      <div style={{ maxWidth: 1400, display: "grid", gap: "var(--space-6)" }}>
+        <DataTable<SourceDocumentVM>
+          rows={[DOCS[3]!, DOCS[2]!]}
+          columns={stuck}
+          rowKey={(d) => d.id}
+          head={{ title: "Problematische Belege", sub: "Ohne Extraktion oder ohne Belegdatum" }}
+          minWidth={sourceDocumentMinWidth(stuck)}
+          empty={{ title: "Kein Beleg steckt fest.", done: true }}
+        />
+        <DataTable<SourceDocumentVM>
+          rows={[DOCS[0]!, DOCS[1]!]}
+          columns={inflight}
+          rowKey={(d) => d.id}
+          head={{ title: "In Verarbeitung", sub: "Die Pipeline läuft noch" }}
+          minWidth={sourceDocumentMinWidth(inflight)}
+          empty={{ title: "Nichts ist mehr in Arbeit.", done: true }}
+        />
+      </div>
+    );
+  },
 };
 
 /**
@@ -186,61 +228,92 @@ export const Submit: Story = {
  * Mitte, damit die Endung lesbar bleibt.
  */
 export const Edges: Story = {
-  render: () => (
-    <Frame
-      title="Belege 2026"
-      sub="Randfälle"
-      columns={sourceDocumentColumns({ href, caseHref })}
-      minWidth={1840}
-    >
-      {[
-        DOCS[3]!,
-        DOCS[2]!,
-        {
-          ...DOCS[0]!,
-          id: "d9",
-          fileName:
-            "Sammelrechnung-Bürobedarf-Meier-GmbH-August-2026-Positionen-1-bis-47-Nachtrag.pdf",
-          counterparty: null,
-          detail: null,
-          documentDate: null,
-        },
-      ].map((d) => {
-        const cols = sourceDocumentColumns({ href, caseHref });
-        return (
-          <Row key={d.id}>
-            {cols.map((c) => (
-              <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
-                {c.cell(d)}
-              </span>
-            ))}
-          </Row>
-        );
-      })}
-    </Frame>
-  ),
+  render: () => {
+    const cols = sourceDocumentColumns({ href, caseHref });
+    return (
+      <div style={{ maxWidth: 1900 }}>
+        <DataTable<SourceDocumentVM>
+          rows={[
+            DOCS[3]!,
+            DOCS[2]!,
+            {
+              ...DOCS[0]!,
+              id: "d9",
+              fileName:
+                "Sammelrechnung-Bürobedarf-Meier-GmbH-August-2026-Positionen-1-bis-47-Nachtrag.pdf",
+              counterparty: null,
+              detail: null,
+              documentDate: null,
+            },
+            {
+              // Ein Betrag **ohne Währung**: er steht als blanke Zahl da. Ein
+              // stilles „€" wäre eine erfundene Tatsache — bei einer Rechnung
+              // aus der Schweiz die falsche.
+              ...DOCS[0]!,
+              id: "d10",
+              fileName: "Invoice-CH-8841.pdf",
+              counterparty: "Alpine Systems AG",
+              detail: { kind: "invoice", number: "8841", gross: 2480, currency: null },
+            },
+          ]}
+          columns={cols}
+          rowKey={(d) => d.id}
+          head={{ title: "Belege 2026", sub: "Randfälle" }}
+          minWidth={sourceDocumentMinWidth(cols)}
+          empty={{ title: "Kein Beleg." }}
+        />
+      </div>
+    );
+  },
 };
 
-/** Die drei Sätze nebeneinander — dieselben Zellen, drei Fragen. */
-export const AllThree: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: "var(--space-6)" }}>
-      <Frame
-        title="Belegliste des Jahres"
-        sub={`${DOCUMENT_LIST_COLUMNS.length} Punkte`}
-        columns={sourceDocumentColumns({ href, caseHref })}
-        minWidth={1840}
-      />
-      <Frame
-        title="Upload & Inbox"
-        sub={`${INBOX_COLUMNS.length} Punkte`}
-        columns={sourceDocumentColumns({ href, columns: INBOX_COLUMNS })}
-      />
-      <Frame
-        title="Beleg einreichen"
-        sub={`${SUBMIT_COLUMNS.length} Punkte`}
-        columns={sourceDocumentColumns({ href, columns: SUBMIT_COLUMNS })}
-      />
-    </div>
-  ),
+/** Die vier Sätze nebeneinander — dieselben Zellen, vier Fragen. */
+export const AllFour: Story = {
+  render: () => {
+    const list = sourceDocumentColumns({ href, caseHref });
+    const inbox = sourceDocumentColumns({ href, columns: INBOX_COLUMNS });
+    const submit = sourceDocumentColumns({ href, columns: SUBMIT_COLUMNS });
+    const stuck = sourceDocumentColumns({
+      href,
+      caseHref,
+      columns: STUCK_COLUMNS,
+      lead: "fileName",
+    });
+    return (
+      <div style={{ display: "grid", gap: "var(--space-6)", maxWidth: 1900 }}>
+        <DataTable<SourceDocumentVM>
+          rows={DOCS}
+          columns={list}
+          rowKey={(d) => d.id}
+          head={{ title: "Belegliste des Jahres", sub: `${DOCUMENT_LIST_COLUMNS.length} Punkte` }}
+          minWidth={sourceDocumentMinWidth(list)}
+          empty={{ title: "Kein Beleg." }}
+        />
+        <DataTable<SourceDocumentVM>
+          rows={DOCS}
+          columns={inbox}
+          rowKey={(d) => d.id}
+          head={{ title: "Upload & Inbox", sub: `${INBOX_COLUMNS.length} Punkte` }}
+          minWidth={sourceDocumentMinWidth(inbox)}
+          empty={{ title: "Nichts hochgeladen." }}
+        />
+        <DataTable<SourceDocumentVM>
+          rows={SUBMITTABLE}
+          columns={submit}
+          rowKey={(d) => d.id}
+          head={{ title: "Beleg einreichen", sub: `${SUBMIT_COLUMNS.length} Punkte` }}
+          minWidth={sourceDocumentMinWidth(submit)}
+          empty={{ title: "Nichts einzureichen.", done: true }}
+        />
+        <DataTable<SourceDocumentVM>
+          rows={[DOCS[3]!, DOCS[2]!]}
+          columns={stuck}
+          rowKey={(d) => d.id}
+          head={{ title: "Stockende Belege", sub: `${STUCK_COLUMNS.length} Punkte` }}
+          minWidth={sourceDocumentMinWidth(stuck)}
+          empty={{ title: "Kein Beleg steckt fest.", done: true }}
+        />
+      </div>
+    );
+  },
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
+import { formatBytes } from "../format";
 import { Progress } from "./Progress";
 import { TextButton } from "./TextButton";
 
@@ -21,12 +22,6 @@ export interface DroppedFile {
   progress?: number;
   /** Rejected or failed — with the reason, not just a colour. */
   error?: string;
-}
-
-function humanSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} kB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
 }
 
 /**
@@ -162,7 +157,7 @@ export function FileDrop({
           {shown.map((f) => (
             <div className="v2dropfile" key={f.id}>
               <span>{f.name}</span>
-              <span className="v2dropfile__size">{humanSize(f.size)}</span>
+              <span className="v2dropfile__size">{formatBytes(f.size)}</span>
               <span>
                 {f.progress !== undefined && f.progress < 1 ? (
                   <Progress share={f.progress} />

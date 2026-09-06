@@ -1,3 +1,4 @@
+import { StateIcon } from "../../patterns/Review";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Table } from "../../primitives/Table";
 import { SourceDocumentRow, type SourceDocumentVM } from "./SourceDocument";
@@ -39,6 +40,9 @@ export function SourceDocumentList({
     return emptyKind === "not-expected" ? (
       <EmptyState
         inline
+        // The tick, because this empty case is a **result**, not a gap — the
+        // same mark `DataTable` puts on its finished lists.
+        icon={<StateIcon state="done" title="erledigt" />}
         title="Kein Beleg zu erwarten"
         description={reason ?? "Für diesen Vorgang ist kein Beleg vorgesehen."}
       />

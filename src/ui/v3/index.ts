@@ -138,6 +138,7 @@ export {
   formatTime,
   formatTimeFull,
   formatDuration,
+  formatBytes,
   daysBetween,
   calendarDay,
   type TimeFormat,
@@ -300,6 +301,7 @@ export { AccountDrawer } from "./entities/account/AccountDrawer";
 /* Beleg — die lesende Familie, die Vorschau, die Fakten je Ausprägung,
    die Nachschlag-Form (0052, 0074, 0075, 0076) */
 export {
+  FileName,
   SourceDocumentCell,
   SourceDocumentClass,
   SourceDocumentRow,
@@ -313,11 +315,14 @@ export { SourceDocumentList, type SourceDocumentEmptyKind } from "./entities/sou
 export {
   sourceDocumentColumns,
   sourceDocumentTracks,
+  sourceDocumentMinWidth,
   DOCUMENT_LIST_COLUMNS,
   INBOX_COLUMNS,
   SUBMIT_COLUMNS,
+  STUCK_COLUMNS,
   type SourceDocumentColumn,
   type SourceDocumentColumnOptions,
+  type StuckVariant,
 } from "./entities/source-document/source-document-columns";
 export { SourceDocumentPreview } from "./entities/source-document/SourceDocumentPreview";
 export {
