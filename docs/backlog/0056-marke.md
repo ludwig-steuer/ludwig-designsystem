@@ -153,3 +153,29 @@ Variabel (aus dieser Spec):
 | … | … | … |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1–M3 hatten eine Ursache: Tailwinds `img { height: auto }` schlägt jedes
+`height`-Attribut.** Eine Autorenregel gewinnt gegen ein
+Präsentations-Attribut, und daran ändert auch die Umstellung der Ladeordnung
+(0111) nichts. Folge war, dass **kein** Zeichen in seinem angegebenen Maß
+stand: `height={56}` rendert 205 px, `height={40}` rendert 52 px.
+
+Jetzt steht die Höhe als **Stil**. Gemessen: `Marks` 157×40 und 56×56,
+`Sizes` 16×16 · 24×24 · 32×32 exakt.
+
+**M2 im Besonderen — die Tafel „Nicht verzerren" verzerrte nicht.** Sie zeigte
+gemessen 100 × 25 px, also das *richtige* Seitenverhältnis: das wichtigste
+„so nicht" der Seite war unsichtbar. Jetzt beide Maße im Stil, gemessen
+100 × 40 px.
+
+**M4 — die Liste der Stories, die den Namen als Text schreiben, wird
+gerechnet.** Sie nannte drei Dateien, es waren vier, und mit `CaseDetailView`
+sind es fünf Fundstellen in vier Dateien. `import.meta.glob` zählt sie jetzt
+selbst — eine handgepflegte Liste veraltet mit dem nächsten Commit, und das
+ist derselbe Fehler, den die Seite an anderer Stelle anprangert.
+
+**M5 — die Missbrauchs-Tafeln tragen `alt=""`**, wo das Urteil im Text daneben
+steht. **M6** (ein `verdict: "falsch"`-Zweig, den `Marks` nie benutzt) bleibt:
+er kostet nichts und `Pair` wird ihn brauchen, sobald eine sechste Tafel dazukommt.

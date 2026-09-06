@@ -521,7 +521,16 @@ export const Motion: Story = {
 
       <Section
         title="Fokus"
-        lead="2 px --color-focus mit Offset, nie abgeschaltet (V10). Mit der Tabulatortaste durch die drei Elemente gehen — der Ring muss an jedem sichtbar sein."
+        lead={
+          <>
+            2 px <code className="lw-mono">--color-focus</code> mit Offset, nie abgeschaltet (V10). Mit der
+            Tabulatortaste durch die drei Elemente gehen — der Fokus muss an jedem sichtbar sein.{" "}
+            <strong>Das Feld ist die benannte Ausnahme:</strong> es setzt <code className="lw-mono">outline: none</code>{" "}
+            und ersetzt den Ring durch einen kräftigeren Rand (
+            <code className="lw-mono">--color-primary-700</code>, gemessen 11,64:1) plus einen weichen Schein. Zwei
+            Fokus-Grammatiken im Set, und diese Seite ist der Ort, an dem das stehen muss.
+          </>
+        }
       >
         <div style={{ display: "flex", gap: "var(--space-6)", alignItems: "center", flexWrap: "wrap" }}>
           <Button variant="secondary">Beleg prüfen</Button>
@@ -540,10 +549,14 @@ export const Motion: Story = {
           Gemessen in <code className="lw-mono">v3.css</code>:{" "}
           <span className="lw-numeric">{count(/transition:/g)}</span> Transitions und{" "}
           <span className="lw-numeric">{count(/\banimation:/g)}</span> Animations stehen{" "}
-          <span className="lw-numeric">{count(/prefers-reduced-motion/g)}</span> Blöcken gegenüber (Skeleton,
-          Spinner, Toast). Die Regel stand bis zum 03.09.2026 in keinem Dokument — jetzt in §2 Bewegung.{" "}
-          <strong>Befund 7:</strong> die Lücke ist offen. Diese Seite kann die Media-Query nicht umschalten; wer
-          abnimmt, stellt sie im Betriebssystem an und sieht nach.
+          <span className="lw-numeric">{count(/prefers-reduced-motion/g)}</span> Blöcken gegenüber. Die Namen dazu
+          stehen bewusst nicht hier: der erste Anlauf zählte vier und nannte drei, und eine Liste neben einer
+          Zahl veraltet mit dem nächsten Commit.{" "}
+          <strong>Seit 0093 (b) ist die Lücke zu:</strong> **Übergänge** fallen sämtlich weg — eine Regel über
+          <code className="lw-mono">*</code> statt einer Selektorliste, die jede neue Transition von Hand
+          nachtragen müsste. <strong>Animationen</strong> bleiben: Spinner und Skelett sagen etwas, solange sie
+          laufen. Diese Seite kann die Media-Query nicht umschalten; wer abnimmt, stellt sie im Betriebssystem an
+          und misst nach.
         </p>
       </Section>
     </div>

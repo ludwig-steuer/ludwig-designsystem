@@ -7,6 +7,19 @@
 /* Dieselbe Kette wie das App-Layout — ohne die seitenspezifischen Styles,
    die kein Design-System-Baustein braucht. */
 
+/* **Preflight zuerst** (0111). Tailwinds Grundschicht lädt seit jeher zuletzt,
+   und bei gleicher Spezifität gewinnt die spätere Regel: `a { color: inherit }`
+   nahm jedem Link seine Farbe, `img { height: auto }` jedem Zeichen sein Maß.
+   Beides sind Regeln, die eine Grundschicht setzen darf — nur eben zuerst,
+   damit die eigenen Blätter sie überschreiben statt umgekehrt.
+
+   Als `@import`, nicht als `@tailwind base`: eine `@import`-Regel muss **vor**
+   jeder anderen Regel stehen, sonst verwirft der Browser sie. Ein `@tailwind`
+   an dieser Stelle hätte alle folgenden `@import`s ungültig gemacht — gemessen
+   im ersten Anlauf: sämtliche eigenen Blätter fielen aus, die Stories standen
+   in Systemschrift und schwarzem Text. */
+@import "tailwindcss/base";
+
 /* Design-Tokens (CSS-Variablen) — die 1:1-Übernahme aus dem Design. */
 @import "./tokens.css";
 
@@ -22,22 +35,6 @@
 /* v3-Bausteine (Tabellen/Listen des Design-Systems). */
 @import "./v3.css";
 
-@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Tailwinds Preflight lädt nach `tokens.css` und setzt `a { color: inherit;
-   text-decoration: inherit }` — bei gleicher Spezifität gewinnt die spätere
-   Regel, und damit sah **jeder** Link des Sets aus wie gewöhnlicher Text: die
-   Farbe aus `tokens.css` kam nie an, unterscheidbar war er erst beim Hover.
-   Deshalb steht die Regel hier noch einmal, nach den Direktiven.
-
-   Die Reihenfolge selbst zu drehen (Preflight nach oben) wäre die saubere
-   Lösung, ändert aber in einem Zug Überschriften, Listen und Knöpfe mit —
-   das ist eine eigene Aufgabe (0111), keine Nebenwirkung dieser. */
-a {
-  color: var(--color-accent-700);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
-a:hover { color: var(--color-primary); }

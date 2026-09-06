@@ -16,6 +16,26 @@ type Story = StoryObj;
 
 const ASSETS = "/reference/design-system-v2/assets";
 const WORDMARK = `${ASSETS}/ludwig-logo.svg`;
+/**
+ * Die Stories, die den Namen als Text schreiben — **gerechnet**, nicht
+ * abgeschrieben: die erste Fassung nannte drei Dateien, es waren vier, und mit
+ * `CaseDetailView` sind es fünf. Eine Liste, die von Hand gepflegt wird,
+ * veraltet mit dem nächsten Commit.
+ */
+const LOGO_TEXT_SOURCES = import.meta.glob("./**/*.stories.tsx", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+}) as Record<string, string>;
+
+const LOGO_TEXT_STORIES = Object.keys(LOGO_TEXT_SOURCES)
+  .filter((path) => {
+    const src = LOGO_TEXT_SOURCES[path];
+    return typeof src === "string" && src.includes("sb__logo") && !path.endsWith("Brand.stories.tsx");
+  })
+  .map((path) => path.split("/").pop() as string)
+  .sort();
+
 const WORDMARK_LIGHT = `${ASSETS}/ludwig-logo-light.svg`;
 const MARK = `${ASSETS}/ludwig-mark.svg`;
 
@@ -107,7 +127,11 @@ function Plate({
   return (
     <div>
       <Ground kind={ground}>
-        <img src={src} alt={alt} height={height} />
+        {/* Die Höhe als **Stil**, nicht als Attribut: Tailwinds Preflight setzt
+            `img { height: auto }`, und eine Autorenregel schlägt jedes
+            Präsentations-Attribut — egal, in welcher Reihenfolge die Blätter
+            laden. Gemessen stand ein `height={56}` sonst mit 205 px im Bild. */}
+        <img src={src} alt={alt} style={{ height, width: "auto" }} />
       </Ground>
       <div style={{ marginTop: "var(--space-2)", display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
         <Mark tone={verdict === "richtig" ? "success" : "danger"}>{verdict}</Mark>
@@ -280,13 +304,13 @@ export const Sizes: Story = {
         <div style={{ display: "flex", gap: "var(--space-8)", alignItems: "flex-start", flexWrap: "wrap" }}>
           <div>
             <SidebarHead>
-              <img src={WORDMARK_LIGHT} alt="Ludwig" height={32} />
+              <img src={WORDMARK_LIGHT} alt="Ludwig" style={{ height: 32, width: "auto" }} />
             </SidebarHead>
             <div style={{ ...note, marginTop: "var(--space-2)" }}>ausgeklappt · 240 px Spalte, 56 px Zeile</div>
           </div>
           <div>
             <SidebarHead collapsed>
-              <img src={MARK} alt="Ludwig" height={32} />
+              <img src={MARK} alt="Ludwig" style={{ height: 32, width: "auto" }} />
             </SidebarHead>
             <div style={{ ...note, marginTop: "var(--space-2)" }}>eingeklappt · 64 px Spalte</div>
           </div>
@@ -306,7 +330,7 @@ export const Sizes: Story = {
           {MARK_SIZES.map((s) => (
             <div key={s.px}>
               <div style={{ height: "var(--space-8)", display: "flex", alignItems: "flex-end" }}>
-                <img src={MARK} alt="Ludwig" width={s.px} height={s.px} />
+                <img src={MARK} alt="Ludwig" style={{ width: s.px, height: s.px }} />
               </div>
               <div className="lw-numeric" style={{ fontWeight: 600, fontSize: "var(--fs-ui)", marginTop: "var(--space-2)" }}>
                 {s.px} px
@@ -369,10 +393,10 @@ export const Misuse: Story = {
       <Pair
         title="Nicht umfärben"
         why={"Das Zeichen trägt seine eigenen Farben. Es nimmt keine Semantikfarbe an — schon deshalb, weil Farbe im Set Kritikalität kodiert und eine rote Marke „Fehler“ hieße."}
-        right={<div style={plate}><img src={WORDMARK} alt="Ludwig" height={40} /></div>}
+        right={<div style={plate}><img src={WORDMARK} alt="Ludwig" style={{ height: 40, width: "auto" }} /></div>}
         wrong={
           <div style={plate}>
-            <img src={WORDMARK} alt="Ludwig" height={40} style={{ filter: "sepia(1) saturate(6) hue-rotate(310deg)" }} />
+            <img src={WORDMARK} alt="Ludwig"  style={{ height: 40, width: "auto",  filter: "sepia(1) saturate(6) hue-rotate(310deg)" }} />
           </div>
         }
       />
@@ -380,8 +404,16 @@ export const Misuse: Story = {
       <Pair
         title="Nicht verzerren"
         why="Höhe setzen, Breite folgen lassen. Das Seitenverhältnis steht in der viewBox und ist nicht verhandelbar."
-        right={<div style={plate}><img src={WORDMARK} alt="Ludwig" height={40} /></div>}
-        wrong={<div style={plate}><img src={WORDMARK} alt="Ludwig" width={100} height={40} /></div>}
+        right={<div style={plate}><img src={WORDMARK} alt="Ludwig" style={{ height: 40, width: "auto" }} /></div>}
+        wrong={<div style={plate}><img
+                src={WORDMARK}
+                alt=""
+                /* Hier **soll** es verzerren — deshalb beide Maße im Stil und
+                   kein `width: auto`. Mit den Attributen allein zeigte die
+                   Tafel gemessen 100 × 25 px, also das richtige Verhältnis:
+                   das wichtigste „so nicht" der Seite war unsichtbar. */
+                style={{ width: 100, height: 40 }}
+              /></div>}
       />
 
       <Pair
@@ -392,10 +424,10 @@ export const Misuse: Story = {
             Sidebar-Verlauf. Jeder andere Grund — auch eine Semantikfläche — ist keiner.
           </>
         }
-        right={<div style={plate}><img src={WORDMARK} alt="Ludwig" height={40} /></div>}
+        right={<div style={plate}><img src={WORDMARK} alt="Ludwig" style={{ height: 40, width: "auto" }} /></div>}
         wrong={
           <div style={{ ...plate, background: "var(--color-warning-bg)" }}>
-            <img src={WORDMARK} alt="Ludwig" height={40} />
+            <img src={WORDMARK} alt="Ludwig" style={{ height: 40, width: "auto" }} />
           </div>
         }
       />
@@ -403,10 +435,10 @@ export const Misuse: Story = {
       <Pair
         title="Kein Schatten, kein Glow"
         why="Das Zeichen liegt in der Fläche, nicht darüber. Schatten sind für Menü, Popover und Dialog reserviert."
-        right={<div style={plate}><img src={MARK} alt="Ludwig" height={56} /></div>}
+        right={<div style={plate}><img src={MARK} alt="Ludwig" style={{ height: 56, width: "auto" }} /></div>}
         wrong={
           <div style={plate}>
-            <img src={MARK} alt="Ludwig" height={56} style={{ boxShadow: "var(--glow-accent)", borderRadius: "var(--radius-xl)" }} />
+            <img src={MARK} alt="Ludwig"  style={{ height: 56, width: "auto",  boxShadow: "var(--glow-accent)", borderRadius: "var(--radius-xl)" }} />
           </div>
         }
       />
@@ -415,16 +447,21 @@ export const Misuse: Story = {
         title="Kein Text an Stelle des Zeichens"
         why={
           <>
-            Der häufigste Fall, und er steht heute im eigenen Set: vier Stories schreiben „Ludwig" beziehungsweise
-            „L" als Text in den Sidebar-Kopf — <code className="lw-mono">AppShell.stories.tsx</code> (zweimal),{" "}
-            <code className="lw-mono">NavList.stories.tsx</code> und{" "}
-            <code className="lw-mono">CommandPalette.stories.tsx</code>. Sie bleiben unangetastet, bis die
-            Top-Bar-Füllung gehoben wird; hier steht, was dann hingehört.
+            Der häufigste Fall, und er steht heute im eigenen Set:{" "}
+            <strong>{LOGO_TEXT_STORIES.length} Stories</strong> schreiben „Ludwig" beziehungsweise „L" als Text in
+            den Sidebar-Kopf —{" "}
+            {LOGO_TEXT_STORIES.map((f, i) => (
+              <span key={f}>
+                {i > 0 ? ", " : ""}
+                <code className="lw-mono">{f}</code>
+              </span>
+            ))}
+            . Sie bleiben unangetastet, bis die Top-Bar-Füllung gehoben wird; hier steht, was dann hingehört.
           </>
         }
         right={
           <SidebarHead>
-            <img src={WORDMARK_LIGHT} alt="Ludwig" height={32} />
+            <img src={WORDMARK_LIGHT} alt="Ludwig" style={{ height: 32, width: "auto" }} />
           </SidebarHead>
         }
         wrong={<SidebarHead>Ludwig</SidebarHead>}

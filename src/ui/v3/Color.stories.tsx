@@ -256,7 +256,11 @@ const ROLES: Record<string, Role> = {
   "--color-accent-50": { role: "Fläche, Fokusring, aktive Zeile", text: "nein", fill: "ja", edge: "ja", note: "ausgewählte Zeile" },
   "--color-text": { role: "Text", text: "ja", fill: "—", edge: "—" },
   "--color-text-muted": { role: "Text", text: "ja", fill: "—", edge: "—" },
-  "--color-text-subtle": { role: "Text", text: "ja", fill: "—", edge: "—", note: "kleinste Textstufe: Unterzeile, Spaltenkopf" },
+  // Fläche „ja": 0110 hat den beiden zusätzlich die Rolle **Diagrammreihe**
+  // gegeben, und §3 führt sie seither so. Zwei Graustufen, die beide ≥ 3:1
+  // gegen Weiß stehen, liegen zwangsläufig eng — getrennt werden sie mit einer
+  // Haarlinie, nicht mit Farbe.
+  "--color-text-subtle": { role: "Text · Diagrammreihe (1.)", text: "ja", fill: "ja", edge: "—", note: "kleinste Textstufe: Unterzeile, Spaltenkopf; erste Reihe im Balkenbild" },
   "--color-text-on-dark": { role: "Text auf Dunkel", text: "ja", fill: "—", edge: "—", note: "Sidebar, Hero" },
   "--color-text-on-dark-muted": { role: "Text auf Dunkel", text: "ja", fill: "—", edge: "—" },
   "--color-bg": { role: "Grund", text: "—", fill: "ja", edge: "—", note: "Seite" },
@@ -267,7 +271,7 @@ const ROLES: Record<string, Role> = {
   "--color-border-subtle": { role: "Trennlinie", text: "—", fill: "—", edge: "ja", note: "Zeile" },
   "--color-border": { role: "Trennlinie", text: "—", fill: "—", edge: "ja", note: "Standard" },
   "--color-border-strong": { role: "Trennlinie", text: "—", fill: "—", edge: "ja", note: "Tabellenblock" },
-  "--color-border-control": { role: "Kontroll-Rand", text: "—", fill: "—", edge: "ja", note: "identifizierend, 3:1 (WCAG 1.4.11)" },
+  "--color-border-control": { role: "Kontroll-Rand · Diagrammreihe (2.)", text: "—", fill: "ja", edge: "ja", note: "identifizierend, 3:1 (WCAG 1.4.11); zweite Reihe im Balkenbild (0110)" },
   "--color-success": { role: "Erledigt (Ausgang)", text: "ja", fill: "ja", edge: "ja", note: "Haken, bestanden, freigegeben" },
   "--color-success-bg": { role: "Erledigt (Ausgang)", text: "—", fill: "ja", edge: "—" },
   "--color-warning": { role: "Warnung", text: "ja", fill: "ja", edge: "ja", note: "Stufe 2 der Skala" },
@@ -354,13 +358,21 @@ export const Roles: Story = {
           Ohne Rolle: <span className="lw-numeric">{withoutRole.length}</span> —{" "}
           {withoutRole.map((r) => r.token.replace("--color-", "")).join(", ")}. Unbenutzt:{" "}
           <span className="lw-numeric">{unread.length}</span> —{" "}
-          {unread.map((r) => r.token.replace("--color-", "")).join(", ")}. Dass{" "}
-          <code className="lw-mono">success-bg</code> und <code className="lw-mono">info-bg</code> niemand liest,
-          heißt: die Plaketten holen ihre Flächen woanders her. Nachgesehen:{" "}
-          <code className="lw-mono">.bdg-info</code>, <code className="lw-mono">.bdg-success</code> und{" "}
-          <code className="lw-mono">.bdg-danger</code> in <code className="lw-mono">app-chrome.css</code> schreiben
-          Fläche, Text und Rand als Hex-Literale aus — genau der V13-Fall, den diese Seite anprangert, im eigenen
-          Set (Befund 8, bestätigt).
+          {unread.map((r) => r.token.replace("--color-", "")).join(", ")}.{" "}
+          {/* **Abgeleitet, nicht behauptet.** Die erste Fassung schrieb hier
+              „dass `success-bg` und `info-bg` niemand liest" — beide **werden**
+              gelesen (`v3.css`, die Zustands-Kacheln der `StateMachine`), und
+              genau diesen Fehler prangert die Seite an. Also nur noch das, was
+              die gerechnete Menge hergibt. */}
+          {unread.some((r) => r.token.endsWith("-bg"))
+            ? "Eine ungelesene Fläche heißt: wer sie zu brauchen scheint, holt sie woanders her."
+            : "Jede Fläche des Satzes wird gelesen."}{" "}
+          Die Plaketten sind der Fall, an dem das zu prüfen war:{" "}
+          <code className="lw-mono">.bdg-warning</code> und{" "}
+          <code className="lw-mono">.bdg-success</code> tragen ihre Fläche weiter als Hex-Literal, Text und Rand
+          teilweise ebenso — <code className="lw-mono">.bdg-info</code>, <code className="lw-mono">.bdg-success</code>{" "}
+          und <code className="lw-mono">.bdg-danger</code> holen ihren **Text** inzwischen aus Token (0112). Der
+          V13-Fall ist damit kleiner geworden, aber nicht weg (Befund 8).
         </p>
       </div>
     );
@@ -373,7 +385,11 @@ const SCALE: { level: string; kind: string; token: string; meaning: string; exam
   { level: "Fehler", kind: "danger", token: "--color-danger", meaning: "Jemand muss handeln, bevor es weitergeht.", example: "gescheitert, überfällig, Abweichung über ±100 %", axis: "job", status: "failed" },
   { level: "Warnung", kind: "warning", token: "--color-warning", meaning: "Quittierbar, weiter ist möglich.", example: "Klärung offen, Prüfung nötig, Abweichung ±50–100 %", axis: "klaerung_status", status: "open" },
   { level: "Hinweis", kind: "info", token: "--color-info", meaning: "Neutral informierend, keine Handlung.", example: "läuft, zur Prüfung, Abweichung ±15–50 %", axis: "job", status: "running" },
-  { level: "Debug", kind: "neutral", token: "--color-text-subtle", meaning: "Ohne Kritikalität — Technik-Sicht und Ruhezustände.", example: "eingereiht, zurückgestellt, Abweichung bis ±15 %", axis: "job", status: "queued" },
+  // Die Plakette daneben nimmt `--color-text` (gemessen `rgb(45,45,45)`), nicht
+  // `--color-text-subtle`: `.bdg-neutral` schreibt es so. Die Spalte nennt das
+  // Token der **Stufe**, die Plakette zeigt, was `app-chrome.css` daraus macht
+  // — ein Auseinandergehen, das hier stehen bleibt, bis eines von beiden zieht.
+  { level: "Debug", kind: "neutral", token: "--color-text-subtle (Plakette: --color-text)", meaning: "Ohne Kritikalität — Technik-Sicht und Ruhezustände.", example: "eingereiht, zurückgestellt, Abweichung bis ±15 %", axis: "job", status: "queued" },
 ];
 
 /**

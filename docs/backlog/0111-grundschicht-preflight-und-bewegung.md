@@ -69,3 +69,35 @@ Durchgang geprüft wird: ein Blick durch das Storybook nach der Änderung.
 - **B1 (L-78)** — Die App lädt Preflight in derselben Reihenfolge; dort sehen
   die Links genauso aus. Nach der Umstellung hier lohnt derselbe Griff drüben.
   Im Register eingetragen am 2026-09-06.
+
+## Erledigt 2026-09-07 — Preflight steht jetzt vorn
+
+`@tailwind base` lud zuletzt und gewann damit gegen die eigenen Blätter: `a`
+verlor seine Farbe, `img` sein Maß. Jetzt steht die Grundschicht **vor**
+`tokens.css`, und der Notbehelf aus 0098 (die `a`-Regel am Dateiende) ist
+weg.
+
+**Als `@import "tailwindcss/base"`, nicht als `@tailwind base`.** Der erste
+Anlauf setzte die Direktive an den Anfang — und machte damit **alle folgenden
+`@import`s ungültig**: eine `@import`-Regel muss vor jeder anderen Regel
+stehen, sonst verwirft der Browser sie. Gemessen fielen sämtliche eigenen
+Blätter aus; 21 von 64 Stichproben-Stories standen in Systemschrift und
+schwarzem Text, eine schrumpfte von 1731 auf 1080 px. Der Fehler war in einer
+Minute sichtbar, weil vorher gemessen worden war — ohne die Vorher-Messung
+wäre er als „sieht doch aus wie immer" durchgegangen.
+
+**Gemessen nach der Korrektur, 64 Stories, acht Merkmale je Story**
+(Überschriften, Listen, Knöpfe, Links, Absätze, Felder, Tabellen, Wurzelmaß):
+**14 Abweichungen, alle in einem einzigen Merkmal** — der Höhe der
+Story-Wurzel, zwischen **+1 und +29 px**. Keine Farbe, keine Schrift, kein
+Knopf, kein Feld, keine Tabelle hat sich geändert. Der Zuwachs kommt daher,
+dass Überschriften und Listen ihre eigenen Abstände zurückbekommen, die
+Preflight vorher abgeräumt hat.
+
+**Was die Umstellung nicht behebt:** `img { height: auto }` schlägt weiterhin
+jedes `height`-Attribut — eine Autorenregel gewinnt gegen ein
+Präsentations-Attribut, unabhängig von der Reihenfolge. Wer eine Bildhöhe
+setzen will, setzt sie als Stil. In `Brand.stories.tsx` ist das nachgezogen
+(0056).
+
+Damit ist 0111 abgeschlossen: Befund 1 hier, Befund 2 mit 0093 (b).

@@ -96,13 +96,21 @@ function Section({ title, lead, children }: { title: string; lead: ReactNode; ch
   );
 }
 
-function Mark({ tone, children }: { tone: "danger" | "success" | "warning"; children: ReactNode }) {
+/** `neutral` ist kein Urteil, sondern eine Einordnung — deshalb Textfarbe. */
+function Mark({
+  tone,
+  children,
+}: {
+  tone: "danger" | "success" | "warning" | "neutral";
+  children: ReactNode;
+}) {
+  const color = tone === "neutral" ? "var(--color-text-subtle)" : `var(--color-${tone})`;
   return (
     <span
       style={{
         fontSize: "var(--fs-ui-xs)",
-        color: `var(--color-${tone})`,
-        border: `1px solid var(--color-${tone})`,
+        color,
+        border: `1px solid ${color}`,
         borderRadius: "var(--radius-sm)",
         padding: "0 var(--space-1)",
         whiteSpace: "nowrap",
@@ -139,7 +147,15 @@ const LADDERS: { register: string; lead: string; steps: { px: number; follows: s
   },
 ];
 
-const ON_LADDER = [12, 14, 16, 20, 24];
+/**
+ * Die **zwei** Leitern von A8, getrennt gehalten: 12 · 14 · 16 ist die Leiter
+ * der Handlungen, 16 · 20 · 24 die der Entitäten. Beide übereinanderzulegen
+ * wäre bequem und falsch — ein `size={20}` an einem Handlungs-Zeichen steht
+ * neben der Leiter, auch wenn 20 in der anderen vorkommt.
+ */
+const ACTION_LADDER = [12, 14, 16];
+const ENTITY_LADDER = [16, 20, 24];
+const ON_LADDER = [...new Set([...ACTION_LADDER, ...ENTITY_LADDER])];
 
 /** Die Leiter je Register (A8) — und daneben, was der Code heute wirklich tut. */
 export const Sizes: Story = {
@@ -183,10 +199,17 @@ export const Sizes: Story = {
                   {String(s.value).replace(".", ",")} px
                 </span>
                 <span className="lw-numeric" style={note}>{s.times}×</span>
-                {ON_LADDER.includes(s.value) ? (
-                  <Mark tone="success">auf der Leiter</Mark>
-                ) : (
+                {!ON_LADDER.includes(s.value) ? (
                   <Mark tone="warning">daneben</Mark>
+                ) : ACTION_LADDER.includes(s.value) && ENTITY_LADDER.includes(s.value) ? (
+                  <Mark tone="success">auf beiden Leitern</Mark>
+                ) : ACTION_LADDER.includes(s.value) ? (
+                  <Mark tone="success">Handlungs-Leiter</Mark>
+                ) : (
+                  // 20 und 24 stehen **nur** in der Entitäts-Leiter. Grün wäre
+                  // hier ein Freispruch, den die Zahl allein nicht hergibt:
+                  // welche Leiter gilt, entscheidet das Register des Zeichens.
+                  <Mark tone="neutral">nur Entitäts-Leiter</Mark>
                 )}
               </div>
             ))}
@@ -338,7 +361,13 @@ export const Actions: Story = {
 
       <Section
         title="Nur in Stories"
-        lead="Diese Zeichen importieren ausschließlich Stories — sie zeigen etwas, sie liefern es nicht aus. Wer eins davon in eine Komponente holt, gibt ihm vorher in der Registry einen Namen; `pnpm check:icons` besteht darauf."
+        lead={
+          <>
+            Diese Zeichen importieren ausschließlich Stories — sie zeigen etwas, sie liefern es nicht aus. Wer eins
+            davon in eine Komponente holt, gibt ihm vorher in der Registry einen Namen;{" "}
+            <code className="lw-mono">pnpm check:icons</code> besteht darauf.
+          </>
+        }
       >
         <div className="lw-mono" style={{ fontSize: "var(--fs-ui-sm)" }}>
           <span className="lw-numeric">{ONLY_IN_STORIES.length}</span> · {ONLY_IN_STORIES.join(", ")}
@@ -488,7 +517,13 @@ export const InUse: Story = {
 
       <Section
         title="Status-Chip und Schließen"
-        lead="Der Chip holt sein Entitäts-Zeichen über die Achse aus derselben Registry; der Knopf nimmt `close` — nicht `remove`, denn hier geht ein Fenster zu."
+        lead={
+          <>
+            Der Chip holt sein Entitäts-Zeichen über die Achse aus derselben Registry; der Knopf nimmt{" "}
+            <code className="lw-mono">close</code> — nicht <code className="lw-mono">remove</code>, denn hier geht
+            ein Fenster zu.
+          </>
+        }
       >
         <div style={{ display: "flex", gap: "var(--space-5)", alignItems: "center" }}>
           <StatusBadge axis="beleg" status="in_progress" info={false} />

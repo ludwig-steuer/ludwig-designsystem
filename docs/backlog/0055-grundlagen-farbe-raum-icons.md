@@ -427,3 +427,45 @@ neuen. Sie stehen jetzt sichtbar in den Stories — das war der Zweck.
 | … | … | … |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+Alle drei blockierenden hatten dieselbe Form: **handgeschriebene Prosa neben
+einer gerechneten Zahl.** Genau der Fehler, gegen den diese Seite gebaut ist.
+
+**M1 — `Roles` widersprach sich in derselben Zeile.** Der Satz behauptete,
+`success-bg` und `info-bg` lese niemand; beide **werden** gelesen (die
+Zustands-Kacheln der `StateMachine`), und die gerechnete Liste sagte das auch.
+Der Satz wird jetzt **abgeleitet**, nicht behauptet. Dazu die zu scharfe
+Aussage über die Plaketten berichtigt: seit 0112 holen drei von ihnen ihren
+**Text** aus Token, der V13-Fall ist kleiner geworden, aber nicht weg.
+
+**M2 — `Motion` nannte drei Blöcke, gerechnet waren es vier.** Die Namen
+stehen nicht mehr da: eine Liste neben einer Zahl veraltet mit dem nächsten
+Commit. Stattdessen der Stand nach 0093 (b) — Übergänge fallen sämtlich weg,
+Animationen bleiben.
+
+**M3 — `Icons/Sizes` gab 20 px einen falschen Freispruch.** `ON_LADDER` legte
+beide A8-Leitern übereinander, und die drei echten `size={20}`-Stellen standen
+grün da, während die Seite darüber zwei getrennte Leitern lehrt. Jetzt vier
+Marken: „auf beiden Leitern", „Handlungs-Leiter", „nur Entitäts-Leiter"
+(neutral, kein Urteil) und „daneben".
+
+**M4 — der Fokusring, den ein Beispiel nicht hat.** Das Feld setzt
+`outline: none` und ersetzt den Ring durch einen kräftigeren Rand plus weichen
+Schein — eine **zweite** Fokus-Grammatik. Sie steht jetzt als benannte
+Ausnahme im Abschnittstext; das ist der Zweck dieser Seite.
+
+**M5 — `Roles` hinkte §3 hinterher.** Die Zeile „Diagrammreihe" aus 0110 ist
+nachgezogen: `text-subtle` und `border-control` tragen Fläche „ja".
+
+**M7 — zwei gerenderte Backticks** sind `<code>`-Knoten.
+
+**M8 — `Criticality` nannte für „Debug" ein Token, das die Plakette daneben
+nicht benutzt.** Die Spalte sagt jetzt beides: das Token der **Stufe** und
+das, was `app-chrome.css` daraus macht.
+
+**M6** (die Story `Vocabulary` gibt es seit 0087 nicht mehr) ist Buchführung:
+das Kriterium der Spec ist durch 0087 überholt, `Entities`/`Actions`/`InUse`
+sind an seine Stelle getreten. **M9** (`--radius-none` mit einem Einsatzort,
+den §2 nicht vergibt; ein `translateY(8px)`) bleibt als Kleinkram stehen.
