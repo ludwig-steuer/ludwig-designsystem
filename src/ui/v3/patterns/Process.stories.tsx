@@ -17,6 +17,8 @@ const MANDANT: BatonMeta = { key: "mandant", label: "Mandant", color: "var(--col
 const KANZLEI: BatonMeta = { key: "kanzlei", label: "Kanzlei", color: "var(--color-primary)" };
 const BRIDGE: BatonMeta = { key: "bridge", label: "Übertragung", color: "var(--color-info)" };
 const DATEV: BatonMeta = { key: "datev", label: "DATEV", color: "var(--color-success)" };
+const BEREIT: BatonMeta = { key: "bereit", label: "Bereit", color: "var(--color-text-subtle)" };
+const SPIEGEL: BatonMeta = { key: "spiegel", label: "Spiegel", color: "var(--color-success)" };
 const NIEMAND: BatonMeta = { key: "niemand", label: "Niemand", color: "var(--color-text-subtle)" };
 
 const PHASES: ProcessPhase[] = [
@@ -87,4 +89,27 @@ export const InLog: Story = {
 /** Frisch angelegt: keine Phase begonnen, niemand hat den Stab. */
 export const Empty: Story = {
   render: () => <ProcessStepper phases={withStatus({ buchen: "pending", pruefen: "pending" })} owner={NIEMAND} />,
+};
+
+/**
+ * Alle acht Halter untereinander — die Story, die 0088 nachmessbar macht.
+ *
+ * Vier von ihnen sind Entitäten und tragen das Zeichen der Registry: „Mandant"
+ * den Koffer (nicht mehr die Person — das ist der Benutzer), „Kanzlei" den
+ * Stempel (nicht mehr das Haus — das ist der Geschäftspartner). „DATEV" und
+ * „Spiegel" teilen sich eines: dasselbe System von zwei Seiten, und das Wort
+ * sagt, welche.
+ *
+ * **„Niemand" bekommt kein Zeichen** — die Abwesenheit eines Halters hat kein
+ * Bild. Der **Platz** bleibt trotzdem, sonst rückte sein Wort aus der Spalte,
+ * in der die Batons untereinander stehen.
+ */
+export const Holders: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-3)", padding: "var(--space-6)" }}>
+      {[AGENT, BEREIT, MANDANT, KANZLEI, BRIDGE, DATEV, SPIEGEL, NIEMAND].map((o) => (
+        <Baton key={o.key} owner={o} />
+      ))}
+    </div>
+  ),
 };

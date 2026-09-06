@@ -196,6 +196,8 @@ export function FilterChips({
 
 /**
  * @when    Full-text search across the rows of a card.
+ * @instead A field with candidates → Combobox. A filter over a list →
+ *          FilterBar.
  */
 export function SearchInput({
   placeholder,

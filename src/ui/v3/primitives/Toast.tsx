@@ -65,6 +65,7 @@ export function ToastHost({ children }: { children: ReactNode }) {
 
 /**
  * @when    Showing a toast from a client component inside `ToastHost`.
+ * @instead A message that stays on the page → Callout. A decision → Dialog.
  */
 export function useToast() {
   const ctx = useContext(ToastContext);

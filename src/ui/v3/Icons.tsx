@@ -74,16 +74,18 @@ import {
  * a status is `StatusBadge` with its colour from the status registry. A second
  * vocabulary for the same thing is exactly the drift this file ends.
  *
- * Three more tables stay where they are, for the same reason `StateIcon`
+ * Two more tables stay where they are, for the same reason `StateIcon`
  * stays: each describes one **domain enumeration** whose values come from the
  * data model, not a sign for a meaning. Moving them here would mean moving
  * the enumeration too.
  *  - `CaseTimeline.tsx` — the event kind (`client_accounting_event.kind`)
  *  - `AiBookingNotes.tsx` — the kind of source backing a statement
- *  - `Process.tsx` — whose turn it is (agent, firm, client, system); it
- *    contradicts this registry today and moves over with task 0088
  *
- * The guard script knows all three by name; every other file has to come here.
+ * `Process.tsx` used to be the third and contradicted this registry — „Kanzlei"
+ * on `Building2`, which belongs to the business partner. Since 0088 it reads
+ * its four entity signs from here, and its exemption in the guard is gone.
+ *
+ * The guard script knows both by name; every other file has to come here.
  *
  * Every entry carries the German word (`label`) — it stands next to the sign,
  * never instead of it (T8) — and one sentence saying when it applies. Those

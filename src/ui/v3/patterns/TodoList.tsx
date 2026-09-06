@@ -152,6 +152,9 @@ export function TodoList({
  * The next open item after `afterId` — the basis of the auto-advance.
  * Returns `null` when nothing is open any more; the selection then stays put
  * and the screen shows its success empty state.
+ *
+ * @when    A list has to jump to the next item that still asks something.
+ * @instead Whether one state counts as open → isOpen.
  */
 export function nextOpen(items: readonly TodoItem[], afterId: string | null): string | null {
   if (items.length === 0) return null;

@@ -233,3 +233,26 @@ String je Zeile wäre bei 190 Zeilen 190 Props.
 Layout-Boolean (`href`) + 0 Callbacks + 1 „im Einsatz" + 1 Rand = 6.
 `Columns` übergibt seine Auswahl **verdreht**, sonst bewiese die Story nicht,
 dass `columns` auswählt statt zu ordnen.
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1 — die Spalte mit Rang 1 war 2 px breit.** Die neun festen Spuren ergeben
+mit Lücken und Polster 1396 px; in einem 1398-px-Rahmen blieben dem
+Anzeigenamen zwei. Er lief über seinen Nachbarn — in `InUse` um bis zu 289 px.
+`minWidth={1180}` lag **unter** dem festen Anteil, also sprang das waagerechte
+Scrollen nie an. Jetzt `minmax(24ch, 1fr)` und `minWidth={1570}`; gemessen ist
+die erste Zelle 204 px breit und die Tabelle scrollt.
+
+**M2 — die Ellipse griff nicht.** `.v2caserow__name` sitzt an einem Span **in**
+der Zelle, und der ist `display: inline` — dort wirkt weder `overflow` noch
+`text-overflow` noch `min-width`. Jetzt `display: block`.
+
+**M3 — die Zustandsspalte lief über.** „Wartet auf Unterlagen" misst 179 px,
+die Spur stand auf 160. Jetzt 190.
+
+**M4 — vier Punkte fehlten still.** Stand, Zuständigkeit und Export zeigen
+jetzt „—". Der Klärungszähler **nicht**: keine Klärung ist kein fehlender
+Wert, sondern die Antwort null — „0 offen" wäre Lärm in einer Spalte, die nur
+meldet, wenn es etwas zu melden gibt. Das steht als Kommentar am Code.
+
+**M5 — `caseTracks` ohne `@when`/`@instead`** — nachgetragen.

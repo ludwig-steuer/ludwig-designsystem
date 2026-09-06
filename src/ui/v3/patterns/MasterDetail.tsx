@@ -53,9 +53,12 @@ export interface ListGroup {
 }
 
 /**
- * Die Liste im Master-Detail: **eine** Karte, Kopfzeile je Gruppe, Zeilen
- * durch Trennlinien statt eigener Rahmen, aktive Zeile mit Akzentleiste
- * (Baukasten §10).
+ * The list of a master-detail: **one** card, a head per group, rows parted by
+ * lines instead of frames of their own, the active row with an accent bar
+ * (kit §10).
+ *
+ * @when    The left half of a MasterDetail — the list one picks from.
+ * @instead The right half → DetailPane. The whole frame → MasterDetail.
  */
 export function ListPane({
   groups,

@@ -79,6 +79,9 @@ export function DotStatus({
  * Point in time. The default is **absolute** in Europe/Berlin — „vor 3 Tagen"
  * is worthless when reviewing a period, the date is not (R3, design
  * `StapelSeite.dc.html` line 99).
+ *
+ * @when    A point in time inside a table cell.
+ * @instead A date outside a table → Time. A span of seconds → formatDuration.
  */
 export function Timestamp({ iso, prefix }: { iso: string | Date | null; prefix?: string }) {
   if (!iso) return <span className="v2muted">—</span>;
@@ -98,6 +101,9 @@ export function Timestamp({ iso, prefix }: { iso: string | Date | null; prefix?:
  * 15–50 % · 50–100 % · from 100 %) are computed by **one** domain function;
  * the cell only paints. The tooltip carries the calculation so the number is
  * not an oracle.
+ *
+ * @when    A difference between two numbers, where the sign is the message.
+ * @instead A plain amount → AmountCell. A share of a whole → Progress.
  */
 export function DeviationCell({
   pct,
@@ -129,6 +135,7 @@ export function DeviationCell({
  * Loading state at row height — the table does not jump when the rows arrive.
  *
  * @when    Loading state inside the card, header rows stay in place.
+ * @instead Nothing there at all → EmptyRow. Loading failed → ErrorRow.
  */
 export function TableLoading({ rows = 3, cols = 3 }: { rows?: number; cols?: number }) {
   return (
@@ -155,13 +162,18 @@ export function TableLoading({ rows = 3, cols = 3 }: { rows?: number; cols?: num
  * The fifth state (UX guidelines V9): loading failed, it is not empty.
  *
  * @when    Error while loading rows, with a way to retry.
+ * @instead Nothing there at all → EmptyRow. Still loading → TableLoading.
  */
 export function ErrorRow({ message, action }: { message: string; action?: ReactNode }) {
   return (
-    <div className="v2tbl__error" role="alert">
-      <span>{message}</span>
-      {action}
-    </div>
+    // A row over all columns, like `EmptyRow` (0106): a `<div>` in a `<tbody>`
+    // is neither valid nor a row.
+    <tr>
+      <td className="v2tbl__error" role="alert" colSpan={999}>
+        <span>{message}</span>
+        {action}
+      </td>
+    </tr>
   );
 }
 

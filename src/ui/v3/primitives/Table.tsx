@@ -218,7 +218,9 @@ export function rowCells(
   ];
 }
 
-/** Spaltenkopf — die Zellen sind einfache Knoten, Ausrichtung über `v2num`. */
+/** Spaltenkopf — die Zellen sind einfache Knoten, Ausrichtung über `v2num`.  * @when    The column heads of a table.
+ * @instead A data row → Row. A heading over a group of rows → GroupRow.
+ */
 export function HeadRow({ children }: { children: ReactNode }) {
   return <tr className="v2tbl__head">{cells(children, "th")}</tr>;
 }
@@ -264,7 +266,9 @@ export function Row({
   );
 }
 
-/** Zwischenüberschrift über eine volle Zeile (gruppierte Tabellen). */
+/** Zwischenüberschrift über eine volle Zeile (gruppierte Tabellen).  * @when    A heading over a group of rows, spanning every column.
+ * @instead The column heads → HeadRow. Nothing to show → EmptyRow.
+ */
 export function GroupRow({ children }: { children: ReactNode }) {
   return (
     <tr>
@@ -275,7 +279,9 @@ export function GroupRow({ children }: { children: ReactNode }) {
   );
 }
 
-/** Leerzustand innerhalb der Karte — Kopfzeilen bleiben stehen. */
+/** Leerzustand innerhalb der Karte — Kopfzeilen bleiben stehen.  * @when    The table has no rows and says so inside the card.
+ * @instead Still loading → TableLoading. Loading failed → ErrorRow.
+ */
 export function EmptyRow({ children }: { children: ReactNode }) {
   return (
     <tr>

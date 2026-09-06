@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { Card, CardHead } from "../../primitives/Table";
+import { Card, CardHead, Table } from "../../primitives/Table";
 import {
   SourceDocumentCell,
   SourceDocumentClass,
@@ -36,14 +36,22 @@ const INVOICE: SourceDocumentVM = {
   href: "#beleg-4471",
 };
 
-/** A row in a card, the way every list of the family shows it. */
+/**
+ * A row in a card, the way every list of the family shows it.
+ *
+ * The `Table` around it is not decoration: since 0106 a `Row` is a `<tr>`, and
+ * a `<tr>` needs a table. The track list comes from `.v2doc__row` itself —
+ * `cols` here only feeds the fallback.
+ */
 function Rows({ title, sub, documents }: { title: string; sub?: string; documents: SourceDocumentVM[] }) {
   return (
     <Card>
       <CardHead title={title} sub={sub} />
-      {documents.map((d) => (
-        <SourceDocumentRow key={d.id} document={d} />
-      ))}
+      <Table cols="minmax(0, 1fr)">
+        {documents.map((d) => (
+          <SourceDocumentRow key={d.id} document={d} />
+        ))}
+      </Table>
     </Card>
   );
 }

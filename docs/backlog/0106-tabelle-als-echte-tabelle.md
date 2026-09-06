@@ -232,3 +232,46 @@ mit einem Token, das ein Aufrufer mit breiten Aktionen hochsetzen kann.
 *Die übrigen 66 Auffälligkeiten des Durchlaufs waren Messfehler meines
 Sweeps:* er las `scrollWidth` an `.v2tbl` auch dort, wo `.v2tbl__scroll` und
 `.v2tbl__inner` das horizontale Scrollen absichtlich tragen (`minWidth`).
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1 — jede Zahl im Set stand links.** Der schwerste Fund, und er war meiner:
+`.v2num` war entweder ein **Inline**-Span in der Zelle — dort tut `text-align`
+nichts — oder es verlor gegen `text-align: inherit`, das ich der `th/td`-Regel
+mitgegeben hatte, um `th`s Vorgabe „zentriert" abzuräumen. Gemessen standen
+die Beträge bis zu **90 px** vor ihrer Spurkante, quer durch das Set.
+
+Jetzt drei Regeln statt einer: `th` links (V3 zentriert nichts),
+`th.v2num`/`td.v2num` rechts, und ein `.v2num` **in** der Zelle wird zur
+Blockbox. Gemessen danach in `table--filled`, `datatable--filled`,
+`caserow--in-use`, `accountentries--filled`, `comparisontable--filled`: jede
+Zahl `text-align: right`, rechte Kante wieder auf der Spurkante (1105 statt
+985).
+
+**Die Lehre steht in der Spec, nicht nur im Commit:** die 132-Stories-Messung
+hat Spurkanten und Zeilenhöhen verglichen — nicht die **Lage des Textes
+darin**. Ein Raster kann stimmen, während jeder Inhalt darin verrutscht ist.
+
+**M2 — `Checklist` hatte den Umbau nicht mitgemacht.** Sie rendert jetzt
+`Table`/`HeadRow`, ihre Zeilen waren schon `<tr>` — der Zwischenstand war
+weder Liste noch Tabelle.
+
+**M3–M7 — fünf Bausteine legten `<div>` neben `<tr>`:** `ErrorRow`,
+`ComparisonTable` (Leerzustand), `AccountEntries` (Leerzustand),
+`BankTransactionRow` (`SplitRows`) und die Story-Hilfen von `SourceDocument`
+und `SourceDocumentFacts`. Alle fünf sind jetzt Zeilen mit einer Zelle über
+alle Spalten bzw. stehen in einer `Table`.
+
+**M8 — „Kein Aufrufer musste sich ändern" trägt nicht.** Der Satz war schon im
+Umbau-Commit falsch (`DocumentNumberRegister` ist eine Entität), und danach
+mussten `OpenItemRow` und sechs weitere nachgezogen werden. Was stimmt: **kein
+Aufrufer musste seine Zellen umschreiben** — was nachgezogen wurde, waren
+Stellen, die ein `<div>` in eine Tabelle legten, und das war schon vorher
+falsch, nur unsichtbar.
+
+**M9 — Zeilenhöhen ±1–2 px.** Bleibt und ist der Preis: eine Zelle ist eine
+Zellbox, kein Grid-Element. Der Satz „Zeilenhöhe wie zuvor" in „Gemessen" ist
+damit zu „±1 px" zu lesen.
+
+**M10 — zwei tote CSS-Regeln** (`a.v2tbl__row`, der Wrapper-Selektor der alten
+`ExpandableRow`) sind gestrichen.

@@ -193,6 +193,10 @@ function formatRelative(d: Date, now: Date): string {
  * 31. August 2026"), the day with a clock in three lengths, the clock alone
  * where the day already stands above it, how long ago it was, and the month
  * for axes and group headers.
+ *
+ * @when    A date or a time has to become a string outside a component.
+ * @instead Drawing it → Time. The full timestamp for an audit line →
+ *          formatTimeFull. A span of seconds → formatDuration.
  */
 export function formatTime(
   value: string | Date | null,
@@ -228,7 +232,9 @@ function formatAge(d: Date, now: Date): string {
   return RELATIVE.format(Math.round(diff / DAY), "day");
 }
 
-/** The full, unambiguous form — what stands in the `title` of a `Time`. */
+/** The full, unambiguous form — what stands in the `title` of a `Time`.  * @when    An audit line or a tooltip needs the timestamp to the second.
+ * @instead Everything a person reads in the interface → formatTime / Time.
+ */
 export function formatTimeFull(value: string | Date | null): string {
   if (!value) return "—";
   const d = toDate(value);
@@ -249,6 +255,10 @@ const SECONDS = new Intl.NumberFormat(LOCALE, {
  * Below a minute one decimal, because that is where the difference between a
  * fast and a slow run shows. Above it, whole units: nobody reads „2 Std
  * 5 Min 13,4 s".
+ *
+ * @when    A span of seconds becomes a readable duration.
+ * @instead A point in time → formatTime. How long ago it was → formatTime
+ *          with the relative format.
  */
 export function formatDuration(seconds: number | null): string {
   if (seconds === null || Number.isNaN(seconds)) return "—";

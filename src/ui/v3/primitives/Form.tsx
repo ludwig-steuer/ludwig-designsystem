@@ -138,7 +138,10 @@ export function InputGroup({
   );
 }
 
-/** Kontrollkästchen mit Beschriftung — das Kästchen allein ist kein Ziel. */
+/** Kontrollkästchen mit Beschriftung — das Kästchen allein ist kein Ziel.  * @when    A single yes/no inside a form or a row.
+ * @instead One of several values → RadioGroup. Selecting rows of a table →
+ *          SelectCell.
+ */
 export function Checkbox({
   label,
   ...rest

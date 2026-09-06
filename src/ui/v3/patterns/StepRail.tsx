@@ -219,6 +219,7 @@ function StepNav({
  * „41 von 118 Punkten" — narrow bar across all steps.
  *
  * @when    Progress of a step in the header, number plus bar.
+ * @instead A share of a whole → Progress. The steps themselves → StepRail.
  */
 export function ProgressBar({
   done,

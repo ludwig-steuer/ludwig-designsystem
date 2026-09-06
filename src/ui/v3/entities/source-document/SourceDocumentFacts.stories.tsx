@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 
 import { Button } from "../../primitives/Button";
-import { Card, CardHead } from "../../primitives/Table";
+import { Card, CardHead, Table } from "../../primitives/Table";
 import { SourceDocumentRow, type SourceDocumentVM } from "./SourceDocument";
 import { SourceDocumentDrawer, type SourceDocumentQuickView } from "./SourceDocumentDrawer";
 import { SourceDocumentFacts } from "./SourceDocumentFacts";
@@ -464,6 +464,9 @@ export const InUse: Story = {
       <div style={{ minHeight: 520 }}>
         <Card>
           <CardHead title="Sachverhalt SV-118 · Belege" sub="Zwei Belege am Vorgang" />
+          {/* Die Zeile ist seit 0106 ein `<tr>` und braucht ihre Tabelle; das
+              Spaltenmaß bringt `.v2doc__row` selbst mit. */}
+          <Table cols="minmax(0, 1fr)">
           <SourceDocumentRow document={{ ...INVOICE, href: "#beleg" }} />
           <SourceDocumentRow
             document={{
@@ -478,6 +481,7 @@ export const InUse: Story = {
               href: "#beleg-auszug",
             }}
           />
+          </Table>
         </Card>
         <div style={{ padding: "var(--space-4) 0" }}>
           <Button onClick={() => setOpen(true)}>Beleg ansehen</Button>

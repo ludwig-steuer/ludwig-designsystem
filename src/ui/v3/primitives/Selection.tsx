@@ -58,6 +58,7 @@ export function SelectionBar({
  * Auswahl-Kästchen als erste Zelle einer Zeile.
  *
  * @when    First cell of every selectable row, together with SelectionBar.
+ * @instead A single yes/no in a form → Checkbox. The head's box → SelectAllCell.
  */
 export function SelectCell({
   checked,
@@ -99,6 +100,7 @@ const SelectionContext = createContext<SelectionApi | null>(null);
 
 /**
  * @when    Inside a `SelectionScope`, to read or change the selection.
+ * @instead One row's own state → the caller's own `useState`.
  */
 export function useSelection(): SelectionApi {
   const api = useContext(SelectionContext);
@@ -176,6 +178,7 @@ export function SelectionScope({
 /**
  * @when    The head cell of the selection column: chooses every row of this
  *          page, and shows a partial selection as `indeterminate`.
+ * @instead The box of one row → SelectRowCell.
  */
 export function SelectAllCell({
   label = "Alle auf dieser Seite auswählen",
@@ -206,6 +209,7 @@ export function SelectAllCell({
 /**
  * @when    The selection cell of a row inside a `SelectionScope`; shift-click
  *          takes the range from the last switched row to this one.
+ * @instead The box in the head → SelectAllCell.
  */
 export function SelectRowCell({ rowKey, label }: { rowKey: string; label: string }) {
   const { keys, toggle, range } = useSelection();

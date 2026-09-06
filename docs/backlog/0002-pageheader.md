@@ -86,10 +86,14 @@ Regel §3.1 (der Fall ist gedeckt) plus §4 („Durchreich-Markup löschen"):
 
 - `StepHeader` komponiert `PageHeader`: `overline` → `overline`, `title` →
   `title`, `lead` → `description`, und die Handlungen gehen als **eine**
-  `ActionBar` in `actions` — die Schritt-Navigation (← Zurück · Weiter zu
-  Schritt n →) steht hinter den übergebenen `actions`, die Reihenfolge
-  primär → sekundär → tertiär kommt aus `ActionBar`, nicht aus jeder Seite
-  neu. Die Klassen `abn__screenhead*` werden aus `v3.css` gelöscht.
+  `ActionBar` in `actions` — die Schritt-Navigation („Zurück" · „Weiter zu
+  Schritt n"), **mit Lucide-Zeichen statt Pfeilzeichen**: seit 0093 (c) tragen
+  die beiden Knöpfe `ActionIcon action="back"` bzw. `"forward"`. Der
+  ursprüngliche Wortlaut dieser Zeile schrieb „← Zurück · Weiter zu Schritt n
+  →" vor und stand damit gegen T9; die Gestaltungsregel schlägt die Spec.
+  Sie steht hinter den übergebenen `actions`; die Reihenfolge primär →
+  sekundär → tertiär kommt aus `ActionBar`, nicht aus jeder Seite neu. Die
+  Klassen `abn__screenhead*` werden aus `v3.css` gelöscht.
 - `PageHeader`: JSDoc und die Story `WithActions` zeigen `actions` als
   `<ActionBar>` mit genau einem `variant="primary"`. Die Prop bleibt
   `ReactNode` — ein Typ, der nur `ActionBar` zuließe, wäre in TypeScript

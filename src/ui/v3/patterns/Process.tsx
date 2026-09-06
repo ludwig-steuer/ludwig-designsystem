@@ -77,23 +77,36 @@ export interface BatonMeta {
 function OwnerSign({ owner }: { owner: BatonMeta }) {
   switch (owner.key) {
     case "agent":
-      return <ActionIcon action="agent" size={14} />;
+      return <ActionIcon action="agent" />;
     case "bereit":
-      return <ActionIcon action="time" size={14} />;
+      return <ActionIcon action="time" />;
     case "mandant":
-      return <EntityIcon entity="client" size={14} />;
+      return <EntityIcon entity="client" />;
     case "kanzlei":
-      return <EntityIcon entity="tenant" size={14} />;
+      return <EntityIcon entity="tenant" />;
     case "bridge":
-      return <EntityIcon entity="bridge" size={14} />;
+      return <EntityIcon entity="bridge" />;
     case "datev":
     case "spiegel":
-      return <EntityIcon entity="datev-mirror" size={14} />;
+      return <EntityIcon entity="datev-mirror" />;
     case "niemand":
-      return null;
+      // **No sign, but the space.** The absence of a holder has no picture;
+      // an empty box in the first grid column keeps the word column straight,
+      // which measured 19 px out of line before (0088 M1).
+      return <span aria-hidden="true" />;
   }
 }
 
+
+/** Nodes with a separator between them — `Array.join` only works on strings. */
+function joined(parts: ReactNode[]): ReactNode {
+  return parts.map((p, i) => (
+    <span key={i}>
+      {i > 0 ? " · " : null}
+      {p}
+    </span>
+  ));
+}
 
 /**
  * Four segments for the list row.
@@ -181,9 +194,22 @@ export function ProcessStepper({
   /** Phase key → time of entry (already formatted). */
   phaseSince?: Partial<Record<string, string>>;
 }) {
-  const parts = [
-    loops?.returned ? `↺ ${loops.returned}× zurück an den Agenten` : null,
-    loops?.reopened ? `↺ ${loops.reopened}× neuer Beleg` : null,
+  // The sign is a Lucide one, not „↺" (T9, 0093 c): a text character is read
+  // aloud as „anticlockwise open circle arrow" and scales with the font
+  // instead of with the icon ladder.
+  const parts: ReactNode[] = [
+    loops?.returned ? (
+      <span className="pz-loop" key="returned">
+        <ActionIcon action="retry" size={12} />
+        {loops.returned}× zurück an den Agenten
+      </span>
+    ) : null,
+    loops?.reopened ? (
+      <span className="pz-loop" key="reopened">
+        <ActionIcon action="retry" size={12} />
+        {loops.reopened}× neuer Beleg
+      </span>
+    ) : null,
   ].filter(Boolean);
 
   return (
@@ -206,7 +232,9 @@ export function ProcessStepper({
       </div>
       {parts.length > 0 ? (
         <div className="pz-loops">
-          {logHref ? <Link href={logHref}>{parts.join(" · ")}</Link> : parts.join(" · ")}
+          {/* `join` ginge nicht mehr: die Teile sind Knoten, keine Strings —
+              das ist der Preis dafür, dass das Zeichen ein Zeichen ist. */}
+          {logHref ? <Link href={logHref}>{joined(parts)}</Link> : joined(parts)}
         </div>
       ) : null}
     </div>
@@ -230,6 +258,8 @@ export interface BatonSegment {
  * practice.
  *
  * @when    Timeline above the log, colored by owner.
+ * @instead One holder as a word with its sign → Baton. The phases of a
+ *          run → Process.
  */
 export function BatonBar({ segments }: { segments: readonly BatonSegment[] }) {
   if (segments.length === 0) return null;

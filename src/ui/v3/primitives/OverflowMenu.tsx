@@ -121,7 +121,10 @@ export function MenuItem({
    * („Zum Sachverhalt") and states, and those come from `EntityIcon` and
    * `StateIcon`. The guard is not the type but `pnpm check:icons`: a caller
    * who wants a sign past the vocabulary would have to import `lucide-react`,
-   * and that is exactly what the check refuses.
+   * and that is exactly what the check refuses — **inside `src/ui/v3`**. It
+   * skips story files on purpose, still carries two pending ones, and reaches
+   * no caller outside this repository. The type is not the fence; the check
+   * is, and it fences this repo.
    */
   icon?: ReactNode;
   tone?: MenuItemTone;

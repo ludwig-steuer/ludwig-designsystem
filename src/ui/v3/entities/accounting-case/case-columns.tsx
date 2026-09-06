@@ -92,7 +92,11 @@ export function caseColumns({
     name: {
       key: "name",
       header: "Sachverhalt",
-      width: "minmax(0, 1fr)",
+      // `minmax(24ch, …)`, nicht `minmax(0, …)`: die neun festen Spuren
+      // ergeben mit Lücken und Polster 1396 px, und in einem 1398-px-Rahmen
+      // blieben dem Rang 1 damit **2 px** — der Name lief über seinen Nachbarn.
+      // Ein Boden zwingt die Tabelle stattdessen ins waagerechte Scrollen.
+      width: "minmax(24ch, 1fr)",
       sortable: true,
       cell: (c) => {
         const name = caseTitle(c);
@@ -114,9 +118,15 @@ export function caseColumns({
     state: {
       key: "state",
       header: "Stand",
-      width: "160px",
+      // 190, nicht 160: „Wartet auf Unterlagen" misst 179 px, und ein Zustand,
+      // der seine Spalte sprengt, ist die Farbe ohne das Wort (V7).
+      width: "190px",
       cell: (c) =>
-        c.lifecycleStatus ? <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} /> : null,
+        c.lifecycleStatus ? (
+          <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} />
+        ) : (
+          <span className="v2muted">—</span>
+        ),
     },
     number: {
       key: "number",
@@ -150,7 +160,12 @@ export function caseColumns({
       key: "disposition",
       header: "Wer ist dran",
       width: "150px",
-      cell: (c) => (c.disposition ? <StatusBadge axis="disposition" status={c.disposition} /> : null),
+      cell: (c) =>
+        c.disposition ? (
+          <StatusBadge axis="disposition" status={c.disposition} />
+        ) : (
+          <span className="v2muted">—</span>
+        ),
     },
     kind: {
       key: "kind",
@@ -166,6 +181,9 @@ export function caseColumns({
         // A count, with its word — never a bare number (V7). And no
         // `StatusBadge`: the axis `klaerung` is an urgency per question, this
         // is a count over the case.
+        // Keine Klärung ist **kein fehlender Wert**, sondern die Antwort null —
+        // „0 offen" oder „—" wäre Lärm in einer Spalte, die nur meldet, wenn
+        // es etwas zu melden gibt.
         c.openClarificationsCount > 0 ? (
           <span className="v2caserow__count">{c.openClarificationsCount} offen</span>
         ) : null,
@@ -196,7 +214,11 @@ export function caseColumns({
       header: "Export",
       width: "150px",
       cell: (c) =>
-        c.exportStatus ? <StatusBadge axis="export_case" status={c.exportStatus} /> : null,
+        c.exportStatus ? (
+          <StatusBadge axis="export_case" status={c.exportStatus} />
+        ) : (
+          <span className="v2muted">—</span>
+        ),
     },
     fiscalYear: {
       key: "fiscalYear",
@@ -211,7 +233,12 @@ export function caseColumns({
   return ORDER.filter((c) => picked.has(c)).map((c) => defs[c]);
 }
 
-/** The grid track list for a column set — head and rows read the same string. */
+/**
+ * The grid track list for a column set — head and rows read the same string.
+ *
+ * @when    A `Table` is framed around `caseColumns()`.
+ * @instead `DataTable` builds it itself.
+ */
 export function caseTracks(columns: ColumnDef<CaseListItem>[]): string {
   return columns.map((c) => c.width ?? "minmax(0, 1fr)").join(" ");
 }

@@ -105,6 +105,10 @@ const CASES: CaseListItem[] = [
 ];
 
 const FULL = caseColumns({ href, counterpartyHref });
+// Die festen Spuren (1270) plus neun Lücken à 10 und zweimal 18 Polster
+// (1396) plus der Boden des Anzeigenamens (24ch ≈ 175) — darunter scrollt die
+// Tabelle waagerecht, statt den Rang 1 auf 2 px zu quetschen.
+const MIN_WIDTH = 1570;
 
 function Frame({
   children,
@@ -119,7 +123,7 @@ function Frame({
     <div style={{ maxWidth: 1400 }}>
       <Card>
         <CardHead title="Sachverhalte" sub={sub ?? "Musterbau GmbH · Wirtschaftsjahr 2026"} />
-        <Table cols={caseTracks(columns)} minWidth={1180}>
+        <Table cols={caseTracks(columns)} minWidth={MIN_WIDTH}>
           <HeadRow>
             {columns.map((c) => (
               <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>

@@ -49,7 +49,17 @@
    und sein `gap`. Kein <colgroup>, kein einziges `role`. */
 .v2tbl, .v2tbl__body { display: block; }
 .v2tbl { border-collapse: collapse; width: 100%; text-align: left; }
-.v2tbl th, .v2tbl td { display: block; min-width: 0; font-weight: inherit; text-align: inherit; padding: 0; }
+.v2tbl th, .v2tbl td { display: block; min-width: 0; font-weight: inherit; padding: 0; }
+/* `th` steht standardmäßig zentriert — V3 zentriert nichts. */
+.v2tbl th { text-align: left; }
+/* **Zahlen rechts, auch in der Zelle.** Nach dem Umbau auf ein echtes
+   `<table>` (0106) war `.v2num` entweder ein Inline-Span in der Zelle — dort
+   tut `text-align` nichts — oder es verlor gegen `text-align: inherit` an der
+   Zelle selbst. Gemessen standen danach **alle** Zahlen des Sets links, bis zu
+   90 px vor ihrer Spurkante. Beide Wege sind hier abgedeckt: die Zelle mit der
+   Klasse, und der Span darin. */
+.v2tbl th.v2num, .v2tbl td.v2num { text-align: right; }
+.v2tbl :is(th, td) > .v2num { display: block; text-align: right; }
 /* `--v2-cols` setzt der Aufrufer (Table-Komponente), `--v2-min` optional für
    horizontales Scrollen bei vielen Spalten. */
 /* Dichte (0057 E9): drei Blöcke, ein Satz Maße. `default` steht am `.v2tbl`
@@ -112,15 +122,14 @@
 /* Letzte Zeile ohne Trennlinie (Baukasten-Regel 1). Eine `ExpandableRow` legt
    ihre Zeile in einen eigenen Wrapper, deshalb der zweite Selektor — sonst
    verlöre jede aufklappbare Zeile ihre Trennlinie statt nur der letzten. */
-.v2tbl__body > .v2tbl__row:last-child,
-.v2tbl__body > :last-child > .v2tbl__row { border-bottom: none; }
+.v2tbl__body > .v2tbl__row:last-child { border-bottom: none; }
 .v2tbl__row.is-clickable { cursor: pointer; transition: background var(--duration-fast) var(--ease-standard); }
 .v2tbl__row.is-clickable:hover { background: var(--color-bg-soft); }
 /* Aktive Zeile im Master-Detail: 3-px-Akzentleiste links (Baukasten §10). */
 .v2tbl__row.is-active { background: var(--color-accent-50); border-left: 3px solid var(--color-accent); padding-left: 15px; }
 
-/* Zeile als Link — der Rahmen bleibt ein Grid, der Text erbt die Farbe. */
-a.v2tbl__row { text-decoration: none; color: inherit; }
+/* `a.v2tbl__row` ist mit 0106 weggefallen: ein `<tr>` kann kein `<a>` sein,
+   der Zeilenlink liegt jetzt als `.v2rowlink` in der ersten Zelle. */
 
 /* Zeile mit eigenen Aktionen: der Link mit `.v2rowlink` deckt die ganze Zeile
    ab. So ist das Ziel überall in der Zeile klickbar, ohne <a> in <a> — und der
@@ -425,8 +434,12 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 .pz-mini span.is-failed { background: var(--color-danger); }
 
 /* --- Staffelstab: wer hat den Stapel — Icon UND Wort ------------------- */
+/* Ein Raster, kein Flex: „niemand" bekommt kein Zeichen (0088), und ohne
+   feste erste Spur ruckte sein Wort 19 px nach links aus der Spalte, in der
+   die Batons untereinander stehen. Der Platz bleibt, das Zeichen nicht. */
 .pz-owner {
-  display: inline-flex; align-items: center; gap: 5px;
+  display: inline-grid; grid-template-columns: 14px auto; align-items: center;
+  gap: 5px;
   font-size: 11.5px; color: var(--color-text-muted);
 }
 .pz-owner.is-alarm { color: var(--color-danger); font-weight: 600; }
@@ -2622,8 +2635,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    die Maße der drei neuen Formen dazu. Eigener Abschnitt am Ende, nicht
    einsortiert: an dieser Datei arbeiten mehrere Sitzungen gleichzeitig. */
 
-/* Die Zeile bringt ihr Spaltenmaß selbst mit — sie steht auch ohne `Table`
-   in einer Karte (Belege am Sachverhalt, Teilbelege). Die Reihenfolge ist die
+/* Die Zeile bringt ihr Spaltenmaß selbst mit — der Aufrufer setzt kein `cols`.
+   Eine `Table` braucht sie seit 0106 trotzdem: ein `<tr>` ohne Tabelle ist
+   ungültiges Markup. Die Reihenfolge ist die
    der Ränge und über alle Belegarten dieselbe: Gegenpart · Maß · Belegdatum ·
    Kennung · Sachverhalt · Eingang · Einordnung · Erledigung. */
 .v2doc__row {
@@ -2637,7 +2651,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
      linksbündiges Belegdatum stoßen sonst aneinander. */
   gap: var(--space-4);
 }
-/* Ohne `Table` gibt es keine Regel, die der letzten Zeile die Linie nimmt. */
+/* Die letzte Zeile ohne Linie — die allgemeine Regel greift nur auf direkten
+   Kindern des `tbody`, und die Belegzeile steht dort in eigener Verschachtelung. */
 .v2doc__row:last-child { border-bottom: none; }
 
 /* Rang 1 über Rang 2: der Gegenpart führt, die Belegart steht als Zweitzeile
@@ -3150,7 +3165,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2snap__recword { color: var(--color-text-muted); }
 
 /* --- Sachverhalt als Zeile (0096) ----------------------------------------- */
-.v2caserow__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 8ch; }
+/* `display: block`: die Klasse sitzt an einem Span **in** der Zelle, und auf
+   einer Inline-Box wirkt weder `overflow` noch `text-overflow` noch
+   `min-width` — gemessen war der Span 165 px breit in einer 2-px-Zelle. */
+.v2caserow__name {
+  display: block; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .v2caserow__count { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 
 /* Zeile, deren Bedienelement ein Knopf ist (0106): derselbe Weg wie
@@ -3172,25 +3193,25 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2dnf__limit { margin: 0; font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
 
 /* --- Bewegung: wer sie abbestellt hat, bekommt keine (0093 b) -------------
-   Bis hierher waren nur `.v2skel`, `.v2spin` und `.v2toast` abgesichert — die
-   Bewegungen, die von selbst laufen. Die, die auf eine Handlung folgen, liefen
-   ungebremst: der Drawer ist die größte Bewegung im Set, und genau die meint
-   die Einstellung. §2 verlangt es für **jede** Transition. */
+   **Eine Regel statt einer Liste.** Der erste Anlauf zählte Selektoren auf —
+   und die Abnahme fand prompt zwei, die fehlten (`.abn__step`, `.v2ibtn`),
+   und zwei, die es gar nicht gibt (`.v2dialog`). Eine Liste, die jede neue
+   Transition von Hand nachtragen muss, ist keine Deckung, sondern ein
+   Versprechen auf Wartung. Dazu trägt das Blatt drei Nachbarschichten
+   (`app-chrome.css` 16 Transitionen, `booking.css` 10, `components.css` 1),
+   die in jeder Story mitlaufen und keinen einzigen Block hatten.
+
+   **Übergänge** sind ausnahmslos Schmuck und fallen alle weg. **Animationen**
+   nicht: der Spinner und das Skelett *sagen* etwas, solange sie laufen — die
+   drei Blöcke, die sie schon bedienen (`.v2skel`, `.v2spin`, `.v2toast`),
+   bleiben deshalb, wie sie sind. */
 @media (prefers-reduced-motion: reduce) {
-  .v2drawer,
-  .v2drawer__scrim,
-  .v2dialog,
-  .v2dialog__scrim,
-  .v2chev,
-  .v2chev--icon,
-  .v2disc__chev,
-  .v2pop,
-  .v2tbl__row,
-  .v2tbl__row.is-clickable,
-  .v2card,
-  .v2btn,
-  .v2link {
-    transition: none !important;
-    animation: none !important;
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
   }
 }
+/* Die Schleifen-Angabe: Zeichen und Zahl gehören zusammen (0093 c). */
+.pz-loop { display: inline-flex; align-items: center; gap: 3px; }

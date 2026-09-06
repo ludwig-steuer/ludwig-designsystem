@@ -4,7 +4,7 @@ import type { Currency } from "@/ludwig/shared/money";
 
 import { AmountCell, ErrorRow, MonoCell, TableLoading } from "../../primitives/Cells";
 import { EmptyState } from "../../primitives/EmptyState";
-import { HeadRow, Row, Table } from "../../primitives/Table";
+import { HeadRow, Row, Table, EmptyRow } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
 import { EntityIcon } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
@@ -319,13 +319,15 @@ export function AccountEntryList({
         ) : error ? (
           <ErrorRow message={error.message} action={error.retry} />
         ) : entries.length === 0 ? (
-          <EmptyState
-            inline
+          <EmptyRow>
+            <EmptyState
+              inline
             // The list does not know the year, so the default must not claim
             // „never" — the caller who knows it says so (the drawer does).
-            title={empty?.title ?? "Keine Bewegungen."}
-            description={empty?.description}
-          />
+              title={empty?.title ?? "Keine Bewegungen."}
+              description={empty?.description}
+            />
+          </EmptyRow>
         ) : (
           entries.map((entry) => (
             <Row

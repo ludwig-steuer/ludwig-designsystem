@@ -2,7 +2,7 @@
 
 import { DeviationCell, AmountCell, type CellTone } from "../primitives/Cells";
 import { StateIcon } from "./Review";
-import { Card, CardHead, HeadRow, Table, rowCells } from "../primitives/Table";
+import { Card, CardHead, EmptyRow, HeadRow, Table, rowCells } from "../primitives/Table";
 
 /**
  * „Sieht der Monat aus wie sonst?" as a table (F123 T123.5, design `DR:599–629`).
@@ -87,7 +87,7 @@ export function ComparisonTable({
           <span className="v2num">Abw.</span>
         </HeadRow>
         {rows.length === 0 ? (
-          <div className="v2tbl__empty">{empty}</div>
+          <EmptyRow>{empty}</EmptyRow>
         ) : (
           rows.map((r) => {
             const content = (

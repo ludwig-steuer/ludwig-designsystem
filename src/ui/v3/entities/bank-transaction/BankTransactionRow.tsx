@@ -73,22 +73,23 @@ export function BankTransactionRow({
  */
 function SplitRows({ transaction }: { transaction: BankTransactionRowData }) {
   return (
-    // No `gridColumn: span n` here: `.v2tbl` is a block, the rows are the
-    // grids. The full width comes from the block flow, and the declaration
-    // measured as having no effect at all.
-    <div className="v2btxrow__split">
-      {transaction.cases.map((c) => (
-        <div className="v2btxrow__splitrow" key={c.caseId}>
-          <span>{c.caseNumber ?? c.caseId.slice(0, 8)}</span>
-          <span className="v2btxrow__splittitle">{c.title ?? c.counterpartyName}</span>
-          <Amount value={c.amount ?? null} currency={transaction.currency} size="sm" />
+    // Its own row with one cell over every column (0106) — a `<div>` next to a
+    // `<tr>` lands in the `<tbody>` and is neither valid nor a row.
+    <tr>
+      <td className="v2btxrow__split" colSpan={999}>
+        {transaction.cases.map((c) => (
+          <div className="v2btxrow__splitrow" key={c.caseId}>
+            <span>{c.caseNumber ?? c.caseId.slice(0, 8)}</span>
+            <span className="v2btxrow__splittitle">{c.title ?? c.counterpartyName}</span>
+            <Amount value={c.amount ?? null} currency={transaction.currency} size="sm" />
+          </div>
+        ))}
+        <div className="v2btxrow__splitrow v2btxrow__splitsum">
+          <span />
+          <span>zugeordnet</span>
+          <Amount value={transaction.allocatedSum} currency={transaction.currency} size="sm" />
         </div>
-      ))}
-      <div className="v2btxrow__splitrow v2btxrow__splitsum">
-        <span />
-        <span>zugeordnet</span>
-        <Amount value={transaction.allocatedSum} currency={transaction.currency} size="sm" />
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 }

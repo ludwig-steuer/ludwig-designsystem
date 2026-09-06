@@ -10,7 +10,8 @@ import {
   XCircle,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { rowCells } from "../primitives/Table";
+import { ActionIcon } from "../Icons";
+import { HeadRow, Table, rowCells } from "../primitives/Table";
 import { TableLoading } from "../primitives/Cells";
 import { Progress } from "../primitives/Progress";
 
@@ -118,17 +119,20 @@ export function Checklist({
    */
   loading?: boolean;
 }) {
-  const cols = "20px 1fr 76px 100px 150px";
+  const cols = "20px minmax(0, 1fr) 76px 100px 150px";
   return (
     <div className="v2card">
-      <div className="v2tbl" style={{ "--v2-cols": cols } as React.CSSProperties}>
-        <div className="v2tbl__head">
+      {/* A real `<table>` like every other list of the set (0106): the
+          checklist is a table — each row has the same five columns, and a
+          screen reader has to be able to read them column by column. */}
+      <Table cols={cols}>
+        <HeadRow>
           <span />
           <span>Prüfung</span>
           <span className="v2num">Stand</span>
           <span>Fortschritt</span>
           <span>Sprung</span>
-        </div>
+        </HeadRow>
         {loading ? (
           // Die Form des Inhalts, nicht ein Kasten: so viele Zeilen, wie
           // kommen werden — und mindestens vier, damit die Karte nicht in
@@ -140,7 +144,7 @@ export function Checklist({
             <ChecklistLine key={r.key} row={r} active={r.key === activeKey} onPick={onPick} />
           ))
         )}
-      </div>
+      </Table>
     </div>
   );
 }
@@ -174,7 +178,17 @@ function ChecklistLine({
           />
         )}
       </span>
-      <span className="v2chk__jump">{row.jump ? `→ ${row.jump}` : ""}</span>
+      <span className="v2chk__jump">
+        {/* The arrow is a Lucide sign, not „→" (T9, 0093 c). */}
+        {row.jump ? (
+          <>
+            <ActionIcon action="forward" size={12} />
+            {row.jump}
+          </>
+        ) : (
+          ""
+        )}
+      </span>
     </>
   );
   if (!onPick)
