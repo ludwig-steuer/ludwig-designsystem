@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
+| Status | in Arbeit |
+| Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/document-number/` |
 | Klassen-Test | nein — Belegfeld 1 ist eine DATEV-Ausnahme, die Rangordnung der Quellen ist Buchhaltungslogik |
 | Quelle | Anfrage Owner 2026-09-03 („Belegfeld 1 sollte ein Lupenicon haben, wodurch ich einen Drawer öffnen kann — sogenannter OPOS-Browser — aus dem als Ergebnis ein Belegfeld übernommen werden kann") |

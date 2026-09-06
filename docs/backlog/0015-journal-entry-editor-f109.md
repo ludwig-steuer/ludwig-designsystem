@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec — zurück 2026-09-06, zwei Owner-Fragen im Abschnitt „Freigabe" |
+| Status | spec |
+| Freigabe | zurück 2026-09-06 — zwei Owner-Fragen im Abschnitt „Freigabe" |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | nein — Buchungssatz, Belegfeld, Gegenkonto sind Fachbegriffe |
 | Quelle | Anfrage Owner 2026-09-03 · Design `reference/f109-buchungsreview/BuchungssatzEditor.dc.html` und `Buchungsreview.dc.html` Z. 891 / 3092 |

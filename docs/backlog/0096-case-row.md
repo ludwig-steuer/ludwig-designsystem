@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec — zurück 2026-09-06, Zuschnitt neu nach Abschnitt „Freigabe", danach ohne zweite Runde freigegeben |
+| Status | spec |
+| Freigabe | zurück 2026-09-06 — Zuschnitt neu nach Abschnitt „Freigabe", danach ohne zweite Runde freigegeben |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: zehn Datenpunkte einer Ludwig-Entität, drei davon aus ihren Achsen |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md` (Status `geprüft`, 2026-09-05), Formen-Tabelle Zeile `CaseRow`; Ränge 1–10 |

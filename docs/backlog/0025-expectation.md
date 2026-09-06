@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
+| Status | in Arbeit |
+| Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/expectation/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, „was noch fehlt" hängt am Sachverhalt |
 | Quelle | Soll-Katalog §11.7 Stufe 3 „Erwartung — fehlt (§3.1)"; `ui-repraesentationen.md` §3.2 Nr. 2 |

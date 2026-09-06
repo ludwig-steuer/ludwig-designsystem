@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
+| Status | in Arbeit |
+| Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/bank-transaction/` — erste Datei dieser Familie |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: SEPA-Tags sind der Zahlungsverkehr dieser Domäne, und die sieben Schlüssel sind ihr Vokabular |
 | Quelle | Entitätsprofil `docs/entitaeten/bank-transaction.md` (Status `geprüft`, 2026-09-05), Formen-Tabelle Zeile `BankTransactionPurpose`; Ränge 1 und 11 |

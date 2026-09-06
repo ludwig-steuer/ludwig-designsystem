@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
+| Status | in Arbeit |
+| Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: fünfzehn Felder genau dieser Entität, zwei davon mit Ludwig-Regeln am Nullwert |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md` (Status `geprüft`, 2026-09-05), Formen-Tabelle Zeile `CaseFacts`; Ränge 11–16, mit `all` bis 25 |

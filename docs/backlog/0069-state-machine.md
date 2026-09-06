@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
+| Status | in Arbeit |
+| Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `patterns/` — Gruppe Prozess, neben `Process` und `Timeline` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, sobald ein Schadenfall Zustände und Übergänge hat, die jemand erklärt haben will |
 | Quelle | Anfrage Owner 2026-09-04 („visuell die Statemachine anschauen, aktuellen State hervorheben, Klick erklärt den State, optional Beschreibung des Prozesses") · **Z1** und **Z3** in `design-guidelines.md` · Vorlage der Daten: `docs/topics/datev.md` R19 (Tabelle `State \| Dran ist \| Hinein durch \| Hinaus durch` für `zyklus_stapel`) und die „Übergänge:"-Blöcke in `status-registry.ts` |

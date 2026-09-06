@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | offen — 2026-09-06 zurückgestellt, wartet auf einen Bildschirm, siehe Abschnitt „Freigabe" |
+| Status | offen |
+| Freigabe | 2026-09-06 zurückgestellt — wartet auf einen Bildschirm, siehe Abschnitt „Freigabe" |
 | Stufe | `entities/open-item-link/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, eine Ausgleichs-Zuordnung ist Buchhaltung |
 | Quelle | Soll-Katalog §11.7 Stufe 3 „Ausgleichs-Zuordnung — fehlt (§3.1)"; `ui-repraesentationen.md` §3.2 Nr. 3 |

@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — freigegeben 2026-09-06, Entscheide und Pflichtänderungen im Abschnitt „Freigabe" |
+| Status | in Arbeit |
+| Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → der **Rahmen** ja (`Drawer`, 0042), der **Inhalt** nein: Zone 3 sind die Fakten dieses Vorgangs |
 | Quelle | `docs/backlog/0052-entity-drawer.md` **Schritt 3** — dort ausdrücklich auf das Entitätsprofil und 0050 vertagt · Entitätsprofil `docs/entitaeten/accounting-case.md` (Status `geprüft`), Formen-Tabelle Zeile `CaseDrawer` |
