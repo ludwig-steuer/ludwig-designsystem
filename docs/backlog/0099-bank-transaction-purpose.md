@@ -182,3 +182,45 @@ Abgenommen von / am: … · Offene Punkte: …
 **Urteil: freigeben.** Entscheide: 1 Chips · 2 `OAMT` als letzter Chip · 3 CSS-Ellipse. Ein Satz in die Spec: `PURP_LABELS` ist eine Code-Übersetzung der SEPA-Schlüssel, kein Status — sonst liest der Abnehmende das feste Kriterium „keine lokale Label-Map" als verletzt.
 
 **Nachtrag 2026-09-06, vor dem Bau:** B1 ist **erledigt** — die App hat die Ableitungen mit `cc141f7b` in den Spiegel gehoben (`modules/bank-transactions/domain/statement-line.ts`: `derivePurposeParts()`, `PurposeParts`, `PurposeRef`, `PURP_LABELS`, dazu `extractSepaTags()`/`SepaTags` in `sepa-tags.ts`). Die Spec verlangte unter „Zuschnitt" eine eigene Datei `purpose-parts.ts`; **die entfällt.** Der Baustein ruft die Ableitung aus dem Spiegel, und das Kriterium „`derivePurposeParts()` steht in einer eigenen Datei und rendert nichts" ist damit über den Spiegel erfüllt — eine deckungsgleiche zweite Fassung wäre der R1-Verstoß, den L-52 schon einmal gekostet hat.
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1 — `PURP` stand als Code, nicht als Wort.** Der Chip zeigte `PURP RINP`,
+mono wie die sechs Kennungen; das deutsche Wort lag nur im `title`, also nur
+per Maus. Genau das ist die eine Ausnahme, die das Profil benennt: `PURP` ist
+ein **Code**wort, und `RINP` sagt niemandem etwas. Jetzt steht dort
+„wiederkehrende Rate", der Code im `title` — übersetzt wird mit `PURP_LABELS`
+aus dem Spiegel, es entsteht keine Map hier.
+
+**M2 — ein Tag-Block ohne SVWZ wurde zum Freitext.** Die Ableitung fällt
+ohne SVWZ auf den ganzen Block zurück, und der stand damit an genau der
+Stelle, an der der Rohwert nie stehen soll. Die Komponente erkennt den Fall
+jetzt (`parts.text === parts.raw` nach Whitespace-Normalisierung) und zeigt
+„—": es gibt keinen Freitext, und die Referenzen liegen hinter dem (i). Neue
+Story `TagsOnly`.
+
+**M3 — die Rand-Story unterschritt den Bestandswert.** Sie hatte 373 Zeichen
+roh, die Spec verlangt 447. Jetzt **509 roh, 360 Freitext** — über dem
+Höchstwert und dem Vierfachen von p90; gemessen, nicht behauptet.
+
+**M4 — der gekürzte Freitext hatte keine lesbare Vollform.** `title` auf der
+Inline-Zeile, wie es die App-Fassung hatte und Z3 für genau diesen Fall
+erlaubt. Gemessen: 360 Zeichen im `title`, die Zeile kürzt.
+
+**M5 — `href` wirkte nur im `inline`-Zweig.** Jetzt in beiden, und die
+Prop-JSDoc nennt die Story, die sie beweist
+(`BankTransactionCell --without-counterparty`).
+
+**M6 — zwei Kommentare standen gegen den Code.** Beide richtiggestellt.
+
+**M7 — die Trefferfläche des (i) war 14 × 14 px.** Jetzt 22 × 22, mit
+negativem Rand **nur senkrecht** — waagerecht hätte der Knopf 4 px über die
+rechte Kante geragt und die Zelle überlaufen lassen (gemessen).
+
+**M8 — `.v2purp__key` hatte Sperrung auf Versalien.** Gestrichen; 0089 hat sie
+im Set abgeschafft.
+
+Offen, weil Owner-Sache: die Spec-Zeile „Setzt auf: `LongText`, `Badge` …"
+stimmt nicht mehr — `LongText` kürzt nach Zeichenzahl und widerspricht
+Entscheid 3, `Badge` heißt im Set „Zustand" und ist durch eine stille Marke
+ersetzt.

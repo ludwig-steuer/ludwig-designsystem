@@ -80,9 +80,10 @@ export const TagsWin: Story = {
 };
 
 /**
- * Rand: ein Rohblock von 373 Zeichen, davon 224 Freitext — über dem
- * Höchstwert des Bestands (447 Roh, p90 84 Freitext). Inline bleibt es eine
- * Zeile mit Ellipse, im Popover steht der Block ganz und mono.
+ * Rand: ein Rohblock von 509 Zeichen, davon 360 Freitext — über dem
+ * Höchstwert des Bestands (447 roh) und dem Vierfachen von p90 (84 Freitext).
+ * Inline bleibt es eine Zeile mit Ellipse, im Popover steht der Block ganz
+ * und mono.
  */
 export const Raw: Story = {
   render: () => (
@@ -91,11 +92,27 @@ export const Raw: Story = {
         purpose={
           "EREF+2026-08-SAMMLER-0093117 KREF+NONREF MREF+D-VR-50411866-0-001 " +
           "CRED+DE87ZZZ00000001701 PURP+SUPP OAMT+12.480,55 ABWA+Musterbau GmbH & Co. KG " +
-          "SVWZ+Sammelüberweisung August 2026 für die Rechnungen RE-4471, RE-4472, RE-4488, " +
-          "RE-4501 und RE-4517 abzüglich der Gutschrift GS-0091 sowie des vereinbarten " +
-          "Skontos von zwei Prozent, Zahlungsziel laut Rahmenvertrag vom 14.03.2026"
+          "SVWZ+Sammelüberweisung August 2026 für die Rechnungen RE-4471, RE-4472, " +
+          "RE-4488, RE-4501, RE-4517, RE-4522 und RE-4530 abzüglich der Gutschrift " +
+          "GS-0091 und der Gutschrift GS-0104 sowie des vereinbarten Skontos von zwei " +
+          "Prozent, Zahlungsziel laut Rahmenvertrag vom 14.03.2026, Ansprechpartner " +
+          "Einkauf, Kostenstelle 4400, Freigabe durch die Geschäftsführung liegt vor"
         }
       />
+    </div>
+  ),
+};
+
+/**
+ * Rand 2: ein Tag-Block **ohne SVWZ**. Die Ableitung fällt dann auf den ganzen
+ * Block zurück — und genau der stünde damit an der Stelle, an der der Rohwert
+ * nie stehen soll. Also steht dort „—": es gibt keinen Freitext, und die
+ * Referenzen liegen hinter dem (i), wo sie hingehören.
+ */
+export const TagsOnly: Story = {
+  render: () => (
+    <div style={{ maxWidth: 420, padding: "var(--space-6)" }}>
+      <BankTransactionPurpose purpose="EREF+0600496348 MREF+D-VR-50411866-0-001 CRED+DE87ZZZ00000001701" />
     </div>
   ),
 };

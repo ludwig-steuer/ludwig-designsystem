@@ -158,7 +158,9 @@ Variabel (aus dieser Spec):
 - [ ] Z3 zeigt eine Rest-Marke, deren Betrag `restOf()` entspricht (Story `Split`, nachgerechnet)
 - [ ] Das Vorzeichen trägt keine Farbe (Story `InUse`, gemessen)
 - [ ] Das Datum trägt das Jahr (Story `Filled`)
-- [ ] Die vier offenen Match-Klassen zeigen keinen Haken, und der Code sagt warum (Story `Filled`, Kommentar)
+- [ ] Rang 5 steht als `StatusBadge axis="bank_match_stage"`; die vier offenen Klassen tragen ihr Wort (Story `Columns`)
+- [ ] Rang 8 steht als Zahl mit Wort, **ohne** Badge (Story `Split`)
+- [ ] Bei mehreren Fällen steht vor jedem Ereignis-Badge die Fallnummer (Story `Split`)
 - [ ] Die vier Ableitungen liegen in einer eigenen Datei und rendern nichts (`grep`: kein JSX darin)
 - [ ] `columns` lässt weg und ordnet nicht um (Story `Columns`)
 - [ ] offen (App): ersetzt die Zeile in `KontoauszugView` und in `BankTransactionAssignmentTable`, dazu die dritte Route aus B3
@@ -187,3 +189,41 @@ Abgenommen von / am: … · Offene Punkte: …
 **Urteil: freigeben mit Änderung.** Entscheide: 1 Haken bis L-57 · 2 „offen" in der Sachverhalts-Spalte · 3 Rest nur bei Z3 · **Namenskollision:** der Komponentenname `BankTransactionRow` bleibt (Familienkonvention), der Datentyp heißt `BankTransactionRowData`, die Familie importiert den gespiegelten Typ `BankTransactionRow` aus `modules/bank-transactions/domain/types.ts` nie, Kommentar am Export.
 
 Vor dem Bau in die Spec: (a) Rang 7 = `StatusBadge axis="ereignis"` über `resolveEventBookingState`, Rang 8 = `StatusBadge axis="klaerung"` mit Zähler, ein Satz zur Achse `buchung` (Vorschlags-Indikator aus `CaseIndicatorBadges`: Default in Rang 7 gefaltet); (b) Namens-Satz von oben; (c) Typ-Satz aus 0100; (d) **Zuschnitt wie 0096:** `bankTransactionColumns()` als `ColumnDef`-Satz für `DataTable` (0085) plus `BankTransactionRow` für kurze Listen aus denselben Zellfunktionen — einmal für beide Familien entschieden.
+
+## Nachtrag 2026-09-06, vor dem Bau: die Achse ist da
+
+**L-57 ist erledigt** — `bank_match_stage` steht seit `cc141f7b` im Register,
+zwölf Werte, Titel „DATEV-Historie", Quelle `client_bank_transactions.match_stage`
+(NULL = Kaskade nicht gelaufen). Damit ändern sich drei Dinge in dieser Spec:
+
+- **Rang 5 ist kein Haken mehr**, sondern `StatusBadge axis="bank_match_stage"`.
+  Die Übergangsregel („die vier offenen Klassen zeigen keinen Haken, und der
+  Code sagt warum") **entfällt**; das Kriterium dazu ebenso. Der Gewinn ist
+  nicht Kosmetik: 29 % des Bestands — `beyond_bookings` allein 328 von 1281 —
+  hatten vorher **kein** Wort, weil ein Haken nur ja sagen kann.
+- Das Kriterium „Die vier Ableitungen liegen in einer eigenen Datei und
+  rendern nichts" ist über den **Spiegel** erfüllt: `deriveZ`, `restOf`,
+  `derivePurposeParts` und `resolveEventBookingState` liegen dort. `derive.ts`
+  in dieser Familie ist eine Re-Export-Datei, damit die Familie eine Adresse
+  hat — keine zweite Fassung.
+- Offene Frage 1 („Bleibt der Haken?") ist damit beantwortet: nein.
+
+**Zwei Abweichungen von der Freigabe, im Bau entschieden:**
+
+(a) **Rang 8 bekommt kein `StatusBadge`.** Die Achse `klaerung` ist eine
+Dringlichkeit **je Rückfrage** (blockierend / optional); die Zeile hat eine
+**Anzahl** über den Fall. Eine Anzahl ist kein Zustand, und ein Badge heißt in
+diesem Set „hier steht ein Zustand". Kriterium: die Zahl steht mit ihrem Wort
+(„2 Klärungen"), ohne Badge.
+
+(b) **Rang 7 nennt bei mehreren Fällen die Fallnummer vor dem Badge.** Der
+Satz, der die Familie trägt, ist, dass der Zustand dem Ereignis gehört und
+nicht dem Sachverhalt — bei zwei Fällen sagt ein Badge allein nicht, zu
+welchem er gehört. Kriterium: bei `cases.length > 1` steht vor jedem Badge
+die Nummer (Story `Split`).
+
+**Zuschnitt, wie die Freigabe ihn entschieden hat:**
+`bankTransactionColumns()` gibt den `ColumnDef`-Satz für `DataTable` (0085),
+`BankTransactionRow` rahmt dieselben Zellen für kurze Listen. `columns`
+**wählt aus**, ordnet nie um — die Reihenfolge der Punkte ist über alle Formen
+dieser Familie dieselbe.

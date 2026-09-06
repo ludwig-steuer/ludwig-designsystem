@@ -3003,9 +3003,14 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2purp--inline .v2purp__text {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
 }
+/* Trefferfläche: das Icon misst 14 px, der Knopf 24 — der negative Rand hält
+   die Zeilenhöhe, damit die Tabelle nicht wächst (WCAG 2.5.8). */
 .v2purp__info {
-  background: none; border: none; padding: 0; cursor: pointer; line-height: 0;
+  background: none; border: none; cursor: pointer; line-height: 0;
   color: var(--color-text-subtle); flex: 0 0 auto;
+  /* Nur senkrecht negativ: waagerecht wuerde der Knopf 4 px ueber die
+     rechte Kante ragen und die Zelle ueberlaufen lassen. */
+  padding: var(--space-1); margin-block: calc(-1 * var(--space-1));
 }
 .v2purp__info:hover { color: var(--color-primary); }
 .v2purp__panel { display: grid; gap: var(--space-3); min-width: 22rem; max-width: 32rem; }
@@ -3018,7 +3023,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2purp__key {
   padding: 1px var(--space-1); border-radius: var(--radius-sm);
   background: var(--color-bg-sunken); color: var(--color-text-muted);
-  font: 500 var(--fs-ui-xs)/1.4 var(--font-mono); letter-spacing: 0.02em;
+  /* Keine Sperrung: 0089 hat sie im Set abgeschafft, sie war für Versalien
+     da. Mono trennt die Kennung schon genug. */
+  font: 500 var(--fs-ui-xs)/1.4 var(--font-mono);
 }
 .v2purp__raw summary { cursor: pointer; font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
 .v2purp__raw pre {
@@ -3032,12 +3039,20 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Datum und Betrag in keine. Der Betrag steht rechts, das Vorzeichen trägt
    **keine** Farbe — Rot ist Kritikalität, ein Ausgang ist kein Fehler. */
 .v2btx { display: grid; gap: 2px; min-width: 0; }
-.v2btx__top { display: flex; align-items: baseline; gap: var(--space-3); min-width: 0; }
-.v2btx__who { font-weight: 600; min-width: 0; flex: 1 1 auto; }
+/* `wrap`, weil Datum und Betrag mit `flex: 0 0 auto` sonst einen harten Boden
+   von rund 180 px setzen und die Zeile darunter in die Nachbarspalte malt. */
+.v2btx__top { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-3); min-width: 0; }
+/* Ellipse **und** Boden — derselbe Fehler wie in 0095: ohne beides bricht der
+   Name um, wächst die Zeile, und ab 240 px steht er außerhalb seiner Box. */
+.v2btx__who {
+  font-size: var(--fs-ui); font-weight: 600;
+  flex: 1 1 auto; min-width: 8ch;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .v2btx__who > .v2purp { font-weight: 400; }
 .v2btx__acct { color: var(--color-text-subtle); font-size: var(--fs-ui-xs); flex: 0 0 auto; }
 .v2btx__top > .v2amount { margin-left: auto; flex: 0 0 auto; }
-.v2btx__top > .v2time { flex: 0 0 auto; color: var(--color-text-subtle); }
+.v2btx__when { flex: 0 0 auto; color: var(--color-text-subtle); }
 .v2btx__what { min-width: 0; color: var(--color-text-muted); }
 
 /* --- Auszugszeile (0101) --------------------------------------------------
@@ -3065,3 +3080,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2btxrow__splitrow > :last-child { text-align: right; }
 .v2btxrow__splittitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2btxrow__splitsum { border-top: 1px solid var(--color-border-subtle); margin-top: 2px; padding-top: 4px; font-weight: 600; }
+
+/* --- Fakten einer Kontoauszugsposition (0102) ----------------------------- */
+.v2btxf { display: grid; gap: var(--space-5); }
+/* Der Zweck ist ein langer Wert ohne Label — er nimmt den Rahmen der
+   Feldliste, aber nicht deren Zeile: rechtsbündiger Fließtext ist unlesbar. */
+.v2btxf__purpose { padding: var(--space-3) var(--space-4) var(--space-1); }
+.v2fields--bare .v2btxf__purpose { padding-left: 0; padding-right: 0; }

@@ -353,6 +353,10 @@ export { BankTransactionPurpose } from "./entities/bank-transaction/BankTransact
 export { BankTransactionCell } from "./entities/bank-transaction/BankTransactionCell";
 export { BankTransactionRow } from "./entities/bank-transaction/BankTransactionRow";
 export {
+  BankTransactionFacts,
+  type BankTransactionFactBlock,
+} from "./entities/bank-transaction/BankTransactionFacts";
+export {
   bankTransactionColumns,
   type BankTransactionColumn,
   type BankTransactionColumnOptions,

@@ -67,9 +67,13 @@ export function BankTransactionCell({
         ) : null}
         {/* With the year: the statement drops it today („15.04."), which is
             ambiguous in a list filtered across financial years — and in a
-            case timeline all the more (finding L-61 names the second half:
-            this is the **posting** date, not the value date). */}
-        <Time value={postingDate} format="date" length="short" size="sm" />
+            case timeline all the more.
+            **Named, not only correct** (finding L-61): a date alone does not
+            say which of the two it is, and `BankPane` over there labels the
+            posting date „Wertstellung". So the word travels with it. */}
+        <span className="v2btx__when" title="Buchungsdatum">
+          <Time value={postingDate} format="date" length="short" size="sm" />
+        </span>
         <Amount value={amount} currency={currency} size="sm" />
       </div>
       {name ? (

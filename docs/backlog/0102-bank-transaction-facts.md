@@ -71,8 +71,8 @@ das bleibt.
 - **Zuordnen oder umbuchen.** Kein Schreibpfad. An dieser Entität schreibt
   ohnehin keine Nutzerhand — vier Schreibpfade gibt es, alle sind Import,
   Matcher, Agent oder Watchdog.
-- **Die Match-Stufe färben.** Für `match_stage` gibt es keine Achse (L-57).
-  Der Klartext steht als Wort, ohne Ton, bis es sie gibt.
+- **Die Match-Stufe selbst benennen.** Wort und Ton kommen aus der Achse
+  `bank_match_stage`; eine lokale Übersetzung gäbe es hier nicht (R1).
 - **Den Zweck kürzen.** Hier steht er ganz (`variant="block"`); das Kürzen
   ist Sache der Zeile.
 
@@ -144,7 +144,7 @@ Variabel (aus dieser Spec):
 - [ ] Der EUR-Wert erscheint **nur** bei Abweichung (Story `Filled`: nicht sichtbar)
 - [ ] Der Zuordnungs-Block sagt bei 0 Fällen einen Satz, keine Lücke (Story `Unassigned`)
 - [ ] Ohne SEPA-Tags fehlt die Chip-Reihe ganz, nicht als leere Zeile (Story `WithoutTags`)
-- [ ] Die Match-Stufe steht als Wort ohne Ton, solange L-57 offen ist (Story `Filled`)
+- [ ] Die Match-Stufe steht als `StatusBadge axis="bank_match_stage"` (Story `Filled`); die vier offenen Klassen tragen ihr Wort
 - [ ] Rohdaten kommen über `RawRecord`, nicht als Feldliste (Story `RawPayload`)
 - [ ] `blocks` und `tone` reichen durch und ändern nichts an der Reihenfolge (Story `InDrawer`)
 - [ ] Kein Schreibpfad in der Datei (`grep`: kein `onChange`, kein `action`)
@@ -174,4 +174,4 @@ Abgenommen von / am: … · Offene Punkte: …
 
 **Urteil: freigeben mit Änderung.** Entscheide: 1 Rohdaten als letzter Block, zugeklappt · 2 fünf Blöcke · 3 Buchungs-Zustand je Fall (Familienregel).
 
-Vor dem Bau in die Spec: (a) Zuordnungs-Block: `match_stage` als Rohwert der Spalte, mono, unübersetzt, ohne Ton, bis L-57 — nicht „Klartext" (R1, keine lokale Map); Kriterium entsprechend; (b) Typ-Satz aus 0100, mit dem Ereignis-Zustand je Fall, den `CaseLink` (0095) nicht trägt; (c) Story-Formel zählt `RawPayload` mit (Kosmetik).
+Vor dem Bau in die Spec: (a) ~~Zuordnungs-Block: `match_stage` als Rohwert der Spalte, mono, unübersetzt, ohne Ton, bis L-57~~ — **überholt am 2026-09-06:** die Achse `bank_match_stage` steht im Register (`cc141f7b`), also `StatusBadge axis="bank_match_stage"` mit Wort und Ton wie überall. Der Befund B2/L-57 dieser Spec ist erledigt; (b) Typ-Satz aus 0100, mit dem Ereignis-Zustand je Fall, den `CaseLink` (0095) nicht trägt; (c) Story-Formel zählt `RawPayload` mit (Kosmetik).

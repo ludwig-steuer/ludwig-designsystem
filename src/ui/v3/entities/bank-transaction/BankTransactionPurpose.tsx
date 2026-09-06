@@ -1,4 +1,8 @@
-import { derivePurposeParts, type SepaTags } from "@/ludwig/modules/bank-transactions/domain/statement-line";
+import {
+  derivePurposeParts,
+  PURP_LABELS,
+  type SepaTags,
+} from "@/ludwig/modules/bank-transactions/domain/statement-line";
 import { ActionIcon } from "../../Icons";
 import { Link } from "../../primitives/Link";
 import { Popover } from "../../primitives/Popover";
@@ -55,7 +59,8 @@ export function BankTransactionPurpose({
    * Makes the free text a link — **not** the whole component, because the (i)
    * is a button and a button inside an anchor is not valid markup. Exists for
    * the one case where the purpose is the identity: a payment without a
-   * counterparty (0100, 3 % of the lines).
+   * counterparty (0100, 3 % of the lines); proved by the story
+   * `BankTransactionCell --without-counterparty`. Works in both variants.
    */
   href?: string;
 }) {
@@ -63,11 +68,20 @@ export function BankTransactionPurpose({
   // No tag block recognised — 10 % of the lines — means the raw value **is**
   // the free text. An (i) without content would be a promise without cover.
   const hasMore = parts.refs.length > 0 || (parts.hadTags && parts.raw.length > 0);
+  // **A tag block without SVWZ is not a free text.** The derivation falls back
+  // to the whole block then, and that block would stand exactly where the
+  // head rule never wants it: first. So it does not: the line says there is no
+  // text, and the block stays behind the (i) with the references.
+  const blockAsText =
+    parts.hadTags && parts.text === parts.raw.replace(/\s+/g, " ").trim();
+  const text = blockAsText ? "" : parts.text;
 
   if (variant === "block") {
     return (
       <div className="v2purp v2purp--block">
-        <p className="v2purp__text">{parts.text || fallback}</p>
+        <p className="v2purp__text">
+          {href ? <Link href={href}>{text || fallback}</Link> : text || fallback}
+        </p>
         {parts.refs.length > 0 ? <Refs refs={parts.refs} /> : null}
         {parts.hadTags && parts.raw ? <Raw raw={parts.raw} /> : null}
       </div>
@@ -78,8 +92,12 @@ export function BankTransactionPurpose({
     <span className="v2purp v2purp--inline">
       {/* The cut happens in CSS, not by character count: a character count
           never matches a grid column (decision 3 of the Freigabe). */}
-      <span className="v2purp__text">
-        {href ? <Link href={href}>{parts.text || fallback}</Link> : parts.text || fallback}
+      {/* `title` on the shortened line: Z3 allows exactly this — one word of
+          explanation for an element that already has a name, without
+          JavaScript. Whoever loses the end of the sentence gets it back
+          without opening anything. */}
+      <span className="v2purp__text" title={text || undefined}>
+        {href ? <Link href={href}>{text || fallback}</Link> : text || fallback}
       </span>
       {hasMore ? (
         <Popover
@@ -112,8 +130,10 @@ export function BankTransactionPurpose({
  * derivation of the content.
  *
  * Six of the seven are identifiers and stay exactly as they are: mono,
- * unshortened, selectable. Only `PURP` is translated, and its `title` carries
- * the code word next to the German one.
+ * unshortened, selectable. `PURP` is the one exception the profile names: it
+ * is a **code word**, and the code word `RINP` tells nobody anything. It
+ * therefore shows the German word and keeps the code in its `title` — the
+ * translation comes from `PURP_LABELS` in the mirror, so no map lives here.
  */
 const REF_ORDER = ["EREF", "KREF", "MREF", "CRED", "ABWA", "PURP", "OAMT"];
 
@@ -126,7 +146,11 @@ function Refs({ refs }: { refs: { key: string; value: string; hint: string }[] }
           {/* Not a `Badge`: in this set a badge means a state, and a SEPA key
               is an identifier. It gets its own quiet chip. */}
           <span className="v2purp__key">{r.key}</span>
-          <span className="v2mono">{r.value}</span>
+          {r.key === "PURP" ? (
+            <span title={r.value}>{PURP_LABELS[r.value] ?? r.value}</span>
+          ) : (
+            <span className="v2mono">{r.value}</span>
+          )}
         </span>
       ))}
     </div>

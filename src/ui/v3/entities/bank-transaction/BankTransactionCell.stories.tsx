@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Landmark } from "lucide-react";
 import { BankTransactionCell } from "./BankTransactionCell";
 import type { BankTransactionCellData } from "./bank-transaction";
 import { Card, CardHead, HeadRow, Row, Table } from "../../primitives/Table";
@@ -77,6 +78,23 @@ export const WithAccount: Story = {
   ),
 };
 
+/**
+ * Zwei Wege, die sonst keine Story trägt: `sepaTags` aus dem Import gewinnen
+ * gegen das Nachparsen (MREF steht als „AUS-DEM-IMPORT-4711"), und `account`
+ * **ohne** `href` — ein Konto, das genannt, aber nicht verlinkt wird.
+ */
+export const TagsAndPlainAccount: Story = {
+  render: () => (
+    <div style={{ maxWidth: 520, padding: "var(--space-6)" }}>
+      <BankTransactionCell
+        transaction={{ ...OUT, sepaTags: { mref: "AUS-DEM-IMPORT-4711" } }}
+        account={{ label: "Commerzbank · 1210" }}
+        href="#bt-1"
+      />
+    </div>
+  ),
+};
+
 /** Ohne `href`: kein `<a>` im DOM, die Zelle ist Text. */
 export const Plain: Story = {
   render: () => (
@@ -89,6 +107,14 @@ export const Plain: Story = {
 /**
  * Im Einsatz 1 — im Zeitstrahl eines Sachverhalts, wo `EventStack` sie heute
  * von Hand baut. Das Konto steht mit, weil es hier sonst niemand weiß.
+ *
+ * Unten daneben **dieselbe** Zahlung in der alten Fassung
+ * (`EventStack.BankTransactionBlock`), damit die Ablösung nachprüfbar ist.
+ * Was die alte kann und die neue nicht: das Landmark-Icon in der 44-px-Kachel.
+ * Was die neue kann und die alte nicht: den **Betrag** (die alte zeigt ihn gar
+ * nicht), das **Jahr** im Datum, den Zweck über `BankTransactionPurpose` mit
+ * Zugang zu den Referenzen — und sie sagt, dass das Datum das Buchungsdatum
+ * ist.
  */
 export const InUseTimeline: Story = {
   render: () => (
@@ -123,11 +149,60 @@ export const InUseTimeline: Story = {
               href="#bt-4"
             />
           </div>
+          <div>
+            <div className="v2sub" style={{ marginBottom: "var(--space-2)" }}>
+              Zum Vergleich: die alte Fassung derselben Zahlung
+            </div>
+            <OldBlock />
+          </div>
         </div>
       </Card>
     </div>
   ),
 };
+
+/**
+ * `EventStack.BankTransactionBlock` der App, nachgebaut mit ihren Inline-Maßen
+ * — nur für den Vergleich in `InUseTimeline`, nicht als Baustein.
+ */
+function OldBlock() {
+  return (
+    <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+      <div
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 6,
+          background: "var(--color-bg-soft)",
+          color: "var(--color-text-subtle)",
+          display: "grid",
+          placeItems: "center",
+          flexShrink: 0,
+        }}
+      >
+        <Landmark size={18} strokeWidth={1.5} />
+      </div>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 500 }}>Bürobedarf Meier GmbH</div>
+        <div
+          style={{
+            fontSize: 11.5,
+            color: "var(--color-text-muted)",
+            display: "flex",
+            gap: 8,
+            marginTop: 2,
+          }}
+        >
+          <span>Commerzbank · 1210</span>
+          <span>26.08.</span>
+        </div>
+        <div style={{ fontSize: 12, color: "var(--color-text-muted)", marginTop: 4 }}>
+          Wartung Klimaanlage, Leistung 08/2026, Rechnung RE-4471
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Im Einsatz 2 — die Gate-Zeile aus Schritt 4 der Stapelabnahme: Bezeichnung,
