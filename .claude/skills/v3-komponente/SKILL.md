@@ -119,6 +119,15 @@ Der Abnehmende prüft zuerst die **Story-Deckung**: hat jede Prop der
 Schnittstelle ihre Story, ist jeder ausgeschlossene Zustand begründet, stimmt
 die Zahl mit der Ableitung (`spec-schreiben` §6) überein.
 
+Eine Abnahme **trägt in die Tabelle ein und ändert nie die Abnahmekriterien**:
+ein fehlendes oder unprüfbares Kriterium ist ein Mangel der Spec, der als
+Zeile in der Tabelle steht, kein Grund, die Liste zu kürzen (Owner-Regel
+2026-09-06, nach Commit `64fbe27`, der zwölf Specs ihre Kriterien nahm). Und
+gemessen wird die **Wirkung, nicht die Behauptung**: `getBoundingClientRect`
+statt `getComputedStyle` auf einem selbst gesetzten Stil, die Lage des
+Textes in der Zelle statt nur der Spurkanten, bei vier Breiten (700, 1100,
+1400, 1920 px).
+
 Die vollständige Gestaltungs-Prüfliste steht in `docs/design-guidelines.md`
 §9 — dort durchgehen, nicht hier zusammenfassen.
 
