@@ -13,6 +13,7 @@ Die Hausregeln stehen in `README.md` („Ordnung im Set") und im Skill
 - **Erst Spec, dann bauen, dann fremde Abnahme.** Aufgaben liegen in
   `docs/backlog/` (eine Datei je Komponente). Skill `spec-schreiben` schreibt
   sie, `v3-komponente` baut danach, abgenommen wird gegen die Kriterien der
-  Spec — nicht vom selben Agenten.
+  Spec — nicht vom selben Agenten. Einer Entitäts-Familie geht
+  `entitaet-analysieren` voraus (Profil in `docs/entitaeten/`).
 - **Nur eigene Dateien stagen.** Hier arbeiten oft mehrere Sitzungen
   parallel — kein `git add -A`.
