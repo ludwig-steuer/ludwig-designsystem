@@ -1,0 +1,179 @@
+import {
+  expectationMaturity,
+  type ExpectationKind,
+} from "@/ludwig/modules/accounting-cases/domain/case";
+import type { Currency } from "@/ludwig/shared/money";
+import { StatusBadge } from "../../patterns/StatusBadge";
+import { AmountCell } from "../../primitives/Cells";
+import { Time } from "../../primitives/Time";
+
+/**
+ * „Es fehlt noch etwas" — as a chip and as a row (0025).
+ *
+ * In Ludwig that sentence is a record with a due date, a maturity and an
+ * escalation level; visible was almost none of it. The clerk read derived
+ * sentences („3 Nachforderungen") and could not see **which** expectation had
+ * been overdue since when.
+ *
+ * Two densities of the same fields: the chip names one expectation beside a
+ * case, the row carries the whole record in a list.
+ *
+ * **The maturity is fetched, not computed.** `expectationMaturity()` lives in
+ * the domain and is the one rule for every reader; a second derivation here
+ * would be the second truth its comment forbids.
+ */
+
+/**
+ * One expectation, as far as chip and row show it.
+ *
+ * Structurally the app's `ExpectationRow`
+ * (`accounting-cases/application/expectation-core.ts`) — **copied, not
+ * invented**. It is not mirrored because it lives in `application/` instead of
+ * `domain/`; that is register entry **L-70**, and when it moves this
+ * definition goes away.
+ */
+export interface ExpectationVM {
+  id: string;
+  kind: ExpectationKind;
+  /** The due date, `YYYY-MM-DD`. Always set — every expectation has one. */
+  dueDate: string;
+  /** How often a run has escalated it. **Never** a DATEV dunning level. */
+  escalationLevel: number;
+  /** Set as soon as the document arrived or the payment came in. */
+  resolvedAt?: string | null;
+  /** Who fetches it (F125): `client` says „Nachforderung", `accounting` „Erwartung". */
+  audience: "client" | "accounting";
+  expectedDocumentKind?: string | null;
+  expectedCounterpartyName?: string | null;
+  expectedAmount?: number | null;
+  /** One sentence of context that does not fit the fields. */
+  note?: string | null;
+}
+
+/** „Nachforderung" when the client fetches it, „Erwartung" when the office does. */
+function audienceWord(audience: ExpectationVM["audience"]): string {
+  return audience === "client" ? "Nachforderung" : "Erwartung";
+}
+
+/**
+ * What is expected, in words: the document kind if the caller has a word for
+ * it, else the axis label („Beleg fehlt", „Zahlung offen").
+ *
+ * The kinds are a **free string** of the database — there is no axis for them,
+ * and a map here would be a third truth beside `FehltPanel` and the DB. So the
+ * caller passes its words, or the axis speaks.
+ */
+function subject(
+  e: ExpectationVM,
+  documentKindLabel: Record<string, string> | undefined,
+): string | null {
+  if (e.kind !== "document" || !e.expectedDocumentKind) return null;
+  return documentKindLabel?.[e.expectedDocumentKind] ?? e.expectedDocumentKind;
+}
+
+/**
+ * @when    One expectation named beside something else — in a case row, in a
+ *          header, next to a title.
+ * @instead The whole record with its date and amount → ExpectationRow. All
+ *          values of the axis explained → StatusInfoDialog.
+ */
+export function ExpectationChip({
+  expectation,
+  today,
+  currency = "EUR",
+  documentKindLabel,
+}: {
+  expectation: ExpectationVM;
+  /** Reference day for the maturity; without it, today. */
+  today?: string;
+  currency?: Currency;
+  /** German words for `expectedDocumentKind` — the caller owns them. */
+  documentKindLabel?: Record<string, string>;
+}) {
+  const maturity = expectationMaturity({ ...expectation, today });
+  const what = subject(expectation, documentKindLabel);
+  return (
+    <span className="v2exp__chip">
+      <StatusBadge axis="erwartung" status={maturity} info={false} />
+      <span className="v2exp__what">
+        {what ?? audienceWord(expectation.audience)}
+        {/* Der Betrag steht nur bei einer Zahlung: bei einem fehlenden Beleg
+            ist die Belegart die Aussage (offene Frage 2). */}
+        {expectation.kind === "payment" && expectation.expectedAmount != null ? (
+          <>
+            {" · "}
+            <AmountCell value={expectation.expectedAmount} currency={currency} />
+          </>
+        ) : null}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * @when    A list of what is still missing — the case detail, step five of the
+ *          batch review.
+ * @instead One expectation named in passing → ExpectationChip. What already
+ *          happened → Timeline.
+ */
+export function ExpectationRow({
+  expectation,
+  today,
+  currency = "EUR",
+  documentKindLabel,
+  onResolve,
+  onOpen,
+}: {
+  expectation: ExpectationVM;
+  today?: string;
+  currency?: Currency;
+  documentKindLabel?: Record<string, string>;
+  /** „Erledigt" — without it the row only shows. */
+  onResolve?: (id: string) => void;
+  /** Jump into the case. */
+  onOpen?: (id: string) => void;
+}) {
+  const maturity = expectationMaturity({ ...expectation, today });
+  const what = subject(expectation, documentKindLabel);
+  const title = [what ?? audienceWord(expectation.audience), expectation.expectedCounterpartyName]
+    .filter(Boolean)
+    .join(" · ");
+
+  return (
+    <div className="v2exp__row">
+      <span className="v2exp__kind">
+        <StatusBadge axis="erwartung_art" status={expectation.kind} info={false} />
+      </span>
+      <span className="v2exp__title">
+        {onOpen ? (
+          <button type="button" className="v2link" onClick={() => onOpen(expectation.id)}>
+            {title}
+          </button>
+        ) : (
+          title
+        )}
+        {expectation.note ? <span className="v2exp__note">{expectation.note}</span> : null}
+      </span>
+      <span className="v2num">
+        {expectation.expectedAmount == null ? null : (
+          <AmountCell value={expectation.expectedAmount} currency={currency} />
+        )}
+      </span>
+      {/* Absolut, nicht „in drei Tagen": wer eine Frist prüft, will das Datum
+          (T7). Die Reife daneben sagt, was es bedeutet. */}
+      <span className="v2exp__due">
+        fällig <Time value={expectation.dueDate} format="date" size="sm" />
+      </span>
+      <span className="v2exp__state">
+        <StatusBadge axis="erwartung" status={maturity} info={false} />
+      </span>
+      <span className="v2exp__act">
+        {onResolve && maturity !== "resolved" ? (
+          <button type="button" className="v2link" onClick={() => onResolve(expectation.id)}>
+            Erledigt
+          </button>
+        ) : null}
+      </span>
+    </div>
+  );
+}

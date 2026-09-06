@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/expectation/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, „was noch fehlt" hängt am Sachverhalt |
 | Quelle | Soll-Katalog §11.7 Stufe 3 „Erwartung — fehlt (§3.1)"; `ui-repraesentationen.md` §3.2 Nr. 2 |
-| Ersetzt | die abgeleiteten Texte in `ClarificationsBanner`, die Nachforderungs-Zeilen der Abnahme-Schritte 1 und 2, die Portal-Karte |
-| Blockiert | Sachverhalt-Detail, Abnahme-Schritt 1, Portal, Beleg-Nachforderung |
+| Ersetzt | `FehltPanel.tsx` (Sachverhalt-Detail) samt seiner lokalen `KIND_LABEL`/`MATURITY_LABEL` und die Erwartungs-Zeilen in `Schritt5Liste.tsx` (Abnahme-Schritt 5). Portal, `document-requests` und die Schritte 1/2 sind mit dem Seiten-Rückbau entfallen |
+| Blockiert | Sachverhalt-Detail (`FehltPanel`) und Abnahme-Schritt 5 |
 | Spec von / am | Claude, 2026-09-03 |
 
 ## Ziel
@@ -30,7 +30,7 @@ nicht.
   einem Sachverhalt) und `ExpectationRow` (S, in der Liste der offenen
   Punkte). Beide zeigen dieselben Felder in zwei Dichten.
 - **Setzt auf:** `StatusBadge` (Achsen `erwartung` und `erwartung_art` — beide
-  in der Registry vorhanden), `Timestamp`, `AmountCell`, `TextButton` (0011).
+  im Spiegel vorhanden), `Time`, `AmountCell`, `TextButton` (0011).
 
 ## Schnittstelle
 
@@ -68,6 +68,35 @@ entscheidet nur das Wort — „Nachforderung" beim Mandanten, „Erwartung" in 
 Kanzlei —, nicht die Farbe. Der Chip ist nicht klickbar, solange kein
 Callback kommt, und bekommt dann auch keinen Hover (§2).
 
+
+## Vor dem Bau eingearbeitet (2026-09-06)
+
+**(b) `currency` ist eine Prop.** Wie bei `CaseTimeline` (L-23): der Betrag
+weiß nicht, in welcher Währung er steht, und die Komponente rät nicht.
+
+**(c) `ExpectationVM` liegt lokal**, strukturell gleich dem `ExpectationRow`
+der App (`application/expectation-core.ts`). Nicht erfunden, sondern
+abgeschrieben — und der Grund steht als **L-70** im Register: der Typ liegt
+drüben in `application/`, nicht in `domain/`, und wird deshalb nicht
+gespiegelt. Sobald er umzieht, fällt die lokale Definition weg. `CaseTimeline`
+(0040) bekommt denselben Typ, wenn es so weit ist.
+
+**(d) `Time` statt `Timestamp`** — das ist der Baustein, der seit 0033 „wann"
+sagt.
+
+**(e) „leer" ist beim Chip nicht anwendbar** und deshalb keine Story: der Chip
+**ist** eine Erwartung. Keine Erwartung heißt kein Chip, nicht ein leerer —
+ein Platzhalter für etwas, das es nicht gibt, wäre eine Behauptung. Die
+Leerheit gehört der Liste darüber, und die zeigt sie in `Empty`.
+
+**Zu den Wörtern:** `FehltPanel` trägt heute zwei lokale Maps —
+`MATURITY_LABEL` („Frist läuft", „überfällig", …) und `KIND_LABEL`
+(„Rechnung", „Beleg / Quittung", …). Die erste ersetzt die Registry-Achse
+`erwartung` wortwörtlich („Läuft", „Fällig", „Eskaliert", „Erledigt"); die
+zweite hat **keine** Achse — `expectedDocumentKind` ist ein freier String der
+DB. Die Komponente zeigt ihn deshalb, wie er kommt, und der Aufrufer reicht
+seine Wörter über `documentKindLabel` herein: eine Map in der Komponente wäre
+die dritte Wahrheit.
 ## Stories
 
 Titel `v3/Entitäten/Erwartung/Expectation`. Abgeleitet nach §6: 3 Zustände
@@ -105,7 +134,7 @@ Variabel (aus dieser Spec):
 - [ ] Status ausschließlich über die Registry-Achse `erwartung` (Blick in den Code, Regel R1)
 - [ ] Frist absolut, nicht „in 3 Tagen" (Story `Row`, Regel T7)
 - [ ] `escalationLevel` erscheint nirgends als Mahnstufe (Blick in den Code)
-- [ ] Ersetzt die Nachforderungs-Zeile in Abnahme-Schritt 1 ohne Funktionsverlust
+- [ ] Ersetzt `FehltPanel` und die Zeilen in `Schritt5Liste` ohne Funktionsverlust — **offen (App)**
 
 ## Offene Fragen
 
@@ -133,3 +162,47 @@ Entscheide: 1 Wort hängt an `audience`, aber mit der richtigen Bedeutung — `a
 Vor dem Bau in die Spec: (a) `Ersetzt`/`Blockiert`/Kriterien auf `Schritt5Liste.tsx`, `FehltPanel.tsx`, 0040 `InUse` umschreiben; (b) Prop `currency: Currency` (L-23, wie `CaseTimeline`); (c) Typ: `ExpectationVM` in dieser Datei, strukturell gleich `ExpectationRow` der App; 0040 importiert ihn künftig (kleiner Nachtrag dort); (d) `Timestamp` → `Time`; (e) für den Chip „leer" als nicht anwendbar begründen.
 
 Befunde ins Register: **L-70** — `ExpectationRow` samt `ExpectationAudience`, `DueSource`, `ExpectationDirection` von `application/expectation-core.ts` nach `modules/accounting-cases/domain/` heben (Muster L-09).
+
+## Gebaut (2026-09-06)
+
+`entities/expectation/Expectation.tsx` mit zwei Exporten
+(`ExpectationChip`, `ExpectationRow`) und dem Typ `ExpectationVM`, Klassen
+`.v2exp*` in `v3.css`, sieben Stories, Server-Component.
+
+### Zwei Dinge, die beim Bauen zu entscheiden waren
+
+**Die Wörter der Belegarten kommen vom Aufrufer.** `FehltPanel` hat dafür
+heute eine lokale Map (`invoice` → „Rechnung", `receipt` → „Beleg /
+Quittung", …). Für die Reife gibt es eine Achse — die Registry sagt „Läuft",
+„Fällig", „Eskaliert", „Erledigt" —, für `expectedDocumentKind` **nicht**: das
+ist ein freier String der Datenbank. Eine Map in der Komponente wäre die
+dritte Wahrheit neben `FehltPanel` und der DB. Also nimmt sie
+`documentKindLabel` als Prop entgegen und zeigt sonst den rohen Wert; die
+Stories reichen die vier Wörter herein.
+
+**Die erste Spalte hat eine feste Breite.** Zuerst stand dort `max-content` —
+und die Spalte war keine: jede Zeile ist ihr eigenes Raster, `max-content`
+misst also nur sich selbst. Gemessen schob die Marke „Zahlung offen" (94 px)
+den Titel ihrer Zeile 17 px weiter nach rechts als „Beleg fehlt" (77 px).
+Jetzt 104 px fest — die Achse `erwartung_art` hat genau zwei Wörter, beide
+passen. Nachgemessen (`InCase`, drei Zeilen mit beiden Arten): alle vier
+Spaltenkanten bei 37 · 153 · 478 · 593, in jeder Zeile dieselben.
+
+### Gemessen
+
+| Story | Was |
+|---|---|
+| `Maturities` | vier Reifen, jede mit ihrem Wort: „Läuft", „Fällig", „Eskaliert", „Erledigt" — keine lebt von der Farbe (V7) |
+| `Row`, `InCase` | Frist **absolut** („fällig 20.09.2026"), nie relativ (T7); die Spaltenkanten stehen über alle Zeilen |
+| `Chip` | der Betrag steht nur bei `payment`; beim fehlenden Beleg trägt die Belegart die Aussage |
+| `Interactive` | „Erledigt" nimmt die Zeile (3 → 2), `onOpen` meldet die Kennung („Geöffnet: e1") |
+
+### Zur Reife
+
+`expectationMaturity()` aus `@/ludwig/modules/accounting-cases/domain/case`
+— eine Regel, alle Leser. Die Komponente rechnet nichts; `today` reicht sie
+nur durch, damit die Stories nicht mit dem Kalender wandern.
+
+`escalationLevel` erscheint **nirgends** als Zahl: er geht in die Reife ein
+und sonst nirgendwohin. Er ist keine DATEV-Mahnstufe, und wer ihn als solche
+liest, liest falsch.

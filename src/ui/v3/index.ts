@@ -336,6 +336,13 @@ export {
   type CaseTimelineExpectation,
 } from "./entities/accounting-case/CaseTimeline";
 
+/* Erwartung — was noch fehlt, als Chip und als Zeile (0025) */
+export {
+  ExpectationChip,
+  ExpectationRow,
+  type ExpectationVM,
+} from "./entities/expectation/Expectation";
+
 /* Klärung — die lesende Familie: Vorschau, Zeile, Liste (0059) */
 export {
   ClarificationCell,
