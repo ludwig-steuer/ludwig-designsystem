@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/bank-transaction/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → der Rahmen ja (`Drawer`, 0042), der Inhalt nein |
@@ -206,3 +206,36 @@ gemessen: `Row href` macht die ganze Zeile zu einem `<a>`, und ihre Zellen
 tragen eigene — die Fall-Links von `CaseCell` und den (i)-Knopf des Zwecks.
 Anker im Anker und Knopf im Anker sind ungültiges Markup; die Konsole meldete
 es als Hydrations-Warnung. Die Wege aus der Zeile heraus sind die Wege in ihr.
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1 — `reference` stand nicht im Kopf, sobald ein Record da war.** Derselbe
+Fehler wie in 0098, eine Entität weiter: der Kopf zeigte, was zurückkam, nicht
+was nachgeschlagen wurde. Jetzt steht die Kennung als `<code>` in der
+Meta-Zeile — und `Filled` trägt bewusst eine Referenz, die **nicht** die id
+des Datensatzes ist (`2026-08-26/1210/0093117` gegen `bt-1`), sonst bewiese
+die Story nichts.
+
+**M2 — die Ladefläche hatte nicht die Form des Inhalts.** Sie war eine Karte
+mit Rahmen und einem Kopf; der Inhalt sind **vier rahmenlose Blöcke**. Beim
+Eintreffen sprang der Rumpf um 431 px, und die Karte verschwand — ein Rahmen,
+den das Auge wieder verlernen muss. Jetzt vier Blöcke mit denselben
+Überschriften in derselben Reihenfolge, `tone="bare"`.
+
+**M3 — Zone 5 behauptete etwas, das der Drawer nicht wissen konnte.** Ohne
+Datensatz war `cases.length` null, also bot der Knopf in `Loading`, `Error`
+**und** `NotFound` an, die Zahlung zuzuordnen — im Fehlerfall ist unbekannt,
+ob sie längst zugeordnet ist, und im Nicht-gefunden-Fall gibt es sie nicht.
+Der Ausgang hat einen dritten Wert bekommen: `statement` → „Im Kontoauszug
+ansehen", der ehrliche Weg aus allen drei Zuständen.
+
+**M4 — der Tooltip „Buchungsdatum" war verdeckt.** Ein `title` über einem
+`<time>`, das seinen eigenen `title` hat, ist unerreichbar. Das Wort steht
+jetzt **sichtbar**: „gebucht 26.08.2026".
+
+**M5 — der Kopf ohne Gegenpartei fiel auf den Nicht-gefunden-Kopf zurück.** Bei
+3 % der Zeilen fehlt der Name; ein geladener Datensatz sah dann aus wie ein
+fehlender. Jetzt rückt der Verwendungszweck nach — dieselbe Regel wie in
+`BankTransactionCell`, und **der Freitext**, nicht der Rohblock: gemessen
+stand dort erst „SVWZ+Kontoführungsentgelt August 2026", jetzt
+„Kontoführungsentgelt August 2026". Neue Story `WithoutCounterparty`.

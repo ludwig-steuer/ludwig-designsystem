@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/document-number/` |
 | Klassen-Test | nein — Belegfeld 1 ist eine DATEV-Ausnahme, die Rangordnung der Quellen ist Buchhaltungslogik |
@@ -192,3 +192,37 @@ Entscheide zu den offenen Fragen: 1 ja, Nummern anderer Sachverhalte mit `caseNu
 Vor dem Bau in die Spec: (a) Quellen-Labels: keine Registry vorhanden → Labels kommen als Prop `sourceLabel: Record<DocumentNumberSource, string>`, bis die App sie in die Domäne hebt (Befund L-71); (b) Verhalten „Feld": „wie 0002" → „wie 0013 (`AccountField`, `onOpenLedger`)", Lupe über `ActionIcon action="search"`; (c) Story-Exportnamen englisch (`Filled`, `WithRegister`, `Diverging`, `Interactive`, `Edge`, `Empty`, `EmptyAfterFilter`, `Loading`), plus ein Satz, warum das Feld kein `Empty`/`Error` hat; (d) Kopf „Ersetzt": nur die Zeile (`JournalEntryEditor.tsx:610`), das Gegenkonto hat kein Belegfeld; prüfen, ob `DocumentNumberRegister` die Liste in `CasePlausibilityTab.tsx` ersetzt; (e) `maxLength` 36 mit Quelle `core/datev/belegfeld.ts`.
 
 Befunde ins Register: **L-71** — `DOCUMENT_NUMBER_SOURCE_LABEL`/`_STATE_LABEL` ins Domain-Modul (heute lokale Map `CasePlausibilityTab.tsx:40`) und `DATEV_MAX_BELEGFELD1 = 36` in `core/datev/field-limits.ts`.
+
+## Nachtrag 2026-09-06, vor dem Bau
+
+**Quellen-Labels als Prop.** Es gibt keine Registry-Achse für die neun Quellen
+und keine Label-Map in der Domäne — die App hält sie lokal in
+`CasePlausibilityTab.tsx`. Das ist Befund **L-71**. Bis sie gehoben sind,
+nehmen beide Komponenten `sourceLabel` (und das Register `stateLabel`) als
+**Prop** entgegen; `document-number-labels.ts` definiert nur die Typen, keine
+Wörter. Eine Map hier wäre die zweite Wahrheit.
+
+**Das Feld folgt 0013, nicht 0002.** Lupe rechts im Feld über
+`ActionIcon action="search"` in einem `IconButton`, `onMouseDown`
+unterdrückt — genau wie `AccountField` mit `onOpenLedger`.
+
+**Story-Namen englisch:** `Filled`, `WithRegister`, `Diverging`,
+`Interactive`, `Edge` (Feld) · `Filled`, `Empty`, `EmptyAfterFilter`,
+`Loading`, `Interactive` (Register). Das **Feld** hat kein `Empty` und kein
+`Error`: ein leeres Belegfeld ist ein gültiger Wert und kein Zustand, und ein
+Fehler ist der rote Rahmen plus der Satz des Aufrufers — die Komponente
+formuliert ihn nicht.
+
+**Ersetzt** nur die Zeile (`JournalEntryEditor.tsx:610`); das Gegenkonto hat
+kein Belegfeld. Ob `DocumentNumberRegister` zusätzlich die Liste in
+`CasePlausibilityTab.tsx` ablöst, entscheidet die App beim Umzug — die Liste
+dort zeigt dieselben Einträge mit derselben Rangordnung.
+
+**`maxLength` 36** kommt aus `core/datev/belegfeld.ts`; die Konstante steht
+hier als `DATEV_MAX_BELEGFELD1`, bis die App sie in
+`core/datev/field-limits.ts` hebt (**L-71**).
+
+**Entscheide der Freigabe umgesetzt:** Nummern anderer Sachverhalte stehen mit
+ihrer `caseNumber` im Register; eine fehlende Kontonummer zeigt „—" wie
+überall im Set; die Hinweiszeile trägt die dominante Nummer als `TextButton`,
+der sie einsetzt (Rundlauf in `Diverging`).

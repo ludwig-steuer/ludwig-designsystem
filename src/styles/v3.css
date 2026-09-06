@@ -3090,7 +3090,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 /* --- Zahlung neben der Arbeit (0103) -------------------------------------- */
 .v2btxd__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-3); }
-.v2btxd__pad { padding: var(--space-4) var(--space-5) var(--space-5); }
+.v2btxd__skel { padding: var(--space-2) 0 var(--space-3); }
 .v2btxd__limit {
   margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui);
   color: var(--color-text-muted);
@@ -3100,3 +3100,18 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2oi__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 8ch; }
 .v2oi__group { display: flex; justify-content: space-between; gap: var(--space-4); width: 100%; }
 .v2oi__groupnum { color: var(--color-text-muted); font-variant-numeric: tabular-nums lining-nums; }
+
+/* --- Belegfeld 1 und Belegnummern-Register (0014) ------------------------- */
+.v2dnf { display: grid; gap: var(--space-2); }
+.v2dnf__box { position: relative; }
+.v2dnf__in { width: 100%; font-family: var(--font-mono); }
+.v2dnf__in--search { padding-right: 34px; }
+.v2dnf__search { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
+/* Ein Hinweis, kein Fehler: eine Abweichung kann begruendet sein. */
+.v2dnf__hint { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v2dnf__src { color: var(--color-text-subtle); }
+.v2dnr { display: grid; gap: var(--space-4); }
+.v2dnr__q { max-width: 22rem; }
+.v2dnr__num { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.v2dnr__datev { color: var(--color-text-subtle); }
+.v2dnr__state { color: var(--color-text-muted); font-size: var(--fs-ui-sm); }

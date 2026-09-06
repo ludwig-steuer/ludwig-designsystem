@@ -53,13 +53,19 @@ const RECORD: BankTransactionDetailData = {
   rawPayload: { buchungstag: "26.08.2026", betrag: "-1249,90", waehrung: "EUR" },
 };
 
-/** Alle vier Zonen. Zone 2 entfällt — eine Zahlung hat kein Original. */
+/**
+ * Alle vier Zonen. Zone 2 entfällt — eine Zahlung hat kein Original.
+ *
+ * Die Referenz ist **bewusst** eine andere als die id des Datensatzes
+ * (`2026-08-26/1210/0093117` gegen `bt-1`): nur so beweist die Story, dass im
+ * Kopf steht, was nachgeschlagen wurde, und nicht, was zurückkam.
+ */
 export const Filled: Story = {
   render: () => (
     <BankTransactionDrawer
       open
       onClose={() => {}}
-      reference="bt-1"
+      reference="2026-08-26/1210/0093117"
       record={RECORD}
       onOpenFull={() => {}}
       caseHref={caseHref}
@@ -85,7 +91,39 @@ export const Unassigned: Story = {
   ),
 };
 
-/** `loading`: dieselbe Karte mit demselben Kopf, fünf Zeilen — keine 96-px-Karte. */
+/**
+ * Rand: eine Zahlung **ohne Gegenpartei** — 3 % der Zeilen. Der Kopf fällt auf
+ * den Verwendungszweck zurück, nicht auf „Zahlung <Kennung>": das ist der Kopf
+ * des Nicht-gefunden-Falls und würde einen geladenen Datensatz wie einen
+ * fehlenden aussehen lassen.
+ */
+export const WithoutCounterparty: Story = {
+  render: () => (
+    <BankTransactionDrawer
+      open
+      onClose={() => {}}
+      reference="2026-08-29/1210/0088111"
+      record={{
+        ...RECORD,
+        counterpartyName: null,
+        counterpartyIban: null,
+        counterpartyBic: null,
+        purpose: "SVWZ+Kontoführungsentgelt August 2026",
+        amount: -89.9,
+        amountEur: -89.9,
+        cases: [],
+        allocatedSum: 0,
+      }}
+      onOpenFull={() => {}}
+      caseHref={caseHref}
+    />
+  ),
+};
+
+/**
+ * `loading`: die Form des Inhalts — vier rahmenlose Blöcke mit denselben
+ * Überschriften, nicht eine Karte, die beim Eintreffen wieder verschwindet.
+ */
 export const Loading: Story = {
   render: () => (
     <BankTransactionDrawer
@@ -100,7 +138,11 @@ export const Loading: Story = {
   ),
 };
 
-/** Der Fehler steht statt Zone 3, **der Ausgang bleibt** — wie bei 0098. */
+/**
+ * Der Fehler steht statt Zone 3, **der Ausgang bleibt** — wie bei 0098. Er
+ * führt aber in den **Kontoauszug**, nicht in die Zuordnung: ohne Datensatz
+ * weiß der Drawer nicht, ob die Zahlung längst zugeordnet ist.
+ */
 export const Error: Story = {
   render: () => (
     <BankTransactionDrawer
@@ -115,7 +157,10 @@ export const Error: Story = {
   ),
 };
 
-/** `record={null}` ohne `loading` heißt **nicht gefunden**, nicht „lädt noch". */
+/**
+ * `record={null}` ohne `loading` heißt **nicht gefunden**, nicht „lädt noch" —
+ * und der Ausgang bietet nicht an, etwas zuzuordnen, das es nicht gibt.
+ */
 export const NotFound: Story = {
   render: () => (
     <BankTransactionDrawer

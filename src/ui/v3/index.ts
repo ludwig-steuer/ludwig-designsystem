@@ -369,6 +369,17 @@ export {
   type OpenItemAgeBucket,
   type OpenItemAgeGroupVM,
 } from "./entities/open-item/open-item";
+
+/* Belegnummer */
+export {
+  DocumentNumberField,
+  DATEV_MAX_BELEGFELD1,
+} from "./entities/document-number/DocumentNumberField";
+export { DocumentNumberRegister } from "./entities/document-number/DocumentNumberRegister";
+export type {
+  DocumentNumberSourceLabels,
+  DocumentNumberStateLabels,
+} from "./entities/document-number/document-number-labels";
 export {
   bankTransactionColumns,
   type BankTransactionColumn,

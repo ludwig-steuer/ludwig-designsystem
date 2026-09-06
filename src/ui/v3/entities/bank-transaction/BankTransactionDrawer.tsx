@@ -7,9 +7,9 @@ import { Drawer } from "../../primitives/Drawer";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Amount } from "../../primitives/Amount";
 import { Skeleton } from "../../primitives/Skeleton";
-import { Card, CardHead } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
 import { BankTransactionFacts } from "./BankTransactionFacts";
+import { derivePurposeParts } from "./derive";
 import type { BankTransactionDetailData } from "./bank-transaction";
 
 /**
@@ -31,8 +31,15 @@ import type { BankTransactionDetailData } from "./bank-transaction";
  * (finding L-45), so there would be nothing to show even if the zone existed.
  */
 
-/** What zone 5 leads to. The drawer decides which; the caller knows the route. */
-export type BankTransactionExit = "case" | "assign";
+/**
+ * What zone 5 leads to. The drawer decides which; the caller knows the route.
+ *
+ * `statement` is the one that needs saying: **without a record the drawer
+ * knows nothing**, so it must not offer „assign" — in the error case the
+ * payment may long since be assigned, and in the not-found case there is
+ * nothing to assign. The statement is the honest way out of all three.
+ */
+export type BankTransactionExit = "case" | "assign" | "statement";
 
 /**
  * @when    A payment is looked up beside other work — from the statement,
@@ -70,21 +77,42 @@ export function BankTransactionDrawer({
 }) {
   const assigned = (record?.cases.length ?? 0) > 0;
   const first = record?.cases[0];
+  const exit: BankTransactionExit = !record ? "statement" : assigned ? "case" : "assign";
+  const exitLabel =
+    exit === "statement"
+      ? "Im Kontoauszug ansehen"
+      : exit === "case"
+        ? "Sachverhalt öffnen"
+        : "Zahlung zuordnen";
+  // 3 % of the lines have no counterparty. Then the purpose is the identity —
+  // the same rule `BankTransactionCell` follows — and the head must not fall
+  // back to „Zahlung <reference>", which is the not-found head.
+  const name = record
+    ? record.counterpartyName?.trim() ||
+      // The **free text**, not the raw column: the head must never show a
+      // SEPA tag block (0099). The derivation is the mirror's.
+      derivePurposeParts(record.purpose, record.sepaTags).text ||
+      "ohne Namen"
+    : `Zahlung ${reference}`;
 
   return (
     <Drawer
       open={open}
       onClose={onClose}
       size="md"
-      title={record?.counterpartyName ?? `Zahlung ${reference}`}
+      title={name}
       meta={
         record ? (
           <span className="v2btxd__meta">
+            {/* What was **looked up**, not what came back: with a record the
+                two can differ, and only the reference says what was asked. */}
+            <code>{reference}</code>
             <Amount value={record.amount} currency={record.currency} size="sm" />
-            {/* The **posting** date, and it says so — a bare date does not
-                tell which of the two it is (finding L-61). */}
-            <span title="Buchungsdatum">
-              <Time value={record.postingDate} format="date" length="short" size="sm" />
+            {/* The word stands **visibly**, not in a `title`: a bare date does
+                not say which of the two it is (finding L-61), and a `title`
+                over an element that has its own is unreachable. */}
+            <span>
+              gebucht <Time value={record.postingDate} format="date" length="short" size="sm" />
             </span>
             {/* No `StatusBadge` in zone 1. Not because there is no axis — since
                 `cc141f7b` there is one for the match stage — but because zone 3
@@ -98,9 +126,9 @@ export function BankTransactionDrawer({
         <Button
           variant="primary"
           icon={<Maximize2 size={16} strokeWidth={1.5} />}
-          onClick={() => onOpenFull(assigned ? "case" : "assign", first?.caseId)}
+          onClick={() => onOpenFull(exit, first?.caseId)}
         >
-          {assigned ? "Sachverhalt öffnen" : "Zahlung zuordnen"}
+          {exitLabel}
         </Button>
       }
     >
@@ -116,6 +144,14 @@ export function BankTransactionDrawer({
     </Drawer>
   );
 }
+
+/** The four blocks of zone 3, with the number of rows each will have. */
+const LOADING_BLOCKS: [string, number][] = [
+  ["Zahlung", 3],
+  ["Verwendungszweck", 2],
+  ["Gegenpartei", 3],
+  ["Zuordnung", 3],
+];
 
 /** Error → loading → not found → content. */
 function Body({
@@ -140,15 +176,20 @@ function Body({
     );
   }
   if (loading) {
-    // The shape of the content: the same card with the same head, so nothing
-    // jumps when the data arrives.
+    // The shape of the content, and the content here is **four rahmenlose
+    // blocks**, not a card: a card that disappears when the data arrives is a
+    // frame the eye has to unlearn. Same headings, same order, same tone.
     return (
-      <Card>
-        <CardHead title="Zahlung" />
-        <div className="v2btxd__pad">
-          <Skeleton lines={5} label="Zahlung wird geladen …" />
-        </div>
-      </Card>
+      <div className="v2btxf">
+        {LOADING_BLOCKS.map(([title, lines]) => (
+          <section className="v2fields v2fields--bare" key={title}>
+            <div className="v2fields__h">{title}</div>
+            <div className="v2btxd__skel">
+              <Skeleton lines={lines} label={`${title} wird geladen …`} />
+            </div>
+          </section>
+        ))}
+      </div>
     );
   }
   if (!record) {
