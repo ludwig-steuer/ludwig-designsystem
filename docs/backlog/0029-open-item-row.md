@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/open-item/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, ein offener Posten ist Buchhaltung |
 | Quelle | Soll-Katalog §11.7 Stufe 3 „DATEV-OPOS — fehlt (§3.2 Nr. 1)"; `ui-repraesentationen.md` §3.1/§3.2 |
 | Ersetzt | die Tabelle inline in `app/(app)/clients/[clientSlug]/[year]/opos/page.tsx` (297 Zeilen, Zeile 175–215) |
-| Blockiert | Abnahme-Schritt 5, die OPOS-Seite, den Dubletten-Blick der Kanzlei |
+| Blockiert | die Seite `[year]/opos`, den Dubletten-Blick der Kanzlei |
 | Spec von / am | Claude, 2026-09-03 |
 
 ## Ziel
@@ -30,7 +30,7 @@ nützlich macht, gibt es gar nicht. Wer wissen will, was über 90 Tage
 - **Zuschnitt:** Familie in einer Datei — `OpenItemRow` (der Posten) und
   `OpenItemAgeGroup` (die Altersklasse als `GroupRow`). Sie ergeben nur
   miteinander Sinn.
-- **Setzt auf:** `Row`, `GroupRow`, `AmountCell`, `Timestamp`, `StatusBadge`
+- **Setzt auf:** `Row`, `GroupRow`, `AmountCell`, `Time`, `StatusBadge`
   (Achse Ausgleich), Mono-Zelle für Konto und Belegnummer.
 
 ## Schnittstelle
@@ -131,3 +131,37 @@ Entscheide: 1 fünf Klassen, Union zeichengleich in L-05: `notDue | d1_30 | d31_
 Vor dem Bau in die Spec: L-66 zitieren mit Übergangsregel; `Blockiert` auf `[year]/opos` und den Dubletten-Blick kürzen, Schritt 5 raus (der steht auf Erwartungen, 0025); Feldliste berichtigen — `dunning_level` ist optional im VM `OpenItemLine`, `openAtStichtag`/`clearedAfterStichtag`/`amountApprox` sind Felder des Seiten-VMs `OposStichtagItem`; `Timestamp` → `Time`.
 
 Befunde ins Register: **L-73** — L-05 gehört zu `datev-truth`, nicht `accounting-cases`, und das Modul braucht ein `domain/`; Bucket-Union wie oben festschreiben; L-66 um 0029 als Wartenden ergänzen.
+
+## Nachtrag 2026-09-06, vor dem Bau
+
+**Die Wartebedingung ist weg.** Die Achse heißt `opos_ausgleich` und steht im
+Spiegel; die Zeile baut die Ausgleichs-Spalte über
+`StatusBadge axis="opos_ausgleich"` und der Spaltenkopf über
+`StatusInfoButton axis="opos_ausgleich"` — keine lokale Achse, kein `hint`.
+
+**L-66 mit Übergangsregel.** Die übrigen neun Spaltenköpfe dieser Tabelle
+haben keine Achse und tragen deshalb **kein** (i). Das ist die Regel, solange
+L-66 offen ist: ein Kopf ohne Achse bekommt keinen Erklärtext, statt einen zu
+erfinden. Sobald die Achsen da sind, wandern sie an dieselbe Stelle.
+
+**Die Art kommt aus der Registry.** `Kreditor`/`Debitor` stehen in der Achse
+`konto_typ`; die Zeile liest sie mit `resolveStatus("konto_typ", item.kind)`
+statt einer lokalen Map — genau die Map, die `opos/page.tsx` heute hat (R1).
+
+**Feldliste berichtigt.** Der Typ ist der Schnitt des Seiten-VMs
+`OposStichtagItem` (`modules/datev-truth/application/opos-stichtag-core.ts`),
+nicht der Zeilen-VM `OpenItemLine`: `openAtStichtag`, `amountApprox` und
+`clearedAfterStichtag` sind Felder des Seiten-VMs, `dunningLevel` ist dort
+optional. `Timestamp` gibt es im Set nicht — die Daten kommen über `Time`.
+
+**Was der Typ hier soll und wie lange.** `open-item.ts` definiert `OpenItem`
+und `OpenItemAgeBucket` lokal, weil `datev-truth` **kein** `domain/` hat —
+Befund **L-73**. Die Union ist zeichengleich zur Freigabe:
+`notDue | d1_30 | d31_60 | d61_90 | d90plus`. Die Altersklasse rechnet die
+Komponente **nicht**; bis `openItemAgeBucket({ dueDate, asOf })` drüben
+existiert (**L-05**), gibt der Aufrufer sie mit. Am Tag, an dem das Modul ein
+`domain/` bekommt, wird diese Datei gelöscht und von dort importiert.
+
+**Zuschnitt bestätigt:** `OpenItemRow` und `OpenItemAgeGroup` bleiben —
+gruppieren ist der Job dieser Ansicht, und `DataTable` gruppiert nicht.
+`openItemColumns()` erst, wenn `opos/page` auf `DataTable` wandert.

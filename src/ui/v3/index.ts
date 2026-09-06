@@ -360,6 +360,15 @@ export {
   BankTransactionDrawer,
   type BankTransactionExit,
 } from "./entities/bank-transaction/BankTransactionDrawer";
+
+/* Offene Posten */
+export { OpenItemRow, OpenItemAgeGroup } from "./entities/open-item/OpenItemRow";
+export {
+  AGE_BUCKET_LABEL,
+  type OpenItem,
+  type OpenItemAgeBucket,
+  type OpenItemAgeGroupVM,
+} from "./entities/open-item/open-item";
 export {
   bankTransactionColumns,
   type BankTransactionColumn,
