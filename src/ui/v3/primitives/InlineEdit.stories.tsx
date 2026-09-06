@@ -137,8 +137,9 @@ export const WithTextarea: Story = {
               renderValue={(text) => (
                 <span style={{ whiteSpace: "pre-line" }}>{text || "—"}</span>
               )}
-              renderInput={({ value, onChange, autoFocus, onKeyDown }) => (
+              renderInput={({ value, onChange, autoFocus, onKeyDown, id }) => (
                 <Textarea
+                  id={id}
                   value={value}
                   autoFocus={autoFocus}
                   onKeyDown={onKeyDown}

@@ -34,7 +34,7 @@ export const WithCandidates: Story = {
     return (
       <div style={{ maxWidth: 380, minHeight: 420 }}>
         <Field label="Konto" htmlFor="k">
-          <AccountField
+          <AccountField id="k"
             value={v}
             onChange={setV}
             candidates={CANDIDATES}
@@ -55,7 +55,7 @@ export const FullTextOnly: Story = {
     return (
       <div style={{ maxWidth: 380, minHeight: 420 }}>
         <Field label="Konto" hint="Nummer oder Name — beides führt zum Ziel." htmlFor="k2">
-          <AccountField
+          <AccountField id="k2"
             value={v}
             onChange={setV}
             candidates={{}}
@@ -76,7 +76,7 @@ export const NoMatch: Story = {
     return (
       <div style={{ maxWidth: 380, minHeight: 300 }}>
         <Field label="Konto" htmlFor="k3">
-          <AccountField value={v} onChange={setV} candidates={{}} onSearch={async () => []} />
+          <AccountField id="k3" value={v} onChange={setV} candidates={{}} onSearch={async () => []} />
         </Field>
       </div>
     );
@@ -90,7 +90,7 @@ export const Invalid: Story = {
     return (
       <div style={{ maxWidth: 380, minHeight: 200 }}>
         <Field label="Konto" error="4980 gibt es im SKR04 dieses Mandanten nicht." htmlFor="k4">
-          <AccountField value={v} onChange={setV} candidates={{}} invalid />
+          <AccountField id="k4" value={v} onChange={setV} candidates={{}} invalid />
         </Field>
       </div>
     );
@@ -112,7 +112,7 @@ export const WithLedger: Story = {
     return (
       <div style={{ display: "grid", gap: 16, maxWidth: 380, minHeight: 420 }}>
         <Field label="Konto" hint="Das Icon führt zum Kontenblatt." htmlFor="k5">
-          <AccountField
+          <AccountField id="k5"
             value={v}
             valueName="Bürobedarf"
             onChange={setV}
@@ -121,7 +121,7 @@ export const WithLedger: Story = {
           />
         </Field>
         <Field label="Gegenkonto" hint="Ohne Wert bleibt das Icon stehen, deaktiviert." htmlFor="k6">
-          <AccountField
+          <AccountField id="k6"
             value={empty}
             onChange={setEmpty}
             candidates={{}}
@@ -164,13 +164,13 @@ export const NumberAndName: Story = {
     return (
       <div style={{ display: "grid", gap: 16, maxWidth: 300, minHeight: 420 }}>
         <Field label="Name bekannt" htmlFor="k7">
-          <AccountField value={known} onChange={setKnown} candidates={CANDIDATES} />
+          <AccountField id="k7" value={known} onChange={setKnown} candidates={CANDIDATES} />
         </Field>
         <Field label="Name unbekannt" hint={'Nur die Nummer — kein Platzhalter, kein „—".'} htmlFor="k8">
-          <AccountField value={foreign} onChange={setForeign} candidates={{}} />
+          <AccountField id="k8" value={foreign} onChange={setForeign} candidates={{}} />
         </Field>
         <Field label="Langer Name im schmalen Feld" htmlFor="k9">
-          <AccountField
+          <AccountField id="k9"
             value={long}
             valueName="Reinigung und Pflege der Geschäftsräume"
             onChange={setLong}

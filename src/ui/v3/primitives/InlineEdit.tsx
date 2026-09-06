@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { ReactNode } from "react";
 import { Button } from "./Button";
 import { Input } from "./Form";
@@ -19,6 +19,11 @@ export interface InlineEditInputProps {
   onChange: (value: string) => void;
   autoFocus: boolean;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  /**
+   * The id the word is bound to — set it on **the** control, otherwise the
+   * field has no name and the word no click target (0104).
+   */
+  id: string;
 }
 
 /**
@@ -55,6 +60,7 @@ export function InlineEdit({
   multiline?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
+  const fieldId = useId();
   const [draft, setDraft] = useState(value);
   const [busy, setBusy] = useState(false);
   const [ownError, setOwnError] = useState<string | null>(null);
@@ -119,16 +125,24 @@ export function InlineEdit({
     value: draft,
     onChange: setDraft,
     autoFocus: true,
+    id: fieldId,
     onKeyDown,
   };
 
   return (
     <div className="v2iedit">
-      <div className="v2field__label">{label}</div>
+      {/* Im Bearbeiten-Modus ist das Wort ein **Label**, kein `div`: die
+          Eingabe hatte sonst weder Namen noch Klickziel — dieselbe Krankheit
+          wie in `Field` vor 0104, nur außerhalb davon (Abnahme 0104). Im
+          Ruhezustand oben bleibt es ein `div`, dort gibt es kein Feld. */}
+      <label className="v2field__label" htmlFor={fieldId}>
+        {label}
+      </label>
       {renderInput ? (
         renderInput(inputProps)
       ) : (
         <Input
+          id={fieldId}
           value={draft}
           autoFocus
           disabled={running}

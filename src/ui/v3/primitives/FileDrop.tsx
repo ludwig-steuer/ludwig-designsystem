@@ -77,6 +77,7 @@ export function FileDrop({
   // Two drops on one page must not carry the same `id` — otherwise the
   // `aria-describedby` of both points at the same hint (0021).
   const hintId = useId();
+  const labelId = useId();
   const [over, setOver] = useState(false);
   const [rejected, setRejected] = useState<DroppedFile[]>([]);
 
@@ -114,7 +115,13 @@ export function FileDrop({
   const shown = [...files, ...rejected];
   return (
     <div>
-      <div className="v2field__label">{label}</div>
+      {/* Kein `<label>`: das eigentliche `<input type="file">` ist verborgen,
+          bedient wird die Zone darunter, und die trägt ihr Wort selbst. Damit
+          eine Vorlesehilfe trotzdem hört, **wofür** die Zone da ist, hängt die
+          Überschrift als Beschreibung am Knopf (Abnahme 0104). */}
+      <div className="v2field__label" id={labelId}>
+        {label}
+      </div>
       <input
         ref={input}
         type="file"
@@ -130,7 +137,7 @@ export function FileDrop({
         type="button"
         className={`v2drop${over ? " is-over" : ""}`}
         disabled={disabled}
-        aria-describedby={hint ? hintId : undefined}
+        aria-describedby={hint ? `${labelId} ${hintId}` : labelId}
         onClick={() => input.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();

@@ -64,13 +64,20 @@ export const Grouped: Story = {
   },
 };
 
-/** Leer: noch nichts gewählt, alle Optionen stehen bereit. */
+/**
+ * Leer: noch nichts gewählt, alle Optionen stehen bereit.
+ *
+ * Dieser hier steht **ohne `name`** — er hängt an keinem Formular. Das Wort
+ * ist trotzdem an das Feld gebunden: die id fällt auf `useId()` zurück
+ * (0104). Vorher war `name` beides, und ein Feld ohne Formular hatte auch
+ * kein Label.
+ */
 export const Empty: Story = {
   render: function Render() {
     const [v, setV] = useState<string | null>(null);
     return (
       <div style={{ maxWidth: 420 }}>
-        <Combobox label="Gegenkonto" name="konto2" value={v} onChange={setV} options={ACCOUNTS} />
+        <Combobox label="Gegenkonto" value={v} onChange={setV} options={ACCOUNTS} />
       </div>
     );
   },
