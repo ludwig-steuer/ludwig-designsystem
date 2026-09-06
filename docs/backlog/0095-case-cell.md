@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` — Darstellungsfamilie des Sachverhalts, neben `CaseTimeline` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: die Rückfallkette und der Nullfall „offen" gehören diesem Vorgangsbegriff |
@@ -344,3 +344,49 @@ sollen, nicht von Inhalt, der mehrzeilig ist.
 - [ ] Der Name kürzt mit Ellipse und behält mindestens acht Zeichen — auch im Stapel
 - [ ] Kein Element überdruckt die Nachbarspalte (`InUse` und `NarrowColumn`)
 - [ ] `CaseLink.currency` ist `Currency`, kein `string` mit Cast
+
+## Abnahme — zweite Runde (2026-09-06)
+
+Gemessen im Browser (Storybook 6107, headless Chromium, 1440 breit). Gemessen
+wurde wieder die Wirkung — `getBoundingClientRect`, `scrollWidth` gegen
+`clientWidth`, `getComputedStyle`, Canvas-Textmaß, Screenshot —, nicht das,
+was der Code setzt. Zusätzlich zu den Stories wurde die Spalte **zur Laufzeit**
+verengt (`--v2-cols` auf 160 / 140 / 120 / 100 / 80 / 60 px), um zu sehen, wo
+es kippt.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` ist in diesem Abnahme-Auftrag untersagt und nicht gelaufen | ✓ |
+| Die Zelle bleibt in ihrer Spalte, auch bei langem Namen (Nachtrag 1) | `--narrow-column`, Spalte 155–355 (200 px): rechte Kante von `.v2case` = 355 = Spaltenkante, **kein** Kind ragt hinaus (größter Überstand 0 px), auch nicht der Stapel. `--in-use`, Spalte 507–767 (260 px): 0 px Überstand in allen drei Zeilen — neben dem langen Namen, neben „offen", neben dem Stapel | ✓ |
+| Wo kippt es? (Spalte zur Laufzeit verengt) | 160 / 140 / 120 px: weiterhin 0 px Überstand. Ab **100 px** kippt es, und zwar am Zustands-Chip, nicht am Namen: `.bdg` ist 90–114 px breit und schrumpft nicht — Überstand 6 px („Zur Prüfung"), 14 px („Klärung offen"); bei 80 px 10–34 px, bei 60 px 30–54 px. Name und Nummer bleiben auf jeder Stufe innerhalb der Spalte (Screenshot `ab95-narrow-100.png`). Der Chip ist ein unteilbarer Baustein — unter 120 px trägt ihn keine Zelle mehr; das ist die Grenze der Spalte, nicht der Zelle | ✓ mit Grenze |
+| Der Name kürzt mit **sichtbarem** Auslassungszeichen | `--narrow-column`: `clientWidth` 200 gegen `scrollWidth` 422 / 284 / 213; Screenshot `ab95-narrow.png` zeigt „Wartung der Klimaanlage im …", „Eingangsrechnung: Stadtwer…", „Reinigungspauschale Septe…". `--in-use`: zweite Stapelzeile 260 gegen 284, sichtbar „Eingangsrechnung: Stadtwerke Muste…" (`ab95-inuse-r2.png`). Damit ist genau das behoben, was in Runde eins nur deklariert war: `clientWidth` war dort gleich `scrollWidth` | ✓ |
+| Der Name behält mindestens acht Zeichen — auch im Stapel | `.v2case__link` hat `min-width: 8ch` = gemessen 69,69 px; die Untergrenze greift erst bei einer 60-px-Spalte (`clientWidth` 70 bei 60 px Spalte). Bei dieser Untergrenze passen für „Wartung der Klimaanlage" **sieben** Zeichen plus das Auslassungszeichen (Canvas: „Wartung" 57,7 px + Ellipse 12,3 px = 70 px) — `ch` misst die Ziffer Null, nicht den Buchstaben, deshalb sind es sieben und nicht acht. Ab 120 px Spalte bekommt der Name die volle Spaltenbreite. Der Fall aus Runde eins (8 px, einzelner Buchstabe, zweimal ohne Auslassungszeichen) ist damit ausgeschlossen | ✓ |
+| Der Umbruch der Nebenteile macht nichts kaputt | Kindpositionen in `--narrow-column` (200 px), relativ zu `.v2case__one`: Name y 0 über volle Breite, Nummer y 32 links, Chip y 28 daneben, Teilbetrag y 58 rechtsbündig — keine Überlappung, nichts abgeschnitten, die drei Teilbeträge in `--in-use` schließen rechts bündig bei x = 767. **Kosten:** die Zeile wächst. `--in-use` misst 75 px für die Ein-Fall-Zeile (gegen 47 px der Zeile mit „offen"), 180 px für die Stapelzeile; `--narrow-column` 264 px. Damit trifft die Aussage im Abschnitt „behoben" nicht mehr zu, die Stapelzeile sei mit 95 px die einzige höhere: auch die **Ein-Fall**-Zeile ist jetzt 75 px hoch, weil der Chip in die zweite Zeile rückt. Das ist der bewusste Tausch (der Name behält seinen Platz), im CSS begründet — kein Mangel, aber die Zahl gehört richtig ins Protokoll | ✓ mit Korrektur |
+| Kein Element überdruckt die Nachbarspalte | `--in-use` und `--narrow-column`: für jedes Kind der Zelle `right − Spaltenkante ≤ 0`. Screenshots bestätigen es — der Chip „Zur Prüfung" steht in Runde zwei innerhalb der Spalte, in Runde eins überdruckte er „1.249,90 €" | ✓ |
+| `CaseLink.currency` ist `Currency`, kein `string` mit Cast | `case-title.ts` Z. 34: `currency?: Currency \| null`, importiert aus `@/ludwig/shared/money`. `grep -n "as Currency\|as unknown\| as string"` über `CaseCell.tsx`, `case-title.ts` und die Story → kein Treffer; `CaseCell.tsx` Z. 73 reicht `c.currency ?? "EUR"` ohne Cast durch. Story setzt `currency: "EUR"` als Literal | ✓ |
+| Die Kette Anzeigename → Nummer → Kurz-ID greift weiter | `--fallbacks`, gerenderte Texte: „Wartung der Klimaanlage" · „Eingangsrechnung: Bürobedarf Meier GmbH" · „Eingangsrechnung" · Kennung `c-d4f9e1` statt `2026-0412`. `caseTitle()` bleibt die Durchreiche auf `caseDisplayTitle()`; keine zweite Ableitung in der Familie | ✓ |
+| `cases={[]}` zeigt „offen", nie einen Gedankenstrich | `--none`: zwei `.v2case__none` mit Text „offen"; erstes Kind `<a href="#zuordnen">`, zweites ein Textknoten. Prüfung auf Gedankenstriche über den gerenderten Text aller sieben Stories → kein Treffer. Pille: Radius 999px, Grund `rgb(244,246,248)`, Schrift `rgb(92,92,92)`; Fokus auf dem Link `outline 2px solid rgb(59,143,196)` | ✓ |
+| Mehrere Fälle als Stapel mit Teilbetrag je Zeile | `--many`: `.v2case--stack` ist `display: grid`, Beträge „812,50 €" · „96,20 €" · „341,20 €", rechte Kanten alle bei x = 436, `font-variant-numeric: lining-nums tabular-nums`, `text-align: right`; kein Element der Zelle zentriert | ✓ |
+| Zustand aus `StatusBadge axis="sachverhalt"`, kein (i) | `--many`: Chips „Zur Prüfung" · „Klärung offen" · „Verbucht" — die Labels der Registry-Achse. `document.querySelectorAll('button[aria-label*="erkl"]')` → 0 in `--single`, `--many`, `--in-use`, `--narrow-column` | ✓ |
+| `showState={false}` lässt den Punkt weg und sonst alles stehen | `--without-state`: `.bdg` → 0 Treffer; Text bleibt „Wartung der Klimaanlage / 2026-0412" | ✓ |
+| Die Zelle baut keine URL, rechnet nichts, sortiert nicht | `grep -n "clients/\|/clients"` → kein Treffer; `grep -n "\.sort(\|\.reduce(\|\.filter(\|Math\."` über `CaseCell.tsx` und `case-title.ts` → kein Treffer. Gerendertes `href="#sachverhalt-c-2026-0412"` kommt aus der Story-Funktion | ✓ |
+| Die Nummer bricht nie um | `--in-use` und `--narrow-column`: `.v2case__no` hat `white-space: nowrap`, `getClientRects().length` = 1 in allen Vorkommen | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | `index.json`: `--single`, `--many`, `--none`, `--without-state`, `--fallbacks`, `--narrow-column`, `--in-use`. Sieben statt der sechs aus §6 — die siebte ist `NarrowColumn`, die dieser Nachtrag verlangt; `lädt`/`Fehler`/`leer nach Filter` sind unter „Verhalten" begründet. Die Stories-Tabelle oben führt `NarrowColumn` noch nicht auf (Pflege, kein Mangel) | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Text links, Zahlen rechts mit `tnum`, nichts zentriert ✓ · kein Hex, kein px in `CaseCell.tsx`/`case-title.ts` (px nur in den Rastermaßen der Stories) ✓ · Status nur über die Registry, jeder farbige Zustand mit Wort ✓ · kein Icon ohne Wort, kein Emoji, keine Versalien ✓ · Fokusring 2 px sichtbar, Hover antwortet (`rgb(45,45,45)` → `rgb(26,58,92)` plus Unterstreichung) ✓ · Kontrast der „offen"-Pille 6,2:1 ✓ · Karte hat Rand statt Schatten ✓. **Eine Zeile bleibt bewusst offen:** „Zeilenhöhe ≤ `.v2tbl__row`" (V1) — 75 px bei einem Fall, 180 px beim Stapel gegen 47 px. Für den Stapel war das schon in Runde eins so und wurde nicht als Mangel gewertet; für den Ein-Fall-Fall ist es der Preis der Behebung von M1/M2 und im CSS begründet | ✓ mit Ausnahme |
+| Im Browser angesehen | Screenshots `ab95-narrow.png`, `ab95-inuse-r2.png`, `ab95-narrow-100.png`; Konsole in `--in-use` und `--narrow-column` ohne Meldung (0 gesamt, keine Verschachtelungs-Warnung) | ✓ |
+| offen (App): ersetzt `ui/case/CaseCell.tsx` und die Kopie in `KontoauszugView`; die drei Queries nehmen `lifecycleStatus` auf (B3) | nicht in diesem Repo prüfbar | offen (App) |
+
+**Urteil: abgenommen.** Beide Mängel der ersten Runde sind behoben, und zwar
+an der Ursache: `.v2case` steht auf `flex` statt `inline-flex`, deshalb hat
+die Ellipse jetzt eine Grenze, an der sie greifen kann; und der Name hat mit
+`min-width: 8ch` einen Boden, unter den ihn Kennung, Chip und Betrag nicht
+mehr drücken. Gemessen ist beides, nicht nur deklariert.
+
+Zwei Zahlen fürs Protokoll, keine Mängel: unter 120 px Spaltenbreite ragt der
+Zustands-Chip aus der Spalte — er ist unteilbar, das ist die Grenze der
+Spalte und nicht der Zelle; und die Ein-Fall-Zeile ist mit 75 px höher als
+die 47 px einer gewöhnlichen Zeile, weil der Chip umbricht.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-06 · Offene Punkte: die
+App-Zeile (Ersatz der drei Fassungen, `lifecycleStatus` in den Queries) —
+offen (App).

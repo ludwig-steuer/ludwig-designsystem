@@ -45,20 +45,23 @@ export const Filled: Story = {
 };
 
 /**
- * Ein frisch gegründeter Fall. Die zwei bedeutenden Nullwerte stehen als
- * **Wort** — „hat bewusst keins" beim Personenkonto —, der Rest fehlt still.
- * „Gegenpartei-Seite" gehört zu `all` und ist hier deshalb nicht zu sehen.
+ * Ein frisch gegründeter Fall — mit `all`, damit **alle drei** bedeutenden
+ * Nullwerte zu sehen sind: „hat bewusst keins" beim Personenkonto, „bewusst
+ * keine" bei der Gegenpartei-Seite, und dass „Kein Beleg zu erwarten" gesetzt
+ * ist, ist selbst die Aussage. Der Rest fehlt still.
  */
 export const Sparse: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <CaseFacts
+        all
         case={{
           caseNumber: "2026-0501",
           kind: "internal_transfer",
           lifecycleStatus: "open",
           openedAt: "2026-09-05",
           fyPersonalAccountNumber: null,
+          counterpartySide: null,
           documentNotRequiredReason:
             "Interne Umbuchung zwischen zwei Sachkonten — es gibt keinen Beleg dazu.",
         }}
@@ -98,9 +101,10 @@ export const InDrawer: Story = {
 };
 
 /**
- * Rand: eine Zusammenfassung von 720 Zeichen — dem Höchstwert des Bestands.
- * Sie kürzt bei 160 und klappt auf; der volle Text steht **darunter**, nicht
- * in einem `title`, denn 720 Zeichen im Hover liest niemand.
+ * Rand: eine Zusammenfassung von **721** Zeichen — ein Zeichen über dem
+ * Höchstwert des Bestands (720), nachgezählt und nicht behauptet. Sie kürzt
+ * bei 160 und klappt auf; der volle Text steht **darunter**, nicht in einem
+ * `title`, denn 700 Zeichen im Hover liest niemand.
  */
 export const LongSummary: Story = {
   render: () => (
@@ -116,7 +120,9 @@ export const LongSummary: Story = {
             "Skontovereinbarung von zwei Prozent bei Zahlung binnen zehn Tagen, die beim " +
             "Zahlungsabgleich zu berücksichtigen ist. Der Lieferschein liegt als zweite " +
             "Seite bei; die dritte Seite ist eine Kopie der Bestellung aus dem Juli und " +
-            "gehört nicht zu diesem Vorgang.",
+            "gehört nicht zu diesem Vorgang. Die Kostenstelle für den Bürobedarf ist die " +
+            "Verwaltung, für die Bewirtung der Vertrieb; beide stehen im Stammsatz des " +
+            "Kreditors hinterlegt und deshalb hier nicht zu setzen.",
         }}
         accountHref={accountHref}
       />

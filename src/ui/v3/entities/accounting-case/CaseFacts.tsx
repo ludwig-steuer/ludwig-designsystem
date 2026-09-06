@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type {
+  CaseDocumentNumberMode,
   CaseKind,
   CaseLifecycle,
 } from "@/ludwig/modules/accounting-cases/domain/case";
@@ -55,7 +56,7 @@ export interface CaseFactsVM {
    */
   fyPersonalAccountNumber?: string | null;
   /** Rank 14, axis `belegnummern_modus`. */
-  documentNumberMode?: string | null;
+  documentNumberMode?: CaseDocumentNumberMode | null;
   /** Rank 15. Set = **no document is expected**, and the reason is the value. */
   documentNotRequiredReason?: string | null;
   /** Rank 16. 26 % are closed. */
@@ -183,5 +184,9 @@ export function CaseFacts({
     // wäre er eine Zahl ohne ihren Zusammenhang (Freigabe 2026-09-06).
   }
 
-  return <FieldList rows={rows} tone={tone} layout="row" />;
+  // `stack`, nicht `row`: die Spec verspricht „Label links, Wert rechts, Zahlen
+  // mit tnum" — und genau das ist die Vorgabe-Form der `FieldList`. `row`
+  // setzt das Label **über** den Wert und beides linksbündig; damit wäre der
+  // Satz im Verhalten nicht eingelöst, sondern nur behauptet (Abnahme 0097).
+  return <FieldList rows={rows} tone={tone} />;
 }
