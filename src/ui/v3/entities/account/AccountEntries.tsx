@@ -255,9 +255,15 @@ export function accountEntryColumns({
   ];
 }
 
-/** Grid track list out of the column definitions — same order, same widths. */
+/**
+ * Grid track list out of the column definitions — same order, same widths.
+ *
+ * `minmax(0, 1fr)`, not `1fr`: a bare `1fr` is `minmax(auto, 1fr)`, and `auto`
+ * is the min-content width of the cell — head and rows are separate grids, so
+ * each would size the track itself and the columns drift apart (found in 0101).
+ */
 function trackList(columns: ColumnDef<AccountEntry>[]): string {
-  return columns.map((c) => c.width ?? "1fr").join(" ");
+  return columns.map((c) => c.width ?? "minmax(0, 1fr)").join(" ");
 }
 
 /**

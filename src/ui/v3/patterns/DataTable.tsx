@@ -206,10 +206,16 @@ export function DataTable<T>(props: DataTableProps<T>) {
   // One grip track in front for each of selection and chevron, `max-content`
   // behind for the actions — the columns fall back to one share each. The
   // width of a grip track is a measure and lives in the CSS (A5).
+  //
+  // The fallback is `minmax(0, 1fr)` and not `1fr`, because a bare `1fr` is
+  // `minmax(auto, 1fr)`: `auto` is the **min-content** width of the cell, and
+  // head and rows are separate grids with different content — each would size
+  // the track itself. Measured in 0101 before the fix: the amount column stood
+  // at three different positions across six rows and ran 111 px past the head.
   const cols = [
     selection ? PICK : null,
     expand ? PICK : null,
-    ...columns.map((c) => c.width ?? "1fr"),
+    ...columns.map((c) => c.width ?? "minmax(0, 1fr)"),
     rowActions ? "max-content" : null,
   ]
     .filter(Boolean)

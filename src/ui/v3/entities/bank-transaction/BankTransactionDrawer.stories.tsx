@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { BankTransactionDrawer } from "./BankTransactionDrawer";
 import { BankTransactionRow } from "./BankTransactionRow";
-import { bankTransactionColumns } from "./bank-transaction-columns";
+import { bankTransactionColumns, bankTransactionTracks } from "./bank-transaction-columns";
 import type { BankTransactionDetailData, CaseAssignment } from "./bank-transaction";
 import { Card, CardHead, HeadRow, Table } from "../../primitives/Table";
 
@@ -205,7 +205,7 @@ export const InUse: Story = {
       <div style={{ maxWidth: 1400 }}>
         <Card>
           <CardHead title="Kontoauszug August 2026" sub="Commerzbank · 1210" />
-          <Table cols={DEF.map((c) => c.width ?? "1fr").join(" ")} minWidth={1220}>
+          <Table cols={bankTransactionTracks(DEF)} minWidth={1220}>
             <HeadRow>
               {DEF.map((c) => (
                 <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
