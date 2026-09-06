@@ -124,6 +124,7 @@ Zustände + 1 Layout-Boolean (`showState`) + 0 Callbacks + 1 „im Einsatz" +
 | `None` | Kein Fall: „offen" mit `emptyHref`, und daneben dieselbe Zelle ohne die Prop |
 | `WithoutState` | `showState={false}` in einer Liste, die eine eigene Zustands-Spalte hat |
 | `Fallbacks` | Rand: vier Zeilen, die die Kette durchspielen — mit `title`, ohne `title` (Art + Gegenpart), ohne beides (nur Art), ohne `caseNumber` (Kurz-ID) |
+| `NarrowColumn` | Rand: ein langer Name in einer 200-px-Spalte, darunter der Stapel — der Fall, den ein weites Raster verbirgt (Abnahme 2026-09-06) |
 | `InUse` | In einer `Table` als Spalte „Sachverhalt" neben Beleg und Betrag — wie `documents/page` sie heute baut |
 
 Nicht anwendbar: `lädt`, `Fehler` (Begründung im Verhalten), `leer nach
