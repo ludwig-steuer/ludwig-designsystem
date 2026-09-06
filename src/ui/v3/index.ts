@@ -376,6 +376,14 @@ export {
   DATEV_MAX_BELEGFELD1,
 } from "./entities/document-number/DocumentNumberField";
 export { DocumentNumberRegister } from "./entities/document-number/DocumentNumberRegister";
+
+/* DATEV-Snapshot */
+export { SnapshotCard } from "./entities/datev-snapshot/SnapshotCard";
+export {
+  SNAPSHOT_COUNT_LABEL,
+  RECONCILE_AXIS,
+  type DatevSnapshot,
+} from "./entities/datev-snapshot/datev-snapshot";
 export type {
   DocumentNumberSourceLabels,
   DocumentNumberStateLabels,

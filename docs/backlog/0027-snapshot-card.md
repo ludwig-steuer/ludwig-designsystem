@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/datev-snapshot/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, ein DATEV-Snapshot ist Buchhaltung |
 | Quelle | Soll-Katalog §11.7 Stufe 3 „DATEV-Snapshot — fehlt (§3.2 Nr. 5)" |
-| Ersetzt | die Inline-Darstellung in `datev/page.tsx` und `reporting/page.tsx` |
-| Blockiert | Abnahme-Schritt 1, die DATEV-Seite, den Onboarding-Abgleich |
+| Ersetzt | den KPI-Block „letzter Abzug" und den Kopf der Abgleich-Historie in `datev/page.tsx` (`reporting` ist gelöscht) |
+| Blockiert | die DATEV-Seite, den Onboarding-Abgleich |
 | Spec von / am | Claude, 2026-09-03 |
 
 ## Ziel
@@ -28,7 +28,7 @@ Formen, und im Abnahme-Schritt 1 gar nicht.
   wird an zwei Orten gebraucht (Abnahme-Schritt 1, DATEV-Seite).
 - **Zuschnitt:** eine Datei, ein Export. Der Abgleichs-Befund gehört hinein,
   nicht daneben — er ist die Aussage über denselben Stand.
-- **Setzt auf:** `Card`/`CardHead`, `FieldList`, `Timestamp`, `StatusCallout`
+- **Setzt auf:** `Card`/`CardHead`, `FieldList`, `Time`, `StatusCallout`
   für das Abgleichs-Ergebnis, `Badge` für den Umfang.
 
 ## Schnittstelle
@@ -74,6 +74,7 @@ Titel `v3/Entitäten/DATEV-Snapshot/SnapshotCard`. Abgeleitet nach §6:
 | `Levels` | `opos`, `journal_opos`, `journal` nebeneinander |
 | `Empty` | kein Snapshot vorhanden, mit Ausweg |
 | `Error` | Laden fehlgeschlagen |
+| `Interactive` | `onOpen` und `onImport` — der Rundlauf, den die Seite verdrahtet |
 | `InGrid` | zwei Karten nebeneinander auf der DATEV-Seite |
 
 Nicht anwendbar: `LeerNachFilter`, `Laedt` (der Aufrufer zeigt `Skeleton`, 0016).
@@ -122,3 +123,38 @@ Entscheide: 1 **alle `counts` beschriftet zeigen** (Buchungen, Offene Posten), k
 Vor dem Bau in die Spec: (a) `reconcile` als fünf Zähler über die Achse `mirror_match` in die Schnittstelle; (b) Story `Interactive` ergänzen oder `onOpen` streichen; (c) `reporting` raus, `Ersetzt` auf den KPI-Block „letzter Abzug" und die Abgleich-Historie der `datev`-Seite; (d) `Levels` zeigt den rohen Wert von `baseline_level` in `MonoCell`, bis das GLOSSARY Wörter hat (keine lokale Map); (e) `Timestamp` → `Time`; (f) Hinweis an 0040: `DatevHistoryCard` ist eine Liste je Fall, kein Snapshot-Kopf.
 
 Befunde ins Register: **L-72** — GLOSSARY-Wörter für die drei `baseline_level`-Stufen und ihr Label in der Domäne (B); L-04 präzisieren: `datev-mirror` und `datev-truth` haben kein `domain/`, der Spiegel nimmt aus beiden Modulen nichts.
+
+## Nachtrag 2026-09-06, vor dem Bau
+
+**Der Abgleich sind fünf Zähler, nicht ein Ja/Nein.** `reconcile` trägt
+`matchedLudwig`, `matchedSplit`, `matchedCorrected`, `newUnprocessed` und
+`unclear`; sie bilden eins zu eins auf die Achse `mirror_match` ab — dieselben
+Wörter, die der Spiegel je Zeile benutzt, hier als Summe. Der Callout nennt
+die Zahl der **ungeklärten** (Fremdbuchung plus unklar), die fünf Zähler
+darunter sagen, welcher Zustand wie oft vorkommt.
+
+**Drei Aussagen, nie zwei.** `reconcile === null` heißt „kein Abgleich
+durchgeführt" — das gibt es nur bei `opos`-Läufen, und es steht als eigener,
+sichtbarer Satz. Ein Lauf, der nicht stattgefunden hat, sieht sonst genauso
+aus wie ein sauberer.
+
+**Tiefe roh und mono.** Die drei Werte von `baseline_level` haben im GLOSSARY
+keine Wörter (Befund **L-72**); bis es sie gibt, steht der Rohwert in
+`MonoCell`. Eine Übersetzung hier wäre die lokale Map, die R1 verbietet.
+
+**Alle `counts` beschriftet**, keine Top-3-Logik: der Datensatz hat zwei
+Schlüssel (`mirror_entries`, `open_items`), und beide bekommen ihr Wort aus
+`SNAPSHOT_COUNT_LABEL` — kein Status, sondern die Beschriftung einer Anzahl.
+
+**`reporting` ist gelöscht**; der Bildschirm ist die `datev`-Seite. Ersetzt
+werden dort der KPI-Block „letzter Abzug" und der Kopf der Abgleich-Historie.
+
+**`Timestamp` gibt es im Set nicht** — die beiden Daten kommen über `Time`,
+beide beschriftet und absolut (T7); sie werden regelmäßig verwechselt.
+
+**Hinweis an 0040:** `DatevHistoryCard` ist eine Liste je Fall, kein
+Snapshot-Kopf — die beiden Formen überschneiden sich nicht.
+
+**Der Typ liegt lokal** in `datev-snapshot.ts`, weil weder `datev-truth` noch
+`datev-mirror` ein `domain/` hat (**L-04**, präzisiert). Die Namen sind die
+der App, damit der Umzug ein Import-Tausch bleibt.

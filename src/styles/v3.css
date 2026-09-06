@@ -3118,3 +3118,16 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2dnr__num { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
 .v2dnr__datev { color: var(--color-text-subtle); }
 .v2dnr__state { color: var(--color-text-muted); font-size: var(--fs-ui-sm); }
+
+/* --- DATEV-Stand als Karte (0027) ----------------------------------------- */
+.v2snap__pad { display: grid; gap: var(--space-4); padding: var(--space-5); }
+.v2snap__scope { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: flex-end; }
+/* Die fünf Zähler als Paare Wort/Zahl — die Zahl rechts, das Wort links,
+   damit die Spalte der Zahlen sich vergleichen lässt. */
+.v2snap__rec { display: grid; gap: var(--space-1); }
+.v2snap__reclabel {
+  display: flex; align-items: center; gap: var(--space-1);
+  font-size: var(--fs-ui-xs); color: var(--color-text-subtle);
+}
+.v2snap__reccount { display: flex; justify-content: space-between; gap: var(--space-4); font-size: var(--fs-ui-sm); }
+.v2snap__recword { color: var(--color-text-muted); }
