@@ -66,5 +66,6 @@ Durchgang geprüft wird: ein Blick durch das Storybook nach der Änderung.
 
 ## Befunde für `ludwig/app`
 
-- **B1** — Die App lädt Preflight in derselben Reihenfolge; dort sehen die
-  Links genauso aus. Nach der Umstellung hier lohnt derselbe Griff drüben.
+- **B1 (L-78)** — Die App lädt Preflight in derselben Reihenfolge; dort sehen
+  die Links genauso aus. Nach der Umstellung hier lohnt derselbe Griff drüben.
+  Im Register eingetragen am 2026-09-06.
