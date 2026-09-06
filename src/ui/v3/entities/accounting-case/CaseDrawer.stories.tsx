@@ -106,8 +106,13 @@ export const Interactive: Story = {
 };
 
 /**
- * Rand: ein Fall ohne Betrag, ohne Partner, ohne Personenkonto — die
- * bedeutenden Nullwerte stehen als Wort, nicht als Gedankenstrich.
+ * Rand: ein Fall ohne Betrag, ohne Gegenpart, ohne Personenkonto.
+ *
+ * Der Kopf fällt auf die Art zurück („Umbuchung") und sagt sie **nicht noch
+ * einmal** in der Meta-Zeile. In den Fakten stehen die beiden bedeutenden
+ * Nullwerte, die der Drawer tragen kann, als Wort: „hat bewusst keins" und
+ * „Kein Beleg zu erwarten". Der dritte („bewusst keine" zur Gegenpartei-Seite)
+ * gehört zu `all` und damit in den View — der Drawer zeigt Zone 3 ohne `all`.
  */
 export const Sparse: Story = {
   render: () => (
@@ -120,7 +125,9 @@ export const Sparse: Story = {
         totalAmount: null,
         eventCount: 0,
         facts: {
-          caseNumber: "2026-0501",
+          // Deliberately without a number: the head must then still show the
+          // reference that was looked up, not a sliced id (defect M1).
+          caseNumber: null,
           kind: "internal_transfer",
           lifecycleStatus: "open",
           openedAt: "2026-09-05",

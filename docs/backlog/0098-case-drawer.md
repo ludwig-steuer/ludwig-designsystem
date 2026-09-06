@@ -191,3 +191,49 @@ Abgenommen von / am: … · Offene Punkte: …
 **Gilt für 0098 und 0103 gemeinsam:** Schnittstelle nach dem 0052-Schema — `reference` (im Kopf und im Fehlertext), `record | null` = **nicht gefunden**, `loading`, `error`, `onOpenFull`; vier Zustände lädt · Fehler · nicht gefunden · Inhalt.
 
 Vor dem Bau in die Spec: Schnittstelle auf das 0052-Schema, Story `NotFound` statt `Closed`, `size="md"`, Zonen-Tabelle Zeile 1 um 4–7, Typ-Verweis auf L-68.
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1 — der Kopf zeigte nicht die nachgeschlagene Kennung.** Er baute sie aus
+dem Record (`caseIdentifier`), und weil `Filled` beide gleich hatte, bewies
+die Story nichts; bei `caseNumber === null` hätte er die id auf acht Zeichen
+geschnitten und eine falsche Nummer angezeigt. Jetzt steht `reference` selbst
+im Kopf — was nachgeschlagen wurde, nicht was zurückkam. `Sparse` hat dafür
+bewusst `caseNumber: null`: gemessen steht dort „2026-0501", die Referenz.
+
+**M2/M6 — `Sparse` behauptete drei Wort-Nullwerte und der Kopf sagte die Art
+zweimal.** Der Drawer zeigt Zone 3 **ohne** `all`, also kann er nur zwei der
+drei tragen; die Story sagt das jetzt. Und fällt der Titel auf die Art zurück
+(ein Fall ohne Titel und ohne Gegenpart), lässt die Meta-Zeile sie weg —
+gemessen „Umbuchung · 2026-0501 · Zur Prüfung · 0 Ereignisse" statt zweimal
+„Umbuchung".
+
+**M3 — die Ladefläche hatte nicht die Form des Inhalts.** Fünf nackte Balken,
+87 px, ohne Rahmen; beim Eintreffen sprang der Rumpf um 214 px und bekam eine
+Karte, die vorher nicht da war. Jetzt liegen die fünf Zeilen in derselben
+`Card` mit demselben `CardHead title="Kernfakten"` — gemessen 176 px gegen
+265 px, gleicher Rahmen, gleicher Kopf.
+
+**M4 — Zone 4 fiel in drei von vier Zuständen weg.** Der Satz beschreibt den
+Drawer, nicht den Datensatz: gerade im Fehlerfall ist „der Rest steht im View"
+die nützlichste Auskunft. Er steht jetzt außerhalb der frühen Rückgaben, in
+allen vier Zuständen (gemessen).
+
+**M5 — der Fehlertext hatte keinen nächsten Schritt (T5).** Jetzt: „**Sachverhalt
+2026-0412 konnte nicht geladen werden.** Zeitüberschreitung beim Laden. Bitte
+erneut öffnen — oder den Sachverhalt vollständig ansehen."
+
+**M7 — die Links waren im Blatt keine Links.** Wurzel gefunden: Tailwinds
+Preflight lädt nach `tokens.css` und setzt `a { color: inherit }`. Behoben in
+`index.css` (die Regel steht nach den Direktiven noch einmal); gemessen
+`rgb(46, 120, 168)` statt `rgb(45, 45, 45)`. Die Reihenfolge selbst ist
+**0111**.
+
+**M8** (Badge-Kontrast 4,14:1) ist **0112**, **M9** (`prefers-reduced-motion`)
+ist Befund 2 von **0111** — beide gehören der Grundschicht, nicht dieser
+Aufgabe.
+
+**M10** (deutsche Story-JSDoc) bleibt: die Familie `accounting-case` schreibt
+sie durchgehend deutsch, und der Text erscheint in Storybook — er ist damit
+näher an „Strings, die Nutzer sehen" als an Code. Eine Umstellung wäre eine
+Hausentscheidung für alle Familien, keine dieser Aufgabe.

@@ -12,7 +12,7 @@ import { EmptyState } from "../../primitives/EmptyState";
 import { Skeleton } from "../../primitives/Skeleton";
 import { Card, CardHead } from "../../primitives/Table";
 import { CaseFacts, type CaseFactsVM } from "./CaseFacts";
-import { caseIdentifier, caseTitle } from "./case-title";
+import { caseTitle } from "./case-title";
 
 /**
  * The case, looked up beside the work (0098, schema of 0052).
@@ -86,6 +86,8 @@ export function CaseDrawer({
         counterpartyName: record.counterpartyName ?? null,
       })
     : null;
+  // Whether the head's title is the kind itself — then rank 5 is already said.
+  const kindInTitle = record ? name === caseKindLabel(record.facts.kind) : false;
 
   return (
     <Drawer
@@ -96,17 +98,26 @@ export function CaseDrawer({
       meta={
         record ? (
           <span className="v2cdr__meta">
-            <code>{caseIdentifier({ caseId: reference, caseNumber: record.facts.caseNumber })}</code>
+            {/* The reference is what was **looked up** — not what came back.
+                Deriving it from the record would hide the one case that
+                matters: a record whose number differs from the reference. */}
+            <code>{reference}</code>
             {record.facts.lifecycleStatus ? (
               <StatusBadge axis="sachverhalt" status={record.facts.lifecycleStatus} info={false} />
             ) : null}
             {record.totalAmount == null ? null : (
               <Amount value={record.totalAmount} currency={record.currency ?? "EUR"} size="sm" />
             )}
-            <span>
-              {caseKindLabel(record.facts.kind)}
-              {record.counterpartyName ? ` · ${record.counterpartyName}` : ""}
-            </span>
+            {/* The title falls back to the kind when a case has none — then
+                the meta line must not say it a second time (M6). */}
+            {kindInTitle && !record.counterpartyName ? null : (
+              <span>
+                {kindInTitle ? "" : caseKindLabel(record.facts.kind)}
+                {record.counterpartyName
+                  ? `${kindInTitle ? "" : " · "}${record.counterpartyName}`
+                  : ""}
+              </span>
+            )}
             {record.dispositionLabel ? <span>{record.dispositionLabel} ist dran</span> : null}
             {record.eventCount === undefined ? null : (
               <span>
@@ -133,11 +144,19 @@ export function CaseDrawer({
         accountHref={accountHref}
         partnerHref={partnerHref}
       />
+      {/* Zone 4: what the quick look does not answer — named, not hidden, and
+          in every state. */}
+      <p className="v2cdr__limit">{LIMIT}</p>
     </Drawer>
   );
 }
 
-/** The four states in their order of precedence: error → loading → not found → content. */
+/**
+ * The four states in their order of precedence: error → loading → not found →
+ * content. Zone 4 stands **outside** this function, because the sentence
+ * describes the drawer, not the record: in the error case „the rest is in the
+ * view" is the most useful thing on screen (M4).
+ */
 function DrawerBody({
   reference,
   record,
@@ -156,14 +175,23 @@ function DrawerBody({
   if (error) {
     return (
       <Callout tone="danger">
-        Sachverhalt {reference} konnte nicht geladen werden: {error}
+        <strong>Sachverhalt {reference} konnte nicht geladen werden.</strong> {error}. Bitte
+        erneut öffnen — oder den Sachverhalt vollständig ansehen.
       </Callout>
     );
   }
   if (loading) {
-    // The shape of the content, not one card: five lines for zone 3, because
-    // five will stand there (defect M2 of the 0052 review, not repeated here).
-    return <Skeleton lines={5} label="Sachverhalt wird geladen …" />;
+    // The shape of the content, not one card and not five bare lines: the
+    // same card with the same head, so nothing jumps when the data arrives
+    // (defect M3 of the first review — 87 px against 301 px).
+    return (
+      <Card>
+        <CardHead title="Kernfakten" />
+        <div className="v2cdr__facts">
+          <Skeleton lines={5} label="Sachverhalt wird geladen …" />
+        </div>
+      </Card>
+    );
   }
   if (!record) {
     return (
@@ -177,23 +205,18 @@ function DrawerBody({
   }
 
   return (
-    <>
-      {/* Zone 3: the same component as the view, without `all` — that is the
-          coverage 0052 asks for: the drawer invents no second field list. */}
-      <Card>
-        <CardHead title="Kernfakten" />
-        <div className="v2cdr__facts">
-          <CaseFacts
-            case={record.facts}
-            tone="bare"
-            accountHref={accountHref}
-            partnerHref={partnerHref}
-          />
-        </div>
-      </Card>
-
-      {/* Zone 4: what the quick look does not answer — named, not hidden. */}
-      <p className="v2cdr__limit">{LIMIT}</p>
-    </>
+    /* Zone 3: the same component as the view, without `all` — that is the
+       coverage 0052 asks for: the drawer invents no second field list. */
+    <Card>
+      <CardHead title="Kernfakten" />
+      <div className="v2cdr__facts">
+        <CaseFacts
+          case={record.facts}
+          tone="bare"
+          accountHref={accountHref}
+          partnerHref={partnerHref}
+        />
+      </div>
+    </Card>
   );
 }

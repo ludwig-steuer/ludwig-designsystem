@@ -25,3 +25,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Tailwinds Preflight lädt nach `tokens.css` und setzt `a { color: inherit;
+   text-decoration: inherit }` — bei gleicher Spezifität gewinnt die spätere
+   Regel, und damit sah **jeder** Link des Sets aus wie gewöhnlicher Text: die
+   Farbe aus `tokens.css` kam nie an, unterscheidbar war er erst beim Hover.
+   Deshalb steht die Regel hier noch einmal, nach den Direktiven.
+
+   Die Reihenfolge selbst zu drehen (Preflight nach oben) wäre die saubere
+   Lösung, ändert aber in einem Zug Überschriften, Listen und Knöpfe mit —
+   das ist eine eigene Aufgabe (0111), keine Nebenwirkung dieser. */
+a {
+  color: var(--color-accent-700);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+a:hover { color: var(--color-primary); }
