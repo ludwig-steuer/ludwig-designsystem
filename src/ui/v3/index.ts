@@ -338,6 +338,7 @@ export {
 
 /* Sachverhalt — die Zelle, ihr Name und ihre Kennung (0095) */
 export { CaseCell } from "./entities/accounting-case/CaseCell";
+export { CaseFacts, type CaseFactsVM } from "./entities/accounting-case/CaseFacts";
 export {
   caseTitle,
   caseIdentifier,

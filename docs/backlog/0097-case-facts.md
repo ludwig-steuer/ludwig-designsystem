@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: fünfzehn Felder genau dieser Entität, zwei davon mit Ludwig-Regeln am Nullwert |
@@ -180,3 +180,38 @@ Abgenommen von / am: … · Offene Punkte: …
 Vor dem Bau in die Spec: (a) B2 konkret: `CaseDetail` existiert im Spiegel **nicht** (liegt in `infrastructure/case-detail-queries.ts`, nicht `domain/`) und trägt `title` nicht — lokales `CaseFactsVM` benennen (Präzedenz `AccountFactsVM`, L-13), Befund L-68; (b) `accountHref(accountNumber)` statt Id — die Kontoroute läuft über die Nummer; (c) `Sparse` präzisieren (ohne `all` steht nur das Personenkonto als Wort); (d) Ausbau-Zeile `clearingBalance` ersetzen — das Feld existiert (F104), Anzeige mit `all`; (e) Rang 25 (Abnahme-Bucket) aus `all` nehmen, das Profil sagt selbst „gehört zur Abnahmeliste".
 
 Befunde ins Register: **L-68** — `CaseDetail` nach `domain/` heben (spiegelbar) und um `title`, `disposition`, `openClarificationsCount`, `exportStatus`, `counterpartySide`, `batchOposReference`, `createdByKind/Label`, `expectedInterval`, `agentRunId`, `exportBatchId` ergänzen (Muster L-08/L-09). Dass `title` fehlt, ist die Wurzel von L-52.
+
+## Vor dem Bau eingearbeitet und gebaut (2026-09-06)
+
+**(a) `CaseFactsVM` liegt lokal.** `CaseDetail` gibt es im Spiegel nicht — es
+liegt drüben in `infrastructure/case-detail-queries.ts` statt in `domain/` —
+und elf der Felder fehlen dort ohnehin, `title` als das folgenreichste (die
+Wurzel von L-52). Präzedenz ist `AccountFactsVM` (L-13); der Befund steht als
+**L-68** im Register. Zieht der Typ um, fällt die lokale Fassung weg.
+
+**(b) `accountHref` nimmt die Konto*nummer*,** nicht die Id: die Kontoroute
+läuft über die Nummer. Deshalb heißen die Felder hier
+`fyPersonalAccountNumber` und `fyClearingAccountNumber` — wer eine Id
+hereinreicht, merkt es am Typ und nicht erst an einer toten Verlinkung.
+
+**(c) `Sparse` ist präzisiert:** ohne `all` steht dort **ein** bedeutender
+Nullwert als Wort („Personenkonto · hat bewusst keins"), dazu „Kein Beleg zu
+erwarten" mit seinem Grund und „Abgeschlossen · laufend". Die
+Gegenpartei-Seite gehört zu `all` und erscheint hier nicht — das war in der
+alten Fassung der Story unscharf.
+
+**(d) Der Ausbau nennt `clearingBalance`** als Prop für den Saldo; das Feld
+selbst (Rang 22) steht mit `all` in der Liste.
+
+**(e) Rang 25 (Abnahme-Bucket) ist nicht in `all`.** Das Profil sagt selbst,
+er gehört zur Abnahmeliste — dort ist er die Gruppierung, hier wäre er eine
+Zahl ohne ihren Zusammenhang.
+
+### Gemessen
+
+| Story | Zeilen |
+|---|---|
+| `Filled` | Zusammenfassung · Geschäftspartner · Personenkonto · Belegnummern · Abgeschlossen |
+| `All` | dieselben plus Gegenpartei-Seite · Anker · Angelegt von · Wirtschaftsjahr · Abrechnungsrhythmus · Verrechnungskonto · Buchungslauf · Buchungszyklus — **kein** Abnahme-Bucket |
+| `Sparse` | Personenkonto „hat bewusst keins" · Kein Beleg zu erwarten mit Grund · Abgeschlossen „laufend" |
+| `LongSummary` | 720 Zeichen kürzen auf einen 159-Zeichen-Anriss mit Aufklapper — der volle Text steht darunter, nicht im `title` |
