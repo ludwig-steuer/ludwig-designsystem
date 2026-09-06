@@ -124,7 +124,7 @@ const LEDGER = [
  */
 export const TwoSeries: Story = {
   render: () => (
-    <Card>
+    <Card style={{ maxWidth: 720 }}>
       <CardHead title="Aufwand je Monat" sub="Bewirtete Kosten als Anteil" />
       <div style={{ padding: "var(--space-5)" }}>
         <BarChart
@@ -146,7 +146,7 @@ export const TwoSeries: Story = {
  */
 export const Grouped: Story = {
   render: () => (
-    <Card>
+    <Card style={{ maxWidth: 720 }}>
       <CardHead title="Konto 4400 · Bürobedarf" sub="Soll und Haben je Monat" />
       <div style={{ padding: "var(--space-5)" }}>
         <BarChart
@@ -169,7 +169,7 @@ export const Grouped: Story = {
  */
 export const WithLine: Story = {
   render: () => (
-    <Card>
+    <Card style={{ maxWidth: 720 }}>
       <CardHead title="Konto 4400 · Bürobedarf" sub="Soll, Haben und laufender Saldo" />
       <div style={{ padding: "var(--space-5)" }}>
         <BarChart

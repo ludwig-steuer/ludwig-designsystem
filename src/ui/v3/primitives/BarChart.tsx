@@ -152,9 +152,14 @@ export function BarChart({
                   x={grouped ? left + sub + INNER : left}
                   width={sub}
                   {...seg(second, base)}
+                  // The hairline that separates the two series is a stroke in
+                  // the surface colour; `preserveAspectRatio="none"` would
+                  // stretch it, hence non-scaling.
+                  vectorEffect="non-scaling-stroke"
                   className={`v2chart__bar v2chart__bar--second${now}`}
                 >
-                  <title>{title(bar)}</title>
+                  {/* No second `title`: the group already carries the whole
+                      period, and the same sentence twice is noise. */}
                 </rect>
               )}
             </g>
@@ -173,7 +178,12 @@ export function BarChart({
               .map((v, i) => `${i * slot + slot / 2},${y(v)}`)
               .join(" ")}
           >
-            <title>{lineLabel ?? "Bezugslinie"}</title>
+            <title>
+              {`${lineLabel ?? "Bezugslinie"}: ${line
+                .slice(0, bars.length)
+                .map((v, i) => `${bars[i]?.label ?? ""} ${format(v)}`)
+                .join(" · ")}`}
+            </title>
           </polyline>
         ) : null}
         <line x1="0" x2={W} y1={zero} y2={zero} className="v2chart__zero" />

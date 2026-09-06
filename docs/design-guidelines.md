@@ -107,6 +107,7 @@ dieselbe Stufe („warning-strong") ist ein Verstoß.
 | Karte | `--color-surface` · `-head` | — | ja | — | Körper · Kopf/Fuß |
 | Trennlinie | `--color-border-subtle` · `-border` · `-strong` | — | — | ja | dekorativ, kein Kontrastanspruch |
 | Kontroll-Rand | `--color-border-control` | — | — | ja | identifizierend, 3:1 |
+| Diagrammreihe | `--color-text-subtle` (1.) · `--color-border-control` (2.) | — | ja | — | Balken; **zwei Reihen liegen zwangsläufig eng** (ΔE 8,5) — das Band zwischen 4,88:1 und 3:1 gibt nicht mehr her. Getrennt wird mit einer Haarlinie in der Flächenfarbe, nicht mit Farbe (0110) |
 | Erledigt (Ausgang) | `--color-success` / `-bg` | ja | ja | ja | Haken, bestanden, freigegeben |
 | Warnung | `--color-warning` / `-bg` | ja | ja | ja | Stufe 2 der Skala |
 | Fehler | `--color-danger` / `-bg` | ja | ja | ja | Stufe 1 der Skala |
@@ -476,7 +477,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Tabelle | `ClickRow` (`href`, `v2rowlink`, I11) · `ExpandableRow` | 120 `<Row>`, 6 mit Ziel | v2; Listen heben |
 | Tabelle | `SelectionBar` + `SelectCell` (I5) | — | v2 |
 | Tabelle | `AmountCell` · `DotStatus` · `Timestamp` · `AbweichungsZelle` | — | v2 |
-| Daten | `Progress` (Anteil als Balken, `share` oder `done`/`total`, sm/md/lg, `inline`) · `BarChart` | — | v2 (0045, 0046, 0041) |
+| Daten | `Progress` (Anteil als Balken, `share` oder `done`/`total`, sm/md/lg, `inline`) · `BarChart` (eine oder zwei Reihen, `layout`, Bezugslinie) | — | v2 (0045, 0046, 0041, 0110) |
 | Tabelle | `RawRecord` · `RawValue` (alle Felder einer DB-Zeile, Wert nach Typ) | 2× `RohdatenTab`, `fmtRawValue` im Drawer | v2 (0051) |
 | Navigation | `RecordPager` (ein Datensatz aus einem Vorrat, „3 von 117", `J`/`K`) | Kopfzeile in `sachverhalt/parts.tsx` | v2 (0047) |
 | Rahmen | `EntityHeader` (Karte über einer Akte: Symbol, Titel, ein Zustand, Kennzahl, Fakten) | `Hero` in `sachverhalt/parts.tsx` (155 Z.) | v2 (0048) |

@@ -1159,19 +1159,36 @@ select.v2in { padding-right: 26px; }
 .v2msg__actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
 .v2msg svg { flex: 0 0 auto; margin-top: 1px; }
 
-/* --- Balken je Zeitabschnitt (0041) ---------------------------------------
-   Eine Reihe, deshalb keine kategoriale Palette: die Balken sind grau, weil
-   ein Wert keine Kritikalitätsstufe trägt (V6/A7); der hervorgehobene trägt
-   die Marke — und zusätzlich zur Farbe ein kräftigeres Label (V7).
-   Beide ≥ 3:1 gegen `--color-bg` (V10), Unterscheidung ΔE 21.8 normal /
-   20.1 bei Farbfehlsichtigkeit (Skill `dataviz`, validate_palette.js). */
+/* --- Balken je Zeitabschnitt (0041, zweite Reihe und Linie 0110) ----------
+   Keine kategoriale Palette: die Balken sind grau, weil ein Wert keine
+   Kritikalitätsstufe trägt (V6/A7); der hervorgehobene trägt die Marke — und
+   zusätzlich zur Farbe ein kräftigeres Label (V7).
+
+   Die zweite Reihe: **zwei Graustufen, die beide ≥ 3:1 gegen Weiß stehen,
+   liegen zwangsläufig eng beieinander.** Gemessen sind es ΔE 8,5 — unter der
+   Grenze des `dataviz`-Skills für benachbarte Marken. Das Band zwischen
+   4,88:1 (`text-subtle`) und 3:1 gibt nicht mehr her: jede hellere Stufe
+   fällt unter die Kontrastschwelle, jede dunklere kommt der Marke
+   `--color-primary` zu nah (ΔE 8,4 zu `--color-text`).
+
+   Deshalb trennt eine **Haarlinie in der Flächenfarbe** die beiden, statt
+   die Farben zu spreizen: berühren sie sich nicht, sind sie im Sinne von
+   1.4.11 keine benachbarten Flächen mehr, und jede für sich hält ihre 3:1.
+   Sie liegt nur an der zweiten Reihe — die erste behält ihre Kante, damit
+   ein Balken nahe null nicht zu weißem Strich wird. Sie erledigt zugleich,
+   dass der Zwischenraum bei `grouped` unter 600 px Breite auf ein
+   Zehntelpixel schrumpft (Mangel M2 der Abnahme). */
 .v2chart { display: block; }
 .v2chart__svg { display: block; width: 100%; height: 96px; }
 .v2chart__bar { fill: var(--color-text-subtle); }
 .v2chart__bar.is-now { fill: var(--color-primary); }
-.v2chart__bar--second { fill: var(--color-border-control); }
-/* Der hervorgehobene Abschnitt bleibt auch mit zweiter Serie erkennbar: die
-   zweite Serie wird dort ebenfalls kraeftiger, nur eine Stufe heller. */
+.v2chart__bar--second {
+  fill: var(--color-border-control);
+  stroke: var(--color-surface); stroke-width: 1;
+}
+/* Der hervorgehobene Abschnitt bleibt auch mit zweiter Reihe erkennbar: die
+   zweite Reihe wird dort ebenfalls kraeftiger, nur eine Stufe heller — die
+   Haarlinie haelt auch dieses Paar auseinander. */
 .v2chart__bar--second.is-now { fill: var(--color-primary-500); }
 /* Die Linie ist keine Serie, sondern ein Bezug — deshalb die Akzentfarbe.
    `non-scaling-stroke` steht am Element, weil `preserveAspectRatio="none"`
