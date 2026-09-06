@@ -26,7 +26,7 @@ Die Wartebedingung ist weg: das Seitenprofil steht als
 - **Neu, weil:** `spec-schreiben` §3 Regel 5 — das Profil führt die Liste,
   und was fehlt, ist nicht die Tabelle, sondern **wer den Spaltensatz, den
   Leerfall und die Breite dieses Auszugs kennt**.
-- **Zuschnitt:** eine Datei, ein Export, 104 Zeilen. Die Liste wählt, übersetzt
+- **Zuschnitt:** eine Datei, ein Export, 129 Zeilen. Die Liste wählt, übersetzt
   und reicht durch; sie rechnet nichts.
 - **Setzt auf:** `DataTable`, `bankTransactionColumns`.
 
@@ -65,7 +65,7 @@ eingebaut sind:
 | `filtered` | `{ summary, resetHref }` | nein | Der Leerfall nach Filter | `EmptyAfterFilter` |
 | `head` | `{ title, sub?, actions? }` | ja | Kopf der Karte: Bank, Konto, Zeitraum | alle |
 | `footer` | `ReactNode` | nein | Zone 6 — **der Saldo, und nur hier** | `WithFooter` |
-| `rowHref` | `(t) => string` | nein | Der Weg in den Drawer einer Zahlung (0103) — das Seitenprofil nennt das Nachschlagen **oft**. Schließt `expand` aus, das ist die Regel von `DataTable` | `RowLink` |
+| `rowHref` | `(t) => string` | nein | Der Weg in den Drawer einer Zahlung (0103) — das Seitenprofil nennt das Nachschlagen **oft**. Der Link sitzt auf der **Gegenpartei**, nicht auf der ersten Zelle. Schließt `expand` aus — das ist die Regel **dieser Liste**, nicht die von `DataTable` | `RowLink` |
 | `density` | `TableDensity` | nein | Durchgereicht | — (Prop von `DataTable`, hier nur weitergegeben) |
 | `minWidth` | `number` | nein | Voreinstellung **1400**, gemessen (siehe unten) | `Filled` bei 1280 px |
 
@@ -112,9 +112,9 @@ Variabel:
 - [ ] Der Saldo erscheint **nur** über `footer`, nie in einer Zeile (`grep`: keine Saldo-Spalte im Katalog)
 - [ ] Der Leerfall des Kontos trägt **keinen** Haken, der Filterfall einen Weg zurück (Stories `Empty`, `EmptyAfterFilter`)
 - [ ] `expand` entscheidet der Aufrufer; ohne ihn hat die Zeile keinen Aufklapper (Stories `Filled` gegen `Expanded`)
-- [ ] Die Zeile hat einen Weg ins Detail, und er erzeugt keine verschachtelten Anker (Story `RowLink`, gemessen: 5 Zeilenlinks, 0 `a a`)
+- [ ] Die Zeile hat einen Weg ins Detail, er sitzt auf der Gegenpartei und erzeugt keine verschachtelten Anker (Story `RowLink`, gemessen: 5 Zeilenlinks auf Spalte 1, 0 `a a`)
 - [ ] Die Fehlerzeile trägt einen Weg zurück, nicht nur einen Satz (Story `LoadingAndError`, gemessen: ein Knopf)
-- [ ] Keine Konsolenmeldung in allen acht Stories (gemessen)
+- [ ] Keine Konsolenmeldung in allen neun Stories (gemessen)
 - [ ] offen (App): ersetzt `KontoauszugView.tsx` (631 Z.)
 
 ### Beim Bauen gemessen

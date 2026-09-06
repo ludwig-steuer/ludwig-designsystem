@@ -57,8 +57,16 @@ export function BankTransactionList({
   /**
    * Where a row leads — the drawer of one payment (0103). The page profile
    * calls looking one up „often" and gives it a click; without this prop the
-   * row is mute. `DataTable` excludes it against `expand`: a row that folds
-   * out cannot also jump, and that is its rule, not ours.
+   * row is mute.
+   *
+   * The link sits on the **counterparty**, not on the first cell: a link
+   * whose text is „30.08.2026" does not say where it goes. That is why it
+   * goes through the column set and not through `DataTable`, which puts it on
+   * cell 0.
+   *
+   * **This list excludes it against `expand`** — a row that folds out should
+   * not also jump. `DataTable` does not enforce that; it is this list's rule,
+   * and it stands here so the next one does not inherit it by accident.
    */
   rowHref?: (t: BankTransactionRowData) => string;
   columns?: BankTransactionColumn[];
@@ -90,6 +98,7 @@ export function BankTransactionList({
     caseHref,
     ...(openHref ? { openHref } : {}),
     ...(columns ? { columns } : {}),
+    ...(rowHref && !expand ? { rowHref } : {}),
   });
 
   return (
@@ -107,7 +116,7 @@ export function BankTransactionList({
       {...(error ? { error } : {})}
       {...(filtered ? { filtered } : {})}
       {...(footer !== undefined ? { next: footer } : {})}
-      {...(expand ? { expand } : rowHref ? { rowHref } : {})}
+      {...(expand ? { expand } : {})}
       empty={{
         // „Konto ohne Bewegung" is a **fact**, not a success and not a gap: an
         // account that saw no money in the period is neither finished nor

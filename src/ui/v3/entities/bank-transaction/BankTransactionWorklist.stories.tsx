@@ -139,6 +139,10 @@ export const AllOfAnAccount: Story = {
         openHref="#zuordnen"
         head={{ title: "Zahlungen", sub: "Commerzbank · 1210 · alle 500" }}
         bulkActions={[]}
+        // Die Konfigurationsseite schlägt Zeilen nach — hier gehört der Weg
+        // ins Detail hin. Der Link sitzt auf der Gegenpartei, nicht auf dem
+        // Datum.
+        rowHref={(t) => `#zahlung-${t.id}`}
         listHref={(p) => `#konto?sort=${p.sort ?? ""}&dir=${p.dir ?? ""}&page=${p.page ?? 1}`}
         sort={{ key: "postingDate", dir: "desc" }}
         pager={{ page: 1, pageSize: 100, totalItems: 500, totalPages: 5 }}
@@ -156,6 +160,7 @@ export const Empty: Story = {
         caseHref={caseHref}
         head={{ title: "Offene Zahlungen", sub: "Commerzbank · 1210 · 0 von 251 offen" }}
         bulkActions={[]}
+        total={251}
       />
     </div>
   ),

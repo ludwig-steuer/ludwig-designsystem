@@ -97,6 +97,25 @@
    Die Zeile mit einer spannenden Zelle wird deshalb selbst ein Block. */
 .v2tbl tr:has(> td[colspan]) { display: block; }
 .v2tbl td[colspan] { width: 100%; }
+/* Und die Sonderzelle behält ihr eigenes Polster: der Reset oben
+   (`.v2tbl th, .v2tbl td { padding: 0 }`, Spezifität 0-1-1) schlägt sonst
+   jede Klassenregel (0-1-0) — gemessen begann der Text bei x = 0, während
+   jede andere Zelle bei x = 18 anfängt, und der Fehlerkasten verlor seine
+   Spaltenrichtung: Meldung und „Erneut laden" standen nebeneinander in einem
+   35-px-Band an der Kartenkante. Die vier Klassen stehen deshalb hier noch
+   einmal, auf der Spezifität des Resets. */
+.v2tbl td.v2tbl__empty { padding: 30px 18px; }
+.v2tbl td.v2tbl__group { padding: 7px 18px; }
+.v2tbl td.v2tbl__detail {
+  padding: var(--v2-detail-y, 14px) 18px calc(var(--v2-detail-y, 14px) + 2px) 46px;
+}
+.v2tbl td.v2tbl__error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: 24px 18px;
+}
 
 .v2tbl__scroll { overflow-x: auto; }
 .v2tbl__inner { min-width: var(--v2-min, 0); }
@@ -1034,6 +1053,11 @@ select.v2in { padding-right: 26px; }
 
 /* Ladezustand: Zeilen in Zeilenhöhe, damit die Tabelle nicht springt. */
 .v2skel {
+  /* **`block`, sonst ist das Gerüst unsichtbar.** Es ist ein `<span>`; ohne
+     diese Zeile bleibt es `inline`, und dort wirken weder `height` noch die
+     inline gesetzte Breite. Gemessen: 40 Skelett-Spans à 0 × 0 px, der
+     Ladezustand zeigte fünf leere Zeilen — in jeder Liste des Sets. */
+  display: block;
   height: 11px; border-radius: var(--radius-sm);
   background: var(--color-bg-sunken);
   animation: v2pulse 1.4s var(--ease-standard) infinite;
@@ -2483,6 +2507,16 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   line-height: var(--lh-ui-sm);
   color: var(--color-text-muted);
 }
+/* Der Grund neben dem gesperrten Knopf. Er steht **daneben**, nicht statt
+   des Knopfes: ein Weg, der verschwindet, sieht aus wie einer, den es nie
+   gab (0065). */
+.v2clc__exitwhy { color: var(--color-text-subtle); }
+.v2clc__deferhint {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-ui-sm);
+  color: var(--color-text-subtle);
+}
+.v2clc__deferby { margin: var(--space-1) 0 0; }
 
 /* ── 0061 Klärung stellen: der schmale Editor ───────────────────────────── */
 .v2cle { display: flex; flex-direction: column; gap: var(--space-4); }

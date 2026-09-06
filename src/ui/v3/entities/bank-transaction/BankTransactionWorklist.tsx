@@ -62,6 +62,7 @@ export function BankTransactionWorklist({
   loading,
   error,
   head,
+  total,
   minWidth = 1100,
 }: {
   transactions: BankTransactionRowData[];
@@ -74,7 +75,10 @@ export function BankTransactionWorklist({
   bulkActions: BulkAction[];
   /** „Einzeln", „Dauer", and the suggestion „→ Beleg Nr." — one row at a time. */
   rowActions?: React.ComponentProps<typeof DataTable<BankTransactionRowData>>["rowActions"];
-  /** Where a row leads — the drawer of one payment (0103). */
+  /**
+   * Where a row leads — the drawer of one payment (0103). Through the column
+   * set, so the link sits on the counterparty and says where it goes.
+   */
   rowHref?: (t: BankTransactionRowData) => string;
   /** Where „offen" leads in the case column. */
   openHref?: string;
@@ -86,6 +90,12 @@ export function BankTransactionWorklist({
   loading?: boolean;
   error?: { message: string; retry?: React.ReactNode };
   head: { title: React.ReactNode; sub?: React.ReactNode; actions?: React.ReactNode };
+  /**
+   * How many payments the account has in total. Only the empty case uses it,
+   * and it needs it: „nothing open" is a success, and a success without its
+   * number („all 251 of them") is a claim (profile, §8 empty case).
+   */
+  total?: number;
   minWidth?: number;
 }) {
   return (
@@ -95,6 +105,7 @@ export function BankTransactionWorklist({
         caseHref,
         columns,
         ...(openHref ? { openHref } : {}),
+        ...(rowHref ? { rowHref } : {}),
       })}
       rowKey={(t) => t.id}
       head={head}
@@ -107,17 +118,20 @@ export function BankTransactionWorklist({
           `${t.counterpartyName ?? "Zahlung"} vom ${formatTime(t.postingDate, "date", "medium")} auswählen`,
       }}
       {...(rowActions ? { rowActions } : {})}
-      {...(rowHref ? { rowHref } : {})}
       {...(listHref ? { href: listHref } : {})}
       {...(sort ? { sort } : {})}
       {...(pager ? { pager } : {})}
       {...(loading ? { loading } : {})}
       {...(error ? { error } : {})}
       empty={{
-        // Here empty **is** a success, and it says so with the tick: every
-        // payment of this account belongs to a case.
+        // Here empty **is** a success, and it says so with the tick — and
+        // with the number, where the caller knows it: „nothing open" without
+        // „of how many" is a claim, not a result.
         title: "Auf diesem Konto ist nichts mehr offen.",
-        description: "Jede Zahlung gehört zu einem Sachverhalt.",
+        description:
+          total === undefined
+            ? "Jede Zahlung gehört zu einem Sachverhalt."
+            : `Alle ${total.toLocaleString("de-DE")} Zahlungen dieses Kontos gehören zu einem Sachverhalt.`,
         done: true,
       }}
     />

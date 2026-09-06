@@ -1,9 +1,11 @@
 import {
+  derivePurposeParts,
   deriveZ,
   restOf,
   resolveEventBookingState,
 } from "./derive";
 import type { ColumnDef } from "../../patterns/DataTable";
+import { Link } from "../../primitives/Link";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Amount } from "../../primitives/Amount";
 import { Time } from "../../primitives/Time";
@@ -65,6 +67,15 @@ const DEFAULT_COLUMNS: BankTransactionColumn[] = ORDER.filter((c) => c !== "acco
 export interface BankTransactionColumnOptions {
   /** Where a case leads. Required — the set builds no URL of its own. */
   caseHref: (caseId: string) => string;
+  /**
+   * Where the **row** leads: the drawer of one payment (0103). The link sits
+   * on the counterparty, not on the first cell — a link whose text is
+   * „30.08.2026" does not say where it goes, and I11 forbids healing that
+   * with an `aria-label`. Both sister catalogues do the same:
+   * `sourceDocumentColumns` leads with the counterparty, `caseColumns` with
+   * the case name.
+   */
+  rowHref?: (t: BankTransactionRowData) => string;
   /** Where „offen" leads: the assignment tab. */
   openHref?: string;
   /** Only for the cross-account worklist; the statement sets it as a page fact. */
@@ -94,6 +105,7 @@ export function bankTransactionTracks(columns: ColumnDef<BankTransactionRowData>
  */
 export function bankTransactionColumns({
   caseHref,
+  rowHref,
   openHref,
   accountLabel,
   columns = DEFAULT_COLUMNS,
@@ -115,7 +127,24 @@ export function bankTransactionColumns({
       header: "Gegenpartei",
       width: "180px",
       sortable: true,
-      cell: (t) => t.counterpartyName ?? <span className="v2muted">ohne Namen</span>,
+      // Rank 3 carries the row link. Where the name is missing (3 % of the
+      // stock) the link takes the purpose instead — never a bare dash: a
+      // focus stop has to say where it goes.
+      cell: (t) => {
+        const name = t.counterpartyName ?? purposeLead(t);
+        const body = t.counterpartyName ? (
+          name
+        ) : (
+          <span className="v2muted">{name}</span>
+        );
+        return rowHref ? (
+          <Link className="v2rowlink" href={rowHref(t)}>
+            {body}
+          </Link>
+        ) : (
+          body
+        );
+      },
     },
     purpose: {
       key: "purpose",
@@ -258,4 +287,20 @@ function EventStateCell({ transaction }: { transaction: BankTransactionRowData }
       })}
     </span>
   );
+}
+
+/**
+ * The first meaningful words of a purpose — what a payment without a
+ * counterparty is recognised by („Kontoführungsentgelt August 2026").
+ *
+ * It does **not** parse the SEPA tags a second time: `derivePurposeParts`
+ * already knows which part is the text and which are references, and a second
+ * parser would drift from the first. Measured, the hand-rolled version ate
+ * the word it was supposed to keep — `SVWZ+Kontoführungsentgelt` has no space
+ * after the tag.
+ */
+function purposeLead(t: BankTransactionRowData): string {
+  const text = derivePurposeParts(t.purpose, t.sepaTags).text.trim();
+  if (!text) return "ohne Namen";
+  return text.length > 34 ? `${text.slice(0, 33)}…` : text;
 }

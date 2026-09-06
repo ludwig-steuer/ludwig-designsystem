@@ -33,7 +33,7 @@ serverseitig gibt es die Zuordnung nur je Zeile (**L-16**).
 - **Warum eigene Komponente:** drei der fünf Merkmale aus §8 gehen auseinander
   (Spaltensatz, Filter, Massenaktion); zwei genügen. **Nicht** die
   Grundgesamtheit — beide Listen zeigen ein Konto (Prüflauf des Profils).
-- **Zuschnitt:** eine Datei, ein Export, 88 Zeilen — `DataTable` mit
+- **Zuschnitt:** eine Datei, ein Export, 139 Zeilen — `DataTable` mit
   `selection`, dem kurzen Spaltensatz und dem Erfolgs-Leerfall.
 - **Setzt auf:** `DataTable` (0057), `bankTransactionColumns` (0101),
   `BulkAction` (`primitives/Selection`).
@@ -62,13 +62,14 @@ aus dem Profil.
 | `caseHref` | `(caseId) => string` | ja | Durchgereicht an den Katalog | `Filled` |
 | `bulkActions` | `BulkAction[]` | ja | „Neuen Sachverhalt anlegen" und „Bestehendem zuordnen" | `Filled` |
 | `rowActions` | wie `DataTable` | nein | Einzelaktionen je Zeile | — (durchgereicht, von `DataTable` bewiesen) |
-| `rowHref` | `(t) => string` | nein | Der Weg in den Drawer einer Zahlung (0103) | `AllOfAnAccount` |
+| `rowHref` | `(t) => string` | nein | Der Weg in den Drawer einer Zahlung (0103); der Link sitzt auf der Gegenpartei | `AllOfAnAccount` |
 | `openHref` | `string` | nein | Wohin „offen" in der Sachverhalts-Spalte führt | `Filled` |
 | `listHref`, `sort`, `pager` | wie `DataTable` | nein | **Der zweite Aufrufer**: die Konfigurationsseite listet alle 500 Zahlungen eines Kontos | `AllOfAnAccount` |
 | `columns` | `BankTransactionColumn[]` | nein | Erweitert den kurzen Satz | `WithMatchStage` |
 | `loading`, `error` | wie `DataTable` | nein | Durchgereicht | `LoadingAndError` |
 | `head` | `{ title, sub?, actions? }` | ja | Kopf der Karte: Konto und Zahl der Offenen | alle |
-| `minWidth` | `number` | nein | Voreinstellung 900 | `Filled` bei 900 px |
+| `minWidth` | `number` | nein | Voreinstellung **1100** — die Sachverhalts-Spalte kam dazu | `Filled` bei 1100 px |
+| `total` | `number` | nein | Wie viele Zahlungen das Konto insgesamt hat; **nur** der Leerfall liest sie | `Empty` |
 
 **Kann bewusst nicht:**
 
@@ -113,10 +114,10 @@ Variabel:
 - [ ] `columns` erweitert, ohne umzuordnen (Story `WithMatchStage`, gemessen)
 - [ ] Jedes Kästchen sagt, **welche** Zeile es wählt, mit absolutem Datum (gemessen: „Stadtwerke Musterstadt vom 26.08.2026 auswählen")
 - [ ] Im Leerfall ist das Kopf-Kästchen stillgelegt (gemessen: `disabled === true`)
-- [ ] Der Leerfall trägt den Haken **und die Zahl** (Story `Empty`)
+- [ ] Der Leerfall trägt den Haken **und die Zahl** — im Satz, nicht nur im Kartenkopf (Story `Empty`)
 - [ ] Die Fehlerzeile trägt einen Weg zurück, nicht nur einen Satz (Story `LoadingAndError`, gemessen: ein Knopf)
 - [ ] Die Komponente kennt keinen `CasePicker` (`grep`: 0 Treffer)
-- [ ] Keine Konsolenmeldung in allen fünf Stories (gemessen)
+- [ ] Keine Konsolenmeldung in allen sechs Stories (gemessen)
 - [ ] offen (App): ersetzt `BankTransactionAssignmentTable.tsx` (658 Z.), sobald L-16 steht
 
 ### Beim Bauen gemessen
@@ -205,3 +206,52 @@ Listen zeigen **ein** Konto. Die drei Unterschiede nach §8 sind
 Kopf und Zeilen an derselben Kante bei 1100/1280/1440/1680/1920 px,
 Zellüberlauf 0 — auch in `Extremes` und mit der zurückgeholten
 Sachverhalts-Spalte. 15 Stories, keine Konsolenmeldung.
+
+## Dritte Runde, 2026-09-07 — die Breite war da, das Polster nicht
+
+Die Nachabnahme hat die 14 Mängel bestätigt und **zwei Dinge gefunden, die
+der eigene Fix aufgemacht hat** — beide in jeder Liste des Sets, beide eine
+CSS-Zeile, beide in Zuständen, die §9 als feste Kriterien verlangt:
+
+- **Die Sonderzeile hatte ihre Breite bekommen, aber nicht ihr Polster.**
+  Derselbe Reset aus 0106 (`.v2tbl th, .v2tbl td { padding: 0 }`, Spezifität
+  0-1-1) schlägt `.v2tbl__empty`, `__error`, `__group` und `__detail` (0-1-0).
+  Gemessen begann der Text bei **x = 0**, während jede andere Zelle bei 18
+  anfängt — und der Fehlerkasten verlor zusätzlich seine Spaltenrichtung:
+  Meldung und „Erneut laden" standen nebeneinander in einem 35-px-Band an der
+  Kartenkante. Die vier Klassen stehen jetzt noch einmal auf der Spezifität
+  des Resets. Gemessen: `24px 18px`, `display: flex`, Höhe 111 px.
+- **Das Ladegerüst war unsichtbar.** `.v2skel` ist ein `<span>` ohne
+  `display`-Regel, also `inline` — und dort wirken weder `height: 11px` noch
+  die inline gesetzte Breite. Gemessen **40 Spans à 0 × 0 px**; der Ladefall
+  zeigte fünf leere Zeilen. Eine Zeile `display: block`. Gemessen: 70 × 11,
+  81 × 11, an derselben Kante wie die Zellen darüber.
+
+**Der Zeilenlink hieß „30.08.2026" (N4).** `DataTable` legt `.v2rowlink`
+blind auf Zelle 0, und die ist hier das Datum — ein Fokus-Stopp, der nicht
+sagt, wohin er führt, und I11 verbietet ausdrücklich, das mit einem
+`aria-label` zu heilen. Beide Schwester-Kataloge machen es anders
+(`sourceDocumentColumns` führt mit dem Gegenpart, `caseColumns` mit dem
+Fallnamen). Der Link geht deshalb jetzt durch `bankTransactionColumns` und
+sitzt auf der **Gegenpartei**; wo der Name fehlt (3 %), nimmt er den Zweck —
+über `derivePurposeParts`, nicht über einen zweiten Parser. Gemessen: fünf
+Links auf Spalte 1, benannt „Handwerk Schulz KG", „Kontoführungsentgelt
+August 20…", 0 verschachtelte Anker.
+
+**Die falsche Zurechnung (N5) ist berichtigt:** dass `rowHref` und `expand`
+einander ausschließen, ist die Regel **dieser Liste**, nicht die von
+`DataTable` — das legt den Link auf Zelle 0 und geht danach trotzdem in den
+Aufklapp-Zweig. Stünde es falsch da, verließe sich die nächste Liste darauf.
+
+**N3** — `rowHref` von 0086 war gebaut und von keiner Story berührt; der
+Nachweis in der Schnittstelle zeigte auf `AllOfAnAccount`, die es nicht
+setzte. Jetzt setzt sie es: die Konfigurationsseite ist genau die, die Zeilen
+nachschlägt. Dazu **N6** (Voreinstellung 1100 statt 900), **N7** (die
+Kriterienzeilen zählen 9 und 6 Stories statt 8 und 5), **N8** (Zeilenzahlen),
+**N9** (die Zahl steht jetzt im Leersatz, nicht nur im Kartenkopf).
+
+**Die Lehre:** ein Fix, der eine Regel wiederherstellt, stellt die Nachbarregel
+nicht mit her. `colSpan` gab der Zelle die Breite zurück — das Polster, die
+Spaltenrichtung und das Ladegerüst hingen an derselben Umstellung und sind
+erst aufgefallen, weil die Zelle breit genug wurde, dass man ihren linken Rand
+sehen konnte.
