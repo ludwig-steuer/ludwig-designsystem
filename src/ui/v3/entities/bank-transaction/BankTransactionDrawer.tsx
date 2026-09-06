@@ -1,6 +1,6 @@
-import { FileWarning, Maximize2 } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { ActionIcon } from "../../Icons";
 import { Button } from "../../primitives/Button";
 import { Callout } from "../../primitives/Callout";
 import { Drawer } from "../../primitives/Drawer";
@@ -125,7 +125,7 @@ export function BankTransactionDrawer({
       footer={
         <Button
           variant="primary"
-          icon={<Maximize2 size={16} strokeWidth={1.5} />}
+          icon={<ActionIcon action="open" size={16} />}
           onClick={() => onOpenFull(exit, first?.caseId)}
         >
           {exitLabel}
@@ -196,7 +196,7 @@ function Body({
     return (
       <EmptyState
         inline
-        icon={<FileWarning size={20} strokeWidth={1.5} />}
+        icon={<ActionIcon action="alert" size={20} />}
         title={`Keine Zahlung zu ${reference}`}
         description="Zu dieser Kennung gibt es keine Position dieses Mandanten. Vielleicht gehört sie einem anderen Konto oder Wirtschaftsjahr."
       />

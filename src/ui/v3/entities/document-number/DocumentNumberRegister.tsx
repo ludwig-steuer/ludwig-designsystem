@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import {
-  isDatevSource,
   sortByDominance,
   type KnownDocumentNumber,
 } from "@/ludwig/modules/accounting-cases/domain/document-number";
@@ -28,7 +27,11 @@ import type {
  * why is a list that has to be trusted, and this one has to be checkable.
  */
 
-const COLS = "1fr 150px 120px 130px 130px";
+/* `minmax(12ch, …)`: sonst fällt die erste Spur unter 760 px auf 20 px, und
+   Nummer und Marke überschreiben die Nachbarspalte (gemessen: 13 Überläufe).
+   `minWidth` deckt die festen Spuren plus vier Lücken und das Polster. */
+const COLS = "minmax(12ch, 1fr) 220px 120px 130px 130px";
+const MIN_WIDTH = 780;
 
 /**
  * @when    Picking a known document number — in the drawer the caller opens
@@ -68,18 +71,18 @@ export function DocumentNumberRegister({
   const rows = sortByDominance(filtered);
 
   function onKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      e.preventDefault();
-      setActive((i) => {
-        const next = e.key === "ArrowDown" ? i + 1 : i - 1;
-        return Math.max(0, Math.min(rows.length - 1, next));
-      });
-    }
-    if (e.key === "Enter" && rows[active]) {
-      e.preventDefault();
-      onPick(rows[active]);
-    }
-    // Esc goes back to the caller — the drawer is his, and so is closing it.
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    e.preventDefault();
+    const next = Math.max(
+      0,
+      Math.min(rows.length - 1, active + (e.key === "ArrowDown" ? 1 : -1)),
+    );
+    setActive(next);
+    // Move the **focus**, not a marker: the row's button is a real focus stop,
+    // so the reader announces the row instead of the list staying silent.
+    list.current?.querySelector<HTMLButtonElement>(`[data-row="${next}"]`)?.focus();
+    // Enter is the button's own activation; Esc goes back to the caller — the
+    // drawer is his, and so is closing it.
   }
 
   return (
@@ -99,7 +102,12 @@ export function DocumentNumberRegister({
       ) : null}
 
       {loading ? (
-        <TableLoading rows={5} cols={5} />
+        // Inside a `Table`, not beside it: the track list and the density live
+        // on `.v2tbl`, and five `<tr>` in a `<div>` are neither valid nor a
+        // table — measured as one 822-px column instead of five.
+        <Table cols={COLS} minWidth={MIN_WIDTH}>
+          <TableLoading rows={5} cols={5} />
+        </Table>
       ) : rows.length === 0 ? (
         <EmptyState
           inline
@@ -111,8 +119,12 @@ export function DocumentNumberRegister({
           }
         />
       ) : (
-        <div ref={list} tabIndex={0} role="listbox" aria-label="Bekannte Belegnummern">
-          <Table cols={COLS}>
+        // **Table, not listbox.** Both at once broke the ownership chain: the
+        // option sat under `tbody` and `table`, and the focus stayed on the
+        // container, so the active row was only a colour. Now the row's button
+        // takes the focus, and ↑/↓ move it — which every reader announces.
+        <div ref={list}>
+          <Table cols={COLS} minWidth={MIN_WIDTH}>
             <HeadRow>
               <span>Belegnummer</span>
               <span>Quelle</span>
@@ -123,11 +135,7 @@ export function DocumentNumberRegister({
             {rows.map((e, i) => (
               <tr
                 key={`${e.source}-${e.documentNumber}-${e.caseId ?? ""}`}
-                role="option"
-                aria-selected={i === active}
-                tabIndex={-1}
                 className={`v2tbl__row is-clickable${i === active ? " is-active" : ""}`}
-                onClick={() => onPick(e)}
               >
                 {rowCells(
                   <>
@@ -138,10 +146,9 @@ export function DocumentNumberRegister({
                       {e.immutable ? <Badge tone="info">DATEV</Badge> : null}
                       {e.orphaned ? <Badge tone="warning">verwaist</Badge> : null}
                     </span>
-                    <span>
-                      {sourceLabel[e.source]}
-                      {isDatevSource(e.source) ? <span className="v2dnr__datev"> · DATEV</span> : null}
-                    </span>
+                    {/* No second „DATEV": the badge in column 1 already says
+                        it, and the same statement twice is noise. */}
+                    <span>{sourceLabel[e.source]}</span>
                     <span className="v2mono">
                       {e.accountNumber ?? <span className="v2muted">—</span>}
                     </span>
@@ -149,6 +156,20 @@ export function DocumentNumberRegister({
                     <span className="v2dnr__state">{stateLabel[e.state]}</span>
 
                   </>,
+                  (node) => (
+                    <button
+                      type="button"
+                      className="v2rowbtn"
+                      data-row={i}
+                      onClick={() => {
+                        setActive(i);
+                        onPick(e);
+                      }}
+                      onFocus={() => setActive(i)}
+                    >
+                      {node}
+                    </button>
+                  ),
                 )}
               </tr>
             ))}

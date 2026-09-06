@@ -31,6 +31,7 @@ export const DATEV_MAX_BELEGFELD1 = 36;
  *          DocumentNumberRegister.
  */
 export function DocumentNumberField({
+  id: givenId,
   value,
   onChange,
   onOpenRegister,
@@ -40,6 +41,12 @@ export function DocumentNumberField({
   invalid,
   ariaLabel = "Belegfeld 1",
 }: {
+  /**
+   * The id the surrounding `Field` points its label at. Without it the label
+   * would name nothing: `Field.htmlFor` is required for exactly that reason
+   * (0104), and a `useId()` inside is unreachable from outside.
+   */
+  id?: string;
   /** Verbatim, in the spelling of its source — DATEV compares character by character. */
   value: string;
   /** Free input stays possible: the register is an offer, not a constraint. */
@@ -60,7 +67,9 @@ export function DocumentNumberField({
   invalid?: boolean;
   ariaLabel?: string;
 }) {
-  const id = useId();
+  const autoId = useId();
+  const id = givenId ?? autoId;
+  const atLimit = value.length >= maxLength;
   const diverging = dominant != null && dominant.documentNumber !== value;
 
   return (
@@ -93,6 +102,13 @@ export function DocumentNumberField({
           </span>
         ) : null}
       </div>
+      {/* The limit says so instead of cutting silently: a number that loses its
+          tail is invisible until DATEV fails to settle it. */}
+      {atLimit ? (
+        <p className="v2dnf__limit">
+          {maxLength} Zeichen — mehr trägt Belegfeld 1 in DATEV nicht.
+        </p>
+      ) : null}
       {diverging ? (
         <p className="v2dnf__hint">
           Für diesen Vorgang gilt{" "}

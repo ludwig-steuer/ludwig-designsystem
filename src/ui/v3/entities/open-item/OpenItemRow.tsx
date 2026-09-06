@@ -1,5 +1,3 @@
-"use client";
-
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { AmountCell, MonoCell } from "../../primitives/Cells";
 import { ClickRow } from "../../primitives/ExpandableRow";
@@ -11,7 +9,7 @@ import {
   type OpenItem,
   type OpenItemAgeGroupVM,
 } from "./open-item";
-import { formatAmount } from "../../format";
+import { formatAmount, formatTime } from "../../format";
 import type { Currency } from "@/ludwig/shared/money";
 
 /**
@@ -46,14 +44,27 @@ export function OpenItemRow({
   currency?: Currency;
   /** The reference date — „open" is never true in the abstract. */
   asOf: string;
-  /** Jump into the case. Without it the row is not clickable. */
+  /**
+   * Jump to the personal account of the item. **Not** to the case: an open
+   * item carries no case id — the app's view model has none either, and the
+   * account is what the OPOS page navigates by.
+   */
   onOpen?: (personalAccount: string) => void;
 }) {
-  const cells = <Cells item={item} currency={currency} asOf={asOf} />;
+  // `Cells(...)` **as a function**, not as `<Cells />`: a component element is
+  // one child to React, and `Row` would wrap it in a single `<td>` — the whole
+  // row would collapse into one cell. Measured exactly that before this line
+  // was changed (0106 wraps cells, and it cannot look inside a component).
+  const parts = Cells({ item, currency, asOf });
   return onOpen ? (
-    <ClickRow onClick={() => onOpen(item.personalAccount)}>{cells}</ClickRow>
+    <ClickRow
+      onClick={() => onOpen(item.personalAccount)}
+      label={`Personenkonto ${item.personalAccount} öffnen`}
+    >
+      {parts}
+    </ClickRow>
   ) : (
-    <Row>{cells}</Row>
+    <Row>{parts}</Row>
   );
 }
 
@@ -87,7 +98,7 @@ function Cells({
         <StatusBadge
           axis="opos_ausgleich"
           status={item.clearedAfterStichtag ? "spaeter_ausgeglichen" : "offen"}
-          note={`Stichtag ${asOf}`}
+          note={`Stichtag ${formatTime(asOf, "date")}`}
         />
       </span>
       <AmountCell value={item.grossAmount} currency={currency} />
@@ -128,7 +139,7 @@ export function OpenItemAgeGroup({
       <span className="v2oi__group">
         <span>{AGE_BUCKET_LABEL[group.bucket]}</span>
         <span className="v2oi__groupnum">
-          {group.count} {group.count === 1 ? "Posten" : "Posten"} ·{" "}
+          {group.count} Posten ·{" "}
           {formatAmount(group.sum, group.currency ?? currency)}
         </span>
       </span>

@@ -30,10 +30,10 @@ export const Filled: Story = {
   render: () => (
     <div style={{ maxWidth: 420, display: "grid", gap: "var(--space-5)", padding: "var(--space-6)" }}>
       <Field label="Belegfeld 1" htmlFor="b1">
-        <DocumentNumberField value="RE-2026-0140" onChange={() => {}} sourceLabel={SOURCE_LABEL} />
+        <DocumentNumberField id="b1" value="RE-2026-0140" onChange={() => {}} sourceLabel={SOURCE_LABEL} />
       </Field>
       <Field label="Belegfeld 1" htmlFor="b2" error="Belegfeld 1 fehlt.">
-        <DocumentNumberField value="" onChange={() => {}} invalid sourceLabel={SOURCE_LABEL} />
+        <DocumentNumberField id="b2" value="" onChange={() => {}} invalid sourceLabel={SOURCE_LABEL} />
       </Field>
     </div>
   ),
@@ -47,6 +47,7 @@ export const WithRegister: Story = {
       <div style={{ maxWidth: 420, display: "grid", gap: "var(--space-5)", padding: "var(--space-6)" }}>
         <Field label="Mit Register" htmlFor="b3">
           <DocumentNumberField
+            id="b3"
             value="RE-2026-0140"
             onChange={() => {}}
             onOpenRegister={() => setOpened((n) => n + 1)}
@@ -54,7 +55,7 @@ export const WithRegister: Story = {
           />
         </Field>
         <Field label="Ohne Register" htmlFor="b4">
-          <DocumentNumberField value="RE-2026-0140" onChange={() => {}} sourceLabel={SOURCE_LABEL} />
+          <DocumentNumberField id="b4" value="RE-2026-0140" onChange={() => {}} sourceLabel={SOURCE_LABEL} />
         </Field>
         <p className="v2sub">Register {opened}× geöffnet.</p>
       </div>
@@ -75,6 +76,7 @@ export const Diverging: Story = {
       <div style={{ maxWidth: 460, display: "grid", gap: "var(--space-5)", padding: "var(--space-6)" }}>
         <Field label="Aus DATEV, unveränderlich" htmlFor="b5">
           <DocumentNumberField
+            id="b5"
             value={a}
             onChange={setA}
             dominant={DOMINANT}
@@ -83,6 +85,7 @@ export const Diverging: Story = {
         </Field>
         <Field label="Kandidat, veränderlich" htmlFor="b6">
           <DocumentNumberField
+            id="b6"
             value={b}
             onChange={setB}
             dominant={{
@@ -107,7 +110,7 @@ export const Interactive: Story = {
     return (
       <div style={{ maxWidth: 420, display: "grid", gap: "var(--space-4)", padding: "var(--space-6)" }}>
         <Field label="Belegfeld 1" htmlFor="b7">
-          <DocumentNumberField value={v} onChange={setV} sourceLabel={SOURCE_LABEL} />
+          <DocumentNumberField id="b7" value={v} onChange={setV} sourceLabel={SOURCE_LABEL} />
         </Field>
         <p className="v2sub">
           Wert: <code>{v || "(leer)"}</code> · {v.length} von {DATEV_MAX_BELEGFELD1} Zeichen
@@ -128,10 +131,11 @@ export const Edge: Story = {
     return (
       <div style={{ maxWidth: 420, display: "grid", gap: "var(--space-5)", padding: "var(--space-6)" }}>
         <Field label="Grenze erreicht" htmlFor="b8">
-          <DocumentNumberField value={v} onChange={setV} sourceLabel={SOURCE_LABEL} />
+          <DocumentNumberField id="b7" value={v} onChange={setV} sourceLabel={SOURCE_LABEL} />
         </Field>
         <Field label="Lange dominante Nummer" htmlFor="b9">
           <DocumentNumberField
+            id="b9"
             value="RE-1"
             onChange={() => {}}
             dominant={{

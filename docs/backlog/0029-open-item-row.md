@@ -165,3 +165,32 @@ existiert (**L-05**), gibt der Aufrufer sie mit. Am Tag, an dem das Modul ein
 **Zuschnitt bestätigt:** `OpenItemRow` und `OpenItemAgeGroup` bleiben —
 gruppieren ist der Job dieser Ansicht, und `DataTable` gruppiert nicht.
 `openItemColumns()` erst, wenn `opos/page` auf `DataTable` wandert.
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1 — die Zeile hatte keine Spalten mehr.** Sie übergab `Row` ein
+**Komponenten-Element** (`<Cells … />`), und der Zellen-Wrapper aus 0106 kann
+nicht in eine Komponente hineinsehen: die ganze Zeile landete in **einer**
+`<td>` von 90 px mit 368 px Inhalt. Jetzt wird `Cells({...})` als Funktion
+gerufen; gemessen 10 Kopfzellen gegen 10 Zeilenzellen, Kopf und Zeile enden
+bei 1397 px, Überlauf 0. **Ein Durchlauf über alle Stories des Sets zeigt
+keinen zweiten Fall dieser Art** — das war die einzige Stelle.
+
+**M2 — verschachtelte Schaltflächen.** Mit M1 verschwunden: `.v2rowbtn`
+umschließt jetzt nur die erste Zelle. Der Zeilenknopf heißt außerdem
+„Personenkonto 70021 öffnen" statt der aneinandergehängten Zeile.
+
+**M3 — `1fr` und ein zu kleines `minWidth`.** `minmax(0, 1fr)`, und `minWidth`
+deckt jetzt die festen Spuren **plus** neun Lücken à 10 px und zweimal 18 px
+Polster: 1090 + 90 + 36 → 1300.
+
+**M4 — `onOpen` bekommt das Personenkonto.** Das bleibt so, aber die Prop sagt
+es jetzt: ein offener Posten trägt **keine** Fall-Kennung, das VM der App
+hat auch keine, und die OPOS-Seite navigiert über das Konto. Die Story-Keys
+nehmen die Belegnummer, nicht das Konto.
+
+**M5 — `"use client"` gestrichen.** `ClickRow` trägt die Grenze selbst.
+
+**M6 — `Loading` ergänzt.** Fünf Zeilen in der Form der Tabelle, Köpfe bleiben.
+
+**M7/M8** — toter Ternär raus, der Stichtag im Erklärtext formatiert.

@@ -1,10 +1,10 @@
-import { FileWarning, Maximize2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { caseKindLabel } from "@/ludwig/modules/accounting-cases/domain/case";
 import type { Currency } from "@/ludwig/shared/money";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Amount } from "../../primitives/Amount";
+import { ActionIcon } from "../../Icons";
 import { Button } from "../../primitives/Button";
 import { Callout } from "../../primitives/Callout";
 import { Drawer } from "../../primitives/Drawer";
@@ -131,7 +131,7 @@ export function CaseDrawer({
         // Zone 5 stands **in the error case too** — deliberately unlike the
         // document drawer: whoever cannot load the case wants the full view
         // all the more (decision of the Freigabe, 2026-09-06).
-        <Button variant="primary" icon={<Maximize2 size={16} strokeWidth={1.5} />} onClick={onOpenFull}>
+        <Button variant="primary" icon={<ActionIcon action="open" size={16} />} onClick={onOpenFull}>
           Sachverhalt öffnen
         </Button>
       }
@@ -197,7 +197,7 @@ function DrawerBody({
     return (
       <EmptyState
         inline
-        icon={<FileWarning size={20} strokeWidth={1.5} />}
+        icon={<ActionIcon action="alert" size={20} />}
         title={`Kein Sachverhalt zu ${reference}`}
         description="Zu dieser Kennung gibt es keinen Sachverhalt dieses Mandanten. Vielleicht gehört sie einem anderen Wirtschaftsjahr."
       />

@@ -226,3 +226,37 @@ hier als `DATEV_MAX_BELEGFELD1`, bis die App sie in
 ihrer `caseNumber` im Register; eine fehlende Kontonummer zeigt „—" wie
 überall im Set; die Hinweiszeile trägt die dominante Nummer als `TextButton`,
 der sie einsetzt (Rundlauf in `Diverging`).
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1 — der Ladezustand war keine Tabelle.** `TableLoading` stand **außerhalb**
+von `<Table>`: fünf `<tr>` in einem `<div>`, gemessen als **eine** Spur von
+822 px statt fünf. Jetzt in der Tabelle; gemessen fünf Spuren, fünf Zellen.
+
+**M2 — das Feld nahm kein `id`, das Label zeigte ins Leere.** `<label for="b1">`
+und `document.getElementById('b1') === null` — genau der Befund, wegen dem
+`Field.htmlFor` Pflicht ist (0104). Jetzt `id?: string`, `useId()` nur als
+Rückfall; alle neun Story-Felder verdrahtet.
+
+**M3 — `maxLength` schnitt beim Einfügen still ab.** 44 eingefügte Zeichen
+wurden lautlos 36. Jetzt sagt das Feld an der Grenze, dass sie erreicht ist —
+eine verlorene Endung fällt sonst erst beim DATEV-Ausziffern auf.
+
+**M4 — die erste Spalte kollabierte.** `1fr` fiel bei 700 px auf 20 px, und
+Nummer und Marke überschrieben die Nachbarspalte (13 Überläufe). Jetzt
+`minmax(12ch, 1fr)` und `minWidth`, das die festen Spuren plus Lücken und
+Polster deckt.
+
+**M5 — Tabelle **oder** Listbox, nicht beides.** `role="option"` unter
+`tbody`/`table` brach die Eigentümerschaft, `aria-activedescendant` fehlte,
+und der Fokus blieb am Container: die aktive Zeile war nur eine Farbe. Jetzt
+Tabellensemantik, und ↑/↓ bewegen den **Fokus** auf den Zeilenknopf — das sagt
+jede Vorlesehilfe an.
+
+**M6 — Zeilenhöhe und doppelte Aussage.** Die Quellenspalte steht auf 220 px
+statt 150, und das zweite „· DATEV" ist weg: die Marke in Spalte 1 sagt es
+schon.
+
+**M7** ist mit **0090** erledigt (`--color-accent-700` hält jetzt 5,03:1 auf
+weichem Grund). **M8** (`Esc` in keiner Story) bleibt: der Drawer gehört dem
+Aufrufer, und eine Story mit Drawer wäre eine Story über den Drawer.

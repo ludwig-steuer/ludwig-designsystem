@@ -1,6 +1,5 @@
-import { CheckCircle2, CircleSlash, TriangleAlert } from "lucide-react";
-
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
+import { StateIcon } from "../../patterns/Review";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { Badge } from "../../primitives/Badge";
 import { Button } from "../../primitives/Button";
@@ -57,7 +56,7 @@ export function SnapshotCard({
         <div className="v2snap__pad">
           <EmptyState
             inline
-            icon={<CircleSlash size={20} strokeWidth={1.5} />}
+            icon={<StateIcon state="skipped" title="kein Stand" />}
             title="Kein DATEV-Stand vorhanden"
             description="Ohne einen Spiegel gibt es nichts, wogegen geprüft werden könnte. Der erste Import legt den Stand an."
             action={
@@ -140,7 +139,7 @@ function Reconciliation({ reconcile }: { reconcile: DatevSnapshot["reconcile"] }
     return (
       <StatusCallout
         tone="warning"
-        icon={<CircleSlash size={16} strokeWidth={1.5} />}
+        icon={<StateIcon state="skipped" title="nicht durchgeführt" />}
         kicker="Abgleich"
         title="Für diesen Stand wurde kein Abgleich durchgeführt."
         sub="Der Abgleich läuft nur bei Journal-Läufen. Ohne ihn ist nicht bekannt, ob die DATEV-Buchungen zu den Ludwig-Buchungen passen."
@@ -152,13 +151,10 @@ function Reconciliation({ reconcile }: { reconcile: DatevSnapshot["reconcile"] }
     <>
       <StatusCallout
         tone={open > 0 ? "warning" : "neutral"}
-        icon={
-          open > 0 ? (
-            <TriangleAlert size={16} strokeWidth={1.5} />
-          ) : (
-            <CheckCircle2 size={16} strokeWidth={1.5} />
-          )
-        }
+        // The three statements each get their own state icon — from
+        // `StateIcon`, where states live, not from `lucide-react` directly
+        // (A8, `pnpm check:icons`).
+        icon={<StateIcon state={open > 0 ? "warning" : "done"} />}
         kicker="Abgleich"
         title={
           open > 0

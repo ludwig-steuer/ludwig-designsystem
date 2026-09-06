@@ -158,3 +158,18 @@ Snapshot-Kopf — die beiden Formen überschneiden sich nicht.
 **Der Typ liegt lokal** in `datev-snapshot.ts`, weil weder `datev-truth` noch
 `datev-mirror` ein `domain/` hat (**L-04**, präzisiert). Die Namen sind die
 der App, damit der Umzug ein Import-Tausch bleibt.
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1 — Icons an der Registry vorbei.** `pnpm check:icons` schlug fehl. Die
+drei Zeichen kommen jetzt aus `StateIcon` — dort wohnen Zustände —, und die
+zwei älteren Verstöße derselben Sitzung (`CaseDrawer`, `BankTransactionDrawer`)
+sind gleich mit erledigt: `ActionIcon action="open"` für den Ausgang,
+`ActionIcon action="alert"` für „nicht gefunden". `check:icons` ist grün.
+
+**M2 — `onImport` und der `null`-Fall fehlten in der Schnittstelle.**
+
+| Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
+|---|---|---|---|---|
+| `snapshot` | `DatevSnapshot \| null` | ja | Der Stand. `null` = **kein Stand vorhanden**, ein eigener Zustand, keine leere Fläche | `Filled`, `Empty` |
+| `onImport` | `() => void` | nein | Der Ausweg des Leerzustands. Ohne ihn nennt der Leertext den Weg, aber kein Knopf führt ihn | `Empty`, `Interactive` |

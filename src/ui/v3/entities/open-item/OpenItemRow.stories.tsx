@@ -4,6 +4,7 @@ import { OpenItemAgeGroup, OpenItemRow } from "./OpenItemRow";
 import type { OpenItem } from "./open-item";
 import { Callout } from "../../primitives/Callout";
 import { Card, CardHead, EmptyRow, HeadRow, Table } from "../../primitives/Table";
+import { TableLoading } from "../../primitives/Cells";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { TextButton } from "../../primitives/TextButton";
 
@@ -15,7 +16,11 @@ export default meta;
 type Story = StoryObj<typeof OpenItemRow>;
 
 const AS_OF = "2026-08-31";
-const COLS = "90px 100px 130px 100px 100px 1fr 120px 190px 130px 130px";
+// `minmax(0, 1fr)`, nicht `1fr`: sonst rechnen Kopf und Zeile die Spur je für
+// sich (gemessen 84 gegen 68 px). Und `minWidth` deckt die festen Spuren
+// **plus** neun Lücken à 10 px und zweimal 18 px Polster: 1090 + 90 + 36.
+const COLS = "90px 100px 130px 100px 100px minmax(0, 1fr) 120px 190px 130px 130px";
+const MIN_WIDTH = 1300;
 
 const ITEM = (over: Partial<OpenItem> = {}): OpenItem => ({
   kind: "creditor",
@@ -83,7 +88,7 @@ function Frame({ children, sub }: { children: React.ReactNode; sub?: string }) {
     <div style={{ maxWidth: 1400 }}>
       <Card>
         <CardHead title="Offene Posten" sub={sub ?? `Stichtag 31.08.2026`} />
-        <Table cols={COLS} minWidth={1200}>
+        <Table cols={COLS} minWidth={MIN_WIDTH}>
           <HeadRow>
             <span>Art</span>
             <span>Konto</span>
@@ -110,7 +115,7 @@ export const Filled: Story = {
   render: () => (
     <Frame>
       {ITEMS.map((i) => (
-        <OpenItemRow key={i.personalAccount} item={i} asOf={AS_OF} />
+        <OpenItemRow key={i.externalDocumentNumber ?? i.personalAccount} item={i} asOf={AS_OF} />
       ))}
     </Frame>
   ),
@@ -145,6 +150,15 @@ export const Empty: Story = {
   ),
 };
 
+/** Lädt: fünf Zeilen in der Form der Tabelle — die Köpfe bleiben stehen. */
+export const Loading: Story = {
+  render: () => (
+    <Frame>
+      <TableLoading rows={5} cols={10} />
+    </Frame>
+  ),
+};
+
 /** Fehler: was schiefging, und der Weg zurück daneben. */
 export const Error: Story = {
   render: () => (
@@ -172,7 +186,7 @@ export const Interactive: Story = {
         <Frame sub="Stichtag 31.08.2026 · Zeile öffnet den Sachverhalt">
           {ITEMS.slice(0, 3).map((i) => (
             <OpenItemRow
-              key={i.personalAccount}
+              key={i.externalDocumentNumber ?? i.personalAccount}
               item={i}
               asOf={AS_OF}
               onOpen={(acct) => setOpen(acct)}
