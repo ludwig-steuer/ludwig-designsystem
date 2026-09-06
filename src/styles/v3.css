@@ -1169,6 +1169,14 @@ select.v2in { padding-right: 26px; }
 .v2chart__svg { display: block; width: 100%; height: 96px; }
 .v2chart__bar { fill: var(--color-text-subtle); }
 .v2chart__bar.is-now { fill: var(--color-primary); }
+.v2chart__bar--second { fill: var(--color-border-control); }
+/* Der hervorgehobene Abschnitt bleibt auch mit zweiter Serie erkennbar: die
+   zweite Serie wird dort ebenfalls kraeftiger, nur eine Stufe heller. */
+.v2chart__bar--second.is-now { fill: var(--color-primary-500); }
+/* Die Linie ist keine Serie, sondern ein Bezug — deshalb die Akzentfarbe.
+   `non-scaling-stroke` steht am Element, weil `preserveAspectRatio="none"`
+   den Strich sonst verzerrt. */
+.v2chart__line { stroke: var(--color-accent); stroke-width: 1.5; }
 .v2chart__zero { stroke: var(--color-border-strong); stroke-width: 0.4; }
 .v2chart__ax {
   display: flex; margin-top: 4px;

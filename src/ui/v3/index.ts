@@ -145,7 +145,7 @@ export {
 } from "./format";
 
 /* Daten — Reihen und Verläufe (0041, 0045) */
-export { BarChart, type Bar } from "./primitives/BarChart";
+export { BarChart, type Bar, type BarLayout } from "./primitives/BarChart";
 export { Progress } from "./primitives/Progress";
 
 /* Tabelle */

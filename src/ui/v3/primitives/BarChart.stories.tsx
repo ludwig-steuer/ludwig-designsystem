@@ -106,3 +106,84 @@ export const Edge: Story = {
     </div>
   ),
 };
+
+/** Sechs Monate mit Soll und Haben — dieselbe Reihe für die drei Formen unten. */
+const LEDGER = [
+  { label: "Mär", value: 8420.5, secondary: 6180.0 },
+  { label: "Apr", value: 7120.0, secondary: 9340.25 },
+  { label: "Mai", value: 10260.3, secondary: 5980.4 },
+  { label: "Jun", value: 6840.75, secondary: 8210.0 },
+  { label: "Jul", value: 9180.0, secondary: 7460.6 },
+  { label: "Aug", value: 8020.4, secondary: 8900.15 },
+];
+
+/**
+ * `secondary` gestapelt: der zweite Wert sitzt **auf** dem ersten, weil beide
+ * Anteile einer Summe sind. Beide Wörter stehen im `title` jedes Balkens und
+ * als Spalte in der Tabelle darunter.
+ */
+export const TwoSeries: Story = {
+  render: () => (
+    <Card>
+      <CardHead title="Aufwand je Monat" sub="Bewirtete Kosten als Anteil" />
+      <div style={{ padding: "var(--space-5)" }}>
+        <BarChart
+          bars={LEDGER}
+          format={euro}
+          highlight="Aug"
+          primaryLabel="Aufwand"
+          secondaryLabel="davon bewirtet"
+          ariaLabel="Aufwand je Monat, mit Anteil"
+        />
+      </div>
+    </Card>
+  ),
+};
+
+/**
+ * `layout="grouped"`: zwei Balken nebeneinander. Soll und Haben sind keine
+ * Anteile voneinander — gestapelt wäre die Summe eine Zahl ohne Bedeutung.
+ */
+export const Grouped: Story = {
+  render: () => (
+    <Card>
+      <CardHead title="Konto 4400 · Bürobedarf" sub="Soll und Haben je Monat" />
+      <div style={{ padding: "var(--space-5)" }}>
+        <BarChart
+          bars={LEDGER}
+          format={euro}
+          layout="grouped"
+          highlight="Aug"
+          primaryLabel="Soll"
+          secondaryLabel="Haben"
+          ariaLabel="Soll und Haben je Monat"
+        />
+      </div>
+    </Card>
+  ),
+};
+
+/**
+ * `line`: der laufende Saldo auf **derselben** Achse. Keine zweite Y-Achse —
+ * zwei Skalen in einem Bild vergleichen sich nicht ehrlich.
+ */
+export const WithLine: Story = {
+  render: () => (
+    <Card>
+      <CardHead title="Konto 4400 · Bürobedarf" sub="Soll, Haben und laufender Saldo" />
+      <div style={{ padding: "var(--space-5)" }}>
+        <BarChart
+          bars={LEDGER}
+          format={euro}
+          layout="grouped"
+          line={[2240.5, 20.25, 4300.15, 2930.9, 4650.3, 3770.55]}
+          highlight="Aug"
+          primaryLabel="Soll"
+          secondaryLabel="Haben"
+          lineLabel="Saldo"
+          ariaLabel="Soll, Haben und laufender Saldo je Monat"
+        />
+      </div>
+    </Card>
+  ),
+};
