@@ -3,6 +3,7 @@
 | | |
 |---|---|
 | Status | spec |
+| Freigabe | zurück 2026-09-07 — Zuschnitt neu nach Abschnitt „Freigabe" (Rahmen wie 0050 plus Karte), danach ohne zweite Runde freigegeben |
 | Stufe | `entities/source-document/` — `SourceDocumentView` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Pipeline, Vorsteuer und Belegart sind Ludwig-Fachbegriffe |
 | Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Formen-Tabelle |
@@ -188,3 +189,13 @@ Variabel:
   Beleg. Ein Vertrag, der in der Extraktion steckt, zeigt keinen Fortschritt —
   nur leere Fakten. Der Fortschritt gehört an den Beleg, wo auch die Achse
   `beleg` hängt.
+
+## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: zurück — Zuschnitt neu, die drei Entscheidungen der Spec bleiben.** Owner-Entscheid zur neuen Frage: **Rahmen mit Slots wie 0050**, kein datengetriebener View — zwölf Datenprops sind eine zweite Seite. Entscheide: 1 vier Reiter (App-Frage, der View merkt nichts) · 2 `InlineEdit` im View ist eine Folgeaufgabe, nicht Teil dieser (vier Callbacks wären vier Stories über der Grenze, A12 verbietet Props ohne Verhalten) · 3 Fakten-Spalte `minmax(400px, 560px)` in `v3.css`.
+
+Neuer Zuschnitt (vorab freigegeben, wenn die Neufassung dem folgt): (1) `SourceDocumentView` = Rahmen mit den Slots `pager` · `header` · `banner` · `tabs` · `children`, Reihenfolge fest nach Rang 1–9, Server-Component, keine Datenprops; 0050 als Vorbild zitieren; `RecordPager` mit `back` und `total`, `EntityHeader actions`/`facts` für Aktionen und Sachverhaltslink. (2) `SourceDocumentCard` = Inhalt des ersten Reiters: `SourceDocumentPreview` links, `SourceDocumentFacts` rechts, `SourceDocumentList` (Teilbelege) darunter; Props in der Form von `SourceDocumentQuickView` (`document, summary, previewUrl, previewUnavailableReason, excerpt, group`) plus `children`; kein eigener Kopf — Rang 1 trägt der `EntityHeader`, sonst zwei Kopfzeilen (Zweifel 1 des Seitenprofils); `compact` streichen → Ausbau. Zweiter Abnehmer: der Drawer-Body rendert dieselbe Karte mit `tone="bare"` (0052-Kriterium „Zone 3 = dieselbe Komponente wie der View"). (3) `missing` als eine Prop an `SourceDocumentFacts` (§3 Regel 2): `missing?: { field, hint, action? }[]` oder Ableitung aus der Achse `beleg_haenger` — der Mangel steht je Wert an seinem Platz, nicht als Liste im View. (4) Rang 4: im Kopf führt die Erledigung (`beleg_erledigung`), `beleg` nur bei Rechnungszeile in Fakten/Banner, `SourceDocumentClass` in `meta`. (5) Abschnitt „Verhalten" ergänzen (J/K über `RecordPager`, Fokus nach Reiterwechsel, Server/Client). (6) Kopf: Seitenprofil unter „Quelle"; „Ersetzt" bereinigen (`SourceDocPipelineTab`/`SourceDocVerlaufTab` sind Reiter-Inhalte, die der View nicht rendert; die fünf Editoren als Folgeaufgabe). (7) Abnahme: „bei 1440 × 900" statt „bei 1440 px"; Karten-Stories auflisten; den Fehler-Zustand einer Karte mit Pflicht-`document` streichen oder begründen.
+
+Seitenprofil `beleg-detail.md` nachziehen: Rang 4 sagt, welcher Zustand im Kopf führt (die Erledigung); der Nebenjob „Zurück zur Liste" bekommt sein Element (`RecordPager back`); `Link` → `TextButton`, `RawDataView` → `RawRecord`; `compact` hat keine Frage und fällt.
+
+Bau-Reihenfolge: `SourceDocumentFacts` + `missing` → `SourceDocumentCard` (mit Drawer-Nachzug) → `SourceDocumentView`. Befunde ins Register: **L-92** — `belegTabLabel()` in `modules/source-docs/domain/tabs.ts` (Buchung/Vertrag/Beleg) widerspricht Entscheidung 2 („Beleg" für alle); bei vier Reitern auch `DOC_TABS`/`parseDocTab`. **L-93** — `SourceDocumentVM` (`SourceDocument.tsx`) ist v3-lokal ohne Spiegel-Gegenstück; nur das Durchreichen (L-79) steht im Register, nicht der Typ.

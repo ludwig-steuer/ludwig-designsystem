@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit |
+| Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/account/` (Zeile) + Spaltendefinition auf `DataTable` (Liste) |
 | Quelle | Entitätsprofil `docs/entitaeten/account.md`, Abschnitte „Listen" (Zeile `AccountList` „Kontenplan") und „Formen" |
 | Auftrag | Die Zeile eines Kontos im Kontenrahmen (Nummer, Name, Rolle, Buchungszahl, Kontostatus) und die Liste, die sie zeigt — nach Klasse gruppiert, 41.570 Zeilen je Mandant und Jahr. Ersetzt `AccountsTable`, `AccountsTableHeader`, `AccountsTableRow` und `AccountsGroupedTable` in `ludwig/app`. |
@@ -149,3 +150,11 @@ Variabel:
 - **Neu (L-87):** Die gruppierte Ansicht hat **keinen Pager**. Bei 41.570
   Zeilen je Mandant und Jahr ist das kein Detail: die Gruppierung gruppiert
   heute den Bestand, nicht die Seite.
+
+## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Quelle, Ränge, Job, Leerfall und „ersetzt" stimmen mit Entitäts- und Seitenprofil überein; der Spaltensatz statt einer `AccountRow` folgt dem Hausmuster. Entscheide: 1 kein Wrapper `AccountList` — `DataTable` trägt `empty`/`filtered` · 2 Ausgang per `href`, der Aufrufer entscheidet Drawer oder Seite · 3 SKR-Klasse als erste Spalte, gruppiert weglassen; die Story `Grouped` ist `Table` + `GroupRow` + `Pagination` von Hand (`DataTable` gruppiert nicht) — so hinschreiben, das ist die Vorlage für die Seite · `name` ist sortierbar (die App kann `account_name`).
+
+Vor dem Bau in die Spec: (a) Typen aus `modules/accounts/domain/account.ts`: `AccountRow`, `AccountClass` + `ACCOUNT_CLASS_LABEL`, `AccountScope`, `ACCOUNT_SORT_KEYS`; Sortierschlüssel `account_number` / `account_name` / `usage_booking_count` / `last_booking_date`; (b) Spalte „Quelle" zeigt `AccountRow.origin` (Mandant / SKR-Katalog, das ist Rang 6 des Seitenprofils), Kopf „Angelegt"; `source` (100 % `imported`) bleibt draußen, der Satz dazu bezieht sich auf `source`; (c) `status` aus beiden Sätzen streichen — 99 % konstant, für Katalogzeilen `null`, die Karteileichen-Frage beantwortet `bookings ↑`; (d) `skrClass` als Text über `ACCOUNT_CLASS_LABEL`, keine Farbe (kein Status, R1); (e) `partner`: Feld `businessPartnerId` + Name lokal deckungsgleich, Befund L-89; (f) die Voreinstellung „bebucht" ist keine neue Entscheidung — `AccountFilter.usedOnly` hat Default `true`; Spec und Seitenprofil nennen das und den Befund L-90 (die App setzt `usedOnly` mit `status='active'` gleich, die Bedingung des Profils ist `usage_booking_count > 0`); (g) `Empty`/`EmptyAfterFilter` als Seiten-Vorlage kennzeichnen oder in `InUse` ziehen; (h) Seitenprofil: `KpiRow` → `KpiGrid`/`KpiTile`.
+
+Befunde ins Register: **L-89** — `AccountRow` trägt keinen Geschäftspartner (52 % Füllgrad, Profil Rang 8). **L-90** — `AccountFilter.usedOnly` verspricht „mindestens eine Buchung", filtert aber über `status='active'` (99 % `active`, 85 % ohne Buchung); zugleich widerspricht Registry `konto.inactive` („angelegt, nie bebucht") den Daten. L-86/L-87 stehen und stimmen.

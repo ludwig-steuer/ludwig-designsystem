@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec — Ergebnis: **keine Komponente**, Aufgabe an die Aufrufstelle |
+| Status | verworfen |
+| Freigabe | 2026-09-07 — kein Baustein: `Drawer` + `ClarificationCard` decken den Fall an der Aufrufstelle; zwei Auslöser im Abschnitt „Freigabe" |
 | Stufe | `entities/clarification/` |
 | Klassen-Test | nein — „Klärung" ist ein Ludwig-Fachwort |
 | Quelle | Entitätsprofil `docs/entitaeten/clarification.md` §Formen, §Zuschnitt (2026-09-04) |
@@ -115,3 +116,9 @@ sie schärfer zu fassen:
 
 Keine neuen. **B8** (der Klärungs-Faden fehlt im Datenmodell) steht im
 Entitätsprofil und ist zugleich der erste der beiden Auslöser oben.
+
+## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: der Schluss trägt — Status `verworfen`** mit den zwei Auslösern, wann die Aufgabe wieder aufgeht. Zwei Korrekturen in die Spec: (a) „den Ausgang zum Sachverhalt kennt die Karte schon (`caseHref`)" ist falsch — `ClarificationCard` hat keine `caseHref`-Prop; der A10-Ausgang gehört in `Drawer.footer` an der Aufrufstelle, und die Stelle muss das Detail-VM laden (`RationaleSource` trägt nur die id): rund acht Zeilen plus Loader, nicht fünf, aber weiterhin Markup, kein Baustein; (b) Auslöser 2 zitiert §3 Regel 3, richtig ist §4 („ein Teil wird woanders allein gebraucht"); Auslöser 1 ohne „Quellen als eigene Zone" (die Karte zeigt sie schon als Block).
+
+Ins Register, Abschnitt E: eine Zeile für den Seitenwechsel `RationaleSources kind='clarification'` → `Drawer` + `ClarificationCard mode="read"` mit Fuß-Ausgang (Vorbild 0098).

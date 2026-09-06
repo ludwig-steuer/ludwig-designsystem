@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit |
+| Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/clarification/` — Erweiterung von `ClarificationCard` (0060) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: die Regeln (30 Tage, ab der dritten nur ein Mensch) sind Ludwig-Fachlogik |
 | Quelle | Entitätsprofil `docs/entitaeten/clarification.md` offene Frage 1 · Owner-Entscheid 2026-09-04 („ok, gute Idee") · `docs/topics/sachverhalt.md` S10–S12, F105 |
@@ -161,3 +162,11 @@ Variabel:
   „endet mit der Antwort auf «…»" ein nacktes Datum.
 - **B8** (der Klärungs-Faden fehlt) bleibt bestehen und ist die Voraussetzung
   dafür, dass die Gegenfrage überhaupt verlinkt werden kann.
+
+## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Die Sperre ab der dritten Verschiebung ist App-Regel (GLOSSARY „Deferral", Registry `KLAERUNG_STATUS`, F105), keine Set-Erfindung; ob der Server sie durchsetzt, ist im Spiegel nicht sichtbar — Befund. Der Schnitt (eine Prop `onDefer` an der Karte, Datumsfeld im `children`-Schlitz von `ReasonDialog`) ist der kleinste und passt zu `onResolve`. Entscheide: 1 Mandant darf nicht zurückstellen · 2 die Karte zählt nicht selbst, `deferLockedReason` kommt vom Aufrufer · 3 am Stichtag passiert im Set nichts.
+
+Vor dem Bau in die Spec: (a) `ClarificationDetailVM` um `deferredReason?`, `deferredCount?`, `deferredBy?: { id, title, href }` ergänzen — strukturell deckungsgleich, L-83 wird um `deferred_reason` erweitert; (b) `deferMaxDays` streichen, 30 ist Regel (Befund L-91: `DEFERRAL_MAX_DAYS` in `domain/case.ts`); (c) Datumsfeld mit Startwert morgen, `min` morgen, `max` heute + 30, Wert wird geklemmt — der Dialog-Knopf sieht das Datum nicht, das `max`-Attribut allein reicht nicht; (d) „mindestens 10 Zeichen (DB-CHECK)" ist nicht belegt — streichen, sofern keine Quelle; gilt sie, bekommt `ReasonDialog` eine Prop `minLength`; (e) Stories: Bestand ist 9, nicht 6 — `onDefer`-Rundlauf in die Callback-Story, eine Story `Deferred` mit den drei Zuständen nebeneinander, gesamt 10; Kriterium „Story `Read`" → `Filled`; Exportnamen englisch, da die Datei angefasst wird; (f) sagen: Knopf nur bei `mode="answer"`, der Antwortbereich bleibt im Zustand `deferred` (eine frühe Antwort beendet die Wiedervorlage); der Gegenfrage-Link führt zur Sachverhaltsseite, nicht in einen Drawer.
+
+Befunde ins Register: L-83 um `deferred_reason` ergänzen; **L-91** — `DEFERRAL_MAX_DAYS = 30` (und ggf. Mindestlänge des Grundes) fehlt in `modules/accounting-cases/domain/case.ts`; Hinweis: `overview-vm.ts` liegt trotz „L-09 erledigt" nicht im Spiegel — Sync prüfen.

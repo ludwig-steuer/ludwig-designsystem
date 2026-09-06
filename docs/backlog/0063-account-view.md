@@ -3,6 +3,7 @@
 | | |
 |---|---|
 | Status | spec |
+| Freigabe | zurück 2026-09-07 — Zuschnitt neu nach Abschnitt „Freigabe" (Rahmen, DATEV führt), nach 0071, danach ohne zweite Runde freigegeben |
 | Stufe | `entities/account/` |
 | Quelle | Entitätsprofil `docs/entitaeten/account.md`, Abschnitt „Formen" (Zeile `AccountView`) |
 | Auftrag | Die Seite hinter dem Fuß-Knopf des `AccountDrawer` (A10): alles über ein Konto in einem Jahr. Heute vier Tabs in `app/(app)/clients/[clientSlug]/[year]/accounts/[accountNumber]/page.tsx` — Übersicht (6 Kennzahlen, 6-Monats-Verlauf, je fünf neueste Bewegungen beider Quellen, Stammdaten), Buchungen, Monatsübersicht, LLM-Profil. Zeigt alle Datenpunkte ab 20 % Füllgrad. |
@@ -135,3 +136,13 @@ Variabel:
   verworfen; die Vereinigung braucht eine Abfrage, die beide Quellen mit einer
   `origin`-Spalte liefert — heute sind es `loadAccountLedgerPage` und
   `listAccountMirrorEntries` getrennt.
+
+## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: zurück.** Zwei Gründe: Entscheidung 2 („Saldo je Quelle, zwei Zahlen plus Differenz") öffnet eine Frage neu, die der Owner am 2026-09-04 im Entitätsprofil beantwortet hat — **DATEV führt, Ludwig ist Delta**, genau so ist `AccountFacts` (0066) gebaut; `totals` beantwortet Rang 2 damit ein zweites Mal. Und Rang 5 („sagen Ludwig und DATEV dasselbe?") hat kein Element. Owner-Entscheide: Rahmen mit Slots wie 0050 (kein Durchreicher um `DataTable`) · Saldo: DATEV führend plus Ludwig-Delta, `totals` entfällt, „Differenz" ist `ludwigOnlyAmount` · Rang 5: die gebaute Herkunft-Spalte aus 0067 (vier Klassen) reicht, `mirror_match` je Zeile ist Ausbau (R1, ein Status je Zeile) · laufender Saldo entfällt ohne Quellfilter, Quellfilter ist Ausbau · Name `LedgerAccountView`, weil `AccountView` im Spiegel ein Typname ist (`"flat" | "grouped"`). Entscheide 1 (zwei Reiter) und 3 (kein InlineEdit) wie Default.
+
+Neuer Zuschnitt (vorab freigegeben, wenn die Neufassung dem folgt): Slots `pager` · `header` · `summary` (`AccountFacts` im `EntityHeader metric/facts` oder als `KpiGrid` mit denselben Zahlen; Σ Soll/Σ Haben als zwei optionale Felder am `AccountFactsVM`, Profil Rang 7) · `chart` (`BarChart` 0110, zwei Serien plus Linie) · `tabs` · `aside` (Fakten in der Randspalte, Zweifel 4) · `children` (die Liste: `DataTable` + `accountEntryColumns({ variant: "full" })`, von der Seite gebaut). Typen: `AccountFactsVM` (v3, Spiegel-Tausch als „offen (App)"), `AccountEntry`, `Bar[]`; kein `AccountVM`, kein `AccountEntryVM`. Rang 5 als Kriterium mit Story über die Herkunft-Spalte. Abhängigkeiten ehrlich: L-30 (Saldo im DATEV-Auszug) und L-88 sind Voraussetzungen für den Einsatz drüben; „Zeile führt in den Drawer" ist „offen (App)". „Verhalten" ergänzen, Seitenprofil unter „Quelle", Zählformel der Stories korrigieren (`Kinds` ist keine Enum-Story), `Edges` konkret (Pager „50 von 3.400").
+
+Seitenprofil `konto-detail.md` nachziehen: offene Frage 2 ist beantwortet (Owner 2026-09-04); Rang 5 ohne `StatusBadge`/`mirror_match` je Zeile (Herkunft-Spalte); Rang 6 (Kontenfunktion, Steuersatz) hat in keinem Typ ein Feld — Befund; `KpiRow` → `KpiGrid`, `Chip` → `Badge`; Nebenjob „Buchung aufschlagen" mit einem Param; die Profil-Empfehlung „Saldospalte kehrt im View wieder, wo eine Quelle allein gezeigt wird" als bewusste Abweichung nennen.
+
+Reihenfolge: nach 0071 — der View erbt dessen Muster. Befunde ins Register: **L-94** — `AccountFactsVM` im Spiegel trägt weder `datevBalance` noch `ludwigOnlyAmount` noch `currency`; L-13 ist nur halb erledigt. **L-95** — Σ Soll/Σ Haben je Konto und Jahr, Monatswerte `{ month, debit, credit }` und Kontenfunktion/Automatik-Steuersatz haben keinen Spiegel-Typ (heute inline in `accounts/[accountNumber]/page.tsx`). L-30 in 0063 verlinken.
