@@ -3215,3 +3215,6 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 /* Die Schleifen-Angabe: Zeichen und Zahl gehören zusammen (0093 c). */
 .pz-loop { display: inline-flex; align-items: center; gap: 3px; }
+
+/* --- Belegliste: Spaltensätze (0070) -------------------------------------- */
+.v2doccol__lead { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

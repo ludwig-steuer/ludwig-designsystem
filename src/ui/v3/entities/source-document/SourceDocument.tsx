@@ -102,6 +102,28 @@ export interface SourceDocumentVM {
   classDocumentKind?: string | null;
   /** Axis `dokumentgruppe`, only ever set on a collection document. */
   collectionKind?: string | null;
+  /**
+   * The processing of the invoice, axis `beleg` (83 % filled). A state of the
+   * **specialization**, not of every document — a contract has none.
+   */
+  processingStatus?: string | null;
+  /**
+   * `source_docs.status`, axis `beleg_inbox` — the one state **every** kind of
+   * document carries (profile finding B4). Almost constant in the stock
+   * (99.7 % `classified`), which is why the list shows it and the row does not.
+   */
+  inboxStatus?: string | null;
+  /**
+   * How sure the classification is, axis `konfidenz`. **Not in the app's view
+   * model yet** (0070 B1): it exists at the inbox, and the column shows „—"
+   * until it is handed over.
+   */
+  classConfidence?: string | null;
+  /**
+   * File size in bytes. Also missing over there (0070 B1) — it matters at
+   * exactly one place: 25 MB is where submitting fails.
+   */
+  sizeBytes?: number | null;
   /** Rank 6 — the case, as an inline mention. */
   caseNumber?: string | null;
   caseHref?: string | null;
