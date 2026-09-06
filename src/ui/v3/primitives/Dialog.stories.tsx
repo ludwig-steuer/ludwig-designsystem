@@ -61,8 +61,8 @@ export const WithReason: Story = {
         </>
       }
     >
-      <Field label="Grund" hint="Steht später im Protokoll des Durchgangs.">
-        <Textarea placeholder="Was soll der Agent anders machen?" />
+      <Field label="Grund" hint="Steht später im Protokoll des Durchgangs." htmlFor="grund">
+        <Textarea id="grund" placeholder="Was soll der Agent anders machen?" />
       </Field>
     </Demo>
   ),
@@ -159,9 +159,9 @@ export const EnterConfirms: Story = {
 export const AutoFocusChild: Story = {
   render: () => (
     <Demo label="Mit Suchfeld öffnen" title="Suchen" size="md">
-      <Field label="Suche">
+      <Field label="Suche" htmlFor="suche">
         {/* eslint-disable-next-line jsx-a11y/no-autofocus -- genau das ist der Nachweis */}
-        <input className="v2in" autoFocus placeholder="Tippen Sie sofort los" />
+        <input id="suche" className="v2in" autoFocus placeholder="Tippen Sie sofort los" />
       </Field>
     </Demo>
   ),
@@ -185,8 +185,8 @@ export const KeyboardTrap: Story = {
         </>
       }
     >
-      <Field label="Grund">
-        <Textarea rows={2} placeholder="Vom letzten Haltepunkt führt Tab zurück auf das Kreuz." />
+      <Field label="Grund" htmlFor="grund-2">
+        <Textarea id="grund-2" rows={2} placeholder="Vom letzten Haltepunkt führt Tab zurück auf das Kreuz." />
       </Field>
     </Demo>
   ),

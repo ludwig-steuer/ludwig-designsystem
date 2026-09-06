@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { Currency } from "@/ludwig/shared/money";
 import { Field, Input } from "./Form";
 
@@ -82,6 +82,7 @@ export function AmountInput({
   size?: "sm" | "md";
   name?: string;
 }) {
+  const autoId = useId();
   const [text, setText] = useState(value === null ? "" : format(value, currency));
   const [ownError, setOwnError] = useState<string | null>(null);
 
@@ -107,11 +108,17 @@ export function AmountInput({
     if (parsed !== value) onChange(parsed);
   }
 
+  // `id` binds the word to the field, `name` names it in a form — two jobs.
+  // They used to be the same prop, so a field without a form had no label
+  // either: `htmlFor` and `id` were both `undefined`, and `input.labels` was
+  // empty (0104). `name` still wins so that an existing form keeps its ids.
+  const fieldId = name ?? autoId;
+
   const shown = error ?? ownError ?? undefined;
   return (
-    <Field label={required ? `${label} *` : label} error={shown} htmlFor={name}>
+    <Field label={required ? `${label} *` : label} error={shown} htmlFor={fieldId}>
       <Input
-        id={name}
+        id={fieldId}
         name={name}
         value={text}
         inputMode="decimal"

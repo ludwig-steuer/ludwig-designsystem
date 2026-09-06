@@ -15,8 +15,8 @@ export default meta;
 type Story = StoryObj<typeof FilterBar>;
 
 const CreditorFilter = () => (
-  <Field label="Kreditor">
-    <Select defaultValue="">
+  <Field label="Kreditor" htmlFor="kreditor">
+    <Select id="kreditor" defaultValue="">
       <option value="">Alle</option>
       <option value="meier">Bürobedarf Meier GmbH</option>
       <option value="stadtwerke">Stadtwerke Musterstadt</option>
@@ -33,8 +33,8 @@ const PeriodFilter = () => {
   const [from, setFrom] = useState<string | null>("2026-08-01");
   const [to, setTo] = useState<string | null>("2026-08-31");
   return (
-    <Field label="Belegdatum">
-      <DateRangeField
+    <Field label="Belegdatum" htmlFor="belegdatum">
+      <DateRangeField id="belegdatum"
         from={from}
         to={to}
         onChange={(f, t) => {
@@ -53,8 +53,8 @@ export const Filled: Story = {
       <FilterBar>
         <CreditorFilter />
         <PeriodFilter />
-        <Field label="Suche">
-          <Input type="search" placeholder="Beleg oder Text" />
+        <Field label="Suche" htmlFor="suche">
+          <Input id="suche" type="search" placeholder="Beleg oder Text" />
         </Field>
       </FilterBar>
     </div>
@@ -70,8 +70,8 @@ export const Active: Story = {
         <FilterBar activeCount={n} onReset={() => setN(0)}>
           <CreditorFilter />
           <PeriodFilter />
-          <Field label="Suche">
-            <Input type="search" defaultValue="Bürobedarf" />
+          <Field label="Suche" htmlFor="suche-2">
+            <Input id="suche-2" type="search" defaultValue="Bürobedarf" />
           </Field>
         </FilterBar>
         <p style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
@@ -103,23 +103,23 @@ export const ManyFields: Story = {
       <FilterBar activeCount={5} resetHref="#">
         <CreditorFilter />
         <PeriodFilter />
-        <Field label="Fälligkeit">
-          <DateField value="2026-09-15" onChange={() => {}} />
+        <Field label="Fälligkeit" htmlFor="falligkeit">
+          <DateField id="falligkeit" value="2026-09-15" onChange={() => {}} />
         </Field>
-        <Field label="Konto">
-          <Input defaultValue="6815" style={{ width: 100 }} />
+        <Field label="Konto" htmlFor="konto">
+          <Input id="konto" defaultValue="6815" style={{ width: 100 }} />
         </Field>
-        <Field label="Betrag ab">
-          <Input defaultValue="100,00" style={{ width: 100 }} />
+        <Field label="Betrag ab" htmlFor="betrag-ab">
+          <Input id="betrag-ab" defaultValue="100,00" style={{ width: 100 }} />
         </Field>
-        <Field label="Status">
-          <Select defaultValue="">
+        <Field label="Status" htmlFor="status">
+          <Select id="status" defaultValue="">
             <option value="">Alle</option>
             <option value="offen">Offen</option>
           </Select>
         </Field>
-        <Field label="Suche">
-          <Input type="search" placeholder="Beleg oder Text" />
+        <Field label="Suche" htmlFor="suche-3">
+          <Input id="suche-3" type="search" placeholder="Beleg oder Text" />
         </Field>
       </FilterBar>
     </div>

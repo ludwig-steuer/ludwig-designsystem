@@ -62,6 +62,7 @@ export function ChoicePrompt({
   // Two questions on one page must not deselect each other — a fixed `name`
   // ties their radios into one group (0028).
   const groupName = useId();
+  const textId = useId();
 
   const missingText = Boolean(freeText?.required) && !text.trim();
   const blocked = (!choice && !text.trim()) || missingText;
@@ -117,8 +118,12 @@ export function ChoicePrompt({
       />
       )}
       {freeText ? (
-        <Field label={freeText.required ? `${freeText.label} *` : freeText.label}>
+        <Field
+          label={freeText.required ? `${freeText.label} *` : freeText.label}
+          htmlFor={textId}
+        >
           <Textarea
+            id={textId}
             value={text}
             rows={3}
             placeholder={freeText.placeholder}

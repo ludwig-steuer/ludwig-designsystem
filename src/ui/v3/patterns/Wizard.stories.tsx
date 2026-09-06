@@ -25,8 +25,8 @@ const THREE: WizardStep[] = [
 export const Filled: Story = {
   render: () => (
     <Wizard steps={THREE} current={1} states={["done", "active", "pending"]}>
-      <Field label="Trennzeichen" hint="Aus der ersten Zeile geraten.">
-        <Input defaultValue=";" />
+      <Field label="Trennzeichen" hint="Aus der ersten Zeile geraten." htmlFor="trennzeichen">
+        <Input id="trennzeichen" defaultValue=";" />
       </Field>
     </Wizard>
   ),
@@ -79,8 +79,8 @@ export const WithFooter: Story = {
         </>
       }
     >
-      <Field label="Buchungskreis">
-        <Input defaultValue="Musterfirma GmbH · 2026" />
+      <Field label="Buchungskreis" htmlFor="buchungskreis">
+        <Input id="buchungskreis" defaultValue="Musterfirma GmbH · 2026" />
       </Field>
     </Wizard>
   ),

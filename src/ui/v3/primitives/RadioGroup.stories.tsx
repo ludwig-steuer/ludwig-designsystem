@@ -98,8 +98,8 @@ export const InForm: Story = {
     const [v, setV] = useState<string | null>("open");
     return (
       <div style={{ maxWidth: 420, display: "grid", gap: "var(--space-4)" }}>
-        <Field label="Bezeichnung des Exports">
-          <Input defaultValue="August 2026 — Bürobedarf" />
+        <Field label="Bezeichnung des Exports" htmlFor="bezeichnung-des-exports">
+          <Input id="bezeichnung-des-exports" defaultValue="August 2026 — Bürobedarf" />
         </Field>
         <RadioGroup name="scope5" label="Umfang" options={SCOPE} value={v} onChange={setV} />
         <div style={{ display: "flex", gap: 10 }}>

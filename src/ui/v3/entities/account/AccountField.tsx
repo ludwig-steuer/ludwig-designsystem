@@ -57,6 +57,7 @@ export function AccountField({
   placeholder = "Nummer oder Name",
   invalid,
   ariaLabel = "Konto",
+  id,
 }: {
   value: string;
   /**
@@ -87,6 +88,11 @@ export function AccountField({
   placeholder?: string;
   invalid?: boolean;
   ariaLabel?: string;
+  /**
+   * What the `htmlFor` of a surrounding `Field` points at (0104) — it lands on
+   * the input, not on the carrier: an id on the `div` would label a box.
+   */
+  id?: string;
 }) {
   const [query, setQuery] = useState(value);
   const [open, setOpen] = useState(false);
@@ -177,6 +183,7 @@ export function AccountField({
     <div ref={box} className="v2kf">
       <div className="v2kf__box">
         <input
+          id={id}
           className={`v2in v2kf__in${resting ? " v2kf__in--rest" : ""}${
             onOpenLedger ? " v2kf__in--ledger" : ""
           }${invalid ? " v2in--invalid" : ""}`}

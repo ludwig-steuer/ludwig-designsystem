@@ -27,7 +27,17 @@ export function Field({
   label: string;
   hint?: ReactNode;
   error?: ReactNode;
-  htmlFor?: string;
+  /**
+   * The `id` of the control the word belongs to — **required**. Without it
+   * `htmlFor` pointed nowhere: `input.labels` was empty, the field had no name
+   * for a reading aid, and a click on the word did not move the focus (0104).
+   *
+   * It is required rather than derived because `Field` does not know its
+   * child: at `AccountField`, `FileDrop` and `DateRangeField` the outer
+   * element is a `div`, and an id put there would label a box. A brick that
+   * brings its own `Field` (`AmountInput`, `Combobox`) binds itself instead.
+   */
+  htmlFor: string;
   children: ReactNode;
 }) {
   return (

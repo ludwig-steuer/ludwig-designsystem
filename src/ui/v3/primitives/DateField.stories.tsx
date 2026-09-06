@@ -23,14 +23,14 @@ const PRESETS = [
 export const Filled: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-4)", maxWidth: 420 }}>
-      <Field label="Belegdatum">
-        <DateField value="2026-08-26" onChange={() => {}} />
+      <Field label="Belegdatum" htmlFor="belegdatum">
+        <DateField id="belegdatum" value="2026-08-26" onChange={() => {}} />
       </Field>
-      <Field label="Belegdatum, beanstandet" error="Liegt vor dem Beginn des Wirtschaftsjahres.">
-        <DateField value="2025-12-30" onChange={() => {}} invalid />
+      <Field label="Belegdatum, beanstandet" error="Liegt vor dem Beginn des Wirtschaftsjahres." htmlFor="belegdatum-beanstandet">
+        <DateField id="belegdatum-beanstandet" value="2025-12-30" onChange={() => {}} invalid />
       </Field>
-      <Field label="Zeitraum">
-        <DateRangeField from="2026-08-01" to="2026-08-31" onChange={() => {}} />
+      <Field label="Zeitraum" htmlFor="zeitraum">
+        <DateRangeField id="zeitraum" from="2026-08-01" to="2026-08-31" onChange={() => {}} />
       </Field>
     </div>
   ),
@@ -40,11 +40,11 @@ export const Filled: Story = {
 export const Empty: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-4)", maxWidth: 420 }}>
-      <Field label="Fällig am">
-        <DateField value={null} onChange={() => {}} />
+      <Field label="Fällig am" htmlFor="fallig-am">
+        <DateField id="fallig-am" value={null} onChange={() => {}} />
       </Field>
-      <Field label="Zeitraum">
-        <DateRangeField from={null} to={null} onChange={() => {}} />
+      <Field label="Zeitraum" htmlFor="zeitraum-2">
+        <DateRangeField id="zeitraum-2" from={null} to={null} onChange={() => {}} />
       </Field>
     </div>
   ),
@@ -60,11 +60,11 @@ export const Interactive: Story = {
     });
     return (
       <div style={{ display: "grid", gap: "var(--space-4)", maxWidth: 420 }}>
-        <Field label="Belegdatum">
-          <DateField value={d} onChange={setD} />
+        <Field label="Belegdatum" htmlFor="belegdatum-2">
+          <DateField id="belegdatum-2" value={d} onChange={setD} />
         </Field>
-        <Field label="Zeitraum">
-          <DateRangeField
+        <Field label="Zeitraum" htmlFor="zeitraum-3">
+          <DateRangeField id="zeitraum-3"
             from={range.from}
             to={range.to}
             onChange={(from, to) => setRange({ from, to })}
@@ -87,8 +87,8 @@ export const WithPresets: Story = {
     });
     return (
       <div style={{ display: "grid", gap: "var(--space-4)", maxWidth: 560 }}>
-        <Field label="Zeitraum">
-          <DateRangeField
+        <Field label="Zeitraum" htmlFor="zeitraum-4">
+          <DateRangeField id="zeitraum-4"
             from={range.from}
             to={range.to}
             presets={PRESETS}
@@ -107,8 +107,8 @@ export const WithPresets: Story = {
 export const Bounds: Story = {
   render: () => (
     <div style={{ maxWidth: 420 }}>
-      <Field label="Belegdatum" hint="Nur innerhalb des Wirtschaftsjahres 2026">
-        <DateField value="2026-08-26" min="2026-01-01" max="2026-12-31" onChange={() => {}} />
+      <Field label="Belegdatum" hint="Nur innerhalb des Wirtschaftsjahres 2026" htmlFor="belegdatum-3">
+        <DateField id="belegdatum-3" value="2026-08-26" min="2026-01-01" max="2026-12-31" onChange={() => {}} />
       </Field>
     </div>
   ),
@@ -123,8 +123,8 @@ export const Edges: Story = {
     });
     return (
       <div style={{ display: "grid", gap: "var(--space-4)", maxWidth: 480 }}>
-        <Field label="Zeitraum" hint="Tragen Sie im zweiten Feld den 01.08.2026 ein — die Felder tauschen.">
-          <DateRangeField
+        <Field label="Zeitraum" hint="Tragen Sie im zweiten Feld den 01.08.2026 ein — die Felder tauschen." htmlFor="zeitraum-5">
+          <DateRangeField id="zeitraum-5"
             from={range.from}
             to={range.to}
             onChange={(from, to) => setRange({ from, to })}
@@ -133,8 +133,8 @@ export const Edges: Story = {
         <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
           von {range.from ?? "—"} bis {range.to ?? "—"}
         </div>
-        <Field label="Jahreswechsel und Schaltjahr">
-          <DateRangeField from="2024-02-29" to="2027-01-01" onChange={() => {}} />
+        <Field label="Jahreswechsel und Schaltjahr" htmlFor="jahreswechsel-und-schaltjahr">
+          <DateRangeField id="jahreswechsel-und-schaltjahr" from="2024-02-29" to="2027-01-01" onChange={() => {}} />
         </Field>
       </div>
     );
@@ -151,8 +151,8 @@ export const InUse: Story = {
     return (
       <div style={{ maxWidth: 720 }}>
         <FilterBar activeCount={1} onReset={() => setRange({ from: null, to: null })}>
-          <Field label="Belegdatum">
-            <DateRangeField
+          <Field label="Belegdatum" htmlFor="belegdatum-4">
+            <DateRangeField id="belegdatum-4"
               from={range.from}
               to={range.to}
               presets={PRESETS}

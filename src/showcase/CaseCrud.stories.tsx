@@ -163,18 +163,18 @@ function CasePage() {
 
       {/* Die Filterleiste steht über der Karte, nie im Kartenkopf (0003). */}
       <FilterBar activeCount={filters} onReset={() => setFilters(0)}>
-        <Field label="Gegenpartei">
-          <Select defaultValue="" onChange={() => setFilters(1)}>
+        <Field label="Gegenpartei" htmlFor="gegenpartei">
+          <Select id="gegenpartei" defaultValue="" onChange={() => setFilters(1)}>
             <option value="">Alle</option>
             <option value="musterfirma">Musterfirma GmbH</option>
             <option value="stadtwerke">Stadtwerke Musterstadt</option>
           </Select>
         </Field>
-        <Field label="Eröffnet ab">
-          <DateField value="2026-08-01" onChange={() => setFilters(1)} />
+        <Field label="Eröffnet ab" htmlFor="eroffnet-ab">
+          <DateField id="eroffnet-ab" value="2026-08-01" onChange={() => setFilters(1)} />
         </Field>
-        <Field label="Suche">
-          <Input type="search" placeholder="Nummer, Titel oder Gegenpartei" />
+        <Field label="Suche" htmlFor="suche">
+          <Input id="suche" type="search" placeholder="Nummer, Titel oder Gegenpartei" />
         </Field>
       </FilterBar>
 
@@ -349,11 +349,11 @@ function CasePage() {
         }
       >
         <div style={{ display: "grid", gap: "var(--space-3)" }}>
-          <Field label="Titel">
-            <Input defaultValue={editing?.title ?? ""} placeholder="Eingangsrechnung: …" />
+          <Field label="Titel" htmlFor="titel">
+            <Input id="titel" defaultValue={editing?.title ?? ""} placeholder="Eingangsrechnung: …" />
           </Field>
-          <Field label="Art">
-            <Select defaultValue={editing?.kind ?? "incoming_invoice"}>
+          <Field label="Art" htmlFor="art">
+            <Select id="art" defaultValue={editing?.kind ?? "incoming_invoice"}>
               {CASE_KIND.map((k) => (
                 <option key={k} value={k}>
                   {CASE_KIND_LABEL[k]}
@@ -369,11 +369,11 @@ function CasePage() {
             placeholder="Name oder Personenkonto"
             options={PARTNERS}
           />
-          <Field label="Zusammenfassung">
-            <Textarea defaultValue={editing?.summary ?? ""} rows={3} />
+          <Field label="Zusammenfassung" htmlFor="zusammenfassung">
+            <Textarea id="zusammenfassung" defaultValue={editing?.summary ?? ""} rows={3} />
           </Field>
-          <Field label="Eröffnet am">
-            <DateField value={openedOn} onChange={setOpenedOn} />
+          <Field label="Eröffnet am" htmlFor="eroffnet-am">
+            <DateField id="eroffnet-am" value={openedOn} onChange={setOpenedOn} />
           </Field>
         </div>
       </Dialog>

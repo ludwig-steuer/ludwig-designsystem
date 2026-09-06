@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import type { ClarificationType } from "@/ludwig/modules/accounting-cases/domain/case";
 import type { ClarificationSeverity } from "@/ludwig/modules/invoices/domain/invoice";
@@ -77,6 +77,8 @@ export function ClarificationEditor({
   audienceHint?: string;
 }) {
   const [type, setType] = useState<ClarificationType>(defaultType);
+  const titleId = useId();
+  const textId = useId();
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [audience, setAudience] = useState<ClarificationAudience>(defaultAudience);
@@ -136,8 +138,10 @@ export function ClarificationEditor({
         label={isComment ? "Worum geht es" : "Die Frage in einem Satz"}
         error={titleError ?? lengthError}
         hint={`Kurz und aussagekräftig — höchstens ${TITLE_MAX} Zeichen.`}
+        htmlFor={titleId}
       >
         <Input
+          id={titleId}
           value={title}
           maxLength={TITLE_MAX + 40}
           invalid={Boolean(titleError ?? lengthError)}
@@ -157,8 +161,10 @@ export function ClarificationEditor({
             ? "Die Notiz steht am Sachverhalt, nicht im Verlauf — sie erwartet keine Antwort."
             : undefined
         }
+        htmlFor={textId}
       >
         <Textarea
+          id={textId}
           value={text}
           rows={5}
           invalid={Boolean(textError)}

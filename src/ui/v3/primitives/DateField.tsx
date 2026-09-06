@@ -35,6 +35,7 @@ export function DateField({
   invalid,
   disabled,
   ariaLabel,
+  id,
   name,
 }: {
   /** ISO `yyyy-mm-dd`, or `null` for empty. */
@@ -45,12 +46,17 @@ export function DateField({
   invalid?: boolean;
   disabled?: boolean;
   ariaLabel?: string;
+  /**
+   * What the `htmlFor` of the surrounding `Field` points at (0104). Separate
+   * from `name`: a field outside a form still needs its word bound to it.
+   */
+  id?: string;
   name?: string;
 }) {
   return (
     <Input
       type="date"
-      id={name}
+      id={id ?? name}
       name={name}
       value={value ?? ""}
       min={min}
@@ -75,6 +81,7 @@ export function DateRangeField({
   min,
   max,
   disabled,
+  id,
 }: {
   from: string | null;
   to: string | null;
@@ -84,6 +91,13 @@ export function DateRangeField({
   min?: string;
   max?: string;
   disabled?: boolean;
+  /**
+   * What the `htmlFor` of the surrounding `Field` points at — it lands on the
+   * **„von"** field: a click on the word belongs at the start of the span, and
+   * a `<label>` can only ever point at one control (0104). „Bis" keeps its own
+   * `ariaLabel`.
+   */
+  id?: string;
 }) {
   // `to` before `from` is a typo, not a statement: swap it instead of
   // producing an error message nobody asked for. But **only once the pair is
@@ -99,6 +113,7 @@ export function DateRangeField({
   return (
     <div className="v2date" onBlur={swapIfInverted}>
       <DateField
+        id={id}
         value={from}
         min={min}
         max={max}

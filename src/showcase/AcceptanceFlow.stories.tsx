@@ -186,14 +186,14 @@ function AcceptancePage() {
                 Spalten — sonst wird er zum Grid-Item und schiebt das Detail
                 in die falsche Spalte (im Browser gesehen, 2026-09-03). */}
             <FilterBar activeCount={filters} onReset={() => setFilters(0)}>
-              <Field label="Zustand">
-                <Select defaultValue="offen" onChange={() => setFilters(1)}>
+              <Field label="Zustand" htmlFor="zustand">
+                <Select id="zustand" defaultValue="offen" onChange={() => setFilters(1)}>
                   <option value="offen">Nur offene</option>
                   <option value="alle">Alle</option>
                 </Select>
               </Field>
-              <Field label="Suche">
-                <Input type="search" placeholder="Sachverhalt oder Kreditor" />
+              <Field label="Suche" htmlFor="suche">
+                <Input id="suche" type="search" placeholder="Sachverhalt oder Kreditor" />
               </Field>
             </FilterBar>
             <MasterDetail

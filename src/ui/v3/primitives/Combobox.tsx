@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionIcon } from "../Icons";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Field, Input } from "./Form";
 
@@ -61,6 +61,10 @@ export function Combobox({
   name?: string;
 }) {
   const [query, setQuery] = useState("");
+  // `id` binds the word to the field, `name` names it in a form (0104). They
+  // used to be one prop, so a combobox without a form had no label either.
+  const autoId = useId();
+  const fieldId = name ?? autoId;
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const box = useRef<HTMLDivElement>(null);
@@ -138,7 +142,7 @@ export function Combobox({
 
   let lastGroup: string | undefined;
   return (
-    <Field label={label} hint={hint} error={error} htmlFor={name}>
+    <Field label={label} hint={hint} error={error} htmlFor={fieldId}>
       <div
         className="v2cmb"
         ref={box}
@@ -150,11 +154,11 @@ export function Combobox({
         }}
       >
         <Input
-          id={name}
+          id={fieldId}
           name={name}
           role="combobox"
           aria-expanded={open}
-          aria-controls={`${name ?? "cmb"}-list`}
+          aria-controls={`${fieldId}-list`}
           autoComplete="off"
           value={text}
           placeholder={placeholder}
@@ -176,7 +180,7 @@ export function Combobox({
           }}
         />
         {open ? (
-          <div className="v2cmb__pop" ref={pop} id={`${name ?? "cmb"}-list`} role="listbox">
+          <div className="v2cmb__pop" ref={pop} id={`${fieldId}-list`} role="listbox">
             {loading ? (
               <div className="v2cmb__empty">Suche läuft …</div>
             ) : hits.length === 0 ? (
