@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/Form.tsx` |
 | Quelle | Abnahme 0019 AmountInput, zweiter Durchgang (2026-09-05), Befund B4 |
 | Auftrag | `Field` rendert `<label htmlFor>` als **Geschwister** des Feldes (`Form.tsx:35`). Ohne ein `name` oder eine `id` am Feld zeigt `htmlFor` ins Leere: gemessen in der Story `AmountInput --filled` ist `input.labels` **leer**. Damit hat das Feld für eine Vorlesehilfe keine Beschriftung, und ein Klick auf das Wort setzt den Fokus nicht ins Feld. |
@@ -286,3 +286,75 @@ Der Prüfer hat zwei Stellen gefunden, die das Feldwort als `div` setzen:
 - [ ] Der Zeitraum heißt „Zeitraum", nicht „Von" (Barrierefreiheits-Baum, `DateField --filled`)
 - [ ] `InlineEdit` bindet sein Wort im Bearbeiten-Modus (`--interactive`)
 - [ ] `renderInput` bekommt die id und kann sie nicht vergessen (Typ)
+
+## Abnahme (zweite Runde, fremd, 2026-09-06)
+
+Zweiter Durchgang durch **alle** Kriterien — die des Nachtrags und die der
+ersten Runde, denn die Behebung darf nichts umgeworfen haben. Abgenommen
+gegen die Spec, nicht gegen den Chat; nicht vom Bauenden. Storybook auf Port
+6107, Chromium headless bei 1440×900, alle Zahlen selbst gemessen.
+
+**Zum Stand des Arbeitsbaums:** eine parallele Sitzung hat während der
+Abnahme an `src/styles/v3.css` gearbeitet (ein angehängter Block `.v2fsm*`
+für 0069) und sechs `StateMachine`-Stories ergänzt; der Bestand wuchs dabei
+von 523 auf **529** Stories. Der Block berührt `Field` nicht, und die sechs
+neuen Stories sind mitgemessen — sie zeigen kein Formularfeld und kein
+`label[for]`.
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| Kein `<Field htmlFor="x">` ohne ein Bedienelement mit `id="x"` — **im ganzen Repo** | Nicht nur `AccountField`: eigene Messung über **alle 529** Stories (`scratchpad/ab2-sweep.mjs`), je Story jedes `label[for]` im Blatt über die DOM-Eigenschaft `label.control` geprüft — sie liefert genau das Bedienelement, an dem das Wort hängt, und `null`, wenn `for` ins Leere zeigt. **112 `label[for]` im Set, null ohne Ziel.** Die neun Stellen des Mangels M1 sind einzeln nachgesehen: `AccountField.stories.tsx:37, 58, 79, 93, 115, 124, 167, 170, 173` tragen jetzt `id="k"`…`id="k9"` passend zum `htmlFor` ihrer Hülle. Gegenprobe mit einem echten Klick in `accountfield--with-candidates`: `for="k"` → Ziel `INPUT#k` (`.v2in v2kf__in`), `labels.length` = 1, `document.activeElement` nach dem Klick `INPUT#k` — in der ersten Runde blieb der Fokus auf `body` | ✓ |
+| Eine `Combobox` **ohne** `name` ist in einer Story zu sehen und gebunden | `v3-primitives-formular-combobox--empty` (`Combobox.stories.tsx:75–80`, `<Combobox label="Gegenkonto" …>` ohne `name`): die Eingabe trägt `id="_r_0_"` aus `useId`, `name` = `null`, `labels.length` = **1** mit dem Text „Gegenkonto", und das `label[for="_r_0_"]` zeigt auf genau diese Eingabe. Der `useId`-Zweig (`Combobox.tsx:67`) ist damit vorgeführt, nicht nur gelesen | ✓ |
+| Der Zeitraum heißt „Zeitraum" statt „Von", und „bis" behält seinen eigenen Namen | `ax.mjs` auf `.v2date input` in `datefield--filled`, also der Barrierefreiheits-Baum, nicht das Blatt: erste Eingabe → Rolle `Date`, **Name „Zeitraum"**, Quellen `relatedElement`, `attribute`, `relatedElement="Zeitraum"`, `attribute (überschrieben)` — das `aria-label` ist jetzt das Überschriebene, das Wort gewinnt. Zweite Eingabe → **Name „Bis"** aus `attribute="Bis"`. In der ersten Runde war es umgekehrt: „Von" schlug die Label-Beziehung, und der Zeitraum hatte gar keinen Namen | ✓ |
+| `InlineEdit` bindet sein Wort im Bearbeiten-Modus, auch über `renderInput` | Beide Wege gemessen, je nach echtem Klick auf „Bearbeiten". `inlineedit--interactive` (Vorgabefeld): `LABEL.v2field__label for="_r_0_"` „Belegart", `INPUT#_r_0_`, `labels.length` = 1. `inlineedit--with-textarea` (**über `renderInput`**): `LABEL for="_r_0_"` „Zusammenfassung", `TEXTAREA#_r_0_`, `labels.length` = 1. Das Wort ist in beiden Fällen ein `<label>`, kein `div` mehr — der Befund 2 der ersten Runde ist behoben, und zwar auch auf dem Weg, der ihn hätte wieder aufreißen können | ✓ |
+| — und `renderInput` kann die id nicht vergessen (Typ) | `InlineEdit.tsx:17–27`: `id: string` steht als **Pflichtfeld** in `InlineEditInputProps`, mit einer JSDoc, die den Grund nennt. Der Typ erzwingt, dass die id ankommt; dass ein eigenes Feld sie auch **setzt**, kann kein Typ erzwingen — hier trägt die Story (`--with-textarea`, gemessen). Stärker geht es an dieser Stelle nicht | ✓ |
+| `FileDrop`: die Überschrift hängt als `aria-describedby` am Knopf, der Hinweis weiterhin auch | `filedrop--empty`: der Knopf `button.v2drop` trägt `aria-describedby="_r_1_ _r_0_"` → aufgelöst `DIV.v2field__label` „Belege hochladen" **und** `SPAN.v2drop__hint` „PDF, JPG oder PNG, höchstens 20 MB je Datei" — die Überschrift zuerst, der Hinweis danach, beide vorhanden. Der zweite `FileDrop` derselben Story (gesperrt) trägt `aria-describedby="_r_3_"` → seine Überschrift; er hat keinen Hinweis, also gibt es dort auch nichts zu verweisen. Das `<input type="file">` bleibt richtigerweise verborgen (`display: none`) und ohne Label — bedient wird die Zone | ✓ |
+
+**Erste Runde — nachgeprüft, ob die Behebung etwas umgeworfen hat**
+
+| Kriterium der ersten Runde | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0 — mit der fremden Arbeit im Baum | ✓ |
+| `pnpm build` grün | In dieser Abnahme untersagt, deshalb wie beim ersten Mal nicht gelaufen. Ersatzweise: der Dev-Server übersetzt und liefert alle 529 Stories, und der Sweep hat jede einzelne geöffnet, ohne Abbruch (`fehler: []`) | offen (nicht geprüft) |
+| `input.labels` ist in keiner Formular-Story mehr leer | Über alle 529 Stories: **239** Bedienelemente in einem `.v2field`, davon **12 ohne `labels`** — und alle zwölf sind das „bis"-Feld eines Zeitraums (`aria-label="Bis"`, ohne id) in elf Stories (`datefield--filled/--empty/--interactive/--with-presets/--edges` [zwei] `/--in-use`, `filterbar--filled/--active/--server-form/--many-fields/--in-use`). Die **neun** Eingaben von `AccountField`, die in der ersten Runde denselben Zustand hatten, sind weg. Damit bleibt genau der Fall offen, den die Spec unter „Was bewusst offen bleibt" nach 0106 verweist — und der dort jetzt nicht mehr bei null anfängt, weil das erste Feld „Zeitraum" heißt | ✓ (bis auf das bewusst offene „bis") |
+| Klick auf das Wort setzt den Fokus ins Feld | Echte Klicks: `accountfield--with-candidates` „Konto" → `INPUT#k` (die einzige Ausnahme der ersten Runde, jetzt getroffen); `combobox--empty` „Gegenkonto" → `INPUT#_r_0_`; `inlineedit--interactive` und `--with-textarea` je auf ihr Feld. Kein Wort mehr, das auf `body` landet | ✓ |
+| `AmountInput` und `Combobox` binden **ohne** `name` | `combobox--empty` gemessen (oben). Für `AmountInput` unverändert: alle elf Story-Aufrufe ohne `name`, `amountinput--filled` → `id="_r_0_"`, `labels` 1 | ✓ |
+| `Field` ohne `htmlFor` übersetzt nicht | `Form.tsx:40`: `htmlFor: string` steht weiter ohne `?` im Typ, und `Form.tsx:45` setzt es am `<label>`. Die Probe der ersten Runde ist damit nicht wiederholt, sondern die Ursache nachgesehen | ✓ |
+| `DateField`, `DateRangeField` und `AccountField` reichen eine `id` durch, beim Zeitraum an „von" | Alle drei jetzt auch **benutzt**: `datefield--filled` → `input#belegdatum`; der Zeitraum → erste Eingabe gebunden und im Barrierefreiheits-Baum „Zeitraum"; `AccountField` → neun Aufrufer setzen die Prop (die Lücke der ersten Runde). Der zehnte Aufruf, `JournalEntryEditor.tsx:603`, steht weiterhin ohne `Field` und mit `ariaLabel` — die Prop bleibt zu Recht optional | ✓ |
+| `id` und `name` sind getrennt | `combobox--empty`: `id="_r_0_"`, `name` = `null`, `labels` 1 — eine Bindung ohne Formularnamen. Umgekehrt `combobox--filled` (`name="konto"`): `id="konto"` | ✓ |
+| Kein Aufrufer verliert seinen `name` | `git diff f564fb5..HEAD -- src \| grep '^-' \| grep 'name='` → genau **zwei** entfernte Zeilen, beide gewollt und keine davon ein Formularfeld eines Aufrufers: `Combobox name="konto2"` in der Story `Empty` (das ist die Behebung von M2) und ein `<Row name="Feld-Label" …>` in `Typography.stories.tsx` (eine Prop der Vorführzeile von 0089, kein `name`-Attribut). Alle übrigen `name=` stehen unverändert | ✓ |
+| Sind die ids eindeutig? | Eigener Durchgang über alle 529 Stories (`scratchpad/ab2-dupid.mjs`): je Story jede `id` des ganzen Dokuments gezählt — **keine doppelte**, auch nicht in den `AccountField`-Stories, die durch die Behebung neun ids dazubekommen haben (`k`…`k9`, je Datei eindeutig) | ✓ |
+
+### Mängel
+
+Keine.
+
+### Beobachtungen außerhalb der Kriterien
+
+1. **Der Satz zum „bis"-Feld ist jetzt richtig — der Abschnitt „Was bewusst
+   offen bleibt" noch nicht ganz.** Er sagt, das „bis"-Feld habe „kein
+   `<label>`, sondern ein `aria-label`". Das stimmt. Was er nicht sagt: das
+   erste Feld heißt seit der Behebung „Zeitraum", nicht mehr „Von" — 0106
+   erbt also eine halb gelöste Gruppe (Name da, Rolle fehlt), nicht eine
+   ungelöste. Der Abschnitt „Korrigiert: das ‚bis'-Feld …" weiter oben sagt es
+   richtig; die beiden Stellen widersprechen sich nicht, stehen aber
+   auseinander.
+2. **Zwei Befunde der ersten Runde sind offen und gehören nicht hierher.**
+   `AppShell.stories.tsx:51` gibt der Kopfzeile ein `<Input type="search">`,
+   das nur vom Platzhalter lebt (T8: Placeholder ist kein Label) — in vier
+   Stories, weiterhin ohne Beschriftung. Und `Input`/`Textarea` in `Form.tsx`
+   (Z. 61, 65) tragen weiter kein `@when`/`@instead`, während `Field` und
+   `Select` es haben. Beides Bestand, von dieser Aufgabe weder verursacht noch
+   verschlimmert; beides verdient eine eigene Zeile im Backlog.
+3. **Die App-Kopie von `Field` wartet weiter.** `ludwig/app`
+   `apps/web/src/ui/v2/primitives/Form.tsx` ist nicht dieses `Field`; die
+   Pflicht-Prop wird dort bei der Migration fällig. Unverändert gegenüber der
+   ersten Runde, hier nur zur Erinnerung.
+4. **Die Zahl der Bedienelemente ist von 242 auf 239 gefallen.** Kein
+   Rückschritt: die drei fehlenden stammen aus Stories, die eine parallele
+   Sitzung seit dem ersten Durchgang umgebaut hat (Buchungssatz-Familie), und
+   in keiner davon fehlt eine Bindung.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-06

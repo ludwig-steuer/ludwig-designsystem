@@ -247,3 +247,149 @@ die Vorlage, nicht das Set — und der Sweep sieht sie zu Recht nicht.
 - [ ] Kein Spaltenkopf bricht um — über alle Stories gemessen
 - [ ] Keine `letter-spacing` mehr an Beischriften, die keine Versalien tragen (`grep`)
 - [ ] `--tr-overline` existiert nicht mehr; kein Kommentar spricht mehr von Versalien-Stufen
+
+## Abnahme (zweite Runde, fremd, 2026-09-06)
+
+Zweiter Durchgang durch **alle** Kriterien — die des Nachtrags und die der
+ersten Runde, denn die Behebung darf nichts umgeworfen haben. Abgenommen
+gegen die Spec, nicht gegen den Chat; nicht vom Bauenden. Storybook auf Port
+6107, Chromium headless bei 1440×900.
+
+**Zum Stand des Arbeitsbaums:** während der Abnahme lag fremde Arbeit einer
+parallelen Sitzung im Baum (`src/styles/v3.css`, ein angehängter Block
+`.v2fsm*` für 0069). Der Block ist nachgesehen: er enthält kein
+`text-transform`, keine `letter-spacing` und keine der Regeln dieser Aufgabe —
+die Messung unten misst 0089. Dieselbe Sitzung hat mitten im Durchgang **sechs
+Stories** ergänzt (`StateMachine --*`); der Bestand wuchs dabei von 523 auf
+529. Die sechs sind einzeln nachgemessen, damit keine Lücke bleibt.
+
+**Nachtrag**
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `.sb__navlabel` und `.hero__summary > .lbl` stehen auf 700, die Wert-Beschriftungen auf 600 | `.sb__navlabel` im Blatt gemessen, `v3-primitives-navigation-navlist--in-shell`: alle fünf Abschnittsköpfe („Übersicht", „Buchung", „Stammdaten", „Reporting", „Kommunikation") → `12.5px / **700** / ls normal / tt none / rgb(111, 132, 153)` gegen `.sb__navitem` `14px / 400 / rgb(197, 210, 223)`. Im Bild ist der Kopf jetzt fett und die Zeile mager — die Verwechslung der ersten Runde ist weg. Die drei `hero`-Regeln haben **keine Story** (`grep -rn "hero__\|hero-fact" src/ui/ src/reference/` → keine Zeile; sie liegen allein in der toten v1-Schicht), deshalb am Quelltext geprüft: `app-chrome.css:536` `.hero__summary > .lbl` `font-weight: 700`, `:528` `.hero__total .lbl` und `:532` `.hero-fact .lbl` je `font-size: 12.5px; font-weight: 600` | ✓ |
+| Der Kopfkommentar von `app-chrome.css` nennt alle drei Rollen | `app-chrome.css:7–10`: „Die Rollen sind dieselben drei wie dort: Beschriftung eines Wertes 12,5 px / 600, Überzeile 11,5 px / 600, Gruppen- und Abschnittskopf 12,5 px / 700." Der Satz „dieselben **zwei** Stufen", den die erste Runde als Selbstauskunft der Abweichung zitiert hat, steht noch in Z. 3 — er beschreibt dort aber die neun angefassten Stellen, nicht die Rollen, und wird von Z. 7–10 richtiggestellt | ✓ |
+| Spaltenköpfe sind Beschriftungen: `.v2tbl__head` und `.bse__head` beide 12,5 px / 600 | Über **alle 529** Stories gemessen (`scratchpad/ab2-sweep.mjs`, ein Durchgang, je Kopf der berechnete Stil): **eine einzige** Ausprägung je Klasse — `.v2tbl__head` `12.5px/600/ls normal/tt none` (102 Vorkommen) und `.bse__head` `12.5px/600/ls normal/tt none` (14 Vorkommen). Keine Story weicht ab. Einzelmessung `table--filled`: Kopf `12.5/600/rgb(113,113,113)`; `journalentryeditor--s-2-split-full`: Kopf `12.5/600/rgb(113,113,113)`. Die beiden stehen jetzt gleich | ✓ |
+| — und der Kopf bleibt vom Inhalt unterscheidbar (Nachprüfung des Entscheids, im Bild) | Angesehen, nicht nur gerechnet: `table--filled` und `table--density` (alle drei Dichten) als Bild. Der Kopf trägt **drei** Unterschiede zum Inhalt, von denen die Größe der schwächste ist: Farbe `rgb(113,113,113)` gegen `rgb(45,45,45)`, Gewicht 600 gegen 400, dazu die Trennlinie unter der Kopfzeile. Ein Punkt Größenunterschied (12,5 gegen 13,5) trägt für sich nichts, muss es aber auch nicht — im Bild liest sich „Gegenpartei / Betrag / Stand / Fällig" als das leiseste Wort der Tabelle, und der Inhalt darunter steht dunkel und halbfett. Der Entscheid trägt. Was auffällt: der Kopf ist jetzt **leiser als die Zwischenzeile** (`.v2tbl__group` „Überfällig", `12.5/700/rgb(92,92,92)` auf getönter Bank) — das ist die Ordnung, die der Entscheid will (Gruppenkopf 700 über Beschriftung 600), sieht aber ungewohnt aus, weil die Gruppe damit lauter ruft als die Spalte, die sie gliedert | ✓ |
+| Kein Spaltenkopf bricht um — über alle Stories gemessen | `scratchpad/ab2-sweep.mjs` über alle 529 Stories, beide Klassen, je Zelle die gemessene Höhe gegen ihre eigene `line-height` (Schwelle 1,55 Zeilen): **624 Kopfzellen** (509 `.v2tbl__head`, 115 `.bse__head`), **null** mehrzeilig. Die Nachmessung des Bauenden (513 Zellen) hat die `.bse__head` nicht mitgezählt — das Werkzeug `head-wrap.mjs` fragt nur `.v2tbl__head` ab; mit beiden Klassen bleibt der Befund derselbe | ✓ |
+| Keine `letter-spacing` mehr an Beischriften, die keine Versalien tragen | `grep -n "letter-spacing" src/styles/v3.css src/styles/app-chrome.css src/styles/tokens.css`: in `v3.css` **keine einzige** Zeile mehr — die vier Regeln der ersten Runde (`.v2cmd__grp`, `.v2phead__over`, `.v2cmb__grp`, `.v2tl__day`) sind weg. In `tokens.css` nur die fünf Überschriften-Token (`--tr-display`…`--tr-h4`, alle negativ, Display-Tracking). In `app-chrome.css` drei: zwei negative an `h1` (Z. 362, 520) und zwei positive an `.role-badge` (Z. 211, 0,005 em) und `.conf` (Z. 653, 10,5 px / 0,02 em) — beides Pillen der toten v1-Schicht, von keinem Baustein und keiner Story benutzt (geprüft gegen `src/ui/` und `src/reference/`), keine Beischriften. Siehe Beobachtung 2 | ✓ |
+| `--tr-overline` existiert nicht mehr | `grep -rn "tr-overline" src/` → keine Zeile. `.lw-overline` (`tokens.css:317–324`) steht ohne `letter-spacing`, ohne `text-transform`, mit Gewicht 600 — die Klasse ist erhalten | ✓ |
+| — kein Kommentar spricht mehr von Versalien-Stufen | `grep -rn "Versalien" src/styles/ src/ui/`: in den Stylesheets beschreibt jede Fundstelle die **Abschaffung** (`v3.css:854–871`, `:970`, `:2069`, `:2693`, `tokens.css:313–316`, `app-chrome.css:1–10`) — richtig. Unter `src/ui/` stehen aber **drei** Kommentare, die eine Versalien-Stufe als heutige Gestalt behaupten, die es nicht mehr gibt | ✗ (M1) |
+
+**Erste Runde — nachgeprüft, ob die Behebung etwas umgeworfen hat**
+
+| Kriterium der ersten Runde | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe, Exit 0 — mit der fremden Arbeit im Baum. `pnpm build` in dieser Abnahme untersagt, deshalb wie beim ersten Mal nicht gemessen | ✓ (build offen) |
+| Keine sichtbaren Versalien mehr im Set | Eigener, breiter Sweep über **alle 529** Stories (`ab2-sweep.mjs`): je Element `text-transform` **über die eigenen Textknoten** (also auch an Elementen mit Kindern), dazu `capitalize`, dazu `::before`/`::after` mit eigenem `text-transform`, dazu `font-variant-caps`. **Null** Treffer, die sechs neuen `StateMachine`-Stories eingeschlossen. Gegenprobe im Quelltext: `grep -rn "text-transform" src/styles/{v3,app-chrome,tokens}.css` → nur `app-chrome.css:771` (`none`) und `v3.css:855` (ein Kommentar, der die Regel zitiert); `grep -rn "uppercase\|textTransform" src/ui/` → keine Zeile | ✓ |
+| `.v2field__label` 12,5 px / 600, ohne Sperrung, ohne `text-transform` | `field--filled`: `LABEL «Beleg 1»` → `12.5px / 600 / ls normal / tt none / rgb(92, 92, 92)`, daneben `.v2in` `13.5px / 400 / rgb(45, 45, 45)`. Unverändert gegenüber der ersten Runde | ✓ |
+| Die `<legend>` einer `RadioGroup` trägt dieselbe Stufe | `radiogroup--filled`: `LEGEND «Umfang des Exports»` → `12.5px / 600 / ls normal / tt none / rgb(92, 92, 92)` — Zeichen für Zeichen dasselbe wie das Feld-Label | ✓ |
+| `.lw-overline` ohne Versalien und ohne Sperrung, als Klasse erhalten | `tokens.css:317–324` unverändert: Gewicht 600, `--fs-overline`, `--color-text-muted`, kein `text-transform`, keine `letter-spacing`. Der Kopfkommentar (Z. 312–316) begründet weiter, warum die Überzeile keine benannte Ausnahme ist | ✓ |
+| Die Beschriftung liest sich nicht wie ihr Wert | Im Bild nachgesehen an `field--filled`, `table--filled`, `table--density`, `navlist--in-shell`, `journalentryeditor--s-2-split-full`. Der neue Fall ist die Seitenleiste: der Abschnittskopf steht jetzt auf 700 und ist damit **fetter** als seine Zeilen (400), obwohl er kleiner und leiser ist — die Stelle, die in der ersten Runde als „das leiseste Wort in der Leiste" bemängelt wurde, trägt jetzt. In der ersten Gruppe heißt der Kopf weiter wie die Zeile darunter („Übersicht" über „Übersicht"), ist aber durch Gewicht, Größe, Farbe und das fehlende Icon klar getrennt | ✓ |
+| Keine doppelte Wirkung auf das Layout (Gegenprobe) | `scratchpad/ab2-overflow.mjs` über alle 529 Stories: je Kopfzelle `scrollWidth − clientWidth`, einmal im Bestand und einmal mit der Typografie **vor** 0089 im Blatt wieder eingesetzt (`.v2tbl__head` 11 px/600/0,04 em, `.bse__head` 10,5 px/400). **Eine** Zelle im ganzen Set läuft über ihre Spalte hinaus, und zwar in beiden Zuständen — siehe Beobachtung 1 | ✓ (kein Rückschritt) |
+
+### Mängel
+
+1. **Drei Kommentare beschreiben eine Versalien-Stufe, die es seit 0089 nicht
+   mehr gibt.** Das Kriterium des Nachtrags verlangt ausdrücklich „kein
+   Kommentar spricht mehr von Versalien-Stufen"; die erste Runde hat dieselbe
+   Krankheit an `--fs-ui-2xs` („Versalien-Label") und `.v2bar__label`
+   („Versalienkopf") gefunden, und beide sind behoben. Unter `src/ui/` sind
+   drei stehen geblieben:
+   - `src/ui/v3/primitives/ProseCard.tsx:4` — „Fließtext in einer Karte:
+     **Versalien-Kopf**, 13,5 px Text." Das ist der JSDoc-Block der
+     Komponente selbst, derselbe, der `@when`/`@instead` trägt. Gemessen ist
+     `.v2prose__h` (`v3.css:693–696`) `--fs-ui-sm` / 700 / `--color-text-muted`
+     — ein Gruppenkopf nach dem Entscheid, ohne jede Versalie.
+   - `src/ui/v3/primitives/ProseCard.stories.tsx:8` — „Fließtext-Karte für
+     längere Erklärungen — **Versalien-Header**, 13,5 px Text."
+   - `src/ui/v3/primitives/FieldList.stories.tsx:17` — „Standardton —
+     Label/Wert-Paare in einer Karte mit **Versalien-Header**."
+
+   Die beiden Story-Kommentare sind nicht nur Kommentare: Storybook rendert
+   sie als Beschreibung der Story. Ein Leser bekommt dort also die Auskunft,
+   die Karte trage einen Versalien-Header — während direkt darunter das
+   Gegenteil zu sehen ist. Damit dokumentiert das Set einen Regelbruch als
+   seine Gestalt, ausgerechnet in der Aufgabe, die ihn abgeschafft hat.
+   `grep -rn "Versalien" src/ui/` findet alle drei.
+
+### Beobachtungen außerhalb der Kriterien
+
+1. **Ein Spaltenkopf im Buchungssatz-Editor druckt über seinen Nachbarn.**
+   `journalentryeditor--s-2-split-full`: die Spalte „Text" steht im Raster auf
+   `minmax(0,1fr)` (`JournalEntryEditor.tsx:244`) und fällt bei der Breite
+   der Story auf **0 px** zusammen; der Kopf `<span>Text</span>`
+   (`JournalEntryEditor.tsx:289`) wird trotzdem gerendert, läuft mit
+   `overflow: visible` **26 px** aus seiner Nullspalte heraus und legt sich
+   auf „KOST". Im Bild steht dort „TKOST". Das ist **kein Rückschritt durch
+   0089**: mit der Typografie von vorher (10,5 px / 400) waren es 21 px, also
+   derselbe Überdruck, nur fünf Pixel schmaler — gemessen im selben Lauf
+   (`ab2-overflow.mjs`, Spalte „vorher"). Der größere Kopf macht einen
+   vorhandenen Fehler sichtbarer, er verursacht ihn nicht. Es ist die einzige
+   solche Stelle im ganzen Set. Gehört zur Buchungssatz-Familie, nicht zu
+   0089: entweder fällt der Kopf mit seiner Spalte weg, oder die Spalte
+   bekommt ein Mindestmaß.
+2. **Zwei Pillen tragen weiter Sperrung.** `.role-badge`
+   (`app-chrome.css:205–212`, 11,5 px / 0,005 em) und `.conf` (`:651–656`,
+   10,5 px / 600 / 0,02 em). Beide standen nie in Versalien und lagen deshalb
+   nie im Umfang; `.conf` hat aber genau die Gestalt der vier Regeln, die in
+   dieser Runde in `v3.css` bereinigt wurden — kleine Schrift, halbfett,
+   positive Sperrung. Beide gehören zur toten v1-Schicht (kein Baustein, keine
+   Story benutzt sie), fallen also mit den 17 Stellen aus `components.css` und
+   `booking.css`, die 0089 bewusst liegen gelassen hat.
+3. **Der Spaltenkopf ist jetzt die leiseste Zeile der Tabelle.** Nach dem
+   Entscheid richtig (Beschriftung 600, Gruppenkopf 700), im Bild aber
+   ungewohnt: die Zwischenzeile `.v2tbl__group` ruft lauter als der Kopf, den
+   sie gliedert. Trägt hier, weil die Kopfzeile ihre Trennlinie hat — es ist
+   dieselbe Konstruktion, die die erste Runde schon an der `FieldList`
+   angemerkt hat und die als Erste kippt, wenn ein Kopf einmal ohne
+   Trennlinie steht.
+4. **Der Bestand ist während der Abnahme gewachsen.** Eine parallele Sitzung
+   hat sechs `StateMachine`-Stories und einen `.v2fsm*`-Block in `v3.css`
+   ergänzt (0069). Beide sind mitgemessen: keine Versalien, keine
+   `letter-spacing`, kein `text-transform`. Der neue Block hält die drei
+   Stufen ein (`.v2fsm__label` `--fs-ui-sm`/600, `.v2fsm__value` und
+   `.v2fsm__now` `--fs-ui-xs`).
+
+Abgenommen von / am: **nicht abgenommen**, Claude (Abnahme-Agent), 2026-09-06
+· Status zurück auf `in Arbeit`, ein Mangel: drei Kommentare unter `src/ui/`
+behaupten weiter eine Versalien-Stufe, zwei davon sichtbar in der
+Storybook-Beschreibung (M1). Alles andere trägt: die drei Rollen sitzen jetzt
+auch in `app-chrome.css`, der Spaltenkopf hat seine Rolle bekommen und steht
+in beiden Familien gleich (12,5 / 600), keine der 624 Kopfzellen bricht um,
+und über 529 Stories ist keine sichtbare Versalie mehr zu finden.
+
+## Der Mangel der zweiten Abnahme — behoben
+
+Drei Kommentare unter `src/ui/` behaupteten weiter eine Versalien-Stufe, die
+es nicht mehr gibt: `ProseCard.tsx` („Versalien-Kopf" im JSDoc der
+Komponente), `ProseCard.stories.tsx` und `FieldList.stories.tsx`
+(„Versalien-Header"). Die beiden Story-Kommentare rendert Storybook als
+Beschreibung — dort stand die Auskunft direkt über dem Gegenbeweis. Alle drei
+heißen jetzt „Abschnittskopf".
+
+Dieselbe Krankheit wie in der ersten Runde an `--fs-ui-2xs` und
+`.v2bar__label`; übersehen, weil ich im **Stylesheet** gesucht hatte und nicht
+im Code.
+
+## Die drei Befunde der Abnahme — festgehalten, nicht hier behoben
+
+1. **Ein Spaltenkopf druckt über seinen Nachbarn** (`JournalEntryEditor
+   --s-2-split-full`): die Spalte „Text" steht auf `minmax(0,1fr)`, fällt auf
+   0 px zusammen, und der Kopf läuft 26 px in „Kost" hinein. **Kein
+   Rückschritt dieser Aufgabe** — mit der alten Typografie waren es 21 px,
+   derselbe Überdruck fünf Pixel schmaler. Er gehört zur Buchungssatz-Familie
+   und ist als Befund in 0044 notiert.
+2. Zwei Pillen der v1-Schicht tragen weiter Sperrung (`.conf`,
+   `.role-badge`) — dieselbe Gestalt wie die vier Regeln, die diese Runde in
+   `v3.css` bereinigt hat. Sie fallen unter dieselbe Begründung wie die 17
+   übrigen Stellen dieser Schicht: keine v3-Komponente benutzt sie.
+3. **Der Spaltenkopf ist jetzt die leiseste Zeile der Tabelle** — die
+   Zwischenzeile (`.v2tbl__group`, 700) ruft lauter als die Spalte, die sie
+   gliedert. Nach dem Entscheid richtig (ein Gruppenkopf gliedert, eine
+   Spaltenbeschriftung benennt), im Bild ungewohnt. Wer es umdreht, dreht die
+   Rollen um; das wäre eine neue Entscheidung, keine Korrektur.
+
+## Abnahmekriterien (Nachtrag der zweiten Runde)
+
+- [ ] Kein Kommentar unter `src/` spricht mehr von einer Versalien-Stufe (`grep`, **auch** in `.tsx`)

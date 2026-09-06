@@ -5,7 +5,7 @@ const meta: Meta<typeof ProseCard> = { title: "v3/Primitives/Fläche/ProseCard",
 export default meta;
 type Story = StoryObj<typeof ProseCard>;
 
-/** Fließtext-Karte für längere Erklärungen — Versalien-Header, 13,5 px Text. */
+/** Fließtext-Karte für längere Erklärungen — Abschnittskopf, 13,5 px Text. */
 export const Report: Story = {
   render: () => (
     <ProseCard title="Letzter Bericht">

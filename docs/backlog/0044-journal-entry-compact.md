@@ -361,3 +361,17 @@ der Editor sein Journal über `JournalEntryCard` (`totals={false}`), und
 
 - [ ] Kein deutscher Kommentar mehr in `JournalEntryCompact.tsx` (`grep`)
 - [ ] offen: das Herauslösen aus `JournalEntryEditor.tsx` — wartet auf die parallele Sitzung
+
+## Befund aus der Abnahme von 0089 (2026-09-06)
+
+**Ein Spaltenkopf druckt über seinen Nachbarn.** In
+`JournalEntryEditor --s-2-split-full` steht die Spalte „Text" auf
+`minmax(0, 1fr)` und fällt auf **0 px** zusammen; der Kopf wird trotzdem
+gerendert und läuft **26 px** in „Kost" hinein — im Bild steht dort „TKost".
+
+Kein Rückschritt aus 0089: mit der alten Typografie waren es 21 px, derselbe
+Überdruck fünf Pixel schmaler. Es ist die einzige solche Stelle im Set, und
+sie gehört zu dieser Familie — wer das Journal-Markup herauslöst (Punkt 1
+dieser Aufgabe), sollte den Spaltensatz gleich mitprüfen: eine Spalte, die auf
+null fallen darf, braucht entweder eine Mindestbreite oder einen Kopf, der
+mitschrumpft.
