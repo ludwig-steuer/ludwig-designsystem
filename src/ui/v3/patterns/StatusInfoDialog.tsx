@@ -7,8 +7,13 @@ import { axisLegend, type StatusAxis } from "@/ludwig/ui/status/status-registry"
 
 interface StatusInfoDialogProps {
   axis: StatusAxis;
-  /** Aktueller DB-Wert — wird in der Liste hervorgehoben. */
-  current?: string | null;
+  /**
+   * Aktueller DB-Wert — wird in der Liste hervorgehoben. `undefined` steht
+   * ausdrücklich mit drin: der Aufrufer reicht durch, was er hat, und unter
+   * `exactOptionalPropertyTypes` ist „die Prop fehlt" nicht dasselbe wie „die
+   * Prop ist undefined".
+   */
+  current?: string | null | undefined;
   open: boolean;
   onClose: () => void;
 }

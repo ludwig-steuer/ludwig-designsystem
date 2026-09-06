@@ -24,8 +24,6 @@ import {
   ActionIcon,
   ENTITY_ICON,
   EntityIcon,
-  type ActionKey,
-  type EntityKey,
   type IconEntry,
 } from "./Icons";
 

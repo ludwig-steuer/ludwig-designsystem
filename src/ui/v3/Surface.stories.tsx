@@ -20,7 +20,11 @@ type Story = StoryObj;
 
 /** Every token of one family declared in `tokens.css`, in file order. */
 const family = (prefix: string) =>
-  [...tokensCss.matchAll(new RegExp(`^ {2}(--${prefix}-[a-z0-9-]+):`, "gm"))].map((m) => m[1]);
+  // `flatMap`: a group that did not match is not a token, and saying so is
+  // cheaper than asserting it away (strict flags).
+  [...tokensCss.matchAll(new RegExp(`^ {2}(--${prefix}-[a-z0-9-]+):`, "gm"))].flatMap((m) =>
+    m[1] ? [m[1]] : [],
+  );
 
 const SPACE = family("space");
 const RADIUS = family("radius");

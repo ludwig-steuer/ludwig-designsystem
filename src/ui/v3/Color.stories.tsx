@@ -21,7 +21,11 @@ type Story = StoryObj;
 /* ── Measurement ──────────────────────────────────────────────────────── */
 
 /** Every `--color-*` declared in `tokens.css`, in file order. */
-const COLOR_TOKENS = [...tokensCss.matchAll(/^ {2}(--color-[a-z0-9-]+):/gm)].map((m) => m[1]);
+const COLOR_TOKENS: string[] = [...tokensCss.matchAll(/^ {2}(--color-[a-z0-9-]+):/gm)].flatMap((m) =>
+  // `flatMap` over `map`: a group that did not match is not a token, and under
+  // `noUncheckedIndexedAccess` saying so is cheaper than asserting it away.
+  m[1] ? [m[1]] : [],
+);
 
 /**
  * Everything that could read a token — the stylesheets and v3 itself.
@@ -44,7 +48,10 @@ const readToken = (token: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(token).trim();
 
 /** Resolved colour of a token as [r, g, b, alpha] — the browser parses it. */
-function tokenRgba(token: string): number[] {
+/** A colour is four numbers, not „an array of numbers" — the tuple says so. */
+type Rgba = [number, number, number, number];
+
+function tokenRgba(token: string): Rgba {
   const probe = document.createElement("span");
   probe.style.color = `var(${token})`;
   document.body.appendChild(probe);
@@ -58,15 +65,24 @@ const channel = (c: number) => {
   const s = c / 255;
   return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
 };
-const luminance = (rgb: number[]) =>
-  0.2126 * channel(rgb[0]) + 0.7152 * channel(rgb[1]) + 0.0722 * channel(rgb[2]);
-const over = (fg: number[], bg: number[]) => fg.slice(0, 3).map((c, i) => c * fg[3] + bg[i] * (1 - fg[3]));
+const luminance = ([r, g, b]: Rgba) =>
+  0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+/** Composite the foreground over the background; the alpha rides on the front. */
+const over = (fg: Rgba, bg: Rgba): Rgba => [
+  fg[0] * fg[3] + bg[0] * (1 - fg[3]),
+  fg[1] * fg[3] + bg[1] * (1 - fg[3]),
+  fg[2] * fg[3] + bg[2] * (1 - fg[3]),
+  1,
+];
 
 /** WCAG 2.x contrast of one token against another, alpha composited. */
 function contrast(token: string, backgroundToken: string): number {
   const bg = tokenRgba(backgroundToken);
   const fg = over(tokenRgba(token), bg);
-  const [light, dark] = [luminance(fg), luminance(bg)].sort((a, b) => b - a);
+  const a = luminance(fg);
+  const b = luminance(bg);
+  const light = Math.max(a, b);
+  const dark = Math.min(a, b);
   return (light + 0.05) / (dark + 0.05);
 }
 
@@ -424,7 +440,8 @@ const OWN_BACKGROUND: Record<string, string> = {
 };
 
 /** Text on dark is measured against dark — everything else against the page. */
-const GROUNDS = (token: string) =>
+/** The two grounds a token is measured against — a pair, not „some strings". */
+const GROUNDS = (token: string): [string, string] =>
   token.startsWith("--color-text-on-dark")
     ? ["--color-primary", "--color-primary-900"]
     : ["--color-bg", "--color-bg-soft"];
@@ -448,8 +465,9 @@ export const Contrast: Story = {
         const [ground, second] = GROUNDS(token);
         pairs.push({ token, background: ground, threshold: 4.5, why: "Text" });
         pairs.push({ token, background: second, threshold: 4.5, why: "Text auf der zweiten Fläche" });
-        if (OWN_BACKGROUND[token]) {
-          pairs.push({ token, background: OWN_BACKGROUND[token], threshold: 4.5, why: "Text auf der eigenen Fläche" });
+        const own = OWN_BACKGROUND[token];
+        if (own) {
+          pairs.push({ token, background: own, threshold: 4.5, why: "Text auf der eigenen Fläche" });
         }
       } else if (IDENTIFYING_EDGE.includes(token)) {
         pairs.push({ token, background: "--color-bg", threshold: 3, why: "Rand, Icon, Fokus" });
