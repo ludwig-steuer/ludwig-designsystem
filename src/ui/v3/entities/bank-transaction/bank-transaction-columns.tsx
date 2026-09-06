@@ -145,13 +145,19 @@ export function bankTransactionColumns({
     eventState: {
       key: "eventState",
       header: "Buchung",
-      width: "140px",
+      // 160 px, gemessen: „Keine Buchung nötig" ist mit 150 px das breiteste
+      // Wort der Achse. Eine feste Spur, die schmaler ist als ihr breitester
+      // Wert, schiebt ihn in den Nachbarn — und `max-content` scheidet aus,
+      // weil Kopf und Zeile getrennte Raster sind (0106).
+      width: "160px",
       cell: (t) => <EventStateCell transaction={t} />,
     },
     matchStage: {
       key: "matchStage",
       header: "DATEV-Historie",
-      width: "160px",
+      // 180 px: „außerhalb des Bestands" braucht 169 px — die Spur stand auf
+      // 160 und der Text lief 9 px in die Rinne. Gemessen, nicht geschätzt.
+      width: "180px",
       // Since `cc141f7b` there is an axis for this (`bank_match_stage`), and
       // with it the four open classes — 29 % of the stock — have a word for
       // the first time. Before that a tick said yes and nothing said no.

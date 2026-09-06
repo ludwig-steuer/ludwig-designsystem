@@ -199,6 +199,10 @@ export function SelectAllCell({
       type="checkbox"
       className="v2check"
       checked={all}
+      // Nothing to choose: an empty list left the box live, and a control that
+      // does nothing is the case V14 forbids for keys — a box is no different.
+      // Measured in the empty story of 0086.
+      disabled={order.length === 0}
       aria-label={label}
       onChange={(e) => setAll(e.target.checked)}
       onClick={(e) => e.stopPropagation()}

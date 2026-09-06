@@ -3094,7 +3094,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2btxrow__cases { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .v2btxrow__rest { font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
 .v2btxrow__states { display: flex; flex-direction: column; gap: 2px; }
-.v2btxrow__state { display: flex; align-items: baseline; gap: var(--space-1); }
+/* Die Fallnummer steht **über** dem Badge, nicht daneben: nebeneinander
+   brauchte die Spur 187 px für den längsten Zustand („Keine Buchung nötig"),
+   und diese Breite hätte jede Zeile bezahlt — die Mehrfach-Zuordnung sind
+   4 %. Gestapelt kostet sie nur diese 4 % eine Zeile, und die sind ohnehin
+   die höchsten. Gemessen: 187 → 150 px Bedarf. */
+.v2btxrow__state { display: grid; justify-items: start; }
 .v2btxrow__statefor { font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
 /* Ein Zähler, kein Zustand: deshalb kein Badge, sondern die Zahl mit ihrem
    Wort — die Achse `klaerung` ist eine Dringlichkeit je Rückfrage, und die

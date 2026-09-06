@@ -1,0 +1,153 @@
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { useState } from "react";
+import { BankTransactionWorklist } from "./BankTransactionWorklist";
+import type { BankTransactionRowData } from "./bank-transaction";
+import type { BulkAction } from "../../primitives/Selection";
+import { PageHeader } from "../../primitives/PageHeader";
+
+const meta: Meta<typeof BankTransactionWorklist> = {
+  title: "v3/Entitäten/Kontoauszugsposition/BankTransactionWorklist",
+  component: BankTransactionWorklist,
+};
+export default meta;
+type Story = StoryObj<typeof BankTransactionWorklist>;
+
+const caseHref = (id: string) => `#fall-${id}`;
+
+const T = (over: Partial<BankTransactionRowData>): BankTransactionRowData => ({
+  id: "bt-1",
+  postingDate: "2026-08-26",
+  amount: -412,
+  currency: "EUR",
+  counterpartyName: "Stadtwerke Musterstadt",
+  purpose: "EREF+SW-2026-08 SVWZ+Abschlag Strom 08/2026",
+  matchStage: "unclear_none",
+  cases: [],
+  allocatedSum: 0,
+  openClarificationsCount: 0,
+  ...over,
+});
+
+const OPEN: BankTransactionRowData[] = [
+  T({ id: "o-1" }),
+  T({ id: "o-2", postingDate: "2026-08-27", amount: -89.9, counterpartyName: null, purpose: "SVWZ+Kontoführungsentgelt August 2026", matchStage: "beyond_bookings" }),
+  T({ id: "o-3", postingDate: "2026-08-28", amount: 240, counterpartyName: "Musterbau GmbH", purpose: "SVWZ+Gutschrift Retoure", matchStage: "unclear_multi" }),
+  T({ id: "o-4", postingDate: "2026-08-31", amount: -1799, counterpartyName: "Fuhrpark Leasing AG", purpose: "EREF+VERTRAG-2026-000441827 SVWZ+Leasingrate 14 von 36", matchStage: "no_account" }),
+];
+
+const HEAD = { title: "Offene Zahlungen", sub: "Commerzbank · 1210 · 4 von 251" };
+
+/**
+ * Die beiden Sammelaktionen im Rundlauf. **Welcher** Sachverhalt es wird,
+ * entscheidet der Aufrufer: der `CasePicker` (0084) ist nicht gebaut, und eine
+ * Liste, die selbst einen öffnete, entschiede etwas, das ihr nicht gehört.
+ */
+export const Filled: Story = {
+  render: function Render() {
+    const [last, setLast] = useState<string | null>(null);
+    const actions: BulkAction[] = [
+      {
+        label: "Neuen Sachverhalt anlegen",
+        hotkey: "N",
+        action: async (keys) => {
+          setLast(`Neuer Sachverhalt aus ${keys.length} Zahlung(en)`);
+        },
+      },
+      {
+        label: "Bestehendem zuordnen",
+        action: async (keys) => {
+          setLast(`${keys.length} Zahlung(en) an den Sachverhalt des Aufrufers`);
+        },
+      },
+    ];
+    return (
+      <div style={{ maxWidth: 1100, display: "grid", gap: "var(--space-3)" }}>
+        <BankTransactionWorklist
+          transactions={OPEN}
+          caseHref={caseHref}
+          head={HEAD}
+          bulkActions={actions}
+        />
+        <span className="v2sub">{last ?? "Noch nichts ausgelöst."}</span>
+      </div>
+    );
+  },
+};
+
+/**
+ * Vier Spalten statt sieben: kein DATEV-Haken, keine Sachverhalts-Spalte —
+ * beide sagten hier in **jeder** Zeile dasselbe. `columns` zeigt, dass der
+ * Aufrufer den Satz erweitern darf, ohne die Reihenfolge zu ändern.
+ */
+export const WithMatchStage: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1250 }}>
+      <BankTransactionWorklist
+        transactions={OPEN}
+        caseHref={caseHref}
+        head={HEAD}
+        columns={["postingDate", "counterparty", "purpose", "matchStage", "amount"]}
+        bulkActions={[]}
+      />
+    </div>
+  ),
+};
+
+/** Nichts offen ist hier ein **Erfolg** — und sagt es mit dem Haken. */
+export const Empty: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1100 }}>
+      <BankTransactionWorklist
+        transactions={[]}
+        caseHref={caseHref}
+        head={{ title: "Offene Zahlungen", sub: "Commerzbank · 1210" }}
+        bulkActions={[]}
+      />
+    </div>
+  ),
+};
+
+/** Lädt und Fehler — der Fehler nennt Ursache und nächsten Schritt (T5). */
+export const LoadingAndError: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1100, display: "grid", gap: "var(--space-6)" }}>
+      <BankTransactionWorklist transactions={[]} caseHref={caseHref} head={HEAD} bulkActions={[]} loading />
+      <BankTransactionWorklist
+        transactions={[]}
+        caseHref={caseHref}
+        head={HEAD}
+        bulkActions={[]}
+        error={{ message: "Die offenen Zahlungen konnten nicht geladen werden. Der Abgleich-Lauf vom 01.09. steht noch aus." }}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Im Einsatz: die Seite gruppiert nach Konto und stellt **je Konto eine**
+ * Liste. Das Gruppieren gehört der Seite — sie weiß, welche Konten es gibt;
+ * die Liste weiß nur ihres.
+ */
+export const InUse: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1100, display: "grid", gap: "var(--space-5)" }}>
+      <PageHeader
+        overline="Musterbau GmbH · Wirtschaftsjahr 2026"
+        title="Offene Zahlungen"
+        description="Sechs Zahlungen auf zwei Konten gehören noch keinem Sachverhalt."
+      />
+      <BankTransactionWorklist
+        transactions={OPEN}
+        caseHref={caseHref}
+        head={{ title: "Commerzbank · 1210", sub: "4 offen" }}
+        bulkActions={[]}
+      />
+      <BankTransactionWorklist
+        transactions={[T({ id: "s-1", postingDate: "2026-08-29", amount: -55.4, counterpartyName: "Deutsche Post AG", purpose: "SVWZ+Porto August", matchStage: "unclear_none" }), T({ id: "s-2", postingDate: "2026-08-30", amount: -18.9, counterpartyName: null, purpose: "SVWZ+Kartenzahlung 30.08.2026", matchStage: "unclear_none" })]}
+        caseHref={caseHref}
+        head={{ title: "Sparkasse · 1220", sub: "2 offen" }}
+        bulkActions={[]}
+      />
+    </div>
+  ),
+};
