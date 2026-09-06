@@ -108,6 +108,12 @@ export type StatusAxis =
   | "produktbefund"
   | "produktbefund_prio"
   // — DATEV-Abgleich —
+  | "kontoauszug_erwartung"
+  | "opos_ausgleich"
+  | "opos_zeilenart"
+  | "datev_verknuepfung"
+  | "plausibilitaet"
+  | "belegnummer_quelle"
   | "mirror_match"
   | "abgleich_lauf"
   | "stapel_commit"
@@ -1543,6 +1549,112 @@ const TOKEN: Record<string, StatusDescriptor> = {
   widerrufen: { label: "widerrufen", kind: "danger", description: "Manuell widerrufen — gilt sofort, unabhängig vom Ablauf." },
 };
 
+/**
+ * Auszugserwartung eines Zahlungskontos — **berechnet** aus zwei Quellen:
+ * dem DATEV-Abgleich (bebucht + IBAN in den Stammdaten) und der Hand-Setzung
+ * im Stammdaten-Formular (`client_payment_accounts.statement_expected`).
+ *
+ * Die Herkunft steht deshalb im Wert und nicht daneben: nur die
+ * Hand-Entscheidung überlebt den nächsten DATEV-Abgleich, die abgeleitete
+ * wird überschrieben. Wer „Keine (Hand)" sieht, weiß, dass das so bleibt.
+ *
+ * Fallstrick: an dieser Achse hängt Gate 1a des Buchungslaufs. Fehlt ein
+ * Auszug im Zeitraum, ist das bei `erwartet*` ein Fehler und bei `keine*`
+ * nur ein Hinweis — dieselbe Lücke, zwei Bedeutungen.
+ */
+const KONTOAUSZUG_ERWARTUNG: Record<string, StatusDescriptor> = {
+  erwartet: { label: "Erwartet", kind: "success", description: "Abgeleitet: das Konto ist bebucht und seine IBAN steht als Bankverbindung in den DATEV-Stammdaten. Fehlt der Auszug im Zeitraum, ist Gate 1a rot." },
+  erwartet_hand: { label: "Erwartet (Hand)", kind: "success", description: "Ein Mensch hat die Erwartung im Stammdaten-Formular gesetzt — der nächste DATEV-Abgleich lässt sie stehen." },
+  keine: { label: "Keine", kind: "neutral", description: "Abgeleitet: keine IBAN in den DATEV-Bankverbindungen oder nie bebucht. Ein fehlender Auszug ist hier nur ein Hinweis." },
+  keine_hand: { label: "Keine (Hand)", kind: "neutral", description: "Ein Mensch hat die Erwartung abgewählt — typisch für Verrechnungs- und Geldtransit-Konten, zu denen es keinen Auszug gibt." },
+};
+
+/**
+ * Ausgleichs-Stand eines offenen Postens **zum gewählten Stichtag** —
+ * berechnet, ephemer.
+ *
+ * Fallstrick: die Achse ist stichtagsbezogen, nicht absolut. „Nach Stichtag
+ * ausgeglichen" heißt, dass der Posten am Stichtag offen war und es heute
+ * nicht mehr ist — beim Blättern auf einen anderen Stichtag wechselt
+ * derselbe Posten die Stufe, ohne dass sich etwas geändert hat.
+ */
+const OPOS_AUSGLEICH: Record<string, StatusDescriptor> = {
+  offen: { label: "offen", kind: "warning", description: "Bis heute nicht ausgeglichen." },
+  spaeter_ausgeglichen: { label: "nach Stichtag ausgeglichen", kind: "neutral", description: "Zum Stichtag offen, inzwischen ausgeglichen." },
+};
+
+/**
+ * Rolle einer Zeile in der Ausgleichs-Klammer eines offenen Postens (F77) —
+ * berechnet aus der Klammer, ephemer.
+ *
+ * Getilgt wird älteste Sollstellung zuerst; `sollstellung_offen` ist deshalb
+ * kein eigener Zustand der Buchung, sondern das Ergebnis dieser Reihenfolge.
+ * Dieselbe Rechnung ist in einer anderen Klammer gedeckt.
+ */
+const OPOS_ZEILENART: Record<string, StatusDescriptor> = {
+  sollstellung: { label: "Sollstellung", kind: "neutral", description: "Rechnung oder Rate — erhöht den offenen Rest; bereits getilgt." },
+  sollstellung_offen: { label: "Sollstellung offen", kind: "warning", description: "Rechnung oder Rate, die durch die bisherigen Zahlungen der Klammer noch nicht gedeckt ist (älteste zuerst getilgt)." },
+  zahlung: { label: "Zahlung", kind: "success", description: "Ausgleich oder Zahlung der Kanzlei — mindert den offenen Rest." },
+};
+
+/**
+ * Warum eine DATEV-Buchung an einem Sachverhalt hängt — berechnet, ephemer
+ * (`VIA_LABEL` in `modules/datev-truth`).
+ *
+ * Keine Rangfolge und keine Schwere: die Achse sagt, über welchen Weg die
+ * Verbindung entstand, nicht wie sicher sie ist. Deshalb tragen alle Werte
+ * `neutral` (V6).
+ *
+ * Fallstrick: `matched` ist der Abgleich (Ludwig hat gebucht, DATEV
+ * bestätigt), `ludwig_ref` dagegen nur DATEVs Zusatzinfo mit der
+ * Sachverhalts-Nummer — die kann auch an einer Buchung stehen, die Ludwig nie
+ * geschrieben hat.
+ */
+const DATEV_VERKNUEPFUNG: Record<string, StatusDescriptor> = {
+  opos_source: { label: "Quelle OPOS-Vortrag", kind: "neutral", description: "Diese Spiegel-Buchung ist die Sollstellung des offenen Postens." },
+  link_invoice: { label: "Klammer: Rechnung", kind: "neutral", description: "Rechnungsseite der Ausgleichs-Zuordnung (F77)." },
+  link_payment: { label: "Klammer: Zahlung", kind: "neutral", description: "Zahlungsseite der Ausgleichs-Zuordnung (F77)." },
+  ludwig_ref: { label: "DATEV-Rückverweis", kind: "neutral", description: "DATEV führt die Buchung mit dieser Sachverhalts-Nummer (LudwigAI-Zusatzinfo)." },
+  matched: { label: "Abgleich-Match", kind: "neutral", description: "Der DATEV-Abgleich hat die Buchung einer Ludwig-Buchung dieses Falls zugeordnet." },
+  rule_document: { label: "DATEV-Historie", kind: "neutral", description: "Wiederkehrende Buchung derselben DATEV-Belegnummer auf dem Personenkonto des Dauersachverhalts — die Historie, aus der er entstand (F91)." },
+};
+
+/**
+ * Ergebnis eines Plausibilitäts-Checks am Sachverhalt — berechnet, ephemer.
+ *
+ * Fallstrick: der DB-nahe Wert heißt `info`, angezeigt wird „nicht
+ * anwendbar". Das ist kein Hinweis im Sinne der Skala, sondern die Aussage
+ * „für diesen Sachverhalt fehlt die Grundlage" — deshalb `neutral` und nicht
+ * `info`. Kein Check ist ein Blocker; auch `warn` hält nichts auf.
+ */
+const PLAUSIBILITAET: Record<string, StatusDescriptor> = {
+  ok: { label: "in Ordnung", kind: "success", description: "Der Check greift und findet nichts zu beanstanden." },
+  warn: { label: "prüfen", kind: "warning", description: "Befund — kein Blocker, aber jemand sollte hinschauen." },
+  info: { label: "nicht anwendbar", kind: "neutral", description: "Für diesen Sachverhalt fehlt die Grundlage, etwa ein Personenkonto oder ein OPOS-Anker." },
+};
+
+/**
+ * Woher die Belegnummer eines Sachverhalts stammt — berechnet, ephemer.
+ *
+ * Die Reihenfolge der Werte **ist** die Dominanz-Rangfolge: was weiter oben
+ * steht, gewinnt. `datev_correction` schlägt alles, weil eine Korrektur in
+ * DATEV die letzte menschliche Aussage ist; `bank_purpose` steht unten, weil
+ * eine im Betreff erkannte Nummer die schwächste Grundlage hat.
+ *
+ * Alle Werte tragen `neutral`: die Quelle sagt, woher die Nummer kommt, nicht
+ * ob sie richtig ist (V6).
+ */
+const BELEGNUMMER_QUELLE: Record<string, StatusDescriptor> = {
+  datev_correction: { label: "in DATEV korrigiert", kind: "neutral", description: "Jemand hat die Nummer in DATEV richtiggestellt — die stärkste Quelle." },
+  opos_anchor: { label: "OPOS-Anker (DATEV)", kind: "neutral", description: "Aus dem offenen Posten in DATEV übernommen." },
+  mirror_ref: { label: "DATEV-Spiegel", kind: "neutral", description: "Aus einer gespiegelten DATEV-Buchung." },
+  case_decision: { label: "entschieden", kind: "neutral", description: "Am Sachverhalt festgelegt." },
+  link: { label: "Ausgleichs-Klammer", kind: "neutral", description: "Über die Ausgleichs-Zuordnung geerbt (F77)." },
+  invoice_number: { label: "Rechnungsnummer des Belegs", kind: "neutral", description: "Aus dem Beleg selbst gelesen." },
+  journal_line: { label: "eigene Buchung", kind: "neutral", description: "Aus einer Ludwig-Buchung des Sachverhalts." },
+  bank_purpose: { label: "im Betreff erkannt", kind: "neutral", description: "Im Verwendungszweck einer Kontoauszugszeile gefunden — die schwächste Grundlage." },
+};
+
 // ══════════════════════════════════════════════════════════════════════
 // BETRIEB
 // ══════════════════════════════════════════════════════════════════════
@@ -1959,6 +2071,12 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   abgleich_lauf: ABGLEICH_LAUF,
   stapel_commit: STAPEL_COMMIT,
   datev_pruefung: DATEV_PRUEFUNG,
+  kontoauszug_erwartung: KONTOAUSZUG_ERWARTUNG,
+  opos_ausgleich: OPOS_AUSGLEICH,
+  opos_zeilenart: OPOS_ZEILENART,
+  datev_verknuepfung: DATEV_VERKNUEPFUNG,
+  plausibilitaet: PLAUSIBILITAET,
+  belegnummer_quelle: BELEGNUMMER_QUELLE,
   zahlungsweg: ZAHLUNGSWEG,
   mandant_betrieb: MANDANT_BETRIEB,
   dauersachverhalt_uebernahme: DAUERSACHVERHALT_UEBERNAHME,
@@ -2120,3 +2238,157 @@ export function resolveEventBookingState(
     ? { ...desc, value, description: input.noBookingRequiredReason }
     : { ...desc, value };
 }
+
+/**
+ * Klartext-Name der Achse. Führt den Tooltip an („Sachverhalt · Klärung
+ * offen · …"), damit ein Status nie ohne seinen Bezug dasteht — dieselbe
+ * Farbe bedeutet je nach Achse etwas anderes.
+ */
+export const AXIS_LABEL: Record<StatusAxis, string> = {
+  beleg: "Beleg",
+  beleg_stage: "Verarbeitungsstufe",
+  beleg_erledigung: "Erledigung",
+  beleg_inbox: "Dokument",
+  beleg_kategorie: "Belegkategorie",
+  dokumentgruppe: "Art der Dokumentgruppe",
+  beleg_richtung: "Belegrichtung",
+  job: "Auftrag",
+  upload: "Upload",
+  dispatch: "Stapellauf",
+  sachverhalt: "Sachverhalt",
+  belegnummern_modus: "Belegnummern-Modus",
+  ereignis: "Buchung (Ereignis)",
+  disposition: "Zuständig",
+  klaerung: "Rückfrage",
+  klaerung_status: "Stand",
+  klaerung_typ: "Art",
+  erwartung: "Reife",
+  erwartung_art: "Erwartet",
+  triage: "Prüfempfehlung",
+  buchung: "Buchung",
+  buchung_datev: "Weg nach DATEV",
+  buchung_origin: "Herkunft",
+  konfidenz: "Sicherheit",
+  judge: "Judge",
+  export_case: "DATEV-Export",
+  export_bucket: "DATEV-Export",
+  lauf: "Buchungslauf",
+  lauf_gate: "Gate",
+  partner: "Geschäftspartner",
+  konto: "Konto",
+  konto_datev_sync: "DATEV-Sync",
+  konto_typ: "Kontoart",
+  verrechnungskonto: "Verrechnungskonto",
+  benutzer: "Zugang",
+  benutzer_art: "Benutzerart",
+  rolle: "Rolle",
+  zyklus: "Buchungsjahr",
+  regel_modus: "Buchungsweise",
+  integration: "Bank-Anbindung",
+  konvention: "Konvention",
+  konvention_herkunft: "Herkunft",
+  produktbefund: "Produktbefund",
+  produktbefund_prio: "Dringlichkeit",
+  mandant_onboarding: "Onboarding",
+  mandant_onboarding_verdict: "Onboarding-Urteil",
+  mirror_match: "DATEV-Abgleich",
+  abgleich_lauf: "Abgleich-Lauf",
+  zyklus_stapel: "Buchungszyklus",
+  stapel_commit: "Festschreibung",
+  datev_pruefung: "DATEV-Prüfung",
+  kontoauszug_erwartung: "Kontoauszug",
+  opos_ausgleich: "Ausgleich",
+  opos_zeilenart: "Zeilenart",
+  datev_verknuepfung: "Verknüpfung",
+  plausibilitaet: "Ergebnis",
+  belegnummer_quelle: "Quelle",
+  zahlungsweg: "Zahlungsweg-Zustand",
+  mandant_betrieb: "Betriebszustand",
+  dauersachverhalt_uebernahme: "Übernahme",
+  token: "Token",
+  actor_kind: "Akteur",
+  bridge_datev: "Bridge",
+  vst_fakt: "Vorsteuer-Fakt",
+  vst_regel: "Vorsteuer-Regel",
+  log_level: "Level",
+  health: "Systemcheck",
+  readiness: "Konfiguration",
+};
+
+/**
+ * Technische Herkunft der Achse — DB-Spalte oder „abgeleitet/ephemer".
+ *
+ * Steht im Status-Dialog unter dem Achsen-Namen, damit man von der Anzeige
+ * zurück auf die Datenquelle kommt, ohne im Code zu suchen. Der Wert ist
+ * bewusst der DB-Bezeichner, nicht die Übersetzung.
+ */
+export const AXIS_SOURCE: Record<StatusAxis, string> = {
+  beleg: "client_source_docs_invoices.processing_status",
+  beleg_stage: "client_source_docs_invoices.processing_stage",
+  beleg_erledigung: "client_source_docs.completed_via (+ completed_at)",
+  beleg_inbox: "client_source_docs.status",
+  beleg_kategorie: "client_source_docs.doc_category",
+  dokumentgruppe: "client_source_docs.collection_kind",
+  beleg_richtung: "client_source_docs_invoices.doc_direction",
+  job: "ops_jobs.status",
+  upload: "ephemer — React-State im Browser, keine DB-Spalte",
+  dispatch: "ephemer — React-State im Verarbeitungs-Panel",
+  sachverhalt: "client_accounting_case.lifecycle_status",
+  belegnummern_modus: "client_accounting_case.document_number_mode",
+  ereignis: "abgeleitet aus den Buchungen am Ereignis (keine Spalte)",
+  disposition: "client_accounting_case.disposition",
+  klaerung: "client_accounting_case_clarification.severity",
+  klaerung_status: "berechnet aus client_accounting_case_clarification.answered_at / deferred_until",
+  klaerung_typ: "client_accounting_case_clarification.type",
+  erwartung: "berechnet aus client_accounting_case_expectation.due_date / escalation_level / resolved_at",
+  erwartung_art: "client_accounting_case_expectation.kind",
+  triage: "abgeleitet — domain/acceptance-triage.ts (keine Spalte)",
+  buchung: "client_journal_entry.status",
+  buchung_datev: "abgeleitet — status + exported_at + datev_mirror_entry_id (keine Spalte)",
+  buchung_origin: "client_journal_entry.origin",
+  konfidenz: "abgeleitet — client_journal_entry.proposal_confidence gebandet (entryConfLevel); Zeilen-Spalte seit 2026-08-29 tot",
+  judge: "client_journal_entry.proposal_rationale (JSON, keine Spalte)",
+  export_case: "abgeleitet — deriveCaseExportStatus (keine Spalte)",
+  export_bucket: "abgeleitet — bucketOf in export-status-core.ts",
+  lauf: "abgeleitet — runOutcome in agent-runs-view.ts (keine Spalte)",
+  lauf_gate: "client_agent_run_steps.gate_result (NULL = Schritt noch offen)",
+  partner: "client_business_partners.onboarding_state",
+  konto: "client_ledger_accounts.status",
+  konto_datev_sync: "client_ledger_accounts.datev_sync_state",
+  konto_typ: "client_ledger_accounts.accounting_role",
+  verrechnungskonto: "client_ledger_accounts.clearing_account_type",
+  benutzer: "platform_tenant_users.status",
+  benutzer_art: "platform_users.kind",
+  rolle: "berechnet — modules/auth/domain/role.ts (keine Spalte)",
+  zyklus: "client_fiscal_years.status",
+  regel_modus: "client_accounting_case_rule.booking_mode",
+  integration: "client_external_integrations.status",
+  konvention: "client_agent_notes.status",
+  konvention_herkunft: "client_agent_notes.origin",
+  produktbefund: "platform_product_feedback.status",
+  produktbefund_prio: "platform_product_feedback.priority (NULL = ungesichtet)",
+  mandant_onboarding: "platform_clients.onboarding_state",
+  mandant_onboarding_verdict: "abgeleitet — get-onboarding-status-core.ts (keine Spalte)",
+  mirror_match: "client_datev_mirror_entries.match_state (NULL = nicht abgeglichen)",
+  abgleich_lauf: "ops_datev_sync_runs.status + client_fiscal_years.datev_resync_requested_at",
+  zyklus_stapel: "client_datev_export_batches.state",
+  stapel_commit: "client_datev_sequences.is_committed (boolean)",
+  datev_pruefung: "client_datev_sequences.inspection_status",
+  kontoauszug_erwartung: "berechnet — DATEV-Bankverbindungen + client_payment_accounts.statement_expected",
+  opos_ausgleich: "berechnet — OPOS-Bestand zum Stichtag (ephemer)",
+  opos_zeilenart: "berechnet — Ausgleichs-Klammer F77 (ephemer)",
+  datev_verknuepfung: "berechnet — VIA_LABEL in modules/datev-truth (ephemer)",
+  plausibilitaet: "berechnet — PlausibilityCheck.verdict (ephemer)",
+  belegnummer_quelle: "berechnet — Dominanz-Rangfolge der Belegnummern-Quellen (ephemer)",
+  zahlungsweg: "berechnet — client_payment_accounts.valid_until",
+  mandant_betrieb: "berechnet — platform_clients.is_active + replay_cutoff_date",
+  dauersachverhalt_uebernahme: "berechnet — RecurringCandidateClass aus der DATEV-Buchungshistorie (F91)",
+  token: "berechnet — platform_agent_tokens.revoked_at + expires_at",
+  actor_kind: "platform_audit_events.actor_kind",
+  bridge_datev: "berechnet — DatevApiStatus, von der on-prem Bridge gemeldet (ephemer)",
+  vst_fakt: "berechnet — VatFact.value aus den Belegdaten (ephemer)",
+  vst_regel: "berechnet — Katalog-Regel über den Vorsteuer-Fakten (ephemer)",
+  log_level: "client_invoice_traces.level",
+  health: "berechnet — modules/health/aggregate.ts (ephemer)",
+  readiness: "berechnet — Onboarding-Aggregat (ephemer)",
+};
