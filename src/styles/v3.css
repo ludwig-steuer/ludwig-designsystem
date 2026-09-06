@@ -2813,8 +2813,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* Der Verbinder der Reihe: gepunktet, ohne Spitze — er behauptet keinen Weg. */
 .v2fsm__edges--dotted path { stroke-dasharray: 2 4; }
 
+/* Die Zelle liegt im Raster, der Knopf füllt sie: `Popover` schiebt einen
+   Anker dazwischen, deshalb kann der Knopf selbst kein Grid-Kind sein. */
+.v2fsm__cell { position: relative; z-index: 1; display: block; }
+.v2fsm__cell > .v2pop__anchor { display: block; height: 100%; }
 .v2fsm__state {
-  position: relative; z-index: 1;
+  width: 100%; height: 100%;
   display: flex; flex-direction: column; justify-content: center; gap: 1px;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
@@ -2831,10 +2835,18 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.v2fsm__meta { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
 .v2fsm__value { font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
-/* „aktuell" statt nur Farbe (V7). */
+/* „aktuell" statt nur Farbe (V7) — neben dem Wert, nicht darunter. */
 .v2fsm__now { font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-muted); }
+/* Der aktuelle Zustand trägt **seinen** Ton, nicht immer denselben (V6): die
+   Farbe kommt aus der Registry, wie am Badge daneben (Abnahme 0069). */
 .v2fsm__state.is-current { border-color: var(--color-accent); background: var(--color-accent-50); }
+.v2fsm__state.is-current--info { border-color: var(--color-info); background: var(--color-info-bg); }
+.v2fsm__state.is-current--success { border-color: var(--color-success); background: var(--color-success-bg); }
+.v2fsm__state.is-current--warning { border-color: var(--color-warning); background: var(--color-warning-bg); }
+.v2fsm__state.is-current--danger { border-color: var(--color-danger); background: var(--color-danger-bg); }
+.v2fsm__state.is-current--neutral { border-color: var(--color-border-strong); background: var(--color-bg-soft); }
 .v2fsm__state--raw .v2fsm__label { font-family: var(--font-mono); font-size: var(--fs-ui-xs); }
 
 .v2fsm__note { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }

@@ -26,6 +26,7 @@ interface StatusInfoDialogProps {
  * @when    All values of one status axis explained, with badge and DB value.
  * @instead One status as a chip → StatusBadge. The (i) that opens this →
  *          StatusInfoButton. Any other confirmation → Dialog.
+ *          The same axis as a **picture**, with its transitions → StateMachine.
  */
 export function StatusInfoDialog({ axis, current, open, onClose }: StatusInfoDialogProps) {
   const items = axisLegend(axis);

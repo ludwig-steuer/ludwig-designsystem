@@ -78,9 +78,11 @@ const INBOX: StateTransition[] = [
 ];
 
 /**
- * Der Buchungszyklus: neun Spalten, sechzehn Übergänge, „Kanzlei prüft" als
- * aktueller Zustand. Fünf Bögen unten (die Rückwege), drei oben — darunter
- * `prepared → review`, der `agent` überspringt.
+ * Der Buchungszyklus: acht Spalten, sechzehn Übergänge, „Kanzlei prüft" als
+ * aktueller Zustand in seinem Warnton. Fünf Bögen unten (die Rückwege), zwei
+ * oben (`exporting → confirmed`, `confirmed → closed`) — `prepared → review`
+ * läuft durch die Mitte, weil `review` seinen Rang aus genau diesem Übergang
+ * zieht und damit neben `agent` steht.
  */
 export const Filled: Story = {
   render: () => (
@@ -112,7 +114,14 @@ export const Sequence: Story = {
   render: () => (
     <StateMachine
       axis="sachverhalt"
-      states={["open", "needs_clarification", "waiting_for_documents", "closed_accepted", "closed_rejected"]}
+      states={[
+        "open",
+        "needs_clarification",
+        "waiting_for_documents",
+        "closed_accepted",
+        "closed_rejected",
+        "closed_superseded",
+      ]}
       current="needs_clarification"
     />
   ),
@@ -137,7 +146,7 @@ export const Explain: Story = {
  */
 export const Edge: Story = {
   render: () => (
-    <div style={{ maxWidth: 480, border: "var(--border-1)", borderRadius: "var(--radius-lg)", padding: "var(--space-4)" }}>
+    <div style={{ maxWidth: 360, border: "var(--border-1)", borderRadius: "var(--radius-lg)", padding: "var(--space-4)" }}>
       <StateMachine
         axis="beleg_inbox"
         transitions={[

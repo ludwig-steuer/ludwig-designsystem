@@ -136,7 +136,8 @@ export interface ProcessLoops {
  * straight through.
  *
  * @when    Process state in the detail header with raw states and loops.
- * @instead Steps of a review → StepRail.
+ * @instead Steps of a review → StepRail. Which ways exist between the
+ *          states — the map instead of the position → StateMachine (Z7).
  */
 export function ProcessStepper({
   phases,

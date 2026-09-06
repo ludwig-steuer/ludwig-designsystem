@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import { Badge } from "../primitives/Badge";
 import { Popover } from "../primitives/Popover";
 import { AXIS_SOURCE } from "./entity-icons";
@@ -25,10 +27,6 @@ import {
  * saying so — the transitions exist as data for almost none of the 70 axes
  * (L-74), and inventing them from the registry order would be a claim.
  *
- * @when    „What are the ways out of this state?" — the map of one axis, in
- *          the status explanation or beside a detail.
- * @instead Where **this** object stands → ProcessStepper (Z7). What happened
- *          to it → Timeline. All values as a list → StatusInfoDialog.
  */
 
 export interface StateTransition {
@@ -60,11 +58,17 @@ interface Box {
    einem SVG mit derselben Rastereinheit. Kein ResizeObserver, keine
    Bibliothek — die Karte ist so groß, wie das Raster sie macht. */
 
-/** Grid unit in px — the same number in `v3.css` (`--v2fsm-col`, `--v2fsm-row`). */
+/**
+ * The grid, in one place. The numbers live **here** and not in `v3.css`,
+ * because the SVG needs them as numbers — a `var()` cannot be added up. The
+ * card hands them to CSS as custom properties, so both sides draw the same
+ * raster from one source (corrected in the acceptance of 0069: the comment
+ * claimed the opposite, and `--v2fsm-*` existed nowhere).
+ */
 const COL = 150;
-const ROW = 74;
+const ROW = 80;
 const BOX_W = 126;
-const BOX_H = 54;
+const BOX_H = 60;
 
 /**
  * The order of the states: what the caller says, else the registry, and
@@ -167,15 +171,36 @@ function edgePath(a: Box, b: Box, height: number): string {
     const mid = (x1 + x2) / 2;
     return `M ${x1} ${from.y} C ${mid} ${from.y}, ${mid} ${to.y}, ${x2} ${to.y}`;
   }
-  // Ein Bogen: oben für den Sprung nach vorn, unten für den Weg zurück.
+  // Ein Bogen: oben für den Sprung nach vorn, unten für den Weg zurück. Er
+  // setzt an der Kante **seiner Boxen** an, nicht an der des Rasters — sonst
+  // endet der Pfeil bei einer Box in der oberen Zeile 80 px unter ihr im
+  // Leeren (Abnahme 0069).
   const above = forward;
   const y = above ? -22 : height + 22;
   const x1 = from.x;
   const x2 = to.x;
-  const edgeY = above ? 0 : height;
-  return `M ${x1} ${edgeY} C ${x1} ${y}, ${x2} ${y}, ${x2} ${edgeY}`;
+  const ay = above ? a.row * ROW : a.row * ROW + BOX_H;
+  const by = above ? b.row * ROW : b.row * ROW + BOX_H;
+  // Zwei Boxen derselben Spalte liegen senkrecht übereinander: ein Bogen über
+  // die Unterkante hätte Anfang und Ende an derselben Stelle und verbände
+  // nichts. Er läuft deshalb **seitlich** — aus der linken Kante der Quelle
+  // heraus und in die linke Kante des Ziels hinein (Abnahme 0069).
+  if (a.column === b.column) {
+    const left = a.column * COL;
+    const ay = a.row * ROW + BOX_H / 2;
+    const by = b.row * ROW + BOX_H / 2;
+    const out = left - COL * 0.28;
+    return `M ${left} ${ay} C ${out} ${ay}, ${out} ${by}, ${left} ${by}`;
+  }
+  return `M ${x1} ${ay} C ${x1} ${y}, ${x2} ${y}, ${x2} ${by}`;
 }
 
+/**
+ * @when    „What are the ways out of this state?" — the map of one axis, in
+ *          the status explanation or beside a detail.
+ * @instead Where **this** object stands → ProcessStepper (Z7). What happened
+ *          to it → Timeline. All values as a list → StatusInfoDialog.
+ */
 export function StateMachine({
   axis,
   transitions = [],
@@ -216,7 +241,11 @@ export function StateMachine({
             gridAutoRows: `${BOX_H}px`,
             columnGap: COL - BOX_W,
             rowGap: ROW - BOX_H,
-          }}
+            "--v2fsm-col": `${COL}px`,
+            "--v2fsm-row": `${ROW}px`,
+            "--v2fsm-box-w": `${BOX_W}px`,
+            "--v2fsm-box-h": `${BOX_H}px`,
+          } as CSSProperties}
         >
           {hasEdges ? null : (
             // Ein Verbinder, keine Kante: gepunktet und **ohne** Spitze — er
@@ -319,21 +348,34 @@ function StateBox({
   const outgoing = transitions.filter((t) => t.from === box.value);
 
   return (
+    // Die **Zelle** liegt im Raster, nicht der Knopf: `Popover` hängt seinen
+    // Auslöser in ein `span.v2pop__anchor`, und damit wäre der Knopf kein
+    // Grid-Kind mehr — `grid-column` an ihm bliebe wirkungslos, die Boxen
+    // stünden im Auto-Flow und die Kanten zeigten ins Leere (Abnahme 0069).
+    <div
+      className="v2fsm__cell"
+      style={{ gridColumn: box.column + 1, gridRow: box.row + 1 }}
+    >
     <Popover
       align="start"
       trigger={
         <button
           type="button"
-          className={`v2fsm__state${current ? " is-current" : ""}${box.raw ? " v2fsm__state--raw" : ""}`}
-          style={{ gridColumn: box.column + 1, gridRow: box.row + 1 }}
+          className={`v2fsm__state${current ? ` is-current is-current--${box.kind}` : ""}${box.raw ? " v2fsm__state--raw" : ""}`}
           aria-current={current ? "step" : undefined}
         >
           <span className="v2fsm__label" title={box.label}>
             {box.label}
           </span>
-          <code className="v2fsm__value">{box.value}</code>
-          {/* Farbe steht nie allein (V7) — der aktuelle Zustand sagt es auch. */}
-          {current ? <span className="v2fsm__now">aktuell</span> : null}
+          <span className="v2fsm__meta">
+            {/* Bei einem Rohwert steht der Schlüssel schon oben — ihn zweimal
+                zu schreiben, sagt nichts zweimal (Abnahme 0069). */}
+            {box.raw ? null : <code className="v2fsm__value">{box.value}</code>}
+            {/* Farbe steht nie allein (V7) — das Wort steht **neben** dem
+                Wert, nicht in einer dritten Zeile: drei Zeilen quetschten die
+                Beschriftung der aktuellen Box auf null (Abnahme 0069). */}
+            {current ? <span className="v2fsm__now">aktuell</span> : null}
+          </span>
         </button>
       }
     >
@@ -361,6 +403,7 @@ function StateBox({
         <code className="v2fsm__src">{AXIS_SOURCE[axis]}</code>
       </div>
     </Popover>
+    </div>
   );
 }
 

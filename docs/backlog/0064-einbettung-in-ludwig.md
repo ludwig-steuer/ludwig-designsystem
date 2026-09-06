@@ -53,6 +53,15 @@ der Restbestand der Migration (Start: 39 Dateien).
 - **Styles als Subpfad exportiert** (`./styles/*` → `./src/styles/*`): mit
   `exports` in der `package.json` wären Deep-Imports auf `src/styles/…`
   sonst gesperrt. Die App lädt `@ludwig/designsystem/styles/<name>.css`.
+- **Wer das Set in Vitest lädt, braucht drei Zeilen** (App-Migration
+  2026-09-06, damit der nächste Konsument sie nicht neu findet): das Set liegt
+  **außerhalb des App-Roots**, also muss der Test-Root es einschließen; es
+  übersetzt mit `"jsx": "preserve"` (Next macht die Transformation), ein
+  Konsument mit `"jsx": "react-jsx"` muss das für die Set-Dateien überschreiben;
+  und der Spiegel-Alias `@/ludwig/*` zeigt hier auf `src/ludwig/`, drüben aber
+  auf die echten Module — er gehört in die Alias-Liste des Test-Setups.
+  **Kein Fehler des Sets**, sondern der Preis dafür, dass der Quelltext direkt
+  konsumiert wird (Abschnitt „Quell-Konsum" oben).
 - **Nicht `styles.css` des DS importieren.** Die Kette dort lädt Google-Fonts
   und Tailwind-Base — die App hat beides schon. Die App importiert die
   Einzeldateien.
