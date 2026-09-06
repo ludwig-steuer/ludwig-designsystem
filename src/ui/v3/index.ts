@@ -350,6 +350,7 @@ export {
   type CaseAssignment,
 } from "./entities/bank-transaction/bank-transaction";
 export { BankTransactionPurpose } from "./entities/bank-transaction/BankTransactionPurpose";
+export { BankTransactionCell } from "./entities/bank-transaction/BankTransactionCell";
 export {
   caseTitle,
   caseIdentifier,

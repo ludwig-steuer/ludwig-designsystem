@@ -1,6 +1,6 @@
 import { derivePurposeParts, type SepaTags } from "@/ludwig/modules/bank-transactions/domain/statement-line";
 import { ActionIcon } from "../../Icons";
-import { Badge } from "../../primitives/Badge";
+import { Link } from "../../primitives/Link";
 import { Popover } from "../../primitives/Popover";
 
 /**
@@ -36,6 +36,7 @@ export function BankTransactionPurpose({
   tags,
   variant = "inline",
   fallback = "—",
+  href,
 }: {
   /** The raw column value. `null` renders the fallback. */
   purpose: string | null;
@@ -50,6 +51,13 @@ export function BankTransactionPurpose({
    */
   variant?: "inline" | "block";
   fallback?: string;
+  /**
+   * Makes the free text a link — **not** the whole component, because the (i)
+   * is a button and a button inside an anchor is not valid markup. Exists for
+   * the one case where the purpose is the identity: a payment without a
+   * counterparty (0100, 3 % of the lines).
+   */
+  href?: string;
 }) {
   const parts = derivePurposeParts(purpose, tags);
   // No tag block recognised — 10 % of the lines — means the raw value **is**
@@ -70,7 +78,9 @@ export function BankTransactionPurpose({
     <span className="v2purp v2purp--inline">
       {/* The cut happens in CSS, not by character count: a character count
           never matches a grid column (decision 3 of the Freigabe). */}
-      <span className="v2purp__text">{parts.text || fallback}</span>
+      <span className="v2purp__text">
+        {href ? <Link href={href}>{parts.text || fallback}</Link> : parts.text || fallback}
+      </span>
       {hasMore ? (
         <Popover
           align="start"
@@ -113,7 +123,9 @@ function Refs({ refs }: { refs: { key: string; value: string; hint: string }[] }
     <div className="v2purp__refs">
       {sorted.map((r) => (
         <span className="v2purp__ref" key={r.key} title={r.hint}>
-          <Badge tone="neutral">{r.key}</Badge>
+          {/* Not a `Badge`: in this set a badge means a state, and a SEPA key
+              is an identifier. It gets its own quiet chip. */}
+          <span className="v2purp__key">{r.key}</span>
           <span className="v2mono">{r.value}</span>
         </span>
       ))}

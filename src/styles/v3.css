@@ -3013,9 +3013,29 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2purp__text { margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui); }
 .v2purp__refs { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
 .v2purp__ref { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--fs-ui-xs); }
+/* Der Schlüssel ist eine Kennung, kein Zustand: eigene, stille Marke statt
+   eines Badges — im Set heißt ein Badge „hier steht ein Zustand". */
+.v2purp__key {
+  padding: 1px var(--space-1); border-radius: var(--radius-sm);
+  background: var(--color-bg-sunken); color: var(--color-text-muted);
+  font: 500 var(--fs-ui-xs)/1.4 var(--font-mono); letter-spacing: 0.02em;
+}
 .v2purp__raw summary { cursor: pointer; font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
 .v2purp__raw pre {
   margin: var(--space-2) 0 0; padding: var(--space-3);
   background: var(--color-bg-sunken); border-radius: var(--radius-sm);
   font-size: var(--fs-ui-xs); white-space: pre-wrap; word-break: break-word;
 }
+
+/* --- Kontoauszugsposition, genannt in fremder Ansicht (0100) --------------
+   Zwei Zeilen: der Zweck hat p90 84 Zeichen und passt neben Gegenpartei,
+   Datum und Betrag in keine. Der Betrag steht rechts, das Vorzeichen trägt
+   **keine** Farbe — Rot ist Kritikalität, ein Ausgang ist kein Fehler. */
+.v2btx { display: grid; gap: 2px; min-width: 0; }
+.v2btx__top { display: flex; align-items: baseline; gap: var(--space-3); min-width: 0; }
+.v2btx__who { font-weight: 600; min-width: 0; flex: 1 1 auto; }
+.v2btx__who > .v2purp { font-weight: 400; }
+.v2btx__acct { color: var(--color-text-subtle); font-size: var(--fs-ui-xs); flex: 0 0 auto; }
+.v2btx__top > .v2amount { margin-left: auto; flex: 0 0 auto; }
+.v2btx__top > .v2time { flex: 0 0 auto; color: var(--color-text-subtle); }
+.v2btx__what { min-width: 0; color: var(--color-text-muted); }
