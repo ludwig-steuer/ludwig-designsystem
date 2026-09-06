@@ -212,8 +212,10 @@ geht — sie folgt daraus, wie viele v3-Bausteine an einem Befund hängen:
    2026-09-06 (App-Seite).* Was hier bleibt, ist der Tausch der lokalen Kopien
    gegen den Spiegel; er gehört je Familie zu ihrer Aufgabe, nicht in einen
    Sammel-Commit.
-6. **L-68/L-70** (`CaseDetail` und `ExpectationRow` nach `domain/`) — beide
+3. **L-68/L-70** (`CaseDetail` und `ExpectationRow` nach `domain/`) — beide
    hängen an Aufgaben, die gerade gebaut werden (0097, 0025), und beide sind
-   ein Umzug, keine Neuentwicklung. L-68 löst nebenbei L-52.
-7. Der Rest nach Aufwand; die Schema-Punkte in C brauchen je eine
+   ein Umzug, keine Neuentwicklung.
+4. **L-74** (Übergänge als Daten) — `StateMachine` ist gebaut und zeigt bis
+   dahin für fast jede Achse nur die Reihe mit dem Hinweis.
+5. Der Rest nach Aufwand; die Schema-Punkte in C brauchen je eine
    Owner-Entscheidung, keine Implementierung.
