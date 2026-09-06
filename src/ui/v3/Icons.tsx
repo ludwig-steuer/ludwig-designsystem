@@ -18,6 +18,7 @@ import {
   Cog,
   Copy,
   Database,
+  Share2,
   Download,
   Ellipsis,
   ExternalLink,
@@ -223,6 +224,12 @@ export const ENTITY_ICON = {
     icon: List,
     label: "Rechnungsposition",
     meaning: "Eine Zeile einer Rechnung.",
+  },
+  bridge: {
+    icon: Share2,
+    label: "Übergabe",
+    meaning: "Die Strecke zwischen zwei Systemen — was Ludwig verlässt und drüben ankommt.",
+    instead: "Der Spiegel dessen, was drüben steht, ist `datev-mirror`.",
   },
 } satisfies Record<string, IconEntry>;
 

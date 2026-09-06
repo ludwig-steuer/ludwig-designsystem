@@ -32,7 +32,6 @@ const REGISTRY = join(SET, "Icons.tsx");
 const EXEMPT = new Map([
   ["Icons.tsx", "the registry itself"],
   ["patterns/Review.tsx", "StateIcon — the vocabulary of the nine review states"],
-  ["patterns/Process.tsx", "whose turn it is: agent, firm, client, system — moves over with task 0088"],
   ["entities/accounting-case/CaseTimeline.tsx", "the event kind (client_accounting_event.kind)"],
   [
     "entities/journal-entry/AiBookingNotes.tsx",

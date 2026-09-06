@@ -1,15 +1,6 @@
+import { ActionIcon, EntityIcon } from "../Icons";
 import { Link } from "../primitives/Link";
 import type { ReactNode } from "react";
-import {
-  Bot,
-  Building2,
-  Database,
-  Hourglass,
-  Minus,
-  Share2,
-  UserRound,
-  type LucideIcon,
-} from "lucide-react";
 
 /**
  * The process picture of a batch — **one** component in three sizes
@@ -66,16 +57,43 @@ export interface BatonMeta {
   color: string;
 }
 
-const OWNER_ICON: Record<BatonKey, LucideIcon> = {
-  agent: Bot,
-  bereit: Hourglass,
-  mandant: UserRound,
-  kanzlei: Building2,
-  bridge: Share2,
-  datev: Database,
-  spiegel: Database,
-  niemand: Minus,
-};
+/**
+ * The sign of each baton holder — **from the registry**, not from a table of
+ * its own (0088).
+ *
+ * Four of the eight are entities the registry already names, and two of them
+ * used to carry a different sign here: „Kanzlei" stood on `Building2` (which
+ * the registry gives to the business partner) and „Mandant" on `UserRound`
+ * (which it gives to the user). Two pictures of the same thing in one set is
+ * exactly the drift 0087 was built against.
+ *
+ * Four are **not** entities, and they say so:
+ * - `bereit` is a wait, not a thing → the action `time`.
+ * - `datev` and `spiegel` are the same system seen from two sides; the word
+ *   next to the sign says which, and `datev-mirror` is the entry for both.
+ * - `niemand` gets **no sign at all**. The absence of a holder has no picture,
+ *   and a dash pretending to be one is worse than the word alone.
+ */
+function OwnerSign({ owner }: { owner: BatonMeta }) {
+  switch (owner.key) {
+    case "agent":
+      return <ActionIcon action="agent" size={14} />;
+    case "bereit":
+      return <ActionIcon action="time" size={14} />;
+    case "mandant":
+      return <EntityIcon entity="client" size={14} />;
+    case "kanzlei":
+      return <EntityIcon entity="tenant" size={14} />;
+    case "bridge":
+      return <EntityIcon entity="bridge" size={14} />;
+    case "datev":
+    case "spiegel":
+      return <EntityIcon entity="datev-mirror" size={14} />;
+    case "niemand":
+      return null;
+  }
+}
+
 
 /**
  * Four segments for the list row.
@@ -105,18 +123,24 @@ export function Baton({
   owner,
   alarm = false,
   detail,
-  size = 13,
 }: {
   owner: BatonMeta;
   alarm?: boolean;
   /** Addition after the word, e.g. „Durchgang 3 läuft seit 14 Min." */
   detail?: ReactNode;
-  size?: number;
+  // No `size` any more (0088 c): it was a free number defaulting to 13, and
+  // 13 is not on the ladder. The sign takes 14 from `EntityIcon`, like every
+  // other sign in the set.
 }) {
-  const Icon = OWNER_ICON[owner.key];
   return (
-    <span className={`pz-owner${alarm ? " is-alarm" : ""}`}>
-      <Icon size={size} strokeWidth={1.75} style={alarm ? undefined : { color: owner.color }} />
+    // The colour rides on the wrapper, not on the sign: `EntityIcon` draws in
+    // `currentColor` and takes no `color` prop — that is how `StatusBadge` has
+    // done it since 0087, and it is why the registry can stay closed.
+    <span
+      className={`pz-owner${alarm ? " is-alarm" : ""}`}
+      style={alarm ? undefined : { color: owner.color }}
+    >
+      <OwnerSign owner={owner} />
       <span>
         {owner.label}
         {detail ? <> · {detail}</> : null}
