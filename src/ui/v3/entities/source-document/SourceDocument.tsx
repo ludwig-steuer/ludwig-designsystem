@@ -216,13 +216,20 @@ export function FileName({ value, max }: { value: string; max: number }) {
 export function sourceDocumentIdentifier(document: SourceDocumentVM): {
   value: string;
   mono: boolean;
+  /**
+   * The fallback took the file name. Callers need to know, because a file
+   * name is not a key: it is set in mono like one, but it has to be **cut in
+   * the middle** so the extension survives — and it must not be printed a
+   * second time in a row that already leads with it.
+   */
+  isFileName?: boolean;
 } {
   const detail = resolveSourceDocumentDetail(document.sourceDocType, document.detail);
   if (detail?.identifier) return detail.identifier;
   // Mono, like everywhere else a file name stands: the same name was set in
   // mono in its own column and in proportional type here — one document, two
   // typefaces in one row.
-  if (document.fileName) return { value: document.fileName, mono: true };
+  if (document.fileName) return { value: document.fileName, mono: true, isFileName: true };
   return { value: document.id.slice(0, 8), mono: true };
 }
 
@@ -396,10 +403,11 @@ export function SourceDocumentRow({ document }: { document: SourceDocumentVM }) 
         className={ident.mono ? "v2mono v2doc__key" : "v2doc__key"}
         title={identRepeatsLead ? undefined : ident.value}
       >
-        {identRepeatsLead ? null : ident.mono ? (
-          ident.value
-        ) : (
+        {identRepeatsLead ? null : ident.isFileName || !ident.mono ? (
+          // A file name gets cut in the middle even in mono — a key does not.
           <FileName value={ident.value} max={MAX_FILENAME_ROW} />
+        ) : (
+          ident.value
         )}
       </span>
 

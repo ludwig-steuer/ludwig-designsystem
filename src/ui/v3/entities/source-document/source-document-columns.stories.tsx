@@ -8,6 +8,7 @@ import {
   sourceDocumentMinWidth,
   type SourceDocumentColumn,
 } from "./source-document-columns";
+import { formQualifiesForInvoiceFlow } from "@/ludwig/modules/source-docs/domain/document-form-mapping";
 import type { SourceDocumentVM } from "./SourceDocument";
 import { DataTable } from "../../patterns/DataTable";
 
@@ -93,10 +94,40 @@ const DOCS: SourceDocumentVM[] = [
   },
 ];
 
-/** Everything the submit list may hold: classified, with a qualifying form. */
-const SUBMITTABLE = DOCS.filter((d) => d.inboxStatus === "classified");
+/**
+ * Everything the submit list may hold: classified **and** a qualifying
+ * document form. The second half is the point of the list — a bank statement
+ * is classified and will never be submitted (`invoiceFlow: false`), and with
+ * the form in its own column one could read the contradiction word by word.
+ */
+const SUBMITTABLE: SourceDocumentVM[] = [
+  ...DOCS.filter(
+    (d) => d.inboxStatus === "classified" && formQualifiesForInvoiceFlow(d.classDocumentForm),
+  ),
+  {
+    ...DOCS[0]!,
+    id: "d5",
+    fileName: "Bewirtung-2026-08-14-Gasthaus-Adler.pdf",
+    classDocumentForm: "hospitality_receipt",
+    counterparty: "Gasthaus Adler",
+    detail: { kind: "invoice", number: "B-2026-0814", gross: 128.4, currency: "EUR" },
+    sizeBytes: 1_100_000,
+  },
+  {
+    ...DOCS[0]!,
+    id: "d6",
+    fileName: "Tankbeleg-2026-08-22.pdf",
+    classDocumentForm: "fuel_receipt",
+    counterparty: "Tankstelle Musterstadt",
+    detail: { kind: "invoice", number: "T-88213", gross: 96.5, currency: "EUR" },
+    sizeBytes: 240_000,
+  },
+];
 
 const PAGER = { page: 1, pageSize: 25, totalItems: 102, totalPages: 5 };
+
+/** Einer mit Rechnungszeile, einer ohne — die zwei Eingaben der Achse. */
+const STUCK_PAIR: SourceDocumentVM[] = [DOCS[3]!, { ...DOCS[2]!, hasInvoiceRow: true }];
 
 /**
  * Der volle Satz der Belegliste des Jahres: zehn Punkte, der Gegenpart führt
@@ -200,8 +231,12 @@ export const Stuck: Story = {
     });
     return (
       <div style={{ maxWidth: 1400, display: "grid", gap: "var(--space-6)" }}>
+        {/* **Dieselben zwei Belege** in beiden Tabellen — einer mit
+            Rechnungszeile, einer ohne. Nur so fallen alle vier Werte der
+            Achse: „nicht extrahiert" und „Datum fehlt" hier, „wird
+            klassifiziert" und „wird extrahiert" darunter. */}
         <DataTable<SourceDocumentVM>
-          rows={[DOCS[3]!, DOCS[2]!]}
+          rows={STUCK_PAIR}
           columns={stuck}
           rowKey={(d) => d.id}
           head={{ title: "Problematische Belege", sub: "Ohne Extraktion oder ohne Belegdatum" }}
@@ -209,7 +244,7 @@ export const Stuck: Story = {
           empty={{ title: "Kein Beleg steckt fest.", done: true }}
         />
         <DataTable<SourceDocumentVM>
-          rows={[DOCS[0]!, DOCS[1]!]}
+          rows={STUCK_PAIR}
           columns={inflight}
           rowKey={(d) => d.id}
           head={{ title: "In Verarbeitung", sub: "Die Pipeline läuft noch" }}

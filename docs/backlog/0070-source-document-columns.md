@@ -310,7 +310,58 @@ verschlucken (gemessen bei 700 px).
 - Deutsche Kommentare im Katalog sind englisch (M14), `sourceDocumentTracks`
   hat `@when`/`@instead` (M15).
 
-**Offen aus der Abnahme:** M11 (`CaseCell` bekommt eine erfundene `kind`),
-M13 (Ton und Mono des führenden Punktes — die Farbe erbt jetzt, das Gewicht
-steht auf 600, der Mono-Rückfall in der Kennung steht noch aus), M18
-(Erfolgs-Icon im Leerfall der kurzen Liste). Sie gehen in die nächste Runde.
+**Offen aus der ersten Abnahme:** nur noch M11 (`CaseCell` bekommt eine
+erfundene `kind`). M13 und M18 sind entgegen einer früheren Fassung dieses
+Absatzes **beide** erledigt — die Nachabnahme hat es nachgemessen: Gewicht
+600, Farbe geerbt, Kennung mono, Haken im Erfolgs-Leerfall.
+
+## Zweite Runde, 2026-09-07 — zwei Fixes hatten neue Verstöße eingebaut
+
+Die Nachabnahme kam wieder **zurück**, knapp und aus dem lehrreichsten Grund:
+zwei der acht Korrekturen haben gegen genau die Regeln verstoßen, die sie
+wiederherstellen sollten.
+
+**N1 — der `lead`-Fix baute zwei Zeilenlinks.** Die Gegenpart-Zelle rief
+`leading()` **unbedingt**; steht sie im Satz und führt die Datei, trugen beide
+Zellen einen `.v2rowlink` auf dasselbe Ziel — und der erste hieß „—", weil ein
+stockender Beleg keinen Gegenpart hat. Ein Fokus-Stopp mit dem zugänglichen
+Namen „Gedankenstrich" ist das Gegenteil von I11. Jetzt liest **jede** der
+beiden Zellen `lead`, nicht nur eine. Gemessen: ein Zeilenlink je Zeile, in
+allen vier Sätzen.
+
+**N2 — der Mono-Fix schaltete die Kürzung ab.** `sourceDocumentIdentifier`
+gibt für den Dateinamen-Rückfall jetzt `mono: true` — und damit lief der Wert
+in den `MonoCell`-Zweig, der ihn **ungekürzt** ausgibt. Gemessen: 81 Zeichen
+in einer 170-px-Spur, sechs Zeilen, **130 px** Zeilenhöhe gegen 48 px normal.
+Der Fehler war, `mono` als Antwort auf zwei verschiedene Fragen zu benutzen:
+*wie wird gesetzt* und *wie wird gekürzt*. Die Rückfallkette gibt jetzt
+zusätzlich `isFileName` zurück; damit setzen Zeile **und** Katalog den Namen
+mono **und** kürzen ihn in der Mitte. Gemessen: zurück auf 48 px.
+
+**N3 — die Grundgesamtheit der Einreich-Liste war halb geprüft.** „eingeordnet
+**und** qualifizierende Belegform" — die Fixtures prüften nur die erste
+Hälfte, und der M2-Fix machte den Widerspruch erst lesbar: in der neuen
+Belegform-Spalte standen „Kontoauszug" und „Vertrag", beide mit
+`invoiceFlow: false`. Jetzt filtert die Story mit
+`formQualifiesForInvoiceFlow()`, und zwei qualifizierende Fixtures kommen
+dazu. Gemessen: Rechnung · Bewirtungsbeleg · Tankquittung.
+
+Dazu die drei kleineren: **N4** — die `Stuck`-Story zeigte zwei disjunkte
+Reihen und behauptete „zwei Wörter über denselben Beleg"; jetzt stehen in
+beiden Tabellen dieselben zwei Belege, einer mit Rechnungszeile, einer ohne,
+und damit fallen **alle vier** Werte der Achse. **N5** — die Einordnungsspalte
+zeigt vier Achsen und trug ein (i); jetzt drei, eins je erklärbarer Achse.
+**N6** — die Kennung wiederholte den Dateinamen, den die Zeile schon führt;
+die Zeile prüft das seit 0074 (`identRepeatsLead`), der Katalog kannte die
+Prüfung nicht.
+
+**Die Lehre, in einem Satz:** ein Wert, der zwei Fragen beantwortet
+(`mono` = wie gesetzt **und** wie gekürzt), ist keine Antwort, sondern eine
+Verwechslung, die auf ihren Anlass wartet. Und: ein Fix, der eine Spalte
+richtigstellt, deckt auf, was die Daten dahinter falsch machen — der M2-Fix
+hat N3 sichtbar gemacht, nicht verursacht.
+
+**Weiter offen:** M11. Seit dem Umstieg auf `DataTable` ist die erfundene
+`kind` teurer geworden — sie steht als Titelzeile „Eingangsrechnung: …" in
+jeder Zeile mit Sachverhalt und treibt die Zeile auf 73 px. Der Fix gehört
+`CaseCell` (`kind` optional), nicht diesem Katalog.

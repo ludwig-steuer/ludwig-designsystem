@@ -173,7 +173,7 @@ function stuckState(hasInvoiceRow: boolean | undefined, variant: StuckVariant): 
 }
 
 /**
- * @when    One of the three long document lists is built with `DataTable`.
+ * @when    One of the four long document lists is built with `DataTable`.
  * @instead A handful of documents beside other work → SourceDocumentList. One
  *          document mentioned elsewhere → SourceDocumentCell.
  */
@@ -189,6 +189,10 @@ export function sourceDocumentColumns({
   // unless the caller says otherwise (the stuck list leads with the file).
   const lead: SourceDocumentColumn =
     leadColumn ?? (picked.has("counterparty") ? "counterparty" : "fileName");
+
+  /** Does some other column of this set already print the file name? */
+  const showsFileName = (d: SourceDocumentVM) =>
+    picked.has("fileName") || (picked.has("counterparty") && !d.counterparty);
 
   const leading = (doc: SourceDocumentVM, content: ReactNode) =>
     href ? (
@@ -217,24 +221,27 @@ export function sourceDocumentColumns({
       // not as plain text: a `text-overflow` on the parent cuts off exactly
       // what the middle cut is there to keep. Measured, „.pdf" stood 69 px
       // outside its cell, in the story that was meant to prove the opposite.
-      cell: (d) => (
-        <span className="v2doccol__lead" title={d.counterparty ?? d.fileName}>
-          {leading(
-            d,
-            d.counterparty ? (
-              <span className="v2doc__keyname">{d.counterparty}</span>
-            ) : picked.has("fileName") ? (
-              // The set already shows the file in its own column — falling
-              // back to it here would print the same name twice in one row.
-              // Measured in the stuck list, where a counterparty is the
-              // exception, not the rule.
-              <span className="v2muted">—</span>
-            ) : (
-              <FileName value={d.fileName} max={48} />
-            ),
-          )}
-        </span>
-      ),
+      cell: (d) => {
+        const body = d.counterparty ? (
+          <span className="v2doc__keyname">{d.counterparty}</span>
+        ) : picked.has("fileName") ? (
+          // The set already shows the file in its own column — falling back
+          // to it here would print the same name twice in one row. Measured
+          // in the stuck list, where a counterparty is the exception.
+          <span className="v2muted">—</span>
+        ) : (
+          <FileName value={d.fileName} max={48} />
+        );
+        // **Only when it leads.** Wrapping unconditionally put a second
+        // `.v2rowlink` in every row of the stuck set — the first one named
+        // „—", because there is no counterparty. One target, one focus stop
+        // (I11).
+        return (
+          <span className="v2doccol__lead" title={d.counterparty ?? d.fileName}>
+            {lead === "counterparty" ? leading(d, body) : body}
+          </span>
+        );
+      },
     },
     fileName: {
       key: "fileName",
@@ -300,6 +307,20 @@ export function sourceDocumentColumns({
       width: "170px",
       cell: (d) => {
         const ident = sourceDocumentIdentifier(d);
+        // The file name already stands in this row — printing it a second
+        // time three columns further right says nothing new. `SourceDocumentRow`
+        // has had this check since 0074; the catalogue did not.
+        if (ident.isFileName && showsFileName(d)) return null;
+        if (ident.isFileName) {
+          // Mono like a key, cut like a file name: `MonoCell` prints its
+          // value whole, and an 81-character name drove the row from 48 px
+          // to 130 px (measured).
+          return (
+            <span className="v2mono v2doc__key" title={ident.value}>
+              <FileName value={ident.value} max={32} />
+            </span>
+          );
+        }
         return ident.mono ? (
           <MonoCell value={ident.value} />
         ) : (
@@ -342,7 +363,14 @@ export function sourceDocumentColumns({
     classification: {
       key: "classification",
       header: "Einordnung",
-      headerAside: <StatusInfoButton axis="beleg_kategorie" />,
+      // Four axes stand in this cell; one (i) would explain one of them.
+      headerAside: (
+        <>
+          <StatusInfoButton axis="beleg_kategorie" />
+          <StatusInfoButton axis="beleg_richtung" />
+          <StatusInfoButton axis="dokumentgruppe" />
+        </>
+      ),
       width: "220px",
       cell: (d) => <SourceDocumentClass document={d} />,
     },
