@@ -145,18 +145,18 @@ export function bankTransactionColumns({
     eventState: {
       key: "eventState",
       header: "Buchung",
-      // 160 px, gemessen: „Keine Buchung nötig" ist mit 150 px das breiteste
-      // Wort der Achse. Eine feste Spur, die schmaler ist als ihr breitester
-      // Wert, schiebt ihn in den Nachbarn — und `max-content` scheidet aus,
-      // weil Kopf und Zeile getrennte Raster sind (0106).
+      // 160 px, measured: „Keine Buchung nötig" is the widest word of the
+      // axis — 132 px as a badge, ~150 with its (i). A fixed track narrower
+      // than its widest value pushes that value into the neighbour, and
+      // `max-content` is out: head and row are separate grids (0106).
       width: "160px",
       cell: (t) => <EventStateCell transaction={t} />,
     },
     matchStage: {
       key: "matchStage",
       header: "DATEV-Historie",
-      // 180 px: „außerhalb des Bestands" braucht 169 px — die Spur stand auf
-      // 160 und der Text lief 9 px in die Rinne. Gemessen, nicht geschätzt.
+      // 180 px: „außerhalb des Bestands" needs 169 px with its (i) — the
+      // track stood at 160 and the text ran 9 px into the gutter. Measured.
       width: "180px",
       // Since `cc141f7b` there is an axis for this (`bank_match_stage`), and
       // with it the four open classes — 29 % of the stock — have a word for

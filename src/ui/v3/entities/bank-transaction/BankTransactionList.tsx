@@ -30,6 +30,7 @@ export function BankTransactionList({
   caseHref,
   openHref,
   expand,
+  rowHref,
   columns,
   listHref,
   sort,
@@ -53,6 +54,13 @@ export function BankTransactionList({
    * caller says **what** is inside, because only 4 % of the rows have anything.
    */
   expand?: (t: BankTransactionRowData) => React.ReactNode;
+  /**
+   * Where a row leads — the drawer of one payment (0103). The page profile
+   * calls looking one up „often" and gives it a click; without this prop the
+   * row is mute. `DataTable` excludes it against `expand`: a row that folds
+   * out cannot also jump, and that is its rule, not ours.
+   */
+  rowHref?: (t: BankTransactionRowData) => string;
   columns?: BankTransactionColumn[];
   listHref?: (patch: ListPatch) => string;
   sort?: { key: string; dir: "asc" | "desc" };
@@ -69,11 +77,12 @@ export function BankTransactionList({
   footer?: React.ReactNode;
   density?: TableDensity;
   /**
-   * Gemessen, nicht geraten: die sieben festen Spuren des Vollsatzes wiegen
-   * 1060 px, dazu 70 px Rinnen und 70 px Polster — bleiben für den Zweck erst
-   * ab 1400 px die 200 px, unter denen er nichts mehr trägt. Darunter rollt
-   * `DataTable` waagerecht; ohne diese Zahl stünde der Kopf „Verwendungszweck"
-   * 39 px außerhalb seiner eigenen Zelle (bei 1280 px gemessen).
+   * Measured, not guessed: the seven fixed tracks of the full set weigh
+   * 1060 px, plus 70 px of gutters and 36 px of card padding — 1166 px before
+   * the purpose gets anything. At the old default of 1250 that left it 84 px,
+   * and the head „Verwendungszweck" (123 px) stood 39 px outside its own
+   * cell. At 1400 the purpose has 234 px; below that `DataTable` scrolls
+   * horizontally instead of cutting a column off.
    */
   minWidth?: number;
 }) {
@@ -98,7 +107,7 @@ export function BankTransactionList({
       {...(error ? { error } : {})}
       {...(filtered ? { filtered } : {})}
       {...(footer !== undefined ? { next: footer } : {})}
-      {...(expand ? { expand } : {})}
+      {...(expand ? { expand } : rowHref ? { rowHref } : {})}
       empty={{
         // „Konto ohne Bewegung" is a **fact**, not a success and not a gap: an
         // account that saw no money in the period is neither finished nor

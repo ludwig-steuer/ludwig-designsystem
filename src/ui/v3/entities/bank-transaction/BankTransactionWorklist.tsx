@@ -1,6 +1,6 @@
 import { formatTime } from "../../format";
 import { DataTable } from "../../patterns/DataTable";
-import type { BulkAction } from "../../patterns/DataTable";
+import type { BulkAction, ListPatch } from "../../patterns/DataTable";
 import {
   bankTransactionColumns,
   type BankTransactionColumn,
@@ -11,21 +11,35 @@ import type { BankTransactionRowData } from "./bank-transaction";
  * The payments that belong to no case yet (0086).
  *
  * **65 % of all positions are this list.** It differs from the statement
- * (0085) in three of the five criteria of §8 — population (only Z0), bulk
- * action (yes) and column set (no DATEV tick, no assignment column, because
- * every row here is unassigned and the tick answers a different question).
- * Two would have been enough.
+ * (0085) in three of the five criteria of §8 — **column set, filter and bulk
+ * action**. The population is *not* one of the three: both lists show one
+ * account (the profile's review run struck the word „across accounts"
+ * explicitly), and grouping several accounts is the page's job — it knows
+ * which accounts there are, the list knows its own.
  *
- * The page groups by account and renders one table per account; the profile is
- * explicit that this component is **per account**, not across them. Grouping is
- * the page's job — it knows which accounts there are, the list knows its own.
+ * It carries **two** callers: the open payments of an account, and the
+ * configuration page, which lists *every* payment of an account. That is why
+ * sorting and paging are passed through even though the first caller rarely
+ * needs them — 500 rows without a pager is not a list, it is a truncation.
  */
 
-/** Without the assignment column and without the tick: both would say „no" in every row. */
+/**
+ * Ranks 1–4 and 6 — the profile's set for this list.
+ *
+ * Without the **DATEV tick**: it answers a different question (does the line
+ * stand in the history?) than the one this list is read for (whose is it?).
+ *
+ * With the **case column**, although in the first caller every row is
+ * unassigned: it is the place where the assignment shows up the moment it
+ * happens, and the second caller (the configuration page) sees rows that
+ * already have one. A column that is empty in one caller and full in the
+ * other is a column, not a duplication.
+ */
 const WORKLIST_COLUMNS: BankTransactionColumn[] = [
   "postingDate",
   "counterparty",
   "purpose",
+  "cases",
   "amount",
 ];
 
@@ -37,13 +51,18 @@ const WORKLIST_COLUMNS: BankTransactionColumn[] = [
 export function BankTransactionWorklist({
   transactions,
   caseHref,
+  openHref,
   bulkActions,
   rowActions,
+  rowHref,
   columns = WORKLIST_COLUMNS,
+  listHref,
+  sort,
+  pager,
   loading,
   error,
   head,
-  minWidth = 900,
+  minWidth = 1100,
 }: {
   transactions: BankTransactionRowData[];
   caseHref: (caseId: string) => string;
@@ -55,7 +74,15 @@ export function BankTransactionWorklist({
   bulkActions: BulkAction[];
   /** „Einzeln", „Dauer", and the suggestion „→ Beleg Nr." — one row at a time. */
   rowActions?: React.ComponentProps<typeof DataTable<BankTransactionRowData>>["rowActions"];
+  /** Where a row leads — the drawer of one payment (0103). */
+  rowHref?: (t: BankTransactionRowData) => string;
+  /** Where „offen" leads in the case column. */
+  openHref?: string;
   columns?: BankTransactionColumn[];
+  /** The second caller lists **all** payments of an account, 500 at a time. */
+  listHref?: (patch: ListPatch) => string;
+  sort?: { key: string; dir: "asc" | "desc" };
+  pager?: { page: number; pageSize: number; totalItems: number; totalPages: number };
   loading?: boolean;
   error?: { message: string; retry?: React.ReactNode };
   head: { title: React.ReactNode; sub?: React.ReactNode; actions?: React.ReactNode };
@@ -64,7 +91,11 @@ export function BankTransactionWorklist({
   return (
     <DataTable<BankTransactionRowData>
       rows={transactions}
-      columns={bankTransactionColumns({ caseHref, columns })}
+      columns={bankTransactionColumns({
+        caseHref,
+        columns,
+        ...(openHref ? { openHref } : {}),
+      })}
       rowKey={(t) => t.id}
       head={head}
       minWidth={minWidth}
@@ -76,6 +107,10 @@ export function BankTransactionWorklist({
           `${t.counterpartyName ?? "Zahlung"} vom ${formatTime(t.postingDate, "date", "medium")} auswählen`,
       }}
       {...(rowActions ? { rowActions } : {})}
+      {...(rowHref ? { rowHref } : {})}
+      {...(listHref ? { href: listHref } : {})}
+      {...(sort ? { sort } : {})}
+      {...(pager ? { pager } : {})}
       {...(loading ? { loading } : {})}
       {...(error ? { error } : {})}
       empty={{

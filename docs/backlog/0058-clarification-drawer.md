@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| Status | offen |
+| Status | spec — Ergebnis: **keine Komponente**, Aufgabe an die Aufrufstelle |
 | Stufe | `entities/clarification/` |
 | Klassen-Test | nein — „Klärung" ist ein Ludwig-Fachwort |
 | Quelle | Entitätsprofil `docs/entitaeten/clarification.md` §Formen, §Zuschnitt (2026-09-04) |
 | Ersetzt | noch nichts — heute führt der Verweis in `RationaleSources` auf die Sachverhaltsseite |
 | Blockiert | nichts |
-| Spec von / am | — (Auftrag, noch keine Spec) |
+| Spec von / am | Claude, 2026-09-07 (Skill `spec-schreiben`, §3 Regel 1) |
 
 ## Auftrag
 
@@ -35,3 +35,83 @@ keine eigene Komponente.
   ihre Vorgängerin zeigen muss.
 
 Dann: Spec mit `spec-schreiben`, Quelle bleibt das Entitätsprofil.
+
+## Spec 2026-09-07 (Skill `spec-schreiben`) — **keine Komponente**
+
+Das Ergebnis dieser Spec ist, dass keine gebaut wird. `spec-schreiben` §3
+Regel 1 greift: „Ein `@when` deckt den Fall → verwenden. Die Spec nennt den
+Export und ist damit meist keine Komponenten-Spec mehr, sondern eine
+Seiten-Aufgabe."
+
+### Was den Fall schon deckt
+
+| Teil | Export | `@when` |
+|---|---|---|
+| Der Rahmen | `Drawer` (`primitives/Drawer.tsx`) | „Looking at something existing next to a list … without leaving the list" |
+| Der Inhalt | `ClarificationCard` (0060) | „One clarification with everything it carries — read it, or answer it" |
+| Der Verweis, aus dem heraus aufgeschlagen wird | `ClarificationCell` (0059) | „A clarification named inside something else — the source behind a booking rationale" |
+
+Der Drawer über eine Klärung ist damit **fünf Zeilen an der Aufrufstelle**:
+
+```tsx
+<Drawer open={openId !== null} onClose={close} title={clarification.title} size="md">
+  <ClarificationCard clarification={clarification} mode="read" />
+</Drawer>
+```
+
+Eine eigene `ClarificationDrawer`-Komponente wäre nach §3 Regel 3 nur
+gerechtfertigt, wenn sie etwas entschiede, was die beiden nicht entscheiden.
+Sie entschiede nichts: der Titel kommt aus der Klärung, die Breite ist die
+Voreinstellung, der Fuß ist leer, und die Karte kann bereits lesen (`read`),
+beantworten (`answer`) und als Vorschau erscheinen (`preview`).
+
+### Der Unterschied zu 0052, und warum er hier nicht trägt
+
+`SourceDocumentDrawer` (0052) ist eine eigene Komponente, weil er **fünf
+Zonen** ordnet, die kein Aufrufer zweimal richtig zusammensetzt: Kopf,
+Original, Kernfakten, die ausdrückliche **Grenze** („mehr steht im View") und
+genau einen Ausgang. Diese Grenze ist die eigentliche Entscheidung — der
+Drawer beantwortet die eine Frage, die woanders aufkam, und bietet für alles
+Weitere den Weg an.
+
+Die Klärung hat diese Grenze nicht: **ihr Detail ist der Sachverhalt** (so
+steht es im Entitätsprofil, Zeile `ClarificationView`: „verworfen"). Ein
+Drawer über der Klärung hätte also entweder keinen Ausgang — dann ist er die
+Karte im Rahmen — oder seinen Ausgang zum Sachverhalt, und den kennt die Karte
+schon (`caseHref`). Es gibt nichts zu zonieren.
+
+### Die Aufgabe, die bleibt (Seiten-Aufgabe)
+
+An **einer** Stelle in `ludwig/app`: `RationaleSources` verweist heute mit
+`kind='clarification'` auf die Sachverhaltsseite und reißt damit den Vorgang
+auf, in dem die Rolle gerade steckt (Buchungs-Begründung lesen). Die Aufgabe
+lautet: den Verweis zu einem `Drawer` machen, Inhalt `ClarificationCard`
+`mode="read"`. Kein Baustein hier, ein Aufruf drüben.
+
+### Abnahmekriterien
+
+Diese Aufgabe wird nicht gebaut, also gibt es keine Story und keine Messung.
+Sie ist **erledigt**, wenn eins von beidem gilt:
+
+- [ ] Die Aufrufstelle in `ludwig/app` benutzt `Drawer` + `ClarificationCard`
+      (offen (App)), **oder**
+- [ ] einer der beiden Auslöser unten tritt ein und die Aufgabe wird neu
+      aufgemacht.
+
+### Wieder aufmachen, wenn — präzisiert
+
+Der ursprüngliche Auftrag nannte zwei Auslöser; nach dem Bau der Familie sind
+sie schärfer zu fassen:
+
+1. **Ein Rahmen braucht mehr als eine Zone.** Sobald der Drawer einer Klärung
+   zusätzlich zur Karte etwas Eigenes tragen soll — den Klärungs-**Faden**
+   (Gegenfrage zeigt ihre Vorgängerin, Befund B8), die Quellen als eigene
+   Zone, oder eine Antwortfläche **im** Drawer mit eigenem Fuß —, dann ordnet
+   er wieder etwas und ist eine Komponente. Vorher nicht.
+2. **Zwei Aufrufstellen bauen denselben Rahmen.** Eine genügt nicht: §3
+   Regel 3 verlangt zwei Verwendungen. Heute ist es eine (`RationaleSources`).
+
+### Befunde für `ludwig/app`
+
+Keine neuen. **B8** (der Klärungs-Faden fehlt im Datenmodell) steht im
+Entitätsprofil und ist zugleich der erste der beiden Auslöser oben.

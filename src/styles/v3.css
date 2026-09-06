@@ -90,6 +90,14 @@
   --v2-head-y: 11px;
   --v2-detail-y: 18px;
 }
+/* `colSpan` ist wirkungslos, seit die Zellen `display: block` sind (0106):
+   die Datenzeile ist ein Grid, und die Sonderzeile mit **einer** Zelle wird
+   sonst zur schrumpfenden anonymen Tabellenzelle. Gemessen war das
+   Fehler-Feld 707 px breit in einer 1400-px-Tabelle und die Lade-Zeile 0 px.
+   Die Zeile mit einer spannenden Zelle wird deshalb selbst ein Block. */
+.v2tbl tr:has(> td[colspan]) { display: block; }
+.v2tbl td[colspan] { width: 100%; }
+
 .v2tbl__scroll { overflow-x: auto; }
 .v2tbl__inner { min-width: var(--v2-min, 0); }
 

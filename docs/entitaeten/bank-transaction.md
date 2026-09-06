@@ -148,7 +148,7 @@ Begründung war nur zu breit formuliert.
 
 | Liste | Job | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
 |---|---|---|---|---|---|---|---|---|---|
-| `BankTransactionList` — der Kontoauszug | Wenn **ein Kontoauszug importiert ist**, will **die Sachbearbeiterin** **sehen, welche Zahlungen noch keinem Vorgang gehören**, damit **kein Geldfluss ungebucht durchrutscht** | ein Zahlungskonto, ein Zeitraum | Buchungsdatum | 1–8 | Zeitraum, Zustand, Volltext (Zweck, Gegenpartei, Betrag, Sachverhalt, EREF/KREF) | keine | „Konto ohne Bewegung" (Erfolg) ≠ „keine Treffer" (Filter) | je Konto und Jahr **p50 36 · p90 251 · max 952** | Staging · `KontoauszugView` · Route `[year]/banks/[accountId]` |
+| `BankTransactionList` — der Kontoauszug | Wenn **ein Kontoauszug importiert ist**, will **die Sachbearbeiterin** **sehen, welche Zahlungen noch keinem Vorgang gehören**, damit **kein Geldfluss ungebucht durchrutscht** | ein Zahlungskonto, ein Zeitraum | Buchungsdatum | 1–8 | Zeitraum, Zustand, Volltext (Zweck, Gegenpartei, Betrag, Sachverhalt, EREF/KREF) | keine | „Konto ohne Bewegung" (**Feststellung**, kein Haken — korrigiert beim Bau 2026-09-07, siehe unten) ≠ „keine Treffer" (Filter) | je Konto und Jahr **p50 36 · p90 251 · max 952** | Staging · `KontoauszugView` · Route `[year]/banks/[accountId]` |
 | `BankTransactionWorklist` — offene Zahlungen | Wenn **Zahlungen ohne Vorgang liegen**, will **die Sachbearbeiterin** **sie in einem Zug einem neuen oder bestehenden Sachverhalt zuordnen**, damit **sie nicht Konto für Konto durchgeht** | **ein Konto** (nicht kontoübergreifend, siehe unten), nur ohne Sachverhalt (Z0), ein Wirtschaftsjahr | Datum absteigend; die **Seite** gruppiert nach Konto und rendert je Konto eine eigene Tabelle | Auswahl · 1 · 2 · 3 · 4 · 6 (+ 7/8 über `CaseIndicatorBadges`, sobald zugeordnet) — **kein** DATEV-Haken, **keine** Konto-Spalte | keiner in der Komponente | **ja** — Auswahl → neuer Sachverhalt oder bestehendem zuordnen; dazu je Zeile „Einzeln", „Dauer" und der Vorschlags-Knopf „→ Beleg *Nr.*" | „nichts offen" (Erfolg, mit Zahl) | 65 % aller Positionen haben kein Ereignis | `BankTransactionAssignmentTable` · Reiter „Offene Zahlungen" der Sachverhaltsseite |
 | dieselbe Komponente, zweiter Aufrufer — **Transaktionen eines Kontos** in der Konfiguration | Wenn **ein Import gelaufen ist**, will **wer das Konto einrichtet** **sehen, was tatsächlich angekommen ist, und Liegengebliebenes gleich zuordnen**, damit **er den Import beurteilen kann, ohne ins Buchungsjahr zu wechseln** | ein Konto, **alle** Zeilen (nicht nur offene), `limit 500`, **ohne** Jahresfilter | Datum absteigend | wie oben | keiner | wie oben | keiner | dieselbe Verteilung | Route `configuration/bankkonten/[accountId]/transactions`, verlinkt aus der Bankkonten-Übersicht und aus der Import-Seite — **im Profil bisher nicht verzeichnet** |
 
@@ -229,6 +229,25 @@ der App `BankTransactionAssignmentRow` und ist nicht gespiegelt.
 | `BankTransactionWorklist` | Backlog | hängt an 0084 `CasePicker` und an der fehlenden Sammelaktion (L-16) | `docs/backlog/0086-bank-transaction-worklist.md` |
 | `BankTransactionView` · `BankTransactionPicker` · `BankTransactionEditor` | verworfen (im Prüflauf alle drei bestätigt) | je ein Satz in der Formen-Tabelle | — |
 | `BankTransactionCard` | **offen** | `SachverhaltScreen.BankPane` erfüllt §7 Nr. 1, aber §9 lässt keine sechste Form „jetzt" zu. Der Prüfagent legt keine Backlog-Datei an — das entscheidet die Überarbeitung | — |
+
+### Korrekturen beim Bau (2026-09-07)
+
+Zwei Zeilen dieses Profils hat der Bau von 0085/0086 widerlegt; sie stehen
+hier, damit die nächste Abnahme gegen den richtigen Stand prüft.
+
+1. **Der Leerfall des Kontoauszugs ist kein Erfolg.** Die Listen-Tabelle sagte
+   „Konto ohne Bewegung (Erfolg)". Ein Konto, auf dem im Zeitraum kein Geld
+   bewegt wurde, ist aber weder fertig noch kaputt — es ist eine
+   **Feststellung**. Der Haken bleibt weg; er behauptete sonst, hier sei etwas
+   erledigt worden. „Nichts mehr offen" in der Arbeitsliste ist dagegen sehr
+   wohl ein Erfolg und trägt ihn (mit der Zahl). Entschieden im Seitenprofil
+   `docs/seiten/kontoauszug.md`, gebaut in 0085.
+2. **Der Spaltensatz der Arbeitsliste bleibt bei den Rängen 1–4 und 6.** Der
+   erste Bau ließ Rang 6 weg („sagt in jeder Zeile dasselbe"); die Abnahme hat
+   das zu Recht zurückgewiesen: das Argument gilt nur für reines Z0, und der
+   zweite Aufrufer (Konfigurationsseite, alle Zahlungen eines Kontos) sieht
+   zugeordnete Zeilen. Rang 6 ist außerdem der Ort, an dem die Zuordnung
+   erscheint, sobald sie passiert.
 
 ## Befunde für `ludwig/app`
 

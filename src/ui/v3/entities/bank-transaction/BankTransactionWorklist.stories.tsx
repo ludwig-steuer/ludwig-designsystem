@@ -3,6 +3,7 @@ import { useState } from "react";
 import { BankTransactionWorklist } from "./BankTransactionWorklist";
 import type { BankTransactionRowData } from "./bank-transaction";
 import type { BulkAction } from "../../primitives/Selection";
+import { Button } from "../../primitives/Button";
 import { PageHeader } from "../../primitives/PageHeader";
 
 const meta: Meta<typeof BankTransactionWorklist> = {
@@ -28,11 +29,12 @@ const T = (over: Partial<BankTransactionRowData>): BankTransactionRowData => ({
   ...over,
 });
 
+// Neueste zuerst — die Sortierung des Profils.
 const OPEN: BankTransactionRowData[] = [
-  T({ id: "o-1" }),
-  T({ id: "o-2", postingDate: "2026-08-27", amount: -89.9, counterpartyName: null, purpose: "SVWZ+Kontoführungsentgelt August 2026", matchStage: "beyond_bookings" }),
-  T({ id: "o-3", postingDate: "2026-08-28", amount: 240, counterpartyName: "Musterbau GmbH", purpose: "SVWZ+Gutschrift Retoure", matchStage: "unclear_multi" }),
   T({ id: "o-4", postingDate: "2026-08-31", amount: -1799, counterpartyName: "Fuhrpark Leasing AG", purpose: "EREF+VERTRAG-2026-000441827 SVWZ+Leasingrate 14 von 36", matchStage: "no_account" }),
+  T({ id: "o-3", postingDate: "2026-08-28", amount: 240, counterpartyName: "Musterbau GmbH", purpose: "SVWZ+Gutschrift Retoure", matchStage: "unclear_multi" }),
+  T({ id: "o-2", postingDate: "2026-08-27", amount: -89.9, counterpartyName: null, purpose: "SVWZ+Kontoführungsentgelt August 2026", matchStage: "beyond_bookings" }),
+  T({ id: "o-1" }),
 ];
 
 const HEAD = { title: "Offene Zahlungen", sub: "Commerzbank · 1210 · 4 von 251" };
@@ -61,7 +63,7 @@ export const Filled: Story = {
       },
     ];
     return (
-      <div style={{ maxWidth: 1100, display: "grid", gap: "var(--space-3)" }}>
+      <div style={{ maxWidth: 1250, display: "grid", gap: "var(--space-3)" }}>
         <BankTransactionWorklist
           transactions={OPEN}
           caseHref={caseHref}
@@ -86,8 +88,60 @@ export const WithMatchStage: Story = {
         transactions={OPEN}
         caseHref={caseHref}
         head={HEAD}
-        columns={["postingDate", "counterparty", "purpose", "matchStage", "amount"]}
+        // **Verwürfelt übergeben** — die Kopfzeile muss trotzdem in der
+        // Reihenfolge des Katalogs stehen: `columns` wählt aus, es ordnet nicht um.
+        columns={["amount", "matchStage", "purpose", "postingDate", "counterparty"]}
         bulkActions={[]}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Der **zweite Aufrufer**: die Konfigurationsseite eines Bankkontos listet
+ * *jede* Zahlung, nicht nur die offenen — 500 Zeilen am Stück. Deshalb reicht
+ * die Liste Sortierung und Pager durch, obwohl der erste Aufrufer sie selten
+ * braucht: 500 Zeilen ohne Pager sind keine Liste, sondern eine Abschneidung.
+ * In dieser Grundgesamtheit ist die Sachverhalts-Spalte auch gefüllt.
+ */
+export const AllOfAnAccount: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1250 }}>
+      <BankTransactionWorklist
+        transactions={[
+          ...OPEN.slice(0, 2),
+          T({
+            id: "a-1",
+            postingDate: "2026-08-26",
+            amount: -1249.9,
+            counterpartyName: "Bürobedarf Meier GmbH",
+            purpose: "EREF+0600496348 SVWZ+Wartung Klimaanlage",
+            matchStage: "exact",
+            cases: [
+              {
+                caseId: "c-4412",
+                caseNumber: "2026-0412",
+                fiscalYear: 2026,
+                title: "Wartung der Klimaanlage",
+                kind: "incoming_invoice",
+                counterpartyName: "Bürobedarf Meier GmbH",
+                lifecycleStatus: "open",
+                amount: 1249.9,
+                currency: "EUR",
+                eventBookingState: "posted",
+                noBookingRequiredReason: null,
+              },
+            ],
+            allocatedSum: 1249.9,
+          }),
+        ]}
+        caseHref={caseHref}
+        openHref="#zuordnen"
+        head={{ title: "Zahlungen", sub: "Commerzbank · 1210 · alle 500" }}
+        bulkActions={[]}
+        listHref={(p) => `#konto?sort=${p.sort ?? ""}&dir=${p.dir ?? ""}&page=${p.page ?? 1}`}
+        sort={{ key: "postingDate", dir: "desc" }}
+        pager={{ page: 1, pageSize: 100, totalItems: 500, totalPages: 5 }}
       />
     </div>
   ),
@@ -96,11 +150,11 @@ export const WithMatchStage: Story = {
 /** Nichts offen ist hier ein **Erfolg** — und sagt es mit dem Haken. */
 export const Empty: Story = {
   render: () => (
-    <div style={{ maxWidth: 1100 }}>
+    <div style={{ maxWidth: 1250 }}>
       <BankTransactionWorklist
         transactions={[]}
         caseHref={caseHref}
-        head={{ title: "Offene Zahlungen", sub: "Commerzbank · 1210" }}
+        head={{ title: "Offene Zahlungen", sub: "Commerzbank · 1210 · 0 von 251 offen" }}
         bulkActions={[]}
       />
     </div>
@@ -110,14 +164,18 @@ export const Empty: Story = {
 /** Lädt und Fehler — der Fehler nennt Ursache und nächsten Schritt (T5). */
 export const LoadingAndError: Story = {
   render: () => (
-    <div style={{ maxWidth: 1100, display: "grid", gap: "var(--space-6)" }}>
+    <div style={{ maxWidth: 1250, display: "grid", gap: "var(--space-6)" }}>
       <BankTransactionWorklist transactions={[]} caseHref={caseHref} head={HEAD} bulkActions={[]} loading />
       <BankTransactionWorklist
         transactions={[]}
         caseHref={caseHref}
         head={HEAD}
         bulkActions={[]}
-        error={{ message: "Die offenen Zahlungen konnten nicht geladen werden. Der Abgleich-Lauf vom 01.09. steht noch aus." }}
+        error={{
+          message:
+            "Die offenen Zahlungen konnten nicht geladen werden. Der Abgleich-Lauf vom 01.09. steht noch aus.",
+          retry: <Button onClick={() => {}}>Erneut laden</Button>,
+        }}
       />
     </div>
   ),
@@ -130,7 +188,7 @@ export const LoadingAndError: Story = {
  */
 export const InUse: Story = {
   render: () => (
-    <div style={{ maxWidth: 1100, display: "grid", gap: "var(--space-5)" }}>
+    <div style={{ maxWidth: 1250, display: "grid", gap: "var(--space-5)" }}>
       <PageHeader
         overline="Musterbau GmbH · Wirtschaftsjahr 2026"
         title="Offene Zahlungen"

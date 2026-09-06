@@ -65,6 +65,7 @@ eingebaut sind:
 | `filtered` | `{ summary, resetHref }` | nein | Der Leerfall nach Filter | `EmptyAfterFilter` |
 | `head` | `{ title, sub?, actions? }` | ja | Kopf der Karte: Bank, Konto, Zeitraum | alle |
 | `footer` | `ReactNode` | nein | Zone 6 — **der Saldo, und nur hier** | `WithFooter` |
+| `rowHref` | `(t) => string` | nein | Der Weg in den Drawer einer Zahlung (0103) — das Seitenprofil nennt das Nachschlagen **oft**. Schließt `expand` aus, das ist die Regel von `DataTable` | `RowLink` |
 | `density` | `TableDensity` | nein | Durchgereicht | — (Prop von `DataTable`, hier nur weitergegeben) |
 | `minWidth` | `number` | nein | Voreinstellung **1400**, gemessen (siehe unten) | `Filled` bei 1280 px |
 
@@ -81,12 +82,14 @@ eingebaut sind:
 
 Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionList`. Abgeleitet nach
 §6: 5 anwendbare Zustände (Laden und Fehler in **einer** Story
-nebeneinander = 4 Dateien) + 1 Callback (`expand`) + 1 Layout (`footer`) +
-1 „im Einsatz" + 1 Rand = **8**.
+nebeneinander = 4 Stories) + 1 Callback (`expand`) + 1 Layout (`footer`) +
+1 Weg ins Detail (`rowHref`, schließt `expand` aus und braucht deshalb eine
+eigene) + 1 „im Einsatz" + 1 Rand = **9**.
 
 | Story | Beweist |
 |---|---|
 | `Filled` | Acht Spalten, Sortierung am Kopf, Pager, „offen" als Wort mit Weg |
+| `RowLink` | Der Weg in den Drawer — die Zeile als Link, ohne verschachtelten Anker |
 | `Expanded` | Die Aufteilung unter der Zeile — der Aufrufer sagt, was drinsteht |
 | `Empty` | Konto ohne Bewegung: eine **Feststellung**, kein Haken |
 | `EmptyAfterFilter` | „Keine Treffer" mit Weg zurück |
@@ -109,6 +112,8 @@ Variabel:
 - [ ] Der Saldo erscheint **nur** über `footer`, nie in einer Zeile (`grep`: keine Saldo-Spalte im Katalog)
 - [ ] Der Leerfall des Kontos trägt **keinen** Haken, der Filterfall einen Weg zurück (Stories `Empty`, `EmptyAfterFilter`)
 - [ ] `expand` entscheidet der Aufrufer; ohne ihn hat die Zeile keinen Aufklapper (Stories `Filled` gegen `Expanded`)
+- [ ] Die Zeile hat einen Weg ins Detail, und er erzeugt keine verschachtelten Anker (Story `RowLink`, gemessen: 5 Zeilenlinks, 0 `a a`)
+- [ ] Die Fehlerzeile trägt einen Weg zurück, nicht nur einen Satz (Story `LoadingAndError`, gemessen: ein Knopf)
 - [ ] Keine Konsolenmeldung in allen acht Stories (gemessen)
 - [ ] offen (App): ersetzt `KontoauszugView.tsx` (631 Z.)
 
@@ -128,10 +133,15 @@ bezahlt, obwohl die Mehrfach-Zuordnung 4 % sind. Gestapelt kostet sie nur
 diese 4 % eine Zeile, und die sind ohnehin die höchsten.
 
 **`minWidth` deckt die Rechnung:** sieben feste Spuren = 1060 px, sieben
-Rinnen à 10, zweimal 35 Polster = 1200 — für den Verwendungszweck blieben bei
-der alten Voreinstellung (1250) genau 50 px, und der Kopf „Verwendungszweck"
-stand 39 px außerhalb seiner eigenen Zelle. Jetzt 1400; darunter rollt
-`DataTable` waagerecht.
+Rinnen à 10, zweimal 18 px Kartenpolster = **1166 px**. Bei der alten
+Voreinstellung (1250) blieben dem Verwendungszweck **84 px**, und der Kopf
+„Verwendungszweck“ (123 px) stand **39 px** außerhalb seiner eigenen Zelle.
+Jetzt 1400, damit 234 px für den Zweck; darunter rollt `DataTable` waagerecht.
+
+*(Der erste Wortlaut rechnete mit „zweimal 35 Polster“ und kam auf 50 px. Die
+Abnahme hat nachgemessen: das Polster ist `12px 18px`. Der Schluss stimmte,
+die Zahl nicht — und dieselbe falsche 70 stand in `sourceDocumentMinWidth()`
+aus 0070, wo sie mitkorrigiert ist.)*
 
 **Ein Kästchen ohne Wirkung.** Der Kopf der Auswahlspalte war im Leerfall
 klickbar und wählte nichts. Behoben in `SelectAllCell` (0057) — es gilt für

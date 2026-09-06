@@ -447,7 +447,9 @@ export function sourceDocumentTracks(columns: ColumnDef<SourceDocumentVM>[]): st
  */
 export function sourceDocumentMinWidth(columns: ColumnDef<SourceDocumentVM>[]): number {
   const GUTTER = 10;
-  const PADDING = 70;
+  // `.v2tbl` sits in a card with `padding: 12px 18px` (v3.css) — 36 px, not
+  // the 70 an earlier note claimed. Measured in the acceptance of 0085.
+  const PADDING = 36;
   const floor = (width: string | undefined): number => {
     if (!width) return 0;
     const min = /minmax\(\s*(\d+)px/.exec(width);

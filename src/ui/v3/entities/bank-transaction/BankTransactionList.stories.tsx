@@ -4,6 +4,7 @@ import type { BankTransactionRowData, CaseAssignment } from "./bank-transaction"
 import { Amount } from "../../primitives/Amount";
 import { FilterBar } from "../../primitives/FilterBar";
 import { Field, Input, Select } from "../../primitives/Form";
+import { Button } from "../../primitives/Button";
 import { PageHeader } from "../../primitives/PageHeader";
 
 const meta: Meta<typeof BankTransactionList> = {
@@ -46,12 +47,14 @@ const T = (over: Partial<BankTransactionRowData> = {}): BankTransactionRowData =
   ...over,
 });
 
+// Absteigend, wie der Kopf es sagt und wie das Profil es vorschreibt: das
+// jüngste Buchungsdatum steht oben.
 const ROWS: BankTransactionRowData[] = [
-  T(),
-  T({ id: "bt-2", postingDate: "2026-08-27", amount: 1800, counterpartyName: "Musterbau GmbH", purpose: "EREF+RE-2026-0338 SVWZ+Zahlung Rechnung RE-2026-0338", matchStage: "beleg", cases: [CASE({ caseId: "c-338", caseNumber: "2026-0338", title: "Ausgangsrechnung Musterbau", amount: 1800, eventBookingState: "posted" })], allocatedSum: 1800 }),
-  T({ id: "bt-3", postingDate: "2026-08-28", amount: -412, counterpartyName: "Stadtwerke Musterstadt", purpose: "EREF+SW-2026-08 SVWZ+Abschlag Strom 08/2026", matchStage: "unclear_none", cases: [], allocatedSum: 0 }),
-  T({ id: "bt-4", postingDate: "2026-08-29", amount: -89.9, counterpartyName: null, purpose: "SVWZ+Kontoführungsentgelt August 2026", matchStage: "beyond_bookings", cases: [], allocatedSum: 0 }),
   T({ id: "bt-5", postingDate: "2026-08-30", amount: -2480.55, counterpartyName: "Handwerk Schulz KG", purpose: "EREF+RE-8817 SVWZ+Sanierung Serverraum, Teilrechnung 2 von 3", matchStage: "near", cases: [CASE({ caseId: "c-8817", caseNumber: "2026-0451", title: "Sanierung Serverraum", amount: 2000, eventBookingState: null })], allocatedSum: 2000, openClarificationsCount: 1 }),
+  T({ id: "bt-4", postingDate: "2026-08-29", amount: -89.9, counterpartyName: null, purpose: "SVWZ+Kontoführungsentgelt August 2026", matchStage: "beyond_bookings", cases: [], allocatedSum: 0 }),
+  T({ id: "bt-3", postingDate: "2026-08-28", amount: -412, counterpartyName: "Stadtwerke Musterstadt", purpose: "EREF+SW-2026-08 SVWZ+Abschlag Strom 08/2026", matchStage: "unclear_none", cases: [], allocatedSum: 0 }),
+  T({ id: "bt-2", postingDate: "2026-08-27", amount: 1800, counterpartyName: "Musterbau GmbH", purpose: "EREF+RE-2026-0338 SVWZ+Zahlung Rechnung RE-2026-0338", matchStage: "beleg", cases: [CASE({ caseId: "c-338", caseNumber: "2026-0338", title: "Ausgangsrechnung Musterbau", amount: 1800, eventBookingState: "posted" })], allocatedSum: 1800 }),
+  T(),
 ];
 
 const HEAD = { title: "Kontoauszug", sub: "Commerzbank · 1210 · 01.08. bis 31.08.2026" };
@@ -69,6 +72,26 @@ export const Filled: Story = {
         sort={{ key: "postingDate", dir: "desc" }}
         pager={PAGER}
         head={HEAD}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Der Weg in den Drawer (0103): das Seitenprofil nennt „eine Zahlung
+ * nachschlagen, ohne die Liste zu verlassen" **oft** und gibt ihm einen Klick.
+ * `rowHref` und `expand` schließen sich aus — das ist die Regel von
+ * `DataTable`: eine Zeile, die aufklappt, springt nicht auch noch.
+ */
+export const RowLink: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1460 }}>
+      <BankTransactionList
+        transactions={ROWS}
+        caseHref={caseHref}
+        openHref="#zuordnen"
+        head={HEAD}
+        rowHref={(t) => `#zahlung-${t.id}`}
       />
     </div>
   ),
@@ -133,7 +156,7 @@ export const EmptyAfterFilter: Story = {
         transactions={[]}
         caseHref={caseHref}
         head={HEAD}
-        filtered={{ summary: "„Miete“ · nur offene", resetHref: "#alle" }}
+        filtered={{ summary: "Miete · nur offene", resetHref: "#alle" }}
       />
     </div>
   ),
@@ -148,7 +171,11 @@ export const LoadingAndError: Story = {
         transactions={[]}
         caseHref={caseHref}
         head={HEAD}
-        error={{ message: "Der Kontoauszug konnte nicht geladen werden. Der Import-Lauf vom 01.09. ist noch nicht durch." }}
+        error={{
+          message:
+            "Der Kontoauszug konnte nicht geladen werden. Der Import-Lauf vom 01.09. ist noch nicht durch.",
+          retry: <Button onClick={() => {}}>Erneut laden</Button>,
+        }}
       />
     </div>
   ),
