@@ -178,3 +178,31 @@ Abgenommen von / am: … · Offene Punkte: …
 **Urteil: freigeben.** Entscheide: 1 ein Ausgang, lageabhängig · 2 Import-Block nicht · 3 Breite: `md` nach der 0052-Regel (`lg` nur für Dokument oder Tabelle), abweichend vom Default der Spec.
 
 Vor dem Bau in die Spec: ein Satz, warum Zone 1 keinen `StatusBadge` trägt (keine Achse für `match_stage`, Ereignis-Zustand nur bei Zuordnung); Schnittstelle nach dem 0052-Schema wie in 0098 entschieden (`reference`, `record | null` = nicht gefunden, `loading`, `error`, `onOpenFull`), Story `NotFound`; Typ-Satz aus 0100.
+
+## Nachtrag 2026-09-06, vor dem Bau
+
+**Schnittstelle nach dem 0052-Schema** (gemeinsam mit 0098 entschieden):
+`reference`, `record | null` = **nicht gefunden**, `loading`, `error`,
+`onOpenFull`, dazu `caseHref` für Zone 3. Story `NotFound` statt `Closed`;
+Breite `md`, nicht `lg` (0052 staffelt nach Inhalt: `lg` nur für ein Dokument
+oder eine Tabelle, und eine Zahlung hat weder).
+
+**Zone 5 bleibt ein Ausgang, und der Drawer wählt ihn** — aber die Route kennt
+der Aufrufer. Deshalb ist `onOpenFull` kein `href`, sondern
+`(exit: "case" | "assign", caseId?: string) => void`: der Drawer entscheidet
+nach `cases.length`, der Aufrufer setzt die URL. Zwei Knöpfe, von denen einer
+bei 65 % der Fälle ins Leere zeigt, wären schlechter als einer, der immer
+stimmt.
+
+**Warum Zone 1 keinen `StatusBadge` trägt** — und der Grund hat sich geändert.
+Die Freigabe nannte „keine Achse für `match_stage`"; die gibt es seit
+`cc141f7b` (`bank_match_stage`). Der Grund ist jetzt ein anderer und ein
+besserer: **Zone 3 trägt sie**, und 0052 verbietet, dasselbe zweimal zu sagen.
+Der Ereignis-Zustand kommt als Kopf-Zustand ohnehin nicht in Frage — es gibt
+ihn nur, wo ein Sachverhalt hängt, also bei 35 % der Zeilen.
+
+**`BankTransactionRow` bekommt kein `href`.** Beim Bau der `InUse`-Story
+gemessen: `Row href` macht die ganze Zeile zu einem `<a>`, und ihre Zellen
+tragen eigene — die Fall-Links von `CaseCell` und den (i)-Knopf des Zwecks.
+Anker im Anker und Knopf im Anker sind ungültiges Markup; die Konsole meldete
+es als Hydrations-Warnung. Die Wege aus der Zeile heraus sind die Wege in ihr.

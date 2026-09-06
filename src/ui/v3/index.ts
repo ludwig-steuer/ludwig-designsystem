@@ -357,6 +357,10 @@ export {
   type BankTransactionFactBlock,
 } from "./entities/bank-transaction/BankTransactionFacts";
 export {
+  BankTransactionDrawer,
+  type BankTransactionExit,
+} from "./entities/bank-transaction/BankTransactionDrawer";
+export {
   bankTransactionColumns,
   type BankTransactionColumn,
   type BankTransactionColumnOptions,

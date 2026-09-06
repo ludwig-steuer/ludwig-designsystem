@@ -31,7 +31,6 @@ import type { BankTransactionRowData } from "./bank-transaction";
 export function BankTransactionRow({
   transaction,
   expanded,
-  href,
   ...options
 }: {
   transaction: BankTransactionRowData;
@@ -40,12 +39,19 @@ export function BankTransactionRow({
    * **state**, not a switch: the caller holds it (`DataTable expand`, 0057).
    */
   expanded?: boolean;
-  href?: string;
 } & BankTransactionColumnOptions) {
   const cols = bankTransactionColumns(options);
   return (
     <>
-      <Row href={href}>
+      {/*
+        **No `href` on the row.** `Row href` makes the whole row an `<a>`, and
+        this row's cells carry their own: the case links of `CaseCell` and the
+        (i) button of the purpose. An anchor inside an anchor, and a button
+        inside an anchor, are invalid markup — measured as a hydration warning
+        before this was removed. The ways out of the row are the ways inside
+        it; a caller who wants the whole row clickable wants a different row.
+      */}
+      <Row>
         {cols.map((c) => (
           <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
             {c.cell(transaction)}

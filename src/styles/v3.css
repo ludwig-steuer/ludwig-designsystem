@@ -3087,3 +3087,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Feldliste, aber nicht deren Zeile: rechtsbündiger Fließtext ist unlesbar. */
 .v2btxf__purpose { padding: var(--space-3) var(--space-4) var(--space-1); }
 .v2fields--bare .v2btxf__purpose { padding-left: 0; padding-right: 0; }
+
+/* --- Zahlung neben der Arbeit (0103) -------------------------------------- */
+.v2btxd__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-3); }
+.v2btxd__pad { padding: var(--space-4) var(--space-5) var(--space-5); }
+.v2btxd__limit {
+  margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui);
+  color: var(--color-text-muted);
+}
