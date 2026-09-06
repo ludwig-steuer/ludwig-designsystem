@@ -2,7 +2,6 @@ import { StatusBadge } from "../../patterns/StatusBadge";
 import { AmountCell } from "../../primitives/Cells";
 import { Link } from "../../primitives/Link";
 import { caseIdentifier, caseTitle, type CaseLink } from "./case-title";
-import type { Currency } from "@/ludwig/shared/money";
 
 /**
  * The case, named inside somebody else's row (0095).
@@ -71,7 +70,7 @@ export function CaseCell({
               dem Sachverhalt — die Zelle rechnet ihn nicht (L-56). */}
           {c.amount == null ? null : (
             <span className="v2case__amt">
-              <AmountCell value={c.amount} currency={(c.currency ?? "EUR") as Currency} />
+              <AmountCell value={c.amount} currency={c.currency ?? "EUR"} />
             </span>
           )}
         </span>

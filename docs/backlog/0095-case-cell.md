@@ -176,11 +176,78 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | … |
+Gemessen am 2026-09-06 im Browser (Storybook 6107, headless Chromium, 1440
+breit). Gemessen wurde die Wirkung — `getBoundingClientRect`, `scrollWidth`
+gegen `clientWidth`, `getComputedStyle`, der gerenderte Text —, nicht das,
+was der Code selbst gesetzt hat.
 
-Abgenommen von / am: … · Offene Punkte: …
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` in dieser Abnahme nicht gelaufen (der Abnahme-Auftrag verbietet es) | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/accounting-case/CaseCell.tsx` · `CaseCell.stories.tsx` daneben · Titel `v3/Entitäten/Sachverhalt/CaseCell` (Story-ID `v3-entitäten-sachverhalt-casecell`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `CaseCell.tsx` Z. 22–25, `case-title.ts` Z. 41–42 und Z. 56–57; Deutsch nur in „offen" und in den Story-Kommentaren | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -n "#[0-9a-f]\{3,6\}\|px" CaseCell.tsx case-title.ts` → nichts; Labels kommen aus der Registry (`StatusBadge axis="sachverhalt"`) | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | `curl localhost:6107/index.json` → `--single`, `--many`, `--none`, `--without-state`, `--fallbacks`, `--in-use`; Ableitung §6: 3 Zustände + 1 Layout-Boolean + 1 „im Einsatz" + 1 Rand = 6; `lädt`/`Fehler`/`leer nach Filter` im Abschnitt „Verhalten" begründet | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | zwei Punkte reißen: der Inhalt der Zelle verlässt die Spalte (M1) und der Anzeigename wird bis zur Unlesbarkeit gestaucht (M2); alle übrigen Zeilen unten geprüft | ✗ |
+| Im Browser angesehen | Screenshots `ab95-inuse-orig.png` (unverändert) und `ab95-inuse-p90.png` (Name in p90-Länge) | ✓ |
+| `caseDisplayTitle()` steht einmal; keine Komponente baut den Namen selbst | `case-title.ts` Z. 44–46 reicht `caseDisplayTitle()` aus `@/ludwig/…/domain/case` durch — keine zweite Ableitung. `grep -rn "counterpartyName" src/ui/v3` findet in dieser Familie keine Zusammensetzung; `CASE_KIND_LABEL`/`caseKindLabel` kommt in `entities/accounting-case/` nirgends vor. Damit ist L-52 hier nicht wiederholt | ✓ |
+| Die Kette Anzeigename → Nummer → Kurz-ID greift in allen vier Fällen | `--fallbacks`, gerenderte Texte: „Wartung der Klimaanlage" · „Eingangsrechnung: Bürobedarf Meier GmbH" · „Eingangsrechnung" · Kennung `c-d4f9e1` statt `2026-0412`; `title`-Attribut je Zeile gleich dem vollen Namen | ✓ |
+| `cases={[]}` zeigt „offen", nie einen Gedankenstrich; mit `emptyHref` verlinkt, ohne nicht | `--none`: zwei `.v2case__none`, beide Text „offen"; erstes Kind `<a href="#zuordnen">`, zweites ein reiner Textknoten. `/[-‐-―]/.test(innerText)` → `false`. Pille: Radius 999px, Grund `rgb(244,246,248)`, Schrift `rgb(92,92,92)` → Kontrast 6,2:1. Fokus auf dem Link: `outline 2px solid rgb(59,143,196)` | ✓ |
+| Mehrere Fälle stehen als Stapel mit Teilbetrag je Zeile | `--many`: `.v2case--stack` hat `display: grid`, die drei `.v2case__one` liegen bei y = 16 / 42 / 68 (untereinander), Beträge „812,50 €" · „96,20 €" · „341,20 €" | ✓ |
+| Beträge rechts, `tnum`, nichts zentriert (V3) | `--many`: rechte Kanten aller drei Beträge bei x = 436 (gleich), `font-variant-numeric: lining-nums tabular-nums`, `text-align: right`; kein Element der Zelle hat `text-align: center` (nur Storybook-Knöpfe und die Storybook-Überschrift) | ✓ |
+| Der Zustand kommt aus `StatusBadge axis="sachverhalt"` | `--many`: Chips `.bdg` mit „Zur Prüfung" · „Klärung offen" · „Verbucht" — die Labels der Registry-Achse `sachverhalt`; keine lokale Map in der Datei | ✓ |
+| Kein (i) an der Zelle | `--single`, `--many`, `--in-use`: `document.querySelectorAll('button[aria-label*="erkl"]').length` → `0` (`StatusInfoButton` trägt „…: Zustände erklären"); `info={false}` in `CaseCell.tsx` Z. 68 | ✓ |
+| `showState={false}` lässt den Punkt weg und sonst alles stehen | `--without-state`: `.bdg` → 0 Treffer, Text der Zelle bleibt „Wartung der Klimaanlage / 2026-0412" | ✓ |
+| Die Zelle baut keine URL | `grep -n "clients/\|/clients" CaseCell.tsx case-title.ts` → kein Treffer (Exit 1); `href` ist `(caseId: string) => string`, Story liefert `#sachverhalt-…`, gerendertes `href="#sachverhalt-c-2026-0412"` | ✓ |
+| Sie rechnet keinen Betrag und sortiert nicht | `grep -n "sort\|reduce\|filter\|Math\." CaseCell.tsx case-title.ts` → kein Treffer; `cases` wird in Eingangsreihenfolge gemappt, `amount` unverändert an `AmountCell` gereicht | ✓ |
+| Kürzung: langer Name mit Ellipse **und** vollem Text im `title` | `title` trägt in jeder Story den vollen Namen (gemessen). Die Ellipse greift aber nur, wo das Elternteil den Kasten blockifiziert (`--fallbacks`, `--many`); in der schmalen Tabellenspalte nicht (M1) und im Stapel nur noch auf ein Zeichen (M2) | ✗ |
+| Die Nummer bricht nie um | `--in-use`: `.v2case__no` hat `white-space: nowrap`, Höhe 17 px, `getClientRects().length` = 1 in allen vier Vorkommen | ✓ |
+| Die Zelle in der Tabelle: stehen die Spaltenkanten? | `--in-use`: linke Kanten der vier Spalten in Kopfzeile und allen drei Zeilen identisch bei x = 35 / 165 / 507 / 777, auch neben einem Stapel und neben „offen"; die Spalte selbst steht also. Der **Inhalt** der Ein-Fall-Zeile steht nicht darin (M1) | ✓ |
+| offen (App): ersetzt `ui/case/CaseCell.tsx` und die Kopie in `KontoauszugView`; die drei Queries nehmen `lifecycleStatus` auf (B3) | nicht in diesem Repo prüfbar | offen (App) |
+
+**Urteil: zurück in Arbeit.** Die Kette, der Nullfall, der Stapel, der
+Zustand und die Abstinenz (keine URL, kein Rechnen, kein (i)) stimmen. Es
+reißt genau der Punkt, den die Spec unter „Verhalten" als eigenen Satz führt:
+die Kürzung.
+
+### Mängel
+
+1. **Ein einzelner Fall kürzt nicht — er läuft aus der Spalte.**
+   `src/styles/v3.css` Z. 2906: `.v2case { display: inline-flex; … }`. Ein
+   Inline-Flex-Kasten ist shrink-to-fit und nimmt hier seine max-content-Breite;
+   `text-overflow: ellipsis` auf `.v2case__link` (Z. 2912–2915) greift deshalb
+   nie, solange die Zelle in einem Inline-Kontext steht.
+   Beleg, Story `--in-use`, Zeile 1 (unverändert, Name 23 Zeichen): Spalte
+   „Sachverhalt" endet bei x = 767, „Betrag" beginnt bei x = 777, `.v2case__one`
+   reicht bis x = 854 — 87 px Überlauf; der Chip „Zur Prüfung" überdruckt
+   „1.249,90 €" (`ab95-inuse-orig.png`). `.v2case__link`: `scrollWidth` 163 =
+   `clientWidth` 163, also keine Kürzung.
+   Mit einem Namen in p90-Länge (33 Zeichen — die Zahl steht in dieser Spec)
+   wächst der Überlauf auf 163 px (`ab95-inuse-p90.png`).
+   Gegenprobe zur Ursache: zur Laufzeit `display: flex` gesetzt → `.v2case__one`
+   endet bei x = 767, `clientWidth` 76 gegen `scrollWidth` 163, die Ellipse
+   greift.
+   Warum die Stories es nicht zeigen: in `--fallbacks` und `--many` ist das
+   Elternteil ein Grid, das den Kasten blockifiziert (`getComputedStyle` →
+   `display: flex`) — genau dort greift die Ellipse, und genau dort steht keine
+   schmale Tabellenspalte.
+
+2. **Im Stapel greift die Ellipse, aber der Name verschwindet.**
+   `src/styles/v3.css` Z. 2911–2915: `.v2case__one` verteilt die Breite ohne
+   Untergrenze für den Namen, `.v2case__link` hat `min-width: 0`.
+   Beleg, Story `--in-use`, Zeile 3 (unverändert, Spalte 260 px): Kennung 62 px
+   + Chip 106 px + Betrag 60 px + drei Abstände à 8 px = 252 px; für den Namen
+   bleiben 8 px. Gemessen `clientWidth` 8 / 8 / 23 bei `scrollWidth` 163 / 284 /
+   213. Sichtbar sind „V", „E", „R…" — bei zwei der drei Zeilen fehlt sogar das
+   Auslassungszeichen (`ab95-inuse-orig.png`).
+   Der `title` trägt den vollen Namen, die Zelle zeigt ihn nicht mehr: Rang 1
+   des Profils fällt in der Fassung aus, für die die Spec die Zelle gebaut hat.
+   In `--many` (420 px, Grid-Elternteil) bekommt der Name 157–172 px und liest
+   sich — die Story deckt den engen Fall nicht ab.
+
+Geprüft von / am: Claude (Abnahme-Agent), 2026-09-06 · Offene Punkte: M1, M2;
+dazu die App-Zeile (Ersatz der drei Fassungen, `lifecycleStatus` in den
+Queries) — offen (App).
 
 ## Offene Fragen
 
@@ -233,3 +300,47 @@ GmbH" und „Stadtwerke Musterstadt".
 | `Fallbacks` | die vier Stufen der Kette: „Wartung der Klimaanlage" · „Eingangsrechnung: Bürobedarf Meier GmbH" · „Eingangsrechnung" · Kennung `c-d4f9e1` statt der fehlenden Nummer |
 | `None` | „offen" — mit `emptyHref` als Link, ohne sie als Wort; in keinem Fall ein Gedankenstrich |
 | `Many` | drei Fälle im Stapel, je mit Teilbetrag rechts |
+
+## Die zwei Mängel der Abnahme vom 2026-09-06 — behoben
+
+Beide saßen an derselben Stelle, und der Prüfer hat auch gleich gesagt, warum
+meine Stories sie nicht gefunden haben: sie legten die Zelle in ein **weites**
+Raster, und dort greift die Kürzung von selbst. Die eine Story mit schmaler
+Spalte hatte zu kurze Namen. Es fehlte die Kombination.
+
+**M1 — die Zelle lief aus ihrer Spalte.** `.v2case` stand auf `inline-flex`,
+und ein Inline-Kasten ist shrink-to-fit: `text-overflow: ellipsis` am Namen
+hatte nie eine Grenze, an der es hätte greifen können. Gemessen lief die Zelle
+87 px über ihre Spalte hinaus und der Zustands-Chip überdruckte den Betrag der
+Nachbarspalte. Jetzt `flex` — als Block nimmt sie die Breite, die die Spalte
+ihr gibt.
+
+**M2 — im Stapel verschwand der Name.** Kennung (62), Chip (106), Betrag (60)
+und drei Abstände belegten 252 der 260 px; für den Namen blieben **8 px**,
+sichtbar war ein einzelner Buchstabe, zweimal ohne Auslassungszeichen. Der
+Name ist Rang 1 des Profils — er behält jetzt mindestens acht Zeichen und
+wächst in die freie Breite, und was daneben steht, rückt bei Bedarf in die
+nächste Zeile.
+
+**Die fehlende Story ist da:** `NarrowColumn` — ein langer Name in einer
+200-px-Spalte, dazu der Stapel darunter. Gemessen: alle Namen 200 px breit
+(`scrollWidth` 422 · 284 · 213, also gekürzt mit Ellipse), **null** Elemente
+ragen über die Spalte hinaus. Dieselbe Messung in `InUse`: Spalte 507–767,
+kein Überlauf in keiner der drei Zeilen.
+
+**Nebenbefund mitgenommen:** `CaseLink.currency` ist jetzt `Currency | null`
+statt `string | null`. Der Cast an der Aufrufstelle war eine Behauptung über
+einen Wert, den der Typ nicht hergab.
+
+**Nicht als Mangel gewertet und hier bestätigt:** die Stapelzeile ist mit
+95 px höher als die 47 px der übrigen. Das folgt zwingend aus dem Stapel, den
+die Spec verlangt — bei sechs Fällen an einer Zahlung ist eine hohe Zeile die
+ehrliche Darstellung, und V1 spricht von Chips, die die Zeile nicht auftreiben
+sollen, nicht von Inhalt, der mehrzeilig ist.
+
+## Abnahmekriterien (Nachtrag)
+
+- [ ] Die Zelle bleibt in ihrer Spalte, auch bei langem Namen (Story `NarrowColumn`, gemessen)
+- [ ] Der Name kürzt mit Ellipse und behält mindestens acht Zeichen — auch im Stapel
+- [ ] Kein Element überdruckt die Nachbarspalte (`InUse` und `NarrowColumn`)
+- [ ] `CaseLink.currency` ist `Currency`, kein `string` mit Cast

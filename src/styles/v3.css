@@ -2903,15 +2903,28 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2exp__act { display: inline-flex; align-items: center; }
 
 /* --- CaseCell (0095) — der Sachverhalt in einer fremden Zeile ------------- */
-.v2case { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); min-width: 0; }
+/* `flex`, nicht `inline-flex`: ein Inline-Kasten ist shrink-to-fit, und dann
+   greift die Ellipse am Namen nie — gemessen lief die Zelle 87 px über ihre
+   Spalte hinaus und der Chip überdruckte den Betrag der Nachbarspalte
+   (Abnahme 0095). Als Block nimmt sie die Breite, die die Spalte ihr gibt. */
+.v2case { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); min-width: 0; }
 /* Mehrere Fälle stehen untereinander, nicht hintereinander: im Kontoauszug
    hängt an einer Zahlung schon mal ein halbes Dutzend, und in einer Zeile
    wäre keiner mehr lesbar. */
 .v2case--stack { display: grid; gap: 2px; }
-.v2case__one { display: inline-flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+/* Der Name ist Rang 1 — er behält seinen Platz, und was daneben steht, rückt
+   in die nächste Zeile. Vorher fraßen Kennung, Chip und Betrag die 260-px-
+   Spalte auf und dem Namen blieben 8 px: sichtbar war ein einzelner
+   Buchstabe, zweimal ohne Auslassungszeichen (Abnahme 0095). */
+.v2case__one {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: var(--space-2); min-width: 0; width: 100%;
+}
 .v2case__link {
   color: var(--color-text); text-decoration: none; font-weight: 500;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  /* Mindestens acht Zeichen, sonst ist der Name keiner mehr. */
+  flex: 1 1 auto; min-width: 8ch;
 }
 .v2case__link:hover { text-decoration: underline; }
 /* Die Nummer bricht nie um — sie ist das, was am Telefon gesagt wird. */

@@ -3,6 +3,7 @@ import {
   type CaseKind,
   type CaseLifecycle,
 } from "@/ludwig/modules/accounting-cases/domain/case";
+import type { Currency } from "@/ludwig/shared/money";
 
 /**
  * How a case is **named** and how it is **found again** — the two chains every
@@ -29,7 +30,8 @@ export interface CaseLink {
   lifecycleStatus: CaseLifecycle | null;
   /** Only in the bank statement: the part of the amount that falls on this case. */
   amount?: number | null;
-  currency?: string | null;
+  /** `Currency`, not `string`: a cast at the call site is a claim, not a type. */
+  currency?: Currency | null;
 }
 
 /**

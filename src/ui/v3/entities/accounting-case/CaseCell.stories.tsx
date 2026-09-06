@@ -114,6 +114,52 @@ export const Fallbacks: Story = {
   ),
 };
 
+/**
+ * Rand: ein langer Name **in einer schmalen Spalte** — der Fall, den die
+ * übrigen Stories nicht treffen, weil sie ihre Zellen in ein weites Raster
+ * legen. Hier muss die Ellipse greifen, der Chip darf den Nachbarn nicht
+ * überdrucken, und der Name behält seine acht Zeichen (Abnahme 0095).
+ */
+export const NarrowColumn: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <Card>
+        <CardHead title="Belege" sub="Schmale Spalte, lange Namen" />
+        <Table cols="110px 200px 1fr">
+          <HeadRow>
+            <span>Datum</span>
+            <span>Sachverhalt</span>
+            <span className="v2num">Betrag</span>
+          </HeadRow>
+          <Row>
+            <span>26.08.2026</span>
+            <span>
+              <CaseCell
+                cases={[
+                  {
+                    ...ONE,
+                    title:
+                      "Wartung der Klimaanlage im Obergeschoss, zweiter Bauabschnitt",
+                  },
+                ]}
+                href={href}
+              />
+            </span>
+            <AmountCell value={1249.9} />
+          </Row>
+          <Row>
+            <span>29.08.2026</span>
+            <span>
+              <CaseCell cases={MANY} href={href} />
+            </span>
+            <AmountCell value={1249.9} />
+          </Row>
+        </Table>
+      </Card>
+    </div>
+  ),
+};
+
 /** Im Einsatz: die Spalte „Sachverhalt" neben Beleg und Betrag. */
 export const InUse: Story = {
   render: () => (
