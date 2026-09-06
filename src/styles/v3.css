@@ -3039,3 +3039,29 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2btx__top > .v2amount { margin-left: auto; flex: 0 0 auto; }
 .v2btx__top > .v2time { flex: 0 0 auto; color: var(--color-text-subtle); }
 .v2btx__what { min-width: 0; color: var(--color-text-muted); }
+
+/* --- Auszugszeile (0101) --------------------------------------------------
+   Die Unterzeilen laufen über die volle Breite der Zeile: sie beantworten
+   „geht das auf?", und dafür müssen Teilbeträge und Summe untereinander
+   stehen, nicht in der Spalte des Betrags. */
+.v2btxrow__cases { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.v2btxrow__rest { font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
+.v2btxrow__states { display: flex; flex-direction: column; gap: 2px; }
+.v2btxrow__state { display: flex; align-items: baseline; gap: var(--space-1); }
+.v2btxrow__statefor { font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
+/* Ein Zähler, kein Zustand: deshalb kein Badge, sondern die Zahl mit ihrem
+   Wort — die Achse `klaerung` ist eine Dringlichkeit je Rückfrage, und die
+   Zeile hat eine Anzahl über den Fall. */
+.v2btxrow__clar { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v2btxrow__split {
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  background: var(--color-bg-soft); border-bottom: 1px solid var(--color-border-subtle);
+}
+.v2btxrow__splitrow {
+  display: grid; grid-template-columns: 120px 1fr 130px;
+  align-items: baseline; gap: var(--space-3);
+  padding: 2px 0; font-size: var(--fs-ui-xs);
+}
+.v2btxrow__splitrow > :last-child { text-align: right; }
+.v2btxrow__splittitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2btxrow__splitsum { border-top: 1px solid var(--color-border-subtle); margin-top: 2px; padding-top: 4px; font-weight: 600; }

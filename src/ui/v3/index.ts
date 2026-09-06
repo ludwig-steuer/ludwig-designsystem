@@ -351,6 +351,12 @@ export {
 } from "./entities/bank-transaction/bank-transaction";
 export { BankTransactionPurpose } from "./entities/bank-transaction/BankTransactionPurpose";
 export { BankTransactionCell } from "./entities/bank-transaction/BankTransactionCell";
+export { BankTransactionRow } from "./entities/bank-transaction/BankTransactionRow";
+export {
+  bankTransactionColumns,
+  type BankTransactionColumn,
+  type BankTransactionColumnOptions,
+} from "./entities/bank-transaction/bank-transaction-columns";
 export {
   caseTitle,
   caseIdentifier,
