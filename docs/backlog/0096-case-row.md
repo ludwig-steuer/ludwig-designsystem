@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec |
-| Freigabe | zurück 2026-09-06 — Zuschnitt neu nach Abschnitt „Freigabe", danach ohne zweite Runde freigegeben |
+| Status | Abnahme |
+| Freigabe | 2026-09-06 — Zuschnitt neu gefasst (Abschnitt „Neufassung"), damit freigegeben |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: zehn Datenpunkte einer Ludwig-Entität, drei davon aus ihren Achsen |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md` (Status `geprüft`, 2026-09-05), Formen-Tabelle Zeile `CaseRow`; Ränge 1–10 |
@@ -192,3 +192,44 @@ Abgenommen von / am: … · Offene Punkte: …
 **Entscheid (vorab freigegeben, wenn die Neufassung dem folgt):** `caseColumns()` als `ColumnDef`-Satz mit `columns`-Auswahl als Option, plus `CaseRow` für kurze Listen (≤ 50) aus denselben Zellfunktionen — wie `AccountEntries`. Offene Fragen 1–3 mit Default. B3 (`disposition='client'`) streichen — `case.ts` sagt schon „stillgelegt". `CaseColumn` um `fiscalYear`, `documents`, `bankTransactions` erweitern oder mit Grund ausschließen. Diese Entscheidung gilt zugleich für 0101 (`BankTransactionRow`) und 0085.
 
 Befunde ins Register: **L-69** — `CaseListItem.counterpartyPartnerId` fehlt; die Zeile kann den Gegenpart nicht verlinken, obwohl 47 % aufgelöst sind.
+
+## Neufassung 2026-09-06 — der Zuschnitt nach der Freigabe
+
+Die Freigabe hat den ersten Zuschnitt zurückgewiesen. Was jetzt steht:
+
+**`caseColumns()` ist die Komponente, `CaseRow` der zweite Rahmen.**
+`DataTable` rendert aus `ColumnDef.cell` und nimmt keine Zeilen-Komponente —
+die Hauptliste (p90 190, Pagination, Sortierung) braucht einen
+`ColumnDef<CaseListItem>[]`-Satz. Kurze Listen (der Reiter des
+Geschäftspartners) bekommen `CaseRow`, gebaut aus **denselben** Zellfunktionen.
+Zwei Zeilen-Komponenten für eine Entität wären R17; zwei Zelldefinitionen
+wären derselbe Verstoß eine Ebene tiefer. Vorbild ist `accountEntryColumns`.
+
+**Die Zeile komponiert `CaseCell` nicht.** Die Zelle trägt ihren eigenen Link,
+und der Zeilenlink würde ihn umschließen — Anker im Anker. Beide teilen
+stattdessen `case-title.ts`, wo die Benennungsregel tatsächlich wohnt. Der
+Zeilenlink liegt als `.v2rowlink` am Anzeigenamen und deckt die Zeile über
+`::after` (I11, Hausmuster `SourceDocument`); gemessen trifft ein Klick bei
+75 % der Zeilenbreite den Link, und im ganzen Set gibt es null verschachtelte
+Anker.
+
+**Der Spaltensatz ist um drei Punkte gewachsen** (Freigabe): `fiscalYear`
+(Rang 20 — nur wo eine Liste über Jahre hinweg listet, also im Partner-Reiter),
+`documents` und `bankTransactions` (die zwei Ereignis-Zähler des Profils).
+Alle drei sind **nicht** im Vorgabesatz: die Hauptliste steht in einem Jahr
+und zeigt zehn Punkte.
+
+**`counterpartyHref` ist eine Funktion des Falls**, kein fester String:
+`CaseListItem` trägt keine Partner-Id (**L-69**), 47 % sind aufgelöst, und
+welcher, weiß nur der Aufrufer.
+
+**`href` ebenfalls als Funktion** — die Zeile baut keine URL, und ein fester
+String je Zeile wäre bei 190 Zeilen 190 Props.
+
+**B3 gestrichen:** `case.ts` sagt zu `disposition='client'` schon
+„stillgelegt"; ein zweiter Befund darüber wäre Doppelung.
+
+**Story-Formel:** 2 anwendbare Zustände + 1 Enum (`columns`) + 1
+Layout-Boolean (`href`) + 0 Callbacks + 1 „im Einsatz" + 1 Rand = 6.
+`Columns` übergibt seine Auswahl **verdreht**, sonst bewiese die Story nicht,
+dass `columns` auswählt statt zu ordnen.

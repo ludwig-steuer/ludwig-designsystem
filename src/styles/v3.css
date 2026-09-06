@@ -3131,3 +3131,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2snap__reccount { display: flex; justify-content: space-between; gap: var(--space-4); font-size: var(--fs-ui-sm); }
 .v2snap__recword { color: var(--color-text-muted); }
+
+/* --- Sachverhalt als Zeile (0096) ----------------------------------------- */
+.v2caserow__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 8ch; }
+.v2caserow__count { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }

@@ -341,6 +341,13 @@ export { CaseCell } from "./entities/accounting-case/CaseCell";
 export { CaseFacts, type CaseFactsVM } from "./entities/accounting-case/CaseFacts";
 export { CaseDetailView } from "./entities/accounting-case/CaseDetailView";
 export { CaseDrawer, type CaseQuickView } from "./entities/accounting-case/CaseDrawer";
+export { CaseRow } from "./entities/accounting-case/CaseRow";
+export {
+  caseColumns,
+  caseTracks,
+  type CaseColumn,
+  type CaseColumnOptions,
+} from "./entities/accounting-case/case-columns";
 
 /* Kontoauszugsposition */
 export {
