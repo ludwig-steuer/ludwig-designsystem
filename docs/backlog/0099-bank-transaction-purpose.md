@@ -38,10 +38,11 @@ unverändert; was diese Spec ändert, ist der Ort und die Reichweite.
   fünf Dateien in zwei Modulen brauchen sie, und keine vorhandene Form deckt
   sie ab. Regel 3 greift nicht: sie trägt ein Fachwort (SEPA), also keine
   Primitive.
-- **Zuschnitt:** eine Datei, ein Export plus die reine Ableitung
-  `derivePurposeParts()` daneben in `purpose-parts.ts`. Die Trennung ist
-  §4 Absatz 1: die Ableitung wird **allein** gebraucht — die Suche der Liste
-  sucht über die Referenzwerte, ohne etwas zu zeichnen.
+- **Zuschnitt:** eine Datei, ein Export. Die Ableitung `derivePurposeParts()`
+  liegt seit dem 06.09. im **Spiegel** (`modules/bank-transactions/domain/statement-line.ts`,
+  Commit `cc141f7b`) — sie wird auch allein gebraucht (die Suche der Liste
+  sucht über die Referenzwerte, ohne etwas zu zeichnen), und genau deshalb
+  gehört sie dorthin und nicht ein zweites Mal hierher.
 - **Setzt auf:** `LongText`, `Badge`, `Popover`, `ActionIcon` (`info`, 0087).
 
 ## Die sieben Schlüssel
@@ -179,3 +180,5 @@ Abgenommen von / am: … · Offene Punkte: …
 ## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
 
 **Urteil: freigeben.** Entscheide: 1 Chips · 2 `OAMT` als letzter Chip · 3 CSS-Ellipse. Ein Satz in die Spec: `PURP_LABELS` ist eine Code-Übersetzung der SEPA-Schlüssel, kein Status — sonst liest der Abnehmende das feste Kriterium „keine lokale Label-Map" als verletzt.
+
+**Nachtrag 2026-09-06, vor dem Bau:** B1 ist **erledigt** — die App hat die Ableitungen mit `cc141f7b` in den Spiegel gehoben (`modules/bank-transactions/domain/statement-line.ts`: `derivePurposeParts()`, `PurposeParts`, `PurposeRef`, `PURP_LABELS`, dazu `extractSepaTags()`/`SepaTags` in `sepa-tags.ts`). Die Spec verlangte unter „Zuschnitt" eine eigene Datei `purpose-parts.ts`; **die entfällt.** Der Baustein ruft die Ableitung aus dem Spiegel, und das Kriterium „`derivePurposeParts()` steht in einer eigenen Datei und rendert nichts" ist damit über den Spiegel erfüllt — eine deckungsgleiche zweite Fassung wäre der R1-Verstoß, den L-52 schon einmal gekostet hat.

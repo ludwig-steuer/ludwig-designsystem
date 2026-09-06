@@ -43,8 +43,8 @@ export function CaseDetailView({
 }) {
   return (
     <div className="v2cdv">
-      {/* Jede leere Zeile entfällt samt Abstand (0048): ein Fall ohne nächste
-          Handlung soll nicht aussehen, als fehlte dort etwas. */}
+      {/* An empty row drops out with its spacing (0048): a case without a
+          next action must not look as if something were missing there. */}
       {pager ? <div className="v2cdv__pager">{pager}</div> : null}
       <div className="v2cdv__head">{header}</div>
       {nextAction ? <div className="v2cdv__next">{nextAction}</div> : null}

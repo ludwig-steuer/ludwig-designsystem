@@ -3,7 +3,10 @@ import { FileText } from "lucide-react";
 import { CaseTimeline } from "./CaseTimeline";
 import { CaseDetailView } from "./CaseDetailView";
 import { CaseFacts, type CaseFactsVM } from "./CaseFacts";
+import { AppShell, TopBar } from "../../primitives/AppShell";
 import { EntityHeader } from "../../patterns/EntityHeader";
+import { NavList, type NavSection } from "../../primitives/NavList";
+import { StatusBadge } from "../../patterns/StatusBadge";
 import { Card, CardHead } from "../../primitives/Table";
 import { RecordPager } from "../../primitives/RecordPager";
 import { StatusCallout } from "../../primitives/StatusCallout";
@@ -32,6 +35,24 @@ const FACTS: CaseFactsVM = {
   closedAt: null,
 };
 
+const SECTIONS: NavSection[] = [
+  {
+    label: "Arbeit",
+    items: [
+      { href: "/cases", label: "Sachverhalte", count: 14 },
+      { href: "/documents", label: "Belege" },
+      { href: "/banks", label: "Bank", count: 2, alarm: true },
+    ],
+  },
+  {
+    label: "Stammdaten",
+    items: [
+      { href: "/accounts", label: "Konten" },
+      { href: "/partners", label: "Geschäftspartner" },
+    ],
+  },
+];
+
 const TABS: TabItem[] = [
   { key: "uebersicht", label: "Übersicht" },
   { key: "belege", label: "Belege", count: 2 },
@@ -47,6 +68,7 @@ const head = (
   <EntityHeader
     overline="Eingangsrechnung · 2026-0412"
     title="Wartung der Klimaanlage"
+    status={<StatusBadge axis="sachverhalt" status="open" />}
     meta="Kanzlei ist dran · Wirtschaftsjahr 2026"
     metric={{ label: "Gesamtbetrag", value: "1.249,90 €" }}
   />
@@ -129,8 +151,9 @@ export const Filled: Story = {
 };
 
 /**
- * Ein einziges Ereignis: kein `aside`, einspaltig. Eine Timeline-Karte mit
- * einer Zeile ist kein Drittel der Breite wert.
+ * Ein einziges Ereignis: kein `aside`, einspaltig — der Strang steht **im
+ * Inhalt**, über den Fakten. Eine Timeline-Karte mit einer Zeile ist kein
+ * Drittel der Breite wert; in voller Breite steht dieselbe Zeile lesbar da.
  */
 export const SingleEvent: Story = {
   render: () => (
@@ -140,6 +163,25 @@ export const SingleEvent: Story = {
         header={head}
         tabs={<Tabs items={TABS.slice(0, 3)} active="uebersicht" ariaLabel="Sachverhalt" />}
       >
+        <Card>
+          <CardHead title="Verlauf" sub="1 Eintrag" />
+          <div style={{ padding: "var(--space-4)" }}>
+            <CaseTimeline
+              events={[
+                {
+                  id: "ev1",
+                  kind: "document_received",
+                  date: "2026-08-26",
+                  title: "RE-4471 im Posteingang angekommen",
+                  state: "posted",
+                  amount: 1249.9,
+                  currency: "EUR",
+                },
+              ]}
+              today="2026-09-06"
+            />
+          </div>
+        </Card>
         {facts}
       </CaseDetailView>
     </div>
@@ -160,6 +202,7 @@ export const Waiting: Story = {
           <EntityHeader
             overline="Eingangsrechnung · 2026-0498"
             title="Bewirtung Restaurant Adler"
+            status={<StatusBadge axis="sachverhalt" status="waiting_for_documents" />}
             meta="Mandant ist dran · wartet auf Unterlagen"
             metric={{ label: "Gesamtbetrag", value: "128,40 €" }}
           />
@@ -184,8 +227,9 @@ export const WithoutTabs: Story = {
 
 /**
  * Die Regel aus Entscheidung 1: ein Zähler, wo sich zählen lässt, ein Punkt,
- * wo es etwas gibt, das sich nicht zählen lässt — und ein Reiter, den es gar
- * nicht gibt, erscheint nicht als leerer.
+ * wo es etwas gibt, das sich nicht zählen lässt — und **kein** Reiter „Verlauf",
+ * weil dieser Fall keine Ereignisse hat. Ein Reiter mit der Zahl 0 wäre die
+ * leere Zusage, die die Regel verbietet: der Aufrufer übergibt ihn gar nicht.
  */
 export const TabsWithCountAndDot: Story = {
   render: () => (
@@ -198,7 +242,6 @@ export const TabsWithCountAndDot: Story = {
               { key: "uebersicht", label: "Übersicht" },
               { key: "klaerungen", label: "Klärungen", count: 3, alarm: true },
               { key: "datev", label: "DATEV", dot: true },
-              { key: "verlauf", label: "Verlauf", count: 0 },
             ]}
             active="uebersicht"
             ariaLabel="Sachverhalt"
@@ -211,10 +254,23 @@ export const TabsWithCountAndDot: Story = {
   ),
 };
 
-/** Im Einsatz: die ganze Seite, wie die App sie zeigt. */
+/**
+ * Im Einsatz: die ganze Seite, wie die App sie zeigt — Sidebar, Kopfleiste,
+ * und der Fall darin. Erst hier ist zu sehen, dass die View **keine** eigene
+ * Klammer setzt: sie füllt den Inhaltsbereich der Schale, ohne ihn zu
+ * verdoppeln.
+ */
 export const InUse: Story = {
   render: () => (
-    <div style={{ maxWidth: 1180, background: "var(--color-bg)", padding: "var(--space-6)" }}>
+    <AppShell
+      sidebar={
+        <>
+          <div className="sb__logo">Ludwig</div>
+          <NavList sections={SECTIONS} activePath="/cases" />
+        </>
+      }
+      topbar={<TopBar crumb="Musterbau GmbH · 2026" />}
+    >
       <CaseDetailView
         pager={pager}
         header={head}
@@ -232,6 +288,6 @@ export const InUse: Story = {
       >
         {facts}
       </CaseDetailView>
-    </div>
+    </AppShell>
   ),
 };

@@ -5,7 +5,6 @@ import type {
   CaseKind,
   CaseLifecycle,
 } from "@/ludwig/modules/accounting-cases/domain/case";
-import type { Currency } from "@/ludwig/shared/money";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { FieldList } from "../../primitives/FieldList";
 import { Link } from "../../primitives/Link";
@@ -111,7 +110,7 @@ export function CaseFacts({
   const rows: [ReactNode, ReactNode][] = [];
   const add = (label: ReactNode, value: ReactNode) => rows.push([label, value]);
 
-  // Rang 11 — der einzige Wert über volle Breite; ungekürzt ist er ein Absatz.
+  // Rang 11 — lang genug, um sich die Restbreite zu nehmen; ungekürzt ist er ein Absatz.
   if (c.summary) add("Zusammenfassung", <LongText max={SUMMARY_MAX}>{c.summary}</LongText>);
 
   // Rang 12

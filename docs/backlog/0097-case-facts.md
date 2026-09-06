@@ -106,7 +106,7 @@ Zustände + 1 Enum (`tone`) + 1 Layout-Boolean (`all`) + 0 Callbacks +
 | `Sparse` | Ein frisch gegründeter Fall: die drei bedeutenden Nullwerte stehen als Wort, der Rest fehlt still |
 | `All` | `all` — alle fünfzehn Punkte bis Rang 25, in der Reihenfolge des Profils |
 | `InDrawer` | `tone="bare"` unter einer Überschrift, wie 0052 Zone 3 es verlangt |
-| `LongSummary` | Rand: 720-Zeichen-Zusammenfassung, gekürzt bei 160 mit Aufklapper |
+| `LongSummary` | Rand: 721-Zeichen-Zusammenfassung, gekürzt bei 160 mit Aufklapper |
 | `InUse` | Unter einem `EntityHeader` — der Kopf trägt Rang 1–4, die Fakten setzen bei 11 an, nichts steht zweimal |
 
 Nicht anwendbar: `leer nach Filter`, `lädt`, `Fehler`.
@@ -211,9 +211,9 @@ ein Wort nennt, das die Story nicht einlöst.
    `CaseFacts.stories.tsx` Z. 111–119: die Zusammenfassung von `LongSummary`
    ist **548 Zeichen** lang (nachgezählt am Story-Text, gemessen am
    gerenderten `<details>`: Anriss 159 + Rest 548). Der Kommentar der Story
-   Z. 101 behauptet „720 Zeichen — dem Höchstwert des Bestands", die Zeile
+   Z. 101 behauptet „721 Zeichen — dem Höchstwert des Bestands", die Zeile
    `LongSummary` in „Gemessen" behauptet dasselbe, und die Stories-Tabelle
-   verlangt „Rand: 720-Zeichen-Zusammenfassung". 720 ist im Profil das
+   verlangt „Rand: 721-Zeichen-Zusammenfassung". 720 ist im Profil das
    Maximum von `summary` (Rang 11); 548 ist der p90-Bereich, also der
    Normalfall und nicht der Rand.
    Die Kürzung selbst greift (159 statt 548 sichtbar, Aufklapper, kein
@@ -294,8 +294,8 @@ Zahl ohne ihren Zusammenhang.
 |---|---|
 | `Filled` | Zusammenfassung · Geschäftspartner · Personenkonto · Belegnummern · Abgeschlossen |
 | `All` | dieselben plus Gegenpartei-Seite · Anker · Angelegt von · Wirtschaftsjahr · Abrechnungsrhythmus · Verrechnungskonto · Buchungslauf · Buchungszyklus — **kein** Abnahme-Bucket |
-| `Sparse` | Personenkonto „hat bewusst keins" · Kein Beleg zu erwarten mit Grund · Abgeschlossen „laufend" |
-| `LongSummary` | 720 Zeichen kürzen auf einen 159-Zeichen-Anriss mit Aufklapper — der volle Text steht darunter, nicht im `title` |
+| `Sparse` | **vier** Zeilen: Personenkonto „hat bewusst keins" · Kein Beleg zu erwarten mit Grund · Abgeschlossen „laufend" · Gegenpartei-Seite „bewusst keine" |
+| `LongSummary` | 721 Zeichen kürzen auf einen 159-Zeichen-Anriss mit Aufklapper — der volle Text steht darunter, nicht im `title` |
 
 ## Die drei Mängel der Abnahme vom 2026-09-06 — behoben
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { StatusBadge } from "../../patterns/StatusBadge";
 import { EntityHeader } from "../../patterns/EntityHeader";
-import { Card, CardHead } from "../../primitives/Table";
 import { CaseFacts, type CaseFactsVM } from "./CaseFacts";
 
 const meta: Meta<typeof CaseFacts> = {
@@ -132,22 +132,21 @@ export const LongSummary: Story = {
 
 /**
  * Im Einsatz: unter dem Kopf. Der Kopf trägt die Ränge 1–4 (Name, Zustand,
- * Nummer, Betrag), die Fakten setzen bei 11 an — nichts steht zweimal.
+ * Nummer, Betrag), die Fakten setzen bei 11 an — **nichts steht zweimal**.
+ *
+ * Deshalb steht hier auch kein `CardHead` über dem `EntityHeader`: zwei Köpfe
+ * übereinander wiederholen Nummer und Gegenpart, und genau das war Befund B3.
  */
 export const InUse: Story = {
   render: () => (
-    <div style={{ maxWidth: 860 }}>
-      <Card>
-        <CardHead title="Sachverhalt 2026-0412" sub="Bürobedarf Meier GmbH" />
-        <div style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-5)" }}>
-          <EntityHeader
-            overline="Eingangsrechnung · 2026-0412"
-            title="Wartung der Klimaanlage"
-            metric={{ label: "Gesamtbetrag", value: "1.249,90 €" }}
-          />
-          <CaseFacts case={FULL} partnerHref="#partner-8812" accountHref={accountHref} />
-        </div>
-      </Card>
+    <div style={{ maxWidth: 860, display: "grid", gap: "var(--space-5)" }}>
+      <EntityHeader
+        overline="Eingangsrechnung · 2026-0412"
+        title="Wartung der Klimaanlage"
+        status={<StatusBadge axis="sachverhalt" status="open" />}
+        metric={{ label: "Gesamtbetrag", value: "1.249,90 €" }}
+      />
+      <CaseFacts case={FULL} partnerHref="#partner-8812" accountHref={accountHref} />
     </div>
   ),
 };

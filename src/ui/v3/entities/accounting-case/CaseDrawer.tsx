@@ -117,9 +117,9 @@ export function CaseDrawer({
         ) : null
       }
       footer={
-        // Zone 5 steht **auch im Fehlerfall** — bewusst anders als der
-        // Beleg-Drawer: wer den Fall nicht laden kann, will erst recht in die
-        // vollständige Ansicht (Entscheid der Freigabe 2026-09-06).
+        // Zone 5 stands **in the error case too** — deliberately unlike the
+        // document drawer: whoever cannot load the case wants the full view
+        // all the more (decision of the Freigabe, 2026-09-06).
         <Button variant="primary" icon={<Maximize2 size={16} strokeWidth={1.5} />} onClick={onOpenFull}>
           Sachverhalt öffnen
         </Button>
@@ -161,9 +161,8 @@ function DrawerBody({
     );
   }
   if (loading) {
-    // Die Form des Inhalts, nicht eine Karte: fünf Zeilen für Zone 3, weil
-    // dort fünf stehen werden (Mangel M2 der 0052-Abnahme, hier nicht
-    // wiederholt).
+    // The shape of the content, not one card: five lines for zone 3, because
+    // five will stand there (defect M2 of the 0052 review, not repeated here).
     return <Skeleton lines={5} label="Sachverhalt wird geladen …" />;
   }
   if (!record) {
@@ -179,9 +178,8 @@ function DrawerBody({
 
   return (
     <>
-      {/* Zone 3: dieselbe Komponente wie im View, ohne `all` — das ist die
-          Deckung, die 0052 verlangt: der Drawer erfindet keine zweite
-          Feldliste. */}
+      {/* Zone 3: the same component as the view, without `all` — that is the
+          coverage 0052 asks for: the drawer invents no second field list. */}
       <Card>
         <CardHead title="Kernfakten" />
         <div className="v2cdr__facts">
@@ -194,8 +192,7 @@ function DrawerBody({
         </div>
       </Card>
 
-      {/* Zone 4: was der Schnellblick nicht beantwortet — benannt, nicht
-          verschwiegen. */}
+      {/* Zone 4: what the quick look does not answer — named, not hidden. */}
       <p className="v2cdr__limit">{LIMIT}</p>
     </>
   );
