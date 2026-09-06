@@ -375,3 +375,26 @@ sie gehört zu dieser Familie — wer das Journal-Markup herauslöst (Punkt 1
 dieser Aufgabe), sollte den Spaltensatz gleich mitprüfen: eine Spalte, die auf
 null fallen darf, braucht entweder eine Mindestbreite oder einen Kopf, der
 mitschrumpft.
+
+## Das Herauslösen — nachgeholt am 2026-09-06
+
+Das letzte offene Kriterium ist erfüllt: `JournalEntryEditor` zeichnet sein
+Journal nicht mehr selbst, sondern über `JournalEntryCard` mit
+`totals={false}`. `grep -rn "bse__journal__row" src` findet die Klasse nirgends
+mehr — die CSS-Regel ist gestrichen, der Rumpf `.bse__journal__body` bleibt,
+weil er die Klapp-Fläche trägt.
+
+**Eine Änderung im Bild, und sie ist der Gewinn.** Der Editor zeigte vier
+Spalten (Konto · Name · S/H · Betrag), die Karte zeigt fünf (Konto · Name ·
+Buchungstext · Soll · Haben). Das waren **zwei Bilder desselben
+Buchungssatzes**, und das des Editors war das, das niemand pflegte — die
+Buchungstext-Spalte fehlte dort ganz. Jetzt ist es eines. Gemessen an
+`s-2-split-full`: sechs Zeilen, Kopf „Konto · Kontoname · Buchungstext · Soll
+Umsatz · Haben Umsatz", null `.bse__journal__row`.
+
+**Die Summe bleibt, wo sie war** — in der Klappzeile („Σ S 1.475,60 € = Σ H
+1.475,60 €"), deshalb `totals={false}`. Sie steht dort sichtbar, während der
+Rumpf zugeklappt ist, und das ist der Grund, warum der Editor sie oben trägt
+und nicht unten.
+
+Konsole in allen geprüften Editor-Stories ohne Meldung.

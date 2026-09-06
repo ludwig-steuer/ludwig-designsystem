@@ -13,6 +13,7 @@ import { parseAmount } from "../../primitives/AmountInput";
 import { Button } from "../../primitives/Button";
 import { Dialog } from "../../primitives/Dialog";
 import { AccountField, type AccountCandidate, type AccountGroup } from "../account/AccountField";
+import { JournalEntryCard } from "./JournalEntryCompact";
 import { AiBookingNotes } from "./AiBookingNotes";
 
 // Beträge im Editor: eine Währung, ein Formatierer (T7, 0043). Der Editor
@@ -770,14 +771,23 @@ function Journal({
       </button>
       {open ? (
         <div className="bse__journal__body">
-          {zeilen.map((z, i) => (
-            <div className="bse__journal__row" key={i}>
-              <span>{z.konto}</span>
-              <span className="v2muted">{z.name}</span>
-              <span>{z.side}</span>
-              <span className="v2num">{euro(z.amount)}</span>
-            </div>
-          ))}
+          {/*
+            The journal is drawn by `JournalEntryCard` (0044), not by markup of
+            its own. It used to be four columns here and five there — two
+            pictures of one entry, and the editor's was the one nobody
+            maintained. `totals={false}`, because the sum already stands in the
+            head above, where it is visible while the body is collapsed.
+          */}
+          <JournalEntryCard
+            lines={zeilen.map((z) => ({
+              side: z.side === "S" ? ("debit" as const) : ("credit" as const),
+              accountNumber: z.konto,
+              accountName: z.name,
+              amount: z.amount,
+            }))}
+            currency="EUR"
+            totals={false}
+          />
         </div>
       ) : null}
     </div>
