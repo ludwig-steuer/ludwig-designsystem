@@ -42,7 +42,7 @@ Fünf-Zonen-Schema auch ohne Vorschau trägt.
 
 | Zone | Inhalt | Quelle |
 |---|---|---|
-| 1 · Kopf | Anzeigename, Nummer, Bearbeitungsstand (Ränge 1–3) | `CaseCell`-Bausteine, `StatusBadge` |
+| 1 · Kopf | Anzeigename und Nummer (Ränge 1, 3), darunter eine Meta-Zeile: Bearbeitungsstand, Betrag, Art · Gegenpart, Zuständigkeit (Ränge 2, 4–7) — wie der Kopf des `SourceDocumentDrawer` | `caseTitle`, `StatusBadge`, `Amount` |
 | 2 · Original | **entfällt** — ein Sachverhalt hat keins. Das ist der Prüfstein aus 0052 | — |
 | 3 · Kernfakten | `CaseFacts` **ohne** `all`, `tone="bare"` (Ränge 11–16) | 0097 |
 | 4 · Grenze | ein Satz, was der Schnellblick nicht beantwortet | Text, Ton nach `ton-und-sprache.md` |
@@ -56,12 +56,20 @@ Sachverhaltsansicht."** Er nennt genau das, was der Drawer weglässt.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `case` | `CaseDetail \| null` | ja | Der Fall. `null` heißt: noch nicht geladen — der Aufrufer hält den Ladezustand, nicht der Drawer | `Filled`, `Loading` |
-| `open` | `boolean` | ja | Offen oder zu; der Aufrufer hält den Zustand (Klasse B) | `Filled`, `Closed` |
-| `onClose` | `() => void` | ja | Der dritte Schließweg neben Esc und Scrim | `Filled` |
-| `viewHref` | `string` | ja | Zone 5. Ohne Ausgang ist der Drawer eine Sackgasse, deshalb Pflicht | `Filled` |
-| `error` | `string \| null` | nein | Was schiefging beim Laden; steht statt Zone 3 | `Error` |
-| `eventCount` | `number` | nein | Der Zähler „n Ereignisse" im Kopf — die einzige Relation, die der Drawer zeigt | `Filled` |
+| `reference` | `string` | ja | Die Kennung, die nachgeschlagen wurde. Sie steht im Kopf, im Fehlersatz **und** im Nicht-gefunden-Text — nur so weiß man, wonach gesucht wurde | `Filled`, `Error`, `NotFound` |
+| `record` | `CaseQuickView \| null` | ja | Der Fall. `null` heißt **nicht gefunden**, nicht „lädt noch" — das trennt `loading` | `Filled`, `NotFound` |
+| `loading` | `boolean` | nein | Schlägt `record`: solange gesetzt, steht die Ladefläche | `Loading` |
+| `error` | `ReactNode` | nein | Was schiefging; steht statt Zone 3, Zone 5 bleibt | `Error` |
+| `onOpenFull` | `() => void` | ja | Zone 5. Als Callback, nicht als `href` — die Familie öffnet den View über den Aufrufer (Route, Suchparameter, Tab) | `Filled` |
+| `open` | `boolean` | ja | Offen oder zu; der Aufrufer hält den Zustand (Klasse B) | `Interactive` |
+| `onClose` | `() => void` | ja | Der dritte Schließweg neben Esc und Scrim | `Interactive` |
+| `accountHref` | `(accountNumber: string) => string` | nein | Reicht an `CaseFacts` durch | `Filled` |
+| `partnerHref` | `string` | nein | Reicht an `CaseFacts` durch | `Filled` |
+
+`CaseQuickView` trägt die Kopf-Ränge (Titel, Gegenpart, Betrag, Zuständigkeit,
+Ereignis-Zähler) und die Fakten als `CaseFactsVM`. Dieser Typ ist **lokal**
+definiert, weil `src/ludwig/` keine Detail-Sicht des Sachverhalts spiegelt —
+Befund **L-68**, dieselbe Lücke wie bei 0097.
 
 **Kann bewusst nicht:**
 
@@ -75,14 +83,21 @@ Sachverhaltsansicht."** Er nennt genau das, was der Drawer weglässt.
 
 ## Verhalten
 
-Client-Island nur, soweit `Drawer` es ist. Breite `--drawer-lg` wie beim
-Beleg — 0052 hat das entschieden und die Messung steht dort.
+Client-Island nur, soweit `Drawer` es ist. Breite **`md`**: 0052 staffelt
+`sm` für Fakten, `md` für ein Detail, `lg` für ein Dokument oder eine Tabelle.
+Der Sachverhalt hat weder Dokument noch Tabelle — `lg` wäre die Breite des
+Belegs ohne dessen Inhalt.
 
-Zustände, alle vier aus 0052: **gefüllt** · **lädt** (`case={null}`: eine
+Zustände, alle vier aus 0052: **gefüllt** · **lädt** (`loading`: eine
 ruhige Fläche **in der Form des Inhalts** — fünf `Skeleton`-Zeilen für Zone
 3, nicht eine Karte; das war Mangel M2 der 0052-Abnahme und wird hier nicht
 wiederholt) · **Fehler** (`error`: der Satz steht statt Zone 3, Zone 5 bleibt
-erreichbar) · **zu** (`open={false}`: nichts im DOM).
+erreichbar) · **nicht gefunden** (`record={null}` ohne `loading`: ein
+`EmptyState` mit der Kennung, kein leerer Rahmen).
+
+Die vier Zustände des 0052-Schemas sind **lädt · Fehler · nicht gefunden ·
+Inhalt** — „zu" ist keiner von ihnen mehr, sondern der Normalfall des
+Aufrufers; `Interactive` zeigt ihn im Rundlauf.
 
 Tastatur: alles aus `Drawer` — Esc schließt, der Fokus geht in den Drawer und
 beim Schließen an den Auslöser zurück. Nichts Eigenes.
@@ -90,20 +105,21 @@ beim Schließen an den Auslöser zurück. Nichts Eigenes.
 ## Stories
 
 Titel `v3/Entitäten/Sachverhalt/CaseDrawer`. Abgeleitet nach §6: 4 anwendbare
-Zustände + 0 Enums + 0 Layout-Booleans + 1 Callback (`onClose`) + 1 „im
-Einsatz" + 1 Rand = 7.
+Zustände (Inhalt, lädt, Fehler, nicht gefunden) + 0 Enums + 0 Layout-Booleans
++ 1 Callback (`onClose`) + 1 „im Einsatz" + 1 Rand = 7.
 
 | Story | Beweist |
 |---|---|
 | `Filled` | Alle vier Zonen; Zone 2 fehlt und hinterlässt keine Lücke |
-| `Loading` | `case={null}`: fünf Zeilen in der Form der Fakten, keine 96-px-Karte |
+| `Loading` | `loading`: fünf Zeilen in der Form der Fakten, keine 96-px-Karte |
 | `Error` | `error`: der Satz steht statt Zone 3, der Ausgang bleibt |
-| `Closed` | `open={false}`: kein `[role=dialog]` im DOM |
+| `NotFound` | `record={null}` ohne `loading`: die gesuchte Kennung steht im Text, der Ausgang bleibt |
 | `Interactive` | Rundlauf: öffnen, Esc, Fokus zurück am Auslöser |
 | `Sparse` | Rand: ein Fall ohne Betrag, ohne Partner, ohne Personenkonto — die drei bedeutenden Nullwerte stehen als Wort |
 | `InUse` | Aus einer Bank-Zeile heraus geöffnet: die Liste bleibt hinter dem Scrim sichtbar, der Kontext geht nicht verloren |
 
-Nicht anwendbar: `leer nach Filter`.
+Nicht anwendbar: `leer nach Filter`. `Closed` entfällt — „zu" ist kein
+Zustand des Schemas mehr; `Interactive` deckt ihn ab.
 
 ## Ausbau
 
@@ -137,9 +153,13 @@ Variabel (aus dieser Spec):
 
 - [ ] **Zone 3 importiert `CaseFacts`** — im Drawer steht keine zweite Feldliste (Nachweis: der Import zeigt auf 0097; `grep` findet kein `FieldList` in der Datei)
 - [ ] Die Zonen 1, 3, 4, 5 stehen in dieser Reihenfolge; Zone 2 fehlt und hinterlässt keine Lücke (Story `Filled`)
+- [ ] Zone 1 trägt die Ränge 1–7: Name, Nummer, Stand, Betrag, Zuständigkeit, Ereignis-Zähler (Story `Filled`)
 - [ ] Der Grenz-Satz aus Zone 4 steht wörtlich wie oben
 - [ ] `Loading` zeigt die Form des Inhalts, nicht eine 96-px-Karte (Story `Loading`, gemessen)
-- [ ] `error` ersetzt Zone 3 und lässt Zone 5 stehen (Story `Error`)
+- [ ] `error` ersetzt Zone 3 und lässt Zone 5 stehen (Story `Error`) — bewusste Abweichung vom `SourceDocumentDrawer`, im Code als Kommentar begründet
+- [ ] `record={null}` ohne `loading` heißt **nicht gefunden** und nennt die Kennung (Story `NotFound`)
+- [ ] `reference` steht im Kopf, im Fehlersatz und im Nicht-gefunden-Text (Stories `Filled`, `Error`, `NotFound`)
+- [ ] Breite `size="md"` (gemessen: `--drawer-md`)
 - [ ] Klasse B: die Datei enthält kein `useEffect` mit Datenholung, kein `fetch`, keinen Modul-Import (`grep`)
 - [ ] Esc schließt, der Fokus kehrt an den Auslöser zurück (Story `Interactive`) — und der Fokus kommt beim Öffnen **in** den Drawer (Aufgabe 0092, dort behoben)
 - [ ] Hinter dem offenen Drawer bleibt der Kontext sichtbar (Story `InUse`)
@@ -158,9 +178,9 @@ Abgenommen von / am: … · Offene Punkte: …
 1. Zeigt der Drawer den Verlauf als Zähler oder gar nicht? *Ohne Antwort:
    als Zähler im Kopf („4 Ereignisse"). Er beantwortet damit „hängt da viel
    dran?", ohne den Strang zu bauen — und Zone 4 sagt, wo der Strang steht.*
-2. Breite `--drawer-lg` wie beim Beleg, obwohl es kein Original gibt? *Ohne
-   Antwort: ja. Zwei Breiten für dieselbe Mechanik wären eine Entscheidung je
-   Entität, und 0052 hat die Breite einmal entschieden.*
+2. Breite `--drawer-lg` wie beim Beleg, obwohl es kein Original gibt?
+   **Entschieden: nein, `md`** — die Staffelung aus 0052 richtet sich nach
+   dem Inhalt, nicht nach der Entität.*
 3. Bleibt Zone 5 im Fehlerfall? *Ohne Antwort: ja — gerade dann ist der Weg
    in den View die Antwort, und ein Drawer ohne Ausgang ist eine Sackgasse.*
 
