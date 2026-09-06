@@ -341,6 +341,15 @@ export { CaseCell } from "./entities/accounting-case/CaseCell";
 export { CaseFacts, type CaseFactsVM } from "./entities/accounting-case/CaseFacts";
 export { CaseDetailView } from "./entities/accounting-case/CaseDetailView";
 export { CaseDrawer, type CaseQuickView } from "./entities/accounting-case/CaseDrawer";
+
+/* Kontoauszugsposition */
+export {
+  type BankTransactionCellData,
+  type BankTransactionRowData,
+  type BankTransactionDetailData,
+  type CaseAssignment,
+} from "./entities/bank-transaction/bank-transaction";
+export { BankTransactionPurpose } from "./entities/bank-transaction/BankTransactionPurpose";
 export {
   caseTitle,
   caseIdentifier,

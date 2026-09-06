@@ -2990,3 +2990,32 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui);
   color: var(--color-text-muted);
 }
+
+/* --- Verwendungszweck (0099) ---------------------------------------------
+   Der Freitext ist ein Satz, keine Kennung — deshalb nie mono. Mono sind nur
+   die Referenzwerte und der Originalblock. */
+/* `flex`, nicht `inline-flex`: shrink-to-fit gibt der Ellipse keine Grenze —
+   die Zeile lief bei 420 px Elternbreite auf 1426 px hinaus. Derselbe Fehler
+   wie in 0095, hier gleich vermieden. */
+.v2purp--inline { display: flex; align-items: baseline; gap: var(--space-1); min-width: 0; max-width: 100%; }
+/* Die Kürzung macht CSS, nicht eine Zeichenzahl: eine Zahl stimmt bei einer
+   Grid-Spalte nie (Entscheid 3 der Freigabe). */
+.v2purp--inline .v2purp__text {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+.v2purp__info {
+  background: none; border: none; padding: 0; cursor: pointer; line-height: 0;
+  color: var(--color-text-subtle); flex: 0 0 auto;
+}
+.v2purp__info:hover { color: var(--color-primary); }
+.v2purp__panel { display: grid; gap: var(--space-3); min-width: 22rem; max-width: 32rem; }
+.v2purp--block { display: grid; gap: var(--space-3); }
+.v2purp__text { margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui); }
+.v2purp__refs { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
+.v2purp__ref { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--fs-ui-xs); }
+.v2purp__raw summary { cursor: pointer; font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
+.v2purp__raw pre {
+  margin: var(--space-2) 0 0; padding: var(--space-3);
+  background: var(--color-bg-sunken); border-radius: var(--radius-sm);
+  font-size: var(--fs-ui-xs); white-space: pre-wrap; word-break: break-word;
+}
