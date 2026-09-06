@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` — Darstellungsfamilie des Sachverhalts, neben `CaseTimeline` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: die Rückfallkette und der Nullfall „offen" gehören diesem Vorgangsbegriff |
@@ -201,3 +201,35 @@ Abgenommen von / am: … · Offene Punkte: …
 **Urteil: freigeben mit Änderung.** Profil-Treue vollständig (Ränge 1–3, Rückfallkette, Stapel 0/1/n). Entscheide: 1 Name voran · 2 „offen" als Wort · 3 Teilbetrag in der Zelle je Fall · `onPeek` bleibt Ausbau, 0098 `InUse` nutzt einen eigenen Auslöser.
 
 Vor dem Bau in die Spec: (a) „Zustand als Punkt" → `StatusBadge axis="sachverhalt" info={false}` als Chip (V7, R1; das (i) sitzt am Spaltenkopf); (b) `CaseLink` und die Kennungs-Kette (`caseIdentifier()`, Nummer → Kurz-ID) in `entities/accounting-case/case-title.ts` exportieren — 0096 und 0101 nutzen dieselben; (c) L-56 nennen (Zeilentyp des Kontoauszugs mit Teilbetrag je Fall); (d) Musterwerte in den Stories nennen (Nummer `2026-0412`, Gegenpart).
+
+## Vor dem Bau eingearbeitet und gebaut (2026-09-06)
+
+**(a) Der Zustand ist ein Chip, kein Punkt.** `StatusBadge axis="sachverhalt"
+info={false}` — Farbe steht nie allein (V7), und die Erklärung sitzt einmal am
+Spaltenkopf (`StatusHeader`, 0077) statt einmal je Zeile (R1).
+
+**(b) Name und Kennung liegen in `case-title.ts`**, damit 0096 und 0101
+dieselben benutzen. Mit einer Änderung gegenüber der Freigabe: der
+**Anzeigename kommt aus dem Spiegel**. `caseDisplayTitle()` ist seit
+`ludwig/app` 44f9cd4e Kanon (L-52 erledigt), und `caseTitle()` hier ist eine
+dünne Durchreiche — eine zweite Ableitung wäre genau das, wovon L-52 handelte.
+Lokal bleibt nur, was drüben fehlt: die **Kennungs-Kette** (Nummer, sonst die
+ersten acht Zeichen der Id).
+
+Warum die Kurz-ID und kein Gedankenstrich: ein Fall ohne Nummer ist trotzdem
+einer. Der Strich sagte „keine Kennung", und das wäre falsch.
+
+**(c) L-56 steht in den Befunden** — der Teilbetrag je Fall kommt aus der
+Zuordnung der Bankzeile, nicht aus dem Sachverhalt; die Zelle rechnet ihn
+nicht, sie zeigt ihn.
+
+**(d) Musterwerte:** Nummer `2026-0412`, Gegenparteien „Bürobedarf Meier
+GmbH" und „Stadtwerke Musterstadt".
+
+### Gemessen
+
+| Story | Was |
+|---|---|
+| `Fallbacks` | die vier Stufen der Kette: „Wartung der Klimaanlage" · „Eingangsrechnung: Bürobedarf Meier GmbH" · „Eingangsrechnung" · Kennung `c-d4f9e1` statt der fehlenden Nummer |
+| `None` | „offen" — mit `emptyHref` als Link, ohne sie als Wort; in keinem Fall ein Gedankenstrich |
+| `Many` | drei Fälle im Stapel, je mit Teilbetrag rechts |

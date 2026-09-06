@@ -336,6 +336,14 @@ export {
   type CaseTimelineExpectation,
 } from "./entities/accounting-case/CaseTimeline";
 
+/* Sachverhalt — die Zelle, ihr Name und ihre Kennung (0095) */
+export { CaseCell } from "./entities/accounting-case/CaseCell";
+export {
+  caseTitle,
+  caseIdentifier,
+  type CaseLink,
+} from "./entities/accounting-case/case-title";
+
 /* Erwartung — was noch fehlt, als Chip und als Zeile (0025) */
 export {
   ExpectationChip,
