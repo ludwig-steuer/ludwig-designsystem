@@ -104,6 +104,17 @@ export function ListPane({
   );
 }
 
+/**
+ * The right half of the master-detail — the pane the selection fills.
+ *
+ * It exists as its own export because the list and the detail come from two
+ * different places in a page: the list is the page's, the detail belongs to
+ * whatever was selected.
+ *
+ * @when    The right side of a MasterDetail, with its own head and body.
+ * @instead The whole two-column frame → MasterDetail. A detail that stands
+ *          alone on a page → CaseDetailView and its kin.
+ */
 export function DetailPane({
   title,
   sub,

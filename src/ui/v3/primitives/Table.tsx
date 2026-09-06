@@ -38,6 +38,15 @@ export function Card({
   );
 }
 
+/**
+ * The head of a card — title, sub-line, and the actions that belong to the
+ * whole card.
+ *
+ * @when    Every card that carries a table or a bounded surface (the kit's
+ *          rule: no free-floating rows).
+ * @instead The head of a page → PageHeader. The head of one entity →
+ *          EntityHeader. The column head of a table → HeadRow.
+ */
 export function CardHead({
   title,
   sub,
@@ -66,6 +75,13 @@ export function CardHead({
   );
 }
 
+/**
+ * The foot of a card — the pager, a sum, the way onwards.
+ *
+ * @when    Something belongs under the card's content and is not a row.
+ * @instead A row that spans the table → GroupRow. Actions of the whole
+ *          card → CardHead.
+ */
 export function CardFoot({ children }: { children: ReactNode }) {
   return <div className="v2card__f">{children}</div>;
 }

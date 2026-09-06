@@ -44,6 +44,11 @@ function moneyFormat(currency: Currency) {
  * `signed` also puts a `+` in front of positive numbers; that is for
  * deviations, where the direction is the message. The sign never carries
  * colour (A7) — that is the caller's `tone`, and it is about the number.
+ *
+ * @when    A number has to become a string outside a component — a `title`, an
+ *          `aria-label`, a sentence.
+ * @instead Drawing the amount → Amount. In a table cell → AmountCell.
+ *          Entering one → AmountInput.
  */
 export function formatAmount(
   value: number | Money | null,

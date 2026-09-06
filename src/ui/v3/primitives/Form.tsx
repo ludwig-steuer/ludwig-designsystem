@@ -58,10 +58,24 @@ function inputClass({ invalid, className }: WithInvalid) {
   return `v2in${invalid ? " v2in--invalid" : ""}${className ? ` ${className}` : ""}`;
 }
 
+/**
+ * The bare input — one line of text, and nothing around it.
+ *
+ * @when    A single-line field inside a `Field`, or in a place that already
+ *          has its own label.
+ * @instead Label, hint and error around it → Field. Several lines →
+ *          Textarea. An amount → AmountInput. An account → AccountField.
+ */
 export function Input({ invalid, className, ...rest }: InputHTMLAttributes<HTMLInputElement> & WithInvalid) {
   return <input {...rest} aria-invalid={invalid || undefined} className={inputClass({ invalid, className })} />;
 }
 
+/**
+ * Several lines of text.
+ *
+ * @when    A free text that can grow — a reason, a note, a summary.
+ * @instead One line → Input. A text that is only read → LongText.
+ */
 export function Textarea({
   invalid,
   className,

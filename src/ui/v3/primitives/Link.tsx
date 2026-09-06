@@ -12,6 +12,10 @@ import type { AnchorHTMLAttributes, Ref } from "react";
  * ponytail: Wenn die App v3 übernimmt und clientseitige Navigation braucht,
  * wird NUR diese Datei auf `next/link` umgestellt — nicht die sechs
  * Komponenten, die hier importieren.
+ *
+ * @when    Anything that leads to a URL — in a row, in a sentence, on a card.
+ * @instead An action without a URL → Button or TextButton. A whole row that
+ *          leads somewhere → the row's own `href` (`.v2rowlink`).
  */
 export function Link({
   href,

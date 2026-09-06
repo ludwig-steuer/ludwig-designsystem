@@ -31,6 +31,10 @@ export interface NavSection {
  * Longest matching prefix wins, so a sub-page still lights up its entry.
  * Exact match beats everything; `/` only matches itself, otherwise it would
  * light up on every page.
+ *
+ * @when    A navigation has to mark its current entry and the page knows only
+ *          its path.
+ * @instead The page passes the entry itself → `activePath` on NavList.
  */
 export function activeHref(items: NavItem[], path: string): string | null {
   let best: string | null = null;

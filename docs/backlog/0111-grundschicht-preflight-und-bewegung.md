@@ -35,7 +35,7 @@ Die App hat dieselbe Kette (`index.css` sagt es im Kopf: „Dieselbe Kette wie
 das App-Layout") — der Befund gilt drüben genauso und geht als Zeile ins
 Register.
 
-## Befund 2 — Die Einfahrt des Drawers fragt nicht nach `prefers-reduced-motion`
+## Befund 2 — ~~Die Einfahrt des Drawers fragt nicht nach `prefers-reduced-motion`~~ **erledigt 2026-09-06 mit 0093 (b)**
 
 `.v2drawer { transition: transform var(--duration-slow) … }` (`v3.css`) läuft
 ohne Schutz. Im ganzen Blatt gibt es drei `@media (prefers-reduced-motion)`-Blöcke
@@ -59,9 +59,9 @@ Durchgang geprüft wird: ein Blick durch das Storybook nach der Änderung.
       Listen und Knöpfe sehen aus wie vorher (Stichprobe mit Screenshots über
       mindestens zehn Stories aus allen drei Stufen, vorher/nachher)
 - [ ] Ein Link ohne eigene Klasse trägt `--color-accent-700` (gemessen)
-- [ ] `@media (prefers-reduced-motion: reduce)` schaltet die Einfahrt von
-      Drawer, Dialog und Popover ab — sie erscheinen, statt zu fahren
-      (gemessen: `transition-duration: 0s` unter gesetzter Einstellung)
+- [x] `@media (prefers-reduced-motion: reduce)` schaltet die Einfahrt von
+      Drawer, Dialog und Popover ab — **erledigt mit 0093 (b)**, gemessen
+      `transition-duration: 0s` an `.v2drawer` und `.v2drawer__scrim`
 - [ ] `pnpm typecheck` und `pnpm build` grün
 
 ## Befunde für `ludwig/app`

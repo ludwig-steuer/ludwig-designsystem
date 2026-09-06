@@ -24,6 +24,9 @@ import { useEffect } from "react";
  * A checkbox or a radio takes no text — `Space` is all it listens to. Whoever
  * has just ticked three rows with the mouse holds the focus there, and the key
  * at the bulk action has to keep working (0057 E6).
+ *
+ * @when    Deciding whether a key press was typing or a command.
+ * @instead Whether a press means one specific key → matchesKey.
  */
 export function isTyping(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
@@ -36,7 +39,13 @@ export function isTyping(target: EventTarget | null): boolean {
   return el.tagName === "TEXTAREA" || el.tagName === "SELECT";
 }
 
-/** Does this press mean that key? Alt never does; Ctrl/⌘ has to match. */
+/**
+ * Does this press mean that key? Alt never does; Ctrl/⌘ has to match.
+ *
+ * @when    A key handler has to decide whether a press was meant for it.
+ * @instead Binding one key to one button → useHotkey. Several keys on a
+ *          screen plus the legend → useHotkeys (`patterns/Hotkeys.tsx`).
+ */
 export function matchesKey(e: KeyboardEvent, key: string, meta = false): boolean {
   if (e.altKey) return false;
   const withMeta = e.ctrlKey || e.metaKey;

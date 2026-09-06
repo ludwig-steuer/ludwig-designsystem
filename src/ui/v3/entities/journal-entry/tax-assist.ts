@@ -38,7 +38,12 @@ export interface DerivedTax {
   tax: number;
 }
 
-/** Brutto → Netto/Steuer, Rundungsdifferenz sitzt auf der Steuerzeile. */
+/**
+ * Brutto → Netto/Steuer, Rundungsdifferenz sitzt auf der Steuerzeile.
+ *
+ * @when    One gross amount has to be split at a known rate.
+ * @instead Deciding whether a line gets tax assistance at all → deriveTax.
+ */
 export function splitGross(grossAmount: number, ratePercent: number): { net: number; tax: number } {
   const grossCents = Math.round(grossAmount * 100);
   const netCents = Math.round(grossCents / (1 + ratePercent / 100));
@@ -49,6 +54,9 @@ export function splitGross(grossAmount: number, ratePercent: number): { net: num
  * Abgeleitete Vorsteuer-Zeile einer Editor-Zeile — `null`, wenn die Zeile
  * keine Assistenz bekommt (kein 8/9-Schlüssel, Framework unbekannt, Betrag
  * leer, oder die Zeile ist selbst ein Steuerkonto).
+ *
+ * @when    A line was entered and the editor asks whether it needs a tax line.
+ * @instead Splitting a known gross at a known rate → splitGross.
  */
 export function deriveTax(
   line: { accountNumber: string; taxKey: string | null; amount: number },
@@ -79,6 +87,9 @@ export interface CollapsibleLine {
  * gleicher Seite mit passendem Schlüssel und Satz × Netto ±1 Cent. Nicht
  * zuordenbare Steuerzeilen bleiben als normale Zeilen stehen (Fallback =
  * bisheriges Verhalten, nichts geht verloren).
+ *
+ * @when    Reading a stored entry back into the editor's assisted form.
+ * @instead Writing it out again → expandWithTaxLines.
  */
 export function collapseTaxPairs<L extends CollapsibleLine>(
   lines: L[],
@@ -132,6 +143,9 @@ export type ExpandedLine = ExpandableLine & { taxForLineNo: number | null };
  * Editor-Zeilen (Brutto-Semantik) → explizite Zeilen fürs Speichern: je
  * assistierter Zeile Netto-Basiszeile + verknüpfte Steuerzeile
  * (`taxForLineNo` = 1-basierte Position der Basiszeile im Ergebnis).
+ *
+ * @when    Writing the editor's assisted lines back out as real entry lines.
+ * @instead Reading them in → collapseTaxPairs.
  */
 export function expandWithTaxLines(
   lines: ExpandableLine[],

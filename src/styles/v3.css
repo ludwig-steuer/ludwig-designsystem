@@ -3170,3 +3170,27 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2tbl__row:has(.v2rowbtn) button:not(.v2rowbtn) { position: relative; z-index: 2; }
 .v2rowbtn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; border-radius: var(--radius-sm); }
 .v2dnf__limit { margin: 0; font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
+
+/* --- Bewegung: wer sie abbestellt hat, bekommt keine (0093 b) -------------
+   Bis hierher waren nur `.v2skel`, `.v2spin` und `.v2toast` abgesichert — die
+   Bewegungen, die von selbst laufen. Die, die auf eine Handlung folgen, liefen
+   ungebremst: der Drawer ist die größte Bewegung im Set, und genau die meint
+   die Einstellung. §2 verlangt es für **jede** Transition. */
+@media (prefers-reduced-motion: reduce) {
+  .v2drawer,
+  .v2drawer__scrim,
+  .v2dialog,
+  .v2dialog__scrim,
+  .v2chev,
+  .v2chev--icon,
+  .v2disc__chev,
+  .v2pop,
+  .v2tbl__row,
+  .v2tbl__row.is-clickable,
+  .v2card,
+  .v2btn,
+  .v2link {
+    transition: none !important;
+    animation: none !important;
+  }
+}

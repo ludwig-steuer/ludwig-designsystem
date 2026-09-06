@@ -3,6 +3,7 @@ import { Link } from "../primitives/Link";
 import { PageHeader } from "../primitives/PageHeader";
 import { Progress } from "../primitives/Progress";
 import type { ReactNode } from "react";
+import { ActionIcon } from "../Icons";
 
 /**
  * Frame building blocks (F123 T123.2): step rail, screen header,
@@ -154,14 +155,21 @@ export function StepHeader({
             primary={
               showNav ? (
                 <StepNav href={nextHref} onClick={onNext} variant="primary">
-                  {nextLabel ?? "Weiter"} →
+                  {/* The arrow is a Lucide sign from the registry, not the
+                      character „→" (T9, 0093 c): a text arrow is read aloud as
+                      „Pfeil nach rechts" and scales with the font instead of
+                      with the icon ladder. The spec of 0002 §A6 wrote the
+                      character — the guideline wins, and §A6 is corrected. */}
+                  {nextLabel ?? "Weiter"}
+                  <ActionIcon action="forward" size={14} />
                 </StepNav>
               ) : null
             }
             secondary={
               showNav ? (
                 <StepNav href={prevHref} onClick={onPrev} variant="secondary">
-                  ← Zurück
+                  <ActionIcon action="back" size={14} />
+                  Zurück
                 </StepNav>
               ) : null
             }

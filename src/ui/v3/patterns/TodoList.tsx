@@ -44,6 +44,15 @@ const OPEN: ReadonlySet<StateKind> = new Set<StateKind>([
   "question",
 ]);
 
+/**
+ * Is this state one that still asks something of a person?
+ *
+ * The list and its counter have to agree on that, and „open" is not simply
+ * „not done": a returned item and an open question both still wait.
+ *
+ * @when    Counting or filtering what is still to do.
+ * @instead Drawing the state → StateIcon.
+ */
 export function isOpen(state: StateKind): boolean {
   return OPEN.has(state);
 }

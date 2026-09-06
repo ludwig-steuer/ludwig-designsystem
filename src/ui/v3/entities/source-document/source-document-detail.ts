@@ -142,6 +142,7 @@ export interface SourceDocumentDetailEntry<K extends SourceDocumentDetail["kind"
   facts: (detail: DetailOf<K>) => FactRow[];
 }
 
+/** Which facts each kind of document carries, and in which order. */
 export const SOURCE_DOCUMENT_DETAILS: {
   [K in SourceDocumentDetail["kind"]]: SourceDocumentDetailEntry<K>;
 } = {

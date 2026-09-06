@@ -33,6 +33,14 @@ function confirmsOnEnter(target: EventTarget | null): boolean {
   return tag !== "TEXTAREA" && tag !== "BUTTON" && tag !== "A";
 }
 
+/**
+ * A decision that has to be made now — the modal that blocks the page.
+ *
+ * @when    One decision with consequences: confirm, discard, choose between
+ *          two ways. The page waits for it.
+ * @instead Work on something beside the page → Drawer. A small field on
+ *          click → Popover. A message that does not block → Toast.
+ */
 export function Dialog({
   open,
   onClose,

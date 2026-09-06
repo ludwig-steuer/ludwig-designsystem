@@ -33,6 +33,7 @@ export interface AccountCandidate {
 
 export type AccountGroup = "agent" | "partner" | "aehnlich" | "belegposition" | "alle";
 
+/** The words of the four candidate groups — where a suggestion came from. */
 export const ACCOUNT_GROUP_LABEL: Record<AccountGroup, string> = {
   agent: "Vorschlag des Agenten",
   partner: "Zuletzt bei dieser Gegenpartei",

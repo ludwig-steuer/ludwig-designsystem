@@ -81,6 +81,8 @@ const OWNER_ICON: Record<BatonKey, LucideIcon> = {
  * Four segments for the list row.
  *
  * @when    Process state in the list row.
+ * @instead The whole run with its phases → Process. One phase as a
+ *          state → StatusBadge on the axis `lauf`.
  */
 export function ProcessMini({ phases }: { phases: readonly ProcessPhase[] }) {
   return (

@@ -63,6 +63,8 @@ const TONE_VAR: Record<string, string> = {
 
 /**
  * @when    State of an item in a list or row, always with a word next to it.
+ * @instead A state from a registry axis → StatusBadge. A thing or an
+ *          action → EntityIcon / ActionIcon.
  */
 export function StateIcon({ state, title }: { state: StateKind; title?: string }) {
   const { Icon, tone, label } = ICONS[state];

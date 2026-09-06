@@ -23,6 +23,7 @@ export const SOURCE_LABEL: DocumentNumberSourceLabels = {
   case_summary: "In der Beschreibung erkannt",
 };
 
+/** The words of the three dominance states. */
 export const STATE_LABEL: DocumentNumberStateLabels = {
   computed: "errechnet",
   fixed_on_export: "mit Export fixiert",

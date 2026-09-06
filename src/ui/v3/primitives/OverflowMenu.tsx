@@ -115,6 +115,14 @@ export function MenuItem({
   children: ReactNode;
   href?: string;
   onClick?: () => void;
+  /**
+   * **Stays a `ReactNode`, deliberately** (0093 d). An `ActionKey` would lock
+   * the entry to the action registry — but a menu entry also names entities
+   * („Zum Sachverhalt") and states, and those come from `EntityIcon` and
+   * `StateIcon`. The guard is not the type but `pnpm check:icons`: a caller
+   * who wants a sign past the vocabulary would have to import `lucide-react`,
+   * and that is exactly what the check refuses.
+   */
   icon?: ReactNode;
   tone?: MenuItemTone;
   disabled?: boolean;
