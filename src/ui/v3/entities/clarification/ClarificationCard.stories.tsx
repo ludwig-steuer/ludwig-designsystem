@@ -50,7 +50,7 @@ const AGENT_DETAIL: ClarificationDetailVM = {
   allowFreeText: true,
 };
 
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: () => (
     <Card>
       <CardHead title="Rückfrage" sub="gelesen, nicht beantwortet" />
@@ -62,7 +62,7 @@ export const Gefuellt: Story = {
 };
 
 /** All three answer shapes side by side, each with a working round trip. */
-export const Antworten: Story = {
+export const Answering: Story = {
   render: function Answering() {
     const [log, setLog] = useState<string[]>([]);
     const answer = async (what: string) =>
@@ -78,6 +78,7 @@ export const Antworten: Story = {
               clarification={{ ...BASE, ...AGENT_DETAIL }}
               onAnswer={(a) => answer(`Auswahl: ${a.optionId ?? "—"}${a.text ? ` (${a.text})` : ""}`)}
               onResolve={(reason) => answer(`Aufgelöst: ${reason}`)}
+              onDefer={(until, reason) => answer(`Zurückgestellt bis ${until}: ${reason}`)}
             />
           </div>
         </Card>
@@ -122,6 +123,11 @@ export const Antworten: Story = {
                 originLabel: "Buchungsvorschlag",
               }}
               onAnswer={(a) => answer(`Freitext: ${a.text ?? "—"}`)}
+              onDefer={(until, reason) => answer(`Zurückgestellt bis ${until}: ${reason}`)}
+              // Zum dritten Mal: ab hier darf nur noch ein Mensch, und diese
+              // Betrachterin ist der Agent. Der Knopf bleibt stehen und sagt,
+              // warum er nicht geht.
+              deferLockedReason="Zweimal zurückgestellt — ab jetzt nur noch von Hand"
             />
           </div>
         </Card>
@@ -166,7 +172,7 @@ export const Antworten: Story = {
   },
 };
 
-export const MitEmpfehlung: Story = {
+export const WithRecommendation: Story = {
   render: () => (
     <Card>
       <CardHead title="Empfehlung" sub="wird zur Vorauswahl und bleibt lesbar" />
@@ -182,7 +188,7 @@ export const MitEmpfehlung: Story = {
 };
 
 /** Without an audit trail: asker and answerer alone already make the history. */
-export const Personen: Story = {
+export const People: Story = {
   render: () => (
     <Card>
       <CardHead title="Ohne Audit-Spur" sub="raisedBy und answeredBy als Actor bzw. String" />
@@ -202,7 +208,7 @@ export const Personen: Story = {
   ),
 };
 
-export const Verlauf: Story = {
+export const History: Story = {
   render: () => (
     <Card>
       <CardHead title="Verlauf" sub="gestellt · beantwortet · aufgelöst, je mit Person und Datum" />
@@ -236,7 +242,7 @@ export const Verlauf: Story = {
 };
 
 /** A question the firm raised itself: text only, no facts, no sources. */
-export const VonHand: Story = {
+export const ByHand: Story = {
   render: () => (
     <Card>
       <CardHead title="Von Hand gestellt" sub="Herkunft Kanzlei — keine leeren Blöcke" />
@@ -259,7 +265,7 @@ export const VonHand: Story = {
   ),
 };
 
-export const ImPortal: Story = {
+export const InPortal: Story = {
   render: () => (
     <Card>
       <CardHead title="Im Portal" sub="client_text, ohne Schwere und Herkunft" />
@@ -285,7 +291,75 @@ export const ImPortal: Story = {
   ),
 };
 
-export const Laedt: Story = {
+/**
+ * Die Wiedervorlage, wie sie aussieht, nachdem sie gesetzt ist — **drei
+ * Lagen nebeneinander**: einmal, mehrfach, und an einer Gegenfrage hängend.
+ * Das Datum steht absolut (T7), der Grund daneben, und ab der zweiten
+ * Verschiebung sagt die Karte, die wievielte es ist — das ist die Warnung
+ * vor der Sperre, bevor die Sperre kommt.
+ */
+export const Deferred: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-6)" }}>
+      <Card>
+        <CardHead title="Einmal zurückgestellt" sub="Datum, Grund" />
+        <div style={{ padding: "var(--space-4)" }}>
+          <ClarificationCard
+            clarification={{
+              ...BASE,
+              ...AGENT_DETAIL,
+              state: "deferred",
+              deferredUntil: "2026-09-15",
+              deferredReason: "wartet auf den Jahresabschluss des Mandanten",
+              deferredCount: 1,
+            }}
+          />
+        </div>
+      </Card>
+
+      <Card>
+        <CardHead title="Zum dritten Mal" sub="die Warnung vor der Sperre" />
+        <div style={{ padding: "var(--space-4)" }}>
+          <ClarificationCard
+            clarification={{
+              ...BASE,
+              id: "c8",
+              ...AGENT_DETAIL,
+              state: "deferred",
+              deferredUntil: "2026-09-30",
+              deferredReason: "Mandant meldet sich nicht",
+              deferredCount: 3,
+            }}
+          />
+        </div>
+      </Card>
+
+      <Card>
+        <CardHead title="An einer Gegenfrage" sub="das Datum ist nicht die Bedingung" />
+        <div style={{ padding: "var(--space-4)" }}>
+          <ClarificationCard
+            clarification={{
+              ...BASE,
+              id: "c9",
+              ...AGENT_DETAIL,
+              state: "deferred",
+              deferredUntil: "2026-09-20",
+              deferredReason: "hängt an der Rückfrage zum Mietvertrag",
+              deferredCount: 1,
+              deferredBy: {
+                id: "c7",
+                title: "Läuft der Mietvertrag über 2026 hinaus?",
+                href: "#sachverhalt-2026-0412",
+              },
+            }}
+          />
+        </div>
+      </Card>
+    </div>
+  ),
+};
+
+export const Loading: Story = {
   render: () => (
     <Card>
       <CardHead title="Sendet" sub="pending am Knopf" />
@@ -301,7 +375,7 @@ export const Laedt: Story = {
   ),
 };
 
-export const Fehler: Story = {
+export const ErrorState: Story = {
   render: () => (
     <Card>
       <CardHead title="Fehlgeschlagen" sub="Fehler am Knopf, Eingabe bleibt" />

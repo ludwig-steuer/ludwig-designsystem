@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/clarification/` — Erweiterung von `ClarificationCard` (0060) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: die Regeln (30 Tage, ab der dritten nur ein Mensch) sind Ludwig-Fachlogik |
@@ -40,7 +40,12 @@ Dazu die Anzeige des Regelwerks, das es schon gibt:
 
 - höchstens **30 Tage** voraus (ein Monatslauf) — das Datumsfeld begrenzt,
   nicht erst der Server
-- **Grund ist Pflicht**, mindestens 10 Zeichen (DB-CHECK)
+- **Grund ist Pflicht** (`required` am `ReasonDialog`; der Knopf bleibt ohne
+  ihn gesperrt). Eine **Mindestlänge** steht in der ursprünglichen Fassung
+  dieses Auftrags („mindestens 10 Zeichen, DB-CHECK") und ist im Spiegel
+  **nicht belegt** — kein CHECK, keine Domänenregel. Sie ist gestrichen;
+  taucht sie doch auf, bekommt `ReasonDialog` eine Prop `minLength`, statt
+  dass die Karte selbst zählt
 - ab der **dritten** Verschiebung darf nur noch ein Mensch verschieben
   (`deferred_count`) — die Karte zeigt den Zähler und sperrt den Knopf mit
   Grund, statt ihn zu verstecken
@@ -77,21 +82,35 @@ Aufgabe, die man einzeln abnehmen kann. Die Karte hat den Platz dafür bereits
   Grund kommt aus dem Dialog; `onDefer` bekommt beides. Ein eigener
   `DeferDialog` wäre `ReasonDialog` plus ein Feld und würde die Frage „was
   nehme ich?" um eine Antwort verschlechtern.
+- **Der Tag wird geklemmt, nicht nur begrenzt.** Startwert **morgen**
+  (heute zurückzustellen ist kein Zurückstellen), `min` morgen, `max`
+  heute + 30. Aber `min`/`max` am Feld sind ein Hinweis beim Tippen, **keine
+  Zusage**: ein von Hand eingetragenes Datum außerhalb erreicht `onChange`,
+  und der Bestätigen-Knopf sieht das Feld nie. Der Wert wird deshalb dort
+  geklemmt, wo er benutzt wird.
 
 ### Schnittstelle — was an `ClarificationCard` dazukommt
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `onDefer` | `(until: string, reason: string) => Promise<void>` | nein | Der zweite Ausgang. **Ohne die Prop kein Knopf** — dieselbe Regel wie bei `onResolve`: fehlt der Callback, fehlt der Weg | `Defer`, `Read` (ohne Knopf) |
-| `deferMaxDays` | `number` | nein | Voreinstellung **30**. Das Datumsfeld begrenzt, nicht erst der Server | `Defer` |
+| — | — | — | **`deferMaxDays` gestrichen.** 30 Tage sind Regel, kein Vorschlag: eine Prop dafür lüde ein, sie zu übergehen, und der Server nähme es nicht an. Die Zahl steht einmal in der Karte, weil `DEFERRAL_MAX_DAYS` in `domain/case.ts` fehlt (Befund L-91) | — |
 | `deferLockedReason` | `string` | nein | Warum der Knopf gesperrt ist — er wird **gesperrt gezeigt, nicht versteckt**. Die Karte errechnet den Text nicht selbst: „ab der dritten Verschiebung nur noch ein Mensch" ist eine Regel über den Betrachter, und den kennt nur der Aufrufer | `DeferLocked` |
 
-Am Anzeige-Typ (`ClarificationVM`, `Clarification.tsx`) ist nichts Neues
-nötig: `deferredUntil` und `state = "deferred"` gibt es, die Zeile zeigt sie
-schon, und `ClarificationEventKind` kennt `deferred` seit 0060.
+Am Anzeige-Typ der **Zeile** (`ClarificationVM`) ist nichts Neues nötig:
+`deferredUntil` und `state = "deferred"` gibt es, und `ClarificationEventKind`
+kennt `deferred` seit 0060. Der Anzeige-Typ der **Karte**
+(`ClarificationDetailVM`) bekommt drei Punkte dazu — strukturell
+deckungsgleich mit den Spalten, die es in der Tabelle längst gibt:
 
-Zwei Punkte fehlen dort und kommen als Befund (siehe unten): der **Zähler**
-(`deferred_count`) und die **Gegenfrage** (`deferred_by_clarification_id`).
+| Feld | Spalte | Wozu |
+|---|---|---|
+| `deferredReason?: string \| null` | `deferred_reason` | Pflicht in der Datenbank; ohne ihn ist die Verschiebung eine Zeile, die niemand zurücklesen kann |
+| `deferredCount?: number \| null` | `deferred_count` | die Warnung vor der Sperre, bevor die Sperre kommt |
+| `deferredBy?: { id, title, href }` | `deferred_by_clarification_id` | dann ist **die Antwort auf jene Frage** die Bedingung, nicht das Datum |
+
+Alle drei sind Befund **L-83** (im Register um `deferred_reason` erweitert):
+die Spalten gibt es, das View-Model der App führt sie nicht.
 
 ### Was die Karte zeigt, wenn zurückgestellt ist
 
@@ -110,21 +129,36 @@ Vier Sätze, keine Rechnung:
    der Antwort auf «…»" — nicht nur ein Datum, denn dieses Datum ist dann
    nicht die eigentliche Bedingung.
 
+### Drei Sätze, die sonst geraten würden
+
+- **Der Knopf erscheint nur bei `mode="answer"`.** Zurückstellen ist eine
+  Handlung an einer offenen Frage; im Lesemodus gibt es sie nicht.
+- **Der Antwortbereich bleibt im Zustand `deferred` stehen.** Eine frühe
+  Antwort beendet die Wiedervorlage — sie ist kein Verbot, sondern ein
+  „nicht jetzt", und wer doch jetzt kann, soll nicht erst warten müssen.
+- **Der Gegenfrage-Link führt zur Sachverhaltsseite**, nicht in einen Drawer.
+  Eine Klärung hat keinen eigenen View (Entitätsprofil); ihr Detail *ist* der
+  Sachverhalt — dasselbe Ergebnis wie in 0058.
+
 ### Stories
 
-Titel `v3/Entitäten/Klärung/ClarificationCard` — die bestehende Datei bekommt
-**vier** Stories dazu (die Karte steht heute bei 6; §6 erlaubt 10):
+Titel `v3/Entitäten/Klärung/ClarificationCard`. Der Bestand ist **9**, nicht
+6 — die Obergrenze aus §6 ist 10, also kommt genau **eine** Story dazu, und
+der Rundlauf zieht in die Callback-Story ein, die es schon gibt:
 
 | Story | Beweist |
 |---|---|
-| `Defer` | Der Rundlauf: Knopf → `ReasonDialog` mit `DateField` darüber → `onDefer(until, reason)`; das Feld lässt keinen Tag über 30 zu |
-| `Deferred` | Der Zustand: Datum absolut, Grund dabei, Zähler ab der zweiten |
-| `DeferLocked` | Der Knopf **gesperrt mit Grund**, nicht versteckt |
-| `DeferredByQuestion` | Die Gegenfrage als Satz mit Link statt eines nackten Datums |
+| `Answering` (bestehend, erweitert) | Der Rundlauf: Knopf → `ReasonDialog` mit `DateField` darüber → `onDefer(until, reason)`. **Und** in derselben Story die dritte Karte mit `deferLockedReason`: der Knopf steht sichtbar und gesperrt da, mit dem Grund daneben |
+| `Deferred` (neu) | Die drei Lagen nebeneinander: einmal · zum dritten Mal · an einer Gegenfrage. Datum absolut, Grund dabei, Zähler ab der zweiten |
 
 Der Fall „ohne `onDefer` kein Knopf" braucht keine eigene Story: er ist in
-jeder bestehenden Story bewiesen, weil keine von ihnen die Prop setzt — die
-Abnahme prüft ihn dort (Story `Read`).
+jeder anderen bewiesen, weil keine von ihnen die Prop setzt — die Abnahme
+prüft ihn an `Filled`.
+
+**Die Export-Namen sind bei dieser Gelegenheit englisch geworden**
+(`Gefuellt` → `Filled`, `Antworten` → `Answering`, …): CLAUDE.md verlangt es,
+und die Datei wird ohnehin angefasst. Die Story-IDs im Storybook ändern sich
+damit — wer auf `--gefuellt` verlinkt hat, findet jetzt `--filled`.
 
 ### Abnahmekriterien
 
@@ -133,13 +167,15 @@ keine lokale Label-Map · alle Stories · §9 · im Browser angesehen.
 
 Variabel:
 
-- [ ] Ohne `onDefer` erscheint kein Knopf (Story `Read`, `grep`)
-- [ ] Das Datumsfeld lässt keinen Tag mehr als 30 Tage voraus zu (Story `Defer`, gemessen: `max`-Attribut am `input`)
-- [ ] Der Grund ist Pflicht; der Knopf im Dialog bleibt ohne ihn gesperrt (Story `Defer`, gemessen)
-- [ ] Die Sperre ab der dritten Verschiebung ist **sichtbar und begründet**, nicht versteckt (Story `DeferLocked`)
-- [ ] Das Wiedervorlage-Datum steht absolut, nie relativ (Story `Deferred`, gemessen)
+- [ ] Ohne `onDefer` erscheint kein Knopf (Story `Filled`, `grep`)
+- [ ] Das Datumsfeld startet **morgen** und reicht 30 Tage (Story `Answering`, gemessen: `value` und `min` = morgen, `max` = heute + 30)
+- [ ] Ein Tag außerhalb wird **geklemmt**, nicht nur am Feld verhindert (`grep`: `clampDeferralDay` im Bestätigungspfad)
+- [ ] Der Grund ist Pflicht; der Knopf im Dialog bleibt ohne ihn gesperrt (Story `Answering`, gemessen: `disabled === true`)
+- [ ] Die Sperre ist **sichtbar und begründet**, nicht versteckt (Story `Answering`, dritte Karte, gemessen: Knopf `disabled` mit Satz daneben)
+- [ ] Das Wiedervorlage-Datum steht absolut, nie relativ (Story `Deferred`, gemessen: „Zurückgestellt bis 15.09.2026")
 - [ ] Der Zustand kommt aus der Registry (`klaerung_status`), kein eigenes Wort (`grep`)
-- [ ] Eine Wiedervorlage an einer Gegenfrage nennt die Gegenfrage (Story `DeferredByQuestion`)
+- [ ] Eine Wiedervorlage an einer Gegenfrage nennt sie und verlinkt auf den **Sachverhalt** (Story `Deferred`, dritte Karte)
+- [ ] Der Knopf erscheint nur bei `mode="answer"`; der Antwortbereich bleibt im Zustand `deferred` stehen (`grep`, Story `Deferred`)
 - [ ] `ReasonDialog` bleibt unverändert — das Datumsfeld steht in seinem `children` (`git diff`: keine Änderung an `ReasonDialog.tsx`)
 - [ ] offen (App): der Knopf ist an `RueckfragenListe` und an der Sachverhaltsseite gebunden, und die 0 Audit-Ereignisse werden nach einem Monat nachgezählt
 

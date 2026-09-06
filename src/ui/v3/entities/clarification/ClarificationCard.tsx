@@ -7,6 +7,8 @@ import type { RationaleSourceKind } from "@/ludwig/modules/accounting-cases/doma
 import type { Actor } from "@/ludwig/modules/audit-log/domain/types";
 
 import { Callout } from "../../primitives/Callout";
+import { DateField } from "../../primitives/DateField";
+import { Field } from "../../primitives/Form";
 import { FieldList } from "../../primitives/FieldList";
 import { Markdown } from "../../primitives/Markdown";
 import { ReasonDialog } from "../../primitives/ReasonDialog";
@@ -132,6 +134,65 @@ export interface ClarificationDetailVM {
   raisedBy?: ClarificationActor | null;
   answeredBy?: ClarificationActor | null;
   history?: readonly ClarificationEvent[];
+  /**
+   * Why the question was put off. Required in the database, so a deferral
+   * without it is a row nobody can read back — the card shows it next to the
+   * date (finding L-83).
+   */
+  deferredReason?: string | null;
+  /**
+   * How often it has been put off. From the second time on the card says so:
+   * that is the warning before the lock, and it arrives before the lock does.
+   */
+  deferredCount?: number | null;
+  /**
+   * The counter-question the deferral hangs on. Then the date is not the real
+   * condition — the answer to that question is — and the card says that
+   * instead of showing a bare day. The link leads to the case page, where the
+   * question lives; a clarification has no view of its own.
+   */
+  deferredBy?: { id: string; title: string; href?: string } | null;
+}
+
+/**
+ * **30 days, the length of one posting run.** The rule belongs to the app
+ * (`F105`), not to this card — but `DEFERRAL_MAX_DAYS` is missing from
+ * `modules/accounting-cases/domain/case.ts`, so it stands here once and as a
+ * finding (L-91). Mirrored, not invented: a card that lets someone pick a day
+ * the server refuses has told them nothing.
+ */
+const DEFERRAL_MAX_DAYS = 30;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** `yyyy-mm-dd` in the local calendar — the same day the user sees. */
+function isoDay(date: Date): string {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 10);
+}
+
+/** Tomorrow. Deferring to today is not deferring. */
+function defaultDeferralDay(): string {
+  return isoDay(new Date(Date.now() + DAY_MS));
+}
+
+function maxDeferralDay(): string {
+  return isoDay(new Date(Date.now() + DEFERRAL_MAX_DAYS * DAY_MS));
+}
+
+/**
+ * Hold the day inside the window. `min` and `max` on the field are a hint the
+ * browser gives while typing — they are **not** a guarantee: a typed date
+ * outside the range still reaches `onChange`, and the confirm button never
+ * looks at the field. So the value is clamped where it is used.
+ */
+function clampDeferralDay(value: string | null): string {
+  const min = defaultDeferralDay();
+  const max = maxDeferralDay();
+  if (!value) return min;
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
 }
 
 function Block({ label, children }: { label: string; children: React.ReactNode }) {
@@ -155,6 +216,8 @@ export function ClarificationCard({
   mode = "read",
   onAnswer,
   onResolve,
+  onDefer,
+  deferLockedReason,
   pending,
   error,
 }: {
@@ -164,10 +227,25 @@ export function ClarificationCard({
   onAnswer?: (answer: ChoiceAnswer) => Promise<void>;
   /** The second exit. Without it, it does not appear. */
   onResolve?: (reason: string) => Promise<void>;
+  /**
+   * The third exit: not now. Without the callback there is no button — the
+   * same rule as `onResolve`, and the reason the deferral has been built in
+   * the database for months and used **zero** times: nothing offered it.
+   */
+  onDefer?: (until: string, reason: string) => Promise<void>;
+  /**
+   * Why deferring is not possible right now — from the third time on only a
+   * person may defer, and only the caller knows who is looking. The button
+   * stays visible and disabled with this sentence next to it: a way that
+   * disappears looks like a way that never existed.
+   */
+  deferLockedReason?: string;
   pending?: boolean;
   error?: string;
 }) {
   const [resolving, setResolving] = useState(false);
+  const [deferring, setDeferring] = useState(false);
+  const [until, setUntil] = useState<string | null>(defaultDeferralDay());
 
   const isComment = c.type === "comment";
   // Without a loaded audit trail, asker and answerer still make a two-step
@@ -213,6 +291,38 @@ export function ClarificationCard({
           <Time value={c.raisedAt} format="dateTime" size="sm" />
         </p>
       </header>
+
+      {/* What a deferral says, and it says it in four sentences, not in a
+          date: until when, why, how often already — and, if it hangs on a
+          counter-question, that the answer to **that** question is the real
+          condition. The state word itself comes from the registry, above. */}
+      {c.state === "deferred" && c.deferredUntil ? (
+        <Callout tone="soft">
+          <strong>
+            Zurückgestellt bis <Time value={c.deferredUntil} format="date" size="sm" />
+          </strong>
+          {c.deferredReason ? <> · {c.deferredReason}</> : null}
+          {(c.deferredCount ?? 0) > 1 ? (
+            <>
+              {" · "}
+              zum {c.deferredCount}. Mal zurückgestellt
+            </>
+          ) : null}
+          {c.deferredBy ? (
+            <p className="v2clc__deferby">
+              Endet mit der Antwort auf{" "}
+              {c.deferredBy.href ? (
+                <a className="v2link" href={c.deferredBy.href}>
+                  „{c.deferredBy.title}"
+                </a>
+              ) : (
+                <>„{c.deferredBy.title}"</>
+              )}{" "}
+              — nicht am Datum.
+            </p>
+          ) : null}
+        </Callout>
+      ) : null}
 
       {/* While answering, `ChoicePrompt` carries the question — once is enough. */}
       {c.question && !canAnswer ? <p className="v2clc__question">{c.question}</p> : null}
@@ -301,7 +411,59 @@ export function ClarificationCard({
               <TextButton onClick={() => setResolving(true)}>Ohne Antwort auflösen</TextButton>
             </p>
           ) : null}
+          {onDefer ? (
+            <p className="v2clc__exit">
+              <ActionIcon action="time" size={14} />
+              Jetzt nicht zu klären?{" "}
+              <TextButton
+                onClick={() => setDeferring(true)}
+                disabled={Boolean(deferLockedReason)}
+              >
+                Zurückstellen
+              </TextButton>
+              {deferLockedReason ? (
+                <span className="v2clc__exitwhy">{deferLockedReason}</span>
+              ) : null}
+            </p>
+          ) : null}
         </div>
+      ) : null}
+
+      {onDefer ? (
+        <ReasonDialog
+          open={deferring}
+          onClose={() => setDeferring(false)}
+          onConfirm={(reason) => {
+            setDeferring(false);
+            const day = clampDeferralDay(until);
+            setUntil(day);
+            void onDefer(day, reason);
+          }}
+          title="Zurückstellen"
+          kicker="Die Frage kommt am Wiedervorlagetag zurück"
+          label="Warum jetzt nicht?"
+          placeholder="z. B. wartet auf den Jahresabschluss des Mandanten"
+          confirmLabel="Zurückstellen"
+          required
+          chips={["wartet auf Unterlagen", "erst nach dem Monatslauf", "Rückfrage beim Mandanten läuft"]}
+          pending={pending}
+        >
+          {/* The date sits **above** the reason, in the slot `ReasonDialog`
+              keeps for „what is this reason for". No second dialog: this one
+              already carries the mandatory reason and its lock. */}
+          <Field label="Wiedervorlage am" htmlFor="defer-until">
+            <DateField
+              id="defer-until"
+              value={until}
+              onChange={setUntil}
+              min={defaultDeferralDay()}
+              max={maxDeferralDay()}
+            />
+          </Field>
+          <p className="v2clc__deferhint">
+            Höchstens {DEFERRAL_MAX_DAYS} Tage voraus — ein Monatslauf.
+          </p>
+        </ReasonDialog>
       ) : null}
 
       {onResolve ? (
