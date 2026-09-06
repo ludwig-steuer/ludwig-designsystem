@@ -227,3 +227,40 @@ die Nummer (Story `Split`).
 `BankTransactionRow` rahmt dieselben Zellen für kurze Listen. `columns`
 **wählt aus**, ordnet nie um — die Reihenfolge der Punkte ist über alle Formen
 dieser Familie dieselbe.
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1 — Kopf und Zellen liefen auseinander, die Zeile lief über.** Der Zweck
+hatte `width: "1fr"`, und `1fr` ist `minmax(auto, 1fr)`: `auto` ist die
+**min-content**-Breite des Inhalts. Kopf und jede Zeile sind eigene Grids mit
+eigenem Inhalt, also maß jedes seine Spur selbst. Gemessen stand die
+Betragsspalte über sechs Zeilen an **drei verschiedenen x-Positionen**, und
+die Zeilen ragten 111 px über den Kopf hinaus; bei 1100 px waren es 260 px
+Versatz und 425 px Überlauf. Ausgerechnet die Spalte, über die man Beträge
+vergleicht, war eine Flatterkante.
+
+`minmax(0, 1fr)` behebt es: die Spur darf auf null schrumpfen, und das Maß ist
+überall dasselbe. Gemessen danach — Kopf und alle Zeilen enden bei 1397 px,
+`scrollWidth − clientWidth` = 0 in allen vier Stories.
+
+**M2 — Kopf und Zellen hatten keine gemeinsame Quelle für die Spurliste.**
+`bankTransactionTracks(columns)` steht jetzt neben `bankTransactionColumns()`
+und wird exportiert, weil den Rahmen der Aufrufer baut. Die `Columns`-Story
+schrieb ihre Liste von Hand — jetzt leitet auch sie ab.
+
+**M3 — die Zeile reichte die Teilbeträge an `CaseCell` durch.** Damit stand
+jede zugeordnete Zeile auf drei Zeilen (94 px gegen 47 px), und in `Expanded`
+stand derselbe Teilbetrag zweimal — einmal in der Zelle, einmal in der
+Unterzeile, wofür `expanded` da ist. Die Zeile reicht sie nicht mehr durch.
+Gemessen bleibt eine Spanne von 47 bis 91 px: eine zugeordnete Zeile trägt
+Fallname und Nummer, eine Z3-Zeile zusätzlich die Rest-Marke. Das ist Inhalt,
+nicht Willkür — und 65 % der Zeilen sind der einzeilige Fall.
+
+**M4 — totes Layout-Attribut.** `gridColumn: span n` auf der Unterzeilen-Fläche
+hatte keine Wirkung (`.v2tbl` ist ein Block, die Zeilen sind die Grids); die
+volle Breite kommt aus dem Blockfluss. Attribut und `span`-Parameter sind weg.
+
+**M5 — `Columns` bewies sein Kriterium nicht.** Die Story übergab die Auswahl
+schon in der Reihenfolge der Familie. Jetzt übergibt sie **verdreht**, und die
+Zeile steht trotzdem richtig — das ist der Beweis, dass `columns` auswählt und
+nicht ordnet.

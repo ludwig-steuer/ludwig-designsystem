@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BankTransactionRow } from "./BankTransactionRow";
-import { bankTransactionColumns } from "./bank-transaction-columns";
+import { bankTransactionColumns, bankTransactionTracks } from "./bank-transaction-columns";
 import type { BankTransactionRowData, CaseAssignment } from "./bank-transaction";
 import { Card, CardHead, HeadRow, Table } from "../../primitives/Table";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
@@ -49,7 +49,7 @@ const BASE: BankTransactionRowData = {
  * schiebt sich der Kopf gegen die Zeile, sobald eine Breite sich ändert.
  */
 const DEF = bankTransactionColumns({ caseHref: () => "#" });
-const COLS = DEF.map((c) => c.width ?? "1fr").join(" ");
+const COLS = bankTransactionTracks(DEF);
 
 function Frame({ children, sub }: { children: React.ReactNode; sub?: string }) {
   return (
@@ -153,7 +153,14 @@ export const Columns: Story = {
     <div style={{ maxWidth: 1000 }}>
       <Card>
         <CardHead title="Worklist" sub="Alle Konten · nicht zugeordnet" />
-        <Table cols="100px 180px 1fr 150px 160px 130px">
+        <Table
+          cols={bankTransactionTracks(
+            bankTransactionColumns({
+              caseHref: () => "#",
+              columns: ["postingDate", "counterparty", "purpose", "account", "matchStage", "amount"],
+            }),
+          )}
+        >
           <HeadRow>
             <span>Datum</span>
             <span>Gegenpartei</span>
@@ -168,7 +175,9 @@ export const Columns: Story = {
             transaction={{ ...BASE, cases: [], allocatedSum: 0, matchStage: "beyond_bookings" }}
             caseHref={caseHref}
             accountLabel="Commerzbank · 1210"
-            columns={["postingDate", "counterparty", "purpose", "account", "matchStage", "amount"]}
+            // **Verdreht übergeben**: `columns` wählt aus, es ordnet nicht —
+            // die Zeile steht trotzdem in der Reihenfolge der Familie.
+            columns={["amount", "matchStage", "account", "purpose", "counterparty", "postingDate"]}
           />
           <BankTransactionRow
             transaction={{
@@ -183,7 +192,9 @@ export const Columns: Story = {
             }}
             caseHref={caseHref}
             accountLabel="Qonto · 4021"
-            columns={["postingDate", "counterparty", "purpose", "account", "matchStage", "amount"]}
+            // **Verdreht übergeben**: `columns` wählt aus, es ordnet nicht —
+            // die Zeile steht trotzdem in der Reihenfolge der Familie.
+            columns={["amount", "matchStage", "account", "purpose", "counterparty", "postingDate"]}
           />
         </Table>
       </Card>

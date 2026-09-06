@@ -3083,6 +3083,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 /* --- Fakten einer Kontoauszugsposition (0102) ----------------------------- */
 .v2btxf { display: grid; gap: var(--space-5); }
+/* Ein Satz ist Text, kein Wert: linksbündig, obwohl die Feldliste ihre Werte
+   rechts setzt (V3 — Text links, Zahlen rechts). */
+.v2btxf__note { text-align: left; font-weight: 400; }
 /* Der Zweck ist ein langer Wert ohne Label — er nimmt den Rahmen der
    Feldliste, aber nicht deren Zeile: rechtsbündiger Fließtext ist unlesbar. */
 .v2btxf__purpose { padding: var(--space-3) var(--space-4) var(--space-1); }

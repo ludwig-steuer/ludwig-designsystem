@@ -382,6 +382,7 @@ export type {
 } from "./entities/document-number/document-number-labels";
 export {
   bankTransactionColumns,
+  bankTransactionTracks,
   type BankTransactionColumn,
   type BankTransactionColumnOptions,
 } from "./entities/bank-transaction/bank-transaction-columns";

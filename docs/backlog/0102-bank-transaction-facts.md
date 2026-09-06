@@ -175,3 +175,34 @@ Abgenommen von / am: … · Offene Punkte: …
 **Urteil: freigeben mit Änderung.** Entscheide: 1 Rohdaten als letzter Block, zugeklappt · 2 fünf Blöcke · 3 Buchungs-Zustand je Fall (Familienregel).
 
 Vor dem Bau in die Spec: (a) ~~Zuordnungs-Block: `match_stage` als Rohwert der Spalte, mono, unübersetzt, ohne Ton, bis L-57~~ — **überholt am 2026-09-06:** die Achse `bank_match_stage` steht im Register (`cc141f7b`), also `StatusBadge axis="bank_match_stage"` mit Wort und Ton wie überall. Der Befund B2/L-57 dieser Spec ist erledigt; (b) Typ-Satz aus 0100, mit dem Ereignis-Zustand je Fall, den `CaseLink` (0095) nicht trägt; (c) Story-Formel zählt `RawPayload` mit (Kosmetik).
+
+## Die Mängel der Abnahme vom 2026-09-06 — behoben
+
+**M1 — der Zuordnungs-Block drehte seine Reihenfolge um, sobald kein Fall da
+war.** Der leere Zweig setzte Rang 6 vor Rang 5, der gefüllte richtig herum —
+und den leeren sehen 65 % der Positionen. Jetzt steht „DATEV-Historie" in
+beiden Zweigen zuerst.
+
+**M2 — der Satz bei null Fällen stand rechtsbündig.** Die Feldliste setzt ihre
+Werte flush rechts; ein Satz ist aber Text (V3). Genau diese Falle war für den
+Zweck-Block erkannt und umgangen worden, für den einzigen echten Satz der
+Komponente nicht. Jetzt `.v2btxf__note` mit `text-align: left`, gemessen.
+
+**M3/M4 — die Rohdaten standen aufgeklappt und in der Wertspalte.** Der
+Freigabe-Entscheid sagt „zugeklappt"; gemessen waren alle sieben Schlüssel
+sofort sichtbar. Und die Tabelle saß als **Wert** einer Feldzeile: sie begann
+erst bei 257 px, war 435 px breit und erbte die Rechtsbündigkeit — das
+Gegenteil dessen, wofür 0051 gebaut wurde. Jetzt ein eigener Abschnitt unter
+dem Import-Block, in einer `Disclosure` („Rohdaten der Quelle"), zugeklappt;
+gemessen steht `buchungstag` nicht mehr im Text.
+
+**M5 — `Split` zeigte den Rest nicht, den seine Beschreibung ankündigt.**
+2.480,55 € minus 1.200 minus 800 minus 180 sind 300,55 €, und die standen
+nirgends — die Zeile (0101) zeigt sie, die Fakten nicht. Jetzt eine Zeile
+„Nicht zugeordnet" mit `restOf()` aus demselben Spiegel wie die Zeile, damit
+beide Formen dieselbe Zahl sagen. Gemessen: 300,55 €.
+
+**M6 — `InUse` bewies sein Kriterium nicht.** Gegenpartei stand dreimal, der
+Betrag zweimal. Der Kopf trägt jetzt nur noch Identität und Datum, und die
+Story lässt den Gegenpartei-Block weg — der Name steht im Kopf, und IBAN und
+BIC ohne ihn wären eine Feldliste ohne Betreff. Gemessen: Gegenpartei einmal.

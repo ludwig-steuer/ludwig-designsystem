@@ -58,7 +58,7 @@ export function BankTransactionRow({
           </span>
         ))}
       </Row>
-      {expanded ? <SplitRows transaction={transaction} span={cols.length} /> : null}
+      {expanded ? <SplitRows transaction={transaction} /> : null}
     </>
   );
 }
@@ -71,15 +71,12 @@ export function BankTransactionRow({
  * and answering it by mental arithmetic across three rows is exactly what a
  * table is supposed to spare.
  */
-function SplitRows({
-  transaction,
-  span,
-}: {
-  transaction: BankTransactionRowData;
-  span: number;
-}) {
+function SplitRows({ transaction }: { transaction: BankTransactionRowData }) {
   return (
-    <div className="v2btxrow__split" style={{ gridColumn: `span ${span}` }}>
+    // No `gridColumn: span n` here: `.v2tbl` is a block, the rows are the
+    // grids. The full width comes from the block flow, and the declaration
+    // measured as having no effect at all.
+    <div className="v2btxrow__split">
       {transaction.cases.map((c) => (
         <div className="v2btxrow__splitrow" key={c.caseId}>
           <span>{c.caseNumber ?? c.caseId.slice(0, 8)}</span>

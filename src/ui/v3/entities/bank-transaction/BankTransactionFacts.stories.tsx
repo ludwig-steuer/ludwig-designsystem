@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BankTransactionFacts } from "./BankTransactionFacts";
 import type { BankTransactionDetailData, CaseAssignment } from "./bank-transaction";
-import { Amount } from "../../primitives/Amount";
 import { Card, CardHead } from "../../primitives/Table";
 import { EntityHeader } from "../../patterns/EntityHeader";
 
@@ -178,8 +177,10 @@ export const Split: Story = {
 };
 
 /**
- * Im Einsatz: unter einem Kopf mit Gegenpartei und Betrag. **Nichts steht
- * zweimal** — der Kopf trägt Ränge 2 und 3, die Fakten setzen den Rest.
+ * Im Einsatz: unter einem Kopf. **Nichts steht zweimal** — der Kopf trägt die
+ * Identität (Gegenpartei, Datum), die Fakten den Rest. Der Betrag steht
+ * bewusst **nicht** im Kopf: `blocks` schneidet ganze Blöcke, und der Block
+ * „Zahlung" beginnt mit ihm.
  */
 export const InUse: Story = {
   render: () => (
@@ -187,12 +188,20 @@ export const InUse: Story = {
       <EntityHeader
         overline="Kontoauszugsposition · Commerzbank · 1210"
         title="Bürobedarf Meier GmbH"
-        metric={{ label: "Betrag", value: <Amount value={-1249.9} currency="EUR" /> }}
+        meta="gebucht am 26.08.2026"
       />
       <Card>
         <CardHead title="Alles zu dieser Zahlung" />
         <div style={{ padding: "var(--space-5)" }}>
-          <BankTransactionFacts transaction={FULL} caseHref={caseHref} tone="bare" />
+          <BankTransactionFacts
+            transaction={FULL}
+            caseHref={caseHref}
+            tone="bare"
+            // Ohne den Gegenpartei-Block: der Name steht schon im Kopf, und
+            // IBAN und BIC gehören zu ihm — sie ohne ihn zu zeigen wäre eine
+            // Feldliste ohne Betreff.
+            blocks={["payment", "purpose", "assignment", "import"]}
+          />
         </div>
       </Card>
     </div>

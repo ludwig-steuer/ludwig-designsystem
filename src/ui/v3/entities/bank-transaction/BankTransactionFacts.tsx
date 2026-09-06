@@ -1,8 +1,9 @@
-import { resolveEventBookingState } from "./derive";
+import { resolveEventBookingState, restOf } from "./derive";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Amount } from "../../primitives/Amount";
 import { FieldList } from "../../primitives/FieldList";
 import { MonoCell } from "../../primitives/Cells";
+import { Disclosure } from "../../primitives/Disclosure";
 import { RawRecord } from "../../primitives/RawRecord";
 import { Time } from "../../primitives/Time";
 import { CaseCell } from "../accounting-case/CaseCell";
@@ -140,15 +141,20 @@ export function BankTransactionFacts({
                   React.ReactNode,
                 ]]
               : []),
-            [
-              "Rohdaten",
-              // As `RawRecord`, not as field rows: the column comment calls
-              // them „for audit and debugging", and that is a different kind
-              // of reading than a fact.
-              <RawRecord key="r" record={t.rawPayload} />,
-            ],
           ]}
         />
+      ) : null}
+
+      {picked.has("import") ? (
+        // **Not a field row.** A field list puts its value flush right and in
+        // the right-hand column: measured, the raw table started at 257 px and
+        // its mono keys stood right-aligned in 435 px — the opposite of what
+        // 0051 was built for. And it is collapsed, because the column comment
+        // calls the payload „for audit and debugging": that is a question one
+        // asks, not one that has to be answered unasked.
+        <Disclosure summary="Rohdaten der Quelle" tone="quiet">
+          <RawRecord record={t.rawPayload} />
+        </Disclosure>
       ) : null}
     </div>
   );
@@ -183,8 +189,16 @@ function Assignment({
         title="Zuordnung"
         tone={tone}
         rows={[
-          ["Sachverhalt", "Diese Zahlung ist noch keinem Sachverhalt zugeordnet."],
+          // Rank 5 before rank 6 — the same order as in the filled branch. The
+          // empty case is the one 65 % of the lines show; it must not turn the
+          // block around.
           ["DATEV-Historie", <MatchStage key="m" stage={t.matchStage} />],
+          [
+            "Sachverhalt",
+            <span key="n" className="v2btxf__note">
+              Diese Zahlung ist noch keinem Sachverhalt zugeordnet.
+            </span>,
+          ],
         ]}
       />
     );
@@ -212,6 +226,14 @@ function Assignment({
             <StatusBadge key={c.caseId} axis="ereignis" status={state.value} />,
           ] as [React.ReactNode, React.ReactNode];
         }),
+        // The rest, from the same source as the row: both forms have to say
+        // the same number, and „adds up?" is the question a split raises.
+        ...(restOf(t) > 0.005
+          ? [[
+              "Nicht zugeordnet",
+              <Amount key="r" value={restOf(t)} currency={t.currency} />,
+            ] as [React.ReactNode, React.ReactNode]]
+          : []),
         ...(t.openClarificationsCount > 0
           ? [[
               "Offene Klärungen",

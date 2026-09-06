@@ -73,6 +73,20 @@ export interface BankTransactionColumnOptions {
 }
 
 /**
+ * The grid track list for a column set — head and rows read the same string.
+ *
+ * It exists because the caller builds the frame (`Table cols={…}`), and a
+ * second, hand-written list is a measure that drifts: the head shrinks while
+ * the rows do not, and nobody notices until a column stands in two places.
+ *
+ * @when    A `Table` is framed around `bankTransactionColumns()`.
+ * @instead `DataTable` does it itself.
+ */
+export function bankTransactionTracks(columns: ColumnDef<BankTransactionRowData>[]): string {
+  return columns.map((c) => c.width ?? "minmax(0, 1fr)").join(" ");
+}
+
+/**
  * @when    A statement or a worklist is built with `DataTable` — sortable,
  *          selectable, paged.
  * @instead A short list of a handful of rows → BankTransactionRow. One
@@ -106,9 +120,14 @@ export function bankTransactionColumns({
     purpose: {
       key: "purpose",
       header: "Verwendungszweck",
-      // The only unset track: the purpose carries the width, everything else
-      // has a fixed measure.
-      width: "1fr",
+      // The only unset track — and `minmax(0, 1fr)`, not `1fr`: a bare `1fr`
+      // is `minmax(auto, 1fr)`, and `auto` is the **min-content** width of
+      // the cell. Head and every row are separate grids with different
+      // content, so each would size the track itself: measured, the amount
+      // column stood at three different x positions across six rows, and the
+      // rows ran 111 px past the head. `minmax(0, …)` lets the track shrink
+      // to zero and makes the measure the same everywhere.
+      width: "minmax(0, 1fr)",
       cell: (t) => <BankTransactionPurpose purpose={t.purpose} tags={t.sepaTags} />,
     },
     account: {
@@ -190,7 +209,15 @@ function CasesCell({
   const z = deriveZ(transaction);
   return (
     <span className="v2btxrow__cases">
-      <CaseCell cases={transaction.cases} href={caseHref} emptyHref={openHref} showState={false} />
+      {/* **Without the part amounts.** They are what `expanded` is for; in
+          the cell they push every assigned row from 47 to 94 px, and with a
+          p90 of 251 rows that halves the field of view. */}
+      <CaseCell
+        cases={transaction.cases.map(({ amount: _amount, ...c }) => c)}
+        href={caseHref}
+        emptyHref={openHref}
+        showState={false}
+      />
       {/* Only Z3 gets the mark: with Z1 and Z2 the rest is zero, and „Rest
           0,00 €" says nothing (decision 3 of the Freigabe). */}
       {z === "Z3" ? (
