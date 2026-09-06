@@ -2,6 +2,28 @@ import { z } from "zod";
 
 // Fachliche Lifecycle-Achse am client_accounting_case. Werte nach
 // Refactor 2026-05-27 — siehe GLOSSARY.md → „Accounting case".
+/**
+ * `client_accounting_event.kind` — was an einem Sachverhalt passiert ist.
+ * NOT NULL, DB-CHECK `client_accounting_event_kind_check`
+ * (`20260819140000_event_mirror_source_and_opos_kind.sql`).
+ *
+ * Bis 2026-09-06 gab es diesen Wertebereich nur im CHECK. Das Icon-`switch`
+ * der Sachverhaltsansicht führte statt dessen seine eigene Liste — mit zwei
+ * Arten, die es nie gab (`contract_received`, `recurring`), und ohne zwei,
+ * die es gibt (`internal_transfer`, `open_item_carryover`); die fielen still
+ * auf das Standard-Icon (L-02).
+ */
+export const EVENT_KINDS = [
+  "document_received",
+  "payment_in",
+  "payment_out",
+  "internal_transfer",
+  "adjustment",
+  "accrual",
+  "open_item_carryover",
+] as const;
+export type EventKind = (typeof EVENT_KINDS)[number];
+
 export const CASE_LIFECYCLE = [
   "open",
   "needs_clarification",
@@ -360,4 +382,28 @@ export function caseFilterForListTab(
   }
   if (tab === "klaerung") filter.lifecycleStatus = ["needs_clarification"];
   return filter;
+}
+
+/**
+ * Anzeigetitel eines Sachverhalts.
+ *
+ * Bis 2026-09-06 hatte jede Oberfläche ihren eigenen Rückfall, und die
+ * fielen unterschiedlich gut aus (L-52): die Sachverhaltsansicht zeigte
+ * schlicht „Sachverhalt", die Partner-Liste die Zusammenfassung, das Portal
+ * als einzige etwas Brauchbares — Art plus Gegenpart.
+ *
+ * Die Reihenfolge hier ist die des Portals, weil sie am meisten sagt: ein
+ * eigener Titel, sonst „Art: Gegenpart", sonst die Art allein. „Sachverhalt"
+ * als Titel ist keine Auskunft; „Eingangsrechnung: Telekom" schon.
+ */
+export function caseDisplayTitle(input: {
+  title: string | null | undefined;
+  kind: string | null | undefined;
+  counterpartyName?: string | null;
+}): string {
+  const titel = input.title?.trim();
+  if (titel) return titel;
+  const art = input.kind ? (CASE_KIND_LABEL[input.kind as CaseKind] ?? input.kind) : "Sachverhalt";
+  const gegenpart = input.counterpartyName?.trim();
+  return gegenpart ? `${art}: ${gegenpart}` : art;
 }

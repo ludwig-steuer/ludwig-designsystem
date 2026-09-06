@@ -1,6 +1,18 @@
 import Decimal from "decimal.js";
 
-export type Currency = "EUR" | "USD" | "CHF" | "GBP";
+export const CURRENCIES = ["EUR", "USD", "CHF", "GBP"] as const;
+export type Currency = (typeof CURRENCIES)[number];
+
+/**
+ * Roher DB-Wert → `Currency`, mit EUR als Rückfall.
+ *
+ * Die Spalte ist `text` ohne CHECK; ein unbekannter Code darf die Anzeige
+ * nicht zerlegen. EUR ist die richtige Annahme — jeder Mandant bucht in Euro,
+ * Fremdwährung ist die Ausnahme und steht zusätzlich am Beleg.
+ */
+export function asCurrency(value: string | null | undefined): Currency {
+  return (CURRENCIES as readonly string[]).includes(value ?? "") ? (value as Currency) : "EUR";
+}
 
 export interface Money {
   amount: Decimal;

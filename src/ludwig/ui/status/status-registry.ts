@@ -63,6 +63,7 @@ export type StatusAxis =
   | "dispatch"
   // — Sachverhalt —
   | "sachverhalt"
+  | "ereignis_art"
   | "belegnummern_modus"
   | "ereignis"
   | "disposition"
@@ -114,6 +115,7 @@ export type StatusAxis =
   | "datev_verknuepfung"
   | "plausibilitaet"
   | "belegnummer_quelle"
+  | "bank_match_stage"
   | "mirror_match"
   | "abgleich_lauf"
   | "stapel_commit"
@@ -874,6 +876,32 @@ const TRIAGE: Record<string, StatusDescriptor> = {
   kurz_ansehen: { label: "Kurz ansehen", kind: "info", description: "Vom Judge angepasst oder mit gelber Ampel — ein Blick genügt meist." },
   durchwinker: { label: "Durchwinker", kind: "success", description: "Bestätigt und unauffällig — kann ohne Detailprüfung freigegeben werden." },
   uebernehmen: { label: "Übernehmen", kind: "info", description: "Vom Mandanten selbst gebucht (Stapel-Import) — nicht vom Agenten vorgeschlagen, kein Judge-Verdikt." },
+};
+
+/**
+ * `client_accounting_event.kind` — was an einem Sachverhalt passiert ist.
+ * NOT NULL, DB-CHECK `client_accounting_event_kind_check`; Wertebereich
+ * `EVENT_KINDS` (`modules/accounting-cases/domain/case.ts`).
+ *
+ * Keine Schwere und keine Reihenfolge: die Art sagt, **was** passiert ist,
+ * nicht wie gut oder wie weit. Deshalb tragen alle Werte `neutral` (V6). Die
+ * zeitliche Ordnung steckt im Datum, nicht in der Art.
+ *
+ * Fallstricke:
+ *  - `internal_transfer` ist eine Bewegung zwischen zwei eigenen Konten, kein
+ *    Zahlungsein- oder -ausgang — sie taucht auf beiden Kontoauszügen auf und
+ *    darf nur einmal gebucht werden.
+ *  - `open_item_carryover` ist kein Vorgang des Jahres, sondern ein
+ *    übernommener offener Posten aus DATEV. Er trägt kein eigenes Dokument.
+ */
+const EREIGNIS_ART: Record<string, StatusDescriptor> = {
+  document_received: { label: "Beleg eingegangen", kind: "neutral", description: "Ein Dokument ist dem Sachverhalt zugeordnet worden." },
+  payment_in: { label: "Zahlungseingang", kind: "neutral", description: "Geld ist auf einem Konto des Mandanten eingegangen." },
+  payment_out: { label: "Zahlungsausgang", kind: "neutral", description: "Geld hat ein Konto des Mandanten verlassen." },
+  internal_transfer: { label: "Umbuchung", kind: "neutral", description: "Bewegung zwischen zwei eigenen Konten — steht auf beiden Auszügen, wird einmal gebucht." },
+  adjustment: { label: "Korrektur", kind: "neutral", description: "Nachträgliche Richtigstellung am Sachverhalt." },
+  accrual: { label: "Abgrenzung", kind: "neutral", description: "Periodengerechte Zuordnung über den Zeitraum hinweg." },
+  open_item_carryover: { label: "Offener Posten (Vortrag)", kind: "neutral", description: "Aus DATEV übernommener offener Posten — kein Vorgang dieses Jahres, ohne eigenes Dokument." },
 };
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1797,6 +1825,41 @@ const READINESS: Record<string, StatusDescriptor> = {
 
 // ══════════════════════════════════════════════════════════════════════
 
+/**
+ * `client_bank_transactions.match_stage` — wie eine Auszugszeile gegen die
+ * DATEV-Buchungshistorie eingeordnet wurde (F63). NULL erlaubt (noch nicht
+ * gelaufen). DB-CHECK `client_bank_transactions_match_stage_check`, zwölf
+ * Werte; die Kaskade schreibt sie (`modules/bank-match/application/cascade.ts`).
+ *
+ * Acht Stufen heißen „in DATEV wiedergefunden", vier heißen „offen" — und
+ * die vier waren bis 2026-09-06 unsichtbar: die Oberfläche zeigte nur ein
+ * grünes Häkchen für die acht und schwieg über den Rest, obwohl allein
+ * `beyond_bookings` 328 von 1281 Zeilen trägt (L-57).
+ *
+ * Die acht Treffer-Stufen sind nach fallender Sicherheit geordnet: `beleg`
+ * ist ein Treffer über die Belegnummer, `residual` ein Rest, der nach Abzug
+ * aller anderen übrig blieb. Sie tragen trotzdem alle `success` — getroffen
+ * ist getroffen; wie schwierig es war, sagt das Label.
+ *
+ * Nicht zu verwechseln mit `mirror_match`: das ist
+ * `client_datev_mirror_entries.match_state` und beschreibt eine gespiegelte
+ * DATEV-Buchung, nicht eine Auszugszeile.
+ */
+const BANK_MATCH_STAGE: Record<string, StatusDescriptor> = {
+  beleg: { label: "über Belegnummer", kind: "success", description: "Die Belegnummer der Zeile steht so in der DATEV-Historie — der sicherste Treffer." },
+  exact: { label: "exakt", kind: "success", description: "Betrag, Datum und Gegenpart stimmen genau überein." },
+  pair: { label: "als Paar", kind: "success", description: "Zwei Zeilen bilden zusammen eine DATEV-Buchung, etwa Zahlung und Rücklastschrift." },
+  near: { label: "nah", kind: "success", description: "Übereinstimmung mit kleiner Abweichung in Betrag oder Datum." },
+  alias: { label: "über Namensvariante", kind: "success", description: "Der Gegenpart trägt in DATEV einen anderen Namen, der als Variante hinterlegt ist." },
+  split: { label: "aufgeteilt", kind: "success", description: "Eine Zeile deckt mehrere DATEV-Buchungen ab." },
+  residual: { label: "als Rest", kind: "success", description: "Blieb nach Abzug aller anderen Zuordnungen übrig — der schwächste der Treffer." },
+  manual: { label: "von Hand", kind: "success", description: "Ein Mensch hat die Verknüpfung gesetzt. Überlebt jeden Neulauf der Kaskade." },
+  unclear_multi: { label: "mehrdeutig", kind: "warning", description: "Mehrere DATEV-Buchungen kommen infrage — die Kaskade entscheidet nicht selbst." },
+  unclear_none: { label: "kein Kandidat", kind: "warning", description: "Keine DATEV-Buchung passt zu dieser Zeile." },
+  beyond_bookings: { label: "außerhalb des Bestands", kind: "info", description: "Die Zeile liegt außerhalb des Zeitraums, den die DATEV-Historie abdeckt — kein Befund, nur keine Vergleichsgrundlage." },
+  no_account: { label: "ohne Konto", kind: "warning", description: "Das Zahlungskonto der Zeile ist in den Stammdaten nicht zugeordnet." },
+};
+
 // ══════════════════════════════════════════════════════════════════════
 // DATEV-ABGLEICH
 // ══════════════════════════════════════════════════════════════════════
@@ -2031,6 +2094,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   upload: UPLOAD_PHASE,
   dispatch: DISPATCH_STATE,
   sachverhalt: SACHVERHALT_LIFECYCLE,
+  ereignis_art: EREIGNIS_ART,
   belegnummern_modus: BELEGNUMMERN_MODUS,
   ereignis: EREIGNIS_BUCHUNG,
   disposition: DISPOSITION,
@@ -2067,6 +2131,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   produktbefund_prio: PRODUKTBEFUND_PRIO,
   mandant_onboarding: MANDANT_ONBOARDING,
   mandant_onboarding_verdict: MANDANT_ONBOARDING_VERDICT,
+  bank_match_stage: BANK_MATCH_STAGE,
   mirror_match: MIRROR_MATCH,
   abgleich_lauf: ABGLEICH_LAUF,
   stapel_commit: STAPEL_COMMIT,
@@ -2256,6 +2321,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   upload: "Upload",
   dispatch: "Stapellauf",
   sachverhalt: "Sachverhalt",
+  ereignis_art: "Ereignisart",
   belegnummern_modus: "Belegnummern-Modus",
   ereignis: "Buchung (Ereignis)",
   disposition: "Zuständig",
@@ -2291,6 +2357,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   produktbefund_prio: "Dringlichkeit",
   mandant_onboarding: "Onboarding",
   mandant_onboarding_verdict: "Onboarding-Urteil",
+  bank_match_stage: "DATEV-Historie",
   mirror_match: "DATEV-Abgleich",
   abgleich_lauf: "Abgleich-Lauf",
   zyklus_stapel: "Buchungszyklus",
@@ -2334,6 +2401,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   upload: "ephemer — React-State im Browser, keine DB-Spalte",
   dispatch: "ephemer — React-State im Verarbeitungs-Panel",
   sachverhalt: "client_accounting_case.lifecycle_status",
+  ereignis_art: "client_accounting_event.kind",
   belegnummern_modus: "client_accounting_case.document_number_mode",
   ereignis: "abgeleitet aus den Buchungen am Ereignis (keine Spalte)",
   disposition: "client_accounting_case.disposition",
@@ -2369,6 +2437,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   produktbefund_prio: "platform_product_feedback.priority (NULL = ungesichtet)",
   mandant_onboarding: "platform_clients.onboarding_state",
   mandant_onboarding_verdict: "abgeleitet — get-onboarding-status-core.ts (keine Spalte)",
+  bank_match_stage: "client_bank_transactions.match_stage (NULL = Kaskade nicht gelaufen)",
   mirror_match: "client_datev_mirror_entries.match_state (NULL = nicht abgeglichen)",
   abgleich_lauf: "ops_datev_sync_runs.status + client_fiscal_years.datev_resync_requested_at",
   zyklus_stapel: "client_datev_export_batches.state",
