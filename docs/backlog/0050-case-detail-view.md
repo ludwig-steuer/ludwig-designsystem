@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | nein — die Reihenfolge Kopf → nächste Aktion → Strang → Detail ist die Sachverhaltslogik, keine allgemeine Form |
@@ -10,7 +10,6 @@
 | Ersetzt | `SachverhaltScreen.tsx` (1815 Z.) + `parts.tsx` (522 Z.) in `modules/accounting-cases/ui/sachverhalt/` — das Gerüst, nicht die Datenbeschaffung |
 | Blockiert | die Ablösung der Sachverhaltsansicht in `ludwig/app` |
 | Voraussetzung | 0047 `RecordPager` ✓ · 0048 `EntityHeader` ✓ · 0049 ✓ · Entitätsprofil `docs/entitaeten/accounting-case.md` ✓ (**geprüft** 2026-09-05, zweiter Agent) · `CaseFacts` (0097) — die Fakten, die `header` und `CaseDrawer` teilen |
-| Blocker | **keiner mehr.** Der Owner-Entscheid vom 2026-09-03 („erst das Entitätsprofil, dann bauen") ist eingelöst: das Profil liegt seit 2026-09-05 vor, ist von einem zweiten Agenten geprüft und führt `CaseDetailView` im Zuschnitt mit Marke **jetzt**. Der Prüflauf hat den Zuschnitt an zwei Stellen geändert — der Gegenpart steht ab Form S statt erst ab M, und der Reiter „Zum Schließen" ist eine eigene Liste — beides betrifft `CaseRow` und `CaseCard`, nicht die Slots dieser View. Die drei Entscheidungen vom 2026-09-03 gelten unverändert. **Die Freigabe zum Bauen liegt beim Owner**, nicht an einer Voraussetzung |
 | Spec von / am | Claude, 2026-09-03 (Entscheidungen getroffen, nicht gebaut) |
 
 ## Ziel
@@ -156,3 +155,36 @@ erfüllt, **die Freigabe zum Bauen liegt beim Owner** — Schritt 2 des Ablaufs 
 **Urteil: freigeben mit Änderung.** Die drei Entscheidungen vom 2026-09-03 sind mit dem geprüften Profil verträglich. Entscheid zur offenen Stelle: **`CaseFacts` sitzt im `children` des ersten Reiters**; die Ränge 5–10 komponiert der Aufrufer in `EntityHeader meta`/`facts`; `disposition` („bin ich dran", Seitenprofil Rang 2) als Wort in `meta`, die Achse `sachverhalt` führt.
 
 Vor dem Bau in die Spec: (a) Profil `docs/entitaeten/accounting-case.md` in „Quelle" nachtragen; (b) Kopfzeile „Blocker" streichen; (c) den Entscheid oben als Satz in Schnittstelle/Verhalten; (d) Abschnitt „Ausbau" (A12): `CaseEditor` 0083 per `InlineEdit` im Kopf.
+
+## Vor dem Bau eingearbeitet und gebaut (2026-09-06)
+
+**(a) Das Profil steht in „Quelle"** — `docs/entitaeten/accounting-case.md`
+(geprüft 2026-09-05) neben dem Seitenprofil.
+
+**(b) Die Kopfzeile „Blocker" ist gestrichen** — sie nannte 0040 und 0048,
+und beide sind gebaut.
+
+**(c) Der Entscheid steht in der Schnittstelle:** `CaseFacts` sitzt im
+`children` des ersten Reiters, nicht in einem eigenen Slot. Die Ränge 5–10
+komponiert der Aufrufer in `EntityHeader` — `meta` trägt „wer dran ist", die
+Achse `sachverhalt` führt den Zustand.
+
+Das ist der Punkt der ganzen View: sie hält **keine Daten**. Fünf Slots, eine
+feste Reihenfolge, sonst nichts. Wer ihr eine Datenprop gäbe, machte aus dem
+Rahmen eine zweite Seite.
+
+**(d) Der Ausbau nennt `CaseEditor` (0083)** per `InlineEdit` im Kopf.
+
+### Gemessen
+
+| Story | Slots in dieser Reihenfolge | Spalten |
+|---|---|---|
+| `Filled` | Pager · Kopf · nächste Handlung · Reiter · `MasterDetail` | zwei |
+| `SingleEvent` | Pager · Kopf · Reiter · Inhalt | eine |
+| `Waiting` | Pager · Kopf · Reiter · `MasterDetail` — **kein** Kasten für die fehlende Handlung | zwei |
+| `WithoutTabs` | Kopf · Inhalt | eine |
+
+**Kein eigener Scroll-Container**: in allen vier Stories gemessen **null**
+Elemente mit `overflow-y: auto|scroll` innerhalb der View. Die Ränge 1–4
+stehen damit ohne Scrollen da, so wie die Spec es verlangt — eine View, die
+ihren Kopf wegscrollen lässt, nimmt die Antwort weg, für die sie gebaut ist.
