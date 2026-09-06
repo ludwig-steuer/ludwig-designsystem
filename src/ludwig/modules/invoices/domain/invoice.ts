@@ -498,3 +498,42 @@ export interface InvoiceTraceEntry {
   /** Verbosity/Severity. Bestands-Zeilen ohne Wert lesen als `"info"`. */
   level: InvoiceTraceLevel;
 }
+
+/**
+ * Trace-Zeile → kanonische Protokollzeile des Design-Systems.
+ *
+ * `stepKind` wird zum **Code** (stabiler Filterschlüssel), `module` zur
+ * **Quelle**, `summary` zur Meldung. Die Konfidenz landet in der Zusatzzelle,
+ * weil sie nur an manchen Schritten hängt und keine eigene Spalte verdient.
+ *
+ * Die Tiefe (Z6) leitet sich aus dem Level ab: was der Prüfer lesen soll, ist
+ * `info` und darüber (Tiefe 2); `verbose` und `debug` sind Technik (Tiefe 3).
+ * Damit sortiert der `LogBrowser` dieselben Zeilen, die vorher ein eigener
+ * Schalter ein- und ausblendete (L-33).
+ */
+export function invoiceTraceToLogEntry(t: InvoiceTraceEntry): {
+  id: string;
+  at: string;
+  message: string;
+  level: InvoiceTraceLevel;
+  source: string;
+  code: string;
+  depth: 1 | 2 | 3;
+  detail?: string;
+  payload?: unknown;
+  actor?: { kind: string; label?: string };
+} {
+  return {
+    id: t.id,
+    at: t.loggedAt,
+    message: t.summary,
+    level: t.level,
+    source: t.module,
+    code: t.stepKind,
+    depth: t.level === "verbose" || t.level === "debug" ? 3 : 2,
+    detail: t.comment ?? undefined,
+    payload: t.payload ?? undefined,
+    // `module='review'` heißt: ein Mensch hat gehandelt.
+    actor: t.actor ? { kind: t.module === "review" ? "user" : "system", label: t.actor } : undefined,
+  };
+}

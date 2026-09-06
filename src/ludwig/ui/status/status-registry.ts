@@ -54,6 +54,7 @@ export type StatusAxis =
   | "beleg"
   | "beleg_stage"
   | "beleg_erledigung"
+  | "beleg_haenger"
   | "beleg_inbox"
   | "beleg_kategorie"
   | "dokumentgruppe"
@@ -580,6 +581,25 @@ const BELEG_ERLEDIGUNG: Record<string, StatusDescriptor> = {
     description:
       "Der Beleg wird nicht gebucht — Auswertung, Doppel oder ein Dokument ohne Geldfluss. Er ist damit fertig, nicht übersprungen.",
   },
+};
+
+/**
+ * Warum ein Beleg in der Hänger-Liste steht — **berechnet, ephemer** aus
+ * zwei Angaben: ob es eine Invoice-Zeile gibt (`hasInvoiceRow`) und ob die
+ * Liste die noch laufenden oder die steckengebliebenen zeigt.
+ *
+ * Die Achse trägt beide Sichten, weil es dieselbe Frage ist: wie weit ist der
+ * Beleg gekommen. Der Unterschied ist nur, ob man ihn noch erwartet.
+ *
+ * Fallstrick: `datum_fehlt` heißt, die Extraktion lief — sie hat nur kein
+ * Belegdatum gefunden. Das ist ein fachlicher Mangel, kein technischer
+ * Abbruch, und deshalb `warning` und nicht `danger`.
+ */
+const BELEG_HAENGER: Record<string, StatusDescriptor> = {
+  wird_klassifiziert: { label: "wird klassifiziert", kind: "info", description: "Der Beleg wird gerade klassifiziert — es gibt noch keine Invoice-Zeile." },
+  wird_extrahiert: { label: "wird extrahiert", kind: "info", description: "Die Grunddaten werden gerade extrahiert." },
+  nicht_extrahiert: { label: "nicht extrahiert", kind: "danger", description: "Keine Extraktion vorhanden — es gibt keine Invoice-Zeile." },
+  datum_fehlt: { label: "Datum fehlt", kind: "warning", description: "Extrahiert, aber ohne Belegdatum. Fachlicher Mangel, kein technischer Abbruch." },
 };
 
 // ══════════════════════════════════════════════════════════════════════
@@ -2086,6 +2106,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   beleg: BELEG_PROCESSING,
   beleg_stage: BELEG_STAGE,
   beleg_erledigung: BELEG_ERLEDIGUNG,
+  beleg_haenger: BELEG_HAENGER,
   beleg_inbox: BELEG_INBOX,
   beleg_kategorie: BELEG_KATEGORIE,
   dokumentgruppe: DOKUMENTGRUPPE,
@@ -2313,6 +2334,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   beleg: "Beleg",
   beleg_stage: "Verarbeitungsstufe",
   beleg_erledigung: "Erledigung",
+  beleg_haenger: "Beleg-Zustand",
   beleg_inbox: "Dokument",
   beleg_kategorie: "Belegkategorie",
   dokumentgruppe: "Art der Dokumentgruppe",
@@ -2393,6 +2415,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   beleg: "client_source_docs_invoices.processing_status",
   beleg_stage: "client_source_docs_invoices.processing_stage",
   beleg_erledigung: "client_source_docs.completed_via (+ completed_at)",
+  beleg_haenger: "berechnet — hasInvoiceRow + Listen-Variante (ephemer)",
   beleg_inbox: "client_source_docs.status",
   beleg_kategorie: "client_source_docs.doc_category",
   dokumentgruppe: "client_source_docs.collection_kind",

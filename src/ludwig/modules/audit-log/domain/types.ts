@@ -87,3 +87,57 @@ export interface AuditEventFilter {
   cursor?: { occurredAt: string; id: string };
   limit?: number;
 }
+
+/**
+ * Audit-Ereignis → kanonische Protokollzeile des Design-Systems.
+ *
+ * Die Audit-Tabelle rechnete ihre Darstellung bis 2026-09-06 selbst aus:
+ * eigene Hex-Farben je `outcome`, eigene Aufklapp-Logik, eigene Spalten. Das
+ * Set hat dafür `LogList`/`LogBrowser` mit festen Spalten, die verschwinden,
+ * wenn keine Zeile das Feld trägt (L-33).
+ *
+ * Zwei Übersetzungen sind nicht offensichtlich:
+ *  - `outcome` wird zur **Schwere**, nicht zu einer eigenen Spalte: ein
+ *    fehlgeschlagener Vorgang ist ein Fehler, ein teilweiser eine Warnung.
+ *    Die frühere Farbtabelle war genau das, nur von Hand.
+ *  - `action` wird zum **Code**, nicht zur Meldung. Der Code ist der stabile
+ *    Filterschlüssel; die Meldung ist der Satz für den Menschen — fehlt er,
+ *    tritt die Aktion ein, weil eine leere Zeile schlimmer ist als eine
+ *    technische.
+ */
+export function auditEventToLogEntry(
+  e: AuditEvent,
+  opts: { resourceHref?: (kind: string, id: string) => string } = {},
+): {
+  id: string;
+  at: string;
+  message: string;
+  level: "error" | "warning" | "info";
+  actor: { kind: string; label?: string };
+  source?: string;
+  code: string;
+  refs?: { label: string; href?: string }[];
+  payload?: unknown;
+} {
+  const level = e.outcome === "failure" ? "error" : e.outcome === "partial" ? "warning" : "info";
+  const refs =
+    e.resourceKind && e.resourceId
+      ? [
+          {
+            label: `${e.resourceKind}:${e.resourceId}`,
+            href: opts.resourceHref?.(e.resourceKind, e.resourceId),
+          },
+        ]
+      : undefined;
+  return {
+    id: e.id,
+    at: e.occurredAt,
+    message: e.message ?? e.action,
+    level,
+    actor: { kind: e.actorKind, label: e.actorLabel ?? undefined },
+    source: e.source ?? undefined,
+    code: e.action,
+    refs,
+    payload: Object.keys(e.payload).length > 0 ? e.payload : undefined,
+  };
+}
