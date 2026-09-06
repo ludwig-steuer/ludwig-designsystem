@@ -1,6 +1,7 @@
 import { caseKindLabel, type CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { Amount } from "../../primitives/Amount";
 import { Badge } from "../../primitives/Badge";
 import { Link } from "../../primitives/Link";
@@ -92,12 +93,12 @@ export function caseColumns({
     name: {
       key: "name",
       header: "Sachverhalt",
-      // Ein **Boden**, nicht `minmax(0, …)`: die neun festen Spuren ergeben
-      // mit Lücken und Polster 1396 px, und in einem 1398-px-Rahmen blieben
-      // dem Rang 1 damit **2 px**. Und in **px**, nicht in `ch`: eine
-      // `ch`-Untergrenze rechnet sich aus der Schriftgröße des Elements, und
-      // der Spaltenkopf steht auf 12,5 px, die Zeile auf 13,5 — gemessen
-      // liefen Kopf und Zeilen dadurch 6 px auseinander (0070).
+      // A **floor**, not `minmax(0, …)`: the nine fixed tracks plus gutters
+      // and padding come to 1396 px, so inside a 1398-px frame rank 1 was
+      // left with **2 px**. And in **px**, never in `ch`: a `ch` minimum is
+      // computed from the font size of the element, and the column head
+      // stands at 12.5 px while the row stands at 13.5 — measured, head and
+      // rows drifted 6 px apart (the lesson of 0070).
       width: "minmax(200px, 1fr)",
       sortable: true,
       cell: (c) => {
@@ -120,8 +121,13 @@ export function caseColumns({
     state: {
       key: "state",
       header: "Stand",
-      // 190, nicht 160: „Wartet auf Unterlagen" misst 179 px, und ein Zustand,
-      // der seine Spalte sprengt, ist die Farbe ohne das Wort (V7).
+      // Z4: a status column carries its (i), and it belongs in `headerAside`
+      // — a button inside the sort link would be invalid HTML. Until now the
+      // stories hung it into their own head by hand and covered the gap
+      // (finding M9 of the acceptance of 0070, family-wide).
+      headerAside: <StatusInfoButton axis="sachverhalt" />,
+      // 190 px, not 160: „Wartet auf Unterlagen" measures 179 px, and a state
+      // that bursts its column is the colour without the word (V7).
       width: "190px",
       cell: (c) =>
         c.lifecycleStatus ? (
@@ -161,6 +167,7 @@ export function caseColumns({
     disposition: {
       key: "disposition",
       header: "Wer ist dran",
+      headerAside: <StatusInfoButton axis="disposition" />,
       width: "150px",
       cell: (c) =>
         c.disposition ? (
@@ -183,9 +190,9 @@ export function caseColumns({
         // A count, with its word — never a bare number (V7). And no
         // `StatusBadge`: the axis `klaerung` is an urgency per question, this
         // is a count over the case.
-        // Keine Klärung ist **kein fehlender Wert**, sondern die Antwort null —
-        // „0 offen" oder „—" wäre Lärm in einer Spalte, die nur meldet, wenn
-        // es etwas zu melden gibt.
+        // No clarification is **not a missing value** but the answer zero —
+        // „0 offen" or „—" would be noise in a column that only speaks when
+        // there is something to report.
         c.openClarificationsCount > 0 ? (
           <span className="v2caserow__count">{c.openClarificationsCount} offen</span>
         ) : null,
@@ -214,6 +221,7 @@ export function caseColumns({
     exportState: {
       key: "exportState",
       header: "Export",
+      headerAside: <StatusInfoButton axis="export_case" />,
       width: "150px",
       cell: (c) =>
         c.exportStatus ? (

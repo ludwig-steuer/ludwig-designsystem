@@ -275,3 +275,57 @@ damit zu „±1 px" zu lesen.
 
 **M10 — zwei tote CSS-Regeln** (`a.v2tbl__row`, der Wrapper-Selektor der alten
 `ExpandableRow`) sind gestrichen.
+
+## Nachtrag 2026-09-07 — `colSpan` war die ganze Zeit wirkungslos
+
+**Der Umbau hat eine Regression hinterlassen, die keine der zehn Messungen
+gesehen hat**, weil sie eine Breite betrifft und alle Messungen Kanten,
+Zeilenhöhen und Verschachtelung geprüft haben: die spannenden Zeilen —
+Leerfall, Fehlerfall, Gruppenüberschrift, Lade-Zeile — sind seit 0106 nicht
+mehr so breit wie ihre Tabelle.
+
+**Warum.** Vor 0106 war die Sonderzeile ein `<div class="v2tbl__empty">`, also
+ein Block im Container: volle Breite, ohne dass jemand etwas dafür tun musste.
+Mit 0106 wurde daraus `<tr><td colSpan={999}>`. Und `colSpan` ist ein
+**Tabellen-Attribut**: es wirkt nur, solange die Zellen `display: table-cell`
+sind. Genau das hat 0106 abgeschafft — `.v2tbl th, .v2tbl td { display: block }`
+ist die Regel, die Kopf und Zeile zu Grids macht. Damit liest niemand mehr das
+Attribut: die Datenzeile ist ein Grid, die Sonderzeile eine anonyme
+Tabellenzelle, die sich auf ihren Inhalt zusammenzieht.
+
+**Gemessen** (Storybook, 1440 px, `BankTransactionList --loading-and-error`):
+das Fehler-Feld war **707 px** breit in einer **1400-px**-Tabelle, die
+Lade-Zeile **0 px**. Ein rot hinterlegter Fehlerkasten, der auf halber Strecke
+aufhört — sichtbar für jeden, der hinsieht, und für keine Messung, die Kanten
+vergleicht.
+
+**Behoben** in `v3.css`, zwei Zeilen: eine Zeile, die eine spannende Zelle
+trägt, wird selbst ein Block, und die Zelle nimmt die volle Breite.
+
+```css
+.v2tbl tr:has(> td[colspan]) { display: block; }
+.v2tbl td[colspan] { width: 100%; }
+```
+
+Das `colSpan`-Attribut bleibt im Markup: für die Vorlesereihenfolge ist es
+richtig, und es ist der Selektor.
+
+**Gegenprobe** (alle bei 1440 px, Zelle gegen Tabellenbreite):
+
+| Story | Tabelle | spannende Zelle | Ergebnis |
+|---|---|---|---|
+| `DataTable --error` | 1406 px | 1406 px | ✓ |
+| `DataTable --empty` (zwei Tabellen) | 694 px | 694 px | ✓ |
+| `CaseList --empty` | 1630 px | 1630 px | ✓ |
+| `OpenItemRow --grouped` (vier Gruppenzeilen) | 1398 px | 4 × 1398 px | ✓ |
+| `BankTransactionList --loading-and-error` | 1406 px | 1406 px (vorher 707 / 0) | ✓ |
+| `SourceDocumentColumns --stuck` | 1398 px | keine (nur Datenzeilen) | ✓ |
+
+Dazu 20 Tabellen-Stories im Konsolen-Sweep: keine Meldung.
+
+**Die Lehre, in einem Satz:** wer Markup von Grid auf Tabelle umstellt, erbt
+die Attribute der Tabelle **nicht** — sie wirken nur, solange auch die
+Darstellung eine Tabelle ist. Und: eine Messung, die Spurkanten vergleicht,
+sieht keine Zelle, die zu schmal ist, wenn sie allein in ihrer Zeile steht.
+Dieselbe Klasse Fehler wie der Befund aus 0106 selbst — „ein Raster kann
+stimmen, während jeder Inhalt darin verrutscht ist".
