@@ -4,6 +4,11 @@
    `v3.css`: Beschriftung 12,5 px / 600, Überzeile 11,5 px / 600. Die
    Sperrung fällt weg — sie war für Versalien da.
 
+   Die Rollen sind dieselben drei wie dort: Beschriftung eines Wertes
+   12,5 px / 600, Überzeile 11,5 px / 600, Gruppen- und Abschnittskopf
+   12,5 px / 700. `.sb__navlabel` und `.hero__summary > .lbl` sind Köpfe, die
+   `.lbl` an Kennzahl und Fakt sind Beschriftungen (nachgezogen 2026-09-06).
+
    App-only chrome on top of design tokens
    Philosophy: flat surfaces, soft drop-shadow for depth, gradient ONLY on:
    - Primary buttons (call-to-action)
@@ -86,7 +91,9 @@ body { background: #FAFBFC; }
 /* Sidebar — nav */
 .sb__nav { padding: 8px 8px; flex: 1; overflow-y: auto; }
 .sb__navlabel {
-  font-size: 12.5px; font-weight: 600;
+  /* Gruppenkopf über Zeilen — dieselbe Rolle wie `.v2lp__grp` und
+     `.v2tbl__group`, also Gewicht 700 (0089, Abnahme 2026-09-06). */
+  font-size: 12.5px; font-weight: 700;
   color: #6F8499;
   padding: 14px 12px 6px;
 }
@@ -518,15 +525,15 @@ body { background: #FAFBFC; }
 .hero__num { font-family: var(--font-mono); font-size: 12.5px; color: var(--color-text-muted); white-space: nowrap; }
 .hero__right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
 .hero__total { text-align: right; }
-.hero__total .lbl { font-size: 11.5px; font-weight: 600; color: var(--color-text-subtle); }
+.hero__total .lbl { font-size: 12.5px; font-weight: 600; color: var(--color-text-subtle); }
 .hero__total .amt { font-family: var(--font-serif); font-weight: 500; font-size: 26px; color: var(--color-primary); line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .hero__facts { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-border-subtle); }
 .hero-fact { min-width: 0; }
-.hero-fact .lbl { font-size: 11.5px; font-weight: 600; color: var(--color-text-subtle); margin-bottom: 3px; }
+.hero-fact .lbl { font-size: 12.5px; font-weight: 600; color: var(--color-text-subtle); margin-bottom: 3px; }
 .hero-fact .val { font-size: 13px; color: var(--color-text); font-weight: 500; }
 .hero-fact .val.mono { font-family: var(--font-mono); font-size: 12.5px; }
 .hero__summary { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-border-subtle); }
-.hero__summary > .lbl { font-size: 11.5px; font-weight: 600; color: var(--color-text-subtle); margin-bottom: 6px; }
+.hero__summary > .lbl { font-size: 12.5px; font-weight: 700; color: var(--color-text-subtle); margin-bottom: 6px; }
 .hero__summary-text { font-size: 13.5px; line-height: 1.5; color: var(--color-text); margin: 0; }
 .hero__summary-text.muted { color: var(--color-text-subtle); font-style: italic; }
 

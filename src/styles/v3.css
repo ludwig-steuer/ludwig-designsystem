@@ -82,8 +82,11 @@
 
 .v2tbl__head {
   padding: var(--v2-head-y, 9px) 18px;
-  font-size: 11.5px;
-  letter-spacing: 0.01em;
+  /* Ein Spaltenkopf beschriftet die Werte unter sich — dieselbe Rolle wie ein
+     Feld-Label, also dieselbe Stufe (0089, ergänzt in der Abnahme: der
+     Entscheid hatte den Spaltenkopf keiner Rolle zugeordnet, und so standen
+     `.v2tbl__head` und `.bse__head` verschieden da). */
+  font-size: var(--fs-ui-sm);
   color: var(--color-text-subtle);
   font-weight: 600;
   border-bottom: 1px solid var(--color-border-subtle);
@@ -963,11 +966,12 @@ select.v2in { padding-right: 26px; }
 .v2bar__fill--warning { background: var(--color-warning); }
 .v2bar__fill--danger { background: var(--color-danger); }
 .v2bar__fill--success { background: var(--color-success); }
-/* Behauptet seinen Stil auch in einem Versalienkopf (v2lp__grp): ein Stand
-   ist ein Wert, keine Überschrift. */
+/* Behauptet seinen Stil auch in einem Gruppenkopf (`.v2lp__grp`): ein Stand
+   ist ein Wert, keine Überschrift. Versalien gibt es dort seit 0089 keine
+   mehr, das Gewicht aber schon. */
 .v2bar__label {
   display: block; font-size: 11px; color: var(--color-text-subtle); margin-top: 3px;
-  font-weight: 400; text-transform: none; letter-spacing: normal;
+  font-weight: 400;
 }
 .v2bar--sm { height: 4px; }
 .v2bar--lg { height: 10px; }
@@ -1190,7 +1194,7 @@ select.v2in { padding-right: 26px; }
 .v2cmd__empty { padding: var(--space-4) var(--space-2); font-size: 13px; color: var(--color-text-subtle); }
 .v2cmd__grp [cmdk-group-heading] {
   padding: var(--space-2) var(--space-2) var(--space-1);
-  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  font-size: var(--fs-ui-sm); font-weight: 600;
   color: var(--color-text-muted);
 }
 .v2cmd__item {
@@ -1388,7 +1392,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   align-items: center;
 }
 .bse__head {
-  font-size: var(--fs-ui-sm); font-weight: 700;
+  /* Spaltenkopf, also Beschriftung — wie `.v2tbl__head`. */
+  font-size: var(--fs-ui-sm); font-weight: 600;
   color: var(--color-text-subtle);
   padding-bottom: 6px;
   border-bottom: 1px solid var(--color-border-subtle);
@@ -1758,7 +1763,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   gap: var(--space-4); flex-wrap: wrap;
 }
 .v2phead__over {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  font-size: 11px; font-weight: 600;
   color: var(--color-text-subtle); margin-bottom: 2px;
 }
 .v2phead__titlerow { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
@@ -1867,7 +1872,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2cmb__grp {
   padding: 6px 8px 2px;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  font-size: 11px; font-weight: 600;
   color: var(--color-text-subtle);
 }
 .v2cmb__opt {
@@ -1924,7 +1929,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* --- Timeline (0023) — der Verlauf ---------------------------------------- */
 .v2tl { display: grid; gap: 2px; }
 .v2tl__day {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  font-size: 11px; font-weight: 600;
   color: var(--color-text-subtle);
   padding: var(--space-3) 0 4px;
 }

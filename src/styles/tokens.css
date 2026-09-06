@@ -101,7 +101,7 @@
   --fs-body:      16px;   --lh-body:      1.55;   --tr-body:       0;
   --fs-body-sm:   14px;   --lh-body-sm:   1.50;   --tr-body-sm:    0;
   --fs-caption:   13px;   --lh-caption:   1.45;   --tr-caption:    0;
-  --fs-overline:  12px;   --lh-overline:  1.40;   --tr-overline:   0.06em;
+  --fs-overline:  12px;   --lh-overline:  1.40;
 
   /* Produktives Register (A1, §1). Die Leiter, aus der **jede** v3-Komponente
      ihre Größe nimmt — vorher stand jede Zahl einzeln in `v3.css`, und eine
@@ -112,7 +112,7 @@
   --fs-ui:       13.5px;  --lh-ui:      1.55;   /* Standard: Zeile, Feld, Fließtext */
   --fs-ui-sm:    12.5px;  --lh-ui-sm:   1.50;   /* Unterzeile, Hinweis */
   --fs-ui-xs:    11.5px;  --lh-ui-xs:   1.45;   /* Beischrift, Taste */
-  --fs-ui-2xs:   11px;    --lh-ui-2xs:  1.40;   /* Versalien-Label */
+  --fs-ui-2xs:   11px;    --lh-ui-2xs:  1.40;   /* Kleinstmaß: Taste, Zähler */
 
   /* ====================================================================
      SPACING — 4px base, 8px rhythm
