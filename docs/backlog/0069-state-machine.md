@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `patterns/` — Gruppe Prozess, neben `Process` und `Timeline` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, sobald ein Schadenfall Zustände und Übergänge hat, die jemand erklärt haben will |
@@ -18,14 +18,14 @@ kommt danach, und wohin kann ich ihn zurückschicken?" Heute bekommt sie dafür
 die Liste im `StatusInfoDialog` — elf Zeilen, alphabetisch nach Registry, ohne
 Pfeil. Ob `failed` zurück nach `ready` geht oder nach `review`, steht in einer
 Markdown-Tabelle in `docs/topics/datev.md`, die nur Entwickler lesen. Ludwig
-arbeitet an jeder Kette mit einer Status-Achse (56 in der Registry), und
+arbeitet an jeder Kette mit einer Status-Achse (**70** in der Registry, gezählt am 2026-09-06 — die Zahl wächst mit jeder App-Runde), und
 keine davon hat ein Bild.
 
 Neu: **eine** Komponente, die eine Achse als Zustandsdiagramm zeigt — Boxen
 mit den Wörtern der Registry, Pfeile für die Übergänge, der aktuelle Zustand
 farbig hervorgehoben, ein Klick auf jede Box erklärt sie (Bedeutung, DB-Wert,
 Hinein durch, Hinaus durch), darüber optional ein Absatz zum ganzen Prozess.
-Fehlen die Übergänge — und das tun sie heute für die meisten der 56 Achsen —, stehen
+Fehlen die Übergänge — und das tun sie heute für fast alle 70 Achsen —, stehen
 die Boxen in Registry-Reihenfolge nebeneinander, mit dem Hinweis, dass die
 Übergänge nicht hinterlegt sind. Das Bild lügt nicht, wo die Daten fehlen.
 
@@ -47,7 +47,7 @@ die Boxen in Registry-Reihenfolge nebeneinander, mit dem Hinweis, dass die
   - `Popover` (`@when A small field on click that does not block the page`)
     — die Erklärung je Box. `Badge` und `code` darin wie in
     `StatusInfoDialog`.
-  - `status-registry.ts` / `axisLegend` — Label, Ton, Erklärtext, DB-Wert je
+  - `@/ludwig/ui/status/status-registry` (`STATUS_REGISTRY`, `resolveStatus`, `axisLegend`) — Label, Ton, Erklärtext, DB-Wert je
     Zustand (Z2). Die Komponente trägt keinen einzigen Statustext.
 - **Neu, weil:** `spec-schreiben` §3.4 — eigener Zustand (welche Box offen
   ist) und Tastaturweg (Tab durch die Boxen, Enter öffnet, Esc schließt) auf
@@ -59,7 +59,7 @@ die Boxen in Registry-Reihenfolge nebeneinander, mit dem Hinweis, dass die
   Funktionen in derselben Datei — kein zweites Modul, keine Bibliothek. Kein
   eigener Dialog: wer das Bild modal will, legt es in `Dialog`.
 - **Setzt auf:** `Popover` · `Badge` · `status-registry` (`STATUS_REGISTRY`,
-  `resolveStatus`) · `entity-icons` (`AXIS_SOURCE` für den DB-Ort im Popover)
+  `resolveStatus`) · `AXIS_SOURCE` **aus dem Spiegel**, dorther, wo `StatusInfoDialog` es holt (seit 2026-09-06 `@/ludwig/ui/status/status-registry`, re-exportiert über `patterns/entity-icons`; 0105 erledigt)
   · SVG für die Kanten (wie `BarChart` zeichnet, ohne Bibliothek).
 
 ## Schnittstelle
@@ -84,7 +84,7 @@ export interface StateTransition {
 ```
 
 Typen aus `src/ludwig/`: keine — `StatusAxis` und `StatusDescriptor` kommen
-aus `patterns/status-registry.ts` (dem Spiegel der App-Registry).
+aus `@/ludwig/ui/status/status-registry` (dem Spiegel der App-Registry; die Set-Kopie ist seit 0080 weg).
 `StateTransition` gibt es weder in `src/ludwig/` noch in der App: **Befund 1**.
 Bis die App die Übergänge als Daten liefert, tragen die Stories sie —
 abgeschrieben aus der Z1-Tabelle (`datev.md` R19) und den „Übergänge:"-
@@ -202,7 +202,7 @@ Abgeleitet nach §6. Titel `v3/Patterns/Prozess/StateMachine`. Die
 
 | Story | Beweist |
 |---|---|
-| `Filled` | `zyklus_stapel`, `states` mit `prepared` zuerst (`prepared, agent, review, ready, exporting, inspection, failed, confirmed, mirrored, closed, cancelled`), die 16 Übergänge aus `datev.md` R19 mit Labels, `current="review"`, `description` aus dem Einleitungsabsatz von R19. Erwartete Spalten: 0 `prepared`+`cancelled` · 1 `agent` · 2 `review` · 3 `ready` · 4 `exporting` · 5 `inspection`+`failed` · 6 `confirmed` · 7 `mirrored` · 8 `closed`. Fünf Bögen unten (`agent→prepared`, `review→agent`, `ready→review`, `failed→ready`, `failed→review`), zwei oben (`exporting→confirmed`, `confirmed→closed`). „Kanzlei prüft" in Warnton mit „aktuell" |
+| `Filled` | `zyklus_stapel`, `states` mit `prepared` zuerst (`prepared, agent, review, ready, exporting, inspection, failed, confirmed, mirrored, closed, cancelled`), die 16 Übergänge aus `datev.md` R19 mit Labels, `current="review"`, `description` aus dem Einleitungsabsatz von R19. Erwartete Spalten (aus der Rangregel gerechnet, nicht von Hand): 0 `prepared`+`cancelled` · 1 `agent`+`review` · 2 `ready` · 3 `exporting` · 4 `inspection`+`failed` · 5 `confirmed` · 6 `mirrored` · 7 `closed`. Fünf Bögen unten (`agent→prepared`, `review→agent`, `ready→review`, `failed→ready`, `failed→review`), **zwei oben** (`exporting→confirmed`, `confirmed→closed`); `prepared→review` ist eine Nachbar-Kante, weil `review` seinen Rang aus genau diesem Übergang zieht — siehe „Eine Abweichung von der Freigabe". „Kanzlei prüft" in Warnton mit „aktuell" |
 | `Branching` | `beleg` ohne `states` (Registry-Reihenfolge `pending, in_progress, processed, review_needed, failed`), sieben Übergänge aus dem Registry-Kommentar, **ohne** `current`, ohne `description`. Erwartete Spalten: 0 `pending` · 1 `in_progress` · 2 `processed`+`failed` · 3 `review_needed`. Der Bogen `in_progress→review_needed` oben, `review_needed→processed` und `failed→in_progress` unten; `processed→review_needed` durch die Mitte — das Paar `⇄` als zwei getrennte Wege. Keine Box farbig |
 | `Sequence` | `sachverhalt` **ohne** `transitions`, `states` ohne den Pseudowert `in_pipeline`, `current="needs_clarification"`: sechs Boxen in einer Reihe, gepunktete Verbinder ohne Spitze, die Hinweiszeile darunter, „Klärung offen" im Warnton mit „aktuell"; Popover ohne Hinein/Hinaus |
 | `Explain` | `Branching`-Daten mit `current="review_needed"`; die Story-Doku beschreibt den Rundlauf: Klick auf „Prüfung nötig" → Popover mit Badge, `review_needed`, dem Erklärtext, **Hinein durch** „In Bearbeitung · Pipeline durch, reparierbare Findings" und „Prozessiert · Revalidierung", **Hinaus durch** „Revalidierung (`update_invoice_extraction`) · Prozessiert", der Ort `client_source_docs_invoices.processing_status`; `Esc` schließt; `Tab` läuft `pending → in_progress → processed → failed → review_needed` |
@@ -269,7 +269,7 @@ Variabel (aus dieser Spec):
 ## Befunde für `ludwig/app`
 
 1. **Übergänge liegen nirgends als Daten.** In `status-registry.ts` tragen
-   vier von 56 Achsen einen „Übergänge:"-Block **als Kommentar** (`beleg`,
+   vier von 70 Achsen einen „Übergänge:"-Block **als Kommentar** (`beleg`,
    `job`, `upload`, `dispatch`); ein Dutzend weitere haben Pfeile im
    Kommentar, teils Übergänge (`mandant_onboarding`, `partner`), teils bloße
    Regeln (`triage`, `beleg_kategorie`); Z1-Tabellen (`State | Dran ist | Hinein
@@ -325,3 +325,131 @@ Abgenommen von / am: … · Offene Punkte: …
 Vor dem Bau in die Spec: (a) Pfad überall auf `@/ludwig/ui/status/status-registry` (die Set-Kopie ist seit 0080 weg); (b) „56 Achsen" → 62; (c) die 16 Übergänge von `zyklus_stapel` (mit Labels) und die `beleg_inbox`-Übergänge als Anhang in die Spec, Quelle mit absolutem Pfad in `ludwig/app` (`docs/topics/datev.md` R19 und `docs/operations/produktbefunde.md` liegen nicht in diesem Repo); (d) `Filled`: drei Bögen oben (`prepared→review`, `exporting→confirmed`, `confirmed→closed`); (e) „Setzt auf": `AXIS_SOURCE` daher, wo `StatusInfoDialog` es holt (0105 offen).
 
 Befunde ins Register: die Befunde 1, 3 und 4 dieser Spec stehen noch nicht in `docs/befunde-app.md` — nachtragen (A, B, E).
+
+## Anhang · Die Übergänge, die die Stories tragen
+
+Sie stehen hier, weil ihre Quellen **nicht in diesem Repo liegen** und die
+Stories sie sonst aus dem Nichts behaupten würden. Solange L-74 offen ist, ist
+dieser Anhang die einzige Stelle, an der beides zusammensteht: der Übergang
+und wo er herkommt.
+
+### `zyklus_stapel` — 16 Übergänge
+
+Quelle: `ludwig/app/docs/topics/datev.md`, Abschnitt **R19** („Der Stapel ist
+der Buchungszyklus"), Tabelle `State | Dran ist | Hinein durch | Hinaus
+durch`. Die Labels sind die Wörter der Spalte „Hinaus durch".
+
+| von | nach | Label |
+|---|---|---|
+| `prepared` | `agent` | Aufgreifen (`start_agent_run`) |
+| `prepared` | `review` | Prüfung übernehmen |
+| `agent` | `prepared` | Durchgang beendet (`finish_agent_run`) |
+| `review` | `ready` | Freigabe |
+| `review` | `agent` | Zurück an den Agenten |
+| `ready` | `exporting` | Push |
+| `ready` | `review` | Abbruch |
+| `exporting` | `confirmed` | Quittung |
+| `exporting` | `inspection` | Quittung mit Prüfung |
+| `exporting` | `failed` | Fehler |
+| `inspection` | `confirmed` | Quittung |
+| `confirmed` | `mirrored` | Spiegel-Import eines festgeschriebenen Stapels |
+| `confirmed` | `closed` | leerer Diff |
+| `mirrored` | `closed` | Nachlese |
+| `failed` | `ready` | Retry |
+| `failed` | `review` | Abbruch |
+
+Zwei Feinheiten der Tabelle, die im Bild nicht stehen und deshalb hier: aus
+`failed` geht es **nie** nach `cancelled` (human-hold, der Claim bleibt), und
+`confirmed` bleibt liegen, solange der Spiegel-Stapel offen ist — das ist kein
+fehlender Übergang, sondern eine Bedingung an einem vorhandenen.
+
+### `beleg_inbox` — 7 Übergänge
+
+Quelle: der Kopfkommentar von `BELEG_INBOX` in
+`ludwig/app/apps/web/src/ui/status/status-registry.ts` („Schreiber: Web-Upload
+setzt `pending_classification`, der Python-Classifier setzt `classified` bzw.
+`classification_failed`, Reprocess setzt zurück, Soft-Delete setzt
+`deleted`").
+
+| von | nach | Label |
+|---|---|---|
+| `pending_classification` | `classified` | Classifier |
+| `pending_classification` | `classification_failed` | Classifier |
+| `classified` | `pending_classification` | Reprocess |
+| `classification_failed` | `pending_classification` | Reprocess |
+| `pending_classification` | `deleted` | Soft-Delete |
+| `classified` | `deleted` | Soft-Delete |
+| `classification_failed` | `deleted` | Soft-Delete |
+
+### `beleg` — 7 Übergänge
+
+Quelle: der „Übergänge:"-Block im Kopfkommentar von `BELEG` derselben Datei.
+
+| von | nach | Label |
+|---|---|---|
+| `pending` | `in_progress` | Pipeline startet |
+| `in_progress` | `processed` | Pipeline durch |
+| `in_progress` | `review_needed` | Pipeline durch, reparierbare Findings |
+| `in_progress` | `failed` | Abbruch |
+| `processed` | `review_needed` | Revalidierung |
+| `review_needed` | `processed` | Revalidierung (`update_invoice_extraction`) |
+| `failed` | `in_progress` | Retry / force-Reprocess |
+
+## Gebaut (2026-09-06)
+
+`patterns/StateMachine.tsx`, ein Export plus `StateTransition`; Layout, Ränge
+und Kanten sind reine Funktionen in derselben Datei, kein zweites Modul, keine
+Bibliothek, kein `"use client"` — nur `Popover` ist ein Client-Island.
+Klassen `.v2fsm*` in `v3.css`.
+
+### Eine Abweichung von der Freigabe, mit Grund
+
+Punkt (d) der Freigabe verlangt **drei** Bögen oben und zählt
+`prepared→review` dazu. Das folgt nicht aus der Rangregel dieser Spec: nach
+ihr bekommt `review` seinen Rang aus dem **einzigen** Vorwärts-Übergang, der
+in ihn mündet — `prepared→review` —, steht also in Spalte 1 **neben** `agent`
+und nicht dahinter. Damit ist die Kante eine Nachbar-Kante durch die Mitte,
+kein Bogen. Ein `agent→review` gibt es in R19 nicht: aus `agent` geht es nur
+zurück nach `prepared`.
+
+Gebaut ist die Regel, nicht die Aufzählung. Die Aufzählung der erwarteten
+Spalten in der Story-Tabelle war von Hand gerechnet und ab `review` um eine
+Spalte verschoben; sie ist unten korrigiert. **Gemessen** (Story `Filled`,
+Chromium headless): zwei Bögen oben („Quittung" `exporting→confirmed`,
+„leerer Diff" `confirmed→closed`), fünf unten (die fünf Rückwege), neun durch
+die Mitte — zusammen die 16.
+
+Wer die drei Bögen doch will, ändert nicht die Komponente, sondern die
+Reihenfolge: `states` mit `review` hinter `agent` gibt genau das Bild. Das ist
+der Zweck der Prop.
+
+### Was beim Bauen dazukam
+
+- **Die Reihe steht waagerecht.** Ohne Übergänge sind alle Ränge 0, und der
+  erste Wurf stapelte die Zustände in einer Spalte. Das Verhalten verlangt
+  eine **Zeile**; ohne Übergänge wird der Index zur Spalte.
+- **Der Verbinder der Reihe ist gepunktet und hat keine Spitze** (`2 4`,
+  gemessen) — er sagt „Reihenfolge", nicht „Übergang".
+- **Die DOM-Reihenfolge ist die Leserichtung**, nicht die Registry-Reihenfolge:
+  die Boxen werden nach Spalte, dann Zeile sortiert, damit Tab die Karte
+  abläuft, wie das Auge sie liest. In `Edge` gemessen:
+  `pending_classification, on_hold, classified, classification_failed,
+  deleted, quarantined`.
+- **Die Kanten liegen unter den Boxen** (`z-index`), sonst endete ein Pfeil
+  über einem Wort und zeigte scheinbar auf den Rand.
+- **Kontrast:** nicht `--color-border-strong` — das sind **1,62:1** gegen die
+  Karte, und V10 verlangt ≥ 3:1 für eine tragende Linie. Die Kanten stehen in
+  `--color-border-control` (**3,45:1**, nachgerechnet), demselben Maß, aus dem
+  der Rahmen eines Eingabefelds seine Sichtbarkeit zieht. Gemessen im Bild:
+  `rgb(138,138,138)` auf `rgb(255,255,255)`.
+
+### Gemessen
+
+| Story | Was |
+|---|---|
+| `Filled` | 11 Boxen, 16 Kanten; Spalten 0 `prepared`+`cancelled` · 1 `agent`+`review` · 2 `ready` · 3 `exporting` · 4 `inspection`+`failed` · 5 `confirmed` · 6 `mirrored` · 7 `closed`; „Kanzlei prüft" trägt „aktuell" |
+| `Branching` | 5 Boxen, 7 Kanten, vier Spalten, keine Box farbig; `processed ⇄ review_needed` als zwei getrennte Wege |
+| `Sequence` | fünf Boxen in **einer Zeile**, vier gepunktete Verbinder, **null** Pfeilspitzen, die Hinweiszeile darunter |
+| `Explain` | Klick auf „Prüfung nötig" → Badge, `review_needed`, **Hinein durch** „In Bearbeitung · Pipeline durch, reparierbare Findings" und „Prozessiert · Revalidierung", **Hinaus durch** „Revalidierung (update_invoice_extraction) · Prozessiert", Quelle `client_source_docs_invoices.processing_status` |
+| `Edge` | zwei Rohwert-Boxen (`quarantined`, `on_hold`), der Selbst-Übergang steht als „Erneut anstoßen · zurück auf sich selbst" im Popover und ist **nicht** gezeichnet (8 von 9 Kanten), der Container scrollt |
+| `InUse` | Positionsanzeige und Landkarte in einer Karte |

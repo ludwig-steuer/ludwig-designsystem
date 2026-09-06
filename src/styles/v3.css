@@ -2783,3 +2783,66 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   min-height: calc(var(--v2-row-fs, 13.5px) * 1.5);
   vertical-align: top;
 }
+
+/* --- StateMachine (0069) — die Landkarte einer Status-Achse ---------------
+   Die Boxen liegen im Grid, die Kanten in einem SVG darüber; beide rechnen in
+   derselben Einheit, die die Komponente setzt (Spalte 150, Zeile 74). Deshalb
+   steht hier kein Maß für das Raster — es käme sonst zweimal vor und ginge
+   beim nächsten Anfassen auseinander. */
+.v2fsm { display: flex; flex-direction: column; gap: var(--space-3); }
+.v2fsm__lead {
+  margin: 0; max-width: 68ch;
+  font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text);
+}
+/* Wird die Karte breiter als ihr Platz, scrollt sie in sich — nie die Seite. */
+.v2fsm__scroll { overflow-x: auto; padding: 26px 2px; }
+.v2fsm__grid { position: relative; display: grid; }
+/* Die Kanten liegen unter den Boxen: ein Pfeil, der über einem Wort endet,
+   sähe aus, als zeigte er auf den Rand statt auf den Zustand. */
+.v2fsm__edges { position: absolute; inset: 0; overflow: visible; z-index: 0; }
+.v2fsm__edges path {
+  fill: none;
+  /* Nicht `--color-border-strong`: das sind 1,62:1 gegen die Karte, und V10
+     verlangt für eine tragende Linie ≥ 3:1. `--color-border-control` steht
+     mit **3,45:1** da (nachgerechnet 2026-09-06) — dasselbe Maß, aus dem der
+     Rahmen eines Eingabefelds seine Sichtbarkeit zieht. */
+  stroke: var(--color-border-control);
+  stroke-width: 1.5;
+}
+.v2fsm__edges marker path { fill: var(--color-border-control); stroke: none; }
+/* Der Verbinder der Reihe: gepunktet, ohne Spitze — er behauptet keinen Weg. */
+.v2fsm__edges--dotted path { stroke-dasharray: 2 4; }
+
+.v2fsm__state {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; justify-content: center; gap: 1px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-sans);
+}
+.v2fsm__state:hover { background: var(--color-bg-soft); }
+.v2fsm__state:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.v2fsm__label {
+  font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.v2fsm__value { font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
+/* „aktuell" statt nur Farbe (V7). */
+.v2fsm__now { font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-muted); }
+.v2fsm__state.is-current { border-color: var(--color-accent); background: var(--color-accent-50); }
+.v2fsm__state--raw .v2fsm__label { font-family: var(--font-mono); font-size: var(--fs-ui-xs); }
+
+.v2fsm__note { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+
+.v2fsm__pop { display: flex; flex-direction: column; gap: var(--space-2); max-width: 34ch; }
+.v2fsm__pophead { display: flex; align-items: center; gap: var(--space-2); }
+.v2fsm__meaning { margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui); color: var(--color-text); }
+.v2fsm__ways { font-size: var(--fs-ui-sm); }
+.v2fsm__waystitle { font-weight: 600; color: var(--color-text-muted); }
+.v2fsm__ways ul { margin: 2px 0 0; padding-left: var(--space-4); color: var(--color-text); }
+.v2fsm__src { font-size: var(--fs-ui-xs); color: var(--color-text-muted); }

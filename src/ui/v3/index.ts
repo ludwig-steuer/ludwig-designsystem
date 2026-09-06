@@ -261,6 +261,10 @@ export {
 } from "./patterns/ChoicePrompt";
 
 /* Prozess */
+export {
+  StateMachine,
+  type StateTransition,
+} from "./patterns/StateMachine";
 export { LogList, type LogEntry, type LogLevel } from "./patterns/Log";
 export { LogBrowser, type LogFilterState } from "./patterns/LogBrowser";
 export {
