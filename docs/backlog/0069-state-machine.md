@@ -259,7 +259,7 @@ Variabel (aus dieser Spec):
 - [ ] `Tab` läuft die Boxen in Spaltenordnung ab (Rang, dann Zeile); jede Box ist ein `<button>` mit Wort; Fokusring sichtbar; Hover färbt (`Explain`)
 - [ ] SVG `aria-hidden`; Kanten-Token ≥ 3:1 gegen die Karte, Wert als Kommentar am Token (`Filled`, `getComputedStyle`)
 - [ ] Labels bis zwei Zeilen, darüber `…` mit `title`; Boxen behalten ihre Rastergröße (`Edge`)
-- [ ] Bei 480 px Kartenbreite scrollt `.v2fsm` horizontal, `body` nicht (`Edge`)
+- [ ] Bei schmaler Karte (360 px) scrollt `.v2fsm` horizontal, `body` nicht (`Edge`)
 - [ ] Kein `ResizeObserver`, kein `getBoundingClientRect`, keine neue Abhängigkeit in `package.json`; Rastermaße nur als CSS-Variablen in `v3.css` (grep)
 - [ ] Kein `"use client"` in `StateMachine.tsx`; Client-Anteil nur `Popover` (grep)
 - [ ] Barrel: Export unter `/* Prozess */` in `index.ts`; `@instead` von `StatusInfoDialog` und `ProcessStepper` nennen `StateMachine` (je ein Halbsatz)
@@ -667,3 +667,203 @@ oben — und warum `prepared → review` durch die Mitte läuft.
 ist kein tragender Strich, sondern die Kante einer Fläche — die Boxen
 unterscheiden sich durch Fläche, Wort und Ton, nicht durch ihren Rand. Die
 Kanten dagegen tragen die Aussage und stehen deshalb auf 3,45:1.
+
+## Abnahme (zweite Runde, fremd, 2026-09-06)
+
+Geprüft gegen die Spec und den Code, nicht gegen den Chat, und mit der Lehre
+der ersten Runde im Rücken: **gemessen wird die Wirkung, nicht die
+Anweisung.** Keine Zahl dieser Runde stammt aus `getComputedStyle(el)
+.gridColumnStart` oder einem anderen Rücklesen eines Inline-Stils — die Lage
+jeder Box kommt aus `getBoundingClientRect()`, die Lage jeder Kante aus
+`path.getPointAtLength()`, jede Farbe aus dem gerechneten Stil und gegen den
+Token nachgerechnet. Storybook lief auf `localhost:6107`. Werkzeuge im
+Scratchpad: `measure.mjs`, `shot.mjs`, `console-check.mjs`, `ax.mjs` und fünf
+eigene (`ab69b-pos.js`, `ab69b-tone.js`, `ab69b-edges.js`, `ab69b-edges2.js`,
+`ab69b-int.mjs`).
+
+**Urteil: nicht abgenommen.** Die Landkarte steht jetzt — Ränge, Boxenmaß,
+Kantenenden, Ton, Tastatur, alles gemessen und richtig. Der Bau ist damit von
+elf Mängeln auf vier gekommen, und der schwerste (M1) ist wirklich weg. Was
+bleibt, ist die **Beschriftung**: Boxen halten ihr Maß, aber ihr Inhalt hält
+sich nicht an die Box — zweizeilige Wörter werden mitten in der zweiten Zeile
+abgeschnitten, der DB-Wert läuft rechts heraus. Dazu kreuzen fünf Kanten
+Boxen, die weder Quelle noch Ziel sind, und der Rasterkommentar in `v3.css`
+nennt eine Zahl, die es nicht mehr gibt.
+
+**Die elf Mängel der ersten Runde, nachgeprüft:** M1 ✓ (Ränge im Raster,
+selbst gemessen) · M2 halb (Boxen halten ihr Maß, der Inhalt nicht — Mangel 1
+und 2) · M3 ✓ · M4 ✓ · M5 halb (eine Stelle, aber falscher Kommentar —
+Mangel 4) · M6 ✓ · M7 ✓ · M8 ✓ für die Enden, aber der neue Seitenbogen
+kreuzt die Nachbarspalte (Mangel 3) · M9 ✓ · M10 ✓ · M11 ✓.
+
+**Die Rangregel wieder von Hand gerechnet, dann mit den Pixeln verglichen.**
+`Filled`, Reihenfolge `prepared, agent, review, ready, exporting, inspection,
+failed, confirmed, mirrored, closed, cancelled`: `prepared` 0 · `cancelled` 0 ·
+`agent` 1 · `review` 1 (aus `prepared→review`) · `ready` 2 · `exporting` 3 ·
+`inspection` 4 · `failed` 4 · `confirmed` max(3+1, 4+1) = 5 · `mirrored` 6 ·
+`closed` max(5+1, 6+1) = 7. Gemessen mit `getBoundingClientRect()`, alle Werte
+relativ zur linken Kante des Rasters: `prepared` x = 0 · `cancelled` x = 0,
+y = 80 · `agent` 150 · `review` 150, y = 80 · `ready` 300 · `exporting` 450 ·
+`inspection` 600 · `failed` 600, y = 80 · `confirmed` 750 · `mirrored` 900 ·
+`closed` 1050. Acht Spalten im Abstand von genau 150 px, zwei Zeilen im
+Abstand von 80 px — Punkt für Punkt die gerechneten Ränge und genau die
+Spaltenaufzählung der Story-Tabelle. `Branching`: `pending` 0 · `in_progress`
+150 · `processed` 300 · `failed` 300 (y = 80) · `review_needed` 450 — also
+0/1/2/2/3 wie gerechnet. `Edge`: `pending_classification` 0 · `on_hold` 0
+(y = 80) · `classified` 150 · `classification_failed` 150 (y = 80) ·
+`deleted` 300 · `quarantined` 300 (y = 80).
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| **Fest** — `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` ist in dieser Abnahme untersagt; ersatzweise `console-check.mjs` über alle sechs Stories: **0** Konsolenmeldungen | ✓ typecheck · build nicht geprüft |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `patterns/StateMachine.tsx` + `StateMachine.stories.tsx`; `index.json` kennt `v3-patterns-prozess-statemachine--{filled,branching,sequence,explain,edge,in-use}`, Titel `v3/Patterns/Prozess/StateMachine` | ✓ |
+| **Fest** — Code englisch; `@when`/`@instead` an jedem Export | Der Block `@when „What are the ways out of this state?" …` / `@instead … → ProcessStepper (Z7) … → Timeline … → StatusInfoDialog` steht jetzt unmittelbar vor `export function StateMachine` (`StateMachine.tsx:198–203`); der beschreibende Kopfkommentar (`:12–30`) hängt am Typ und trägt keine der beiden Zeilen mehr. Dass `export interface StateTransition` ohne `@when` auskommt, ist Hausbrauch für Datentypen (`TimelineItem`, `LogEntry`, `ChecklistRow` ebenso). Bezeichner, Typen, JSDoc englisch; Deutsch nur in sichtbaren Strings | ✓ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep` findet kein Hex, keine Label-Map, keinen Statustext in der Datei. `px` steht nur noch am Raster (`:240–247`) — bewusst und begründet; die Bewertung dieser Abweichung steht in der Zeile „Rastermaße" | ✓ |
+| **Fest** — alle Stories vorhanden; ausgeschlossene Zustände begründet | Sechs Stories, alle sechs rendern ohne Meldung. `Sequence` zeigt jetzt **sechs** Boxen (`open, needs_clarification, waiting_for_documents, closed_accepted, closed_rejected, closed_superseded`), `in_pipeline` bleibt draußen. `Empty`/`Loading`/`Error` sind in der Spec mit Grund ausgeschlossen | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 | Text links (`text-align: left`), nichts zentriert; Farbe nur an der aktuellen Box und nur als Registry-Ton; jeder farbige Zustand mit Wort („aktuell"); Kanten 3,45:1; Fokusring 2 px sichtbar; Hover färbt; keine Icons, keine Emoji, keine Versalien; Karte hat Rand ohne Schatten; Texte Sie/Imperativ, Begriffe aus der Registry. Reißt an V10/T8, weil die Beschriftung nicht vollständig lesbar ist: zweizeilige Wörter werden quer durch die zweite Zeile geschnitten und der DB-Wert läuft aus der Box (Mangel 1 und 2) | ✗ |
+| **Fest** — im Browser angesehen | Alle sechs Stories im Iframe geöffnet, fünf als Bild (`ab69c-filled.png`, `ab69c-branching.png`, `ab69c-edge.png`, `ab69c-sequence.png`, `ab69c-in-use.png`), dazu echte Maus- und Tastenanschläge über CDP | ✓ |
+| Label, Ton, Erklärtext und DB-Ort aus `STATUS_REGISTRY`/`AXIS_SOURCE`; kein Statustext in der Datei | `grep` findet keinen Statustext; `AXIS_SOURCE` kommt aus `./entity-icons` (`:5`), derselben Stelle wie im `StatusInfoDialog`. Gemessen im Popover von `Explain`: Badge „Prüfung nötig", `review_needed`, der Registry-Erklärtext, Quelle `client_source_docs_invoices.processing_status`; in `Edge` entsprechend `client_source_docs.status` | ✓ |
+| Ohne `states` Registry-Reihenfolge, mit `states` deren Reihenfolge und Teilmenge | `Branching` ohne `states` ordnet nach `BELEG_PROCESSING`; `Filled` mit `states` stellt `prepared` nach vorn und `cancelled` ans Ende (gemessen: `cancelled` in Spalte 0, Zeile 2); `Sequence` als Teilmenge ohne `in_pipeline` | ✓ |
+| Unbekannte Keys hängen hinten als Rohwert-Box: neutral, `code`-Label, kein Erklärtext | `Edge`: `quarantined` und `on_hold` tragen `v2fsm__state--raw`, Label in `JetBrains Mono`, **kein** zweiter `code`-Wert darunter (Nebenbefund der ersten Runde behoben), Popover „Diesen Wert kennt die Registry nicht." mit neutralem Badge. `quarantined` misst Rand `rgb(221,226,232)` = `--color-border`, Fläche weiß — neutral | ✓ |
+| Rang = längster Vorwärtspfad; die Spalten von `Filled` und `Branching` wie in der Story-Tabelle | Von Hand gerechnet und mit `getBoundingClientRect()` verglichen — die Aufstellung oben. Acht Spalten in `Filled` (x = 0 · 150 · 300 · 450 · 600 · 750 · 900 · 1050), vier in `Branching`. Rasterbreite 1176 = 8 × 150 − 24, Höhe 140 = 2 × 80 − 20, beides selbst nachgerechnet | ✓ |
+| Vorwärts-Nachbarn durch die Mitte, Sprünge als Bogen oben, Rückwärts als Bogen unten; Pfeilspitze als SVG-`marker`; **kein Pfad kreuzt eine Box** | Formen stimmen: in `Filled` neun Pfade durch die Mitte, zwei oben („Quittung" `exporting→confirmed`, „leerer Diff" `confirmed→closed`), fünf unten — zusammen die 16. Die Spitze ist ein `<marker id="v2fsm-arrow">` mit `marker-end`, kein Zeichen (T9). **Aber** fünf Pfade laufen durch das Innere einer dritten Box: `Filled`/`InUse` „Durchgang beendet" durch `review` und `cancelled`, „Zurück an den Agenten" durch `cancelled` und `prepared`; `Branching`/`Explain` „Revalidierung (update_invoice_extraction)" durch `failed`; `Edge` „Reprocess" (aus `classified`) durch `classification_failed` und `on_hold`, „Reprocess" (aus `classification_failed`) durch `on_hold` (Mangel 3) | ✗ |
+| Das Paar `processed ⇄ review_needed` ergibt zwei getrennte, nicht deckende Pfade | `Branching`: „Revalidierung" läuft als Nachbar-Kante durch die Mitte (Pfadlänge 24 px), „Revalidierung (update_invoice_extraction)" als Bogen unten (240 px). Kein Paar von Pfaden in einer der Stories hat dasselbe `d` — geprüft über eine Zählung aller `d`-Attribute | ✓ |
+| Selbst-Übergänge werden nicht gezeichnet und stehen im Popover unter „Hinaus durch" | `Edge`: neun Übergänge, **acht** Pfade; das Popover von `pending_classification` listet „Erneut anstoßen · zurück auf sich selbst" unter „Hinaus durch" | ✓ |
+| `label` eines Übergangs steht als `<title>` am Pfad | `Filled`: **16 von 16** Pfaden tragen ein `<title>`, von „Aufgreifen (start_agent_run)" bis „Abbruch"; `Branching` 7 von 7, `Edge` 8 von 8 | ✓ |
+| Ohne `transitions`: eine Reihe, gepunktete Verbinder ohne Spitze, Hinweiszeile; Popover ohne Hinein/Hinaus | `Sequence`: sechs Boxen, alle mit `y = 0` (eine einzige Zeile), fünf Pfade mit gemessenem `stroke-dasharray: 2px, 4px`, **null** `marker-end` und **null** `<marker>` im SVG; darunter „Reihenfolge nach Registry, Übergänge nicht hinterlegt."; das Popover von `needs_clarification` zeigt Badge, `code`, Bedeutung, Quelle — keine Wege | ✓ |
+| `current` tönt genau eine Box im Registry-`kind`, setzt „aktuell" und `aria-current="step"`; ohne `current` keine getönte Box; Kanten neutral | Zwei Töne über die Prop belegt: `Filled` (`review`, `kind: "warning"`) misst Rand `rgb(140,96,30)` = `--color-warning` `#8C601E` und Fläche `rgb(245,238,224)` = `--color-warning-bg` — **nicht** mehr der Akzent; `Edge` (`on_hold`, unbekannt → `neutral`) misst `rgb(196,204,213)` / `rgb(244,246,248)`. Dazu zur Laufzeit an derselben Box alle fünf Tonklassen durchgetauscht und die Farbe gelesen: info `rgb(59,143,196)` · success `rgb(63,122,90)` · warning `rgb(140,96,30)` · danger `rgb(168,64,60)` · neutral `rgb(196,204,213)` — fünf verschiedene, jede gleich ihrem Token. Genau **eine** Box mit `aria-current="step"` in `Filled`, `Sequence`, `Edge`; in `Branching` **null**. Kanten überall `rgb(138,138,138)`. Die Beschriftung der aktuellen Box misst 19 px statt 0 und lautet „Kanzlei prüft" | ✓ |
+| `description` als Absatz über dem Diagramm, linksbündig; ohne Prop kein Absatz und kein Leerraum | `Filled`: `p.v2fsm__lead` ist das erste Kind, `text-align: start`, `max-width: 68ch` = 579 px, Abstand zum Raster 75 px (Absatzhöhe + 12 px `gap`). `Branching`/`Sequence`: `.v2fsm` hat nur ein Kind (`.v2fsm__scroll`), Abstand nach oben 0 px | ✓ |
+| Klick/Enter/Space öffnet das `Popover` mit Badge, `code`-Wert, Erklärtext, Hinein durch, Hinaus durch, DB-Ort; `Esc` schließt; nur eins offen | Echte Maus- und Tastenanschläge über CDP (`Explain`): Klick auf „Prüfung nötig" → ein offenes `.v2pop` mit Badge, `review_needed`, Erklärtext, **Hinein durch** „In Bearbeitung · Pipeline durch, reparierbare Findings" / „Prozessiert · Revalidierung", **Hinaus durch** „Revalidierung (update_invoice_extraction) · Prozessiert", zuletzt `client_source_docs_invoices.processing_status`. Klick auf eine zweite Box → weiterhin genau **eins** offen, `aria-expanded` wandert mit. `Escape` → 0 offen, alle `aria-expanded` `false`. `Enter` (mit `char`-Ereignis) → 1, `Space` → 1 | ✓ |
+| `Tab` läuft die Boxen in Spaltenordnung ab; jede Box ist ein `<button>` mit Wort; Fokusring sichtbar; Hover färbt | Echte Tab-Anschläge (`Explain`): `pending → in_progress → processed → failed → review_needed`, danach aus der Karte heraus — Rang, dann Zeile, wie die Spec es sagt. Alle Boxen `<button type="button">` mit sichtbarem Wort. Nach dem Anschlag `:focus-visible` = `true`, `outline: 2px solid rgb(59,143,196)`, `outline-offset: 2px`. Hover: `.v2fsm__state:hover { background: var(--color-bg-soft) }`, im Blatt aus dem Stylesheet gelesen | ✓ |
+| SVG `aria-hidden`; Kanten-Token ≥ 3:1 gegen die Karte, Wert als Kommentar am Token | `aria-hidden="true"` an beiden SVG-Varianten, am Element gemessen. Kanten `stroke = rgb(138,138,138)` = `--color-border-control` `#8A8A8A`; selbst nachgerechnet: 3,45:1 gegen `#FFFFFF`, 3,19:1 gegen `#F4F6F8` — beides ≥ 3:1. Der Wert steht als Kommentar am Token (`tokens.css:56`) und noch einmal an der Regel (`v3.css:2803–2811`) | ✓ |
+| Labels bis zwei Zeilen, darüber `…` mit `title`; Boxen behalten ihre Rastergröße | Boxen: **alle** 126 × 60 px in `Filled` (11), `Branching` (5) und `Edge` (6); paarweise geprüft — **null** Überschneidungen. Die Beschriftung dagegen bekommt nur 24 px, obwohl sie 38 px braucht: `freigegeben (Bridge)`, `in DATEV angekommen`, `Wird eingeordnet`, `Einordnung fehlgeschlagen` werden quer durch die zweite Zeile geschnitten, ohne `…`. Und der DB-Wert läuft aus der Box: `pending_classification` misst 152 px in einem 126-px-Kasten (Mangel 1 und 2) | ✗ |
+| Bei schmaler Karte scrollt `.v2fsm` horizontal, `body` nicht | `Edge`: `.v2fsm__scroll` misst `scrollWidth` 430 gegen `clientWidth` 326 — es scrollt. `document.body.scrollWidth` = `clientWidth` = 1440, die Seite scrollt nicht. In `InUse` dasselbe: die Karte (1180 px) schneidet `closed` ab, der Container scrollt. Die Story nimmt 360 px statt der in der Spec genannten 480 — siehe „Außerhalb der Kriterien" | ✓ |
+| Kein `ResizeObserver`, kein `getBoundingClientRect`, keine neue Abhängigkeit; Rastermaße an einer Stelle | Kein `ResizeObserver`, kein `getBoundingClientRect` (nur im Kommentar `:58`), keine neue Abhängigkeit in `package.json`. Die vier Maße stehen an genau **einer** Stelle (`StateMachine.tsx:68–71`), und die Abweichung von „nur als CSS-Variablen" ist begründet — ein `var()` lässt sich nicht addieren. Aber der Rasterkommentar in `v3.css:2789–2790` nennt „Spalte 150, Zeile 74", während `ROW = 80` ist, und die vier weitergereichten Eigenschaften `--v2fsm-col`/`-row`/`-box-w`/`-box-h` (`:244–247`) liest **keine** CSS-Regel (`grep -- "var(--v2fsm" src/` findet nichts), anders als das JSDoc `:62–66` behauptet (Mangel 4) | ✗ |
+| Kein `"use client"`; Client-Anteil nur `Popover` | `grep "use client" src/ui/v3/patterns/StateMachine.tsx` → nichts; einziger Client-Anteil ist `Popover` | ✓ |
+| Barrel: Export unter `/* Prozess */`; `@instead` von `StatusInfoDialog` und `ProcessStepper` nennen `StateMachine` | `index.ts:263–267` exportiert `StateMachine` und `StateTransition` direkt unter `/* Prozess */`. `StatusInfoDialog.tsx:29`: „The same axis as a **picture**, with its transitions → StateMachine." · `Process.tsx:140`: „the map instead of the position → StateMachine (Z7)." | ✓ |
+| Tut bewusst nicht: Übergänge herleiten, Selbst-Übergänge zeichnen, Besitzer, Phasen, zählen, filtern, auslösen | Ohne `transitions` entsteht kein einziger Pfeil (`Sequence`: 0 `<marker>`, 0 `marker-end`); Selbst-Übergang nicht gezeichnet (`Edge`: 8 von 9); kein `Baton`, keine Phase, kein Zähler, kein `onSelect`, kein `href`, kein `fetch`, kein Router-Import in der Datei | ✓ |
+| Ersetzt nichts in der App; das Diagramm im `StatusInfoDialog` wartet auf Befund 1 | `StatusInfoDialog` ist bis auf den Halbsatz im `@instead` unverändert, kein Umschalter, kein Aufruf von `StateMachine` außerhalb der eigenen Story | offen (App) |
+
+### Mängel der zweiten Runde
+
+1. **Zweizeilige Beschriftungen werden quer durch die zweite Zeile
+   geschnitten — ohne `…`.** `v3.css:2833–2837` gibt `.v2fsm__label` zwei
+   Zeilen (`-webkit-line-clamp: 2`), aber die Beschriftung ist ein
+   schrumpfendes Flex-Kind in einer Box fester Höhe (`.v2fsm__state`,
+   `v3.css:2820–2830`, `BOX_H = 60`, `StateMachine.tsx:71`). Gemessen:
+   `freigegeben (Bridge)` in `Filled` misst 24 px hoch bei einem
+   `scrollHeight` von 38 — die zweite Zeile steht zu einem Viertel da.
+   Dasselbe bei `in DATEV angekommen` (`Filled`, `InUse`), `Wird eingeordnet`
+   und `Einordnung fehlgeschlagen` (`Edge`). Weil der Inhalt genau zwei Zeilen
+   hat und nicht mehr, setzt `line-clamp` auch keine Auslassungspunkte: es
+   sieht nach einem Rendering-Fehler aus, nicht nach einer Kürzung
+   (`ab69c-filled.png`, `ab69c-edge.png`, `ab69c-in-use.png`). Die Spec
+   verlangt „Labels bis zwei Zeilen, darüber `…` mit `title`" — hier ist schon
+   die **zweite** Zeile nicht mehr ganz da.
+2. **Der DB-Wert läuft aus der Box heraus und wird vom Nachbarn
+   abgeschnitten.** `.v2fsm__meta` und `.v2fsm__value` (`v3.css:2838–2839`)
+   kürzen nicht; die Box lässt Überlauf stehen. Gemessen in `Edge`: das
+   `<code>` von `pending_classification` (`StateMachine.tsx:373`) ist 152 px
+   breit und beginnt bei x = 13 in einem 126 px breiten Kasten — es ragt 39 px
+   nach rechts hinaus und endet im Bild an der linken Kante von „Eingeordnet"
+   (`ab69c-edge.png`); `classification_failed` ebenso mit 145 px. Die Boxen
+   selbst überschneiden sich nicht (M2 der ersten Runde ist insoweit behoben),
+   aber der sichtbare Befund von damals — „`pending_classificati…` wird vom
+   Nachbarn abgeschnitten" — steht unverändert im Bild.
+3. **Fünf Kanten laufen durch Boxen, die weder Quelle noch Ziel sind.**
+   Gemessen, indem jeder Pfad in sechzig Schritten abgetastet und gegen die
+   Rechtecke aller Boxen geprüft wurde:
+   `Filled`/`InUse` — „Durchgang beendet (finish_agent_run)" (`agent→prepared`)
+   durch `review` und `cancelled`; „Zurück an den Agenten" (`review→agent`,
+   dieselbe Spalte) durch `cancelled` und `prepared`, weil der neue
+   Seitenbogen (`StateMachine.tsx:188–194`) mit `out = left − COL · 0,28` auf
+   x = 108 ausschert und damit mitten in die Nachbarspalte (0…126) greift.
+   `Branching`/`Explain` — „Revalidierung (update_invoice_extraction)"
+   (`review_needed→processed`) durch `failed`; im Bild scheint der Pfeil auf
+   `Prozessiert` aus `Fehlgeschlagen` zu kommen, einem Übergang, den es nicht
+   gibt (`ab69c-branching.png`). `Edge` — „Reprocess" aus `classified` durch
+   `classification_failed` und `on_hold`, „Reprocess" aus
+   `classification_failed` durch `on_hold`. Das Kriterium „kein Pfad kreuzt
+   eine Box" ist damit in vier der sechs Stories verletzt. Dass die Kanten
+   unter den Boxen liegen, verdeckt es nur — es macht die Aussage falsch,
+   statt sie zu ordnen.
+4. **Der Rasterkommentar nennt eine Zahl, die es nicht gibt, und die
+   weitergereichten Eigenschaften liest niemand.** `v3.css:2789–2790` sagt
+   „(Spalte 150, Zeile 74)", während `ROW = 80` und `BOX_H = 60` sind
+   (`StateMachine.tsx:68–71`) — dieselbe Art von Falschaussage, die M5 in der
+   ersten Runde beanstandet hat, nur an der anderen Datei. Dazu setzt
+   `StateMachine.tsx:244–247` vier Eigenschaften `--v2fsm-col`, `--v2fsm-row`,
+   `--v2fsm-box-w`, `--v2fsm-box-h` am Raster, die **keine** CSS-Regel liest:
+   `grep -- "var(--v2fsm" src/` findet nichts. Das JSDoc `:62–66` („The card
+   hands them to CSS as custom properties, so both sides draw the same raster
+   from one source") beschreibt damit eine Leitung, die nirgends ankommt.
+
+### Außerhalb der Kriterien aufgefallen
+
+- **Die Spec und die Story sind bei der schmalen Karte auseinander.** Die
+  Story-Tabelle (Zeile 209) und das Kriterium (Zeile 262) nennen 480 px, die
+  Story nimmt `maxWidth: 360` (`StateMachine.stories.tsx:149`). Der Bau hat
+  recht — bei 480 px passt `beleg_inbox` mit seinen 426 px Rasterbreite hinein
+  und nichts würde scrollen —, aber die Zahl steht noch zweimal falsch in der
+  Spec. Beim nächsten Anfassen mitziehen.
+- **Die Rohwert-Box hängt nicht „hinten", sondern an ihrem Rang.** `on_hold`
+  steht in `Edge` in Spalte 0, Zeile 2, `quarantined` in Spalte 2, Zeile 2.
+  Das folgt aus der Rangregel und ist richtiger als ein Anhängsel am rechten
+  Rand; die Spec sagt an zwei Stellen „hinten" und meint die Reihenfolge, nicht
+  die Lage. Kein Mangel, aber der Satz taugt so nicht als Prüfstein.
+- **Die leere Unterzeile der Rohwert-Box.** `quarantined` hat weder `code`
+  noch „aktuell", also steht dort ein `.v2fsm__meta` von 0 px Höhe. Sichtbar
+  ist es nicht, es verschiebt aber die Beschriftung gegenüber den Nachbarn um
+  ein paar Pixel nach oben.
+- **In `Edge` sind zwei Boxen nur nach dem Scrollen erreichbar.** `deleted` und
+  `quarantined` liegen außerhalb der 326 px sichtbarer Breite; ein Klick ins
+  Blatt trifft sie nicht, ohne vorher zu scrollen. Das ist der Zweck der
+  Story und kein Fehler — es heißt nur, dass eine Prüfung des Popovers dort
+  immer erst scrollen muss.
+
+Abgenommen von / am: **nicht abgenommen** · geprüft von Claude
+(Abnahme-Agent), 2026-09-06 · Offene Punkte: Mängel 1–4 sowie „ersetzt nichts
+in der App" (offen App, Befund 1).
+
+## Die vier Mängel der zweiten Abnahme — behoben
+
+**M1 · Zweizeilige Beschriftungen wurden stumm geschnitten.** Der Grund lag
+nicht an der Höhe, sondern an einer Zeile CSS, die ich für harmlos hielt:
+`.v2fsm__state` war ein **Flex**-Container, und ein Flex-Kind verliert sein
+`display: -webkit-box` — der Browser blockifiziert es zu `flow-root`, und mit
+ihm fällt `-webkit-line-clamp` aus. Die Beschriftung wurde also nicht
+gekürzt, sondern **abgeschnitten**: 35,8 von 38 px, ohne Ellipse.
+
+Die Box ist jetzt ein Block (Innenabstand statt Zentrierung), und die
+Beschriftung klemmt wieder. Nachgemessen: „freigegeben (Bridge)" misst 37,5
+gegen `scrollHeight` 38 — sie passt; ein zur Laufzeit eingesetzter
+94-Zeichen-Name bleibt bei **zwei** Zeilen (`scrollHeight` 131) und ragt nicht
+aus der Box. Die Zeile wuchs dafür von 80 auf 92, die Box von 60 auf 72.
+
+**M2 · Der DB-Wert lief aus der Box.** `pending_classification` misst 152 px
+in einem 126er Kasten. Er bekommt jetzt eine Ellipse; der volle Wert steht im
+Popover daneben. Gemessen: in keiner der sechs Stories ragt noch ein Inhalt
+über seine Box hinaus.
+
+**M3 · Fünf Kanten liefen durch fremde Boxen.** Der erste Versuch führte sie
+als geschwungenen Bogen — und eine Kurve schneidet auf dem Weg nach oben die
+Ecke der Box, an der sie vorbeiwill; gemessen streifte „Quittung" die linke
+obere Ecke von `inspection`, und der Weg aus `agent` lief durch `cancelled`.
+
+Jetzt laufen sie **rechtwinklig mit gerundeten Ecken**: die senkrechten Stücke
+liegen in den Spaltenlücken, das waagerechte über oder unter allem. Damit
+*kann* ein Weg keine fremde Box berühren — das ist keine Feinjustierung,
+sondern eine Eigenschaft der Führung.
+
+Nachgemessen mit einem Abtaster, der jeden Pfad in 120 Punkten gegen jede Box
+prüft: **null** Kreuzungen in `Filled` (16 Kanten), `Branching` (7), `Edge`
+(8) und `InUse` (16).
+
+**M4 · Der Rasterkommentar und die toten Eigenschaften.** Der Kommentar sagte
+„Zeile 74", die Zahl war 80 und ist jetzt 92 — er nennt sie und verweist auf
+die Datei, in der sie steht. Die vier `--v2fsm-*` sind weg: keine Regel hat
+sie je gelesen, sie waren die zweite Fassung derselben Zahlen.
+
+**Nebenbefund:** die Spec nannte die schmale Karte zweimal mit 480 px, die
+Story nimmt 360. Die Story hat recht — bei 480 passt `beleg_inbox` hinein und
+bewiese nichts. Die Spec ist korrigiert.

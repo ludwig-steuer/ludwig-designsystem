@@ -2786,7 +2786,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 /* --- StateMachine (0069) — die Landkarte einer Status-Achse ---------------
    Die Boxen liegen im Grid, die Kanten in einem SVG darüber; beide rechnen in
-   derselben Einheit, die die Komponente setzt (Spalte 150, Zeile 74). Deshalb
+   derselben Einheit, die die Komponente setzt (Spalte 150, Zeile 92 — die Zahlen stehen in `StateMachine.tsx`). Deshalb
    steht hier kein Maß für das Raster — es käme sonst zweimal vor und ginge
    beim nächsten Anfassen auseinander. */
 .v2fsm { display: flex; flex-direction: column; gap: var(--space-3); }
@@ -2819,7 +2819,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2fsm__cell > .v2pop__anchor { display: block; height: 100%; }
 .v2fsm__state {
   width: 100%; height: 100%;
-  display: flex; flex-direction: column; justify-content: center; gap: 1px;
+  /* Block, nicht Flex: als Flex-Kind verliert die Beschriftung ihr
+     `-webkit-box` (der Browser blockifiziert es zu `flow-root`), und mit ihm
+     die Ellipse nach zwei Zeilen — gemessen schnitt sie stumm bei 35,8 von
+     38 px ab (zweite Abnahme 0069). */
+  display: block;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -2830,13 +2834,22 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2fsm__state:hover { background: var(--color-bg-soft); }
 .v2fsm__state:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+/* Zwei Zeilen, dann Ellipse — und die Box ist hoch genug für beide. Vorher
+   schnitt die feste Höhe die zweite Zeile mittendurch, ohne `…` (Abnahme
+   0069): das Kürzen muss der Text tun, nicht der Kasten. */
 .v2fsm__label {
   font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.v2fsm__meta { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
-.v2fsm__value { font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
+.v2fsm__meta { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; max-width: 100%; }
+/* Der Schlüssel kann länger sein als die Box (`pending_classification`
+   misst 152 px in einem 126er Kasten) — er bekommt eine Ellipse und den
+   vollen Text im `title` des Popovers daneben (Abnahme 0069). */
+.v2fsm__value {
+  font-size: var(--fs-ui-xs); color: var(--color-text-muted);
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 /* „aktuell" statt nur Farbe (V7) — neben dem Wert, nicht darunter. */
 .v2fsm__now { font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-muted); }
 /* Der aktuelle Zustand trägt **seinen** Ton, nicht immer denselben (V6): die

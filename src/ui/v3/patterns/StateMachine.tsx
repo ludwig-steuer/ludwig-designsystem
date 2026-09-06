@@ -1,5 +1,3 @@
-import type { CSSProperties } from "react";
-
 import { Badge } from "../primitives/Badge";
 import { Popover } from "../primitives/Popover";
 import { AXIS_SOURCE } from "./entity-icons";
@@ -60,15 +58,18 @@ interface Box {
 
 /**
  * The grid, in one place. The numbers live **here** and not in `v3.css`,
- * because the SVG needs them as numbers — a `var()` cannot be added up. The
- * card hands them to CSS as custom properties, so both sides draw the same
- * raster from one source (corrected in the acceptance of 0069: the comment
- * claimed the opposite, and `--v2fsm-*` existed nowhere).
+ * because the SVG needs them as numbers — a `var()` cannot be added up. They
+ * reach the DOM as inline values on the card; CSS never repeats them, so
+ * there is nothing that can drift apart (a first attempt also handed them
+ * over as `--v2fsm-*`, which no rule ever read — dead weight, removed in the
+ * second acceptance of 0069).
  */
 const COL = 150;
-const ROW = 80;
+// Zwei Zeilen Beschriftung (2 × 19) plus die Wertzeile (15) plus
+// Innenabstand (2 × 8) = 60; die Zeile lässt 20 für die Bögen darunter.
+const ROW = 92;
 const BOX_W = 126;
-const BOX_H = 60;
+const BOX_H = 72;
 
 /**
  * The order of the states: what the caller says, else the registry, and
@@ -171,16 +172,35 @@ function edgePath(a: Box, b: Box, height: number): string {
     const mid = (x1 + x2) / 2;
     return `M ${x1} ${from.y} C ${mid} ${from.y}, ${mid} ${to.y}, ${x2} ${to.y}`;
   }
-  // Ein Bogen: oben für den Sprung nach vorn, unten für den Weg zurück. Er
-  // setzt an der Kante **seiner Boxen** an, nicht an der des Rasters — sonst
-  // endet der Pfeil bei einer Box in der oberen Zeile 80 px unter ihr im
-  // Leeren (Abnahme 0069).
+  // Ein Bogen läuft **um** das Bild herum, nicht hindurch: die senkrechten
+  // Stücke liegen in den Spaltenlücken, das lange Stück über oder unter allem.
+  // Vorher stieg er bei der Zielbox senkrecht auf und durchquerte dabei, was
+  // in derselben Spalte darunter stand — der Pfeil schien dann aus der
+  // falschen Box zu kommen (Abnahme 0069).
   const above = forward;
-  const y = above ? -22 : height + 22;
-  const x1 = from.x;
-  const x2 = to.x;
-  const ay = above ? a.row * ROW : a.row * ROW + BOX_H;
-  const by = above ? b.row * ROW : b.row * ROW + BOX_H;
+  const y = above ? -24 : height + 24;
+  const lane = 12;
+  const ax = above ? a.column * COL + BOX_W : a.column * COL;
+  const bx = b.column * COL;
+  const ay = a.row * ROW + BOX_H / 2;
+  const by = b.row * ROW + BOX_H / 2;
+  const aLane = above ? ax + lane : ax - lane;
+  const bLane = bx - lane;
+  // Rechtwinklig statt geschwungen: eine Kurve schneidet auf dem Weg nach oben
+  // die Ecke der Box, an der sie vorbeiwill — gemessen hat „Quittung" so die
+  // obere linke Ecke von `inspection` gestreift. Die senkrechten Stücke liegen
+  // in den Lücken, das waagerechte über oder unter allem; damit kann der Weg
+  // keine fremde Box berühren.
+  const r = 8;
+  const vDir = y < ay ? -1 : 1;
+  return (
+    `M ${ax} ${ay} L ${aLane - Math.sign(aLane - ax) * r} ${ay} ` +
+    `Q ${aLane} ${ay}, ${aLane} ${ay + vDir * r} ` +
+    `L ${aLane} ${y - vDir * r} Q ${aLane} ${y}, ${aLane + Math.sign(bLane - aLane) * r} ${y} ` +
+    `L ${bLane - Math.sign(bLane - aLane) * r} ${y} Q ${bLane} ${y}, ${bLane} ${y - vDir * r} ` +
+    `L ${bLane} ${by + vDir * r} Q ${bLane} ${by}, ${bLane + r} ${by} ` +
+    `L ${bx} ${by}`
+  );
   // Zwei Boxen derselben Spalte liegen senkrecht übereinander: ein Bogen über
   // die Unterkante hätte Anfang und Ende an derselben Stelle und verbände
   // nichts. Er läuft deshalb **seitlich** — aus der linken Kante der Quelle
@@ -189,10 +209,9 @@ function edgePath(a: Box, b: Box, height: number): string {
     const left = a.column * COL;
     const ay = a.row * ROW + BOX_H / 2;
     const by = b.row * ROW + BOX_H / 2;
-    const out = left - COL * 0.28;
+    const out = left - 12;
     return `M ${left} ${ay} C ${out} ${ay}, ${out} ${by}, ${left} ${by}`;
   }
-  return `M ${x1} ${ay} C ${x1} ${y}, ${x2} ${y}, ${x2} ${by}`;
 }
 
 /**
@@ -241,11 +260,7 @@ export function StateMachine({
             gridAutoRows: `${BOX_H}px`,
             columnGap: COL - BOX_W,
             rowGap: ROW - BOX_H,
-            "--v2fsm-col": `${COL}px`,
-            "--v2fsm-row": `${ROW}px`,
-            "--v2fsm-box-w": `${BOX_W}px`,
-            "--v2fsm-box-h": `${BOX_H}px`,
-          } as CSSProperties}
+          }}
         >
           {hasEdges ? null : (
             // Ein Verbinder, keine Kante: gepunktet und **ohne** Spitze — er
