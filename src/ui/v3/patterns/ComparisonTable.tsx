@@ -2,7 +2,7 @@
 
 import { DeviationCell, AmountCell, type CellTone } from "../primitives/Cells";
 import { StateIcon } from "./Review";
-import { Card, CardHead, HeadRow, Table } from "../primitives/Table";
+import { Card, CardHead, HeadRow, Table, rowCells } from "../primitives/Table";
 
 /**
  * „Sieht der Monat aus wie sonst?" as a table (F123 T123.5, design `DR:599–629`).
@@ -124,28 +124,26 @@ export function ComparisonTable({
             // Only what stands out has a detail — the rest is plain information.
             if (!onSelect || !r.flagged) {
               return (
-                <div className="v2tbl__row" key={r.key} title={r.explanation}>
-                  {content}
-                </div>
+                <tr className="v2tbl__row" key={r.key} title={r.explanation}>
+                  {rowCells(content)}
+                </tr>
               );
             }
             return (
-              <div
+              // The button sits in the first cell and covers the row — a `<tr>`
+              // cannot be a button, and a row that is one is no longer a row
+              // (0106).
+              <tr
                 key={r.key}
-                role="button"
-                tabIndex={0}
                 title={r.explanation}
                 className={`v2tbl__row is-clickable${r.key === selectedKey ? " is-active" : ""}`}
-                onClick={() => onSelect(r.key)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onSelect(r.key);
-                  }
-                }}
               >
-                {content}
-              </div>
+                {rowCells(content, (node) => (
+                  <button type="button" className="v2rowbtn" onClick={() => onSelect(r.key)}>
+                    {node}
+                  </button>
+                ))}
+              </tr>
             );
           })
         )}

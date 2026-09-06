@@ -10,7 +10,7 @@ import { Badge } from "../../primitives/Badge";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Input } from "../../primitives/Form";
 import { TableLoading } from "../../primitives/Cells";
-import { HeadRow, Table } from "../../primitives/Table";
+import { HeadRow, Table, rowCells } from "../../primitives/Table";
 import type {
   DocumentNumberSourceLabels,
   DocumentNumberStateLabels,
@@ -121,7 +121,7 @@ export function DocumentNumberRegister({
               <span>Zustand</span>
             </HeadRow>
             {rows.map((e, i) => (
-              <div
+              <tr
                 key={`${e.source}-${e.documentNumber}-${e.caseId ?? ""}`}
                 role="option"
                 aria-selected={i === active}
@@ -129,23 +129,28 @@ export function DocumentNumberRegister({
                 className={`v2tbl__row is-clickable${i === active ? " is-active" : ""}`}
                 onClick={() => onPick(e)}
               >
+                {rowCells(
+                  <>
                 <span className="v2dnr__num">
-                  <span className="v2mono">{e.documentNumber}</span>
-                  {/* Immutable is the whole point of rule 1, so it stands at
-                      the row — not in a tooltip. */}
-                  {e.immutable ? <Badge tone="info">DATEV</Badge> : null}
-                  {e.orphaned ? <Badge tone="warning">verwaist</Badge> : null}
-                </span>
-                <span>
-                  {sourceLabel[e.source]}
-                  {isDatevSource(e.source) ? <span className="v2dnr__datev"> · DATEV</span> : null}
-                </span>
-                <span className="v2mono">
-                  {e.accountNumber ?? <span className="v2muted">—</span>}
-                </span>
-                <span>{e.caseNumber ?? <span className="v2muted">—</span>}</span>
-                <span className="v2dnr__state">{stateLabel[e.state]}</span>
-              </div>
+                      <span className="v2mono">{e.documentNumber}</span>
+                      {/* Immutable is the whole point of rule 1, so it stands at
+                          the row — not in a tooltip. */}
+                      {e.immutable ? <Badge tone="info">DATEV</Badge> : null}
+                      {e.orphaned ? <Badge tone="warning">verwaist</Badge> : null}
+                    </span>
+                    <span>
+                      {sourceLabel[e.source]}
+                      {isDatevSource(e.source) ? <span className="v2dnr__datev"> · DATEV</span> : null}
+                    </span>
+                    <span className="v2mono">
+                      {e.accountNumber ?? <span className="v2muted">—</span>}
+                    </span>
+                    <span>{e.caseNumber ?? <span className="v2muted">—</span>}</span>
+                    <span className="v2dnr__state">{stateLabel[e.state]}</span>
+
+                  </>,
+                )}
+              </tr>
             ))}
           </Table>
         </div>

@@ -10,6 +10,7 @@ import {
   XCircle,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { rowCells } from "../primitives/Table";
 import { TableLoading } from "../primitives/Cells";
 import { Progress } from "../primitives/Progress";
 
@@ -174,22 +175,18 @@ function ChecklistLine({
       <span className="v2chk__jump">{row.jump ? `→ ${row.jump}` : ""}</span>
     </>
   );
-  if (!onPick) return <div className={`v2tbl__row${active ? " is-active" : ""}`}>{body}</div>;
+  if (!onPick)
+    return <tr className={`v2tbl__row${active ? " is-active" : ""}`}>{rowCells(body)}</tr>;
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      className={`v2tbl__row is-clickable${active ? " is-active" : ""}`}
-      onClick={() => onPick(row.key)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onPick(row.key);
-        }
-      }}
-    >
-      {body}
-    </div>
+    // The button is in the first cell and covers the row (0106): a `<tr>`
+    // cannot be a button, and a row that is one is no longer a row.
+    <tr className={`v2tbl__row is-clickable${active ? " is-active" : ""}`}>
+      {rowCells(body, (node) => (
+        <button type="button" className="v2rowbtn" onClick={() => onPick(row.key)}>
+          {node}
+        </button>
+      ))}
+    </tr>
   );
 }
 

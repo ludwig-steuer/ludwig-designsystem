@@ -134,13 +134,19 @@ export function TableLoading({ rows = 3, cols = 3 }: { rows?: number; cols?: num
   return (
     <>
       {Array.from({ length: rows }, (_, r) => (
-        <div className="v2tbl__row" key={r} aria-hidden>
+        <tr className="v2tbl__row" key={r} aria-hidden>
           {Array.from({ length: cols }, (_, c) => (
-            <span className="v2skel" key={c} style={{ width: c === 0 ? "70%" : "45%" }} />
+            <td key={c}>
+              <span className="v2skel" style={{ width: c === 0 ? "70%" : "45%" }} />
+            </td>
           ))}
-        </div>
+        </tr>
       ))}
-      <span className="sr-only">Wird geladen …</span>
+      <tr>
+        <td colSpan={999}>
+          <span className="sr-only">Wird geladen …</span>
+        </td>
+      </tr>
     </>
   );
 }

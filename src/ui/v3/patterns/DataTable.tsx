@@ -226,7 +226,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
       {selection ? <SelectAllCell /> : null}
       {expand ? <span /> : null}
       {columns.map((c) => headCell(c, sort, href))}
-      {rowActions ? <span className="v2actions">Aktionen</span> : null}
+      {rowActions ? <th scope="col" className="v2actions">Aktionen</th> : null}
     </HeadRow>
   );
 
@@ -331,10 +331,10 @@ function headCell<T>(
   const cls = col.align === "end" ? "v2num" : undefined;
   if (!col.sortable || !href) {
     return (
-      <span key={col.key} className={cls}>
+      <th key={col.key} scope="col" className={cls}>
         {col.header}
         {col.headerAside}
-      </span>
+      </th>
     );
   }
   const active = sort?.key === col.key;
@@ -344,7 +344,18 @@ function headCell<T>(
     ? `derzeit ${asc ? "aufsteigend" : "absteigend"}`
     : "derzeit nicht sortiert";
   return (
-    <span key={col.key} className={cls}>
+    // `aria-sort` is back where it belongs (0106): on the `columnheader`. It
+    // only ever worked there, and until the table was a real table there was
+    // no such element — 0094 measured it at a `<span>`, doing nothing. The
+    // `aria-label` of the link stays: it says the state in words, which is
+    // read out everywhere, while `aria-sort` is announced by some readers and
+    // not by others.
+    <th
+      key={col.key}
+      scope="col"
+      className={cls}
+      aria-sort={active ? (asc ? "ascending" : "descending") : "none"}
+    >
       <Link
         className="v2sortlink"
         href={href({ sort: col.key, dir: asc ? "desc" : "asc", page: 1 })}
@@ -354,7 +365,7 @@ function headCell<T>(
         {active ? <ActionIcon action={asc ? "sort-asc" : "sort-desc"} size={12} /> : null}
       </Link>
       {col.headerAside}
-    </span>
+    </th>
   );
 }
 

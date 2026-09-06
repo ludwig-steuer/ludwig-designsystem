@@ -42,7 +42,14 @@
   color: var(--color-text-muted);
 }
 
-/* --- Tabelle: Grid statt <table> --------------------------------------- */
+/* --- Tabelle: echtes <table>, Grid an der Zeile (0106) ------------------- */
+/* Bis 0106 war das hier ein Grid aus <div>s — ohne Zeilen, Spaltenköpfe und
+   Zellen. Der Umbau kostet kein Maß: das Grid sitzt an der **Zeile**, nicht am
+   Container, also behält jedes `tr` sein `grid-template-columns` samt `1fr`
+   und sein `gap`. Kein <colgroup>, kein einziges `role`. */
+.v2tbl, .v2tbl__body { display: block; }
+.v2tbl { border-collapse: collapse; width: 100%; text-align: left; }
+.v2tbl th, .v2tbl td { display: block; min-width: 0; font-weight: inherit; text-align: inherit; padding: 0; }
 /* `--v2-cols` setzt der Aufrufer (Table-Komponente), `--v2-min` optional für
    horizontales Scrollen bei vielen Spalten. */
 /* Dichte (0057 E9): drei Blöcke, ein Satz Maße. `default` steht am `.v2tbl`
@@ -100,8 +107,8 @@
 /* Letzte Zeile ohne Trennlinie (Baukasten-Regel 1). Eine `ExpandableRow` legt
    ihre Zeile in einen eigenen Wrapper, deshalb der zweite Selektor — sonst
    verlöre jede aufklappbare Zeile ihre Trennlinie statt nur der letzten. */
-.v2tbl > .v2tbl__row:last-child,
-.v2tbl > :last-child > .v2tbl__row { border-bottom: none; }
+.v2tbl__body > .v2tbl__row:last-child,
+.v2tbl__body > :last-child > .v2tbl__row { border-bottom: none; }
 .v2tbl__row.is-clickable { cursor: pointer; transition: background var(--duration-fast) var(--ease-standard); }
 .v2tbl__row.is-clickable:hover { background: var(--color-bg-soft); }
 /* Aktive Zeile im Master-Detail: 3-px-Akzentleiste links (Baukasten §10). */
@@ -150,7 +157,8 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
-/* Aufgeklappter Inhalt unter einer Zeile — kein Modal, kein Drawer. */
+/* Aufgeklappter Inhalt unter einer Zeile — kein Modal, kein Drawer. Er ist
+   jetzt eine eigene Zeile mit einer Zelle über alle Spalten. */
 .v2tbl__detail {
   padding: var(--v2-detail-y, 14px) 18px calc(var(--v2-detail-y, 14px) + 2px) 46px;
   background: var(--color-bg-soft);
@@ -3135,3 +3143,20 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* --- Sachverhalt als Zeile (0096) ----------------------------------------- */
 .v2caserow__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 8ch; }
 .v2caserow__count { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+
+/* Zeile, deren Bedienelement ein Knopf ist (0106): derselbe Weg wie
+   `.v2rowlink` — der Knopf liegt in der ersten Zelle und deckt die Zeile ab.
+   Vorher trug die Zeile `role="button"`; ein `<tr>` kann das nicht sein, und
+   eine Zeile, die eine Schaltfläche ist, ist keine Zeile mehr. */
+.v2rowbtn {
+  background: none; border: none; padding: 0; margin: 0; font: inherit;
+  color: inherit; text-align: inherit; cursor: pointer; width: 100%;
+}
+.v2tbl__row:has(.v2rowbtn) { position: relative; cursor: pointer; }
+.v2tbl__row:has(.v2rowbtn):hover { background: var(--color-bg-soft); }
+.v2rowbtn::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.v2tbl__row:has(.v2rowbtn) a,
+.v2tbl__row:has(.v2rowbtn) input,
+.v2tbl__row:has(.v2rowbtn) summary,
+.v2tbl__row:has(.v2rowbtn) button:not(.v2rowbtn) { position: relative; z-index: 2; }
+.v2rowbtn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; border-radius: var(--radius-sm); }

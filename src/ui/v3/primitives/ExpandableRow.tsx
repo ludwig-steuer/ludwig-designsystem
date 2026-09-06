@@ -1,8 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useId, useState } from "react";
 import { ActionIcon } from "../Icons";
+import { rowCells } from "./Table";
 
 /**
  * Die Client-Zwillinge von `Row` (F123 T123.1).
@@ -15,6 +16,12 @@ import { ActionIcon } from "../Icons";
 /**
  * Zeile mit `onClick` statt `href`. Ansonsten identisch zu `Row`.
  *
+ * Der Knopf sitzt in der **ersten Zelle** und deckt die Zeile über
+ * `.v2rowbtn::after` ab. Vorher trug die Zeile selbst `role="button"` — das
+ * ging nur, solange sie ein `<div>` war; ein `<tr>` kann keine Schaltfläche
+ * sein, und eine Zeile, die eine Schaltfläche ist, ist für eine Vorlesehilfe
+ * keine Zeile mehr (0106).
+ *
  * @when    The click does something client-side, such as selecting in MasterDetail.
  * @instead The target is a URL → Row with `href`.
  */
@@ -22,28 +29,26 @@ export function ClickRow({
   onClick,
   active,
   children,
+  label,
   className,
 }: {
   onClick: () => void;
   active?: boolean;
   children: ReactNode;
+  /** What the button is called when the first cell has no text of its own. */
+  label?: string;
   className?: string;
 }) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <tr
       className={`v2tbl__row is-clickable${active ? " is-active" : ""}${className ? ` ${className}` : ""}`}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick();
-        }
-      }}
     >
-      {children}
-    </div>
+      {rowCells(children, (node) => (
+        <button type="button" className="v2rowbtn" onClick={onClick} aria-label={label}>
+          {node}
+        </button>
+      ))}
+    </tr>
   );
 }
 
@@ -73,32 +78,34 @@ export function ExpandableRow({
   const [open, setOpen] = useState(defaultOpen);
   const id = useId();
   return (
-    <div>
-      <div
-        role="button"
-        tabIndex={0}
-        aria-expanded={open}
-        aria-controls={id}
-        className="v2tbl__row is-clickable"
-        onClick={() => setOpen((v) => !v)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setOpen((v) => !v);
-          }
-        }}
-      >
-        {lead}
-        <span className={`v2chev v2chev--icon${open ? " is-open" : ""}`}>
-          <ActionIcon action="collapse" size={12} />
-        </span>
-        {summary}
-      </div>
+    <>
+      <tr className="v2tbl__row is-clickable">
+        {rowCells(lead)}
+        <td className="v2tbl__chev">
+          {/* The chevron is the button, and it covers the row. It carries no
+              text of its own, so it says what it does. */}
+          <button
+            type="button"
+            className="v2rowbtn"
+            aria-expanded={open}
+            aria-controls={id}
+            aria-label={open ? "Zeile zuklappen" : "Zeile aufklappen"}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span className={`v2chev v2chev--icon${open ? " is-open" : ""}`}>
+              <ActionIcon action="collapse" size={12} />
+            </span>
+          </button>
+        </td>
+        {rowCells(summary)}
+      </tr>
       {open ? (
-        <div className="v2tbl__detail" id={id}>
-          {children}
-        </div>
+        <tr>
+          <td className="v2tbl__detail" id={id} colSpan={999}>
+            {children}
+          </td>
+        </tr>
       ) : null}
-    </div>
+    </>
   );
 }

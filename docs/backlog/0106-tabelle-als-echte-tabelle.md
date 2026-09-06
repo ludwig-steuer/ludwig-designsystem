@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | offen |
+| Status | Abnahme |
 | Stufe | `primitives/Table.tsx`, `Cells.tsx`, `ExpandableRow.tsx` · `patterns/DataTable.tsx`, `Review.tsx`, `ComparisonTable.tsx` · rund 20 Story-Dateien |
 | Quelle | 0094 (a), beim Beheben aufgeteilt — die Reparatur ist größer als der Befund |
 | Auftrag | Der v3-Tabellenfamilie fehlt jede Tabellensemantik. `.v2tbl` ist ein CSS-Grid aus `<div>`s: keine Zeilen, keine Spaltenköpfe, keine Zellen. Eine Vorlesehilfe kann darin nicht spaltenweise lesen — sie hört eine Folge von Texten. |
@@ -146,3 +146,89 @@ keine `row` sind, kündigt eine Tabelle an, in der die Vorlesehilfe nichts
 findet. Und der Befund selbst ist gemessen: der Baum von
 `DataTable --filled` zählt `link` 57, `button` 1, `navigation` 1, `time` 50
 — kein `table`, kein `row`, kein `columnheader`, keine `cell`.
+
+## Spec 2026-09-06 — der Weg, und warum er billiger ist als gedacht
+
+Freigegeben vom Owner über `designsystem-f0` am 2026-09-06, **vor** Welle 2
+der App: dort wandern dreizehn Listenseiten auf `DataTable`. Der Umbau muss
+vorher passieren, sonst migriert die App auf eine Semantik, die gleich wieder
+geändert wird.
+
+### Entscheid: echtes `<table>`, keine Rollen
+
+Der Rollen-Weg des ersten Zuschnitts ist verworfen. Befund B2 der 0094-Abnahme
+hat gemessen, dass ein `<table>` seine Semantik behält, wenn `display`
+überschrieben wird — und Befund B3, dass das Grid an der **Zeile** sitzt, nicht
+am Container. Damit behält jedes `<tr>` sein `grid-template-columns` samt `1fr`
+und sein `gap`; kein `<colgroup>`, keine Übersetzung der `cols`-Angaben, kein
+einziges `role`-Attribut. Und 0091 erledigt sich mit: die Story-Dateien, die
+heute `<th>`/`<td>` in `div`-Bausteine schreiben, sind danach richtig.
+
+### Zuschnitt
+
+1. `Table` → `<table>` mit `<tbody>`; `HeadRow` → `<tr>` mit `<th scope="col">`;
+   `Row`/`GroupRow`/`EmptyRow` → `<tr>`; Gruppen-, Leer- und Detailzeile mit
+   `colSpan`.
+2. **Die Zellen wrappt der Baustein**, nicht der Aufrufer: `cells()` in
+   `Table.tsx` flacht Fragmente ab, überspringt `null` (wie das Grid es tat)
+   und lässt bereits geschriebene `td`/`th` durch. So bleiben rund vierzig
+   Aufrufstellen unverändert.
+3. **Fünf klickbare Formen** ziehen ihr Bedienelement in die erste Zelle
+   (Befund B1): `Row href`, `ClickRow`, `ExpandableRow`, `ComparisonTable`,
+   `Checklist`. Für Links gab es `.v2rowlink` schon; für Knöpfe kommt
+   `.v2rowbtn` mit derselben Overlay-Regel dazu. Ein `<tr>` kann weder Link
+   noch Schaltfläche sein — und eine Zeile, die eine Schaltfläche ist, ist für
+   eine Vorlesehilfe keine Zeile mehr.
+4. `aria-sort` kehrt an den `columnheader` zurück. Das `aria-label` des
+   Sortier-Links aus 0094 **bleibt**: es sagt den Stand in Worten und wird
+   überall vorgelesen, während `aria-sort` je nach Vorlesehilfe angesagt wird
+   oder nicht.
+5. `rowCells()` wird exportiert — die Client-Zwillinge bauen ihr `<tr>` selbst
+   und brauchen dieselbe Zellenteilung.
+
+### Abnahmekriterien
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Der Baum einer Tabellen-Story trägt `table`, `row`, `columnheader`, `cell` (gemessen über `Accessibility.getFullAXTree`)
+- [ ] `aria-sort` steht am `th` der sortierten Spalte, `none` an den anderen sortierbaren
+- [ ] Keine Zeile trägt mehr `role="button"`; die fünf klickbaren Formen haben ihr Bedienelement in der ersten Zelle
+- [ ] Kein Aufrufer musste seine Zellen ändern (`git diff --stat`: nur Bausteine und CSS)
+- [ ] **Alle Tabellen-Stories stehen unverändert im Bild** — Kopf und Zeilen enden an derselben Kante, kein Überlauf, Zeilenhöhe wie zuvor; gemessen bei **vier** Breiten (1440 · 1100 · 900 · 700)
+- [ ] Konsole ohne Meldung in allen Tabellen-Stories (kein `<div>` in `<tr>`, kein `<span>` als Zelle)
+- [ ] 0091 ist damit erledigt: `<th>`/`<td>` in Story-Dateien sind gültig
+
+### Gemessen (2026-09-06, Chromium headless)
+
+**Der Baum trägt die Tabelle.** Vorher zählte `DataTable --filled` `link` 57,
+`button` 1 — und **kein** `table`, `row`, `columnheader`, `cell`. Danach:
+`table` 1 · `row` 51 · `columnheader` 5 · `cell` 250. `Table --filled`:
+`table` 1 · `row` 7 · `columnheader` 4 · `cell` 18. `CaseRow --in-use`:
+`table` 1 · `row` 6 · `columnheader` 10 · `cell` 50.
+
+**`aria-sort` steht am `th`:** in `DataTable --filled` trägt „Eröffnet"
+`descending`, „Betrag" und „Bearbeitungsstand" `none`, die zwei nicht
+sortierbaren Spalten gar keins.
+
+**Kein Aufrufer musste sich ändern.** `git diff --stat` des Umbaus: acht
+Dateien, alle Bausteine oder CSS — keine Story, keine Entität, keine Seite.
+
+**Vier Breiten, 132 Tabellen-Stories** (1440 · 1100 · 900 · 700): Kopf und
+Zeilen enden an derselben Kante, Zeilenhöhen unverändert. Zwei Ausnahmen, beide
+**nicht** durch diesen Umbau entstanden:
+
+## Befund für 0057 — die Aktionsspalte ist `max-content` und driftet
+
+Gemessen an `datatable--row-actions` bei 700 px: der Spaltenkopf löst die Spur
+auf **54,2 px** auf („Aktionen"), die Zeile auf **176,4 px** (zwei Knöpfe) —
+Kopf und Zeilen enden 122 px auseinander. Das ist derselbe Fehler wie
+`width: "1fr"` (behoben in `399b38a`): eine inhaltsbemessene Spur wird von
+Kopf und Zeile **getrennt** gerechnet, weil beide eigene Grids sind.
+
+`max-content` steht in `DataTable` fest (`rowActions ? "max-content" : null`)
+und ist keine Frage der Tabellensemantik, sondern der Spaltenmaße — deshalb
+hier als Befund und nicht als Teil dieses Umbaus. Der Weg ist ein festes Maß
+mit einem Token, das ein Aufrufer mit breiten Aktionen hochsetzen kann.
+
+*Die übrigen 66 Auffälligkeiten des Durchlaufs waren Messfehler meines
+Sweeps:* er las `scrollWidth` an `.v2tbl` auch dort, wo `.v2tbl__scroll` und
+`.v2tbl__inner` das horizontale Scrollen absichtlich tragen (`minWidth`).
