@@ -139,14 +139,12 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 /* Zwischenüberschrift über eine volle Zeile — nicht Fettdruck in Spalte 1. */
 .v2tbl__group {
   padding: 7px 18px;
-  font-size: 11px;
+  font-size: var(--fs-ui-sm);
   font-weight: 700;
   color: var(--color-text-muted);
   background: var(--color-bg-soft);
   border-top: 1px solid var(--color-border-subtle);
   border-bottom: 1px solid var(--color-border-subtle);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 /* Aufgeklappter Inhalt unter einer Zeile — kein Modal, kein Drawer. */
@@ -422,8 +420,7 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 .pz-stepper > div.is-failed { border-top-color: var(--color-danger); }
 
 .pz-stepper .phase {
-  font-size: 12px; font-weight: 700; letter-spacing: 0.05em;
-  text-transform: uppercase; color: var(--color-text-subtle);
+  font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-subtle);
 }
 .pz-stepper > div.is-done .phase,
 .pz-stepper > div.is-active .phase { color: var(--color-primary); }
@@ -621,8 +618,7 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 /* --- Filter-Chips ------------------------------------------------------- */
 .v2chips { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .v2chips__label {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--color-text-subtle);
+  font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text-subtle);
 }
 .v2chip {
   border: 1px solid var(--color-border-strong);
@@ -652,8 +648,8 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   padding: 14px 16px;
 }
 .v2kpi__label {
-  font-size: 11px; color: var(--color-text-muted);
-  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
+  font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text-muted);
+  margin-bottom: 6px;
 }
 .v2kpi__val {
   font-size: 19px; font-weight: 600; color: var(--color-primary);
@@ -670,7 +666,7 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 }
 .v2fields--soft { background: var(--color-bg-soft); }
 .v2fields__h {
-  font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: var(--fs-ui-sm); font-weight: 700;
   color: var(--color-text-muted);
   border-bottom: 1px solid var(--color-border-subtle);
   padding-bottom: 10px; margin-bottom: 12px;
@@ -692,7 +688,7 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   padding: var(--space-5);
 }
 .v2prose__h {
-  font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: var(--fs-ui-sm); font-weight: 700;
   color: var(--color-text-muted); margin-bottom: 10px;
 }
 .v2prose__body { font-size: 13.5px; line-height: 1.6; color: var(--color-text); }
@@ -713,7 +709,7 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 .v2callout--warning { border-color: var(--color-warning); }
 .v2callout--danger { border-color: var(--color-danger); }
 .v2callout__kicker {
-  font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: var(--fs-ui-xs); font-weight: 600;
   color: var(--color-text-subtle); margin-bottom: 6px;
 }
 .v2callout--warning .v2callout__kicker { color: var(--color-warning); }
@@ -769,7 +765,7 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
   display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
 }
 .v2dlg__kicker {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  font-size: var(--fs-ui-xs); font-weight: 600;
   color: var(--color-text-subtle); margin-bottom: 3px;
 }
 .v2dlg__title { font-size: 15px; font-weight: 600; color: var(--color-text); }
@@ -852,8 +848,26 @@ a.v2tbl__row { text-decoration: none; color: inherit; }
 
 /* --- Formular ------------------------------------------------------------ */
 .v2field { display: flex; flex-direction: column; gap: 4px; }
+/* --- Beischriften ohne Versalien (0089) ---------------------------------
+   T3 verbietet Versalien und nennt `text-transform: uppercase` als
+   Gegenbeispiel; A2 sagt dasselbe für den Spaltenkopf. Die Beschriftungen des
+   Sets standen trotzdem in Overline-Typografie: 11 px, Sperrung, Versalien.
+
+   Drei Rollen, drei Stufen — die Farbe bleibt je Regel, wie sie war (der
+   Kontrast ist Sache von 0090):
+
+   · **Beschriftung eines Wertes** (Feld, Kennzahl, Chip-Reihe): 12,5 px, 600.
+     Dieselbe Stufe wie die linke Spalte einer `FieldList` — ein Wort liest
+     sich gleich, ob das Feld beschreibbar ist oder nicht.
+   · **Überzeile** über einem Titel (Kicker, Art): 11,5 px, 600. Sie steht
+     unter einem Titel, nicht neben einem Wert; Größe und Farbe trennen sie,
+     nicht die Schreibweise.
+   · **Gruppen- und Abschnittskopf**: 12,5 px, 700. Ein Kopf trägt sein
+     Gewicht, dazu meist schon Fläche und Linie.
+
+   Die Sperrung fällt überall weg: sie war für Versalien da. */
 .v2field__label {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: var(--fs-ui-sm); font-weight: 600;
   color: var(--color-text-muted);
 }
 .v2field__hint { font-size: 12px; color: var(--color-text-subtle); }
@@ -1069,7 +1083,7 @@ select.v2in { padding-right: 26px; }
   padding: 12px 16px;
   background: var(--color-surface-head);
   border-bottom: 1px solid var(--color-border);
-  font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  font-size: var(--fs-ui-sm); font-weight: 700;
   color: var(--color-text-subtle);
   display: flex; justify-content: space-between; gap: 8px;
 }
@@ -1239,7 +1253,7 @@ select.v2in { padding-right: 26px; }
   padding: 7px 12px;
   background: var(--color-surface-head);
   border-bottom: 1px solid var(--color-border-subtle);
-  font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: var(--fs-ui-sm); font-weight: 700;
   color: var(--color-text-subtle);
   position: sticky; top: 0;
 }
@@ -1337,8 +1351,7 @@ select.v2in { padding-right: 26px; }
 }
 a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .ki__art {
-  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
-  color: var(--color-text-subtle);
+  font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-subtle);
 }
 .ki__quote { font-style: italic; color: var(--color-text-subtle); }
 .ki__src svg { align-self: center; flex: 0 0 auto; }
@@ -1375,8 +1388,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   align-items: center;
 }
 .bse__head {
-  font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em;
-  color: var(--color-text-subtle); font-weight: 600;
+  font-size: var(--fs-ui-sm); font-weight: 700;
+  color: var(--color-text-subtle);
   padding-bottom: 6px;
   border-bottom: 1px solid var(--color-border-subtle);
 }
@@ -2101,8 +2114,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2fields--cols .v2fields__row { display: block; padding: 0; }
 .v2fields--cols .v2fields__row > span:first-child {
   display: block;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-  color: var(--color-text-subtle);
+  font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text-subtle);
 }
 .v2fields--cols .v2fields__row > span:last-child {
   display: block; text-align: left; margin-top: 2px;
@@ -2172,7 +2184,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2ehead__id { min-width: 0; margin-right: auto; }
 .v2ehead__over {
-  font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: var(--fs-ui-xs); font-weight: 600;
   color: var(--color-text-subtle); margin-bottom: 3px;
 }
 .v2ehead__title {
@@ -2194,8 +2206,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2ehead__metric { flex: 0 0 auto; text-align: right; }
 .v2ehead__metric__label {
-  font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-  color: var(--color-text-subtle);
+  font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text-subtle);
 }
 .v2ehead__metric__value { font-size: 20px; font-weight: 600; line-height: 1.2; margin-top: 2px; }
 .v2ehead__actions { flex: 0 0 auto; display: flex; align-items: center; gap: var(--space-3); }
@@ -2281,10 +2292,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* Überschrift über den Kern-Fakten — kleiner als der Drawer-Titel, damit die
    Zone erkennbar ist, ohne eine zweite Ebene aufzumachen. */
 .v2doc__h {
-  font-size: var(--fs-ui-2xs);
+  font-size: var(--fs-ui-sm);
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   color: var(--color-text-subtle);
   margin-bottom: var(--space-2);
 }
