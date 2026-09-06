@@ -70,13 +70,32 @@ export const AllPassed: Story = {
   ),
 };
 
-/** Noch nichts gerechnet: die Zähler bleiben leer statt zu raten. */
-export const Loading: Story = {
+/**
+ * Noch nichts gerechnet: die Prüfungen stehen, aber keine ist gelaufen — die
+ * Zähler bleiben leer statt zu raten. Das ist **nicht** der Ladezustand,
+ * sondern ein Ergebnis; deshalb heißt die Story so und nicht `Loading`
+ * (0109).
+ */
+export const NotCounted: Story = {
   render: () => (
     <Checklist
       rows={ROWS.map((z) => ({ ...z, state: "open", counter: undefined, progress: null }))}
     />
   ),
+};
+
+/**
+ * Während die Prüfungen laufen: der Spaltenkopf steht, die Zeilen sind
+ * Flächen in ihrer Zahl. Ohne das las sich die leere Tabelle wie „alles
+ * offen, nichts getan" — das Gegenteil dessen, was gerade passiert (0109).
+ */
+export const Loading: Story = {
+  render: () => <Checklist rows={ROWS} loading />,
+};
+
+/** Ohne bekannte Zeilen sind es vier Flächen — die Karte fällt nicht zusammen. */
+export const LoadingEmpty: Story = {
+  render: () => <Checklist rows={[]} loading />,
 };
 
 /** Die neun Zustands-Icons — Lucide statt Sonderzeichen (V7). */

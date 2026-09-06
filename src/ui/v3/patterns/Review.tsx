@@ -10,6 +10,7 @@ import {
   XCircle,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { TableLoading } from "../primitives/Cells";
 import { Progress } from "../primitives/Progress";
 
 /**
@@ -102,10 +103,17 @@ export function Checklist({
   rows,
   activeKey,
   onPick,
+  loading,
 }: {
   rows: ChecklistRow[];
   activeKey?: string;
   onPick?: (key: string) => void;
+  /**
+   * The checks are still running. Without this the table stood there with its
+   * column heads and **no rows** — and that reads as „nothing open, nothing
+   * done", the opposite of what is happening (V9/T6, 0109).
+   */
+  loading?: boolean;
 }) {
   const cols = "20px 1fr 76px 100px 150px";
   return (
@@ -118,9 +126,17 @@ export function Checklist({
           <span>Fortschritt</span>
           <span>Sprung</span>
         </div>
-        {rows.map((r) => (
-          <ChecklistLine key={r.key} row={r} active={r.key === activeKey} onPick={onPick} />
-        ))}
+        {loading ? (
+          // Die Form des Inhalts, nicht ein Kasten: so viele Zeilen, wie
+          // kommen werden — und mindestens vier, damit die Karte nicht in
+          // sich zusammenfällt. Der Spaltenkopf bleibt stehen; er ist die
+          // Zusage, was kommt.
+          <TableLoading rows={Math.max(rows.length, 4)} cols={5} />
+        ) : (
+          rows.map((r) => (
+            <ChecklistLine key={r.key} row={r} active={r.key === activeKey} onPick={onPick} />
+          ))
+        )}
       </div>
     </div>
   );
