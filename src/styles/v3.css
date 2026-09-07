@@ -3281,7 +3281,6 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 
 /* --- Offene Posten (0029) ------------------------------------------------- */
-.v2oi__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 8ch; }
 .v2oi__group { display: flex; justify-content: space-between; gap: var(--space-4); width: 100%; }
 .v2oi__groupnum { color: var(--color-text-muted); font-variant-numeric: tabular-nums lining-nums; }
 
@@ -3321,7 +3320,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Name steht, dessen Länge niemand begrenzt. Ohne sie kostet ein zu langer
    Wert nicht Breite, sondern **Höhe**: gemessen 67 px statt 47 in der
    Kontenliste (Abnahme 0062). `.v2caserow__name` war dieselbe Regel unter
-   einem Namen, der nur der Fallzeile gehört. */
+   einem Namen, der nur der Fallzeile gehört.
+
+   **Und sie wird nicht ein zweites Mal erfunden.** 0029 hatte daneben eine
+   eigene `.v2oi__text` gestellt — mit denselben drei Angaben, aber ohne
+   `display: block`. Auf einer Inline-Box wirkt keine davon: gemessen lief der
+   Buchungstext 1.035 px breit durch eine 182-px-Zelle, quer über vier
+   Spalten. Wer eine Zelle kürzen will, nimmt diese Klasse. */
 .v2trunc,
 .v2caserow__name {
   display: block; min-width: 0;

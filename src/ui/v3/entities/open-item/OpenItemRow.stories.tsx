@@ -242,9 +242,14 @@ export const InUse: Story = {
     <Frame sub="Stichtag 31.08.2026 · 5 Posten · 6.782,45 € offen">
       <OpenItemAgeGroup group={{ bucket: "d1_30", count: 1, sum: 1249.9 }} />
       <OpenItemRow item={ITEMS[0]!} asOf={AS_OF} />
-      <OpenItemAgeGroup group={{ bucket: "d90plus", count: 2, sum: 852 }} />
+      {/* Die fünfte Klasse `d61_90` stand in keiner Story — jetzt steht sie
+          hier, damit alle fünf einmal gezeigt sind (Abnahme 0029, M6). */}
+      <OpenItemAgeGroup group={{ bucket: "d61_90", count: 1, sum: 480 }} />
       <OpenItemRow item={ITEMS[3]!} asOf={AS_OF} />
-      <OpenItemRow item={ITEMS[4]!} asOf={AS_OF} />
+      <OpenItemAgeGroup group={{ bucket: "d90plus", count: 1, sum: 372 }} />
+      {/* Ein Posten in Franken: `currency` lief bis hierhin auf dem Default,
+          hatte also keinen Nachweis (M7). */}
+      <OpenItemRow item={ITEMS[4]!} asOf={AS_OF} currency="CHF" />
     </Frame>
   ),
 };

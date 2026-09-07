@@ -83,22 +83,36 @@ function Cells({
           axis `konto_typ` already carries both words (R1). */}
       <span>{resolveStatus(KIND_AXIS, item.kind).label}</span>
       <MonoCell value={item.personalAccount} />
-      <MonoCell value={item.externalDocumentNumber} />
+      {/* Document number 1 holds up to 36 characters (DATEV), the fixtures
+          reach 12 — the track was measured against them (M2). It truncates
+          like every other cell whose length nobody bounds. */}
+      <span className="v2trunc">
+        <MonoCell value={item.externalDocumentNumber} title={item.externalDocumentNumber ?? undefined} />
+      </span>
       <Time value={item.invoiceDate} format="date" length="short" size="sm" />
       <Time value={item.dueDate} format="date" length="short" size="sm" />
-      <span className="v2oi__text" title={item.description ?? undefined}>
+      <span className="v2trunc" title={item.description ?? undefined}>
         {item.description ?? <span className="v2muted">—</span>}
       </span>
       <span>
-        {/* The dunning level as a **word**, and only above zero — `null` is an
-            old snapshot, `0` is „not dunned yet". Two different silences. */}
+        {/* The dunning level as a **word**, and only above zero. `null` (an old
+            snapshot) and `0` (not dunned yet) look the same here, and that is
+            deliberate: the row has no place for the difference, and neither
+            reading changes what to do. Whoever needs it reads the snapshot
+            (acceptance of 0029, M8 — the comment claimed a distinction the
+            cell does not make). */}
         {item.dunningLevel ? `${item.dunningLevel}. Mahnung` : <span className="v2muted">—</span>}
       </span>
       <span>
+        {/* The (i) belongs to the column head, not to every row — that is
+            what `case-columns`, `source-document-columns` and `DataTable` do
+            (acceptance of 0029, M3). Twenty rows would otherwise carry twenty
+            buttons to the same legend. */}
         <StatusBadge
           axis="opos_ausgleich"
           status={item.clearedAfterStichtag ? "spaeter_ausgeglichen" : "offen"}
           note={`Stichtag ${formatTime(asOf, "date")}`}
+          info={false}
         />
       </span>
       <AmountCell value={item.grossAmount} currency={currency} />
