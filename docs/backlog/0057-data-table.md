@@ -344,3 +344,39 @@ Tablet-Ziel. Darunter Sperre mit einem Satz" fest, und `AppShell` (0030) setzt
 sie um. Der Satz steht hier, damit niemand die Messung später als offene
 Aufgabe missversteht: an der Grenze selbst (1280 px) ist die Leiste einzeilig,
 in jeder gemessenen Liste.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**Der Ladefall zählte die Griff-Spuren nicht mit.** `TableLoading` bekam
+`cols={columns.length}` — die Spuren für Auswahl, Aufklapp-Griff und Aktionen
+fehlten. Die Folge war keine Kleinigkeit: die ganze Ladezeile rutschte um eine
+Spur nach links, der erste Balken lag im 32-px-Auswahlkästchen, und die letzte
+Spur blieb leer. Gemessen an `BankTransactionWorklist/LoadingAndError`: Kopf
+sechs Zellen und Kante 1247, Ladezeile fünf Zellen und Kante 1107 — 140 px
+Unterschied. Gefunden hat es die Abnahme von 0086; die Ursache liegt hier, und
+es trifft **jede** Liste mit `selection`, `expand` oder `rowActions`.
+
+`TableLoading` nimmt jetzt `leadingCols` und `trailingCols`: Spuren ohne
+eigenen Inhalt bekommen ihre Zelle, aber **keinen Balken** — ein Balken im
+Auswahlkästchen sähe aus wie eine ladende Checkbox, und die Aktionsspalte hat
+keine Daten. `DataTable` rechnet die Zahlen aus denselben drei Props, aus
+denen es auch seine Spuren baut.
+
+Nachgemessen nach der Reparatur, je Kopfzelle gegen Ladezelle:
+
+| Story | Kopf | Ladezeilen | Kanten |
+|---|---|---|---|
+| `BankTransactionWorklist/LoadingAndError` | 6 | 6 | 67 · 177 · 367 · 897 · 1107 · 1247, deckungsgleich |
+| `DataTable/Loading` | 5 | 5 | 145 · 905 · 1045 · 1245 · 1405, deckungsgleich |
+| `AccountEntries/Lädt` | 7 | 7 | 118 · 152 · 258 · 393,6 · 490 · 604 · 718, deckungsgleich |
+| `Table/Loading` | 4 | 4 | 975 · 1105 · 1265 · 1405, deckungsgleich |
+| `Zellen/Loading` | 5 | 5 | 225 · 345 · 505 · 625 · 1405, deckungsgleich |
+
+Der erste Balken liegt jetzt bei x = 77 statt 22,4 — hinter dem Kästchen, das
+bei 67 endet.
+
+### Abnahmekriterium (Nachtrag)
+
+- [ ] Im Ladezustand hat jede Zeile so viele Zellen wie die Kopfzeile, und die
+      rechten Kanten sind deckungsgleich — gemessen, mit `selection`,
+      `expand` und `rowActions` je einzeln und zusammen

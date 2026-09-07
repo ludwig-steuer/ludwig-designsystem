@@ -77,9 +77,15 @@ export const Filled: Story = {
 };
 
 /**
- * Vier Spalten statt sieben: kein DATEV-Haken, keine Sachverhalts-Spalte —
- * beide sagten hier in **jeder** Zeile dasselbe. `columns` zeigt, dass der
- * Aufrufer den Satz erweitern darf, ohne die Reihenfolge zu ändern.
+ * **Erweitern, nicht umordnen.** Der Vorgabesatz ist Datum · Gegenpartei ·
+ * Verwendungszweck · Sachverhalt · Betrag; hier kommt `matchStage` dazu — und
+ * `columns` wird **verwürfelt** übergeben. Die Kopfzeile steht trotzdem in der
+ * Reihenfolge des Katalogs: `columns` wählt aus, es ordnet nicht um.
+ *
+ * Der Satz muss dafür eine **Obermenge** der Vorgabe sein. Vorher fehlte
+ * `cases` darin, und die Story zeigte fünf Spalten mit DATEV **anstelle** des
+ * Sachverhalts — bewiesen war damit „ordnet nicht um", nicht „erweitert"
+ * (Abnahme 2026-09-07, M2 und M3).
  */
 export const WithMatchStage: Story = {
   render: () => (
@@ -88,9 +94,7 @@ export const WithMatchStage: Story = {
         transactions={OPEN}
         caseHref={caseHref}
         head={HEAD}
-        // **Verwürfelt übergeben** — die Kopfzeile muss trotzdem in der
-        // Reihenfolge des Katalogs stehen: `columns` wählt aus, es ordnet nicht um.
-        columns={["amount", "matchStage", "purpose", "postingDate", "counterparty"]}
+        columns={["matchStage", "amount", "purpose", "cases", "postingDate", "counterparty"]}
         bulkActions={[]}
       />
     </div>
@@ -133,6 +137,18 @@ export const AllOfAnAccount: Story = {
               },
             ],
             allocatedSum: 1249.9,
+          }),
+          // Ohne Gegenpartei — dann trägt der Verwendungszweck den Zeilenlink
+          // (N4). Bis zur Abnahme vom 2026-09-07 zeigte das keine Story dieser
+          // Liste: die namenlose Zeile stand in `Filled`, wo es keinen Link
+          // gibt, und der Link in dieser hier, wo jede Zeile einen Namen hat.
+          T({
+            id: "a-2",
+            postingDate: "2026-08-25",
+            amount: -89.9,
+            counterpartyName: null,
+            purpose: "SEPA-Lastschrift Kartenzahlung 8842",
+            matchStage: "none",
           }),
         ]}
         caseHref={caseHref}

@@ -266,34 +266,56 @@ export const ContraAccountEditable: Story = {
 /**
  * Was **nur** der Editor kann, in einer Story: die drei Schnellaktionen
  * (`quickActions`, mit Alt+K/W/P am Knopf), der Weg zum Steuerschlüssel
- * (`onOpenTaxKey`) und die Sperre (`locked`) samt Storno-Grund.
+ * (`onOpenTaxKey`), die Sperre (`locked`) samt Storno-Grund — und die drei
+ * Wege aus dem Lesezustand heraus: `onEdit` schreibt den Satz um, `onDelete`
+ * storniert ihn, `deletable` entscheidet, ob es den Weg überhaupt gibt.
  *
- * Diese vier Props hatten bis zum Schnitt keinen Nachweis: die Datei lag mit
+ * Diese Props hatten bis zum Schnitt keinen Nachweis: die Datei lag mit
  * 17 Stories über der Grenze, und zwei davon standen ausdrücklich als offene
  * Lücke in 0015 (M11). Nach dem Schnitt ist Platz — das Lesen zeigt jetzt
- * `JournalEntryGrid` (0113).
+ * `JournalEntryGrid` (0113). Der dritte Block hier ist der Nachtrag der
+ * Abnahme vom 2026-09-07: `onEdit`, `onDelete` und `deletable` hingen an den
+ * acht entfernten Lese-Stories und standen danach ohne da.
  */
 export const S20_EditorOnly: Story = {
-  render: () => (
-    <Frame>
-      <JournalEntryEditor
-        {...BASE}
-        editable
-        quickActions={{
-          klaerungskonto: () => {},
-          wieLetzte: () => {},
-          privatanteil: () => {},
-        }}
-        onOpenTaxKey={() => {}}
-      />
-      <div style={{ height: "var(--space-5)" }} />
-      <JournalEntryEditor
-        {...BASE}
-        status="reversed"
-        editable={false}
-        locked={{ reason: "Der Satz ist storniert und nicht mehr zu ändern." }}
-        reversedReason="Doppelt erfasst, siehe RE-4471-B."
-      />
-    </Frame>
-  ),
+  render: function Render() {
+    const [protokoll, setProtokoll] = useState<string[]>([]);
+    return (
+      <Frame>
+        <JournalEntryEditor
+          {...BASE}
+          editable
+          quickActions={{
+            klaerungskonto: () => {},
+            wieLetzte: () => {},
+            privatanteil: () => {},
+          }}
+          onOpenTaxKey={() => {}}
+        />
+        <div style={{ height: "var(--space-5)" }} />
+        <JournalEntryEditor
+          {...BASE}
+          status="reversed"
+          editable={false}
+          locked={{ reason: "Der Satz ist storniert und nicht mehr zu ändern." }}
+          reversedReason="Doppelt erfasst, siehe RE-4471-B."
+        />
+        <div style={{ height: "var(--space-5)" }} />
+        {/* Lesend, aber mit beiden Wegen hinaus: „Ändern" und „Löschen".
+            `deletable` ohne `onDelete` zeigte keinen Knopf — die Taste gäbe
+            es, aber nichts täte sie (V14). */}
+        <JournalEntryEditor
+          {...BASE}
+          status="accepted"
+          editable={false}
+          deletable
+          onEdit={() => setProtokoll((p) => [...p, "Ändern"])}
+          onDelete={(grund) => setProtokoll((p) => [...p, `Storniert: ${grund}`])}
+        />
+        <p className="v2muted">
+          {protokoll.length === 0 ? "Noch nichts ausgelöst." : protokoll.join(" · ")}
+        </p>
+      </Frame>
+    );
+  },
 };

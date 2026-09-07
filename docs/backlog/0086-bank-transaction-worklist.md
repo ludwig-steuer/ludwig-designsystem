@@ -38,7 +38,7 @@ serverseitig gibt es die Zuordnung nur je Zeile (**L-16**).
 - **Setzt auf:** `DataTable` (0057), `bankTransactionColumns` (0101),
   `BulkAction` (`primitives/Selection`).
 
-### Vier Spalten statt sieben
+### Fünf Spalten statt sieben
 
 `WORKLIST_COLUMNS = postingDate · counterparty · purpose · cases · amount` —
 die Ränge 1–4 und 6 des Profils. Weggelassen ist **nur** die DATEV-Historie:
@@ -372,3 +372,50 @@ sechs Stories. `typecheck`, `build`, `check:icons`, `check:contrast`: Exit 0.
 |---|---|
 | Abgenommen von / am | Claude (fremde Abnahme, nicht der Bau), 2026-09-07 |
 | Ergebnis | **zurück** — blockierend sind 1, 2 und 3 |
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+Die drei blockierenden Mängel sind behoben, zwei der kleinen ebenfalls.
+
+**M1 lag nicht hier, sondern in `DataTable`** (0057): `TableLoading` bekam nur
+die Zahl der Datenspalten, nicht die Griff-Spuren. Behoben ist es dort, samt
+Kriterium und Messung über fünf Listen; hier fluchten Kopf und Ladezeilen jetzt
+auf allen sechs Kanten (67 · 177 · 367 · 897 · 1107 · 1247), und der erste
+Balken liegt bei x = 77 statt bei 22,4 im Auswahlkästchen.
+
+**M2 und M3 gehören zusammen.** `WithMatchStage` übergab
+`["amount","matchStage","purpose","postingDate","counterparty"]` — darin fehlt
+`cases`, also war es **keine** Obermenge des Vorgabesatzes, und gezeigt wurden
+fünf Spalten mit DATEV **anstelle** des Sachverhalts. Bewiesen war damit „ordnet
+nicht um", nicht „erweitert". Der Satz ist jetzt
+`["matchStage","amount","purpose","cases","postingDate","counterparty"]`,
+weiterhin verwürfelt; gemessen stehen sechs Spalten in Katalogreihenfolge:
+Datum · Gegenpartei · Verwendungszweck · Sachverhalt · DATEV-Historie · Betrag.
+Die Bildunterschrift, die das Gegenteil behauptete, ist mit ihr neu
+geschrieben — und die Überschrift der Spec sagt jetzt „Fünf Spalten statt
+sieben", wie sie darunter aufzählt.
+
+**M6 — der Rückfall des Zeilenlinks hat seine Story.** Fehlt die Gegenpartei,
+trägt der Verwendungszweck den Link (N4). Das zeigte keine Story dieser Liste:
+die namenlose Zeile stand in `Filled` ohne Link, der Link in `AllOfAnAccount`
+ohne namenlose Zeile. `AllOfAnAccount` hat jetzt eine — gemessen trägt sie den
+Link in derselben Zelle 2 wie die drei benannten.
+
+**S1 — der Ausschluss steht im Typ.** Der Kommentar an `rowHref` sagte,
+`DataTable` erzwinge den Ausschluss gegen `expand` nicht. Das stimmte nicht:
+0057 hat dafür seit jeher eine diskriminierte Union. Diese Liste hat sie jetzt
+auch, und die Laufzeit-Bedingung `rowHref && !expand`, die stillschweigend die
+Prop fallen ließ, ist weg. Gegenprobe: beides zusammen übergeben ergibt einen
+Typfehler.
+
+**S2 — zwei redundante Regeln sind weg.** Seit `.v2skel` selbst `display: block`
+setzt, brauchten `.v2doc__origskel` und `.v2doc__headskel` es nicht mehr; beide
+Klassen stehen ohnehin immer zusammen mit `.v2skel` am selben Element. Nach dem
+Löschen im Bild gegengemessen: unverändert 180×22 und 1018×620.
+
+**M5 bleibt offen, mit Grund.** Das Kriterium sagt „grep auf `CasePicker`: 0
+Treffer", und es ist einer da — im **Fließtext** eines Story-JSDocs, der
+erklärt, warum die Liste keinen öffnet. Der Text ist die Begründung einer
+Entscheidung; ihn zu löschen, um einen grep zu befriedigen, hieße die
+Begründung gegen die Prüfung zu tauschen. Gemeint war „kein Import, keine
+Nutzung" — und das gilt.

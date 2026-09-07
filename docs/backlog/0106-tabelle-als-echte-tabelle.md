@@ -329,3 +329,20 @@ Darstellung eine Tabelle ist. Und: eine Messung, die Spurkanten vergleicht,
 sieht keine Zelle, die zu schmal ist, wenn sie allein in ihrer Zeile steht.
 Dieselbe Klasse Fehler wie der Befund aus 0106 selbst — „ein Raster kann
 stimmen, während jeder Inhalt darin verrutscht ist".
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**Regression, gefunden von der Abnahme 0089 am 2026-09-07: die Zwischenzeile
+verlor ihr Gewicht.** `.v2tbl th, .v2tbl td { font-weight: inherit }` (Z. 52)
+schlägt `.v2tbl__group` mit 0-1-1 gegen 0-1-0 — dieselbe Falle, die dieser
+Umbau fürs **Polster** schon entschärft hat (Z. 108), nur eben nicht fürs
+Gewicht. Die Zwischenüberschrift stand seither auf 400 und sah aus wie eine
+Datenzeile.
+
+Gemessen vor der Reparatur an `AccountColumns/Grouped`: `font-weight: 400`;
+danach 700, ebenso in `OpenItemRow/Grouped` und `OpenItemRow/InUse` — eine
+einzige Ausprägung (700 / 12,5 px / 7px 18px) über alle Zwischenzeilen des
+Bestands.
+
+Die Reparatur steht in derselben Zeile wie das Polster, auf der Spezifität des
+Resets: `.v2tbl td.v2tbl__group { padding: 7px 18px; font-weight: 700; }`.

@@ -505,3 +505,13 @@ Abgenommen von / am: **abgenommen**, Claude (Prüf-Agent, nicht der Bauende),
 nachgeholt (Exit 0), und über 717 Stories ist keine sichtbare Versalie, keine
 Sperrung an einer Beischrift und kein umbrechender Spaltenkopf zu finden. Ein
 Befund geht an die Tabellen-Familie (0106).
+
+## Nach der Prüfung (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+Der weitergereichte Befund ist behoben: `.v2tbl__group` stand seit dem
+Tabellen-Umbau **0106** auf Gewicht 400, weil `font-weight: inherit` an
+`th`/`td` die Regel dieser Aufgabe schlägt (0-1-1 gegen 0-1-0). Die Regel von
+0089 ist unverändert; repariert ist es dort, wo die Ursache liegt — in 0106,
+in derselben Zeile, die dieselbe Falle fürs Polster schon entschärft hatte.
+Nachgemessen: alle Zwischenzeilen des Bestands tragen wieder 700, in einer
+einzigen Ausprägung.

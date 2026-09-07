@@ -247,7 +247,12 @@ export function DataTable<T>(props: DataTableProps<T>) {
   );
 
   const body = loading ? (
-    <TableLoading rows={5} cols={columns.length} />
+    <TableLoading
+      rows={5}
+      cols={columns.length}
+      leadingCols={(selection ? 1 : 0) + (expand ? 1 : 0)}
+      trailingCols={rowActions ? 1 : 0}
+    />
   ) : error ? (
     <ErrorRow message={error.message} action={error.retry} />
   ) : rows.length > 0 ? (

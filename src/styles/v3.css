@@ -105,7 +105,11 @@
    35-px-Band an der Kartenkante. Die vier Klassen stehen deshalb hier noch
    einmal, auf der Spezifität des Resets. */
 .v2tbl td.v2tbl__empty { padding: 30px 18px; }
-.v2tbl td.v2tbl__group { padding: 7px 18px; }
+/* Auch das **Gewicht**: `font-weight: inherit` am Reset schlägt die Regel der
+   Zwischenzeile genauso, wie es ihr Polster geschlagen hat — nur ist es beim
+   Umbau 0106 nur fürs Polster aufgefallen. Die Zeile stand seither auf 400
+   und sah aus wie eine Datenzeile (Abnahme 0089, 2026-09-07). */
+.v2tbl td.v2tbl__group { padding: 7px 18px; font-weight: 700; }
 .v2tbl td.v2tbl__detail {
   padding: var(--v2-detail-y, 14px) 18px calc(var(--v2-detail-y, 14px) + 2px) 46px;
 }
@@ -2403,12 +2407,14 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   background: var(--color-bg-sunken);
 }
 /* Der Ladezustand nimmt die Form des Inhalts an, nicht die eines Kastens —
-   dieselbe Karte, derselbe Kopf, dieselbe Höhe wie das geladene Original. */
-.v2doc__origskel { display: block; width: 100%; }
+   dieselbe Karte, derselbe Kopf, dieselbe Höhe wie das geladene Original.
+   `display: block` steht nicht mehr hier: `.v2skel` bringt es seit 0086 selbst,
+   und beide Klassen stehen immer zusammen am selben Element. */
+.v2doc__origskel { width: 100%; }
 /* So hoch wie der Kartentitel daneben (15 px Schrift, 1,45 Zeilen). Feste
    Breite, kein Prozentwert: der Titel-Träger im Kartenkopf wächst nicht von
    selbst, und 42 % von null sind null — der Platzhalter war unsichtbar. */
-.v2doc__headskel { display: block; width: 180px; height: 22px; }
+.v2doc__headskel { width: 180px; height: 22px; }
 /* Fließtext in einer Feldzeile: links, ohne Ziffernstellung — die Spalte
    richtet sonst Zahlen rechts aus (V3). */
 .v2doc__prose {
@@ -3565,6 +3571,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    abgefangen, nicht in eine leere Fläche gelegt. */
 .bse__leer { padding: var(--space-4) 0; }
 .bse__msgs { margin-top: var(--space-3); }
-/* Der Kontoname steht neben der Nummer und kürzt, statt die Zeile zu dehnen. */
+/* Die Kontozelle des **Lesers**: Nummer, Name und der Weg ins Kontenblatt
+   nebeneinander. Sie heißt nicht `.bse__konto` wie die Lesezelle des Editors
+   — dieselbe Klasse hätte dort `display: flex` gesetzt und damit ihre Kürzung
+   ausgeschaltet (Abnahme 0113, M4). */
+.bse__kontocell { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
 .bse__kontoname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bse__konto { display: flex; align-items: baseline; gap: var(--space-2); }

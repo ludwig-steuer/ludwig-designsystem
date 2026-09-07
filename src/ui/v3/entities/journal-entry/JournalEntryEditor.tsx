@@ -6,6 +6,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { deriveTax } from "./tax-assist";
 // Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
 // und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
+import { ActionIcon } from "../../Icons";
+import { IconButton } from "../../primitives/IconButton";
 import { StatusBadge } from "../../patterns/StatusBadge";
 
 import { formatAmount } from "../../format";
@@ -165,12 +167,6 @@ export interface JournalEntryEditorProps {
   quickActions?: { klaerungskonto?: () => void; wieLetzte?: () => void; privatanteil?: () => void };
 }
 
-const STATUS_TEXT: Record<EditorStatus, string> = {
-  proposed: "Vorschlag",
-  accepted: "Freigegeben",
-  posted: "Gebucht",
-  reversed: "Storniert",
-};
 
 /** Die Summe der Zeilen auf der Belegseite — daraus fällt der Rest. */
 function summeBelegseite(rows: readonly EditorRow[], belegSide: Side): number {
@@ -595,7 +591,12 @@ function Kopf({
             {Math.abs(rest!) < 0.005 ? " ✓" : ""}
           </span>
         ) : null}
-        <button type="button" className="v2link" onClick={onToggleMode} title={STATUS_TEXT[status]}>
+        <button
+          type="button"
+          className="v2link"
+          onClick={onToggleMode}
+          title={voll ? "Zur einfachen Sicht" : "Zur vollen Sicht — alle DATEV-Spalten"}
+        >
           {voll ? "Einfach ◂" : "Voll ▸"} · Alt+V
         </button>
       </span>
@@ -756,14 +757,12 @@ function Zeile({
             {voll ? <span>{row.kost1 || "—"}</span> : null}
             <span>
               {onOpenLedger && row.konto ? (
-                <button
-                  type="button"
-                  className="v2link v2link--quiet"
+                <IconButton
+                  size="sm"
+                  label={`Kontenblatt zu ${row.konto}`}
+                  icon={<ActionIcon action="ledger" size={14} />}
                   onClick={() => onOpenLedger(row.konto)}
-                  title={`Kontenblatt ${row.konto}`}
-                >
-                  ▤
-                </button>
+                />
               ) : null}
             </span>
           </>

@@ -135,21 +135,43 @@ export function DeviationCell({
 }
 
 /**
- * Loading state at row height — the table does not jump when the rows arrive.
+ * Ladende Zeilen in einer Tabelle.
  *
- * @when    Loading state inside the card, header rows stay in place.
- * @instead Nothing there at all → EmptyRow. Loading failed → ErrorRow.
+ * `cols` sind die Spuren **mit Inhalt**. Eine Tabelle hat oft mehr: das
+ * Auswahlkästchen, den Aufklapp-Griff, die Aktionsspalte. Die tragen keine
+ * Daten und bekommen deshalb keinen Balken — aber sie brauchen ihre Zelle,
+ * sonst rutscht die ganze Zeile um eine Spur nach links und der erste Balken
+ * landet im 32-px-Kästchen (Abnahme 0086: Kopf sechs Zellen, Ladezeile fünf,
+ * die letzte Spur blieb 140 px leer).
+ *
+ * @when    Eine Tabelle lädt und die Zahl der Zeilen ist ungefähr bekannt.
+ * @instead Eine Fläche außerhalb einer Tabelle → Skeleton. Es gibt nichts zu
+ *          zeigen → EmptyState. Das Laden ist gescheitert → ErrorRow.
  */
-export function TableLoading({ rows = 3, cols = 3 }: { rows?: number; cols?: number }) {
+export function TableLoading({
+  rows = 3,
+  cols = 3,
+  leadingCols = 0,
+  trailingCols = 0,
+}: {
+  rows?: number;
+  cols?: number;
+  /** Spuren vor den Daten ohne eigenen Inhalt: Auswahl, Aufklapp-Griff. */
+  leadingCols?: number;
+  /** Spuren dahinter ohne eigenen Inhalt: die Aktionsspalte. */
+  trailingCols?: number;
+}) {
   return (
     <>
       {Array.from({ length: rows }, (_, r) => (
         <tr className="v2tbl__row" key={r} aria-hidden>
+          {Array.from({ length: leadingCols }, (_, c) => <td key={`l${c}`} />)}
           {Array.from({ length: cols }, (_, c) => (
             <td key={c}>
               <span className="v2skel" style={{ width: c === 0 ? "70%" : "45%" }} />
             </td>
           ))}
+          {Array.from({ length: trailingCols }, (_, c) => <td key={`t${c}`} />)}
         </tr>
       ))}
       <tr>

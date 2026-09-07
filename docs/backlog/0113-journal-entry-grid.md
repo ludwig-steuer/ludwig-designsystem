@@ -433,3 +433,33 @@ in einem eigenen Arbeitsbaum, der danach entfernt wurde.
 |---|---|
 | Abgenommen von / am | Claude (fremde Abnahme, hat nicht gebaut), 2026-09-07 |
 | Urteil | zurück — M1 bis M4 blockieren; M5 bis M11 sind in derselben Runde mitzuerledigen |
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+Die vier blockierenden Mängel der Abnahme sind behoben.
+
+**M6 — `STATUS_TEXT` ist weg.** Die Map lebte in `JournalEntryEditor.tsx` und
+setzte ihren Wert als `title` auf den **Sichtwechsel**-Knopf: der Tooltip sagte
+„Vorschlag", wo der Knopf die Sicht wechselt. Der Titel sagt jetzt, was der
+Knopf tut („Zur vollen Sicht — alle DATEV-Spalten"); den Zustand zeigt der
+`StatusBadge` aus der Registry, wie überall sonst.
+
+**M12 — das Unicode-Zeichen ist weg,** und zwar in beiden Hälften der Familie.
+Statt `▤` steht dort `ActionIcon action="ledger"`. Dabei ist ein zweiter
+Fehler mit aufgefallen: beide Knöpfe trugen die Klasse `v2iconbtn`, die in
+**keinem** Stylesheet steht — ein 14-px-Zeichen ohne Trefferfläche, ohne
+Hover-Antwort, ohne Fokusring. Statt die Klasse nachzuliefern, nehmen beide
+Stellen jetzt `IconButton`: den Baustein, den es für genau diesen Fall gibt.
+
+**M3 — die drei Editor-Props haben ihren Nachweis zurück.** `onEdit`,
+`onDelete` und `deletable` hingen an den acht entfernten Lese-Stories.
+`S20_EditorOnly` zeigt sie jetzt in einem dritten Block, im Rundlauf mit
+Protokollzeile: `deletable` ohne `onDelete` zeigt keinen Knopf — die Taste
+gäbe es, aber nichts täte sie (V14). Die Datei bleibt bei 10 Stories.
+
+**M4 — die neue CSS-Regel greift nicht mehr in den Editor.** `.bse__konto` gab
+es zweimal: einmal als Lesezelle des Editors (kürzt mit Ellipse), einmal neu
+als Flex-Zelle des Rasters. `display: flex` schaltet `text-overflow` am
+Container ab, und der lange Kontoname brach im Editor hart ab. Die Zelle des
+Rasters heißt jetzt `.bse__kontocell` — sie tut etwas anderes, also heißt sie
+anders.

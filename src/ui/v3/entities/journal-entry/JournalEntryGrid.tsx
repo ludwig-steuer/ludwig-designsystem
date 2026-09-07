@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { ActionIcon } from "../../Icons";
 import { Disclosure } from "../../primitives/Disclosure";
+import { IconButton } from "../../primitives/IconButton";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { JournalEntryCard } from "./JournalEntryCompact";
 import { formatAmount } from "../../format";
@@ -180,20 +181,20 @@ function Row({
   onOpenLedger?: (accountNumber: string) => void;
 }) {
   const account = (
-    <span className="bse__konto">
+    <span className="bse__kontocell">
       <span className="v2mono">{row.konto}</span>
       {row.kontoName ? <span className="v2muted bse__kontoname">{row.kontoName}</span> : null}
       {onOpenLedger ? (
-        <button
-          type="button"
-          className="v2iconbtn"
+        // `IconButton`, kein blanker Knopf mit eigener Klasse: der Baustein
+        // bringt Trefferfläche, Hover und Fokusring mit — die selbst
+        // erfundene `.v2iconbtn` stand in keinem Stylesheet und ließ ein
+        // 14-px-Zeichen ohne Antwort zurück (Abnahme 0113).
+        <IconButton
+          size="sm"
+          label={`Kontenblatt zu ${row.konto}`}
+          icon={<ActionIcon action="ledger" size={14} />}
           onClick={() => onOpenLedger(row.konto)}
-          aria-label={`Kontenblatt zu ${row.konto}`}
-        >
-          {/* The sign comes from the registry, not from a Unicode character —
-              the editor beside it does the same (0015 M12, §9/A8). */}
-          <ActionIcon action="ledger" size={14} />
-        </button>
+        />
       ) : null}
     </span>
   );

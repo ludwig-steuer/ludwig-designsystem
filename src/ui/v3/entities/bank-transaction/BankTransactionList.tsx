@@ -21,6 +21,38 @@ import type { BankTransactionRowData } from "./bank-transaction";
  */
 
 /**
+ * Aufklappen und Springen schließen sich aus — eine Zeile, die sich öffnet,
+ * soll nicht auch woanders hin. Das steht seit der Abnahme vom 2026-09-07 im
+ * **Typ** und nicht mehr nur in einer Laufzeit-Bedingung: `DataTable` (0057)
+ * macht es genauso, und der Kommentar hier behauptete das Gegenteil.
+ */
+type RowWayProps =
+  | {
+      /**
+       * What stands under a row when it is folded open — the split into its
+       * cases with their part amounts. `DataTable` brings the chevron and the
+       * state; the caller says **what** is inside, because only 4 % of the
+       * rows have anything.
+       */
+      expand: (t: BankTransactionRowData) => React.ReactNode;
+      rowHref?: never;
+    }
+  | {
+      /**
+       * Where a row leads — the drawer of one payment (0103). The page profile
+       * calls looking one up „often" and gives it a click; without this prop
+       * the row is mute.
+       *
+       * The link sits on the **counterparty**, not on the first cell: a link
+       * whose text is „30.08.2026" does not say where it goes. That is why it
+       * goes through the column set and not through `DataTable`, which puts it
+       * on cell 0.
+       */
+      rowHref?: (t: BankTransactionRowData) => string;
+      expand?: never;
+    };
+
+/**
  * @when    The statement of one payment account: sorted, filtered, paged.
  * @instead Every open payment across accounts, with bulk assignment →
  *          BankTransactionWorklist. A handful of rows → BankTransactionRow.
@@ -48,27 +80,6 @@ export function BankTransactionList({
   caseHref: (caseId: string) => string;
   /** Where „offen" leads — the assignment. The list shows, it does not assign. */
   openHref?: string;
-  /**
-   * What stands under a row when it is folded open — the split into its cases
-   * with their part amounts. `DataTable` brings the chevron and the state; the
-   * caller says **what** is inside, because only 4 % of the rows have anything.
-   */
-  expand?: (t: BankTransactionRowData) => React.ReactNode;
-  /**
-   * Where a row leads — the drawer of one payment (0103). The page profile
-   * calls looking one up „often" and gives it a click; without this prop the
-   * row is mute.
-   *
-   * The link sits on the **counterparty**, not on the first cell: a link
-   * whose text is „30.08.2026" does not say where it goes. That is why it
-   * goes through the column set and not through `DataTable`, which puts it on
-   * cell 0.
-   *
-   * **This list excludes it against `expand`** — a row that folds out should
-   * not also jump. `DataTable` does not enforce that; it is this list's rule,
-   * and it stands here so the next one does not inherit it by accident.
-   */
-  rowHref?: (t: BankTransactionRowData) => string;
   columns?: BankTransactionColumn[];
   listHref?: (patch: ListPatch) => string;
   sort?: { key: string; dir: "asc" | "desc" };
@@ -93,12 +104,12 @@ export function BankTransactionList({
    * horizontally instead of cutting a column off.
    */
   minWidth?: number;
-}) {
+} & RowWayProps) {
   const cols = bankTransactionColumns({
     caseHref,
     ...(openHref ? { openHref } : {}),
     ...(columns ? { columns } : {}),
-    ...(rowHref && !expand ? { rowHref } : {}),
+    ...(rowHref ? { rowHref } : {}),
   });
 
   return (
