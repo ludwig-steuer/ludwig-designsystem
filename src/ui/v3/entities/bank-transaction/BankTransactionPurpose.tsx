@@ -30,14 +30,14 @@ import { Popover } from "../../primitives/Popover";
  * status.
  */
 
+/** No purpose at all — the em dash, the set's one word for „nothing here". */
+const EMPTY = "—";
+
 /**
  * @when    A payment's purpose is shown — in a row, in the facts, in a drawer.
  * @instead The whole line → BankTransactionCell. The raw record for audit →
  *          RawRecord.
  */
-/** No purpose at all — the em dash, the set's one word for „nothing here". */
-const EMPTY = "—";
-
 export function BankTransactionPurpose({
   purpose,
   tags,

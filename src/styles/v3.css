@@ -3535,6 +3535,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* Die Schleifen-Angabe: Zeichen und Zahl gehören zusammen (0093 c). */
 .pz-loop { display: inline-flex; align-items: center; gap: 3px; }
 
+/* „Erledigt" trägt Weg **und** Zeitpunkt nebeneinander: das Abzeichen sagt
+   wodurch, das Datum wann. `baseline`, damit die Zahl auf der Schriftlinie des
+   Wortes sitzt (Abnahme 0070, M5). */
+.v2doccompl { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; flex-wrap: wrap; }
+.v2doccompl > time { color: var(--color-text-subtle); font-size: var(--fs-ui-xs); }
+
 /* --- Belegliste: Spaltensätze (0070) -------------------------------------- */
 /* Wie `.v2doc__key`: der Name schrumpft, die Endung nicht. Ein reines
    `text-overflow` am Elternteil schnitt genau die `.pdf` ab, für die die
@@ -3550,6 +3556,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    (`.v2doc__lead`) und im Sachverhalts-Katalog. */
 .v2doccol__lead .v2rowlink { color: inherit; text-decoration: none; }
 .v2doccol__lead { font-weight: 600; }
+/* Führen soll **einer**. Zeigt die führende Zelle nur den Gedankenstrich —
+   im stockenden Satz hat die Gegenpart-Spalte keinen Wert und die Datei
+   führt —, dann stand sie daneben ebenso fett da (Abnahme 0070, M7). Der
+   Gedankenstrich ist kein Name, den man betonen könnte. */
+.v2doccol__lead:has(> .v2muted),
+.v2doccol__lead:has(> .v2rowlink > .v2muted) { font-weight: 400; }
 
 /* ── Rechnungsposition (0072/0114/0115) ─────────────────────────────────── */
 

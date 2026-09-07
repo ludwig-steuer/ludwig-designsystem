@@ -200,12 +200,18 @@ export function sourceDocumentIdentifier(document: SourceDocumentVM): {
 export function SourceDocumentCompletion({ document }: { document: SourceDocumentVM }) {
   const status = document.completedAt ? (document.completedVia ?? "completed") : "open";
   return (
-    <StatusBadge
-      axis="beleg_erledigung"
-      status={status}
-      info={false}
-      note={document.completedReason ? clipEnd(document.completedReason, MAX_REASON) : null}
-    />
+    <span className="v2doccompl">
+      <StatusBadge
+        axis="beleg_erledigung"
+        status={status}
+        info={false}
+        note={document.completedReason ? clipEnd(document.completedReason, MAX_REASON) : null}
+      />
+      {/* „Done" means **when and how** (catalogue table of the spec).
+          The way stood there, the date did not — and „done" without a date is
+          the half of the answer one cannot check (acceptance 0070, M5). */}
+      {document.completedAt ? <Time value={document.completedAt} format="date" /> : null}
+    </span>
   );
 }
 

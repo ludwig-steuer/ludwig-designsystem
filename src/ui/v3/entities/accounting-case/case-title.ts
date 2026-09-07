@@ -25,7 +25,14 @@ export interface CaseLink {
   caseNumber: string | null;
   fiscalYear: number | null;
   title: string | null;
-  kind: CaseKind;
+  /**
+   * `null` where the caller does not know the kind — a foreign list that only
+   * carries the case **number** must not have to invent one. It was invented:
+   * the document catalogue passed `"incoming_invoice"` for every row, which
+   * put a wrong badge into the cell and drove the row to 71,7 px (acceptance
+   * 0070, M2). `caseDisplayTitle` falls back to „Sachverhalt" without it.
+   */
+  kind: CaseKind | null;
   counterpartyName: string | null;
   lifecycleStatus: CaseLifecycle | null;
   /** Only in the bank statement: the part of the amount that falls on this case. */

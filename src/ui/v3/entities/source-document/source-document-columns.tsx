@@ -14,7 +14,6 @@ import {
   FileName,
   SourceDocumentClass,
   SourceDocumentCompletion,
-  clipMiddle,
   sourceDocumentIdentifier,
   type SourceDocumentVM,
 } from "./SourceDocument";
@@ -250,7 +249,12 @@ export function sourceDocumentColumns({
         return (
           <span
             className={`v2doccol__lead${zeigtDatei ? " v2mono" : ""}`}
-            title={d.counterparty ?? d.fileName}
+            // The tooltip belongs to the **same branch** as the content. Built
+            // unconditionally it promised a file where the cell deliberately
+            // shows „—": measured in `Stuck`, row 1, text „—" with
+            // `title="Scan-2026-09-01-14-32-08.pdf"` — the name of a file that
+            // stands two columns further right anyway (acceptance 0070, M8).
+            title={d.counterparty ?? (picked.has("fileName") ? undefined : d.fileName)}
           >
             {lead === "counterparty" ? leading(d, body) : body}
           </span>
@@ -338,13 +342,29 @@ export function sourceDocumentColumns({
         return ident.mono ? (
           <MonoCell value={ident.value} />
         ) : (
-          <span title={ident.value}>{clipMiddle(ident.value, 32)}</span>
+          // The non-mono branch is „a sentence, not a number" — the subject of
+          // a contract. A cut by character count is no cut at all here: it
+          // left the value whole enough to wrap, and 29 characters drove the
+          // row from 48,0 px to 66,8 px in a 170 px track (acceptance 0070).
+          // The clip belongs to CSS, at the same shell the file-name branch
+          // already uses — but at the **end**, not in the middle: for a
+          // sentence the beginning carries the meaning, for a file name the
+          // extension does.
+          <span className="v2doc__key" title={ident.value}>
+            <span className="v2doc__keyname">{ident.value}</span>
+          </span>
         );
       },
     },
     case: {
       key: "case",
       header: "Sachverhalt",
+      // Stays 170. Widening does not help: `.v2case__one` is `flex-wrap: wrap`,
+      // so the name gets its own line **before** anything shrinks — measured
+      // at 232 px the cell was still 46,7 px high, exactly as at 170. The
+      // two-line cell is by design (0095, „the name keeps its place"); that it
+      // makes this row the one 71,7 px outlier in a list of 48 px rows is a
+      // finding for `CaseCell`, not a track width here (acceptance 0070, M2).
       width: "170px",
       cell: (d) =>
         d.caseNumber ? (
@@ -355,7 +375,11 @@ export function sourceDocumentColumns({
                 caseNumber: d.caseNumber,
                 fiscalYear: null,
                 title: null,
-                kind: "incoming_invoice",
+                // **Not invented.** The catalogue knows the case number, not
+                // its kind — and a guessed kind put a wrong badge into the
+                // cell and drove the row from 48 px to 71,7 px (acceptance
+                // 0070, M2). `CaseLink.kind` may be `null` since then.
+                kind: null,
                 counterpartyName: d.counterparty ?? null,
                 lifecycleStatus: null,
               },
@@ -364,7 +388,11 @@ export function sourceDocumentColumns({
             showState={false}
           />
         ) : (
-          <span className="v2muted">—</span>
+          // **`CaseCell`s word, not our own.** Without a case the cell said
+          // „—", and a dash claims the value is unknown; the case is not
+          // unknown, there is none yet. `CaseCell` has the word and the
+          // reasoning for exactly this (acceptance 0070, M4).
+          <CaseCell cases={[]} href={caseHref ?? (() => "#")} />
         ),
     },
     receivedDate: {

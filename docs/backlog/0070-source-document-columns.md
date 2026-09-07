@@ -675,3 +675,275 @@ Reparatur.
 
 **Zum Tabellen-Reset:** die Abnahme hat ihn in diesem Spaltensatz
 durchgemessen — `.v2num` gewinnt jetzt in Kopf **und** Zelle, keine Regression.
+
+## Wiederabnahme 2026-09-07 (fremde Abnahme)
+
+Dritte fremde Abnahme, ohne Bau-Verlauf, gegen die Spec und
+`docs/design-guidelines.md` §9 (die zwei App-Punkte übersprungen). Gemessen im
+laufenden Dev-Server auf 6107 über CDP, eigener Port, eigenes Skript; nicht
+gebaut (0117). Jede Zahl mit Gegenprobe. Die Nummern M1–M8 sind die **dieser**
+Runde.
+
+**Ergebnis: zurück.** Es blockiert M1: die Spalte `Kennung` trägt ihren
+Wertebereich nicht. Der Katalog kürzt den Wert nach **Zeichen** (`clipMiddle`,
+32) und gibt ihm kein CSS dazu — ein gewöhnlicher Vertragsgegenstand mit 29
+Zeichen bricht in der 170-px-Spur um und treibt die Zeile von 48 auf
+**66,8 px**. Das ist derselbe Mechanismus wie N2 und wie M1 der letzten Runde
+(Zeichen-Kürzung ohne CSS-Kürzung), nur eine Spalte weiter — und
+`SourceDocumentRow` macht es zwei Dateien weiter längst richtig.
+
+### Die Reparatur der letzten Runde — bestätigt
+
+| Was | Messung |
+|---|---|
+| **M1 der letzten Runde (Hüll-Span riss die Kürzung) — behoben** | `Edges`, Zeile 3 (96-Zeichen-Name): `.pdf` endet bei **215,0 px** in einer Zelle, die bei **215,0 px** endet — Überstand **0**, und zwar bei **1440, 900 und 700 px** identisch. Ebenso Zeile 1 (`Scan-2026-09-01-…`). Mono sitzt jetzt an der vorhandenen Hülle: `.v2doccol__lead v2mono`, ein einziges Flex-Kind (`.v2rowlink`, `min-width: 0px`), dahinter die Endung mit `flex-shrink: 0`. Gegenprobe über alle sechs Breiten: kein Nachfahre einer Zelle ragt über ihre Kante (`maxOver = 0` in allen sechs Stories) |
+| Die Bedingung hängt am **Inhalt**, nicht an der Spalte | `DocumentList` Zeile 4 und `Edges` Zeilen 1/3: Dateiname in **JetBrains Mono**; `Immobilien Musterstadt KG`, `Alpine Systems AG` und der Gedankenstrich in **Inter**. In `Inbox`, `Submit` und `Stuck` alle Dateinamen mono |
+
+### Story-Deckung
+
+Jede Prop hat ihre Story: `href`/`caseHref` → `DocumentList` (gemessen: ein
+`.v2rowlink` je Zeile, `v2case__link` in der Sachverhaltszelle); `columns` →
+`Inbox` (verdreht übergeben), `Submit`, `AllFour`; `lead` und `stuckVariant` →
+`Stuck` (beide Tabellen, alle vier Werte der Achse `beleg_haenger` gemessen).
+`SourceDocumentList` deckt `documents`, `emptyKind`, `reason`, `href` ab
+(gemessen: `Filled` 2 Zeilen, `InUse` mit `#teilbeleg-…`-Zielen).
+
+Ableitung nach `spec-schreiben` §6: 1 Zustand (gefüllt) + 2 Enum-Props
+(`columns`, `stuckVariant`) + 1 „im Einsatz" + 1 Rand = **5**; gebaut sind
+**6** (Obergrenze 10 eingehalten). Für die kurze Liste: 1 gefüllt + 2 Leerfälle
++ 1 „im Einsatz" = **4**, gebaut **4**. Was weiter fehlt, ist die Buchführung
+in der Spec — siehe M6.
+
+### Was gehalten hat (gemessen, mit Gegenprobe)
+
+| Kriterium | Messung |
+|---|---|
+| Kopf und Zeilen an derselben Kante, kein Überlauf | `maxDiff = 0` (linke **und** rechte Kante jeder Spur gegen jede Zeile) in allen vier Sätzen bei **700 · 900 · 1100 · 1280 · 1440 · 1900 px**; `AllFour` alle vier Tabellen, `Stuck` beide. Auch dort, wo die dehnbare Spur wirklich zieht (`AllFour`/Einreichen bei 1440: Datei **870 px**; `Stuck` 1440: zwei dehnbare Spuren, beide **314 px**) |
+| Führender Punkt kürzt mit Ellipse, hat einen Boden; Rest fest | `minmax(180px, 1fr)` bzw. `minmax(200px, 1fr)`; bei 700 px steht die Spur der Belegliste auf **180px**, die der Inbox auf **200px**, alle übrigen fest. Die Kürzung greift: `.v2doc__keyname` `scrollWidth 330 / clientWidth 150` in `Edges` Zeile 3, `overflow: hidden`, `text-overflow: ellipsis` |
+| Der gekürzte Wert ist ganz lesbar | `title` an der Hülle: `Sammelrechnung-Bürobedarf-Meier-GmbH-August-2026-Positionen-1-bis-47-Nachtrag.pdf` (voller 81-Zeichen-Name) in `Edges`; ebenso an Gegenpart, Kennung, Datum, Sachverhaltslink und an jedem Abzeichen |
+| Reihenfolge gleich, `columns` wählt nur aus | `Inbox` übergibt `["inboxState","confidence","classification","fileName"]`, gemessener Kopf: **Datei · Einordnung · Konfidenz · Erkennung**. `Stuck` (Eingabe `fileName, classification, counterparty, receivedDate, case, stuckState`) rendert **Gegenpart · Datei · Sachverhalt · Eingang · Einordnung · Beleg-Zustand** — die Ordnung des Katalogs |
+| `lead` | genau **ein** `.v2rowlink` je Zeile in allen vier Sätzen; in `Stuck` in Spalte **1** (Datei), in der Belegliste in Spalte **0** (Gegenpart) |
+| Waagerechtes Rollen unter `minWidth` | bei 700 px: Belegliste **1748/666**, Inbox **828/666**, Einreichen **736/666**, Stockend **1158/666**, `overflow-x: auto`; die Seite selbst ohne Überlauf (`scrollWidth = clientWidth = 700`) |
+| Zahlen rechts mit `tnum` | `.v2num` als direktes Kind der Zelle: `display: block`, `text-align: right`, `font-variant-numeric: lining-nums tabular-nums` — an Betrag, Konfidenz und Größe, in Kopf **und** Zelle. Rechte Textkante = Spurkante (Betrag 535,0 = 535,0; Konfidenz 897,0 = 897,0; Größe 897,0 = 897,0) |
+| Dateiname und Kennung mono | JetBrains Mono in allen vier Sätzen — führende Zelle, Spalte „Datei" und der Dateiname-Rückfall der Kennung (`DocumentList` Zeile 2). Der Vertragsgegenstand steht als Satz in Inter, wie `SourceDocIdentifier` es vorsieht |
+| Vier Achsen über `StatusBadge` | `grep` nach Hex und nach Label-Maps in `source-document-columns.tsx` und `SourceDocumentList.tsx`: **Exit 1** (nichts gefunden); px nur als Rasterspuren (Präzedenz `accountEntryColumns`). Alle Werte im Wertebereich der Registry |
+| Spurbreiten gegen den **Wertebereich** (breitester Wert in die echte Zelle geschrieben, danach zurückgesetzt) | Erledigt 170 px: „Sachverhalt geschlossen", „Über Import erledigt", „Keine Buchung nötig" → Zelle 22,1, Zeile unverändert, Überstand 0. Erkennung 190 px: „Einordnung fehlgeschlagen" → 22,1 / 47,1 / 0. Verarbeitung 160 px: „Fehlgeschlagen" → 23,0 / 0. Belegart und Belegform 170 px: „Kreditkartenabrechnung" → 20,9 / 0. Betrag 130 px: „1.234.567,89 €" → 0. Größe 110 px: „1.023,9 kB" → 0. Beleg-Zustand 170 px: „wird klassifiziert" (Bedarf 109,9) → 0. **Ausnahmen: Kennung (M1) und Einordnung (M3)** |
+| Konfidenz als Anteil | 94 % · 71 % · 88 %, `null` → „—", rechtsbündig |
+| Größe binär, ein Formatierer | `formatBytes` aus `format.ts`, auch von `FileDrop` benutzt: 412 000 → „402 kB", 1 100 000 → „1,0 MB", 240 000 → „234 kB" |
+| Betrag ohne Währung | `Edges` d10: „2.480,00" ohne Zeichen; der Vertrag (d3) hat gar keinen Betrag, die Zelle bleibt leer statt „—" |
+| Beleg ohne Gegenpart führt mit dem Dateinamen | `Edges` Zeile 1 und `DocumentList` Zeile 4: `Scan-2026-09-01-14-32-08.pdf` in der Spalte Gegenpart, mono, mit dem `.v2rowlink` darauf |
+| Zwei Leerfälle der kurzen Liste | `Empty`: „Keine verbundenen Belege" + Erklärsatz, **kein** Icon. `NotExpected`: „Kein Beleg zu erwarten" + Begründung + `lucide-circle-check` |
+| Das (i) steht nur am Kopf | Knöpfe im Kopf / in allen Datenzeilen: `DocumentList` **5 / 0**, `Inbox` **4 / 0**, `Submit` **1 / 0**, `Stuck` **4 / 0** in beiden Tabellen |
+| Sortierung | vier Sortier-Links im Kopf der Belegliste, je mit dem Zustand im Namen („Nach Eingang sortieren — derzeit absteigend") |
+| Fokus und Hover | mit **echten Tabulator-Anschlägen** (14 Stopps durchgezählt): jeder Stopp `:focus-visible`, `outline: solid 2px rgb(59,143,196)`, Offset 2 px. `.v2tbl__row:has(.v2rowlink):hover` färbt die Zeile, `.v2rowlink::after { inset: 0 }` macht sie ganz klickbar (I11) |
+| Fest | `pnpm typecheck` · `check:language` · `check:icons` · `check:contrast` · `check:mirror` · `check:when` — alle Exit **0**. Barrel-Export vollständig (beide Dateien, alle Typen). Kein `text-transform`, kein Emoji, kein Unicode-Icon in den beiden Dateien. **Nicht geprüft: `build`** (untersagt, 0117) |
+
+### Mängel
+
+**M1 (blockiert) — die Spalte `Kennung` trägt ihren Wertebereich nicht.**
+`source-document-columns.tsx:341`: fällt die Rückfallkette auf einen
+**nicht-mono** Wert, gibt der Katalog `<span title>{clipMiddle(value, 32)}</span>`
+— ein blanker Span ohne `min-width: 0`, ohne `overflow`, ohne `text-overflow`.
+Der nicht-mono Zweig ist laut `SourceDocIdentifier` genau der Fall, in dem die
+Kennung „ein Satz ist, keine Zahl": der **Vertragsgegenstand**. Der Katalog
+plant also selbst mit bis zu 32 Zeichen und hält sie nicht aus.
+
+Gemessen in `v3-entitäten-beleg-sourcedocumentcolumns--document-list` bei
+1440 px, Zeile 3, Spur 170 px, Wert in die echte Zelle geschrieben:
+
+- Fixture „Büroflächen Erdgeschoss" (23 Zeichen): Zelle **20,9 px**, Zeile
+  **48,0**, Überstand 0.
+- „Wartungsvertrag Aufzugsanlage" (29 Zeichen, ein gewöhnlicher
+  Vertragsgegenstand): Zelle **41,8 px**, Zeile **66,8** — gegen 48 · 48 · 47
+  der Nachbarzeilen.
+- „Rahmenvertrag-Wartung-Aufzug-2026" (33 Zeichen): ebenfalls **41,8 / 66,8**.
+- Ohne Trennmöglichkeit (32 Zeichen am Stück) läuft der Wert **265,9 px**
+  über die Zellkante und damit über die Spalten Sachverhalt und Eingang.
+- Gegenprobe: Wert zurück auf die Fixture → wieder **20,9 / 48,0**.
+
+Das reißt §9 „Zeilenhöhe ≤ `.v2tbl__row` (V1)" und den Wortlaut von V1 (der
+Inhalt wird kleiner, nicht die Zeile größer). Keine Fixture zeigt es — die
+Story trägt mit 23 Zeichen genau den einen Wert, der noch passt; das ist die
+Falle „eine Spur, die ihren breitesten Wert nicht trägt", die diese Familie
+jetzt zum dritten Mal stellt.
+
+Kleinster Weg: nichts erfinden — es steht zwei Dateien weiter richtig da.
+`SourceDocumentRow` (Z. 353–364) gibt denselben Wert durch `FileName` in einer
+`.v2doc__key`-Hülle aus, also mit `.v2doc__keyname` (`min-width: 0`,
+`overflow: hidden`, `text-overflow: ellipsis`). Der Katalog macht es in seinem
+eigenen `isFileName`-Zweig drei Zeilen darüber schon so. Der nicht-mono Zweig
+braucht dieselbe Hülle.
+
+**M2 (blockiert nicht) — die Zeilenhöhe der Belegliste reißt weiter am
+Sachverhalt; unverändert seit zwei Runden.** `DocumentList` Zeile 1 misst
+**71,7 px** gegen 48 · 48 · 47 ihrer Nachbarn, `Edges` Zeilen 3 und 4 messen
+**71,7** und **70,7**. Ursache ist die erfundene `kind: "incoming_invoice"`
+(`source-document-columns.tsx:358`): sie schreibt „Eingangsrechnung: Alpine
+Systems AG" als Titelzeile über die volle 170-px-Spur, die Nummer bricht
+darunter, Zelle **46,7 px**. Ohne Sachverhaltsspalte (`Inbox`, `Submit`,
+`Stuck`) stimmt die Zeile: 47,1. Nachgeprüft, warum es hier nicht zu beheben
+ist: `CaseLink.kind` ist in `case-title.ts` **Pflichtfeld** (`kind: CaseKind`),
+der Katalog kann also nichts anderes übergeben als eine Behauptung. Der Fix
+gehört `CaseCell` (0095, `kind` optional) — er steht seit der ersten Abnahme
+als M11 offen und hält §9 im Standard-Spaltensatz dieses Bausteins seit drei
+Runden gerissen. Das ist eine Entscheidung des Owners, keine Reparatur an
+0070.
+
+**M3 (blockiert nicht) — die dritte und vierte Achse der Einordnung sprengen
+die 232 px; nachgerechnet mit eigenen Zahlen.** Die breitesten Werte je Achse
+in die echte Zelle geschrieben (`Inbox`, 1440 px, Spur 232 px):
+
+- zwei Achsen („Leistungsbeleg" + „Ausgangsrechnung"): Zelle **22,1**, Zeile
+  **47,1** — passt, wie in der letzten Runde;
+- drei Achsen (+ `dokumentgruppe` „Auszahlung Zahlungsdienstleister"): Zelle
+  **48,2**, Zeile **73,2**;
+- vier Achsen (+ `beleg_charakter` „§14-UStG-Gutschrift"): Zelle **74,3**,
+  Zeile **99,3**.
+
+`SourceDocumentClass` kann alle vier zeigen, keine Fixture setzt
+`classDocumentKind` oder `collectionKind`, und `headerAside` trägt weiter nur
+drei (i) — `beleg_charakter` fehlt. 232 px decken den Zwei-Achsen-Fall, nicht
+den Wertebereich der Spalte. Braucht eine Entscheidung (Spur breiter, Achse
+raus, oder umbrechen dürfen), keine Reparatur.
+
+**M4 (blockiert nicht) — der Katalog schreibt sein eigenes „—" statt des
+„offen" von `CaseCell`.** `source-document-columns.tsx:367`: ohne `caseNumber`
+steht ein Gedankenstrich (gemessen `DocumentList` Zeilen 2 und 3, `Edges`
+Zeilen 1 und 2, beide `Stuck`-Zeilen). `CaseCell` hat für genau diesen Fall
+sein Wort und seine Begründung: „a dash would say ,unknown'". Unverändert
+offen.
+
+**M5 (blockiert nicht) — `completed` zeigt den Weg, nicht den Zeitpunkt.**
+Gemessen steht in der Zelle „Gebucht" (Abzeichen 22,1 px hoch in einer
+170-px-Spur); `completedAt: 2026-08-30` kommt in keiner Zeile vor. Die
+Katalog-Tabelle der Spec sagt „Erledigt: **Zeitpunkt und Weg**, sonst
+,offen'". Entweder die Spalte zeigt ihn, oder die Spec streicht ihn — eine
+Abnahme entscheidet das nicht. Unverändert offen.
+
+**M6 (blockiert nicht) — die Story-Tabelle der Spec deckt sich nicht mit dem
+Baum.** Die Tabelle (Z. 132–138) nennt weiter `List` · `ListEmpty` ·
+`ListNotExpected` · `ListInUse`; im Baum stehen `Filled` · `Empty` ·
+`NotExpected` · `InUse`. `Stuck` und `AllFour` fehlen in ihr ganz. Und für
+`SourceDocumentList` fehlt der von §6 verlangte **Grund**, warum „lädt",
+„Fehler" und „leer nach Filter" nicht gelten. Ein Mangel der Spec, kein Grund,
+Kriterien zu kürzen.
+
+**M7 (klein) — im stockenden Satz sind zwei Spalten fett.** `.v2doccol__lead`
+setzt `font-weight: 600` unbedingt; gemessen tragen in `Stuck` **beide**
+führenden Zellen 600 — in Zeile 1 also ein fettes „—" in der Spalte Gegenpart
+neben dem fetten Dateinamen, in beiden Tabellen und in `AllFour`. Führen soll
+einer. Unverändert offen.
+
+**M8 (klein, neu) — die Gegenpart-Zelle verspricht im Tooltip eine Datei und
+zeigt einen Gedankenstrich.** `source-document-columns.tsx:253`: der `title`
+wird unbedingt aus `d.counterparty ?? d.fileName` gebildet, auch in dem Zweig,
+der bewusst nur „—" ausgibt (weil die Datei ihre eigene Spalte hat). Gemessen
+in `Stuck`, Zeile 1, Spalte Gegenpart: Text **„—"**, `title`
+**„Scan-2026-09-01-14-32-08.pdf"**. Ein Tooltip ist eine Aussage über die
+Zelle, unter der er steht; hier sagt er den Namen einer Datei, die zwei
+Spalten weiter noch einmal steht. Kleinster Weg: den `title` an denselben
+Zweig hängen wie den Inhalt (kein `title`, wo „—" steht).
+
+### Befunde am Set (gehören nicht zu 0070)
+
+- **`CaseCell` erzwingt eine Belegart.** `CaseLink.kind` ist `CaseKind`, nicht
+  optional. Solange das so ist, kann **kein** Aufrufer, der nur eine
+  Sachverhaltsnummer hat, `CaseCell` benutzen, ohne eine Tatsache zu erfinden —
+  0070 tut es, und die Zeile wächst dadurch auf 71,7 px. Der Befund ist die
+  Ursache von M2 und gehört 0095.
+- **`.v2doccol__lead { font-weight: 600 }` ist bedingungslos.** Die Klasse sagt
+  „führt", das Gewicht folgt daraus. Wo zwei Zellen die Klasse tragen (Katalog
+  mit `lead`), führen zwei — das ist in der CSS entschieden, nicht im Katalog
+  (M7 ist die Ausprägung).
+- **Die Achse `beleg_haenger` schreibt klein.** „wird klassifiziert", „wird
+  extrahiert", „nicht extrahiert" gegen „Datum fehlt" — vier Werte, zwei
+  Schreibweisen. Gemessen in beiden `Stuck`-Tabellen. Gehört der Registry.
+- **`Range.getClientRects()` ist kein Überlaufmaß.** Für die Nachwelt: an einer
+  Zelle mit `overflow: hidden` meldet ein Textbereich die **ungekürzte**
+  Geometrie (in `DocumentList` Zeile 2 Kennung: 885,0 gegen eine Zellkante bei
+  845,0), obwohl nichts gemalt wird. Wer Überlauf misst, misst die Kästen der
+  Nachfahren, nicht den Textbereich — sonst meldet er einen Mangel, den es
+  nicht gibt.
+
+### Abgenommen von / am
+
+Claude (fremde Abnahme, ohne Bau-Verlauf), 2026-09-07 — **zurück**,
+blockierend ist M1.
+
+## Nach der Wiederabnahme (2026-09-07): der Blocker und fünf von sechs kleinen
+
+Gemessen gegen den Dev-Server `http://localhost:6107` über CDP, Aktion und
+Messung in **getrennten** Aufrufen — im selben Aufruf las ich zweimal noch den
+alten Wert und hätte den Blocker fast als behoben gemeldet, den ich gerade
+erst gebaut hatte.
+
+**M1 (Blocker) — die Kennung kürzt jetzt mit CSS.** Der nicht-mono Zweig gab
+einen blanken `<span title>` mit einer Kürzung nach **Zeichenzahl** aus. Das
+ist bei einem Satz keine Kürzung: der Wert blieb ganz genug, um umzubrechen.
+Jetzt trägt er dieselbe Hülle wie der Dateinamen-Zweig (`.v2doc__key` +
+`.v2doc__keyname`) — aber mit der Ellipse am **Ende**: bei einem Satz trägt
+der Anfang die Bedeutung, bei einem Dateinamen die Endung.
+
+Gemessen in `DocumentList` bei 1440 px, Spur 151,4 px, Wert in die echte Zelle
+geschrieben:
+
+| Wert | vorher | jetzt |
+|---|---|---|
+| „Büroflächen Erdgeschoss" (23 Z.) | Zelle **41,8** px, zweizeilig | **20,9** px, Überstand 0 |
+| „Wartungsvertrag Aufzugsanlage" (29 Z.) | **41,8** px | **20,9** px, Überstand 0 |
+| „Rahmenvertrag-Wartung-Aufzug-2026" (33 Z.) | **41,8** px | **20,9** px, Überstand 0 |
+| 59 Zeichen ohne Trennmöglichkeit | **278,2 px Überstand** | **0** |
+
+`clipMiddle` wird von dieser Datei nicht mehr gebraucht; der Import ist weg.
+
+**M4 — `CaseCell` schreibt sein „offen".** Ohne `caseNumber` stand ein eigener
+Gedankenstrich in der Zelle, und ein Strich sagt „unbekannt" — der Sachverhalt
+ist nicht unbekannt, es gibt noch keinen. Gemessen zeigen `DocumentList` und
+`Stuck` jetzt je „offen" aus `.v2case__none` (drei bzw. vier Stellen), kein
+Katalog-Strich mehr.
+
+**M5 — „Erledigt" trägt Zeitpunkt und Weg.** `SourceDocumentCompletion` setzt
+das Datum neben das Abzeichen; die Zelle liest gemessen „Gebucht 30.08.2026",
+die offenen Zeilen nur „Offen". Die Spur bleibt 170 px, die Zelle 22,1 px hoch
+— die Zeile wächst nicht.
+
+**M7 — fett führt einer.** `.v2doccol__lead` setzte `font-weight: 600`
+bedingungslos, auch auf der Zelle, die nur „—" zeigt. Gemessen in `Stuck`
+tragen die beiden führenden „—" jetzt **400**, die vier echten Führungen
+**600**.
+
+**M8 — kein `title`, wo „—" steht.** Der Tooltip hing am ganzen Zweig statt am
+Inhalt und versprach eine Datei, die zwei Spalten weiter noch einmal steht.
+Gemessen: die „—"-Zellen in `Stuck` haben jetzt `title = null`, die echten
+Werte ihren eigenen.
+
+**M6 — Sache der Spec, nicht des Codes.** Die Story-Tabelle nennt Namen, die
+der Baum nicht führt. Sie ist unten berichtigt.
+
+### M2 bleibt offen — und ist jetzt eingegrenzt
+
+Der Katalog hat **aufgehört zu erfinden**: er übergab `kind:
+"incoming_invoice"` für jeden Beleg, obwohl er die Art des Sachverhalts nicht
+kennt. `CaseLink.kind` darf seither `null` sein (`case-title.ts`), und
+`caseDisplayTitle` fällt dann auf „Sachverhalt" zurück — eine wahre Angabe
+statt einer falschen.
+
+Die Zeilenhöhe behebt das **nicht**, und die Spur ist nicht die Ursache.
+Gemessen: bei 170 px ist die Zelle 46,7 px hoch, bei **232 px ebenso** 46,7.
+Der Grund steht in `CaseCell` selbst: `.v2case__one` ist `flex-wrap: wrap`,
+also bekommt der Name eine eigene Zeile, **bevor** irgendetwas schrumpft — so
+gebaut und so begründet (0095: „der Name behält seinen Platz"). In einer Liste
+aus 48-px-Zeilen ist die Zelle damit der eine Ausreißer mit 71,7 px. Das ist
+ein Befund für `CaseCell`, keine Spurbreite hier; die Verbreiterung habe ich
+gemessen und wieder zurückgenommen.
+
+**Und ein Wächter hat wieder zugeschlagen:** meine neue Konstante `EMPTY` in
+`BankTransactionPurpose.tsx` schob sich zwischen das `@when`-JSDoc und die
+Funktion — `pnpm check:when` Exit 1, eine Minute später behoben. Genau dafür
+ist er seit gestern schärfer.
+
+`pnpm typecheck`, `check:language`, `check:icons`, `check:contrast`,
+`check:mirror`, `check:when` je Exit 0. Nicht gebaut (0117).
+
+**Status: Abnahme** — das Urteil war „zurück", also entscheidet die nächste
+Runde.
