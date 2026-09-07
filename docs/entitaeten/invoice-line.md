@@ -248,16 +248,13 @@ Komponente, `PositionenTab`.
   USt-Notizen nur über den Aufrufer erreichbar. Beim Schreiben der Specs
   gefunden (2026-09-07).
 
-Im Register stehen B1/B1b als **L-98** und B2 als **L-99**. B3 und B4 hängen
-dort an L-99 mit dem Vermerk, dass sie eine eigene Nummer brauchen: die
-Nummern ab **L-100** sind für den Entwicklungsagenten der App reserviert, und
-zwei Befunde stillschweigend in seinen Bereich zu schreiben, wäre der
-schnellste Weg zu zwei L-100.
-
-**Aus der Prüfung dazugekommen: B5 und B6.** Sie stehen noch nicht in
-`docs/befunde-app.md` — der Prüfagent ändert nur dieses Profil. Sie gehören
-an dieselbe Stelle wie B3/B4, also als Nachtrag an L-99, bis die Nummern
-vergeben werden.
+Im Register stehen B1/B1b als **L-98** und B2 als **L-99**. Die übrigen haben
+am 2026-09-07 eigene Nummern bekommen, nachdem der Owner den Bereich getrennt
+hat — das Set vergibt ab **L-200**, die App zählt bei L-100 weiter: B3 ist
+**L-200**, B4 ist **L-201**, B5 ist **L-202**, B6 ist **L-203**, B7 ist
+**L-204**. B5 (c) und B6 stehen dort ausdrücklich als **Fehler im laufenden
+UI**, nicht als Datenlücke: das eine ist eine falsche Bedingung, das andere
+falscher Text auf dem Bildschirm.
 
 ## Offene Fragen
 
