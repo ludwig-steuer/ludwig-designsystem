@@ -29,10 +29,13 @@
 
   /* Accent — Mittelblau. Used sparingly for links, focus, active states. */
   --color-accent:         #3B8FC4;
-  /* 5.45:1 auf Weiss, 5.03:1 auf bg-soft, 4.85:1 auf accent-50 — WCAG 1.4.3 AA.
-     Vorher #2E78A8: 4.81 auf Weiss, aber nur 4.44 auf bg-soft und 4.28 auf
+  /* 5.45:1 auf Weiss, 5.03:1 auf bg-soft, 5.04:1 auf accent-50 — WCAG 1.4.3 AA.
+     Vorher #2E78A8: 4.81 auf Weiss, aber nur 4.44 auf bg-soft und 4.45 auf
      accent-50, also unter 4.5 genau dort, wo Links am haeufigsten stehen —
-     in Zeilen und auf der aktiven Zeile (0090). */
+     in Zeilen und auf der aktiven Zeile (0090). Die zwei accent-50-Werte
+     standen bis zum 2026-09-07 als 4.85 und 4.28 hier; beide waren
+     verrechnet, der Schluss bleibt derselbe (die Pruefung hat sie zweimal
+     unabhaengig nachgerechnet, A4 will den gemessenen Wert). */
   --color-accent-700:     #2B6F9C;
   --color-accent-600:     #3B8FC4; /* base */
   --color-accent-500:     #5BA4D1;

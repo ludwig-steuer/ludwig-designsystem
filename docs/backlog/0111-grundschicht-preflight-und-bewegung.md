@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `src/styles/` — keine Komponente, die Schicht unter allen |
 | Quelle | Abnahme 0098 (2026-09-06), Mängel M7 und M9; die Wurzel von M7 stand schon in der ersten Runde von 0097 als Hinweis H1 |
 | Auftrag | Zwei Befunde derselben Schicht: die Reihenfolge der CSS-Kette und die fehlende Rücksicht auf `prefers-reduced-motion` |
@@ -101,3 +101,123 @@ setzen will, setzt sie als Stil. In `Brand.stories.tsx` ist das nachgezogen
 (0056).
 
 Damit ist 0111 abgeschlossen: Befund 1 hier, Befund 2 mit 0093 (b).
+
+## Prüfung 2026-09-07 — fremd, Claude (nicht gebaut, kein Chatverlauf gelesen)
+
+Gemessen mit Chromium headless über CDP gegen den Dev-Server
+(`localhost:6107`, also die Quelle), 1440×900. Nichts unten ist aus dem Text
+übernommen.
+
+### Befund 1 — Preflight steht vorn, und die Tokens gewinnen
+
+**Reihenfolge, wie der Browser sie geladen hat** (nicht aus `index.css`
+gelesen): alle `document.styleSheets` flach durchgezählt, 1736 Regeln.
+
+| Regel | Position |
+|---|---|
+| Preflight `a { color: inherit; text-decoration: inherit }` | **76** |
+| Preflight `blockquote,dl,dd,h1…h6 { margin: 0 }` | 93 |
+| Preflight `img, video { max-width: 100%; height: auto }` | 103 |
+| eigen: `a { color: var(--color-accent-700); text-decoration-thickness: 1px; … }` | **120** |
+| eigen: `a:hover { color: var(--color-primary) }` | 121 |
+
+Preflight liegt also vor den eigenen Blättern und verliert bei gleicher
+Spezifität — genau die Ordnung, die das Abnahmekriterium verlangt. Der
+Notbehelf aus 0098 (die `a`-Regel am Dateiende) ist weg; `index.css` endet mit
+`@tailwind components; @tailwind utilities;`.
+
+**Gerendert:** ein frisch eingehängtes `<a href>` **ohne eigene Klasse** misst
+`rgb(43, 111, 156)` = `#2B6F9C` = `--color-accent-700` — in **60 von 60**
+zufällig gezogenen Stories, kein Ausreißer.
+
+**Gegenprobe auf den Fehler des ersten Anlaufs** (die eigenen Blätter fielen
+aus, Stories standen in Systemschrift): über dieselben 60 Stories 60×
+`font-family: Inter`, 60× `color: rgb(45, 45, 45)`, 60× `box-sizing:
+border-box`, 60× `--color-accent-700 = #2B6F9C`. Keine Story steht in
+Systemschrift, keine hat ihre Tokens verloren.
+
+**Der Nachsatz zu `img` stimmt:** ein `<img width="40" height="40">` mit einer
+100×20-Quelle misst gerendert **8 px** hoch — `height: auto` schlägt das
+Attribut, unabhängig von der Reihenfolge.
+
+### Befund 2 — die Bewegung fragt
+
+Im Blatt: vier `@media (prefers-reduced-motion: reduce)`-Blöcke (`v3.css`
+Z. 1076, 1752, 1898, 3363). Der vierte ist die eine Regel für alles:
+`*, ::before, ::after { transition-duration: 0.01ms !important; transition-delay: 0s !important }`.
+
+**Gerendert**, `Emulation.setEmulatedMedia` auf `prefers-reduced-motion:
+reduce` (`matchMedia(…).matches` = true gegengeprüft), Overlay je per Klick
+geöffnet:
+
+| Story · Element | normal | reduce |
+|---|---|---|
+| `Drawer --open` · `.v2drawer` | 0,28 s (transform) | **1e-05 s** |
+| `Drawer --open` · `.v2drawer__scrim` | 0,18 s (opacity) | **1e-05 s** |
+| `Dialog --confirmation` · `.v2dlg`, `.v2scrim` | 0 s | 1e-05 s |
+| `Popover --interactive` · `.v2pop` | 0 s | 1e-05 s |
+| `OverflowMenu --interactive` · `.v2menu__panel` | 0 s | 1e-05 s |
+| jede Story · `.v2btn` | 0,12/0,12/0,18/0,12 s | 1e-05 s |
+
+Dialog, Popover und Menü hatten nie eine Transition — dort war nichts
+abzuschalten; der Drawer hatte eine, und sie fällt weg. Der Haken in den
+Abnahmekriterien nennt „gemessen `transition-duration: 0s`"; heute misst man
+**0,01 ms** (die globale Regel aus 0093 b). Wirkung gleich, Zahl überholt.
+
+### Werkzeuge
+
+`pnpm typecheck` → exit 0 · `pnpm build` → exit 0 (Storybook gebaut, nur die
+bekannte Chunk-Größen-Warnung von Rolldown) · `pnpm check:icons` → exit 0.
+Kein Fehler, auch keiner aus einer fremden Sitzung — im Arbeitsbaum lagen
+parallel Änderungen an `src/styles/v3.css` und `entities/invoice-line/*`; der
+`v3.css`-Diff berührt keinen `prefers-reduced-motion`-Block.
+
+### Zwei Anmerkungen, die den Entscheid nicht drehen
+
+1. **Die Begründung für den Höhenzuwachs trägt nicht.** Der Abschnitt
+   „Erledigt" erklärt die +1 bis +29 px damit, dass „Überschriften und Listen
+   ihre eigenen Abstände zurückbekommen". Gemessen hat ein `<h1>` weiter
+   `margin: 0px`, `font-weight: 400` und die geerbte Größe, eine `<ul>` weiter
+   `list-style: none` und `padding-inline-start: 0px`. Preflight räumt
+   Überschriften und Listen also **unverändert** ab — das darf es auch, weil es
+   ein Autorenblatt ist und kein eigenes Blatt diese Eigenschaften erneut
+   setzt; an ihnen ändert die Reihenfolge nichts. Der gemessene Zuwachs mag
+   stimmen, die genannte Ursache stimmt nicht. Wer die Zeile später als Beleg
+   zitiert, zitiert eine falsche Erklärung.
+2. **Der Vorher/Nachher-Durchgang ist von außen nicht nachvollziehbar**, ohne
+   die Umstellung zurückzubauen — das habe ich nicht getan. Geprüft ist nur der
+   Nachher-Zustand (60 Stories, s. o.), und der ist unauffällig. Außerdem: die
+   Haken in „Abnahmekriterien" stehen noch leer, obwohl „Erledigt" die Aufgabe
+   abschließt — bitte nachziehen, sonst liest die nächste Sitzung sie als offen.
+
+### Ergebnis: **bestätigt**
+
+Beide Befunde halten heute: Preflight lädt vorn, die eigenen Blätter gewinnen,
+ein Link ohne Klasse trägt `--color-accent-700` (60/60), und wer weniger
+Bewegung bestellt hat, bekommt den Drawer ohne Einfahrt.
+
+## Nach der Prüfung (2026-09-07): bestätigt, mit einer berichtigten Begründung
+
+Die Prüfung hat die Reihenfolge nicht im Quelltext, sondern **wie der Browser
+sie geladen hat** gezählt (1.736 Regeln flach): Preflight `a{color:inherit}`
+an Stelle **76**, die eigene `a`-Regel an **120**, `a:hover` an 121. Ein frisch
+eingefügter, klassenloser `<a href>` misst in **60 von 60** Stories
+`rgb(43,111,156)` — das ist `--color-accent-700`. Der Notnagel aus 0098 am
+Ende von `index.css` ist weg.
+
+Die Bewegung ebenfalls gemessen, mit `prefers-reduced-motion: reduce` und
+wirklich geöffneten Überlagerungen: `.v2drawer` 0,28 s → **1e-05 s**, das
+Scrim 0,18 s → 1e-05 s, `.v2btn` 0,12–0,18 s → 1e-05 s. Eine einzige globale
+Regel tut das.
+
+**Berichtigt:** die Aufgabe nannte als Ursache des Höhenwachstums (+1 bis
++29 px) den Überschriften- und Listen-Reset des Preflights. Das stimmt nicht —
+`<h1>` hat weiterhin `margin: 0` und `font-weight: 400`, `<ul>` weiterhin
+`list-style: none` und `padding-inline-start: 0`. Der Reset ist von der
+Umsortierung gar nicht betroffen, weil nichts diese Eigenschaften neu
+deklariert. Die **Wirkung** der Aufgabe ist gemessen und richtig; nur die
+Erklärung dafür war es nicht.
+
+Die Prüfung nennt noch einen zweiten Punkt, und der ist berechtigt: der
+Vorher-Nachher-Vergleich ist ohne Zurückrollen nicht unabhängig
+nachvollziehbar. Belegt ist der **Nachher**-Zustand, und zwar vollständig.
