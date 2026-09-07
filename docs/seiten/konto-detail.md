@@ -28,12 +28,12 @@
 | Rang | Frage der Rolle | Antwort steht in | Baustein |
 |---|---|---|---|
 | 1 | „Welches Konto ist das?" | Kopf: Nummer, Name, Rolle, Jahr | `EntityHeader`, `AccountCell` |
-| 2 | „Wie viel liegt drauf?" | Saldo, Soll, Haben — **je Quelle**, nie vermischt | `KpiRow`, `Amount` |
+| 2 | „Wie viel liegt drauf?" | **DATEV führt, Ludwig ist das Delta** (Owner 2026-09-04): der Saldo des Spiegels, daneben „nur in Ludwig" als Abweichung — kein zweiter, gleichrangiger Saldo | `KpiGrid` + `KpiTile`, `Amount` |
 | 3 | „Ist das viel oder wenig für dieses Konto?" | Verlauf über die letzten Monate | `BarChart` (0110) |
 | 4 | „Was liegt konkret drauf?" | Die Bewegungen, beide Quellen **in einer Liste**, Herkunft als Spalte | `AccountEntryList` |
-| 5 | „Sagen Ludwig und DATEV dasselbe?" | Der Abgleich je Zeile (Achse `mirror_match`) | `StatusBadge` in der Zeile |
-| 6 | „Wofür ist dieses Konto gedacht?" | Stammdaten: SKR-Klasse, Kontenfunktion, Automatik-Steuersatz | `AccountFacts` |
-| 7 | „Was weiß Ludwig sonst über das Konto?" | Beschreibung, Belegbegriffe (LLM-Profil) | `LongText`, `Chip` |
+| 5 | „Sagen Ludwig und DATEV dasselbe?" | Die **Herkunft-Spalte** der Bewegungszeile (0067, vier Klassen): nur in DATEV · von Ludwig gebucht und bestätigt · exportiert und noch nicht wiedergefunden · nur in Ludwig | `accountEntryColumns` (Herkunft-Zeichen) |
+| 6 | „Wofür ist dieses Konto gedacht?" | Stammdaten: SKR-Klasse, Kontenfunktion, Automatik-Steuersatz. **Kontenfunktion und Steuersatz haben in keinem Typ ein Feld** — Befund L-95; bis dahin zeigt die Randspalte, was `AccountFactsVM` trägt | `AccountFacts` in der Randspalte |
+| 7 | „Was weiß Ludwig sonst über das Konto?" | Beschreibung, Belegbegriffe (LLM-Profil) | `LongText`, `Badge` |
 
 Rang 1–3 stehen ohne Klick. Rang 4 ist die Hauptfläche. Rang 5 steht **in**
 der Zeile, nicht in einem eigenen Reiter. Rang 6 und 7 dürfen je einen Klick
@@ -43,7 +43,7 @@ kosten.
 
 | Nebenjob | Wie oft | Darf kosten |
 |---|---|---|
-| Eine einzelne Buchung aufschlagen | oft — der Grund, warum jemand hier ist | einen Klick (Drawer, `?entry=` / `?buchung=`) |
+| Eine einzelne Buchung aufschlagen | oft — der Grund, warum jemand hier ist | einen Klick und **einen** URL-Parameter: zwei Quellen sind eine Eigenschaft der Zeile, nicht zwei Drawer (`?buchung=<id>`) |
 | Monat für Monat vergleichen | zur Abschlussprüfung, geschätzt einmal je Jahr | einen Reiter |
 | Das LLM-Profil prüfen | selten, bei Zweifeln an der Einordnung | einen Reiter |
 
@@ -76,14 +76,27 @@ kosten.
 5. **Vier Reiter, von denen zwei Daten wiederholen.** Nach den Zweifeln 1 und
    3 bleiben zwei: die Seite selbst und das LLM-Profil.
 
+
+## Eine bewusste Abweichung vom Entitätsprofil
+
+Das Profil empfiehlt, die **Saldospalte** kehre im View wieder, „wo eine
+Quelle allein gezeigt wird". Der View zeigt die Quellen aber nicht allein,
+sondern in **einer** Liste mit der Herkunft als Spalte (Owner-Entscheid
+2026-09-04) — und ein laufender Saldo stimmt nur bei genau einer Sortierung
+und einer Quelle. Solange es keinen Quellfilter gibt, bleibt die Spalte
+deshalb weg; mit ihm ist sie Ausbau. Dieselbe Begründung wie beim Kontoauszug
+(0085), nur eine Entität weiter.
+
 ## Offene Fragen
 
 1. **Bleiben vier Reiter oder zwei?** *Ohne Antwort: zwei* — „Konto" (alles
    ab Rang 1 bis 6) und „LLM-Profil". Buchungen und Monate gehen in den
    ersten auf.
-2. **Wird der Saldo je Quelle gezeigt oder vereinigt?** *Ohne Antwort: je
-   Quelle*, nebeneinander — das ist die offene Frage 1 des Entitätsprofils,
-   und die Seite ist genau der Ort, an dem der Unterschied zählt.
+2. **Wird der Saldo je Quelle gezeigt oder vereinigt?** **Beantwortet vom
+   Owner am 2026-09-04:** DATEV führt, Ludwig ist das Delta. Nicht zwei
+   gleichrangige Salden — zwei gleich große Zahlen nebeneinander laden dazu
+   ein, sie zu addieren; und nicht vereinigt, weil das die Abweichung
+   verbirgt, wegen der jemand hier ist. So ist `AccountFacts` (0066) gebaut.
 3. **Führt eine Bewegungszeile in den Drawer oder auf den Sachverhalt?**
    *Ohne Antwort: in den Drawer* — der Sachverhalt ist der Fuß-Ausgang des
    Drawers, wie bei 0052.

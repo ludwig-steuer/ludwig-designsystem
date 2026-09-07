@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Freigabe | zurück 2026-09-07 — Zuschnitt neu nach Abschnitt „Freigabe" (Rahmen, DATEV führt), nach 0071, danach ohne zweite Runde freigegeben |
 | Stufe | `entities/account/` |
-| Quelle | Entitätsprofil `docs/entitaeten/account.md`, Abschnitt „Formen" (Zeile `AccountView`) |
+| Quelle | Entitätsprofil `docs/entitaeten/account.md`, Abschnitt „Formen“ (Zeile `AccountView`) · Seitenprofil `docs/seiten/konto-detail.md` |
 | Auftrag | Die Seite hinter dem Fuß-Knopf des `AccountDrawer` (A10): alles über ein Konto in einem Jahr. Heute vier Tabs in `app/(app)/clients/[clientSlug]/[year]/accounts/[accountNumber]/page.tsx` — Übersicht (6 Kennzahlen, 6-Monats-Verlauf, je fünf neueste Bewegungen beider Quellen, Stammdaten), Buchungen, Monatsübersicht, LLM-Profil. Zeigt alle Datenpunkte ab 20 % Füllgrad. |
 | Vertagt, weil | Eigene Route mit vier Tabs → nach `docs/backlog/README.md` Schritt 0b erst ein Seitenprofil unter `docs/seiten/`; jedes Element muss dort einer Frage der Rolle dienen, und ob es bei vier Tabs bleibt, entscheidet das Profil, nicht die Spec. Der Teil, den View und Drawer teilen, wird als `AccountFacts` in der laufenden Welle gebaut — der Drawer wartet damit nicht auf den View (Präzedenz `SourceDocumentFacts`, 0052). |
 | Setzt voraus | Seitenprofil `docs/seiten/konto-detail.md` — **angelegt 2026-09-07** · `AccountFacts` und `AccountEntryList` aus der Konto-Welle · 0057 `DataTable` für den Tab „Buchungen" · offene Frage 1 des Profils (Saldo je Quelle) |
@@ -146,3 +146,133 @@ Neuer Zuschnitt (vorab freigegeben, wenn die Neufassung dem folgt): Slots `pager
 Seitenprofil `konto-detail.md` nachziehen: offene Frage 2 ist beantwortet (Owner 2026-09-04); Rang 5 ohne `StatusBadge`/`mirror_match` je Zeile (Herkunft-Spalte); Rang 6 (Kontenfunktion, Steuersatz) hat in keinem Typ ein Feld — Befund; `KpiRow` → `KpiGrid`, `Chip` → `Badge`; Nebenjob „Buchung aufschlagen" mit einem Param; die Profil-Empfehlung „Saldospalte kehrt im View wieder, wo eine Quelle allein gezeigt wird" als bewusste Abweichung nennen.
 
 Reihenfolge: nach 0071 — der View erbt dessen Muster. Befunde ins Register: **L-94** — `AccountFactsVM` im Spiegel trägt weder `datevBalance` noch `ludwigOnlyAmount` noch `currency`; L-13 ist nur halb erledigt. **L-95** — Σ Soll/Σ Haben je Konto und Jahr, Monatswerte `{ month, debit, credit }` und Kontenfunktion/Automatik-Steuersatz haben keinen Spiegel-Typ (heute inline in `accounts/[accountNumber]/page.tsx`). L-30 in 0063 verlinken.
+
+## Neufassung 2026-09-07 nach der Freigabe — Rahmen mit Slots, DATEV führt
+
+Die erste Fassung ist an zwei Stellen zurückgewiesen worden, und beide
+Zurückweisungen waren berechtigt:
+
+1. **„Saldo je Quelle, zwei Zahlen plus Differenz"** hat eine Frage neu
+   aufgemacht, die der Owner am 2026-09-04 im Entitätsprofil beantwortet hat:
+   **DATEV führt, Ludwig ist das Delta.** Genau so ist `AccountFacts` (0066)
+   gebaut — die Spec hätte Rang 2 also ein zweites Mal beantwortet, anders als
+   der Baustein, der ihn schon beantwortet.
+2. **Rang 5 hatte kein Element.** „Sagen Ludwig und DATEV dasselbe?" stand in
+   der Rangfolge und in keiner Zeile der Schnittstelle.
+
+### Einordnung
+
+- **Klasse:** `entities/account/`, Größe L. **Name `LedgerAccountView`**, nicht
+  `AccountView`: `AccountView` ist im gespiegelten Datenmodell bereits ein
+  Typname (`"flat" | "grouped"`, die Ansichtsform des Kontenplans). Eine
+  Komponente, die einen Domänentyp verdeckt, ist eine Namenskollision, die auf
+  den ersten Import wartet.
+- **Regel aus §3:** Nr. 5. Kein Durchreicher um `DataTable` — ein Rahmen mit
+  Slots wie 0050 und 0071.
+- **Setzt auf:** `AccountFacts` (0066), `accountEntryColumns()` (0067),
+  `BarChart` (0110), `EntityHeader`, `RecordPager`, `MasterDetail`.
+
+### Die drei Entscheidungen
+
+**1. Rang 2: DATEV führt, Ludwig ist das Delta.** Kein zweiter, gleichrangiger
+Saldo und keine vereinigte Zahl. Zwei gleich große Zahlen nebeneinander laden
+dazu ein, sie zu addieren; eine vereinigte verbirgt die Abweichung, wegen der
+jemand hier ist. Der View bekommt dafür **keine** Datenprop `totals` — die
+Zahlen stehen in `AccountFactsVM` (`datevBalance`, `datevCount`,
+`ludwigOnlyAmount`, `ludwigOnlyCount`), und die Seite baut daraus ihre
+`KpiGrid`. Σ Soll und Σ Haben (Rang 7 des Profils) fehlen dort und sind
+Befund **L-94**.
+
+**2. Rang 5 ist die Herkunft-Spalte.** Sie ist gebaut (0067) und trägt vier
+Klassen: nur in DATEV · von Ludwig gebucht und in DATEV bestätigt · von Ludwig
+exportiert und noch nicht wiedergefunden · nur in Ludwig. Damit steht der
+Abgleich **in der Zeile**, wo die Frage entsteht. Ein zweiter Status je Zeile
+(`mirror_match`) wäre ein Statuszeichen zu viel (R1) und ist Ausbau.
+
+**3. Kein laufender Saldo.** Er stimmt nur bei genau einer Sortierung **und**
+einer Quelle; die Liste vereinigt beide. Mit einem Quellfilter kommt er wieder
+— der Filter ist Ausbau, und das Seitenprofil nennt die Abweichung von der
+Profil-Empfehlung ausdrücklich.
+
+### Schnittstelle — sieben Slots, keine Datenprops
+
+| Slot | Was hineingehört | Rang | Nachweis |
+|---|---|---|---|
+| `pager` | `RecordPager` mit `back` („← Konten") und `total` | — | `Filled` |
+| `header` | `EntityHeader` — Nummer und Name, Kontoart als Zustand | 1 | `Filled` |
+| `summary` | `KpiGrid` aus `AccountFactsVM`: Saldo in DATEV, „nur in Ludwig", letzte Buchung | 2 | `Filled` |
+| `chart` | `BarChart` (0110), Soll und Haben je Monat, `grouped` | 3 | `Filled` |
+| `tabs` | `Tabs` — zwei: Konto und LLM-Profil | 7 | `OtherTab` |
+| `aside` | `AccountFacts` in der Randspalte; leer → eine Spalte | 6 | `Filled`, `WithoutFacts` |
+| `children` | Die Bewegungen: `DataTable` mit `accountEntryColumns({ variant: "full" })` | 4, 5 | `Filled`, `Edges` |
+
+**Kann bewusst nicht:**
+
+- **Laden.** Kein Reiter-Inhalt, keine Bewegungen — die Seite lädt.
+- **Die Quellen verrechnen.** Sie stehen nebeneinander, DATEV führend.
+- **Zwei Auszüge zeigen.** Eine Liste, Herkunft als Spalte (L-88).
+- **Einen laufenden Saldo führen.** Siehe Entscheidung 3.
+- **Den Kontenplan zeigen.** Vor und Zurück ja, keine eingebettete Liste.
+
+### Verhalten
+
+- **Tastatur:** `J`/`K` kommen von `RecordPager`; der Rahmen bindet nichts.
+- **Reiterwechsel:** die Reiter sind Links; kein lokaler Zustand.
+- **Server/Client:** der Rahmen ist eine Server-Komponente. `MasterDetail`
+  bringt den Zweispalter mit, `DataTable` seine eigenen Inseln.
+- **Ränge 1–3 ohne Scrollen:** gemessen enden sie bei 1440 × 900 auf y = 538.
+
+### Stories
+
+Titel `v3/Entitäten/Konto/LedgerAccountView`. Ableitung nach §6: 4 Zustände
+(gefüllt · leer · lädt · Fehler; „leer nach Filter" entfällt — der Rahmen
+filtert nicht, Laden und Fehler teilen sich eine Story) + 1 Layout (`aside`
+leer) + 1 Slot-Wechsel (anderer Reiter) + 1 Rand = **6**.
+
+| Story | Beweist |
+|---|---|
+| `Filled` | Die sieben Slots, DATEV führend, alle vier Herkunftsklassen in der Liste |
+| `WithoutFacts` | Ohne Randspalte nimmt die Liste die ganze Breite — der Rahmen erzwingt keinen Zweispalter |
+| `OtherTab` | Derselbe Rahmen, anderer Inhalt; der View lädt nichts |
+| `Empty` | Konto ohne Bewegung: ein **Befund**, kein Fehler und kein Erfolg; der Verlauf fällt weg statt zwölf leerer Balken |
+| `LoadingAndError` | Kopf, Zahlen und Reiter bleiben stehen |
+| `Edges` | Das Bankkonto: 3.400 Bewegungen, Pager „50 von 3.400" |
+
+### Abnahmekriterien
+
+Fest: typecheck · build · Datei nach der Familie · Code englisch mit
+`@when`/`@instead` · kein Hex, keine lokale Label-Map · alle Stories · §9 ·
+im Browser angesehen.
+
+Variabel:
+
+- [ ] Der Rahmen hat **keine** Datenprops (`grep`: nur `ReactNode`-Slots)
+- [ ] Rang 2 zeigt **einen** führenden Saldo (DATEV) und Ludwig als Delta — kein zweiter gleichrangiger, keine Summe (Story `Filled`, gemessen)
+- [ ] Rang 5 steht in der Zeile: alle **vier** Herkunftsklassen sind an einer Zeile nachweisbar (Story `Filled`, gemessen)
+- [ ] **Eine** Bewegungsliste, kein zweiter Auszug (`grep`, Story `Filled`)
+- [ ] Kein laufender Saldo (`grep`: keine Saldospalte im Satz)
+- [ ] Ränge 1–3 stehen bei 1440 × 900 ohne Scrollen (gemessen)
+- [ ] Ohne `aside` eine Spalte, ohne `tabs`/`pager` fallen die Zeilen samt Abstand (Story `WithoutFacts`)
+- [ ] Der Rahmen lädt nichts (`grep`: kein Modul-Import, kein `await`, kein `useState`)
+- [ ] offen (App): ersetzt `accounts/[accountNumber]/page.tsx` (846 Z.) samt beider Auszugstabellen — **abhängig von L-88** (eine Abfrage über beide Quellen) und **L-30** (Saldo im DATEV-Auszug)
+- [ ] offen (App): die Zeile führt in den Drawer, mit **einem** URL-Parameter
+
+### Ausbau (A12)
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Quellfilter (nur DATEV / nur Ludwig) | eine Prop an der Liste der Seite | wenn jemand die Quellen einzeln lesen will — dann kommt auch der laufende Saldo wieder |
+| Abgleich je Zeile (`mirror_match`) | eine Spalte im Satz 0067 | wenn die vier Herkunftsklassen nicht mehr reichen; heute wäre es ein zweiter Status je Zeile (R1) |
+| Σ Soll / Σ Haben in den Kennzahlen | zwei Felder an `AccountFactsVM` | sobald L-94 steht |
+| Zwei Jahre vergleichen | `compareYear` | wenn die Abschlussprüfung danach fragt |
+
+### Befunde für `ludwig/app`
+
+- **L-94** — `AccountFactsVM` trägt im Spiegel weder `datevBalance` noch
+  `ludwigOnlyAmount` noch `currency`; L-13 ist damit nur halb erledigt.
+- **L-95** — Σ Soll/Σ Haben je Konto und Jahr, die Monatswerte
+  (`{ month, debit, credit }`) und Kontenfunktion/Automatik-Steuersatz haben
+  keinen Spiegel-Typ; sie stehen heute inline in
+  `accounts/[accountNumber]/page.tsx`.
+- **L-88** (zwei Auszüge für eine Frage) und **L-30** (Saldo im DATEV-Auszug)
+  sind Voraussetzungen für den Einsatz drüben, nicht für den Bau hier.

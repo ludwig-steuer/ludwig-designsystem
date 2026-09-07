@@ -393,7 +393,8 @@ export {
 export { BankTransactionList } from "./entities/bank-transaction/BankTransactionList";
 export { BankTransactionWorklist } from "./entities/bank-transaction/BankTransactionWorklist";
 
-/* Konto — der Kontenplan als Spaltensatz (0062) */
+/* Konto — die Seite (0063) und der Kontenplan als Spaltensatz (0062) */
+export { LedgerAccountView } from "./entities/account/LedgerAccountView";
 export {
   accountColumns,
   accountTracks,

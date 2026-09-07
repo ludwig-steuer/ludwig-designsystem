@@ -3116,6 +3116,16 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2docview__tabs,
 .v2docview__body { min-width: 0; }
 
+/* Der Rahmen der Kontoseite (0063) — dieselbe Bauart wie `.v2cdv` und
+   `.v2docview`. */
+.v2lav { display: flex; flex-direction: column; gap: var(--space-5); }
+.v2lav__pager,
+.v2lav__head,
+.v2lav__sum,
+.v2lav__chart,
+.v2lav__tabs,
+.v2lav__body { min-width: 0; }
+
 .v2cdv { display: flex; flex-direction: column; gap: var(--space-5); }
 .v2cdv__pager,
 .v2cdv__head,
