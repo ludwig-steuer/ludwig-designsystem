@@ -647,7 +647,7 @@ export const Misuse: Story = {
                    wichtigste Tafel der Seite für eine Vorlesehilfe stumm, und
                    „richtig" wie „falsch" hießen beide „Ludwig" (Abnahme
                    0056, M5). */
-              alt="Ludwig-Wortmarke, auf 100 × 40 px gestaucht"
+              alt="Ludwig-Wortmarke, auf 64 % der Breite gestaucht"
               /* **`scaleX`, nicht zwei Maße.** Beide Maße im Stil stauchen
                  nichts: `ludwig-logo.svg` trägt kein `preserveAspectRatio`,
                  also gilt `xMidYMid meet`, und das Bild skaliert in den Kasten
@@ -659,7 +659,11 @@ export const Misuse: Story = {
                  Bild. Erst die Transformation staucht wirklich: gemessen
                  1,906, und die Bildmarke wird zum Hochrechteck (Abnahme
                  0056, zweite Runde). */
-              style={{ height: 40, width: "auto", transform: "scaleX(0.64)", transformOrigin: "left center" }}
+              style={{
+                height: 40,
+                width: "auto",
+                transform: "scaleX(0.64)",
+              }}
             />
           </div>
         }

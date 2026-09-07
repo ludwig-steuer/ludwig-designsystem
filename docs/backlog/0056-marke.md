@@ -432,10 +432,13 @@ Nacharbeit hat den Zustand **verschlechtert**: seit sie der Tafel den Namen
 Seite, deren Gegenstand Genauigkeit ist. Vorher war sie nur stumm.
 
 Jetzt staucht sie wirklich: `transform: scaleX(0.64)` bei natürlichem
-Verhältnis. Gemessen: gestauchte Tafel **2,514**, unverzerrte **3,929** — und
-die Bildmarke wird zum Hochrechteck. Der Name nennt jetzt den **Vorgang**
-(„auf 64 % der Breite gestaucht"), kein Kastenmaß. `reference/` bleibt
-unangetastet.
+Verhältnis. Gemessen **an der gezeichneten Fläche**, nicht am Kasten:
+gestauchte Tafel **1,916**, unverzerrte **3,010** — Faktor 0,637, und die
+Bildmarke wird zum Hochrechteck. (Die Zahlen 2,514 / 3,929 standen hier
+zuerst; das waren wieder **Kastenmaße** — dieselbe Basis, die zwei Absätze
+darüber verworfen wird. Berichtigt am 2026-09-07, gefunden von der dritten
+Runde.) Der Name nennt den **Vorgang** („auf 64 % der Breite gestaucht"),
+kein Kastenmaß. `reference/` bleibt unangetastet.
 
 **Auch berichtigt, und beides waren meine Zahlen:**
 
@@ -449,3 +452,141 @@ unangetastet.
 **Offen, benannt:** `Section` und der neue `h3` in `Pair` setzen ihre
 Überschriften verschieden (18 px/600 gegen 14 px/600). Eine Gliederung, zwei
 Bilder — das gehört in dieselbe Textrunde wie M14/M17 aus 0055.
+
+## Wiederabnahme (2026-09-07) — dritte Runde
+
+Gemessen gegen `cb63b05` (die Nacharbeit `515d5ba` ist enthalten; an `src/`
+liegt nichts an, der Baum trägt nur eine fremde Änderung an
+`docs/backlog/0025-expectation.md` und eine unverfolgte
+`scripts/check-when.mjs`), Dev-Server `http://localhost:6107`, also gegen die
+Quelle. **Nicht gebaut** — ein Bau leert `storybook-static/`, und im Baum
+arbeiten mehrere Prüfer (0117). Die Seitenverhältnisse sind an der
+**gezeichneten Fläche** gemessen: Ausschnittbild je Bildkasten (8-fach, 6 px
+Rand), Tinte gegen den Grund der Tafel abgegrenzt — nicht am Element-Kasten und
+nicht aus dem Quelltext. Jede Messung mit Gegenprobe.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | Exit-Code **0** | erfüllt |
+| `pnpm build` grün | nicht ausgeführt — Bauverbot dieser Runde (0117) | nicht prüfbar |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `index.json`: drei Einträge `v3-grundlagen-marke--marks/--sizes/--misuse`, alle `title: "v3/Grundlagen/Marke"`, `importPath ./src/ui/v3/Brand.stories.tsx` | erfüllt |
+| Code englisch; `@when`/`@instead` (entfällt) | Bezeichner und Story-Exporte englisch, Kommentare deutsch — unverändert der Befund am Set | erfüllt, mit Set-Befund |
+| Kein Hex, kein px, keine lokale Label-Map | `grep -c '#[0-9A-Fa-f]\{6\}'` = **0**; `grep -c '<svg'` = **0**; `grep -cE '\S  +\S'` = **0** | erfüllt |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | drei von drei geladen; `Log.entryAdded` + `Runtime.consoleAPICalled` (Level error/warning) je Story: **0** | erfüllt |
+| Prüfliste §9 durchgegangen | `pnpm check:contrast` Exit **0**, `pnpm check:icons` Exit **0**; im Zugänglichkeitsbaum kein namenloses Bild (siehe unten) | erfüllt |
+| Im Browser angesehen | alle drei Stories über CDP geladen, vermessen und als Bild angesehen; 6 · 5 · 9 Bilder, alle `complete` | erfüllt |
+| Story lädt die drei SVGs als Dateien, kein SVG-Markup | `naturalWidth × naturalHeight` 300×76 · 300×76 · 150×150 von `/reference/design-system-v2/assets/…`; `document.querySelectorAll('svg').length` = **0** in allen drei Stories | erfüllt |
+| `viewBox`-Tabelle stimmt mit den Dateien | der Server liefert `viewBox="0 0 220 56"`, `"0 0 220 56"`, `"0 0 56 56"`; die gerenderte Tabelle nennt 220 × 56, 220 × 56, 56 × 56 | erfüllt |
+| `Marks`: drei Zeichen auf hellem und dunklem Grund | `ludwig-logo.svg` 157,14 × 40 auf `rgb(255,255,255)` (= `--color-bg` `#FFFFFF`); `ludwig-logo-light.svg` 157,14 × 40 auf `rgb(26,58,92)` (= `--color-primary` `#1A3A5C`) und auf `linear-gradient(rgb(31,70,112), rgb(20,48,75), rgb(15,36,56))`; `ludwig-mark.svg` 56 × 56 auf allen dreien; kein `filter`, kein `box-shadow` | erfüllt |
+| `Sizes`: Mark bei 16, 24, 32 px, Ablösung genannt | gemessen 16×16 · 24×24 · 32×32 exakt; der echte Rahmen 240 px Spalte ausgeklappt, 64 px eingeklappt, `.sb__logo` 56 px Zeile, Wordmark 125,7 × 32 darin | erfüllt |
+| `Misuse`: Text an Stelle des Zeichens, Liste gerechnet | rendert „**7** Dateien" und listet `AppShell`, `CaseDetailView`, `CaseList`, `CommandPalette`, `LedgerAccountView`, `NavList`, `SourceDocumentView`; `grep -rl 'sb__logo' src/ui/v3 --include='*.stories.tsx'` ohne `Brand` findet genau diese sieben (acht Fundstellen, `AppShell` zweimal) | erfüllt |
+| Keine Datei unter `reference/` geändert | `git status --short reference/ public/` leer | erfüllt |
+| Story unter `v3/Grundlagen/…` | ja | erfüllt |
+| **M7 — die Tafel „Nicht verzerren" staucht jetzt wirklich** | Tinte im Ausschnittbild (8-fach): richtig **897 × 298** → **3,0101**, falsch **571 × 298** → **1,9161**; Faktor **0,637**. Die Bildmarke wird zum Hochrechteck. Gegenprobe zur Laufzeit: `transform: none` → **3,0101** (deckungsgleich mit der richtigen Tafel), `scaleX(0.30)` → **0,8993** — die Messung reagiert | **behoben** |
+| Überschriften der Missbrauchs-Seite | `--misuse`: **5** `heading`-Knoten, alle Ebene 3, genau die fünf Regeltitel; `--marks` und `--sizes` je **2**, ebenfalls Ebene 3 | behoben |
+| Landmarken-Zahl berichtigt | `--misuse` **2** `complementary`, `--sizes` **0** — bei je zwei `<aside>` im DOM. Die berichtigte Notiz trifft zu | behoben |
+| Namen der Tafeln | 9 `<img>`, **9** `image`-Knoten, keiner `ignored`, jeder `nameFrom: attribute:alt`, neun verschiedene Namen | behoben |
+| **M8 — der berichtigte Name steht nicht in der Datei** | `Brand.stories.tsx:650` trägt unverändert `alt="Ludwig-Wortmarke, auf 100 × 40 px gestaucht"`; `grep '64 %\|64%'` in der Datei = **0 Treffer** | **offen, blockiert** |
+
+### M8 — die Nacharbeit meldet einen Namen, den sie nicht gesetzt hat (blockiert)
+
+**Ort:** `src/ui/v3/Brand.stories.tsx:650` gegen `docs/backlog/0056-marke.md:437`
+(und dieselbe Zusage in der Commit-Nachricht von `515d5ba`).
+
+**Zusage:** „Der Name nennt jetzt den **Vorgang** („auf 64 % der Breite
+gestaucht"), kein Kastenmaß."
+
+**Ist:** der Name lautet Zeile für Zeile wie vor der Nacharbeit —
+`alt="Ludwig-Wortmarke, auf 100 × 40 px gestaucht"`. Im Zugänglichkeitsbaum von
+`v3-grundlagen-marke--misuse` steht er als vierter `image`-Knoten so da.
+Geändert wurde allein die Zeile darunter (`transform: scaleX(0.64)`).
+
+**Was die Zahl wert ist:** gemessen ist der gezeichnete Kasten **100,57 × 40**
+(Element-Rechteck nach der Transformation; Layout-Kasten 157,14 × 40, Tinte
+71,38 × 37,25). Der Name lügt heute also **nicht** — er stimmt auf 0,6 % genau,
+weil `0,64 × 157,14 = 100,57` ist. Er stimmt aber nur **zufällig**: die 100 ist
+von Hand getippt und aus nichts abgeleitet. Wer `height: 40` oder den Faktor
+anfasst, hat wieder eine Tafel, die etwas anderes sagt als sie zeigt — genau
+der Fehler, den M4 auf derselben Seite abgestellt hat, indem die Liste gerechnet
+statt gepflegt wird.
+
+**Warum das blockiert:** die Seite ist in Ordnung, das Protokoll nicht. Ein
+Abnahmebericht, der eine Berichtigung meldet, die im Baum nicht steht, ist auf
+einer Aufgabe, deren Gegenstand Genauigkeit ist, kein Randfall — die nächste
+Runde liest den Bericht, nicht den Diff.
+
+**Kleinster Weg:** den Namen auf den Vorgang umstellen, wie angekündigt
+(`alt="Ludwig-Wortmarke, auf 64 % der Breite gestaucht"`), und ihn — wie
+`GROUND_LABEL` und `LOGO_TEXT_STORIES` — aus dem Faktor bilden, statt ihn zu
+tippen. Wer stattdessen den Namen behalten will, muss den Satz im Protokoll
+berichtigen; beides ist eine Zeile.
+
+### Nicht blockierend
+
+1. **„2,514 gegen 3,929" sind wieder Kastenmaße.** `docs/backlog/0056-marke.md:436`.
+   Gemessen trifft beides zu (Element-Rechtecke 100,57 × 40 und 157,14 × 40),
+   nur ist es dieselbe Messbasis, die derselbe Abschnitt zwei Absätze weiter
+   oben verwirft („Der Kasten ist nicht das Bild") und für dieselbe richtige
+   Tafel **3,010** nennt. Wer die beiden Absätze nebeneinander liest, kann die
+   Zahlen nicht zusammenbringen. An der Tinte gemessen lauten sie **3,0101**
+   und **1,9161** — der Kommentar in der Datei (Zeile 659) nennt mit „1,906"
+   die richtige Basis, der Bericht nicht.
+2. **Die gestauchte Tafel steht nicht mehr in der Mitte.** `Brand.stories.tsx:662`
+   setzt `transformOrigin: "left center"`. Gemessen in `--misuse`: Tafel 350 px
+   breit, Luft links **96,42**, rechts **153,01**, Mittenversatz **−28,29 px**;
+   die richtige Tafel daneben steht mittig (−0,01). Das Paar soll sich in genau
+   einem Punkt unterscheiden. `transformOrigin` weglassen (Vorgabe `center`)
+   kostet nichts.
+3. **Zeile 662 ist nicht formatiert.** 110 Zeichen, vier Eigenschaften in einer
+   Zeile, während jedes andere `style`-Objekt der Datei umbrochen ist — die
+   Zeile ist nach dem Lauf des Formatierers entstanden, von dem der Abschnitt
+   davor spricht. Es gibt weiter kein Formatier- oder Lint-Skript, das das
+   fängt (Befund am Set).
+4. **Zwei Überschriften-Bilder, unverändert.** Gemessen: `Section`-`h3`
+   `lw-h4` 18 px/600, `Pair`-`h3` als Stil 14 px/600 — gleiche Ebene, zwei
+   Erscheinungen. Im Bericht als „offen, benannt" geführt und an die Textrunde
+   mit 0055 verwiesen; hier nur bestätigt.
+
+### Befunde am Set (gehören nicht zu 0056)
+
+- **`pnpm build` bleibt ungeprüft**, weil ein Bau `storybook-static/` leert und
+  mehrere Prüfer parallel im Baum arbeiten (0117). Solange der Bau in etwa
+  jedem dritten Lauf am Kopieren der `staticDirs` scheitert, kann keine Abnahme
+  dieses feste Kriterium ehrlich abhaken.
+- **Deutsche Kommentare und JSDoc in den Grundlagen-Stories** — an den Owner
+  verwiesen, kein Rückgabegrund.
+- **Kein Formatierer, kein Linter** in `package.json`.
+
+Abgenommen von / am: Claude (fremde Wiederabnahme), 2026-09-07 · Ergebnis:
+**zurück** · Offene Punkte: M8 (blockiert); vier nicht blockierende Befunde und
+drei am Set. Die Seite selbst hält jedem gemessenen Kriterium stand — die
+Stauchung ist echt, die Namen sind da, die Liste rechnet; zurück geht die
+Aufgabe allein wegen des Satzes, der eine Berichtigung meldet, die nicht
+stattgefunden hat.
+
+## Nach der dritten Wiederabnahme (2026-09-07)
+
+**M8 (blockierend) — die angekündigte Berichtigung war nie im Baum.** Das
+Protokoll und die Commit-Nachricht von `515d5ba` sagten, der Name nenne jetzt
+den Vorgang („auf 64 % der Breite gestaucht"); im Code stand weiter „auf
+100 × 40 px gestaucht". Geändert worden war allein die Zeile darunter. Der Name
+stimmte damit nur **zufällig** — 0,64 × 157,14 = 100,57 —, und wer die Höhe
+oder den Faktor anfasst, hätte wieder eine Tafel, die etwas anderes sagt als
+sie zeigt. Genau diesen Fehler hatte M4 auf derselben Seite abgestellt. Der
+`alt` nennt jetzt den Vorgang.
+
+**Der Bericht maß wieder den Kasten.** Zwei Absätze über der Stelle wird diese
+Basis verworfen, darunter standen erneut Kastenmaße (2,514 / 3,929). Berichtigt
+auf die gezeichnete Fläche: **1,916** gestaucht gegen **3,010** unverzerrt,
+Faktor 0,637.
+
+**`transformOrigin: "left center"` ist weg.** Es kostete nichts und schob die
+gestauchte Tafel aus der Mitte. Gemessen, Luft links/rechts auf der 350-px-Tafel:
+
+| | vorher | jetzt |
+|---|---|---|
+| gestauchte Tafel | 96,42 / 153,01 | **124,71 / 124,72** |
+| unverzerrte Tafel daneben | 96,42 / 96,44 | unverändert |
+
+Dazu die Formatierung derselben Zeile — sie stand als einzige der Datei mit
+vier Eigenschaften in einer Zeile.

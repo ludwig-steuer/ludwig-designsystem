@@ -3,7 +3,6 @@ import { StateIcon } from "../../patterns/Review";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { Badge } from "../../primitives/Badge";
 import { Button } from "../../primitives/Button";
-import { MonoCell } from "../../primitives/Cells";
 import { EmptyState } from "../../primitives/EmptyState";
 import { FieldList } from "../../primitives/FieldList";
 import { StatusCallout } from "../../primitives/StatusCallout";
@@ -97,7 +96,7 @@ export function SnapshotCard({
             ["Importiert", <Time key="i" value={snapshot.importedAt} format="dateTime" />],
             [
               "Tiefe",
-              // The three levels have words since 2026-09-07 (`362325b2`,
+              // The three levels have words since 2026-09-07 (`222c8d5a`,
               // finding L-72): they come from the domain, not from a map here.
               // Without a level the field says so — an unknown value would be
               // an import that the DB allows and nobody named, so it stands

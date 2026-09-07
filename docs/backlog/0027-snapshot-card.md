@@ -583,3 +583,150 @@ gespiegelten Typ, statt ihn zu ersetzen.
 (`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
 Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
 schreibt. Eine kurze Bestätigung steht aus.
+
+## Wiederabnahme (2026-09-07): der Typtausch trägt, die Stories erzählen zweimal etwas anderes
+
+**Urteil: zurück.** Der Typtausch ist auf dem Bildschirm gemessen und stimmt:
+die Zeile „Tiefe" zeigt die Wörter der Domäne, in Inter statt Mono, und der
+Rohwert steht in keiner der sieben Stories mehr. Auch alles, was die Runden
+davor erledigt haben, hält — Tausenderpunkte, Singular samt Unterzeile,
+Inventar, der berichtigte Nachweis. Es blockiert **ein** Mangel, und er ist
+wieder der Preis der Nacharbeit: **zwei der sieben Stories beschreiben sich
+selbst falsch**, eine davon mit einer Zahl (48 statt 1.204), die andere mit der
+Regel, die den Typtausch verbieten würde.
+
+Gemessen am laufenden Dev-Server (`localhost:6107`, Quelle, nicht
+`storybook-static`) über CDP, je Schritt ein eigenes `Runtime.evaluate`, Klicks
+über `el.click()`; eigene Kopie der Helfer im Scratchpad. Kein Wert aus der
+Spec zurückgelesen — jede Zahl unten kommt aus
+`getComputedStyle`/`getBoundingClientRect`/`innerText` oder aus einer Datei, die
+dabei offen lag. Vier Screenshots (`Filled`, `Levels`, `Empty`, `InGrid`, DPR 2).
+
+### Die Werkzeuge (Exit-Code, nicht `| tail`)
+
+| Lauf | Ergebnis |
+|---|---|
+| `pnpm typecheck` | exit 0 |
+| `pnpm check:icons` | exit 0, „53 Zeichen in der Registry, 2 Datei(en) noch offen" |
+| `pnpm check:contrast` | exit 0, „11 Angaben nachgerechnet" |
+| `pnpm build` | **nicht gelaufen** — Bauverbot dieser Runde (0117, mehrere Prüfer im selben Baum). Nicht prüfbar, mit Grund |
+
+### Der Typtausch, gemessen
+
+| Punkt | Messung | Ergebnis |
+|---|---|---|
+| Die Zeile „Tiefe" zeigt **das Wort** | `…--levels`, die drei Karten: `opos` → „nur offene Posten", `journal_opos` → „Journal und offene Posten", `journal` → „nur Journal" — zeichengleich mit `BASELINE_LEVEL_LABEL` in `src/ludwig/modules/datev-mirror/domain/snapshot.ts:33–37`. `font-family` gemessen `Inter, …` (kein Mono mehr), `color rgb(45, 45, 45)`, auf Weiß **13.77:1** | erfüllt |
+| Der Rohwert steht nirgends mehr | Alle sieben Stories nacheinander geladen und `document.body.innerText` auf `opos`, `journal_opos`, `journal` als eigenständige Zeichenkette geprüft: **0 Treffer** in 7 von 7 | erfüllt |
+| Keine lokale Map (R1) | `grep BASELINE_LEVEL` über `src/`: **genau eine** Deklaration, im gespiegelten `domain/snapshot.ts`; die Karte importiert sie (`SnapshotCard.tsx:13`). `diff` gegen `apps/web/src/modules/datev-mirror/domain/snapshot.ts` der App: **leer**, Datei ist identisch | erfüllt |
+| Der Fall ohne Stufe | Code stimmt (`SnapshotCard.tsx:105–113`): `null` → `<span class="v2muted">nicht vermerkt</span>`, also eine Aussage statt eines Lochs; die Farbe der Klasse in derselben Zelle gemessen (eingehängter Klon): `rgb(92, 92, 92)` auf `rgb(255, 255, 255)` = **6.69:1**. **Auf dem Bildschirm aber nirgends:** „nicht vermerkt" kommt in **0 von 7** Stories vor (Mangel 4) | am Code erfüllt, ohne Nachweis am Bildschirm |
+| Die Begründung der vier lokalen Felder | `datev-snapshot.ts:6–14` nennt `contents`, `counts`, `reconcile`, `createdBy` und **L-206**; nachgeschlagen: `docs/befunde-app.md:87` trägt genau diese vier mit demselben Fundort. In der App stehen sie tatsächlich noch in `apps/web/src/modules/datev-truth/infrastructure/snapshot-history-queries.ts:17–34` (`SnapshotRun`), nicht in `datev-mirror/domain/`. `extends Partial<MirrorSnapshot>` lässt vom gespiegelten Typ genau **ein** Feld übrig (`id`, optional) — die vier anderen sind hier neu deklariert; das ist im Register so festgehalten | trägt |
+| Typschutz | `baselineLevel: BaselineLevel \| null` in `datev-snapshot.ts:22`; `noUncheckedIndexedAccess` macht den `?? snapshot.baselineLevel`-Zweig nötig, er ist also kein toter Code. `typecheck` exit 0 | trägt |
+
+### Die Nacharbeit der Runden davor, nachgeprüft
+
+| Punkt | Messung | Ergebnis |
+|---|---|---|
+| Tausenderpunkte | `…--filled`: `4.812 / 137`, Zähler `4.520 / 88 / 204 / 0 / 0`. `…--in-grid` rechts: `4.390 / 152`, Zähler `4.102 / 74 / 190 / 1 / 0`. `…--with-deviations` Hauptsatz „**1.204** Buchungen sind ungeklärt." — die vierstellige Zahl im Callout hat jetzt ihre Story | hält |
+| Singular, Haupt- **und** Nebensatz | `…--in-grid` rechte Karte: „1 Buchung ist ungeklärt." + „**Sie steht** im Spiegel, mit ihrem Zustand — Fremdbuchung oder unklar." · `…--with-deviations`: „1.204 Buchungen sind ungeklärt." + „**Sie stehen** im Spiegel, jede mit ihrem Zustand" | hält |
+| Inventar | `docs/design-guidelines.md:544` „`SnapshotCard` · **gebaut (0027)**"; `docs/ui-repraesentationen.md:505` „`SnapshotCard` (0027) — `reporting/page.tsx` ist gelöscht" | hält |
+| Dritte Aussage, berichtigter Nachweis | `…--levels` linke Karte: `.v2callout--warning`, Kicker „Abgleich", Titel „Für diesen Stand wurde kein Abgleich durchgeführt.", **0** Zähler-Zeilen; `…--empty` hat **0** Callouts | hält |
+
+### Was der Typtausch nicht zerrissen hat
+
+- **Rand ohne Schatten.** `…--filled`, `.v2card`: `border: 1px solid rgb(221, 226, 232)`, `box-shadow: none`.
+- **Zahlen rechts mit `tnum`.** Bei 472 px Kartenbreite liegen alle **sechs** Feldzeilen und alle **fünf** Zähler mit ihrer rechten Kante auf exakt **491 px**; `font-variant-numeric: lining-nums tabular-nums` an allen. *Gegenprobe:* dieselbe Messung nach `fontVariantNumeric = 'normal'` liefert `normal` — die Messung reagiert.
+- **Breite auf der Seite, nicht im Story-Rahmen.** `max-width` entfernt, Karte auf 1440 / 520 / 320 / 260 / 240 px gezwungen: `scrollWidth − clientWidth = 0` in jedem Fall. Die Zeile „Tiefe" trägt jetzt bis zu 25 Zeichen statt 12 und bricht ab 260 px auf zwei Zeilen (20.9 → 41.8 px) — ohne Überlauf. *Gegenprobe:* ein 48-Zeichen-Wort ohne Trennstelle in dieselbe Zelle gesetzt ergibt bei 240 px **207 px** Überlauf, nach dem Zurücksetzen wieder 0. Die Messung misst also etwas.
+- **R1 über die Registry.** Die fünf Zählwörter aus `resolveStatus("mirror_match", …)`: „mit Ludwig gematcht / aufgeteilt (Kanzlei) / von der Kanzlei geändert / DATEV-Fremdbuchung / unklar". Das (i) öffnet den `StatusInfoDialog` derselben Achse, gemessen samt Herkunft „`client_datev_mirror_entries.match_state` (NULL = nicht abgeglichen)".
+- **Rundlauf `Interactive`** (Klicks je in eigenem `Runtime.evaluate`): Leerzustand, ein Knopf „Spiegel importieren" → Karte gefüllt, Zeile „Tiefe" zeigt „Journal und offene Posten", Kopfknopf „Spiegel öffnen" da, Log „Import angestoßen" → Klick → „Import angestoßen · Spiegel geöffnet".
+- **Kein Hex, kein px** in `SnapshotCard.tsx` und `datev-snapshot.ts` (grep leer). Sieben Stories, Exportnamen englisch, Barrel unverändert (`src/ui/v3/index.ts:443, 448`).
+- **Ersetzt die Seite ohne Funktionsverlust.** Gegen `apps/web/src/app/(app)/clients/[clientSlug]/[year]/datev/page.tsx:773, 784` gehalten: die Seite zeigt dort `r.baselineLevel ?? "—"`, also den Rohwert und einen Gedankenstrich. Die Karte zeigt das Wort und „nicht vermerkt" — mehr, nicht weniger.
+
+### Mängel
+
+**1 · Zwei Stories beschreiben etwas anderes, als sie zeigen — blockiert.**
+Kriterium: keins wörtlich; der Auftrag dieser Runde lautet, zu prüfen, ob die
+Nacharbeit anderswo etwas zerrissen hat. Beides ist in den zwei letzten
+Nacharbeiten entstanden, beides steht in der Datei, die den Nachweis führt.
+
+- `SnapshotCard.stories.tsx:43` sagt „Abweichungen: **41** Fremdbuchungen und
+  **7** unklare" (= 48). Die Fixture darunter (`:59–60`) trägt seit der
+  Nacharbeit `newUnprocessed: 1_150, unclear: 54`; gemessen steht im Callout
+  „**1.204** Buchungen sind ungeklärt." Ist 48, Soll 1.204.
+- `SnapshotCard.stories.tsx:69–71` sagt „Der Wert steht **roh und mono**, bis
+  das GLOSSARY Wörter dafür hat (Befund L-72) — eine Map hier wäre genau die
+  lokale Map, die R1 verbietet." Gemessen zeigt genau diese Story drei Wörter
+  in Inter. Die Story, die das Enum-Kriterium beweist, trägt damit die
+  Anweisung, den Typtausch rückgängig zu machen, und führt einen erledigten
+  Befund als offen.
+
+Kleinster Weg: die zwei Kommentarblöcke neu schreiben — „1.150
+Fremdbuchungen und 54 unklare" bzw. „die Wörter kommen seit `222c8d5a` aus
+`datev-mirror/domain/snapshot.ts` (L-72), nicht aus einer Map hier". Kein Code.
+
+**2 · Toter Import — blockiert nicht.**
+`SnapshotCard.tsx:6` importiert weiter `MonoCell`; seit dem Typtausch benutzt
+die Datei ihn nicht mehr (grep: ein Treffer, die Import-Zeile). Kein Linter im
+Repo fängt das, `typecheck` bleibt grün (`noUnusedLocals` ist nicht gesetzt).
+Kleinster Weg: Zeile löschen.
+
+**3 · Falscher Commit in der Begründung — blockiert nicht.**
+`SnapshotCard.tsx:100` schreibt „since 2026-09-07 (`362325b2`, finding L-72)".
+Nachgeschlagen im App-Repo: `362325b2` ist „Belegnummern-Labels und die
+Feldgrenze bekommen einen Ort (F147 **L-71**)"; L-04/L-72 kamen mit
+**`222c8d5a`** („Snapshot-Stufen und Altersklassen bekommen ein domain/"), so
+wie es `datev-snapshot.ts:11` und dieser Backlog auch schreiben.
+Kleinster Weg: Hash tauschen.
+
+**4 · Der Fall ohne Stufe hat keine Story — blockiert nicht.**
+Kriterium: „Alle Stories oben vorhanden" — `null` ist kein Zustand der
+Spec-Tabelle. Messung: „nicht vermerkt" kommt in **0 von 7** Stories vor,
+obwohl `BaselineLevel | null` den Fall trägt und die DB ihn erlaubt
+(Altbestand). Gebaut, aber nicht gezeigt — dieselbe Lücke, die in der letzten
+Runde als Punkt 2 stand.
+Kleinster Weg: in `Levels` eine vierte Karte mit `baselineLevel: null`.
+
+**5 · L-72 ist halb — blockiert nicht, gehört nicht hierher.**
+Die Schnittstelle dieser Spec sagt: „die Wortwahl für die drei Stufen steht im
+GLOSSARY". Gemessen: `docs/ludwig/GLOSSARY.md` nennt `baseline_level` nur
+einmal (Zeile 2086, in der Definition des Snapshots) und führt die drei Wörter
+nicht. Sie stehen jetzt in der Domäne — vom Owner so entschieden und im
+Commit selbst als „L-72 halb" vermerkt. Befund ans App-Register, nicht an
+diese Karte.
+
+Abgenommen von / am: designsystem-abnahme (fremde Wiederabnahme, ohne
+Bauanteil), 2026-09-07 · Offene Punkte: Mangel 1 blockiert; 2, 3, 4 und 5 sind
+notiert. Der Typtausch selbst ist **bestätigt**: Wörter aus der Domäne, Fall
+ohne Stufe im Code richtig, Begründung der vier lokalen Felder trägt.
+
+## Nach der Wiederabnahme (2026-09-07)
+
+Die fünf Mängel sind behoben; keiner steckte im Bau, alle in dem, was über ihn
+geschrieben stand.
+
+**M1 (blockierend) — zwei Story-Kommentare sagten etwas anderes als das Bild.**
+Der eine nannte „41 Fremdbuchungen und 7 unklare", gemessen stehen dort 1.204
+(1.150 + 54) — die Zahlen stammten aus einer früheren Fixture. Der andere sagte,
+der Wert stehe „roh und mono, bis das GLOSSARY Wörter hat; eine Map hier wäre
+genau die lokale Map, die R1 verbietet" — ausgerechnet an der Story, die seit
+dem Typtausch die Wörter zeigt. Beide sagen jetzt, was zu sehen ist: die Map
+gibt es drüben, also liest die Karte sie.
+
+**M4 — „nicht vermerkt" hat seine Story.** Der Fall war gebaut, aber in keiner
+der sieben Stories zu sehen. `Levels` zeigt ihn als vierte Karte, statt eine
+achte Story dafür zu eröffnen. Gemessen:
+
+| Karte | Zeile „Tiefe" |
+|---|---|
+| Nur offene Posten | nur offene Posten |
+| Journal und OPOS | Journal und offene Posten |
+| Nur Journal | nur Journal |
+| **Ohne Stufe** | **nicht vermerkt** |
+
+**M3 — die Commit-Nummer war falsch.** Der Kommentar nannte `362325b2`; das ist
+L-71 (Belegnummern-Labels). L-04 und L-72 kamen mit `222c8d5a`.
+
+**M2 — toter Import.** `MonoCell` wurde mit dem Typtausch überflüssig und stand
+noch da; kein Linter im Repo, `noUnusedLocals` ist nicht gesetzt.
+
+**M5 bleibt offen und gehört der App:** L-72 ist halb — die Wörter stehen in
+der Domäne, der GLOSSARY-Eintrag fehlt. So steht es im Register.

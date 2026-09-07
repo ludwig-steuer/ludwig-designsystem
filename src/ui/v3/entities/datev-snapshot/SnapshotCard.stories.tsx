@@ -40,8 +40,9 @@ export const Filled: Story = {
 };
 
 /**
- * Abweichungen: 41 Fremdbuchungen und 7 unklare. Der Callout nennt die Zahl,
- * die fünf Zähler darunter sagen, **welcher** Zustand wie oft vorkommt.
+ * Abweichungen: 1.150 Fremdbuchungen und 54 unklare — zusammen die 1.204, die
+ * der Callout nennt. Die fünf Zähler darunter sagen, **welcher** Zustand wie
+ * oft vorkommt.
  */
 export const WithDeviations: Story = {
   render: () => (
@@ -66,9 +67,14 @@ export const WithDeviations: Story = {
 };
 
 /**
- * Die drei Tiefen nebeneinander. Der Wert steht **roh und mono**, bis das
- * GLOSSARY Wörter dafür hat (Befund L-72) — eine Map hier wäre genau die
- * lokale Map, die R1 verbietet.
+ * Die vier Fälle der Tiefe nebeneinander. Die **Wörter** kommen aus der Domäne
+ * (`BASELINE_LEVEL_LABEL`, seit L-04/L-72) — bis dahin stand hier der Rohwert
+ * in Mono, weil eine Map an dieser Stelle genau die lokale Map gewesen wäre,
+ * die R1 verbietet. Jetzt gibt es sie drüben, also liest die Karte sie.
+ *
+ * Der vierte Fall ist ein Abzug **ohne** Stufe: Altbestand vor der Einführung.
+ * Er sagt „nicht vermerkt" — ein Gedankenstrich behauptete, es gäbe nichts zu
+ * wissen, dabei ist die Stufe nur nicht festgehalten.
  *
  * Ein `opos`-Lauf hat keinen Abgleich: der läuft nur bei Journal-Läufen. Das
  * ist die dritte Aussage, und sie steht sichtbar da.
@@ -101,6 +107,16 @@ export const Levels: Story = {
           baselineLevel: "journal",
           contents: ["Buchungsstapel"],
           counts: { mirror_entries: 4812 },
+        }}
+      />
+      <SnapshotCard
+        title="Ohne Stufe"
+        snapshot={{
+          ...SNAP,
+          baselineLevel: null,
+          contents: ["Buchungsstapel"],
+          counts: { mirror_entries: 2140 },
+          reconcile: null,
         }}
       />
     </div>
