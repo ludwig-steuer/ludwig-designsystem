@@ -2145,11 +2145,19 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2mk__hr { margin: var(--space-4) 0; border: 0; border-top: 1px solid var(--color-border); }
 .v2mk__tblwrap { overflow-x: auto; margin: 0 0 11px; }
 .v2mk__tbl { border-collapse: collapse; font-size: var(--fs-ui); }
-.v2mk__tbl th, .v2mk__tbl td {
+/* Der Reset der Markdown-Tabelle steht in `:where()` und damit auf **0-0-0** —
+   dieselbe Bauform wie bei `.v2tbl` (0106). Vorher waren beide Regeln 0-1-1
+   und hätten jede Klassenregel geschlagen, die je an einer dieser Zellen
+   hängt. Heute trägt keine der Zellen eine Klasse, die Falle ist also latent;
+   sie hat aber an einem Tag viermal zugeschnappt, seit die v3-Tabelle echte
+   `<th>`/`<td>` hat. Auch die Kopfregel gehört hinein: bei `.v2tbl` schlug
+   genau sie (`text-align: left`, 0-1-1) die Klasse `.v2num`, und die
+   Zahlenspalten fielen nach links. */
+:where(.v2mk__tbl th, .v2mk__tbl td) {
   padding: 5px 10px 5px 0; text-align: left; vertical-align: top;
   border-bottom: 1px solid var(--color-border-subtle);
 }
-.v2mk__tbl th { font-weight: 600; color: var(--color-text-muted); }
+:where(.v2mk__tbl th) { font-weight: 600; color: var(--color-text-muted); }
 .v2mk--inline { display: inline; }
 /* Klappe ohne Zustand: der Knopf steht unter dem Text, der Text blendet aus. */
 .v2mk--clamp { display: flex; flex-direction: column; }

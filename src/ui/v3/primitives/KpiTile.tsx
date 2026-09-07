@@ -19,7 +19,10 @@ export function KpiTile({ label, value, sub }: { label: string; value: ReactNode
   );
 }
 
-/** Raster für Kennzahl-Kacheln; `columns` ist die Spaltenzahl auf voller Breite.  * @when    Several key figures side by side, sharing one measure.
+/**
+ * A grid of key-figure tiles; `columns` is the column count at full width.
+ *
+ * @when    Several key figures side by side, sharing one measure.
  * @instead One figure → KpiTile. A table of numbers → DataTable.
  */
 export function KpiGrid({ columns = 6, children }: { columns?: number; children: ReactNode }) {

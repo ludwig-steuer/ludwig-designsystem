@@ -218,7 +218,11 @@ export function rowCells(
   ];
 }
 
-/** Spaltenkopf — die Zellen sind einfache Knoten, Ausrichtung über `v2num`.  * @when    The column heads of a table.
+/**
+ * The column heads of a table — the cells are plain nodes, alignment comes
+ * from `v2num`.
+ *
+ * @when    The column heads of a table.
  * @instead A data row → Row. A heading over a group of rows → GroupRow.
  */
 export function HeadRow({ children }: { children: ReactNode }) {
@@ -266,7 +270,10 @@ export function Row({
   );
 }
 
-/** Zwischenüberschrift über eine volle Zeile (gruppierte Tabellen).  * @when    A heading over a group of rows, spanning every column.
+/**
+ * A heading across one full row, for grouped tables.
+ *
+ * @when    A heading over a group of rows, spanning every column.
  * @instead The column heads → HeadRow. Nothing to show → EmptyRow.
  */
 export function GroupRow({ children }: { children: ReactNode }) {
@@ -279,7 +286,10 @@ export function GroupRow({ children }: { children: ReactNode }) {
   );
 }
 
-/** Leerzustand innerhalb der Karte — Kopfzeilen bleiben stehen.  * @when    The table has no rows and says so inside the card.
+/**
+ * The empty state inside the card — the column heads stay put.
+ *
+ * @when    The table has no rows and says so inside the card.
  * @instead Still loading → TableLoading. Loading failed → ErrorRow.
  */
 export function EmptyRow({ children }: { children: ReactNode }) {

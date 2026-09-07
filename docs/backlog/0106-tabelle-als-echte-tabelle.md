@@ -753,3 +753,114 @@ steht im `:where()`-Kommentar.
 dieselbe Falle mit 0-1-1. Heute harmlos — alle 27 Zellen dort tragen keine
 Klasse —, aber es ist dieselbe Bauform. Das gehört in eine eigene Aufgabe,
 nicht hierher.
+
+## Nachtrag der Erstabnahme (2026-09-07, nachgemessen am heutigen Baum)
+
+Der Abschnitt „Abnahme (2026-09-07)" **steht in dieser Datei**, Zeilen 350–534
+— 185 Zeilen, alle neun Landmarken (Fester Block, Variabler Block, Nachtrag
+zum Gewicht, M1, M2, M3, B1, Prüfliste §9, Urteil) genau einmal. Er ist nicht
+verloren gegangen; `8fbfafd` hat darunter geschrieben, nicht darüber. Ein
+zweites Anhängen würde ihn verdoppeln, deshalb hier nur die Nachmessung.
+
+**M1 und M2 sind behoben — nachgemessen bei 1440 px, nicht übernommen.**
+
+| | vorher (Erstabnahme) | heute |
+|---|---|---|
+| `th.v2actions`, `datatable--row-actions` | `display: block`, Wort 1225 → **1279,2**, Zeileninhalt bis 1405 — **125,8 px** Versatz | `display: flex`, `justify-content: flex-end`, `gap: 14px`; Wort **1350,8 → 1405**, Zeileninhalt 1228,6 → **1405** — **0 px** |
+| `td.v2btxrow__split`, `banktransactionrow--expanded` | `padding: 0 0 0 0`, Inhalt bei **x = 17**, Höhe **77,4** | `padding: 8px 18px 12px 18px`, `display: block`, Inhalt bei **x = 35**, Höhe **97,4** |
+
+Bei M2 ist das Ergebnis **besser als das Soll, das ich genannt hatte**: ich
+hatte 16 px links/rechts gemessen (der Wert der Klassenregel), heute sind es
+18 px — dieselbe Rinne wie jede andere Zelle der Tabelle, und der erste Inhalt
+steht damit exakt auf der ersten Zelle der Datenzeile darüber (beide x = 35).
+
+**M3 — warum der Wächter nichts fand, und was übrig ist.**
+
+Der Suchbereich `6cba1e5~1..HEAD` erfasst die beiden Commits nicht, die das
+Deutsch geschrieben haben: `git merge-base --is-ancestor` bestätigt, dass
+sowohl **`0bd5d80`** (der Umbau selbst) als auch **`6ecae07`** (die Einarbeitung
+der Abnahme vom 2026-09-06) **vor** `6cba1e5~1` liegen — `6cba1e5` ist der
+Commit, der meine Abnahme eingearbeitet hat. Der Wächter hat also nach dem
+Zeitpunkt gesucht, an dem der Befund schon geschrieben war.
+
+Was ich zitiert hatte, ist **zum größeren Teil bereits übersetzt**: `git blame`
+plus `kommentarZeilen`/`istDeutsch` über die sechs Dateien ergibt heute
+`ExpandableRow.tsx` **0** (die Prosa „Der Knopf sitzt in der **ersten
+Zelle** …" ist weg) und `Table.tsx:229–236` ebenfalls weg („Datenzeile. Mit
+`href` wird die erste Zelle der Link" findet sich nirgends mehr).
+
+Übrig sind in `Table.tsx` zwölf deutsche Kommentarzeilen, und `git blame`
+trennt sie sauber:
+
+| Zeilen | Urheber | Einordnung |
+|---|---|---|
+| 7–9, 11–13, 16, 98–99 | `5ec5da6` | Bestand, älter als 0106 — Bestandsregel aus `CLAUDE.md` |
+| **221, 269, 282** | **`6ecae07`** | von 0106 geschrieben |
+
+Das sind die drei, um die es geht — `HeadRow`, `GroupRow`, `EmptyRow`. Und sie
+haben einen zweiten Mangel, den mein fester Block übersehen hat: **das `@when`
+steht auf derselben physischen Zeile wie die deutsche Zusammenfassung.**
+
+```
+/** Spaltenkopf — die Zellen sind einfache Knoten, Ausrichtung über `v2num`.  * @when    The column heads of a table.
+/** Zwischenüberschrift über eine volle Zeile (gruppierte Tabellen).  * @when    A heading over a group of rows, spanning every column.
+/** Leerzustand innerhalb der Karte — Kopfzeilen bleiben stehen.  * @when    The table has no rows and says so inside the card.
+```
+
+`6ecae07` hat den englischen `@when`-Block in den deutschen Einzeiler
+hineingeschoben, ohne die Zeile zu brechen. Damit steht das Tag nicht am
+Zeilenanfang und wird von keinem JSDoc-Leser als Tag erkannt — es liest sich
+als Fließtext der Zusammenfassung.
+
+**Korrektur an meinem eigenen festen Block:** dort steht „`@when`/`@instead`
+vollständig — Table 9/9". Das war ein Zählen der Zeichenkette, nicht des Tags.
+Richtig ist **6 von 9 wohlgeformt**; bei `HeadRow`, `GroupRow` und `EmptyRow`
+ist das `@when` in die Zusammenfassungszeile gerutscht. Der kleinste Weg
+erledigt beides auf einmal: die drei Zeilen umbrechen und den deutschen Satz
+dabei übersetzen.
+
+| | |
+|---|---|
+| Nachgemessen von / am | Claude (fremde Erstabnahme, hat nicht gebaut), 2026-09-07 |
+| Stand | M1 und M2 behoben und nachgemessen · M3 auf `Table.tsx:221`, `:269`, `:282` eingegrenzt, dazu das verrutschte `@when` an denselben drei Stellen |
+
+## Nach dem Nachtrag der Abnahme (2026-09-07): M3 und die Lücke dahinter
+
+Der Nachtrag hat recht in allem, auch gegen mich: der Abnahmeabschnitt stand
+die ganze Zeit in der Datei (Zeilen 350–534), mein `8fbfafd` hat **darunter**
+geschrieben, nicht darüber. Ich hatte beim Suchen die Überschrift „## Abnahme
+(2026-09-07)" für eine ältere Runde gehalten und daraufhin eine Kollision
+gemeldet, die es nicht gab. M1 und M2 sind vom Nachtrag unabhängig
+nachgemessen und bestätigt.
+
+**M3 ist behoben — und war größer, als beide Seiten dachten.** Die drei
+Stellen aus dem Nachtrag (`Table.tsx` `HeadRow`, `GroupRow`, `EmptyRow`)
+stehen jetzt auf Englisch, jede mit gebrochener Zeile: Satz, Leerzeile, dann
+`@when` und `@instead` je am Zeilenanfang.
+
+Der Nachtrag nennt den Grund, aus dem mein Wächterlauf leer blieb (falscher
+Commit-Bereich), aber der eigentliche Grund liegt tiefer: **`check:when` hat
+die zerdrückten Tags durchgewinkt.** Er fragte `doc.includes("@when")` — und
+die Zeichenkette steht ja da, nur eben mitten in der Zeile, wo kein
+JSDoc-Leser sie als Tag liest. Der Wächter prüft jetzt die **Form**: ein Tag
+zählt nur am Zeilenanfang, nach `/**` oder ` * `. Sechs Fälle mehr in der
+Selbstprüfung (11 statt 5), darunter „Tag mitten in der Zeile" und „Wort
+statt Tag".
+
+Der gehärtete Lauf fand sofort **drei weitere** Stellen derselben Bauform,
+die niemand gemeldet hatte — `format.ts:257` `formatTimeFull`,
+`Form.tsx:145` `Checkbox`, `KpiTile.tsx:25` `KpiGrid`. Alle drei tragen
+dieselbe Signatur: ein deutscher Einzeiler, in den ein englischer `@when`-Block
+geschoben wurde, ohne die Zeile zu brechen. Alle sechs sind jetzt gebrochen
+und übersetzt; `pnpm check:when` Exit 0, `--test` Exit 0 (11 Fälle).
+
+Damit ist die Zahl aus dem Nachtrag („6 von 9 wohlgeformt") überholt: in
+`Table.tsx` sind es jetzt 9 von 9, und im ganzen Set gibt es kein Tag mehr,
+das nur wie eines aussieht.
+
+**Der Befund M3 der `:where()`-Abnahme** (`.v2mk__tbl`, dieselbe
+Spezifitätsfalle in der Markdown-Tabelle) ist als eigene Aufgabe angelegt und
+gebaut: `docs/backlog/0118-markdown-tabelle-spezifitaet.md`, Status Abnahme.
+
+`pnpm typecheck`, `check:language`, `check:icons`, `check:contrast`,
+`check:mirror`, `check:when` je Exit 0. Nicht gebaut (0117).

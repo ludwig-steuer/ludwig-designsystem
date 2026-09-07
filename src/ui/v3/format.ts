@@ -251,7 +251,10 @@ function formatAge(d: Date, now: Date): string {
   return RELATIVE.format(Math.round(diff / DAY), "day");
 }
 
-/** The full, unambiguous form — what stands in the `title` of a `Time`.  * @when    An audit line or a tooltip needs the timestamp to the second.
+/**
+ * The full, unambiguous form — what stands in the `title` of a `Time`.
+ *
+ * @when    An audit line or a tooltip needs the timestamp to the second.
  * @instead Everything a person reads in the interface → formatTime / Time.
  */
 export function formatTimeFull(value: string | Date | null): string {

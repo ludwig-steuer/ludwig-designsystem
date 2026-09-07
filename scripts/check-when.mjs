@@ -69,6 +69,18 @@ export function jsdocUeber(lines, i) {
   return j < 0 ? null : lines.slice(j, ende + 1).join("\n");
 }
 
+/**
+ * Trägt das JSDoc das Tag **als Tag**? `doc.includes("@when")` genügt nicht:
+ * ein Tag zählt nur am Zeilenanfang (nach `/**` oder ` * `). Steht es mitten
+ * in einer Zeile — so wie es entsteht, wenn ein englischer Block in einen
+ * deutschen Einzeiler geschoben wird, ohne die Zeile zu brechen —, liest es
+ * kein JSDoc-Leser als Tag, und dieser Wächter hat es dreimal durchgewinkt
+ * (`Table.tsx`, gefunden von der Abnahme 0106).
+ */
+export function hatTag(doc, tag) {
+  return new RegExp(`(^|\\n)\\s*(?:/\\*\\*)?\\s*\\*?\\s*@${tag}\\b`).test(doc);
+}
+
 /* ── Selbstprüfung ─────────────────────────────────────────────────────────
    Ein Wächter, der falsch anschlägt, ist schlimmer als keiner: er lässt einen
    Satz nachtragen, der schon dasteht. Die Fälle unten sind die, an denen der
@@ -89,11 +101,27 @@ function selbsttest() {
       console.error(`  ✗ ${name}: erwartet ${erwartet}, gemessen ${ist}`);
     }
   }
+  // Und das Tag selbst: nur am Zeilenanfang zählt es.
+  const tagFaelle = [
+    ["Tag in eigener Zeile", "/**\n * Satz.\n * @when    Der Fall.\n */", true],
+    ["Tag im Einzeiler", "/** @when Der Fall. */", true],
+    ["Tag ohne Stern", "/**\n   @when Der Fall.\n */", true],
+    ["Tag mitten in der Zeile", "/** Satz.  * @when    Der Fall.\n */", false],
+    ["Wort statt Tag", "/**\n * Sagt, wann@when gilt.\n */", false],
+    ["gar kein Tag", "/**\n * Nur ein Satz.\n */", false],
+  ];
+  for (const [name, doc, erwartet] of tagFaelle) {
+    const ist = hatTag(doc, "when");
+    if (ist !== erwartet) {
+      schlecht++;
+      console.error(`  ✗ ${name}: erwartet ${erwartet}, gemessen ${ist}`);
+    }
+  }
   if (schlecht) {
-    console.error(`\ncheck:when — Selbstprüfung: ${schlecht} von ${faelle.length} Fällen falsch.`);
+    console.error(`\ncheck:when — Selbstprüfung: ${schlecht} von ${faelle.length + tagFaelle.length} Fällen falsch.`);
     process.exit(1);
   }
-  console.log(`check:when — Selbstprüfung in Ordnung, ${faelle.length} Fälle.`);
+  console.log(`check:when — Selbstprüfung in Ordnung, ${faelle.length + tagFaelle.length} Fälle.`);
 }
 
 if (process.argv[2] === "--test") {
@@ -117,8 +145,8 @@ for (const datei of dateien(ROOT)) {
       if (!/[A-Za-zÄÖÜäöü]/.test(doc.replace(/[/*]/g, ""))) fehlt.push(`${wo} — Wert ohne Satz`);
       continue;
     }
-    const hatWhen = doc.includes("@when");
-    const hatInstead = doc.includes("@instead");
+    const hatWhen = hatTag(doc, "when");
+    const hatInstead = hatTag(doc, "instead");
     if (!hatWhen || !hatInstead) {
       fehlt.push(`${wo} — ${!hatWhen && !hatInstead ? "@when und @instead" : !hatWhen ? "@when" : "@instead"} fehlt`);
     }
