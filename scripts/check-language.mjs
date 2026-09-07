@@ -60,9 +60,13 @@ export function kommentarZeilen(source) {
       if (t.includes("*/")) imBlock = false;
       continue;
     }
-    if (t.startsWith("/*")) {
-      out.push([i + 1, t]);
-      if (!t.includes("*/")) imBlock = true;
+    // Auch der JSX-Kommentar `{/* … */}`: er beginnt mit einer Klammer, und
+    // genau daran las der Wächter ihn nicht — ein deutscher Absatz in
+    // `MasterDetail.tsx` lief grün durch (0063, sechste Runde).
+    const blockAnfang = t.startsWith("/*") ? t : t.startsWith("{/*") ? t.slice(1) : null;
+    if (blockAnfang !== null) {
+      out.push([i + 1, blockAnfang]);
+      if (!blockAnfang.includes("*/")) imBlock = true;
       continue;
     }
     // Zeilenkommentar — aber nicht das `//` in einer URL („https://…").
@@ -110,11 +114,18 @@ function selbsttest() {
     schlecht++;
     console.error(`  ✗ Kommentar-Leser: erwartet Zeilen 2,3,4 — gemessen ${z.join(",") || "keine"}`);
   }
+  // Der JSX-Kommentar über zwei Zeilen — die Lücke, die 0063 fand.
+  const jsx = '      {/* Detail vor Liste im DOM: wer linear liest,\n          bekommt die Arbeitsfläche zuerst. */}\n';
+  const zj = kommentarZeilen(jsx);
+  if (zj.length !== 2 || !zj.some(([, t]) => istDeutsch(t))) {
+    schlecht++;
+    console.error(`  ✗ JSX-Kommentar: erwartet 2 Zeilen, davon eine deutsch — gemessen ${zj.length}`);
+  }
   if (schlecht) {
     console.error(`\ncheck:language — Selbstprüfung: ${schlecht} Fälle falsch.`);
     process.exit(1);
   }
-  console.log(`check:language — Selbstprüfung in Ordnung, ${faelle.length + 1} Fälle.`);
+  console.log(`check:language — Selbstprüfung in Ordnung, ${faelle.length + 2} Fälle.`);
 }
 
 if (process.argv[2] === "--test") {

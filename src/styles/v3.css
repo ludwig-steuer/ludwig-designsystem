@@ -1106,15 +1106,22 @@ select.v2in { padding-right: 26px; }
  * Literal, und die gehört dem Aufrufer. */
 .v2md--detail-breit {
   display: flex;
-  /* `wrap-reverse`, nicht `wrap`: passen die beiden nebeneinander, ändert es
-     nichts — brechen sie um, kommt die **Arbeitsfläche nach oben** und die
-     Randspalte darunter. Vorher stand bei 1280 px in der Kontoansicht die
-     Faktenspalte über den Bewegungen: wer die Buchungen sucht, scrollte erst
-     an den Fakten vorbei (Abnahme 0063). `align-items: start` bleibt: die
-     Kreuzachse dreht sich zwar mit, aber gemessen stehen beide Hälften damit
-     oben bündig (1440: beide bei y = 688) — mit `end` hing die kürzere
-     Randspalte am unteren Rand der Zeile. */
-  flex-wrap: wrap-reverse;
+  /* `row-reverse` mit `wrap`, und im DOM steht das Detail zuerst. Damit
+     stimmen **beide** Fälle: nebeneinander läuft die Hauptachse von rechts
+     nach links, also steht die Liste links und die Arbeitsfläche rechts;
+     brechen sie um, bleibt das Detail in der ersten Zeile und damit oben.
+     Vorher machte das `wrap-reverse` — es dreht aber nur das Bild, im Baum
+     stand weiter Liste vor Detail, und wer linear liest, bekam bei jeder
+     Breite zuerst die Fakten (Wiederabnahme 0063). `align-items: start`
+     bleibt: gemessen stehen beide Hälften oben bündig. */
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  /* Bei `row-reverse` liegt der Hauptachsen-Anfang rechts — auch der der
+     zweiten Zeile. Ohne dies stand die umgebrochene Randspalte rechts
+     eingerückt (gemessen 1440: left 968 statt 16). `flex-end` ist hier das
+     **linke** Ende; nebeneinander bleibt es folgenlos, weil die breite Hälfte
+     den Rest der Zeile ohnehin ausfüllt. */
+  justify-content: flex-end;
   gap: var(--space-5);
   align-items: start;
   grid-template-columns: none;

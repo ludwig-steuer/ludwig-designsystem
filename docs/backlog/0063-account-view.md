@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Freigabe | zurück 2026-09-07 — Zuschnitt neu nach Abschnitt „Freigabe" (Rahmen, DATEV führt), nach 0071, danach ohne zweite Runde freigegeben |
 | Stufe | `entities/account/` |
 | Quelle | Entitätsprofil `docs/entitaeten/account.md`, Abschnitt „Formen“ (Zeile `AccountView`) · Seitenprofil `docs/seiten/konto-detail.md` |
@@ -204,7 +204,7 @@ Profil-Empfehlung ausdrücklich.
 | `chart` | `BarChart` (0110), Soll und Haben je Monat, `grouped`. **Ohne die Linie**, die die Freigabe nannte: `BarChart.line` ist für einen laufenden Saldo da, und den verwirft Entscheidung 3 | 3 | `Filled` |
 | `tabs` | `Tabs` — zwei: Konto und LLM-Profil | 7 | `OtherTab` |
 | `aside` | `AccountFacts` in der Randspalte; leer → eine Spalte | 6 | `Filled`, `WithoutFacts` |
-| `children` | Die Bewegungen: `DataTable` mit `accountEntryColumns({ variant: "full" })` | 4, 5 | `Filled`, `Edges` |
+| `children` | Die Bewegungen: `DataTable` mit `accountEntryColumns()` — `variant: "full"` ohne Randspalte, `"compact"` daneben (die drei Zusatzspalten verlangen 300 px, die neben dem 440-px-Strang nicht da sind) | 4, 5 | `WithoutFacts` (voll), `Filled`, `Edges` (kompakt) |
 
 **Kann bewusst nicht:**
 
@@ -230,17 +230,18 @@ nach Filter" entfällt, der Rahmen filtert nicht) + 1 Layout (ohne `aside`,
 `pager` und `tabs`) + 1 Slot-Wechsel (anderer Reiter) + 1 Rand + 1 „im
 Einsatz" (`InUse`, in der `AppShell` — der einzige Ort, an dem die Breite
 stimmt) = **7**. *(Die Rechnung sagte bis 2026-09-07 „= 6" und kannte `InUse`
-nicht, obwohl Code und Registry sieben führen — berichtigt in der vierten
-Runde, M2.)*
+nicht, obwohl Code und Registry sieben führen — berichtigt nach der fünften
+Runde, M2; die Tabelle zog nach der sechsten nach.)*
 
 | Story | Beweist |
 |---|---|
 | `Filled` | Die sieben Slots, DATEV führend, alle vier Herkunftsklassen in der Liste |
-| `WithoutFacts` | Ohne Randspalte nimmt die Liste die ganze Breite — der Rahmen erzwingt keinen Zweispalter |
+| `WithoutFacts` | Ohne Randspalte nimmt die Liste die ganze Breite — der Rahmen erzwingt keinen Zweispalter — und trägt dort den **vollen** Spaltensatz (`variant: "full"`) |
 | `OtherTab` | Derselbe Rahmen, anderer Inhalt; der View lädt nichts |
 | `Empty` | Konto ohne Bewegung: ein **Befund**, kein Fehler und kein Erfolg; der Verlauf fällt weg statt zwölf leerer Balken |
 | `LoadingAndError` | Kopf, Zahlen und Reiter bleiben stehen |
 | `Edges` | Das Bankkonto: 3.400 Bewegungen, Pager „50 von 3.400" |
+| `InUse` | Die Ansicht in der `AppShell` — der einzige Ort, an dem die Breite die der Seite ist; hier misst sich der Umbruch (Arbeitsfläche 1.134 px bei 1440, 974 px bei 1280) |
 
 ### Abnahmekriterien
 
@@ -1492,3 +1493,76 @@ beide unverändert.
 Abgenommen von / am: Claude (fremde Abnahme, hat nicht gebaut), 2026-09-07 ·
 **Urteil: abgenommen** — die Mängel 1 bis 4 blockieren nicht; 1, 2 und 4 sind
 Textzeilen dieser Aufgabe, 3 gehört `MasterDetail`.
+
+## Nach der sechsten Abnahme (2026-09-07): alle vier Punkte abgearbeitet
+
+Urteil war **abgenommen**, keiner der vier Punkte blockierte. Trotzdem alle
+vier erledigt — drei sind Textzeilen, der vierte gehörte `MasterDetail` und
+war der einzige mit Verhalten dahinter. Gemessen wie in der Abnahme: gegen den
+Dev-Server `http://localhost:6107`, CDP, `getBoundingClientRect`, Bedarf einer
+Zelle über einen ungebundenen Klon (`white-space: nowrap`, `max-width: none`).
+
+**M3 — die Reihenfolge im Dokument, `MasterDetail`.** Der Vorschlag der
+dritten Runde ist jetzt gebaut: im `detailBreit`-Zweig steht das **Detail vor
+der Liste** im Markup, und die Leserichtung im Nebeneinander stellt
+`flex-direction: row-reverse` her (`v3.css:1108–1122`, statt `wrap-reverse`).
+Damit stimmen beide Fälle statt einem:
+
+| | DOM-Reihenfolge | im Bild |
+|---|---|---|
+| nebeneinander (`DetailBreit` #0, 1440) | Detail, Liste | Liste links 16, Detail rechts 476 |
+| umgebrochen (`InUse`, 1440) | Detail, Liste | Detail top 688,5, Liste top 1003 |
+| umgebrochen (`InUse`, 1280) | Detail, Liste | Detail top 725,7, Liste top 1040,2 |
+
+Dabei fiel ein zweiter Fehler an, den `wrap-reverse` verdeckt hatte: bei
+`row-reverse` beginnt **auch die zweite Zeile rechts** — die umgebrochene
+Randspalte stand gemessen bei `left` 968 statt 272 (1440). `justify-content:
+flex-end` (bei umgekehrter Hauptachse das linke Ende) setzt sie zurück auf
+272; nebeneinander bleibt es folgenlos, weil die breite Hälfte die Zeile
+ohnehin füllt. Nachgemessen bei 1440, 1280, 1000 und 860 an `InUse` und an
+allen drei Rahmen von `DetailBreit`. **Gegenprobe**, dass die Grundvariante
+unberührt ist: `Filled` bei 1280 — Liste DOM-Kind 0 bei `left` 16 (808 px),
+Detail DOM-Kind 1 bei `left` 844 (420 px), unverändert.
+
+**M4 — `variant: "full"` hat seine Story.** `WithoutFacts` ist die einzige
+Ansicht ohne Randspalte und damit der Ort, den die Slot-Tabelle selbst nennt;
+sie fährt jetzt den vollen Satz (`Movements` bekam ein `full`-Flag). Gemessen
+stehen dort 1.398 px (1440) und 1.238 px (1280) — zehn Spalten statt sieben,
+kein Querlauf bei 1440, 1280, 1152 und 1024.
+
+Die Messung fand dabei zwei Spuren, die ihren Inhalt nicht trugen:
+
+- **`Buchungszustand` war 132 px breit, der breiteste Chip braucht 144,3.** Er
+  kürzte bei jeder Breite. Jetzt 148 px (`AccountEntries.tsx`) — dieselbe
+  Klasse Fehler wie in den Runden drei bis fünf, diesmal in der Spalte, die
+  nur der volle Satz führt und die deshalb keine Story ansah.
+- **`Gegenkonto` kürzt im vollen Satz** (gemessen 163 px gegen 229 px Bedarf
+  bei 1280; bei 1440 fehlen 0,8 px). Das ist M5 der fünften Runde, dort ohne
+  `title` vermerkt — der Kasten `.v2ae__contra` trägt ihn jetzt mit allen
+  Gegenkonten. Die Verteilung 1,6fr/1,1fr bleibt: der Buchungstext hat bei
+  1440 zwar 142 px Überschuss gegen diese Fixture, aber sein Bedarf hängt an
+  den Daten, der des Gegenkontos an der Kontenlänge.
+
+**M2 — der `Movements`-Kommentar rechnet mit den Zahlen von heute.** Statt
+„674 px (1440) und 514 bei 1280" stehen dort die gemessenen **1.134** und
+**974** px, und die Begründung steht nicht mehr auf einer Gesamtzahl (1.180),
+sondern auf dem, was der volle Satz zusätzlich verlangt: Buchungszustand 148 +
+Stapel 88 + DATEV 64 = 300 px, die neben dem 440-px-Strang nicht da sind.
+
+**M1 — die Story-Tabelle hat sieben Zeilen.** `InUse` ist ergänzt, der
+Klammersatz nennt jetzt die fünfte Runde. Die `WithoutFacts`-Zeile und die
+`children`-Zeile der Slot-Tabelle sagen dazu, welcher Spaltensatz wo läuft.
+
+**Ein Wächter hat dazugelernt.** Der deutsche Absatz, den ich für M3 in
+`MasterDetail.tsx` schrieb, lief durch `pnpm check:language` **grün** durch:
+`kommentarZeilen` erkannte den Blockanfang an `/*`, der JSX-Kommentar beginnt
+aber mit `{/*` — und damit blieb auch jede Folgezeile ungelesen. Behoben, mit
+einem achten Fall in der Selbstprüfung; der Wächter meldete die fünf Zeilen
+sofort und ich habe sie übersetzt. Das ist der sechste deutsche Kommentar in
+zwei Tagen und der zweite, den erst der Wächter fand.
+
+`pnpm typecheck` Exit 0; `check:language`, `check:icons`, `check:contrast`,
+`check:mirror`, `check:when` je Exit 0, `check:language --test` Exit 0
+(8 Fälle). Nicht gebaut (0117 — parallele Prüfer messen gegen 6107).
+
+**Status: fertig.**

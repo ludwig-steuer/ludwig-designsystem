@@ -63,8 +63,14 @@ export function MasterDetail({
         { ...style, ...(minDetail ? { "--v2md-min": `${minDetail}px` } : {}) } as CSSProperties
       }
     >
-      <div className="v2md__list">{list}</div>
+      {/* Detail **before** list in the DOM: whoever reads linearly — a screen
+          reader, the keyboard, the page without its CSS — should get the work
+          surface first, not the side rail. `wrap-reverse` had only turned the
+          **picture**; in the tree the list still came first, so at either page
+          width the facts came first (acceptance 0063, sixth round). Reading
+          order side by side is restored by `row-reverse`. */}
       <div className="v2md__detail">{detail}</div>
+      <div className="v2md__list">{list}</div>
     </div>
   );
 }

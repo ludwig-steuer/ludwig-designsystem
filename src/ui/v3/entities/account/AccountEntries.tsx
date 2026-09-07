@@ -113,8 +113,13 @@ function ContraAccounts({
 }) {
   const [first, ...rest] = entry.contraAccounts;
   if (!first) return <span className="v2muted">—</span>;
+  // The whole box is clipped by CSS once the track gets narrow (measured 169,5
+  // px against 229 px of need at 1280 in the full set), and a clipped value
+  // without a way to read it is no value. `AccountCell` only titles the *name*
+  // it shortened itself, so the full list belongs on the box.
+  const alle = entry.contraAccounts.map((a) => `${a.number} ${a.name ?? ""}`.trim()).join(", ");
   return (
-    <span className="v2ae__contra">
+    <span className="v2ae__contra" title={alle}>
       <AccountCell
         number={first.number}
         name={first.name}
@@ -230,7 +235,9 @@ export function accountEntryColumns({
   const status: ColumnDef<AccountEntry> = {
     key: "status",
     header: "Buchungszustand",
-    width: "132px",
+    // 148, not 132: the widest chip of the axis needs 144,3 px in the cell,
+    // measured with an unbound clone — at 132 it was clipped at every width.
+    width: "148px",
     cell: (e) =>
       e.origin === "exported" ? (
         <StatusBadge axis="buchung_datev" status="exported" info={false} />

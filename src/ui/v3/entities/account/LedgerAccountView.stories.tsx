@@ -231,20 +231,22 @@ function Chart() {
   );
 }
 
-function Movements({ entries }: { entries: AccountEntry[] }) {
-  // **Ohne „Stapel".** Der volle Satz ist für eine Seite ohne Randspalte
-  // gedacht; hier nimmt `aside` 440 px, und gemessen lag der Zustands-Chip
-  // dahinter im Querlauf — Rang 5 wäre unsichtbar gewesen. Der Stapel ist
-  // Rang 8 und die einzige Spalte, deren Verlust nichts kostet: die Nummer
-  // steht im Drawer der Buchung.
-  // **Der kompakte Satz, nicht der volle.** Neben dem 440-px-Strang bleiben
-  // der Liste gemessen 674 px auf der Seite (1440) und 514 bei 1280 — ein Satz
-  // mit 1180 verlangte dort mehr, als da ist, und die Haben-Spalte stand bei
-  // keiner Breite im Bild (Abnahme 0063). Der Strang trägt die Fakten; die
-  // Liste daneben beantwortet „was ist gebucht": Datum, Beleg, Text,
-  // Gegenkonto, Soll, Haben. Buchungszustand, Stapel und DATEV gehören in den
-  // vollen Satz, den die Ansicht **ohne** Strang zeigt.
-  const cols = accountEntryColumns({ currency: "EUR", variant: "compact" });
+function Movements({ entries, full = false }: { entries: AccountEntry[]; full?: boolean }) {
+  // **Neben dem Strang der kompakte Satz, ohne ihn der volle.** Auf der Seite
+  // bleiben der Liste neben der 440-px-Randspalte gemessen 1.134 px (1440) und
+  // 974 px (1280); die drei Spalten, die der volle Satz zusätzlich führt —
+  // Buchungszustand 148, Stapel 88, DATEV 64 — verlangen 300 px, die dort
+  // nicht sind, und die Haben-Spalte stand bei keiner Breite im Bild (Abnahme
+  // 0063). Der Strang trägt die Fakten; die Liste daneben beantwortet „was ist
+  // gebucht": Datum, Beleg, Text, Gegenkonto, Soll, Haben. Ohne Strang sind
+  // gemessen 1.398 px (1440) und 1.238 px (1280) da — dort trägt der volle
+  // Satz jede Spur bis auf das Gegenkonto, das mit `title` gekürzt wird.
+  //
+  // **Ohne „Stapel" im kompakten Satz.** Dort nimmt `aside` 440 px, und
+  // gemessen lag der Zustands-Chip dahinter im Querlauf — Rang 5 wäre
+  // unsichtbar gewesen. Der Stapel ist Rang 8 und die einzige Spalte, deren
+  // Verlust nichts kostet: die Nummer steht im Drawer der Buchung.
+  const cols = accountEntryColumns({ currency: "EUR", variant: full ? "full" : "compact" });
   return (
     <DataTable<AccountEntry>
       rows={entries}
@@ -296,7 +298,10 @@ export const WithoutFacts: Story = {
   render: () => (
     <div style={{ padding: "var(--space-5)", maxWidth: 1600 }}>
       <LedgerAccountView header={<Head facts={FACTS} />} summary={<Summary facts={FACTS} />}>
-        <Movements entries={ENTRIES} />
+        {/* Die einzige Story ohne Randspalte — und damit die, in der der
+            **volle** Spaltensatz Platz hat: Buchungszustand, Stapel und DATEV
+            kommen dazu (Slot-Tabelle der Spec, `variant: "full"`). */}
+        <Movements entries={ENTRIES} full />
       </LedgerAccountView>
     </div>
   ),
