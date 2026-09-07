@@ -146,26 +146,29 @@ export const Kinds: Story = {
 };
 
 /**
- * `md` beside the work (drawer), `lg` where the preview carries the page (view
- * and card). Both heights are `clamp()` values from `v3.css`, not pixels in
- * the component.
+ * Die Höhe, an ihren beiden Grenzen. Sie ist **eine** — `clamp(320px, 62vh,
+ * 900px)`, seit dem Owner-Entscheid vom 2026-09-07 überall dieselbe. Die Prop
+ * `height` gab es bis dahin in zwei Stufen; sie wird ignoriert.
+ *
+ * Was hier steht, ist deshalb kein Prop-Vergleich mehr, sondern der Beweis,
+ * dass die Grenzen greifen: in einem kurzen Fenster bleibt die Vorschau bei
+ * 320 px, in einem hohen bei 900 — dazwischen sind es 62 % der Fensterhöhe.
+ * (Wer es sehen will, ändert die Fensterhöhe; die Story kann sie nicht setzen.)
  */
-export const Sizes: Story = {
-  name: "Groessen",
+export const Bounds: Story = {
+  name: "Grenzen",
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-5)", gridTemplateColumns: "1fr 1fr" }}>
-      <SourceDocumentPreview url={INVOICE_PDF} title="Beleg · md" fileName="RE-4471.pdf" pageCount={3} />
+      <SourceDocumentPreview url={INVOICE_PDF} title="Beleg" fileName="RE-4471.pdf" pageCount={3} />
       <SourceDocumentPreview
-        url={INVOICE_PDF}
-        title="Beleg · lg"
-        fileName="RE-4471.pdf"
-        pageCount={3}
-        height="lg"
+        url={null}
+        unavailableReason="Kein Original — dieselbe Höhe, damit die Karte nicht springt."
+        title="Ohne Original"
+        fileName="RE-4472.pdf"
       />
     </div>
   ),
 };
-
 const ROWS = [
   { id: "c1", ref: "RE-4471", vendor: "ACME GmbH", at: "2026-08-26", gross: "1.249,90 €" },
   { id: "c2", ref: "RE-4468", vendor: "Bürodienst Nord", at: "2026-08-24", gross: "318,00 €" },

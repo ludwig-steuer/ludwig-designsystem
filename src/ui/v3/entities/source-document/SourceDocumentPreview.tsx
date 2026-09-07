@@ -35,7 +35,6 @@ export function SourceDocumentPreview({
   fileName,
   pageCount,
   excerpt,
-  height = "md",
 }: {
   /** Signed URL of the original. `null` means **there is none**, not „still loading". */
   url: string | null;

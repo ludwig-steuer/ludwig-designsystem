@@ -317,7 +317,7 @@ Variabel:
 - [ ] Ein `missing`-Eintrag ohne passende Zeile geht nicht verloren (Story `Missing`, zweiter Eintrag)
 - [ ] Die Fakten-Spalte ist `minmax(400px, 560px)`; die Karte misst **sich selbst**, nicht das Fenster (gemessen: im Drawer eine Spalte, auf der Seite zwei)
 - [ ] Im Kopf führt die **Erledigung**, nicht die Verarbeitung (Story `Filled`, `grep`)
-- [ ] Bei 1440 × 900 stehen Ränge 1–4 ohne Scrollen (gemessen; siehe Vorbehalt unten)
+- [ ] Bei 1440 × 900 stehen Ränge 1–4 ohne Scrollen (gemessen) — **die Bedingung ist die Fensterhöhe**: die Vorschau ist 62 vh, also gilt der Satz ab ≈ 890 px. Darunter ist das Original angeschnitten; das ist die Grenze, nicht ein Fehler
 - [ ] Ohne `pager` und ohne `tabs` fallen die Zeilen samt Abstand (Story `Bare`, gemessen)
 - [ ] offen (App): ersetzt `SourceDocFamily`, `InvoiceSidebar`, `DocTabsBar`, `SourceDocBelegTab` und den Anzeigeteil von `ContractDetail`
 

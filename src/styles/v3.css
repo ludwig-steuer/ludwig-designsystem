@@ -2813,12 +2813,16 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Vorschau die Seite trägt statt neben der Arbeit zu stehen. Eigener
    Abschnitt am Ende, nicht einsortiert. */
 /* **Gestrichen mit dem Owner-Entscheid vom 2026-09-07.** `lg` war
-   `clamp(420px, 78vh, 1100px)`; bei 1440 × 900 begann „Belegdaten" damit
-   unter der Falz — und die Rangfolge des Seitenprofils will die gelesenen
-   Werte **neben** dem Original, nicht darunter. Eine Höhe für jede Stelle,
-   an der die Vorschau steht. Die Klasse bleibt als leere Regel stehen, damit
-   ein Aufrufer, der sie noch setzt, nichts Falsches bekommt. */
-.v2doc__orig--lg { /* dieselbe Höhe wie `.v2doc__orig` */ }
+   `clamp(420px, 78vh, 1100px)` — bei 1440 × 900 also 702 px. Wirksam wurde
+   das dort, wo die Karte **einspaltig** steht (Containerbreite < 1180 px,
+   also im Drawer und in der schmalen Karte): „Belegdaten" begann im Drawer
+   bei y = 911 statt 767. In der zweispaltigen Karte und im View stand es
+   schon vorher neben dem Original und hat sich nicht bewegt.
+
+   Die Klasse trägt die Höhe noch einmal — leer war sie wirkungslos: ein
+   Element, das **nur** sie hätte, bekäme seine Inhaltshöhe (gemessen 24,8 px)
+   statt einer Vorschau. */
+.v2doc__orig--lg { height: clamp(320px, 62vh, 900px); }
 
 /* Die Vorschau sitzt in einer Karte: der Rahmen kommt von der Karte, das
    `<iframe>` gibt seinen eigenen ab und bekommt den Innenabstand, den der

@@ -91,7 +91,6 @@ export function SourceDocumentCard({
             title={kind}
             fileName={document.fileName}
             excerpt={excerpt}
-            height="lg"
           />
         </div>
 

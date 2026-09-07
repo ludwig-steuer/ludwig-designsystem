@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig |
+| Status | Abnahme (Änderung der Vorschauhöhe, 2026-09-07) |
 | Stufe | `entities/source-document/` — `SourceDocumentPreview.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **fast**: ein PDF in einem Rahmen ist kein Fachwort. Sie bleibt trotzdem Entität, weil sie zwei fachliche Regeln trägt — der Grund für eine fehlende Vorschau wird ausgesprochen statt bebildert, und ein Teilbeleg sagt, aus welchen Seiten welches Originals er stammt (`splitPageRange`, `parentSourceDocId`). Ohne die zwei wäre sie ein `<iframe>` an der Aufrufstelle. |
 | Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Formen-Tabelle Zeile `SourceDocumentPreview`; Datenpunkte Rang 10 und 12 |
@@ -52,7 +52,7 @@ sind.
 | `pageCount` | `number \| null` | nein | Seitenzahl des Dokuments (100 % gefüllt, p90 3, max 27). Steht als Meta neben dem Titel. | `Gefuellt` |
 | `excerpt` | `{ pages: string; parentTitle?: string; parentHref?: string } \| null` | nein | Der Ausschnitt: `splitPageRange` („5-7") plus, wenn bekannt, der Weg zum Sammel-Original. `null` = ein ganzes Dokument. | `Teilbeleg` |
 | `fileName` | `string \| null` | nein | Der Dateiname des Originals — er steht **nicht** im Bild, sondern im `title` des `<iframe>`: „Vorschau von RE-4471-ACME.pdf". Ohne ihn fällt der Rahmen auf „Vorschau: `<Titel>`" zurück, und für eine Vorlesehilfe ist ein Rahmen ohne Namen ein Kasten ohne Inhalt. Nachgetragen 2026-09-05, die Prop war seit dem Bauen da. | `Gefuellt` |
-| `height` | `"md" \| "lg"` | nein | `md` im Drawer, `lg` in View und Karte. Ein Enum statt zweier Booleans (§5); die Werte sind Token-Höhen aus `v3.css`, keine px in der Komponente. | `Groessen` |
+| ~~`height`~~ | `"md" \| "lg"` | — | **Gestrichen** mit dem Owner-Entscheid vom 2026-09-07: eine Höhe für jede Stelle. Die Prop bleibt eine Version lang als `@deprecated` stehen und wird **ignoriert**. | — |
 
 Typen: keiner aus `src/ludwig/` nötig — die Vorschau kennt den Beleg nicht,
 nur seine Datei. `splitPageRange` kommt als fertiger String („5-7"), die
@@ -100,7 +100,7 @@ Titel `v3/Entitäten/Beleg/SourceDocumentPreview`.
 | `OhneVorschau` | Beide Leerfälle nebeneinander: mit Begründung und ohne (Standardsatz) — kein Platzhalterbild in beiden |
 | `Teilbeleg` | „Seiten 5–7 aus Sammel-PDF vom 12.08.2026" mit Weg zum Original; daneben dasselbe Dokument ohne `excerpt` |
 | `Ausprägungen` | Titel „Beleg", „Rechnung", „Vertrag", „Kontoauszug" — die Aufschrift kommt vom Aufrufer, die Vorschau bleibt dieselbe |
-| `Groessen` | `md` und `lg` nebeneinander |
+| `Grenzen` | Die **eine** Höhe an ihren `clamp`-Grenzen. *(Hieß bis 2026-09-07 `Groessen` und stellte `md` neben `lg` — den Unterschied gibt es nicht mehr, und eine Story, die einen nicht existierenden Unterschied vorführt, lehrt das Gegenteil des Entscheids.)* |
 | `ImEinsatz` | In einem `Drawer` neben einer Liste — so, wie 0076 sie einsetzt |
 
 Sechs Stories: 2 anwendbare Zustände + 1 je Enum-Prop (`height`, plus
@@ -122,7 +122,7 @@ nichts.
 |---|---|
 | Dateien | `src/ui/v3/entities/source-document/SourceDocumentPreview.tsx` plus Story |
 | Barrel | Abschnitt `/* Beleg — … */`, Export `SourceDocumentPreview` |
-| CSS | Präfix **`v2doc`**. `.v2doc__orig` gibt es bereits (0052) und trägt die Höhe `clamp(320px, 62vh, 900px)` — sie wird hier zur Variante `md`; `lg` kommt als zweite Klasse dazu. Neuer Abschnitt am Ende von `v3.css`, überschrieben mit `0075` |
+| CSS | Präfix **`v2doc`**. `.v2doc__orig` gibt es bereits (0052) und trägt die Höhe `clamp(320px, 62vh, 900px)`. *(Bis 2026-09-07 kam `.v2doc__orig--lg` als zweite Stufe dazu; sie ist gestrichen und trägt jetzt dieselbe Höhe.)* |
 | Reihenfolge | unabhängig von 0074. 0076 braucht sie |
 | Nicht anfassen | `SourceDocumentDrawer.tsx` — dass er sein `<iframe>` gegen diese Komponente tauscht, ist Teil von 0076, nicht von 0075. Bis dahin stehen beide nebeneinander; das ist für die Dauer eines Arbeitspakets in Ordnung und wird dort aufgelöst |
 
@@ -143,7 +143,7 @@ Variabel (aus dieser Spec):
 - [ ] `url = null` zeigt einen **Satz**, keinen grauen Kasten in Dokumentform (Story `OhneVorschau`)
 - [ ] Ohne `unavailableReason` steht der Standardsatz, nicht nichts (Story `OhneVorschau`)
 - [ ] `excerpt` nennt Seitenbereich **und** Weg zum Original; ohne `excerpt` steht keine Zeile, kein „ganzes Dokument" (Story `Teilbeleg`)
-- [ ] `height` verhält sich wie Zeile 6 der Schnittstelle, beide Werte aus Tokens (Story `Groessen`)
+- [x] ~~`height` verhält sich wie Zeile 6 der Schnittstelle~~ — die Prop ist gestrichen (Owner 2026-09-07); an ihre Stelle tritt das Kriterium unten
 - [ ] Das `<iframe>` trägt ein sprechendes `title` mit dem Dateinamen (Story `Gefuellt`, im Browser geprüft)
 - [ ] Ersetzt `BelegPreview` in allen drei App-Aufrufstellen ohne Funktionsverlust
 - [ ] Tut bewusst nicht: laden, rendern, zoomen, blättern
@@ -213,22 +213,30 @@ Fall ist: `Abnahme`.
 `height="md" | "lg"` ist **gestrichen**. Die Vorschau steht überall auf
 `clamp(320px, 62vh, 900px)`.
 
-**Warum.** `lg` war `clamp(420px, 78vh, 1100px)` und stand in Karte und View.
-Bei 1440 × 900 begann „Belegdaten" damit **unter der Falz** — und die
-Rangfolge des Seitenprofils `beleg-detail.md` will die gelesenen Werte
-(Rang 3) neben dem Original (Rang 2), nicht darunter. Eine Vorschau, die den
-Rang danach aus dem Bild drückt, beantwortet ihre eigene Frage auf Kosten der
-nächsten.
+**Warum.** `lg` war `clamp(420px, 78vh, 1100px)` — bei 1440 × 900 also
+**702 px**. Wirksam wurde die Höhe dort, wo die Karte **einspaltig** steht,
+also unterhalb der Container-Schwelle von 1180 px: im **Drawer** und in der
+schmalen Karte. Dort begann „Belegdaten" unter der Falz. In der zweispaltigen
+Karte und im View stand es schon vorher neben dem Original.
 
-Gemessen nach der Änderung, bei **1440 × 900**:
+*(Die erste Fassung dieses Absatzes schrieb „795 px in der Karte, Belegdaten
+bei y = 831" und nannte Karte und View als Tatort. Beides hat die Abnahme
+widerlegt: 795 px sind 78 vh eines **1019 px** hohen Fensters — die Zahl aus
+einer älteren 0071-Notiz, nicht aus 1440 × 900 —, und bewegt hat sich der
+Drawer, nicht der View. Die Entscheidung bleibt richtig, die Begründung stand
+am falschen Ort.)*
 
-| Stelle | Vorschau | „Belegdaten" beginnt bei | im Bild |
-|---|---|---|---|
-| `SourceDocumentCard` | 558 px | y = 20 (zweispaltig) | ✓ |
-| `SourceDocumentView` | 558 px, y = 338–896 | y = 267 | ✓ |
-| `SourceDocumentDrawer` | 558 px, y = 172–730 | y = 767 | ✓ |
+Gemessen, bei **1440 × 900**:
 
-Vorher: 795 px in der Karte, „Belegdaten" bei y = 831.
+| Stelle | Vorschau vorher → nachher | „Belegdaten" vorher → nachher |
+|---|---|---|
+| `SourceDocumentCard`, zweispaltig | 702 → **558** | y = 20 → 20 (unverändert) |
+| `SourceDocumentCard`, einspaltig | 702 → **558** | y = 831 → **687** |
+| `SourceDocumentView` | 702 → **558** (y 338–896) | y = 267 → 267 (unverändert) |
+| `SourceDocumentDrawer` | 702 → **558** (y 172–730) | y = **911** → **767** |
+
+Und an den Rändern greift `clamp`: bei 400 px Fensterhöhe 320 px, bei 1600 und
+2000 px je 900 px, bei 1013 px genau 628 px — an allen vier Stellen gleich.
 
 Die Prop bleibt eine Version lang als `@deprecated` stehen und wird
 **ignoriert**, damit kein Aufrufer bricht; die Klasse `.v2doc__orig--lg`
@@ -237,4 +245,46 @@ bleibt als leere Regel, damit ein alter Aufruf nichts Falsches bekommt.
 **Neues Abnahmekriterium:**
 
 - [ ] Die Vorschau ist an **jeder** Stelle gleich hoch, und „Belegdaten"
-      beginnt bei 1440 × 900 im Bild (gemessen: 558 px, y = 267 im View)
+      beginnt bei 1440 × 900 im Bild (gemessen: 558 px; y = 267 im View,
+      y = 767 im Drawer, y = 20 in der zweispaltigen Karte)
+- [ ] `clamp` greift an beiden Rändern (gemessen: 320 px bei 400 px
+      Fensterhöhe, 900 px bei 1600 und 2000)
+- [ ] Die gestrichene Prop ist wirkungslos, und keine Story führt einen
+      Unterschied vor, den es nicht gibt (Story `Grenzen`)
+
+### Nach der Abnahme vom 2026-09-07
+
+Die Abnahme hat den **Kern bestätigt** — eine Höhe überall, `clamp` an beiden
+Rändern, die Prop wirklich wirkungslos, das Skelett so hoch wie das Original
+(0,3 px Versatz), nichts nach unten geschoben — und die **Ränder der Änderung**
+zurückgewiesen. Zu Recht:
+
+- **Meine „Vorher"-Zahlen stimmten nicht.** 795 px sind 78 vh eines 1019 px
+  hohen Fensters, nicht 1440 × 900; dort waren es **702**. Und bewegt hat sich
+  nicht die zweispaltige Karte, sondern der **Drawer** (911 → 767) und die
+  einspaltige Karte (831 → 687) — die Begründung stand am falschen Ort. Die
+  Messtabelle oben trägt jetzt beide Spalten, vorher und nachher.
+- **Die Story `Groessen` führte einen Unterschied vor, den es nicht mehr
+  gibt** — zwei Vorschauen nebeneinander, beide 558 px, beschriftet „md" und
+  „lg". Wer sie ansah, lernte das Gegenteil des Entscheids. Sie heißt jetzt
+  `Grenzen` und zeigt, was tatsächlich variiert: die `clamp`-Ränder und der
+  Fall ohne Original in derselben Höhe.
+- **Die Spec beschrieb den gestrichenen Zustand an vier Stellen als geltend.**
+  Schnittstelle, CSS-Abschnitt, Story-Tabelle und das alte Kriterium sind
+  durchgestrichen bzw. ersetzt.
+- **Die leere CSS-Regel hielt nicht, was ihr Kommentar versprach:** ein
+  Element mit **nur** `.v2doc__orig--lg` bekam 24,8 px. Sie trägt jetzt
+  dieselbe Höhe.
+- `height="lg"` stand noch an der eigenen Aufrufstelle (`SourceDocumentCard`)
+  und in einer Story — die Schonfrist gilt Aufrufern in der App, nicht uns.
+  Die tote Destrukturierung in der Komponente ist weg.
+- Der Status steht wieder auf **Abnahme**: eine Änderung nach der Abnahme
+  macht die Aufgabe nicht fertig, sie macht sie prüfbar.
+
+**Offen und benannt (H1 der Abnahme):** „Ränge 1–4 ohne Scrollen" gilt erst ab
+**≈ 890 px Fensterhöhe** — bei 1440 × 900 bleiben 4 px Luft, bei 768 px sind
+46 px des Originals und 22 px der Faktenspalte unter der Falz. Das gehört in
+0071 als Bedingung des Kriteriums, nicht hierher als weitere Höhenregel; und
+die zweite Hälfte davon (**M5**: im Drawer stehen die Werte nie neben dem
+Original, weil die Karte dort 1060 px breit ist und die Zwei-Spalten-Schwelle
+bei 1180 liegt) ist eine Frage an den Drawer, nicht an die Vorschau.
