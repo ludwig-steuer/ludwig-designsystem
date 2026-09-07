@@ -132,6 +132,39 @@ die der Baustein auf der Seite hat (Karte, Drawer, Reiter), nicht bei der des
 Story-Rahmens — deshalb ist „im Einsatz" ein fester Summand der
 Story-Ableitung (`spec-schreiben` §6) und keine Kür (0071, 2026-09-07).
 
+### Womit gemessen wird
+
+`scripts/cdp.mjs` — **der Helfer aus dem Repo, keine eigene Kopie.** Er
+startet einen Messbrowser gegen den laufenden Dev-Server (Port 6107), wählt
+seinen Port selbst und räumt sich ab, auch wenn das Messskript mitten in der
+Messung wirft:
+
+```js
+import { launch, Session, url } from "../../scripts/cdp.mjs";
+await launch();
+const s = await Session.open();
+await s.goto(url("v3-primitives-fläche-markdown--filled"));
+await s.resize(1400);
+console.log(await s.eval(`return document.title`));
+```
+
+Warum das eine Regel ist und keine Bequemlichkeit: bis zum 2026-09-07 hatte
+jeder Prüfer seine eigene Kopie, und jede ließ ihren Browser stehen, sobald
+ein Skript vor dem Aufräumen abbrach. Gezählt wurden an einem Tag **388
+Prozesse mit 38 GB** — die Maschine ging in die Knie und nahm die fünf Prüfer
+einer ganzen Welle mitsamt ihrer Arbeit mit. Auf ein Hauptfenster kommen rund
+zwei Dutzend Renderer, die ihren Vater überleben.
+
+Dazu drei Gewohnheiten:
+
+- **Ein Browser für alle Messungen** einer Abnahme, nicht einer je Skript:
+  ein Messskript, das die Stories nacheinander abfährt, statt zehn kleiner.
+- `pnpm cdp:clean`, wenn unklar ist, ob etwas hängen blieb.
+- **Wer im Arbeitsbaum misst, baut nicht.** `pnpm build` leert
+  `storybook-static/` unter allen anderen weg; er läuft **je Welle bei genau
+  einem** Prüfer in einem eigenen `git worktree` (Owner-Entscheid 2026-09-07,
+  Befund 0117).
+
 Die vollständige Gestaltungs-Prüfliste steht in `docs/design-guidelines.md`
 §9 — dort durchgehen, nicht hier zusammenfassen.
 
