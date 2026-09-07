@@ -70,9 +70,14 @@ export function BankTransactionCell({
             case timeline all the more.
             **Named, not only correct** (finding L-61): a date alone does not
             say which of the two it is, and `BankPane` over there labels the
-            posting date „Wertstellung". So the word travels with it. */}
-        <span className="v2btx__when" title="Buchungsdatum">
-          <Time value={postingDate} format="date" length="short" size="sm" />
+            posting date „Wertstellung". So the word travels with it — as a
+            **visible** prefix, not as a `title`: `Time` writes its own
+            `title` (the full timestamp), so the outer one only covered the
+            6,0 px above and 3,8 px below the glyphs and never the digits
+            themselves (acceptance 0100, M1). A word one has to hover for is
+            not a word (V11, T8). */}
+        <span className="v2btx__when">
+          <Time value={postingDate} format="date" length="short" size="sm" prefix="Buchung" />
         </span>
         <Amount value={amount} currency={currency} size="sm" />
       </div>

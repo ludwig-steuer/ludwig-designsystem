@@ -215,6 +215,7 @@ Registry-Entscheid im Handoff, nicht still im Screen (F123 §2.4).
 - [ ] Kontrast: Text ≥ 4.5:1, Rahmen/Icons/Fokus ≥ 3:1; Fokusring sichtbar; Bewegung respektiert `prefers-reduced-motion` (V10, §2)
 - [ ] Hauptweg per Tastatur, Taste sichtbar; kein Icon ohne Wort (V11, V14, T8)
 - [ ] Jedes klickbare Element antwortet auf Hover; Listenzeile mit Detail ist ganz klickbar (§2, I11)
+- [ ] **Trefferfläche 24 × 24 px**, auch wo das Zeichen kleiner ist: das Polster wächst nach außen, ein negativer Rand hält die Zeilenhöhe (WCAG 2.5.8). Ein Knopf, dessen Fläche seine Glyphe ist, misst 12 × 12 — gemessen, nicht geschätzt. Vier Abnahmen an einem Tag haben dasselbe (i) gemeldet, weil die Regel nirgends stand (0099, 0100, 0103, 0105; Hausmaß aus 0113)
 - [ ] Icons Lucide 1.5 px, Maß aus der Leiter des Registers (A8); keine Emoji/Unicode-Icons, keine Versalien (§2, T9, A2)
 - [ ] Karte: Rand **oder** Schatten; linksbündig; kein Modal, wo Detail oder Drawer geht (L2–L4)
 - [ ] Ein Baustein mit `minWidth` oder innerem Scrollen steht in einem Raster- oder Flex-Kind nur mit `min-width: 0` bzw. `minmax(0, …)` — sonst schneidet das Kind ab, statt zu scrollen; gemessen bei der Breite, die der Baustein auf der Seite hat (vier Fälle in einer Abnahme-Welle: 0014, 0029, 0063, 0069; Owner-Regel 2026-09-07)

@@ -29,25 +29,15 @@ export function StatusInfoButton({ axis, current }: StatusInfoButtonProps) {
     <>
       <button
         type="button"
+        className="v2sinfo"
         aria-label={`${AXIS_LABEL[axis]}: Zustände erklären`}
         title={`${AXIS_LABEL[axis]}: Zustände erklären`}
         onClick={(e) => {
-          // Der Chip sitzt oft in einer klickbaren Zeile — die Info soll nur
-          // den Dialog öffnen, nicht die Zeilennavigation auslösen.
+          // The chip often sits in a clickable row — the info opens the
+          // dialog, it does not follow the row.
           e.preventDefault();
           e.stopPropagation();
           setOpen(true);
-        }}
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          margin: 0,
-          cursor: "pointer",
-          display: "inline-flex",
-          alignItems: "center",
-          color: "var(--color-text-muted)",
-          opacity: 0.65,
         }}
       >
         <ActionIcon action="info" size={12} />

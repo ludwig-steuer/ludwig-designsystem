@@ -3551,6 +3551,29 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2doccompl { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; flex-wrap: wrap; }
 .v2doccompl > time { color: var(--color-text-subtle); font-size: var(--fs-ui-xs); }
 
+/* --- Das (i) am Zustand (0077) ------------------------------------------
+ * Trefferfläche **24 × 24**, das Hausmaß aus 0113 — das Zeichen selbst misst
+ * 12. Vorher stand die Größe in Inline-Stilen mit `padding: 0`, und damit war
+ * der Knopf so groß wie sein Zeichen: gemessen 12 × 12 in jeder Story, und
+ * das an einer Stelle, die `StatusBadge` an **jedem** Chip rendert. Vier
+ * Abnahmen an einem Tag haben es gemeldet (0099, 0100, 0103, 0105).
+ *
+ * Der negative Rand hält die Zeilenhöhe: die Fläche wächst nach außen, die
+ * Zeile bleibt, wo sie war. Nur senkrecht — waagerecht ragte der Knopf sonst
+ * über die Zellkante (dieselbe Lehre wie bei `.v2purp__info`).
+ *
+ * Und eine Antwort auf Hover: ein Zeiger ohne Antwort ist ein Versprechen
+ * ohne Deckung (§9). */
+.v2sinfo {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--space-6); min-height: var(--space-6);
+  padding: var(--space-1); margin-block: calc(-1 * var(--space-1));
+  background: none; border: none; cursor: pointer;
+  color: var(--color-text-muted); opacity: 0.65;
+}
+.v2sinfo:hover { opacity: 1; color: var(--color-primary); }
+.v2sinfo:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+
 /* --- Belegliste: Spaltensätze (0070) -------------------------------------- */
 /* Wie `.v2doc__key`: der Name schrumpft, die Endung nicht. Ein reines
    `text-overflow` am Elternteil schnitt genau die `.pdf` ab, für die die
