@@ -108,8 +108,11 @@ export const Missing: Story = {
             action: <TextButton onClick={() => {}}>Datum setzen</TextButton>,
           },
           {
-            field: "Gegenpart",
-            hint: "Noch nicht erkannt — die Einordnung läuft.",
+            // No generic row carries this name, so the gap takes the append
+            // path at the end of the list — the case the row-matching path
+            // never reaches (0071 acceptance, M2).
+            field: "Fälligkeit",
+            hint: "Steht auf dem Beleg, ist aber nicht gelesen worden.",
           },
         ]}
       />

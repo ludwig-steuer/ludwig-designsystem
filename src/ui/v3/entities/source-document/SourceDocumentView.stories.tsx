@@ -4,6 +4,8 @@ import { SourceDocumentView } from "./SourceDocumentView";
 import { SourceDocumentCard } from "./SourceDocumentCard";
 import { SourceDocumentClass, type SourceDocumentVM } from "./SourceDocument";
 import { SourceDocumentCompletion } from "./SourceDocument";
+import { AppShell, TopBar } from "../../primitives/AppShell";
+import { NavList, type NavSection } from "../../primitives/NavList";
 import { Banner } from "../../primitives/Banner";
 import { Button } from "../../primitives/Button";
 import { EmptyState } from "../../primitives/EmptyState";
@@ -64,6 +66,24 @@ const PREVIEW = "data:application/pdf;base64,";
 // Vier Reiter, nicht sechs: „Monate" und „Rohdaten" beantworten dieselbe
 // Frage wie der Verlauf, nur tiefer — der View merkt davon nichts, er bekommt
 // die Liste, die er bekommt (Entscheid der Freigabe).
+const SECTIONS: NavSection[] = [
+  {
+    label: "Arbeit",
+    items: [
+      { href: "/cases", label: "Sachverhalte", count: 14 },
+      { href: "/documents", label: "Belege", count: 102 },
+      { href: "/banks", label: "Bank", count: 2, alarm: true },
+    ],
+  },
+  {
+    label: "Stammdaten",
+    items: [
+      { href: "/accounts", label: "Konten" },
+      { href: "/partners", label: "Geschäftspartner" },
+    ],
+  },
+];
+
 const TABS = [
   { key: "beleg", label: "Beleg", href: "#beleg" },
   { key: "positionen", label: "Positionen", href: "#positionen" },
@@ -230,5 +250,48 @@ export const Bare: Story = {
         <SourceDocumentCard document={INVOICE} previewUrl={PREVIEW} />
       </SourceDocumentView>
     </div>
+  ),
+};
+
+/**
+ * Im Einsatz: die ganze Seite, wie die App sie zeigt — Sidebar, Kopfleiste,
+ * der Beleg darin. Erst hier hat die Karte die Breite, die sie auf der Seite
+ * wirklich bekommt: bei 1440 × 900 sind das **1.104 px** (Sidebar 240,
+ * zweimal 32 Polster), nicht die 1.400 der übrigen Stories. Die Abnahme vom
+ * 2026-09-07 hat genau daran gemessen, dass das Zwei-Spalten-Tor gegen die
+ * Fixture gerechnet war — deshalb steht diese Story hier und nicht nur in
+ * der Ableitung.
+ */
+export const InUse: Story = {
+  render: () => (
+    <AppShell
+      sidebar={
+        <>
+          <div className="sb__logo">Ludwig</div>
+          <NavList sections={SECTIONS} activePath="/documents" />
+        </>
+      }
+      topbar={<TopBar crumb="Musterbau GmbH · 2026" />}
+    >
+      <SourceDocumentView
+        pager={PAGER}
+        header={
+          <Head
+            document={INVOICE}
+            actions={
+              <>
+                <TextButton onClick={() => {}}>Zum Sachverhalt →</TextButton>
+                <Button variant="secondary" onClick={() => {}}>
+                  Erledigt setzen
+                </Button>
+              </>
+            }
+          />
+        }
+        tabs={<Tabs items={TABS} active="beleg" ariaLabel="Ansichten des Belegs" />}
+      >
+        <SourceDocumentCard document={INVOICE} previewUrl={PREVIEW} />
+      </SourceDocumentView>
+    </AppShell>
   ),
 };

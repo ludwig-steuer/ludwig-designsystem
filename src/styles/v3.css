@@ -2413,12 +2413,17 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   gap: var(--space-4);
   align-items: start;
 }
-/* Zwei Spalten erst ab 1.180 px **Kartenbreite**: die Faktenspalte fordert
-   560, das Original braucht mindestens 600, um lesbar zu sein — darunter
-   stünden beide zu eng, und ein Beleg, den man nicht lesen kann, beantwortet
-   Rang 2 des Seitenprofils nicht. */
-@container doccard (min-width: 1180px) {
-  .v2doccard__cols { grid-template-columns: minmax(0, 1fr) minmax(400px, 560px); }
+/* Zwei Spalten ab **960 px Kartenbreite** — der Summe der Minima: 560 für das
+   Original, 384 für die Fakten, 16 Rinne. Vorher stand hier 1.180, gegen die
+   Fixture der Story gerechnet (1.400 px breit) statt gegen die Stelle, an der
+   die Karte steht. Gemessen in `SourceDocumentView` → `InUse`, also in der
+   `AppShell`: bei **1280** (die Untergrenze aus L1) bleiben der Karte 976 px,
+   bei 1440 sind es 1.136. Mit dem alten Tor fiel sie bei beiden auf eine
+   Spalte, und die Fakten begannen bei y = 1.001 statt 335 — Rang 3, 5 und 6
+   des Seitenprofils standen unter der Falz. Jetzt: 1280 → 560 / 400,
+   1440 → 560 / 560, 1600 → 720 / 560, kein Überlauf in der Karte. */
+@container doccard (min-width: 960px) {
+  .v2doccard__cols { grid-template-columns: minmax(560px, 1fr) minmax(384px, 560px); }
 }
 .v2doccard__facts { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
 .v2doccard__orig { min-width: 0; }
