@@ -301,3 +301,151 @@ Regel nennt diese Ausnahme, oder die Dateien ziehen nach** — das entscheidet
 keine Abnahme und kein Bau. Dazu: es gibt keinen Formatierer und keinen
 Linter im `package.json`, sonst wären die doppelten Leerzeichen nie
 stehengeblieben.
+
+## Wiederabnahme (2026-09-07)
+
+Gemessen gegen `be96a56` (die Nacharbeit `b3ccb19` ist enthalten, Baum sauber),
+Dev-Server `http://localhost:6107`, also gegen die Quelle. Der Zugänglichkeits-
+baum kommt aus `Accessibility.getFullAXTree`, die Maße aus dem Browser, die
+Tafel-Verhältnisse aus Ausschnitt-Bildern (8-fach) mit gemessener Tinten-Box —
+keine Zahl ist aus dem Quelltext abgeschrieben.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | Exit-Code **0**, keine Ausgabe | erfüllt |
+| `pnpm build` grün | drei Läufe, Exit-Codes **1 · 0 · 0**. Der Fehlschlag ist ein `ENOENT` beim Kopieren von `reference/f109-buchungsreview/…/ui_kits/marketing` nach `storybook-static/` — `staticDirs`, nicht diese Aufgabe (Befund am Set) | erfüllt, mit Set-Befund |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/Brand.stories.tsx`, `title: "v3/Grundlagen/Marke"`; `index.json` führt `--marks`, `--sizes`, `--misuse` | erfüllt |
+| Code englisch; `@when`/`@instead` (entfällt) | Bezeichner und Story-Exporte englisch, Kommentare deutsch — unverändert der Befund am Set, nicht an dieser Aufgabe | erfüllt, mit Set-Befund |
+| Kein Hex, kein px, keine lokale Label-Map | `grep -c '#[0-9A-Fa-f]\{6\}'` = **0**; `grep -c '<svg'` = **0**; `grep -cE '\S  +\S'` = **0** (die doppelten Leerzeichen sind weg) | erfüllt |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | drei von drei geladen, je ohne Konsolenfehler | erfüllt |
+| Prüfliste §9 durchgegangen | Kontrast im Browser gerechnet, alle drei Stories, **null Textzeile unter der Schwelle**: kleinster Wert 4,51:1 (`rgb(113,113,113)` auf `rgb(244,246,248)`), Tabellentext 6,17:1, Badge „richtig" 4,68:1, „falsch" 5,60:1. Jeder farbige Zustand trägt sein Wort. `pnpm check:contrast` Exit **0** („11 Angaben nachgerechnet") | erfüllt bis auf M7 |
+| Im Browser angesehen | alle drei Stories über CDP geladen, vermessen und als Bild angesehen; 6 · 5 · 9 Bilder, alle `complete` | erfüllt |
+| Story lädt die drei SVGs als Dateien, kein SVG-Markup | `naturalWidth × naturalHeight` 300×76 · 300×76 · 150×150, geladen von `/reference/design-system-v2/assets/…`; `document.querySelectorAll('svg').length` = **0** in allen drei Stories | erfüllt |
+| `viewBox`-Tabelle stimmt mit den Dateien | die vom Server ausgelieferten Dateien tragen `viewBox="0 0 220 56"`, `"0 0 220 56"`, `"0 0 56 56"`; die gerenderte Tabelle nennt 220 × 56, 220 × 56, 56 × 56 | erfüllt |
+| `Marks`: drei Zeichen auf hellem und dunklem Grund | `ludwig-logo.svg` 157,14 × 40 auf `rgb(255,255,255)` (= `--color-bg` `#FFFFFF`); `ludwig-logo-light.svg` 157,14 × 40 auf `rgb(26,58,92)` (= `--color-primary` `#1A3A5C`) und auf `linear-gradient(rgb(31,70,112), rgb(20,48,75), rgb(15,36,56))`; `ludwig-mark.svg` 56 × 56 auf allen dreien. Kein `filter`, kein `box-shadow` | erfüllt |
+| `Sizes`: Mark bei 16, 24, 32 px, Ablösung genannt | gemessen 16×16 · 24×24 · 32×32 exakt; der echte Rahmen misst 240 px Spalte ausgeklappt, 64 px eingeklappt, `.sb__logo` 56 px Zeile, Wordmark 125,7 × 32 darin | erfüllt |
+| `Misuse`: Text an Stelle des Zeichens, Liste gerechnet | rendert „**7** Dateien" und listet `AppShell`, `CaseDetailView`, `CaseList`, `CommandPalette`, `LedgerAccountView`, `NavList`, `SourceDocumentView`. `grep -rl 'sb__logo' src/ui/v3 --include='*.stories.tsx'` ohne `Brand` findet genau diese sieben (acht Fundstellen, `AppShell` zweimal). Die Liste ist seit der letzten Abnahme von sechs auf sieben gewachsen — sie rechnet also wirklich | erfüllt |
+| Keine Datei unter `reference/` geändert | `git status --short reference/ public/` leer; der ganze Baum ist sauber | erfüllt |
+| Story unter `v3/Grundlagen/…` | ja | erfüllt |
+| **M5 — die Tafeln tragen ihr Urteil im Namen** | `Accessibility.getFullAXTree` auf `--misuse`: **9 `<img>` im DOM, 9 `image`-Knoten im Baum**, keiner `ignored`, jeder mit `nameFrom: attribute:alt`. Acht verschiedene Namen („Ludwig-Wortmarke, unverändert", „… rot umgefärbt", „… unverzerrt", „… auf 100 × 40 px gestaucht", „… auf der Grundfläche", „… auf einer Warnfläche", „Ludwig-Bildmarke, ohne Schatten", „Ludwig-Bildmarke mit Schein darunter"), der neunte „Ludwig" auf der guten Seite von „Kein Text an Stelle des Zeichens" — dort ist genau das der Punkt | **behoben** |
+| Überschriften-Ebene der Seite | `--misuse`: **5** `heading`-Knoten im Baum, alle **Ebene 3**, keiner `ignored`. `--marks` und `--sizes` je **2**, ebenfalls Ebene 3. Eine Gliederung statt zweier | behoben |
+| M7 — die Tafel „Nicht verzerren" verzerrt weiterhin nicht | Tinten-Box im Ausschnittbild (8-fach): richtige Tafel **897 × 298** → Verhältnis **3,010**; „falsche" Tafel **568 × 190** → **2,989**. Dieselben Proportionen. Der Kasten ist 100 × 40, das *Bild* darin 100 × 25,5, oben 7,8 px und unten 8,5 px Luft | **offen, blockiert** |
+
+### M7 — die wichtigste Tafel der Seite zeigt ihren Verstoß nicht, behauptet ihn aber jetzt (blockiert)
+
+**Kriterium:** `Misuse` „zeigt fünf verbotene Fälle, je neben dem richtigen"
+(Stories-Tabelle) und Verhalten Punkt 3 („gestreckt"). Die Spec nennt diesen
+Fall selbst das wichtigste „so nicht" der Seite.
+
+**Messung** — nicht am Element-Kasten, sondern an der gezeichneten Fläche.
+Ausschnitt-Screenshot je Bildkasten, 8-fach, Tinte gegen Weiß abgegrenzt:
+
+```
+richtig  (Kasten 157,14 × 40)   Tinte 897 × 298 (8x)   Verhältnis 3,010
+falsch   (Kasten 100    × 40)   Tinte 568 × 190 (8x)   Verhältnis 2,989
+                                Luft oben 7,8 px, unten 8,5 px
+```
+
+Die beiden Verhältnisse sind gleich; der Unterschied liegt unter der
+Kantenglättung. Das Zeichen auf der „falsch"-Tafel ist **nicht gestaucht,
+sondern nur kleiner** — die Bildmarke bleibt ein Quadrat, „Ludwig" bleibt
+unverzerrt.
+
+**Ursache:** `ludwig-logo.svg` trägt kein `preserveAspectRatio`, also gilt der
+Standard `xMidYMid meet`. Ein `<img>` mit `width: 100, height: 40` skaliert das
+Kunstwerk dann **hinein** statt es zu strecken: 100 × 25,5, mittig, mit
+Briefkasten-Rändern. Nachgeprüft: `object-fit: fill` ändert daran nichts
+(gemessen wieder 2,989) — die Angabe in der Datei gewinnt.
+
+**Warum das jetzt blockiert, obwohl M2 als behoben galt:** die Abnahme vom
+2026-09-06 hat den *Kasten* gemessen (`getBoundingClientRect` → 100 × 40,
+Verhältnis 2,500) und daraus „sichtbar gestaucht" geschlossen. Der Kasten ist
+aber nicht das Bild. Dazu kommt, was die Nacharbeit neu gebracht hat: das
+`alt` sagt seit `b3ccb19` **in Worten** „auf 100 × 40 px gestaucht". Wer die
+Seite hört, bekommt eine Stauchung zugesagt, die wer sie sieht nicht findet.
+Vorher war die Tafel stumm; jetzt behauptet sie etwas, das das Bild nicht
+hergibt — auf einer Seite, deren Gegenstand Genauigkeit ist, ist das der
+schlechtere Zustand.
+
+**Vorschlag (im Browser nachgemessen):** das Zeichen in seinem natürlichen
+Verhältnis rendern und mit einer Transformation stauchen, statt den Kasten zu
+verengen — etwa `style={{ height: 40, width: "auto", transform: "scaleX(0.64)" }}`.
+Gemessen ergibt das Tinte 568 × 298 → Verhältnis **1,906** gegen 3,010 der
+richtigen Tafel: sichtbar gestaucht, die Bildmarke wird zum Hochrechteck. Das
+`alt` sollte dann den tatsächlichen Vorgang nennen („auf 64 % der Breite
+gestaucht"), nicht ein Kastenmaß. `reference/` bleibt dabei unangetastet.
+
+### Nicht blockierend
+
+1. **„7 Überschriften" ist ein DOM-Wert, kein Baum-Wert.** Der Abschnitt „Nach
+   der Abnahme" nennt 7. Gemessen: `document.querySelectorAll('h1,…,h6')`
+   liefert in `--misuse` 7, davon sind **zwei Storybooks eigenes Gerüst**
+   (`h1.sb-heading` „No Preview" und ein leeres `h1`) — sie stehen auch in
+   `--marks` und `--sizes` (dort je 4 = 2 + 2). Im Zugänglichkeitsbaum, gegen
+   den der Mangel erhoben war, sind es **5**. Der Befund ist behoben, die Zahl
+   im Text ist falsch.
+2. **Die Landmarken-Notiz stimmt nur zur Hälfte.** „zweimal in `Sizes` und
+   zweimal in `Misuse`" — gemessen: `--misuse` hat 2 `complementary`-Knoten,
+   `--sizes` **null**, obwohl beide zwei `<aside>` im DOM haben. In `Sizes`
+   liegt das `<aside>` innerhalb des `<section>` von `Section` und wird ohne
+   eigenen Namen zu `generic`. Die Entscheidung („der Preis dafür, echtes
+   Markup zu zeigen") bleibt richtig, die Zahl nicht.
+3. **Zwei Überschriften-Bilder in einer Datei.** `Section` gibt sein `h3` die
+   Klasse `lw-h4` (gemessen 18 px / 600); das neue `h3` in `Pair` setzt
+   `fontSize` und `fontWeight` als Stil (gemessen 14 px / 600). Gleiche Ebene,
+   zwei Erscheinungen — die Klasse gäbe es schon.
+4. **`Marks` heißt sechsmal „Ludwig".** Dort tragen alle sechs Tafeln dasselbe
+   Urteil („richtig"), der Name muss also nichts unterscheiden. Kein Mangel,
+   nur die Feststellung, dass die Nacharbeit bewusst nur `Misuse` angefasst hat.
+
+### Befunde am Set (gehören nicht zu 0056)
+
+- **`pnpm build` ist unzuverlässig.** Von drei Läufen brach einer mit
+  `ENOENT … chmod './storybook-static/reference/f109-buchungsreview/_ds/…/ui_kits/marketing'`
+  ab (Exit **1**), zwei liefen durch (Exit **0**). Der Fehler steht **nicht** in
+  der letzten Zeile — die lautet dort `ELIFECYCLE`. Ursache ist das parallele
+  Kopieren der `staticDirs`, nicht diese Aufgabe: `b3ccb19` hat nur
+  `Brand.stories.tsx` und diese Spec berührt.
+- **`pnpm check:icons`** meldet weiter „2 Datei(en) noch offen" (Exit 0) — die
+  Icon-Leiter aus einer anderen Aufgabe.
+- **Deutsche Kommentare und JSDoc in den Grundlagen-Stories** — an den Owner
+  verwiesen, kein Rückgabegrund.
+- **Kein Formatierer, kein Linter** in `package.json`.
+
+Abgenommen von / am: Claude (fremde Abnahme), 2026-09-07 · Ergebnis: **zurück**
+· Offene Punkte: M7 (blockiert); vier nicht blockierende Befunde und vier am Set.
+
+## Nach der Wiederabnahme (2026-09-07): die Tafel verzerrte nie
+
+**M7 erledigt — und der Fund ist der bisher unangenehmste dieser Serie.** Die
+Tafel „Nicht verzerren / falsch" hat **nie** verzerrt. `ludwig-logo.svg` trägt
+kein `preserveAspectRatio`, also gilt `xMidYMid meet`: ein `<img>` mit
+`width: 100; height: 40` skaliert das Bild in den Kasten **hinein**, statt es
+zu strecken — gemessen 100 × 25,5 in einem 100 × 40er Kasten, Verhältnis
+**2,989** gegen 3,010 im Original. Auch `object-fit: fill` ändert daran
+nichts.
+
+Die Abnahme vom 2026-09-06 hatte den **Kasten** gemessen (2,500) und daraus
+„sichtbar gestaucht" geschlossen. Der Kasten ist nicht das Bild. Und meine
+Nacharbeit hat den Zustand **verschlechtert**: seit sie der Tafel den Namen
+„auf 100 × 40 px gestaucht" gab, sagt die Seite etwas Falsches zu — auf einer
+Seite, deren Gegenstand Genauigkeit ist. Vorher war sie nur stumm.
+
+Jetzt staucht sie wirklich: `transform: scaleX(0.64)` bei natürlichem
+Verhältnis. Gemessen: gestauchte Tafel **2,514**, unverzerrte **3,929** — und
+die Bildmarke wird zum Hochrechteck. Der Name nennt jetzt den **Vorgang**
+(„auf 64 % der Breite gestaucht"), kein Kastenmaß. `reference/` bleibt
+unangetastet.
+
+**Auch berichtigt, und beides waren meine Zahlen:**
+
+- „**7 Überschriften**" im Abschnitt darüber war ein DOM-Wert: zwei davon sind
+  Storybooks eigenes Gerüst. Im Zugänglichkeitsbaum, gegen den der Mangel
+  erhoben war, sind es **5** — und genau die fünf Regeltitel.
+- Die Landmarken-Notiz stimmte zur Hälfte: `Misuse` hat zwei
+  `complementary`-Landmarken, `Sizes` **keine** — dort liegt das `<aside>` in
+  der `<section>` von `Section` und wird zu `generic`.
+
+**Offen, benannt:** `Section` und der neue `h3` in `Pair` setzen ihre
+Überschriften verschieden (18 px/600 gegen 14 px/600). Eine Gliederung, zwei
+Bilder — das gehört in dieselbe Textrunde wie M14/M17 aus 0055.

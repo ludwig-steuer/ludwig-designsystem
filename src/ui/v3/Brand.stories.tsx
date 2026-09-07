@@ -648,11 +648,18 @@ export const Misuse: Story = {
                    „richtig" wie „falsch" hießen beide „Ludwig" (Abnahme
                    0056, M5). */
               alt="Ludwig-Wortmarke, auf 100 × 40 px gestaucht"
-              /* Hier **soll** es verzerren — deshalb beide Maße im Stil und
-                   kein `width: auto`. Mit den Attributen allein zeigte die
-                   Tafel gemessen 100 × 25 px, also das richtige Verhältnis:
-                   das wichtigste „so nicht" der Seite war unsichtbar. */
-              style={{ width: 100, height: 40 }}
+              /* **`scaleX`, nicht zwei Maße.** Beide Maße im Stil stauchen
+                 nichts: `ludwig-logo.svg` trägt kein `preserveAspectRatio`,
+                 also gilt `xMidYMid meet`, und das Bild skaliert in den Kasten
+                 **hinein**, statt sich zu strecken — gemessen 100 × 25,5 in
+                 einem 100 × 40er Kasten, Verhältnis 2,989 gegen 3,010 im
+                 Original. Auch `object-fit: fill` ändert daran nichts. Die
+                 Abnahme vom 2026-09-06 hatte den **Kasten** gemessen (2,500)
+                 und daraus „staucht" geschlossen; der Kasten ist nicht das
+                 Bild. Erst die Transformation staucht wirklich: gemessen
+                 1,906, und die Bildmarke wird zum Hochrechteck (Abnahme
+                 0056, zweite Runde). */
+              style={{ height: 40, width: "auto", transform: "scaleX(0.64)", transformOrigin: "left center" }}
             />
           </div>
         }
