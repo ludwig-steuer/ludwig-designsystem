@@ -24,10 +24,10 @@
 import { readFileSync } from "node:fs";
 
 /**
- * Alle drei Stylesheets, nicht nur die Tokens: die vierte falsch gerechnete
- * Zahl der Woche stand in `v3.css` („2.67:1 gegen bg-soft", gerechnet gegen
- * ein `accent-700`, das es seit 0090 nicht mehr gibt). Ein Wächter, der an
- * der Token-Datei endet, prüft die Hälfte der Behauptungen.
+ * All three stylesheets, not only the tokens: the fourth miscalculated ratio
+ * of the week sat in `v3.css` ("2.67:1 on bg-soft", measured against an
+ * `accent-700` that has not existed since 0090). A guard that stops at the
+ * token file checks half the claims.
  */
 const FILES = ["src/styles/tokens.css", "src/styles/v3.css", "src/styles/app-chrome.css"];
 const TOKEN_SOURCE = readFileSync(FILES[0], "utf8");
@@ -143,12 +143,12 @@ for (const c of claims) {
 }
 
 const checked = claims.length - unchecked;
-// In `tokens.css` ist eine Angabe, die sich nicht auflösen lässt, selbst ein
-// Mangel: dort steht der Wert direkt daneben. In den anderen Stylesheets
-// beziehen sich viele Angaben auf Klassen statt auf Token — die kann dieser
-// Wächter nicht nachrechnen, und er sagt es, statt Grün zu melden. Wer eine
-// solche Angabe prüfbar machen will, nennt beide Token im Kommentar:
-// „gemessen 2.87:1 (`--color-text-subtle` auf `--color-bg-soft`)".
+// In `tokens.css` a claim that cannot be resolved is itself a defect: the
+// value stands right next to it. In the other stylesheets many claims name a
+// class instead of a token — those this guard cannot recompute, and it says
+// so rather than reporting green. To make such a claim checkable, name both
+// tokens in the comment: „gemessen 2.87:1 (`--color-text-subtle` auf
+// `--color-bg-soft`)".
 if (bad || unresolvedInTokens) {
   console.error(
     `\ncheck:contrast — ${bad} von ${checked} Angaben stimmen nicht${unresolvedInTokens ? `, ${unresolvedInTokens} in tokens.css lassen sich nicht auflösen` : ""}. Die Zahl im Kommentar ist die Messung; wer sie ändert, rechnet sie nach.`,
