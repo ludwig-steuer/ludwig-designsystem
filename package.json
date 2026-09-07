@@ -19,7 +19,8 @@
     "sync:ludwig": "./scripts/sync-ludwig.sh",
     "check:mirror": "node scripts/mirror-filter.mjs --test",
     "check:when": "node scripts/check-when.mjs",
-    "check:language": "node scripts/check-language.mjs"
+    "check:language": "node scripts/check-language.mjs",
+    "cdp:clean": "node scripts/cdp.mjs --clean"
   },
   "dependencies": {
     "clsx": "^2.1.1",
