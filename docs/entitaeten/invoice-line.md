@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **geprüft** |
+| Status | **in Specs** — 0072 (`InvoiceLineRow`), 0114 (`InvoiceLineFacts`), 0115 (`InvoiceLineList`), geschrieben am 2026-09-07 |
 | GLOSSARY | **kein eigener Eintrag** — nur drei Einträge *über* sie (`Invoice line item source`, `Fund usage nature`, `Accounting subject`). Befund B1; bis dahin gilt der englische Name `invoice line`, Ordner `entities/invoice-line/` |
 | Tabelle | `ludwig.client_source_docs_invoice_lines` (1:n zum Rechnungs-Subtyp `client_source_docs_invoices`) |
 | Typen | `src/ludwig/modules/invoices/domain/invoice.ts` — `InvoiceLineItem` (**32 Felder**; die Tabelle hat 41 Spalten), eingebettet in `InvoiceDetail.lineItems` |
@@ -166,9 +166,9 @@ und werden von der Liste aufgeklappt.
 
 | Form / Liste | Marke | Grund | Backlog |
 |---|---|---|---|
-| `InvoiceLineRow` | **jetzt** | trägt die Liste; existiert heute als Karte mit Kopfzeile und Sub-Streifen | — |
-| `InvoiceLineFacts` | **jetzt** | trägt den Aufklapper; ohne sie ist die Zeile die halbe Antwort | — |
-| `InvoiceLineList` | **jetzt** | der Reiter „Positionen" von 0071 braucht sie | — |
+| `InvoiceLineRow` | **jetzt** | trägt die Liste; existiert heute als Karte mit Kopfzeile und Sub-Streifen | **0072** |
+| `InvoiceLineFacts` | **jetzt** | trägt den Aufklapper; ohne sie ist die Zeile die halbe Antwort | **0114** |
+| `InvoiceLineList` | **jetzt** | der Reiter „Positionen" von 0071 braucht sie | **0115** |
 | `InvoiceLineCell` · `View` · `Drawer` · `Editor` | verworfen | je ein Satz in der Formen-Tabelle | — |
 
 Drei Formen „jetzt" — unter dem Deckel von fünf, und alle drei hängen an
@@ -237,6 +237,16 @@ Komponente, `PositionenTab`.
   `summary_tax` (2). B2 ist damit kein Zukunftsproblem: die verbotene lokale
   Label-Map existiert und ist bereits falsch — wer sie in die neue Zeile
   kopiert, kopiert den Fehler mit.
+
+- **B7 — drei JSONB-Spalten sind im Anzeige-Typ `unknown`.** `vatEvidence`
+  (40 % nicht leer), `vatNotes` (68 %) und `collapseDecisionJson` (die 9
+  Aggregat-Zeilen) stehen in `InvoiceLineItem` als `unknown`. Eine Komponente
+  kann `unknown` nicht darstellen, und eine eigene Struktur dafür wäre die
+  lokale Erfindung, die `spec-schreiben` §5 verbietet. 0114 nimmt sie deshalb
+  als aufbereitete Props entgegen (`notes`, `collapse`) — die Darstellung ist
+  frei, die Struktur nicht. Solange der Typ fehlt, sind Belegstellen und
+  USt-Notizen nur über den Aufrufer erreichbar. Beim Schreiben der Specs
+  gefunden (2026-09-07).
 
 Im Register stehen B1/B1b als **L-98** und B2 als **L-99**. B3 und B4 hängen
 dort an L-99 mit dem Vermerk, dass sie eine eigene Nummer brauchen: die
