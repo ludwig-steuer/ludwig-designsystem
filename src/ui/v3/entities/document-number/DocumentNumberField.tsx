@@ -110,17 +110,28 @@ export function DocumentNumberField({
         </p>
       ) : null}
       {diverging ? (
-        <p className="v2dnf__hint">
-          Für diesen Vorgang gilt{" "}
+        <p
+          className="v2dnf__hint"
+          title={`Für diesen Vorgang gilt ${dominant.documentNumber} (${sourceLabel[dominant.source]})${
+            dominant.immutable ? " — die Nummer kommt aus DATEV und ist nicht verhandelbar." : ""
+          }`}
+        >
+          {/* In a narrow column only the number survives — the field is 96 px
+              wide inside `JournalEntryEditor`, and the full sentence grew to
+              ten lines there (acceptance of 0014, M2). What falls away stays
+              in the `title`, so nothing is lost, it is only shorter. */}
+          <span className="v2dnf__wide">Für diesen Vorgang gilt </span>
           <TextButton onClick={() => onChange(dominant.documentNumber)}>
             {dominant.documentNumber}
           </TextButton>{" "}
-          <span className="v2dnf__src">({sourceLabel[dominant.source]})</span>
+          <span className="v2dnf__src v2dnf__wide">({sourceLabel[dominant.source]})</span>
           {/* Only DATEV sources are immutable, and only there is the sentence
               true. Saying it everywhere would make it decoration. */}
-          {dominant.immutable
-            ? " — die Nummer kommt aus DATEV und ist nicht verhandelbar."
-            : null}
+          {dominant.immutable ? (
+            <span className="v2dnf__wide">
+              {" "}— die Nummer kommt aus DATEV und ist nicht verhandelbar.
+            </span>
+          ) : null}
         </p>
       ) : null}
     </div>

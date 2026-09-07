@@ -131,7 +131,7 @@ export const Edge: Story = {
     return (
       <div style={{ maxWidth: 420, display: "grid", gap: "var(--space-5)", padding: "var(--space-6)" }}>
         <Field label="Grenze erreicht" htmlFor="b8">
-          <DocumentNumberField id="b7" value={v} onChange={setV} sourceLabel={SOURCE_LABEL} />
+          <DocumentNumberField id="b8" value={v} onChange={setV} sourceLabel={SOURCE_LABEL} />
         </Field>
         <Field label="Lange dominante Nummer" htmlFor="b9">
           <DocumentNumberField

@@ -177,11 +177,115 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+**Ergebnis: zurück.** Gemessen am 2026-09-07 gegen den Dev-Server
+(`localhost:6107`) mit CDP (echte Tasten, je Schritt ein eigener
+`Runtime.evaluate`). Story-IDs verkürzt: `…field--<name>` =
+`v3-entitäten-belegnummer-documentnumberfield--<name>`, `…register--<name>`
+entsprechend.
+
+### Story-Deckung (§6 `spec-schreiben`)
+
+Feld **5**, Register **5** — genau die Namen der Freigabe. Ableitung: Feld =
+1 anwendbarer Zustand (gefüllt, `invalid` daneben) + 2 Rundläufe (`onChange`
+→ `Interactive`, `onOpenRegister` → `WithRegister`) + 1 `dominant`-Rundlauf
+(`Diverging`) + 1 Rand (`Edge`). Register = 4 Zustände + Rundläufe `onPick`
+/ `onQueryChange` in `Interactive`. Ausgeschlossen mit Grund: Feld ohne
+`Empty`/`Error` (Nachtrag), Register ohne `Error` (Spec). Prop ohne Story:
+nur `ariaLabel`, in der Schnittstelle als „—" vorgesehen. Alle zehn IDs in
+`storybook-static/index.json` vorhanden.
+
+### Fester Block
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| … | … | ✓ / ✗ |
+| `pnpm typecheck` / `pnpm build` grün | `pnpm typecheck` → exit 0; `pnpm build` → exit 0, „Storybook build completed successfully"; dazu `pnpm check:icons` → exit 0, 53 Zeichen, 2 offene Dateien (beide aus anderen Aufgaben) | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der richtigen Gruppe | `entities/document-number/{DocumentNumberField,DocumentNumberRegister}.{tsx,stories.tsx}` + `document-number-labels.ts`, `fixtures.ts`; Titel `v3/Entitäten/Belegnummer/…` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Beide Komponenten tragen `@when` **und** `@instead`; `DATEV_MAX_BELEGFELD1` trägt Fließtext-JSDoc wie andere Konstanten im Set (`SNAPSHOT_COUNT_LABEL`). **Aber:** `DocumentNumberRegister.tsx:30–36` ist ein deutscher Kommentarblock | ✗ **M4** |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep '#[0-9a-f]{3,6}'` → 0 Treffer; `COLS`/`MIN_WIDTH` in px folgen dem Muster von `ComparisonTable.tsx:78`; `sourceLabel`/`stateLabel` sind Props (L-71), keine Map in der Komponente | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | s. Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 | Kontrast gemessen (`…register--filled`): Zustandsspalte 6,19:1 · Kopfzeile 4,88:1 · „—" 6,69:1 · Badge DATEV 4,69:1 · Badge verwaist 4,78:1; Fokusring `2px solid rgb(59,143,196)`; Hover über `.v2tbl__row:has(.v2rowbtn):hover`; Limit-Zeile 4,88:1 bei 11,5 px | ✓ (Nebenbefunde B3, B4) |
+| Im Browser angesehen | Alle zehn Stories über `iframe.html` gemessen, nicht nur gebaut | ✓ |
 
-Abgenommen von / am: … · Offene Punkte: …
+### Variabler Block
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Typen aus `document-number.ts`, keiner lokal nachgebaut | `grep '^export type\|^interface'` in `entities/document-number/` → nur `DocumentNumberSourceLabels`/`DocumentNumberStateLabels`, beide `Record<…>` über die Domänen-Unions (Nachtrag). `KnownDocumentNumber`, `sortByDominance` importiert. **Aber:** das in der Schnittstelle genannte `isDatevSource` wird nirgends importiert — die DATEV-Marke hängt an `e.immutable` | ✗ **M6** (klein) |
+| Reihenfolge aus `sortByDominance` | `…register--filled`, DOM-Reihenfolge der neun Zeilen: opos_anchor · mirror_ref · datev_correction · case_decision · link · invoice_number · journal_line · bank_purpose · case_summary — identisch mit `documentNumberRank` (−9, −8, 0, 2.5, 4, 4.5, 5, 6, 7) über die unsortierte `REGISTER`-Fixture. `grep '\.sort('` in beiden Dateien → 0 eigene Sortierung | ✓ |
+| Jede Zeile nennt ihre Quelle sichtbar | `…register--filled`, Spalte 2 je Zeile: „Offener Posten aus DATEV", „Gespiegelte DATEV-Buchung", „Korrektur in DATEV", „Entschieden am Sachverhalt", „Ausgleichs-Klammer", „Rechnungsnummer des Belegs", „Eigene Buchungszeile", „Im Verwendungszweck erkannt", „In der Beschreibung erkannt" | ✓ |
+| `immutable` an der Zeile erkennbar, Übernahme davon unbeeinflusst | `…register--filled`: Badge „DATEV" an Zeile 1–3, „verwaist" an der `link`-Zeile. `…register--interactive`: ↓↓↑ auf `data-row=1` (unveränderlich, `mirror_ref`), `Enter` → „Übernommen: RE-2026-0140 (Gespiegelte DATEV-Buchung)" | ✓ |
+| Abweichung von `dominant` als Hinweis, nicht als Fehler | `…field--diverging`: zwei `.v2dnf__hint` in `rgb(92,92,92)` (6,69:1), `role=null`, `aria-invalid` 0×, `.v2in--invalid` 0×, `[role=alert]` 0×. Klick auf die Nummer (`button.v2link`) setzt `b5` von „RE 2026 140" auf „RE-2026-0140", der Hinweis verschwindet; zweiter Klick ebenso für `b6` | ✓ (Layout s. M2) |
+| `maxLength` hält bei 36, ohne stilles Abschneiden | `…field--interactive`: Feld auf 8 Zeichen, `Input.insertText` mit 44 Zeichen → Wert 36 Zeichen **und** die Zeile „36 Zeichen — mehr trägt Belegfeld 1 in DATEV nicht." erscheint (vorher 0×). `…field--edge`: 36 Zeichen, Zeile steht. `maxLength=36` am Element | ✓ (Befund B7: keine Live-Region) |
+| Tastatur ↑/↓/`Enter`/`Esc` | `…register--interactive`, echte Tasten: Fokus in der Suche → ↓ → `document.activeElement` = `BUTTON.v2rowbtn[data-row=1]`, ↓ → `data-row=2`, ↑ → `data-row=1`, `Enter` → „Übernommen: …". `Esc` erreicht `document` mit `defaultPrevented=false` (Drawer gehört dem Aufrufer, M8). **Aber:** das erste ↓ überspringt die dominanteste Zeile (`data-row=0`) | ✗ **M5** (klein) |
+| Ersetzt die `beleg1`-Inputs in `JournalEntryEditor` ohne Funktionsverlust (0015) | `v3-entitäten-buchungssatz-journalentryeditor--document-number-across-rows`: `.v2dnf` ist **96 px** breit, der `dominant`-Hinweis bricht auf **10 Zeilen / 194 px**, die Buchungszeile wächst auf **265 px** (bei 1440 und bei 1280 gleich) | ✗ **M2** (blockiert) |
+
+### Die Mängel vom 2026-09-06 — nachgemessen
+
+| | Nachweis | Ergebnis |
+|---|---|---|
+| M1 Ladezustand als Tabelle | `…register--loading`: **eine** `.v2tbl`, fünf `tr.v2tbl__row` mit je **5** `td`, Spuren `182px 220px 120px 130px 130px`, 25 Skelette, `sr-only` „Wird geladen …" | ✓ behoben |
+| M2 `id` am Feld | `…field--{filled,with-register,diverging,interactive}`: alle acht `label[for]` lösen auf `INPUT` auf. **`…field--edge`: `label[for="b8"]` löst auf nichts auf — das Feld trägt `id="b7"`** (`DocumentNumberField.stories.tsx:134`) | ✗ **M3** — 8 von 9 verdrahtet |
+| M3 stilles Abschneiden | s. `maxLength` oben | ✓ behoben |
+| M4 erste Spalte kollabiert | Spur 1 = 182 px bei 1440 / 1024, 160 px ab 760 — kein Kollaps, 0 Zellenüberläufe. **Aber** der Rahmen scrollt nicht mehr (s. M1 unten) | teils |
+| M5 Tabelle statt Listbox | `…register--filled`: `TABLE`, 5 `th`, 45 `td`, `role=option` 0×, `role=listbox` 0×, `aria-activedescendant` 0×; ↑/↓ bewegen echten Fokus | ✓ behoben |
+| M6 Zeilenhöhe, doppelte Aussage | Quellenspalte 220 px; Zeilen 45–47 px; kein zweites „· DATEV" im DOM | ✓ behoben (Befund B2: `.v2dnr__datev` in `v3.css:3300` ist tot) |
+| M7 / M8 | M7 mit 0090 erledigt; M8 (kein `Esc`-Story) bleibt bewusst offen | ✓ |
+
+### Mängel dieser Abnahme
+
+**M1 — das Register wird beschnitten, sobald es schmaler als ~840 px steht (blockiert).**
+`…register--filled`, Viewport 700: `.v2dnr` (grid) 626 px, ihr Grid-Item
+`<div ref={list}>` **836 px**, `.v2tbl__scroll` `clientWidth 836 = scrollWidth 836`
+— es gibt nichts zu scrollen. `.v2card` hat `overflow-x: hidden`, also stehen
+**20 Zellen** rechts außerhalb der Karte; bei 500 px sind es **30** und die
+Spalten Konto, Sachverhalt und Zustand sind weg und unerreichbar. Der
+`ref`-Wrapper aus der M5-Nacharbeit ist kein Scroll-Container, also greift
+`min-width: auto` und das Item schrumpft nicht — die `minWidth`-Nacharbeit aus
+M4 läuft dadurch ins Leere. Gegenprobe im selben Lauf bei 500 px:
+`AccountEntries` (`.v2ae`, Scroll-Container **ist** das Grid-Item) 468/620 →
+scrollt; `ComparisonTable` 466/860 → scrollt. Es liegt also am Wrapper, nicht
+an `Table`. Und es trifft genau den Einsatz: `--drawer-sm` = `clamp(340px, 34vw, 560px)`,
+`--drawer-md` bei 1440 px = 720 px, abzüglich `--space-5` beidseitig.
+*Vorschlag:* den `ref` auf `.v2dnr` legen (der `onKeyDown` sitzt schon dort)
+oder dem Wrapper `min-width: 0` geben.
+
+**M2 — das Feld ist auf der Seite 96 px breit, der Hinweis rechnet mit 420 (blockiert).**
+`…journalentryeditor--document-number-across-rows`: `.v2dnf` 96 px,
+`.v2dnf__hint` 194 px hoch (10 Zeilen à 19,375 px), `.bse__row` 265 px statt
+~30. Die Story `Edge` beweist das Gegenteil nur, weil sie in 420–460 px misst.
+Dazu: `.v2dnf__hint` und `.v2dnf__limit` stehen auf `overflow-wrap: normal` —
+eine 36-stellige Nummer ohne Trennzeichen läuft in dieser Breite waagerecht
+über (die Edge-Fixture ist bindestrichhaltig, deshalb fällt es nicht auf).
+*Vorschlag:* schmale Form des Hinweises (Nummer + Marke, der Satz als
+`title`), oder 0015 gibt Belegfeld 1 eine breitere Spur — zu entscheiden mit
+0015, gemessen wird es dort.
+
+**M3 — die M2-Nacharbeit ist bei 8 von 9 Feldern angekommen (blockiert, ein Zeichen).**
+`…field--edge`: `document.getElementById('b8') === null`, das Feld darüber
+trägt `id="b7"` (`DocumentNumberField.stories.tsx:134`, `Field` daneben mit
+`htmlFor="b8"`). Genau der Befund, wegen dem `Field.htmlFor` seit 0104 Pflicht
+ist. *Vorschlag:* `id="b8"`.
+
+**M4 — deutscher Kommentar im Code (nicht blockierend).**
+`DocumentNumberRegister.tsx:30–36` („sonst fällt die erste Spur …") ist der
+einzige deutsche Kommentar in beiden Dateien; `CLAUDE.md` verlangt englische
+Kommentare, Deutsch nur in Nutzertexten. *Vorschlag:* übersetzen, der Inhalt
+bleibt.
+
+**M5 — das erste ↓ überspringt die dominanteste Zeile (nicht blockierend).**
+`…register--interactive`: `active` startet auf 0, aus der Suche heraus setzt ↓
+auf 1 — der Fokus landet auf `mirror_ref`, während `opos_anchor` (die Nummer,
+die gilt) schon `is-active` gefärbt ist und übersprungen wird; nur ↑ führt
+dorthin. *Vorschlag:* solange kein Zeilenknopf den Fokus hat, führt das erste
+↓ auf Zeile 0.
+
+**M6 — `isDatevSource` steht in der Schnittstelle, wird aber nicht benutzt (nicht blockierend).**
+Die DATEV-Marke hängt an `e.immutable`. In der Fixture fallen beide zusammen;
+ein Eintrag mit `source: "opos_anchor"` und `immutable: false` verlöre die
+Marke. *Vorschlag:* entweder `isDatevSource` verwenden oder es aus dem
+Abschnitt „Schnittstelle" streichen.
+
+Abgenommen von / am: fremde Abnahme-Sitzung (kein Bau, kein Chat-Verlauf), 2026-09-07 · Offene Punkte: M1, M2, M3 blockieren; M4–M6 nachziehen.
 
 ## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
 
@@ -260,3 +364,63 @@ schon.
 **M7** ist mit **0090** erledigt (`--color-accent-700` hält jetzt 5,03:1 auf
 weichem Grund). **M8** (`Esc` in keiner Story) bleibt: der Drawer gehört dem
 Aufrufer, und eine Story mit Drawer wäre eine Story über den Drawer.
+
+## Nach der Abnahme (2026-09-07): drei Blocker, alle an Stellen, die niemand gemessen hatte
+
+**M1 erledigt — das Register wurde beschnitten, statt zu scrollen.** Der
+`ref`-Wrapper aus der letzten Nacharbeit ist ein Rasterkind, und ein Rasterkind
+hat `min-width: auto`: es wächst mit seinem Inhalt, statt den Scroll-Container
+darin scrollen zu lassen. Die Karte (`overflow-x: hidden`) schnitt dann ab.
+Gemessen bei 700 px Fenster: Wrapper **836 px** in einer 626-px-Karte, zwanzig
+Zellen weg; bei 500 px waren es dreißig, Konto, Sachverhalt und Zustand
+unerreichbar. Genau die Breiten, in denen das Register steht — der `sm`-Drawer
+hat rund 450 px Inhalt.
+
+`min-width: 0` am Wrapper. Gemessen bei 700 px: Wrapper **626 px**,
+Scroll-Container `clientWidth 626` gegen `scrollWidth 818` — er scrollt. Bei
+1440: 858 gegen 858, also kein Scrollbalken, wo keiner nötig ist.
+
+**M2 erledigt — der Hinweis rechnete mit 420 px, das Feld hat 96.** In der
+Buchungszeile des Editors wuchs er auf zehn Zeilen (194 px), und die Zeile auf
+265 statt 30. Die Story `Edge` bewies nichts dagegen, weil sie in 420–460 px
+misst: **gegen die Fixture gemessen, nicht gegen den Wertebereich** — dieselbe
+Falle wie in 0025, 0027, 0029 und 0071.
+
+Das Feld misst jetzt sich selbst (Container-Query). Unter 240 px bleibt die
+**Nummer** stehen, der erklärende Satz geht in den `title`. Gemessen im
+Editor bei 1280 und 1440: Feld 96 px, Hinweis **19 px** (eine Zeile), Zeile 91
+statt 265. Dazu `overflow-wrap: anywhere` an Hinweis und Grenzzeile — eine
+36-stellige Nummer ohne Trennzeichen hat keine Umbruchstelle und lief sonst
+waagerecht aus der Spalte.
+
+**M3 erledigt** — ein Zeichen: das Feld der Story `Edge` trug `id="b7"`,
+während sein `Field` auf `b8` zeigte. Genau der Befund, wegen dem `htmlFor`
+seit 0104 Pflicht ist.
+
+**Auch erledigt:**
+
+- **M4** — der deutsche Kommentar über der Spurenliste ist Englisch.
+- **M5** — der erste ↓ sprang auf Zeile **zwei**, weil `active` auf 0 stand
+  und der Tastenweg von dort weiterzählt, während Zeile eins schon gefärbt
+  war. Jetzt beginnt nichts fokussiert (`-1`), und die Farbe sagt dasselbe.
+  Gemessen: **null** aktive Zeilen vor dem ersten Druck.
+- **M6** — die DATEV-Marke hing an `immutable`. In der Fixture fallen die
+  beiden zusammen, aber ein Eintrag aus DATEV, der noch offen ist, verlöre
+  seine Marke. Sie liest jetzt `isDatevSource(e.source)` — die Funktion, die
+  dafür in der Domäne steht und bisher nur in der Schnittstelle erwähnt war.
+  Gemessen: vier Marken, unverändert.
+
+**Befunde am Set, ohne Nacharbeit:**
+
+- `.bse__row .v2in { padding: 4px 7px }` (Spezifität 0,2,0) schlägt die
+  feldeigenen `--search`/`--ledger`-Polster (0,1,0): im Editor liegt das Icon
+  über dem Eingabetext — 21 px bei `DocumentNumberField`, 20 px bei
+  `AccountField`. **Vorbestehend und nicht 0014-eigen**: es trifft 0013
+  genauso. Gehört in eine eigene Aufgabe.
+- `.v2dnr__datev` ist seit M6 tot.
+- Der Ladezustand des Registers rendert keinen `HeadRow` — eine
+  Skelett-Tabelle ohne Spaltenkopf (§9/V5).
+- Die Grenzzeile hat keine Live-Region: beim Einfügen erfährt eine
+  Vorlesehilfe nichts vom Abschnitt.
+- `index.ts` exportiert die Label-Typen unter `/* DATEV-Snapshot */` statt
+  unter `/* Belegnummer */`.

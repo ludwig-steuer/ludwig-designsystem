@@ -3312,13 +3312,30 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2oi__groupnum { color: var(--color-text-muted); font-variant-numeric: tabular-nums lining-nums; }
 
 /* --- Belegfeld 1 und Belegnummern-Register (0014) ------------------------- */
-.v2dnf { display: grid; gap: var(--space-2); }
+.v2dnf {
+  display: grid;
+  gap: var(--space-2);
+  /* Das Feld misst **sich selbst**: auf der eigenen Seite steht es in 420 px,
+     in der Buchungszeile des Editors in **96** (gemessen). Dort wuchs der
+     Hinweis auf zehn Zeilen und die Zeile auf 265 px statt 30 — eine
+     `@media`-Regel sähe beide Male dasselbe Fenster. */
+  container-type: inline-size;
+  container-name: dnf;
+}
 .v2dnf__box { position: relative; }
 .v2dnf__in { width: 100%; font-family: var(--font-mono); }
 .v2dnf__in--search { padding-right: 34px; }
 .v2dnf__search { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
 /* Ein Hinweis, kein Fehler: eine Abweichung kann begruendet sein. */
 .v2dnf__hint { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+/* Eine 36-stellige Nummer ohne Trennzeichen hat keine Umbruchstelle; ohne
+   diese Zeile läuft sie waagerecht aus der Spalte. */
+.v2dnf__hint,
+.v2dnf__limit { overflow-wrap: anywhere; }
+/* Schmal bleibt die Nummer, der erklärende Satz geht in den `title`. */
+@container dnf (max-width: 240px) {
+  .v2dnf__wide { display: none; }
+}
 .v2dnf__src { color: var(--color-text-subtle); }
 .v2dnr { display: grid; gap: var(--space-4); }
 .v2dnr__q { max-width: 22rem; }

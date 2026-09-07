@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import {
+  isDatevSource,
   sortByDominance,
   type KnownDocumentNumber,
 } from "@/ludwig/modules/accounting-cases/domain/document-number";
@@ -27,13 +28,13 @@ import type {
  * why is a list that has to be trusted, and this one has to be checkable.
  */
 
-/* `minmax(160px, …)`: sonst fällt die erste Spur unter 760 px auf 20 px, und
-   Nummer und Marke überschreiben die Nachbarspalte (gemessen: 13 Überläufe).
-   `minWidth` deckt die festen Spuren plus vier Lücken und das Polster.
+/* `minmax(160px, …)`: otherwise the first track falls to 20 px below 760 px,
+   and number and mark overwrite the next column (measured: 13 overflows).
+   `minWidth` covers the fixed tracks plus four gaps and the padding.
 
-   In px, nicht in `ch`: eine `ch`-Untergrenze rechnet sich aus der
-   Schriftgröße des Elements, und Kopf und Zeile stehen auf verschiedenen
-   (12,5 gegen 13,5) — die Spur ginge auseinander (0070). */
+   In px, not in `ch`: a `ch` floor is computed from the element's own font
+   size, and head and row sit on different ones (12.5 against 13.5) — the
+   track would drift apart (0070). */
 const COLS = "minmax(160px, 1fr) 220px 120px 130px 130px";
 const MIN_WIDTH = 780;
 
@@ -61,7 +62,11 @@ export function DocumentNumberRegister({
   sourceLabel: DocumentNumberSourceLabels;
   stateLabel: DocumentNumberStateLabels;
 }) {
-  const [active, setActive] = useState(0);
+  // `-1`, not `0`: with `0` the first ↓ jumped to row **two**, because it
+  // moves from wherever it stands — while row one was already coloured as
+  // active. Nothing is focused before the first key press, and now the
+  // colour says the same (acceptance of 0014, M5).
+  const [active, setActive] = useState(-1);
   const list = useRef<HTMLDivElement>(null);
 
   const q = (query ?? "").trim().toLowerCase();
@@ -77,9 +82,10 @@ export function DocumentNumberRegister({
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
     e.preventDefault();
+    const from = active < 0 ? (e.key === "ArrowDown" ? -1 : rows.length) : active;
     const next = Math.max(
       0,
-      Math.min(rows.length - 1, active + (e.key === "ArrowDown" ? 1 : -1)),
+      Math.min(rows.length - 1, from + (e.key === "ArrowDown" ? 1 : -1)),
     );
     setActive(next);
     // Move the **focus**, not a marker: the row's button is a real focus stop,
@@ -127,7 +133,13 @@ export function DocumentNumberRegister({
         // option sat under `tbody` and `table`, and the focus stayed on the
         // container, so the active row was only a colour. Now the row's button
         // takes the focus, and ↑/↓ move it — which every reader announces.
-        <div ref={list}>
+        // `min-width: 0` on the wrapper, or the scroll container inside
+        // `Table` never gets to scroll: a grid item defaults to `min-width:
+        // auto`, so it grows to its content and the card (`overflow-x:
+        // hidden`) cuts the columns off instead. Measured at a 700 px
+        // viewport: item 836 px in a 626 px card, twenty cells gone
+        // (acceptance of 0014, M1).
+        <div ref={list} style={{ minWidth: 0 }}>
           <Table cols={COLS} minWidth={MIN_WIDTH}>
             <HeadRow>
               <span>Belegnummer</span>
@@ -147,7 +159,10 @@ export function DocumentNumberRegister({
                       <span className="v2mono">{e.documentNumber}</span>
                       {/* Immutable is the whole point of rule 1, so it stands at
                           the row — not in a tooltip. */}
-                      {e.immutable ? <Badge tone="info">DATEV</Badge> : null}
+                      {/* The mark reads the **source**, not `immutable`: in the fixture the
+                          two coincide, but an entry from DATEV that is still open
+                          would lose its mark (acceptance of 0014, M6). */}
+                      {isDatevSource(e.source) ? <Badge tone="info">DATEV</Badge> : null}
                       {e.orphaned ? <Badge tone="warning">verwaist</Badge> : null}
                     </span>
                     {/* No second „DATEV": the badge in column 1 already says
