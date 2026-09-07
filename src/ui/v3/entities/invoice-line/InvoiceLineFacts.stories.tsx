@@ -90,7 +90,9 @@ export const Aggregate: Story = {
 
 /**
  * Der Fremdwährungs-Block — 20 von 726 Zeilen tragen ihn. Ohne `fxCurrency`
- * bliebe er weg: eine nackte Zahl ohne Währung wäre eine Behauptung.
+ * bliebe der Wert nicht weg: er stünde ohne Währung da, mit dem Vermerk an
+ * ihrer Stelle. Ein Betrag, den es gibt, verschwindet hier nicht, nur weil
+ * seine Währung fehlt.
  */
 export const ForeignCurrency: Story = {
   render: () => (
@@ -101,8 +103,8 @@ export const ForeignCurrency: Story = {
 };
 
 /**
- * Die Ränder: Buchungsgegenstand mit 392 Zeichen, Begründung mit 295 — beide
- * gekürzt. Dazu ein extrahierter USt-Satz, der **abweicht**, damit die Zeile
+ * Die Ränder: Buchungsgegenstand mit 400 Zeichen, Begründung mit 297 — beide
+ * werden gekürzt, bei 161 und 169. Dazu ein extrahierter USt-Satz, der **abweicht**, damit die Zeile
  * einmal zu sehen ist; im Bestand weicht er in null von 559 Zeilen ab.
  */
 export const Edges: Story = {

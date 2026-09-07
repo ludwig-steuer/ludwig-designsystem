@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 
-import { InvoiceLineRow, invoiceLineTracks, invoiceLineTracksExpandable } from "./InvoiceLineRow";
+import {
+  InvoiceLineRow,
+  invoiceLineMinWidth,
+  invoiceLineTracks,
+  invoiceLineTracksExpandable,
+} from "./InvoiceLineRow";
 import { InvoiceLineFacts } from "./InvoiceLineFacts";
 import { HeadRow, Table } from "../../primitives/Table";
 import { DEVIATIONS, FIVE, LABELS, LONG, MINIMAL, NAMELESS, P90, SIMPLE } from "./fixtures";
@@ -16,7 +21,11 @@ type Story = StoryObj<typeof InvoiceLineRow>;
 function Frame({ children, expandable = false }: { children: React.ReactNode; expandable?: boolean }) {
   return (
     <div style={{ padding: "var(--space-5)", maxWidth: 1100 }}>
-      <Table cols={expandable ? invoiceLineTracksExpandable : invoiceLineTracks} density="wide">
+      <Table
+        cols={expandable ? invoiceLineTracksExpandable : invoiceLineTracks}
+        minWidth={invoiceLineMinWidth}
+        density="wide"
+      >
         <HeadRow>
           {expandable ? <span /> : null}
           <span>Pos.</span>
@@ -107,11 +116,11 @@ export const Edges: Story = {
   ),
 };
 
-/** Fünf Zeilen unter einer Kopfzeile — der Umfang einer p90-Rechnung. */
+/** Drei Zeilen unter einer Kopfzeile, so wie im Reiter „Positionen". */
 export const InUse: Story = {
   render: () => (
     <Frame>
-      {FIVE.map((line) => (
+      {FIVE.slice(0, 3).map((line) => (
         <InvoiceLineRow key={line.position} line={line} labels={LABELS} />
       ))}
     </Frame>

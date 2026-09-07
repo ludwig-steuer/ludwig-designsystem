@@ -56,14 +56,20 @@ type Props = {
  *          list with its head, switch and sum → InvoiceLineList.
  */
 export function InvoiceLineRow({ line, labels, open, onOpenChange, children }: Props) {
+  // Without a name the title is the first line of the description — then that
+  // line must not stand twice (acceptance of 0072, M6).
+  const rest = line.itemName
+    ? line.productDescription
+    : line.productDescription?.split("\n").slice(1).join(" ").trim() || null;
+
   const summary = (
     <>
-      <span className="v2num">#{line.position}</span>
+      <span className="v2ilrow__pos">#{line.position}</span>
       <span>
         <span className="v2ilrow__name">{lineTitle(line)}</span>
-        {line.productDescription ? (
+        {rest ? (
           <span className="v2ilrow__desc">
-            <LongText max={81}>{line.productDescription}</LongText>
+            <LongText max={81}>{rest}</LongText>
           </span>
         ) : null}
         <Strip line={line} labels={labels} />
@@ -83,9 +89,13 @@ export function InvoiceLineRow({ line, labels, open, onOpenChange, children }: P
         {line.taxRatePercent === null ? (
           <span className="v2muted">—</span>
         ) : (
-          `${formatAmount(line.taxRatePercent, null)} %`
+          `${line.taxRatePercent} %`
         )}
       </span>
+      {/* The wrapper carries the emphasis, so it has to carry the alignment
+          too: `.v2tbl :is(th,td) > .v2num` only reaches a direct child, and an
+          `AmountCell` inside a span quietly loses its right edge (found in the
+          acceptance of 0072, measured 81 px of slack). */}
       <span className="v2ilrow__total">
         <AmountCell value={line.lineTotalNetValue} />
       </span>

@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { InvoiceLineList } from "./InvoiceLineList";
 import { InvoiceLineFacts } from "./InvoiceLineFacts";
-import { ALL, FIVE, LABELS, MINIMAL } from "./fixtures";
+import { ALL, FIVE, LABELS, MINIMAL, SUMMARY_TOTAL } from "./fixtures";
 import { linesNetTotal } from "./invoice-line";
 
 const meta: Meta<typeof InvoiceLineList> = {
@@ -82,19 +82,21 @@ export const AllExpanded: Story = {
 };
 
 /**
- * Die Probe schlägt an: die Summe der Positionen weicht vom Netto der
- * Rechnung ab. Das passiert echt — 40 Zeilen im Bestand sind Summenzeilen und
- * zählen mit; genau diese Abweichung ist die Information, für die es die
- * Probe gibt. Die Abweichung steht mit einem Wort da, nicht nur in Farbe.
+ * Die Probe schlägt an, und zwar **aus der Regel heraus**: der Beleg führt
+ * seine eigene Zwischensumme als Position (`summary_total`, 40 solcher Zeilen
+ * im Bestand). Sie zählt mit, deshalb liegt die Summe der Positionen um genau
+ * diesen Betrag über dem Nettobetrag der Rechnung — das ist die Information,
+ * für die es die Probe gibt. Die Abweichung steht mit einem Wort da, nicht
+ * nur in Farbe.
  */
 export const TotalMismatch: Story = {
   render: () => (
     <Frame>
       <InvoiceLineList
-        lines={ALL}
+        lines={[...ALL, SUMMARY_TOTAL]}
         labels={LABELS}
         renderFacts={facts}
-        invoiceNetTotal={linesNetTotal(ALL) - 612.4}
+        invoiceNetTotal={linesNetTotal(ALL)}
       />
     </Frame>
   ),

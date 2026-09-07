@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import type { InvoiceLineItem } from "@/ludwig/modules/invoices/domain/invoice";
 
 import { Amount } from "../../primitives/Amount";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Segmented } from "../../primitives/Nav";
-import { EmptyRow, HeadRow, Table } from "../../primitives/Table";
+import { Card, CardFoot, CardHead, EmptyRow, HeadRow, Table } from "../../primitives/Table";
+import { isTyping } from "../../primitives/hotkey";
 import { formatCount } from "../../format";
 import { InvoiceLineRow, invoiceLineMinWidth, invoiceLineTracks, invoiceLineTracksExpandable } from "./InvoiceLineRow";
 import { linesNetTotal, type InvoiceLineLabels } from "./invoice-line";
@@ -53,6 +54,10 @@ export function InvoiceLineList({
   // what is true for each.
   const [deviating, setDeviating] = useState<ReadonlySet<number>>(new Set());
   const canExpand = Boolean(renderFacts) && lines.length > 0;
+  // The key handler is bound once; it reads the current value from here
+  // instead of closing over a stale one.
+  const expandedRef = useRef(expanded);
+  expandedRef.current = expanded;
 
   function switchTo(next: boolean) {
     setExpanded(next);
@@ -76,47 +81,56 @@ export function InvoiceLineList({
     if (!canExpand) return;
     function onKey(e: KeyboardEvent) {
       if (!e.altKey || e.key.toLowerCase() !== "e") return;
+      // In a text field the press is typing, not a command (V14, the shared
+      // half of the rule in `primitives/hotkey.ts`). `matchesKey` cannot be
+      // used here: it drops every combination with Alt.
+      if (isTyping(e.target)) return;
       e.preventDefault();
-      setExpanded((v) => {
-        onExpandedChange?.(!v);
-        return !v;
-      });
-      setDeviating(new Set());
+      // Not inside the state updater: under StrictMode React runs it twice,
+      // and the caller would hear the switch twice (acceptance of 0115, M5).
+      switchTo(!expandedRef.current);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [canExpand, onExpandedChange]);
+  }, [canExpand, onExpandedChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sorted = [...lines].sort((a, b) => a.position - b.position);
   const total = linesNetTotal(sorted);
   const difference = invoiceNetTotal === undefined ? null : total - invoiceNetTotal;
 
+  const expandable = Boolean(renderFacts) && sorted.length > 0;
+
   return (
-    <div className="v2illist">
-      <div className="v2illist__head">
-        <span className="v2muted">
-          {formatCount(lines.length)} {lines.length === 1 ? "Position" : "Positionen"}
-        </span>
-        {canExpand ? (
-          <Segmented
-            ariaLabel="Wie viel je Position"
-            active={expanded ? "wide" : "compact"}
-            options={[
-              { key: "compact", label: "Kompakt" },
-              { key: "wide", label: "Erweitert · Alt+E" },
-            ]}
-            onPick={(key) => switchTo(key === "wide")}
-          />
-        ) : null}
-      </div>
+    <Card className="v2illist">
+      <CardHead
+        title="Positionen"
+        meta={
+          <span className="v2muted">
+            {formatCount(lines.length)} {lines.length === 1 ? "Position" : "Positionen"}
+          </span>
+        }
+        actions={
+          canExpand ? (
+            <Segmented
+              ariaLabel="Wie viel je Position"
+              active={expanded ? "wide" : "compact"}
+              options={[
+                { key: "compact", label: "Kompakt" },
+                { key: "wide", label: "Erweitert · Alt+E" },
+              ]}
+              onPick={(key) => switchTo(key === "wide")}
+            />
+          ) : null
+        }
+      />
 
       <Table
-        cols={renderFacts ? invoiceLineTracksExpandable : invoiceLineTracks}
+        cols={expandable ? invoiceLineTracksExpandable : invoiceLineTracks}
         minWidth={invoiceLineMinWidth}
         density="wide"
       >
         <HeadRow>
-          {renderFacts ? <span /> : null}
+          {expandable ? <span /> : null}
           <span>Pos.</span>
           <span>Bezeichnung</span>
           <span className="v2num">Menge</span>
@@ -153,7 +167,7 @@ export function InvoiceLineList({
       </Table>
 
       {sorted.length > 0 ? (
-        <div className="v2illist__foot">
+        <CardFoot>
           <span className="v2muted">Summe der Positionen</span>
           <Amount value={total} currency="EUR" />
           {difference === null ? null : Math.abs(difference) < 0.005 ? (
@@ -163,8 +177,8 @@ export function InvoiceLineList({
               weicht vom Rechnungsbetrag ab: <Amount value={difference} currency="EUR" signed />
             </span>
           )}
-        </div>
+        </CardFoot>
       ) : null}
-    </div>
+    </Card>
   );
 }

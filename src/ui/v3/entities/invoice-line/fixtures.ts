@@ -132,7 +132,11 @@ export const DEVIATIONS = line({
   collapseDecisionJson: { collapsed: [1, 2, 4] },
 });
 
-/** The line that pushes every limit: 251 characters, a unit nobody spells alike. */
+/**
+ * The line that pushes every limit: a name of 254 characters, an accounting
+ * subject of 400 and a reasoning of 297 — the three long texts of the profile at
+ * their measured maximum (251 / 392 / 295), plus a unit nobody spells alike.
+ */
 export const LONG = line({
   position: 12,
   itemName:
@@ -148,9 +152,9 @@ export const LONG = line({
   fundUsageNature: "investment",
   vatSpecialCase: "exempt_other",
   accountingSubject:
-    "Instandhaltung der technischen Anlagen; die Umwälzpumpen sind Ersatzbeschaffung und kein nachträglicher Herstellungsaufwand, weil sie den Nutzungswert nicht erhöhen.",
+    "Instandhaltung der technischen Anlagen: die beiden Umwälzpumpen sind Ersatzbeschaffung und kein nachträglicher Herstellungsaufwand, weil sie den Nutzungswert der Anlage nicht erhöhen und die Nutzungsdauer nicht verlängern; die Filter- und Dichtheitsprüfung ist ohnehin laufender Aufwand, und der Einsatzbericht weist keine Erweiterung der Anlage aus, sondern allein ihren Erhalt im bisherigen Umfang.",
   fundUsageReasoning:
-    "Der Austausch ersetzt vorhandene Teile gleicher Art. Eine Aktivierung käme nur bei einer wesentlichen Verbesserung in Betracht, die der Bericht nicht ausweist.",
+    "Der Austausch ersetzt vorhandene Teile gleicher Art und Güte. Eine Aktivierung käme nur bei einer wesentlichen Verbesserung in Betracht, die der Einsatzbericht nicht ausweist; die abweichende Stundenzahl betrifft die Anfahrt und nicht den Umfang der Leistung, sie ändert die Einordnung also nicht.",
   fundUsageConfidence: 0.74,
 });
 
@@ -412,6 +416,27 @@ export const P90 = line({
   taxRatePercent: 19,
   lineTotalNetValue: 640,
   fundUsageConfidence: 0.93,
+});
+
+/**
+ * Eine **aktive** Summenzeile — `summary_total`, nicht deaktiviert. Sie ist
+ * der Fall, für den es die Probe im Fuß gibt: der Beleg führt seine eigene
+ * Summe als Position, sie zählt mit, und dadurch weicht die Summe der
+ * Positionen vom Nettobetrag der Rechnung ab. Im Bestand gibt es 40 solcher
+ * Zeilen. Sie steht **nicht** in `ALL`.
+ */
+export const SUMMARY_TOTAL = line({
+  position: 23,
+  itemName: "Zwischensumme Rechnung",
+  productDescription: "Der Beleg führt seine eigene Summe als Position.",
+  quantity: 1,
+  unit: "Pos",
+  unitPriceValue: 1_475.6,
+  taxRatePercent: 19,
+  lineTotalNetValue: 1_475.6,
+  lineSpecialType: "summary_total",
+  fundUsageNature: "unknown",
+  fundUsageConfidence: 0.83,
 });
 
 /** All 22, in the order of the document. */

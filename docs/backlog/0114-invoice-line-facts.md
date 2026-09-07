@@ -180,14 +180,90 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | … |
+Gemessen am laufenden Storybook (6107), je Zustand ein eigener Aufruf; die
+Blöcke sind über ihren gerenderten Text gezählt, nicht über den Code gelesen.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Story-Deckung: vollständig.** Sieben Stories, wie abgeleitet (2 Zustände +
+`fxCurrency` + `collapse` + die heute falsche Bedingung + im Einsatz + Rand).
+`line` → `Standard`, `notes` → `Standard`, `collapse` → `Aggregate`,
+`fxCurrency` → `ForeignCurrency`. Ausschlüsse (`Laedt`, `Fehler`,
+`LeerNachFilter`) sind begründet. Ein Schönheitsfehler: die Spec nennt für
+`labels` den Nachweis `Standard`, dort ist `vatSpecialCase` aber `none` — die
+Prop wirkt erst in `Aggregate` und `ForeignCurrency`.
+
+| Kriterium | Nachweis (Story-ID · Messung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck`, `pnpm build` grün | beide Exit 0 | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `entities/invoice-line/InvoiceLineFacts.tsx` + `.stories.tsx`, Titel `v3/Entitäten/Rechnungsposition/InvoiceLineFacts` | ✓ |
+| Code englisch; `@when`/`@instead` am Export | vorhanden; die drei Helfer (`rows`, `text`, `money`) sind modul-lokal | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map | keine Farbe, kein Maß in der Datei; Wörter über `labels` | ✓ |
+| Alle Stories vorhanden, Ausschlüsse begründet | 7/7 | ✓ |
+| Prüfliste §9 durchgegangen | Zahlen rechts (`FieldList`), Text links, keine Farbe als Kategorie, keine Konsolenmeldung | ✓ |
+| Im Browser angesehen | alle sieben Stories geladen, 0 Fehler/Warnungen | ✓ |
+| Ein Feld ohne Wert erscheint **nicht** | `Standard`: fünf Blöcke, darin kein „—" und keine leere Zeile; `USt-Sonderfall`, `Rechtsgrundlage`, `Extrahierter USt-Satz`, `Fremdwährung`, `Beleg-Kollaps` fehlen ganz. `Sparse`: 0 Blöcke | ✓ |
+| Steuerschlüssel-Block ohne USt-Sonderfall | `TaxKeysWithoutSpecialCase` · linke Form ohne Kandidaten: nur „Buchungsklassifikation"; rechte Form mit `taxCandidateKeys` und `vatSpecialCase: "none"`: „DATEV-Steuerschlüssel · Kandidaten · 9 · 8 · 3" | ✓ |
+| Extrahierter USt-Satz nur bei Abweichung | `Edges` (`vatExtractedRatePercent` 7 gegen `taxRatePercent` 19) → „Extrahierter USt-Satz 7,00 %"; `Standard` → Feld fehlt | ✓ |
+| Kollaps-Kasten genau dann, wenn `collapse` gesetzt ist | `Aggregate` → Block „Beleg-Kollaps" mit drei Paaren; `Standard` (dieselbe Form ohne `collapse`) → kein Block. Die Form prüft `source` nicht selbst | ✓ |
+| `fx*`-Block nur bei gesetzten Werten, Währung aus `fxCurrency` | `ForeignCurrency` → „Fremdwährung · Einzelpreis 399,00 $ · USt-Betrag 0,00 $ · Netto-Summe 1.197,00 $"; `Standard` → kein Block | ✓ (siehe M2) |
+| Sind alle Blöcke leer, steht der Satz | `Sparse` · 0 `.v2ilfacts`, ein `<p class="v2muted">Zu dieser Position hat Ludwig nichts vermerkt.</p>` | ✓ |
+| Die zwei Freitexte werden bei 161 und 169 Zeichen gekürzt | `Edges` · Buchungsgegenstand: Fixture 165 Zeichen → 158 gerendert plus „…" (Schnitt bei 161, Wortgrenze). **Begründung: Fixture 159 Zeichen → 159 gerendert, kein Schnitt** — die Grenze 169 wird von keiner Story erreicht | **✗ M1** |
+| Kein eigener Rahmen, kein eigener Innenabstand (1280/1600) | `InUse` · `.v2ilfacts`: `border 0`, `padding 0`, Hintergrund transparent, Radius 0; die fünf Blöcke sind `v2fields v2fields--bare`, ebenfalls ohne Rahmen und Polster. Rahmen und Polster kommen von `.v2tbl__detail` (`18px 18px 20px 46px`, `rgb(244,246,248)`). Identisch bei beiden Breiten | ✓ |
+| Ersetzt den Aufklapper in `PositionenTab` ohne Funktionsverlust | gegen `PositionenTab.tsx` gelesen: „Buchungsklassifikation", „USt-Sonderbehandlung" (hier auf „Umsatzsteuer" plus eigenen Steuerschlüssel-Block aufgeteilt, P12), „Fremdwährung", „Hinweise" (`vatNotes` + `lineNotes`) und der Kollaps-Kasten sind gedeckt; dazu neu: Artikelnummer und Leistungsdatum. Bewusst weggelassen: „Alternative Kategorien (Historie)" (L-202 a) und der Roh-Schlüssel in Klammern hinter dem Spezial-Typ, dessen Wort jetzt in der Zeile steht | ✓ |
+
+### Mängel
+
+1. **Die Grenze 169 ist von keiner Story bewiesen (blockiert).** Kriterium
+   „Die zwei Freitexte werden bei 161 und 169 Zeichen gekürzt, nicht bei einer
+   geratenen Zahl". Gemessen in `Edges`: `LONG.accountingSubject` ist 165
+   Zeichen lang und wird auf 158 plus „…" geschnitten — die 161 sind belegt.
+   `LONG.fundUsageReasoning` ist **159** Zeichen lang, bleibt also unter 169 und
+   erscheint vollständig; der zweite Schnitt ist ungeprüft. Dazu behauptet der
+   deutsche Story-Text „Buchungsgegenstand mit 392 Zeichen (max), Begründung mit
+   295" — beides trifft auf die Fixture nicht zu (165 / 159), und die Spec
+   nennt genau diese beiden Maximalwerte. Vorschlag: die zwei Fixture-Texte auf
+   392 und 295 Zeichen bringen; dann zeigt `Edges` beide Schnitte und der
+   Story-Text stimmt wieder mit dem Bild überein.
+2. **Ein `fx*`-Wert ohne `fxCurrency` verschwindet lautlos.** `money()` gibt
+   `null` zurück, wenn die Währung fehlt — der ganze Block entfällt dann, ohne
+   Spur. Die Spec macht `fxCurrency` „Pflicht, sobald ein `fx*`-Wert gesetzt
+   ist"; ein Aufrufer, der sie vergisst, verliert damit Daten unbemerkt. Das ist
+   das Gegenteil der Regel, die dieselbe Familie für `labels` aufstellt
+   („visibly wrong beats silently gone", L-203). Vorschlag: den Block mit einem
+   Wort statt gar nicht zeigen, oder `Amount` werfen lassen. Nicht blockierend.
+3. **`currency={currency as never}`.** Der Cast schaltet genau die Prüfung ab,
+   die `fxCurrency` erst zur Pflicht macht; `pnpm typecheck` ist deshalb grün,
+   ohne dass die Währung je geprüft wird. Vorschlag: `fxCurrency` mit dem Typ
+   deklarieren, den `Amount` annimmt. Nicht blockierend.
+
+**Urteil: zurück.** Blockierend ist Mangel 1 — ein Kriterium, das „gemessen"
+verlangt und dessen Story die Grenze gar nicht erreicht, dazu ein Story-Text,
+dem das Bild widerspricht. Alles Übrige ist gemessen und gehalten.
+
+Abgenommen von / am: Claude (Abnahme, nicht Bau), 2026-09-07 · Offene Punkte:
+M1 (blockiert), M2–M3.
 
 ## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
 
 **Urteil: freigeben mit Änderung.** Ränge exakt nach der Formen-Tabelle; die Abweichung „Steuerschlüssel als eigener Block, nicht am USt-Sonderfall" trägt — sie ist im Profil (P12) entschieden, 423 von 440 Kandidatenlisten wären sonst unsichtbar. Historie-Untertabelle und Rabatt nicht bauen, Trigger im Ausbau. Entscheide: Währung des Fremdwährungs-Blocks als Prop `fxCurrency?: string` (Pflicht, sobald ein `fx*`-Wert gesetzt ist; Quelle `InvoiceDetail.fxCurrency` — `Amount` wirft bei nackter Zahl) · `tone` streichen, immer `bare`, die Stories rahmen mit `Card` (kein Abnehmer, A12) · Kollaps-Kasten: „erscheint nur, wenn `collapse` gesetzt ist; die Story setzt es auf der Aggregat-Zeile".
 
 Vor dem Bau in die Spec: (a) Prop `fxCurrency` in die Schnittstelle, Story `ForeignCurrency` beweist sie; (b) `notes` auf Belegstellen und USt-Notizen eingrenzen — `line.lineNotes` ist typisiert und wird von der Form selbst gelesen; (c) „Setzt auf": `formatTime(d, "date")`/`Time` statt `formatDate`, Prozent wie in 0072; (d) `tone` streichen, Kollaps-Kriterium umformulieren; (e) „B7" → L-204, mit Präzisierung: der Typ hat vier `unknown`-Felder (`historyCandidates` dazu); (f) Abschnitt „Offene Fragen" nachtragen.
+
+## Nach der Abnahme (2026-09-07): drei Mängel, einer blockierend
+
+**M1 erledigt — die Grenze 169 war von keiner Story bewiesen.** Die Fixture
+`LONG` trug 165 und 159 Zeichen, während der Story-Text 392 und 295
+behauptete. Beides sind jetzt echte Texte in der Länge des Wertebereichs
+(**400** und **297** Zeichen), und die Story-Beschreibung nennt genau diese
+Zahlen. Ein JSDoc, das eine Messung behauptet, ist so bindend wie ein
+Kriterium — der Mangel war die Behauptung, nicht die Kürzung.
+
+**M2 erledigt — ein `fx*`-Wert ohne `fxCurrency` verschwand lautlos.** Das war
+das Gegenteil der Familienregel. Jetzt steht der Betrag **ohne Währung** da,
+und an ihrer Stelle steht, was fehlt: `(Währung fehlt)`, oder bei einem
+unbekannten Code `(XYZ?)`. Ein Betrag, den es gibt, verschwindet nicht, weil
+seine Währung fehlt.
+
+**M3 erledigt** — `currency as never` ist weg. Die Form prüft den Code gegen
+`CURRENCIES` aus `src/ludwig/shared/money.ts`; nur ein bekannter geht an
+`Amount`, alles andere nimmt den Weg aus M2. Damit schaltet nichts mehr die
+Typprüfung ab, die den Fall absichern soll.

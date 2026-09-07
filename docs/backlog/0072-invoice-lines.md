@@ -242,11 +242,90 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | … |
+Abgenommen gegen Spec und Freigabe, ohne Chatverlauf, am laufenden Storybook
+(6107, Quelle) gemessen — nicht am State abgelesen. Belege: Story-ID plus die
+gemessene Zahl.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Story-Deckung: vollständig.** Sechs Stories, wie abgeleitet (1 gefüllt + 1 je
+Enum-Bündel + 1 Callback + 1 im Einsatz + 1 Rand + 1 häufigster Fall). Jede Prop
+hat ihren Nachweis: `line` → `Standard`, `labels` → `Deviations`/`Edges`,
+`open`/`onOpenChange` → `Expanded`, `children` → `Standard` (ohne) gegen
+`Expanded` (mit). Ausschlüsse (`Leer`, `Laedt`, `Fehler`) sind begründet.
+
+| Kriterium | Nachweis (Story-ID · Messung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck`, `pnpm build` grün | beide Exit 0 | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `entities/invoice-line/InvoiceLineRow.tsx` + `.stories.tsx`, Titel `v3/Entitäten/Rechnungsposition/InvoiceLineRow` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Komponente und die vier Helfer in `invoice-line.ts` tragen beide Zeilen; die drei Spur-Konstanten tragen JSDoc ohne `@when` — Hauspraxis (`DATEV_MAX_BELEGFELD1`) | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map | px nur in `v3.css` und im `cols`-String (§9: „kein px **außerhalb** v2.css", Präzedenz `ComparisonTable`, `Review`); Wörter kommen über `labels` | ✓ |
+| Alle Stories vorhanden, Ausschlüsse begründet | 6/6, siehe oben | ✓ |
+| Prüfliste §9 durchgegangen | V3 gerissen (M1, M2), sonst gehalten: V6/V7 (jede Plakette mit Wort, keine Farbe als Kategorie), V1 (`density="wide"`), Kontrast gedämpfte Zeile 4,9:1, keine Konsolenmeldung in 19 Stories | teilweise |
+| Im Browser angesehen | alle 19 Stories der Familie geladen, 0 Fehler/Warnungen (CDP `Runtime.consoleAPICalled`) | ✓ |
+| Sechs Spalten in Rang-Reihenfolge, keine Rabatt-Spalte | `Standard` · Kopf und Zeile: `Pos. · Bezeichnung · Menge · Einzelpreis · USt-Satz · Netto-Summe`, Spuren `56px 472px 110px 120px 84px 132px` | ✓ |
+| Jede Zahl rechts mit `tnum`, jeder Text links, nichts zentriert | `Standard` @1400 · Menge/Einzelpreis/USt-Satz: `display:block`, `text-align:right`, `tabular-nums`, Textkante = Zellkante. **Netto-Summe: Text 946–997 in der Zelle 946–1078, 81 px Luft rechts**, `.v2ilrow__total` ist `inline` | **✗ M1** |
+| Verwendungsart und Konfidenz immer, die vier übrigen nur bei Abweichung | `Standard` 2 Streifen-Elemente · `Deviations` Zeile #1: 2, Zeile #7: 6 (gemischt · Plausibel 81 % · Sammelposition · deaktiviert · Reverse Charge (Drittland) · Summenzeile) | ✓ |
+| Wert ohne Wort in `labels` als Rohwert, nicht als leeres Badge | `Edges` Zeile #12 mit `vatSpecialCase: {}` → Plakette trägt `exempt_other` | ✓ |
+| Streifen ist die dritte Zeile derselben Zelle, keine zweite `<tr>` | `Standard`: 1 Datenzeile, `.v2ilrow__strip.closest("td") === cells[1]` → true; `InvoiceLineList/Edges`: 22 Positionen → 22 `<tr>`, 0 Detailzeilen | ✓ |
+| Ohne `children` keine Chevron-Spur, mit `children` `var(--v2-tbl-pick)` | `Standard`: 6 Spuren, 0 `.v2tbl__chev` · `Expanded`: 7 Spuren, erste 32 px = `--v2-tbl-pick`, leere Kopfzelle | ✓ |
+| Fehlt `itemName`: erste Zeile von `productDescription`, sonst „Position n" | `Edges` #18 → „Zuschlag Kleinmenge" (erste Zeile von `productDescription`) | ✓ (siehe M6) |
+| Menge zeigt Nachkommastellen, wird nicht gerundet | `Edges` #12 → „2,50 Stck"; `Minimal` ohne Menge → gedämpftes „—" in der `v2num`-Zelle | ✓ |
+| `open`/`onOpenChange` von außen auf, Rückmeldung; ohne beide klappt die Zeile selbst | `Expanded` · echter Klick über CDP, je Schritt eigener `Runtime.evaluate`: Detailzeilen 1 → 0 → 1, `aria-expanded` true → false → true. Ohne die Props: `ExpandableRow/Expandable` 1 → 0 → 1, `With Lead` 0 → 1 → 0 | ✓ |
+| Ohne `children` kein Aufklapp-Knopf | `Standard`: 0 `<button>` in der Tabelle | ✓ |
+| Deaktivierte Zeile gedämpft **und** mit Wort | `Deviations` #7 · Zellfarbe `rgb(113,113,113)` gegen `rgb(45,45,45)`, Name von 600 auf 500, Plakette „deaktiviert" in `rgb(140,96,30)`; die CSS hängt die Dämpfung über `:has(.v2ilrow__off)` an das Wort — ohne Wort keine Dämpfung | ✓ |
+| Beschreibung ab 81 Zeichen gekürzt, Bezeichnung nicht | `Edges` #12 · Beschreibung 106 Zeichen → 78 gerendert plus „mehr ▾"; Bezeichnung 254 Zeichen ungekürzt, bricht auf 4 Zeilen | ✓ |
+| Spurbreiten gegen den **Wertebereich**, 1280/1600, Zeilenhöhe unverändert | Sonden in die echten Spuren (Text ersetzt, Kante gemessen): Menge 110 px trägt „12.345,00 Stück" und „99.999,99 h" einzeilig, nur „12.345,00 Pauschale" bricht auf zwei Zeilen · Einzelpreis 120 px trägt „1.234.567,89 €" · USt-Satz 84 px · Pos. 56 px trägt „#999". Bezeichnung: p50 (34 Z.) einzeilig → Zeile 103 px; **p90 (92/95 Z.) zweizeilig → Zeile 124 px**, bei 1104/1280/1600 identisch. Werte gleich bei 1280 und 1600 | teilweise — Spuren ✓, Zeilenhöhe siehe 0115 (Widerspruch, entschieden) |
+| `ExpandableRow` ohne die neuen Props wie zuvor | `v3/Primitives/Tabelle/ExpandableRow` · `Expandable` und `With Lead` klappen unverändert selbst, `defaultOpen` gilt | ✓ |
+| Ersetzt die Karte je Position in `PositionenTab` ohne Funktionsverlust | gegen `/Users/simonfakir/dev/ludwig/app/apps/web/src/modules/invoices/ui/tabs/PositionenTab.tsx` (770 Z.) gelesen: Kopf, Sub-Streifen, Kollaps-Kasten, lokales Aufklappen sind gedeckt. Bewusst nicht übernommen: Rabatt-Spalte (L-201), Historie-Tabelle (L-202 a), Roh-Schlüssel in Klammern hinter dem Spezial-Typ, der Fremdwährungs-Spiegel **in** der Zeile (gehört nach 0114) und die `title`-Tooltips der Zellen — die Spaltenköpfe tragen dieselben Wörter | ✓ |
+
+### Mängel
+
+1. **Die Netto-Summe steht links (blockiert).** Kriterium „Jede Zahl steht
+   rechts mit `tnum`". Gemessen `Standard` @1400: die Zelle liegt bei 946–1078,
+   der Text „83,80 €" bei 946–997 — 81 px Luft rechts, während ihre Kopfzelle
+   rechtsbündig steht. Ursache: `<span className="v2ilrow__total">` umschließt
+   die `AmountCell`, dadurch greift `.v2tbl :is(th, td) > .v2num` nicht mehr
+   (die `.v2num` ist Enkel, nicht Kind), und `.v2ilrow__total` trägt nur
+   `font-weight`. `tnum` bleibt erhalten, die Ausrichtung nicht. Betrifft Rang 2,
+   die einzige betonte Zahl, in **jeder** Zeile jeder Liste; im Bild
+   (`InvoiceLineList/Standard`) sind die Beträge links bündig und rechts
+   ausgefranst. Vorschlag: `v2num` auf denselben Knoten legen
+   (`<span className="v2num v2ilrow__total">` um den Text, ohne zweite Hülle)
+   oder `.v2ilrow__total { display: block; text-align: right; }` in `v3.css`.
+2. **Pos. steht rechts, ihre Kopfzelle links.** Die Spalten-Tabelle der Spec
+   sagt „links, `tnum`"; gebaut ist `<span className="v2num">#1</span>` als
+   direktes Kind der Zelle, also `display:block; text-align:right`. Gemessen
+   `Standard` @1400: Kopf 54–80 (links), Wert 54–110 (rechts). Kopf und Wert
+   gehören auf dieselbe Kante — entweder beide links (so die Spec) oder beide
+   rechts (so das Kriterium „jede Zahl rechts"). Nicht blockierend, aber zu
+   entscheiden.
+3. **USt-Satz mit zwei Nachkommastellen.** Freigabe (b) verlangt
+   `${taxRatePercent} %`; gerendert wird `formatAmount(taxRatePercent, null)`,
+   also „19,00 %" statt „19 %". Der Umweg ist verständlich (ein roher
+   Template-String gäbe bei 7,5 den englischen Punkt), das Ergebnis ist zwei
+   Ziffern Rauschen in jeder Zeile. Vorschlag: ganze Sätze ohne Nachkommastellen
+   ausgeben. Nicht blockierend.
+4. **Der Story-Rahmen kennt `invoiceLineMinWidth` nicht.** Die Komponente
+   exportiert 760 px, `InvoiceLineList` reicht sie an `Table` durch, der
+   `Frame` dieser Story-Datei nicht. Gemessen `Standard` @700: die
+   Bezeichnungs-Spur fällt auf 40 px, die Zeile wächst auf 282 px. Die Liste
+   scrollt an derselben Stelle sauber (760 px Mindestbreite, gemessen). Das
+   Kriterium misst nur 1280/1600, die Hausregel misst auch 700 — Vorschlag:
+   `minWidth={invoiceLineMinWidth}` in den `Frame`. Nicht blockierend.
+5. **`InUse` zeigt fünf Zeilen, die Spec sagt drei.** Fünf ist der p90-Umfang
+   und damit die bessere Wahl; Spec-Text und Story sollten trotzdem
+   übereinstimmen. Nicht blockierend.
+6. **Die namenlose Zeile sagt zweimal dasselbe.** `Edges` #18: Bezeichnung
+   „Zuschlag Kleinmenge", darunter die Beschreibung „Zuschlag Kleinmenge
+   Berechnet je Auftrag". Das Kriterium ist erfüllt, die Wirkung nicht gewollt.
+   Vorschlag: wenn der Titel aus der Beschreibung stammt, deren erste Zeile
+   nicht noch einmal darunter setzen. Nicht blockierend.
+
+**Urteil: zurück.** Blockierend ist Mangel 1. Alles Übrige ist gemessen und
+gehalten; die Zeilenhöhe bei p90 ist kein Mangel dieser Spec, sondern der
+Widerspruch, den 0115 benennt — dort entschieden.
+
+Abgenommen von / am: Claude (Abnahme, nicht Bau), 2026-09-07 · Offene Punkte:
+M1 (blockiert), M2–M6.
 
 ## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
 
@@ -255,3 +334,32 @@ Abgenommen von / am: … · Offene Punkte: …
 Vor dem Bau in die Spec: (a) Typ-Satz: `confidenceLevel`/`ConfidenceLevel` aus `src/ludwig/shared/confidence.ts` statt `confidenceBand` — `Confidence` nimmt `level` (Achse `konfidenz`), `value` zeigt den Prozentwert; (b) „Setzt auf": `formatDate` gibt es nicht und die Zeile zeigt kein Datum; `formatCount` rundet auf ganze Zahlen — für `quantity` (2,5 h) `formatAmount(q, null)` bzw. `Amount currency={null}`; USt-Satz als `${taxRatePercent} %` in `v2num`; (c) Spaltenzahl vereinheitlichen: sechs Datenspalten plus Chevron-Spur `var(--v2-tbl-pick)` nur mit `children`, `InUse` mit der leeren Kopfzelle wie `DataTable.tsx:243`; (d) Streifen-Ort und EUR-Regel als Satz in „Verhalten"; in `Edges` „Fremdwährung" streichen (Rang 22 ist Fakten-Sache); (e) Befund-Nummern: B4/B5/B6 → L-201/L-202/L-203; (f) Abschnitt „Offene Fragen" mit den drei Entscheiden oben nachtragen (Skill §8.4).
 
 Familie: Typen aus `InvoiceLineItem` (Spiegel) und `InvoiceLineLabels` in einer Datei `entities/invoice-line/invoice-line.ts`, dazu `fixtures.ts` mit den 22 Positionen für alle drei Story-Dateien. Gedämpfte Zeilen brauchen eine eigene Klasse (`is-dimmed` gibt es nur an `.abn__step`) — Präfix vorher greppen.
+
+## Nach der Abnahme (2026-09-07): sechs Mängel, einer blockierend
+
+**M1 erledigt — die Netto-Summe stand links.** Die Hülle `.v2ilrow__total`
+trug nur das Gewicht; damit war die `.v2num` der `AmountCell` ein **Enkel** der
+Zelle, und `.v2tbl :is(th,td) > .v2num` greift nur beim direkten Kind. Die
+Hülle richtet jetzt selbst aus (`display: block; text-align: right`). Gemessen
+in `Standard` @1400: Zelle 946–1078, Text **1027–1078**, Kopfzelle endet
+ebenfalls bei 1078.
+
+**M2 erledigt** — die Positionsnummer stand rechts, ihre Kopfzelle links. Sie
+ist eine Kennung, keine Größe: eigene Klasse `.v2ilrow__pos`, links mit
+Ziffernstellung. Gemessen: Wert 54–71, Kopf 54–80, dieselbe Kante.
+
+**M3 erledigt** — der USt-Satz zeigt „19 %" statt „19,00 %", wie der
+Freigabe-Entscheid (b) es verlangt. Er nimmt den Rohwert; im Bestand sind die
+Sätze ganzzahlig (19, 7, 0). **Offen bleibt** (kein Mangel, ein Hinweis): ein
+Satz mit Nachkommastelle stünde als „7.5 %" da, mit Punkt. Sobald ein solcher
+Satz vorkommt, gehört eine Prozent-Formatierung nach `format.ts` — heute wäre
+sie eine Prop ohne Fall (A12).
+
+**M4 erledigt** — der Story-`Frame` reicht `invoiceLineMinWidth` (760) durch;
+die Tabelle scrollt jetzt, statt die Namensspur auf 40 px zu quetschen.
+
+**M5 erledigt** — `InUse` zeigt drei Zeilen, wie die Spec sagt.
+
+**M6 erledigt** — hat die Zeile keinen Namen, wird der Titel aus der ersten
+Zeile der Beschreibung gebildet; **diese Zeile steht dann nicht ein zweites
+Mal** darunter. Vorher sagte die namenlose Position zweimal dasselbe.

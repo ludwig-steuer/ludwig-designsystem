@@ -44,7 +44,10 @@ export function AmountCell({
 }) {
   // Explicitly against null, not falsy: 0 is an amount, and „0,00 €" is a
   // statement — „nothing was booked" is not the same as „we do not know".
-  if (value === null) return <span className="v2muted">—</span>;
+  // The em dash keeps the column's geometry: `v2num` first, `v2muted` after.
+  // Without it the unknown value stands left in a right-aligned column — found
+  // in the acceptance of 0072, and it hits every table with unknown amounts.
+  if (value === null) return <span className="v2num v2muted">—</span>;
   // One formatter for the whole house (P24): the cell only adds its geometry.
   const text = typeof value === "number" ? formatAmount(value, currency as never) : value;
   return (

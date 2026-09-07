@@ -3402,7 +3402,14 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   gap: var(--space-2);
   margin-top: var(--space-1);
 }
-.v2ilrow__total { font-weight: 600; }
+/* Die Positionsnummer steht **links** wie jeder Text, aber mit Ziffernstellung:
+   sie ist eine Kennung, keine Größe (V3). */
+.v2ilrow__pos { font-variant-numeric: tabular-nums lining-nums; }
+/* Die betonte Netto-Summe. Die Hülle trägt das Gewicht — und muss deshalb
+   auch die Kante tragen: `.v2tbl :is(th,td) > .v2num` erreicht nur ein
+   direktes Kind, und eine `AmountCell` in einem Span verlöre die
+   Rechtsbündigkeit still (Abnahme 0072, gemessen 81 px Luft). */
+.v2ilrow__total { display: block; text-align: right; font-weight: 600; }
 
 /* **Gedämpft wird über das Wort, nicht daneben:** `.v2ilrow__off` ist die
    Plakette „deaktiviert", und die Zeile, die sie enthält, verliert ihre
@@ -3418,17 +3425,14 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Blöcke untereinander, mit Luft dazwischen, ohne Kasten um den Kasten. */
 .v2ilfacts { display: flex; flex-direction: column; gap: var(--space-4); }
 
-.v2illist { display: flex; flex-direction: column; gap: var(--space-3); }
-.v2illist__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
-/* Der Fuß trägt die Probe: Summe der Positionen gegen den Rechnungsbetrag.
-   Sie fehlt in der App ganz — wer prüft, hat dort keine Anschlusszahl. */
-.v2illist__foot {
+/* Die Liste lebt in einer Karte — die Hausregel aus `Table.tsx`: keine
+   frei schwebende Tabelle. Kopf und Fuß kommen von `CardHead`/`CardFoot`,
+   hier steht nur, wie die Probe im Fuß ausgerichtet ist. */
+.v2illist .v2card__f {
   display: flex;
   align-items: baseline;
   justify-content: flex-end;
   gap: var(--space-3);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border);
 }
 /* Eine Abweichung ist ein Befund, kein Fehler: gedeckte Warnfarbe, und das
    Wort steht ohnehin daneben (V7). */

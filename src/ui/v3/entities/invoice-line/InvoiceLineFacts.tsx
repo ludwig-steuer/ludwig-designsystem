@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { InvoiceLineItem } from "@/ludwig/modules/invoices/domain/invoice";
+import { CURRENCIES, type Currency } from "@/ludwig/shared/money";
 
 import { Amount } from "../../primitives/Amount";
 import { FieldList } from "../../primitives/FieldList";
@@ -138,10 +139,22 @@ function text(value: string | null, max: number): ReactNode {
   return value ? <LongText max={max}>{value}</LongText> : null;
 }
 
+/**
+ * The mirror value with its currency — and where the currency is missing or
+ * unknown, the number **plus what stands in its place**.
+ *
+ * Dropping the row would be the silent failure this family rejects everywhere
+ * else: the value exists, only its currency does not, and that is exactly what
+ * the reader has to see (acceptance of 0114, M2).
+ */
 function money(value: number | null, currency: string | undefined): ReactNode {
   if (value === null) return null;
-  // Without a currency the mirror stays invisible rather than claiming EUR —
-  // the number is by definition not in euros.
-  if (!currency) return null;
-  return <Amount value={value} currency={currency as never} />;
+  const known = CURRENCIES.includes(currency as Currency) ? (currency as Currency) : null;
+  if (known) return <Amount value={value} currency={known} />;
+  return (
+    <>
+      <Amount value={value} currency={null} />{" "}
+      <span className="v2muted">{currency ? `(${currency}?)` : "(Währung fehlt)"}</span>
+    </>
+  );
 }

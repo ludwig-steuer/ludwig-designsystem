@@ -176,11 +176,141 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | … |
+Gemessen am laufenden Storybook (6107). Die Tasten sind über
+`Input.dispatchKeyEvent` gedrückt, nicht als synthetisches Event; zwischen den
+Schritten wurde neu gelesen. Layout-Zahlen zusätzlich bei 1104 px — der Breite,
+die der Reiter in der Belegkarte von 0071 bei 1440 × 900 hat.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Story-Deckung: vollständig gegenüber der Story-Tabelle** — sechs Stories,
+`lines`/`labels` → `Standard`, `renderFacts` → `AllExpanded` (und `Single`,
+`Empty`, `TotalMismatch`, `Edges`), `invoiceNetTotal` → `TotalMismatch`,
+`defaultExpanded`/`onExpandedChange` → `AllExpanded`. Ausschlüsse (`lädt`,
+`Fehler`, `leer nach Filter`) sind begründet. **Befund an der Spec:** die
+Ableitung zählt „1 im Einsatz", die Story-Tabelle führt keine solche Story —
+gemessen wurde deshalb in `Standard`/`Edges` bei der Reiterbreite.
+
+| Kriterium | Nachweis (Story-ID · Messung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck`, `pnpm build` grün | beide Exit 0 | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `entities/invoice-line/InvoiceLineList.tsx` + `.stories.tsx`, Titel `v3/Entitäten/Rechnungsposition/InvoiceLineList` | ✓ |
+| Code englisch; `@when`/`@instead` am Export | vorhanden | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map | Maße über `invoiceLineTracks`/`invoiceLineMinWidth` aus 0072, Farben aus `v3.css` | ✓ |
+| Alle Stories vorhanden, Ausschlüsse begründet | 6/6 | ✓ |
+| Prüfliste §9 durchgegangen | V3 gerissen (geerbt, M2), Karte fehlt (M4); sonst gehalten: Taste sichtbar im Segment (V14), Abweichung mit Wort (V7), Leertext benennt den Befund (T6), Kontrast Warnfarbe 5,5:1, keine Konsolenmeldung | teilweise |
+| Im Browser angesehen | alle sechs Stories, 0 Fehler/Warnungen | ✓ |
+| Zeilen nach `position` aufsteigend, auch bei anderer Eingabereihenfolge | `Edges` bekommt `[...ALL].reverse()` · gerendert #1 … #22 in Folge | ✓ |
+| Kein Pager, keine Sortier-Knöpfe, keine Auswahlspalte — auch bei 22 Zeilen | `Edges` · 0 Pager-Knoten, 0 `<button>` in `<th>`, 0 `input[type=checkbox]`, 22 Datenzeilen | ✓ |
+| Summe über die **nicht deaktivierten** Zeilen; `summary_total` zählt mit | `Edges` · Fuß „4.406,30 €". Selbst nachgerechnet aus `fixtures.ts`: 83,80 + 359,60 + 70,50 + 1.117,50 + 9,90 + 30,00 + 44,75 + 87,00 + 480,00 + 76,80 + 371,25 + 429,80 + 90,00 + 68,00 + 39,00 − 120,00 + 12,00 + 760,00 + 156,40 + 240,00 = **4.406,30**; ausgelassen #7 (612,40, `disabled`) und #20 (0,00, `disabled`). Die erste Hälfte stimmt. **Die zweite ist unbewiesen: die einzige `summary_total`-Zeile im Bestand der Fixtures (#7) ist selbst `disabled`** und zählt daher nicht mit | **✗ M1** |
+| Weicht die Summe von `invoiceNetTotal` ab, steht die Abweichung mit einem Wort da | `TotalMismatch` · Fuß „Summe der Positionen · 4.406,30 € · weicht vom Rechnungsbetrag ab: +612,40 €", Farbe `rgb(140,96,30)` (Kontrast 5,5:1), Wort steht vor der Zahl | ✓ (Ursache siehe M1) |
+| Ohne `invoiceNetTotal` keine Probe, aber die Summe | `Standard` · Fuß „Summe der Positionen · 1.641,30 €", kein Probesatz. Nachgerechnet: 83,80 + 359,60 + 70,50 + 1.117,50 + 9,90 = 1.641,30 | ✓ |
+| Ohne `renderFacts` weder Umschalter noch Aufklapp-Knopf noch Chevron-Spur, `Alt+E` nicht gedruckt | `Standard` · Kopfzeile 6 Zellen, Spuren `56px 472px 110px 120px 84px 132px`, 0 `.v2tbl__chev`, 0 `<button>`, kein `Segmented`, „Alt+E" kommt im Text nicht vor. Gegenprobe `Single`: 7 Zellen, erste 32 px | ✓ |
+| `Alt+E` klappt alle Zeilen auf und zu; die Taste steht im Segment-Label | `AllExpanded` · echter Tastendruck (`Input.dispatchKeyEvent`, `modifiers:1`, `KeyE`), je Schritt neu gelesen: offen 5 → **Alt+E** → 0, Segment „Kompakt", Rückmeldung „Zuletzt für alle gesetzt: Kompakt" → **Alt+E** → 5, Segment „Erweitert · Alt+E" | ✓ |
+| Eine einzeln zugeklappte Zeile lässt den Umschalter stehen | `AllExpanded` · nach dem Klick auf ein Chevron: offen 4, Segment bleibt „Erweitert · Alt+E", Rückmeldung bleibt „Erweitert" | ✓ |
+| Der Leerfall nennt das Extraktionsproblem und feiert nichts | `Empty` · „Für diesen Beleg wurden keine Positionen erkannt." plus „Das ist kein Erfolg, sondern selten und meist ein Problem der Extraktion: 4 von 318 Rechnungen im Bestand. Der Beleg lässt sich erneut lesen."; kein Fuß, kein Umschalter | ✓ |
+| Deaktivierte Zeilen bleiben sichtbar und sind gedämpft | `Edges` · #7 und #20 stehen in der Liste, Zellfarbe `rgb(113,113,113)` gegen `rgb(45,45,45)`, beide mit der Plakette „deaktiviert" | ✓ |
+| Spaltenbreiten halten bei 1280/1600; Bezeichnungs-Zelle bleibt bei 93 Zeichen dreizeilig | Spuren identisch bei 1104, 1280 und 1600 (`32px 56px 430px 110px 120px 84px 132px` mit Aufklapper, `56px 472px …` ohne) und bei 700 px scrollt die Tabelle ab 760 px statt zu quetschen. **Namensspur 402 px bei 1104, 430 px bei 1280/1600; 92 wie 95 Zeichen brechen auf zwei Zeilen → Zelle vierzeilig, Zeile 124 px statt 103 px.** Gemessen mit dem p90-Namen in der echten Spur, nicht an der Fixture | **✗ M3 — entschieden, siehe unten** |
+| Ersetzt Rahmen, Kopfzeile und Umschalter von `PositionenTab` ohne Funktionsverlust | Kopfzeile ✓ (ohne Rabatt-Spalte), Umschalter ✓ (Persistenz liegt jetzt beim Aufrufer, `defaultExpanded`/`onExpandedChange`), Zählung ✓, dazu neu die Probe im Fuß. **Rahmen: nicht ersetzt** — die App fasst den Kopf in eine `<Section>`, hier steht die Tabelle frei (M4) | **✗ M4** |
+
+### Mängel
+
+1. **„`summary_total` zählt mit" ist von keiner Fixture bewiesen (blockiert).**
+   In `ALL` gibt es genau eine `summary_total`-Zeile (#7) — und die ist
+   `disabled`, fällt also aus der Summe heraus. Die zweite Hälfte des Kriteriums
+   hat damit in keiner Story einen Beleg. Dasselbe trifft `TotalMismatch`: die
+   Abweichung entsteht dort nicht aus der Regel, sondern aus
+   `invoiceNetTotal={linesNetTotal(ALL) - 612.4}`, einer gesetzten Zahl; der
+   deutsche Story-Text behauptet trotzdem „40 Zeilen im Bestand sind
+   Summenzeilen und zählen mit". Die Freigabe hatte genau diesen Fall als
+   Fixture für `TotalMismatch` bestellt. Vorschlag: eine **nicht** deaktivierte
+   `summary_total`-Zeile in `ALL` aufnehmen und `invoiceNetTotal` auf die Summe
+   ohne sie setzen — dann ist die Abweichung genau dieser Betrag, und die Regel
+   ist an ihrer eigenen Wirkung gemessen.
+2. **Die Netto-Summe steht links (blockiert, geerbt aus 0072 M1).** In der
+   Liste fällt es am stärksten auf: die Beträge der Spalte beginnen alle an der
+   linken Kante und enden ausgefranst, während Kopfzelle und Fuß-Summe
+   rechtsbündig stehen — die Probe im Fuß fluchtet mit nichts. Behebung gehört
+   nach 0072; hier nur festgehalten, weil das Kriterium „Zahlen rechts" auch für
+   diese Liste gilt.
+3. **Die Bezeichnungs-Zelle ist bei p90 vierzeilig, nicht dreizeilig.**
+   Gemessen bei 1104 / 1280 / 1600 px, mit dem p90-Namen in der echten
+   Namensspur (402 bzw. 430 px): 92 Zeichen brechen auf zwei Zeilen, die Zelle
+   wird vierzeilig, die Zeile 124 px statt 103 px. Bei 95 Zeichen dasselbe. Das
+   ist der Widerspruch, den der „Befund beim Bauen" benennt — **entschieden
+   unten; kein Grund, den Code zurückzugeben.**
+4. **Die Liste hat keine Karte (blockiert).** Die Spec führt `Card` und
+   `CardFoot` unter „Wiederverwenden" und „Setzt auf"; gebaut ist ein nacktes
+   `<div class="v2illist">` mit eigenem Kopf und Fuß. Gemessen `Standard`:
+   `border 0`, Hintergrund transparent, kein Schatten, kein `.v2card` innen oder
+   außen. `Table.tsx` schreibt als Kernregel des Baukastens „**jede Tabelle
+   lebt in einer Karte** … keine frei schwebenden Zeilen", und der Reiter, in
+   dem die Liste landen soll, bringt keinen Rahmen mit: `.v2docview__body`
+   (0071) ist `min-width: 0`, sonst nichts — die erste Registerkarte setzt ihren
+   Rahmen selbst (`.v2doccard`). Auf der Seite schwebt die Tabelle also. Das
+   ist zugleich die Hälfte des Kriteriums „Ersetzt **Rahmen**, Kopfzeile und
+   Umschalter von `PositionenTab`", die die App über `<Section>` löst.
+   Vorschlag: `Card` + `CardHead` (Zählung und Umschalter als `actions`) +
+   `CardFoot` (Summe und Probe) nehmen — dann fällt auch das eigene
+   Kopf-/Fuß-CSS weg. Wenn der Rahmen stattdessen nach 0071 gehört, ist das eine
+   Änderung an dieser Spec, keine an dieser Abnahme.
+5. **`onExpandedChange` wird in einem State-Updater gerufen.** Im
+   `Alt+E`-Zweig steht `setExpanded((v) => { onExpandedChange?.(!v); return !v; })`.
+   Ein Updater muss frei von Wirkungen sein; unter StrictMode läuft er zweimal
+   und meldet zweimal nach außen. Die Wirkung war im Test nicht sichtbar (die
+   Rückmeldung der Story stimmte), der Fehler ist latent. `switchTo` macht es
+   drei Zeilen weiter oben richtig — dieselbe Form auch hier. Nicht blockierend.
+6. **Der Leerfall trägt eine Chevron-Spur ohne Chevron.** `Empty` · Kopfzeile
+   7 Zellen, erste 32 px, obwohl keine Zeile aufklappen kann. Der Umschalter
+   wird über `canExpand` (`renderFacts` **und** ≥ 1 Zeile) richtig
+   unterdrückt, die Spur nur über `renderFacts`. Kosmetik, nicht blockierend.
+
+### Entscheidung zum Widerspruch (Befund beim Bauen)
+
+**0072 bleibt, wie es ist: die Bezeichnung wird nicht gekürzt. Das Kriterium
+dieser Spec ist das falsche und lautet künftig: die Bezeichnungs-Zelle darf bei
+p90 vierzeilig sein (124 px), bei max sechszeilig; die Bezeichnung bricht um,
+sie wird nicht gekürzt. Die sechs festen Spuren bleiben unverändert.** Vier
+Gründe, alle gemessen:
+
+1. **Für den Namen gibt es keine Grenze aus den Daten.** Das Profil setzt
+   Kürzungsgrenzen dort, wo es sie messen konnte — Beschreibung 81,
+   Buchungsgegenstand 161, Begründung 169. Für die Bezeichnung nennt es p50 34,
+   p90 93, max 251 und **keine** Grenze. Eine Grenze käme also aus dem Layout,
+   und genau das verbietet der Befund selbst („dann aber mit einer Grenze aus
+   den Daten, nicht aus dem Layout").
+2. **Die Spur, die „dreizeilig" bräuchte, gibt es auf der Seite nicht.**
+   Gemessen: 402 px im Reiter bei 1104 px Karte, 430 px bei 1280 und 1600.
+   Dreizeilig bliebe die Zelle erst ab rund 650 px Namensspur — dafür müsste die
+   Tabelle breiter sein als die Belegkarte, in der sie steht.
+3. **Der Preis ist klein und gedeckelt.** p50 1 Position, p90 5, max 22, kein
+   Pager, keine Virtualisierung, keine feste Zeilenhöhe, von der etwas abhängt.
+   Eine p90-Zeile wächst um 21 px; bei fünf Positionen sind das im schlimmsten
+   Fall gut 100 px auf einer Seite, die ohnehin scrollt. V1 meint die **Dichte**
+   der Zeile, und `density="wide"` ist genau die Stufe, die es für „Titel plus
+   Unterzeile" gibt — nicht ein Verbot, dass ein Name zwei Zeilen braucht.
+4. **Kürzen kostet genau das, wofür die Spalte da ist.** Die Sachbearbeiterin
+   sucht die eine Zeile, die falsch liegt. Zwei Wartungsverträge derselben
+   Anlage unterscheiden sich erst hinter Zeichen 60 („… Grundleistung je
+   Quartal" gegen „… Filterwechsel"); ein Schnitt bei 60 oder 80 machte sie
+   ununterscheidbar, und der Aufklapper trägt den Namen nicht noch einmal.
+
+Die Umformulierung des Kriteriums gehört in diese Spec und ist Sache dessen,
+der sie führt — eine Abnahme ändert keine Kriterien. Bis dahin steht das
+Kriterium hier als **nicht erfüllt** in der Tabelle, und der Bau wird deswegen
+**nicht** zurückgegeben.
+
+Nachtrag: Während dieser Abnahme ist unten der Abschnitt „Nach der Abnahme — der
+Kriterien-Widerspruch ist entschieden" dazugekommen (designsystem-f0 im Auftrag
+des Owners, gleiches Datum). Er entscheidet dasselbe — nicht kürzen, die Zelle
+wächst — und formuliert das Kriterium bereits um. Die Messungen hier sind
+unabhängig davon entstanden und stützen ihn: 402 px Namensspur bei der Breite,
+die der Reiter auf der Seite wirklich hat, nicht nur die 472 px des
+Story-Rahmens.
+
+**Urteil: zurück.** Blockierend sind die Mängel 1, 2 (geerbt) und 4. Mangel 3
+ist gemessen und entschieden, Mängel 5 und 6 sind klein.
+
+Abgenommen von / am: Claude (Abnahme, nicht Bau), 2026-09-07 · Offene Punkte:
+M1, M2, M4 (blockierend), M3 (Kriterium umformulieren), M5, M6.
 
 ## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
 
@@ -240,3 +370,55 @@ Der Abnahme gehört die Entscheidung: entweder das Kriterium hier lautet
 künftig „vier Zeilen bei p90 sind in Ordnung, sechs bei max auch", oder 0072
 bekommt eine Kürzung der Bezeichnung — dann aber mit einer Grenze aus den
 Daten, nicht aus dem Layout.
+
+## Nach der Abnahme (2026-09-07): sechs Mängel, drei blockierend
+
+**M1 erledigt — „`summary_total` zählt mit" war von keiner Fixture bewiesen.**
+Die einzige Summenzeile im Bestand der Stories war selbst `disabled` und fiel
+damit aus der Summe; die Abweichung in `TotalMismatch` entstand aus einer
+gesetzten Zahl, nicht aus der Regel. Neu ist `SUMMARY_TOTAL` — eine **aktive**
+`summary_total`-Zeile über 1.475,60 €. Gemessen: 23 Zeilen, Summe **5.881,90 €**,
+Abweichung **+1.475,60 €** — genau der Betrag der Summenzeile. Die Regel steht
+jetzt hinter der Story, nicht neben ihr.
+
+**M2 erledigt** — mit M1 aus 0072: die Fuß-Summe fluchtet wieder mit der
+Netto-Spalte.
+
+**M4 erledigt — die Liste hatte keine Karte.** Gebaut war ein nacktes `div`;
+auf der Seite hätte die Tabelle geschwebt, gegen die Regel aus `Table.tsx`
+(„jede Tabelle lebt in einer Karte"). Jetzt `Card` mit `CardHead` (Titel,
+Vorratszähler, Umschalter) und `CardFoot` (die Probe). Gemessen: `.v2card` mit
+1 px Rahmen, Kopf „Positionen · 23 Positionen · Kompakt · Erweitert · Alt+E".
+Das eigene Kopf- und Fuß-CSS ist damit entfallen.
+
+**M5 erledigt** — `onExpandedChange` wurde im State-Updater gerufen und liefe
+unter StrictMode zweimal. Der Tastenweg geht jetzt über dieselbe Funktion wie
+der Klick; den aktuellen Stand liest er aus einer Ref, statt ihn einzufangen.
+
+**M6 erledigt** — der Leerfall trug eine Chevron-Spur ohne Chevron. Gemessen:
+`Empty` hat jetzt **6** Kopfzellen, `TotalMismatch` 7.
+
+**M3 bleibt** — die Bezeichnungs-Zelle ist bei p90 vierzeilig. Das ist der
+Widerspruch, den der Abschnitt „Nach der Abnahme — der Kriterien-Widerspruch
+ist entschieden" darüber auflöst; die Abnahme kommt unabhängig zum selben
+Ergebnis und liefert die Zahl aus der **echten Reiterbreite** nach (Namensspur
+402 px, nicht die 472 des Story-Rahmens).
+
+**Aus den Befunden am Set mitgenommen:**
+
+- `AmountCell` gab bei `value === null` ein `<span class="v2muted">—</span>`
+  **ohne** `v2num` zurück — der Strich stand links in einer rechtsbündigen
+  Spalte, in **jeder** v3-Tabelle mit unbekannten Beträgen. Behoben in
+  `primitives/Cells.tsx`; gemessen in `Minimal`: Strich 829–842, Zelle endet
+  842.
+- Der `Alt+E`-Listener prüft jetzt `isTyping` aus `primitives/hotkey.ts` — in
+  einem Textfeld ist der Druck Tippen, kein Befehl (V14). `matchesKey` selbst
+  ist hier nicht brauchbar: es verwirft jede Kombination mit Alt.
+- **Offen und benannt:** zwei Listen auf einer Seite schalten weiterhin
+  gemeinsam, weil der Listener am `window` hängt. Das trifft auch den
+  `JournalEntryEditor` und ist eine Frage an die Hausregel, nicht an diese
+  Liste. Ebenso offen: `.v2tbl :is(th,td) > .v2num` greift nur beim direkten
+  Kind — jede Hülle um eine `AmountCell` hebt die Ausrichtung still auf, und
+  der Fehler sieht im Code richtig aus (genau M1 aus 0072). Ein
+  `:is(th,td) .v2num` wäre die robustere Regel; das ist eine Änderung an jeder
+  Tabelle des Sets und gehört in eine eigene Aufgabe.
