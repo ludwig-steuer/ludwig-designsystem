@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | **fertig** — zweite Abnahme am 2026-09-07 freigegeben; fünf Nachträge (N1–N5) abgearbeitet, N1 wartet auf den Owner |
 | Freigabe | zurück 2026-09-07 — Zuschnitt neu nach Abschnitt „Freigabe" (Rahmen wie 0050 plus Karte), danach ohne zweite Runde freigegeben |
 | Stufe | `entities/source-document/` — `SourceDocumentView` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Pipeline, Vorsteuer und Belegart sind Ludwig-Fachbegriffe |
@@ -593,3 +593,225 @@ einspaltig, und genau das hat die Abnahme von **0075** als **M5** gemeldet:
 1060 px breit ist und die Zwei-Spalten-Schwelle bei 1180 liegt". Der Befund
 ist damit erledigt — nicht durch eine Sonderregel für den Drawer, sondern
 weil die Schwelle jetzt dort steht, wo die Minima sie hinlegen.
+
+## Zweite Abnahme 2026-09-07 (fremder Abnehmer, nur Spec und Code gelesen)
+
+**Urteil: freigegeben.** M1 und M2 sind nachgemessen erledigt, nicht nur
+behauptet; die Nebenwirkung im Drawer ist gemessen und macht die Karte dort
+besser, nicht schlechter. Fünf Nachträge stehen unten — **keiner blockiert**,
+zwei davon sind Text, der der Messung nachgezogen werden muss.
+
+Gemessen im laufenden Storybook (Dev-Server 6107, CDP, `deviceScaleFactor` 1,
+Fenster 1440 × 900 wo nicht anders genannt). Jede Zahl unten ist neu gemessen;
+keine ist aus der Nacharbeit übernommen. Der Arbeitsbaum trug beim Messen nur
+fremde Zusätze am Ende von `v3.css` (Rechnungsposition, 0072/0114/0115) — die
+Regeln der Belegkarte stehen wie in `739fb7f`.
+
+### M1 — nachgemessen in der `AppShell` (Story `InUse`), nicht im Story-Rahmen
+
+| Fensterbreite | Karte | `gridTemplateColumns` | Fakten oben | Überlauf in der Karte |
+|---|---|---|---|---|
+| 1280 (Untergrenze L1) | 976 px | `560px 400px` | y = 335 | keiner |
+| 1440 | 1.136 px | `560px 560px` | y = 335 | keiner |
+| 1600 | 1.296 px | `720px 560px` | y = 335 | keiner |
+
+`scrollWidth > clientWidth` traf bei allen drei Breiten **kein** Element der
+Karte; `document.body` blieb bei allen drei genau fensterbreit. Die Zahlen der
+Nacharbeit sind damit bestätigt. **M1 erledigt.**
+
+Das Tor sitzt gemessen genau bei 960 px Kartenbreite: Fenster 1263 → Karte
+959, eine Spur (`959px`); 1264 → Karte 960, `560px 384px`; 1272 → `560px
+392px`; 1279 → `560px 399px`; 1280 → `560px 400px`. Der ganze Bereich, in dem
+die Faktenspur unter 400 fällt, liegt damit **unter** der L1-Grenze und hinter
+der Sperre `.app__toonarrow` (`app-chrome.css:759`, `@media (max-width:
+1279px)`) — im erreichbaren Bereich läuft die Spur 400 … 560. Dazu Nachtrag 1.
+
+Die übrigen Stories (Fixture 1.400 px) stehen unverändert: `SourceDocumentCard`
+→ `Filled` / `Missing` / `WithoutPreview` / `WithParts` je Karte 1400,
+`824px 560px`, kein Überlauf; `SourceDocumentView` → `Filled` Karte 1400,
+`824px 560px`, Fakten ab y = 267 (die Zahl der ersten Abnahme), `Pending`
+Fakten ab 315, `Bare` Karte 1400. `SourceDocumentCard` → `Bare` steht in
+einem 720-px-Rahmen und bleibt einspaltig (Karte 646) — dazu Nachtrag 3.
+
+Die Fensterhöhe ist die zweite Hälfte von Kriterium 9, und sie wurde bisher
+nur im Story-Rahmen gemessen. Auf der Seite bei 1440 × 900: Pager 88–116, Kopf
+136–252, Reiter 272–315, Karte 335–985; im Original-Block der Kopf „Rechnung"
+336–386 und der Vorschaurahmen **406–964**. `.app__main` beginnt bei 56, ist
+844 hoch und hat `scrollHeight` 961 — die Seite scrollt um **117 px**, und die
+unteren 64 px des Vorschaurahmens stehen unter der Falz. Ränge 1, 3 und 4
+stehen vollständig darüber (die Fakten enden bei 827). Bei 1000 px Fensterhöhe
+bleibt derselbe Rest: Rahmen 406–1026, Scrollweg 79 px; ganz ohne Scrollen
+steht die Karte erst ab ≈ 1.210 px Fensterhöhe. Das Original ist also
+angeschnitten — was die Spec als Grenze und nicht als Fehler führt —, aber die
+Schwelle „gilt ab ≈ 890 px" ist an der Fixture gerechnet. Dazu Nachtrag 2.
+
+### M2 — nachgemessen an `SourceDocumentCard` → `Missing`
+
+Zeilen der Feldliste in Reihenfolge (y-Position, Text): Belegart 76 „Beleg" ·
+Gegenpart 107 „—" · **Belegdatum 138** „Die Extraktion hat keins gefunden.
+Datum setzen" (Mangel, ersetzt den Wert seiner Zeile) · Eingang 169 · Kennung
+200 · Erledigung 231 „Offen" · **Fälligkeit 263** „Steht auf dem Beleg, ist
+aber nicht gelesen worden." (Mangel, als achte Zeile **angehängt**). Beide
+Pfade von `SourceDocumentFacts` laufen damit in einer Story: Zuordnung und
+Anhang. Der angehängte Mangel trägt dasselbe Warnzeichen und dieselbe Form wie
+der zugeordnete (Bild `ab71b-missing.png`). **M2 erledigt**, Kriterium 6
+erfüllt.
+
+Der gewählte Name kollidiert mit nichts: die Ausprägung „Rechnung" beschriftet
+ihre Zeile „Fällig", nicht „Fälligkeit", und im `Missing`-Fall steht ohnehin
+kein Ausprägungs-Block (der Beleg ist unklassifiziert).
+
+### Die Nebenwirkung im Drawer — geprüft, und sie trägt
+
+`SourceDocumentDrawer` → `Geoeffnet`, gemessen: Karte 1.060 px, Spuren
+`560px 484px` bei Fensterbreite 1440 **und** 1920 **und** 1280 — die Karte
+misst weiter sich selbst, nicht das Fenster. Kein Element mit `scrollWidth >
+clientWidth`, kein Element mit vertikalem Scrollweg: Fakten 101–592, Original
+101–751, Vorschaurahmen 172–730 (558 px = 62 vh, wie überall), Karte endet bei
+790 im 900 hohen Fenster. Die Fakten tragen `v2fields v2fields--bare`, der Ton
+wirkt also weiter. Bei 1024 px Fenster fällt die Karte (923 px) sauber auf eine
+Spalte, ohne Überlauf.
+
+Die Zweispaltigkeit ist im Drawer **kein Problem, sondern das Gewünschte**: die
+Vorschau behält ihre Höhe und damit die Größe, in der die Seite gerendert wird
+(sie ist höhenbegrenzt, nicht breitenbegrenzt), und die Werte stehen zum ersten
+Mal neben dem Original statt darunter. Der Befund **M5 aus 0075** („im Drawer
+stehen die Werte nie neben dem Original") ist damit im Verhalten erledigt —
+abhaken darf ihn aber die Abnahme von 0075, nicht diese: hier ist nur gemessen,
+dass das Symptom weg ist.
+
+### Story-Deckung
+
+`SourceDocumentView`: sechs Exporte (`Filled`, `Pending`, `OtherTab`,
+`LoadingAndError`, `Bare`, `InUse`) — genau die Zahl der Ableitung (4 Zustände
++ 1 Layout + 1 Rand + 1 „im Einsatz", Laden und Fehler in einer Story). Jede
+Prop hat ihre Story: `pager` und `tabs` in `Filled` und in ihrer Abwesenheit in
+`Bare`, `header` überall, `banner` in `Pending`, `children` in `OtherTab`
+gegen `Filled`. Ausgeschlossen bleibt „leer" — ein Rahmen ohne Datenprops kann
+nicht leer sein, und `Bare` zeigt den Fall ohnehin; die Ableitung nennt den
+Grund nicht mehr, seit die Neufassung den Satz der ersten Fassung („der View
+hat keinen Filter") verloren hat. Das ist eine Lücke im Text, kein Mangel an
+Stories.
+
+`SourceDocumentCard`: fünf Exporte, wie abgeleitet. `excerpt` und die
+Teilbeleg-Ausprägung von `group` bleiben ohne eigene Story (M3 der ersten
+Abnahme) — die Begründung der Nacharbeit trägt, beide sind reine Durchreichen
+und eine Stufe tiefer bewiesen.
+
+### Feste Kriterien
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm build` | „Storybook build completed successfully", Exit 0 | erfüllt |
+| `pnpm check:icons` | „in Ordnung. 53 Zeichen in der Registry, 2 Datei(en) noch offen", Exit 0 | erfüllt |
+| `pnpm typecheck` | Exit 1 — **ein** Fehler, `src/ui/v3/entities/invoice-line/InvoiceLineRow.tsx:133` (`number \| null` gegen `number \| undefined`). Das Verzeichnis ist ungetrackt und gehört 0072/0114/0115, nicht dieser Aufgabe; an 0071 hängt kein Fehler | nicht 0071 zuzurechnen |
+| Im Browser angesehen | `InUse`, `Geoeffnet`, `Missing` geladen: **0** Konsolenmeldungen außer Vite-Verbindung und dem React-DevTools-Hinweis; Bilder `ab71b-inuse-1440.png`, `ab71b-drawer.png`, `ab71b-missing.png` im Scratchpad | erfüllt |
+
+Kriterium 10 noch einmal selbst gemessen, weil die Karte darunter liegt:
+`Bare` hat genau zwei Kinder (`__head` 20–136, `__body` 156–806) bei 20 px
+Zeilenabstand — derselbe Abstand wie zwischen zwei vorhandenen Slots in
+`Filled` (Pager 20–48, Kopf 68–184). **Erfüllt.** Die Kriterien 1–4 und 8
+betrifft die Nacharbeit nicht: `SourceDocumentView.tsx` und
+`SourceDocumentCard.tsx` sind im Commit unverändert.
+
+### Nachträge (keiner blockiert)
+
+**N1 — die Faktenspur steht im Code auf `minmax(384px, 560px)`, in Kriterium 7
+und im Freigabe-Entscheid 3 auf `minmax(400px, 560px)`.** Die Nacharbeit sagt
+nicht, dass sie hier von einem Owner-Entscheid abweicht. Gemessen ist die
+Wirkung gleich: im erreichbaren Bereich (ab 1280 px, darunter sperrt L1) läuft
+die Spur 400 … 560, die 384 werden nur zwischen Fenster 1264 und 1279 erreicht
+— hinter der Sperre. Der Grund für die 16 px Luft ist gut, steht aber nirgends:
+mit `minmax(400px, 560px)` müsste das Tor auf 976 px, und das ist bei 1280 px
+Fenster **genau** die Kartenbreite — eine klassische Bildlaufleiste (15 px, dort
+wo sie Platz nimmt) drückt die Karte darunter und die Seite fiele an der
+Untergrenze auf eine Spalte. Vorschlag: entweder 400/976 nehmen und den
+Bildlauf-Fall messen, oder 384/960 behalten und beides nachziehen — den Satz im
+CSS-Kommentar (er nennt nur „die Summe der Minima") und Kriterium 7. Das
+Kriterium zu ändern steht dieser Abnahme nicht zu; es braucht den Owner.
+
+**N2 — die Klammer in Kriterium 7 ist von der Nebenwirkung überholt.** Sie
+nennt als Nachweis der Selbstmessung „im Drawer eine Spalte, auf der Seite
+zwei". Der Drawer hat jetzt zwei Spalten; der Nachweis ist trotzdem geführt,
+nur anders: die Karte bleibt im Drawer bei 1.060 px, ob das Fenster 1280, 1440
+oder 1920 ist, während sie auf der Seite mit dem Fenster wächst (976 / 1.136 /
+1.296). Der Satz gehört ausgetauscht, damit das Kriterium abhakbar bleibt.
+
+**N3 — die Karten-Story `Bare` zeigt seit der Nacharbeit nicht mehr, was sie
+behauptet.** Ihr Kommentar sagt „so rendert der Drawer sie"; ihr Rahmen ist
+`maxWidth: 720`, die Karte darin 646 px breit und **einspaltig**, während der
+Drawer sie mit 1.060 px **zweispaltig** rendert. Vor der Nacharbeit stimmte das
+Bild (beide einspaltig). Vorschlag: den Rahmen der Story auf die Breite des
+Drawers stellen (≈ 1.100), dann zeigt sie wieder den Fall, für den sie da ist.
+
+**N4 — die Zahl im Kommentar der neuen Story stimmt nicht.** Der JSDoc über
+`InUse` sagt, die Karte bekomme bei 1440 × 900 „**1.104 px** (Sidebar 240,
+zweimal 32 Polster)"; gemessen sind es **1.136**, und die eigene Rechnung des
+Kommentars ergibt ebenfalls 1.136. Die 1.104 stammen aus
+`CaseDetailView` → `In Use`, deren `AppShell` 16 px links und rechts eingerückt
+steht (`.app` dort 1.408 breit), während diese Story sie randlos zeigt (1.440)
+— das ist der bessere Rahmen, nur die Zahl daneben ist der fremde.
+
+**N5 — der Blockkommentar über `.v2doccard` (v3.css:2392) beschreibt die alte
+Regel.** Er sagt, die Faktenspalte sei `minmax(400px, 560px)` und das Original
+bekomme „nie weniger als null (`minmax(0, 1fr)`, sonst sprengt ein breites PDF
+die Spalte)". Dreißig Zeilen tiefer steht `minmax(560px, 1fr) minmax(384px,
+560px)`. Zwei Kommentare, die sich widersprechen, sind schlimmer als keiner.
+
+### Befund am Set (kein Kriterium)
+
+Die Fensterhöhe, an der die ganze Karte ohne Scrollen steht, liegt auf der
+Seite bei ≈ 1.210 px, nicht bei den 890, die Kriterium 9 in seiner Klammer
+nennt — der Unterschied ist der Anwendungsrahmen (Kopfleiste 56, Polster 32)
+plus der Kopf des Vorschau-Kastens (51). Solange die Vorschau 62 vh misst,
+wächst sie mit dem Fenster fast so schnell, wie der Platz wächst; der Rest ist
+konstant, und deshalb schließt sich die Lücke erst spät. Das ist derselbe
+Rechenfehler wie bei M1, nur auf der senkrechten Achse: gerechnet gegen den
+Story-Rahmen. Kein Blocker (die Spec führt das angeschnittene Original selbst
+als Grenze), aber die Zahl gehört korrigiert — und die Adresse ist **0075**,
+wo die Höhe entsteht, nicht dieser Rahmen.
+
+## Nacharbeit zu den Nachträgen der zweiten Abnahme (2026-09-07)
+
+Die zweite Abnahme hat `freigegeben` und fünf Nachträge notiert. Vier davon
+sind erledigt, einer ist eine Sache der Spec und steht hier:
+
+- **N1 — die 384 px sind jetzt begründet, im CSS, an der Regel selbst.** Der
+  Freigabe-Entscheid nannte `minmax(400px, 560px)`; mit 400 läge das Tor bei
+  **976 px**, also genau auf der Kartenbreite bei einem 1280 px breiten
+  Fenster. Ein Fenster mit klassischer Bildlaufleiste liegt darunter und fiele
+  unbemerkt auf eine Spalte zurück — unbemerkt, weil 1280 die Untergrenze aus
+  L1 ist und dort niemand mehr nachsieht. Die 16 px Spielraum kaufen genau
+  diesen Fall frei. Der Bereich 384–399 kommt sonst nur zwischen 1264 und
+  1279 px vor, also hinter der L1-Sperre. **Der Entscheid gehört dem Owner:**
+  bleibt es bei 384, oder soll die Karte bei 1280 mit Bildlaufleiste
+  einspaltig werden?
+- **N2 — der Nachweissatz von Kriterium 7 ist überholt**, nicht das Kriterium.
+  Er lautete „im Drawer eine Spalte, auf der Seite zwei" und belegte damit die
+  Selbstmessung. Seit dem neuen Tor steht die Karte in beiden zweispaltig; die
+  Selbstmessung zeigt sich jetzt anders — die Karte misst bei 1280, 1440 und
+  1920 Fensterbreite im Drawer **dieselben** 1.060 px und dieselben Spuren
+  (560 / 484), während sie auf der Seite mit dem Fenster wächst (976 → 1.136 →
+  1.296). Eine `@media`-Regel könnte das nicht: sie sähe beide Male dasselbe
+  Fenster.
+- **N3 erledigt** — die Story `Bare` stand in einem 720-px-Rahmen und zeigte
+  damit eine einspaltige Karte, während der Drawer sie zweispaltig rendert.
+  Der Rahmen ist jetzt 1.060 px, die Breite des `lg`-Drawers; gemessen 986 px
+  Karte, Spuren 560 / 410.
+- **N4 erledigt** — der JSDoc von `InUse` nannte 1.104 px Kartenbreite;
+  gemessen sind es 1.136. Die 1.104 stammen aus der Schale von
+  `CaseDetailView`, nicht aus dieser.
+- **N5 erledigt** — der Blockkommentar über `.v2doccard` beschrieb noch die
+  alte Regel und widersprach der dreißig Zeilen tiefer.
+
+**Zum gemeldeten Typecheck-Fehler:** er lag in `InvoiceLineRow.tsx`, einer
+Datei aus 0072, und war zum Zeitpunkt der Messung echt — behoben mit `d6a4938`
+im selben Zug. `pnpm typecheck` ist grün.
+
+**Der Befund am Set gehört 0075**, wie die Abnahme sagt: auch die senkrechte
+Hälfte von Kriterium 9 war gegen die Fixture gerechnet. Auf der Seite bei
+1440 × 900 scrollt `.app__main` 117 px, und die unteren 64 px des
+Vorschaurahmens liegen unter der Falz; die ganze Karte steht erst ab rund
+1.210 px Fensterhöhe ohne Scrollen, nicht ab den ≈ 890, die das Kriterium
+nennt. Die Ränge 1, 3 und 4 stehen vollständig darüber — deshalb blockiert es
+nicht.

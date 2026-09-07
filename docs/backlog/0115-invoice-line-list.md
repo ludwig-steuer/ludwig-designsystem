@@ -171,7 +171,7 @@ Variabel (aus dieser Spec):
 - [ ] Eine einzeln zugeklappte Zeile lässt den Umschalter stehen (Story `AllExpanded`, gemessen)
 - [ ] Der Leerfall nennt das Extraktionsproblem und feiert nichts (Story `Empty`)
 - [ ] Deaktivierte Zeilen bleiben sichtbar und sind gedämpft (Story `Edges`, gemessen)
-- [ ] Die Spaltenbreiten halten bei 1280 px und 1600 px; die Bezeichnungs-Zelle bleibt bei 93 Zeichen (p90) **dreizeilig** — Name, Beschreibung, Streifen — und bricht nicht in eine vierte um (gegen den Wertebereich gemessen, nicht gegen die Fixtures)
+- [ ] ~~Die Spaltenbreiten halten bei 1280 px und 1600 px; die Bezeichnungs-Zelle bleibt bei 93 Zeichen (p90) **dreizeilig** — Name, Beschreibung, Streifen — und bricht nicht in eine vierte um~~ — **abgelöst am 2026-09-07**, siehe „Nach der Abnahme" am Ende dieser Datei
 - [ ] Ersetzt Rahmen, Kopfzeile und Umschalter von `PositionenTab` ohne Funktionsverlust — außer der Rabatt-Spalte, die dort in jeder Zeile leer ist (B4)
 
 ## Abnahme
@@ -189,6 +189,30 @@ Abgenommen von / am: … · Offene Punkte: …
 Vor dem Bau in die Spec: (a) Summen-Kriterium: „Summe der `lineTotalNetValue` über die nicht deaktivierten Zeilen", `Edges` (zwei deaktivierte plus Aggregat) beweist es nachgerechnet; (b) `invoiceNetTotal` mit Quelle `InvoiceDetail.subtotalValue` (netto; `totalValue` ist brutto); (c) Tastenmechanik und Ort der Taste wie entschieden; (d) Chevron-Spur `var(--v2-tbl-pick)` und leere Kopfzelle bei `renderFacts`; Umschalter nur bei ≥ 1 Zeile (V14); (e) Kriterium „einzeilig" → „drei Zeilen, die Bezeichnung bricht bei 93 Zeichen nicht um" (0072); (f) React-Key ist `position` (UNIQUE je Rechnung), `InvoiceLineItem` hat keine `id`; (g) Abschnitt „Offene Fragen" nachtragen.
 
 Register-Kosmetik: Abschnitt E nennt noch „Positionen und Vorsteuer (0072)" — die Vorsteuer gehört der Rechnung, 0072 hat `VorsteuerTab` gestrichen; und 0078 sagt „0072 (Kontenkandidaten mit Konfidenz)" — die Zeile trägt `fundUsageConfidence`, keine Kontokandidaten.
+
+## Nach der Abnahme — der Kriterien-Widerspruch ist entschieden (2026-09-07)
+
+**Entscheid (designsystem-f0 im Auftrag des Owners): nicht kürzen, die Zelle
+wächst.** Damit gilt statt des Kriteriums zur Zeilenhöhe:
+
+- [ ] Die Bezeichnung **bricht um und wird nicht gekürzt**; die Zeilenhöhe
+      folgt dem Inhalt. Gemessen in der 472-px-Spur: 19 Zeichen → 3 Zeilen
+      (102 px), **p90 (92 Zeichen) → 4 Zeilen (124 px)**, max (254 Zeichen) →
+      6 Zeilen (184 px). Die Spaltenbreiten halten dabei bei 1280 px und
+      1600 px.
+
+Das Kriterium darüber („die Bezeichnungs-Zelle bleibt bei 93 Zeichen
+dreizeilig") ist damit **abgelöst** — es widersprach dem Kriterium von 0072,
+die Bezeichnung nicht zu kürzen.
+
+Der Grund gehört dazu, sonst kippt die Entscheidung beim nächsten Mal zurück:
+**ein Positionsname ist Inhalt, keine Kennung.** Ihn zu kürzen versteckt genau
+das Wort, nach dem die Sachbearbeiterin sucht — und die Liste hat p90 fünf
+Zeilen, Höhe ist hier billig. Anders läge es in einer langen Liste, in der
+jede Zeile gleich hoch sein muss, um überflogen zu werden.
+
+Der Abschnitt „Befund beim Bauen" darunter bleibt stehen: er trägt die
+Messung, aus der die Entscheidung entstanden ist.
 
 ## Befund beim Bauen (2026-09-07): zwei Kriterien widersprechen sich
 

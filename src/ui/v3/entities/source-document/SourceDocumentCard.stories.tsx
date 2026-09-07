@@ -159,10 +159,18 @@ export const WithParts: Story = {
  * Fläche, weil der Drawer sie schon stellt. Das ist die Regel aus 0052
  * („Zone 3 ist dieselbe Komponente wie der View"), und der sicherste Weg,
  * sie zu halten, ist, den Drawer den ersten Reiter rendern zu lassen.
+ *
+ * Der Rahmen ist **1.060 px breit — die Breite des `lg`-Drawers**; der Karte
+ * bleiben darin 986 px (Polster), im Drawer selbst sind es 1.060. Beide
+ * stehen damit zweispaltig, und genau darum geht es. Vorher
+ * standen hier 720, und damit zeigte die Story eine einspaltige Karte,
+ * während der Drawer sie seit dem neuen Spalten-Tor zweispaltig rendert
+ * (0071, Nachtrag N3): der Satz „so rendert der Drawer sie" stimmte für den
+ * Ton, aber nicht mehr für das Bild.
  */
 export const Bare: Story = {
   render: () => (
-    <div style={{ padding: "var(--space-5)", maxWidth: 720 }}>
+    <div style={{ padding: "var(--space-5)", maxWidth: 1060 }}>
       <Card>
         <CardHead title="Rechnung · Bürobedarf Meier GmbH" sub="RE-4471" />
         <div style={{ padding: "var(--space-4)" }}>

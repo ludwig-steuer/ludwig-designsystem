@@ -2390,10 +2390,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   line-height: var(--lh-ui);
 }
 /* Die Belegkarte: das Original links, die gelesenen Werte rechts (0071).
-   Die Faktenspalte ist **fest begrenzt** — `minmax(400px, 560px)`, dieselbe
-   Breite wie heute in der App: darunter bricht die Feldzeile, darüber steht
-   ein Wert allein auf 900 px. Das Original bekommt den Rest und nie weniger
-   als null (`minmax(0, 1fr)`, sonst sprengt ein breites PDF die Spalte). */
+   Die Faktenspalte ist **begrenzt** — `minmax(384px, 560px)`: darunter bricht
+   die Feldzeile, darüber stünde ein Wert allein auf 900 px. Das Original
+   fordert 560 und bekommt darüber hinaus den Rest (`minmax(560px, 1fr)`).
+   Die Regel selbst und ihre Schwelle stehen dreißig Zeilen tiefer; hier steht
+   nur, warum es überhaupt zwei Spuren mit Grenzen sind. */
 .v2doccard {
   display: flex;
   flex-direction: column;
@@ -2422,6 +2423,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Spalte, und die Fakten begannen bei y = 1.001 statt 335 — Rang 3, 5 und 6
    des Seitenprofils standen unter der Falz. Jetzt: 1280 → 560 / 400,
    1440 → 560 / 560, 1600 → 720 / 560, kein Überlauf in der Karte. */
+/* **Warum 384 und nicht 400.** Der Freigabe-Entscheid nannte 400; gemessen
+   ergäbe das ein Tor bei 976 px — genau die Kartenbreite bei einem 1280 px
+   breiten Fenster. Ein Fenster mit klassischer Bildlaufleiste liegt darunter
+   und fiele auf eine Spalte zurück, und zwar unbemerkt, weil 1280 die
+   Untergrenze aus L1 ist. Die 16 px Spielraum kaufen genau diesen Fall frei;
+   der Bereich 384–399 kommt sonst nur zwischen 1264 und 1279 px vor, also
+   hinter der L1-Sperre. */
 @container doccard (min-width: 960px) {
   .v2doccard__cols { grid-template-columns: minmax(560px, 1fr) minmax(384px, 560px); }
 }

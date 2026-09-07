@@ -256,8 +256,9 @@ export const Bare: Story = {
 /**
  * Im Einsatz: die ganze Seite, wie die App sie zeigt — Sidebar, Kopfleiste,
  * der Beleg darin. Erst hier hat die Karte die Breite, die sie auf der Seite
- * wirklich bekommt: bei 1440 × 900 sind das **1.104 px** (Sidebar 240,
- * zweimal 32 Polster), nicht die 1.400 der übrigen Stories. Die Abnahme vom
+ * wirklich bekommt: bei 1440 × 900 sind das **1.136 px** (nachgemessen; die
+ * Sidebar und das Polster der Schale gehen ab), nicht die 1.400 der übrigen
+ * Stories. Die Abnahme vom
  * 2026-09-07 hat genau daran gemessen, dass das Zwei-Spalten-Tor gegen die
  * Fixture gerechnet war — deshalb steht diese Story hier und nicht nur in
  * der Ableitung.
