@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 import type { Currency } from "@/ludwig/shared/money";
 
+import { formatCount } from "../../format";
+
 import { Amount } from "../../primitives/Amount";
 import { MonoCell } from "../../primitives/Cells";
 import { FieldList } from "../../primitives/FieldList";
@@ -175,7 +177,7 @@ export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
   rows.push([
     "Bewegungen",
     <span key="cnt">
-      {facts.datevCount.toLocaleString("de-DE")} in DATEV
+      {formatCount(facts.datevCount)} in DATEV
       {facts.ludwigOnlyCount > 0 ? `, ${facts.ludwigOnlyCount} nur in Ludwig` : ""}
     </span>,
   ]);

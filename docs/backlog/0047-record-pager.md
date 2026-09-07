@@ -189,4 +189,15 @@ Die Formatierung steht als `formatCount()` in `format.ts`, neben
 `formatAmount` und `formatBytes`, **nicht** als `toLocaleString`-Aufruf in der
 Komponente: sonst steht dieselbe Entscheidung an zwanzig Stellen und driftet.
 
-- [ ] Position und Vorrat stehen mit Tausendertrennung (gemessen: „Konto 412 von 6.212")
+- [x] Position und Vorrat stehen mit Tausendertrennung — Story `LastRecord`, gemessen „Sachverhalt 6.212 von 6.212“
+
+**Nachabnahme 2026-09-07 (fremd).** Sie kam zurück, und beide Punkte waren
+berechtigt: der JSDoc der neuen Funktion war **deutsch** — ein festes
+Kriterium beider Specs —, und das Kriterium stand in einer Story, in der es
+sich gar nicht messen ließ: die größte Zahl war dreistellig, und „von 583“
+sieht formatiert aus wie roh. Der Vorrat der Story ist deshalb angehoben; die
+Regel beweist sich jetzt am eigenen Baustein statt an einer fremden Liste.
+
+Dazu: fünf Zähler im Set formatierten weiter selbst (`toLocaleString` in
+`AccountEntries`, `account-columns`, `Account`, `BankTransactionWorklist`) —
+genau das, wovor der neue JSDoc warnt. Sie lesen jetzt `formatCount`.

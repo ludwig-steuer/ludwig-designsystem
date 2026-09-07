@@ -23,7 +23,7 @@ sondern der Migrationsschritt; er steht in Abschnitt E.
 
 | | |
 |---|---|
-| Stand | 2026-09-04 |
+| Stand | 2026-09-07 |
 | Quellen | `docs/backlog/*.md` (Abschnitte „Befunde für `ludwig/app`", Kriterien „offen (App)") · `docs/entitaeten/*.md` |
 | Erhoben von / am | Claude, 2026-09-04 — maschinell aus allen Aufgaben und Profilen extrahiert, nicht aus dem Gedächtnis |
 
@@ -111,7 +111,6 @@ meldet ihn hier — es erfindet keine Begriffe.
 | **L-94** | **`AccountFactsVM` trägt im Spiegel weder `datevBalance` noch `ludwigOnlyAmount` noch `currency`.** Die Kontoseite beantwortet Rang 2 („wie viel liegt drauf") mit genau diesen drei Werten — DATEV führend, Ludwig als Delta —, und der Typ, aus dem sie kommen sollen, ist v3-lokal. L-13 ist damit nur halb erledigt: die Fakten stehen, die Zahlen darin nicht | Die drei Felder in den Anzeige-Typ des Kontos aufnehmen; dazu Σ Soll und Σ Haben (Rang 7 des Profils), die heute nirgends stehen | 0063 |
 | **L-95** | **Drei Punkte der Kontoseite haben keinen Spiegel-Typ.** Σ Soll/Σ Haben je Konto und Jahr, die Monatswerte des Verlaufs (`{ month, debit, credit }`) und Kontenfunktion/Automatik-Steuersatz stehen heute **inline** in `accounts/[accountNumber]/page.tsx`. Solange sie dort wohnen, kann kein zweiter Aufrufer sie lesen und keine Komponente sie als Vertrag annehmen | Je einen Typ in `modules/accounts/domain/` und über `sync:ludwig` spiegeln | 0063, Seitenprofil `konto-detail.md` |
 | **L-96** | **`AccountRow.origin` hat keine Label-Map.** Die Zeile unterscheidet „im Mandanten angelegt" von „nur im SKR-Katalog" — das ist die ganze Frage der Katalogansicht —, aber im Gegensatz zu `source` (`ACCOUNT_SOURCE_LABEL`) gibt es dafür keine Wörter in der Domäne. Das Set setzt sie deshalb einmal als Vorgabewert und lässt den Aufrufer sie überschreiben, statt sie an zwei Stellen zu erfinden | `ACCOUNT_ORIGIN_LABEL` in `modules/accounts/domain/account.ts` anlegen (die App sagt dieselbe Sache heute als Badge „SKR-Katalog") | 0062, Abnahme 2026-09-07 |
-| **L-97** (Set, nicht App) | ~~Die Pager schreiben rohe Zahlen.~~ **Erledigt am 2026-09-07:** `formatCount()` steht in `format.ts` neben `formatAmount` und `formatBytes`; `Pagination` (0057) und `RecordPager` (0047) lesen von dort. Gemessen „1–50 von 6.212“ und „Konto 412 von 6.212“. Der Befund stand hier, weil er in einer Abnahme auffiel — er war ein **Set**-Befund und ist im Set behoben | — | 0063, behoben 2026-09-07 |
 | **L-98** | **Kein GLOSSARY-Eintrag für die Rechnungsposition selbst**, und die drei Einträge *über* ihre Felder (`Invoice line item source`, `Fund usage nature`, `Accounting subject`) nennen eine Tabelle, die es nicht gibt: `client_invoice_line_items`. Die Tabelle heißt `client_source_docs_invoice_lines`. Wer nach dem GLOSSARY sucht, findet nichts — und der englische Name der Entität ist nirgends festgelegt | Eintrag „Invoice line (Rechnungsposition)" anlegen, die drei bestehenden auf den richtigen Tabellennamen ziehen | `entitaeten/invoice-line.md` |
 | **L-99** | **Vier Wertebereiche der Rechnungsposition ohne Registry-Achse.** `source` (3 Werte), `fund_usage_nature` (6), `line_special_type` (12), `vat_special_case` (11) haben deutsche Wörter nur im GLOSSARY-Fließtext oder gar nicht. Eine Zeile kann sie damit nicht als Zustand zeigen, ohne eine lokale Label-Map zu bauen — und die verbietet R1. **Zwei Spalten-Befunde derselben Tabelle warten auf eine Nummer** (der App-Worker beginnt bei L-100): `accounting_type` ist zu 98 % gefüllt und hat keinen Konsumenten — kein GLOSSARY-Eintrag, kein Feld im Anzeige-Typ, keine Verwendung im UI; und `line_discount_value` ist zu **0 %** gefüllt (726 von 726 leer), hat aber eine eigene Spalte in der heutigen Kopfzeile | Je Wertebereich entscheiden: Registry-Achse (mit Beschreibung je Wert) oder Label-Map in `modules/invoices/domain/`. `line_special_type` und `vat_special_case` sind zu ~75 % `none` — für sie genügt vielleicht ein Wort für die Ausnahme. Für die zwei Spalten: klären, ob sie jemand vermisst oder ob sie tot sind | `entitaeten/invoice-line.md` |
 
@@ -226,6 +225,12 @@ wird nicht mehr ans Set gemeldet. Antwort auf `ludwig/app`
 
 Wer die App anfasst, kommt am schnellsten voran, wenn er in dieser Reihenfolge
 geht — sie folgt daraus, wie viele v3-Bausteine an einem Befund hängen:
+
+**Nicht in diesem Register, damit niemand danach sucht:** L-97 („die Pager
+schreiben rohe Zahlen") war ein **Set**-Befund und ist im Set behoben —
+`formatCount()` in `format.ts`, gelesen von `Pagination` (0057) und
+`RecordPager` (0047), Commit `49760b1`. In der App ist dafür nichts zu tun.
+Die Nummer bleibt vergeben, damit sie nicht ein zweites Mal vergeben wird.
 
 0. **L-48/L-49** (Registry) — eine Typdefinition und ein kopierter Block;
    blockiert E1.4 der App-Migration und 0080 hier. *(erledigt 2026-09-05)*

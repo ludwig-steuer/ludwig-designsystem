@@ -3,6 +3,7 @@ import {
   type AccountRow,
   type AccountSortKey,
 } from "@/ludwig/modules/accounts/domain/account";
+import { formatCount } from "../../format";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
@@ -253,7 +254,7 @@ export function accountColumns({
         a.usageBookingCount === null ? (
           <span className="v2muted">—</span>
         ) : (
-          <span className="v2num">{a.usageBookingCount.toLocaleString("de-DE")}</span>
+          <span className="v2num">{formatCount(a.usageBookingCount)}</span>
         ),
     },
     lastBooking: {

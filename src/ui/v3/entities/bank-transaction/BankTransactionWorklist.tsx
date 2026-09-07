@@ -1,4 +1,4 @@
-import { formatTime } from "../../format";
+import { formatCount, formatTime } from "../../format";
 import { DataTable } from "../../patterns/DataTable";
 import type { BulkAction, ListPatch } from "../../patterns/DataTable";
 import {
@@ -131,7 +131,7 @@ export function BankTransactionWorklist({
         description:
           total === undefined
             ? "Jede Zahlung gehört zu einem Sachverhalt."
-            : `Alle ${total.toLocaleString("de-DE")} Zahlungen dieses Kontos gehören zu einem Sachverhalt.`,
+            : `Alle ${formatCount(total)} Zahlungen dieses Kontos gehören zu einem Sachverhalt.`,
         done: true,
       }}
     />

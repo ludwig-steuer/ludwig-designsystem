@@ -324,4 +324,15 @@ Derselbe Befund wie in 0047 (**L-97**): `Pagination` schrieb „1–50 von 3400"
 Die drei Zahlen laufen jetzt über `formatCount()` aus `format.ts` — dieselbe
 Stelle, an der `formatAmount` und `formatBytes` stehen.
 
-- [ ] Von-bis und Vorrat stehen mit Tausendertrennung (gemessen: „1–50 von 6.212")
+- [x] Von-bis und Vorrat stehen mit Tausendertrennung — Story `LastPage`, gemessen „6.201–6.212 von 6.212“
+
+**Nachabnahme 2026-09-07 (fremd).** Sie kam zurück, und beide Punkte waren
+berechtigt: der JSDoc der neuen Funktion war **deutsch** — ein festes
+Kriterium beider Specs —, und das Kriterium stand in einer Story, in der es
+sich gar nicht messen ließ: die größte Zahl war dreistellig, und „von 583“
+sieht formatiert aus wie roh. Der Vorrat der Story ist deshalb angehoben; die
+Regel beweist sich jetzt am eigenen Baustein statt an einer fremden Liste.
+
+Dazu: fünf Zähler im Set formatierten weiter selbst (`toLocaleString` in
+`AccountEntries`, `account-columns`, `Account`, `BankTransactionWorklist`) —
+genau das, wovor der neue JSDoc warnt. Sie lesen jetzt `formatCount`.

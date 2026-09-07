@@ -40,8 +40,8 @@ export const FirstRecord: Story = {
 export const LastRecord: Story = {
   render: () => (
     <RecordPager
-      position={117}
-      total={117}
+      position={6212}
+      total={6212}
       label="Sachverhalt"
       back={BACK}
       prevHref="/cases/116"

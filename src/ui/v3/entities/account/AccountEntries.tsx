@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 import type { Currency } from "@/ludwig/shared/money";
 
+import { formatCount } from "../../format";
+
 import { AmountCell, ErrorRow, MonoCell, TableLoading } from "../../primitives/Cells";
 import { EmptyState } from "../../primitives/EmptyState";
 import { HeadRow, Row, Table, EmptyRow } from "../../primitives/Table";
@@ -360,7 +362,7 @@ export function AccountEntryList({
         <div className="v2ae__more">
           {more}
           <span className="v2sub">
-            {entries.length.toLocaleString("de-DE")} von {stock.toLocaleString("de-DE")} Bewegungen
+            {formatCount(entries.length)} von {formatCount(stock)} Bewegungen
           </span>
         </div>
       ) : null}

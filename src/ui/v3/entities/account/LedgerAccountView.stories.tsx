@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { LedgerAccountView } from "./LedgerAccountView";
 import { AccountFacts, type AccountFactsVM } from "./Account";
 import { accountEntryColumns, type AccountEntry } from "./AccountEntries";
-import { formatAmount } from "../../format";
+import { formatAmount, formatCount } from "../../format";
 import { Time } from "../../primitives/Time";
 import { BarChart, type Bar } from "../../primitives/BarChart";
 import { EmptyState } from "../../primitives/EmptyState";
@@ -157,8 +157,8 @@ function Summary({ facts }: { facts: AccountFactsVM }) {
         value={formatAmount(facts.datevBalance, facts.currency)}
         sub={
           facts.ludwigOnlyCount > 0
-            ? `${facts.datevCount.toLocaleString("de-DE")} Buchungen · + ${facts.ludwigOnlyCount} nur in Ludwig (${formatAmount(facts.ludwigOnlyAmount, facts.currency)})`
-            : `${facts.datevCount.toLocaleString("de-DE")} Buchungen im Spiegel`
+            ? `${formatCount(facts.datevCount)} Buchungen · + ${facts.ludwigOnlyCount} nur in Ludwig (${formatAmount(facts.ludwigOnlyAmount, facts.currency)})`
+            : `${formatCount(facts.datevCount)} Buchungen im Spiegel`
         }
       />
       <KpiTile

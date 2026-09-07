@@ -65,24 +65,24 @@ export function formatAmount(
   return signed && n > 0 ? `+${text}` : text;
 }
 
+const COUNT = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 });
+
 /**
- * `3.400` — eine ganze Zahl, wie man sie in diesem Land liest.
+ * `3.400` — a whole number, the way this country reads it.
  *
- * Sie steht hier und nicht als `toLocaleString`-Aufruf an zwanzig Stellen: die
- * Pager schrieben „1–50 von 3400" und „Konto 412 von 6212", während jede Zahl
- * daneben ihre Punkte hatte — gefunden in der Abnahme von 0063 (Befund L-97).
- * Eine Zahl, die in derselben Zeile zweimal verschieden aussieht, ist kein
- * Detail: sie lässt den Leser rechnen, ob es dieselbe Größe ist.
+ * It stands here and not as a `toLocaleString` call in twenty places: the
+ * pagers wrote „1–50 von 3400" and „Konto 412 von 6212" while every number
+ * beside them carried its separators (finding L-97, found in the acceptance
+ * of 0063). A number that looks different twice in one line is not a detail —
+ * it makes the reader work out whether it is the same size.
  *
- * @when    Eine Anzahl wird zu Text — Pager, Zähler, Vorratsangabe.
- * @instead Ein Geldbetrag → formatAmount. Eine Dateigröße → formatBytes.
- *          Ein Anteil → Progress.
+ * @when    A count becomes text — pager, counter, stock figure.
+ * @instead An amount of money → formatAmount. A file size → formatBytes. A
+ *          share of something → Progress.
  */
 export function formatCount(value: number): string {
   return COUNT.format(value);
 }
-
-const COUNT = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
 
 /* ── Zeitpunkte ─────────────────────────────────────────────────────────── */
 
