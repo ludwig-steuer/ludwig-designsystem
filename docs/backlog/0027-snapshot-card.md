@@ -94,7 +94,7 @@ Fest (gilt immer):
 Variabel (aus dieser Spec):
 
 - [ ] Stichtag und Importzeitpunkt sind beide beschriftet und absolut (Story `Filled`, Regel T7)
-- [ ] „Abgleich nicht durchgeführt" ist eine eigene, sichtbare Aussage (Story `Empty`, Regel V9)
+- [ ] „Abgleich nicht durchgeführt" ist eine eigene, sichtbare Aussage (Story `Levels`, linke Karte, Regel V9) — **Nachweis berichtigt am 2026-09-07**, siehe „Nach der Abnahme"
 - [ ] Karte hat Rand oder Schatten, nicht beides (Story `Filled`, Regel §2)
 - [ ] Stückzahlen rechtsbündig mit `tnum` (Story `Filled`, Regel V3)
 - [ ] Ersetzt die Inline-Darstellung in `datev/page.tsx` ohne Funktionsverlust
@@ -338,3 +338,16 @@ Wertebereich.**
 - **Typ-Abweichung ohne Folge:** `createdBy` ist hier optional, im App-VM
   `SnapshotRun` Pflicht. Kein Mangel — das Set darf weniger verlangen als die
   App liefert.
+
+## Nach der Abnahme — ein Nachweis berichtigt (2026-09-07)
+
+**Geändert im Auftrag des Owners, designsystem-f0.** Nicht vom Bauenden und
+nicht vom Abnehmenden: die Sache stimmt, nur der Zeiger war falsch.
+
+Das Kriterium „‚Abgleich nicht durchgeführt' ist eine eigene, sichtbare
+Aussage" nannte als Nachweis die Story `Empty`. Dort steht sie nicht —
+`…--empty` enthält gemessen **null** Callouts. Sie steht in **`Levels`**,
+linke Karte (`reconcile: null`): Kicker „Abgleich", Titel „Für diesen Stand
+wurde kein Abgleich durchgeführt.", Warnton, null Zähler-Zeilen. Damit sind
+die drei Aussagen unterscheidbar — `Filled` neutral, `WithDeviations` mit
+Zahl, `Levels` ohne Abgleich.

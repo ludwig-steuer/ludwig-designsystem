@@ -163,7 +163,7 @@ Variabel (aus dieser Spec):
 
 - [ ] Die Zeilen stehen nach `position` aufsteigend, auch wenn `lines` anders sortiert hereinkommt (Story `Edges`, gemessen)
 - [ ] Kein Pager, keine Sortier-Knöpfe, keine Auswahlspalte — auch bei 22 Zeilen (Story `Edges`, gemessen)
-- [ ] Die Summe im Fuß ist die Summe der `lineTotalNetValue` **über die nicht deaktivierten Zeilen**; `summary_total` zählt mit (Story `Edges` mit zwei deaktivierten und der Aggregat-Zeile, nachgerechnet)
+- [ ] Die Summe im Fuß ist die Summe der `lineTotalNetValue` **über die nicht deaktivierten Zeilen**; `summary_total` zählt mit (Story `TotalMismatch` mit der aktiven Summenzeile, nachgerechnet; `Edges` beweist die zwei deaktivierten und die Aggregat-Zeile) — **Nachweis berichtigt am 2026-09-07**, siehe „Nach der Abnahme — ein Nachweis berichtigt"
 - [ ] Weicht die Summe von `invoiceNetTotal` ab, steht die Abweichung mit einem Wort da (Story `TotalMismatch`, gemessen)
 - [ ] Ohne `invoiceNetTotal` steht keine Probe, aber die Summe (Story `Standard`)
 - [ ] Ohne `renderFacts` gibt es weder Umschalter noch Aufklapp-Knopf noch Chevron-Spur, und `Alt+E` wird nicht gedruckt (Story `Standard`, gemessen: Spaltenzahl der Kopfzeile)
@@ -531,3 +531,16 @@ derselbe Druck wirkungslos, danach schaltet er wieder — `isTyping` greift.
   `ALL` keine **aktive** Summenzeile enthält. Die Sache stimmt, die Klammer
   zeigt auf die falsche Story — **ein Kriterium ändert weder der Bauende noch
   der Abnehmende.**
+
+## Nach der Abnahme — ein Nachweis berichtigt (2026-09-07)
+
+**Geändert im Auftrag des Owners, designsystem-f0.** Die Sache stimmt, der
+Zeiger war falsch.
+
+Das Summen-Kriterium nannte für „`summary_total` zählt mit" die Story `Edges`.
+Dort steht die Regel nicht: `ALL` enthält keine **aktive** Summenzeile — die
+einzige (`#7`) ist selbst deaktiviert und fällt damit aus der Summe. Bewiesen
+wird sie in **`TotalMismatch`**, wo eine aktive `summary_total`-Zeile über
+1.475,60 € die Summe auf 5.881,90 € hebt und die Probe genau um diesen Betrag
+abweichen lässt. `Edges` beweist die andere Hälfte: die zwei deaktivierten
+Zeilen und die Aggregat-Zeile zählen **nicht** mit.

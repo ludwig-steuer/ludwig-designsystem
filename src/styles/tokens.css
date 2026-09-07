@@ -67,7 +67,7 @@
   --color-success-bg:     #EBF2EE;
   --color-warning:        #8C601E;   /* muted amber, used sparingly — 5.52:1, 4.78:1 auf warning-bg */
   --color-warning-bg:     #F5EEE0;
-  --color-warning-strong: #9C5021;   /* Abweichungsstufe +-50-100 % (UX-Guidelines L7) -- 5.85:1 auf bg, 5.40:1 auf bg-soft; dunkler als warning, heller als danger */
+  --color-warning-strong: #9C5021;   /* Abweichungsstufe +-50-100 % (UX-Guidelines L7) -- 5.86:1 auf bg, 5.41:1 auf bg-soft; dunkler als warning, heller als danger */
   --color-danger:         #A8403C;   /* muted brick */
   --color-danger-bg:      #F4E6E5;
   --color-info:           var(--color-accent);
@@ -81,7 +81,8 @@
   --color-focus-ring:     rgba(59, 143, 196, 0.32);
   /* Weicher Ring innen am Feldrahmen (Eingabe im Fokus). Dekorativ: den
      Kontrast trägt der Rahmen selbst (--color-primary-700, 11.64:1 auf Weiss)
-     — WCAG 1.4.11. Bis 2026-09-07 stand hier 9.4:1; der Wert ergab sich gegen
+     — WCAG 1.4.11. Bis 2026-09-07 stand dort 9,4 (ohne Doppelpunkt geschrieben, weil
+     nur geltende Angaben die Form X:1 tragen); der Wert ergab sich gegen
      keinen Grund des Satzes und war verrechnet (Abnahme 0055). */
   --color-focus-ring-soft: rgba(59, 143, 196, 0.14);
 
