@@ -367,3 +367,142 @@ Das Bild ist unverändert. Gemessen in `InUse`, beide Zeilen:
 Kennung und Zustand daraus ab — der Kommentar sagt es ausdrücklich: der Drawer
 bekommt sie nicht mehr gereicht, damit er das Dokument nicht anders benennen
 kann als die Liste daneben. Ein Kanal, wie hier jetzt auch.
+
+## Nachabnahme (2026-09-07)
+
+Fremde Nachabnahme des Umbaus `f40ba33` („ein Kanal") — ohne Chatverlauf, ohne
+eigenen Bau. Gemessen im Browser über CDP gegen den Dev-Server auf 6107, nicht
+an der Fixture. Jede Messung mit Gegenprobe: der Wert wurde zur Laufzeit über
+den React-Fiber der Story geändert, neu gerendert und neu gemessen — reagiert
+die Messung nicht, misst sie nichts. `pnpm build` blieb ungeprüft (0117).
+
+**Messnotiz für den nächsten Leser:** im Headless-Chrome hört die
+Bildproduktion nach dem Laden auf. Das zweite Öffnen desselben Drawers bleibt
+dann bei `translateX(100%)` stehen, weil `Drawer` `is-open` in einem
+`requestAnimationFrame` setzt (`Drawer.tsx:99`). Ein erzwungener Frame
+(`Page.captureScreenshot`) holt es sofort nach — gemessen: vorher `x = 1400`
+ohne `is-open`, nach einem Frame `x = 700` mit `is-open`. Das ist ein
+Messfehler, kein Befund.
+
+### Was geprüft wurde
+
+| Kriterium | Nachweis (gemessen) | Ergebnis |
+|---|---|---|
+| Das Bild ist unverändert — der Kopf sagt Titel, Nummer, Zustand, Betrag, Art · Gegenpart, „… ist dran", Ereigniszahl | `--filled` und `--in-use`/2026-0412: **Wartung der Klimaanlage** · `2026-0412` · Zur Prüfung · 1.249,90 € · Eingangsrechnung · Bürobedarf Meier GmbH · Kanzlei ist dran · 6 Ereignisse. `--in-use`/2026-0413: **Abschlag Strom 08/2026** · `2026-0413` · Wartet auf Unterlagen · -412,00 € · Dauersachverhalt · Stadtwerke Musterstadt · Mandant ist dran · 2 Ereignisse. `--sparse`: **Umbuchung** · `2026-0501` · Zur Prüfung · 0 Ereignisse — kein Betrag, die Art **nicht** zweimal. Wort für Wort dieselben sieben Ränge wie in der Abnahme vom 2026-09-06 | ✅ |
+| Der Umzug der fünf Felder ist wertgleich | Diff Wert für Wert: `title`, `totalAmount`, `currency` unverändert; `counterpartyName` stand im Datensatz schon mit demselben Wort; `dispositionLabel: "Kanzlei"` → `disposition: "accounting"`, Registry-Label „Kanzlei" (`status-registry.ts:809`), `"Mandant"` → `"client"` → „Mandant" (`:810`). Beide Schlüssel sind die richtigen | ✅ |
+| Es gibt wirklich nur noch einen Kanal | Zur Laufzeit aus dem Fiber gelesen: `Object.keys(record)` = **`["eventCount", "facts"]`**. `eventCount` hat im Spiegel keine Entsprechung (`grep eventCount src/ludwig` → 0 Treffer). Im Code liest der Kopf nur `record.facts.*`, `record.eventCount` und die Prop `reference` (bewusst, weil sie das Nachgeschlagene ist) | ✅ |
+| Der Kopf sucht an keinem zweiten Ort | **Gegenprobe:** dem Datensatz zur Laufzeit die alten flachen Felder wieder angehängt (`title: "ZWEITER KANAL Titel"`, `counterpartyName`, `totalAmount: 99999`, `currency: "CHF"`, `dispositionLabel`) und neu gerendert — der Kopf blieb in **allen sechs** Teilen unverändert. Umgekehrt: `facts.title`/`facts.counterpartyName`/`facts.totalAmount` geändert → Kopf **und** Zone 3 ziehen gemeinsam mit (Kopf „FAKTEN Titel", Meta „Eingangsrechnung · FAKTEN Gegenpart", Rang 12 „FAKTEN Gegenpart"). Eine Quelle, zwei Zonen | ✅ |
+| Die Zuständigkeit kommt aus der Achse, nicht aus der Fixture | **Gegenprobe** am laufenden Bild, `facts.disposition` umgesetzt: `accounting` → „Kanzlei ist dran" · `client` → „Mandant ist dran" · `agent` → „Agent ist dran" · `unbekannter_schluessel` → „unbekannter_schluessel ist dran" (roher Schlüssel, kein Absturz, kein „—"). Das Wort zieht mit dem Schlüssel mit; in der Fixture steht keines dieser Wörter | ✅ |
+| Zonen | Alle vier Zustände: Zone 1 Kopf, Zone 3 `CaseFacts` ohne `all` mit `tone="bare"` (`v2fields v2fields--bare`, dieselben fünf Zeilen wie `CaseFacts --in-drawer`), Zone 4 in **allen vier** Zuständen, Zone 5 „Sachverhalt öffnen" in **allen vier** — auch im Fehlerfall. Zone 2 fehlt weiterhin und hinterlässt keine Lücke | ✅ |
+| Lade- und Fehlerfall | `--loading`: dieselbe `v2card` mit `CardHead "Kernfakten"`, 176 px gegen 265 px im gefüllten Fall — dieselben Zahlen wie in der Abnahme vom 2026-09-06. `--error`: `v2note v2note--danger`, 62 px, „Sachverhalt 2026-0412 konnte nicht geladen werden. Zeitüberschreitung beim Laden. Bitte erneut öffnen — oder den Sachverhalt vollständig ansehen." `--not-found`: `v2empty v2empty--inline`, 175 px, „Kein Sachverhalt zu 2026-9999 …". In allen dreien steht im Kopf „Sachverhalt <Kennung>" und keine Meta-Zeile | ✅ |
+| Tastatur und Fokus | `--interactive`: Klick auf den Auslöser → Panel `is-open` bei x = 700 (Breite 700, `md`), `document.activeElement` = `ASIDE.v2drawer`. Acht Tabs laufen im Ring Kreuz → `70021` → „Sachverhalt öffnen" → Kreuz, **nie** außerhalb (8 von 8 Messungen `panel.contains(activeElement) === true`). Esc: Knoten weg, Fokus zurück auf `BUTTON "Sachverhalt 2026-0412 ansehen"`. **Gegenprobe:** Taste „a" schließt nicht (danach weiter `is-open`, x = 700). Scrim-Klick schließt ebenfalls und gibt den Fokus zurück | ✅ |
+| Kontext bleibt hinter dem offenen Drawer | `--in-use` bei 1400 px: Liste 900 px ab x = 16, Panel ab x = 700 → **684 px** der Liste bleiben stehen, `visibility: visible`, Scrim `rgba(20, 36, 56, 0.3)`, `pointer-events: auto` | ✅ |
+| Fest | `pnpm typecheck` Exit 0 · `check:icons` 0 · `check:contrast` 0 · `check:when` 0 · `check:language` 0 · `check:mirror` 0 (Exit-Codes geprüft). `pnpm build` nicht gelaufen (0117) | ✅ |
+| Die Beleg-Familie trägt die Dopplung nicht | `SourceDocumentQuickView` (`SourceDocumentDrawer.tsx:40–57`) nimmt `document` und leitet Titel, Kennung und Zustand daraus ab; die übrigen Felder (`summary`, `previewUrl`, `excerpt`, `group`) gibt es im Dokument nicht. Die Aussage des Umbaus stimmt | ✅ |
+| Der Betrag verträgt den rohen Spalten-Wert | **Nein** — siehe M1 | ❌ |
+
+### Mängel
+
+**M1 — der Betrag nimmt den rohen Spalten-Wert ungeprüft und reißt die Seite
+mit.** `CaseDrawer.tsx:111`: `currency={(record.facts.currency as Currency) ??
+"EUR"}`. Vor dem Umbau trug die Schnittstelle `currency?: Currency | null` —
+der Aufrufer **musste** verengen. Jetzt kommt das Feld aus dem Spiegel und ist
+dort `string | null` (`case-detail.ts:24`); die Zusicherung `as Currency`
+schaltet die Prüfung ab. Gemessen, `--in-use`/2026-0412, Wert zur Laufzeit
+gesetzt: `"USD"` → Kopf „1.249,90 $" (der Weg ist also live), `"XX"` →
+`RangeError: Invalid currency code : XX` in `moneyFormat`
+(`format.ts`), „Error rendering story" — **die ganze Story ist weg**: kein
+Drawer, keine Liste dahinter, von sieben Knöpfen bleiben drei (die der
+Storybook-Hülle). Dasselbe bei `"€"` und beim leeren String. Das Set hat für
+genau diesen Fall `asCurrency` (`shared/money.ts:13`) samt Begründung: „Die
+Spalte ist `text` ohne CHECK; ein unbekannter Code darf die Anzeige nicht
+zerlegen." *Kleinster Weg:* `currency={asCurrency(record.facts.currency)}`,
+Zusicherung weg. **Dieselbe Lücke steht schon einen Schritt weiter** in
+`case-columns.tsx:158` (`(c.currency as "EUR") ?? "EUR"`, aus `d80f04c`, älter
+als dieser Umbau) — ein Griff, zwei Zeilen.
+
+**M2 — die Tabelle des Nachtrags gibt den gemessenen Kopf unvollständig
+wieder.** Sie steht unter „Gemessen in `InUse`, beide Zeilen", lässt aber
+gerade das weg, was der Umbau beweisen soll. Gemessen steht dort:
+
+| Zeile | Kopf des Drawers, vollständig |
+|---|---|
+| 2026-0412 | Wartung der Klimaanlage · `2026-0412` · Zur Prüfung · 1.249,90 € · Eingangsrechnung · Bürobedarf Meier GmbH · Kanzlei ist dran · **6 Ereignisse** |
+| 2026-0413 | Abschlag Strom 08/2026 · `2026-0413` · Wartet auf Unterlagen · -412,00 € · **Dauersachverhalt · Stadtwerke Musterstadt · Mandant ist dran · 2 Ereignisse** |
+
+Der zweiten Zeile fehlen vier Angaben, darunter „Mandant ist dran" — der
+einzige Beleg dafür, dass auch der Schlüssel `client` sein Wort aus der Achse
+bekommt. *Kleinster Weg:* die beiden Zeilen der Tabelle vervollständigen.
+(Nebenbei: der Nachtrag schreibt „−412,00 €" mit U+2212, auf dem Schirm steht
+das Hyphen-Minus aus `formatAmount` — so in der Freigabe zu 0100 entschieden.)
+
+**M3 — die einzige Fixture des Sets, die bei `disposition` kein Achsen-Wort
+trägt, steht in `RawRecord`.** `src/ui/v3/primitives/RawRecord.stories.tsx:26`
+sagt `disposition: "kanzlei"`; gemessen steht in `--filled` auf dem Schirm
+„disposition kanzlei". Die Achse kennt `agent`, `accounting`, `client`
+(`status-registry.ts:807–811`, DB-CHECK) — „kanzlei" ist das **Label** von
+`accounting`, genau die Verwechslung, die dieser Umbau aufgelöst hat, und die
+Rohdaten-Sicht ist die Stelle, an der eine Leserin den Spaltenwert lernt. Alle
+übrigen Stellen stimmen (`CaseDrawer`, `CaseRow`, `CaseList`, `DataTable`, je
+`agent`/`accounting`/`client`/`null` geprüft). *Kleinster Weg:*
+`disposition: "accounting"`. **Gehört zu 0051**, nicht zu dieser Aufgabe —
+hier nur notiert, weil die Nachabnahme die Achse überall abgeklopft hat.
+
+**M4 (klein) — der Label-Griff baut nach, was das Set als Funktion hat.**
+`CaseDrawer.tsx:125` liest `STATUS_REGISTRY.disposition[…]?.label ?? …`.
+`resolveStatus(axis, value)` (`status-registry.ts:2219`) tut genau das, mit
+demselben Rückfall auf den Rohwert; die Nachbardatei derselben Familie nutzt
+sie zweimal (`CaseTimeline.tsx:206`, `:230`). Gemessen ist das Bild identisch
+(unbekannter Schlüssel → roher Schlüssel), es ist also keine Abweichung im
+Verhalten, sondern eine im Griff — und der Index nimmt einen beliebigen
+`string`, ohne dass die Achse ihn prüft. *Kleinster Weg:*
+`resolveStatus("disposition", record.facts.disposition).label`, Import
+statt `STATUS_REGISTRY`.
+
+### Beobachtung, kein Mangel
+
+Der Abschnitt **Schnittstelle** oben beschreibt weiter die alte
+`CaseQuickView` („trägt die Kopf-Ränge … Dieser Typ ist **lokal** definiert").
+Drei Nachträge korrigieren ihn inzwischen. Das ist die Hausform, aber wer die
+Tabelle zuerst liest, liest sie falsch — beim nächsten Anfassen der Datei
+nachziehen.
+
+Abgenommen von / am: **nicht abgenommen — zurück**, fremde Nachabnahme,
+2026-09-07 · Offene Punkte: M1 (Code, reißt die Seite), M2 (Nachtrag), M4
+(klein) · M3 gehört zu 0051 · `pnpm build` blieb ungeprüft (0117).
+
+## Nach der Nachabnahme (2026-09-07)
+
+Die Nachabnahme hat den Kanal-Umbau bestätigt — Bild wort für Wort unverändert,
+`Object.keys(record)` ist `["eventCount","facts"]`, und die alten flachen
+Felder wieder anzuhängen ändert nichts mehr. Zurück ging sie an einem Fehler,
+den ich beim Umbau gemacht habe.
+
+**M1 (blockierend) — meine Typzusicherung schaltete die Prüfung ab.** Vor dem
+Umbau war die Währung `Currency | null` und der Aufrufer musste verengen;
+danach kam sie als `string` aus dem Spiegel, und ich habe sie mit `as Currency`
+durchgereicht. Ein Code, den die Datenbank erlaubt und `Intl` nicht kennt,
+warf damit einen `RangeError` — und riss **die ganze Story** mit, Drawer und
+Liste dahinter. Das Set hat `asCurrency()` für genau diesen Fall; beide Stellen
+nutzen sie jetzt (auch `case-columns.tsx:158`, wo dieselbe Lücke älter war).
+Durchgespielt: `EUR`/`USD` bleiben, `XX`, `€`, leer, `null` und `undefined`
+werden zu `EUR`.
+
+**M4 — `resolveStatus()` statt Nachbau.** Der Kopf griff direkt in
+`STATUS_REGISTRY` und baute den Rückfall auf den Rohschlüssel selbst nach; die
+Nachbardatei nutzt die Funktion. Jetzt beide.
+
+**M2 — die Tabelle im Nachtrag war unvollständig.** Sie gab den „gemessenen"
+Kopf gekürzt wieder und ließ dabei ausgerechnet weg, was den Entscheid belegt:
+dass auch `client` sein Wort aus der Achse holt. Vollständig:
+
+| Story | Kopf, gemessen |
+|---|---|
+| 2026-0412 | Wartung der Klimaanlage · `2026-0412` · Zur Prüfung · 1.249,90 € · Eingangsrechnung · Bürobedarf Meier GmbH · **Kanzlei ist dran** · 6 Ereignisse |
+| 2026-0413 | Abschlag Strom 08/2026 · `2026-0413` · Wartet auf Unterlagen · −412,00 € · Dauersachverhalt · Stadtwerke Musterstadt · **Mandant ist dran** · 2 Ereignisse |
+| `Sparse` | Umbuchung · `2026-0501` · Zur Prüfung · 0 Ereignisse |
+
+**M3 gehört 0051 und ist mit erledigt:** die Rohdaten-Sicht trug
+`disposition: "kanzlei"` — das ist das **Wort** von `accounting`, nicht der
+Schlüssel. Dieselbe Verwechslung, die dieser Umbau aufgelöst hat, ausgerechnet
+dort. Steht jetzt richtig.

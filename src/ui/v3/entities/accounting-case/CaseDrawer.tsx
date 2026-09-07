@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { caseKindLabel } from "@/ludwig/modules/accounting-cases/domain/case";
-import type { Currency } from "@/ludwig/shared/money";
+import { asCurrency } from "@/ludwig/shared/money";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Amount } from "../../primitives/Amount";
 import { ActionIcon } from "../../Icons";
@@ -13,7 +13,7 @@ import { Skeleton } from "../../primitives/Skeleton";
 import { Card, CardHead } from "../../primitives/Table";
 import { CaseFacts, type CaseFactsVM } from "./CaseFacts";
 import { caseTitle } from "./case-title";
-import { STATUS_REGISTRY } from "@/ludwig/ui/status/status-registry";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 /**
  * The case, looked up beside the work (0098, schema of 0052).
@@ -108,7 +108,7 @@ export function CaseDrawer({
               <StatusBadge axis="sachverhalt" status={record.facts.lifecycleStatus} info={false} />
             ) : null}
             {record.facts.totalAmount == null ? null : (
-              <Amount value={record.facts.totalAmount} currency={(record.facts.currency as Currency) ?? "EUR"} size="sm" />
+              <Amount value={record.facts.totalAmount} currency={asCurrency(record.facts.currency)} size="sm" />
             )}
             {/* The title falls back to the kind when a case has none — then
                 the meta line must not say it a second time (M6). */}
@@ -122,8 +122,7 @@ export function CaseDrawer({
             )}
             {record.facts.disposition ? (
               <span>
-                {STATUS_REGISTRY.disposition[record.facts.disposition]?.label ??
-                  record.facts.disposition}{" "}
+                {resolveStatus("disposition", record.facts.disposition).label}{" "}
                 ist dran
               </span>
             ) : null}

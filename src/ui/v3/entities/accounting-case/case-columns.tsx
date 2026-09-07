@@ -8,6 +8,7 @@ import { Link } from "../../primitives/Link";
 import { MonoCell } from "../../primitives/Cells";
 import { Time } from "../../primitives/Time";
 import { caseIdentifier, caseTitle } from "./case-title";
+import { asCurrency } from "@/ludwig/shared/money";
 
 /**
  * The ten points of a case as cells — **once**, for the short list and for
@@ -155,7 +156,7 @@ export function caseColumns({
       width: "130px",
       align: "end",
       sortable: true,
-      cell: (c) => <Amount value={c.totalAmount} currency={(c.currency as "EUR") ?? "EUR"} />,
+      cell: (c) => <Amount value={c.totalAmount} currency={asCurrency(c.currency)} />,
     },
     counterparty: {
       key: "counterparty",

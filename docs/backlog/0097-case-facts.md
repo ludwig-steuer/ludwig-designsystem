@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: fünfzehn Felder genau dieser Entität, zwei davon mit Ludwig-Regeln am Nullwert |
@@ -518,3 +518,30 @@ Eine Folge betrifft aber diese Spec: **die Zuständigkeit steht als Schlüssel
 im Datensatz** (`disposition`), nicht als fertiges Wort. Das Wort kommt aus
 der Achse. Wer `CaseFactsVM` befüllt, gibt also den Schlüssel weiter — genau
 wie bei jedem anderen Achsenwert.
+
+## Nachabnahme (2026-09-07)
+
+Mitgeprüft mit der Nachabnahme von 0098 (Umbau `f40ba33`, „ein Kanal"), fremd
+und ohne Chatverlauf. Seit dem Umbau ist `CaseFactsVM` die **eine** Quelle,
+aus der auch der Drawer-Kopf liest — deshalb war zu prüfen, ob die
+Fakten-Ansicht selbst dabei unverändert geblieben ist.
+
+| Kriterium | Nachweis (gemessen) | Ergebnis |
+|---|---|---|
+| Am Bau von 0097 hat sich nichts geändert | `git log -- CaseFacts.tsx CaseFacts.stories.tsx` → letzter Anfasser `6cba1e5`, **älter** als `f40ba33`; der Umbau berührt fünf Dateien, keine davon gehört zu 0097 | ✅ |
+| Die Fakten-Ansicht zeigt dasselbe wie vorher | Alle sechs Stories im Browser gelesen. `--filled`: Zusammenfassung · Geschäftspartner · Personenkonto 70021 · Belegnummern „Eine Belegnummer" · Abgeschlossen „laufend" (5 Zeilen). `--all`: dieselben fünf in derselben Reihenfolge, dann Gegenpartei-Seite · Anker · Angelegt von · Wirtschaftsjahr · Abrechnungsrhythmus · Verrechnungskonto · Buchungslauf · Buchungszyklus (13 Zeilen). `--sparse`: „hat bewusst keins" · „Kein Beleg zu erwarten" · „laufend" · „bewusst keine" (4 Zeilen — der dritte bedeutende Nullwert steht inzwischen im Bild, anders als bei M1 der Runde 2). Rang für Rang dieselbe Reihenfolge wie in der Abnahme oben | ✅ |
+| Zone 3 des Drawers ist wirklich dieselbe Ansicht | `CaseFacts --in-drawer` und der Rumpf von `CaseDrawer --filled` liefern **dieselben fünf Zeilen mit denselben Werten** und dieselbe Klasse `v2fields v2fields--bare`; die Fassung im Drawer unterscheidet sich nur im Ton | ✅ |
+| Die Messung reagiert (Gegenprobe) | Im offenen Drawer `facts.counterpartyName` zur Laufzeit auf „FAKTEN Gegenpart" gesetzt → Rang 12 **und** die Meta-Zeile des Kopfes ziehen gemeinsam mit. Zwei Zonen, ein Wert, eine Quelle | ✅ |
+| Der Nachtrag „ein Kanal" stimmt | `CaseDetail.disposition` ist `string \| null` (`case-detail.ts:71`) — ein **Schlüssel**, kein Wort; das Wort holt die Achse (`status-registry.ts:807–811`), gemessen im Drawer-Kopf: `accounting` → „Kanzlei", `client` → „Mandant", `agent` → „Agent", unbekannter Schlüssel → der rohe Schlüssel. `CaseFacts` selbst rendert die Zuständigkeit nicht (kein Rang 11–24 trägt sie) — der Satz betrifft also nur, was in den Typ hineingegeben wird, und so steht er auch da | ✅ |
+| Fest | `pnpm typecheck` Exit 0 · `check:icons`/`check:contrast`/`check:when`/`check:language`/`check:mirror` je Exit 0. `pnpm build` nicht gelaufen (0117) | ✅ |
+
+**Kein Mangel an 0097.** Der eine Befund des Umbaus hängt an der Stelle, die
+diesen Typ **liest**, nicht an ihm: `CaseDrawer.tsx:111` gibt
+`facts.currency` mit `as Currency` ungeprüft an `Amount` weiter, obwohl das
+Feld im Spiegel `string | null` ist — mit einem Code außerhalb von
+`CURRENCIES` wirft `moneyFormat` und die ganze Story verschwindet (gemessen,
+M1 in 0098). Wer `CaseFactsVM` künftig woanders anzeigt, geht über
+`asCurrency` (`shared/money.ts:13`).
+
+Abgenommen von / am: **abgenommen**, fremde Nachabnahme, 2026-09-07 — für
+0097 unverändert richtig; der offene Punkt steht in 0098 (M1).

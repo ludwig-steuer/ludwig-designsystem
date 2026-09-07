@@ -105,25 +105,12 @@
    Fehler-Feld 707 px breit in einer 1400-px-Tabelle und die Lade-Zeile 0 px.
    Die Zeile mit einer spannenden Zelle wird deshalb selbst ein Block. */
 .v2tbl tr:has(> td[colspan]) { display: block; }
-.v2tbl td[colspan] { width: 100%; }
-/* Und die Sonderzelle behält ihr eigenes Polster: der Reset oben
-   (`.v2tbl th, .v2tbl td { padding: 0 }`, Spezifität 0-1-1) schlägt sonst
-   jede Klassenregel (0-1-0) — gemessen begann der Text bei x = 0, während
-   jede andere Zelle bei x = 18 anfängt, und der Fehlerkasten verlor seine
-   Spaltenrichtung: Meldung und „Erneut laden" standen nebeneinander in einem
-   35-px-Band an der Kartenkante. Die vier Klassen stehen deshalb hier noch
-   einmal, auf der Spezifität des Resets. */
-/* Auch das **Gewicht**: `font-weight: inherit` am Reset schlägt die Regel der
-   Zwischenzeile genauso, wie es ihr Polster geschlagen hat — nur ist es beim
-   Umbau 0106 nur fürs Polster aufgefallen. Die Zeile stand seither auf 400
-   und sah aus wie eine Datenzeile (Abnahme 0089, 2026-09-07). */
-/* Auf der Spezifität des Resets: `.v2tbl th, .v2tbl td` (0-1-1) schlägt jede
-   Regel, die nur an einer Klasse hängt (0-1-0). Dieselbe Falle hat schon das
-   Polster der Zwischenzeile und ihr Gewicht erwischt — und diese zwei hier
-   waren die letzten von dreizehn, die die Abnahme einzeln durchgemessen hat:
-   der Aktionskopf stand ohne `flex` 125,8 px neben seiner Spalte, die
-   Aufteilungszeile hatte statt 8/16/12/16 gar kein Polster. */
-
+/* Auch diese in `:where()`: mit 0-2-1 schlug sie jede Klassenregel — und zwar
+   genau an den Sonderzellen, die dieser Umbau befreit hat (`__group`,
+   `__empty`, `__detail`, `__error`, `__btxrow__split` stehen alle auf
+   `colSpan`). Bewirkt hat sie dabei nichts: die Breiten sind mit und ohne sie
+   identisch. Gefunden von der Abnahme des `:where()`-Umbaus, 2026-09-07. */
+:where(.v2tbl td[colspan]) { width: 100%; }
 .v2tbl__scroll { overflow-x: auto; }
 .v2tbl__inner { min-width: var(--v2-min, 0); }
 

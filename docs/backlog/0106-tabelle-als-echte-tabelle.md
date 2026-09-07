@@ -608,3 +608,148 @@ Reset wirkt also, und er verliert.
       Zelle greift ohne Gegen-Regel — geprüft, indem eine beliebige Klasse an
       einer Zelle ihre Wirkung zeigt **und** der Reset sie übernimmt, sobald
       man die Klassenregel abschaltet
+
+## Abnahme des `:where()`-Umbaus (2026-09-07)
+
+Fremde Abnahme, nichts gebaut, nichts vom Bauenden übernommen. Alle Zahlen aus
+dem gerenderten Baum (CDP, Dev-Server 6107), jede Messung mit Gegenprobe: Regel
+zur Laufzeit abschalten, neu messen, zurückschalten.
+
+**Der breite Lauf, den der Umbau schuldig geblieben ist.** Alle **717 Stories**
+des Katalogs, zwei Fensterbreiten (1280 und 720 px), je Tabelle die rechte
+Kante jeder Kopfzelle gegen die derselben Spalte in jeder Datenzeile, dazu die
+Zellenzahl jeder Zeile gegen die des Kopfs.
+
+| | 1280 px | 720 px |
+|---|---|---|
+| Stories geladen (0 Fehler) | 717 | 717 |
+| Stories mit `.v2tbl` | 180 | 180 |
+| Tabellen | 209 | 209 |
+| verglichene Zellen | 8 758 | 8 758 |
+| **Kantenabweichungen > 0,5 px** | **0** | **0** |
+| **Zeilen mit falscher Zellenzahl** | **0** | **0** |
+| Tabellen mit `clientWidth`/`scrollWidth` 0 | 0 | 0 |
+| Tabellen, die waagerecht scrollen | 6 | 43 |
+
+Die 13 Tabellen ohne Kopfzeile (Beleg-Familie, `table--card-head-icon-meta`)
+tragen nichts zum Kopf-gegen-Zeile-Vergleich bei und wurden getrennt Zeile
+gegen Zeile gemessen: 336 Zellen, **0 Abweichungen**, beide Breiten.
+
+*Gegenprobe des Detektors:* mit `td:nth-child(2) { margin-right: 13px }` zur
+Laufzeit meldet derselbe Lauf sofort 50 Abweichungen (13,0 px), ohne die Regel
+wieder 0. Der Nullwert ist gemessen, nicht bloß ausgeblieben.
+
+**Die sieben Klassen tragen ihre Werte** — nicht an einem Beispiel, sondern an
+**allen 128 Zellen**, die im Katalog eine der sieben Klassen tragen
+(`getComputedStyle`, 188 Stories):
+
+| Klasse | Zellen | gemessen |
+|---|---|---|
+| `v2tbl__group` | 14 | `block` · 7px 18px · **700** |
+| `v2actions` (th) | 2 | `flex` · `flex-end` · `center` · gap 14px |
+| `v2btxrow__split` | 1 | `block` · 8px 18px 12px 18px |
+| `v2tbl__empty` | 23 | `block` · 30px 18px |
+| `v2tbl__detail` | 8 | `block` · 14px 18px 16px 46px (7× 18/20 bei `--v2-detail-y: 18px`) |
+| `v2tbl__error` | 7 | `flex` · `column` · `flex-start` · gap **8px** · 24px 18px |
+| `v2num` (th) | 73 | `text-align: right` |
+
+Kein abweichender Wert. Der Vorher-Zustand wurde am lebenden Baum nachgestellt
+(alter 0-1-1-Reset plus die sieben Gegen-Regeln als `<style>` injiziert) —
+alle sieben Werte identisch zu heute.
+
+**Der Reset wirkt noch.** Über alle 188 Tabellen-Stories haben die **8 478
+klassenlosen Zellen** genau drei Rechenwert-Profile: 7 364 `td` mit
+`block` / 0 0 0 0 / **400** / `left`, 1 110 `th` ebenso, aber Gewicht **600**
+(kommt per `font-weight: inherit` aus `tr.v2tbl__head`, gemessen: Zeile 600),
+und 4 `th` mit `text-align: right` — die tragen ein Inline-`style` aus ihrer
+Story und gewannen auch vor dem Umbau.
+
+*Gegenprobe je Klasse:* Regel abschalten → der Reset übernimmt
+(`.v2tbl__group` 700 / 7px 18px → 400 / 0, Zellhöhe 35,38 → 24,80 px;
+`.v2tbl__error` `flex`/`column`/8px → `block`/`row`/`normal`;
+`.v2num` am `th` rechts → links) → zurückschalten → alter Wert wieder da.
+Und die alte Falle nachgestellt: injiziert man `.v2tbl th, .v2tbl td` mit
+0-1-1 **ohne** Gegen-Regel, fällt die Zwischenzeile wieder auf 400 / 0
+(35,38 → 21,38 px). Der Reset ist also da, und er verliert nur, weil er in
+`:where()` steht.
+
+**Die 8 px der Fehlerzelle sind die Zahl von vorher.** Nicht nur `gap: 8px` in
+der Rechnung, sondern **8,00 px Lücke** zwischen Meldung und „Erneut laden" im
+gemessenen Kasten. Mit den alten Regeln injiziert: ebenfalls 8,00 px. Mit
+`gap: 10px` allein (was die alte Klassenregel ohne Gegen-Regel ergeben hätte):
+10,00 px. `--space-2` misst 8px, `--space-3` 12px.
+
+### Was noch offen ist
+
+**Die Falle ist nicht ganz zu.** Ein Durchgang über alle Regeln aller
+Stylesheets im laufenden Blatt (Spezifität berechnet, `:where()` als 0), die
+eine echte Zelle treffen, lässt im `.v2tbl`-System genau **eine** Regel über
+0-1-0 übrig:
+
+    .v2tbl td[colspan] { width: 100%; }   /* 0-2-1 */
+
+Sie trifft genau die Sonderzellen, um die es hier geht — `v2tbl__group`,
+`__empty`, `__detail`, `__error` und `v2btxrow__split` stehen alle auf
+`colSpan={999}`. Gemessen: `.v2tbl__group { width: 120px }` zur Laufzeit
+dazugelegt bleibt wirkungslos (1246 px); schaltet man die Attributregel ab,
+greift dieselbe Klassenregel sofort (120 px). Die Regel selbst ändert heute
+nichts: in 7 Stories × 2 Breiten sind die Breiten mit und ohne sie identisch
+(1246 / 686 / 1400 / 860 px). Kleinster Weg: `:where(.v2tbl td[colspan])` —
+dieselbe Wirkung, keine Falle.
+
+Die Zeilenregel `.v2tbl tr:has(> td[colspan])` (0-2-2) trifft heute nur Zeilen
+**ohne** Klasse (gemessen in fünf Stories) und schlägt deshalb nichts.
+
+Außerhalb dieser Aufgabe steht dieselbe Falle noch in der Markdown-Tabelle:
+`.v2mk__tbl th, .v2mk__tbl td` (0-1-1). Gemessen: eine Klassenregel
+`padding: 40px` an einer solchen Zelle bleibt wirkungslos (5px 10px 5px 0px)
+und greift erst, wenn man die Zellregel abschaltet. Heute harmlos — alle 27
+Zellen dort tragen keine Klasse.
+
+**Drei Kommentarblöcke stehen verwaist im Blatt.** In `src/styles/v3.css`
+folgen auf `.v2tbl td[colspan]` drei Blöcke, die die gestrichenen Gegen-Regeln
+erklären („Die vier Klassen stehen deshalb hier noch einmal, auf der
+Spezifität des Resets") und den Reset weiter auf **0-1-1** verorten. Beides
+stimmt nicht mehr; sie hängen jetzt über `.v2tbl__scroll`. Wer sie liest,
+schreibt die vierzehnte Gegen-Regel.
+
+`pnpm typecheck`, `check:icons`, `check:contrast`, `check:language`,
+`check:mirror`, `check:when`: alle Exit-Code 0.
+
+- [x] Der Reset auf `th`/`td` steht in `:where()`; eine Klassenregel an einer
+      Zelle greift ohne Gegen-Regel — an allen sieben Klassen gemessen, mit
+      Abschalten und Zurückschalten
+
+## Nach der Abnahme des `:where()`-Umbaus (2026-09-07)
+
+Die Abnahme hat den breiten Lauf geliefert, den der Umbau schuldig geblieben
+war: **717 Stories, zwei Breiten, 209 Tabellen, 8 758 verglichene Zellen je
+Breite — 0 Kantenabweichungen, 0 falsche Zellenzahlen.** Dazu alle 128 Zellen
+mit einer der sieben Klassen einzeln gemessen und der Vorher-Zustand am
+lebenden Baum nachgestellt. Beides steht jetzt in der Datei; ich hatte darauf
+verzichtet, eine Zahl zu behaupten, die mein hängengebliebener Lauf nicht
+hergab.
+
+Zwei Mängel, beide behoben:
+
+**M1 — eine Regel stand noch, und zwar auf genau den befreiten Zellen.**
+`.v2tbl td[colspan] { width: 100% }` hat Spezifität 0-2-1 und trifft
+`__group`, `__empty`, `__detail`, `__error` und `__btxrow__split` — sie alle
+stehen auf `colSpan`. Der Umbau tritt mit dem Anspruch an, die Falle zu
+schließen, und ließ sie dort offen. Gemessen: eine Klassenregel
+`width: 120px` blieb wirkungslos (1246 px) und greift jetzt (**120 px** in
+allen drei geprüften Stories). Die Regel bewirkt dabei nichts — die Breiten
+sind mit und ohne sie identisch —, aber sie stand im Weg.
+
+**M2 — drei Kommentarblöcke behaupteten das Gegenteil des Codes.** Sie
+erklärten die gestrichenen Gegen-Regeln („die vier Klassen stehen deshalb hier
+noch einmal, auf der Spezifität des Resets") und verorteten den Reset weiter
+auf 0-1-1. Sie hingen nach dem Umbau über `.v2tbl__scroll`. Wer sie liest,
+schreibt die vierzehnte Gegen-Regel — sie sind gestrichen; was noch gilt,
+steht im `:where()`-Kommentar.
+
+**M3 gehört einer anderen Familie und ist als Befund vermerkt:**
+`.v2mk__tbl th, .v2mk__tbl td` (Markdown-Tabelle, `v3.css:2151`) trägt
+dieselbe Falle mit 0-1-1. Heute harmlos — alle 27 Zellen dort tragen keine
+Klasse —, aber es ist dieselbe Bauform. Das gehört in eine eigene Aufgabe,
+nicht hierher.
