@@ -22,7 +22,8 @@
  * „Bestehende deutsche Bezeichner werden nicht in Masse umbenannt; eine Datei,
  * die ohnehin angefasst wird, bekommt englische Namen." Genau so läuft er —
  * ohne Argumente nimmt er die Dateien, die `git` als geändert meldet. Der
- * Bestand (`--all`) ist ein Bericht, kein Tor: 407 Zeilen am 2026-09-07.
+ * Bestand (`--all`) ist ein Bericht, kein Tor: 388 Zeilen in 132 Dateien am
+ * 2026-09-07 — die Zahl sinkt mit jeder Datei, die ohnehin angefasst wird.
  *
  * Run: `pnpm check:language` · Bestand: `--all` · Selbstprüfung: `--test`
  */
@@ -30,6 +31,7 @@
 import { execSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const ROOT = "src/ui/v3";
 
@@ -178,6 +180,10 @@ function geaenderteZeilen() {
   return proDatei;
 }
 
+// Nur beim direkten Aufruf laufen: `kommentarZeilen` und `istDeutsch` sind
+// exportiert, damit man sie prüfen kann — ein Import darf dabei nicht den
+// ganzen Wächter starten und mit `process.exit` enden.
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
 const alle = process.argv[2] === "--all";
 const geaendert = alle ? null : geaenderteZeilen();
 const zuPruefen = alle ? dateien(ROOT) : [...geaendert.keys()];
@@ -204,3 +210,4 @@ if (fehlt.length) {
   process.exit(1);
 }
 console.log(`check:language — in Ordnung, ${zuPruefen.length} ${alle ? "Dateien" : "angefasste Dateien"} geprüft.`);
+}
