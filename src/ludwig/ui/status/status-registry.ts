@@ -31,9 +31,12 @@
  * Ein flacher Lookup würde diese Werte stillschweigend vermischen.
  *
  * ## Sprache
- * Achsen-Keys sind bewusst deutsch (`beleg`, `sachverhalt`, `buchung`) — sie
- * spiegeln die Begriffe aus `GLOSSARY.md` und die Main-Navigation. Die
- * Status-*Werte* bleiben englisch, weil sie 1:1 die DB-Werte sind.
+ * **Technischer Name englisch, Anzeige deutsch** (AGENTS.md → Naming). Die
+ * Status-*Werte* und die Auslöser der Übergänge halten sich daran; die
+ * *Achsen-Keys* noch nicht: 54 von 72 sind deutsch, weil diese Datei sich
+ * einmal auf „bewusst und dokumentiert" berufen hat. Genau das ist die
+ * Ausnahme, die es nicht mehr gibt — F150 T150.2 benennt sie um. Bis dahin
+ * hier keine neuen deutschen Keys anlegen.
  *
  * ## Neue Achse hinzufügen
  * 1. Map mit Block-Kommentar anlegen: DB-Spalte (oder „ephemer"), wer den Wert
@@ -2361,20 +2364,54 @@ export function resolveEventBookingState(
    ══════════════════════════════════════════════════════════════════════ */
 
 /**
- * Ein Übergang zwischen zwei Zuständen derselben Achse.
+ * Ein Übergang zwischen zwei Zuständen.
  *
  * `from: null` ist der Eintritt — wie ein Ding in die Achse hineinkommt.
  * `to: null` gibt es nicht: wer die Achse verlässt, tut das über einen
  * Endzustand, und der steht in der Descriptor-Map.
+ *
+ * **`trigger` ist technisch und englisch, `label` ist die Anzeige.** Bis
+ * 2026-09-07 trug `trigger` beides in einem deutschen Satz — damit gab es
+ * keinen stabilen Schlüssel, den ein State-Machine-Log speichern könnte, und
+ * eine umformulierte Beschriftung hätte still die Log-Historie zerschnitten
+ * (F150 T150.1).
  */
 export interface StateTransition {
+  /**
+   * Nur setzen, wenn der Übergang **nicht** auf der Standardachse der Maschine
+   * liegt. Ein Prozess darf mehrere Achsen schreiben (siehe
+   * `document_processing`), ohne dass die Achsen ihren eigenen Wertebereich
+   * und ihren Deckungstest verlieren.
+   */
+  axis?: StatusAxis;
   /** Ausgangszustand, oder `null` für den Eintritt in die Achse. */
   from: string | null;
   to: string;
-  /** Was den Übergang auslöst — knapp, in der Sprache der Rolle. */
+  /**
+   * Technischer Name des Übergangs — englisch, `snake_case`. Das ist der
+   * Wert, den das spätere State-Machine-Log schreibt. Er darf sich innerhalb
+   * einer Maschine wiederholen: derselbe Auslöser kann aus mehreren
+   * Zuständen feuern.
+   */
   trigger: string;
+  /** Deutsche Beschriftung — was ein Mensch liest. */
+  label: string;
   /** Wer ihn auslöst: ein Wert der Achse `actor_kind`, oder „system". */
   by?: string;
+}
+
+/**
+ * Ein Prozess und die Übergänge, die er schreibt.
+ *
+ * Der Schlüssel in `STATE_MACHINES` ist der **Prozess**, nicht die Spalte —
+ * englisch, weil ihn Maschinen lesen. Meist deckt sich beides, dann steht in
+ * `axis` genau eine Achse und kein Übergang setzt seine eigene.
+ */
+export interface StateMachine {
+  /** Achse, auf die sich Übergänge ohne eigenes `axis` beziehen. */
+  axis: StatusAxis;
+  description: string;
+  transitions: StateTransition[];
 }
 
 /**
@@ -2390,62 +2427,247 @@ export interface StateTransition {
  * `to` ein Schlüssel seiner Achse ist — ein umbenannter Zustand macht die
  * Maschine rot, statt sie still falsch werden zu lassen.
  *
- * Die Sammlung ist bewusst `Partial`: eine Achse ohne Übergänge ist keine
- * Lücke im Typ, sondern eine offene Aufgabe (L-75, rund fünfzig).
+ * ## Was hier NICHT steht
+ * Die 45 Achsen, die keinen Prozess abbilden. Sie sagen, *was* etwas ist
+ * (`beleg_kategorie`, `actor_kind`) oder werden bei jedem Aufruf neu gerechnet
+ * (`konfidenz`, `mahnstufe`) — beides hat keine Übergänge, weil sich nichts
+ * bewegt. Sie werden Klassen und ziehen in eine eigene Datei um (F151).
+ * Eine fehlende Maschine ist deshalb **keine** automatische Lücke; offen sind
+ * heute nur die dreizehn kurzen Achsen aus Rang 3 (Owner 2026-09-07:
+ * zurückgestellt, „fast nur zwei Zustände").
  */
-export const STATE_MACHINES: Partial<
-  Record<StatusAxis, { description: string; transitions: StateTransition[] }>
-> = {
-  beleg: {
+export const STATE_MACHINES: Record<string, StateMachine> = {
+  /* ── Beleg ──────────────────────────────────────────────────────────── */
+
+  document_processing: {
+    axis: "beleg",
     description:
-      "Der technische Weg eines Belegs durch die Pipeline. `review_needed` ist kein Abbruch — die Pipeline lief durch, es bleiben reparierbare Findings.",
+      "Der Weg eines Belegs durch die Verarbeitung — EIN Prozess über drei Spalten. " +
+      "`beleg_inbox` (Supertyp, jede Belegart) läuft zuerst, `beleg` (Rechnungs-Subtyp) danach, " +
+      "und `beleg_stage` ist die Position *innerhalb* von `in_progress`, kein eigener Weg. " +
+      "Dass die Aufteilung künstlich ist, zeigt `resolveEffectiveBelegStatus`: die Funktion " +
+      "existiert nur, um zwei Achsen für einen einzigen Chip wieder zusammenzurechnen (F151).",
     transitions: [
-      { from: null, to: "pending", trigger: "Beleg angelegt", by: "api" },
-      { from: "pending", to: "in_progress", trigger: "Workflow greift ihn auf", by: "system" },
-      { from: "in_progress", to: "processed", trigger: "ohne offene Findings fertig", by: "system" },
-      { from: "in_progress", to: "review_needed", trigger: "reparierbare Findings bleiben", by: "system" },
-      { from: "in_progress", to: "failed", trigger: "Pipeline abgebrochen", by: "system" },
-      { from: "review_needed", to: "processed", trigger: "Extraktion korrigiert, synchron neu geprüft", by: "user" },
-      { from: "processed", to: "review_needed", trigger: "Revalidierung findet doch etwas", by: "system" },
-      { from: "failed", to: "in_progress", trigger: "Neuverarbeitung angestoßen", by: "user" },
+      // — Eingang, Supertyp `client_source_docs.status` —
+      { axis: "beleg_inbox", from: null, to: "pending_classification", trigger: "document_uploaded", label: "Datei hochgeladen", by: "user" },
+      { axis: "beleg_inbox", from: "pending_classification", to: "classified", trigger: "classification_succeeded", label: "Klassifikator hat die Dokumentart erkannt", by: "system" },
+      { axis: "beleg_inbox", from: "pending_classification", to: "classification_failed", trigger: "classification_failed", label: "Dokumentart nicht bestimmbar — es gibt keinen automatischen Wiederholungslauf", by: "system" },
+      { axis: "beleg_inbox", from: "classification_failed", to: "pending_classification", trigger: "classification_restarted", label: "von Hand neu angestoßen", by: "user" },
+      { axis: "beleg_inbox", from: "classified", to: "pending_classification", trigger: "document_reprocessed", label: "Neuverarbeitung angestoßen", by: "user" },
+      { axis: "beleg_inbox", from: "classified", to: "deleted", trigger: "document_soft_deleted", label: "aus der Liste entfernt — Datei und Historie bleiben", by: "user" },
+
+      // — Pipeline, Subtyp `client_source_docs_invoices.processing_status` —
+      { from: null, to: "pending", trigger: "invoice_row_created", label: "Rechnungs-Stub angelegt, bevor die Pipeline läuft", by: "api" },
+      { from: "pending", to: "in_progress", trigger: "pipeline_started", label: "Workflow greift den Beleg auf", by: "system" },
+      { from: "in_progress", to: "processed", trigger: "pipeline_completed", label: "ohne offene Findings fertig", by: "system" },
+      { from: "in_progress", to: "review_needed", trigger: "pipeline_completed_with_findings", label: "reparierbare Findings bleiben — kein Abbruch", by: "system" },
+      { from: "in_progress", to: "failed", trigger: "pipeline_aborted", label: "Crash, Timeout oder kritischer Befund", by: "system" },
+      { from: "review_needed", to: "processed", trigger: "extraction_corrected", label: "Extraktion korrigiert, synchron neu geprüft", by: "user" },
+      { from: "processed", to: "review_needed", trigger: "revalidation_found_findings", label: "Revalidierung findet doch etwas", by: "system" },
+      { from: "failed", to: "in_progress", trigger: "pipeline_restarted", label: "Neuverarbeitung angestoßen", by: "user" },
+
+      // — Stufen innerhalb von `in_progress`, `…invoices.processing_stage`.
+      //   Resume-Anker des Workflows, nicht nur Anzeige: ein von Hand
+      //   gesetzter Wert kann Belege dauerhaft überspringen lassen. —
+      { axis: "beleg_stage", from: null, to: "classified", trigger: "stage_classified", label: "Belegart erkannt (Cheap-Classifier)", by: "system" },
+      { axis: "beleg_stage", from: "classified", to: "extracted", trigger: "stage_extracted", label: "Grunddaten ausgelesen — Schnelldurchlauf des Onboardings, hier endet er", by: "system" },
+      { axis: "beleg_stage", from: "classified", to: "preprocessed", trigger: "stage_preprocessed", label: "OCR und Strukturierung durch", by: "system" },
+      { axis: "beleg_stage", from: "preprocessed", to: "interpreted", trigger: "stage_interpreted", label: "fachliche Bedeutung ermittelt (Rolle, Positionen, Lieferant)", by: "system" },
+      { axis: "beleg_stage", from: "interpreted", to: "proposed", trigger: "stage_proposed", label: "historisch — seit 2026-07-06 entstehen Vorschläge am Sachverhalt", by: "system" },
     ],
   },
-  job: {
+
+  document_completion: {
+    axis: "beleg_erledigung",
+    description:
+      "Ob der Beleg fachlich durch ist — die zweite, parallele Achse des Belegs. Sie folgt der " +
+      "BUCHUNG, nicht der Pipeline: „Pipeline durchgelaufen\" heißt nicht „fertig\", und ein " +
+      "erledigter Beleg kann eine abgebrochene Pipeline haben. Deshalb eine eigene Maschine und " +
+      "nicht in `document_processing` gefaltet — beide Zustände dürfen gleichzeitig gelten.",
+    transitions: [
+      { from: null, to: "open", trigger: "document_created", label: "Beleg angelegt, `completed_at` ist NULL", by: "system" },
+      { from: "open", to: "booking", trigger: "completed_by_booking", label: "die Buchung hat ihn beim Abschluss miterledigt", by: "system" },
+      { from: "open", to: "manual", trigger: "completed_by_hand", label: "von Hand abgehakt, mit Begründung", by: "user" },
+      { from: "open", to: "no_booking_required", trigger: "marked_no_booking_required", label: "kein Buchungsbedarf — der Beleg bleibt liegen, ohne offen zu sein", by: "user" },
+      { from: "open", to: "case_closed", trigger: "completed_by_case_close", label: "der Sachverhalt wurde geschlossen, der Beleg nicht einzeln abgehakt", by: "user" },
+      { from: "open", to: "import", trigger: "completed_by_datev_import", label: "kam aus DATEV und war dort bereits gebucht", by: "system" },
+      { from: "open", to: "superseded", trigger: "superseded_by_document", label: "ein neuer Beleg hat diesen abgelöst (Korrektur, zweiter Scan)", by: "user" },
+      { from: "open", to: "completed", trigger: "completed_without_reason", label: "Altbestand — erledigt, Grund nicht festgehalten; seit F87 schreibt jeder Weg seinen Grund mit", by: "system" },
+      { from: "booking", to: "open", trigger: "reopened_by_reversal", label: "die Buchung wurde storniert — der Trigger nimmt den Stempel zurück", by: "system" },
+    ],
+  },
+
+  /* ── Sachverhalt und Buchung ────────────────────────────────────────── */
+
+  accounting_case: {
+    axis: "sachverhalt",
+    description:
+      "Der fachliche Weg eines Sachverhalts durch den Review. `needs_clarification` sticht " +
+      "`waiting_for_documents`: wer eine echte Rückfrage offen hat, zeigt das, auch wenn " +
+      "zusätzlich Unterlagen fehlen.",
+    transitions: [
+      { from: null, to: "in_pipeline", trigger: "case_created", label: "Sachverhalt entsteht am Beleg-Ereignis", by: "system" },
+      { from: "in_pipeline", to: "open", trigger: "pipeline_completed", label: "Verarbeitung durch — der Sachverhalt liegt zur Bearbeitung", by: "system" },
+      { from: "open", to: "needs_clarification", trigger: "clarification_raised", label: "eine Rückfrage wurde gestellt", by: "agent" },
+      { from: "waiting_for_documents", to: "needs_clarification", trigger: "clarification_raised", label: "eine Rückfrage kommt dazu und sticht die fehlende Unterlage", by: "agent" },
+      { from: "needs_clarification", to: "open", trigger: "clarification_answered", label: "die Rückfrage ist beantwortet", by: "user" },
+      { from: "open", to: "waiting_for_documents", trigger: "document_expected", label: "eine Unterlage wird erwartet — fehlender Beleg ist keine Frage", by: "agent" },
+      { from: "waiting_for_documents", to: "open", trigger: "expected_document_arrived", label: "die erwartete Unterlage ist da", by: "system" },
+      { from: "open", to: "closed_accepted", trigger: "case_accepted", label: "abgenommen — der Trigger stempelt die Quelldokumente auf „erledigt\"", by: "user" },
+      { from: "open", to: "closed_rejected", trigger: "case_rejected", label: "verworfen", by: "user" },
+      { from: "open", to: "closed_superseded", trigger: "case_merged", label: "durch einen anderen Sachverhalt abgelöst (Zusammenführung)", by: "agent" },
+      { from: "closed_accepted", to: "open", trigger: "case_reopened", label: "wieder geöffnet — die Erledigt-Stempel an den Belegen bleiben bewusst stehen", by: "user" },
+    ],
+  },
+
+  journal_entry: {
+    axis: "buchung",
+    description:
+      "Die Audit-Achse der Buchung. Exportiert wird ausschließlich `accepted`, nicht `posted` — " +
+      "der Reviewer gibt für DATEV frei, er schreibt nicht fest. `posted` ist für eine künftige " +
+      "eigene Festschreibung reserviert und entsteht heute nur über den DATEV-Import.",
+    transitions: [
+      { from: null, to: "proposed", trigger: "booking_proposed", label: "Vorschlag am Sachverhalt entstanden", by: "agent" },
+      { from: "proposed", to: "accepted", trigger: "booking_released", label: "für DATEV freigegeben", by: "user" },
+      { from: "accepted", to: "proposed", trigger: "release_withdrawn", label: "Freigabe zurückgenommen — nur solange nicht exportiert", by: "user" },
+      { from: "accepted", to: "posted", trigger: "found_posted_in_datev", label: "der DATEV-Import meldet den Satz als dort bereits Ist", by: "system" },
+      { from: "accepted", to: "reversed", trigger: "booking_reversed", label: "storniert — nach dem Export der einzige verbliebene Weg", by: "user" },
+      { from: "posted", to: "reversed", trigger: "booking_reversed", label: "storniert", by: "user" },
+    ],
+  },
+
+  export_batch: {
+    axis: "zyklus_stapel",
+    description:
+      "Der Buchungszyklus: die Klammer um die Bearbeitung eines Zeitraums, vom Eröffnen bis " +
+      "zum Wiederfinden in DATEV. Wer gerade dran ist, IST der Zustand. Die längste Kette im " +
+      "System — elf Zustände über Agent, Kanzlei, Bridge und DATEV.",
+    transitions: [
+      { from: null, to: "prepared", trigger: "cycle_opened", label: "Zyklus eröffnet", by: "user" },
+      { from: "prepared", to: "agent", trigger: "agent_run_started", label: "ein Agentendurchgang greift den Zyklus auf", by: "agent" },
+      { from: "agent", to: "prepared", trigger: "agent_run_finished", label: "Durchgang beendet — der Zyklus liegt wieder bereit", by: "agent" },
+      { from: "prepared", to: "review", trigger: "review_started", label: "die Kanzlei übernimmt die Abnahme statt des nächsten Durchgangs", by: "user" },
+      { from: "review", to: "prepared", trigger: "returned_to_agent", label: "die Kanzlei gibt an den Agenten zurück", by: "user" },
+      { from: "review", to: "ready", trigger: "batch_released", label: "abgenommen und geschnitten — die Sätze sind geclaimt und gesperrt", by: "user" },
+      { from: "ready", to: "exporting", trigger: "bridge_picked_up", label: "die Bridge holt den Stapel beim nächsten Poll", by: "system" },
+      { from: "exporting", to: "inspection", trigger: "datev_received", label: "übertragen — DATEV prüft, noch keine Quittung", by: "system" },
+      { from: "inspection", to: "confirmed", trigger: "datev_acknowledged", label: "DATEV hat quittiert; der Folge-Zyklus ist eröffnet", by: "system" },
+      { from: "inspection", to: "failed", trigger: "datev_rejected", label: "DATEV hat den Stapel abgelehnt — der Claim bleibt (human-hold)", by: "system" },
+      { from: "failed", to: "ready", trigger: "released_again", label: "erneut freigegeben", by: "user" },
+      { from: "failed", to: "review", trigger: "release_withdrawn", label: "Freigabe zurückgenommen", by: "user" },
+      { from: "confirmed", to: "mirrored", trigger: "found_in_mirror", label: "im DATEV-Spiegel wiedergefunden (ID-Kante) — die Nachlese steht aus", by: "system" },
+      { from: "mirrored", to: "closed", trigger: "reconciled", label: "abgeglichen — es gibt nichts mehr zu tun", by: "system" },
+      { from: "prepared", to: "cancelled", trigger: "cycle_cancelled", label: "Altbestand: terminal abgebrochen, die Buchungen sind wieder frei — ein lebender Zyklus geht stattdessen zurück in die Prüfung", by: "user" },
+    ],
+  },
+
+  /* ── Wer am Zug ist, Mandant, Partner, Lauf ─────────────────────────── */
+
+  disposition: {
+    axis: "disposition",
+    description:
+      "Wer am Zug ist. Kurze Kette, hohe Sichtbarkeit — sie beantwortet „warum liegt der Fall\". " +
+      "`client` ist derzeit stillgelegt: ohne Portal-Betrieb liegen Fälle bei Agent oder Kanzlei.",
+    transitions: [
+      { from: null, to: "agent", trigger: "case_created", label: "ein neuer Sachverhalt landet beim Agenten", by: "system" },
+      { from: "agent", to: "accounting", trigger: "handed_to_accounting", label: "der Agent kommt nicht weiter — die Kanzlei ist am Zug", by: "agent" },
+      { from: "accounting", to: "agent", trigger: "handed_back_to_agent", label: "die Kanzlei gibt zurück an den Agenten", by: "user" },
+      { from: "agent", to: "client", trigger: "question_to_client", label: "Rückfrage an den Mandanten", by: "agent" },
+      { from: "client", to: "accounting", trigger: "client_answered", label: "der Mandant hat geantwortet", by: "user" },
+    ],
+  },
+
+  client_onboarding: {
+    axis: "mandant_onboarding",
+    description:
+      "Der Weg eines Mandanten bis zur Buchbarkeit. Wird selten durchlaufen, dann aber von " +
+      "jemandem, der nicht weiß, was noch fehlt. Nichts läuft von selbst weiter: weder " +
+      "`processing` noch `failed` haben einen automatischen Wiederholungslauf.",
+    transitions: [
+      { from: null, to: "created", trigger: "client_created", label: "Mandant in Ludwig angelegt", by: "user" },
+      { from: "created", to: "importing", trigger: "bridge_poll_started", label: "die Bridge lädt Stammdaten, Konten und Buchungshistorie aus DATEV", by: "system" },
+      { from: "importing", to: "processing", trigger: "import_finished", label: "Daten geladen — die Pipeline bereitet sie auf", by: "system" },
+      { from: "processing", to: "review", trigger: "preparation_finished", label: "Aufbereitung durch — bis zur Freigabe ist der Mandant NICHT buchbar", by: "system" },
+      { from: "review", to: "ready", trigger: "review_completed", label: "Bankverbindungen und Buchungsbeginn bestätigt — der Mandant ist buchbar", by: "user" },
+      { from: "importing", to: "failed", trigger: "onboarding_aborted", label: "der Import ist abgebrochen", by: "system" },
+      { from: "processing", to: "failed", trigger: "onboarding_aborted", label: "die Aufbereitung ist abgebrochen", by: "system" },
+      { from: "failed", to: "importing", trigger: "onboarding_restarted", label: "bewusst neu angestoßen", by: "user" },
+    ],
+  },
+
+  business_partner: {
+    axis: "partner",
+    description:
+      "Vom erkannten Namen zum bebuchbaren Geschäftspartner. Der Weg ist kurz, die Frage " +
+      "„warum hängt der noch\" häufig — sie beantwortet sich mit `proposed`.",
+    transitions: [
+      { from: null, to: "proposed", trigger: "partner_detected", label: "aus einem Beleg automatisch erkannt", by: "system" },
+      { from: null, to: "draft", trigger: "partner_drafted", label: "angelegt, aber noch nicht ausgearbeitet", by: "user" },
+      { from: "draft", to: "proposed", trigger: "partner_submitted", label: "zur Bestätigung vorgelegt", by: "user" },
+      { from: "proposed", to: "confirmed", trigger: "partner_confirmed", label: "die Kanzlei bestätigt — ab jetzt bebuchbar", by: "user" },
+      { from: "confirmed", to: "proposed", trigger: "partner_reopened", label: "Bestätigung zurückgenommen", by: "user" },
+    ],
+  },
+
+  run_gate: {
+    axis: "lauf_gate",
+    description:
+      "Die Tore eines Agentenlaufs. `running` ist der DB-Wert NULL — der Schritt ist betreten " +
+      "und noch offen. `blocked` ist kein Endzustand: wird das Gate grün, geht es weiter; " +
+      "zweimal dasselbe Gate eskaliert an den Menschen.",
+    transitions: [
+      { from: null, to: "running", trigger: "step_entered", label: "Schritt betreten, Gate noch offen", by: "agent" },
+      { from: "running", to: "passed", trigger: "gate_passed", label: "der Agent hat im Schritt gearbeitet und ihn grün verlassen", by: "agent" },
+      { from: "running", to: "auto_passed", trigger: "gate_auto_passed", label: "der Server hat das Gate aus den Daten heraus als erfüllt gerechnet — erledigt, nicht übersprungen", by: "system" },
+      { from: "running", to: "blocked", trigger: "gate_blocked", label: "Übergang abgelehnt, das Gate war rot", by: "system" },
+      { from: "blocked", to: "running", trigger: "gate_retried", label: "erneuter Anlauf, nachdem sich etwas geändert hat", by: "agent" },
+      { from: "blocked", to: "overridden", trigger: "gate_overridden", label: "mit begründeter Ausnahme passiert — jeder offene Fall musste benannt werden", by: "user" },
+      { from: "blocked", to: "unresolved", trigger: "run_closed_while_red", label: "beim Lauf-Abschluss war das Gate noch rot — unvollständiger Abschluss, kein Durchlauf", by: "system" },
+    ],
+  },
+
+  /* ── Technische Läufe ───────────────────────────────────────────────── */
+
+  ops_job: {
+    axis: "job",
     description:
       "Der durable Job in `ops_jobs`. Job-Erfolg ist nicht Beleg-Erfolg: der Ingest-Handler wirft nicht, der Job wird auch dann `succeeded`, wenn der Beleg intern scheiterte.",
     transitions: [
-      { from: null, to: "queued", trigger: "eingereiht", by: "system" },
-      { from: "queued", to: "running", trigger: "Worker greift ihn (zählt `attempts` hoch)", by: "system" },
-      { from: "running", to: "succeeded", trigger: "durchgelaufen", by: "system" },
-      { from: "running", to: "queued", trigger: "Fehler, Wiederholung nach 60 s", by: "system" },
-      { from: "running", to: "failed", trigger: "Versuche erschöpft", by: "system" },
-      { from: "running", to: "queued", trigger: "Reaper: `locked_at` zu alt", by: "system" },
-      { from: "queued", to: "failed", trigger: "unbekannter job_type — sofort, ohne Wiederholung", by: "system" },
+      { from: null, to: "queued", trigger: "job_enqueued", label: "eingereiht", by: "system" },
+      { from: "queued", to: "running", trigger: "job_claimed", label: "Worker greift ihn (zählt `attempts` hoch)", by: "system" },
+      { from: "running", to: "succeeded", trigger: "job_succeeded", label: "durchgelaufen", by: "system" },
+      { from: "running", to: "queued", trigger: "job_retried", label: "Fehler — Wiederholung nach 60 s; der Reaper requeued zusätzlich, wenn `locked_at` zu alt ist", by: "system" },
+      { from: "running", to: "failed", trigger: "job_attempts_exhausted", label: "Versuche erschöpft", by: "system" },
+      { from: "queued", to: "failed", trigger: "job_type_unknown", label: "unbekannter `job_type` — sofort, ohne Wiederholung", by: "system" },
     ],
   },
-  upload: {
+
+  browser_upload: {
+    axis: "upload",
     description:
       "Der Browser-Upload einer Datei. Reiner Client-Zustand, überlebt keinen Reload. `done` heißt nur „Datei ist angekommen\" — ob Klassifizierung und Ingest starteten, steht daneben.",
     transitions: [
-      { from: null, to: "queued", trigger: "Datei ausgewählt oder abgelegt", by: "user" },
-      { from: "queued", to: "uploading", trigger: "Übertragung beginnt", by: "system" },
-      { from: "uploading", to: "finalizing", trigger: "Datei liegt im Speicher, Eintrag wird angelegt", by: "system" },
-      { from: "finalizing", to: "done", trigger: "Eintrag steht", by: "system" },
-      { from: "queued", to: "error", trigger: "Abbruch", by: "system" },
-      { from: "uploading", to: "error", trigger: "Abbruch", by: "system" },
-      { from: "finalizing", to: "error", trigger: "Abbruch", by: "system" },
+      { from: null, to: "queued", trigger: "file_selected", label: "Datei ausgewählt oder abgelegt", by: "user" },
+      { from: "queued", to: "uploading", trigger: "transfer_started", label: "Übertragung beginnt", by: "system" },
+      { from: "uploading", to: "finalizing", trigger: "transfer_finished", label: "Datei liegt im Speicher, Eintrag wird angelegt", by: "system" },
+      { from: "finalizing", to: "done", trigger: "entry_created", label: "Eintrag steht", by: "system" },
+      { from: "queued", to: "error", trigger: "upload_aborted", label: "Abbruch vor der Übertragung", by: "system" },
+      { from: "uploading", to: "error", trigger: "upload_aborted", label: "Abbruch während der Übertragung", by: "system" },
+      { from: "finalizing", to: "error", trigger: "upload_aborted", label: "Abbruch beim Anlegen des Eintrags", by: "system" },
     ],
   },
-  dispatch: {
+
+  processing_dispatch: {
+    axis: "dispatch",
     description:
       "Der Anstoß der Verarbeitung aus dem Browser. `failed` heißt „Start misslungen\", nicht „Beleg gescheitert\" — der Beleg steht danach unverändert auf `pending`.",
     transitions: [
-      { from: null, to: "queued", trigger: "Verarbeitung angestoßen", by: "user" },
-      { from: "queued", to: "starting", trigger: "Aufruf abgesetzt", by: "system" },
-      { from: "starting", to: "running", trigger: "Workflow bestätigt den Start", by: "system" },
-      { from: "running", to: "done", trigger: "Beleg-Status meldet Ende", by: "system" },
-      { from: "running", to: "stuck", trigger: "keine Rückmeldung mehr", by: "system" },
-      { from: "starting", to: "failed", trigger: "Aufruf kam nicht durch", by: "system" },
+      { from: null, to: "queued", trigger: "dispatch_requested", label: "Verarbeitung angestoßen", by: "user" },
+      { from: "queued", to: "starting", trigger: "dispatch_sent", label: "Aufruf abgesetzt", by: "system" },
+      { from: "starting", to: "running", trigger: "dispatch_acknowledged", label: "Workflow bestätigt den Start", by: "system" },
+      { from: "running", to: "done", trigger: "processing_finished", label: "der Beleg-Status meldet das Ende", by: "system" },
+      { from: "running", to: "stuck", trigger: "dispatch_wait_timeout", label: "nach 5 Minuten hört der Browser auf zu warten — serverseitig läuft es weiter", by: "system" },
+      { from: "starting", to: "failed", trigger: "dispatch_failed", label: "der Aufruf kam nicht durch", by: "system" },
     ],
   },
 };

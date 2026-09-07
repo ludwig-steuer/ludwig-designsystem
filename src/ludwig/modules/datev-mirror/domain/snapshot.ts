@@ -16,11 +16,11 @@
  * Die Wörter fehlten bisher ganz — weder im GLOSSARY noch als Label; die
  * Oberfläche zeigte den rohen Wert (L-72).
  *
- * **Fallstrick:** `journal_opos` steht im DB-CHECK, wird aber von keiner
- * Stelle im Code geschrieben (geprüft 2026-09-07, ganzes Repo). Entweder
- * befüllt ein externer Weg die Spalte, oder die Stufe ist tot. Sie bleibt
- * hier, bis das geklärt ist — ein Wert, den die DB erlaubt, muss die
- * Oberfläche benennen können.
+ * **Fallstrick:** `journal_opos` wird von keiner Stelle im App-Code
+ * geschrieben (geprüft 2026-09-07, ganzes Repo) — die Spalte wird **von
+ * außen befüllt** (Owner-Auskunft 2026-09-07). Die Stufe ist also nicht tot,
+ * sondern hat ihren Schreiber woanders; wer im Code nach ihm sucht, findet
+ * ihn nicht und darf daraus nicht schließen, der Wert käme nie vor.
  */
 export const BASELINE_LEVELS = ["opos", "journal_opos", "journal"] as const;
 export type BaselineLevel = (typeof BASELINE_LEVELS)[number];

@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Card, CardHead } from "../primitives/Table";
 import { ProcessStepper } from "./Process";
-import { StateMachine, type StateTransition } from "./StateMachine";
+import { STATE_MACHINES } from "@/ludwig/ui/status/status-registry";
+import { StateMachine } from "./StateMachine";
 
 const meta: Meta<typeof StateMachine> = {
   title: "v3/Patterns/Prozess/StateMachine",
@@ -11,34 +12,20 @@ export default meta;
 type Story = StoryObj<typeof StateMachine>;
 
 /*
-  Zwei Sätze stehen hier noch als Konstanten: ihre Achsen haben in der
-  Registry keine Maschine (`STATE_MACHINES` führt bisher `beleg`, `job`,
-  `upload`, `dispatch` — Register L-75, rund fünfzig offen). Quelle je Satz
-  steht darüber; der Anhang der Spec 0069 führt dieselben Tabellen mit ihrem
-  Fundort in `ludwig/app`. Die Achse `beleg` braucht keine mehr: sie kommt aus
-  der Registry, und genau das zeigen `Branching` und `Explain`.
+  **Nichts mehr von Hand.** Bis zum Spiegel-Zug vom 2026-09-07 standen hier
+  zwei Sätze als Konstanten, weil ihre Achsen in der Registry keine Maschine
+  hatten (Register L-75). Seither führt `STATE_MACHINES` zwölf Maschinen mit
+  englischem `trigger` und deutschem `label` — darunter genau diese zwei. Eine
+  Kopie daneben wäre wieder das Muster, das dieses Repo dreimal gerissen hat:
+  eine handgeschriebene Liste neben einer gepflegten.
 */
+const ZYKLUS = STATE_MACHINES.export_batch!.transitions;
+const INBOX = STATE_MACHINES.document_processing!.transitions;
 
-/** `ludwig/app/docs/topics/datev.md`, Abschnitt R19 — Spalte „Hinaus durch". */
-const ZYKLUS: StateTransition[] = [
-  { from: "prepared", to: "agent", trigger: "Aufgreifen (start_agent_run)" },
-  { from: "prepared", to: "review", trigger: "Prüfung übernehmen" },
-  { from: "agent", to: "prepared", trigger: "Durchgang beendet (finish_agent_run)" },
-  { from: "review", to: "ready", trigger: "Freigabe" },
-  { from: "review", to: "agent", trigger: "Zurück an den Agenten" },
-  { from: "ready", to: "exporting", trigger: "Push" },
-  { from: "ready", to: "review", trigger: "Abbruch" },
-  { from: "exporting", to: "confirmed", trigger: "Quittung" },
-  { from: "exporting", to: "inspection", trigger: "Quittung mit Prüfung" },
-  { from: "exporting", to: "failed", trigger: "Fehler" },
-  { from: "inspection", to: "confirmed", trigger: "Quittung" },
-  { from: "confirmed", to: "mirrored", trigger: "Spiegel-Import eines festgeschriebenen Stapels" },
-  { from: "confirmed", to: "closed", trigger: "leerer Diff" },
-  { from: "mirrored", to: "closed", trigger: "Nachlese" },
-  { from: "failed", to: "ready", trigger: "Retry" },
-  { from: "failed", to: "review", trigger: "Abbruch" },
-];
-
+/* Die **Spaltenordnung** bleibt Sache der Story: sie ist eine Aussage über das
+   Bild („`review` steht neben `agent`, weil es seinen Rang aus genau diesem
+   Übergang zieht"), keine Kopie von Daten. Alles andere — Übergänge, Wörter,
+   Beschreibung — kommt aus der Registry. */
 const ZYKLUS_STATES = [
   "prepared",
   "agent",
@@ -53,39 +40,19 @@ const ZYKLUS_STATES = [
   "cancelled",
 ];
 
-const ZYKLUS_LEAD =
-  "Der Stapel ist die Klammer um die Bearbeitung eines Zeitraums, nicht die " +
-  "Hülle um einen Export. Nummer und Beschreibung fallen bei der Eröffnung — " +
-  "der Zyklus hat von Anfang an eine Identität. Wer dran ist, ist der Zustand.";
-
-/** Der Schreiber-Absatz im Kopfkommentar von `BELEG_INBOX`. */
-const INBOX: StateTransition[] = [
-  { from: "pending_classification", to: "classified", trigger: "Classifier" },
-  { from: "pending_classification", to: "classification_failed", trigger: "Classifier" },
-  { from: "classified", to: "pending_classification", trigger: "Reprocess" },
-  { from: "classification_failed", to: "pending_classification", trigger: "Reprocess" },
-  { from: "pending_classification", to: "deleted", trigger: "Soft-Delete" },
-  { from: "classified", to: "deleted", trigger: "Soft-Delete" },
-  { from: "classification_failed", to: "deleted", trigger: "Soft-Delete" },
-];
-
 /**
  * Der Buchungszyklus: acht Spalten, sechzehn Übergänge, „Kanzlei prüft" als
  * aktueller Zustand in seinem Warnton. Fünf Bögen unten (die Rückwege), zwei
  * oben (`exporting → confirmed`, `confirmed → closed`) — `prepared → review`
  * läuft durch die Mitte, weil `review` seinen Rang aus genau diesem Übergang
  * zieht und damit neben `agent` steht.
+ *
+ * Ohne `transitions` und ohne `description`: beides holt sich die Komponente
+ * aus `STATE_MACHINES` (Maschine `export_batch`, Achse `zyklus_stapel`) — und
+ * genau das ist der Beweis, dass der Weg über die Registry trägt.
  */
 export const Filled: Story = {
-  render: () => (
-    <StateMachine
-      axis="zyklus_stapel"
-      states={ZYKLUS_STATES}
-      transitions={ZYKLUS}
-      current="review"
-      description={ZYKLUS_LEAD}
-    />
-  ),
+  render: () => <StateMachine axis="zyklus_stapel" states={ZYKLUS_STATES} current="review" />,
 };
 
 /**
@@ -143,8 +110,12 @@ export const Edge: Story = {
         axis="beleg_inbox"
         transitions={[
           ...INBOX,
-          { from: "classification_failed", to: "quarantined", trigger: "Aussortiert" },
-          { from: "pending_classification", to: "pending_classification", trigger: "Erneut anstoßen" },
+          // Zwei Übergänge, die die Registry **nicht** führt — genau der Rand,
+          // den diese Story zeigt: ein Ziel außerhalb der Achse und eine
+          // Schlinge auf sich selbst. Sie tragen `trigger` und `label` wie
+          // jeder andere Übergang seit dem Spiegel-Zug.
+          { from: "classification_failed", to: "quarantined", trigger: "quarantined", label: "Aussortiert" },
+          { from: "pending_classification", to: "pending_classification", trigger: "reprocess", label: "Erneut anstoßen" },
         ]}
         current="on_hold"
       />

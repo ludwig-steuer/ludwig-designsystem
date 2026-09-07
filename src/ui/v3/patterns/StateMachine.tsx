@@ -232,7 +232,15 @@ export function StateMachine({
   current?: string | null;
   description?: string;
 }) {
-  const machine = STATE_MACHINES[axis];
+  // **Searched, not indexed.** The key in `STATE_MACHINES` is the **process**
+  // (`export_batch`, `document_processing`), not the axis — the registry says
+  // so explicitly since the mirror pull of 2026-09-07. Before that the four
+  // machines were named after their axes and the direct lookup hit; after it
+  // hit nothing, silently. A process may write several axes, so the machine's
+  // default axis is what counts.
+  const machine =
+    STATE_MACHINES[axis] ?? Object.values(STATE_MACHINES).find((m) => m.axis === axis);
+
   const all = transitions ?? machine?.transitions ?? [];
   const lead = description ?? machine?.description;
   // The entry into the axis has no source box; it is not an edge.
@@ -349,12 +357,18 @@ export function StateMachine({
 }
 
 /**
- * A transition in words: the trigger, and who pulls it. The actor is a value
- * of the axis `actor_kind` and comes from the registry (L-74); where it is
- * missing, the sentence simply ends after the trigger.
+ * A transition in words: **the label**, and who pulls it.
+ *
+ * The label, not the trigger: since the mirror pull of 2026-09-07 the two are
+ * separate — `trigger` is the technical name the later state-machine log
+ * writes (English, `snake_case`), `label` is what a person reads (German).
+ * Showing the trigger would put `agent_run_started` in front of a bookkeeper.
+ *
+ * The actor is a value of the axis `actor_kind` and comes from the registry
+ * (L-74); where it is missing, the sentence simply ends after the label.
  */
 function wayText(t: StateTransition): string {
-  return t.by ? `${t.trigger} · ${t.by}` : t.trigger;
+  return t.by ? `${t.label} · ${t.by}` : t.label;
 }
 
 /** One box plus its explanation — the trigger carries its word (T8). */

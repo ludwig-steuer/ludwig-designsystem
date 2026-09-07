@@ -2117,6 +2117,33 @@ Spalten mit DB-`CHECK`-Constraints, die kein eigenständiges Geschäftskonzept r
 - Definition: Ein Kontext-Block am Sachverhalt in *Schritt 3* der *Stapelabnahme*. Sieben Stück: Sachverhalt · Gegenpartei · Beleg & USt · Zahlung · Regel & Periode · Notizen · Danach.
 - Notes: Jede Zone beantwortet „warum steht dieser Vorschlag hier?" aus einer anderen Richtung. Ohne sie muss die Prüferin für jede Entscheidung die Seite wechseln — und genau das kostet die Zeit, die das Review sparen soll. „Danach" ist reine Ableitung: was bleibt offen, wenn ich jetzt übernehme?
 
+### Transition (Übergang)
+
+- English: `transition`
+- German: **Übergang**
+- Definition: Der Schritt von einem Zustand einer Achse zum nächsten, mit dem Auslöser und dem Akteur, der ihn auslöst. Die Design-Guidelines nennen dasselbe in der Zustandstabelle „Hinein durch / Hinaus durch" (Z1), der Code nennt es `transition`.
+- Data type: `StateTransition` in `apps/web/src/ui/status/status-registry.ts`, gesammelt in `STATE_MACHINES` je Achse.
+- Example: `{ from: "in_progress", to: "review_needed", trigger: "reparierbare Findings bleiben", by: "system" }` auf der Achse `beleg`.
+- Notes: `from: null` ist der **Eintritt** in die Achse — wie ein Ding überhaupt einen ersten Zustand bekommt. Ein `to: null` gibt es nicht: wer die Achse verlässt, tut das über einen Endzustand, und der steht in der Descriptor-Map. Der Registry-Test prüft, dass jedes `from` und `to` ein Wert seiner Achse ist; ein umbenannter Zustand macht die Maschine damit rot, statt sie still falsch werden zu lassen. Bis 2026-09-07 standen Übergänge als Prosa in Kommentaren und waren weder abfragbar noch prüfbar.
+
+### Contra account (Gegenkonto)
+
+- English: `contra account`
+- German: **Gegenkonto**
+- Definition: Das andere Konto einer Buchung — aus Sicht der betrachteten Zeile die Gegenseite, auf der derselbe Betrag mit umgekehrtem Vorzeichen steht.
+- Data type: Ableitung, keine Spalte. Am Kontoblatt die übrigen Konten des Satzes (`contraAccounts` in `AccountEntry`), im Buchungssatz-Editor das Feld, das der Nutzer neben Soll oder Haben ausfüllt.
+- Example: Auf dem Kontoblatt von 6815 (Telefon) ist 1200 (Bank) das Gegenkonto; auf dem Kontoblatt von 1200 ist es umgekehrt.
+- Notes: **Relativ, nicht absolut** — dasselbe Konto ist mal Konto, mal Gegenkonto, je nachdem, welches Blatt man liest. Ein Satz mit mehreren Zeilen hat mehrere Gegenkonten; die Anzeige fasst sie kommasepariert zusammen. Nicht zu verwechseln mit dem *Personenkonto* (dem einen Kreditor oder Debitor des Sachverhalts) oder dem *Verrechnungskonto* (der Klammer einer Ausgleichsgruppe): beide sind Eigenschaften des Vorgangs, das Gegenkonto ist eine Eigenschaft der Blickrichtung.
+
+### Baseline level (Abzugstiefe)
+
+- English: `baseline level`
+- German: **Abzugstiefe**
+- Definition: Was ein DATEV-Abzug abdeckt — nur die offenen Posten, nur das Journal, oder beides.
+- Data type: `client_datev_snapshots.baseline_level`, DB-CHECK mit drei Werten; `BaselineLevel` in `apps/web/src/modules/datev-mirror/domain/snapshot.ts`.
+- Example: `baseline_level = 'opos'` → „nur offene Posten".
+- Notes: Sagt, **was im Abzug steckt**, nicht wie gut er ist: ein reiner OPOS-Abzug ist nicht schlechter als ein Journal-Abzug, er beantwortet nur andere Fragen. `journal_opos` wird von keiner Stelle im App-Code geschrieben — die Spalte wird von außen befüllt; wer im Code nach dem Schreiber sucht, findet ihn nicht und darf daraus nicht schließen, der Wert käme nie vor.
+
 ## How to extend this file
 
 When adding a new concept, use this template:

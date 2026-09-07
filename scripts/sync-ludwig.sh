@@ -60,6 +60,26 @@ node "$(dirname "$0")/mirror-barrels.mjs" "$DST"
 
 echo "$(find "$DST" -name '*.ts' | wc -l | tr -d ' ') Interface-Dateien gespiegelt nach src/ludwig/"
 
+# --- Stand festhalten -------------------------------------------------------
+# Der Spiegel ist seit 2026-09-07 eingefroren (Owner: das Set wird fertig, dann
+# zieht die App in einem Zug nach). Damit niemand raten muss, auf welchem Stand
+# er steht, schreibt der Zug ihn hin — `check:mirror` vergleicht ihn mit dem
+# Arbeitsbaum der App und meldet eine Abweichung als **Hinweis**, nicht als
+# Fehler.
+if [ -d "$APP/.git" ]; then
+  HASH="$(git -C "$APP" rev-parse HEAD)"
+  ZWEIG="$(git -C "$APP" branch --show-current || echo '?')"
+  cat > "$DST/GESPIEGELT_AUS.json" <<JSON
+{
+  "appHash": "$HASH",
+  "zweig": "$ZWEIG",
+  "datum": "$(date +%Y-%m-%d)",
+  "hinweis": "Kopien aus ludwig/app — nie hier bearbeiten. Eingefroren bis zur Migration (Owner-Entscheid 2026-09-07)."
+}
+JSON
+  echo "Stand vermerkt: $ZWEIG ${HASH:0:8}"
+fi
+
 # --- Doku aus der App -------------------------------------------------------
 # NUR was drüben SSOT ist: App-Architektur und App-Bestand. Die Designsprache
 # gehört diesem Repo (docs/design-guidelines.md) und wird NICHT gespiegelt.

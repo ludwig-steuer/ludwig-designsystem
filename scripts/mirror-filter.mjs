@@ -17,7 +17,8 @@
  * die gelöscht gehören. `--test` fährt die Selbstprüfung.
  */
 
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { execSync } from "node:child_process";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 /** Ein Modul, das den Server voraussetzt. Präfix zählt: `@/core/db/x` auch. */
@@ -87,6 +88,47 @@ function selbsttest() {
     process.exit(1);
   }
   console.log(`mirror-filter — in Ordnung, ${faelle.length} Fälle geprüft.`);
+  standHinweis();
+}
+
+/**
+ * Zweite Prüfung: **steht der Spiegel noch auf dem Stand, auf dem er
+ * eingefroren wurde?**
+ *
+ * Der Spiegel ist seit dem 2026-09-07 eingefroren (Owner-Entscheid: das Set
+ * wird erst fertig, dann zieht die App in einem Zug nach). `sync-ludwig.sh`
+ * schreibt dabei den App-Hash nach `src/ludwig/GESPIEGELT_AUS.json`. Läuft
+ * die App inzwischen woanders, ist das **kein Fehler** — der Spiegel soll ja
+ * stehen bleiben. Es ist ein Hinweis, damit niemand eine Abweichung für einen
+ * Bug im Set hält, so wie „Abzugstiefe" zwei Runden lang für eine falsche
+ * Beschriftung gehalten wurde (Abnahme 0027).
+ */
+function standHinweis() {
+  const marke = "src/ludwig/GESPIEGELT_AUS.json";
+  if (!existsSync(marke)) {
+    console.log("  ℹ kein Stand vermerkt — `pnpm sync:ludwig` schreibt ihn beim nächsten Zug.");
+    return;
+  }
+  const { appHash, datum } = JSON.parse(readFileSync(marke, "utf8"));
+  const app = process.env.LUDWIG_APP ?? "../app";
+  let jetzt = null;
+  try {
+    jetzt = execSync(`git -C ${JSON.stringify(app)} rev-parse HEAD`, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    console.log(`  ℹ App nicht erreichbar (${app}) — Stand nicht vergleichbar.`);
+    return;
+  }
+  if (jetzt === appHash) {
+    console.log(`  ✓ Spiegel und App stehen gleich (${appHash.slice(0, 8)}, eingefroren ${datum}).`);
+  } else {
+    console.log(
+      `  ℹ Der Spiegel steht auf ${appHash.slice(0, 8)} (eingefroren ${datum}), die App auf ` +
+        `${jetzt.slice(0, 8)}. Das ist Absicht, solange das Set nicht fertig ist — kein Sync bis zur Migration.`,
+    );
+  }
 }
 
 const arg = process.argv[2];
