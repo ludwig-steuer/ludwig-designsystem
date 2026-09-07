@@ -1003,3 +1003,46 @@ es nicht; es ist mit einem Satz oder einer Story erledigt.
 
 Abgenommen von / am: Claude (fremde Abnahme, hat nicht gebaut), 2026-09-07 ·
 **Urteil: zurück** — **Mangel 1 blockiert**; 2 und 3 blockieren nicht.
+
+## Nach der vierten Abnahme (2026-09-07): sieben Spalten, von denen zwei nichts trugen
+
+**Der Blocker erledigt — und er ist der lehrreichste dieser Aufgabe.** Die
+sieben Spalten waren im Bild, kein Querlauf, alle Kriterien formal erfüllt.
+Trotzdem stand in der Buchungstext-Spalte „B…" (2 von 21 Zeichen) und im
+Gegenkonto „70001 Bür" (9 von 27): 98,4 px und 67,6 px Spurbreite bei 1440.
+**Die Vorgabe 620 sichert, dass die Spalten existieren — nicht, dass sie
+tragen.**
+
+Am schärfsten zeigt es die Kippkante: bei **1383 px** Fenster war die Ansicht
+umgebrochen und die Zeile vollständig lesbar, bei **1384** stand sie
+nebeneinander und der Textkasten hatte **null Pixel** — der Zustands-Chip
+verdrängte den Buchungstext ganz. Die schmalere Pflichtbreite lieferte das
+bessere Bild als die breitere.
+
+`LedgerAccountView` gibt jetzt `minDetail={960}` — gerechnet aus dem Satz:
+feste Spuren, Rinnen, Polster, dazu Platz für Text und Gegenkonto. Gemessen in
+der `AppShell`:
+
+| Fenster | Lage | Arbeitsfläche | Buchungstext | Gegenkonto |
+|---|---|---|---|---|
+| 1280 | umgebrochen | 976 px | 190 px, vollständig | 104 px, vollständig |
+| 1440 | umgebrochen | 1.136 px | **371 px**, vollständig | **255 px**, vollständig |
+| 1920 | nebeneinander | 980 px | 279 px, vollständig | 191 px, vollständig |
+
+Neben dem Strang steht die Liste damit erst auf sehr breiten Schirmen — und
+das ist die ehrliche Antwort: eine Tabelle mit sieben Spalten und zwei
+Freitexten passt neben eine 440-px-Randspalte erst ab rund 1.756 px
+Fensterbreite. Vorher stand sie dort **auch**, nur unlesbar.
+
+**Die Abnahme hat den Wert gegengeprüft**, bevor sie ihn vorschlug: `--v2md-min`
+zur Laufzeit auf 900 px gesetzt, gleiches Fenster → die Spur springt von 98,4
+auf 371 px. Der Messwert reagiert.
+
+**Nicht blockierend, erledigt:** die Story-Tabelle zählte weiter „= 6" und
+kannte `InUse` nicht — es sind sieben.
+
+**Nicht blockierend, bleibt:** der volle Spaltensatz kommt in keiner Story
+dieser Aufgabe mehr vor. `WithoutFacts` hätte bei 1440 den Platz dafür
+(1.398 px). Das ist derselbe Riss wie der Blocker, nur andersherum: ein
+Dokument beschreibt eine Anordnung, die niemand angesehen hat. Es gehört in
+dieselbe Runde wie die Slot-Tabelle.
