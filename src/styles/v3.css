@@ -634,7 +634,9 @@
   white-space: nowrap;
 }
 /* 0.85 statt der 0.7 des alten `.v2btn__key`: darunter fällt der Rand auf dem
-   tertiären Knopf unter 3:1 (V10, gemessen 2.67:1 gegen `--color-bg-soft`). */
+   tertiären Knopf unter 3:1 (V10, gemessen **2.87:1** gegen
+   `--color-bg-soft`; bis 2026-09-07 stand hier 2.67, gerechnet gegen das alte
+   `accent-700` #2E78A8 — seit 0090 ist es ein anderes). */
 .v2btn .v2kbd {
   border-color: currentColor;
   background: transparent;
@@ -3128,7 +3130,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Titel trägt, nicht an die, ab der er hineinpasst (Wiederabnahme 0025). */
 @container exprow (min-width: 780px) {
   .v2exp__row {
-    grid-template-columns: 104px minmax(0, 1fr) 110px max-content 110px max-content;
+    /* 126 px, nicht 110: der Franken-Betrag „1.234.567,89 CHF" misst 121,2 px
+       und ragte in die Rinne — der Wertebereich hört nicht bei Euro auf
+       (Wiederabnahme 0025, M9). */
+    grid-template-columns: 104px minmax(0, 1fr) 126px max-content 110px max-content;
   }
 }
 /* Schmal: der Titel nimmt die ganze Breite, alles Übrige fließt darunter in

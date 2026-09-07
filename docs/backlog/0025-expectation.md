@@ -564,3 +564,219 @@ sondern eine Zeile mit Nachsatz.
   Zahl.** Frühere Abnahmen zitieren 42, 46,25 und 47,3 px, heute misst sie
   48,0. Ein Kriterium, dessen Maßstab jeder neu misst, ist ein halbes
   Kriterium — gehört in `design-guidelines.md` §9.
+
+## Dritte Abnahme (2026-09-07, fremd, ohne Bau und ohne Chatverlauf)
+
+Gemessen am laufenden Storybook (`http://localhost:6107`) über CDP, gegen den
+Stand nach `9c3fe37` (Arbeitsbaum auf `be96a56`). Kein Wert ist aus der Quelle
+zurückgelesen; jede Zahl unten stammt aus einem Rahmen, dessen Breite im
+selben Lauf gesetzt und dessen Antwort darauf mitgemessen wurde.
+
+**Die Werkzeuge sind grün.** `pnpm typecheck` Exit 0 · `pnpm build`
+„Storybook build completed successfully", Exit 0 · `pnpm check:icons`
+„in Ordnung. 53 Zeichen in der Registry", Exit 0 · `pnpm check:contrast`
+„in Ordnung. 11 Angaben nachgerechnet", Exit 0. (Der erste Build-Lauf brach
+mit Exit 1 ab — `ENOENT … copyfile ./reference/design-system-v2/ui_kits/
+marketing/index.html`, obwohl die Datei da ist und im Index steht. Der zweite
+Lauf war grün; das ist ein fremder, vermutlich paralleler Lauf am selben
+`storybook-static`, kein Befund an 0025. **Der Fehler stand nicht in der
+letzten Zeile** — nur der Exit-Code zeigte ihn.)
+
+### Zuerst: die Spalte, in der die Zeile steht
+
+`casedetailview--in-use`, je Fensterbreite eine frische Seite, gemessen an
+`.v2md--detail-breit > .v2md__detail`. `CaseDetailView` reicht seit `131412e`
+`minDetail={460}` herein; `--v2md-min` steht gemessen auf `460px`. Die Spalte
+ist trotzdem breiter als 460, weil `minDetail` der **Flex-Sockel** ist und der
+Rest an die wachsende Hälfte geht. Die Zeile in der Karte ist 42 px schmaler
+(Rand + `padding: 0 var(--space-5)`):
+
+| Fenster | Detailspalte | Zeile in der Karte | Modus | Zeilenhöhe |
+|---|---|---|---|---|
+| 1280 | **484 px** | 442 px | flex | 76 · 76 · 75 px |
+| 1360 | 564 px | 522 px | flex | 76 · 76 · 75 px |
+| 1400 | 604 px | 562 px | flex | 76 · 76 · 75 px |
+| 1440 | **644 px** | 602 px | flex | 76 · 76 · 75 px |
+| 1500 | 704 px | 662 px | flex | 76 · 76 · 75 px |
+| 1600 | 804 px | 762 px | flex | 76 · 76 · 75 px |
+
+Referenz `.v2tbl__row`: **48,0 px** (`datatable--filled`, 50 Zeilen, alle 48,0;
+`padding: 12px 18px`) — dieselbe Zahl wie in der Wiederabnahme.
+
+Nebenbefund: Die Detailspalte ist bei 1280 px Fenster **484 px** breit, nicht
+464. Der Sockel 460 plus die 24 px, die nach `440 + 20 + 460` von 944 übrig
+bleiben.
+
+### M1 — das Tor steht jetzt bei 780 px, und das Band dazwischen ist geräumt
+
+Gemessen an `interactive` (drei Zeilen **mit** Handlungsspalte) und `in-case`
+(drei Zeilen in der Karte); je Breite ein Setzen des Rahmens und ein neues
+Auslesen. Dass die Messung auf die Änderung reagiert, zeigt das Tor selbst:
+
+| Zeilenbreite | Modus | Spuren | Zeilenhöhen | Titelspur | Überlauf | Dok.-Scroll |
+|---|---|---|---|---|---|---|
+| 442 | flex | `minmax(0px, 1fr)` | 76 · 76 · 75 | volle Breite | 0 | 0 |
+| 522 · 562 · 602 · 644 · 662 · 700 · 762 | flex | eine | 76 · 76 · 75 | volle Breite | 0 | 0 |
+| **779** | flex | eine | 76 · 76 · 75 | volle Breite | 0 | 0 |
+| **780** | grid | `104px 242,3px 110px 103,3px 110px 50,4px` | **47,1 · 47,1 · 46,1** | 242,3 px | 0 | 0 |
+| 800 · 900 · 1158 | grid | sechs | 47,1 · 47,1 · 46,1 | 262 · 362 · 620 px | 0 | 0 |
+
+779 → flex, 780 → grid: das Tor sitzt genau dort, wo der Nachtrag es angibt.
+
+**Das Band 560–780 ist damit weg.** Wo die Wiederabnahme 107,7–128,6 px
+gemessen hat (560) und 149,5 px mit einem echten Firmennamen, stehen jetzt
+75–76 px. Der Nachtrag „Nach der Wiederabnahme" ist nachgerechnet und stimmt:
+484 · 602 · 644 → eine Spur, 75–76 px · 780 → sechs Spuren, 47 px · 900 → 47 px
+· **kein Überlauf bei keiner Breite** (`scrollWidth − clientWidth = 0` an
+`.v2exp`, kein Kind ragt über sein Elternteil, Dokument-Scroll 0 — geprüft bei
+442, 484, 522, 562, 602, 644, 662, 700, 762, 779, 780, 800, 804, 822, 824, 900,
+942, 1158, 1200).
+
+Was dabei auffällt, ohne Mangel zu sein: Bei `minDetail={460}` liefert die
+Detailspalte bis 1600 px Fenster **nie** mehr als 762 px Zeilenbreite. Auf der
+Sachverhaltsseite ist die Zeile also durchweg im einspaltigen Notfall; die
+sechs Spuren erscheinen dort erst ab rund 1620 px Fenster. Das ist die
+Konsequenz des höheren Tores und in der Sache richtig — bei 602 px bekäme der
+Titel 64,3 px, und das trägt kein Firmenname. Dasselbe gilt für die Story:
+`in-case` steht bei ihrer eigenen Vorgabebreite (Rahmen 720, Zeile 678) jetzt
+im Notfall, `row`, `maturities` und `interactive` (Rahmen 860, Zeile 818 bzw.
+860) im Raster.
+
+### M6 — die Trennlinien sind zurück
+
+`.v2exp:last-child .v2exp__row { border-bottom: none }` hängt jetzt am
+Behälter. Gemessen `borderBottomWidth` je Zeile:
+
+| Story | Zeilen | gemessen | `:last-child` je Behälter |
+|---|---|---|---|
+| `maturities` | 4 | **1px · 1px · 1px · 0px** | false · false · false · true |
+| `in-case` | 3 | 1px · 1px · 0px | false · false · true |
+| `interactive` | 3 | 1px · 1px · 0px | false · false · true |
+| `row` | 2 | 1px · 0px | false · true |
+
+Und die Regel folgt dem Baum: nach einem echten Klick auf „Erledigt" in
+`interactive` bleiben zwei Zeilen mit **1px · 0px** — der Messwert wandert mit,
+er wird nicht zurückgelesen. Im Bild bei 484 und bei 942 px stehen die Linien
+sichtbar zwischen den Zeilen.
+
+### Die Punkte, die vorher hielten — noch einmal nachgemessen
+
+| Punkt | Messung | Ergebnis |
+|---|---|---|
+| Datei, Story, Titel, Barrel | `entities/expectation/Expectation.tsx` + `.stories.tsx`, Titel `v3/Entitäten/Erwartung/Expectation`, Barrel `index.ts:465–470` | hält |
+| kein Hex, kein px, keine Label-Map, kein Inline-Stil | Grep über die Komponente: keine Treffer | hält |
+| genau sieben Stories | `index.json` des Dev-Servers: `chip`, `row`, `maturities`, `empty`, `error`, `interactive`, `in-case` | hält |
+| Reife aus `expectationMaturity` | Import aus `domain/case`, keine zweite Ableitung, kein Datumsvergleich im Modul | hält |
+| Reife als Wort (V7) | „Läuft", „Fällig", „Eskaliert", „Erledigt", jede mit dem Erklärsatz der Achse im `title` | hält |
+| Status nur über die Registry | `erwartung` und `erwartung_art`; Tooltip gemessen: „Erwartet: Beleg fehlt · Zu diesem Sachverhalt fehlt noch ein Beleg." | hält |
+| Frist absolut (T7) | „fällig 20.09.2026", „fällig 11.08.2026", „fällig 31.08.2026", „fällig 20.07.2026" | hält |
+| `escalationLevel` nie sichtbar | keine Stufe im Text der Seite, kein Render im Modul | hält |
+| Betrag nur bei `payment` (Chip) | zwei Beleg-Chips ohne Zahl, zwei Zahlungs-Chips mit „412,00 €"; Chip `cursor: auto`, kein Knopf | hält |
+| `currency` ist Pflicht und hat einen Nachweis | 14 Story-Stellen, `InCase` gibt `"CHF"`; im DOM gemessen „412,00 CHF" | hält |
+| Zahlen rechts mit `tnum` | `.v2num`: `lining-nums tabular-nums`, `text-align: right` | hält |
+| Fokusring, Tastatur, Hover | Ring `2px solid rgb(59, 143, 196)`, Offset 2 px; sechs Stopps (je Zeile Titel + „Erledigt"); `.v2link:hover:not(:disabled) { text-decoration: underline }`, `cursor: pointer` | hält |
+| Rundlauf `Interactive` | „3 offen · Geöffnet: nichts" → echter Klick auf den Titel → „Geöffnet: e1", drei Zeilen → echter Klick „Erledigt" → „2 offen", zwei Zeilen, die richtigen | hält |
+| feste Spuren gegen den Wertebereich | Art 104 px gegen „Zahlung offen" 94,3 px und „Beleg fehlt" 76,9 px · Reife 110 px gegen „Eskaliert" 65,2 px · Betrag 110 px gegen „1.234.567,89 €" 102,3 px. Zur dritten Spur siehe **M9** | hält (mit Vermerk) |
+| M3 (deutsche Kommentare) | Grep über die Komponente: keine deutsche Kommentarzeile mehr; die Story-JSDocs bleiben deutsch | erledigt |
+
+### Mängel
+
+**M8 · neu · blockiert · Die Kürzung erreicht den Titel nur, wenn `onOpen`
+gesetzt ist — sonst kürzt sie die Notiz.**
+Kriterium: Prüfliste `design-guidelines.md` §9, „Zeilenhöhe ≤ `.v2tbl__row`"
+(Referenz gemessen 48,0 px), und die zweite Hälfte der M1-Nacharbeit: „der
+Titel kürzt wie `.v2case` seit 0095, statt die Zeile zu dehnen".
+Messung: Die Regel heißt `.v2exp__title > :first-child` (`v3.css:3145`) und
+trifft ein **Element**. Die Komponente rendert den Titel aber nur dann als
+Element, wenn `onOpen` da ist (`Expectation.tsx:166–176`: Knopf oder **nackter
+Textknoten**). Gemessen an `.v2exp__title` je Zeile:
+
+| Story | erstes Kind | erstes **Element** | worauf die Regel wirkt |
+|---|---|---|---|
+| `interactive` (mit `onOpen`) | `BUTTON.v2link` | `BUTTON.v2link` | auf den Titel — richtig |
+| `in-case`, `maturities`, `row` Z. 1 | `TEXT:Rechnung · Bürobed…` | **kein Element** | auf nichts |
+| `row` Z. 2 (mit Notiz) | `TEXT:Erwartung · Stadtw…` | `SPAN.v2exp__note` | auf die **Notiz** |
+
+Zwei gemessene Folgen, beide mit dem echten Firmennamen
+„Elektro-Großhandel Nordwest Verwaltungs GmbH & Co. KG":
+
+| Zeilenbreite | `interactive` (Knopf) | `in-case` (Text) |
+|---|---|---|
+| 442 (flex) | gekürzt, **75–76 px** | nicht gekürzt, **95,9–96,9 px** |
+| 780 (grid) | gekürzt, **46,1–47,1 px** | nicht gekürzt, **65,8–66,8 px** |
+| 900 (grid) | gekürzt, 46,1–47,1 px | nicht gekürzt, 65,8–66,8 px |
+| 1158 (grid) | gekürzt bzw. passend, 46,1–47,1 px | 46,1–47,1 px (erst hier passt der Name in die Spur) |
+
+Also genau das, was die Nacharbeit ausschließen wollte: die Zeile **dehnt
+sich** auf 66,8 px gegen eine Referenz von 48,0 px, sobald kein `onOpen`
+gereicht wird — und `InCase` ist die Story, die die Karte im Sachverhalt
+nachstellt, also der Hauptfall.
+Zweitens **verschwindet Text**: in `row` (Vorgabebreite, Zeile 818 px, grid)
+steht im Bild „Teilzahlung vom 12.08. ist eingegangen, der Re…", während der
+Titel daneben ungekürzt umbricht. Dass es die Regel ist, ist gegengemessen:
+mit der Regel 66,3 px und `scrollWidth > clientWidth`, mit einem
+Gegen-Stylesheet (`overflow: visible; white-space: normal`) 85,7 px und nicht
+gekürzt, nach dem Entfernen des Gegen-Stylesheets wieder 66,3 px. Vor `9c3fe37`
+gab es die Regel nicht — die Notiz brach um, sie wurde nicht abgeschnitten.
+Vorschlag: den Titel **immer** als Element rendern — im `else`-Zweig ein
+`<span className="v2exp__label">{title}</span>` statt des nackten Textes — und
+die Regel an diese Klasse und an den Knopf hängen
+(`.v2exp__label, .v2exp__title > button { … ellipsis }`) statt an
+`:first-child`. Dann kürzt der Titel in beiden Ausprägungen, und die Notiz
+bricht wieder um, wie sie es vorher tat.
+
+**M9 · neu · blockiert nicht · Die Betragsspur hält gegen den Wertebereich in
+Euro, nicht in Franken.**
+Kriterium: „Maße gegen den Wertebereich, nicht gegen die Fixtures" (Abnahme 1).
+Messung: Die Spur ist 110 px. `1.234.567,89 €` misst 102,3 px und passt.
+`1.234.567,89 CHF` — dieselbe Zahl in der Währung, die `InCase` selbst reicht —
+misst **121,2 px** und ragt 11,2 px über die Spur. Es kollidiert nichts: die
+Rinne daneben ist 12 px breit, die Frist beginnt genau dort. Und der Fall
+tritt nur im Rasterbetrieb (ab 780 px Zeilenbreite) auf. Die Spur stammt aus
+dem Bau, nicht aus der Nacharbeit.
+Vorschlag: die Spur auf `max-content` stellen (die Rinne trägt den Abstand,
+und ein Betrag bricht wegen des geschützten Leerzeichens ohnehin nicht) oder
+sie auf rund 125 px setzen und den Wert im Kommentar mit der Währung nennen.
+
+**M7 · bleibt Vermerk.** Im einspaltigen Notfall stehen die Spaltenkanten
+nicht untereinander — nachgemessen bei 442 px Zeilenbreite: Frist bei
+x = 137,9 in den Zeilen ohne Betrag, bei x = 234,2 in der Zeile mit Betrag.
+Bewusst so; unter 780 px gibt es keine Spalten, sondern eine Zeile mit
+Nachsatz. Kein Rückgabegrund.
+
+**M5 · bleibt Vermerk.** `audienceWord()` unverändert; gedeckt durch
+Freigabe-Entscheid 1.
+
+**M1 · Tor erledigt, Kürzung offen.** Der erste Teil der Nacharbeit — das Tor
+bei 780 px statt bei der Summe der festen Spuren — ist nachgemessen und
+stimmt; der zweite Teil, „der Titel kürzt", trägt nur die Hälfte der Fälle und
+steht als **M8**. **M6 · erledigt.** **M3 · erledigt.** **M2, M4 · erledigt
+(Wiederabnahme).**
+
+Abgenommen von / am: fremde dritte Abnahme (Claude, ohne Bau und ohne
+Chatverlauf) · 2026-09-07 · Ergebnis: **zurück**. **M8** blockiert; **M9**
+läuft mit; **M5** und **M7** bleiben Vermerke.
+
+**Befund am Set** (nicht Gegenstand dieser Aufgabe): Die Referenzhöhe hinter
+„Zeilenhöhe ≤ `.v2tbl__row`" steht weiterhin nirgends als Zahl; gemessen sind
+es 48,0 px, frühere Abnahmen zitieren 42, 46,25 und 47,3. Der Satz gehört nach
+`design-guidelines.md` §9 — zum zweiten Mal notiert.
+
+## Nach der dritten Abnahme (2026-09-07): die Kürzung traf die falsche Zeile
+
+**M8 erledigt.** Die Regel hing an `.v2exp__title > :first-child` — und ein
+`:first-child` ist ein **Element**. Ohne `onOpen` rendert die Komponente den
+Titel als nackten Textknoten; die Kürzung traf dann die **Notiz** darunter. Im
+Bild stand „Teilzahlung vom 12.08. ist eingegangen, der Re…" abgeschnitten,
+während der Titel daneben umbrach, und die Zeile maß 65,8 statt 46,1 px.
+
+Der Titel ist jetzt **immer** ein Element (`.v2exp__label`), und die Regel
+hängt an der Klasse. Gemessen in `InCase` bei 900 px Rahmen: 47 · 47 · 46 px,
+kein Überlauf; im schmalen Band unverändert 75–76.
+
+**M9 erledigt** — die Betragsspur war mit 110 px gegen den **Euro**-Betrag
+bemessen; `1.234.567,89 CHF` misst 121,2 px und ragte in die Rinne. Jetzt
+126 px. Der Wertebereich hört nicht bei Euro auf — dieselbe Lehre wie bei den
+Spurbreiten, eine Währung weiter.
+
+**M5 und M7 bleiben Vermerk**, wie vereinbart.

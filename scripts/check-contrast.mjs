@@ -23,12 +23,18 @@
 
 import { readFileSync } from "node:fs";
 
-const FILE = "src/styles/tokens.css";
-const source = readFileSync(FILE, "utf8");
+/**
+ * Alle drei Stylesheets, nicht nur die Tokens: die vierte falsch gerechnete
+ * Zahl der Woche stand in `v3.css` („2.67:1 gegen bg-soft", gerechnet gegen
+ * ein `accent-700`, das es seit 0090 nicht mehr gibt). Ein Wächter, der an
+ * der Token-Datei endet, prüft die Hälfte der Behauptungen.
+ */
+const FILES = ["src/styles/tokens.css", "src/styles/v3.css", "src/styles/app-chrome.css"];
+const TOKEN_SOURCE = readFileSync(FILES[0], "utf8");
 
 /** `--color-x: #AABBCC;` → the map every claim is resolved against. */
 const TOKENS = new Map();
-for (const m of source.matchAll(/(--color-[a-z0-9-]+)\s*:\s*(#[0-9A-Fa-f]{3,8})\s*;/g)) {
+for (const m of TOKEN_SOURCE.matchAll(/(--color-[a-z0-9-]+)\s*:\s*(#[0-9A-Fa-f]{3,8})\s*;/g)) {
   TOKENS.set(m[1], m[2]);
 }
 
@@ -77,37 +83,41 @@ function resolveGround(word) {
  * unless the comment names one itself, as the focus ring does.
  */
 const claims = [];
-const lines = source.split("\n");
-for (let i = 0; i < lines.length; i++) {
-  const line = lines[i];
-  const found = [...line.matchAll(/(\d+[.,]\d+)\s*:\s*1\s*(?:auf\s+([A-Za-zäöü0-9-]+))?/g)];
-  if (!found.length) continue;
+for (const file of FILES) {
+    const lines = readFileSync(file, "utf8").split("\n");
+    for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const found = [...line.matchAll(/(\d+[.,]\d+)\s*:\s*1\s*(?:auf\s+([A-Za-zäöü0-9-]+))?/g)];
+    if (!found.length) continue;
 
-  // The token this comment talks about: named inside it, or the next one
-  // declared below it, or — for a trailing comment — the one on this line.
-  const named = line.match(/(--color-[a-z0-9-]+)\s*,/);
-  let token = named?.[1] ?? line.match(/(--color-[a-z0-9-]+)\s*:/)?.[1] ?? null;
-  for (let j = i + 1; !token && j < Math.min(i + 12, lines.length); j++) {
-    token = lines[j].match(/(--color-[a-z0-9-]+)\s*:/)?.[1] ?? null;
+    // The token this comment talks about: named inside it, or the next one
+    // declared below it, or — for a trailing comment — the one on this line.
+    const named = line.match(/(--color-[a-z0-9-]+)\s*,/);
+    let token = named?.[1] ?? line.match(/(--color-[a-z0-9-]+)\s*:/)?.[1] ?? null;
+    for (let j = i + 1; !token && j < Math.min(i + 12, lines.length); j++) {
+      token = lines[j].match(/(--color-[a-z0-9-]+)\s*:/)?.[1] ?? null;
+    }
+
+    // Each claim carries its own ground, and one without a named ground is
+    // measured against the page — **not** against the ground of its neighbour.
+    // „5.52:1, 4.78:1 auf warning-bg" is two claims: the first against white,
+    // the second against the warning surface.
+    for (const f of found) {
+      claims.push({
+        file,
+        line: i + 1,
+        text: f[0].trim(),
+        claimed: Number(f[1].replace(",", ".")),
+        ground: f[2] ?? "weiss",
+        token,
+      });
+    }
   }
 
-  // Each claim carries its own ground, and one without a named ground is
-  // measured against the page — **not** against the ground of its neighbour.
-  // „5.52:1, 4.78:1 auf warning-bg" is two claims: the first against white,
-  // the second against the warning surface.
-  for (const f of found) {
-    claims.push({
-      line: i + 1,
-      text: f[0].trim(),
-      claimed: Number(f[1].replace(",", ".")),
-      ground: f[2] ?? "weiss",
-      token,
-    });
-  }
 }
-
 let bad = 0;
 let unchecked = 0;
+let unresolvedInTokens = 0;
 for (const c of claims) {
   // A token declared as `rgba(...)` has no hex and is not the foreground of
   // its own claim — such a comment names the token it means (the focus ring
@@ -116,8 +126,9 @@ for (const c of claims) {
   const bg = resolveGround(c.ground);
   if (!fg || !bg) {
     unchecked++;
+    if (c.file === FILES[0]) unresolvedInTokens++;
     console.log(
-      `  ? Zeile ${c.line}: „${c.text}" — ${!fg ? `Token ${c.token ?? "unbekannt"}` : `Grund ${c.ground}`} nicht auflösbar`,
+      `  ? ${c.file}:${c.line} — „${c.text}" — ${!fg ? `Token ${c.token ?? "unbekannt"}` : `Grund ${c.ground}`} nicht auflösbar`,
     );
     continue;
   }
@@ -126,18 +137,26 @@ for (const c of claims) {
   if (Math.abs(actual - c.claimed) > 0.005) {
     bad++;
     console.error(
-      `  ✗ Zeile ${c.line}: ${c.token} auf ${c.ground} steht mit ${c.claimed.toFixed(2)}:1 da, gemessen ${actual.toFixed(2)}:1`,
+      `  ✗ ${c.file}:${c.line} — ${c.token} auf ${c.ground} steht mit ${c.claimed.toFixed(2)}:1 da, gemessen ${actual.toFixed(2)}:1`,
     );
   }
 }
 
 const checked = claims.length - unchecked;
-if (bad) {
+// In `tokens.css` ist eine Angabe, die sich nicht auflösen lässt, selbst ein
+// Mangel: dort steht der Wert direkt daneben. In den anderen Stylesheets
+// beziehen sich viele Angaben auf Klassen statt auf Token — die kann dieser
+// Wächter nicht nachrechnen, und er sagt es, statt Grün zu melden. Wer eine
+// solche Angabe prüfbar machen will, nennt beide Token im Kommentar:
+// „gemessen 2.87:1 (`--color-text-subtle` auf `--color-bg-soft`)".
+if (bad || unresolvedInTokens) {
   console.error(
-    `\ncheck:contrast — ${bad} von ${checked} Angaben stimmen nicht. Die Zahl im Kommentar ist die Messung; wer sie ändert, rechnet sie nach.`,
+    `\ncheck:contrast — ${bad} von ${checked} Angaben stimmen nicht${unresolvedInTokens ? `, ${unresolvedInTokens} in tokens.css lassen sich nicht auflösen` : ""}. Die Zahl im Kommentar ist die Messung; wer sie ändert, rechnet sie nach.`,
   );
   process.exit(1);
 }
 console.log(
-  `check:contrast — in Ordnung. ${checked} Angaben nachgerechnet${unchecked ? `, ${unchecked} nicht auflösbar` : ""}.`,
+  `check:contrast — in Ordnung. ${checked} Angaben nachgerechnet${
+    unchecked ? `, ${unchecked} beziehen sich auf Klassen statt auf Token und bleiben ungeprüft` : ""
+  }.`,
 );

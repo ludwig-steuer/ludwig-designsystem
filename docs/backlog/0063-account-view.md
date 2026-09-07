@@ -820,3 +820,186 @@ Der Nachweis steht in 0050.
   behauptet ihn für „ohne Strang", `WithoutFacts` fährt aber ebenfalls
   `compact`. Entweder bekommt `WithoutFacts` den vollen Satz — dort ist Platz
   dafür —, oder die Tabelle sagt, dass es ihn in dieser Ansicht nicht gibt.
+
+## Wiederabnahme 2026-09-07 (vierte Runde, fremde Abnahme)
+
+**Urteil: zurück.** Die zwei Blocker der dritten Runde sind behoben und in der
+Wirkung nachgemessen: `InUse` rendert den Verlauf, und `Edges` zeigt keine
+Kontoart mehr, die es nicht gibt. Auch der Umbruch stimmt jetzt — bei 1280
+steht die Arbeitsfläche oben. Blockierend ist **ein** Punkt, und er ist die
+nächste Schicht desselben Fehlers, an dem die zweite Runde blockiert hat: bei
+1440 sind zwar sieben von sieben Spalten im Bild, aber `Buchungstext` und
+`Gegenkonto` tragen dort nichts mehr. Die zweite Runde hat gemessen, ob die
+Spalten **existieren**; diese misst, ob sie etwas **sagen**.
+
+Der Rahmen selbst (`LedgerAccountView.tsx`) bleibt wie in den drei Runden
+zuvor unangetastet — 78 Zeilen, sieben `ReactNode`-Slots, zwei Importe.
+
+Gemessen am laufenden Dev-Server `http://localhost:6107` (Quelle, nicht
+`storybook-static`), CDP über ein eigenes Blatt, `getBoundingClientRect`,
+`getComputedStyle` und `Range` am gerenderten Bild, Fenster 1280 und
+1440 × 900 sowie ein 1-px-Schwenk um die Kippkante, Stand `be96a56`, Baum
+sauber. **Gegenprobe, dass der Messwert reagiert:** `--v2md-min` zur Laufzeit
+auf 900 px gesetzt — dieselbe Ansicht, dasselbe Fenster (1440) — schlägt von
+`440 / 676` auf eine umgebrochene Fläche von 1134 px um, und die Spur
+`Buchungstext` springt von 98,4 auf 371 px. Die Zahlen unten sind also
+gemessen, nicht zurückgelesen.
+
+### Behoben, gemessen
+
+- **M2 (Rang 3 in `InUse`).** Der Verlauf ist ein gemeinsamer Baustein
+  (`Chart`), den `Filled` und `InUse` rendern. In der `AppShell` gemessen:
+  12 Balken Soll, 12 Balken Haben, 12 Achsenmarken bei **beiden** Breiten.
+  Slots bei 1440: `pager` 88–116 · `head` 136–222,6 · `sum` 242,6–365 ·
+  `chart` **385–605,5** · `tabs` 625,5–668,5. Die Ränge 1–3 enden bei
+  y = 605,5, die Seite ist bis y = 900 sichtbar — **kein Scrollen**. Bei 1280:
+  `chart` 422,2–642,7, ebenfalls ohne Scrollen. Kein Querlauf
+  (`scrollWidth − clientWidth = 0` an `.app__main`).
+- **M3 (Kontoart im Bestand).** `BANK` setzt `role: "general_ledger"`.
+  Gemessen in `Edges`: Marke im Kopf „Sachkonto", Randspalte „Kontoart ·
+  Sachkonto", SKR-Klasse „Finanz- und Privatkonten". Ein Textknoten-Schwenk
+  über die ganze Seite nach den Rohschlüsseln der Achse (`general_ledger`,
+  `creditor`, `debtor`, `revenue`, `other`, `bank`, `datev`, `ludwig`,
+  `mirrored`, `exported`, `proposed`) findet in `InUse` und `Edges` bei beiden
+  Breiten **null** Rohwerte; die Treffer sind sämtlich deutsche Oberfläche
+  („Saldo in DATEV 2026", „+ 3 nur in Ludwig", der Sidebar-Eintrag „Bank").
+- **Umbruch-Reihenfolge (Mangel 4 der dritten Runde).** Mit `04ae1ad` dreht
+  `flex-wrap: wrap-reverse` die Zeilenfolge. Gemessen `InUse` bei 1280:
+  Arbeitsfläche (`.v2md__detail`, die Bewegungen) `top` **725,7**,
+  Randspalte (`.v2md__list`, die Fakten) `top` **1040,2** — die Bewegungen
+  stehen oben. Bei 1440 nebeneinander, beide bündig bei `top` 688,5.
+- **`minDetail`.** Die Ansicht gibt keine Prop, gemessen ist `--v2md-min` an
+  `.v2md` **unset**, es gilt also der Sockel des Stylesheets (620). Die
+  Kippkante liegt damit rechnerisch bei 440 + 620 + 20 = 1.080 px Inhalt; im
+  1-px-Schwenk gemessen kippt sie bei Fenster **1383 → 1384** (Inhalt
+  1079 → 1080). Die Formel trifft.
+- **Rang 5, vier Klassen** — in `InUse` bei 1440 an einer Zeile nachweisbar:
+  `datev` kein Zeichen, kein Chip, `rgb(45,45,45)` · `mirrored` Zeichen ·
+  `exported` Zeichen + Chip „Exportiert" · `ludwig` Zeichen +
+  `v2ae__row--draft`, `rgb(92,92,92)`. Dasselbe Bild in `Edges`.
+- **Rang 2.** Eine führende Zahl: `v2kpi__val` 19 px / 600, das Delta in
+  `v2kpi__sub` 11,5 px („47 Buchungen · + 3 nur in Ludwig (612,40 €)"). Die
+  zweite Kachel trägt ein Datum.
+- **Ein Konto je Bildschirm.** `Edges`: Kennzahl −184.221,55 €, Randspalte
+  derselbe Saldo, Σ Soll / Σ Haben 612.004,20 € / 796.225,75 € (Differenz
+  184.221,55 €), Tabellenpager „1–50 von 3.400". `Empty`: „Saldo in DATEV —",
+  „0 Buchungen im Spiegel", Σ 0,00 € / 0,00 €, „Letzte Buchung —", Liste
+  „Auf diesem Konto ist im Jahr 2026 nichts gebucht." Kein Haken, kein Grün.
+- **`WithoutFacts`.** Kein `.v2md`; drei Slots — `head` 20–106,6 · `sum`
+  126,6–249 · `body` 269–563,5, Abstände durchgehend 20 px, keine leere Zeile.
+- **Fest.** `pnpm typecheck` **Exit 0** · `pnpm build` **Exit 0** (am
+  Exit-Code geprüft, nicht an der letzten Zeile — die trägt nur die
+  Rolldown-Zeitmessung) · `pnpm check:icons` Exit 0 (53 Zeichen, 2 Dateien
+  offen — vorbestehend) · `pnpm check:contrast` Exit 0 (11 Angaben
+  nachgerechnet) · Slots nur `ReactNode`, kein `useState`, kein `await`, kein
+  Modul-Import, kein Hex · keine Saldospalte im Satz · **eine** Bewegungsliste
+  je Story · Barrel `index.ts:415`.
+
+### Mängel
+
+**1. Bei 1440 sind die sieben Spalten im Bild, aber `Buchungstext` und
+`Gegenkonto` tragen nichts mehr. — blockierend**
+
+*Kriterium:* der Auftrag („alles über ein Konto in einem Jahr"; „zeigt alle
+Datenpunkte ab 20 % Füllgrad"), die Slot-Zeile `children` (Ränge 4 und 5) und
+das offene App-Kriterium „ersetzt `accounts/[accountNumber]/page.tsx` samt
+beider Auszugstabellen" — dazu L1 („kein zusammengeschobener Screen"). Und der
+Satz, den die Nacharbeit nach der zweiten Runde selbst geschrieben hat: „die
+Liste daneben beantwortet ‚was ist gebucht' — Datum, Beleg, Text, Gegenkonto,
+Soll, Haben." Gemessen beantworten „Text" und „Gegenkonto" das auf der Seite
+nicht. Die Abnahme von 0116 hat denselben Punkt unabhängig gemessen und
+ausdrücklich hierher gereicht („Das ist ein Punkt für 0063").
+
+*Messung*, `InUse` in der `AppShell`, 1440 × 900, `.v2md` `440px 676px`,
+7/7 Spalten im Bild, Querlauf 0 — und trotzdem:
+
+| Spur | Breite | Zeile | sichtbar |
+|---|---|---|---|
+| `Buchungstext` | 98,4 px | „Bürobedarf Meier GmbH" (mit Chip „Exportiert", 72,2 px, `flex-shrink: 0`) | Textkasten **18,2 px** → **„Bü"**, 2 von 21 Zeichen |
+| | | „Kaffeeröster Nord GmbH" | 14 von 22 |
+| | | „Storno RE-4455" | 13 von 14 |
+| | | „Schreibwaren Süd" | 13 von 16 |
+| `Gegenkonto` | 67,6 px | „70001 Bürobedarf Meier GmbH" | **„70001 Bür"**, 9 von 27 Zeichen |
+
+Der Name des Gegenkontos fehlt damit in **jeder** Zeile, die einen hat.
+
+Schlimmer ist die Richtung. Ein Schwenk in 1-px-Schritten über die Kippkante,
+alles in der `AppShell`:
+
+| Fenster | Inhalt | Lage | Arbeitsfläche | Spur `Buchungstext` | Textkasten Zeile 1 |
+|---|---|---|---|---|---|
+| 1383 | 1079 | umgebrochen | 1079 | 337,2 | **156,1 — voller Text** |
+| **1384** | 1080 | nebeneinander | 620 | 66,4 | **0 px — 0 von 21 Zeichen** |
+| 1440 | 1136 | nebeneinander | 676 | 98,4 | 18,2 („Bü") |
+| 1520 | 1216 | nebeneinander | 756 | 145,8 | 65,6 |
+| 1600 | 1296 | nebeneinander | 836 | 193,2 | 113 |
+| 1700 | 1396 | nebeneinander | 936 | 252,4 | 156,1 — voller Text |
+
+**Ein Pixel mehr Fenster kostet den ganzen Buchungstext**, und zwischen 1384
+und rund 1700 px wird der Kontoauszug mit wachsender Fensterbreite lesbarer,
+statt es zu sein. Bei 1384 verdrängt der Chip „Exportiert" (72,2 px, schrumpft
+nicht) den Text vollständig aus einer 66,4-px-Spur — im Bild steht dort nur
+noch der Chip. Bei 1280, wo die Ansicht umbricht, ist dieselbe Zeile
+vollständig lesbar (Spur 276,1 px, „Bürobedarf Meier GmbH", Gegenkonto 26 von
+27 Zeichen). Die schmalere Pflichtbreite liefert also das bessere Bild als die
+breitere.
+
+Die Vorgabe 620 sichert, dass die Spalten **existieren** — genau das hat diese
+Aufgabe nach der zweiten Runde gemessen und für erledigt erklärt. Sie sichert
+nicht, dass sie tragen.
+
+*Vorschlag* (kein Griff an `MasterDetail` nötig, der Baustein tut, was 0116
+verlangt): `LedgerAccountView` gibt `minDetail` selbst — den Wert, den der
+kompakte Satz braucht, um **lesbar** zu sein, nicht um vorhanden zu sein. Aus
+dem Satz gerechnet: feste Spuren 84 + 24 + 96 + 104 + 104 = 412, sechs Rinnen
+à 10 = 60, Polster 36 → 508; dazu ~300 für `Buchungstext` (Chip 72 + Rinne 8 +
+~220 Text) und ~150 für `Gegenkonto` ≈ **960**. Gegenprobe gemessen: mit
+`--v2md-min: 900px` bei Fenster 1440 bricht die Ansicht um, die Bewegungen
+nehmen 1134 px, `Buchungstext` 371 px und `Gegenkonto` 255 px — alle vier
+Zeilen vollständig, 7/7 Spalten, kein Querlauf. Zwei Alternativen, falls der
+Zuschnitt anders ausfallen soll: die Fakten neben den Bewegungen auf der Seite
+gar nicht führen (dann fällt die Frage weg), oder den Chip unterhalb einer
+Spurbreite mitschrumpfen bzw. entfallen lassen — er ist Rang 5, das
+Herkunfts-Zeichen zwei Spalten links beantwortet dieselbe Frage. Der Zuschnitt
+gehört dem Owner, die Messung sagt nur: 620 ist zu wenig.
+
+**2. Die Story-Tabelle der Neufassung zählt weiter sechs und kennt `InUse`
+nicht. — nicht blockierend**
+
+*Kriterium:* fest „alle Stories" mit der Ableitung nach §6, und der eigene
+Satz der Nacharbeit nach der zweiten Runde („die Zählung geht auf sieben")
+sowie M11 („die Zählformel geht auf").
+
+*Messung:* Im Code stehen **sieben** Story-Exporte (`Filled`, `WithoutFacts`,
+`OtherTab`, `Empty`, `LoadingAndError`, `Edges`, `InUse`) — in der Registry
+des Dev-Servers ebenso sieben. Der Abschnitt „Stories" der Neufassung rechnet
+unverändert „3 + 1 + 1 + 1 = **6**", und seine Tabelle hat sechs Zeilen;
+`InUse` fehlt darin. Zwei Nacharbeits-Texte behaupten seither das Gegenteil.
+Der Code ist richtig, die Spec hinkt nach — eine Zeile und eine Zahl.
+
+**3. Der volle Spaltensatz kommt in keiner Story dieser Aufgabe vor. — nicht
+blockierend, aber er stört mich**
+
+Unverändert aus der dritten Runde: `grep 'variant: "full"'` trifft im ganzen
+Set nur `AccountEntries.stories.tsx` (0067). Die Slot-Tabelle nennt weiter
+`accountEntryColumns({ variant: "full" })`, und die Nacharbeit sagt, der volle
+Satz gehöre in die Ansicht **ohne** Strang — `WithoutFacts` fährt aber
+ebenfalls `compact`. Gemessen hat `WithoutFacts` bei 1440 eine sichtbare
+Fläche von 1398 px mit Spuren von 527,4 px (`Buchungstext`) und 362,6 px
+(`Gegenkonto`); für den vollen Satz wäre dort dreifach Platz.
+
+Warum es mehr ist als Kosmetik: es ist derselbe Riss wie Mangel 1 — ein
+Dokument beschreibt eine Anordnung, die niemand angesehen hat. Blockieren tut
+es nicht; es ist mit einem Satz oder einer Story erledigt.
+
+### Befunde am Set (nicht an dieser Aufgabe)
+
+- **`DataTable.rowClassName` heißt nach der falschen Familie.** Unverändert:
+  die einzige Regel ist `.v2tbl__row.v2ae__row--draft` (`v3.css:2740`), also
+  nach `AccountEntryList` benannt, obwohl der Haken jede Tabelle betrifft.
+  Gehört zu 0057.
+- **Alter Name in zwei fremden Dateien.** `0066-account-cell-facts.md:10` und
+  `0067-account-entries.md:10` verlinken 0063 weiter als `AccountView`.
+
+Abgenommen von / am: Claude (fremde Abnahme, hat nicht gebaut), 2026-09-07 ·
+**Urteil: zurück** — **Mangel 1 blockiert**; 2 und 3 blockieren nicht.

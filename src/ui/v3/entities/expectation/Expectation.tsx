@@ -163,16 +163,20 @@ export function ExpectationRow({
           />
         </span>
         <span className="v2exp__title">
+          {/* Auch ohne `onOpen` ein **Element**: die Kürzung hängt an der
+              Klasse, und ein nackter Textknoten nimmt sie nicht an — dann
+              kürzte die Regel die Notiz darunter statt des Titels
+              (Wiederabnahme 0025, M8). */}
           {onOpen ? (
             <button
               type="button"
-              className="v2link"
+              className="v2link v2exp__label"
               onClick={() => onOpen(expectation.id)}
             >
               {title}
             </button>
           ) : (
-            title
+            <span className="v2exp__label">{title}</span>
           )}
           {expectation.note ? (
             <span className="v2exp__note">{expectation.note}</span>

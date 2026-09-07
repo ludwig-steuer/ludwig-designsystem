@@ -69,7 +69,16 @@ export function LedgerAccountView({
         // movements are the working surface (rank 4), and a block of field
         // rows over them pushes the answer below the fold (doubt 4 of the
         // page profile). `detailBreit` gives the wide half to the movements.
-        <MasterDetail list={aside} detail={children} detailBreit />
+        // 960 px, nicht die Vorgabe 620: die Vorgabe sichert, dass die
+        // sieben Spalten **existieren**, nicht dass sie tragen. Neben dem
+        // 440-px-Strang blieb der Buchungstext bei 1440 px Fenster 98 px breit
+        // — im Textkasten zwei von 21 Zeichen —, und beim Gegenkonto fehlte
+        // der Name in jeder Zeile. Schlimmer: bei 1384 px stand die Ansicht
+        // gerade wieder nebeneinander und der Text hatte **null** Pixel, bei
+        // 1383 umgebrochen war er vollständig — die schmalere Breite lieferte
+        // das bessere Bild (Abnahme 0063, vierte Runde). 960 = feste Spuren
+        // plus Rinnen plus Polster plus Platz für Text und Gegenkonto.
+        <MasterDetail list={aside} detail={children} detailBreit minDetail={960} />
       ) : (
         <div className="v2lav__body">{children}</div>
       )}

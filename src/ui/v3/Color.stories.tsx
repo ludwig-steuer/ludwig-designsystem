@@ -46,7 +46,8 @@ const isUnread = (token: string) => !READERS.includes(`var(${token})`);
 /**
  * The declared value **as the browser hands it back** — not verbatim: a token
  * whose declaration is itself a `var()` comes back substituted
- * (`--color-info` returns `#3B8FC4`, not `var(--color-accent)`). The old
+ * (`--color-info` comes back as the accent's own value, not as
+ * `var(--color-accent)`). The old
  * comment claimed the opposite (acceptance of 0055).
  */
 const readToken = (token: string) =>
