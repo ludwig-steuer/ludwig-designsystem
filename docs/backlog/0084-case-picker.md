@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit |
+| Freigabe | 2026-09-07, ludwig-coordinator im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md`, Abschnitt „Formen" (Zeile `CasePicker`) und „Heutige Darstellung" (letzte Zeile) |
 | Auftrag | Die Auswahl eines bestehenden Sachverhalts, wenn eine Bankzeile ihm zugeordnet wird. Ersetzt den `<select>` in `modules/bank-transactions/ui/BankTransactionAssignmentTable.tsx` (Z. 376–388), der heute „Nummer · Art · 40 Zeichen Zusammenfassung" in eine Optionszeile presst. |
@@ -194,3 +195,9 @@ Variabel (aus dieser Spec):
 - [ ] Ersetzt den `<select>` in `BankTransactionAssignmentTable.tsx` Z. 376–388 ohne Funktionsverlust — die Zuordnung geht weiter, und zusätzlich sieht man Zustand und Betrag (Story `InUse`)
 
 ## Abnahme
+
+## Freigabe (2026-09-07, ludwig-coordinator im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Die Begründung, `Combobox` nicht zu erweitern, trägt für die Plakette — nicht für die Suche: `Combobox` filtert lokal nur `label` und `value`, die Nummer steht im `hint` und wird nicht gefunden, die Zusammenfassung nirgends. Entscheid: **der Picker filtert selbst** (Anzeigename, Nummer, Gegenpart, Zusammenfassung) und reicht `onSearch` durch — der kleinere Schritt; `ComboboxOption.keywords` bleibt Ausbau, bis `AccountField` als zweiter Nutzer kommt. Entscheide: 1 Server oder Client — beides, mit dieser Korrektur · 2 Betrag fehlt → nichts · 3 Gegenpart **im `hint`, wenn `title` gesetzt** (sonst steckt er im Label) — das 47-%-Argument ist widerlegt.
+
+Vor dem Bau in die Spec: Suche (Ort der Filterung plus Kriterium); Kennung über `caseIdentifier()` statt „entfällt ersatzlos" (auch der heutige `<select>` zeigt die Kurz-ID); Registry-Pfad `src/ludwig/ui/status/status-registry.ts` (Achse `sachverhalt`); `currency`-Prop streichen — `CaseListItem.currency` je Fall, `asCurrency()` aus `shared/money.ts` je Treffer; `Edges` auf die Suche umformulieren (die 700-Zeichen-Zusammenfassung steht nicht in der Zeile).

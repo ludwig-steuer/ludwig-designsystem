@@ -3,6 +3,7 @@
 | | |
 |---|---|
 | Status | spec |
+| Freigabe | zurück 2026-09-07 — Neufassung auf einen Einsatzort nach Abschnitt „Freigabe", danach ohne zweite Runde freigegeben |
 | Stufe | `entities/accounting-case/` |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md`, Abschnitt „Formen" (Zeile `CaseCard`) und „Listen" (Zeile `PortalCaseList`) |
 | Auftrag | Die Karte, die der **Mandant** von einem Sachverhalt sieht: Anzeigename, Nummer, Art, Betrag, Eröffnet, Zusammenfassung — darunter seine offenen Fragen und Belegwünsche als Unterlisten. Ersetzt `modules/client-portal/ui/PortalCaseList.tsx` (396 Z.). |
@@ -190,3 +191,11 @@ Variabel (aus dieser Spec):
 - [ ] Ersetzt die Karte in `PortalCaseList.tsx` und die in `CloseCasesPanel.tsx` ohne Funktionsverlust — beide Rollen mit demselben Export, ohne Rollen-Variante im Code (Stories `InPortal`, `InAcceptance`)
 
 ## Abnahme
+
+## Freigabe (2026-09-07, ludwig-coordinator im Auftrag des Owners)
+
+**Urteil: zurück — Neufassung auf einen Einsatzort.** Das Portal ist mit dem Seiten-Rückbau vom 2026-09-05 gelöscht (§11.4; L-32 erledigt; `disposition='client'` stillgelegt, Owner 2026-08-31). Der ganze Zuschnitt „zwei Rollen → Rahmen mit Slots", die Zeile „ersetzt `PortalCaseList.tsx`", die Story `InPortal` und Frage 3 stehen auf einem Bildschirm, den es nicht gibt. Es bleibt **ein** Einsatzort: `CloseCasesPanel` (Reiter „Zum Schließen", `[year]/cases`, Welle 1). §3 Regel 5 trägt weiter — eine Seite braucht die Form, keine vorhandene deckt sie —, aber die Slots werden für einen Aufrufer über die Präzedenz 0050/0063 begründet, nicht über zwei Rollen.
+
+Entscheide: 1 Gegenpart **in der Karte ab S** (Rang 5), ausgelassen nur ohne `title` — das Profil hat das Rückfallketten-Argument am 2026-09-05 widerlegt (in 51 % der Fälle mit `title` fehlt er darin) · 2 alle Kinder zeigen · 3 gegenstandslos, streichen · **Zustand in den Kopf** (`StatusBadge` Achse `sachverhalt`), Bearbeitungsstand (Rang 2) und Zuständigkeit (Rang 6) gehören in die Karte — die Ränge sind kumulativ, und genau diese zwei nennt das Profil als Lücke von `CloseCasesPanel` · der Abnahme-Bucket (Rang 25) geht **nicht** in `aside`: „Gruppenkopf, gehört zur Abnahmeliste, nicht in die Zeile" (Profil).
+
+Vor dem Bau in die Spec: Neufassung auf den einen Einsatzort; Slots gegen 0050/0063 begründen; `InPortal` streichen (vier Stories bleiben über der Untergrenze); Anzeigename und Kennung über `caseTitle()`/`caseIdentifier()` aus `case-title.ts` statt eigener Regeln — „fehlt die Nummer, steht keine da" widerspricht der Familie; kein lokales `CaseCardVM`: `CaseLink` plus `Pick<CaseListItem, …>` für die Zusammenfassung; Kopfzeile bereinigen („Zeigt (Ränge)" gegen den Text, „L-32 fällt an" ist erledigt). Vorab freigegeben, wenn die Neufassung dem folgt.

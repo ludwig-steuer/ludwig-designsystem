@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit |
+| Freigabe | 2026-09-07, ludwig-coordinator im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md`, Abschnitt „Formen" (Zeile `CaseEditor`) |
 | Auftrag | Kein Formular, sondern `InlineEdit` je Wert im `CaseDetailView`: Anzeigename (`title`), Zusammenfassung (`summary`), Art (`kind`) und Belegnummern-Modus (`document_number_mode`); dazu die Zuständigkeit (`disposition`, schreibbar nur `agent` und `accounting`). Ersetzt `CaseSummaryEditor`, `CaseKindEditor`, `CaseDocumentNumberModeEditor` und `CaseCommentForm`. |
@@ -216,3 +217,11 @@ Variabel (aus dieser Spec):
 - [ ] Ersetzt `CaseSummaryEditor`, `CaseKindEditor` und `CaseDocumentNumberModeEditor` ohne Funktionsverlust; `CaseCommentForm` bleibt bewusst draußen und der Grund steht in „Kann bewusst nicht" (Story `InUse`)
 
 ## Abnahme
+
+## Freigabe (2026-09-07, ludwig-coordinator im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Die Regel aus `case.ts:102–107` ist richtig gelesen (jede Umstufung mit Grund, Herabstufung nur `→ single` zusätzlich mit Nummernwahl, `none` über `allowNone`); `InlineEdit`, `ReasonDialog`, `Select` sind im Barrel. Entscheide: 1 kein Grund bei der Zuständigkeit · 2 **`RadioGroup` über `KnownDocumentNumber[]`**, kein Scrollfall (Bestand max. 1) · 3 `none` ohne `allowNone` unsichtbar.
+
+Vor dem Bau in die Spec: (a) `ReasonDialog` sperrt „Bestätigen" nur über `required && reason`, Knopf **und** Enter — die Sperre ohne Nummernwahl braucht einen Weg: `ReasonDialog` um eine Prop `confirmDisabled?: boolean` erweitern (§3 Regel 2, gilt für Knopf und Enter), Kriterium „Enter bestätigt nicht, was der Knopf verweigert"; (b) Typen aus dem Spiegel: `CaseDispositionWritable`/`CASE_DISPOSITION_WRITABLE` (case.ts) statt der lokalen Union, `KnownDocumentNumber` (document-number.ts) statt `readonly string[]`; (c) `InUse`: die drei Editoren im `children`-Slot des `CaseDetailView` (0050: „`CaseEditor` füllt `children`"), Breite des Slots gemessen; (d) Kopfzeile: `CaseCommentForm` aus „ersetzt" streichen — `CaseTimeline` überspringt Kommentare (Owner 2026-09-04), die Ablösung hat im Set keinen Ort, bleibt Ausbau 0040.
+
+Befunde ins Register: **L-211** — `CaseDetail` trägt die verknüpften Belegnummern (`client_case_document_numbers`) nicht; die Herabstufung kann ihre Wahl nicht aus dem Detail speisen. **L-212** — `CaseDetail.disposition` ist `string | null` statt `CaseDisposition | null` (`case-detail.ts:71`), Cast an jeder Aufrufstelle.
