@@ -126,7 +126,11 @@ Zeile in der Tabelle steht, kein Grund, die Liste zu kürzen (Owner-Regel
 gemessen wird die **Wirkung, nicht die Behauptung**: `getBoundingClientRect`
 statt `getComputedStyle` auf einem selbst gesetzten Stil, die Lage des
 Textes in der Zelle statt nur der Spurkanten, bei vier Breiten (700, 1100,
-1400, 1920 px).
+1400, 1920 px). Ein Layout-Kriterium, das nur im Story-Rahmen gemessen wird,
+misst die Fixture: gemessen wird in der Story „im Einsatz" bei der Breite,
+die der Baustein auf der Seite hat (Karte, Drawer, Reiter), nicht bei der des
+Story-Rahmens — deshalb ist „im Einsatz" ein fester Summand der
+Story-Ableitung (`spec-schreiben` §6) und keine Kür (0071, 2026-09-07).
 
 Die vollständige Gestaltungs-Prüfliste steht in `docs/design-guidelines.md`
 §9 — dort durchgehen, nicht hier zusammenfassen.
