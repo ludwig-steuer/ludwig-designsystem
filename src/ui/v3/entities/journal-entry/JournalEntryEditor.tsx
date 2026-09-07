@@ -13,6 +13,10 @@ import { parseAmount } from "../../primitives/AmountInput";
 import { Button } from "../../primitives/Button";
 import { Dialog } from "../../primitives/Dialog";
 import { AccountField, type AccountCandidate, type AccountGroup } from "../account/AccountField";
+import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain/document-number";
+
+import { DocumentNumberField } from "../document-number/DocumentNumberField";
+import type { DocumentNumberSourceLabels } from "../document-number/document-number-labels";
 import { JournalEntryCard } from "./JournalEntryCompact";
 import { AiBookingNotes } from "./AiBookingNotes";
 
@@ -128,8 +132,34 @@ export interface JournalEntryEditorProps {
   onDelete?: (reason: string) => void | Promise<void>;
   /** Kontenblatt eines Kontos öffnen (Drawer des Aufrufers). */
   onOpenLedger?: (konto: string) => void;
+  /**
+   * Das Belegnummern-Register zu **dieser Zeile** öffnen (0014). Gesetzt →
+   * die Lupe erscheint am Feld; weggelassen → kein Icon, wie bei
+   * `AccountField`. Die Zeilen-Id geht mit, weil der Aufrufer wissen muss,
+   * wohin er die gewählte Nummer zurückgibt.
+   */
+  onOpenDocumentNumberRegister?: (rowId: string) => void;
+  /**
+   * Die Nummer, die für diesen Fall **gilt**, samt ihrer Herkunft — sie kommt
+   * aus der Dominanz-Rangfolge der Belegnummern-Quellen (`belegnummer_quelle`,
+   * berechnet in `modules/datev-truth`). Weicht der Wert der Zeile davon ab,
+   * sagt `DocumentNumberField` es; der Editor rechnet nichts und rät nichts.
+   */
+  dominantDocumentNumber?: KnownDocumentNumber | null;
+  /** Die Wörter der neun Quellen — Prop, weil es dafür keine Achse gibt (L-71). */
+  documentNumberSourceLabel?: DocumentNumberSourceLabels;
   /** Erklärung eines BU-Schlüssels öffnen. */
   onOpenTaxKey?: (bu: string) => void;
+  /**
+   * Gesetzt → das Gegenkonto ist **bearbeitbar**, mit demselben `AccountField`
+   * wie die Zeilen. Weggelassen → Anzeige wie bisher. Die Seite (S/H) bleibt
+   * in beiden Fällen fest: sie ist die Gegenseite des Belegs und fällt aus
+   * `belegSide` — ein Umschalter dort erzeugte einen Satz, der nicht aufgeht.
+   * Das `≠` in der Summenzeile ist die ehrlichere Rückmeldung.
+   */
+  onContraAccountChange?: (konto: string, name: string) => void;
+  /** Kandidaten für das Gegenkonto-Feld, in der Form von `AccountField`. */
+  contraAccountCandidates?: React.ComponentProps<typeof AccountField>["candidates"];
   /** Schnellfunktionen: Klärungskonto, wie letzte Buchung, Privatanteil. */
   quickActions?: { klaerungskonto?: () => void; wieLetzte?: () => void; privatanteil?: () => void };
 }
@@ -175,13 +205,17 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
     onDelete,
     onOpenLedger,
     onOpenTaxKey,
+    onOpenDocumentNumberRegister,
+    dominantDocumentNumber,
+    documentNumberSourceLabel,
+    onContraAccountChange,
+    contraAccountCandidates,
     quickActions,
   } = props;
 
   const [rows, setRows] = useState<EditorRow[]>(props.rows);
   const [mode, setMode] = useState<EditorMode>(props.mode ?? "einfach");
   const [reason, setReason] = useState("");
-  const [quittiert, setQuittiert] = useState<Set<string>>(new Set());
   const [journalOffen, setJournalOffen] = useState(false);
   const [stornoOffen, setStornoOffen] = useState(false);
   const [stornoGrund, setStornoGrund] = useState("");
@@ -192,8 +226,23 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
   const summe = summeBelegseite(rows, belegSide);
   const rest = belegAmount == null ? null : belegAmount - summe;
 
-  const offeneWarnungen = warnings.filter((w) => !quittiert.has(w.code));
-  const saveBlocked = errors.length > 0 || offeneWarnungen.length > 0 || aktiv.length === 0;
+  // **Warnungen blockieren nicht.** Sie stehen sichtbar da und das Speichern
+  // läuft; nur Fehler halten es an. Die Quittung war der Versuch, eine
+  // Entscheidung zu erzwingen — und erzwungene Quittungen werden geklickt,
+  // nicht gelesen (Owner-Entscheid 2026-09-07).
+  const saveBlocked = errors.length > 0 || aktiv.length === 0;
+
+  /**
+   * Tragen die aktiven Zeilen **verschiedene** Belegfeld-1-Werte? Der leere
+   * Wert zählt mit — er ist die häufigste Abweichung, und genau sie meldet
+   * der Server später als Prüfpunkt `P-BELEG`.
+   */
+  const belegfeldUneinheitlich =
+    aktiv.length > 1 && new Set(aktiv.map((r) => r.beleg1.trim())).size > 1;
+
+  const applyDocumentNumberToAll = useCallback((value: string) => {
+    setRows((rs) => rs.map((r) => (r.removed ? r : { ...r, beleg1: value })));
+  }, []);
 
   const setRow = useCallback((id: string, patch: Partial<EditorRow>) => {
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
@@ -314,6 +363,12 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
               onSearchAccounts={onSearchAccounts}
               onOpenLedger={onOpenLedger}
               onOpenTaxKey={onOpenTaxKey}
+              {...(onOpenDocumentNumberRegister ? { onOpenDocumentNumberRegister } : {})}
+              {...(dominantDocumentNumber ? { dominantDocumentNumber } : {})}
+              {...(documentNumberSourceLabel ? { documentNumberSourceLabel } : {})}
+              {...(belegfeldUneinheitlich
+                ? { onApplyDocumentNumberToAll: () => applyDocumentNumberToAll(r.beleg1) }
+                : {})}
             />
           ),
         )}
@@ -321,18 +376,36 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
         {gegenkonto ? (
           <div className="bse__gegen">
             <span className="bse__gegen__label">
-              an {belegSide === "S" ? "H" : "S"} {gegenkonto.konto}{" "}
-              <span className="v2muted">{gegenkonto.name}</span>
-              {gegenkonto.tag ? <span className="bse__tag">{gegenkonto.tag}</span> : null}
-              {onOpenLedger ? (
-                <button
-                  type="button"
-                  className="v2link v2link--quiet"
-                  onClick={() => onOpenLedger(gegenkonto.konto)}
-                >
-                  Kontenblatt
-                </button>
-              ) : null}
+              {/* Die Seite steht fest — sie ist die Gegenseite des Belegs. */}
+              an {belegSide === "S" ? "H" : "S"}{" "}
+              {editable && !locked && onContraAccountChange ? (
+                // Dasselbe Feld wie in den Zeilen: gleiches Verhalten, gleiche
+                // Tastatur, und das Kontenblatt-Icon (0013) kommt mit.
+                <AccountField
+                  value={gegenkonto.konto}
+                  onChange={(konto, candidate) =>
+                    onContraAccountChange(konto, candidate?.name ?? gegenkonto.name)
+                  }
+                  candidates={contraAccountCandidates ?? {}}
+                  {...(onSearchAccounts ? { onSearch: onSearchAccounts } : {})}
+                  {...(onOpenLedger ? { onOpenLedger } : {})}
+                  ariaLabel="Gegenkonto"
+                />
+              ) : (
+                <>
+                  {gegenkonto.konto} <span className="v2muted">{gegenkonto.name}</span>
+                  {gegenkonto.tag ? <span className="bse__tag">{gegenkonto.tag}</span> : null}
+                  {onOpenLedger ? (
+                    <button
+                      type="button"
+                      className="v2link v2link--quiet"
+                      onClick={() => onOpenLedger(gegenkonto.konto)}
+                    >
+                      Kontenblatt
+                    </button>
+                  ) : null}
+                </>
+              )}
             </span>
             <span className="v2num">{euro(summe)}</span>
           </div>
@@ -401,21 +474,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
         />
       ) : null}
 
-      <Meldungsblock
-        errors={errors}
-        warnings={warnings}
-        hints={hints}
-        quittiert={quittiert}
-        editable={editable}
-        onQuittieren={(code) =>
-          setQuittiert((q) => {
-            const next = new Set(q);
-            if (next.has(code)) next.delete(code);
-            else next.add(code);
-            return next;
-          })
-        }
-      />
+      <Meldungsblock errors={errors} warnings={warnings} hints={hints} />
 
       {editable ? (
         <>
@@ -441,9 +500,6 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
             <Button variant="primary" size="sm" hotkey="Ctrl+↵" disabled={saveBlocked} onClick={speichern}>
               Speichern &amp; freigeben
               {errors.length > 0 ? ` · ${errors.length} Fehler` : ""}
-              {errors.length === 0 && offeneWarnungen.length > 0
-                ? ` · ${offeneWarnungen.length} offene Warnung${offeneWarnungen.length === 1 ? "" : "en"}`
-                : ""}
             </Button>
           </div>
         </>
@@ -557,6 +613,10 @@ function Zeile({
   onSearchAccounts,
   onOpenLedger,
   onOpenTaxKey,
+  onOpenDocumentNumberRegister,
+  dominantDocumentNumber,
+  documentNumberSourceLabel,
+  onApplyDocumentNumberToAll,
 }: {
   row: EditorRow;
   voll: boolean;
@@ -569,6 +629,11 @@ function Zeile({
   onSearchAccounts?: (q: string) => Promise<AccountCandidate[]>;
   onOpenLedger?: (konto: string) => void;
   onOpenTaxKey?: (bu: string) => void;
+  onOpenDocumentNumberRegister?: (rowId: string) => void;
+  dominantDocumentNumber?: KnownDocumentNumber | null;
+  documentNumberSourceLabel?: DocumentNumberSourceLabels;
+  /** Gesetzt → der Übernahme-Knopf steht unter dem Feld dieser Zeile. */
+  onApplyDocumentNumberToAll?: () => void;
 }) {
   const brutto = toNumber(row.umsatz);
   // Die Steuerzeile wird abgeleitet, nicht getippt — dieselbe Rechnung, die
@@ -621,12 +686,38 @@ function Zeile({
             </select>
             <AccountField
               value={row.konto}
-              onChange={(konto) => onChange({ konto })}
+              // Der Name kommt mit, wenn der Kandidat ihn trägt — sonst stünde
+              // in der Zeile eine Nummer ohne Wort, und im Journal daneben ein
+              // leerer Kontoname.
+              onChange={(konto, candidate) =>
+                onChange(candidate ? { konto, kontoName: candidate.name } : { konto })
+              }
               candidates={row.candidates ?? {}}
               onSearch={onSearchAccounts}
+              // **Der Rest von 0013:** das Kontenblatt-Icon steht am Feld,
+              // nicht nur in der Lese-Ansicht. Ohne dieses Durchreichen führt
+              // der Weg zum Kontenblatt genau dort nicht hin, wo man das Konto
+              // gerade wählt.
+              {...(onOpenLedger ? { onOpenLedger } : {})}
               ariaLabel="Konto"
             />
-            <input className="v2in" value={row.beleg1} onChange={(e) => onChange({ beleg1: e.target.value })} aria-label="Belegfeld 1" />
+            {/* Belegfeld 1 ist ein eigener Baustein (0014): 36 Zeichen, die
+                Herkunft der geltenden Nummer, der Weg ins Register. Ein
+                nacktes `<input>` hier wäre die zweite Wahrheit über dieselbe
+                Regel. */}
+            {documentNumberSourceLabel ? (
+              <DocumentNumberField
+                value={row.beleg1}
+                onChange={(beleg1) => onChange({ beleg1 })}
+                sourceLabel={documentNumberSourceLabel}
+                {...(dominantDocumentNumber ? { dominant: dominantDocumentNumber } : {})}
+                {...(onOpenDocumentNumberRegister
+                  ? { onOpenRegister: () => onOpenDocumentNumberRegister(row.id) }
+                  : {})}
+              />
+            ) : (
+              <input className="v2in" value={row.beleg1} onChange={(e) => onChange({ beleg1: e.target.value })} aria-label="Belegfeld 1" />
+            )}
             {voll ? (
               <input className="v2in" value={row.beleg2 ?? ""} onChange={(e) => onChange({ beleg2: e.target.value })} aria-label="Belegfeld 2" />
             ) : null}
@@ -696,6 +787,15 @@ function Zeile({
             Rest {euro(rest)} einsetzen
           </button>
         ) : null}
+        {/* Gleiche Machart und gleiche Stelle wie „Rest einsetzen": eine
+            Korrektur, die dort steht, wo der Befund auffällt. Der Server
+            erhebt denselben (Prüfpunkt `P-BELEG`) — der Knopf setzt sie
+            davor. */}
+        {editable && onApplyDocumentNumberToAll ? (
+          <button type="button" className="v2link" onClick={onApplyDocumentNumberToAll}>
+            Belegfeld 1 in alle Zeilen übernehmen
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -721,7 +821,10 @@ function Journal({
   open: boolean;
   onToggle: () => void;
 }) {
-  const zeilen: { konto: string; name: string; side: Side; amount: number }[] = [];
+  // Der Buchungstext geht mit: das Journal ist die **DATEV-Stapelordnung**
+  // (Konto · Kontoname · Buchungstext · Soll · Haben), und ohne ihn stünde in
+  // der Spalte, die `JournalEntryCard` dafür hat, nichts.
+  const zeilen: { konto: string; name: string; text: string; side: Side; amount: number }[] = [];
   for (const r of rows) {
     const brutto = toNumber(r.umsatz);
     const steuer = deriveTax(
@@ -729,13 +832,16 @@ function Journal({
       accountFramework,
     );
     if (!steuer) {
-      zeilen.push({ konto: r.konto, name: r.kontoName, side: r.side, amount: brutto });
+      zeilen.push({ konto: r.konto, name: r.kontoName, text: r.text, side: r.side, amount: brutto });
       continue;
     }
-    zeilen.push({ konto: r.konto, name: r.kontoName, side: r.side, amount: steuer.net });
+    zeilen.push({ konto: r.konto, name: r.kontoName, text: r.text, side: r.side, amount: steuer.net });
     zeilen.push({
       konto: steuer.account.accountNumber,
       name: steuer.account.accountName,
+      // Die Steuerzeile trägt den Text ihrer Zeile: sie ist dieselbe Buchung,
+      // nur aufgeteilt — im Stapel stünde dort derselbe Text.
+      text: r.text,
       side: r.side,
       amount: steuer.tax,
     });
@@ -751,6 +857,9 @@ function Journal({
       zeilen.push({
         konto: gegenkonto.konto,
         name: gegenkonto.name,
+        // Das Gegenkonto hat keinen eigenen Text — es nimmt den der ersten
+        // Zeile, wie der Stapel es täte.
+        text: rows[0]?.text ?? "",
         side: belegSide === "S" ? "H" : "S",
         amount: summe,
       });
@@ -783,6 +892,7 @@ function Journal({
               side: z.side === "S" ? ("debit" as const) : ("credit" as const),
               accountNumber: z.konto,
               accountName: z.name,
+              text: z.text,
               amount: z.amount,
             }))}
             currency="EUR"
@@ -795,24 +905,21 @@ function Journal({
 }
 
 /**
- * Fehler blockieren, Warnungen brauchen eine Quittung, Hinweise stehen nur da.
- * Die Quittung ist der Punkt: die Entscheidung soll getroffen, nicht
- * übersehen werden.
+ * Fehler blockieren das Speichern, Warnungen und Hinweise stehen nur da.
+ *
+ * Die Quittungspflicht für Warnungen ist mit dem Owner-Entscheid vom
+ * 2026-09-07 gestrichen: eine Warnung, die man abhaken **muss**, wird
+ * abgehakt und nicht gelesen — und sie hielte den Satz an einer Stelle an, an
+ * der nichts falsch ist, sondern nur etwas auffällig.
  */
 function Meldungsblock({
   errors,
   warnings,
   hints,
-  quittiert,
-  editable,
-  onQuittieren,
 }: {
   errors: EditorMessage[];
   warnings: EditorMessage[];
   hints: EditorMessage[];
-  quittiert: ReadonlySet<string>;
-  editable: boolean;
-  onQuittieren: (code: string) => void;
 }) {
   if (errors.length + warnings.length + hints.length === 0) return null;
   return (
@@ -836,24 +943,13 @@ function Meldungsblock({
           <span className="v2msg__body">
             <span className="v2pp__code">{w.code}</span> {w.message}
           </span>
-          <span className="v2msg__actions">
-            {w.onFix ? (
+          {w.onFix ? (
+            <span className="v2msg__actions">
               <button type="button" className="v2link" onClick={w.onFix}>
                 {w.fixLabel ?? "Beheben"}
               </button>
-            ) : null}
-            {editable ? (
-              <label className="v2checkline" style={{ fontSize: 12 }}>
-                <input
-                  type="checkbox"
-                  className="v2check"
-                  checked={quittiert.has(w.code)}
-                  onChange={() => onQuittieren(w.code)}
-                />
-                <span>quittieren</span>
-              </label>
-            ) : null}
-          </span>
+            </span>
+          ) : null}
         </div>
       ))}
       {hints.map((h) => (

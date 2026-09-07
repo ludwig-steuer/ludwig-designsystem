@@ -2,14 +2,14 @@
 
 | | |
 |---|---|
-| Status | spec |
-| Freigabe | zurück 2026-09-06 — zwei Owner-Fragen im Abschnitt „Freigabe" |
+| Status | Abnahme |
+| Freigabe | zurück 2026-09-06, Owner-Fragen beantwortet 2026-09-07 — Neufassung unten |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | nein — Buchungssatz, Belegfeld, Gegenkonto sind Fachbegriffe |
 | Quelle | Anfrage Owner 2026-09-03 · Design `reference/f109-buchungsreview/BuchungssatzEditor.dc.html` und `Buchungsreview.dc.html` Z. 891 / 3092 |
 | Ersetzt | — (erweitert den bestehenden Editor) |
 | Blockiert | — |
-| Wartet auf | 0013 (Kontenblatt-Icon), 0014 (Belegfeld-Feld) |
+| Wartet auf | — (0013 und 0014 sind fertig; der Rest von 0013 ist mit dieser Aufgabe eingebaut) |
 | Spec von / am | Claude, 2026-09-03 |
 
 ## Ziel
@@ -174,3 +174,135 @@ Abgenommen von / am: … · Offene Punkte: …
 Danach: §1 gegen den entschiedenen Stand neu schreiben; §2 um `onOpenDocumentNumberRegister?: (rowId: string) => void` und die Herkunft von `dominant` ergänzen; §3 Props englisch (`onContraAccountChange`, `contraAccountCandidates`) und der 0013-Rest (der Editor reicht `onOpenLedger` an die Zeilen-Felder durch, `JournalEntryEditor.tsx:603–609`) als vierter Punkt; Stories: heute 14, mit +3 sind es 17 — Ausnahme begründen oder nach §4 trennen, `Empty` erklären, Namen englisch; Kopf „Wartet auf": 0013 ist fertig, nur 0014 bleibt.
 
 Befunde ins Register: **B** — GLOSSARY-Eintrag „Gegenkonto (contra account)" fehlt.
+
+## Neufassung 2026-09-07 — gegen den Stand, nicht gegen den Stash
+
+Die Freigabe vom 2026-09-06 hatte zwei Fragen an den Owner gestellt; beide
+sind am 2026-09-07 beantwortet:
+
+- **(a) Journal-Spalten:** wie im Umbau — Konto · Kontoname · Buchungstext ·
+  Soll · Haben, die DATEV-Stapelordnung. Der **BU** bleibt in der Editorzeile,
+  nicht im Journal.
+- **(b) Quittungspflicht:** **keine.** Warnungen stehen sichtbar da und
+  blockieren das Speichern nicht; Fehler blockieren.
+
+Der Stash „verwaister JournalEntryEditor-Umbau" ist als **Vorlage gelesen**,
+nicht angewandt worden. Er stammt von einem Stand vor 0044 **und** vor 0106:
+sein Journal-Markup war eine eigene Fünf-Spalten-Tabelle aus `<div>`-Zeilen —
+nach 0044 zeichnet der Editor das Journal gar nicht mehr selbst, und nach 0106
+wäre das Markup ohnehin ungültig. Übernommen sind seine **Entscheidungen**,
+verworfen ist sein Code.
+
+### §1 — Journal in der DATEV-Stapelordnung
+
+Der Umbau ist kleiner, als er 2026-09-06 aussah: `JournalEntryCard` (0044)
+zeichnet die fünf Spalten **bereits**. Was fehlte, war der **Buchungstext** —
+der Editor hat ihn nicht übergeben, also stand die Spalte, die es dafür gibt,
+leer. Jetzt geht er mit:
+
+- Die **Steuerzeile** trägt den Text ihrer Zeile — sie ist dieselbe Buchung,
+  nur aufgeteilt, und im Stapel stünde dort derselbe Text.
+- Das **Gegenkonto** nimmt den Text der ersten Zeile, wie der Stapel es täte.
+- Der **BU** steht nicht im Journal. Er ist eine Eingabe der Zeile, keine
+  Buchungszeile — im Stapel erzeugt er die Steuerzeile, die daneben schon
+  steht.
+
+Damit ist die ursprüngliche Fassung dieses Abschnitts („Konto | Soll | Haben |
+BU", vier Spalten, `side` entfällt) **überholt**: sie beschreibt ein Journal,
+das der Editor seit 0044 nicht mehr selbst zeichnet.
+
+Gemessen (Story `JournalWithPostingText`, zwei Zeilen mit Steuer):
+
+```
+Konto   Kontoname                  Buchungstext        Soll Umsatz  Haben Umsatz
+6815    Bürobedarf                 Bürobedarf August    1.240,00 €
+1406    Abziehbare Vorsteuer 19 %  Bürobedarf August      235,60 €
+6820    Porto                      Porto August            75,55 €
+1406    Abziehbare Vorsteuer 19 %  Porto August            14,35 €
+70044   Bürobedarf Meier GmbH      Bürobedarf August                 1.565,50 €
+```
+
+### §1b — Warnungen quittieren entfällt
+
+Der Zustand `quittiert`, die Kästchen im Meldungsblock und der Zusatz „·
+n offene Warnungen" am Speichern-Knopf sind weg. `saveBlocked` prüft nur noch
+Fehler und leere Zeilen.
+
+**Warum das die bessere Fassung ist:** eine Warnung, die man abhaken **muss**,
+wird abgehakt und nicht gelesen — und sie hält den Satz an einer Stelle an, an
+der nichts falsch ist, sondern nur etwas auffällig. Die Warnung behält ihren
+Weg („6820 einsetzen"); wer ihn nicht nimmt, hat entschieden, nicht übersehen.
+Gemessen in `S1_EditWithWarning`: Warnung sichtbar mit ihrem Knopf, kein
+Kästchen, Speichern offen.
+
+### §2 — Belegfeld 1
+
+- Das Feld ist `DocumentNumberField` (0014), sobald der Aufrufer die Wörter
+  der Quellen mitgibt (`documentNumberSourceLabel`) — sonst bleibt das nackte
+  Feld. Damit kommen die 36-Zeichen-Grenze, der Hinweis auf die **geltende**
+  Nummer und der Weg ins Register mit.
+- **Neue Props:** `onOpenDocumentNumberRegister?: (rowId: string) => void`
+  (die Zeilen-Id geht mit, weil der Aufrufer wissen muss, wohin er die
+  gewählte Nummer zurückgibt), `dominantDocumentNumber?: KnownDocumentNumber`
+  und `documentNumberSourceLabel?: DocumentNumberSourceLabels`.
+- **Die Herkunft von `dominant`:** die geltende Nummer kommt aus der
+  Dominanz-Rangfolge der Belegnummern-Quellen (Achse `belegnummer_quelle`,
+  berechnet in `modules/datev-truth`). Der Editor rechnet sie **nicht** — er
+  zeigt, was ihm gegeben wird; die Rangfolge ist Fachlogik der App.
+- **„Belegfeld 1 in alle Zeilen übernehmen"** steht dort, wo „Rest einsetzen"
+  steht, und erscheint nur, wenn die aktiven Zeilen verschiedene Werte tragen
+  (der leere Wert zählt mit). Er übernimmt den Wert **seiner** Zeile.
+
+### §3 — Gegenkonto bearbeitbar, und der Rest von 0013
+
+- **Props englisch:** `onContraAccountChange(konto, name)` und
+  `contraAccountCandidates`. Gesetzt → das Gegenkonto ist ein `AccountField`
+  wie die Zeilen; weggelassen → Anzeige wie bisher.
+- **S/H bleibt fest.** Die Seite des Gegenkontos ist die Gegenseite des
+  Belegs und fällt aus `belegSide`; ein Umschalter dort erzeugte einen Satz,
+  der nicht aufgeht. Das `≠` in der Summenzeile ist die ehrlichere Rückmeldung.
+- **Vierter Punkt, der Rest von 0013:** der Editor reicht `onOpenLedger`
+  jetzt auch an die **Zeilen-Felder** durch. Vorher stand das Kontenblatt-Icon
+  nur in der Lese-Ansicht — der Weg zum Kontenblatt fehlte genau dort, wo man
+  das Konto gerade wählt. Dabei kommt auch der **Kontoname** aus dem
+  gewählten Kandidaten mit; sonst stünde in der Zeile eine Nummer ohne Wort
+  und im Journal daneben ein leerer Kontoname.
+
+### Stories — 17, mit begründeter Ausnahme
+
+`spec-schreiben` §6 setzt die Grenze bei 10. Diese Datei steht bei **17**, und
+das ist eine Ausnahme mit Ablaufdatum, keine Regel:
+
+- **14 davon sind kein Prop-Raster, sondern ein Zustandskatalog.** Sie stellen
+  die 24 Zustände aus `Buchungseditor-Zustände.dc.html` nach — gesperrt,
+  storniert, mehrere Fehler, Judge-Befund. Im laufenden Screen sieht man immer
+  nur einen; gerade die seltenen sind die, in denen sich Fehler einnisten.
+  Die Ableitung aus §6 („Zustände ≤ 5") greift für einen solchen Katalog nicht.
+- **Drei sind neu** und gehören zu den drei Punkten dieser Aufgabe.
+
+**Der Schnitt, der die Ausnahme beendet** (eigene Aufgabe, nicht diese): der
+Editor ist heute zwei Dinge in einer Datei — das **Lese**-Raster (`editable:
+false`, sieben der 14 Zustände) und das **Bearbeiten**-Raster. Getrennt ergäbe
+das `JournalEntryGrid` (lesend, Server-Komponente) und `JournalEntryEditor`
+(bearbeitend, `"use client"`), je unter 10 Stories, und die Lese-Ansicht
+verlöre ihren Client-Anteil. Das ist der Zuschnitt nach §4 („ein Teil braucht
+`"use client"`, der Rest nicht") — und er ist eine eigene Runde wert, keine
+Nebenwirkung dieser.
+
+| Neue Story | Beweist |
+|---|---|
+| `JournalWithPostingText` | Die fünf Spalten mit Text; Steuerzeile und Gegenkonto tragen ihren |
+| `DocumentNumberAcrossRows` | `DocumentNumberField` mit Register-Weg, und der Übernahme-Knopf nur bei verschiedenen Werten |
+| `ContraAccountEditable` | Das Gegenkonto als `AccountField`, S/H unverändert |
+
+### Abnahmekriterien — Ergänzungen
+
+- [ ] Das Journal zeigt Konto · Kontoname · Buchungstext · Soll · Haben; der BU steht **nicht** darin (Story `JournalWithPostingText`, gemessen)
+- [ ] Die Steuerzeile trägt den Text ihrer Zeile, das Gegenkonto den der ersten (gemessen)
+- [ ] Eine Warnung blockiert das Speichern **nicht** und hat kein Kästchen (Story `S1_EditWithWarning`, gemessen)
+- [ ] Belegfeld 1 ist `DocumentNumberField`, sobald die Quellen-Wörter da sind; ohne sie das nackte Feld (`grep`)
+- [ ] Der Übernahme-Knopf erscheint nur bei verschiedenen Werten und übernimmt den seiner Zeile (Story `DocumentNumberAcrossRows`, gemessen: zwei Knöpfe bei zwei verschiedenen Werten)
+- [ ] Das Gegenkonto ist nur mit `onContraAccountChange` bearbeitbar; S/H bleibt fest (Story `ContraAccountEditable`)
+- [ ] `onOpenLedger` erreicht auch die Zeilen-Felder (`grep`)
+- [ ] 17 Stories, keine Konsolenmeldung (gemessen)
+- [ ] offen (Set): der Schnitt in Lese- und Bearbeiten-Raster, der die Story-Ausnahme beendet

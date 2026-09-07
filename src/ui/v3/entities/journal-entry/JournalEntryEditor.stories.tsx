@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { useState } from "react";
+
 import { JournalEntryEditor, type EditorRow } from "./JournalEntryEditor";
+import { REGISTER, SOURCE_LABEL } from "../document-number/fixtures";
 
 const meta: Meta<typeof JournalEntryEditor> = {
   title: "v3/Entitäten/Buchungssatz/JournalEntryEditor",
@@ -61,7 +64,13 @@ export const S0_Simple: Story = {
   ),
 };
 
-/** S1 — im Formular, mit einer Warnung, die eine Quittung braucht. */
+/**
+ * S1 — im Formular, mit einer Warnung. Sie **blockiert nicht**: der Satz
+ * lässt sich speichern, die Warnung steht sichtbar daneben und bietet ihren
+ * Weg an („6820 einsetzen"). Die Quittungspflicht ist mit dem Owner-Entscheid
+ * vom 2026-09-07 gestrichen — eine Warnung, die man abhaken **muss**, wird
+ * abgehakt und nicht gelesen.
+ */
 export const S1_EditWithWarning: Story = {
   render: () => (
     <Frame>
@@ -288,4 +297,98 @@ export const Empty: Story = {
       />
     </Frame>
   ),
+};
+
+/* ── 0015 · Die drei Punkte der Freigabe ──────────────────────────────────
+   Sie stehen am Ende, weil sie nicht zu den 24 Zuständen des Prototyps
+   gehören, sondern Fähigkeiten sind, die der Aufrufer einschaltet. */
+
+/**
+ * §1 — das **Journal in der DATEV-Stapelordnung**: Konto · Kontoname ·
+ * Buchungstext · Soll · Haben. Der BU-Schlüssel steht **nicht** hier, sondern
+ * in der Editorzeile: er ist eine Eingabe, keine Buchungszeile. Der Text kommt
+ * jetzt mit — die Steuerzeile trägt den ihrer Zeile, das Gegenkonto den der
+ * ersten.
+ */
+export const JournalWithPostingText: Story = {
+  render: () => (
+    <Frame>
+      <JournalEntryEditor
+        {...BASE}
+        rows={[
+          { ...ROW, text: "Bürobedarf August" },
+          {
+            ...ROW,
+            id: "2",
+            umsatz: "89,90",
+            bu: "9",
+            konto: "6820",
+            kontoName: "Porto",
+            text: "Porto August",
+          },
+        ]}
+        editable={false}
+        onEdit={() => {}}
+      />
+    </Frame>
+  ),
+};
+
+/**
+ * §2 — **Belegfeld 1 in alle Zeilen übernehmen.** Der Knopf steht dort, wo
+ * „Rest einsetzen" steht, und erscheint nur, wenn die aktiven Zeilen
+ * verschiedene Werte tragen (der leere Wert zählt mit — er ist die häufigste
+ * Abweichung). Das Feld selbst ist `DocumentNumberField` (0014), mit dem Weg
+ * ins Register und dem Hinweis, wenn die geltende Nummer eine andere ist.
+ */
+export const DocumentNumberAcrossRows: Story = {
+  render: function Render() {
+    const [rows, setRows] = useState<EditorRow[]>([
+      { ...ROW, beleg1: "RE-4471" },
+      { ...ROW, id: "2", umsatz: "89,90", konto: "6820", kontoName: "Porto", beleg1: "", text: "Porto August" },
+    ]);
+    return (
+      <Frame>
+        <JournalEntryEditor
+          {...BASE}
+          rows={rows}
+          key={rows.map((r) => r.beleg1).join("|")}
+          editable
+          documentNumberSourceLabel={SOURCE_LABEL}
+          // Die geltende Nummer: die mit DATEV-Herkunft schlägt die errechnete.
+          dominantDocumentNumber={REGISTER[1]}
+          onOpenDocumentNumberRegister={() => {}}
+          onSave={(next) => setRows(next)}
+        />
+      </Frame>
+    );
+  },
+};
+
+/**
+ * §3 — **das Gegenkonto ist bearbeitbar**, mit demselben `AccountField` wie
+ * die Zeilen. Die Seite (S/H) bleibt fest: sie ist die Gegenseite des Belegs,
+ * und ein Umschalter dort erzeugte einen Satz, der nicht aufgeht. Das `≠` in
+ * der Summenzeile ist die ehrlichere Rückmeldung.
+ */
+export const ContraAccountEditable: Story = {
+  render: function Render() {
+    const [gk, setGk] = useState(AGAINST);
+    return (
+      <Frame>
+        <JournalEntryEditor
+          {...BASE}
+          gegenkonto={gk}
+          editable
+          onContraAccountChange={(konto, name) => setGk({ ...gk, konto, name })}
+          contraAccountCandidates={{
+            partner: [{ number: "70044", name: "Bürobedarf Meier GmbH", reason: "Kreditor des Belegs" }],
+            alle: [{ number: "1200", name: "Bank" }],
+          }}
+          onOpenLedger={() => {}}
+          onSave={() => {}}
+        />
+      </Frame>
+    );
+  },
 };
