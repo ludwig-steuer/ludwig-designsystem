@@ -280,11 +280,7 @@ wird sofort korrigiert, wo die Korrektur sichtbar ist. Gemessen:
 
 Dazu bleiben zwei Netze: `DateField` hat eine Prop `onBlur` bekommen (die dem
 Set gefehlt hat — dieselbe Stelle, an der `DateRangeField` seinen Tausch
-macht), und `clampDeferralDay` steht weiter im Bestätigungspfad. **Ehrlich
-gesagt:** die Blur-Klemmung ist in der headless-Messung nicht nachweisbar —
-das Werkzeug kann Datumssegmente nicht bedienen und React reagiert auf
-synthetische Fokus-Ereignisse nicht. Bewiesen ist die sichtbare Korrektur am
-Change; der Blur ist der Gürtel zum Hosenträger, nicht der Nachweis.
+macht), und `clampDeferralDay` steht weiter im Bestätigungspfad.
 
 **Der Fix für die Ausgänge hat jetzt seine Story (N-2).** Die Altlast-Karte in
 `Answering` (`answer_kind = "document_upload"`) bekommt `onDefer` und
@@ -302,3 +298,49 @@ Rhythmus um 4–5 px). Das ist Geschmack, und ein eigener `margin-top` an
 `.v2clc__exit` wäre eine Regel mehr für einen Unterschied, den niemand
 gemeldet hat. **M-11:** das CSS zu dieser Aufgabe liegt im Vor-Commit
 `680653c` — wer den 0065-Diff liest, findet die Formatierung dort.
+
+## Dritte Runde, 2026-09-07 — die engere Regel deckte nur das Jahr
+
+Die Nachabnahme hat zwei Dinge geliefert, und beide waren mehr wert als eine
+Freigabe.
+
+**Sie hat gemessen, was ich für unmessbar hielt.** Der Weg ist eine Zeile:
+React hängt `onBlur` nicht an `blur`, sondern an das bubbelnde **`focusout`**.
+Ein synthetisches `new FocusEvent("blur")` läuft ins Leere; `element.blur()`
+löst nativ `focusout` aus, und React feuert. Meine „das ist nicht nachweisbar,
+der Blur ist nur der Gürtel"-Notiz war also nicht Vorsicht, sondern ein
+Werkzeugfehler — der Satz ist gestrichen.
+
+**Und sie hat gezeigt, dass die engere Regel nur das Jahr deckt.** Ein Jahr
+unter 1000 ist als Tastenanschlag erkennbar. Monat und Tag sind es **nicht**:
+„01" ist ein legitimer Monat, und in einem Fenster vom 08.09. bis 07.10. muss
+jeder, der den Oktober tippt, durch den Januar. Gemessen sprang dabei der
+**Tag** von 20 auf 08 — derselbe Fehler wie zuvor, eine Ebene tiefer und ohne
+Regel, die ihn erkennen könnte.
+
+`clampTyped` ist deshalb **ersatzlos gestrichen**. Der Blur trägt allein, und
+das ist jetzt nachgemessen — mit dem Werkzeug der Abnahme, nicht mit meinem:
+
+| Eingabe, dann Feld verlassen | Feld zeigt danach | `onDefer` bekam |
+|---|---|---|
+| `0202-09-20` (Tippwert) | 2026-09-08 | 2026-09-08 |
+| `2027-01-01` | 2026-10-07 | 2026-10-07 |
+| `2020-01-01` | 2026-09-08 | 2026-09-08 |
+| `2026-09-25` | unverändert | 2026-09-25 |
+
+Und beim Tippen bleibt jetzt jedes Segment stehen: Jahr, Monat und Tag gehen
+unangetastet durch.
+
+**Die Lehre:** eine Regel, die einen Sonderfall erkennt („Jahr < 1000"), ist
+keine Lösung, sondern eine Wette darauf, dass die anderen Fälle sich genauso
+verhalten. Sie taten es nicht. Die richtige Stelle war die ganze Zeit die, an
+der `DateRangeField` seit 0024 steht — beim Verlassen des Feldes.
+
+**Restmaß, benannt statt behoben (aus der Nachabnahme):** zwischen „quiet +
+aktiv" (rgb 92) und „quiet + gesperrt" (rgb 113) liegt ein Verhältnis von
+**1,37:1**. Jeder Ton steht über der Textschwelle; als Unterscheidungsmerkmal
+zweier Zustände ist das dünn. Für diese Karte ohne Folge (der Grund-Satz ist
+das Wort, V7); für die Vorgabeknöpfe von `DateRangeField` wäre die Farbe das
+einzige Merkmal — dort ist es latent, weil keine Story einen gesperrten
+Zeitraum zeigt. Das ist die Zahl, an der eine eigene Runde am Primitive
+ansetzt.
