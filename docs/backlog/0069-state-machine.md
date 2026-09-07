@@ -206,7 +206,7 @@ Abgeleitet nach §6. Titel `v3/Patterns/Prozess/StateMachine`. Die
 | `Branching` | `beleg` ohne `states` (Registry-Reihenfolge `pending, in_progress, processed, review_needed, failed`), sieben Übergänge aus dem Registry-Kommentar, **ohne** `current`, ohne `description`. Erwartete Spalten: 0 `pending` · 1 `in_progress` · 2 `processed`+`failed` · 3 `review_needed`. Der Bogen `in_progress→review_needed` oben, `review_needed→processed` und `failed→in_progress` unten; `processed→review_needed` durch die Mitte — das Paar `⇄` als zwei getrennte Wege. Keine Box farbig |
 | `Sequence` | `sachverhalt` **ohne** `transitions`, `states` ohne den Pseudowert `in_pipeline`, `current="needs_clarification"`: sechs Boxen in einer Reihe, gepunktete Verbinder ohne Spitze, die Hinweiszeile darunter, „Klärung offen" im Warnton mit „aktuell"; Popover ohne Hinein/Hinaus |
 | `Explain` | `Branching`-Daten mit `current="review_needed"`; die Story-Doku beschreibt den Rundlauf: Klick auf „Prüfung nötig" → Popover mit Badge, `review_needed`, dem Erklärtext, **Hinein durch** „In Bearbeitung · Pipeline durch, reparierbare Findings" und „Prozessiert · Revalidierung", **Hinaus durch** „Revalidierung (`update_invoice_extraction`) · Prozessiert", der Ort `client_source_docs_invoices.processing_status`; `Esc` schließt; `Tab` läuft `pending → in_progress → processed → failed → review_needed` |
-| `Edge` | `beleg_inbox` (Labels bis „Einordnung fehlgeschlagen", zwei Zeilen), Übergänge aus dem Registry-Kommentar plus drei Ränder: ein Ziel `quarantined`, das die Registry nicht kennt (Rohwert-Box hinten, neutral, `code`-Label), ein Selbst-Übergang `pending_classification→pending_classification` („Erneut anstoßen", nicht gezeichnet, im Popover unter Hinaus durch), und `current="on_hold"`, das nirgends vorkommt (zweite Rohwert-Box, hervorgehoben, ohne Ton — `kind` neutral). Dazu die Karte auf 480 px Breite: der Container scrollt, die Seite nicht |
+| `Edge` | `beleg_inbox` (Labels bis „Einordnung fehlgeschlagen", zwei Zeilen), Übergänge aus dem Registry-Kommentar plus drei Ränder: ein Ziel `quarantined`, das die Registry nicht kennt (Rohwert-Box hinten, neutral, `code`-Label), ein Selbst-Übergang `pending_classification→pending_classification` („Erneut anstoßen", nicht gezeichnet, im Popover unter Hinaus durch), und `current="on_hold"`, das nirgends vorkommt (zweite Rohwert-Box, hervorgehoben, ohne Ton — `kind` neutral). Dazu die Karte auf **360 px** Breite: der Container scrollt, die Seite nicht |
 | `InUse` | Stapel-Detail: `Card` mit Kopf „Buchungszyklus August 2026", darin `ProcessStepper` (Phasen aus `Process.stories`, aktiv „Prüfen", Baton Kanzlei) und darunter unter der Zwischenüberschrift „Ablauf" die `StateMachine` aus `Filled` — Positionsanzeige und Landkarte in einer Karte, wie Z7 sie trennt |
 
 Sechs Stories: zwei Zustände (Landkarte, Reihe), eine Reihenfolge-Prop
@@ -867,3 +867,57 @@ sie je gelesen, sie waren die zweite Fassung derselben Zahlen.
 **Nebenbefund:** die Spec nannte die schmale Karte zweimal mit 480 px, die
 Story nimmt 360. Die Story hat recht — bei 480 passt `beleg_inbox` hinein und
 bewiese nichts. Die Spec ist korrigiert.
+
+## Nach der dritten Abnahme (2026-09-07): der Rückweg kam aus dem Nichts
+
+**Der Blocker erledigt.** Ein Rückweg in die erste Spalte legt seine senkrechte
+Spur auf x = −12 und greift mit dem Bogen darüber hinaus; der Behälter hatte
+links 2 px Polster und `overflow-x: auto`. Was links der Inhaltskante liegt,
+wird geschnitten **und ist nicht zu erreichen** — sichtbar blieb eine
+Grundlinie, die am Rand aufhört, und eine Pfeilspitze neben „bereit", zu der
+keine Linie führte. Die Abnahme hat 166 von 466 px eines Pfades als unsichtbar
+gemessen (35,7 %).
+
+**Der Vorlauf gehört ins Raster, nicht an den Behälter.** Polster am Behälter
+verschiebt den Inhalt, nicht die Zeichenfläche: das SVG liegt mit `inset: 0`
+auf dem Raster, und ein Pfad bei −12 bleibt links davon, wie viel Polster auch
+außen steht. Das Raster hat jetzt **36 px Vorlauf** (`margin-left`), und der
+liegt im scrollbaren Inhalt — also bei jeder Kartenbreite erreichbar.
+
+Nachgemessen mit `getPointAtLength`, 200 Punkte je Pfad, gegen die
+Behälterkante:
+
+| Story | geprüfte Punkte | unsichtbar | linkester Punkt |
+|---|---|---|---|
+| `Filled` | 3.417 | **0** | 26 px innerhalb |
+| `Edge` | 1.809 | **0** | 26 px innerhalb |
+| `InUse` | 3.417 | **0** | 26 px innerhalb |
+
+**Ein Umweg, den ich dokumentiere, weil er lehrreich ist:** zwei Anläufe davor
+haben das Polster am Behälter vergrößert (14 px, dann 32 px) und dabei jedes
+Mal „unsichtbar" gemessen. Die Messung selbst war falsch —
+`getBoundingClientRect()` auf einem `<path>` liefert für leere Pfade
+`0, 0, 0, 0`, und das Minimum über alle Pfade war deshalb immer 0, egal was
+das Layout tat. Erst die Messung über die Pfadlänge zeigte, wo die Linien
+wirklich liegen. Ein Messfehler, der aussieht wie ein Baufehler, kostet zwei
+Runden — dasselbe Muster wie „nicht nachweisbar" in 0065.
+
+**M2 erledigt** — `edgePath` gab unbedingt zurück; der Kommentar darunter und
+der Zweig für „zwei Boxen derselben Spalte" liefen nie. Beides ist weg.
+`tsc` hat es nicht gefunden, weil `allowUnreachableCode` nicht gesetzt ist.
+Dazu die Rasterrechnung im Kopf der Datei: sie stand auf „= 60", während
+`BOX_H = 72` ist — dieselbe Art Falschaussage, die diese Aufgabe schon zweimal
+zurückgebracht hat, diesmal in der TSX statt im CSS.
+
+**M3 erledigt** — die Story-Tabelle nannte „480 px", die Story nimmt 360. Die
+Zahl ist an der einen Stelle berichtigt; das Kriterium stand bereits richtig.
+(Beim ersten Versuch hätte eine pauschale Ersetzung acht Stellen getroffen,
+darunter sechs, die von der **Messung** bei 480 px handeln und richtig sind —
+zurückgenommen und einzeln gesetzt.)
+
+**Außerhalb der Kriterien, benannt und nicht gebaut:** die fünf Rückwege von
+`Filled` teilen sich eine Grundlinie bei y = 188; zwischen x = 138 und 588
+liegen bis zu drei Pfade exakt übereinander, und die Unterkante liest sich als
+eine Linie statt als fünf Wege. Das ist ein echter Mangel des Bildes, aber
+kein Kriterium — und die Lösung (je Weg eine eigene Spur) ändert die Geometrie
+aller Kanten. **Eigene Aufgabe.**

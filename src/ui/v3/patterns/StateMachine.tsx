@@ -65,8 +65,10 @@ interface Box {
  * second acceptance of 0069).
  */
 const COL = 150;
-// Zwei Zeilen Beschriftung (2 × 19) plus die Wertzeile (15) plus
-// Innenabstand (2 × 8) = 60; die Zeile lässt 20 für die Bögen darunter.
+// Zwei Zeilen Beschriftung (2 × 19) plus die Wertzeile (15) plus Innenabstand
+// (2 × 8) und die Ränder = **72**, die Höhe der Box; die Zeile lässt darüber
+// hinaus 20 für die Bögen darunter. (Die Rechnung stand bis 2026-09-07 mit
+// „= 60" hier und passte damit zu keiner gemessenen Box.)
 const ROW = 92;
 const BOX_W = 126;
 const BOX_H = 72;
@@ -201,17 +203,6 @@ function edgePath(a: Box, b: Box, height: number): string {
     `L ${bLane} ${by + vDir * r} Q ${bLane} ${by}, ${bLane + r} ${by} ` +
     `L ${bx} ${by}`
   );
-  // Zwei Boxen derselben Spalte liegen senkrecht übereinander: ein Bogen über
-  // die Unterkante hätte Anfang und Ende an derselben Stelle und verbände
-  // nichts. Er läuft deshalb **seitlich** — aus der linken Kante der Quelle
-  // heraus und in die linke Kante des Ziels hinein (Abnahme 0069).
-  if (a.column === b.column) {
-    const left = a.column * COL;
-    const ay = a.row * ROW + BOX_H / 2;
-    const by = b.row * ROW + BOX_H / 2;
-    const out = left - 12;
-    return `M ${left} ${ay} C ${out} ${ay}, ${out} ${by}, ${left} ${by}`;
-  }
 }
 
 /**
