@@ -3605,6 +3605,30 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2sinfo:hover { opacity: 1; color: var(--color-primary); }
 .v2sinfo:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 
+/* --- Sachverhalts-Karte (0081) -------------------------------------------
+ * Der Kopf trägt Namen und Zustand nebeneinander, darunter die Kennung. Der
+ * Rumpf eine Zeile Fakten und die gekürzte Zusammenfassung. Was unter dem Fall
+ * hängt, kommt als Knoten und bekommt eine eigene Fläche — **oder gar keine**:
+ * ohne Kinder fällt sie samt Abstand weg, damit eine Karte ohne Unterlisten
+ * nicht aussieht, als fehlte dort etwas.
+ */
+.v2casecard__title { display: inline-flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+.v2casecard__body { display: grid; gap: var(--space-2); padding: var(--space-4) var(--space-5); }
+.v2casecard__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); }
+/* Der Trenner steht **zwischen** den Angaben, nicht hinter der letzten. */
+.v2casecard__metaitem + .v2casecard__metaitem::before {
+  content: "·";
+  margin-right: var(--space-3);
+  color: var(--color-text-subtle);
+}
+.v2casecard__summary {
+  margin: 0;
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui);
+  color: var(--color-text-muted);
+}
+.v2casecard__subs { border-top: 1px solid var(--color-border-subtle); }
+
 /* --- Belegliste: Spaltensätze (0070) -------------------------------------- */
 /* Wie `.v2doc__key`: der Name schrumpft, die Endung nicht. Ein reines
    `text-overflow` am Elternteil schnitt genau die `.pdf` ab, für die die

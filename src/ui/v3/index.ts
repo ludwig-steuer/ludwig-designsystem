@@ -383,6 +383,7 @@ export { CaseDetailView } from "./entities/accounting-case/CaseDetailView";
 export { CaseDrawer, type CaseQuickView } from "./entities/accounting-case/CaseDrawer";
 export { CaseRow } from "./entities/accounting-case/CaseRow";
 export { CaseList, caseListTracks, type CaseListTab } from "./entities/accounting-case/CaseList";
+export { CaseCard, type CaseCardData } from "./entities/accounting-case/CaseCard";
 export { CasePicker } from "./entities/accounting-case/CasePicker";
 export {
   CaseDispositionEdit,
