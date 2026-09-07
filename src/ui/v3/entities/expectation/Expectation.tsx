@@ -80,13 +80,14 @@ function subject(
 export function ExpectationChip({
   expectation,
   today,
-  currency = "EUR",
+  currency,
   documentKindLabel,
 }: {
   expectation: ExpectationVM;
   /** Reference day for the maturity; without it, today. */
   today?: string;
-  currency?: Currency;
+  /** Required: an amount without its currency is a guess (the kit's rule). */
+  currency: Currency;
   /** German words for `expectedDocumentKind` — the caller owns them. */
   documentKindLabel?: Record<string, string>;
 }) {
@@ -97,12 +98,16 @@ export function ExpectationChip({
       <StatusBadge axis="erwartung" status={maturity} info={false} />
       <span className="v2exp__what">
         {what ?? audienceWord(expectation.audience)}
-        {/* Der Betrag steht nur bei einer Zahlung: bei einem fehlenden Beleg
-            ist die Belegart die Aussage (offene Frage 2). */}
-        {expectation.kind === "payment" && expectation.expectedAmount != null ? (
+        {/* The amount only shows on a payment: where a document is missing,
+            the kind of document is the statement (open question 2). */}
+        {expectation.kind === "payment" &&
+        expectation.expectedAmount != null ? (
           <>
             {" · "}
-            <AmountCell value={expectation.expectedAmount} currency={currency} />
+            <AmountCell
+              value={expectation.expectedAmount}
+              currency={currency}
+            />
           </>
         ) : null}
       </span>
@@ -119,14 +124,15 @@ export function ExpectationChip({
 export function ExpectationRow({
   expectation,
   today,
-  currency = "EUR",
+  currency,
   documentKindLabel,
   onResolve,
   onOpen,
 }: {
   expectation: ExpectationVM;
   today?: string;
-  currency?: Currency;
+  /** Required: an amount without its currency is a guess (the kit's rule). */
+  currency: Currency;
   documentKindLabel?: Record<string, string>;
   /** „Erledigt" — without it the row only shows. */
   onResolve?: (id: string) => void;
@@ -135,45 +141,71 @@ export function ExpectationRow({
 }) {
   const maturity = expectationMaturity({ ...expectation, today });
   const what = subject(expectation, documentKindLabel);
-  const title = [what ?? audienceWord(expectation.audience), expectation.expectedCounterpartyName]
+  const title = [
+    what ?? audienceWord(expectation.audience),
+    expectation.expectedCounterpartyName,
+  ]
     .filter(Boolean)
     .join(" · ");
 
   return (
-    <div className="v2exp__row">
-      <span className="v2exp__kind">
-        <StatusBadge axis="erwartung_art" status={expectation.kind} info={false} />
-      </span>
-      <span className="v2exp__title">
-        {onOpen ? (
-          <button type="button" className="v2link" onClick={() => onOpen(expectation.id)}>
-            {title}
-          </button>
-        ) : (
-          title
-        )}
-        {expectation.note ? <span className="v2exp__note">{expectation.note}</span> : null}
-      </span>
-      <span className="v2num">
-        {expectation.expectedAmount == null ? null : (
-          <AmountCell value={expectation.expectedAmount} currency={currency} />
-        )}
-      </span>
-      {/* Absolut, nicht „in drei Tagen": wer eine Frist prüft, will das Datum
+    // The row measures **itself**, not the window: on its own page it is wide,
+    // in the detail column of the case page it has 484 px at a 1280 px window
+    // (measured). A `@media` rule would see the same window in both cases, so
+    // the wrapper is the container and the grid inside asks it.
+    <div className="v2exp">
+      <div className="v2exp__row">
+        <span className="v2exp__kind">
+          <StatusBadge
+            axis="erwartung_art"
+            status={expectation.kind}
+            info={false}
+          />
+        </span>
+        <span className="v2exp__title">
+          {onOpen ? (
+            <button
+              type="button"
+              className="v2link"
+              onClick={() => onOpen(expectation.id)}
+            >
+              {title}
+            </button>
+          ) : (
+            title
+          )}
+          {expectation.note ? (
+            <span className="v2exp__note">{expectation.note}</span>
+          ) : null}
+        </span>
+        <span className="v2num">
+          {expectation.expectedAmount == null ? null : (
+            <AmountCell
+              value={expectation.expectedAmount}
+              currency={currency}
+            />
+          )}
+        </span>
+        {/* Absolut, nicht „in drei Tagen": wer eine Frist prüft, will das Datum
           (T7). Die Reife daneben sagt, was es bedeutet. */}
-      <span className="v2exp__due">
-        fällig <Time value={expectation.dueDate} format="date" size="sm" />
-      </span>
-      <span className="v2exp__state">
-        <StatusBadge axis="erwartung" status={maturity} info={false} />
-      </span>
-      <span className="v2exp__act">
-        {onResolve && maturity !== "resolved" ? (
-          <button type="button" className="v2link" onClick={() => onResolve(expectation.id)}>
-            Erledigt
-          </button>
-        ) : null}
-      </span>
+        <span className="v2exp__due">
+          fällig <Time value={expectation.dueDate} format="date" size="sm" />
+        </span>
+        <span className="v2exp__state">
+          <StatusBadge axis="erwartung" status={maturity} info={false} />
+        </span>
+        <span className="v2exp__act">
+          {onResolve && maturity !== "resolved" ? (
+            <button
+              type="button"
+              className="v2link"
+              onClick={() => onResolve(expectation.id)}
+            >
+              Erledigt
+            </button>
+          ) : null}
+        </span>
+      </div>
     </div>
   );
 }

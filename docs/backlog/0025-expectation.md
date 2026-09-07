@@ -113,45 +113,128 @@ Titel `v3/Entitäten/Erwartung/Expectation`. Abgeleitet nach §6: 3 Zustände
 | `Interactive` | „Erledigt" nimmt die Zeile aus der Liste |
 | `InCase` | drei Erwartungen in der Sachverhalt-Karte, wie im Detail |
 
-Nicht anwendbar: `LeerNachFilter` — filtern tut die Liste darüber.
-
-## Abnahmekriterien
-
-Fest (gilt immer):
-
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
-
-Variabel (aus dieser Spec):
-
-- [ ] Die Reife kommt aus `expectationMaturity`, nicht aus der Komponente (Blick in den Code)
-- [ ] Reife steht als Wort, nicht nur als Farbe (Story `Maturities`, Regel V7)
-- [ ] Status ausschließlich über die Registry-Achse `erwartung` (Blick in den Code, Regel R1)
-- [ ] Frist absolut, nicht „in 3 Tagen" (Story `Row`, Regel T7)
-- [ ] `escalationLevel` erscheint nirgends als Mahnstufe (Blick in den Code)
-- [ ] Ersetzt `FehltPanel` und die Zeilen in `Schritt5Liste` ohne Funktionsverlust — **offen (App)**
-
-## Offene Fragen
-
-1. Heißt die Zeile beim Mandanten „Nachforderung"? *Ohne Antwort: ja, über
-   `audience` gesteuert — ein Wort, keine zweite Komponente.*
-2. Zeigt der Chip den Betrag? *Ohne Antwort: nur bei `kind="payment"`; bei
-   einem fehlenden Beleg ist die Belegart die Aussage.*
-3. Braucht die Zeile eine „Frist ändern"-Handlung? *Ohne Antwort: nein, das
-   ist eine Editor-Aufgabe, keine Darstellungsform.*
+Nicht anwendbar: `LeerNachFilter` — filtern tut die Liste darüber. **`Lädt`** —
+die Erwartung bekommt ihre Daten als Prop; wer sie lädt, zeigt das an seiner
+Stelle (die Liste, die Karte, der Sachverhalt). Eine Skeleton-Story hier hieße,
+die Zeile könne warten — sie kann nur zeigen.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| | | |
+Gemessen am laufenden Storybook (`http://localhost:6107`) über CDP, nicht aus
+der Quelle zurückgelesen. Story-IDs unter `v3-entitäten-erwartung-expectation--…`.
 
-Abgenommen von / am: — · Offene Punkte: —
+**Fest**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `tsc --noEmit` Exit 0 · `Storybook build completed successfully`, Exit 0 · zusätzlich `pnpm check:icons` „in Ordnung, 53 Zeichen" | erfüllt |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/expectation/Expectation.tsx` mit `Expectation.stories.tsx` daneben · Titel `v3/Entitäten/Erwartung/Expectation` · Barrel `index.ts:466` unter dem Kommentar „Erwartung — was noch fehlt, als Chip und als Zeile (0025)" | erfüllt |
+| Code englisch; `@when`/`@instead` an jedem Export | Beide Funktions-Exporte tragen beide Zeilen; der Typ-Export `ExpectationVM` trägt nur den Doku-Block — wie `CaseTimelineExpectation` und `CaseTimelineEntry`, also Hauspraxis. Zwei **deutsche** Kommentare im Code (Z. 100/101 und 162/163) → **M3** | mit Mangel |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | Grep über die Komponente: kein Hex, kein `px`, kein `fontSize`; alle Maße stehen in `v3.css`. Die Wörter der Belegarten kommen über `documentKindLabel` vom Aufrufer, keine Map im Modul. Reife und Art ausschließlich über `StatusBadge`; gemessener Tooltip aus der Registry: „Reife: Fällig · Die Frist ist verstrichen. Der Sachverhalt zählt wieder als offene Arbeit." Zu `audienceWord()` siehe **M5** | erfüllt |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | Genau die sieben Stories der Spec stehen in `storybook-static/index.json` (`chip`, `row`, `maturities`, `empty`, `error`, `interactive`, `in-case`). Ableitung nach §6 geht auf: 3 Zustände + 1 Enum + 1 Callback-Story + 1 im Einsatz + 1 Rand = 7. `LeerNachFilter` ist begründet, „leer" beim Chip auch (e); **„lädt" ist ohne Begründung ausgelassen** → **M4** | mit Mangel |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Farbe nur als Kritikalität, Vorzeichen ohne Farbe, Zahlen rechts mit `tnum` (`.v2num`), nichts zentriert, kein Icon ohne Wort, Fokusring gemessen (`2px solid rgb(59,143,196)`), Hauptweg per Tastatur (vier Knöpfe, `tabIndex 0`), Hover nur am Klickbaren (Chip: `cursor: auto`, kein Knopf). **Zeilenhöhe ≤ `.v2tbl__row`** reißt: `.v2tbl__row` liegt bei ~42 px, die Erwartungszeile misst in der echten Spaltenbreite 88 px, mit langem Firmennamen 151 px, bei 1280 px Fenster 109–130 px → **M1** | nicht erfüllt |
+| Im Browser angesehen, nicht nur gebaut | Alle Zahlen dieser Abnahme stammen aus CDP-Läufen gegen `localhost:6107` (Story-Iframe, echte Klicks im `Interactive`) | erfüllt |
+
+**Variabel**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Reife kommt aus `expectationMaturity`, nicht aus der Komponente | `Expectation.tsx:1-4` importiert aus `@/ludwig/modules/accounting-cases/domain/case`; beide Exporte rufen `expectationMaturity({ ...expectation, today })`, im Modul steht keine zweite Ableitung (kein Datumsvergleich, kein Schwellwert) | erfüllt |
+| Reife steht als Wort, nicht nur als Farbe (V7) | `--maturities`, vier Zeilen gemessen: „Läuft" (`bdg-neutral`), „Fällig" (`bdg-warning`), „Eskaliert" (`bdg-danger`), „Erledigt" (`bdg-success`) — jede trägt ihr Wort, dazu den Erklärsatz der Achse im `title` | erfüllt |
+| Status ausschließlich über die Registry-Achse `erwartung` (R1) | `StatusBadge axis="erwartung"` in Chip und Zeile; die Art zusätzlich über `erwartung_art`, so in der Einordnung vorgesehen. Kein eigener Statustext, keine eigene Farbwahl | erfüllt |
+| Frist absolut, nicht „in 3 Tagen" (T7) | `--row` und `--in-case` gemessen: „fällig 20.09.2026", „fällig 11.08.2026", „fällig 31.08.2026" — `Time format="date"`, nie relativ | erfüllt |
+| `escalationLevel` erscheint nirgends als Mahnstufe | Grep über die Datei: der Wert kommt nur im Typ (Z. 41) vor und fließt in `expectationMaturity`; kein Render, keine Zahl im Markup | erfüllt |
+| Ersetzt `FehltPanel` und die Zeilen in `Schritt5Liste` | offen (App) — laut Spec nicht Gegenstand dieser Abnahme | offen |
+
+**Zwei Entscheide aus „Gebaut" nachgemessen**
+
+| Aussage | Nachmessung | Ergebnis |
+|---|---|---|
+| „Der Betrag steht nur bei `payment`" | `--chip`: zwei Beleg-Chips ohne Zahl („Rechnung"), zwei Zahlungs-Chips mit `<span class="v2num">412,00 €</span>` | bestätigt |
+| „Spaltenkanten bei 37 · 153 · 478 · 593, in jeder Zeile dieselben" | `--in-case` bei 1440: Kanten 37 · 153 · 356 · 478 · 593 · 715, in allen drei Zeilen gleich — **im Story-Rahmen von 720 px**. Auf der Seite gilt das nicht mehr, siehe **M1** | im Rahmen bestätigt, auf der Seite nicht |
+
+**Maße gegen den Wertebereich, nicht gegen die Fixtures** — hier stimmt es:
+
+| Feste Spur | Breite | Größter Wert des Bereichs | Ergebnis |
+|---|---|---|---|
+| Art (`erwartung_art`) | 104 px | „Zahlung offen" 94 px, „Beleg fehlt" 77 px; die Achse hat genau zwei Werte | passt |
+| Reife (`erwartung`) | 110 px | „Eskaliert" 65 px, der breiteste von vieren | passt |
+| Betrag | 110 px | `1.234.567,89 €` misst 102 px und bricht nicht (geschütztes Leerzeichen) | passt |
+
+**Rundlauf `Interactive`** (echte Klicks, je Schritt ein eigener Aufruf): Start
+`3 offen · Geöffnet: nichts` → Klick auf den Titel → `Geöffnet: e1`, Zeilenzahl
+unverändert 3 → Klick „Erledigt" → `2 offen`, die Zeile verschwindet, die
+übrigen zwei stimmen. Beide Callbacks der Schnittstelle sind damit bewiesen.
+
+### Mängel
+
+**M1 · blockiert · Die Zeile passt nicht in die Spalte, in der sie steht.**
+Kriterium: Prüfliste §9 (Zeilenhöhe ≤ `.v2tbl__row`) und der Nachtrag „Die
+erste Spalte hat eine feste Breite" aus „Gebaut".
+Messung: Die festen Spuren summieren sich auf **537 px** (104 + 110 + 103 + 110
++ 50 + fünf Zwischenräume à 12) — so breit ist die Zeile mindestens, **bevor**
+der Titel ein Pixel bekommt. Im Sachverhalt-Detail hat die Detailspalte
+gemessen 644 px bei 1440 und **484 px bei 1280** (`.v2md--detail-breit` =
+`minmax(0,440px) minmax(0,1fr)`, gemessen an `casedetailview--in-use` im echten
+App-Rahmen); in der Karte bleiben davon 604 bzw. 444 px.
+- bei 644 px Karte: Titelspur nur 106 px, Zeilenhöhe **88 px** — drei Zeilen für
+  „Rechnung · Bürobedarf Meier GmbH"; mit einem echten Firmennamen
+  („Elektro-Großhandel Nordwest Verwaltungs GmbH & Co. KG") 151 px.
+- bei 484 px Karte, also an der L1-Untergrenze 1280: Titelspur **0 px**, der
+  Titel läuft mit 74–80 px aus seiner Spur in die Betragsspalte (Titel bei
+  x = 132, Betrag bei x = 144), die Zeile ist 538 px breit in einem 484 px
+  breiten Behälter, die Karte scrollt waagerecht (495 gegen 482) und die Zeilen
+  sind 109–130 px hoch.
+Das ist genau der Fall, den der Kommentar an `.v2case` (0095) schon einmal
+beschreibt. Die Nachmessung in „Gebaut" reproduziert exakt — aber nur im
+Story-Rahmen von 720 px, den es auf der Seite nirgends gibt.
+Vorschlag: Der Titel bekommt den Vorrang —
+`grid-template-columns: 104px minmax(0, 1fr) max-content max-content max-content max-content`,
+Betrag, Reife und Handlung nach Inhalt statt fest; die Titelzeile selbst
+(Knopf bzw. Text, nicht die Spalte mit der Notiz darunter) bekommt
+`white-space: nowrap; overflow: hidden; text-overflow: ellipsis` wie `.v2case`,
+damit ein langer Firmenname kürzt statt umzubrechen. Dazu eine Story, die die
+Zeile in 484 px zeigt, damit die nächste Messung nicht wieder gegen den Rahmen
+läuft.
+
+**M2 · blockiert · `currency` rät.**
+Kriterium: Spec, „Vor dem Bau eingearbeitet (b)": „`currency` ist eine Prop.
+Wie bei `CaseTimeline` (L-23): der Betrag weiß nicht, in welcher Währung er
+steht, und die Komponente rät nicht."
+Messung: `Expectation.tsx:83` und `:122` setzen `currency = "EUR"` als Vorgabe,
+die Prop ist als `currency?: Currency` optional. `CaseTimeline.tsx:103` führt
+sie dagegen als `currency: Currency` ohne Vorgabe. Keine der sieben Stories
+reicht die Prop herein — es gibt für sie also auch keinen Nachweis.
+Vorschlag: `currency: Currency` in beiden Exporten verpflichtend, ohne Default;
+die Stories geben `currency="EUR"` ausdrücklich an.
+
+**M3 · blockiert nicht · Zwei deutsche Kommentare im Code.**
+Kriterium: fester Block „Code englisch" (`CLAUDE.md`: Kommentare englisch,
+Deutsch nur in Nutzertexten; Story-JSDocs bleiben deutsch).
+Messung: `Expectation.tsx` Z. 100/101 („Der Betrag steht nur bei einer
+Zahlung …") und Z. 162/163 („Absolut, nicht „in drei Tagen" …"). Die Stories
+sind in Ordnung, deren JSDocs dürfen deutsch bleiben.
+Vorschlag: beide Kommentare übersetzen; die deutsche Begründung steht ohnehin
+in Spec und `v3.css`.
+
+**M4 · blockiert nicht · Der ausgelassene Zustand „lädt" ist nicht begründet.**
+Kriterium: fester Block „ausgeschlossene Zustände begründet" (§6: jeder
+ausgeschlossene Zustand steht in der Spec mit Grund).
+Messung: Die Spec begründet `LeerNachFilter` („filtern tut die Liste darüber")
+und „leer" beim Chip (e). Zu „lädt" steht nichts, und eine Skeleton-Story gibt
+es nicht.
+Vorschlag: ein Satz im Abschnitt „Stories" — die Zeile bekommt ihre Daten
+fertig gereicht, das Laden gehört der Liste darüber. Kein Code.
+
+**M5 · kein Mangel, nur vermerkt** — `audienceWord()` bildet zwei DB-Werte auf
+zwei deutsche Wörter ab, ohne Achse dahinter. Das ist dieselbe Form, die die
+Komponente für `expectedDocumentKind` ausdrücklich ablehnt; sie ist hier
+gedeckt, weil die Freigabe (Entscheid 1) genau diese zwei Wörter benennt.
+Wenn `audience` je eine Registry-Achse bekommt, gehört die Zuordnung dorthin.
+
+Abgenommen von / am: fremde Abnahme (Claude, ohne Bau und ohne Chatverlauf) ·
+2026-09-07 · Ergebnis: **zurück**. Offene Punkte: **M1** und **M2** blockieren,
+**M3** und **M4** laufen mit; **M5** ist nur vermerkt.
 
 ## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
 
@@ -206,3 +289,45 @@ nur durch, damit die Stories nicht mit dem Kalender wandern.
 `escalationLevel` erscheint **nirgends** als Zahl: er geht in die Reife ein
 und sonst nirgendwohin. Er ist keine DATEV-Mahnstufe, und wer ihn als solche
 liest, liest falsch.
+
+## Nach der Abnahme (2026-09-07): die Zeile passte nicht in ihre Spalte
+
+**M1 erledigt — und es war derselbe Fehler wie in 0071, nur eine Ebene
+tiefer.** Die festen Spuren summieren sich mit den Rinnen auf **537 px**,
+bevor der Titel ein Pixel bekommt. Nachgemessen wurde das im Story-Rahmen von
+720 px, den es auf der Seite nirgends gibt: in der Detailspalte der
+Sachverhaltsseite bleiben bei 1280 px Fenster **484 px**. Dort war die
+Titelspur **0 px**, der Titel lief 74 px in die Betragsspalte, die Zeile stand
+538 px breit in einem 484-px-Behälter, und die Karte bekam eine
+Bildlaufleiste.
+
+Die Zeile misst jetzt **sich selbst** (Container-Query, wie die Belegkarte in
+0071): ab 560 px Zeilenbreite die sechs Spuren, darunter der Titel über die
+volle Breite und alles Übrige in einer Reihe darunter. Gemessen:
+
+| Zeilenbreite | Spuren | Zeilenhöhe | Überlauf |
+|---|---|---|---|
+| 484 px (Detailspalte bei 1280) | eine | 75 px | 0 |
+| 644 px (Detailspalte bei 1440) | sechs | 66 px | 0 |
+| 900 px (eigene Seite) | sechs | **46 px** | 0 |
+
+Ein erster Versuch stapelte im schmalen Fall alles untereinander — gemessen
+148 px je Zeile, eine Liste aus fünf Erwartungen hätte den halben Bildschirm
+gefüllt. Deshalb steht dort jetzt `flex-wrap` statt einer einspaltigen
+Rasterreihe.
+
+**M2 erledigt** — `currency` hatte einen Default (`"EUR"`), obwohl der
+Nachtrag „die Komponente rät nicht" sagt und `CaseTimeline` sie verpflichtend
+führt. Sie ist jetzt Pflicht, alle Stories reichen sie herein, und eine gibt
+`"CHF"` — damit hat die Prop einen Nachweis statt eines Defaults.
+
+**M3 erledigt** — der deutsche Kommentar im Code ist übersetzt. Die
+Story-JSDocs bleiben deutsch (Nutzertext).
+
+**M4 erledigt** — „lädt" ist begründet: die Zeile bekommt ihre Daten als Prop;
+wer sie lädt, zeigt das an seiner Stelle.
+
+**M5 bleibt als Vermerk:** `audienceWord()` bildet zwei DB-Werte auf zwei
+deutsche Wörter ab, ohne Achse — dieselbe Form, die die Komponente für
+`expectedDocumentKind` ablehnt. Gedeckt durch Freigabe-Entscheid 1; sobald
+`audience` eine Achse bekommt, fällt die Funktion weg.

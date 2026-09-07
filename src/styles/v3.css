@@ -3064,15 +3064,42 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Marke „Zahlung offen" (94 px) schob den Titel ihrer Zeile 17 px weiter
    nach rechts als „Beleg fehlt" (77 px), und die Spalte war keine. 104 px
    fasst beide Wörter der Achse `erwartung_art`; ein längeres bekäme eine
-   Ellipse, aber die Achse hat genau zwei. */
+   Ellipse, aber die Achse hat genau zwei.
+
+   **Und die Zeile misst sich selbst, nicht das Fenster.** Die festen Spuren
+   summieren sich mit den Rinnen auf 537 px, bevor der Titel ein Pixel
+   bekommt; in der Detailspalte der Sachverhaltsseite bleiben bei 1280 px
+   Fenster aber nur **484 px** (gemessen in `casedetailview--in-use`). Dort
+   lief die Zeile 538 px breit in einen 484-px-Behälter, der Titel 74 px in
+   die Betragsspalte, und die Karte bekam eine Bildlaufleiste (Abnahme 0025).
+   Eine `@media`-Regel könnte das nicht sehen: dasselbe Fenster trägt die
+   Zeile einmal breit (eigene Seite) und einmal schmal (Detailspalte). */
+.v2exp { container-type: inline-size; container-name: exprow; }
 .v2exp__row {
   display: grid;
-  grid-template-columns: 104px minmax(0, 1fr) 110px max-content 110px max-content;
+  /* Schmal ist der Ausgangspunkt: Titel oben, alles Übrige darunter. So steht
+     die Zeile auch dort richtig, wo Container-Queries nicht greifen. */
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-3);
   padding: var(--space-3) 0;
   border-bottom: 1px solid var(--color-border-subtle);
   font-size: var(--fs-ui);
+}
+/* Ab 560 px Zeilenbreite die sechs Spuren — die Summe der festen Anteile
+   (104 + 110 + 110 + fünf Rinnen) plus Luft für Titel, Frist und Reife. */
+@container exprow (min-width: 560px) {
+  .v2exp__row {
+    grid-template-columns: 104px minmax(0, 1fr) 110px max-content 110px max-content;
+  }
+}
+/* Schmal: der Titel nimmt die ganze Breite, alles Übrige fließt darunter in
+   **einer** Reihe. Gestapelt wäre jede Zeile 148 px hoch — gemessen —, und
+   eine Liste aus fünf Erwartungen füllte den halben Bildschirm. */
+@container exprow (max-width: 559.98px) {
+  .v2exp__row { display: flex; flex-wrap: wrap; align-items: baseline; }
+  .v2exp__title { flex: 1 1 100%; order: -1; }
+  .v2exp__kind { order: 0; }
 }
 .v2exp__row:last-child { border-bottom: none; }
 .v2exp__title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
