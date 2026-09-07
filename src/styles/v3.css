@@ -266,7 +266,12 @@
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
-.v2link:disabled { opacity: 0.5; cursor: not-allowed; }
+/* Gesperrt heißt **lesbar gesperrt**: `opacity: .5` auf der Linkfarbe ergab
+   gemessen 2,11:1 — unter jeder Schwelle, und damit ist der Weg nicht
+   „sichtbar und begründet", sondern nur noch zu ahnen (Abnahme 0065). Statt
+   Deckkraft die gedämpfte Textfarbe: 6,69:1, und der Unterschied zum aktiven
+   Link bleibt deutlich, weil dieser blau ist. */
+.v2link:disabled { color: var(--color-text-muted); cursor: not-allowed; }
 
 
 /* ==========================================================================

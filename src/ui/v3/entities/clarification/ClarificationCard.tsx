@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import type { ClarificationAnswerKind } from "@/ludwig/modules/invoices/domain/invoice";
 import type { RationaleSourceKind } from "@/ludwig/modules/accounting-cases/domain/rationale-source";
@@ -181,10 +181,15 @@ function maxDeferralDay(): string {
 }
 
 /**
- * Hold the day inside the window. `min` and `max` on the field are a hint the
- * browser gives while typing — they are **not** a guarantee: a typed date
- * outside the range still reaches `onChange`, and the confirm button never
- * looks at the field. So the value is clamped where it is used.
+ * Hold the day inside the window.
+ *
+ * `min` and `max` on the field are a hint the browser gives while typing —
+ * they are **not** a guarantee: a typed date outside the range still reaches
+ * `onChange`, and the confirm button never looks at the field. So the value is
+ * clamped **at the change**, where the correction is visible in the field, and
+ * again on confirm as a net. A date that quietly turns into another one is
+ * the kind of thing nobody notices until the question comes back on the wrong
+ * day (finding of the acceptance).
  */
 function clampDeferralDay(value: string | null): string {
   const min = defaultDeferralDay();
@@ -246,6 +251,11 @@ export function ClarificationCard({
   const [resolving, setResolving] = useState(false);
   const [deferring, setDeferring] = useState(false);
   const [until, setUntil] = useState<string | null>(defaultDeferralDay());
+  // Generated, not hard-coded: several cards stand in one list, and two
+  // elements with the same id are a label that points at the wrong field.
+  const dayId = useId();
+  const hintId = useId();
+  const whyId = useId();
 
   const isComment = c.type === "comment";
   // Without a loaded audit trail, asker and answerer still make a two-step
@@ -266,6 +276,13 @@ export function ClarificationCard({
   // eight remaining rows are legacy: show the question, offer no upload.
   const legacyUpload = c.answerKind === "document_upload";
   const canAnswer = mode === "answer" && !isComment && Boolean(onAnswer) && !legacyUpload;
+  /**
+   * The two exits are **not** bound to the answer. A question one cannot
+   * answer any more is exactly the one to resolve or defer — the eight legacy
+   * `document_upload` rows are that case, and they lost both ways as long as
+   * the exits hung on `canAnswer`.
+   */
+  const canExit = mode === "answer" && !isComment;
 
   return (
     <article className="v2clc">
@@ -404,29 +421,33 @@ export function ClarificationCard({
             pending={pending}
             error={error}
           />
-          {onResolve ? (
-            <p className="v2clc__exit">
-              <ActionIcon action="help" size={14} />
-              Woanders geklärt?{" "}
-              <TextButton onClick={() => setResolving(true)}>Ohne Antwort auflösen</TextButton>
-            </p>
-          ) : null}
-          {onDefer ? (
-            <p className="v2clc__exit">
-              <ActionIcon action="time" size={14} />
-              Jetzt nicht zu klären?{" "}
-              <TextButton
-                onClick={() => setDeferring(true)}
-                disabled={Boolean(deferLockedReason)}
-              >
-                Zurückstellen
-              </TextButton>
-              {deferLockedReason ? (
-                <span className="v2clc__exitwhy">{deferLockedReason}</span>
-              ) : null}
-            </p>
-          ) : null}
         </div>
+      ) : null}
+
+      {canExit && onResolve ? (
+        <p className="v2clc__exit">
+          <ActionIcon action="help" size={14} />
+          Woanders geklärt?{" "}
+          <TextButton onClick={() => setResolving(true)}>Ohne Antwort auflösen</TextButton>
+        </p>
+      ) : null}
+      {canExit && onDefer ? (
+        <p className="v2clc__exit">
+          <ActionIcon action="time" size={14} />
+          Jetzt nicht zu klären?{" "}
+          <TextButton
+            onClick={() => setDeferring(true)}
+            disabled={Boolean(deferLockedReason)}
+            {...(deferLockedReason ? { "aria-describedby": whyId } : {})}
+          >
+            Zurückstellen
+          </TextButton>
+          {deferLockedReason ? (
+            <span className="v2clc__exitwhy" id={whyId}>
+              {deferLockedReason}
+            </span>
+          ) : null}
+        </p>
       ) : null}
 
       {onDefer ? (
@@ -451,16 +472,17 @@ export function ClarificationCard({
           {/* The date sits **above** the reason, in the slot `ReasonDialog`
               keeps for „what is this reason for". No second dialog: this one
               already carries the mandatory reason and its lock. */}
-          <Field label="Wiedervorlage am" htmlFor="defer-until">
+          <Field label="Wiedervorlage am" htmlFor={dayId}>
             <DateField
-              id="defer-until"
+              id={dayId}
               value={until}
-              onChange={setUntil}
+              onChange={(value) => setUntil(clampDeferralDay(value))}
               min={defaultDeferralDay()}
               max={maxDeferralDay()}
+              describedBy={hintId}
             />
           </Field>
-          <p className="v2clc__deferhint">
+          <p className="v2clc__deferhint" id={hintId}>
             Höchstens {DEFERRAL_MAX_DAYS} Tage voraus — ein Monatslauf.
           </p>
         </ReasonDialog>

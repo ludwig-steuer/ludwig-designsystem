@@ -124,9 +124,9 @@ export const Answering: Story = {
               }}
               onAnswer={(a) => answer(`Freitext: ${a.text ?? "—"}`)}
               onDefer={(until, reason) => answer(`Zurückgestellt bis ${until}: ${reason}`)}
-              // Zum dritten Mal: ab hier darf nur noch ein Mensch, und diese
-              // Betrachterin ist der Agent. Der Knopf bleibt stehen und sagt,
-              // warum er nicht geht.
+              // The third time: from here only a person may defer, and this
+              // viewer is the agent. The button stays and says why it will
+              // not go.
               deferLockedReason="Zweimal zurückgestellt — ab jetzt nur noch von Hand"
             />
           </div>
@@ -292,19 +292,26 @@ export const InPortal: Story = {
 };
 
 /**
- * Die Wiedervorlage, wie sie aussieht, nachdem sie gesetzt ist — **drei
- * Lagen nebeneinander**: einmal, mehrfach, und an einer Gegenfrage hängend.
- * Das Datum steht absolut (T7), der Grund daneben, und ab der zweiten
- * Verschiebung sagt die Karte, die wievielte es ist — das ist die Warnung
- * vor der Sperre, bevor die Sperre kommt.
+ * A deferral after it has been set — **three situations side by side**: once,
+ * repeatedly, and hanging on a counter-question. The date stands absolute
+ * (T7), the reason beside it, and from the second time the card says which
+ * one it is: that is the warning before the lock, and it arrives before the
+ * lock does.
+ *
+ * The first card runs in `answer` mode on purpose: a deferral is „not now",
+ * not a ban — whoever can answer today should not have to wait for the
+ * deferral day.
  */
 export const Deferred: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)" }}>
       <Card>
-        <CardHead title="Einmal zurückgestellt" sub="Datum, Grund" />
+        <CardHead title="Einmal zurückgestellt" sub="Datum, Grund — und der Antwortbereich bleibt" />
         <div style={{ padding: "var(--space-4)" }}>
           <ClarificationCard
+            mode="answer"
+            onAnswer={async () => {}}
+            onDefer={async () => {}}
             clarification={{
               ...BASE,
               ...AGENT_DETAIL,

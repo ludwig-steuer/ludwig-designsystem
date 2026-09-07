@@ -93,9 +93,9 @@ Aufgabe, die man einzeln abnehmen kann. Die Karte hat den Platz dafür bereits
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `onDefer` | `(until: string, reason: string) => Promise<void>` | nein | Der zweite Ausgang. **Ohne die Prop kein Knopf** — dieselbe Regel wie bei `onResolve`: fehlt der Callback, fehlt der Weg | `Defer`, `Read` (ohne Knopf) |
+| `onDefer` | `(until: string, reason: string) => Promise<void>` | nein | Der dritte Ausgang. **Ohne die Prop kein Knopf** — dieselbe Regel wie bei `onResolve`: fehlt der Callback, fehlt der Weg | `Answering`, `Filled` (ohne Knopf) |
 | — | — | — | **`deferMaxDays` gestrichen.** 30 Tage sind Regel, kein Vorschlag: eine Prop dafür lüde ein, sie zu übergehen, und der Server nähme es nicht an. Die Zahl steht einmal in der Karte, weil `DEFERRAL_MAX_DAYS` in `domain/case.ts` fehlt (Befund L-91) | — |
-| `deferLockedReason` | `string` | nein | Warum der Knopf gesperrt ist — er wird **gesperrt gezeigt, nicht versteckt**. Die Karte errechnet den Text nicht selbst: „ab der dritten Verschiebung nur noch ein Mensch" ist eine Regel über den Betrachter, und den kennt nur der Aufrufer | `DeferLocked` |
+| `deferLockedReason` | `string` | nein | Warum der Knopf gesperrt ist — er wird **gesperrt gezeigt, nicht versteckt**, und der Satz hängt über `aria-describedby` am Knopf. Die Karte errechnet den Text nicht selbst: „ab der dritten Verschiebung nur noch ein Mensch" ist eine Regel über den Betrachter, und den kennt nur der Aufrufer | `Answering` (dritte Karte) |
 
 Am Anzeige-Typ der **Zeile** (`ClarificationVM`) ist nichts Neues nötig:
 `deferredUntil` und `state = "deferred"` gibt es, und `ClarificationEventKind`
@@ -206,3 +206,46 @@ Variabel:
 Vor dem Bau in die Spec: (a) `ClarificationDetailVM` um `deferredReason?`, `deferredCount?`, `deferredBy?: { id, title, href }` ergänzen — strukturell deckungsgleich, L-83 wird um `deferred_reason` erweitert; (b) `deferMaxDays` streichen, 30 ist Regel (Befund L-91: `DEFERRAL_MAX_DAYS` in `domain/case.ts`); (c) Datumsfeld mit Startwert morgen, `min` morgen, `max` heute + 30, Wert wird geklemmt — der Dialog-Knopf sieht das Datum nicht, das `max`-Attribut allein reicht nicht; (d) „mindestens 10 Zeichen (DB-CHECK)" ist nicht belegt — streichen, sofern keine Quelle; gilt sie, bekommt `ReasonDialog` eine Prop `minLength`; (e) Stories: Bestand ist 9, nicht 6 — `onDefer`-Rundlauf in die Callback-Story, eine Story `Deferred` mit den drei Zuständen nebeneinander, gesamt 10; Kriterium „Story `Read`" → `Filled`; Exportnamen englisch, da die Datei angefasst wird; (f) sagen: Knopf nur bei `mode="answer"`, der Antwortbereich bleibt im Zustand `deferred` (eine frühe Antwort beendet die Wiedervorlage); der Gegenfrage-Link führt zur Sachverhaltsseite, nicht in einen Drawer.
 
 Befunde ins Register: L-83 um `deferred_reason` ergänzen; **L-91** — `DEFERRAL_MAX_DAYS = 30` (und ggf. Mindestlänge des Grundes) fehlt in `modules/accounting-cases/domain/case.ts`; Hinweis: `overview-vm.ts` liegt trotz „L-09 erledigt" nicht im Spiegel — Sync prüfen.
+
+## Nach der Abnahme vom 2026-09-07
+
+Die Abnahme kam **zurück, auf kurzem Weg**: alle variablen Kriterien erfüllt,
+das feste „Code englisch" nicht — und zwei Punkte, die eine Entscheidung
+brauchten statt einer Korrektur.
+
+**Die Klemmung war stumm (M-2).** Sie griff, aber erst im Bestätigungspfad:
+gemessen wurde aus `2027-01-01` beim Speichern `2026-10-07`, ohne dass im
+Feld etwas darauf hindeutete. Ein Wiedervorlagedatum, das sich unbemerkt
+verschiebt, fällt genau dann auf, wenn die Frage am falschen Tag zurückkommt.
+Jetzt klemmt es **am `onChange`** — die Korrektur steht im Feld — und im
+Bestätigungspfad bleibt sie als Netz. Gemessen: `2027-01-01` wird sofort zu
+`2026-10-07`, `2020-01-01` zu `2026-09-08`, ein gültiger Tag bleibt stehen.
+
+**Der dritte Ausgang hing am ersten (M-3).** Beide Ausgänge standen im
+`canAnswer`-Block, und `canAnswer` verlangt `onAnswer` **und** eine
+beantwortbare Frageart. Wer `onDefer` ohne `onAnswer` setzte, bekam keinen
+Knopf — und die acht Altlast-Fragen (`answer_kind = "document_upload"`)
+verloren beide Wege, ausgerechnet die Fragen, die man zurückstellt, **weil**
+man sie nicht mehr beantworten kann. Jetzt hängen sie an `canExit`
+(`mode === "answer"` und kein Kommentar). Der Fehler war von `onResolve` aus
+0060 geerbt und ist dort mitbehoben.
+
+**Der gesperrte Knopf war mit 2,11:1 kaum lesbar (M-5).** `opacity: .5` auf
+der Linkfarbe — und damit war der Weg nicht „sichtbar und begründet", sondern
+nur zu ahnen. Die Regel gehört dem Primitive: `.v2link:disabled` nimmt jetzt
+die gedämpfte Textfarbe statt Deckkraft. Gemessen **6,69:1**, und der
+Unterschied zum aktiven Link bleibt deutlich, weil dieser blau ist. Dazu hängt
+der Grund über `aria-describedby` am Knopf.
+
+Dazu: die zwei deutschen Kommentarblöcke sind englisch (M-1), die Story
+`Deferred` zeigt ihre erste Karte im Antwortmodus und beweist damit den Satz
+„der Antwortbereich bleibt im Zustand `deferred` stehen" (M-4), die Ids kommen
+aus `useId()` statt fest verdrahtet (M-6), und der Hinweis „höchstens 30 Tage"
+hängt über `aria-describedby` am Datumsfeld — dafür hat `DateField` eine Prop
+bekommen, die dem ganzen Set gefehlt hat (M-7).
+
+**Offen und benannt:** M-9 — die Umbenennung der Story-Exporte macht die
+Nachweise der abgeschlossenen Abnahme 0060 tot (`--gefuellt`, `--antworten`,
+…). Sie stehen dort als Story-IDs in der Abnahmetabelle; wer 0060 nachprüft,
+findet sie nicht mehr. M-10 (`void onDefer(...)` verschluckt einen Fehler) ist
+seit 0060 so und gehört in eine eigene Runde für beide Ausgänge.

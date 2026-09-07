@@ -165,6 +165,12 @@ Nach A12: keine Prop auf Vorrat, hier steht der Plan.
 | Beleg-Upload | keiner — seit F125 ist der fehlende Beleg eine Erwartung | nie; der Hinweis-Zweig entfällt, sobald die acht Altzeilen migriert sind (B6) |
 | Frage weiterleiten („das kann nur der Mandant beantworten") | `onReroute?: (audience) => Promise<void>` | die Abnahme braucht es; heute löst die Kanzlei das, indem sie selbst antwortet |
 
+**Hinweis 2026-09-07:** die Story-Exportnamen dieser Datei sind mit 0065
+englisch geworden (`Gefuellt` → `Filled`, `Antworten` → `Answering`, …), weil
+CLAUDE.md es verlangt und die Datei ohnehin angefasst wurde. Die Story-IDs in
+der Tabelle unten (`--gefuellt`, `--antworten`, `--von-hand` …) zeigen damit
+ins Leere; die Nachweise gelten weiter, ihre IDs heißen jetzt englisch.
+
 ## Abnahmekriterien
 
 Fest (gilt immer):

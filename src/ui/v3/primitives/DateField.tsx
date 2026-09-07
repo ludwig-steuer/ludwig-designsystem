@@ -35,6 +35,7 @@ export function DateField({
   invalid,
   disabled,
   ariaLabel,
+  describedBy,
   id,
   name,
 }: {
@@ -46,6 +47,12 @@ export function DateField({
   invalid?: boolean;
   disabled?: boolean;
   ariaLabel?: string;
+  /**
+   * The id of the sentence that explains the field — a limit („at most 30
+   * days ahead"), a rule. Without it the sentence stands next to the field
+   * and is read by everyone **except** the person who needs it most.
+   */
+  describedBy?: string;
   /**
    * What the `htmlFor` of the surrounding `Field` points at (0104). Separate
    * from `name`: a field outside a form still needs its word bound to it.
@@ -64,6 +71,7 @@ export function DateField({
       invalid={invalid}
       disabled={disabled}
       aria-label={ariaLabel}
+      aria-describedby={describedBy}
       onChange={(e) => onChange(e.target.value || null)}
     />
   );
