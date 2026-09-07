@@ -3274,17 +3274,26 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* `flex`, nicht `inline-flex`: shrink-to-fit gibt der Ellipse keine Grenze —
    die Zeile lief bei 420 px Elternbreite auf 1426 px hinaus. Derselbe Fehler
    wie in 0095, hier gleich vermieden. */
-.v2purp--inline { display: flex; align-items: baseline; gap: var(--space-1); min-width: 0; max-width: 100%; }
+/* `center`, nicht `baseline`: der Knopf hat `line-height: 0`, und an der
+   Grundlinie ausgerichtet zog er die Zeile um 2,46 px auseinander — gemessen
+   48,38 px mit (i) gegen 45,92 px ohne (Wiederabnahme 0099, M9). Die
+   Kürzung bleibt davon unberührt. */
+.v2purp--inline { display: flex; align-items: center; gap: var(--space-1); min-width: 0; max-width: 100%; }
 /* Die Kürzung macht CSS, nicht eine Zeichenzahl: eine Zahl stimmt bei einer
    Grid-Spalte nie (Entscheid 3 der Freigabe). */
 .v2purp--inline .v2purp__text {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
 }
-/* Trefferfläche: das Icon misst 14 px, der Knopf 24 — der negative Rand hält
-   die Zeilenhöhe, damit die Tabelle nicht wächst (WCAG 2.5.8). */
+/* Trefferfläche: das Icon misst 14 px, der Knopf **24 × 24** — das Hausmaß
+   aus 0113. Das Polster allein ergab 22 × 22 (14 + 2 × 4), also die Marke
+   knapp unter dem Maß; der Kommentar behauptete 24, gemessen waren es 22
+   (Wiederabnahme 0099, M9). Der negative Rand hält die Zeilenhöhe, damit die
+   Tabelle nicht wächst (WCAG 2.5.8). */
 .v2purp__info {
   background: none; border: none; cursor: pointer; line-height: 0;
   color: var(--color-text-subtle); flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--space-6); min-height: var(--space-6);
   /* Nur senkrecht negativ: waagerecht wuerde der Knopf 4 px ueber die
      rechte Kante ragen und die Zelle ueberlaufen lassen. */
   padding: var(--space-1); margin-block: calc(-1 * var(--space-1));
@@ -3304,7 +3313,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
      da. Mono trennt die Kennung schon genug. */
   font: 500 var(--fs-ui-xs)/1.4 var(--font-mono);
 }
+/* Ein Zeiger, der auf nichts antwortet, ist ein Versprechen ohne Deckung —
+   §9 verlangt zu jedem `cursor: pointer` eine sichtbare Antwort (Abnahme
+   0099, M10). */
 .v2purp__raw summary { cursor: pointer; font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
+.v2purp__raw summary:hover { color: var(--color-text); text-decoration: underline; }
 .v2purp__raw pre {
   margin: var(--space-2) 0 0; padding: var(--space-3);
   background: var(--color-bg-sunken); border-radius: var(--radius-sm);

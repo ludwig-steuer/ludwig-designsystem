@@ -35,14 +35,16 @@ import { Popover } from "../../primitives/Popover";
  * @instead The whole line → BankTransactionCell. The raw record for audit →
  *          RawRecord.
  */
+/** No purpose at all — the em dash, the set's one word for „nothing here". */
+const EMPTY = "—";
+
 export function BankTransactionPurpose({
   purpose,
   tags,
   variant = "inline",
-  fallback = "—",
   href,
 }: {
-  /** The raw column value. `null` renders the fallback. */
+  /** The raw column value. `null` renders the em dash. */
   purpose: string | null;
   /**
    * Tags parsed at import time (`raw_payload.parsed_sepa_tags`). They win over
@@ -54,13 +56,14 @@ export function BankTransactionPurpose({
    * `block`: free text plus the chips below it — for facts and drawer.
    */
   variant?: "inline" | "block";
-  fallback?: string;
   /**
    * Makes the free text a link — **not** the whole component, because the (i)
    * is a button and a button inside an anchor is not valid markup. Exists for
    * the one case where the purpose is the identity: a payment without a
-   * counterparty (0100, 3 % of the lines); proved by the story
-   * `BankTransactionCell --without-counterparty`. Works in both variants.
+   * counterparty (0100, 3 % of the lines). Works in both variants, and both
+   * are proved: `inline` by `BankTransactionCell --without-counterparty`,
+   * `block` by the second surface in the story `Block` (acceptance 0099, M12
+   * — the sentence had claimed both and shown one).
    */
   href?: string;
 }) {
@@ -80,7 +83,7 @@ export function BankTransactionPurpose({
     return (
       <div className="v2purp v2purp--block">
         <p className="v2purp__text">
-          {href ? <Link href={href}>{text || fallback}</Link> : text || fallback}
+          {href ? <Link href={href}>{text || EMPTY}</Link> : text || EMPTY}
         </p>
         {parts.refs.length > 0 ? <Refs refs={parts.refs} /> : null}
         {parts.hadTags && parts.raw ? <Raw raw={parts.raw} /> : null}
@@ -97,13 +100,21 @@ export function BankTransactionPurpose({
           JavaScript. Whoever loses the end of the sentence gets it back
           without opening anything. */}
       <span className="v2purp__text" title={text || undefined}>
-        {href ? <Link href={href}>{text || fallback}</Link> : text || fallback}
+        {href ? <Link href={href}>{text || EMPTY}</Link> : text || EMPTY}
       </span>
       {hasMore ? (
         <Popover
           align="start"
           trigger={
-            <button type="button" className="v2purp__info" aria-label="Referenzen und Originalwert">
+            // `title` next to `aria-label`: the screen reader hears the one,
+            // the mouse reads the other — a mark without a word needs both
+            // (V11, acceptance 0099, M14).
+            <button
+              type="button"
+              className="v2purp__info"
+              aria-label="Referenzen und Originalwert"
+              title="Referenzen und Originalwert"
+            >
               <ActionIcon action="info" size={14} />
             </button>
           }

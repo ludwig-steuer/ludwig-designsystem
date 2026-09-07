@@ -33,13 +33,21 @@ export const Inline: Story = {
 
 /**
  * `variant="block"`: der Freitext steht ganz, darunter die Chips. `PURP` steht
- * als Code, sein `title` trägt das Wort — die Übersetzung kommt aus dem
- * Spiegel (`PURP_LABELS`), nicht aus einer Map in dieser Datei.
+ * als **Wort**, sein `title` trägt den Code — „wiederkehrende Rate" mit
+ * `title="RINP"`, denn das Codewort sagt niemandem etwas. Die Übersetzung
+ * kommt aus dem Spiegel (`PURP_LABELS`), nicht aus einer Map in dieser Datei.
+ * (Der Satz stand bis zur Abnahme 0099 genau andersherum da — und diese Story
+ * ist der benannte Nachweis eben dieses Kriteriums.)
+ *
+ * Die zweite Fläche zeigt denselben Zweck mit `href`: auch im Block-Zweig
+ * wird **nur der Freitext** zum Weg, nicht die ganze Komponente — das (i) ist
+ * ein Knopf, und ein Knopf im Anker ist kein gültiges Markup (M12).
  */
 export const Block: Story = {
   render: () => (
-    <div style={{ maxWidth: 620, padding: "var(--space-6)" }}>
+    <div style={{ maxWidth: 620, padding: "var(--space-6)", display: "grid", gap: "var(--space-6)" }}>
       <BankTransactionPurpose purpose={FULL} variant="block" />
+      <BankTransactionPurpose purpose={FULL} variant="block" href="#bt-3" />
     </div>
   ),
 };

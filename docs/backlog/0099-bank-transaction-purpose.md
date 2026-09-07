@@ -101,15 +101,21 @@ Lädt und Fehler gibt es nicht.
 
 Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionPurpose`. Abgeleitet
 nach §6: 3 anwendbare Zustände + 1 Enum (`variant`) + 0 Callbacks + 1 „im
-Einsatz" + 1 Rand = 6.
+Einsatz" + 1 Rand = 6. Gebaut sind **8**: zwei Props tragen je einen eigenen
+Nachweis, den die Rechnung nicht vorsieht — `tags` (gesetzte gewinnen gegen
+das Nachparsen) und der Fall, in dem **nur** Tags da sind. Beide sind eigene
+Kriterien, beide unter der Obergrenze 10. *(Die Zeile sagte bis zur
+Wiederabnahme 2026-09-07 „= 6" und zählte die zwei nicht mit.)*
 
 | Story | Beweist |
 |---|---|
 | `Inline` | Eine Zeile mit Ellipse, Referenzen hinter dem (i); Tastatur öffnet es |
-| `Block` | Freitext plus sechs Chips darunter, `PURP` als Wort übersetzt |
+| `Block` | Freitext plus die Chips darunter, `PURP` als **Wort** mit dem Code im `title`; die zweite Fläche derselben Story zeigt `href` im Block-Zweig |
 | `WithoutTags` | Ein Zweck ohne Tag-Block: kein (i), der Rohwert ist der Text |
 | `Empty` | `purpose={null}` → „—" |
-| `Raw` | Rand: 447-Zeichen-Rohblock — inline eine Zeile, im Popover vollständig und mono |
+| `TagsWin` | Gesetzte `tags` gewinnen gegen das Nachparsen — die Referenz aus dem Import steht im Chip, nicht die aus dem Text |
+| `TagsOnly` | Nur Tags, kein Freitext |
+| `Raw` | Rand: 509-Zeichen-Rohblock — inline eine Zeile, im Popover vollständig und mono |
 | `InUse` | In einer `Table` als breiteste Spalte neben Datum, Gegenpartei und Betrag |
 
 Nicht anwendbar: `leer nach Filter`, `lädt`, `Fehler`.
@@ -153,7 +159,7 @@ Variabel (aus dieser Spec):
 - [ ] Das Original ist über dasselbe (i) erreichbar wie die Referenzen (Story `Inline`)
 - [ ] Das (i) ist per Tastatur erreichbar und öffnet mit Enter (Story `Inline`)
 - [ ] `derivePurposeParts()` steht in einer eigenen Datei und rendert nichts (`grep`: kein JSX darin)
-- [ ] Gesetzte `tags` gewinnen gegen das Nachparsen (Story `Block` gegen `WithoutTags`)
+- [ ] Gesetzte `tags` gewinnen gegen das Nachparsen (Story `TagsWin` gegen `Block` — `Block` setzt keine `tags`, der alte Verweis ging ins Leere)
 - [ ] Der Freitext steht nicht mono (Story `Inline`)
 - [ ] offen (App): ersetzt `PurposeDisplay.tsx` und `purpose.css` in fünf Dateien; `KontoauszugView` bekommt sie überhaupt erst (L-59)
 
@@ -224,3 +230,224 @@ Offen, weil Owner-Sache: die Spec-Zeile „Setzt auf: `LongText`, `Badge` …"
 stimmt nicht mehr — `LongText` kürzt nach Zeichenzahl und widerspricht
 Entscheid 3, `Badge` heißt im Set „Zustand" und ist durch eine stille Marke
 ersetzt.
+
+## Wiederabnahme 2026-09-07 (fremde Abnahme)
+
+**Urteil: zurück.** Alle acht variablen Kriterien der Spec sind erfüllt und
+gemessen. Zurück geht es an zwei Punkten der Prüfliste §9 — und an **M7 der
+Vorrunde, dessen Behauptung die Messung widerlegt**: das (i) misst 22 × 22
+statt der im eigenen Kommentar genannten 24, und es macht die Zeile 2,46 px
+höher.
+
+Gemessen gegen den laufenden Dev-Server `http://localhost:6107` (Quelle),
+headless über CDP auf eigenem Port 9381. **Nicht gebaut** (Befund 0117: ein
+Build leert `storybook-static/` unter den parallelen Sitzungen weg). Bedarf
+immer am ungebundenen Klon (`position:absolute; visibility:hidden; width:auto;
+max-width:none; white-space:nowrap`), nie geschätzt.
+
+### 1 · Story-Deckung
+
+Ableitung nach `spec-schreiben` §6: 3 anwendbare Zustände + 1 Enum (`variant`)
++ 0 Callbacks + 1 „im Einsatz" + 1 Rand = **6**. Im `index.json` stehen **8**:
+die sechs der Spec (`Inline`, `Block`, `WithoutTags`, `Empty`, `Raw`, `InUse`)
+plus `TagsWin` und `TagsOnly`. Beide tragen je ein Kriterium (Vorrang der
+gesetzten Tags · Tag-Block ohne SVWZ, M2), beide liegen unter der Obergrenze
+von 10. Der Abschnitt „Stories" der Spec nennt weiter 6 und listet 6 — das ist
+ein **Mangel der Spec**, keine Kürzung durch diese Abnahme.
+
+| Prop | Story | Ergebnis |
+|---|---|---|
+| `purpose` | `Inline`, `Empty` | ✓ |
+| `tags` | `TagsWin` (die Spec nennt `Block` — dort werden gar keine `tags` gesetzt) | ✓, Spec-Zeile falsch |
+| `variant` | `Inline` / `Block` | ✓ |
+| `fallback` | keine | ✗ M13 |
+| `href` | `BankTransactionCell --without-counterparty` (nur `inline`) | halb, M12 |
+
+Ausgeschlossene Zustände (`leer nach Filter`, `lädt`, `Fehler`) sind in der
+Spec begründet. ✓
+
+### 2 · Kriterien
+
+**Fest**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | Exit 0 | ✓ |
+| `pnpm build` grün | **nicht gelaufen** (Befund 0117, Owner-Regel für parallele Sitzungen). Ersatz: alle acht Stories rendern auf dem Dev-Server, `Runtime.consoleAPICalled`/`exceptionThrown` je 1,2 s nach dem Laden: **0 Warnungen, 0 Ausnahmen** | offen, unter der geltenden Regel nicht prüfbar |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `entities/bank-transaction/BankTransactionPurpose.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionPurpose` (index.json); Export `src/ui/v3/index.ts:400` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `pnpm check:language` Exit 0 · `pnpm check:when` Exit 0. Ein Export, beide Zeilen da. Deutsche Story-JSDoc sind ausgenommen (Hausentscheid 0098 M10) | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `check:contrast` Exit 0 · `check:icons` Exit 0 · `check:mirror` Exit 0. `PURP_LABELS` kommt aus dem Spiegel (Freigabe-Nachtrag). Einziger px-Wert: `.v2purp__key { padding: 1px … }` — steht in `v3.css` und ist dort erlaubt; `size={14}` ist die Leiter A8 | ✓ |
+| Alle Stories vorhanden; ausgeschlossene begründet | siehe §1 | ✓ (Spec-Zahl veraltet) |
+| Prüfliste §9 durchgegangen | **zwei Punkte reißen: M9 (V1, Zeilenhöhe) und M10 (Hover)** | ✗ |
+| Im Browser angesehen | acht Stories, vier Breiten (700/1100/1400/1920) | ✓ |
+
+**Variabel**
+
+| Kriterium | Nachweis (gemessen) | Ergebnis |
+|---|---|---|
+| Rohblock **nie** als Erstes | `Raw`: sichtbar sind 360 Zeichen SVWZ-Freitext; Bedarf am Klon 2255 px gegen 346 px Kastenbreite → gekürzt. Der 509-Zeichen-Rohblock liegt hinter dem (i) unter „Originalwert" | ✓ |
+| Alle sieben Schlüssel, Reihenfolge, `PURP` als Wort | `Raw`, Popover offen: **EREF · KREF · MREF · CRED · ABWA · PURP · OAMT** — genau die Reihenfolge der Spec-Tabelle. `PURP` zeigt „Lieferantenzahlung", `title="SUPP"`. In `Block` sechs davon (der Rohwert trägt kein ABWA) mit „wiederkehrende Rate" / `title="RINP"` | ✓ |
+| Ohne Tag-Block **kein** (i) | `WithoutTags`: `.v2purp__info` nicht im DOM | ✓ |
+| Original über dasselbe (i) | ein Panel `#_r_0_`, 358 × 157 px, darin die Chips **und** `<details><summary>Originalwert</summary>` | ✓ |
+| (i) per Tastatur, öffnet mit Enter | ein Tab-Stopp bis zum Knopf; Fokusring `2px solid rgb(59,143,196)`, `outline-offset: 2px`, `:focus-visible` trifft. Enter: `aria-expanded` false → true, `:popover-open` 0 → 1, genau **ein** Klick-Ereignis. Weiter mit Tab auf `summary`, Enter öffnet den Rohblock: 509 Zeichen, mono, 352 × 256 px sichtbar | ✓ |
+| `derivePurposeParts()` eigene Datei, rendert nichts | `src/ludwig/modules/bank-transactions/domain/statement-line.ts`; `grep -nE "</\|/>\|from \"react\""` → **Exit 1** (kein Treffer) | ✓ |
+| Gesetzte `tags` gewinnen | `TagsWin` gegen `Block`: derselbe Rohwert, MREF im Chip `AUS-DEM-IMPORT-4711` statt `D-VR-50411866-0-001`, dazu ABWA `Musterbau GmbH & Co. KG`, das im Text gar nicht vorkommt | ✓ |
+| Freitext nicht mono | `.v2purp__text` computed `font-family: Inter …`, 12,5 px, Kontrast 13,77:1 | ✓ |
+| offen (App): ersetzt `PurposeDisplay.tsx` … | außerhalb dieses Repos | bleibt offen |
+
+### 3 · Mängel
+
+**M9 — das (i) macht die Zeile höher, und seine Trefferfläche ist 22 × 22. Blockiert.**
+Kriterium: §9 „Zeilenhöhe ≤ `.v2tbl__row` (V1)" — und die Behauptung aus M7 der
+Vorrunde.
+Ort: `src/styles/v3.css:3269` (`.v2purp--inline { align-items: baseline }`) und
+`:3285–3291` (`.v2purp__info`).
+Messung (`--in-use`, 1400 px): Zeilen **mit** (i) 48,38 px, die Zeile **ohne**
+(i) 45,92 px. Gegenprobe durch Ausblenden des Knopfs: 48,38 → 45,92 und
+47,38 → 44,92. In der echten Liste (`BankTransactionList --in-use`, 1400 px)
+dasselbe Muster: 48,38 → 47,09. `getBoundingClientRect()` des Knopfs:
+**22 × 22** — der Kommentar zwei Zeilen darüber sagt „der Knopf 24" und beruft
+sich auf WCAG 2.5.8 (24 × 24), und 0113 hat 24 × 24 als Hausmaß gesetzt (dort
+war 22,9 × 24 ein Mangel). Der negative Rand hält die Zeilenhöhe **nicht**:
+`line-height: 0` legt die Grundlinie des Knopfs auf seine untere Randkante, bei
+`align-items: baseline` wandert er dadurch 4 px über die Textoberkante.
+Kleinster Weg, im Browser eingespielt und gemessen:
+`.v2purp--inline { align-items: center }` plus
+`.v2purp__info { width: 24px; height: 24px; padding: 0; margin-block: -4px;
+display: inline-flex; align-items: center; justify-content: center }`
+→ Zeilen 45,92 / 45,92 / 45,92 / 44,92, Knopf 24 × 24. Noch kleiner: den
+Knopf gegen `IconButton size="sm"` tauschen — `.v2ibtn--sm` ist genau 24 × 24.
+
+**M10 — „Originalwert" ist klickbar und antwortet nicht auf Hover. Blockiert.**
+Kriterium: §9 „Jedes klickbare Element antwortet auf Hover".
+Ort: `src/styles/v3.css:3299` (`.v2purp__raw summary`).
+Messung: `CSS.forcePseudoState` `:hover` auf dem `summary` (Story `Block`) —
+`color` bleibt `rgb(113,113,113)`, `background-color` bleibt transparent, keine
+Unterstreichung, bei `cursor: pointer`. Zum Vergleich antwortet `.v2purp__info`
+sauber (`rgb(113,113,113)` → `rgb(26,58,92)`).
+Kleinster Weg: eine Zeile —
+`.v2purp__raw summary:hover { color: var(--color-text); }`.
+
+**M11 — drei Kommentare stehen gegen den gemessenen Code. Blockiert nicht, gehört aber in dieselbe Runde.**
+a) `BankTransactionPurpose.stories.tsx:34–38`: die Story `Block` beschreibt
+„`PURP` steht als Code, sein `title` trägt das Wort" — gemessen steht dort
+„wiederkehrende Rate" mit `title="RINP"`, also genau das Gegenteil. Diese Story
+ist der **benannte Nachweis** genau dieses Kriteriums.
+b) `v3.css:3283` „der Knopf 24" — gemessen 22.
+c) `v3.css:3283–3284` „der negative Rand hält die Zeilenhöhe, damit die Tabelle
+nicht wächst" — gemessen wächst sie (M9).
+M6 der Vorrunde hat zwei Kommentare richtiggestellt; diese drei sind übrig.
+
+**M12 — `href` im `block`-Zweig hat keinen Nachweis. Blockiert nicht.**
+Die Prop-JSDoc sagt „Works in both variants" und nennt als Beweis
+`BankTransactionCell --without-counterparty`. Gemessen beweist die Story nur
+den `inline`-Zweig: `.v2purp--inline`, darin `<a href="#bt-3">` mit dem ganzen
+Freitext (357 × 15 px). Keine Story im Set rendert `variant="block"` mit
+`href` (grep über `src/ui/v3`). M5 der Vorrunde ist damit halb belegt.
+Kleinster Weg: den Satz auf `inline` einschränken oder eine Zeile in `Block`.
+
+**M13 — `fallback` ist eine Prop ohne Spec-Zeile und ohne Story. Blockiert nicht.**
+`BankTransactionPurpose.tsx:42,57`. Die Schnittstelle der Spec kennt drei
+Props; `fallback` steht in keiner, und kein Aufrufer im Set setzt sie (grep über
+`src/ui/v3`, **Exit 1**). Kleinster Weg: streichen — „—" steht schon als
+Kriterium fest.
+
+**M14 — das (i) hat kein `title`. Blockiert nicht.**
+`aria-label="Referenzen und Originalwert"` ist da, ein `title` nicht. Das
+Hausmuster `StatusInfoButton` trägt beides; mit der Maus bekommt hier niemand
+das Wort zum Icon (V11, T8). Kleinster Weg: dasselbe Wort zusätzlich als
+`title`.
+
+### 4 · Die Mängel der Runde vom 2026-09-06, nachgemessen
+
+| | Behauptung | Gemessen | |
+|---|---|---|---|
+| M1 | `PURP` als Wort, Code im `title` | Chip „wiederkehrende Rate" / `title="RINP"` (Block), „Lieferantenzahlung" / `title="SUPP"` (Raw); Schrift Inter, nicht mono; Übersetzung aus dem Spiegel, keine Map in der Datei | ✓ |
+| M2 | Tag-Block ohne SVWZ zeigt „—" | `TagsOnly`: sichtbarer Text „—", (i) da, im Panel EREF/MREF/CRED und 64 Zeichen Rohblock | ✓ |
+| M3 | 509 roh, 360 Freitext | `pre` 509 Zeichen, `.v2purp__text` 360 Zeichen | ✓ |
+| M4 | `title` trägt die Vollform | `title` 360 Zeichen = der ganze Freitext; die Zeile kürzt (2255 px Bedarf gegen 346 px Kasten) | ✓ |
+| M5 | `href` wirkt in beiden Zweigen | nur `inline` gemessen, `block` unbelegt | halb (M12) |
+| M6 | zwei Kommentare richtiggestellt | drei stehen weiter gegen den Code | ✗ (M11) |
+| M7 | „Jetzt 22 × 22", Zeilenhöhe gehalten | 22 × 22 gegen das Hausmaß 24 × 24 aus 0113, und die Zeile wächst um 2,46 px | ✗ (M9) |
+| M8 | Sperrung auf Versalien gestrichen | `.v2purp__key`: `letter-spacing: normal`, `text-transform: none` | ✓ |
+
+### 5 · Befunde am Set (gehört nicht zu dieser Aufgabe)
+
+1. **`1fr` im Spaltensatz der `InUse`-Story.** `Table cols="110px 200px 1fr
+   120px"` ist `minmax(auto, 1fr)` — der Fehler, den e7439fb, 399b38a und
+   64e3fd9 an fünf Stellen gefunden haben. Hier **hält** er, weil
+   `.v2purp--inline` selbst `min-width: 0` setzt: bei 700/1100/1400/1920 px
+   kein Überlauf, `scrollWidth == clientWidth == 898`. Er hält also am
+   Baustein, nicht am Satz. Ein Wächter über `cols=`-Zeichenketten mit nacktem
+   `1fr` würde die nächste Familie billiger schützen als die nächste Abnahme.
+2. **`Popover`-Vertrag gegen Gebrauch.** Die JSDoc des Primitivs sagt
+   „`trigger`: A button **with a word** (T8)". Das (i) ist icon-only — und das
+   ist im Set die Regel (0087, `StatusInfoButton`), nicht die Ausnahme. Die
+   Vertragszeile beschreibt ihren eigenen Gebrauch nicht mehr.
+3. **Drei Familien bauen sich ihr eigenes (i).** `.v2purp__info` (hier),
+   `StatusInfoButton` (Inline-Styles im TSX) und `.v2ibtn--sm` sind drei
+   Fassungen desselben Knopfs mit drei Maßen (22, 12-Icon ohne Polster, 24).
+   Genau daraus entsteht M9. Ein einziger Icon-Knopf für alle wäre eine Stelle
+   statt drei, an denen das Maß abdriftet.
+4. **Die Spec kennt ihren eigenen Nachweis nicht mehr.** „Gesetzte `tags`
+   gewinnen (Story `Block` gegen `WithoutTags`)" — `Block` setzt gar keine
+   `tags`; der Beweis liegt in `TagsWin`. Dazu die Zeile „Setzt auf: `LongText`,
+   `Badge` …", die schon die Vorrunde als überholt vermerkt hat. Beides ist
+   Owner-Sache; eine Abnahme ändert keine Kriterien.
+
+**Abgenommen von / am:** fremde Sitzung, 2026-09-07 — **zurück**.
+**Blockierend:** M9, M10. **Mit derselben Runde zu erledigen:** M11–M14.
+
+## Nach der Wiederabnahme (2026-09-07): beide Blocker und die vier kleinen
+
+Gemessen gegen den Dev-Server `http://localhost:6107` über CDP; der Hover mit
+`CSS.forcePseudoState`, nicht mit einem Blick ins Stylesheet.
+
+**M9 — der Knopf misst jetzt 24 × 24, und die Zeile wächst nicht mehr.** Zwei
+Ursachen, beide behoben: `.v2purp--inline` stand auf `align-items: baseline`,
+und der Knopf hat `line-height: 0` — an der Grundlinie ausgerichtet zog er die
+Zeile auseinander. Jetzt `center`. Und das Polster allein ergab 22 × 22 (14 +
+2 × 4); die Trefferfläche steht jetzt über `min-width`/`min-height:
+var(--space-6)` auf dem Hausmaß aus 0113.
+
+Gemessen in `InUse` bei 1400 px: Knopf **24 × 24**; die Zeilen **mit** (i)
+messen **45,92 px** — genau so viel wie die Zeilen ohne. Vorher waren es
+48,38 gegen 45,92.
+
+**M10 — der Zeiger hat jetzt eine Deckung.** `.v2purp__raw summary:hover`
+setzt Textfarbe und Unterstreichung. Mit `CSS.forcePseudoState` gemessen:
+ruhend `rgb(113,113,113)` ohne Dekoration, im Hover `rgb(45,45,45)` mit
+`underline`. Vorher änderte sich nichts.
+
+**M11 — die drei Kommentare stimmen.** (a) Der Story-Kommentar von `Block`
+sagte „`PURP` steht als Code, sein `title` trägt das Wort" — gemessen ist es
+umgekehrt, und diese Story ist der benannte Nachweis genau dieses Kriteriums.
+Er sagt jetzt, was dasteht: „wiederkehrende Rate" mit `title="RINP"`
+(nachgemessen). (b) und (c) sind mit M9 weggefallen — die Zahl 24 stimmt
+jetzt, und die Zeile wächst nicht mehr.
+
+**M12 — `href` im Block-Zweig hat seinen Nachweis.** Die Story `Block` zeigt
+zwei Flächen, die zweite mit `href`. Gemessen: zwei `.v2purp--block`, davon
+eine mit `<a href>`, dessen Text der Freitext ist — und **kein** Knopf
+innerhalb eines Ankers (`a[href] button` findet nichts). Der JSDoc-Satz nennt
+jetzt beide Nachweise statt einen für beide Zweige.
+
+**M13 — `fallback` ist gestrichen.** Keine Spec-Zeile, kein Aufrufer. An ihre
+Stelle tritt die Konstante `EMPTY = "—"`; das Kriterium „`purpose={null}` → —"
+steht ohnehin fest, und eine Prop, die niemand setzt, ist eine Frage ohne
+Fragesteller.
+
+**M14 — das (i) trägt sein `title`.** Dasselbe Wort wie `aria-label`, wie beim
+Hausmuster `StatusInfoButton`. Gemessen am gerenderten Knopf.
+
+**Die Spec ist nachgezogen**, wo die Abnahme sie als veraltet gemeldet hat:
+die Story-Ableitung nennt jetzt die gebauten **8** und sagt, welche zwei über
+die Rechnung hinausgehen und warum (`TagsWin`, `TagsOnly` — je ein eigenes
+Kriterium, unter der Obergrenze 10); das Kriterium „gesetzte `tags` gewinnen"
+verweist auf `TagsWin` gegen `Block` statt auf `Block` gegen `WithoutTags` —
+`Block` setzt gar keine Tags, der alte Verweis ging ins Leere.
+
+`pnpm typecheck` Exit 0, `check:language` Exit 0. Nicht gebaut (0117).
+
+**Status: Abnahme** — das Urteil war „zurück", also entscheidet die nächste
+Runde, nicht ich.
