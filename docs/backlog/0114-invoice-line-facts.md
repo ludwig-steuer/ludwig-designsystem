@@ -35,8 +35,9 @@ Untertabellen, in derselben 770-Zeilen-Datei wie Liste und Zeile.
   weil sie ihr eigenes `@when` hat (die Zeile zeigt, was auf dem Beleg steht;
   die Fakten zeigen, was Ludwig daraus gemacht hat) und weil die Zeile ohne
   sie funktioniert.
-- **Setzt auf:** `FieldList`, `LongText`, `Amount`, `Badge`, `formatDate` und
-  `formatPercent` aus `format.ts`.
+- **Setzt auf:** `FieldList`, `LongText`, `Amount`, `Badge`, `Time`/`formatTime` aus
+  `format.ts`. **Nicht** `formatDate` oder `formatPercent` — beide gibt es
+  nicht.
 
 ## Was die Fakten zeigen
 
@@ -56,15 +57,15 @@ Rabatt-Spalte scheitert.
 
 **Der Steuerschlüssel-Block steht für sich.** Heute hängt er im Block
 „USt-Sonderbehandlung" und wird nur gezeigt, wenn es einen Sonderfall gibt —
-423 der 440 gefüllten Kandidatenlisten bleiben dadurch unsichtbar (Befund B5c).
+423 der 440 gefüllten Kandidatenlisten bleiben dadurch unsichtbar (L-202 c).
 Das ist ein Fehler in der Bedingung, kein Merkmal.
 
 **Zwei Dinge werden nicht gebaut**, beide mit Messung statt Meinung:
 
 - die Untertabelle „Alternative Kategorien (Historie)" — `historyCandidates`
-  ist in **726 von 726** Zeilen ein leeres Array (B5a). Eine Untertabelle für
+  ist in **726 von 726** Zeilen ein leeres Array (L-202 a). Eine Untertabelle für
   Daten, die es nicht gibt, ist derselbe Fehler wie die Rabatt-Spalte.
-- der **Rabatt** (Rang 21 im Profil) — 0 % gefüllt (B4). Er steht im Ausbau,
+- der **Rabatt** (Rang 21 im Profil) — 0 % gefüllt (L-201). Er steht im Ausbau,
   nicht im Bau. Das ist die einzige Stelle, an der diese Spec vom Profil
   abweicht, und sie sagt hier, warum.
 
@@ -74,12 +75,12 @@ Das ist ein Fehler in der Bedingung, kein Merkmal.
 |---|---|---|---|---|
 | `line` | `InvoiceLineItem` | ja | die Position, unverändert aus `src/ludwig/modules/invoices/domain/invoice.ts` | `Standard` |
 | `labels` | `InvoiceLineLabels` | ja | dieselben Wörter wie in 0072 — für USt-Sonderfall und Sonderart, die hier ihren **Wert** zeigen, nicht nur ihr Badge | `Standard` |
-| `notes` | `readonly string[]` | nein | die Hinweise, vom Aufrufer aus den drei Notiz-Spalten zusammengesetzt (siehe Befund unten) | `Standard` |
+| `notes` | `readonly string[]` | nein | Belegstellen und USt-Notizen, vom Aufrufer zu Sätzen gemacht — die beiden JSONB-Spalten, für die es keinen Typ gibt (L-204). `line.lineNotes` ist typisiert und wird von der Form **selbst** gelesen, nicht hierüber | `Standard` |
 | `collapse` | `readonly [string, string][]` | nein | der Audit-Trail des Beleg-Kollaps als Label/Wert-Paare, wie `FieldList` sie nimmt | `Aggregate` |
-| `tone` | `"bare" \| "soft"` | nein | `bare` im Aufklapper der Zeile (Vorgabe), `soft` wenn die Fakten für sich stehen | `InUse` |
+| `fxCurrency` | `string` | nein | die Währung des Fremdwährungs-Blocks (Quelle `InvoiceDetail.fxCurrency`). **Pflicht, sobald ein `fx*`-Wert gesetzt ist** — `Amount` wirft bei einer nackten Zahl ohne Währung | `ForeignCurrency` |
 
-**Befund für `ludwig/app` (neu, B7):** `vatEvidence`, `vatNotes` und
-`collapseDecisionJson` sind in `InvoiceLineItem` als `unknown` typisiert. Eine
+**Befund für `ludwig/app` (L-204):** `vatEvidence`, `vatNotes`, `collapseDecisionJson` und `historyCandidates` — **vier**
+Felder — sind in `InvoiceLineItem` als `unknown` typisiert. Eine
 Komponente kann `unknown` nicht darstellen, und eine eigene Struktur dafür wäre
 genau die lokale Erfindung, die `spec-schreiben` §5 verbietet. Deshalb nimmt
 diese Spec die drei als aufbereitete Props entgegen (`notes`, `collapse`) —
@@ -95,7 +96,14 @@ anderen vergleichen — dafür ist die Liste da.
 ## Verhalten
 
 Server-Component: die Fakten rendern nur. Das Auf- und Zuklappen gehört der
-Zeile (0072), das gemeinsame Aufklappen der Liste (0115).
+Zeile (0072), das gemeinsame Aufklappen der Liste (0115). Die Form steht
+**immer frei** (`FieldList tone="bare"`): sie sitzt im Aufklapper einer Zeile,
+die den Rahmen schon setzt. Eine `tone`-Prop gibt es nicht — sie hätte keinen
+Abnehmer (A12); die Stories rahmen mit `Card`, wenn sie einen Rahmen brauchen.
+
+Datum und Prozent wie in 0072: das Leistungsdatum über `Time`
+(`formatTime(value, "date")`), der USt-Satz als `${taxRatePercent} %` in
+`v2num`. `formatDate` gibt es nicht.
 
 Zustände: **gefüllt** und **fast leer** sind die beiden, die vorkommen. Ein
 Block ohne Feld erscheint nicht; sind alle Blöcke leer, steht ein Satz statt
@@ -105,10 +113,10 @@ Position (`virtual_fallback`) vor, die nichts als Zahlen hat.
 
 ## Stories
 
-Abgeleitet nach `spec-schreiben` §6: 2 Zustände (gefüllt, leer) + 1 je
-Layout-Prop (`tone`) + 1 „im Einsatz" + 1 Rand (die Form kürzt zwei
-Freitexte) + 2 Ausprägungen mit eigenem Block (Aggregat, Fremdwährung) =
-**7**. Titel `v3/Entitäten/Rechnungsposition/InvoiceLineFacts`.
+Abgeleitet nach `spec-schreiben` §6: 2 Zustände (gefüllt, leer) + 1 je Prop
+mit eigenem Zweig (`fxCurrency`, `collapse`) + 1 Bedingung, die heute falsch
+steht (Steuerschlüssel ohne Sonderfall) + 1 „im Einsatz" + 1 Rand (die Form
+kürzt zwei Freitexte) = **7**. Titel `v3/Entitäten/Rechnungsposition/InvoiceLineFacts`.
 
 | Story | Beweist |
 |---|---|
@@ -118,19 +126,32 @@ Freitexte) + 2 Ausprägungen mit eigenem Block (Aggregat, Fremdwährung) =
 | `Aggregate` | die `virtual_aggregate`-Position mit dem Kollaps-Kasten |
 | `ForeignCurrency` | der `fx*`-Block, der nur bei 20 von 726 Zeilen erscheint |
 | `Edges` | Buchungsgegenstand mit 392 Zeichen (max), Begründung mit 295 — beide gekürzt; dazu ein extrahierter USt-Satz, der **abweicht**, damit die Klammer einmal zu sehen ist |
-| `InUse` | im Aufklapper einer `InvoiceLineRow` (0072), `tone="bare"` — so, wie die Liste sie steckt |
+| `InUse` | im Aufklapper einer `InvoiceLineRow` (0072) — so, wie die Liste sie steckt |
 
 Nicht anwendbar: `Laedt` und `Fehler` — die Fakten laden nichts, sie stehen im
 Aufklapper einer Zeile, die schon da ist. `LeerNachFilter` — es wird nicht
 gefiltert.
 
+## Offene Fragen
+
+Keine mehr offen — entschieden mit der Freigabe vom 2026-09-07:
+
+1. **Woher kommt die Währung des Fremdwährungs-Blocks?** Als Prop
+   `fxCurrency`, Quelle `InvoiceDetail.fxCurrency`. Pflicht, sobald ein
+   `fx*`-Wert gesetzt ist: `Amount` wirft bei einer nackten Zahl.
+2. **Braucht die Form eine `tone`-Prop?** Nein. Sie steht immer frei; einen
+   Rahmen setzt, wer sie einsetzt (A12: keine Prop ohne Abnehmer).
+3. **Wann erscheint der Kollaps-Kasten?** Wenn `collapse` gesetzt ist — die
+   Story setzt es auf der Aggregat-Zeile. Die Form prüft nicht selbst auf
+   `source === "virtual_aggregate"`; sie zeigt, was sie bekommt.
+
 ## Ausbau
 
 | Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
 |---|---|---|
-| Belegstellen und USt-Notizen als eigene Blöcke | `notes`/`collapse` fallen weg, `line` trägt die Typen selbst | Befund B7 ist gelöst — `src/ludwig/` führt einen Typ für die drei JSONB-Spalten |
-| Der Rabatt | `line.lineDiscountValue` wird gezeigt | in `line_discount_value` steht ein Wert (B4) |
-| Alternative Kategorien | eine Untertabelle | `historyCandidates` ist irgendwo nicht leer (B5a) |
+| Belegstellen und USt-Notizen als eigene Blöcke | `notes`/`collapse` fallen weg, `line` trägt die Typen selbst | L-204 ist gelöst — `src/ludwig/` führt einen Typ für die drei JSONB-Spalten |
+| Der Rabatt | `line.lineDiscountValue` wird gezeigt | in `line_discount_value` steht ein Wert (L-201) |
+| Alternative Kategorien | eine Untertabelle | `historyCandidates` ist irgendwo nicht leer (L-202 a) |
 | Der Weg zum Buchungsvorschlag | `onOpenProposal?` an der Zeile (0072), nicht hier | ein Screen verlangt ihn |
 
 ## Abnahmekriterien
@@ -150,12 +171,12 @@ Variabel (aus dieser Spec):
 - [ ] Ein Feld ohne Wert erscheint **nicht** — kein „—", keine leere Zeile (Story `Sparse`, gemessen: die Zahl der gerenderten Zeilen)
 - [ ] Der Steuerschlüssel-Block erscheint ohne USt-Sonderfall (Story `TaxKeysWithoutSpecialCase`, gemessen)
 - [ ] Der extrahierte USt-Satz erscheint nur bei Abweichung (Story `Edges`: da; `Standard`: nicht da — beides gemessen)
-- [ ] Der Kollaps-Kasten erscheint nur auf `virtual_aggregate` (Story `Aggregate` gegen `Standard`, gemessen)
-- [ ] Der `fx*`-Block erscheint nur bei gesetzten Werten (Story `ForeignCurrency` gegen `Standard`)
+- [ ] Der Kollaps-Kasten erscheint genau dann, wenn `collapse` gesetzt ist; die Story setzt es auf der Aggregat-Zeile (Story `Aggregate` gegen `Standard`, gemessen)
+- [ ] Der `fx*`-Block erscheint nur bei gesetzten Werten und zeigt die Währung aus `fxCurrency` (Story `ForeignCurrency` gegen `Standard`, gemessen)
 - [ ] Sind alle Blöcke leer, steht der Satz statt der leeren Fläche (Story `Sparse`, gemessen)
 - [ ] Die zwei Freitexte werden bei 161 und 169 Zeichen gekürzt, nicht bei einer geratenen Zahl (Story `Edges`, gemessen)
-- [ ] `tone="bare"` hat keinen Rahmen und keinen eigenen Innenabstand (Story `InUse`, bei 1280 px und 1600 px gemessen)
-- [ ] Ersetzt den Aufklapper in `PositionenTab` ohne Funktionsverlust — außer der Historie-Tabelle und der Klammer „(extrahiert: …)", die dort nie rendern (B5)
+- [ ] Die Form hat keinen eigenen Rahmen und keinen eigenen Innenabstand (Story `InUse`, bei 1280 px und 1600 px gemessen)
+- [ ] Ersetzt den Aufklapper in `PositionenTab` ohne Funktionsverlust — außer der Historie-Tabelle und der Klammer „(extrahiert: …)", die dort nie rendern (L-202)
 
 ## Abnahme
 

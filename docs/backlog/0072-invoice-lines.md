@@ -52,7 +52,12 @@ zugleich ist.
   Teil dieser Datei — sie werden woanders allein gebraucht (0114 hat ihr
   eigenes `@when`) und kommen als `children` in den Aufklapper.
 - **Setzt auf:** `ExpandableRow`, `Row`, `AmountCell`, `Badge`, `LongText`,
-  `Confidence`, `formatCount`/`formatDate` aus `format.ts`.
+  `Confidence` (0078). **Keine Datums- und keine Zähl-Formatierung:** die
+  Zeile zeigt kein Datum (`formatDate` gibt es nicht und wird nicht
+  gebraucht), und `formatCount` rundet auf ganze Zahlen — für die Menge
+  (2,5 h) ist das falsch. Menge und Einzelpreis laufen über `Amount` bzw.
+  `formatAmount(value, null)`; der USt-Satz steht als `${taxRatePercent} %`
+  in einer `v2num`-Zelle.
 
 ## Was in der Zeile steht
 
@@ -69,7 +74,7 @@ Raster, darunter ein Streifen mit dem, was Ludwig aus der Zeile gemacht hat:
 | Netto-Summe | 2 | `lineTotalNetValue`, betont | rechts, `tnum` |
 
 **Keine Rabatt-Spalte.** `lineDiscountValue` ist in 726 von 726 Zeilen leer
-(Befund B4); die heutige Kopfzeile führt sie als fünfte von sieben und zeigt
+(Befund **L-201**); die heutige Kopfzeile führt sie als fünfte von sieben und zeigt
 in jeder Zeile „—". Sie kommt erst wieder, wenn ein Wert darin steht.
 
 Der Streifen darunter, in dieser Reihenfolge:
@@ -77,13 +82,13 @@ Der Streifen darunter, in dieser Reihenfolge:
 | Was | Rang | Wann sichtbar |
 |---|---|---|
 | Verwendungsart (`fundUsageNature`) | 10 | **immer** — sie steht heute schon in der kompakten Zeile |
-| Konfidenz (`fundUsageConfidence` → `confidenceBand`) | 15 | **immer**, als `Confidence` mit der Achse `konfidenz` |
+| Konfidenz (`fundUsageConfidence` → `confidenceLevel`) | 15 | **immer**, als `Confidence` mit `level` und `value` (Achse `konfidenz`) |
 | Herkunft (`source`) | 8 | nur wenn ≠ `extracted` (98 % sind der Normalfall) |
 | Deaktiviert (`disabled`) | 9 | nur wenn `true` (16 von 726) — die Zeile wird zusätzlich gedämpft |
 | USt-Sonderfall (`vatSpecialCase`) | 12 | nur wenn ≠ `none` (116 von 726) |
 | Sonderart (`lineSpecialType`) | 13 | nur wenn ≠ `none` (262 von 726) |
 
-Vier davon sind **Zustände ohne Registry-Achse** (Befund B2). Sie tragen
+Vier davon sind **Zustände ohne Registry-Achse** (Befund **L-99**). Sie tragen
 deshalb kein `StatusBadge` und keine Farbe als Kritikalitätsstufe, sondern ein
 neutrales `Badge` mit Wort — V6/V7 bleiben gewahrt, weil jedes Badge sein Wort
 selbst trägt.
@@ -93,7 +98,7 @@ selbst trägt.
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `line` | `InvoiceLineItem` | ja | die Position, unverändert aus `src/ludwig/modules/invoices/domain/invoice.ts` | `Standard` |
-| `labels` | `InvoiceLineLabels` | ja | die deutschen Wörter der vier Wertebereiche — solange B2 offen ist, kommen sie von außen | `Deviations` |
+| `labels` | `InvoiceLineLabels` | ja | die deutschen Wörter der vier Wertebereiche — solange L-99 offen ist, kommen sie von außen | `Deviations` |
 | `open` | `boolean` | nein | aufgeklappt; ohne die Prop entscheidet die Zeile selbst | `Expanded` |
 | `onOpenChange` | `(open: boolean) => void` | nein | meldet das Auf- und Zuklappen an die Liste | `Expanded` |
 | `children` | `ReactNode` | nein | was im Aufklapper steht — die Liste steckt `InvoiceLineFacts` (0114) hinein. Fehlt es, hat die Zeile **keinen** Aufklapp-Knopf | `Standard` (ohne) · `Expanded` (mit) |
@@ -102,7 +107,7 @@ selbst trägt.
 /**
  * The German words for the four value ranges the line shows as a badge.
  * They arrive as a prop because none of them has a registry axis yet
- * (finding B2) and R1 forbids a local label map. A value without a word is
+ * (finding L-99) and R1 forbids a local label map. A value without a word is
  * shown raw — visibly wrong beats silently gone.
  */
 export interface InvoiceLineLabels {
@@ -114,7 +119,7 @@ export interface InvoiceLineLabels {
 ```
 
 Typen aus `src/ludwig/`: `InvoiceLineItem` (`modules/invoices/domain/invoice.ts`),
-`confidenceBand`/`ConfidenceBand` (`shared/confidence.ts`). GLOSSARY: die
+`confidenceLevel`/`ConfidenceLevel` (`shared/confidence.ts`). GLOSSARY: die
 Entität hat **keinen** eigenen Eintrag (Befund B1) — bis dahin gilt der
 englische Name `invoice line`.
 
@@ -133,14 +138,35 @@ also mit Enter und Leertaste bedienbar; keine eigene Taste, weil die Zeile in
 einer Liste steht und ein Kürzel je Zeile keinen Sinn ergibt (V14: lieber
 keins als eins ohne Wirkung).
 
+**Der Streifen ist die dritte Zeile der Bezeichnungs-Zelle**, keine eigene
+Tabellenzeile und kein neues Layout-CSS: unter `itemName` und
+`productDescription` stehen die Badges in derselben Zelle, und die Tabelle
+läuft mit `density="wide"`. So bleibt die Spaltenordnung unberührt und die
+Zeile eine Zeile.
+
+**Die Spuren:** sechs Datenspalten, dazu die Chevron-Spur
+`var(--v2-tbl-pick)` — **nur wenn `children` gesetzt sind**. Ohne sie gibt es
+keinen Aufklapper und also auch keine Spur dafür. Die Kopfzeile der Liste
+trägt an dieser Stelle eine leere Kopfzelle, wie `DataTable` es tut
+(`DataTable.tsx:243`).
+
+**Alle Beträge sind EUR.** Die `*_value`-Felder der Position sind in
+Belegwährung umgerechnet EUR (GLOSSARY *Transaction currency*), und
+`InvoiceLineItem` hat keine Währungsspalte. Der Fremdwährungs-Spiegel gehört
+den Fakten (Rang 22, 0114), nicht der Zeile.
+
+**Fehlt die Bezeichnung** (`itemName === null`), nimmt die Zeile die erste
+Zeile von `productDescription`; fehlt auch die, steht dort „Position n" mit
+der Positionsnummer. Eine namenlose Zeile darf nicht namenlos aussehen.
+
 Eine deaktivierte Zeile (`disabled`) wird gedämpft **und** trägt das Wort
 „deaktiviert" — Farbe allein sagt es nicht (V7). Sie verschwindet nicht: sie
 bleibt für den Audit-Trail sichtbar, so wie der Spaltenkommentar es verlangt.
 
 Fehlt zu einem Wert das Wort in `labels`, zeigt die Zeile den Rohwert. Das ist
 Absicht: heute zeigt die App für 92 Zeilen den englischen Schlüssel, weil ihre
-lokale Map die echten Werte nicht trifft (Befund B6) — ein stiller Ausfall
-wäre schlimmer als ein sichtbarer.
+lokale Map die echten Werte nicht trifft (Befund **L-203**) — ein stiller
+Ausfall wäre schlimmer als ein sichtbarer.
 
 ## Stories
 
@@ -155,20 +181,34 @@ häufigsten Fall = **6**. Titel `v3/Entitäten/Rechnungsposition/InvoiceLineRow`
 | `Minimal` | der häufigste Fall — **die Hälfte aller Rechnungen hat genau eine Position**; ohne Menge, ohne Einheit (nur 19 % haben eine), ohne Beschreibung |
 | `Deviations` | alle vier Wertebereiche zugleich: virtuelle Herkunft, deaktiviert, USt-Sonderfall, Sonderart — jedes Badge mit Wort |
 | `Expanded` | Rundlauf über `open`/`onOpenChange` mit `useState`, Fakten als `children` |
-| `Edges` | Bezeichnung mit 251 Zeichen (max), Einheit als `Stck` neben `STK` (23 Schreibweisen im Bestand), Fremdwährung, ein Wertebereich **ohne** Wort in `labels` |
+| `Edges` | Bezeichnung mit 251 Zeichen (max), Einheit als `Stck` neben `STK` (23 Schreibweisen im Bestand), ein Wertebereich **ohne** Wort in `labels`, und eine Position ganz ohne `itemName` |
 | `InUse` | drei Zeilen unter einer Kopfzeile in `Table`, wie im Reiter „Positionen" |
 
 Nicht anwendbar: `Leer` — eine Zeile ohne Position gibt es nicht, der Leerfall
 gehört der Liste (0115). `Laedt` und `Fehler` — die Zeile lädt nichts; der
 Reiter, in dem sie steht, wird erst geladen, wenn man ihn öffnet.
 
+## Offene Fragen
+
+Keine mehr offen — die drei, die beim Schreiben blieben, sind mit der Freigabe
+vom 2026-09-07 entschieden:
+
+1. **Wo steht der Streifen?** Als dritte Zeile in der Bezeichnungs-Zelle,
+   Tabelle mit `density="wide"`. Kein neues Layout-CSS, keine zweite
+   Tabellenzeile je Position.
+2. **Welche Währung?** Immer EUR. Die `*_value`-Felder sind EUR (GLOSSARY
+   *Transaction currency*), `InvoiceLineItem` hat keine Währungsspalte; der
+   Fremdwährungs-Spiegel gehört den Fakten (0114).
+3. **Was steht da, wenn `itemName` fehlt?** Die erste Zeile von
+   `productDescription`, sonst „Position n".
+
 ## Ausbau
 
 | Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
 |---|---|---|
-| Die vier Wertebereiche als Registry-Achsen statt als `labels`-Prop | `labels` fällt ersatzlos weg | Befund B2/L-99 ist gelöst — dann liest die Zeile die Wörter selbst |
+| Die vier Wertebereiche als Registry-Achsen statt als `labels`-Prop | `labels` fällt ersatzlos weg | Befund **L-99**/L-99 ist gelöst — dann liest die Zeile die Wörter selbst |
 | Der Sprung von der Position zum Buchungsvorschlag | `onOpenProposal?: (position: number) => void` | ein Screen verlangt den Weg; heute hängt der Vorschlag an der Rechnung, nicht an der Zeile |
-| Rabatt als achte Spalte | `line.lineDiscountValue` wird gezeigt | in `line_discount_value` steht ein Wert (Befund B4) |
+| Rabatt als achte Spalte | `line.lineDiscountValue` wird gezeigt | in `line_discount_value` steht ein Wert (Befund **L-201**) |
 
 ## Abnahmekriterien
 
@@ -188,13 +228,17 @@ Variabel (aus dieser Spec):
 - [ ] Jede Zahl steht rechts mit `tnum`, jeder Text links, nichts zentriert (Story `Standard`, gemessen)
 - [ ] Verwendungsart und Konfidenz stehen **immer** im Streifen, die vier übrigen Badges nur bei Abweichung (Stories `Standard` und `Deviations`, gemessen: in `Standard` zwei Badges, in `Deviations` sechs)
 - [ ] Ein Wert ohne Wort in `labels` erscheint als Rohwert, nicht als leeres Badge (Story `Edges`, gemessen)
+- [ ] Der Streifen ist die dritte Zeile **derselben** Zelle wie die Bezeichnung, nicht eine zweite Tabellenzeile (Story `Standard`, gemessen: eine `<tr>` je Position)
+- [ ] Ohne `children` fehlt die Chevron-Spur ganz, mit `children` ist sie `var(--v2-tbl-pick)` breit (Stories `Standard` und `Expanded`, gemessen)
+- [ ] Fehlt `itemName`, steht die erste Zeile von `productDescription` da, sonst „Position n" (Story `Edges`, gemessen)
+- [ ] Die Menge zeigt Nachkommastellen (2,5 h), wird also nicht gerundet (Story `Standard`, gemessen)
 - [ ] `open`/`onOpenChange` klappen von außen auf und melden zurück; ohne beide klappt die Zeile selbst (Story `Expanded`, gemessen — nicht am State abgelesen, sondern am gerenderten Aufklapper)
 - [ ] Ohne `children` hat die Zeile keinen Aufklapp-Knopf (Story `Standard`, gemessen)
 - [ ] Eine deaktivierte Zeile ist gedämpft **und** trägt das Wort (Story `Deviations`)
 - [ ] Die Beschreibung wird ab 81 Zeichen gekürzt, die Bezeichnung nicht (Story `Edges`, gemessen bei 251 Zeichen)
 - [ ] Die Spurbreiten sind gegen den **Wertebereich** gemessen, nicht gegen die Fixtures: Bezeichnung p90 93 / max 251 Zeichen, Menge bis fünf Stellen plus Einheit — bei 1280 px und 1600 px nachgemessen, Zeilenhöhe unverändert
 - [ ] `ExpandableRow` verhält sich ohne die neuen Props wie zuvor (Story von 0057/0106, gemessen)
-- [ ] Ersetzt die Karte je Position in `PositionenTab` ohne Funktionsverlust — außer den drei Zweigen, die dort nie rendern (B5)
+- [ ] Ersetzt die Karte je Position in `PositionenTab` ohne Funktionsverlust — außer den drei Zweigen, die dort nie rendern (**L-202**)
 
 ## Abnahme
 

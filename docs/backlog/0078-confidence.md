@@ -7,7 +7,7 @@
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede App mit Modell-Vorschlägen zeigt, wie sicher der Vorschlag ist; kennt die Achse `konfidenz`, keine Entität |
 | Quelle | Soll-Katalog §11.7 Stufe 1 „Konfidenz (Punkt · Band · Meter) → heben → eine Primitive" · `ludwig/app` `F147-luecken-fuer-design-agent.md` §4 Nr. 21 · GLOSSARY „Confidence band" |
 | Ersetzt | `ui/booking/ConfidenceDot.tsx` (3 Dateien) · `ConfidenceMeter`/`ConfidenceBand` in `ui/booking/ConfidenceMeter.tsx` (5 + 4) · `Confidence` in `modules/invoices/ui/invoice-detail-format.tsx` (3) — zwölf Dateien; im Set die Inline-`confdot` in `AiBookingNotes` samt lokaler Map `KONFIDENZ_TEXT` (R1-Verstoß) |
-| Blockiert | `AiBookingNotes` (Bereinigung), 0044 `JournalEntryCard` („Konfidenz neben der Karte"), 0072 `InvoiceLines` (Kontenkandidaten mit Konfidenz), 0073 (Fakten mit Provenienz und Konfidenz) |
+| Blockiert | `AiBookingNotes` (Bereinigung), 0044 `JournalEntryCard` („Konfidenz neben der Karte"), 0072 `InvoiceLineRow` (die Konfidenz der **Verwendungsart**, `fundUsageConfidence` — keine Kontokandidaten), 0073 (Fakten mit Provenienz und Konfidenz) |
 | Spec von / am | Claude, 2026-09-04 |
 
 ## Ziel

@@ -51,9 +51,9 @@ einzeilige Fall und der Leerfall verdienen mehr Sorgfalt als der lange.
 | Teil | Inhalt |
 |---|---|
 | Kopf | die Zahl der Positionen (`formatCount`) und der Umschalter **Kompakt \| Erweitert** |
-| Spalten-Kopfzeile | Pos. · Bezeichnung · Menge · Einzelpreis · USt-Satz · Netto-Summe — **ohne** Rabatt (0 % gefüllt, B4) |
+| Spalten-Kopfzeile | Pos. · Bezeichnung · Menge · Einzelpreis · USt-Satz · Netto-Summe — **ohne** Rabatt (0 % gefüllt, L-201) |
 | Zeilen | `InvoiceLineRow` je Position, nach `position` aufsteigend, `disabled` eingeschlossen und gedämpft |
-| Fuß | die **Summe der Nettobeträge**, und wenn `invoiceNetTotal` gesetzt ist, die Probe dagegen |
+| Fuß | die **Summe der Nettobeträge über die nicht deaktivierten Zeilen**, und wenn `invoiceNetTotal` gesetzt ist, die Probe dagegen |
 | Leerfall | „Für diesen Beleg wurden keine Positionen erkannt." |
 
 **Der Leerfall ist kein Erfolg.** Eine Rechnung ohne Positionen ist 1 % der
@@ -68,10 +68,10 @@ nie die Probe gegen den Rechnungsbetrag. Genau die braucht, wer prüft.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `lines` | `readonly InvoiceLineItem[]` | ja | die Positionen **einer** Rechnung; die Liste sortiert selbst nach `position` | `Standard` |
-| `labels` | `InvoiceLineLabels` | ja | die Wörter der vier Wertebereiche, durchgereicht an jede Zeile (Befund B2) | `Standard` |
-| `renderFacts` | `(line: InvoiceLineItem) => ReactNode` | nein | füllt den Aufklapper je Zeile — hier steckt der Aufrufer `InvoiceLineFacts` (0114) hinein. **Fehlt er, klappt keine Zeile auf** und der Umschalter erscheint nicht | `AllExpanded` |
-| `invoiceNetTotal` | `number` | nein | der Nettobetrag der Rechnung; gesetzt, macht der Fuß die Probe | `TotalMismatch` |
+| `lines` | `readonly InvoiceLineItem[]` | ja | die Positionen **einer** Rechnung; die Liste sortiert selbst nach `position` und nimmt sie auch als React-Key — `InvoiceLineItem` hat keine `id`, `position` ist je Rechnung eindeutig (UNIQUE) | `Standard` |
+| `labels` | `InvoiceLineLabels` | ja | die Wörter der vier Wertebereiche, durchgereicht an jede Zeile (L-99) | `Standard` |
+| `renderFacts` | `(line: InvoiceLineItem) => ReactNode` | nein | füllt den Aufklapper je Zeile — hier steckt der Aufrufer `InvoiceLineFacts` (0114) hinein. **Fehlt er, klappt keine Zeile auf**, der Umschalter erscheint nicht, und die Chevron-Spur `var(--v2-tbl-pick)` samt leerer Kopfzelle entfällt | `AllExpanded` |
+| `invoiceNetTotal` | `number` | nein | der **Netto**betrag der Rechnung (Quelle `InvoiceDetail.subtotalValue`; `totalValue` ist brutto). Gesetzt, macht der Fuß die Probe | `TotalMismatch` |
 | `defaultExpanded` | `boolean` | nein | der gemerkte Stand des Umschalters — die App liest ihn aus `localStorage`, die Liste kennt keinen Speicher | `AllExpanded` |
 | `onExpandedChange` | `(expanded: boolean) => void` | nein | meldet den Umschalter nach außen, damit die App ihn merken kann | `AllExpanded` |
 
@@ -85,13 +85,25 @@ die einzige richtige), filtern, auswählen, blättern, nachladen — und nichts
 ## Verhalten
 
 Client-Component wegen des Umschalters; die Zeilen darunter bleiben, was sie
-sind. Der Umschalter ist ein `Segmented` mit zwei Werten und trägt die Taste
-`Alt+E` sichtbar am Knopf — **nur wenn `renderFacts` gesetzt ist**, sonst gäbe
-es eine sichtbare Taste ohne Wirkung (V14).
+sind. Der Umschalter ist ein `Segmented` mit zwei Werten und erscheint **nur,
+wenn `renderFacts` gesetzt ist und mindestens eine Zeile da ist** — sonst gäbe
+es einen Schalter ohne Wirkung (V14).
+
+**Die Taste ist `Alt+E`**, gebunden mit einem eigenen `keydown`-Listener wie im
+`JournalEntryEditor`: `useHotkeys` verwirft Kombinationen mit Alt, und
+`Segmented` hat keinen `Kbd`-Slot. Sie steht deshalb als Text im Label des
+Segments („Erweitert · Alt+E"). `E`, weil `J`/`K` dem Pager gehören.
 
 Der Umschalter setzt alle Zeilen zugleich; eine einzelne Zeile darf danach
 wieder abweichen, ohne dass der Umschalter zurückspringt — er sagt, was zuletzt
 für alle galt, nicht, was gerade für jede gilt.
+
+**Die Summe im Fuß läuft über die nicht deaktivierten Zeilen.** Eine
+`disabled`-Zeile ist vom Beleg-Kollaps ersetzt worden, und die
+`virtual_aggregate`-Zeile ist ihr Sammel-Item — zählte man beide, käme jede
+kollabierte Rechnung doppelt heraus. `summary_total`-Zeilen (40 im Bestand)
+werden **mitsummiert**: weicht die Summe dadurch vom Rechnungsbetrag ab, ist
+genau das die Information, die die Probe geben soll.
 
 Zustände: **gefüllt**, **einzeilig**, **leer**. Nicht anwendbar sind **lädt**
 und **Fehler**: der Reiter wird als Ganzes geladen, und die Liste bekommt ihre
@@ -112,6 +124,20 @@ formatiert und summiert) = **6**. Titel
 | `AllExpanded` | Rundlauf über `defaultExpanded`/`onExpandedChange` mit `useState`; alle Zeilen zugleich auf, eine einzeln wieder zu |
 | `TotalMismatch` | die Probe gegen `invoiceNetTotal` schlägt an — Abweichung mit Wort, nicht nur mit Farbe (V7) |
 | `Edges` | 22 Positionen (max), darunter zwei deaktivierte und die `virtual_aggregate`-Zeile |
+
+## Offene Fragen
+
+Keine mehr offen — entschieden mit der Freigabe vom 2026-09-07:
+
+1. **Worüber läuft die Summe?** Über die nicht deaktivierten Zeilen;
+   `summary_total` zählt mit. Eine deaktivierte Zeile ist vom Kollaps ersetzt,
+   die Aggregat-Zeile ist ihr Sammel-Item — sonst zählt jede kollabierte
+   Rechnung doppelt.
+2. **Welche Zahl ist `invoiceNetTotal`?** `InvoiceDetail.subtotalValue`, also
+   netto. `totalValue` ist brutto und wäre die falsche Probe.
+3. **Wie wird `Alt+E` gebunden?** Mit einem eigenen `keydown`-Listener; die
+   Taste steht als Text im Segment-Label. `useHotkeys` verwirft Alt, und
+   `Segmented` hat keinen `Kbd`-Slot.
 
 ## Ausbau
 
@@ -137,15 +163,15 @@ Variabel (aus dieser Spec):
 
 - [ ] Die Zeilen stehen nach `position` aufsteigend, auch wenn `lines` anders sortiert hereinkommt (Story `Edges`, gemessen)
 - [ ] Kein Pager, keine Sortier-Knöpfe, keine Auswahlspalte — auch bei 22 Zeilen (Story `Edges`, gemessen)
-- [ ] Die Summe im Fuß ist die Summe der `lineTotalNetValue` (Story `Standard`, nachgerechnet)
+- [ ] Die Summe im Fuß ist die Summe der `lineTotalNetValue` **über die nicht deaktivierten Zeilen**; `summary_total` zählt mit (Story `Edges` mit zwei deaktivierten und der Aggregat-Zeile, nachgerechnet)
 - [ ] Weicht die Summe von `invoiceNetTotal` ab, steht die Abweichung mit einem Wort da (Story `TotalMismatch`, gemessen)
 - [ ] Ohne `invoiceNetTotal` steht keine Probe, aber die Summe (Story `Standard`)
-- [ ] Ohne `renderFacts` gibt es weder Umschalter noch Aufklapp-Knopf, und die Taste `Alt+E` wird nicht gedruckt (Story `Standard`, gemessen)
-- [ ] `Alt+E` klappt alle Zeilen auf und wieder zu, die Taste steht am Knopf (Story `AllExpanded`, gemessen — mit einem echten Tastendruck, nicht am State abgelesen)
+- [ ] Ohne `renderFacts` gibt es weder Umschalter noch Aufklapp-Knopf noch Chevron-Spur, und `Alt+E` wird nicht gedruckt (Story `Standard`, gemessen: Spaltenzahl der Kopfzeile)
+- [ ] `Alt+E` klappt alle Zeilen auf und wieder zu; die Taste steht als Text im Segment-Label (Story `AllExpanded`, gemessen — mit einem echten Tastendruck über CDP, nicht am State abgelesen)
 - [ ] Eine einzeln zugeklappte Zeile lässt den Umschalter stehen (Story `AllExpanded`, gemessen)
 - [ ] Der Leerfall nennt das Extraktionsproblem und feiert nichts (Story `Empty`)
 - [ ] Deaktivierte Zeilen bleiben sichtbar und sind gedämpft (Story `Edges`, gemessen)
-- [ ] Die Spaltenbreiten halten bei 1280 px und 1600 px; die Zeilenhöhe bleibt einzeilig bei einer Bezeichnung von 93 Zeichen (p90) — gegen den Wertebereich gemessen, nicht gegen die Fixtures
+- [ ] Die Spaltenbreiten halten bei 1280 px und 1600 px; die Bezeichnungs-Zelle bleibt bei 93 Zeichen (p90) **dreizeilig** — Name, Beschreibung, Streifen — und bricht nicht in eine vierte um (gegen den Wertebereich gemessen, nicht gegen die Fixtures)
 - [ ] Ersetzt Rahmen, Kopfzeile und Umschalter von `PositionenTab` ohne Funktionsverlust — außer der Rabatt-Spalte, die dort in jeder Zeile leer ist (B4)
 
 ## Abnahme
