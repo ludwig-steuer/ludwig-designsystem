@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | keine Komponente — eine Story `src/ui/v3/Brand.stories.tsx` in der Gruppe `v3/Grundlagen` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, mit deren Zeichen: welche Variante auf welchen Grund, wie klein, was nicht — die Regel ist markenfrei |
 | Quelle | `design-guidelines.md` §11.7 Stufe 0 („Marke: Wordmark, Mark, Light-Variante", Status v2 ohne Nachweis) · Review 0055 vom 2026-09-03 |
@@ -590,3 +590,111 @@ gestauchte Tafel aus der Mitte. Gemessen, Luft links/rechts auf der 350-px-Tafel
 
 Dazu die Formatierung derselben Zeile — sie stand als einzige der Datei mit
 vier Eigenschaften in einer Zeile.
+
+## Wiederabnahme (2026-09-07, vierte Runde)
+
+Gemessen gegen `8fbfafd` (die Nacharbeit `4605cb6` ist enthalten; der Baum ist
+sauber, `git status --short` leer), Dev-Server `http://localhost:6107`, also
+gegen die Quelle. **Nicht gebaut** — mehrere Prüfer arbeiten parallel im Baum
+(0117). Die Seitenverhältnisse sind an der **gezeichneten Fläche** gemessen:
+Ausschnittbild je Bildkasten (8-fach, 6 px Rand), Tinte gegen den Tafelgrund
+abgegrenzt — nicht am Element-Kasten und nicht aus dem Quelltext. Jede Messung
+mit Gegenprobe; die Tinten-Messung ist über sechs Schwellen (10…380 von 765)
+stabil.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | Exit-Code **0** | erfüllt |
+| `pnpm build` grün | nicht ausgeführt — Bauverbot dieser Runde (0117) | nicht prüfbar |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `index.json`: drei Einträge `v3-grundlagen-marke--marks/--sizes/--misuse`, alle `title: "v3/Grundlagen/Marke"`, `importPath ./src/ui/v3/Brand.stories.tsx` | erfüllt |
+| Code englisch; `@when`/`@instead` (entfällt) | `pnpm check:when` Exit **0**, `pnpm check:language` Exit **0**; Bezeichner und Story-Exporte englisch, Kommentare deutsch — unverändert der Befund am Set | erfüllt, mit Set-Befund |
+| Kein Hex, kein px, keine lokale Label-Map | `grep -c '#[0-9A-Fa-f]\{6\}'` = **0**; `grep -c '<svg'` = **0**; `grep -cE '\S  +\S'` = **0**. `GROUND_LABEL` bildet Grund→Token-Name ab, kein Statuslabel | erfüllt |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | drei von drei geladen; `Log.entryAdded` + `Network.responseReceived` ≥ 400: `--sizes` **0**, `--misuse` **0**, `--marks` **1** — und das ist `404 /favicon.ico`, Storybooks eigener Dev-Server beim ersten Aufruf eines frischen Profils, nicht die Story | erfüllt |
+| Prüfliste §9 durchgegangen | Kontrast im Browser über **alle** Textknoten gerechnet (79 · 54 · 76): **null unter 4,5:1**. Kleinster Wert 4,51:1 (`rgb(113,113,113)` auf `rgb(244,246,248)`), Badge „richtig" 4,68:1, „falsch" 5,60:1, Fließtext 6,17:1. `pnpm check:contrast` Exit **0**, `pnpm check:icons` Exit **0**, `pnpm check:mirror` Exit **0**. Im Zugänglichkeitsbaum kein namenloses Bild | erfüllt |
+| Im Browser angesehen | alle drei Stories über CDP geladen, vermessen und als ganzseitiges Bild angesehen; 6 · 5 · 9 Bilder, alle `complete`, `naturalWidth > 0` | erfüllt |
+| Story lädt die drei SVGs als Dateien, kein SVG-Markup | `naturalWidth × naturalHeight` 300×76 · 300×76 · 150×150 von `/reference/design-system-v2/assets/…`; `document.querySelectorAll('svg').length` = **0** in allen drei Stories | erfüllt |
+| `viewBox`-Tabelle stimmt mit den Dateien | der Server liefert `viewBox="0 0 220 56"`, `"0 0 220 56"`, `"0 0 56 56"`; die gerenderte Tabelle nennt 220 × 56, 220 × 56, 56 × 56. Keine der drei Dateien trägt `preserveAspectRatio` — die Ursachen-Erklärung im Kommentar trifft zu | erfüllt |
+| `Marks`: drei Zeichen auf hellem und dunklem Grund | `ludwig-logo.svg` 157,14 × 40 auf `rgb(255,255,255)`; `ludwig-logo-light.svg` 157,14 × 40 auf `rgb(26,58,92)` und auf `linear-gradient(rgb(31,70,112), rgb(20,48,75), rgb(15,36,56))`; `ludwig-mark.svg` 56 × 56 auf allen dreien. Kein dunkles Wordmark auf dunklem Grund, keine helle Variante auf Weiß; `filter: none`, `box-shadow: none` an jedem der sechs Bilder | erfüllt |
+| `Sizes`: Mark bei 16, 24, 32 px, Ablösung genannt | gemessen **16×16 · 24×24 · 32×32** exakt; der echte Rahmen `.app` 240 px, `.app--collapsed` 64 px, `.sb__logo` 56 px hoch; das Wordmark steht mit **125,7 × 32** darin. Der Satz zu `.is-collapsed` steht im Text | erfüllt |
+| `Misuse`: Text an Stelle des Zeichens, Liste gerechnet | rendert „**7** Dateien" und listet `AppShell`, `CaseDetailView`, `CaseList`, `CommandPalette`, `LedgerAccountView`, `NavList`, `SourceDocumentView`; `grep -rl 'sb__logo' src/ui/v3 --include='*.stories.tsx'` ohne `Brand` findet genau diese sieben (acht Fundstellen, `AppShell` zweimal). Fünf Paare, je richtig neben falsch | erfüllt |
+| Keine Datei unter `reference/` geändert | `git status --short reference/ public/` leer; der ganze Baum ist sauber | erfüllt |
+| Story unter `v3/Grundlagen/…` | ja, nicht unter `Primitives` | erfüllt |
+| **M8 — Protokoll und Code sagen jetzt dasselbe** | `Brand.stories.tsx:650` trägt `alt="Ludwig-Wortmarke, auf 64 % der Breite gestaucht"`; im Zugänglichkeitsbaum von `--misuse` steht der vierte `image`-Knoten mit genau diesem Namen (`nameFrom: attribute:alt`, nicht `ignored`). Er deckt sich mit der Zusage in `docs/backlog/0056-marke.md:440` und der Commit-Nachricht von `4605cb6`. Gemessen ist der Name wahr: Kasten **100,57 × 40** gegen **157,14 × 40**, Anteil **0,6400** — und er ist jetzt **höhenfest**: mit `height: 56` zur Laufzeit misst der Kasten 140,8 × 56, Anteil weiterhin **0,6400** | **behoben** |
+| Die Stauchung ist echt (M7, nachgeprüft) | Tinte im Ausschnittbild (8-fach): richtig **897 × 298** → **3,0101**, falsch **571 × 298** → **1,9161**, Faktor **0,6365**. Die Bildmarke wird zum Hochrechteck. Gegenprobe zur Laufzeit: `transform: none` → **3,0101** (deckungsgleich mit der richtigen Tafel), `scaleX(0.50)` → **1,4966**, `scaleX(0.30)` → **0,8993** — die Messung reagiert | erfüllt |
+| Der Bericht misst die Fläche, nicht den Kasten | die berichtigte Stelle (`0056-marke.md:435–441`) nennt **1,916 / 3,010, Faktor 0,637**; nachgemessen **1,9161 / 3,0101, Faktor 0,6365**. Die verworfenen Kastenmaße stehen nur noch als benannter Rückblick da | erfüllt |
+| `transformOrigin` ist weg, die Tafel steht mittig | `grep -c transformOrigin` = **0**; berechnet `78,5703px 20px` (= Mitte von 157,14 × 40). Gemessen auf der 350-px-Tafel: Luft links **124,71**, rechts **124,72**, Mittenversatz **−0,01 px**; die unverzerrte Tafel daneben 96,42 / 96,44, Versatz **−0,01**. Die Tabelle der Nacharbeit trifft auf zwei Nachkommastellen zu | erfüllt |
+| Formatierung der geänderten Zeile | das `style`-Objekt steht wieder umbrochen; keine Zeile der Datei über 90 Zeichen außer Fließtext und Kommentar, wie im Rest des Sets | erfüllt |
+| Namen, Überschriften, Landmarken (unverändert) | 9 `<img>` → **9** `image`-Knoten, keiner `ignored`, jeder `nameFrom: attribute:alt`, acht verschiedene Urteile plus „Ludwig" auf der guten Seite von „Kein Text an Stelle des Zeichens". `--misuse` **5** `heading`, alle Ebene 3; `--marks` und `--sizes` je **2**, ebenfalls Ebene 3. `complementary`: `--misuse` **2**, `--sizes` **0** bei je zwei `<aside>` im DOM | behoben |
+
+### Nicht blockierend
+
+1. **M9 — „64 %" ist getippt, nicht gerechnet.** `Brand.stories.tsx:650` gegen
+   `:665`: der Name steht fünfzehn Zeilen über dem Faktor, aus dem er stammt.
+   Der Mangel ist kleiner als in Runde 3, weil der Name jetzt höhenfest ist
+   (gemessen mit `height: 56` → Anteil unverändert 0,6400), aber die eine
+   verbliebene Kopplung ist ungesichert: `scaleX(0.50)` zur Laufzeit ergibt
+   gemessen Anteil **0,5000** und Tinte **1,4966**, während der Name weiter
+   „64 %" sagt. Der kleinste Weg ist der aus M8: eine Konstante
+   (`const SQUEEZE = 0.64`), aus der beide Zeilen lesen — wie `GROUND_LABEL`
+   und `LOGO_TEXT_STORIES`.
+2. **M10 — eine Zahl, zwei Werte.** `Brand.stories.tsx:660` nennt für die
+   gestauchte Tafel „**1,906**", der berichtigte Bericht „**1,916**".
+   Nachgemessen: **1,9161** (571 × 298 bei 8-fach), und die Messung ist über
+   alle geprüften Schwellen stabil (10 · 30 · 60 · 120 · 240 → 571 × 298;
+   erst 380 gibt 569 × 296). Die 1,906 stammt aus der Vormessung der zweiten
+   Runde. Eine Zahl im Kommentar.
+3. **Zwei Überschriften-Bilder, weiterhin.** `Section`-`h3` trägt `lw-h4`
+   (gemessen 18 px / 600), das `h3` in `Pair` setzt `fontSize`/`fontWeight` als
+   Stil (gemessen 14 px / 600). Gleiche Ebene, zwei Erscheinungen. Im Protokoll
+   als „offen, benannt" geführt und an die Textrunde mit 0055 verwiesen; hier
+   nur bestätigt.
+4. **Die Spec sagt „gestreckt", die Tafel staucht.** Verhalten Punkt 3 nennt
+   den Fall „gestreckt", die Regel heißt „Nicht verzerren" und der Verstoß ist
+   gemessen sichtbar (1,9161 gegen 3,0101). Dieselbe Regel, die andere
+   Richtung — kein Mangel, nur die Feststellung, dass drei Runden das nicht
+   erwähnt haben.
+
+### Befunde am Set (gehören nicht zu 0056)
+
+- **`pnpm build` bleibt ungeprüft** (0117). Das feste Kriterium kann keine
+  Abnahme dieser Serie ehrlich abhaken, solange im selben Baum mehrere Prüfer
+  arbeiten und der Bau `storybook-static/` leert.
+- **`404 /favicon.ico`** auf dem Dev-Server beim ersten Aufruf eines frischen
+  Browser-Profils. Wer Konsolenfehler zählt, findet ihn in der zuerst geladenen
+  Story und schreibt ihn sonst dieser Aufgabe zu.
+- **`pnpm check:icons`** meldet weiter „2 Datei(en) noch offen" (Exit 0);
+  **`pnpm check:contrast`** meldet drei Angaben, die ihren Ton nicht als Token
+  nennen (`src/styles/v3.css`) — beide aus anderen Aufgaben.
+- **Deutsche Kommentare und JSDoc in den Grundlagen-Stories** — an den Owner
+  verwiesen, kein Rückgabegrund.
+- **Kein Formatierer, kein Linter** in `package.json`.
+
+Abgenommen von / am: Claude (fremde Wiederabnahme), 2026-09-07 · Ergebnis:
+**abgenommen** · Offene Punkte: keiner blockierend; M9 und M10 sind je eine
+Zeile und gehören in die nächste Berührung der Datei, dazu zwei
+Feststellungen und fünf Befunde am Set. Der blockierende Mangel der dritten
+Runde ist geschlossen: der Name steht im Baum, deckt sich mit Protokoll und
+Commit-Nachricht, ist an der gezeichneten Fläche belegt (0,6400 Kastenanteil,
+Tinte 1,9161 gegen 3,0101) und übersteht eine Höhenänderung.
+
+## Nach der vierten Wiederabnahme (2026-09-07)
+
+**Abgenommen.** Der Blocker M8 ist geschlossen und die drei Punkte der
+Nacharbeit sind bestätigt — Tinte 3,0101 gegen 1,9161 (Faktor 0,6365),
+`transformOrigin` weg, Mittenversatz −0,01 px, der Name im
+Zugänglichkeitsbaum deckungsgleich mit dem Protokoll.
+
+Die zwei kleinen Mängel sind noch mitgenommen:
+
+**M9 — „64 %" war getippt, nicht gerechnet.** Der Name sagte 64 %, der Stil
+`scaleX(0.64)`, und beide standen unabhängig voneinander da: `scaleX(0.50)`
+zur Laufzeit ergab Anteil 0,50, während der Name weiter „64 %" behauptete —
+derselbe Fehlertyp wie M8 eine Runde davor, nur eine Ebene kleiner. Jetzt
+lesen beide aus `SQUEEZE = 0.64`. Gemessen: Name „auf 64 % der Breite
+gestaucht", Anteil **0,6400**.
+
+**M10 — die Zahl im Kommentar** sagte 1,906, gemessen sind es 1,9161.
+
+Die zwei Feststellungen bleiben, wie die Abnahme sie einordnet: die zwei
+Überschriften-Erscheinungen gehören in die Textrunde mit 0055, und dass die
+Spec „gestreckt" sagt, wo die Tafel staucht, ist eine Wortfrage der Spec.

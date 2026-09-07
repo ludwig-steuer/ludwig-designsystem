@@ -17,6 +17,14 @@ type Story = StoryObj;
 const ASSETS = "/reference/design-system-v2/assets";
 const WORDMARK = `${ASSETS}/ludwig-logo.svg`;
 /**
+ * Der Faktor der falschen Tafel — **eine** Zahl für Bild und Beschriftung.
+ * Sie standen getrennt da: der Name sagte „64 %", der Stil `scaleX(0.64)`, und
+ * wer eines von beidem ändert, hat wieder eine Tafel, die etwas anderes sagt
+ * als sie zeigt (Wiederabnahme 0056, M9 — derselbe Fehlertyp wie M8 eine
+ * Runde davor).
+ */
+const SQUEEZE = 0.64;
+/**
  * Die **Dateien**, die den Namen als Text schreiben — **gerechnet**, nicht
  * abgeschrieben: die erste Fassung nannte drei Dateien, es waren vier, und mit
  * `CaseDetailView` sind es fünf. Eine Liste, die von Hand gepflegt wird,
@@ -647,7 +655,7 @@ export const Misuse: Story = {
                    wichtigste Tafel der Seite für eine Vorlesehilfe stumm, und
                    „richtig" wie „falsch" hießen beide „Ludwig" (Abnahme
                    0056, M5). */
-              alt="Ludwig-Wortmarke, auf 64 % der Breite gestaucht"
+              alt={`Ludwig-Wortmarke, auf ${Math.round(SQUEEZE * 100)} % der Breite gestaucht`}
               /* **`scaleX`, nicht zwei Maße.** Beide Maße im Stil stauchen
                  nichts: `ludwig-logo.svg` trägt kein `preserveAspectRatio`,
                  also gilt `xMidYMid meet`, und das Bild skaliert in den Kasten
@@ -657,12 +665,12 @@ export const Misuse: Story = {
                  Abnahme vom 2026-09-06 hatte den **Kasten** gemessen (2,500)
                  und daraus „staucht" geschlossen; der Kasten ist nicht das
                  Bild. Erst die Transformation staucht wirklich: gemessen
-                 1,906, und die Bildmarke wird zum Hochrechteck (Abnahme
+                 1,916, und die Bildmarke wird zum Hochrechteck (Abnahme
                  0056, zweite Runde). */
               style={{
                 height: 40,
                 width: "auto",
-                transform: "scaleX(0.64)",
+                transform: `scaleX(${SQUEEZE})`,
               }}
             />
           </div>

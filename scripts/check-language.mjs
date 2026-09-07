@@ -141,7 +141,11 @@ const raus = (cmd) => {
  */
 function geaenderteZeilen() {
   const proDatei = new Map();
-  for (const bereich of ["HEAD", "--cached"]) {
+  // Auch der **letzte Commit**: sonst prüft der Wächter nach dem Committen
+  // nichts mehr, und genau so ist eine deutsche Zeile durchgerutscht — die
+  // Abnahme von 0027 fand sie mit `--all`, während `pnpm check:language` grün
+  // meldete, weil der Baum sauber war.
+  for (const bereich of ["HEAD~1", "HEAD", "--cached"]) {
     let datei = null;
     for (const zeile of raus(`git diff -U0 ${bereich}`)) {
       const neu = zeile.match(/^\+\+\+ b\/(.+)$/);

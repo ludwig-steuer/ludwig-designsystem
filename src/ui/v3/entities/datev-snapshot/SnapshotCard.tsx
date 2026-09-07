@@ -179,10 +179,10 @@ function Reconciliation({ reconcile }: { reconcile: DatevSnapshot["reconcile"] }
             : "Alle DATEV-Buchungen sind zugeordnet."
         }
         sub={
-          // Der Nebensatz beugt sich mit: „1 Buchung ist ungeklärt." und
-          // darunter „Sie stehen im Spiegel" war ein halb gebeugter Satz — der
-          // Hauptsatz wusste vom Singular, die Zeile vier Zeilen tiefer nicht
-          // (Wiederabnahme 0027).
+          // The subordinate clause bends along: „1 Buchung ist ungeklärt."
+          // above and „Sie stehen im Spiegel" below was a half-inflected
+          // sentence — the main clause knew about the singular, the line four
+          // lines further down did not (acceptance 0027).
           open === 0
             ? undefined
             : open === 1

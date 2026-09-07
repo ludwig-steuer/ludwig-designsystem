@@ -730,3 +730,212 @@ noch da; kein Linter im Repo, `noUnusedLocals` ist nicht gesetzt.
 
 **M5 bleibt offen und gehört der App:** L-72 ist halb — die Wörter stehen in
 der Domäne, der GLOSSARY-Eintrag fehlt. So steht es im Register.
+
+## Wiederabnahme (2026-09-07, zweite Runde): die fünf sind weg, die Nacharbeit hat eine deutsche Zeile hinterlassen
+
+**Urteil: zurück.** Die fünf Mängel der letzten Runde sind nachgeprüft und
+erledigt — die zwei Story-Kommentare stimmen mit dem Bild überein, „nicht
+vermerkt" hat seine Karte, der Commit-Hash ist der richtige, `MonoCell` ist
+weg, und L-72 ist inzwischen sogar ganz (drüben). Auch alles, was die Runden
+davor erledigt haben, hält: Tausenderpunkte, Singular in Haupt- **und**
+Nebensatz, Wörter aus der Domäne, Rand ohne Schatten, eine rechte Kante.
+
+Es blockiert **ein** Mangel, und er ist wieder der Preis der Nacharbeit — nur
+kommt er diesmal nicht aus dieser Runde, sondern aus der davor: der Kommentar,
+der die Beugung der Unterzeile erklärt, ist **auf Deutsch** geschrieben. Der
+Wächter des Hauses nennt ihn beim Namen, `pnpm check:language` schweigt nur,
+weil der Baum sauber ist und er den Bestand nicht prüft.
+
+Gemessen am laufenden Dev-Server (`localhost:6107`, Quelle, nicht
+`storybook-static`) über CDP, je Schritt ein eigenes `Runtime.evaluate`, Klicks
+über `el.click()`; eigene Kopie der Helfer im Scratchpad. Kein Wert aus der Spec
+zurückgelesen — jede Zahl unten kommt aus
+`getComputedStyle`/`getBoundingClientRect`/`Range.getBoundingClientRect`/`innerText`
+oder aus einer Datei, die dabei offen lag. Kontraste aus den **gerenderten**
+Farben nachgerechnet, nicht aus dem Protokoll übernommen. Vier Screenshots
+(`Filled`, `Levels`, `Empty`, `InGrid`).
+
+### Die Werkzeuge (Exit-Code, nicht `| tail`)
+
+| Lauf | Ergebnis |
+|---|---|
+| `pnpm typecheck` | exit 0 |
+| `pnpm check:icons` | exit 0, „53 Zeichen in der Registry, 2 Datei(en) noch offen" |
+| `pnpm check:contrast` | exit 0, „18 Angaben nachgerechnet" |
+| `pnpm check:when` | exit 0 |
+| `pnpm check:language` | exit 0 — **aber leer**: „nichts geändert unter src/ui/v3". Der Baum ist sauber, also prüft er nichts. `node scripts/check-language.mjs --all` nennt drei Zeilen dieser Karte (Mangel 1) |
+| `pnpm check:mirror` | exit 0, 8 Fälle — prüft den Filter, nicht den Abgleich mit der App |
+| `pnpm build` | **nicht gelaufen** — Bauverbot dieser Runde (0117). Nicht prüfbar, mit Grund |
+
+### Die fünf Mängel der letzten Runde, nachgeprüft
+
+| Punkt | Messung | Ergebnis |
+|---|---|---|
+| **M1 Story-Kommentare** | `SnapshotCard.stories.tsx:43` sagt jetzt „1.150 Fremdbuchungen und 54 unklare — zusammen die 1.204"; gemessen zeigt `…--with-deviations` im Callout „**1.204** Buchungen sind ungeklärt.", Fixture `:60–61` `newUnprocessed: 1_150, unclear: 54` — Soll und Bild decken sich. `:70–73` sagt jetzt „Die **Wörter** kommen aus der Domäne (`BASELINE_LEVEL_LABEL`, seit L-04/L-72) … Jetzt gibt es sie drüben, also liest die Karte sie"; gemessen zeigt `…--levels` genau diese Wörter. Die Anweisung, den Typtausch zurückzudrehen, steht nirgends mehr | erledigt |
+| **M4 „ohne Stufe"** | `…--levels` hat **4** Karten; die vierte trägt Kopf „Ohne Stufe", Zeile „Tiefe" = „**nicht vermerkt**" in `.v2muted`, `rgb(92, 92, 92)` auf `rgb(255, 255, 255)` = **6.69:1**, Font `Inter` (kein Mono), Zähler `2.140`, Callout „kein Abgleich". „nicht vermerkt" kommt jetzt in **1 von 7** Stories vor statt in 0 — aber die Karte steht nicht neben den anderen (Mangel 2) | erledigt in der Sache |
+| **M3 Commit-Nummer** | `SnapshotCard.tsx:99` nennt `222c8d5a`. Im App-Repo nachgeschlagen: `222c8d5a` = „feat(datev): Snapshot-Stufen und Altersklassen bekommen ein domain/ (F147 **L-04, L-72**, L-05, L-73)"; `362325b2` = „Belegnummern-Labels … (F147 **L-71**)". Der Hash stimmt jetzt | erledigt |
+| **M2 toter Import** | `grep -rn MonoCell src/ui/v3/entities/datev-snapshot/` → **0 Treffer**. Der Import ist raus, `typecheck` exit 0 | erledigt |
+| **M5 L-72 halb** | Inzwischen **ganz** — nicht durch diese Karte: App-Commit `db8efeda` („docs(glossary): Übergang, Gegenkonto und Abzugstiefe (F147 L-76, L-77, **L-72**)", 2026-09-07 11:12) trägt in `GLOSSARY.md:2138` „**Baseline level (Abzugstiefe)**" mit den drei Wörtern und dem Fallstrick. Der gespiegelte `docs/ludwig/GLOSSARY.md` hier kennt ihn noch nicht (Mangel 3) | erledigt drüben |
+
+### Was hält — gemessen, mit Gegenprobe
+
+- **Rand ohne Schatten (§2).** `…--filled`, `.v2card`: `border: 1px solid
+  rgb(221, 226, 232)`, `box-shadow: none`.
+- **Eine rechte Kante, `tnum` (V3).** Bei 472 px Karte liegen alle **sechs**
+  Feldzeilen und alle **fünf** Zähler mit der rechten Kante ihres *Textes*
+  (`Range`, nicht die Box) auf exakt **491 px**; `font-variant-numeric:
+  lining-nums tabular-nums` an allen. *Gegenproben:* `fontVariantNumeric =
+  'normal'` liefert `normal` und danach wieder `lining-nums tabular-nums`;
+  `justify-content: flex-start` an der Zeile schiebt die Kante von **491** auf
+  **188.22** px und zurück auf **491**. Die Messung reagiert.
+- **Tausenderpunkte, alle drei Aufrufstellen.** `…--filled` `4.812 / 137`,
+  Zähler `4.520 / 88 / 204 / 0 / 0`; `…--in-grid` rechts `4.390 / 152`, Zähler
+  `4.102 / 74 / 190 / 1 / 0`; `…--levels` vierte Karte `2.140`;
+  `…--with-deviations` Hauptsatz `1.204`. Über alle sieben Stories gescannt:
+  die einzige ungruppierte vierstellige Zahl ist **2026** — das
+  Wirtschaftsjahr, richtig ungruppiert.
+- **Singular, Haupt- und Nebensatz.** `…--in-grid` rechte Karte: „**1 Buchung
+  ist** ungeklärt." + „**Sie steht** im Spiegel, mit ihrem Zustand —
+  Fremdbuchung oder unklar." · `…--with-deviations`: „1.204 Buchungen **sind**
+  ungeklärt." + „**Sie stehen** im Spiegel, jede mit ihrem Zustand".
+- **Drei Aussagen, unterscheidbar, jede mit Wort und Zeichen.** Gemessen über
+  `…--filled`/`…--with-deviations`/`…--levels`: „Alle DATEV-Buchungen sind
+  zugeordnet." mit `aria-label="erledigt"`, Strich `rgb(63, 122, 90)` = **5.02:1**
+  auf Weiß · „1.204 Buchungen sind ungeklärt." mit `aria-label="Warnung"`,
+  `rgb(140, 96, 30)` = **5.52:1** · „Für diesen Stand wurde kein Abgleich
+  durchgeführt." mit `aria-label="nicht durchgeführt"`, `rgb(113, 113, 113)` =
+  **4.88:1**. Alle drei über der 3:1-Schwelle für Grafik.
+- **Kontraste, aus den gerenderten Farben nachgerechnet** (auf `rgb(255, 255,
+  255)`): Feld-Label `rgb(92, 92, 92)` **6.69:1** · Feldwert `rgb(45, 45, 45)`
+  **13.77:1** · Zähler-Wort **6.69:1** · Zähler-Zahl **13.77:1** · „Zustände"
+  `rgb(113, 113, 113)` **4.88:1** · Callout-Titel `rgb(26, 58, 92)` **11.64:1** ·
+  Callout-Kicker, -Unterzeile und -Rand im Warnton `rgb(140, 96, 30)` **5.52:1**.
+  Von Hand gegengerechnet (sRGB-Linearisierung, WCAG-Formel), nicht aus dem
+  Protokoll der Vorrunde übernommen.
+- **Fokusring.** `…--empty`, per **Tab** (nicht `focus()` — das trifft
+  `:focus-visible` nicht): `outline: rgb(59, 143, 196) solid 2px`, Offset
+  `2px`, `:focus-visible` greift.
+- **Breite auf der Seite, nicht im Story-Rahmen.** `max-width` entfernt,
+  Rahmen auf 1440 / 760 / 520 / 320 / 260 / 240 px gezwungen: `scrollWidth −
+  clientWidth = 0` an Karte **und** Dokument in jedem Fall; die Zeile „Tiefe"
+  bricht ab 260 px auf zwei Zeilen (30.92 → 51.84 px), Zähler bleiben einzeilig
+  (19.38 px). Erst bei 200 px 7 px Überlauf — unter der zugesagten Grenze.
+  *Gegenprobe:* ein 48-Zeichen-Wort ohne Trennstelle in dieselbe Zelle ergibt
+  bei 240 px **284 px** Überlauf, nach dem Zurücksetzen wieder **0**.
+- **Wertebereich statt Fixture.** Alle sieben Zahlen auf `1.234.567` gesetzt:
+  kein Überlauf, alle rechten Kanten weiter bei **491 px**, Zähler-Zeilen
+  weiter einzeilig (19.38 px).
+- **R1 über die Registry.** Die fünf Zählwörter aus `resolveStatus("mirror_match",
+  …)`: „mit Ludwig gematcht / aufgeteilt (Kanzlei) / von der Kanzlei geändert /
+  DATEV-Fremdbuchung / unklar". Das (i) öffnet den `StatusInfoDialog` der Achse
+  samt Herkunft „`client_datev_mirror_entries.match_state` (NULL = nicht
+  abgeglichen)". `grep BASELINE_LEVEL` über `src/`: **genau eine** Deklaration,
+  im gespiegelten `domain/snapshot.ts` — keine lokale Map.
+- **Die Wörter der Tiefe.** `…--levels`: „nur offene Posten" · „Journal und
+  offene Posten" · „nur Journal" · „nicht vermerkt" — zeichengleich mit
+  `BASELINE_LEVEL_LABEL`. Rohwert-Scan über alle sieben Stories: `opos`,
+  `journal_opos`, `journal` als eigenständige Zeichenkette **0 Treffer in 7 von 7**.
+- **Rundlauf `Interactive`** (Klicks je in eigenem `Runtime.evaluate`):
+  Leerzustand, ein Knopf → Klick „Spiegel importieren" → Karte gefüllt, Zeile
+  „Tiefe" = „Journal und offene Posten", Kopfknopf „Spiegel öffnen" da, Log
+  „Import angestoßen" → Klick → Log „Import angestoßen · Spiegel geöffnet" →
+  Klick auf das (i) öffnet den Dialog „DATEV-Abgleich" mit allen Ausprägungen.
+- **`Empty`**: `EmptyState` in der Karte, „Kein DATEV-Stand vorhanden", ein
+  primärer Knopf „Spiegel importieren", **0** Callouts — der berichtigte
+  Nachweis der dritten Aussage zeigt weiter zu Recht auf `Levels`.
+- **Kein Hex, kein px** in `SnapshotCard.tsx` und `datev-snapshot.ts` (grep
+  leer). Sieben Stories, Exportnamen englisch, Barrel unverändert
+  (`src/ui/v3/index.ts:443, 448`).
+- **Ersetzt die Seite ohne Funktionsverlust.** Gegen
+  `apps/web/src/app/(app)/clients/[clientSlug]/[year]/datev/page.tsx:773, 784`
+  gehalten: die Seite zeigt dort `r.baselineLevel ?? "—"`, also den Rohwert und
+  einen Gedankenstrich. Die Karte zeigt das Wort und „nicht vermerkt" — mehr,
+  nicht weniger.
+
+### Mängel
+
+**1 · Ein deutscher Kommentar im Code — blockiert.**
+Kriterium: fester Block, „Code englisch" (CLAUDE.md: Kommentare und JSDoc unter
+`src/ui/v3/` sind englisch; deutsch ist nur, was Nutzer sehen).
+Ort: `src/ui/v3/entities/datev-snapshot/SnapshotCard.tsx:182–185`.
+Messung: `node scripts/check-language.mjs --all` nennt drei Zeilen dieser Datei:
+
+```
+✗ SnapshotCard.tsx:182 — Der Nebensatz beugt sich mit: „1 Buchung ist ungeklärt." und
+✗ SnapshotCard.tsx:183 — darunter „Sie stehen im Spiegel" war ein halb gebeugter Satz — der
+✗ SnapshotCard.tsx:184 — Hauptsatz wusste vom Singular, die Zeile vier Zeilen tiefer nicht
+```
+
+`pnpm check:language` steht auf exit 0, weil er nur prüft, **was gerade
+angefasst ist** — der Baum ist sauber, also prüft er nichts. Die Datei ist
+keine Story-Datei, die Ausnahme greift nicht.
+Herkunft: `git log -S` weist die Zeilen `ab63181` zu — „0027: der Hauptsatz
+beugte sich, die Unterzeile nicht", der Nacharbeit, die den Blocker der
+vorletzten Runde behob. Genau der Fall, den der Wächter im eigenen JSDoc
+beschreibt: „jedes Mal eingeschleppt von der Nacharbeit, die einen anderen
+Mangel behob."
+Kleinster Weg: die vier Kommentarzeilen auf Englisch — der Inhalt bleibt, nur
+die Sprache wechselt. Kein Code.
+
+**2 · `Levels` sagt „nebeneinander" und zeigt drei plus eine — blockiert nicht.**
+Kriterium: keins wörtlich; derselbe Typ wie der blockierende Mangel der letzten
+Runde („Stories beschreiben sich selbst falsch"), und aus derselben Nacharbeit.
+Ort: `SnapshotCard.stories.tsx:70` („Die vier Fälle der Tiefe **nebeneinander**")
+gegen `:87` (`gridTemplateColumns: "repeat(3, minmax(0, 1fr))"`).
+Messung bei 1280 px: Karten 1–3 liegen bei `y = 40` (x = 40 / 447 / 853, je
+387 px breit), Karte 4 „Ohne Stufe" bei `y = **678**`, x zurück auf 40 — **638
+px unter** den anderen, allein in einer zweiten Zeile. Im Screenshot sichtbar.
+*Gegenprobe:* `repeat(4, …)` zur Laufzeit gesetzt → alle vier bei `y = 40`;
+zurück auf `repeat(3, …)` → `40 / 40 / 40 / 678`. Die Messung reagiert.
+Nebenbei: der Satz „Ein `opos`-Lauf hat keinen Abgleich" (`:79`) gilt jetzt für
+zwei Karten, von denen die zweite kein `opos`-Lauf ist.
+Kleinster Weg: `repeat(3` → `repeat(4` in `:87`. Kein Code an der Karte.
+
+**3 · Der Spiegel ist seit heute Mittag hinter der App — blockiert nicht,
+gehört nicht hierher.**
+Ort: `src/ludwig/modules/datev-mirror/domain/snapshot.ts:19–23` und
+`docs/ludwig/GLOSSARY.md`.
+Messung: `diff` gegen `apps/web/src/modules/datev-mirror/domain/snapshot.ts`
+der App ist **nicht mehr leer** — der Fallstrick-Absatz zu `journal_opos` wurde
+drüben mit `db8efeda` (11:12) auf die Owner-Auskunft umgeschrieben („die Spalte
+wird von außen befüllt"), hier steht noch „Entweder befüllt ein externer Weg
+die Spalte, oder die Stufe ist tot." `BASELINE_LEVELS`,
+`BASELINE_LEVEL_LABEL` und das Interface sind **zeichengleich** — die Karte
+zeigt also das Richtige, es driftet nur der Kommentar. Derselbe Commit trägt
+den GLOSSARY-Eintrag „Baseline level (Abzugstiefe)" nach, den der hiesige
+`docs/ludwig/GLOSSARY.md` noch nicht kennt. `pnpm check:mirror` fängt das
+nicht: er prüft den Filter (8 Fälle), nicht den Abgleich mit der App.
+Kleinster Weg: beim nächsten Spiegel-Zug mitnehmen. Gehört der Aufgabe, die
+den Spiegel pflegt.
+
+Abgenommen von / am: designsystem-abnahme (fremde Wiederabnahme, ohne
+Bauanteil), 2026-09-07 · Offene Punkte: Mangel 1 blockiert; 2 und 3 sind
+notiert. Die fünf Mängel der letzten Runde sind **alle erledigt**, M5 sogar
+ganz (App-Commit `db8efeda`); nichts von dem, was vorher hielt, ist zerbrochen.
+
+## Nach der zweiten Wiederabnahme (2026-09-07)
+
+Die fünf Mängel der Vorrunde sind bestätigt; **L-72 ist inzwischen ganz
+erledigt** (App-Commit `db8efeda` trägt den GLOSSARY-Eintrag „Baseline level
+(Abzugstiefe)"). Zurück kam die Abnahme an zwei neuen Punkten.
+
+**M1 (blockierend) — ein deutscher Kommentar, und der Wächter hat ihn nicht
+gemeldet.** Vier Zeilen in `SnapshotCard.tsx` sind Englisch. Der interessante
+Teil ist, **warum** sie durchkamen: `pnpm check:language` prüft die Zeilen, die
+eine Änderung anfasst — nach dem Commit ist nichts mehr angefasst, und der
+Baum war sauber. Die Abnahme fand sie nur mit `--all`.
+
+Der Wächter prüft jetzt auch den **letzten Commit** (`HEAD~1`): wer committet,
+hatte seine Zeilen sonst nie geprüft. Das war eine Lücke in der Bauform, nicht
+in der Regel.
+
+**M2 — `Levels` sagte „nebeneinander" und zeigte drei plus eine.** Die vierte
+Karte kam mit der Nacharbeit dazu, das Raster blieb bei drei Spalten: gemessen
+stand sie 638 px unter den anderen. Jetzt vier Spalten, alle vier bei y = 40
+(x = 40 · 345 · 650 · 955).
+
+**M3 gehört nicht hierher und bleibt vermerkt:** der Spiegel driftet seit
+`db8efeda` um einen Kommentar, und `docs/ludwig/GLOSSARY.md` kennt den neuen
+Eintrag noch nicht. Ein Sync findet nicht mehr statt (Owner-Entscheid: das Set
+wird erst fertig, dann zieht die App in einem Zug nach), also ist das kein
+Mangel dieser Aufgabe — es steht hier, damit der eine Zug es mitnimmt.
