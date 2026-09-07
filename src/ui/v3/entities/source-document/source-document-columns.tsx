@@ -222,6 +222,11 @@ export function sourceDocumentColumns({
       // what the middle cut is there to keep. Measured, „.pdf" stood 69 px
       // outside its cell, in the story that was meant to prove the opposite.
       cell: (d) => {
+        // Mono only when the cell really shows the **file name** — a company
+        // name is prose. The condition hangs on the content, not on the
+        // column: written the other way round it put the file names in Inter
+        // and the firms in mono (measured while fixing 0070, M2).
+        const zeigtDatei = !d.counterparty && !picked.has("fileName");
         const body = d.counterparty ? (
           <span className="v2doc__keyname">{d.counterparty}</span>
         ) : picked.has("fileName") ? (
@@ -230,18 +235,23 @@ export function sourceDocumentColumns({
           // in the stuck list, where a counterparty is the exception.
           <span className="v2muted">—</span>
         ) : (
-          // Mono, like the „Datei" column: the same value must not look
-          // different depending on the column set (acceptance 0070, M2).
-          <span className="v2mono">
-            <FileName value={d.fileName} max={48} />
-          </span>
+          <FileName value={d.fileName} max={48} />
         );
         // **Only when it leads.** Wrapping unconditionally put a second
         // `.v2rowlink` in every row of the stuck set — the first one named
         // „—", because there is no counterparty. One target, one focus stop
         // (I11).
+        //
+        // Mono sits on **this** wrapper, not on one of its own: an extra span
+        // made itself the flex child of `.v2doccol__lead`, and with
+        // `min-width: auto` it did not shrink — the extension stood 180 px
+        // outside its cell and 64 px over the neighbour, in the very story
+        // that is meant to prove the opposite (acceptance 0070, second round).
         return (
-          <span className="v2doccol__lead" title={d.counterparty ?? d.fileName}>
+          <span
+            className={`v2doccol__lead${zeigtDatei ? " v2mono" : ""}`}
+            title={d.counterparty ?? d.fileName}
+          >
             {lead === "counterparty" ? leading(d, body) : body}
           </span>
         );

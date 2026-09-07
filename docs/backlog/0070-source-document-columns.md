@@ -639,3 +639,39 @@ deckt den Zwei-Achsen-Fall, nicht den Wertebereich der Spalte.
 
 Claude (fremde Wiederabnahme, ohne Bau-Verlauf), 2026-09-07 — **zurück**,
 blockierend ist M1.
+
+## Nach der Wiederabnahme (2026-09-07)
+
+Die drei Reparaturen sind bestätigt — Spur 232 px mit reagierender Gegenprobe
+(220 → Zeile 73,2; 260 → 47,1; zurück → 47,1), das (i) nur noch im Kopf
+(5/0 · 4/0 · 1/0 · 4/0). Zurück kam die Abnahme an **meinem eigenen Fix**.
+
+**M1 (blockierend) — der Mono-Fix riss die Kürzung.** Ich hatte `FileName` in
+einen **zusätzlichen** `<span className="v2mono">` gelegt. Damit war nicht mehr
+`.v2doc__keyname` das Flex-Kind von `.v2doccol__lead`, sondern der neue Span —
+und der hat `min-width: auto`, schrumpft also nicht. Gemessen in `Edges` bei
+1440 px: Hüll-Span **360,0 px** in einer 180-px-Spur, „.pdf" endete bei 395,0
+in einer Zelle, die bei 215,0 endet — **180 px draußen**, davon 64,3 px über
+der Nachbarspalte. Und zwar in genau der Story, die beweisen soll, dass die
+Endung in ihrer Zelle bleibt.
+
+Das ist dieselbe Falle wie N2 der zweiten Runde: `min-width: auto` an einem
+Flex-Kind. Mono sitzt jetzt an der **vorhandenen** Hülle, wie es die Spalte
+„Datei" zwei Dutzend Zeilen weiter längst macht. Gemessen: Überstand **0** in
+`Edges`, `DocumentList` und `Inbox`.
+
+**Beim Umbau fiel ein zweiter Fehler auf, den die Abnahme nicht sehen konnte:**
+die Bedingung hing zuerst an der Spalte statt am Inhalt — damit standen die
+**Dateinamen in Inter und die Firmennamen in Mono**, also genau verkehrt.
+Gemessen jetzt: `Scan-2026-09-01-…` und `Mietvertrag-…` in JetBrains Mono,
+„Immobilien Musterstadt KG" und der Gedankenstrich in Inter.
+
+**M2, M3 und M4–M6 bleiben offen und sind nachgemessen vermerkt:** die
+Zeilenhöhe der Belegliste reißt weiter, jetzt an der Sachverhaltszelle mit der
+erfundenen `kind` (71,7 gegen 48); 232 px decken den Zwei-Achsen-Fall, mit
+einer dritten Achse wächst die Zeile wieder; und die vierte Achse hat weder
+Fixture noch (i). Jeder dieser Punkte braucht eine Entscheidung, keine
+Reparatur.
+
+**Zum Tabellen-Reset:** die Abnahme hat ihn in diesem Spaltensatz
+durchgemessen — `.v2num` gewinnt jetzt in Kopf **und** Zelle, keine Regression.
