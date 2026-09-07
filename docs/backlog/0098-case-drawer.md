@@ -337,3 +337,33 @@ Es fehlt dabei **nichts**: jedes gelesene Feld gibt es im Spiegel. Die Frage
 ist, welcher der beiden Kanäle bleibt — die flache `CaseQuickView` für den
 Kopf, oder `facts` für alles. Das ist eine Schnittstellen-Entscheidung, und
 sie betrifft auch 0097; sie ist an den Owner gegeben.
+
+## Nach der Abnahme: ein Kanal (2026-09-07, im Auftrag des Owners, ludwig-coordinator)
+
+**Der Owner hat entschieden: `facts` ist die Quelle.** `CaseQuickView` trägt
+nur noch `facts` und `eventCount` — die fünf Felder, die es seit dem Typtausch
+doppelt gab (`title`, `counterpartyName`, `totalAmount`, `currency`,
+`dispositionLabel`), sind weg. Der Kopf holt sie aus `facts`.
+
+**Die Zuständigkeit kommt als Schlüssel, das Wort aus der Registry.** Statt
+eines Label-Felds trägt der Datensatz `disposition`, und die Achse liefert das
+Wort. Beim Umstellen ist dabei aufgefallen, dass die Fixture „Kanzlei" sagte —
+der zugehörige Schlüssel ist `accounting`, nicht `agent`. Gemessen steht im
+Kopf unverändert „Kanzlei ist dran".
+
+Grund für den Entscheid: ein Feld an zwei Stellen driftet. Genau das ist an
+diesem Tag zweimal passiert (`SnapshotCard`, `CaseRow`), und die Regel „Zone 3
+zeigt dieselbe Komponente wie der View" (0052) will genau eine Quelle.
+
+Das Bild ist unverändert. Gemessen in `InUse`, beide Zeilen:
+
+| Zeile | Kopf des Drawers |
+|---|---|
+| 2026-0412 | Wartung der Klimaanlage · 2026-0412 · Zur Prüfung · 1.249,90 € · Eingangsrechnung · Bürobedarf Meier GmbH · Kanzlei ist dran |
+| 2026-0413 | Abschlag Strom 08/2026 · 2026-0413 · Wartet auf Unterlagen · −412,00 € |
+
+**Die Beleg-Familie trägt dieselbe Dopplung nicht.**
+`SourceDocumentQuickView` nimmt den Beleg als `document` und leitet Titel,
+Kennung und Zustand daraus ab — der Kommentar sagt es ausdrücklich: der Drawer
+bekommt sie nicht mehr gereicht, damit er das Dokument nicht anders benennen
+kann als die Liste daneben. Ein Kanal, wie hier jetzt auch.

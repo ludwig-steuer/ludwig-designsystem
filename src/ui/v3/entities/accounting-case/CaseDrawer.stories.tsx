@@ -16,13 +16,12 @@ type Story = StoryObj<typeof CaseDrawer>;
 const accountHref = (nr: string) => `#konto-${nr}`;
 
 const RECORD: CaseQuickView = {
-  title: "Wartung der Klimaanlage",
-  counterpartyName: "Bürobedarf Meier GmbH",
-  totalAmount: 1249.9,
-  currency: "EUR",
-  dispositionLabel: "Kanzlei",
   eventCount: 6,
   facts: {
+    title: "Wartung der Klimaanlage",
+    totalAmount: 1249.9,
+    currency: "EUR",
+    disposition: "accounting",
     caseNumber: "2026-0412",
     kind: "incoming_invoice",
     lifecycleStatus: "open",
@@ -45,13 +44,12 @@ const RECORD: CaseQuickView = {
  * GmbH" — beides gleichzeitig im Bild (Abnahme 0098, M2).
  */
 const RECORD_STROM: CaseQuickView = {
-  title: "Abschlag Strom 08/2026",
-  counterpartyName: "Stadtwerke Musterstadt",
-  totalAmount: -412,
-  currency: "EUR",
-  dispositionLabel: "Mandant",
   eventCount: 2,
   facts: {
+    title: "Abschlag Strom 08/2026",
+    totalAmount: -412,
+    currency: "EUR",
+    disposition: "client",
     caseNumber: "2026-0413",
     kind: "recurring_charge",
     lifecycleStatus: "waiting_for_documents",
@@ -148,10 +146,10 @@ export const Sparse: Story = {
       onClose={() => {}}
       reference="2026-0501"
       record={{
-        title: null,
-        totalAmount: null,
         eventCount: 0,
         facts: {
+          title: null,
+          totalAmount: null,
           // Deliberately without a number: the head must then still show the
           // reference that was looked up, not a sliced id (defect M1).
           caseNumber: null,

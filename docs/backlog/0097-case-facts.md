@@ -504,3 +504,17 @@ prüft die Zeilen, die eine Änderung anfasst, und wird sie beim nächsten Mal
 fordern. Eine Story für den unbekannten Seiten-Wert wäre ein erfundener Wert
 und verstieße gegen §6. Und „volle Breite" ist gemessen die Restbreite hinter
 dem Label (540 von 678 px) — der Satz meint sie, die Zahl steht jetzt dabei.
+
+
+## Nach der Abnahme: ein Kanal (2026-09-07, im Auftrag des Owners, ludwig-coordinator)
+
+Die Abnahme von 0098 hat gezeigt, dass fünf Felder der `CaseQuickView` seit
+dem Typtausch doppelt standen — sie liegen auch in `CaseFactsVM`. Der Owner
+hat entschieden: **`facts` ist die Quelle.** Für 0097 ändert sich am Bau
+nichts; der Typ dieser Aufgabe ist der eine Kanal geworden, aus dem der
+Drawer-Kopf seine Werte holt.
+
+Eine Folge betrifft aber diese Spec: **die Zuständigkeit steht als Schlüssel
+im Datensatz** (`disposition`), nicht als fertiges Wort. Das Wort kommt aus
+der Achse. Wer `CaseFactsVM` befüllt, gibt also den Schlüssel weiter — genau
+wie bei jedem anderen Achsenwert.

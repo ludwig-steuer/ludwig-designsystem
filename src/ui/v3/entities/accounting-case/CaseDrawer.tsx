@@ -13,6 +13,7 @@ import { Skeleton } from "../../primitives/Skeleton";
 import { Card, CardHead } from "../../primitives/Table";
 import { CaseFacts, type CaseFactsVM } from "./CaseFacts";
 import { caseTitle } from "./case-title";
+import { STATUS_REGISTRY } from "@/ludwig/ui/status/status-registry";
 
 /**
  * The case, looked up beside the work (0098, schema of 0052).
@@ -28,18 +29,19 @@ import { caseTitle } from "./case-title";
  * says so in one sentence instead of pretending otherwise.
  */
 
-/** What the head and the facts need. `null` is **not found**, not „loading". */
+/**
+ * What the head and the facts need. `null` is **not found**, not „loading".
+ *
+ * **One channel.** Until 2026-09-07 five fields stood here *and* in `facts` —
+ * title, counterparty, amount, currency and the word for who is up. Since
+ * `CaseFactsVM = Partial<CaseDetail>` the mirror carries them all, and head
+ * and zone 3 read the same value from two sources (acceptance 0098, M1). A
+ * field kept in two places drifts: that happened twice in a single day. Owner
+ * decision: `facts` is the source, and only what is missing there stays here.
+ */
 export interface CaseQuickView {
   /** Ranks 11–16 for zone 3, plus the head's ranks 1–7. */
   facts: CaseFactsVM;
-  /** Rank 1 — the display name; rank 3 the number. */
-  title: string | null;
-  counterpartyName?: string | null;
-  /** Rank 4 — in the meta line of the head. */
-  totalAmount?: number | null;
-  currency?: Currency | null;
-  /** Rank 7 — „wer dran ist", as a word. */
-  dispositionLabel?: string | null;
   /** The one relation the drawer shows: how many events hang on the case. */
   eventCount?: number;
 }
@@ -81,9 +83,9 @@ export function CaseDrawer({
 }) {
   const name = record
     ? caseTitle({
-        title: record.title,
+        title: record.facts.title ?? null,
         kind: record.facts.kind,
-        counterpartyName: record.counterpartyName ?? null,
+        counterpartyName: record.facts.counterpartyName ?? null,
       })
     : null;
   // Whether the head's title is the kind itself — then rank 5 is already said.
@@ -105,20 +107,26 @@ export function CaseDrawer({
             {record.facts.lifecycleStatus ? (
               <StatusBadge axis="sachverhalt" status={record.facts.lifecycleStatus} info={false} />
             ) : null}
-            {record.totalAmount == null ? null : (
-              <Amount value={record.totalAmount} currency={record.currency ?? "EUR"} size="sm" />
+            {record.facts.totalAmount == null ? null : (
+              <Amount value={record.facts.totalAmount} currency={(record.facts.currency as Currency) ?? "EUR"} size="sm" />
             )}
             {/* The title falls back to the kind when a case has none — then
                 the meta line must not say it a second time (M6). */}
-            {kindInTitle && !record.counterpartyName ? null : (
+            {kindInTitle && !record.facts.counterpartyName ? null : (
               <span>
                 {kindInTitle ? "" : caseKindLabel(record.facts.kind)}
-                {record.counterpartyName
-                  ? `${kindInTitle ? "" : " · "}${record.counterpartyName}`
+                {record.facts.counterpartyName
+                  ? `${kindInTitle ? "" : " · "}${record.facts.counterpartyName}`
                   : ""}
               </span>
             )}
-            {record.dispositionLabel ? <span>{record.dispositionLabel} ist dran</span> : null}
+            {record.facts.disposition ? (
+              <span>
+                {STATUS_REGISTRY.disposition[record.facts.disposition]?.label ??
+                  record.facts.disposition}{" "}
+                ist dran
+              </span>
+            ) : null}
             {record.eventCount === undefined ? null : (
               <span>
                 {record.eventCount} {record.eventCount === 1 ? "Ereignis" : "Ereignisse"}

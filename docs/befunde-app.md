@@ -176,6 +176,12 @@ Ablösung doppelt Arbeit macht.
 Das sind **keine Befunde**, sondern die Migrationsschritte. Sie stehen in den
 Specs als Kriterien „offen (App)": hier nicht erfüllbar, weil dieses Repo das
 ausgelagerte Design-System ist (`docs/backlog/README.md`).
+**Der Sachverhalts-Drawer speist seinen Kopf künftig aus `CaseDetail`**
+(Owner-Entscheid 2026-09-07). `CaseQuickView` trägt nur noch `facts` und
+`eventCount`; Titel, Gegenpart, Betrag und Währung kommen aus dem Datensatz,
+die Zuständigkeit als Schlüssel `disposition` — das Wort holt die Registry.
+Wer den Drawer in der App einbaut, reicht also `CaseDetail` durch und baut
+keinen zweiten, flachen Satz daneben.
 
 **Stand der Migration (Rolle A, nachgesehen am 2026-09-07):** 141 Dateien der
 App importieren aus dem Set, 208 Import-Zeilen, **68 verschiedene Namen — alle
