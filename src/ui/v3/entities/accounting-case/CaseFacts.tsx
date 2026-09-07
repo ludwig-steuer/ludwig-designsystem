@@ -7,6 +7,7 @@ import { FieldList } from "../../primitives/FieldList";
 import { Link } from "../../primitives/Link";
 import { LongText } from "../../primitives/LongText";
 import { MonoCell } from "../../primitives/Cells";
+import { AccountCell } from "../account/Account";
 import { Time } from "../../primitives/Time";
 
 /**
@@ -100,13 +101,14 @@ export function CaseFacts({
   add(
     "Personenkonto",
     c.personalAccountNumber ? (
-      accountHref ? (
-        <Link href={accountHref(c.personalAccountNumber)}>
-          <MonoCell value={c.personalAccountNumber} />
-        </Link>
-      ) : (
-        <MonoCell value={c.personalAccountNumber} />
-      )
+      // `AccountCell`, not `<Link><MonoCell/></Link>`: the mono class sets its
+      // own colour and wins over the link's, so the account looked like plain
+      // text and answered no hover — the set decided that in 0066
+      // (`.v2acc--link`, `v3.css:2690`). Acceptance 0097, M1.
+      <AccountCell
+        number={c.personalAccountNumber}
+        {...(accountHref ? { href: accountHref(c.personalAccountNumber) } : {})}
+      />
     ) : (
       "hat bewusst keins"
     ),
@@ -145,13 +147,10 @@ export function CaseFacts({
     if (c.clearingAccountNumber) {
       add(
         "Verrechnungskonto",
-        accountHref ? (
-          <Link href={accountHref(c.clearingAccountNumber)}>
-            <MonoCell value={c.clearingAccountNumber} />
-          </Link>
-        ) : (
-          <MonoCell value={c.clearingAccountNumber} />
-        ),
+        <AccountCell
+          number={c.clearingAccountNumber}
+          {...(accountHref ? { href: accountHref(c.clearingAccountNumber) } : {})}
+        />,
       );
     }
     if (c.agentRunId) add("Buchungslauf", <MonoCell value={c.agentRunId} />);

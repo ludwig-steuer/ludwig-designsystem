@@ -122,23 +122,50 @@ if (process.argv[2] === "--test") {
   process.exit(0);
 }
 
-/** Die Dateien, die diese Änderung anfasst — Arbeitsbaum und letzter Commit. */
-function geaenderte() {
-  const raus = (cmd) => {
-    try {
-      return execSync(cmd, { encoding: "utf8" }).trim().split("\n").filter(Boolean);
-    } catch {
-      return [];
+const raus = (cmd) => {
+  try {
+    return execSync(cmd, { encoding: "utf8" }).split("\n");
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * Die **Zeilen**, die diese Änderung anfasst, je Datei.
+ *
+ * Nicht die ganze Datei: CLAUDE.md sagt „eine Datei, die ohnehin angefasst
+ * wird, bekommt englische Namen" — gemeint ist, was man dabei schreibt, nicht
+ * jeder Altbestand, den man mit anfasst. `Table.tsx` trägt Sätze von 2026-08;
+ * wer dort eine Zeile ändert, soll nicht dreißig übersetzen müssen, aber auch
+ * keine neue deutsche dazuschreiben.
+ */
+function geaenderteZeilen() {
+  const proDatei = new Map();
+  for (const bereich of ["HEAD", "--cached"]) {
+    let datei = null;
+    for (const zeile of raus(`git diff -U0 ${bereich}`)) {
+      const neu = zeile.match(/^\+\+\+ b\/(.+)$/);
+      if (neu) {
+        datei = neu[1];
+        continue;
+      }
+      const stueck = zeile.match(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/);
+      if (!stueck || !datei) continue;
+      if (!datei.startsWith(`${ROOT}/`) || !/\.tsx?$/.test(datei) || datei.includes(".stories.")) continue;
+      if (!existsSync(datei)) continue;
+      const von = Number(stueck[1]);
+      const wieviele = stueck[2] === undefined ? 1 : Number(stueck[2]);
+      const menge = proDatei.get(datei) ?? new Set();
+      for (let i = 0; i < wieviele; i++) menge.add(von + i);
+      proDatei.set(datei, menge);
     }
-  };
-  const alle = new Set([...raus("git diff --name-only HEAD"), ...raus("git diff --name-only --cached")]);
-  return [...alle].filter(
-    (f) => f.startsWith(`${ROOT}/`) && /\.tsx?$/.test(f) && !f.includes(".stories.") && existsSync(f),
-  );
+  }
+  return proDatei;
 }
 
 const alle = process.argv[2] === "--all";
-const zuPruefen = alle ? dateien(ROOT) : geaenderte();
+const geaendert = alle ? null : geaenderteZeilen();
+const zuPruefen = alle ? dateien(ROOT) : [...geaendert.keys()];
 
 if (!alle && zuPruefen.length === 0) {
   console.log("check:language — nichts geändert unter " + ROOT + ".");
@@ -147,7 +174,9 @@ if (!alle && zuPruefen.length === 0) {
 
 const fehlt = [];
 for (const datei of zuPruefen) {
+  const zeilen = alle ? null : geaendert.get(datei);
   for (const [nr, zeile] of kommentarZeilen(readFileSync(datei, "utf8"))) {
+    if (!alle && !zeilen.has(nr)) continue;
     if (istDeutsch(zeile)) fehlt.push(`${datei}:${nr} — ${zeile.slice(0, 72)}`);
   }
 }
@@ -155,8 +184,8 @@ for (const datei of zuPruefen) {
 if (fehlt.length) {
   for (const f of fehlt) console.error(`  ✗ ${f}`);
   console.error(
-    `\ncheck:language — ${fehlt.length} deutsche Kommentarzeilen in ${zuPruefen.length} ${alle ? "Dateien des Bestands" : "geänderten Dateien"}. Code nur Englisch (CLAUDE.md); Deutsch bleibt in Nutzer-Strings und in den Story-JSDoc.`,
+    `\ncheck:language — ${fehlt.length} deutsche Kommentarzeilen in ${zuPruefen.length} ${alle ? "Dateien des Bestands" : "angefassten Dateien"}. Code nur Englisch (CLAUDE.md); Deutsch bleibt in Nutzer-Strings und in den Story-JSDoc.`,
   );
   process.exit(1);
 }
-console.log(`check:language — in Ordnung, ${zuPruefen.length} ${alle ? "Dateien" : "geänderte Dateien"} geprüft.`);
+console.log(`check:language — in Ordnung, ${zuPruefen.length} ${alle ? "Dateien" : "angefasste Dateien"} geprüft.`);

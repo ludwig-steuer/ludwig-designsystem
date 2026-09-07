@@ -106,10 +106,20 @@ const CASES: CaseListItem[] = [
 ];
 
 const FULL = caseColumns({ href, counterpartyHref });
-// Die festen Spuren (1270) plus neun Lücken à 10 und zweimal 18 Polster
-// (1396) plus der Boden des Anzeigenamens (24ch ≈ 175) — darunter scrollt die
-// Tabelle waagerecht, statt den Rang 1 auf 2 px zu quetschen.
-const MIN_WIDTH = 1630;
+/**
+ * Die Mindestbreite folgt dem **Spaltensatz**, nicht einer festen Zahl: die
+ * festen Spuren plus Lücken plus Polster plus der Boden des Anzeigenamens
+ * (24ch ≈ 175 px). Mit einer festen 1630 blieben in `Columns` zwei Spalten
+ * außerhalb der Karte — ausgerechnet die, für die der Satz gewählt wurde
+ * (Abnahme 0096, M3).
+ */
+function minBreite(columns: typeof FULL): number {
+  const fest = columns.reduce((sum, c) => {
+    const px = /^(\d+)px$/.exec((c.width ?? "").trim());
+    return sum + (px?.[1] ? Number(px[1]) : 175);
+  }, 0);
+  return fest + (columns.length - 1) * 10 + 36;
+}
 
 function Frame({
   children,
@@ -124,14 +134,16 @@ function Frame({
     <div style={{ maxWidth: 1400 }}>
       <Card>
         <CardHead title="Sachverhalte" sub={sub ?? "Musterbau GmbH · Wirtschaftsjahr 2026"} />
-        <Table cols={caseTracks(columns)} minWidth={MIN_WIDTH}>
+        <Table cols={caseTracks(columns)} minWidth={minBreite(columns)}>
           <HeadRow>
             {columns.map((c) => (
               <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
                 {c.header}
-                {c.key === "state" ? <StatusInfoButton axis="sachverhalt" /> : null}
-                {c.key === "disposition" ? <StatusInfoButton axis="disposition" /> : null}
-                {c.key === "exportState" ? <StatusInfoButton axis="export_case" /> : null}
+                {/* Das (i) kommt aus dem Spaltensatz (`headerAside`), nicht aus
+                    einer Liste hier: sonst steht es an anderen Spalten als in
+                    `DataTable` und ohne den Abstand, den die Regel setzt
+                    (Abnahme 0096, M4). */}
+                {c.headerAside}
               </span>
             ))}
           </HeadRow>
@@ -152,9 +164,12 @@ export const Filled: Story = {
 };
 
 /**
- * Der häufige Fall: kein Betrag (52 % Füllung), kein Gegenpart, keine
+ * Der dünn besetzte Fall: kein Betrag (52 % Füllung), kein Gegenpart, keine
  * Zuständigkeit, kein Export. Jeder Punkt sagt „—" oder schweigt begründet,
- * statt zu fehlen — und der Anzeigename fällt auf Art plus Gegenpart zurück.
+ * statt zu fehlen — und ohne Titel **und** ohne Gegenpart bleibt vom
+ * Anzeigenamen die **Art** allein („Umbuchung"), so wie `caseTitle` es
+ * vorsieht. Die Klärungsspalte zeigt hier drei offene: der Fall ist dünn an
+ * Stammdaten, nicht an Arbeit (berichtigt 2026-09-07, Abnahme 0096, M7).
  */
 export const Sparse: Story = {
   render: () => (

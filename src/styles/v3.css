@@ -110,6 +110,16 @@
    Umbau 0106 nur fürs Polster aufgefallen. Die Zeile stand seither auf 400
    und sah aus wie eine Datenzeile (Abnahme 0089, 2026-09-07). */
 .v2tbl td.v2tbl__group { padding: 7px 18px; font-weight: 700; }
+/* Auf der Spezifität des Resets: `.v2tbl th, .v2tbl td` (0-1-1) schlägt jede
+   Regel, die nur an einer Klasse hängt (0-1-0). Dieselbe Falle hat schon das
+   Polster der Zwischenzeile und ihr Gewicht erwischt — und diese zwei hier
+   waren die letzten von dreizehn, die die Abnahme einzeln durchgemessen hat:
+   der Aktionskopf stand ohne `flex` 125,8 px neben seiner Spalte, die
+   Aufteilungszeile hatte statt 8/16/12/16 gar kein Polster. */
+.v2tbl th.v2actions { display: flex; gap: 14px; justify-content: flex-end; align-items: center; }
+.v2tbl td.v2btxrow__split {
+  padding: var(--space-2) var(--space-4) var(--space-3);
+}
 .v2tbl td.v2tbl__detail {
   padding: var(--v2-detail-y, 14px) 18px calc(var(--v2-detail-y, 14px) + 2px) 46px;
 }

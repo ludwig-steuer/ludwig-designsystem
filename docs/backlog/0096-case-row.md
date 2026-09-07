@@ -171,7 +171,7 @@ Variabel (aus dieser Spec):
 |---|---|---|
 | … | … | … |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: siehe Abschnitt „Abnahme (2026-09-07)“ am Ende der Datei.
 
 ## Offene Fragen
 
@@ -268,3 +268,183 @@ es im Befund ging: 47 % der Sachverhalte haben einen aufgelösten Partner, und
 nur die bekommen einen Link. Ein Fall in `CaseList` trägt deshalb einen
 Gegenpart **ohne** Id — sonst zeigte keine Story, dass der Name dann kein Link
 ist.
+
+## Abnahme (2026-09-07)
+
+Erste Abnahme, fremder Prüfer (designsystem, kein Bauanteil, kein Chat-Verlauf).
+Gemessen im Storybook-Dev-Server auf 6107 über CDP, Viewport 1440×900 (für die
+Trefferprobe 1760×900). `pnpm build` wurde **nicht** gelaufen — mehrere Prüfer
+teilen den Baum (Aufgabe 0117); `pnpm typecheck` steht dafür als Beleg.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Zahl) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | Exit 0 | **ja** |
+| `pnpm build` grün | nicht ausgeführt (0117) — Konsole aller sechs Stories fehlerfrei, nur Vite-/React-DevTools-Hinweise | offen |
+| Datei nach der Familie benannt, Story daneben, Titel richtig | `entities/accounting-case/{CaseRow,case-columns,CaseRow.stories}.tsx`; Titel `v3/Entitäten/Sachverhalt/CaseRow` | ja |
+| Code englisch; `@when`/`@instead` an jedem Export | `pnpm check:when` Exit 0, `pnpm check:language` Exit 0; `caseColumns`, `caseTracks`, `CaseRow` tragen beide Zeilen | ja |
+| Kein Hex, kein px in TSX außer Spurbreiten, keine lokale Label-Map | `grep -E '#[0-9a-f]{3,8}'` leer; Labels aus `CASE_KIND_LABEL` und der Registry; Spurbreiten wie in `source-document-columns` (16×), `account-columns` (8×) | ja |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | 6 vorhanden = Formel §6 (2 Zustände + 1 Enum + 1 Layout-Boolean + 0 Callbacks + 1 Einsatz + 1 Rand); „leer nach Filter“, „lädt“, „Fehler“ begründet an die Liste abgegeben | ja, mit **M3/M5** |
+| Prüfliste `design-guidelines.md` §9 | durchgegangen (App-Punkte A6 und §11 übersprungen) | **M1** (Zeilenhöhe V1), **M2** (Tastatur), **M4** |
+| Im Browser angesehen | sechs Stories gerendert, drei Screenshots, Konsole sauber | ja |
+| Reihenfolge fest; `columns` wählt aus, ordnet **nicht** um | `…--columns` übergibt `fiscalYear, state, amount, openedAt, number, name`; gerendert `Sachverhalt · Stand · Nummer · Betrag · Eröffnet · Jahr` | **ja** |
+| Gegenpart als eigener Punkt ab S | Rang 5, eigene Spur, in `Filled` als Link auf den Partner | ja, aber **M1** |
+| Alle drei Achsen über `StatusBadge`, keine lokale Label-Map | `sachverhalt`, `disposition`, `export_case`; Klassen gemessen `bdg-info` / `bdg-warning` | ja |
+| Die Art trägt **keinen** Ton | `…--filled`: Art `bdg-neutral` `rgb(236,239,243)` gegen Stand `bdg-info` `rgb(227,240,248)` | **ja** |
+| Klärungszähler „n offen“, nie eine nackte Zahl | `Filled` „1 offen“, `Sparse` „3 offen“; 0 bleibt stumm (begründet am Code) | ja |
+| Ohne `href` kein `<a>` für die Zeile | `…--without-link`: einziger Anker der Zeile ist der Gegenpart; kein `.v2rowlink` | **ja** |
+| `case` ist `CaseListItem` aus `src/ludwig/` | Import Z. 1, kein lokaler Zeilentyp | ja |
+| Jeder fehlende Wert steht als „—“ | `Sparse`: Betrag, Gegenpart, Wer ist dran, Export je „—“ | ja, außer **M6** |
+| Keine verschachtelten Anker | `a a` = **0** in allen sechs Stories und in `CaseList` `Filled`; die Zeile trifft an 18 von 21 sichtbaren Punkten den `.v2rowlink` (86 %), die Ausnahmen sind der Gegenpart-Link und ein (i) | **ja** |
+| Nachtrag L-69: Verweis aus der Partner-Id, ein Fall ohne Id | `caselist--filled`: Zeile 3 „Stadtwerke Musterstadt“ (`counterpartyPartnerId: null`) ist **kein** Anker; die drei anderen zeigen auf `#partner-bp-8841` | **ja** |
+| offen (App): ersetzt die zwei handgeschriebenen Zeilen | nicht Gegenstand dieser Abnahme | offen |
+
+### Mängel
+
+**M1 — die Gegenpart-Spur ist gegen ihren eigenen Wertebereich zu schmal; die
+Zeile wächst statt zu kürzen.** `case-columns.tsx:154–166` — `width: "180px"`,
+und die Zelle hat keine Kürzungsregel. Der breiteste Wert kam in die echte
+Zelle, gemessen in `v3-entitäten-sachverhalt-caserow--in-use` bei 1440×900
+(Spur 180 px, Zeile im Ausgang 48,0 px):
+
+| Gegenpart | Zeilenhöhe |
+|---|---|
+| 10 Zeichen (Ausgang) | 48,0 px |
+| p50 · 14 Zeichen | 48,0 px |
+| **p90 · 27 Zeichen** | **66,8 px (+39 %)** |
+| max · 57 Zeichen | **87,8 px (+83 %)** |
+| Gegenprobe zurück auf 10 Zeichen | 48,0 px |
+
+Wertebereich aus dem geprüften Profil (`docs/entitaeten/accounting-case.md`,
+Rang 5): 95 % gefüllt, **p50 14 · p90 27 · max 57 Zeichen**. Gemessen misst
+„Bürobedarf Meier GmbH“ (21 Zeichen) 156,1 px, also 7,4 px je Zeichen — 180 px
+tragen 24. Ab dem 25. Zeichen bricht die Zelle um; jede zehnte Zeile ist damit
+anderthalb Zeilen hoch (V1). Rang 1 hat die Regel (`.v2caserow__name`), Rang 5
+hat sie nicht. Kleinster Weg: an die Gegenpart-Zelle die vorhandene
+`.v2trunc` (`v3.css:3456`) plus `title={c.counterpartyName}` — eine Klasse,
+keine neue Regel.
+
+**M2 — das (i) steht zweimal: im Spaltenkopf und in jeder Zeile.**
+`case-columns.tsx:132–137, 172–177, 226–231` geben `StatusBadge` kein
+`info={false}`, obwohl der Kopf sein (i) schon über `headerAside` trägt
+(Z. 128, 170, 224) und der eigene Kommentar der Datei (Z. 124–127) genau das
+festhält. Gemessen in `…--in-use` bei 1760×900: Kopfzeile 3 Knöpfe, **jede
+Datenzeile ebenfalls 3** → **5 Fokusstopps je Zeile** (`A.v2rowlink`, 3 ×
+`BUTTON` „…: Zustände erklären“, `A` Gegenpart) statt 2; bei p90 190 Zeilen sind
+das 570 zusätzliche Tabstopps vor dem Pager. Gegenprobe: die Knöpfe zur Laufzeit
+entfernt → 2 Fokusstopps je Zeile, und die Zustandszelle schrumpft von
+**181,3 auf 163,3 px** — die breiteste Ausprägung „Wartet auf Unterlagen“ hat
+mit dem (i) nur **8,7 px** Luft in der 190-px-Spur, ohne es 26,7. Die
+Geschwister im Set machen es anders: `source-document-columns.tsx:397/414/425`,
+`account-columns.tsx:199`, `DataTable.stories.tsx:137` und `CaseCell.tsx:67`
+derselben Familie setzen `info={false}`. Kleinster Weg: `info={false}` an die
+drei `StatusBadge`.
+
+**M3 — die Story `Columns` zeigt zwei ihrer sechs Punkte nicht.**
+`CaseRow.stories.tsx:112` setzt `MIN_WIDTH = 1630` für **alle** Stories, auch
+für den Sechs-Spalten-Satz, dessen feste Spuren nur 620 px ergeben. Gemessen in
+`…--columns` bei 1440×900: Spuren `924px 190px 110px 130px 110px 80px`, Tabelle
+1630 px in einem 1398-px-Fenster — alles ab „Eröffnet“ ist abgeschnitten, und
+damit ist **`fiscalYear` unsichtbar**, die eine Spalte, für die der
+Partner-Reiter-Satz überhaupt existiert. Der Anzeigename bekommt 924 statt der
+200 px Boden. `CaseList.stories.tsx:151` rechnet denselben Satz richtig
+(`minWidth={900}`, `maxWidth 1180`). Kleinster Weg: `Frame` rechnet die
+Mindestbreite aus `columns` (Summe der Spuren + Lücken + 36 Polster + 200)
+statt sie zu konstantieren; für die sechs Spalten sind das 906.
+
+**M4 — der Spaltenkopf baut von Hand nach, was zwei Bausteine liefern.**
+`CaseRow.stories.tsx:130–135` hängt drei `StatusInfoButton` selbst in die
+`HeadRow`, obwohl jede Spalte ihr `headerAside` mitbringt und `StatusHeader`
+(0077) genau dieses Markup ist — die Spec verlangt für `InUse` ausdrücklich
+„Köpfe der Status-Spalten über `StatusHeader`“. Gemessen: der Abstand zwischen
+„Stand“ und dem (i) ist **0 px**; `.v2sth` (`v3.css:2906`) gäbe
+`var(--space-1)`. Kleinster Weg: im `Frame` `{c.header}{c.headerAside}`
+rendern.
+
+**M5 — zwei der dreizehn `CaseColumn`-Werte hat nie jemand gesehen.**
+`documents` (100 px) und `bankTransactions` (110 px) kommen in **keiner** Story
+der Familie vor (`grep` über alle `*.stories.tsx` unter
+`entities/accounting-case/`). Die Freigabe hatte sie „erweitern oder mit Grund
+ausschließen“ verlangt; erweitert sind sie, gezeigt nicht — ihre Spurbreiten
+sind ungemessen. Kleinster Weg: sie in die `Columns`-Auswahl aufnehmen, die
+ohnehin der Nachweis ist, dass `columns` auswählt.
+
+**M6 — Rang 3 verliert die Identität, wo die Familie sie gerade rettet.**
+`case-columns.tsx:144` rendert `MonoCell value={c.caseNumber}`; bei
+`caseNumber === null` steht dort „—“. Der Fall ist echt (`case.ts:277–279`:
+„Kann null sein, wenn der Case kein `fiscal_year` hat“) und die Story baut ihn
+selbst: `…--edges`, zweite Zeile, Zelle „Nummer“ = „—“. `case-title.ts:52–62`
+hält dafür `caseIdentifier()` bereit und begründet ausdrücklich, dass der Strich
+hier falsch ist („es hat eine, es hat nur keine Nummer“); `CaseCell.tsx:62`
+benutzt sie. Kleinster Weg: `caseIdentifier(c)` statt `c.caseNumber`.
+
+**M7 (klein) — zwei Story-Texte sagen etwas anderes als ihr Bild.** `Sparse`
+soll laut Spec „ohne Klärung“ zeigen, zeigt aber „3 offen“ (der stumme Nullfall
+steht nur in `InUse`), und ihr Kommentar sagt, der Anzeigename falle „auf Art
+plus Gegenpart“ zurück — gemessen steht dort „Umbuchung“, die Art allein, weil
+der Fall keinen Gegenpart hat. Dazu tragen in `CaseRow.stories.tsx` drei
+verschiedene Firmen dieselbe `counterpartyPartnerId` `bp-8841` (§6: Daten in
+Stories sehen echt aus).
+
+### Was gemessen wurde und hielt
+
+- Die Ellipse greift: `…--edges`, `.v2caserow__name` `display: block`,
+  `scrollWidth` 647 gegen `clientWidth` 204, voller Name im `title`, Zeile
+  bleibt 48,0 px hoch (M2 der Vorrunde ist erledigt).
+- Rang 1 ist 204 px breit und die Tabelle scrollt: `minmax(200px, 1fr)`,
+  Fenster 1398, Tabelle 1630 (M1 der Vorrunde ist erledigt).
+- Die breitesten Werte je Achse in der echten Zelle (1440×900):
+  Stand „Wartet auf Unterlagen“ 181,3 in 190 · Art „Ausgangsrechnung“ 127,6 in
+  160 · Export „Nicht exportiert“ 123,9 in 150 · Zuständigkeit „Mandant“ 86,4
+  in 150 · Nummer `2026-0412` 69,5 in 110 · Eröffnet `26.08.2026` 73,6 in 110 ·
+  Klärung „3 offen“ 43,8 in 120 · Jahr 80 in 80. Der Betrag über einer Million
+  misst 102,3 px in 130 und steht bündig an der Spurkante (`text-align: right`,
+  `tabular-nums`).
+- Alle sechs Stories rendern ohne Konsolenmeldung.
+
+Abgenommen von / am: **zurück** — designsystem (fremder Prüfer), 2026-09-07.
+Offene Punkte: M1 und M2 tragen das Urteil (die Zeile wächst bei p90 des
+Wertebereichs auf 66,8 px und trägt fünf Fokusstopps statt zwei); M3–M7 sind
+klein und in einem Zug mit zu erledigen. `pnpm build` bleibt für die
+Wiedervorlage offen.
+
+## Nach der Abnahme (2026-09-07)
+
+Beide tragenden Mängel sind behoben, dazu drei der kleinen.
+
+**M1 — die Gegenpart-Spur trug 24 Zeichen, der Wertebereich geht bis 57.**
+Ohne Kürzung brach die Zelle um: p90 (27 Zeichen) machte die Zeile 39 %, das
+Maximum 83 % höher als ihre Nachbarn. Sie hat jetzt `.v2trunc` und ihren
+`title`. Gemessen in `InUse` bei 1760 px, Werte zur Laufzeit gesetzt:
+
+| Zeichen | Zeile | kürzt |
+|---|---|---|
+| 14 (p50) | 48,0 px | nein |
+| 27 (p90) | **48,0 px** (vorher 66,8) | ja (329 → 180) |
+| 57 (max) | **48,0 px** (vorher 87,8) | ja (695 → 180) |
+
+**M2 — das (i) stand zweimal.** Der Kopf trägt es über `headerAside`, und die
+drei Abzeichen brachten ihr eigenes mit — bei 190 Zeilen sind das 570
+zusätzliche Tabstopps. Jetzt `info={false}`, wie es `CaseCell` und drei andere
+Spaltensätze im Set längst tun.
+
+**M3 — die Mindestbreite folgt dem Spaltensatz.** `Columns` erbte die feste
+1630 des vollen Satzes; zwei Spalten standen außerhalb der Karte, darunter
+`fiscalYear` — die, für die der Partner-Satz überhaupt existiert. Gemessen
+sind jetzt alle sechs sichtbar.
+
+**M4 — das (i) kommt aus dem Spaltensatz.** Die Story hängte drei
+`StatusInfoButton` von Hand in die Kopfzeile; jetzt rendert sie `headerAside`,
+also dieselbe Stelle und derselbe Abstand wie in `DataTable`.
+
+**M6 — die Nummer nutzt `caseIdentifier()`.** Ein Sachverhalt ohne Nummer zeigt
+die ersten acht Zeichen seiner Id statt „—". Der Strich sagte „hat keine" —
+er hat eine Identität, nur keine Nummer, und `case-title.ts` hält die Regel
+dafür seit jeher bereit.
+
+**M7 — der Story-Text stimmt.** Er behauptete einen Rückfall auf „Art plus
+Gegenpart"; ohne Titel **und** ohne Gegenpart bleibt die Art allein, und die
+drei offenen Klärungen sind kein Widerspruch: der Fall ist dünn an Stammdaten,
+nicht an Arbeit.
+
+**M5 bleibt offen:** `documents` und `bankTransactions` haben keine Story, ihre
+Spurbreiten sind ungemessen. Das ist eine Story-Ergänzung, keine Reparatur.

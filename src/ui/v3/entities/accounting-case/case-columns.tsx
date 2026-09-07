@@ -7,7 +7,7 @@ import { Badge } from "../../primitives/Badge";
 import { Link } from "../../primitives/Link";
 import { MonoCell } from "../../primitives/Cells";
 import { Time } from "../../primitives/Time";
-import { caseTitle } from "./case-title";
+import { caseIdentifier, caseTitle } from "./case-title";
 
 /**
  * The ten points of a case as cells — **once**, for the short list and for
@@ -121,7 +121,10 @@ export function caseColumns({
     state: {
       key: "state",
       header: "Stand",
-      // Z4: a status column carries its (i), and it belongs in `headerAside`
+      // Z4: a status column carries its (i) — **once**, in `headerAside`. The
+      // badges below pass `info={false}`: the same button in every row costs
+      // a focus stop per row (190 rows at p90 → 570 of them) and eats the
+      // width the longest word needs (acceptance 0096, M2).
       // — a button inside the sort link would be invalid HTML. Until now the
       // stories hung it into their own head by hand and covered the gap
       // (finding M9 of the acceptance of 0070, family-wide).
@@ -131,7 +134,7 @@ export function caseColumns({
       width: "190px",
       cell: (c) =>
         c.lifecycleStatus ? (
-          <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} />
+          <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} info={false} />
         ) : (
           <span className="v2muted">—</span>
         ),
@@ -141,7 +144,10 @@ export function caseColumns({
       header: "Nummer",
       width: "110px",
       sortable: true,
-      cell: (c) => <MonoCell value={c.caseNumber} />,
+      // `caseIdentifier`, not the raw number: a case without one still has to
+      // be nameable, and the em dash would say „none" — it has an identity,
+      // it just has no number (acceptance 0096, M6).
+      cell: (c) => <MonoCell value={caseIdentifier(c)} />,
     },
     amount: {
       key: "amount",
@@ -161,7 +167,15 @@ export function caseColumns({
         // it — so this is not a duplication.
         if (!c.counterpartyName) return <span className="v2muted">—</span>;
         const to = counterpartyHref?.(c);
-        return to ? <Link href={to}>{c.counterpartyName}</Link> : c.counterpartyName;
+        // The 180-px track carries 24 characters; the range is p50 14 · p90 27
+        // · max 57. Without clipping the cell wrapped and the row grew by 39 %
+        // at p90 and 83 % at the maximum — V1 asks for one row height
+        // (acceptance 0096, M1). Rank 1 has had its own rule all along.
+        return (
+          <span className="v2trunc" title={c.counterpartyName}>
+            {to ? <Link href={to}>{c.counterpartyName}</Link> : c.counterpartyName}
+          </span>
+        );
       },
     },
     disposition: {
@@ -171,7 +185,7 @@ export function caseColumns({
       width: "150px",
       cell: (c) =>
         c.disposition ? (
-          <StatusBadge axis="disposition" status={c.disposition} />
+          <StatusBadge axis="disposition" status={c.disposition} info={false} />
         ) : (
           <span className="v2muted">—</span>
         ),
@@ -225,7 +239,7 @@ export function caseColumns({
       width: "150px",
       cell: (c) =>
         c.exportStatus ? (
-          <StatusBadge axis="export_case" status={c.exportStatus} />
+          <StatusBadge axis="export_case" status={c.exportStatus} info={false} />
         ) : (
           <span className="v2muted">—</span>
         ),

@@ -346,3 +346,217 @@ Bestands.
 
 Die Reparatur steht in derselben Zeile wie das Polster, auf der Spezifität des
 Resets: `.v2tbl td.v2tbl__group { padding: 7px 18px; font-weight: 700; }`.
+
+## Abnahme (2026-09-07)
+
+Fremde Abnahme, hat nicht gebaut; erste Abnahme dieser Aufgabe. Gemessen im
+laufenden Storybook (Dev-Server 6107, also die **Quelle**, nicht der Bau),
+Chromium headless über CDP, `deviceScaleFactor` 1, Fenster 1440 × 900, wo
+nicht anders genannt; der Barrierefreiheits-Baum über
+`Accessibility.getFullAXTree`. Jede Zahl steht am gerenderten Element
+(`getComputedStyle`, `getBoundingClientRect`, `Range`), keine aus der
+CSS-Datei gelesen; jede Aussage hat eine **Gegenprobe** — die geprüfte Regel
+wird zur Laufzeit entfernt oder überschrieben und neu gemessen.
+
+`pnpm build` ist **nicht** gelaufen: mehrere Prüfer arbeiten parallel im
+selben Baum, und ein Bau leert `storybook-static/` (0117).
+
+### Fester Block
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` / `pnpm build` grün | `pnpm typecheck` Exit 0; dazu `pnpm check:icons` Exit 0 und `pnpm check:contrast` Exit 0. `pnpm build` nicht geprüft (0117) | erfüllt, mit Einschränkung |
+| Datei nach der Familie, Story daneben, Titel in der richtigen Gruppe | `primitives/{Table,ExpandableRow,Cells}.tsx`, `patterns/{DataTable,Review,ComparisonTable}.tsx`, Stories daneben; Titel `v3/Primitives/Tabelle/…`, `v3/Patterns/Arbeitsfläche/DataTable`, `v3/Patterns/Prüfen/…` | erfüllt |
+| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` vollständig — Table 9/9, ExpandableRow 2/2, Cells 7/7, DataTable 1/1, Review 4/4, ComparisonTable 1/1. **Aber** 0106 hat neue **deutsche** JSDoc-Prosa geschrieben | ✗ **M3** |
+| Kein Hex, kein px, keine lokale Label-Map | kein Hex in den sechs Dateien; px nur in `cols`-Werten (`Review.tsx:122`, `ComparisonTable.tsx:78`) — das ist der `grid-template-columns`-Wert und das Muster des Sets, unverändert seit vor 0106 | erfüllt |
+| Alle Stories vorhanden | die Spec listet keine neuen Stories (Umbau des Bestands); `git log --diff-filter=D` seit `0bd5d80~1`: keine Story-Datei entfernt | erfüllt |
+| Prüfliste `design-guidelines.md` §9 | s. u. | erfüllt bis auf V3 im Spaltenkopf (**M1**) |
+| Im Browser angesehen, nicht nur gebaut | 322 Tabellen-Stories über `iframe.html` geladen und bei vier Breiten vermessen; Bildbelege im Scratchpad (`m1-actions.png`, `m2-split.png`) | erfüllt |
+
+### Variabler Block (die acht Kriterien der Spec)
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| typecheck / build grün | s. o. | erfüllt, mit Einschränkung |
+| Baum trägt `table`, `row`, `columnheader`, `cell` | `datatable--filled` 1 · 51 · 5 · 250; `table--filled` 1 · 7 · 4 · 18; `caserow--in-use` 1 · 6 · 10 · 50; `checklist--filled` 1 · 7 · 5 · 30 — dieselben Zahlen wie in „Gemessen". **Gegenprobe:** `role="presentation"` an `.v2tbl` → 0 · 0 · 0 · 0, Attribut wieder weg → 1 · 7 · 4 · 18. Die Messung reagiert | erfüllt |
+| `aria-sort` am `th` | `datatable--filled`: „Eröffnet" `descending`, „Betrag" `none`, „Bearbeitungsstand" `none`, „Nummer"/„Sachverhalt" (nicht sortierbar) ohne Attribut — alle fünf am `<th>` | erfüllt |
+| Keine Zeile mit `role="button"`; fünf Formen mit Bedienelement in der ersten Zelle | `grep 'role="button"'` in `src/ui/v3`: 0 Treffer (nur ein Kommentar). Hittest mit `elementFromPoint` bei 15 / 50 / 85 % der Zeilenbreite: `expandablerow--expandable`, `--clickable`, `comparisontable--filled`, `checklist--filled` treffen an allen drei Punkten `button.v2rowbtn`, `caselist--filled` `a.v2rowlink`. Fokusring `2px solid rgb(59,143,196)`, ein Fokus-Halt je Zeile bei `ClickRow` | erfüllt |
+| Kein Aufrufer musste seine Zellen ändern | trägt in der wörtlichen Fassung nicht — die Spec räumt es unter **M8** selbst ein; `6ecae07` und `b08bfc4` haben `AccountEntries`, `case-columns`, `BankTransactionRow`, `OpenItemRow`, `DocumentNumberRegister` und zwei Story-Hilfen nachgezogen. Kein neuer Mangel, aber die Kriterienzeile oben ist nicht nachgeführt | gerissen, bereits dokumentiert |
+| Alle Tabellen-Stories unverändert im Bild, vier Breiten (1440 · 1100 · 900 · 700) | **Das Raster ist tadellos:** 322 Stories, 169 Tabellen bei 1440, je vier Breiten — **0** Abweichungen zwischen `grid-template-columns` von Kopf und Zeile, **0** Abweichungen der rechten Kante der letzten Zelle, **0** Verschachtelungsverstöße (`tbody > *:not(tr)`, `tr > *:not(td):not(th)`). **Aber der Inhalt darin nicht:** der Kopf der Aktionsspalte steht 125,8 px neben seiner Spalte | ✗ **M1** (dazu Befund **B1**) |
+| Konsole ohne Meldung | 40 Tabellen-Stories (alle fünf Zustände von `Table`, `Zellen`, `DataTable`, `Checklist`, `ComparisonTable`, `ExpandableRow`, `Selection` und die Entitätenlisten aus M2–M7): **0** Warnungen, Fehler oder Ausnahmen. **Gegenprobe:** `console.warn`/`console.error` in derselben Story werden vom Leser erfasst. Dazu die Verschachtelung selbst über alle 322 Stories gemessen (s. o.), also nicht nur die Meldung darüber | erfüllt |
+| 0091 erledigt | `<th>`/`<td>` in Stories laufen durch `cells()` unverändert durch; über 322 Stories kein `th`/`td` außerhalb einer `<tr>`. Anmerkung: vier Stories (`button--sizes-in-row`, `datefield--in-use`, `filterbar--in-use`, `overflowmenu--in-row`) schreiben `<th>` **ohne** `scope="col"` — gemessen bleibt die Rolle trotzdem `columnheader` (`overflowmenu--in-row`: 1 · 3 · 4 · 8) | erfüllt |
+
+### Der Nachtrag zum Gewicht — greift, und die Falle schnappt zweimal weiter
+
+**Die Reparatur greift, über den ganzen Bestand.** Vierzehn Zwischenzeilen in
+vier Stories (`table--filled` 2, `openitemrow--grouped` 4,
+`openitemrow--in-use` 3, `accountcolumns--grouped` 5) — **eine einzige
+Ausprägung**: `font-weight: 700`, `font-size: 12.5px`,
+`padding: 7px 18px`, Breite gleich der Tabellenbreite (1406 / 1398 / 1298 px),
+`x = 17` wie jede andere Zeile. `accountcolumns--in-use` hat keine
+Zwischenzeile. **Gegenprobe:** Regel `.v2tbl td.v2tbl__group` zur Laufzeit
+gelöscht → `font-weight: 400`, `padding: 0` an allen vierzehn. Die Messung
+reagiert, und sie misst genau die Reparatur.
+
+**Die Falle ist damit aber nicht geschlossen.** Wer an einem `td`/`th` hängt,
+wurde vollständig aufgezählt — ein mehrzeiliger Regex über **alle** `.tsx` des
+Repos ergibt genau dreizehn Ausdrücke:
+
+| Klasse am `td`/`th` | Lage | Ergebnis |
+|---|---|---|
+| `v2tbl__empty`, `v2tbl__group`, `v2tbl__detail`, `v2tbl__error`, `v2num` | Zwilling auf Reset-Spezifität vorhanden | gemessen in Ordnung |
+| `v2tbl__lead`, `v2tbl__chev` | gar keine CSS-Regel | unkritisch |
+| `lw-mono`, `lw-numeric` | rühren keine der fünf Reset-Eigenschaften an | unkritisch |
+| `cellClass` (`Table.tsx:177`) | wird nie gesetzt | unkritisch |
+| `cls` (`DataTable.tsx:355`) | ist `v2num` oder nichts | s. o. |
+| **`v2actions`** | kein Zwilling | ✗ **M1** |
+| **`v2btxrow__split`** | kein Zwilling | ✗ **M2** |
+
+Zusätzlich über alle 322 Tabellen-Stories laufend gemessen: für jede gerenderte
+Zelle jede passende Regel gegen den berechneten Wert gehalten — dieselben zwei
+Treffer, keine weiteren.
+
+### Mängel
+
+**M1 — der Kopf der Aktionsspalte steht 125,8 px neben seiner Spalte.**
+Ort: `src/ui/v3/patterns/DataTable.tsx:245`
+(`<th scope="col" className="v2actions">Aktionen</th>`) gegen
+`src/styles/v3.css:52` (Reset, 0-1-1) und `src/styles/v3.css:254`
+(`.v2actions { display: flex; … justify-content: flex-end }`, 0-1-0).
+Gemessen in `datatable--row-actions` bei 1440 px: die Aktionsspur ist
+1225 → 1405 px breit (180 px, Kopf und Zeile identisch). Das `th` steht auf
+`display: block` statt `flex`; das Wort „Aktionen" läuft von **1225 bis
+1279,2**, die Knöpfe der Zeile von 1228,6 bis **1405** — **125,8 px**
+auseinander (Bild: `m1-actions.png`, „Aktionen" links, „Zurückstellen" rechts).
+Gegenprobe: `.v2tbl th.v2actions { display: flex; justify-content: flex-end }`
+zur Laufzeit → das Wort springt auf 1350,8 → 1405, bündig mit der Zeile.
+**Regression aus 0106:** vorher war es ein `<span class="v2actions">` als
+Rasterkind (`0bd5d80^:DataTable.tsx:229`) und stand rechts.
+Kleinster Weg: die Regel ein zweites Mal auf der Spezifität des Resets, wie
+Polster und Gewicht — `.v2tbl th.v2actions { display: flex; gap: 14px;
+justify-content: flex-end; align-items: center; }`.
+
+**M2 — die Unterzeilen der Mehrfachzuordnung haben kein Polster.**
+Ort: `src/ui/v3/entities/bank-transaction/BankTransactionRow.tsx:79`
+(`<td className="v2btxrow__split" colSpan={999}>`) gegen
+`src/styles/v3.css:52` und `src/styles/v3.css:3338`
+(`padding: var(--space-2) var(--space-4) var(--space-3)`, 0-1-0).
+Gemessen in `banktransactionrow--expanded` bei 1440 px: `padding`
+**0 0 0 0** statt 8 / 16 / 12 / 16; der erste Inhalt beginnt bei **x = 17**,
+während die erste Zelle der Datenzeile darüber bei **x = 35** anfängt; der
+Block ist **77,4 px** hoch statt 97,4 (Bild: `m2-split.png` — die drei
+Unterzeilen kleben an der Kartenkante).
+Gegenprobe: dieselbe Regel als `.v2tbl td.v2btxrow__split` → 8 / 16 / 12 / 16,
+Inhalt bei x = 33, Höhe 97,4.
+**Entstanden in `6ecae07`**, beim Beheben von M3–M7 der Abnahme vom
+2026-09-06: dort wurde aus dem `<div class="v2btxrow__split">` ein `<td>`, und
+damit fiel die Regel unter den Reset.
+Kleinster Weg: derselbe wie bei M1 — die Regel auf Reset-Spezifität.
+
+**M3 — 0106 hat neue deutsche JSDoc-Prosa geschrieben.**
+Die Hausregel verlangt englische Kommentare und JSDoc, und eine Datei, die
+ohnehin angefasst wird, wird nachgezogen. `Table.tsx` (153 geänderte Zeilen)
+und `ExpandableRow.tsx` (83) sind angefasst worden und tragen weiter Deutsch —
+und zwar **neu geschriebenes**: `git show 0bd5d80` fügt unter anderem
+„`+ * Der Knopf sitzt in der **ersten Zelle** und deckt die Zeile über
+.v2rowbtn::after ab`" (`ExpandableRow.tsx:19–23`) und „`+ * Datenzeile. Mit
+href wird die erste Zelle der Link`" (`Table.tsx:229–236`) hinzu. Betroffen:
+`Table.tsx` Z. 5–13, 19, 48, 93, 98, 120, 136, 143, 198, 229–236;
+`ExpandableRow.tsx` Z. 11–13, 17, 19–23, 56–57, 60, 76, 82.
+Kleinster Weg: die Blöcke übersetzen; die Fachwörter stehen in
+`docs/ludwig/GLOSSARY.md`.
+
+### Befund (kein Mangel dieser Aufgabe)
+
+**B1 — bei 700 px läuft ein Teil des Bestands über, und die Karte schneidet
+ab.** Aus dem Breiten-Sweep: 27 Überläufe in 9 Stories, alle bei 900 oder
+700 px, dazu `overflowmenu--in-row` mit 9 px bei jeder Breite. Größte:
+`sourcedocument--filled/--kinds/--states/--edges/--in-use` 200 px bei 900 und
+400 px bei 700; `checklist--filled` 178 px bei 700;
+`datatable--row-actions` 162 px bei 700; `banktransactionrow--columns`
+142 px. `.v2card` steht auf `overflow: hidden`, es wird also abgeschnitten,
+nicht gescrollt — betroffen sind genau die Aufrufer **ohne** `minWidth`; wo
+`minWidth` gesetzt ist, trägt `.v2tbl__scroll` (`comparisontable--filled`
+bei 700: scrollWidth 860, clientWidth 666, `overflow-x: auto`).
+**Das ist keine Frage der Tabellensemantik:** Kopf und Zeile laufen *gleich*
+über (`gridTemplateColumns` identisch, gemessen `gleich: true`), die Summe der
+festen Spuren ist schlicht größer als die Karte. Gehört zu 0057 (Spaltenmaße)
+bzw. an die Aufrufer, die kein `minWidth` setzen.
+
+Nebenher bestätigt: die Aktionsspur mit dem festen Maß aus `b8accdc` hat den
+0057-Befund erledigt — bei 700 px stehen Kopf und Zeile jetzt beide auf
+180 px; mit der Gegenprobe `--v2-tbl-actions: max-content` driften sie wieder
+auf 719,2 gegen 841,4 auseinander, also die 122 px von damals.
+
+### Prüfliste §9 (ohne die zwei Punkte, die der App gelten)
+
+Übersprungen: „Liegt unter `apps/web/src/ui/v2/…`" und „In §11 auf v2 gesetzt"
+— beides zeigt auf die App, nicht auf dieses Repo.
+
+| Punkt | Gemessen | Ergebnis |
+|---|---|---|
+| Ersetzt das v1-Gegenstück | betrifft die App; hier ist v3 die einzige Fassung | n. z. |
+| Kein Hex, kein px außerhalb der CSS, keine lokale Label-Map | s. Fester Block | erfüllt |
+| Text links, Zahlen rechts mit `tnum`, nichts zentriert (V3) | über 322 Stories **kein** `th`/`td` mit `text-align: center`; jede `.v2num` mit Inhalt steht rechts — in `datatable--filled` (101), `accountentries--filled` (20), `caserow--in-use` (6), `comparisontable--filled` (36) endet jede höchstens 1,5 px vor ihrer Spurkante. **Aber** der Kopf „Aktionen" ist die Ausnahme | ✗ **M1** |
+| Zeilenhöhe ≤ `.v2tbl__row` (V1) | Zwischenzeile 35,4 px gegen Datenzeile derselben Tabelle; die ±1–2 px des Umbaus stehen als M9 in der Spec und sind nicht gegen den alten Bau nachmessbar (Bauverbot) | erfüllt, mit M9 |
+| Farbe nur als Kritikalitätsstufe, Vorzeichen ohne Farbe | 0106 hat keine Farbe angefasst; `pnpm check:contrast` Exit 0 | erfüllt |
+| Jeder farbige Zustand hat Wort oder Icon; Status über Registry | 0106 hat keine Zustände angefasst; `pnpm check:icons` Exit 0 | erfüllt |
+| Fünf Zustände | `Table`: gefüllt · leer · lädt · Fehler; „leer nach Filter" trägt die Ebene darüber (`DataTable --empty-filtered`, `Zellen --empty-after-filter`) — Stand vor 0106 | erfüllt |
+| Kontrast, Fokusring, `prefers-reduced-motion` | Fokusring an `.v2rowbtn` und `.v2rowlink` gemessen: `2px solid rgb(59,143,196)`, Versatz −2 px bzw. 2 px | erfüllt |
+| Hauptweg per Tastatur; kein Icon ohne Wort | `ClickRow`-Zeilen haben genau **einen** Fokus-Halt; der Chevron von `ExpandableRow` ist icon-only, trägt aber `aria-label` und fällt unter die benannte Ausnahme zu T8 (auf-/zuklappen, umkehrbar, die ganze Zeile ist der zweite Weg) | erfüllt |
+| Jedes klickbare Element antwortet auf Hover; Listenzeile ist ganz klickbar (I11) | Hittest an drei Punkten je Zeile trifft überall das Bedienelement (s. o.); `:hover` an `.v2tbl__row:has(.v2rowlink)` und `:has(.v2rowbtn)` | erfüllt |
+| Karte: Rand **oder** Schatten, linksbündig | `.v2card` hat Rand, keinen Schatten; `.v2tbl__empty`/`__error` linksbündig | erfüllt |
+| `minWidth`/inneres Scrollen nur mit `min-width: 0` | der Reset setzt `min-width: 0` an jeder Zelle; `.v2tbl__scroll`/`.v2tbl__inner` gemessen (860/666, 1630/866, 1748/666 — `overflow-x: auto`, kein Nullwert) | erfüllt |
+| Texte nach T1–T5 | 0106 hat einen Nutzertext hinzugefügt: „Zeile aufklappen"/„Zeile zuklappen" (`ExpandableRow.tsx:105`) — Imperativ mit Objekt, Sie-Form, kein Ausrufezeichen | erfüllt |
+| Story mit allen Zuständen | s. Fester Block | erfüllt |
+
+### Urteil
+
+**Zurück.** Der Nachtrag hat die Zwischenzeile richtig repariert und die
+Reparatur hält über den ganzen Bestand — aber die Frage, ob dieselbe Falle
+noch woanders zuschnappt, ist mit **ja** zu beantworten: **M1** (der Kopf der
+Aktionsspalte, 125,8 px daneben, seit 0106) und **M2** (die Unterzeilen der
+Mehrfachzuordnung ohne Polster, seit `6ecae07`). Beide sind sichtbar, beide
+brauchen dieselbe eine Zeile wie Polster und Gewicht. **M1 blockiert**, weil
+es zusätzlich das Kriterium „Alle Tabellen-Stories stehen unverändert im Bild"
+und V3 reißt; **M2** blockiert als zweiter Fall derselben Ursache. **M3** ist
+klein und kann mit den beiden zusammen fallen.
+
+Was trägt: die Semantik selbst ist gemessen und in Ordnung — `table`, `row`,
+`columnheader`, `cell` im Baum, `aria-sort` am `th`, keine Zeile mehr eine
+Schaltfläche, 169 Tabellen bei vier Breiten ohne eine einzige Abweichung
+zwischen Kopf- und Zeilenraster, keine Verschachtelungsmeldung, 0091 erledigt.
+
+| | |
+|---|---|
+| Abgenommen von / am | Claude (fremde Abnahme, hat nicht gebaut), 2026-09-07 — **zurück** |
+| Offene Punkte | M1, M2 (blockierend), M3 (klein); Befund B1 gehört zu 0057 bzw. an die Aufrufer ohne `minWidth` |
+
+## Nach der Abnahme (2026-09-07)
+
+Die Abnahme hat **alle dreizehn** Ausdrücke aufgezählt, die je an einem
+`td`/`th` landen können, und einzeln gemessen. Zwei sind der Falle noch zum
+Opfer gefallen, beide sind behoben — mit derselben einen Zeile auf der
+Spezifität des Resets, die schon Polster und Gewicht gerettet hat:
+
+**M1 — der Kopf der Aktionsspalte stand 125,8 px neben seiner Spalte.**
+`.v2actions` setzt `display: flex; justify-content: flex-end`, der Reset
+`display: block` — und 0-1-1 schlägt 0-1-0. „Aktionen" endete bei 1279,2, die
+Knöpfe der Zeile bei 1405. Jetzt `.v2tbl th.v2actions`; gemessen `display:
+flex`, Spur 1225–1405, Kopf und Zeile auf derselben Kante.
+
+**M2 — die Aufteilungszeile hatte gar kein Polster.** `.v2btxrow__split` gegen
+`padding: 0` des Resets: Inhalt bei x=17 statt 35, Block 77,4 statt 97,4 px.
+Jetzt `.v2tbl td.v2btxrow__split`; gemessen `padding: 8px 16px 12px`, Höhe
+97,4, erster Inhalt x=33.
+
+**M3 — die JSDoc, die dieser Umbau neu geschrieben hat, sind Englisch.**
+`ExpandableRow.tsx` ganz, in `Table.tsx` der Block, den 0106 verfasst hat. Der
+Rest der Datei bleibt: CLAUDE.md verbietet die Masse-Umbenennung, und der
+Wächter `pnpm check:language` prüft seit heute genau die Zeilen, die eine
+Änderung anfasst — nicht jeden Altbestand, den sie mitträgt.
+
+**B1 gehört zu 0057** und ist dort zu entscheiden: neun Stories laufen bei
+900/700 px über, weil ihre festen Spuren breiter sind als die Karte und der
+Aufrufer kein `minWidth` setzt. Kopf und Zeile laufen dabei **gleich** über —
+die Tabellensemantik ist daran unschuldig.

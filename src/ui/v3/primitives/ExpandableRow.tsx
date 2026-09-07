@@ -6,21 +6,20 @@ import { ActionIcon } from "../Icons";
 import { rowCells } from "./Table";
 
 /**
- * Die Client-Zwillinge von `Row` (F123 T123.1).
+ * The client twins of `Row` (F123 T123.1).
  *
- * `Row` und `Table` aus `./Table` sind Server-Components ohne `onClick` —
- * bewusst. Wo eine Zeile wirklich interaktiv ist (Ausklappen, Master-Detail-
- * Klick), steht sie hier; die Mehrfachauswahl steht in `./Selection`.
+ * `Row` and `Table` from `./Table` are server components without `onClick` —
+ * deliberately. Where a row really is interactive (expanding, master-detail
+ * click), it lives here; multiple selection lives in `./Selection`.
  */
 
 /**
- * Zeile mit `onClick` statt `href`. Ansonsten identisch zu `Row`.
+ * A row with `onClick` instead of `href`. Otherwise identical to `Row`.
  *
- * Der Knopf sitzt in der **ersten Zelle** und deckt die Zeile über
- * `.v2rowbtn::after` ab. Vorher trug die Zeile selbst `role="button"` — das
- * ging nur, solange sie ein `<div>` war; ein `<tr>` kann keine Schaltfläche
- * sein, und eine Zeile, die eine Schaltfläche ist, ist für eine Vorlesehilfe
- * keine Zeile mehr (0106).
+ * The button sits in the **first cell** and covers the row through
+ * `.v2rowbtn::after`. The row itself used to carry `role="button"` — that only
+ * worked while it was a `<div>`; a `<tr>` cannot be a button, and a row that
+ * is a button is no longer a row to a screen reader (0106).
  *
  * @when    The click does something client-side, such as selecting in MasterDetail.
  * @instead The target is a URL → Row with `href`.
@@ -53,8 +52,8 @@ export function ClickRow({
 }
 
 /**
- * Zeile, die sich in die Tabelle hinein aufklappt — kein Modal, kein Drawer
- * für kleine Zusatzinfos (Baukasten §7).
+ * A row that folds open **into** the table — no modal, no drawer for a small
+ * piece of extra information (Baukasten §7).
  *
  * @when    A small extra detail for a row that is read and collapsed again —
  *          on its own (`defaultOpen`) or steered from the list

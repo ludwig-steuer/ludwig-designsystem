@@ -226,14 +226,14 @@ export function HeadRow({ children }: { children: ReactNode }) {
 }
 
 /**
- * Datenzeile. Mit `href` wird die **erste Zelle** der Link, der über
- * `.v2rowlink::after` die ganze Zeile abdeckt.
+ * Data row. With `href` the **first cell** becomes the link, and it covers the
+ * whole row through `.v2rowlink::after`.
  *
- * Vorher war die Zeile selbst ein `<a>`. Ein `<tr>` kann das nicht sein, und
- * es war ohnehin die falsche Form: eine Zeile mit einem zweiten Link darin
- * ergab Anker im Anker. So bleibt ein Fokus-Halt, der Link behält seinen
- * eigenen Text — also braucht er kein `aria-label` —, und was sonst klickbar
- * ist, liegt darüber (I11).
+ * The row itself used to be an `<a>`. A `<tr>` cannot be one, and it was the
+ * wrong shape anyway: a row with a second link inside it gave anchors within
+ * anchors. This way one focus stop remains, the link keeps its own text — so
+ * it needs no `aria-label` — and whatever else is clickable lies above it
+ * (I11).
  *
  * @when    Data row; with `href` the whole row leads to one target.
  * @instead Click without a URL → ClickRow.

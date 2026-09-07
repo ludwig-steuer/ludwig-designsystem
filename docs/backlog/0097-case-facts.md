@@ -146,7 +146,7 @@ Fest (gilt immer):
 Variabel (aus dieser Spec):
 
 - [ ] **Kein „—" an den drei bedeutenden Nullwerten**: Personenkonto ohne Wert sagt „bewusst keins", Gegenpartei-Seite „bewusst keine", und „Kein Beleg zu erwarten" erscheint nur, wenn der Grund gesetzt ist (Story `Sparse`)
-- [ ] `all` ergänzt die Ränge 17–25 und ändert an 11–16 nichts (Story `All` gegen `Filled`)
+- [ ] `all` ergänzt die Ränge 17–24 und ändert an 11–16 nichts (Story `All` gegen `Filled`)
 - [ ] Die Zusammenfassung kürzt bei 160 Zeichen mit Aufklapper, nicht mit `title` (Story `LongSummary`)
 - [ ] `tone="bare"` reicht an `FieldList` durch und setzt keine eigene Fläche (Story `InDrawer`)
 - [ ] Der Belegnummern-Modus kommt aus `StatusBadge axis="belegnummern_modus"`
@@ -169,7 +169,7 @@ Aufklapper, die tatsächliche Zeichenzahl —, nicht das, was der Code setzt.
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -n "#[0-9a-f]\{3,6\}\|[0-9]px"` über `CaseFacts.tsx` und die Story → kein Treffer. `SIDE_LABEL` (Z. 84–87) ist eine Label-Map, aber **keine Status-Map**: die Gegenpartei-Seite ist keine Registry-Achse (Profil, Rang 17, Rolle „Kontext"), und `counterpartySide` kommt im Spiegel gar nicht vor. Präzedenz im Set: `AUDIENCE_LABEL`/`EVENT_LABEL` in `ClarificationCard.tsx`. Der Belegnummern-Modus kommt aus der Registry | ✓ |
 | Die Reihenfolge der Ränge stimmt mit der Profil-Tabelle | `--filled`, gerenderte Zeilen in Dokumentreihenfolge: Zusammenfassung (11) · Geschäftspartner (12) · Personenkonto (13) · Belegnummern (14) · Abgeschlossen (16); Rang 15 fehlt zu Recht, weil `documentNotRequiredReason` nicht gesetzt ist. `--all`: dieselben fünf, dann Gegenpartei-Seite (17) · Anker (18) · Angelegt von (19) · Wirtschaftsjahr (20) · Abrechnungsrhythmus (21) · Verrechnungskonto (22) · Buchungslauf (23) · Buchungszyklus (24). Punkt für Punkt gegen die Datenpunkt-Tabelle des Profils geprüft: **kein Rang fehlt, keiner steht falsch** | ✓ |
 | `all` ergänzt 17–24 und ändert an 11–16 nichts | `--all` gegen `--filled`: dieselben fünf Labels in derselben Reihenfolge an denselben Positionen (x = 21 / 203 / 318 / 463, y = 21 / 98). Der einzige Unterschied im Wert steht bei „Abgeschlossen" (02.09.2026 statt „laufend") und kommt aus den Story-Daten (`closedAt` gesetzt), nicht aus `all`; im Code hängt am `if (all)` nur ein Anhängen, kein Umbau | ✓ |
-| Rang 25 (Abnahme-Bucket) ist **nicht** in `all`, und die Begründung trägt | `--all`: dreizehn Zeilen, keine mit einem Abnahme-Bucket. `CaseFacts.tsx` Z. 181–183 begründet es mit dem Profil selbst („gehört zur Abnahmeliste … hier wäre er eine Zahl ohne ihren Zusammenhang"), und das Profil sagt an Rang 25 genau das: „Gehört zur Abnahmeliste, nicht in die Zeile". Die Freigabe (e) verlangt es so. **Nur die Schnittstellen-Tabelle oben sagt noch „Ränge 17–25 … Abnahme-Bucket"** — nachzuziehen (Pflege, kein Mangel am Code) | ✓ |
+| Rang 25 (Abnahme-Bucket) ist **nicht** in `all`, und die Begründung trägt | `--all`: dreizehn Zeilen, keine mit einem Abnahme-Bucket. `CaseFacts.tsx` Z. 181–183 begründet es mit dem Profil selbst („gehört zur Abnahmeliste … hier wäre er eine Zahl ohne ihren Zusammenhang"), und das Profil sagt an Rang 25 genau das: „Gehört zur Abnahmeliste, nicht in die Zeile". Die Freigabe (e) verlangt es so. **Nur die Schnittstellen-Tabelle oben sagt noch „Ränge 17–24 … Abnahme-Bucket"** — nachzuziehen (Pflege, kein Mangel am Code) | ✓ |
 | Kein „—" an den drei bedeutenden Nullwerten | `--sparse`, drei Zeilen: „Personenkonto · hat bewusst keins" (Wort statt Wert) · „Kein Beleg zu erwarten" mit dem Grund als Wert · „Abgeschlossen · laufend". Kein Gedankenstrich als Platzhalter in irgendeiner Story (Prüfung auf `‐–―`, `−` über alle sechs; der einzige Treffer ist ein Gedankenstrich **im** Grundtext der Story). Der **dritte** bedeutende Nullwert fehlt aber: „Gegenpartei-Seite · bewusst keine" wird in keiner Story gerendert — `Sparse` läuft ohne `all` (Entscheid (c)), und `All` setzt `counterpartySide: "creditor"`. `CaseFacts.tsx` Z. 162 hat den Zweig, gemessen ist er nie (M1) | ✗ |
 | Eine Zeile, deren Leersein nichts bedeutet, fehlt still | `--sparse`: exakt drei `.v2fields__row`, keine davon mit leerem Wert. Zusammenfassung, Geschäftspartner und Belegnummern erscheinen gar nicht — sie stehen nicht leer da | ✓ |
 | Die Zusammenfassung kürzt bei 160 mit Aufklapper, nicht mit `title` | `--long-summary`: `<details class="more">` geschlossen, Anriss 159 Zeichen mit „…", Marke „ mehr ▾"; `summary` und `details` tragen **kein** `title`. Nach `click()`: `open=true`, Höhe 41 → 142 px, sichtbarer Text 159 → 548 Zeichen, Anriss ausgeblendet, Marke „weniger ▴" — der volle Text steht **darunter**. `<summary>` ist mit `tabIndex 0` erreichbar, Fokusring `2px solid rgb(59,143,196)`. **Der Rand-Fall trifft aber nicht:** die Zusammenfassung der Story ist 548 Zeichen lang, nicht 720 (M2) | ✗ |
@@ -244,7 +244,7 @@ M3; dazu die App-Zeile (Ablösung der drei heutigen Fassungen) — offen (App).
 ## Offene Fragen
 
 1. Welcher Satz gilt, wo die drei heutigen sich widersprechen? *Ohne
-   Antwort: der des Profils — Ränge 11–16 im Kern, 17–25 mit `all`. Die drei
+   Antwort: der des Profils — Ränge 11–16 im Kern, 17–24 mit `all`. Die drei
    bestehenden Sätze sind gewachsen, nicht entschieden.*
 2. Gehört der Betrag (Rang 4) in die Fakten? *Ohne Antwort: nein — er steht
    im `EntityHeader` als Kennzahl, und zweimal wäre er die Dopplung, die
@@ -327,7 +327,7 @@ von selbst. Der Satz im Verhalten sagt das jetzt.
 **Mitgenommen aus den Befunden:** `documentNumberMode` ist
 `CaseDocumentNumberMode` statt `string` — dieselbe Lücke, die 0095 bei
 `currency` geschlossen hat. Und die Schnittstellen-Tabelle sagte noch
-„Ränge 17–25 … Abnahme-Bucket", obwohl die Freigabe ihn herausgenommen hat.
+„Ränge 17–24 … Abnahme-Bucket", obwohl die Freigabe ihn herausgenommen hat.
 
 ## Abnahmekriterien (Nachtrag)
 
@@ -363,3 +363,144 @@ Drei Folgen, die beim Tausch auffielen:
 
 `pnpm typecheck`, `pnpm build`, `pnpm check:icons` und `pnpm check:contrast`
 sind grün (Exit-Code geprüft, nicht die letzte Zeile der Ausgabe).
+
+## Abnahme (2026-09-07)
+
+Zweite Runde, fremde Abnahme: gemessen im Browser (Storybook 6107, headless
+Chromium, Seitenbreite 1440, Karte 720 bzw. 560 breit), nicht aus dem Code
+geschlossen. Jede Zahl steht mit Story-Id und Gegenprobe. `pnpm build` ist in
+diesem Auftrag untersagt (0117) und nicht gelaufen.
+
+### Fest
+
+| Kriterium | Nachweis (Story-Id · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | `tsc --noEmit`, Exit 0. `pnpm check:icons`, `check:contrast`, `check:when`, `check:language` ebenfalls Exit 0 (Ergebnis am Exit-Code, nicht an der letzten Zeile) | ✓ |
+| `pnpm build` grün | untersagt, nicht gelaufen | offen |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/accounting-case/CaseFacts.tsx` · `CaseFacts.stories.tsx` daneben · Barrel `src/ui/v3/index.ts` Z. 381 · `index.json`: sechs Ids `v3-entitäten-sachverhalt-casefacts--…` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `check:when` liest den **ganzen** Baum `src/ui/v3` (nicht nur Geändertes) und ist Exit 0; `CaseFacts` Z. 60–64. Typ-Exporte sind im Wächter bewusst ausgenommen. Hinweis H1 unten zu elf deutschen Kommentarzeilen | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -E "#[0-9a-fA-F]{3,8}\b\|[0-9]+px"` über Komponente und Story → kein Treffer (Exit 1). `SIDE_LABEL` (Z. 55–58) ist eine Label-Map ohne Registry-Achse: `counterpartySide` kommt in `src/ludwig/ui/status/status-registry.ts` nicht vor (`grep`), Präzedenz `AUDIENCE_LABEL`/`EVENT_LABEL`/`ACCOUNT_GROUP_LABEL`. Der Belegnummern-Modus kommt aus der Registry (siehe unten) | ✓ |
+| Alle Stories vorhanden; jede Prop mit ihrer Story; ausgeschlossene Zustände begründet | sechs Ids: `--filled`, `--sparse`, `--all`, `--in-drawer`, `--long-summary`, `--in-use`. §6-Ableitung: 2 Zustände + 1 Enum (`tone`) + 1 Layout-Boolean (`all`) + 0 Callbacks + 1 „im Einsatz" + 1 Rand = **6**, gezählt = 6. `case`→`Filled`, `all`→`All`, `tone`→`InDrawer`, `partnerHref`→`Filled`/`InUse`, `accountHref`→`Filled`/`All`. `leer nach Filter`, `lädt`, `Fehler` sind unter „Verhalten"/„Stories" begründet | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | kein Hex/px ✓ · nichts zentriert, Label linksbündig (`text-align: start`, x = 37 in allen sechs Stories), Werte rechts (`text-align: right`, rechte Kante 715 bei 720 Karte) ✓ · `tnum` an **jedem** Wert (`font-variant-numeric: lining-nums tabular-nums`) ✓ · Zeilenhöhe 31 px gegen `.v2tbl__row` 46 px (nur die zweizeilige Zusammenfassung 52) ✓ · Status nur über Registry ✓ · Karte Rand **ohne** Schatten (`box-shadow: none`, `1px rgb(221,226,232)`) ✓ · Kontrast Label `rgb(92,92,92)` auf Weiß = **6,69:1**, Wert `rgb(45,45,45)` = 13,77:1, Link `rgb(43,111,156)` = 5,45:1 ✓ · Fokus per **echtem Tab** (nicht `focus()`): beide Links `:focus-visible`, `2px solid rgb(59,143,196)`, Offset 2 px ✓ · keine Emoji, keine Versalien (`text-transform: none`) ✓ · bei 420 px Seitenbreite kein Überlauf (`scrollWidth − clientWidth = 0`, `documentElement.scrollWidth = 420`) ✓ · **Hover: der Kontolink antwortet nicht (M1)** | ✗ |
+| Im Browser angesehen | sechs Stories geladen, Screenshots `--sparse` und `--in-use` angesehen; Konsole je Story nur Vite-/React-DevTools-Rauschen, keine Meldung der Komponente, keine Verschachtelungs-Warnung | ✓ |
+
+### Variabel
+
+| Kriterium | Nachweis (Story-Id · Messwert) | Ergebnis |
+|---|---|---|
+| Kein „—" an den drei bedeutenden Nullwerten | `--sparse`, **vier** Zeilen, alle drei als Wort: „Personenkonto · hat bewusst keins" · „Kein Beleg zu erwarten · Interne Umbuchung zwischen zwei Sachkonten …" · „Gegenpartei-Seite · bewusst keine". Über alle sechs Stories: **null** leere Werte, und der einzige Treffer auf `‐–—―−` steht **im** Grundtext des Grundes, nicht als Platzhalter | ✓ |
+| `all` ergänzt 17–24 und ändert an 11–16 nichts | `--all` = 13 Zeilen, `--filled` = 5. Die ersten fünf tragen dieselben Labels an denselben Stellen (Label x = 37, Wert rechte Kante 715); der einzige Unterschied ist der **Wert** bei „Abgeschlossen" (02.09.2026 statt „laufend") und kommt aus den Story-Daten. Reihenfolge Punkt für Punkt gegen die Datenpunkt-Tabelle des Profils: 11 · 12 · 13 · 14 · 16 · 17 · 18 · 19 · 20 · 21 · 22 · 23 · 24 — Rang 15 fehlt zu Recht (`documentNotRequiredReason` nicht gesetzt), Rang 25 kommt nicht vor | ✓ |
+| Die Zusammenfassung kürzt bei 160 mit Aufklapper, nicht mit `title` | `--long-summary`: `<details class="more">` geschlossen, Anriss **159** Zeichen mit „…", Marke „ mehr ▾"; **kein** `title` an `summary`, `details` oder irgendeinem Element der Zeile (`[title]` in der Zeile = 0 Treffer). Nach `click()`: `open=true`, Höhe 63 → **230** px, sichtbarer Text 159 → **721** Zeichen, Anriss auf `display:none`, Marke „weniger ▴" — der volle Text steht **darunter**. `<summary>` mit `tabIndex 0` | ✓ |
+| `tone="bare"` reicht durch und setzt keine eigene Fläche | `--in-drawer`: Klasse `v2fields v2fields--bare`, `background rgba(0,0,0,0)`, Rahmen `0px`, Padding `0px` — gegen `--filled` mit `rgb(255,255,255)`, `1px` und `20px`. Ohne `partnerHref` ist der Partner reiner Text (`innerHTML` = „Bürobedarf Meier GmbH", kein `<a>`) | ✓ |
+| Der Belegnummern-Modus kommt aus `StatusBadge axis="belegnummern_modus"` | `--filled`: Chip „Eine Belegnummer" mit `title` „Belegnummern-Modus: Eine Belegnummer · Genau EINE Nummer über den ganzen Vorgang …" — Label **und** Erklärung der Registry-Achse (`status-registry.ts` Z. 2150/2473), keine lokale Map | ✓ |
+| Die Komponente zählt keine Kinder und rechnet keinen Gegenpart | `grep -E "\.filter\(\|\.reduce\(\|\.sort\(\|Math\.\|\.length"` über `CaseFacts.tsx` → kein Treffer (Exit 1); der Gegenpart kommt aus `counterpartyName` | ✓ |
+| `case` ist ein Typ aus `src/ludwig/` | `CaseFactsVM extends Partial<CaseDetail>` aus `src/ludwig/modules/accounting-cases/domain/case-detail.ts`. Typ-Probe mit `tsc` gegen die Repo-`tsconfig`: ein vollständiges `CaseDetail` ist zuweisbar (kein Fehler), ein fehlendes `openedAt` schlägt fehl (`TS2741`) — die vier Pflichtfelder tragen, der Rest ist optional. Kein lokaler Datensatz mehr | ✓ |
+| offen (App): ersetzt die Faktenzeile aus `parts.tsx`, die Portal-Meta und den Streifen aus `CaseOverviewBox` | nicht in diesem Repo prüfbar | offen (App) |
+
+### Nachtrag (die vier offenen Kriterien)
+
+| Kriterium | Nachweis (Story-Id · Messwert) | Ergebnis |
+|---|---|---|
+| Alle **drei** bedeutenden Nullwerte stehen in einer Story als Wort | `--sparse`, vier Zeilen, alle drei gemessen (oben). M1 der Runde vom 2026-09-06 ist damit behoben | ✓ |
+| Die lange Zusammenfassung ist so lang, wie der Kommentar sagt | nachgezählt am gerenderten DOM, nicht am Quelltext: aufgeklappt **721** sichtbare Zeichen; der Kommentar `CaseFacts.stories.tsx` Z. 104 sagt 721. M2 behoben | ✓ |
+| Label links, Wert rechts — im Bild gemessen | `--filled`: Label x = **37** (alle fünf Zeilen), `text-align: start`; Wert `text-align: right`, rechte Kante **715** (alle fünf). **Gegenprobe:** den Wert der Zusammenfassung zur Laufzeit auf „kurz" gesetzt → x springt 175 → **687**, rechte Kante bleibt 715, Label bleibt 37; die Messung reagiert also. Klasse ist `v2fields` **ohne** `--cols`. M3 behoben | ✓ |
+| `documentNumberMode` trägt den Typ des Spiegels | Typ-Probe mit `tsc`: `documentNumberMode: "quatsch"` → `TS2322: Type '"quatsch"' is not assignable to type '"single" \| "per_period" \| "multiple" \| "none" \| undefined'`; `"per_period"` geht durch. Also `CaseDocumentNumberMode` über `CaseDetail`, kein `string`, kein lokaler Import | ✓ |
+
+### Der Typtausch (Nachtrag „Nach der Abnahme")
+
+| Behauptung | Nachweis (Story-Id · Messwert) | Ergebnis |
+|---|---|---|
+| Die Kontonummern heißen wie im Spiegel, `accountHref` nimmt die **Nummer** | Felder `personalAccountNumber` / `clearingAccountNumber` (`case-detail.ts` Z. 46/54); gerendert `href="#konto-70021"` (`--filled`) und `href="#konto-1370"` (`--all`) — die Nummer, keine Id | ✓ |
+| `counterpartySide` ist `string`, ein **unbekannter** Wert steht roh da | Typ-Probe: `counterpartySide: "vermischt"` geht durch, also `string`. Im Bild gemessen, ohne eine Datei zu ändern: die Story-Antwort auf dem Weg zum Browser abgefangen und `"creditor"` → `"vermischt"` ersetzt; `--all` zeigt dann **„Gegenpartei-Seite · vermischt"**, dieselbe Story unverändert „Kreditor". Der Wert verschwindet also nicht still. Hinweis H2: keine Story zeigt das im Bestand | ✓ |
+
+**Urteil: zurück in Arbeit.** Alle vier offenen Kriterien des Nachtrags sind
+eingelöst und mit Zahlen belegt, die Rangfolge stimmt Punkt für Punkt, `all`
+hängt nur an, der Typ kommt aus dem Spiegel und verengt sich an der
+Nutzungsstelle richtig. Es reißt an **einer** Stelle, und die steht in §9.
+
+### Mängel
+
+**M1 — der Kontolink ist im Bild kein Link.**
+`src/ui/v3/entities/accounting-case/CaseFacts.tsx` Z. 102–109 (und Z. 145–155
+für das Verrechnungskonto) rendert `<Link href={…}><MonoCell …/></Link>`.
+Gemessen an `--filled`, Zeile „Personenkonto":
+
+- Ruhezustand: das `<a>` hat `color: rgb(43,111,156)`, aber das `.v2mono`
+  darin setzt `color: rgb(45,45,45)` — **exakt die Farbe eines Werts ohne
+  Ziel** (Zeile „Abgeschlossen · laufend": ebenfalls `rgb(45,45,45)`), ohne
+  Unterstreichung. Zum Vergleich der Partner-Link in derselben Karte:
+  `rgb(43,111,156)`, sichtbar blau.
+- Hover: mit der Maus auf der Zeile ist `a:matches(':hover') === true`, das
+  `<a>` wechselt auf `rgb(26,58,92)` — das `.v2mono` bleibt bei
+  `rgb(45,45,45)`, `text-decoration-line: none`. **Sichtbar ändert sich
+  nichts.** Gegenprobe: Maus weg → `matches(':hover') === false`, Farbe
+  unverändert; Kontrolle am Partner-Link → `rgb(43,111,156)` → `rgb(26,58,92)`,
+  also misst die Messung.
+- Fokus trägt (echtes Tab: `2px solid rgb(59,143,196)`), die Tastatur kommt
+  hin — nur die Maus sieht kein Ziel.
+
+Das verletzt §9 („Jedes klickbare Element antwortet auf Hover") und §2
+(„Ohne Hover-Antwort ist ein Element nicht klickbar"), und es macht die Zusage
+der Schnittstelle — „Personen- und Verrechnungskonto **werden Links**",
+Nachweis `Filled` — im Bild unsichtbar. Das Set hat genau diesen Fall schon
+entschieden: `src/styles/v3.css` Z. 2690–2696 trägt die Regel samt Begründung
+aus **Abnahme 0066** („`.v2mono` setzt sonst `--color-text` und die Zelle sähe
+im Ruhezustand aus wie Text ohne Ziel"), und Z. 2863 löst dasselbe für die
+Beleg-Zelle.
+
+Kleinster Weg: statt `<Link><MonoCell/></Link>` den vorhandenen Baustein
+`AccountCell` (`entities/account/Account.tsx` Z. 47–80) nehmen — sein `@when`
+sagt wörtlich „Naming an account inside foreign markup … with `href` it leads
+to the account sheet", er trägt `.v2acc--link` und damit Linkfarbe **und**
+Unterstreichung im Hover. Entitätsübergreifende Importe sind im Set üblich
+(`CaseCell` in `bank-transaction`, `AccountField` in `journal-entry`). Wer die
+Kontonamen mitnehmen will: `personalAccountName` und `clearingAccountName`
+stehen im Spiegel bereits bereit.
+
+### Hinweise (kein Mangel)
+
+- **H1 — elf deutsche Kommentarzeilen** in `CaseFacts.tsx` (Z. 84, 99, 123,
+  132, 159–161, 164–167), geprüft mit der Logik aus
+  `scripts/check-language.mjs`. Alle stammen vom 2026-09-06 und damit **vor**
+  dem Wächter (`d4803ff`, 2026-09-07 10:20); der letzte Zugriff auf die Datei
+  (`21d9a4d`, 08:30) hat nur englische Kommentare hinzugefügt. Der Wächter
+  nennt den Bestand selbst „ein Bericht, kein Tor" — 40 von 114 Dateien unter
+  `src/ui/v3` betrifft es. Beim **nächsten** Anfassen der Datei fällt
+  `pnpm check:language` darüber.
+- **H2 — den unbekannten Gegenpartei-Wert zeigt keine Story.** Der Zweig ist
+  belegt (oben, über eine abgefangene Story-Antwort), aber im Bestand steht er
+  nirgends im Bild. Eine Story dafür wäre allerdings ein erfundener Wert und
+  damit gegen §6 („Daten in Stories sehen echt aus") — deshalb Hinweis und
+  nicht Mangel.
+- **H3 — Pflege:** das variable Kriterium sagt noch „`all` ergänzt die Ränge
+  17–**25**", während Freigabe (e) den Abnahme-Bucket herausgenommen hat und
+  die Schnittstellen-Tabelle inzwischen richtig „17–24" sagt. Gemessen wurde
+  gegen 17–24.
+- **H4 — „volle Breite" ist gemessen die Restbreite:** bei 720 px Karte ist die
+  Zusammenfassung 540 von 678 px breit (Label 122 + Abstand). Der Satz unter
+  „Verhalten" beschreibt das schon als Folge, nicht als Regel; das Wort „volle"
+  bleibt trotzdem eine Spur zu groß.
+
+Abgenommen von / am: Claude (fremde Abnahme, kein Bau), 2026-09-07 ·
+Ergebnis: **zurück** — offen: M1; dazu die App-Zeile (Ablösung der drei
+heutigen Fassungen) als offen (App).
+
+## Nach der Abnahme (2026-09-07)
+
+**M1 — der Kontolink war im Bild kein Link.** `<Link><MonoCell/></Link>`: die
+Mono-Klasse setzt ihre eigene Farbe und gewinnt gegen die des Ankers, also
+stand die Kontonummer in `rgb(45,45,45)` — genau wie ein Wert ohne Ziel — und
+antwortete auf Hover mit nichts. Beide Stellen nehmen jetzt `AccountCell`, die
+das Set in 0066 für genau diesen Fall gebaut hat (`.v2acc--link`). Gemessen in
+`Filled`: `href="#konto-70021"`, Farbe außen **und** innen `rgb(43,111,156)`,
+Klasse `v2acc v2acc--link`.
+
+**H3 — das variable Kriterium** sagte „Ränge 17–24"; die Freigabe hat 25 (den
+Abnahme-Bucket) herausgenommen. Es sagt jetzt 17–24.
+
+**H1, H2 und H4 bleiben vermerkt:** die elf deutschen Kommentarzeilen stammen
+vom 2026-09-06 und damit aus der Zeit vor dem Wächter — `pnpm check:language`
+prüft die Zeilen, die eine Änderung anfasst, und wird sie beim nächsten Mal
+fordern. Eine Story für den unbekannten Seiten-Wert wäre ein erfundener Wert
+und verstieße gegen §6. Und „volle Breite" ist gemessen die Restbreite hinter
+dem Label (540 von 678 px) — der Satz meint sie, die Zahl steht jetzt dabei.
