@@ -387,6 +387,17 @@ export {
 export { BankTransactionList } from "./entities/bank-transaction/BankTransactionList";
 export { BankTransactionWorklist } from "./entities/bank-transaction/BankTransactionWorklist";
 
+/* Konto — der Kontenplan als Spaltensatz (0062) */
+export {
+  accountColumns,
+  accountTracks,
+  accountMinWidth,
+  ACCOUNT_LIST_COLUMNS,
+  ACCOUNT_CATALOG_COLUMNS,
+  type AccountColumn,
+  type AccountColumnOptions,
+} from "./entities/account/account-columns";
+
 /* Offene Posten */
 export { OpenItemRow, OpenItemAgeGroup } from "./entities/open-item/OpenItemRow";
 export {

@@ -33,7 +33,7 @@ keine Tabelle mit Filter.
 
 | Rang | Frage der Rolle | Antwort steht in | Baustein |
 |---|---|---|---|
-| 1 | „Wie groß ist der Rahmen, und wie viel davon lebt?" | Kopfzahlen: Konten gesamt · bebucht · ungenutzt · letzte Buchung | `AccountsStats` → `KpiRow` |
+| 1 | „Wie groß ist der Rahmen, und wie viel davon lebt?" | Kopfzahlen: Konten gesamt · bebucht · ungenutzt · letzte Buchung | `AccountsStats` → `KpiGrid` + `KpiTile` |
 | 2 | „Wo ist das Konto, das ich suche?" | Volltext über Nummer und Name — **die häufigste Handlung** | `FilterBar` mit `search` |
 | 3 | „Welche Klasse hat wie viele?" | Klassen-Aufriss (SKR 0–9) mit Zählern, als Filter | `FilterBar`, Achse `konto_typ` |
 | 4 | „Was steht in der Zeile?" | Nummer, Name, Rolle, Buchungen, Kontostatus | `AccountRow` / `accountColumns()` |
@@ -84,9 +84,13 @@ Liste selbst. Rang 7 verlässt die Seite.
 
 ## Offene Fragen
 
-1. **Ist die Voreinstellung „bebucht" oder „alle"?** *Ohne Antwort: bebucht*
-   (Zweifel 4) — mit dem Vorratszähler daneben, damit die Einschränkung
-   sichtbar ist.
+1. **Ist die Voreinstellung „bebucht" oder „alle"?** **Beantwortet, und zwar
+   vom Bestand:** `AccountFilter.usedOnly` steht in der App bereits auf `true`.
+   Die Seite zeigt also bebuchte Konten, mit dem Vorratszähler daneben
+   („6.212 von 41.570"), damit die Einschränkung sichtbar ist. Was der Filter
+   dabei **tatsächlich** tut, ist etwas anderes als das, was er verspricht —
+   er filtert über `status='active'`, nicht über `usage_booking_count > 0`
+   (Befund L-90).
 2. **Bleibt die Gruppierung?** *Ohne Antwort: ja*, aber als Prop auf einer
    Liste, nicht als zweite Tabelle (Zweifel 1).
 3. **Führt die Zeile in den Drawer oder auf die Kontoseite?** *Ohne Antwort:
