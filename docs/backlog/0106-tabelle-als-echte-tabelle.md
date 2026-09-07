@@ -560,3 +560,51 @@ Wächter `pnpm check:language` prüft seit heute genau die Zeilen, die eine
 900/700 px über, weil ihre festen Spuren breiter sind als die Karte und der
 Aufrufer kein `minWidth` setzt. Kopf und Zeile laufen dabei **gleich** über —
 die Tabellensemantik ist daran unschuldig.
+
+## Der Reset steht in `:where()` (2026-09-07, Owner-Entscheid)
+
+Die Abnahme hatte zwei weitere Stellen gefunden, an denen der Reset eine
+Klassenregel schlug — und den richtigen Schluss gezogen: **nicht die
+vierzehnte Gegen-Regel schreiben, sondern den Reset entwaffnen.**
+
+`:where(.v2tbl th, .v2tbl td)` hat Spezifität **0-0-0**. Jede Regel, die an
+einer Klasse hängt, gewinnt wieder gegen ihn; der Reset gilt nur noch dort, wo
+nichts anderes steht. Damit fallen **sieben** Gegen-Regeln weg, die nur gegen
+ihn anschrieben:
+
+| Gegen-Regel | ersetzt durch |
+|---|---|
+| `.v2tbl th.v2num, .v2tbl td.v2num` | `.v2num` |
+| `.v2tbl td.v2tbl__empty` | `.v2tbl__empty` |
+| `.v2tbl td.v2tbl__group` | `.v2tbl__group` |
+| `.v2tbl th.v2actions` | `.v2actions` |
+| `.v2tbl td.v2btxrow__split` | `.v2btxrow__split` |
+| `.v2tbl td.v2tbl__detail` | `.v2tbl__detail` |
+| `.v2tbl td.v2tbl__error` | `.v2tbl__error` |
+
+**Gemessen vorher und nachher, alle sieben identisch:** Zwischenzeile 700 /
+7px 18px · Aktionskopf `flex` / `flex-end` · Aufteilungszeile 8px 18px 12px ·
+Leerzelle 30px 18px · Fehlerzelle `flex` / `column` / 8px / 24px 18px ·
+Zahlenspalte rechts.
+
+**Eine zweite Zeile musste mit:** `.v2tbl th { text-align: left }` stand
+ebenfalls auf 0-1-1 und schlug `.v2num` — die Zahlenspalten fielen nach links,
+sobald die Gegen-Regel weg war. Gemessen beim Umbau, nicht vermutet; sie steht
+jetzt ebenfalls in `:where()`.
+
+**Ein Wert hat sich geändert, und zwar absichtlich:** die Fehlerzelle hatte in
+der Gegen-Regel `var(--space-2)` (8 px), in ihrer Klassenregel `gap: 10px`.
+Der Owner hat entschieden: das Pixel-Literal steht gegen die Hausregel, der
+Token gewinnt. Die Klassenregel trägt ihn jetzt — 8 px, wie vorher im Bild.
+
+**Gegenprobe:** eine gewöhnliche Zelle zeigt weiter `display: block`,
+`padding: 0`, `font-weight: 400`; schaltet man `.v2tbl__group` zur Laufzeit ab,
+übernimmt der Reset (0 / 400) und gibt danach wieder ab (7px 18px / 700). Der
+Reset wirkt also, und er verliert.
+
+### Abnahmekriterium (Nachtrag)
+
+- [ ] Der Reset auf `th`/`td` steht in `:where()`; eine Klassenregel an einer
+      Zelle greift ohne Gegen-Regel — geprüft, indem eine beliebige Klasse an
+      einer Zelle ihre Wirkung zeigt **und** der Reset sie übernimmt, sobald
+      man die Klassenregel abschaltet

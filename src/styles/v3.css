@@ -49,16 +49,25 @@
    und sein `gap`. Kein <colgroup>, kein einziges `role`. */
 .v2tbl, .v2tbl__body { display: block; }
 .v2tbl { border-collapse: collapse; width: 100%; text-align: left; }
-.v2tbl th, .v2tbl td { display: block; min-width: 0; font-weight: inherit; padding: 0; }
-/* `th` steht standardmäßig zentriert — V3 zentriert nichts. */
-.v2tbl th { text-align: left; }
+/* Der Reset steht in `:where()` und damit auf Spezifität **0-0-0**: jede Regel,
+   die nur an einer Klasse hängt, gewinnt wieder gegen ihn. Vorher war er
+   0-1-1 und schlug sie alle — die Falle hat an einem Tag viermal zugeschnappt
+   (Polster und Gewicht der Zwischenzeile, der Kopf der Aktionsspalte 125,8 px
+   neben seiner Spalte, das Polster der Aufteilungszeile), und die Abnahme
+   musste alle dreizehn Klassen einzeln durchmessen, die je an einem `td` oder
+   `th` landen. Sieben Gegen-Regeln, die nur dagegen anschrieben, sind mit
+   diesem `:where()` weggefallen (0106, Abnahme 2026-09-07). */
+:where(.v2tbl th, .v2tbl td) { display: block; min-width: 0; font-weight: inherit; padding: 0; }
+/* `th` steht standardmäßig zentriert — V3 zentriert nichts. Auch diese Zeile
+   in `:where()`: mit 0-1-1 schlug sie `.v2num` und die Zahlenspalten fielen
+   nach links, sobald die Gegen-Regel weg war (gemessen beim Umbau). */
+:where(.v2tbl th) { text-align: left; }
 /* **Zahlen rechts, auch in der Zelle.** Nach dem Umbau auf ein echtes
    `<table>` (0106) war `.v2num` entweder ein Inline-Span in der Zelle — dort
    tut `text-align` nichts — oder es verlor gegen `text-align: inherit` an der
    Zelle selbst. Gemessen standen danach **alle** Zahlen des Sets links, bis zu
    90 px vor ihrer Spurkante. Beide Wege sind hier abgedeckt: die Zelle mit der
    Klasse, und der Span darin. */
-.v2tbl th.v2num, .v2tbl td.v2num { text-align: right; }
 .v2tbl :is(th, td) > .v2num { display: block; text-align: right; }
 /* `--v2-cols` setzt der Aufrufer (Table-Komponente), `--v2-min` optional für
    horizontales Scrollen bei vielen Spalten. */
@@ -104,32 +113,16 @@
    Spaltenrichtung: Meldung und „Erneut laden" standen nebeneinander in einem
    35-px-Band an der Kartenkante. Die vier Klassen stehen deshalb hier noch
    einmal, auf der Spezifität des Resets. */
-.v2tbl td.v2tbl__empty { padding: 30px 18px; }
 /* Auch das **Gewicht**: `font-weight: inherit` am Reset schlägt die Regel der
    Zwischenzeile genauso, wie es ihr Polster geschlagen hat — nur ist es beim
    Umbau 0106 nur fürs Polster aufgefallen. Die Zeile stand seither auf 400
    und sah aus wie eine Datenzeile (Abnahme 0089, 2026-09-07). */
-.v2tbl td.v2tbl__group { padding: 7px 18px; font-weight: 700; }
 /* Auf der Spezifität des Resets: `.v2tbl th, .v2tbl td` (0-1-1) schlägt jede
    Regel, die nur an einer Klasse hängt (0-1-0). Dieselbe Falle hat schon das
    Polster der Zwischenzeile und ihr Gewicht erwischt — und diese zwei hier
    waren die letzten von dreizehn, die die Abnahme einzeln durchgemessen hat:
    der Aktionskopf stand ohne `flex` 125,8 px neben seiner Spalte, die
    Aufteilungszeile hatte statt 8/16/12/16 gar kein Polster. */
-.v2tbl th.v2actions { display: flex; gap: 14px; justify-content: flex-end; align-items: center; }
-.v2tbl td.v2btxrow__split {
-  padding: var(--space-2) 18px var(--space-3);
-}
-.v2tbl td.v2tbl__detail {
-  padding: var(--v2-detail-y, 14px) 18px calc(var(--v2-detail-y, 14px) + 2px) 46px;
-}
-.v2tbl td.v2tbl__error {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  padding: 24px 18px;
-}
 
 .v2tbl__scroll { overflow-x: auto; }
 .v2tbl__inner { min-width: var(--v2-min, 0); }
@@ -1101,7 +1094,7 @@ select.v2in { padding-right: 26px; }
   background: var(--color-danger-bg);
   color: var(--color-danger);
   font-size: 13px;
-  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);
 }
 
 /* --- Master-Detail -------------------------------------------------------
