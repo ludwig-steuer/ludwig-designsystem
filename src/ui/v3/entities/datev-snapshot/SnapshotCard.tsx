@@ -9,6 +9,7 @@ import { FieldList } from "../../primitives/FieldList";
 import { StatusCallout } from "../../primitives/StatusCallout";
 import { Card, CardHead } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
+import { formatCount } from "../../format";
 import {
   RECONCILE_AXIS,
   SNAPSHOT_COUNT_LABEL,
@@ -115,7 +116,12 @@ export function SnapshotCard({
             ],
             ...Object.entries(snapshot.counts).map(
               ([key, n]) =>
-                [SNAPSHOT_COUNT_LABEL[key] ?? key, <span key={key} className="v2num">{n}</span>] as [
+                [
+                  SNAPSHOT_COUNT_LABEL[key] ?? key,
+                  <span key={key} className="v2num">
+                    {formatCount(n)}
+                  </span>,
+                ] as [
                   React.ReactNode,
                   React.ReactNode,
                 ],
@@ -158,7 +164,7 @@ function Reconciliation({ reconcile }: { reconcile: DatevSnapshot["reconcile"] }
         kicker="Abgleich"
         title={
           open > 0
-            ? `${open} Buchungen sind ungeklärt.`
+            ? `${formatCount(open)} ${open === 1 ? "Buchung ist" : "Buchungen sind"} ungeklärt.`
             : "Alle DATEV-Buchungen sind zugeordnet."
         }
         sub={
@@ -174,7 +180,7 @@ function Reconciliation({ reconcile }: { reconcile: DatevSnapshot["reconcile"] }
         {RECONCILE_AXIS.map(([key, value]) => (
           <span className="v2snap__reccount" key={value}>
             <span className="v2snap__recword">{resolveStatus("mirror_match", value).label}</span>
-            <span className="v2num">{reconcile[key]}</span>
+            <span className="v2num">{formatCount(reconcile[key])}</span>
           </span>
         ))}
       </div>

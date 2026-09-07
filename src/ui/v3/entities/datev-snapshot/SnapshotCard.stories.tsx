@@ -176,8 +176,11 @@ export const InGrid: Story = {
             matchedLudwig: 4102,
             matchedSplit: 74,
             matchedCorrected: 190,
-            newUnprocessed: 18,
-            unclear: 6,
+            // Genau **eine** offene Buchung: der Satz darüber muss dann
+            // „1 Buchung ist ungeklärt." heißen, nicht „1 Buchungen sind"
+            // (Abnahme 0027, M2).
+            newUnprocessed: 1,
+            unclear: 0,
           },
         }}
         onOpen={() => {}}

@@ -540,7 +540,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Buchungssatz | Row · View (Anzeige-Modus des Editors) · Card (kompakt im Sachverhalt) · Editor · KI-Hinweise · Freigabe → `ActionBar` · Drawer (DATEV/Ludwig/Rohzeile) | `BuchungenTabelle` (v2), `JournalEntryView`, `JournalEntryDetail`, `BookingProposalView`/`Compact`, `ManualBookingDrawer`, `BookingRationale`, `RationaleSources`, `BookingApproveBar`, `BookingStatusBadge`, `CreditorRecentBookingsCard`, 3 Drawer | teils v2 (`BuchungssatzEditor`, `KIBuchungshinweise`); View/Card heben |
 | Buchungszeile | Row (`EditorRow`) · Picker Steuerschlüssel · Picker Konto | `BookingLineRow`, `TaxKeySelect`, `KontoCombobox` | teils v2; `SteuerschluesselFeld` fehlt |
 | DATEV-OPOS | Row (Posten) · GroupRow (Altersklasse) | inline in `opos/page` | fehlt (0029, §3.2 Nr. 1) |
-| DATEV-Snapshot | Card (Datum, WJ, Umfang, Ergebnis) | — | fehlt (0027, §3.2 Nr. 5) |
+| DATEV-Snapshot | Card (Datum, WJ, Umfang, Ergebnis) | `SnapshotCard` | **gebaut (0027)** — Karte mit Kopf, Fakten, Aussage und Zustandszählern |
 | DATEV-Spiegelbuchung | View · Vergleich → `VergleichsTabelle` · Kopieren | `DatevEntryDetail`, `CaseDatevTruthTab`, `StapelVergleich`, `ReplayVergleich`, `CopyTextButton` | heben |
 | DATEV-Export-Stapel | Row · View · Wizard · Download · RowActions | Stapel-Subsite (v2); `DatevExportWizard`, `ExportBatch*`, `OpenExportOverview`, `DatevExportTabs` | v2; Rest Rückbau (F118) |
 | Wiederkehr-Regel | Row · Editor | `modules/recurring-rules/ui` | heben |
