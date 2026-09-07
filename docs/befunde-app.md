@@ -171,9 +171,14 @@ Das sind **keine Befunde**, sondern die Migrationsschritte. Sie stehen in den
 Specs als Kriterien „offen (App)": hier nicht erfüllbar, weil dieses Repo das
 ausgelagerte Design-System ist (`docs/backlog/README.md`).
 
+**Stand der Migration (Rolle A, nachgesehen am 2026-09-07):** 141 Dateien der
+App importieren aus dem Set, 208 Import-Zeilen. Erledigte Zeilen sind
+durchgestrichen und nennen den Commit der App-Seite — wer hier etwas ablöst,
+trägt es selbst ein; gefunden wurde das hier durch Nachsehen, nicht durch eine
+Meldung.
 | v3-Baustein | Ersetzt in der App | Bewusst nicht mitgenommen |
 |---|---|---|
-| `Drawer` / `DrawerFooter` (0042) | `ui/components/primitives/Drawer.tsx` | — · `UrlDrawer` baut weiter darauf auf, Schnittstelle unverändert |
+| ~~`Drawer` / `DrawerFooter` (0042)~~ | ~~`ui/components/primitives/Drawer.tsx`~~ — **erledigt (App-Seite): Commit `26a593d7`.** Die Datei ist weg, `UrlDrawer` baut auf dem Set auf | — |
 | `SourceDocumentDrawer` (0052) | `BelegDrawer` und das Sachverhalts-Gegenstück in `ui/drawers/` | — |
 | `AccountDrawer` (0068) | `AccountLedgerDrawerProvider` (`ui/drawers/AccountLedgerDrawer.tsx`, 365 Z.) | Spalte „Sachverhalt" (2 % gefüllt) und die Tab-Umschaltung — beides absichtlich |
 | `AccountCell` (0066) | `AccountRef` (`ui/booking/`, 5 Aufrufstellen, 13 Context-Dateien) | der Context-Weg wird ein `href` über den Search-Param (L3) |
@@ -182,13 +187,13 @@ ausgelagerte Design-System ist (`docs/backlog/README.md`).
 | `JournalEntryCard` (0044) | `BookingProposalCompact` (`EventStack.tsx:127`) | Status, Herkunft, Konfidenz, Belegfeld 1 — stehen künftig **neben** der Karte (`StatusBadge`, `FieldList`) |
 | `CaseTimeline` (0040) | `Timeline`/`TimelineItem`/`EventIcon` in `SachverhaltScreen.tsx`/`parts.tsx` | die bewusst ins Detail verschobenen Punkte |
 | `RawRecord` (0051) | `RecordValue`/`RowKeyValueTable`/`CollapsibleText` in **beiden** `RohdatenTab.tsx`, `fmtRawValue` in `ui/drawers/server.tsx` | — |
-| `LogBrowser` (0054) | `InvoiceLogsPanel` samt verbose-Schalter, die Stapel-Sichten | — |
+| `LogBrowser` (0054) | `InvoiceLogsPanel` samt verbose-Schalter, die Stapel-Sichten — **Teilstand:** Commit `03ab5976` hat die Log-Familie an `LogList`/`LogBrowser` gegeben und damit L-33 geschlossen, aber `modules/invoices/ui/logs/InvoiceLogsPanel.tsx` steht noch (221 Z., eigener Umschalter Fachlich/Technisch/Beides, `verboseHiddenCount`). Nachgesehen am 2026-09-07 | — |
 | `DataTable` (0057) | den Tabellenteil der 13 Listenseiten, zuerst `[year]/cases/page.tsx`; die zwei v2-`SelectionBar`-Stellen | — |
 | `ClarificationCard` (0060) | `AnswerInput` und die Portal-Kopie | — |
 | Beleg-Familie (`SourceDocumentCell`/`Row`/`Preview`/`Facts`) | `BelegSummary`, `BelegPreview`, `SourceDocFactsCard`, den Fakten-Teil von `GlanceCard` und `ContractDetail`, `ClassificationStack`, `InvoiceNumberCell`, die Zeilen von sechs Listen | Positionen und Vorsteuer (0072), der Vertrags-Editor (0073), der View mit seinen sechs Tabs (0071) |
-| `StatusHeader` (0077) | `ui/components/primitives/StatusHeader.tsx` in 36 Dateien — `legend={axisLegend("x")}` wird `axis="x"` | `hint` (20 Stellen) und `legend` von Hand (8 Stellen → L-51); die Hover-Legende — das Set erklärt per Klick im `StatusInfoDialog` |
-| `Confidence` (0078) | `ConfidenceDot`, `ConfidenceMeter`/`ConfidenceBand`, `Confidence` (invoices) in zwölf Dateien; danach `.confdot`/`.conf`/`.confband` aus `app-chrome.css`/`booking.css` | Meter (drei Balken) und Band — ein Anteil als Balken ist `Progress` |
-| `Wizard` (0079) | `ui/components/wizard/Wizard.tsx` in fünf Dateien, formgleich (Import-Tausch); `settings/components` ist vorher Rückbau (F111 B2) | die `h2`/`.sub`-Typografie im Body |
+| ~~`StatusHeader` (0077)~~ | ~~`ui/components/primitives/StatusHeader.tsx` in 36 Dateien~~ — **erledigt (App-Seite): Commit `40f8f085`.** Die Datei ist weg | `hint` (20 Stellen) und `legend` von Hand (8 Stellen → L-51); die Hover-Legende — das Set erklärt per Klick im `StatusInfoDialog` |
+| ~~`Confidence` (0078)~~ | ~~`ConfidenceDot`, `ConfidenceMeter`/`ConfidenceBand`, `Confidence` (invoices) in zwölf Dateien~~ — **erledigt (App-Seite): Commit `40f8f085`.** Kein Treffer mehr auf `ConfidenceDot`, `ConfidenceMeter` oder `.confdot` | Meter (drei Balken) und Band — ein Anteil als Balken ist `Progress` |
+| ~~`Wizard` (0079)~~ | ~~`ui/components/wizard/Wizard.tsx` in fünf Dateien~~ — **erledigt (App-Seite): Commit `40f8f085`.** Die Datei ist weg | die `h2`/`.sub`-Typografie im Body |
 | `FilterBar` (0003) | die Formularzeile von `AccountFilterForm` | — |
 | `Skeleton` (0016) | drei handgebaute Lade-Platzhalter, dazu elf `Suspense`-Fallbacks | — |
 | `RadioGroup` (0017) | drei rohe `<input type="radio">` in `DatevExportWizard.tsx` und `BatchActions.tsx` | — |
