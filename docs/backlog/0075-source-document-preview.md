@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/source-document/` — `SourceDocumentPreview.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **fast**: ein PDF in einem Rahmen ist kein Fachwort. Sie bleibt trotzdem Entität, weil sie zwei fachliche Regeln trägt — der Grund für eine fehlende Vorschau wird ausgesprochen statt bebildert, und ein Teilbeleg sagt, aus welchen Seiten welches Originals er stammt (`splitPageRange`, `parentSourceDocId`). Ohne die zwei wäre sie ein `<iframe>` an der Aufrufstelle. |
 | Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Formen-Tabelle Zeile `SourceDocumentPreview`; Datenpunkte Rang 10 und 12 |
@@ -316,3 +316,15 @@ Die Zahl steht hier, weil hier die Höhe gesetzt wird
 (`clamp(320px, 62vh, 900px)`). Sie ändert an der Höhe nichts — sie sagt nur,
 was sie auf der Seite bedeutet. Dieselbe Berichtigung steht in 0071 beim
 Kriterium selbst.
+
+## Status 2026-09-07: fertig
+
+Der einzige offene Punkt der Abnahme vom 2026-09-05 — die fehlende
+`fileName`-Zeile in der Schnittstellen-Tabelle — ist nachgetragen; alle
+übrigen Kriterien waren schon damals erfüllt, das App-Kriterium bleibt offen
+und gehört der App.
+
+**Der Owner-Entscheid vom 2026-09-07 (eine Höhe statt zweier) kam nach der
+Abnahme.** Er ist gebaut, `height` ist `@deprecated` und wird ignoriert, und
+die Wirkung ist an allen vier Stellen gemessen (Tabelle oben) — aber gemessen
+hat sie, wer sie gebaut hat. Eine kurze Bestätigung steht aus.
