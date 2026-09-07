@@ -64,7 +64,7 @@
 
   /* Semantic — desaturated, restrained. */
   --color-success:        #3F7A5A;   /* muted forest */
-  --color-success-bg:     #EBF2EE;
+  --color-success-bg:     #F0F6F2;
   --color-warning:        #8C601E;   /* muted amber, used sparingly — 5.52:1, 4.78:1 auf warning-bg */
   --color-warning-bg:     #F5EEE0;
   --color-warning-strong: #9C5021;   /* Abweichungsstufe +-50-100 % (UX-Guidelines L7) -- 5.86:1 auf bg, 5.41:1 auf bg-soft; dunkler als warning, heller als danger */

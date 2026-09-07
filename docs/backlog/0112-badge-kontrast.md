@@ -138,7 +138,8 @@ Gemessen in `v3-entitäten-rechnungsposition-invoicelinelist--edges` und
 `…-invoicelinerow--deviations` bei 1300 px, 11,5 px Schrift. Gegenprobe: Regel
 abgeschaltet → 4,690 bzw. 11,941, dieselben Knoten. Ein Lauf über **alle 717
 Stories** des Katalogs findet genau acht verschiedene Plaketten-Darstellungen;
-diese zwei sind die einzigen unter 4,5. Der Kommentar darüber sagt „Die Plakette selbst behält ihre Farbe" —
+diese zwei sind die einzigen unter 4,5. Der Kommentar darüber sagt „Die
+Plakette selbst behält ihre Farbe" —
 gemessen ist es umgekehrt: `.v2ilrow__off` behält 4,778, gedämpft werden ihre
 Nachbarn. Das Kriterium sagt „gemessen, alle Töne" — die Aufgabe hat nur
 `statusbadge--all-axes` gemessen, und dort tritt der Fall nicht auf.
@@ -226,3 +227,38 @@ misst 4,778.
 | | |
 |---|---|
 | Abgenommen von / am | Claude (fremde Abnahme), 2026-09-07 — **zurück** |
+
+## Nach der Abnahme (2026-09-07)
+
+Alle fünf Zahlen der Erledigt-Tabelle hat die Abnahme unabhängig nachgerechnet
+und bestätigt. Zurück kam sie an vier Stellen, an denen der hergestellte
+Kontrast danach wieder verloren ging — drei davon sind behoben.
+
+**M1 — eine Zeile machte die Arbeit rückgängig.**
+`.v2tbl__row:has(.v2ilrow__off) .bdg { color: inherit }` gab jeder Plakette in
+einer deaktivierten Zeile den gedämpften Ton der Zeile: `bdg-info` fiel auf
+**4,20**, `bdg-neutral` auf **4,23**. Deaktiviert ist die *Zeile*, nicht die
+Aussage der Plakette. Nach dem Streichen gemessen: 4,690 und 11,941 in beiden
+betroffenen Stories.
+
+**M4 — die zwei Farbpaare, um die es ursprünglich ging, liefen weiter.**
+`.banner--info` stand mit `#2E78A8` auf `#E3F0F8` bei **4,140**,
+`.banner--success` bei **4,458**. Beide nehmen jetzt die Token, die 0112 für
+die Plakette gewählt hat: 4,690 und 4,627.
+
+**M2 — der Einzel-Hex ist ein Token.** `#F0F6F2` stand genau einmal im ganzen
+Satz. `--color-success-bg` trägt jetzt diesen Wert, und der Chip nimmt das
+Token.
+
+**M3 — die Angaben prüfen jetzt, was dasteht.** Der Wächter löst den
+**genannten** Grund auf; stand die Fläche daneben als Hex, prüfte er ein
+anderes Paar, und eine Änderung am Hex wäre unbemerkt geblieben. Beide Seiten
+der `info`-Marke sind Token, und die `success`-Zahl steht wieder da, prüfbar
+geschrieben. `check:contrast` rechnet damit 18 statt 17 Angaben nach.
+
+**M5 — der Chevron trug `opacity: 0.7`** und kam damit auf 2,76, wo §9 für
+Zeichen 3:1 verlangt. Die Deckkraft ist weg; er trägt den vollen Ton (4,69).
+
+**M6 bleibt offen:** Befund B1 gehört als Zeile nach `docs/befunde-app.md`, ist
+aber nach dem Bau inhaltlich überholt — er will neu formuliert werden, nicht
+abgeschrieben.

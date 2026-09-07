@@ -3564,7 +3564,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    selbst behält ihre Farbe: sie ist der Grund, nicht der Zustand. */
 .v2tbl__row:has(.v2ilrow__off) > td { color: var(--color-text-subtle); }
 .v2tbl__row:has(.v2ilrow__off) .v2ilrow__name { font-weight: 500; }
-.v2tbl__row:has(.v2ilrow__off) .bdg { color: inherit; }
+/* Die Plakette behält ihre Farbe: `color: inherit` gab ihr den gedämpften Ton
+   der deaktivierten Zeile, und damit fielen `bdg-info` auf 4,20 und
+   `bdg-neutral` auf 4,23 — unter die 4,5, die 0112 gerade hergestellt hat.
+   Deaktiviert ist die **Zeile**, nicht die Aussage der Plakette (Abnahme
+   0112, M1). */
 .v2tbl__row:has(.v2ilrow__off) .v2ilrow__off { color: var(--color-warning); }
 
 /* Die Fakten stehen frei im Aufklapper — die Zeile ist der Rahmen. Mehrere

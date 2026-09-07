@@ -90,7 +90,7 @@ export function StatusBadge({
         ) : null}
         {desc.label}
         {chevron ? (
-          <span style={{ display: "inline-flex", marginLeft: 3, opacity: 0.7 }}>
+          <span style={{ display: "inline-flex", marginLeft: 3 }}>
             <ActionIcon action="expand" size={12} />
           </span>
         ) : null}
