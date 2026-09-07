@@ -6,7 +6,7 @@
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | nein — die Reihenfolge Kopf → nächste Aktion → Strang → Detail ist die Sachverhaltslogik, keine allgemeine Form |
-| Quelle | Screenshot der Sachverhaltsansicht vom 2026-09-03 · `docs/seiten/sachverhalt-detail.md` |
+| Quelle | Screenshot der Sachverhaltsansicht vom 2026-09-03 · `docs/seiten/sachverhalt-detail.md` · Entitätsprofil `docs/entitaeten/accounting-case.md` (geprüft 2026-09-05) |
 | Ersetzt | `SachverhaltScreen.tsx` (1815 Z.) + `parts.tsx` (522 Z.) in `modules/accounting-cases/ui/sachverhalt/` — das Gerüst, nicht die Datenbeschaffung |
 | Blockiert | die Ablösung der Sachverhaltsansicht in `ludwig/app` |
 | Voraussetzung | 0047 `RecordPager` ✓ · 0048 `EntityHeader` ✓ · 0049 ✓ · Entitätsprofil `docs/entitaeten/accounting-case.md` ✓ (**geprüft** 2026-09-05, zweiter Agent) · `CaseFacts` (0097) — die Fakten, die `header` und `CaseDrawer` teilen |
@@ -68,7 +68,7 @@ Ein Export, fünf Slots, keine Datenprops.
 | `nextAction` | `ReactNode` | nein | Die eine nächste Handlung: `StatusCallout` mit `icon` (0049). Entfällt, wenn der Fall auf jemand anderen wartet | `Filled`, `Waiting` |
 | `tabs` | `ReactNode` | nein | Die Reiterleiste: `Tabs` (0049). Ohne Reiter entfällt die Zeile | `SingleEvent` |
 | `aside` | `ReactNode` | nein | Der Strang links: `CaseTimeline` (0040). Leer → einspaltig | `SingleEvent` |
-| `children` | `ReactNode` | ja | Der Inhalt des aktiven Reiters | `Filled` |
+| `children` | `ReactNode` | ja | Der Inhalt des aktiven Reiters. **Der Rahmen filtert nicht:** welcher Reiter aktiv ist, entscheidet der Aufrufer über `tabs`, und was dazu gehört, reicht er als `children` herein — die View kennt weder die Reiter noch ihre Inhalte | `Filled` |
 
 **Kann bewusst nicht:** Daten holen, Server-Actions kennen, den aktiven
 Reiter verwalten (das tut der Aufrufer über die URL), Reiter ausblenden,
@@ -132,6 +132,16 @@ Variabel (aus dieser Spec):
       sichtbar (Story `Filled`, gemessen)
 - [ ] Server-Component: keine `"use client"`-Direktive (`grep`)
 
+## Ausbau
+
+Was die View später tragen soll, heute aber nicht kann (A12). Keine Prop auf
+Vorrat — hier steht der Plan, nicht der Platzhalter.
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Bearbeiten im Kopf statt nur Lesen | `CaseEditor` (0083) füllt `children`; der Rahmen bleibt, wie er ist | 0083 wird gebaut — die View ändert sich dafür nicht, sie bekommt einen anderen Inhalt |
+| Ein Feld direkt in den Fakten ändern | `InlineEdit` (0020) an der Stelle, an der `CaseFacts` heute nur zeigt | ein Screen verlangt die Korrektur ohne Umweg über den Editor |
+| Ein zweiter Strang neben dem ersten | — | zwei Stränge sind kein Ausbau, sondern ein anderer Rahmen (`MasterDetail` direkt) |
 ## Nicht in dieser Aufgabe
 
 Rückfragen-Formular, Buchungsmaske, Plausibilitätsprüfung, DATEV-Wahrheit.
@@ -139,11 +149,95 @@ Das sind eigene Bausteine hinter den Reitern; die View kennt nur ihre Slots.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Fremde Abnahme (nicht der bauende Agent), gemessen am laufenden Dev-Server
+`http://localhost:6107` (Quelle, nicht `storybook-static`), Fenster 1280 und
+1440 × 900, CDP.
 
-Abgenommen von / am: … · Offene Punkte: …
+**Story-Deckung.** Sechs Stories im Code, sechs in der Spec — `Filled`,
+`SingleEvent`, `Waiting`, `WithoutTabs`, `TabsWithCountAndDot`, `InUse`.
+Rechnung nach `spec-schreiben` §6: 2 Zustände + 0 Enum + 2 Layout + 0 Callback
++ 1 „im Einsatz" + 1 Rand = 6, Untergrenze Entität (3) übertroffen. Jede Prop
+hat ihren Nachweis: `pager`/`header`/`children` in `Filled`, `nextAction` in
+`Filled` (gesetzt) und `Waiting` (fehlend), `tabs` in `SingleEvent` (gesetzt)
+und `WithoutTabs` (fehlend), `aside` in `Filled` (gesetzt) und `SingleEvent`
+(fehlend). `Loading`, `Error`, `Empty`, `LeerNachFilter` sind in der Spec mit
+Grund ausgeschlossen.
+
+### Fest
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `tsc --noEmit` Exit 0; Storybook-Build Exit 0 („built in 5.90s"). Zusätzlich `pnpm check:icons` Exit 0 | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/entities/accounting-case/CaseDetailView.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Sachverhalt/CaseDetailView`; Barrel `src/ui/v3/index.ts:382` | ✓ |
+| Code englisch; `@when`/`@instead` am Export | Bezeichner und JSDoc der Komponente englisch, Story-Exportnamen englisch, Story-JSDocs deutsch, Deutsch sonst nur in Nutzertexten; `@when`/`@instead` in `CaseDetailView.tsx:18–21` | ✓ |
+| Kein Hex, kein px im TSX; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}\|[0-9]+px' CaseDetailView.tsx` → keine Treffer; Abstände über `.v2cdv` (`gap: var(--space-5)`), Story-Rahmen `maxWidth: 1180` wie in 72 weiteren v3-Story-Dateien; kein Statusausdruck in der Datei | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung; `storybook-static/index.json` führt genau die sechs IDs | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Stufe/Import nur abwärts (nur `patterns/MasterDetail`), kein Hex/px, kein eigener Statustext, Karte mit Rand statt Schatten, Kontrast und Fokus in den Slot-Bausteinen (0047/0048/0049/0040/0097, je einzeln abgenommen), Story unter `v3/Entitäten/Sachverhalt/`; Konsole in allen sechs Stories ohne Warnung oder Ausnahme | ✓ (zwei Gestaltungsbefunde, B1/B2) |
+| Im Browser angesehen | Screenshots 1440 × 900 aller sechs Stories, `InUse` zusätzlich 1280 × 900 (`ab50-*.png` im Scratchpad) | ✓ |
+
+### Variabel
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Kein Prop nimmt Daten | `CaseDetailView.tsx:30–43`: sechs Props, alle `ReactNode`, kein VM, kein Array, kein Callback | ✓ |
+| Reihenfolge nicht konfigurierbar | kein `order`-Prop, kein Slot-Array, kein `.map(` in der Datei (`grep`); die Reihenfolge steht als fünf feste Zeilen im JSX (`:48–56`). Gemessene DOM-Reihenfolge je Story: `Filled` `__pager` · `__head` · `__next` · `__tabs` · `.v2md`; `SingleEvent` `__pager` · `__head` · `__tabs` · `__body`; `Waiting` `__pager` · `__head` · `__tabs` · `.v2md`; `WithoutTabs` `__head` · `__body`; `TabsWithCountAndDot` `__head` · `__tabs` · `__body`; `InUse` wie `Filled` | ✓ |
+| Ohne `aside` einspaltig, ohne leere zweite Spalte | `…--single-event`, DOM-Probe: `.v2md` nicht vorhanden, letztes Kind `.v2cdv__body`, Breite 1180 = volle Viewbreite. Ebenso `--without-tabs` und `--tabs-with-count-and-dot` | ✓ |
+| Kein Zustand aus eigenem Antrieb | `grep` in `CaseDetailView.tsx`: kein `StatusBadge`, kein `resolveStatus`, keine Registry-Einfuhr. Der Badge in den Stories liegt im `header`-Slot | ✓ |
+| Kein Reiter ausgeblendet | kein Filter und kein Zugriff auf `tabs` außer `tabs ? … : null` (`:51`); `TabsWithCountAndDot` zeigt Zähler (3) und Punkt (DATEV), der Reiter „Verlauf" wird gar nicht erst übergeben | ✓ |
+| Rang 1–4 ohne Scrollen bei 900 px Höhe | `--filled` bei 1440 × 900: `__next` 197–313 px, Strang-Oberkante 376 px, View-Unterkante 691 px. `--in-use` in der `AppShell` bei **1280** × 900: `__next` 285–381 px, `__tabs` 401–444 px, Strang-Oberkante 464 px, View-Unterkante 837 px; bei **1440** × 900 dieselben Oberkanten, Unterkante 795 px. Kein Element mit `overflow-x/y: auto\|scroll` innerhalb der View — in allen sechs Stories null, auch in `InUse` (`.v2md--detail-breit` setzt `overflow: visible`) | ✓ |
+| Server-Component: keine `"use client"`-Direktive | `grep '"use client"' CaseDetailView.tsx` → keine Treffer (das importierte `MasterDetail` trägt sie selbst, das ist die Grenze des Aufrufers) | ✓ |
+
+### Aus „Freigabe" (2026-09-06) und „Vor dem Bau eingearbeitet"
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Entscheid: `CaseFacts` sitzt im `children` des ersten Reiters, kein eigener Slot | keine `facts`-Prop in der Schnittstelle; in `Filled`, `Waiting`, `WithoutTabs`, `TabsWithCountAndDot`, `InUse` steht `CaseFacts` im `children`; JSDoc der Prop nennt es (`:41`) | ✓ |
+| Entscheid: Ränge 5–10 im `EntityHeader`, `disposition` als Wort in `meta`, Achse `sachverhalt` führt | Stories: `meta="Kanzlei ist dran · Wirtschaftsjahr 2026"` bzw. `"Mandant ist dran · wartet auf Unterlagen"`, `status={<StatusBadge axis="sachverhalt" …>}` | ✓ |
+| (a) Profil `docs/entitaeten/accounting-case.md` in „Quelle" nachgetragen | Zeile „Quelle" nennt weiter nur den Screenshot und `docs/seiten/sachverhalt-detail.md`; das Profil steht in „Voraussetzung" und stand dort schon vor der Freigabe (`git show fbe2e73`). Der Abschnitt „Vor dem Bau eingearbeitet" behauptet die Änderung | ✗ (M1) |
+| (b) Kopfzeile „Blocker" gestrichen | `git show fbe2e73` entfernt die Zeile; im Kopf steht nur noch „Blockiert" | ✓ |
+| (c) Entscheid als Satz in Schnittstelle/Verhalten | Abschnitte „Schnittstelle" und „Verhalten" sind unverändert; der Satz steht nur im nachgestellten Abschnitt „Vor dem Bau eingearbeitet" und im JSDoc der Prop | ✗ (M2, klein) |
+| (d) Abschnitt „Ausbau" (A12) mit `CaseEditor` 0083 per `InlineEdit` | die Spec hat keine Überschrift „Ausbau" (`grep '^## Ausbau'` → nichts); nur der Satz „Der Ausbau nennt `CaseEditor` (0083)" verweist auf einen Abschnitt, den es nicht gibt. A12 verlangt den eigenen Abschnitt ausdrücklich | ✗ (M3) |
+| Layout in der Schale, nicht nur im Story-Rahmen (Lehre aus 0071) | `--in-use` bei 1280 und 1440: `document.scrollWidth == innerWidth` (kein Querlauf), kein abgeschnittener Text (`scrollWidth > clientWidth` → null Elemente), zwei Spalten 440 / 484 px (1280) bzw. 440 / 644 px (1440) | ✓ |
+
+### Mängel
+
+1. **M1 (blockierend) — Pflichtänderung (a) der Freigabe ist nicht ausgeführt,
+   wird aber als ausgeführt behauptet.** Die Zeile „Quelle" nennt das
+   Entitätsprofil nicht. Vorschlag: `docs/entitaeten/accounting-case.md`
+   (geprüft 2026-09-05) in „Quelle" neben `docs/seiten/sachverhalt-detail.md`
+   setzen — oder, wenn „Voraussetzung" der richtige Ort ist, den Satz (a) im
+   Abschnitt „Vor dem Bau eingearbeitet" auf das ändern, was dasteht.
+2. **M3 (blockierend) — Pflichtänderung (d) ist nicht ausgeführt.** Es gibt
+   keinen Abschnitt „Ausbau"; A12 verlangt geplante Ausbaustufen genau dort
+   und nicht als Nebensatz. Vorschlag: `## Ausbau` vor „Nicht in dieser
+   Aufgabe" mit einer Zeile — `CaseEditor` (0083) macht den Kopf über
+   `InlineEdit` bearbeitbar, ohne neue Prop an dieser View.
+3. **M2 (nicht blockierend) — Pflichtänderung (c) sitzt nicht dort, wo sie
+   verlangt war.** Der Entscheid steht im Nachtrag statt in „Schnittstelle"
+   oder „Verhalten". Vorschlag: einen Satz in die Zeile `children` der
+   Schnittstellen-Tabelle („`CaseFacts` sitzt hier auf dem ersten Reiter").
+
+Am Code ist für M1–M3 nichts zu ändern.
+
+### Befunde (keine Kriterien, nicht blockierend)
+
+- **B1 — `SingleEvent`: die beiden Karten stoßen ohne Abstand aneinander.**
+  Gemessen: `.v2cdv__body` ist `display: block` ohne `gap`, die Lücke zwischen
+  der Verlaufs- und der Fakten-Karte ist **0 px**, die beiden Ränder lesen sich
+  als Trennlinie in *einer* Karte. Das ist der Story-Aufbau, nicht der
+  Baustein — die View reicht `children` unverändert durch. Vorschlag: die
+  beiden Karten in der Story in einen Rahmen mit `gap: var(--space-5)` legen.
+- **B2 — im schmalsten Fenster ist der Strang kein Drittel mehr.**
+  `.v2md--detail-breit` setzt die linke Spalte fest auf 440 px; in der Schale
+  bleiben bei 1280 px Fenster 944 px Inhalt, also 440 / 484 — der Strang nimmt
+  47 % statt des Drittels, mit dem Entscheidung 2 argumentiert. Kein
+  Kriterium dieser Spec, und nichts bricht; der Ort einer Änderung wäre
+  `MasterDetail`, nicht diese View.
+
+Abgenommen von / am: Claude (fremde Abnahme, hat nicht gebaut), 2026-09-07 ·
+**Urteil: zurück** — die Kriterien-Tabelle ist vollständig grün, zwei der vier
+Pflichtänderungen der Freigabe fehlen aber und stehen im Nachtrag als erledigt.
+Offene Punkte: M1, M3 (blockierend), M2 (klein), B1, B2 (Befunde).
 
 **Status-Nachtrag 2026-09-05.** Der Zusatz im Statusfeld hat die Suche über den
 Status unbrauchbar gemacht. Er steht jetzt hier: die Voraussetzungen sind
@@ -188,3 +282,42 @@ Rahmen eine zweite Seite.
 Elemente mit `overflow-y: auto|scroll` innerhalb der View. Die Ränge 1–4
 stehen damit ohne Scrollen da, so wie die Spec es verlangt — eine View, die
 ihren Kopf wegscrollen lässt, nimmt die Antwort weg, für die sie gebaut ist.
+
+## Nach der Abnahme (2026-09-07): drei Mängel, alle am Text
+
+Die Abnahme hat den Code durchgewinkt — alle sieben festen und alle sieben
+variablen Kriterien gemessen und erfüllt, das Layout dabei **in der Schale**
+statt im Story-Rahmen (bei 1280 × 900: `nextAction` 285–381, Strang-Oberkante
+464, View-Unterkante 837; kein Querlauf, kein Element mit eigener Bildlaufleiste).
+Zurück kam sie wegen zweier Pflichtänderungen der Freigabe, die **nicht
+ausgeführt** waren, obwohl der Abschnitt „Vor dem Bau eingearbeitet" das
+Gegenteil behauptete. Das ist der unangenehmere Fehler von beiden: eine
+Behauptung über die eigene Arbeit.
+
+- **M1 erledigt** — das Entitätsprofil steht jetzt in „Quelle", nicht nur in
+  „Voraussetzung". Die beiden Zeilen sagen Verschiedenes: woher der Auftrag
+  kommt, und was vorher fertig sein musste.
+- **M3 erledigt** — es gibt einen Abschnitt **`## Ausbau`**. A12 verlangt ihn
+  ausdrücklich als eigenen Abschnitt; ein Nebensatz, der auf einen nicht
+  existierenden Abschnitt zeigt, ist keiner. Drin stehen `CaseEditor` (0083)
+  und `InlineEdit` (0020), dazu die Absage an einen zweiten Strang — der wäre
+  kein Ausbau, sondern ein anderer Rahmen.
+- **M2 erledigt** — der Satz „der Rahmen filtert nicht" steht jetzt in der
+  Zeile `children` der Schnittstelle, nicht nur im Nachtrag und im JSDoc.
+
+**Die drei Befunde am Set** stehen ohne Nacharbeit, mit Adresse:
+
+- **B1** — in `SingleEvent` stoßen die Verlaufs- und die Fakten-Karte mit 0 px
+  aneinander und lesen sich als eine Karte mit Trennlinie. Das ist der Aufbau
+  der **Story**, nicht der Baustein: `children` bekommt zwei Karten ohne
+  Abstand. Gehört in die Story, sobald jemand sie ohnehin anfasst.
+- **B2** — `.v2md--detail-breit` setzt die linke Spalte fest auf 440 px; bei
+  1280 px Fenster ergibt das 440/484, der Strang nimmt also 47 % statt des
+  „Drittels", mit dem Entscheidung 2 argumentiert. Nichts bricht, aber die
+  Begründung stimmt nicht mehr mit der Wirkung überein. Ort einer Änderung
+  wäre `MasterDetail` (0050-fremd) — **eigene Aufgabe, wenn jemand das Drittel
+  wirklich will**.
+- **B3** — `MasterDetail` trägt den deutschen Prop-Namen `detailBreit`. Nach
+  CLAUDE.md ist ein bestehender Bezeichner in fremder Datei kein
+  Umbenennungsgrund für diese Aufgabe; er fällt, wenn `MasterDetail` selbst
+  angefasst wird.
