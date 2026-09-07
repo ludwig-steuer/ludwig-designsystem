@@ -197,13 +197,19 @@ export function Combobox({
                       role="option"
                       aria-selected={o.value === value}
                       className={`v2cmb__opt${i === active ? " is-active" : ""}`}
+                      // The whole line as a tooltip: it is clipped to one row,
+                      // and a clipped value with no way to the whole one is
+                      // lost. Measured in `CasePicker --edges`: 52 of 191 hits
+                      // wrapped to two rows before, and a list one reads by
+                      // scanning down cannot have rows of two heights (0084).
+                      title={o.hint ? `${o.label} · ${o.hint}` : o.label}
                       onMouseEnter={() => setActive(i)}
                       onClick={() => pick(o)}
                     >
                       <span className="v2cmb__mark" aria-hidden="true">
                         {o.value === value ? <ActionIcon action="confirm" size={12} /> : null}
                       </span>
-                      <span>
+                      <span className="v2cmb__text">
                         {o.label}
                         {o.hint ? <span className="v2cmb__hint"> · {o.hint}</span> : null}
                       </span>

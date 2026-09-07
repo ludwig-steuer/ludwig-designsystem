@@ -2026,6 +2026,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Das Häkchen davor markiert den bereits gewählten Wert. */
 .v2cmb__opt.is-active { background: var(--color-accent-50); font-weight: 600; }
 .v2cmb__mark { flex: 0 0 auto; width: 12px; color: var(--color-accent-700); line-height: 1; }
+/* Eine Trefferzeile ist **eine** Zeile: eine Liste, die man von oben nach
+   unten überfliegt, verträgt keine zwei Höhen. Gemessen in `CasePicker
+   --edges` brachen 52 von 191 Treffern um, weil Name und Hinweis zusammen zu
+   breit wurden (0084). Der ganze Wert steht im `title` am Knopf. */
+.v2cmb__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2cmb__hint { font-size: 11.5px; color: var(--color-text-subtle); }
 .v2cmb__empty { padding: 14px 10px; font-size: 13px; color: var(--color-text-subtle); }
 
