@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig (Abnahme 2026-09-07, vierte Runde) |
 | Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/clarification/` — Erweiterung von `ClarificationCard` (0060) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: die Regeln (30 Tage, ab der dritten nur ein Mensch) sind Ludwig-Fachlogik |
@@ -344,3 +344,34 @@ das Wort, V7); für die Vorgabeknöpfe von `DateRangeField` wäre die Farbe das
 einzige Merkmal — dort ist es latent, weil keine Story einen gesperrten
 Zeitraum zeigt. Das ist die Zahl, an der eine eigene Runde am Primitive
 ansetzt.
+
+## Freigegeben (2026-09-07, vierte Runde) — und zwei Dinge, die über 0065 hinausreichen
+
+Alle festen und alle variablen Kriterien stehen auf ✓, jedes mit einem
+Messwert statt einer Behauptung; die Kriterienliste ist über vier Runden nicht
+angerührt worden.
+
+**1. `DateField.onBlur` ist die eigentliche Ausbeute fürs Set.** Die Lücke war
+set-weit — es gab keinen Ort, an dem ein Datumsfeld eine Korrektur anbringen
+kann, ohne gegen das Tippen zu kämpfen. Sie ist jetzt an einem Primitive
+geschlossen, mit dem Grund im JSDoc.
+
+**2. „Nicht nachweisbar" war ein Werkzeugfehler, keine Eigenschaft der Sache.**
+Zweimal in dieser Aufgabe stand in einer Notiz, etwas lasse sich headless nicht
+messen — und beide Male stimmte es nicht. Für die Werkzeugkiste der nächsten
+Abnahme:
+
+- **React hängt `onBlur` an das bubbelnde `focusout`**, nicht an `blur`. Ein
+  synthetisches `new FocusEvent("blur")` läuft ins Leere; `element.blur()`
+  löst nativ `focusout` aus und React feuert. Ebenso wirkt „ein anderes
+  Element fokussieren".
+- **Mehrere Schritte in einem `Runtime.evaluate` sehen das Re-Render nicht.**
+  Wer Wert setzen, Ereignis auslösen und Ergebnis lesen in einen Ausdruck
+  packt, misst den Zustand *vor* Reacts Arbeit. Je Fall frisch laden und
+  zwischen den Schritten warten.
+
+Offen und benannt, außerhalb dieser Aufgabe: **M-10** (`void onDefer(…)`
+verschluckt einen Fehler — gilt seit 0060 für beide Ausgänge), **M-11** (das
+CSS dieser Aufgabe liegt im Vor-Commit `680653c`) und das **Restmaß zu N-3**
+(1,37:1 zwischen „quiet + aktiv" und „quiet + gesperrt"; latent für die
+Vorgabeknöpfe von `DateRangeField`).
