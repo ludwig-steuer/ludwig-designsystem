@@ -43,7 +43,12 @@ const READERS = Object.values(
 /** No stylesheet and no component reads this token. */
 const isUnread = (token: string) => !READERS.includes(`var(${token})`);
 
-/** The declared value, verbatim — `--color-info` stays `var(--color-accent)`. */
+/**
+ * The declared value **as the browser hands it back** — not verbatim: a token
+ * whose declaration is itself a `var()` comes back substituted
+ * (`--color-info` returns `#3B8FC4`, not `var(--color-accent)`). The old
+ * comment claimed the opposite (acceptance of 0055).
+ */
 const readToken = (token: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(token).trim();
 
@@ -367,12 +372,16 @@ export const Roles: Story = {
           {unread.some((r) => r.token.endsWith("-bg"))
             ? "Eine ungelesene Fläche heißt: wer sie zu brauchen scheint, holt sie woanders her."
             : "Jede Fläche des Satzes wird gelesen."}{" "}
-          Die Plaketten sind der Fall, an dem das zu prüfen war:{" "}
-          <code className="lw-mono">.bdg-warning</code> und{" "}
-          <code className="lw-mono">.bdg-success</code> tragen ihre Fläche weiter als Hex-Literal, Text und Rand
-          teilweise ebenso — <code className="lw-mono">.bdg-info</code>, <code className="lw-mono">.bdg-success</code>{" "}
-          und <code className="lw-mono">.bdg-danger</code> holen ihren **Text** inzwischen aus Token (0112). Der
-          V13-Fall ist damit kleiner geworden, aber nicht weg (Befund 8).
+          Die Plaketten sind der Fall, an dem das zu prüfen war — und das
+          Ergebnis ist kleiner, als der Satz hier lange behauptet hat:{" "}
+          <strong>den Text holen alle fünf aus Token</strong> (0112). Als
+          Hex-Literale stehen nur noch <strong>drei Flächen</strong> (
+          <code className="lw-mono">.bdg-info</code>,{" "}
+          <code className="lw-mono">.bdg-success</code>,{" "}
+          <code className="lw-mono">.bdg-warning</code>) und{" "}
+          <strong>vier Ränder</strong> (dieselben drei plus{" "}
+          <code className="lw-mono">.bdg-danger</code>). Der V13-Fall ist damit
+          kleiner geworden, aber nicht weg (Befund 8).
         </p>
       </div>
     );

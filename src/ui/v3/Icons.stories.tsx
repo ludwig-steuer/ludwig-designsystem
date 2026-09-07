@@ -18,7 +18,7 @@ import { IconButton } from "./primitives/IconButton";
 import { TextButton } from "./primitives/TextButton";
 import { EntityHeader } from "./patterns/EntityHeader";
 import { StatusBadge } from "./patterns/StatusBadge";
-import { AXIS_LABEL } from "./patterns/entity-icons";
+import { AXIS_ENTITY, AXIS_LABEL } from "./patterns/entity-icons";
 import {
   ACTION_ICON,
   ActionIcon,
@@ -245,7 +245,7 @@ function Entry({ id, entry }: { id: string; entry: IconEntry; }) {
   const Icon = entry.icon;
   return (
     <tr>
-      <td style={{ padding: "var(--space-2) var(--space-3)", width: 32 }}>
+      <td style={{ padding: "var(--space-2) var(--space-3)", width: "var(--space-8)" }}>
         <Icon size={16} strokeWidth={1.5} aria-hidden="true" />
       </td>
       <td className="lw-mono" style={{ padding: "var(--space-2) var(--space-3)", fontSize: "var(--fs-ui-sm)", whiteSpace: "nowrap" }}>
@@ -289,7 +289,13 @@ export const Entities: Story = {
             Aus <code className="lw-mono">ENTITY_ICON</code> gerendert, nicht abgeschrieben: die Sidebar der
             App ist die Vorgabe, wo sie eine hat. Die Achsen der Status-Registry finden ihr Zeichen über die
             Abbildung Achse → Entität; die übrigen{" "}
-            <span className="lw-numeric">{Object.keys(AXIS_LABEL).length - 3}</span> Achsen haben bewusst
+            {/* Gerechnet, nicht verdrahtet: `AXIS_ENTITY` sagt selbst, welche
+                Achse eine Entität nennt — die „− 3" war eine Zahl, die beim
+                nächsten Eintrag falsch geworden wäre (Abnahme 0055). */}
+            <span className="lw-numeric">
+              {Object.keys(AXIS_LABEL).length - Object.keys(AXIS_ENTITY).length}
+            </span>{" "}
+            Achsen haben bewusst
             keins — sie stehen in einem Kontext, der die Entität schon nennt.
           </>
         }

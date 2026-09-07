@@ -365,7 +365,7 @@ const rowBase: CSSProperties = {
 };
 
 const chipBase: CSSProperties = {
-  border: "1px solid var(--color-border-strong)",
+  border: "var(--border-1-strong)",
   background: "var(--color-surface)",
   color: "var(--color-text-muted)",
   borderRadius: "var(--radius-pill)",
@@ -552,7 +552,7 @@ export const Motion: Story = {
           <span className="lw-numeric">{count(/prefers-reduced-motion/g)}</span> Blöcken gegenüber. Die Namen dazu
           stehen bewusst nicht hier: der erste Anlauf zählte vier und nannte drei, und eine Liste neben einer
           Zahl veraltet mit dem nächsten Commit.{" "}
-          <strong>Seit 0093 (b) ist die Lücke zu:</strong> **Übergänge** fallen sämtlich weg — eine Regel über
+          <strong>Seit 0093 (b) ist die Lücke zu:</strong> <strong>Übergänge</strong> fallen sämtlich weg — eine Regel über{" "}
           <code className="lw-mono">*</code> statt einer Selektorliste, die jede neue Transition von Hand
           nachtragen müsste. <strong>Animationen</strong> bleiben: Spinner und Skelett sagen etwas, solange sie
           laufen. Diese Seite kann die Media-Query nicht umschalten; wer abnimmt, stellt sie im Betriebssystem an
