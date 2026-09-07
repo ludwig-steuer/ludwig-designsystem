@@ -7,6 +7,7 @@ import {
 import type { ColumnDef } from "../../patterns/DataTable";
 import { Link } from "../../primitives/Link";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { Amount } from "../../primitives/Amount";
 import { Time } from "../../primitives/Time";
 import { CaseCell } from "../accounting-case/CaseCell";
@@ -137,12 +138,19 @@ export function bankTransactionColumns({
         ) : (
           <span className="v2muted">{name}</span>
         );
-        return rowHref ? (
-          <Link className="v2rowlink" href={rowHref(t)}>
-            {body}
-          </Link>
-        ) : (
-          body
+        // The 180-px track carries about 20 characters; the stock goes to 54.
+        // Without clipping the cell wrapped and the row grew by 38 % at p90
+        // — V1 asks for one row height (acceptance 0101, M2).
+        return (
+          <span className="v2trunc" title={name}>
+            {rowHref ? (
+              <Link className="v2rowlink" href={rowHref(t)}>
+                {body}
+              </Link>
+            ) : (
+              body
+            )}
+          </span>
         );
       },
     },
@@ -179,6 +187,10 @@ export function bankTransactionColumns({
       // than its widest value pushes that value into the neighbour, and
       // `max-content` is out: head and row are separate grids (0106).
       width: "160px",
+      // Z4: a status column carries its (i) — **once**, in the head. It goes
+      // into `headerAside`, not `header`: a button inside the sort link would
+      // be invalid HTML (acceptance 0101, M5).
+      headerAside: <StatusInfoButton axis="ereignis" />,
       cell: (t) => <EventStateCell transaction={t} />,
     },
     matchStage: {
@@ -187,12 +199,13 @@ export function bankTransactionColumns({
       // 180 px: „außerhalb des Bestands" needs 169 px with its (i) — the
       // track stood at 160 and the text ran 9 px into the gutter. Measured.
       width: "180px",
+      headerAside: <StatusInfoButton axis="bank_match_stage" />,
       // Since `cc141f7b` there is an axis for this (`bank_match_stage`), and
       // with it the four open classes — 29 % of the stock — have a word for
       // the first time. Before that a tick said yes and nothing said no.
       cell: (t) =>
         t.matchStage ? (
-          <StatusBadge axis="bank_match_stage" status={t.matchStage} />
+          <StatusBadge axis="bank_match_stage" status={t.matchStage} info={false} />
         ) : (
           <span className="v2muted">nicht gelaufen</span>
         ),
@@ -281,7 +294,7 @@ function EventStateCell({ transaction }: { transaction: BankTransactionRowData }
             {transaction.cases.length > 1 ? (
               <span className="v2btxrow__statefor">{c.caseNumber ?? c.caseId.slice(0, 8)}</span>
             ) : null}
-            <StatusBadge axis="ereignis" status={state.value} />
+            <StatusBadge axis="ereignis" status={state.value} info={false} />
           </span>
         );
       })}

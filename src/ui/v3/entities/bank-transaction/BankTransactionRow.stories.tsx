@@ -56,13 +56,15 @@ function Frame({ children, sub }: { children: React.ReactNode; sub?: string }) {
     <div style={{ maxWidth: 1400 }}>
       <Card>
         <CardHead title="Kontoauszug August 2026" sub={sub ?? "Commerzbank · 1210"} />
-        <Table cols={COLS} minWidth={1220}>
+        <Table cols={COLS} minWidth={1400}>
           <HeadRow>
             {DEF.map((c) => (
               <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
                 {c.header}
-                {c.key === "eventState" ? <StatusInfoButton axis="ereignis" /> : null}
-                {c.key === "matchStage" ? <StatusInfoButton axis="bank_match_stage" /> : null}
+                {/* Das (i) kommt aus dem Spaltensatz, nicht aus einer Liste
+                    hier: von Hand gehängt fehlt ihm der Abstand, den die Regel
+                    setzt — gemessen 0 px statt 4 (Abnahme 0101, M5). */}
+                {c.headerAside}
               </span>
             ))}
           </HeadRow>
@@ -166,7 +168,7 @@ export const Columns: Story = {
             <span>Gegenpartei</span>
             <span>Verwendungszweck</span>
             <span>Konto</span>
-            <span>
+            <span className="v2sth">
               DATEV-Historie <StatusInfoButton axis="bank_match_stage" />
             </span>
             <span className="v2num">Betrag</span>
@@ -241,7 +243,7 @@ export const InUse: Story = {
       {[
         BASE,
         { ...BASE, id: "b2", postingDate: "2026-08-27", amount: 1800, counterpartyName: "Musterbau GmbH", purpose: "EREF+RE-2026-0338 SVWZ+Zahlung Rechnung RE-2026-0338", matchStage: "beleg", cases: [CASE({ caseId: "c-338", caseNumber: "2026-0338", title: "Ausgangsrechnung Musterbau", amount: 1800, eventBookingState: "posted" })], allocatedSum: 1800 },
-        { ...BASE, id: "b3", postingDate: "2026-08-28", amount: -412, counterpartyName: "Stadtwerke Musterstadt", purpose: "EREF+SW-2026-08 SVWZ+Abschlag Strom 08/2026", matchStage: "unclear_none", cases: [], allocatedSum: 0 },
+        { ...BASE, id: "b3", postingDate: "2026-08-28", amount: -412, counterpartyName: "Stadtwerke Musterstadt", purpose: "EREF+SW-2026-08 SVWZ+Abschlag Strom 08/2026", matchStage: "no_account", cases: [], allocatedSum: 0 },
         { ...BASE, id: "b4", postingDate: "2026-08-29", amount: -89.9, counterpartyName: null, purpose: "SVWZ+Kontoführungsentgelt August 2026", matchStage: "exact", cases: [], allocatedSum: 0 },
         { ...BASE, id: "b5", postingDate: "2026-08-30", amount: -2480.55, counterpartyName: "Handwerk Schulz KG", purpose: "EREF+RE-8817 SVWZ+Sanierung Serverraum, Teilrechnung 2 von 3", matchStage: "near", cases: [CASE({ caseId: "c-8817", caseNumber: "2026-0451", title: "Sanierung Serverraum", amount: 2000, eventBookingState: null })], allocatedSum: 2000, openClarificationsCount: 1 },
         { ...BASE, id: "b6", postingDate: "2026-08-31", amount: -74.2, counterpartyName: "Deutsche Post AG", purpose: "SVWZ+Porto August 2026", matchStage: "beyond_bookings", cases: [CASE({ caseId: "c-9001", caseNumber: "2026-0499", title: "Porto", amount: 74.2, eventBookingState: null, noBookingRequiredReason: "Sammelbuchung am Monatsende, hier keine Einzelbuchung." })], allocatedSum: 74.2 },

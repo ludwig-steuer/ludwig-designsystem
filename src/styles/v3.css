@@ -118,7 +118,7 @@
    Aufteilungszeile hatte statt 8/16/12/16 gar kein Polster. */
 .v2tbl th.v2actions { display: flex; gap: 14px; justify-content: flex-end; align-items: center; }
 .v2tbl td.v2btxrow__split {
-  padding: var(--space-2) var(--space-4) var(--space-3);
+  padding: var(--space-2) 18px var(--space-3);
 }
 .v2tbl td.v2tbl__detail {
   padding: var(--v2-detail-y, 14px) 18px calc(var(--v2-detail-y, 14px) + 2px) 46px;
@@ -3352,8 +3352,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Wort — die Achse `klaerung` ist eine Dringlichkeit je Rückfrage, und die
    Zeile hat eine Anzahl über den Fall. */
 .v2btxrow__clar { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+/* Seitlich 18 px wie jede Zelle der Tabelle (`__group`, `__empty`, `__detail`
+   fuehren dieselbe Zahl): mit den 16 des Tokens sass die rechte Kante der
+   Unterzeile neben der Betragsspalte, und die Aufteilung soll unter dem
+   Betrag stehen, den sie aufteilt (Abnahme 0101, M6). */
 .v2btxrow__split {
-  padding: var(--space-2) var(--space-4) var(--space-3);
+  padding: var(--space-2) 18px var(--space-3);
   background: var(--color-bg-soft); border-bottom: 1px solid var(--color-border-subtle);
 }
 .v2btxrow__splitrow {
