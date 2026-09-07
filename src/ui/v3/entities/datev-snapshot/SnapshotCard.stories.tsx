@@ -76,15 +76,21 @@ export const WithDeviations: Story = {
  * Er sagt „nicht vermerkt" — ein Gedankenstrich behauptete, es gäbe nichts zu
  * wissen, dabei ist die Stufe nur nicht festgehalten.
  *
- * Ein `opos`-Lauf hat keinen Abgleich: der läuft nur bei Journal-Läufen. Das
- * ist die dritte Aussage, und sie steht sichtbar da.
+ * Zwei der vier Karten haben keinen Abgleich, und aus zwei verschiedenen
+ * Gründen: der `opos`-Lauf gleicht nicht ab, weil das nur bei Journal-Läufen
+ * geschieht — der Abzug **ohne** Stufe, weil er aus der Zeit vor der
+ * Einführung stammt. Das ist die dritte Aussage, und sie steht sichtbar da.
  */
 export const Levels: Story = {
   render: () => (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+        // `auto-fit` statt fester vier Spalten: bei vier Spuren blieben den
+        // Karten unter 1100 px Fensterbreite 140 px, und der Inhalt lief um
+        // bis zu 81 px über — `.v2card` schneidet ihn dann ab, statt zu
+        // scrollen (Abnahme 0027). Umbrechen ist die Antwort, nicht Quetschen.
+        gridTemplateColumns: "repeat(auto-fit, minmax(15rem, 1fr))",
         gap: "var(--space-5)",
         padding: "var(--space-6)",
       }}

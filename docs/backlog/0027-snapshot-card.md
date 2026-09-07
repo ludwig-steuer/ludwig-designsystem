@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/datev-snapshot/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, ein DATEV-Snapshot ist Buchhaltung |
@@ -939,3 +939,295 @@ stand sie 638 px unter den anderen. Jetzt vier Spalten, alle vier bei y = 40
 Eintrag noch nicht. Ein Sync findet nicht mehr statt (Owner-Entscheid: das Set
 wird erst fertig, dann zieht die App in einem Zug nach), also ist das kein
 Mangel dieser Aufgabe — es steht hier, damit der eine Zug es mitnimmt.
+
+## Wiederabnahme 2026-09-07 (fremde Abnahme)
+
+**Urteil: abgenommen.** Die zwei Mängel der Vorrunde sind nachgeprüft und
+erledigt — der deutsche Kommentar ist auf Englisch, und `Levels` zeigt vier
+Karten in einer Reihe statt drei plus eine. Alles, was die fünf Runden davor
+erledigt haben, hält: Tausenderpunkte an allen drei Aufrufstellen, Singular in
+Haupt- **und** Nebensatz, die Wörter der Tiefe aus der Domäne, „nicht vermerkt"
+mit eigener Karte, Rand ohne Schatten, **eine** rechte Kante. Es blockiert
+**nichts**.
+
+Was offen bleibt, gehört nicht dieser Karte: der Spiegel driftet weiter um
+einen Kommentar, und der deutsche Begriff für `baseline_level` heißt seit
+heute Mittag drüben **„Abzugstiefe"** — die Zeile heißt hier „Tiefe". Der
+hiesige `docs/ludwig/GLOSSARY.md` kennt den Eintrag nicht, der Bauende konnte
+ihn also nicht nachschlagen; beides nimmt der eine Zug mit (Owner-Entscheid:
+kein Sync, bis das Set fertig ist).
+
+Gemessen am laufenden Dev-Server (`localhost:6107`, Quelle, nicht
+`storybook-static`) über CDP auf eigenem Port, je Schritt ein eigenes
+`Runtime.evaluate`, Klicks über `el.click()`, eigene Kopie der Helfer im
+Scratchpad. Kein Wert aus der Spec oder aus einem früheren Protokoll
+zurückgelesen — jede Zahl unten kommt aus
+`getComputedStyle`/`getBoundingClientRect`/`Range.getBoundingClientRect`/`innerText`
+oder aus einer Datei, die dabei offen lag. Kontraste aus den **gerenderten**
+Farben von Hand nachgerechnet. Fünf Screenshots (`Filled`, `Levels`, `Empty`,
+`InGrid`, `WithDeviations`).
+
+### Die Werkzeuge (Exit-Code, nicht `| tail`)
+
+| Lauf | Ergebnis |
+|---|---|
+| `pnpm typecheck` | exit 0 |
+| `pnpm check:language` | exit 0 — „nichts geändert unter src/ui/v3" (der Baum ist sauber, HEAD~1 fasst diese Datei nicht mehr an). **Gegenprobe:** `node scripts/check-language.mjs --all` → exit 1, 388 Zeilen in 132 Dateien des Bestands, davon **0** unter `entities/datev-snapshot/`. Selbstprüfung `--test` exit 0, 8 Fälle |
+| `pnpm check:icons` | exit 0, „53 Zeichen in der Registry, 2 Datei(en) noch offen" |
+| `pnpm check:contrast` | exit 0, „20 Angaben nachgerechnet" |
+| `pnpm check:mirror` | exit 0, 8 Fälle — prüft den Filter, nicht den Abgleich mit der App |
+| `pnpm check:when` | exit 0 |
+| `pnpm build` | **nicht gelaufen** — Bauverbot dieser Runde (Befund 0117: parallele Prüfer, ein Bau leert `storybook-static/` unter ihnen weg). Nicht prüfbar, mit Grund |
+
+### Story-Deckung
+
+Sieben Stories, genau die der Spec-Tabelle, Exportnamen englisch — aus
+`index.json` des laufenden Servers gelesen, nicht aus der Datei:
+`--filled`, `--with-deviations`, `--levels`, `--empty`, `--error`,
+`--interactive`, `--in-grid`, Titel `v3/Entitäten/DATEV-Snapshot/SnapshotCard`,
+`count = 7`.
+
+Ableitung nach `spec-schreiben` §6: 3 anwendbare Zustände (gefüllt, leer,
+Fehler) + 1 Enum (`baselineLevel`, alle Werte nebeneinander) + 1 Rundlauf
+(`onOpen` **und** `onImport` in einer Story) + 1 „im Einsatz" + 1 Rand
+(`WithDeviations`) = **7**, unter der Obergrenze 10. Der Fließtext der Spec
+rechnet 6, ihre eigene Tabelle listet 7 — der Bau folgt der Tabelle; das ist
+die bekannte Inkonsistenz der Spec, nicht des Baus.
+
+Jede Prop hat ihre Story: `snapshot` (`Filled` gefüllt, `Empty` `null`),
+`title` (Default „DATEV-Stand" in `Filled` gemessen, gesetzt in `Levels` und
+`InGrid`), `onOpen` (`Interactive`, `InGrid` — Knopf „Spiegel öffnen" in beiden
+Karten gemessen), `onImport` (`Empty`, `Interactive`). Ausgeschlossen mit
+Grund: `LeerNachFilter` (nicht anwendbar), `Laedt` (der Aufrufer zeigt
+`Skeleton`, 0016). `Error` zeigt den Satz des **Aufrufers** ohne die Karte —
+die Schnittstelle hat bewusst keine `error`-Prop.
+
+### Die zwei Mängel der Vorrunde, nachgeprüft
+
+| Punkt | Messung | Ergebnis |
+|---|---|---|
+| **M1 deutscher Kommentar** | `node scripts/check-language.mjs --all` nennt **0** Zeilen unter `src/ui/v3/entities/datev-snapshot/` (Vorrunde: drei). Die vier Zeilen stehen jetzt englisch in `SnapshotCard.tsx:182–185` („The subordinate clause bends along … (acceptance 0027)"); `git show 35930f8` zeigt genau diesen Tausch, Inhalt gleich, Sprache gewechselt. Der Wächter selbst liest jetzt auch `HEAD~1` (`scripts/check-language.mjs`, `geaenderteZeilen()`), seine Selbstprüfung ist grün | erledigt |
+| **M2 `Levels` „nebeneinander"** | `…--levels` bei 1280 px: **vier** Karten, alle bei `y = 40`, `x = 40 / 345 / 650 / 955`, je 285 px breit. `SnapshotCard.stories.tsx:87` steht auf `repeat(4, minmax(0, 1fr))`. *Gegenprobe:* zur Laufzeit auf `repeat(3, …)` gesetzt → `y = 40 / 40 / 40 / 678.3`, die vierte fällt wieder 638 px tief. Die Messung reagiert | erledigt |
+| **M3 Spiegel-Drift** | Steht weiter: `diff apps/web/src/modules/datev-mirror/domain/snapshot.ts src/ludwig/modules/datev-mirror/domain/snapshot.ts` → exit 1, genau **ein** Absatz (der Fallstrick zu `journal_opos`, drüben mit `db8efeda` auf die Owner-Auskunft umgeschrieben). `BASELINE_LEVELS`, `BASELINE_LEVEL_LABEL` und das Interface sind zeichengleich — die Karte zeigt das Richtige. Gehört dem einen Zug, nicht dieser Aufgabe | bleibt vermerkt, blockiert nicht |
+
+### Der feste Block
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `typecheck` exit 0. `build` nicht gelaufen (Bauverbot 0117) — der letzte Bau dieser Karte lief in einer früheren Runde grün, und keine Zeile hat sich seither an einer bau-relevanten Stelle geändert (letzter Commit an den Dateien: `35930f8`, ein Kommentar und eine Rasterzahl) | erfüllt, `build` mit Grund ungeprüft |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/entities/datev-snapshot/{SnapshotCard.tsx, SnapshotCard.stories.tsx, datev-snapshot.ts}`; Titel aus dem laufenden Server `v3/Entitäten/DATEV-Snapshot/SnapshotCard`; Barrel `src/ui/v3/index.ts:443` (Komponente) und `:448` (Typ-Modul) | erfüllt |
+| Code englisch; `@when`/`@instead` an jedem Export | `check:language --all`: 0 Treffer in beiden Dateien. `@when`/`@instead` an `SnapshotCard` (`:34`, `:36`); `Reconciliation` ist nicht exportiert. `datev-snapshot.ts` exportiert nur Interface und zwei Konstanten — vom Wächter ausdrücklich ausgenommen („Konstanten sind ausgenommen", `check-when.mjs`), und `pnpm check:when` steht auf exit 0 | erfüllt |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\b\|[0-9]+px"` über beide Dateien → exit 1, keine Treffer. R1 im Browser: die fünf Zählwörter kommen aus `resolveStatus("mirror_match", …)` und lauten gemessen „mit Ludwig gematcht / aufgeteilt (Kanzlei) / von der Kanzlei geändert / DATEV-Fremdbuchung / unklar"; das (i) öffnet den `StatusInfoDialog` derselben Achse samt Herkunft „`client_datev_mirror_entries.match_state` (NULL = nicht abgeglichen)". `BASELINE_LEVEL` hat im Set genau **eine** Deklaration, im gespiegelten `domain/snapshot.ts`; `SNAPSHOT_COUNT_LABEL` ist die vom Nachtrag angeordnete Beschriftung einer Anzahl, kein Status | erfüllt |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | erfüllt |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Punkt für Punkt unten unter „Was hält". Die zwei Zeilen, die laut Skill der App gehören (`@deprecated`, „in §11 auf v2 gesetzt"), sind übersprungen — der v3-Eintrag steht trotzdem: `docs/design-guidelines.md:544` „`SnapshotCard` · **gebaut (0027)**", `docs/ui-repraesentationen.md:505` „`SnapshotCard` (0027) — `reporting/page.tsx` ist gelöscht" | erfüllt |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Fünf Screenshots über `Page.captureScreenshot`: `Filled` (900), `Levels` (1400), `Empty` (900), `InGrid` (1200), `WithDeviations` (900) | erfüllt |
+
+### Der variable Block
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Stichtag und Importzeitpunkt beide beschriftet und absolut (`Filled`, T7) | `…--filled`, aus den Zeilen gelesen: `["Stichtag","31.08.2026"]`, `["Importiert","01.09.2026, 06:12"]` — beide beschriftet, beide absolut, kein „vor 3 Tagen"; Europe/Berlin (Quelle `2026-09-01T06:12:00+02:00`) | erfüllt |
+| „Abgleich nicht durchgeführt" ist eine eigene, sichtbare Aussage (`Levels`, linke Karte, V9 — Nachweis am 2026-09-07 berichtigt) | `…--levels`, Karte 1 (`reconcile: null`): `.v2callout--warning`, Kicker „Abgleich", Titel „Für diesen Stand wurde kein Abgleich durchgeführt.", Unterzeile „Der Abgleich läuft nur bei Journal-Läufen. …", Zeichen mit `aria-label="nicht durchgeführt"`, **0** Zähler-Zeilen. Die drei Aussagen sind unterscheidbar und tragen je Wort **und** Zeichen: `Filled` neutral / „Alle DATEV-Buchungen sind zugeordnet." / `aria-label="erledigt"` · `WithDeviations` warning / „1.204 Buchungen sind ungeklärt." / „Warnung" · `Levels` warning / „kein Abgleich" / „nicht durchgeführt". `…--empty` hat gemessen **0** Callouts — der berichtigte Zeiger stimmt | erfüllt |
+| Karte hat Rand oder Schatten, nicht beides (`Filled`, §2) | `…--filled`, `getComputedStyle('.v2card')`: `border: 1px solid rgb(221, 226, 232)`, `box-shadow: none` | erfüllt |
+| Stückzahlen rechtsbündig mit `tnum` (`Filled`, V3) | `…--filled` bei 472 px Karte: alle **sechs** Feldzeilen und alle **fünf** Zähler haben die rechte Kante ihres *Textes* (`Range`, nicht die Box) auf exakt **491 px**; `font-variant-numeric: lining-nums tabular-nums` an allen sieben Zahl-Spans. Werte gruppiert: `4.812 / 137` und `4.520 / 88 / 204 / 0 / 0`. *Gegenprobe:* `justify-content: flex-start` an den Zähler-Zeilen schiebt die Kanten auf `236.44 / 204.11 / 249.66 / 220.02 / 121.50` und zurück auf `491`. Die Messung reagiert | erfüllt |
+| Ersetzt die Inline-Darstellung in `datev/page.tsx` ohne Funktionsverlust | Gegen `apps/web/src/app/(app)/clients/[clientSlug]/[year]/datev/page.tsx` gehalten: der KPI „Letzter Abgleich" (`fmtDateTime(importedAt)` + „Stichtag" `fmtDate(asOf)`, Z. 592–597) und der Snapshot-Teil der Abgleich-Historie (Z. 757–786: Zeitpunkt, Stichtag, Inhalte, `fmtCount` auf `mirror_entries`/`open_items`, die fünf Reconcile-Zähler, `r.baselineLevel ?? "—"`) sind vollständig abgedeckt — mit **denselben** Tausenderpunkten und, bei der Tiefe, mit dem Wort statt des Rohwerts und mit „nicht vermerkt" statt eines Gedankenstrichs. Mehr, nicht weniger. Nicht übernommen und richtig so: Dauer, Auslöser, Snapshot-ID — die gehören zum Lauf, nicht zum Stand | erfüllt |
+
+### Was hält — gemessen, mit Gegenprobe
+
+- **Die Wörter der Tiefe kommen aus der Domäne.** `…--levels`, die vier Karten:
+  „nur offene Posten" · „Journal und offene Posten" · „nur Journal" · „nicht
+  vermerkt" — zeichengleich mit `BASELINE_LEVEL_LABEL` im gespiegelten
+  `domain/snapshot.ts`. Font gemessen `Inter` (kein Mono), Farbe `rgb(45, 45, 45)`;
+  der vierte Fall steht in `.v2muted`, `rgb(92, 92, 92)`.
+- **Kein Rohwert mehr, keine ungruppierte Zahl.** Alle sieben Stories geladen
+  und der Text von `#storybook-root` geprüft: `opos`, `journal_opos`, `journal`
+  als eigenständige Zeichenkette **0 Treffer in 7 von 7**. Ungruppierte
+  vierstellige Zahlen: **nur `2026`** — das Wirtschaftsjahr, richtig
+  ungruppiert.
+- **Tausenderpunkte an allen drei `formatCount`-Stellen, jede mit Story.**
+  `…--filled` `4.812 / 137` und `4.520 / 88 / 204 / 0 / 0` · `…--in-grid`
+  rechts `4.390 / 152` und `4.102 / 74 / 190 / 1 / 0` · `…--levels` vierte Karte
+  `2.140` · `…--with-deviations` im Hauptsatz **1.204** (`1.150 + 54`).
+- **Singular, Haupt- und Nebensatz.** `…--in-grid` rechte Karte: „**1 Buchung
+  ist** ungeklärt." + „**Sie steht** im Spiegel, mit ihrem Zustand —
+  Fremdbuchung oder unklar." · `…--with-deviations`: „1.204 Buchungen **sind**
+  ungeklärt." + „**Sie stehen** im Spiegel, jede mit ihrem Zustand".
+- **Kontraste, aus den gerenderten Farben von Hand nachgerechnet** (auf
+  `rgb(255, 255, 255)`, sRGB-Linearisierung, WCAG-Formel): Feld-Label und
+  Zählerwort `rgb(92, 92, 92)` **6.69:1** · Feldwert und Zählerzahl
+  `rgb(45, 45, 45)` **13.77:1** · „Zustände" `rgb(113, 113, 113)` **4.88:1** ·
+  Callout-Titel `rgb(26, 58, 92)` **11.64:1** · Warnton (Rand, Kicker,
+  Unterzeile, Warnzeichen) `rgb(140, 96, 30)` **5.52:1** · Erledigt-Zeichen
+  `rgb(63, 122, 90)` **5.07:1** · Fokusring `rgb(59, 143, 196)` **3.55:1**.
+  Alle über ihrer Schwelle. *Kleine Korrektur an einer früheren Runde:* das
+  Erledigt-Zeichen stand hier mit 5,02 — nachgerechnet sind es 5,07. Schluss
+  unverändert; genau die Sorte Zahl, die der Kontrast-Wächter im eigenen JSDoc
+  als „die eine Messung, die niemand nachrechnet" beschreibt.
+- **Fokusring per Tastatur.** `…--empty`, zweimal **Tab** (nicht `focus()` —
+  das trifft `:focus-visible` nicht): aktiv ist `BUTTON` „Spiegel importieren",
+  `outline: rgb(59, 143, 196) solid 2px`, `outline-offset: 2px`,
+  `:focus-visible` greift (gemessen `true`).
+- **Hover.** `.v2btn--tertiary:hover:not(:disabled) { background:
+  var(--color-accent-50) }` liegt an; „Spiegel öffnen" ist ein echter `button`.
+- **„im Einsatz" bei den Breiten der Seite.** `…--in-grid` bei 700 / 1100 /
+  1400 / 1920 px: Karten 300 / 500 / 506 / 506 px, `scrollWidth − clientWidth =
+  0` an **jeder** Karte und am Dokument, Zähler-Zeilen einzeilig (19.4 px),
+  „Tiefe" einzeilig (30.9 px). Das Raster steht auf `minmax(0, 1fr)` — das
+  Kind darf schrumpfen (§9, Owner-Regel 2026-09-07).
+- **Breite über den Story-Rahmen hinaus.** `…--filled` mit entferntem
+  `max-width`, Rahmen auf 1920 / 1400 / 1100 / 700 / 520 / 320 / 260 / 240 px
+  gezwungen: `scrollWidth − clientWidth = 0` an der Karte durchweg; „Tiefe"
+  bricht ab 260 px auf zwei Zeilen (30.9 → 51.8 px), Zähler bleiben einzeilig.
+  Erst bei **200 px** 7 px Überlauf — unter der zugesagten Grenze von 240 px,
+  also kein Rückschritt. *Gegenprobe:* ein 48-Zeichen-Wort ohne Trennstelle in
+  dieselbe Zelle ergibt bei 240 px **299 px** Überlauf. Die Messung misst etwas.
+- **Rundlauf `Interactive`** (Klicks je in eigenem `Runtime.evaluate`):
+  Leerzustand mit genau einem Knopf → Klick „Spiegel importieren" → Karte
+  gefüllt, „Tiefe" = „Journal und offene Posten", Kopfknopf „Spiegel öffnen"
+  da, Log „Import angestoßen" → Klick → Log „Import angestoßen · Spiegel
+  geöffnet" → Klick auf das (i) öffnet den Dialog „DATEV-Abgleich" mit allen
+  fünf Ausprägungen, ihren Rohwerten und der Herkunft.
+- **`Empty`**: `EmptyState` in der Karte, „Kein DATEV-Stand vorhanden", Grund
+  und Weg in der Beschreibung, ein primärer Knopf „Spiegel importieren", **0**
+  Callouts. (Die drei Knöpfe „Set string", die im Iframe mitgemessen werden,
+  liegen außerhalb von `#storybook-root` — Storybooks eigene Steuerung, nicht
+  die Karte. Gemessen: `inRoot: false`.)
+- **Farbe, Zeichen, Versalien.** Rot nirgends in der Karte (nur im
+  `Error`-Callout des **Aufrufers**); jeder farbige Zustand trägt Wort **und**
+  Zeichen; Zeichen über `StateIcon`/`ActionIcon`, `check:icons` grün; keine
+  Emoji, keine Versalien, keine Bewegung.
+
+### Mängel
+
+**1 · Die Zeile heißt „Tiefe", der Begriff heißt „Abzugstiefe" — blockiert
+nicht.**
+Kriterium: fester Block, „Texte nach T1–T5" (§9: GLOSSARY-Begriffe;
+CLAUDE.md: „der deutsche gehört ins UI").
+Ort: `SnapshotCard.tsx:98` (`"Tiefe"` als Label der Feldzeile).
+Messung: `/Users/simonfakir/dev/ludwig/app/GLOSSARY.md:2138` trägt seit
+`db8efeda` (heute 11:12) „### Baseline level (Abzugstiefe)" mit
+„- German: **Abzugstiefe**". Im Browser zeigt jede der sieben Stories die Zeile
+als „Tiefe". Der hiesige `docs/ludwig/GLOSSARY.md` kennt den Eintrag **nicht**
+(`grep Abzugstiefe` → 0 Treffer) — der Bauende konnte ihn nicht nachschlagen,
+deshalb blockiert das nicht.
+Kleinster Weg: mit dem Spiegel-Zug, der den GLOSSARY-Eintrag holt, das Label
+auf „Abzugstiefe" heben. Ein Wort, kein Code — und dann passt auch die Breite:
+gemessen bricht die Zeile heute erst ab 260 px Kartenbreite um.
+
+**2 · `Levels` unterschreitet unter 1100 px die Breite, die die Karte hält —
+blockiert nicht.**
+Kriterium: §9, „Ein Baustein … in einem Raster- oder Flex-Kind … sonst
+schneidet das Kind ab, statt zu scrollen"; gemessen wird bei der Breite, die
+der Baustein **auf der Seite** hat — und dort (`InGrid`) hält er sauber.
+Ort: `SnapshotCard.stories.tsx:87`, `repeat(4, minmax(0, 1fr))`.
+Messung: `…--levels` bei 700 px Fensterbreite → Karten **140 px**,
+`scrollWidth − clientWidth` = **81 / 67 / 67 / 81 px**; `.v2card` hat
+`overflow-x: hidden`, die Werte werden also **abgeschnitten**, nicht
+gescrollt (gemessen: `.v2fields__row` reicht bis `x = 260.3`, die Karte endet
+bei `180`). Bei 1100 px sind die Karten 240 px und der Überlauf **0**, bei
+1400 px 315 px, bei 1920 px 445 px. Aus den gemessenen Maßen (Rahmen-Polster
+2 × 40 px, Spalten-Abstand 20 px) folgt die Schwelle für 240 px Kartenbreite:
+mit vier Spalten `(W − 140)/4 = 240` → **1100 px**, mit den drei Spalten davor
+`(W − 120)/3 = 240` → **840 px**. Die Nacharbeit der Vorrunde hat sie also um
+260 px angehoben.
+Warum das nicht blockiert: L1 sperrt das produktive Register ohnehin unter
+1280 px, und die Story „im Einsatz" (`InGrid`) hält bei 700–1920 px ohne
+Überlauf.
+Kleinster Weg: im Story-Rahmen `repeat(auto-fit, minmax(240px, 1fr))` statt
+`repeat(4, …)` — dann bleibt „nebeneinander" wahr, solange Platz ist, und
+darunter bricht das Raster, statt die Karte zu schneiden. Kein Code an der
+Karte.
+
+**3 · Der Nebensatz aus M2 der Vorrunde steht noch — blockiert nicht.**
+Kriterium: keins wörtlich; die Vorrunde hatte ihn unter M2 als „Nebenbei"
+genannt, die Nacharbeit hat nur das Raster angefasst.
+Ort: `SnapshotCard.stories.tsx:79–80`: „Ein `opos`-Lauf hat keinen Abgleich:
+der läuft nur bei Journal-Läufen. Das ist die dritte Aussage, und sie steht
+sichtbar da."
+Messung: `…--levels` zeigt die dritte Aussage in **zwei** Karten (1 und 4), und
+die vierte ist kein `opos`-Lauf — sie hat gar keine Stufe (`baselineLevel:
+null`, gemessen „nicht vermerkt"), ihr `Umfang` ist „Buchungsstapel". Der Satz
+erklärt also nur die Hälfte dessen, was zu sehen ist.
+Kleinster Weg: einen Halbsatz anhängen — „…, und ein Altbestand ohne Stufe hat
+ihn auch nicht". Kein Code.
+
+### Befunde am Set (gehören nicht zu dieser Aufgabe)
+
+- **`.v2card` schneidet, statt zu scrollen.** `overflow-x: hidden` an der Karte
+  trifft auf ein `.v2fields__row`, das sich bei rund 199 px Textbedarf nicht
+  weiter drücken lässt: unter etwa 240 px Kartenbreite verschwinden Werte
+  lautlos am rechten Rand (gemessen oben, 81 px bei 140 px Karte). Das ist
+  genau der Fall, vor dem §9 warnt, nur eine Ebene tiefer als dort beschrieben
+  — die Rasterzelle steht korrekt auf `minmax(0, …)`, die Karte selbst
+  schneidet. Betrifft jede Karte des Sets, nicht diese.
+- **`StateIcon` koppelt Glyphe und Ton.** Der nicht durchgeführte Lauf trägt
+  `state="skipped"`, zeichnet damit in `rgb(113, 113, 113)` (4.88:1, über der
+  3:1-Schwelle, also kein Kontraktmangel) und steht in einem Callout, dessen
+  Rand und Text `rgb(140, 96, 30)` sind. `"warning"` gäbe den Ton, aber das
+  Warndreieck — und das sagt „Warnung", wo „nicht gelaufen" gemeint ist. Ohne
+  Ton-Parameter am `StateIcon` gibt es hier keinen richtigen Griff. Steht seit
+  der ersten Abnahme; unverändert.
+- **`.v2num` richtet außerhalb von `.v2tbl`/`.v2fields` nicht aus.** Die Klasse
+  setzt nur `text-align: right` und `font-variant-numeric`; auf einer Box, die
+  auf ihren Inhalt schrumpft, bleibt `text-align` folgenlos. In dieser Karte
+  kommt die Kante aus `.v2fields__row > span:last-child` bzw. aus
+  `justify-content: space-between` — die Klasse hält hier, aber nicht durch
+  sich selbst. Eigene Aufgabe, unverändert.
+- **Der Spiegel und das GLOSSARY hängen hinter der App.** `domain/snapshot.ts`
+  driftet um einen Kommentar-Absatz (`db8efeda`), und
+  `docs/ludwig/GLOSSARY.md` fehlt „Baseline level (Abzugstiefe)". `check:mirror`
+  fängt das nicht — er prüft den Filter (8 Fälle), nicht den Abgleich mit der
+  App. Nach dem Owner-Entscheid findet kein Sync statt; der eine Zug nimmt es
+  mit, zusammen mit Mangel 1 oben.
+- **`pnpm build` flackert** (`ENOENT … chmod
+  './storybook-static/reference/design-system-v2/PROGRESS.md'` beim Kopieren
+  der `staticDirs`) — in dieser Runde nicht nachgemessen, weil nicht gebaut
+  wurde. Steht seit der zweiten Abnahme und betrifft jeden Bau im Repo.
+
+Abgenommen von / am: designsystem-abnahme (fremde Wiederabnahme, ohne
+Bauanteil), 2026-09-07 · **Kein Mangel blockiert.** Die zwei Mängel der
+Vorrunde sind erledigt, M3 (Spiegel-Drift) bleibt vermerkt und gehört dem
+einen Zug. Offene Punkte 1, 2 und 3 sind notiert und blockieren nicht;
+`pnpm build` ist mit Grund ungeprüft (Bauverbot 0117).
+
+## Nach der Wiederabnahme (2026-09-07): die drei nicht blockierenden Punkte
+
+Urteil war **abgenommen**. Alle drei Punkte trotzdem erledigt — zwei davon
+sind eine Zeile, der dritte ist eine Layout-Regel, die auch woanders gilt.
+Gemessen gegen den Dev-Server `http://localhost:6107` über CDP,
+`getBoundingClientRect` und `scrollWidth`/`clientWidth`, Fenster 1440, 1280,
+1100, 900 und 700 × 900.
+
+**1. Das Wort heißt „Abzugstiefe".** `SnapshotCard.tsx` sagt es jetzt so. Der
+Begriff steht seit `db8efeda` im GLOSSARY der App; unser Spiegel trägt den
+Eintrag noch nicht — er ist also **nachgeschlagen, nicht erfunden**, und das
+steht als Satz am Code. Gemessen: der gerenderte Text enthält viermal
+„Abzugstiefe" und kein alleinstehendes „Tiefe". Dass der Spiegel hinter der
+App liegt, bleibt der Befund des Prüfers und gehört an den nächsten
+Spiegel-Zug, nicht hierher.
+
+**2. `Levels` bricht um, statt zu quetschen.** Vier feste Spuren ließen den
+Karten unter 1100 px nur 140 px, und `.v2card` schnitt den Überlauf ab —
+gemessen hatte der Prüfer bei 700 px **81/67/67/81 px**. Jetzt
+`repeat(auto-fit, minmax(15rem, 1fr))`:
+
+| Fenster | Karten | Überlauf |
+|---|---|---|
+| 1440 | 4 nebeneinander, alle `y` 40, je 325 px | 0 |
+| 1280 | 4 nebeneinander, alle `y` 40, je 285 px | 0 |
+| 1100 | 4 nebeneinander, alle `y` 40, je 240 px | 0 |
+| 900 | 3 + 1, je 260 px | 0 |
+| 700 | 2 × 2, je 300 px | 0 |
+
+Damit hält die Story **beides**: „nebeneinander" (M2 der Vorrunde) bis
+hinunter zur L1-Sperre von 1280 px, und darunter bricht sie um, statt
+abzuschneiden.
+
+**3. Der Nebensatz nennt jetzt beide Karten ohne Abgleich.** Es sind zwei,
+aus zwei Gründen: der `opos`-Lauf gleicht nicht ab, weil das nur bei
+Journal-Läufen geschieht; der Abzug **ohne** Stufe, weil er aus der Zeit vor
+der Einführung stammt.
+
+`pnpm typecheck` Exit 0, `check:language` Exit 0. Nicht gebaut (0117).
+
+**Status: fertig.**

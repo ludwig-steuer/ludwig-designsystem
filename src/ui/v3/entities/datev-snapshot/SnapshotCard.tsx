@@ -95,7 +95,11 @@ export function SnapshotCard({
             ["Stichtag", <Time key="a" value={snapshot.asOf} format="date" />],
             ["Importiert", <Time key="i" value={snapshot.importedAt} format="dateTime" />],
             [
-              "Tiefe",
+              // The word is „Abzugstiefe", not „Tiefe" — GLOSSARY of the app
+              // since `db8efeda`. Our mirror does not carry the entry yet, so
+              // it was looked up over there, not invented here (acceptance
+              // 0027; the mirror pull is its own task).
+              "Abzugstiefe",
               // The three levels have words since 2026-09-07 (`222c8d5a`,
               // finding L-72): they come from the domain, not from a map here.
               // Without a level the field says so — an unknown value would be
