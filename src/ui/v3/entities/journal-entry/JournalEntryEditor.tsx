@@ -133,32 +133,33 @@ export interface JournalEntryEditorProps {
   /** Kontenblatt eines Kontos öffnen (Drawer des Aufrufers). */
   onOpenLedger?: (konto: string) => void;
   /**
-   * Das Belegnummern-Register zu **dieser Zeile** öffnen (0014). Gesetzt →
-   * die Lupe erscheint am Feld; weggelassen → kein Icon, wie bei
-   * `AccountField`. Die Zeilen-Id geht mit, weil der Aufrufer wissen muss,
-   * wohin er die gewählte Nummer zurückgibt.
+   * Open the register of document numbers for **this row** (0014). Set → the
+   * magnifier appears at the field; left out → no icon, like `AccountField`.
+   * The row id goes along because the caller has to know where to put the
+   * number that comes back.
    */
   onOpenDocumentNumberRegister?: (rowId: string) => void;
   /**
-   * Die Nummer, die für diesen Fall **gilt**, samt ihrer Herkunft — sie kommt
-   * aus der Dominanz-Rangfolge der Belegnummern-Quellen (`belegnummer_quelle`,
-   * berechnet in `modules/datev-truth`). Weicht der Wert der Zeile davon ab,
-   * sagt `DocumentNumberField` es; der Editor rechnet nichts und rät nichts.
+   * The number that **holds** for this case, with where it comes from — the
+   * dominance order of the document-number sources (`belegnummer_quelle`,
+   * computed in `modules/datev-truth`). Where the row differs from it,
+   * `DocumentNumberField` says so; the editor computes nothing and guesses
+   * nothing.
    */
   dominantDocumentNumber?: KnownDocumentNumber | null;
-  /** Die Wörter der neun Quellen — Prop, weil es dafür keine Achse gibt (L-71). */
+  /** The words of the nine sources — a prop, because there is no axis (L-71). */
   documentNumberSourceLabel?: DocumentNumberSourceLabels;
   /** Erklärung eines BU-Schlüssels öffnen. */
   onOpenTaxKey?: (bu: string) => void;
   /**
-   * Gesetzt → das Gegenkonto ist **bearbeitbar**, mit demselben `AccountField`
-   * wie die Zeilen. Weggelassen → Anzeige wie bisher. Die Seite (S/H) bleibt
-   * in beiden Fällen fest: sie ist die Gegenseite des Belegs und fällt aus
-   * `belegSide` — ein Umschalter dort erzeugte einen Satz, der nicht aufgeht.
-   * Das `≠` in der Summenzeile ist die ehrlichere Rückmeldung.
+   * Set → the contra account is **editable**, with the same `AccountField` as
+   * the rows. Left out → read-only as before. The side (debit/credit) stays
+   * fixed either way: it is the opposite side of the document and follows
+   * from `belegSide` — a switch there would produce an entry that does not
+   * balance. The `≠` in the totals row is the honester answer.
    */
-  onContraAccountChange?: (konto: string, name: string) => void;
-  /** Kandidaten für das Gegenkonto-Feld, in der Form von `AccountField`. */
+  onContraAccountChange?: (accountNumber: string, accountName: string) => void;
+  /** Candidates for the contra-account field, in the shape `AccountField` takes. */
   contraAccountCandidates?: React.ComponentProps<typeof AccountField>["candidates"];
   /** Schnellfunktionen: Klärungskonto, wie letzte Buchung, Privatanteil. */
   quickActions?: { klaerungskonto?: () => void; wieLetzte?: () => void; privatanteil?: () => void };
@@ -226,18 +227,18 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
   const summe = summeBelegseite(rows, belegSide);
   const rest = belegAmount == null ? null : belegAmount - summe;
 
-  // **Warnungen blockieren nicht.** Sie stehen sichtbar da und das Speichern
-  // läuft; nur Fehler halten es an. Die Quittung war der Versuch, eine
-  // Entscheidung zu erzwingen — und erzwungene Quittungen werden geklickt,
-  // nicht gelesen (Owner-Entscheid 2026-09-07).
+  // **Warnings do not block.** They stand there in plain sight and saving
+  // goes through; only errors stop it. The acknowledgement was an attempt to
+  // force a decision — and a forced acknowledgement gets clicked, not read
+  // (owner decision, 2026-09-07).
   const saveBlocked = errors.length > 0 || aktiv.length === 0;
 
   /**
-   * Tragen die aktiven Zeilen **verschiedene** Belegfeld-1-Werte? Der leere
-   * Wert zählt mit — er ist die häufigste Abweichung, und genau sie meldet
-   * der Server später als Prüfpunkt `P-BELEG`.
+   * Do the active rows carry **different** values in document field 1? The
+   * empty value counts — it is the most common deviation, and exactly the one
+   * the server reports later as check `P-BELEG`.
    */
-  const belegfeldUneinheitlich =
+  const documentNumbersDiffer =
     aktiv.length > 1 && new Set(aktiv.map((r) => r.beleg1.trim())).size > 1;
 
   const applyDocumentNumberToAll = useCallback((value: string) => {
@@ -366,7 +367,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
               {...(onOpenDocumentNumberRegister ? { onOpenDocumentNumberRegister } : {})}
               {...(dominantDocumentNumber ? { dominantDocumentNumber } : {})}
               {...(documentNumberSourceLabel ? { documentNumberSourceLabel } : {})}
-              {...(belegfeldUneinheitlich
+              {...(documentNumbersDiffer
                 ? { onApplyDocumentNumberToAll: () => applyDocumentNumberToAll(r.beleg1) }
                 : {})}
             />
@@ -376,13 +377,14 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
         {gegenkonto ? (
           <div className="bse__gegen">
             <span className="bse__gegen__label">
-              {/* Die Seite steht fest — sie ist die Gegenseite des Belegs. */}
+              {/* The side is fixed — it is the opposite side of the document. */}
               an {belegSide === "S" ? "H" : "S"}{" "}
               {editable && !locked && onContraAccountChange ? (
-                // Dasselbe Feld wie in den Zeilen: gleiches Verhalten, gleiche
-                // Tastatur, und das Kontenblatt-Icon (0013) kommt mit.
+                // The same field as in the rows: same behaviour, same
+                // keyboard, and the account-sheet icon (0013) comes along.
                 <AccountField
                   value={gegenkonto.konto}
+                  {...(gegenkonto.name ? { valueName: gegenkonto.name } : {})}
                   onChange={(konto, candidate) =>
                     onContraAccountChange(konto, candidate?.name ?? gegenkonto.name)
                   }
@@ -632,7 +634,7 @@ function Zeile({
   onOpenDocumentNumberRegister?: (rowId: string) => void;
   dominantDocumentNumber?: KnownDocumentNumber | null;
   documentNumberSourceLabel?: DocumentNumberSourceLabels;
-  /** Gesetzt → der Übernahme-Knopf steht unter dem Feld dieser Zeile. */
+  /** Set → the „apply to all rows" button stands under this row's field. */
   onApplyDocumentNumberToAll?: () => void;
 }) {
   const brutto = toNumber(row.umsatz);
@@ -686,18 +688,23 @@ function Zeile({
             </select>
             <AccountField
               value={row.konto}
-              // Der Name kommt mit, wenn der Kandidat ihn trägt — sonst stünde
-              // in der Zeile eine Nummer ohne Wort, und im Journal daneben ein
-              // leerer Kontoname.
+              // The loaded name belongs in the field, not only in the
+              // journal: without it the row shows a bare number as soon as
+              // the account is not among the candidates by chance.
+              // `AccountField` has the prop for exactly this (0013).
+              {...(row.kontoName ? { valueName: row.kontoName } : {})}
+              // The name comes along when the candidate carries it — without
+              // it the row shows a number without a word, and the journal
+              // beside it an empty account name.
               onChange={(konto, candidate) =>
                 onChange(candidate ? { konto, kontoName: candidate.name } : { konto })
               }
               candidates={row.candidates ?? {}}
               onSearch={onSearchAccounts}
-              // **Der Rest von 0013:** das Kontenblatt-Icon steht am Feld,
-              // nicht nur in der Lese-Ansicht. Ohne dieses Durchreichen führt
-              // der Weg zum Kontenblatt genau dort nicht hin, wo man das Konto
-              // gerade wählt.
+              // **The rest of 0013:** the account-sheet icon belongs at the
+              // field, not only in the read-only grid. Without passing it
+              // through, the way to the account sheet is missing exactly
+              // where someone is choosing the account.
               {...(onOpenLedger ? { onOpenLedger } : {})}
               ariaLabel="Konto"
             />

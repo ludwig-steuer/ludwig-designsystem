@@ -73,6 +73,11 @@ Konto                        Soll      Haben   BU
 
 ## 2. Belegfeld 1 in alle Zeilen übernehmen
 
+> **Überholt wie §1** — die geltende Fassung steht unter „Neufassung
+> 2026-09-07". Was hier steht, ist richtig geblieben und um zwei Props
+> ergänzt worden (`onOpenDocumentNumberRegister`, `dominantDocumentNumber`);
+> der Satz „Neue Prop: keine" stimmt nicht mehr.
+
 - Belegfeld 1 wird `DocumentNumberField` (0014), samt Lupe ins Register.
 - Tragen die nicht gelöschten Zeilen **verschiedene** nicht-leere Werte,
   erscheint unter dem Feld ein Knopf: **„Belegfeld 1 in alle Zeilen
@@ -91,6 +96,11 @@ Korrektur an die Stelle, an der die Prüfung sie später meldet.
 Neue Prop: keine. Der Editor hat `rows` und `setRow` bereits.
 
 ## 3. Gegenkonto bearbeitbar
+
+> **Überholt wie §1.** Die Props heißen englisch — `onContraAccountChange`
+> und `contraAccountCandidates`, nicht `onGegenkontoChange` /
+> `gegenkontoCandidates`. Dazu kam ein vierter Punkt (der Rest von 0013).
+> Geltende Fassung: „Neufassung 2026-09-07".
 
 Vorlage: `BuchungssatzEditor.dc.html` (`gkEditing`, `gkCandidates`,
 `onGkSideKeyDown`).
@@ -119,6 +129,12 @@ Vorlage: `BuchungssatzEditor.dc.html` (`gkEditing`, `gkCandidates`,
 
 ## Stories
 
+> **Überholt.** Die Namen dieser Tabelle (`JournalZweispaltig`,
+> `BelegfeldAbweichend`, `GegenkontoBearbeitbar`) und der Kriterienblock
+> darunter beziehen sich auf die erste Fassung. Es gilt die Story-Tabelle der
+> Neufassung; die drei neuen heißen `JournalWithPostingText`,
+> `DocumentNumberAcrossRows`, `ContraAccountEditable`.
+
 Nach §6. Bestehende Stories bleiben; die Journal-Änderung wird von jeder
 belegt, die das Journal zeigt.
 
@@ -131,7 +147,11 @@ belegt, die das Journal zeigt.
 Zusammen mit dem Bestand bleibt der Editor unter der Obergrenze von 10.
 
 Nicht anwendbar: `Leer` — ein Buchungssatz ohne Zeile ist kein Zustand des
-Editors, sondern ein Fehler des Aufrufers.
+Editors, sondern ein Fehler des Aufrufers. **Die Story `Empty` gibt es
+trotzdem**, und aus demselben Grund: der Fehler des Aufrufers soll sichtbar
+abgefangen sein statt in einer leeren Fläche zu enden. Sie zeigt „Keine
+Buchungszeilen.", den Hinweis `E-LEER` und ein gesperrtes Speichern — das ist
+kein sechster Zustand, sondern die Bremse.
 
 ## Abnahmekriterien
 
@@ -268,7 +288,13 @@ Kästchen, Speichern offen.
   gewählten Kandidaten mit; sonst stünde in der Zeile eine Nummer ohne Wort
   und im Journal daneben ein leerer Kontoname.
 
-### Stories — 17, mit begründeter Ausnahme
+### Stories
+
+> **Überholt.** Die Namen dieser Tabelle (`JournalZweispaltig`,
+> `BelegfeldAbweichend`, `GegenkontoBearbeitbar`) und der Kriterienblock
+> darunter beziehen sich auf die erste Fassung. Es gilt die Story-Tabelle der
+> Neufassung; die drei neuen heißen `JournalWithPostingText`,
+> `DocumentNumberAcrossRows`, `ContraAccountEditable`. — 17, mit begründeter Ausnahme
 
 `spec-schreiben` §6 setzt die Grenze bei 10. Diese Datei steht bei **17**, und
 das ist eine Ausnahme mit Ablaufdatum, keine Regel:
@@ -280,7 +306,7 @@ das ist eine Ausnahme mit Ablaufdatum, keine Regel:
   Die Ableitung aus §6 („Zustände ≤ 5") greift für einen solchen Katalog nicht.
 - **Drei sind neu** und gehören zu den drei Punkten dieser Aufgabe.
 
-**Der Schnitt, der die Ausnahme beendet** (eigene Aufgabe, nicht diese): der
+**Der Schnitt, der die Ausnahme beendet** — als **`docs/backlog/0113-journal-entry-grid.md`** angelegt: der
 Editor ist heute zwei Dinge in einer Datei — das **Lese**-Raster (`editable:
 false`, sieben der 14 Zustände) und das **Bearbeiten**-Raster. Getrennt ergäbe
 das `JournalEntryGrid` (lesend, Server-Komponente) und `JournalEntryEditor`
@@ -305,4 +331,32 @@ Nebenwirkung dieser.
 - [ ] Das Gegenkonto ist nur mit `onContraAccountChange` bearbeitbar; S/H bleibt fest (Story `ContraAccountEditable`)
 - [ ] `onOpenLedger` erreicht auch die Zeilen-Felder (`grep`)
 - [ ] 17 Stories, keine Konsolenmeldung (gemessen)
-- [ ] offen (Set): der Schnitt in Lese- und Bearbeiten-Raster, der die Story-Ausnahme beendet
+- [ ] offen (Set): der Schnitt in Lese- und Bearbeiten-Raster, der die Story-Ausnahme beendet — als **0113** angelegt, damit die Ausnahme eine Adresse hat und nicht nur ein Versprechen ist
+
+### Befunde am Set, aus der Abnahme vom 2026-09-07
+
+Vier Punkte, die die Abnahme als nicht blockierend geführt hat (M4–M7). Sie
+stehen hier, weil sie sonst niemand wiederfindet — keiner von ihnen gehört zu
+den drei Aufträgen dieser Spec, jeder von ihnen ist eine echte Abweichung.
+
+- [ ] **M4 — die Ausnahme in `scripts/check-icons.mjs` ist abgelaufen.** Der
+  Grund lautet „uncommitted changes from another session"; mit dem Commit
+  dieser Runde stimmt er nicht mehr. Entweder die Datei stellt auf die
+  Icon-Registry um, oder die Zeile bekommt einen Grund, der trägt. Ein
+  Freibrief ohne Ablaufdatum ist genau das, was die Liste verhindern soll
+  (ihr eigener Kommentar: „This list only ever shrinks").
+- [ ] **M5 — `Alt+V` steht im Lese-Raster am Knopf, wirkt dort aber nicht.**
+  Der Tastenhandler beginnt mit `if (!editable) return;`, der Kopf druckt
+  „Einfach ◂ / Voll ▸ · Alt+V" in beiden Modi. Das ist der Fall, den V14
+  ausdrücklich verbietet: eine sichtbare Taste ohne Wirkung. Zwei Wege — die
+  Taste auch lesend binden (der Umschalter ist dort ja bedienbar) oder das
+  Kürzel im Lesemodus nicht drucken. Fällt mit **0113** ohnehin an, gehört
+  aber nicht erst dorthin vertagt.
+- [ ] **M6 — `STATUS_TEXT` ist eine lokale Label-Map** (R1). Sie liefert den
+  `title` des Umschalters; die fünf Texte gehören zur Achse `buchung` und
+  damit in die Registry, aus der der `StatusBadge` daneben schon liest.
+- [ ] **M7 — die Spaltenmaße stehen als px in der Komponente**
+  (`"88px 56px 104px …"`, zwei Zeilen). Das Set schreibt Maße als Token oder
+  Klasse. Sauber wäre eine Track-Liste neben der Komponente, wie sie
+  `bank-transaction-columns.tsx` und `account-columns.tsx` führen — dann sind
+  die Breiten auch messbar begründet statt geraten.

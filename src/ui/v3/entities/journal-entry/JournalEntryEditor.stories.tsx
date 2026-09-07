@@ -282,7 +282,13 @@ export const S23_JudgeFlaggedWithError: Story = {
   ),
 };
 
-/** Ohne Zeilen — der Editor sagt, dass nothing zu speichern ist. */
+/**
+ * Ohne Zeilen. Die Spec führt „leer" als **nicht anwendbar** — ein
+ * Buchungssatz ohne Zeile ist kein Zustand des Editors, sondern ein Fehler
+ * des Aufrufers. Die Story steht trotzdem hier, und genau deshalb: der Fehler
+ * soll **sichtbar abgefangen** sein, nicht in einer leeren Fläche enden.
+ * Gemessen: „Keine Buchungszeilen.", Hinweis `E-LEER`, Speichern gesperrt.
+ */
 export const Empty: Story = {
   render: () => (
     <Frame>
@@ -299,9 +305,9 @@ export const Empty: Story = {
   ),
 };
 
-/* ── 0015 · Die drei Punkte der Freigabe ──────────────────────────────────
-   Sie stehen am Ende, weil sie nicht zu den 24 Zuständen des Prototyps
-   gehören, sondern Fähigkeiten sind, die der Aufrufer einschaltet. */
+/* ── 0015 · The three points of the release ───────────────────────────────
+   They stand at the end because they are not among the 24 states of the
+   prototype: they are abilities the caller switches on. */
 
 /**
  * §1 — das **Journal in der DATEV-Stapelordnung**: Konto · Kontoname ·
@@ -355,7 +361,7 @@ export const DocumentNumberAcrossRows: Story = {
           key={rows.map((r) => r.beleg1).join("|")}
           editable
           documentNumberSourceLabel={SOURCE_LABEL}
-          // Die geltende Nummer: die mit DATEV-Herkunft schlägt die errechnete.
+          // The number that holds: the one from DATEV beats the computed one.
           dominantDocumentNumber={REGISTER[1]}
           onOpenDocumentNumberRegister={() => {}}
           onSave={(next) => setRows(next)}
