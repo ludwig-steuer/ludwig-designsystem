@@ -165,13 +165,79 @@ Variabel (aus dieser Spec):
 - [ ] Hinter dem offenen Drawer bleibt der Kontext sichtbar (Story `InUse`)
 - [ ] offen (App): die drei Listen mit `CaseCell` öffnen den Drawer, statt die Seite zu wechseln
 
-## Abnahme
+## Abnahme (2026-09-07)
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+Erste Abnahme, fremd — kein Bauanteil, kein Chat-Verlauf, nur Spec und Code.
+Gemessen über CDP gegen den Dev-Server auf Port 6107, Fenster 1440 × 900, wenn
+nicht anders vermerkt. Jede Zahl hat eine Gegenprobe.
+
+**Fest:**
+
+| Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| … | … | … |
+| `pnpm typecheck` grün | Exit 0 | ✅ |
+| `pnpm build` grün | **nicht gelaufen** — 0117 verbietet den Bau im geteilten Baum. Ersatz: alle sieben Stories im Dev-Server gerendert; `check:icons`, `check:contrast`, `check:when`, `check:language`, `check:mirror` je Exit 0 | ⚠️ offen |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `CaseDrawer.tsx` + `CaseDrawer.stories.tsx` in `entities/accounting-case/`; Titel `v3/Entitäten/Sachverhalt/CaseDrawer`; Barrel `src/ui/v3/index.ts:383` | ✅ |
+| Code englisch; `@when`/`@instead` am Export | `CaseDrawer.tsx:52–55`, `check:when` Exit 0. Story-JSDoc deutsch = M10 der Vorrunde (Hausentscheid), `check:language` Exit 0 | ✅ |
+| Kein Hex, kein px, keine lokale Label-Map; Status über Registry | `grep -E '#[0-9a-f]{3,8}|[0-9]+px'` in `CaseDrawer.tsx`: 0 Treffer. Art über `caseKindLabel` aus dem Spiegel, Stand über `StatusBadge axis="sachverhalt"` | ✅ |
+| Alle Stories vorhanden, Ausschlüsse begründet | 7 im Katalog `index.json`: Filled · Loading · Error · NotFound · Interactive · Sparse · InUse — genau die Ableitung nach `spec-schreiben` §6 (4 Zustände + 0 Enums + 0 Layout-Booleans + 1 Callback + 1 im Einsatz + 1 Rand = 7). `leer nach Filter` und `Closed` mit Grund ausgeschlossen. Jede der neun Props hat ihre Story; `accountHref`/`partnerHref` in `Filled` als echte Links gemessen (`#konto-70021`, `#partner-8812`) | ✅ |
+| Prüfliste `design-guidelines.md` §9 | durchgegangen ohne die zwei App-Punkte (v1-Ablösung, §11). Karte: Rand 1 px, kein Schatten. Grenz-Satz `rgb(92,92,92)` auf `rgb(255,255,255)` = **6,7:1**. Fokusring 2 px `rgb(59,143,196)` gemessen. Links `rgb(43,111,156)`, nicht Textfarbe (M7 der Vorrunde hält). `min-width:0`: bei 700 px Fenster (Drawer 360 px) **kein** Element mit `scrollWidth > clientWidth`, `document.scrollWidth == clientWidth == 700`; Gegenprobe: 300 Zeichen ohne Trennstelle in die Zusammenfassung → Body-`scrollWidth` 2783 gegen 360, die Messung schlägt also an | ✅ |
+| Im Browser angesehen | sechs Aufnahmen: Filled/InUse, Loading, Error, NotFound, Sparse, InUse-Zeile-2 | ✅ |
 
-Abgenommen von / am: … · Offene Punkte: …
+**Variabel:**
+
+| Kriterium | Nachweis (gemessen) | Ergebnis |
+|---|---|---|
+| Zone 3 importiert `CaseFacts` | `CaseDrawer.tsx:14`; `grep FieldList` in der Datei: 0 Treffer. Im Blatt kommt `.v2fields` aus `CaseFacts`, `tone="bare"`, ohne `all` (`CaseDrawer.tsx:213–218`) | ✅ |
+| Zonen 1, 3, 4, 5 in dieser Reihenfolge; Zone 2 ohne Lücke | `--filled`: Kopf-Unterkante 111,44 px = Body-Oberkante, Body-`padding-top` 20 px, Karte bei 131,44, Zone 4 bei 412,83, Fuß bei 853,20. `--loading`: 61 / 81 — **derselbe** Abstand von 20 px, also kein reservierter Platz für Zone 2 | ✅ |
+| Zone 1 trägt die Ränge 1–7 | `--filled`, gemessen: „Wartung der Klimaanlage" + `2026-0412` · Zur Prüfung · 1.249,90 € · Eingangsrechnung · Bürobedarf Meier GmbH · Kanzlei ist dran · 6 Ereignisse — sieben Werte | ✅ |
+| Grenz-Satz wörtlich | in **allen vier** Zuständen zeichengleich gemessen: „Ereignisse, Klärungen und Buchungen stehen in der vollständigen Sachverhaltsansicht." (`.v2cdr__limit`, 19,38 px hoch) | ✅ |
+| `Loading` zeigt die Form des Inhalts | `--loading`: Karte **175,69 px** mit `.v2card__h` „Kernfakten" und fünf `.v2skel`; `--filled`: **265,39 px**, gleicher Rahmen, gleicher Kopf. Gegenprobe: `.v2card__h` zur Laufzeit entfernt → 125 px, die 50,69 px Kopf sind wirklich da. Keine 96-px-Karte | ✅ |
+| `error` ersetzt Zone 3, Zone 5 bleibt | `--error`: `.v2note--danger`, 62,28 px, **keine** `.v2card` im Body; Fuß „Sachverhalt öffnen" 181,09 × 34,80 px in allen vier Zuständen gemessen. Abweichung im Code begründet (`CaseDrawer.tsx:131–133`) | ✅ |
+| `record={null}` ohne `loading` = nicht gefunden, mit Kennung | `--not-found`: `.v2empty--inline`, „Kein Sachverhalt zu **2026-9999**", Fuß bleibt | ✅ |
+| `reference` in Kopf, Fehlersatz, Nicht-gefunden-Text | Kopf „Sachverhalt 2026-0412" / „Sachverhalt 2026-9999"; Callout „Sachverhalt **2026-0412** konnte nicht geladen werden."; EmptyState „… zu **2026-9999**". `--sparse` mit `caseNumber: null` zeigt im Kopf `2026-0501`, die Referenz (M1 der Vorrunde hält). Gegenprobe in `--in-use`: Klick auf Zeile 2 → Kopf-Kennung wechselt auf `2026-0413`, obwohl der Record derselbe bleibt — der Kopf liest wirklich `reference` | ✅ |
+| Breite `size="md"` | 720 px bei 1440 px Fenster = 50vw = `--drawer-md`. Gegenprobe 1: `--drawer-md` zur Laufzeit auf `300px` → Panel 300 px. Gegenprobe 2: Klasse auf `v2drawer--sm` → 489,59 px (34vw). Bei 700 px Fenster 360 px (untere Klemme) | ✅ |
+| Klasse B | `grep` in `CaseDrawer.tsx`: kein `useEffect`, kein `useState`, kein `fetch`, kein `await`, kein `import(` — 0 Treffer. Nur Typ- und Label-Importe aus dem Spiegel (`:3`, `:4`) | ✅ |
+| Esc schließt, Fokus zurück am Auslöser; Fokus beim Öffnen **in** den Drawer | `--interactive`: Auslöser fokussiert → Enter öffnet, `document.activeElement` = `ASIDE.v2drawer` (Fokus im Drawer). 10× Tab läuft im Ring Kreuz → `70021` → „Sachverhalt öffnen" → Kreuz, **nie** außerhalb. Esc: Knoten weg, `activeElement` = BUTTON „Sachverhalt 2026-0412 ansehen". Gegenprobe: Taste „a" schließt nicht. Scrim-Klick und Kreuz schließen ebenfalls und geben den Fokus zurück (Scrim `is-open`, `pointer-events: auto` gemessen) | ✅ |
+| Kontext bleibt hinter dem offenen Drawer sichtbar | `--in-use`: Liste 900 px ab x = 16, Panel ab x = 720 → **704 px** der Liste stehen weiter, `visibility: visible`, Scrim `rgba(20, 36, 56, .3)` | ✅ |
+| offen (App): die drei Listen öffnen den Drawer | App-Punkt, hier übersprungen | — |
+
+### Mängel
+
+**M1 — seit dem Typtausch trägt die Schnittstelle fünf Felder doppelt.**
+`CaseDrawer.tsx:32–45`. Der Nachtrag sagt, an der Schnittstelle ändere sich
+nichts. Es fehlt auch nichts: jedes Feld, das der Drawer liest, gibt es im
+Spiegel (`typecheck` Exit 0). Aber seit `CaseFactsVM = Partial<CaseDetail>`
+stehen **fünf** der sieben Felder von `CaseQuickView` ein zweites Mal in
+`record.facts`: `title` (`case-detail.ts:69`), `counterpartyName` (`:30`),
+`totalAmount` (`:25`), `currency` (`:24`), `dispositionLabel` ↔ `disposition`
+(`:71`). Nur `eventCount` hat im Spiegel keine Entsprechung. Zwei der fünf
+stehen gleichzeitig auf dem Schirm und können sich widersprechen: der Kopf
+liest `record.counterpartyName` (`CaseDrawer.tsx:113–118`), Zone 3 liest
+`record.facts.counterpartyName` (Rang 12) — in `Filled` aus zwei getrennten
+Feldern derselben Fixture (`CaseDrawer.stories.tsx:20` und `:34`) zufällig
+gleich. Das ist derselbe Fehlertyp wie M6 der Vorrunde, eine Ebene höher.
+*Kleinster Weg:* entweder die fünf aus `CaseQuickView` streichen und im Kopf
+aus `record.facts` lesen (`eventCount` bleibt), oder — wenn der flache Kopf
+bleiben soll — in die Spec schreiben, dass die Ränge 1–7 bewusst ein zweiter
+Kanal sind und eine Abweichung der Fehler des Aufrufers ist. Eine
+Owner-Entscheidung, kein Bau ins Blaue.
+
+**M2 — `InUse` zeigt zur zweiten Zeile den falschen Fall.**
+`CaseDrawer.stories.tsx:171` gibt beiden Zeilen dasselbe `RECORD`. Gemessen:
+die Zeile hinter dem Scrim sagt „27.08.2026 · Stadtwerke Musterstadt ·
+2026-0413 · −412,00 €", der daraus geöffnete Drawer sagt „Wartung der
+Klimaanlage · `2026-0413` · Zur Prüfung · **1.249,90 €** · Eingangsrechnung ·
+**Bürobedarf Meier GmbH** · 6 Ereignisse". Beides steht gleichzeitig im Bild
+(704 px der Liste bleiben sichtbar). Die Story, die beweisen soll, dass der
+Kontext nicht verloren geht, stellt ihn damit als widersprüchlich dar; §6
+verlangt Story-Daten, die echt aussehen. *Kleinster Weg:* der zweiten Zeile
+ein eigenes Record geben (Stadtwerke, −412,00 €, `2026-0413`) — oder nur die
+erste Zeile als Knopf.
+
+Abgenommen von / am: **nicht abgenommen — zurück**, fremde Abnahme,
+2026-09-07 · Offene Punkte: M1 (Owner-Entscheidung), M2 (zwei Zeilen Story) ·
+`pnpm build` blieb ungeprüft (0117).
 
 ## Offene Fragen
 
@@ -245,3 +311,29 @@ mit `18ddaa28` erledigt: `CaseDetail` liegt in `domain/`, wird gespiegelt, und
 `CaseFactsVM` ist seither `Partial<CaseDetail>` plus vier Pflichtfelder
 (0097). Der Drawer reicht den Typ unverändert durch — an seiner Schnittstelle
 ändert sich nichts, nur die Herkunft der Felder.
+
+## Nach der Abnahme (2026-09-07)
+
+**M2 ist behoben.** Beide Bankzeilen der `InUse`-Story teilten sich dasselbe
+`RECORD`: die Liste zeigte „Stadtwerke Musterstadt · −412,00 €", der Drawer
+daneben „Wartung der Klimaanlage · 1.249,90 € · Bürobedarf Meier GmbH" —
+beides gleichzeitig im Bild. Die zweite Zeile hat jetzt ihren eigenen
+Sachverhalt. Gemessen, je nach angeklickter Zeile:
+
+| Zeile | Kopf des Drawers |
+|---|---|
+| 2026-0412 | Wartung der Klimaanlage · Zur Prüfung · 1.249,90 € |
+| 2026-0413 | Abschlag Strom 08/2026 · Wartet auf Unterlagen · −412,00 € |
+
+**M1 liegt beim Owner und ist keine Reparatur.** Seit `CaseFactsVM =
+Partial<CaseDetail>` stehen fünf von sieben Feldern der `CaseQuickView`
+doppelt: `title`, `counterpartyName`, `totalAmount`, `currency` und
+`dispositionLabel` gibt es auch in `record.facts`. Nur `eventCount` hat keine
+Entsprechung. Kopf und Zone 3 lesen die Gegenpartei aus zwei Kanälen und
+stehen gleichzeitig im Bild — derselbe Fehlertyp wie M6 der Vorrunde, eine
+Ebene höher.
+
+Es fehlt dabei **nichts**: jedes gelesene Feld gibt es im Spiegel. Die Frage
+ist, welcher der beiden Kanäle bleibt — die flache `CaseQuickView` für den
+Kopf, oder `facts` für alles. Das ist eine Schnittstellen-Entscheidung, und
+sie betrifft auch 0097; sie ist an den Owner gegeben.

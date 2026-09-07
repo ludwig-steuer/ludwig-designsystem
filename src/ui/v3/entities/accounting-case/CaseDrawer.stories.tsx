@@ -38,6 +38,33 @@ const RECORD: CaseQuickView = {
   },
 };
 
+/**
+ * Die zweite Zeile hat ihren **eigenen** Sachverhalt. Beide teilten sich
+ * vorher `RECORD`: die Liste zeigte „Stadtwerke Musterstadt · −412,00 €", der
+ * Drawer daneben „Wartung der Klimaanlage · 1.249,90 € · Bürobedarf Meier
+ * GmbH" — beides gleichzeitig im Bild (Abnahme 0098, M2).
+ */
+const RECORD_STROM: CaseQuickView = {
+  title: "Abschlag Strom 08/2026",
+  counterpartyName: "Stadtwerke Musterstadt",
+  totalAmount: -412,
+  currency: "EUR",
+  dispositionLabel: "Mandant",
+  eventCount: 2,
+  facts: {
+    caseNumber: "2026-0413",
+    kind: "recurring_charge",
+    lifecycleStatus: "waiting_for_documents",
+    openedAt: "2026-08-27",
+    summary: "Monatlicher Abschlag; die Jahresabrechnung steht noch aus.",
+    counterpartyPartnerId: "p-4471",
+    counterpartyName: "Stadtwerke Musterstadt",
+    personalAccountNumber: "70044",
+    documentNumberMode: "per_period",
+    closedAt: null,
+  },
+};
+
 /** Alle vier Zonen. Zone 2 fehlt — ein Sachverhalt hat kein Original. */
 export const Filled: Story = {
   render: () => (
@@ -179,7 +206,7 @@ export const InUse: Story = {
             open
             onClose={() => setRef(null)}
             reference={ref}
-            record={RECORD}
+            record={ref === "2026-0413" ? RECORD_STROM : RECORD}
             onOpenFull={() => {}}
             accountHref={accountHref}
           />
