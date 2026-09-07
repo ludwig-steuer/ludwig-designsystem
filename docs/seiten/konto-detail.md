@@ -6,7 +6,7 @@
 | Route | `ludwig/app`: `app/(app)/clients/[clientSlug]/[year]/accounts/[accountNumber]/page.tsx` (846 Z.) — Identifikator ist die **Kontonummer**, nicht die Id |
 | Heute gebaut in | dieselbe Datei (vier Tabs inline) plus `modules/accounts/` (`accountFacts`, `accountSourceLabel`), `MonthlyBarChart`, `DatevEntryDrawer`, `LudwigEntryDrawer` |
 | Entitäten | Konto (`docs/entitaeten/account.md`) · Buchung (beide Quellen) · Geschäftspartner |
-| Baustein in v3 | noch keiner — Aufgabe **0063** `AccountView` |
+| Baustein in v3 | **`LedgerAccountView`** (0063, gebaut 2026-09-07) — nicht `AccountView`: der Name ist im Spiegel bereits ein Typ (`"flat" | "grouped"`) |
 | Fachliche Quelle | GLOSSARY F64 (Kontenplan je Wirtschaftsjahr), `konten.md` R18 |
 | Profil von / am | Claude, 2026-09-07 · gelesen: Route, Tab-Struktur, Kennzahlen, Entitätsprofil |
 

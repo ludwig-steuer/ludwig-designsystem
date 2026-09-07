@@ -126,6 +126,17 @@ interface DataTableBase<T> {
   minWidth?: number;
   /** The last column, always visible (V14): ≤ 2 inline, ≥ 3 primary plus menu. */
   rowActions?: (row: T) => RowAction[];
+  /**
+   * A class for **one** row — for a state that belongs to the whole line and
+   * not to a cell: a draft that is dimmed, a row that is struck through.
+   *
+   * It is not a way in through the back door for colour: `V6` still holds,
+   * and a state that means something gets its word in a cell. What this is
+   * for is the **weight** of a row against its neighbours — measured, the
+   * „only in Ludwig" line was indistinguishable from a posted one because
+   * that difference had nowhere to go (acceptance of 0063).
+   */
+  rowClassName?: (row: T) => string | undefined;
   /** The state out of the URL; the active column carries the arrow, and the link says the state in words. */
   sort?: { key: string; dir: "asc" | "desc" };
   /**
@@ -375,7 +386,7 @@ function headCell<T>(
 }
 
 function bodyRow<T>(row: T, props: DataTableProps<T>): ReactNode {
-  const { columns, rowKey, rowActions, selection } = props;
+  const { columns, rowKey, rowActions, selection, rowClassName } = props;
   const { rowHref, expand } = props as {
     rowHref?: (row: T) => string;
     expand?: (row: T) => ReactNode;
@@ -425,7 +436,7 @@ function bodyRow<T>(row: T, props: DataTableProps<T>): ReactNode {
   }
 
   return (
-    <Row key={key}>
+    <Row key={key} {...(rowClassName?.(row) ? { className: rowClassName(row) } : {})}>
       {select}
       {cells}
       {actions}

@@ -4,6 +4,7 @@ import { LedgerAccountView } from "./LedgerAccountView";
 import { AccountFacts, type AccountFactsVM } from "./Account";
 import { accountEntryColumns, type AccountEntry } from "./AccountEntries";
 import { formatAmount } from "../../format";
+import { Time } from "../../primitives/Time";
 import { BarChart, type Bar } from "../../primitives/BarChart";
 import { EmptyState } from "../../primitives/EmptyState";
 import { KpiGrid, KpiTile } from "../../primitives/KpiTile";
@@ -37,6 +38,9 @@ const FACTS: AccountFactsVM = {
   ludwigOnlyCount: 3,
   ludwigOnlyAmount: 612.4,
   lastBookingDate: "2026-08-26",
+  debitTotal: 21_442.19,
+  creditTotal: 3_000.0,
+  skrClassLabel: "Sonstige betr. Aufwendungen",
 };
 
 const E = (over: Partial<AccountEntry> & { id: string }): AccountEntry => ({
@@ -80,6 +84,34 @@ const MONTHS: Bar[] = [
   { label: "Dez", value: 0, secondary: 0 },
 ];
 
+/**
+ * Das Bankkonto der Rand-Story. **Ein** Objekt für Kopf, Kennzahlen und
+ * Randspalte: zwei Spreads waren zwei verschiedene DATEV-Salden desselben
+ * Kontos auf einem Bildschirm — genau der Fall, den das Seitenprofil als
+ * Misslingen der Seite nennt („wenn sie die zwei Quellen für eine hält").
+ */
+const BANK: AccountFactsVM = {
+  ...FACTS,
+  accountNumber: "1210",
+  accountName: "Bank Commerzbank",
+  datevBalance: -184_221.55,
+  datevCount: 3400,
+  ludwigOnlyCount: 128,
+  ludwigOnlyAmount: 41_882.9,
+};
+
+/** Ein Konto ohne jede Bewegung im Jahr — auch die letzte Buchung fehlt. */
+const UNUSED: AccountFactsVM = {
+  ...FACTS,
+  accountNumber: "4650",
+  accountName: "Bewirtungskosten",
+  datevBalance: null,
+  datevCount: 0,
+  ludwigOnlyCount: 0,
+  ludwigOnlyAmount: null,
+  lastBookingDate: null,
+};
+
 const TABS = [
   { key: "konto", label: "Konto", href: "#konto" },
   { key: "llm", label: "LLM-Profil", href: "#llm" },
@@ -117,23 +149,36 @@ function Head({ facts }: { facts: AccountFactsVM }) {
 function Summary({ facts }: { facts: AccountFactsVM }) {
   return (
     <KpiGrid>
+      {/* **Eine** führende Zahl. Das Delta steht in ihrer Unterzeile, nicht
+          als gleich große Kachel daneben: zwei gleich große Zahlen laden dazu
+          ein, sie zu addieren — und genau das sagt die Spec selbst. */}
       <KpiTile
         label={`Saldo in DATEV ${facts.fiscalYear}`}
         value={formatAmount(facts.datevBalance, facts.currency)}
-        sub={`${facts.datevCount} Buchungen im Spiegel`}
+        sub={
+          facts.ludwigOnlyCount > 0
+            ? `${facts.datevCount.toLocaleString("de-DE")} Buchungen · + ${facts.ludwigOnlyCount} nur in Ludwig (${formatAmount(facts.ludwigOnlyAmount, facts.currency)})`
+            : `${facts.datevCount.toLocaleString("de-DE")} Buchungen im Spiegel`
+        }
       />
       <KpiTile
-        label="Nur in Ludwig"
-        value={formatAmount(facts.ludwigOnlyAmount, facts.currency)}
-        sub={`${facts.ludwigOnlyCount} Sätze ohne Gegenstück in DATEV`}
+        label="Letzte Buchung"
+        value={<Time value={facts.lastBookingDate ?? null} format="date" />}
+        sub="im Spiegel"
       />
-      <KpiTile label="Letzte Buchung" value="26.08.2026" sub="im Spiegel" />
     </KpiGrid>
   );
 }
 
 function Movements({ entries }: { entries: AccountEntry[] }) {
-  const cols = accountEntryColumns({ currency: "EUR", variant: "full" });
+  // **Ohne „Stapel".** Der volle Satz ist für eine Seite ohne Randspalte
+  // gedacht; hier nimmt `aside` 440 px, und gemessen lag der Zustands-Chip
+  // dahinter im Querlauf — Rang 5 wäre unsichtbar gewesen. Der Stapel ist
+  // Rang 8 und die einzige Spalte, deren Verlust nichts kostet: die Nummer
+  // steht im Drawer der Buchung.
+  const cols = accountEntryColumns({ currency: "EUR", variant: "full" }).filter(
+    (c) => c.key !== "batchId",
+  );
   return (
     <DataTable<AccountEntry>
       rows={entries}
@@ -141,6 +186,12 @@ function Movements({ entries }: { entries: AccountEntry[] }) {
       rowKey={(e) => e.id}
       head={{ title: "Bewegungen 2026", sub: "beide Quellen, neueste zuerst" }}
       minWidth={1180}
+      // **Rang 5, zweite Hälfte.** Das Herkunfts-Zeichen unterscheidet drei
+      // Klassen; die vierte — „nur in Ludwig, noch nicht in DATEV" — ist die
+      // **gedämpfte Zeile** (Owner-Entscheid 2026-09-04). Ohne sie sahen eine
+      // gebuchte und eine ungebuchte Zeile gleich aus; `AccountEntryList`
+      // macht es im Drawer seit je so.
+      rowClassName={(e) => (e.origin === "ludwig" ? "v2ae__row--draft" : undefined)}
       empty={{ title: "Auf diesem Konto ist im Jahr 2026 nichts gebucht." }}
     />
   );
@@ -185,18 +236,15 @@ export const Filled: Story = {
 };
 
 /**
- * Ohne Randspalte: die Bewegungen nehmen die ganze Breite. Das ist richtig,
- * wo die Fakten nicht die Frage sind — der Rahmen erzwingt keinen Zweispalter.
+ * **Drei Slots weniger**: keine Randspalte, kein Pager, keine Reiter. Die
+ * Bewegungen nehmen die ganze Breite, und die zwei leeren Zeilen fallen
+ * **samt Abstand** — ein Konto, das niemand aus einer Liste geöffnet hat,
+ * darf nicht aussehen, als fehlte dort etwas.
  */
 export const WithoutFacts: Story = {
   render: () => (
     <div style={{ padding: "var(--space-5)", maxWidth: 1600 }}>
-      <LedgerAccountView
-        pager={PAGER}
-        header={<Head facts={FACTS} />}
-        summary={<Summary facts={FACTS} />}
-        tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
-      >
+      <LedgerAccountView header={<Head facts={FACTS} />} summary={<Summary facts={FACTS} />}>
         <Movements entries={ENTRIES} />
       </LedgerAccountView>
     </div>
@@ -234,18 +282,10 @@ export const Empty: Story = {
     <div style={{ padding: "var(--space-5)", maxWidth: 1600 }}>
       <LedgerAccountView
         pager={PAGER}
-        header={
-          <Head
-            facts={{ ...FACTS, accountNumber: "4650", accountName: "Bewirtungskosten" }}
-          />
-        }
-        summary={
-          <Summary
-            facts={{ ...FACTS, datevBalance: null, datevCount: 0, ludwigOnlyCount: 0, ludwigOnlyAmount: null }}
-          />
-        }
+        header={<Head facts={UNUSED} />}
+        summary={<Summary facts={UNUSED} />}
         tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
-        aside={<AccountFacts facts={{ ...FACTS, datevBalance: null, datevCount: 0, ludwigOnlyCount: 0, ludwigOnlyAmount: null }} />}
+        aside={<AccountFacts facts={UNUSED} />}
       >
         <Movements entries={[]} />
       </LedgerAccountView>
@@ -293,10 +333,10 @@ export const Edges: Story = {
       <div style={{ padding: "var(--space-5)", maxWidth: 1600 }}>
         <LedgerAccountView
           pager={PAGER}
-          header={<Head facts={{ ...FACTS, accountNumber: "1210", accountName: "Bank Commerzbank", datevCount: 3400 }} />}
-          summary={<Summary facts={{ ...FACTS, datevBalance: -184_221.55, datevCount: 3400, ludwigOnlyCount: 128, ludwigOnlyAmount: 41_882.9 }} />}
+          header={<Head facts={BANK} />}
+          summary={<Summary facts={BANK} />}
           tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
-          aside={<AccountFacts facts={{ ...FACTS, accountNumber: "1210", accountName: "Bank Commerzbank", datevCount: 3400 }} />}
+          aside={<AccountFacts facts={BANK} />}
         >
           <DataTable<AccountEntry>
             rows={ENTRIES}

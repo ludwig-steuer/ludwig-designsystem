@@ -99,6 +99,21 @@ export interface AccountFactsVM {
   /** Ludwig entries without `datev_mirror_entry_id` — count and sum. */
   ludwigOnlyCount: number;
   ludwigOnlyAmount: number | null;
+  /**
+   * Σ debit and Σ credit of the year — rank 7 of the profile, and the two
+   * numbers the account page shows above its chart. Optional, because the
+   * drawer does not need them and the mirror does not carry them yet
+   * (finding L-94).
+   */
+  debitTotal?: number | null;
+  creditTotal?: number | null;
+  /**
+   * The place in the chart of accounts (rank 9, filled 100 %). Optional for
+   * the same reason: the drawer answers „which account", the page answers
+   * „what is it for". The label comes from `ACCOUNT_CLASS_LABEL`, never from
+   * a second map here (L-95).
+   */
+  skrClassLabel?: string | null;
   /** Personal account: the business partner behind it (52 % of all accounts). */
   partnerName?: string | null;
   /** `client_ledger_accounts.last_booking_date` — filled on 15 %. */
@@ -141,6 +156,21 @@ export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
       <Amount key="lud" value={facts.ludwigOnlyAmount ?? null} currency={facts.currency} />,
     ]);
   }
+
+  // Σ Soll / Σ Haben stehen **zusammen** in einer Zeile: sie sind ein Paar,
+  // und getrennt lädt die Spalte dazu ein, das eine ohne das andere zu lesen.
+  if (facts.debitTotal != null || facts.creditTotal != null) {
+    rows.push([
+      "Σ Soll / Σ Haben",
+      <span key="sums">
+        <Amount value={facts.debitTotal ?? null} currency={facts.currency} size="sm" />
+        {" / "}
+        <Amount value={facts.creditTotal ?? null} currency={facts.currency} size="sm" />
+      </span>,
+    ]);
+  }
+
+  if (facts.skrClassLabel) rows.push(["SKR-Klasse", facts.skrClassLabel]);
 
   rows.push([
     "Bewegungen",

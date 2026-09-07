@@ -225,26 +225,37 @@ export function accountEntryColumns({
 
   if (variant === "compact") return columns;
 
+  const status: ColumnDef<AccountEntry> = {
+    key: "status",
+    header: "Buchungszustand",
+    width: "132px",
+    cell: (e) =>
+      e.origin === "exported" ? (
+        <StatusBadge axis="buchung_datev" status="exported" info={false} />
+      ) : e.status ? (
+        <StatusBadge axis="buchung" status={e.status} info={false} />
+      ) : (
+        <span className="v2muted">—</span>
+      ),
+  };
+
+  // **Der Zustand steht vorn, nicht hinten** (Abnahme 0063). Er beantwortet
+  // dieselbe Frage wie das Herkunfts-Zeichen zwei Spalten links — „sagen
+  // Ludwig und DATEV dasselbe?" —, und am rechten Rand lag er gemessen hinter
+  // dem Querlauf: bei 1440 px mit einer 440-px-Randspalte endete die sichtbare
+  // Fläche bei 1419, der Chip bei 1509. Eine Antwort, die man wegscrollen
+  // muss, ist keine.
+  const [datum, herkunft, ...rest] = columns;
   return [
-    ...columns,
+    datum!,
+    herkunft!,
+    status,
+    ...rest,
     {
       key: "batchId",
       header: "Stapel",
       width: "88px",
       cell: (e) => <MonoCell value={e.batchId ?? null} />,
-    },
-    {
-      key: "status",
-      header: "Buchungszustand",
-      width: "132px",
-      cell: (e) =>
-        e.origin === "exported" ? (
-          <StatusBadge axis="buchung_datev" status="exported" info={false} />
-        ) : e.status ? (
-          <StatusBadge axis="buchung" status={e.status} info={false} />
-        ) : (
-          <span className="v2muted">—</span>
-        ),
     },
     {
       key: "markOfOrigin",

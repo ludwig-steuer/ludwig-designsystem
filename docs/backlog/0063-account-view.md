@@ -1,4 +1,4 @@
-# 0063 · `AccountView` — die Vollansicht eines Kontos
+# 0063 · `LedgerAccountView` — die Vollansicht eines Kontos
 
 | | |
 |---|---|
@@ -201,7 +201,7 @@ Profil-Empfehlung ausdrücklich.
 | `pager` | `RecordPager` mit `back` („← Konten") und `total` | — | `Filled` |
 | `header` | `EntityHeader` — Nummer und Name, Kontoart als Zustand | 1 | `Filled` |
 | `summary` | `KpiGrid` aus `AccountFactsVM`: Saldo in DATEV, „nur in Ludwig", letzte Buchung | 2 | `Filled` |
-| `chart` | `BarChart` (0110), Soll und Haben je Monat, `grouped` | 3 | `Filled` |
+| `chart` | `BarChart` (0110), Soll und Haben je Monat, `grouped`. **Ohne die Linie**, die die Freigabe nannte: `BarChart.line` ist für einen laufenden Saldo da, und den verwirft Entscheidung 3 | 3 | `Filled` |
 | `tabs` | `Tabs` — zwei: Konto und LLM-Profil | 7 | `OtherTab` |
 | `aside` | `AccountFacts` in der Randspalte; leer → eine Spalte | 6 | `Filled`, `WithoutFacts` |
 | `children` | Die Bewegungen: `DataTable` mit `accountEntryColumns({ variant: "full" })` | 4, 5 | `Filled`, `Edges` |
@@ -224,10 +224,10 @@ Profil-Empfehlung ausdrücklich.
 
 ### Stories
 
-Titel `v3/Entitäten/Konto/LedgerAccountView`. Ableitung nach §6: 4 Zustände
-(gefüllt · leer · lädt · Fehler; „leer nach Filter" entfällt — der Rahmen
-filtert nicht, Laden und Fehler teilen sich eine Story) + 1 Layout (`aside`
-leer) + 1 Slot-Wechsel (anderer Reiter) + 1 Rand = **6**.
+Titel `v3/Entitäten/Konto/LedgerAccountView`. Ableitung nach §6: **3
+Story-Zustände** (gefüllt · leer · Laden und Fehler zusammen in einer; „leer
+nach Filter" entfällt, der Rahmen filtert nicht) + 1 Layout (ohne `aside`,
+`pager` und `tabs`) + 1 Slot-Wechsel (anderer Reiter) + 1 Rand = **6**.
 
 | Story | Beweist |
 |---|---|
@@ -276,3 +276,59 @@ Variabel:
   `accounts/[accountNumber]/page.tsx`.
 - **L-88** (zwei Auszüge für eine Frage) und **L-30** (Saldo im DATEV-Auszug)
   sind Voraussetzungen für den Einsatz drüben, nicht für den Bau hier.
+
+## Nach der Abnahme vom 2026-09-07
+
+Die Abnahme hat den Rahmen selbst durchgewinkt („tadellos, muss nicht
+angefasst werden") und **zwei blockierende Mängel in dem gefunden, was um ihn
+herum steht** — beide an der Stelle, die die Freigabe zum Prüfstein gemacht
+hatte.
+
+**Rang 5 fiel in der Wirkung von vier Klassen auf zwei zurück (M1).** In der
+Spec war er sauber verankert; gemessen bei 1440 × 900 war die Zeile „nur in
+Ludwig" **nicht gedämpft** — der Owner-Entscheid vom 2026-09-04 sieht für sie
+„Symbol, Zeile gedämpft" vor —, und der Chip „Exportiert" lag bei x = 1509 in
+einer Fläche, die bei 1419 endet. Sichtbar blieb „Zeichen / kein Zeichen":
+zwei Klassen statt vier.
+
+Zwei Ursachen, zwei Korrekturen:
+
+- **`DataTable` hatte keinen Ort für die Dämpfung.** `AccountEntryList` macht
+  sie im Drawer seit je selbst (`v2ae__row--draft`), der `DataTable`-Weg
+  konnte es nicht. Jetzt gibt es `rowClassName?: (row) => string | undefined`
+  — ausdrücklich für das **Gewicht** einer Zeile gegen ihre Nachbarn, nicht
+  als Hintertür für Farbe.
+- **Der Zustand stand am rechten Rand.** Er beantwortet dieselbe Frage wie das
+  Herkunfts-Zeichen zwei Spalten links; im `full`-Satz steht er jetzt direkt
+  dahinter. Gemessen liegt der Chip bei x = 699 — bei 1280 **und** 1440 px im
+  Bild. Dazu lässt die Story „Stapel" weg (Rang 8, die Nummer steht im Drawer
+  der Buchung).
+
+**Zwei DATEV-Salden desselben Kontos auf einem Bildschirm (M2).** `Edges` gab
+`Summary` und `AccountFacts` zwei verschiedene Spreads: −184.221,55 € oben,
+18.442,19 € in der Randspalte. Das ist wörtlich der Fall, den das Seitenprofil
+als Misslingen definiert („wenn sie die zwei Quellen für eine hält") — und er
+stand in meiner eigenen Story. Jetzt ein Objekt (`BANK`) für Kopf, Kennzahlen
+und Randspalte, ebenso `UNUSED` für den Leerfall.
+
+**Und `Empty` widersprach sich selbst (M3):** „nichts gebucht" über einer
+Kachel „Letzte Buchung 26.08.2026" — der Wert war hart in die Story
+geschrieben. Er kommt jetzt aus den Fakten.
+
+**Rang 2 war typografisch gleichrangig (M4).** Zwei Kacheln, beide 19 px und
+600 — während die Spec selbst argumentiert, zwei gleich große Zahlen lüden zum
+Addieren ein. Der Owner hat „Saldo in DATEV" und **darunter** „+ n nur in
+Ludwig" entschieden; jetzt trägt die DATEV-Kachel das Delta in ihrer
+Unterzeile, und die Reihe zeigt Saldo · Bewegungen · letzte Buchung.
+
+**Die Freigabe-Auflage zu Σ Soll/Σ Haben war unterschlagen (M5).** Sie stand
+in der Freigabe und wurde von meiner Neufassung eigenmächtig nach Ausbau
+verschoben. `AccountFactsVM` trägt jetzt `debitTotal` und `creditTotal`
+(optional, der Drawer braucht sie nicht) — und dazu `skrClassLabel` (M6),
+denn Rang 6 versprach die SKR-Klasse, die kein Typ trug und kein Befund nannte.
+
+Dazu: der Pager-Befund geht als **L-97** ans Register (er gehört 0047/0057,
+nicht dieser Aufgabe), die drei Dokumente tragen den Namen `LedgerAccountView`
+(M9), `WithoutFacts` lässt jetzt auch `pager` und `tabs` weg und beweist
+damit, dass die Zeilen samt Abstand fallen (M10), die Zählformel geht auf
+(M11), und die weggelassene Verlaufslinie ist als Absicht benannt (M12).
