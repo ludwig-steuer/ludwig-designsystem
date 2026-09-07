@@ -398,3 +398,18 @@ Rumpf zugeklappt ist, und das ist der Grund, warum der Editor sie oben trägt
 und nicht unten.
 
 Konsole in allen geprüften Editor-Stories ohne Meldung.
+
+## Stand 2026-09-07: beide offenen Punkte sind erledigt
+
+Die Abnahme vom 2026-09-05 nannte zwei Gründe für „nicht abgenommen". Beide
+treffen heute nicht mehr zu:
+
+1. **Das Herauslösen ist geschehen.** `JournalEntryEditor` zeichnet das Journal
+   nicht mehr selbst: es importiert `JournalEntryCard` (`:22`) und rendert sie
+   (`:895`), und `.bse__journal__row` ist aus `v3.css` verschwunden — der
+   Kommentar an seiner Stelle (`:1589`) hält fest, dass es mit 0044 wegfiel.
+   `JournalEntryGrid` (0113) nutzt dieselbe Karte für seine Klappe.
+2. **Die Kommentare sind Englisch.** `pnpm check:language --all` findet in
+   `JournalEntryCompact.tsx` keine deutsche Zeile mehr.
+
+Eine Abnahme steht damit aus, nicht eine Nacharbeit.
