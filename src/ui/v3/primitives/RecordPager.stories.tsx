@@ -44,7 +44,7 @@ export const LastRecord: Story = {
       total={6212}
       label="Sachverhalt"
       back={BACK}
-      prevHref="/cases/116"
+      prevHref="/cases/6211"
       nextHref={null}
     />
   ),

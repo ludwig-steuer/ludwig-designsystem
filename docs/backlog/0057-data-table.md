@@ -336,3 +336,11 @@ Regel beweist sich jetzt am eigenen Baustein statt an einer fremden Liste.
 Dazu: fünf Zähler im Set formatierten weiter selbst (`toLocaleString` in
 `AccountEntries`, `account-columns`, `Account`, `BankTransactionWorklist`) —
 genau das, wovor der neue JSDoc warnt. Sie lesen jetzt `formatCount`.
+**Befund beim Bauen (2026-09-07):** unterhalb von 1280 px bricht die
+Mengenangabe der `Pagination` auf zwei Zeilen um — gemessen bei 420 px, sauber
+ohne Überlauf und ohne Dokument-Scroll. **Das ist unter L1 kein Fall:** die
+Guidelines setzen „Desktop ab 1280 px Innenbreite. Kein Mobile-, kein
+Tablet-Ziel. Darunter Sperre mit einem Satz" fest, und `AppShell` (0030) setzt
+sie um. Der Satz steht hier, damit niemand die Messung später als offene
+Aufgabe missversteht: an der Grenze selbst (1280 px) ist die Leiste einzeilig,
+in jeder gemessenen Liste.
