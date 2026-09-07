@@ -237,3 +237,11 @@ Aufgabe.
 sie durchgehend deutsch, und der Text erscheint in Storybook — er ist damit
 näher an „Strings, die Nutzer sehen" als an Code. Eine Umstellung wäre eine
 Hausentscheidung für alle Familien, keine dieser Aufgabe.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**Der Satz „Dieser Typ ist lokal definiert" oben gilt nicht mehr.** L-68 ist
+mit `18ddaa28` erledigt: `CaseDetail` liegt in `domain/`, wird gespiegelt, und
+`CaseFactsVM` ist seither `Partial<CaseDetail>` plus vier Pflichtfelder
+(0097). Der Drawer reicht den Typ unverändert durch — an seiner Schnittstelle
+ändert sich nichts, nur die Herkunft der Felder.

@@ -335,3 +335,31 @@ von selbst. Der Satz im Verhalten sagt das jetzt.
 - [ ] Die lange Zusammenfassung ist so lang, wie der Kommentar sagt (nachgezählt)
 - [ ] Label links, Wert rechts — im Bild gemessen, nicht aus der Prop geschlossen
 - [ ] `documentNumberMode` trägt den Typ des Spiegels
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-68 ist erledigt, die lokale Fassung ist weg.** Die App hat `CaseDetail`
+mit `18ddaa28` nach `domain/` gehoben und um die elf Felder ergänzt; der
+Spiegel führt ihn seither als `modules/accounting-cases/domain/case-detail.ts`.
+`CaseFactsVM` ist damit kein eigener Datensatz mehr, sondern
+`Partial<CaseDetail>` plus die vier Felder, ohne die keine Faktenzeile steht:
+`caseNumber`, `kind`, `lifecycleStatus`, `openedAt`. Was die Freigabe unter
+(a) vorsah — „zieht der Typ um, fällt die lokale Fassung weg" — ist damit
+eingelöst.
+
+Drei Folgen, die beim Tausch auffielen:
+
+- **Die zwei Kontonummern heißen jetzt wie im Spiegel:**
+  `personalAccountNumber` und `clearingAccountNumber`. Punkt (b) der Freigabe
+  gilt unverändert — `accountHref` nimmt die Konto*nummer* —, nur trägt den
+  Hinweis jetzt der Feldname des Datenmodells statt ein lokales `fy`-Präfix.
+- **`counterpartySide` ist im Spiegel `string`,** nicht das lokale
+  `"debtor" | "creditor"`. Die Zeile schlägt das Label nach und zeigt einen
+  unbekannten Wert **roh**, statt ihn still wegzulassen: sichtbar falsch ist
+  hier besser als unsichtbar.
+- **`documentNumberMode` trägt den Typ des Spiegels** über `CaseDetail` — das
+  offene Kriterium des Nachtrags ist damit erfüllt, der lokale Import von
+  `CaseDocumentNumberMode` entfällt.
+
+`pnpm typecheck`, `pnpm build`, `pnpm check:icons` und `pnpm check:contrast`
+sind grün (Exit-Code geprüft, nicht die letzte Zeile der Ausgabe).

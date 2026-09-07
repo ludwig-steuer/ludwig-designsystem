@@ -32,7 +32,7 @@ const RECORD: CaseQuickView = {
       "Der Betrag ist auf zwei Kostenstellen zu verteilen.",
     counterpartyPartnerId: "p-8812",
     counterpartyName: "Bürobedarf Meier GmbH",
-    fyPersonalAccountNumber: "70021",
+    personalAccountNumber: "70021",
     documentNumberMode: "single",
     closedAt: null,
   },
@@ -131,7 +131,7 @@ export const Sparse: Story = {
           kind: "internal_transfer",
           lifecycleStatus: "open",
           openedAt: "2026-09-05",
-          fyPersonalAccountNumber: null,
+          personalAccountNumber: null,
           documentNotRequiredReason:
             "Interne Umbuchung zwischen zwei Sachkonten — es gibt keinen Beleg dazu.",
         },

@@ -229,6 +229,10 @@ export interface CaseListItem {
   summary: string | null;
   /** Gegenpartei (Lieferant/Kunde), denormalisiert am Sachverhalt. */
   counterpartyName: string | null;
+  /** Aufgelöster Geschäftspartner, falls der Beleg- oder Zahlungsfluss einen
+   *  gefunden hat. Ohne ihn bleibt der Gegenpart in der Zeile ein Name ohne
+   *  Ziel — 47 % der Sachverhalte tragen einen (L-69). */
+  counterpartyPartnerId: string | null;
   currency: string | null;
   totalAmount: number | null;
   lifecycleStatus: CaseLifecycle | null;

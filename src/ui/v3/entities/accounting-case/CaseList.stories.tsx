@@ -29,6 +29,7 @@ const CASE = (over: Partial<CaseListItem> = {}): CaseListItem => ({
   title: "Wartung der Klimaanlage",
   summary: null,
   counterpartyName: "Bürobedarf Meier GmbH",
+  counterpartyPartnerId: "bp-8841",
   currency: "EUR",
   totalAmount: 1249.9,
   lifecycleStatus: "open",
@@ -46,7 +47,7 @@ const CASE = (over: Partial<CaseListItem> = {}): CaseListItem => ({
 const CASES: CaseListItem[] = [
   CASE(),
   CASE({ caseId: "c-4413", caseNumber: "2026-0413", kind: "outgoing_invoice", title: "Beratung Q2 2026", counterpartyName: "Musterbau GmbH", totalAmount: 1800, lifecycleStatus: "closed_accepted", disposition: "agent", openClarificationsCount: 0, openedAt: "2026-06-02", exportStatus: "exportiert" }),
-  CASE({ caseId: "c-4414", caseNumber: "2026-0414", kind: "recurring_charge", title: "Abschlag Strom 08/2026", counterpartyName: "Stadtwerke Musterstadt", totalAmount: 412, lifecycleStatus: "waiting_for_documents", disposition: "client", openClarificationsCount: 0, openedAt: "2026-08-28", exportStatus: null }),
+  CASE({ caseId: "c-4414", caseNumber: "2026-0414", kind: "recurring_charge", title: "Abschlag Strom 08/2026", counterpartyName: "Stadtwerke Musterstadt", counterpartyPartnerId: null, totalAmount: 412, lifecycleStatus: "waiting_for_documents", disposition: "client", openClarificationsCount: 0, openedAt: "2026-08-28", exportStatus: null }),
   CASE({ caseId: "c-4415", caseNumber: "2026-0415", kind: "internal_transfer", title: null, counterpartyName: null, totalAmount: null, currency: null, lifecycleStatus: "needs_clarification", disposition: null, openClarificationsCount: 3, openedAt: "2026-09-01", exportStatus: null }),
   CASE({ caseId: "c-4416", caseNumber: "2026-0416", title: "Sanierung Serverraum, Teilrechnung 2 von 3", counterpartyName: "Handwerk Schulz KG", totalAmount: 2480.55, openClarificationsCount: 0, openedAt: "2026-08-20", exportStatus: "teilweise" }),
 ];
@@ -61,7 +62,7 @@ export const Filled: Story = {
         tab="laufend"
         cases={CASES}
         href={href}
-        counterpartyHref={(c) => (c.counterpartyName ? `#partner-${c.caseId}` : undefined)}
+        counterpartyHref={(c) => (c.counterpartyPartnerId ? `#partner-${c.counterpartyPartnerId}` : undefined)}
         listHref={listHref}
         sort={{ key: "openedAt", dir: "desc" }}
         pager={PAGER}
@@ -212,7 +213,7 @@ export const InUse: Story = {
         tab="laufend"
         cases={CASES}
         href={href}
-        counterpartyHref={(c) => (c.counterpartyName ? `#partner-${c.caseId}` : undefined)}
+        counterpartyHref={(c) => (c.counterpartyPartnerId ? `#partner-${c.counterpartyPartnerId}` : undefined)}
         listHref={listHref}
         sort={{ key: "openedAt", dir: "desc" }}
         pager={PAGER}

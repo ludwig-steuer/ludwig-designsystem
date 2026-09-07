@@ -77,6 +77,7 @@ function makeCase(i: number): CaseListItem {
     title,
     summary: SUMMARIES[i % SUMMARIES.length]!,
     counterpartyName,
+    counterpartyPartnerId: `bp-${880 + (i % PARTNERS.length)}`,
     currency: "EUR",
     totalAmount: base + (i % 5) * 12.5,
     lifecycleStatus,

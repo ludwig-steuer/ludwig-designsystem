@@ -22,7 +22,7 @@ const FULL: CaseFactsVM = {
     "Der Betrag ist auf zwei Kostenstellen zu verteilen.",
   counterpartyPartnerId: "p-8812",
   counterpartyName: "Bürobedarf Meier GmbH",
-  fyPersonalAccountNumber: "70021",
+  personalAccountNumber: "70021",
   documentNumberMode: "single",
   closedAt: null,
   counterpartySide: "creditor",
@@ -30,7 +30,7 @@ const FULL: CaseFactsVM = {
   createdByLabel: "Agent · Vorbereitungslauf",
   fiscalYear: 2026,
   expectedInterval: null,
-  fyClearingAccountNumber: null,
+  clearingAccountNumber: null,
   agentRunId: "run-8f21c4",
   exportBatchId: null,
 };
@@ -60,7 +60,7 @@ export const Sparse: Story = {
           kind: "internal_transfer",
           lifecycleStatus: "open",
           openedAt: "2026-09-05",
-          fyPersonalAccountNumber: null,
+          personalAccountNumber: null,
           counterpartySide: null,
           documentNotRequiredReason:
             "Interne Umbuchung zwischen zwei Sachkonten — es gibt keinen Beleg dazu.",
@@ -79,7 +79,7 @@ export const All: Story = {
           ...FULL,
           closedAt: "2026-09-02",
           expectedInterval: "monatlich",
-          fyClearingAccountNumber: "1370",
+          clearingAccountNumber: "1370",
           exportBatchId: "2026-0042",
         }}
         all

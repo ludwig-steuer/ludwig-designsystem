@@ -14,7 +14,7 @@ type Story = StoryObj<typeof CaseRow>;
 
 const href = (c: CaseListItem) => `#fall-${c.caseId}`;
 const counterpartyHref = (c: CaseListItem) =>
-  c.counterpartyName ? `#partner-${c.caseId}` : undefined;
+  c.counterpartyPartnerId ? `#partner-${c.counterpartyPartnerId}` : undefined;
 
 const CASE = (over: Partial<CaseListItem> = {}): CaseListItem => ({
   caseId: "c-4412",
@@ -25,6 +25,7 @@ const CASE = (over: Partial<CaseListItem> = {}): CaseListItem => ({
   title: "Wartung der Klimaanlage",
   summary: null,
   counterpartyName: "Bürobedarf Meier GmbH",
+  counterpartyPartnerId: "bp-8841",
   currency: "EUR",
   totalAmount: 1249.9,
   lifecycleStatus: "open",

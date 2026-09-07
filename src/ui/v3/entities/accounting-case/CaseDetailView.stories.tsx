@@ -30,7 +30,7 @@ const FACTS: CaseFactsVM = {
     "Der Betrag ist auf zwei Kostenstellen zu verteilen.",
   counterpartyPartnerId: "p-8812",
   counterpartyName: "Bürobedarf Meier GmbH",
-  fyPersonalAccountNumber: "70021",
+  personalAccountNumber: "70021",
   documentNumberMode: "single",
   closedAt: null,
 };

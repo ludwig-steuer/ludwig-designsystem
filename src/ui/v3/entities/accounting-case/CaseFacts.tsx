@@ -1,10 +1,7 @@
 import type { ReactNode } from "react";
 
-import type {
-  CaseDocumentNumberMode,
-  CaseKind,
-  CaseLifecycle,
-} from "@/ludwig/modules/accounting-cases/domain/case";
+import type { CaseDetail } from "@/ludwig/modules/accounting-cases/domain/case-detail";
+import type { CaseKind, CaseLifecycle } from "@/ludwig/modules/accounting-cases/domain/case";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { FieldList } from "../../primitives/FieldList";
 import { Link } from "../../primitives/Link";
@@ -31,51 +28,25 @@ import { Time } from "../../primitives/Time";
  */
 
 /**
- * The facts of a case, as far as this list shows them.
+ * The facts of a case — **from the mirror**, not defined here.
  *
- * `CaseDetail` of the app lives in `infrastructure/case-detail-queries.ts`
- * instead of `domain/`, so the mirror does not carry it, and eleven of these
- * fields are missing over there anyway — including `title`, which is the root
- * of L-52. Register entry **L-68**; the precedent for a local view model is
- * `AccountFactsVM` (L-13). When it moves, this interface goes away.
+ * Until 2026-09-07 this file carried a structure of its own with nineteen
+ * fields. It existed because `CaseDetail` sat in `infrastructure/` and was
+ * missing eleven of them (finding **L-68**). The app closed that with
+ * `18ddaa28`: the type lives in `domain/` now, is mirrored, and carries
+ * `title`, `disposition`, `openClarificationsCount`, `exportStatus`,
+ * `counterpartySide`, `batchOposReference`, `createdByKind`/`createdByLabel`,
+ * `expectedInterval`, `agentRunId` and `exportBatchId`.
+ *
+ * Four fields are required, because without them no fact line stands at all;
+ * everything else is optional, because the view shows what it is given. The
+ * ranks are in the entity profile, not here — a second list goes stale.
  */
-export interface CaseFactsVM {
+export interface CaseFactsVM extends Partial<CaseDetail> {
   caseNumber: string | null;
   kind: CaseKind;
   lifecycleStatus: CaseLifecycle | null;
   openedAt: string;
-  /** Rank 11 — the agent's sentence about this case. */
-  summary?: string | null;
-  /** Rank 12. 47 % have one. */
-  counterpartyPartnerId?: string | null;
-  counterpartyName?: string | null;
-  /**
-   * Rank 13. **NULL means „deliberately none"** (GLOSSARY) — a collective
-   * case, an internal transfer, a pure nominal booking.
-   */
-  fyPersonalAccountNumber?: string | null;
-  /** Rank 14, axis `belegnummern_modus`. */
-  documentNumberMode?: CaseDocumentNumberMode | null;
-  /** Rank 15. Set = **no document is expected**, and the reason is the value. */
-  documentNotRequiredReason?: string | null;
-  /** Rank 16. 26 % are closed. */
-  closedAt?: string | null;
-  /** Rank 17. NULL means „deliberately none". */
-  counterpartySide?: "debtor" | "creditor" | null;
-  /** Rank 18 — where the case comes from. */
-  batchOposReference?: string | null;
-  /** Rank 19. */
-  createdByLabel?: string | null;
-  /** Rank 20 — the route sets it, the drawer does not know it. */
-  fiscalYear?: number | null;
-  /** Rank 21, 3 % — only on a recurring case. */
-  expectedInterval?: string | null;
-  /** Rank 22, 0 % today (2 of 915). */
-  fyClearingAccountNumber?: string | null;
-  /** Rank 23. */
-  agentRunId?: string | null;
-  /** Rank 24. */
-  exportBatchId?: string | null;
 }
 
 /** Above this the summary is a paragraph, not a fact line (p90 309). */
@@ -128,13 +99,13 @@ export function CaseFacts({
   // Rang 13 — NULL ist eine Aussage, kein fehlender Wert.
   add(
     "Personenkonto",
-    c.fyPersonalAccountNumber ? (
+    c.personalAccountNumber ? (
       accountHref ? (
-        <Link href={accountHref(c.fyPersonalAccountNumber)}>
-          <MonoCell value={c.fyPersonalAccountNumber} />
+        <Link href={accountHref(c.personalAccountNumber)}>
+          <MonoCell value={c.personalAccountNumber} />
         </Link>
       ) : (
-        <MonoCell value={c.fyPersonalAccountNumber} />
+        <MonoCell value={c.personalAccountNumber} />
       )
     ) : (
       "hat bewusst keins"
@@ -159,20 +130,27 @@ export function CaseFacts({
 
   if (all) {
     // Rang 17 — NULL ist auch hier eine Aussage.
-    add("Gegenpartei-Seite", c.counterpartySide ? SIDE_LABEL[c.counterpartySide] : "bewusst keine");
+    // The mirror types the side as `string`; an unknown value is shown raw
+    // rather than silently dropped — visibly wrong beats quietly absent.
+    add(
+      "Gegenpartei-Seite",
+      c.counterpartySide
+        ? (SIDE_LABEL[c.counterpartySide as keyof typeof SIDE_LABEL] ?? c.counterpartySide)
+        : "bewusst keine",
+    );
     if (c.batchOposReference) add("Anker", <MonoCell value={c.batchOposReference} />);
     if (c.createdByLabel) add("Angelegt von", c.createdByLabel);
     if (c.fiscalYear != null) add("Wirtschaftsjahr", String(c.fiscalYear));
     if (c.expectedInterval) add("Abrechnungsrhythmus", c.expectedInterval);
-    if (c.fyClearingAccountNumber) {
+    if (c.clearingAccountNumber) {
       add(
         "Verrechnungskonto",
         accountHref ? (
-          <Link href={accountHref(c.fyClearingAccountNumber)}>
-            <MonoCell value={c.fyClearingAccountNumber} />
+          <Link href={accountHref(c.clearingAccountNumber)}>
+            <MonoCell value={c.clearingAccountNumber} />
           </Link>
         ) : (
-          <MonoCell value={c.fyClearingAccountNumber} />
+          <MonoCell value={c.clearingAccountNumber} />
         ),
       );
     }

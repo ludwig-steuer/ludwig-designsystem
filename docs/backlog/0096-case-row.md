@@ -256,3 +256,15 @@ Wert, sondern die Antwort null — „0 offen" wäre Lärm in einer Spalte, die 
 meldet, wenn es etwas zu melden gibt. Das steht als Kommentar am Code.
 
 **M5 — `caseTracks` ohne `@when`/`@instead`** — nachgetragen.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-69 ist erledigt.** Die App hat `CaseListItem.counterpartyPartnerId` mit
+`a094826e` ergänzt; der Spiegel führt das Feld. An der Schnittstelle ändert
+das nichts — `counterpartyHref` bleibt eine Funktion des Falls, weil die Route
+dem Aufrufer gehört —, aber die Stories bauen den Verweis jetzt aus der
+**Partner-Id** statt aus der Sachverhalts-Id. Das ist der Unterschied, um den
+es im Befund ging: 47 % der Sachverhalte haben einen aufgelösten Partner, und
+nur die bekommen einen Link. Ein Fall in `CaseList` trägt deshalb einen
+Gegenpart **ohne** Id — sonst zeigte keine Story, dass der Name dann kein Link
+ist.
