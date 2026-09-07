@@ -227,7 +227,11 @@ Profil-Empfehlung ausdrücklich.
 Titel `v3/Entitäten/Konto/LedgerAccountView`. Ableitung nach §6: **3
 Story-Zustände** (gefüllt · leer · Laden und Fehler zusammen in einer; „leer
 nach Filter" entfällt, der Rahmen filtert nicht) + 1 Layout (ohne `aside`,
-`pager` und `tabs`) + 1 Slot-Wechsel (anderer Reiter) + 1 Rand = **6**.
+`pager` und `tabs`) + 1 Slot-Wechsel (anderer Reiter) + 1 Rand + 1 „im
+Einsatz" (`InUse`, in der `AppShell` — der einzige Ort, an dem die Breite
+stimmt) = **7**. *(Die Rechnung sagte bis 2026-09-07 „= 6" und kannte `InUse`
+nicht, obwohl Code und Registry sieben führen — berichtigt in der vierten
+Runde, M2.)*
 
 | Story | Beweist |
 |---|---|
@@ -1025,9 +1029,15 @@ der `AppShell`:
 
 | Fenster | Lage | Arbeitsfläche | Buchungstext | Gegenkonto |
 |---|---|---|---|---|
-| 1280 | umgebrochen | 976 px | 190 px, vollständig | 104 px, vollständig |
+| 1280 | umgebrochen | 976 px | **276 px**, vollständig | **190 px**, 26 von 27 Zeichen |
 | 1440 | umgebrochen | 1.136 px | **371 px**, vollständig | **255 px**, vollständig |
 | 1920 | nebeneinander | 980 px | 279 px, vollständig | 191 px, vollständig |
+
+*(Die Zeile für 1280 stand bis 2026-09-07 mit „190 / 104, beide vollständig"
+da — um eine Spalte verschoben: 190 ist das Gegenkonto, 104 war Soll. Und das
+Gegenkonto ist dort **nicht** vollständig: 189,9 px Kasten gegen 197,4 px
+Bedarf. Berichtigt in der vierten Runde, M3; die Zeilen für 1440 und 1920
+stimmten.)*
 
 Neben dem Strang steht die Liste damit erst auf sehr breiten Schirmen — und
 das ist die ehrliche Antwort: eine Tabelle mit sieben Spalten und zwei
@@ -1046,3 +1056,241 @@ dieser Aufgabe mehr vor. `WithoutFacts` hätte bei 1440 den Platz dafür
 (1.398 px). Das ist derselbe Riss wie der Blocker, nur andersherum: ein
 Dokument beschreibt eine Anordnung, die niemand angesehen hat. Es gehört in
 dieselbe Runde wie die Slot-Tabelle.
+
+## Wiederabnahme 2026-09-07 (fünfte Runde, fremde Abnahme)
+
+**Urteil: zurück.** Der Blocker der vierten Runde ist behoben und in der
+Wirkung nachgemessen: `minDetail={960}` trägt, die Umbruch-Reihenfolge stimmt
+(erst die Arbeitsfläche, dann die Randspalte), und der Typtausch auf den
+Spiegel hat weder eine Zahl noch das Bild verändert. Blockierend ist **ein**
+Punkt, und er ist ein **fester**: die Begründung der 960 steht als
+neunzeiliger **deutscher** Kommentar in einer bis dahin durchgängig englischen
+Datei.
+
+Gemessen am laufenden Dev-Server `http://localhost:6107` (Quelle, nicht
+`storybook-static`), CDP über ein eigenes Blatt (eigene Kopie der Helfer,
+`w5-*` im Scratchpad), `getBoundingClientRect`, `getComputedStyle` und `Range`
+am gerenderten Bild. Fenster 1024, 1152, 1280, 1440, 1680, 1920 und ein
+1-px-Schwenk 1720–1726, je × 900. Gemessen wurde **auf der Seite** (`InUse` in
+der `AppShell`), die Fixture-Breiten nur zum Vergleich. Stand `cb63b05`.
+
+**Gegenprobe, dass die Messung reagiert:** `--v2md-min` zur Laufzeit auf
+620 px zurückgesetzt — dieselbe Story, dasselbe Fenster (`InUse`, 1440) —
+kippt die Ansicht von umgebrochen (Arbeitsfläche 1.136 px) auf nebeneinander
+(440/676), die Spur `Buchungstext` fällt von **371 auf 98,4 px** und der
+Textkasten von 156,1 auf **18,2 px: 2 von 21 Zeichen**; die Spur `Gegenkonto`
+von 255 auf 67,6 px bei 197,4 px Bedarf. Die Behauptung der Nacharbeit, bei
+620 hätten Buchungstext und Gegenkonto nichts mehr getragen, ist damit
+**belegt** — und die Zahlen unten sind gemessen, nicht zurückgelesen.
+
+### Behoben, gemessen
+
+- **Die Untergrenze trägt.** `InUse` in der `AppShell`, alle vier
+  Pflichtbreiten, 7 von 7 Spalten, `scrollWidth − clientWidth = 0` an
+  `.v2tbl__scroll`, `html`, `body`, `.app__main`, `.v2lav`, `.v2md` und
+  `.v2md__detail`:
+
+  | Fenster | Inhalt `.v2lav` | Lage | Arbeitsfläche | Spur Text / Gegenkonto | Zeile 1 |
+  |---|---|---|---|---|---|
+  | 1280 | 976 | umgebrochen | 976 | 276,1 / 189,9 | Text 21/21; Gegenkonto 189,9 von 197,4 |
+  | 1440 | 1.136 | umgebrochen | 1.136 | 371,0 / 255,0 | beide vollständig |
+  | 1680 | 1.376 | umgebrochen | 1.376 | 513,2 / 352,8 | beide vollständig |
+  | 1920 | 1.440 (Deckel) | nebeneinander | 980 | 278,5 / 191,5 | Text vollständig; Gegenkonto 191,5 von 197,4 |
+
+- **Die Kippkante trifft die Formel.** 1-px-Schwenk in der `AppShell`: bei
+  Fenster 1723 (Inhalt 1.419) umgebrochen, bei **1724** (Inhalt **1.420**)
+  nebeneinander — genau 440 + 960 + 20. Kein Absturz mehr wie 1383/1384 in der
+  vierten Runde: der Buchungstext bleibt über die Kante hinweg bei 156,1 px
+  vollständig (Spur 267,9 px), das Gegenkonto verliert 14,1 px (183,3 statt
+  197,4). Die schmalere Breite liefert nicht mehr das bessere Bild.
+- **Umbruch-Reihenfolge.** Umgebrochen steht die Arbeitsfläche oben: `InUse`
+  bei 1280 `.v2md__detail` `top` **725,7**, `.v2md__list` `top` **1040,2**;
+  bei 1440 `top` 688,5 / 1003,0; `Edges` bei 1440 `top` 379,9 / 743,4.
+  Nebeneinander (1920) stehen beide bündig.
+- **Nichts zerrissen.** `CaseDetailView · In Use` steht unverändert
+  zweispaltig: 1280 `440/484`, 1440 `440/644`, `--v2md-min: 460px`. `.v2md` in
+  `v3.css` ist seit `be96a56` unberührt; die 960 stehen am Aufrufer.
+- **Der Überstand wird eingefangen.** Auch bei 1024 und 1152 px Fenster — weit
+  unter der Pflichtbreite — läuft nichts über: `.v2md__detail` trägt
+  `min-width: 0px`, der Querlauf bleibt in `.v2tbl__scroll` (dort ebenfalls 0
+  gemessen), `html` und `body` scrollen nicht seitlich.
+- **Typtausch, Σ Soll / Σ Haben.** Die Zeile steht erst, wenn eine der Summen
+  etwas trägt — im Bild stimmt das und widerspricht nichts: `Filled`
+  21.442,19 € / 3.000,00 € (Differenz 18.442,19 = `datevBalance`), `Edges`
+  612.004,20 / 796.225,75 (Differenz −184.221,55 = `datevBalance`), `Empty`
+  **keine Zeile** neben „Saldo in DATEV —“, „0 in DATEV“ und
+  „Letzte Buchung —“. Kein Konto zeigt die Zahlen eines anderen. Der Drawer
+  (0068, lädt keine Monatswerte) zeigt die Zeile gemessen ebenfalls nicht —
+  genau der Fall, den die Regel meint.
+- **Typtausch, die Anzahl passt zur Summe.** Die Paarung im Code stimmt:
+  `ludwigOnlyCount` steht überall neben `ludwigOnlyAmount`
+  (`Account.tsx:148–152, 174–180`, `LedgerAccountView.stories.tsx:198–202`);
+  `ludwigEntryCount` (41) erscheint **nirgends** im Bild. Ein
+  Textknoten-Schwenk über `Filled`, `Empty`, `Edges`, `InUse`, `Account` und
+  `AccountDrawer` findet **null** Rohschlüssel der Achse `konto_typ`; im Kopf
+  und in der Randspalte steht „Sachkonto“. Einschränkung: Mangel 4.
+- **Rang 5, vier Klassen** — `InUse` bei 1280 und 1440 an einer Zeile:
+  `datev` kein Zeichen / kein Chip / `rgb(45,45,45)` · `mirrored` Zeichen ·
+  `exported` Zeichen + Chip „Exportiert“ · `ludwig` Zeichen +
+  `v2ae__row--draft`, `rgb(92,92,92)`. Dasselbe Bild in `Edges` und `Filled`.
+- **Rang 2.** Eine führende Zahl: `v2kpi__val` 19 px / 600, das Delta in
+  `v2kpi__sub` 11,5 px. Die zweite Kachel trägt ein Datum.
+- **Rang 3.** `Filled` und `InUse`: 24 Balken (12 Soll, 12 Haben) und 12
+  Achsenmarken. `Empty` zeigt keinen Verlauf.
+- **Ränge 1–3 ohne Scrollen.** `InUse` bei 1440 × 900 endet der Verlauf bei
+  y = **605,5**, bei 1280 bei y = **642,7**; `.app__main` ist 844 px hoch.
+- **`WithoutFacts`.** Kein `.v2md`; drei Slots — `head` 20–106,6 · `sum`
+  126,6–249 · `body` 269–563,5, Abstände durchgehend 20 px.
+- **Fest.** `pnpm typecheck` **Exit 0** · `pnpm check:icons` **Exit 0** ·
+  `pnpm check:contrast` **Exit 0** (je am Exit-Code, nicht an der letzten
+  Zeile). `pnpm build` **nicht gelaufen** — in dieser Runde ausdrücklich
+  untersagt (0117, mehrere Prüfer im selben Baum); die Änderungen seit
+  `be96a56` sind eine Prop, Typnamen und Kommentare, `v3.css` ist an `.v2md`
+  unberührt. Slots nur `ReactNode` (sieben), kein `useState`, kein `await`,
+  kein Modul-Import außer `MasterDetail`, kein Hex, keine lokale Label-Map,
+  keine Saldospalte im Satz, **eine** Bewegungsliste je Story, sieben
+  Story-Exporte und sieben in der Registry, Barrel `index.ts:415`.
+
+### Mängel
+
+**1. Neun Zeilen deutscher Kommentar in einer englischen Datei. —
+blockierend**
+
+*Kriterium:* fest „Code englisch mit `@when`/`@instead`“, und `CLAUDE.md`
+sagt, was das heißt: „Bezeichner, Props, Typen, **Kommentare**, JSDoc …
+Englisch. Deutsch ausschließlich in Strings, die Nutzer sehen“.
+
+*Ort und Messung:* `src/ui/v3/entities/account/LedgerAccountView.tsx:72–80` —
+der Block, der die 960 begründet („960 px, nicht die Vorgabe 620: die Vorgabe
+sichert, dass die sieben Spalten existieren …“). Vor dieser Nacharbeit war die
+Datei **durchgängig englisch**; `git diff be96a56..HEAD` zeigt neun neue
+deutsche Zeilen und keine andere Änderung außer der Prop. Es ist genau die
+Klasse, für die `85755ed` einen eigenen Commit brauchte („zwei
+Kommentarblöcke waren Deutsch“) und `82403f2` einen Befund
+(„englischer JSDoc“).
+
+*Kleinster Weg:* denselben Text auf Englisch. Der Inhalt ist richtig und
+gehört an genau diese Stelle — nur die Sprache nicht.
+
+*Am Rand, gleiche Regel, andere Aufgabe:* dieselbe Nacharbeit hat
+`Account.tsx:157–160` (0066) um vier deutsche Kommentarzeilen erweitert.
+
+**2. Die Story-Tabelle zählt weiter sechs — und die Nacharbeit behauptet, das
+sei erledigt. — nicht blockierend**
+
+*Kriterium:* fest „alle Stories“ mit der Ableitung nach §6.
+
+*Messung:* Im Code stehen **sieben** Exporte (`Filled`, `WithoutFacts`,
+`OtherTab`, `Empty`, `LoadingAndError`, `Edges`, `InUse`), in der Registry
+ebenso sieben — die Sache selbst ist also in Ordnung. Der Abschnitt
+„Stories“ der Neufassung rechnet in Zeile 230 unverändert
+„3 + 1 + 1 + 1 = **6**“, und seine Tabelle (Zeilen 232–239) hat sechs Zeilen
+ohne `InUse`. Der Nacharbeits-Text in Zeile 1042 sagt dagegen: „Nicht
+blockierend, erledigt: die Story-Tabelle zählte weiter ‚= 6‘ und kannte
+`InUse` nicht — es sind sieben.“ Das ist eine Erledigungs-Behauptung ohne
+Änderung, und es ist der zweite Anlauf auf denselben Punkt (vierte Runde,
+Mangel 2).
+
+*Kleinster Weg:* eine Zeile in der Tabelle, eine Zahl in der Formel.
+
+**3. Die Messtabelle der Nacharbeit liest bei 1280 die falschen zwei Spuren. —
+nicht blockierend**
+
+*Messung:* Die Tabelle am Ende der Nacharbeit gibt für Fenster 1280
+„Buchungstext 190 px, vollständig“ und „Gegenkonto 104 px, vollständig“.
+Gemessen sind die Spuren bei 1280 in der `AppShell`
+`84px 24px 96px 276,1px 189,9px 104px 104px`: 190 ist das **Gegenkonto**, 104
+ist **Soll** — die Zeile ist um eine Spalte verschoben. Außerdem ist das
+Gegenkonto dort nicht vollständig: Kasten 189,9 px gegen 197,4 px Bedarf, 26
+von 27 Zeichen. Die Zeilen für 1440 und 1920 stimmen dagegen genau (371/255
+und 278,5/191,5).
+
+*Kleinster Weg:* die eine Zeile berichtigen.
+
+**4. „Nur in Ludwig“ ist zweimal verschieden definiert. — nicht blockierend,
+Frage an den Owner**
+
+*Kriterium:* Rang 5 des Seitenprofils und die vier Herkunftsklassen aus 0067.
+
+*Messung:* `Account.tsx:96–102` definiert `ludwigOnlyCount` als „Ludwig
+entries **without** `datev_mirror_entry_id`“ — darunter fällt auch die Klasse
+`exported` (`AccountEntries.tsx:76–79`: „Ludwig entry, exported, not found in
+DATEV“). Das Vokabular der Zeile nennt dagegen nur die vierte Klasse „nur in
+Ludwig“; `exported` trägt den eigenen Chip. In `Filled` und `InUse` steht
+deshalb die Aufschrift „+ 3 nur in Ludwig (612,40 €)“ unmittelbar neben einer
+Liste, in der zwei Ludwig-seitige Bewegungen sichtbar sind: `exported`
+1.249,90 € und `ludwig` 612,40 €, zusammen **1.862,30 €**. Unter der
+Definition des Typs sind zwei der drei gezählten Bewegungen im Bild und
+übersteigen die genannte Summe um 1.249,90 €; unter der Definition der Zeile
+stimmt die Zahl, dann müssten die zwei übrigen aber 0,00 € sein.
+
+*Kleinster Weg:* eine der beiden Definitionen streichen — entweder sagt der
+Typ „Ludwig-Sätze ohne Spiegel-Zuordnung **und ohne Export**“, oder die
+Aufschrift heißt „+ n noch nicht in DATEV“. Danach trägt die Fixture die
+Summe, die zu ihrer Zahl gehört.
+
+**5. Am breitesten Bild kürzt das Gegenkonto. — nicht blockierend**
+
+*Messung:* Ab Fenster 1724 (Inhalt 1.420) steht die Liste neben dem Strang und
+bekommt 960–980 px. Die Spur `Gegenkonto` misst dann 183,3 px (an der Kante)
+bis 191,5 px (bei 1920), der Name „70001 Bürobedarf Meier GmbH“ braucht
+197,4 px — 26 von 27 Zeichen, ohne `title` am Kasten (`AccountCell` setzt ihn
+erst ab 40 Zeichen). Rechnerisch trägt der kompakte Satz das Gegenkonto erst ab
+rund **995 px** Arbeitsfläche. Die Spalte trägt damit etwas, sie trägt nur
+nicht alles; deshalb kein Blocker — aber die 960 sind knapp gerechnet.
+
+**6. Der volle Spaltensatz kommt in keiner Story dieser Aufgabe vor. — nicht
+blockierend, dritte Runde in Folge**
+
+Unverändert: `grep 'variant: "full"'` trifft im ganzen Set nur
+`AccountEntries.stories.tsx` (0067). Die Slot-Tabelle (Zeile 207) nennt weiter
+`accountEntryColumns({ variant: "full" })`, und `WithoutFacts` — die Story ohne
+Strang — fährt `compact`, obwohl dort bei 1440 eine Fläche von 1.398 px steht.
+Die Nacharbeit sagt selbst „bleibt“; er bleibt seit der dritten Runde.
+
+### Befunde am Set (nicht an dieser Aufgabe)
+
+- **`DataTable.rowClassName` heißt nach der falschen Familie.** Unverändert:
+  die einzige Regel ist `.v2tbl__row.v2ae__row--draft` (`v3.css:2748`), also
+  nach `AccountEntryList` benannt, obwohl der Haken jede Tabelle betrifft.
+  Gehört zu 0057.
+- **`AccountFacts` zeigt Σ Soll / Σ Haben in keiner eigenen Story.**
+  `Account.stories.tsx` und `AccountDrawer.stories.tsx` setzen durchweg
+  `totalDebit: 0, totalCredit: 0`; die Zeile ist dort gemessen nie im Bild.
+  Sichtbar wird sie nur über 0063. Gehört zu 0066.
+- **Alter Name in zwei fremden Dateien.** `0066-account-cell-facts.md:10` und
+  `0067-account-entries.md:10` verlinken 0063 weiter als `AccountView`.
+
+Abgenommen von / am: Claude (fremde Abnahme, hat nicht gebaut), 2026-09-07 ·
+**Urteil: zurück** — **Mangel 1 blockiert**; 2 bis 6 blockieren nicht.
+
+## Nach der Wiederabnahme (2026-09-07)
+
+Die zwei Punkte, die diese Runde tragen sollten, sind bestätigt: die Untergrenze
+von 960 px hält (Kippkante 1723 → 1724, Umbruch-Reihenfolge Arbeitsfläche vor
+Randspalte), und der Typtausch zeigt nirgends fremde Zahlen. Blockiert hat ein
+fester Kriterienpunkt aus derselben Nacharbeit.
+
+**M1 — neun deutsche Kommentarzeilen** in einer durchgängig englischen Datei,
+dazu vier weitere in `Account.tsx` (0066). Beide Blöcke sind Englisch. Das war
+in dieser Runde der **vierte** Rückfall derselben Regel, jedes Mal eingeschleppt
+von der Nacharbeit, die einen anderen Mangel behob — deshalb steht die Regel
+jetzt als Wächter im Repo (`pnpm check:language`). Er prüft, was die aktuelle
+Änderung anfasst, nicht den Bestand: CLAUDE.md verbietet die Masse-Umbenennung,
+und im Bestand stehen 407 solcher Zeilen.
+
+**M2 — die Story-Rechnung** sagte „= 6" und kannte `InUse` nicht, während Code
+und Registry sieben führen. Sie sagt jetzt sieben, mit `InUse` als „im Einsatz".
+
+**M3 — die Messtabelle las bei 1280 die falschen Spuren.** „Buchungstext 190 px,
+Gegenkonto 104 px, beide vollständig" war um eine Spalte verschoben: 190 ist
+das Gegenkonto, 104 war Soll. Und das Gegenkonto ist dort **nicht** vollständig
+(189,9 px Kasten gegen 197,4 px Bedarf, 26 von 27 Zeichen). Die Zeile steht
+berichtigt; 1440 und 1920 stimmten.
+
+**M4, M5 und M6 bleiben offen und sind vermerkt:** „nur in Ludwig" ist zweimal
+verschieden definiert (Typ gegen Zeilenvokabular) — das ist eine Owner-Frage,
+keine Reparatur. Ab 1724 px kürzt das Gegenkonto knapp (183–191 gegen 197,4
+nötig; rechnerisch bräuchte die Untergrenze ~995 statt 960). Und `variant:
+"full"` steht weiter in der Slot-Tabelle, ohne dass eine Story dieser Aufgabe
+ihn fährt.

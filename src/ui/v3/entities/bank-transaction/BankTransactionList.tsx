@@ -21,10 +21,10 @@ import type { BankTransactionRowData } from "./bank-transaction";
  */
 
 /**
- * Aufklappen und Springen schließen sich aus — eine Zeile, die sich öffnet,
- * soll nicht auch woanders hin. Das steht seit der Abnahme vom 2026-09-07 im
- * **Typ** und nicht mehr nur in einer Laufzeit-Bedingung: `DataTable` (0057)
- * macht es genauso, und der Kommentar hier behauptete das Gegenteil.
+ * Expanding and jumping exclude each other — a row that folds open should not
+ * also go somewhere. Since 2026-09-07 that stands in the **type** and no
+ * longer only in a runtime condition: `DataTable` (0057) does the same, and
+ * the comment here claimed the opposite.
  */
 type RowWayProps =
   | {

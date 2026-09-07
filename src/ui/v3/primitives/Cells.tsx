@@ -135,18 +135,17 @@ export function DeviationCell({
 }
 
 /**
- * Ladende Zeilen in einer Tabelle.
+ * Loading rows inside a table.
  *
- * `cols` sind die Spuren **mit Inhalt**. Eine Tabelle hat oft mehr: das
- * Auswahlkästchen, den Aufklapp-Griff, die Aktionsspalte. Die tragen keine
- * Daten und bekommen deshalb keinen Balken — aber sie brauchen ihre Zelle,
- * sonst rutscht die ganze Zeile um eine Spur nach links und der erste Balken
- * landet im 32-px-Kästchen (Abnahme 0086: Kopf sechs Zellen, Ladezeile fünf,
- * die letzte Spur blieb 140 px leer).
+ * `cols` are the tracks **with content**. A table often has more: the select
+ * box, the expand handle, the actions column. Those carry no data and get no
+ * bar — but they need their cell, or the whole row slides one track to the
+ * left and the first bar lands inside the 32-px checkbox (acceptance 0086:
+ * head six cells, loading row five, the last track 140 px empty).
  *
- * @when    Eine Tabelle lädt und die Zahl der Zeilen ist ungefähr bekannt.
- * @instead Eine Fläche außerhalb einer Tabelle → Skeleton. Es gibt nichts zu
- *          zeigen → EmptyState. Das Laden ist gescheitert → ErrorRow.
+ * @when    A table is loading and the number of rows is roughly known.
+ * @instead A surface outside a table → Skeleton. Nothing to show at all →
+ *          EmptyState. The loading failed → ErrorRow.
  */
 export function TableLoading({
   rows = 3,
@@ -156,9 +155,9 @@ export function TableLoading({
 }: {
   rows?: number;
   cols?: number;
-  /** Spuren vor den Daten ohne eigenen Inhalt: Auswahl, Aufklapp-Griff. */
+  /** Tracks before the data with no content of their own: select, expand. */
   leadingCols?: number;
-  /** Spuren dahinter ohne eigenen Inhalt: die Aktionsspalte. */
+  /** Tracks behind them with no content of their own: the actions column. */
   trailingCols?: number;
 }) {
   return (

@@ -18,6 +18,11 @@
  * `X.XX:1`. A number a comment quotes as history („it said 9,4 until …")
  * drops the `:1`, otherwise this script would demand that the past be true.
  *
+ * **Was er nicht kann: Deckkraft.** Er rechnet volle Token gegeneinander; eine
+ * Zahl, die für `opacity` gilt, kann er nicht bestätigen. Solche Angaben
+ * lassen das `:1` weg und nennen die Deckkraft im Satz — sonst würde er sie
+ * gegen den vollen Ton prüfen und stillschweigend durchwinken.
+ *
  * Run: `pnpm check:contrast`
  */
 
@@ -92,7 +97,12 @@ for (const file of FILES) {
 
     // The token this comment talks about: named inside it, or the next one
     // declared below it, or — for a trailing comment — the one on this line.
-    const named = line.match(/(--color-[a-z0-9-]+)\s*,/);
+    // Der Backtick zählt mit: Kommentare schreiben ihr Token als
+    // `--color-text-subtle`, nicht als `--color-text-subtle,`. Ohne ihn fielen
+    // sieben auflösbare Angaben durch und der Lauf meldete sie als „bezieht
+    // sich auf eine Klasse" — und die Abhilfe, die dieser Wächter selbst
+    // vorschreibt, war wörtlich eingesetzt wirkungslos (Wiederabnahme 0055).
+    const named = line.match(/(--color-[a-z0-9-]+)[`,]/);
     let token = named?.[1] ?? line.match(/(--color-[a-z0-9-]+)\s*:/)?.[1] ?? null;
     for (let j = i + 1; !token && j < Math.min(i + 12, lines.length); j++) {
       token = lines[j].match(/(--color-[a-z0-9-]+)\s*:/)?.[1] ?? null;
@@ -157,6 +167,6 @@ if (bad || unresolvedInTokens) {
 }
 console.log(
   `check:contrast — in Ordnung. ${checked} Angaben nachgerechnet${
-    unchecked ? `, ${unchecked} beziehen sich auf Klassen statt auf Token und bleiben ungeprüft` : ""
+    unchecked ? `, ${unchecked} nennen ihren Ton nicht als Token und bleiben ungeprüft` : ""
   }.`,
 );

@@ -53,7 +53,7 @@ function Frame({ children, sub }: { children: React.ReactNode; sub?: string }) {
   );
 }
 
-/** Der Normalfall: sechs Spalten, das Gegenkonto darunter. */
+/** Der Normalfall: sieben Spalten, das Gegenkonto darunter. */
 export const Simple: Story = {
   render: () => (
     <Frame>
@@ -69,7 +69,7 @@ export const Simple: Story = {
 };
 
 /**
- * `mode="voll"` — elf Spalten, und der Umschalter ist ein **Link**: der Modus
+ * `mode="voll"` — zehn Spalten, und der Umschalter ist ein **Link**: der Modus
  * gehört zur Adresse, nicht zum Zustand. Ohne `modeHref` gibt es ihn nicht,
  * und damit auch keine gedruckte Taste ohne Wirkung (V14).
  */
@@ -94,6 +94,12 @@ export const Full: Story = {
  * Kontoname · Buchungstext · Soll · Haben. Sie ist ein `<details>` und
  * funktioniert ohne JavaScript; die Summe steht in der Kopfzeile, damit sie
  * auch zugeklappt sichtbar ist.
+ *
+ * **`accountFramework` beweist sich hier.** Ohne den Kontenrahmen kann
+ * `deriveTax` das Steuerkonto nicht bestimmen, und eine Zeile mit BU-Schlüssel
+ * bleibt eine Zeile; mit `skr04` wird aus der 9-Prozent-Zeile ein Paar aus
+ * Netto und Vorsteuer. Der Editor an derselben Rechnung zeigte vier Zeilen,
+ * das Raster drei — die Prop war der Unterschied (Wiederabnahme 0113, M3).
  */
 export const WithJournal: Story = {
   render: () => (
@@ -102,6 +108,7 @@ export const WithJournal: Story = {
         rows={ROWS}
         status="posted"
         journal
+        accountFramework="skr04"
         contraAccount={CONTRA}
         documentNumber="RE-4471"
         documentAmount={1475.6}

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/bank-transaction/` |
 | Quelle | Entitätsprofil `docs/entitaeten/bank-transaction.md`, Abschnitt „Listen" (Zeile `BankTransactionWorklist`) |
 | Auftrag | Die Arbeitsliste der Zahlungen **eines Kontos** ohne Sachverhalt (die Seite gruppiert mehrere Konten untereinander), mit Mehrfachauswahl und zwei Sammelaktionen: neuen Sachverhalt anlegen oder einem bestehenden zuordnen. Ersetzt `modules/bank-transactions/ui/BankTransactionAssignmentTable.tsx` (658 Z.). |
@@ -116,7 +116,11 @@ Variabel:
 - [ ] Im Leerfall ist das Kopf-Kästchen stillgelegt (gemessen: `disabled === true`)
 - [ ] Der Leerfall trägt den Haken **und die Zahl** — im Satz, nicht nur im Kartenkopf (Story `Empty`)
 - [ ] Die Fehlerzeile trägt einen Weg zurück, nicht nur einen Satz (Story `LoadingAndError`, gemessen: ein Knopf)
-- [ ] Die Komponente kennt keinen `CasePicker` (`grep`: 0 Treffer)
+- [ ] Die Komponente kennt keinen `CasePicker` — **kein Import und keine
+      Nutzung** (`grep -E 'from .*CasePicker|<CasePicker'`: 0 Treffer). Der
+      Fließtext, der erklärt *warum* sie keinen öffnet, zählt nicht: er ist
+      die Begründung, auf die sich diese Spec selbst beruft (berichtigt
+      2026-09-07 auf Vorschlag der Wiederabnahme)
 - [ ] Keine Konsolenmeldung in allen sechs Stories (gemessen)
 - [ ] offen (App): ersetzt `BankTransactionAssignmentTable.tsx` (658 Z.), sobald L-16 steht
 
@@ -419,3 +423,174 @@ erklärt, warum die Liste keinen öffnet. Der Text ist die Begründung einer
 Entscheidung; ihn zu löschen, um einen grep zu befriedigen, hieße die
 Begründung gegen die Prüfung zu tauschen. Gemeint war „kein Import, keine
 Nutzung" — und das gilt.
+
+## Wiederabnahme (2026-09-07) — die vier Nacharbeiten halten
+
+Geprüft gegen den Dev-Server auf Port 6107 (serviert die Quelle), ohne Blick in
+den Bau, jede Messung mit Gegenprobe. Nicht gebaut (`storybook build` ist für
+Prüfer gesperrt, 0117). **Ergebnis: abgenommen.**
+
+### M1 — der Ladefall fluchtet, gemessen und gegengeprüft
+
+`LoadingAndError`, 1440 px: Kopfzeile **6** Zellen mit den rechten Kanten
+`67 · 177 · 367 · 897 · 1107 · 1247`; jede der **5** Ladezeilen ebenfalls
+6 Zellen mit **denselben** Kanten (Abweichung 0). Der erste Balken liegt bei
+**x = 77**, also hinter dem Auswahlkästchen, das bei 67 endet; die Spur
+„Betrag" trägt einen Balken (x 1117, 58,5 × 11) statt leer zu bleiben.
+Bei 900 · 1100 · 1280 · 1440 · 1680 · 1920 px in allen sechs Stories: Kopf und
+Zeilen auf derselben Kante (0 Abweichungen), Zellüberlauf **0**, kein
+Dokumentüberlauf.
+
+**Gegenprobe:** im laufenden Dokument die führende Leerzelle jeder Ladezeile
+entfernt und neu gemessen — das alte Bild kommt exakt zurück: 5 Zellen, letzte
+Kante **1107** gegen Kopf **1247** (140 px), erster Balken bei **x = 35** mit
+**22,4** px Breite, also im 32-px-Kästchen. Die Messung reagiert.
+
+Gegengemessen an sieben weiteren Ladefällen, alle deckungsgleich, kein Skelett
+0 × 0: `DataTable/Loading` (5 Zellen, `145 · 905 · 1045 · 1245 · 1405`),
+`Zellen/Loading` (5), `Table/Loading` (4), `CaseList/Loading` (10),
+`OpenItemRow/Loading` (10), `BankTransactionList/LoadingAndError` (8),
+`DocumentNumberRegister/Loading` (5, ohne Spaltenkopf). Andere Listen **mit
+`selection`** gibt es nur in `DataTable.stories` (`grep 'selection='`: zwei
+Dateien); dort Kopf gegen Datenzeile gemessen: `Selection` 6 = 6 Spuren
+(`67 · 187 · 905 · 1045 · 1245 · 1405`), `Expand` 7 = 7
+(`67 · 109 · 229 · 905 · 1045 · 1245 · 1405`), `RowActions` 6 = 6 in beiden
+Karten — alle Kanten deckungsgleich. Zum Ladefall dieser Kombinationen siehe
+Befund 4.
+
+### M2/M3 — `WithMatchStage` erweitert jetzt wirklich
+
+Übergeben wird verwürfelt
+`["matchStage","amount","purpose","cases","postingDate","counterparty"]` — eine
+**Obermenge** von `WORKLIST_COLUMNS`. Gemessene Kopfzeile: 7 Zellen =
+Auswahl + **Datum · Gegenpartei · Verwendungszweck · Sachverhalt ·
+DATEV-Historie · Betrag**, also Katalogreihenfolge (`ORDER`,
+`bank-transaction-columns.tsx:53`). Unterscheidend: `matchStage` steht im
+übergebenen Satz **vorn** und in der Kopfzeile an **fünfter** Stelle — eine
+Kopfzeile, die den Satz nur nachspräche, sähe anders aus. `Filled` dagegen
+5 Spuren **ohne** DATEV (Ränge 1–4 und 6 des Profils). Die Bildunterschrift
+beschreibt genau diesen Bau, die Spec-Überschrift zählt fünf und sagt fünf.
+
+### M6 — der Rückfall des Zeilenlinks hat seine Story
+
+`AllOfAnAccount`: vier Zeilenlinks, **alle in Zelle 2** (Gegenpartei). Die
+namenlose Zeile `a-2` trägt ihn in derselben Zelle 2, beschriftet mit dem
+Zweck: „SEPA-Lastschrift Kartenzahlung 88…" → `#zahlung-a-2`. **0**
+verschachtelte Anker auf der Seite.
+
+### S1 — der Ausschluss steht im Typ
+
+Probe in einer Kopie außerhalb des Repos (`src` kopiert, eigener
+`tsc --noEmit`, Baseline Exit 0): `rowHref` allein übersetzt, `expand` allein
+übersetzt, **beides zusammen ist ein Typfehler** — `BankTransactionList` über
+die Union `RowWayProps` (TS2322, „Types of property 'expand' are incompatible …
+not assignable to type 'undefined'"), `BankTransactionWorklist`, weil sie
+`expand` gar nicht kennt (TS2322, „Property 'expand' does not exist").
+**Gegenprobe:** die Union in der Kopie neutralisiert → die Zeile mit beidem
+übersetzt wieder; Union zurück → der Fehler ist zurück. Die Laufzeit-Bedingung
+`rowHref && !expand` ist weg. Die Probe ist entfernt.
+
+### Die übrigen Kriterien
+
+Kopf und Zeilen an derselben Kante bei 900/1100/1440 (und 1280/1680/1920) ✓ ·
+Satz mit den Rängen 1–4 und 6, keine DATEV-Spalte in `Filled` ✓ · Sortierung
+und Pager durchgereicht (`AllOfAnAccount`: `1–100 von 500`, drei Sortier-Links
+`#konto?sort=postingDate|counterparty|amount&dir=asc&page=1`) ✓ · `columns`
+erweitert ohne umzuordnen ✓ · Kästchen-Beschriftung mit absolutem Datum
+(„Stadtwerke Musterstadt vom 26.08.2026 auswählen", ohne Namen „Zahlung vom
+27.08.2026 auswählen") ✓ · Kopf-Kästchen im Leerfall `disabled === true`
+(im Lade- und Fehlerfall ebenso; in `Filled` `false`, ein Klick wählt alle
+4 Zeilen) ✓ · Leerfall mit Haken (`aria-label="erledigt"`) **und** Zahl im Satz
+(„Alle 251 Zahlungen dieses Kontos gehören zu einem Sachverhalt.") ✓ ·
+Fehlerzeile mit **einem** Knopf („Erneut laden", Kasten `24px 18px`,
+`flex`/`column`, 110,9 px hoch) ✓ · Rundlauf beider Sammelaktionen: zwei
+Kästchen + Taste `N` → „Neuer Sachverhalt aus 2 Zahlung(en)", zwei Kästchen +
+Klick → „2 Zahlung(en) an den Sachverhalt des Aufrufers", Auswahl danach
+zurückgesetzt ✓ · keine Konsolenmeldung in allen sechs Stories (nur
+Vite-Hinweis und React-DevTools-Hinweis des Rahmens) ✓ · Datei nach der
+Familie, `@when`/`@instead`, kein Hex, keine lokale Label-Map ✓ ·
+`typecheck`, `check:icons`, `check:contrast` Exit **0** (Exit-Code geprüft);
+`build` **nicht prüfbar** — Bauen ist für Prüfer gesperrt (0117).
+`CasePicker`: **1** Treffer, unverändert der Fließtext in
+`BankTransactionWorklist.stories.tsx:44`, siehe Befund 3.
+
+Nebenbei gegengemessen, weil S2 dieselbe Regel angefasst hat:
+`SourceDocumentDrawer/Lädt` unverändert `180 × 22` und `1018 × 744` (62 vh bei
+1200 px Fensterhöhe), beide `display: block`, kein Skelett 0 × 0.
+
+### Befunde — fünf, keiner blockierend
+
+1. **Der JSDoc von `TableLoading` ist beim Reparieren ins Deutsche gekippt**
+   (`src/ui/v3/primitives/Cells.tsx:137–163`, dazu die beiden neuen
+   Prop-Kommentare). Vorher englisch, jetzt deutsch **samt `@when`/`@instead`**
+   — die Hausregel („Code nur Englisch, JSDoc auch `@when`/`@instead`") gilt
+   ohne Ausnahme, und jeder andere JSDoc derselben Datei (Zeilen 30, 63, 86,
+   108, 189, 210) ist englisch. Dasselbe im Kopfkommentar von `RowWayProps`
+   (`BankTransactionList.tsx:23–28`), dessen Prop-Kommentare darunter englisch
+   sind. Kleinster Weg: die drei Blöcke zurück ins Englische, Inhalt
+   unverändert.
+2. **Zwei Nachweis-Spalten der Schnittstelle zeigen auf die falsche Story** —
+   dieselbe Sorte wie N3 der dritten Runde. `caseHref` und `openHref` nennen
+   `Filled`; gemessen hat `Filled` in der Sachverhalts-Spur **0** Anker
+   (viermal nacktes „offen"), während `AllOfAnAccount` dreimal
+   „offen → `#zuordnen`" und einmal „Wartung der Klimaanlage →
+   `#fall-c-4412`" trägt. Kleinster Weg: in beiden Zeilen `AllOfAnAccount`
+   eintragen.
+3. **Das `CasePicker`-Kriterium gehört geändert, nicht der Text** (bewusst
+   offen gelassen, hier nur bewertet). Gemessen: `grep -r CasePicker src/` → 1
+   Treffer, `BankTransactionWorklist.stories.tsx:44`, Fließtext; in
+   `BankTransactionWorklist.tsx` **0**. Das Kriterium heißt „Die Komponente
+   kennt keinen `CasePicker`" — die Komponente ist die `.tsx`, und dort ist die
+   Zahl 0. Der Satz in der Story ist die **Begründung** einer Entscheidung, auf
+   die sich die Spec selbst beruft („Die Wartebedingung, zur Hälfte
+   aufgelöst"); ihn zu löschen, tauschte die Begründung gegen die Messbarkeit.
+   Kleinster Weg: das Kriterium auf das formulieren, was es meint — „kein
+   Import und keine Nutzung (`grep` auf `from .*CasePicker` und `<CasePicker`:
+   0 Treffer)".
+4. **Das neue Kriterium in 0057 ist heute nur zu einem Drittel messbar.** Es
+   verlangt den Ladefall „mit `selection`, `expand` und `rowActions` je einzeln
+   und zusammen"; gemessen zeigt **keine** Story einen Ladezustand zusammen mit
+   `expand` oder `rowActions` — `DataTable/Expand` und `DataTable/RowActions`
+   setzen `loading` nicht, und `selection` im Ladefall gibt es nur hier. Die
+   Formel in `DataTable.tsx:250–255` deckt beide Fälle ab, bewiesen ist die
+   Spur-Zahl aber nur an der Kopfzeile (7 bzw. 6 Spuren, oben gemessen).
+   Gehört zu 0057, nicht hierher.
+5. **Zwei Buchhaltungs-Kleinigkeiten.** Der S1-Absatz oben in dieser Datei
+   sagt „Diese Liste hat sie jetzt auch" — die Union steht in
+   `BankTransactionList.tsx` (0085), die Worklist kennt `expand` schlicht
+   nicht. Und 0085 hat den Fix seines eigenen Befundes 1 nicht vermerkt.
+   Kosmetisch, ohne Folgen für den Bau.
+
+Nicht als Mangel gezählt, aber notiert: im Ladefall steht der Balken der Spur
+„Betrag" links (x 1117 in der Spur 1107–1247), während die Spalte rechts
+ausrichtet. Verhalten von `TableLoading` (0057), in jeder Liste gleich.
+
+| | |
+|---|---|
+| Abgenommen von / am | Claude (fremde Wiederabnahme, nicht der Bau), 2026-09-07 |
+| Ergebnis | **abgenommen** — kein blockierender Mangel; offen bleiben die fünf Befunde oben und das Kriterium „ersetzt `BankTransactionAssignmentTable.tsx`" (App, wartet auf L-16) |
+
+## Nach der Wiederabnahme (2026-09-07)
+
+**Abgenommen.** Die vier Nacharbeiten halten, gemessen mit Gegenprobe: der
+Ladefall hat sechs Zellen wie der Kopf und deckungsgleiche Kanten (der
+Rückbau bringt exakt das alte Bild zurück — 5 Zellen, 140 px Lücke, Balken bei
+22,4 im Kästchen), `WithMatchStage` übergibt eine verwürfelte Obermenge und
+zeigt sieben Zellen in Katalogreihenfolge, der Zeilenlink fällt bei fehlender
+Gegenpartei auf den Zweck, und beides zusammen — `rowHref` und `expand` —
+ergibt einen Typfehler.
+
+Die Befunde der Abnahme sind eingearbeitet:
+
+- **Befund 1:** der JSDoc von `TableLoading` war beim Reparieren von Englisch
+  nach Deutsch gekippt, ebenso der Kopf von `RowWayProps`. Beide sind zurück
+  auf Englisch — und die Regel steht jetzt als Wächter im Repo
+  (`pnpm check:language`), weil das in dieser Runde der vierte Rückfall war.
+- **Befund 3 gebe ich der Abnahme recht:** ändern gehört das **Kriterium**,
+  nicht der Text. Es lautet jetzt „kein Import und keine Nutzung", statt einen
+  grep zu verlangen, den die eigene Begründung reißt.
+- **Befunde 2, 4 und 5** sind vermerkt: die Nachweis-Spalten für `caseHref` und
+  `openHref` zeigen auf die falsche Story; das neue 0057-Kriterium ist heute
+  nur für `selection` messbar, weil keine Story `loading` mit `expand` oder
+  `rowActions` kombiniert; und die Union steht in der Datei von 0085, nicht in
+  dieser — dort ist sie auch vermerkt.

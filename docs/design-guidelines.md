@@ -580,7 +580,7 @@ Kartenradius `--radius-lg` · Kopffläche `--color-surface-head`.
 | `--color-text` | 13.77 | Text |
 | `--color-text-muted` | 6.69 | Text |
 | `--color-text-subtle` (K1: dunkler gesetzt) | 4.88 (4.51) | Text, kleinste Stufe |
-| `--color-accent-700` | 4.81 | Text |
+| `--color-accent-700` | 5.45 | Text |
 | `--color-accent` | 3.55 | nur Fläche/Rand |
 | `--color-primary` | 11.64 | Text |
 | `--color-success` | 5.07 (4.68); auf `success-bg` 4.46 | Text — offen |

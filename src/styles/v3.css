@@ -637,10 +637,13 @@
   font-weight: 500;
   white-space: nowrap;
 }
-/* 0.85 statt der 0.7 des alten `.v2btn__key`: darunter fällt der Rand auf dem
-   tertiären Knopf unter 3:1 (V10, gemessen **2.87:1** gegen
-   `--color-bg-soft`; bis 2026-09-07 stand hier 2.67, gerechnet gegen das alte
-   `accent-700` #2E78A8 — seit 0090 ist es ein anderes). */
+/* 0.85 statt der 0.7 des alten `.v2btn__key`: bei 0.7 fällt der Rand auf dem
+   tertiären Knopf auf 2.87 gegen bg-soft und damit unter die 3:1, die V10
+   verlangt; bei 0.85 sind es 3.79. **Beide Zahlen tragen kein `:1`** — sie
+   gelten für `--color-accent-700` bei Deckkraft, und Deckkraft rechnet
+   `check:contrast` nicht (es kennt nur volle Token). Bis 2026-09-07 stand
+   hier 2.67, gerechnet gegen das alte `accent-700` #2E78A8; seit 0090 ist es
+   ein anderes. */
 .v2btn .v2kbd {
   border-color: currentColor;
   background: transparent;
@@ -1271,8 +1274,8 @@ select.v2in { padding-right: 26px; }
    Die zweite Reihe: **zwei Graustufen, die beide ≥ 3:1 gegen Weiß stehen,
    liegen zwangsläufig eng beieinander.** Gemessen sind es ΔE 8,5 — unter der
    Grenze des `dataviz`-Skills für benachbarte Marken. Das Band zwischen
-   4,88:1 (`text-subtle`) und 3:1 gibt nicht mehr her: jede hellere Stufe
-   fällt unter die Kontrastschwelle, jede dunklere kommt der Marke
+   (`--color-text-subtle`, 4,88:1) und 3:1 gibt nicht mehr her: jede hellere
+   Stufe fällt unter die Kontrastschwelle, jede dunklere kommt der Marke
    `--color-primary` zu nah (ΔE 8,4 zu `--color-text`).
 
    Deshalb trennt eine **Haarlinie in der Flächenfarbe** die beiden, statt
@@ -2955,8 +2958,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 /* Auf der danger-Fläche trägt auch „Schritt n" den danger-Ton: der
    Subtle-Ton hat sein Kontrastbudget nur auf Weiss und auf bg-soft (siehe
-   Kommentar an `--color-text-subtle`), auf `--color-danger-bg` kommt er auf
-   4,0:1 und fällt unter AA. */
+   Kommentar an `--color-text-subtle`), auf der Warnfläche kommt er auf
+   (`--color-text-subtle`, 4,02:1 auf danger-bg) und fällt unter AA. */
 .v2wiz__step[data-state="error"] .v2wiz__n { color: var(--color-danger); }
 .v2wiz__step[data-state="active"] .v2wiz__name { color: var(--color-primary); font-weight: 600; }
 .v2wiz__step[data-state="done"] .v2wiz__name { color: var(--color-text); }
@@ -3024,10 +3027,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2fsm__edges { position: absolute; inset: 0; overflow: visible; z-index: 0; }
 .v2fsm__edges path {
   fill: none;
-  /* Nicht `--color-border-strong`: das sind 1,62:1 gegen die Karte, und V10
-     verlangt für eine tragende Linie ≥ 3:1. `--color-border-control` steht
-     mit **3,45:1** da (nachgerechnet 2026-09-06) — dasselbe Maß, aus dem der
-     Rahmen eines Eingabefelds seine Sichtbarkeit zieht. */
+  /* Nicht `--color-border-strong`: das sind 1,62 gegen die Karte, und V10
+     verlangt für eine tragende Linie ≥ 3:1. Die Linie nimmt deshalb
+     (`--color-border-control`, 3,45:1) — dasselbe Maß, aus dem der Rahmen
+     eines Eingabefelds seine Sichtbarkeit zieht (nachgerechnet 2026-09-06). */
   stroke: var(--color-border-control);
   stroke-width: 1.5;
 }
@@ -3580,4 +3583,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    — dieselbe Klasse hätte dort `display: flex` gesetzt und damit ihre Kürzung
    ausgeschaltet (Abnahme 0113, M4). */
 .bse__kontocell { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+/* Der Weg ins Kontenblatt schrumpft **nicht** mit: als Flex-Kind gab er
+   nach, sobald der Kontoname die Zelle füllte — gemessen 14 × 24 px statt
+   24 × 24, also die Marke ohne ihr Polster (Wiederabnahme 0113, M7). */
+.bse__kontocell > .v2ibtn { flex: 0 0 auto; }
 .bse__kontoname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

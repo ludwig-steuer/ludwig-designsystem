@@ -436,7 +436,9 @@ Damit ist die ursprüngliche Fassung dieses Abschnitts („Konto | Soll | Haben 
 BU", vier Spalten, `side` entfällt) **überholt**: sie beschreibt ein Journal,
 das der Editor seit 0044 nicht mehr selbst zeichnet.
 
-Gemessen (Story `JournalWithPostingText`, zwei Zeilen mit Steuer):
+Gemessen (Story `JournalWithPostingText`, zwei Zeilen mit Steuer — die
+Story ist mit 0113 in das Lese-Raster gezogen und heißt dort
+`WithJournal`; die Zahlen unten sind die von damals):
 
 ```
 Konto   Kontoname                  Buchungstext        Soll Umsatz  Haben Umsatz

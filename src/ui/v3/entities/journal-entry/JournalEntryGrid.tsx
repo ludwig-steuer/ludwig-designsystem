@@ -113,6 +113,24 @@ export function JournalEntryGrid({
         </span>
       </div>
 
+      {/* Über dem Raster, wie die Spec es sagt: der Satz beginnt mit der
+          Gegenseite, die Zeilen darunter sind ihre Aufteilung. Und als
+          **eine** Gruppe, nicht als vier Spans in einem `space-between` —
+          sonst zerfallen sie über die ganze Breite (Wiederabnahme 0113, M4).
+          Die Seite steht dabei, wie im Editor: sie ist die Gegenseite des
+          Belegs, nicht wählbar. */}
+      {contraAccount ? (
+        <div className="bse__gegen">
+          <span className="bse__gegen__label">
+            <span className="v2muted">Gegenkonto</span> an{" "}
+            {documentSide === "S" ? "H" : "S"}{" "}
+            <span className="v2mono">{contraAccount.konto}</span>
+            <span className="v2muted">{contraAccount.name}</span>
+            {contraAccount.tag ? <span className="bse__tag">{contraAccount.tag}</span> : null}
+          </span>
+        </div>
+      ) : null}
+
       {rows.length === 0 ? (
         <p className="v2muted bse__leer">Keine Buchungszeilen.</p>
       ) : (
@@ -126,24 +144,18 @@ export function JournalEntryGrid({
             {full ? <span>Konto</span> : null}
             <span>{full ? "Beleg 1" : "Konto"}</span>
             {full ? <span>Beleg 2</span> : null}
+            {/* Belegfeld 1 steht **vor** dem Buchungstext — die Ordnung des
+                DATEV-Stapels, und dieselbe, die der Editor führt. Das Raster
+                hatte sie getauscht (Wiederabnahme 0113, M5). */}
+            {full ? null : <span className="v2mono">Beleg 1</span>}
             <span>Text</span>
             {full ? <span>KOST</span> : null}
-            {full ? null : <span className="v2num">Beleg 1</span>}
           </div>
           {rows.map((row) => (
             <Row key={row.id} row={row} full={full} onOpenLedger={onOpenLedger} />
           ))}
         </div>
       )}
-
-      {contraAccount ? (
-        <div className="bse__gegen">
-          <span className="v2muted">Gegenkonto</span>
-          <span className="v2mono">{contraAccount.konto}</span>
-          <span>{contraAccount.name}</span>
-          {contraAccount.tag ? <span className="v2muted">{contraAccount.tag}</span> : null}
-        </div>
-      ) : null}
 
       <Messages messages={messages} />
 
@@ -185,10 +197,10 @@ function Row({
       <span className="v2mono">{row.konto}</span>
       {row.kontoName ? <span className="v2muted bse__kontoname">{row.kontoName}</span> : null}
       {onOpenLedger ? (
-        // `IconButton`, kein blanker Knopf mit eigener Klasse: der Baustein
-        // bringt Trefferfläche, Hover und Fokusring mit — die selbst
-        // erfundene `.v2iconbtn` stand in keinem Stylesheet und ließ ein
-        // 14-px-Zeichen ohne Antwort zurück (Abnahme 0113).
+        // `IconButton`, not a bare button with a class of its own: the
+        // building block brings the hit area, the hover answer and the focus
+        // ring with it — the invented `.v2iconbtn` was in no stylesheet and
+        // left a 14-px sign without an answer (acceptance 0113).
         <IconButton
           size="sm"
           label={`Kontenblatt zu ${row.konto}`}
@@ -210,11 +222,11 @@ function Row({
         {full ? account : null}
         {full ? <span className="v2mono">{row.beleg1}</span> : account}
         {full ? <span className="v2mono">{row.beleg2 ?? ""}</span> : null}
+        {full ? null : <span className="v2mono">{row.beleg1}</span>}
         <span className="v2trunc" title={row.text}>
           {row.text}
         </span>
         {full ? <span className="v2muted">{row.kost1 ?? ""}</span> : null}
-        {full ? null : <span className="v2mono v2num">{row.beleg1}</span>}
       </div>
     </div>
   );

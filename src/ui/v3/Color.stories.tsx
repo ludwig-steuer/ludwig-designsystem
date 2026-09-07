@@ -337,7 +337,7 @@ export const Roles: Story = {
                       background: `var(${r.token})`,
                       border: "var(--border-1)",
                       borderRadius: "var(--radius-sm)",
-                      verticalAlign: "-2px",
+                      verticalAlign: "sub",
                       marginRight: "var(--space-2)",
                     }}
                   />

@@ -55,7 +55,14 @@ export function rowAmount(value: string | number | null | undefined): number {
   return typeof parsed === "number" ? parsed : 0;
 }
 
-/** The sum of the rows on the document's own side. */
+/**
+ * The sum of the rows on the document's own side.
+ *
+ * @when    Checking an entry against the document: this is the figure the
+ *          remainder is measured from.
+ * @instead Debit and credit of the whole entry, contra account included →
+ *          journalTotals. One row's own amount → rowAmount.
+ */
 export function documentSideTotal(rows: readonly JournalRow[], side: Side): number {
   return rows.filter((r) => r.side === side).reduce((sum, r) => sum + rowAmount(r.umsatz), 0);
 }
@@ -129,7 +136,14 @@ export function journalLines(
   return lines;
 }
 
-/** Debit and credit of the whole entry, for the head of the journal. */
+/**
+ * Debit and credit of the whole entry, for the head of the journal.
+ *
+ * @when    Showing or checking the balance of an entry — both sides as
+ *          numbers.
+ * @instead The sentence „Σ S … = Σ H …" → journalBalanceText. Only the
+ *          document's own side → documentSideTotal.
+ */
 export function journalTotals(lines: readonly JournalBatchLine[]): { soll: number; haben: number } {
   return {
     soll: lines.filter((l) => l.side === "S").reduce((s, l) => s + l.amount, 0),
@@ -137,7 +151,13 @@ export function journalTotals(lines: readonly JournalBatchLine[]): { soll: numbe
   };
 }
 
-/** „Σ S 1.475,60 € = Σ H 1.475,60 €" — the sentence the head carries. */
+/**
+ * „Σ S 1.475,60 € = Σ H 1.475,60 €" — the sentence the head carries.
+ *
+ * @when    The fold of the journal needs its head: one line that says whether
+ *          the entry balances, readable while it is closed.
+ * @instead The two numbers on their own → journalTotals.
+ */
 export function journalBalanceText(lines: readonly JournalBatchLine[]): string {
   const { soll, haben } = journalTotals(lines);
   return `Σ S ${euro(soll)} ${Math.abs(soll - haben) < 0.005 ? "=" : "≠"} Σ H ${euro(haben)}`;
@@ -152,6 +172,6 @@ export function journalBalanceText(lines: readonly JournalBatchLine[]): string {
  * one entry.
  */
 export const journalGridTracks: Record<JournalMode, string> = {
-  einfach: "88px 104px 40px 62px 148px minmax(0, 1fr) 96px",
+  einfach: "88px 104px 40px 62px 148px 96px minmax(0, 1fr)",
   voll: "88px 56px 104px 40px 62px 148px 96px 96px minmax(0, 1fr) 80px",
 };

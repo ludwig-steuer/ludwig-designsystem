@@ -134,8 +134,8 @@ Meldungen = **8**. Titel `v3/Entitäten/Buchungssatz/JournalEntryGrid`.
 
 | Story | Beweist |
 |---|---|
-| `Simple` | der Normalfall: Kopf, sechs Spalten, Gegenkonto |
-| `Full` | `mode="voll"` mit elf Spalten, Umschalter als Link |
+| `Simple` | der Normalfall: Kopf, sieben Spalten, Gegenkonto |
+| `Full` | `mode="voll"` mit zehn Spalten, Umschalter als Link |
 | `WithJournal` | die Klappe mit der DATEV-Stapelordnung und der Summenzeile |
 | `WithLedgerLink` | `onOpenLedger` je Zeile, als `ActionIcon` |
 | `WithMessages` | Fehler, Warnung und Hinweis nebeneinander — ohne Beheben-Knopf |
@@ -463,3 +463,228 @@ als Flex-Zelle des Rasters. `display: flex` schaltet `text-overflow` am
 Container ab, und der lange Kontoname brach im Editor hart ab. Die Zelle des
 Rasters heißt jetzt `.bse__kontocell` — sie tut etwas anderes, also heißt sie
 anders.
+
+## Wiederabnahme (2026-09-07)
+
+**Fremde Wiederabnahme, gegen den Arbeitsbaum auf `cb63b05` (die Nacharbeit
+steht in `7ee2168`). Urteil: zurück — die vier Blocker sind erledigt, die
+sieben mitzuerledigenden Befunde der ersten Abnahme stehen unverändert.**
+
+Gemessen im Dev-Server `http://localhost:6107` (er serviert die Quelle), je
+Schritt ein eigener `Runtime.evaluate` — mehrere Schritte in einem Aufruf
+sehen das Re-Render nicht. Jeder Messwert hat seine Gegenprobe: die
+Hover-Regel wurde zur Laufzeit gelöscht, die alte CSS-Kollision zur Laufzeit
+wiederhergestellt, die Klappe auf und wieder zu geklickt, die Sicht
+umgeschaltet. `pnpm build` ist **nicht** gelaufen (Owner-Anweisung, 0117);
+`pnpm typecheck`, `pnpm check:icons`, `pnpm check:contrast` sind grün
+(Exit 0). Im Baum lagen fremde, nicht eingecheckte Änderungen anderer
+Sitzungen (`v3.css`, `Expectation.tsx`); keine davon berührt `.bse*`.
+
+### Die vier blockierenden Mängel sind erledigt — gemessen
+
+**M6 (`STATUS_TEXT`) — erfüllt.** `grep` auf `STATUS_TEXT` in `src/` ist leer
+(nur die Backlog-Dateien erzählen die Geschichte). Der Tooltip am
+Sichtwechsel-Knopf sagt jetzt, was der Knopf tut, und er wechselt mit der
+Sicht: `S1` in `einfach` → `title="Zur vollen Sicht — alle DATEV-Spalten"`,
+nach dem Klick → `title="Zur einfachen Sicht"` (Gegenprobe: der Wert ändert
+sich mit der Sicht, die Messung greift also). In `S20_EditorOnly` tragen alle
+drei Editoren denselben Handlungstitel — auch der zweite, dessen Zustand
+„Storniert" ist. Ein Zustandswort als `title` steht in beiden Stories
+**nirgends** (0 Treffer über alle `[title]`); die Zustände stehen nur im
+`StatusBadge` („Vorschlag", „Storniert", „Freigegeben").
+
+**M12 (Unicode-Zeichen) — erfüllt, in beiden Hälften.** `grep` auf `▤` in
+`src/` ist leer, und im gerenderten Text aller 18 Stories der Familie steht es
+0 mal. Der Knopf ist `IconButton` (`button.v2ibtn.v2ibtn--sm`):
+
+| | Raster (`WithLedgerLink`) | Editor (Lesezweig) |
+|---|---|---|
+| Trefferfläche | 24 × 24 px (Zeile 2: 22,9 × 24) | 24 × 24 px |
+| Wort am Knopf | `aria-label` **und** `title` = „Kontenblatt zu 6815" | ebenso |
+| Marke | `<svg viewBox="0 0 24 24">`, 14 × 14 px, 6 gezeichnete Formen | ebenso |
+| Hover | Grund `rgba(0,0,0,0)` → `rgb(244,246,248)`, Schrift `#5C5C5C` → `#2D2D2D` | dieselben zwei Werte |
+| Fokusring | `2px solid rgb(59,143,196)`, Offset 2 px, `:focus-visible` = true | ebenso |
+| Wirkung | — | Klick gezählt: 1 |
+
+Gegenprobe zum Hover: nach dem Löschen der Regel `.v2ibtn:hover:not(:disabled)`
+im laufenden Bild bleiben Grund und Schrift unverändert, obwohl `:hover`
+weiter matcht — die Messung misst also die Regel und nicht sich selbst.
+
+Der Editor-Knopf ist dabei **von keiner Story erreichbar**: der Lesezweig
+läuft nur mit `editable={false}`, und die beiden Stellen, die das setzen
+(`S20`, zweiter und dritter Editor), reichen `onOpenLedger` nicht durch.
+Gemessen wurde er deshalb an einem Ad-hoc-Aufbau: `JournalEntryEditor.tsx`
+im laufenden Iframe nachgeladen und mit `editable: false, onOpenLedger` in
+einen eigenen Knoten gerendert — ohne eine Zeile im Repo zu ändern. Der Code
+stimmt; der Nachweis im Katalog fehlt weiter (siehe M6 unten).
+
+**M3 (die drei Editor-Props) — erfüllt.** `S20_EditorOnly` hat drei Editoren;
+die Füße tragen `[Abbrechen · Speichern]`, `[]` und
+`[Löschen · Buchung bearbeiten E]`. Rundlauf gemessen: Protokoll „Noch nichts
+ausgelöst." → Klick „Buchung bearbeiten" → **„Ändern"** → Klick „Löschen" →
+Dialog „Buchung entfernen?" mit einem Feld, „Buchung stornieren" ist
+`disabled` → Grund eingetippt → Knopf frei → Klick → Protokoll
+**„Ändern · Storniert: Doppelt erfasst"**, Dialog zu.
+
+V14 ist ebenfalls gemessen, wieder am Ad-hoc-Aufbau, weil keine Story den Fall
+zeigt: `deletable` **ohne** `onDelete` → Fuß leer (0 Knöpfe, „Löschen" steht
+nicht im Text); Gegenprobe mit `onDelete` → `["Löschen"]`; und editierbar mit
+`deletable` ohne `onDelete` → nur `[Abbrechen, Speichern & freigeben]`. Die
+Sperre sitzt in beiden Zweigen (`JournalEntryEditor.tsx:489` und `:506`).
+
+**M4 (die CSS-Kollision) — erfüllt.** `.bse__konto` steht nur noch einmal
+(`v3.css:1532`), die Zelle des Rasters heißt `.bse__kontocell`
+(`v3.css:3578`).
+
+- **Editor, Lesezweig, Kontoname in p90-Länge:** `display: block`,
+  `text-overflow: ellipsis`, Kasten 148 px gegen 488,9 px Inhalt — im Bild
+  „6815 Reparaturen und…". *Gegenprobe:* die alte Kollision zur Laufzeit
+  wiederhergestellt (`.bse__konto { display: flex }`) → `display: flex`, und
+  derselbe Name bricht wieder hart ab („6815 Reparaturen und I"). Beide
+  Zustände als Bildausschnitt festgehalten; die Messung reagiert.
+- **Raster, `WithLedgerLink`:** `.bse__kontocell` ist `display: flex`,
+  `column-gap: 8px`; die drei Teile stehen nebeneinander auf einer Grundlinie
+  (Kanten links 371 · 409 · 486,4, Unterkanten 223,1 · 222,9 · 222,8), Inhalt
+  139,4 px in einer 148-px-Spur. *Gegenprobe:* Regel `.bse__kontocell`
+  gelöscht → `display: block`, beide Lücken 0 px.
+- **Raster, `Edges`:** der lange Kontoname kürzt mit Auslassung (Kasten
+  110 px, `scrollWidth` 449 px), die Zelle läuft nicht über (Inhalt rechts
+  581 = Zellenkante 581).
+
+### Sonst geprüft und in Ordnung
+
+Alle 18 Stories der Familie rendern, keine Konsolenmeldung (0 `error`,
+0 `warning`); 8 Grid-, 10 Editor-Stories im Katalog. `JournalEntryGrid.tsx`
+enthält weder `"use client"` noch `useState` noch `useEffect` (einziger
+Treffer: der JSDoc-Satz in Zeile 64), und keinen der vier deutschen Altnamen.
+`Simple`: kein Umschalter, kein `kbd`, 0 mal „Alt+V". `Full`: der Umschalter
+ist `A · href="?sicht=einfach"`, ohne `kbd`. Die Klappe ist ein `<details>`:
+zu → Klick auf `<summary>` → `open=true` mit Konto · Kontoname · Buchungstext ·
+Soll · Haben → zweiter Klick → wieder zu. Die Summen stimmen:
+`WithJournal` „Σ S 1.475,60 € = Σ H 1.475,60 €", `Edges`
+„Σ S 13.716,15 € = Σ H 13.716,15 €" (12.480,55 − 240,00 + 0,00 + 1.000,00 +
+475,60 nachgerechnet). Kopf und Zeilen fluchten in allen fünf `Edges`-Zeilen
+(identische Spaltenkanten). `WithMessages`: 0 Knöpfe im Meldungsblock.
+`Empty`: „Keine Buchungszeilen.", kein Raster. Bei 1400 · 1280 · 1100 · 980 px
+läuft nichts über (`scrollWidth` = `clientWidth`, 1106/1106/994/874).
+Aus 0015 gegengeprüft: `onOpenLedger` erreicht weiter die **Zeilen-Felder**
+(`ContraAccountEditable`: zwei Knöpfe, „Kontenblatt zu 6815" und „… zu 70044",
+je 24 × 24), und das Journal des Editors zeigt Konto · Kontoname ·
+Buchungstext · Soll · Haben samt Steuerzeile („1406 · Abziehbare Vorsteuer
+19 % · 235,60 €").
+
+### Was offen bleibt — die Befunde der ersten Abnahme, unverändert
+
+`7ee2168` hat vier Dateien angefasst (Editor, Grid, Editor-Stories, CSS). Die
+sieben Punkte, die die erste Abnahme „in derselben Runde mitzuerledigen"
+nannte, sind nicht angefasst und im Nachtrag auch nicht erwähnt.
+
+**M1 — `@when`/`@instead` fehlen an drei exportierten Funktionen** (festes
+Kriterium; erste Abnahme M11). `journal-entry.ts:59` `documentSideTotal`,
+`:133` `journalTotals`, `:141` `journalBalanceText` tragen je eine Doc-Zeile,
+nicht das Paar; `rowAmount` und `journalLines` zeigen die Form, `tax-assist.ts`
+hat es an allen vier. `journalGridTracks:154` ist eine Konstante und nach dem
+Entscheid aus 0093 ausgenommen — sie trägt ihren erklärenden Satz. *Kleinster
+Weg:* drei Doc-Paare nachtragen.
+
+**M2 — die Stories behaupten Spaltenzahlen, die das Bild nicht zeigt** (erste
+Abnahme M8). Gemessen: `Simple` 7 Kopfzellen und 7 Zellen je Zeile, der
+Doc-Kommentar (`JournalEntryGrid.stories.tsx:56`) sagt „sechs Spalten";
+`Full` 10 und 10, der Kommentar (`:72`) sagt „elf Spalten". Dieselben zwei
+Zahlen stehen in der Story-Tabelle dieser Spec (Zeilen 137–138). *Kleinster
+Weg:* vier Zahlen auf 7 und 10 setzen.
+
+**M3 — `accountFramework` bleibt eine Prop ohne Spec-Zeile und ohne Story**
+(erste Abnahme M9). `grep` in `JournalEntryGrid.stories.tsx`: 0 Treffer.
+Folge, gemessen: das Journal von `WithJournal` hat **drei** Zeilen (6815,
+6845, 70044) — keine Steuerzeile, weil `deriveTax` ohne Rahmen `null` liefert.
+Der Editor zeigt an derselben Rechnung vier Zeilen (mit „1406 · 235,60 €").
+Der Steuersplit in `journalLines()` ist auf der Raster-Seite also unbelegt.
+*Kleinster Weg:* `accountFramework="skr04"` in `WithJournal` setzen und die
+Zeile in die Schnittstellen-Tabelle nachtragen.
+
+**M4 — die Gegenkonto-Zeile zerfällt weiter über die Breite** (erste Abnahme
+M5). `JournalEntryGrid.tsx:139–146` legt vier nackte `<span>` in ein
+`display:flex; justify-content:space-between`. Gemessen in `WithLedgerLink`
+bei 1400 px (Kanten links): „Gegenkonto" 53 · „70044" 392 · „Bürobedarf Meier
+GmbH" 694 · „Kreditor" 1109 — gegen die Spalten Konto 371, Text 525, Beleg 1
+1063. 0 mal `.bse__tag`, und die Zeile steht unter dem Raster, während die
+Spec „über dem Raster" sagt. *Kleinster Weg:* wie im Editor in
+`.bse__gegen__label` bündeln, `.bse__tag` verwenden.
+
+**M5 — in `einfach` steht die Spaltenordnung anders als im Editor** (erste
+Abnahme M7). Gemessen, beide Köpfe: Raster Datum · Umsatz · S/H · BU · Konto ·
+**Text · Beleg 1**; Editor Datum · Umsatz · S/H · BU · Konto · **Beleg 1 ·
+Text** (plus Aktionsspalte). In `voll` stimmen beide überein. Das trifft die
+Begründung des Zuschnitts („die beiden teilen die Spaltenordnung, nicht das
+Markup"). *Kleinster Weg:* Beleg 1 auch im Raster vor den Text ziehen, oder
+die Abweichung im JSDoc begründen.
+
+**M6 — der Kontenblatt-Knopf des Editors hat weiter keine Story, und das
+Journal-Kriterium von 0015 zeigt auf eine gelöschte.** `editable={false}` und
+`onOpenLedger` kommen in keiner der zehn Editor-Stories zusammen vor (`grep`,
+gemessen am Ad-hoc-Aufbau, siehe oben). Und `0015`, Kriterium „Das Journal
+zeigt Konto · Kontoname · Buchungstext · Soll · Haben (Story
+`JournalWithPostingText`)" nennt eine Story, die es seit dem Schnitt nicht
+mehr gibt; `7ee2168` hat `0015-journal-entry-editor-f109.md` nicht angefasst.
+Die Sache selbst ist in Ordnung (in `S1` gemessen), nur ihr Nachweis steht am
+falschen Namen. *Kleinster Weg:* `onOpenLedger` an den dritten Editor in `S20`
+hängen (er ist ohnehin lesend) und im 0015-Eintrag den Story-Namen auf `S1`
+umschreiben.
+
+**M7 — die Trefferfläche des Kontenblatt-Knopfs schrumpft mit dem
+Kontonamen** (neu, gemessen). `.bse__kontocell` ist ein Flex ohne
+`flex-shrink: 0` am Knopf. In `WithLedgerLink` misst der Knopf der zweiten
+Zeile schon 22,9 × 24 px statt 24 × 24; mit einem Kontonamen in p90-Länge (im
+laufenden Bild eingesetzt) bleiben **14,0 × 24 px** — genau die Marke ohne
+Polster, also der Zustand, den die Nacharbeit mit dem Wechsel auf `IconButton`
+gerade abgeschafft hat. Hover, Fokusring und `title` bleiben dabei erhalten,
+die Fläche nicht. Sichtbar wird es, sobald eine Story `Edges` (p90-Namen) mit
+`onOpenLedger` kombiniert. *Kleinster Weg:* `flex-shrink: 0` für den Knopf in
+`.bse__kontocell`.
+
+**Kein Rückgabegrund, aber weiter unerwähnt:** die deutschen Feldnamen in
+`JournalRow`/`ContraAccount` (erste Abnahme M10). Das Kriterium prüft nur die
+vier Altnamen in der neuen Datei — dieser `grep` ist leer —, und der Grund
+gegen das Umbenennen (`EditorRow` heißt genauso, ein Aufrufer reicht dieselbe
+Zeile an beide Hälften) ist real. Er steht bis heute in keinem JSDoc.
+
+| | |
+|---|---|
+| Abgenommen von / am | Claude (fremde Wiederabnahme, hat nicht gebaut), 2026-09-07 |
+| Urteil | zurück — die vier Blocker sind erledigt; es blockieren M1 (festes Kriterium `@when`/`@instead`), M2 (falsche Spaltenzahlen in Story und Spec) und M3 (`accountFramework` ohne Story). M4 bis M7 gehören in dieselbe Runde. |
+
+## Nach der Wiederabnahme (2026-09-07)
+
+Die drei blockierenden Punkte sind behoben, dazu die vier der Runde.
+
+**M1 — `@when`/`@instead` an den drei Funktionen** von `journal-entry.ts`.
+Damit ist auch der neue Wächter `pnpm check:when` grün und eingehängt: die
+Abnahme von 0093 hatte angemerkt, dass diese Regel die einzige ohne Skript ist
+— und die einzige, die zurückfällt.
+
+**M2 — die Spaltenzahlen.** Gemessen 7 (`Simple`) und 10 (`Full`); Kommentare
+und Spec-Tabelle sagten „sechs" und „elf".
+
+**M3 — `accountFramework` hat seinen Nachweis.** `WithJournal` setzt jetzt
+`skr04`. Gemessen zeigt die Klappe damit den Steuersplit: 6815 · Bürobedarf ·
+840,34 € **und** 1406 · Abziehbare Vorsteuer 19 % · 159,66 € — vorher drei
+Zeilen ohne Steuer, während der Editor an derselben Rechnung vier zeigte.
+
+**M4 — die Gegenkonto-Zeile.** Sie stand als vier nackte Spans in einem
+`space-between` und zerfiel über die Breite (Kanten 53 · 392 · 694 · 1109);
+jetzt eine Gruppe wie im Editor, mit der Seite („an H") und dem Tag als
+`.bse__tag`. Gemessen: Kanten 53 · 173 · 219 · 378 — und die Zeile steht
+**über** dem Raster (166 gegen 206), wie die Schnittstelle es zusagt.
+
+**M5 — die Spaltenordnung.** Belegfeld 1 steht jetzt vor dem Buchungstext, wie
+im DATEV-Stapel und wie im Editor. Gemessen sind beide Köpfe deckungsgleich:
+Datum · Umsatz · S/H · BU · Konto · Beleg 1 · Text.
+
+**M6 — der Kontenblatt-Knopf des Editors** hat seine Story: `S20_EditorOnly`
+reicht `onOpenLedger` in den lesenden Block. Und das 0015-Kriterium nennt
+nicht mehr eine gelöschte Story, sondern sagt, wohin sie gezogen ist.
+
+**M7 — der Knopf schrumpfte mit.** Als Flex-Kind gab er nach, sobald der
+Kontoname die Zelle füllte. Gemessen mit p90-Namen: **24 × 24 px** mit
+`flex: 0 0 auto`, **14 × 24** ohne (Gegenprobe im laufenden Bild).

@@ -446,12 +446,12 @@ body { background: #FAFBFC; }
 .bdg { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; line-height: 1.4; white-space: nowrap; }
 .bdg .dot { width: 6px; height: 6px; border-radius: 999px; }
 /* Kontrast gemessen (0112): der Vordergrund kommt aus dem Token, nicht als
-   eigener Hex — mit `--color-accent-700` sind es 4.69:1 auf dieser Flaeche,
-   vorher waren es mit dem festen #2E78A8 nur 4.14:1. */
+   eigener Hex — `--color-accent-700` misst 4.69:1 auf accent-100 (die Flaeche
+   dieser Marke), vorher waren es mit dem festen #2E78A8 nur 4.14. */
 .bdg-info { background: #E3F0F8; color: var(--color-accent-700); border-color: #C7DFEC; }
-/* 4.63:1 (0112). Der Vordergrund ist das Token; die Flaeche ist eine Stufe
-   heller als vorher, weil #3F7A5A auf #EBF2EE nur 4.46:1 traegt und das
-   Gruen dunkler zu ziehen es aus dem Rest des Satzes herausbraechte. */
+/* Der Vordergrund ist das Token; die Flaeche ist eine Stufe heller als vorher,
+   weil #3F7A5A auf success-bg nur 4.46 traegt und das Gruen dunkler zu ziehen
+   es aus dem Rest des Satzes herausbraechte. */
 .bdg-success { background: #F0F6F2; color: var(--color-success); border-color: #D5E3DB; }
 .bdg-warning { background: #F5EEE0; color: var(--color-warning); border-color: #E8DCBE; }
 .bdg-neutral { background: var(--color-bg-sunken); color: var(--color-text); border-color: var(--color-border); }

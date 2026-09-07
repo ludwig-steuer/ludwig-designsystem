@@ -17,7 +17,9 @@
     "check:icons": "node scripts/check-icons.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
     "sync:ludwig": "./scripts/sync-ludwig.sh",
-    "check:mirror": "node scripts/mirror-filter.mjs --test"
+    "check:mirror": "node scripts/mirror-filter.mjs --test",
+    "check:when": "node scripts/check-when.mjs",
+    "check:language": "node scripts/check-language.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

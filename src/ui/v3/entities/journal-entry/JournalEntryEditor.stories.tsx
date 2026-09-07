@@ -311,6 +311,10 @@ export const S20_EditorOnly: Story = {
           deletable
           onEdit={() => setProtokoll((p) => [...p, "Ändern"])}
           onDelete={(grund) => setProtokoll((p) => [...p, `Storniert: ${grund}`])}
+          // Der Weg ins Kontenblatt, auch **lesend**: er hing bis zur
+          // Wiederabnahme 0113 an keiner Editor-Story, seit die acht
+          // Lese-Stories in das Raster gezogen sind.
+          onOpenLedger={() => setProtokoll((p) => [...p, "Kontenblatt"])}
         />
         <p className="v2muted">
           {protokoll.length === 0 ? "Noch nichts ausgelöst." : protokoll.join(" · ")}

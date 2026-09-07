@@ -152,12 +152,12 @@ export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
     ]);
   }
 
-  // Σ Soll / Σ Haben stehen **zusammen** in einer Zeile: sie sind ein Paar,
-  // und getrennt lädt die Spalte dazu ein, das eine ohne das andere zu lesen.
-  // Beide sind im Spiegel Pflicht und werden `0`, wenn der Aufrufer keine
-  // Monatswerte hat (der Drawer lädt keine). Zwei Nullen zu zeigen hieße
-  // „nichts gebucht" zu behaupten, wo „nicht geladen" gemeint ist — deshalb
-  // steht die Zeile erst, wenn eine der beiden Summen etwas trägt.
+  // Σ debit / Σ credit stand **together** in one row: they are a pair, and
+  // apart the column invites reading one without the other. Both are required
+  // in the mirror and become `0` when the caller has no monthly figures (the
+  // drawer loads none). Showing two zeros would claim „nothing booked" where
+  // „not loaded" is meant — so the row stands only once one of the sums
+  // carries something.
   if (facts.totalDebit !== 0 || facts.totalCredit !== 0) {
     rows.push([
       "Σ Soll / Σ Haben",
