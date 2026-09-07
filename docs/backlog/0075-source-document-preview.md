@@ -207,3 +207,34 @@ erfüllt, das App-Kriterium bleibt offen (App).
 angesehen. Abnahme steht aus und gehört einem anderen Agenten.") — der
 Status stand seither fälschlich auf `in Arbeit`. Er sagt jetzt, was der
 Fall ist: `Abnahme`.
+
+## Owner-Entscheid 2026-09-07 — eine Höhe statt zweier
+
+`height="md" | "lg"` ist **gestrichen**. Die Vorschau steht überall auf
+`clamp(320px, 62vh, 900px)`.
+
+**Warum.** `lg` war `clamp(420px, 78vh, 1100px)` und stand in Karte und View.
+Bei 1440 × 900 begann „Belegdaten" damit **unter der Falz** — und die
+Rangfolge des Seitenprofils `beleg-detail.md` will die gelesenen Werte
+(Rang 3) neben dem Original (Rang 2), nicht darunter. Eine Vorschau, die den
+Rang danach aus dem Bild drückt, beantwortet ihre eigene Frage auf Kosten der
+nächsten.
+
+Gemessen nach der Änderung, bei **1440 × 900**:
+
+| Stelle | Vorschau | „Belegdaten" beginnt bei | im Bild |
+|---|---|---|---|
+| `SourceDocumentCard` | 558 px | y = 20 (zweispaltig) | ✓ |
+| `SourceDocumentView` | 558 px, y = 338–896 | y = 267 | ✓ |
+| `SourceDocumentDrawer` | 558 px, y = 172–730 | y = 767 | ✓ |
+
+Vorher: 795 px in der Karte, „Belegdaten" bei y = 831.
+
+Die Prop bleibt eine Version lang als `@deprecated` stehen und wird
+**ignoriert**, damit kein Aufrufer bricht; die Klasse `.v2doc__orig--lg`
+bleibt als leere Regel, damit ein alter Aufruf nichts Falsches bekommt.
+
+**Neues Abnahmekriterium:**
+
+- [ ] Die Vorschau ist an **jeder** Stelle gleich hoch, und „Belegdaten"
+      beginnt bei 1440 × 900 im Bild (gemessen: 558 px, y = 267 im View)

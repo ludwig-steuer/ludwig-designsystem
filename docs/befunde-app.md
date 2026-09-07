@@ -192,6 +192,7 @@ ausgelagerte Design-System ist (`docs/backlog/README.md`).
 | `BankTransactionFacts` (0102) | `BankTransactionDetail.tsx` samt `KV` | — |
 | `BankTransactionDrawer` (0103) | `ui/drawers/BankTransactionDrawer.tsx` | Klasse A → B: die drei Aufrufer bringen die Zeile künftig mit |
 | `StateMachine` (0069) | nichts — der Baustein ist neu. **Wartet auf L-74:** sobald die Übergänge als Daten im Spiegel stehen, bekommt `StatusInfoDialog` seine vierte Stufe und zeigt Liste **und** Diagramm (Umschalter) | `FlowModal` bleibt die Kette Beleg → Sachverhalt → Buchung und ist davon nicht betroffen |
+| `Drawer` + `ClarificationCard mode="read"` (0058) | `RationaleSources`, Verweis `kind='clarification'` — er führt heute auf die Sachverhaltsseite und reißt damit den Vorgang auf, in dem die Rolle gerade steckt (Buchungs-Begründung lesen) | **Kein Baustein im Set**: der Rahmen ist Markup an der Aufrufstelle (rund acht Zeilen plus Loader — `RationaleSource` trägt nur die Id). Der Ausgang „Zum Sachverhalt →" gehört in `Drawer.footer`, wie bei 0098; die Karte kennt ihn nicht und soll ihn nicht kennen |
 
 ## F · Bleibt in der App — benannte Kompositionen (Owner 2026-09-04)
 

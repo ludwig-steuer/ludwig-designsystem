@@ -2812,7 +2812,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Variante `md` (Drawer). `lg` ist die Höhe für View und Karte, wo die
    Vorschau die Seite trägt statt neben der Arbeit zu stehen. Eigener
    Abschnitt am Ende, nicht einsortiert. */
-.v2doc__orig--lg { height: clamp(420px, 78vh, 1100px); }
+/* **Gestrichen mit dem Owner-Entscheid vom 2026-09-07.** `lg` war
+   `clamp(420px, 78vh, 1100px)`; bei 1440 × 900 begann „Belegdaten" damit
+   unter der Falz — und die Rangfolge des Seitenprofils will die gelesenen
+   Werte **neben** dem Original, nicht darunter. Eine Höhe für jede Stelle,
+   an der die Vorschau steht. Die Klasse bleibt als leere Regel stehen, damit
+   ein Aufrufer, der sie noch setzt, nichts Falsches bekommt. */
+.v2doc__orig--lg { /* dieselbe Höhe wie `.v2doc__orig` */ }
 
 /* Die Vorschau sitzt in einer Karte: der Rahmen kommt von der Karte, das
    `<iframe>` gibt seinen eigenen ab und bekommt den Innenabstand, den der

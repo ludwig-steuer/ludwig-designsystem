@@ -52,10 +52,23 @@ Seiten-Aufgabe."
 | Der Inhalt | `ClarificationCard` (0060) | „One clarification with everything it carries — read it, or answer it" |
 | Der Verweis, aus dem heraus aufgeschlagen wird | `ClarificationCell` (0059) | „A clarification named inside something else — the source behind a booking rationale" |
 
-Der Drawer über eine Klärung ist damit **fünf Zeilen an der Aufrufstelle**:
+Der Drawer über eine Klärung ist damit **Markup an der Aufrufstelle**, kein
+Baustein — rund acht Zeilen plus den Loader:
 
 ```tsx
-<Drawer open={openId !== null} onClose={close} title={clarification.title} size="md">
+// Die Aufrufstelle lädt das Detail: `RationaleSource` trägt nur die Id.
+const clarification = await getClarificationDetail(sourceId);
+
+<Drawer
+  open={openId !== null}
+  onClose={close}
+  title={clarification.title}
+  size="md"
+  // Der Ausgang gehört in den Fuß, wie bei jedem Drawer (A10) — die Karte
+  // kennt ihn **nicht**: sie hat keine `caseHref`-Prop und soll auch keine
+  // bekommen, denn wohin „mehr dazu" führt, weiß die Seite.
+  footer={<Button variant="primary" href={caseHref}>Zum Sachverhalt →</Button>}
+>
   <ClarificationCard clarification={clarification} mode="read" />
 </Drawer>
 ```
@@ -78,8 +91,9 @@ Weitere den Weg an.
 Die Klärung hat diese Grenze nicht: **ihr Detail ist der Sachverhalt** (so
 steht es im Entitätsprofil, Zeile `ClarificationView`: „verworfen"). Ein
 Drawer über der Klärung hätte also entweder keinen Ausgang — dann ist er die
-Karte im Rahmen — oder seinen Ausgang zum Sachverhalt, und den kennt die Karte
-schon (`caseHref`). Es gibt nichts zu zonieren.
+Karte im Rahmen — oder seinen Ausgang zum Sachverhalt, und der ist **eine
+Zeile im Fuß**, die die Seite ohnehin bauen muss: sie kennt den Sachverhalt,
+die Karte nicht. Es gibt nichts zu zonieren.
 
 ### Die Aufgabe, die bleibt (Seiten-Aufgabe)
 
@@ -106,11 +120,13 @@ sie schärfer zu fassen:
 
 1. **Ein Rahmen braucht mehr als eine Zone.** Sobald der Drawer einer Klärung
    zusätzlich zur Karte etwas Eigenes tragen soll — den Klärungs-**Faden**
-   (Gegenfrage zeigt ihre Vorgängerin, Befund B8), die Quellen als eigene
-   Zone, oder eine Antwortfläche **im** Drawer mit eigenem Fuß —, dann ordnet
-   er wieder etwas und ist eine Komponente. Vorher nicht.
-2. **Zwei Aufrufstellen bauen denselben Rahmen.** Eine genügt nicht: §3
-   Regel 3 verlangt zwei Verwendungen. Heute ist es eine (`RationaleSources`).
+   (Gegenfrage zeigt ihre Vorgängerin, Befund B8) oder eine Antwortfläche
+   **im** Drawer mit eigenem Fuß —, dann ordnet er wieder etwas und ist eine
+   Komponente. Vorher nicht. (Die **Quellen** gehören nicht dazu: die Karte
+   zeigt sie schon als eigenen Block.)
+2. **Zwei Aufrufstellen bauen denselben Rahmen.** Dann greift `spec-schreiben`
+   **§4** — „ein Teil wird woanders **allein** gebraucht", und er bekommt sein
+   eigenes `@when`. Heute ist es eine Stelle (`RationaleSources`).
 
 ### Befunde für `ludwig/app`
 

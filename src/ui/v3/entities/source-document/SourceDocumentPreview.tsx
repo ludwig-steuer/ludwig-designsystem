@@ -55,7 +55,15 @@ export function SourceDocumentPreview({
    * collection original. `null` is a whole document — and says nothing.
    */
   excerpt?: { pages: string; parentTitle?: string; parentHref?: string } | null;
-  /** `md` in the drawer, `lg` in view and card. Both are token heights. */
+  /**
+   * **Gone with the owner decision of 2026-09-07.** There was `md` (62vh) and
+   * `lg` (78vh); at 1440 × 900 the taller one pushed „Belegdaten" below the
+   * fold, and the rank order of the page profile says the read-out values
+   * stand beside the original, not under it. One height for every place the
+   * preview appears: `clamp(320px, 62vh, 900px)`.
+   *
+   * @deprecated Ignored. It stays for one release so no caller breaks.
+   */
   height?: "md" | "lg";
 }) {
   return (
@@ -67,7 +75,7 @@ export function SourceDocumentPreview({
       />
       {url ? (
         <iframe
-          className={`v2doc__orig${height === "lg" ? " v2doc__orig--lg" : ""}`}
+          className="v2doc__orig"
           src={url}
           // Without a name of its own the frame is a nameless box to a screen
           // reader — and „Vorschau" alone does not say of what.

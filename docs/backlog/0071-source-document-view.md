@@ -321,12 +321,12 @@ Variabel:
 - [ ] Ohne `pager` und ohne `tabs` fallen die Zeilen samt Abstand (Story `Bare`, gemessen)
 - [ ] offen (App): ersetzt `SourceDocFamily`, `InvoiceSidebar`, `DocTabsBar`, `SourceDocBelegTab` und den Anzeigeteil von `ContractDetail`
 
-**Vorbehalt zu „ohne Scrollen":** die Vorschau steht heute auf 795 px
-(`height="lg"`). Bei 1440 × 900 beginnt die Faktenspalte bei y = 267 und endet
-bei 790 — Ränge 1, 3 und 4 stehen also über der Falz, das Original ist
-angeschnitten. Die Owner-Entscheidung zur Vorschauhöhe
-(`clamp(320px, 62vh, 900px)`, eigene Aufgabe an 0075) macht daraus 558 px und
-schließt die Lücke; bis dahin wird das Kriterium mit dieser Zahl gemessen.
+**Der Vorbehalt ist eingelöst (2026-09-07).** Er lautete: die Vorschau steht
+auf 795 px, bei 1440 × 900 ist das Original angeschnitten. Der Owner-Entscheid
+zur Vorschauhöhe ist umgesetzt (0075) — eine Höhe für jede Stelle,
+`clamp(320px, 62vh, 900px)`. Gemessen im View bei 1440 × 900: Vorschau
+338–896, Faktenspalte 267–790. Die Ränge 1–4 stehen damit vollständig über der
+Falz, ohne Scrollen und ohne Klick.
 
 ### Ausbau (A12)
 
