@@ -77,18 +77,31 @@ export const Filled: Story = {
  * Der 65-Prozent-Fall: keine Zuordnung, und deshalb führt Zone 5 **nicht**
  * „zum Fall", sondern „zuordnen". Ein Ausgang, der immer stimmt, statt zweier,
  * von denen einer meistens ins Leere zeigt.
+ *
+ * Hier läuft auch der **Rundlauf** von `onOpenFull`: die Prop entscheidet mit
+ * `("case" | "assign" | "statement", caseId?)`, wohin es geht, und acht Stories
+ * gaben ihr eine leere Funktion — der Klick tat nachweislich nichts (Abnahme
+ * 0103, M1). Die Zeile darunter zeigt, was ankommt.
  */
 export const Unassigned: Story = {
-  render: () => (
-    <BankTransactionDrawer
-      open
-      onClose={() => {}}
-      reference="bt-2"
-      record={{ ...RECORD, cases: [], allocatedSum: 0, matchStage: "unclear_none" }}
-      onOpenFull={() => {}}
-      caseHref={caseHref}
-    />
-  ),
+  render: function Render() {
+    const [ziel, setZiel] = useState<string | null>(null);
+    return (
+      <>
+        <BankTransactionDrawer
+          open
+          onClose={() => {}}
+          reference="2026-08-27/1210/0093121"
+          record={{ ...RECORD, cases: [], allocatedSum: 0, matchStage: "unclear_none" }}
+          onOpenFull={(exit, caseId) => setZiel(`${exit}${caseId ? ` · ${caseId}` : ""}`)}
+          caseHref={caseHref}
+        />
+        <p className="v2muted" style={{ padding: "var(--space-4)" }}>
+          {ziel ? `Weiter zu: ${ziel}` : "Noch nichts ausgelöst."}
+        </p>
+      </>
+    );
+  },
 };
 
 /**
@@ -129,7 +142,7 @@ export const Loading: Story = {
     <BankTransactionDrawer
       open
       onClose={() => {}}
-      reference="bt-1"
+      reference="2026-08-26/1210/0093117"
       record={null}
       loading
       onOpenFull={() => {}}
@@ -148,7 +161,7 @@ export const Error: Story = {
     <BankTransactionDrawer
       open
       onClose={() => {}}
-      reference="bt-1"
+      reference="2026-08-26/1210/0093117"
       record={null}
       error="Zeitüberschreitung beim Laden"
       onOpenFull={() => {}}
@@ -166,7 +179,7 @@ export const NotFound: Story = {
     <BankTransactionDrawer
       open
       onClose={() => {}}
-      reference="bt-9999"
+      reference="2026-08-30/1210/0093140"
       record={null}
       onOpenFull={() => {}}
       caseHref={caseHref}
@@ -186,7 +199,7 @@ export const Interactive: Story = {
         <BankTransactionDrawer
           open={open}
           onClose={() => setOpen(false)}
-          reference="bt-1"
+          reference="2026-08-26/1210/0093117"
           record={RECORD}
           onOpenFull={() => {}}
           caseHref={caseHref}
@@ -205,7 +218,7 @@ export const InUse: Story = {
       <div style={{ maxWidth: 1400 }}>
         <Card>
           <CardHead title="Kontoauszug August 2026" sub="Commerzbank · 1210" />
-          <Table cols={bankTransactionTracks(DEF)} minWidth={1220}>
+          <Table cols={bankTransactionTracks(DEF)} minWidth={1400}>
             <HeadRow>
               {DEF.map((c) => (
                 <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
