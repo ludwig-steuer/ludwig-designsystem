@@ -91,8 +91,18 @@ export const Unassigned: Story = {
         <BankTransactionDrawer
           open
           onClose={() => {}}
+          // Referenz und Buchungstag sagen **denselben** Tag: die Kennung
+          // beginnt mit dem Buchungstag, und wenn der Kopf darunter einen
+          // anderen nennt, widerspricht sich der Drawer in seinen ersten zwei
+          // Zeilen (Wiederabnahme 0103, M3).
           reference="2026-08-27/1210/0093121"
-          record={{ ...RECORD, cases: [], allocatedSum: 0, matchStage: "unclear_none" }}
+          record={{
+            ...RECORD,
+            postingDate: "2026-08-27",
+            cases: [],
+            allocatedSum: 0,
+            matchStage: "unclear_none",
+          }}
           onOpenFull={(exit, caseId) => setZiel(`${exit}${caseId ? ` · ${caseId}` : ""}`)}
           caseHref={caseHref}
         />
@@ -118,6 +128,8 @@ export const WithoutCounterparty: Story = {
       reference="2026-08-29/1210/0088111"
       record={{
         ...RECORD,
+        // Derselbe Tag wie in der Referenz darüber (M3).
+        postingDate: "2026-08-29",
         counterpartyName: null,
         counterpartyIban: null,
         counterpartyBic: null,

@@ -647,6 +647,13 @@ Kommentaren. Alles vier steht jetzt — und §9 hat die Zeile zur Trefferfläche
 bekommen, die nirgends stand. Das ist der Grund, warum vier Abnahmen
 desselben Tages dasselbe finden mussten.
 
+**Nachtrag zu M3:** die zwei Kopf-Widersprüche sind ebenfalls behoben.
+`WithoutCounterparty` nannte die Referenz `2026-08-29/…` über einem Kopf mit
+„gebucht 26.08.2026", `Unassigned` hatte denselben Bruch mit `2026-08-27/…`.
+Die Kennung beginnt mit dem Buchungstag; nennt der Kopf darunter einen
+anderen, widerspricht sich der Drawer in seinen ersten zwei Zeilen. Gemessen
+stimmen beide jetzt überein (27.08. und 29.08.).
+
 M6 (der Zweig `("case", …)` ohne Auslöser) und M7 (`InUse` schreibt
 `minWidth` ab, statt die Liste zu benutzen) bleiben offen — beide brauchen
 eine Entscheidung über den Zuschnitt der Story, keine Reparatur.
