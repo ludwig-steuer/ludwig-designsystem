@@ -1,6 +1,7 @@
 "use client";
 
 import { ActionIcon } from "../Icons";
+import { formatCount } from "../format";
 
 import { useHotkeys } from "../patterns/Hotkeys";
 import { IconButton } from "./IconButton";
@@ -83,7 +84,7 @@ export function RecordPager(props: PagerLinkProps | PagerButtonProps) {
       <Step dir="prev" target={prev} hotkey={hotkeys ? "K" : undefined} />
       <span className="v2pager__count">
         {label ? `${label} ` : ""}
-        {position} von {total}
+        {formatCount(position)} von {formatCount(total)}
       </span>
       <Step dir="next" target={next} hotkey={hotkeys ? "J" : undefined} />
     </div>

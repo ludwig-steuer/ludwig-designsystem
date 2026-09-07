@@ -139,6 +139,7 @@ export {
   formatTimeFull,
   formatDuration,
   formatBytes,
+  formatCount,
   daysBetween,
   calendarDay,
   type TimeFormat,

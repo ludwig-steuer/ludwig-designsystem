@@ -1,4 +1,5 @@
 import { Link } from "./Link";
+import { formatCount } from "../format";
 import { PageSizeSelect } from "./Nav";
 import { ActionIcon } from "../Icons";
 
@@ -54,7 +55,7 @@ export function Pagination({
   return (
     <nav className="pag" aria-label="Pagination">
       <span className="info">
-        {fromIdx}–{toIdx} von {totalItems}
+        {formatCount(fromIdx)}–{formatCount(toIdx)} von {formatCount(totalItems)}
       </span>
       {page > 1 ? (
         <Link href={buildHref(page - 1)} className="page" aria-label="Vorherige Seite">

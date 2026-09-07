@@ -177,3 +177,16 @@ fertig) — die Begründung trägt: keine Prop nimmt eine Quelle entgegen.
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte:
 `text-align: center` an `.v2pager__count` (V3) — gemeldet als Befund für das
 Set, kein Kriterium dieser Spec.
+
+## Nachtrag 2026-09-07 — die Zahl im Pager wird gelesen wie jede andere
+
+Gefunden in der Abnahme von 0063 (Set-Befund **L-97**): der Pager schrieb
+„Konto 412 von 6212", während jede Zahl daneben ihre Tausenderpunkte hatte.
+Eine Zahl, die in derselben Zeile zweimal verschieden aussieht, ist kein
+Detail — sie lässt den Leser rechnen, ob es dieselbe Größe ist.
+
+Die Formatierung steht als `formatCount()` in `format.ts`, neben
+`formatAmount` und `formatBytes`, **nicht** als `toLocaleString`-Aufruf in der
+Komponente: sonst steht dieselbe Entscheidung an zwanzig Stellen und driftet.
+
+- [ ] Position und Vorrat stehen mit Tausendertrennung (gemessen: „Konto 412 von 6.212")

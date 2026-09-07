@@ -317,3 +317,11 @@ Token an seiner Tabelle hoch; wer schmalere hat, setzt es herunter.
 **Kriterium (neu):** Kopf und Zeilen enden bei **vier** Breiten
 (1440 · 1100 · 900 · 700) an derselben Kante. Gemessen nach dem Fix:
 1405 · 1065 · 865 · 845, Kopf und Zeilen jeweils gleich.
+
+## Nachtrag 2026-09-07 — die Zahlen des Pagers
+
+Derselbe Befund wie in 0047 (**L-97**): `Pagination` schrieb „1–50 von 3400".
+Die drei Zahlen laufen jetzt über `formatCount()` aus `format.ts` — dieselbe
+Stelle, an der `formatAmount` und `formatBytes` stehen.
+
+- [ ] Von-bis und Vorrat stehen mit Tausendertrennung (gemessen: „1–50 von 6.212")
