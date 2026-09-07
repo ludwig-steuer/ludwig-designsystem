@@ -101,7 +101,11 @@ Inhalts — Kopf plus fünf Zeilen, nicht eine Karte) · Fehler (Satz statt Zone
 
 Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionDrawer`. Abgeleitet
 nach §6: 4 anwendbare Zustände + 0 Enums + 0 Layout-Booleans + 1 Callback +
-1 „im Einsatz" + 1 Rand = 7.
+1 „im Einsatz" + 1 Rand = 7. Gebaut sind **8**: der zweite Callback
+(`onOpenFull`, der Weg in die Vollansicht) trägt seinen eigenen Nachweis und
+ist in der Rechnung nicht enthalten. *(Die Zeile sagte bis zur Wiederabnahme
+2026-09-07 „= 7" und die Tabelle darunter führte acht — die Nacharbeit der
+Vorrunde hatte nur die Tabelle nachgezogen, M4.)*
 
 | Story | Beweist |
 |---|---|
@@ -406,3 +410,249 @@ darunter `Closed`; `Closed` ist in `Interactive` aufgegangen, `NotFound` und
 während die Klappe „Originalwert" zwei Blöcke darüber 108 Zeichen Rohwert
 zeigt. Das ist eine Frage an den Zuschnitt der Zonen, keine Reparatur — und
 sie gehört zu 0102, wo die Fakten wohnen.
+
+## Wiederabnahme 2026-09-07 (fremde Abnahme)
+
+Gemessen über CDP gegen den laufenden Dev-Server (Port 6107), eigener
+CDP-Port 9361/9362, Viewports 700 · 1100 · 1280 · 1440 · 1920 × 900.
+Story-Präfix `v3-entitäten-kontoauszugsposition-banktransactiondrawer--`.
+Aktion und Messung je in zwei getrennten `Runtime.evaluate`-Aufrufen. Nicht
+gebaut (`pnpm build` gesperrt, Befund 0117 — den Bau prüft in dieser Welle
+ein eigener Worktree).
+
+### 1 Story-Deckung
+
+Ableitung nach `spec-schreiben` §6 auf die **gebaute** Schnittstelle:
+4 anwendbare Zustände (gefüllt · lädt · Fehler · nicht gefunden) + 0
+Enum-Props + 0 Layout-Booleans + **2 Callbacks** (`onClose`, `onOpenFull`)
++ 1 „im Einsatz" + 1 Rand = **8**. Gebaut sind 8, und die Zusammensetzung
+stimmt jetzt: `Interactive` trägt `onClose`, `Unassigned` trägt `onOpenFull`,
+`InUse` den Einsatz, `WithoutCounterparty` den Rand. Der Zustand „zu" ist
+ohne eigene Story bewiesen: `…--interactive` und `…--in-use` starten mit **0**
+`[role=dialog]` im DOM (gemessen), `…--interactive` schließt wieder auf 0.
+
+Jede Prop hat ihre Story: `transaction`/`record` → `Filled`/`NotFound`,
+`open` → `Interactive`, `onClose` → `Interactive`, `caseHref` → `Filled`,
+`loading` → `Loading`, `error` → `Error`, `onOpenFull` → `Unassigned`,
+`reference` → alle. „leer nach Filter" ist in der Spec begründet entfallen.
+
+**Aber**: die Ableitungszeile der Spec selbst sagt weiter „1 Callback … = 7"
+(Zeile 103/104), während darunter acht Stories stehen — siehe **M4**.
+
+### 2 Kriterien
+
+**Fest**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `typecheck` und Wächter grün | `pnpm typecheck` Exit 0 · `check:language` Exit 0 · `check:icons` Exit 0 · `check:contrast` Exit 0 · `check:mirror` Exit 0 · `check:when` Exit 0 | erfüllt (`build` nicht gelaufen, mit Grund) |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `BankTransactionDrawer.tsx` + `.stories.tsx`, Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionDrawer`, Barrel `src/ui/v3/index.ts:408` | erfüllt |
+| Code englisch, `@when`/`@instead` | `check:language`/`check:when` Exit 0; `BankTransactionDrawer` trägt beide (`.tsx:45-48`) | erfüllt |
+| Kein Hex, kein px, keine Label-Map, Status nur über Registry | `grep -E '#[0-9a-fA-F]{3,8}\b\|[0-9]+px'` über Komponente **und** Story: Exit 1 (kein Treffer); Zustände über `StatusBadge` | erfüllt |
+| Alle Stories vorhanden, ausgeschlossene begründet | 8 Story-IDs im `index.json`, alle acht gemessen | erfüllt (Spec-Zeile: **M4**) |
+| Prüfliste §9 | siehe unten | erfüllt im Baustein; **Befund 1** liegt bei `StatusInfoButton` |
+| Im Browser angesehen | alle 8 IDs über CDP gerendert und ausgemessen | erfüllt |
+
+**Variabel**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Klasse B | `grep -E 'useEffect\|fetch(\|useClientScope\|useState'` in `BankTransactionDrawer.tsx` → einziger Treffer Zeile 24, ein Kommentar über die App-Fassung | erfüllt |
+| Zone 3 aus `BankTransactionFacts`, kein `FieldList` | `grep FieldList` Exit 1; `…--filled` zeigt 4 `.v2fields`-Blöcke mit den Überschriften Zahlung · Verwendungszweck · Gegenpartei · Zuordnung | erfüllt |
+| Zone 5: Fall gegen Zuordnung | `…--filled` Fußknopf „Sachverhalt öffnen", `…--unassigned` „Zahlung zuordnen", `…--loading` / `…--error` / `…--not-found` je „Im Kontoauszug ansehen" | erfüllt |
+| Import-Block fehlt, Zone 4 sagt wo er steht | keine Überschrift „Import" in `…--filled`; `.v2btxd__limit` („Herkunft und Rohdaten stehen im Kontoauszug.") in **allen fünf** offenen Zuständen vorhanden | erfüllt (Anmerkung **M5** der Vorrunde, siehe unten) |
+| `Loading` hat die Form des Inhalts | `…--loading`: 4 Blöcke, `border-top: 0px`, Hintergrund `rgba(0,0,0,0)`, Höhen 111,4 / 92,4 / 111,4 / 111,4 px gegen 135,1 / 138,9 / 135,1 / 137,5 px in `…--filled`, gleiche Überschriften in gleicher Reihenfolge. Der erste Block rückt beim Eintreffen um 16,3 px (81,0 → 97,3), nicht um 431 px. Keine Karte | erfüllt |
+| `error` ersetzt Zone 3, Zone 5 bleibt | `…--error`: 0 `.v2fields`, Callout-Satz, Fußknopf steht | erfüllt |
+| Fokus rein und zurück | siehe Tastaturweg | erfüllt |
+| App-Punkt (B1) | nicht Gegenstand dieses Repos | offen (App) |
+
+**Tastaturweg** (echte Tasten über `Input.dispatchKeyEvent`, kein gelesener
+Code). Vor dem Klick 0 `[role=dialog]`; nach dem Klick auf „Zahlung ansehen"
+ist `document.activeElement` = `ASIDE.v2drawer v2drawer--md is-open`, also
+**im** Drawer. Zwölf Tab-Anschläge laufen zyklisch über **6 Stationen** und
+verlassen den Drawer nie (`d.contains(activeElement)` 12× `true`): Schließen ·
+Originalwert · DATEV-Historie erklären · Wartung der Klimaanlage ·
+Buchung (Ereignis) erklären · Sachverhalt öffnen. Alle drei Schließwege
+gemessen, je +450 ms und +1450 ms nach der Aktion:
+
+| Weg | Dialoge danach | `activeElement` danach |
+|---|---|---|
+| Escape | 0 | `BUTTON.v2btn v2btn--ghost` „Zahlung ansehen" |
+| Scrim (Klick auf 10/450, `elementFromPoint` = `v2drawer__scrim is-open`) | 0 | `BUTTON.v2btn v2btn--ghost` „Zahlung ansehen" |
+| Kreuz (28 × 28 px, `aria-label="Schließen"`) | 0 | `BUTTON.v2btn v2btn--ghost` „Zahlung ansehen" |
+
+### 3 Prüfliste §9 — die Punkte, die am häufigsten reißen
+
+- **Trefferfläche**: Kreuz 28 × 28, Fußknopf 181,1 × 34,8, Fall-Link
+  162,8 × 20,9 (Textlink, keine Fläche). **Zwei Knöpfe messen 12 × 12 px** —
+  die (i) neben den beiden Status-Chips. Kein `::before`/`::after` als
+  Vergrößerung (`content: none`, `width: auto`). Siehe **Befund 1**.
+- **`cursor: pointer` mit Antwort auf Hover** (mit `CSS.forcePseudoState`,
+  Vorher/Nachher verglichen): Fußknopf `rgb(26,58,92)` → `rgb(34,74,115)` ·
+  Kreuz transparent → `rgb(244,246,248)` · Fall-Link ohne → mit
+  `underline` · `summary` „Originalwert" `rgb(113,113,113)` → `rgb(45,45,45)`
+  plus `underline`. **Die beiden (i) antworten nicht**: Größe, Farbe
+  (`rgb(92,92,92)`), Deckkraft (0,65) und Hintergrund sind mit erzwungenem
+  `:hover` identisch — bei `cursor: pointer`. Siehe **Befund 1**.
+- **`minWidth` / Quetschen**: `…--in-use` bei 700 · 1100 · 1280 · 1440 ·
+  1920 px gemessen. Der Scroller trägt durchgehend `scrollWidth 1400` gegen
+  `clientWidth` 666 / 1066 / 1246 / 1398 / 1398, die Spur „Verwendungszweck"
+  bleibt **234 px**, der Textkasten `clientWidth 234` = `scrollWidth 234`
+  (nichts abgeschnitten), und das Dokument bekommt an keiner Breite eigenes
+  Querscrollen. Im Drawer selbst an allen fünf Breiten **kein** Element mit
+  `scrollWidth > clientWidth` (Panel 360 / 550 / 640 / 720 / 880 px).
+- **Kontrast** der neu dazugekommenen Zeile in `…--unassigned`:
+  `rgb(92,92,92)` auf `rgb(244,246,248)` = **6,17 : 1** bei 16 px.
+- Zahlen rechts mit `tnum`, Vorzeichen ohne Farbe, jeder farbige Zustand mit
+  Wort, kein Icon ohne Wort, Rand **oder** Schatten: unverändert gegenüber der
+  Runde vom 2026-09-07, stichprobenweise nachgemessen, kein Rückfall.
+
+### 4 Die Mängel der Vorrunden — nachgemessen
+
+| Mangel | Behauptung | Messung | Stand |
+|---|---|---|---|
+| **M1** `onOpenFull` ohne Rundlauf | „`Unassigned` führt jetzt den Rundlauf" | `…--unassigned`: `p.v2muted` steht auf „Noch nichts ausgelöst.", nach dem Klick auf „Zahlung zuordnen" (175,7 × 34,8 px) auf **„Weiter zu: assign"** | **behoben** |
+| **M2** Liste gequetscht | „dieselbe Zahl wie die Liste … der Zweck hat 234 px" | fünf Breiten, s. o.: Scroller 1400/1246 bei 1280, Zweck 234 px, nichts abgeschnitten | **behoben** |
+| **M3** interne id im Kopf | „Alle Stories tragen jetzt echte Kennungen" | `…--in-use` zeigt nach dem Klick im Kopf `<code>` = **`bt-1`**, Meta-Zeile „bt-1 · −1.249,90 € · gebucht 26.08.2026" | **offen**, s. u. |
+| **M4** Tabelle gegen Set | „die Story-Tabelle nennt die acht gebauten" | Tabelle: 8 Zeilen ✓ — Ableitungszeile darüber weiter „1 Callback … **= 7**" | **halb**, s. u. |
+| **M5** Zone 4 sagt „Rohdaten" | „gehört zu 0102" | `grep` über `docs/backlog/0102-*.md` findet keinen Eintrag dazu | **nirgends verbucht**, s. Befund 2 |
+| Runde 2026-09-06, M2 (Ladefläche) | — | Höhen und Sprung neu gemessen, s. o. | kein Rückfall |
+| Runde 2026-09-06, M5 (Kopf ohne Gegenpartei) | — | `…--without-counterparty` Titel = „Kontoführungsentgelt August 2026", kein `SVWZ+` | kein Rückfall |
+
+### Mängel
+
+**M3 — die „im Einsatz"-Story übergibt weiter die interne id als Kennung, und
+zwei Stories widersprechen sich im Kopf.** *Blockiert: ja.*
+
+- Kriterium: Story-Deckung / `spec-schreiben` §6 („Daten in Stories sehen echt
+  aus"), zusammen mit M1 der Runde vom 2026-09-06, die die Kennung überhaupt
+  erst sichtbar in den Kopf gebracht hat.
+- Ort: `BankTransactionDrawer.stories.tsx:250` (`setRef("bt-1")`) und
+  `:118` gegen `:53`/`RECORD.postingDate`.
+- Messung: in `…--in-use` steht nach dem Klick auf „Erste Zahlung
+  nachschlagen" im Kopf `code` = `bt-1`, Meta „bt-1 · −1.249,90 € · gebucht
+  26.08.2026" — während `…--filled` mit `2026-08-26/1210/0093117` genau
+  beweist, worum es geht. Das ist nicht nur unechtes Datum: `InUse` ist die
+  **einzige** Story, die einen Aufrufer nachstellt, und sie stellt ihn falsch
+  nach — sie lässt ihn die id des Datensatzes als „was nachgeschlagen wurde"
+  durchreichen, also genau die Verwechslung, gegen die die Prop `reference`
+  gebaut wurde. Dazu widerspricht sich `…--without-counterparty` weiter im
+  eigenen Kopf: Referenz `2026-08-29/1210/0088111` über „gebucht 26.08.2026"
+  (`postingDate: "2026-08-26"`) — das war Wort für Wort der kleinste Weg der
+  Vorrunde und ist unberührt. `…--unassigned` hat denselben Bruch neu
+  eingeführt: `2026-08-27/…` über „gebucht 26.08.2026".
+- Kleinster Weg: in `InUse` eine Kennung derselben Form setzen (die Zeile
+  liefert sie ohnehin), und in `WithoutCounterparty` und `Unassigned` das
+  Datum in der Referenz an `postingDate` angleichen. Drei Literale, kein Code.
+
+**M4 — die Messlatte der Spec sagt weiter 7.** *Blockiert: ja.*
+
+- Kriterium: „stimmt die Zahl mit der Ableitung aus `spec-schreiben` §6?" —
+  der erste Punkt, den der Abnehmende prüft (`v3-komponente`, Abschnitt
+  Abnahme).
+- Ort: `docs/backlog/0103-bank-transaction-drawer.md:103-104`.
+- Messung: die Zeile lautet „4 anwendbare Zustände + 0 Enums + 0
+  Layout-Booleans + **1 Callback** + 1 „im Einsatz" + 1 Rand = **7**"; die
+  Tabelle darunter führt 8, gebaut sind 8, und §6 auf die gebaute
+  Schnittstelle ergibt 8 (zwei Callbacks). Der kleinste Weg der Vorrunde hieß
+  „Tabelle **und Zeile** auf 8 nachziehen"; nachgezogen ist die Tabelle.
+- Kleinster Weg: die Zeile auf „2 Callbacks … = 8" setzen. Ein Satz, kein Code.
+
+**M6 (Anmerkung) — bewiesen ist der Ausgang, der keine Argumente trägt.**
+*Blockiert: nein.*
+
+- Kriterium: §6, ein Rundlauf je Callback — der Buchstabe ist mit
+  `…--unassigned` erfüllt, deshalb kein Blocker.
+- Messung: `…--filled` Fußknopf „Sachverhalt öffnen" geklickt →
+  `location.hash` unverändert `""`, `[role=dialog]` weiter 1, Textlänge des
+  Rumpfs 565 → 565. Der Zweig, den der Nachtrag als die Entscheidung des
+  Bausteins beschreibt (`("case", first.caseId)`, also `c-4412`), ist damit in
+  keiner Story ausgelöst; bewiesen ist `("assign")`, der Zweig **ohne**
+  Argument.
+- Kleinster Weg: denselben `useState` wie in `Unassigned` auch in `Filled` —
+  dann steht dort „Weiter zu: case · c-4412".
+
+**M7 (Anmerkung) — `InUse` schreibt die Breite ab, statt die Liste zu
+benutzen.** *Blockiert: nein.*
+
+- Ort: `BankTransactionDrawer.stories.tsx:218,221` gegen
+  `BankTransactionList.tsx:76` (`minWidth = 1400`).
+- Messung: gleiche Wirkung wie die Liste (s. o.) — der Wert ist jetzt
+  richtig, aber er steht zweimal. Genau diese Verdopplung war die Ursache von
+  M2 (1220 gegen 1400); ändert die Liste ihre Spuren, driftet die Story
+  wieder stumm.
+- Kleinster Weg: der von der Vorrunde bevorzugte — `…--in-use` baut mit
+  `BankTransactionList` statt mit `Card`/`Table` von Hand.
+
+### Befunde am Set
+
+**Befund 1 — `StatusInfoButton`: 12 × 12 px, `cursor: pointer`, keine Antwort
+auf Hover.** `src/ui/v3/patterns/StatusInfoButton.tsx:29-53`. Gemessen im
+Drawer (`…--filled`, zweimal: `bank_match_stage` und Ereignis):
+`getBoundingClientRect` = 12 × 12 px, kein Pseudoelement zur Vergrößerung
+(`::before`/`::after` `content: none`). Mit erzwungenem `:hover` bleiben
+Farbe (`rgb(92,92,92)`), Deckkraft (0,65) und Hintergrund
+(`rgba(0,0,0,0)`) unverändert. §9 verlangt „jedes klickbare Element antwortet
+auf Hover"; die Trefferfläche liegt unter 24 × 24. `:focus-visible` gibt
+immerhin 2 px Ring. Der Knopf trägt außerdem Inline-Stile statt einer Klasse
+in `v3.css` (`background`, `border`, `padding`, `cursor`, `color`, `opacity`)
+und deutsche Kommentare/JSDoc in einer v3-Datei — `check:language` prüft nur
+geänderte Dateien und schweigt deshalb. Gehört zur Familie (0099), nicht zu
+0103.
+
+**Befund 2 — eine Verschiebung, die nirgends ankommt.** Der Nachtrag zu M5
+sagt, die Frage „Zone 4 sagt Rohdaten, die Klappe zeigt welche" gehöre zu
+0102. `grep` über `docs/backlog/0102-*.md` findet dort keine Zeile dazu — die
+Anmerkung ist damit aus 0103 heraus- und in nichts hineingeschoben. Wer sie
+weiterträgt, sollte sie in 0102 als offenen Punkt eintragen.
+
+### Urteil
+
+**zurück** — knapp, und nur an den Stories. Der Baustein selbst besteht jeden
+festen und jeden variablen Punkt: Klasse B, vier Zonen, vier Zustände,
+Ladeform, Fehlerfall, Fokusfalle über sechs Stationen, drei Schließwege mit
+Rückgabe an den Auslöser, keine Überläufe an fünf Breiten, alle sechs Wächter
+Exit 0. Die beiden Blocker der Vorrunde (M1, M2) sind gemessen behoben.
+
+Zurück geht sie, weil zwei der als erledigt gemeldeten Punkte es nicht sind:
+`InUse` — die einzige Story, die einen Aufrufer nachstellt — reicht weiter die
+interne id `bt-1` als nachgeschlagene Kennung durch, obwohl im Bericht steht
+„Alle Stories tragen jetzt echte Kennungen" (M3), und die Ableitungszeile der
+Spec sagt weiter „= 7", während acht Stories daneben stehen (M4). Zusammen
+sind das drei Literale und ein Satz.
+
+Abgenommen von / am: **zurück** — designsystem-abnahme (fremd, ohne
+Bau-Kontext), 2026-09-07 · Offene Punkte: M3, M4 (blockierend), M6, M7
+(Anmerkungen), Befund 1 und 2 am Set; dazu der App-Punkt B1, der hier nicht
+prüfbar ist.
+
+## Nach der Wiederabnahme (2026-09-07): beide Blocker
+
+**M3 — der Knopf schlägt jetzt eine Referenz nach, keine Datensatz-id.**
+`InUse` gab `setRef("bt-1")` — unsere Fixture-id, durchgereicht als „was
+nachgeschlagen wurde". Genau die Verwechslung, gegen die `reference` gebaut
+wurde. Der Knopf übergibt jetzt `2026-08-26/1210/0093117`: derselbe
+Buchungstag und dasselbe Konto wie `RECORD`, also kein zweiter Widerspruch an
+der Stelle, die den ersten beheben soll.
+
+**M4 — die Ableitungszeile sagt, was gebaut ist.** Sie stand auf „= 7",
+darunter führte die Tabelle acht Stories. Die Nacharbeit der Vorrunde hatte
+nur die Tabelle nachgezogen. Jetzt nennt die Zeile die **8** und sagt, welche
+über die Rechnung hinausgeht und warum: der zweite Callback `onOpenFull`, der
+Weg in die Vollansicht, trägt seinen eigenen Nachweis.
+
+**Der Befund am Set ist behoben:** `StatusInfoButton` maß 12 × 12 statt des
+Hausmaßes 24 × 24, ohne Antwort auf Hover, mit Inline-Stilen und deutschen
+Kommentaren. Alles vier steht jetzt — und §9 hat die Zeile zur Trefferfläche
+bekommen, die nirgends stand. Das ist der Grund, warum vier Abnahmen
+desselben Tages dasselbe finden mussten.
+
+M6 (der Zweig `("case", …)` ohne Auslöser) und M7 (`InUse` schreibt
+`minWidth` ab, statt die Liste zu benutzen) bleiben offen — beide brauchen
+eine Entscheidung über den Zuschnitt der Story, keine Reparatur.
+
+`pnpm typecheck`, `check:language`, `check:icons`, `check:contrast`,
+`check:mirror`, `check:when` je Exit 0. `pnpm build` lief in dieser Welle im
+eigenen Worktree: **Exit 0** (Bauprüfung in 0117).
+
+**Status: Abnahme.**

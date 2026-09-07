@@ -4,6 +4,7 @@ import { BankTransactionCell } from "./BankTransactionCell";
 import type { BankTransactionCellData } from "./bank-transaction";
 import { Card, CardHead, HeadRow, Row, Table } from "../../primitives/Table";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { Time } from "../../primitives/Time";
 
 const meta: Meta<typeof BankTransactionCell> = {
@@ -55,7 +56,7 @@ export const WithoutCounterparty: Story = {
   render: () => (
     <div style={{ maxWidth: 520, padding: "var(--space-6)" }}>
       <BankTransactionCell
-        transaction={{ ...OUT, counterpartyName: null, amount: -89.9 }}
+        transaction={{ ...OUT, id: "bt-3", counterpartyName: null, amount: -89.9 }}
         href="#bt-3"
       />
     </div>
@@ -80,14 +81,15 @@ export const WithAccount: Story = {
 
 /**
  * Zwei Wege, die sonst keine Story trägt: `sepaTags` aus dem Import gewinnen
- * gegen das Nachparsen (MREF steht als „AUS-DEM-IMPORT-4711"), und `account`
+ * gegen das Nachparsen (MREF steht als „M-2026-08-4471" statt der Nummer aus
+ * dem Text), und `account`
  * **ohne** `href` — ein Konto, das genannt, aber nicht verlinkt wird.
  */
 export const TagsAndPlainAccount: Story = {
   render: () => (
     <div style={{ maxWidth: 520, padding: "var(--space-6)" }}>
       <BankTransactionCell
-        transaction={{ ...OUT, sepaTags: { mref: "AUS-DEM-IMPORT-4711" } }}
+        transaction={{ ...OUT, id: "bt-4", sepaTags: { mref: "M-2026-08-4471" } }}
         account={{ label: "Commerzbank · 1210" }}
         href="#bt-1"
       />
@@ -218,12 +220,19 @@ export const InUseGate: Story = {
         <Table cols="1fr 200px">
           <HeadRow>
             <span>Position</span>
-            <span>Gate</span>
+            {/* Das (i) **einmal** am Spaltenkopf, nicht je Zeile: die Achse
+                erklärt sich einmal, und in einer Liste von hundert Zeilen
+                stünde sonst hundertmal dasselbe Zeichen. 0101 hat das für die
+                Zeilenfamilie abgeschafft, diese Story baute es nach
+                (Wiederabnahme 0100, M3). */}
+            <span>
+              Gate <StatusInfoButton axis="bank_match_stage" />
+            </span>
           </HeadRow>
           <Row>
             <BankTransactionCell transaction={OUT} href="#bt-1" />
             <span>
-              <StatusBadge axis="bank_match_stage" status="unclear_multi" />
+              <StatusBadge axis="bank_match_stage" status="unclear_multi" info={false} />
             </span>
           </Row>
           <Row>
@@ -232,7 +241,7 @@ export const InUseGate: Story = {
               href="#bt-5"
             />
             <span>
-              <StatusBadge axis="bank_match_stage" status="unclear_none" />
+              <StatusBadge axis="bank_match_stage" status="unclear_none" info={false} />
             </span>
           </Row>
         </Table>

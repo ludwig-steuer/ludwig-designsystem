@@ -178,9 +178,16 @@ export const Split: Story = {
 
 /**
  * Im Einsatz: unter einem Kopf. **Nichts steht zweimal** — der Kopf trägt die
- * Identität (Gegenpartei, Datum), die Fakten den Rest. Der Betrag steht
- * bewusst **nicht** im Kopf: `blocks` schneidet ganze Blöcke, und der Block
- * „Zahlung" beginnt mit ihm.
+ * Identität (Gegenpartei und wo sie herkommt), die Fakten alles Übrige.
+ *
+ * Auch das **Datum** gehört den Fakten, nicht dem Kopf: es ist ein Faktum,
+ * kein Name. Der Kopf trug es bis zur Wiederabnahme 0102 als „gebucht am
+ * 26.08.2026", und damit stand `26.08.2026` an beiden Stellen — gemessen bei
+ * 700, 1100, 1400 und 1920 px. Der Satz „nichts steht zweimal" war der
+ * Nachweis, den diese Story schuldet.
+ *
+ * Der Betrag steht ebenfalls nicht im Kopf: `blocks` schneidet ganze Blöcke,
+ * und der Block „Zahlung" beginnt mit ihm.
  */
 export const InUse: Story = {
   render: () => (
@@ -188,7 +195,6 @@ export const InUse: Story = {
       <EntityHeader
         overline="Kontoauszugsposition · Commerzbank · 1210"
         title="Bürobedarf Meier GmbH"
-        meta="gebucht am 26.08.2026"
       />
       <Card>
         <CardHead title="Alles zu dieser Zahlung" />

@@ -49,7 +49,11 @@ export function BankTransactionCell({
   return (
     <div className="v2btx">
       <div className="v2btx__top">
-        <span className="v2btx__who">
+        {/* A `title` only where a name stands: the purpose branch brings its
+            own, and two tooltips over one place say two things about it. The
+            name is clipped by CSS, and a clipped value with no way to the
+            whole one is lost (acceptance 0100, M2). */}
+        <span className="v2btx__who" title={name ?? undefined}>
           {name ? (
             href ? (
               <Link href={href}>{name}</Link>

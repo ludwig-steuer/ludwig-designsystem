@@ -247,7 +247,17 @@ export const InUse: Story = {
           </Table>
         </Card>
         <div style={{ padding: "var(--space-4)" }}>
-          <button type="button" className="v2btn v2btn--ghost" onClick={() => setRef("bt-1")}>
+          {/* Die **Referenz**, nicht die id des Datensatzes: `reference` ist,
+              was der Aufrufer nachschlägt — Buchungstag, Konto, laufende
+              Nummer. `bt-1` ist unsere Fixture-id und stand hier zwei Runden
+              lang; genau die Verwechslung, gegen die `reference` gebaut wurde
+              (Wiederabnahme 0103, M3). Sie stimmt jetzt mit `RECORD` überein:
+              derselbe Buchungstag, dasselbe Konto. */}
+          <button
+            type="button"
+            className="v2btn v2btn--ghost"
+            onClick={() => setRef("2026-08-26/1210/0093117")}
+          >
             Erste Zahlung nachschlagen
           </button>
         </div>

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `patterns/entity-icons.ts` |
 | Quelle | Abnahme 0080 (2026-09-05), Befund 1 — gefunden **in dem Commit, der die erste Gabelung beendet hat** |
 | Auftrag | Die App führt dieselbe Datei mit denselben 62 Schlüsseln: `apps/web/src/ui/status/entity-icons.ts`. Für die 54 alten Achsen ist sie wortgleich; auseinander gingen zuletzt `beleg_erledigung` und die sieben neuen — vier Labels und acht Quelltexte. Beides ist am 2026-09-05 angeglichen worden, aber die Struktur bleibt: **zwei Dateien, ein Inhalt, keine Vorrangregel.** |
@@ -23,8 +23,11 @@ Die App hat im selben Zug den sauberen Schnitt gemacht: `AXIS_LABEL` und
 `ui/status/entity-icons.ts` re-exportiert sie nur noch. Damit **spiegeln sie
 sich mit** — und dieses Repo re-exportiert sie ebenso, statt sie zu führen.
 
-Von 177 Zeilen bleiben 48. Was hier bleibt, ist das, was der App fehlt:
-`AXIS_ENTITY` (welche Achse welche Entität meint) und `ENTITY_LABEL`.
+Von 177 Zeilen bleiben 42. Was hier bleibt, ist das, was der App fehlt:
+`AXIS_ENTITY` — welche Achse welche Entität meint. *(Bis zur Wiederabnahme
+2026-09-07 stand hier „bleiben 48" und „`AXIS_ENTITY` … und `ENTITY_LABEL`";
+beides beschrieb einen Stand, den die Nacharbeit selbst überholt hatte —
+`ENTITY_LABEL` ist mit M1 gefallen, die Datei ist seither 42 Zeilen lang, M5.)*
 
 Damit fällt auch der Grund weg, aus dem diese Aufgabe entstand: dass **jede
 neue Achse der App das Set rot macht**. Sie tut es nicht mehr — eine Achse ist
@@ -167,3 +170,146 @@ Props heißen null eigene Stories.
 **Nebenbefund, nicht 0105:** `StateMachine.stories.tsx` schrieb „fast allen 70
 Achsen", gemessen sind es 72 — die Zahl stand in einer Story-Beschreibung.
 Berichtigt.
+
+## Wiederabnahme 2026-09-07 (fremde Abnahme)
+
+Zweite Runde, anderer Prüfer als der Bauende. Gemessen am gerenderten Baum
+über CDP gegen den **Dev-Server 6107**, nicht gegen `storybook-static`; jede
+Behauptung mit Gegenprobe. Diese Runde prüft **auch den Bau** — als Prüfer
+dieser Welle in einem eigenen `git worktree` auf HEAD `f1913b6`, damit der
+Ausgabeordner des Arbeitsbaums unberührt bleibt (0117).
+
+Während der Messung hat eine **fremde Sitzung** den Spiegel gezogen
+(`src/ludwig/ui/status/status-registry.ts` und `StateMachine.stories.tsx`
+geändert, Baum vorübergehend rot). Alle Befehls-Ergebnisse unten sind deshalb
+am sauberen HEAD im Worktree gemessen, nicht im laufenden Arbeitsbaum; die
+Browser-Messungen laufen gegen den Dev-Server, wie beauftragt.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `entity-icons.ts` führt keine eigene `AXIS_LABEL`/`AXIS_SOURCE` mehr | Datei **42 Zeilen** (177 vor dem Umbau, 48 nach Runde 1). `grep` über `src/` findet beide Namen in der Datei nur in Zeile 42 als `export { … } from` — keine Objektliteral-Zuweisung | ✓ |
+| Beide kommen aus `@/ludwig/ui/status/status-registry` | `entity-icons.ts:42`. Und die Werte stimmen mit der App: `AXIS_LABEL` **72/72 Schlüssel, 0 Abweichungen**, `AXIS_SOURCE` **72/72, 0 Abweichungen**, `StatusAxis` **72/72** — Schlüssel für Schlüssel gegen `apps/web/src/ui/status/status-registry.ts` verglichen, nicht nur die Zeilenzahl | ✓ |
+| Die Achsen-Namen stehen unverändert im Tooltip | `…statusbadge--all-axes` gemessen: **72 Achsen-Blöcke, 326 Plaketten**. Für jede Plakette ist der Teil des `title` vor dem ersten `:` ein Wert aus `AXIS_LABEL` des Spiegels — **0 Abweichungen bei 326**. Die 72 Blocküberschriften tragen alle den `AXIS_LABEL`-Text (`beleg — Beleg`), **0 von 72** ohne. **Gegenprobe:** ein `title` zur Laufzeit auf „KAPUTT: xx" gesetzt (eigener `Runtime.evaluate`, getrennt von der Messung) → dieselbe Messung meldet **1** Abweichung | ✓ |
+| `pnpm typecheck`, **`pnpm build`** und `pnpm check:icons` grün | Am HEAD im Worktree je über den Exit-Code: `typecheck` **0** · `check:icons` **0** · `check:contrast` **0** · `check:mirror` **0** · `check:when` **0** · `check:language` **0**. **`pnpm build` = 0** — erstmals seit zehn Abnahmen wirklich gelaufen, im eigenen Worktree, 613 Zeilen Log, „Storybook build completed successfully"; **0 Treffer für `ENOENT`**, beide `staticDirs` kopiert. Der Ausgabeordner des Arbeitsbaums blieb bei 12:47 stehen, der des Worktrees trägt 13:56 — nichts geteilt. Einzelheiten in 0117 | ✓ |
+| Eine neue Achse der App macht das Set nicht mehr rot | **Neu gemessen, nicht aus Runde 1 übernommen.** Isolierte Kopie des HEAD-Standes (Scratchpad, Repo unberührt); Basis `tsc --noEmit` → **Exit 0**. Dann eine Achse `probe_neue_achse` genau so eingesetzt, wie die App sie brächte: `StatusAxis`-Union + `AXIS_LABEL` + `AXIS_SOURCE` + `STATUS_REGISTRY` → **Exit 0**. **Gegenprobe:** dieselbe Probe mit der `entity-icons.ts` von vor dem Umbau (`994fda2^`, 177 Zeilen) → **Exit 2, 2 Fehler**, beide in ihren eigenen Map-Literalen („missing … `beleg_charakter`, `beleg_haenger`, `ereignis_art`, `kontoauszug_erwartung`, and 7 more"). Die Gabelung war der Fehler, und sie ist weg | ✓ |
+
+### Mängel der vorigen Runde — steht der behauptete Fix wirklich da?
+
+| Punkt aus Runde 1 | Gemessen | Ergebnis |
+|---|---|---|
+| **M1 (Blocker)** — `ENTITY_LABEL` ist die letzte Kopie | `grep -rn "ENTITY_LABEL"` über `src/` liefert **einen** Treffer, und der ist eine JSDoc-Zeile, die den Wegfall festhält — **keine Deklaration mehr**. Die Datei schrumpft von 48 auf 42 Zeilen, `EntityType` ist aus dem Typ-Import raus, `typecheck` 0 | ✓ (bis auf M5) |
+| **M3** — neunzehn deutsche JSDoc-Zeilen | `node scripts/check-language.mjs --all` am HEAD: **0 Treffer** für `entity-icons.ts` (vorher 19 Zeilen). **Gegenprobe, weil „nicht gemeldet" nicht „geprüft" heißt:** in einer Kopie eine deutsche Kommentarzeile eingesetzt → derselbe Wächter meldet sie sofort (`entity-icons.ts:20`). Er deckt die Datei also wirklich ab | ✓ |
+| **M2** — Wächter für `AXIS_ENTITY` | Bewusst offen gelassen, mit Grund im Abschnitt „Nach der Abnahme". Der Grund trägt: `AXIS_LABEL`/`AXIS_SOURCE` können nicht mehr auseinanderlaufen, und `ui/status/entity-icons.ts` lässt sich nicht spiegeln (sie importiert Lucide). Der Rest ist heute deckungsgleich, gemessen: `AXIS_ENTITY` = `{beleg, sachverhalt, buchung}`, App-`ENTITY_ICON` = dieselben drei Achsen, und die Zeichen dahinter stimmen überein (`Icons.tsx`: `source-document`→`Receipt`, `accounting-case`→`Layers`, `journal-entry`→`BookOpen`; App: `Receipt`, `Layers`, `BookOpen`) | ✓ offen mit Grund |
+| **M4** — kein fester Kriterienblock, keine Stories-Sektion | Weiter keine Sektion, aber der fehlende **Satz** steht jetzt in der Datei („null Props heißen null eigene Stories"). Damit ist das Prüfbare da; die Form der Spec bleibt eine Altlast dieser Befund-Notiz | ✓ offen mit Grund |
+| **Nebenbefund** — „fast allen 70 Achsen" in `StateMachine.stories.tsx` | Am HEAD steht dort **72** | ✓ |
+
+### Story-Deckung
+
+Die Datei hat **keine Prop** und rendert nichts; nach `spec-schreiben` §6 fällt
+daraus **keine eigene Story** — die fünf Zustände (gefüllt · leer · leer nach
+Filter · lädt · Fehler) und der Summand „im Einsatz" gelten für eine
+Konstanten-Map nicht. Ihre Wirkung zeigen zwei bestehende Stories, beide zur
+Laufzeit aus den Daten gerechnet statt abgeschrieben, beide nachgemessen:
+
+- `…statusbadge--all-axes` — **72 Blöcke** für 72 Achsen des Spiegels,
+  326 Plaketten.
+- `…icons--entities` — **22 SVG** im DOM neben dem Text „22 Dinge, je ein
+  Zeichen", und „**69** Achsen haben bewusst keins" = 72 − 3, aus
+  `Object.keys(AXIS_LABEL).length - Object.keys(AXIS_ENTITY).length`
+  gerechnet. Beide Zahlen sind also nicht veraltet und können es nicht werden.
+
+### Prüfliste `design-guidelines.md` §9
+
+Ohne die zwei App-Punkte („ersetzt ihr v1-Gegenstück", „in §11 auf v2 gesetzt").
+Stufe `patterns/`, Importe nur auf die Icon-Registry und den Spiegel, kein
+Fachmodul · kein Hex, kein px in der Datei · **Zeichen und Wort**: alle 16
+Plaketten mit Zeichen in `--all-axes` tragen das Wort, **0 von 16** ohne;
+**0 von 16** SVG ohne `aria-hidden="true"` · **Maß und Strich**: alle 16
+Zeichen **12 × 12 px** bei `stroke-width: 1.5px` — auf der produktiven Leiter
+(12/14/16), kürzester Pfad `getTotalLength() = 10`, also kein leerer Pfad, der
+`0,0,0,0` vortäuscht · **Ton nur aus der Registry**: die 16 verteilen sich auf
+`neutral` 6 · `info` 3 · `success` 4 · `warning` 2 · `danger` 1 = 16, und die
+Glyphe bringt keinen eigenen Ton mit — `stroke` des SVG **gleich** `color` der
+Plakette in **16 von 16**, `fill: none`. **Gegenprobe:** Plakettenfarbe zur
+Laufzeit auf `rgb(1,2,3)` gesetzt → `color` **und** `stroke` des SVG ziehen mit
+· **Icon-Knopf**: das (i) trägt `aria-label` **und** `title`, beide
+„Buchung: Zustände erklären", sein SVG ist `aria-hidden="true"` · genau
+**3 von 72** Achsen-Blöcken tragen ein Zeichen (`beleg`, `sachverhalt`,
+`buchung`), wie in der App · keine Emoji, keine Versalien in der Datei.
+
+### Mängel
+
+**M5 — die Spec beschreibt in Zeile 26–27 einen Stand, den es nicht mehr gibt.
+Nicht blockierend.** Dort steht „Von 177 Zeilen bleiben **48**. Was hier
+bleibt, ist das, was der App fehlt: `AXIS_ENTITY` … und `ENTITY_LABEL`."
+Gemessen sind es **42** Zeilen, und `ENTITY_LABEL` ist genau das, was Runde 1
+als Blocker herausgenommen hat. Der kleinste Weg von M1 hatte zwei Teile — die
+Zeilen löschen **und** den Halbsatz richtigstellen; der zweite ist liegen
+geblieben. Entschärft ist es dadurch, dass der Abschnitt „Erledigt
+(2026-09-06)" heißt und der spätere Abschnitt den Stand korrekt nachträgt: als
+Datumsstand ist der Satz nicht falsch, als Beschreibung von heute schon.
+Kleinster Weg: „48" → „42", und den Halbsatz auf `AXIS_ENTITY` kürzen.
+
+Kein weiterer Mangel. Kein blockierender Mangel.
+
+### Befunde am Set (nicht 0105)
+
+**B1 — das (i) hat eine Trefferfläche von 12 × 12, das Hausmaß ist 24 × 24.**
+`…statusbadge--with-info-dialog` gemessen: der `<button>` des
+`StatusInfoButton` misst **12,00 × 12,00 px** (`getBoundingClientRect`), sein
+SVG ebenfalls 12 × 12 — die Quelle setzt `padding: 0` und kein
+`min-width`/`min-height`. 0113 hat **24 × 24** als Hausmaß gesetzt, und 0099
+war gestern an genau dieser Größe blockiert (Commit `dd0491c`: „seine
+Trefferfläche … maß 22 × 22 … jetzt steht das Hausmaß aus 0113 als
+`min-width`/`min-height`"). Beschriftung und `title` sind korrekt, es ist
+allein die Fläche. `StatusBadge` rendert das (i) per Default an **jedem**
+Chip. Gehört nicht zu 0105 — die Datei wurde hier nicht angefasst —, aber es
+ist derselbe Fehler, der einen Tag zuvor eine andere Aufgabe blockiert hat.
+
+**B2 — §9 kennt die Regel nicht, an der B1 hängt.** Die Prüfliste, die jede
+Abnahme durchgeht, führt Kontrast, Leiter, Strich und Fokusring, aber keine
+Zeile zur Trefferfläche; `grep` über `docs/design-guidelines.md` findet
+„24 × 24" nirgends. Das Hausmaß steht nur in 0113 und 0099. Solange es nicht
+in §9 steht, findet es nur, wer die beiden Aufgaben kennt.
+
+**B3 — der Spiegel ist bei `STATE_MACHINES` von der App abgewandert.**
+`diff` gegen `apps/web/src/ui/status/status-registry.ts`: **339 Zeilen**,
+alle Hunks in Zeile 34–36 (ein Blockkommentar) und 2364–2448
+(`StateTransition`, `STATE_MACHINES` — die App hat `label` eingeführt und die
+Maschinen umbenannt, F150/F151). **`AXIS_LABEL`, `AXIS_SOURCE` und
+`StatusAxis` sind davon nicht berührt** (72/72 zeichengleich, siehe Kriterium
+2), 0105 ist also nicht betroffen. Während dieser Abnahme hat eine fremde
+Sitzung angefangen, genau das zu ziehen. Hier nur notiert, damit niemand mein
+grünes `typecheck` als Aussage über diesen Bereich liest.
+
+**B4 — kein Fehler, nur damit es nicht als einer gemeldet wird:**
+`…icons--sizes` rendert zwei SVG **neben** der Leiter (13 × 13 und 15 × 15).
+Das ist Absicht — der Abschnitt „Was der Code heute tut" zählt die Größen zur
+Laufzeit aus der Quelle aus und markiert beide mit „daneben".
+
+**Urteil: abgenommen.** Alle fünf Kriterien halten, jedes gemessen und
+gegengeprobt — darunter erstmals der Bau selbst, der in Runde 1 noch ersetzt
+werden musste. Der Blocker M1 ist in der Sache erledigt: die Kopie ist weg,
+nicht kleiner geworden. M3 ist erledigt und der Wächter, der es meldet, ist
+gegengeprobt. M2 und M4 bleiben offen, aber mit einem Grund, der trägt und der
+in der Datei steht. Was bleibt, ist ein Halbsatz und eine Zahl in der
+Beschreibung eines vergangenen Standes (M5) — das hält eine Aufgabe nicht auf.
+
+Abgenommen von / am: Claude (fremde Abnahme, Bau-Prüfer dieser Welle),
+2026-09-07 · Offene Punkte: M5 (nicht blockierend), M2 und M4 (offen mit
+Grund) · Befunde für andere Aufgaben: B1, B2, B3.
+
+## Nach der Wiederabnahme (2026-09-07): M5
+
+Urteil war **abgenommen**, und der Bau dieser Welle lief hier: `pnpm build`
+Exit 0 im eigenen Worktree, kein ENOENT, beide `staticDirs` kopiert. Der
+Arbeitsbaum blieb unberührt.
+
+**M5 — die Spec beschreibt jetzt den Stand, den sie hat.** Sie sagte „von 177
+Zeilen bleiben **48**" und „was der App fehlt: `AXIS_ENTITY` … und
+`ENTITY_LABEL`". Beides war von der eigenen Nacharbeit überholt:
+`ENTITY_LABEL` ist mit M1 gefallen, und die Datei ist seither **42** Zeilen
+lang (nachgezählt). Der kleinste Weg von M1 hatte zwei Teile; der zweite lag
+liegen.
+
+**Status: fertig.**

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | offen |
+| Status | fertig |
 | Stufe | Werkzeug (`.storybook/main.ts`, `package.json`) |
 | Klassen-Test | — keine Komponente |
 | Quelle | **Fünf** Meldungen am 2026-09-07, unabhängig voneinander: 0027 (einer von vier Läufen), 0056 (einer von drei), 0050 (mit der richtigen Spur) und drei Prüfer, denen der Ordner unter den Füßen wegkam — der letzte Fall mit bekanntem Auslöser, siehe unten |
@@ -90,3 +90,76 @@ Damit bleibt für die Aufgabe selbst nur noch die Frage, ob zwei Sitzungen je
 einen eigenen `--output-dir` bekommen sollen. Solange Prüfer den Dev-Server
 nehmen, ist der geteilte Ordner unkritisch; er wird es wieder, sobald zwei
 Sitzungen gleichzeitig bauen.
+
+## Bauprüfung dieser Welle (im Worktree) — 2026-09-07
+
+Nach der Owner-Regel prüft je Welle **genau ein** Prüfer den Bau, und zwar
+nicht im Arbeitsbaum. Für diese Welle war das der Abnehmende von
+`0105-entity-icons-gabelt.md`.
+
+```
+git worktree add <scratchpad>/build-check HEAD   # f1913b6, sauber
+pnpm install --frozen-lockfile                   # Exit 0, 4,2 s
+pnpm build                                       # Exit 0
+```
+
+**Ergebnis: `build=0`.** 613 Zeilen Log, letzte Zeile „Storybook build
+completed successfully", Exit-Code gelesen — nicht `| tail`.
+
+### Flackert das `staticDirs`-Kopieren noch?
+
+**Nein — in diesem Lauf nicht, und der Grund dafür ist bekannt.**
+
+| Frage | Messung |
+|---|---|
+| `ENOENT` im Log? | `grep -c ENOENT` → **0** |
+| Wurden beide `staticDirs` kopiert? | ja, beide Zeilen im Log: „Copying static files: **public** at storybook-static" und „Copying static files: **reference** at storybook-static/reference" |
+| Andere Fehler? | keine. Die einzigen Treffer für `error/failed/warn` sind zwei Zeilen über `build.chunkSizeWarningLimit` |
+| Wohin ging die Ausgabe? | `…/scratchpad/build-check/storybook-static` — der Worktree hat **seinen eigenen** Ausgabeordner |
+| Blieb der Arbeitsbaum unberührt? | ja: `storybook-static/` dort trägt weiter **12:47**, die Worktree-Ausgabe **13:56**. Kein geteilter Ordner, kein gelöschter Ordner unter fremden Füßen |
+
+Das bestätigt die vierte Meldung dieser Aufgabe von der anderen Seite: nicht
+der Kopierer ist unzuverlässig, sondern **der geteilte Ausgabeordner**. Nimmt
+man ihn weg — und genau das tut ein eigener Worktree, ohne dass irgendein
+Schalter gesetzt werden müsste —, läuft der Bau durch, kopiert beide
+statischen Verzeichnisse und fasst nichts an, woran gerade jemand misst.
+
+### Empfehlung: 0117 kann geschlossen werden
+
+Die Aufgabe fragt zuletzt nur noch, „ob zwei Sitzungen je einen eigenen
+`--output-dir` bekommen sollen". Die Antwort steht damit fest, und sie braucht
+keine Änderung an `package.json`:
+
+1. **Ein Prüfer misst gegen den Dev-Server 6107** — steht schon in jedem
+   Prüfauftrag und hat in dieser Welle gehalten.
+2. **Wer baut, baut im eigenen `git worktree`.** Der Worktree bringt den
+   eigenen Ausgabeordner mit; ein `--output-dir` je Sitzung wäre dieselbe
+   Trennung mit mehr Schrauben.
+
+Ehrlich dazugesagt: das ist **ein** grüner Lauf, und ein Lauf widerlegt keine
+Fehlerrate von eins zu drei. Was ihn trotzdem trägt, ist die Ursache — sie ist
+seit der vierten Meldung benannt und in diesem Lauf durch Abwesenheit belegt:
+kein zweiter Bau im selben Ordner, kein `ENOENT`, beide `staticDirs` kopiert.
+Sollte der Abbruch in einem **isolierten** Worktree je wieder auftauchen, wäre
+das ein neuer Befund und diese Aufgabe die falsche Stelle dafür.
+
+Eingetragen von / am: Claude (Abnahme 0105, Bau-Prüfer dieser Welle),
+2026-09-07.
+
+## Geschlossen (2026-09-07)
+
+Der Owner hat über den Coordinator entschieden: **je Welle prüft genau ein
+Prüfer den Bau in einem eigenen `git worktree`** — nicht im Arbeitsbaum, in
+dem gemessen wird. Damit ist der Befund kein Hindernis mehr, sondern eine
+Arbeitsregel, und sie steht in den Abnahme-Aufträgen.
+
+Der erste Lauf nach dieser Regel steht oben: **Exit 0**, kein `ENOENT`, beide
+`staticDirs` kopiert, der Arbeitsbaum unberührt. Die Ursache war nie der
+Kopierer, sondern der geteilte Ausgabeordner — ein Worktree nimmt ihn weg,
+ohne dass ein `--output-dir` gesetzt werden muss.
+
+Was dabei bleibt und in den Prüf-Auftrag gehört, nicht hierher: **wer im
+Arbeitsbaum misst, baut nicht.** Zehn Abnahmen in Folge haben `pnpm build` als
+ungeprüft vermerkt, weil die Regel fehlte — das war der eigentliche Schaden.
+
+**Status: fertig.**

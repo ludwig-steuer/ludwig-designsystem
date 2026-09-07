@@ -3393,8 +3393,22 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* --- Fakten einer Kontoauszugsposition (0102) ----------------------------- */
 .v2btxf { display: grid; gap: var(--space-5); }
 /* Ein Satz ist Text, kein Wert: linksbündig, obwohl die Feldliste ihre Werte
-   rechts setzt (V3 — Text links, Zahlen rechts). */
-.v2btxf__note { text-align: left; font-weight: 400; }
+   rechts setzt (V3 — Text links, Zahlen rechts).
+
+   Drei Dinge sind dafür nötig, und zwei davon fehlten. `text-align` allein war
+   **wirkungslos**: der Satz saß in einem `<span>` mit `display: inline`, und
+   auf einem Inline-Kasten wirkt es nicht — gemessen standen die Zeilenkästen
+   mit und ohne die Regel byte-gleich rechtsbündig an der Wertkante
+   (Wiederabnahme 0102, M2). Der Satz braucht also einen **Blockkasten**, und
+   die Wertspalte der Feldliste — ein Flex-Kind mit `flex: 0 1 auto` — muss
+   die Zeile füllen, sonst schrumpft sie auf den Text und `space-between`
+   schiebt sie nach rechts.
+
+   Dass das hier steht und nicht in `FieldList`, ist ein Ausweg: die Feldliste
+   kann keinen Satz tragen, und jeder Aufrufer baut sich seinen eigenen
+   (Befund der Abnahme 0102, gehört 0058). */
+.v2btxf__note { display: block; text-align: left; font-weight: 400; }
+.v2fields__row:has(.v2btxf__note) > :last-child { flex: 1; min-width: 0; }
 /* Der Zweck ist ein langer Wert ohne Label — er nimmt den Rahmen der
    Feldliste, aber nicht deren Zeile: rechtsbündiger Fließtext ist unlesbar. */
 .v2btxf__purpose { padding: var(--space-3) var(--space-4) var(--space-1); }
