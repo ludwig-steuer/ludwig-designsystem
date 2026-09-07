@@ -1310,6 +1310,9 @@ select.v2in { padding-right: 26px; }
 /* Die Linie ist keine Serie, sondern ein Bezug — deshalb die Akzentfarbe.
    `non-scaling-stroke` steht am Element, weil `preserveAspectRatio="none"`
    den Strich sonst verzerrt. */
+/* Der Saum unter der Bezugslinie: ohne ihn misst sie auf einem Balken 1,03:1
+   (Abnahme 0110, M1). Er traegt keine Bedeutung und ist deshalb `aria-hidden`. */
+.v2chart__linehalo { stroke: var(--color-surface); stroke-width: 3.5; }
 .v2chart__line { stroke: var(--color-accent); stroke-width: 1.5; }
 .v2chart__zero { stroke: var(--color-border-strong); stroke-width: 0.4; }
 .v2chart__ax {

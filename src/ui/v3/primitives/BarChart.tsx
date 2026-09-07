@@ -109,10 +109,21 @@ export function BarChart({
   const width = slot * (1 - GAP);
   const sub = grouped ? (width - INNER) / 2 : width;
   const y = (value: number) => zero - (value / span) * H;
-  const seg = (value: number, base: number) => ({
+  // The second series carries a 1-px hairline on every edge; at a minimum
+  // height of 0.4 px that line covers the bar completely and the value
+  // disappears (acceptance 0110, M2). It needs at least as much height as the
+  // line takes away above and below.
+  const MIN = 0.4;
+  const MIN_ZWEITE = 2.4;
+  const seg = (value: number, base: number, zweite = false) => ({
     y: value < 0 ? y(base) : y(base + value),
-    height: Math.max((Math.abs(value) / span) * H, 0.4),
+    height: Math.max((Math.abs(value) / span) * H, zweite ? MIN_ZWEITE : MIN),
   });
+
+  const linePoints = (line ?? [])
+    .slice(0, bars.length)
+    .map((v, i) => `${i * slot + slot / 2},${y(v)}`)
+    .join(" ");
 
   const title = (bar: Bar) => {
     const parts = [`${primaryLabel ? `${primaryLabel} ` : ""}${format(bar.value)}`];
@@ -151,40 +162,54 @@ export function BarChart({
                 <rect
                   x={grouped ? left + sub + INNER : left}
                   width={sub}
-                  {...seg(second, base)}
+                  {...seg(second, base, true)}
                   // The hairline that separates the two series is a stroke in
                   // the surface colour; `preserveAspectRatio="none"` would
                   // stretch it, hence non-scaling.
                   vectorEffect="non-scaling-stroke"
                   className={`v2chart__bar v2chart__bar--second${now}`}
                 >
-                  {/* No second `title`: the group already carries the whole
-                      period, and the same sentence twice is noise. */}
+                  {/* The title hangs on the `rect`, not on the `g`: a
+                      `<title>` on the group element does not reach the mouse
+                      over the second bar (acceptance 0110, M3). */}
+                  <title>{title(bar)}</title>
                 </rect>
               )}
             </g>
           );
         })}
         {line ? (
-          <polyline
-            className="v2chart__line"
-            // `non-scaling-stroke`, because `preserveAspectRatio="none"`
-            // stretches the drawing — a plain stroke would come out wider
-            // than tall.
-            vectorEffect="non-scaling-stroke"
-            fill="none"
-            points={line
-              .slice(0, bars.length)
-              .map((v, i) => `${i * slot + slot / 2},${y(v)}`)
-              .join(" ")}
-          >
-            <title>
-              {`${lineLabel ?? "Bezugslinie"}: ${line
-                .slice(0, bars.length)
-                .map((v, i) => `${bars[i]?.label ?? ""} ${format(v)}`)
-                .join(" · ")}`}
-            </title>
-          </polyline>
+          <>
+            {/* Two lines on top of each other: the lower one in the surface
+                colour, so the upper one stays visible **on a bar** too.
+                Against white the accent measures 3.55:1 — over the bars it was
+                1.03:1 (`border-control`) and 1.37:1 (`text-subtle`), and three
+                quarters of the line lie there (acceptance 0110, M1). The same
+                hairline trick that already separates the two series. */}
+            <polyline
+              className="v2chart__linehalo"
+              vectorEffect="non-scaling-stroke"
+              fill="none"
+              points={linePoints}
+              aria-hidden="true"
+            />
+            <polyline
+              className="v2chart__line"
+              // `non-scaling-stroke`, because `preserveAspectRatio="none"`
+              // stretches the drawing — a plain stroke would come out wider
+              // than tall.
+              vectorEffect="non-scaling-stroke"
+              fill="none"
+              points={linePoints}
+            >
+              <title>
+                {`${lineLabel ?? "Bezugslinie"}: ${line
+                  .slice(0, bars.length)
+                  .map((v, i) => `${bars[i]?.label ?? ""} ${format(v)}`)
+                  .join(" · ")}`}
+              </title>
+            </polyline>
+          </>
         ) : null}
         <line x1="0" x2={W} y1={zero} y2={zero} className="v2chart__zero" />
       </svg>
