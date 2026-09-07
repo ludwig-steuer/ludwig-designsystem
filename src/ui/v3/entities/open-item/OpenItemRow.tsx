@@ -21,9 +21,12 @@ import type { Currency } from "@/ludwig/shared/money";
  * by hand.
  *
  * „Open" is always a statement **about a date**. That is why `asOf` is
- * required and stands in the empty state, in the group heading and in the
- * settlement column: an item that is settled today can have been open on the
- * reference date, and the row must not collapse the two.
+ * required — it names the reference date in the settlement column, where the
+ * badge carries it in its `title`: an item that is settled today can have
+ * been open on the reference date, and the row must not collapse the two.
+ * (It does **not** appear in a group heading or an empty state: the row has
+ * no empty state, and the group heading carries count and sum. The comment
+ * claimed all three until the acceptance of 2026-09-07 measured them.)
  */
 
 const KIND_AXIS = "konto_typ" as const;

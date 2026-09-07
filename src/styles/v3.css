@@ -3112,9 +3112,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   border-bottom: 1px solid var(--color-border-subtle);
   font-size: var(--fs-ui);
 }
-/* Ab 560 px Zeilenbreite die sechs Spuren — die Summe der festen Anteile
-   (104 + 110 + 110 + fünf Rinnen) plus Luft für Titel, Frist und Reife. */
-@container exprow (min-width: 560px) {
+/* Ab **780 px** die sechs Spuren. Die Summe der festen Anteile liegt bei
+   537,7 px — dort *passen* sechs Spuren, aber der Titel bekäme 22 px, und die
+   Zeile wurde in dem Band gemessen **128,6 px** hoch, also schlechter als der
+   einspaltige Notfall darunter (75 px). Einzeilig wird sie erst ab rund
+   780 px Zeilenbreite (46,1 px). Das Tor gehört an die Breite, ab der der
+   Titel trägt, nicht an die, ab der er hineinpasst (Wiederabnahme 0025). */
+@container exprow (min-width: 780px) {
   .v2exp__row {
     grid-template-columns: 104px minmax(0, 1fr) 110px max-content 110px max-content;
   }
@@ -3122,13 +3126,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* Schmal: der Titel nimmt die ganze Breite, alles Übrige fließt darunter in
    **einer** Reihe. Gestapelt wäre jede Zeile 148 px hoch — gemessen —, und
    eine Liste aus fünf Erwartungen füllte den halben Bildschirm. */
-@container exprow (max-width: 559.98px) {
+@container exprow (max-width: 779.98px) {
   .v2exp__row { display: flex; flex-wrap: wrap; align-items: baseline; }
   .v2exp__title { flex: 1 1 100%; order: -1; }
   .v2exp__kind { order: 0; }
 }
-.v2exp__row:last-child { border-bottom: none; }
+.v2exp:last-child .v2exp__row { border-bottom: none; }
 .v2exp__title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+/* Der Titel kürzt, statt die Zeile zu dehnen — wie `.v2case` seit 0095. */
+.v2exp__title > :first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2exp__note { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 .v2exp__due { font-size: var(--fs-ui-sm); color: var(--color-text-muted); white-space: nowrap; }
 .v2exp__kind,

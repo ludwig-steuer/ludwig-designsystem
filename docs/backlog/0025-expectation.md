@@ -331,3 +331,236 @@ wer sie lädt, zeigt das an seiner Stelle.
 deutsche Wörter ab, ohne Achse — dieselbe Form, die die Komponente für
 `expectedDocumentKind` ablehnt. Gedeckt durch Freigabe-Entscheid 1; sobald
 `audience` eine Achse bekommt, fällt die Funktion weg.
+
+## Wiederabnahme (2026-09-07, fremd, ohne Bau und ohne Chatverlauf)
+
+Gemessen am laufenden Storybook (`http://localhost:6107`) über CDP, gegen
+Stand `01ebb7c`. Die Zeile wurde **nicht** im Story-Rahmen beurteilt, sondern
+in den Breiten, die sie auf der Seite bekommt; dazu wurde zuerst die
+Detailspalte selbst gemessen. (`MasterDetail` hat während dieser Abnahme seine
+Untergrenze gewechselt — `01ebb7c`, `minDetail`; alle Zahlen unten sind
+danach neu erhoben.)
+
+**Die Werkzeuge sind grün.** `pnpm typecheck` Exit 0 · `pnpm build`
+„Storybook build completed successfully", Exit 0 · `pnpm check:icons`
+„in Ordnung. 53 Zeichen in der Registry", Exit 0.
+
+### Zuerst: wie breit ist die Spalte, in der die Zeile steht?
+
+`casedetailview--in-use`, je Fensterbreite eine frische Seite, gemessen an
+`.v2md--detail-breit > .v2md__detail` (`CaseDetailView` reicht `minDetail={484}`
+herein). Die Zeile in der Karte ist 42 px schmaler — die Karte trägt
+`padding: 0 var(--space-5)` wie in `InCase`:
+
+| Fenster | Detailspalte | Zeile in der Karte | Modus | Titelspur | Zeilenhöhe |
+|---|---|---|---|---|---|
+| 1280 | **484 px** | 442 px | flex | volle Breite | **75 px** |
+| 1360 | 564 px | 522 px | flex | volle Breite | **75 px** |
+| 1400 | 604 px | 562 px | grid | **74,7 px** | **86,8–128,6 px** |
+| 1440 | **644 px** | 602 px | grid | **114,7 px** | **86,8 px** |
+| 1600 | 804 px | 762 px | grid | 274,7 px | 46,1 px |
+
+Referenz `.v2tbl__row`: gemessen **48,0 px**
+(`v3-patterns-arbeitsfläche-datatable--filled`, `padding: 12px 18px`).
+
+### M1 — der Überlauf ist weg, das Loch sitzt jetzt eine Stufe höher
+
+Was die Nacharbeit **erledigt** hat, ist nachgemessen und stimmt:
+
+| Nachweis | Messung |
+|---|---|
+| kein waagerechter Überlauf mehr | `scrollWidth − clientWidth = 0` an `.v2exp`, an `.v2card` und am Dokument, bei Zeilenbreiten 356 · 398 · 442 · 484 · 498 · 516 · 518 · 520 · 522 · 560 · 562 · 602 · 636 · 644 · 678 · 762 · 902 · 1158 |
+| Titel läuft nicht mehr in die Betragsspalte | Abstand Titelkante → Betragskante konstant **−12 px** (die Rinne) bei jeder Breite, auch mit „Elektro-Großhandel Nordwest Verwaltungs GmbH & Co. KG" |
+| schmal wird nicht gestapelt | unter 560 px Zeilenbreite `display: flex`: Titel über die volle Breite, alles Übrige in **einer** Reihe darunter, **75 px** je Zeile bei 442 und 522 px — genau die zwei Breiten, die die Detailspalte bei 1280 und 1360 hergibt. Lesbar (Bild), und der Fall, der die Nacharbeit ausgelöst hat, ist damit sauber |
+
+Was **nicht** erledigt ist: das Tor liegt bei 560 px Zeilenbreite, also genau
+bei der Summe der festen Anteile — 104 + 110 + 103,3 + 110 + 50,4 („Erledigt")
++ fünf Rinnen à 12 = **537,7 px**. Ab dem Tor gibt es sechs Spuren, aber dem
+Titel bleibt nichts:
+
+Beide Listen-Stories bei **derselben** Zeilenbreite gemessen (`InCase` in einer
+Karte, deshalb Rahmen = Zeile + 42; `Interactive` trägt zusätzlich die
+Handlungsspalte „Erledigt", so wie eine echte Liste):
+
+| Zeilenbreite | Modus | `InCase`: Titelspur → Höhen | `Interactive`: Titelspur → Höhen | langer Firmenname |
+|---|---|---|---|---|
+| 522 | flex | volle Breite → 75 px | volle Breite → 75 px | 95,9 px |
+| **560 (Tor)** | grid | **72,7 px** → 107,7–128,6 px | **22,3 px** → 107,7–128,6 px | **170,5 px** |
+| **602** | grid | 114,7 px → **86,8 px** | **64,3 px** → 107,7–128,6 px | **149,5 px** |
+| 644 | grid | 156,7 px → 65,8 px | 106,3 px → 86,8 px | 149,5 px |
+| 700 | grid | 212,7 px → 65,8 px | 162,3 px → 65,8 px | — |
+| 780 | grid | 292,7 px → **46,1 px** | 242,3 px → **46,1 px** | 86,8 px |
+| 902 | grid | 414,7 px → 46,1 px | 364,3 px → 46,1 px | 65,8 px |
+
+Einzeilig — also unter der Referenz von 48,0 px — wird die Zeile erst ab einer
+Titelspur von rund **240 px**, das heißt ab rund **780 px Zeilenbreite**.
+Zwischen 560 und 780 px steht die Zeile in sechs Spuren, ohne dass eine davon
+den Titel trägt: der bricht dort über drei bis fünf Zeilen; im `Interactive`
+bei 602 px steht das trennende „·" allein auf einer Zeile.
+
+**Das Band ist schlechter als der Notfall darunter** — 75 px bei 522 px
+Zeilenbreite gegen 128,6 px bei 562 px — und es ist nicht theoretisch: die
+Detailspalte trifft es bei 1400 px Fenster (604 → Zeile 562) und bei 1440
+(644 → Zeile 602), also in der Mitte des Registers L1, das bei 1280 anfängt.
+Bei 1440 sind es gemessen **86,8 px** je Zeile mit den kurzen Namen der
+Fixtures und **149,5 px** mit einem echten Firmennamen.
+
+Zur Tabelle „Nach der Abnahme": die Zeile „484 px → eine Spur, 75 px, 0" ist
+reproduziert, „900 px → 46 px" auch (46,1 px). **„644 px → 66 px" nicht** —
+bei 644 px Zeilenbreite messe ich 86,8 px (`Interactive`, alle drei Zeilen)
+bzw. 65,8–86,8 px (`InCase`); die 66 px erscheinen nur bei einer Zeile ohne
+Handlungsspalte und ohne Notiz. In der Karte der 644-px-Spalte ist die Zeile
+zudem nicht 644, sondern **602 px** breit.
+
+### Die Punkte, die vorher hielten — noch einmal nachgemessen
+
+| Punkt | Messung | Ergebnis |
+|---|---|---|
+| Datei, Story, Titel, Barrel | `entities/expectation/Expectation.tsx` + `.stories.tsx`, Titel `v3/Entitäten/Erwartung/Expectation`, Barrel `index.ts:466–471` | hält |
+| kein Hex, kein px, keine Label-Map, kein Inline-Stil | Grep über die Komponente: keine Treffer | hält |
+| genau sieben Stories | `index.json` des Dev-Servers: `chip`, `row`, `maturities`, `empty`, `error`, `interactive`, `in-case` | hält |
+| Reife aus `expectationMaturity` | Import aus `domain/case`, keine zweite Ableitung im Modul | hält |
+| Reife als Wort (V7) | „Läuft", „Fällig", „Eskaliert", „Erledigt", je mit dem Erklärsatz der Achse im `title` | hält |
+| Status nur über die Registry | Chip und Zeile über `erwartung` bzw. `erwartung_art`; Tooltip gemessen: „Reife: Fällig · Die Frist ist verstrichen. …" | hält |
+| Frist absolut (T7) | „fällig 20.09.2026", „fällig 11.08.2026", „fällig 31.08.2026" | hält |
+| `escalationLevel` nie sichtbar | nur im Typ und als Argument der Reife | hält |
+| Betrag nur bei `payment` (Chip) | zwei Beleg-Chips ohne Zahl, zwei Zahlungs-Chips mit „412,00 €"; Chip `cursor: auto`, kein Knopf | hält |
+| Zahlen rechts mit `tnum` | `.v2num`: `font-variant-numeric: lining-nums tabular-nums`, `text-align: right` | hält |
+| Fokusring, Tastatur, Hover | Ring `2px solid rgb(59,143,196)`, Offset 2 px; sechs Stopps (je Zeile Titel + „Erledigt"); Titelknopf `none → underline`, `cursor: pointer` | hält |
+| Rundlauf `Interactive` | „3 offen · Geöffnet: nichts" → Klick Titel → „Geöffnet: e1" → Klick „Erledigt" → „2 offen", zwei Zeilen übrig | hält |
+| feste Spuren gegen den Wertebereich | Art 104 px gegen „Zahlung offen" 94,3 px · Reife 110 px gegen „Eskaliert" 65,2 px · Betrag 110 px gegen „1.234.567,89 €" 102,3 px, Zelle ohne Überlauf | hält |
+
+### Mängel
+
+**M1 · bleibt offen · blockiert · Das Tor steht bei der Summe der festen
+Spuren, nicht bei der Breite, ab der der Titel trägt.**
+Kriterium: Prüfliste `design-guidelines.md` §9, „Zeilenhöhe ≤ `.v2tbl__row`"
+(V1), Referenz gemessen 48,0 px.
+Messung: siehe die zwei Tabellen oben. Ab dem Tor (560 px) bekommt der Titel
+in der Liste mit Handlung 22,3 px, bei 602 px 64,3 px, bei 644 px
+106,3 px; die Zeilen sind dort 86,8 bis 128,6 px hoch, mit einem echten Firmennamen 149,5 px. Einzeilig
+wird die Zeile erst ab rund 780 px Zeilenbreite. Die Detailspalte der
+Sachverhaltsseite liegt bei 1400 und 1440 px Fenster mitten in diesem Band
+(Zeile 562 bzw. 602 px). Der Überlauf und der Einbruch in die Betragsspalte
+sind behoben — die Zeile bricht jetzt, statt überzulaufen.
+Vorschlag: Das Tor an die Breite hängen, ab der die Titelspur trägt, nicht an
+die Summe der festen Anteile. Zwei kleine Wege, die sich ergänzen:
+(1) im Raster `minmax(16rem, 1fr)` für den Titel und `max-content` statt der
+festen 110 px für Betrag und Reife — dann fällt das Tor mit der Breite
+zusammen, ab der das Raster wirklich passt (gemessen rund 780 px);
+(2) dem Titel selbst — dem Knopf bzw. Text, nicht der Spalte mit der Notiz —
+`white-space: nowrap; overflow: hidden; text-overflow: ellipsis` geben, wie
+`.v2case` es hat (gemessen steht dort heute `white-space: normal`,
+`text-overflow: clip`), damit ein langer Firmenname kürzt statt über fünf
+Zeilen zu brechen.
+Dazu die Tabelle „Nach der Abnahme" auf die gemessenen Werte bringen: bei 644
+ist die Zeile in der Karte 602 px breit und 86,8 px hoch, nicht 66.
+
+**M6 · neu · blockiert · Die Trennlinie zwischen den Zeilen ist verschwunden.**
+Kriterium: die Nacharbeit darf nichts beschädigen, das vorher hielt.
+`.v2exp__row` trägt `border-bottom: 1px solid var(--color-border-subtle)`
+(`v3.css:3112`), und `.v2exp__row:last-child { border-bottom: none }`
+(`v3.css:3130`) soll nur die letzte Zeile davon befreien.
+Messung: Der neue Behälter `<div className="v2exp">` macht **jede** Zeile zum
+`:last-child`. Gemessen in `in-case`, `maturities` und `interactive`, an jeder
+einzelnen Zeile: `borderBottomWidth: "0px"`, `borderBottomStyle: "none"`,
+`matches(":last-child") === true`, `parentElement.children.length === 1`. Im
+Bild bei 900 px stehen drei Zeilen ohne eine einzige Linie. Vor der Nacharbeit
+war `.v2exp__row` die Wurzel der Komponente und hatte Geschwister — da traf
+die Regel nur die letzte.
+Vorschlag: die Ausnahme auf den Behälter heben, etwa
+`.v2exp:last-child .v2exp__row { border-bottom: none; }`.
+
+**M3 · nur zur Hälfte erledigt · blockiert nicht · Ein deutscher Kommentar
+steht noch im Code.**
+Kriterium: fester Block „Code englisch" (`CLAUDE.md`).
+Messung: Der Kommentar am Betrag ist übersetzt („The amount only shows on a
+payment …"). Der zweite steht unverändert deutsch in `Expectation.tsx:189–190`
+(„Absolut, nicht „in drei Tagen": wer eine Frist prüft, will das Datum (T7).
+Die Reife daneben sagt, was es bedeutet."). Der Nachtrag sagt „der deutsche
+Kommentar im Code ist übersetzt" — es waren zwei.
+Vorschlag: den zweiten ebenfalls übersetzen.
+
+**M7 · neu · blockiert nicht · Im schmalen Modus stehen die Kanten nicht
+mehr.**
+Kriterium: der Kommentar über `.v2exp__row` begründet das Raster damit, dass
+„Frist und Reife in jeder Zeile an derselben Stelle" stehen; die erste Abnahme
+hat die stehenden Spaltenkanten als bestätigten Entscheid protokolliert.
+Messung: bei 442 px Zeilenbreite (`InCase` in der 484-px-Spalte) beginnt die
+Frist in den Zeilen ohne Betrag bei x = 137,9 und in der Zeile mit Betrag bei
+x = 234,2; die Reife bei x = 253,1 gegen x = 349,5. Im `flex-wrap`-Notfall
+gibt es keine Spalten mehr.
+Das ist bewusst gewählt — die Alternative, das Stapeln, war mit 148 px je
+Zeile schlechter — und bleibt lesbar; hier nur vermerkt, damit die Aussage
+„Spaltenkanten in jeder Zeile dieselben" nicht unbesehen weitergetragen wird.
+
+**M2 · erledigt.** `currency: Currency` ist in beiden Exporten Pflicht, ohne
+Vorgabe (`Expectation.tsx:90` und `:135`); vierzehn Story-Stellen reichen sie
+herein, `InCase` gibt `"CHF"`, und im DOM steht gemessen „412,00 CHF". Die
+Prop hat damit einen Nachweis statt eines Defaults.
+
+**M4 · erledigt.** Der Abschnitt „Stories" begründet „Lädt" jetzt: die
+Erwartung bekommt ihre Daten als Prop, wer sie lädt, zeigt das an seiner
+Stelle.
+
+**M5 · bleibt Vermerk.** `audienceWord()` unverändert; gedeckt durch
+Freigabe-Entscheid 1.
+
+Abgenommen von / am: fremde Wiederabnahme (Claude, ohne Bau und ohne
+Chatverlauf) · 2026-09-07 · Ergebnis: **zurück**. **M1** (bleibt offen) und
+**M6** (neu) blockieren, **M3** und **M7** laufen mit; **M2** und **M4** sind
+erledigt, **M5** bleibt Vermerk.
+
+**Befunde am Set** (nicht Gegenstand dieser Aufgabe): (1) Die Untergrenze von
+`.v2md--detail-breit` ist heute zweimal gewandert (`ed6e79a` feste Schwelle
+1080 px, `01ebb7c` `minDetail` beim Aufrufer) — dazwischen war die
+Detailspalte bei 1280 px Fenster nicht 484, sondern 944 px breit. Wer eine
+Zeile gegen „die Breite der Detailspalte" baut, baut gegen einen Wert, der
+sich unter ihm bewegt; ein Satz mit den gemessenen Spaltenbreiten am Kommentar
+von `.v2md--detail-breit` (484 bei 1280, 604 bei 1400, 644 bei 1440, 804 bei
+1600) würde das festhalten. (2) Die Referenzhöhe hinter „Zeilenhöhe ≤
+`.v2tbl__row`" steht nirgends als Zahl — gemessen sind es heute 48,0 px,
+während frühere Abnahmen 42, 46,25 und 47,3 px zitieren.
+
+## Nach der Wiederabnahme (2026-09-07): das Tor stand an der falschen Stelle, und mein Behälter fraß die Linien
+
+**M1 wirklich erledigt.** Das Tor lag bei 560 px — der Summe der festen Spuren
+(537,7). Dort *passen* sechs Spuren, aber der Titel bekommt 22 px, und die
+Zeile misst gemessen **128,6 px**: schlechter als der einspaltige Notfall
+darunter mit 75. Das Band 560–780 traf ausgerechnet die Detailspalte bei 1400
+und 1440. **Das Tor gehört an die Breite, ab der der Titel trägt, nicht an
+die, ab der er hineinpasst.** Es steht jetzt bei **780 px**, und der Titel
+kürzt wie `.v2case` seit 0095, statt die Zeile zu dehnen. Gemessen:
+
+| Zeilenbreite | Spuren | Zeilenhöhe |
+|---|---|---|
+| 484 · 602 · 644 | eine | 75–76 px |
+| **780** | sechs | **47 px** |
+| 900 | sechs | 47 px |
+
+Kein Überlauf bei keiner Breite.
+
+**M6 erledigt — und er war meiner.** Der Behälter, den die letzte Nacharbeit
+für die Container-Abfrage eingezogen hat, macht **jede** Zeile zum
+`:last-child`; damit traf `.v2exp__row:last-child { border-bottom: none }`
+alle, und die Trennlinien waren komplett weg. Die Regel hängt jetzt am
+Behälter (`.v2exp:last-child .v2exp__row`). Gemessen: `1px · 1px · 1px · 0px`
+bei vier Zeilen.
+
+**M3 erledigt** — der zweite deutsche Kommentar ist übersetzt.
+
+**M7 bleibt als Vermerk:** im einspaltigen Notfall stehen die Spaltenkanten
+nicht mehr untereinander (Frist bei x = 137,9 gegen x = 234,2). Das ist der
+Preis des Umbruchs und bewusst so: unter 780 px gibt es keine Spalten mehr,
+sondern eine Zeile mit Nachsatz.
+
+**Zwei Befunde am Set, die die Abnahme mitgibt:**
+
+- **Die Untergrenze von `.v2md--detail-breit` ist an einem Tag zweimal
+  gewandert.** Wer gegen „die Breite der Detailspalte" baut, baut gegen einen
+  wandernden Wert — die gemessenen Breiten gehören an den CSS-Kommentar, und
+  seit `01ebb7c` gehört die Schwelle dem Aufrufer.
+- **Die Referenzhöhe hinter „Zeilenhöhe ≤ `.v2tbl__row`" steht nirgends als
+  Zahl.** Frühere Abnahmen zitieren 42, 46,25 und 47,3 px, heute misst sie
+  48,0. Ein Kriterium, dessen Maßstab jeder neu misst, ist ein halbes
+  Kriterium — gehört in `design-guidelines.md` §9.

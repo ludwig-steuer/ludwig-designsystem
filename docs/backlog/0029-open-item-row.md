@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/open-item/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, ein offener Posten ist Buchhaltung |
@@ -365,3 +365,206 @@ erfunden wird — mit dieser Messung als Grund.
   der Satz gehört zusätzlich in `design-guidelines.md` §9: „eine kürzende
   Zelle bekommt `.v2trunc`, keine eigene Klasse". Das ist eine Regeländerung
   und gehört dem, der die Regeln führt.
+
+## Wiederabnahme 2026-09-07 (fremde Abnahme, ohne Bauauftrag)
+
+**Urteil: freigegeben.** Der Blocker B1 ist behoben, und zwar in der Wirkung,
+nicht nur im Quelltext: die Zelle des Buchungstextes bleibt bei **900, 1100 und
+1440 px** in ihrer Spur und kürzt. Von den fünf kleineren sind vier erledigt und
+nachgemessen; **M8 ist es nur zur Hälfte** — der Absatz „Nach der Abnahme" führt
+ihn trotzdem unter „Auch erledigt". Das und eine `InUse`-Story, deren Summen
+seit der Nacharbeit nicht mehr zu den Zeilen darunter passen, bleiben als
+Mängel stehen; beide blockieren nicht.
+
+Gemessen am Dev-Server `http://localhost:6107` (Quelle, nicht
+`storybook-static`), Chrome headless über CDP, `getBoundingClientRect` und
+`getComputedStyle` am gerenderten Bild, Breiten **900 · 1100 · 1440**,
+Story-Präfix `v3-entitäten-offene-posten-openitemrow--`. Kein
+`console.error`/`warning` in einer der acht Stories bei einer der drei Breiten.
+
+`pnpm typecheck` exit 0 · `pnpm build` „Storybook build completed successfully",
+exit 0 · `pnpm check:icons` „in Ordnung. 53 Zeichen in der Registry, 2 Datei(en)
+noch offen", exit 0. Kein Fehler aus einer fremden Aufgabe.
+
+### B1 — behoben, die Box misst jetzt gegen die Spur
+
+Die Zelle nimmt `.v2trunc`. Gemessen wurde die **Box** gegen die Spur, nicht der
+Inhalt:
+
+| Breite | Spur | Box der Zelle | Inhalt (`scrollWidth`) | kürzt | Überlauf |
+|---|---|---|---|---|---|
+| 1440 | 182 px | **182 px** | 1.035 px | ja | **0 px** |
+| 1100 | 84 px | **84 px** | 1.035 px | ja | **0 px** |
+| 900 | 84 px | **84 px** | 1.035 px | ja | **0 px** |
+
+`display: block`, `overflow: hidden`, `text-overflow: ellipsis`,
+`white-space: nowrap` — alle vier am Element, das die Kürzung tragen muss. Bei
+1100 und 900 steht die Tabelle auf ihrer `minWidth` von 1300 px und scrollt in
+der Karte (Scroller 1066 bzw. 866 px); die 1fr-Spur fällt dabei auf 84 px, und
+auch dort bleibt die Box in der Spur. Der volle Text steht im `title`
+(153 Zeichen). Der größte Überlauf **irgendeiner** Zelle **irgendeiner** Zeile
+über alle acht Stories und alle drei Breiten: **0 px**. Zeilenhöhen unverändert
+47/47/47/47/46 px (`Filled`) und 47/46 px (`Edges`), `Loading` 36 px.
+
+Im Bild (`w29-edges-1440.png`): „Sammel-OP aus dem Alt-S…" endet mit der
+Ellipse an der Spaltengrenze, Mahnstufe, Ausgleich, Brutto und Offen sind frei,
+„1.249,90 €" und „≈ 18,40 €" stehen lesbar rechts. Der Fall, den `Edges`
+beweisen soll, wird jetzt bewiesen.
+
+### Die fünf kleineren
+
+- **M2 — erledigt, aber ohne Story.** Die Belegnummer-Zelle trägt `.v2trunc`:
+  gemessen `display: block`, Box 130 px in einer 130-px-Spur, kein Überlauf.
+  Gegenprobe mit einem 35-Zeichen-Wert (Belegfeld 1 trägt 36): `scrollWidth`
+  **263 px** gegen `clientWidth` **130 px** → sie kürzt, Überlauf 0, Zeilenhöhe
+  47 px unverändert, die Datum-Spur beginnt unverändert bei x = 385. Die Regel
+  wirkt. Nur: **keine Fixture ist länger als 12 Zeichen**, ich musste den Wert
+  einspritzen — die Kürzung, die M2 verlangt hat, hat keinen Nachweis in einer
+  Story (siehe W1).
+- **M3 — erledigt.** Genau **eine** Schaltfläche „Ausgleich: Zustände erklären"
+  je Liste, in allen acht Stories; in `--interactive` daneben drei `.v2rowbtn`,
+  verschachtelte Schaltflächen **0**. Der Klick auf das (i) öffnet den Dialog
+  („Ausgleich · Woher der Wert kommt: berechnet — OPOS-Bestand zum Stichtag
+  (ephemer) · offen · Bis heute nicht ausgeglichen"), **ohne** eine Zeile zu
+  öffnen: der Satz darunter bleibt „Geöffnet: Personenkonto 70021".
+- **M4 — durch M3 miterledigt.** Ohne das (i) in der Zelle misst der breiteste
+  Achsenwert „nach Stichtag ausgeglichen" **170 px** in der 190-px-Spur (bei
+  1100 und 1440 gleich) — **20 px Luft, nicht 2**. Der Absatz „Offen, mit
+  Adresse" ist an dieser Stelle überholt; der Punkt ist zu.
+- **M6 — erledigt.** `d61_90` steht in `InUse` („61 bis 90 Tage überfällig");
+  mit `Grouped` (`notDue`, `d1_30`, `d31_60`, `d90plus`) ist jede der fünf
+  Klassen einmal gerendert.
+- **M7 — erledigt.** `InUse`, dritte Zeile: gemessen „412,00 CHF" (Brutto) und
+  „≈ 212,00 CHF" (Offen). Die Schnittstellen-Tabelle nennt als Nachweis
+  `Filled`; der Beleg steht jetzt in `InUse`. Das genügt, verursacht hier aber
+  W2.
+- **M8 — nur zur Hälfte, und der Abschnitt sagt das Gegenteil.** Siehe W3.
+
+### Was vorher hielt und weiter hält
+
+Zeilenhöhe 46–47 px bei allen drei Breiten · `ClickRow`: drei `.v2rowbtn`, je in
+der ersten Zelle, `aria-label` „Personenkonto 70021 öffnen" · Fokus auf die
+zweite Zeile + **Enter** → „Geöffnet: Personenkonto 10044", Klick auf die erste
+→ „Geöffnet: Personenkonto 70021" · **null** verschachtelte Schaltflächen ·
+Fehlende Felder in `Edges` weiter „—", auch die Belegnummer in ihrem neuen
+`.v2trunc`-Mantel · Belegnummer und Konto weiter `.v2mono`, Beträge weiter
+rechts · `Grouped` unverändert stimmig (852,00 € = 640,00 € + 212,00 €) ·
+`.v2oi__text` ist restlos weg (kein Treffer in `src/`).
+
+### Mängel (keiner blockiert)
+
+**W1 — die Kürzung der Belegnummer steht in keiner Story.** Kriterium: „Alle
+Stories oben vorhanden" / `Edges` = „ohne Belegnummer, ohne Fälligkeit,
+Näherungsbetrag, **langer Text**". Gemessen: längste Belegnummer im ganzen Satz
+„AR-2026-0338" = 12 Zeichen, 130-px-Spur, `scrollWidth` = `clientWidth` = 130 →
+nichts kürzt. Ich musste 35 Zeichen einspritzen, um die Nacharbeit zu prüfen.
+— **Vorschlag:** die zweite `Edges`-Zeile bekommt eine Belegnummer mit 36
+Zeichen; dann beweist die Story beide Kürzungen, die sie tragen soll.
+
+**W2 — `InUse` behauptet Summen, die die Zeilen darunter nicht hergeben.**
+Gemessen im DOM:
+
+| Gruppenzeile | Zeile darunter |
+|---|---|
+| „61 bis 90 Tage überfällig · 1 Posten · **480,00 €**" | 640,00 € (Konto 10090) |
+| „über 90 Tage überfällig · 1 Posten · **372,00 €**" | ≈ **212,00 CHF** (Konto 70200) |
+
+Dazu: die Gruppe rechnet in Euro, die Zeile darunter steht in Franken —
+`OpenItemAgeGroupVM.currency` bleibt ungesetzt, obwohl es das Feld genau dafür
+gibt. Und die Klassen stehen vertauscht: Konto 10090 ist zum 31.08.2026
+**143 Tage** überfällig (fällig 10.04.2026), gehört also unter „über 90"; Konto
+70200 ist **88 Tage** überfällig (fällig 04.06.2026), gehört unter „61 bis 90".
+Vor der Nacharbeit stimmte die Summe (`d90plus` · 2 Posten · 852,00 € über
+640,00 € + ≈ 212,00 €) — das ist der eine Punkt, an dem die Nacharbeit etwas
+beschädigt hat, das vorher hielt. Der Kopf sagt außerdem weiter „5 Posten ·
+6.782,45 € offen" über drei Zeilen; das stand schon vor der Nacharbeit da.
+Nicht blockierend, weil das Kriterium „Jede Gruppe nennt Anzahl **und** Summe"
+an `Grouped` hängt und `Grouped` stimmig ist — aber `InUse` ist die Story, aus
+der abgeschrieben wird. — **Vorschlag:** Konto 10090 zurück unter `d90plus`,
+Konto 70200 unter `d61_90`, beide Summen aus den Zeilen rechnen, und der
+Franken-Gruppe `currency: "CHF"` mitgeben (oder den Franken-Posten nach `Edges`
+verschieben, wo eine zweite Währung niemanden über die Seite belügt).
+
+**W3 — M8 ist zur Hälfte offen, wird aber als erledigt geführt.** Der Abschnitt
+„Nach der Abnahme" listet M8 unter „Auch erledigt". Erledigt ist Teil (b), und
+auch der nur an einer von zwei Stellen: der Kommentar in `OpenItemRow.tsx` sagt
+jetzt, dass `0` und `null` gleich aussehen und warum — die in der Abnahme
+genannte Zeile `open-item.ts:32` schreibt weiter „`0` means „not dunned", which
+is not the same". Teil (a) ist gar nicht angefasst: der JSDoc von `OpenItemRow`
+behauptet unverändert, `asOf` stehe „in the empty state, in the group heading
+and in the settlement column". Gemessen: `OpenItemAgeGroup` hat die Prop nicht,
+und die Gruppenzeilen tragen kein Datum („noch nicht fällig 1 Posten ·
+2.480,55 €"); einen Leerzustand hat die Komponente gar nicht (den Satz schreibt
+der Aufrufer); in der Ausgleich-Spalte steht sichtbar nur „offen" bzw. „nach
+Stichtag ausgeglichen" — den Stichtag trägt allein der `title` des Chips
+(„Ausgleich: offen · Bis heute nicht ausgeglichen. · Stichtag 31.08.2026").
+Nicht blockierend (es ist Kommentar, kein Bild), aber ein Abschnitt, der einen
+Mangel als behoben führt, ist teurer als der Mangel. — **Vorschlag:** den JSDoc
+auf das kürzen, was das Bild hält („der Stichtag steht im `title` des
+Ausgleichs-Chips; Leerzustand und Gruppierung gehören dem Aufrufer"), die Zeile
+in `open-item.ts` an den Kommentar in der Zelle angleichen, und M8 in „Nach der
+Abnahme" von „erledigt" nach „offen" schieben.
+
+### Befund am Set (nicht an dieser Aufgabe)
+
+**S2 — die Story `Interactive` schiebt bei 900 px das Dokument um 418 px über
+die Fläche.** Ihr Rahmen ist ein `display: grid`, und ein Grid-Kind hat
+`min-width: auto`: gemessen misst `.v2tbl__scroll` dort **1300 px** statt 866 px
+und scrollt nicht mehr in der Karte, `docOver` = **418 px**. Alle übrigen
+Stories: `docOver` 0 bei 900, 1100 und 1440. Gegenprobe: `min-width: 0` am
+Grid-Kind → `docOver` 0, Scroller 866 px. **Nicht** von der Nacharbeit
+verursacht (der Rahmen ist seit dem Bau unverändert) und nicht am Baustein — die
+Runde davor hat `docOver` nur bei 1440 gemessen, deshalb fiel es nicht auf. Es
+trifft jede Story, die eine `Table` mit `minWidth` in ein Grid stellt; der Satz
+gehört zu S1 in dieselbe Zeile der Prüfliste: **eine Tabelle mit `minWidth`
+gehört nicht ohne `min-width: 0` in ein Grid- oder Flex-Kind.**
+
+**S1 bleibt, wie die letzte Runde es gelassen hat:** der Kommentar an `.v2trunc`
+trägt die Messung; der Satz „eine kürzende Zelle bekommt `.v2trunc`, keine
+eigene Klasse" steht weiter nicht in `design-guidelines.md` §9. Regeländerung,
+gehört dem, der die Regeln führt.
+
+Abgenommen von / am: designsystem-abnahme (fremd, ohne Bauauftrag), 2026-09-07
+· Urteil **freigegeben** · Offene Punkte: W1, W2, W3 — keiner blockierend; M4
+mit der Nacharbeit von M3 erledigt (20 px Luft statt 2); M5 (`StatusHeader`)
+bleibt als eigene Aufgabe stehen.
+
+## Nach der Wiederabnahme (2026-09-07): freigegeben, drei Nachträge erledigt
+
+Die Wiederabnahme hat **freigegeben** und den Blocker gegen den Wertebereich
+nachgemessen: Box gegen Spur bei drei Breiten (182/182, 84/84, 84/84),
+Überlauf null in allen acht Stories, Zeilenhöhen 46–47 px. Drei Nachträge,
+alle erledigt:
+
+- **W1** — die Kürzung der Belegnummer hatte **keinen Nachweis in einer
+  Story**: die längste Fixture trug zwölf Zeichen, gekürzt hat nie etwas; der
+  Prüfer musste 35 Zeichen einspritzen. `Edges` trägt jetzt eine
+  34-stellige Nummer.
+- **W2 — und der war meiner.** Die Nacharbeit hat in `InUse` zwei
+  Altersklassen vertauscht und die Summen aus der Luft gegriffen: „61 bis 90
+  Tage · 480,00 €" stand über einer Zeile mit 640,00 €, „über 90 · 372,00 €"
+  über einem Posten in Franken. Jetzt trägt jede Gruppe die Zahl ihrer Zeile
+  und die richtige Klasse: RE-4400 ist 88 Tage überfällig (`d61_90`, 212,00
+  CHF, Gruppe ebenfalls in Franken), AR-2026-0301 143 Tage (`d90plus`,
+  640,00 €). Gemessen im Bild.
+- **W3** — M8 war nur zur Hälfte erledigt und stand trotzdem als erledigt da.
+  Beide Behauptungen sind jetzt berichtigt: der JSDoc am Typ sagt, dass die
+  Zeile `null` und `0` **gleich** zeigt und warum, und der JSDoc der Zeile
+  behauptet nicht mehr, `asOf` stehe „im Leerzustand, in der Gruppenzeile und
+  in der Ausgleichsspalte" — die Komponente hat keinen Leerzustand, die
+  Gruppenzeile trägt Anzahl und Summe, und der Stichtag lebt im `title` des
+  Chips.
+
+**M4 ist durch M3 miterledigt:** ohne das (i) je Zeile misst der breiteste
+Achsenwert 170 px in der 190-px-Spur — **20 px Luft, nicht 2**. Der Absatz
+„Offen, mit Adresse" darüber ist an dieser Stelle überholt.
+
+**S2 erledigt** (Befund am Set): die Story `Interactive` schob bei 900 px das
+Dokument um **418 px** über die Fläche. Eine Rasterspur ist `auto` und damit
+mindestens so breit wie ihr Inhalt — die Karte wuchs mit der Tabelle, statt
+sie in sich scrollen zu lassen. Mit `minmax(0, 1fr)` gemessen: Seitenüberlauf
+**0**, die Tabelle scrollt in der Karte (866 gegen 1300). **Dieselbe Falle wie
+im Belegnummern-Register (0014 M1), nur an der Spur statt am Kind** — und das
+ist jetzt das dritte Mal in dieser Welle. Der Satz gehört in die Prüfliste:
+*eine `Table` mit `minWidth` gehört nicht ohne `min-width: 0` beziehungsweise
+`minmax(0, …)` in ein Raster- oder Flex-Kind.*

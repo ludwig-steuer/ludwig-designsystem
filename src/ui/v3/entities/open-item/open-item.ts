@@ -29,7 +29,13 @@ export interface OpenItem {
   /** Settled today, but the settlement was booked **after** the reference date. */
   clearedAfterStichtag: boolean;
   description: string | null;
-  /** `null` in old snapshots; `0` means „not dunned", which is not the same. */
+  /**
+   * `null` in old snapshots; `0` means „not dunned". The two are not the same
+   * thing — but the row **shows them the same** (an em dash), because it has
+   * no place for the difference and neither reading changes what to do. The
+   * distinction lives here, for whoever reads the snapshot (acceptance of
+   * 0029, M8: this comment claimed a distinction the cell does not make).
+   */
   dunningLevel?: number | null;
 }
 

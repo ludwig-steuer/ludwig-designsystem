@@ -186,8 +186,8 @@ export function ExpectationRow({
             />
           )}
         </span>
-        {/* Absolut, nicht „in drei Tagen": wer eine Frist prüft, will das Datum
-          (T7). Die Reife daneben sagt, was es bedeutet. */}
+        {/* Absolute, not „in three days": whoever checks a deadline wants the
+            date (T7). The maturity beside it says what the date means. */}
         <span className="v2exp__due">
           fällig <Time value={expectation.dueDate} format="date" size="sm" />
         </span>

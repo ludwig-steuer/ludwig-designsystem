@@ -181,8 +181,15 @@ export const Error: Story = {
 export const Interactive: Story = {
   render: function Render() {
     const [open, setOpen] = useState<string | null>(null);
+    // `minmax(0, 1fr)` statt der Vorgabe: eine Rasterspur ist `auto` und damit
+    // mindestens so breit wie ihr Inhalt — die Karte wuchs mit der Tabelle und
+    // schob die Seite, statt in sich zu scrollen. Gemessen bei 900 px: 418 px
+    // Überlauf (Abnahme 0029, S2). Dieselbe Falle wie im Belegnummern-Register
+    // (0014 M1), nur an der Spur statt am Kind.
     return (
-      <div style={{ display: "grid", gap: "var(--space-4)" }}>
+      <div
+        style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: "var(--space-4)" }}
+      >
         <Frame sub="Stichtag 31.08.2026 · Zeile öffnet den Sachverhalt">
           {ITEMS.slice(0, 3).map((i) => (
             <OpenItemRow
@@ -223,7 +230,9 @@ export const Edges: Story = {
       <OpenItemRow
         item={ITEM({
           personalAccount: "70311",
-          externalDocumentNumber: "RE-9002",
+          // 36 Zeichen — die Grenze von Belegfeld 1. Ohne sie kürzt in keiner
+    // Story eine Belegnummer, und M2 hätte keinen Nachweis (W1).
+    externalDocumentNumber: "RE-9002-SAMMEL-2026-03-14-TEIL-002",
           openAtStichtag: 18.4,
           amountApprox: true,
           description:
@@ -243,13 +252,19 @@ export const InUse: Story = {
       <OpenItemAgeGroup group={{ bucket: "d1_30", count: 1, sum: 1249.9 }} />
       <OpenItemRow item={ITEMS[0]!} asOf={AS_OF} />
       {/* Die fünfte Klasse `d61_90` stand in keiner Story — jetzt steht sie
-          hier, damit alle fünf einmal gezeigt sind (Abnahme 0029, M6). */}
-      <OpenItemAgeGroup group={{ bucket: "d61_90", count: 1, sum: 480 }} />
-      <OpenItemRow item={ITEMS[3]!} asOf={AS_OF} />
-      <OpenItemAgeGroup group={{ bucket: "d90plus", count: 1, sum: 372 }} />
+          hier, damit alle fünf einmal gezeigt sind (Abnahme 0029, M6).
+
+          **Jede Gruppe trägt die Zahlen ihrer Zeile**: RE-4400 ist am
+          Stichtag 88 Tage überfällig (also `d61_90`) und steht in Franken,
+          AR-2026-0301 mit 143 Tagen in `d90plus`. Die erste Fassung hatte
+          beides vertauscht und die Summen aus der Luft gegriffen — die
+          Wiederabnahme hat es gefunden (W2). */}
+      <OpenItemAgeGroup group={{ bucket: "d61_90", count: 1, sum: 212 }} currency="CHF" />
       {/* Ein Posten in Franken: `currency` lief bis hierhin auf dem Default,
           hatte also keinen Nachweis (M7). */}
       <OpenItemRow item={ITEMS[4]!} asOf={AS_OF} currency="CHF" />
+      <OpenItemAgeGroup group={{ bucket: "d90plus", count: 1, sum: 640 }} />
+      <OpenItemRow item={ITEMS[3]!} asOf={AS_OF} />
     </Frame>
   ),
 };
