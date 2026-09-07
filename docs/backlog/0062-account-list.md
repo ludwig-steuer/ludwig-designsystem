@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/account/` (Zeile) + Spaltendefinition auf `DataTable` (Liste) |
 | Quelle | Entitätsprofil `docs/entitaeten/account.md`, Abschnitte „Listen" (Zeile `AccountList` „Kontenplan") und „Formen" |
@@ -262,3 +262,136 @@ importiert — und das ist Absicht. Der Spaltensatz bekommt keinen Scope, er
 **ist** zweimal einer: `ACCOUNT_LIST_COLUMNS` und `ACCOUNT_CATALOG_COLUMNS`,
 und die Wahl trifft der Aufrufer über `columns`. Ein Typ, den niemand
 braucht, ist Rauschen — der Beweis stand eine Zeile darüber (M15).
+
+## Wiederabnahme 2026-09-07 — gegen den Wertebereich, nicht gegen die Fixtures
+
+**Urteil: freigegeben.** Der wiederkehrende Fehler dieses Sets — eine Spur
+gegen die Beispieldaten zu bemessen statt gegen ihren Wertebereich — ist weg,
+und zwar an beiden Stellen, die die Abnahme gefunden hatte. Gemessen wurde
+nicht mit den Namen der Story: in die laufende Seite eingesetzt wurden echte
+Werte an der Obergrenze des Profils — Kontoname **50 Zeichen** (Profil:
+p50 19 · p90 39 · max 50) und Geschäftspartner „Musterbau Handels- und
+Beteiligungs GmbH & Co. KG" (**49 Zeichen**) — über Chrome/CDP gegen den
+Dev-Server, der die Quelle serviert. Der Weg ist derselbe, den die Zelle
+nimmt (`<span class="v2trunc" title={name}>{name}</span>`), die Werte gehen
+also durch dieselbe Regel.
+
+**M1 und M2 — behoben. Zeilenhöhe bleibt 47 px, bei jeder Breite:**
+
+| Satz | `accountMinWidth` | gemessen bei | Zeilenhöhe | Zellüberlauf | Kopf-/Zeilenkante |
+|---|---|---|---|---|---|
+| `ACCOUNT_LIST_COLUMNS` (`Filled`, `InUse`) | **966 px** | 700 · 900 · 966 · 1100 · 1280 · 1400 · 1440 · 1920 | 47,1 px | 0 | deckungsgleich |
+| `ACCOUNT_CATALOG_COLUMNS` (`Catalog`) | **846 px** | 846 · 900 · 1036 · 1100 · 1280 · 1440 · 1920 | 47,1 px | 0 | deckungsgleich |
+| Satz mit `partner` (`Personal`) | **1036 px** | 846 · 900 · 1036 · 1100 · 1280 · 1440 · 1920 | 47,1 px | 0 | deckungsgleich |
+| gruppiert, ohne `skrClass` (`Grouped`) | **756 px** | 756 · 900 · 1280 · 1920 | 47,1 px | 0 | deckungsgleich; Gruppenzeile = volle Tabellenbreite |
+
+(Die letzte Zeile jeder Tabelle misst 46,1 px — ihr fehlt die Trennlinie.)
+
+**`accountMinWidth` ist die richtige Zahl, nicht bloß eine Zahl.** Bei genau
+966 px steht die dehnbare Namensspur exakt auf ihrem Boden (200,0 px) und
+jede feste Spur auf ihrem Sollwert (200 · 110 · 200 · 120 · 120 · 130); die
+Zeile misst 966 = 880 Spuren + 5 × 10 Rinne + 2 × 18 Zeilenpolster. Ein Pixel
+weniger, und der Boden fiele. Darunter wird **gerollt, nicht abgeschnitten**:
+bei 900 px `scrollWidth` 966 gegen `clientWidth` 932, Zellüberlauf weiter 0.
+Dasselbe für 846 (Katalog), 1036 (Personenkonten), 756 (gruppiert) — jeweils
+an der eigenen Zahl geprüft, nicht an der des Standardsatzes. Für L1 ist das
+ohnehin nur Reserve: der breiteste Satz passt bei 1280 px ohne Rollbalken.
+
+**Kürzen statt wachsen — an der Wirkung geprüft.** Beide Spuren tragen
+`.v2trunc` (`nowrap`, `overflow: hidden`, `text-overflow: ellipsis`,
+`min-width: 0`); der volle Wert steht im `title` (50 bzw. 49 Zeichen
+gemessen, kein gekürzter Text ohne `title`). Weil die Ellipse rein optisch
+ist, bleibt der ganze Name im DOM — die Vorlesehilfe verliert nichts. Bei
+1280 px wird der 50-Zeichen-Name im Standardsatz gar nicht erst gekürzt (Spur
+480 px), der 49-Zeichen-Partner in seiner festen 200-px-Spur schon.
+
+**Die festen Spuren gegen ihren geschlossenen Wertebereich**, jeder Wert
+einzeln in die Zelle gesetzt und gemessen:
+
+| Spur | Breite | Wertebereich | breitester Wert |
+|---|---|---|---|
+| `skrClass` | 200 px | alle 14 `ACCOUNT_CLASS_LABEL` | „Sonstige betr. Aufwendungen" **189,5 px**, dahinter „Unentgeltliche Wertabgaben" 182,2 px |
+| `role` | 120 px | alle 5 `konto_typ` | 67,5 px als Badge |
+| `origin` | 140 px | beide Vorgabewörter | „nur im SKR-Katalog" 124,7 px |
+| `number` | 110 px | 4- bis 7-stellig | 56,4 px |
+| `bookings` | 120 px | bis „999.999" | Zellüberlauf 0; Kopf mit Pfeil 85 px |
+| `lastBooking` | 130 px | Datum kurz | 71,6 px; Kopf mit Pfeil 110,7 px |
+
+Für den Kopf wurde der Sortierpfeil versuchsweise **jeder** sortierbaren
+Spalte gegeben — der ungünstigste Zustand, den die URL herstellen kann.
+Kopfhöhe bleibt 38,4 px, einzeilig, Überlauf 0.
+
+**Die übrigen Kriterien, einzeln nachgemessen:**
+
+- `columns` ordnet nicht um: `Catalog` übergibt
+  `["origin","role","name","number","skrClass"]`, der Kopf liest
+  „SKR-Klasse · Konto-Nr. · Name · Rolle · Angelegt".
+- Die Nummer ist mono und trägt den Zeilenlink (`a.v2rowlink > span.v2mono`,
+  eigener Text, kein `aria-label` nötig); `a a` = **0** in allen sechs
+  Stories. Der Partnerlink liegt mit `z-index: 2` über der Zeilenabdeckung —
+  `elementFromPoint` trifft ihn, daneben die Zeile (I11).
+- Buchungen rechts mit `tabular-nums`, alle Zahlenkanten auf demselben Wert
+  (V3); die **Null steht als „0"** da, der unbekannte Wert als „—".
+- Die SKR-Klasse ist Text: `<span>Sonstige betr. Aufwendungen</span>`, kein
+  `StatusBadge` (V6, R1). Einzige Label-Map ist die importierte
+  `ACCOUNT_CLASS_LABEL` der Domäne.
+- Der Kontostatus steht in keinem Satz (`grep`: `status` erscheint nur in
+  Kommentaren und als `status={a.accountingRole}` am Rollen-Badge).
+- Die zwei Leerfälle sagen Verschiedenes: „In diesem Wirtschaftsjahr gibt es
+  keinen Kontenrahmen." samt Hinweis auf den DATEV-Import gegen „Keine
+  Treffer für … · Filter zurücksetzen".
+- Die gruppierte Vorlage trägt fünf Gruppenzeilen mit Zähler, die Gruppenzeile
+  spannt über die volle Tabellenbreite (756/866/1246/1298 px = Tabellenbreite),
+  darunter `Pagination` („1–50 von 6.212"), und die Sortierköpfe tragen
+  `aria-sort`, den ausgeschriebenen Namen und `Link` (M10/M17 bestätigt).
+- Sechs Stories, wie abgeleitet; Titel `v3/Entitäten/Konto/AccountColumns`.
+- `pnpm typecheck`, `pnpm build`, `pnpm check:icons` grün. Keine Hex-Farbe.
+
+**Ein Mangel, der nicht blockiert:**
+
+- **M19 — zwei Kommentare der Komponente sind deutsch.**
+  `account-columns.tsx` bei `bookings` („120 px: der Kopf misst 69 px …") und
+  bei `lastBooking` („130 px: der Kopf misst 94,8 px …"), dazu die Überschrift
+  „**Kürzen, nicht wachsen.**" im Namens-Kommentar. Das feste Kriterium heißt
+  „Code englisch"; die drei Schwestern desselben Musters (`case-columns`,
+  `bank-transaction-columns`, `source-document-columns`) sind durchgehend
+  englisch, und die Sätze sind erst mit M4 dieser Runde hineingekommen.
+  Vorschlag: beim nächsten Anfassen der Datei übersetzen. Deutsche Kommentare
+  in **Story**-Dateien bleiben — die sind im Set Hausbrauch. Blockiert nicht:
+  kein Bezeichner, keine Wirkung, keine Messung berührt.
+
+**Weiter offen, weiter richtig so:** M11 (camelCase-Schlüssel neben
+snake_case-Sortierschlüsseln) und M14 (`accountMinWidth` gibt für unbekannte
+Spurformen still 0) betreffen alle drei Kataloge und gehören in eine eigene
+Runde. Neu in derselben Klasse und deshalb hier nur notiert: `origin` ist eine
+feste 140-px-Spur, deren Text der **Aufrufer** setzt (`originLabels`), ohne
+Kürzung. Der Vorgabewert passt (124,7 px in 140), ein längeres Wort des
+Aufrufers bräche die Zeile — sobald `origin` in der Domäne eine Label-Map
+bekommt (L-96), gehört die Spur noch einmal gemessen.
+
+## Freigegeben (2026-09-07, Wiederabnahme)
+
+Der wiederkehrende Fehler ist weg, und die Abnahme hat ihn **gegen den
+Wertebereich** geprüft, nicht gegen die Story: Kontoname mit 50 Zeichen und
+Geschäftspartner mit 49 in die laufende Seite eingesetzt, durch dieselbe Zelle
+und dieselbe Regel wie die echten Werte. **Zeilenhöhe 47,1 px bei jeder
+Breite und in jedem Spaltensatz**, Zellüberlauf null, Kanten deckungsgleich —
+gemessen bei 700, 900, 966, 1100, 1280, 1400, 1440 und 1920 px.
+
+`accountMinWidth` ist mitgeprüft: bei exakt 966 px steht die dehnbare
+Namensspur genau auf ihrem Boden (200,0 px), und 966 rechnet sich auf 880
+Spuren + fünf Rinnen + zweimal Zeilenpolster. Darunter wird gerollt, nicht
+abgeschnitten. Die festen Spuren sind gegen ihren **geschlossenen**
+Wertebereich geprüft — alle 14 SKR-Labels, alle 5 Achsenwerte der Rolle —, und
+für den Kopf hat die Abnahme versuchsweise jeder sortierbaren Spalte den Pfeil
+gegeben: einzeilig, kein Überlauf.
+
+**Ein nicht blockierender Mangel, erledigt:** drei Kommentare in
+`account-columns.tsx` waren deutsch — sie kamen erst mit der letzten
+Nacharbeit hinein, während die drei Schwesterdateien desselben Musters
+durchgehend englisch sind. Übersetzt.
+
+**Notiert, nicht als Mangel:** die Spur `origin` ist fest 140 px und trägt
+Text, den der Aufrufer setzt (`originLabels`), ohne Kürzung. Der Vorgabewert
+passt mit 124,7 px; ein längeres Wort des Aufrufers bräche die Zeile.
+Nachmessen, sobald `origin` in der Domäne eine Label-Map bekommt (L-96).

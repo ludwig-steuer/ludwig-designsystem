@@ -162,11 +162,12 @@ export function accountColumns({
       // row stand at different sizes (the lesson of 0070).
       width: "minmax(200px, 1fr)",
       sortable: true,
-      // **Kürzen, nicht wachsen.** The profile measures the name at p90 = 39
+      // **Truncate, do not grow.** The profile measures the name at p90 = 39
       // and max = 50 characters; at the floor of this track (200 px) that is
       // 244 px of text and a row of 67 px instead of 47. The full name stays
-      // in the `title` — the profile prescribes exactly this („kürzen ab 40,
-      // voller Name im `title`"), and `caseColumns` has done it since 0096.
+      // in the `title` — the profile prescribes exactly that („kürzen ab 40,
+      // voller Name im `title`", its words), and `caseColumns` has done it
+      // since 0096.
       cell: (a) =>
         a.accountName ? (
           <span className="v2trunc" title={a.accountName}>
@@ -242,8 +243,8 @@ export function accountColumns({
     bookings: {
       key: "usage_booking_count" satisfies AccountSortKey,
       header: "Buchungen",
-      // 120 px: der Kopf misst 69 px, die größte Zahl des Bestands („5.474")
-      // deutlich weniger — mit dem Sortierpfeil bleibt Luft.
+      // 120 px: the head measures 69 px, the largest number in the stock
+      // („5.474") clearly less — with the sort arrow there is room to spare.
       width: "120px",
       align: "end",
       sortable: true,
@@ -260,7 +261,7 @@ export function accountColumns({
     lastBooking: {
       key: "last_booking_date" satisfies AccountSortKey,
       header: "Letzte Buchung",
-      // 130 px: der Kopf misst 94,8 px, das Datum („31.08.2026") 70.
+      // 130 px: the head measures 94.8 px, the date („31.08.2026") 70.
       width: "130px",
       sortable: true,
       cell: (a) => <Time value={a.lastBookingDate} format="date" length="short" size="sm" />,
