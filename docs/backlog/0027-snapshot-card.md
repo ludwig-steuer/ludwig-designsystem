@@ -351,3 +351,210 @@ linke Karte (`reconcile: null`): Kicker „Abgleich", Titel „Für diesen Stand
 wurde kein Abgleich durchgeführt.", Warnton, null Zähler-Zeilen. Damit sind
 die drei Aussagen unterscheidbar — `Filled` neutral, `WithDeviations` mit
 Zahl, `Levels` ohne Abgleich.
+
+## Wiederabnahme (2026-09-07): die zwei Blocker sind weg, einer steht eine Zeile tiefer
+
+**Urteil: zurück.** M1, M2 und M3 sind nachgeprüft und erledigt, der
+berichtigte Nachweis stimmt, und nichts von dem, was vorher hielt, ist
+zerbrochen. Es blockiert **ein** Mangel, und er ist der Preis der Nacharbeit:
+der Hauptsatz beugt sich jetzt, die Unterzeile zwei Zeilen darunter nicht — und
+die Fixture, die der Bau für den Nachweis von M2 auf **genau eine** offene
+Buchung gesetzt hat, stellt den Bruch jetzt dauerhaft auf den Bildschirm.
+
+Gemessen am laufenden Dev-Server (`localhost:6107`, Quelle, nicht
+`storybook-static`) über CDP, je Schritt ein eigenes `Runtime.evaluate`, Klicks
+über `el.click()`. Kein Wert aus der Spec zurückgelesen; jede Zahl unten kommt
+aus `getComputedStyle`/`getBoundingClientRect`/`innerText` des Browsers oder aus
+einer Datei, die dabei offen lag. Vier Screenshots (`Filled`, `Levels`, `Empty`,
+`InGrid`, 1200 px, DPR 2).
+
+### Die Werkzeuge
+
+| Lauf | Ergebnis |
+|---|---|
+| `pnpm typecheck` | exit 0 |
+| `pnpm build` | „Storybook build completed successfully", exit 0 — **in drei von vier Läufen**, siehe „Aus einer anderen Aufgabe" |
+| `pnpm check:icons` | exit 0, „53 Zeichen in der Registry, 2 Datei(en) noch offen" |
+| `pnpm check:contrast` | exit 0, „11 Angaben nachgerechnet" |
+
+### Die Nacharbeit, nachgeprüft
+
+| Punkt | Messung | Ergebnis |
+|---|---|---|
+| **M1 Tausenderpunkte** | `…--filled`: `Buchungen 4.812`, `Offene Posten 137`, Zähler `4.520 / 88 / 204 / 0 / 0`. `…--in-grid` rechte Karte: `4.390 / 152`, Zähler `4.102 / 74 / 190 / 1 / 0`. `…--levels`: `4.812 / 137`. In keiner Story steht noch eine ungruppierte vierstellige Zahl. Alle drei Stellen laufen über `formatCount` (`SnapshotCard.tsx:122, 167, 183`) | erledigt |
+| **M2 Singular** | `…--in-grid`, rechte Karte (`newUnprocessed: 1`): „**1 Buchung ist** ungeklärt." · `…--with-deviations` (48): „48 **Buchungen sind** ungeklärt." Der Fall hat jetzt eine Story statt einer Behauptung | erledigt — **aber nur der Hauptsatz**, siehe Mangel 1 |
+| **M3 Inventar** | `docs/design-guidelines.md:544`: „\| DATEV-Snapshot \| Card … \| `SnapshotCard` \| **gebaut (0027)** …" | erledigt |
+| **Berichtigter Nachweis** | Der Zeiger stimmt jetzt: `…--levels` linke Karte hat `.v2callout--warning`, Kicker „Abgleich", Titel „Für diesen Stand wurde kein Abgleich durchgeführt.", Zeichen mit `aria-label="nicht durchgeführt"` und **0** Zähler-Zeilen; `…--empty` hat gemessen **0** Callouts | trägt |
+
+### Was vorher hielt und weiter hält
+
+- **R1 über die Registry.** Die fünf Zählwörter kommen aus
+  `resolveStatus("mirror_match", …)` und lauten im Browser „mit Ludwig
+  gematcht / aufgeteilt (Kanzlei) / von der Kanzlei geändert /
+  DATEV-Fremdbuchung / unklar" — zeichengleich mit `MIRROR_MATCH` in
+  `src/ludwig/ui/status/status-registry.ts:1902–1929`. Das (i) öffnet den
+  `StatusInfoDialog` derselben Achse; gemessen mit allen Ausprägungen und der
+  Herkunft „`client_datev_mirror_entries.match_state` (NULL = nicht
+  abgeglichen)". `baseline_level` steht weiter roh in `MonoCell` (`opos`,
+  `journal_opos`, `journal`), keine lokale Übersetzung.
+- **Rand ohne Schatten.** `…--filled`, `.v2card`: `border: 1px solid
+  rgb(221, 226, 232)`, `box-shadow: none`.
+- **Zahlen rechts mit `tnum`.** `font-variant-numeric: lining-nums
+  tabular-nums` an allen sieben Zahl-Spans. Rechte Kanten: bei 472 px Karte
+  alle sechs Feldzeilen und alle fünf Zähler exakt **491 px**, bei 520 px
+  exakt **515 px** — eine Kante, keine zwei.
+- **Kontraste** (gemessen, auf Weiß): Feld-Label 6.69:1 · Feldwert 13.77:1 ·
+  Zähler-Wort 6.69:1 · Zähler-Zahl 13.77:1 · „Zustände" 4.88:1 ·
+  Callout-Titel 11.64:1 · Callout-Kicker, -Unterzeile und -Rand im Warnton
+  (`rgb(140, 96, 30)`) 5.52:1. Alle über der Schwelle. Fokusring am Kopfknopf
+  `outline: rgb(59, 143, 196) solid 2px`, Offset 2px.
+- **Layout bis 240 px Kartenbreite.** `Filled` ohne den `max-width` des
+  Story-Rahmens bei 1440 / 320 / 240 px: `scrollWidth − clientWidth = 0` an
+  Karte und Dokument, Zähler-Zeilen einzeilig (19 px) bis hinunter auf 240 px.
+  Erst bei 200 px Karte 7 px Überlauf — unterhalb der zugesagten Grenze, also
+  kein Rückschritt.
+- **Wertebereich statt Fixture.** Zähler auf `1.234.567`, Feldwerte auf
+  `9.876.543` gesetzt: bei 240 px kein Überlauf, die Zähler brechen sauber auf
+  zwei Zeilen; bei 520 px stehen alle rechten Kanten weiter bei 515 px. Die
+  Gruppierung kostet das Layout nichts.
+- **Rundlauf `Interactive`** (Klicks je in eigenem `Runtime.evaluate`):
+  Leerzustand mit einem Knopf → Klick „Spiegel importieren" → Karte gefüllt,
+  Kopfknopf „Spiegel öffnen" da, Log „Import angestoßen" → Klick → Log „Import
+  angestoßen · Spiegel geöffnet" → Klick auf das (i) öffnet den Dialog der
+  Achse.
+- **Kein Hex, kein px** in `SnapshotCard.tsx` und `datev-snapshot.ts` (grep
+  leer). Sieben Stories wie vorher, Exportnamen englisch, Barrel unverändert
+  (`src/ui/v3/index.ts:443–448`).
+
+### Die zwei Begründungen — tragen sie?
+
+- **`.v2num` richtet außerhalb von `.v2tbl`/`.v2fields` nicht aus — trägt.**
+  Nachgerechnet: `.v2num` setzt nur `text-align: right` und
+  `font-variant-numeric` (`v3.css:221`); auf einer Inline-Box ohne eigene
+  Breite bewirkt `text-align` nichts. Die Kante kommt in der Feldzeile aus
+  `.v2fields__row > span:last-child { text-align: right }` (`v3.css:750`) und
+  in `.v2snap__reccount` aus `justify-content: space-between` (`v3.css:3420`)
+  — der Span ist dort als Flex-Kind zwar blockifiziert (gemessen `display:
+  block`), schrumpft aber auf seinen Inhalt, `text-align` bleibt folgenlos. In
+  dieser Karte hält die Klasse also, was sie verspricht, nur nicht durch sich
+  selbst. Eigene Aufgabe, richtig so.
+- **Das graue Zeichen im gelben Callout — trägt, aber nicht mit dem genannten
+  Grund.** Gemessen: Rand, Kicker und Unterzeile stehen in `rgb(140, 96, 30)`,
+  das Zeichen erbt zwar diese `color`, zeichnet aber mit `stroke: rgb(113,
+  113, 113)` — dem Ton `muted` aus `StateIcon` (`Review.tsx:51`). Auf Weiß
+  sind das 4.88:1, über der 3:1-Schwelle für Grafik; ein Kontraktmangel ist es
+  nicht. Das **Wort** heißt aber gar nicht „übersprungen": die Karte
+  überschreibt es bereits mit `title="nicht durchgeführt"` (gemessen als
+  `aria-label`). Die Namens-Begründung trägt deshalb allein nicht. Was trägt,
+  ist die Kopplung darunter: `state` wählt in `StateIcon` Glyphe **und** Ton
+  zusammen — `"warning"` gäbe den richtigen Ton, aber das Warndreieck, und das
+  sagt „Warnung", wo „nicht gelaufen" gemeint ist. Ohne einen Ton-Parameter am
+  `StateIcon` gibt es hier keinen richtigen Griff. Also: Befund ans Set,
+  blockiert nicht — die Begründung sollte nur den Ton nennen, nicht das Wort.
+
+### Mängel
+
+**1 · Die Unterzeile beugt sich nicht mit — blockiert.**
+Kriterium: fester Block, „Texte nach T1–T5" (§9) — derselbe, an dem M2 hing.
+Messung: `…--in-grid`, rechte Karte, gelesen aus dem Browser und im Screenshot
+sichtbar:
+
+> **1 Buchung ist ungeklärt.**
+> Sie stehen im Spiegel, jede mit ihrem Zustand — Fremdbuchung oder unklar.
+
+Zwei aufeinanderfolgende Zeilen, zwei Numeri. Der Bau hat den Hauptsatz
+gebeugt (`SnapshotCard.tsx:167`) und die Unterzeile vier Zeilen tiefer
+(`:170–174`) unangetastet gelassen. Vor der Nacharbeit stand der Bruch nicht
+auf dem Bildschirm (`InGrid` hatte `newUnprocessed: 18, unclear: 6`); die
+Fixture-Änderung, die M2 belegen soll, hat ihn erst sichtbar gemacht. Das ist
+derselbe Fehlertyp wie M2 und in derselben Aussage — deshalb dieselbe Stufe.
+Vorschlag:
+
+```
+sub={
+  open === 0
+    ? undefined
+    : open === 1
+      ? "Sie steht im Spiegel, mit ihrem Zustand — Fremdbuchung oder unklar."
+      : "Sie stehen im Spiegel, jede mit ihrem Zustand — Fremdbuchung oder unklar."
+}
+```
+
+**2 · Der dritte `formatCount`-Aufruf hat keine Story — blockiert nicht.**
+Kriterium: „Stückzahlen rechtsbündig mit `tnum`" (V3), Nachweis-Teil.
+Messung: die Gruppierung ist an den `counts` und den fünf Zählern belegt
+(4.812, 4.520, 4.102). Im Hauptsatz des Callouts steht in **keiner** Story
+eine Zahl über 999 — `WithDeviations` zeigt 48, `InGrid` zeigt 1.
+`formatCount(open)` (`SnapshotCard.tsx:167`) ist damit gebaut, aber nicht
+gezeigt; genau das war der Vorwurf an M1.
+Vorschlag: `WithDeviations` auf einen vierstelligen Wert heben (etwa
+`newUnprocessed: 1197, unclear: 7` → „1.204 Buchungen sind ungeklärt.") —
+`InGrid` bleibt dann der Singular-Nachweis.
+
+**3 · `ui-repraesentationen.md` führt die Karte weiter als inline — blockiert
+nicht.**
+Kriterium: keins — §9 verlangt nur den Eintrag in §11 der
+`design-guidelines.md`, und der ist nachgezogen. Der Vollständigkeit halber:
+`docs/ui-repraesentationen.md:505` sagt weiter „inline in `datev/page.tsx` und
+`reporting/page.tsx`", und `reporting` ist laut Freigabe gelöscht — die Zeile
+ist doppelt veraltet. Gehört in die Aufgabe, die dieses Register pflegt, nicht
+hierher.
+
+### Aus einer anderen Aufgabe: `pnpm build` flackert
+
+Von vier Läufen brach einer mit Exit-Code 1 ab, ohne dass die letzte
+Log-Zeile den Grund nennt:
+
+```
+Error: ENOENT: no such file or directory, chmod
+'./storybook-static/reference/design-system-v2/PROGRESS.md'
+  at async copyDir (node:internal/fs/cp/cp:320:19)
+```
+
+Der Fehler fällt beim Kopieren der `staticDirs` (`.storybook/main.ts:21`,
+`{ from: "../reference", to: "/reference" }`); die Quelldatei existiert, das
+Ziel wird währenddessen aufgeräumt. Drei weitere Läufe — einer davon nach
+`rm -rf storybook-static`, zwei mit vorhandenem Verzeichnis — liefen grün
+durch. Betrifft jeden Bau in diesem Repo und keine Zeile dieser Karte; hier
+nur notiert, damit die nächste Abnahme den Exit-Code nicht der Komponente
+anlastet.
+
+Abgenommen von / am: designsystem-abnahme (fremde Abnahme, ohne Bauanteil),
+2026-09-07 · Offene Punkte: Mangel 1 blockiert; 2 und 3 sind notiert. M1, M2,
+M3 und der berichtigte Nachweis sind erledigt.
+
+## Nach der Wiederabnahme (2026-09-07): der halb gebeugte Satz
+
+**Der Blocker erledigt — und er war die Folge meiner eigenen Nacharbeit.** Ich
+hatte den Hauptsatz beugen lassen („1 Buchung **ist** ungeklärt.") und die
+Unterzeile vier Zeilen tiefer stehen gelassen: „**Sie stehen** im Spiegel,
+jede mit ihrem Zustand." Vor der Nacharbeit stand der Bruch nicht auf dem
+Bildschirm — erst die Fixture, die den Singular belegen sollte, hat ihn
+sichtbar gemacht. Gleicher Fehlertyp, gleiche Aussage, eine Zeile tiefer.
+
+Gemessen: `InGrid` zeigt „1 Buchung ist ungeklärt." mit „Sie **steht** im
+Spiegel, mit ihrem Zustand", `WithDeviations` den Plural.
+
+**Punkt 2 erledigt** — `formatCount` im Hauptsatz hatte keine Story mit einer
+Zahl über 999. `WithDeviations` hat jetzt **1.204** offene Buchungen;
+gemessen steht dort „1.204 Buchungen sind ungeklärt."
+
+**Punkt 3 erledigt** — `ui-repraesentationen.md` führte die Karte weiter als
+„inline in `datev/page.tsx` und `reporting/page.tsx`"; die Seite `reporting`
+ist gelöscht.
+
+**Zur Begründung des grauen Zeichens: die Abnahme hat recht, ich hatte den
+falschen Grund genannt.** Ich schrieb, der Zustand heiße „übersprungen" und
+nicht „Warnung" — tatsächlich überschreibt die Karte das Wort längst mit
+`title="nicht durchgeführt"`. Was wirklich trägt, ist die **Kopplung** in
+`StateIcon`: `state` wählt Glyphe **und** Ton zusammen, `"warning"` gäbe das
+Warndreieck. Ohne einen Ton-Parameter am `StateIcon` gibt es hier keinen
+richtigen Griff. Der Kontrast stimmt (4,88:1). Der Befund geht ans Set, mit
+dem richtigen Grund.
+
+**Getrennt gemeldet, betrifft jeden Bau im Repo:** `pnpm build` flackert —
+einer von vier Läufen brach mit `ENOENT … chmod
+'./storybook-static/reference/design-system-v2/PROGRESS.md'` ab, beim
+Kopieren der `staticDirs`. Die letzte Log-Zeile nennt den Grund nicht (noch
+ein Fall für „Exit-Code lesen, nicht `| tail`"). Das ist keine Zeile dieser
+Karte und gehört in eine eigene Aufgabe.

@@ -53,8 +53,11 @@ export const WithDeviations: Story = {
             matchedLudwig: 4310,
             matchedSplit: 88,
             matchedCorrected: 366,
-            newUnprocessed: 41,
-            unclear: 7,
+            // 1.204 offene: der Hauptsatz zählt mit `formatCount`, und ohne
+            // eine vierstellige Zahl zeigte das keine Story (Wiederabnahme
+            // 0027, Punkt 2).
+            newUnprocessed: 1_150,
+            unclear: 54,
           },
         }}
       />

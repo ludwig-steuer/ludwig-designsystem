@@ -168,9 +168,15 @@ function Reconciliation({ reconcile }: { reconcile: DatevSnapshot["reconcile"] }
             : "Alle DATEV-Buchungen sind zugeordnet."
         }
         sub={
-          open > 0
-            ? "Sie stehen im Spiegel, jede mit ihrem Zustand — Fremdbuchung oder unklar."
-            : undefined
+          // Der Nebensatz beugt sich mit: „1 Buchung ist ungeklärt." und
+          // darunter „Sie stehen im Spiegel" war ein halb gebeugter Satz — der
+          // Hauptsatz wusste vom Singular, die Zeile vier Zeilen tiefer nicht
+          // (Wiederabnahme 0027).
+          open === 0
+            ? undefined
+            : open === 1
+              ? "Sie steht im Spiegel, mit ihrem Zustand — Fremdbuchung oder unklar."
+              : "Sie stehen im Spiegel, jede mit ihrem Zustand — Fremdbuchung oder unklar."
         }
       />
       <div className="v2snap__rec">

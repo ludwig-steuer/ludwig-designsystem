@@ -502,7 +502,7 @@ keine Komponente — sie werden, wo überhaupt, direkt in einer Page gerendert:
 | **Erwartung** | `client_accounting_case_expectation` | Abnahme-Schritt 1 (fehlende Belege, eingebettetes `DocumentRequestMailPanel`) und Schritt 2 (Rückfragen) | erledigt mit F118 |
 | **Ausgleichs-Zuordnung** | `client_open_item_links` | inline in `cases/[caseId]/page.tsx` und `opos/page.tsx`; Abnahme-Schritt 4 zeigt die offenen Gegenstände | teilweise erledigt (F118) |
 | **DATEV-Offene-Posten** | `client_datev_open_items` | `opos/page.tsx` und Abnahme-Schritt 5 (gruppiert nach Fälligkeit) | erledigt mit F118 |
-| **DATEV-Snapshot** | `client_datev_snapshots` | inline in `datev/page.tsx` und `reporting/page.tsx` | Mengengerüst nach Stückzahlen offen (`web-ui-offen.md` P21) |
+| **DATEV-Snapshot** | `client_datev_snapshots` | `SnapshotCard` (0027) — `reporting/page.tsx` ist gelöscht | Mengengerüst nach Stückzahlen offen (`web-ui-offen.md` P21) |
 
 Das ist kein Zufall: es sind genau die Entitäten, die der Buchungsreview
 (F109) braucht und die es vor dem Review nicht gab. Die Briefs setzen für
