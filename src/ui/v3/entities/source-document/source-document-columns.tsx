@@ -230,7 +230,11 @@ export function sourceDocumentColumns({
           // in the stuck list, where a counterparty is the exception.
           <span className="v2muted">—</span>
         ) : (
-          <FileName value={d.fileName} max={48} />
+          // Mono, like the „Datei" column: the same value must not look
+          // different depending on the column set (acceptance 0070, M2).
+          <span className="v2mono">
+            <FileName value={d.fileName} max={48} />
+          </span>
         );
         // **Only when it leads.** Wrapping unconditionally put a second
         // `.v2rowlink` in every row of the stuck set — the first one named
@@ -371,19 +375,26 @@ export function sourceDocumentColumns({
           <StatusInfoButton axis="dokumentgruppe" />
         </>
       ),
-      width: "220px",
+      // 232 px, not 220: at 220 the two badges of the classification
+      // (102.1 + 121.0 px plus a 4-px gutter = 227.1) did not fit side by
+      // side, the cell wrapped and the row grew to 73.2 px against the 47–48
+      // of its neighbours — V1 asks for one row height (acceptance 0070, M1).
+      width: "232px",
       cell: (d) => <SourceDocumentClass document={d} />,
     },
     processing: {
       key: "processing",
       header: "Verarbeitung",
       // Z4: a status column carries its (i) — and it belongs **here**, not in
-      // `header`: a button inside the sort link would be invalid HTML.
+      // `header`: a button inside the sort link would be invalid HTML. The
+      // badges below carry none: the head already explains the axis, and the
+      // same button in every row said the same thing four times over
+      // (acceptance 0070, M3).
       headerAside: <StatusInfoButton axis="beleg" />,
       width: "160px",
       cell: (d) =>
         d.processingStatus ? (
-          <StatusBadge axis="beleg" status={d.processingStatus} />
+          <StatusBadge axis="beleg" status={d.processingStatus} info={false} />
         ) : (
           <span className="v2muted">—</span>
         ),
@@ -400,7 +411,7 @@ export function sourceDocumentColumns({
       header: "Beleg-Zustand",
       headerAside: <StatusInfoButton axis="beleg_haenger" />,
       width: "170px",
-      cell: (d) => <StatusBadge axis="beleg_haenger" status={stuckState(d.hasInvoiceRow, stuckVariant)} />,
+      cell: (d) => <StatusBadge axis="beleg_haenger" status={stuckState(d.hasInvoiceRow, stuckVariant)} info={false} />,
     },
     inboxState: {
       key: "inboxState",
@@ -411,7 +422,7 @@ export function sourceDocumentColumns({
       width: "190px",
       cell: (d) =>
         d.inboxStatus ? (
-          <StatusBadge axis="beleg_inbox" status={d.inboxStatus} />
+          <StatusBadge axis="beleg_inbox" status={d.inboxStatus} info={false} />
         ) : (
           <span className="v2muted">—</span>
         ),
