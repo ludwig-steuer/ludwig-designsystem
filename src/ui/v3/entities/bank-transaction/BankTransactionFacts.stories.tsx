@@ -40,7 +40,7 @@ const FULL: BankTransactionDetailData = {
   counterpartyBic: "COBADEFFXXX",
   purpose:
     "EREF+0600496348 KREF+DA-77120 MREF+D-VR-50411866-0-001 " +
-    "CRED+DE87ZZZ00000001701 PURP+SUPP OAMT+1249,90 ABWA+Musterbau GmbH & Co. KG " +
+    "CRED+DE87ZZZ00000001701 PURP+SUPP OAMT+2480,55 ABWA+Musterbau GmbH & Co. KG " +
     "SVWZ+Wartung Klimaanlage, Leistung 08/2026, Rechnung RE-4471",
   matchStage: "exact",
   cases: [CASE()],

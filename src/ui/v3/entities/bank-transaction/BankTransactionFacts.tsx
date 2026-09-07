@@ -1,4 +1,5 @@
 import { resolveEventBookingState, restOf } from "./derive";
+import { caseIdentifier } from "../accounting-case/case-title";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Amount } from "../../primitives/Amount";
 import { FieldList } from "../../primitives/FieldList";
@@ -219,14 +220,18 @@ function Assignment({
         // Per case, not once: the booking state belongs to the **event**, and
         // with several cases there are several events. That is the sentence
         // the whole family rests on (decision 3 of the Freigabe).
-        ...t.cases.map((c) => {
+        ...t.cases.map((c, i) => {
           const state = resolveEventBookingState({
             proposalStatus: c.eventBookingState,
             noBookingRequiredReason: c.noBookingRequiredReason,
           });
           return [
-            `Buchung ${c.caseNumber ?? c.caseId.slice(0, 8)}`,
-            <StatusBadge key={c.caseId} axis="ereignis" status={state.value} />,
+            `Buchung ${caseIdentifier(c)}`,
+            // The (i) **once**, on the first one: the axis explains itself
+            // once, and with three cases three word-identical marks stood
+            // under each other (acceptance 0102). Same rule the column of
+            // this family follows — there it sits in the head.
+            <StatusBadge key={c.caseId} axis="ereignis" status={state.value} info={i === 0} />,
           ] as [React.ReactNode, React.ReactNode];
         }),
         // The rest, from the same source as the row: both forms have to say

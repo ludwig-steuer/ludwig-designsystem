@@ -1,4 +1,5 @@
 import { Amount } from "../../primitives/Amount";
+import { caseIdentifier } from "../accounting-case/case-title";
 import { Row } from "../../primitives/Table";
 import {
   bankTransactionColumns,
@@ -79,7 +80,7 @@ function SplitRows({ transaction }: { transaction: BankTransactionRowData }) {
       <td className="v2btxrow__split" colSpan={999}>
         {transaction.cases.map((c) => (
           <div className="v2btxrow__splitrow" key={c.caseId}>
-            <span>{c.caseNumber ?? c.caseId.slice(0, 8)}</span>
+            <span>{caseIdentifier(c)}</span>
             <span className="v2btxrow__splittitle">{c.title ?? c.counterpartyName}</span>
             <Amount value={c.amount ?? null} currency={transaction.currency} size="sm" />
           </div>

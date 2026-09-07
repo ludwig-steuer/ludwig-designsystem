@@ -4,6 +4,7 @@ import {
   restOf,
   resolveEventBookingState,
 } from "./derive";
+import { caseIdentifier } from "../accounting-case/case-title";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { Link } from "../../primitives/Link";
 import { StatusBadge } from "../../patterns/StatusBadge";
@@ -292,7 +293,7 @@ function EventStateCell({ transaction }: { transaction: BankTransactionRowData }
             {/* With several cases the badge alone would not say which event
                 it belongs to — and „which one" is the whole point of rank 7. */}
             {transaction.cases.length > 1 ? (
-              <span className="v2btxrow__statefor">{c.caseNumber ?? c.caseId.slice(0, 8)}</span>
+              <span className="v2btxrow__statefor">{caseIdentifier(c)}</span>
             ) : null}
             <StatusBadge axis="ereignis" status={state.value} info={false} />
           </span>
