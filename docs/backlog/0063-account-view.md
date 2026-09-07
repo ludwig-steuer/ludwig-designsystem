@@ -332,3 +332,247 @@ nicht dieser Aufgabe), die drei Dokumente tragen den Namen `LedgerAccountView`
 (M9), `WithoutFacts` lässt jetzt auch `pager` und `tabs` weg und beweist
 damit, dass die Zeilen samt Abstand fallen (M10), die Zählformel geht auf
 (M11), und die weggelassene Verlaufslinie ist als Absicht benannt (M12).
+
+## Wiederabnahme 2026-09-07 (zweite Runde, fremde Abnahme)
+
+**Urteil: zurück.** Der Prüfstein der letzten Runde — Rang 5, die vier
+Herkunftsklassen — ist **behoben und in der Wirkung nachgemessen**. Blockierend
+sind drei andere Punkte, alle drei wieder in dem, was um den Rahmen herum
+steht: eine fehlende Story („im Einsatz"), die dazu führt, dass die
+Layout-Kriterien die Fixture messen, ein Satz, dessen Beträge bei beiden
+Pflichtbreiten außerhalb der Fläche liegen, und zwei Stories, die die Zahlen
+zweier verschiedener Konten auf einen Bildschirm bringen.
+
+Der Rahmen selbst (`LedgerAccountView.tsx`) bleibt unangetastet — er ist, wie
+die letzte Abnahme sagte, in Ordnung.
+
+### Behoben, gemessen (nicht nur behauptet)
+
+Gemessen im laufenden Dev-Server (Quelle), `getBoundingClientRect` und
+`getComputedStyle` am gerenderten Bild, bei vier Innenbreiten: 976 px und
+1136 px (die Breiten, die der Baustein auf der Seite hat — `AppShell`-`main`
+ist 240 px Sidebar + 2 × 32 px Polster, gemessen an `SourceDocumentView · In
+Use`) sowie 1280 px und 1440 px.
+
+- **M1 (Rang 5, vier Klassen).** In `Filled` bei allen vier Breiten
+  unterscheidbar:
+
+  | Klasse | Zeichen | Chip | Zeile |
+  |---|---|---|---|
+  | `datev` | keins | „—" | `rgb(45,45,45)` |
+  | `mirrored` | Zeichen | „—" | `rgb(45,45,45)` |
+  | `exported` | Zeichen | „Exportiert" | `rgb(45,45,45)` |
+  | `ludwig` | Zeichen | „Vorschlag" | **`rgb(92,92,92)`** (`v2ae__row--draft`) |
+
+  Die Dämpfung greift: `.v2tbl__row.v2ae__row--draft` in `v3.css` und
+  `DataTable.rowClassName` sind gebaut und in `Filled` verdrahtet.
+- **Der Chip liegt im Bild.** Zustands-Spalte an dritter Stelle: Chip bei
+  x = 607…702, sichtbare Fläche 461…975 (Seite bei 1280) bzw. 461…1135 (Seite
+  bei 1440). Der Wert x = 1509 aus der letzten Abnahme kommt nicht wieder.
+- **M2 (ein Saldo).** Kennzahl und Randspalte nennen in `Filled` und `Edges`
+  denselben `datevBalance`. Nur teilweise — siehe Mangel 3.
+- **M3 (Leerfall).** `Empty`: „Saldo in DATEV —", „0 Buchungen im Spiegel",
+  „Letzte Buchung —", Liste „Auf diesem Konto ist im Jahr 2026 nichts
+  gebucht." Kein Haken, kein Grün. Nur teilweise — siehe Mangel 3.
+- **M4 (Rang 2 typografisch).** Eine führende Zahl: `v2kpi__val` 19 px / 600
+  („18.442,19 €"), das Delta in `v2kpi__sub` 11,5 px („47 Buchungen · + 3 nur
+  in Ludwig (612,40 €)"). Keine zweite gleich große Zahl.
+- **M10 (`WithoutFacts`).** Gemessen nur drei Slots — `v2lav__head` (0–87),
+  `v2lav__sum` (107–229), `v2lav__body` (249–546); Abstände durchgehend
+  20 px, keine leere Zeile, `.v2md` nicht vorhanden.
+- **M9, M12, L-97.** Der Name `LedgerAccountView` steht in allen drei
+  Dokumenten; die weggelassene Verlaufslinie ist als Absicht benannt; der
+  Pager schreibt „1–50 von 3.400" und „Konto 412 von 6.212".
+- **Fest.** `pnpm typecheck` grün · `pnpm build` grün · `pnpm check:icons`
+  grün (53 Zeichen, 2 Dateien offen — vorbestehend, nicht aus dieser
+  Aufgabe) · kein Hex, keine lokale Label-Map · Slots nur `ReactNode`, kein
+  `useState`, kein `await`, kein Modul-Import · keine Saldospalte im Satz ·
+  eine Bewegungsliste · Zahlen rechts mit `tabular-nums` (V3).
+
+### Mängel
+
+**1. Es fehlt die Story „im Einsatz"; die Layout-Kriterien messen die
+Fixture. — blockierend**
+
+*Kriterium:* fest „alle Stories" mit der Ableitung aus `spec-schreiben` §6,
+in der „+ 1 ‚im Einsatz'" ein **fester** Summand ist — die Hausregel des
+Skills `v3-komponente` sagt das seit 0071 (2026-09-07) ausdrücklich: „ein
+Layout-Kriterium, das nur im Story-Rahmen gemessen wird, misst die Fixture …
+deshalb ist ‚im Einsatz' ein fester Summand … und keine Kür". Betroffen ist
+das variable Kriterium „Ränge 1–3 stehen bei 1440 × 900 ohne Scrollen
+(gemessen)". Die Neufassung rechnet 3 + 1 + 1 + 1 = 6 und lässt den Summanden
+weg; M11 („die Zählformel geht auf") trifft damit nicht zu — richtig sind 7.
+
+*Messung:* Im Story-Rahmen bei Viewport 1440 ist `.v2lav` **1400 px** breit
+und die Ränge 1–3 enden bei y = 538 — genau die Zahl, die die Spec unter
+„Verhalten" nennt. Auf der Seite ist derselbe Baustein **1136 px** breit
+(`main` innen, gemessen) und beginnt bei y = 88 (Top-Bar 56 + Polster 32);
+die Ränge 1–3 enden dort bei y = 606. Bei Viewport 1280: innen 976 px,
+y = 643. Das Kriterium hält also auch auf der Seite — aber es wurde nie dort
+geprüft, und dieselbe Blindheit verdeckt Mangel 2: die Fixture ist 264 px
+breiter als die Seite.
+
+*Vorschlag:* Story `InUse` in der `AppShell`, mit `RecordPager` aus der
+Kontenliste und realistischen Daten — wie `CaseDetailView · In Use` (0050)
+und `SourceDocumentView · In Use` (0071), die beide eine haben. Danach die
+zwei Layout-Kriterien dort nachmessen.
+
+**2. Soll und Haben liegen bei beiden Pflichtbreiten außerhalb ihrer Fläche.
+— blockierend**
+
+*Kriterium:* L1 (Desktop ab 1280 px Innenbreite, „kein zusammengeschobener
+Screen"), L5 (DATEV-Ordnung `… | Betrag S | Betrag H | …`), Rang 4 des
+Seitenprofils — und derselbe Prüfstein, an dem die letzte Abnahme blockiert
+hat: „ein Chip lag bei x = 1509 in einer Fläche, die bei 1419 endet".
+
+*Messung:* `Filled`, `accountEntryColumns({ variant: "full" })` neben
+`aside`. Die Randspalte ist über `MasterDetail detailBreit` fest 440 px
+(`grid-template-columns: minmax(0, 440px) minmax(0, 1fr)`), die Liste
+verlangt `minWidth={1180}`:
+
+| Innenbreite | `.v2md` | Liste sichtbar | nötig | verdeckt | verdeckte Spalten |
+|---|---|---|---|---|---|
+| 976 (Seite bei 1280) | `440px 516px` | 514 | 1180 | **666** | Buchungstext, Gegenkonto, Soll, Haben, DATEV |
+| 1136 (Seite bei 1440) | `440px 676px` | 674 | 1180 | **506** | Gegenkonto, Soll, Haben, DATEV |
+| 1280 (L1-Untergrenze, Rahmen außer Rechnung) | `440px 820px` | 818 | 1180 | **362** | Gegenkonto, Soll, Haben, DATEV |
+| 1440 | `440px 980px` | 978 | 1180 | **202** | Haben, DATEV |
+
+Die **Haben-Spalte ist bei keiner** der vier Breiten im Bild, Soll erst ab
+1280 px Innenbreite gar nicht und ab 1440 px nur teilweise. In `Edges`
+(zusätzlich „Stapel") dasselbe Bild: bei 976 px verdeckt ab Buchungstext, bei
+1136 px ab Gegenkonto. Ein Kontoauszug ohne S- und H-Betrag beantwortet Rang 4
+nicht — und es ist wörtlich der Mangel der letzten Runde, eine Spalte weiter
+rechts.
+
+*Vorschlag* (berührt den Zuschnitt der Slots, deshalb Owner-Frage): entweder
+neben `aside` den `compact`-Satz plus Zustandsspalte fahren — der Weg, den
+`Movements` mit dem Weglassen von „Stapel" schon halb gegangen ist —, oder
+`minWidth` aus dem tatsächlichen Satz rechnen statt fest 1180 (feste Spuren
+608 + 8 × 10 Rinne + 36 Polster = 724, wie `accountMinWidth()` es für den
+Kontenplan-Satz tut) und die Randspalte unterhalb ~1400 px Innenbreite unter
+die Liste klappen.
+
+**3. `Edges` und `Empty` zeigen die Zahlen zweier verschiedener Konten auf
+einem Bildschirm. — blockierend**
+
+*Kriterium:* die Story-Tabelle (`Edges`, `Empty`) und das Misslingen, das das
+Seitenprofil definiert („wenn sie die zwei Quellen für eine hält") — die
+letzte Abnahme hat genau das als M2 und M3 blockiert. Der Rückfall sitzt auf
+den Feldern, die dieselbe Nacharbeit neu eingeführt hat (M5 `debitTotal` /
+`creditTotal`, M6 `skrClassLabel`).
+
+*Messung `Edges`*, Kopf „1210 Bank Commerzbank": Kennzahl und Randspalte
+sagen übereinstimmend „Saldo in DATEV −184.221,55 €", „3.400 Buchungen · + 128
+nur in Ludwig (41.882,90 €)" — die Randspalte darunter aber „Σ Soll / Σ Haben
+**21.442,19 € / 3.000,00 €**" (Differenz 18.442,19 €, also der Saldo des
+Kontos 4930) und „SKR-Klasse **Sonstige betr. Aufwendungen**" für ein
+Bankkonto.
+
+*Messung `Empty`*, Kopf „4650 Bewirtungskosten": „Saldo in DATEV —",
+„Bewegungen 0 in DATEV", „Letzte Buchung —", Liste „Auf diesem Konto ist im
+Jahr 2026 nichts gebucht." — und dazwischen „Σ Soll / Σ Haben 21.442,19 € /
+3.000,00 €". Ein Konto ohne jede Buchung mit 21.442,19 € Soll-Summe ist
+derselbe Selbstwiderspruch, den M3 benannt hat.
+
+*Ursache:* `BANK` und `UNUSED` spreaden `FACTS` und überschreiben
+`debitTotal`, `creditTotal` und `skrClassLabel` nicht; `AccountFacts` zeigt
+die Zeile, sobald eines der beiden Felder gesetzt ist.
+
+*Vorschlag:* beide Objekte um die drei Felder ergänzen — `BANK` mit Summen,
+die zu −184.221,55 € passen, und der SKR-Klasse eines Finanzkontos; `UNUSED`
+mit `debitTotal: 0` und `creditTotal: 0` (oder beide `null`, dann fällt die
+Zeile weg).
+
+**4. `Edges` dämpft die Zeile „nur in Ludwig" nicht. — nicht blockierend**
+
+*Kriterium:* Rang 5 („alle vier Herkunftsklassen an einer Zeile nachweisbar")
+nennt Story `Filled`, und dort stimmt es — deshalb nicht blockierend. Es ist
+aber derselbe Owner-Entscheid vom 2026-09-04 („Symbol, Zeile gedämpft"),
+dessen Verletzung die letzte Abnahme blockiert hat.
+
+*Messung:* `Edges` baut seine `DataTable` selbst und lässt `rowClassName`
+weg; gemessen tragen alle vier Zeilen `rgb(45,45,45)`, keine
+`v2ae__row--draft`. In `Filled` steht die Zeile korrekt bei `rgb(92,92,92)`.
+In einer Datei stehen damit zwei verschiedene Darstellungen derselben vier
+Zeilen.
+
+*Vorschlag:* `Edges` über den `Movements`-Helfer bauen und ihm Sortierung,
+Pager und „Stapel" als Zusatz mitgeben, statt die Tabelle ein zweites Mal
+aufzuschreiben.
+
+**5. Der Nacharbeits-Text beschreibt eine dritte Kachel, die es nicht gibt. —
+nicht blockierend**
+
+M4 oben schreibt „die Reihe zeigt Saldo · Bewegungen · letzte Buchung";
+gemessen stehen **zwei** Kacheln, die Bewegungen stehen in der Unterzeile der
+Saldo-Kachel. Das Kriterium („ein führender Saldo, Ludwig als Delta, kein
+zweiter gleichrangiger") ist so besser erfüllt als mit drei Kacheln — nur
+beschreibt der Abnahme-Text etwas anderes als der Code. Ein Satz genügt.
+
+### Befunde am Set (nicht an dieser Aufgabe)
+
+- **`MasterDetail --detail-breit` kennt keine Untergrenze.**
+  `grid-template-columns: minmax(0, 440px) minmax(0, 1fr)` gibt der
+  Randspalte bis hinunter zu jeder Breite 440 px und fällt nie auf eine
+  Spalte zurück. Gemessen bleibt die Spalte bei 976 px Innenbreite bei
+  440 px und lässt der Arbeitsfläche 514 px. Jede breite Tabelle daneben
+  erbt Mangel 2. Gehört zu `MasterDetail` (`patterns/`), nicht zu 0063.
+- **Der Dämpfungs-Haken heißt nach der falschen Familie.**
+  `DataTable.rowClassName` ist generisch, die einzige Regel dafür heißt
+  `.v2tbl__row.v2ae__row--draft` — also nach `AccountEntryList`. Wer die
+  Dämpfung in einer anderen Familie braucht, schreibt entweder `v2ae__` in
+  eine fremde Datei oder eine zweite Regel. Gehört zu 0057.
+
+## Nach der zweiten Abnahme (2026-09-07): drei Blocker, und der schwerste lag nicht in dieser Datei
+
+**M2 erledigt — die Haben-Spalte stand bei keiner Breite im Bild.** Der Strang
+nimmt über `MasterDetail detailBreit` feste 440 px; daneben blieben der Liste
+gemessen 674 px auf der Seite (1440) und 514 bei 1280, während der volle
+Spaltensatz 1.180 verlangt. Soll, Haben und DATEV lagen im Querlauf — die zwei
+wichtigsten Zahlen eines Kontoauszugs waren nur zu erscrollen.
+
+Zwei Griffe, und beide gehören zusammen:
+
+1. **`MasterDetail --detail-breit` hatte keine Untergrenze.** Es hielt seine
+   440 px bis zu jeder Breite und fiel nie auf eine Spalte zurück — jede
+   breite Tabelle daneben erbte den Fehler. Es misst jetzt sich selbst und
+   schaltet erst ab **1.080 px** (440 + 620, die kleinste Tabelle des Sets,
+   plus Rinne) auf zwei Spuren.
+2. **Die Ansicht nimmt neben dem Strang den kompakten Satz**, nicht den
+   vollen. Der Strang trägt die Fakten; die Liste daneben beantwortet „was ist
+   gebucht" — Datum, Beleg, Text, Gegenkonto, Soll, Haben. Buchungszustand,
+   Stapel und DATEV gehören in den vollen Satz, den die Ansicht **ohne**
+   Strang zeigt.
+
+Gemessen, `Filled` und `InUse`: bei 1280 Spuren `440px 780px`, bei 1440
+`440px 940px`, in der `AppShell` `440px 676px` — und in allen dreien **sieben
+von sieben Spalten sichtbar, ohne zu scrollen**.
+
+**M1 erledigt — die Story „im Einsatz" fehlte.** `spec-schreiben` §6 führt sie
+als festen Summanden, und seit 0071 steht in der Hausregel, warum: ein
+Layout-Kriterium ohne sie misst die Fixture. Der Story-Rahmen ist 1.400 px
+breit, die Seite gibt 1.136 — **264 px Unterschied**, und genau darin
+versteckte sich M2. Die Story steht jetzt da (`InUse`, in der `AppShell`), und
+die Zählung geht auf sieben.
+
+**M3 erledigt — zwei Stories zeigten die Zahlen zweier Konten.** `BANK` und
+`UNUSED` spreadeten `FACTS` und überschrieben die in derselben Nacharbeit neu
+eingeführten Felder nicht. `Edges` zeigte für ein Bankkonto mit Saldo
+−184.221,55 € die Σ-Zeile 21.442,19 / 3.000,00 — die Differenz war der Saldo
+des Kontos 4930 — und „SKR-Klasse Sonstige betr. Aufwendungen". `Empty` zeigte
+„0 Buchungen" **und** dieselbe Σ-Zeile. Gemessen jetzt: `Edges`
+612.004,20 € / 796.225,75 € und „Finanz- und Privatkonten", `Empty`
+0,00 € / 0,00 €.
+
+**M4 erledigt** — `Edges` baute seine Tabelle selbst und ließ `rowClassName`
+weg; alle vier Zeilen standen in derselben Farbe. Gemessen: eine gedämpfte
+Zeile, wie in `Filled`.
+
+**M5 erledigt** — der Nacharbeits-Text nannte drei Kacheln, gemessen sind es
+zwei. Der Code war besser als sein Text.
+
+**Der Befund am Set ist mit M2 abgetragen**, und er war der wichtigere Teil:
+`MasterDetail --detail-breit` hätte jede breite Tabelle neben sich beschnitten,
+nicht nur diese. Der zweite Befund bleibt: `DataTable.rowClassName` ist
+generisch, die einzige Regel dafür heißt `.v2tbl__row.v2ae__row--draft` — nach
+`AccountEntryList` benannt, obwohl sie jede Tabelle betrifft. Gehört zu 0057.

@@ -30,10 +30,25 @@ export function MasterDetail({
    */
   detailBreit?: boolean;
 }) {
+  if (!detailBreit) {
+    return (
+      <div className="v2md" style={style}>
+        <div>{list}</div>
+        <div className="v2md__detail">{detail}</div>
+      </div>
+    );
+  }
+  // The reversed layout needs a **floor**, and a floor needs a container to
+  // measure: without one the narrow column keeps its 440 px at every width and
+  // never falls back to a single column — a wide table beside it then loses
+  // its right-hand columns into the horizontal scroll (found in 0063, where
+  // the credit column stood at no width at all).
   return (
-    <div className={detailBreit ? "v2md v2md--detail-breit" : "v2md"} style={style}>
-      <div>{list}</div>
-      <div className="v2md__detail">{detail}</div>
+    <div className="v2mdw" style={style}>
+      <div className="v2md v2md--detail-breit">
+        <div>{list}</div>
+        <div className="v2md__detail">{detail}</div>
+      </div>
     </div>
   );
 }

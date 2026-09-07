@@ -8,6 +8,8 @@ import { Time } from "../../primitives/Time";
 import { BarChart, type Bar } from "../../primitives/BarChart";
 import { EmptyState } from "../../primitives/EmptyState";
 import { KpiGrid, KpiTile } from "../../primitives/KpiTile";
+import { AppShell, TopBar } from "../../primitives/AppShell";
+import { NavList, type NavSection } from "../../primitives/NavList";
 import { Tabs } from "../../primitives/Nav";
 import { RecordPager } from "../../primitives/RecordPager";
 import { Skeleton } from "../../primitives/Skeleton";
@@ -91,13 +93,20 @@ const MONTHS: Bar[] = [
  * Misslingen der Seite nennt („wenn sie die zwei Quellen für eine hält").
  */
 const BANK: AccountFactsVM = {
+  // Jedes Feld, das die Zahlen dieses Kontos betrifft — sonst zeigt die Karte
+  // den Kopf des einen und die Summen des anderen Kontos (Abnahme 0063, M3).
   ...FACTS,
   accountNumber: "1210",
   accountName: "Bank Commerzbank",
+  role: "bank",
+  skrClassLabel: "Finanz- und Privatkonten",
   datevBalance: -184_221.55,
   datevCount: 3400,
   ludwigOnlyCount: 128,
   ludwigOnlyAmount: 41_882.9,
+  debitTotal: 612_004.2,
+  creditTotal: 796_225.75,
+  lastBookingDate: "2026-08-31",
 };
 
 /** Ein Konto ohne jede Bewegung im Jahr — auch die letzte Buchung fehlt. */
@@ -105,12 +114,35 @@ const UNUSED: AccountFactsVM = {
   ...FACTS,
   accountNumber: "4650",
   accountName: "Bewirtungskosten",
+  skrClassLabel: "Sonstige betriebliche Aufwendungen",
   datevBalance: null,
   datevCount: 0,
   ludwigOnlyCount: 0,
   ludwigOnlyAmount: null,
   lastBookingDate: null,
+  // Ohne Bewegung gibt es auch keine Summen: „0 Buchungen" und daneben eine
+  // Σ-Zeile aus dem Nachbarkonto war der Fehler (M3).
+  debitTotal: 0,
+  creditTotal: 0,
 };
+
+const SECTIONS: NavSection[] = [
+  {
+    label: "Arbeit",
+    items: [
+      { href: "/cases", label: "Sachverhalte", count: 14 },
+      { href: "/documents", label: "Belege", count: 102 },
+      { href: "/banks", label: "Bank", count: 2, alarm: true },
+    ],
+  },
+  {
+    label: "Stammdaten",
+    items: [
+      { href: "/accounts", label: "Konten" },
+      { href: "/partners", label: "Geschäftspartner" },
+    ],
+  },
+];
 
 const TABS = [
   { key: "konto", label: "Konto", href: "#konto" },
@@ -176,16 +208,21 @@ function Movements({ entries }: { entries: AccountEntry[] }) {
   // dahinter im Querlauf — Rang 5 wäre unsichtbar gewesen. Der Stapel ist
   // Rang 8 und die einzige Spalte, deren Verlust nichts kostet: die Nummer
   // steht im Drawer der Buchung.
-  const cols = accountEntryColumns({ currency: "EUR", variant: "full" }).filter(
-    (c) => c.key !== "batchId",
-  );
+  // **Der kompakte Satz, nicht der volle.** Neben dem 440-px-Strang bleiben
+  // der Liste gemessen 674 px auf der Seite (1440) und 514 bei 1280 — ein Satz
+  // mit 1180 verlangte dort mehr, als da ist, und die Haben-Spalte stand bei
+  // keiner Breite im Bild (Abnahme 0063). Der Strang trägt die Fakten; die
+  // Liste daneben beantwortet „was ist gebucht": Datum, Beleg, Text,
+  // Gegenkonto, Soll, Haben. Buchungszustand, Stapel und DATEV gehören in den
+  // vollen Satz, den die Ansicht **ohne** Strang zeigt.
+  const cols = accountEntryColumns({ currency: "EUR", variant: "compact" });
   return (
     <DataTable<AccountEntry>
       rows={entries}
       columns={cols}
       rowKey={(e) => e.id}
       head={{ title: "Bewegungen 2026", sub: "beide Quellen, neueste zuerst" }}
-      minWidth={1180}
+      minWidth={620}
       // **Rang 5, zweite Hälfte.** Das Herkunfts-Zeichen unterscheidet drei
       // Klassen; die vierte — „nur in Ludwig, noch nicht in DATEV" — ist die
       // **gedämpfte Zeile** (Owner-Entscheid 2026-09-04). Ohne sie sahen eine
@@ -328,7 +365,9 @@ export const LoadingAndError: Story = {
  */
 export const Edges: Story = {
   render: () => {
-    const cols = accountEntryColumns({ currency: "EUR", variant: "full" });
+    // Derselbe kompakte Satz wie in `Filled`: der Strang steht daneben, und
+    // ein Satz mit 1180 verlöre auch hier seine rechten Spalten (M2).
+    const cols = accountEntryColumns({ currency: "EUR", variant: "compact" });
     return (
       <div style={{ padding: "var(--space-5)", maxWidth: 1600 }}>
         <LedgerAccountView
@@ -343,8 +382,12 @@ export const Edges: Story = {
             columns={cols}
             rowKey={(e) => e.id}
             head={{ title: "Bewegungen 2026", sub: "beide Quellen, neueste zuerst" }}
-            minWidth={1180}
+            minWidth={620}
             sort={{ key: "postingDate", dir: "desc" }}
+            // Auch hier: die vierte Klasse von Rang 5 ist die gedämpfte Zeile
+            // (Owner-Entscheid 2026-09-04). Ohne sie sahen vier Zeilen gleich
+            // aus — der Mangel, den `Filled` schon behoben hatte (M4).
+            rowClassName={(e) => (e.origin === "ludwig" ? "v2ae__row--draft" : undefined)}
             href={(p) => `#konto?page=${p.page ?? 1}`}
             pager={{ page: 1, pageSize: 50, totalItems: 3400, totalPages: 68 }}
             empty={{ title: "Nichts gebucht." }}
@@ -353,4 +396,36 @@ export const Edges: Story = {
       </div>
     );
   },
+};
+
+/**
+ * Im Einsatz: die ganze Seite, wie die App sie zeigt — Sidebar, Kopfleiste,
+ * das Konto darin. Erst hier hat die Ansicht die Breite, die sie auf der
+ * Seite bekommt: bei 1440 × 900 sind es **1.136 px** innen, nicht die 1.400
+ * des Story-Rahmens. Genau diese Story hat in 0071 den Fehler gezeigt, den
+ * ein Layout-Kriterium im Story-Rahmen nicht zeigen kann — und `spec-schreiben`
+ * §6 führt sie deshalb als festen Summanden.
+ */
+export const InUse: Story = {
+  render: () => (
+    <AppShell
+      sidebar={
+        <>
+          <div className="sb__logo">Ludwig</div>
+          <NavList sections={SECTIONS} activePath="/accounts" />
+        </>
+      }
+      topbar={<TopBar crumb="Musterbau GmbH · 2026" />}
+    >
+      <LedgerAccountView
+        pager={PAGER}
+        header={<Head facts={FACTS} />}
+        summary={<Summary facts={FACTS} />}
+        tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
+        aside={<AccountFacts facts={FACTS} />}
+      >
+        <Movements entries={ENTRIES} />
+      </LedgerAccountView>
+    </AppShell>
+  ),
 };
