@@ -23,7 +23,10 @@ const CASE_ROW: Record<string, unknown> = {
   client_id: 4711,
   case_number: "2026-0815",
   status: "needs_clarification",
-  disposition: "kanzlei",
+  // The raw record shows what the **column** holds, and the column holds
+  // `accounting` — „kanzlei" is the German label, and a raw view that shows
+  // labels is not raw (finding M3/0051, reported as done twice and not done).
+  disposition: "accounting",
   net_amount: 124090,
   currency: "EUR",
   is_reverse_charge: false,

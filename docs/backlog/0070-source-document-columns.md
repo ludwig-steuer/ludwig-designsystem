@@ -127,7 +127,11 @@ Titel `v3/Entitäten/Beleg/SourceDocumentColumns` bzw. `…/SourceDocumentList`.
 Abgeleitet nach §6: 1 Zustand (gefüllt — lädt, leer und Fehler gehören
 `DataTable`) + 1 Enum (`columns`, drei Werte in **einer** Story) + 0 Layout +
 0 Callbacks + 1 „im Einsatz" + 1 Rand = 4 für den Katalog; für die Liste
-2 Leerfälle + 1 gefüllt + 1 „im Einsatz" = 4.
+2 Leerfälle + 1 gefüllt + 1 „im Einsatz" = 4. *(Berichtigt nach der
+Wiederabnahme 2026-09-07, M6: die Tabelle nannte `List` · `ListEmpty` ·
+`ListNotExpected` · `ListInUse`, der Baum führt `Filled` · `Empty` ·
+`NotExpected` · `InUse`; `Stuck` und `AllFour` fehlten ganz, und der von §6
+verlangte Grund für die drei nicht geltenden Zustände stand nirgends.)*
 
 | Story | Beweist |
 |---|---|
@@ -135,7 +139,9 @@ Abgeleitet nach §6: 1 Zustand (gefüllt — lädt, leer und Fehler gehören
 | `Inbox` | Der Eingangs-Satz: die Datei führt, Konfidenz und Zustand stehen, kein Jahr und kein Sachverhalt |
 | `Submit` | Der Einreich-Satz mit der Größe |
 | `Edges` | Rand: ohne Gegenpart, ohne Belegdatum, ohne Betrag, 96-Zeichen-Dateiname |
-| `List` · `ListEmpty` · `ListNotExpected` · `ListInUse` | Die kurze Liste mit ihren zwei Leerfällen |
+| `Stuck` | Der stockende Satz: der Beleg-Zustand führt, der Gegenpart fehlt meist |
+| `AllFour` | Alle vier Sätze untereinander — der Vergleich, den keine einzelne Story zeigt |
+| `Filled` · `Empty` · `NotExpected` · `InUse` (`SourceDocumentList`) | Die kurze Liste mit ihren zwei Leerfällen. „lädt", „Fehler" und „leer nach Filter" gelten nicht: die Liste bekommt fertige Belege als Prop, lädt nichts und filtert nichts — was scheitern oder filtern kann, liegt bei der Seite |
 
 ### Abnahmekriterien
 

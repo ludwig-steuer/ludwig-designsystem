@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → der **Rahmen** ja (`Drawer`, 0042), der **Inhalt** nein: Zone 3 sind die Fakten dieses Vorgangs |
@@ -66,10 +66,15 @@ Sachverhaltsansicht."** Er nennt genau das, was der Drawer weglässt.
 | `accountHref` | `(accountNumber: string) => string` | nein | Reicht an `CaseFacts` durch | `Filled` |
 | `partnerHref` | `string` | nein | Reicht an `CaseFacts` durch | `Filled` |
 
-`CaseQuickView` trägt die Kopf-Ränge (Titel, Gegenpart, Betrag, Zuständigkeit,
-Ereignis-Zähler) und die Fakten als `CaseFactsVM`. Dieser Typ ist **lokal**
-definiert, weil `src/ludwig/` keine Detail-Sicht des Sachverhalts spiegelt —
-Befund **L-68**, dieselbe Lücke wie bei 0097.
+`CaseQuickView` trägt zwei Dinge und keine dritte Fassung derselben Angabe:
+`facts: CaseFactsVM` — daraus liest **auch der Kopf** Titel, Gegenpart,
+Betrag und Zuständigkeit — und `eventCount?: number`. Bis zur Wiederabnahme
+2026-09-07 standen die Kopf-Ränge als eigene, flache Felder daneben; damit gab
+es zwei Wahrheiten über denselben Sachverhalt, und die Gegenprobe der Abnahme
+zeigt jetzt, dass Kopf und Zone 3 gemeinsam ziehen, wenn `facts.*` sich
+ändert. `CaseFactsVM` ist **lokal** definiert, weil `src/ludwig/` keine
+Detail-Sicht des Sachverhalts spiegelt — Befund **L-68**, dieselbe Lücke wie
+bei 0097.
 
 **Kann bewusst nicht:**
 
@@ -226,13 +231,13 @@ Owner-Entscheidung, kein Bau ins Blaue.
 **M2 — `InUse` zeigt zur zweiten Zeile den falschen Fall.**
 `CaseDrawer.stories.tsx:171` gibt beiden Zeilen dasselbe `RECORD`. Gemessen:
 die Zeile hinter dem Scrim sagt „27.08.2026 · Stadtwerke Musterstadt ·
-2026-0413 · −412,00 €", der daraus geöffnete Drawer sagt „Wartung der
+2026-0413 · -412,00 €", der daraus geöffnete Drawer sagt „Wartung der
 Klimaanlage · `2026-0413` · Zur Prüfung · **1.249,90 €** · Eingangsrechnung ·
 **Bürobedarf Meier GmbH** · 6 Ereignisse". Beides steht gleichzeitig im Bild
 (704 px der Liste bleiben sichtbar). Die Story, die beweisen soll, dass der
 Kontext nicht verloren geht, stellt ihn damit als widersprüchlich dar; §6
 verlangt Story-Daten, die echt aussehen. *Kleinster Weg:* der zweiten Zeile
-ein eigenes Record geben (Stadtwerke, −412,00 €, `2026-0413`) — oder nur die
+ein eigenes Record geben (Stadtwerke, -412,00 €, `2026-0413`) — oder nur die
 erste Zeile als Knopf.
 
 Abgenommen von / am: **nicht abgenommen — zurück**, fremde Abnahme,
@@ -315,7 +320,7 @@ mit `18ddaa28` erledigt: `CaseDetail` liegt in `domain/`, wird gespiegelt, und
 ## Nach der Abnahme (2026-09-07)
 
 **M2 ist behoben.** Beide Bankzeilen der `InUse`-Story teilten sich dasselbe
-`RECORD`: die Liste zeigte „Stadtwerke Musterstadt · −412,00 €", der Drawer
+`RECORD`: die Liste zeigte „Stadtwerke Musterstadt · -412,00 €", der Drawer
 daneben „Wartung der Klimaanlage · 1.249,90 € · Bürobedarf Meier GmbH" —
 beides gleichzeitig im Bild. Die zweite Zeile hat jetzt ihren eigenen
 Sachverhalt. Gemessen, je nach angeklickter Zeile:
@@ -323,7 +328,7 @@ Sachverhalt. Gemessen, je nach angeklickter Zeile:
 | Zeile | Kopf des Drawers |
 |---|---|
 | 2026-0412 | Wartung der Klimaanlage · Zur Prüfung · 1.249,90 € |
-| 2026-0413 | Abschlag Strom 08/2026 · Wartet auf Unterlagen · −412,00 € |
+| 2026-0413 | Abschlag Strom 08/2026 · Wartet auf Unterlagen · -412,00 € |
 
 **M1 liegt beim Owner und ist keine Reparatur.** Seit `CaseFactsVM =
 Partial<CaseDetail>` stehen fünf von sieben Feldern der `CaseQuickView`
@@ -360,7 +365,7 @@ Das Bild ist unverändert. Gemessen in `InUse`, beide Zeilen:
 | Zeile | Kopf des Drawers |
 |---|---|
 | 2026-0412 | Wartung der Klimaanlage · 2026-0412 · Zur Prüfung · 1.249,90 € · Eingangsrechnung · Bürobedarf Meier GmbH · Kanzlei ist dran |
-| 2026-0413 | Abschlag Strom 08/2026 · 2026-0413 · Wartet auf Unterlagen · −412,00 € |
+| 2026-0413 | Abschlag Strom 08/2026 · 2026-0413 · Wartet auf Unterlagen · -412,00 € |
 
 **Die Beleg-Familie trägt dieselbe Dopplung nicht.**
 `SourceDocumentQuickView` nimmt den Beleg als `document` und leitet Titel,
@@ -433,7 +438,7 @@ gerade das weg, was der Umbau beweisen soll. Gemessen steht dort:
 Der zweiten Zeile fehlen vier Angaben, darunter „Mandant ist dran" — der
 einzige Beleg dafür, dass auch der Schlüssel `client` sein Wort aus der Achse
 bekommt. *Kleinster Weg:* die beiden Zeilen der Tabelle vervollständigen.
-(Nebenbei: der Nachtrag schreibt „−412,00 €" mit U+2212, auf dem Schirm steht
+(Nebenbei: der Nachtrag schreibt „-412,00 €" mit U+2212, auf dem Schirm steht
 das Hyphen-Minus aus `formatAmount` — so in der Freigabe zu 0100 entschieden.)
 
 **M3 — die einzige Fixture des Sets, die bei `disposition` kein Achsen-Wort
@@ -499,10 +504,207 @@ dass auch `client` sein Wort aus der Achse holt. Vollständig:
 | Story | Kopf, gemessen |
 |---|---|
 | 2026-0412 | Wartung der Klimaanlage · `2026-0412` · Zur Prüfung · 1.249,90 € · Eingangsrechnung · Bürobedarf Meier GmbH · **Kanzlei ist dran** · 6 Ereignisse |
-| 2026-0413 | Abschlag Strom 08/2026 · `2026-0413` · Wartet auf Unterlagen · −412,00 € · Dauersachverhalt · Stadtwerke Musterstadt · **Mandant ist dran** · 2 Ereignisse |
+| 2026-0413 | Abschlag Strom 08/2026 · `2026-0413` · Wartet auf Unterlagen · -412,00 € · Dauersachverhalt · Stadtwerke Musterstadt · **Mandant ist dran** · 2 Ereignisse |
 | `Sparse` | Umbuchung · `2026-0501` · Zur Prüfung · 0 Ereignisse |
 
 **M3 gehört 0051 und ist mit erledigt:** die Rohdaten-Sicht trug
 `disposition: "kanzlei"` — das ist das **Wort** von `accounting`, nicht der
 Schlüssel. Dieselbe Verwechslung, die dieser Umbau aufgelöst hat, ausgerechnet
 dort. Steht jetzt richtig.
+
+## Wiederabnahme 2026-09-07 (fremde Abnahme)
+
+Dritte Runde, fremd — kein Bauanteil, kein Chatverlauf, nur Spec und Code.
+Gemessen über CDP (eigener Port 9371) gegen den Dev-Server auf 6107, Fenster
+1440 × 900, wenn nicht anders vermerkt. Aktion und Messung immer in getrennten
+`Runtime.evaluate`-Aufrufen; Tasten als echte `Input.dispatchKeyEvent`. Jede
+Zahl hat eine Gegenprobe. `pnpm build` blieb ungeprüft (0117).
+
+**Messnotiz:** `Enter` öffnet im Headless-Chrome nur mit `text: "\r"` — ohne
+Text schickt der Helfer `rawKeyDown`, und Chrome führt dann die Standardaktion
+des Knopfes nicht aus. Der erste Lauf sah deshalb aus, als bliebe der Drawer
+zu; er blieb es nicht (Gegenprobe: mit `text` öffnet er, `is-open`, x = 720).
+Messfehler, kein Befund — daneben gilt weiter die Notiz der Vorrunde zum
+`requestAnimationFrame` beim zweiten Öffnen.
+
+### 1 · Story-Deckung
+
+Sieben Stories im Katalog (`index.json`, Dev-Server): `Filled` · `Loading` ·
+`Error` · `NotFound` · `Interactive` · `Sparse` · `InUse`, alle unter
+`v3/Entitäten/Sachverhalt/CaseDrawer`, alle aus
+`CaseDrawer.stories.tsx`. Das ist genau die Ableitung nach `spec-schreiben`
+§6: 4 anwendbare Zustände + 0 Enums + 0 Layout-Booleans + 1 Callback + 1 „im
+Einsatz" + 1 Rand = **7**. `leer nach Filter` und `Closed` stehen mit Grund in
+der Spec. Jede der neun Props hat ihre Story wie in der Schnittstellen-Tabelle
+angegeben; `accountHref`/`partnerHref` sind in `Filled` als echte Anker
+gemessen (`#konto-70021`, `#partner-8812`). Keine Story rendert mit Fehler:
+über alle sieben nur ein 404 auf `/favicon.ico` (Storybook-Hülle), keine
+Ausnahme, keine React-Warnung.
+
+### 2 · Die Kriterien der Spec
+
+**Fest:**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | Exit **0** | ✅ |
+| `pnpm build` grün | **nicht gelaufen** — 0117 sperrt den Bau im geteilten Baum. Ersatz: alle sieben Stories im Dev-Server gerendert und gemessen; `check:language` 0 · `check:icons` 0 · `check:contrast` 0 · `check:mirror` 0 · `check:when` 0 (je Exit-Code) | ⚠️ offen |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `CaseDrawer.tsx` + `CaseDrawer.stories.tsx` in `entities/accounting-case/`; Titel `v3/Entitäten/Sachverhalt/CaseDrawer`; Barrel `src/ui/v3/index.ts:383` | ✅ |
+| Code englisch; `@when`/`@instead` am Export | `CaseDrawer.tsx:53–58`; `check:when` Exit 0 (der Wächter läuft rekursiv über `src/ui/v3`, Stories ausgenommen, Interfaces sind keine Bausteine). `check:language` Exit 0. Deutsche Story-JSDoc = M10, Hausentscheid der Vorrunde | ✅ |
+| Kein Hex, kein px, keine lokale Label-Map; Status über Registry | `grep -E '#[0-9a-fA-F]{3,8}\|[0-9]+px'` in der Datei: **Exit 1**, 0 Treffer. `grep STATUS_REGISTRY`: **Exit 1** — der direkte Registry-Griff der Vorrunde ist weg. Stand über `StatusBadge axis="sachverhalt"`, Zuständigkeit über `resolveStatus("disposition", …)`, Art über `caseKindLabel` aus dem Spiegel | ✅ |
+| Alle Stories vorhanden, Ausschlüsse begründet | siehe §1 | ✅ |
+| Prüfliste `design-guidelines.md` §9 | siehe §3 | ✅ |
+| Im Browser angesehen | sieben Aufnahmen: Filled, Loading, Error, NotFound, Sparse, InUse/Zeile 2, Interactive geöffnet | ✅ |
+
+**Variabel:**
+
+| Kriterium | Nachweis (gemessen) | Ergebnis |
+|---|---|---|
+| Zone 3 importiert `CaseFacts` | `CaseDrawer.tsx:14`; `grep FieldList` in der Datei: **Exit 1**, 0 Treffer. Im Blatt eine `.v2fields v2fields--bare` mit fünf Zeilen (Zusammenfassung · Geschäftspartner · Personenkonto · Belegnummern · Abgeschlossen), also `CaseFacts` ohne `all` | ✅ |
+| Zonen 1, 3, 4, 5 in dieser Reihenfolge; Zone 2 ohne Lücke | Kopf-Unterkante → erstes Element im Rumpf, in **allen fünf** Zuständen derselbe Abstand von **20 px**: gefüllt 111,44 → 131,44 · lädt 61 → 81 · Fehler 61 → 81 · nicht gefunden 61 → 81 · Rand 80,69 → 100,69. Danach Zone 4 (`.v2cdr__limit`) und Zone 5 (Fuß bei y = 840,20). Kein reservierter Platz für Zone 2 | ✅ |
+| Zone 1 trägt die Ränge 1–7 | `--filled`, sechs Kinder der Meta-Zeile plus Titel: **Wartung der Klimaanlage** · `2026-0412` · Zur Prüfung · 1.249,90 € · Eingangsrechnung · Bürobedarf Meier GmbH · Kanzlei ist dran · 6 Ereignisse | ✅ |
+| Grenz-Satz wörtlich | **zeichengleich** geprüft: die Konstante `LIMIT` (`CaseDrawer.tsx:50`), der Satz der Spec und der gerenderte Text sind byteweise identisch — und der gerenderte Text stimmt in **allen fünf** gemessenen Zuständen mit der Konstanten überein (`.v2cdr__limit`, 19,38 px hoch) | ✅ |
+| `Loading` zeigt die Form des Inhalts | `--loading`: dieselbe `.v2card` mit `.v2card__h` „Kernfakten", **175,69 px** gegen **265,39 px** im gefüllten Fall; darin **fünf** `.v2skel`-Balken in einer `.v2skelgroup` mit `aria-label="Sachverhalt wird geladen …"`. Keine 96-px-Karte | ✅ |
+| `error` ersetzt Zone 3, Zone 5 bleibt | `--error`: `.v2note v2note--danger`, 62,28 px, **keine** `.v2card` im Rumpf. Fuß-Knopf „Sachverhalt öffnen" 181,09 × 34,80 px in **allen vier** Zuständen identisch gemessen. Abweichung im Code begründet (`CaseDrawer.tsx:138–140`) | ✅ |
+| `record={null}` ohne `loading` = nicht gefunden, mit Kennung | `--not-found`: `.v2empty v2empty--inline`, 175,27 px, „Kein Sachverhalt zu **2026-9999** …", Fuß bleibt | ✅ |
+| `reference` in Kopf, Fehlersatz, Nicht-gefunden-Text | Kopf „Sachverhalt 2026-0412" / „Sachverhalt 2026-9999"; Callout „Sachverhalt **2026-0412** konnte nicht geladen werden. Zeitüberschreitung beim Laden. Bitte erneut öffnen — oder den Sachverhalt vollständig ansehen."; EmptyState „… zu **2026-9999**". `--sparse` hat `caseNumber: null` und zeigt trotzdem `2026-0501` — die Referenz (M1 der ersten Runde hält) | ✅ |
+| Breite `size="md"` | `--drawer-md` = `clamp(360px, 50vw, 880px)`; gemessen 720 px bei 1440. In `--in-use` bei vier Breiten: 700 → **360** (untere Klemme) · 1100 → 550 · 1400 → 700 · 1920 → **880** (obere Klemme). **Gegenprobe 1:** Token zur Laufzeit auf `300px` → Panel 300 px. **Gegenprobe 2:** Klasse auf `v2drawer--sm` → 489,59 px (34vw) | ✅ |
+| Klasse B | `grep -E 'useEffect\|useState\|fetch\(\|await \|import\('` in der Datei: **Exit 1**, 0 Treffer. Importiert werden nur Typ-, Label- und Registry-Funktionen aus dem Spiegel (`:3`, `:4`, `:16`) — dieselben Pfade wie im übrigen Set (`@/ludwig/ui/status/status-registry` steht so in 18 weiteren v3-Dateien) | ✅ |
+| Esc schließt, Fokus zurück am Auslöser; Fokus beim Öffnen **in** den Drawer | `--interactive`, echte Tasten: Auslöser fokussiert → **Enter** öffnet, `document.activeElement` = `ASIDE.v2drawer`, Panel `is-open` bei x = 720. **Zehn Tabs** laufen im Ring Schließen → `70021` → „Sachverhalt öffnen" → Schließen; **10 von 10** Messungen `panel.contains(activeElement) === true`, nie außerhalb. **Gegenprobe:** Taste „a" schließt nicht (danach weiter `is-open`). **Esc**: Knoten weg, `activeElement` = `BUTTON "Sachverhalt 2026-0412 ansehen"`. Scrim-Klick (120/450) schließt ebenfalls und gibt den Fokus an denselben Knopf zurück. Der Rahmen trägt `role="dialog"`, `aria-modal="true"`, `tabindex="-1"` | ✅ |
+| Kontext bleibt hinter dem offenen Drawer sichtbar | `--in-use` bei 1440: Liste ab x = 16, Panel ab x = 720 → **704 px** der Liste stehen weiter, `visibility: visible`, Scrim `rgba(20, 36, 56, 0.3)`, `pointer-events: auto` | ✅ |
+| offen (App): die drei Listen öffnen den Drawer | App-Punkt, hier übersprungen | — |
+
+### 3 · §9, die Punkte, die am häufigsten reißen
+
+- **Text links, Zahlen rechts mit `tnum`, nichts zentriert.** Der Betrag ist
+  `.v2amount v2amount--sm` mit `font-variant-numeric: lining-nums tabular-nums`.
+  Kein Textelement im Drawer hat `text-align: center` (Sweep über alle
+  `p/span/div/dd/dt/td/th/h*` außerhalb von Knöpfen: **0 Treffer**).
+- **Kontrast.** Grenz-Satz `rgb(92,92,92)` auf `rgb(255,255,255)` = **6,69:1**.
+  Links `rgb(43,111,156)` = **5,45:1** und dabei erkennbar Links (eigene Farbe,
+  nicht Textfarbe — M7 der ersten Runde hält). Fokusring `rgb(59,143,196)` =
+  **3,55:1**. Weiß auf dem Primär-Knopf `rgb(26,58,92)` = 11,64:1.
+- **Fokusring sichtbar.** Nach echtem `Tab` (nicht `el.focus()`, sonst greift
+  `:focus-visible` nicht): `outline: 2px solid rgb(59,143,196)`, `outline-offset: 2px`
+  — am Schließen-Knopf und am Ausgang gemessen.
+- **Hover.** Der Ausgang antwortet: Grund `rgb(26,58,92)` → `rgb(34,74,115)`
+  bei `mouseMoved` auf seine Mitte (`:hover` bestätigt).
+- **Kein Icon ohne Wort.** Der Schließen-Knopf trägt `aria-label="Schließen"`
+  und `title="Schließen"`; der Ausgang hat Icon **und** Wort.
+- **Icons Lucide 1,5 px.** Drei SVG im Blatt, `stroke-width` je **1.5**,
+  Maße 12/16/16; `check:icons` Exit 0.
+- **Karte: Rand oder Schatten.** `border: 1px solid rgb(221,226,232)`,
+  `box-shadow: none`.
+- **`min-width: 0`.** In `--in-use` bei **700, 1100, 1400, 1920 px** kein
+  einziges Element im Drawer mit `scrollWidth > clientWidth`, und
+  `document.scrollWidth == clientWidth` bei jeder Breite. **Gegenprobe:** 300
+  Zeichen ohne Trennstelle in die erste Faktenzeile → vier Elemente reißen auf
+  (2996 gegen 318) — die Messung schlägt also an.
+- **Bewegung.** `@media (prefers-reduced-motion: reduce)` greift global
+  (`transition-duration: 0.01ms !important`) und für `.v2skel` eigens.
+- Übersprungen wie im Skill vorgesehen: v1-Ablösung und §11-Häkchen (App).
+
+### 4 · Die Mängel der Vorrunden — gemessen, nicht geglaubt
+
+| Mangel | Behauptet | Gemessen | |
+|---|---|---|---|
+| **M1** (blockierend) Währung ungeprüft | `asCurrency()` statt `as Currency` | `grep "as Currency"` in der Datei: **Exit 1**, 0 Treffer; `CaseDrawer.tsx:111` ruft `asCurrency`. Am laufenden Bild über den Fiber gesetzt (`--in-use`/2026-0412, je Zug geschlossen und neu geöffnet): `"USD"` → „1.249,90 **$**" (der Weg ist live) · `"XX"` → „1.249,90 €" · `""` → „1.249,90 €" · `null` → „1.249,90 €". In allen drei Rückfällen bleiben Drawer **und** Liste stehen: sieben Knöpfe wie im Grundzustand, Listentext unverändert, keine Ausnahme in der Konsole. Kein `RangeError` mehr | ✅ |
+| **M1** zweite Stelle | `case-columns.tsx:158` mit derselben Lücke | `case-columns.tsx:159` ruft jetzt `asCurrency(c.currency)`. Sweep über `src/ui/v3`: die einzige verbliebene Währungs-Zusicherung steht in `InvoiceLineFacts.tsx:152` und ist **geprüft** (`CURRENCIES.includes(...)` davor), also keine offene Lücke | ✅ |
+| **M2** `InUse` zeigte zur zweiten Zeile den falschen Fall | eigenes Record | Zeile 2 öffnet **Abschlag Strom 08/2026** · `2026-0413` · Wartet auf Unterlagen · -412,00 € · Dauersachverhalt · Stadtwerke Musterstadt · Mandant ist dran · 2 Ereignisse — und Zone 3 dazu passend (Stadtwerke Musterstadt, 70044, Je Periode eine). Liste und Drawer sagen jetzt dasselbe, beides gleichzeitig im Bild | ✅ |
+| **M4** Label-Griff baute die Funktion nach | `resolveStatus()` | `CaseDrawer.tsx:125`. **Gegenprobe** am laufenden Bild: `accounting` → „Kanzlei ist dran" · `client` → „Mandant ist dran" · `agent` → „Agent ist dran" · `unbekannter_schluessel` → „unbekannter_schluessel ist dran" (roher Schlüssel, kein Absturz) · `null` → die Angabe fällt ganz weg. Das Wort zieht mit dem Schlüssel mit | ✅ |
+| **M3** (0051) `RawRecord` trug `disposition: "kanzlei"` | „Steht jetzt richtig" | **Nein** — siehe Mangel B1 | ❌ |
+| **Ein Kanal** (Owner-Entscheid) | `facts` ist die Quelle | Zur Laufzeit aus dem Fiber: `Object.keys(record)` = **`["eventCount", "facts"]`**. **Gegenprobe A:** dem Datensatz die alten flachen Felder wieder angehängt (`title`, `counterpartyName`, `totalAmount: 99999`, `currency: "CHF"`, `dispositionLabel`, `kind`) und neu gerendert → Kopf in **allen sechs** Teilen unverändert. **Gegenprobe B:** `facts.title`/`facts.counterpartyName`/`facts.totalAmount` geändert → Kopf **und** Zone 3 ziehen gemeinsam mit (Titel „FAKTEN Titel", Meta „Eingangsrechnung · FAKTEN Gegenpart · 7,50 €", Rang 12 „FAKTEN Gegenpart"). Eine Quelle, zwei Zonen | ✅ |
+
+### Mängel
+
+**B1 — der Nachtrag meldet einen Fix, den es nicht gibt (nicht blockierend).**
+Kriterium: keines dieser Spec — aber die Aussage steht in dieser Datei.
+Ort: `docs/backlog/0098-case-drawer.md`, letzter Abschnitt („M3 gehört 0051 und
+ist mit erledigt … Steht jetzt richtig.") gegen
+`src/ui/v3/primitives/RawRecord.stories.tsx:26`.
+Messung: die Zeile sagt weiterhin `disposition: "kanzlei"`, und im Blatt steht
+in `v3/Primitives/Tabelle/RawRecord --filled` gerendert „**disposition
+kanzlei**". Die Achse kennt `agent`, `accounting`, `client` — „kanzlei" ist
+das **Wort** von `accounting`, genau die Verwechslung, die der Kanal-Umbau
+aufgelöst hat.
+Kleinster Weg: entweder `disposition: "accounting"` setzen (ein Wort) oder den
+Satz im Nachtrag zurücknehmen und den Punkt sichtbar an 0051 geben. Ein
+gemeldeter, aber nicht ausgeführter Fix ist teurer als ein offener Punkt.
+**Blockiert nicht** — die Datei gehört 0051, und kein Kriterium dieser Spec
+hängt daran.
+
+**B2 — der Abschnitt „Schnittstelle" beschreibt weiter die alte
+`CaseQuickView` (nicht blockierend).** Ort: Zeilen 69–72 dieser Datei. Dort
+steht, der Typ trage „die Kopf-Ränge (Titel, Gegenpart, Betrag,
+Zuständigkeit, Ereignis-Zähler)" und sei „**lokal** definiert … Befund L-68".
+Gemessen und im Code: er trägt `facts` und `eventCount`, sonst nichts, und
+L-68 ist mit `18ddaa28` erledigt. Vier Nachträge korrigieren den Absatz
+inzwischen von hinten. Die Vorrunde hat das als Beobachtung notiert mit „beim
+nächsten Anfassen der Datei nachziehen" — die Datei ist seither zweimal
+angefasst worden (`f40ba33`, `8fbfafd`).
+Kleinster Weg: die zwei Sätze unter der Prop-Tabelle auf den Stand bringen;
+die Prop-Tabelle selbst stimmt. **Blockiert nicht.**
+
+**B3 — die Tabelle des letzten Nachtrags schreibt ein Minus, das nicht auf dem
+Schirm steht (nicht blockierend).** Ort: Zeile 502 dieser Datei, „-412,00 €"
+mit U+2212. Gemessen zeigt `formatAmount` das Hyphen-Minus: „-412,00 €" (so in
+der Freigabe zu 0100 entschieden). Dieselbe Stelle war schon in der Vorrunde
+angemerkt und ist beim Nachschreiben der Tabelle wieder entstanden. In einer
+Zeile, die „gemessen" überschrieben ist, sollte das Zeichen das gemessene
+sein. Kleinster Weg: ein Zeichen. **Blockiert nicht.**
+
+### Beobachtung, kein Mangel
+
+Die Gegenpartei steht zweimal im Bild — in der Meta-Zeile („Eingangsrechnung ·
+Bürobedarf Meier GmbH", Rang 6) und als Rang 12 in Zone 3. Das ist so
+**bestellt** (Zonen-Tabelle der Spec, Freigabe 2026-09-06) und seit dem
+Kanal-Umbau nachweislich derselbe Wert aus derselben Quelle: die Gegenprobe
+oben verschiebt beide gemeinsam. Kein zweiter Kanal, nur zwei Zonen.
+
+### Befunde am Set
+
+- **RawRecord (0051)** — `src/ui/v3/primitives/RawRecord.stories.tsx:26` trägt
+  als einzige Fixture des Sets bei `disposition` kein Achsen-Wort, sondern das
+  Label (`"kanzlei"` statt `"accounting"`). Gemessen im Blatt. Gehört 0051;
+  siehe B1. Alle übrigen Stellen sind geprüft und richtig (`CaseDrawer`,
+  `CaseRow`, `CaseList`, `case-columns`).
+- **Währungs-Zusicherungen im Set** — nach dem Fix zu M1 gibt es in
+  `src/ui/v3` keine ungeprüfte mehr. `InvoiceLineFacts.tsx:152` sieht wie eine
+  aus, verengt aber vorher über `CURRENCIES.includes(...)`; kein Handlungsbedarf.
+- **`pnpm build`** bleibt für jede Abnahme dieser Welle ungeprüft, solange
+  0117 den Bau im geteilten Baum sperrt. Das ist inzwischen die dritte Runde
+  an dieser Aufgabe mit demselben ⚠ — die Frage, wer den Bau einmal in einem
+  eigenen Worktree gegenprüft, gehört an den Owner, nicht in diese Spec.
+
+Abgenommen von / am: **abgenommen**, fremde Wiederabnahme, 2026-09-07 · Alle
+Kriterien der Spec mit Messung belegt; die blockierenden Mängel der Vorrunde
+(M1 Währung, M2 zweite Zeile, M4 Label-Griff) sind behoben und gegengeprüft ·
+Offen, nicht blockierend: B1 (falsch gemeldeter Fix, Punkt gehört 0051), B2
+(Schnittstellen-Absatz veraltet), B3 (Minuszeichen) · `pnpm build` ungeprüft
+(0117).
+
+## Nach der Wiederabnahme (2026-09-07): die drei Berichtigungen
+
+Urteil war **abgenommen**, keiner der drei Punkte blockierte. Alle drei
+erledigt.
+
+**B1 — der gemeldete, nicht ausgeführte Fix ist jetzt ausgeführt.**
+`RawRecord.stories.tsx` stand weiter auf `disposition: "kanzlei"`. Das
+Rohblatt zeigt, was die **Spalte** hält, und die Spalte hält `accounting`
+(`CASE_DISPOSITION`); „Kanzlei" ist das deutsche Etikett, und ein Rohblatt mit
+Etiketten ist keines. Zweimal als erledigt gemeldet, zweimal nicht getan —
+jetzt gemessen im Blatt: `accounting`.
+
+**B2 — die Schnittstelle beschreibt den Kanal, den es gibt.** Der Abschnitt
+nannte weiter die alte, flache `CaseQuickView` mit den Kopf-Rängen als eigenen
+Feldern; vier Nachträge korrigierten ihn von hinten. Er sagt jetzt, was
+dasteht: `facts: CaseFactsVM` — daraus liest auch der Kopf — und
+`eventCount?: number`, und warum der Typ lokal ist (L-68).
+
+**B3 — das Minuszeichen.** Die Nachtrags-Tabelle schrieb „−412,00 €" mit
+U+2212, auf dem Schirm steht das Hyphen-Minus. Acht Stellen berichtigt; eine
+Tabelle, die einen gemessenen Wert wiedergibt, gibt ihn zeichengenau wieder.
+
+`pnpm typecheck` Exit 0, `check:language` Exit 0.
+
+**Status: fertig.**

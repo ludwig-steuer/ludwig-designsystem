@@ -44,6 +44,7 @@ const CASES: CaseListItem[] = [
   CASE(),
   CASE({
     caseId: "c-4413",
+    counterpartyPartnerId: "bp-8842",
     caseNumber: "2026-0413",
     kind: "outgoing_invoice",
     title: "Beratung Q2 2026",
@@ -59,6 +60,10 @@ const CASES: CaseListItem[] = [
   }),
   CASE({
     caseId: "c-4414",
+    // Ohne aufgelösten Geschäftspartner (47 % tragen einen, L-69): hier bleibt
+    // der Gegenpart ein Name ohne Ziel — und die Zeile zeigt gemessen keinen
+    // Anker. Vorher trugen alle vier Firmen dieselbe Id (Abnahme 0096, M7a).
+    counterpartyPartnerId: null,
     caseNumber: "2026-0414",
     kind: "recurring_charge",
     title: "Abschlag Strom 08/2026",
@@ -74,6 +79,7 @@ const CASES: CaseListItem[] = [
   }),
   CASE({
     caseId: "c-4415",
+    counterpartyPartnerId: "bp-8844",
     caseNumber: "2026-0415",
     kind: "internal_transfer",
     title: null,
@@ -82,7 +88,10 @@ const CASES: CaseListItem[] = [
     currency: null,
     lifecycleStatus: "needs_clarification",
     disposition: null,
-    openClarificationsCount: 3,
+    // Der Fall der `Sparse`-Story: dünn an Stammdaten **und** ohne Klärung — so
+    // steht es in der Story-Tabelle der Spec, und eine Abnahme ändert die
+    // Kriterien nicht. Der Rand mit drei offenen steht in `Edges` (M7b).
+    openClarificationsCount: 0,
     documentEventsCount: 0,
     bankEventsCount: 0,
     openedAt: "2026-09-01",
@@ -90,6 +99,7 @@ const CASES: CaseListItem[] = [
   }),
   CASE({
     caseId: "c-4416",
+    counterpartyPartnerId: "bp-8845",
     caseNumber: "2026-0416",
     kind: "incoming_invoice",
     title: "Sanierung Serverraum, Teilrechnung 2 von 3",
@@ -109,14 +119,23 @@ const FULL = caseColumns({ href, counterpartyHref });
 /**
  * Die Mindestbreite folgt dem **Spaltensatz**, nicht einer festen Zahl: die
  * festen Spuren plus Lücken plus Polster plus der Boden des Anzeigenamens
- * (24ch ≈ 175 px). Mit einer festen 1630 blieben in `Columns` zwei Spalten
+ * aus seinem eigenen `minmax()`. Mit einer festen 1630 blieben in `Columns` zwei Spalten
  * außerhalb der Karte — ausgerechnet die, für die der Satz gewählt wurde
  * (Abnahme 0096, M3).
  */
 function minBreite(columns: typeof FULL): number {
   const fest = columns.reduce((sum, c) => {
-    const px = /^(\d+)px$/.exec((c.width ?? "").trim());
-    return sum + (px?.[1] ? Number(px[1]) : 175);
+    const w = (c.width ?? "").trim();
+    const px = /^(\d+)px$/.exec(w);
+    if (px?.[1]) return sum + Number(px[1]);
+    // Der Boden einer flexiblen Spur steht **im Satz**, nicht hier: eine Zahl
+    // daneben veraltet mit dem nächsten Commit. `minmax(200px, 1fr)` hatte
+    // seit der Nacharbeit 200, diese Funktion rechnete weiter mit 175 — und
+    // die Mindestbreite lag 25 px unter dem Satz (1601 statt 1626), gemessen
+    // `.v2tbl__inner` clientWidth 1601 gegen scrollWidth 1608 (Abnahme 0096,
+    // N1). Deshalb wird der Boden aus dem `minmax()` gelesen.
+    const boden = /^minmax\(\s*(\d+)px/.exec(w);
+    return sum + (boden?.[1] ? Number(boden[1]) : 175);
   }, 0);
   return fest + (columns.length - 1) * 10 + 36;
 }
@@ -196,12 +215,26 @@ export const Columns: Story = {
       "name",
     ];
     const cols = caseColumns({ href, columns: picked });
+    // **Die zwei Zähler dazu.** `documents` und `bankTransactions` hatte im
+    // ganzen Set nie eine Story gerendert — ihre Spuren waren damit ungemessen
+    // (Abnahme 0096, M5). §6 verlangt zu einem Enum **alle** Werte
+    // nebeneinander; hier stehen sie in einem zweiten Satz, weil ein Satz mit
+    // allen dreizehn Spalten die Karte sprengt.
+    const zaehler: CaseColumn[] = ["name", "number", "documents", "bankTransactions", "state"];
+    const zaehlerCols = caseColumns({ href, columns: zaehler });
     return (
-      <Frame columns={cols} sub="Bürobedarf Meier GmbH · alle Jahre">
-        {CASES.slice(0, 3).map((c) => (
-          <CaseRow key={c.caseId} case={c} href={href} columns={picked} />
-        ))}
-      </Frame>
+      <div style={{ display: "grid", gap: "var(--space-6)" }}>
+        <Frame columns={cols} sub="Bürobedarf Meier GmbH · alle Jahre">
+          {CASES.slice(0, 3).map((c) => (
+            <CaseRow key={c.caseId} case={c} href={href} columns={picked} />
+          ))}
+        </Frame>
+        <Frame columns={zaehlerCols} sub="Mit den beiden Zählern: Belege und Bankzeilen">
+          {CASES.slice(0, 3).map((c) => (
+            <CaseRow key={c.caseId} case={c} href={href} columns={zaehler} />
+          ))}
+        </Frame>
+      </div>
     );
   },
 };

@@ -448,3 +448,233 @@ nicht an Arbeit.
 
 **M5 bleibt offen:** `documents` und `bankTransactions` haben keine Story, ihre
 Spurbreiten sind ungemessen. Das ist eine Story-Ergänzung, keine Reparatur.
+
+## Wiederabnahme 2026-09-07 (fremde Abnahme)
+
+Zweiter Prüfer, kein Bauanteil, kein Chat-Verlauf — gelesen wurden Spec,
+Skill-Abschnitt „Abnahme", `design-guidelines.md` §9 und der Code. Gemessen
+über CDP gegen den laufenden Dev-Server auf **6107**, Viewport 1440×900, die
+Layout-Punkte zusätzlich bei **700 · 1100 · 1400 · 1920**, die Zeilenprobe bei
+1760×900. `pnpm build` wurde **nicht** gelaufen (Aufgabe 0117 — mehrere Prüfer
+teilen den Baum); `pnpm typecheck` steht dafür als Beleg.
+
+**Urteil: zurück** — aber kein Mangel blockiert. Die beiden tragenden Mängel
+der Vorrunde (M1 Zeilenhöhe, M2 doppeltes (i)) sind behoben und nachgemessen,
+ebenso M3, M4 und M6. Offen bleiben **M5** (vom Bauenden selbst als offen
+vermerkt), der Rest von **M7** und ein **neuer, kleiner Befund N1**, der aus
+der M3-Reparatur stammt. Nach der Hausregel („alles ✓ → fertig, sonst zurück")
+reicht das nicht für `fertig`; alle drei sind in einem Zug zu erledigen.
+
+### Story-Deckung (zuerst geprüft)
+
+| Frage | Befund |
+|---|---|
+| Zahl gegen die Ableitung §6 | 2 Zustände + 1 Enum (`columns`) + 1 Layout-Boolean (`href`) + 0 Callbacks + 1 Einsatz + 1 Rand = **6**; vorhanden sind `Filled`, `Sparse`, `Columns`, `WithoutLink`, `Edges`, `InUse` — **stimmt** |
+| Hat jede Prop ihre Story | `case` → `Filled` · `href` → `Filled`/`WithoutLink` · `columns` → `Columns` · `counterpartyHref` → `Filled`, `WithoutLink` — **ja** |
+| Ausgeschlossene Zustände begründet | „leer nach Filter", „lädt", „Fehler" gehören laut Verhalten der Liste (`TableLoading`, `ErrorRow`) — **ja** |
+| Enum vollständig gezeigt (§6: „alle Werte nebeneinander") | **nein** — 11 der 13 `CaseColumn`-Werte rendern (10 im Vorgabesatz, `fiscalYear` in `Columns`). `grep -rn '"documents"\|"bankTransactions"' src/ui/v3/` (Exit 0) findet sie nur in `case-columns.tsx` und einer fremden Palette-Id → **M5**, unverändert offen |
+
+### Kriterien
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | Exit **0** | ja |
+| `pnpm build` grün | nicht ausgeführt (0117); Konsole aller sechs Stories ohne `error`/`warning` (CDP `Log.entryAdded` + `Runtime.consoleAPICalled`) | offen |
+| Datei nach der Familie, Story daneben, Titel richtig | `entities/accounting-case/{CaseRow,case-columns,CaseRow.stories}.tsx`; Titel `v3/Entitäten/Sachverhalt/CaseRow`; Barrel `index.ts:384/387–390` | ja |
+| Code englisch; `@when`/`@instead` an jedem Export | `pnpm check:when` Exit **0**, `pnpm check:language` Exit **0**; `caseColumns`, `caseTracks`, `CaseRow` tragen beide Zeilen | ja |
+| Kein Hex, kein px (außer Spurbreiten), keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}\b'` über die drei Dateien Exit **1** (leer); `px` nur als `width` der Spuren (13×, wie `source-document-columns`/`account-columns`); Labels aus `caseKindLabel` (Spiegel) und der Registry; `pnpm check:mirror` Exit **0** | ja |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | sechs, siehe Story-Deckung | ja, mit **M5** |
+| Prüfliste §9 durchgegangen | App-Punkte A6 und §11 übersprungen; Rest gemessen (siehe unten) | ja, mit **N1** |
+| Im Browser angesehen | sechs Stories bei vier Breiten gerendert, Konsole leer | ja |
+| Reihenfolge fest; `columns` wählt aus, ordnet **nicht** um | `…--in-use` Kopf gerendert: `Sachverhalt · Stand · Nummer · Betrag · Gegenpart · Wer ist dran · Art · Klärung · Eröffnet · Export` = Ränge 1–10 der Tabelle. `…--columns` übergibt `fiscalYear, state, amount, openedAt, number, name`, gerendert `Sachverhalt · Stand · Nummer · Betrag · Eröffnet · Jahr` | **ja** |
+| Gegenpart als eigener Punkt ab S | Rang 5, eigene Spur 180 px, in `…--filled` ein Anker auf `#partner-bp-8841` | ja |
+| Alle drei Achsen über `StatusBadge`, keine lokale Label-Map | gemessene Klassen/Farben: `bdg-info` `rgb(227,240,248)` („Zur Prüfung", „Nicht exportiert"), `bdg-success` `rgb(240,246,242)` („Verbucht"), `bdg-warning` `rgb(245,238,224)` („Kanzlei", „Agent", „Mandant", „Klärung offen"); Wörter aus der Registry | ja |
+| Die Art trägt **keinen** Ton | `…--filled`: Art `bdg bdg-neutral` `rgb(236,239,243)` gegen Stand `bdg-info` `rgb(227,240,248)` | **ja** |
+| Klärungszähler „n offen", nie eine nackte Zahl | `…--filled` „1 offen", `…--sparse` „3 offen"; 0 bleibt stumm — `…--in-use` Zeilen 2, 3, 5 haben eine **leere** Klärungszelle (begründet am Code, `case-columns.tsx:205–213`) | ja |
+| Ohne `href` kein `<a>` für die Zeile | `…--without-link`: `document.querySelectorAll('.v2rowlink').length` = **0**; einziger Anker der Zeile ist der Gegenpart | **ja** |
+| `case` ist `CaseListItem` aus `src/ludwig/` | Import `CaseRow.tsx:1` / `case-columns.tsx:1`; kein lokaler Zeilentyp | ja |
+| Jeder fehlende Wert steht als „—" | `…--sparse`: **4 ×** „—" (Betrag, Gegenpart, Wer ist dran, Export); Anzeigename fällt auf die Art zurück („Umbuchung") | ja |
+| Keine verschachtelten Anker | `a a` = **0** in allen sechs Stories **und** in `caselist--filled` | **ja** |
+| Ganze Zeile klickbar (I11, §9) | Trefferprobe `…--in-use` bei 1760×900, 35 sichtbare Punkte über die Zeilenbreite: **31 ×** `.v2rowlink`, **4 ×** Gegenpart-Anker, **0** tote Stelle; `.v2rowlink::after` `inset: 0px`, `.v2tbl__row:has(.v2rowlink):hover` setzt `--color-bg-soft` | **ja** |
+| Zahlen rechts mit `tnum` (V3) | Betrag: `text-align: right`, `font-variant-numeric: lining-nums tabular-nums`; „1.284.900,55 €" endet bei x 695 = rechte Spurkante 695. Zentriert ist nur das Icon der drei (i)-Knöpfe (UA-Vorgabe des `button`), keine Datenzelle | ja |
+| Tastatur, Fokus sichtbar (V11/V14) | `…--in-use`: Tab-Folge = 3 Kopf-(i) + je Zeile **2** Stopps (Zeile ohne Gegenpart: 1) = 12 bis zum Ende; Fokusring `2px solid rgb(59,143,196)` an jedem Stopp | ja |
+| Kontrast, Icons | `pnpm check:contrast` Exit **0**, `pnpm check:icons` Exit **0** | ja |
+| offen (App): ersetzt die zwei handgeschriebenen Zeilen | nicht Gegenstand dieser Abnahme | offen |
+
+### Die Mängel der Vorrunde — nachgemessen
+
+- **M1 (behoben).** `…--in-use` bei 1760×900, Werte zur Laufzeit in die echte
+  Zelle gesetzt und Aktion/Messung getrennt: 13 Zeichen → **48,0 px**, 26
+  Zeichen (p90 27) → **48,0 px** (vorher 66,8), 57 Zeichen (max) → **48,0 px**
+  (vorher 87,8), Gegenprobe zurück auf 10 → **48,0 px**. Die Kürzung greift
+  nachweislich: `scrollWidth` 190 bzw. **397** gegen `clientWidth` **180**,
+  `text-overflow: ellipsis`, `title` trägt den vollen Namen. Der Wertebereich
+  ist geprüft: `docs/entitaeten/accounting-case.md` Rang 5 — 95 % gefüllt,
+  **p50 14 · p90 27 · max 57**.
+- **M2 (behoben).** `…--in-use`: Kopfzeile **3** Knöpfe, jede der fünf
+  Datenzeilen **0**. Fokusstopps je Zeile **2** statt 5. `caselist--filled`
+  gegengeprüft: Kopf 3 (i) (`Sachverhalt`, `Zuständig`, `DATEV-Export`),
+  Zeilen 0 — die Achse steht einmal, Regel Z4 erfüllt.
+- **M3 (behoben in der Sache, siehe N1).** `…--columns` bei 1440×900: Spuren
+  `692px 190px 110px 130px 110px 80px`, Kopf `Sachverhalt · Stand · Nummer ·
+  Betrag · Eröffnet · Jahr` — **alle sechs sichtbar**, rechte Kante 1397
+  gegen Fensterkante des Scrollers 1415. `fiscalYear` steht.
+- **M4 (behoben, wie vom Vorprüfer vorgegeben).** Der `Frame` rendert
+  `{c.header}{c.headerAside}`; das (i) sitzt an denselben drei Spalten wie in
+  `DataTable`. **Der Buchstabe der Spec ist damit nicht erfüllt**
+  („Köpfe der Status-Spalten über `StatusHeader` (0077)"): `.v2sth` kommt in
+  der Story nicht vor, und der Abstand Wort → (i) ist gemessen **0,00 px**.
+  Gegenprobe: in `caselist--filled`, also in `DataTable` selbst, ebenfalls
+  **0,00 px** und ebenfalls ohne `.v2sth`. Das ist deshalb kein Mangel dieser
+  Aufgabe, sondern ein Befund am Set (unten).
+- **M6 (behoben).** `…--edges`, zweite Zeile, Zelle „Nummer" = **„c-9002"**
+  (`caseIdentifier()`), nicht „—".
+- **M7 (halb behoben).** Der Story-Text stimmt jetzt: `…--sparse` zeigt
+  gemessen „Umbuchung" als Anzeigenamen, und der Kommentar sagt das auch.
+  **Nicht behoben** ist der zweite Teil — siehe M7a.
+
+### Mängel
+
+**M5 (offen aus der Vorrunde) — zwei der dreizehn `CaseColumn`-Werte hat nie
+jemand gesehen.** *Kriterium:* Story-Deckung / §6 „ein Enum, alle Werte
+nebeneinander"; dazu die Freigabe vom 2026-09-06 („erweitern **oder** mit
+Grund ausschließen"). *Ort:* `case-columns.tsx:215–228` (`documents` 100 px,
+`bankTransactions` 110 px) gegen alle `*.stories.tsx` unter
+`entities/accounting-case/`. *Messung:*
+`grep -rn '"documents"\|"bankTransactions"' src/ui/v3/` (Exit 0) trifft
+ausschließlich `case-columns.tsx` — keine Story rendert sie, ihre Spurbreiten
+sind ungemessen. Der Wertebereich spricht dafür, dass sie tragen (Profil
+§Relationen: Ereignisse p50 1 · p90 2 · **max 38**, also höchstens zwei
+Stellen), aber gemessen ist das nicht. *Kleinster Weg:* die beiden in die
+`Columns`-Auswahl aufnehmen — sie ist ohnehin der Nachweis, dass `columns`
+auswählt. **Blockiert nicht.**
+
+**N1 (neu) — die Mindestbreite ist 25 px kleiner als der Spaltensatz selbst.**
+*Kriterium:* §9 („ein Baustein mit `minWidth` … scrollt, statt abzuschneiden")
+und die M3-Reparatur. *Ort:* `CaseRow.stories.tsx:116–122` — `minBreite()`
+rechnet für jede Spur ohne reines `px`-Maß **175**, während
+`case-columns.tsx:103` dem Anzeigenamen `minmax(**200px**, 1fr)` gibt. Der
+Kommentar der Story (Z. 113: „24ch ≈ 175 px") widerspricht dabei dem
+Kommentar der Spaltendatei (Z. 99–102: „in **px**, never in `ch`").
+*Messung:* voller Satz — Spuren 1500 + Lücken 9×10 + Polster 36 = **1626 px**
+nötig, gesetzt sind **1601 px**; Sechser-Satz — 820 + 50 + 36 = **906 px**
+nötig, gesetzt **881 px**. Wirkung in `…--in-use`, gemessen bei **700, 1100,
+1400 und 1920**: `.v2tbl__inner` `clientWidth` 1601 gegen `scrollWidth`
+**1608** — das Grid läuft über sein eigenes Polster. Ganz nach rechts
+gescrollt bleibt rechts neben der letzten Spalte **0,0 px**, links stehen
+18 px (`padding: 9px 18px` bzw. `12px 18px`). In `…--columns` derselbe Effekt
+bei 700 px; ab 1100 px trägt der Satz und der Abstand ist wieder 18 px.
+Abgeschnitten wird **nichts** — der Scroller führt bis 1608 —, verloren geht
+das rechte Polster. *Kleinster Weg:* in `minBreite()` 200 statt 175 und den
+`24ch`-Kommentar berichtigen. **Blockiert nicht.**
+
+**M7a (Rest aus der Vorrunde) — vier Firmen, eine Geschäftspartner-Id.**
+*Kriterium:* §6 „Daten in Stories sehen echt aus". *Ort:*
+`CaseRow.stories.tsx:19–106` — nur `CASE()` setzt `counterpartyPartnerId`,
+keiner der vier Überschreiber ändert sie. *Messung:* `…--in-use`, die Anker
+je Zeile: `#partner-bp-8841` für „Bürobedarf Meier GmbH", „Musterbau GmbH",
+„Stadtwerke Musterstadt" **und** „Handwerk Schulz KG". `CaseList.stories.tsx`
+macht es richtig (dort ist „Stadtwerke Musterstadt" ohne Id und darum kein
+Anker — gemessen in `caselist--filled`). *Kleinster Weg:* je Fall eine eigene
+Id, und einem der Fälle `counterpartyPartnerId: null` geben — dann zeigt auch
+`CaseRow`, dass 47 % aufgelöst heißt: nicht jeder Name ist ein Link.
+**Blockiert nicht.**
+
+**M7b (klein) — `Sparse` beweist nicht, was die Spec ihr aufträgt.**
+*Kriterium:* Story-Tabelle der Spec — `Sparse` = „ohne Betrag, ohne Gegenpart,
+**ohne Klärung**, ohne Export". *Ort:* `CaseRow.stories.tsx:174–180` (Fall
+`CASES[3]`, `openClarificationsCount: 3`). *Messung:* `…--sparse` zeigt in der
+Klärungsspalte **„3 offen"**; der stumme Nullfall steht nur in `…--in-use`
+(Zeilen 2, 3, 5, Zelle leer). Die Begründung des Bauenden („dünn an
+Stammdaten, nicht an Arbeit") ist nachvollziehbar — nur ändert eine Abnahme
+die Kriterien nicht: entweder trägt `Sparse` den Nullfall, oder die Zeile der
+Spec wird von der Spec-Seite her geändert. *Kleinster Weg:* im Fall der
+`Sparse`-Story `openClarificationsCount: 0` setzen; der Rand mit drei offenen
+steht schon in `…--edges`. **Blockiert nicht.**
+
+### Was gemessen wurde und hielt
+
+- Zeilenhöhe über alle Stories und alle vier Breiten konstant: **48,0 px**
+  (letzte Zeile 47,0 — Rahmenrundung), auch mit 90-Zeichen-Name, Betrag über
+  einer Million und 57-Zeichen-Gegenpart (V1).
+- Die Ellipse greift an Rang 1: `…--edges`, `.v2caserow__name`
+  `display: block`, `scrollWidth` **647** gegen `clientWidth` **200**, voller
+  Name im `title`.
+- Betrag rechtsbündig mit `tabular-nums`, bündig an der Spurkante;
+  „1.284.900,55 €" in 130 px.
+- Achsen-Wörter und -Farben kommen aus der Registry; die Art bleibt
+  `bdg-neutral`, solange L-53 offen ist.
+- `a a` = 0 in allen sechs Stories und in `CaseList`; die Zeile ist an jedem
+  sichtbaren Punkt entweder Zeilenlink oder Gegenpart-Link.
+- Nachtrag L-69 hält: in `caselist--filled` ist „Stadtwerke Musterstadt"
+  (`counterpartyPartnerId: null`) **kein** Anker, die drei anderen zeigen auf
+  `#partner-bp-8841`.
+- Alle sechs Stories rendern ohne Konsolenmeldung.
+- `pnpm typecheck` · `check:language` · `check:icons` · `check:contrast` ·
+  `check:mirror` · `check:when` — je **Exit 0**.
+
+### Befunde am Set (gehören nicht zu 0096)
+
+- **S1 — `headerAside` steht ohne Abstand am Wort.** Gemessen 0,00 px
+  zwischen „Stand" und dem (i), sowohl in der `CaseRow`-Story als auch in
+  `DataTable` selbst (`caselist--filled`). `.v2sth` (`v3.css:2909`, aus 0077)
+  gäbe `var(--space-1)`, wird aber weder von `DataTable.tsx:355–357/386–388`
+  noch von einem Spaltensatz benutzt — `StatusHeader` hat damit im ganzen
+  Tabellenweg keinen Aufrufer. Entweder `DataTable` umschließt
+  `header` + `headerAside` mit `.v2sth`, oder 0077 verliert seinen Zweck.
+  Betrifft jeden Spaltensatz mit Status-Spalte, nicht nur diesen.
+- **S2 — doppeltes `.v2num`.** `CaseRow.tsx:34` legt um jede
+  `align: "end"`-Zelle ein `<span class="v2num">`, und die Zellen
+  `fiscalYear`/`documents`/`bankTransactions` bringen selbst eines mit
+  (`case-columns.tsx:220/227/255`). Gemessen in `…--columns` stehen zwei
+  ineinander (x 1317/w 80 und x 1362/r 1397); die Wirkung ist richtig, die
+  Regel steht zweimal. Kosmetisch.
+
+Abgenommen von / am: **zurück** — designsystem (fremder Prüfer), 2026-09-07.
+Kein Mangel blockiert: M1 und M2 der Vorrunde sind behoben und nachgemessen.
+Offen sind M5 (zwei Enum-Werte ohne Story), N1 (Mindestbreite 25 px unter dem
+Satz), M7a (vier Firmen, eine Partner-Id) und M7b (`Sparse` ohne den
+Nullfall) — vier kleine Punkte in einem Zug. `pnpm build` bleibt für die
+Wiedervorlage offen (0117).
+
+## Nach der Wiederabnahme (2026-09-07): die vier kleinen in einem Zug
+
+Urteil war „zurück", kein Mangel blockierte. Alle vier erledigt, gemessen
+gegen den Dev-Server `http://localhost:6107` über CDP.
+
+**N1 — die Mindestbreite liest den Boden aus dem Satz.** `minBreite()` rechnete
+flexible Spuren mit einer festen 175 („24ch ≈ 175 px"); der Satz gibt Rang 1
+seit der Nacharbeit `minmax(200px, 1fr)`. Eine Zahl neben der Wahrheit
+veraltet mit dem nächsten Commit — jetzt wird der Boden aus dem `minmax()`
+gelesen. Gemessen `.v2tbl__inner`:
+
+| Story | vorher | jetzt |
+|---|---|---|
+| `InUse` | client 1601 gegen scroll **1608** (7 px Überstand) | client **1626** = scroll 1626 |
+| `Columns` | 881 | **906** |
+
+Bei 700, 1100, 1400 und 1920 px je `diff = 0` am `.v2tbl__inner`.
+
+**M5 — die zwei Zähler haben ihre Story.** `documents` und
+`bankTransactions` hatte im ganzen Set nie jemand gerendert. `Columns` zeigt
+jetzt einen **zweiten** Satz darunter (ein Satz mit allen dreizehn Spalten
+sprengt die Karte): gemessen „Belege" 100 px und „Zahlungen" 110 px, Zeilen
+unverändert 48,0 px. Damit ist der Enum-Wertebereich vollständig gezeigt.
+
+**M7a — vier Firmen, vier Zustände.** Nur `CASE()` setzte
+`counterpartyPartnerId`, und keiner der Überschreiber änderte sie: alle vier
+Firmen trugen `bp-8841`. Jetzt je eine eigene, und „Stadtwerke Musterstadt"
+bekommt `null` — 47 % der Sachverhalte tragen einen aufgelösten Partner
+(L-69), der Rest ist ein Name ohne Ziel. Gemessen in `InUse` drei Anker
+(`bp-8841`, `bp-8842`, `bp-8845`) und eine Firma ohne.
+
+**M7b — `Sparse` trägt den Nullfall.** Die Story-Tabelle der Spec sagt „ohne
+Betrag, ohne Gegenpart, **ohne Klärung**, ohne Export"; die Fixture stand auf
+`openClarificationsCount: 3`. Jetzt 0 — gemessen ist die Klärungszelle in
+`Sparse` leer, und der Rand mit „3 offen" und „1 offen" steht in `Edges`.
+
+`pnpm typecheck`, `check:language`, `check:icons`, `check:contrast`,
+`check:mirror`, `check:when` je Exit 0. Nicht gebaut (0117).
+
+**Status: Abnahme** — das Urteil war „zurück", also entscheidet die nächste
+Runde.
