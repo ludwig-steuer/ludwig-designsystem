@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | fertig |
 | Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/invoice-line/` — eigene Entitäts-Familie, nicht Teil von `entities/source-document/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: USt-Sonderfall, Verwendungsart und Steuerschlüssel-Kandidaten sind Ludwig-Fachbegriffe |
@@ -363,3 +363,85 @@ die Tabelle scrollt jetzt, statt die Namensspur auf 40 px zu quetschen.
 **M6 erledigt** — hat die Zeile keinen Namen, wird der Titel aus der ersten
 Zeile der Beschreibung gebildet; **diese Zeile steht dann nicht ein zweites
 Mal** darunter. Vorher sagte die namenlose Position zweimal dasselbe.
+
+## Zweite Abnahme (2026-09-07): freigegeben
+
+Gemessen gegen Spec und Freigabe, ohne Chatverlauf, am laufenden Storybook
+(6107) auf Commit `829d477`, Arbeitsbaum sauber. **Jeder behobene Mangel ist
+selbst nachgemessen, nicht die Nacharbeit nachgelesen.** Textkanten über eine
+`Range` auf den Textinhalt, nicht über die Zellbox; Klicks und Tasten als
+echte Ereignisse, je Schritt ein eigener `Runtime.evaluate`.
+
+### Die sechs Mängel der ersten Runde
+
+| Mangel | Messung | Ergebnis |
+|---|---|---|
+| M1 Netto-Summe stand links (blockierte) | `InvoiceLineRow/Standard` @1280/1440/1600 · Zelle 946–1078, **Text der Netto-Summe 1026,6–1078**, Kopfzellen-Text 991,1–1078 — gleiche rechte Kante, 0 px Luft. `.v2ilrow__total` ist `display:block; text-align:right`, die `.v2num` darin trägt `lining-nums tabular-nums` | ✓ behoben |
+| M2 Pos. stand rechts, ihre Kopfzelle links | `Standard` · Wert-Text 54–71,3, Kopf-Text 54–80,4 — gleiche **linke** Kante; `.v2ilrow__pos` mit Ziffernstellung statt `.v2num` | ✓ behoben |
+| M3 USt-Satz mit zwei Nachkommastellen | `Standard` · gerendert „19 %" (DOM, nicht aus dem Code gelesen) | ✓ behoben |
+| M4 Story-Rahmen ohne `invoiceLineMinWidth` | `Standard` @700 · `.v2tbl__inner` trägt `--v2-min: 760px`, `clientWidth` 628 gegen `scrollWidth` 760 → die Tabelle **scrollt**; Namensspur 172 px statt 40 px, Zeile 120,2 px. @1440 unverändert 472 px / 101,6 px | ✓ behoben |
+| M5 `InUse` zeigte fünf statt drei Zeilen | `InUse` · 3 Datenzeilen | ✓ behoben |
+| M6 namenlose Zeile sagte zweimal dasselbe | `Edges` #18 · Titel „Zuschlag Kleinmenge" (19 Z.), darunter **nur** „Berechnet je Auftrag" — die Titelzeile steht nicht ein zweites Mal | ✓ behoben |
+
+### Was in Runde 1 hielt und weiter hält (nachgemessen)
+
+| Kriterium | Messung |
+|---|---|
+| Sechs Spalten in Rang-Reihenfolge, keine Rabatt-Spalte | `Standard` · Spuren `56 · 472 · 110 · 120 · 84 · 132` px, identisch bei 1280/1440/1600 |
+| Jede Zahl rechts mit `tnum`, jeder Text links | Menge 642,8–712 / Kopf 670,2–712 · Einzelpreis 799,5–842 / Kopf 776–842 · USt-Satz 901,6–936 / Kopf 879,4–936 — jeweils Textkante = Zellkante rechts |
+| Verwendungsart und Konfidenz immer, die vier übrigen nur bei Abweichung | `Standard` 2 Streifen-Elemente · `Deviations` #7 sechs (gemischt · Plausibel 81 % · Sammelposition · deaktiviert · Reverse Charge (Drittland) · Summenzeile) |
+| Wert ohne Wort als Rohwert | `Edges` #12 mit `vatSpecialCase: {}` → Plakette `exempt_other` |
+| Streifen ist die dritte Zeile derselben Zelle | `Standard` 1 `<tr>`, Streifen im zweiten `<td>`; `InvoiceLineList/Edges` 22 Positionen → 22 `<tr>`, 0 Detailzeilen |
+| Ohne `children` keine Chevron-Spur, mit `children` `var(--v2-tbl-pick)` | `Standard` 6 Kopfzellen, 0 `.v2tbl__chev`, 0 `<button>` · `Expanded` 7 Kopfzellen, erste Spur 32 px |
+| Menge mit Nachkommastellen | `Standard` „20,00 Ries" · `Minimal` ohne Menge → gedämpftes „—" in der `v2num`-Zelle, rechtsbündig |
+| Beschreibung ab 81 Zeichen gekürzt, Bezeichnung nicht | `Edges` #12 · Beschreibung 106 Zeichen → 78 gerendert plus „…"; Bezeichnung 254 Zeichen ungekürzt, 4 Namenszeilen |
+| `open`/`onOpenChange` von außen und zurück | `Expanded` · echte Klicks, je Schritt eigener Evaluate: Detailzeilen 1 → 0 → 1 → 0, `aria-expanded` true → false → true → false |
+| Deaktivierte Zeile gedämpft **und** mit Wort | `Deviations` #7 · Zellfarbe `rgb(113,113,113)` gegen `rgb(45,45,45)`, Plakette „deaktiviert" |
+| `ExpandableRow` ohne die neuen Props wie zuvor | `Primitives/Tabelle/ExpandableRow` · `Expandable` 1 → 0 → 1 → 0 (`defaultOpen` gilt), `With Lead` 0 → 1 → 0 → 1 |
+| Zeilenhöhe nach dem entschiedenen Kriterium (0115) | 472-px-Spur: 19 Z. → 101,6 px · **p90 92 Z. → 123,5 px** · max 254 Z. → 184 px; in der echten Karten-Spur der Liste (428 px) wächst die Maximal-Zeile auf 204,9 px — die Zelle wächst, wie entschieden |
+| `pnpm typecheck`, `pnpm build`, `pnpm check:icons` | Exit 0, 0, 0 (`check:icons`: 53 Zeichen in der Registry) |
+| Im Browser angesehen | alle 19 Stories der Familie geladen, **0** Fehler/Warnungen (`Runtime.consoleAPICalled` + `Runtime.exceptionThrown`) |
+
+**Story-Deckung:** 6/6 wie abgeleitet, jede Prop mit Nachweis, Ausschlüsse
+begründet — unverändert vollständig.
+
+### Mangel (nicht blockierend)
+
+1. **Der Story-Text von `Edges` behauptet noch die abgelöste Regel.** Er sagt
+   „die p90-Bezeichnung mit 92 Zeichen — **bis hierhin muss die Zelle
+   dreizeilig bleiben** —, danach eine mit **251 Zeichen**". Gemessen: bei 92
+   Zeichen ist die Zelle **vierzeilig** (123,5 px), und die zweite Bezeichnung
+   hat **254** Zeichen (die Fixture sagt das selbst, der Story-Text nicht). Die
+   Dreizeiligkeit ist mit dem Entscheid in 0115 abgelöst — der Text hält eine
+   Anforderung fest, die es nicht mehr gibt, und sein Bild widerspricht ihm.
+   Das ist dieselbe Klasse wie 0114 M1, die die Nacharbeit selbst als bindend
+   bezeichnet hat („ein JSDoc, das eine Messung behauptet, ist so bindend wie
+   ein Kriterium") — hier ohne Kriterium dahinter, deshalb nicht blockierend.
+   Vorschlag: „p90 mit 92 Zeichen — die Zelle wird vierzeilig, der Name bricht
+   um und wird nicht gekürzt —, danach eine mit 254 Zeichen".
+
+Festgehalten, kein Mangel: der USt-Satz nimmt seit M3 den Rohwert, ein Satz mit
+Nachkommastelle stünde als „7.5 %" da. Die Nacharbeit hat das oben selbst
+vermerkt; im Bestand sind die Sätze ganzzahlig, eine Prozent-Formatierung wäre
+heute eine Prop ohne Fall (A12).
+
+**Urteil: freigegeben.** Alle fünf blockierenden Punkte dieser Spec sind
+behoben und nachgemessen, nichts aus Runde 1 ist dabei zerbrochen.
+
+Abgenommen von / am: Claude (zweite Abnahme, nicht Bau), 2026-09-07 · Offener
+Punkt: der Story-Text von `Edges` (nicht blockierend).
+
+## Freigegeben (2026-09-07, zweite Runde)
+
+Alle Kriterien auf ✓, jedes mit einem Messwert. Die Abnahme hat auch
+nachgesehen, ob die Nacharbeit etwas zerbrochen hat, das in Runde 1 hielt —
+sie hat dafür **alle 714 Stories des Sets** geladen und jeden Strich einer
+`AmountCell` mit `value === null` vermessen: sieben Stories tragen einen, in
+jedem Fall direktes Kind der Zelle, rechtsbündig, Kopfzelle passend. Der
+Eingriff in `primitives/Cells.tsx` steht also überall richtig.
+
+**Ein Nachtrag, nicht blockierend, erledigt:** der Story-Text von `Edges`
+behauptete „bis hierhin muss die Zelle dreizeilig bleiben" und „251 Zeichen".
+Gemessen sind es vier Zeilen (123 px) und 254 Zeichen — die Dreizeiligkeit ist
+mit dem Entscheid in 0115 abgelöst. Der Text sagt jetzt, was dasteht, und
+warum nicht gekürzt wird.

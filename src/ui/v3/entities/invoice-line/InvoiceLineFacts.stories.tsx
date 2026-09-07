@@ -98,6 +98,10 @@ export const ForeignCurrency: Story = {
   render: () => (
     <Frame>
       <InvoiceLineFacts line={FOREIGN} labels={LABELS} fxCurrency="USD" />
+      <div style={{ height: "var(--space-4)" }} />
+      {/* Dieselbe Position **ohne** `fxCurrency`: der Betrag bleibt stehen,
+          an der Stelle der Währung steht, was fehlt. */}
+      <InvoiceLineFacts line={FOREIGN} labels={LABELS} />
     </Frame>
   ),
 };

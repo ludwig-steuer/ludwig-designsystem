@@ -55,9 +55,14 @@ export function InvoiceLineList({
   const [deviating, setDeviating] = useState<ReadonlySet<number>>(new Set());
   const canExpand = Boolean(renderFacts) && lines.length > 0;
   // The key handler is bound once; it reads the current value from here
-  // instead of closing over a stale one.
+  // instead of closing over a stale one. The write happens **after** the
+  // render, not during it — a render can be thrown away, and the handler
+  // would then switch from a value that was never committed (acceptance of
+  // 0115, second round).
   const expandedRef = useRef(expanded);
-  expandedRef.current = expanded;
+  useEffect(() => {
+    expandedRef.current = expanded;
+  }, [expanded]);
 
   function switchTo(next: boolean) {
     setExpanded(next);

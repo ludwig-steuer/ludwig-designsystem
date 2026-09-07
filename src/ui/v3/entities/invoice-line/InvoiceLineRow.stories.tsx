@@ -100,8 +100,10 @@ export const Expanded: Story = {
 };
 
 /**
- * Die Ränder: die p90-Bezeichnung mit 92 Zeichen — bis hierhin muss die Zelle
- * dreizeilig bleiben —, danach eine mit 251 Zeichen (das Maximum im Bestand), zwei
+ * Die Ränder: die p90-Bezeichnung mit 92 Zeichen — sie bricht um, die Zelle
+ * wird vierzeilig (123 px), und **gekürzt wird sie nicht**: ein Positionsname
+ * ist Inhalt, keine Kennung (Entscheid vom 2026-09-07, siehe 0115). Danach
+ * eine mit 254 Zeichen, dem Maximum im Bestand, dazu zwei
  * Einheiten in verschiedener Schreibweise (`Stck` neben `STK` — im Bestand
  * sind es 23), ein Wertebereich **ohne** Wort in `labels`, und eine Position
  * ganz ohne `itemName`.

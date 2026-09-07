@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | fertig |
 | Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/invoice-line/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: sie zeigt Rechnungspositionen mit ihrer Ludwig-Einordnung |
@@ -422,3 +422,112 @@ Ergebnis und liefert die Zahl aus der **echten Reiterbreite** nach (Namensspur
   der Fehler sieht im Code richtig aus (genau M1 aus 0072). Ein
   `:is(th,td) .v2num` wäre die robustere Regel; das ist eine Änderung an jeder
   Tabelle des Sets und gehört in eine eigene Aufgabe.
+
+## Zweite Abnahme (2026-09-07): freigegeben
+
+Gemessen am laufenden Storybook (6107) auf Commit `829d477`. Die Summen sind
+aus `fixtures.ts` **selbst nachgerechnet** und gegen den gerenderten Fuß
+gehalten; die Taste ist über `Input.dispatchKeyEvent` gedrückt, je Schritt ein
+eigener `Runtime.evaluate`. Layout zusätzlich in der Breite, die der Reiter auf
+der Seite hat.
+
+### Die sechs Mängel der ersten Runde
+
+| Mangel | Messung | Ergebnis |
+|---|---|---|
+| M1 „`summary_total` zählt mit" war von keiner Fixture bewiesen (blockierte) | `TotalMismatch` · 23 Zeilen, Fuß „Summe der Positionen · **5.881,90 €** · weicht vom Rechnungsbetrag ab: **+1.475,60 €**". Selbst nachgerechnet: die nicht deaktivierten Zeilen von `ALL` ergeben 4.406,30 € (ausgelassen #7 mit 612,40 € und #20 mit 0,00 €, beide `disabled`), dazu die **aktive** Summenzeile `SUMMARY_TOTAL` mit 1.475,60 € → 5.881,90 €; `invoiceNetTotal` ist 4.406,30 € → die Abweichung ist genau der Betrag der Summenzeile. Die Regel steht jetzt hinter der Story | ✓ behoben |
+| M2 Netto-Summe stand links (geerbt aus 0072) | `Edges` @1280/1440/1600 · Text der Netto-Summe endet bei **1077**, die Kopfzelle „Netto-Summe" ebenfalls bei 1077; die Fuß-Summe fluchtet mit der Spalte | ✓ behoben |
+| M3 Bezeichnungs-Zelle vierzeilig bei p90 | entschieden (nicht kürzen, die Zelle wächst) — gemessen in der 472-px-Spur: 19 Z. → 101,6 px, p90 92 Z. → 123,5 px, max 254 Z. → 184 px; in der echten Karten-Spur (428 px) wächst die Maximal-Zeile auf 204,9 px | kein Mangel |
+| M4 die Liste hatte keine Karte (blockierte) | `Standard`/`Edges` · `.v2card` mit **1 px solid rgb(221,226,232)**, Radius 6 px, Fläche `rgb(255,255,255)`; `.v2card__h` trägt „Positionen · 23 Positionen · Kompakt · Erweitert · Alt+E"; `.v2card__f` mit 1 px Oberkante auf `rgb(250,251,252)`. Karte 1.060 px breit bei 1280, 1440 und 1600, `scrollWidth − clientWidth = 0` — kein Überlauf. Eigenes Kopf-/Fuß-CSS entfallen (`.v2illist__head`/`__foot` sind nirgends mehr im Baum) | ✓ behoben |
+| M5 `onExpandedChange` im State-Updater | Der Tastenweg ruft dieselbe Funktion wie der Klick; je Druck genau **eine** Rückmeldung (Story-Zeile wechselt einmal je Druck) | ✓ behoben, siehe Mangel 2 |
+| M6 Chevron-Spur im Leerfall | `Empty` **6** Kopfzellen, 0 `.v2tbl__chev`; `Single`, `AllExpanded`, `TotalMismatch`, `Edges` je 7 | ✓ behoben |
+
+### Alt+E, mit echtem Tastendruck
+
+`AllExpanded` · `Input.dispatchKeyEvent` mit `modifiers:1`, `code:"KeyE"`, je
+Schritt neu gelesen:
+
+| Schritt | offene Aufklapper | Segment | Rückmeldung der Story |
+|---|---|---|---|
+| Start | 5 | Erweitert · Alt+E | Erweitert |
+| **Alt+E** | **0** | Kompakt | Kompakt |
+| **Alt+E** | **5** | Erweitert · Alt+E | Erweitert |
+| Klick auf ein einzelnes Chevron | 4 | **Erweitert · Alt+E** | Erweitert |
+
+**Die Probe im Textfeld:** in ein echtes `<input type="text">` fokussiert
+bleibt derselbe Druck **wirkungslos** (5 offen, Segment unverändert, das Feld
+bleibt leer); in einem `<textarea>` ebenso. Nach dem Verlassen des Feldes
+schaltet derselbe Druck wieder auf 0 / „Kompakt". `isTyping` greift also.
+
+### Was in Runde 1 hielt und weiter hält (nachgemessen)
+
+| Kriterium | Messung |
+|---|---|
+| Zeilen nach `position` aufsteigend | `Edges` bekommt `[...ALL].reverse()` · gerendert #1 … #22 in Folge |
+| Kein Pager, keine Sortier-Knöpfe, keine Auswahlspalte | `Edges` · 22 Zeilen, 0 Pager-Knoten, 0 `<button>` in einer Kopfzelle, 0 `input[type=checkbox]` |
+| Ohne `invoiceNetTotal` keine Probe, aber die Summe | `Standard` · Fuß „Summe der Positionen · 1.641,30 €", kein Probesatz. Nachgerechnet: 83,80 + 359,60 + 70,50 + 1.117,50 + 9,90 = 1.641,30 |
+| Abweichung mit einem Wort | `TotalMismatch` · „weicht vom Rechnungsbetrag ab: +1.475,60 €", Farbe `rgb(140,96,30)` auf `rgb(250,251,252)`, das Wort steht **vor** der Zahl |
+| Übereinstimmung, wenn sie stimmt | `Edges` mit `invoiceNetTotal = linesNetTotal(ALL)` · Fuß „4.406,30 € · stimmt mit dem Rechnungsbetrag überein" |
+| Ohne `renderFacts` nichts davon | `Standard` · 6 Kopfzellen, Spuren `56 · 472 · 110 · 120 · 84 · 132`, 0 `.v2tbl__chev`, 0 `<button>`, kein `Segmented`, „Alt+E" kommt im Text nicht vor |
+| Der Leerfall benennt den Befund | `Empty` · „Für diesen Beleg wurden keine Positionen erkannt." plus „Das ist kein Erfolg, sondern selten und meist ein Problem der Extraktion: 4 von 318 Rechnungen im Bestand. Der Beleg lässt sich erneut lesen."; kein Fuß, kein Umschalter |
+| Deaktivierte Zeilen sichtbar und gedämpft | `Edges` und `TotalMismatch` · je 2 Zeilen mit `rgb(113,113,113)` gegen `rgb(45,45,45)`, beide mit der Plakette „deaktiviert" |
+| Spaltenbreiten halten | Spuren `32 · 56 · 428 · 110 · 120 · 84 · 132` px, identisch bei 1280, 1440 und 1600; die Karte bleibt 1.060 px |
+| `pnpm typecheck`, `pnpm build`, `pnpm check:icons` | Exit 0, 0, 0 |
+| Im Browser angesehen | alle sechs Stories, 0 Fehler/Warnungen |
+
+**Story-Deckung:** 6/6 wie abgeleitet, Ausschlüsse begründet. Der Befund an der
+Spec aus Runde 1 bleibt: die Ableitung zählt „1 im Einsatz", die Story-Tabelle
+führt keine solche Story.
+
+### Mängel (beide nicht blockierend)
+
+1. **Das Summen-Kriterium nennt die falsche Story.** Es lautet „…;
+   `summary_total` zählt mit (Story `Edges` mit zwei deaktivierten und der
+   Aggregat-Zeile, nachgerechnet)". `ALL` enthält weiterhin **keine aktive**
+   Summenzeile — die einzige (`DEVIATIONS` #7) ist `disabled`. Bewiesen wird
+   die Regel jetzt in `TotalMismatch`, mit `SUMMARY_TOTAL`. Die Sache ist
+   gemessen und stimmt; nur die Klammer zeigt auf die falsche Story. Eine
+   Abnahme ändert keine Kriterien — Vorschlag an den, der die Spec führt:
+   Klammer auf „Story `TotalMismatch` (aktive Summenzeile) und `Edges` (zwei
+   deaktivierte plus Aggregat), beide nachgerechnet".
+2. **`expandedRef.current = expanded` wird während des Renderns geschrieben.**
+   `InvoiceLineList.tsx:60`. Das ist die Stelle, an der M5 gelandet ist: der
+   Wirkungsaufruf ist aus dem State-Updater heraus, der Ref-Schreibzugriff aber
+   in den Render-Lauf hinein. React verlangt, dass während des Renderns weder
+   in eine Ref geschrieben noch aus ihr gelesen wird; ein abgebrochener Lauf
+   kann die Ref auf einen Wert setzen, der nie festgeschrieben wurde, und
+   `Alt+E` schaltete dann vom falschen Stand aus. Im Test nicht sichtbar
+   (Doppel-Render unter StrictMode ist hier idempotent), der Fehler ist latent
+   — dieselbe Art wie M5. Vorschlag: `useEffect(() => { expandedRef.current =
+   expanded; }, [expanded])`.
+
+**Urteil: freigegeben.** Die drei blockierenden Mängel M1, M2 und M4 sind
+behoben und nachgemessen, M3 ist entschieden, M5 und M6 sind erledigt; nichts
+aus Runde 1 ist dabei zerbrochen.
+
+Abgenommen von / am: Claude (zweite Abnahme, nicht Bau), 2026-09-07 · Offene
+Punkte: die Klammer des Summen-Kriteriums, der Ref-Schreibzugriff im Render
+(beide nicht blockierend).
+
+## Freigegeben (2026-09-07, zweite Runde)
+
+Alle Kriterien auf ✓. Die Summe ist von der Abnahme selbst nachgerechnet
+worden: nicht deaktivierte Zeilen aus `ALL` = 4.406,30 € (ohne #7 mit 612,40
+und #20 mit 0,00), plus die aktive Summenzeile 1.475,60 = **5.881,90 €**, und
+die Abweichung im Fuß ist genau der Betrag der Summenzeile. `Alt+E` mit echtem
+Tastendruck: 5 → 0 → 5; in einem `input` und in einem `textarea` bleibt
+derselbe Druck wirkungslos, danach schaltet er wieder — `isTyping` greift.
+
+**Zwei Nachträge, nicht blockierend:**
+
+- **Erledigt:** `expandedRef.current = expanded` stand **während des Renderns**
+  — genau die Stelle, an der M5 gelandet war: die Wirkung raus aus dem
+  State-Updater, dafür ein Ref-Schreibzugriff in den Render hinein. Ein
+  abgebrochener Lauf hätte den Tastenweg von einem Stand schalten lassen, den
+  React nie festgeschrieben hat. Der Schreibzugriff steht jetzt in einem
+  `useEffect`.
+- **Offen, gehört dem Auftraggeber:** das Summen-Kriterium nennt als Nachweis
+  die Story `Edges`; bewiesen wird die Regel aber in `TotalMismatch`, weil
+  `ALL` keine **aktive** Summenzeile enthält. Die Sache stimmt, die Klammer
+  zeigt auf die falsche Story — **ein Kriterium ändert weder der Bauende noch
+  der Abnehmende.**

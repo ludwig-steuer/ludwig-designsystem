@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | fertig |
 | Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/invoice-line/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungsgegenstand, USt-Sonderbehandlung und DATEV-Steuerschlüssel sind Ludwig-Fachbegriffe |
@@ -267,3 +267,67 @@ seine Währung fehlt.
 `CURRENCIES` aus `src/ludwig/shared/money.ts`; nur ein bekannter geht an
 `Amount`, alles andere nimmt den Weg aus M2. Damit schaltet nichts mehr die
 Typprüfung ab, die den Fall absichern soll.
+
+## Zweite Abnahme (2026-09-07): freigegeben
+
+Gemessen am laufenden Storybook (6107) auf Commit `829d477`. Die Längen der
+zwei Freitexte sind **am gerenderten Knoten** gezählt (Teaser und der
+vollständige Text im `<details>`), nicht in der Fixture nachgelesen; die
+Blöcke sind über ihren gerenderten Text gezählt.
+
+### Die drei Mängel der ersten Runde
+
+| Mangel | Messung | Ergebnis |
+|---|---|---|
+| M1 die Grenze 169 war von keiner Story bewiesen (blockierte) | `Edges` · **Buchungsgegenstand: Volltext 400 Zeichen, Teaser 159 + „…"** (Schnitt an der Wortgrenze vor 161) · **Begründung: Volltext 297 Zeichen, Teaser 167 + „…"** (Wortgrenze vor 169). Beide Grenzen sind jetzt von der Story erreicht und geschnitten; der Story-Text nennt 400 und 297 — Text und Bild stimmen überein | ✓ behoben |
+| M2 ein `fx*`-Wert ohne `fxCurrency` verschwand lautlos | Der Zweig ist gebaut: `money()` gibt bei unbekannter oder fehlender Währung den Betrag ohne Währung aus und setzt „(Währung fehlt)" bzw. „(XYZ?)" daneben. **Von keiner Story gezeigt** — siehe Mangel 1 unten | ✓ gebaut, ✗ ungezeigt |
+| M3 `currency as never` | Der Cast ist weg; die Form prüft gegen `CURRENCIES` aus `src/ludwig/shared/money.ts` und reicht nur einen bekannten Code an `Amount`. `pnpm typecheck` Exit 0 **ohne** abgeschaltete Prüfung | ✓ behoben |
+
+### Was in Runde 1 hielt und weiter hält (nachgemessen)
+
+| Kriterium | Messung |
+|---|---|
+| Ein Feld ohne Wert erscheint nicht | `Standard` fünf Blöcke, **0** „—" im gesamten Baum; `USt-Sonderfall`, `Rechtsgrundlage`, `Extrahierter USt-Satz`, `Fremdwährung`, `Beleg-Kollaps` fehlen ganz. `Sparse` 0 Blöcke |
+| Steuerschlüssel-Block ohne USt-Sonderfall | `TaxKeysWithoutSpecialCase` · linke Form nur „Buchungsklassifikation", rechte zusätzlich „DATEV-Steuerschlüssel · Kandidaten · 9 · 8 · 3" bei `vatSpecialCase: "none"` |
+| Extrahierter USt-Satz nur bei Abweichung | `Edges` → „Extrahierter USt-Satz 7,00 %"; `Standard` → Feld fehlt |
+| Kollaps-Kasten genau bei gesetztem `collapse` | `Aggregate` → Block „Beleg-Kollaps" mit drei Paaren (1, 2, 4 · Grund · Entschieden am); `Standard` → kein Block |
+| `fx*`-Block nur bei gesetzten Werten, Währung aus `fxCurrency` | `ForeignCurrency` → „Einzelpreis 399,00 $ · USt-Betrag 0,00 $ · Netto-Summe 1.197,00 $"; `Standard` → kein Block |
+| Leerer Fall: der Satz statt der leeren Fläche | `Sparse` · 0 `.v2ilfacts`, ein `<p class="v2muted">Zu dieser Position hat Ludwig nichts vermerkt.</p>` |
+| Kein eigener Rahmen, kein eigener Innenabstand (1280/1600) | `InUse` · `.v2ilfacts`: `border 0`, `padding 0px`, Hintergrund `rgba(0,0,0,0)`, Radius 0 — identisch bei 1280, 1440 und 1600; alle Blöcke `v2fields v2fields--bare` |
+| `pnpm typecheck`, `pnpm build`, `pnpm check:icons` | Exit 0, 0, 0 |
+| Im Browser angesehen | alle sieben Stories geladen, 0 Fehler/Warnungen |
+
+**Story-Deckung:** 7/7 wie abgeleitet, Ausschlüsse begründet — unverändert
+vollständig. Der Schönheitsfehler aus Runde 1 bleibt: die Spec nennt für
+`labels` den Nachweis `Standard`, dort ist `vatSpecialCase` aber `none`; die
+Prop wirkt erst in `Aggregate` und `ForeignCurrency`.
+
+### Mangel (nicht blockierend)
+
+1. **Der Zweig aus M2 hat keine Story.** Der Story-Text von `ForeignCurrency`
+   behauptet ihn ausdrücklich („Ohne `fxCurrency` bliebe der Wert nicht weg: er
+   stünde ohne Währung da, mit dem Vermerk an ihrer Stelle"), gerendert wird
+   aber nur der Fall **mit** `fxCurrency="USD"`. Der Vermerk „(Währung fehlt)"
+   steht in keiner Story und ist im Browser nicht messbar. Kein Kriterium
+   verlangt ihn — deshalb nicht blockierend —, aber es ist wieder eine
+   Behauptung im Story-Text ohne Bild, also dieselbe Klasse wie M1 der ersten
+   Runde. Vorschlag: eine zweite Form in `ForeignCurrency`, dieselbe Zeile ohne
+   `fxCurrency`, mit einem Satz dazu.
+
+**Urteil: freigegeben.** Der blockierende Mangel M1 ist behoben und
+nachgemessen, M2 und M3 sind gebaut, nichts aus Runde 1 ist zerbrochen.
+
+Abgenommen von / am: Claude (zweite Abnahme, nicht Bau), 2026-09-07 · Offener
+Punkt: die fehlende Story zum Währungs-Rückfall (nicht blockierend).
+
+## Freigegeben (2026-09-07, zweite Runde)
+
+Alle Kriterien auf ✓. Die Grenzen 161 und 169 sind jetzt von der Story
+erreicht: Buchungsgegenstand 400 Zeichen → 159 plus „…", Begründung 297 → 167
+plus „…" (die Kürzung bricht an der Wortgrenze davor).
+
+**Ein Nachtrag, nicht blockierend, erledigt:** der Zweig aus M2 — ein
+`fx*`-Wert ohne `fxCurrency` — hatte keine Story, während der Story-Text ihn
+behauptete. `ForeignCurrency` zeigt jetzt **beide** Formen untereinander.
+Gemessen: „399,00 $" mit Währung, „399,00 (Währung fehlt)" ohne. Ein Betrag,
+den es gibt, verschwindet nicht, weil seine Währung fehlt.
