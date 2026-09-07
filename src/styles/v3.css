@@ -3386,7 +3386,14 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
     white-space: nowrap;
   }
   .v2dnf__narrow { display: inline; }
-  /* Eine 36-stellige Nummer ohne Trennzeichen bricht sonst auf vier Zeilen. */
+  /* Eine 36-stellige Nummer ohne Trennzeichen bricht sonst auf vier Zeilen —
+     und mit `nowrap` allein **läuft sie 200 px aus der Spalte**: der Absatz
+     ist ein Rasterkind (`min-width: auto`) und dehnt sich mit, der Knopf
+     darum schrumpft auf seinen Inhalt, also greift `max-width: 100%` am Text
+     ins Leere. Beide brauchen ihre Grenze, sonst hat keiner eine (Abnahme
+     0014, dritte Runde: gemessen 295,9 px Hinweis in einem 96-px-Feld). */
+  .v2dnf__hint { min-width: 0; }
+  .v2dnf__hint .v2link { max-width: 100%; overflow: hidden; }
   .v2dnf__num {
     display: inline-block; max-width: 100%;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;

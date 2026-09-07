@@ -103,10 +103,10 @@ export function DocumentNumberRegister({
             value={query ?? ""}
             onChange={(e) => {
               onQueryChange(e.target.value);
-              // `-1`, nicht `0`: beim Tippen steht der Fokus in der Suche, und
-              // eine gefärbte Zeile ohne Fokus ist ein Zustand ohne Bedeutung
-              // (V7). Mit `0` sprang das erste ↓ danach auf Zeile **zwei** und
-              // übersprang die dominanteste (Wiederabnahme 0014, M3).
+              // `-1`, not `0`: while typing the focus is in the search box, and
+              // a coloured row without focus is a state without meaning (V7).
+              // With `0` the first ↓ jumped to row **two** and skipped the most
+              // dominant one (acceptance of 0014, M3).
               setActive(-1);
             }}
             placeholder="Nummer, Konto oder Sachverhalt"

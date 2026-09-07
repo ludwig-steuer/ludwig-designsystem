@@ -567,3 +567,137 @@ ohne Fokus, und das erste ↓ landet oben.
 den waagerechten Lauf, und dann steht nur noch die Nummernspalte — neun gleich
 lautende Nummern ohne ihren Grund. Das folgt aus `MIN_WIDTH = 780` und ist
 eine Frage an den Drawer, in dem es steht (0052), nicht an dieses Feld.
+
+## Dritte Abnahme (2026-09-07)
+
+**Ergebnis: zurück.** Gemessen gegen den Dev-Server (`localhost:6107`, Stand
+`04ae1ad`, Arbeitsbaum sauber — die beiden Commits nach `2487bde` fassen 0014
+nicht an) mit CDP: echte Tasten (`Input.dispatchKeyEvent`), echte Klicks, echte
+Eingabe (`Input.insertText`), je Schritt ein eigener `Runtime.evaluate`. Kein
+Bau, kein Chat-Verlauf: nur Spec und Code. Story-IDs verkürzt wie oben.
+
+### Die drei Punkte der Nacharbeit — nachgemessen
+
+| | Nachweis | Ergebnis |
+|---|---|---|
+| **M1** Grenzzeile rechnete mit 420 px | `…journalentryeditor--document-number-across-rows`, **36 echte Zeichen** im Feld (nativer Wert-Setter plus `input`-Event, Messung im eigenen `Runtime.evaluate`), 1440 **und** 1280 gleich: Feld 96 px, `.v2dnf__limit` **17,8 px / eine Zeile** (Zeilenhöhe 17,825), sichtbar „36/36", `title` = „36 Zeichen — mehr trägt Belegfeld 1 in DATEV nicht.", Hinweis 19,4 px, Buchungszeile **90,6 → 116,4** statt 170. Gegenprobe mit echter Eingabe: `Input.insertText` mit 44 Zeichen ins Editorfeld → Wert 36 Zeichen, Grenzzeile 17,8 px, Zeile 116,4. In `…field--edge` (372 px) steht dieselbe Zeile mit dem ganzen Satz, ebenfalls 17,8 px | ✓ behoben |
+| **M2** schmale Form nahm den Satz aus dem Baum | Gemessen am **Zugänglichkeitsbaum** (`Accessibility.getFullAXTree`), nicht am Markup. Im Editor bei 96 px: alle sieben `.v2dnf__wide` stehen auf `position: absolute`, 1×1 px, `clip-path: inset(50%)` — `display` bleibt `block`, kein `display: none`. Im Baum stehen `StaticText` „Für diesen Vorgang gilt", `button` „RE-2026-0140", `StaticText` „Offener Posten aus DATEV", `StaticText` „— die Nummer kommt aus DATEV und ist nicht verhandelbar." und für die Grenzzeile „36 Zeichen — mehr trägt Belegfeld 1 in DATEV nicht."; der `<p>` trägt denselben Satz als `description`. Die Kurzform „36/36" ist `aria-hidden` und **fehlt** im Baum — keine doppelte Ansage | ✓ behoben |
+| **M3** `active` stand beim Tippen auf 0 | `…register--interactive`, echte Tasten: Klick in die Suche, „RE-2026-0140" Zeichen für Zeichen getippt (9 → **7** Treffer) → `.v2tbl__row.is-active` **0×**, Fokus in der Suche. Erstes ↓ → `data-row=0`, ↓ → 1, ↑ → 0, `Enter` → „Übernommen: RE-2026-0140 (Offener Posten aus DATEV)". Ohne Suche derselbe Weg, ebenfalls ab Zeile 0; ein zweites `Enter` auf Zeile 1 → „Gespiegelte DATEV-Buchung" | ✓ behoben |
+
+### Was in der letzten Runde hielt — hält es noch?
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` / `pnpm build` / `pnpm check:icons` / `pnpm check:contrast` | **Exit-Code geprüft, nicht die letzte Zeile:** 0 / 0 („Storybook build completed successfully") / 0 (53 Zeichen, 2 offene Dateien — `SourceDocumentDrawer.tsx` und `JournalEntryEditor.tsx`, beide aus anderen Aufgaben) / 0 (11 Angaben nachgerechnet) | ✓ |
+| Register scrollt, statt beschnitten zu werden | `…register--filled`, fünf Breiten: Wrapper `min-width: 0px`, Wrapper = `.v2dnr` (1440: 858 · 1024: 858 · 700: 626 · 500: 426 · 450: 376). Scroll-Container 858/858 · 626/818 · 426/818 · 376/818. Echtes Scrollen auf das Maximum (192 · 392 · 442 px) bringt die letzte Datenzelle bei 700, 500 **und** 450 vollständig in die Karte; sichtbare Zellen 27→36, 18→27, 9→18. Seite scrollt bei keiner Breite waagerecht | ✓ |
+| Ladezustand ist eine Tabelle | `…register--loading`: eine `.v2tbl`, fünf `tr.v2tbl__row` mit je 5 `td`, 25 Skelette, `sr-only` „Wird geladen …"; bei 500 px scrollt er (426/818) | ✓ |
+| Spuren, keine Überläufe | `…register--filled`: `182px 220px 120px 130px 130px` bei 1440/1024, `160px …` ab 760; im Ladezustand dieselben Spuren. **0** Zellenüberläufe bei allen fünf Breiten | ✓ |
+| Tabelle statt Listbox | 1 `table` im Story-Baum, 5 `th`, 45 `td`, 9 `.v2rowbtn`; `role=option`, `role=listbox`, `aria-activedescendant`, `aria-selected` je **0×** | ✓ |
+| Reihenfolge aus `sortByDominance`, Quelle je Zeile, `immutable` an der Zeile | DOM-Reihenfolge unverändert: opos_anchor · mirror_ref · datev_correction · case_decision · link · invoice_number · journal_line · bank_purpose · case_summary, alle neun Quellenwörter in Spalte 2, Marke „DATEV" an den Zeilen 0–2, „verwaist" an der `link`-Zeile | ✓ |
+| Tastatur ↑/↓/`Enter`/`Esc` | s. M3; `Esc` erreicht `document` mit `defaultPrevented=false`, Ziel `BUTTON` | ✓ |
+| `maxLength` hält bei 36, ohne stilles Abschneiden | `…field--interactive`: Feld auf 8 Zeichen, `Input.insertText` mit 44 → Wert 36, Grenzzeile erscheint, Echo „36 von 36 Zeichen". Im Editor dasselbe. `maxLength=36` am Element | ✓ |
+| Abweichung als Hinweis, nicht als Fehler | `…field--diverging`: zwei `.v2dnf__hint`, `role=null`, `[role=alert]` 0×, `.v2in--invalid` 0×, `aria-invalid` 0×, Farbe `rgb(92,92,92)`. Klick auf die Nummer setzt `b5` von „RE 2026 140" auf „RE-2026-0140" (Hinweise 2 → 1), zweiter Klick ebenso für `b6` (1 → 0) | ✓ |
+| Übernahme im Editor | Klick auf die Hinweis-Nummer setzt das Feld auf „RE-2026-0140", die Zeile fällt von 90,6 auf **65,2** px, Hinweise 2 → 1 | ✓ |
+| Leer / leer nach Filter | beide ohne Tabelle, mit Grund und Ausweg; bei 1440 und 500 **0** Elemente außerhalb der Karte | ✓ |
+| Lupe vorhanden/weggelassen | `…field--with-register`: zwei Felder, **eine** `.v2dnf__search`, `aria-label` „Belegnummern-Register öffnen", Klick → „Register 1× geöffnet." | ✓ |
+| `id` an allen Feldern | fünf Feld-Stories: **9 von 9** `label[for]` (b1–b9) lösen auf ein `INPUT` auf | ✓ |
+| `invalid` nur als Rahmen | `…field--filled`: 1× `.v2in--invalid`, 1× `aria-invalid`, `[role=alert]` 0×, kein eigener Text | ✓ |
+
+Von dem, was hielt, ist nichts gefallen.
+
+### Mängel dieser Runde
+
+**M1 — die dominante Nummer kürzt nicht; der Hinweis verlässt in 96 px seine Spalte (blockiert).**
+Die Nacharbeit nennt zwei Hälften: die Grenzzeile (hält, s. oben) und „dazu
+kürzt die dominante Nummer im schmalen Fall (`.v2dnf__num`)". Die zweite Hälfte
+greift nicht. `.v2dnf__num` bekommt `max-width: 100%`, steht aber im
+`TextButton` — und der ist `display: inline-block` mit `max-width: none`, also
+schrumpf-auf-Inhalt: die 100 % lösen sich gegen eine Breite auf, die der Inhalt
+selbst bestimmt, und begrenzen nichts. Das dazu gesetzte `white-space: nowrap`
+gibt dem `<p class="v2dnf__hint">` dann einen großen Mindestbeitrag, und als
+Rasterkind mit `min-width: auto` dehnt es die Spur.
+
+- *Im Editor*, 1440, dominante Nummer mit 36 Zeichen ohne Trennzeichen (nur der
+  **Textknoten** von `.v2dnf__num` zur Laufzeit gesetzt — geprüft wird das CSS):
+  Feld **96 px**, `.v2dnf__hint` **295,9 px**, Überstand über die rechte
+  Feldkante **199,9 px**; `.v2dnf__num` `clientWidth 296 = scrollWidth 296`,
+  also **kein** Kürzen. Alle Vorfahren bis `.v2card` stehen auf
+  `overflow-x: visible`, der Text läuft also über die Zeile: er kreuzt das
+  Buchungstext-Feld (`.v2in`, l 609–859, t 124,2–153,5) auf 5,7 px Höhe und
+  steht darunter frei über der Nachbarspalte.
+- *In der eigenen Story*, `…field--edge` (Feld b9, 36-stellige dominante
+  Nummer), Behälter zur Laufzeit auf dieselben 96 px: Hinweis **275,2 px**,
+  Überstand **179,2 px**, `client 275 = scroll 275`. Bei 372 px bricht dieselbe
+  Zeile auf 4 Zeilen um und läuft **nicht** über (Überstand 0) — die Story
+  beweist den Fall also weiterhin nicht.
+- *Gegenprobe im selben Lauf:* `.v2dnf__hint { min-width: 0 }` allein bringt den
+  Absatz auf 96 px zurück, die Nummer läuft aber weiter (`client 296 = scroll
+  296`). Erst zusammen mit `max-width: 100%; overflow: hidden` am Knopf greift
+  die Ellipse: Hinweis 96 px, `client 96 / scroll 296`, Überstand 0.
+
+Vor der Nacharbeit war derselbe Fall eingefasst (4 Zeilen, 78 px, Zeile 149 px);
+jetzt ist er eine Zeile, die 200 px weit aus der Spalte läuft. Das Kriterium
+„sehr lange dominante Nummer bricht das Layout nicht" hält damit nur in der
+Breite der Fixture-Story, nicht in der, in der der Baustein steht — dieselbe
+Falle, die die Nacharbeit eine Zeile höher selbst benennt.
+*Vorschlag:* `min-width: 0` am `.v2dnf__hint` **und** `max-width: 100%;
+overflow: hidden` am Knopf der Hinweiszeile (gemessen wirksam, s. o.); der
+ganze Satz steht ohnehin schon im `title` und im Zugänglichkeitsbaum.
+
+**M2 — der deutsche Kommentar ist zurück (nicht blockierend).**
+M4 der ersten Runde war in der zweiten als behoben vermerkt („kein deutscher
+Kommentar mehr in beiden Bausteinen"). Die Nacharbeit hat drei neue deutsche
+Blöcke eingetragen: `DocumentNumberField.tsx:112–115`,
+`DocumentNumberField.tsx:135–136` und `DocumentNumberRegister.tsx:106–109`.
+`CLAUDE.md` verlangt englische Kommentare, Deutsch nur in Nutzertexten. Der
+Block bei `Field.tsx:135–136` behauptet dazu etwas Falsches („sie kürzt hier"
+— s. M1). *Vorschlag:* übersetzen, und den Satz bei 135–136 an das anpassen,
+was der Code dann tut.
+
+### Befunde am Set, ohne Nacharbeit
+
+- **Unverändert offen und nicht 0014-eigen:** `.bse__row .v2in { padding: 4px
+  7px }` schlägt die feldeigenen `--search`-Polster; trifft 0013 genauso,
+  gehört in eine eigene Aufgabe.
+- Ladezustand ohne `HeadRow` (das einzige `thead` im Baum gehört Storybooks
+  verstecktem `sb-argstableBlock`), Grenzzeile ohne Live-Region, `.v2dnr__datev`
+  weiterhin tot, Label-Typen in `index.ts` weiterhin unter `/* DATEV-Snapshot */`
+  — alle vier unverändert aus den letzten beiden Runden.
+- Das `sr-only`-Muster der Nacharbeit ist in `v3.css` ausgeschrieben statt über
+  die Klasse `sr-only`, die `Cells.tsx` und `Skeleton.tsx` benutzen. Hier
+  richtig so — die Klasse gilt immer, das Muster hier nur in der
+  Container-Abfrage —, aber im Set gibt es für `sr-only` keine eigene Regel;
+  sie kommt aus Tailwind. Eigene Aufgabe, wenn Tailwind einmal fällt.
+- **Kein Rückgabegrund:** das Register unter rund 380 px Inhaltsbreite (nur die
+  Nummernspalte ohne ihren Grund) ist an **0052** verwiesen.
+
+Abgenommen von / am: fremde Abnahme-Sitzung (kein Bau, kein Chat-Verlauf),
+2026-09-07 (dritte Runde) · Offene Punkte: M1 blockiert; M2 nachziehen.
+
+## Nach der dritten Abnahme (2026-09-07): eine Grenze allein ist keine
+
+Die drei nachgearbeiteten Punkte halten alle — die Abnahme hat sie mit echten
+36 Zeichen, am Zugänglichkeitsbaum und mit echten Tastendrücken geprüft.
+Zurück kam sie an der **zweiten Hälfte** meiner eigenen Nacharbeit.
+
+**M1 erledigt — und der Grund ist lehrreich.** Ich hatte der Nummer
+`max-width: 100%` gegeben und gedacht, damit sei sie eingefasst. Sie stand
+aber in einem `TextButton`, der als `inline-block` auf seinen Inhalt
+schrumpft — 100 % von „so breit wie nötig" ist keine Grenze. Das zusätzliche
+`nowrap` dehnte dann den Absatz, der als Rasterkind ohnehin `min-width: auto`
+hat. Gemessen: Hinweis **295,9 px** in einem 96-px-Feld, **200 px Überstand**,
+kein Vorfahre mit `overflow` — der Text kreuzte das Nachbarfeld. Vorher war
+derselbe Fall wenigstens eingefasst (vier Zeilen, 78 px); meine „Verbesserung"
+hat ihn schlimmer gemacht.
+
+**Beide brauchen ihre Grenze, sonst hat keiner eine:** `min-width: 0` am
+Absatz **und** `max-width: 100%; overflow: hidden` am Knopf. Gemessen mit
+einer 32-stelligen Nummer ohne Trennzeichen im Editor: Feld 96, Hinweis 96
+(`client` = `scroll` = 96), **Überstand 0**, die Nummer kürzt (Box 96, Inhalt
+247), Zeile 91 px.
+
+**M2 erledigt** — drei deutsche Kommentarblöcke waren mit meiner Nacharbeit
+zurückgekommen, obwohl derselbe Mangel eine Runde zuvor behoben war; einer
+behauptete zudem „sie kürzt hier", was zu dem Zeitpunkt nicht stimmte. Alle
+drei sind Englisch, und der falsche Satz sagt jetzt, **wo** gekürzt wird und
+dass es zwei Grenzen braucht.

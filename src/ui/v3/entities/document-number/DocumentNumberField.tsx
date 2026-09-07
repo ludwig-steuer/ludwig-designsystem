@@ -109,10 +109,10 @@ export function DocumentNumberField({
           className="v2dnf__limit"
           title={`${maxLength} Zeichen — mehr trägt Belegfeld 1 in DATEV nicht.`}
         >
-          {/* Schmal bleibt die Zahl, der Satz geht in den `title` — im Editor
-              ist das Feld 96 px breit, und der ganze Satz wurde dort vier
-              Zeilen hoch (Wiederabnahme 0014). Dieselbe Regel wie beim
-              Hinweis darunter. */}
+          {/* Narrow keeps the number, the sentence moves into the `title`:
+              inside the editor the field is 96 px wide, and the whole sentence
+              grew to four lines there (acceptance of 0014). Same rule as the
+              hint below. */}
           <span className="v2dnf__wide">{maxLength} Zeichen — mehr trägt Belegfeld 1 in DATEV nicht.</span>
           <span className="v2dnf__narrow" aria-hidden="true">
             {maxLength}/{maxLength}
@@ -132,8 +132,10 @@ export function DocumentNumberField({
               in the `title`, so nothing is lost, it is only shorter. */}
           <span className="v2dnf__wide">Für diesen Vorgang gilt </span>
           <TextButton onClick={() => onChange(dominant.documentNumber)}>
-            {/* Eine 36-stellige Nummer bricht in 96 px auf vier Zeilen; sie
-                kürzt hier und steht vollständig im `title` des Absatzes. */}
+            {/* A 36-character number breaks into four lines at 96 px. It is
+                truncated by the stylesheet — which needs a limit on **both**
+                the paragraph and this button, or neither has one (acceptance
+                of 0014, third round) — and stands in full in the `title`. */}
             <span className="v2dnf__num">{dominant.documentNumber}</span>
           </TextButton>{" "}
           <span className="v2dnf__src v2dnf__wide">({sourceLabel[dominant.source]})</span>
