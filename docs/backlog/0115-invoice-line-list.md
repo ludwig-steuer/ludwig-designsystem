@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit |
+| Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/invoice-line/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: sie zeigt Rechnungspositionen mit ihrer Ludwig-Einordnung |
 | Quelle | Entitätsprofil `docs/entitaeten/invoice-line.md` (Status `geprüft`), Abschnitt **Listen** — Job-Satz, Grundgesamtheit und Mechanik stammen von dort |
@@ -154,3 +155,11 @@ Variabel (aus dieser Spec):
 | … | … | … |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Job-Satz, Mechanik (p50 1, p90 5, max 22 — kein Pager, kein Filter, kein Ladefall), Leerfall und „ersetzt" aus dem Profil; kein `DataTable`, die Begründung hält; passt in den `children`-Slot von `SourceDocumentView`. Entscheide: die Summe läuft über die **nicht deaktivierten** Zeilen — `disabled` sind vom Beleg-Kollaps ersetzt, `virtual_aggregate` ist ihr Sammel-Item, sonst zählt jede kollabierte Rechnung doppelt · `summary_total`-Zeilen (40 im Bestand) werden mitsummiert, die Abweichung ist genau die Information der Probe; `TotalMismatch` nimmt diesen Fall als Fixture · Taste: eigener `keydown`-Listener für Alt+E wie im `JournalEntryEditor`, Taste als Text im Segment-Label („Erweitert · Alt+E") — `useHotkeys` verwirft Alt, `Segmented` hat keinen `Kbd`-Slot; `E`, weil J/K dem Pager gehören.
+
+Vor dem Bau in die Spec: (a) Summen-Kriterium: „Summe der `lineTotalNetValue` über die nicht deaktivierten Zeilen", `Edges` (zwei deaktivierte plus Aggregat) beweist es nachgerechnet; (b) `invoiceNetTotal` mit Quelle `InvoiceDetail.subtotalValue` (netto; `totalValue` ist brutto); (c) Tastenmechanik und Ort der Taste wie entschieden; (d) Chevron-Spur `var(--v2-tbl-pick)` und leere Kopfzelle bei `renderFacts`; Umschalter nur bei ≥ 1 Zeile (V14); (e) Kriterium „einzeilig" → „drei Zeilen, die Bezeichnung bricht bei 93 Zeichen nicht um" (0072); (f) React-Key ist `position` (UNIQUE je Rechnung), `InvoiceLineItem` hat keine `id`; (g) Abschnitt „Offene Fragen" nachtragen.
+
+Register-Kosmetik: Abschnitt E nennt noch „Positionen und Vorsteuer (0072)" — die Vorsteuer gehört der Rechnung, 0072 hat `VorsteuerTab` gestrichen; und 0078 sagt „0072 (Kontenkandidaten mit Konfidenz)" — die Zeile trägt `fundUsageConfidence`, keine Kontokandidaten.

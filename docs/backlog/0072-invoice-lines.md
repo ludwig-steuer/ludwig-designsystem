@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit |
+| Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/invoice-line/` — eigene Entitäts-Familie, nicht Teil von `entities/source-document/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: USt-Sonderfall, Verwendungsart und Steuerschlüssel-Kandidaten sind Ludwig-Fachbegriffe |
 | Quelle | Entitätsprofil `docs/entitaeten/invoice-line.md` (Status `geprüft`, 726 Zeilen aus Staging) — Datenpunkte, Ränge und „ersetzt" stammen von dort |
@@ -202,3 +203,11 @@ Variabel (aus dieser Spec):
 | … | … | … |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Ränge, Relationen und „ersetzt" wörtlich aus dem Profil; die drei Entscheidungen des Autors tragen: `labels` als ein Prop mit Rohwert-Rückfall (R1, Präzedenz L-96), kontrolliertes Paar `open`/`onOpenChange` an `ExpandableRow` (§3 Regel 2, zweiter Abnehmer `DataTable.expand`), nichts bauen, was gemessen leer ist. Entscheide zu den abgeleiteten Fragen: der Streifen liegt als dritte Zeile in der Bezeichnungs-Zelle (`density="wide"`), kein neues Layout-CSS · die Zeile ist immer EUR (GLOSSARY *Transaction currency*: die `*_value`-Felder sind EUR, `InvoiceLineItem` hat keine Währungsspalte) — hinschreiben · `itemName` bei `null`: erste Zeile von `productDescription`, sonst „Position n".
+
+Vor dem Bau in die Spec: (a) Typ-Satz: `confidenceLevel`/`ConfidenceLevel` aus `src/ludwig/shared/confidence.ts` statt `confidenceBand` — `Confidence` nimmt `level` (Achse `konfidenz`), `value` zeigt den Prozentwert; (b) „Setzt auf": `formatDate` gibt es nicht und die Zeile zeigt kein Datum; `formatCount` rundet auf ganze Zahlen — für `quantity` (2,5 h) `formatAmount(q, null)` bzw. `Amount currency={null}`; USt-Satz als `${taxRatePercent} %` in `v2num`; (c) Spaltenzahl vereinheitlichen: sechs Datenspalten plus Chevron-Spur `var(--v2-tbl-pick)` nur mit `children`, `InUse` mit der leeren Kopfzelle wie `DataTable.tsx:243`; (d) Streifen-Ort und EUR-Regel als Satz in „Verhalten"; in `Edges` „Fremdwährung" streichen (Rang 22 ist Fakten-Sache); (e) Befund-Nummern: B4/B5/B6 → L-201/L-202/L-203; (f) Abschnitt „Offene Fragen" mit den drei Entscheiden oben nachtragen (Skill §8.4).
+
+Familie: Typen aus `InvoiceLineItem` (Spiegel) und `InvoiceLineLabels` in einer Datei `entities/invoice-line/invoice-line.ts`, dazu `fixtures.ts` mit den 22 Positionen für alle drei Story-Dateien. Gedämpfte Zeilen brauchen eine eigene Klasse (`is-dimmed` gibt es nur an `.abn__step`) — Präfix vorher greppen.

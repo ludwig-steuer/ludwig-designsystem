@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | in Arbeit |
+| Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/invoice-line/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungsgegenstand, USt-Sonderbehandlung und DATEV-Steuerschlüssel sind Ludwig-Fachbegriffe |
 | Quelle | Entitätsprofil `docs/entitaeten/invoice-line.md` (Status `geprüft`), Formen-Tabelle · Ränge 11, 14, 16–25 |
@@ -163,3 +164,9 @@ Variabel (aus dieser Spec):
 | … | … | … |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Freigabe (2026-09-07, designsystem-f0 im Auftrag des Owners)
+
+**Urteil: freigeben mit Änderung.** Ränge exakt nach der Formen-Tabelle; die Abweichung „Steuerschlüssel als eigener Block, nicht am USt-Sonderfall" trägt — sie ist im Profil (P12) entschieden, 423 von 440 Kandidatenlisten wären sonst unsichtbar. Historie-Untertabelle und Rabatt nicht bauen, Trigger im Ausbau. Entscheide: Währung des Fremdwährungs-Blocks als Prop `fxCurrency?: string` (Pflicht, sobald ein `fx*`-Wert gesetzt ist; Quelle `InvoiceDetail.fxCurrency` — `Amount` wirft bei nackter Zahl) · `tone` streichen, immer `bare`, die Stories rahmen mit `Card` (kein Abnehmer, A12) · Kollaps-Kasten: „erscheint nur, wenn `collapse` gesetzt ist; die Story setzt es auf der Aggregat-Zeile".
+
+Vor dem Bau in die Spec: (a) Prop `fxCurrency` in die Schnittstelle, Story `ForeignCurrency` beweist sie; (b) `notes` auf Belegstellen und USt-Notizen eingrenzen — `line.lineNotes` ist typisiert und wird von der Form selbst gelesen; (c) „Setzt auf": `formatTime(d, "date")`/`Time` statt `formatDate`, Prozent wie in 0072; (d) `tone` streichen, Kollaps-Kriterium umformulieren; (e) „B7" → L-204, mit Präzisierung: der Typ hat vier `unknown`-Felder (`historyCandidates` dazu); (f) Abschnitt „Offene Fragen" nachtragen.
