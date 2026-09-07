@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `src/styles/v3.css` — eine Regel, aber jedes Formular im Set |
 | Quelle | Vier unabhängige Abnahmen am 2026-09-05: 0017 (RadioGroup), 0079 (Wizard), Paket 0019/0020/0021/0028 und Paket 0016/0017/0031/0034/0038 — die letzte hat den Umfang nachgezählt |
 | Auftrag | `.v2field__label` (`src/styles/v3.css`, Z. 842–845) setzt `text-transform: uppercase`. Damit steht **jede** Feldbeschriftung des Sets in Versalien: „BRUTTOBETRAG", „BELEGE HOCHLADEN", „TRENNZEICHEN", `<legend>ANTWORT</legend>`. T3 verbietet Versalien ausdrücklich und nennt `text-transform: uppercase` als Gegenbeispiel; A2 sagt dasselbe für den Spaltenkopf. |

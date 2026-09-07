@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `patterns/` |
 | Quelle | Abnahme von 0087 (fremder Agent, 2026-09-05), Mangel M6 · `docs/backlog/0087-icon-registry.md`, Befund B3 |
 | Auftrag | `patterns/Process.tsx` zeichnet den Staffelstab („wer ist dran") mit einer eigenen Tabelle `OWNER_ICON`. Vier ihrer acht Einträge sind **Entitäten**, die die Registry benennt — und zwei davon mit einem anderen Zeichen: Kanzlei steht dort auf `Building2` (Registry: der **Geschäftspartner**), Mandant auf `UserRound` (Registry: der **Benutzer**; der Mandant trägt `Briefcase`). Zwei Bilder derselben Sache im selben Set — genau die Drift, gegen die 0087 gebaut wurde. |

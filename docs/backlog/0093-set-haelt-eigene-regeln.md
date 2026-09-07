@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | quer durch `src/ui/v3` und `src/styles/` |
 | Quelle | Abnahme Paket 0002/0005/0008/0009/0013 (2026-09-05), Befunde 3–6; Paket 0032/0033/0037/0041/0051 (`format.ts` ohne `@when`); Paket 0059/0060/0061/0064 (Punkt e) |
 | Auftrag | Fünf Verstöße gegen Regeln, die das Set selbst aufstellt. Einzeln sind sie klein, zusammen sind sie der Grund, warum eine Abnahme sie jedes Mal wieder findet. Punkt (e) hält heute eine Aufgabe auf (0059). |
