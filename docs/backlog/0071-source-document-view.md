@@ -324,9 +324,9 @@ Variabel:
 - [ ] Der Drawer rendert **dieselbe** Karte (`grep`: `SourceDocumentCard` in `SourceDocumentDrawer.tsx`)
 - [ ] Ein fehlender Pflichtwert steht **an der Stelle des Wertes** (Story `Missing`, gemessen)
 - [ ] Ein `missing`-Eintrag ohne passende Zeile geht nicht verloren (Story `Missing`, zweiter Eintrag)
-- [ ] Die Fakten-Spalte ist `minmax(400px, 560px)`; die Karte misst **sich selbst**, nicht das Fenster (gemessen: im Drawer eine Spalte, auf der Seite zwei)
+- [ ] Die Fakten-Spalte ist `minmax(384px, 560px)`; die Karte misst **sich selbst**, nicht das Fenster — Nachweis berichtigt am 2026-09-07, siehe „Nach der Abnahme"
 - [ ] Im Kopf führt die **Erledigung**, nicht die Verarbeitung (Story `Filled`, `grep`)
-- [ ] Bei 1440 × 900 stehen Ränge 1–4 ohne Scrollen (gemessen) — **die Bedingung ist die Fensterhöhe**: die Vorschau ist 62 vh, also gilt der Satz ab ≈ 890 px. Darunter ist das Original angeschnitten; das ist die Grenze, nicht ein Fehler
+- [ ] Bei 1440 × 900 stehen Ränge 1–4 ohne Scrollen (gemessen) — **die Bedingung ist die Fensterhöhe**; die berichtigte Schwelle steht in „Nach der Abnahme": ≈ 1.210 px für die ganze Karte, nicht die ≈ 890 aus dem Story-Rahmen
 - [ ] Ohne `pager` und ohne `tabs` fallen die Zeilen samt Abstand (Story `Bare`, gemessen)
 - [ ] offen (App): ersetzt `SourceDocFamily`, `InvoiceSidebar`, `DocTabsBar`, `SourceDocBelegTab` und den Anzeigeteil von `ContractDetail`
 
@@ -815,3 +815,39 @@ Vorschaurahmens liegen unter der Falz; die ganze Karte steht erst ab rund
 1.210 px Fensterhöhe ohne Scrollen, nicht ab den ≈ 890, die das Kriterium
 nennt. Die Ränge 1, 3 und 4 stehen vollständig darüber — deshalb blockiert es
 nicht.
+
+## Nach der Abnahme — zwei Kriterien berichtigt (2026-09-07)
+
+**Geändert im Auftrag des Owners, designsystem-f0.** Nicht vom Bauenden und
+nicht vom Abnehmenden: beide Sätze waren an der Fixture gerechnet, und ein
+Kriterium ändert nur, wer den Auftrag gibt.
+
+**Kriterium 7** — der Nachweis der Selbstmessung lautete „im Drawer eine
+Spalte, auf der Seite zwei". Das ist vom neuen Spalten-Tor überholt: die Karte
+steht in beiden zweispaltig. Er lautet jetzt:
+
+> Die Karte misst im Drawer bei 1280, 1440 und 1920 dieselben 1.060 px und
+> Spuren, auf der Seite wächst sie mit dem Fenster.
+
+Gemessen: im Drawer 1.060 px und `560px 484px` bei allen drei Fensterbreiten;
+auf der Seite 976 → 1.136 → 1.296 px, Spuren 560/400 → 560/560 → 720/560. Eine
+`@media`-Regel könnte das nicht — sie sähe beide Male dasselbe Fenster.
+
+Die Spurangabe im selben Kriterium heißt außerdem `minmax(384px, 560px)`, nicht
+400: der Freigabe-Entscheid ist entsprechend berichtigt. Der Grund steht an der
+Regel selbst in `v3.css` — mit 400 läge das Tor genau auf der Kartenbreite bei
+1280 px Fensterbreite, und ein Fenster mit klassischer Bildlaufleiste fiele
+unbemerkt auf eine Spalte zurück.
+
+**Kriterium 9** — die senkrechte Schwelle „gilt ab ≈ 890 px Fensterhöhe" war
+im Story-Rahmen gerechnet. Auf der Seite lautet sie:
+
+> Die ganze Karte steht ab ≈ 1.210 px Fensterhöhe ohne Scrollen; bei
+> 1440 × 900 stehen Rang 1, 3 und 4 über der Falz, die unteren 64 px der
+> Vorschau darunter.
+
+Gemessen in der `AppShell`: `.app__main` scrollt dort 117 px, der
+Vorschaurahmen läuft von 406 bis 964. Das ist die Grenze, nicht ein Fehler —
+ein angeschnittenes Original bleibt lesbar, und die Ränge, auf die es ankommt,
+stehen darüber. Die Höhe selbst wird in **0075** gesetzt; dort steht dieselbe
+Berichtigung.

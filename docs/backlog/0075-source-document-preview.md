@@ -296,3 +296,23 @@ steht jetzt bei **960 px** — der Summe der Minima (560 Original, 384 Fakten,
 1.060 px breit und zeigt `560 / 484`, kein Überlauf. Die Werte stehen im
 Drawer also neben dem Original. Der Grund für die Regel bleibt derselbe wie
 im View — sie zählt die Minima, nicht die Breite einer Story.
+
+## Nach der Abnahme — die senkrechte Schwelle berichtigt (2026-09-07)
+
+**Geändert im Auftrag des Owners, designsystem-f0.**
+
+Die Schwelle „Ränge 1–4 ohne Scrollen gilt ab ≈ 890 px Fensterhöhe" (Nachtrag
+H1 dieser Datei, Kriterium 9 in 0071) war im **Story-Rahmen** gerechnet. Auf
+der Seite gilt:
+
+> Die ganze Karte steht ab ≈ 1.210 px Fensterhöhe ohne Scrollen; bei
+> 1440 × 900 stehen Rang 1, 3 und 4 über der Falz, die unteren 64 px der
+> Vorschau darunter.
+
+Gemessen in der `AppShell` (Story `SourceDocumentView` → `InUse`):
+`.app__main` scrollt 117 px, der Vorschaurahmen läuft von y = 406 bis 964.
+
+Die Zahl steht hier, weil hier die Höhe gesetzt wird
+(`clamp(320px, 62vh, 900px)`). Sie ändert an der Höhe nichts — sie sagt nur,
+was sie auf der Seite bedeutet. Dieselbe Berichtigung steht in 0071 beim
+Kriterium selbst.
