@@ -583,3 +583,13 @@ Layout-Kriterium, das nur im Story-Rahmen gemessen wird, misst die Fixture.**
 - **„Rechnung" viermal auf einem Schirm** (Kopf-Chip, Kartenkopf der Vorschau,
   Faktenzeile „Belegart", Blocktitel der Ausprägung). Kostet Höhe über der
   Falz. Gehört zu **0075/0076**, wo die Köpfe entstehen.
+
+**Eine Nebenwirkung, die eine offene Frage beantwortet.** Das Tor gilt für die
+Karte, wo immer sie steht — also auch im Drawer. Gemessen in
+`SourceDocumentDrawer` → `Geoeffnet`: die Karte ist dort **1.060 px** breit
+und steht jetzt zweispaltig, `560 / 484`, ohne Überlauf. Vorher war sie
+einspaltig, und genau das hat die Abnahme von **0075** als **M5** gemeldet:
+„im Drawer stehen die Werte nie neben dem Original, weil die Karte dort
+1060 px breit ist und die Zwei-Spalten-Schwelle bei 1180 liegt". Der Befund
+ist damit erledigt — nicht durch eine Sonderregel für den Drawer, sondern
+weil die Schwelle jetzt dort steht, wo die Minima sie hinlegen.

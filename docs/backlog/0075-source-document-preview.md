@@ -288,3 +288,11 @@ zurückgewiesen. Zu Recht:
 die zweite Hälfte davon (**M5**: im Drawer stehen die Werte nie neben dem
 Original, weil die Karte dort 1060 px breit ist und die Zwei-Spalten-Schwelle
 bei 1180 liegt) ist eine Frage an den Drawer, nicht an die Vorschau.
+
+**M5 erledigt (2026-09-07, aus der 0071-Nacharbeit).** Die Zwei-Spalten-Schwelle
+der Karte lag bei 1.180 px und war gegen die Fixture der Story gerechnet; sie
+steht jetzt bei **960 px** — der Summe der Minima (560 Original, 384 Fakten,
+16 Rinne). Gemessen in `SourceDocumentDrawer` → `Geoeffnet`: die Karte ist
+1.060 px breit und zeigt `560 / 484`, kein Überlauf. Die Werte stehen im
+Drawer also neben dem Original. Der Grund für die Regel bleibt derselbe wie
+im View — sie zählt die Minima, nicht die Breite einer Story.

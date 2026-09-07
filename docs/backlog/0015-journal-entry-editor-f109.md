@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | **fertig** — dritte Abnahme am 2026-09-07 freigegeben |
 | Freigabe | zurück 2026-09-06, Owner-Fragen beantwortet 2026-09-07 — Neufassung unten |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | nein — Buchungssatz, Belegfeld, Gegenkonto sind Fachbegriffe |
@@ -178,6 +178,72 @@ Variabel (aus dieser Spec):
 - [ ] S/H des Gegenkontos ist nicht bearbeitbar; der Ausschluss steht im JSDoc
 
 ## Abnahme
+
+**Dritte Abnahme 2026-09-07 (dritter Durchgang), gegen die Nacharbeit
+`ca0f07c`. Urteil: freigegeben.**
+
+Geprüft ist nur, was die zweite Abnahme offengelassen hat: M1b, und ob die
+Übersetzung etwas kaputtgemacht hat. Gemessen im laufenden Storybook
+(Dev-Server `http://localhost:6107`, er serviert die Quelle); Klicken und
+Lesen je in einem eigenen `Runtime.evaluate`, sonst zeigt die Klappe den
+Stand vor dem Re-Render.
+
+### M1b — erledigt
+
+- **Alle in dieser und der vorigen Runde hinzugefügten Kommentar- und
+  JSDoc-Zeilen sind englisch.** `git diff f37c1c3..HEAD --
+  …/JournalEntryEditor.tsx`, alle hinzugefügten Kommentarzeilen einzeln
+  durchgesehen: kein deutscher Satz mehr. Die sechs benannten Blöcke stehen
+  übersetzt (Steuerzeile, Belegfeld-1-Baustein, Übernahme-Knopf,
+  Buchungstext im Journal, Text der Steuerzeile, Text des Gegenkontos), dazu
+  der JSDoc von `Meldungsblock` und ein neuer englischer Block am
+  `hints`-Zweig, der den Grund für M14 festhält.
+- **Die deutschen Anführungszeichen der Prop-Zeile sind gerade Zeichen:**
+  `/** Set → the "apply to all rows" button stands under this row's field. */`
+  (Z. 637). Ein `grep` auf typografisch deutsche Anführungszeichen findet in
+  der Datei noch vier Treffer (Z. 54, 67, 70, 856) — `git blame` weist jeden
+  einem Commit **vor** dieser Aufgabe zu (Erstbestückung, 0043-Nachlese,
+  Umbenennungen aus 0001). Sie fallen unter M16 und nicht unter diese Runde.
+- **Deutsch steht nur noch, wo es hingehört:** die Knopfbeschriftung
+  „Belegfeld 1 in alle Zeilen übernehmen" und die Story-Daten
+  („Bürobedarf August", „Kreditor des Belegs") sind Nutzertext; die
+  Story-JSDocs sind die Storybook-Beschreibung und damit ebenfalls Nutzertext
+  (Hauspraxis, so von der 0062-Abnahme angenommen).
+
+### Die Übersetzung hat nichts kaputtgemacht
+
+Die beim Ersetzen kurzzeitig verlorene Zeile `name:` ist zurück — nachgemessen,
+nicht am Code abgelesen:
+
+| Messung | Ergebnis |
+|---|---|
+| `--s-2-split-full`, Journalklappe geklickt, danach gelesen | fünf Zeilen, jede mit Konto **und** Kontoname: `6815 · Bürobedarf`, `1406 · Abziehbare Vorsteuer 19 %`, `6845 · EDV-Zubehör`, `1406 · Abziehbare Vorsteuer 19 %`, `70044 · Bürobedarf Meier GmbH`; Kopfzeile `Konto · Kontoname · Buchungstext · Soll Umsatz · Haben Umsatz` |
+| dieselbe Story, Summen | 840,34 + 159,66 + 399,66 + 75,94 im Soll, 1.475,60 im Haben, Summenzeile `Σ S 1.475,60 € = Σ H 1.475,60 €` — Steuersplit und eingerechnetes Gegenkonto rechnen wie vorher |
+| `--journal-with-posting-text` als Gegenprobe | dieselben fünf Zeilen mit Name und Buchungstext, `Σ S 1.565,50 € = Σ H 1.565,50 €` — Zahl für Zahl die Messung der zweiten Abnahme |
+| Sweep über alle 17 Story-Ids | jede gerendert (`.bse` vorhanden), keine einzige Konsolenmeldung |
+| `pnpm typecheck` | `tsc --noEmit`, EXIT=0 |
+| `pnpm build` | Storybook build completed successfully, EXIT=0 |
+
+**Der Diff von `ca0f07c` enthält nichts als Text.** In beiden `.tsx`-Dateien
+sind sämtliche geänderten Zeilen Kommentar-, JSDoc- oder JSX-Kommentarzeilen;
+keine Anweisung, keine Prop, kein Markup hat sich bewegt. Die in der zweiten
+Runde bestandenen Kriterien können dadurch nicht beschädigt sein — die
+Live-Messungen und der Sweep bestätigen es.
+
+Der mitgegangene Nachtrag an der Story `Empty` stimmt jetzt mit der Messung
+überein: `--empty` zeigt den Hinweis „Noch keine Zeile — mit + Zeile (Split)
+beginnen.", `.v2msg--hint .v2pp__code` → 0, „Keine Buchungszeilen." steht,
+Speichern `disabled: true`. Damit ist M14 als Absicht festgehalten statt als
+Widerspruch zwischen JSDoc und Anzeige.
+
+### Offen, aber nicht blockierend
+
+Unverändert und an ihre Adressen verwiesen: M4, M5, M6, M7 und M11 in dieser
+Datei; M12, M13 und M16 an 0113 beziehungsweise 0013. M15 (falscher Dateiname
+in 0113) ist mit `ca0f07c` erledigt.
+
+Abgenommen von / am: designsystem-abnahme, 2026-09-07 (dritter Durchgang) ·
+Urteil: **freigegeben**, keine offenen blockierenden Punkte.
 
 **Wiederabnahme 2026-09-07 (zweiter Durchgang), gegen die Neufassung
 2026-09-07. Urteil: zurück** — ein blockierender Mangel (M1b), alles andere
