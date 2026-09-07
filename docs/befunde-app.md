@@ -172,10 +172,12 @@ Specs als Kriterien „offen (App)": hier nicht erfüllbar, weil dieses Repo das
 ausgelagerte Design-System ist (`docs/backlog/README.md`).
 
 **Stand der Migration (Rolle A, nachgesehen am 2026-09-07):** 141 Dateien der
-App importieren aus dem Set, 208 Import-Zeilen. Erledigte Zeilen sind
-durchgestrichen und nennen den Commit der App-Seite — wer hier etwas ablöst,
-trägt es selbst ein; gefunden wurde das hier durch Nachsehen, nicht durch eine
-Meldung.
+App importieren aus dem Set, 208 Import-Zeilen, **68 verschiedene Namen — alle
+im Barrel vorhanden** (maschinell gegen `src/ui/v3/index.ts` geprüft, kein
+toter Import). Erledigte Zeilen sind durchgestrichen und nennen den Commit der
+App-Seite — wer hier etwas ablöst, trägt es selbst ein; gefunden wurde das
+hier durch Nachsehen, nicht durch eine Meldung.
+
 | v3-Baustein | Ersetzt in der App | Bewusst nicht mitgenommen |
 |---|---|---|
 | ~~`Drawer` / `DrawerFooter` (0042)~~ | ~~`ui/components/primitives/Drawer.tsx`~~ — **erledigt (App-Seite): Commit `26a593d7`.** Die Datei ist weg, `UrlDrawer` baut auf dem Set auf | — |
