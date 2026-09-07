@@ -3152,8 +3152,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2exp:last-child .v2exp__row { border-bottom: none; }
 .v2exp__title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-/* Der Titel kürzt, statt die Zeile zu dehnen — wie `.v2case` seit 0095. */
-.v2exp__title > :first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Der Titel kürzt, statt die Zeile zu dehnen — wie `.v2case` seit 0095.
+   An der **Klasse**, nicht an `:first-child`: der Titel ist in beiden Zweigen
+   ein Element mit `.v2exp__label`, und eine Positionsregel würde wieder die
+   Notiz treffen, sobald etwas anderes vorne steht (Wiederabnahme 0025, M11 —
+   Kommentar und Bau sagten Verschiedenes). */
+.v2exp__title > .v2exp__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2exp__note { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 .v2exp__due { font-size: var(--fs-ui-sm); color: var(--color-text-muted); white-space: nowrap; }
 .v2exp__kind,

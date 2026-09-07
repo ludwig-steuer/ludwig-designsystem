@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/expectation/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, „was noch fehlt" hängt am Sachverhalt |
@@ -801,3 +801,201 @@ Komponente. Der Import kommt deshalb unter dem Namen der Sache herein
 (`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
 Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
 schreibt. Eine kurze Bestätigung steht aus.
+
+## Wiederabnahme (2026-09-07, vierte Runde, fremd — ohne Bau und ohne Chatverlauf)
+
+Gegenstand: der **Typtausch** (`86d34cd`, Spiegel nachgezogen mit `0550d9c`),
+die Nacharbeit der dritten Runde (M8, M9) und die Kriterien insgesamt.
+Gemessen am laufenden Dev-Server (`http://localhost:6107`) über CDP, Arbeitsbaum
+auf `0550d9c`. Kein Wert ist aus der Quelle zurückgelesen: jede Zeilenbreite
+wurde im selben Lauf gesetzt und die Antwort darauf gemessen. Nicht gebaut
+(mehrere Prüfer im selben Baum, Aufgabe 0117).
+
+**Werkzeuge:** `pnpm typecheck` Exit 0 · `pnpm check:icons` Exit 0 ·
+`pnpm check:contrast` Exit 0.
+
+### Der Typtausch — stimmt, was der Nachtrag behauptet?
+
+Der Tausch hat **nur den Typblock** angefasst: `git show 86d34cd -- entities/expectation/`
+meldet eine Datei, 17 Zeilen zu, 14 weg, alles zwischen `export interface
+ExpectationVM` und der schließenden Klammer. Kein Story-Code, kein CSS, kein
+Render-Zweig. Was auf dem Bildschirm steht, kann sich davon nicht geändert
+haben — und tut es gemessen auch nicht: Chip-Texte, die vier Reifewörter samt
+Achsen-Tooltip, „412,00 CHF" in `in-case`, die drei absoluten Fristen, die
+Spurbreiten und der Rundlauf reproduzieren die Zahlen der dritten Abnahme.
+
+Feld für Feld gegen `domain/expectation.ts`:
+
+| Feld | Herkunft |
+|---|---|
+| `expectedDocumentKind`, `expectedCounterpartyName`, `expectedAmount`, `note` | aus dem Spiegel (`Partial<ExpectationRow>`) — die lokalen Deklarationen sind weg |
+| `id`, `kind`, `dueDate`, `escalationLevel` | lokal **nur verpflichtend gemacht**; Typ identisch, `kind` über `ExpectationKind` aus `domain/case` |
+| `audience` | lokal als **Literal-Union** neu geschrieben, statt `ExpectationAudience` zu importieren → **M10** |
+| `resolvedAt` | lokal, L-205, als solches markiert — richtig |
+
+Dass `resolvedAt` den Tausch überlebt hat, ist nicht gelesen, sondern gemessen:
+`maturities` Zeile 4 (`dueDate` 2026-08-20, `today` 2026-09-06,
+`resolvedAt` 2026-08-29) zeigt **„Erledigt"**. Wäre das Feld beim Tausch
+verlorengegangen, stünde dort „Fällig". Zeile 3 (`escalationLevel: 2`) zeigt
+„Eskaliert" — auch dieser Weg trägt.
+
+### M8 (Kürzung) und M1 (Tor) — nachgemessen
+
+Zeilenbreite gesetzt und zurückgemessen, je Breite ein eigener Lauf;
+`interactive` (drei Zeilen mit Handlungsspalte) und `in-case` (drei Zeilen in
+der Karte, deshalb Rahmen = Zeile + 42):
+
+| Zeilenbreite | Modus | Zeilenhöhen | Titelspur | Überlauf `.v2exp` | Dok.-Scroll |
+|---|---|---|---|---|---|
+| 400 · 442 · 480 · 484 · 520 · 522 · 560 · 602 · 644 · 658 · 700 · 737 · 738 · 758 · 762 | flex | 76 · 76 · 75 | volle Breite | 0 | 0 |
+| **779** | flex | 76 · 76 · 75 | volle Breite | 0 | 0 |
+| **780** | grid | **47,1 · 47,1 · 46,1** | 226,3 px | 0 | 0 |
+| 800 · 822 · 858 · 900 · 1116 · 1158 | grid | 47,1 · 47,1 · 46,1 | 246–612 px | 0 | 0 |
+
+779 → flex, 780 → grid: das Tor sitzt, wo der Nachtrag es angibt, und die
+Messung reagiert auf die Änderung. Referenz `.v2tbl__row`: **48,0 px**
+(`datatable--filled`, 50 Zeilen). Kein Kind ragt über sein Elternteil, an
+keiner der 20 Breiten.
+
+**Die Kürzung trifft jetzt den Titel, auch ohne `onOpen`.** Mit
+„Elektro-Grosshandel Nordwest Verwaltungs GmbH & Co. KG" zur Laufzeit in jeden
+Titel gesetzt: `in-case` bei 858 px Zeilenbreite `scrollWidth > clientWidth`,
+Zeilen **47,1 · 47,1 · 46,1 px**. In der dritten Runde stand dort 65,8–66,8 px
+mit ungekürztem Titel — der Mangel ist weg. Und die **Notiz bricht wieder um**
+statt abgeschnitten zu werden: `.v2exp__note` misst `visible | clip | normal`,
+`scrollWidth == clientWidth`, im Bild steht „…der Rest steht aus." vollständig.
+Eine Zeile mit Notiz ist dadurch 66,3 px hoch (Notiz einzeilig, Raster) bis
+96,4 px (Notiz zweizeilig, schmal) — das ist der bewusst gewählte Preis der
+M8-Behebung, kein neuer Mangel.
+
+**Aber die Regel hängt nicht, wo der Nachtrag sie sieht → M11.**
+
+### M6 (Trennlinien) — hält
+
+`borderBottomWidth` je Zeile, vier Stories: `row` 1px · 0px · `in-case`
+1px · 1px · 0px · `interactive` 1px · 1px · 0px · `maturities`
+1px · 1px · 1px · 0px. Nach einem echten Klick auf „Erledigt" in `interactive`
+bleiben 1px · 0px — der Wert wandert mit.
+
+### M9 (Betragsspur) — hält
+
+Spur 126 px. Der Zellinhalt zur Laufzeit auf „1.234.567,89 CHF" gesetzt:
+121,2 px breit, rechte Kante bei x = 745,7, die Frist beginnt bei x = 757,7 —
+die 12-px-Rinne steht, kein Überlauf der Zelle.
+
+### Die Punkte, die vorher hielten
+
+| Punkt | Messung | Ergebnis |
+|---|---|---|
+| Datei, Story, Titel, Barrel | `entities/expectation/Expectation.tsx` + `.stories.tsx`, Titel `v3/Entitäten/Erwartung/Expectation`, Barrel `index.ts:465–470` | hält |
+| genau sieben Stories | `index.json` des Dev-Servers: `chip`, `row`, `maturities`, `empty`, `error`, `interactive`, `in-case` | hält |
+| kein Hex, kein px, keine Label-Map, kein Inline-Stil | Grep über die Komponente: keine Treffer | hält |
+| Reife aus `expectationMaturity` | Import aus `domain/case`; kein Datumsvergleich, kein Schwellwert im Modul | hält |
+| Reife als Wort (V7) | „Läuft", „Fällig", „Eskaliert", „Erledigt", jede mit dem Erklärsatz der Achse im `title` | hält |
+| Status nur über die Registry | `erwartung` und `erwartung_art`; Tooltip gemessen: „Reife: Fällig · Die Frist ist verstrichen. …" | hält |
+| Frist absolut (T7) | „fällig 20.09.2026", „fällig 11.08.2026", „fällig 31.08.2026" | hält |
+| `escalationLevel` nie sichtbar | keine Stufe im Text der Seite | hält |
+| Betrag nur bei `payment` | Chip: zwei Beleg-Chips ohne Zahl, zwei Zahlungs-Chips mit „412,00 €"; Zeile: die Belegzeile hat eine leere `.v2num` | hält |
+| `currency` Pflicht mit Nachweis | `in-case` reicht `"CHF"`, im DOM gemessen „412,00 CHF" | hält |
+| Zahlen rechts mit `tnum` | `.v2num`: `text-align: right`, `lining-nums tabular-nums` | hält |
+| Fokusring, Tastatur, Hover | sechs Stopps (je Zeile Titel + „Erledigt"), Ring `2px solid rgb(59, 143, 196)`, Offset 2 px; Titelknopf `cursor: pointer`; Chip `cursor: auto`, null Knöpfe | hält |
+| Rundlauf `Interactive` | „3 offen · Geöffnet: nichts" → echter Klick Titel → „Geöffnet: e1", drei Zeilen → echter Klick „Erledigt" → „2 offen", die richtigen zwei | hält |
+| `Empty`, `Error` | „Nichts offen." bzw. „…konnten nicht geladen werden: Zeitüberschreitung." | hält |
+
+### Mängel
+
+**M11 · neu · blockiert nicht · Die Kürzung hängt an `:first-child`, nicht an
+der Klasse — Kommentar und Nachtrag sagen etwas anderes.**
+Kriterium: die Nacharbeit muss beschreiben, was sie tut; der Nachtrag „Nach der
+dritten Abnahme" sagt „der Titel ist jetzt immer ein Element (`.v2exp__label`),
+und **die Regel hängt an der Klasse**", ebenso der Kommentar in
+`Expectation.tsx:169–172` („die Kürzung hängt an der Klasse").
+Messung: In `v3.css:3156` steht unverändert
+`.v2exp__title > :first-child { overflow: hidden; text-overflow: ellipsis;
+white-space: nowrap; }`. Über alle geladenen Stylesheets gesucht: **keine
+einzige Regel** nennt `v2exp__label` — die Klasse an `Expectation.tsx:176`
+und `:182` ist tot. Gegenprobe zur Laufzeit in `in-case` bei 858 px mit langem
+Firmennamen: ein unsichtbares `<i>` vor den Titel geschoben → Titelstil kippt
+von `hidden|ellipsis|nowrap` auf `visible|clip|normal`, keine Kürzung mehr,
+Zeilenhöhe **47,1 → 66,8 px**; das `<i>` wieder entfernt → 47,1 px. Die Wirkung
+stimmt heute, weil der Titel immer das erste Element ist — aber sie hängt an
+der Reihenfolge, nicht an der Klasse, und genau das war M8s Fehlerbild.
+Vorschlag: die Regel auf `.v2exp__label` umhängen (ein Selektor) — dann stimmt
+sie mit dem, was Code und Spec über sie behaupten.
+
+**M3 · Rückfall · blockiert nicht · Ein deutscher Kommentar ist wieder im
+Code.**
+Kriterium: fester Block „Code englisch" (`CLAUDE.md`: Kommentare und JSDoc
+englisch, Deutsch nur in Nutzertexten).
+Messung: `Expectation.tsx:169–172` — „Auch ohne `onOpen` ein **Element**: die
+Kürzung hängt an der Klasse, und ein nackter Textknoten nimmt sie nicht an …".
+Eingeführt mit `db68dad` (`git log -S`), also mit derselben Nacharbeit, die
+M3 als erledigt gemeldet hat. Die dritte Abnahme maß vor diesem Commit; ihr
+„keine deutsche Kommentarzeile mehr" war zu dem Zeitpunkt richtig. Die
+Story-JSDocs bleiben deutsch, das ist in Ordnung.
+Vorschlag: übersetzen — und dabei den Satz gleich richtigstellen (M11).
+
+**M10 · neu · blockiert nicht · `audience` ist der zweite lokale Typ, nicht
+`resolvedAt` allein.**
+Kriterium: der Nachtrag „Nach der Abnahme (im Auftrag des Owners)" — „bis dahin
+ist es das einzige Feld dieses Typs, das nicht aus dem Spiegel kommt".
+Messung: `Expectation.tsx:51` schreibt `audience: "client" | "accounting"`;
+der Spiegel führt denselben Wertebereich als `ExpectationAudience`
+(`domain/expectation.ts:19`). Als **Feld** kommt `audience` aus dem Spiegel,
+als **Typ** ist es eine zweite Wahrheit über dieselben zwei Werte — genau das
+Muster, das `0550d9c` eine Datei weiter als L-210 für `ExpectationKind`
+beseitigt hat.
+Vorschlag: `import type { ExpectationAudience }` und `audience: ExpectationAudience`
+— eine Zeile; der Satz im Nachtrag stimmt danach wörtlich.
+
+**M5 · bleibt Vermerk, mit einer Zahl dazu.** `audienceWord()` unverändert,
+gedeckt durch Freigabe-Entscheid 1. Gemessen: **„Nachforderung" steht in
+keiner der fünf zeichnenden Stories** (`chip`, `row`, `maturities`,
+`interactive`, `in-case`) — jede Erwartung mit `audience: "client"` trägt eine
+`expectedDocumentKind`, und dann gewinnt das Wort der Belegart. Der eine der
+beiden Entscheid-1-Wörter hat damit keinen Nachweis auf dem Bildschirm.
+
+**M7 · bleibt Vermerk.** Im einspaltigen Notfall (unter 780 px Zeilenbreite)
+stehen die Spaltenkanten nicht untereinander. Bewusst so.
+
+**M1, M2, M4, M6, M8, M9 · erledigt** — alle sechs oben nachgemessen.
+
+Abgenommen von / am: fremde vierte Abnahme (Claude, ohne Bau und ohne
+Chatverlauf) · 2026-09-07 · Ergebnis: **abgenommen**. Kein Mangel blockiert;
+der Typtausch trägt und ändert nichts am Bild. Nachzuziehen beim nächsten
+Anfassen der Datei: **M11** (Regel auf die Klasse umhängen), **M3** (Kommentar
+übersetzen) und **M10** (`ExpectationAudience` importieren) — zusammen fünf
+Zeilen. **M5** und **M7** bleiben Vermerke.
+
+## Nach der Wiederabnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+Die drei Mängel der vierten Runde sind behoben — keiner blockierte, alle drei
+waren Aussagen, die nicht zum Bau passten.
+
+**M11 — die Regel hängt jetzt an der Klasse, die sie meint.** Kommentar und
+Nachtrag sagten „die Kürzung hängt an der Klasse", `v3.css` hatte
+`.v2exp__title > :first-child`. Berichtigt ist der **Bau**, nicht der Satz: die
+Regel steht auf `.v2exp__label`. Eine Positionsregel würde wieder die Notiz
+treffen, sobald etwas anderes vorne steht — genau das war M8 der dritten Runde.
+
+Gemessen in `Row` bei 900 px, zweite Zeile, mit einem zur Laufzeit gesetzten
+110-Zeichen-Titel:
+
+| | Titel | Notiz |
+|---|---|---|
+| Stile | `hidden` · `ellipsis` · `nowrap` | `visible` · `clip` · `normal` |
+| mit Regel | `scroll 710` in `client 315`, Höhe **20,9 px** (eine Zeile) | 38,8 px |
+| ohne Regel (Gegenprobe) | `scroll 315`, Höhe **62,8 px** (drei Zeilen) | 38,8 px |
+
+Überstand 0 in beiden Fällen; die Notiz bleibt unberührt, und die Messung
+reagiert.
+
+**M3 — der deutsche Kommentar ist wieder Englisch.** Er kam mit `db68dad`
+zurück, also mit derselben Nacharbeit, die den Mangel behob. Er sagt jetzt
+außerdem das Richtige (Klasse statt Position).
+
+**M10 — `audience` kommt aus dem Spiegel.** Der Nachtrag behauptete,
+`resolvedAt` sei das einzige Feld ohne Spiegel-Herkunft; `audience` war als
+Literal-Union nachgeschrieben, obwohl `ExpectationAudience`
+(`domain/expectation.ts`) denselben Wertebereich führt. Jetzt importiert —
+`resolvedAt` ist damit tatsächlich das einzige lokale Feld (L-205).

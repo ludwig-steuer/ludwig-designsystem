@@ -56,14 +56,6 @@ export type SourceDocumentGroup =
   | { pages: string; parentTitle?: string; parentHref?: string };
 
 /**
- * @when    The facts of a document, read-only — in its drawer, its card, its
- *          view; every kind of document, with the fields of its own kind
- *          underneath.
- * @instead A document in a list → SourceDocumentRow. Positions and input tax →
- *          0072. Changing a single value → InlineEdit in the view (0071). The
- *          original itself → SourceDocumentPreview.
- */
-/**
  * A value the document is **missing** and someone has to supply — the
  * document date above all: „Datum fehlt" is the most common defect of the
  * stock (axis `beleg_haenger`) and the main job of the detail page.
@@ -81,6 +73,14 @@ export interface SourceDocumentGap {
   action?: ReactNode;
 }
 
+/**
+ * @when    The facts of a document, read-only — in its drawer, its card, its
+ *          view; every kind of document, with the fields of its own kind
+ *          underneath.
+ * @instead A document in a list → SourceDocumentRow. Positions and input tax →
+ *          0072. Changing a single value → InlineEdit in the view (0071). The
+ *          original itself → SourceDocumentPreview.
+ */
 export function SourceDocumentFacts({
   document,
   summary,

@@ -35,6 +35,11 @@ export type ParsedAmount = number | null | "invalid";
  * jetzt 12345 (der Punkt trennt Tausender, denn hinter ihm stehen vier
  * Ziffern) statt 1,2345. Das ist die Regel der App, und sie ist die richtige —
  * 1,2345 € gibt es nicht.
+ *
+ * @when    Reading what someone typed into a money field — on blur, before
+ *          saving.
+ * @instead Turning a number into text → formatAmount. Parsing an amount that
+ *          comes from data rather than from a person → parseGermanAmount.
  */
 export function parseAmount(raw: string): ParsedAmount {
   const t = raw.replace(/[\s ]/g, "");

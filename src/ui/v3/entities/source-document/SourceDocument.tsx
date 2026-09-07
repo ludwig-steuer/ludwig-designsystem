@@ -132,6 +132,11 @@ export function clipMiddle(text: string, max: number): string {
  * shrinks with an ellipsis, the suffix behind it does not. Without the second
  * half the middle cut would be pointless: the column would simply cut the
  * extension off again.
+ *
+ * @when    A file name stands in a column that can get narrow — a document
+ *          row, the identifier line of a card.
+ * @instead Any other text that has to shrink → `.v2trunc` with a `title`.
+ *          The whole identifier of a document → sourceDocumentIdentifier.
  */
 export function FileName({ value, max }: { value: string; max: number }) {
   const short = clipMiddle(value, max);

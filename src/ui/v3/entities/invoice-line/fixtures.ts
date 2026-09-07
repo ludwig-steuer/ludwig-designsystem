@@ -48,6 +48,7 @@ const BLANK: InvoiceLineItem = {
   collapseDecisionJson: null,
 };
 
+/** One line, built from the blank one — everything not given stays at its default. */
 export function line(over: Partial<InvoiceLineItem> & { position: number }): InvoiceLineItem {
   return { ...BLANK, ...over };
 }

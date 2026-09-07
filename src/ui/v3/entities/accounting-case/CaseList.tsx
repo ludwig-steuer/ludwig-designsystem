@@ -133,7 +133,14 @@ export function CaseList({
   );
 }
 
-/** The track list of the list's own column set — head and rows read the same. */
+/**
+ * The track list of the list's own column set — head and rows read the same.
+ *
+ * @when    Laying out the case list by hand, with `Table` instead of
+ *          `CaseList` — the tracks have to match what `caseColumns()` builds.
+ * @instead The whole list with sorting and pager → CaseList. One row inside
+ *          foreign markup → CaseRow.
+ */
 export function caseListTracks(columns?: CaseColumn[]): string {
   return caseTracks(caseColumns(columns ? { columns } : {}));
 }

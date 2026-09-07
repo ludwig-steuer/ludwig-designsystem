@@ -4,7 +4,10 @@ import {
 } from "@/ludwig/modules/accounting-cases/domain/case";
 // The record is `ExpectationRow` over there and a component here, so it comes
 // in under the name the glossary uses for the thing itself.
-import type { ExpectationRow as Expectation } from "@/ludwig/modules/accounting-cases/domain/expectation";
+import type {
+  ExpectationAudience,
+  ExpectationRow as Expectation,
+} from "@/ludwig/modules/accounting-cases/domain/expectation";
 import type { Currency } from "@/ludwig/shared/money";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { AmountCell } from "../../primitives/Cells";
@@ -48,7 +51,7 @@ export interface ExpectationVM extends Partial<Expectation> {
   /** How often a run has escalated it. **Never** a DATEV dunning level. */
   escalationLevel: number;
   /** Who fetches it (F125): `client` says „Nachforderung", `accounting` „Erwartung". */
-  audience: "client" | "accounting";
+  audience: ExpectationAudience;
   /** Set as soon as the document arrived or the payment came in (L-205). */
   resolvedAt?: string | null;
 }
@@ -166,10 +169,10 @@ export function ExpectationRow({
           />
         </span>
         <span className="v2exp__title">
-          {/* Auch ohne `onOpen` ein **Element**: die Kürzung hängt an der
-              Klasse, und ein nackter Textknoten nimmt sie nicht an — dann
-              kürzte die Regel die Notiz darunter statt des Titels
-              (Wiederabnahme 0025, M8). */}
+          {/* An **element** even without `onOpen`: the clipping hangs on the
+              class `.v2exp__label`, and a bare text node cannot carry it —
+              the rule then clipped the note below instead of the title
+              (acceptance 0025, M8). */}
           {onOpen ? (
             <button
               type="button"
