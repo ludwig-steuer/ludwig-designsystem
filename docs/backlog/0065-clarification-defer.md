@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig (Abnahme 2026-09-07, vierte Runde) |
+| Status | fertig |
 | Freigabe | 2026-09-07, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/clarification/` — Erweiterung von `ClarificationCard` (0060) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: die Regeln (30 Tage, ab der dritten nur ein Mensch) sind Ludwig-Fachlogik |

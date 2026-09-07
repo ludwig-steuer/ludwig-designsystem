@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **fertig** — zweite Abnahme am 2026-09-07 freigegeben; fünf Nachträge (N1–N5) abgearbeitet, N1 wartet auf den Owner |
+| Status | fertig |
 | Freigabe | zurück 2026-09-07 — Zuschnitt neu nach Abschnitt „Freigabe" (Rahmen wie 0050 plus Karte), danach ohne zweite Runde freigegeben |
 | Stufe | `entities/source-document/` — `SourceDocumentView` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Pipeline, Vorsteuer und Belegart sind Ludwig-Fachbegriffe |

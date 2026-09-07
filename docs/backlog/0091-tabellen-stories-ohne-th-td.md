@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | offen |
+| Status | Abnahme |
 | Stufe | Stories unter `src/ui/v3/**` |
 | Quelle | Abnahme Paket 0032/0033/0037/0041/0051, 2026-09-05 |
 | Auftrag | `Table`, `HeadRow` und `Row` sind CSS-Grid-`<div>`s (`Table.tsx:102`, `:118`). **Fünfzehn Story-Dateien** füllen sie trotzdem mit `<th>`/`<td>` — darunter `Amount`, `Time` und bereits abgenommene wie `AppShell`, `Toast`, `FilterBar`. Fünfzehn weitere machen es richtig mit `<div>`, ebenso `DataTable`, `Log` und `ComparisonTable` im Produktivcode. |

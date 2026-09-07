@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **fertig** — dritte Abnahme am 2026-09-07 freigegeben |
+| Status | fertig |
 | Freigabe | zurück 2026-09-06, Owner-Fragen beantwortet 2026-09-07 — Neufassung unten |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | nein — Buchungssatz, Belegfeld, Gegenkonto sind Fachbegriffe |

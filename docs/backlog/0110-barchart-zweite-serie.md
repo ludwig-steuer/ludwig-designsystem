@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `primitives/BarChart.tsx` |
 | Quelle | App-Migration E1.2 (2026-09-06, `designsystem-f0`): `BarChart` (0041) ist nicht formgleich zu `MonthlyBarChart` der App |
 | Ersetzt | `ui/components/primitives/MonthlyBarChart.tsx` — **beide** Aufrufer: das Dashboard und `accounts/[accountNumber]` (Kontoblatt) |

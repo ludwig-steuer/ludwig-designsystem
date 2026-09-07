@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | offen |
+| Status | Abnahme |
 | Stufe | `src/styles/` — keine Komponente, die Schicht unter allen |
 | Quelle | Abnahme 0098 (2026-09-06), Mängel M7 und M9; die Wurzel von M7 stand schon in der ersten Runde von 0097 als Hinweis H1 |
 | Auftrag | Zwei Befunde derselben Schicht: die Reihenfolge der CSS-Kette und die fehlende Rücksicht auf `prefers-reduced-motion` |

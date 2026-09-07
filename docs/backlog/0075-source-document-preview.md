@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme (Änderung der Vorschauhöhe, 2026-09-07) |
+| Status | Abnahme |
 | Stufe | `entities/source-document/` — `SourceDocumentPreview.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **fast**: ein PDF in einem Rahmen ist kein Fachwort. Sie bleibt trotzdem Entität, weil sie zwei fachliche Regeln trägt — der Grund für eine fehlende Vorschau wird ausgesprochen statt bebildert, und ein Teilbeleg sagt, aus welchen Seiten welches Originals er stammt (`splitPageRange`, `parentSourceDocId`). Ohne die zwei wäre sie ein `<iframe>` an der Aufrufstelle. |
 | Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Formen-Tabelle Zeile `SourceDocumentPreview`; Datenpunkte Rang 10 und 12 |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Soll/Haben, Konto, Steuerschlüssel sind Buchhaltung, nicht Layout |
 | Quelle | Anfrage vom 2026-09-03 („eine simplere Version, um einen Buchungssatz nur anzuzeigen, ohne Extras") · `docs/v3-backlog.md` „Nicht `primitives`" (`BookingProposalView`/`-Compact`, `BookingLineRow` fehlen v3) · `docs/ui-repraesentationen.md` §4.4 (Form `Card` für „Buchung") |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | spec |
 | Stufe | `entities/accounting-case/` |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md`, Abschnitt „Listen" |
 | Auftrag | **Ein** Listen-Baustein für alle vier Reiter der Sachverhaltsliste (`laufend` · `belege` · `klaerung` · `alle`) — sie unterscheiden sich nur in der Grundgesamtheit, nicht in Sortierung, Spaltensatz oder Massenaktion, und sind deshalb nach §8 ein Prop, keine vier Komponenten. Ersetzt die Tabelle in `app/(app)/clients/[clientSlug]/[year]/cases/page.tsx` (571 Z.) samt `CaseListFilters` und `CaseListTabsBar`. |
