@@ -5,7 +5,7 @@
 | Status | offen |
 | Stufe | Werkzeug (`.storybook/main.ts`, `package.json`) |
 | Klassen-Test | — keine Komponente |
-| Quelle | **Zwei** Abnahmen am 2026-09-07, unabhängig voneinander: 0027 (einer von vier Läufen) und 0056 (einer von drei) |
+| Quelle | **Fünf** Meldungen am 2026-09-07, unabhängig voneinander: 0027 (einer von vier Läufen), 0056 (einer von drei), 0050 (mit der richtigen Spur) und drei Prüfer, denen der Ordner unter den Füßen wegkam — der letzte Fall mit bekanntem Auslöser, siehe unten |
 | Angelegt von / am | Claude, 2026-09-07 |
 
 ## Was passiert
@@ -55,3 +55,38 @@ schreibt immer nach `storybook-static/`. Der serielle Zweitlauf war grün.
 
 Die Ursache **im** Storybook-Kopierer zu beheben. Wenn sie dort liegt, ist der
 Ausweg, weniger zu kopieren — nicht, das Werkzeug zu reparieren.
+
+## Vierte Meldung — und diesmal mit bekannter Ursache (2026-09-07)
+
+Die Spur aus der 0050-Meldung stimmt: **es ist der zweite Bau im selben
+Ausgabeordner**, und heute ist er nachweisbar, weil ich ihn selbst ausgelöst
+habe. Während drei Prüf-Subagenten gegen `storybook-static/` maßen, lief
+hier `pnpm build` — zweimal, im Rahmen einer anderen Aufgabe. Alle drei
+meldeten im selben Zeitraum einen Ausfall, jeder an einer anderen Stelle:
+
+| Prüfer | Was er sah |
+|---|---|
+| 0085 | 404 aus Vite beim Laden einer Story |
+| 0086 | `chrome-headless-shell` hängt, Messlauf ohne Antwort |
+| 0088/0089/0093 | `storybook-static/index.json` fehlt |
+
+Drei verschiedene Fehlerbilder, ein Auslöser: der Bau **löscht** den Ordner
+und schreibt ihn neu. Wer in diesem Fenster liest, sieht je nach Zeitpunkt
+eine fehlende Datei, eine halbe Datei oder gar keinen Ordner. Dass es wie drei
+verschiedene Fehler aussieht, ist der Grund, warum es viermal einzeln gemeldet
+wurde.
+
+**Der Ausweg ist nicht, den Kopierer zu reparieren, sondern den Ordner nicht
+zu teilen.** Zwei Regeln, die ab sofort in jedem Prüfauftrag stehen:
+
+1. **Gemessen wird gegen den Dev-Server auf Port 6107**, nicht gegen
+   `storybook-static/`. Er serviert die Quelle, kennt keinen Ausgabeordner und
+   überlebt jeden Bau: Katalog unter `/index.json`, eine Story unter
+   `/iframe.html?id=<story-id>&viewMode=story`.
+2. **Ein Prüfer baut nicht.** `pnpm build` ist der Grün/Rot-Test dessen, der
+   gebaut hat — für eine Messung ist er nie nötig.
+
+Damit bleibt für die Aufgabe selbst nur noch die Frage, ob zwei Sitzungen je
+einen eigenen `--output-dir` bekommen sollen. Solange Prüfer den Dev-Server
+nehmen, ist der geteilte Ordner unkritisch; er wird es wieder, sobald zwei
+Sitzungen gleichzeitig bauen.
