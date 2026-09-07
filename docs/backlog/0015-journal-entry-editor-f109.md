@@ -179,11 +179,150 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+**Wiederabnahme 2026-09-07 (zweiter Durchgang), gegen die Neufassung
+2026-09-07. Urteil: zurück** — ein blockierender Mangel (M1b), alles andere
+steht.
+
+Gemessen im laufenden Storybook (Dev-Server `http://localhost:6107`, er
+serviert die Quelle), je Schritt ein eigener `Runtime.evaluate`; Skripte im
+Scratchpad (`a0015.mjs`, `sweep.mjs`). Story-Id-Stamm:
+`v3-entitäten-buchungssatz-journalentryeditor--`.
+
+### Story-Deckung
+
+17 Stories, alle 17 gerendert (`.bse` vorhanden), keine einzige
+Konsolenmeldung beim Laden. Die drei neuen der Neufassung sind da und heißen
+englisch: `JournalWithPostingText`, `DocumentNumberAcrossRows`,
+`ContraAccountEditable`. Die Ausnahme von der Grenze 10 ist begründet und hat
+mit **0113** eine Adresse (Datei vorhanden).
+
+Jede Prop der Schnittstelle hat ihre Story — mit **zwei Ausnahmen ohne
+Begründung**: `onOpenTaxKey` und `quickActions` (0 Treffer in der
+Story-Datei). Beide sind älter als diese Aufgabe; sie stehen unten als M11.
+
+### Kriterien
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| … | … | ✓ / ✗ |
+| `pnpm typecheck` grün | `tsc --noEmit`, EXIT=0 | ✓ |
+| `pnpm build` grün | Storybook build completed successfully, EXIT=0 | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/journal-entry/JournalEntryEditor.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Buchungssatz/JournalEntryEditor` wie bei den Nachbarn (`v3/Entitäten/Konto/…`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Props, Typen, Bezeichner und Story-Exportnamen der neuen Teile englisch; `@when`/`@instead` an `JournalEntryEditor`. **Aber:** sechs in dieser Runde neu geschriebene Kommentarblöcke sind deutsch (Z. 711, 797, 831, 849, 867, 915–920) | ✗ (M1b) |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | kein Hex (grep leer); Status über `StatusBadge axis="buchung"` ✓. **Aber:** `STATUS_TEXT` (Z. 168–173) und px-Spurenliste (Z. 296–297) stehen weiter — beide seit `1ff963d`, als M6/M7 registriert | ✗ (M6, M7 — nicht blockierend) |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | 17 Stories; `Empty` erklärt, warum es sie trotz „nicht anwendbar" gibt | ✓ (Lücke bei zwei Alt-Props → M11) |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Zahlen rechts (`text-align: right`) mit `lining-nums tabular-nums`; nichts zentriert außer Buttons/`kbd` (UA-Default, 25 Treffer, alle `BUTTON`/`KBD`/`svg`); Fokusring am Gegenkonto-Feld sichtbar (`box-shadow 0 0 0 3px rgba(59,143,196,.14)`, Rand dunkelt nach). **Aber:** `▤` als Icon-Knopf (Z. 765) → M12 | ✓ mit Befund |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle 17 Stories im Headless-Chrome geladen und bedient | ✓ |
+| Journal zeigt Konto · Kontoname · Buchungstext · Soll · Haben; **kein** BU | `--journal-with-posting-text`, Journalklappe geöffnet: Kopfzeile `["Konto","Kontoname","Buchungstext","Soll Umsatz","Haben Umsatz"]`; `/\bBU\b/` im Journal → `false` | ✓ |
+| Steuerzeile trägt den Text ihrer Zeile, Gegenkonto den der ersten | dieselbe Story: `6815 Bürobedarf · Bürobedarf August · 1.240,00` / `1406 Vorsteuer 19 % · Bürobedarf August · 235,60` / `6820 Porto · Porto August · 75,55` / `1406 · Porto August · 14,35` / `70044 Bürobedarf Meier GmbH · Bürobedarf August · Haben 1.565,50` — Zahlen und Texte deckungsgleich mit der Messung in §1 | ✓ |
+| Warnung blockiert das Speichern nicht und hat kein Kästchen | `--s-1-edit-with-warning`: `input[type=checkbox]` → 0; Speichern-Knopf `disabled: false`; kein „offene Warnungen" im Text; der Weg „6820 einsetzen" steht an der Warnung | ✓ |
+| Belegfeld 1 ist `DocumentNumberField`, sobald die Quellen-Wörter da sind; ohne sie das nackte Feld | mit `documentNumberSourceLabel` (`--document-number-across-rows`): 2× `.v2dnf`, `maxLength 36`, Lupe „Belegnummern-Register öffnen", Hinweis „Für diesen Vorgang gilt RE-2026-0140 (Offener Posten aus DATEV) …". Ohne (`--s-2-split-full`): `.v2dnf` → 0, Klasse `v2in` | ✓ (gemessen, nicht nur `grep`) |
+| Übernahme-Knopf nur bei verschiedenen Werten, übernimmt den **seiner** Zeile | `--document-number-across-rows` (`RE-4471` / leer): 2 Knöpfe. Klick auf den **zweiten** → Felder `["",""]`, Knöpfe 0. Neu geladen, Klick auf den **ersten** → `["RE-4471","RE-4471"]`, Knöpfe 0. Gleiche Werte (`--s-2-split-full`, 2×`RE-4471`) → 0 Knöpfe; eine Zeile (`--s-1-edit-with-warning`) → 0 Knöpfe | ✓ |
+| Gegenkonto nur mit `onContraAccountChange` bearbeitbar; S/H bleibt fest | mit Prop (`--contra-account-editable`): `.bse__gegen .v2kf` vorhanden, `input[aria-label="Gegenkonto"]` `role=combobox`; Rundlauf gemessen — „1200" getippt, Kandidat *1200 Bank* gewählt → Feld im Ruhezustand `1200 / Bank`, Journalzeile `1200 | Bank | Bürobedarf August | | 1.475,60 €`. Ohne Prop, aber `editable` (`--s-1-edit-with-warning`): 0 Eingabeelemente in `.bse__gegen`, reiner Text. S/H: `.bse__gegen` zeigt nur „an H", 0 Umschalter; der Zeilen-Umschalter (`S`) bleibt | ✓ |
+| `onOpenLedger` erreicht auch die Zeilen-Felder | `--contra-account-editable`: `.v2kf__in--ledger` 2× — 1× in `.bse__row`, 1× im Gegenkonto; Knopf-Labels `["Kontenblatt zu 6815","Kontenblatt zu 70044"]` (gemessen, nicht nur `grep`) | ✓ |
+| 17 Stories, keine Konsolenmeldung | Sweep über alle 17 Story-Ids: jede `gerendert: true`, jede „keine Meldung". (Beim **Tippen** im Gegenkonto-Feld erscheint eine React-Key-Warnung — sie stammt aus `AccountField`, siehe M13) | ✓ |
+| offen (Set): der Schnitt in Lese- und Bearbeiten-Raster als 0113 | `docs/backlog/0113-journal-entry-grid.md` vorhanden, Status offen | ✓ |
 
-Abgenommen von / am: … · Offene Punkte: …
+Nebenbei mitgemessen (aus „Verhalten", nicht aus den Kriterien): die
+Tabreihenfolge stimmt — `… Konto · Kontenblatt · Belegfeld 1 · Buchungstext ·
+**Gegenkonto** · Kontenblatt · + Zeile · Journal · Grund der Änderung ·
+Abbrechen · Speichern`. Und `Empty` hält, was ihr JSDoc sagt: „Keine
+Buchungszeilen." aus `JournalEntryCard`, der Hinweis steht, Speichern
+`disabled: true`.
+
+### Mängel
+
+**M1b — blockierend. Sechs in dieser Runde neu geschriebene Kommentarblöcke
+sind deutsch.** Kriterium: „Code englisch" (fest). Gemessen mit
+`git diff f37c1c3..HEAD -- …/JournalEntryEditor.tsx` auf die hinzugefügten
+Zeilen: `Z. 711` („Belegfeld 1 ist ein eigener Baustein …", §2), `Z. 797`
+(„Gleiche Machart und gleiche Stelle wie ‚Rest einsetzen'…", §2), `Z. 831`
+(„Der Buchungstext geht mit …", §1), `Z. 849` („Die Steuerzeile trägt den Text
+…", §1), `Z. 867` („Das Gegenkonto hat keinen eigenen Text …", §1) und der
+**neu geschriebene JSDoc** von `Meldungsblock`, `Z. 914–921` („Fehler
+blockieren das Speichern … Die Quittungspflicht … 2026-09-07", §1b). Daneben
+steht englischer Text derselben Runde (`saveBlocked`, `documentNumbersDiffer`,
+die drei neuen Prop-JSDocs) — die Datei ist innerhalb **eines** Merkmals
+zweisprachig. Das ist derselbe Mangel, der die erste Abnahme blockiert hat;
+er ist nur kleiner geworden. *Vorschlag:* die sechs Blöcke übersetzen; dabei
+in `Z. 637` die deutschen Anführungszeichen im sonst englischen JSDoc
+(`the „apply to all rows" button`) mitnehmen. Danach ist der Punkt erledigt —
+nichts anderes ist zu tun.
+
+**M6 — nicht blockierend, bleibt offen. `STATUS_TEXT` ist eine lokale
+Label-Map** (Z. 168–173), Kriterium „keine lokale Label-Map" (fest).
+Gemessen: sie liefert den `title` des **Sichtwechsel**-Knopfes — in
+`--s-19-judge-with-note` steht auf „Voll ▸ · Alt+V" der Tooltip
+„**Vorschlag**". Das ist nicht nur eine zweite Quelle, sondern ein falscher
+Tooltip: der Knopf schaltet die Sicht um, nicht den Status. Älter als diese
+Aufgabe (`1ff963d`), in dieser Spec schon als M6 geführt.
+
+**M7 — nicht blockierend, bleibt offen. Spaltenmaße als px in der
+Komponente** (Z. 296–297), Kriterium „kein px" (fest). Unverändert; ebenfalls
+seit `1ff963d`.
+
+**M5 — nicht blockierend, bleibt offen. `Alt+V` im Lese-Raster ist tot.**
+Gemessen in `--s-19-judge-with-note`: Knopfbeschriftung „Voll ▸ · Alt+V";
+`window.dispatchEvent(new KeyboardEvent('keydown',{key:'v',altKey:true}))` →
+Spaltenkopf unverändert (`Datum · Umsatz · S/H · BU · Konto · Beleg 1 · Text`).
+Derselbe Knopf **geklickt** → 11 Spalten (`… Whg. … Beleg 2 … KOST`). Also
+sichtbare Taste ohne Wirkung (V14).
+
+**M4 — nicht blockierend, bleibt offen. Die Ausnahme in
+`scripts/check-icons.mjs` ist abgelaufen.** Der Grund lautet weiter
+„uncommitted changes from another session — migrate once they are committed";
+die Änderungen **sind** committet (`3cc0333`), der Arbeitsbaum ist sauber.
+`node scripts/check-icons.mjs` meldet trotzdem „in Ordnung … 2 Datei(en) noch
+offen".
+
+**M11 — nicht blockierend, neu. Zwei Props der Schnittstelle haben keine
+Story und keine Begründung:** `onOpenTaxKey` und `quickActions` (je 0 Treffer
+in `JournalEntryEditor.stories.tsx`). Kriterium: „Alle Stories oben vorhanden;
+ausgeschlossene Zustände begründet" (fest). Praktische Folge: die Zeile
+„Tastatur unverändert (Alt+V, **Alt+K/W/P**, Ctrl+Enter, Esc)" unter
+„Verhalten" ist in Storybook nicht messbar — kein Aufruf setzt
+`quickActions`. Beide Props sind älter als diese Aufgabe. *Vorschlag:* keine
+zwei weiteren Stories in eine Datei, die bei 17 steht — sondern beide in der
+Story-Tabelle ausdrücklich als nicht gezeigt führen, mit Grund, und die
+Deckung in **0113** nachholen, wo die Datei ohnehin geschnitten wird.
+
+### Befunde am Set (kein Kriterium dieser Spec)
+
+- **M12 — `▤` als Icon-Knopf.** Im Lese-Raster steht der Weg zum Kontenblatt
+  als Unicode-Zeichen `▤` (`JournalEntryEditor.tsx:765`), im Bearbeiten-Raster
+  daneben als `ActionIcon action="ledger"` aus der Registry. §9 verlangt
+  „Icons Lucide 1.5 px …, keine Emoji/Unicode-Icons"; V14/T8 verlangen ein Wort
+  dazu. Dieselbe Handlung, zwei Zeichen — und das falsche ist das, das man
+  zuerst sieht. (Auch `◂`/`▸` am Sichtwechsel-Knopf, dort aber als Pfeil neben
+  einem Wort.) Seit `1ff963d`, gehört zu **0113**.
+- **M13 — `AccountField` doppelt den React-Key `alle`.** Gemessen: in
+  `--contra-account-editable` „1200" tippen → zweimal
+  `error: Encountered two children with the same key`. Ursache:
+  `AccountField.tsx:143–156` hängt die Treffer aus `onSearch` als weitere
+  Gruppe mit `key: "alle"` an, obwohl der Aufrufer schon eine Gruppe `alle`
+  übergibt. Trifft jeden, der Kandidaten **und** Suche mitgibt; keine Story von
+  0013 tut das, die neue Story dieser Aufgabe schon. Gehört zu 0013 /
+  `AccountField`, nicht zu diesem Editor.
+- **M14 — Hinweise drucken ihren Code nicht.** `Meldungsblock` zeigt bei
+  `errors` und `warnings` `<span class="v2pp__code">`, bei `hints` nur den
+  Text. Gemessen in `--empty`: `.v2msg--hint .v2pp__code` → 0, obwohl der
+  JSDoc der Story „Gemessen: … Hinweis `E-LEER`" sagt. Entweder der Code
+  gehört auch an den Hinweis, oder der Satz in der Story stimmt nicht.
+- **M15 — 0113 zeigt auf eine Datei, die es nicht gibt.** Die Zeile „Quelle"
+  in `docs/backlog/0113-journal-entry-grid.md` nennt
+  `docs/backlog/0015-journal-entry-f109.md`; die Datei heißt
+  `0015-journal-entry-editor-f109.md`.
+- **M16 — die deutschen Bezeichner der Altteile stehen weiter.** `gegenkonto`,
+  `belegSide`, `EditorRow.datum/umsatz/konto/beleg1`, `Kopf`, `Zeile`,
+  `Journal`, `Meldungsblock`, `summeBelegseite`, `speichern`, `journalOffen`
+  …; `CLAUDE.md` sagt „eine Datei, die ohnehin angefasst wird, bekommt
+  englische Namen". Das ist eine Umbenennung durch die ganze Datei und eine
+  eigene Runde wert — sinnvollerweise die von **0113**, die die Datei ohnehin
+  in zwei schneidet. Als Mangel dieser Aufgabe geführt hätte sie einen Umbau
+  erzwungen, den die Spec nicht bestellt.
+
+Abgenommen von / am: designsystem-abnahme, 2026-09-07 (zweiter Durchgang) ·
+Offene Punkte: **M1b blockiert** (sechs Kommentarblöcke übersetzen); M4–M7
+und M11 bleiben nicht blockierend offen; M12–M16 sind Befunde am Set.
 
 ## Freigabe (2026-09-06, designsystem-f0 im Auftrag des Owners)
 
@@ -360,3 +499,41 @@ den drei Aufträgen dieser Spec, jeder von ihnen ist eine echte Abweichung.
   Klasse. Sauber wäre eine Track-Liste neben der Komponente, wie sie
   `bank-transaction-columns.tsx` und `account-columns.tsx` führen — dann sind
   die Breiten auch messbar begründet statt geraten.
+
+### Nacharbeit zur zweiten Abnahme (2026-09-07)
+
+- **M1b erledigt.** Die sechs in der Runde neu geschriebenen Kommentarblöcke
+  und der JSDoc von `Meldungsblock` sind Englisch, die deutschen
+  Anführungszeichen in der Prop-Zeile ebenfalls. Beim Übersetzen ist mir in
+  zwei Blöcken die Zeile `name:` mitgegangen — der Typecheck hat es gefangen,
+  und die Wirkung ist nachgemessen: das Journal von `S2_SplitFull` zeigt
+  `6815 · Bürobedarf`, `1406 · Abziehbare Vorsteuer 19 %`, `6845 ·
+  EDV-Zubehör`, `70044 · Bürobedarf Meier GmbH`. Genau der Punkt, den M2 der
+  ersten Abnahme betraf.
+- **M14 erledigt** — nicht am Code, sondern an der Behauptung: Hinweise
+  drucken ihren Code nicht, und das ist Absicht. Der Code benennt einen
+  Prüfpunkt, den jemand nachschlägt (Fehler, Warnung); ein Hinweis ist ein
+  Nebensatz. Der JSDoc der Story sagt das jetzt richtig, und im
+  `Meldungsblock` steht der Grund, damit es nicht noch einmal auffällt.
+- **M15 erledigt** — 0113 nennt den richtigen Dateinamen.
+- **M11 — bewusst ohne Story, mit Grund.** `onOpenTaxKey` und `quickActions`
+  bekommen in dieser Datei keine: sie hat 17 Stories und damit schon die
+  begründete Ausnahme von der Grenze aus `spec-schreiben` §6; zwei weitere
+  würden die Ausnahme vergrößern statt sie abzutragen. Beide sind
+  Durchreichen an vorhandene Bausteine (`ActionIcon`, die Schnellaktionen des
+  Kopfes). Ihre Deckung holt **0113** nach — dort werden die Stories auf zwei
+  Dateien verteilt, und beide passen ins Bearbeiten-Raster.
+- **M4, M5, M6, M7 bleiben** als Befunde am Set stehen (Abschnitt darüber). Die
+  zweite Abnahme hat M6 dabei geschärft: `STATUS_TEXT` liefert nicht nur eine
+  zweite Quelle, sondern in `S19` den **falschen** Tooltip („Vorschlag" auf dem
+  Sichtwechsel-Knopf). Das gehört mit 0113 abgeräumt.
+- **Neu aus der zweiten Abnahme, an andere Aufgaben verwiesen:**
+  - M12 — `▤` als Unicode-Icon im Lese-Raster, während dasselbe im
+    Bearbeiten-Raster `ActionIcon action="ledger"` nutzt → **0113**.
+  - M13 — `AccountField` hängt die Suchtreffer als zweite Gruppe mit
+    `key: "alle"` an und erzeugt beim Tippen `Encountered two children with
+    the same key`. Trifft **jeden** Aufrufer mit `alle`-Kandidaten und Suche →
+    gehört zu **0013**, nicht hierher.
+  - M16 — die deutschen Bezeichner der Altteile (`gegenkonto`, `Kopf`,
+    `Zeile`, `summeBelegseite`) → **0113**, wenn die Datei ohnehin geteilt
+    wird.

@@ -287,7 +287,8 @@ export const S23_JudgeFlaggedWithError: Story = {
  * Buchungssatz ohne Zeile ist kein Zustand des Editors, sondern ein Fehler
  * des Aufrufers. Die Story steht trotzdem hier, und genau deshalb: der Fehler
  * soll **sichtbar abgefangen** sein, nicht in einer leeren Fläche enden.
- * Gemessen: „Keine Buchungszeilen.", Hinweis `E-LEER`, Speichern gesperrt.
+ * Gemessen: „Keine Buchungszeilen.", der Hinweis „Noch keine Zeile …",
+ * Speichern gesperrt.
  */
 export const Empty: Story = {
   render: () => (

@@ -634,12 +634,12 @@ function Zeile({
   onOpenDocumentNumberRegister?: (rowId: string) => void;
   dominantDocumentNumber?: KnownDocumentNumber | null;
   documentNumberSourceLabel?: DocumentNumberSourceLabels;
-  /** Set → the „apply to all rows" button stands under this row's field. */
+  /** Set → the "apply to all rows" button stands under this row's field. */
   onApplyDocumentNumberToAll?: () => void;
 }) {
   const brutto = toNumber(row.umsatz);
-  // Die Steuerzeile wird abgeleitet, nicht getippt — dieselbe Rechnung, die
-  // beim Speichern die verknüpfte Zeile erzeugt.
+  // The tax line is derived, never typed — the same calculation that creates
+  // the linked line on save.
   const steuer = deriveTax(
     { accountNumber: row.konto, taxKey: row.bu || null, amount: brutto },
     accountFramework,
@@ -708,10 +708,10 @@ function Zeile({
               {...(onOpenLedger ? { onOpenLedger } : {})}
               ariaLabel="Konto"
             />
-            {/* Belegfeld 1 ist ein eigener Baustein (0014): 36 Zeichen, die
-                Herkunft der geltenden Nummer, der Weg ins Register. Ein
-                nacktes `<input>` hier wäre die zweite Wahrheit über dieselbe
-                Regel. */}
+            {/* Document number 1 is its own building block (0014): 36
+                characters, where the current number comes from, the way into
+                the register. A bare `<input>` here would be a second truth
+                about the same rule. */}
             {documentNumberSourceLabel ? (
               <DocumentNumberField
                 value={row.beleg1}
@@ -794,10 +794,9 @@ function Zeile({
             Rest {euro(rest)} einsetzen
           </button>
         ) : null}
-        {/* Gleiche Machart und gleiche Stelle wie „Rest einsetzen": eine
-            Korrektur, die dort steht, wo der Befund auffällt. Der Server
-            erhebt denselben (Prüfpunkt `P-BELEG`) — der Knopf setzt sie
-            davor. */}
+        {/* Same make and same place as "insert the rest": a correction that
+            stands where the finding shows up. The server raises the same one
+            (check `P-BELEG`) — the button comes before it. */}
         {editable && onApplyDocumentNumberToAll ? (
           <button type="button" className="v2link" onClick={onApplyDocumentNumberToAll}>
             Belegfeld 1 in alle Zeilen übernehmen
@@ -828,9 +827,9 @@ function Journal({
   open: boolean;
   onToggle: () => void;
 }) {
-  // Der Buchungstext geht mit: das Journal ist die **DATEV-Stapelordnung**
-  // (Konto · Kontoname · Buchungstext · Soll · Haben), und ohne ihn stünde in
-  // der Spalte, die `JournalEntryCard` dafür hat, nichts.
+  // The posting text comes along: the journal is the **DATEV batch order**
+  // (account · account name · posting text · debit · credit), and without it
+  // the column `JournalEntryCard` has for it would stay empty.
   const zeilen: { konto: string; name: string; text: string; side: Side; amount: number }[] = [];
   for (const r of rows) {
     const brutto = toNumber(r.umsatz);
@@ -846,8 +845,8 @@ function Journal({
     zeilen.push({
       konto: steuer.account.accountNumber,
       name: steuer.account.accountName,
-      // Die Steuerzeile trägt den Text ihrer Zeile: sie ist dieselbe Buchung,
-      // nur aufgeteilt — im Stapel stünde dort derselbe Text.
+      // The tax line carries the text of its own line: it is the same entry,
+      // only split — in the batch the same text would stand there.
       text: r.text,
       side: r.side,
       amount: steuer.tax,
@@ -864,8 +863,8 @@ function Journal({
       zeilen.push({
         konto: gegenkonto.konto,
         name: gegenkonto.name,
-        // Das Gegenkonto hat keinen eigenen Text — es nimmt den der ersten
-        // Zeile, wie der Stapel es täte.
+        // The contra account has no text of its own — it takes the one of the
+        // first line, the way the batch would.
         text: rows[0]?.text ?? "",
         side: belegSide === "S" ? "H" : "S",
         amount: summe,
@@ -912,12 +911,11 @@ function Journal({
 }
 
 /**
- * Fehler blockieren das Speichern, Warnungen und Hinweise stehen nur da.
+ * Errors block saving; warnings and hints only stand there.
  *
- * Die Quittungspflicht für Warnungen ist mit dem Owner-Entscheid vom
- * 2026-09-07 gestrichen: eine Warnung, die man abhaken **muss**, wird
- * abgehakt und nicht gelesen — und sie hielte den Satz an einer Stelle an, an
- * der nichts falsch ist, sondern nur etwas auffällig.
+ * The owner's decision of 2026-09-07 dropped the acknowledgement for
+ * warnings: a warning you **must** tick gets ticked, not read — and it would
+ * hold up the entry at a place where nothing is wrong, only conspicuous.
  */
 function Meldungsblock({
   errors,
@@ -959,6 +957,9 @@ function Meldungsblock({
           ) : null}
         </div>
       ))}
+      {/* A hint prints no code and takes no fix: the code identifies a check
+          someone looks up (error, warning), a hint is an aside. `code` stays
+          in the type because it is the key. */}
       {hints.map((h) => (
         <div className="v2msg v2msg--hint" key={h.code}>
           <span className="v2msg__body">{h.message}</span>
