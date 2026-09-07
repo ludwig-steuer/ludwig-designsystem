@@ -110,3 +110,46 @@ export const EmptyAfterFilter: Story = {
     />
   ),
 };
+
+/**
+ * `detailBreit`: schmale Randspalte links, breite Arbeitsfläche rechts — und
+ * die **Untergrenze, ab der die beiden umbrechen**, gehört dem Aufrufer
+ * (`minDetail`, Vorgabe 620). Links im Bild die Vorgabe, rechts eine Ansicht,
+ * deren Inhalt schon bei 484 px trägt.
+ *
+ * Zum Prüfen den Rahmen schmaler ziehen: **im Umbruch steht die
+ * Arbeitsfläche oben**, die Randspalte darunter. Vorher stand die Randspalte
+ * oben, und wer die Bewegungen suchte, scrollte erst an den Fakten vorbei
+ * (Abnahme 0063).
+ */
+export const DetailBreit: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-6)" }}>
+      <div style={{ maxWidth: 1100 }}>
+        <div className="v2fields__h">Vorgabe (620) — bei 1.100 px nebeneinander</div>
+        <MasterDetail
+          detailBreit
+          list={<DetailPane title="Randspalte">Fakten, Zähler, Zustände.</DetailPane>}
+          detail={<DetailPane title="Arbeitsfläche">Die Tabelle, die 620 px braucht.</DetailPane>}
+        />
+      </div>
+      <div style={{ maxWidth: 1000 }}>
+        <div className="v2fields__h">Vorgabe (620) — bei 1.000 px umgebrochen</div>
+        <MasterDetail
+          detailBreit
+          list={<DetailPane title="Randspalte">Steht jetzt unten.</DetailPane>}
+          detail={<DetailPane title="Arbeitsfläche">Steht oben, wo sie hingehört.</DetailPane>}
+        />
+      </div>
+      <div style={{ maxWidth: 1000 }}>
+        <div className="v2fields__h">minDetail 484 — bei 1.000 px nebeneinander</div>
+        <MasterDetail
+          detailBreit
+          minDetail={484}
+          list={<DetailPane title="Randspalte">Fakten.</DetailPane>}
+          detail={<DetailPane title="Arbeitsfläche">Inhalt, der bei 484 px trägt.</DetailPane>}
+        />
+      </div>
+    </div>
+  ),
+};

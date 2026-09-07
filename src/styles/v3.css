@@ -1107,7 +1107,15 @@ select.v2in { padding-right: 26px; }
  * Literal, und die gehört dem Aufrufer. */
 .v2md--detail-breit {
   display: flex;
-  flex-wrap: wrap;
+  /* `wrap-reverse`, nicht `wrap`: passen die beiden nebeneinander, ändert es
+     nichts — brechen sie um, kommt die **Arbeitsfläche nach oben** und die
+     Randspalte darunter. Vorher stand bei 1280 px in der Kontoansicht die
+     Faktenspalte über den Bewegungen: wer die Buchungen sucht, scrollte erst
+     an den Fakten vorbei (Abnahme 0063). `align-items: start` bleibt: die
+     Kreuzachse dreht sich zwar mit, aber gemessen stehen beide Hälften damit
+     oben bündig (1440: beide bei y = 688) — mit `end` hing die kürzere
+     Randspalte am unteren Rand der Zeile. */
+  flex-wrap: wrap-reverse;
   gap: var(--space-5);
   align-items: start;
   grid-template-columns: none;
