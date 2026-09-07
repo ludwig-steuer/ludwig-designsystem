@@ -1,6 +1,5 @@
 import {
   ACCOUNT_CLASS_LABEL,
-  type AccountClass,
   type AccountRow,
   type AccountSortKey,
 } from "@/ludwig/modules/accounts/domain/account";

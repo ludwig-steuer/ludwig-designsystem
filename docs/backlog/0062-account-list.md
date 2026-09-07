@@ -246,3 +246,19 @@ M11 (camelCase-Schlüssel neben snake_case-Sortierschlüsseln) und M14
 (`accountMinWidth` gibt für unbekannte Spurformen still 0 zurück) bleiben —
 beide betreffen das Muster aller drei Kataloge und gehören in eine eigene
 Runde, nicht in diese Datei allein.
+
+**Freigegeben in der Nachabnahme vom 2026-09-07**, mit vier Kleinigkeiten, die
+im selben Zug mitgegangen sind: der tote `AccountClass`-Import ist weg (M15);
+die Story `Catalog` übergibt jetzt `originLabels` und zeigt damit das Wort,
+das die App heute benutzt („SKR-Katalog") statt nur den Vorgabewert (M16);
+der handgebaute Sortierkopf der Vorlage trägt `aria-sort` und den
+ausgeschriebenen Namen und benutzt `Link` statt eines rohen `<a>` — er ist
+die Datei, die in die App kopiert wird, und ein Sortierkopf, der seinen
+Zustand nur mit einem Pfeil sagt, sagt ihn nicht (M17); und die
+Zuschnitt-Tabelle des Entitätsprofils steht nicht mehr auf „Backlog" (M18).
+
+Zu `AccountScope`: die Freigabe hat ihn namentlich verlangt, er ist **nicht**
+importiert — und das ist Absicht. Der Spaltensatz bekommt keinen Scope, er
+**ist** zweimal einer: `ACCOUNT_LIST_COLUMNS` und `ACCOUNT_CATALOG_COLUMNS`,
+und die Wahl trifft der Aufrufer über `columns`. Ein Typ, den niemand
+braucht, ist Rauschen — der Beweis stand eine Zeile darüber (M15).

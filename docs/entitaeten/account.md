@@ -252,7 +252,7 @@ hier, damit die nächste Abnahme gegen den richtigen Stand prüft.
 | `AccountEntryList` „Kontoauszug" | jetzt | der Listen-Job der Anfrage | Spec `docs/backlog/0067-account-entries.md` |
 | `AccountFacts` | jetzt | Zone 3 des Drawers, Kriterium aus 0052 | Spec `docs/backlog/0066-account-cell-facts.md` |
 | `AccountDrawer` | jetzt | die Anfrage vom 2026-09-04 | Spec `docs/backlog/0068-account-drawer.md` |
-| `AccountRow` + `AccountList` „Kontenplan" | Backlog | eigene Route → erst Seitenprofil; wird eine Spaltendefinition auf `DataTable` (0057), keine eigene Tabelle | `docs/backlog/0062-account-list.md` |
+| `AccountRow` + `AccountList` „Kontenplan" → **`accountColumns()`** | **gebaut (0062, 2026-09-07)** | Das Seitenprofil steht (`docs/seiten/kontenplan.md`); daraus wurde eine Spaltendefinition auf `DataTable` (0057), keine eigene Tabelle und keine `AccountRow`-Komponente — siehe „Nachtrag beim Bau von 0062" | `docs/backlog/0062-account-list.md` |
 | `AccountView` | Backlog | vier Tabs, eigene Route, braucht Seitenprofil; `AccountFacts` ist der Teil, den er mit dem Drawer teilt | `docs/backlog/0063-account-view.md` |
 | `AccountCard` | verworfen | kein Screen | — |
 | `AccountEditor` | verworfen | keine Punkte mit änderbar = Nutzer außerhalb eigener Forms | — |

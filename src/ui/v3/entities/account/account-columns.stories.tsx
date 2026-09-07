@@ -14,6 +14,7 @@ import { FilterBar } from "../../primitives/FilterBar";
 import { Field, Input, Select } from "../../primitives/Form";
 import { KpiGrid, KpiTile } from "../../primitives/KpiTile";
 import { PageHeader } from "../../primitives/PageHeader";
+import { Link } from "../../primitives/Link";
 import { Pagination } from "../../primitives/Pagination";
 import { Card, CardHead, GroupRow, HeadRow, Row, Table } from "../../primitives/Table";
 
@@ -96,7 +97,14 @@ export const Filled: Story = {
 export const Catalog: Story = {
   render: () => {
     const picked: AccountColumn[] = ["origin", "role", "name", "number", "skrClass"];
-    const cols = accountColumns({ href, columns: picked });
+    // `originLabels` übergeben, weil die App dieselbe Sache heute „SKR-Katalog"
+    // nennt (`ACCOUNT_SOURCE_LABEL.reference`) — die Wörter stehen in der
+    // Domäne nicht (Befund L-96), also entscheidet sie der Aufrufer.
+    const cols = accountColumns({
+      href,
+      columns: picked,
+      originLabels: { client: "im Mandanten", catalog: "SKR-Katalog" },
+    });
     return (
       <div style={{ maxWidth: 1300 }}>
         <DataTable<AccountRow>
@@ -143,20 +151,25 @@ export const Grouped: Story = {
           <Table cols={accountTracks(cols)} minWidth={accountMinWidth(cols)}>
             <HeadRow>
               {cols.map((c) => (
-                <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
-                  {/* Auch von Hand bleibt der Kopf ein Sortierlink — sonst
-                      verliert die gruppierte Ansicht Rang 5 des Seitenprofils
-                      („Welche sind Karteileichen?"), und das ist genau die
-                      Lücke, die diese Story an der heutigen Ansicht anprangert. */}
+                // `aria-sort` und der ausgeschriebene Name gehören dazu, nicht
+                // nur der Link: `DataTable` schreibt beides, und diese Story
+                // ist die **Vorlage**, die in die App kopiert wird. Ein
+                // Sortierkopf, der seinen Zustand nur mit einem Pfeil sagt,
+                // sagt ihn nicht (Z4, Abnahme 0062).
+                <th key={c.key} scope="col" aria-sort="none" className={c.align === "end" ? "v2num" : undefined}>
                   {c.sortable ? (
-                    <a className="v2sortlink" href={listHref({ sort: c.key, dir: "asc" })}>
+                    <Link
+                      className="v2sortlink"
+                      href={listHref({ sort: c.key, dir: "asc" })}
+                      aria-label={`Nach ${String(c.header)} sortieren — derzeit nicht sortiert`}
+                    >
                       {c.header}
-                    </a>
+                    </Link>
                   ) : (
                     c.header
                   )}
                   {c.headerAside}
-                </span>
+                </th>
               ))}
             </HeadRow>
             {[...groups.entries()].map(([label, rows]) => (
