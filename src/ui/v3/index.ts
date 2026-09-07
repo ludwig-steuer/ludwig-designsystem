@@ -326,6 +326,11 @@ export {
 } from "./entities/source-document/source-document-columns";
 export { SourceDocumentPreview } from "./entities/source-document/SourceDocumentPreview";
 export {
+  SourceDocumentCard,
+  type SourceDocumentCardProps,
+} from "./entities/source-document/SourceDocumentCard";
+export { SourceDocumentView } from "./entities/source-document/SourceDocumentView";
+export {
   SOURCE_DOCUMENT_DETAILS,
   resolveSourceDocumentDetail,
   type SourceDocumentDetail,
@@ -340,6 +345,7 @@ export {
 } from "./entities/source-document/SourceDocumentDrawer";
 export {
   SourceDocumentFacts,
+  type SourceDocumentGap,
   type SourceDocumentGroup,
 } from "./entities/source-document/SourceDocumentFacts";
 

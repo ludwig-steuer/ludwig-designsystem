@@ -17,8 +17,8 @@ import {
   sourceDocumentIdentifier,
   type SourceDocumentVM,
 } from "./SourceDocument";
-import { SourceDocumentFacts, type SourceDocumentGroup } from "./SourceDocumentFacts";
-import { SourceDocumentPreview } from "./SourceDocumentPreview";
+import { SourceDocumentCard } from "./SourceDocumentCard";
+import { type SourceDocumentGroup } from "./SourceDocumentFacts";
 
 /**
  * The document, looked up beside the work (0052).
@@ -181,41 +181,25 @@ function DrawerBody({
     );
   }
 
+  // Zones 2 and 3 are **the card**, not a second build of it: „zone 3 is the
+  // same component as the view" is the rule of 0052, and the surest way to
+  // keep it is to let the drawer render the view's first tab. `bare` because
+  // the `Drawer` already provides the surface.
   return (
-    <>
-      {/* Zone 2: the thing itself, first and large — the same preview the card
-          and the view use (0075), including the sentence that stands in for a
-          missing original and the excerpt of a partial document. */}
-      <SourceDocumentPreview
-        url={record.previewUrl ?? null}
-        unavailableReason={record.previewUnavailableReason}
-        title={sourceDocTypeLabel(
-          record.document.sourceDocType,
-          record.document.classDocumentForm,
-        )}
-        fileName={record.document.fileName}
-        excerpt={record.excerpt}
-        height="md"
-      />
-
-      {/* Zone 3: the same component the full view uses — one set of field rows.
-          „Belegdaten", not „Extrahierte Belegdaten": at a contract nothing was
-          extracted that an invoice extracts. */}
-      <div>
-        <div className="v2doc__h">Belegdaten</div>
-        <SourceDocumentFacts
-          document={record.document}
-          summary={record.summary}
-          group={record.group}
-          tone="bare"
-        />
-      </div>
-
+    <SourceDocumentCard
+      document={record.document}
+      summary={record.summary}
+      previewUrl={record.previewUrl}
+      previewUnavailableReason={record.previewUnavailableReason}
+      excerpt={record.excerpt}
+      group={record.group}
+      tone="bare"
+    >
       {/* Zone 4: what the glance does not answer. */}
       <p className="v2doc__limit">
         Schnellvorschau. Positionen, USt-Sätze und Konto-Splitting werden in der
         vollständigen Belegansicht geprüft.
       </p>
-    </>
+    </SourceDocumentCard>
   );
 }

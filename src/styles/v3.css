@@ -2379,6 +2379,54 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   font-variant-numeric: normal;
   line-height: var(--lh-ui);
 }
+/* Die Belegkarte: das Original links, die gelesenen Werte rechts (0071).
+   Die Faktenspalte ist **fest begrenzt** — `minmax(400px, 560px)`, dieselbe
+   Breite wie heute in der App: darunter bricht die Feldzeile, darüber steht
+   ein Wert allein auf 900 px. Das Original bekommt den Rest und nie weniger
+   als null (`minmax(0, 1fr)`, sonst sprengt ein breites PDF die Spalte). */
+.v2doccard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  /* **Die Karte misst sich selbst, nicht das Fenster.** Sie steht einmal auf
+     der Seite (breit) und einmal im Drawer (1.060 px, davon 560 für die
+     Fakten) — eine `@media`-Regel sähe beide Male dasselbe Fenster und gäbe
+     dem Original im Drawer 484 px. Gemessen war genau das der Fall. */
+  container-type: inline-size;
+  container-name: doccard;
+}
+.v2doccard__cols {
+  display: grid;
+  /* Eine Spalte ist der Ausgangspunkt, zwei die Ausnahme: so steht die Karte
+     auch dort richtig, wo Container-Queries nicht greifen. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+/* Zwei Spalten erst ab 1.180 px **Kartenbreite**: die Faktenspalte fordert
+   560, das Original braucht mindestens 600, um lesbar zu sein — darunter
+   stünden beide zu eng, und ein Beleg, den man nicht lesen kann, beantwortet
+   Rang 2 des Seitenprofils nicht. */
+@container doccard (min-width: 1180px) {
+  .v2doccard__cols { grid-template-columns: minmax(0, 1fr) minmax(400px, 560px); }
+}
+.v2doccard__facts { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.v2doccard__orig { min-width: 0; }
+.v2doccard__parts { display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* Ein fehlender Pflichtwert steht **an der Stelle des Wertes** — nicht als
+   leeres Feld: eine Leerzeile sagt „hier ist nichts", der Mangel sagt „hier
+   fehlt etwas, und so kommt es hin" (0071). Links wie jeder Inhalt, ohne
+   Ziffernstellung, weil hier ein Satz steht und keine Zahl. */
+.v2doc__gap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  text-align: left;
+  font-variant-numeric: normal;
+  color: var(--color-text-muted);
+}
+
 /* Kennung und Zustand nebeneinander in der Kopf-Zweitzeile. */
 .v2doc__ident { display: inline-flex; align-items: center; gap: var(--space-2); }
 /* Überschrift über den Kern-Fakten — kleiner als der Drawer-Titel, damit die
@@ -3047,6 +3095,17 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    Nur Reihenfolge und Abstand: die View ordnet, sie stellt nichts dar. Keine
    eigene Höhe und kein Scroll-Container um die oberen Slots — die Ränge 1–4
    müssen ohne Scrollen beantwortet sein. */
+/* Der Rahmen der Belegseite (0071) — dieselbe Bauart wie `.v2cdv`: eine
+   Spalte, feste Reihenfolge, kein eigener Scroll-Container über den oberen
+   Slots. Die Ränge 1–4 sollen ohne Scrollen dastehen; wer hier eine Höhe
+   setzt, nimmt genau das weg. */
+.v2docview { display: flex; flex-direction: column; gap: var(--space-5); }
+.v2docview__pager,
+.v2docview__head,
+.v2docview__banner,
+.v2docview__tabs,
+.v2docview__body { min-width: 0; }
+
 .v2cdv { display: flex; flex-direction: column; gap: var(--space-5); }
 .v2cdv__pager,
 .v2cdv__head,

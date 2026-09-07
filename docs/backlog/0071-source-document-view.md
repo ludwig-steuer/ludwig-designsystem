@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Freigabe | zurück 2026-09-07 — Zuschnitt neu nach Abschnitt „Freigabe" (Rahmen wie 0050 plus Karte), danach ohne zweite Runde freigegeben |
 | Stufe | `entities/source-document/` — `SourceDocumentView` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Pipeline, Vorsteuer und Belegart sind Ludwig-Fachbegriffe |
-| Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Formen-Tabelle |
-| Ersetzt | `SourceDocFamily`, `InvoiceSidebar`, `DocTabsBar`, `SourceDocBelegTab`, `SourceDocPipelineTab`, `SourceDocVerlaufTab`, den Anzeige-Teil von `ContractDetail` |
+| Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Formen-Tabelle · Seitenprofil `docs/seiten/beleg-detail.md` |
+| Ersetzt | `SourceDocFamily`, `InvoiceSidebar`, `DocTabsBar`, `SourceDocBelegTab`, den Anzeige-Teil von `ContractDetail`. **Nicht** `SourceDocPipelineTab` und `SourceDocVerlaufTab` — das sind Reiter-Inhalte, die der Rahmen nicht rendert; die fünf Editoren sind eine Folgeaufgabe |
 | Blockiert | nichts |
 | Setzt voraus | `SourceDocumentCard` (**entsteht hier**, Profil-Prüfung 2026-09-04), `SourceDocumentFacts` mit Ausprägungs-Registry, `SourceDocumentPreview` (alle aus dieser Familie), `EntityHeader`, `Tabs`, `LogList` |
 | Spec von / am | Claude, 2026-09-07 (Skill `spec-schreiben`) |
@@ -199,3 +199,151 @@ Neuer Zuschnitt (vorab freigegeben, wenn die Neufassung dem folgt): (1) `SourceD
 Seitenprofil `beleg-detail.md` nachziehen: Rang 4 sagt, welcher Zustand im Kopf führt (die Erledigung); der Nebenjob „Zurück zur Liste" bekommt sein Element (`RecordPager back`); `Link` → `TextButton`, `RawDataView` → `RawRecord`; `compact` hat keine Frage und fällt.
 
 Bau-Reihenfolge: `SourceDocumentFacts` + `missing` → `SourceDocumentCard` (mit Drawer-Nachzug) → `SourceDocumentView`. Befunde ins Register: **L-92** — `belegTabLabel()` in `modules/source-docs/domain/tabs.ts` (Buchung/Vertrag/Beleg) widerspricht Entscheidung 2 („Beleg" für alle); bei vier Reitern auch `DOC_TABS`/`parseDocTab`. **L-93** — `SourceDocumentVM` (`SourceDocument.tsx`) ist v3-lokal ohne Spiegel-Gegenstück; nur das Durchreichen (L-79) steht im Register, nicht der Typ.
+
+## Neufassung 2026-09-07 nach der Freigabe — Rahmen mit Slots
+
+Die erste Fassung schnitt den View als **datengetriebene Ansicht** mit zwölf
+Props. Die Freigabe hat das zurückgewiesen, und zwar mit dem Argument, das
+diese Spec selbst hätte finden müssen: **zwölf Datenprops sind eine zweite
+Seite** — eine, die bei jedem neuen Reiter, jeder neuen Aktion und jedem neuen
+Zustand mit der ersten in Schritt gehalten werden muss. Der Zuschnitt ist
+jetzt der von 0050: ein Rahmen mit Slots, der ordnet und nichts weiß.
+
+### Drei Bausteine, in dieser Reihenfolge gebaut
+
+**1. `SourceDocumentFacts` bekommt `missing`.** Nach §3 Regel 2: ein `@when`
+deckt den Fall zu vier Fünfteln, und was fehlt, ist **eine** Prop.
+
+```ts
+missing?: readonly { field: string; hint: string; action?: ReactNode }[]
+```
+
+Der Mangel ersetzt den **Wert seiner Zeile**, er steht nicht als Liste
+daneben. Das ist die ganze Entscheidung: ein Mangel, der weg von seinem Feld
+steht, lässt das Feld bloß leer aussehen — und ein leeres Feld sieht aus wie
+nichts zu tun. Ein Eintrag, dessen `field` keine Zeile trifft, wird **nicht**
+still verschluckt, sondern steht am Ende: ein Mangel, den niemand sieht, ist
+schlimmer als einer in der falschen Zeile.
+
+**2. `SourceDocumentCard` — der Inhalt des ersten Reiters.** Original links,
+gelesene Werte rechts, Teilbelege darunter. Props in der Form von
+`SourceDocumentQuickView` plus `parts`, `missing`, `tone` und `children`.
+
+Sie hat **keinen eigenen Kopf**: im View sagt der `EntityHeader` darüber
+schon, welcher Beleg das ist, im Drawer der Drawer-Titel — zwei Titelzeilen
+sind der erste Zweifel des Seitenprofils am heutigen Screen. `compact` ist
+gestrichen und in den Ausbau gewandert; es hatte keine Frage, die es
+beantwortet.
+
+**Der Drawer rendert dieselbe Karte** mit `tone="bare"`. Das ist die Regel aus
+0052 („Zone 3 ist dieselbe Komponente wie der View"), und der sicherste Weg,
+sie zu halten, ist, den Drawer den ersten Reiter rendern zu lassen, statt
+seine Zonen ein zweites Mal zu bauen.
+
+**3. `SourceDocumentView` — der Rahmen.** Fünf Slots in fester Reihenfolge:
+
+| Slot | Was hineingehört | Rang |
+|---|---|---|
+| `pager` | `RecordPager` mit `back` (nennt die Liste) und `total` | 9 |
+| `header` | `EntityHeader` — Titel, **Erledigung** als Zustand, `SourceDocumentClass` als `meta`, Aktionen und der Sachverhaltsweg in `actions` | 1, 4 |
+| `banner` | „wird eingeordnet" (samt dem Satz, dass die Seite sich selbst nachlädt), „Einordnung fehlgeschlagen", der Hinweis auf das Sammel-Original | — |
+| `tabs` | `Tabs` — vier, nicht sechs; welche, ist die Frage der App, nicht des Rahmens | 7–9 |
+| `children` | der Inhalt des aktiven Reiters; im ersten steht die Karte | 2, 3, 5, 6 |
+
+Keine Datenprops, kein Laden, keine eigene Höhe über den oberen Slots — die
+Ränge 1–4 sollen ohne Scrollen dastehen, und wer hier einen Scroll-Container
+setzt, nimmt genau das weg.
+
+### Rang 4: welcher Zustand im Kopf führt
+
+Die **Erledigung** (`beleg_erledigung`), nicht die Verarbeitung. Die Achse
+`beleg` hängt an der Rechnungszeile und hat für 16 % aller Belege überhaupt
+keinen Wert (Befund L-42) — ein Kopf, dessen Zustand bei jedem sechsten Beleg
+leer bleibt, ist kein Kopf. `beleg` steht dort, wo sie hingehört: in den
+Fakten und, wenn die Pipeline hängt, im Banner. Die vier Einordnungs-Achsen
+stehen als `meta` unter dem Titel.
+
+### Verhalten
+
+- **Tastatur:** `J`/`K` für vor und zurück kommen von `RecordPager`; der
+  Rahmen bindet nichts.
+- **Reiterwechsel:** die Reiter sind Links (`href`), kein lokaler Zustand —
+  der Fokus liegt nach dem Wechsel dort, wo der Browser ihn hinlegt, und der
+  Inhalt kommt vom Server. Der Rahmen hält keinen Zustand.
+- **Server/Client:** Rahmen und Karte sind Server-Komponenten. Was Zustand
+  braucht, bringt der Aufrufer mit (`Tabs` mit `href` ist statisch).
+
+### Stories
+
+`SourceDocumentCard` (Titel `v3/Entitäten/Beleg/SourceDocumentCard`):
+3 Zustände (gefüllt · ohne Vorschau · mit Mangel — „leer" entfällt, eine
+Karte ohne Beleg wird nicht gerendert; „lädt" und „Fehler" gehören dem
+Aufrufer, im Drawer bewiesen) + 1 Layout (`parts`) + 1 Enum (`tone`) = **5**.
+
+| Story | Beweist |
+|---|---|
+| `Filled` | Original links, Fakten rechts, keine eigene Kopfzeile |
+| `Missing` | Der Mangel an der Stelle des Wertes, mit dem Weg dorthin |
+| `WithoutPreview` | Kein Original: der Grund steht da |
+| `WithParts` | Teilbelege **unter** den zwei Spalten, als eigene Form |
+| `Bare` | `tone="bare"` — so rendert der Drawer sie |
+
+`SourceDocumentView` (Titel `v3/Entitäten/Beleg/SourceDocumentView`):
+4 Zustände (gefüllt · „wird eingeordnet" · lädt · Fehler) + 1 Layout (anderer
+Reiter) + 1 Rand (ohne Pager und ohne Reiter) = **5** (Laden und Fehler in
+einer Story = 5 Dateien).
+
+| Story | Beweist |
+|---|---|
+| `Filled` | Die fünf Slots in ihrer Reihenfolge, Ränge 1–4 ohne Scrollen |
+| `Pending` | Der Banner gehört dem Beleg, nicht einem Reiter |
+| `OtherTab` | Derselbe Rahmen, anderer Inhalt — der View lädt nichts |
+| `LoadingAndError` | Kopf und Reiter bleiben stehen; der Fehler nennt den Weg |
+| `Bare` | Ohne Pager und Reiter fallen beide Zeilen **samt Abstand** |
+
+### Abnahmekriterien
+
+Fest: typecheck · build · Dateien nach der Familie · Code englisch mit
+`@when`/`@instead` · kein Hex, keine lokale Label-Map · alle Stories · §9 ·
+im Browser angesehen.
+
+Variabel:
+
+- [ ] Der Rahmen hat **keine** Datenprops (`grep`: nur `ReactNode`-Slots)
+- [ ] Der View lädt nichts (`grep`: kein Modul-Import, kein `await`, kein `useState`)
+- [ ] Die Karte hat **keine** eigene Kopfzeile (`grep`: kein `CardHead`, kein Titel-Element)
+- [ ] Der Drawer rendert **dieselbe** Karte (`grep`: `SourceDocumentCard` in `SourceDocumentDrawer.tsx`)
+- [ ] Ein fehlender Pflichtwert steht **an der Stelle des Wertes** (Story `Missing`, gemessen)
+- [ ] Ein `missing`-Eintrag ohne passende Zeile geht nicht verloren (Story `Missing`, zweiter Eintrag)
+- [ ] Die Fakten-Spalte ist `minmax(400px, 560px)`; die Karte misst **sich selbst**, nicht das Fenster (gemessen: im Drawer eine Spalte, auf der Seite zwei)
+- [ ] Im Kopf führt die **Erledigung**, nicht die Verarbeitung (Story `Filled`, `grep`)
+- [ ] Bei 1440 × 900 stehen Ränge 1–4 ohne Scrollen (gemessen; siehe Vorbehalt unten)
+- [ ] Ohne `pager` und ohne `tabs` fallen die Zeilen samt Abstand (Story `Bare`, gemessen)
+- [ ] offen (App): ersetzt `SourceDocFamily`, `InvoiceSidebar`, `DocTabsBar`, `SourceDocBelegTab` und den Anzeigeteil von `ContractDetail`
+
+**Vorbehalt zu „ohne Scrollen":** die Vorschau steht heute auf 795 px
+(`height="lg"`). Bei 1440 × 900 beginnt die Faktenspalte bei y = 267 und endet
+bei 790 — Ränge 1, 3 und 4 stehen also über der Falz, das Original ist
+angeschnitten. Die Owner-Entscheidung zur Vorschauhöhe
+(`clamp(320px, 62vh, 900px)`, eigene Aufgabe an 0075) macht daraus 558 px und
+schließt die Lücke; bis dahin wird das Kriterium mit dieser Zahl gemessen.
+
+### Ausbau (A12)
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Einzelwerte ändern (Belegdatum, Einordnung, Erledigung, DATEV-Ablage) | je ein optionaler Callback über `InlineEdit` in den Fakten | **eigene Folgeaufgabe** — vier Callbacks wären vier Stories über der Grenze, und A12 verbietet Props, die nichts tun |
+| `compact` an der Karte | eine Prop, die die Vorschau weglässt | wenn eine Stelle die Karte ohne Original braucht; heute gibt es keine |
+| Positionen und Vorsteuer | 0072 | wenn die Rechnungsposition ihr Profil hat |
+
+### Befunde für `ludwig/app`
+
+- **L-92** — `belegTabLabel()` benennt den ersten Reiter je nach Belegart
+  („Buchung" / „Vertrag" / „Beleg") und widerspricht damit dem Entscheid, dass
+  er für jede Belegart gleich heißt: er zeigt in allen drei Fällen dasselbe.
+  Bei vier statt sechs Reitern sind zusätzlich `DOC_TABS` und `parseDocTab`
+  nachzuziehen.
+- **L-93** — `SourceDocumentVM` ist v3-lokal und hat kein Gegenstück im
+  Spiegel; im Register stand bisher nur das Durchreichen (L-79), nicht der
+  Typ selbst.
+- **L-82** (`ProcessingProgress` hängt an der Rechnungszeile) bleibt.

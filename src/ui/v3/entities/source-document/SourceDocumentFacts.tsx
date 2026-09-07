@@ -6,6 +6,7 @@ import { Amount } from "../../primitives/Amount";
 import { MonoCell } from "../../primitives/Cells";
 import { FieldList } from "../../primitives/FieldList";
 import { Time } from "../../primitives/Time";
+import { StateIcon } from "../../patterns/Review";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import {
   SourceDocumentCompletion,
@@ -62,10 +63,29 @@ export type SourceDocumentGroup =
  *          0072. Changing a single value → InlineEdit in the view (0071). The
  *          original itself → SourceDocumentPreview.
  */
+/**
+ * A value the document is **missing** and someone has to supply — the
+ * document date above all: „Datum fehlt" is the most common defect of the
+ * stock (axis `beleg_haenger`) and the main job of the detail page.
+ *
+ * It stands **at the value**, not as a list somewhere else: a defect that is
+ * shown away from the field it belongs to leaves the field looking merely
+ * empty, and an empty field looks like nothing to do.
+ */
+export interface SourceDocumentGap {
+  /** Which row it belongs to — the label of the field, matched verbatim. */
+  field: string;
+  /** What is wrong and what follows from it (T5). */
+  hint: string;
+  /** The way to fix it. Without it the gap is named but not actionable. */
+  action?: ReactNode;
+}
+
 export function SourceDocumentFacts({
   document,
   summary,
   group,
+  missing,
   tone = "surface",
 }: {
   /** The same row the list gets — kind, counterparty, both dates, completion, `detail`. */
@@ -78,6 +98,12 @@ export function SourceDocumentFacts({
   summary?: string | null;
   /** The group block, on the relation. `null` means the document is in none. */
   group?: SourceDocumentGroup | null;
+  /**
+   * What is missing and has to be filled in. Each entry names the row it
+   * belongs to; the value there is replaced by the defect with its way out.
+   * An empty list and an absent prop are the same thing — nothing missing.
+   */
+  missing?: readonly SourceDocumentGap[];
   /** `bare` in the drawer, `surface` in the card. */
   tone?: "surface" | "soft" | "bare";
 }) {
@@ -123,11 +149,27 @@ export function SourceDocumentFacts({
     ]);
   }
 
+  // A gap replaces the value of its row. Matching by the German label is the
+  // narrowest contract the caller can meet without this component exporting
+  // its row keys — and an unmatched gap is not silently dropped: it stands at
+  // the end, because a defect nobody sees is worse than one in the wrong row.
+  const gaps = new Map((missing ?? []).map((m) => [m.field, m]));
+  const shown = new Set<string>();
+  const withGaps: [ReactNode, ReactNode][] = rows.map(([label, value]) => {
+    const gap = typeof label === "string" ? gaps.get(label) : undefined;
+    if (!gap) return [label, value];
+    shown.add(gap.field);
+    return [label, <Gap key={`gap-${gap.field}`} gap={gap} />];
+  });
+  for (const m of missing ?? []) {
+    if (!shown.has(m.field)) withGaps.push([m.field, <Gap key={`gap-${m.field}`} gap={m} />]);
+  }
+
   const groupRows = group ? groupBlock(document, group) : [];
 
   return (
     <div className="v2doc__facts">
-      <FieldList tone={tone} rows={rows} />
+      <FieldList tone={tone} rows={withGaps} />
       {/* The block of the specialization. No entry, or a subtype row that
           contradicts the discriminator: no block — not one with a heading and
           „Keine Angaben." under it. */}
@@ -145,6 +187,27 @@ export function SourceDocumentFacts({
         <FieldList tone={tone} title="Dokumentgruppe" rows={groupRows} />
       ) : null}
     </div>
+  );
+}
+
+/**
+ * A missing value, in place of the value. It is **not** an empty field and not
+ * an em dash: both say „there is nothing here", and this says „there is
+ * something here that is not filled in yet, and here is how".
+ */
+function Gap({ gap }: { gap: SourceDocumentGap }) {
+  return (
+    <span className="v2doc__gap">
+      {/* `warning`, not `error`: a missing document date is a defect in the
+          record, not a broken pipeline — the axis `beleg_haenger` grades it
+          the same way (`datum_fehlt` is `warning`, `nicht_extrahiert` is
+          `danger`). */}
+      <StateIcon state="warning" title="fehlt" />
+      <span>
+        {gap.hint}
+        {gap.action ? <> {gap.action}</> : null}
+      </span>
+    </span>
   );
 }
 

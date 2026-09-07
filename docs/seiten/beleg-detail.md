@@ -37,12 +37,12 @@ Verdacht mitgebracht.
 | 1 | „Welcher Beleg ist das — wer, welche Art, welche Nummer?" | Kopf: Gegenpart als Titel (sonst die Belegart), Belegart als Chip, Kennung | `EntityHeader`, `SourceDocumentCell` |
 | 2 | „Stimmt, was ich sehe, mit dem Papier überein?" | Das Original, groß, links — **nicht** hinter einem Klick | `SourceDocumentPreview` (0075) |
 | 3 | „Was hat Ludwig daraus gelesen?" | Fakten der Ausprägung rechts: Rechnungsdaten, Vertragsfelder, sonst die generischen Punkte | `SourceDocumentFacts` (0076) |
-| 4 | „Wie weit ist er — und wartet er auf mich?" | Einordnung (4 Achsen), Verarbeitung (`beleg`), Erledigung (`beleg_erledigung`) | `SourceDocumentClass`, `StatusBadge` |
-| 5 | „Kann ich den einen falschen Wert hier korrigieren?" | Belegdatum, Einordnung, Erledigung, DATEV-Ablage — je Wert an seinem Platz | `InlineEdit` je Punkt (0071 Ausbau) |
-| 6 | „Wo gehört er hin?" | „Zum Sachverhalt →", bei einem Sammel-PDF die Kinder, beim Teilbeleg das Original | `Link`, `SourceDocumentList` |
+| 4 | „Wie weit ist er — und wartet er auf mich?" | Im Kopf führt die **Erledigung** (`beleg_erledigung`); die Einordnung (4 Achsen) steht als `meta` darunter, die Verarbeitung (`beleg`) in den Fakten und, wenn die Pipeline hängt, im Banner | `EntityHeader status`, `SourceDocumentClass`, `SourceDocumentFacts` |
+| 5 | „Kann ich den einen falschen Wert hier korrigieren?" | Belegdatum, Einordnung, Erledigung, DATEV-Ablage — je Wert an seinem Platz. **Fehlt** ein Pflichtwert, steht dort der Mangel mit dem Weg dorthin, nicht eine Leerzeile | `SourceDocumentFacts missing`; das Ändern selbst ist eine Folgeaufgabe zu 0071 |
+| 6 | „Wo gehört er hin?" | „Zum Sachverhalt →" (in `EntityHeader actions`), bei einem Sammel-PDF die Teilbelege unter der Karte, beim Teilbeleg der Hinweis auf das Original | `TextButton`, `SourceDocumentCard parts` |
 | 7 | „Warum hat es nicht funktioniert?" | Verlauf & Befunde: Extraktions-Logs, LLM-Aufrufe, Jobs | Reiter `verlauf`, `LogList` |
 | 8 | „Was genau ist gelaufen?" | Pipeline-Schritte mit Zeiten | Reiter `pipeline` |
-| 9 | „Was steht wirklich in der Zeile?" | Rohdaten, Tabelle für Tabelle | Reiter `rohdaten`, `RawDataView` |
+| 9 | „Was steht wirklich in der Zeile?" | Rohdaten, Tabelle für Tabelle | Reiter `rohdaten`, `RawRecord` |
 
 Rang 1–4 stehen **ohne Scrollen und ohne Klick**. Rang 5 kostet einen Klick am
 Wert selbst, nie einen Wechsel der Ansicht. Rang 6 ist ein Knopf. Rang 7–9
@@ -54,7 +54,7 @@ Fehler gestellt werden.
 | Nebenjob | Wie oft | Darf kosten |
 |---|---|---|
 | Zum nächsten Beleg derselben Liste (`InvoiceListNav`, `1/117`) | bei Reihenarbeit ständig, sonst nie — geschätzt | eine **Taste** (`J`/`K`), kein Klick |
-| Zurück zur Liste, aus der sie kam | jedes Mal | ein Knopf, der die Liste **nennt** (heute: „← Belege" bzw. „← Problematische Belege", je nach Belegdatum) |
+| Zurück zur Liste, aus der sie kam | jedes Mal | ein Knopf, der die Liste **nennt** — `RecordPager back` (heute: „← Belege" bzw. „← Problematische Belege", je nach Belegdatum). Er gehört zur Vor/Zurück-Zeile, nicht zum Kopf: es ist dieselbe Frage („wo komme ich her, wo geht es weiter") |
 | Positionen einer Rechnung prüfen | nur bei Rechnungen, geschätzt jede fünfte | einen Reiter (`positionen`) |
 | Vorsteuer prüfen | nur bei Rechnungen mit VSt-Fakten | einen Reiter (`vorsteuer`) |
 | Neu verarbeiten, zurücksetzen, DATEV-Meta importieren | selten, im Fehlerfall | ein Menü (`DocActionsMenu`) — nie ein Knopf in der ersten Reihe |
@@ -102,13 +102,15 @@ Fehler gestellt werden.
 
 Höchstens drei, jede mit Vorgabewert:
 
-1. **Bleiben es sechs Reiter oder vier?** *Ohne Antwort: vier* — Beleg,
+1. **Bleiben es sechs Reiter oder vier?** **Entschieden: vier** — Beleg,
    Positionen, Vorsteuer, Verlauf; Pipeline und Rohdaten wandern in den
-   Verlauf als aufklappbare Tiefe (Zweifel 3).
-2. **Trägt der View die `InlineEdit`-Werte oder ein eigener Editor?** *Ohne
-   Antwort: der View*, je Wert ein optionaler Callback — so steht es im
-   Zuschnitt des Entitätsprofils („kein Formular, sondern `InlineEdit` je
-   Wert im View").
+   Verlauf als aufklappbare Tiefe (Zweifel 3). Der Baustein merkt davon
+   nichts: er bekommt die Liste, die er bekommt (Befund L-92 für die App —
+   `DOC_TABS`, `parseDocTab` und `belegTabLabel` sind nachzuziehen).
+2. **Trägt der View die `InlineEdit`-Werte oder ein eigener Editor?**
+   **Entschieden:** der View, je Wert ein optionaler Callback — aber als
+   **eigene Folgeaufgabe**. Vier Callbacks wären vier Stories über der Grenze
+   aus `spec-schreiben` §6, und A12 verbietet Props, die nichts tun.
 3. **Gehört die Vor/Zurück-Navigation der Seite oder dem Baustein?** *Ohne
    Antwort: der Seite.* Sie kennt die Liste, aus der die Rolle kam; der
    Baustein bekommt nur `prevHref`/`nextHref` und die Position.
