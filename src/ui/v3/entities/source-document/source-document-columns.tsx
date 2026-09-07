@@ -476,7 +476,9 @@ export function sourceDocumentTracks(columns: ColumnDef<SourceDocumentVM>[]): st
 export function sourceDocumentMinWidth(columns: ColumnDef<SourceDocumentVM>[]): number {
   const GUTTER = 10;
   // `.v2tbl` sits in a card with `padding: 12px 18px` (v3.css) — 36 px, not
-  // the 70 an earlier note claimed. Measured in the acceptance of 0085.
+  // the 70 an earlier note claimed. Measured while building 0085, and
+  // confirmed by its acceptance on 2026-09-07 (the comment said „acceptance"
+  // before there had been one).
   const PADDING = 36;
   const floor = (width: string | undefined): number => {
     if (!width) return 0;

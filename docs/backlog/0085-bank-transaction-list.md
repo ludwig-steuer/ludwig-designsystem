@@ -138,10 +138,12 @@ Voreinstellung (1250) blieben dem Verwendungszweck **84 px**, und der Kopf
 „Verwendungszweck“ (123 px) stand **39 px** außerhalb seiner eigenen Zelle.
 Jetzt 1400, damit 234 px für den Zweck; darunter rollt `DataTable` waagerecht.
 
-*(Der erste Wortlaut rechnete mit „zweimal 35 Polster“ und kam auf 50 px. Die
-Abnahme hat nachgemessen: das Polster ist `12px 18px`. Der Schluss stimmte,
-die Zahl nicht — und dieselbe falsche 70 stand in `sourceDocumentMinWidth()`
-aus 0070, wo sie mitkorrigiert ist.)*
+*(Der erste Wortlaut rechnete mit „zweimal 35 Polster" und kam auf 50 px. Beim
+Bauen nachgemessen: das Polster ist `12px 18px`. Der Schluss stimmte, die Zahl
+nicht — und dieselbe falsche 70 stand in `sourceDocumentMinWidth()` aus 0070,
+wo sie mitkorrigiert ist. **Berichtigt am 2026-09-07:** hier stand
+„die Abnahme hat nachgemessen", 0085 hatte zu dem Zeitpunkt aber noch keine —
+die Zahl ist richtig, die Herkunft war es nicht.)*
 
 **Ein Kästchen ohne Wirkung.** Der Kopf der Auswahlspalte war im Leerfall
 klickbar und wählte nichts. Behoben in `SelectAllCell` (0057) — es gilt für

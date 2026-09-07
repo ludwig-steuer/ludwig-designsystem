@@ -222,8 +222,12 @@ export const Extremes: Story = {
           T({
             id: "x-1",
             counterpartyName: null,
+            // Der lange Teil steht im **SVWZ**, nicht in der EREF-Kette: die
+            // Spalte zeigt den Klartext, die Kette landet im Aufklapper. Mit
+            // ihr allein maß der Zweck hier 125,9 px — der schmalste aller
+            // Stories, ausgerechnet im Randfall (Abnahme 0085, Befund 2).
             purpose:
-              "EREF+VERTRAGSNUMMER-2026-000441827-RATE-014-VON-036 SVWZ+Leasingrate Fuhrpark",
+              "EREF+VERTRAGSNUMMER-2026-000441827-RATE-014-VON-036 SVWZ+Leasingrate Fuhrpark 014 von 036, Fahrzeug MUS-AB 1234, Sonderzahlung anteilig verrechnet",
             matchStage: "beyond_bookings",
             amount: -1234567.89,
             openClarificationsCount: 128,
