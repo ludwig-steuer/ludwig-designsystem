@@ -82,12 +82,16 @@ Aufgabe, die man einzeln abnehmen kann. Die Karte hat den Platz dafür bereits
   Grund kommt aus dem Dialog; `onDefer` bekommt beides. Ein eigener
   `DeferDialog` wäre `ReasonDialog` plus ein Feld und würde die Frage „was
   nehme ich?" um eine Antwort verschlechtern.
-- **Der Tag wird geklemmt, nicht nur begrenzt.** Startwert **morgen**
-  (heute zurückzustellen ist kein Zurückstellen), `min` morgen, `max`
-  heute + 30. Aber `min`/`max` am Feld sind ein Hinweis beim Tippen, **keine
-  Zusage**: ein von Hand eingetragenes Datum außerhalb erreicht `onChange`,
-  und der Bestätigen-Knopf sieht das Feld nie. Der Wert wird deshalb dort
-  geklemmt, wo er benutzt wird.
+- **Der Tag wird geklemmt, nicht nur begrenzt.** Startwert **morgen**, `min`
+  morgen, `max` heute + 30. Aber `min`/`max` am Feld sind ein Hinweis beim
+  Tippen, **keine Zusage**: ein von Hand eingetragenes Datum außerhalb
+  erreicht `onChange`, und der Bestätigen-Knopf sieht das Feld nie.
+
+  Dass der Startwert **morgen** ist, ist dabei keine Höflichkeit, sondern
+  abgeleitet: `clarificationState()` liefert `deferred` nur für
+  `deferredUntil > today`. Eine Zurückstellung auf heute würde gespeichert und
+  sofort wieder als `open` gelesen — morgen ist der erste Tag, der den Zustand
+  überhaupt erzeugt.
 
 ### Schnittstelle — was an `ClarificationCard` dazukommt
 
@@ -249,3 +253,52 @@ Nachweise der abgeschlossenen Abnahme 0060 tot (`--gefuellt`, `--antworten`,
 …). Sie stehen dort als Story-IDs in der Abnahmetabelle; wer 0060 nachprüft,
 findet sie nicht mehr. M-10 (`void onDefer(...)` verschluckt einen Fehler) ist
 seit 0060 so und gehört in eine eigene Runde für beide Ausgänge.
+
+## Zweite Runde, 2026-09-07 — die Klemmung war nicht mehr stumm, sondern laut an der falschen Stelle
+
+Acht der neun Punkte hielten der Nachprüfung stand; zurück ging es an dem
+einen, der aus der ersten Korrektur entstanden ist.
+
+**Das Klemmen am `onChange` kämpfte gegen das Tippen (N-1).** Ein natives
+Datumsfeld meldet **jede Ziffer der Jahreszahl einzeln**, so dass „2026" durch
+0002, 0020 und 0202 läuft. Wer auf jedem dieser Werte korrigiert, schreibt
+Segmente um, die niemand angefasst hat: gemessen sprang beim ersten Anschlag
+der Jahreszahl der **Tag** von 20 auf 8. Dieses Repo hat denselben Fehler
+schon einmal gefunden — im Review von 0024, an `DateRangeField`, das seither
+auf den Blur wartet.
+
+Die Lösung hier ist enger und braucht den Umweg nicht: **ein Jahr unter 1000
+ist ein Tastenanschlag, kein Datum** und geht unverändert durch; alles andere
+wird sofort korrigiert, wo die Korrektur sichtbar ist. Gemessen:
+
+| Eingabe | Feld zeigt danach |
+|---|---|
+| `2026-09-20` | 2026-09-20 |
+| `0002-09-20` · `0020-09-20` · `0202-09-20` | unverändert — der Tag bleibt der 20. |
+| `2027-01-01` | **2026-10-07** |
+| `2020-01-01` | **2026-09-08** |
+
+Dazu bleiben zwei Netze: `DateField` hat eine Prop `onBlur` bekommen (die dem
+Set gefehlt hat — dieselbe Stelle, an der `DateRangeField` seinen Tausch
+macht), und `clampDeferralDay` steht weiter im Bestätigungspfad. **Ehrlich
+gesagt:** die Blur-Klemmung ist in der headless-Messung nicht nachweisbar —
+das Werkzeug kann Datumssegmente nicht bedienen und React reagiert auf
+synthetische Fokus-Ereignisse nicht. Bewiesen ist die sichtbare Korrektur am
+Change; der Blur ist der Gürtel zum Hosenträger, nicht der Nachweis.
+
+**Der Fix für die Ausgänge hat jetzt seine Story (N-2).** Die Altlast-Karte in
+`Answering` (`answer_kind = "document_upload"`) bekommt `onDefer` und
+`onResolve` — sie ist genau der Fall, für den die Entkopplung gemacht ist:
+beantworten kann man diese Frage nicht mehr, auflösen und zurückstellen schon.
+
+**Und der Kontrast-Fix hatte eine Nebenwirkung, die die Abnahme gefunden hat
+(N-3):** mit `--color-text-muted` waren „quiet + aktiv" und „quiet + gesperrt"
+**pixelgleich** — übrig blieb `cursor: not-allowed`, also nichts, was man ohne
+Maus sieht. Gesperrt hat jetzt eine eigene Stufe (`--color-text-subtle`,
+4,88:1): über der Schwelle und von beiden aktiven Tönen unterscheidbar.
+
+**Nicht geändert:** N-4 (der Umzug der Ausgänge verschiebt den senkrechten
+Rhythmus um 4–5 px). Das ist Geschmack, und ein eigener `margin-top` an
+`.v2clc__exit` wäre eine Regel mehr für einen Unterschied, den niemand
+gemeldet hat. **M-11:** das CSS zu dieser Aufgabe liegt im Vor-Commit
+`680653c` — wer den 0065-Diff liest, findet die Formatierung dort.

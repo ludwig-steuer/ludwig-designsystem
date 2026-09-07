@@ -271,7 +271,12 @@
    „sichtbar und begründet", sondern nur noch zu ahnen (Abnahme 0065). Statt
    Deckkraft die gedämpfte Textfarbe: 6,69:1, und der Unterschied zum aktiven
    Link bleibt deutlich, weil dieser blau ist. */
-.v2link:disabled { color: var(--color-text-muted); cursor: not-allowed; }
+/* Gesperrt braucht eine **eigene** Stufe, nicht die des ruhigen Tons: mit
+   `--color-text-muted` waren „quiet + aktiv" und „quiet + gesperrt"
+   pixelgleich, und übrig blieb `cursor: not-allowed` — nichts, was man ohne
+   Maus sieht (Nachabnahme 0065). `--color-text-subtle` misst 4,88:1, liegt
+   also über der Schwelle und unter beiden aktiven Tönen. */
+.v2link:disabled { color: var(--color-text-subtle); cursor: not-allowed; }
 
 
 /* ==========================================================================

@@ -36,6 +36,7 @@ export function DateField({
   disabled,
   ariaLabel,
   describedBy,
+  onBlur,
   id,
   name,
 }: {
@@ -53,6 +54,14 @@ export function DateField({
    * and is read by everyone **except** the person who needs it most.
    */
   describedBy?: string;
+  /**
+   * Fires when the field is left. The place for a correction that must not
+   * fight the typing: a native date input reports **every keystroke** of the
+   * year, so „2026" passes through 0002, 0020 and 0202 — whoever corrects on
+   * `onChange` rewrites segments the person never touched (found in the
+   * review of 0024, and again in the acceptance of 0065).
+   */
+  onBlur?: () => void;
   /**
    * What the `htmlFor` of the surrounding `Field` points at (0104). Separate
    * from `name`: a field outside a form still needs its word bound to it.
@@ -73,6 +82,7 @@ export function DateField({
       aria-label={ariaLabel}
       aria-describedby={describedBy}
       onChange={(e) => onChange(e.target.value || null)}
+      onBlur={onBlur}
     />
   );
 }

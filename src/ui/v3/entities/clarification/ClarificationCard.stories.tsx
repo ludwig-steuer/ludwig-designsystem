@@ -149,6 +149,12 @@ export const Answering: Story = {
                 originLabel: "Buchungsvorschlag",
               }}
               onAnswer={() => answer("darf nicht passieren")}
+              // **Der Fall, für den die Ausgänge da sind.** Diese Frage lässt
+              // sich nicht mehr beantworten — der Upload ist mit F125 weg —,
+              // also sind Auflösen und Zurückstellen die einzigen Wege. Solange
+              // sie an `canAnswer` hingen, hatte ausgerechnet sie keinen.
+              onResolve={(reason) => answer(`Aufgelöst: ${reason}`)}
+              onDefer={(until, reason) => answer(`Zurückgestellt bis ${until}: ${reason}`)}
             />
           </div>
         </Card>

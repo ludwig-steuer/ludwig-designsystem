@@ -171,6 +171,26 @@ function isoDay(date: Date): string {
   return local.toISOString().slice(0, 10);
 }
 
+/**
+ * The correction **while typing** — and the reason it has to hold back.
+ *
+ * A native date input reports every keystroke of the year separately, so
+ * „2026" passes through 0002, 0020 and 0202. Correcting on each of those
+ * rewrites segments the person never touched: they type the year and the day
+ * jumps from the 20th to the 8th under their hands. This repo found that once
+ * before, in the review of 0024, and `DateRangeField` waits for the blur.
+ *
+ * Here the rule is narrower and does not need the detour: a year below 1000
+ * is a keystroke, not a date — it passes through untouched. Everything else
+ * is corrected right away, where the correction is visible.
+ */
+function clampTyped(value: string | null): string | null {
+  if (!value) return value;
+  const year = Number(value.slice(0, 4));
+  if (!Number.isFinite(year) || year < 1000) return value;
+  return clampDeferralDay(value);
+}
+
 /** Tomorrow. Deferring to today is not deferring. */
 function defaultDeferralDay(): string {
   return isoDay(new Date(Date.now() + DAY_MS));
@@ -185,11 +205,16 @@ function maxDeferralDay(): string {
  *
  * `min` and `max` on the field are a hint the browser gives while typing —
  * they are **not** a guarantee: a typed date outside the range still reaches
- * `onChange`, and the confirm button never looks at the field. So the value is
- * clamped **at the change**, where the correction is visible in the field, and
- * again on confirm as a net. A date that quietly turns into another one is
- * the kind of thing nobody notices until the question comes back on the wrong
- * day (finding of the acceptance).
+ * `onChange`, and the confirm button never looks at the field. So the day is
+ * held in three places, and each one exists for a reason:
+ *
+ *  - **at the change**, but only once the year is written out — see
+ *    `clampTyped`, and the reason there;
+ *  - **on leaving the field**, for whatever the first rule let through;
+ *  - **on confirm**, as the net that nothing gets past.
+ *
+ * A date that quietly turns into another one is the kind of thing nobody
+ * notices until the question comes back on the wrong day.
  */
 function clampDeferralDay(value: string | null): string {
   const min = defaultDeferralDay();
@@ -256,6 +281,18 @@ export function ClarificationCard({
   const dayId = useId();
   const hintId = useId();
   const whyId = useId();
+
+  /**
+   * Hold the day inside the window — **once the field is left**, so the
+   * correction is visible without fighting the typing. An empty field is
+   * someone about to type, not a mistake: it fills itself only on confirm,
+   * where the net sits.
+   */
+  function clampOnLeave() {
+    if (until === null) return;
+    const day = clampDeferralDay(until);
+    if (day !== until) setUntil(day);
+  }
 
   const isComment = c.type === "comment";
   // Without a loaded audit trail, asker and answerer still make a two-step
@@ -472,11 +509,19 @@ export function ClarificationCard({
           {/* The date sits **above** the reason, in the slot `ReasonDialog`
               keeps for „what is this reason for". No second dialog: this one
               already carries the mandatory reason and its lock. */}
+          {/* Geklemmt wird **beim Verlassen**, nicht bei jedem Anschlag: ein
+              natives Datumsfeld meldet jede Ziffer der Jahreszahl einzeln, so
+              dass „2026" durch 0002, 0020 und 0202 läuft — und eine Korrektur
+              auf jedem dieser Werte schriebe dem Tippenden Segmente um, die er
+              gar nicht angefasst hat. `DateRangeField` löst dasselbe Problem
+              zehn Zeilen weiter oben genauso (`swapIfInverted`, Befund aus der
+              Abnahme von 0024). Das Netz im Bestätigungspfad bleibt. */}
           <Field label="Wiedervorlage am" htmlFor={dayId}>
             <DateField
               id={dayId}
               value={until}
-              onChange={(value) => setUntil(clampDeferralDay(value))}
+              onChange={(value) => setUntil(clampTyped(value))}
+              onBlur={clampOnLeave}
               min={defaultDeferralDay()}
               max={maxDeferralDay()}
               describedBy={hintId}
