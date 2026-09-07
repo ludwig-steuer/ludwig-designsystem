@@ -20,7 +20,7 @@ export function MasterDetail({
   detail,
   style,
   detailBreit = false,
-  minDetail = 620,
+  minDetail,
 }: {
   list: ReactNode;
   detail: ReactNode;
@@ -59,7 +59,9 @@ export function MasterDetail({
   return (
     <div
       className="v2md v2md--detail-breit"
-      style={{ ...style, "--v2md-min": `${minDetail}px` } as CSSProperties}
+      style={
+        { ...style, ...(minDetail ? { "--v2md-min": `${minDetail}px` } : {}) } as CSSProperties
+      }
     >
       <div className="v2md__list">{list}</div>
       <div className="v2md__detail">{detail}</div>

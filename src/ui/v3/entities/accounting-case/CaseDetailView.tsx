@@ -50,11 +50,14 @@ export function CaseDetailView({
       {nextAction ? <div className="v2cdv__next">{nextAction}</div> : null}
       {tabs ? <div className="v2cdv__tabs">{tabs}</div> : null}
       {aside ? (
-        // 484 px, nicht die Vorgabe 620: rechts stehen Fakten, keine
-        // Tabelle — sie bleiben in der Detailspalte der Seite lesbar, und mit
-        // der Vorgabe kippte die Ansicht bei 1280 px Fensterbreite in die
-        // Einspaltigkeit (Wiederabnahme 0050).
-        <MasterDetail list={aside} detail={children} detailBreit minDetail={484} />
+        // 460 px, nicht die Vorgabe 620: rechts stehen Fakten, keine Tabelle —
+        // sie bleiben in der Detailspalte der Seite lesbar, und mit der Vorgabe
+        // kippte die Ansicht bei 1280 px Fensterbreite in die Einspaltigkeit
+        // (Wiederabnahme 0050). **Nicht 484:** damit läge die Schwelle bei
+        // exakt 944 px, der Breite, die die Seite bei einem 1280er Fenster
+        // hat — ein Browser mit platznehmenden Rollbalken verliert rund 15 px
+        // und kippt unbemerkt (Abnahme 0116). 460 lässt 24 px Luft.
+        <MasterDetail list={aside} detail={children} detailBreit minDetail={460} />
       ) : (
         <div className="v2cdv__body">{children}</div>
       )}
