@@ -50,13 +50,13 @@ export function CaseDetailView({
       {nextAction ? <div className="v2cdv__next">{nextAction}</div> : null}
       {tabs ? <div className="v2cdv__tabs">{tabs}</div> : null}
       {aside ? (
-        // 460 px, nicht die Vorgabe 620: rechts stehen Fakten, keine Tabelle —
-        // sie bleiben in der Detailspalte der Seite lesbar, und mit der Vorgabe
-        // kippte die Ansicht bei 1280 px Fensterbreite in die Einspaltigkeit
-        // (Wiederabnahme 0050). **Nicht 484:** damit läge die Schwelle bei
-        // exakt 944 px, der Breite, die die Seite bei einem 1280er Fenster
-        // hat — ein Browser mit platznehmenden Rollbalken verliert rund 15 px
-        // und kippt unbemerkt (Abnahme 0116). 460 lässt 24 px Luft.
+        // 460 px instead of the default 620: what stands on the right are
+        // facts, not a table — they stay readable in the detail column, and
+        // with the default the view fell into a single column at a 1280 px
+        // window (acceptance of 0050). **Not 484:** the threshold would then
+        // sit exactly on the page width at 1280, and a browser with
+        // space-taking scrollbars loses about 15 px and wraps unnoticed
+        // (acceptance of 0116). 460 leaves 24 px of room.
         <MasterDetail list={aside} detail={children} detailBreit minDetail={460} />
       ) : (
         <div className="v2cdv__body">{children}</div>

@@ -36,12 +36,20 @@ Arbeit. Zwei Abnahmen desselben Tages haben genau das gemeldet.
 
 ## Was zu prüfen ist
 
+**Dritte Meldung, andere Spur:** die Abnahme von 0050 sah denselben Abbruch an
+`sb-common-assets/nunito-sans-bold.woff2` — einer Datei, die Storybook selbst
+schreibt — und nennt als Ursache **einen zweiten Bau im selben
+Ausgabeordner**. Das erklärt das Flackern besser als eine Eigenart des
+Kopierers: in diesem Baum arbeiten mehrere Sitzungen, und `pnpm build`
+schreibt immer nach `storybook-static/`. Der serielle Zweitlauf war grün.
+
 | Frage | Woran man es sieht |
 |---|---|
 | Kopiert Storybook parallel und kollidiert mit sich selbst? | Der Fehler nennt `chmod` auf eine Datei, die es gerade schreibt |
 | Braucht `reference/` überhaupt den Weg über `staticDirs`? | Es wird nur von den Artboard-Stories eingebettet |
 | Reicht ein Symlink oder ein `serve`-Pfad statt einer Kopie? | Der Bau würde nichts mehr kopieren |
-| Gibt es das auch in CI? | Dort wäre es ein roter Lauf ohne Ursache |
+| Gibt es das auch in CI? | Dort wäre es ein roter Lauf ohne Ursache — und dort baut **niemand** parallel, was die Ursache eingrenzt |
+| Bauen zwei Sitzungen in denselben Ordner? | `storybook-static/` ist nicht je Sitzung getrennt; ein `--output-dir` pro Sitzung wäre der kleinste Ausweg |
 
 ## Nicht Teil dieser Aufgabe
 
