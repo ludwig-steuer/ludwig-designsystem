@@ -1,4 +1,10 @@
 import type { Currency } from "@/ludwig/shared/money";
+import {
+  OPEN_ITEM_AGE_BUCKETS,
+  OPEN_ITEM_AGE_LABEL,
+  openItemAgeBucket,
+  type OpenItemAgeBucket,
+} from "@/ludwig/modules/datev-truth/domain/open-item";
 
 /**
  * A DATEV open item, as the row needs it (0029).
@@ -42,21 +48,14 @@ export interface OpenItem {
 /**
  * How long an item has been overdue — the five classes DATEV uses.
  *
- * **The component does not compute this.** The rule belongs to the domain
- * (`openItemAgeBucket({ dueDate, asOf })`, finding L-05), and until it exists
- * over there the caller hands the class in. A second version here is what
- * L-52 already cost the set once.
+ * They come from the mirror since 2026-09-07 (`222c8d5a`, findings L-05 and
+ * L-73): the classes, their words and the rule that assigns them all live in
+ * `datev-truth/domain/open-item.ts`. **The component still does not compute
+ * the class** — the caller hands it in, exactly as before; what changed is
+ * that the rule can now be quoted instead of copied.
  */
-export type OpenItemAgeBucket = "notDue" | "d1_30" | "d31_60" | "d61_90" | "d90plus";
-
-/** The words of the five classes. Not a status: there is no axis, and none is due. */
-export const AGE_BUCKET_LABEL: Record<OpenItemAgeBucket, string> = {
-  notDue: "noch nicht fällig",
-  d1_30: "1 bis 30 Tage überfällig",
-  d31_60: "31 bis 60 Tage überfällig",
-  d61_90: "61 bis 90 Tage überfällig",
-  d90plus: "über 90 Tage überfällig",
-};
+export type { OpenItemAgeBucket };
+export { OPEN_ITEM_AGE_BUCKETS, OPEN_ITEM_AGE_LABEL, openItemAgeBucket };
 
 export interface OpenItemAgeGroupVM {
   bucket: OpenItemAgeBucket;

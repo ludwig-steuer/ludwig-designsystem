@@ -1111,3 +1111,35 @@ sich die Nacharbeit bezieht, stehen deshalb nirgends beschrieben. Das ist ein
 Loch in der Spur, kein Baufehler, und es lässt sich nicht rückwirkend
 schließen: der Entwurf ist Arbeitsstand, kein Abnahme-Eintrag. Was er sagte,
 steht in der Nacharbeit; wer die Kette liest, findet den Grund dort.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-74 ist erledigt** (App-Commit `ba5da563`): `STATE_MACHINES` trägt die
+Übergänge als Daten — je Achse eine Beschreibung und die Übergänge mit
+**Auslöser und Akteur**. Vier Achsen sind gefüllt (`beleg`, `job`, `upload`,
+`dispatch`), rund fünfzig stehen aus (L-75).
+
+Was die Karte jetzt tut:
+
+- **Sie liest die Übergänge selbst.** `transitions` ist von einer Pflicht- zu
+  einer Ausnahme-Prop geworden: sie ist nur noch für eine Achse da, die keine
+  Maschine hat. Dasselbe gilt für `description`.
+- **`from: null` ist der Eintritt in die Achse** und wird **nicht** als Kante
+  gezeichnet — es gibt keinen Ausgangskasten, ein Pfeil aus dem Nichts wäre
+  eine Behauptung. Der Eintritt steht in der Erklärung seines Ziels als eigene
+  Zeile („Eintritt durch").
+- **Der Akteur steht am Übergang**, wo die Registry ihn nennt: „Pipeline
+  abgebrochen · system". Das ist die Information, die es vorher nirgends gab.
+
+Zwei Sätze bleiben als Konstante in den Stories (`zyklus_stapel`,
+`beleg_inbox`) — ihre Achsen haben keine Maschine. Der Satz für `beleg` ist
+weg: `Branching` und `Explain` beziehen ihn aus der Registry, und genau das
+sollen sie zeigen.
+
+Der lokale `StateTransition` ist der gespiegelte; `label` heißt jetzt
+`trigger`, wie in der Registry.
+
+**Der Typtausch kam nach der letzten Abnahme.** Er ist typgeprüft
+(`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
+Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
+schreibt. Eine kurze Bestätigung steht aus.

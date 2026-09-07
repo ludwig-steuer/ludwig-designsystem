@@ -426,7 +426,7 @@ export {
 /* Offene Posten */
 export { OpenItemRow, OpenItemAgeGroup } from "./entities/open-item/OpenItemRow";
 export {
-  AGE_BUCKET_LABEL,
+  OPEN_ITEM_AGE_LABEL,
   type OpenItem,
   type OpenItemAgeBucket,
   type OpenItemAgeGroupVM,

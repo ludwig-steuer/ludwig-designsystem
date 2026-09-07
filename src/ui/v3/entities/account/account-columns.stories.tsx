@@ -43,6 +43,8 @@ const A = (over: Partial<AccountRow>): AccountRow => ({
   lastBookingDate: "2026-08-26",
   skrBaseCode: "4930",
   accountFrameworkCode: null,
+  businessPartnerId: null,
+  businessPartnerName: null,
   ...over,
 });
 
@@ -50,15 +52,10 @@ const ACCOUNTS: AccountRow[] = [
   A({}),
   A({ key: "client_2", id: "a2", accountNumber: "4120", accountName: "Gehälter", skrClass: "personnel_expense", usageBookingCount: 12, lastBookingDate: "2026-08-31" }),
   A({ key: "client_3", id: "a3", accountNumber: "8400", accountName: "Erlöse 19 % USt", accountingRole: "revenue", skrClass: "revenue", usageBookingCount: 318, lastBookingDate: "2026-08-31" }),
-  A({ key: "client_4", id: "a4", accountNumber: "70001", accountName: "Bürobedarf Meier GmbH", accountingRole: "creditor", skrClass: "creditor", usageBookingCount: 9, lastBookingDate: "2026-08-26" }),
-  A({ key: "client_5", id: "a5", accountNumber: "10001", accountName: "Musterbau GmbH", accountingRole: "debtor", skrClass: "debtor", usageBookingCount: 3, lastBookingDate: "2026-07-14" }),
+  A({ key: "client_4", id: "a4", accountNumber: "70001", accountName: "Bürobedarf Meier GmbH", accountingRole: "creditor", businessPartnerId: "bp-70001", businessPartnerName: "Bürobedarf Meier GmbH", skrClass: "creditor", usageBookingCount: 9, lastBookingDate: "2026-08-26" }),
+  A({ key: "client_5", id: "a5", accountNumber: "10001", accountName: "Musterbau GmbH", accountingRole: "debtor", businessPartnerId: "bp-10001", businessPartnerName: "Musterbau GmbH", skrClass: "debtor", usageBookingCount: 3, lastBookingDate: "2026-07-14" }),
   A({ key: "client_6", id: "a6", accountNumber: "4650", accountName: "Bewirtungskosten", skrClass: "other_operating_expense", usageBookingCount: 0, lastBookingDate: null, status: "inactive" }),
 ];
-
-const PARTNERS: Record<string, string> = {
-  "70001": "Bürobedarf Meier GmbH",
-  "10001": "Musterbau GmbH",
-};
 
 const PAGER = { page: 1, pageSize: 50, totalItems: 41_570, totalPages: 832 };
 
@@ -202,14 +199,18 @@ export const Grouped: Story = {
   },
 };
 
-/** Personenkonten mit ihrem Geschäftspartner — 52 % Füllgrad, dort ~100 %. */
+/**
+ * Personenkonten mit ihrem Geschäftspartner — 52 % Füllgrad, dort ~100 %.
+ * Der Name steht seit L-89 in der Zeile; die Story reicht nur noch die
+ * **Route** herein, denn die kennt der Aufrufer. Das Sachkonto in der dritten
+ * Zeile trägt keinen Partner, und das ist dort richtig.
+ */
 export const Personal: Story = {
   render: () => {
     const cols = accountColumns({
       href,
       columns: ["skrClass", "number", "name", "role", "partner", "bookings"],
-      partnerName: (a) => PARTNERS[a.accountNumber] ?? null,
-      partnerHref: (a) => (PARTNERS[a.accountNumber] ? `#partner-${a.accountNumber}` : undefined),
+      partnerHref: (a) => (a.businessPartnerId ? `#partner-${a.businessPartnerId}` : undefined),
     });
     return (
       <div style={{ maxWidth: 1300 }}>

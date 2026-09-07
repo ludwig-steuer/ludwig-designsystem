@@ -440,10 +440,10 @@ export function sourceDocumentColumns({
       width: "110px",
       align: "end",
       cell: (d) =>
-        d.sizeBytes == null ? (
+        d.byteSize == null ? (
           <span className="v2muted">—</span>
         ) : (
-          <span className="v2num">{formatBytes(d.sizeBytes)}</span>
+          <span className="v2num">{formatBytes(d.byteSize)}</span>
         ),
     },
   };

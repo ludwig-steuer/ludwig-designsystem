@@ -255,3 +255,120 @@ nicht mit her. `colSpan` gab der Zelle die Breite zurück — das Polster, die
 Spaltenrichtung und das Ladegerüst hingen an derselben Umstellung und sind
 erst aufgefallen, weil die Zelle breit genug wurde, dass man ihren linken Rand
 sehen konnte.
+
+## Wiederabnahme, 2026-09-07 — beide Nacharbeiten halten, der Ladefall nicht
+
+Geprüft wurden Kriterien-Tabelle und jeder Abschnitt danach, gegen den
+Dev-Server (Port 6107), ohne Blick in den Bau. **Ergebnis: zurück** — nicht
+wegen der Nacharbeit, sondern wegen dessen, was sie sichtbar gemacht hat.
+
+### Die zwei Nacharbeiten sind nachgerechnet und halten
+
+Die Sonderzelle hat ihr Polster zurück, gemessen an der Klasse selbst:
+`.v2tbl__empty` `30px 18px`, `.v2tbl__group` `7px 18px`, `.v2tbl__detail`
+`14px 18px 16px 46px`, `.v2tbl__error` `24px 18px` — Text jeweils bei
+**x = 18** relativ zur Zelle, wie jede andere. Der Fehlerkasten steht auf
+`display: flex` / `column` / `align-items: flex-start`, **Höhe 110,9 px**,
+`Erneut laden` unter der Meldung statt daneben. Das Ladegerüst ist
+`display: block`, **25 Spans, kein einziger 0 × 0**.
+
+**Der Messwert reagiert.** Beide Regeln wurden im laufenden Dokument aus dem
+Stylesheet gelöscht und neu gemessen: ohne `.v2tbl td.v2tbl__error` fällt die
+Zelle auf `padding: 0`, `display: block`, **Höhe 34,8 px**, Text bei
+**x = 0** — genau das 35-px-Band an der Kartenkante, das die dritte Runde
+beschreibt. Ohne `.v2skel { display: block }` stehen dieselben 25 Spans auf
+`inline` und **0 × 0**. Die Werte sind also gemessen, nicht zurückgelesen.
+
+### Beschädigt hat die Nacharbeit nichts
+
+Gruppenzeilen (`AccountColumns/Grouped`, `OpenItemRow/Grouped`) `7px 18px`,
+Inhalt bei +18; Aufklappzeilen (`DataTable/Expand`,
+`BankTransactionList/Expanded`) `14px 18px 16px 46px`, Inhalt bei +46; die
+Skeleton-Stories und die Gerüste des Beleg-Drawers unverändert (die tragen
+ihr `display: block` seit je selbst). Kopf und Zeilen enden bei
+**900/1100/1280/1440/1680/1920 px** auf **derselben Kante** (Abweichungen: 0),
+Zellüberlauf 0, kein Seitenüberlauf bis hinunter zu 480 px — die Karte scrollt
+innen, sie drückt die Seite nicht auf. Sachverhalts-Spur 200 px und **trägt
+etwas**: viermal „offen" in `Filled`, der Fallname in `AllOfAnAccount`.
+Verwendungszweck 372 px bei `minWidth` 1100, 520 px bei 1250. Kästchen-
+Beschriftungen mit absolutem Datum, Kopf-Kästchen im Leer-, Lade- und
+Fehlerfall `disabled === true`, Leerfall mit Haken (`aria-label="erledigt"`)
+**und** Zahl im Satz, Fehlerzeile mit **einem** Knopf, Rundlauf beider
+Sammelaktionen samt Taste `N` geprüft, Pager `1–100 von 500` und drei
+Sortier-Links in `AllOfAnAccount`, drei Zeilenlinks auf Spalte 2
+(Gegenpartei), **0** verschachtelte Anker. Keine Konsolenmeldung in allen
+sechs Stories. `typecheck`, `build`, `check:icons`, `check:contrast`: Exit 0.
+
+### Mängel
+
+1. **Der Ladefall hat sechs Spuren und fünf Zellen — blockierend.**
+   Kriterium „Kopf und Zeilen enden an derselben Kante". Gemessen bei 1440 px:
+   Kopf 6 Zellen (`32 · 100 · 180 · 520 · 200 · 130`), jede Ladezeile **5**.
+   Die Balken sitzen dadurch um eine Spur verschoben — der erste liegt mit
+   22,4 px **im 32-px-Auswahlkästchen**, und die Spur „Betrag" bleibt in allen
+   fünf Zeilen **leer** (letzte Ladezelle endet bei 1107, der Kopf bei 1247).
+   Ursache liegt nicht hier, sondern in `DataTable.tsx`: `cols` zählt
+   Auswahl-, Aufklapp- und Aktionsspur mit, `<TableLoading cols={columns.length} />`
+   nicht. Vorschlag: `TableLoading` die **Spurzahl** übergeben und die
+   Griff-Spuren als leere Zellen rendern, nicht als Balken.
+   Die Nacharbeit hat den Fehler nicht gemacht, sie hat ihn sichtbar gemacht:
+   solange die Spans 0 × 0 waren, sah man die Verschiebung nicht.
+   Dazu: die Zahlen der dritten Runde („70 × 11, 81 × 11, an derselben Kante
+   wie die Zellen darüber") sind reproduzierbar — aber auf
+   `BankTransactionList/LoadingAndError` (gemessen 70 · 81 · 108 · 90 · 72),
+   **nicht** auf dieser Liste (gemessen 22,4 · 45 · 81 · 234 · 90).
+
+2. **`WithMatchStage` beweist die Erweiterung nicht — blockierend.**
+   Kriterium „`columns` erweitert, ohne umzuordnen (gemessen)". Übergeben wird
+   `["amount","matchStage","purpose","postingDate","counterparty"]` — das ist
+   **keine Obermenge** von `WORKLIST_COLUMNS`, es lässt `cases` weg. Gemessen
+   kommt „Datum · Gegenpartei · Verwendungszweck · DATEV-Historie · Betrag"
+   zurück: fünf Spalten wie die Voreinstellung, DATEV **anstelle** von
+   Sachverhalt. Bewiesen ist damit „ordnet nicht um", nicht „erweitert".
+   Vorschlag: den vollen Satz plus `matchStage` verwürfelt übergeben, etwa
+   `["matchStage","amount","purpose","cases","postingDate","counterparty"]`;
+   erwartet werden dann sechs Köpfe mit `Sachverhalt` **und**
+   `DATEV-Historie`.
+
+3. **Die Bildunterschrift derselben Story sagt das Gegenteil des Baus —
+   blockierend.** Sie liest „Vier Spalten statt sieben: kein DATEV-Haken,
+   **keine Sachverhalts-Spalte** — beide sagten hier in **jeder** Zeile
+   dasselbe". Genau dieses Argument hat M2 zurückgenommen; gebaut sind fünf
+   Spalten **mit** Sachverhalt (gemessen, Kopf von `Filled`). Der Satz steht
+   auf der Doku-Seite und schickt den nächsten Leser in die Richtung, die
+   diese Aufgabe zweimal verworfen hat. Vorschlag: Unterschrift auf den
+   heutigen Satz ziehen.
+
+4. **Nicht blockierend, aber schief:** die Überschrift „Vier Spalten statt
+   sieben" (Zeile 42 dieser Datei) zählt darunter fünf auf — seit M2 stale.
+   Eine Abnahme ändert die Spec nicht; der nächste Bau möge es mitnehmen.
+
+5. **Nicht blockierend:** Kriterium „kennt keinen `CasePicker` (grep: 0
+   Treffer)" — `grep` findet **1** Treffer,
+   `BankTransactionWorklist.stories.tsx:44`, in Fließtext. Kein Import, keine
+   Nutzung; im Sinn erfüllt, in der Zahl nicht.
+
+6. **Nicht blockierend:** die Rückfall-Beschriftung des Zeilenlinks (fehlende
+   Gegenpartei → Zweck, N4) wird in **keiner** Story dieser Liste mit einem
+   Link gezeigt: `AllOfAnAccount` setzt `rowHref`, hat aber keine namenlose
+   Zeile; `Filled` hat die namenlose Zeile, setzt aber kein `rowHref`. Der
+   Pfad ist über 0085 gedeckt, hier nicht.
+
+### Befunde am Set (nicht dieser Aufgabe anzulasten)
+
+- **S1 — `DataTable` zählt die Ladezeile falsch** (Ursache von Mangel 1,
+  `patterns/DataTable.tsx`, `TableLoading cols={columns.length}` gegen `cols`
+  mit Griff- und Aktionsspuren). Trifft jede Liste mit `selection`, `expand`
+  oder `rowActions`. `grep 'selection={'` findet heute nur
+  `DataTable.stories.tsx` und diese Liste — deshalb fällt es hier zuerst auf.
+- **S2 —** die Zeile `display: block` in `.v2skel` macht die beiden
+  Sonderregeln `v3.css:2407` und `:2411` (`.v2doc__origskel`,
+  `.v2doc__headskel`) redundant. Kosmetik.
+- **S3 —** die Aufklappzeile beginnt bei Karte + 46 px, die erste Datenspalte
+  bei Karte + 60 px (gemessen 63 gegen 77 bei 1440). Alt, nicht aus dieser
+  Runde; wer 0057 anfasst, prüfe die 46.
+
+| | |
+|---|---|
+| Abgenommen von / am | Claude (fremde Abnahme, nicht der Bau), 2026-09-07 |
+| Ergebnis | **zurück** — blockierend sind 1, 2 und 3 |

@@ -41,7 +41,7 @@ const DOCS: SourceDocumentVM[] = [
     processingStatus: "processed",
     inboxStatus: "classified",
     classConfidence: 0.94,
-    sizeBytes: 412_000,
+    byteSize: 412_000,
     hasInvoiceRow: true,
   },
   {
@@ -57,7 +57,7 @@ const DOCS: SourceDocumentVM[] = [
     processingStatus: "in_progress",
     inboxStatus: "classified",
     classConfidence: 0.71,
-    sizeBytes: 2_400_000,
+    byteSize: 2_400_000,
     hasInvoiceRow: true,
   },
   {
@@ -74,7 +74,7 @@ const DOCS: SourceDocumentVM[] = [
     processingStatus: "review_needed",
     inboxStatus: "classified",
     classConfidence: 0.88,
-    sizeBytes: 8_100_000,
+    byteSize: 8_100_000,
     hasInvoiceRow: false,
   },
   {
@@ -89,7 +89,7 @@ const DOCS: SourceDocumentVM[] = [
     processingStatus: "failed",
     inboxStatus: "pending_classification",
     classConfidence: null,
-    sizeBytes: 19_800_000,
+    byteSize: 19_800_000,
     hasInvoiceRow: false,
   },
 ];
@@ -111,7 +111,7 @@ const SUBMITTABLE: SourceDocumentVM[] = [
     classDocumentForm: "hospitality_receipt",
     counterparty: "Gasthaus Adler",
     detail: { kind: "invoice", number: "B-2026-0814", gross: 128.4, currency: "EUR" },
-    sizeBytes: 1_100_000,
+    byteSize: 1_100_000,
   },
   {
     ...DOCS[0]!,
@@ -120,7 +120,7 @@ const SUBMITTABLE: SourceDocumentVM[] = [
     classDocumentForm: "fuel_receipt",
     counterparty: "Tankstelle Musterstadt",
     detail: { kind: "invoice", number: "T-88213", gross: 96.5, currency: "EUR" },
-    sizeBytes: 240_000,
+    byteSize: 240_000,
   },
 ];
 

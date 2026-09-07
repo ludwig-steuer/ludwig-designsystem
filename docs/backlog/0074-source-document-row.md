@@ -568,3 +568,29 @@ stehen begründet unter „Verhalten".
   gehört den Grundlagen (0055), nicht dieser Aufgabe.
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-93 ist erledigt** (App-Commit `62a2d0fa`): `SourceDocumentVM` liegt in
+`source-docs/domain/source-document-vm.ts`. Der Anzeige-Typ der Familie setzt
+darauf auf und trägt nur noch, was dort nicht hingehört oder noch fehlt:
+
+- **`href` und `caseHref`** sind Routen — die gehören dem Aufrufer, nicht dem
+  Datensatz.
+- **`caseNumber` und `hasInvoiceRow`** fehlen dem Datensatz (**L-207**); die
+  Zeile braucht beide, den Sachverhalt als Rang 6 und das Kennzeichen für die
+  Achse `beleg_haenger`.
+- **`detail` ist bewusst nicht das des Spiegels.** Drüben sind es die vier
+  Kernfakten einer Rechnung, hier ist es die Union über die Belegarten mit
+  `net`, `vat`, `processingStatus` und den Feldern des Vertrags — das, was
+  0076 zeichnet. Der reichere Typ gewinnt, und dass die App die Union heben
+  sollte statt ihrer Rechnungshälfte, steht als **L-208** im Register.
+- `sizeBytes` heißt jetzt `byteSize`, wie im Spiegel.
+
+`completedVia` ist drüben `string` und hier die Union der vier Achsenwerte —
+dieselbe Verengung wie bei `counterpartySide` in 0097.
+
+**Der Typtausch kam nach der letzten Abnahme.** Er ist typgeprüft
+(`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
+Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
+schreibt. Eine kurze Bestätigung steht aus.

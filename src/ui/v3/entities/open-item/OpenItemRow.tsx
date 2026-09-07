@@ -5,7 +5,7 @@ import { GroupRow, Row } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import {
-  AGE_BUCKET_LABEL,
+  OPEN_ITEM_AGE_LABEL,
   type OpenItem,
   type OpenItemAgeGroupVM,
 } from "./open-item";
@@ -154,7 +154,14 @@ export function OpenItemAgeGroup({
   return (
     <GroupRow>
       <span className="v2oi__group">
-        <span>{AGE_BUCKET_LABEL[group.bucket]}</span>
+        {/* The words are the domain's; the reference is this row's. „31–60
+            Tage" alone would not say what the number counts — and „überfällig"
+            on the class that is not yet due would be wrong. */}
+        <span>
+          {group.bucket === "notDue"
+            ? OPEN_ITEM_AGE_LABEL[group.bucket]
+            : `${OPEN_ITEM_AGE_LABEL[group.bucket]} überfällig`}
+        </span>
         <span className="v2oi__groupnum">
           {group.count} Posten ·{" "}
           {formatAmount(group.sum, group.currency ?? currency)}

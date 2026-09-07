@@ -568,3 +568,28 @@ im Belegnummern-Register (0014 M1), nur an der Spur statt am Kind** — und das
 ist jetzt das dritte Mal in dieser Welle. Der Satz gehört in die Prüfliste:
 *eine `Table` mit `minWidth` gehört nicht ohne `min-width: 0` beziehungsweise
 `minmax(0, …)` in ein Raster- oder Flex-Kind.*
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-05 und L-73 sind erledigt** (App-Commit `222c8d5a`): die Altersklassen, ihre
+Wörter und die Regel, die sie zuweist, stehen in
+`datev-truth/domain/open-item.ts` — beim DATEV-Bestand, nicht beim Sachverhalt.
+
+Was sich ändert: die lokale Union und `AGE_BUCKET_LABEL` sind weg, die Datei
+reicht `OPEN_ITEM_AGE_BUCKETS`, `OPEN_ITEM_AGE_LABEL` und `openItemAgeBucket`
+weiter. **Was sich nicht ändert: die Komponente rechnet die Klasse weiter
+nicht** — der Aufrufer gibt sie herein, wie die Spec es verlangt. Neu ist nur,
+dass die Regel jetzt zitiert statt abgeschrieben wird.
+
+Die Wörter der Domäne sind kürzer als die alten („1–30 Tage" statt „1 bis 30
+Tage überfällig"). Den Bezug stellt die Gruppenzeile her: sie hängt
+„überfällig" an alle Klassen außer `notDue`, wo es falsch wäre. Eine zweite
+Map dafür gibt es nicht.
+
+Der Datensatz selbst (`OpenItem`, aus `opos-stichtag-core.ts`) ist **nicht**
+mitgezogen und bleibt lokal.
+
+**Der Typtausch kam nach der letzten Abnahme.** Er ist typgeprüft
+(`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
+Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
+schreibt. Eine kurze Bestätigung steht aus.

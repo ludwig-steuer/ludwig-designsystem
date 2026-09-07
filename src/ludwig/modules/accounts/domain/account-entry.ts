@@ -169,6 +169,40 @@ export interface AccountFactsVM {
   usageBookingCount: number;
   /** Über alle Jahre. */
   lastBookingDate: string | null;
+
+  // — 2026-09-07 ergänzt (L-94) —
+
+  /** Währung der drei Beträge. Ohne sie ist eine Zahl keine Aussage. */
+  currency: string;
+  /** Summe aller Sollbuchungen des Jahres. */
+  totalDebit: number;
+  /** Summe aller Habenbuchungen des Jahres. */
+  totalCredit: number;
+  /**
+   * Saldo laut DATEV — die führende Zahl. „Wie viel liegt drauf" beantwortet
+   * das Kontoblatt aus DATEV, nicht aus Ludwig.
+   */
+  datevBalance: number | null;
+  /**
+   * Was Ludwig zusätzlich gebucht hat und in DATEV noch nicht steht — das
+   * Delta, nicht der zweite Saldo. Zwei konkurrierende Salden nebeneinander
+   * wären die teuerste Art, dieselbe Frage zweimal zu beantworten.
+   */
+  ludwigOnlyAmount: number | null;
+}
+
+/**
+ * Ein Monat auf dem Konto — die Balken des Verlaufs.
+ *
+ * Lag als `AccountMonthTotals` in `accounting-cases/infrastructure`; die
+ * Monatswerte gehören zum Konto, nicht zum Sachverhalt, und der Spiegel nimmt
+ * aus `infrastructure/` nichts (L-95).
+ */
+export interface AccountMonth {
+  /** 1–12. */
+  month: number;
+  debit: number;
+  credit: number;
 }
 
 /**
@@ -188,7 +222,16 @@ export function accountFacts(input: {
   openProposalCount?: number;
   usageBookingCount?: number | null;
   lastBookingDate?: string | null;
+  currency?: string;
+  months?: readonly AccountMonth[];
+  datevBalance?: number | null;
+  ludwigOnlyAmount?: number | null;
 }): AccountFactsVM {
+  // Σ Soll und Σ Haben aus den Monatswerten, statt sie an jeder Aufrufstelle
+  // erneut zu summieren (L-94, Rang 7 des Entitätsprofils).
+  const months = input.months ?? [];
+  const totalDebit = months.reduce((sum, m) => sum + m.debit, 0);
+  const totalCredit = months.reduce((sum, m) => sum + m.credit, 0);
   return {
     accountNumber: input.accountNumber,
     accountName: input.accountName,
@@ -199,5 +242,10 @@ export function accountFacts(input: {
     openProposalCount: input.openProposalCount ?? 0,
     usageBookingCount: input.usageBookingCount ?? 0,
     lastBookingDate: input.lastBookingDate ?? null,
+    currency: input.currency ?? "EUR",
+    totalDebit,
+    totalCredit,
+    datevBalance: input.datevBalance ?? null,
+    ludwigOnlyAmount: input.ludwigOnlyAmount ?? null,
   };
 }

@@ -32,16 +32,19 @@ type Story = StoryObj<typeof LedgerAccountView>;
 const FACTS: AccountFactsVM = {
   accountNumber: "4930",
   accountName: "Bürobedarf",
-  role: "general_ledger",
+  accountingRole: "general_ledger",
   fiscalYear: 2026,
   currency: "EUR",
   datevBalance: 18_442.19,
-  datevCount: 47,
+  ludwigEntryCount: 41,
+  openProposalCount: 2,
+  usageBookingCount: 3_412,
+  datevEntryCount: 47,
   ludwigOnlyCount: 3,
   ludwigOnlyAmount: 612.4,
   lastBookingDate: "2026-08-26",
-  debitTotal: 21_442.19,
-  creditTotal: 3_000.0,
+  totalDebit: 21_442.19,
+  totalCredit: 3_000.0,
   skrClassLabel: "Sonstige betr. Aufwendungen",
 };
 
@@ -103,14 +106,14 @@ const BANK: AccountFactsVM = {
   // lässt einen Rohwert durch den Typecheck — im Bild stand zweimal das
   // englische „bank" (Wiederabnahme 0063). Die Kontoart des Bankkontos ist
   // die SKR-Klasse daneben.
-  role: "general_ledger",
+  accountingRole: "general_ledger",
   skrClassLabel: "Finanz- und Privatkonten",
   datevBalance: -184_221.55,
-  datevCount: 3400,
+  datevEntryCount: 3400,
   ludwigOnlyCount: 128,
   ludwigOnlyAmount: 41_882.9,
-  debitTotal: 612_004.2,
-  creditTotal: 796_225.75,
+  totalDebit: 612_004.2,
+  totalCredit: 796_225.75,
   lastBookingDate: "2026-08-31",
 };
 
@@ -121,14 +124,14 @@ const UNUSED: AccountFactsVM = {
   accountName: "Bewirtungskosten",
   skrClassLabel: "Sonstige betriebliche Aufwendungen",
   datevBalance: null,
-  datevCount: 0,
+  datevEntryCount: 0,
   ludwigOnlyCount: 0,
   ludwigOnlyAmount: null,
   lastBookingDate: null,
   // Ohne Bewegung gibt es auch keine Summen: „0 Buchungen" und daneben eine
   // Σ-Zeile aus dem Nachbarkonto war der Fehler (M3).
-  debitTotal: 0,
-  creditTotal: 0,
+  totalDebit: 0,
+  totalCredit: 0,
 };
 
 const SECTIONS: NavSection[] = [
@@ -171,7 +174,7 @@ function Head({ facts }: { facts: AccountFactsVM }) {
       icon={<EntityIcon entity="ledger-account" size={20} />}
       overline={`Konto · Musterbau GmbH · ${facts.fiscalYear}`}
       title={`${facts.accountNumber} ${facts.accountName ?? ""}`.trim()}
-      status={<StatusBadge axis="konto_typ" status={facts.role} info={false} />}
+      status={<StatusBadge axis="konto_typ" status={facts.accountingRole} info={false} />}
       actions={<TextButton onClick={() => {}}>Zum Kontenplan →</TextButton>}
     />
   );
@@ -194,8 +197,8 @@ function Summary({ facts }: { facts: AccountFactsVM }) {
         value={formatAmount(facts.datevBalance, facts.currency)}
         sub={
           facts.ludwigOnlyCount > 0
-            ? `${formatCount(facts.datevCount)} Buchungen · + ${facts.ludwigOnlyCount} nur in Ludwig (${formatAmount(facts.ludwigOnlyAmount, facts.currency)})`
-            : `${formatCount(facts.datevCount)} Buchungen im Spiegel`
+            ? `${formatCount(facts.datevEntryCount)} Buchungen · + ${facts.ludwigOnlyCount} nur in Ludwig (${formatAmount(facts.ludwigOnlyAmount, facts.currency)})`
+            : `${formatCount(facts.datevEntryCount)} Buchungen im Spiegel`
         }
       />
       <KpiTile

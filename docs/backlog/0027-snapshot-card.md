@@ -558,3 +558,28 @@ einer von vier Läufen brach mit `ENOENT … chmod
 Kopieren der `staticDirs`. Die letzte Log-Zeile nennt den Grund nicht (noch
 ein Fall für „Exit-Code lesen, nicht `| tail`"). Das ist keine Zeile dieser
 Karte und gehört in eine eigene Aufgabe.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-04 und L-72 sind erledigt** (App-Commit `222c8d5a`): `datev-mirror` hat ein
+`domain/`, und die drei Stufen von `baseline_level` haben Wörter.
+
+Zwei Folgen für diese Karte:
+
+- `baselineLevel` trägt den Typ `BaselineLevel` statt `string` — ein Wert, den
+  der DB-CHECK nicht kennt, fällt jetzt am Typ auf.
+- **Die Zeile „Tiefe" zeigt das Wort, nicht mehr den Rohwert in Mono.** Genau
+  dafür stand der Rohwert dort: „a map here would be that map". Die Map ist
+  jetzt in der Domäne, also darf die Karte sie lesen. Ohne Stufe steht
+  „nicht vermerkt" — Altbestand vor der Einführung, und das ist eine Aussage,
+  kein fehlender Wert.
+
+Vier Felder bleiben lokal: `contents`, `counts`, `reconcile` und `createdBy`
+stehen weiter in `snapshot-history-queries.ts` und sind nicht mitgezogen —
+**L-206** im Register. Die Karte zeigt alle vier, also erweitert sie den
+gespiegelten Typ, statt ihn zu ersetzen.
+
+**Der Typtausch kam nach der letzten Abnahme.** Er ist typgeprüft
+(`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
+Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
+schreibt. Eine kurze Bestätigung steht aus.

@@ -87,3 +87,68 @@ ein Zeichen am Vokabular vorbei will, müsste `lucide-react` importieren, und
 genau das weist der Wächter zurück. Begründung steht am Prop.
 
 **(e)** war schon am 2026-09-05 erledigt.
+
+## Prüfung 2026-09-07 (fremd, nicht der Bauende)
+
+Die Datei trug bisher keinen Abnahme-Eintrag; dies ist er. Geprüft wurde der
+**Bestand**, nicht die Commits: Storybook auf Port 6107 (Dev-Server, Katalog
+aus `/index.json`, 717 Stories), Chromium headless bei 1440×900. Jede
+Messung ist gegengeprobt — ein zurückgelesener Wert ist keine Messung.
+
+**Urteil: bestätigt.** Alle fünf Punkte halten heute. Was seither an der Regel
+(a) abgerieben ist, stammt aus Arbeit **nach** dieser Aufgabe und ist unten als
+Beobachtung notiert, nicht als Mangel.
+
+**Fest**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` | `tsc --noEmit` ohne Ausgabe, **Exit 0** | ✓ |
+| `pnpm build` | einmal gelaufen, **Exit 0** (am Exit-Code geprüft, nicht an der letzten Zeile). Danach vom Owner untersagt: mehrere Prüfer im selben Baum, ein Bau leert `storybook-static/` — der „Build-Flacker" aus 0117 | ✓ |
+| `pnpm check:icons` / `pnpm check:contrast` | beide **Exit 0** | ✓ |
+
+**Die fünf Punkte**
+
+| Punkt | Nachweis (Story-ID · Messwert · Gegenprobe) | Ergebnis |
+|---|---|---|
+| **(a) `@when`/`@instead` an jedem Export** | Durchlauf über alle `.ts`/`.tsx` unter `src/ui/v3` ohne Stories: **259** Wert-Exporte, davon 30 SCREAMING\_SNAKE-Konstanten (alle mit dem Satz, den der Entscheid für sie vorsieht — keine ohne). **248 von 259** tragen beide Zeilen; die 31 Exporte, die diese Aufgabe nachgetragen hat, tragen sie ausnahmslos noch (`tax-assist.ts` alle vier, `format.ts` alle acht, `CardHead`, `CardFoot`, `Input`, `Textarea`, `StateIcon`, `ProcessMini`, `Link`, `matchesKey` …). Die 11 ohne Zeilen sind **jünger als diese Aufgabe** — siehe Beobachtung 1 | ✓ |
+| **(b) `prefers-reduced-motion` deckt jede Transition** | Gemessen mit `Emulation.setEmulatedMedia`, einmal `no-preference` und einmal `reduce`, an fünf Stories. `no-preference`: `.v2drawer` **0,28 s**, `.v2drawer__scrim` **0,18 s**, `.v2disc__chev` 0,12 s, `.v2tbl__row` 0,12 s, `.v2btn` 0,12/0,12/0,18/0,12 s, `.sb__navitem` 0,12 s. `reduce`: **alle** auf `1e-05s`, Delay 0 s. Die Zahl reagiert also auf die Einstellung. Der Weg ist eine Regel statt einer Liste (`v3.css:3483–3489`, `*`, `*::before`, `*::after` mit `!important`) — sie greift damit auch auf `app-chrome.css` und `booking.css`, was eine Selektorliste nie geschafft hätte (`.sb__navitem` ist der Beleg) | ✓ |
+| **(c) Die Pfeile in `StepRail` sind Lucide-Zeichen** | `steprail--screen-header`: „Weiter zu Schritt 4" trägt `lucide-chevron-right w=14 sw=1.5`, „Zurück" trägt `lucide-chevron-left w=14 sw=1.5`; **kein** Textpfeil im Bild der Story. Über **alle 717 Stories** gesucht: `StepRail` hat in keiner einen Textpfeil. Derselbe Griff ist in `Review.tsx:182` mitgezogen | ✓ |
+| **(d) `MenuItem icon` bleibt `ReactNode`** | Der Typ ist `ReactNode` (`OverflowMenu.tsx:129`), und die Begründung steht **am Prop** (Z. 118–128), nicht nur im Commit. Sie nennt inzwischen sogar die Grenzen der Schranke („überspringt Story-Dateien, trägt zwei offene, erreicht keinen Aufrufer außerhalb dieses Repos") — die Aufgabe hat den Entscheid also nicht nur getroffen, sondern auch ehrlich beschrieben. Die Schranke selbst läuft: `check:icons` Exit 0, und auf einer Kopie außerhalb des Repos mit einem eingesetzten `lucide-react`-Import Exit 1 | ✓ |
+| **(e) `Disclosure` lässt die Zeile auf Breite wachsen** | `clarificationrow--mit-karte`: `.v2disc__label` steht auf `flex: 1 1 auto`, ist **1368 px** breit, und der Zustands-Chip `.v2cl__state` endet bei **x = 1399**, also 24 px vor dem Zeilenrand 1423. Gegenprobe: zur Laufzeit `.v2disc__label{flex:0 0 auto}` gesetzt → der Chip fällt auf **x = 517** zurück, exakt der Wert, den die Abnahme von 0059 als Mangel gemessen hat; nach dem Entfernen wieder 1399. Der Fix ist also wirksam und die Messung reagiert | ✓ |
+
+### Beobachtungen außerhalb der Kriterien
+
+1. **Die Regel (a) reibt sich weiter ab, weil kein Wächter sie hält.** Heute
+   fehlen `@when`/`@instead` an **11** Exporten: `caseListTracks`
+   (`CaseList.tsx`), `invoiceLineTracks`, `invoiceLineTracksExpandable`,
+   `invoiceLineMinWidth`, `line` (`invoice-line/fixtures.ts`, ganz ohne JSDoc),
+   `documentSideTotal`, `journalTotals`, `journalBalanceText`,
+   `journalGridTracks` (`journal-entry.ts`), `FileName` (`SourceDocument.tsx`)
+   und `SourceDocumentFacts`. Vier der sechs Dateien sind **heute** entstanden
+   (`git log --diff-filter=A`: 2026-09-07), `FileName` ist neu, und bei
+   `SourceDocumentFacts` ist der Block **abgerutscht**: die Zeilen stehen noch
+   da, aber 0071 hat ein zweites JSDoc dazwischengeschoben, sodass sie nicht
+   mehr am Export hängen (im Stand dieser Aufgabe, `6ecae07`, hingen sie noch).
+   Kein Mangel dieser Aufgabe — aber (a) ist der einzige der fünf Punkte ohne
+   Skript, und genau er ist der einzige, der wieder zurückgefallen ist. `(d)`
+   hat `check:icons`, `(b)` und `(e)` hängen an einer Regel, die von selbst
+   greift; `(a)` hängt an Disziplin.
+2. **Der geschärfte Entscheid zu (a) steht nicht in der Regel.** Diese Aufgabe
+   hat entschieden, dass Konstanten (`ENTITY_ICON`, `AGE_BUCKET_LABEL` …) statt
+   der zwei Zeilen einen Satz bekommen — die Regel in `README.md` (Z. 47) sagt
+   weiter „**jeder** Export trägt `@when` und `@instead`". Wer nach der Regel
+   prüft, meldet 30 falsche Treffer.
+3. **Ein Textpfeil als Bedeutungsträger, außerhalb des Umfangs.** Über alle 717
+   Stories gesucht: `„→"` steht in 22 Stories. In 21 davon ist es Fließtext
+   („02:30 UTC → 04:30 Berlin", „19 % 235,60 € → 1406") — Satzzeichen, kein
+   Zeichen. Eine ist es nicht: `LedgerAccountView.stories.tsx:175` beschriftet
+   einen `TextButton` mit „Zum Kontenplan →". Das ist dieselbe Gestalt, die (c)
+   in `StepRail` abgeschafft hat, nur in einer **Story**, nicht im Baustein.
+4. **Animationen sind bewusst außen vor** — der Entscheid sagt es. Drei laufen
+   in der v1-Schicht ungebremst weiter (`components.css` `.skel`,
+   `.uz-step.run .dot`, `app-chrome.css` `progress-indeterminate-slide`); §2 der
+   Gestaltungsregeln verlangt `prefers-reduced-motion` für „jede Transition
+   **und Animation**". Keine der drei Klassen wird von einem v3-Baustein
+   benutzt (geprüft gegen `src/ui/`), sie fallen also unter dieselbe Begründung
+   wie die übrigen Reste dieser Schicht.

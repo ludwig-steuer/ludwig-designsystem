@@ -2,10 +2,12 @@
 
 import { useRef, useState } from "react";
 import {
+  DOCUMENT_NUMBER_STATE_LABEL,
   isDatevSource,
   sortByDominance,
   type KnownDocumentNumber,
 } from "@/ludwig/modules/accounting-cases/domain/document-number";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { Badge } from "../../primitives/Badge";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Input } from "../../primitives/Form";
@@ -59,8 +61,9 @@ export function DocumentNumberRegister({
   query?: string;
   onQueryChange?: (q: string) => void;
   loading?: boolean;
-  sourceLabel: DocumentNumberSourceLabels;
-  stateLabel: DocumentNumberStateLabels;
+  /** Only what a caller wants to word differently — see the labels module. */
+  sourceLabel?: DocumentNumberSourceLabels;
+  stateLabel?: DocumentNumberStateLabels;
 }) {
   // `-1`, not `0`: with `0` the first ↓ jumped to row **two**, because it
   // moves from wherever it stands — while row one was already coloured as
@@ -171,12 +174,14 @@ export function DocumentNumberRegister({
                     </span>
                     {/* No second „DATEV": the badge in column 1 already says
                         it, and the same statement twice is noise. */}
-                    <span>{sourceLabel[e.source]}</span>
+                    <span>{sourceLabel?.[e.source] ?? resolveStatus("belegnummer_quelle", e.source).label}</span>
                     <span className="v2mono">
                       {e.accountNumber ?? <span className="v2muted">—</span>}
                     </span>
                     <span>{e.caseNumber ?? <span className="v2muted">—</span>}</span>
-                    <span className="v2dnr__state">{stateLabel[e.state]}</span>
+                    <span className="v2dnr__state">
+                      {stateLabel?.[e.state] ?? DOCUMENT_NUMBER_STATE_LABEL[e.state] ?? e.state}
+                    </span>
 
                   </>,
                   (node) => (

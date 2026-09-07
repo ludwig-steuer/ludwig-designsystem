@@ -213,3 +213,223 @@ verlangt Typen aus dem Spiegel; dort gibt es für die Zeile eines
 Buchungssatzes keinen. `EditorRow` hatte dasselbe Problem und hat es seit der
 Erstbestückung. Der Befund gehört ans App-Register, sobald jemand die
 Buchungssatz-Familie dorthin meldet — hier stünde er zum dritten Mal.
+
+## Abnahme
+
+**Fremde Abnahme 2026-09-07, gegen den Bau `0aa4b3f`. Urteil: zurück.**
+
+Gemessen im laufenden Dev-Server (`http://localhost:6107`, er serviert die
+Quelle), je Story ein eigener `Runtime.evaluate` — mehrere Schritte in einem
+Aufruf sehen das Re-Render nicht. Jeder Messwert, an dem etwas hängt, ist
+gegen eine Änderung geprüft: die Klappe wurde auf und wieder zu geklickt, die
+Sicht mit `Alt+V` umgeschaltet, die neue CSS-Regel im laufenden Bild gelöscht
+und danach neu gemessen. `pnpm typecheck` und `pnpm build` sind gegen
+`0aa4b3f` in einem eigenen Arbeitsbaum gelaufen, weil im gemeinsamen Baum
+gerade fremde Sitzungen schreiben; beide grün (`build` Exit 0). `check:icons`
+und `check:contrast` grün.
+
+### Die Behauptung trägt — das Lese-Raster ist eine Server-Komponente
+
+Das ist der Kern der Aufgabe, und er ist eingelöst.
+
+- `JournalEntryGrid.tsx` und `journal-entry.ts` enthalten weder `"use client"`
+  noch `useState` noch `useEffect`; der einzige Treffer ist der JSDoc-Satz,
+  der erklärt, warum es sie nicht braucht (`grep`, beide Dateien).
+- **Ohne `modeHref` kein Umschalter, keine Taste:** `Simple` hat kein `<a>`
+  und kein `<button>` mit „Voll/Einfach", kein `kbd`, und `Alt+V` steht
+  nirgends im Text (0 Treffer). Damit ist M5 für das Raster erledigt.
+- **Mit `modeHref` ist der Umschalter ein Link:** in `Full` gemessen
+  `A · href="?sicht=einfach" · „Einfach ◂"` — ein `<a>` mit `href`, kein
+  `<button>`.
+- **Die Klappe ist ein `<details>` und hält ihren Zustand selbst:** zu →
+  `open=false`, `checkVisibility()=false`, „Kontoname" steht nicht im
+  `innerText`; Klick auf `<summary>` → `open=true`, sichtbar, Inhalt im Text;
+  zweiter Klick → wieder zu. Und `details.open = true` per Eigenschaft gesetzt
+  bleibt nach 300 ms stehen — kein React hält dagegen. (Die Höhe des Körpers
+  ist als Messwert untauglich: sie steht zu wie offen bei 121 px, weil eine
+  geschlossene `<details>` in Chrome nur `content-visibility` setzt.)
+- **Die geteilte Rechnung stimmt:** `WithJournal` zeigt Konto · Kontoname ·
+  Buchungstext · Soll · Haben und „Σ S 1.475,60 € = Σ H 1.475,60 €"; in
+  `Edges` „Σ S 13.716,15 € = Σ H 13.716,15 €" — von Hand nachgerechnet aus den
+  fünf Zeilen (12.480,55 − 240,00 + 0,00 + 1.000,00 + 475,60), das Gegenkonto
+  auf der Gegenseite. Kopf und Zeile fluchten: 7/7 Zellen in `einfach`, 10/10
+  in `voll`, in allen fünf Zeilen von `Edges` dieselben Spaltenkanten. Jede
+  Spur trägt etwas — Beleg 2 („LS-9912") und KOST („K-100") in der letzten
+  Zeile. Der lange Kontoname kürzt mit Auslassung (110 px Kasten gegen 449 px
+  Inhalt), die Zelle läuft nicht über.
+- **Breite:** bei 1440, 1280, 1100 und 980 px läuft nichts über. `voll`
+  überschreitet seine Karte erst bei ~860 px (Raster 824 px, Karte 754 px) —
+  unterhalb der Sperre von 1280 px für das produktive Register (L1). Kein
+  Mangel, aber notiert: `.bse__tbl` hat kein eigenes Scrollen, es schneidet ab.
+- 8 Grid-Stories und 10 Editor-Stories stehen im Katalog des Dev-Servers, alle
+  18 rendern, keine Konsolenmeldung.
+
+### Mängel
+
+**M1 (blockiert) — `STATUS_TEXT` lebt, und der falsche Tooltip mit ihm.**
+Kriterium: „Der Zustandstext kommt aus der Registry, nicht aus einer lokalen
+Map (`grep` auf `STATUS_TEXT` ist leer)". Der `grep` ist nicht leer:
+`JournalEntryEditor.tsx:168` (die Map) und `:598`
+(`title={STATUS_TEXT[status]}` am Sichtwechsel-Knopf). Gemessen im Bild: in
+`S1`, `S2`, `S3`, `S5`, `S12`, `S23`, `Empty`, `DocumentNumberAcrossRows`,
+`ContraAccountEditable` steht auf dem Knopf „Voll ▸ · Alt+V" der Tooltip
+**„Vorschlag"**, in `S20_EditorOnly` am zweiten Editor **„Storniert"** — genau
+der Befund M6 aus der 0015-Abnahme, der mit dieser Aufgabe erledigt sein
+sollte. Das neue Raster ist sauber; die Familie ist es nicht. Was fehlt, ist
+nicht das Vermeiden im neuen File, sondern das Entfernen im alten.
+*Vorschlag:* `title` am Umschalter streichen (er sagt ohnehin das Falsche),
+`STATUS_TEXT` löschen, der `StatusBadge` daneben trägt das Wort bereits.
+
+**M2 (blockiert) — `▤` steht noch da, hat aber keine Story mehr.**
+Kriterium: „Der Weg ins Kontenblatt ist `ActionIcon action="ledger"`, kein
+Unicode-Zeichen (`grep` auf `▤` ist leer)". Ein Treffer in `src/`:
+`JournalEntryEditor.tsx:765`, im Lesezweig des Editors. Erschwerend: nach dem
+Schnitt führt **keine** Editor-Story mehr dorthin — `editable={false}` gibt es
+nur einmal (`S20`, zweiter Editor), und dort wird `onOpenLedger` nicht
+gesetzt. Der Befund ist damit nicht behoben, sondern unsichtbar geworden.
+*Vorschlag:* die vier Zeilen im Lesezweig auf `ActionIcon action="ledger"`
+ziehen (die Marke steht in `Icons.tsx`), oder den Lesezweig des Editors ganz
+streichen — dafür ist jetzt `JournalEntryGrid` da.
+
+**M3 (blockiert) — der Schnitt hat drei Props des Editors ohne Nachweis
+gelassen.** Kriterium: „`JournalEntryEditor` verhält sich unverändert — die
+Kriterien von 0015 gelten weiter". Von den acht entfernten Stories
+(`S0_Simple`, `S10_Payment`, `S11_Locked`, `S15_Released`, `S17_Posted`,
+`S18_Reversed`, `S19_JudgeWithNote`, `JournalWithPostingText`) trugen die
+einzigen Belege für `onEdit` (5 Vorkommen), `onDelete` und `deletable`; in den
+zehn neuen Stories kommt keines dieser drei mehr vor (`grep`, je 0). Der Weg
+„Ansehen → Bearbeiten" und der Löschdialog samt Grund sind damit unbelegt.
+Dazu: das 0015-Kriterium „Das Journal zeigt Konto · Kontoname · Buchungstext ·
+Soll · Haben (Story `JournalWithPostingText`)" nennt eine Story, die es nicht
+mehr gibt — das Journal des **Editors** hat keinen Nachweis mehr (das des
+Rasters hat einen). *Vorschlag:* `onEdit`/`onDelete`/`deletable` in `S20`
+aufnehmen (der zweite Editor dort ist ohnehin `editable={false}` — ihm fehlen
+nur die drei Props) und im 0015-Eintrag die Story umbenennen, auf die sich das
+Journal-Kriterium jetzt stützt.
+
+**M4 (blockiert) — die neue CSS-Regel greift in den Editor.**
+`.bse__konto` steht jetzt zweimal in `v3.css`: alt bei 1528
+(`overflow:hidden; text-overflow:ellipsis`) und neu bei 3570
+(`display:flex; gap`). Die Klasse trägt aber auch die **Lesezelle des
+Editors** (`JournalEntryEditor.tsx:750`), und `text-overflow` wirkt nicht auf
+den anonymen Textteil eines Flex-Kastens. Gemessen an `S20`, zweiter Editor,
+mit einem Kontonamen in p90-Länge, einmal mit und einmal ohne die neue Regel
+(Regel im laufenden Bild gelöscht, dann neu gemessen): mit Regel
+`display:flex` und der Name bricht hart ab („Reparaturen und I▌"), ohne Regel
+`display:block` und er endet mit Auslassung („Reparaturen und…"). Das ist
+keine unveränderte Verhaltensweise. *Vorschlag:* die neue Regel auf eine
+eigene Klasse des Rasters legen (`.bse__kontocell` o. ä.) statt die geteilte
+zu überschreiben.
+
+**M5 — die Gegenkonto-Zeile zerfällt über die Breite.** `.bse__gegen` ist ein
+Flex mit `justify-content: space-between`; der Editor legt genau **ein** Kind
+hinein (`.bse__gegen__label`) und hält damit alles links, das Raster legt
+**vier** nackte `<span>` hinein. Gemessen in `WithLedgerLink` (Kanten links):
+„Gegenkonto" 53, „70044" 392, „Bürobedarf Meier GmbH" 694, „Kreditor" 1109 —
+gegen die Spalten Konto 371, Text 525, Beleg 1 1063. Die Teile landen unter
+Spalten, zu denen sie nicht gehören, und lesen sich wie eine verrutschte
+Zeile. Dazu verliert die Marke die Pille `.bse__tag`, die sie im Editor hat,
+und die Seite („an H") fehlt. Nebenbei: die Spec sagt „das Gegenkonto **über**
+dem Raster", gebaut ist es darunter. *Vorschlag:* wie im Editor in
+`.bse__gegen__label` bündeln und `.bse__tag` verwenden.
+
+**M6 — `v2iconbtn` gibt es nicht.** Die Klasse am Kontenblatt-Knopf
+(`JournalEntryGrid.tsx:189`) kommt im ganzen Repo genau einmal vor, nämlich
+dort; in `v3.css` steht keine Regel dazu. Folge, gemessen: der Knopf ist
+14 × 14 px, ohne Polster, und **antwortet nicht auf Hover** (Hintergrund,
+Farbe, Deckkraft vor und nach `mouseMoved` identisch) — §9 verlangt beides
+anders. Er trägt auch kein Wort und kein `title` (nur `aria-label`), während
+der Editor daneben `title="Kontenblatt 6815"` setzt: §9 „kein Icon ohne Wort"
+(V11, V14, T8). Der Fokusring sitzt (2 px). *Vorschlag:* `v2link
+v2link--quiet` nehmen — die Klasse, die diese Familie für kleine stille
+Knöpfe schon achtmal verwendet — und ein `title` setzen.
+
+**M7 — in `einfach` steht die Spaltenordnung anders als im Editor.** Raster:
+Datum · Umsatz · S/H · BU · Konto · **Text · Beleg 1**. Editor: Datum · Umsatz
+· S/H · BU · Konto · **Beleg 1 · Text** (gemessen, beide Köpfe). In `voll`
+stimmen beide überein. Das trifft genau die Begründung des Zuschnitts („die
+beiden teilen die Spaltenordnung, nicht das Markup") und den Kommentar über
+dem CSS-Block („Anzeigen und Bearbeiten teilen sich dasselbe Raster — sonst
+muss die Prüferin beim Korrigieren neu suchen"). *Vorschlag:* Beleg 1 auch in
+`einfach` vor den Text ziehen (Spuren `… 148px 96px minmax(0,1fr)`), oder die
+Abweichung im JSDoc begründen.
+
+**M8 — die Stories behaupten Spaltenzahlen, die das Bild nicht zeigt.** Der
+Doc-Kommentar von `Simple` sagt „sechs Spalten", gemessen sind 7; `Full` sagt
+„elf Spalten", gemessen sind 10 (die elfte ist die Aktionsspalte des Editors,
+die das Raster nicht hat). Dieselben zwei Zahlen stehen in der Story-Tabelle
+dieser Spec. Der Bau hat die 7 im Commit genannt, die Story aber stehen
+lassen. *Vorschlag:* beide Zahlen in Story und Spec auf 7/10 korrigieren.
+
+**M9 — `accountFramework` ist eine Prop ohne Spec-Zeile und ohne Story.** Sie
+steht in `JournalEntryGridProps`, fehlt in der Schnittstellen-Tabelle dieser
+Spec, und keine der acht Stories setzt sie. Damit zeigt keine Story den
+Steuersplit in `journalLines()` — also gerade den Teil der geteilten Rechnung,
+in dem sich Raster und Editor unterscheiden könnten. *Vorschlag:* die Prop in
+`WithJournal` setzen (`skr04`, wie der Editor) und die Zeile in der
+Schnittstellen-Tabelle nachtragen.
+
+**M10 — die neuen Typen tragen deutsche Feldnamen.** `JournalRow` hat `datum`,
+`umsatz`, `konto`, `kontoName`, `beleg1`, `beleg2`, `kost1`; `ContraAccount`
+hat `konto`, `name`, `tag`; `journalTotals` gibt `{ soll, haben }` zurück. Das
+Kriterium prüft ausdrücklich nur `gegenkonto`, `Kopf`, `Zeile`,
+`summeBelegseite` **in der neuen Datei** — dieser `grep` ist leer, das
+Kriterium ist also formal erfüllt. Aber die Spec schreibt `contraAccount` als
+`{ accountNumber; accountName? }`, und CLAUDE.md sagt „Code nur Englisch"; die
+Aussage im Bau, „die Bezeichner sind englisch", gilt nur für die Props. Der
+Grund gegen das Umbenennen ist real und gehört genannt statt verschwiegen:
+`EditorRow` heißt so, und ein Aufrufer reicht dieselbe Zeile an beide Hälften.
+*Vorschlag:* entweder beide Hälften in einem Zug übersetzen (dann ist
+`JournalRow` der richtige Ort, damit anzufangen) oder den Verzicht im JSDoc
+begründen — er ist heute unsichtbar.
+
+**M11 — vier Exporte ohne `@when`/`@instead`.** `documentSideTotal`,
+`journalTotals`, `journalBalanceText` und `journalGridTracks` in
+`journal-entry.ts` tragen je eine Doc-Zeile, aber nicht das Paar; im
+Nachbarmodul `tax-assist.ts` hat es jede der vier exportierten Funktionen.
+Festes Kriterium „`@when`/`@instead` an jedem Export". *Vorschlag:*
+nachtragen; `rowAmount` und `journalLines` zeigen die Form.
+
+### Zur Abweichung von der Story-Zahl: sie trägt, ihre Begründung nur halb
+
+Die Zahl selbst ist in Ordnung. 8 lesend und 10 bearbeitend liegen beide auf
+oder unter der Grenze, die Ausnahme aus 0015 ist damit abgetragen, und
+`S20_EditorOnly` gibt `quickActions`, `onOpenTaxKey`, `locked` und
+`reversedReason` ihren ersten Nachweis — zwei davon standen in 0015 als
+offene Lücke M11. Der Zuschnitt ist auch inhaltlich richtig: die acht
+entfallenen Stories waren die rein lesenden.
+
+Was nicht trägt, ist die Begründung in ihrer eigenen Logik. Sie lautet: „vier
+Props, die bis heute keinen Nachweis hatten". Dieselbe Änderung hat drei
+anderen Props den Nachweis genommen (M3), ohne es zu sagen — und mit
+`S19_JudgeWithNote` ist die Story verschwunden, an der die 0015-Abnahme den
+falschen Tooltip gemessen hat, während der Tooltip geblieben ist (M1). Mit M3
+und M1 erledigt trägt die Abweichung vollständig; die Zahl 10 ist dann zu
+verteidigen und muss nicht auf 9 zurück.
+
+**Kein Rückgabegrund** ist der im Bau benannte Punkt, dass `JournalRow` ein
+neuer Typ im Set ist statt einer aus `src/ludwig/`: für die Zeile eines
+Buchungssatzes gibt es dort keinen, und `EditorRow` hat dasselbe Problem seit
+der Erstbestückung. Der Befund gehört ans App-Register, nicht in diese Runde.
+
+### Sonst geprüft und in Ordnung
+
+Datei nach der Familie benannt, Story daneben, Titel
+`v3/Entitäten/Buchungssatz/JournalEntryGrid`; `@when`/`@instead` an der
+Komponente; kein Hex, keine lokale Label-Map, Status über
+`StatusBadge axis="buchung"`; kein `▤` im gerenderten Text aller acht Stories
+(0 Treffer); `Empty` fängt den Fehler des Aufrufers sichtbar ab („Keine
+Buchungszeilen."); `WithMessages` zeigt Fehler, Warnung und Hinweis ohne einen
+einzigen Knopf (0 Buttons im Meldungsblock); negative Beträge ohne Farbe, der
+nicht aufgehende Rest rot; `pnpm typecheck`, `pnpm build`, `check:icons`,
+`check:contrast` grün.
+
+*Hinweis zur Messhygiene:* Ich habe einmal `pnpm build` im gemeinsamen Baum
+laufen lassen, bevor die Warnung kam — das hat `storybook-static/` neu
+geschrieben. Alles Weitere lief gegen den Dev-Server, der Bau gegen `0aa4b3f`
+in einem eigenen Arbeitsbaum, der danach entfernt wurde.
+
+| | |
+|---|---|
+| Abgenommen von / am | Claude (fremde Abnahme, hat nicht gebaut), 2026-09-07 |
+| Urteil | zurück — M1 bis M4 blockieren; M5 bis M11 sind in derselben Runde mitzuerledigen |

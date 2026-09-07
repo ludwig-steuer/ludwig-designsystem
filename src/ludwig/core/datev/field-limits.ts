@@ -19,6 +19,15 @@ export const DATEV_MAX_LEGAL_NAME = 40;
 /** Buchungstext (EXTF-Feld 14 / `posting_description`). */
 export const DATEV_MAX_BUCHUNGSTEXT = 60;
 
+/**
+ * Belegfeld 1 (EXTF-Feld 11 / `document_field1`) — die Belegnummer.
+ *
+ * Stand bis 2026-09-07 nur als `.max(36)` an vier Zod-Schemata und als Zahl in
+ * einem Kommentar des Stapel-Bauers (L-71). Wer die Grenze ändern wollte,
+ * musste sie suchen.
+ */
+export const DATEV_MAX_BELEGFELD1 = 36;
+
 /** Belegfeld 2 (EXTF-Feld 12 / `document_field2`). */
 export const DATEV_MAX_BELEGFELD2 = 12;
 

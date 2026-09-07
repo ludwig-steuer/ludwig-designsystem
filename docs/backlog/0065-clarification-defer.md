@@ -375,3 +375,18 @@ verschluckt einen Fehler — gilt seit 0060 für beide Ausgänge), **M-11** (das
 CSS dieser Aufgabe liegt im Vor-Commit `680653c`) und das **Restmaß zu N-3**
 (1,37:1 zwischen „quiet + aktiv" und „quiet + gesperrt"; latent für die
 Vorgabeknöpfe von `DateRangeField`).
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-91 ist erledigt** (App-Commit `9c60caf4`): `MAX_DEFERRAL_DAYS` steht in
+`accounting-cases/domain/case.ts`. Die Karte importiert die 30, statt sie zu
+wiederholen — der Name bleibt lokal `DEFERRAL_MAX_DAYS`, weil die Datei ihn so
+liest; die Zahl ist die der App.
+
+Eine Mindestlänge des Grundes gibt es weiterhin nicht, und es gibt sie auch in
+der App nicht — das war die zweite Hälfte der Frage im Register.
+
+**Der Typtausch kam nach der letzten Abnahme.** Er ist typgeprüft
+(`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
+Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
+schreibt. Eine kurze Bestätigung steht aus.

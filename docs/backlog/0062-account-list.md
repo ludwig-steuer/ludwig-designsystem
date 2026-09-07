@@ -395,3 +395,24 @@ durchgehend englisch sind. Übersetzt.
 Text, den der Aufrufer setzt (`originLabels`), ohne Kürzung. Der Vorgabewert
 passt mit 124,7 px; ein längeres Wort des Aufrufers bräche die Zeile.
 Nachmessen, sobald `origin` in der Domäne eine Label-Map bekommt (L-96).
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-89, L-90 und L-96 sind erledigt** (App-Commits `0f3c4358` und `eaf73d45`).
+
+- **Der Geschäftspartner steht in der Zeile.** `AccountRow` trägt
+  `businessPartnerId` und `businessPartnerName`; die Spalte liest den Namen
+  von dort. `partnerName` bleibt als **Überschreibung** für einen Aufrufer,
+  der es besser weiß, `partnerHref` bleibt ohnehin seine Sache — die Route
+  gehört der Seite. Die Story reicht nur noch die Route herein und baut sie
+  aus der Partner-Id.
+- **`usedOnly` filtert jetzt über `usage_booking_count > 0`** statt über
+  `status` — die Bedingung, die der Kopf der Liste behauptet.
+- **Die zwei Wörter der Spalte „Angelegt" kommen aus `ACCOUNT_ORIGIN_LABEL`.**
+  Die Prop bleibt als Überschreibung; die Vorgabe ist nicht mehr die
+  Nachahmung dessen, was die App anderswo sagt, sondern das, was sie sagt.
+
+**Der Typtausch kam nach der letzten Abnahme.** Er ist typgeprüft
+(`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
+Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
+schreibt. Eine kurze Bestätigung steht aus.

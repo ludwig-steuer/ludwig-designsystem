@@ -411,3 +411,17 @@ export function caseDisplayTitle(input: {
   const gegenpart = input.counterpartyName?.trim();
   return gegenpart ? `${art}: ${gegenpart}` : art;
 }
+
+/**
+ * Höchstabstand einer Wiedervorlage in Tagen.
+ *
+ * 30, weil die Buchhaltung im Monatsrhythmus läuft
+ * (`platform_clients.booking_interval='monthly'`): eine Frage darf höchstens
+ * den nächsten Lauf überspringen, nicht zwei.
+ *
+ * Lag bis 2026-09-07 in `application/clarification-core.ts` — die Zahl ist
+ * eine fachliche Regel, keine Eigenschaft der Ableitung, und das Set brauchte
+ * sie spiegelbar (L-91). Der Name bleibt `MAX_DEFERRAL_DAYS`; das Register
+ * nennt sie `DEFERRAL_MAX_DAYS`, gemeint ist dieselbe Zahl.
+ */
+export const MAX_DEFERRAL_DAYS = 30;

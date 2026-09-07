@@ -10,6 +10,7 @@ import { StatusCallout } from "../../primitives/StatusCallout";
 import { Card, CardHead } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
 import { formatCount } from "../../format";
+import { BASELINE_LEVEL_LABEL } from "@/ludwig/modules/datev-mirror/domain/snapshot";
 import {
   RECONCILE_AXIS,
   SNAPSHOT_COUNT_LABEL,
@@ -96,9 +97,20 @@ export function SnapshotCard({
             ["Importiert", <Time key="i" value={snapshot.importedAt} format="dateTime" />],
             [
               "Tiefe",
-              // The raw value in mono until the GLOSSARY has words for the
-              // three levels (finding L-72) — a map here would be that map.
-              <MonoCell key="b" value={snapshot.baselineLevel} />,
+              // The three levels have words since 2026-09-07 (`362325b2`,
+              // finding L-72): they come from the domain, not from a map here.
+              // Without a level the field says so — an unknown value would be
+              // an import that the DB allows and nobody named, so it stands
+              // raw rather than silently missing.
+              snapshot.baselineLevel ? (
+                <span key="b">
+                  {BASELINE_LEVEL_LABEL[snapshot.baselineLevel] ?? snapshot.baselineLevel}
+                </span>
+              ) : (
+                <span key="b" className="v2muted">
+                  nicht vermerkt
+                </span>
+              ),
             ],
             [
               "Umfang",

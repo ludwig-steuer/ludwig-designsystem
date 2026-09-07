@@ -5,8 +5,11 @@
  * Slugs, eigener Tab-Leiste und eigener Shell; siehe decision-log 2026-07-20.
  *
  * Die Belegart bestimmt nur noch, **welche** Tabs sichtbar sind
- * (`availableDocTabs`) und wie der erste Tab heißt — nicht mehr, welche
- * Ansicht gemountet wird.
+ * (`availableDocTabs`) — nicht mehr, welche Ansicht gemountet wird und auch
+ * nicht mehr, wie der erste Tab heißt: er hieß je nach Belegart „Buchung",
+ * „Vertrag" oder „Beleg" und zeigte in allen drei Fällen dasselbe, nämlich
+ * das Original. Eine Aufschrift, die wechselt, während der Inhalt gleich
+ * bleibt, ist eine falsche Fährte (L-92).
  *
  * URL-Konvention: `?tab=<slug>`, der Default-Tab („beleg") trägt keinen
  * Param.
@@ -29,20 +32,6 @@ export const DOC_TAB_LABEL: Record<DocTab, string> = {
   pipeline: "Pipeline",
   rohdaten: "Rohdaten",
 };
-
-/**
- * Label des ersten Tabs je Belegart — derselbe Slot, andere Aufschrift:
- * bei einer Rechnung steht dort der Buchungsvorschlag, beim Vertrag die
- * Vertrags-Prüfung, sonst der Beleg selbst.
- */
-export function belegTabLabel(args: {
-  isInvoice: boolean;
-  isContract: boolean;
-}): string {
-  if (args.isInvoice) return "Buchung";
-  if (args.isContract) return "Vertrag";
-  return "Beleg";
-}
 
 /**
  * Sichtbare Tabs. `positionen` und `vorsteuer` setzen eine Rechnungs-

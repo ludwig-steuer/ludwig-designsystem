@@ -11,29 +11,32 @@ export default meta;
 type Story = StoryObj<typeof StateMachine>;
 
 /*
-  Die Übergänge stehen hier als Konstanten, weil es sie **als Daten nirgends
-  gibt** (Register L-74). Quelle je Satz steht darüber; der Anhang der Spec
-  0069 führt dieselben Tabellen mit ihrem Fundort in `ludwig/app`.
+  Zwei Sätze stehen hier noch als Konstanten: ihre Achsen haben in der
+  Registry keine Maschine (`STATE_MACHINES` führt bisher `beleg`, `job`,
+  `upload`, `dispatch` — Register L-75, rund fünfzig offen). Quelle je Satz
+  steht darüber; der Anhang der Spec 0069 führt dieselben Tabellen mit ihrem
+  Fundort in `ludwig/app`. Die Achse `beleg` braucht keine mehr: sie kommt aus
+  der Registry, und genau das zeigen `Branching` und `Explain`.
 */
 
 /** `ludwig/app/docs/topics/datev.md`, Abschnitt R19 — Spalte „Hinaus durch". */
 const ZYKLUS: StateTransition[] = [
-  { from: "prepared", to: "agent", label: "Aufgreifen (start_agent_run)" },
-  { from: "prepared", to: "review", label: "Prüfung übernehmen" },
-  { from: "agent", to: "prepared", label: "Durchgang beendet (finish_agent_run)" },
-  { from: "review", to: "ready", label: "Freigabe" },
-  { from: "review", to: "agent", label: "Zurück an den Agenten" },
-  { from: "ready", to: "exporting", label: "Push" },
-  { from: "ready", to: "review", label: "Abbruch" },
-  { from: "exporting", to: "confirmed", label: "Quittung" },
-  { from: "exporting", to: "inspection", label: "Quittung mit Prüfung" },
-  { from: "exporting", to: "failed", label: "Fehler" },
-  { from: "inspection", to: "confirmed", label: "Quittung" },
-  { from: "confirmed", to: "mirrored", label: "Spiegel-Import eines festgeschriebenen Stapels" },
-  { from: "confirmed", to: "closed", label: "leerer Diff" },
-  { from: "mirrored", to: "closed", label: "Nachlese" },
-  { from: "failed", to: "ready", label: "Retry" },
-  { from: "failed", to: "review", label: "Abbruch" },
+  { from: "prepared", to: "agent", trigger: "Aufgreifen (start_agent_run)" },
+  { from: "prepared", to: "review", trigger: "Prüfung übernehmen" },
+  { from: "agent", to: "prepared", trigger: "Durchgang beendet (finish_agent_run)" },
+  { from: "review", to: "ready", trigger: "Freigabe" },
+  { from: "review", to: "agent", trigger: "Zurück an den Agenten" },
+  { from: "ready", to: "exporting", trigger: "Push" },
+  { from: "ready", to: "review", trigger: "Abbruch" },
+  { from: "exporting", to: "confirmed", trigger: "Quittung" },
+  { from: "exporting", to: "inspection", trigger: "Quittung mit Prüfung" },
+  { from: "exporting", to: "failed", trigger: "Fehler" },
+  { from: "inspection", to: "confirmed", trigger: "Quittung" },
+  { from: "confirmed", to: "mirrored", trigger: "Spiegel-Import eines festgeschriebenen Stapels" },
+  { from: "confirmed", to: "closed", trigger: "leerer Diff" },
+  { from: "mirrored", to: "closed", trigger: "Nachlese" },
+  { from: "failed", to: "ready", trigger: "Retry" },
+  { from: "failed", to: "review", trigger: "Abbruch" },
 ];
 
 const ZYKLUS_STATES = [
@@ -55,26 +58,15 @@ const ZYKLUS_LEAD =
   "Hülle um einen Export. Nummer und Beschreibung fallen bei der Eröffnung — " +
   "der Zyklus hat von Anfang an eine Identität. Wer dran ist, ist der Zustand.";
 
-/** Der „Übergänge:"-Block im Kopfkommentar von `BELEG` in der Registry. */
-const BELEG: StateTransition[] = [
-  { from: "pending", to: "in_progress", label: "Pipeline startet" },
-  { from: "in_progress", to: "processed", label: "Pipeline durch" },
-  { from: "in_progress", to: "review_needed", label: "Pipeline durch, reparierbare Findings" },
-  { from: "in_progress", to: "failed", label: "Abbruch" },
-  { from: "processed", to: "review_needed", label: "Revalidierung" },
-  { from: "review_needed", to: "processed", label: "Revalidierung (update_invoice_extraction)" },
-  { from: "failed", to: "in_progress", label: "Retry / force-Reprocess" },
-];
-
 /** Der Schreiber-Absatz im Kopfkommentar von `BELEG_INBOX`. */
 const INBOX: StateTransition[] = [
-  { from: "pending_classification", to: "classified", label: "Classifier" },
-  { from: "pending_classification", to: "classification_failed", label: "Classifier" },
-  { from: "classified", to: "pending_classification", label: "Reprocess" },
-  { from: "classification_failed", to: "pending_classification", label: "Reprocess" },
-  { from: "pending_classification", to: "deleted", label: "Soft-Delete" },
-  { from: "classified", to: "deleted", label: "Soft-Delete" },
-  { from: "classification_failed", to: "deleted", label: "Soft-Delete" },
+  { from: "pending_classification", to: "classified", trigger: "Classifier" },
+  { from: "pending_classification", to: "classification_failed", trigger: "Classifier" },
+  { from: "classified", to: "pending_classification", trigger: "Reprocess" },
+  { from: "classification_failed", to: "pending_classification", trigger: "Reprocess" },
+  { from: "pending_classification", to: "deleted", trigger: "Soft-Delete" },
+  { from: "classified", to: "deleted", trigger: "Soft-Delete" },
+  { from: "classification_failed", to: "deleted", trigger: "Soft-Delete" },
 ];
 
 /**
@@ -102,7 +94,7 @@ export const Filled: Story = {
  * durch die Mitte, einer unten herum. Ohne `current`: keine Box ist farbig.
  */
 export const Branching: Story = {
-  render: () => <StateMachine axis="beleg" transitions={BELEG} />,
+  render: () => <StateMachine axis="beleg" />,
 };
 
 /**
@@ -135,7 +127,7 @@ export const Sequence: Story = {
  * Escape schließt, Tab läuft die Boxen in Spaltenordnung ab.
  */
 export const Explain: Story = {
-  render: () => <StateMachine axis="beleg" transitions={BELEG} current="review_needed" />,
+  render: () => <StateMachine axis="beleg" current="review_needed" />,
 };
 
 /**
@@ -151,8 +143,8 @@ export const Edge: Story = {
         axis="beleg_inbox"
         transitions={[
           ...INBOX,
-          { from: "classification_failed", to: "quarantined", label: "Aussortiert" },
-          { from: "pending_classification", to: "pending_classification", label: "Erneut anstoßen" },
+          { from: "classification_failed", to: "quarantined", trigger: "Aussortiert" },
+          { from: "pending_classification", to: "pending_classification", trigger: "Erneut anstoßen" },
         ]}
         current="on_hold"
       />

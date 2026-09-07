@@ -306,3 +306,36 @@ Abgenommen von / am: Claude (Abnahme), 2026-09-04 (Runde 1) · 2026-09-04
 (Runde 2, nach Commit `0ae2dad`) · Ergebnis: **fertig** · Offene Punkte:
 keine; Anmerkung 4 ist Textpflege, das App-Kriterium bleibt planmäßig
 **offen (App)**.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-94 und zwei Drittel von L-95 sind erledigt** (App-Commit `eaf73d45`):
+`AccountFactsVM` und `AccountMonth` stehen in
+`accounts/domain/account-entry.ts`, und `accountFacts()` summiert Σ Soll und
+Σ Haben aus den Monatswerten — die Doppelmontage aus L-13 ist damit weg.
+
+Beim Tausch sind vier Dinge aufgefallen:
+
+- **Feldnamen folgen dem Spiegel:** `role` → `accountingRole`, `datevCount` →
+  `datevEntryCount`, `debitTotal`/`creditTotal` → `totalDebit`/`totalCredit`.
+- **`accountingRole` ist nullable.** Ein Konto ohne Rolle im Kontenrahmen zeigt
+  das Wort der Achse für „unbekannt", keine leere Zelle.
+- **Σ Soll / Σ Haben sind im Spiegel Pflicht und werden `0`,** wenn der
+  Aufrufer keine Monatswerte hat — der Drawer lädt keine. Zwei Nullen zu
+  zeigen hieße „nichts gebucht" zu behaupten, wo „nicht geladen" gemeint ist;
+  die Zeile steht deshalb erst, wenn eine der beiden Summen etwas trägt.
+- **`ludwigOnlyCount` bleibt lokal.** Der Spiegel hat den Betrag, nicht die
+  Anzahl; `ludwigEntryCount` ist etwas anderes (alle Ludwig-Sätze des Jahres).
+  Das Feld zu tauschen hätte aus „+ 3 nur in Ludwig" eine größere, falsche
+  Zahl gemacht — **L-209** im Register.
+
+Zum letzten Drittel von L-95 (Kontenfunktion und Automatik-Steuersatz): die
+Behauptung des Registers, sie stünden inline auf der Kontoseite, war falsch.
+Sie sind Spalten von `client_ledger_accounts` (`datev_main_function`,
+`datev_main_function_number`, `datev_tax_rate`), die Seite zeigt sie nicht, und
+kein Typ trägt sie. Das ist im Register berichtigt.
+
+**Der Typtausch kam nach der letzten Abnahme.** Er ist typgeprüft
+(`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
+Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
+schreibt. Eine kurze Bestätigung steht aus.

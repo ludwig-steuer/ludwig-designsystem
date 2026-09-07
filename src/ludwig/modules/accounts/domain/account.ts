@@ -190,6 +190,16 @@ export interface AccountRow {
   skrBaseCode: string | null;
   /** Nur skr_catalog: ``skr03`` oder ``skr04``. */
   accountFrameworkCode: string | null;
+  /**
+   * Nur client: der Geschäftspartner hinter einem Personenkonto.
+   *
+   * Fehlte bis 2026-09-07 (L-89), obwohl die Relation existiert und der
+   * Partner-Tab sie von der anderen Seite längst zeigt. Auf Personenkonten
+   * ist sie praktisch immer gefüllt, über alle Konten bei gut der Hälfte —
+   * auf einem Sachkonto steht hier zu Recht nichts.
+   */
+  businessPartnerId: string | null;
+  businessPartnerName: string | null;
 }
 
 const FilterSchema = z.object({
@@ -253,3 +263,19 @@ export function parseAccountFilter(raw: RawSearchParams): AccountFilter {
     usedOnly,
   };
 }
+
+/**
+ * Woher eine Zeile der Kontenliste stammt.
+ *
+ * Das ist die Frage der Katalogansicht: steht das Konto schon im Mandanten
+ * oder bisher nur im Kontenrahmen? Die App sagt dasselbe heute als Badge
+ * („SKR-Katalog"), aber ohne Wörter in der Domäne — anders als bei `source`,
+ * das seine Map längst hat (L-96).
+ *
+ * Nicht mit `source` verwechseln: `origin` sagt, **ob** es das Konto beim
+ * Mandanten gibt, `source` sagt, **wie** es dorthin kam.
+ */
+export const ACCOUNT_ORIGIN_LABEL: Record<AccountRow["origin"], string> = {
+  client: "Im Mandanten angelegt",
+  skr_catalog: "SKR-Katalog",
+};

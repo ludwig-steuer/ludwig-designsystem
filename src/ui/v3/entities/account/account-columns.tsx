@@ -1,5 +1,6 @@
 import {
   ACCOUNT_CLASS_LABEL,
+  ACCOUNT_ORIGIN_LABEL,
   type AccountRow,
   type AccountSortKey,
 } from "@/ludwig/modules/accounts/domain/account";
@@ -90,13 +91,18 @@ export const ACCOUNT_CATALOG_COLUMNS: AccountColumn[] = [
 export interface AccountColumnOptions {
   /** Where a row leads — drawer or account page; the page decides (A10). */
   href?: (account: AccountRow) => string;
-  /** The business partner of a personal account, where the caller knows it. */
+  /**
+   * The business partner of a personal account — an **override**, for a caller
+   * who knows a better name than the row carries. The row carries one since
+   * L-89 (`businessPartnerName`); without this callback the column reads it.
+   */
   partnerName?: (account: AccountRow) => string | null;
   partnerHref?: (account: AccountRow) => string | undefined;
   columns?: AccountColumn[];
   /**
-   * The two words of the column „Angelegt". They are not in the app's domain
-   * (finding L-96); the default mirrors what the app says elsewhere.
+   * The two words of the column „Angelegt" — an **override**. They come from
+   * the domain since 2026-09-07 (`eaf73d45`, finding L-96); a caller only
+   * passes them to word the column differently.
    */
   originLabels?: { client: string; catalog: string };
 }
@@ -112,7 +118,10 @@ export function accountColumns({
   partnerName,
   partnerHref,
   columns = ACCOUNT_LIST_COLUMNS,
-  originLabels = { client: "im Mandanten", catalog: "nur im SKR-Katalog" },
+  originLabels = {
+    client: ACCOUNT_ORIGIN_LABEL.client,
+    catalog: ACCOUNT_ORIGIN_LABEL.skr_catalog,
+  },
 }: AccountColumnOptions = {}): ColumnDef<AccountRow>[] {
   const picked = new Set(columns);
 
@@ -197,11 +206,11 @@ export function accountColumns({
       header: "Geschäftspartner",
       width: "200px",
       // Rank 8, 52 % filled — and only on personal accounts, where it is
-      // ~100 %. The name is **not** in `AccountRow` (finding L-89), so the
-      // caller passes it; without the callback the column stays empty rather
-      // than inventing a value.
+      // ~100 %. The name comes from the row (`businessPartnerName`, L-89
+      // closed 2026-09-07); a caller may still override it. Neither: the
+      // column stays empty rather than inventing a value.
       cell: (a) => {
-        const name = partnerName?.(a);
+        const name = partnerName ? partnerName(a) : a.businessPartnerName;
         if (!name) return <span className="v2muted">—</span>;
         const to = partnerHref?.(a);
         // A company name has no upper bound in the data — „Musterbau Handels-

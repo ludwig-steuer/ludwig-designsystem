@@ -2,8 +2,10 @@ import { Badge } from "../primitives/Badge";
 import { Popover } from "../primitives/Popover";
 import { AXIS_SOURCE } from "./entity-icons";
 import {
+  STATE_MACHINES,
   STATUS_REGISTRY,
   resolveStatus,
+  type StateTransition,
   type StatusAxis,
 } from "@/ludwig/ui/status/status-registry";
 
@@ -20,24 +22,27 @@ import {
  * with the words of the registry, arrows for the transitions, the current
  * state highlighted, and a click on every box explains it.
  *
- * **The picture does not lie where the data is missing.** Without
- * `transitions` the states stand in a row with a dotted connector and a line
- * saying so — the transitions exist as data for almost none of the 70 axes
- * (L-74), and inventing them from the registry order would be a claim.
+ * **The transitions come from the registry.** Since 2026-09-07 (`ba5da563`,
+ * finding L-74) `STATE_MACHINES` carries them as data, for four axes so far;
+ * the component reads them itself, and a caller only passes `transitions` for
+ * an axis that has none yet.
  *
+ * **The picture does not lie where the data is missing.** Without transitions
+ * the states stand in a row with a dotted connector and a line saying so —
+ * some fifty axes are still open (L-75), and inventing them from the registry
+ * order would be a claim.
  */
 
-export interface StateTransition {
-  /** Registry key of the source state. */
-  from: string;
-  /** Registry key of the target state. */
-  to: string;
-  /**
-   * What triggers it — „Freigabe", „Retry", `start_agent_run`. On the arrow as
-   * a `<title>`, and readable in the explanation of both states.
-   */
-  label?: string;
-}
+export type { StateTransition };
+
+/**
+ * A transition between two boxes. `from: null` is the **entry** into the axis
+ * — it has no source box, so it is no edge; it is drawn as a line in the
+ * explanation of its target instead of an arrow out of nowhere.
+ */
+type Edge = StateTransition & { from: string };
+
+const isEdge = (t: StateTransition): t is Edge => t.from !== null;
 
 /** One box, once the order and the ranks are known. */
 interface Box {
@@ -83,7 +88,7 @@ const BOX_H = 72;
 function order(
   axis: StatusAxis,
   states: readonly string[] | undefined,
-  transitions: readonly StateTransition[],
+  transitions: readonly Edge[],
   current: string | null | undefined,
 ): string[] {
   const known = Object.keys(STATUS_REGISTRY[axis]);
@@ -106,7 +111,7 @@ function order(
  * one more than the deepest source. Computed in order — every `from` stands
  * before its `to`, so one pass is enough. Backward transitions change nothing.
  */
-function ranks(values: string[], transitions: readonly StateTransition[]): Map<string, number> {
+function ranks(values: string[], transitions: readonly Edge[]): Map<string, number> {
   const index = new Map(values.map((v, i) => [v, i]));
   const rank = new Map(values.map((v) => [v, 0]));
   for (const v of values) {
@@ -131,7 +136,7 @@ function ranks(values: string[], transitions: readonly StateTransition[]): Map<s
 function layout(
   axis: StatusAxis,
   values: string[],
-  transitions: readonly StateTransition[],
+  transitions: readonly Edge[],
 ): Box[] {
   const rank = transitions.length === 0
     ? new Map(values.map((v, i) => [v, i]))
@@ -215,22 +220,29 @@ function edgePath(a: Box, b: Box, height: number): string {
  */
 export function StateMachine({
   axis,
-  transitions = [],
+  transitions,
   states,
   current,
   description,
 }: {
   axis: StatusAxis;
+  /** Only for an axis the registry has no machine for yet (L-75). */
   transitions?: readonly StateTransition[];
   states?: readonly string[];
   current?: string | null;
   description?: string;
 }) {
-  const values = order(axis, states, transitions, current);
+  const machine = STATE_MACHINES[axis];
+  const all = transitions ?? machine?.transitions ?? [];
+  const lead = description ?? machine?.description;
+  // The entry into the axis has no source box; it is not an edge.
+  const edges = all.filter(isEdge);
+  const entries = all.filter((t) => !isEdge(t));
+  const values = order(axis, states, edges, current);
   // Die DOM-Reihenfolge ist die Leserichtung: Spalte, dann Zeile. Damit läuft
   // Tab die Karte ab, wie das Auge sie liest — und nicht in der Reihenfolge,
   // in der die Zustände zufällig in der Registry stehen (0069, Tastatur).
-  const boxes = layout(axis, values, transitions).sort(
+  const boxes = layout(axis, values, edges).sort(
     (a, b) => a.column - b.column || a.row - b.row,
   );
   const byValue = new Map(boxes.map((b) => [b.value, b]));
@@ -238,11 +250,11 @@ export function StateMachine({
   const rows = Math.max(...boxes.map((b) => b.row)) + 1;
   const width = columns * COL - (COL - BOX_W);
   const height = rows * ROW - (ROW - BOX_H);
-  const hasEdges = transitions.length > 0;
+  const hasEdges = edges.length > 0;
 
   return (
     <div className="v2fsm">
-      {description ? <p className="v2fsm__lead">{description}</p> : null}
+      {lead ? <p className="v2fsm__lead">{lead}</p> : null}
       <div className="v2fsm__scroll">
         <div
           className="v2fsm__grid"
@@ -294,7 +306,7 @@ export function StateMachine({
                   <path d="M 0 0 L 8 4 L 0 8 z" />
                 </marker>
               </defs>
-              {transitions.map((t) => {
+              {edges.map((t) => {
                 const a = byValue.get(t.from);
                 const b = byValue.get(t.to);
                 // Ein Selbst-Übergang wird nicht gezeichnet — er steht im
@@ -302,11 +314,11 @@ export function StateMachine({
                 if (!a || !b || a === b) return null;
                 return (
                   <path
-                    key={`${t.from}-${t.to}-${t.label ?? ""}`}
+                    key={`${t.from}-${t.to}-${t.trigger}`}
                     d={edgePath(a, b, height)}
                     markerEnd="url(#v2fsm-arrow)"
                   >
-                    {t.label ? <title>{t.label}</title> : null}
+                    <title>{wayText(t)}</title>
                   </path>
                 );
               })}
@@ -319,7 +331,8 @@ export function StateMachine({
               axis={axis}
               box={b}
               current={current === b.value}
-              transitions={transitions}
+              transitions={edges}
+              entries={entries}
               byValue={byValue}
               hasEdges={hasEdges}
             />
@@ -335,25 +348,39 @@ export function StateMachine({
   );
 }
 
+/**
+ * A transition in words: the trigger, and who pulls it. The actor is a value
+ * of the axis `actor_kind` and comes from the registry (L-74); where it is
+ * missing, the sentence simply ends after the trigger.
+ */
+function wayText(t: StateTransition): string {
+  return t.by ? `${t.trigger} · ${t.by}` : t.trigger;
+}
+
 /** One box plus its explanation — the trigger carries its word (T8). */
 function StateBox({
   axis,
   box,
   current,
   transitions,
+  entries,
   byValue,
   hasEdges,
 }: {
   axis: StatusAxis;
   box: Box;
   current: boolean;
-  transitions: readonly StateTransition[];
+  transitions: readonly Edge[];
+  entries: readonly StateTransition[];
   byValue: Map<string, Box>;
   hasEdges: boolean;
 }) {
   const label = (v: string) => byValue.get(v)?.label ?? v;
   const incoming = transitions.filter((t) => t.to === box.value && t.from !== box.value);
   const outgoing = transitions.filter((t) => t.from === box.value);
+  // How a thing enters the axis at all — the registry says it since L-74, and
+  // it is the one way that has no arrow, because it comes from outside.
+  const entering = entries.filter((t) => t.to === box.value);
 
   return (
     // Die **Zelle** liegt im Raster, nicht der Knopf: `Popover` hängt seinen
@@ -395,15 +422,16 @@ function StateBox({
         <p className="v2fsm__meaning">
           {box.meaning || (box.raw ? "Diesen Wert kennt die Registry nicht." : "—")}
         </p>
+        <Ways title="Eintritt durch" items={entering.map(wayText)} />
         {hasEdges ? (
           <>
-            <Ways title="Hinein durch" items={incoming.map((t) => `${label(t.from)} · ${t.label ?? "—"}`)} />
+            <Ways title="Hinein durch" items={incoming.map((t) => `${label(t.from)} · ${wayText(t)}`)} />
             <Ways
               title="Hinaus durch"
               items={outgoing.map((t) =>
                 t.to === box.value
-                  ? `${t.label ?? "—"} · zurück auf sich selbst`
-                  : `${t.label ?? "—"} · ${label(t.to)}`,
+                  ? `${wayText(t)} · zurück auf sich selbst`
+                  : `${wayText(t)} · ${label(t.to)}`,
               )}
             />
           </>

@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 
 import type { ClarificationAnswerKind } from "@/ludwig/modules/invoices/domain/invoice";
+import { MAX_DEFERRAL_DAYS } from "@/ludwig/modules/accounting-cases/domain/case";
 import type { RationaleSourceKind } from "@/ludwig/modules/accounting-cases/domain/rationale-source";
 import type { Actor } from "@/ludwig/modules/audit-log/domain/types";
 
@@ -156,12 +157,11 @@ export interface ClarificationDetailVM {
 
 /**
  * **30 days, the length of one posting run.** The rule belongs to the app
- * (`F105`), not to this card — but `DEFERRAL_MAX_DAYS` is missing from
- * `modules/accounting-cases/domain/case.ts`, so it stands here once and as a
- * finding (L-91). Mirrored, not invented: a card that lets someone pick a day
- * the server refuses has told them nothing.
+ * (`F105`) and lives there since 2026-09-07 (`9c60caf4`, finding L-91): the
+ * card imports it rather than repeating it. Mirrored, not invented — a card
+ * that lets someone pick a day the server refuses has told them nothing.
  */
-const DEFERRAL_MAX_DAYS = 30;
+const DEFERRAL_MAX_DAYS = MAX_DEFERRAL_DAYS;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

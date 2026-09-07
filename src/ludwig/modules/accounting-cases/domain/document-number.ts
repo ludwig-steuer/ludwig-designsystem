@@ -153,3 +153,17 @@ export function dominantDocumentNumber(
 ): KnownDocumentNumber | null {
   return sortByDominance(entries)[0] ?? null;
 }
+
+/**
+ * Zustand einer Belegnummer im Vorgang — `client_accounting_case_document_number.state`.
+ *
+ * Lag bis 2026-09-07 als lokale Map in `CasePlausibilityTab.tsx` (L-71). Die
+ * Quelle der Nummer hat seit dem 2026-09-06 eine Registry-Achse
+ * (`belegnummer_quelle`); der Zustand ist etwas anderes und bleibt ein Label:
+ * er sagt, wie fest die Nummer sitzt, nicht woher sie kommt.
+ */
+export const DOCUMENT_NUMBER_STATE_LABEL: Record<string, string> = {
+  computed: "errechnet",
+  fixed_on_export: "mit dem Export fixiert",
+  datev_corrected: "in DATEV korrigiert",
+};

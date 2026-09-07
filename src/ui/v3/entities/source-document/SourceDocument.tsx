@@ -1,6 +1,8 @@
 import type { DocCategory, DocDirection, SourceDocType } from "@/ludwig/modules/source-docs/domain/document-form-mapping";
 import { formatDocumentKind } from "@/ludwig/modules/source-docs/domain/document-form-labels";
 import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
+// The record, under a name that does not collide with the component family.
+import type { SourceDocumentVM as MirrorDocument } from "@/ludwig/modules/source-docs/domain/source-document-vm";
 
 import { Amount } from "../../primitives/Amount";
 import { Badge } from "../../primitives/Badge";
@@ -50,86 +52,39 @@ export type SourceDocCompletionVia =
   | "no_booking_required";
 
 /**
- * One row of `ludwig.client_source_docs`, as far as cell and row show it
- * (ranks 1–7 of the entity profile plus the states).
+ * A source document, as this family shows it — **from the mirror**.
  *
- * Freetexts — summary, DATEV reference, agent note — are deliberately absent:
- * a row shows no three sentences. They belong to `SourceDocumentFacts` (0076).
+ * The record lived only here until 2026-09-07: as long as it did, the app
+ * could not read it as a contract, and every divergence surfaced at assembly
+ * time (finding L-93). `62a2d0fa` moved it to
+ * `source-docs/domain/source-document-vm.ts`, and this interface is what the
+ * **display** adds on top of it.
+ *
+ * Four fields stay here, and each for its own reason: `href` and `caseHref`
+ * are routes — the caller owns them, they are no part of the record;
+ * `caseNumber` and `hasInvoiceRow` are data the record does not carry yet
+ * (finding **L-207**), and the row needs both.
+ *
+ * `detail` is **not** the mirror's. Over there it is the four core facts of an
+ * invoice; here it is a union over the kinds of document, and it carries what
+ * the specialization block shows (`net`, `vat`, `processingStatus`, and the
+ * contract's own fields). The richer one wins, because dropping it would lose
+ * what 0076 draws — finding **L-208**: the app should lift this union, not the
+ * invoice half of it.
  */
-export interface SourceDocumentVM {
-  id: string;
-  /**
-   * Rank 1b. `NOT NULL` in the database and filled in **every** kind of
-   * document, which is why it is required here: it is the last fallback of the
-   * identifier and the only anchor a non-invoice always has.
-   */
-  fileName: string;
-  /**
-   * The discriminator. Widened by `declaration` against the type in
-   * `document-form-mapping.ts`: the DB check and `SOURCE_DOC_TYPE_LABELS` know
-   * the value, the TypeScript union is the type of what is *written* (finding
-   * B10, confirmed by the app side). Reading, seven values are right.
-   */
-  sourceDocType?: SourceDocType | "declaration" | null;
-  /** Fallback key of the **label**: with `other`/NULL the document form wins. */
-  classDocumentForm?: string | null;
-  /** Rank 1. Filled 50–95 % depending on the kind — without it the file name leads. */
-  counterparty?: string | null;
+export interface SourceDocumentVM extends Omit<MirrorDocument, "detail"> {
   /**
    * Ranks 3 and 5. The caller sets it **when the subtype row exists**; whether
    * it is shown is decided by the registry, which compares it against
    * `sourceDocType`.
    */
   detail?: SourceDocumentDetail | null;
-  /** Rank 4, ISO day. NULL stays NULL — never the upload day (GLOSSARY). */
-  documentDate?: string | null;
-  /** Rank 7, `NOT NULL`. The sort key of the document list. */
-  receivedDate: string;
-  /** `null` = still open. */
-  completedAt?: string | null;
   /**
    * Why it is done. `null` **with `completedAt` set** means „done, reason not
-   * recorded" (61 of 384) — not „open".
+   * recorded" (61 of 384) — not „open". The mirror types it as `string`; the
+   * axis has four values, and the family narrows to them here.
    */
   completedVia?: SourceDocCompletionVia | null;
-  /** Freetext beside the badge, in its tooltip. */
-  completedReason?: string | null;
-  /** Axis `beleg_kategorie`. NULL shows **nothing**, never „unclassified". */
-  docCategory?: DocCategory | null;
-  /** Axis `beleg_richtung`. NULL means „not applicable" (GLOSSARY) — no badge. */
-  docDirection?: DocDirection | null;
-  /** Shown **only when ≠ `original`**: 83 % are, and the normal case is no news. */
-  classDocumentKind?: string | null;
-  /** Axis `dokumentgruppe`, only ever set on a collection document. */
-  collectionKind?: string | null;
-  /**
-   * The processing of the invoice, axis `beleg` (83 % filled). A state of the
-   * **specialization**, not of every document — a contract has none.
-   */
-  processingStatus?: string | null;
-  /**
-   * `source_docs.status`, axis `beleg_inbox` — the one state **every** kind of
-   * document carries (profile finding B4). Almost constant in the stock
-   * (99.7 % `classified`), which is why the list shows it and the row does not.
-   */
-  inboxStatus?: string | null;
-  /**
-   * How sure the classification is: `class_confidence`, `numeric(5,4)`, so a
-   * share between 0 and 1 — **a number, not an axis value**. The axis
-   * `konfidenz` looks like it fits and does not: it is the confidence of a
-   * **booking proposal** (`client_journal_entry.proposal_confidence`), and its
-   * „Bitte Konto und Steuerschlüssel prüfen" is no answer to a document
-   * classification. Until there is an axis of its own (finding L-80) the
-   * column shows the share as a percentage, the way the app's document tabs
-   * already do.
-   */
-  classConfidence?: number | null;
-  /**
-   * File size in bytes — `ops_stored_files.byte_size`, handed over with the
-   * inbox entry. It matters at exactly one place: 25 MB is where submitting
-   * fails.
-   */
-  sizeBytes?: number | null;
   /**
    * Whether the document already has an invoice row. Two booleans decide the
    * axis `beleg_haenger` — this one and which of the two stuck lists is shown

@@ -393,3 +393,115 @@ im Code.
 ## Abnahmekriterien (Nachtrag der zweiten Runde)
 
 - [ ] Kein Kommentar unter `src/` spricht mehr von einer Versalien-Stufe (`grep`, **auch** in `.tsx`)
+
+## Abnahme (dritte Runde, fremd, 2026-09-07)
+
+Die zweite Runde hat **nicht abgenommen** — ein Mangel: drei Kommentare unter
+`src/ui/` behaupteten eine Versalien-Stufe. Diese Runde prüft **den Mangel und
+alle Kriterien noch einmal**, denn seit dem 2026-09-06 ist viel bewegt worden:
+der Bestand ist von 529 auf **717 Stories** gewachsen. Storybook auf Port 6107
+(Dev-Server, Katalog aus `/index.json`), Chromium headless bei 1440×900. Nicht
+vom Bauenden, gegen die Spec, nicht gegen den Chat.
+
+**Urteil: bestätigt.** Der Mangel M1 ist behoben, das Kriterium des Nachtrags
+ist erfüllt, und keines der Kriterien der ersten beiden Runden ist umgeworfen.
+**Ein Befund** gehört weitergereicht, blockiert diese Aufgabe aber nicht: eine
+spätere Aufgabe (0106) hat der Tabellen-Zwischenzeile ihr Gewicht genommen —
+siehe unten.
+
+**Zum Stand des Arbeitsbaums:** während der Prüfung arbeiteten mehrere fremde
+Sitzungen im selben Baum (Sachverhalts-Familie, `src/ludwig/`). Ihre Arbeit
+berührt keine der Regeln dieser Aufgabe; `pnpm typecheck` war im ersten Anlauf
+rot durch eine halbfertige Datei einer solchen Sitzung und nach deren Commit
+grün (Exit 0). Der Katalog kam durchgehend vom Dev-Server, nicht aus
+`storybook-static/` — das Verzeichnis wird von parallelen Bauten geleert
+(„Build-Flacker", 0117).
+
+**Der Mangel der zweiten Runde**
+
+| Kriterium (Nachtrag der zweiten Runde) | Nachweis | Ergebnis |
+|---|---|---|
+| Kein Kommentar unter `src/` spricht mehr von einer Versalien-Stufe (`grep`, **auch** in `.tsx`) | `grep -rn "Versalien" src/` → 13 Fundstellen, **jede** beschreibt die Abschaffung: `ProseCard.tsx:4`, `ProseCard.stories.tsx:8` und `FieldList.stories.tsx:17` heißen jetzt „**Abschnittskopf**", die übrigen stehen in `v3.css`, `app-chrome.css`, `tokens.css` und `Typography.stories.tsx` („Über dem Feld, ohne Versalien (0089)"). Keine behauptet eine Versalien-Stufe als heutige Gestalt | ✓ |
+
+**Fest**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | `tsc --noEmit`, **Exit 0** | ✓ |
+| `pnpm build` grün | einmal gelaufen, **Exit 0** — am Exit-Code geprüft, nicht an der letzten Zeile. Danach vom Owner untersagt (parallele Prüfer im selben Baum). Damit ist der Punkt, den die ersten beiden Runden offenlassen mussten, **geschlossen** | ✓ |
+| `pnpm check:icons` / `pnpm check:contrast` | beide **Exit 0** | ✓ |
+| Im Browser angesehen | **alle 717 Stories** in zwei vollständigen Durchläufen geöffnet und vermessen (0 Fehler, 0 leer gerenderte), dazu Einzelbilder von `field--filled`, `radiogroup--filled`, `table--filled`, `journalentryeditor--s-2-split-full`, `navlist--in-shell`, `kpitile--six-columns`, `fieldlist--filled`, `typografie--scale` | ✓ |
+
+**Variabel (erste Runde)**
+
+| Kriterium | Nachweis (Story-ID · Messwert) | Ergebnis |
+|---|---|---|
+| **Keine sichtbaren Versalien mehr im Set** — über alle Stories gemessen, nicht über den Quelltext | Eigener Sweep über **alle 717** Stories: je Element der berechnete `text-transform` über die **eigenen Textknoten** (also auch an Elementen mit Kindern), dazu `capitalize`, dazu `::before`/`::after` mit eigenem `text-transform`, dazu `font-variant-caps`. **`text-transform` 0 · Pseudoelemente 0 · `font-variant-caps` 0.** Die Messung ist gegengeprobt: mit `.v2field__label{text-transform:uppercase}` zur Laufzeit meldet derselbe Sweep **4** Treffer, nach dem Entfernen wieder 0 | ✓ |
+| — und was schon groß **geschrieben** ist, ist es zu Recht | 75 verschiedene Zeichenketten in reinen Großbuchstaben, alle legitim: SEPA-Schlüssel im Verwendungszweck (`EREF`, `MREF`, `PURP`, `CRED`, `KREF`, `OAMT`, `ABWA`, `NONREF`), Währungen und Einheiten (`EUR`, `CHF`, `STK`), Kürzel (`DATEV`, `IBAN`, `BIC`, `API`, `CLI`, `OPOS`, `KOST`), Hex-Werte in `Grundlagen/Farbe`, Bezeichner in `Grundlagen/Icons` (`ENTITY_ICON`), Beleg- und Vertragsnummern, die Prüfpunkt-Codes des Buchungssatz-Editors (`P-KONTO`, `E-KONTO`, `P-UST` …). **Keine einzige Beschriftung** | ✓ |
+| `.v2field__label` steht in 12,5 px, 600, ohne Sperrung und ohne `text-transform` | Über alle 717 Stories: **202 Vorkommen, eine einzige Ausprägung** — `12.5px / 600 / ls normal / tt none`. Einzelmessung `field--filled`: „Beleg 1" `rgb(92,92,92)` neben `.v2in` `13.5px / 400 / rgb(45,45,45)`. Gegenprobe: die alte Typografie zur Laufzeit wieder eingesetzt → `11px / 600 / ls 0.44px / tt uppercase`, danach wieder der Ausgangswert | ✓ |
+| Die `<legend>` einer `RadioGroup` trägt dieselbe Stufe wie ein Feld-Label | `radiogroup--filled`: `LEGEND.v2field__label` „Umfang des Exports" → `12.5px / 600 / ls normal / tt none / rgb(92,92,92)` — Zeichen für Zeichen dieselbe Messung wie das Feld-Label | ✓ |
+| Der Spaltenkopf einer Tabelle steht ohne Versalien (A2) und bleibt vom Inhalt unterscheidbar | `table--filled`: Kopf `12.5/600/rgb(113,113,113)` gegen Zellen `13.5/400/rgb(45,45,45)` — drei Unterschiede (Farbe, Gewicht, Trennlinie), die Größe ist der schwächste davon und muss es nicht tragen | ✓ |
+| `.lw-overline` hat keine Versalien und keine Sperrung mehr — und ist als Klasse erhalten | Über alle Stories: **24 Vorkommen, eine Ausprägung** — `12px / 600 / ls normal / tt none`. Die Klasse steht unverändert in `tokens.css:328–334`, der Kopfkommentar (Z. 322–327) begründet weiter, warum die Überzeile keine benannte Ausnahme ist | ✓ |
+| Kein `text-transform: uppercase` mehr in `v3.css`, `app-chrome.css`, `tokens.css` und in keinem Inline-Stil unter `src/ui/v3` | `grep -n "text-transform" src/styles/{v3,app-chrome,tokens}.css` → zwei Zeilen: `app-chrome.css:777` (`none`) und `v3.css:924` (ein Kommentar, der die Regel zitiert). `grep -rn "text-transform\|textTransform\|uppercase\|small-caps\|font-variant-caps" src/ui/` → **keine Zeile** | ✓ |
+| Die Beschriftung liest sich nicht wie ihr Wert | Über alle 717 Stories je Klasse **eine einzige** Ausprägung: `.v2field__label` 202 × `12,5/600`, `.v2kpi__label` 35 × `12,5/600`, `.v2ehead__metric__label` 13 × `12,5/600` — jeweils über Werten in `13,5/400` bis `19–20 px`. Im Bild nachgesehen an `field--filled`, `kpitile--six-columns`, `fieldlist--filled`, `navlist--in-shell` | ✓ |
+
+**Variabel (Nachtrag der zweiten Runde)**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `.sb__navlabel` und `.hero__summary > .lbl` stehen auf 700, die Wert-Beschriftungen auf 600 | `.sb__navlabel` über alle Stories: **34 Vorkommen, eine Ausprägung** `12.5px / **700** / ls normal / tt none` (`navlist--in-shell`: `rgb(111,132,153)` über Zeilen `14px / 400`). Die drei `hero`-Regeln haben weiterhin keine Story und sind am Quelltext geprüft: `app-chrome.css:542` `.hero__summary > .lbl` `700`; `:534` `.hero__total .lbl` und `:538` `.hero-fact .lbl` je `12.5px / 600` | ✓ |
+| Der Kopfkommentar von `app-chrome.css` nennt alle drei Rollen | `app-chrome.css:7–10`: „Die Rollen sind dieselben drei wie dort: Beschriftung eines Wertes 12,5 px / 600, Überzeile 11,5 px / 600, Gruppen- und Abschnittskopf 12,5 px / 700." | ✓ |
+| Spaltenköpfe sind Beschriftungen: `.v2tbl__head` und `.bse__head` beide 12,5 px / 600 | Über **alle 717** Stories, je Kopfzelle der berechnete Stil: `.v2tbl__head` **1188 Zellen**, `.bse__head` **146 Zellen** (in 26 Buchungssatz-Stories einzeln nachgemessen) — zusammen **1334 Kopfzellen** und **genau eine** Ausprägung: `12.5px / 600 / ls normal / tt none`. Keine Story weicht ab | ✓ |
+| Kein Spaltenkopf bricht um — über alle Stories gemessen | Dieselben 1334 Kopfzellen, je Zelle die gemessene Höhe minus Innenabstand gegen ihre eigene `line-height` (Schwelle 1,55 Zeilen): **null** mehrzeilig | ✓ |
+| Keine `letter-spacing` mehr an Beischriften, die keine Versalien tragen | `grep -n "letter-spacing" src/styles/{v3,app-chrome,tokens}.css`: in `v3.css` **keine einzige** Zeile; in `tokens.css` nur die fünf negativen Überschriften-Token; in `app-chrome.css` vier — zwei negative an `h1` (Z. 362, 526) und zwei positive an `.role-badge` (Z. 211) und `.conf` (Z. 659), beides Pillen der toten v1-Schicht, von keinem Baustein und keiner Story benutzt. Über alle 717 Stories gemessen trägt keine der fünf Beischriften-Klassen eine Sperrung (`ls normal`, ausnahmslos) | ✓ |
+| `--tr-overline` existiert nicht mehr; kein Kommentar spricht mehr von Versalien-Stufen | `grep -rn "tr-overline" src/` → keine Zeile. `--fs-ui-2xs` trägt den Kommentar „Kleinstmaß: Taste, Zähler". Kommentare: siehe die Zeile zum Mangel oben | ✓ |
+
+### Befund, weitergereicht — kein Mangel dieser Aufgabe
+
+1. **Die Tabellen-Zwischenzeile hat ihr Gewicht verloren — durch 0106, nicht
+   durch 0089.** Der Entscheid dieser Aufgabe kennt drei Rollen; die dritte
+   („Gruppen- und Abschnittskopf, 12,5 px / **700**") sitzt heute überall außer
+   an einer Stelle. Über alle 717 Stories gemessen: `.v2fields__h` 133 × `12,5/700`,
+   `.v2lp__grp` 11 × `12,5/700`, `.v2prose__h` 4 × `12,5/700` — und
+   **`.v2tbl__group` 14 × `12,5/400`**. Beide früheren Runden hatten hier 700
+   gemessen.
+   Die Regel selbst ist unverändert (`v3.css:191–199`, `font-weight: 700`); sie
+   **verliert** seit dem Umbau der Tabelle auf ein echtes `<table>` (0106,
+   Commit `6ecae07`) gegen `.v2tbl th, .v2tbl td { … font-weight: inherit … }`
+   (`v3.css:52`) — Spezifität 0-1-1 gegen 0-1-0. Gemessen und gegengeprobt in
+   `table--filled`: Bestand `TD` `400`; mit `.v2tbl td.v2tbl__group{font-weight:700}`
+   zur Laufzeit `700`; nach dem Entfernen wieder `400`. Dieselbe Falle hatte
+   0106 fürs `padding` schon erkannt und mit `.v2tbl td.v2tbl__group` (Z. 108)
+   entschärft — beim Gewicht nicht.
+   Im Bild trägt die Zeile noch: getönte Bank, zwei Trennlinien, `12,5` gegen
+   `13,5` und `rgb(92,92,92)` gegen `rgb(45,45,45)`. Es ist also kein
+   Lesbarkeitsfehler, sondern ein stillschweigend gekippter Entscheid.
+   **Blockiert 0089 nicht**: die Zeile, die 0089 geschrieben hat, steht
+   unverändert da; der Griff gehört in die Tabellen-Familie (0106), wo die
+   Regel liegt, die sie schlägt.
+
+### Beobachtungen außerhalb der Kriterien
+
+1. **Vier Regeln sitzen weiter neben den drei Stufen.** Die zweite Runde hatte
+   sie als Beobachtung notiert; die Behebung hat ihnen die Sperrung genommen,
+   aber nicht die Stufe gegeben: `.v2cmd__grp [cmdk-group-heading]`
+   (`v3.css:1322`) steht auf `12,5/**600**`, obwohl es ein Gruppenkopf ist;
+   `.v2cmb__grp` (Z. 2000) auf `**11 px**/600`, ebenfalls ein Gruppenkopf;
+   `.v2phead__over` (Z. 1891) auf `**11 px**/600`, obwohl `.v2ehead__over`
+   (Z. 2317) als dieselbe Überzeile auf `--fs-ui-xs` (11,5) steht; `.v2tl__day`
+   (Z. 2057) auf `11 px`/600. Keine von ihnen kam im Sweep vor (Kommandopalette
+   und Combobox zeigen ihre Köpfe erst geöffnet), deshalb am Quelltext geprüft.
+2. **Ein Gruppenkopf ruft weiter lauter als der Spaltenkopf, den er gliedert** —
+   solange `.v2tbl__group` bei 400 steht, sogar leiser. Wer den Befund oben
+   behebt, bekommt die Ordnung der zweiten Runde zurück (Gruppenkopf 700 über
+   Beschriftung 600); wer sie umdreht, dreht die Rollen um und braucht dafür
+   einen neuen Entscheid.
+3. **Die zwölf `Referenz/…`-Stories** betten die gelieferten Artboards als
+   `<iframe>` ein und tragen weiter Versalien. Unverändert richtig: das ist die
+   Vorlage, nicht das Set — und beide Sweeps sehen sie zu Recht nicht.
+
+Abgenommen von / am: **abgenommen**, Claude (Prüf-Agent, nicht der Bauende),
+2026-09-07 · Der Mangel M1 der zweiten Runde ist behoben, `pnpm build` ist
+nachgeholt (Exit 0), und über 717 Stories ist keine sichtbare Versalie, keine
+Sperrung an einer Beischrift und kein umbrechender Spaltenkopf zu finden. Ein
+Befund geht an die Tabellen-Familie (0106).

@@ -53,6 +53,7 @@ export type StatusAxis =
   // — Beleg & Pipeline —
   | "beleg"
   | "beleg_stage"
+  | "beleg_charakter"
   | "beleg_erledigung"
   | "beleg_haenger"
   | "beleg_inbox"
@@ -497,6 +498,35 @@ const DISPATCH_STATE: Record<string, StatusDescriptor> = {
   done: { label: "Durchgelaufen", kind: "neutral", description: "Verarbeitung beendet. Ob erfolgreich, zeigt der Beleg-Status — auch Fehler landen hier." },
   stuck: { label: "Dauert an", kind: "warning", description: "Nach 5 Minuten ohne Ergebnis hat der Browser aufgehört zu warten. Die Verarbeitung läuft im Hintergrund weiter." },
   failed: { label: "Start-Fehler", kind: "danger", description: "Die Verarbeitung ließ sich nicht anstoßen. Der Beleg ist unverändert und kann neu gestartet werden." },
+};
+
+/**
+ * `client_source_docs.class_document_kind` — der **Charakter** eines Belegs:
+ * ob er eine Leistung berechnet oder eine frühere Rechnung zurücknimmt.
+ * Wertebereich `DOCUMENT_KINDS`
+ * (`modules/source-docs/domain/document-form-labels.ts`), gleiche Quelle wie
+ * das Python-Enum.
+ *
+ * Vierte und letzte Einordnungs-Achse des Belegs neben `beleg_kategorie`
+ * (was als Nächstes passiert), `beleg_richtung` (ein- oder ausgehend) und
+ * `dokumentgruppe` (einzeln oder Sammel-PDF). Sie stand als Einzige nicht in
+ * der Registry — die Belegliste zeigte den Wert als Abzeichen ohne Achse
+ * (L-37).
+ *
+ * Fallstricke:
+ *  - **`credit_note` und `self_billing` sind nicht dasselbe.** Das eine nimmt
+ *    zurück, das andere rechnet ab: bei der Gutschrift nach §14 UStG stellt
+ *    der Leistungsempfänger die Rechnung. Vorzeichen und Steuerbehandlung
+ *    unterscheiden sich.
+ *  - `original` ist mit 83 % der Normalfall und wird in Listen bewusst nicht
+ *    gezeigt — der Normalfall ist keine Nachricht.
+ */
+const BELEG_CHARAKTER: Record<string, StatusDescriptor> = {
+  original: { label: "Normal-Beleg", kind: "neutral", description: "Berechnet eine Leistung — der Normalfall." },
+  credit_note: { label: "Stornogutschrift", kind: "info", description: "Nimmt eine frühere Rechnung ganz oder teilweise zurück." },
+  self_billing: { label: "§14-UStG-Gutschrift", kind: "info", description: "Der Leistungsempfänger rechnet ab — keine Rücknahme, sondern eine Rechnung aus der anderen Richtung." },
+  refund: { label: "Erstattung", kind: "info", description: "Rückzahlung ohne eigene Leistung." },
+  unknown: { label: "Unbekannt", kind: "neutral", description: "Der Klassifikator hat den Charakter nicht bestimmt." },
 };
 
 /**
@@ -2105,6 +2135,7 @@ const DATEV_PRUEFUNG: Record<string, StatusDescriptor> = {
 export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor>> = {
   beleg: BELEG_PROCESSING,
   beleg_stage: BELEG_STAGE,
+  beleg_charakter: BELEG_CHARAKTER,
   beleg_erledigung: BELEG_ERLEDIGUNG,
   beleg_haenger: BELEG_HAENGER,
   beleg_inbox: BELEG_INBOX,
@@ -2325,6 +2356,100 @@ export function resolveEventBookingState(
     : { ...desc, value };
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   ÜBERGÄNGE
+   ══════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Ein Übergang zwischen zwei Zuständen derselben Achse.
+ *
+ * `from: null` ist der Eintritt — wie ein Ding in die Achse hineinkommt.
+ * `to: null` gibt es nicht: wer die Achse verlässt, tut das über einen
+ * Endzustand, und der steht in der Descriptor-Map.
+ */
+export interface StateTransition {
+  /** Ausgangszustand, oder `null` für den Eintritt in die Achse. */
+  from: string | null;
+  to: string;
+  /** Was den Übergang auslöst — knapp, in der Sprache der Rolle. */
+  trigger: string;
+  /** Wer ihn auslöst: ein Wert der Achse `actor_kind`, oder „system". */
+  by?: string;
+}
+
+/**
+ * Die Zustandsmaschinen, soweit sie aufgeschrieben sind.
+ *
+ * Bis 2026-09-07 standen Übergänge als **Prosa im Kommentar** — vier Achsen
+ * hatten einen „Übergänge:"-Block, ein Dutzend weitere Pfeile im Fließtext.
+ * Zwei Tabellen lagen in der Doku, eine dritte Form im Code
+ * (`CASE_DOCUMENT_NUMBER_MODE_TRANSITIONS`, vollvermascht und anders
+ * geschnitten). Nichts davon war abfragbar, nichts prüfbar (L-74).
+ *
+ * Hier stehen sie als Daten. Der Registry-Test prüft, dass jedes `from` und
+ * `to` ein Schlüssel seiner Achse ist — ein umbenannter Zustand macht die
+ * Maschine rot, statt sie still falsch werden zu lassen.
+ *
+ * Die Sammlung ist bewusst `Partial`: eine Achse ohne Übergänge ist keine
+ * Lücke im Typ, sondern eine offene Aufgabe (L-75, rund fünfzig).
+ */
+export const STATE_MACHINES: Partial<
+  Record<StatusAxis, { description: string; transitions: StateTransition[] }>
+> = {
+  beleg: {
+    description:
+      "Der technische Weg eines Belegs durch die Pipeline. `review_needed` ist kein Abbruch — die Pipeline lief durch, es bleiben reparierbare Findings.",
+    transitions: [
+      { from: null, to: "pending", trigger: "Beleg angelegt", by: "api" },
+      { from: "pending", to: "in_progress", trigger: "Workflow greift ihn auf", by: "system" },
+      { from: "in_progress", to: "processed", trigger: "ohne offene Findings fertig", by: "system" },
+      { from: "in_progress", to: "review_needed", trigger: "reparierbare Findings bleiben", by: "system" },
+      { from: "in_progress", to: "failed", trigger: "Pipeline abgebrochen", by: "system" },
+      { from: "review_needed", to: "processed", trigger: "Extraktion korrigiert, synchron neu geprüft", by: "user" },
+      { from: "processed", to: "review_needed", trigger: "Revalidierung findet doch etwas", by: "system" },
+      { from: "failed", to: "in_progress", trigger: "Neuverarbeitung angestoßen", by: "user" },
+    ],
+  },
+  job: {
+    description:
+      "Der durable Job in `ops_jobs`. Job-Erfolg ist nicht Beleg-Erfolg: der Ingest-Handler wirft nicht, der Job wird auch dann `succeeded`, wenn der Beleg intern scheiterte.",
+    transitions: [
+      { from: null, to: "queued", trigger: "eingereiht", by: "system" },
+      { from: "queued", to: "running", trigger: "Worker greift ihn (zählt `attempts` hoch)", by: "system" },
+      { from: "running", to: "succeeded", trigger: "durchgelaufen", by: "system" },
+      { from: "running", to: "queued", trigger: "Fehler, Wiederholung nach 60 s", by: "system" },
+      { from: "running", to: "failed", trigger: "Versuche erschöpft", by: "system" },
+      { from: "running", to: "queued", trigger: "Reaper: `locked_at` zu alt", by: "system" },
+      { from: "queued", to: "failed", trigger: "unbekannter job_type — sofort, ohne Wiederholung", by: "system" },
+    ],
+  },
+  upload: {
+    description:
+      "Der Browser-Upload einer Datei. Reiner Client-Zustand, überlebt keinen Reload. `done` heißt nur „Datei ist angekommen\" — ob Klassifizierung und Ingest starteten, steht daneben.",
+    transitions: [
+      { from: null, to: "queued", trigger: "Datei ausgewählt oder abgelegt", by: "user" },
+      { from: "queued", to: "uploading", trigger: "Übertragung beginnt", by: "system" },
+      { from: "uploading", to: "finalizing", trigger: "Datei liegt im Speicher, Eintrag wird angelegt", by: "system" },
+      { from: "finalizing", to: "done", trigger: "Eintrag steht", by: "system" },
+      { from: "queued", to: "error", trigger: "Abbruch", by: "system" },
+      { from: "uploading", to: "error", trigger: "Abbruch", by: "system" },
+      { from: "finalizing", to: "error", trigger: "Abbruch", by: "system" },
+    ],
+  },
+  dispatch: {
+    description:
+      "Der Anstoß der Verarbeitung aus dem Browser. `failed` heißt „Start misslungen\", nicht „Beleg gescheitert\" — der Beleg steht danach unverändert auf `pending`.",
+    transitions: [
+      { from: null, to: "queued", trigger: "Verarbeitung angestoßen", by: "user" },
+      { from: "queued", to: "starting", trigger: "Aufruf abgesetzt", by: "system" },
+      { from: "starting", to: "running", trigger: "Workflow bestätigt den Start", by: "system" },
+      { from: "running", to: "done", trigger: "Beleg-Status meldet Ende", by: "system" },
+      { from: "running", to: "stuck", trigger: "keine Rückmeldung mehr", by: "system" },
+      { from: "starting", to: "failed", trigger: "Aufruf kam nicht durch", by: "system" },
+    ],
+  },
+};
+
 /**
  * Klartext-Name der Achse. Führt den Tooltip an („Sachverhalt · Klärung
  * offen · …"), damit ein Status nie ohne seinen Bezug dasteht — dieselbe
@@ -2333,6 +2458,7 @@ export function resolveEventBookingState(
 export const AXIS_LABEL: Record<StatusAxis, string> = {
   beleg: "Beleg",
   beleg_stage: "Verarbeitungsstufe",
+  beleg_charakter: "Beleg-Charakter",
   beleg_erledigung: "Erledigung",
   beleg_haenger: "Beleg-Zustand",
   beleg_inbox: "Dokument",
@@ -2414,6 +2540,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
 export const AXIS_SOURCE: Record<StatusAxis, string> = {
   beleg: "client_source_docs_invoices.processing_status",
   beleg_stage: "client_source_docs_invoices.processing_stage",
+  beleg_charakter: "client_source_docs.class_document_kind",
   beleg_erledigung: "client_source_docs.completed_via (+ completed_at)",
   beleg_haenger: "berechnet — hasInvoiceRow + Listen-Variante (ephemer)",
   beleg_inbox: "client_source_docs.status",

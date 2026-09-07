@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import type { AccountFactsVM as MirrorAccountFacts } from "@/ludwig/modules/accounts/domain/account-entry";
 import type { Currency } from "@/ludwig/shared/money";
 
 import { formatCount } from "../../format";
@@ -80,46 +81,33 @@ export function AccountCell({
 }
 
 /**
- * The facts of one account in one fiscal year.
+ * The facts of one account in one fiscal year — **from the mirror**.
  *
- * Structurally `client_ledger_accounts` plus two aggregates of its movements.
- * A canonical view model for this does not exist in `src/ludwig/` — the app
- * assembles it twice, in the drawer and on the account page (finding for
- * `ludwig/app`, see 0066).
+ * The app assembled this twice, in the drawer and on the account page; since
+ * 2026-09-07 it does it once, in `accounts/domain/account-entry.ts`
+ * (`eaf73d45`, findings L-94 and L-95), and `accountFacts()` sums Σ debit and
+ * Σ credit out of the monthly figures. What this interface adds are three
+ * fields the record does not carry — and one it carries differently.
  */
-export interface AccountFactsVM {
-  accountNumber: string;
-  accountName: string | null;
-  /** `client_ledger_accounts.accounting_role` — axis `konto_typ`. */
-  role: string;
-  /** The year whose chart of accounts this row is (GLOSSARY F64). */
-  fiscalYear: number;
+export interface AccountFactsVM extends MirrorAccountFacts {
+  /** The mirror types it as `string`; every amount here needs the real one. */
   currency: Currency;
-  /** Σ debit − Σ credit of the **mirror** entries. `null` = never reconciled. */
-  datevBalance: number | null;
-  datevCount: number;
-  /** Ludwig entries without `datev_mirror_entry_id` — count and sum. */
-  ludwigOnlyCount: number;
-  ludwigOnlyAmount: number | null;
   /**
-   * Σ debit and Σ credit of the year — rank 7 of the profile, and the two
-   * numbers the account page shows above its chart. Optional, because the
-   * drawer does not need them and the mirror does not carry them yet
-   * (finding L-94).
+   * Ludwig entries **without** `datev_mirror_entry_id` — the count that goes
+   * with `ludwigOnlyAmount`. The record has the sum and not the count
+   * (`ludwigEntryCount` is all Ludwig entries of the year, which is a
+   * different number): finding **L-209**. Swapping one for the other would
+   * turn „+ 3 nur in Ludwig" into a larger, wrong figure.
    */
-  debitTotal?: number | null;
-  creditTotal?: number | null;
+  ludwigOnlyCount: number;
   /**
-   * The place in the chart of accounts (rank 9, filled 100 %). Optional for
-   * the same reason: the drawer answers „which account", the page answers
-   * „what is it for". The label comes from `ACCOUNT_CLASS_LABEL`, never from
-   * a second map here (L-95).
+   * The place in the chart of accounts (rank 9, filled 100 %). Optional: the
+   * drawer answers „which account", the page answers „what is it for". The
+   * label comes from `ACCOUNT_CLASS_LABEL`, never from a second map here.
    */
   skrClassLabel?: string | null;
   /** Personal account: the business partner behind it (52 % of all accounts). */
   partnerName?: string | null;
-  /** `client_ledger_accounts.last_booking_date` — filled on 15 %. */
-  lastBookingDate?: string | null;
   /**
    * Axis `konto_datev_sync`. Only shown when it is **not** `synced`: 41.555
    * of 41.570 accounts on staging are, so the normal case stays quiet.
@@ -138,7 +126,12 @@ export interface AccountFactsVM {
  */
 export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
   const rows: [ReactNode, ReactNode][] = [
-    ["Kontoart", <StatusBadge key="role" axis="konto_typ" status={facts.role} info={false} />],
+    [
+      "Kontoart",
+      // `accountingRole` is nullable in the record: an account without a role
+      // in the chart shows the axis' own word for „unknown", not an empty cell.
+      <StatusBadge key="role" axis="konto_typ" status={facts.accountingRole ?? ""} info={false} />,
+    ],
     [
       // The year rides on the label of the number it belongs to. Without it a
       // balance in a HoverCard says nothing about *which* year it is — and a
@@ -161,13 +154,17 @@ export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
 
   // Σ Soll / Σ Haben stehen **zusammen** in einer Zeile: sie sind ein Paar,
   // und getrennt lädt die Spalte dazu ein, das eine ohne das andere zu lesen.
-  if (facts.debitTotal != null || facts.creditTotal != null) {
+  // Beide sind im Spiegel Pflicht und werden `0`, wenn der Aufrufer keine
+  // Monatswerte hat (der Drawer lädt keine). Zwei Nullen zu zeigen hieße
+  // „nichts gebucht" zu behaupten, wo „nicht geladen" gemeint ist — deshalb
+  // steht die Zeile erst, wenn eine der beiden Summen etwas trägt.
+  if (facts.totalDebit !== 0 || facts.totalCredit !== 0) {
     rows.push([
       "Σ Soll / Σ Haben",
       <span key="sums">
-        <Amount value={facts.debitTotal ?? null} currency={facts.currency} size="sm" />
+        <Amount value={facts.totalDebit} currency={facts.currency} size="sm" />
         {" / "}
-        <Amount value={facts.creditTotal ?? null} currency={facts.currency} size="sm" />
+        <Amount value={facts.totalCredit} currency={facts.currency} size="sm" />
       </span>,
     ]);
   }
@@ -177,7 +174,7 @@ export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
   rows.push([
     "Bewegungen",
     <span key="cnt">
-      {formatCount(facts.datevCount)} in DATEV
+      {formatCount(facts.datevEntryCount)} in DATEV
       {facts.ludwigOnlyCount > 0 ? `, ${facts.ludwigOnlyCount} nur in Ludwig` : ""}
     </span>,
   ]);

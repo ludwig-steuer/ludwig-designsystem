@@ -780,3 +780,24 @@ bemessen; `1.234.567,89 CHF` misst 121,2 px und ragte in die Rinne. Jetzt
 Spurbreiten, eine Währung weiter.
 
 **M5 und M7 bleiben Vermerk**, wie vereinbart.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-70 ist erledigt** (App-Commit `3048389d`): `ExpectationRow` liegt in
+`accounting-cases/domain/expectation.ts` und wird gespiegelt. `ExpectationVM`
+ist damit kein Nachbau mehr, sondern `Partial<ExpectationRow>` plus die fünf
+Felder, ohne die Chip und Zeile nicht zeichnen können.
+
+Ein Feld bleibt lokal: **`resolvedAt`**. Die Spalte `resolved_at` gibt es, und
+`expectation-core.ts` schreibt sie — das gehobene Modell trägt sie nicht. Das
+steht als **L-205** im Register; bis dahin ist es das einzige Feld dieses Typs,
+das nicht aus dem Spiegel kommt, und es ist als solches markiert.
+
+Der Datensatz heißt drüben `ExpectationRow` und hier ist `ExpectationRow` die
+Komponente. Der Import kommt deshalb unter dem Namen der Sache herein
+(`ExpectationRow as Expectation`) — nicht umbenannt, nur eingeführt.
+
+**Der Typtausch kam nach der letzten Abnahme.** Er ist typgeprüft
+(`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
+Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
+schreibt. Eine kurze Bestätigung steht aus.

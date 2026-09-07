@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { DATEV_MAX_BELEGFELD1 } from "@/ludwig/core/datev/field-limits";
 import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain/document-number";
 import { ActionIcon } from "../../Icons";
 import { IconButton } from "../../primitives/IconButton";
@@ -22,8 +23,13 @@ import type { DocumentNumberSourceLabels } from "./document-number-labels";
  * justified.
  */
 
-/** DATEV's field limit for Belegfeld 1 (`core/datev/belegfeld.ts`). */
-export const DATEV_MAX_BELEGFELD1 = 36;
+/**
+ * DATEV's field limit for Belegfeld 1 — **the app's number**, re-exported so
+ * the callers of this family keep their import. It stood here as a literal
+ * until 2026-09-07, because over there it was a `.max(36)` on four Zod schemas
+ * and a number in a comment (finding L-71); `362325b2` gave it a place.
+ */
+export { DATEV_MAX_BELEGFELD1 };
 
 /**
  * @when    Belegfeld 1 is entered — in the entry editor, in a correction.

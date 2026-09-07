@@ -2,6 +2,9 @@ import {
   expectationMaturity,
   type ExpectationKind,
 } from "@/ludwig/modules/accounting-cases/domain/case";
+// The record is `ExpectationRow` over there and a component here, so it comes
+// in under the name the glossary uses for the thing itself.
+import type { ExpectationRow as Expectation } from "@/ludwig/modules/accounting-cases/domain/expectation";
 import type { Currency } from "@/ludwig/shared/money";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { AmountCell } from "../../primitives/Cells";
@@ -24,30 +27,30 @@ import { Time } from "../../primitives/Time";
  */
 
 /**
- * One expectation, as far as chip and row show it.
+ * One expectation, as far as chip and row show it — **from the mirror**.
  *
- * Structurally the app's `ExpectationRow`
- * (`accounting-cases/application/expectation-core.ts`) — **copied, not
- * invented**. It is not mirrored because it lives in `application/` instead of
- * `domain/`; that is register entry **L-70**, and when it moves this
- * definition goes away.
+ * Until 2026-09-07 this was a copy: the record sat in `application/` and could
+ * not be mirrored (finding L-70). The app moved it to `domain/expectation.ts`
+ * with `3048389d`, so the fields come from there now. What stays is the
+ * selection: five fields are required, because chip and row cannot draw
+ * without them, and the rest is optional because a caller shows what it has.
+ *
+ * `resolvedAt` is **not** in the record. The column exists (`resolved_at`, and
+ * `expectation-core.ts` writes it), the lifted model does not carry it —
+ * finding **L-205**. Until then it stays here, and it is the one field of this
+ * type that is not the mirror's.
  */
-export interface ExpectationVM {
+export interface ExpectationVM extends Partial<Expectation> {
   id: string;
   kind: ExpectationKind;
   /** The due date, `YYYY-MM-DD`. Always set — every expectation has one. */
   dueDate: string;
   /** How often a run has escalated it. **Never** a DATEV dunning level. */
   escalationLevel: number;
-  /** Set as soon as the document arrived or the payment came in. */
-  resolvedAt?: string | null;
   /** Who fetches it (F125): `client` says „Nachforderung", `accounting` „Erwartung". */
   audience: "client" | "accounting";
-  expectedDocumentKind?: string | null;
-  expectedCounterpartyName?: string | null;
-  expectedAmount?: number | null;
-  /** One sentence of context that does not fit the fields. */
-  note?: string | null;
+  /** Set as soon as the document arrived or the payment came in (L-205). */
+  resolvedAt?: string | null;
 }
 
 /** „Nachforderung" when the client fetches it, „Erwartung" when the office does. */

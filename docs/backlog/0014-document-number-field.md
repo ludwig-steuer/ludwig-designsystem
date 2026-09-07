@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/document-number/` |
 | Klassen-Test | nein — Belegfeld 1 ist eine DATEV-Ausnahme, die Rangordnung der Quellen ist Buchhaltungslogik |
@@ -701,3 +701,34 @@ zurückgekommen, obwohl derselbe Mangel eine Runde zuvor behoben war; einer
 behauptete zudem „sie kürzt hier", was zu dem Zeitpunkt nicht stimmte. Alle
 drei sind Englisch, und der falsche Satz sagt jetzt, **wo** gekürzt wird und
 dass es zwei Grenzen braucht.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-71 ist erledigt** (App-Commit `362325b2`), und damit fallen zwei Stellen
+weg, vor denen der Nachtrag gewarnt hat:
+
+- **`DATEV_MAX_BELEGFELD1` kommt aus `core/datev/field-limits.ts`.** Die 36
+  stand hier als Literal, weil sie drüben nur als `.max(36)` an vier
+  Zod-Schemata und als Zahl in einem Kommentar existierte. Der Export bleibt,
+  damit die Aufrufer ihren Import behalten — die Zahl ist jetzt die der App.
+- **`sourceLabel` und `stateLabel` sind Überschreibungen geworden.** Die Wörter
+  der Quelle stehen in der Registry-Achse `belegnummer_quelle`, die des
+  Zustands als `DOCUMENT_NUMBER_STATE_LABEL` in der Domäne; das Register liest
+  beide selbst. Wären die Props Pflicht geblieben, hätte jeder Aufrufer eine
+  zweite Wahrheit mitgebracht — genau davor warnte die Abnahme dieser Runde.
+
+Dazu der eine Punkt zum Nachziehen aus der vierten Abnahme: **`Edge` zeigt den
+engen Fall jetzt selbst.** Die Story maß 372 px, und der 96-px-Fall — die Spur,
+die Belegfeld 1 im Buchungsraster hat — war nur in der Story einer anderen
+Aufgabe zu sehen. Genau in dieser Lücke saß der Blocker in Runde 2, 3 und 4.
+Die Story trägt ihn jetzt als dritten Fall, mit einer 36-stelligen Nummer ohne
+Trennzeichen.
+
+Der zweite Punkt der Abnahme (bei 36 Zeichen ist im Editor weder Nummer noch
+Quelle lesbar) gehört zu **0015** — dort wird über die Breite der Spur
+entschieden, nicht hier.
+
+**Der Typtausch kam nach der letzten Abnahme.** Er ist typgeprüft
+(`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
+Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
+schreibt. Eine kurze Bestätigung steht aus.

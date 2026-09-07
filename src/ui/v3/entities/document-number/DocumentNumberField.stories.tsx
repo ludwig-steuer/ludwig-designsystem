@@ -122,8 +122,9 @@ export const Interactive: Story = {
 
 /**
  * Rand: 36 Zeichen erreicht — das Feld **hält**, statt still abzuschneiden.
- * Darunter eine sehr lange dominante Nummer: der Hinweis bricht um, das
- * Layout nicht.
+ * Darunter dieselbe sehr lange dominante Nummer zweimal: in 420 px bricht
+ * der Hinweis um, in **96 px** — der Spur des Buchungsrasters — kürzt er.
+ * Das Layout hält in beiden Fällen.
  */
 export const Edge: Story = {
   render: function Render() {
@@ -144,6 +145,25 @@ export const Edge: Story = {
             }}
             sourceLabel={SOURCE_LABEL}
           />
+        </Field>
+        {/* Derselbe Fall in **96 px** — der Spur, die Belegfeld 1 im
+            Buchungsraster hat. Genau hier riss das Layout dreimal, und
+            geprüft wurde es jedes Mal in der Story einer anderen Aufgabe;
+            der Baustein trägt seinen engen Fall jetzt selbst (Abnahme
+            2026-09-07, vierte Runde). */}
+        <Field label="Dieselbe Nummer in der Spur des Rasters" htmlFor="b10">
+          <div style={{ width: 96 }}>
+            <DocumentNumberField
+              id="b10"
+              value="RE-1"
+              onChange={() => {}}
+              dominant={{
+                ...DOMINANT,
+                documentNumber: "RE20260140TEILRECHNUNG2VON3XXYYZZ123",
+              }}
+              sourceLabel={SOURCE_LABEL}
+            />
+          </div>
         </Field>
       </div>
     );
