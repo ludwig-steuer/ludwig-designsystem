@@ -103,7 +103,11 @@ export function DocumentNumberRegister({
             value={query ?? ""}
             onChange={(e) => {
               onQueryChange(e.target.value);
-              setActive(0);
+              // `-1`, nicht `0`: beim Tippen steht der Fokus in der Suche, und
+              // eine gefärbte Zeile ohne Fokus ist ein Zustand ohne Bedeutung
+              // (V7). Mit `0` sprang das erste ↓ danach auf Zeile **zwei** und
+              // übersprang die dominanteste (Wiederabnahme 0014, M3).
+              setActive(-1);
             }}
             placeholder="Nummer, Konto oder Sachverhalt"
             aria-label="Register durchsuchen"

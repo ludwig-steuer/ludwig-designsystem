@@ -98,7 +98,12 @@ const BANK: AccountFactsVM = {
   ...FACTS,
   accountNumber: "1210",
   accountName: "Bank Commerzbank",
-  role: "bank",
+  // `general_ledger`, nicht „bank": die Achse `konto_typ` kennt nur
+  // general_ledger | creditor | debtor | revenue | other, und `role: string`
+  // lässt einen Rohwert durch den Typecheck — im Bild stand zweimal das
+  // englische „bank" (Wiederabnahme 0063). Die Kontoart des Bankkontos ist
+  // die SKR-Klasse daneben.
+  role: "general_ledger",
   skrClassLabel: "Finanz- und Privatkonten",
   datevBalance: -184_221.55,
   datevCount: 3400,
@@ -202,6 +207,27 @@ function Summary({ facts }: { facts: AccountFactsVM }) {
   );
 }
 
+/** Rang 3 — der Verlauf. Steht in `Filled` und in `InUse`, damit das
+ *  Höhen-Kriterium auch dort messbar ist, wo die Ansicht wirklich steht. */
+function Chart() {
+  return (
+    <Card>
+      <CardHead title="Verlauf 2026" sub="Soll und Haben je Monat" />
+      <div style={{ padding: "var(--space-4)" }}>
+        <BarChart
+          bars={MONTHS}
+          layout="grouped"
+          format={(v) => formatAmount(v, "EUR")}
+          highlight="Aug"
+          primaryLabel="Soll"
+          secondaryLabel="Haben"
+          ariaLabel="Soll und Haben je Monat 2026"
+        />
+      </div>
+    </Card>
+  );
+}
+
 function Movements({ entries }: { entries: AccountEntry[] }) {
   // **Ohne „Stapel".** Der volle Satz ist für eine Seite ohne Randspalte
   // gedacht; hier nimmt `aside` 440 px, und gemessen lag der Zustands-Chip
@@ -247,22 +273,7 @@ export const Filled: Story = {
         pager={PAGER}
         header={<Head facts={FACTS} />}
         summary={<Summary facts={FACTS} />}
-        chart={
-          <Card>
-            <CardHead title="Verlauf 2026" sub="Soll und Haben je Monat" />
-            <div style={{ padding: "var(--space-4)" }}>
-              <BarChart
-                bars={MONTHS}
-                layout="grouped"
-                format={(v) => formatAmount(v, "EUR")}
-                highlight="Aug"
-                primaryLabel="Soll"
-                secondaryLabel="Haben"
-                ariaLabel="Soll und Haben je Monat 2026"
-              />
-            </div>
-          </Card>
-        }
+        chart={<Chart />}
         tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
         aside={<AccountFacts facts={FACTS} />}
       >
@@ -421,6 +432,7 @@ export const InUse: Story = {
         pager={PAGER}
         header={<Head facts={FACTS} />}
         summary={<Summary facts={FACTS} />}
+        chart={<Chart />}
         tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
         aside={<AccountFacts facts={FACTS} />}
       >

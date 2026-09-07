@@ -105,8 +105,18 @@ export function DocumentNumberField({
       {/* The limit says so instead of cutting silently: a number that loses its
           tail is invisible until DATEV fails to settle it. */}
       {atLimit ? (
-        <p className="v2dnf__limit">
-          {maxLength} Zeichen — mehr trägt Belegfeld 1 in DATEV nicht.
+        <p
+          className="v2dnf__limit"
+          title={`${maxLength} Zeichen — mehr trägt Belegfeld 1 in DATEV nicht.`}
+        >
+          {/* Schmal bleibt die Zahl, der Satz geht in den `title` — im Editor
+              ist das Feld 96 px breit, und der ganze Satz wurde dort vier
+              Zeilen hoch (Wiederabnahme 0014). Dieselbe Regel wie beim
+              Hinweis darunter. */}
+          <span className="v2dnf__wide">{maxLength} Zeichen — mehr trägt Belegfeld 1 in DATEV nicht.</span>
+          <span className="v2dnf__narrow" aria-hidden="true">
+            {maxLength}/{maxLength}
+          </span>
         </p>
       ) : null}
       {diverging ? (
@@ -122,7 +132,9 @@ export function DocumentNumberField({
               in the `title`, so nothing is lost, it is only shorter. */}
           <span className="v2dnf__wide">Für diesen Vorgang gilt </span>
           <TextButton onClick={() => onChange(dominant.documentNumber)}>
-            {dominant.documentNumber}
+            {/* Eine 36-stellige Nummer bricht in 96 px auf vier Zeilen; sie
+                kürzt hier und steht vollständig im `title` des Absatzes. */}
+            <span className="v2dnf__num">{dominant.documentNumber}</span>
           </TextButton>{" "}
           <span className="v2dnf__src v2dnf__wide">({sourceLabel[dominant.source]})</span>
           {/* Only DATEV sources are immutable, and only there is the sentence

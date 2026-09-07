@@ -2994,15 +2994,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 /* Wird die Karte breiter als ihr Platz, scrollt sie in sich — nie die Seite. */
 .v2fsm__scroll { overflow-x: auto; padding: 26px 2px; }
-/* **Links 36 px Vorlauf im Raster selbst**, nicht als Polster am Behälter:
-   ein Rückweg in die erste Spalte greift mit seinem Bogen bis x = −30 aus,
+/* **Links 16 px Vorlauf im Raster selbst**, nicht als Polster am Behälter:
+   ein Rückweg in die erste Spalte greift bis x = −12 aus (−12,75 mit Strich),
    und was links der Inhaltskante liegt, wird geschnitten und ist auch nicht
    zu erreichen — Polster am Behälter verschiebt nur den Inhalt, nicht die
    Zeichenfläche. Gemessen vorher: 166 von 466 px eines Pfades unsichtbar
    (35,7 %), und was blieb, war eine Pfeilspitze links neben „bereit", zu der
    keine Linie führte (Abnahme 0069, dritte Runde). Der Vorlauf gehört zum
    scrollbaren Inhalt, ist also bei jeder Kartenbreite erreichbar. */
-.v2fsm__grid { position: relative; display: grid; margin-left: 36px; }
+.v2fsm__grid { position: relative; display: grid; margin-left: 16px; }
 /* Die Kanten liegen unter den Boxen: ein Pfeil, der über einem Wort endet,
    sähe aus, als zeigte er auf den Rand statt auf den Zustand. */
 .v2fsm__edges { position: absolute; inset: 0; overflow: visible; z-index: 0; }
@@ -3364,9 +3364,26 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    diese Zeile läuft sie waagerecht aus der Spalte. */
 .v2dnf__hint,
 .v2dnf__limit { overflow-wrap: anywhere; }
-/* Schmal bleibt die Nummer, der erklärende Satz geht in den `title`. */
+/* Schmal bleibt die Nummer, der erklärende Satz geht in den `title`. Die
+   Kurzform steht **daneben**, nicht anstelle: `display: none` nähme sie auch
+   der Vorlesehilfe, und dann bliebe ein Knopf ohne Wort (Wiederabnahme 0014,
+   M2). Deshalb wandert der lange Satz aus dem Bild statt aus dem Baum. */
+.v2dnf__narrow { display: none; }
 @container dnf (max-width: 240px) {
-  .v2dnf__wide { display: none; }
+  .v2dnf__wide {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0; border: 0;
+    overflow: hidden; clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .v2dnf__narrow { display: inline; }
+  /* Eine 36-stellige Nummer ohne Trennzeichen bricht sonst auf vier Zeilen. */
+  .v2dnf__num {
+    display: inline-block; max-width: 100%;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    vertical-align: bottom;
+  }
 }
 .v2dnf__src { color: var(--color-text-subtle); }
 .v2dnr { display: grid; gap: var(--space-4); }

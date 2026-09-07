@@ -1,0 +1,5 @@
+`.storybook/main.ts` verlangt `../public` als statisches Verzeichnis. Der
+Ordner war leer und **nicht in git** — ein frischer Klon hatte ihn nicht, und
+`pnpm build` brach mit „Failed to load static files, no such directory" ab.
+Diese Datei hält ihn im Repo. Wer echte statische Dateien braucht, legt sie
+daneben; wer `staticDirs` ändert, darf sie löschen.

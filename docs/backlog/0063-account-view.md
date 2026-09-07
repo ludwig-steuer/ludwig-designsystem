@@ -590,3 +590,233 @@ Für diese Aufgabe ändert sich am Ergebnis nichts: gemessen in der `AppShell`
 steht die Liste bei 1280 untereinander (volle 976 px, sieben von sieben
 Spalten sichtbar) und bei 1440 nebeneinander (440 / 676, ebenfalls sieben von
 sieben).
+
+## Wiederabnahme 2026-09-07 (dritte Runde, fremde Abnahme)
+
+**Urteil: zurück.** Die drei Blocker der zweiten Runde sind behoben und in der
+Wirkung nachgemessen — die Haben-Spalte steht bei jeder gemessenen Breite im
+Bild, die Story „im Einsatz" existiert, und die zwei Stories nennen wieder die
+Zahlen ihres eigenen Kontos. Blockierend sind zwei andere Punkte, beide aus
+der Nacharbeit selbst: die neue Story `InUse` lässt **Rang 3** weg — womit das
+Layout-Kriterium weiter nur die Fixture misst —, und die Rand-Story zeigt eine
+**Kontoart, die es im Bestand nicht gibt**. Der dritte Punkt, den diese
+Abnahme gesucht und gefunden hat, ist die Nebenwirkung des Griffs an
+`MasterDetail` auf `CaseDetailView`; er ist während der Abnahme mit `01ebb7c`
+gefallen und unten trotzdem protokolliert, weil er aus dieser Aufgabe kam.
+
+Der Rahmen selbst (`LedgerAccountView.tsx`) bleibt wie in den zwei Runden
+zuvor unangetastet.
+
+Gemessen am laufenden Dev-Server `http://localhost:6107` (Quelle, nicht
+`storybook-static`), CDP über Playwright, `getBoundingClientRect` und
+`getComputedStyle` am gerenderten Bild, Fenster 1280 und 1440 × 900, Stand
+`ed6e79a`. Während der Abnahme lag eine **fremde, ungestagte** Änderung an
+`MasterDetail` im Baum; sie ist unten getrennt vermerkt und, wo sie die Zahlen
+ändert, eigens gemessen.
+
+### Behoben, gemessen
+
+- **M2 (Spaltensatz).** `Filled` bei 1280: `.v2md` `440px 780px`, sichtbare
+  Fläche 481–1259, **7 von 7** Spalten (Datum · Zeichen · Beleg ·
+  Buchungstext · Gegenkonto · Soll · Haben), `scrollWidth − clientWidth = 0`.
+  Bei 1440: `440px 940px`, Fläche 481–1419, 7/7. `InUse` bei 1440: `.v2lav`
+  1136 px, `.v2md` `440px 676px`, Fläche 733–1407, 7/7, kein Querlauf.
+  `Edges` bei beiden Breiten 7/7, `WithoutFacts` 1238 bzw. 1398 px Fläche,
+  7/7. Die Haben-Spalte steht überall im Bild.
+- **M1 (Story im Einsatz).** `InUse` in der `AppShell` ist da; `.v2lav` misst
+  976 px (Fenster 1280) und 1136 px (1440) — die Breite der Seite, nicht die
+  1.400 der Fixture. Sieben Story-Exporte, die Zählung geht auf.
+  Einschränkung: Mangel 2.
+- **M3 (zwei Konten auf einem Bildschirm).** `Edges`, Kopf „1210 Bank
+  Commerzbank": Saldo in DATEV −184.221,55 €, Σ Soll / Σ Haben 612.004,20 € /
+  796.225,75 € (Differenz 184.221,55 €, also der Saldo dieses Kontos),
+  SKR-Klasse „Finanz- und Privatkonten"; Kennzahl und Randspalte nennen
+  denselben Saldo. `Empty`, Kopf „4650 Bewirtungskosten": Saldo „—",
+  „0 Buchungen im Spiegel", Σ Soll / Σ Haben 0,00 € / 0,00 €, letzte Buchung
+  „—", Liste „Auf diesem Konto ist im Jahr 2026 nichts gebucht." Kein
+  Selbstwiderspruch mehr.
+- **M4 (gedämpfte Zeile in `Edges`).** Zeile „Schreibwaren Süd" trägt
+  `v2tbl__row v2ae__row--draft` und `rgb(92,92,92)`, die drei anderen
+  `rgb(45,45,45)` — dasselbe Bild wie in `Filled`.
+- **Rang 5, vier Klassen** (`Filled`, 1280 **und** 1440): `datev` kein
+  Zeichen · `mirrored` Zeichen · `exported` Zeichen + Chip „Exportiert"
+  (x 820,8–893 bei 1280, 897,1–969,3 bei 1440; sichtbare Fläche 481–1259 bzw.
+  481–1419) · `ludwig` Zeichen + gedämpfte Zeile. Vier unterscheidbare
+  Klassen, alles im Bild.
+- **Rang 2.** Eine führende Zahl: `v2kpi__val` 19 px / 600 („18.442,19 €"),
+  das Delta in `v2kpi__sub` 11,5 px („47 Buchungen · + 3 nur in Ludwig
+  (612,40 €)"). Die zweite Kachel trägt ein Datum, keine zweite Zahl.
+- **Rang 3.** 12 Balken und 12 Achsenmarken — das ganze Jahr.
+- **`WithoutFacts`.** Kein `.v2md`; drei Slots: `v2lav__head` 20–106,6 ·
+  `v2lav__sum` 126,6–249 · `v2lav__body` 269–563,5, Abstände durchgehend
+  20 px, keine leere Zeile.
+- **Fest.** `pnpm typecheck` grün · `pnpm build` grün · `pnpm check:icons`
+  grün (53 Zeichen, 2 Dateien offen — vorbestehend) · Slots nur `ReactNode` ·
+  kein `useState`, kein `await`, kein Modul-Import, kein Hex · keine
+  Saldospalte im Satz · **eine** Bewegungsliste · Barrel `index.ts:415`.
+
+### Mängel
+
+**1. Die Untergrenze an `MasterDetail` kippte `CaseDetailView` zwischen 1280
+und rund 1.416 px Fensterbreite. — während der Abnahme behoben (`01ebb7c`),
+darum nicht mehr blockierend; hier festgehalten, weil er aus dieser Aufgabe
+kam**
+
+*Kriterium:* Eine Änderung am Set darf nichts umwerfen, das stand; 0050
+„Verhalten" verlangt zweispaltig, sobald `aside` gesetzt ist, und seine
+Entscheidung 2 verlangt ausdrücklich **keine** Schwelle im Baustein. Die
+Nacharbeit hat eine feste Schwelle (Container-Abfrage, 1.080 px) aus dem
+Bedarf **dieser** Aufgabe in einen Baustein geschrieben, den 0050 mitbenutzt.
+
+*Messung:* `CaseDetailView · In Use` in der `AppShell`, Stand `ed6e79a`, gegen
+dieselbe Story mit der Regel von vor `ed6e79a` (per injiziertem Stylesheet
+zurückgesetzt), × 900:
+
+| Fenster | Inhaltsbreite | jetzt | vorher | Unterkante jetzt / vorher |
+|---|---|---|---|---|
+| 1280 | 944 | **eine Spalte** 944 | 440 / 484 | 1059,6 / 836,8 |
+| 1320 | 984 | **eine Spalte** 984 | 440 / 524 | 1059,6 / 815,9 |
+| 1384 | 1048 | **eine Spalte** 1048 | 440 / 588 | 1038,6 / 815,9 |
+| 1440 | 1104 | 440 / 644 | 440 / 644 | 795 / 795 |
+
+Wirkung bei 1280: der Strang steht 944 px breit **über** den Fakten, die
+Fakten-Karte beginnt bei y = 728,6, und die Seite scrollt, wo sie vorher auf
+900 px Höhe hineinpasste. Die Wiederabnahme von 0050 hat denselben Befund
+unabhängig gemessen und blockiert daran.
+
+*Erledigt, gemessen:* Während dieser Abnahme ist `01ebb7c` gelandet — die
+Schwelle gehört jetzt dem Aufrufer (Flex-Sockel `--v2md-min`, Prop
+`minDetail`, Vorgabe 620; `CaseDetailView` gibt 484, weil rechts Fakten
+stehen und keine Tabelle). An diesem Stand nachgemessen steht
+`CaseDetailView · In Use` bei 1280 wieder auf 440 / 484 (Unterkante 836,8)
+und bei 1440 auf 440 / 644; 0063 misst unverändert 7/7 Spalten in `Filled`,
+`Edges` und `InUse` (1440: `440px 676px`, Fläche 733–1407, kein Querlauf).
+Der Griff dieser Aufgabe war also richtig gedacht und an der falschen Stelle
+festgeschrieben: eine Zahl aus 0063 in einem Baustein, den 0050 mitbenutzt.
+Was bleibt, ist Mangel 4 — die Reihenfolge beim Umbruch.
+
+**2. `InUse` lässt Rang 3 weg; das Layout-Kriterium misst weiter die Fixture.
+— blockierend**
+
+*Kriterium:* „Ränge 1–3 stehen bei 1440 × 900 ohne Scrollen (gemessen)" —
+zusammen mit der Hausregel, die die letzte Runde durchgesetzt hat: ein
+Layout-Kriterium, das nur im Story-Rahmen gemessen wird, misst die Fixture.
+
+*Messung:* In `InUse` gibt es bei beiden Breiten **kein** `.v2lav__chart`. Die
+Slots dort (1440): `pager` 88–116 · `head` 136–222,6 · `sum` 242,6–365 ·
+`tabs` 385–427,9. Rang 3 kommt in der einzigen Story mit Seitenbreite also gar
+nicht vor; nachweisbar ist er weiter nur im Story-Rahmen (`Filled` bei 1440:
+`chart` 317–537,5). Die Story wurde angelegt, um genau diese Blindheit zu
+beenden, und trägt das Element nicht, um das es geht.
+
+*Vorschlag:* dieselbe `Card` mit `BarChart` wie in `Filled` auch in `InUse`,
+danach die zwei Layout-Kriterien dort nachmessen.
+
+**3. `Edges` zeigt eine Kontoart, die der Bestand nicht kennt. — blockierend**
+
+*Kriterium:* fest „keine lokale Label-Map" — das Wort auf der Marke kommt aus
+der Status-Registry — und die Story-Tabelle (`Edges` ist das Bankkonto).
+
+*Messung:* `BANK` setzt seit `ed6e79a` `role: "bank"`. Die Achse `konto_typ`
+(`client_ledger_accounts.accounting_role`, `ACCOUNT_TYPES` in
+`modules/accounts/domain/account.ts`) kennt nur `general_ledger`, `creditor`,
+`debtor`, `revenue`, `other`; `resolveStatus` fällt auf den Rohwert zurück.
+In `Edges` steht darum zweimal **„bank"**: als Marke neben „1210 Bank
+Commerzbank" im Kopf und als Wert der Zeile „Kontoart" in der Randspalte —
+ein englischer Rohschlüssel in deutscher Oberfläche und ein Wert, den es nicht
+gibt. `AccountFactsVM.role` ist `string`, deshalb greift der typecheck nicht.
+
+*Vorschlag:* `role: "general_ledger"` — ein Bankkonto ist im Kontenplan ein
+Sachkonto; die SKR-Klasse „Finanz- und Privatkonten" sagt bereits, was es ist.
+Fehlt die Rolle im Bestand wirklich, ist das ein Befund an `ludwig/app`, kein
+erfundener Wert in einer Story.
+
+**4. Beim Umbruch steht die Randspalte über der Arbeitsfläche. — nicht
+blockierend**
+
+*Kriterium:* Zweifel 4 des Seitenprofils, den der Rahmen in seinem eigenen
+Kommentar zitiert („ein Block Feldzeilen über den Bewegungen schiebt die
+Antwort unter die Falz").
+
+*Messung:* `InUse` bei 1280 (Inhaltsbreite 976, eine Spalte): `AccountFacts`
+485,1–702,7 · Karte „Bewegungen" ab 722,7 · Spaltenköpfe 794–832,4 · erste
+Zeile 832,4–879,5, zweite 879,5–925,4. Auf 900 px Höhe bleibt **eine** Zeile
+des Kontoauszugs — unter `ed6e79a` wie unter `01ebb7c` dieselben Werte. Bei
+976 px passen 440 + 620 nicht nebeneinander, der Umbruch
+ist also richtig — falsch ist nur die Reihenfolge.
+
+*Vorschlag:* gehört zu `MasterDetail`: beim Umbruch die Arbeitsfläche zuerst
+(Detail vor Liste im DOM, `order` für den Nebeneinander-Fall). 0050 hat
+dasselbe Bild seitenverkehrt und wird davon mitgetragen.
+
+**5. Der volle Spaltensatz kommt in keiner Story dieser Aufgabe mehr vor. —
+nicht blockierend**
+
+*Kriterium:* die Slot-Tabelle („`children` … `accountEntryColumns({ variant:
+"full" })`") und der Satz der Nacharbeit: „Buchungszustand, Stapel und DATEV
+gehören in den vollen Satz, den die Ansicht **ohne** Strang zeigt."
+
+*Messung:* `grep 'variant: "full"'` trifft im ganzen Set nur noch
+`AccountEntries.stories.tsx` (0067). Auch `WithoutFacts` — die Story **ohne**
+Strang — fährt `compact` (7 Spalten, Fläche 1238 px bei 1280 und 1398 px bei
+1440, also Platz für mehr). Der Satz beschreibt damit etwas, das keine Story
+zeigt, und die Slot-Tabelle nennt weiter `full`.
+
+*Vorschlag:* eins von beidem — `WithoutFacts` den vollen Satz geben, oder Satz
+und Slot-Zeile auf `compact` umschreiben. Nicht beides offen lassen.
+
+### Befunde am Set (nicht an dieser Aufgabe)
+
+- **`MasterDetail`, feste Schwelle.** Siehe Mängel 1 und 4. Die 1.080 px waren
+  eine Zahl aus 0063 in einem Baustein, den 0050 mitbenutzt; `01ebb7c` gibt
+  sie dem Aufrufer zurück (`minDetail`). Der Nachweis dafür gehört zu 0050,
+  nicht hierher — dort blockiert derselbe Befund als M4.
+- **`MasterDetail`, `style` im `detailBreit`-Zweig** (Stand `ed6e79a`): der
+  Stil landete am neuen Wrapper `.v2mdw` statt am Raster `.v2md`, während der
+  andere Zweig ihn weiter am Raster setzt. Heute folgenlos — beide Aufrufer
+  geben kein `style` —, aber ein stiller Unterschied zwischen zwei Zweigen
+  desselben Bausteins. Mit `01ebb7c` ist der Wrapper wieder weg.
+- **`DataTable.rowClassName` heißt nach der falschen Familie.** Unverändert
+  aus der letzten Runde: die einzige Regel ist
+  `.v2tbl__row.v2ae__row--draft` (`v3.css:2732`). Gehört zu 0057.
+- **Alter Name in zwei fremden Dateien.** `0066-account-cell-facts.md` und
+  `0067-account-entries.md` verlinken 0063 weiter als `AccountView`.
+
+Abgenommen von / am: Claude (fremde Abnahme, hat nicht gebaut), 2026-09-07 ·
+**Urteil: zurück** — die Mängel **2 und 3 blockieren**; 1 ist während der
+Abnahme gefallen (`01ebb7c`), 4 und 5 blockieren nicht.
+
+## Nach der dritten Abnahme (2026-09-07): zwei Blocker, beide in den Stories
+
+**M2 erledigt — `InUse` ließ Rang 3 weg.** Die Story, die es überhaupt erst
+möglich macht, das Höhen-Kriterium an der richtigen Stelle zu messen, zeigte
+den Verlauf nicht; damit war „Ränge 1–3 bei 1440 × 900 ohne Scrollen" weiter
+nur im Story-Rahmen belegbar — genau die Blindheit, gegen die die Story
+angelegt wurde. Das Diagramm ist jetzt ein gemeinsamer Baustein (`Chart`), den
+`Filled` **und** `InUse` rendern. Gemessen in der `AppShell` bei 1440 × 900:
+Verlauf von y = 385 bis 606, Dokumenthöhe 900 — **kein Scrollen**.
+
+**M3 erledigt — `Edges` zeigte eine Kontoart, die es nicht gibt.** Die Fixture
+setzte `role: "bank"`; die Achse `konto_typ` kennt nur `general_ledger`,
+`creditor`, `debtor`, `revenue` und `other`, also fiel `resolveStatus` auf den
+Rohwert zurück und im Bild stand zweimal das englische „bank". Dass `role`
+als `string` typisiert ist, ließ es durch den Typecheck. Jetzt
+`general_ledger`; gemessen: **null** Rohwerte, „Kontoart · Sachkonto". Die
+Kontoart eines Bankkontos steht in der SKR-Klasse daneben.
+
+**Mangel 1 der Abnahme hat sich während der Abnahme erledigt:** die feste
+1.080-px-Schwelle, die aus dieser Aufgabe kam, hat `CaseDetailView` gekippt —
+behoben mit `01ebb7c`, seitdem gehört die Schwelle dem Aufrufer (`minDetail`).
+Der Nachweis steht in 0050.
+
+**Zwei Punkte bleiben, beide mit Adresse:**
+
+- **Beim Umbruch steht die Randspalte über der Arbeitsfläche** (bei 1280 in
+  der `AppShell`: Fakten 485–703, Liste ab 723). Der Umbruch ist richtig, die
+  **Reihenfolge** nicht — wer die Bewegungen sucht, scrollt erst an den Fakten
+  vorbei. Das gehört `MasterDetail`: dort entscheidet sich, welche Hälfte im
+  Umbruch oben steht.
+- **Der volle Spaltensatz kommt in keiner Story mehr vor.** Die Slot-Tabelle
+  behauptet ihn für „ohne Strang", `WithoutFacts` fährt aber ebenfalls
+  `compact`. Entweder bekommt `WithoutFacts` den vollen Satz — dort ist Platz
+  dafür —, oder die Tabelle sagt, dass es ihn in dieser Ansicht nicht gibt.

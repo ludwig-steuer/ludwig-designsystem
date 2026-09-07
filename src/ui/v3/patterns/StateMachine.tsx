@@ -65,10 +65,12 @@ interface Box {
  * second acceptance of 0069).
  */
 const COL = 150;
-// Zwei Zeilen Beschriftung (2 × 19) plus die Wertzeile (15) plus Innenabstand
-// (2 × 8) und die Ränder = **72**, die Höhe der Box; die Zeile lässt darüber
-// hinaus 20 für die Bögen darunter. (Die Rechnung stand bis 2026-09-07 mit
-// „= 60" hier und passte damit zu keiner gemessenen Box.)
+// **72** ist die Höhe der Box — gemessen an allen 44 Boxen der sechs Stories,
+// nicht gerechnet: zwei Zeilen Beschriftung messen 19,375 px, die Wertzeile
+// 17,81, dazu Innenabstand und Ränder. Eine Summe hinzuschreiben hieße, sie
+// bei der nächsten Schriftstufe still falsch werden zu lassen; sie stand hier
+// zweimal falsch (60, dann 71). Die Zeile lässt über der Box weitere 20 px für
+// die Bögen darunter.
 const ROW = 92;
 const BOX_W = 126;
 const BOX_H = 72;

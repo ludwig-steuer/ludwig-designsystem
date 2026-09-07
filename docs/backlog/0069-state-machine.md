@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `patterns/` — Gruppe Prozess, neben `Process` und `Timeline` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, sobald ein Schadenfall Zustände und Übergänge hat, die jemand erklärt haben will |
@@ -921,3 +921,193 @@ liegen bis zu drei Pfade exakt übereinander, und die Unterkante liest sich als
 eine Linie statt als fünf Wege. Das ist ein echter Mangel des Bildes, aber
 kein Kriterium — und die Lösung (je Weg eine eigene Spur) ändert die Geometrie
 aller Kanten. **Eigene Aufgabe.**
+
+## Abnahme (vierte Runde, fremd, 2026-09-07)
+
+Geprüft gegen die Spec und den Code, nicht gegen den Chat. Storybook lief auf
+`localhost:6107`. Gemessen wird die **Wirkung**: die Lage jeder Box aus
+`getBoundingClientRect()`, die Lage jeder Kante aus `getTotalLength()` /
+`getPointAtLength()` — 201 Punkte je Pfad, über `getScreenCTM()` in
+Blattkoordinaten und von dort in die Inhaltskoordinaten des Behälters
+gerechnet. Kein Messwert dieser Runde stammt aus dem Rechteck eines `<path>`
+(das für leere Pfade `0,0,0,0` liefert und deshalb konstant lügt) oder aus
+einem zurückgelesenen Inline-Stil. Werkzeuge im Scratchpad: `ab69e-run.mjs`,
+`ab69e-geom.js`, `ab69e-control.js`, `ab69e-int.mjs`, `ab69e-tab.mjs`,
+`ab69e-key2.mjs`, `ab69e-pop.mjs`, `ab69e-farben.js`, `ab69e-clamp.js`,
+`ab69e-vert.js`, `ab69e-links.js`, `ab69e-scroll.js`, dazu `abn-shot.mjs` und
+`console-check.mjs`.
+
+**Urteil: abgenommen.** Der Rückweg ist da, ganz und erreichbar, und die vier
+Punkte, die in der dritten Runde hielten, halten weiter. Drei Mängel bleiben
+notiert; keiner davon blockiert.
+
+**Die Gegenprobe zuerst — reagiert der Messwert überhaupt?** In `Filled` den
+Vorlauf zur Laufzeit auf `margin-left: 0` gesetzt, gemessen, zurückgesetzt:
+
+| Zustand | geprüfte Punkte | unsichtbar | linkester Punkt (Inhaltskante) |
+|---|---|---|---|
+| wie gebaut | 3.216 | **0** | +26 px |
+| `margin-left: 0` | 3.216 | **72** (alle im Pfad „Durchgang beendet") | −10 px |
+| zurückgesetzt | 3.216 | **0** | +26 px |
+
+Der Messwert folgt dem Layout. Danach alle Stories mit Rückwegen, jeder Pfad
+in 201 Punkten gegen die Inhaltskanten des scrollbaren Behälters:
+
+| Story | Pfade | geprüfte Punkte | unsichtbar | linkester Punkt | oberster / unterster |
+|---|---|---|---|---|---|
+| `Filled` | 16 | 3.216 | **0** | +26 px | 2 / 214 (Behälter 216) |
+| `Edge` | 8 | 1.608 | **0** | +26 px | 2 / 214 |
+| `InUse` | 16 | 3.216 | **0** | +26 px | 2 / 214 |
+| `Branching` | 7 | 1.407 | **0** | +164 px | 2 / 214 |
+| `Explain` | 7 | 1.407 | **0** | +164 px | 2 / 214 |
+| `Sequence` | 5 | 1.005 | **0** | +164 px | 62 / 62 |
+
+Der linkeste Punkt liegt in `Filled`, `Edge` und `InUse` bei **x = −12** im
+Raster (Strich 1,5 px, also −12,75 px Farbe); das Raster beginnt 38 px hinter
+der Inhaltskante (36 px Vorlauf + 2 px Polster). Der Weg zurück in die erste
+Spalte ist damit vollständig gezeichnet und ohne Scrollen sichtbar — im Bild
+`shot-ab69e-…filled.png` läuft er aus „Agent arbeitet" nach links, unten
+herum und mit der Spitze in die linke Kante von „bereit".
+
+**Die vier Punkte, die in der dritten Runde hielten, nachgemessen:** Boxen
+**126 × 72** in `Filled` (11), `Branching` (5), `Explain` (5), `Edge` (6),
+`Sequence` (6) und `InUse` (11) — ausnahmslos; Beschriftungen **100 px** breit
+in jeder dieser Boxen; **null** Kreuzungen (jeder Pfad in 201 Punkten gegen
+jedes Boxenrechteck, 1 px Einzug, Quelle und Ziel ausgenommen) in allen sechs
+Stories; die Hinweiszeile „Reihenfolge nach Registry, Übergänge nicht
+hinterlegt." steht unter `Sequence`. Kein Inhalt ragt mehr aus seiner Box:
+`scrollHeight` = `clientHeight` = 70 an jeder Box, der breiteste DB-Wert misst
+100 px im 100-px-Gleis (`pending_classification` mit Ellipse).
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| **Fest** — `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` → `tsc --noEmit`, keine Ausgabe, Exit 0. `pnpm build` → „Storybook build completed successfully", Exit 0. Dazu `pnpm check:icons` → „in Ordnung. 53 Zeichen in der Registry", Exit 0. `console-check.mjs` über alle sechs Stories: **0** Konsolenmeldungen | ✓ |
+| **Fest** — Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `patterns/StateMachine.tsx` + `StateMachine.stories.tsx`; alle sechs IDs `v3-patterns-prozess-statemachine--{filled,branching,sequence,explain,edge,in-use}` laden und rendern; Titel `v3/Patterns/Prozess/StateMachine` | ✓ |
+| **Fest** — Code englisch; `@when`/`@instead` an jedem Export | Der Block `@when „What are the ways out of this state?"` / `@instead … ProcessStepper (Z7) … Timeline … StatusInfoDialog` steht unmittelbar vor `export function StateMachine` (`:208–213`); der Kopfkommentar (`:10–28`) beschreibt nur. Bezeichner, Typen, JSDoc englisch, Deutsch nur in sichtbaren Strings | ✓ |
+| **Fest** — kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -E "#[0-9a-fA-F]{3,8}"` in TSX und Story: nichts. Keine Label-Map, kein Statustext. `px` nur an den vier Rastermaßen (`:67–74`, `:250–253`) — die in der zweiten Runde begründete Abweichung | ✓ |
+| **Fest** — alle Stories vorhanden; ausgeschlossene Zustände begründet | Sechs Stories, alle sechs ohne Meldung. `Sequence` zeigt sechs Boxen ohne `in_pipeline`; `Empty`/`Loading`/`Error` sind in der Spec mit Grund ausgeschlossen | ✓ |
+| **Fest** — Prüfliste `design-guidelines.md` §9 | Text links (`text-align: start` am Absatz, `left` in der Box), nichts zentriert; Farbe nur an der aktuellen Box und nur als Registry-Ton, immer mit dem Wort „aktuell"; Kanten 3,45:1; Fokusring 2 px sichtbar; Hover färbt; keine Icons, keine Emoji, keine Versalien. Die Beschriftung ist vollständig lesbar oder sauber gekürzt (siehe Label-Zeile) | ✓ |
+| **Fest** — im Browser angesehen | Alle sechs Stories im Iframe geöffnet, fünf als Bild (`shot-ab69e-…{filled,edge,in-use,branching,sequence}.png`), dazu ein Ausschnitt mit einer zur Laufzeit verlängerten Beschriftung (`ab69e-ellipse.png`) und echte Maus- und Tastenanschläge über CDP | ✓ |
+| Label, Ton, Erklärtext und DB-Ort aus `STATUS_REGISTRY`/`AXIS_SOURCE`; kein Statustext in der Datei | `AXIS_SOURCE` kommt aus `./entity-icons` (`:3`), derselben Stelle wie im `StatusInfoDialog`. Gemessen im Popover: `Explain` → Badge „Prüfung nötig", `review_needed`, Registry-Erklärtext, `client_source_docs_invoices.processing_status`; `Edge` → `client_source_docs.status` | ✓ |
+| Ohne `states` Registry-Reihenfolge, mit `states` deren Reihenfolge und Teilmenge | `Branching` ohne `states` → `pending, in_progress, processed, review_needed, failed`; `Filled` mit `states` → `prepared` in Spalte 0, `cancelled` in Spalte 0/Zeile 2; `Sequence` sechs von sieben Keys ohne `in_pipeline` | ✓ |
+| Unbekannte Keys hängen hinten als Rohwert-Box: neutral, `code`-Label, kein Erklärtext | `Edge`: `quarantined` und `on_hold` tragen `v2fsm__state--raw`, Label in `JetBrains Mono`, **kein** zweiter Wert darunter; Popover „Diesen Wert kennt die Registry nicht." mit neutralem Badge. `quarantined` misst Rand `rgb(221,226,232)` = `--color-border`, Fläche weiß | ✓ |
+| Rang = längster Vorwärtspfad; die Spalten von `Filled` und `Branching` wie in der Story-Tabelle | Von Hand gerechnet (`prepared` 0 · `cancelled` 0 · `agent` 1 · `review` 1 · `ready` 2 · `exporting` 3 · `inspection` 4 · `failed` 4 · `confirmed` 5 · `mirrored` 6 · `closed` 7) und mit `getBoundingClientRect()` verglichen: x = 0 · 0 · 150 · 150 · 300 · 450 · 600 · 600 · 750 · 900 · 1050, zweite Zeile bei y = 92. `Branching`: 0 · 150 · 300 · 300 (y = 92) · 450. Beides Punkt für Punkt die Story-Tabelle | ✓ |
+| Vorwärts-Nachbarn durch die Mitte, Sprünge als Bogen oben, Rückwärts als Bogen unten; Pfeilspitze als SVG-`marker`; **kein Pfad kreuzt eine Box** | `Filled`: neun Pfade durch die Mitte, **zwei** oben (`exporting→confirmed` „Quittung", `confirmed→closed` „leerer Diff", oberster Punkt y = 2), **fünf** unten (unterster Punkt y = 214) — zusammen 16. Spitze ist ein `<marker id="v2fsm-arrow">` mit `marker-end`, Füllung `rgb(138,138,138)`, kein Zeichen (T9). Kreuzungen: **0** in allen sechs Stories | ✓ |
+| Das Paar `processed ⇄ review_needed` ergibt zwei getrennte, nicht deckende Pfade | `Branching`: „Revalidierung" als Nachbar-Kante durch die Mitte (Pfadlänge 24 px, y = 62), „Revalidierung (update_invoice_extraction)" als Bogen unten (465,9 px, y bis 214) | ✓ |
+| Selbst-Übergänge werden nicht gezeichnet und stehen im Popover unter „Hinaus durch" | `Edge`: neun Übergänge, **acht** Pfade; das Popover von `pending_classification` listet „Erneut anstoßen · zurück auf sich selbst" unter „Hinaus durch" | ✓ |
+| `label` eines Übergangs steht als `<title>` am Pfad | `Filled` 16 von 16 (von „Aufgreifen (start_agent_run)" bis „Abbruch"), `Branching` 7 von 7, `Edge` 8 von 8 | ✓ |
+| Ohne `transitions`: eine Reihe, gepunktete Verbinder ohne Spitze, Hinweiszeile; Popover ohne Hinein/Hinaus | `Sequence`: sechs Boxen, alle y = 0; fünf Pfade mit gemessenem `stroke-dasharray: 2px, 4px`, **null** `marker-end`, **null** `<marker>` im SVG; darunter die Hinweiszeile; Popover von `needs_clarification` zeigt Badge, `code`, Bedeutung, Quelle — keine Wege | ✓ |
+| `current` tönt genau eine Box im Registry-`kind`, setzt „aktuell" und `aria-current="step"`; ohne `current` keine getönte Box; Kanten neutral | `Filled`/`InUse`: genau eine Box mit `aria-current="step"`, Rand `rgb(140,96,30)` = `--color-warning` `#8C601E`, Fläche `rgb(245,238,224)` = `--color-warning-bg`, Wort „aktuell" sichtbar (Beschriftung 19,4 px hoch). `Edge`: `on_hold` unbekannt → neutral, `rgb(196,204,213)` / `rgb(244,246,248)`. `Branching`: **null** getönte Boxen, alle Ränder `rgb(221,226,232)`. Kanten überall `rgb(138,138,138)` | ✓ |
+| `description` als Absatz über dem Diagramm, linksbündig; ohne Prop kein Absatz und kein Leerraum | `Filled`: `p.v2fsm__lead` ist das erste Kind, `text-align: start`, `max-width: 579 px` (68ch), 12 px Abstand zum Raster. `Branching`: einziges Kind ist `.v2fsm__scroll`, Leerraum oben 0 px; `Sequence`: `.v2fsm__scroll` + `.v2fsm__note`, oben 0 px | ✓ |
+| Klick/Enter/Space öffnet das `Popover` mit Badge, `code`-Wert, Erklärtext, Hinein durch, Hinaus durch, DB-Ort; `Esc` schließt; nur eins offen | Echte Anschläge über CDP (`Explain`): Klick auf „Prüfung nötig" → **1** offenes `.v2pop` mit Badge, `review_needed`, Erklärtext, **Hinein durch** „In Bearbeitung · Pipeline durch, reparierbare Findings" / „Prozessiert · Revalidierung", **Hinaus durch** „Revalidierung (update_invoice_extraction) · Prozessiert", zuletzt `client_source_docs_invoices.processing_status`. Klick auf eine zweite Box → weiterhin genau **1**, `aria-expanded` wandert mit. `Escape` → 0. `Enter` (keyDown mit Text) → 1, `Space` → 1, `Escape` → 0 | ✓ |
+| `Tab` läuft die Boxen in Spaltenordnung ab; jede Box ist ein `<button>` mit Wort; Fokusring sichtbar; Hover färbt | Echte Tab-Anschläge auf frisch geladener Seite (`Explain`): `pending → in_progress → processed → failed → review_needed`, danach aus der Karte heraus — Rang, dann Zeile. Alle Boxen `<button type="button">` mit sichtbarem Wort. Nach dem Anschlag `:focus-visible` = `true`, `outline: 2px solid rgb(59,143,196)`, `outline-offset: 2px`. Hover: `.v2fsm__state:hover { background: var(--color-bg-soft) }` | ✓ |
+| SVG `aria-hidden`; Kanten-Token ≥ 3:1 gegen die Karte, Wert als Kommentar am Token | `aria-hidden="true"` am SVG beider Varianten, am Element gemessen. Kanten `stroke = rgb(138,138,138)` = `--color-border-control` `#8A8A8A`; im Blatt nachgerechnet: **3,45:1** gegen die Kartenfläche `rgb(255,255,255)`, 3,19:1 gegen `#F4F6F8` — beides ≥ 3:1. Der Wert steht als Kommentar an der Regel (`v3.css:3011–3014`) und am Token (`tokens.css:63`) | ✓ |
+| Labels bis zwei Zeilen, darüber `…` mit `title`; Boxen behalten ihre Rastergröße | `title` an jedem Label. Zweizeilige Wörter passen: „freigegeben (Bridge)", „in DATEV angekommen", „Wird eingeordnet", „Einordnung fehlgeschlagen" messen 38,75 px bei `scrollHeight` 39. Ein zur Laufzeit eingesetzter 84-Zeichen-Name bleibt bei **zwei** Zeilen (38,75 px bei `scrollHeight` 136) und endet mit einer sichtbaren Ellipse (`ab69e-ellipse.png`); die Box bleibt 126 × 72 | ✓ |
+| Bei schmaler Karte (360 px) scrollt `.v2fsm` horizontal, `body` nicht | `Edge`: `.v2fsm__scroll` misst `scrollWidth` 466 gegen `clientWidth` 326, `scrollLeft` lässt sich bis **140** bewegen — es scrollt wirklich, nicht nur der Stil sagt es. `document.body.scrollWidth` = `clientWidth` = 1440. In `InUse` scrollt der Behälter dagegen **nicht** und die Karte schneidet `closed` ab (Mangel 1) | ✓ für `Edge` |
+| Kein `ResizeObserver`, kein `getBoundingClientRect`, keine neue Abhängigkeit; Rastermaße an einer Stelle | Kein `ResizeObserver` (das Wort steht nur im Kommentar `:56`), `getBoundingClientRect` kommt in der Datei überhaupt nicht vor, keine neue Abhängigkeit in `package.json`. `grep -- "var(--v2fsm" src/` findet nichts, und der Kommentar behauptet es auch nicht mehr. Die vier Maße stehen an einer Stelle (`:67–74`) — die Herleitung darüber geht allerdings nicht auf (Mangel 3) | ✓ |
+| Kein `"use client"`; Client-Anteil nur `Popover` | `grep "use client" src/ui/v3/patterns/StateMachine.tsx` → nichts | ✓ |
+| Barrel: Export unter `/* Prozess */`; `@instead` von `StatusInfoDialog` und `ProcessStepper` nennen `StateMachine` | `index.ts:265–269` exportiert `StateMachine` und `StateTransition` unter `/* Prozess */`. `StatusInfoDialog.tsx:34`: „The same axis as a **picture**, with its transitions → StateMachine." · `Process.tsx:179`: „the map instead of the position → StateMachine (Z7)." | ✓ |
+| Tut bewusst nicht: Übergänge herleiten, Selbst-Übergänge zeichnen, Besitzer, Phasen, zählen, filtern, auslösen | Ohne `transitions` kein einziger Pfeil (`Sequence`: 0 `<marker>`, 0 `marker-end`); Selbst-Übergang nicht gezeichnet (`Edge`: 8 von 9); kein `Baton`, keine Phase, kein Zähler, kein `onSelect`, kein `href`, kein `fetch`, kein Router-Import | ✓ |
+| Ersetzt nichts in der App; das Diagramm im `StatusInfoDialog` wartet auf Befund 1 | `StatusInfoDialog` unverändert bis auf den Halbsatz im `@instead`, kein Umschalter, kein Aufruf außerhalb der eigenen Story | offen (App) |
+
+### Mängel — **keiner blockiert**
+
+1. **`InUse`: „abgeschlossen" wird abgeschnitten und ist nicht zu erreichen.**
+   Gemessen: `.v2fsm__scroll` misst `clientWidth` = `scrollWidth` = 1216, und
+   `scrollLeft` lässt sich **nicht** bewegen (Maximum 0) — der Behälter ist so
+   breit wie sein Inhalt und scrollt deshalb nie. Geschnitten wird statt
+   dessen von der Karte: `.v2card` hat `overflow-x: hidden` und endet bei
+   x = 1196, die Box `closed` liegt bei 1125…1251 — **55 von 126 px** sind
+   weg, und keine Bewegung bringt sie zurück (`body` scrollt auch nicht,
+   1440 = 1440). Ursache ist nicht die Komponente, sondern der Aufrufer: das
+   Grid-Kind „Ablauf" der Story trägt `min-width: auto` und schrumpft nicht
+   unter die Mindestbreite seines Inhalts; die Mindestbreite reicht durch
+   `.v2fsm` (Flex-Spalte) bis zum Raster durch. Gegenprobe zur Laufzeit:
+   `min-width: 0` an genau diesem `div` → Behälter 1138 px, `scrollLeft` bis
+   78, der Rest ist erreichbar. Der neue Vorlauf hat den Schnitt um 36 px
+   vergrößert (vorher wären es rund 21 px gewesen), er hat ihn aber nicht
+   verursacht — in `Edge`, wo der Aufrufer eine `max-width` setzt, scrollt der
+   Behälter einwandfrei. **Blockiert nicht:** das Kriterium nennt `Edge`, und
+   dort ist es erfüllt. Vorschlag: `minWidth: 0` am Wrapper
+   (`StateMachine.stories.tsx:189`) und ein Halbsatz im JSDoc, dass ein
+   Aufrufer im Grid oder Flex `min-width: 0` setzen muss, damit die Karte
+   scrollen statt schneiden kann.
+2. **Der Kommentar am Vorlauf nennt eine Zahl, die die Messung nicht
+   hergibt.** Der Kommentar über `.v2fsm__grid` (`v3.css:2997–3004`) begründet die 36 px mit „ein Rückweg in die
+   erste Spalte greift mit seinem Bogen bis x = −30 aus". Gemessen liegt der
+   linkeste Punkt jedes Rückwegs bei **x = −12** im Raster (−12,75 px mit dem
+   1,5-px-Strich), in `Filled`, `Edge` und `InUse` gleich; auch die Pfeilspitze
+   reicht nicht weiter. Der Vorlauf ist damit rund 23 px größer als nötig —
+   und er schiebt die Karte gegenüber dem Absatz (`Filled`) und der
+   Hinweiszeile (`Sequence`) um 38 px nach rechts, was im Bild als Einzug zu
+   sehen ist. Vorschlag: die Zahl berichtigen und den Vorlauf auf das Maß
+   bringen, das die Messung trägt (12,75 px Farbe plus Rand), oder begründen,
+   warum es mehr sein soll.
+3. **Die Rasterrechnung im Dateikopf geht nicht auf.**
+   `StateMachine.tsx:68–71`: „Zwei Zeilen Beschriftung (2 × 19) plus die
+   Wertzeile (15) plus Innenabstand (2 × 8) und die Ränder = **72**". Die
+   genannten Summanden ergeben 71; gemessen sind die Zeilen 19,375 px und
+   17,81 px, was 74,56 ergäbe. Die **72** stimmt (an jeder Box gemessen), die
+   Herleitung nicht — dieselbe Art Aussage, die diese Aufgabe schon dreimal
+   beschäftigt hat, nur diesmal in den Nachkommastellen. Vorschlag: die
+   gemessenen Zeilenhöhen einsetzen oder den Satz auf „die Box ist 72 hoch,
+   damit zwei Zeilen Beschriftung und die Wertzeile hineinpassen" kürzen.
+
+### Außerhalb der Kriterien aufgefallen
+
+- **Der Abnahme-Eintrag der dritten Runde fehlt in dieser Datei.** Auf „Die
+  vier Mängel der zweiten Abnahme — behoben" folgt unmittelbar „Nach der
+  dritten Abnahme (2026-09-07)", die dort behobenen Punkte („M2", „M3")
+  stehen nirgends beschrieben. Wer den Verlauf nachliest, findet zwei
+  Antworten ohne ihre Frage. (Der Entwurf liegt im Scratchpad als
+  `ab69d-eintrag.md`; er gehört vor diesen Eintrag.)
+- **Die gemeinsame Grundlinie der fünf Rückwege ist bestätigt.** In `Filled`
+  enden alle fünf unteren Bögen auf derselben Höhe (unterster Punkt y = 214),
+  und zwischen x = 176 und 638 liegen mehrere übereinander. Laut Nacharbeit
+  bewusst offen und ausdrücklich **kein** Rückgabegrund — hier nur bestätigt,
+  damit die eigene Aufgabe eine Messung hat.
+- **Die Statuszeile im Kopf steht auf „Abnahme".** Nach dieser Freigabe
+  gehört dort „fertig" hin; eine Abnahme ändert die Spec nicht über ihren
+  eigenen Eintrag hinaus, deshalb bleibt sie hier stehen.
+- **Das Popover einer Rohwert-Box schreibt den Schlüssel zweimal** (Badge
+  `on_hold`, darunter `code` `on_hold`) — in der Box selbst ist das seit der
+  zweiten Runde behoben, im Kopf des Popovers steht es noch doppelt.
+
+Abgenommen von / am: **abgenommen (freigegeben)** · geprüft von Claude
+(Abnahme-Agent), 2026-09-07 · Offene Punkte: Mängel 1–3 (keiner blockiert),
+die gemeinsame Grundlinie der Rückwege (eigene Aufgabe) sowie „ersetzt nichts
+in der App" (offen App, Befund 1).
+
+## Nach der vierten Abnahme (2026-09-07): freigegeben, drei Nachträge
+
+Die Abnahme hat **freigegeben** — und ihre eigene Messung gegengeprüft, indem
+sie den Vorlauf zur Laufzeit auf 0 setzte: 72 unsichtbare Punkte statt 0, dann
+zurück auf 0. Genau die Kontrolle, die der Runde davor gefehlt hat. Null
+unsichtbare Punkte in sechs Stories, null Kantenkreuzungen, 44 Boxen à
+126 × 72.
+
+- **Der Vorlauf ist von 36 auf 16 px zurück.** Der Kommentar nannte „x = −30";
+  gemessen greift der Bogen bis **−12** aus (−12,75 mit Strich). 36 px waren
+  rund 23 zu viel und haben die Karte gegen Absatz und Hinweiszeile
+  eingeschoben. Nachgemessen: linkester Punkt 6 px innerhalb der Kante, null
+  unsichtbar.
+- **Die Rasterrechnung im Dateikopf ist raus.** Sie ging nicht auf (die
+  Summanden ergaben 71, gemessen sind die Zeilen 19,375 und 17,81 px) und
+  stand damit zum zweiten Mal falsch da. Jetzt steht dort, dass **72** an
+  allen 44 Boxen gemessen ist — eine Summe hinzuschreiben hieße, sie bei der
+  nächsten Schriftstufe still falsch werden zu lassen.
+- **`InUse` schnitt den letzten Zustand um 55 px ab.** Nicht das Diagramm war
+  schuld, sondern der Aufrufer: das Rasterkind schrumpft mit `min-width: auto`
+  nicht, also reichte die Mindestbreite durch und die Karte schnitt, statt
+  dass der Behälter scrollt. Mit `minWidth: 0` gemessen: Behälter 1.138 gegen
+  Inhalt 1.196, er scrollt. **Das ist in dieser Welle der vierte Fall
+  derselben Art** — ein `overflow-x` im Inneren schützt sich nicht selbst.
+
+**Was die Abnahme sonst noch gefunden hat, und es stimmt:** der Abnahme-Eintrag
+der **dritten** Runde fehlt in dieser Datei. Auf „Die vier Mängel der zweiten
+Abnahme" folgt direkt die Nacharbeit zur dritten. Der Entwurf lag im
+Scratchpad und ist nie eingearbeitet worden — die Mängel M2 und M3, auf die
+sich die Nacharbeit bezieht, stehen deshalb nirgends beschrieben. Das ist ein
+Loch in der Spur, kein Baufehler, und es lässt sich nicht rückwirkend
+schließen: der Entwurf ist Arbeitsstand, kein Abnahme-Eintrag. Was er sagte,
+steht in der Nacharbeit; wer die Kette liest, findet den Grund dort.

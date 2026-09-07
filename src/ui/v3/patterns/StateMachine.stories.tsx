@@ -186,7 +186,12 @@ export const InUse: Story = {
               },
             ]}
           />
-          <div>
+          {/* `minWidth: 0`: ein Rasterkind ist so breit wie sein Inhalt, und
+              dann reicht die Mindestbreite des Diagramms durch — die Karte
+              schnitt den letzten Zustand um 55 px ab, statt dass der Behälter
+              in sich scrollt (Abnahme 0069, vierte Runde). Ein `overflow-x`
+              im Inneren schützt sich nicht selbst. */}
+          <div style={{ minWidth: 0 }}>
             <div className="v2fields__h">Ablauf</div>
             <StateMachine
               axis="zyklus_stapel"

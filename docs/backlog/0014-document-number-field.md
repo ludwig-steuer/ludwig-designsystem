@@ -424,3 +424,146 @@ seit 0104 Pflicht ist.
   Vorlesehilfe nichts vom Abschnitt.
 - `index.ts` exportiert die Label-Typen unter `/* DATEV-Snapshot */` statt
   unter `/* Belegnummer */`.
+
+## Wiederabnahme (2026-09-07, zweite Runde)
+
+**Ergebnis: zurück.** Gemessen gegen den Dev-Server (`localhost:6107`, Stand
+`ec424a9`, HEAD `d62fbb3` — die Commits dazwischen fassen 0014 nicht an) mit
+CDP, echte Tasten und echte Klicks, je Schritt ein eigener `Runtime.evaluate`.
+Kein Bau, kein Chat-Verlauf: nur Spec und Code. Story-IDs verkürzt wie oben.
+
+### Die drei Blocker der letzten Runde — nachgemessen
+
+| | Nachweis | Ergebnis |
+|---|---|---|
+| **M1** Register beschnitten statt gescrollt | `…register--filled`, fünf Breiten: Wrapper hat jetzt `min-width: 0px` und ist genau so breit wie `.v2dnr` (1440: 858 · 1024: 858 · 700: 626 · 500: 426 · 450: 376). Der Scroll-Container scrollt, wo er muss: `clientWidth/scrollWidth` 858/858 (kein Balken, wo keiner nötig ist) · 626/818 · 426/818 · 376/818. **Gegenprobe mit echtem Scrollen:** `scrollLeft` auf das Maximum (192 · 392 · 442 px) bringt die letzte Datenzelle („errechnet", Spalte Zustand) vollständig in die Karte — bei 700, 500 **und** 450 px, vorher bei keiner. Sichtbare Zellen in der Karte 30 → 40 (700), 20 → 30 (500), 10 → 20 (450); die Werte hängen am Layout | ✓ behoben |
+| **M2** Hinweis rechnet mit 420 px | `…journalentryeditor--document-number-across-rows`, 1440/1280/1024: Feld 96 px, `container-type: inline-size` greift, alle sechs `.v2dnf__wide` auf `display: none`, `.v2dnf__hint` **19 px** (eine Zeile), Buchungszeile **91** statt 265. Der genannte Teil hält. **Aber** die Zeile wächst weiter aus zwei Quellen, die dieselbe Rechnung machen — s. M1 dieser Runde | ✗ **teils** |
+| **M3** `id="b7"` bei `htmlFor="b8"` | alle fünf Feld-Stories: **9 von 9** `label[for]` lösen auf ein `INPUT` auf (b1–b9), `…field--edge` trägt `id="b8"` | ✓ behoben |
+
+### Die kleinen drei
+
+| | Nachweis | Ergebnis |
+|---|---|---|
+| **M4** deutscher Kommentar | `DocumentNumberRegister.tsx:31–37` ist englisch; kein deutscher Kommentar mehr in beiden Bausteinen (die deutschen Story-JSDocs sind Storybook-Prosa und damit Nutzertext) | ✓ |
+| **M5** erstes ↓ überspringt Zeile 1 | ohne Suche behoben, **mit Suche nicht** — s. M3 dieser Runde | ✗ **teils** |
+| **M6** `isDatevSource` ungenutzt | importiert und an der Zeile ausgewertet (`DocumentNumberRegister.tsx:165`); `…register--filled`: vier Marken (DATEV an den Zeilen 0–2, verwaist an der `link`-Zeile), unverändert | ✓ behoben |
+
+### Was in der letzten Runde hielt — hält es noch?
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` / `pnpm build` / `pnpm check:icons` | exit 0 / exit 0 („Storybook build completed successfully") / exit 0, 53 Zeichen, 2 offene Dateien (aus anderen Aufgaben) | ✓ |
+| Kein Hex, kein px im Baustein | `grep` in beiden Dateien: 0 Hex-Treffer; px nur in `COLS`/`MIN_WIDTH` wie zuvor. `style={{ minWidth: 0 }}` folgt dem Muster von `Review.tsx:253`, `StepRail.tsx:72`, `TodoList.tsx:137` | ✓ |
+| Ladezustand ist eine Tabelle | `…register--loading`: eine `.v2tbl`, fünf Zeilen mit je 5 `td`, Spuren `182px 220px 120px 130px 130px` (1440) bzw. `160px …` (500), 25 Skelette, `sr-only` „Wird geladen …". Bei 500 px scrollt auch der Ladezustand (426/818) — er hängt direkt unter `.v2dnr`, und ein Scroll-Container bekommt `min-width: auto` = 0 von selbst | ✓ |
+| Erste Spur kollabiert nicht, keine Überläufe | 1440/1024: `182px …`; 760/700/500: `160px …`; **0** Zellenüberläufe bei allen fünf Breiten | ✓ |
+| Tabelle statt Listbox | `…register--filled`: 1 `table` im Story-Baum (die zweite im DOM ist Storybooks verstecktes `sb-argstableBlock`), 5 `th`, 45 `td`, 9 `.v2rowbtn`; `role=option`, `role=listbox`, `aria-activedescendant`, `aria-selected` je **0×** | ✓ |
+| Reihenfolge aus `sortByDominance` | DOM-Reihenfolge der neun Zeilen unverändert: opos_anchor · mirror_ref · datev_correction · case_decision · link · invoice_number · journal_line · bank_purpose · case_summary | ✓ |
+| Jede Zeile nennt ihre Quelle | alle neun Quellen-Wörter in Spalte 2 gemessen | ✓ |
+| Abweichung als Hinweis, nicht als Fehler | `…field--diverging`: zwei Hinweise, `.v2in--invalid` 0×, `[role=alert]` 0×. Klick auf die Nummer setzt `b5` von „RE 2026 140" auf „RE-2026-0140", der Hinweis verschwindet; zweiter Klick ebenso für `b6` | ✓ |
+| `maxLength` hält bei 36, ohne stilles Abschneiden | im Editor: 36 Zeichen eingefügt → Wert 36 Zeichen **und** die Grenzzeile erscheint | ✓ (Layout s. M1) |
+| Tastatur ↑/↓/`Enter`/`Esc` | `…register--interactive`: ↓ → `data-row=0`, ↓ → 1, ↑ → 0, `Enter` → „Übernommen: RE-2026-0140 (Offener Posten aus DATEV)". `Esc` erreicht `document` mit `defaultPrevented=false` | ✓ (Einstieg s. M3) |
+| Leer / leer nach Filter | beide ohne Tabelle, mit Grund und Ausweg, bei 1440 und 500 nichts außerhalb der Karte | ✓ |
+| Übernahme im Editor | Klick auf die Hinweis-Nummer setzt das Feld auf „RE-2026-0140", der Hinweis der Zeile verschwindet, die Zeile fällt von 91 auf 65 px | ✓ |
+
+Nichts von dem, was hielt, ist durch die Nacharbeit gefallen.
+
+### Mängel dieser Runde
+
+**M1 — die Grenzzeile rechnet weiter mit 420 px, und der Wertebereich der
+Nummer auch (blockiert).**
+Die Container-Query verbirgt nur `.v2dnf__wide`. Die Grenzzeile steht nicht
+darin, und die Nummer soll ausdrücklich stehen bleiben — beide wachsen in
+96 px weiter.
+
+- *Grenzzeile.* `…journalentryeditor--document-number-across-rows`, echte
+  Eingabe (Klick ins Feld, `Input.insertText` mit 36 Zeichen): Wert 36 Zeichen,
+  `.v2dnf__limit` erscheint mit **71 px / vier Zeilen**, die Buchungszeile
+  wächst von **91 auf 170 px**. Dieselbe Zeile misst in `…field--edge`
+  (372 px) **18 px**, eine Zeile — 18 gegen 71, der Wert hängt am Layout.
+  Ausgelöst wird das vom Normalfall: eine volle DATEV-Belegnummer.
+- *Nummer.* Mit einer 36-stelligen dominanten Nummer ohne Trennzeichen wird
+  `.v2dnf__hint` **78 px / vier Zeilen** und die Buchungszeile **149 px**
+  (gegen 19 px / 91 px mit der zwölfstelligen Fixture). `overflow-wrap:
+  anywhere` verhindert den waagerechten Auslauf (`scrollWidth − clientWidth
+  = 0`), nicht das Wachstum. Belegfeld 1 trägt 36 Zeichen; gemessen wurde
+  gegen die zwölfstellige Fixture — dieselbe Falle, die die Nacharbeit
+  benennt.
+
+*Vorschlag:* die Grenzzeile in dieselbe Container-Query (schmal etwa „36/36",
+der Satz in den `title`); für die Nummer mit 0015 entscheiden — eine Zeile mit
+`text-overflow: ellipsis` plus dem schon vorhandenen `title`, oder Belegfeld 1
+bekommt im Editor eine breitere Spur.
+
+**M2 — die schmale Form nimmt der Vorlesehilfe den Satz (nicht blockierend).**
+Im Editor stehen alle sechs `.v2dnf__wide` auf `display: none`; das nimmt sie
+auch aus dem Zugänglichkeitsbaum. Übrig bleibt ein Knopf „RE-2026-0140" ohne
+ein Wort dazu, und die Erklärung lebt nur noch im `title` des `<p>` — der wird
+an einem Absatz nicht verlässlich angesagt und braucht sonst die Maus (§9/T8:
+„Tooltip erklärt, ersetzt kein Label"). Vor der Nacharbeit stand der Satz im
+DOM. *Vorschlag:* statt `display: none` das `sr-only`-Muster des Sets — die
+Zeile bleibt 19 px, der Satz bleibt im Baum.
+
+**M3 — M5 der letzten Runde hält nur auf dem Weg ohne Suche (nicht
+blockierend).**
+`…register--interactive`, echte Tasten: beim Laden **null** gefärbte Zeilen,
+und aus der Suche heraus führt das erste ↓ auf `data-row=0` — behoben. Wird
+aber erst gesucht („RE-2026-0140" getippt, 7 Treffer), ist **Zeile 0 gefärbt,
+während der Fokus in der Suche steht** (`onQueryChange` setzt `setActive(0)`,
+`DocumentNumberRegister.tsx:106`), und das erste ↓ führt auf `data-row=1`: die
+dominanteste Zeile wird übersprungen, und die Farbe sagt wieder etwas anderes
+als der Fokus. Das ist wörtlich M5, nur hinter dem Filter. *Vorschlag:* beim
+Filtern `setActive(-1)` wie beim Laden.
+
+### Befunde am Set, ohne Nacharbeit
+
+- **Unverändert offen und nicht 0014-eigen:** `.bse__row .v2in { padding: 4px
+  7px }` schlägt die feldeigenen Polster. Gemessen im Editor:
+  `padding-right` **7 px**, die Lupe beginnt **21 px innerhalb** des
+  Textbereichs; in der eigenen Story des Feldes 34 px Polster und 6 px Luft.
+  Trifft 0013 genauso, gehört in eine eigene Aufgabe.
+- **Das Register im `sm`-Drawer** (rund 426–450 px Inhalt): Nummer und Quelle
+  stehen in der Karte, Konto, Sachverhalt und Zustand brauchen den waagerechten
+  Lauf. Unter rund 380 px Inhalt bleibt nur die Nummernspalte — und dort stehen
+  neun gleich lautende Nummern ohne ihren Grund. Folgt aus `MIN_WIDTH = 780`
+  und der Entscheidung aus M4 der ersten Runde; erreichbar ist alles.
+- **Neu als Nebenwirkung, ohne Schaden:** unterhalb rund 1000 px hält jetzt
+  `MIN_WIDTH` die erste Spur bei 160 px (statt dass sie mit dem Fenster
+  wächst); zwei Zeilen brechen dort auf 65 px statt 45–47. Keine Überläufe,
+  keine Beschneidung.
+- Ladezustand ohne `HeadRow`, Grenzzeile ohne Live-Region, `.v2dnr__datev`
+  weiterhin tot, Label-Typen in `index.ts` weiterhin unter
+  `/* DATEV-Snapshot */` — alle vier unverändert aus der letzten Runde.
+
+Abgenommen von / am: fremde Abnahme-Sitzung (kein Bau, kein Chat-Verlauf),
+2026-09-07 (zweite Runde) · Offene Punkte: M1 blockiert; M2 und M3 nachziehen.
+
+## Nach der Wiederabnahme (2026-09-07): die Grenzzeile rechnete weiter mit 420 px
+
+**M1 erledigt.** Der Hinweis war schmal geworden, die **Grenzzeile** nicht:
+mit 36 Zeichen im Editor maß sie 71 px (vier Zeilen) und die Buchungszeile
+wuchs von 91 auf 170. Gemessen war sie gegen die zwölfstellige Fixture —
+dieselbe Falle, die die Nacharbeit selbst benannt hatte, eine Zeile tiefer.
+Sie läuft jetzt durch dieselbe Container-Abfrage: schmal steht **„36/36"**, der
+Satz im `title` und im Zugänglichkeitsbaum. Gemessen mit 36 echten Zeichen im
+Editor: Grenzzeile **18 px**, Hinweis 19 px, Buchungszeile 116 statt 170.
+
+Dazu kürzt die dominante Nummer im schmalen Fall (`.v2dnf__num`): eine
+36-stellige Nummer ohne Trennzeichen hat keine Umbruchstelle und machte den
+Hinweis vierzeilig.
+
+**M2 erledigt — und das war ein Fehler in meiner eigenen Nacharbeit.** Die
+schmale Form hatte den erklärenden Satz mit `display: none` ausgeblendet, und
+damit war er auch aus dem Zugänglichkeitsbaum verschwunden: übrig blieb ein
+Knopf „RE-2026-0140" ohne Wort. **Der Satz wandert jetzt aus dem Bild, nicht
+aus dem Baum** (`sr-only`-Muster), und die Kurzform steht daneben statt an
+seiner Stelle. Wer die Seite hört, bekommt weiterhin den ganzen Satz.
+
+**M3 erledigt** — beim Tippen in die Suche stand `active` auf 0, also war
+Zeile eins gefärbt, während der Fokus in der Suche war; das erste ↓ sprang
+dann auf Zeile zwei und übersprang die dominanteste. Jetzt `-1`: keine Farbe
+ohne Fokus, und das erste ↓ landet oben.
+
+**Offen, mit Adresse:** das Register braucht unter rund 380 px Inhaltsbreite
+den waagerechten Lauf, und dann steht nur noch die Nummernspalte — neun gleich
+lautende Nummern ohne ihren Grund. Das folgt aus `MIN_WIDTH = 780` und ist
+eine Frage an den Drawer, in dem es steht (0052), nicht an dieses Feld.
