@@ -55,15 +55,6 @@ const Frame = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-/** S0 — der Regelfall: eine Zeile, Rest geht auf, nur Anzeige. */
-export const S0_Simple: Story = {
-  render: () => (
-    <Frame>
-      <JournalEntryEditor {...BASE} editable={false} onEdit={() => {}} />
-    </Frame>
-  ),
-};
-
 /**
  * S1 — im Formular, mit einer Warnung. Sie **blockiert nicht**: der Satz
  * lässt sich speichern, die Warnung steht sichtbar daneben und bietet ihren
@@ -143,40 +134,6 @@ export const S5_RemainderDoesNotBalance: Story = {
   ),
 };
 
-/** S10 — Zahlungssatz: Belegseite Haben, Gegenkonto Bank. */
-export const S10_Payment: Story = {
-  render: () => (
-    <Frame>
-      <JournalEntryEditor
-        {...BASE}
-        belegSide="H"
-        rows={[{ ...ROW, side: "H", bu: "", konto: "70044", kontoName: "Bürobedarf Meier GmbH", text: "Zahlung RE-4471" }]}
-        gegenkonto={{ konto: "1800", name: "Bank", tag: "Zahlungskonto" }}
-        editable={false}
-        onEdit={() => {}}
-      />
-    </Frame>
-  ),
-};
-
-/** S11 — gesperrt: der Grund steht da, und der eine erlaubte Ausweg. */
-export const S11_Locked: Story = {
-  render: () => (
-    <Frame>
-      <JournalEntryEditor
-        {...BASE}
-        status="posted"
-        editable={false}
-        locked={{
-          reason: "Der Satz liegt bereits in DATEV.",
-          actionLabel: "Storno + Neu",
-          onAction: () => {},
-        }}
-      />
-    </Frame>
-  ),
-};
-
 /** S12 — mehrere Fehler: Speichern bleibt gesperrt, jeder Fehler nennt sich. */
 export const S12_MultipleErrors: Story = {
   render: () => (
@@ -191,69 +148,6 @@ export const S12_MultipleErrors: Story = {
         ]}
         onCancel={() => {}}
         onSave={() => {}}
-      />
-    </Frame>
-  ),
-};
-
-/** S15 — freigegeben: Anzeige, Bearbeiten möglich, Löschen erlaubt. */
-export const S15_Released: Story = {
-  render: () => (
-    <Frame>
-      <JournalEntryEditor
-        {...BASE}
-        status="accepted"
-        editable={false}
-        deletable
-        onEdit={() => {}}
-        onDelete={() => {}}
-      />
-    </Frame>
-  ),
-};
-
-/** S17 — gebucht: kein Bearbeiten mehr, nur noch lesen. */
-export const S17_Posted: Story = {
-  render: () => (
-    <Frame>
-      <JournalEntryEditor {...BASE} status="posted" editable={false} />
-    </Frame>
-  ),
-};
-
-/** S18 — storniert: der Satz bleibt stehen, mit Grund. */
-export const S18_Reversed: Story = {
-  render: () => (
-    <Frame>
-      <JournalEntryEditor
-        {...BASE}
-        status="reversed"
-        editable={false}
-        reversedReason="Doppelt erfasst — der Beleg lag schon an 2026-0031."
-      />
-    </Frame>
-  ),
-};
-
-/** S19 — der Judge bestätigt mit Hinweis: die Begründung ist einsehbar. */
-export const S19_JudgeWithNote: Story = {
-  render: () => (
-    <Frame>
-      <JournalEntryEditor
-        {...BASE}
-        editable={false}
-        onEdit={() => {}}
-        aiReview={{
-          verdict: "confirm_with_note",
-          confidence: "yellow",
-          rationale:
-            "Bürobedarf Meier GmbH liefert regelmäßig Verbrauchsmaterial; die Positionen sind Toner und Papier. Konto 6815 folgt der bisherigen Behandlung.",
-          judgeReasoning: "Konto und Steuerschlüssel plausibel. Der Betrag liegt 18 % über dem Monatsschnitt.",
-          sources: [
-            { key: "1", art: "beleg", label: "RE-4471 vom 21.08.2026", quote: "Toner HP 415A, 4 Stück" },
-            { key: "2", art: "regel", label: "Konvention „Bürobedarf auf 6815“ vom 12.08.2026" },
-          ],
-        }}
       />
     </Frame>
   ),
@@ -309,37 +203,6 @@ export const Empty: Story = {
 /* ── 0015 · The three points of the release ───────────────────────────────
    They stand at the end because they are not among the 24 states of the
    prototype: they are abilities the caller switches on. */
-
-/**
- * §1 — das **Journal in der DATEV-Stapelordnung**: Konto · Kontoname ·
- * Buchungstext · Soll · Haben. Der BU-Schlüssel steht **nicht** hier, sondern
- * in der Editorzeile: er ist eine Eingabe, keine Buchungszeile. Der Text kommt
- * jetzt mit — die Steuerzeile trägt den ihrer Zeile, das Gegenkonto den der
- * ersten.
- */
-export const JournalWithPostingText: Story = {
-  render: () => (
-    <Frame>
-      <JournalEntryEditor
-        {...BASE}
-        rows={[
-          { ...ROW, text: "Bürobedarf August" },
-          {
-            ...ROW,
-            id: "2",
-            umsatz: "89,90",
-            bu: "9",
-            konto: "6820",
-            kontoName: "Porto",
-            text: "Porto August",
-          },
-        ]}
-        editable={false}
-        onEdit={() => {}}
-      />
-    </Frame>
-  ),
-};
 
 /**
  * §2 — **Belegfeld 1 in alle Zeilen übernehmen.** Der Knopf steht dort, wo
@@ -398,4 +261,39 @@ export const ContraAccountEditable: Story = {
       </Frame>
     );
   },
+};
+
+/**
+ * Was **nur** der Editor kann, in einer Story: die drei Schnellaktionen
+ * (`quickActions`, mit Alt+K/W/P am Knopf), der Weg zum Steuerschlüssel
+ * (`onOpenTaxKey`) und die Sperre (`locked`) samt Storno-Grund.
+ *
+ * Diese vier Props hatten bis zum Schnitt keinen Nachweis: die Datei lag mit
+ * 17 Stories über der Grenze, und zwei davon standen ausdrücklich als offene
+ * Lücke in 0015 (M11). Nach dem Schnitt ist Platz — das Lesen zeigt jetzt
+ * `JournalEntryGrid` (0113).
+ */
+export const S20_EditorOnly: Story = {
+  render: () => (
+    <Frame>
+      <JournalEntryEditor
+        {...BASE}
+        editable
+        quickActions={{
+          klaerungskonto: () => {},
+          wieLetzte: () => {},
+          privatanteil: () => {},
+        }}
+        onOpenTaxKey={() => {}}
+      />
+      <div style={{ height: "var(--space-5)" }} />
+      <JournalEntryEditor
+        {...BASE}
+        status="reversed"
+        editable={false}
+        locked={{ reason: "Der Satz ist storniert und nicht mehr zu ändern." }}
+        reversedReason="Doppelt erfasst, siehe RE-4471-B."
+      />
+    </Frame>
+  ),
 };

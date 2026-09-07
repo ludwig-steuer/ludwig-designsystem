@@ -3550,3 +3550,16 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* Eine Abweichung ist ein Befund, kein Fehler: gedeckte Warnfarbe, und das
    Wort steht ohnehin daneben (V7). */
 .v2illist__off { color: var(--color-warning); }
+
+/* ── Lese-Raster des Buchungssatzes (0113) ──────────────────────────────── */
+
+/* Der Kopf trägt rechts Rest und Sichtwechsel. Im Editor stand dafür ein
+   Inline-Stil; hier ist es eine Klasse, weil das Raster keine trägt. */
+.bse__kopfrechts { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
+/* Ein Satz ohne Zeile ist ein Fehler des Aufrufers — er wird sichtbar
+   abgefangen, nicht in eine leere Fläche gelegt. */
+.bse__leer { padding: var(--space-4) 0; }
+.bse__msgs { margin-top: var(--space-3); }
+/* Der Kontoname steht neben der Nummer und kürzt, statt die Zeile zu dehnen. */
+.bse__kontoname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bse__konto { display: flex; align-items: baseline; gap: var(--space-2); }

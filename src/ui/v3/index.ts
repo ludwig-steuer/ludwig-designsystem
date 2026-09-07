@@ -502,6 +502,20 @@ export {
   type EditorStatus,
   type Side,
 } from "./entities/journal-entry/JournalEntryEditor";
+export { JournalEntryGrid, type JournalEntryGridProps, type JournalGridMessage } from "./entities/journal-entry/JournalEntryGrid";
+export {
+  journalLines,
+  journalTotals,
+  journalBalanceText,
+  journalGridTracks,
+  documentSideTotal,
+  rowAmount,
+  type JournalRow,
+  type JournalBatchLine,
+  type JournalMode,
+  type JournalStatus,
+  type ContraAccount,
+} from "./entities/journal-entry/journal-entry";
 export {
   JournalEntryCell,
   JournalEntryCard,

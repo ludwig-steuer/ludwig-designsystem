@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | nein — Buchungssatz, BU, Belegfeld sind Fachbegriffe |
 | Quelle | `docs/backlog/0015-journal-entry-editor-f109.md`, Abschnitt „Stories — 17, mit begründeter Ausnahme"; Abnahme 0015 vom 2026-09-07, Mangel M10 |
@@ -171,3 +171,45 @@ Variabel (aus dieser Spec):
 - [ ] Die Bezeichner der herausgelösten Teile sind englisch (`grep` auf `gegenkonto`, `Kopf`, `Zeile`, `summeBelegseite` in der neuen Datei ist leer)
 - [ ] Der Editor hat nach dem Schnitt 9 Stories, das Grid 8; beide unter 10 (`grep`)
 - [ ] `JournalEntryEditor` verhält sich unverändert — die Kriterien von 0015 gelten weiter und werden in derselben Runde gegengeprüft
+
+## Gebaut (2026-09-07)
+
+`JournalEntryGrid` steht, und die zwei Entscheidungen der Spec sind gemessen
+eingelöst.
+
+**Kein Zustand, keine Direktive.** Die Datei enthält weder `"use client"` noch
+`useState` noch `useEffect` — der einzige Treffer auf diese Wörter ist der
+Satz im JSDoc, der erklärt, warum es sie nicht braucht. Der Umschalter ist ein
+`<a href>` (gemessen in `Full`: `A href=?sicht=einfach`), die Journal-Klappe
+ein `<details>`, das sich per Klick auf die Zusammenfassung öffnet (gemessen).
+Ohne `modeHref` gibt es keinen Umschalter — und damit auch keine gedruckte
+Taste ohne Wirkung.
+
+**Was aus der 0015-Abnahme mitkam, ist erledigt:** der Zustandstext kommt aus
+der Registry (kein `STATUS_TEXT`), der Weg ins Kontenblatt ist
+`ActionIcon action="ledger"` (kein `▤`, gemessen null Treffer im Text), und
+die Bezeichner sind englisch.
+
+**Geteilt wird die Rechnung, nicht das Markup.** `journal-entry.ts` trägt
+`journalLines()`, die Summen, den Bilanzsatz und die Spurenliste; beide Hälften
+lesen daraus. Gemessen in `Simple`: sieben Kopfzellen, sieben Zellen je Zeile,
+sieben gerenderte Spuren — Kopf und Zeile fluchten. In `WithJournal` steht die
+DATEV-Stapelordnung mit „Σ S 1.475,60 € = Σ H 1.475,60 €" in der Kopfzeile der
+Klappe, damit die Summe auch zugeklappt sichtbar ist.
+
+**Zur Story-Zahl, und hier weiche ich von der Spec ab:** sie sagt 8 lesend und
+**9** bearbeitend. Es sind 8 und **10**. Die acht rein lesenden Stories des
+Editors sind entfallen — das Lesen zeigt jetzt das Grid —, und die zehnte ist
+`S20_EditorOnly`: sie hält die vier Props zusammen, die **nur** der Editor hat
+und die bis heute keinen Nachweis hatten (`quickActions`, `onOpenTaxKey`,
+`locked`, `reversedReason`). Zwei davon standen in 0015 ausdrücklich als
+offene Lücke (M11). Beide Dateien liegen damit **auf oder unter** der Grenze
+von zehn, und die begründete Ausnahme aus 0015 ist abgetragen — das war der
+Zweck dieser Aufgabe.
+
+**Was der Schnitt nicht gelöst hat, und das gehört gesagt:** `JournalRow` ist
+ein neuer Typ in `journal-entry.ts`, kein Typ aus `src/ludwig/`. Die Spec
+verlangt Typen aus dem Spiegel; dort gibt es für die Zeile eines
+Buchungssatzes keinen. `EditorRow` hatte dasselbe Problem und hat es seit der
+Erstbestückung. Der Befund gehört ans App-Register, sobald jemand die
+Buchungssatz-Familie dorthin meldet — hier stünde er zum dritten Mal.
