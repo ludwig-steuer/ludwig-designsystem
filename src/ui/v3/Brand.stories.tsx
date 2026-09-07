@@ -17,7 +17,7 @@ type Story = StoryObj;
 const ASSETS = "/reference/design-system-v2/assets";
 const WORDMARK = `${ASSETS}/ludwig-logo.svg`;
 /**
- * Die Stories, die den Namen als Text schreiben — **gerechnet**, nicht
+ * Die **Dateien**, die den Namen als Text schreiben — **gerechnet**, nicht
  * abgeschrieben: die erste Fassung nannte drei Dateien, es waren vier, und mit
  * `CaseDetailView` sind es fünf. Eine Liste, die von Hand gepflegt wird,
  * veraltet mit dem nächsten Commit.
@@ -31,7 +31,11 @@ const LOGO_TEXT_SOURCES = import.meta.glob("./**/*.stories.tsx", {
 const LOGO_TEXT_STORIES = Object.keys(LOGO_TEXT_SOURCES)
   .filter((path) => {
     const src = LOGO_TEXT_SOURCES[path];
-    return typeof src === "string" && src.includes("sb__logo") && !path.endsWith("Brand.stories.tsx");
+    return (
+      typeof src === "string" &&
+      src.includes("sb__logo") &&
+      !path.endsWith("Brand.stories.tsx")
+    );
   })
   .map((path) => path.split("/").pop() as string)
   .sort();
@@ -42,13 +46,32 @@ const MARK = `${ASSETS}/ludwig-mark.svg`;
 /* ── Shared bits ──────────────────────────────────────────────────────── */
 
 const page: CSSProperties = { maxWidth: "var(--container-base)" };
-const note: CSSProperties = { fontSize: "var(--fs-ui-xs)", color: "var(--color-text-subtle)" };
+const note: CSSProperties = {
+  fontSize: "var(--fs-ui-xs)",
+  color: "var(--color-text-subtle)",
+};
 
-function Section({ title, lead, children }: { title: string; lead: ReactNode; children: ReactNode }) {
+function Section({
+  title,
+  lead,
+  children,
+}: {
+  title: string;
+  lead: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <section style={{ marginBottom: "var(--space-10)" }}>
-      <h3 className="lw-h4" style={{ margin: 0 }}>{title}</h3>
-      <p className="lw-caption" style={{ margin: "var(--space-1) 0 var(--space-5)", maxWidth: "var(--content-measure)" }}>
+      <h3 className="lw-h4" style={{ margin: 0 }}>
+        {title}
+      </h3>
+      <p
+        className="lw-caption"
+        style={{
+          margin: "var(--space-1) 0 var(--space-5)",
+          maxWidth: "var(--content-measure)",
+        }}
+      >
         {lead}
       </p>
       {children}
@@ -56,7 +79,13 @@ function Section({ title, lead, children }: { title: string; lead: ReactNode; ch
   );
 }
 
-function Mark({ tone, children }: { tone: "danger" | "success"; children: ReactNode }) {
+function Mark({
+  tone,
+  children,
+}: {
+  tone: "danger" | "success";
+  children: ReactNode;
+}) {
   return (
     <span
       style={{
@@ -74,7 +103,13 @@ function Mark({ tone, children }: { tone: "danger" | "success"; children: ReactN
 }
 
 /** A ground to stand a mark on: page white, brand dark, or the sidebar. */
-function Ground({ kind, children }: { kind: "bg" | "primary" | "sidebar"; children: ReactNode }) {
+function Ground({
+  kind,
+  children,
+}: {
+  kind: "bg" | "primary" | "sidebar";
+  children: ReactNode;
+}) {
   const common: CSSProperties = {
     display: "flex",
     alignItems: "center",
@@ -133,9 +168,20 @@ function Plate({
             laden. Gemessen stand ein `height={56}` sonst mit 205 px im Bild. */}
         <img src={src} alt={alt} style={{ height, width: "auto" }} />
       </Ground>
-      <div style={{ marginTop: "var(--space-2)", display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
-        <Mark tone={verdict === "richtig" ? "success" : "danger"}>{verdict}</Mark>
-        <code className="lw-mono" style={note}>{GROUND_LABEL[ground]}</code>
+      <div
+        style={{
+          marginTop: "var(--space-2)",
+          display: "flex",
+          gap: "var(--space-2)",
+          alignItems: "center",
+        }}
+      >
+        <Mark tone={verdict === "richtig" ? "success" : "danger"}>
+          {verdict}
+        </Mark>
+        <code className="lw-mono" style={note}>
+          {GROUND_LABEL[ground]}
+        </code>
       </div>
       <div style={{ ...note, marginTop: "var(--space-1)" }}>{why}</div>
     </div>
@@ -147,7 +193,13 @@ function Plate({
  * collapsed) column, `.sb__logo` the 56 px row. No measure is written here —
  * the frame brings its own.
  */
-function SidebarHead({ collapsed, children }: { collapsed?: boolean; children: ReactNode }) {
+function SidebarHead({
+  collapsed,
+  children,
+}: {
+  collapsed?: boolean;
+  children: ReactNode;
+}) {
   return (
     <div
       className={`app${collapsed ? " app--collapsed" : ""}`}
@@ -162,30 +214,56 @@ function SidebarHead({ collapsed, children }: { collapsed?: boolean; children: R
 
 const grid: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(calc(var(--container-narrow) / 3), 1fr))",
+  gridTemplateColumns:
+    "repeat(auto-fill, minmax(calc(var(--container-narrow) / 3), 1fr))",
   gap: "var(--space-5)",
 };
 
 /* ── Marks ────────────────────────────────────────────────────────────── */
 
 const FILES: { file: string; size: string; use: string }[] = [
-  { file: "ludwig-logo.svg", size: "220 × 56", use: "Sidebar-Kopf, Login, Marketing — überall auf hellem Grund" },
-  { file: "ludwig-logo-light.svg", size: "220 × 56", use: "dieselbe Stelle auf dunklem Grund: Hero, dunkle Sidebar" },
-  { file: "ludwig-mark.svg", size: "56 × 56", use: "Favicon, App-Icon, Avatar, eingeklappte Sidebar" },
+  {
+    file: "ludwig-logo.svg",
+    size: "220 × 56",
+    use: "Sidebar-Kopf, Login, Marketing — überall auf hellem Grund",
+  },
+  {
+    file: "ludwig-logo-light.svg",
+    size: "220 × 56",
+    use: "dieselbe Stelle auf dunklem Grund: Hero, dunkle Sidebar",
+  },
+  {
+    file: "ludwig-mark.svg",
+    size: "56 × 56",
+    use: "Favicon, App-Icon, Avatar, eingeklappte Sidebar",
+  },
 ];
 
 /** Die drei Zeichen, je auf dem Grund, für den sie gemacht sind. */
 export const Marks: Story = {
   render: () => (
     <div style={page}>
-      <p className="lw-body-sm" style={{ maxWidth: "var(--content-measure)", marginTop: 0 }}>
+      <p
+        className="lw-body-sm"
+        style={{ maxWidth: "var(--content-measure)", marginTop: 0 }}
+      >
         Drei Dateien sind die Marke. Sie liegen unter{" "}
-        <code className="lw-mono">reference/design-system-v2/assets/</code> und werden von dort geladen — nicht
-        kopiert, nicht nachgebaut. Die Regel darunter ist die eigentliche Aussage: <strong>das dunkle Wordmark
-        steht nie auf dunklem Grund, die helle Variante nie auf hellem.</strong>
+        <code className="lw-mono">reference/design-system-v2/assets/</code> und
+        werden von dort geladen — nicht kopiert, nicht nachgebaut. Die Regel
+        darunter ist die eigentliche Aussage:{" "}
+        <strong>
+          das dunkle Wordmark steht nie auf dunklem Grund, die helle Variante
+          nie auf hellem.
+        </strong>
       </p>
 
-      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "var(--space-8)" }}>
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          marginBottom: "var(--space-8)",
+        }}
+      >
         <thead>
           <tr>
             {["Datei", "viewBox", "Einsatzort"].map((h) => (
@@ -207,12 +285,23 @@ export const Marks: Story = {
         <tbody>
           {FILES.map((f) => (
             <tr key={f.file}>
-              <td style={{ padding: "var(--space-2) var(--space-3)", borderBottom: "var(--border-1-subtle)" }}>
-                <code className="lw-mono" style={{ fontSize: "var(--fs-ui)" }}>{f.file}</code>
+              <td
+                style={{
+                  padding: "var(--space-2) var(--space-3)",
+                  borderBottom: "var(--border-1-subtle)",
+                }}
+              >
+                <code className="lw-mono" style={{ fontSize: "var(--fs-ui)" }}>
+                  {f.file}
+                </code>
               </td>
               <td
                 className="lw-numeric"
-                style={{ padding: "var(--space-2) var(--space-3)", borderBottom: "var(--border-1-subtle)", fontSize: "var(--fs-ui)" }}
+                style={{
+                  padding: "var(--space-2) var(--space-3)",
+                  borderBottom: "var(--border-1-subtle)",
+                  fontSize: "var(--fs-ui)",
+                }}
               >
                 {f.size}
               </td>
@@ -231,9 +320,19 @@ export const Marks: Story = {
         </tbody>
       </table>
 
-      <Section title="Wordmark" lead="Die volle Marke — Zeichen und Wort. Sie steht dort, wo Platz für den Namen ist.">
+      <Section
+        title="Wordmark"
+        lead="Die volle Marke — Zeichen und Wort. Sie steht dort, wo Platz für den Namen ist."
+      >
         <div style={grid}>
-          <Plate src={WORDMARK} alt="Ludwig" height={40} ground="bg" verdict="richtig" why="der Normalfall" />
+          <Plate
+            src={WORDMARK}
+            alt="Ludwig"
+            height={40}
+            ground="bg"
+            verdict="richtig"
+            why="der Normalfall"
+          />
           <Plate
             src={WORDMARK_LIGHT}
             alt="Ludwig"
@@ -253,9 +352,19 @@ export const Marks: Story = {
         </div>
       </Section>
 
-      <Section title="Mark" lead="Das quadratische Zeichen ohne Wort — für alles, was klein und quadratisch ist.">
+      <Section
+        title="Mark"
+        lead="Das quadratische Zeichen ohne Wort — für alles, was klein und quadratisch ist."
+      >
         <div style={grid}>
-          <Plate src={MARK} alt="Ludwig" height={56} ground="bg" verdict="richtig" why="Favicon, Avatar, App-Icon" />
+          <Plate
+            src={MARK}
+            alt="Ludwig"
+            height={56}
+            ground="bg"
+            verdict="richtig"
+            why="Favicon, Avatar, App-Icon"
+          />
           <Plate
             src={MARK}
             alt="Ludwig"
@@ -276,10 +385,12 @@ export const Marks: Story = {
       </Section>
 
       <p className="lw-caption" style={{ maxWidth: "var(--content-measure)" }}>
-        Die Zeichen tragen zwei Farbwerte, die <code className="lw-mono">tokens.css</code> nicht führt. Das ist
-        Absicht und keine Nachlässigkeit: die Marke steht — wie{" "}
-        <code className="lw-mono">app-chrome.css</code> — bewusst außerhalb der Palette (A5-Ausnahme). Wer sie
-        sucht, findet sie in den SVG-Dateien; ein Token dafür wird <strong>nicht</strong> erfunden.
+        Die Zeichen tragen zwei Farbwerte, die{" "}
+        <code className="lw-mono">tokens.css</code> nicht führt. Das ist Absicht
+        und keine Nachlässigkeit: die Marke steht — wie{" "}
+        <code className="lw-mono">app-chrome.css</code> — bewusst außerhalb der
+        Palette (A5-Ausnahme). Wer sie sucht, findet sie in den SVG-Dateien; ein
+        Token dafür wird <strong>nicht</strong> erfunden.
       </p>
     </div>
   ),
@@ -301,24 +412,53 @@ export const Sizes: Story = {
         title="Wordmark im Sidebar-Kopf"
         lead="Die Zeile ist 56 px hoch (.sb__logo). Das Zeichen steht mit Luft darin, es füllt sie nicht aus — links das echte Markup mit dem echten Verlauf."
       >
-        <div style={{ display: "flex", gap: "var(--space-8)", alignItems: "flex-start", flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--space-8)",
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+          }}
+        >
           <div>
             <SidebarHead>
-              <img src={WORDMARK_LIGHT} alt="Ludwig" style={{ height: 32, width: "auto" }} />
+              <img
+                src={WORDMARK_LIGHT}
+                alt="Ludwig"
+                style={{ height: 32, width: "auto" }}
+              />
             </SidebarHead>
-            <div style={{ ...note, marginTop: "var(--space-2)" }}>ausgeklappt · 240 px Spalte, 56 px Zeile</div>
+            <div style={{ ...note, marginTop: "var(--space-2)" }}>
+              ausgeklappt · 240 px Spalte, 56 px Zeile
+            </div>
           </div>
           <div>
             <SidebarHead collapsed>
-              <img src={MARK} alt="Ludwig" style={{ height: 32, width: "auto" }} />
+              <img
+                src={MARK}
+                alt="Ludwig"
+                style={{ height: 32, width: "auto" }}
+              />
             </SidebarHead>
-            <div style={{ ...note, marginTop: "var(--space-2)" }}>eingeklappt · 64 px Spalte</div>
+            <div style={{ ...note, marginTop: "var(--space-2)" }}>
+              eingeklappt · 64 px Spalte
+            </div>
           </div>
         </div>
-        <p className="lw-body-sm" style={{ maxWidth: "var(--content-measure)", marginTop: "var(--space-5)" }}>
-          <strong>Das Mark ersetzt das Wordmark, sobald der Name nicht mehr passt</strong> — heute genau ein Fall:
-          die eingeklappte Sidebar (<code className="lw-mono">.is-collapsed</code>). Dort steht bisher der
-          Buchstabe „L". Der Buchstabe ist kein Zeichen, sondern ein Platzhalter dafür.
+        <p
+          className="lw-body-sm"
+          style={{
+            maxWidth: "var(--content-measure)",
+            marginTop: "var(--space-5)",
+          }}
+        >
+          <strong>
+            Das Mark ersetzt das Wordmark, sobald der Name nicht mehr passt
+          </strong>{" "}
+          — heute genau ein Fall: die eingeklappte Sidebar (
+          <code className="lw-mono">.is-collapsed</code>). Dort steht bisher der
+          Buchstabe „L". Der Buchstabe ist kein Zeichen, sondern ein Platzhalter
+          dafür.
         </p>
       </Section>
 
@@ -326,21 +466,51 @@ export const Sizes: Story = {
         title="Mark in den Maßen, die es wirklich gibt"
         lead="Favicon und App-Icon geben die Maße vor, nicht das Design. Bei 16 px muss der Bogen noch zu erkennen sein — hier nachsehen, nicht schätzen."
       >
-        <div style={{ display: "flex", gap: "var(--space-10)", alignItems: "flex-end" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--space-10)",
+            alignItems: "flex-end",
+          }}
+        >
           {MARK_SIZES.map((s) => (
             <div key={s.px}>
-              <div style={{ height: "var(--space-8)", display: "flex", alignItems: "flex-end" }}>
-                <img src={MARK} alt="Ludwig" style={{ width: s.px, height: s.px }} />
+              <div
+                style={{
+                  height: "var(--space-8)",
+                  display: "flex",
+                  alignItems: "flex-end",
+                }}
+              >
+                <img
+                  src={MARK}
+                  alt="Ludwig"
+                  style={{ width: s.px, height: s.px }}
+                />
               </div>
-              <div className="lw-numeric" style={{ fontWeight: 600, fontSize: "var(--fs-ui)", marginTop: "var(--space-2)" }}>
+              <div
+                className="lw-numeric"
+                style={{
+                  fontWeight: 600,
+                  fontSize: "var(--fs-ui)",
+                  marginTop: "var(--space-2)",
+                }}
+              >
                 {s.px} px
               </div>
               <div style={note}>{s.use}</div>
             </div>
           ))}
         </div>
-        <p className="lw-caption" style={{ marginTop: "var(--space-4)", maxWidth: "var(--content-measure)" }}>
-          Unter 16 px wird das Mark nicht verkleinert — dort steht kein Zeichen, sondern nichts.
+        <p
+          className="lw-caption"
+          style={{
+            marginTop: "var(--space-4)",
+            maxWidth: "var(--content-measure)",
+          }}
+        >
+          Unter 16 px wird das Mark nicht verkleinert — dort steht kein Zeichen,
+          sondern nichts.
         </p>
       </Section>
     </div>
@@ -349,14 +519,48 @@ export const Sizes: Story = {
 
 /* ── Misuse ───────────────────────────────────────────────────────────── */
 
-function Pair({ title, why, right, wrong }: { title: string; why: ReactNode; right: ReactNode; wrong: ReactNode }) {
+function Pair({
+  title,
+  why,
+  right,
+  wrong,
+}: {
+  title: string;
+  why: ReactNode;
+  right: ReactNode;
+  wrong: ReactNode;
+}) {
   return (
     <div style={{ marginBottom: "var(--space-8)" }}>
-      <div style={{ fontSize: "var(--fs-ui-md)", fontWeight: 600, marginBottom: "var(--space-1)" }}>{title}</div>
-      <div className="lw-caption" style={{ marginBottom: "var(--space-3)", maxWidth: "var(--content-measure)" }}>
+      {/* Eine echte Überschrift, kein fettes `div`: `Marks` und `Sizes` geben
+          ihren Abschnitten über `Section` ein `h3`, und zwei Gliederungen in
+          einer Datei sind für eine Vorlesehilfe keine (Abnahme 0056). */}
+      <h3
+        style={{
+          fontSize: "var(--fs-ui-md)",
+          fontWeight: 600,
+          margin: "0 0 var(--space-1)",
+        }}
+      >
+        {title}
+      </h3>
+      <div
+        className="lw-caption"
+        style={{
+          marginBottom: "var(--space-3)",
+          maxWidth: "var(--content-measure)",
+        }}
+      >
         {why}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-5)", maxWidth: "var(--container-narrow)" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "var(--space-5)",
+          maxWidth: "var(--container-narrow)",
+        }}
+      >
         <div>
           <Mark tone="success">richtig</Mark>
           <div style={{ marginTop: "var(--space-2)" }}>{right}</div>
@@ -385,18 +589,40 @@ const plate: CSSProperties = {
 export const Misuse: Story = {
   render: () => (
     <div style={page}>
-      <p className="lw-body-sm" style={{ maxWidth: "var(--content-measure)", marginTop: 0 }}>
-        Die Marke ist ein Zeichen, kein Gestaltungselement. Sie wird geladen, platziert und in Ruhe gelassen —
-        alles, was man mit ihr „macht", ist ein Fehler.
+      <p
+        className="lw-body-sm"
+        style={{ maxWidth: "var(--content-measure)", marginTop: 0 }}
+      >
+        Die Marke ist ein Zeichen, kein Gestaltungselement. Sie wird geladen,
+        platziert und in Ruhe gelassen — alles, was man mit ihr „macht", ist ein
+        Fehler.
       </p>
 
       <Pair
         title="Nicht umfärben"
-        why={"Das Zeichen trägt seine eigenen Farben. Es nimmt keine Semantikfarbe an — schon deshalb, weil Farbe im Set Kritikalität kodiert und eine rote Marke „Fehler“ hieße."}
-        right={<div style={plate}><img src={WORDMARK} alt="Ludwig" style={{ height: 40, width: "auto" }} /></div>}
+        why={
+          "Das Zeichen trägt seine eigenen Farben. Es nimmt keine Semantikfarbe an — schon deshalb, weil Farbe im Set Kritikalität kodiert und eine rote Marke „Fehler“ hieße."
+        }
+        right={
+          <div style={plate}>
+            <img
+              src={WORDMARK}
+              alt="Ludwig-Wortmarke, unverändert"
+              style={{ height: 40, width: "auto" }}
+            />
+          </div>
+        }
         wrong={
           <div style={plate}>
-            <img src={WORDMARK} alt="Ludwig"  style={{ height: 40, width: "auto",  filter: "sepia(1) saturate(6) hue-rotate(310deg)" }} />
+            <img
+              src={WORDMARK}
+              alt="Ludwig-Wortmarke, rot umgefärbt"
+              style={{
+                height: 40,
+                width: "auto",
+                filter: "sepia(1) saturate(6) hue-rotate(310deg)",
+              }}
+            />
           </div>
         }
       />
@@ -404,30 +630,60 @@ export const Misuse: Story = {
       <Pair
         title="Nicht verzerren"
         why="Höhe setzen, Breite folgen lassen. Das Seitenverhältnis steht in der viewBox und ist nicht verhandelbar."
-        right={<div style={plate}><img src={WORDMARK} alt="Ludwig" style={{ height: 40, width: "auto" }} /></div>}
-        wrong={<div style={plate}><img
-                src={WORDMARK}
-                alt=""
-                /* Hier **soll** es verzerren — deshalb beide Maße im Stil und
+        right={
+          <div style={plate}>
+            <img
+              src={WORDMARK}
+              alt="Ludwig-Wortmarke, unverzerrt"
+              style={{ height: 40, width: "auto" }}
+            />
+          </div>
+        }
+        wrong={
+          <div style={plate}>
+            <img
+              src={WORDMARK}
+              /* Das Bild **ist** die Aussage: ohne Namen bleibt die
+                   wichtigste Tafel der Seite für eine Vorlesehilfe stumm, und
+                   „richtig" wie „falsch" hießen beide „Ludwig" (Abnahme
+                   0056, M5). */
+              alt="Ludwig-Wortmarke, auf 100 × 40 px gestaucht"
+              /* Hier **soll** es verzerren — deshalb beide Maße im Stil und
                    kein `width: auto`. Mit den Attributen allein zeigte die
                    Tafel gemessen 100 × 25 px, also das richtige Verhältnis:
                    das wichtigste „so nicht" der Seite war unsichtbar. */
-                style={{ width: 100, height: 40 }}
-              /></div>}
+              style={{ width: 100, height: 40 }}
+            />
+          </div>
+        }
       />
 
       <Pair
         title="Nur drei Gründe"
         why={
           <>
-            <code className="lw-mono">--color-bg</code>, <code className="lw-mono">--color-primary</code> und der
-            Sidebar-Verlauf. Jeder andere Grund — auch eine Semantikfläche — ist keiner.
+            <code className="lw-mono">--color-bg</code>,{" "}
+            <code className="lw-mono">--color-primary</code> und der
+            Sidebar-Verlauf. Jeder andere Grund — auch eine Semantikfläche — ist
+            keiner.
           </>
         }
-        right={<div style={plate}><img src={WORDMARK} alt="Ludwig" style={{ height: 40, width: "auto" }} /></div>}
+        right={
+          <div style={plate}>
+            <img
+              src={WORDMARK}
+              alt="Ludwig-Wortmarke auf der Grundfläche"
+              style={{ height: 40, width: "auto" }}
+            />
+          </div>
+        }
         wrong={
           <div style={{ ...plate, background: "var(--color-warning-bg)" }}>
-            <img src={WORDMARK} alt="Ludwig" style={{ height: 40, width: "auto" }} />
+            <img
+              src={WORDMARK}
+              alt="Ludwig-Wortmarke auf einer Warnfläche"
+              style={{ height: 40, width: "auto" }}
+            />
           </div>
         }
       />
@@ -435,10 +691,27 @@ export const Misuse: Story = {
       <Pair
         title="Kein Schatten, kein Glow"
         why="Das Zeichen liegt in der Fläche, nicht darüber. Schatten sind für Menü, Popover und Dialog reserviert."
-        right={<div style={plate}><img src={MARK} alt="Ludwig" style={{ height: 56, width: "auto" }} /></div>}
+        right={
+          <div style={plate}>
+            <img
+              src={MARK}
+              alt="Ludwig-Bildmarke, ohne Schatten"
+              style={{ height: 56, width: "auto" }}
+            />
+          </div>
+        }
         wrong={
           <div style={plate}>
-            <img src={MARK} alt="Ludwig"  style={{ height: 56, width: "auto",  boxShadow: "var(--glow-accent)", borderRadius: "var(--radius-xl)" }} />
+            <img
+              src={MARK}
+              alt="Ludwig-Bildmarke mit Schein darunter"
+              style={{
+                height: 56,
+                width: "auto",
+                boxShadow: "var(--glow-accent)",
+                borderRadius: "var(--radius-xl)",
+              }}
+            />
           </div>
         }
       />
@@ -448,20 +721,27 @@ export const Misuse: Story = {
         why={
           <>
             Der häufigste Fall, und er steht heute im eigenen Set:{" "}
-            <strong>{LOGO_TEXT_STORIES.length} Stories</strong> schreiben „Ludwig" beziehungsweise „L" als Text in
-            den Sidebar-Kopf —{" "}
+            {/* „Dateien", nicht „Stories": gezählt wird über die Quelldateien,
+                und `AppShell` trägt den Fall zweimal (Abnahme 0056). */}
+            <strong>{LOGO_TEXT_STORIES.length} Dateien</strong> schreiben
+            „Ludwig" beziehungsweise „L" als Text in den Sidebar-Kopf —{" "}
             {LOGO_TEXT_STORIES.map((f, i) => (
               <span key={f}>
                 {i > 0 ? ", " : ""}
                 <code className="lw-mono">{f}</code>
               </span>
             ))}
-            . Sie bleiben unangetastet, bis die Top-Bar-Füllung gehoben wird; hier steht, was dann hingehört.
+            . Sie bleiben unangetastet, bis die Top-Bar-Füllung gehoben wird;
+            hier steht, was dann hingehört.
           </>
         }
         right={
           <SidebarHead>
-            <img src={WORDMARK_LIGHT} alt="Ludwig" style={{ height: 32, width: "auto" }} />
+            <img
+              src={WORDMARK_LIGHT}
+              alt="Ludwig"
+              style={{ height: 32, width: "auto" }}
+            />
           </SidebarHead>
         }
         wrong={<SidebarHead>Ludwig</SidebarHead>}

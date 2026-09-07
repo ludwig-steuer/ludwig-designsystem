@@ -148,11 +148,91 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+Gemessen am 2026-09-07 gegen `ec424a9` (Story zuletzt in `7560236`), Dev-Server
+`http://localhost:6107`, also gegen die Quelle und nicht gegen
+`storybook-static`. Jede Zahl unten ist im Browser gelesen (CDP), keine aus dem
+Quelltext abgeschrieben.
+
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| … | … | … |
+| `pnpm typecheck` und `pnpm build` grün | `tsc --noEmit` ohne Ausgabe; `storybook build` endet mit „Storybook build completed successfully"; dazu `pnpm check:icons` „in Ordnung, 53 Zeichen in der Registry" | erfüllt |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/Brand.stories.tsx`, `title: "v3/Grundlagen/Marke"`; `index.json` führt `v3-grundlagen-marke--marks`, `--sizes`, `--misuse` | erfüllt |
+| Code englisch; `@when`/`@instead` (entfällt) | Bezeichner, Props, Typen und Story-Exporte sind englisch; Kommentare und JSDoc sind deutsch. Dasselbe gilt für `Color`-, `Icons`-, `Surface`- und `Typography.stories.tsx` — Befund am Set, nicht an dieser Aufgabe | erfüllt, mit Set-Befund |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -c '#[0-9A-Fa-f]\{6\}' src/ui/v3/Brand.stories.tsx` = **0**; `grep -c '<svg'` = **0**; kein Status im Spiel, keine Registry berührt. Die px-Zahlen (16 · 24 · 32 · 40 · 56 · 100) sind Gegenstand der Seite und von M1/M2 ausdrücklich als Stil verlangt; `GROUND_LABEL` bildet Grund→Token-Name ab, keine Statuslabel | erfüllt |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | drei von drei; `Empty`, `EmptyAfterFilter`, `Loading`, `Error` in der Spec begründet | erfüllt |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Kontrast im Browser gerechnet: kleinster Textwert `--color-text-subtle` 4,51:1, Tabellentext 6,17:1, Badge „richtig" 4,68:1, „falsch" 5,60:1 — alle ≥ 4,5:1. Jeder farbige Zustand trägt sein Wort (V7). Keine Bewegung, kein Fokusziel, keine Ikone ohne Wort. §11.7 Stufe 0 führt die Marke als `v2 (0056)`. Offen bleibt allein die Vorlesbarkeit der Tafeln (M5) | erfüllt bis auf M5 |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle drei Stories über CDP geladen und vermessen; 6 · 5 · 9 Bilder, alle `complete` | erfüllt |
+| Story lädt die drei SVGs als Dateien, kein SVG-Markup, kein Hex | im Browser `naturalWidth × naturalHeight` 300×76 (beide Wordmarks) und 150×150 (Mark), geladen von `/reference/design-system-v2/assets/…`; die `viewBox` der Dateien lautet 220 56, 220 56 und 56 56 — genau die Werte, die die Tabelle nennt | erfüllt |
+| `Marks` zeigt die drei Zeichen auf hellem und dunklem Grund; helle Variante nie auf `--color-bg`, Wordmark nie auf dunkel | `--marks`: `ludwig-logo.svg` 157,14 × 40 auf `rgb(255,255,255)` (= `--color-bg`); `ludwig-logo-light.svg` 157,14 × 40 auf `rgb(26,58,92)` (= `--color-primary`) und auf `linear-gradient(rgb(31,70,112), rgb(20,48,75) …)` (Sidebar); `ludwig-mark.svg` 56 × 56 auf allen dreien. Kein dunkles Wordmark auf dunklem Grund, keine helle Variante auf Weiß | erfüllt |
+| `Sizes` zeigt das Mark bei 16, 24 und 32 px scharf und nennt die Ablösung | `--sizes`: gemessen 16×16, 24×24, 32×32 — exakt, und als SVG verlustfrei. Der echte Rahmen misst 240 px Spalte ausgeklappt, 64 px eingeklappt, `.sb__logo` 56 px Zeile; das Wordmark steht mit 125,7 × 32 darin, also mit Luft. Der Satz „Das Mark ersetzt das Wordmark, sobald der Name nicht mehr passt … `.is-collapsed`" steht da | erfüllt |
+| `Misuse` zeigt Text an Stelle des Zeichens und nennt die Stories, die es heute so machen | `--misuse` rendert „**6** Stories" und listet `AppShell.stories.tsx`, `CaseDetailView.stories.tsx`, `CaseList.stories.tsx`, `CommandPalette.stories.tsx`, `NavList.stories.tsx`, `SourceDocumentView.stories.tsx`. `grep -rl 'sb__logo' src/ui/v3` findet genau diese sechs Dateien (sieben Fundstellen, `AppShell` zweimal). Die „vier Stories" der Kriterienzeile sind durch M4 abgelöst: die Liste wird gerechnet, nicht gepflegt | erfüllt |
+| Keine Datei unter `reference/` geändert, kopiert oder verschoben | `git status --short reference/ public/` leer; der ganze Baum ist sauber | erfüllt |
+| Die Story steht unter `v3/Grundlagen/…` | ja, nicht unter `Primitives` | erfüllt |
+| M1 / M3 — die Höhe steht als Stil, nicht als Attribut | nachgemessen: `Marks` 157,14 × 40 und 56 × 56, `Sizes` 16 · 24 · 32 exakt. Die Behauptung des Bauabschnitts trifft zu | behoben |
+| M2 — die Tafel „Nicht verzerren" verzerrt | gemessen 100 × 40, Verhältnis 2,500 gegen 3,947 der Datei — sichtbar gestaucht | behoben |
+| M4 — die Liste wird gerechnet | `import.meta.glob`; das gerenderte Ergebnis deckt sich mit `grep` (sechs Dateien) und ist gegenüber der handgeschriebenen Fassung um zwei gewachsen | behoben |
+| M5 — die Missbrauchs-Tafeln sind für eine Vorlesehilfe stumm | `Accessibility.getFullAXTree` auf `--misuse`: **9 `<img>` im DOM, 8 `image`-Knoten im Baum**. Die fehlende ist ausgerechnet „Nicht verzerren / falsch" (`alt=""`, gemessen 100 × 40); sie gilt als präsentational und kommt im Baum nicht vor — gelesen wird dort „falsch", dann nichts. Die übrigen acht tragen ausnahmslos denselben Namen „Ludwig" (`nameFrom: attribute:Ludwig`), keiner eine `description`. Das Urteil steht ausschließlich im Nachbartext | **offen, blockiert** |
+| M6 — ungenutzter `verdict: "falsch"`-Zweig in `Plate` | bleibt laut Spec-Entscheid. Anmerkung ohne Folge: `Pair` benutzt `Plate` gar nicht, der Zweig wartet also nicht auf die sechste Tafel, sondern auf einen Aufrufer, den es nicht gibt | übernommen |
 
-Abgenommen von / am: … · Offene Punkte: …
+### M5 — die Tafeln sagen nicht, was sie zeigen (blockiert)
+
+**Kriterium:** der Abschnitt „Die Mängel der Abnahme vom 2026-09-06 — behoben",
+Punkt M5. Er nennt den Mangel, aber anders als M1–M4 keinen Beheb-Satz und
+anders als M6 kein „bleibt".
+
+**Messung** (`Accessibility.getFullAXTree`, nicht das Markup): im Baum von
+`v3-grundlagen-marke--misuse` stehen acht `image`-Knoten für neun Bilder. Die
+Lesereihenfolge des zweiten Paars lautet
+
+```
+StaticText "Nicht verzerren"
+  StaticText "richtig" → image "Ludwig"
+  StaticText "falsch"  → (nichts)
+```
+
+Alle acht sichtbaren Knoten heißen gleich: `"Ludwig"`. Wer die Seite hört,
+bekommt fünfmal „richtig, Ludwig" und viermal „falsch, Ludwig" — dieselben
+Wörter für das Richtige und das Verbotene — und beim wichtigsten Fall der Seite
+gar nichts. Das Bild trägt die ganze Aussage, und genau die fehlt ihm.
+
+**Vorschlag:** den Namen aus dem Urteil bauen, statt ihn je Bild zu tippen —
+`Plate` und `Pair` kennen Titel und Urteil bereits. Etwa
+`alt="Ludwig-Wordmark, auf 100 × 40 px gestaucht"`,
+`alt="Ludwig-Wordmark, umgefärbt"`, `alt="Ludwig-Wordmark auf Warnfläche"`,
+`alt="Ludwig-Mark mit Glow"` und auf der guten Seite
+`alt="Ludwig-Wordmark, unverändert"`. Kein `alt=""` auf einer Tafel, die etwas
+zeigen soll: ein leeres `alt` heißt „hier steht nichts Wichtiges", und das ist
+hier die Unwahrheit.
+
+### Nicht blockierend
+
+1. **`Misuse` hat keine Überschriften.** Der Baum enthält null `heading`-Knoten;
+   die fünf Regeltitel sind `<div style={{ fontWeight: 600 }}>`. `Marks` und
+   `Sizes` haben sie über `Section` (`h3.lw-h4`). Zwei Gliederungen in einer
+   Datei; wer per Überschrift springt, findet in `Misuse` nichts.
+2. **„6 Stories" zählt Dateien, nicht Stories.** Sieben Fundstellen in sechs
+   Dateien, `AppShell` zweimal. „6 Dateien" wäre der richtige Satz auf einer
+   Seite, deren Gegenstand Genauigkeit ist.
+3. **Zwei doppelte Leerzeichen** in den Zeilen 399 und 441
+   (`alt="Ludwig"  style=`, `"auto",  filter:`) — Rest einer Textersetzung. Das
+   Repo hat kein Formatier- oder Lint-Skript, das so etwas fängt (Befund am Set).
+4. **`SidebarHead` erzeugt eine `complementary`-Landmarke** je Vorführung
+   (`<aside class="app__sidebar">`), zweimal in `Sizes` und zweimal in `Misuse`.
+   Echtes Markup zu zeigen ist der Punkt der Tafel; die Landmarke ist der Preis.
+
+### Befunde am Set (gehören nicht zu 0056)
+
+- **Deutsche Kommentare und JSDoc in den v3-Stories** widersprechen `CLAUDE.md`
+  („Code nur Englisch … Kommentare, JSDoc"). Es ist die gelebte Regel in
+  `Brand`, `Color`, `Icons`, `Surface` und `Typography.stories.tsx`. Entweder
+  zieht die Regel nach oder die Dateien — eine Abnahme entscheidet das nicht.
+- **`pnpm check:icons`** meldet „2 Datei(en) noch offen". Das ist die
+  Icon-Leiter aus einer anderen Aufgabe, kein Befund an 0056.
+- **Kein Formatierer, kein Linter** in `package.json` (nur `typecheck`, `build`,
+  `check:icons`); Befund 3 oben wäre sonst nie stehen geblieben.
+
+Abgenommen von / am: Claude (fremde Abnahme), 2026-09-07 · Ergebnis: **zurück**
+· Offene Punkte: M5 (blockiert); vier nicht blockierende Befunde und drei am Set.
 
 ## Die Mängel der Abnahme vom 2026-09-06 — behoben
 
@@ -179,3 +259,45 @@ ist derselbe Fehler, den die Seite an anderer Stelle anprangert.
 **M5 — die Missbrauchs-Tafeln tragen `alt=""`**, wo das Urteil im Text daneben
 steht. **M6** (ein `verdict: "falsch"`-Zweig, den `Marks` nie benutzt) bleibt:
 er kostet nichts und `Pair` wird ihn brauchen, sobald eine sechste Tafel dazukommt.
+
+## Nach der Abnahme (2026-09-07): die Tafel, die am lautesten sein sollte, war stumm
+
+**M5 erledigt.** Die Abnahme hat nicht das Markup gelesen, sondern den
+Zugänglichkeitsbaum gemessen: **9 `<img>` im DOM, 8 `image`-Knoten im Baum**.
+Die fehlende war ausgerechnet „Nicht verzerren / falsch" — die Tafel, die die
+Spec selbst als das wichtigste „so nicht" der Seite bezeichnet. Und die
+übrigen acht hießen ausnahmslos „Ludwig": wer die Seite hört, bekam „richtig,
+Ludwig" und „falsch, Ludwig" — **dieselben Wörter für das Richtige und das
+Verbotene**.
+
+Jede Tafel trägt jetzt ihr Urteil im Namen. Gemessen: 9 Bilder, **null ohne
+Namen**, acht verschiedene Texte („Ludwig-Wortmarke, auf 100 × 40 px
+gestaucht", „… rot umgefärbt", „… auf einer Warnfläche", „Ludwig-Bildmarke mit
+Schein darunter" …). Das neunte heißt weiterhin „Ludwig" — es ist die gute
+Seite der Tafel „Kein Text an Stelle des Zeichens", und dort ist genau das der
+Punkt.
+
+**Auch erledigt:**
+
+- Die fünf Regeltitel der Missbrauchs-Seite waren fette `div`s, während
+  `Marks` und `Sizes` über `Section` echte `h3` haben — zwei Gliederungen in
+  einer Datei, und für eine Vorlesehilfe war die eine keine. Gemessen: **7**
+  Überschriften statt 0.
+- „6 Stories" zählte in Wahrheit Dateien (`AppShell` trägt den Fall zweimal).
+  Der Satz sagt jetzt „Dateien".
+- Die zwei doppelten Leerzeichen aus einer alten Textersetzung sind weg (die
+  Datei ist einmal durch den Formatierer gelaufen).
+
+**Nicht geändert, mit Grund:** `SidebarHead` erzeugt je Vorführung eine
+`complementary`-Landmarke, zweimal in `Sizes` und zweimal in `Misuse`. Das ist
+der Preis dafür, echtes Markup zu zeigen statt eines Bildes davon — und der
+ist er wert.
+
+**Befund am Set, der über diese Aufgabe hinausgeht:** die deutschen Kommentare
+und JSDocs in den Grundlagen-Stories (`Brand`, `Color`, `Icons`, `Surface`,
+`Typography`) widersprechen der Hausregel „Code englisch". Sie sind dort die
+gelebte Praxis, weil diese Dateien selbst Dokumentation sind. **Entweder die
+Regel nennt diese Ausnahme, oder die Dateien ziehen nach** — das entscheidet
+keine Abnahme und kein Bau. Dazu: es gibt keinen Formatierer und keinen
+Linter im `package.json`, sonst wären die doppelten Leerzeichen nie
+stehengeblieben.
