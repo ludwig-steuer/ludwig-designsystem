@@ -144,7 +144,17 @@ export const Grouped: Story = {
             <HeadRow>
               {cols.map((c) => (
                 <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
-                  {c.header}
+                  {/* Auch von Hand bleibt der Kopf ein Sortierlink — sonst
+                      verliert die gruppierte Ansicht Rang 5 des Seitenprofils
+                      („Welche sind Karteileichen?"), und das ist genau die
+                      Lücke, die diese Story an der heutigen Ansicht anprangert. */}
+                  {c.sortable ? (
+                    <a className="v2sortlink" href={listHref({ sort: c.key, dir: "asc" })}>
+                      {c.header}
+                    </a>
+                  ) : (
+                    c.header
+                  )}
                   {c.headerAside}
                 </span>
               ))}

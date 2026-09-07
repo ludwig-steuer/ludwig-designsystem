@@ -2,6 +2,7 @@ import {
   ACCOUNT_CLASS_LABEL,
   type AccountClass,
   type AccountRow,
+  type AccountSortKey,
 } from "@/ludwig/modules/accounts/domain/account";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { StatusBadge } from "../../patterns/StatusBadge";
@@ -93,6 +94,11 @@ export interface AccountColumnOptions {
   partnerName?: (account: AccountRow) => string | null;
   partnerHref?: (account: AccountRow) => string | undefined;
   columns?: AccountColumn[];
+  /**
+   * The two words of the column „Angelegt". They are not in the app's domain
+   * (finding L-96); the default mirrors what the app says elsewhere.
+   */
+  originLabels?: { client: string; catalog: string };
 }
 
 /**
@@ -106,7 +112,8 @@ export function accountColumns({
   partnerName,
   partnerHref,
   columns = ACCOUNT_LIST_COLUMNS,
-}: AccountColumnOptions): ColumnDef<AccountRow>[] {
+  originLabels = { client: "im Mandanten", catalog: "nur im SKR-Katalog" },
+}: AccountColumnOptions = {}): ColumnDef<AccountRow>[] {
   const picked = new Set(columns);
 
   const defs: Record<AccountColumn, ColumnDef<AccountRow>> = {
@@ -121,15 +128,18 @@ export function accountColumns({
       // **Text, no badge.** The class is a place in the chart, not a state:
       // no progress, no criticality — and colour in this set means
       // criticality only (V6). The label comes from the app's own map.
+      // No cast: an unknown value from the database falls through visibly as
+      // its raw word, the way `accountSourceLabel` does it one file over — a
+      // silently empty cell would hide exactly the case worth seeing.
       cell: (a) =>
         a.skrClass ? (
-          ACCOUNT_CLASS_LABEL[a.skrClass as AccountClass]
+          ACCOUNT_CLASS_LABEL[a.skrClass] ?? a.skrClass
         ) : (
           <span className="v2muted">—</span>
         ),
     },
     number: {
-      key: "account_number",
+      key: "account_number" satisfies AccountSortKey,
       header: "Konto-Nr.",
       width: "110px",
       sortable: true,
@@ -145,14 +155,26 @@ export function accountColumns({
         ),
     },
     name: {
-      key: "account_name",
+      key: "account_name" satisfies AccountSortKey,
       header: "Name",
       // The only flexible track — and its floor in **px**, never `ch`: a `ch`
       // minimum is computed from the font size of the element, and head and
       // row stand at different sizes (the lesson of 0070).
       width: "minmax(200px, 1fr)",
       sortable: true,
-      cell: (a) => a.accountName ?? <span className="v2muted">ohne Namen</span>,
+      // **Kürzen, nicht wachsen.** The profile measures the name at p90 = 39
+      // and max = 50 characters; at the floor of this track (200 px) that is
+      // 244 px of text and a row of 67 px instead of 47. The full name stays
+      // in the `title` — the profile prescribes exactly this („kürzen ab 40,
+      // voller Name im `title`"), and `caseColumns` has done it since 0096.
+      cell: (a) =>
+        a.accountName ? (
+          <span className="v2trunc" title={a.accountName}>
+            {a.accountName}
+          </span>
+        ) : (
+          <span className="v2muted">ohne Namen</span>
+        ),
     },
     role: {
       key: "role",
@@ -181,12 +203,20 @@ export function accountColumns({
         const name = partnerName?.(a);
         if (!name) return <span className="v2muted">—</span>;
         const to = partnerHref?.(a);
-        return to ? (
-          <a className="v2link" href={to}>
-            {name}
-          </a>
-        ) : (
-          name
+        // A company name has no upper bound in the data — „Musterbau Handels-
+        // und Beteiligungs GmbH & Co. KG" is 49 characters and drove the row
+        // to 67 px at **every** width. The track stays 200 px, the row does
+        // not grow.
+        return (
+          <span className="v2trunc" title={name}>
+            {to ? (
+              <Link className="v2link" href={to}>
+                {name}
+              </Link>
+            ) : (
+              name
+            )}
+          </span>
         );
       },
     },
@@ -198,17 +228,23 @@ export function accountColumns({
       // nothing; `origin` separates the two halves of the catalogue view —
       // the account this client has, and the one the SKR knows and nobody
       // created. That is the whole question of `scope=all`.
+      // The two words are **not** in `src/ludwig`: `origin` has no label map
+      // there (finding L-96), while `source` has one. Until it exists they
+      // stand here once — and the caller can override them rather than build
+      // a second pair somewhere else.
       cell: (a) =>
         a.origin === "client" ? (
-          "im Mandanten"
+          originLabels.client
         ) : (
-          <span className="v2muted">nur im SKR-Katalog</span>
+          <span className="v2muted">{originLabels.catalog}</span>
         ),
     },
     bookings: {
-      key: "usage_booking_count",
+      key: "usage_booking_count" satisfies AccountSortKey,
       header: "Buchungen",
-      width: "130px",
+      // 120 px: der Kopf misst 69 px, die größte Zahl des Bestands („5.474")
+      // deutlich weniger — mit dem Sortierpfeil bleibt Luft.
+      width: "120px",
       align: "end",
       sortable: true,
       // 85 % of the stock is zero. The zero stands there as a **number**, not
@@ -222,9 +258,10 @@ export function accountColumns({
         ),
     },
     lastBooking: {
-      key: "last_booking_date",
+      key: "last_booking_date" satisfies AccountSortKey,
       header: "Letzte Buchung",
-      width: "140px",
+      // 130 px: der Kopf misst 94,8 px, das Datum („31.08.2026") 70.
+      width: "130px",
       sortable: true,
       cell: (a) => <Time value={a.lastBookingDate} format="date" length="short" size="sm" />,
     },

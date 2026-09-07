@@ -36,7 +36,7 @@ keine Tabelle mit Filter.
 | 1 | „Wie groß ist der Rahmen, und wie viel davon lebt?" | Kopfzahlen: Konten gesamt · bebucht · ungenutzt · letzte Buchung | `AccountsStats` → `KpiGrid` + `KpiTile` |
 | 2 | „Wo ist das Konto, das ich suche?" | Volltext über Nummer und Name — **die häufigste Handlung** | `FilterBar` mit `search` |
 | 3 | „Welche Klasse hat wie viele?" | Klassen-Aufriss (SKR 0–9) mit Zählern, als Filter | `FilterBar`, Achse `konto_typ` |
-| 4 | „Was steht in der Zeile?" | Nummer, Name, Rolle, Buchungen, Kontostatus | `AccountRow` / `accountColumns()` |
+| 4 | „Was steht in der Zeile?" | SKR-Klasse, Nummer, Name, Rolle, Buchungen, letzte Buchung — **kein Kontostatus**: 99 % `active`, und die Karteileichen-Frage beantwortet die Buchungsspalte (Befund L-90) | `accountColumns()` |
 | 5 | „Welche sind Karteileichen?" | Sortierung nach Buchungen ↑ und nach letzter Buchung | Sortierung über die URL |
 | 6 | „Fehlt ein Konto, das der SKR kennt?" | Der Katalog-Zusatz (`scope=all`), Katalogzeilen erkennbar markiert | Prop am Spaltensatz |
 | 7 | „Was liegt auf diesem Konto?" | Klick auf die Zeile → Kontoauszug | `AccountDrawer` bzw. Kontoseite |

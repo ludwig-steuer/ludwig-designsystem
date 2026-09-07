@@ -3279,6 +3279,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* `display: block`: die Klasse sitzt an einem Span **in** der Zelle, und auf
    einer Inline-Box wirkt weder `overflow` noch `text-overflow` noch
    `min-width` — gemessen war der Span 165 px breit in einer 2-px-Zelle. */
+/* Kürzen statt wachsen — die eine Regel, die jede Zelle braucht, in der ein
+   Name steht, dessen Länge niemand begrenzt. Ohne sie kostet ein zu langer
+   Wert nicht Breite, sondern **Höhe**: gemessen 67 px statt 47 in der
+   Kontenliste (Abnahme 0062). `.v2caserow__name` war dieselbe Regel unter
+   einem Namen, der nur der Fallzeile gehört. */
+.v2trunc,
 .v2caserow__name {
   display: block; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;

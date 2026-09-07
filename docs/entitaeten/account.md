@@ -177,7 +177,7 @@ Der Drawer der App ist die Vorlage, nicht die Neuerfindung: 365 Zeilen,
 | Liste | Job | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
 |---|---|---|---|---|---|---|---|---|---|
 | `AccountEntryList` „Kontoauszug" | Wenn die Sachbearbeiterin mitten in einer Buchung auf einem Konto steht, will sie sehen, **was sonst noch auf diesem Konto liegt**, damit sie das Konto bestätigen oder verwerfen kann. | Alle Bewegungen des Kontos **in einem Wirtschaftsjahr**, beide Quellen vereinigt: alle Spiegelsätze außer Tombstones (`match_state not like 'disappeared%'`) + Ludwig-Sätze ohne `datev_mirror_entry_id` | neueste zuerst | 1–6 der Bewegungs-Tabelle | Jahr (Pflicht, kein Filter — Grundgesamtheit) · Herkunft: nein (Default) | keine — der Auszug ist lesend | „Auf diesem Konto ist im Jahr <n> nichts gebucht." (kein Fehler, ein Befund) | 4 · 20; p99 250, max 3.400 → Nachladen nötig | Staging · `AccountLedgerDrawer` |
-| `AccountList` „Kontenplan" | Wenn die Kanzlei den Kontenrahmen prüft, will sie alle Konten des Jahres nach Klasse gruppiert sehen, damit sie Lücken und Karteileichen findet. | alle Konten des Mandanten im WJ | Nummer aufsteigend | 1–3, 11, 12 | Rolle, Status, Volltext | keine | „Kein Konto im Jahr <n>." | 41.570 / Mandant+Jahr | `AccountsGroupedTable`, Route `accounts/` |
+| `AccountList` „Kontenplan" | Wenn die Kanzlei den Kontenrahmen prüft, will sie alle Konten des Jahres nach Klasse gruppiert sehen, damit sie Lücken und Karteileichen findet. | alle Konten des Mandanten im WJ, **Voreinstellung bebucht** (`usedOnly`, Befund L-90) | Nummer aufsteigend | 1–3, 9–11 (Klasse als Gruppenschlüssel); **ohne Rang 12** — siehe Nachtrag | Rolle, Status, Volltext | keine | **zwei** Leerfälle: „In diesem Wirtschaftsjahr gibt es keinen Kontenrahmen" (Bestand) ≠ „Keine Treffer" (Filter, L-86) | 41.570 / Mandant+Jahr | `AccountsGroupedTable`, Route `accounts/` |
 
 Der Kontoauszug hat **keine eigene Route** — er lebt im Drawer und im Tab
 „Buchungen" der Kontoseite. Der Kontenplan hat eine (`/accounts`) und braucht
@@ -205,7 +205,7 @@ kein Serverfilter, aber **Nachladen in Seiten** wie heute
 | `AccountFacts` | M | ja | 1 — ersetzt `meta` und `tfoot` des heutigen Drawers; dieselbe Komponente trägt später den View (0052, Präzedenz `SourceDocumentFacts`) | 1–7 | Partner als Inline | `FieldList bare`, `Amount`, `StatusBadge` | den `meta`- und `tfoot`-Teil des heutigen Drawers · Präzedenz `SourceDocumentFacts` |
 | `AccountDrawer` | L | ja | 5 — `AccountRef` verweist von 5 Stellen aus auf das Konto, ohne es zeigen zu können | Zonen 1 · 3 · 4 · 5 (Zone 2 entfällt: ein Konto hat kein Original) | Kontoauszug als Zone 3b | `Drawer`, `AccountFacts`, `AccountEntryList` | `AccountLedgerDrawerProvider` |
 | `AccountPicker` | S | **erledigt** | — | — | — | — | steht als `AccountField` (0013, Abnahme) |
-| `AccountRow` | S | Backlog | 1 — `AccountsTableRow` existiert, aber kein Screen dieser Welle braucht sie | 1–3, 11, 12 | — | `DataTable`-Spaltendefinition | `AccountsTable*` |
+| `AccountRow` → **`accountColumns()`** | S | **gebaut (0062)** | 1 — `AccountsTableRow` existiert. Wie bei der Bewegungszeile (A11) wird daraus eine **Spaltendefinition**, keine Komponente: zwei Zeilenbauten für eine Entität sind, was R17 eine Ebene höher verbietet — und `AccountRow` heißt in `src/ludwig` ohnehin schon der Datentyp | 1–3, 9–11 | — | `DataTable`-Spaltendefinition | `AccountsTable*` |
 | `AccountView` | L | Backlog | 1 — die Kontoseite existiert mit vier Tabs; sie braucht erst ein Seitenprofil (`docs/seiten/`) | alles ab 20 % Füllgrad | alle | `AccountFacts`, `AccountEntryList`, `BarChart` | `accounts/[accountNumber]/page.tsx` |
 | `AccountCard` | M | verworfen | kein Screen zeigt ein Konto im Kontext einer anderen Entität — dort steht die Cell | | | | |
 | `AccountEditor` | XL | verworfen | die einzigen Punkte mit änderbar = Nutzer sind `clearingAccountType` (0 % gefüllt, eigenes Bestätigungs-Form) und die Enrichment-Beschreibung (eigener Tab) — `InlineEdit` im View reicht | | | | |
@@ -221,6 +221,27 @@ eines Buchungs**satzes** (0044 `JournalEntryCard`: Konto · Kontoname ·
 Buchungstext · Soll · Haben) beantwortet die andere Frage, wie der Satz
 gebaut ist. Zwei Tabellen, dieselben Zellen-Primitives, keine gemeinsame
 Komponente mit Spaltenkonfiguration.
+
+
+### Nachtrag beim Bau von 0062 (2026-09-07)
+
+Drei Zeilen dieses Profils hat der Bau widerlegt oder überholt; sie stehen
+hier, damit die nächste Abnahme gegen den richtigen Stand prüft.
+
+1. **Rang 12 (Kontostatus) steht in keinem Spaltensatz.** Er ist zu 99 %
+   `active`, für Katalogzeilen `null` — und die Frage, für die er da zu sein
+   scheint (welches Konto ist eine Karteileiche), beantwortet die
+   Buchungsspalte. Eine Spalte, die konstant ist, ist keine Antwort. Dazu der
+   Befund **L-90**: `usedOnly` filtert über `status`, während die Bedingung
+   `usage_booking_count > 0` lautet, und die Registry beschreibt
+   `konto.inactive` als „angelegt, nie bebucht" — was die Daten nicht hergeben.
+2. **Dafür sind die Ränge 9 (SKR-Klasse), 10 (letzte Buchung) und 8
+   (Geschäftspartner) dazugekommen** — die ersten beiden aus dem Seitenprofil
+   (Rang 3 und 5), der dritte nur im Personenkonten-Satz. Der Partner ist ein
+   Befund: `AccountRow` trägt ihn nicht (**L-89**).
+3. **Der Leerfall ist zweigeteilt** („kein Rahmen" ≠ „keine Treffer", L-86),
+   und die Voreinstellung zeigt bebuchte Konten — was keine neue Entscheidung
+   ist, sondern ein Fund: `AccountFilter.usedOnly` steht in der App auf `true`.
 
 ## Zuschnitt
 

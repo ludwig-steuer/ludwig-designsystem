@@ -44,7 +44,7 @@ Die Ränge kommen aus dem Entitätsprofil, die Auswahl aus dem Seitenprofil:
 | `number` | „Konto-Nr." | 1 | 110px | mono, sortierbar (`account_number`), **trägt den Zeilenlink** — sie ist, woran die Sachbearbeiterin die Zeile liest |
 | `name` | „Name" | 2 | `minmax(200px, 1fr)` | die einzige dehnbare Spur; px als Boden, nie `ch` (Lehre aus 0070). Sortierbar — die App kann `account_name` |
 | `role` | „Rolle" | 3 | 120px | Achse `konto_typ`, über `StatusBadge`, mit (i) im Kopf (Z4) |
-| `partner` | „Geschäftspartner" | 8 | 200px | nur im Personenkonten-Satz — 52 % Füllgrad, dort ~100 %. **`AccountRow` trägt ihn nicht** (Befund L-89): der Name kommt als Callback vom Aufrufer, sonst bleibt die Spalte leer statt zu erfinden |
+| `partner` | „Geschäftspartner" | 8 | 200px, gekürzt | nur im Personenkonten-Satz — 52 % Füllgrad, dort ~100 %. **`AccountRow` trägt ihn nicht** (Befund L-89): der Name kommt als Callback vom Aufrufer, sonst bleibt die Spalte leer statt zu erfinden |
 | `bookings` | „Buchungen" | 11 | 120px | rechts, `tnum`, sortierbar; **die Spalte, auf die es ankommt** |
 | `lastBooking` | „Letzte Buchung" | 10 | 130px | sortierbar; 15 % Füllgrad, deshalb nicht vor M |
 | `origin` | „Angelegt" | — | 140px | **`AccountRow.origin`, nicht `source`.** Sie trennt die zwei Hälften der Katalogansicht: das Konto, das dieser Mandant hat, und das, was der SKR kennt und niemand angelegt hat — Rang 6 des Seitenprofils. `source` bleibt draußen: 100 % `imported`, sagt nichts |
@@ -92,7 +92,9 @@ gibt es in `Table`; `DataTable` gruppiert die **Seite**, nicht den Bestand.
 |---|---|---|---|---|
 | `href` | `(a) => string` | nein | Wohin die Zeile führt — Drawer oder Kontoseite, das entscheidet die Seite | `Filled` |
 | `columns` | `AccountColumn[]` | nein | Wählt aus; **ordnet nicht um** | `Catalog` (verwürfelt übergeben) |
-| `partnerHref` | `(id) => string` | nein | Der Geschäftspartner als Inline-Link | `Personal` |
+| `partnerName` | `(a) => string \| null` | nein | Der Name des Geschäftspartners. Als Callback, weil `AccountRow` ihn nicht trägt (L-89) — ohne ihn bleibt die Spalte leer, statt zu erfinden | `Personal` |
+| `partnerHref` | `(a) => string \| undefined` | nein | Wohin der Partner führt | `Personal` |
+| `originLabels` | `{ client, catalog }` | nein | Die zwei Wörter der Spalte „Angelegt" — sie stehen nicht in der Domäne (L-96), also einmal hier als Vorgabewert | `Catalog` |
 
 `accountTracks(columns)` gibt die Spurliste; `accountMinWidth(columns)` die
 Breite, unterhalb derer waagerecht gerollt wird — beides wie in 0070, wo die
@@ -192,3 +194,55 @@ Achse misst als Badge 77 px. Jetzt 200 und 120; gemessen alle Zeilen bei
 mit Zähler, darunter `Pagination` — genau das, was der heutigen Ansicht fehlt
 (L-87). Und die Gruppenzeile spannt jetzt über die volle Tabellenbreite; bis
 zur `colSpan`-Korrektur dieser Sitzung endete sie bei 239 px.
+
+## Nach der Abnahme vom 2026-09-07
+
+**Zwei Spuren waren gegen die Fixtures bemessen statt gegen ihren
+Wertebereich** — und das ist genau der Fehler, den der Abschnitt „Beim Bauen
+gemessen" eine Spalte weiter selbst beschreibt. Die Abnahme hat ihn dort
+gefunden, wo dieser Bau nicht hingesehen hat: bei der **Mindestbreite, die
+die Komponente selbst ausgibt**.
+
+- **Der Kontoname (M1).** Das Entitätsprofil sagt „p50 19 · p90 39 · max 50
+  Zeichen — kürzen ab 40, voller Name im `title`". Gebaut war weder das eine
+  noch das andere. Gemessen bei 986 px (= `accountMinWidth`) und einem
+  p90-Namen: 244 px Text in einer 200-px-Spur, Zeile **67 px** statt 47.
+- **Der Geschäftspartner (M2).** 200 px feste Spur, keine Obergrenze in den
+  Daten: „Musterbau Handels- und Beteiligungs GmbH & Co. KG" (49 Zeichen)
+  trieb die Zeile bei **jeder** Breite auf 67 px.
+
+Beide kürzen jetzt mit Ellipse und tragen den vollen Wert im `title` — dieselbe
+Regel, die `caseColumns` seit 0096 hat. Sie heißt jetzt `.v2trunc` statt
+`.v2caserow__name`: es war nie eine Regel der Fallzeile, sondern die eine
+Regel, die **jede** Zelle braucht, in der ein Name steht, dessen Länge niemand
+begrenzt. Gemessen: 49 Zeichen in beiden Spalten, Zeile bleibt bei 986 **und**
+1440 px auf 47 px.
+
+Dazu:
+
+- **M3** — die vier Sortierschlüssel hängen jetzt über `satisfies AccountSortKey`
+  an der Domäne. Vorher waren es nackte Strings, die stumm brechen, sobald
+  drüben einer umbenannt wird.
+- **M4** — die zwei Spuren, die von der Spec-Tabelle abwichen (130/140 statt
+  120/130), stehen wieder auf den Spec-Werten. Gemessen tragen sie: Kopf
+  „Buchungen" 69 px, „Letzte Buchung" 94,8 px.
+- **M5** — Entitätsprofil und Seitenprofil sind nachgezogen: Rang 12 steht in
+  keinem Satz mehr, dafür 8–10; die Grundgesamtheit nennt die Voreinstellung
+  und L-90; der Leerfall ist zweigeteilt; und `AccountRow` trägt im Profil den
+  Nachtrag, dass daraus ein **Spaltensatz** wird — wie bei `accountEntryColumns()`.
+- **M6** — die zwei Wörter der Spalte „Angelegt" sind in der Domäne nicht
+  vorhanden (Befund **L-96**). Sie stehen jetzt als überschreibbarer
+  Vorgabewert an einer Stelle statt als Literale in der Zelle.
+- **M9** — der Cast auf `AccountClass` ist weg: ein unbekannter Wert fällt
+  jetzt sichtbar als Rohwort durch, statt die Zelle still zu leeren.
+- **M10** — der handgebaute Kopf der gruppierten Vorlage trägt jetzt
+  Sortierlinks. Ohne sie hätte die Vorlage Rang 5 des Seitenprofils verloren —
+  dieselbe Lücke, die sie an der heutigen Ansicht anprangert.
+- **M8** (`accountColumns()` ohne Argument), **M12** (`Link` statt rohem `<a>`),
+  **M13** (L-89/L-90 vor L-91 einsortiert) sind mit erledigt.
+
+**Offen und benannt:** M7 ist in die Schnittstellen-Tabelle eingearbeitet;
+M11 (camelCase-Schlüssel neben snake_case-Sortierschlüsseln) und M14
+(`accountMinWidth` gibt für unbekannte Spurformen still 0 zurück) bleiben —
+beide betreffen das Muster aller drei Kataloge und gehören in eine eigene
+Runde, nicht in diese Datei allein.
