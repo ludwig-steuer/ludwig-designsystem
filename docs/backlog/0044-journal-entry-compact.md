@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Soll/Haben, Konto, Steuerschlüssel sind Buchhaltung, nicht Layout |
 | Quelle | Anfrage vom 2026-09-03 („eine simplere Version, um einen Buchungssatz nur anzuzeigen, ohne Extras") · `docs/v3-backlog.md` „Nicht `primitives`" (`BookingProposalView`/`-Compact`, `BookingLineRow` fehlen v3) · `docs/ui-repraesentationen.md` §4.4 (Form `Card` für „Buchung") |
@@ -413,3 +413,186 @@ treffen heute nicht mehr zu:
    `JournalEntryCompact.tsx` keine deutsche Zeile mehr.
 
 Eine Abnahme steht damit aus, nicht eine Nacharbeit.
+
+## Abnahme (2026-09-07)
+
+Dritte Abnahme, fremder Agent, ohne Chat-Verlauf — nur Spec und Code. Alle
+acht Stories von `JournalEntryCompact` und alle zehn von `JournalEntryEditor`
+auf dem Dev-Server (Port 6107) geöffnet und über CDP gemessen; jede Messung
+mit Gegenprobe. Nicht gebaut (`storybook build` ist während paralleler
+Abnahmen gesperrt, 0117).
+
+### Die zwei Punkte, die 2026-09-05 offen blieben
+
+**1 — Das Herauslösen ist geschehen und trägt.** `JournalEntryEditor` zeichnet
+kein eigenes Zeilen-Markup mehr: `JournalEntryCard` wird importiert
+(`JournalEntryEditor.tsx:22`) und im Journal-Rumpf gerendert (`:895`, mit
+`totals={false}`). `grep -rn "bse__journal__row" src` trifft nur noch zwei
+Kommentarzeilen in `v3.css` (`:1589`, `:2639`) — die Regel selbst ist gestrichen.
+
+Gemessen wurde nicht der Import, sondern das Bild. In **allen zehn**
+Editor-Stories steht die Karte im Rumpf: `bse__journal__row`-Elemente **0**,
+`.v2je__row--sum` **0** (die Summe bleibt in der Klappzeile, „Σ S 1.475,60 € =
+Σ H 1.475,60 €"), Konsole in allen zehn ohne Meldung.
+
+Der Vergleich Editor gegen Karte, an `--s-2-split-full` (Editor) gegen
+`--filled`/`--without-totals` (Karte):
+
+| | Editor-Journal | Karte allein |
+|---|---|---|
+| Kopfzeile | `Konto · Kontoname · Buchungstext · Soll Umsatz · Haben Umsatz` | identisch, Zeichenfolge für Zeichenfolge |
+| Spaltensatz | `70px 156,66px 219,33px 104px 104px` (Karte 686 px breit) | `70px 129,16px 180,83px 104px 104px` (Karte 620 px breit) — dieselbe Formel, andere Behälterbreite |
+| Ausrichtung | `right, start, start, right, right` | dieselbe Folge |
+| Summenzeile | keine (`totals={false}`), Summe steht in der Klappzeile | `Σ Soll = Σ Haben · 1.475,60 € · 1.475,60 €` |
+| Kürzung | `Abziehbare Vorsteuer 19 %`: `scrollWidth 160` bei `clientWidth 157`, `text-overflow: ellipsis`, voller Name im `title` | `Betriebs- und Geschäftsausstattung, …`: `404` bei `129`, ebenso |
+| Zeilen | Kopf + 5 (zwei Steuerzeilen und die Gegenkonto-Zeile 70044 sind mit dabei) | Kopf + 2 bzw. + 4 |
+
+Gegenprobe zur Kürzung: `.v2je__clip` zur Laufzeit auf `overflow: visible;
+white-space: normal` gesetzt — `scrollWidth 404 → 133`, Zellhöhe 26 → 75 px.
+Die Messung reagiert, sie misst also etwas.
+
+Rechnen ist im Editor geblieben: `deriveTax` steht dort (`:5`), die
+Gegenkonto-Einrechnung ebenso (`:857–869`); `JournalEntryCompact.tsx` hat drei
+Importe (`Currency`, `formatAmount` aus v3, `AmountCell`/`MonoCell`),
+`grep -c "legacy/"` = 0.
+
+**2 — Die Kommentare sind Englisch.** `pnpm check:language --all` (Exit 1,
+404 deutsche Zeilen in 132 Bestandsdateien) nennt `JournalEntryCompact.tsx`
+mit **0** Zeilen; auch der neue Kommentarblock im Editor (`:888–894`) ist
+englisch. `pnpm check:when` Exit 0 — `@when`/`@instead` stehen an beiden
+Exporten (`:62–65`, `:124–127`).
+
+### Story-Deckung
+
+Acht Stories in der Spec, acht Exporte in der Story-Datei, acht IDs in
+`index.json` (`--filled`, `--split`, `--empty`, `--unbalanced`,
+`--without-names`, `--without-totals`, `--in-use`, `--edges`). Die Ableitung
+nach `spec-schreiben` §6 geht auf: 4 anwendbare Zustände (gefüllt, Split,
+leer, unstimmig — „lädt", „Fehler", „leer nach Filter" begründet
+ausgeschlossen) + 2 Layout-Booleans + 0 Enum-Props + 0 Callbacks + 1 „im
+Einsatz" + 1 Rand = **8**. Untergrenze für eine Entitätsform (3) erfüllt.
+
+Jede Prop hat ihre Story, und jede ist am Bildschirm nachgewiesen:
+`JournalEntryCell.lines`/`currency` → `--filled` („1200 Bank an 4400 Erlöse
+19 % USt · 1.475,60 €"), `showNames` → `--without-names` („1200 an 4400 ·
+1.475,60 €", die Karte darunter zeigt die Namen weiter) ·
+`JournalEntryCard.lines`/`currency` → `--filled`, `caption` → `--in-use`
+(`div.v2je__caption` „Buchungsvorschlag zu RE-4471", erstes Kind der Karte,
+über der Kopfzeile), `totals` → `--without-totals` (5 Zeilen, keine
+`--sum`; Gegenprobe `--split` mit denselben Daten: 6 Zeilen, letzte mit Σ).
+
+### Fest
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` Exit **0**. `pnpm build` **nicht gelaufen** — während paralleler Abnahmen gesperrt (0117); ersatzweise: der Dev-Server übersetzt alle 18 Stories der Familie fehlerfrei, Konsole in allen 18 ohne Meldung | ✓ / Bau nicht prüfbar |
+| Datei nach der Familie benannt, Story daneben, Titel | `JournalEntryCompact.tsx` (191 Zeilen, zwei Exporte), Story daneben, Titel `v3/Entitäten/Buchungssatz/JournalEntryCompact`, Barrel `src/ui/v3/index.ts:520–523` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `check:language --all`: 0 Treffer in der Datei · `check:when` Exit 0 | ✓ |
+| Kein Hex, kein px, keine Label-Map; Status nur über Registry | `grep -cE '#[0-9a-fA-F]{3,8}'` = 0, `grep -cE '[0-9]+px'` = 0; kein Status | ✓ |
+| Alle acht Stories vorhanden; ausgeschlossene Zustände begründet | siehe Story-Deckung | ✓ |
+| Prüfliste `design-guidelines.md` §9 | Text links / Zahlen rechts `tnum`: Kopfspalten `right, start, start, right, right`, `font-variant-numeric: lining-nums tabular-nums` an jeder Zahlenzelle, **0** Elemente mit `text-align: center` · Zeilenhöhe `.v2je__row` **26,75 px** gegen `.v2tbl__row` **45,92 px** (≤) · Kontrast: kleinster gemessener Wert **6,17:1** (gedämpfter Text `rgb(92,92,92)` auf `rgb(244,246,248)`), Fließtext 12,71:1 — beides ≥ 4,5:1 · keine Farbe als Signal, das `≠` ist ein Zeichen · kein Icon, keine Versalien · Karte: `.v2je` `border-width: 0px` und `box-shadow: none`, nur eine Linie am Rumpf — Rand **oder** Schatten ist eingehalten · `minWidth`-Regel: in `--in-use` scrollt die Tabelle (`.v2tbl__scroll` `overflow-x: auto`, bei 480 px Fenster `scrollWidth 599` gegen `clientWidth 446`), sie schneidet nicht ab · die zwei App-Punkte (`@deprecated`-Ablösung des v1-Gegenstücks, Eintrag in §11) übersprungen | ✓, ein Randbefund (M1) |
+| Im Browser angesehen | 8 + 10 Stories über CDP geöffnet und gemessen; 0 Konsolenmeldungen | ✓ |
+
+### Variabel
+
+| Kriterium | Nachweis (Story-ID · gemessen) | Ergebnis |
+|---|---|---|
+| `lines`/`currency` (`Filled`) | Zelle „1200 Bank an 4400 Erlöse 19 % USt · 1.475,60 €"; Karte 4 Zeilen (Kopf, 2 Buchungszeilen, Σ), `currency="EUR"` schlägt bis ins Format durch | ✓ |
+| `showNames={false}` (`WithoutNames`) | „1200 an 4400 · 1.475,60 €" — Namen weg, Nummern bleiben | ✓ |
+| `totals={false}` (`WithoutTotals`) | 5 Zeilen, `.v2je__row--sum` **0**; Gegenprobe `--split`: 6 Zeilen mit Σ | ✓ |
+| `caption` über den Zeilen (`InUse`) | `.v2je__caption` „Buchungsvorschlag zu RE-4471" als erstes Kind, über der Kopfzeile | ✓ |
+| Zelle fasst Splits zusammen (`Split`) | „1200 Bank an 3 Konten · 1.475,60 €", Karte zeigt alle vier Zeilen; `--edges`: beide Seiten mehrzeilig → „12 Zeilen · -19,00 €" | ✓ |
+| Karte zeigt `≠` und sonst keine Meldung (`Unbalanced`) | Σ-Zeile „Σ Soll ≠ Σ Haben · 1.475,60 € · 1.400,00 €", sonst kein Text, keine Farbe (nur zwei Textfarben im ganzen `.v2je`); Gegenprobe `--filled`: dasselbe Markup mit `=` | ✓ |
+| Leer (`Empty`) | Zelle: 0 × `.v2je__cell`, ein `span.v2muted` mit „—"; Karte: `.v2je__empty` „Keine Buchungszeilen.", keine Kopfzeile, kein Knopf | ✓ |
+| Langer Kontoname gekürzt, voller Name im `title` (`Edges`) | `scrollWidth 404` bei `clientWidth 129`, `text-overflow: ellipsis`, `title` trägt den vollen Namen; Buchungstext 347 gegen 181. Gegenprobe siehe oben | ✓ |
+| Zahlen rechts mit `tnum`, Text links, nichts zentriert (`Edges`) | `right, start, start, right, right`; `lining-nums tabular-nums`; 0 zentrierte Elemente | ✓ |
+| Karte in Stapelordnung (`Filled`) | Kopf `Konto · Kontoname · Buchungstext · Soll Umsatz · Haben Umsatz`; „1200 · Bank · Reparatur März · **1.475,60 €** · (leer)" und „4400 · Erlöse 19 % USt · Reparatur März · (leer) · **1.475,60 €**"; „Konto" `text-align: right` | ✓ |
+| Kein Element fokussierbar (`InUse`) | Sechsmal `Tab` als echter Tastendruck: `document.activeElement` bleibt jedes Mal `BODY`. Gegenprobe: ein `<button>` in die Zelle injiziert — der erste `Tab` landet darauf. Die Messung reagiert | ✓ |
+| **Herauslösen** über `JournalEntryCard` (`totals={false}`), `bse__journal__row` nur noch in `v3.css` | siehe oben, in allen zehn Editor-Stories gemessen | ✓ |
+| `deriveTax` und Gegenkonto im Editor geblieben; kein `legacy/` | drei Importe, `grep -c "legacy/"` = 0; die Steuer- und Gegenkonto-Zeilen erscheinen in der Karte des Editors (1406, 70044) | ✓ |
+| Die Editor-Stories sehen nach dem Herauslösen **unverändert** aus | **Nein** — und das ist gewollt: vorher vier Spalten ohne Kopfzeile (`Konto · Name · S/H · Betrag`, altes `.bse__journal__row`-Raster `70px minmax(0,1fr) 30px 110px`), jetzt fünf mit Kopfzeile. Kein Datenverlust: die Seite steht statt im Kennzeichen `S`/`H` in der Betragsspalte, der Buchungstext kommt hinzu. Der Abschnitt „Das Herauslösen — nachgeholt am 2026-09-06" sagt es und begründet es | gerissen im Wortlaut, begründet (M3) |
+| Ersetzt `BookingProposalCompact` in `EventStack.tsx:127` | betrifft `ludwig/app` | offen (App) |
+
+### Mängel
+
+**M1 — die Kopfzeile der Karte druckt über ihren Nachbarn, wenn die Karte
+schmal wird.** Ort: `src/styles/v3.css:2656–2663` (`.v2je__row`,
+`grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1.4fr) 104px 104px`)
+zusammen mit `JournalEntryCompact.tsx:153–159` — die fünf Kopf-Spans tragen
+kein `.v2je__clip`, während jede Datenzelle es trägt. Gemessen an
+`v3-entitäten-buchungssatz-journalentrycompact--filled`, Behälterbreite zur
+Laufzeit verstellt: bei **620 px** Karte kein Überstand (−60 / −97 px Luft),
+bei **470 px** beginnt „Kontoname" (+2 px), bei **440 px** stehen +15 und
++8 px, bei **400 px** je **+31 px**. In `JournalEntryEditor
+--s-2-split-full` bei 380 px Fenster: Karte 310 px, „Kontoname"-Spalte
+**0 px**, Kopf läuft **69 px** in den Nachbarn, „Buchungstext" **84 px** in
+„Soll Umsatz". Gegenprobe: `minmax(60px, 1fr) minmax(90px, 1.4fr)` zur
+Laufzeit gesetzt → Überstand 69/84 → 9/−6 px; die Messung reagiert.
+**Nicht blockierend**, weil die Karte auf der Seite nirgends so schmal steht:
+620 px in allen acht eigenen Stories, 686 px im Editor, 634 px in
+`JournalEntryGrid --with-journal` — überall Überstand 0. Kleinster Weg: den
+Kopf-Spans dieselbe Klasse `v2je__clip` geben, dann schrumpft der Kopf mit,
+statt zu überdrucken.
+
+**M2 — der Befund aus 0089 in dieser Datei ist unerledigt.** Der Abschnitt
+„Befund aus der Abnahme von 0089" bat, beim Herauslösen den Spaltensatz
+gleich mitzuprüfen. Er steht unverändert: in `JournalEntryEditor
+--s-2-split-full` fällt die Spalte „Text" auf **0 px** (`journalGridTracks`,
+`src/ui/v3/entities/journal-entry/journal-entry.ts:175–176`,
+`minmax(0, 1fr)`), und der Kopf läuft **26 px** in „KOST" — im Bild „TKost".
+Gemessen bei 756, 900 und 1200 px Fensterbreite, jedes Mal derselbe Wert: das
+Raster hat 862 px feste Spuren plus Abstände, mehr als der Behälter je
+hergibt, deshalb bleibt für `1fr` nichts übrig. **Nicht blockierend für 0044**:
+die Stelle liegt in `journal-entry.ts` (0086/0113), nicht in der Familie
+dieser Aufgabe, und sie stand vor dem Herauslösen genauso da. Kleinster Weg:
+`minmax(0, 1fr)` → `minmax(90px, 1fr)` in beiden Spuren-Sätzen, oder dem
+`.bse__head` dieselbe Kürzung geben, die `.bse__cells` schon trägt.
+
+**M3 — ein Kriterium und das Gebaute widersprechen sich auf dem Papier.**
+Ort: dieselbe Datei, Kriterienliste („Die Stories von `JournalEntryEditor`
+sehen nach dem Herauslösen unverändert aus") gegen den Abschnitt „Das
+Herauslösen — nachgeholt am 2026-09-06" („Eine Änderung im Bild, und sie ist
+der Gewinn"). Gemessen: das Bild ist verändert — Kopfzeile neu, `S`/`H`-Spalte
+weg, Buchungstext-Spalte neu, fünf statt vier Spalten. Es geht keine
+Information verloren, und die Änderung ist der Zweck der Aufgabe.
+**Nicht blockierend**, aber es gehört in die Tabelle „Abweichungen von der
+Spec" statt nur in die Prosa — sonst liest die nächste Abnahme das Kriterium
+gegen das Bild und findet wieder einen Widerspruch. Kleinster Weg: eine Zeile
+in dieser Tabelle, kein Code.
+
+Alles Übrige ist erfüllt und oben mit Zahlen belegt.
+
+Abgenommen von / am: **abgenommen**, Claude (Abnahme-Agent), 2026-09-07 —
+M1 bis M3 sind Notizen, keine Sperren.
+
+## Nach der Abnahme (2026-09-07)
+
+**Abgenommen.** Beide Punkte von 2026-09-05 sind belegt, nicht nur behauptet:
+das Journal des Editors ist dasselbe Bild wie die Karte (Kopfzeile
+zeichengleich, gleiche Spaltenformel, gleiche Kürzung über `.v2je__clip`), und
+`JournalEntryCompact.tsx` hat keine deutsche Kommentarzeile mehr.
+
+Von den drei Notizen ist die zweite behoben — sie war ein echter Layoutfehler
+und lag in fremdem Code:
+
+**M2 — die Textspur des Buchungsrasters fiel auf null.** `journalGridTracks`
+gab ihr `minmax(0, 1fr)`; unter 900 px Fenster blieb ihr nichts, und der Kopf
+lief 32 px in „KOST". Sie hat jetzt eine Untergrenze (160 px), und `.bse__tbl`
+rollt waagerecht, statt eine Spalte verschwinden zu lassen. Gemessen über vier
+Breiten:
+
+| Fenster | Spur „Text" | größter Kopfüberstand |
+|---|---|---|
+| 756 | 0 → **160 px** | +32,3 → **−12,1** |
+| 900 | 0 → **160 px** | +32,3 → **−12,1** |
+| 1200 | 270 px | −12,1 |
+| 1400 | 282 px | −12,1 |
+
+**M1 und M3 bleiben vermerkt.** Der Kopf der Karte trägt kein `.v2je__clip` —
+unter ~470 px Kartenbreite druckt er über den Nachbarn; auf der Seite steht
+die Karte nirgends so schmal (620 px in den eigenen Stories, 686 im Editor,
+634 im Raster, Überstand überall 0). Und das Kriterium „Editor-Stories sehen
+unverändert aus" ist im Wortlaut gerissen (vier Spalten wurden fünf) — ohne
+Informationsverlust und mit Begründung, aber die Zeile gehört in die Tabelle
+„Abweichungen von der Spec", damit die nächste Abnahme nicht denselben
+Widerspruch findet.

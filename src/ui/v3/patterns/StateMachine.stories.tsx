@@ -98,7 +98,7 @@ export const Branching: Story = {
 };
 
 /**
- * Ohne Übergänge — der Normalfall bei fast allen 70 Achsen. Die Zustände
+ * Ohne Übergänge — der Normalfall bei fast allen 72 Achsen. Die Zustände
  * stehen in einer Reihe, und die Zeile darunter sagt, dass die Übergänge nicht
  * hinterlegt sind. Das Bild behauptet nichts, was die Daten nicht hergeben.
  */

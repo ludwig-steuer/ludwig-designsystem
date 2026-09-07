@@ -172,6 +172,6 @@ export function journalBalanceText(lines: readonly JournalBatchLine[]): string {
  * one entry.
  */
 export const journalGridTracks: Record<JournalMode, string> = {
-  einfach: "88px 104px 40px 62px 148px 96px minmax(0, 1fr)",
-  voll: "88px 56px 104px 40px 62px 148px 96px 96px minmax(0, 1fr) 80px",
+  einfach: "88px 104px 40px 62px 148px 96px minmax(160px, 1fr)",
+  voll: "88px 56px 104px 40px 62px 148px 96px 96px minmax(160px, 1fr) 80px",
 };

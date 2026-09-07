@@ -1,48 +1,42 @@
 /**
- * Achse → Icon/Label.
+ * Axis → entity.
  *
- * Icons gibt es NUR für die drei Haupt-Entitäten der Datenmodell-Kette; sie
- * spiegeln die Main-Navigation (`ui/components/layout/Sidebar.tsx`). So
- * erkennt der Nutzer am Badge sofort, auf welche Entität sich ein Status
- * bezieht.
+ * Icons exist ONLY for the three main entities of the data-model chain; they
+ * mirror the main navigation. That way the badge tells at a glance which
+ * entity a status belongs to.
  *
- * Welches Zeichen eine Entität trägt, steht nicht hier, sondern in der
- * Icon-Registry (`Icons.tsx`). Diese Datei sagt nur, welche Achse welche
- * Entität meint (`AXIS_ENTITY`); das Zeichen fällt daraus ab.
+ * **Which sign an entity carries is not here** — that is the icon registry
+ * (`Icons.tsx`). This file only says which axis means which entity
+ * (`AXIS_ENTITY`); the sign falls out of that.
  *
- * Alle übrigen Achsen (Auftrag, Konto, Zugang, …) haben bewusst kein Icon —
- * sie stehen ohnehin in einem Kontext, der die Entität nennt (Spaltenkopf,
- * Abschnitt), und ein zweites Symbol stiftete nur Unruhe. `StatusBadge`
- * rendert deshalb einfach keins, wenn hier nichts steht.
+ * All other axes (order, account, upload, …) deliberately have no icon: they
+ * already stand in a context that names the entity — a column header, a
+ * section — and a second symbol would only add noise. `StatusBadge` simply
+ * renders none when nothing stands here.
  */
 import type { EntityKey } from "../Icons";
-import type { EntityType, StatusAxis } from "@/ludwig/ui/status/status-registry";
+import type { StatusAxis } from "@/ludwig/ui/status/status-registry";
 
-/** Welche Achse benennt welche Entität — der Schlüssel in die Icon-Registry. */
+/** Which axis names which entity — the key into the icon registry. */
 export const AXIS_ENTITY: Partial<Record<StatusAxis, EntityKey>> = {
   beleg: "source-document",
   sachverhalt: "accounting-case",
   buchung: "journal-entry",
 };
 
-
-
 /**
- * Achsen-Name und Herkunft kommen seit 2026-09-06 aus dem **Spiegel**: die App
- * hat `AXIS_LABEL` und `AXIS_SOURCE` in `status-registry.ts` gelegt (reine
- * Daten, `ui/status/entity-icons.ts` re-exportiert sie dort nur noch), und
- * damit spiegeln sie sich mit.
+ * Axis name and origin come from the **mirror** since 2026-09-06: the app put
+ * `AXIS_LABEL` and `AXIS_SOURCE` into `status-registry.ts` (pure data, its own
+ * `ui/status/entity-icons.ts` only re-exports them), so they mirror along.
  *
- * Vorher lagen hier zwei Kopien mit 62 Einträgen. Sie waren der Grund, warum
- * **jede neue Achse der App dieses Repo rot machte** — sechs Achsen am
- * 2026-09-06 waren der letzte Fall (0105). Was hier bleibt, ist das, was der
- * App fehlt: welche Achse welche **Entität** meint, und das Zeichen dazu.
+ * Two copies with 62 entries used to sit here. They were the reason **every
+ * new axis of the app turned this repo red** — six axes on 2026-09-06 were the
+ * last case (0105). What stays is what the app does not have: which axis means
+ * which **entity**, and the sign that goes with it.
+ *
+ * `ENTITY_LABEL` was here too, with the same three entries the app carries in
+ * `ui/status/entity-icons.ts` — and nobody read it. It was removed on
+ * 2026-09-07 (acceptance 0105, M1): a shrunk copy is still a copy, and this
+ * task exists to end them.
  */
 export { AXIS_LABEL, AXIS_SOURCE } from "@/ludwig/ui/status/status-registry";
-
-/** Nur die drei Haupt-Entitäten — für Flow-Modal und Icon-Beschriftung. */
-export const ENTITY_LABEL: Record<EntityType, string> = {
-  beleg: "Beleg",
-  sachverhalt: "Sachverhalt",
-  buchung: "Buchung",
-};

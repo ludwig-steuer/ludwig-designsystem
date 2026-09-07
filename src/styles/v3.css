@@ -1515,7 +1515,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .bse__rest.is-ok { color: var(--color-success); }
 .bse__rest.is-off { color: var(--color-danger); }
 
-.bse__tbl { --bse-cols: 1fr; }
+/* Der Satz rollt waagerecht, statt eine Spalte verschwinden zu lassen. Mit
+   `minmax(0, 1fr)` an der Textspur fiel sie unter 900 px Fenster auf **0 px**
+   und der Kopf lief 32 px in „KOST" — die Spur hatte keine Untergrenze, und
+   das Raster keinen Ausweg (Abnahme 0044, M2). Die Untergrenze steht in
+   `journalGridTracks`, das Rollen hier. */
+.bse__tbl { --bse-cols: 1fr; overflow-x: auto; }
 .bse__head,
 .bse__cells {
   display: grid;
