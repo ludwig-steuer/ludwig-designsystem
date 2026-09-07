@@ -32,6 +32,7 @@ export function ReasonDialog({
   confirmLabel = "Bestätigen",
   confirmVariant = "primary",
   required = false,
+  confirmDisabled = false,
   /** Suggestions that fill the reason — one click instead of typing. */
   chips,
   pending = false,
@@ -47,10 +48,20 @@ export function ReasonDialog({
   confirmLabel?: string;
   confirmVariant?: "primary" | "danger";
   required?: boolean;
+  /**
+   * A second lock, owned by the caller: the reason may be there and the step
+   * still not be allowed. The downgrade of a document-number mode is the case
+   * it was built for — it needs the reason **and** the choice of the number
+   * that stays valid (0083). It locks the button and Enter alike, because a
+   * lock that Enter walks around is none (I2, 0092).
+   */
+  confirmDisabled?: boolean;
   chips?: string[];
   pending?: boolean;
 }) {
   const [reason, setReason] = useState("");
+
+  const locked = pending || confirmDisabled || (required && reason.trim().length === 0);
 
   function close() {
     setReason("");
@@ -61,7 +72,7 @@ export function ReasonDialog({
   // not confirm what the button refuses (I2, 0092). Inside the reason field
   // Enter stays a line break; `Dialog` keeps that apart.
   function confirm() {
-    if (pending || (required && reason.trim().length === 0)) return;
+    if (locked) return;
     onConfirm(reason.trim());
     setReason("");
   }
@@ -82,7 +93,7 @@ export function ReasonDialog({
           <Button
             variant={confirmVariant}
             size="sm"
-            disabled={pending || (required && reason.trim().length === 0)}
+            disabled={locked}
             onClick={confirm}
           >
             {confirmLabel}

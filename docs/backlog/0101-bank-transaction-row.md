@@ -442,3 +442,242 @@ sie aufteilt. Gemessen: **1399,0 gegen 1399,0**.
 nicht in der Schnittstellen-Tabelle und hat in 0101 keine eigene Story — 0085
 und 0086 belegen sie. Das gehört in die Tabelle nachgetragen, wenn die Spec
 das nächste Mal angefasst wird.
+
+## Wiederabnahme 2026-09-07 (fremde Abnahme)
+
+Zweite Abnahme, fremd: Spec und Code gelesen, kein Chat-Verlauf, nicht der
+bauende Agent. Gemessen im Browser über CDP gegen den laufenden Dev-Server
+6107 (headless Chromium, eigener Port, Breiten 700 · 1100 · 1280 · 1440 ·
+1920). Gemessen wurde jeweils die **Wirkung** — `getBoundingClientRect`,
+`scrollWidth` gegen `clientWidth`, `getComputedStyle`, `Range` für Textkanten,
+echte `Input.dispatchKeyEvent`-Tabs, echte Klicks, `CSS.forcePseudoState` für
+Hover —, nie die gesetzte Prop. Aktion und Messung standen in **getrennten**
+`Runtime.evaluate`-Aufrufen. Jede Zahl, an der ein Mangel hängt, hat eine
+Gegenprobe (Regel zur Laufzeit gesetzt, neu gemessen, zurückgesetzt). Die
+breitesten Werte des Bestands stammen aus `docs/entitaeten/bank-transaction.md`
+und aus der Registry (`BANK_MATCH_STAGE` 12 Werte, `EREIGNIS_BUCHUNG` 8) und
+wurden mit ungebundenem Klon **und** in der echten Zelle gemessen.
+`pnpm build` war untersagt (Befund 0117) und ist nicht gelaufen.
+
+**Ein Hinweis zur ersten Messreihe:** die allererste Messung an `--in-use`
+zeigte Zeilenhöhen 71,7/71,7/47,1/47,1/93,5/46,1 — ein Zwischenstand während
+des ersten Story-Kompilats. Vier Wiederholungen über 3 s ergeben stabil
+47,1/47,1/47,1/47,1/67,7/46,1 (`document.fonts.status` = `loaded`). Alle
+Zahlen unten stammen aus dem stabilen Zustand.
+
+### Story-Deckung
+
+Sechs Stories, `index.json` bestätigt sechs IDs unter
+`v3/Entitäten/Kontoauszugsposition/BankTransactionRow`: `Filled`,
+`Unassigned`, `Split`, `Columns`, `Expanded`, `InUse`. Das ist genau die
+Ableitung nach `spec-schreiben` §6: 2 anwendbare Zustände + 1 Enum
+(`columns`) + 1 Layout-Boolean (`expanded`) + 0 Callbacks + 1 im Einsatz + 1
+Rand = 6. Prop-Deckung: `transaction`/`caseHref` (`--filled`), `openHref`
+(`--unassigned`, gemessen `href="#zuordnen"`), `columns` + `accountLabel`
+(`--columns`), `expanded` (`--expanded`). Ausgeschlossen und begründet:
+`lädt` und `Fehler` gehören der Liste (Abschnitt „Verhalten"), `leer nach
+Filter` hat eine einzelne Zeile nicht. **Nicht gedeckt bleibt `rowHref`** —
+siehe Mangel M-D.
+
+### Kriterien
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | `pnpm typecheck` Exit **0** | ✓ |
+| `pnpm build` grün | untersagt (parallele Sitzungen, Befund 0117) — nicht gelaufen | nicht geprüft |
+| Wächter | `check:language` Exit 0 · `check:icons` Exit 0 · `check:contrast` Exit 0 · `check:mirror` Exit 0 · `check:when` Exit 0. Dazu `check-language.mjs --all` (Bestandsbericht, Exit 1 bei 388 Altzeilen): **kein** Treffer in `entities/bank-transaction/` | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/bank-transaction/BankTransactionRow.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionRow` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `check:when` Exit 0 über ganz `src/ui/v3`; `BankTransactionRow`, `bankTransactionColumns`, `bankTransactionTracks` tragen beide Zeilen; Typ-Exporte sind nach der Regel des Wächters ausgenommen | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep '#[0-9a-fA-F]{3}'` über die fünf Dateien: Exit 1 (kein Treffer). px nur als `ColumnDef.width` (8 Zeilen, Rastermaß wie `case-columns`/`account-columns`). Labels aus `BANK_MATCH_STAGE`/`EREIGNIS_BUCHUNG` über `StatusBadge`; `derive.ts` ist reiner Re-Export, `check:mirror` Exit 0 | ✓ |
+| Rang 7 = Zustand des **Ereignisses**, Klärungszähler fallweit; beides als Kommentar im Code | `bank-transaction-columns.tsx:27–35` sagt beides wörtlich und englisch. `--filled`: Badge „Vorschlag" aus `resolveEventBookingState`, Achse `ereignis` | ✓ |
+| Z0 zeigt „offen", nie einen Gedankenstrich | `--unassigned`: `a.v2case__nonelink` mit Text „offen" und `href="#zuordnen"`; Zeilentext gemessen, kein Gedankenstrich (`/(^\|\s)[—–-](\s\|$)/` = false). `--in-use` zweimal derselbe Weg | ✓ |
+| Z3 zeigt eine Rest-Marke = `restOf()` | `--split`: „Rest 149,90 €"; `restOf` aus dem Spiegel = \|−1.249,90\| − 1.100,00 = 149,90 ✓. `--in-use` Zeile 5: „Rest 480,55 €" = 2.480,55 − 2.000,00 ✓. Bei Z1 (`--filled`) keine Marke — `deriveZ` liefert dort Z1 | ✓ |
+| Das Vorzeichen trägt keine Farbe | `--in-use`, alle sechs Beträge: `color` = `rgb(45, 45, 45)` — Eingang (1.800,00 €) wie Ausgänge. Gegenprobe: Regel `.v2tbl__row .v2num{color:rgb(200,0,0)!important}` zur Laufzeit → alle sechs `rgb(200, 0, 0)`, Regel entfernt → wieder `rgb(45, 45, 45)`. Ausrichtung `right`, `font-variant-numeric: lining-nums tabular-nums`, rechte Kante aller sechs 1399,0 | ✓ |
+| Das Datum trägt das Jahr | `--filled` „26.08.2026"; Spur 100 px, Bedarf 71,6 px (ungebundener Klon) | ✓ |
+| Rang 5 als `StatusBadge axis="bank_match_stage"`; die vier offenen Klassen tragen ihr Wort (Story `Columns`) | Badge steht. `--columns` zeigt **zwei**: „außerhalb des Bestands" (`beyond_bookings`) und „mehrdeutig" (`unclear_multi`). `unclear_none` („kein Kandidat") steht in `--unassigned`, `no_account` („ohne Konto") in `--in-use` Zeile 3 — beide **nicht** in `Columns` | **M-B** |
+| Rang 8 als Zahl mit Wort, **ohne** Badge | `--split`: `span.v2btxrow__clar` „2 Klärungen", `--in-use` Zeile 5 „1 Klärung"; `.bdg` in der Klärungs-Spalte: 0. Spur 110 px, Bedarf „3 Klärungen" (Höchstwert des Bestands) 91,5 px | ✓ |
+| Bei mehreren Fällen steht vor jedem Ereignis-Badge die Fallnummer | `--split`: `.v2btxrow__statefor` „2026-0412" über Badge „Vorschlag" (y 137,7 gegen 155,5), „2026-0488" über „Buchung fehlt" (y 179,6 gegen 197,4); DOM-Reihenfolge davor. Im CSS begründet (nebeneinander bräuchte die Spur 187 statt 150 px) | ✓ |
+| Die vier Ableitungen liegen in einer eigenen Datei und rendern nichts | `derive.ts` 23 Zeilen, reiner Re-Export, kein JSX; `deriveZ`, `restOf`, `derivePurposeParts`, `resolveEventBookingState` liegen im Spiegel. `check:mirror` Exit 0 | ✓ |
+| `columns` lässt weg und ordnet nicht um | `--columns` übergibt **verdreht** (`amount, matchStage, account, purpose, counterparty, postingDate`); gerendert steht die Zeile in der Familien-Reihenfolge, Zell-x = Kopf-x = 35/145/335/517/677/867 in beiden Zeilen | ✓ |
+| Kopf und Zellen haben eine Quelle, keine Flatterkante | `--in-use` 1440 px: `grid-template-columns` von Kopf und **allen sechs** Zeilen identisch (`100px 180px 234px 200px 160px 180px 110px 130px`), Zell-x = Kopf-x in allen acht Spalten. `--columns` ebenso | ✓ |
+| Spurbreiten gegen den Wertebereich (ungebundener Klon **und** echte Zelle) | Datum 100 / 71,6 · Buchung 160 / **131,7** („Keine Buchung nötig", der breiteste Wert der Achse) · DATEV 180 / **151,0** („außerhalb des Bestands"; „über Namensvariante" 136,1) · Klärung 110 / 91,5 („3 Klärungen") · Betrag 130 / 113,0 („−1.234.567,89 €") · Sachverhalt 200: `.v2case__link` kürzt (130/163) mit `title` · Zweck `minmax(0,1fr)` = 234: `.v2purp__text` kürzt (206/357), `nowrap`/`ellipsis` | ✓ |
+| Zeilenhöhe (V1) | `--in-use` stabil **47,1 / 47,1 / 47,1 / 47,1 / 67,7 / 46,1** px. Die eine hohe Zeile ist die Z3-Zeile mit Rest-Marke (4 % des Bestands). `--filled` 46,1 px, `--split` 105,8 px (zwei Fälle **und** Rest) | ✓ |
+| Das (i) steht nur einmal (Mangel M1 der Vorrunde) | `--in-use`: „Buchung (Ereignis): Zustände erklären" **1×**, „DATEV-Historie: Zustände erklären" **1×**, beide im Kopf; Knöpfe in Zeilen: 6, davon **0** Status-(i) (alle sechs sind `.v2purp__info` von 0099). Echter Tab-Lauf mit `Input.dispatchKeyEvent`: **14** Fokusstopps für sechs Zeilen (2 Kopf-(i) + 6 Zweck-(i) + 6 Fall-/„offen"-Links), der 15. Druck landet auf `body` — genau die Zahl, die die Vorrunde als Gegenprobe genannt hat | ✓ |
+| Fokusring, verschachtelte Anker | Fokusring auf **allen 14** Stopps sichtbar: `outline: rgb(59, 143, 196) solid 2px`, `:focus-visible` wahr. `a a` = 0, `a button` = 0 in allen sechs Stories | ✓ |
+| Jedes klickbare Element antwortet auf Hover (§2, I11) | `CSS.forcePseudoState` je Element, mit Rücksetzen: `.v2case__link` `rgb(45,45,45)` → `rgb(26,58,92)` + `underline` → zurück · `.v2case__nonelink` `rgb(92,92,92)` → `rgb(26,58,92)` + `underline` → zurück · `.v2purp__info` `rgb(113,113,113)` → `rgb(26,58,92)` → zurück · Kopf-(i) Opazität 0,65 → 1 → zurück. Kein `cursor: pointer` ohne Antwort | ✓ |
+| Echte Klicks | Klick auf das Kopf-(i) der DATEV-Spalte (1065/104) öffnet den Legenden-Dialog mit **allen zwölf** Werten der Achse samt Bedeutung; `Escape` schließt ihn (gemessen `dialog[open]` vorher 0, danach 1, nach Escape 0). Klick auf `.v2case__link` setzt `location.hash` von `""` auf `#fall-c-4412` | ✓ |
+| Aufklapp-Mechanik und Aufteilungszeile | Die Zeile klappt bewusst nicht selbst auf (`expanded` ist Zustand, kein Schalter) — im Tab-Lauf gibt es keinen Zeilen-Stopp, in `--split` ist `.v2btxrow__split` **0×** vorhanden, in `--expanded` **1×** und sichtbar (Höhe 97,4 px) | ✓ |
+| Polster der Aufteilungszeile (Spezifitätsfalle, Mangel M6 der Vorrunde) | `--expanded`, `getComputedStyle(td.v2btxrow__split)`: `padding` **8px 18px 12px**, `display: block`, `background: rgb(244,246,248)`, `border-bottom: 1px rgb(236,239,243)` — der Reset schlägt sie nicht. Wirkung: rechte Kante von Teilbetrag und Summe **1399,0** = rechte Kante der Betragsspalte **1399,0**. Gegenprobe: `padding-right: 16px` zur Laufzeit → 1401,0 (2 px daneben), zurück → 1399,0 | ✓ |
+| §9: Text links, Zahlen rechts, nichts zentriert (V3) | `text-align: center` im ganzen `.v2tbl`: nur auf den Icon-Knöpfen und ihren SVG-Kindern, auf keinem Text | ✓ |
+| §9: Kontrast (V10) | `check:contrast` Exit 0. Spot-Messung gegen `rgb(255,255,255)`: `.v2btxrow__rest` 6,69 · `.v2btxrow__clar` 6,69 · `.v2btxrow__statefor` 4,88 · `.v2case__no` 6,69 · `.v2case__link` 13,77 · `.v2purp__text` 13,77 — alle ≥ 4,5 | ✓ |
+| §9: Karte Rand **oder** Schatten | `.v2card`: `border 1px solid rgb(221,226,232)`, `box-shadow: none` | ✓ |
+| §9: keine Emoji, keine Versalien | Kartentext: `\p{Extended_Pictographic}` false; einziges Versalienwort „DATEV" (Eigenname) | ✓ |
+| §9: Baustein mit `minWidth` scrollt statt abzuschneiden — gemessen bei vier Breiten (Mangel M3 der Vorrunde) | `--in-use` mit `Table minWidth={1400}`: 1920 → 1400/1398 · 1440 → 1400/1398 · 1280 → **1400/1246**, `overflow-x: auto`, Spurliste unverändert `100px 180px 234px …`, Zweck behält **234 px**, Kopftext „Verwendungszweck" bleibt **110,8 px innerhalb** seiner Zelle (kein Überdrucken von „Sachverhalt") · 1100 → 1400/1066 · 700 → 1400/666. Screenshot `inuse-1280.png` | ✓ (mit M-C) |
+| §9: Legende am Ort (V14) / Story `InUse` „Köpfe der Status-Spalten über `StatusHeader` (0077)" | Der Kopf ist ein nackter `<span>{c.header}{c.headerAside}</span>` (`BankTransactionRow.stories.tsx:62–68`), kein `StatusHeader`. Gemessen ist der Abstand zwischen Wortende und (i) **0,0 px** („Buchung" 843,0/843,0 · „DATEV-Historie" 1052,6/1052,6). Gegenprobe: `.v2sth` zur Laufzeit gesetzt → **4,0 px** (847,0/1056,6), Klasse entfernt → wieder 0,0 px | **M-A** |
+| Im Browser angesehen | Screenshots `inuse-1440.png`, `inuse-1280.png`, `split-1440.png`, `expanded-1440.png`, `columns-1440.png` im Abnahme-Scratchpad | ✓ |
+| offen (App): ersetzt die Zeile in `KontoauszugView` und `BankTransactionAssignmentTable`, dazu die dritte Route aus B3 | in diesem Repo nicht prüfbar | offen (App) |
+
+### Die Mängel der Vorrunde — nachgemessen
+
+| Vorrunde | Behauptung der Nacharbeit | Nachgemessen |
+|---|---|---|
+| M1 doppeltes (i) | „2 im Kopf, 0 in den Zeilen, 24 → 14 Stopps" | **stimmt.** 1× je Achse im Kopf, 0 Status-(i) in den Zeilen, echter Tab-Lauf = 14 Stopps |
+| M2 Gegenpartei-Spur | „hat jetzt `.v2trunc` und ihren `title`; `client 180 = scroll 180`" | **stimmt und trägt weiter.** p90 (31 Zeichen) in die echte Zelle geschrieben: 180/216, Zeilenhöhe bleibt 47,1 · max (53 Zeichen): 180/379, Zeilenhöhe bleibt 47,1. `--in-use` Zeile 4 („Kontoführungsentgelt August 2026") 180/225 mit vollem `title`. Bedarf ungebunden: p50 178,8 · p90 256,3 · max 448,6 px |
+| M3 1280 px | „scrollt (1400/1246), der Zweck hat 208 px" | **stimmt.** 1400/1246 bei 1280 px; die Zweck-Spur misst 234 px (Zelleninhalt `.v2purp__text` 206 px), kein Kopf-Überstand |
+| M4 vierte offene Klasse | „`no_account` … eine Zeile trägt sie jetzt" | **halb.** `no_account` steht in `--in-use` Zeile 3 („ohne Konto") — das Kriterium nennt aber Story `Columns`, und dort stehen weiter nur zwei der vier → M-B |
+| M5 (i) aus dem Spaltensatz | „`bankTransactionColumns()` trägt es jetzt in `headerAside`" | **halb.** Das (i) kommt aus dem Satz ✓, aber die Story rahmt es ohne `StatusHeader`/`.v2sth`: der Abstand, dessentwegen M5 überhaupt aufgeschrieben wurde, ist wieder **0,0 px** → M-A. Dazu schreibt `Columns` seine Kopfbeschriftungen weiter von Hand (`:166–175`), samt eigenem `StatusInfoButton` |
+| M6 Unterzeile | „1399,0 gegen 1399,0" | **stimmt**, mit Gegenprobe (16 px → 1401,0 → zurück 1399,0) |
+
+### Mängel
+
+**M-A — Der Kopf der Status-Spalten ist weiter handgerahmt; das (i) klebt am Wort. (blockiert)**
+Ort: `BankTransactionRow.stories.tsx:62–68` (`Frame`) und `:166–175` (`Columns`).
+Die Spec nennt für `InUse` ausdrücklich „Köpfe der Status-Spalten über
+`StatusHeader` (0077)", und V14 nennt `StatusHeader` als die Form der Legende
+am Ort. Gemessen in `--in-use` bei 1440 px: Wortende und Knopf-Kante stehen
+auf **derselben** x-Position — „Buchung" 843,0/843,0 und „DATEV-Historie"
+1052,6/1052,6, also **0,0 px** Abstand. Gegenprobe: `.v2sth` zur Laufzeit an
+beide Kopf-Spans → 4,0 px (847,0 / 1056,6), Klasse entfernt → wieder 0,0 px.
+Genau diese Messung stand schon in der Abnahme vom Vortag; die Nacharbeit hat
+das (i) in den Spaltensatz verschoben, aber nicht in seinen Rahmen. Dass
+`Columns` in derselben Datei `.v2sth` von Hand setzt (dort gemessen 4,0 px),
+zeigt, dass es kein Zufall zweier Zahlen ist, sondern zwei Wege in einer Datei.
+*Kleinster Weg:* im `Frame` die Kopfzelle als `<span className="v2sth">`
+rahmen, wo `c.headerAside` steht (oder `StatusHeader` benutzen, wenn der Kopf
+nicht sortierbar sein muss), und die Kopfzeile von `Columns` aus dem
+abgeleiteten Satz bauen statt aus sechs Literalen.
+
+**M-B — `Columns` zeigt weiter zwei der vier offenen DATEV-Klassen. (blockiert)**
+Ort: `BankTransactionRow.stories.tsx:176–200`. Das Kriterium lautet wörtlich
+„die vier offenen Klassen tragen ihr Wort (Story `Columns`)". Gemessen in
+`--columns`: die beiden Badges heißen „außerhalb des Bestands"
+(`beyond_bookings`) und „mehrdeutig" (`unclear_multi`). `unclear_none`
+(„kein Kandidat") steht in `--unassigned`, `no_account` („ohne Konto") in
+`--in-use` Zeile 3 — beide nicht dort, wo das Kriterium sie verlangt. Die
+Nacharbeit hat `no_account` einer `InUse`-Zeile gegeben; das erfüllt den
+Buchstaben des Kriteriums nicht. Der Legenden-Dialog des Kopfes zeigt zwar
+alle zwölf Werte (gemessen), aber die Story soll die vier **im Bild** zeigen.
+*Kleinster Weg:* `Columns` um zwei Zeilen mit `unclear_none` und `no_account`
+ergänzen — die Story hat heute zwei Zeilen und kein Platzproblem.
+
+**M-C (klein) — Die Story-Karte scrollt bei jeder Breite um 2 px. (blockiert nicht)**
+Ort: `BankTransactionRow.stories.tsx:56` (`maxWidth: 1400`) gegen `:59`
+(`Table minWidth={1400}`). Die Karte hat 1 px Rand je Seite, also bleiben
+1398 px Innenbreite für eine Tabelle, die 1400 px fordert. Gemessen:
+`.v2tbl__scroll` **1400/1398** bei 1920 px **und** bei 1440 px — die Tabelle
+hat auf jedem Bildschirm eine waagerechte Scrollleiste, auch wo genug Platz
+wäre. Die Schwester macht es richtig: `BankTransactionList --in-use` misst
+1406/1406, kein Überlauf. Das ist die Nebenwirkung der M3-Nacharbeit (vorher
+1398/1398, Überlauf 0). *Kleinster Weg:* den Rahmen der Story auf
+`maxWidth: 1440` setzen (oder `minWidth` und Rahmen aus einer Zahl ableiten) —
+die 1400 der Tabelle bleiben, wie 0085 sie hat.
+
+**M-D (Mangel der Spec, steht seit der Vorrunde) — `rowHref` hat weder Zeile in der Schnittstelle noch Story. (blockiert nicht)**
+Ort: `bank-transaction-columns.tsx:79`. Die Prop ist im Bau dazugekommen,
+verändert die Zeile spürbar (sie legt einen `.v2rowlink` über die Gegenpartei,
+und `.v2tbl__row:has(.v2rowlink)` färbt die ganze Zeile beim Überfahren,
+`v3.css:159–169`) und wird in 0101 von **keiner** Story gezeigt — belegt ist
+sie nur in `BankTransactionList.stories.tsx:94` und
+`BankTransactionWorklist.stories.tsx:161`. Eine Abnahme ändert die Kriterien
+nicht, deshalb steht das hier als Mangel der Spec und nicht als gekürzte
+Liste. *Kleinster Weg:* Zeile in die Schnittstellen-Tabelle, und entweder eine
+Story in 0101 oder ein Satz, warum 0085/0086 sie tragen.
+
+### Befunde am Set
+
+1. **`headerAside` verliert überall den Abstand, den `StatusHeader` gibt.**
+   `DataTable.headCell` setzt `{col.header}{col.headerAside}` ohne rahmenden
+   `.v2sth`-Span (`DataTable.tsx:354–358` und `:381–389`). Gemessen ist der
+   Abstand Wort → (i) deshalb **0,0 px** nicht nur hier, sondern auch in
+   `DataTable --in-use` („Bearbeitung") und in `CaseRow --in-use` („Stand",
+   „Wer ist dran", „Export") — drei Bausteine, dieselbe Null. `.v2sth`
+   (`v3.css:2917`) ist die einzige Stelle, die die 4 px setzt, und der
+   `headerAside`-Weg kommt nie an ihr vorbei. Solange das so ist, hat jeder
+   Spaltensatz, der Z4 richtig macht, den Abstand falsch. Kleinster Weg an der
+   Wurzel: in `headCell` den Kopf als `<span className="v2sth">` rahmen, wenn
+   `headerAside` gesetzt ist — dann verschwindet M-A hier und in vier weiteren
+   Familien (`case-columns`, `account-columns`, `source-document-columns`,
+   `bank-transaction-columns`).
+
+2. **`nicht gelaufen` (matchStage `null`) kommt in keiner Story vor.**
+   `bank-transaction-columns.tsx:210` zeigt für `matchStage === null` den Text
+   „nicht gelaufen" in `.v2muted`. Der Text deckt sich mit der Registry
+   (`AXIS_SOURCE` sagt „NULL = Kaskade nicht gelaufen"), ist also keine lokale
+   Label-Map — aber keine der sechs Stories setzt `matchStage: null`, und der
+   Zweig ist damit nie im Bild. Kein Kriterium verlangt ihn; als Rand-Wert
+   gehört er in `Columns` oder `InUse`, wenn die Spec das nächste Mal
+   angefasst wird.
+
+3. **`Filled` zeigt Rang 8 leer.** Die Stories-Tabelle sagt für `Filled`
+   „Alle acht Punkte"; die Klärungs-Spalte ist dort leer, weil die Fixture
+   `openClarificationsCount: 0` trägt. Alle acht **Spalten** stehen (gemessen),
+   nur der achte Wert fehlt. Das Kriterium zu Rang 8 nennt `Split`, und dort
+   steht er — kein Mangel, aber die Stories-Tabelle verspricht etwas, das die
+   Fixture nicht hält.
+
+**Urteil: zurück.** Der Bau ist in der Sache dicht, und die schweren Mängel der
+Vorrunde sind wirklich weg — das doppelte (i) ist auf 14 statt 24 Fokusstopps
+zurück (echter Tab-Lauf), die Gegenpartei kürzt jetzt bis zum Höchstwert des
+Bestands ohne eine einzige Zeile höher zu werden (180/379 bei 53 Zeichen,
+Zeilenhöhe 47,1 px), bei 1280 px scrollt die Tabelle statt Rang 1 auf 80 px zu
+drücken, und die Unterzeile fluchtet auf 1399,0 mit der Betragsspalte
+(Gegenprobe gemacht). Zurück geht es an zwei Stellen, die beide je zwei Zeilen
+kosten: der Kopf der Status-Spalten steht weiter ohne `StatusHeader`, und der
+Abstand, dessentwegen M5 aufgeschrieben wurde, ist wieder 0,0 px (M-A); und
+`Columns` zeigt weiter zwei der vier offenen DATEV-Klassen, obwohl das
+Kriterium diese Story beim Namen nennt (M-B). M-C sind zwei Pixel Scrollleiste
+aus der M3-Nacharbeit, M-D ist der stehende Spec-Mangel zu `rowHref`.
+
+Abgenommen von / am: **nicht abgenommen** — geprüft von Claude
+(Abnahme-Agent, fremd), 2026-09-07 · Offene Punkte: M-A, M-B (blockierend),
+M-C, M-D (nicht blockierend); danach Wiederabnahme. Dazu offen (App): Ersatz
+der Zeile in `KontoauszugView`, in `BankTransactionAssignmentTable` und der
+dritten Route aus B3.
+
+## Nach der Wiederabnahme (2026-09-07): beide Blocker, und einer an der Wurzel
+
+**M-A — der Abstand gehört der Kopfzelle, nicht fünf Spaltensätzen.** Der
+Befund des Prüfers trifft den Kern: `headerAside` wurde als nacktes
+Geschwister seines Wortes gerendert, und der Abstand war gemessen **0,0 px**
+— nicht nur hier, sondern in `DataTable --in-use`, `CaseRow --in-use` und
+`BankTransactionRow --in-use`. Die Spaltensätze, die `.v2sth` von Hand
+setzten, hatten 4,0 px; der Rest sah aus wie ein Tippfehler.
+
+Behoben wurde deshalb **an zwei Wurzeln**, nicht in den Stories:
+
+1. `DataTable` rahmt einen Kopf mit `headerAside` selbst in `.v2sth` — in der
+   sortierbaren Variante bleibt `headerAside` dabei **außerhalb** des Links
+   (ein Knopf im Anker ist ungültiges Markup).
+2. Für die Köpfe, die nicht durch `DataTable` gehen — `Table`/`HeadRow` steht
+   in Stories und Seiten ebenso —, trägt die Kopfzelle die Regel selbst:
+   `.v2tbl th:has(> .v2sinfo)` und `.v2tbl th > *:has(> .v2sinfo)`.
+
+Gemessen bei 1400 px, Wortende → (i), über vier Spaltensätze:
+
+| | vorher | jetzt |
+|---|---|---|
+| `BankTransactionRow --in-use` (Buchung, DATEV-Historie) | 0,0 | **4,0** |
+| `CaseRow --in-use` (Stand, Wer ist dran, Export) | 0,0 | **4,0** |
+| `DataTable --in-use` (Bearbeitung) | 4,0 | 4,0 |
+| `SourceDocumentColumns --document-list` (drei Köpfe) | 4,0 | 4,0 |
+
+Wer den Kopf baut, muss die Zahl nicht mehr kennen.
+
+**M-B — `Columns` zeigt alle vier offenen DATEV-Klassen.** Zwei fehlten; die
+Story hat zwei Zeilen mehr bekommen. Gemessen im gerenderten Text je genau
+einmal: „außerhalb des Bestands", „mehrdeutig", „kein Kandidat", „ohne
+Konto".
+
+M-C (der Story-Rahmen ist 2 px enger als die Tabelle) und M-D (`rowHref` ohne
+Zeile in der Schnittstelle) bleiben offen — der erste ist eine
+Zuschnitt-Frage der Story, der zweite ein Spec-Mangel.
+
+**Der Befund am Set ist behoben:** `StatusInfoButton` maß 12 × 12 statt
+24 × 24 und antwortete nicht auf Hover; §9 hat jetzt die Zeile zur
+Trefferfläche.
+
+`pnpm typecheck`, `check:language`, `check:icons`, `check:contrast`,
+`check:mirror`, `check:when` je Exit 0. `pnpm build` lief in dieser Welle im
+eigenen Worktree: **Exit 0** (Bauprüfung in 0117).
+
+**Status: Abnahme.**

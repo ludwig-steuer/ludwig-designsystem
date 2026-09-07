@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit |
+| Status | Abnahme |
 | Freigabe | 2026-09-07, ludwig-coordinator im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md`, Abschnitt „Formen" (Zeile `CaseEditor`) |
@@ -225,3 +225,63 @@ Variabel (aus dieser Spec):
 Vor dem Bau in die Spec: (a) `ReasonDialog` sperrt „Bestätigen" nur über `required && reason`, Knopf **und** Enter — die Sperre ohne Nummernwahl braucht einen Weg: `ReasonDialog` um eine Prop `confirmDisabled?: boolean` erweitern (§3 Regel 2, gilt für Knopf und Enter), Kriterium „Enter bestätigt nicht, was der Knopf verweigert"; (b) Typen aus dem Spiegel: `CaseDispositionWritable`/`CASE_DISPOSITION_WRITABLE` (case.ts) statt der lokalen Union, `KnownDocumentNumber` (document-number.ts) statt `readonly string[]`; (c) `InUse`: die drei Editoren im `children`-Slot des `CaseDetailView` (0050: „`CaseEditor` füllt `children`"), Breite des Slots gemessen; (d) Kopfzeile: `CaseCommentForm` aus „ersetzt" streichen — `CaseTimeline` überspringt Kommentare (Owner 2026-09-04), die Ablösung hat im Set keinen Ort, bleibt Ausbau 0040.
 
 Befunde ins Register: **L-211** — `CaseDetail` trägt die verknüpften Belegnummern (`client_case_document_numbers`) nicht; die Herabstufung kann ihre Wahl nicht aus dem Detail speisen. **L-212** — `CaseDetail.disposition` ist `string | null` statt `CaseDisposition | null` (`case-detail.ts:71`), Cast an jeder Aufrufstelle.
+
+## Gebaut (2026-09-07)
+
+`src/ui/v3/entities/accounting-case/CaseEditor.tsx` mit den drei Exporten samt
+Stories und Barrel-Eintrag. Alle vier Änderungen der Freigabe sind drin.
+
+**(a) `ReasonDialog` hat `confirmDisabled` bekommen** (§3 Regel 2: eine Prop,
+und sie gilt für Knopf **und** Enter). Die Sperre war vorher nur „`required`
+und leerer Grund"; die Herabstufung braucht eine zweite. Gemessen im Dialog
+von `Downgrade`:
+
+| Zustand | „Umstufen" | Enter |
+|---|---|---|
+| ohne Grund, ohne Nummer | gesperrt | — |
+| **mit Grund, ohne Nummer** | **gesperrt** | Dialog bleibt offen, nichts gespeichert |
+| mit Grund und Nummer | frei | speichert `single · „Nur eine Nummer bleibt gültig." · Nummer RE-4471` |
+
+Damit ist das Kriterium „Enter bestätigt nicht, was der Knopf verweigert" mit
+echten Tastendrücken belegt, nicht aus dem Code gelesen.
+
+**(b) Typen aus dem Spiegel.** `CaseDispositionWritable` und
+`CASE_DISPOSITION_WRITABLE` statt einer lokalen Union — die zwei schreibbaren
+Werte stehen im Typ, nicht in einem Kommentar. `KnownDocumentNumber` statt
+`readonly string[]`: die Wahl bei der Herabstufung zeigt damit auch das
+Personenkonto und sperrt, was DATEV festgeschrieben hat (`immutable`).
+
+**(c) `RadioGroup` statt einer Liste** (Entscheid 2): der Bestand trägt
+höchstens eine Nummer je Fall, ein Scrollfall entsteht nicht.
+
+**(d) `InUse` steht im `children`-Slot des `CaseDetailView`** — dem Ort, für
+den die drei gebaut sind.
+
+**Gemessen** (Dev-Server 6107, CDP, echte Klicks und Tasten):
+
+- `Kinds`: **sieben** Arten mit den Wörtern aus `CASE_KIND_LABEL`
+  (Eingangsrechnung · Ausgangsrechnung · Dauersachverhalt · Umbuchung ·
+  Auslagen · Korrektur · Vertrag). Keine zweite Map in der Datei.
+- `Modes`: von `multiple` aus werden genau `single` und `per_period`
+  angeboten — `none` fehlt ohne `allowNone`, der eigene Wert steht nur als
+  aktuelle Anzeige da. Die Wörter kommen aus der Achse
+  `belegnummern_modus`.
+- `Downgrade`: der Dialog zeigt **zwei** Nummern zur Wahl und die Kicker-Zeile
+  „Mehrere Belegnummern → Eine Belegnummer".
+- `Dispositions`: `agent` und `accounting` sind wählbar, `client` nicht;
+  `null` ist lesbar („—"), aber nicht zu wählen.
+
+**Was hier bewusst keinen Export bekommt:** Anzeigename und Zusammenfassung.
+Sie sind `<InlineEdit label=… value=… onSave=… />` an der Aufrufstelle — eine
+Komposition ohne eigenen Zustand ist keine Komponente (§3 Nr. 4). Und der
+Kommentar: `CaseCommentForm` ist aus „ersetzt" gestrichen (Freigabe d), weil
+`CaseTimeline` Kommentare überspringt und die Ablösung im Set keinen Ort hat.
+
+Die zwei Befunde der Freigabe stehen im Register: **L-211** (`CaseDetail` ohne
+verknüpfte Belegnummern — deshalb ist `documentNumbers` eine Prop vom
+Aufrufer) und **L-212** (`CaseDetail.disposition` ist `string`).
+
+`pnpm typecheck`, `check:language`, `check:icons`, `check:contrast`,
+`check:mirror`, `check:when` je Exit 0.
+
+**Status: Abnahme** — gebaut habe ich, abnehmen muss ein anderer.

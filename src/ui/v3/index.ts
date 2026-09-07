@@ -385,6 +385,11 @@ export { CaseRow } from "./entities/accounting-case/CaseRow";
 export { CaseList, caseListTracks, type CaseListTab } from "./entities/accounting-case/CaseList";
 export { CasePicker } from "./entities/accounting-case/CasePicker";
 export {
+  CaseDispositionEdit,
+  CaseDocumentNumberModeEdit,
+  CaseKindEdit,
+} from "./entities/accounting-case/CaseEditor";
+export {
   caseColumns,
   caseTracks,
   type CaseColumn,

@@ -2924,6 +2924,18 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   align-items: baseline;
   gap: var(--space-1);
 }
+/* **Und dieselbe Regel an der Kopfzelle selbst**: nicht jeder Kopf entsteht
+   in `DataTable` — `Table`/`HeadRow` steht in Stories und Seiten ebenso, und
+   dort war das (i) ein nacktes Geschwister seines Wortes. Gemessen 0,0 px
+   Abstand in fünf Spaltensätzen, während die, die `.v2sth` von Hand setzten,
+   4,0 px hatten (Wiederabnahme 0101). Wer den Kopf baut, soll die Zahl nicht
+   kennen müssen. */
+.v2tbl th:has(> .v2sinfo),
+.v2tbl th > *:has(> .v2sinfo) {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
 
 /* ── 0079 · Wizard — der Rahmen eines Ablaufs in nummerierten Schritten ────
    Aus der App geholt (`.wz*` in `components.css`) und auf die Hausregeln

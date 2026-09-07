@@ -350,11 +350,24 @@ function headCell<T>(
   href: ((patch: ListPatch) => string) | undefined,
 ) {
   const cls = col.align === "end" ? "v2num" : undefined;
+  // **The gap belongs to the head, not to five column sets.** `headerAside` is
+  // an (i) beside a word, and beside means 4 px. Rendered as bare siblings the
+  // distance was measured **0,0 px** — in `BankTransactionRow`, `DataTable`
+  // and `CaseRow` alike, five column sets in total (acceptance 0101). The
+  // column sets that wrapped their head in `.v2sth` by hand had 4,0 px; the
+  // rest looked like a typo. So the head carries the rule.
+  const head = col.headerAside ? (
+    <span className="v2sth">
+      {col.header}
+      {col.headerAside}
+    </span>
+  ) : (
+    col.header
+  );
   if (!col.sortable || !href) {
     return (
       <th key={col.key} scope="col" className={cls}>
-        {col.header}
-        {col.headerAside}
+        {head}
       </th>
     );
   }
@@ -377,15 +390,20 @@ function headCell<T>(
       className={cls}
       aria-sort={active ? (asc ? "ascending" : "descending") : "none"}
     >
-      <Link
-        className="v2sortlink"
-        href={href({ sort: col.key, dir: asc ? "desc" : "asc", page: 1 })}
-        aria-label={`Nach ${name} sortieren — ${state}`}
-      >
-        {col.header}
-        {active ? <ActionIcon action={asc ? "sort-asc" : "sort-desc"} size={12} /> : null}
-      </Link>
-      {col.headerAside}
+      {/* The same 4 px as above, and the link stays a link: `headerAside` is a
+          sibling of the anchor, not inside it — a button inside an `<a>` is
+          invalid HTML (0094 b). */}
+      <span className="v2sth">
+        <Link
+          className="v2sortlink"
+          href={href({ sort: col.key, dir: asc ? "desc" : "asc", page: 1 })}
+          aria-label={`Nach ${name} sortieren — ${state}`}
+        >
+          {col.header}
+          {active ? <ActionIcon action={asc ? "sort-asc" : "sort-desc"} size={12} /> : null}
+        </Link>
+        {col.headerAside}
+      </span>
     </th>
   );
 }

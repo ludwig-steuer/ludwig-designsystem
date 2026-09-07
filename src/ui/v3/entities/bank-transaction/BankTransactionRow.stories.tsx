@@ -198,6 +198,36 @@ export const Columns: Story = {
             // die Zeile steht trotzdem in der Reihenfolge der Familie.
             columns={["amount", "matchStage", "account", "purpose", "counterparty", "postingDate"]}
           />
+          <BankTransactionRow
+            transaction={{
+              ...BASE,
+              id: "bt-10",
+              cases: [],
+              allocatedSum: 0,
+              matchStage: "unclear_none",
+              counterpartyName: "Stadtwerke Musterstadt",
+              amount: -412,
+              purpose: "EREF+SW-2026-08 SVWZ+Abschlag Strom 08/2026",
+            }}
+            caseHref={caseHref}
+            accountLabel="Commerzbank · 1210"
+            columns={["amount", "matchStage", "account", "purpose", "counterparty", "postingDate"]}
+          />
+          <BankTransactionRow
+            transaction={{
+              ...BASE,
+              id: "bt-11",
+              cases: [],
+              allocatedSum: 0,
+              matchStage: "no_account",
+              counterpartyName: "Handwerk Schulz KG",
+              amount: -1240,
+              purpose: "SVWZ+Anzahlung Sanierung Serverraum",
+            }}
+            caseHref={caseHref}
+            accountLabel="Qonto · 4021"
+            columns={["amount", "matchStage", "account", "purpose", "counterparty", "postingDate"]}
+          />
         </Table>
       </Card>
     </div>
