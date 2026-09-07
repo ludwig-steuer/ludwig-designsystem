@@ -217,6 +217,7 @@ Registry-Entscheid im Handoff, nicht still im Screen (F123 §2.4).
 - [ ] Jedes klickbare Element antwortet auf Hover; Listenzeile mit Detail ist ganz klickbar (§2, I11)
 - [ ] Icons Lucide 1.5 px, Maß aus der Leiter des Registers (A8); keine Emoji/Unicode-Icons, keine Versalien (§2, T9, A2)
 - [ ] Karte: Rand **oder** Schatten; linksbündig; kein Modal, wo Detail oder Drawer geht (L2–L4)
+- [ ] Ein Baustein mit `minWidth` oder innerem Scrollen steht in einem Raster- oder Flex-Kind nur mit `min-width: 0` bzw. `minmax(0, …)` — sonst schneidet das Kind ab, statt zu scrollen; gemessen bei der Breite, die der Baustein auf der Seite hat (vier Fälle in einer Abnahme-Welle: 0014, 0029, 0063, 0069; Owner-Regel 2026-09-07)
 - [ ] Texte nach T1–T5 (Sie, Imperativ, GLOSSARY-Begriffe)
 - [ ] **Story** unter `v2/Primitives|Patterns|Entitäten/<Entität>/<Name>` mit allen fünf Zuständen (Storybook ist die Antwort auf „wovon gibt es v2?")
 - [ ] In §11 auf v2 gesetzt
