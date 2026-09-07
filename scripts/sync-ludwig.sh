@@ -42,8 +42,11 @@ rsync -a --prune-empty-dirs \
   --exclude='*' \
   "$SRC/" "$DST/"
 
-# Server-gekoppelte Domain-Dateien gehören nicht ins Design-System.
-grep -rl 'server-only\|from "@/core/db\|from "@/core/auth\|drizzle-orm' "$DST" --include='*.ts' 2>/dev/null | xargs -r rm -f
+# Server-gekoppelte Domain-Dateien gehören nicht ins Design-System. Entschieden
+# wird am **Import**, nicht am Text: ein Volltext-Grep hat zweimal in zwei Tagen
+# eine reine Datei aussortiert, weil das Wort in einem Kommentar oder an einer
+# Nachbarfunktion stand (`scripts/mirror-filter.mjs`, dort auch die Selbstprüfung).
+node "$(dirname "$0")/mirror-filter.mjs" "$DST" | xargs -r rm -f
 
 # Import-Pfade auf den Spiegel umbiegen.
 find "$DST" -name '*.ts' -exec sed -i '' \

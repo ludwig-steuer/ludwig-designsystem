@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "check:icons": "node scripts/check-icons.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "sync:ludwig": "./scripts/sync-ludwig.sh"
+    "sync:ludwig": "./scripts/sync-ludwig.sh",
+    "check:mirror": "node scripts/mirror-filter.mjs --test"
   },
   "dependencies": {
     "clsx": "^2.1.1",
