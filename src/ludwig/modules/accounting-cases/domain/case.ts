@@ -183,6 +183,68 @@ export function clarificationState(c: {
 export const CLARIFICATION_TYPES = ["question", "comment"] as const;
 export type ClarificationType = (typeof CLARIFICATION_TYPES)[number];
 
+/**
+ * Worum es in einer Rückfrage geht — `question_type`.
+ *
+ * `text NOT NULL` **ohne** DB-CHECK: die Werte entstehen im Code, nicht im
+ * Schema. Wer einen neuen einführt, trägt ihn hier ein — sonst zeigt die
+ * Oberfläche den Slug mit Unterstrichen, was sie bis 2026-09-07 tat
+ * (`humanizeType()` in `ClarificationsBanner`, L-10).
+ *
+ * Die `opos_*`-Typen sind Wächter-Fragen: sie entstehen automatisch aus dem
+ * Abgleich mit dem DATEV-Bestand und tragen deshalb einen Sperrindex gegen
+ * Dubletten je Sachverhalt.
+ */
+export const CLARIFICATION_QUESTION_TYPE_LABEL: Record<string, string> = {
+  agent_clarification: "Rückfrage des Agenten",
+  human_clarification: "Rückfrage der Kanzlei",
+  document_missing: "Beleg fehlt",
+  creditor_mismatch: "Kreditor passt nicht",
+  duplicate_booking_suspected: "Doppelbuchung vermutet",
+  partner_ambiguous: "Geschäftspartner mehrdeutig",
+  recurring_amount_deviation: "Betrag weicht vom Dauersachverhalt ab",
+  recurring_document_number_format: "Belegnummer passt nicht zum Muster",
+  recurring_no_input: "Dauersachverhalt ohne Eingang",
+  opos_anchor: "Offener Posten als Anker",
+  opos_carryover: "Offener Posten aus dem Vortrag",
+  opos_clearing_mismatch: "Ausgleich passt nicht zum offenen Posten",
+  opos_settled_by_ludwig: "In Ludwig ausgeglichen, in DATEV nicht",
+  opos_settled_extern: "Außerhalb von Ludwig ausgeglichen",
+  other: "Sonstiges",
+};
+
+/**
+ * Klartext eines Fragetyps. Unbekannte Slugs werden lesbar gemacht statt
+ * verworfen — ein neuer Typ soll auffallen, nicht verschwinden.
+ */
+export function clarificationQuestionTypeLabel(questionType: string): string {
+  const known = CLARIFICATION_QUESTION_TYPE_LABEL[questionType];
+  if (known) return known;
+  const cleaned = questionType.replace(/[_-]+/g, " ").trim();
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+/**
+ * Woher eine maschinelle Rückfrage kommt — der schreibende Dienst.
+ *
+ * Lag bis 2026-09-07 als lokale Map in `ClarificationsBanner.tsx` und kannte
+ * `agent`, `web` und `datev-mirror` nicht — zusammen 78 % des Bestands, die
+ * deshalb ihren technischen Slug zeigten (L-11).
+ */
+export const CLARIFICATION_MODULE_LABEL: Record<string, string> = {
+  agent: "Buchungsagent",
+  web: "Kanzlei-Oberfläche",
+  "datev-mirror": "DATEV-Abgleich",
+  "booking-module": "Buchungsvorschlag",
+  "invoice-interpreter": "Beleg-Interpretation",
+  "document-simple-classifier": "Beleg-Klassifikation",
+  "invoice-preprocessor": "Beleg-Erfassung",
+};
+
+export function clarificationModuleLabel(slug: string): string {
+  return CLARIFICATION_MODULE_LABEL[slug] ?? slug;
+}
+
 export const EXPECTATION_KINDS = ["document", "payment"] as const;
 export type ExpectationKind = (typeof EXPECTATION_KINDS)[number];
 

@@ -978,3 +978,15 @@ nachzuziehen, sie ist kein Mangel am Code. Die drei Ergänzungen in
   `--loading` die Skeleton-Fläche mit „Verlauf wird geladen …".
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-08 ist erledigt** (App-Commit `52914c45`): `CaseEvent` liegt in
+`accounting-cases/domain/case-event.ts` und wird gespiegelt.
+
+Für diesen Strang heißt das: die Wörter der Ereignisarten kommen aus der Achse
+`ereignis_art`, nicht mehr aus einer Map, die der Aufrufer mitbringt.
+Reihenfolge wie im Grundstrang (0023): Achse, dann `kindLabels` als
+Überschreibung, dann der Rohwert. Die lokale `KIND_LABELS` der Stories ist
+weg — mit einer sichtbaren Folge: `accrual` heißt in der Achse **Abgrenzung**,
+die Story sagte „Sollstellung".

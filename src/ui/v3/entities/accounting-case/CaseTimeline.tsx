@@ -28,6 +28,7 @@ import { calendarDay } from "../../format";
 import { Amount } from "../../primitives/Amount";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Timeline, type TimelineItem } from "../../patterns/Timeline";
+import { STATUS_REGISTRY } from "@/ludwig/ui/status/status-registry";
 
 /**
  * The history of a case, in one strand (0040).
@@ -247,7 +248,10 @@ export function CaseTimeline({
   }
 
   for (const ev of events) {
-    const label = kindLabels?.[ev.kind] ?? ev.kind;
+    // Achse zuerst (`ereignis_art`, L-02), Prop als Überschreibung, Rohwert
+    // zuletzt — dieselbe Reihenfolge wie im Strang darunter.
+    const label =
+      kindLabels?.[ev.kind] ?? STATUS_REGISTRY.ereignis_art[ev.kind]?.label ?? ev.kind;
     const Glyph = EVENT_ICON[ev.kind] ?? FileText;
     byId.set(ev.id, { type: "event", event: ev });
     items.push({

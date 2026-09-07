@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import type { Currency } from "@/ludwig/shared/money";
+import { parseGermanAmount, type Currency } from "@/ludwig/shared/money";
 import { Field, Input } from "./Form";
 
 /**
@@ -17,32 +17,34 @@ import { Field, Input } from "./Form";
 export type ParsedAmount = number | null | "invalid";
 
 /**
- * German input, tolerantly read: „1.234,56", „1234,56", „1234.56" and
- * „1 234,56" are the same amount. A dot counts as a thousands separator only
- * when exactly three digits follow it — otherwise it is the decimal point
- * people typed on a numeric keypad.
+ * Text aus dem Feld → Betrag.
  *
- * @when    Turning what someone typed into a number — inside this field, and
- *          wherever else an amount arrives as text (import, paste, URL).
- * @instead Formatting a number for display → `formatMoney` in
- *          `src/ludwig/shared/money.ts`.
+ * **Die Rechnung gehört der App** (`parseGermanAmount`, `shared/money.ts`):
+ * welcher Punkt ein Tausendertrenner ist und welcher ein Komma vertritt,
+ * entscheidet seit 2026-09-07 eine Regel für beide Seiten (Befund L-01, App-
+ * Commit `52914c45`). Hier steht nur noch, was ein **Eingabefeld** zusätzlich
+ * braucht: die Unterscheidung zwischen „nichts getippt" und „getippt, aber
+ * keine Zahl".
  *
- * ponytail: lives here until `src/ludwig/shared/money.ts` gets the counterpart
- * to `formatMoney` — see spec 0019, „Befund für ludwig/app".
+ * Deshalb die Formprüfung davor. `parseGermanAmount` verwirft, was keine
+ * Ziffer ist, und liest „12,3,4" als 123,4 — für einen Import ist das richtig,
+ * für ein Feld wäre es eine stille Umdeutung dessen, was jemand getippt hat.
+ * Was die Form nicht besteht, ist `"invalid"` und wird sichtbar bemängelt.
+ *
+ * Eine Schreibweise liest das Feld seither anders als vorher: „1.2345" ist
+ * jetzt 12345 (der Punkt trennt Tausender, denn hinter ihm stehen vier
+ * Ziffern) statt 1,2345. Das ist die Regel der App, und sie ist die richtige —
+ * 1,2345 € gibt es nicht.
  */
 export function parseAmount(raw: string): ParsedAmount {
-  const t = raw.replace(/[\s ]/g, "");
+  const t = raw.replace(/[\s ]/g, "");
   if (!t) return null;
-  let s = t;
-  if (s.includes(",")) {
-    s = s.replace(/\./g, "").replace(",", ".");
-  } else {
-    const tail = s.match(/\.(\d+)$/);
-    if (tail?.[1]?.length === 3) s = s.replace(/\./g, "");
-  }
-  if (!/^-?\d+(\.\d+)?$/.test(s)) return "invalid";
-  const n = Number(s);
-  return Number.isFinite(n) ? n : "invalid";
+  // Entweder deutsche Gruppierung („1.234.567,89") oder eine schlichte Zahl
+  // mit höchstens einem Trenner („1234.56", „1234,56", „1234").
+  const wohlgeformt = /^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t) || /^-?\d+([.,]\d+)?$/.test(t);
+  if (!wohlgeformt) return "invalid";
+  const n = parseGermanAmount(t);
+  return n === null ? "invalid" : n;
 }
 
 function format(value: number, currency: Currency | null) {

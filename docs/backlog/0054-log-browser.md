@@ -288,3 +288,11 @@ Ablösung von `InvoiceLogsPanel` und der Stapel-Sichten in `ludwig/app` — sie
 zielt nicht auf dieses Repo; die zwei Befunde ohne ✗ (Zählerkontrast, fehlendes
 `:hover` an `.v2seg__btn`) bleiben Sache des Sets. Neue Bilanz:
 **21 ✓ · 1 offen (App)** — Status `fertig`.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-17 ist erledigt** (App-Commit `52914c45`): `LOG_VIEWS` und
+`LOG_VIEW_DEPTH` stehen in `shared/log-views.ts` — als gemeinsames
+Anzeige-Vokabular ohne Modulbezug, nicht als `BATCH_LOG_VIEWS` im Stapel-Modul.
+Die Vorgabe der drei Beschriftungen kommt jetzt von dort; `viewLabels` bleibt
+als Überschreibung für einen Aufrufer, der ein anderes Wort braucht.

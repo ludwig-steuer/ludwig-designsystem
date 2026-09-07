@@ -594,3 +594,26 @@ dieselbe Verengung wie bei `counterpartySide` in 0097.
 (`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
 Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
 schreibt. Eine kurze Bestätigung steht aus.
+
+## Nachtrag zum Typtausch (2026-09-07, zweite Lieferung)
+
+Drei weitere Befunde der Beleg-Familie sind erledigt (App-Commit `7184a8ac`):
+
+- **L-47** — `SOURCE_DOC_COMPLETION_VIA` steht in der Domäne; die lokale Union
+  der sechs Erledigungswege ist ein Re-Export.
+- **L-37** — die Achse `beleg_charakter` gibt es. Der Charakter war ein
+  `Badge` mit rohem Wort, „weil es keine Achse gibt"; jetzt ist er ein
+  `StatusBadge` wie die drei Angaben neben ihm, mit dem Wort der Achse und
+  ihrer Erklärung.
+- **L-36** — `documentCounterparty()` ist der eine Weg zum Namen des
+  Gegenparts. **Am Bau ändert das nichts:** die Familie nimmt den Namen fertig
+  vom Aufrufer und leitet selbst nichts ab, wie es sich gehört. Der dritte
+  Fall des Befunds betraf uns aber doch — der Drawer beschriftete die Spalte
+  „Lieferant"; bei einer Ausgangsrechnung ist der Gegenpart der Kunde. Sie
+  heißt jetzt „Gegenpart".
+
+**Eine Anmerkung zum Spiegel:** `documentCounterparty()` ist eine reine
+Funktion, liegt aber in einer Datei mit einem Drizzle-SQL-Ausdruck. Der Spiegel
+nimmt aus einer Datei mit Infrastruktur-Import nichts, also fehlt sie hier.
+Solange die Familie nichts ableitet, ist das folgenlos; sollte sie je gebraucht
+werden, braucht sie drüben eine eigene Datei.

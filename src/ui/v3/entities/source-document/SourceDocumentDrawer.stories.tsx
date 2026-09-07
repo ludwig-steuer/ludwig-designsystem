@@ -191,7 +191,10 @@ export const ImKontext: Story = {
           <Table cols="140px 1fr 130px 120px 150px">
             <HeadRow>
               <span>Belegnr.</span>
-              <span>Lieferant</span>
+              {/* „Gegenpart", nicht „Lieferant": bei einer Ausgangsrechnung
+                  ist er der Kunde. Genau diese Beschriftung war der dritte
+                  Fall in Befund L-36. */}
+              <span>Gegenpart</span>
               <span>Datum</span>
               <span className="v2num">Brutto</span>
               <span />

@@ -43,8 +43,10 @@ const AGENT_DETAIL: ClarificationDetailVM = {
     { kind: "source_doc", label: "Beleg RE-2026-4471", href: "#" },
     { kind: "ledger_account", label: "4670 Reisekosten Arbeitnehmer", href: "#" },
   ],
-  questionTypeLabel: "Bewirtung oder Reisekosten",
-  originLabel: "Buchungsvorschlag",
+  // Roh, wie es in der Zeile steht — die Wörter kommen aus der Domäne
+  // (`clarification_question_type` und das Modul, Befunde L-10 und L-11).
+  questionType: "agent_clarification",
+  sourceModule: "booking-module",
   answerKind: "single_choice",
   answerOptions: ["Bewirtung (4650)", "Reisekosten (4670)"],
   allowFreeText: true,
@@ -98,8 +100,8 @@ export const Answering: Story = {
                 text: "Auf dem Konto ist kein Abgang zu finden.",
                 answerKind: "yes_no",
                 answerOptions: ["Ja", "Nein"],
-                questionTypeLabel: null,
-                originLabel: "DATEV-Abgleich",
+                questionType: "opos_clearing_mismatch",
+                sourceModule: "datev-mirror",
               }}
               onAnswer={(a) => answer(`Ja/Nein: ${a.optionId ?? "—"}`)}
             />
@@ -119,8 +121,8 @@ export const Answering: Story = {
                 context: null,
                 text: "Der Betrag von 1.800,00 € lässt sich keiner Rechnung zuordnen.",
                 answerKind: "free_text",
-                questionTypeLabel: null,
-                originLabel: "Buchungsvorschlag",
+                questionType: "other",
+                sourceModule: "booking-module",
               }}
               onAnswer={(a) => answer(`Freitext: ${a.text ?? "—"}`)}
               onDefer={(until, reason) => answer(`Zurückgestellt bis ${until}: ${reason}`)}

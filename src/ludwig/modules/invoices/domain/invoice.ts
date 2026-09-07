@@ -437,11 +437,27 @@ export interface InvoiceLogEntry {
 }
 
 export type ClarificationSeverity = "required" | "optional";
-export type ClarificationAnswerKind =
-  | "yes_no"
-  | "single_choice"
-  | "multi_choice"
-  | "free_text";
+/**
+ * Antwortform einer Rückfrage — `client_accounting_case_clarification.answer_kind`.
+ * DB-CHECK mit fünf Werten.
+ *
+ * `document_upload` ist ein **Altwert und wird nicht mehr geschrieben**: seit
+ * F125 ist ein fehlender Beleg keine Rückfrage, sondern eine Erwartung. Acht
+ * Zeilen im Bestand tragen ihn noch, deshalb steht er hier — wer alte Fälle
+ * liest, muss sie typkorrekt lesen können. Wer eine neue Rückfrage stellt,
+ * nimmt ihn nicht.
+ *
+ * Bis 2026-09-07 kannte die Union nur vier Werte; der `ClarificationEditor`
+ * weitete sie lokal und begründete es dort (L-12).
+ */
+export const CLARIFICATION_ANSWER_KINDS = [
+  "yes_no",
+  "single_choice",
+  "multi_choice",
+  "free_text",
+  "document_upload",
+] as const;
+export type ClarificationAnswerKind = (typeof CLARIFICATION_ANSWER_KINDS)[number];
 
 export interface InvoiceClarification {
   id: string;

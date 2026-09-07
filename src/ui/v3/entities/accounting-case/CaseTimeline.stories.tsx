@@ -13,6 +13,7 @@ import { Amount } from "../../primitives/Amount";
 import { FieldList } from "../../primitives/FieldList";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { formatTime } from "../../format";
+import { STATUS_REGISTRY } from "@/ludwig/ui/status/status-registry";
 
 const meta: Meta<typeof CaseTimeline> = {
   title: "v3/Entitäten/Sachverhalt/CaseTimeline",
@@ -22,15 +23,6 @@ export default meta;
 type Story = StoryObj<typeof CaseTimeline>;
 
 /** Bis die Registry die Achse `ereignis_art` führt (Befund 1 der Spec). */
-const KIND_LABELS: Record<string, string> = {
-  document_received: "Beleg",
-  payment_in: "Zahlungseingang",
-  payment_out: "Zahlungsausgang",
-  internal_transfer: "Umbuchung",
-  adjustment: "Korrektur",
-  accrual: "Sollstellung",
-  open_item_carryover: "OP-Vortrag",
-};
 
 const TODAY = "2026-09-03";
 
@@ -122,7 +114,6 @@ export const Filled: Story = {
         events={EVENTS}
         clarifications={CLARIFICATIONS}
         expectations={EXPECTATIONS}
-        kindLabels={KIND_LABELS}
         today={TODAY}
       />
     </div>
@@ -133,7 +124,7 @@ export const Filled: Story = {
 export const Empty: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
-      <CaseTimeline events={[]} kindLabels={KIND_LABELS} today={TODAY} />
+      <CaseTimeline events={[]} today={TODAY} />
     </div>
   ),
 };
@@ -142,7 +133,7 @@ export const Empty: Story = {
 export const Loading: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
-      <CaseTimeline events={[]} loading kindLabels={KIND_LABELS} today={TODAY} />
+      <CaseTimeline events={[]} loading today={TODAY} />
     </div>
   ),
 };
@@ -156,7 +147,6 @@ export const EntryKinds: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
       <CaseTimeline
-        kindLabels={KIND_LABELS}
         today={TODAY}
         events={[
           { id: "k1", kind: "document_received", date: "2026-08-20", title: "Rechnung RE-4471 · Telekom", amount: 89.9, currency: "EUR", state: "posted" },
@@ -205,7 +195,6 @@ export const Interactive: Story = {
             events={EVENTS}
             clarifications={CLARIFICATIONS}
             expectations={EXPECTATIONS}
-            kindLabels={KIND_LABELS}
             today={TODAY}
             selectedId={id}
             onSelect={setEntry}
@@ -220,7 +209,6 @@ export const Interactive: Story = {
             events={EVENTS}
             clarifications={CLARIFICATIONS}
             expectations={EXPECTATIONS}
-            kindLabels={KIND_LABELS}
             today={TODAY}
           />
         </div>
@@ -254,7 +242,6 @@ export const InUse: Story = {
                 events={EVENTS}
                 clarifications={CLARIFICATIONS}
                 expectations={EXPECTATIONS}
-                kindLabels={KIND_LABELS}
                 today={TODAY}
                 selectedId={id}
                 onSelect={setEntry}
@@ -276,7 +263,7 @@ function EntryDetail({ entry }: { entry: CaseTimelineEntry | null }) {
   if (entry.type === "event") {
     const e = entry.event;
     return (
-      <DetailPane title={e.title} sub={`${KIND_LABELS[e.kind] ?? e.kind} · ${e.date}`}>
+      <DetailPane title={e.title} sub={`${STATUS_REGISTRY.ereignis_art[e.kind]?.label ?? e.kind} · ${e.date}`}>
         <FieldList
           rows={[
             ["Zustand", <StatusBadge key="s" axis="ereignis" status={e.state} />],
@@ -331,7 +318,6 @@ export const SameDay: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
       <CaseTimeline
-        kindLabels={KIND_LABELS}
         today={TODAY}
         events={[
           {
@@ -372,7 +358,6 @@ export const Edge: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
       <CaseTimeline
-        kindLabels={KIND_LABELS}
         today={TODAY}
         events={[
           {

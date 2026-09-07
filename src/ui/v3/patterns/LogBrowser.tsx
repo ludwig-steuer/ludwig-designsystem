@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { LOG_VIEWS } from "@/ludwig/shared/log-views";
 import { Button } from "../primitives/Button";
 import { EmptyState } from "../primitives/EmptyState";
 import { FilterBar } from "../primitives/FilterBar";
@@ -28,7 +29,20 @@ export interface LogFilterState {
 }
 
 const VIEWS = [1, 2, 3] as const;
-const DEFAULT_VIEW_LABELS: [string, string, string] = ["Verlauf", "Protokoll", "Technik"];
+/**
+ * Die drei Sichten mit ihren Wörtern — **aus dem gemeinsamen Vokabular**.
+ *
+ * Sie standen hier als Vorgabe, weil es sie in der App nur als lokale Liste in
+ * `BatchLogPanel` gab (Befund L-17). Seit 2026-09-07 stehen sie in
+ * `shared/log-views.ts` (App-Commit `52914c45`) und gelten für beide Seiten;
+ * `viewLabels` bleibt als Überschreibung für einen Aufrufer, der ein anderes
+ * Wort braucht.
+ */
+const DEFAULT_VIEW_LABELS: [string, string, string] = [
+  LOG_VIEWS[0]!.label,
+  LOG_VIEWS[1]!.label,
+  LOG_VIEWS[2]!.label,
+];
 
 const SEVERITIES = [
   { key: "all", label: "Alle" },

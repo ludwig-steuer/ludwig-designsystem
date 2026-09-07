@@ -122,3 +122,10 @@ Abgenommen von / am: — · Offene Punkte: —
 **Urteil: zurückgestellt (Status offen).** Zwei Gründe: (1) Story `Unpaid` (`payment: null`) widerspricht dem Schema — `client_open_item_links` erzwingt genau eine Zahlungsseite (Migration `20260815120000_open_item_links.sql:72–75`); eine Rechnung ohne Zahlung ist eine Erwartung (0025) oder ein OPOS (0029). (2) Kein Bildschirm liest die Klammer heute als Paar: das Sachverhalt-Detail zeigt DATEV-OPOS-Zeilen, Abnahme-Schritt 4 zeigt Gate-Zeilen, das Seitenprofil nennt die Klammer in keiner Frage. Ohne Ort greift §3 Regel 5 nur formal.
 
 Entscheid: die Zeile wird gebaut, sobald eine Seite sie braucht — Kandidat ist der Saldo-/DATEV-Reiter der Sachverhaltsansicht (0050) oder die OPOS-Seite von der Zahlung her; das entscheidet der Owner beim Seitenprofil. Bis dahin gilt: `payment` Pflicht ohne `null`, `Unpaid` streichen, `Empty`/`Error` aufnehmen oder begründen, „verwaist" als `Badge` mit Wort (V7) oder Achse als Befund, L-03 präzisieren zu „Lese-VM der Klammer in `accounting-cases/domain/`", `Timestamp` → `Time`. Nebenbefund fürs Repo: `docs/ui-repraesentationen.md` §3.1/§3.2 beschreibt die Abnahme-Schritte 4 und 5 vor F123.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-03 ist erledigt** (App-Commit `52914c45`): `OpenItemLink` steht in
+`datev-truth/domain/open-item.ts` und wird gespiegelt. Die Aufgabe bleibt
+zurückgestellt — hier ist nur festgehalten, dass der Typ da ist, wenn sie
+drankommt: der lokale Nachbau, den die Spec vorsah, entfällt damit.

@@ -258,3 +258,23 @@ Zwei Anmerkungen ohne Mangel:
    steht — zu sehen in `…--von-hand` („Gehört der Laptop ins Anlagevermögen?")
    und `…--im-portal`. Das war schon bei der ersten Abnahme eine Anmerkung und
    kein Kriterium; es bleibt eine.
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-10, L-11 und L-12 sind erledigt** (App-Commit `34b5cdc6`).
+
+- **Die Karte nimmt die Rohwerte.** `questionType` und `sourceModule` stehen
+  so in der Zeile; die Wörter kommen aus `clarificationQuestionTypeLabel` und
+  `clarificationModuleLabel`. Die alten Label-Props bleiben als
+  **Überschreibung** — sie waren vorher die einzige Quelle, weil es keinen
+  Katalog gab.
+- **Ein unbekannter Slug verschwindet nicht:** die Domänen-Funktion macht ihn
+  lesbar, statt ihn zu verwerfen. Das ist der Unterschied zu `humanizeType()`,
+  das der Befund benannt hat.
+- **`document_upload` ist im Typ.** Die lokale Weitung
+  (`ClarificationAnswerKind | "document_upload"`) ist weg; die Union der App
+  kennt den Wert, den der DB-CHECK immer erlaubt hat.
+
+Gemessen in `Filled`: die Kopfzeile liest „Gefragt ist: Kanzlei · Rückfrage des
+Agenten · Buchungsvorschlag · 26.08.2026, 09:12". Der mittlere Teil kam vorher
+aus einem freien Prop-Text der Story, jetzt aus dem Katalog.

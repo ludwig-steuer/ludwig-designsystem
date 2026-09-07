@@ -2,6 +2,8 @@
 
 import type { ReactNode } from "react";
 
+import { STATUS_REGISTRY } from "@/ludwig/ui/status/status-registry";
+
 import { daysBetween, formatTime, formatTimeFull } from "../format";
 import { Disclosure } from "../primitives/Disclosure";
 import { Skeleton } from "../primitives/Skeleton";
@@ -83,8 +85,11 @@ export function Timeline({
   groupBy?: "day" | "month" | "none";
   emptyText?: string;
   /**
-   * German word per `kind`. Stays a prop until `src/ludwig/` carries an event
-   * type — the component invents no vocabulary (spec 0023, „Befund").
+   * Wort je `kind` — eine **Überschreibung**. Für die Arten des Sachverhalts
+   * hat die Registry seit 2026-09-06 die Achse `ereignis_art` (Befund L-02),
+   * und der Strang schlägt dort selbst nach. Diese Prop ist für einen Strang,
+   * dessen Arten nicht in der Achse stehen — die Komponente erfindet kein
+   * Vokabular (0023).
    */
   kindLabels?: Record<string, string>;
   /**
@@ -171,7 +176,12 @@ function Entry({
   const title = <span className="v2tl__title">{item.title}</span>;
   // A kind without a word, and no actor: then the second line would repeat the
   // icon in text — the entry stays one line (0040).
-  const second = item.kind ? `${kindLabels?.[item.kind] ?? item.kind}${item.actor ? ` · ${item.actor}` : ""}` : item.actor;
+  // Die Achse zuerst, die Prop als Überschreibung, der Rohwert zuletzt: ein
+  // unbekannter Wert verschwindet nicht, er fällt auf (L-02).
+  const kindWord = item.kind
+    ? (kindLabels?.[item.kind] ?? STATUS_REGISTRY.ereignis_art[item.kind]?.label ?? item.kind)
+    : null;
+  const second = kindWord ? `${kindWord}${item.actor ? ` · ${item.actor}` : ""}` : item.actor;
   return (
     <div
       className={`v2tl__item${selected ? " is-current" : ""}${item.dim ? " v2muted" : ""}`}

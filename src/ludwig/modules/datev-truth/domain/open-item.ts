@@ -53,3 +53,41 @@ export function openItemAgeBucket(input: {
   if (days <= 90) return "d61_90";
   return "d90plus";
 }
+
+/**
+ * # Die Ausgleichs-Klammer
+ *
+ * Eine Zuordnung zwischen einer Sollstellung und einer Zahlung — die Klammer,
+ * die einen offenen Posten schließt (F77). Sie kann auf beiden Seiten je eine
+ * Ludwig-Buchung **oder** eine Spiegel-Buchung greifen: der Ausgleich steht
+ * manchmal nur in DATEV.
+ *
+ * Der Typ fehlte ganz; das Design-System definierte ihn lokal (L-03).
+ */
+export interface OpenItemLink {
+  id: string;
+  caseId: string | null;
+  /** Personenkonto, auf dem die Klammer sitzt. */
+  accountNumber: string;
+  /** Belegfeld 1 — der Anker, über den DATEV den offenen Posten führt. */
+  belegfeldValue: string | null;
+  /** Zustand der Belegnummer, siehe `DOCUMENT_NUMBER_STATE_LABEL`. */
+  belegfeldState: string | null;
+  /** Zugeordneter Betrag. Eine Zahlung kann mehrere Sollstellungen decken. */
+  amountAllocated: number;
+  /** Wie die Zuordnung entstand — Abgleich, Hand, Regel. */
+  matchedBy: string | null;
+  /** Begründung, wenn sie nicht offensichtlich ist. */
+  rationale: string | null;
+  /**
+   * Gesetzt = eine der beiden Seiten ist weggefallen (storniert, ersetzt).
+   * Die Klammer bleibt als Spur stehen, zählt aber nicht mehr.
+   */
+  orphanedAt: string | null;
+
+  // Je Seite entweder eine Ludwig-Buchung oder eine Spiegel-Buchung.
+  invoiceJournalEntryId: string | null;
+  invoiceMirrorEntryId: string | null;
+  paymentJournalEntryId: string | null;
+  paymentMirrorEntryId: string | null;
+}

@@ -2,6 +2,7 @@
 export * from "./domain/acceptance-quality";
 export * from "./domain/acceptance-triage";
 export * from "./domain/case-detail";
+export * from "./domain/case-event";
 export * from "./domain/case";
 export * from "./domain/convention";
 export * from "./domain/document-number";
@@ -14,4 +15,3 @@ export * from "./domain/rationale-source";
 export * from "./domain/tabs";
 export * from "./domain/tax-keys";
 export * from "./domain/vat-rules";
-export type { ExpectationKind } from "./domain/case";

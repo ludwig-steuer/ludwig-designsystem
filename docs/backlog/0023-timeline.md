@@ -448,3 +448,19 @@ Filter" und „Fehler" sind in der Spec begründet ausgeschlossen.
   Baum stehen. Unverändert seit der Abnahme vom 2026-09-05.
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-02 und L-08 sind erledigt** (App-Commits `c5d1dffd` und `52914c45`): die
+Ereignisarten haben eine Registry-Achse (`ereignis_art`), und `CaseEvent` liegt
+in `accounting-cases/domain/`.
+
+Damit fällt der Grund für `kindLabels` weg. Der Strang schlägt das Wort jetzt
+selbst nach, in dieser Reihenfolge: **Achse zuerst, Prop als Überschreibung,
+Rohwert zuletzt** — ein unbekannter Wert verschwindet nicht, er fällt auf. Die
+Prop bleibt für einen Strang, dessen Arten nicht in der Achse stehen; die
+Komponente erfindet weiterhin kein Vokabular.
+
+Die lokale `KIND_LABELS`-Map der Stories ist weg. Gemessen ändert sich dabei
+ein Wort: `accrual` heißt in der Achse **Abgrenzung**, die Story sagte
+„Sollstellung". Die Achse gilt.

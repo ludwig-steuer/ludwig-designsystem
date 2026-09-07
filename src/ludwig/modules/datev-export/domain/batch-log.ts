@@ -1,3 +1,5 @@
+import { LOG_VIEWS, LOG_VIEW_DEPTH, type LogView } from "@/ludwig/shared/log-views";
+
 /**
  * Die drei Sichten des Stapel-Logs (F114 §4, F118 T118.2).
  *
@@ -18,15 +20,13 @@
  * sichtbar, aber nicht in der Kurzfassung.
  */
 
-export type BatchLogView = "verlauf" | "protokoll" | "technik";
+// Die drei Sichten gelten für jedes Protokoll und stehen deshalb in
+// `audit-log/domain/log-views.ts` (L-17). Hier bleibt, was den Stapel
+// betrifft: welche Aktion in welche Tiefe fällt.
+export type BatchLogView = LogView;
+export const BATCH_LOG_VIEWS = LOG_VIEWS;
 
-export const BATCH_LOG_VIEWS: ReadonlyArray<{ key: BatchLogView; label: string; hint: string }> = [
-  { key: "verlauf", label: "Verlauf", hint: "Die Geschichte des Stapels — was ein Mensch erzählen würde." },
-  { key: "protokoll", label: "Protokoll", hint: "Dazu jede fachliche Entscheidung: Klärungen, Buchungen, Konventionen." },
-  { key: "technik", label: "Technik", hint: "Dazu die Innereien des Agenten: Schritt-Kanten, rohe Action-Codes." },
-];
-
-const VIEW_DEPTH: Record<BatchLogView, number> = { verlauf: 1, protokoll: 2, technik: 3 };
+const VIEW_DEPTH = LOG_VIEW_DEPTH;
 
 /**
  * Tiefe 1 — die Geschichte. Bewusst eine kurze, explizite Liste: alles, was

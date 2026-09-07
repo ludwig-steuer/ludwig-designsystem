@@ -1,8 +1,8 @@
 import type { DocCategory, DocDirection, SourceDocType } from "@/ludwig/modules/source-docs/domain/document-form-mapping";
-import { formatDocumentKind } from "@/ludwig/modules/source-docs/domain/document-form-labels";
 import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
 // The record, under a name that does not collide with the component family.
 import type { SourceDocumentVM as MirrorDocument } from "@/ludwig/modules/source-docs/domain/source-document-vm";
+import type { SourceDocCompletionVia } from "@/ludwig/modules/source-docs/domain/document-form-labels";
 
 import { Amount } from "../../primitives/Amount";
 import { Badge } from "../../primitives/Badge";
@@ -35,21 +35,13 @@ import { resolveSourceDocumentDetail, type SourceDocumentDetail } from "./source
  */
 
 /**
- * Why a document counts as done — DB-CHECK on
- * `client_source_docs.completed_via`.
+ * Die sechs Wege, auf denen ein Beleg erledigt wird — **aus der Domäne**.
  *
- * Defined here because `src/ludwig/` has no type for it (finding B14, register
- * L-47): the six values live in the check constraint and nowhere in
- * TypeScript. Structurally identical, and to be replaced by the shared type
- * the day it exists.
+ * Sie standen hier als lokale Union, weil `SOURCE_DOC_COMPLETION_VIA` drüben
+ * fehlte (Befund L-47). Seit 2026-09-07 gibt es sie (App-Commit `7184a8ac`);
+ * der Re-Export hält die Importe der Aufrufer.
  */
-export type SourceDocCompletionVia =
-  | "booking"
-  | "case_closed"
-  | "import"
-  | "superseded"
-  | "manual"
-  | "no_booking_required";
+export type { SourceDocCompletionVia };
 
 /**
  * A source document, as this family shows it — **from the mirror**.
@@ -265,7 +257,7 @@ export function SourceDocumentClass({ document }: { document: SourceDocumentVM }
   // badge, and `unknown` says nothing either.
   const character =
     document.classDocumentKind && document.classDocumentKind !== "original"
-      ? formatDocumentKind(document.classDocumentKind)
+      ? document.classDocumentKind
       : null;
 
   // Every NULL here means something and none of them means „unknown": no
@@ -279,12 +271,12 @@ export function SourceDocumentClass({ document }: { document: SourceDocumentVM }
     document.docDirection ? (
       <StatusBadge key="dir" axis="beleg_richtung" status={document.docDirection} info={false} />
     ) : null,
-    // The character has no registry axis (finding B5) — it is a property, not
-    // a state, and `Badge` is what a property gets.
+    // The character **has** an axis since 2026-09-07 (`beleg_charakter`,
+    // App-Commit `7184a8ac`, finding L-37). It was a `Badge` with a raw word
+    // while it had none — now it is a state like the three around it, with
+    // the axis' own wording and its explanation.
     character ? (
-      <Badge key="kind" tone="neutral">
-        {character}
-      </Badge>
+      <StatusBadge key="kind" axis="beleg_charakter" status={character} info={false} />
     ) : null,
     document.collectionKind ? (
       <StatusBadge key="coll" axis="dokumentgruppe" status={document.collectionKind} info={false} />

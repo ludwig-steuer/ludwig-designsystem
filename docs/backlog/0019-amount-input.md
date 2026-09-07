@@ -217,3 +217,29 @@ Kriterium ist auch bei erneuter, unabhängiger Prüfung erfüllt.
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 — zweite Prüfung gegen
 die wiederhergestellten Kriterien
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, designsystem-f0)
+
+**L-01 ist erledigt** (App-Commit `52914c45`): `parseGermanAmount` steht in
+`shared/money.ts` und gilt für beide Seiten. `parseAmount` rechnet nicht mehr
+selbst — es prüft nur noch die **Form** und übergibt dann.
+
+Die Formprüfung bleibt, und das ist der Punkt: `parseGermanAmount` verwirft,
+was keine Ziffer ist, und liest „12,3,4" als 123,4. Für einen Import ist das
+richtig, für ein Eingabefeld wäre es eine stille Umdeutung dessen, was jemand
+getippt hat — und das Kriterium dieser Aufgabe verlangt ausdrücklich das
+Gegenteil. Gemessen im Feld (Story `Interactive`, echte Eingabe, `focusout`):
+
+| Eingabe | Feld danach | `aria-invalid` | gespeichert |
+|---|---|---|---|
+| `12,3,4` | `12,3,4` | `true` | unverändert |
+| `1.234,56` | `1.234,56 €` | — | 1234.56 |
+| `1234.56` | `1.234,56 €` | — | 1234.56 |
+| `1.2345` | `12.345,00 €` | — | 12345 |
+| `12abc` | `12abc` | `true` | unverändert |
+| leer | leer | — | `null` |
+
+**Eine Schreibweise liest das Feld seither anders:** „1.2345" ist jetzt 12345
+statt 1,2345 — der Punkt trennt Tausender, denn hinter ihm stehen vier
+Ziffern. Das ist die Regel der App, und sie ist die richtige: 1,2345 € gibt es
+nicht.

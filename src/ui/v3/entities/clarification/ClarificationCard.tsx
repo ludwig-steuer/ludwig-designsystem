@@ -3,7 +3,11 @@
 import { useId, useState } from "react";
 
 import type { ClarificationAnswerKind } from "@/ludwig/modules/invoices/domain/invoice";
-import { MAX_DEFERRAL_DAYS } from "@/ludwig/modules/accounting-cases/domain/case";
+import {
+  MAX_DEFERRAL_DAYS,
+  clarificationModuleLabel,
+  clarificationQuestionTypeLabel,
+} from "@/ludwig/modules/accounting-cases/domain/case";
 import type { RationaleSourceKind } from "@/ludwig/modules/accounting-cases/domain/rationale-source";
 import type { Actor } from "@/ludwig/modules/audit-log/domain/types";
 
@@ -113,9 +117,21 @@ export interface ClarificationDetailVM {
   recommendation?: string | null;
   facts?: readonly { label: string; value: string }[];
   sources?: readonly ClarificationSource[];
-  /** German label for `question_type` — a prop, because there is no catalogue. */
+  /**
+   * Der Fragetyp, wie er in der Zeile steht. Das **Wort** dazu kommt aus der
+   * Domäne (`clarificationQuestionTypeLabel`, seit 2026-09-07, Befund L-10) —
+   * fünfzehn Typen, und ein unbekannter Slug wird lesbar gemacht statt
+   * verworfen.
+   */
+  questionType?: string | null;
+  /**
+   * Das Modul, aus dem die Frage kam. Das Wort kommt aus der Domäne
+   * (`clarificationModuleLabel`, Befund L-11).
+   */
+  sourceModule?: string | null;
+  /** Überschreibung des Fragetyp-Worts, wenn ein Aufrufer eines braucht. */
   questionTypeLabel?: string | null;
-  /** Where the question came from, in words: „Buchungsvorschlag", „Kanzlei". */
+  /** Überschreibung des Herkunfts-Worts („Buchungsvorschlag", „Kanzlei"). */
   originLabel?: string | null;
   /**
    * `ClarificationAnswerKind` from `src/ludwig` is missing `document_upload`,
@@ -280,6 +296,13 @@ export function ClarificationCard({
   }
 
   const isComment = c.type === "comment";
+  // Die Wörter kommen aus der Domäne; eine Prop überschreibt sie nur, wenn
+  // ein Aufrufer wirklich ein anderes braucht (L-10, L-11).
+  const frageWort =
+    c.questionTypeLabel ??
+    (c.questionType ? clarificationQuestionTypeLabel(c.questionType) : null);
+  const herkunftWort =
+    c.originLabel ?? (c.sourceModule ? clarificationModuleLabel(c.sourceModule) : null);
   // Without a loaded audit trail, asker and answerer still make a two-step
   // history — the same shape, so the card never has two ways to show a person.
   const history: readonly ClarificationEvent[] =
@@ -324,8 +347,8 @@ export function ClarificationCard({
         </div>
         <p className="v2clc__meta">
           {isComment ? "Notiz" : `Gefragt ist: ${AUDIENCE_LABEL[c.audience]}`}
-          {c.questionTypeLabel ? ` · ${c.questionTypeLabel}` : ""}
-          {c.originLabel ? ` · ${c.originLabel}` : ""}
+          {frageWort ? ` · ${frageWort}` : ""}
+          {herkunftWort ? ` · ${herkunftWort}` : ""}
           {" · "}
           <Time value={c.raisedAt} format="dateTime" size="sm" />
         </p>
