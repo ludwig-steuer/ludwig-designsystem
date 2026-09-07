@@ -56,7 +56,9 @@ export function ClickRow({
  * Zeile, die sich in die Tabelle hinein aufklappt — kein Modal, kein Drawer
  * für kleine Zusatzinfos (Baukasten §7).
  *
- * @when    A small extra detail for a row that is read and collapsed again.
+ * @when    A small extra detail for a row that is read and collapsed again —
+ *          on its own (`defaultOpen`) or steered from the list
+ *          (`open`/`onOpenChange`).
  * @instead Working on the item → MasterDetail. Confirmation with consequences → Dialog.
  */
 export function ExpandableRow({
@@ -64,6 +66,8 @@ export function ExpandableRow({
   children,
   lead,
   defaultOpen = false,
+  open: openProp,
+  onOpenChange,
 }: {
   summary: ReactNode;
   children: ReactNode;
@@ -74,8 +78,20 @@ export function ExpandableRow({
    */
   lead?: ReactNode;
   defaultOpen?: boolean;
+  /**
+   * Controlled: the list decides, not the row. A list with a switch that
+   * opens **every** row at once cannot do that through `defaultOpen` — the
+   * rows are already mounted (0072). Without it the row keeps its own state.
+   */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [ownOpen, setOwnOpen] = useState(defaultOpen);
+  const open = openProp ?? ownOpen;
+  const setOpen = (next: boolean) => {
+    if (openProp === undefined) setOwnOpen(next);
+    onOpenChange?.(next);
+  };
   const id = useId();
   return (
     <>
@@ -90,7 +106,7 @@ export function ExpandableRow({
             aria-expanded={open}
             aria-controls={id}
             aria-label={open ? "Zeile zuklappen" : "Zeile aufklappen"}
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpen(!open)}
           >
             <span className={`v2chev v2chev--icon${open ? " is-open" : ""}`}>
               <ActionIcon action="collapse" size={12} />

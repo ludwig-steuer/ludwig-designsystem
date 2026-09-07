@@ -1,0 +1,170 @@
+"use client";
+
+import { useEffect, useState, type ReactNode } from "react";
+
+import type { InvoiceLineItem } from "@/ludwig/modules/invoices/domain/invoice";
+
+import { Amount } from "../../primitives/Amount";
+import { EmptyState } from "../../primitives/EmptyState";
+import { Segmented } from "../../primitives/Nav";
+import { EmptyRow, HeadRow, Table } from "../../primitives/Table";
+import { formatCount } from "../../format";
+import { InvoiceLineRow, invoiceLineMinWidth, invoiceLineTracks, invoiceLineTracksExpandable } from "./InvoiceLineRow";
+import { linesNetTotal, type InvoiceLineLabels } from "./invoice-line";
+
+type Props = {
+  lines: readonly InvoiceLineItem[];
+  labels: InvoiceLineLabels;
+  /** Fills the expander of each row — this is where `InvoiceLineFacts` goes. */
+  renderFacts?: (line: InvoiceLineItem) => ReactNode;
+  /** The **net** total of the invoice (`InvoiceDetail.subtotalValue`). */
+  invoiceNetTotal?: number;
+  defaultExpanded?: boolean;
+  onExpandedChange?: (expanded: boolean) => void;
+};
+
+/**
+ * The positions of one invoice, in the order of the document.
+ *
+ * > Wenn die Sachbearbeiterin einen Kontovorschlag prüft, will sie sehen,
+ * > welche Positionen der Beleg hat und wie Ludwig jede eingeordnet hat,
+ * > damit sie die eine Zeile findet, die falsch liegt.
+ *
+ * No pager, no filter, no loading state — measured: p50 1, p90 5, max 22
+ * positions per invoice, and the tab is only fetched when it is opened. The
+ * one-line case and the empty case deserve more care than the long one: half
+ * of all invoices have exactly one position.
+ *
+ * @when    The positions of an invoice — the tab „Positionen".
+ * @instead One position → InvoiceLineRow. Its reasoning → InvoiceLineFacts.
+ *          A long, sortable, filterable table → DataTable.
+ */
+export function InvoiceLineList({
+  lines,
+  labels,
+  renderFacts,
+  invoiceNetTotal,
+  defaultExpanded = false,
+  onExpandedChange,
+}: Props) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  // The positions that deviate from what the switch last said. Whoever closes
+  // one row does not move the switch: it says what was last set for all, not
+  // what is true for each.
+  const [deviating, setDeviating] = useState<ReadonlySet<number>>(new Set());
+  const canExpand = Boolean(renderFacts) && lines.length > 0;
+
+  function switchTo(next: boolean) {
+    setExpanded(next);
+    setDeviating(new Set());
+    onExpandedChange?.(next);
+  }
+
+  function toggleRow(position: number) {
+    setDeviating((set) => {
+      const next = new Set(set);
+      if (next.has(position)) next.delete(position);
+      else next.add(position);
+      return next;
+    });
+  }
+
+  // Alt+E, bound by hand: `useHotkeys` drops every combination with Alt, and
+  // `Segmented` has no slot for a `Kbd` — the key stands in the label instead.
+  // `E`, because J and K belong to the pager.
+  useEffect(() => {
+    if (!canExpand) return;
+    function onKey(e: KeyboardEvent) {
+      if (!e.altKey || e.key.toLowerCase() !== "e") return;
+      e.preventDefault();
+      setExpanded((v) => {
+        onExpandedChange?.(!v);
+        return !v;
+      });
+      setDeviating(new Set());
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [canExpand, onExpandedChange]);
+
+  const sorted = [...lines].sort((a, b) => a.position - b.position);
+  const total = linesNetTotal(sorted);
+  const difference = invoiceNetTotal === undefined ? null : total - invoiceNetTotal;
+
+  return (
+    <div className="v2illist">
+      <div className="v2illist__head">
+        <span className="v2muted">
+          {formatCount(lines.length)} {lines.length === 1 ? "Position" : "Positionen"}
+        </span>
+        {canExpand ? (
+          <Segmented
+            ariaLabel="Wie viel je Position"
+            active={expanded ? "wide" : "compact"}
+            options={[
+              { key: "compact", label: "Kompakt" },
+              { key: "wide", label: "Erweitert · Alt+E" },
+            ]}
+            onPick={(key) => switchTo(key === "wide")}
+          />
+        ) : null}
+      </div>
+
+      <Table
+        cols={renderFacts ? invoiceLineTracksExpandable : invoiceLineTracks}
+        minWidth={invoiceLineMinWidth}
+        density="wide"
+      >
+        <HeadRow>
+          {renderFacts ? <span /> : null}
+          <span>Pos.</span>
+          <span>Bezeichnung</span>
+          <span className="v2num">Menge</span>
+          <span className="v2num">Einzelpreis</span>
+          <span className="v2num">USt-Satz</span>
+          <span className="v2num">Netto-Summe</span>
+        </HeadRow>
+        {sorted.length === 0 ? (
+          <EmptyRow>
+            <EmptyState
+              title="Für diesen Beleg wurden keine Positionen erkannt."
+              description="Das ist kein Erfolg, sondern selten und meist ein Problem der Extraktion: 4 von 318 Rechnungen im Bestand. Der Beleg lässt sich erneut lesen."
+            />
+          </EmptyRow>
+        ) : (
+          sorted.map((line) => (
+            // `position` is the key: `InvoiceLineItem` has no id, and the
+            // column is unique per invoice.
+            <InvoiceLineRow
+              key={line.position}
+              line={line}
+              labels={labels}
+              {...(renderFacts
+                ? {
+                    open: deviating.has(line.position) ? !expanded : expanded,
+                    onOpenChange: () => toggleRow(line.position),
+                  }
+                : {})}
+            >
+              {renderFacts?.(line)}
+            </InvoiceLineRow>
+          ))
+        )}
+      </Table>
+
+      {sorted.length > 0 ? (
+        <div className="v2illist__foot">
+          <span className="v2muted">Summe der Positionen</span>
+          <Amount value={total} currency="EUR" />
+          {difference === null ? null : Math.abs(difference) < 0.005 ? (
+            <span className="v2muted">stimmt mit dem Rechnungsbetrag überein</span>
+          ) : (
+            <span className="v2illist__off">
+              weicht vom Rechnungsbetrag ab: <Amount value={difference} currency="EUR" signed />
+            </span>
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}

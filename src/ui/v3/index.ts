@@ -350,6 +350,23 @@ export {
   type SourceDocumentGroup,
 } from "./entities/source-document/SourceDocumentFacts";
 
+/* Rechnungsposition — die Zeile, ihre Fakten, die Liste eines Belegs
+   (0072, 0114, 0115) */
+export {
+  InvoiceLineRow,
+  invoiceLineTracks,
+  invoiceLineTracksExpandable,
+  invoiceLineMinWidth,
+} from "./entities/invoice-line/InvoiceLineRow";
+export { InvoiceLineFacts } from "./entities/invoice-line/InvoiceLineFacts";
+export { InvoiceLineList } from "./entities/invoice-line/InvoiceLineList";
+export {
+  lineLabel,
+  lineTitle,
+  linesNetTotal,
+  type InvoiceLineLabels,
+} from "./entities/invoice-line/invoice-line";
+
 /* Sachverhalt — der Verlauf über Ereignisse, Klärungen, Erwartungen (0040) */
 export {
   CaseTimeline,

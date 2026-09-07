@@ -3378,3 +3378,50 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    (`.v2doc__lead`) und im Sachverhalts-Katalog. */
 .v2doccol__lead .v2rowlink { color: inherit; text-decoration: none; }
 .v2doccol__lead { font-weight: 600; }
+
+/* ── Rechnungsposition (0072/0114/0115) ─────────────────────────────────── */
+
+/* Die Zeile trägt drei Zeilen in **einer** Zelle: Bezeichnung, Beschreibung
+   und darunter der Streifen mit dem, was Ludwig aus der Position gemacht hat.
+   Keine zweite Tabellenzeile, kein eigenes Raster — die Tabelle läuft mit
+   `density="wide"`, das ist genau der Fall, für den es die Stufe gibt. */
+.v2ilrow__name { display: block; font-weight: 600; }
+.v2ilrow__desc { display: block; color: var(--color-text-subtle); font-size: 12px; }
+.v2ilrow__strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+.v2ilrow__total { font-weight: 600; }
+
+/* **Gedämpft wird über das Wort, nicht daneben:** `.v2ilrow__off` ist die
+   Plakette „deaktiviert", und die Zeile, die sie enthält, verliert ihre
+   Farbe. So kann es keine gedämpfte Zeile ohne Wort geben (V7) — die beiden
+   können nicht auseinanderlaufen, weil es nur eine Quelle gibt. Die Plakette
+   selbst behält ihre Farbe: sie ist der Grund, nicht der Zustand. */
+.v2tbl__row:has(.v2ilrow__off) > td { color: var(--color-text-subtle); }
+.v2tbl__row:has(.v2ilrow__off) .v2ilrow__name { font-weight: 500; }
+.v2tbl__row:has(.v2ilrow__off) .bdg { color: inherit; }
+.v2tbl__row:has(.v2ilrow__off) .v2ilrow__off { color: var(--color-warning); }
+
+/* Die Fakten stehen frei im Aufklapper — die Zeile ist der Rahmen. Mehrere
+   Blöcke untereinander, mit Luft dazwischen, ohne Kasten um den Kasten. */
+.v2ilfacts { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.v2illist { display: flex; flex-direction: column; gap: var(--space-3); }
+.v2illist__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+/* Der Fuß trägt die Probe: Summe der Positionen gegen den Rechnungsbetrag.
+   Sie fehlt in der App ganz — wer prüft, hat dort keine Anschlusszahl. */
+.v2illist__foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+/* Eine Abweichung ist ein Befund, kein Fehler: gedeckte Warnfarbe, und das
+   Wort steht ohnehin daneben (V7). */
+.v2illist__off { color: var(--color-warning); }

@@ -189,3 +189,30 @@ Abgenommen von / am: … · Offene Punkte: …
 Vor dem Bau in die Spec: (a) Summen-Kriterium: „Summe der `lineTotalNetValue` über die nicht deaktivierten Zeilen", `Edges` (zwei deaktivierte plus Aggregat) beweist es nachgerechnet; (b) `invoiceNetTotal` mit Quelle `InvoiceDetail.subtotalValue` (netto; `totalValue` ist brutto); (c) Tastenmechanik und Ort der Taste wie entschieden; (d) Chevron-Spur `var(--v2-tbl-pick)` und leere Kopfzelle bei `renderFacts`; Umschalter nur bei ≥ 1 Zeile (V14); (e) Kriterium „einzeilig" → „drei Zeilen, die Bezeichnung bricht bei 93 Zeichen nicht um" (0072); (f) React-Key ist `position` (UNIQUE je Rechnung), `InvoiceLineItem` hat keine `id`; (g) Abschnitt „Offene Fragen" nachtragen.
 
 Register-Kosmetik: Abschnitt E nennt noch „Positionen und Vorsteuer (0072)" — die Vorsteuer gehört der Rechnung, 0072 hat `VorsteuerTab` gestrichen; und 0078 sagt „0072 (Kontenkandidaten mit Konfidenz)" — die Zeile trägt `fundUsageConfidence`, keine Kontokandidaten.
+
+## Befund beim Bauen (2026-09-07): zwei Kriterien widersprechen sich
+
+Gemessen in `InvoiceLineRow` → `Edges`, Namensspur 472 px (Rahmen 1.100 px,
+502 px gehen an die fünf festen Spuren):
+
+| Bezeichnung | Zeilen in der Zelle | Zeilenhöhe |
+|---|---|---|
+| 19 Zeichen | 3 (Name · Beschreibung · Streifen) | 102 px |
+| **92 Zeichen (p90)** | **4** — der Name bricht um | 124 px |
+| 254 Zeichen (max) | 6 | 184 px |
+
+Das Kriterium dieser Spec verlangt, dass die Zelle bei p90 **dreizeilig**
+bleibt; das Kriterium von 0072 verlangt, dass die Bezeichnung **nicht**
+gekürzt wird. Beides zugleich geht nur mit einer Namensspur von rund 650 px,
+also einer Tabelle ab etwa 1.150 px — auf der Seite hat der Reiter aber die
+Breite der Belegkarte (1.104 px bei 1440 × 900, gemessen in 0071).
+
+**Gebaut ist die Auslegung, die die Spec sonst trägt:** die Bezeichnung wird
+nicht gekürzt, die Zelle wächst. Eine p90-Zeile ist damit 124 statt 102 px
+hoch — 22 px, nicht die 20 px, die V1 als Zeilenhöhe meint, sondern der
+Umbruch eines Namens, den zu kürzen den Zweck der Spalte verfehlte.
+
+Der Abnahme gehört die Entscheidung: entweder das Kriterium hier lautet
+künftig „vier Zeilen bei p90 sind in Ordnung, sechs bei max auch", oder 0072
+bekommt eine Kürzung der Bezeichnung — dann aber mit einer Grenze aus den
+Daten, nicht aus dem Layout.
