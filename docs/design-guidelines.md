@@ -391,7 +391,7 @@ Erledigt: K1–K3, A2, A3, A1, 17 `#B07B2C`-Literale auf den Token.
 | `<Badge kind=…>` direkt in Modulen | 126 — nicht jede ein Status; prüfen gegen Z2 | Z2 |
 | Stories mit Präfix `v2/` | 0 von 64 Story-Dateien | §9 |
 | `--color-border-control` an Feldern anwenden | nur definiert | I8 |
-| `--color-success` auf `success-bg` 4.46:1 | am `success-bg` korrigieren | V10 |
+| ~~`--color-success` auf `success-bg`~~ | **Erledigt.** 0112 hat die Fläche ersetzt: gegen `#F0F6F2` misst der Ton 4,63:1, gegen die alte `#EBF2EE` waren es 4,46. Die Zahl in §12 stand danach noch zwei Runden falsch da (Abnahme 0055, M27). | V10 |
 | `warning-strong` von der Skala nehmen (A7, bestätigt A9) | **Offen.** F123 hatte ihn stattdessen mit neuem Wert „zurückgeführt" — der Widerspruch zu A7, den A9 auflöst. Rückbau ist eine eigene Aufgabe: `--color-warning-strong` in `tokens.css`, `.v2num--warning-strong` in `v2.css`, `CellTone` in `Cells.tsx`, `AbweichungsTon`/`deviationTone()` (`stapelabnahme/domain/vergleich.ts`, die einzige Stelle mit 15/50/100 %) auf die vier Stufen Debug/Hinweis/Warnung/Fehler. Bis dahin zeigt 0055 den Token als „entfällt". | A7/A9/§3 |
 
 ### 11.6 Reihenfolge
@@ -583,7 +583,7 @@ Kartenradius `--radius-lg` · Kopffläche `--color-surface-head`.
 | `--color-accent-700` | 5.45 | Text |
 | `--color-accent` | 3.55 | nur Fläche/Rand |
 | `--color-primary` | 11.64 | Text |
-| `--color-success` | 5.07 (4.68); auf `success-bg` 4.46 | Text — offen |
+| `--color-success` | 5.07 (4.68); auf `success-bg` 4.63 | Text |
 | `--color-warning` (K2: dunkler gesetzt; war 18× als Literal) | 5.52; auf `warning-bg` 4.78 | Text |
 | `--color-danger` | 6.06 | Text |
 | `--color-border` / `-strong` | 1.30 / 1.62 | Trennlinie, kein Anspruch |

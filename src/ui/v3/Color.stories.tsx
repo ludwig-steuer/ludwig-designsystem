@@ -251,7 +251,11 @@ type Role = { role: string | null; text: Allow; fill: Allow; edge: Allow; note?:
  */
 const ROLES: Record<string, Role> = {
   "--color-primary": { role: "Marke, Titel, Primär-Knopf", text: "ja", fill: "ja", edge: "ja", note: "App-Chrome, Überschrift 1–2" },
-  "--color-primary-700": { role: "Marke, Titel, Primär-Knopf", text: "ja", fill: "ja", edge: "ja", note: "Grundwert von --color-primary" },
+  // Kein Eintrag für `--color-primary-700`: §3 nennt in der Primär-Zeile
+  // `--color-primary` mit `-600` und `-800`, den `-700` nicht — obwohl er
+  // deren Grundwert stellt. Nach der Regel dieser Seite („ohne Rolle heißt:
+  // §3 nennt den Token nicht") gehört er in die gerechnete Spalte, nicht in
+  // eine hier erfundene Zeile (Abnahme 0055, M29). Der Befund gehört §3.
   "--color-primary-600": { role: "Primär-Knopf, Hover", text: "ja", fill: "ja", edge: "ja" },
   "--color-primary-800": { role: "Primär-Knopf, gedrückt", text: "ja", fill: "ja", edge: "ja" },
   "--color-accent-700": { role: "Aktion, Link, aktiv", text: "ja", fill: "—", edge: "ja", note: "die einzige Akzentstufe für Text" },
@@ -300,6 +304,24 @@ const NO_ROLE: Role = { role: null, text: "—", fill: "—", edge: "—" };
  * `--color-accent` trägt keinen Text, `--color-accent-700` schon. Dazu die
  * beiden gerechneten Spalten „ohne Rolle" und „unbenutzt".
  */
+/**
+ * Die Plaketten aus `app-chrome.css`, **gerechnet statt geschrieben**. Der Satz
+ * darunter hat dreimal danebengelegen (M1, M10, M26 der Abnahme 0055): er zählte
+ * Hex-Flächen von Hand, und jedes Mal zog eine andere Aufgabe eine davon auf
+ * Token, ohne dass ihn jemand nachzählte — zuletzt 0112, neununddreißig Minuten
+ * nach der Nacharbeit, die ihn berichtigt hatte. Wer zählt, irrt nicht.
+ */
+const PLAKETTEN = [...READERS.matchAll(/\.(bdg-[a-z]+)\s*\{([^}]*)\}/g)].map((m) => ({
+  name: m[1] ?? "",
+  regeln: m[2] ?? "",
+}));
+const mitHex = (prop: RegExp) => PLAKETTEN.filter((p) => prop.test(p.regeln)).map((p) => p.name);
+const hexFlaechen = mitHex(/background:\s*#/);
+// Der Rückblick trennt `color` von `border-color` — sonst zählt jeder Hex-Rand
+// als Hex-Text und der Satz behauptet das Gegenteil dessen, was dasteht.
+const hexText = mitHex(/(?<!-)color:\s*#/);
+const hexRaender = mitHex(/border-color:\s*#/);
+
 export const Roles: Story = {
   render: () => {
     const rows = COLOR_TOKENS.map((token) => ({ token, ...(ROLES[token] ?? NO_ROLE), unread: isUnread(token) }));
@@ -373,16 +395,29 @@ export const Roles: Story = {
           {unread.some((r) => r.token.endsWith("-bg"))
             ? "Eine ungelesene Fläche heißt: wer sie zu brauchen scheint, holt sie woanders her."
             : "Jede Fläche des Satzes wird gelesen."}{" "}
-          Die Plaketten sind der Fall, an dem das zu prüfen war — und das
-          Ergebnis ist kleiner, als der Satz hier lange behauptet hat:{" "}
-          <strong>den Text holen alle fünf aus Token</strong> (0112). Als
-          Hex-Literale stehen nur noch <strong>drei Flächen</strong> (
-          <code className="lw-mono">.bdg-info</code>,{" "}
-          <code className="lw-mono">.bdg-success</code>,{" "}
-          <code className="lw-mono">.bdg-warning</code>) und{" "}
-          <strong>vier Ränder</strong> (dieselben drei plus{" "}
-          <code className="lw-mono">.bdg-danger</code>). Der V13-Fall ist damit
-          kleiner geworden, aber nicht weg (Befund 8).
+          Die Plaketten sind der Fall, an dem das zu prüfen war — hier gezählt,
+          nicht behauptet: von {PLAKETTEN.length} Plaketten in{" "}
+          <code className="lw-mono">app-chrome.css</code> stehen als Hex-Literal
+          noch{" "}
+          <strong>
+            <span className="lw-numeric">{hexFlaechen.length}</span>{" "}
+            {hexFlaechen.length === 1 ? "Fläche" : "Flächen"}
+          </strong>{" "}
+          ({hexFlaechen.join(", ") || "keine"}) und{" "}
+          <strong>
+            <span className="lw-numeric">{hexRaender.length}</span>{" "}
+            {hexRaender.length === 1 ? "Rand" : "Ränder"}
+          </strong>{" "}
+          ({hexRaender.join(", ") || "keiner"});{" "}
+          {hexText.length === 0 ? (
+            <>den Text holen alle aus Token</>
+          ) : (
+            <>
+              <span className="lw-numeric">{hexText.length}</span> auch den Text (
+              {hexText.join(", ")})
+            </>
+          )}
+          . Der V13-Fall ist damit kleiner geworden, aber nicht weg (Befund 8).
         </p>
       </div>
     );

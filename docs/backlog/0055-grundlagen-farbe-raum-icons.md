@@ -1001,7 +1001,11 @@ sieben auflösbare Angaben als „bezieht sich auf eine Klasse", weil die
 Token-Erkennung nur `--color-x,` und `--color-x:` kannte — Kommentare schreiben
 ihr Token aber in Backticks. Die Abhilfe, die er selbst vorschreibt, war damit
 wörtlich eingesetzt wirkungslos. Der Backtick zählt jetzt mit: **17 statt 11**
-Angaben werden nachgerechnet, ungeprüft bleiben zwei (echte Alpha-Fälle).
+Angaben werden nachgerechnet, ungeprüft bleiben zwei. *(Berichtigt nach der
+zweiten Runde, M23: von den zweien war nur **einer** ein Alpha-Fall; der andere
+war `--color-text-muted` auf Weiß und nannte sein Token nur zwei Zeilen tiefer.
+Heute nennt jede Angabe ihr Token auf der eigenen Zeile — 20 nachgerechnet,
+keine ungeprüft.)*
 
 **Und er fand sofort eine sechste falsche Zahl.** `--color-text-subtle` auf
 `danger-bg` stand mit 4,0 da, gemessen 4,02.
@@ -1022,3 +1026,320 @@ Wert des alten `#2E78A8`. Seit 0090 sind es **5.45**. Fünfter Fall derselben
 Art, und der erste in Markdown, wohin der Wächter von Bauart nicht reicht.
 Die ganze Tabelle ist gegen die Token nachgerechnet; die übrigen elf Zeilen
 stimmen.
+
+## Wiederabnahme (2026-09-07, zweite Runde): der Wächter reicht weiter — seine Anleitung noch nicht
+
+Fremde Abnahme, ohne Chatverlauf, nur gegen Spec und Code. Gemessen am
+laufenden Dev-Server (`localhost:6107`) über CDP: alle 15 Stories geladen, jede
+Zahl aus dem **gerenderten** Baum (`getComputedStyle`, `innerText`), jeder
+Kontrast unabhängig in Python aus den gerenderten Farben nachgerechnet, jede
+Messung mit Gegenprobe (Token zur Laufzeit verstellt, neu gemessen). Der
+Wächter wurde **nicht gelesen, sondern verfälscht** — auf einer Kopie außerhalb
+des Repos (`scratchpad/wa2/copy`, gleiche Pfadstruktur); `scripts/` und
+`src/styles/` im Repo blieben unberührt. `pnpm typecheck` · `check:icons` ·
+`check:contrast` · `check:when` · `check:language` · `check:mirror` je
+**Exit 0**. Nicht gebaut (0117). Zeilennummern in `v3.css` sind der Stand der
+Messung — eine fremde Sitzung (0063) hat die Datei währenddessen angefasst und
+alles unterhalb Zeile 1106 um eins verschoben.
+
+### Die Nacharbeiten aus der letzten Runde — nachgemessen
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| M19 (war blockierend): der Backtick zählt mit | Der Wächter rechnet heute **18** Angaben nach, 3 bleiben ungeprüft. Am Stand des Nacharbeits-Commits (`d4803ff`, auf einer Kopie gefahren) waren es **17 / 2**; die Differenz ist fremde Arbeit (die 1,03:1 der Bezugslinie kam mit 0110 dazu). Von den acht Stellen, die M19 als auflösbar benannt hat, werden **sieben** nachgerechnet und stimmen; die achte (`border-strong`, „1,62 gegen die Karte", `v3.css:3029`) trägt kein `:1` und fällt damit nicht unter die Konvention — gerechnet stimmt sie (1,6222), ungeprüft bleibt sie trotzdem: das ist die bekannte Lücke (a) | behoben, aber siehe M22/M23 |
+| die sechste falsche Zahl | `v3.css:2961` steht mit `4,02:1` — unabhängig gerechnet `--color-text-subtle` auf `--color-danger-bg` = **4,0200** | behoben |
+| Deckkraft als benannte Grenze | `v3.css:630–637`: 2.87 (bei `opacity: .7`) und 3.79 (bei den gebauten 0.85) tragen kein `:1`; gerechnet **2,8675** und **3,7932**, gebaut ist `opacity: 0.85` (`.v2btn .v2kbd`). Der Skriptkopf nennt die Grenze | behoben — mit zwei Rissen, siehe M24/M25 |
+| M20 · M21 | `app-chrome.css:450` zitiert `4.14` ohne `:1` (gerechnet `#2E78A8` auf `accent-100` = **4,1403**); die Gründe beider Marken stehen als Token (`accent-100`, `success-bg`) und werden dadurch geprüft; `Color.stories.tsx:340` = `verticalAlign: "sub"` | behoben |
+| §12 der `design-guidelines.md` | `--color-accent-700` steht mit **5.45** (gerechnet 5,4453) | behoben — aber die Tabelle trägt eine andere alte Zahl, siehe M27 |
+| M13 · M15 · M16 · M18 | `width: var(--space-8)` · `Object.keys(AXIS_LABEL).length - Object.keys(AXIS_ENTITY).length`, gerendert **69** (72 − 3, gegen die Quelle nachgezählt) · `readToken`-JSDoc ohne Hex · `grep -c '#[0-9A-Fa-f]\{6\}'` = **0 · 0 · 0** | behoben |
+
+### `check:contrast` — auf der Kopie verfälscht
+
+| Probe | Ergebnis |
+|---|---|
+| unveränderte Datei | Exit **0**, „18 Angaben nachgerechnet, 3 … bleiben ungeprüft" |
+| Zahl in `tokens.css` verfälscht (5.45:1 → 5.55:1) | Exit **1**, mit Datei, Zeile und gemessenem Wert |
+| Zahl in `v3.css` verfälscht (4,02:1 → 9,99:1) | Exit **1** — die neue Reichweite trägt (in der Vorrunde noch Exit 0) |
+| Zahl in `app-chrome.css` verfälscht (4.69:1 → 9.99:1) | Exit **1** |
+| Tokenwert verfälscht (`text-subtle` `#717171` → `#999999`) | Exit **1**, **fünf** Angaben in zwei Dateien fallen zugleich (4,88 → 2,85 · 4,51 → 2,63 · 4,02 → 2,35) |
+| `v3.css:266` mit seinem Token benannt | wird geprüft, **19 statt 18**, Lauf grün; dieselbe Angabe falsch (6,99) → Exit **1** |
+| `v3.css:1294` mit seinen Token benannt | wird geprüft, 19 statt 18, Lauf grün |
+| Alpha-Fall `v3.css:264` mit Token benannt | Exit **1** mit falscher Anklage („gemessen 5.45:1") — siehe M25 |
+| **die Anleitung des Skripts wörtlich**, mit der richtigen Zahl für `bg-soft` | Exit **1**, falsche Anklage („auf weiss … gemessen 4.88:1") — siehe M22 |
+| dieselbe Form mit der **falschen** Zahl (der Weiß-Zahl auf einem `bg-soft`-Grund) | Exit **0** — der Wächter bestätigt eine falsche Angabe |
+
+Alle 21 Angaben der drei Blätter habe ich unabhängig nachgerechnet, dazu die
+Zuordnung Token/Grund, die der Wächter intern trifft (Debug-Lauf auf der
+Kopie): 5,4453 · 5,0263 · 5,0401 · 4,8807 · 4,5052 · 3,4522 · 5,5162 · 4,7777 ·
+5,8610 · 5,4101 · 11,6428 · 2,1121 · 6,6869 · 4,8807 · 3,4522 · 4,8807 ·
+1,0289 · 4,0200 · 3,4522 · 4,6896 · 4,6272. **Kein Abweicher**, auch nicht bei
+den Zahlen ohne `:1` (4.81 / 4.44 / 4.45 / 9,4 / 4.14 / 4.46 / 1,62 / 2.87 /
+3.79 und `components.css:35` mit 4.14).
+
+### Mängel dieser Runde
+
+**M22 — blockierend. Die Abhilfe, die der Wächter vorschreibt, ist weiter
+wörtlich wirkungslos — und im schlimmeren Fall winkt er eine falsche Angabe
+durch.** `scripts/check-contrast.mjs:157–161` verlangt: „name both tokens in
+the comment: gemessen 2.87:1 (`--color-text-subtle` auf `--color-bg-soft`)" —
+mit Backticks um **beide** Token. M19 hatte zwei Regexe vorgeschlagen; eingebaut
+ist nur der für das Token (`:105`). Der Regex für den Grund (`:95`,
+`auf\s+([A-Za-zäöü0-9-]+)`) lässt den Backtick weiterhin nicht zu: der Grund
+fällt durch, und die Angabe wird still gegen **Weiß** gerechnet. Auf der Kopie
+gemessen: die Anleitung mit der **richtigen** Zahl für `bg-soft` (4.51) →
+Exit 1 mit der falschen Meldung „auf weiss … gemessen 4.88:1"; dieselbe Form
+mit der **falschen** Zahl (4.88 dort, wo 4,51 gilt) → Exit **0**, grün. Wer der
+Anleitung folgt, bekommt entweder eine falsche Anklage oder ein falsches
+Testat. *Vorschlag (kleinster Weg, auf der Kopie belegt):* den Backtick auch im
+Grund-Regex zulassen — die zweite Hälfte des schon angenommenen Vorschlags —,
+oder die Anleitung auf die Form umschreiben, die funktioniert: `4.51:1 auf
+bg-soft`, ohne Backticks um den Grund.
+
+**M23 — blockierend. Zwei der drei ungeprüften Angaben sind sehr wohl
+auflösbar; unauflösbar ist genau eine.** Der Lauf meldet `v3.css:264 · :266 ·
+:1294`. Gemessen:
+
+- `:266` „6,69:1" ist `--color-text-muted` auf Weiß = **6,6869** — voll in
+  Token ausdrückbar. Der Kommentar nennt sein Token zwei Zeilen tiefer in
+  Backticks, nur nicht auf der Zeile der Zahl. Gegenprobe: Token auf die Zeile
+  geschrieben → 19 statt 18 geprüft, grün; Zahl verfälscht → Exit 1.
+- `:1294` „1,03:1" ist `--color-accent` über `--color-border-control` =
+  **1,0289** — beide Seiten sind Token. Gegenprobe: benannt → geprüft, grün.
+- `:264` „2,11:1" ist der einzige echte Fall: `accent-700` bei `opacity: .5`
+  über Weiß = **2,1121** — Deckkraft, die der Wächter nicht rechnet.
+
+Damit stimmt die Behauptung aus „Nach der Wiederabnahme" nicht: dort steht
+„ungeprüft bleiben **zwei** (echte Alpha-Fälle)" — von den zweien war schon
+damals nur einer ein Alpha-Fall, der andere ist `text-muted` auf Weiß. Ebenso
+`scripts/check-contrast.mjs:157–158`: „many claims name a class instead of a
+token" — heute nennt **keine** der drei ungeprüften Angaben eine Klasse. Das
+ist wieder eine handgeschriebene Behauptung neben einer gerechneten Zahl,
+diesmal über den Wächter selbst. *Vorschlag:* die beiden Angaben mit ihren
+Token schreiben (dann prüft er 20) und den Kommentar auf das reduzieren, was
+gilt: ungeprüft bleibt, was Deckkraft trägt.
+
+**M24 — eine Deckkraft-Angabe trägt `:1`, dreihundert Zeilen neben der Regel,
+die es verbietet.** `v3.css:264`: „`opacity: .5` auf der Linkfarbe ergab
+gemessen **2,11:1**". Die Zahl stimmt (2,1121), aber sie verletzt beide Hälften
+der Konvention, die derselbe Commit aufgestellt hat: sie gilt für Deckkraft
+(Skriptkopf `:21–24`) **und** für die verworfene Variante, nicht für den
+gebauten Zustand (`v3.css:641`, `tokens.css:33`, `:84` halten sich daran).
+*Vorschlag:* `2,11` ohne `:1`, wie 2.87 und 3.79 vierhundert Zeilen weiter —
+dann bleibt keine Angabe ungeprüft, die es nicht sein muss.
+
+**M25 — der Skriptkopf beschreibt das Gegenteil dessen, was das Skript tut.**
+`scripts/check-contrast.mjs:23–24`: eine Deckkraft-Angabe würde er „gegen den
+vollen Ton prüfen und **stillschweigend durchwinken**". Gemessen: nennt man am
+Alpha-Fall das Token, rechnet er den vollen Ton und **schlägt an** — Exit 1,
+„`--color-accent-700` auf weiss steht mit 2.11:1 da, gemessen 5.45:1". Er winkt
+nicht durch, er klagt falsch an. Still bleibt er nur ohne Token, und das meldet
+er. *Vorschlag:* den Satz auf die gemessene Wirkung umschreiben.
+
+**M26 — blockierend. Der Plaketten-Satz in `Roles` ist zum dritten Mal falsch.**
+`Color.stories.tsx:376–386` sagt: „Als Hex-Literale stehen nur noch **drei
+Flächen** (`.bdg-info`, `.bdg-success`, `.bdg-warning`) und **vier Ränder**".
+Gemessen in `app-chrome.css:455–463`: eine Hex-Fläche ist übrig
+(`.bdg-warning`, `#F5EEE0`); `.bdg-info` liest `var(--color-accent-100)`,
+`.bdg-success` `var(--color-success-bg)`, `.bdg-neutral` und `.bdg-danger`
+ebenso Token. Die vier Hex-Ränder stimmen, „den Text holen alle fünf aus Token"
+stimmt. Ursache: `01502ef` (0112) hat die zwei Flächen **39 Minuten nach** dem
+Nacharbeits-Commit auf Token gezogen. Genau das ist der Punkt: M1 war dieser
+Satz, M10 war dieser Satz, und er hängt weiter als handgeschriebener Anhang an
+zwei gerechneten Spalten. *Vorschlag:* ableiten statt schreiben — `READERS`
+enthält `app-chrome.css` bereits, die Zahl der Hex-Flächen und -Ränder ist
+daraus zählbar; oder der Satz nennt keine Namen mehr.
+
+**M27 — §12 trägt die sechste veraltete Kontrastzahl, und der Nachweis der
+Vorrunde hat sie freigesprochen.** `docs/design-guidelines.md:586` nennt
+`--color-success` „auf `success-bg` **4.46**", Rolle „Text — offen". Gemessen:
+`#3F7A5A` auf `--color-success-bg` `#F0F6F2` = **4,6272**; 4,46 ist der Wert
+gegen die **alte** Fläche `#EBF2EE` (4,4578), die 0112 ersetzt hat — womit der
+Fall auch nicht mehr „offen" ist. Dieselbe Zahl steht in §11.5 (`:394`) noch
+als offene Sofort-Aufgabe. Die Vorrunde hat „die übrigen elf Zahlen der Tabelle
+stimmen" geschrieben und 4.46 dabei ausdrücklich mitgezählt. Die
+`Contrast`-Story rechnet richtig und zeigt **4,63:1** ohne Marke. Die zehn
+anderen Zeilen der Tabelle stimmen, ebenso die zwei ersten Zahlen der
+`success`-Zeile (13,7721 · 6,6869 · 4,8807/4,5052 · 5,4453 · 3,5521 · 11,6428 ·
+5,0690/4,6791 · 5,5162/4,7777 · 6,0631 · 1,3029/1,6222 · 3,4522/3,1866).
+
+**M28 (klein) — `Motion` zählt Animationen mit, die keine sind.**
+`Surface.stories.tsx:551` zählt `/\banimation:/g` und kommt auf **5**; zwei
+davon sind die `animation: none` **in** den Reduced-Motion-Blöcken selbst
+(`v3.css:1075`, `:1932`). Echte Animationen sind **drei** (`v2pulse`, `v2spin`,
+`v2toastin`), und jede wird von einem Block bedient. Die Zahl neben „4 Blöcken"
+liest sich als Lücke, wo keine ist. *Vorschlag:* `none` ausschließen.
+
+**M29 (klein) — `Roles` wendet seine eigene Regel auf einen Token nicht an.**
+Der Vorspann sagt: „Ohne Rolle heißt: §3 nennt den Token nicht." §3 nennt in
+der Primär-Zeile `--color-primary` (+`-600`, `-800`) — `-700` steht dort nicht,
+bekommt in `Color.stories.tsx:254` aber die volle Rolle mit der Anmerkung
+„Grundwert von --color-primary". Bei `accent-600` ist das gedeckt (§3 nennt ihn
+wörtlich), bei `primary-700` nicht; nach der eigenen Regel wären es **7** ohne
+Rolle, nicht 6.
+
+**M14 und M17 stehen unverändert** und sind wie angekündigt **kein**
+Rückgabegrund: `Sizes` führt oben „Produktiv"/„Lesend" und in den Marken
+„Handlungs-Leiter"/„nur Entitäts-Leiter", der Vorspann sagt weiter „Was auf
+einer Leiter steht, ist grün"; `--radius-none` trägt einen Einsatzort, den §2
+nicht vergibt; `Surface.stories.tsx:497` fährt weiter `translateY(8px)`.
+
+### Die Kriterien der Spec — gemessen
+
+**Fest.** `pnpm typecheck` Exit 0 · die drei Dateien auf Barrel-Ebene, Titel
+`v3/Grundlagen/Farbe` · `…/Raum und Fläche` · `…/Icons`, keine unter
+`Primitives` (`index.json`) · alle 15 Stories laden und rendern, **null**
+Konsolenmeldung (`Runtime.consoleAPICalled`/`exceptionThrown` über alle 15) ·
+**null** gerenderte `**` · Exportnamen englisch (`Ramps` … `InUse`) · Status nur
+über die Registry · „kein px" mit den Resten aus M17 (die 2 px/3 px in
+`Surface` sind die *gezeigten* Abweichler). `pnpm build` nicht gefahren (0117).
+
+**Variabel.**
+
+| Kriterium | Messung | Ergebnis |
+|---|---|---|
+| Hex 0 in den drei Stories | 0 · 0 · 0 | erfüllt |
+| kein neues CSS | `git diff --stat src/styles/` zeigt nur fremde Arbeit (`v3.css`, 0063, `.v2md--detail-breit`); an 0055 keine Zeile | erfüllt |
+| jeder Farb-Token genau einmal in `Ramps` | **40** gerenderte Kacheln zu `grep -c '^  --color-'` = **40**; jede Kachel aus ihrer *gerenderten* Farbe unabhängig nachgerechnet, inklusive der drei `rgba`-Token (scrim 1,8841/1,8665 · focus-ring 1,4373/1,4110 · focus-ring-soft 1,1661/1,1575) — **kein Abweicher** | erfüllt |
+| `warning-strong` mit „entfällt (A7, A9)" | gerendert `warning-strong · #9C5021 · 5,86:1 · 5,41:1 · entfällt (A7, A9) — Rückbau offen` | erfüllt |
+| `accent` nicht textfähig, `accent-700` textfähig | `accent` Text **nein** („trägt keinen Text — unter 4,5:1"), gemessen 3,5521; `accent-700` Text **ja**, 5,4453 | erfüllt |
+| „ohne Rolle" und „unbenutzt" gerechnet | „Unbenutzt: 5 — primary-900, accent-500, text-on-dark-muted, surface-raised, focus-ring"; die Gegenprobe der Spec (`rg` über `src/styles src/ui -g '!*.stories.tsx'`) liefert **dieselben fünf**. „Ohne Rolle: 6" gegen §3 durchgezählt, mit dem Vorbehalt aus M29 | erfüllt (M29) |
+| `Criticality` mit Registry-`kind`, `success` außerhalb | `danger` · `warning` · `info` · `neutral`; `success` als eigene Zeile „Ausgang ‚erledigt'"; Debug nennt Stufen-Token **und** was `app-chrome.css` daraus macht | erfüllt |
+| `Contrast` rechnet, statt zu zitieren | **39 Zeilen**, jede aus den gerenderten Farben der Probe-Spalte nachgerechnet — kein Abweicher, jede „unter der Schwelle"-Marke sitzt richtig (nur die drei `info`-Zeilen: 3,5521 · 3,2788 · 3,2878). Gegenprobe ohne Eingriff in `tokens.css`: `--color-text-subtle` per `addScriptToEvaluateOnNewDocument` auf `#999999` → 4,88/4,51 wird **2,85/2,63**, beide Zeilen markieren sich neu, `Ramps` zieht mit | erfüllt |
+| `Space` zeigt alle 12 Stufen | 12 Balken, gemessene Breiten 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64 · 80 · 96 px = ihre Token. Gegenprobe: `--space-6` zur Laufzeit auf 99 px → **nur** dieser Balken misst 99 px | erfüllt |
+| `Radius`: Einsatzort je Radius, 1-px-Regel | sechs Radien gerendert 0 · 2 · 4 · 6 · 10 · 999 px = ihre Token; „1 px, nie dicker — die einzige Ausnahme ist der aktive Tab mit 2 px", daneben die 3-px-Zeile als Abweichler. `--radius-none` siehe M17 | erfüllt mit Mangel |
+| `Elevation`: Rand **oder** Schatten, z-index-Leiter | gemessen: „Richtig" Rand 1 px / Schatten `none` · „Auch richtig" Rand 0 / Schatten gesetzt · „Falsch" **beides**. Leiter 5 · 20 · 40 · 60/61 gegen `v3.css` nachgezählt (380, 1673 · 1374 · 1945, 2001 · 812, 857, 864, 1913): stimmt. Alt-Leitern verifiziert: `components.css` 90/91 und 100, `booking.css` 1080/1081, `app-chrome.css` 50 und 200 | erfüllt |
+| `Widths`: 1280-px-Schwelle als Linie | gemessen 720 · 1080 · **1280** · 1440 px, `container-wide` als einzige in `rgb(59,143,196)` = `--color-accent`; die Drawer-Linien folgen ihren `clamp()`/`min()`-Werten, `content-measure` 686 px = 68 ch | erfüllt |
+| `States`: vier Zustände an drei Elementen, V7 | 4 × 3 gemessen: Zeile `transparent → rgb(244,246,248)` (bg-soft) → `rgb(241,247,251)` + `3px rgb(59,143,196)` → `opacity .5` + `not-allowed`; Knopf `rgb(26,58,92)` → `rgb(34,74,115)` (primary-600) → `rgb(20,48,75)` (primary-800) → `opacity .5`; Chip weiß → bg-soft → `rgb(26,58,92)` mit weißem Text. Jede Tonstufe gegen `v3.css` geprüft (147–150, 570–579, 692–707). Gegenprobe: echter `mouseMoved` auf die Ruhe-Zeile → `transparent` wird `rgb(244,246,248)` | erfüllt |
+| `Motion`: auslösbar, Fokusring, Reduced Motion | 9 Auslöser, gemessene Dauern 0,12 / 0,18 / 0,28 s. Fokus per **echtem** Tab: Knopf und Zeile `2px solid rgb(59,143,196)`, Offset 2 px; das Feld als benannte Ausnahme `outline: none`, Rand `rgb(26,58,92)` und `rgba(59,143,196,0.14) 0 0 0 3px` — die genannten 11,64:1 unabhängig bestätigt (11,6428). Reduced Motion per `Emulation.setEmulatedMedia`: **alle** Übergangsdauern fallen auf 1e-05 s. Zählung 9 Transitions / 4 Blöcke stimmt, „5 Animations" siehe M28 | erfüllt (M28) |
+| `Sizes`: beide Leitern, gemessene Praxis | Leitern 12/14/16 und 16/20/24, Strich 1,5. Praxis gerendert 12 (10×) · 13 (2×) · 14 (17×) · 15 (1×) · 16 (11×) · 20 (3×), Strich nur 1,5 (10×) — unabhängig gegen die Quelle gezählt (`size={…}` in `src/ui/v3` ohne Stories): **identisch**. Benennung siehe M14 | erfüllt mit Mangel |
+| Vokabular (überholt durch 0087) | `Entities` 22 Zeilen zu 22 Einträgen in `ENTITY_ICON`, `Actions` 33 zu 33 in `ACTION_ICON`, „nur in Stories" 12; die 69 Achsen ohne Zeichen = 72 − 3, gegen `AXIS_LABEL`/`AXIS_ENTITY` nachgezählt. `pnpm check:icons` Exit 0 | erfüllt (Ersatz) |
+| `WithWord`: die drei Bedingungen wörtlich | Wort für Wort wie §6 T8, dazu „`label` bleibt Pflicht und wird `aria-label` **und** `title`"; gemessen tragen alle vier `IconButton` beides. Kebab als Satz, nicht als Zeichen | erfüllt |
+| alle Stories unter `v3/Grundlagen/…` | 15 von 15, keine unter `Primitives` | erfüllt |
+
+### Befunde am Set (nicht 0055)
+
+1. **§12 und §11.5 tragen die veraltete `success`-Zahl** — 4.46 statt gemessen
+   **4,63** (M27). Wieder in Markdown, wohin der Wächter von Bauart nicht
+   reicht.
+2. **Der Wächter liest drei der fünf Blätter.** `components.css:35` trägt eine
+   Kontrastangabe (`#2E78A8` auf `#E3F0F8` „misst 4.14", nachgerechnet 4,1403 —
+   richtig, und ohne `:1`), `booking.css` keine. Wer dort eine geltende Angabe
+   schreibt, bekommt sie nicht geprüft.
+3. **Backticks rendern weiter als Zeichen** — `Entities` **22**, `Actions`
+   **28**, aus den `meaning`/`instead`-Strings der Icon-Registry. Gehört zu
+   `Icons.tsx` (0087), unverändert.
+4. **`pnpm check:icons` hält weiter zwei Dateien offen**
+   (`SourceDocumentDrawer.tsx`, `JournalEntryEditor.tsx`) — beide fremde
+   Sitzungen, mit Grund in `PENDING`.
+
+Abgenommen von / am: Claude (fremde Abnahme), 2026-09-07 — **zurück** ·
+Offene Punkte: **M22, M23 und M26 blockieren**; M24, M25, M27–M29 nicht. Alle
+Abnahmekriterien der Spec sind gemessen erfüllt, alle 21 Kontrastangaben der
+drei Blätter stimmen auf vier Stellen, und der Wächter fängt die Verfälschung
+jetzt in allen drei Dateien und in beide Richtungen — Zahl wie Tokenwert. Der
+Rückgabegrund ist zum vierten Mal derselbe Fehlertyp: eine handgeschriebene
+Behauptung neben einer gerechneten Zahl. Diesmal die Anleitung des Wächters,
+die wörtlich befolgt eine falsche Angabe grün meldet; seine Aussage über die
+eigenen ungeprüften Angaben, von denen nur eine wirklich unauflösbar ist; und
+der Plaketten-Satz, der 39 Minuten nach dem Commit wieder unwahr wurde, weil er
+geschrieben und nicht gerechnet ist.
+
+## Nach der zweiten Wiederabnahme (2026-09-07): der Wächter prüft jetzt sich selbst
+
+Drei Blocker, fünf kleine Punkte, dazu M14 und M17 aus den Vorrunden — alle
+erledigt. Gemessen gegen den Dev-Server `http://localhost:6107` (CDP,
+`document.body.innerText` der gerenderten Story), gerechnet mit demselben
+WCAG-Verfahren wie der Wächter.
+
+### M22 — die Anleitung wirkt jetzt, und zwar in beide Richtungen
+
+Der Grund fiel durch, weil der Regex von der Zahl aus nach rechts las: in der
+Form, die der Wächter selbst vorschreibt („2.87:1 (`--color-text-subtle` auf
+`--color-bg-soft`)"), steht zwischen Zahl und „auf" noch das Token. Ein
+Backtick mehr hätte das nicht geheilt. Jetzt wird die Zeile **vor jeder Zahl
+geteilt** und der Grund nur im eigenen Abschnitt gesucht — damit gilt die
+Regel „jede Angabe trägt ihren eigenen Grund" auch dann, wenn zwischen beiden
+etwas steht. Gegenprobe an derselben Datei, angehängt und wieder entfernt:
+
+| Probe | vorher | jetzt |
+|---|---|---|
+| Anleitungsform mit **richtiger** Zahl (4.51 auf `bg-soft`) | Exit 1, „auf weiss … gemessen 4.88" | Exit 0, mitgezählt (21) |
+| Anleitungsform mit **falscher** Zahl (4.88 statt 4,51) | Exit 0, grün | Exit 1 |
+| bestehende Zahl verfälscht (6,69 → 6,99) | Exit 1 | Exit 1 |
+
+**Und er hat jetzt eine Selbstprüfung** — `node scripts/check-contrast.mjs
+--test`, 12 Fälle, wie die vier anderen Wächter. Sie fand beim ersten Lauf
+genau den Fall aus M22 (die Anleitungsform kam ohne Grund an) und beim zweiten
+einen, den niemand gemeldet hatte: der Schnitt vor jeder Zahl trennte
+**innerhalb** von „11.64:1" und der Wächter las 1,64 — `tokens.css:83` wäre ab
+sofort falsch angeklagt worden. Ein Wächter, dessen Abhilfe zweimal
+wirkungslos war, prüft ab jetzt zuerst sich selbst.
+
+### M23 — es bleibt nichts ungeprüft
+
+`v3.css:266` nennt `--color-text-muted` jetzt auf der Zeile der Zahl (6,69:1
+auf Weiß = 6,6869), `v3.css:1300` nennt `--color-accent` **und** den Grund
+`border-control` auf einer Zeile (1,03:1 = 1,0289). Damit rechnet der Lauf
+**20 von 20** Angaben nach, ungeprüft bleibt keine. Der Skriptkommentar sagt
+nicht mehr „many claims name a class instead of a token" — keine tut das —,
+sondern was gilt: ungeprüft bleibt, was Deckkraft trägt, und das Token gehört
+auf die Zeile der Zahl. Die falsche Zahl in „Nach der Wiederabnahme" („zwei
+echte Alpha-Fälle") ist dort berichtigt.
+
+### M26 — der Plaketten-Satz wird gezählt, nicht geschrieben
+
+`Color.stories.tsx` leitet ihn aus `app-chrome.css` ab (`READERS` enthält die
+Datei schon): Selektor, Fläche, Rand und Text je Plakette per Regex, die
+Namen aus dem Treffer. Gerendert steht dort jetzt „von 5 Plaketten … stehen
+als Hex-Literal noch **1 Fläche** (bdg-warning) und **4 Ränder** (bdg-info,
+bdg-success, bdg-warning, bdg-danger); den Text holen alle aus Token" — genau
+die Messung der Abnahme. Dreimal war dieser Satz falsch, weil er von Hand
+zählte und eine fremde Aufgabe ihn überholte; ein vierter Anlauf mit
+richtigen Zahlen hätte beim nächsten Commit wieder danebengelegen.
+
+### Die kleineren
+
+- **M24.** `v3.css:264` trägt „2,11" ohne `:1` — die Zahl gilt für eine
+  Deckkraft und für die **verworfene** Variante, und die Form `X:1` ist nach
+  der Konvention desselben Commits nur für geltende Angaben da.
+- **M25.** Der Skriptkopf sagt jetzt, was gemessen passiert: bei einem
+  Alpha-Fall mit Token rechnet er den vollen Ton und **klagt falsch an**
+  (2,11 gegen 5,45), er winkt nicht durch; still bleibt er nur ohne Token,
+  und das meldet er.
+- **M27.** `design-guidelines.md:586` nennt 4,63 statt 4,46 (`#3F7A5A` auf
+  `#F0F6F2` = 4,6272; 4,46 galt gegen die alte Fläche `#EBF2EE`), die Rolle
+  ist „Text" statt „Text — offen", und die Zeile in §11.5 steht als
+  **erledigt** da — 0112 hat die Fläche ersetzt, damit ist der Fall zu. Die
+  `Contrast`-Story zeigt dieselben 4,63:1.
+- **M28.** `Motion` zählt `animation:` ohne `none`. Gerendert: **3**
+  Animationen (`v2pulse`, `v2spin`, `v2toastin`) gegen 4 Blöcke statt 5 gegen
+  4. Der erste Anlauf des Regex zählte 4 — `\s*` vor dem Lookahead lässt sich
+  wegbacktracken; die Grenze gehört direkt hinter den Doppelpunkt.
+- **M29.** `--color-primary-700` hat keine Zeile mehr in `ROLES`: §3 nennt in
+  der Primär-Zeile `--color-primary` mit `-600` und `-800`, den `-700` nicht.
+  Gerendert stehen jetzt **7** Token ohne Rolle (primary-900, primary-700,
+  primary-500, surface-raised, warning-strong, scrim, focus-ring-soft) — nach
+  der Regel, die die Seite selbst aufstellt. Dass der Grundwert der Marke in
+  §3 fehlt, ist ein Befund für §3, keine hier erfundene Zeile.
+
+### M14 und M17 — die zwei aus den Vorrunden
+
+- **M14.** Die Marken heißen wie die Register darüber: „produktive Leiter"
+  und „nur lesende Leiter" statt „Handlungs-" und „Entitäts-Leiter"; die
+  Konstanten dazu `PRODUCTIVE_LADDER`/`READING_LADDER`. Der Vorspann sagt
+  „Was auf der Leiter **seines Registers** steht, ist grün" — das war der
+  Satz, den 20 px widerlegt hat. Gemessen sind in der Story nur noch die vier
+  neuen Marken, die alten Namen kommen nicht mehr vor.
+- **M17.** `--radius-none` hat keinen Einsatzort mehr in `RADIUS_USE`;
+  gerendert steht dort der Fallback „kein Einsatzort in §2" — §2 vergibt
+  Einsatzorte für sm · md · lg · xl · pill. Und `Motion` fährt
+  `translateY(var(--space-2))` statt `8px`.
+
+`pnpm typecheck` Exit 0; `check:contrast`, `check:language`, `check:icons`,
+`check:mirror`, `check:when` je Exit 0; beide Selbstprüfungen Exit 0
+(12 und 8 Fälle). Nicht gebaut (0117).
+
+**Status: Abnahme** — das Urteil der zweiten Runde war „zurück", also
+entscheidet die dritte Runde, nicht ich. Zu prüfen sind die drei Blocker, die
+fünf kleinen Punkte und M14/M17; die Gegenproben oben stehen zum Nachfahren
+da, und `--test` ist der kürzeste Weg, dem Wächter selbst zu misstrauen.

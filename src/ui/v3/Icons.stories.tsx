@@ -153,9 +153,9 @@ const LADDERS: { register: string; lead: string; steps: { px: number; follows: s
  * wäre bequem und falsch — ein `size={20}` an einem Handlungs-Zeichen steht
  * neben der Leiter, auch wenn 20 in der anderen vorkommt.
  */
-const ACTION_LADDER = [12, 14, 16];
-const ENTITY_LADDER = [16, 20, 24];
-const ON_LADDER = [...new Set([...ACTION_LADDER, ...ENTITY_LADDER])];
+const PRODUCTIVE_LADDER = [12, 14, 16];
+const READING_LADDER = [16, 20, 24];
+const ON_LADDER = [...new Set([...PRODUCTIVE_LADDER, ...READING_LADDER])];
 
 /** Die Leiter je Register (A8) — und daneben, was der Code heute wirklich tut. */
 export const Sizes: Story = {
@@ -187,7 +187,7 @@ export const Sizes: Story = {
 
       <Section
         title="Was der Code heute tut"
-        lead="Gemessen in src/ui/v3 ohne Stories. Was auf einer Leiter steht, ist grün; was daneben liegt, wird beim nächsten Anfassen der Komponente gezogen — nicht in Masse (Befund 1)."
+        lead="Gemessen in src/ui/v3 ohne Stories. Was auf der Leiter seines Registers steht, ist grün; was daneben liegt, wird beim nächsten Anfassen der Komponente gezogen — nicht in Masse (Befund 1)."
       >
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-8)" }}>
           <div>
@@ -201,15 +201,18 @@ export const Sizes: Story = {
                 <span className="lw-numeric" style={note}>{s.times}×</span>
                 {!ON_LADDER.includes(s.value) ? (
                   <Mark tone="warning">daneben</Mark>
-                ) : ACTION_LADDER.includes(s.value) && ENTITY_LADDER.includes(s.value) ? (
+                ) : PRODUCTIVE_LADDER.includes(s.value) && READING_LADDER.includes(s.value) ? (
                   <Mark tone="success">auf beiden Leitern</Mark>
-                ) : ACTION_LADDER.includes(s.value) ? (
-                  <Mark tone="success">Handlungs-Leiter</Mark>
+                ) : PRODUCTIVE_LADDER.includes(s.value) ? (
+                  <Mark tone="success">produktive Leiter</Mark>
                 ) : (
-                  // 20 und 24 stehen **nur** in der Entitäts-Leiter. Grün wäre
+                  // 20 und 24 stehen **nur** auf der lesenden Leiter. Grün wäre
                   // hier ein Freispruch, den die Zahl allein nicht hergibt:
                   // welche Leiter gilt, entscheidet das Register des Zeichens.
-                  <Mark tone="neutral">nur Entitäts-Leiter</Mark>
+                  // Die Marken heißen wie die Register darüber — zwei Namen für
+                  // dieselbe Leiter hatten die Seite dreimal ungenau gemacht
+                  // (Abnahme 0055, M14).
+                  <Mark tone="neutral">nur lesende Leiter</Mark>
                 )}
               </div>
             ))}

@@ -107,7 +107,9 @@ export const Space: Story = {
 /* ── Radius ───────────────────────────────────────────────────────────── */
 
 const RADIUS_USE: Record<string, string> = {
-  "--radius-none": "Kante an Kante — Tabellenzelle, angesetzte Fläche",
+  // Kein Eintrag für `--radius-none`: §2 vergibt Einsatzorte für sm · md · lg
+  // · xl · pill, für `none` keinen — und eine Seite, die die Richtlinie zeigt,
+  // erfindet keinen dazu. Der Fallback sagt es (Abnahme 0055, M9/M17).
   "--radius-sm": "Eingabefeld, Tag",
   "--radius-md": "Knopf, Karte",
   "--radius-lg": "große Karte, Dialog",
@@ -494,7 +496,7 @@ function Fade({ duration, ease }: { duration: string; ease: string }) {
           background: "var(--color-accent-100)",
           borderRadius: "var(--radius-md)",
           opacity: on ? 1 : 0,
-          transform: on ? "translateY(0)" : "translateY(8px)",
+          transform: on ? "translateY(0)" : "translateY(var(--space-2))",
           transition: `opacity var(${duration}) var(${ease}), transform var(${duration}) var(${ease})`,
         }}
       />
@@ -548,7 +550,11 @@ export const Motion: Story = {
         <p className="lw-body-sm" style={{ maxWidth: "var(--content-measure)", marginTop: 0 }}>
           Gemessen in <code className="lw-mono">v3.css</code>:{" "}
           <span className="lw-numeric">{count(/transition:/g)}</span> Transitions und{" "}
-          <span className="lw-numeric">{count(/\banimation:/g)}</span> Animations stehen{" "}
+          {/* `animation: none` ist keine Animation, sondern ihre Abschaltung —
+              und sie steht genau in den Reduced-Motion-Blöcken, die hier
+              danebengezählt werden. Mitgezählt las sich die Zahl als Lücke, wo
+              keine ist (Abnahme 0055, M28). */}
+          <span className="lw-numeric">{count(/\banimation:(?!\s*none)/g)}</span> Animations stehen{" "}
           <span className="lw-numeric">{count(/prefers-reduced-motion/g)}</span> Blöcken gegenüber. Die Namen dazu
           stehen bewusst nicht hier: der erste Anlauf zählte vier und nannte drei, und eine Liste neben einer
           Zahl veraltet mit dem nächsten Commit.{" "}

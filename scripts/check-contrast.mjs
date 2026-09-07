@@ -20,8 +20,11 @@
  *
  * **Was er nicht kann: Deckkraft.** Er rechnet volle Token gegeneinander; eine
  * Zahl, die für `opacity` gilt, kann er nicht bestätigen. Solche Angaben
- * lassen das `:1` weg und nennen die Deckkraft im Satz — sonst würde er sie
- * gegen den vollen Ton prüfen und stillschweigend durchwinken.
+ * lassen das `:1` weg und nennen die Deckkraft im Satz. Nennt eine von ihnen
+ * doch ein Token, rechnet er den **vollen** Ton und klagt falsch an — er
+ * winkt sie nicht durch (gemessen: `--color-accent-700` bei `opacity: .5`,
+ * 2,11 gegen die gerechneten 5,45). Still bleibt er nur ohne Token, und das
+ * meldet er als ungeprüft.
  *
  * Run: `pnpm check:contrast`
  */
@@ -87,12 +90,30 @@ function resolveGround(word) {
  * belongs to. The foreground is the token declared **after** the comment —
  * unless the comment names one itself, as the focus ring does.
  */
-const claims = [];
-for (const file of FILES) {
-    const lines = readFileSync(file, "utf8").split("\n");
-    for (let i = 0; i < lines.length; i++) {
+/** Alle Angaben einer Datei — die Einheit, die `--test` prüft. */
+export function claimsAus(lines, file = "") {
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const found = [...line.matchAll(/(\d+[.,]\d+)\s*:\s*1\s*(?:auf\s+([A-Za-zäöü0-9-]+))?/g)];
+    // **Jede Angabe trägt ihren eigenen Grund** — deshalb wird die Zeile vor
+    // jeder Zahl geteilt und der Grund nur im eigenen Abschnitt gesucht: aus
+    // „5.52:1, 4.78:1 auf warning-bg" werden zwei Ansprüche, der erste gegen
+    // Weiß. Ein Regex, der von der Zahl aus nach rechts liest, kann das nicht:
+    // er erbt entweder den fremden Grund oder er findet den eigenen nicht,
+    // wenn zwischen Zahl und „auf" noch das Token steht — und genau die Form
+    // schreibt der Schlusstext vor („2.87:1 (`--color-text-subtle` auf
+    // `--color-bg-soft`)"). Sie fiel zweimal durch, einmal als falsche
+    // Anklage, einmal als grünes Testat für eine falsche Zahl (0055).
+    // Der Backtick zählt dabei auf **beiden** Hälften.
+    const found = [];
+    // Der Rückblick verhindert den Schnitt **innerhalb** einer Zahl: ohne ihn
+    // trennte „11.64:1" vor der zweiten Eins und der Wächter las 1,64.
+    for (const teil of line.split(/(?<![\d.,])(?=\d+[.,]\d+\s*:\s*1)/)) {
+      const zahl = teil.match(/^(\d+[.,]\d+)\s*:\s*1/);
+      if (!zahl) continue;
+      const grund = teil.match(/auf\s+`?([A-Za-zäöü0-9-]+)`?/);
+      found.push({ text: zahl[0].trim(), claimed: zahl[1], ground: grund?.[1] });
+    }
     if (!found.length) continue;
 
     // The token this comment talks about: named inside it, or the next one
@@ -108,23 +129,93 @@ for (const file of FILES) {
       token = lines[j].match(/(--color-[a-z0-9-]+)\s*:/)?.[1] ?? null;
     }
 
-    // Each claim carries its own ground, and one without a named ground is
-    // measured against the page — **not** against the ground of its neighbour.
-    // „5.52:1, 4.78:1 auf warning-bg" is two claims: the first against white,
-    // the second against the warning surface.
     for (const f of found) {
-      claims.push({
+      out.push({
         file,
         line: i + 1,
-        text: f[0].trim(),
-        claimed: Number(f[1].replace(",", ".")),
-        ground: f[2] ?? "weiss",
+        text: f.text,
+        claimed: Number(f.claimed.replace(",", ".")),
+        ground: f.ground ?? "weiss",
         token,
       });
     }
   }
-
+  return out;
 }
+
+/**
+ * Selbstprüfung. Sie steht hier, weil dieser Wächter zweimal an seiner
+ * **eigenen Anleitung** gescheitert ist: die Form, die er vorschreibt, fiel
+ * durch seinen Regex und wurde still gegen Weiß gerechnet — einmal als
+ * falsche Anklage, einmal als grünes Testat für eine falsche Zahl (0055,
+ * Runden eins und zwei). Ein Wächter, dessen Abhilfe nicht wirkt, ist
+ * schlimmer als keiner.
+ */
+function selbsttest() {
+  let schlecht = 0;
+  const pruefe = (name, ist, soll) => {
+    if (JSON.stringify(ist) !== JSON.stringify(soll)) {
+      schlecht++;
+      console.error(`  ✗ ${name}: erwartet ${JSON.stringify(soll)}, gemessen ${JSON.stringify(ist)}`);
+    }
+  };
+  const eine = (zeile) => {
+    const c = claimsAus([zeile])[0];
+    return c ? [c.claimed, c.ground, c.token] : null;
+  };
+
+  // Die Form, die der Schlusstext vorschreibt — beide Token in Backticks.
+  pruefe(
+    "Anleitungsform",
+    eine("/* gemessen 2.87:1 (`--color-text-subtle` auf `--color-bg-soft`) */"),
+    [2.87, "--color-bg-soft", "--color-text-subtle"],
+  );
+  pruefe(
+    "Grund ohne Backtick",
+    eine("/* `--color-text-subtle`: 4.51:1 auf bg-soft */"),
+    [4.51, "bg-soft", "--color-text-subtle"],
+  );
+  pruefe("ohne Grund ist Weiß", eine("/* `--color-accent` 3.55:1 */"), [3.55, "weiss", "--color-accent"]);
+  pruefe("Zahl ohne `:1` ist keine Angabe", eine("/* opacity .5 ergab 2,11 */"), null);
+  pruefe("Komma wie Punkt", eine("/* `--color-text-muted` 6,69:1 */"), [6.69, "weiss", "--color-text-muted"]);
+  pruefe(
+    "Token erst darunter deklariert",
+    (() => {
+      const c = claimsAus(["  /* 4.88:1 auf Weiss */", "  --color-text-subtle: #717171;"])[0];
+      return [c.claimed, c.token];
+    })(),
+    [4.88, "--color-text-subtle"],
+  );
+  pruefe(
+    "zweistellige Zahl bleibt ganz",
+    eine("/* den Kontrast traegt der Rahmen (--color-primary-700, 11.64:1 auf Weiss) */"),
+    [11.64, "Weiss", "--color-primary-700"],
+  );
+  pruefe(
+    "zwei Angaben in einer Zeile, je eigener Grund",
+    claimsAus(["/* 5.52:1, 4.78:1 auf warning-bg */"]).map((c) => [c.claimed, c.ground]),
+    [[5.52, "weiss"], [4.78, "warning-bg"]],
+  );
+
+  // Und die Rechnung selbst, gegen von Hand nachgerechnete Werte.
+  const rund = (x) => Math.round(x * 1e4) / 1e4;
+  pruefe("Verhältnis text-subtle auf Weiß", rund(ratio("#717171", "#FFFFFF")), 4.8807);
+  pruefe("Verhältnis accent auf border-control", rund(ratio("#3B8FC4", "#8A8A8A")), 1.0289);
+  pruefe("Grund über Wort auflösbar", resolveGround("bg-soft") !== null, true);
+  pruefe("Grund über Token auflösbar", resolveGround("--color-border-control"), "#8A8A8A");
+
+  if (schlecht) {
+    console.error(`\ncheck:contrast — Selbstprüfung: ${schlecht} Fälle falsch.`);
+    process.exit(1);
+  }
+  console.log("check:contrast — Selbstprüfung in Ordnung, 12 Fälle.");
+  process.exit(0);
+}
+
+if (process.argv[2] === "--test") selbsttest();
+
+const claims = FILES.flatMap((file) => claimsAus(readFileSync(file, "utf8").split("\n"), file));
+
 let bad = 0;
 let unchecked = 0;
 let unresolvedInTokens = 0;
@@ -154,11 +245,12 @@ for (const c of claims) {
 
 const checked = claims.length - unchecked;
 // In `tokens.css` a claim that cannot be resolved is itself a defect: the
-// value stands right next to it. In the other stylesheets many claims name a
-// class instead of a token — those this guard cannot recompute, and it says
-// so rather than reporting green. To make such a claim checkable, name both
-// tokens in the comment: „gemessen 2.87:1 (`--color-text-subtle` auf
-// `--color-bg-soft`)".
+// value stands right next to it. What stays unchecked elsewhere is what
+// carries **opacity** — a full-tone computation would be a wrong answer, not
+// a missing one. To make a claim checkable, name both tokens on the line of
+// the number: „gemessen 2.87:1 (`--color-text-subtle` auf
+// `--color-bg-soft`)" — the token two lines below does not count, the guard
+// reads the line.
 if (bad || unresolvedInTokens) {
   console.error(
     `\ncheck:contrast — ${bad} von ${checked} Angaben stimmen nicht${unresolvedInTokens ? `, ${unresolvedInTokens} in tokens.css lassen sich nicht auflösen` : ""}. Die Zahl im Kommentar ist die Messung; wer sie ändert, rechnet sie nach.`,

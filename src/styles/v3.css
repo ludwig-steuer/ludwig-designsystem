@@ -261,10 +261,12 @@
   border-radius: var(--radius-sm);
 }
 /* Gesperrt heißt **lesbar gesperrt**: `opacity: .5` auf der Linkfarbe ergab
-   gemessen 2,11:1 — unter jeder Schwelle, und damit ist der Weg nicht
-   „sichtbar und begründet", sondern nur noch zu ahnen (Abnahme 0065). Statt
-   Deckkraft die gedämpfte Textfarbe: 6,69:1, und der Unterschied zum aktiven
-   Link bleibt deutlich, weil dieser blau ist. */
+   gemessen 2,11 — unter jeder Schwelle, und damit ist der Weg nicht
+   „sichtbar und begründet", sondern nur noch zu ahnen (Abnahme 0065). Die
+   Zahl trägt kein `:1`: sie gilt für eine Deckkraft und für die verworfene
+   Variante, und beides rechnet `check:contrast` nicht nach. Statt Deckkraft
+   die gedämpfte Textfarbe: `--color-text-muted` steht mit 6,69:1 da, und der
+   Unterschied zum aktiven Link bleibt deutlich, weil dieser blau ist. */
 /* Gesperrt braucht eine **eigene** Stufe, nicht die des ruhigen Tons: mit
    `--color-text-muted` waren „quiet + aktiv" und „quiet + gesperrt"
    pixelgleich, und übrig blieb `cursor: not-allowed` — nichts, was man ohne
@@ -1297,8 +1299,9 @@ select.v2in { padding-right: 26px; }
 /* Die Linie ist keine Serie, sondern ein Bezug — deshalb die Akzentfarbe.
    `non-scaling-stroke` steht am Element, weil `preserveAspectRatio="none"`
    den Strich sonst verzerrt. */
-/* Der Saum unter der Bezugslinie: ohne ihn misst sie auf einem Balken 1,03:1
-   (Abnahme 0110, M1). Er traegt keine Bedeutung und ist deshalb `aria-hidden`. */
+/* Der Saum unter der Bezugslinie: ohne ihn steht die Linie auf der zweiten
+   Balkenreihe (Abnahme 0110, M1) — `--color-accent` 1,03:1 auf `border-control`.
+   Er traegt keine Bedeutung und ist deshalb `aria-hidden`. */
 .v2chart__linehalo { stroke: var(--color-surface); stroke-width: 3.5; }
 .v2chart__line { stroke: var(--color-accent); stroke-width: 1.5; }
 .v2chart__zero { stroke: var(--color-border-strong); stroke-width: 0.4; }
