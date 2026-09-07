@@ -3193,14 +3193,24 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    hängt an einer Zahlung schon mal ein halbes Dutzend, und in einer Zeile
    wäre keiner mehr lesbar. */
 .v2case--stack { display: grid; gap: 2px; }
-/* Der Name ist Rang 1 — er behält seinen Platz, und was daneben steht, rückt
-   in die nächste Zeile. Vorher fraßen Kennung, Chip und Betrag die 260-px-
-   Spalte auf und dem Namen blieben 8 px: sichtbar war ein einzelner
-   Buchstabe, zweimal ohne Auslassungszeichen (Abnahme 0095). */
+/* Zwei Anordnungen, eine Zelle (Owner-Entscheid 2026-09-07).
+
+   `--inline` ist die Vorgabe und gilt in **Zeilen**: eine Liste liest sich über
+   ihre Zeilenhöhe, und eine Zelle, die 24 px höher ist als ihre Nachbarn, ist
+   ein Signal ohne Bedeutung. Kein Umbruch; die Kennung und der Zustand
+   behalten ihre Breite, der Name gibt nach und trägt seinen vollen Wert im
+   `title`.
+
+   `--stacked` ist die alte Anordnung und bleibt für Karten und Faktentafeln:
+   dort ist Platz, der Name ist der Punkt, und was daneben steht, rückt in die
+   nächste Zeile (Abnahme 0095). */
 .v2case__one {
-  display: flex; flex-wrap: wrap; align-items: baseline;
+  display: flex; align-items: baseline;
   gap: var(--space-2); min-width: 0; width: 100%;
 }
+.v2case__one--inline { flex-wrap: nowrap; }
+.v2case__one--inline > *:not(.v2case__link) { flex-shrink: 0; }
+.v2case__one--stacked { flex-wrap: wrap; }
 .v2case__link {
   color: var(--color-text); text-decoration: none; font-weight: 500;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;

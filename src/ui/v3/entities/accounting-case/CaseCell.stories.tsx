@@ -48,6 +48,8 @@ const MANY: CaseLink[] = [
 ];
 
 /** Ein Fall: Anzeigename, Nummer, Zustand — alles in einer Zeile. */
+const LANG = "Wartung der Klimaanlage im Obergeschoss, zweiter Bauabschnitt";
+
 export const Single: Story = {
   render: () => (
     <div style={{ maxWidth: 420 }}>
@@ -110,6 +112,49 @@ export const Fallbacks: Story = {
         cases={[{ ...ONE, caseId: "c-d4f9e1a2b3", caseNumber: null }]}
         href={href}
       />
+    </div>
+  ),
+};
+
+/**
+ * Die zwei Anordnungen nebeneinander, in **derselben** schmalen Spur (200 px).
+ *
+ * `inline` ist die Vorgabe und die Anordnung für Zeilen: alles auf einer
+ * Linie, die Kennung führt, der Name gibt nach. `stacked` ist die alte Form
+ * für Karten und Faktentafeln — der Name behält seinen Platz, der Rest rückt
+ * eine Zeile tiefer und macht die Zeile doppelt so hoch.
+ *
+ * Der Unterschied ist der Grund für den Owner-Entscheid vom 2026-09-07: eine
+ * Liste liest sich über ihre Zeilenhöhe, und eine Zelle, die 24 px höher ist
+ * als ihre Nachbarn, ist ein Signal ohne Bedeutung.
+ */
+export const Layouts: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <Card>
+        <CardHead title="Dieselbe Spur, zwei Anordnungen" sub="200 px, langer Name" />
+        <Table cols="110px 200px 1fr">
+          <HeadRow>
+            <span>Anordnung</span>
+            <span>Sachverhalt</span>
+            <span>Was passiert</span>
+          </HeadRow>
+          <Row>
+            <span>inline</span>
+            <span>
+              <CaseCell cases={[{ ...ONE, title: LANG }]} href={href} />
+            </span>
+            <span>Eine Zeile, der Name mit Ellipse</span>
+          </Row>
+          <Row>
+            <span>stacked</span>
+            <span>
+              <CaseCell cases={[{ ...ONE, title: LANG }]} href={href} layout="stacked" />
+            </span>
+            <span>Der Name behält seinen Platz, der Rest bricht um</span>
+          </Row>
+        </Table>
+      </Card>
     </div>
   ),
 };

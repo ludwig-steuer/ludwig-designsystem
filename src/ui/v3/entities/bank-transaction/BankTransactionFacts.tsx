@@ -211,7 +211,10 @@ function Assignment({
         ["DATEV-Historie", <MatchStage key="m" stage={t.matchStage} />],
         [
           "Sachverhalte",
-          <CaseCell key="c" cases={t.cases} href={caseHref} showState={false} />,
+          // `stacked`: a facts panel has room, and here the case **is** the
+          // point — the name keeps its place (owner decision 2026-09-07; a
+          // list is the other case and gets `inline`).
+          <CaseCell key="c" cases={t.cases} href={caseHref} showState={false} layout="stacked" />,
         ],
         // Per case, not once: the booking state belongs to the **event**, and
         // with several cases there are several events. That is the sentence

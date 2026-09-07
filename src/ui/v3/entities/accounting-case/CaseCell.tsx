@@ -28,6 +28,7 @@ export function CaseCell({
   href,
   emptyHref,
   showState = true,
+  layout = "inline",
 }: {
   cases: readonly CaseLink[];
   /** Where each case leads. The cell builds no URL — it knows neither client nor year. */
@@ -36,6 +37,19 @@ export function CaseCell({
   emptyHref?: string;
   /** The state as a chip behind the name; `false` where the row has its own column. */
   showState?: boolean;
+  /**
+   * `inline` — **one line**: identifier, then the name with an ellipsis and
+   * the whole value in its `title`, then the state. That is what a list
+   * needs: a list is read down its row heights, and a cell 24 px taller than
+   * its neighbours is a signal without a meaning (owner decision 2026-09-07
+   * via the coordinator; measured in the document catalogue, one row of 71,7
+   * px among rows of 48).
+   *
+   * `stacked` — the name keeps its place and everything else moves to the
+   * next line. That is right where the cell has room and the name is the
+   * point: a card, a facts panel, zone 1 of a drawer.
+   */
+  layout?: "inline" | "stacked";
 }) {
   if (cases.length === 0) {
     const word = "offen";
@@ -55,11 +69,14 @@ export function CaseCell({
   return (
     <span className={`v2case${cases.length > 1 ? " v2case--stack" : ""}`}>
       {cases.map((c) => (
-        <span className="v2case__one" key={c.caseId}>
+        <span className={`v2case__one v2case__one--${layout}`} key={c.caseId}>
+          {/* The identifier leads: it is what a person searches for and quotes
+              on the phone, and in a line it is the fixed part while the name
+              is the one that gives way. */}
+          <code className="v2case__no">{caseIdentifier(c)}</code>
           <Link href={href(c.caseId)} className="v2case__link" title={caseTitle(c)}>
             {caseTitle(c)}
           </Link>
-          <code className="v2case__no">{caseIdentifier(c)}</code>
           {/* Der Zustand als Chip, nicht als Punkt: Farbe steht nie allein
               (V7), und die Erklärung sitzt einmal am Spaltenkopf statt einmal
               je Zeile (R1, 0077). */}

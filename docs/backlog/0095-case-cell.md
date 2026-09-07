@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig |
+| Status | Abnahme |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` — Darstellungsfamilie des Sachverhalts, neben `CaseTimeline` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: die Rückfallkette und der Nullfall „offen" gehören diesem Vorgangsbegriff |
@@ -391,3 +391,65 @@ die 47 px einer gewöhnlichen Zeile, weil der Chip umbricht.
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-06 · Offene Punkte: die
 App-Zeile (Ersatz der drei Fassungen, `lifecycleStatus` in den Queries) —
 offen (App).
+
+## Nach der Abnahme (2026-09-07, im Auftrag des Owners, ludwig-coordinator)
+
+**Auftrag.** In einer **Zeile** ist die Zelle eine Zeile: Kennung mono, dann
+der Name mit Ellipse und dem vollen Wert im `title`, dann der Zustands-Chip.
+Die zweizeilige Form bleibt als Option für Karten und Faktentafeln. Neue Prop
+`layout: "inline" | "stacked"`, Vorgabe `inline`.
+
+**Grund.** Eine Liste liest sich über ihre Zeilenhöhe. Die zweizeilige Zelle
+war so gebaut und so begründet („der Name behält seinen Platz", Abnahme 0095),
+aber sie machte die Zeile, in der ein Sachverhalt steht, zum Ausreißer: im
+Belegkatalog gemessen **71,7 px** zwischen Zeilen von 48. Ein Unterschied von
+24 px ist ein Signal — hier eines ohne Bedeutung, also V7 rückwärts. Und die
+Spurbreite half nicht: bei 232 px war die Zelle genauso hoch wie bei 170,
+weil `flex-wrap: wrap` umbricht, **bevor** irgendetwas schrumpft.
+
+**Gebaut.**
+
+- `CaseCell` bekommt `layout`, Vorgabe `inline`. Die **Reihenfolge** ändert
+  sich mit: die Kennung führt jetzt. Sie ist das, wonach gesucht und was am
+  Telefon gesagt wird — und in einer Zeile ist sie der feste Teil, während der
+  Name der ist, der nachgibt.
+- `.v2case__one--inline` ist `nowrap`; alles außer dem Namen behält seine
+  Breite (`flex-shrink: 0`), der Name kürzt und trägt den vollen Wert im
+  `title`. `.v2case__one--stacked` ist die alte Regel, unverändert.
+- `BankTransactionFacts` — die einzige Faktentafel mit dieser Zelle — setzt
+  `layout="stacked"`. Die Listen (`source-document-columns`,
+  `bank-transaction-columns`) bekommen die Vorgabe.
+- Neue Story `Layouts`: beide Anordnungen in **derselben** 200-px-Spur, damit
+  der Unterschied nicht behauptet, sondern gezeigt wird.
+
+**Gemessen** (Dev-Server 6107, CDP, je 700 und 1400 px — beide Breiten mit
+identischem Ergebnis):
+
+| | Zeile | Zelle | `flex-wrap` | `title` |
+|---|---|---|---|---|
+| `Layouts`, `inline` | **48,0** px | 23,0 | `nowrap` | 61 Zeichen |
+| `Layouts`, `stacked` | **100,8** px | 76,8 | `wrap` | 61 Zeichen |
+
+Und die Wirkung dort, wo der Befund herkam — Belegkatalog `DocumentList`,
+alle Zeilen bei 700 **und** 1400 px:
+
+| | vorher | jetzt |
+|---|---|---|
+| Zeile mit Sachverhalt | **71,7** px | **48,0** px |
+| Nachbarzeilen | 48,0 · 48,0 · 47,0 | 48,0 · 48,0 · 47,0 |
+
+Die CaseCell-Zellen messen dort jetzt durchweg 20,9 px. In
+`BankTransactionRow --in-use` ebenso (vier Zellen à 20,9); die eine 67,7-px-
+Zeile dort ist die ausgeklappte Aufteilungszeile, nicht diese Zelle.
+`NarrowColumn` hält: der Einzelfall 48,0 px, der Fall mit **mehreren**
+Sachverhalten 96,9 px — die stehen untereinander (`--stack`), und das ist eine
+andere Regel als `layout`.
+
+`pnpm typecheck`, `check:language`, `check:icons`, `check:contrast`,
+`check:mirror`, `check:when` je Exit 0. Nicht gebaut (der Bau dieser Welle
+läuft in einem eigenen Worktree, Entscheid vom 2026-09-07).
+
+**Status: Abnahme** — gebaut habe ich, abnehmen muss ein anderer. Zu prüfen:
+in **allen** Listen-Stories die Zeilenhöhe gleich der Nachbarzeilen, gemessen
+bei 700 und 1400 px; die `stacked`-Form unverändert; und dass keine
+Faktentafel oder Karte versehentlich auf `inline` gefallen ist.
