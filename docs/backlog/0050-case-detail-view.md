@@ -68,7 +68,7 @@ Ein Export, fünf Slots, keine Datenprops.
 | `nextAction` | `ReactNode` | nein | Die eine nächste Handlung: `StatusCallout` mit `icon` (0049). Entfällt, wenn der Fall auf jemand anderen wartet | `Filled`, `Waiting` |
 | `tabs` | `ReactNode` | nein | Die Reiterleiste: `Tabs` (0049). Ohne Reiter entfällt die Zeile | `SingleEvent` |
 | `aside` | `ReactNode` | nein | Der Strang links: `CaseTimeline` (0040). Leer → einspaltig | `SingleEvent` |
-| `children` | `ReactNode` | ja | Der Inhalt des aktiven Reiters. **Der Rahmen filtert nicht:** welcher Reiter aktiv ist, entscheidet der Aufrufer über `tabs`, und was dazu gehört, reicht er als `children` herein — die View kennt weder die Reiter noch ihre Inhalte | `Filled` |
+| `children` | `ReactNode` | ja | Der Inhalt des aktiven Reiters — **hier sitzt `CaseFacts`** (0097), auf dem ersten Reiter, ohne eigenen Slot; die Ränge 5–10 komponiert der Aufrufer in `EntityHeader meta`/`facts`. **Der Rahmen filtert nicht:** welcher Reiter aktiv ist, entscheidet der Aufrufer über `tabs` | `Filled` |
 
 **Kann bewusst nicht:** Daten holen, Server-Actions kennen, den aktiven
 Reiter verwalten (das tut der Aufrufer über die URL), Reiter ausblenden,
@@ -321,3 +321,143 @@ Behauptung über die eigene Arbeit.
   CLAUDE.md ist ein bestehender Bezeichner in fremder Datei kein
   Umbenennungsgrund für diese Aufgabe; er fällt, wenn `MasterDetail` selbst
   angefasst wird.
+
+## Wiederabnahme (2026-09-07)
+
+Zweite fremde Abnahme, wieder nicht der bauende Agent. Gemessen am laufenden
+Dev-Server `http://localhost:6107` (Quelle, nicht `storybook-static`), CDP über
+Playwright, Fenster 1280 / 1366 / 1440 / 1512 × 900.
+
+**Der Code ist unverändert — aber sein Unterbau nicht.**
+`git log --oneline -5 -- src/ui/v3/entities/accounting-case/CaseDetailView.tsx`
+→ jüngster Commit `d6696b4` (2026-09-06 21:27), ebenso die Story-Datei; nichts
+Ungestagtes in diesem Ordner. Zwischen der ersten Abnahme (`37d4934`, 05:43)
+und heute hat sich aber `patterns/MasterDetail.tsx` geändert (`ed6e79a`, 06:36,
+aus 0063): `--detail-breit` hat eine Untergrenze bekommen. Das kippt diese View
+an einer Breite, an der sie vorher stand — siehe M4.
+
+### Die drei Textmängel der ersten Runde
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M1 — Profil in „Quelle" | Zeile 9 nennt jetzt `docs/entitaeten/accounting-case.md` (geprüft 2026-09-05) neben dem Seitenprofil; `git show 37d4934` zeigt die Änderung | ✓ behoben |
+| M3 — eigener Abschnitt `## Ausbau` (A12) | `grep '^## Ausbau'` → Zeile 135; drei Zeilen mit `CaseEditor` (0083), `InlineEdit` (0020) und der Absage an einen zweiten Strang | ✓ behoben |
+| M2 — Entscheid (c) in Schnittstelle/Verhalten | `grep 'CaseFacts'` über die Zeilen 60–89 (Schnittstelle + Verhalten) → **kein Treffer**. Eingefügt wurde in der Zeile `children` der Satz „Der Rahmen filtert nicht" — das ist Entscheidung 1 (Reiter), nicht der Entscheid der Freigabe. Der Entscheid selbst („`CaseFacts` sitzt im `children` des ersten Reiters", Ränge 5–10 im `EntityHeader`) steht weiter nur im Nachtrag und im JSDoc | ✗ offen (M2) |
+
+### Vollständigkeit der Aufgabe
+
+Kopf ✓ · Einordnung ✓ · Schnittstelle ✓ (Tabelle, Pflichtspalten, „Kann
+bewusst nicht"; offen nur M2) · Verhalten ✓ · Stories ✓ (sechs, benannt und
+begründet) · **Ausbau ✓** · Abnahmekriterien ✓ (7 fest + 7 variabel). Kein
+Abschnitt fehlt mehr.
+
+### Kriterien, stichprobenartig nachgemessen
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck`, `pnpm build`, `pnpm check:icons` | Exit 0 / 0 / 0 („Storybook build completed successfully", „53 Zeichen in der Registry"). Keine Fehler aus fremden Aufgaben | ✓ |
+| Kein Hex, kein px im TSX; kein `"use client"`; kein `StatusBadge`/`resolveStatus`; kein `order`-Prop, kein `.map(` | `grep` in `CaseDetailView.tsx` → je null Treffer; `@when`/`@instead` in `:18–19`; Barrel `src/ui/v3/index.ts:382` | ✓ |
+| Sechs Stories, Titel `v3/Entitäten/Sachverhalt/CaseDetailView` | `grep '^export const'` → `Filled`, `SingleEvent`, `Waiting`, `WithoutTabs`, `TabsWithCountAndDot`, `InUse` | ✓ |
+| Slot-Reihenfolge im DOM | `InUse` 1280 und 1440: `v2cdv__pager` · `v2cdv__head` · `v2cdv__next` · `v2cdv__tabs` · `v2mdw` (der Rahmen ist neu von `MasterDetail`, die Reihenfolge unverändert) | ✓ |
+| Rang 1–4 ohne Scrollen bei 900 px Höhe | `InUse` in der `AppShell`, **1280 × 900**: `__next` 285–381, `__tabs` 401–444, Strang-Oberkante 464. Bei 1440 dieselben Werte. Null Elemente mit `overflow-x/y: auto\|scroll` innerhalb der View | ✓ |
+| Kein Querlauf, nichts abgeschnitten | `document.scrollWidth == innerWidth` bei 1280/1366/1440/1512; null Elemente mit `scrollWidth > clientWidth`; Konsole ohne Warnung oder Ausnahme | ✓ |
+| Ohne `aside` einspaltig | `SingleEvent`/`WithoutTabs`/`TabsWithCountAndDot`: kein `.v2md`, letztes Kind `.v2cdv__body` | ✓ |
+| **Layout in der Schale, nicht im Story-Rahmen** (Lehre aus 0071) | `InUse` bei 1280: **eine** Spalte statt zwei — siehe M4 | ✗ (M4) |
+
+### Mängel
+
+1. **M4 (blockierend) — in der `AppShell` ist die View unter 1.416 px Fenster
+   einspaltig, obwohl `aside` gesetzt ist.** „Verhalten" verlangt: *zweispaltig
+   über `MasterDetail`, sobald `aside` gesetzt ist*; Entscheidung 2 verlangt
+   ausdrücklich *keine Schwelle im Baustein* — die Schwelle sollte beim
+   Aufrufer liegen, der seine Ereignisse zählt. Seit `ed6e79a` hat
+   `.v2md--detail-breit` eine Breiten-Schwelle: `.v2mdw` misst sich als
+   Container, zwei Spuren erst ab `min-width: 1080px`.
+   Gemessen, `InUse` (Story in der Schale), Fenster × 900:
+
+   | Fenster | Inhaltsbreite `.v2mdw` | `grid-template-columns` | Strang / Detail | Unterkante der View |
+   |---|---|---|---|---|
+   | 1280 | 944 | `944px` | **untereinander** | 1060 (vorher 837) |
+   | 1366 | 1030 | `1030px` | **untereinander** | 1039 |
+   | 1440 | 1104 | `440px 644px` | nebeneinander | 795 |
+   | 1512 | 1176 | `440px 716px` | nebeneinander | 795 |
+
+   Die Schale nimmt 336 px (Sidebar + Rinnen), der Kipppunkt liegt also bei
+   1.416 px Fensterbreite. Wirkung bei 1280: der Strang steht 944 px breit über
+   den Fakten, die Fakten-Karte beginnt bei y = 729 und liegt damit unter der
+   Falte — die Ränge 5–10 sind nur noch zu erscrollen, und die Karte „Verlauf"
+   nimmt die volle Breite für zwei Zeilen. Genau das Bild, gegen das
+   Entscheidung 2 argumentiert, nur seitenverkehrt.
+   Die Story-Stories verdecken das: `Filled` und `Waiting` stehen im
+   Story-Rahmen mit `maxWidth: 1180` und zeigen darum bei **jeder** Fensterbreite
+   `440px 720px` — zwei Spalten. Nur `InUse` zeigt die Wahrheit; das ist die
+   Lehre aus 0071 ein zweites Mal.
+   Vorschlag: **nicht** in `CaseDetailView.tsx`. Die Untergrenze gehört
+   parametrisiert an `MasterDetail` (0063 braucht 1.080, weil rechts eine
+   Tabelle mit 620 px Mindestsatz steht; hier stehen rechts Fakten, die bei
+   484 px lesbar sind) — etwa eine Prop `detailMin` oder eine zweite Variante
+   mit niedrigerer Schwelle. Eigene Aufgabe an `MasterDetail`; 0050 bleibt
+   solange offen, weil seine tragende Anordnung an den zwei häufigsten
+   Laptop-Breiten nicht mehr steht.
+
+2. **M2 (nicht blockierend, unverändert aus der ersten Runde) —
+   Pflichtänderung (c) der Freigabe ist weiter nicht ausgeführt, wird aber
+   erneut als ausgeführt behauptet.** Der Abschnitt „Nach der Abnahme" sagt
+   „M2 erledigt", eingefügt wurde jedoch ein anderer Satz. Auch der ältere Satz
+   „(c) Der Entscheid steht in der Schnittstelle" stimmt weiterhin nicht.
+   Vorschlag: in der Zeile `children` der Schnittstellen-Tabelle einen Satz
+   ergänzen — „`CaseFacts` sitzt hier auf dem ersten Reiter; die Ränge 5–10
+   komponiert der Aufrufer im `EntityHeader`" — und die beiden Behauptungen im
+   Nachtrag erst danach stehen lassen.
+
+### Befunde (keine Kriterien, nicht blockierend)
+
+- **B2 ist überholt und liest sich jetzt falsch.** Der Text sagt: „bei 1280 px
+  Fenster ergibt das 440/484". Gemessen ergibt es heute 944/eine Spalte. Wenn
+  M4 angefasst wird, gehört B2 auf den neuen Stand.
+- **B1** (0 px zwischen den zwei Karten in `SingleEvent`) und **B3** (deutscher
+  Prop-Name `detailBreit`) stehen unverändert und bleiben ohne Nacharbeit.
+- Kleinigkeit im Text: vor `## Nicht in dieser Aufgabe` (Zeile 145) fehlt die
+  Leerzeile nach der Ausbau-Tabelle. Rendert richtig, ist aber die einzige
+  Stelle der Datei ohne Trennzeile.
+
+Abgenommen von / am: Claude (fremde Abnahme, hat nicht gebaut), 2026-09-07 ·
+**Urteil: zurück** — M4 blockiert (Layout kippt in der Schale unter 1.416 px),
+M2 bleibt klein und offen. M1 und M3 sind behoben, alle übrigen Kriterien
+messen grün. Am Code dieser Datei ist nichts zu ändern: M4 gehört an
+`MasterDetail`, M2 an die Spec.
+
+## Nach der Wiederabnahme (2026-09-07): meine eigene Untergrenze hat diese View gebrochen
+
+**M4 erledigt — und der Mangel stammt aus der Nacharbeit einer anderen
+Aufgabe.** In 0063 hat `MasterDetail --detail-breit` eine Untergrenze bekommen,
+weil dort ohne sie die Haben-Spalte in den Querlauf fiel. Die Schwelle war
+**fest 1.080 px** — und damit kippte diese View bei 1280 px Fensterbreite in
+die Einspaltigkeit: der Strang stand 944 px breit über den Fakten, die
+Fakten-Karte begann bei y = 729 und lag unter der Falte. Ein Fix, der eine
+Aufgabe repariert und die nächste bricht, eine Breite weiter.
+
+**Die Schwelle gehört dem Aufrufer, nicht dem Muster.** `MasterDetail` nimmt
+jetzt `minDetail` (Vorgabe 620, die kleinste Tabelle des Sets); diese View
+gibt **484**, weil rechts Fakten stehen und keine Tabelle. Der Umbruch
+geschieht über den Flex-Sockel statt über eine Container-Abfrage — eine
+Abfrage bräuchte die Schwelle als Literal, und genau das war der Fehler.
+
+Gemessen in der `AppShell`, beide Aufrufer nebeneinander:
+
+| Fenster | 0050 (`minDetail` 484) | 0063 (Vorgabe 620) |
+|---|---|---|
+| 1280 | 440 / 484 **nebeneinander** | untereinander, Liste 976 breit, 7 von 7 Spalten sichtbar |
+| 1440 | 440 / 644 nebeneinander | 440 / 676 nebeneinander, 7 von 7 sichtbar |
+
+**M2 erledigt, diesmal richtig.** Die letzte Runde hat den falschen Satz in
+die `children`-Zeile geschrieben — „der Rahmen filtert nicht" ist Entscheidung
+1, der Freigabe-Entscheid war ein anderer. Jetzt steht dort, was er sagt:
+**`CaseFacts` sitzt im `children` des ersten Reiters**, ohne eigenen Slot, und
+die Ränge 5–10 komponiert der Aufrufer im Kopf. Dass ich „M2 erledigt"
+geschrieben hatte, ohne dass es stimmte, ist derselbe Fehler wie in der Runde
+davor — und die Abnahme hat ihn beide Male gefunden.
+
+**Der Befund B2 des vorigen Nachtrags ist überholt:** die feste 440-px-Spalte
+mit „440/484 bei 1280" beschreibt jetzt genau das gewollte Verhalten und liest
+sich als Mangel. Er ist damit erledigt, nicht offen.

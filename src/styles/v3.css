@@ -1096,17 +1096,24 @@ select.v2in { padding-right: 26px; }
  * Auswahl trägt (Design `DR:757`, Schritt 2). Das Detail steht dann nicht
  * mehr fest: es ist der lange Teil der Seite.
  *
- * **Mit Untergrenze.** Ohne sie hält die Randspalte ihre 440 px bis zu jeder
- * Breite und fällt nie auf eine Spalte zurück — jede breite Tabelle daneben
- * verliert dann ihre rechten Spalten in den Querlauf. Gemessen in 0063: bei
- * 1136 px Innenbreite (die Seite bei 1440) blieben der Liste 674 px für einen
- * Satz, der 1180 verlangt; die Haben-Spalte stand bei keiner Breite im Bild.
- * 1080 = 440 Randspalte + 620 (die kleinste Tabelle des Sets) + Rinne. */
-.v2mdw { container-type: inline-size; container-name: mdw; }
-.v2md--detail-breit { grid-template-columns: minmax(0, 1fr); }
-@container mdw (min-width: 1080px) {
-  .v2md--detail-breit { grid-template-columns: minmax(0, 440px) minmax(0, 1fr); }
+ * **Mit Untergrenze, und die kennt der Aufrufer.** Ohne sie hielt die
+ * Randspalte ihre 440 px bis zu jeder Breite und fiel nie auf eine Spalte
+ * zurück — eine breite Tabelle daneben verlor ihre rechten Spalten in den
+ * Querlauf (0063: die Haben-Spalte stand bei keiner Breite im Bild). Eine
+ * feste Schwelle war aber auch falsch: mit 1.080 px kippte 0050 bei 1280
+ * Fensterbreite in die Einspaltigkeit, obwohl seine Fakten bei 484 px lesbar
+ * sind. Deshalb `--v2md-min` — der Umbruch geschieht über den Flex-Sockel,
+ * nicht über eine Abfrage, denn eine Abfrage bräuchte die Schwelle als
+ * Literal, und die gehört dem Aufrufer. */
+.v2md--detail-breit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  align-items: start;
+  grid-template-columns: none;
 }
+.v2md--detail-breit > .v2md__list { flex: 0 1 440px; min-width: 0; }
+.v2md--detail-breit > .v2md__detail { flex: 1 1 var(--v2md-min, 620px); min-width: 0; }
 .v2md--detail-breit .v2md__detail { position: static; max-height: none; overflow: visible; }
 
 /* --- Klappbarer Gruppenkopf ---------------------------------------------

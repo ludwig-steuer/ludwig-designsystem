@@ -576,3 +576,17 @@ zwei. Der Code war besser als sein Text.
 nicht nur diese. Der zweite Befund bleibt: `DataTable.rowClassName` ist
 generisch, die einzige Regel dafür heißt `.v2tbl__row.v2ae__row--draft` — nach
 `AccountEntryList` benannt, obwohl sie jede Tabelle betrifft. Gehört zu 0057.
+
+## Nachtrag (2026-09-07): die Untergrenze ist parametrisch geworden
+
+Die feste Schwelle von 1.080 px aus der Nacharbeit oben hat prompt die
+Nachbar-Ansicht gebrochen: `CaseDetailView` (0050) kippte bei 1280 px
+Fensterbreite in die Einspaltigkeit, obwohl seine Fakten bei 484 px lesbar
+sind. `MasterDetail` nimmt die Schwelle jetzt als `minDetail` entgegen —
+Vorgabe 620, die kleinste Tabelle des Sets, also der Wert, den **diese**
+Ansicht braucht; 0050 gibt 484.
+
+Für diese Aufgabe ändert sich am Ergebnis nichts: gemessen in der `AppShell`
+steht die Liste bei 1280 untereinander (volle 976 px, sieben von sieben
+Spalten sichtbar) und bei 1440 nebeneinander (440 / 676, ebenfalls sieben von
+sieben).

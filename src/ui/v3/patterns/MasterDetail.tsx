@@ -20,6 +20,7 @@ export function MasterDetail({
   detail,
   style,
   detailBreit = false,
+  minDetail = 620,
 }: {
   list: ReactNode;
   detail: ReactNode;
@@ -29,6 +30,14 @@ export function MasterDetail({
    * denen im Detail gearbeitet und in der Liste nur ausgewählt wird.
    */
   detailBreit?: boolean;
+  /**
+   * How much the wide half needs before the two stop standing next to each
+   * other, in px. **The caller knows this, the pattern does not**: a table of
+   * movements needs 620, a list of facts stays readable at 484 — and a floor
+   * that fits one starves the other (found in 0063 and immediately again in
+   * 0050, one width apart). Below `440 + minDetail + gap` the two wrap.
+   */
+  minDetail?: number;
 }) {
   if (!detailBreit) {
     return (
@@ -38,17 +47,22 @@ export function MasterDetail({
       </div>
     );
   }
-  // The reversed layout needs a **floor**, and a floor needs a container to
-  // measure: without one the narrow column keeps its 440 px at every width and
-  // never falls back to a single column — a wide table beside it then loses
-  // its right-hand columns into the horizontal scroll (found in 0063, where
-  // the credit column stood at no width at all).
+  // The reversed layout needs a **floor**: without one the narrow column keeps
+  // its 440 px at every width and never falls back to a single column — a wide
+  // table beside it then loses its right-hand columns into the horizontal
+  // scroll (found in 0063, where the credit column stood at no width at all).
+  //
+  // The floor is a flex basis, not a container query, and that is the whole
+  // point: a query would need the threshold as a literal, and the threshold
+  // belongs to the caller. Here the wide half asks for `minDetail` and wraps
+  // when it cannot have it.
   return (
-    <div className="v2mdw" style={style}>
-      <div className="v2md v2md--detail-breit">
-        <div>{list}</div>
-        <div className="v2md__detail">{detail}</div>
-      </div>
+    <div
+      className="v2md v2md--detail-breit"
+      style={{ ...style, "--v2md-min": `${minDetail}px` } as CSSProperties}
+    >
+      <div className="v2md__list">{list}</div>
+      <div className="v2md__detail">{detail}</div>
     </div>
   );
 }

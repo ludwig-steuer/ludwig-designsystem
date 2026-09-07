@@ -50,7 +50,11 @@ export function CaseDetailView({
       {nextAction ? <div className="v2cdv__next">{nextAction}</div> : null}
       {tabs ? <div className="v2cdv__tabs">{tabs}</div> : null}
       {aside ? (
-        <MasterDetail list={aside} detail={children} detailBreit />
+        // 484 px, nicht die Vorgabe 620: rechts stehen Fakten, keine
+        // Tabelle — sie bleiben in der Detailspalte der Seite lesbar, und mit
+        // der Vorgabe kippte die Ansicht bei 1280 px Fensterbreite in die
+        // Einspaltigkeit (Wiederabnahme 0050).
+        <MasterDetail list={aside} detail={children} detailBreit minDetail={484} />
       ) : (
         <div className="v2cdv__body">{children}</div>
       )}
