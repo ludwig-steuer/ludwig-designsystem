@@ -86,6 +86,10 @@ const FACT_SOURCE_FIELDS: Record<string, readonly string[]> = {
   ],
   collection_document: ["client_source_docs.class_document_form"],
   vendor_vat_id_origin: ["client_source_docs_invoices.vendor_ust_id"],
+  reverse_charge_case: [
+    "client_source_docs_invoices.vendor_ust_id",
+    "client_business_partners.country_code",
+  ],
   foreign_currency: ["client_source_docs_invoices.currency", "client_source_docs_invoices.fx_currency"],
   reverse_charge_notice: ["client_source_docs_invoices.reverse_charge"],
   receipt_form: ["client_source_docs.class_document_form"],
@@ -130,6 +134,12 @@ export interface VatAssessmentInput {
     vendorUstId: string | null;
     /** client_source_docs_invoices.reverse_charge (Extraktions-Hinweis). */
     reverseCharge: string | null;
+    /**
+     * `client_business_partners.country_code` des am Beleg verknüpften
+     * Partners — zweites Sitzland-Signal für den § 13b-Sachverhalt (F152),
+     * wenn der Beleg keine USt-IdNr. trägt.
+     */
+    partnerCountryCode: string | null;
     documentForm: string | null;
     /** match | mismatch | uncertain | not_applicable | null (BL-17). */
     recipientMatch: string | null;
@@ -185,6 +195,106 @@ function vatIdPrefix(ustId: string | null): string | null {
   const cleaned = ustId.replace(/\s/g, "").toUpperCase();
   const m = /^([A-Z]{2})/.exec(cleaned);
   return m ? m[1]! : null;
+}
+
+// ---------------------------------------------------------------------------
+// § 13b-Sachverhalt („Sachverhalt L+L", F152)
+// ---------------------------------------------------------------------------
+
+/** BU-Schlüssel, für die DATEV zwingend einen Sachverhalts-Code verlangt. */
+export const REVERSE_CHARGE_CASE_TAX_KEYS: ReadonlySet<string> = new Set(["91", "92", "94", "95"]);
+
+/**
+ * DATEV-Sachverhalte L+L, soweit Ludwig sie führt. Die vollständige Liste
+ * (1–13, 16) steht in der DATEV-Feldbeschreibung „Sachverhalt L+L"; hier stehen
+ * nur die Codes, die Ludwig entweder selbst ableitet (1/7) oder in einer Meldung
+ * benennt (4). Die Inlandsfälle (Bauleistung u. a.) sind bewusst NICHT
+ * hinterlegt — sie sind aus den Belegdaten nicht ableitbar, siehe
+ * `docs/topics/datev-offen.md`.
+ */
+export const REVERSE_CHARGE_CASES: ReadonlyMap<number, string> = new Map([
+  [1, "Werklieferung / sonstige Leistung eines im Ausland (Drittland) ansässigen Unternehmers (§ 13b Abs. 2 Nr. 1)"],
+  [4, "Bauleistung (§ 13b Abs. 2 Nr. 4)"],
+  [7, "Sonstige Leistung eines im übrigen Gemeinschaftsgebiet ansässigen Unternehmers (§ 13b Abs. 1)"],
+]);
+
+export interface ReverseChargeOrigin {
+  /** client_source_docs_invoices.vendor_ust_id — das stärkere Signal. */
+  vendorUstId: string | null;
+  /** client_business_partners.country_code des verknüpften Partners. */
+  partnerCountryCode: string | null;
+}
+
+export interface ReverseChargeCaseResult {
+  /** DATEV-Sachverhalt L+L; `null`, wenn nicht ableitbar. */
+  code: number | null;
+  /** Warum — wörtlich verwendbar in Fakt-Rationale und Submit-Fehler. */
+  rationale: string;
+  /** `domestic`: Aussteller sitzt im Inland (Bauleistung u. a., nicht abgeleitet).
+   *  `unknown`: kein Sitzland-Signal. Beide führen zu `code = null`. */
+  gap: "domestic" | "unknown" | null;
+}
+
+/**
+ * Sitzland des Ausstellers → DATEV-Sachverhalt L+L. Entschieden wird über den
+ * SITZ, nicht über den Steuerschlüssel: 94 deckt EU-Leistung und Drittland
+ * gleichermaßen ab, DATEV unterscheidet sie erst über diesen Code (REW02191).
+ *
+ * Reihenfolge: USt-IdNr. am Beleg schlägt das Land am Geschäftspartner (die
+ * IdNr. steht auf DEM Beleg, das Partner-Land ist Stammdatum). Die
+ * OSS-Sondernummer `EU…` ist kein Sitzland-Signal (§ 18i UStG) — sie fällt auf
+ * das Partner-Land zurück; §13b entsteht in dem Fall ohnehin nicht (VST-XB-5).
+ */
+export function deriveReverseChargeCase(origin: ReverseChargeOrigin): ReverseChargeCaseResult {
+  const prefix = vatIdPrefix(origin.vendorUstId);
+  if (prefix && prefix !== "EU") {
+    if (prefix === "DE") {
+      return {
+        code: null,
+        gap: "domestic",
+        rationale: `Deutsche USt-IdNr. (${origin.vendorUstId}) — Aussteller sitzt im Inland`,
+      };
+    }
+    return EU_COUNTRIES.has(prefix)
+      ? {
+          code: 7,
+          gap: null,
+          rationale: `Sachverhalt 7 — sonstige Leistung eines EU-Unternehmers (USt-IdNr. ${origin.vendorUstId})`,
+        }
+      : {
+          code: 1,
+          gap: null,
+          rationale: `Sachverhalt 1 — Drittland (USt-IdNr./Kennung ${origin.vendorUstId})`,
+        };
+  }
+
+  const country = origin.partnerCountryCode?.trim().toUpperCase();
+  if (country && country.length === 2) {
+    if (country === "DE") {
+      return {
+        code: null,
+        gap: "domestic",
+        rationale: "Land am Geschäftspartner: DE — Aussteller sitzt im Inland",
+      };
+    }
+    return EU_COUNTRIES.has(country)
+      ? {
+          code: 7,
+          gap: null,
+          rationale: `Sachverhalt 7 — sonstige Leistung eines EU-Unternehmers (Land am Geschäftspartner: ${country})`,
+        }
+      : {
+          code: 1,
+          gap: null,
+          rationale: `Sachverhalt 1 — Drittland (Land am Geschäftspartner: ${country})`,
+        };
+  }
+
+  return {
+    code: null,
+    gap: "unknown",
+    rationale: "Nicht ableitbar: keine USt-IdNr. am Beleg, kein Land am Geschäftspartner",
+  };
 }
 
 function fact(
@@ -294,6 +404,27 @@ export function deriveVatFacts(input: VatAssessmentInput): VatFact[] {
             ? fact("vendor_vat_id_origin", "USt-IdNr. des Ausstellers", "no", `EU-ausländische USt-IdNr. (${prefix}) — § 13b/igE-Fall (VST-XB-1/2)`)
             : fact("vendor_vat_id_origin", "USt-IdNr. des Ausstellers", "no", `Nicht-EU-Kennung (${prefix})`),
   );
+
+  // § 13b-Sachverhalt für DATEV (F152) — der Code, den DATEV neben BU 91/92/94/95
+  // verlangt (REW02191). Steht hier, damit die Kanzlei VOR dem Buchen sieht,
+  // welches Signal ihn entscheidet; der Submit-Kern rechnet mit derselben
+  // Funktion und schreibt das Ergebnis an die Zeile.
+  {
+    const rcCase = deriveReverseChargeCase({
+      vendorUstId: inv.vendorUstId,
+      partnerCountryCode: inv.partnerCountryCode,
+    });
+    out.push(
+      fact(
+        "reverse_charge_case",
+        "§ 13b-Sachverhalt für DATEV",
+        rcCase.code != null ? "yes" : rcCase.gap === "domestic" ? "not_applicable" : "unknown",
+        rcCase.gap === "domestic"
+          ? `${rcCase.rationale} — ein Inlands-§ 13b-Fall (z. B. Bauleistung, Sachverhalt 4) wird nicht abgeleitet`
+          : rcCase.rationale,
+      ),
+    );
+  }
 
   // Währung
   const fw =

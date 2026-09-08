@@ -383,6 +383,11 @@ export interface CaseFilter {
    *  Personenkonto bebucht wird (`fy_personal_account_id`) — sonst fehlen
    *  genau die OPOS-Fälle, die den Partner noch nicht verknüpft haben (F97). */
   counterpartyPartnerId?: string;
+  /**
+   * Wer am Zug ist (Achse `disposition`). Bis 2026-09-08 hatte die Liste den
+   * Filter in der Oberfläche, aber nirgends ein Feld dafür — er tat nichts.
+   */
+  disposition?: CaseDisposition[];
 }
 
 /** Helper: ist dieser ``kind`` ein Dauersachverhalt? */
@@ -417,10 +422,18 @@ export function parseCaseListTab(value: string | string[] | undefined): CaseList
 }
 
 /**
- * Listen-URL-Parameter (``tab``/``q``/``recurring``/``dispo``) → ``CaseFilter``
- * des Tabs. Eine Ableitung für Listen-Tabelle **und** Detailseiten-Blättern,
- * damit „Vor/Zurück" exakt dieselbe Menge sieht wie die Liste.
- * ``null`` für Tabs ohne Case-Tabelle (``offen``/``schliessen``).
+ * Listen-URL-Parameter → ``CaseFilter``. Eine Ableitung für Listen-Tabelle
+ * **und** Detailseiten-Blättern, damit „Vor/Zurück" exakt dieselbe Menge sieht
+ * wie die Liste.
+ *
+ * Bis 2026-09-08 kam der Zustand aus dem Reiter: „Laufende", „Wartet auf
+ * Unterlagen" und „Zur Bearbeitung" waren drei Reiter, die in Wahrheit
+ * dieselbe Liste nach `lifecycle_status` filterten. Ein Reiter ist aber kein
+ * Filter — er verspricht eine andere Ansicht und liefert dieselbe. Jetzt ist
+ * es ein Filter (`?state=`), und die Liste hat einen Reiter.
+ *
+ * ``null`` für die zwei Ansichten, die keine Sachverhaltsliste sind
+ * (``offen``/``schliessen``).
  */
 export function caseFilterForListTab(
   tab: CaseListTab,
@@ -432,6 +445,7 @@ export function caseFilterForListTab(
   const recurring = one(raw.recurring);
   const docMode = one(raw.belegnr);
   const q = one(raw.q)?.trim();
+  const dispo = one(raw.dispo) ?? CASE_DISPOSITION_DEFAULT;
   const filter: CaseFilter = {
     fiscalYear,
     recurringMode:
@@ -441,13 +455,81 @@ export function caseFilterForListTab(
       ? (docMode as CaseDocumentNumberMode)
       : undefined,
   };
-  if (tab === "laufend") filter.excludeClosed = true;
-  if (tab === "belege") {
-    filter.excludeClosed = true;
-    filter.lifecycleStatus = ["waiting_for_documents"];
+  if ((CASE_DISPOSITION as readonly string[]).includes(dispo ?? "")) {
+    filter.disposition = [dispo as CaseDisposition];
   }
-  if (tab === "klaerung") filter.lifecycleStatus = ["needs_clarification"];
+  // Ohne Angabe gilt der Standardstand — die Liste zeigt, was noch läuft.
+  const state = caseStateFilter(one(raw.state) ?? CASE_STATE_DEFAULT);
+  if (state) Object.assign(filter, state);
   return filter;
+}
+
+/**
+ * Die Zustands-Auswahl der Liste — genau das, was vorher drei Reiter taten.
+ *
+ * `laufend` ist kein Wert der Achse, sondern ihre Verneinung: alles außer
+ * geschlossen. Deshalb steht er hier neben den Achsenwerten und nicht in
+ * `CASE_LIFECYCLE`.
+ */
+export const CASE_STATE_FILTERS = [
+  "laufend",
+  "waiting_for_documents",
+  "needs_clarification",
+] as const;
+export type CaseStateFilter = (typeof CASE_STATE_FILTERS)[number];
+
+export const CASE_STATE_FILTER_LABEL: Record<CaseStateFilter, string> = {
+  laufend: "Nur laufende",
+  waiting_for_documents: "Wartet auf Unterlagen",
+  needs_clarification: "Zur Bearbeitung",
+};
+
+/**
+ * Der Standardstand der Liste: was noch läuft **und bei der Kanzlei liegt**.
+ *
+ * Er ist nicht nur eine Vorauswahl, sondern die Bedingung für den
+ * **Erfolgs-Leerfall**: eine leere Liste im unveränderten Standardstand heißt
+ * „nichts mehr offen", eine leere Liste nach einem Filtergriff heißt „keine
+ * Treffer". Ohne diesen Unterschied verschwindet die einzige Rückmeldung, an
+ * der die Sachbearbeiterin sieht, dass sie fertig ist.
+ *
+ * Wichtig dabei: der Standardstand ist **selbst** ein Filter. „Gefiltert"
+ * heißt deshalb nicht „irgendein Filter gesetzt" — sonst wäre der Erfolgsfall
+ * nie erreichbar —, sondern „weicht vom Standardstand ab".
+ *
+ * „Eigene Zuständigkeit" ist die **Rolle** `accounting`, nicht der angemeldete
+ * Mensch: die Achse kennt Agent, Kanzlei und Mandant, keine Personen.
+ */
+export const CASE_STATE_DEFAULT: CaseStateFilter = "laufend";
+export const CASE_DISPOSITION_DEFAULT: CaseDisposition = "accounting";
+
+/** Die Parameter, die den Filterstand ausmachen — und nur die. */
+export const CASE_FILTER_PARAMS = ["q", "recurring", "dispo", "belegnr", "state"] as const;
+
+/**
+ * Hat der Nutzer am Filter gedreht? „Unverändert" heißt: keiner der
+ * Filter-Parameter steht in der URL. Seite und Sortierung zählen nicht mit —
+ * wer blättert, filtert nicht.
+ */
+export function caseFilterIsDefault(
+  raw: Record<string, string | string[] | undefined>,
+): boolean {
+  return CASE_FILTER_PARAMS.every((k) => {
+    const v = Array.isArray(raw[k]) ? raw[k][0] : raw[k];
+    return v == null || v === "";
+  });
+}
+
+/** `?state=` → die Filterfelder, die er setzt. Unbekanntes ergibt `null`. */
+export function caseStateFilter(
+  value: string | undefined,
+): Pick<CaseFilter, "excludeClosed" | "lifecycleStatus"> | null {
+  if (value === "laufend") return { excludeClosed: true };
+  if (value === "waiting_for_documents") {
+    return { excludeClosed: true, lifecycleStatus: ["waiting_for_documents"] };
+  }
+  if (value === "needs_clarification") return { lifecycleStatus: ["needs_clarification"] };
+  return null;
 }
 
 /**

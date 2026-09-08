@@ -23,6 +23,66 @@ export interface GateZeile {
   amount: number | null;
   /** Was an der Zeile fehlt — in Worten, nie als JSON. */
   problem: string;
+  /** Die Befundart, wie das Gate sie benennt (`kind`); null, wenn keine da ist. */
+  kind: string | null;
+}
+
+/**
+ * Befundarten, die die Abnahme als **Hinweis** zeigt statt als Mangel
+ * (Owner-Entscheid 2026-09-08):
+ *
+ *  - `clearing_balance` — ein Verrechnungskonto steht nicht auf null. Ein
+ *    Saldo will angesehen werden, aber er macht den Stapel nicht falsch.
+ *
+ * Für den **Agenten** bleibt der Befund Arbeitsauftrag: die Gates rechnen
+ * unverändert, nur die Kanzlei-Ansicht stuft sie ein.
+ *
+ * `expected_payment_missing` stand hier bis zum 08.09.2026 daneben. Die
+ * ausgebliebene erwartete Zahlung ist seither überhaupt kein Gate-Befund mehr,
+ * sondern ein gewöhnlicher offener Posten (`sachverhalt.md` S18) — sie steht
+ * in Schritt 5 bei den offenen Posten und wird nirgends quittiert.
+ */
+export const HINWEIS_ARTEN = new Set(["clearing_balance"]);
+
+/**
+ * Befundarten, die in der Abnahme **nichts** zu suchen haben: Gate 4d fasst
+ * die Ergebnisse anderer Gates noch einmal zusammen („Details: Gate 2a"). In
+ * der Abnahme hat jedes dieser Gates einen eigenen Schritt mit der vollen
+ * Liste — die Zusammenfassung wäre eine Dublette ohne Gegenstand und ohne
+ * Betrag.
+ */
+export const DUBLETTEN_ARTEN = new Set(["summary"]);
+
+export interface GeteilteBefunde {
+  /** Was den Stapel wirklich aufhält. */
+  maengel: GateZeile[];
+  /** Was gesehen werden will, aber nicht blockiert. */
+  hinweise: GateZeile[];
+}
+
+/**
+ * Ist dieser Befund ein Mangel? Alles ohne bekannte Art ist einer — eine Zeile
+ * verschwindet nie, nur weil sie unbenannt ist.
+ */
+export function istMangel(raw: unknown): boolean {
+  const kind = leseGateZeile(raw).kind;
+  if (kind === null) return true;
+  return !HINWEIS_ARTEN.has(kind) && !DUBLETTEN_ARTEN.has(kind);
+}
+
+/**
+ * Ein Gate-Ergebnis in Mängel und Hinweise teilen. Zusammenfassungszeilen
+ * fallen weg.
+ */
+export function teileGateBefunde(open: readonly unknown[]): GeteilteBefunde {
+  const maengel: GateZeile[] = [];
+  const hinweise: GateZeile[] = [];
+  for (const raw of open) {
+    const z = leseGateZeile(raw);
+    if (z.kind !== null && DUBLETTEN_ARTEN.has(z.kind)) continue;
+    (z.kind !== null && HINWEIS_ARTEN.has(z.kind) ? hinweise : maengel).push(z);
+  }
+  return { maengel, hinweise };
 }
 
 /** `"1.234,50"`, `"1234.50"` und `1234.5` ergeben alle dieselbe Zahl. */
@@ -53,7 +113,12 @@ export function leseGateZeile(raw: unknown): GateZeile {
   // Beide Schreibweisen — Gate 2a und Gate 4d benennen dieselbe Sache anders.
   const tx = ersterText(o, ["transactionId", "bankTransactionId"]);
 
+  // Ein Konto ist seine Nummer UND sein Name — „1590" allein sagt der
+  // Buchhalterin nicht, was sie ansehen soll (Owner 2026-09-08).
+  const kontoName = ersterText(o, ["accountName"]);
+  const kontoNummer = ersterText(o, ["accountNumber"]);
   const label =
+    (kontoNummer !== null && kontoName !== null ? `${kontoNummer} · ${kontoName}` : null) ??
     ersterText(o, [
       "label",
       "accountNumber",
@@ -62,7 +127,8 @@ export function leseGateZeile(raw: unknown): GateZeile {
       "postingDate",
       "title",
       "fileName",
-    ]) ?? "—";
+    ]) ??
+    "—";
 
   const amount = leseBetrag(o.amount ?? o.balance ?? o.rest ?? o.openAmount);
 
@@ -72,5 +138,5 @@ export function leseGateZeile(raw: unknown): GateZeile {
     ersterText(o, ["problem", "reason", "note", "blockedReason"]) ??
     (tx ? "Auszugszeile ohne Sachverhalt." : "Ohne nähere Angabe des Gates.");
 
-  return { transactionId: tx, label, amount, problem };
+  return { transactionId: tx, label, amount, problem, kind: ersterText(o, ["kind"]) };
 }

@@ -15,6 +15,10 @@
  *
  * Deckungslücken kommen über `deckungsluecke.ts` in Worte (F141) — derselbe
  * Satz, den Schritt 8 zeigt.
+ *
+ * Die vierte Zeile kommt nicht aus einem Gate: Belege, die **ohne Buchung**
+ * erledigt wurden. Für die Gates sind sie fertig — genau deshalb sieht sie
+ * sonst niemand mehr, und genau deshalb stehen sie hier (gelb, nie rot).
  */
 
 import { deckungsLueckeAus } from "./deckungsluecke";
@@ -34,7 +38,7 @@ export interface BereitschaftsPunkt {
 }
 
 export interface BereitschaftsZeile {
-  key: "belege_periode" | "belege_alle" | "auszuege";
+  key: "belege_periode" | "belege_alle" | "auszuege" | "ohne_buchung";
   label: string;
   stand: BereitschaftsStand;
   /** „6 offen" bzw. „vollständig" — rechts in der Zeile. */
@@ -98,6 +102,8 @@ export function bereitschaftsZeilen(
   gate3f: GateEingang,
   periodFrom: string,
   periodTo: string,
+  /** Belege, die ohne Buchung erledigt wurden (`application/belege-ohne-buchung.ts`). */
+  ohneBuchung: { punkte: BereitschaftsPunkt[]; total: number } = { punkte: [], total: 0 },
 ): BereitschaftsZeile[] {
   const belege = gate3f.open.map(belegPunkt);
   // Der Gate-Zähler ist ungedeckelt, die Liste nicht. Die Aufteilung kann
@@ -143,6 +149,18 @@ export function bereitschaftsZeilen(
       leerText: "Jedes aktive Zahlungskonto deckt den Zeitraum ab, der Saldenanschluss stimmt.",
       punkte: auszugPunkte,
       nichtGelistet: Math.max(0, gate1a.openCount - gate1a.open.length),
+      belege: false,
+    },
+    {
+      key: "ohne_buchung",
+      label: "Belege ohne Buchung — mit Begründung erledigt",
+      // Nie rot: hier fehlt nichts, hier wurde entschieden. Aber gesehen
+      // werden soll die Entscheidung (Owner 2026-09-08).
+      stand: ohneBuchung.total > 0 ? "hinweis" : "ok",
+      standText: ohneBuchung.total === 0 ? "keine" : `${ohneBuchung.total} Beleg(e)`,
+      leerText: "Jeder erledigte Beleg dieses Zeitraums trägt eine Buchung.",
+      punkte: ohneBuchung.punkte,
+      nichtGelistet: Math.max(0, ohneBuchung.total - ohneBuchung.punkte.length),
       belege: false,
     },
   ];

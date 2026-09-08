@@ -104,6 +104,11 @@ done
 cat > "$DOCS/README.md" <<'MD'
 # App-Doku (gespiegelt)
 
+> **Diese Datei wird bei jedem Lauf neu geschrieben** (`sync-ludwig.sh` macht
+> `rm -rf docs/ludwig`). Notizen gehören deshalb nicht hierher, sondern nach
+> `docs/spiegel-vormerkungen.md` — dort steht, was beim nächsten Lauf fällig
+> ist.
+
 Kopien aus `ludwig/app` — **nicht hier bearbeiten**, sondern drüben, dann
 `pnpm sync:ludwig`. Welche Dateien gespiegelt werden, steht in
 `scripts/sync-ludwig.sh` (`DOCS_TO_MIRROR`).

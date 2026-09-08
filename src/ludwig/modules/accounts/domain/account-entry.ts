@@ -60,6 +60,8 @@ export interface AccountEntry {
   ludwigCaseNumber?: string | null;
   /** Achse `mirror_match`. */
   matchState?: string | null;
+  /** DATEV-Herkunftskennzeichen: RE, WK, SV, JA, AN, KS. */
+  markOfOrigin?: string | null;
 }
 
 /** Betrag aus einer `numeric`-Spalte; NULL und Unparsbares werden 0. */
@@ -126,6 +128,7 @@ export function accountEntryFromTruthRow(row: {
   debitAmount: number;
   creditAmount: number;
   contraAccounts: string | null;
+  markOfOrigin?: string | null;
 }): AccountEntry {
   return {
     id: row.id,
@@ -139,6 +142,7 @@ export function accountEntryFromTruthRow(row: {
     accountingSequenceId: row.accountingSequenceId,
     ludwigCaseNumber: row.ludwigCaseNumber,
     matchState: row.matchState,
+    markOfOrigin: row.markOfOrigin ?? null,
   };
 }
 
@@ -257,4 +261,27 @@ export function accountFacts(input: {
     ludwigOnlyAmount: input.ludwigOnlyAmount ?? null,
     ludwigOnlyCount: input.ludwigOnlyCount ?? null,
   };
+}
+
+/**
+ * # Woher eine Bewegung kommt — die vier Klassen
+ *
+ * `source` sagt, welche Seite die Zeile geliefert hat. Das ist die halbe
+ * Antwort: die eigentliche Frage am Kontoblatt ist, ob **beide Seiten
+ * dasselbe sagen**. Vier Fälle, und sie schließen sich aus:
+ *
+ * - `datev` — steht nur im Spiegel, Ludwig kennt die Bewegung nicht.
+ * - `mirrored` — Ludwig hat gebucht, DATEV hat es bestätigt.
+ * - `exported` — Ludwig hat exportiert, im Spiegel ist sie **nicht**
+ *   wiedergefunden. Der Fall, der auffallen muss (Push-204 ≠ angekommen).
+ * - `ludwig` — nur in Ludwig, noch nicht an DATEV übergeben.
+ */
+export type AccountEntryOrigin = "datev" | "mirrored" | "exported" | "ludwig";
+
+export function accountEntryOrigin(entry: AccountEntry): AccountEntryOrigin {
+  if (entry.source === "datev") {
+    return entry.matchState?.startsWith("matched_") ? "mirrored" : "datev";
+  }
+  if (entry.datevMirrorEntryId) return "mirrored";
+  return entry.exportedAt ? "exported" : "ludwig";
 }

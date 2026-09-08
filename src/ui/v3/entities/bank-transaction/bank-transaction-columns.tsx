@@ -1,3 +1,4 @@
+import { bankMatchStage } from "@/ludwig/modules/bank-transactions/domain/bank-transaction-vm";
 import {
   derivePurposeParts,
   deriveZ,
@@ -204,17 +205,13 @@ export function bankTransactionColumns({
       // Since `cc141f7b` there is an axis for this (`bank_match_stage`), and
       // with it the four open classes — 29 % of the stock — have a word for
       // the first time. Before that a tick said yes and nothing said no.
-      cell: (t) =>
-        t.matchStage ? (
-          <StatusBadge axis="bank_match_stage" status={t.matchStage} info={false} />
-        ) : (
-          // NULL is not a value of the axis — the cascade has not run, which
-          // is not „no match". The axis has no word for it, so the word lives
-          // here; it lived here **twice** with two different wordings until
-          // 2026-09-08 (`BankTransactionFacts` said „Kaskade nicht gelaufen").
-          // That the word has to be written at all is finding L-218.
-          <span className="v2muted">Kaskade nicht gelaufen</span>
-        ),
+      // `bankMatchStage` turns NULL into `not_run` — the axis has had the value
+      // since `c1e8e752` (L-218, closed). Until then both this file and
+      // `BankTransactionFacts` wrote the word by hand, and for two days they
+      // wrote two different ones.
+      cell: (t) => (
+        <StatusBadge axis="bank_match_stage" status={bankMatchStage(t.matchStage)} info={false} />
+      ),
     },
     clarifications: {
       key: "clarifications",

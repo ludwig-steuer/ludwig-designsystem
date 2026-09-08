@@ -1911,6 +1911,11 @@ const BANK_MATCH_STAGE: Record<string, StatusDescriptor> = {
   unclear_none: { label: "kein Kandidat", kind: "warning", description: "Keine DATEV-Buchung passt zu dieser Zeile." },
   beyond_bookings: { label: "außerhalb des Bestands", kind: "info", description: "Die Zeile liegt außerhalb des Zeitraums, den die DATEV-Historie abdeckt — kein Befund, nur keine Vergleichsgrundlage." },
   no_account: { label: "ohne Konto", kind: "warning", description: "Das Zahlungskonto der Zeile ist in den Stammdaten nicht zugeordnet." },
+  // L-218: „nicht gelaufen" ist etwas anderes als „nichts gefunden". Vorher
+  // stand hier NULL, und jede Anzeige erfand ihr eigenes Wort dafür — die
+  // Detailsicht des Auszugs schrieb „kein Treffer" und behauptete damit ein
+  // Ergebnis, wo noch nicht gesucht worden war.
+  not_run: { label: "nicht geprüft", kind: "neutral", description: "Für diese Zeile ist der Abgleich mit der DATEV-Historie nie gelaufen — es liegt kein Ergebnis vor, weder ein Treffer noch ein Fehlschlag." },
 };
 
 // ══════════════════════════════════════════════════════════════════════

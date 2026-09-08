@@ -44,6 +44,12 @@ export interface BookingLineVM {
   /** DATEV KOST1 (Kostenstelle) / KOST2 (Kostenträger) — je Zeile eigenständig. */
   kost1?: string | null;
   kost2?: string | null;
+  /**
+   * F152: DATEV „Sachverhalt L+L" (§ 13b-Fallcode, 1–16), den der Submit-Kern
+   * aus dem Sitzland des Ausstellers gesetzt hat. Reine Anzeige neben dem
+   * BU-Schlüssel — keine Zustandsachse, eine Klasse (F151).
+   */
+  reverseChargeCase?: number | null;
   /** Marks a line the AI is unsure about (renders a hint). */
   uncertain?: boolean;
   // Keine Zeilen-Ampel mehr (2026-08-29): die Ampel gilt dem Satz, siehe

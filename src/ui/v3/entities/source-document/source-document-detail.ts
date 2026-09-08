@@ -1,9 +1,7 @@
-import type {
-  ContractBookingFact,
-  ProvenanceSource,
-} from "@/ludwig/modules/contracts/domain/contract";
+import type { ProvenanceSource } from "@/ludwig/modules/contracts/domain/contract";
 import { contractTypeLabel } from "@/ludwig/modules/contracts/domain/contract";
 import type { Currency } from "@/ludwig/shared/money";
+import type { SourceDocumentDetail } from "@/ludwig/modules/source-docs/domain/source-document-vm";
 
 import { formatAmount, formatTime } from "../../format";
 
@@ -36,58 +34,16 @@ import { formatAmount, formatTime } from "../../format";
  */
 
 /**
- * The subtype row of a document, as far as the family reads it. The caller
- * sets it **when the row exists** — whether it is shown is decided here.
+ * The subtype row of a document — **from the mirror since 2026-09-08.**
+ *
+ * It lived here as a local copy while the app carried only the invoice half
+ * (finding L-208): the caller set it when the subtype row existed, and whether
+ * it was shown was decided by the registry below. The app has lifted the union
+ * word for word (`ae0e1a63`), so the copy is gone and this file re-exports the
+ * type instead — the registry, `FactRow` and `resolveSourceDocumentDetail`
+ * stay here, they are display and not data.
  */
-export type SourceDocumentDetail =
-  | {
-      kind: "invoice";
-      /** `invoice_number` — rank 5, read digit by digit. */
-      number?: string | null;
-      /** `invoice_total_value` — rank 3. */
-      gross?: number | null;
-      currency?: Currency | null;
-      /** `processing_status`, registry axis `beleg`. */
-      processingStatus?: string | null;
-      /* Only the block of the specialization shows these (0076). */
-      /** `subtotal_value` and `tax_total_value`. */
-      net?: number | null;
-      vat?: number | null;
-      dueDate?: string | null;
-      /** `payment_term` — „30 Tage netto", as extracted. */
-      paymentTerm?: string | null;
-      /** `service_period` — a period as one string, not two dates. */
-      servicePeriod?: string | null;
-      /**
-       * `paid_at`. The **date**, not `payment_status`: that column has neither
-       * a registry axis nor an enum, and a raw state without a word would be a
-       * local label map (finding, reported with 0076).
-       */
-      paidAt?: string | null;
-      /** `vendor_ust_id` — the issuer's VAT id, read digit by digit. */
-      issuerVatId?: string | null;
-      /** FX: only ever set on a document that was not issued in euros. */
-      originalCurrency?: string | null;
-      originalGross?: number | null;
-    }
-  | {
-      kind: "contract";
-      /** `contract_subject` — rank 5, a sentence, not a number. */
-      subject?: string | null;
-      /** `primary_amount` — rank 3. */
-      amount?: number | null;
-      currency?: Currency | null;
-      /** `contract_type`, label through `contractTypeLabel()`. */
-      contractType?: string | null;
-      /* Only the block of the specialization shows these (0076). */
-      startDate?: string | null;
-      endDate?: string | null;
-      durationMonths?: number | null;
-      /** No end date **and** open-ended are two different statements. */
-      isOpenEnded?: boolean;
-      /** `booking_facts_json` — what the contract means for booking, with provenance. */
-      bookingFacts?: readonly ContractBookingFact[];
-    };
+export type { SourceDocumentDetail };
 
 /** Rank 5. `mono` is false where the identifier is a sentence, not a number. */
 export interface SourceDocIdentifier {

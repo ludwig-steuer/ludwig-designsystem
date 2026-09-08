@@ -28,6 +28,8 @@ export interface CaseEventBookingLine {
   /** DATEV KOST1 / KOST2 dieser Zeile (Aufwandssplit je Kostenstelle). */
   kost1: string | null;
   kost2: string | null;
+  /** F152: DATEV „Sachverhalt L+L" (§ 13b-Fallcode) dieser Zeile. */
+  reverseChargeCase?: number | null;
 }
 
 export interface CaseEventBooking {

@@ -1670,6 +1670,15 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Example: `vat_key = '9'` (Vorsteuer 19% Inland), `'8'` (Vorsteuer 7%), `'0'` (steuerfrei / Kleinunternehmer), `'94'` (§13b Reverse Charge), `'19'` / `'18'` (innergemeinschaftlicher Erwerb 19% / 7%).
 - Notes: DATEV-exception. The booking module emits these from `apps/booking-module/src/buchassi_booking_module/domain/tax_classification.py`. The codes shown are SKR04 convention; SKR03 uses largely the same set. The full mapping treatment → key lives next to the decision tree in `tax_classification.py:52–61`.
 
+### Sachverhalt L+L (§ 13b case code)
+
+- English: *(kept in German — DATEV field name)*
+- German: `Sachverhalt L+L`, „Lieferungs- und Leistungsart"
+- Definition: DATEV code (1–13, 16) that names WHICH § 13b constellation a reverse-charge posting belongs to — EU service, third-country supply, Bauleistung, … The BU key alone is ambiguous (94 covers all of them), so DATEV needs both to map the record into the right UStVA line.
+- Data type: `ludwig.client_journal_entry_line.datev_reverse_charge_case` — `smallint`, nullable, CHECK 1..16. Wire: EXTF field 43 / `cases_related_to_goods_and_services`.
+- Example: `datev_reverse_charge_case = 7` (sonstige Leistung eines EU-Unternehmers), `1` (Drittland), `4` (Bauleistung).
+- Notes: DATEV-exception. Missing on a key 91/92/94/95 posting → DATEV rejects the whole batch with `REW02191`. Set by the submit core from the supplier's location (`vendor_ust_id`, else the partner's `country_code`), never derived at export and never defaulted; domestic cases (4 and the other § 13b Abs. 2 constellations) are not derivable and are refused at submit (`docs/topics/datev-offen.md` P13). The sibling field `additional_functions_for_goods_and_services` (field 44, „Funktionsergänzung L+L") is never sent — DATEV does not import it. Rules: `docs/topics/datev.md` R21, catalog entry VST-XB-1.
+
 ### BEDI hash
 
 - English: *(kept as DATEV identifier)*

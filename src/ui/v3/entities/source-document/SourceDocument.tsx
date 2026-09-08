@@ -8,7 +8,7 @@ import { Link } from "../../primitives/Link";
 import { Row } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
 import { StatusBadge } from "../../patterns/StatusBadge";
-import { resolveSourceDocumentDetail, type SourceDocumentDetail } from "./source-document-detail";
+import { resolveSourceDocumentDetail } from "./source-document-detail";
 
 /**
  * The reading family of a document (0074): cell, classification, row.
@@ -62,19 +62,7 @@ export type { SourceDocCompletionVia };
  * what 0076 draws — finding **L-208**: the app should lift this union, not the
  * invoice half of it.
  */
-export interface SourceDocumentVM extends Omit<MirrorDocument, "detail"> {
-  /**
-   * Ranks 3 and 5. The caller sets it **when the subtype row exists**; whether
-   * it is shown is decided by the registry, which compares it against
-   * `sourceDocType`.
-   */
-  detail?: SourceDocumentDetail | null;
-  /**
-   * Why it is done. `null` **with `completedAt` set** means „done, reason not
-   * recorded" (61 of 384) — not „open". The mirror types it as `string`; the
-   * axis has four values, and the family narrows to them here.
-   */
-  completedVia?: SourceDocCompletionVia | null;
+export interface SourceDocumentVM extends MirrorDocument {
   /**
    * Whether the document already has an invoice row. Two booleans decide the
    * axis `beleg_haenger` — this one and which of the two stuck lists is shown
@@ -87,21 +75,6 @@ export interface SourceDocumentVM extends Omit<MirrorDocument, "detail"> {
   caseHref?: string | null;
   /** Without it the row is not a link. */
   href?: string | null;
-  /*
-   * Ranks 14 and 16, for the provenance rows of `SourceDocumentFacts` (0120).
-   *
-   * They exist in the app since `ae0e1a63` (finding L-217, closed) and are
-   * here only because the mirror is **frozen until the migration** — they go
-   * when `pnpm sync:ludwig` runs again, like the four above them. Only the
-   * detail mapper fills them over there; the list mappers do not fetch the
-   * columns, which is enough: these are points of the detail form.
-   */
-  /** `class_overridden_at` — set means a person corrected the classification. */
-  classOverriddenAt?: string | null;
-  /** Where the document sits in DATEV: system, folder, id. */
-  datevRefSystem?: string | null;
-  datevRefFolder?: string | null;
-  datevRefId?: string | null;
 }
 
 /* ── Cutting ─────────────────────────────────────────────────────────────

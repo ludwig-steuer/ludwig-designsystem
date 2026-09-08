@@ -1,3 +1,4 @@
+import { bankMatchStage } from "@/ludwig/modules/bank-transactions/domain/bank-transaction-vm";
 import { resolveEventBookingState, restOf } from "./derive";
 import { caseIdentifier } from "../accounting-case/case-title";
 import { StatusBadge } from "../../patterns/StatusBadge";
@@ -255,9 +256,7 @@ function Assignment({
 
 /** Rank 5/13 — the axis exists since `cc141f7b`; before that this was a tick. */
 function MatchStage({ stage }: { stage: string | null }) {
-  return stage ? (
-    <StatusBadge axis="bank_match_stage" status={stage} />
-  ) : (
-    <span className="v2muted">Kaskade nicht gelaufen</span>
-  );
+  // `bankMatchStage` turns NULL into `not_run`; the axis carries the word
+  // since `c1e8e752` (L-218). Two files wrote it by hand before that.
+  return <StatusBadge axis="bank_match_stage" status={bankMatchStage(stage)} />;
 }

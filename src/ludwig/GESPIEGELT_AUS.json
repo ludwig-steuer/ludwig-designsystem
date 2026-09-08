@@ -1,6 +1,6 @@
 {
-  "appHash": "f1c58c44776cc1ef161c501a389330256c38cd4a",
+  "appHash": "6ba47fb2bb1eccc5443ce0016cf93f6bd20d4b4f",
   "zweig": "staging",
   "datum": "2026-09-08",
-  "hinweis": "Kopien aus ludwig/app — nie hier bearbeiten. Eingefroren bis zur Migration (Owner-Entscheid 2026-09-07)."
+  "hinweis": "Kopien aus ludwig/app — nie hier bearbeiten. Einmaliger Lauf am 2026-09-08 mit Owner-Freigabe (Simon); danach wieder eingefroren — der nächste Lauf braucht wieder eine Freigabe, auf Zuruf über ludwig-manager."
 }

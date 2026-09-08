@@ -1,7 +1,11 @@
 import { z } from "zod";
 import type { RawSearchParams } from "@/ludwig/shared";
 // Kategorie-Werteraum aus der EINEN Mapping-Quelle — keine zweite Liste.
-import { DOC_CATEGORIES, type DocCategory } from "@/ludwig/modules/source-docs";
+import {
+  DOC_CATEGORIES,
+  type DocCategory,
+  type SourceDocCompletionVia,
+} from "@/ludwig/modules/source-docs";
 
 // Fachliche Reviewer-Achse (orthogonal zur technischen `processingStatus`).
 // Seit dem btx-Refactor lebt der Wert am Sachverhalt
@@ -238,6 +242,9 @@ export interface InvoiceListItem {
   completedAt: string | null;
   /** Kurze Begründung der Erledigung — Tooltip am Status-Badge. */
   completedReason: string | null;
+  /** Wodurch er erledigt wurde (Achse `beleg_erledigung`). `null` bei
+   *  gesetztem `completedAt` heißt „erledigt, Grund nicht festgehalten". */
+  completedVia: SourceDocCompletionVia | null;
 
   // ── Sachverhalt (client_accounting_case via document_received event) ──
   /** ID des Sachverhalts, dem dieser Beleg angehängt ist (NULL, wenn der

@@ -54,6 +54,15 @@ export interface ExportableJournalEntryLine {
    * NULL (Bestand, manuell, DATEV-Import) → ±1-Cent-Heuristik als Fallback.
    */
   taxForLineNo: number | null;
+  /**
+   * F152: `client_journal_entry_line.datev_reverse_charge_case` — der DATEV
+   * „Sachverhalt L+L" (§ 13b-Fallcode). Gesetzt vom Schreibweg für die
+   * Schlüssel 91/92/94/95, sonst NULL. Fehlt er an einer § 13b-Zeile, bricht
+   * der Export ab (DATEV lehnt sonst mit REW02191 ab) — Bestandszeilen von vor
+   * der Migration werden per Re-Submit repariert. Optional, weil pure
+   * Builder-Tests ohne § 13b ihn weglassen.
+   */
+  reverseChargeCase?: number | null;
   accountNumberSnapshot: string;
   /**
    * Kontotyp aus `client_ledger_accounts.account_kind` (BL-109). Pflicht, weil
@@ -106,6 +115,8 @@ export interface ExportableJournalEntry {
    * Referenz (F24-T24.1). Genau einer → Beleglink (Feld 20); leer →
    * still kein Link (dokumentierter Normalfall, Nicht-Ziel); mehrere →
    * uneindeutig, Writer warnt + Feld leer. Fehlt (Unit-Tests) = leer.
+   * F154: fehlt ein Beleg am Sachverhalt, trägt ein Sollstellungs-Satz
+   * (`accrual`, Regel) die DMS-Referenz der Regel.
    */
   datevDocumentRefs?: DatevDocumentRef[];
   /**
