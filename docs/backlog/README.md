@@ -39,6 +39,28 @@ Dasselbe gilt für die Kriterien „offen (App)": ihre Ablösung steht dort in
 Abschnitt E. Wer einen Befund drüben erledigt, streicht ihn hier und nennt
 den Commit.
 
+## Wer nachzieht, wenn die Spec zurückbleibt
+
+**Beobachtung aus der Abnahmewelle vom 2026-09-08: in acht von acht schlanken
+Abnahmen war der Hauptfund derselbe — die Spec beschrieb nicht mehr, was
+gebaut war.** Nie ein Fehler im Verhalten: eine Prop mehr im Code als in der
+Tabelle, ein Union-Wert zu wenig, eine Rechnung, die ihr eigenes Ergebnis
+verfehlt. In 0103 nannte die Schnittstellen-Tabelle einen Baustein, den es nie
+gegeben hat.
+
+Das ist kein Versäumnis einzelner Runden, sondern eine Lücke im Ablauf: der
+Bau darf von der Spec abweichen (er findet Dinge, die beim Schreiben niemand
+sah), aber niemand war verpflichtet, sie zurückzuschreiben. Deshalb:
+
+- **Wer baut, zieht die Schnittstellen-Tabelle mit.** Eine Prop, die anders
+  heißt oder dazukommt, gehört in dieselbe Änderung — nicht in die Abnahme.
+  Der Bau endet nicht am Typcheck, sondern an der Spec.
+- **Wer abnimmt, prüft die Tabelle Zeichen für Zeichen** gegen den Code und
+  meldet jede Abweichung als Mangel, auch wenn das Gebaute stimmiger ist als
+  das Geschriebene. Welches von beiden nachgibt, entscheidet die Nacharbeit.
+- **Bis eine Spec einen Nacharbeitsabschnitt mit Datum trägt, gilt der Code.**
+  Das ist die Lesehilfe für alle, die von außen gegen das Set bauen.
+
 ## Status
 
 `offen` → `spec` → `in Arbeit` → `Abnahme` → `fertig`. Der Status steht in
