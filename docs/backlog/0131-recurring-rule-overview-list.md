@@ -441,3 +441,31 @@ sie dort; die Liste verlangt sie nicht und die Prop dafür gibt es nicht.
 | … | … | ✓ / ✗ |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Entscheid 2026-09-08 — `matchesDocuments` bekommt keine Spalte
+
+Die App liefert das Feld seit `4828f6c0`. Es bleibt trotzdem aus dem
+Spaltensatz, aus zwei Gründen, und der zweite wiegt schwerer:
+
+**Es unterscheidet nichts.** 29 von 30 Regeln tragen `true` (Profil, Rang 21).
+Eine Spalte, die in 97 % der Zeilen dasselbe sagt, kostet Breite und hilft bei
+keiner der Fragen, die diese Liste beantwortet — dieselbe Begründung, aus der
+0133 die Gültigkeits-Spalte weglässt, wenn die Grundgesamtheit schon „aktiv"
+heißt.
+
+**Und es sagt vermutlich nicht, was es behauptet.** `matches_documents` steht
+auf `true`, obwohl **keine** Regel ein Beleg-Kriterium trägt:
+`match_contract_number` und `match_document_text_regex` sind zu 0 % gefüllt
+(Befund **L-249**, offen). Solange das so ist, wäre die Spalte nicht bloß
+nutzlos, sondern eine Behauptung über einen Treffer, den die Daten nicht
+decken. Eine Spalte, die 29-mal dasselbe Falsche sagt, ist schlimmer als
+keine.
+
+**Wo das Feld hingehört, hat es schon einen Platz:** `RecurringRuleFacts`
+(0134) zeigt es — und zwar **nur bei `true`**, als Zeile im Auslöser-Block.
+Dort steht es neben den Kriterien, aus denen es folgen soll, und dort fällt
+auch auf, wenn beide fehlen.
+
+**Was den Entscheid umdreht:** wenn L-249 erledigt ist und Regeln mit echtem
+Beleg-Kriterium im Bestand stehen, unterscheidet das Feld wieder — dann ist es
+eine Spalte, und der Katalog trägt sie ohne Umbau (ein Katalog, drei Sätze).
