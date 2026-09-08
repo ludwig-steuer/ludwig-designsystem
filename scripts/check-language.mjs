@@ -177,6 +177,22 @@ function geaenderteZeilen() {
       proDatei.set(datei, menge);
     }
   }
+  // **Neue Dateien sieht `git diff` nicht.** Es vergleicht nur, was git schon
+  // kennt — eine gerade angelegte, ungestagte Datei kommt in keinem der drei
+  // Bereiche vor und läuft grün durch, ohne geprüft zu sein. Genau so wären am
+  // 2026-09-08 drei deutsche Zeilen in vier neuen Bausteinen durchgerutscht;
+  // sie fielen nur auf, weil der Bauende sie zwischendurch gestagt hat.
+  // Bei einer neuen Datei ist **jede** Zeile neu, also wird sie ganz geprüft.
+  for (const datei of raus("git ls-files --others --exclude-standard")) {
+    const pfad = datei.trim();
+    if (!pfad.startsWith(`${ROOT}/`) || !/\.tsx?$/.test(pfad) || pfad.includes(".stories.")) continue;
+    if (!existsSync(pfad)) continue;
+    const menge = proDatei.get(pfad) ?? new Set();
+    const zeilen = readFileSync(pfad, "utf8").split("\n").length;
+    for (let i = 1; i <= zeilen; i++) menge.add(i);
+    proDatei.set(pfad, menge);
+  }
+
   return proDatei;
 }
 

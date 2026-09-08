@@ -53,3 +53,18 @@ Ergebnis. Diese Aufgabe sammelt nur, sie misst nicht selbst.
 
 **Betroffen sind alle Aufgaben, deren Abnahme ab dem 2026-09-08 den Vermerk
 „schlanke Abnahme (Schnittstelle)" trägt.**
+
+## Messhinweis, der hierher gehört (2026-09-08)
+
+**`element.disabled` ist die falsche Messung.** Ein Feld innerhalb eines
+`fieldset[disabled]` ist tatsächlich gesperrt — aber `element.disabled` bleibt
+`false`; nur der Selektor `:disabled` trifft. Wer prüft „`pending` sperrt jede
+Eingabe" und dabei `element.disabled` liest, misst falsch und meldet grün.
+
+Gefunden beim Bau von 0135: dort umschließt der Editor die zwei Kontofelder
+mit einem `fieldset[disabled]`, weil `AccountField` keine eigene
+`disabled`-Prop hat (das ist der Befund darin). Die erste Messung sagte „2 von
+23 bedienbar", die richtige sagt 0.
+
+Richtig ist `document.querySelectorAll("… :disabled").length` gegen die Zahl
+der Felder, oder `el.matches(":disabled")` je Feld.
