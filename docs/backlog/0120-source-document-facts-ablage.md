@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
 | Stufe | `entities/source-document/` — Nachtrag an `SourceDocumentFacts` (0076) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: DATEV-Ablage und Einordnungs-Konfidenz sind Ludwig-Fachbegriffe |
 | Quelle | Anfrage `ludwig-manager` 2026-09-08 nach dem Umbau von `documents/[sourceDocId]` (App-Commit `c9fca3aa`); Entitätsprofil `docs/entitaeten/source-document.md` Ränge 13, 14, 16; Seitenprofil `docs/seiten/beleg-detail.md` Rang 5 |
@@ -98,3 +98,40 @@ Gedankenstrich da) = **2**.
 `provenance` ist der Platz, an dem später die Herkunft **je Feld** stünde
 (`field_provenance`, heute im Schema unbeschrieben — L-214). Käme sie, würde
 aus dem Boolean ein Enum (`"summary" | "per-field"`); vorher nicht.
+
+## Gebaut 2026-09-08
+
+`provenance?: boolean` an `SourceDocumentFacts`; die drei Punkte stehen als
+vierter Block „Herkunft und Ablage" unter den allgemeinen Zeilen. Zwei
+Stories, beide im Browser gemessen.
+
+**Jeder Punkt entscheidet für sich, ob er eine Zeile bekommt** — das ist die
+eine Entscheidung dieses Nachtrags:
+
+| Punkt | Wann eine Zeile | Warum |
+|---|---|---|
+| Erkennungssicherheit | immer (100 % gefüllt) | Eine **Zahl** mit Prozentzeichen, kein Badge: die Achse `konfidenz` gehört dem Buchungsvorschlag (L-80) |
+| Von Hand korrigiert | nur bei gesetztem Wert (3 %) | Der Spaltenkommentar sagt es so. Eine leere Zeile machte aus „niemand hat es angefasst" ein „wir wissen es nicht" |
+| DATEV-Ablage | nur wenn mindestens ein Teil steht (65 %) | Drei Spalten, **eine** Zeile mit `·` — sonst müsste der Leser sie zusammensetzen. Ein Beleg ohne Ablage ist kein Beleg mit unbekannter Ablage |
+
+**Gemessen** (`scripts/cdp.mjs`):
+
+| Story | Gemessen |
+|---|---|
+| `WithProvenance` | Block da, „Erkennungssicherheit 94 %", „Von Hand korrigiert", „DATEV-Ablage DUO · 2026/08 · DOC-4471-0088" |
+| `ProvenanceEmpty` | Block da mit **einer** Zeile: nur die Sicherheit. Kein Gedankenstrich, keine leere Zeile |
+| `Filled` | Ohne die Prop kein Block — die Karte (M) bleibt, wie sie war |
+
+**Die Felder stehen vorerst lokal.** `classOverriddenAt` und die drei
+`datevRef*` sind mit App-Commit `ae0e1a63` gebaut (L-217, erledigt), aber der
+Spiegel ist bis zur Migration eingefroren. Sie liegen deshalb in
+`SourceDocumentVM` neben den vier anderen Feldern, die dort aus demselben
+Grund stehen, und fallen beim nächsten `pnpm sync:ludwig` — vermerkt in
+`docs/ludwig/README.md`.
+
+Offene Frage 1 ist damit beantwortet (eine Zeile mit `·`, wie die Vorgabe);
+Frage 2 hat sich erledigt, weil L-217 vor dem Bau kam.
+
+**Was die App wissen muss:** nur `sourceDocumentFromDispatch` füllt die vier
+Felder, die Listen-Mapper nicht. Das reicht — `provenance` ist eine Prop der
+Detailform, und in der Liste hat keiner der drei Punkte einen Rang unter 13.

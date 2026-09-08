@@ -87,6 +87,7 @@ export function SourceDocumentFacts({
   group,
   missing,
   tone = "surface",
+  provenance,
 }: {
   /** The same row the list gets — kind, counterparty, both dates, completion, `detail`. */
   document: SourceDocumentVM;
@@ -106,6 +107,18 @@ export function SourceDocumentFacts({
   missing?: readonly SourceDocumentGap[];
   /** `bare` in the drawer, `surface` in the card. */
   tone?: "surface" | "soft" | "bare";
+  /**
+   * The three points of provenance and filing (0120): how sure the
+   * classification is, whether a person corrected it, and where the document
+   * sits in DATEV. **One prop, not three** — they answer one question („where
+   * does this classification come from, where does the document live"), and
+   * the entity profile ranks them together at 13, 14 and 16.
+   *
+   * Off in the card (M), on in the detail and the drawer (L). The values come
+   * from `document`, not from props of their own: a form that takes values it
+   * already holds is a pass-through.
+   */
+  provenance?: boolean;
 }) {
   const detail = resolveSourceDocumentDetail(document.sourceDocType, document.detail);
   const ident = sourceDocumentIdentifier(document);
@@ -166,6 +179,7 @@ export function SourceDocumentFacts({
   }
 
   const groupRows = group ? groupBlock(document, group) : [];
+  const provenanceRows = provenance ? provenanceBlock(document) : [];
 
   return (
     <div className="v2doc__facts">
@@ -186,8 +200,47 @@ export function SourceDocumentFacts({
       {groupRows.length > 0 ? (
         <FieldList tone={tone} title="Dokumentgruppe" rows={groupRows} />
       ) : null}
+      {provenanceRows.length > 0 ? (
+        <FieldList tone={tone} title="Herkunft und Ablage" rows={provenanceRows} />
+      ) : null}
     </div>
   );
+}
+
+/**
+ * Where the classification comes from, and where the document is filed (0120).
+ *
+ * Three points, and each one may be absent for a different reason — so each
+ * decides for itself whether it has a row:
+ *
+ * - **Confidence** is filled on every document (100 %) and is a **number**,
+ *   not a badge: the axis `konfidenz` belongs to the booking proposal, not
+ *   here (finding L-80, settled with 0070).
+ * - **Corrected by hand** shows only when it is set (3 %). The column comment
+ *   says as much — „is not null → Hinweis"; an empty row would turn „nobody
+ *   touched it" into „we do not know".
+ * - **The DATEV filing** is three columns and one row, read digit by digit.
+ *   It is missing on 35 % of documents, and then it has no row either: a
+ *   document that is not filed is not a document with an unknown filing.
+ */
+function provenanceBlock(d: SourceDocumentVM): [ReactNode, ReactNode][] {
+  const rows: [ReactNode, ReactNode][] = [];
+  if (d.classConfidence !== null && d.classConfidence !== undefined) {
+    rows.push(["Erkennungssicherheit", `${Math.round(d.classConfidence * 100)} %`]);
+  }
+  if (d.classOverriddenAt) {
+    rows.push([
+      "Von Hand korrigiert",
+      <Time key="ovr" value={d.classOverriddenAt} format="date" />,
+    ]);
+  }
+  // System, folder and id are one statement about one place — three rows would
+  // make the reader assemble them.
+  const filing = [d.datevRefSystem, d.datevRefFolder, d.datevRefId].filter(Boolean);
+  if (filing.length > 0) {
+    rows.push(["DATEV-Ablage", <MonoCell key="datev" value={filing.join(" · ")} />]);
+  }
+  return rows;
 }
 
 /**

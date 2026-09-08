@@ -40,10 +40,53 @@ const INVOICE: SourceDocumentVM = {
   docDirection: "inbound",
   classDocumentKind: "original",
   caseNumber: "SV-118",
+  // Herkunft und Ablage (0120). Die Konfidenz trägt jeder Beleg, die beiden
+  // anderen nicht — deshalb stehen sie hier und fehlen in `NO_FILING` unten.
+  classConfidence: 0.94,
+  classOverriddenAt: "2026-08-30T11:04:00Z",
+  datevRefSystem: "DUO",
+  datevRefFolder: "2026/08",
+  datevRefId: "DOC-4471-0088",
 };
 
 const SUMMARY =
   "Bürobedarf und eine Bewirtung auf einem Beleg — der Beleg wird gesplittet gebucht, die Bewirtung mit 70 / 30.";
+
+/**
+ * Woher die Einordnung kommt und wo der Beleg liegt (0120) — die drei Punkte
+ * der Ränge 13, 14 und 16, unter den allgemeinen Zeilen.
+ */
+export const WithProvenance: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640, padding: "var(--space-6)" }}>
+      <SourceDocumentFacts document={INVOICE} provenance />
+    </div>
+  ),
+};
+
+/**
+ * Jeder der drei Punkte entscheidet für sich, ob er eine Zeile bekommt. Hier
+ * fehlen zwei: die Ablage (35 % der Belege liegen nicht in DATEV) und die
+ * Korrektur (97 % hat niemand angefasst). Beide **fehlen** dann — ein
+ * Gedankenstrich würde aus „niemand hat es angefasst" ein „wir wissen es
+ * nicht" machen. Die Konfidenz steht, sie ist auf jedem Beleg gefüllt.
+ */
+export const ProvenanceEmpty: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640, padding: "var(--space-6)" }}>
+      <SourceDocumentFacts
+        document={{
+          ...INVOICE,
+          classOverriddenAt: null,
+          datevRefSystem: null,
+          datevRefFolder: null,
+          datevRefId: null,
+        }}
+        provenance
+      />
+    </div>
+  ),
+};
 
 /** Everything the drawer and the card show, in the order every document keeps. */
 function Framed({ title, children }: { title: string; children: React.ReactNode }) {

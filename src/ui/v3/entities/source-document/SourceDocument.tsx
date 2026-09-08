@@ -87,6 +87,21 @@ export interface SourceDocumentVM extends Omit<MirrorDocument, "detail"> {
   caseHref?: string | null;
   /** Without it the row is not a link. */
   href?: string | null;
+  /*
+   * Ranks 14 and 16, for the provenance rows of `SourceDocumentFacts` (0120).
+   *
+   * They exist in the app since `ae0e1a63` (finding L-217, closed) and are
+   * here only because the mirror is **frozen until the migration** — they go
+   * when `pnpm sync:ludwig` runs again, like the four above them. Only the
+   * detail mapper fills them over there; the list mappers do not fetch the
+   * columns, which is enough: these are points of the detail form.
+   */
+  /** `class_overridden_at` — set means a person corrected the classification. */
+  classOverriddenAt?: string | null;
+  /** Where the document sits in DATEV: system, folder, id. */
+  datevRefSystem?: string | null;
+  datevRefFolder?: string | null;
+  datevRefId?: string | null;
 }
 
 /* ── Cutting ─────────────────────────────────────────────────────────────
