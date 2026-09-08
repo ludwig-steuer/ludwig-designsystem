@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig (Schnittstelle) — die gemessene Prüfung steht in 0119 aus |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/bank-transaction/` — erste Datei dieser Familie |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: SEPA-Tags sind der Zahlungsverkehr dieser Domäne, und die sieben Schlüssel sind ihr Vokabular |
@@ -43,7 +43,12 @@ unverändert; was diese Spec ändert, ist der Ort und die Reichweite.
   Commit `cc141f7b`) — sie wird auch allein gebraucht (die Suche der Liste
   sucht über die Referenzwerte, ohne etwas zu zeichnen), und genau deshalb
   gehört sie dorthin und nicht ein zweites Mal hierher.
-- **Setzt auf:** `LongText`, `Badge`, `Popover`, `ActionIcon` (`info`, 0087).
+- **Setzt auf:** `Popover`, `ActionIcon` (`info`, 0087), `Link`.
+  **Nicht** `LongText` (der Freitext wird nicht gekürzt, er ist die Antwort)
+  und **nicht** `Badge` (ein Abzeichen heißt in diesem Set ein Zustand, ein
+  SEPA-Schlüssel ist eine Kennung und bekommt seinen eigenen stillen Chip) —
+  beide standen hier, obwohl sie bewusst nicht verwendet werden
+  (berichtigt 2026-09-08, M4).
 
 ## Die sieben Schlüssel
 
@@ -68,8 +73,9 @@ sind Kennungen und bleiben, wie sie sind — mono, ungekürzt, kopierbar.
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `purpose` | `string \| null` | ja | Der Rohwert aus der Spalte. `null` → „—" | `Inline`, `Empty` |
-| `tags` | `SepaTags \| null` | nein | Beim Import geparste Tags (`raw_payload.parsed_sepa_tags`). Sie gewinnen gegen das Nachparsen — aber der Aufrufer darf sie weglassen, dann parst die Ableitung nach | `Block` |
+| `tags` | `SepaTags \| null` | nein | Beim Import geparste Tags (`raw_payload.parsed_sepa_tags`). Sie gewinnen gegen das Nachparsen — aber der Aufrufer darf sie weglassen, dann parst die Ableitung nach | `TagsWin` |
 | `variant` | `"inline" \| "block"` | nein, Default `inline` | `inline`: eine Zeile, Referenzen hinter dem (i). `block`: Freitext plus Chips darunter — für Fakten und Drawer | `Inline`, `Block` |
+| `href` | `string` | nein | Wohin der Freitext führt; ohne sie ist er Text. `BankTransactionCell` setzt sie, damit die ganze Zelle ein Ziel hat (ergänzt 2026-09-08, M1 — gebaut und belegt, aber nie in der Tabelle geführt) | `Block` |
 
 **Kann bewusst nicht:**
 
@@ -451,3 +457,225 @@ verweist auf `TagsWin` gegen `Block` statt auf `Block` gegen `WithoutTags` —
 
 **Status: Abnahme** — das Urteil war „zurück", also entscheidet die nächste
 Runde, nicht ich.
+
+## Schlanke Abnahme (Schnittstelle) 2026-09-08
+
+Dritte Runde, fremder Prüfer — kein Bauanteil, kein Chat-Verlauf gelesen.
+**Schlank** nach dem Owner-Entscheid 2026-09-08 (Skill `v3-komponente`, „Zwei
+Tiefen"): geprüft wird die **Schnittstelle**, nicht die Darstellung.
+
+Gelesen: diese Spec ganz (Schnittstelle Z. 66–83, Verhalten, Stories, Kriterien,
+Freigabe samt Nachtrag, die Runden vom 2026-09-06 und 2026-09-07 und der
+Abschnitt „Nach der Wiederabnahme"), dazu
+`src/ui/v3/entities/bank-transaction/BankTransactionPurpose.tsx` (179 Z.) und
+`BankTransactionPurpose.stories.tsx` (176 Z.), der Spiegel
+`src/ludwig/modules/bank-transactions/domain/statement-line.ts` und
+`sepa-tags.ts`, `src/ui/v3/entities/bank-transaction/derive.ts`, die vier
+Aufrufstellen im Set, der CSS-Block `src/styles/v3.css:3297–3352`, das Barrel
+`src/ui/v3/index.ts:414` und `spec-schreiben` §5/§6.
+
+Gemessen: ein Durchlauf über **alle acht** Stories mit `scripts/cdp.mjs` aus dem
+Repo (ein Browser, ein Skript) gegen den Dev-Server auf 6107, Story-IDs aus
+`http://localhost:6107/index.json`, Breite 1400 px. Aktion (Popover öffnen) und
+Messung in getrennten `Runtime.evaluate`-Aufrufen. **Nicht gebaut** (0117 — der
+Baum ist geteilt). Die drei geprüften Dateien sind im Arbeitsbaum unverändert;
+letzter Zug am Baustein `dd0491c`.
+
+**Nicht geprüft, vertagt nach `docs/backlog/0119-visuelle-pruefung-nachholen.md`:**
+Spurbreiten, Zeilenhöhen, Überläufe, Kontraste, Trefferflächen, Hover, Fokus,
+Tastaturwege. Damit fallen zwei Zeilen dieser Spec in die Vertagung: das
+Kriterium „das (i) ist per Tastatur erreichbar und öffnet mit Enter" und die
+Prüfliste §9 — und mit ihr die Nachmessung von M9/M10 der Vorrunde. Was ich
+dazu sagen kann, ist gelesen, nicht gemessen: `.v2purp__info` setzt
+`min-width`/`min-height: var(--space-6)` (`v3.css:3325–3326`; `--space-6` ist
+`24px`, `tokens.css:135`), `.v2purp--inline` steht auf `align-items: center`
+(`:3308`), und `.v2purp__raw summary:hover` trägt Farbe und Unterstreichung
+(`:3347`). Die **Wirkung** dieser drei Zeilen gehört 0119.
+
+**Urteil: zurück** — **kein Mangel blockiert**. Der Baustein selbst ist sauber:
+alle acht variablen Kriterien, die schlank prüfbar sind, sind erfüllt und im
+Browser belegt; die sechs Wächter stehen samt Selbstprüfungen auf Exit 0; die
+acht Stories rendern und schreiben nichts in die Konsole. Zurück geht die Runde
+an **vier** Punkten, von denen drei die **Spec** betreffen und einer eine
+Typherkunft im Code — nach der Hausregel „alles ✓ → fertig, sonst zurück"
+reicht das nicht für `fertig`. Die vier sind in einem Zug zu erledigen.
+
+### 1 · Die Schnittstelle, Zeichen für Zeichen
+
+Signatur `BankTransactionPurpose.tsx:41–69`, Spec-Tabelle Z. 68–72.
+
+| Prop | Spec | Code | Ergebnis |
+|---|---|---|---|
+| `purpose` | `string \| null`, Pflicht | `purpose: string \| null` (`:48`), ohne `?` | ✓ zeichengleich |
+| `tags` | `SepaTags \| null`, optional | `tags?: SepaTags \| null` (`:53`) | ✓ zeichengleich |
+| `variant` | `"inline" \| "block"`, optional, Vorgabe `inline` | `variant?: "inline" \| "block"` (`:58`), Vorgabe im Destructuring `variant = "inline"` (`:44`) | ✓ zeichengleich |
+| `href` | **keine Zeile** | `href?: string` (`:68`) | ✗ **M1** |
+
+`fallback` (M13 der Vorrunde) ist wirklich weg — `grep fallback` über den Ordner
+findet nur noch zwei Kommentarwörter (`:51`, `:171`), keine Prop. An ihrer
+Stelle steht die Konstante `EMPTY = "—"` (`:34`), gemessen in `Empty` und
+`TagsOnly`.
+
+**Herkunft der Typen.** `SepaTags`, `derivePurposeParts` und `PURP_LABELS`
+kommen aus dem Spiegel (`BankTransactionPurpose.tsx:1–5` →
+`@/ludwig/modules/bank-transactions/domain/statement-line`, das `SepaTags` aus
+`sepa-tags.ts:34–44` weiterreicht). Nichts davon ist hier neu definiert, nichts
+verschärft: der Spiegel nimmt `string | null | undefined`, die Prop gibt
+`string | null` — das ist die Verengung der **Spec**, nicht eine des Bausteins.
+`grep -nE '\bas [A-Z]'` über `BankTransactionPurpose.tsx`,
+`BankTransactionPurpose.stories.tsx` und `derive.ts`: **Exit 1**, kein Treffer.
+Eine Ausnahme: `Refs` beschreibt `PurposeRef` noch einmal von Hand → **M3**.
+
+**Kann bewusst nicht** (Spec Z. 74–83), am Code nachgelesen: keine Suche (die
+Komponente ruft nur `derivePurposeParts`, `:70`); kein erzwungenes Nachparsen
+(`tags` fließt unverändert in die Ableitung, die sie über das Nachgeparste
+legt, `statement-line.ts:52`); keine Kürzungsentscheidung im TSX (die Ellipse
+steht in CSS, `v3.css:3311–3313`, `block` hat keine); der Originalblock ist in
+**beiden** Zweigen erreichbar (`:89` und `:124`, gemessen: `details` 2 in
+`Block`, 1 in `Inline`).
+
+### 2 · Kriterien
+
+**Fest**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` grün | Exit **0** | ✓ |
+| `pnpm build` grün | **nicht gelaufen** — 0117, ein geteilter Baum, `build` leert `storybook-static/` unter den anderen weg. Ersatz: Exit 0 des `typecheck` und acht rendernde Stories | offen (Regel) |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `entities/bank-transaction/BankTransactionPurpose.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionPurpose` (`stories:7`, bestätigt im `index.json`); Barrel `src/ui/v3/index.ts:414` | ✓ |
+| Code englisch | `pnpm check:language` Exit **0**. Der Wächter prüft aber nur, was `HEAD~1`/`HEAD`/`--cached` anfassen — die Datei ist älter, also deckt der Exit sie **nicht**. Gegenprobe mit dem Bestandsbericht `--all` (377 Zeilen in 136 Dateien): **kein Treffer aus `BankTransactionPurpose.tsx`**. Story-JSDoc sind ausgenommen (0098 M10) | ✓, eigens nachgesehen |
+| `@when`/`@instead` an jedem Export | ein Export (`:41`), beide Zeilen darüber (`:37–39`); `Refs`, `Raw`, `EMPTY`, `REF_ORDER` sind nicht exportiert. `pnpm check:when` Exit **0** | ✓ |
+| Kein Hex, kein px | `grep -nE '#[0-9a-fA-F]{3,8}\b\|[0-9]+px'` über die Komponente: **Exit 1**. Einzige nackte Zahl ist `size={14}` (`:118`) — die Ikonenleiter, 38 weitere Stellen im Set. Die `maxWidth: 420`-Rahmen der Stories sind Story-Rahmen, wie in 78 Story-Dateien | ✓ |
+| Keine lokale Label-Map; Status nur über Registry | `PURP_LABELS` kommt aus dem Spiegel (`:3`, `statement-line.ts:15–22`), die Hinweistexte der Chips ebenfalls (`refDefs`, dort Z. 54–66). `REF_ORDER` (`:149`) ist eine **Reihenfolge**, keine Übersetzung. Die Komponente trägt keine Zustandsachse, also keine Registry-Pflicht — `grep status-registry`: Exit 1 | ✓ |
+| Alle Stories vorhanden; ausgeschlossene begründet | §3 | ✓ |
+| Prüfliste §9 | **vertagt nach 0119** (Hover, Fokus, Trefferfläche, Zeilenhöhe) | vertagt |
+| Im Browser angesehen | acht Stories, 1400 px | ✓ |
+
+Die Wächter über den Exit-Code, alle sechs:
+`pnpm typecheck` **0** · `pnpm check:language` **0** · `pnpm check:icons` **0**
+(53 Zeichen in der Registry) · `pnpm check:contrast` **0** (33 Angaben) ·
+`pnpm check:mirror` **0** (8 Fälle; der Spiegel steht eingefroren auf
+`f1c58c44`) · `pnpm check:when` **0**.
+Ihre Selbstprüfungen: `check-language --test` **0** (8 Fälle) ·
+`check-when --test` **0** (11) · `check-contrast --test` **0** (16) ·
+`mirror-filter --test` **0** (8). `check-icons.mjs` **kennt kein `--test`** —
+derselbe Befund am Set wie in 0096.
+
+**Variabel** (gemessen im Browser, sofern nicht vertagt)
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Rohblock **nie** als Erstes | `Raw`: `.v2purp__text` trägt 360 Zeichen SVWZ-Freitext, beginnend „Sammelüberweisung August 2026 …"; der 509-Zeichen-Rohblock steht allein im `<pre>` hinter dem (i) | ✓ |
+| Alle sieben Schlüssel, Reihenfolge, `PURP` als Wort | `Raw`, Popover offen: **EREF · KREF · MREF · CRED · ABWA · PURP · OAMT** — genau die Reihenfolge der Spec-Tabelle Z. 53–61; `PURP` = „Lieferantenzahlung", `title="SUPP"`, als einziger ohne `.v2mono`. `TagsWin` zeigt dieselben sieben mit „wiederkehrende Rate" / `title="RINP"` | ✓ |
+| Ohne Tag-Block **kein** (i) | `WithoutTags`: `.v2purp__info` **0 ×** im DOM, Text ist der Rohwert. `Empty` ebenfalls 0 × | ✓ |
+| Original über dasselbe (i) | `Inline`, Popover offen: ein `.v2purp__panel` mit sechs Chips **und** `<details><summary>Originalwert</summary><pre>` | ✓ |
+| (i) per Tastatur, öffnet mit Enter | **vertagt nach 0119** (Tastaturweg) | vertagt |
+| `derivePurposeParts()` eigene Datei, rendert nichts | `src/ludwig/modules/bank-transactions/domain/statement-line.ts:46–76`; `grep -nE "</\|/>\|from \"react\""` darauf → **Exit 1** | ✓ |
+| Gesetzte `tags` gewinnen | `TagsWin` gegen `Block`, derselbe Rohwert: MREF im Chip **`AUS-DEM-IMPORT-4711`** statt `D-VR-50411866-0-001`, dazu ein ABWA-Chip `Musterbau GmbH & Co. KG`, den der Text gar nicht enthält (`Block` zeigt sechs Chips, `TagsWin` sieben) | ✓ |
+| Freitext nicht mono | `.v2purp__text` computed `font-family: Inter, Inter, -apple-system, "system-ui", "Segoe UI", sans-serif` | ✓ |
+| offen (App): ersetzt `PurposeDisplay.tsx` … | außerhalb dieses Repos | bleibt offen |
+
+### 3 · Story-Deckung
+
+| Frage | Befund |
+|---|---|
+| Zahl gegen `spec-schreiben` §6 | 3 anwendbare Zustände + 1 Enum (`variant`) + 0 Layout-Booleans + 0 Callbacks + 1 „im Einsatz" + 1 Rand = **6**. Im `index.json` stehen **8**; die Spec nennt seit dem 2026-09-07 selbst 8 und begründet die zwei (Z. 104–108). Obergrenze 10 gehalten | ✓ |
+| Vorhanden | `Inline`, `Block`, `WithoutTags`, `Empty`, `TagsWin`, `Raw`, `TagsOnly`, `InUse` — genau die acht der Tabelle Z. 110–119 | ✓ |
+| `purpose` | `Inline` (55 Zeichen Freitext) · `Empty` (`—`) | ✓ |
+| `tags` | `TagsWin` — gemessen. Die **Schnittstellen**-Tabelle nennt weiter `Block`, das keine `tags` setzt | ✗ **M2** |
+| `variant` | `Inline` (`.v2purp--inline` 1 ×, `--block` 0) gegen `Block` (`--block` 2 ×, `--inline` 0) | ✓ |
+| `href` | `Block`, zweite Fläche: ein `<a href="#bt-3">` um den Freitext, `a[href] button` = **0** — der Knopf bleibt außerhalb des Ankers; dazu `BankTransactionCell --without-counterparty` für `inline`. Nur: die Spec kennt die Prop nicht | ✗ **M1** |
+| Ausgeschlossene Zustände begründet | `leer nach Filter`, `lädt`, `Fehler` — Z. 98 und Z. 121; für eine reine Anzeige einer Spalte trägt keiner davon | ✓ |
+| Sagen die Stories, was sie zeigen | ja, auch der 2026-09-07 richtiggestellte `Block`-Kommentar (`stories:34–45`): gemessen steht dort „wiederkehrende Rate" mit `title="RINP"` — genau das, was er behauptet | ✓ |
+
+**Jede Story rendert, keine schreibt in die Konsole.** Acht Stories, je nach
+dem Laden 900 ms beobachtet über `Runtime.consoleAPICalled` (error/warning),
+`Runtime.exceptionThrown` und `Log.entryAdded`: **eine** Meldung im ganzen Lauf,
+`404` auf `http://localhost:6107/favicon.ico` (per `Network.responseReceived`
+nachgesehen) — der Dev-Server, nicht der Baustein. Aus den Komponenten
+**null**. Gerenderte `.v2purp`-Knoten: `Inline` 1 · `Block` 2 · `WithoutTags` 1
+· `Empty` 1 · `TagsWin` 1 · `Raw` 1 · `TagsOnly` 1 · `InUse` 4.
+
+### 4 · Mängel
+
+**M1 (Spec) — `href` ist eine vierte Prop ohne Zeile in der Schnittstelle.**
+*Kriterium:* jede Prop gegen die Schnittstellen-Tabelle, Typ, Pflicht, Vorgabe.
+*Ort:* `BankTransactionPurpose.tsx:59–68` gegen Spec Z. 68–72.
+*Befund:* die Tabelle führt drei Props, der Code hat vier. `href?: string` ist
+kein Rest: sie trägt ein eigenes Verhalten (nur der **Freitext** wird zum Weg,
+weil ein Knopf im Anker kein gültiges Markup ist), sie hat einen Nachweis in
+beiden Zweigen, und `BankTransactionCell.tsx:64` setzt sie. Genau umgekehrt zu
+`fallback`, das die Vorrunde als „Prop ohne Spec-Zeile" gestrichen hat — hier
+ist die Prop richtig und die **Spec hinterher**, dasselbe Muster wie 0070,
+0082, 0095 M1 und 0096 A1. Wer beim Umzug nur die Schnittstelle liest, baut
+die 3 % Zeilen ohne Gegenpartei ohne Weg.
+*Kleinster Weg:* eine vierte Zeile in die Tabelle — `href` · `string` · nein ·
+„macht den Freitext zum Weg, nicht die ganze Komponente (0100)" · Nachweis
+`Block` (zweite Fläche) und `BankTransactionCell --without-counterparty`.
+**Blockiert nicht.**
+
+**M2 (Spec) — die Nachweis-Spalte für `tags` zeigt weiter auf `Block`.**
+*Kriterium:* §5 „Jede Prop bekommt in der Tabelle die Story, die sie beweist".
+*Ort:* Spec Z. 71 gegen `BankTransactionPurpose.stories.tsx:46–53`.
+*Befund:* `Block` rendert zweimal `purpose={FULL}` **ohne** `tags` — die Story
+kann den Vorrang gesetzter Tags nicht zeigen. Die Nacharbeit vom 2026-09-07 hat
+das Kriterium (Z. 162) und die Story-Tabelle (Z. 116) auf `TagsWin` umgestellt,
+die **Schnittstellen**-Tabelle aber nicht; der Befund 4 der Vorrunde ist damit
+nur halb erledigt.
+*Kleinster Weg:* in Z. 71 `Block` durch `TagsWin` ersetzen.
+**Blockiert nicht.**
+
+**M3 — `PurposeRef` steht ein zweites Mal, lokal.**
+*Kriterium:* Fachtypen kommen aus `src/ludwig/`, nie lokal neu definiert.
+*Ort:* `BankTransactionPurpose.tsx:151`.
+*Befund:* `function Refs({ refs }: { refs: { key: string; value: string; hint:
+string }[] })` beschreibt Feld für Feld `PurposeRef` aus dem Spiegel
+(`statement-line.ts:24–28`) — den `derive.ts:19` sogar schon für die Familie
+re-exportiert. Heute deckungsgleich, also kein Typfehler und kein `as`; aber
+genau so driften Fachtypen: kommt drüben ein Feld dazu oder wird eines optional,
+merkt es hier niemand, weil die Struktur passt.
+*Kleinster Weg:* `type PurposeRef` mitimportieren und `refs: PurposeRef[]`
+schreiben — eine Zeile im Import, eine in der Signatur.
+**Blockiert nicht.**
+
+**M4 (Spec) — „Setzt auf" nennt zwei Bausteine, die nicht drin sind, und
+verschweigt einen, der drin ist.**
+*Kriterium:* die Einordnung der Spec gegen den gebauten Code.
+*Ort:* Spec Z. 46 gegen `BankTransactionPurpose.tsx:6–8`.
+*Befund:* die Spec sagt `LongText`, `Badge`, `Popover`, `ActionIcon`. Importiert
+sind `ActionIcon`, `Link`, `Popover`. `LongText` kürzt nach Zeichenzahl und
+widerspricht damit Entscheid 3 der Freigabe; `Badge` heißt im Set „hier steht
+ein Zustand" und ist bewusst durch die stille Marke `.v2purp__key` ersetzt
+(Kommentar `:157–158`). Beides steht seit dem 2026-09-06 als „offen, weil
+Owner-Sache" unter den Mängeln und ist seither zweimal ungeändert durch eine
+Abnahme gegangen. `Link` fehlt in der Aufzählung, obwohl `href` über sie läuft.
+*Kleinster Weg:* die Zeile auf „`Popover`, `ActionIcon`, `Link`" ziehen und den
+Satz über `Badge` in einen Halbsatz „statt `Badge`, weil ein Badge im Set einen
+Zustand meint" verwandeln.
+**Blockiert nicht.**
+
+### 5 · Was ich nicht angefasst habe
+
+Die Tabelle „Abnahme" (Z. 168–172) steht weiter als Platzhalter `| … | … | … |`
+da; wie in den beiden Runden davor tritt dieser Abschnitt an ihre Stelle. Eine
+Abnahme ändert keine Kriterien, deshalb stehen M1, M2 und M4 hier und nicht in
+der Kriterienliste. Code, Stories und CSS sind unverändert.
+
+**Abgenommen von / am:** fremde Sitzung, 2026-09-08 — **zurück** (schlank,
+Schnittstelle).
+**Blockierend:** keiner.
+**Mit derselben Runde zu erledigen:** M1, M2, M4 (Spec) und M3 (eine
+Typherkunft).
+
+### Nacharbeit 2026-09-08 (nach der schlanken Abnahme)
+
+Urteil war **zurück**, ohne blockierenden Punkt. Alle vier erledigt:
+
+| Punkt | Was getan |
+|---|---|
+| **M1** | `href` steht jetzt in der Schnittstellen-Tabelle, mit `Block` als Nachweis (die Story setzt sie seit jeher). Gebaut, belegt und benutzt von `BankTransactionCell` — sie fehlte nur in der Tabelle |
+| **M2** | Der Nachweis für `tags` zeigt auf `TagsWin` statt auf `Block`; `Block` setzt gar keine. Kriterium und Story-Tabelle waren am 07.09. schon umgezogen, die Schnittstellen-Tabelle nicht |
+| **M3** | `Refs` importiert `PurposeRef` aus `src/ludwig/`, statt seine drei Felder lokal noch einmal hinzuschreiben. `derive.ts` re-exportiert den Typ bereits — der Nachbau war nur ein Vergessen, und er hätte jede Änderung am Spiegel stillschweigend überlebt |
+| **M4** | „Setzt auf" nennt `Popover`, `ActionIcon` und `Link`. `LongText` und `Badge` standen dort, obwohl beide **bewusst** nicht verwendet werden — jetzt steht das mit Grund da, statt sie zu verschweigen |
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0.

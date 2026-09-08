@@ -1,6 +1,7 @@
 import {
   derivePurposeParts,
   PURP_LABELS,
+  type PurposeRef,
   type SepaTags,
 } from "@/ludwig/modules/bank-transactions/domain/statement-line";
 import { ActionIcon } from "../../Icons";
@@ -148,7 +149,7 @@ export function BankTransactionPurpose({
  */
 const REF_ORDER = ["EREF", "KREF", "MREF", "CRED", "ABWA", "PURP", "OAMT"];
 
-function Refs({ refs }: { refs: { key: string; value: string; hint: string }[] }) {
+function Refs({ refs }: { refs: PurposeRef[] }) {
   const sorted = [...refs].sort((a, b) => REF_ORDER.indexOf(a.key) - REF_ORDER.indexOf(b.key));
   return (
     <div className="v2purp__refs">
