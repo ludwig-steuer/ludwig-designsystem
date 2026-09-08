@@ -11,7 +11,7 @@
 | Fachliche Quelle | `docs/topics/datev.md` (OPOS-Rekonstruktion), F85-T85.2b für den Abgleich |
 | Profil von / am | Claude (ludwig-worker), 2026-09-08 |
 
-## Job
+## Job — J-07
 
 > Wenn **eine Zahlung eingeht oder eine Mahnung ansteht**, will **die
 > Kanzlei** **wissen, welche Rechnungen zu einem Stichtag offen waren**,
@@ -48,7 +48,7 @@ das von DATEV ab" — er gehört auf die Seite, nicht in ein Protokoll.
 
 | Nebenjob | Wie oft | Darf kosten |
 |---|---|---|
-| Zum Replay-Cutoff springen (Experiment-Mandant) | selten, aber dann sofort | einen Knopf neben dem Stichtag |
+| J-33 · Zum Replay-Cutoff springen (Experiment-Mandant) | selten, aber dann sofort | einen Knopf neben dem Stichtag |
 | Ein Personenkonto öffnen | beim Nachfassen | einen Klick auf die Zeile (`OpenItemRow onOpen`) |
 | Nach Alter gruppieren (Mahnstufen) | im Mahnlauf | **gebaut am 2026-09-08** (App `3a8411c5`): `groupByAge` an der Regel, gezeigt mit `OpenItemAgeGroup` — der Baustein stand seit 0029 fertig daneben und war der eine von zwei unbedienten Jobs, dem nichts fehlte als ein Aufrufer (J-35) |
 

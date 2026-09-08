@@ -10,7 +10,7 @@
 | Fachliche Quelle | `ludwig/app`: `docs/topics/sachverhalt.md` (Zustände, Regeln S1–S3) |
 | Profil von / am | Claude, 2026-09-03 · Screenshot der heutigen Implementierung |
 
-## Job
+## Job — J-08
 
 > Wenn **ein Sachverhalt in ihrem Vorrat liegt**, will **die Sachbearbeiterin
 > der Kanzlei** **ihn zur Buchung bringen — oder begründet weglegen**, damit
@@ -48,10 +48,10 @@ je einen Klick kosten. Rang 9 ist eine Taste (`J`/`K`, `Hotkeys` gibt es).
 
 | Nebenjob | Wie oft | Darf kosten |
 |---|---|---|
-| Beleg nachträglich anhängen | selten (geschätzt) | einen Knopf im Kopf |
-| Belegnummern-Modus umstufen (S3) | selten, begründungspflichtig | einen Klick + Dialog mit Grund |
+| J-36 · Beleg nachträglich anhängen | selten (geschätzt) | einen Knopf im Kopf |
+| J-37 · Belegnummern-Modus umstufen (S3) | selten, begründungspflichtig | einen Klick + Dialog mit Grund |
 | Zusammenfassung schreiben | selten | einen Bleistift, keine eigene Zeile im Ruhezustand |
-| Fall an die Kanzlei zurückgeben | mittel | einen Eintrag im Überlaufmenü |
+| J-39 · Fall an die Kanzlei zurückgeben | mittel | einen Eintrag im Überlaufmenü |
 
 ## Was hier nicht hingehört
 

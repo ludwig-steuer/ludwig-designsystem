@@ -44,8 +44,8 @@ kosten.
 | Nebenjob | Wie oft | Darf kosten |
 |---|---|---|
 | Eine einzelne Buchung aufschlagen | oft — der Grund, warum jemand hier ist | einen Klick und **einen** URL-Parameter: zwei Quellen sind eine Eigenschaft der Zeile, nicht zwei Drawer (`?buchung=<id>`) |
-| Monat für Monat vergleichen | zur Abschlussprüfung, geschätzt einmal je Jahr | einen Reiter |
-| Das LLM-Profil prüfen | selten, bei Zweifeln an der Einordnung | einen Reiter |
+| J-28 · Monat für Monat vergleichen | zur Abschlussprüfung, geschätzt einmal je Jahr | einen Reiter |
+| J-29 · Das LLM-Profil prüfen | selten, bei Zweifeln an der Einordnung | einen Reiter |
 
 ## Was hier nicht hingehört
 

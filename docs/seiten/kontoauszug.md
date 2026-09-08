@@ -51,8 +51,8 @@ bleibt es: die Zahlen dafür stehen am Import-Batch, nicht an der Zeile.
 
 | Nebenjob | Wie oft | Darf kosten |
 |---|---|---|
-| Eine Zahlung nachschlagen, ohne die Liste zu verlassen | oft | einen Klick — `BankTransactionDrawer` (0103) |
-| Sehen, woraus eine Zeile aufgeteilt ist | bei 4 % der Zeilen (Z3) | einen Aufklapper je Zeile |
+| J-30 · Eine Zahlung nachschlagen, ohne die Liste zu verlassen | oft | einen Klick — `BankTransactionDrawer` (0103) |
+| J-31 · Sehen, woraus eine Zeile aufgeteilt ist | bei 4 % der Zeilen (Z3) | einen Aufklapper je Zeile |
 | Den Import beurteilen | nach jedem Lauf | eine eigene Route in der Konfiguration, **nicht** diese Seite |
 
 ## Was hier nicht hingehört

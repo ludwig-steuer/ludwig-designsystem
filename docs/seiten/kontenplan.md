@@ -49,8 +49,8 @@ Liste selbst. Rang 7 verlässt die Seite.
 | Nebenjob | Wie oft | Darf kosten |
 |---|---|---|
 | Nach Klasse gruppiert lesen statt flach (`view=grouped`) | geschätzt bei der Jahresprüfung, sonst nie | einen Schalter |
-| Seitengröße ändern (heute 50) | selten | ein Feld im Pager |
-| Den SKR-Katalog dazunehmen | bei der Einrichtung eines Mandanten | einen Schalter, der **sagt**, was er dazunimmt |
+| J-25 · Seitengröße ändern (heute 50) | selten | ein Feld im Pager |
+| J-26 · Den SKR-Katalog dazunehmen | bei der Einrichtung eines Mandanten | einen Schalter, der **sagt**, was er dazunimmt |
 
 ## Was hier nicht hingehört
 

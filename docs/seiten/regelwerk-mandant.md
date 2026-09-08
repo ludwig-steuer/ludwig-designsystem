@@ -7,7 +7,7 @@
 | Heute gebaut in | nichts. `rule-overview-queries.ts` liefert die Daten und hat seit seiner Entstehung keinen Aufrufer |
 | Entitäten | Wiederkehr-Regel (`docs/entitaeten/recurring-rule.md`) |
 | Baustein in v3 | `RecurringRuleList` — Backlog **0131**, noch nicht gebaut |
-| Job | **J-54** — „Wenn **ein Mandant übernommen ist**, will **die Sachbearbeiterin** **alle Dauerbuchungs-Regeln nebeneinander sehen**, damit **sie erkennt, welche stillsteht, welche kein Personenkonto hat und welche doppelt greift**." (`docs/jobs.md`, Stand `unbedient`) |
+| Job | **J-54** — „Wenn **ein Mandant übernommen ist**, will **die Sachbearbeiterin** **alle Dauerbuchungs-Regeln nebeneinander sehen**, damit **sie erkennt, welche stillsteht, welche kein Personenkonto hat und welche doppelt greift**." (`docs/jobs.md`, Stand `bedient` seit 2026-09-08) |
 | Layout | **entfällt** — der Detailseiten-Standard gilt ausdrücklich nicht für Listenseiten. Form ist die der Belegliste: Kopf, Filterzeile, `DataTable` in einer Karte |
 | Reiter | **keine.** Eine Liste ist eine Sicht; was sich hier unterscheiden ließe (aktiv/inaktiv), ist ein Filter, kein Reiter (R9, D10) |
 | Zonendeckung | entfällt (Listenseite) |

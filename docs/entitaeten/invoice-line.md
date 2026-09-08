@@ -128,7 +128,7 @@ ausgewählt.
 
 | Liste | Job | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
 |---|---|---|---|---|---|---|---|---|---|
-| `InvoiceLineList` „Positionen des Belegs" | Wenn **die Sachbearbeiterin einen Kontovorschlag prüft**, will sie **sehen, welche Positionen der Beleg hat und wie Ludwig jede eingeordnet hat**, damit **sie die eine Zeile findet, die falsch liegt** | alle Positionen **einer** Rechnung, `disabled` eingeschlossen (ausgegraut) | `position` aufsteigend — die Reihenfolge des Belegs, nie eine andere | 1–10, 12/13/15, dazu 8/9 nur wenn sie vom Normalfall abweichen | keiner | keine | „Für diesen Beleg wurden keine Positionen erkannt." — **kein Erfolg**, ein Befund: eine Rechnung ohne Positionen ist 1 % der Fälle (4 von 318) und meist ein Extraktionsproblem | 1 · 5 (p99 17, max 22) | Staging · `PositionenTab` |
+| J-13 · `InvoiceLineList` „Positionen des Belegs" | Wenn **die Sachbearbeiterin einen Kontovorschlag prüft**, will sie **sehen, welche Positionen der Beleg hat und wie Ludwig jede eingeordnet hat**, damit **sie die eine Zeile findet, die falsch liegt** | alle Positionen **einer** Rechnung, `disabled` eingeschlossen (ausgegraut) | `position` aufsteigend — die Reihenfolge des Belegs, nie eine andere | 1–10, 12/13/15, dazu 8/9 nur wenn sie vom Normalfall abweichen | keiner | keine | „Für diesen Beleg wurden keine Positionen erkannt." — **kein Erfolg**, ein Befund: eine Rechnung ohne Positionen ist 1 % der Fälle (4 von 318) und meist ein Extraktionsproblem | 1 · 5 (p99 17, max 22) | Staging · `PositionenTab` |
 
 **Mechanik nach §8** (nachgemessen): 318 Rechnungen, p50 **1** · p90 **5** ·
 p99 17 · max 22, 1 % ohne Position → **keine Pagination, kein Serverfilter,

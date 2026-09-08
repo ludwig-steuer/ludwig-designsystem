@@ -5,7 +5,7 @@
 | Zweck | Alle Job-Sätze und Nebenjobs an **einem** Ort, je Rolle und je Entität vergleichbar und nach Häufigkeit sortierbar |
 | Geerntet aus | 10 Seitenprofile (`docs/seiten/*.md`) + 8 Entitätsprofile (`docs/entitaeten/*.md`), je ohne `TEMPLATE.md` |
 | Umfang | 58 Jobs — `bedient` 29 · `halb` 22 · `unbedient` 7 |
-| Kennungen in Profilen | noch nicht eingetragen |
+| Kennungen in Profilen | eingetragen |
 | Wächter | `pnpm check:jobs` · Selbstprüfung `pnpm check:jobs --test` |
 | Angelegt von / am | Claude, 2026-09-08 · Auftrag des Owners vom selben Tag |
 
@@ -211,6 +211,11 @@ aber das Profil nennt einen Mangel daran. Acht davon haben denselben Mangel:
   freie Kennung und eine Zeile in „Fundstellen"; im Profil steht danach der
   Wortlaut mit der Kennung davor. Andersherum entsteht ein Job, den keine
   Sortierung findet.
+- **Wo die Kennung im Profil steht.** Im Job-Abschnitt einer Seite gehört
+  sie in die Überschrift (`## Job — J-01`); in einer Tabelle — Nebenjobs,
+  Listen — steht sie am Anfang der **ersten Zelle**, mit einem Mittelpunkt
+  getrennt (`| J-11 · Zum nächsten Beleg … |`). Trägt eine Zeile zwei
+  Jobs, stehen beide da (`| J-16 · J-17 · **Stockende Belege** |`).
 - **Fällt eine Seite weg, bleibt der Job.** Sein Zustand wechselt auf
   `unbedient`, „Bedient von" beginnt mit `—` und nennt den Grund samt Datum.
   Die Zeile wird **nicht** gelöscht: die `unbedient`-Liste ist der Vorrat für

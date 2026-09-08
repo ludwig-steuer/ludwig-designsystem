@@ -73,10 +73,10 @@ da, wenn es etwas zu sagen gibt.
 
 | Nebenjob | Wie oft | Darf kosten |
 |---|---|---|
-| In einem Stapel nachsehen, was drin ist | beim Prüfen einer Festschreibung | einen Reiter, einen Drawer |
+| J-20 · In einem Stapel nachsehen, was drin ist | beim Prüfen einer Festschreibung | einen Reiter, einen Drawer |
 | Ein Personenkonto nachschlagen (Kreditor/Debitor) | selten, und die Stammdaten stehen woanders vollständig | einen Reiter — **oder gar keinen**, siehe Zweifel 3 |
-| Die Wirtschaftsjahre sehen, die DATEV führt | bei der Einrichtung, danach nie | einen Reiter |
-| Die Rohdaten einer Zeile lesen | beim Debuggen, nicht im Alltag | ein Icon in der Zeile |
+| J-22 · Die Wirtschaftsjahre sehen, die DATEV führt | bei der Einrichtung, danach nie | einen Reiter |
+| J-23 · Die Rohdaten einer Zeile lesen | beim Debuggen, nicht im Alltag | ein Icon in der Zeile |
 
 ## Was hier nicht hingehört
 

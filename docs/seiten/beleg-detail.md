@@ -10,7 +10,7 @@
 | Fachliche Quelle | `ludwig/app`: `modules/source-docs/domain/tabs.ts` (Tab-Katalog, decision-log 2026-07-20 „eine Shell für jede Belegart") |
 | Profil von / am | Claude, 2026-09-07 · gelesen: Route, Tab-Katalog, die neun UI-Dateien oben |
 
-## Job
+## Job — J-01
 
 > Wenn **ein Beleg auffällt — in einer Liste, an einem Sachverhalt oder weil
 > die Pipeline ihn liegen ließ**, will **die Sachbearbeiterin der Kanzlei**
@@ -53,11 +53,11 @@ Fehler gestellt werden.
 
 | Nebenjob | Wie oft | Darf kosten |
 |---|---|---|
-| Zum nächsten Beleg derselben Liste (`InvoiceListNav`, `1/117`) | bei Reihenarbeit ständig, sonst nie — geschätzt | eine **Taste** (`J`/`K`), kein Klick |
-| Zurück zur Liste, aus der sie kam | jedes Mal | ein Knopf, der die Liste **nennt** — `RecordPager back` (heute: „← Belege" bzw. „← Problematische Belege", je nach Belegdatum). Er gehört zur Vor/Zurück-Zeile, nicht zum Kopf: es ist dieselbe Frage („wo komme ich her, wo geht es weiter") |
-| Positionen einer Rechnung prüfen | nur bei Rechnungen, geschätzt jede fünfte | einen Reiter (`positionen`) |
-| Vorsteuer prüfen | nur bei Rechnungen mit VSt-Fakten | einen Reiter (`vorsteuer`) |
-| Neu verarbeiten, zurücksetzen, DATEV-Meta importieren | selten, im Fehlerfall | ein Menü (`DocActionsMenu`) — nie ein Knopf in der ersten Reihe |
+| J-11 · Zum nächsten Beleg derselben Liste (`InvoiceListNav`, `1/117`) | bei Reihenarbeit ständig, sonst nie — geschätzt | eine **Taste** (`J`/`K`), kein Klick |
+| J-12 · Zurück zur Liste, aus der sie kam | jedes Mal | ein Knopf, der die Liste **nennt** — `RecordPager back` (heute: „← Belege" bzw. „← Problematische Belege", je nach Belegdatum). Er gehört zur Vor/Zurück-Zeile, nicht zum Kopf: es ist dieselbe Frage („wo komme ich her, wo geht es weiter") |
+| J-13 · Positionen einer Rechnung prüfen | nur bei Rechnungen, geschätzt jede fünfte | einen Reiter (`positionen`) |
+| J-14 · Vorsteuer prüfen | nur bei Rechnungen mit VSt-Fakten | einen Reiter (`vorsteuer`) |
+| J-15 · Neu verarbeiten, zurücksetzen, DATEV-Meta importieren | selten, im Fehlerfall | ein Menü (`DocActionsMenu`) — nie ein Knopf in der ersten Reihe |
 
 ## Was hier nicht hingehört
 

@@ -10,7 +10,7 @@
 | Fachliche Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Abschnitt „Listen" (Zeilen „Belegliste des Jahres" und „Stockende Belege") |
 | Profil von / am | Claude (ludwig-worker), 2026-09-08 |
 
-## Job
+## Job — J-02
 
 > Wenn **ein Buchungsmonat abgeschlossen werden soll**, will **die Kanzlei**
 > **alle Belege der Periode nach Eingangsdatum durchgehen**, damit **kein
@@ -46,10 +46,10 @@ das bei 21 % fehlt.
 
 | Nebenjob | Wie oft | Darf kosten |
 |---|---|---|
-| Sehen, was in der Pipeline gerade läuft | täglich, kurz | einen Reiter („In Verarbeitung") |
-| Sehen, was hängengeblieben ist | wöchentlich | einen Reiter („Problematisch"); p90 = 10 Zeilen |
-| Die Belege mit offener Rückfrage herausgreifen | im Buchungslauf | einen Reiter („Klärungsfragen") |
-| Einen hängenden Beleg neu anstoßen | selten | einen Knopf **in der Zeile**, keine Massenaktion |
+| J-16 · Sehen, was in der Pipeline gerade läuft | täglich, kurz | einen Reiter („In Verarbeitung") |
+| J-17 · Sehen, was hängengeblieben ist | wöchentlich | einen Reiter („Problematisch"); p90 = 10 Zeilen |
+| J-18 · Die Belege mit offener Rückfrage herausgreifen | im Buchungslauf | einen Reiter („Klärungsfragen") |
+| J-19 · Einen hängenden Beleg neu anstoßen | selten | einen Knopf **in der Zeile**, keine Massenaktion |
 
 ## Was hier nicht hingehört
 
