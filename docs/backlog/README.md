@@ -61,6 +61,22 @@ sah), aber niemand war verpflichtet, sie zurückzuschreiben. Deshalb:
 - **Bis eine Spec einen Nacharbeitsabschnitt mit Datum trägt, gilt der Code.**
   Das ist die Lesehilfe für alle, die von außen gegen das Set bauen.
 
+**Nachtrag vom 2026-09-08, nach fünfzehn Abnahmen:** die Regel greift — in der
+Wiederkehr-Familie (0131–0135) stimmten vier von fünf Prop-Tabellen Zeichen
+für Zeichen mit dem Code. Der Fund ist damit **umgezogen**, nicht
+verschwunden: er sitzt jetzt an den **Rändern** der Tabellen. „Dreizehn Props"
+neben einer Tabelle mit 18 Zeilen; „Elf Props" neben zwölf; ein
+Zuschnitt-Absatz, der zwei Bausteine in der Datei verortet, aus der sie vor
+zwei Aufgaben ausgezogen sind; ein Erklärsatz zu einer Typabweichung, der
+seinerseits veraltet war. Wer baut, zieht die Tabelle mit — den Satz daneben
+zieht niemand.
+
+Deshalb, als Ergänzung zur ersten Regel: **wer eine Tabelle ändert, liest den
+Absatz darüber und darunter.** Zahlwörter („dreizehn Props"), Dateinamen und
+Aufzählungen im Fließtext sind Kopien der Tabelle, und Kopien altern. Am
+billigsten ist es, sie gar nicht erst zu schreiben: „so viele Props, wie die
+Tabelle führt" braucht keine Pflege.
+
 ## Status
 
 `offen` → `spec` → `in Arbeit` → `Abnahme` → `fertig`. Der Status steht in
