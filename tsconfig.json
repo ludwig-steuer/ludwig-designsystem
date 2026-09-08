@@ -8,6 +8,10 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
+    /* Ein toter Import fiel bisher nur einer Abnahme auf (0096 A3) — jetzt
+       fällt er dem Typprüfer auf, jedes Mal. */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",

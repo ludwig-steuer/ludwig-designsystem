@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Fragment } from "react";
 import {
-  ACCOUNT_CATALOG_COLUMNS,
   ACCOUNT_LIST_COLUMNS,
   accountColumns,
   accountMinWidth,

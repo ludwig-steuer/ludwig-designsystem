@@ -1,11 +1,9 @@
-import type { DocCategory, DocDirection, SourceDocType } from "@/ludwig/modules/source-docs/domain/document-form-mapping";
 import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
 // The record, under a name that does not collide with the component family.
 import type { SourceDocumentVM as MirrorDocument } from "@/ludwig/modules/source-docs/domain/source-document-vm";
 import type { SourceDocCompletionVia } from "@/ludwig/modules/source-docs/domain/document-form-labels";
 
 import { Amount } from "../../primitives/Amount";
-import { Badge } from "../../primitives/Badge";
 import { Link } from "../../primitives/Link";
 import { Row } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";

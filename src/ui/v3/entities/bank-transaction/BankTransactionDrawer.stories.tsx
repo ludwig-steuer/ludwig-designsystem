@@ -2,10 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { BankTransactionList } from "./BankTransactionList";
 import { BankTransactionDrawer } from "./BankTransactionDrawer";
-import { BankTransactionRow } from "./BankTransactionRow";
-import { bankTransactionColumns, bankTransactionTracks } from "./bank-transaction-columns";
 import type { BankTransactionDetailData, CaseAssignment } from "./bank-transaction";
-import { Card, CardHead, HeadRow, Table } from "../../primitives/Table";
 
 const meta: Meta<typeof BankTransactionDrawer> = {
   title: "v3/Entitäten/Kontoauszugsposition/BankTransactionDrawer",

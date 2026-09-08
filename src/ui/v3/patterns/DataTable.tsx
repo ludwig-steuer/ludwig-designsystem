@@ -207,12 +207,11 @@ export function DataTable<T>(props: DataTableProps<T>) {
     loading,
     error,
     next,
-    rowHref,
+    // `expand` is read here; `rowHref` is **not** — `bodyRow` takes that from
+    // `props` itself, and here it stood twice and unused (0096 A3, found by
+    // `noUnusedLocals`).
     expand,
-  } = props as DataTableBase<T> & {
-    rowHref?: (row: T) => string;
-    expand?: (row: T) => ReactNode;
-  };
+  } = props as DataTableBase<T> & { expand?: (row: T) => ReactNode };
 
   // One grip track in front for each of selection and chevron, `max-content`
   // behind for the actions — the columns fall back to one share each. The

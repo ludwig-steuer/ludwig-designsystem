@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
 import { CaseRow } from "./CaseRow";
 import { caseColumns, caseTracks, type CaseColumn } from "./case-columns";
-import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { Card, CardHead, HeadRow, Table } from "../../primitives/Table";
 
 const meta: Meta<typeof CaseRow> = {
@@ -134,8 +133,8 @@ function minBreite(columns: typeof FULL): number {
     // die Mindestbreite lag 25 px unter dem Satz (1601 statt 1626), gemessen
     // `.v2tbl__inner` clientWidth 1601 gegen scrollWidth 1608 (Abnahme 0096,
     // N1). Deshalb wird der Boden aus dem `minmax()` gelesen.
-    const boden = /^minmax\(\s*(\d+)px/.exec(w);
-    return sum + (boden?.[1] ? Number(boden[1]) : 175);
+    const floor = /^minmax\(\s*(\d+)px/.exec(w);
+    return sum + (floor?.[1] ? Number(floor[1]) : 175);
   }, 0);
   return fest + (columns.length - 1) * 10 + 36;
 }
@@ -187,8 +186,12 @@ export const Filled: Story = {
  * Zuständigkeit, kein Export. Jeder Punkt sagt „—" oder schweigt begründet,
  * statt zu fehlen — und ohne Titel **und** ohne Gegenpart bleibt vom
  * Anzeigenamen die **Art** allein („Umbuchung"), so wie `caseTitle` es
- * vorsieht. Die Klärungsspalte zeigt hier drei offene: der Fall ist dünn an
- * Stammdaten, nicht an Arbeit (berichtigt 2026-09-07, Abnahme 0096, M7).
+ * vorsieht.
+ *
+ * Auch **ohne Klärung**: die Klärungsspalte bleibt stumm, so wie es die
+ * Story-Tabelle der Spec verlangt. Der Rand mit drei offenen steht in `Edges`
+ * — dieser Satz behauptete bis zur schlanken Abnahme 2026-09-08 das
+ * Gegenteil, obwohl die Fixture längst auf 0 stand (M7b).
  */
 export const Sparse: Story = {
   render: () => (
@@ -220,8 +223,8 @@ export const Columns: Story = {
     // (Abnahme 0096, M5). §6 verlangt zu einem Enum **alle** Werte
     // nebeneinander; hier stehen sie in einem zweiten Satz, weil ein Satz mit
     // allen dreizehn Spalten die Karte sprengt.
-    const zaehler: CaseColumn[] = ["name", "number", "documents", "bankTransactions", "state"];
-    const zaehlerCols = caseColumns({ href, columns: zaehler });
+    const counters: CaseColumn[] = ["name", "number", "documents", "bankTransactions", "state"];
+    const counterCols = caseColumns({ href, columns: counters });
     return (
       <div style={{ display: "grid", gap: "var(--space-6)" }}>
         <Frame columns={cols} sub="Bürobedarf Meier GmbH · alle Jahre">
@@ -229,9 +232,9 @@ export const Columns: Story = {
             <CaseRow key={c.caseId} case={c} href={href} columns={picked} />
           ))}
         </Frame>
-        <Frame columns={zaehlerCols} sub="Mit den beiden Zählern: Belege und Bankzeilen">
+        <Frame columns={counterCols} sub="Mit den beiden Zählern: Belege und Bankzeilen">
           {CASES.slice(0, 3).map((c) => (
-            <CaseRow key={c.caseId} case={c} href={href} columns={zaehler} />
+            <CaseRow key={c.caseId} case={c} href={href} columns={counters} />
           ))}
         </Frame>
       </div>

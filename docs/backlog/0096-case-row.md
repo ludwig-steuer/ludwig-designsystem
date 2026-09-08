@@ -63,15 +63,18 @@ nicht. Die Zeile zeigt beides, und das ist keine Dopplung.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `case` | `CaseListItem` | ja | Der Fall. Der Typ kommt aus `src/ludwig/modules/accounting-cases/domain/case.ts` und wird nicht lokal neu definiert | `Filled` |
-| `href` | `string` | nein | Die ganze Zeile wird ein Link. Ohne `href` ist sie ein `div` — der Partner-Reiter zeigt sie heute ohne Ziel | `Filled`, `WithoutLink` |
-| `columns` | `CaseColumn[]` | nein, Default alle zehn | Welche Punkte in welcher Reihenfolge. Die Reihenfolge ist **nicht frei**: die Prop wählt aus, sie sortiert nicht um | `Columns` |
-| `counterpartyHref` | `string` | nein | Der Gegenpart wird ein Link zum Geschäftspartner, wo einer aufgelöst ist (47 %) | `Filled` |
+| `case` | `CaseListItem` | ja | Der Fall. Der Typ kommt aus `src/ludwig/modules/accounting-cases/domain/case.ts` und wird nicht lokal neu definiert | alle |
+| `href` | `(item: CaseListItem) => string` | nein | Die ganze Zeile wird ein Link. Eine **Funktion**, keine Zeichenkette: die Zeile baut keine URL, sie kennt weder Mandant noch Jahr — dieselbe Form wie in `CaseCell`. Ohne `href` ist sie ein `div` (der Partner-Reiter zeigt sie heute ohne Ziel) | `Filled`, `WithoutLink` |
+| `columns` | `CaseColumn[]` | nein, Default alle **dreizehn** | Welche Punkte in welcher Reihenfolge. Die Prop **wählt aus, sie ordnet nicht** — die Reihenfolge kommt aus dem geprüften Profil | `Columns` |
+| `counterpartyHref` | `(item: CaseListItem) => string \| undefined` | nein | Der Gegenpart wird ein Link zum Geschäftspartner, wo einer aufgelöst ist (47 %). Gibt die Funktion `undefined` zurück, bleibt der Name Text | `Filled` |
 
-`CaseColumn` ist eine String-Union der zehn Punkte (`name`, `state`,
+`CaseColumn` ist eine String-Union der **dreizehn** Punkte (`name`, `state`,
 `number`, `amount`, `counterparty`, `disposition`, `kind`, `clarifications`,
-`openedAt`, `exportState`) — keine freie Zeichenkette, damit ein Tippfehler
-ein Typfehler ist.
+`openedAt`, `exportState`, `fiscalYear`, `documents`, `bankTransactions`) —
+keine freie Zeichenkette, damit ein Tippfehler ein Typfehler ist. *(Die Spec
+sagte bis zur schlanken Abnahme 2026-09-08 „zehn" und beschrieb `href` und
+`counterpartyHref` als `string`; drei Werte und zwei Typen waren seit der
+Nacharbeit zu 0096 M5 hinter dem Code zurück.)*
 
 **Kann bewusst nicht:**
 
@@ -678,3 +681,272 @@ Betrag, ohne Gegenpart, **ohne Klärung**, ohne Export"; die Fixture stand auf
 
 **Status: Abnahme** — das Urteil war „zurück", also entscheidet die nächste
 Runde.
+
+## Schlanke Abnahme (Schnittstelle) 2026-09-08
+
+Dritte Abnahme, fremder Prüfer (kein Bauanteil, kein Chat-Verlauf). **Schlank**
+nach dem Owner-Entscheid 2026-09-08 (Skill `v3-komponente`, „Zwei Tiefen"):
+geprüft wird die **Schnittstelle**, nicht die Darstellung. Gelesen wurden der
+Spec-Teil (Schnittstelle, Verhalten, Stories, Abnahmekriterien), die Neufassung
+2026-09-06, der Abschnitt „Nach der Wiederabnahme (2026-09-07)" und die drei
+Dateien. Ein Durchlauf über alle sechs Stories mit `scripts/cdp.mjs` aus dem
+Repo gegen den Dev-Server auf 6107, ein Skript für alle Stories.
+
+**Nicht geprüft, vertagt nach `docs/backlog/0119-visuelle-pruefung-nachholen.md`:**
+Spurbreiten, Zeilenhöhen, Überläufe an vier Breiten, Kontrastzahlen,
+Trefferflächen, Hover, Fokus, Tastaturwege. Die Messungen der Runden vom
+2026-09-07 stehen oben und werden hier **nicht** wiederholt — auch N1 nicht,
+das ein Überlauf-Kriterium ist.
+
+**Urteil: zurück** — kein Mangel blockiert. Die Schnittstelle selbst ist
+sauber: `CaseRow` hat genau die vier Props der Spec, in den Typen der
+Neufassung, und kann gar nicht von `caseColumns()` abdriften, weil sie ihre
+Optionen als `CaseColumnOptions` weiterreicht. Alle vier Punkte der Vorrunde
+(M5, N1, M7a, M7b) sind erledigt und im Browser nachgewiesen; **keiner davon
+hat die Schnittstelle berührt**. Zurück geht die Runde an drei kleinen Punkten
+in der Story-Datei, die alle aus derselben Nacharbeit stammen (A2, A3, A4),
+plus einem Mangel der **Spec** (A1). Nach der Hausregel („alles ✓ → fertig,
+sonst zurück") reicht das nicht für `fertig`; die vier sind in einem Zug zu
+erledigen.
+
+### Die Schnittstelle, Prop für Prop
+
+`CaseRow` ist `{ case: CaseListItem } & CaseColumnOptions` (`CaseRow.tsx:23–26`),
+`caseColumns()` nimmt dasselbe `CaseColumnOptions` (`case-columns.tsx:69–91`) —
+eine Prop kann in der Zeile nicht anders heißen als im Spaltensatz.
+
+| Prop | Spec (Tabelle + Neufassung) | Code | Ergebnis |
+|---|---|---|---|
+| `case` | `CaseListItem`, Pflicht | `case: CaseListItem`, Pflicht, `CaseRow.tsx:24` | ✓ |
+| `href` | Tabelle Z. 67: `string`, optional · Neufassung: **Funktion des Falls** | `href?: (item: CaseListItem) => string` (`case-columns.tsx:71`) | ✓ gegen die Neufassung, ✗ gegen die Tabelle → **A1** |
+| `columns` | `CaseColumn[]`, optional, Vorgabe alle zehn | `columns?: CaseColumn[]`, Vorgabe `DEFAULT_COLUMNS` = `ORDER` ohne `fiscalYear`/`documents`/`bankTransactions` = **zehn** (`case-columns.tsx:64–67`) | ✓ |
+| `counterpartyHref` | Tabelle Z. 69: `string`, optional · Neufassung: **Funktion des Falls** (L-69) | `counterpartyHref?: (item: CaseListItem) => string \| undefined` (`case-columns.tsx:77`) | ✓ gegen die Neufassung, ✗ gegen die Tabelle → **A1** |
+
+Keine Prop im Code, die die Spec nicht kennt; keine in der Spec, die der Code
+nicht hat. `CaseColumn` trägt die dreizehn Werte der Neufassung
+(`case-columns.tsx:32–45`), `ORDER` (Z. 48–62) hält die Reihenfolge des Profils
+und `caseColumns()` filtert nur (`return ORDER.filter(...)`, Z. 258) — die Prop
+**wählt aus und ordnet nicht um**, und zwar strukturell, nicht nur in der
+Story.
+
+### Kriterien
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Jede Prop gegen die Schnittstelle (Typ, Pflicht, Vorgabe) | Tabelle oben; vier Props, keine mehr, keine weniger | ja, mit **A1** |
+| Typen aus `src/ludwig/`, keine lokale Neudefinition | `CaseListItem` und `caseKindLabel` aus `@/ludwig/modules/accounting-cases/domain/case` (`CaseRow.tsx:1`, `case-columns.tsx:1`), `asCurrency` aus `@/ludwig/shared/money` (Z. 11); kein eigener Zeilentyp in beiden Dateien | ja |
+| Keine `as`-Zusicherung auf einen Fachtyp | `grep -nE '\bas [A-Z]'` über `CaseRow.tsx` und `case-columns.tsx` — **kein Treffer**; die Währung geht über die Funktion `asCurrency()` des Spiegels, nicht über einen Cast | ja |
+| `@when`/`@instead` an jedem Export | `CaseRow` (`CaseRow.tsx:17–22`), `caseColumns` (`case-columns.tsx:81–86`), `caseTracks` (Z. 261–266); `pnpm check:when` Exit **0** | ja |
+| Datei nach der Familie benannt, Story daneben, Titel richtig | `entities/accounting-case/{CaseRow,case-columns,CaseRow.stories}.tsx`; Titel `v3/Entitäten/Sachverhalt/CaseRow` (`CaseRow.stories.tsx:9`); Barrel `index.ts:384` (`CaseRow`) und `400–405` (`caseColumns`, `caseTracks`, `CaseColumn`, `CaseColumnOptions`) | ja |
+| Status nur über die Registry, keine lokale Label-Map | drei Achsen über `StatusBadge` — `sachverhalt` (Z. 138), `disposition` (Z. 189), `export_case` (Z. 243); die Art über `caseKindLabel` aus dem Spiegel (Z. 198), tonlos (`Badge tone="neutral"`, L-53); keine Zeichenkette in der Datei, die einen Status benennt | ja |
+| Kein Hex | `grep -nE '#[0-9a-fA-F]{3,8}\b'` über beide Dateien — **kein Treffer** | ja |
+| Kein px in der Komponente | `px` steht ausschließlich als `width` der Spuren (13 ×, `case-columns.tsx:103–251`), wie in `source-document-columns` und `account-columns`; `CaseRow.tsx` enthält **keine** Zahl | ja |
+| Story-Deckung | eigener Abschnitt unten | ja, mit **A2** |
+| Die sechs Wächter über den Exit-Code | `pnpm typecheck` **0** · `check:language` **0** · `check:icons` **0** (53 Zeichen in der Registry) · `check:contrast` **0** (33 Angaben) · `check:mirror` **0** (8 Fälle) · `check:when` **0** | ja |
+| Ihre Selbstprüfungen (`--test`) | `check-language --test` **0** (8 Fälle) · `check-contrast --test` **0** (16) · `check-when --test` **0** (11) · `mirror-filter --test` **0** (8). `check-icons.mjs` **hat keine `--test`** — Befund am Set | ja, 4 von 5 |
+| Jede Story rendert etwas | `innerText` des `#storybook-root`: `filled` 273 · `sparse` 188 · `columns` 559 · `without-link` 262 · `edges` 458 · `in-use` 709 Zeichen; jede zeigt Kopf **und** Zeilen (`.v2tbl__row` 1 · 1 · 6 · 1 · 2 · 5) | ja |
+| Keine Story schreibt in die Konsole | `Log.entryAdded` + `Runtime.consoleAPICalled` über alle sechs Stories: **eine** Meldung, `404 http://localhost:6107/favicon.ico` (per `Network.responseReceived` nachgesehen) — der Dev-Server, nicht der Baustein. Aus den Komponenten **null** | ja |
+| `pnpm build` | nicht ausgeführt (0117 — mehrere Prüfer teilen den Baum); `pnpm typecheck` Exit 0 steht dafür | offen |
+| offen (App): ersetzt die zwei handgeschriebenen Zeilen | nicht Gegenstand dieser Abnahme | offen |
+
+### Story-Deckung
+
+| Frage | Befund |
+|---|---|
+| Zahl gegen die Ableitung `spec-schreiben` §6 | 2 Zustände + 1 Enum (`columns`) + 1 Layout-Boolean (`href`) + 0 Callbacks + 1 „im Einsatz" + 1 Rand = **6**; vorhanden `Filled`, `Sparse`, `Columns`, `WithoutLink`, `Edges`, `InUse` — **stimmt** |
+| Hat jede Prop ihre Story | `case` → alle sechs · `href` → `Filled` (gemessen ein `.v2rowlink`) gegen `WithoutLink` (gemessen **0**) · `columns` → `Columns` · `counterpartyHref` → `Filled`/`InUse` (Anker `#partner-…`) — **ja** |
+| Enum vollständig gezeigt (§6 „alle Werte nebeneinander") | **ja, jetzt** — 13 von 13. Gemessene Köpfe: die zehn des Vorgabesatzes in `Filled`/`InUse`, `fiscalYear` im ersten Satz von `Columns` (`Sachverhalt · Stand · Nummer · Betrag · Eröffnet · Jahr`), `documents`/`bankTransactions` im zweiten (`Sachverhalt · Stand · Nummer · Belege · Zahlungen`). **M5 der Vorrunde ist damit zu** |
+| Ausgeschlossene Zustände begründet | „leer nach Filter", „lädt", „Fehler" gehören laut Verhalten der Liste (`TableLoading`, `ErrorRow`) — **ja** |
+| Sagen die Stories, was sie zeigen | **nein, an einer Stelle** — `Sparse` → **A2** |
+
+### Hat die Nacharbeit die Schnittstelle berührt?
+
+Die Frage des Auftrags, Punkt für Punkt — **nein, keiner der vier**:
+
+- **M5 (zweiter Spaltensatz in `Columns`).** Die Story ruft `caseColumns()` ein
+  zweites Mal auf (`CaseRow.stories.tsx:223–224`) und rahmt das Ergebnis in
+  einen zweiten `Frame`. Der Rahmen ist eine **Story-lokale** Hilfe (Z. 143),
+  kein Export; `CaseRow` bekommt dieselbe `columns`-Prop wie vorher. Keine neue
+  Prop, kein neuer Wert in `CaseColumn` — `documents` und `bankTransactions`
+  standen seit der Neufassung 2026-09-06 in der Union, sie hatte nur nie
+  jemand gerendert.
+- **N1 (Mindestbreite).** Berührt allein `minBreite()` in der Story-Datei
+  (Z. 126–141), eine Funktion, die weder exportiert noch von der Komponente
+  gelesen wird. `Table minWidth` ist eine Prop von `Table`, nicht von `CaseRow`.
+- **M7a / M7b.** Fixture-Werte (`counterpartyPartnerId`,
+  `openClarificationsCount`), kein Code.
+- **`CaseCell.layout` (0095, 2026-09-08).** Erreicht 0096 **nicht**:
+  `CaseRow.tsx` und `case-columns.tsx` importieren `CaseCell` nicht und nennen
+  sie nur im `@instead` und im Kommentar Z. 24 („It does not compose
+  `CaseCell`") — so will es die Freigabe vom 2026-09-06 (Grund 1: Anker im
+  Anker). Gegenprobe im Browser: `document.querySelectorAll('a a')` = **0** in
+  allen sechs Stories. Die drei Aufrufer von `layout` sind
+  `source-document-columns`, `bank-transaction-columns` und
+  `BankTransactionFacts`; kein Spaltensatz dieser Familie ist darunter.
+
+### Die vier Punkte der Vorrunde — nachgesehen
+
+- **M5 zu.** Zweiter Kopf in `…--columns` gemessen: `Belege` und `Zahlungen`
+  stehen, sechs Zeilen im Bild, `a a` = 0.
+- **N1 zu (soweit schlank prüfbar).** `minBreite()` liest den Boden jetzt aus
+  dem `minmax()` (`CaseRow.stories.tsx:137`) statt aus einer festen 175, und der
+  Kommentar sagt das auch. Die **Messung** (client = scroll) gehört zu 0119 und
+  wurde hier nicht wiederholt.
+- **M7a zu.** `…--in-use`, die Anker: `#partner-bp-8841`, `#partner-bp-8842`,
+  `#partner-bp-8845` — **drei verschiedene** Ids, und „Stadtwerke Musterstadt"
+  (`counterpartyPartnerId: null`, Z. 66) ist kein Anker. Fünf `.v2rowlink`,
+  acht Anker insgesamt.
+- **M7b zu (an der Fixture).** `…--sparse` zeigt gemessen **vier** „—" (Betrag,
+  Gegenpart, Wer ist dran, Export) und eine **leere** Klärungszelle; der Rand
+  mit „3 offen" steht in `…--edges`. Der Story-**Text** ist der Nacharbeit
+  nicht gefolgt → **A2**.
+
+### Mängel
+
+**A1 (Spec) — die Schnittstellen-Tabelle steht seit dem 2026-09-06 neben der
+Wahrheit.** *Kriterium:* jede Prop gegen die Schnittstelle der Spec (Typ,
+Pflicht, Vorgabe). *Ort:* Spec Z. 64–74 gegen `case-columns.tsx:69–79`.
+*Befund:* die Tabelle führt `href` und `counterpartyHref` als `string` und
+`CaseColumn` als „String-Union der **zehn** Punkte"; die Neufassung darunter
+macht beide zu **Funktionen des Falls** und die Union auf **dreizehn** Werte
+breit. Der Code folgt der Neufassung — richtig —, aber wer nur die
+Schnittstelle liest (und das tut die App beim Umzug), baut vier falsche
+Aufrufstellen. Denselben Mangel trägt 0095 als M1. Eine Abnahme ändert die
+Kriterien nicht, deshalb steht er hier statt in der Tabelle. *Kleinster Weg:*
+die vier Zeilen der Tabelle auf die Typen der Neufassung ziehen und den Satz
+darunter auf dreizehn Werte, drei davon opt-in. **Blockiert nicht.**
+
+**A2 — `Sparse` sagt das Gegenteil dessen, was `Sparse` zeigt.** *Kriterium:*
+Story-Deckung; die Story-JSDoc ist der Text, den Storybook dem Leser zeigt.
+*Ort:* `CaseRow.stories.tsx:190–191`. *Befund:* dort steht „Die Klärungsspalte
+zeigt hier drei offene: der Fall ist dünn an Stammdaten, nicht an Arbeit
+(berichtigt 2026-09-07, Abnahme 0096, M7)" — das war die Antwort auf M7. Die
+Reparatur von **M7b** hat die Fixture danach auf `openClarificationsCount: 0`
+gestellt (Z. 94), gemessen ist die Zelle leer. Der Satz, den M7 richtiggestellt
+hat, ist damit wieder falsch, nur andersherum: er behauptet einen Zustand, den
+die Story nicht mehr hat. Genau das Muster, vor dem der Kopf von
+`check-language.mjs` warnt — eingeschleppt von der Nacharbeit, die einen
+anderen Mangel behob. *Kleinster Weg:* die letzten beiden Sätze der JSDoc durch
+den Satz ersetzen, der zehn Zeilen höher schon an der Fixture steht (Z. 91–93):
+ohne Klärung, der Rand mit drei offenen in `Edges`. **Blockiert nicht.**
+
+**A3 — ein Import ohne Verwendung.** *Kriterium:* fest, „Code englisch /
+sauber"; ein Import, der nichts tut, behauptet eine Abhängigkeit, die es nicht
+gibt. *Ort:* `CaseRow.stories.tsx:5` — `import { StatusInfoButton } from
+"../../patterns/StatusInfoButton"`. *Befund:* seit der M4-Reparatur hängt das
+(i) nicht mehr von Hand in der Kopfzeile, sondern kommt über `c.headerAside`
+aus dem Spaltensatz (Z. 165); `grep -n "StatusInfoButton"` findet in der Datei
+nur noch die Import-Zeile. `pnpm typecheck` schweigt, weil `tsconfig.json`
+kein `noUnusedLocals` setzt, und ein Lint-Skript gibt es nicht — kein Wächter
+kann das finden. *Kleinster Weg:* Zeile 5 löschen. **Blockiert nicht.**
+
+**A4 — die Nacharbeit hat neue deutsche Bezeichner eingeführt.** *Kriterium:*
+CLAUDE.md, „Code nur Englisch. Bezeichner, Props, Typen, Kommentare … eine
+Datei, die ohnehin angefasst wird, bekommt englische Namen." *Ort:*
+`CaseRow.stories.tsx` — `boden` (Z. 137, aus der N1-Reparatur), `zaehler` und
+`zaehlerCols` (Z. 223–224, aus der M5-Reparatur); dazu die schon vorher
+vorhandenen `minBreite` (Z. 126) und `fest` (Z. 127). *Befund:* `git show
+f1913b6 -- CaseRow.stories.tsx` zeigt `boden`, `zaehler`, `zaehlerCols` als
+**neue** Zeilen derselben Nacharbeit — die Datei wurde ohnehin angefasst, die
+Regel greift also. `pnpm check:language` bleibt grün, weil er Story-Dateien
+ganz ausnimmt (Hausentscheid 0098 M10, Kopf des Skripts) und weil er
+Kommentare prüft, nicht Bezeichner. *Kleinster Weg:* fünf Umbenennungen —
+`minWidth`, `fixed`, `floor`, `counters`, `counterCols`. **Blockiert nicht.**
+
+### Was gemessen wurde und hielt
+
+- Alle sechs Stories rendern Kopf **und** Zeilen; `innerText` 188–709 Zeichen,
+  keine leere Story.
+- Aus den Komponenten kommt **keine** Konsolenmeldung; die einzige Meldung im
+  ganzen Lauf ist der `favicon.ico`-404 des Dev-Servers.
+- `a a` = **0** in allen sechs Stories — die Zeile hat keinen Anker im Anker,
+  obwohl sie zwei Klickwege trägt.
+- `…--without-link`: `.v2rowlink` = **0**, einziger Anker ist der Gegenpart
+  (`#partner-bp-8841`). `…--filled`: ein `.v2rowlink` (`#fall-c-4412`) plus der
+  Gegenpart.
+- Reihenfolge fest: gemessener Kopf in `filled`, `sparse`, `without-link`,
+  `edges`, `in-use` je `Sachverhalt · Stand · Nummer · Betrag · Gegenpart ·
+  Wer ist dran · Art · Klärung · Eröffnet · Export` = Ränge 1–10 des Profils.
+  `…--columns` übergibt `fiscalYear, state, amount, openedAt, number, name`
+  **verdreht** und rendert `Sachverhalt · Stand · Nummer · Betrag · Eröffnet ·
+  Jahr` — ausgewählt, nicht umgeordnet.
+- Sechs Wächter Exit 0, vier Selbstprüfungen Exit 0.
+- Die Achsen kommen aus der Registry, die Art bleibt tonlos, solange L-53 offen
+  ist; keine Zeichenkette in `case-columns.tsx` benennt einen Status.
+
+### Befunde am Set (gehören nicht zu 0096)
+
+- **S1 (aus der Vorrunde, unverändert)** — `headerAside` steht ohne Abstand am
+  Wort; `StatusHeader`/`.v2sth` (0077) hat im ganzen Tabellenweg keinen
+  Aufrufer. Hier nicht nachgemessen (0119), aber im Code unverändert.
+- **S2 (aus der Vorrunde, jetzt sichtbar)** — doppeltes `.v2num`:
+  `CaseRow.tsx:34` legt um jede `align: "end"`-Zelle ein `<span class="v2num">`,
+  und `fiscalYear`, `documents`, `bankTransactions` bringen selbst eines mit
+  (`case-columns.tsx:220/227/255`). Solange die zwei Zähler keine Story hatten,
+  war das theoretisch — mit dem zweiten Satz in `Columns` stehen sie jetzt im
+  Bild. Kosmetisch, aber die Regel steht zweimal: entweder der Rahmen setzt
+  `.v2num` oder die Zelle, nicht beide.
+- **S3 (neu)** — `check:language` kann „Code englisch" für Story-Dateien nicht
+  durchsetzen: er nimmt sie ganz aus (wegen der JSDoc, die in Storybook
+  erscheinen) und prüft ohnehin nur Kommentare, keine Bezeichner. Die Folge
+  steht als A4 in dieser Aufgabe und dürfte im Set nicht allein sein. Denkbar
+  wäre, die Ausnahme auf JSDoc-Blöcke zu verengen statt auf die ganze Datei.
+- **S4 (neu)** — `check:icons` ist der einzige der sechs Wächter **ohne**
+  `--test`. Die fünf anderen fahren ihre Selbstprüfung; wer die Wächter über
+  den Exit-Code beurteilt, hat bei diesem einen nichts, was die Prüfung selbst
+  prüft.
+- **S5 (klein)** — kein `noUnusedLocals` in `tsconfig.json` und kein
+  Lint-Skript in `package.json`: ein toter Import (A3) fällt im ganzen Set
+  durch alle sechs Wächter. Eine Zeile in der `tsconfig` fände ihn.
+
+Abgenommen von / am: **zurück** — designsystem (fremder Prüfer, schlanke
+Abnahme (Schnittstelle)), 2026-09-08. Kein Mangel blockiert. Die Schnittstelle
+ist vollständig und stimmt mit der Neufassung überein; die vier Punkte der
+Vorrunde sind erledigt und keiner hat sie berührt. Offen sind **A1** (die
+Schnittstellen-Tabelle der Spec ist veraltet), **A2** (`Sparse` behauptet drei
+offene Klärungen, zeigt aber keine), **A3** (toter Import) und **A4** (neue
+deutsche Bezeichner in der Story-Datei) — vier kleine Punkte in einem Zug.
+`pnpm build` bleibt für die Wiedervorlage offen (0117); Maße, Kontraste,
+Trefferflächen und Tastaturwege liegen bei 0119.
+
+## Nach der schlanken Abnahme (2026-09-08)
+
+Urteil war **zurück**, ohne Blocker: die Schnittstelle selbst ist vollständig
+(`CaseRow` = `{ case: CaseListItem } & CaseColumnOptions`, vier Props), und
+Zeile und Spaltensatz können nicht auseinanderlaufen, weil sie dasselbe
+Options-Objekt teilen. Die vier Punkte der Vorrunde sind erledigt und
+**keiner** hat die Schnittstelle berührt.
+
+Die vier kleinen sind behoben:
+
+**A1 — die Schnittstellen-Tabelle war hinter dem Code.** `href` und
+`counterpartyHref` standen als `string`, im Code sind es **Funktionen**
+(`(item: CaseListItem) => string`) — dieselbe Form wie in `CaseCell`, damit
+die Zeile keine URL baut. Und `CaseColumn` führte zehn Werte, es sind
+**dreizehn** (`fiscalYear`, `documents`, `bankTransactions` kamen dazu).
+Dasselbe Muster wie in 0095: die Abnahmen haben den Code korrigiert, die Spec
+hat es nicht mitgeschrieben.
+
+**A2 — die `Sparse`-JSDoc behauptete drei offene Klärungen**, während die
+M7b-Reparatur die Fixture auf 0 gestellt hat. Der Satz sagt jetzt, was da ist,
+und verweist für den Rand auf `Edges`.
+
+**A3 und A4 waren meine eigenen Reste von gestern:** ein toter Import
+(`StatusInfoButton`) und drei deutsche Bezeichner (`boden`, `zaehler`,
+`zaehlerCols`) aus der Nacharbeit.
+
+### Was daraus folgt: `noUnusedLocals` ist an
+
+A3 fiel nur einer Abnahme auf, weil nichts danach sucht — der Wächter prüft
+Kommentare, nicht Bezeichner, und ein Lint gibt es nicht. `tsconfig.json` hat
+jetzt `noUnusedLocals` und `noUnusedParameters`, und der erste Lauf fand
+**sieben** tote Stellen in fünf Dateien, darunter drei aus meinen eigenen
+Umbauten von heute.
+
+Eine davon war mehr als Kosmetik: `DataTable` destrukturierte `rowHref` und
+las es nie — `bodyRow` holt es sich selbst aus `props`. Genau die Prop, die
+die 0101-Abnahme als „ohne Zeile in der Schnittstelle und ohne Story"
+gemeldet hatte; der Typprüfer hat bestätigt, dass sie an dieser Stelle tot
+war.
+
+**Status: Abnahme.**
