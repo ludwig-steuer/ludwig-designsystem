@@ -214,7 +214,11 @@ export const InUse: Story = {
  * Zuordnungs-Notiz über 400 Zeichen, `schedule: null` — dann **entfällt** die
  * Gruppe „Erwartung" —, und eine gesetzte Belegseite (Vertragsnummer +
  * Belegtext-Muster), die im Bestand zu 0 % gefüllt ist und in keiner
- * Oberfläche steht (L-249).
+ * Oberfläche steht.
+ *
+ * Dazu `currency="CHF"`: die Regel selbst führt **keine** Währungsspalte, jeder
+ * Betrag an ihr ist Euro. Eine andere Währung kann darum nur vom Aufrufer
+ * kommen — und wenn die Prop das können soll, muss eine Story es zeigen.
  */
 export const Edges: Story = {
   render: () => {
@@ -251,7 +255,7 @@ export const Edges: Story = {
     });
     return (
       <div style={{ maxWidth: 720 }}>
-        <RecurringRuleFacts {...facts(r)} all />
+        <RecurringRuleFacts {...facts(r)} all currency="CHF" />
       </div>
     );
   },

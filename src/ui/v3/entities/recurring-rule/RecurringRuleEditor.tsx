@@ -520,12 +520,15 @@ export function RecurringRuleEditor({
 
           <Disclosure
             summary="Buchung im Detail"
-            defaultOpen={Boolean(
-              draft.template.taxKey ??
-                draft.template.taxRatePercent ??
-                draft.paymentAccountId ??
-                draft.template.lines,
-            )}
+            // Not a `??` chain: it stops at the first value that is merely
+            // *set*, and `taxRatePercent: 0` — a lawful rate, tax-free — is
+            // set and falsy. The fold would hide an entry someone made.
+            defaultOpen={
+              draft.template.taxKey != null ||
+              draft.template.taxRatePercent != null ||
+              draft.paymentAccountId != null ||
+              draft.template.lines != null
+            }
           >
             <TaxKeyField
               value={draft.template.taxKey}

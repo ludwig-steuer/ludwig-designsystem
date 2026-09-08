@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** |
+| Status | fertig — abgenommen 2026-09-08, am selben Tag nachgearbeitet; die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Buchungsweise, Personenkonto, Gegenkonto, BU-Schlüssel, Sollstellung |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Datenpunkte" (die Punkte mit änderbar = **Nutzer**), „Formen" (Zeile `RecurringRuleEditor`), „Zuschnitt" (Marke **jetzt**) · Owner-Entscheid vom 2026-09-08 zum Leerfall |
@@ -157,9 +157,9 @@ Pick<RecurringRule,
   | "isActive" | "template">
 ```
 
-**Elf Props — und §4 sagt: trotzdem eine Komponente.** Sechs davon sind
+**Zwölf Props — und §4 sagt: trotzdem eine Komponente.** Sechs davon sind
 Aufrufer-Werkzeuge (Speichern, Abbrechen, Trefferzahl, Kontenquelle,
-Vorschau, Fehler), fünf sind der Entwurf und seine Wörter. Sie zu trennen
+Vorschau, Fehler), sechs sind der Entwurf und seine Wörter. Sie zu trennen
 hieße, den Entwurf zu teilen — und den teilt niemand.
 
 **Was der Editor bewusst nicht kann:**
@@ -345,11 +345,43 @@ eine eigene Aufgabe.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Schlanke Abnahme nach Owner-Entscheid 2026-09-08: geprüft ist die
+**Schnittstelle**, nicht die Darstellung. Pixel, Abstände und Farbwirkung
+stehen bei **0119**.
 
-Abgenommen von / am: … · Offene Punkte: …
+| Kriterium | Nachweis (Datei:Zeile · Story · Befehl) | Ergebnis |
+|---|---|---|
+| **Schnittstellen-Tabelle Zeichen für Zeichen** | Alle zwölf Zeilen decken sich mit `RecurringRuleEditor.tsx:118–162`: `onSubmit`, `accounts` und `labels` Pflicht, die neun übrigen optional, Namen und Typen wie geschrieben. Der Inline-Typ von `accounts` steht im Code als exportiertes `RecurringRuleAccounts` (`:105–109`) — gleiche Form, zusätzlicher Name. `RecurringRuleDraft` ist der `Pick` aus der Spec, Feld für Feld (`recurring-rule.ts:68–87`) | ✓ |
+| **Der Prosa-Satz „Elf Props"** | Die Tabelle hat zwölf Zeilen, der Code zwölf Props; der Satz darunter zählt elf und teilt sie in „sechs Aufrufer-Werkzeuge, fünf Entwurf und Wörter" — die Rechnung geht nicht auf | ✗ |
+| `pnpm typecheck` grün | Exit 0 (ein Lauf für 0131–0135, 2026-09-08). `pnpm build` nach Owner-Entscheid 2026-09-07 nicht gelaufen | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `RecurringRuleEditor.tsx` · `.stories.tsx` · Titel `v3/Entitäten/Wiederkehr-Regel/RecurringRuleEditor` (`stories:25`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `RecurringRuleEditor.tsx:112–117`; `pnpm check:when` und `check:language` Exit 0 | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | Keine Inline-Styles, kein Hex; die drei Modi kommen aus `resolveStatus("regel_modus", …)` (`:340`), der Rhythmus aus `RULE_INTERVAL_LABEL` (`:437`), die Richtung aus `labels` | ✓ |
+| Alle Stories vorhanden; ausgeschlossene begründet | 9 Exporte (`New`, `Filled`, `Modes`, `Invalid`, `Pending`, `Error`, `Interactive`, `InUse`, `Edges`) wie in der Spec; `LeerNachFilter` begründet ausgelassen. Die zwei Callbacks teilen sich `Interactive` — so steht es in der Ableitung | ✓ |
+| Story je Prop wie zugewiesen | Jede der zwölf Props wird in mindestens einer Story gesetzt. Anmerkung: `paymentAccounts` hat als Nachweis `Edges`, und dort ist die Prop **weggelassen** (der Fall „kein Zahlungskonto"); die gefüllte Auswahl steht in `New`, `Filled`, `Interactive` und `InUse` | ✓ |
+| Prüfliste §9, soweit ohne Browser prüfbar | Zahlen rechts in der Split-Vorlage (`:700` `v2num`), Prozentfelder mit `InputGroup suffix="%"`; kein Icon ohne Wort; Sie-Form und GLOSSARY-Begriffe in den Feldtexten. Kontrast, Trefferfläche, Fokusring | vertagt auf 0119 |
+| Im Browser angesehen | Messprotokoll im Abschnitt „Gemessen" | vertagt auf 0119 |
+| Ohne `defaultValue` leer, zwölf Felder, drei Abschnitte gefaltet | `EMPTY` (`:60–85`) mit `bookingMode: "book_on_payment"` → kein Personenkonto-Feld; sichtbar bleiben Gegenpartei, IBAN, Richtung, Betrag, Toleranz, Toleranz in Prozent, Buchungsweise, Gegenkonto, Vorlagenbetrag, Buchungstext, Rhythmus, Zahltag = **12**. Alle drei `Disclosure defaultOpen` werten auf `false` (`:472`, `:523`, `:575`); Story `New` | ✓ |
+| Ein gefalteter Abschnitt, in dem ein Wert steht, ist **offen** | Gilt für „Weitere Kriterien" (`:472`) und „Notiz" (`:575`). **Nicht** für „Buchung im Detail": `Boolean(taxKey ?? taxRatePercent ?? paymentAccountId ?? lines)` (`:523–529`) — bei `taxRatePercent: 0` **ohne** Steuerschlüssel ergibt die Kette `0` und damit `false`, der Abschnitt bleibt zu, obwohl jemand einen gültigen USt-Satz (0 %, steuerfrei) eingetragen hat. Die Klappe versteckt dann genau das, was sie nicht verstecken darf | ✗ |
+| Drei Wahlmöglichkeiten mit den Beschreibungen der Achse; `match_only` zeigt den Satz | `:334–352`: `modes` sind alle drei Werte, Label und `hint` aus `resolveStatus`; bei `bookless` steht der `Callout` statt der Vorlagenfelder (`:348`). Story `Modes` | ✓ |
+| Personenkonto **nur** bei `accrue_then_settle` | `accrues` (`:185`) bewacht das Feld (`:357`); Story `Modes`, drei Formulare nebeneinander | ✓ |
+| Sollstellung ohne Personenkonto blockiert, Grund neben dem Knopf | `missingPersonal` (`:190`) geht in `reasons`/`why` (`:209–216`) und an `ActionBar info` (`:641`), dazu ans Feld (`:360`); `send()` bricht bei `blocked` ab (`:220`). Story `Invalid` | ✓ |
+| Ungültiger Regex blockiert, geprüft mit `isValidRegex()` | `:191–194`, Import aus dem Spiegel (`:6`); `grep -n "new RegExp" RecurringRuleEditor.tsx` → 0 Treffer. Story `Invalid` | ✓ |
+| Regel **ohne Kriterium** speichern, nur warnen | In `reasons` steht kein Kriterien-Fall (`:209–214`); die Warnung ist der `summary`-`Callout` (`:602`). Story `New` | ✓ |
+| Der Editor formuliert keinen Satz selbst | `grep -n "describeRecurringRule\|hasAnyCriterion\|MATCH_CRITERIA" RecurringRuleEditor.tsx` → 0 Treffer | ✓ |
+| Der Editor rechnet keine Trefferzahl | `grep -n "matchTransaction" RecurringRuleEditor.tsx` → 0 Treffer; `MatchCount` (`:717–723`) zeigt nur, was hereinkommt, und ohne Prop **nichts** statt einer Null | ✓ |
+| Die Konten kommen als **Nummer** in den Entwurf | `AccountField onChange` schreibt `personalAccountNumber` (`:373`) bzw. `template.counterAccountNumber` (`:387`) als String; keine Id im Entwurf. Story `Interactive` | ✓ |
+| `template.lines` geht unverändert durch und ist nicht änderbar | `SplitTemplate` (`:689–707`) rendert nur Text, kein `input`; `updateTemplate` (`:181`) spreizt `draft.template` und lässt `lines` stehen. Story `Edges` | ✓ |
+| Der Entwurf trägt **kein** `priority` | `RecurringRuleDraft` (`recurring-rule.ts:68–87`) ohne `priority`; `grep -n "priority" RecurringRuleEditor.tsx` → 0 Treffer | ✓ |
+| `Strg`/`Cmd` + `Enter` speichert, `Esc` bricht ab, beide sichtbar | `onKeyDown` (`:230–237`), `hotkey="Strg+Enter"` am `ActionButton` (`:620`) und `hotkey="Esc"` am Abbrechen-Knopf (`:633`), das es nur mit `onCancel` gibt | ✓ |
+| `pending` sperrt jede Eingabe; `error` über der Aktionszeile | Jedes Feld trägt `disabled={pending}`, die zwei `AccountField` sitzen im `Lock`-`fieldset[disabled]` (`:655–661`); der `error`-`Callout` (`:603`) steht **vor** `ActionBar` (`:615`). Stories `Pending`, `Error` | ✓ |
+| Nachtrag „was ohne die Prop behauptet wird" | Ohne `matchCount` steht **nichts** statt einer Null (`:718`); ohne `paymentAccounts` ist die Auswahl gesperrt und sagt „Konto der jeweiligen Zahlung" (`:555`, `:564`) — eine Aussage, kein leeres Feld (die Spec zitiert dafür „Konto der jeweiligen Transaktion"); ohne `renderPreview` fehlt die Vorschau ganz (`:592`); ohne `summary` fehlt die Warnung. Keine Prop, deren Fehlen etwas Falsches behauptet | ✓ |
+| Ersetzt `RuleEditorForm` **und** `MatchingNoteForm` | Die Ablösung ist ein eigener Schritt in `ludwig/app` | offen (App) |
+
+Abgenommen von / am: Claude (zweiter Agent), 2026-09-08 ·
+**Offene Punkte:** (1) „Buchung im Detail" bleibt bei `taxRatePercent: 0`
+gefaltet, obwohl dort ein Wert steht — `?? `-Kette gegen `!= null` tauschen;
+(2) „Elf Props" gegen zwölf in der Tabelle.
 
 ## Nachtrag 2026-09-08 — zwei Props, deren Weglassen still schadet
 
@@ -369,3 +401,30 @@ eine Prop, die man weglassen **darf**, deren Weglassen aber eine Aussage
 verfälscht statt sie nur zu unterdrücken. Für die Abnahme heißt das: bei
 einer optionalen Prop nicht nur prüfen, ob sie eine Story hat, sondern was
 ohne sie **behauptet** wird. „Fehlt" und „ist falsch" sehen im DOM gleich aus.
+
+## Nacharbeit zur Abnahme, 2026-09-08
+
+Zwei Mängel: ein echter Fehler und ein Zahlwort.
+
+**M1 — die Klappe „Buchung im Detail" blieb bei 0 % zu.** `defaultOpen` stand
+auf `Boolean(taxKey ?? taxRatePercent ?? paymentAccountId ?? lines)`. Die
+`??`-Kette hält beim ersten Wert an, der **gesetzt** ist — und `0` ist
+gesetzt. `Boolean(0)` ist `false`, also faltete die Klappe einen USt-Satz von
+0 % weg, obwohl 0 % ein gültiger Satz ist (steuerfrei) und jemand ihn
+eingetragen hatte. Genau das, was die Klappe laut Spec nie tun darf: etwas
+verbergen, was jemand geschrieben hat.
+
+Jetzt vier `!= null`-Prüfungen. Der Unterschied ist die ganze Sache: `??`
+fragt „ist einer gesetzt?" und gibt den **Wert** zurück, `!= null` fragt
+dasselbe und gibt die **Antwort** zurück. Wer den Wert an `Boolean` weiterreicht,
+lässt die falsy-Werte des Wertebereichs über die Sichtbarkeit entscheiden — bei
+Zahlen ist das die 0, bei Texten der leere String, und beide sind hier gültige
+Eingaben.
+
+Nachzumessen in **0119**: eine Regel mit `taxRatePercent: 0` und ohne
+Steuerschlüssel, die Klappe muss offen aufgehen.
+
+**M2 — „Elf Props" gegen zwölf.** Dieselbe Sorte Fehler wie in 0132 („Dreizehn"
+gegen 18): die Tabelle wurde beim Bauen mitgezogen, der Satz daneben nicht.
+Die Aufteilung darunter stimmte deshalb auch nicht mehr — sechs und sechs,
+nicht sechs und fünf.

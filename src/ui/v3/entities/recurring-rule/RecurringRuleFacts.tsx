@@ -211,7 +211,12 @@ export function RecurringRuleFacts({
       origin.push(["Split-Vorlage", `${t.lines.length} Gegenkonto-Zeilen`]);
     }
     if (t.taxKey) origin.push(["Steuerschlüssel", <MonoCell key="tk" value={t.taxKey} />]);
-    if (t.taxRatePercent !== null) origin.push(["USt-Satz", `${t.taxRatePercent} %`]);
+    if (t.taxRatePercent !== null) {
+      origin.push([
+        "USt-Satz",
+        <span key="tr" className="v2num">{`${t.taxRatePercent} %`}</span>,
+      ]);
+    }
     origin.push([
       "Belegnummern-Strategie",
       ruleLabel(labels.documentNumberStrategy, rule.documentNumberStrategy),

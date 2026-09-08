@@ -435,6 +435,7 @@ export { BankTransactionWorklist } from "./entities/bank-transaction/BankTransac
 /* Wiederkehr-Regel — Spaltensatz, Zeile, Listen, Fakten, Editor (0131–0135) */
 export {
   recurringRuleColumns,
+  recurringRuleColumnOrder,
   recurringRuleTracks,
   RECURRING_RULE_COLUMN_LABEL,
   RECURRING_RULE_ROW_COLUMNS,
@@ -451,7 +452,6 @@ export {
 } from "./entities/recurring-rule/RecurringRuleRow";
 export {
   RecurringRuleList,
-  type RecurringRuleListItem,
 } from "./entities/recurring-rule/RecurringRuleList";
 export { RecurringRuleOverview } from "./entities/recurring-rule/RecurringRuleOverview";
 export {

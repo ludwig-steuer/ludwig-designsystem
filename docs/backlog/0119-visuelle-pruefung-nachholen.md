@@ -44,6 +44,16 @@ Damit klar ist, was **nicht** hierher vertagt wird:
 - **Tastatur**: Fokusfallen, Reihenfolge, Escape und Enter
 - je an vier Breiten (700 · 1100 · 1400 · 1920) und in der Story „im Einsatz"
 
+**Namentlich vorgemerkt aus den Nacharbeiten vom 2026-09-08** — jeweils eine
+Behauptung, die nur eine Messung stützt:
+
+| Woher | Was zu messen ist |
+|---|---|
+| 0135 | Eine Regel mit `taxRatePercent: 0` **ohne** Steuerschlüssel: die Klappe „Buchung im Detail" muss offen aufgehen. Vorher faltete sie zu, weil `Boolean(0)` falsch ist — der Fix ist gebaut, aber unbewiesen |
+| 0134 | `Edges` mit `currency="CHF"`: schlägt die Währung bis in `AmountCell` und `JournalEntryCard` durch, oder steht irgendwo noch ein Euro-Zeichen |
+| 0132 · 0133 | Ein Spaltensatz, der **nicht** schon in `ORDER`-Reihenfolge steht: Kopfzeile, Spuren und Zellen müssen sich trotzdem decken. Das ist der Fall, den `recurringRuleColumnOrder()` abfangen soll |
+| 0126 | Die Kachel mit `href` **und** einem Link im Untertitel — sie darf so nicht gebaut werden, und die Messung sagt, ob man es sieht, wenn doch |
+
 ## Wie das später läuft
 
 `scripts/cdp.mjs` steht im Repo und räumt seinen Browser selbst ab; die

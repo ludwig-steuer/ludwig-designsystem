@@ -5,6 +5,7 @@ import { Card, CardHead, HeadRow, Table } from "../../primitives/Table";
 import { LABELS, LABELS_WITH_GAPS, caseLink } from "./fixtures";
 import {
   RECURRING_RULE_COLUMN_LABEL,
+  recurringRuleColumnOrder,
   recurringRuleTracks,
   type RecurringRuleColumn,
 } from "./recurring-rule-columns";
@@ -74,7 +75,7 @@ function Frame({
         <CardHead title={title} {...(sub ? { sub } : {})} />
         <Table cols={recurringRuleTracks(columns)} minWidth={columns.length > 6 ? 1280 : 900}>
           <HeadRow>
-            {columns.map((c) => (
+            {recurringRuleColumnOrder(columns).map((c) => (
               <span key={c} className={c === "amount" ? "v2num" : undefined}>
                 {RECURRING_RULE_COLUMN_LABEL[c]}
               </span>

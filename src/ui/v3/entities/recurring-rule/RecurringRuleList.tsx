@@ -4,6 +4,7 @@ import { Card, CardHead, EmptyRow, HeadRow, Table } from "../../primitives/Table
 import {
   RECURRING_RULE_COLUMN_LABEL,
   RECURRING_RULE_OVERDUE_COLUMNS,
+  recurringRuleColumnOrder,
   recurringRuleTracks,
   type RecurringRuleListRow,
 } from "./recurring-rule-columns";
@@ -31,17 +32,6 @@ import type { RecurringRuleLabels } from "./recurring-rule";
  * No pager and no sorting either: the population is the active rules with a
  * rhythm, at most 29 in the stock, and in the usual case one to five rows.
  */
-
-/**
- * One row of the list: what the row shows, plus the key.
- *
- * **Without `labels` and `caseHref`** — those two are props of the list and
- * are handed down to every row. Demanding them per row would make the list's
- * own two props unreachable and repeat the same object in every entry (the
- * one place where this list deviates from the interface written in 0133, and
- * it deviates in order to keep that interface's own sentence true).
- */
-export type RecurringRuleListItem = RecurringRuleListRow;
 
 /**
  * The case leads: this list has left its own case — it counts across every
@@ -74,8 +64,16 @@ export function RecurringRuleList({
   total,
   title = "Erwartete Zahlungen ohne Eingang",
 }: {
-  /** The overdue rules in the order of the query — the list does not sort. */
-  rules: readonly RecurringRuleListItem[];
+  /**
+   * The overdue rules in the order of the query — the list does not sort.
+   *
+   * **Without `labels` and `caseHref`**: those two are props of the list and
+   * are handed to every row. Per row they would make the list's own two props
+   * unreachable and repeat the same object in every entry — the one place
+   * where this list deviates from the interface written in 0133, and it
+   * deviates in order to keep that interface's own sentence true.
+   */
+  rules: readonly RecurringRuleListRow[];
   /** The German words of the family, handed to every row (L-242, L-256). */
   labels: RecurringRuleLabels;
   /**
@@ -98,7 +96,7 @@ export function RecurringRuleList({
       />
       <Table cols={recurringRuleTracks(COLUMNS)} minWidth={MIN_WIDTH}>
         <HeadRow>
-          {COLUMNS.map((c) => (
+          {recurringRuleColumnOrder(COLUMNS).map((c) => (
             <span key={c} className={c === "amount" ? "v2num" : undefined}>
               {RECURRING_RULE_COLUMN_LABEL[c]}
             </span>

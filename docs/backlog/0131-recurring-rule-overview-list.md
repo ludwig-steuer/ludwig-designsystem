@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** |
+| Status | fertig — abgenommen 2026-09-08, am selben Tag nachgearbeitet; die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Buchungsweise, Personenkonto, Gegenkonto und Belegnummern-Strategie sind Ludwig-Fachbegriffe |
 | Quelle | Seitenprofil `docs/seiten/regelwerk-mandant.md` (Job **J-54**) · Entitätsprofil `docs/entitaeten/recurring-rule.md`, Abschnitte „Listen" (zweite Zeile) und „Formen" (`RecurringRuleList` „Regelwerk des Mandanten") · der Auftrag, der bis zum 2026-09-08 in dieser Datei stand |
@@ -183,6 +183,8 @@ GLOSSARY: `recurring rule` im Code, „Wiederkehr-Regel" im Label;
 | `RECURRING_RULE_BOOK_COLUMNS` | Satz 3 — das Regelwerk des Mandanten (0131) |
 | `recurringRuleTracks()` | die Spur für einen Satz, damit Kopf und Zeilen dieselbe lesen |
 | `recurringRuleColumns()` | die `ColumnDef`-Objekte für `DataTable` |
+| `RecurringRuleColumnOptions` | was `recurringRuleColumns()` braucht — und zugleich der halbe Prop-Satz von `RecurringRuleRow`, die diese Zellen rendert |
+| `recurringRuleColumnOrder()` | die gewählten Spalten **in der angewandten Ordnung**; wer seine Kopfzeile von Hand baut, baut sie hieraus (Nacharbeit 2026-09-08) |
 
 **Was die Liste bewusst nicht kann:**
 
@@ -436,11 +438,39 @@ sie dort; die Liste verlangt sie nicht und die Prop dafür gibt es nicht.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Schlanke Abnahme nach Owner-Entscheid 2026-09-08: geprüft ist die
+**Schnittstelle**, nicht die Darstellung. Kein Storybook, keine Messung —
+Pixel, Abstände und Farbwirkung stehen bei **0119**.
 
-Abgenommen von / am: … · Offene Punkte: …
+| Kriterium | Nachweis (Datei:Zeile · Story · Befehl) | Ergebnis |
+|---|---|---|
+| **Schnittstellen-Tabelle Zeichen für Zeichen** | `RecurringRuleOverview.tsx:58–108`: elf Props, Namen, Typen und Pflicht wie in der Tabelle — `rules`, `labels`, `ruleHref` Pflicht; `accountHref`, `casesWithoutRule`, `total`, `sort`, `href`, `filtered`, `loading`, `error` optional. Keine Prop im Code, die in der Tabelle fehlt | ✓ |
+| **Katalog-Tabelle „Der Katalog"** | Der Code exportiert einen **zehnten** Baustein, den die Tabelle nicht nennt: `RecurringRuleColumnOptions` (`recurring-rule-columns.tsx:249`, re-exportiert in `src/ui/v3/index.ts:444`). Er ist die Option-Hälfte von `RecurringRuleRowProps` und damit Teil der öffentlichen Schnittstelle | ✗ |
+| `pnpm typecheck` grün | Exit 0 (ein Lauf für 0131–0135, 2026-09-08). `pnpm build` nach Owner-Entscheid 2026-09-07 nicht gelaufen | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `RecurringRuleOverview.tsx` · `.stories.tsx` · Titel `v3/Entitäten/Wiederkehr-Regel/RecurringRuleOverview` (`stories:12`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `RecurringRuleOverview.tsx:52–57`; `pnpm check:when` und `check:language` Exit 0 | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep "style=\|#[0-9a-f]{3,6}"` über die fünf Komponentendateien: 0 Treffer. Buchungsweise über `StatusBadge axis="regel_modus"` (`recurring-rule-columns.tsx:325`), die übrigen Wörter kommen als `labels`-Prop | ✓ |
+| Alle Stories vorhanden; ausgeschlossene begründet | 7 Exporte (`Filled`, `Empty`, `EmptyAfterFilter`, `Loading`, `Error`, `InUse`, `Edges`) = §6-Rechnung 5+0+0+0+1+1; `Varianten` und `Interaktiv` in der Spec begründet ausgelassen | ✓ |
+| Prüfliste §9, soweit ohne Browser prüfbar | Zahlen rechts nur bei „Erwartet" (`recurring-rule-columns.tsx:233`), sonst links; kein Icon ohne Wort (keine `lucide`-Importe in der Familie); Sie-Form und GLOSSARY-Begriffe in den Strings. Kontrast, Trefferfläche, Hover, Zeilenhöhe | vertagt auf 0119 |
+| Im Browser angesehen | Messprotokoll im Abschnitt „Gemessen" | vertagt auf 0119 |
+| Zehn Spalten in der Rangordnung 6, 1, 2, 3, 4, 5, 7, 10, 11, 22 | `RECURRING_RULE_BOOK_COLUMNS` (`recurring-rule-columns.tsx:172–183`) hat zehn Einträge, `pick()` (`:244`) legt die Reihenfolge aus `ORDER` (`:120`) fest. Kopf und Zeilen lesen **eine** Spur: `DataTable` baut `cols` aus `ColumnDef.width` (`DataTable.tsx:289–292`), und `width` kommt aus demselben `TRACK` wie `recurringRuleTracks()` (`:302`, `:281`). Anmerkung: die Liste ruft `recurringRuleTracks` **nicht** — das Kriterium nennt den falschen Mechanismus, die Zusage hält trotzdem | ✓ |
+| Die drei Auffälligkeiten tragen je ein Wort, keine Farbe | `Filled`: „inaktiv" (`recurring-rule-columns.tsx:330`), „ohne Personenkonto" (`:356`), „2 Regeln" (`:404`); `.v2rrov__dup` und `.v2rrrow__none` tragen `--color-text-muted`, keinen Ton (`v3.css:3774`, `:3872`) | ✓ |
+| `rules`: die Liste sortiert und filtert nicht | `RecurringRuleOverview.tsx:111` reicht `rows={[...rules]}` durch; kein `sort()`, kein `filter()` in der Datei | ✓ |
+| `ruleHref` auf der ganzen Zeile, `.v2rowlink`, ein Fokus-Stopp, kein `<a>` in `<a>` | `:118` `rowHref={ruleHref}`; `DataTable.tsx:486–487` setzt `.v2rowlink` **nur** in der ersten Zelle. Der Spaltensatz bekommt hier **kein** `caseHref` (`:112–116`), deshalb rendert `Case` Nummer und Titel als Text statt `CaseCell` (`recurring-rule-columns.tsx:392–399`) — kein zweiter Anker | ✓ |
+| `accountHref` macht beide Konten zu Wegen; ohne die Prop bleiben sie Text | `recurring-rule-columns.tsx:449–456`: `AccountCell` bekommt `href` nur, wenn die Prop da ist. Story `Filled` mit, `Error` ohne | ✓ |
+| `casesWithoutRule` trägt Zone 6 **und** den Leerfall; `count === 0` ohne Zahl und ohne Weg | `:129–132` (Zone 6 nur bei `count > 0`, über `DataTable next`) und `emptyState()` (`:173–190`); Story `Empty` stellt beide Formen nebeneinander | ✓ |
+| `total` bildet den Nenner; ohne die Prop nur die Trefferzahl | `counter()` (`:143–147`), Stories `Filled` (`total={30}`) und `EmptyAfterFilter` | ✓ |
+| `sort` + `href` machen vier Köpfe zu Sortier-Links, `aria-sort` am Kopf | `SORTABLE` (`recurring-rule-columns.tsx:236–241`) = `case`, `counterparty`, `validity`, `amount`; `DataTable.tsx:449` setzt `aria-sort` am `columnheader`, nur der aktive Kopf trägt den Zustand | ✓ |
+| `filtered` ersetzt den Leertext | `:126` durchgereicht; Story `EmptyAfterFilter` mit `summary` und `resetHref` | ✓ |
+| `loading` lässt Kopf und Spaltenköpfe stehen; `error` zeigt einen Weg | `:127–128` durchgereicht an `DataTable`; Stories `Loading` und `Error` (ein `TextButton` als `retry`) | ✓ |
+| Ein Wert ohne deutsches Wort steht **roh** | `ruleLabel()` (`recurring-rule.ts:46–52`) gibt den Rohwert zurück; Story `Edges` mit `LABELS_WITH_GAPS` (`fixtures.ts:46–50`) | ✓ |
+| `RecurringRuleRow` rendert dieselben Zellen aus dem Katalog (R17) | `RecurringRuleRow.tsx:48` ruft `recurringRuleColumns()`; keine zweite Zell-Definition in der Familie. Stories von 0132 (7) und 0133 (4) unverändert, `pnpm typecheck` Exit 0 | ✓ |
+| Die drei Befunde stehen in `docs/befunde-app.md` | Zeilen 110–112 (L-262, L-263, L-264) — alle drei inzwischen drüben erledigt (`4828f6c0`) | ✓ |
+
+Abgenommen von / am: Claude (zweiter Agent, Skill-frei), 2026-09-08 ·
+**Offene Punkte:** die Katalog-Tabelle „Der Katalog" nennt neun Exporte, der
+Code hat zehn — `RecurringRuleColumnOptions` fehlt in der Spec. Entweder die
+Tabelle nachziehen oder den Typ nicht exportieren; alles andere ist ✓.
 
 ## Entscheid 2026-09-08 — `matchesDocuments` bekommt keine Spalte
 
@@ -473,3 +503,20 @@ auch auf, wenn beide fehlen.
 **Was den Entscheid umdreht:** wenn L-249 erledigt ist und Regeln mit echtem
 Beleg-Kriterium im Bestand stehen, unterscheidet das Feld wieder — dann ist es
 eine Spalte, und der Katalog trägt sie ohne Umbau (ein Katalog, drei Sätze).
+
+## Nacharbeit zur Abnahme, 2026-09-08
+
+Ein Mangel, und er lag in der Spec: der Katalog exportierte zehn Bausteine,
+die Tabelle nannte neun. `RecurringRuleColumnOptions` fehlte — ausgerechnet
+der Typ, der zugleich der halbe Prop-Satz von `RecurringRuleRow` ist. Er steht
+jetzt drin, und mit ihm `recurringRuleColumnOrder()` aus der Nacharbeit zu
+0132.
+
+**Was die Abnahme nebenbei bestätigt hat:** die Prop-Tabelle stimmt Zeichen
+für Zeichen mit dem Code, 11 zu 11 — ebenso in 0132, 0134 und 0135. Nach neun
+Abnahmen, in denen der Hauptfund „die Spec ist hinter ihrem Code" lautete, ist
+das die erste Familie, in der die Tabellen selbst halten. Geblieben sind
+Fehler an ihren **Rändern**: eine Zeile zu wenig, ein Prosa-Satz mit der alten
+Zahl, ein Dateiname von vorgestern. Die Tabelle wird beim Bauen mitgezogen,
+der Fließtext daneben nicht — das ist die nächste Lücke im Ablauf, nachdem
+die erste geschlossen ist.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** |
+| Status | fertig — abgenommen 2026-09-08, am selben Tag nachgearbeitet; die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Sollstellung, Personenkonto, Belegfeld 1, DATEV-Steuerschlüssel |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Datenpunkte" (Ränge 1–28), „Relationen", „Formen" (Zeile `RecurringRuleFacts`), „Zuschnitt" (Marke **jetzt**) |
@@ -69,7 +69,7 @@ da** — kein „—", keine leere Zeile; eine Gruppe ohne Feld erscheint gar ni
 | **Auslöser** | Gegenpartei-Kriterium (1, abgeleitet `name ?? iban`) · Richtung (7) · Betrag ± geltende Toleranz (4, 17) · IBAN und Zweck-Regex (19) · Belegseite: Vertragsnummer, Belegtext-Regex, `matchesDocuments` (18) · Zuordnungs-Notiz (20) | je Feld einzeln. Ohne **jedes** Kriterium steht hier der Satz aus dem Kopf und sonst nichts |
 | **Wirkung** | Belegnummer der Dauerbuchung (8) · Buchungssatz-Vorschau (9) als `JournalEntryCard` · Gegenkonto (10) · Personenkonto (11) · Buchungstext der Vorlage (16) | je Feld einzeln; die Vorschau immer, außer sie ist leer (siehe unten) |
 | **Erwartung** | Rhythmus-Satz (13) · Rhythmus (5) · Zahltag (14) · Laufzeit (15) | nur, wenn der Rhythmus-Satz nicht `null` ist — sonst **entfällt die Gruppe** |
-| **Herkunft** (nur `all`) | Herkunft des Profils (23) · Zahlungskonto (24) · Split-Vorlage (21) · Steuerschlüssel und USt-Satz der Vorlage (25) · Belegnummern-Strategie (22) · Idempotenz-Anker, Buchungslauf, Buchungszyklus (27) · DMS-Beleglink (28) | nur mit `all` und nur je gesetztem Feld |
+| **Herkunft** (nur `all`) | Herkunft des Profils (23) · Zahlungskonto (24) · Split-Vorlage (21) · Steuerschlüssel und USt-Satz der Vorlage (25) · Belegnummern-Strategie (22) · Idempotenz-Anker (27) | nur mit `all` und nur je gesetztem Feld. **Buchungslauf und Buchungszyklus (27) und der DMS-Beleglink (28) fehlen**: der gespiegelte `RecurringRule` trägt die vier Felder nicht (Befund **L-265**). Kommen sie, kommen die Zeilen — die Gruppe ist dafür gebaut |
 
 **Vier Festlegungen, die keine Spec neu verhandelt:**
 
@@ -313,12 +313,67 @@ kennt **`agentRunId`, `exportBatchId` und die beiden `datevDocumentLink*`
 nicht**, obwohl das Profil sie als Ränge 27 und 28 führt und die Spec sie in
 „Herkunft" vorsieht. Entweder gehören sie in den Domänen-Typ, oder Rang 27/28
 gehören aus dem Profil — heute kann keine Form sie zeigen, ohne einen Typ zu
-erfinden.
+erfinden. **Eingetragen als L-265** (Nacharbeit 2026-09-08); die Abnahme fand
+ihn im Register nicht, weil er nur hier stand.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Schlanke Abnahme nach Owner-Entscheid 2026-09-08: geprüft ist die
+**Schnittstelle**, nicht die Darstellung. Pixel, Abstände und Farbwirkung
+stehen bei **0119**.
 
-Abgenommen von / am: … · Offene Punkte: …
+| Kriterium | Nachweis (Datei:Zeile · Story · Befehl) | Ergebnis |
+|---|---|---|
+| **Schnittstellen-Tabelle Zeichen für Zeichen** | Alle neun Zeilen decken sich mit `RecurringRuleFacts.tsx:67–105`: `rule`, `summary`, `schedule`, `preview`, `labels` Pflicht; `all` (Default `false`), `accountHref`, `hints`, `currency` (Default `EUR`) optional. Der Inline-Typ von `preview` steht im Code als exportiertes `RecurringRulePreview` (`:51–57`) — gleiche Form, zusätzlicher Name; die Tabelle nennt ihn nicht, der Bauabschnitt schon | ✓ |
+| **Gruppen-Tabelle „Herkunft"** | Sie führt „Idempotenz-Anker, **Buchungslauf, Buchungszyklus** (27) · **DMS-Beleglink** (28)". Der Code zeigt davon nur den Idempotenz-Anker (`RecurringRuleFacts.tsx:219–227`), weil der gespiegelte `RecurringRule` (`src/ludwig/…/domain/rule.ts:208–263`) weder `agentRunId` noch `exportBatchId` noch `datevDocumentLink*` trägt. Die Entscheidung steht im Bauabschnitt, die Gruppen-Tabelle wurde nicht nachgezogen — und der Befund dazu steht **nicht** in `docs/befunde-app.md`, obwohl `docs/backlog/README.md` das verlangt | ✗ |
+| `pnpm typecheck` grün | Exit 0 (ein Lauf für 0131–0135, 2026-09-08). `pnpm build` nach Owner-Entscheid 2026-09-07 nicht gelaufen | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `RecurringRuleFacts.tsx` · `.stories.tsx` · Titel `v3/Entitäten/Wiederkehr-Regel/RecurringRuleFacts` (`stories:21`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `RecurringRuleFacts.tsx:60–66`; `pnpm check:when` und `check:language` Exit 0 | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | Keine Inline-Styles, kein Hex; Buchungsweise über `StatusBadge axis="regel_modus"` (`:235`), die drei Wortlisten kommen als `labels`-Prop, der Rhythmus aus `RULE_INTERVAL_LABEL` (`:191`) | ✓ |
+| Alle Stories vorhanden; ausgeschlossene begründet | 6 Exporte (`Filled`, `WithoutCriterion`, `Modes`, `All`, `InUse`, `Edges`) = §6-Rechnung 2+1+1+1+1; `Leer`, `LeerNachFilter`, `Laedt`, `Fehler` begründet ausgelassen | ✓ |
+| **Story je Prop wie zugewiesen** | Acht von neun. `currency` steht mit Nachweis `Filled` in der Tabelle, wird aber in keiner Story gesetzt — gezeigt ist nur der Default `EUR` | ✗ |
+| Prüfliste §9, soweit ohne Browser prüfbar | Kein Icon ohne Wort; Sie-Form und GLOSSARY-Begriffe in den Strings; Konten über `AccountCell`, Datum über `Time`, Beträge über `AmountCell`. **Aber**: „Zahlen rechts" trifft der USt-Satz nicht — `${t.taxRatePercent} %` steht als nackter String in der Feldliste (`:214`), während „Verhalten" ausdrücklich „Prozentwerte … in `v2num`" verlangt. Kontrast und Trefferfläche | ✗ (ein Fall) |
+| Im Browser angesehen | Messprotokoll im Abschnitt „Gemessen" | vertagt auf 0119 |
+| Ein Feld ohne Wert erscheint nicht; eine Gruppe ohne Feld erscheint nicht | Jeder `push` ist einzeln bewacht (`:114–228`), `Group` gibt bei leer `null` zurück (`:283`); Story `WithoutCriterion` (Gruppe „Auslöser" abwesend) und `Edges` (`schedule: null` → „Erwartung" abwesend) | ✓ |
+| Der Klartext-Satz kommt aus `summary` | `:233`; `grep -n "hasAnyCriterion\|describeRecurringRule\|MATCH_CRITERIA" RecurringRuleFacts.tsx` → 0 Treffer | ✓ |
+| Bei `preview.automatic === false` steht `preview.note`, keine leere Karte | `:184–186` (Zeile „Buchungsvorschlag") und `:250` (die Karte nur bei `automatic`); Story `Modes`, dritte Spalte | ✓ |
+| Die Vorschau ist ein `JournalEntryCard`, keine eigene Tabelle | `:252`; Story `Filled` | ✓ |
+| Die Form zerlegt keinen Beschriftungs-String | `grep -n "\.split(" RecurringRuleFacts.tsx` → 0 Treffer; die Übersetzung macht der Aufrufer (`stories:45–89`) | ✓ |
+| Betrag und Toleranz aus `accrualAmount()` und `effectiveAmountTolerance()` | `:106` und `:128`; `grep -n "template\.amount" RecurringRuleFacts.tsx` → 0 Treffer | ✓ |
+| Konten stehen als **Nummer** in `AccountCell` | `Account` (`:301–303`) gibt nur die Nummer weiter und schlägt keinen Namen nach; Story `Filled` | ✓ |
+| Die Gültigkeit ist ein Wort **ohne** Farbe | `:238` mit `.v2rrfacts__validity`, definiert als `--color-text-muted` ohne Ton und ohne Punkt (`v3.css:3805`) | ✓ |
+| Ein Wert ohne Wort erscheint roh | `ruleLabel()` (`recurring-rule.ts:51`); Story `All` mit `fixed` ohne Eintrag | ✓ |
+| Kein eigener Rahmen, kein eigener Innenabstand | `.v2rrfacts` trägt nur `display/flex/gap` (`v3.css:3796`), kein `border`, kein `padding`; Story `InUse` setzt den Rahmen selbst. Die Messung bei 1280/1600 px | ✓ (Maß vertagt auf 0119) |
+| Ersetzt die vier Abschnitte des `RegelwerkTab` und die Kriterien-Tabelle des `ZuordnungTab` | Die Ablösung ist ein eigener Schritt in `ludwig/app` | offen (App) |
+
+Abgenommen von / am: Claude (zweiter Agent), 2026-09-08 ·
+**Offene Punkte:** (1) die Gruppe „Herkunft" verspricht vier Felder, die der
+gespiegelte Typ nicht hat — Tabelle nachziehen **und** den Befund in
+`docs/befunde-app.md` eintragen; (2) der USt-Satz steht ohne `v2num`,
+entgegen „Verhalten"; (3) `currency` hat keine Story, die die Prop setzt.
+
+## Nacharbeit zur Abnahme, 2026-09-08
+
+Drei Mängel: einmal die Spec, einmal der Code, einmal eine Story.
+
+**M1 — die Gruppen-Tabelle versprach vier Felder, die es nicht gibt.** Der
+Bauabschnitt entschied richtig (Nr. 3: der Spiegel trägt sie nicht, also zeigt
+die Form sie nicht), aber die Tabelle darüber blieb stehen und versprach sie
+weiter. Und der Befund, den derselbe Abschnitt „neuer Befund" nennt, stand
+nirgends im Register — `docs/backlog/README.md` verlangt beides, Spec **und**
+Zeile in `befunde-app.md`, genau damit der Entwicklungsagent der App ihn
+findet. Er ist jetzt **L-265**.
+
+**M2 — der USt-Satz stand als nackter String.** `${wert} %` ohne `v2num`,
+während jede andere Zahl der Form rechtsbündig mit Ziffernbreite steht (§9).
+Eine Prozentzahl ist eine Zahl; dass sie ein Zeichen hinter sich trägt, macht
+sie nicht zu Text.
+
+**M3 — `currency` hatte `Filled` als Nachweis, aber keine Story setzte die
+Prop.** Sie steht jetzt in `Edges` auf `CHF`. Der Fall ist echt genug: die
+Regel führt keine Währungsspalte, jeder Betrag an ihr ist Euro — eine andere
+Währung kann also **nur** vom Aufrufer kommen, und wenn die Prop das können
+soll, muss eine Story zeigen, dass sie durchschlägt. Die Alternative wäre
+gewesen, die Prop zu streichen und `EUR` fest zu verdrahten; das wäre weniger
+Code, aber die Härte gehört nicht in eine Form, die den Betrag nur
+weitergibt.

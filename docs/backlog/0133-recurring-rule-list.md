@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** |
+| Status | fertig — abgenommen 2026-09-08, am selben Tag nachgearbeitet; die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Dauerzahlung, Buchungsweise, Sachverhalt |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Listen" (erste Zeile), „Formen" (Zeile `RecurringRuleList`), „Zuschnitt" (Marke **jetzt**) |
@@ -86,7 +86,7 @@ sie.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `rules` | `readonly (RecurringRuleRowProps & { id: string })[]` | ja | die überfälligen Regeln in der Reihenfolge der Query. `id` ist der Schlüssel der Zeile, nicht ihr Inhalt | `Filled` |
+| `rules` | `readonly RecurringRuleListRow[]` | ja | die überfälligen Regeln in der Reihenfolge der Query. Der Typ ist `RecurringRuleRowData & { id: string }` aus dem Katalog (0131) — **ohne** `labels` und `caseHref`, die Props der Liste sind. `id` ist der Schlüssel der Zeile, nicht ihr Inhalt | `Filled` |
 | `labels` | `RecurringRuleLabels` | ja | die Wörter der Familie (L-242, L-256), an jede Zeile durchgereicht | `Filled` |
 | `caseHref` | `(caseId: string) => string` | ja | Weg zum Sachverhalt. Ohne Weg ist die Liste eine Sackgasse: die Nachfrage passiert **am Fall** | `Filled` |
 | `period` | `string` | nein | der Zeitraum des Stapels im Kopf („August 2026") | `Filled` |
@@ -216,20 +216,77 @@ Konsolen-Ausgabe, keine Ausnahme:
 | `lastPayment: null` | `Filled` Zeile 3 und `Edges` Zeile 1: „noch keine" |
 | 29 Zeilen ohne Quetschen bei 1280 px | `Edges`: 29 Zeilen; bei 1280 px kein Seiten- und kein innerer Scroll (Tabelle 1246 px), Zeilenhöhe 47 px in allen 29 Zeilen. Bei 700 und 1100 px scrollt der innere Rahmen (`.v2tbl__scroll`), statt zu quetschen — Kopf- und Zeilenkanten decken sich bei allen fünf Breiten (700/1100/1280/1400/1920) |
 
-**Entscheidung, die die Spec offen ließ — und die einzige Abweichung von ihrer
-Schnittstelle:** `rules` ist getippt als
-`readonly (Omit<RecurringRuleRowProps, "labels" | "caseHref" | "columns"> & { id: string })[]`
-(exportiert als `RecurringRuleListItem`), nicht als
+**Entscheidung, die die Spec offen ließ:** `rules` ist getippt als
+`readonly RecurringRuleListRow[]`, nicht als
 `readonly (RecurringRuleRowProps & { id: string })[]`. Grund: die Spec führt
 `labels` und `caseHref` als **Props der Liste**, „an jede Zeile
 durchgereicht". Verlangte der Zeilentyp sie zusätzlich je Zeile, wären die
 beiden Listen-Props unerreichbar und jede der 29 Zeilen trüge dasselbe Objekt
-noch einmal. Der Rest der Schnittstelle steht wie in der Spec.
+noch einmal.
+
+Die Fassung dieses Absatzes vom Bautag nannte einen `Omit<…>`-Ausdruck und
+einen eigenen Export `RecurringRuleListItem`. Beides ist mit der Nacharbeit
+weg: `RecurringRuleListRow` aus dem Katalog sagt dasselbe, `RecurringRuleListItem`
+war ein reiner Alias darauf — zwei exportierte Namen für einen Typ, beide im
+Barrel. Der Rest der Schnittstelle steht wie in der Spec.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Schlanke Abnahme nach Owner-Entscheid 2026-09-08: geprüft ist die
+**Schnittstelle**, nicht die Darstellung. Pixel, Abstände und Farbwirkung
+stehen bei **0119**.
 
-Abgenommen von / am: … · Offene Punkte: …
+| Kriterium | Nachweis (Datei:Zeile · Story · Befehl) | Ergebnis |
+|---|---|---|
+| **Schnittstellen-Tabelle Zeichen für Zeichen** | Fünf von sechs Zeilen stimmen (`labels`, `caseHref`, `period`, `total`, `title` — `RecurringRuleList.tsx:69–91`). Die erste nicht: die Tabelle sagt `readonly (RecurringRuleRowProps & { id: string })[]`, der Code nimmt `readonly RecurringRuleListItem[]` (`:78`), und `RecurringRuleListItem` ist heute `RecurringRuleListRow` = `RecurringRuleRowData & { id: string }` (`:44`, `recurring-rule-columns.tsx:117`) — **ohne** `labels`, `caseHref`, `columns` **und ohne** `accountHref`. Auch der Abweichungssatz im Bauabschnitt stimmt nicht mehr: das dort genannte `Omit<RecurringRuleRowProps, "labels" \| "caseHref" \| "columns">` trüge seit 0131 noch `accountHref` | ✗ |
+| **Export in der Tabelle** | `RecurringRuleListItem` ist exportiert (`RecurringRuleList.tsx:44`, `src/ui/v3/index.ts:454`) und steht in keiner Zeile der Schnittstelle | ✗ |
+| `pnpm typecheck` grün | Exit 0 (ein Lauf für 0131–0135, 2026-09-08). `pnpm build` nach Owner-Entscheid 2026-09-07 nicht gelaufen | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `RecurringRuleList.tsx` · `.stories.tsx` · Titel `v3/Entitäten/Wiederkehr-Regel/RecurringRuleList` (`stories:8`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `RecurringRuleList.tsx:63–68`; `pnpm check:when` und `check:language` Exit 0 | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | Keine Inline-Styles, kein Hex; die Buchungsweise kommt aus der Zelle des Katalogs (`StatusBadge axis="regel_modus"`), die Wörter als `labels`-Prop | ✓ |
+| Alle Stories vorhanden; ausgeschlossene begründet | 4 Exporte (`Filled`, `Empty`, `InUse`, `Edges`) = §6-Rechnung 2+0+0+0+1+1; `LeerNachFilter`, `Laedt`, `Fehler`, `Interaktiv` begründet ausgelassen | ✓ |
+| **Story je Prop wie zugewiesen** | Fünf Props haben ihre Story. `title` hat keine: die Tabelle nennt `InUse` als Nachweis, aber `InUse` (`stories:90–101`) übergibt die Prop nicht — in **keiner** Story steht ein anderer Titel als der Default | ✗ |
+| Prüfliste §9, soweit ohne Browser prüfbar | Zahlen rechts nur bei „Erwartet" (`RecurringRuleList.tsx:102` im Kopf, `RecurringRuleRow.tsx:64` in der Zeile); kein Icon ohne Wort; Sie-Form und GLOSSARY-Begriffe in den Strings. Zeilenhöhe, Kontrast, Trefferfläche | vertagt auf 0119 |
+| Im Browser angesehen | Messprotokoll im Abschnitt „Gemessen" | vertagt auf 0119 |
+| Bei null Zeilen steht die **Karte mit dem Erfolgssatz** | `RecurringRuleList.tsx:107–120`: `Card` und `HeadRow` stehen vor der Fallunterscheidung, im `EmptyRow` ein `EmptyState` mit „Alle erwarteten Dauerzahlungen sind im Zeitraum eingegangen." und **ohne** `action`; Story `Empty` | ✓ |
+| Der Sachverhalt ist die **erste** Zelle und führt über `caseHref` zum Fall | `RECURRING_RULE_OVERDUE_COLUMNS` beginnt mit `case` (`recurring-rule-columns.tsx:154–162`), `ORDER` stellt ihn vorn (`:120`); `caseHref` geht an jede Zeile (`RecurringRuleList.tsx:123`); Story `Filled` | ✓ |
+| Buchungsweise in jeder Zeile als `StatusBadge axis="regel_modus"` | `recurring-rule-columns.tsx:325`; Story `Filled` mit zwei Modi im Bestand | ✓ |
+| Auf dem Bildschirm steht nie `monthly` | `:335–340` über `RULE_INTERVAL_LABEL`; Stories `Filled` und `Edges` (dort eine Zeile ohne Rhythmus → „ohne Rhythmus") | ✓ |
+| Keine Gültigkeits-Spalte, kein Filter, keine Sammelaktion, keine Kästchen | Der Satz enthält `validity` nicht (`:154–162`); in `RecurringRuleList.tsx` kein `input`, kein `Checkbox`, kein `FilterBar`, kein Sortier-Link | ✓ |
+| Kopf zeigt Zeitraum und Zähler; ohne `total` nur die Trefferzahl | `counter()` (`:137–141`), `CardHead sub={period}` (`:96`); Story `Filled` („3 von 27 Regeln") gegen `InUse` (ohne `total`) | ✓ |
+| `lastPayment: null` zeigt „noch keine" | `recurring-rule-columns.tsx:461`; Story `Filled` (dritte Zeile) und `Edges` | ✓ |
+| 29 Zeilen ohne Umbruch und ohne Quetschen bei 1280 px | `minWidth={1180}` (`RecurringRuleList.tsx:60`), 29 Zeilen in `Edges`. Die Messung selbst | vertagt auf 0119 |
+| Ersetzt `ErwarteteZahlungen` in `Schritt5.tsx` | Die Ablösung ist ein eigener Schritt in `ludwig/app` | offen (App) |
+
+Abgenommen von / am: Claude (zweiter Agent), 2026-09-08 ·
+**Offene Punkte:** (1) die erste Zeile der Schnittstelle beschreibt einen
+anderen Typ als der Code — und der Abweichungssatz im Bauabschnitt ist
+inzwischen selbst überholt; (2) `RecurringRuleListItem` fehlt in der Tabelle;
+(3) `title` hat keine Story, die die Prop setzt.
+
+## Nacharbeit zur Abnahme, 2026-09-08
+
+Drei Mängel, alle in der Spec — und einer davon hat beim Nachsehen einen
+vierten im Code freigelegt.
+
+**M1 — der Typ von `rules`.** Die Tabelle nannte
+`readonly (RecurringRuleRowProps & { id: string })[]`, gebaut war etwas
+anderes, und der Abweichungssatz im Bauabschnitt, der das erklärte, war
+seinerseits überholt: das dort genannte `Omit<…>` trüge seit 0131 noch
+`accountHref` mit. Ein Erklärsatz, der einmal richtig war, altert schneller
+als die Tabelle, weil ihn niemand mitzieht.
+
+**M2 — `RecurringRuleListItem` stand in keiner Zeile der Schnittstelle.** Beim
+Nachtragen fiel auf, warum das schwerfiel: der Typ war ein reiner Alias
+(`= RecurringRuleListRow`), und **beide** Namen standen im Barrel. Zwei Namen
+für eine Sache sind keine Schnittstellenzeile wert, sie sind ein Mangel. Der
+Alias ist weg, sein erklärendes JSDoc sitzt jetzt an der Prop `rules`, wo es
+gelesen wird. Damit erledigt sich die Zeile, statt geschrieben zu werden — der
+kürzere Weg von beiden.
+
+**M3 — `title` hatte `InUse` als Nachweis, aber keine Story setzte die Prop.**
+Jetzt setzt `InUse` sie („Offene Dauerbuchungen dieses Stapels"), und das ist
+auch die ehrlichere Story: der Rahmen dort ist die Stapelabnahme, nicht das
+Regelwerk, und eine Liste in fremdem Rahmen heißt anders. Die Alternative wäre
+gewesen, die Nachweisspalte zu leeren — dann stünde eine Prop ohne Beleg da,
+und §5 sagt, die ist entweder überflüssig oder ihre Story fehlt.

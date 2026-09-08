@@ -240,11 +240,26 @@ const SORTABLE: ReadonlySet<RecurringRuleColumn> = new Set<RecurringRuleColumn>(
   "amount",
 ]);
 
-/** The chosen cells in the fixed order — the one place that applies it. */
-function pick(columns: readonly RecurringRuleColumn[]): RecurringRuleColumn[] {
+/**
+ * The chosen cells in the fixed order — the one place that applies it.
+ *
+ * `columns` **selects, it never reorders**: the rank order is the same in
+ * every form of the entity, so a caller cannot put the amount first here and
+ * leave it last in the facts.
+ *
+ * @when    Building the header of a hand-rolled `Table` over these cells —
+ *          the labels must come out in the order the cells will.
+ * @instead One `DataTable` → recurringRuleColumns(), which carries its own
+ *          headers. The track widths → recurringRuleTracks().
+ */
+export function recurringRuleColumnOrder(
+  columns: readonly RecurringRuleColumn[] = RECURRING_RULE_ROW_COLUMNS,
+): RecurringRuleColumn[] {
   const chosen = new Set(columns);
   return ORDER.filter((c) => chosen.has(c));
 }
+
+const pick = recurringRuleColumnOrder;
 
 export interface RecurringRuleColumnOptions {
   /** The German words the mirror does not carry (L-242, L-256). */

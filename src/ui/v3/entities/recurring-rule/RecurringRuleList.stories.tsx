@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { Card, CardHead } from "../../primitives/Table";
 import { LABELS, caseLink } from "./fixtures";
-import { RecurringRuleList, type RecurringRuleListItem } from "./RecurringRuleList";
+import { RecurringRuleList } from "./RecurringRuleList";
+import type { RecurringRuleListRow } from "./recurring-rule-columns";
 
 const meta: Meta<typeof RecurringRuleList> = {
   title: "v3/Entitäten/Wiederkehr-Regel/RecurringRuleList",
@@ -13,7 +14,7 @@ type Story = StoryObj<typeof RecurringRuleList>;
 
 const caseHref = (id: string) => `#fall-${id}`;
 
-function item(over: Partial<RecurringRuleListItem> & { id: string }): RecurringRuleListItem {
+function item(over: Partial<RecurringRuleListRow> & { id: string }): RecurringRuleListRow {
   return {
     counterpartyName: "Musterfirma Immobilien GmbH",
     counterpartyIban: null,
@@ -28,7 +29,7 @@ function item(over: Partial<RecurringRuleListItem> & { id: string }): RecurringR
   };
 }
 
-const THREE: RecurringRuleListItem[] = [
+const THREE: RecurringRuleListRow[] = [
   item({ id: "r-1" }),
   item({
     id: "r-2",
@@ -96,7 +97,13 @@ export const InUse: Story = {
           sub="Prüfen Sie, was im Zeitraum offen geblieben ist, bevor Sie den Stapel freigeben."
         />
       </Card>
-      <RecurringRuleList rules={THREE} labels={LABELS} caseHref={caseHref} period="August 2026" />
+      <RecurringRuleList
+        rules={THREE}
+        labels={LABELS}
+        caseHref={caseHref}
+        period="August 2026"
+        title="Offene Dauerbuchungen dieses Stapels"
+      />
     </div>
   ),
 };

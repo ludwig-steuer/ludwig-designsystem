@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** |
+| Status | fertig — abgenommen 2026-09-08, am selben Tag nachgearbeitet; die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Buchungsweise (Sollstellung ⇄ Bei Zahlung), Personenkonto und Dauersachverhalt sind Ludwig-Fachbegriffe |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Datenpunkte" (Ränge 1–7), „Relationen", „Formen" (Zeile `RecurringRuleRow`), „Zuschnitt" (Marke **jetzt**) |
@@ -38,9 +38,11 @@ Baustein im Set, und zwei Listen (0133 jetzt, 0131 später) setzen auf ihr auf.
   passt (Nr. 1, 2), die Zeile trägt Fachwörter (Nr. 3), und sie hat weder
   eigenen Zustand noch eigenen Tastaturweg (Nr. 4).
 - **Zuschnitt:** **zwei Dateien**, eine Familie im Sinne von §4:
-  - `RecurringRuleRow.tsx` — die Zeile, dazu `recurringRuleTracks()` und die
-    Union `RecurringRuleColumn`, damit Kopfzeile und Zeilen dieselbe Spur
-    lesen (Muster `bankTransactionTracks`).
+  - `RecurringRuleRow.tsx` — die Zeile. `recurringRuleTracks()` und die Union
+    `RecurringRuleColumn` standen hier, solange es nur die Zeile gab; seit
+    0131 liegen sie in `recurring-rule-columns.tsx`, wo auch die
+    `ColumnDef`-Fassung derselben Zellen entsteht. Kopfzeile und Zeilen lesen
+    dieselbe Spur (Muster `bankTransactionTracks`) — jetzt aus dem Katalog.
   - `recurring-rule.ts` — das **Wörterbuch der Familie**
     (`RecurringRuleLabels`, `ruleLabel()`), das Zeile, Fakten und Editor
     gemeinsam brauchen. Zweimal dieselbe Wortliste wäre eine zweite Wahrheit
@@ -127,7 +129,7 @@ ein eigener Typ wäre die lokale Erfindung, die §5 verbietet.
 | `caseHref` | `(caseId: string) => string` | nein | Weg zum Sachverhalt. Ohne ihn steht der Name ohne Weg — die Zeile baut keine URL, sie kennt weder Mandant noch Jahr | `InUse` |
 | `periodCount` | `number` | nein | Zähler der Ereignisse („3 Perioden") | `InUse` |
 | `lastPayment` | `{ date: string; amount: number } \| null` | nein | letzte zugeordnete Zahlung. **Prop fehlt** = die Spalte gibt es nicht; **`null`** = es gab noch keine Zahlung | `InUse` |
-| `columns` | `readonly RecurringRuleColumn[]` | nein | welche Zellen die Zeile rendert, in der Reihenfolge der Liste. Default: `counterparty`, `bookingMode`, `validity`, `amount`, `interval`, `direction` (Ränge 1–5, 7) | `InUse` |
+| `columns` | `readonly RecurringRuleColumn[]` | nein | **welche** Zellen die Zeile rendert — nicht in welcher Ordnung: die Rangordnung des Profils gilt in jeder Form, `recurringRuleColumnOrder()` wendet sie an. Default: `counterparty`, `bookingMode`, `validity`, `amount`, `interval`, `direction` (Ränge 1–5, 7) | `InUse` |
 | `counterAccount` | `PreviewAccount \| null` | nein | Rang 10 — Gegenkonto der Vorlage, **Nummer und Name**; ohne Konto das Wort „ohne Gegenkonto" | 0131 `Filled` |
 | `personalAccount` | `PreviewAccount \| null` | nein | Rang 11 — Personenkonto; ohne Konto das Wort **„ohne Personenkonto"**, eine der drei Auffälligkeiten von J-54 | 0131 `Filled` |
 | `documentNumberStrategy` | `RuleDocumentNumberStrategy \| null` | nein | Rang 22 — Wort aus `labels.documentNumberStrategy`, ohne Wort roh (L-242) | 0131 `Filled`, `Edges` |
@@ -155,8 +157,10 @@ Typen aus `src/ludwig/modules/recurring-rules/domain/rule.ts`
 `entities/accounting-case/case-title.ts` · GLOSSARY: `recurring rule` im Code,
 „Wiederkehr-Regel" im Label.
 
-**Dreizehn Props — und §4 sagt: trotzdem eine Komponente.** Der Grund ist
-benannt und hat ein Ablaufdatum: elf davon sind Spalten **einer** Zeile, die
+**Achtzehn Props — und §4 sagt: trotzdem eine Komponente.** (Dreizehn waren
+es beim Schreiben der Spec; die fünf dazu kamen mit dem Katalog aus 0131 und
+stehen seither in der Tabelle darüber.) Der Grund ist
+benannt und hat ein Ablaufdatum: sechzehn davon sind Spalten **einer** Zeile, die
 nur deshalb einzeln kommen, weil ihr Modell nicht gespiegelt ist (L-240).
 Trennen würde nichts entkoppeln, sondern nur Durchreich-Props erzeugen — genau
 den Fall, für den §4 „zusammenlassen" sagt. Ist L-240 erledigt, schrumpfen
@@ -269,7 +273,7 @@ Variabel (aus dieser Spec):
 - [ ] Ein Wert, für den `labels` kein Wort hat, erscheint **roh** statt zu verschwinden (Story `Words`, eine Zeile ohne Eintrag)
 - [ ] Die Zeile enthält **keine** Betrags- oder Toleranz-Ableitung: `grep -n "template\.\|matchAmount\|Tolerance" RecurringRuleRow.tsx` findet nichts
 - [ ] Die Zeile rendert **kein** `href` auf `Row`; die Wege stehen in den Zellen (Story `InUse`, Baum geprüft)
-- [ ] `columns` bestimmt Zellenzahl **und** Reihenfolge; `recurringRuleTracks(columns)` und die Kopfzeile decken sich (Story `InUse`, Spurenzahl gegen Zellenzahl gezählt)
+- [ ] `columns` bestimmt die Zellen**zahl**; die Ordnung ist fest. `recurringRuleTracks(columns)`, `recurringRuleColumnOrder(columns)` und die Kopfzeile decken sich (Story `InUse`, Spurenzahl gegen Zellenzahl gezählt)
 - [ ] `lastPayment: null` zeigt „noch keine", die fehlende Prop zeigt gar keine Spalte (Story `Edges` gegen `InUse`)
 - [ ] Die Zeile kennt kein `priority` (grep) — Owner-Entscheid; sichtbar wird die Rangfolge erst mit L-245
 - [ ] Ersetzt die Zeile in `ErwarteteZahlungen` (`Schritt5.tsx`) ohne Funktionsverlust und zeigt zusätzlich Buchungsweise und Gültigkeit — **offen (App)**, die Ablösung ist ein eigener Schritt
@@ -334,8 +338,69 @@ Wortsatz entsteht.
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | ✓ / ✗ |
+Schlanke Abnahme nach Owner-Entscheid 2026-09-08: geprüft ist die
+**Schnittstelle**, nicht die Darstellung. Pixel, Abstände und Farbwirkung
+stehen bei **0119**.
 
-Abgenommen von / am: … · Offene Punkte: …
+| Kriterium | Nachweis (Datei:Zeile · Story · Befehl) | Ergebnis |
+|---|---|---|
+| **Schnittstellen-Tabelle Zeichen für Zeichen** | Alle **18** Zeilen decken sich mit dem Code: `RecurringRuleRowProps = RecurringRuleRowData & RecurringRuleColumnOptions` (`RecurringRuleRow.tsx:30`), Felder in `recurring-rule-columns.tsx:65–114`, Optionen in `:249–265`. Namen, Typen und Pflicht stimmen bei jeder Prop; keine Prop im Code, die in der Tabelle fehlt | ✓ |
+| **Der Prosa-Satz „Dreizehn Props"** | Die Tabelle führt seit dem Nachtrag 18 Props; der Satz darunter sagt weiter „Dreizehn", und dieselbe Zahl steht im Code (`RecurringRuleRow.tsx:25` „Thirteen props"). Die Rechnung „elf davon sind Spalten einer Zeile" stimmt damit auch nicht mehr | ✗ |
+| **Zuschnitt-Absatz** | Er legt `recurringRuleTracks()` und die Union `RecurringRuleColumn` weiter nach `RecurringRuleRow.tsx`; beide liegen seit 0131 in `recurring-rule-columns.tsx:44`, `:278`. Der Nachtrag nennt nur den Umzug der **Zellen** | ✗ |
+| `pnpm typecheck` grün | Exit 0 (ein Lauf für 0131–0135, 2026-09-08). `pnpm build` nach Owner-Entscheid 2026-09-07 nicht gelaufen | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `RecurringRuleRow.tsx` · `.stories.tsx` · Titel `v3/Entitäten/Wiederkehr-Regel/RecurringRuleRow` (`stories:14`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `RecurringRuleRow.tsx:33–40`; `pnpm check:when` und `check:language` Exit 0 | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | Keine Inline-Styles und kein Hex in der Datei; Buchungsweise über `StatusBadge axis="regel_modus"` (`recurring-rule-columns.tsx:325`); `RECURRING_RULE_COLUMN_LABEL` ist die Spaltenbeschriftung, keine Statusliste | ✓ |
+| Alle Stories vorhanden; ausgeschlossene begründet | 7 Exporte (`Filled`, `LearnedFromPayment`, `WithoutCriterion`, `Modes`, `Words`, `InUse`, `Edges`) = §6-Rechnung 2+2+1+1+1; `Leer`/`LeerNachFilter`/`Laedt`/`Fehler`/`Interaktiv` begründet ausgelassen. Die fünf nachgetragenen Props haben ihren Nachweis wie geschrieben in 0131 `Filled`/`Edges` | ✓ |
+| Prüfliste §9, soweit ohne Browser prüfbar | Zahlen rechts nur bei „Erwartet" (`RecurringRuleRow.tsx:64` setzt `v2num` aus `align === "end"`); kein Icon ohne Wort; Sie-Form und GLOSSARY-Begriffe in den Strings. Zeilenhöhe, Kontrast, Trefferfläche | vertagt auf 0119 |
+| Im Browser angesehen | Messprotokoll im Abschnitt „Gemessen" | vertagt auf 0119 |
+| Rang 1 ist **abgeleitet** | `Counterparty` (`recurring-rule-columns.tsx:418–430`): Name, sonst IBAN in `MonoCell`, in **derselben** Zelle; Story `LearnedFromPayment` gegen `Filled` | ✓ |
+| Fehlen Name **und** IBAN, steht „ohne Kriterium" | `recurring-rule-columns.tsx:429`; Story `WithoutCriterion` | ✓ |
+| Buchungsweise aus `StatusBadge axis="regel_modus"`, alle drei Werte | `:325`; Story `Modes` mit `accrue_then_settle`, `book_on_payment`, `match_only` | ✓ |
+| Gültigkeit ist ein **Wort ohne Farbe** | `:329–330` gibt einen nackten String zurück, kein `tone`, kein `dot`; Story `Modes` (vierte Zeile) | ✓ |
+| Rhythmus **deutsch** aus `RULE_INTERVAL_LABEL` | `:335–340`; Story `Words`. `monthly` steht in keiner Zelle | ✓ |
+| Ein Wert ohne Wort erscheint **roh** | `ruleLabel()` (`recurring-rule.ts:51`); Story `Words`, letzte Zeile mit `LABELS_WITH_GAPS` | ✓ |
+| Keine Betrags- oder Toleranz-Ableitung | `grep -n "template\.\|matchAmount\|Tolerance" RecurringRuleRow.tsx` → 0 Treffer; dieselbe Suche im Katalog `recurring-rule-columns.tsx` → 0 Treffer | ✓ |
+| Kein `href` auf `Row` | `RecurringRuleRow.tsx:62` rendert `<Row>` ohne `href`; die Wege stehen in den Zellen (`CaseCell`, `AccountCell`). Story `InUse` | ✓ |
+| `columns` bestimmt Zellenzahl **und Reihenfolge** | Nur die **Zahl** stimmt. `pick()` (`recurring-rule-columns.tsx:244–247`) filtert die feste `ORDER` (`:120–135`) — die Reihenfolge des Aufrufers wird verworfen, und der Code sagt das auch so („`columns` selects, it never reorders", `:41`), ebenso die Katalog-Tabelle in 0131. Praktisch: wer eine andere Reihenfolge übergibt, baut seinen Kopf aus seinem Array (so machen es `RecurringRuleRow.stories.tsx:73` und `RecurringRuleList.tsx:101`) und bekommt Kopf und Zellen auseinander. Heute unauffällig, weil alle drei benannten Sätze schon in `ORDER`-Reihenfolge stehen | ✗ |
+| `lastPayment: null` zeigt „noch keine", die fehlende Prop keine Spalte | `LastPayment` (`:460–461`) gegen `pick()`: ohne `lastPayment` in `columns` entsteht die Zelle gar nicht. Story `InUse` (Zeile 3) gegen `Filled` | ✓ |
+| Die Zeile kennt kein `priority` | `grep -n "priority" RecurringRuleRow.tsx` und `recurring-rule-columns.tsx` → 0 Treffer | ✓ |
+| Ersetzt die Zeile in `ErwarteteZahlungen` (`Schritt5.tsx`) | Die Ablösung ist ein eigener Schritt in `ludwig/app` | offen (App) |
+
+Abgenommen von / am: Claude (zweiter Agent), 2026-09-08 ·
+**Offene Punkte:** (1) `columns` ordnet nicht um, die Spec und ihr Kriterium
+behaupten das Gegenteil — hier muss eines von beiden nachgeben; (2) „Dreizehn
+Props" in Spec und Code-Kommentar gegen 18 in der Tabelle; (3) der
+Zuschnitt-Absatz nennt noch die alte Datei für `recurringRuleTracks()` und
+`RecurringRuleColumn`.
+
+## Nacharbeit zur Abnahme, 2026-09-08
+
+Drei Mängel. Zwei gab die Spec, beim dritten gab **beides** nach.
+
+**M1 — `columns` ordnet nicht um, und das ist richtig so.** Die Spec
+behauptete an zwei Stellen, die Prop bestimme „Zellenzahl **und**
+Reihenfolge"; `pick()` filtert seit jeher die feste `ORDER`. Naheliegend wäre,
+den Code der Spec anzupassen — aber die feste Ordnung ist kein Versehen,
+sondern eine Regel: die Rangordnung der Datenpunkte ist in **jeder** Form der
+Entität dieselbe, sonst steht der Betrag in der Liste vorn und in den Fakten
+hinten. Also gab die Spec nach.
+
+Nur war die Gefahr, die die Abnahme benannt hat, damit nicht weg: Kopfzeile
+und Zellen kamen aus **zwei** Quellen. Die Zellen liefen durch `pick()`, die
+Kopfzeile baute der Aufrufer aus seinem eigenen Array (`RecurringRuleList`,
+und die Story dieser Spec). Solange jeder Satz zufällig schon in
+`ORDER`-Reihenfolge steht, fällt das nicht auf — beim ersten, der es nicht
+tut, stehen Kopf und Zellen versetzt. Deshalb ist `pick()` jetzt als
+`recurringRuleColumnOrder()` exportiert, und beide Kopfzeilen bauen daraus.
+Eine Regel, die man befolgen **muss**, ist besser als eine, die man befolgen
+soll.
+
+**M2 — „Dreizehn Props".** Es sind achtzehn, seit der Katalog aus 0131 fünf
+dazugab. Die Tabelle war mitgezogen worden, der Satz darunter nicht.
+
+**M3 — der Zuschnitt-Absatz nannte die Datei von vorgestern.** Er legte
+`recurringRuleTracks()` und `RecurringRuleColumn` nach `RecurringRuleRow.tsx`;
+beide liegen seit 0131 im Katalog. Jetzt steht dort, wo sie waren und warum
+sie umgezogen sind — das ist die Auskunft, die jemand braucht, der dem alten
+Satz gefolgt ist.
