@@ -226,7 +226,7 @@ export function SourceDocumentFacts({
 function provenanceBlock(d: SourceDocumentVM): [ReactNode, ReactNode][] {
   const rows: [ReactNode, ReactNode][] = [];
   if (d.classConfidence !== null && d.classConfidence !== undefined) {
-    rows.push(["Erkennungssicherheit", `${Math.round(d.classConfidence * 100)} %`]);
+    rows.push(["Konfidenz", `${Math.round(d.classConfidence * 100)} %`]);
   }
   if (d.classOverriddenAt) {
     rows.push([

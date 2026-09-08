@@ -22,9 +22,21 @@ export function KpiTile({
   href,
 }: {
   label: string;
+  /**
+   * With `href` set, this sits **inside** the anchor: no link, no button and
+   * nothing focusable in here. That is not theoretical — the app puts its link
+   * in `sub` today for want of `href`, and keeping both would nest one anchor
+   * in another on the first swap.
+   */
   value: ReactNode;
+  /** Same rule as `value`: inside the anchor once `href` is set. */
   sub?: ReactNode;
-  /** Where the figure leads — the list it counts, the page it summarises. */
+  /**
+   * Where the figure leads — the list it counts, the page it summarises.
+   *
+   * The target must count what the tile counts (I12): a tile reading 225 that
+   * opens a list of 180 is worse than a tile that leads nowhere.
+   */
   href?: string;
 }) {
   const inner = (
