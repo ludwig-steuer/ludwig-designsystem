@@ -24,6 +24,13 @@ export interface InlineEditInputProps {
    * field has no name and the word no click target (0104).
    */
   id: string;
+  /**
+   * While saving, and while the caller says so. **Set it on the control**: the
+   * built-in `Input` had it from the start, a custom one did not — so the
+   * buttons locked and the field stayed open, and a real Enter saved past the
+   * lock (acceptance 0083, M5).
+   */
+  disabled: boolean;
 }
 
 /**
@@ -127,6 +134,7 @@ export function InlineEdit({
     autoFocus: true,
     id: fieldId,
     onKeyDown,
+    disabled: running,
   };
 
   return (

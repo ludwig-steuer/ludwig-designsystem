@@ -114,13 +114,29 @@ export function CaseDocumentNumberModeEdit({
   const [target, setTarget] = useState<CaseDocumentNumberMode | null>(null);
   const [keepNumber, setKeepNumber] = useState<string | null>(null);
 
-  const allowed = CASE_DOCUMENT_NUMBER_MODE_TRANSITIONS[value].filter(
-    (m) => m !== "none" || allowNone,
-  );
+  /**
+   * **DATEV wins** (`document-number.ts`, rule 1): a number from the DATEV
+   * truth is the canonical value of the case and not negotiable. So if one of
+   * the candidates is `immutable`, the question „which number stays valid" is
+   * already answered — it is that one, and there is nothing to pick. The
+   * dialog said the opposite until 2026-09-08: it offered every number and
+   * **disabled the canonical one**, which in a list of DATEV numbers left the
+   * dialog without an exit (acceptance M7).
+   */
+  const fixed = documentNumbers.find((d) => d.immutable) ?? null;
+  const choices = fixed ? [] : documentNumbers;
+
+  const allowed = CASE_DOCUMENT_NUMBER_MODE_TRANSITIONS[value].filter((m) => {
+    if (m === "none" && !allowNone) return false;
+    // A downgrade without a number to keep is not offered at all — an option
+    // one can see and not answer is a question without an answer. The comment
+    // said this before, the filter did not, and the mode saved without the
+    // choice that `case.ts:102–107` requires (acceptance M2).
+    if (isDocumentNumberModeDowngrade(value, m)) return documentNumbers.length > 0;
+    return true;
+  });
   const isDowngrade = target ? isDocumentNumberModeDowngrade(value, target) : false;
-  // A downgrade without a choice is not offered at all: an option one can see
-  // and not take is a question without an answer.
-  const needsNumber = isDowngrade && documentNumbers.length > 0;
+  const needsNumber = isDowngrade && choices.length > 0;
 
   return (
     <>
@@ -130,6 +146,11 @@ export function CaseDocumentNumberModeEdit({
         // The mode never saves straight away — every change carries a reason,
         // so the field hands over to the dialog and keeps its old value.
         onSave={(next) => {
+          // The current value is the placeholder of the select, not a choice:
+          // „Eine Belegnummer → Eine Belegnummer" is no transition, and the
+          // table does not list it. Saving without a change closes the field
+          // and asks nothing (acceptance M3).
+          if (next === value) return;
           setTarget(next as CaseDocumentNumberMode);
           setKeepNumber(null);
         }}
@@ -151,7 +172,10 @@ export function CaseDocumentNumberModeEdit({
         open={target !== null}
         onClose={() => setTarget(null)}
         onConfirm={(reason) => {
-          if (target) void onSave(target, reason, needsNumber ? (keepNumber ?? undefined) : undefined);
+          if (target) {
+            const keep = fixed ? fixed.documentNumber : needsNumber ? (keepNumber ?? undefined) : undefined;
+            void onSave(target, reason, keep);
+          }
           setTarget(null);
         }}
         title="Belegnummern-Modus ändern"
@@ -168,17 +192,22 @@ export function CaseDocumentNumberModeEdit({
         confirmDisabled={needsNumber && keepNumber === null}
         pending={pending}
       >
+        {fixed && isDowngrade ? (
+          <p className="v2field__hint">
+            Es bleibt <strong>{fixed.documentNumber}</strong> — die Nummer kommt aus DATEV
+            und ist gesetzt.
+          </p>
+        ) : null}
         {needsNumber ? (
           <RadioGroup
             name="keep-number"
             label="Welche Nummer bleibt gültig?"
             value={keepNumber}
             onChange={setKeepNumber}
-            options={documentNumbers.map((d) => ({
+            options={choices.map((d) => ({
               value: d.documentNumber,
               label: d.documentNumber,
               hint: d.accountNumber ? `Personenkonto ${d.accountNumber}` : undefined,
-              disabled: d.immutable,
             }))}
           />
         ) : null}
@@ -208,7 +237,14 @@ export function CaseDispositionEdit({
     <InlineEdit
       label="Zuständigkeit"
       value={value ?? ""}
-      onSave={(next) => onSave(next as CaseDispositionWritable)}
+      onSave={(next) => {
+        // The placeholder is not a value. With `value === null` the select
+        // opens on „—", and saving from there called `onSave("")` — a string
+        // the axis does not know, hidden by the assertion below. Nothing to
+        // save, so nothing is saved (acceptance 0083, M4).
+        if (next === "") return;
+        onSave(next as CaseDispositionWritable);
+      }}
       pending={pending}
       disabled={disabled}
       error={error}
@@ -218,7 +254,13 @@ export function CaseDispositionEdit({
           {/* `client` is not offered: bringing the client in is an action with
               an outside effect — they get a question — not a value change. It
               belongs to the clarification. */}
-          {value === null ? <option value="">—</option> : null}
+          {/* The placeholder of an unset value — readable, not choosable
+              (`disabled`), so the select cannot be saved back onto it. */}
+          {value === null ? (
+            <option value="" disabled>
+              —
+            </option>
+          ) : null}
           {CASE_DISPOSITION_WRITABLE.map((d) => (
             <option key={d} value={d}>
               {resolveStatus("disposition", d).label}

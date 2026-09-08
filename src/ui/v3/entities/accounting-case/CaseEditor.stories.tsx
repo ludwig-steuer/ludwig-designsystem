@@ -35,7 +35,10 @@ const NUMMERN: KnownDocumentNumber[] = [
   },
   {
     documentNumber: "RE-4488",
-    source: "case_decision",
+    // Zwei Kandidaten aus **zwei** Quellen: eine Kandidatenliste, in der jede
+    // Nummer denselben Ursprung hat, zeigt nicht, wofür das Register da ist
+    // (Abnahme 2026-09-08, M10).
+    source: "mirror_ref",
     accountNumber: "70012",
     caseId: "c-4412",
     caseNumber: "2026-0412",
@@ -44,6 +47,11 @@ const NUMMERN: KnownDocumentNumber[] = [
     immutable: false,
   },
 ];
+
+/** Regel 1 des Registers: kommt die Nummer aus DATEV, ist sie gesetzt. */
+const NUMMERN_MIT_DATEV: KnownDocumentNumber[] = NUMMERN.map((n, i) =>
+  i === 0 ? { ...n, source: "datev_correction", immutable: true } : n,
+);
 
 const Rahmen = ({ children }: { children: React.ReactNode }) => (
   <div style={{ maxWidth: 620, padding: "var(--space-6)", display: "grid", gap: "var(--space-5)" }}>
@@ -143,6 +151,17 @@ export const Downgrade: Story = {
         <p className="lw-body-sm">
           Zuletzt gespeichert: <strong>{letzte}</strong>
         </p>
+        {/* **DATEV gewinnt** (Register-Regel 1): ist einer der Kandidaten
+            `immutable`, ist die Frage „welche Nummer bleibt gültig" schon
+            beantwortet — der Dialog sagt es und fragt nicht. Bis zum
+            2026-09-08 bot er alle Nummern an und **sperrte die kanonische**;
+            bestand die Liste nur aus DATEV-Nummern, hatte er keinen Ausgang
+            (Abnahme M7). */}
+        <CaseDocumentNumberModeEdit
+          value="multiple"
+          documentNumbers={NUMMERN_MIT_DATEV}
+          onSave={() => {}}
+        />
       </Rahmen>
     );
   },
@@ -168,6 +187,15 @@ export const Failed: Story = {
         onSave={() => {
           throw new Error("Der Sachverhalt ist gesperrt, solange der Lauf läuft.");
         }}
+      />
+      {/* Derselbe Satz, der andere Weg: `error` kommt von außen, statt aus
+          einem abgelehnten `onSave`. Die Prop hatte bis zum 2026-09-08 keinen
+          Nachweis (Abnahme M8). Der Modus-Editor liest sie nicht — er
+          speichert über den Dialog, und der trägt seinen eigenen Fehler. */}
+      <CaseDispositionEdit
+        value="agent"
+        onSave={() => {}}
+        error="Der Sachverhalt ist inzwischen geschlossen — die Zuständigkeit lässt sich nicht mehr ändern."
       />
     </Rahmen>
   ),
