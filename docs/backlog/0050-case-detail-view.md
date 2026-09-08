@@ -629,3 +629,22 @@ an der Breite, die die App als ihre Untergrenze führt; M2 steht jetzt dort,
 wo die Freigabe es verlangt hat. Alle 14 Kriterien messen grün. Offen bleibt
 M5 (die Zahl 484 im vorigen Nachtrag) und die Befunde B1, B3–B6 — nichts
 davon am Verhalten dieser View.
+
+## Nachtrag 2026-09-08 — die Sachverhaltsseite geht auf eine Spalte
+
+**Owner-Entscheid:** `sachverhalt-detail` wird **D-L1** (Zonen untereinander),
+die Ereignisse stehen untereinander statt in der Randspalte.
+
+**An diesem Baustein ändert sich nichts.** `CaseDetailView` ist ein Rahmen mit
+Slots, und `aside` ist einer davon — das Konto braucht ihn nach D-L3 weiter
+(`LedgerAccountView`, 960 px). Die Sachverhaltsseite übergibt ihn schlicht
+nicht mehr, und der Rahmen fällt dann von selbst auf eine Spalte; genau dafür
+ist die Prop optional (`aside` fehlt → `v2cdv__body`, kein `MasterDetail`).
+
+Der Grund für den Entscheid steht im Seitenprofil: Ereignisse haben **p50 1 ·
+p90 2** (max 38), der Richtwert des Standards für einen Strang neben der
+Fläche ist `p90 ≥ 5`. In 90 % der Fälle hätte die Spalte höchstens zwei
+Einträge gezeigt und die Arbeitsfläche daneben verschmälert.
+
+Die gemessenen 460 px aus der Abnahme bleiben gültig — sie gelten dem Slot,
+nicht dieser Seite.

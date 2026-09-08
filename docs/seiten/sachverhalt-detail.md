@@ -96,7 +96,7 @@ Geprüft gegen `docs/detailseiten-standard.md` (D1–D16).
 
 | | |
 |---|---|
-| Layout | **D-L3 Randspalte** mit dem **Strang** darin — so gebaut (`CaseDetailView`, 0050). Die Zahl trägt das nicht: Ereignisse **p50 1 · p90 2 · max 38**, der Richtwert für einen Strang neben der Fläche ist `p90 ≥ 5`. Entscheid liegt beim Owner (Standard §11.3, vierte Zahl); bis dahin bleibt es beim Gebauten. |
+| Layout | **D-L1 Zonen untereinander** — Owner-Entscheid 2026-09-08. Die Randspalte fällt, die Ereignisse stehen untereinander. Gebaut war **D-L3** mit dem Strang darin (`CaseDetailView`, 0050); die Zahl trug das nicht — Ereignisse **p50 1 · p90 2 · max 38**, der Richtwert für einen Strang neben der Fläche ist `p90 ≥ 5`, also hätten 90 % der Fälle eine Spalte mit höchstens zwei Einträgen getragen. **Der Rahmen selbst ändert sich nicht:** `CaseDetailView` behält seinen `aside`-Slot, weil andere Entitäten ihn brauchen — die Seite füllt ihn nicht mehr |
 | Reiter | **Übersicht** (Rang 1–4) · **Details** · Beleg ↔ Buchung (Rang 5) · Rückfragen (6) · Plausibilität (6) · Saldo & Konten (7) · DATEV-Wahrheit (8) · **Verlauf** (8) · **Rohdaten** (8). Der Standard **ordnet** die Leiste, er kürzt sie nicht — die Frage aus Zweifel 3 („acht Reiter für einen Fall mit einem Ereignis") bleibt offen und gehört in die Spec. |
 | Zone 4 (Abrisse) | Ereignisse **4 % ohne · p50 1 · p90 2** → keine eigene Karte, der Strang steht in der Randspalte · Klärungen **87 % ohne · p50 0 · p90 1** → Zahl mit Weg in Zone 3 · Erwartungen **95 % ohne**, Klammern **95 % ohne**, Belegnummern **99 % ohne**, Regel **97 % ohne** → nichts auf der Übersicht |
 | Zone 5 (Verlauf) | die Zone nennt als Quelle den **Ereignis-Strang** (`CaseTimeline`, 0040), nicht das Audit-Log: dieses ist bei **43 % der Fälle leer** (p50 3 · p90 9 · max 84) und wäre in fast jedem zweiten Fall eine leere Zone |
@@ -111,7 +111,14 @@ Geprüft gegen `docs/detailseiten-standard.md` (D1–D16).
 - **D12 (Rohdaten zuletzt):** Rang 8 bündelt heute Historie, Rohdaten und
   DATEV-Wahrheit in einer Zeile. Der Standard trennt sie: Historie → Verlauf,
   DATEV-Wahrheit → eigene fachliche Sicht, Rohdaten → letzter Reiter.
-- **Zweifel 6 ist damit entschieden, nicht offen:** Der Zweispalter öffnet
-  **nicht** erst ab zwei Einträgen. Das Layout wechselt nicht je Datensatz
-  (D3) — entweder die Randspalte gilt für die Entität oder nicht; was die Zahl
-  dazu sagt, steht oben in der Layout-Zeile.
+- **Zweifel 6 ist geschlossen (Owner, 2026-09-08): die Randspalte fällt.**
+  Der Zweifel fragte, ob der Zweispalter erst ab zwei Einträgen öffnen soll —
+  die Antwort ist eine Ebene darüber: das Layout wechselt **nie** je Datensatz
+  (D3), und für diese Entität trägt die Zahl es nicht. Ereignisse p50 1 ·
+  p90 2; eine Randspalte hätte in 90 % der Fälle höchstens zwei Einträge
+  gezeigt und daneben die Fläche verschmälert.
+
+  **Was das für 0050 heißt: nichts.** `CaseDetailView` ist ein Rahmen mit
+  Slots; `aside` bleibt, weil das Konto ihn nach D-L3 weiter braucht. Nur
+  diese Seite übergibt ihn nicht mehr — und die Ansicht fällt dann von selbst
+  auf eine Spalte, das ist im Rahmen so gebaut (`aside` fehlt → `v2cdv__body`).
