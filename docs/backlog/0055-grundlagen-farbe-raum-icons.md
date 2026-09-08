@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | keine Komponente — drei Stories zu `src/styles/tokens.css` in der Gruppe `v3/Grundlagen` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Tokens und Icon-Regeln sind fachfrei |
 | Quelle | Anfrage Owner vom 2026-09-03 („Farben, Shades, Bedeutung der Farben festlegen, damit wir eine Übersicht haben") · `design-guidelines.md` §11.7 Stufe 0 · Fortsetzung von 0037 · Review 2026-09-03 mit Owner-Entscheiden A8 (Icon-Leiter) und A9 (`warning-strong`) |
@@ -1343,3 +1343,232 @@ richtigen Zahlen hätte beim nächsten Commit wieder danebengelegen.
 entscheidet die dritte Runde, nicht ich. Zu prüfen sind die drei Blocker, die
 fünf kleinen Punkte und M14/M17; die Gegenproben oben stehen zum Nachfahren
 da, und `--test` ist der kürzeste Weg, dem Wächter selbst zu misstrauen.
+
+## Wiederabnahme 2026-09-07 (dritte Runde, fremde Abnahme)
+
+**Urteil: abgenommen.** Kein blockierender Mangel, kein neuer Mangel. Die drei
+Blocker (M22, M23, M26), die fünf kleinen (M24, M25, M27–M29) und M14/M17 sind
+behoben — jeder an seiner **Wirkung** gemessen, keiner am Text gelesen. Gemessen
+gegen `http://localhost:6107` mit `scripts/cdp.mjs` aus dem Repo (ein Messlauf
+über alle Stories, kein eigener Helfer); jede Kontrastzahl unabhängig aus den
+**gerenderten** Farben nachgerechnet (WCAG 2.x, Alpha über den Grund
+komponiert). Nichts gebaut, nichts geändert, nichts gestaget (`pnpm build`
+weiter nicht gefahren, 0117).
+
+### Der Wächter — erst geprüft, dann verfälscht
+
+`node scripts/check-contrast.mjs --test` → Exit **0**, „Selbstprüfung in
+Ordnung, 12 Fälle". `pnpm check:contrast` → Exit **0**, „**20** Angaben
+nachgerechnet" — **ohne** den Zusatz „… bleiben ungeprüft", keine `?`-Zeile im
+Lauf. Unabhängig gezählt: die drei Blätter tragen zusammen genau 20 Angaben der
+Form `X,XX:1` (drei auf `tokens.css:32`, je zwei auf `:48`, `:68`, `:70`, je
+eine auf `:63`, `:83`, `app-chrome.css:449`, `:456`, `v3.css:268`, `:273`,
+`:613`, `:1276`, `:1303`, `:2995`, `:3065`) — 20 von 20, ungeprüft bleibt
+keine.
+
+Dann misstraut: die drei Blätter in ein Scratchpad kopiert (`src/styles/`
+darunter), das Skript **aus dem Repo** von dort aus darauf laufen lassen.
+
+| # | Probe auf der Kopie | Ergebnis |
+|---|---|---|
+| — | unverfälscht | Exit **0**, 20 |
+| A | Zahl verfälscht: `tokens.css:48` 4.88 → 4.99 | Exit **1** — „steht mit 4.99:1 da, gemessen 4.88:1" |
+| B | **Tokenwert** verfälscht: `--color-text-subtle` `#717171` → `#818181` | Exit **1** — **fünf** Angaben in **zwei** Dateien fallen (tokens 2, v3 3) |
+| C | Zahl in `v3.css:268` 6,69 → 6,99 | Exit **1** |
+| D | **Tokenwert** `--color-success` `#3F7A5A` → `#4F8A6A` | Exit **1** — `app-chrome.css:456` |
+| E | **Anleitungsform wörtlich**, richtige Zahl — `` /* gemessen 4.51:1 (`--color-text-subtle` auf `--color-bg-soft`) */ `` an `v3.css` | Exit **0**, **21** nachgerechnet |
+| F | dieselbe Form, falsche Zahl (4.88 statt 4,51) | Exit **1** |
+| G | Anleitungsform an `app-chrome.css`, richtig (5.45, `--color-accent-700` auf Weiss) | Exit **0**, 21 |
+| H | dieselbe, falsch (5.55) | Exit **1** |
+
+Zahl **und** Tokenwert, in **allen drei** Blättern, in **beide** Richtungen —
+und die Form, die sein Schlusstext (`:250–253`) vorschreibt, trägt jetzt in
+beiden Dateien, in denen sie vorher durchfiel.
+
+### Die drei Blocker
+
+**M22 — behoben, an der Wirkung belegt (E–H oben).** Die Mechanik hält, was der
+Kommentar `:98–111` behauptet: die Zeile wird **vor jeder Zahl** geteilt
+(`(?<![\d.,])(?=\d+[.,]\d+\s*:\s*1)`), der Grund nur im eigenen Abschnitt
+gesucht, und der Backtick zählt auf **beiden** Hälften — im Grund-Regex
+(`:114`) wie im Token-Regex (`:126`). Der
+Rückblick verhindert den Schnitt **innerhalb** von „11.64:1" — der Selbsttest
+prüft genau das („zweistellige Zahl bleibt ganz"), und der Fall steht heute
+zweimal echt in den Blättern (`tokens.css:83`, `Motion`). Die zwölf Fälle
+decken die Anleitungsform, den Grund ohne Backtick, „ohne Grund ist Weiß", die
+Zahl ohne `:1`, Komma wie Punkt, das Token zwei Zeilen tiefer, zwei Angaben in
+einer Zeile mit je eigenem Grund — und vier gerechnete Verhältnisse.
+
+**M23 — behoben.** `v3.css:268` nennt `--color-text-muted` auf der Zeile der
+Zahl (6,69:1; unabhängig 6,6869), `v3.css:1303` nennt `--color-accent` **und**
+den Grund `border-control` auf einer Zeile (1,03:1; unabhängig 1,0289). Der
+dritte, echte Alpha-Fall trägt kein `:1` mehr und ist damit keine Angabe (M24).
+Ergebnis: 20 von 20 gerechnet, nichts ungeprüft. Der Skriptkopf sagt nicht mehr
+„many claims name a class instead of a token" — keine tut das.
+
+**M26 — behoben, und zwar gerechnet.** Gerendert in `Roles`: „von **5**
+Plaketten in `app-chrome.css` stehen als Hex-Literal noch **1 Fläche**
+(bdg-warning) und **4 Ränder** (bdg-info, bdg-success, bdg-warning,
+bdg-danger); den Text holen alle aus Token." Unabhängig aus
+`app-chrome.css:455–463` nachgezählt: fünf `.bdg-*`-Regeln; Hex-`background`
+nur `.bdg-warning` (`#F5EEE0`); Hex-`border-color` bei info (`#C7DFEC`),
+success (`#D5E3DB`), warning (`#E8DCBE`), danger (`#E7CFCE`); `.bdg-neutral`
+ganz aus Token; **kein** Hex-`color`. Der Satz kommt aus `READERS` per Regex,
+die Namen aus dem Treffer — er kann jetzt nicht mehr veralten, ohne dass die
+Zahl mitgeht. Gegenprobe auf die Trennung `color` / `border-color`: der
+Rückblick `(?<!-)color:\s*#` liefert leer, und genau das steht da.
+
+### Die fünf kleinen, M14 und M17
+
+- **M24 — behoben.** `v3.css:263–265` trägt „`opacity: .5` auf der Linkfarbe
+  ergab gemessen **2,11**" ohne `:1`, mit dem Satz, warum. Der Wächter sieht
+  dort keine Angabe mehr (Selbsttestfall „Zahl ohne `:1` ist keine Angabe").
+- **M25 — behoben, gegen die Wirkung geprüft.** Der Kopf (`:21–27`) behauptet
+  drei Dinge; alle drei auf der Kopie nachgemessen: Alpha-Angabe **mit** Token
+  → Exit 1, „`--color-accent-700` auf Weiss steht mit 2.11:1 da, gemessen
+  5.45:1" (klagt falsch an, winkt nicht durch); Alpha-Angabe **ohne** Token in
+  `v3.css` → Exit 0 mit „1 … bleiben ungeprüft"; dieselbe in `tokens.css` →
+  Exit **1**. Der Kopf beschreibt jetzt, was passiert.
+- **M27 — behoben.** `design-guidelines.md:587` nennt „5.07 (4.68); auf
+  `success-bg` **4.63**", Rolle **„Text"** (nicht mehr „Text — offen"); §11.5
+  (`:395`) steht durchgestrichen als **Erledigt** mit beiden Zahlen und dem
+  Grund. Unabhängig: `#3F7A5A` auf `#F0F6F2` = **4,6272**, auf dem alten
+  `#EBF2EE` 4,4578. **Alle zwölf Zeilen** der §12-Tabelle nachgerechnet, kein
+  Abweicher: 13,7721 · 6,6869 · 4,8807/4,5052 · 5,4453 · 3,5521 · 11,6428 ·
+  5,0690/4,6791/4,6272 · 5,5162/4,7777 · 6,0631 · 1,3029/1,6222 ·
+  3,4522/3,1866. Die `Contrast`-Story zeigt dieselben 4,63:1.
+- **M28 — behoben.** `Surface.stories.tsx:557` zählt
+  `/\banimation:(?!\s*none)/g`; gerendert: „**9** Transitions und **3**
+  Animations stehen **4** Blöcken gegenüber". Unabhängig in `v3.css` gezählt:
+  fünf `animation:`, davon zwei `none` (`:1077`, `:1942`) → drei echte
+  (`:1074` `v2pulse`, `:1790` `v2spin`, `:1934` `v2toastin`), passend zu drei
+  `@keyframes`; `transition:` 9; `prefers-reduced-motion` 4.
+- **M29 — behoben.** `--color-primary-700` hat keine `ROLES`-Zeile mehr
+  (`Color.stories.tsx:254` sagt warum). Gerendert: „Ohne Rolle: **7** —
+  primary-900, primary-700, primary-500, surface-raised, warning-strong,
+  scrim, focus-ring-soft". Gegen §3 durchgezählt: §3 nennt in der Primär-Zeile
+  `--color-primary` (+`-600`, `-800`), in der Akzent-Zeile `-600`, `-500`,
+  `-100`, `-50`, bei Fläche nur `--color-surface` · `-head`, beim Fokus
+  `--color-focus` / `-ring` — die sieben stimmen. Folgefehler geprüft:
+  `Contrast` hat dadurch **37** statt 39 Zeilen, weil primary-700 zwei
+  Textzeilen stellte.
+- **M14 — behoben.** Gerendert stehen nur noch „produktive Leiter", „nur
+  lesende Leiter", „auf beiden Leitern", „daneben"; „Handlungs-Leiter" und
+  „Entitäts-Leiter" kommen im gerenderten Text nicht mehr vor. Der Vorspann
+  sagt „Was auf der Leiter **seines Registers** steht, ist grün".
+- **M17 — behoben.** `Radius` zeigt bei `none` den Fallback „kein Einsatzort in
+  §2" (`RADIUS_USE` hat keinen Eintrag mehr); `Motion` fährt
+  `translateY(var(--space-2))`, gerendert gemessen `matrix(1, 0, 0, 1, 0, 8)`.
+
+### Die Kriterien der Spec — gemessen
+
+**Fest.** `pnpm typecheck` Exit **0** · `check:language` **0** ·
+`check:icons` **0** („53 Zeichen in der Registry, 2 Datei(en) noch offen") ·
+`check:contrast` **0** · `check:mirror` **0** (8 Fälle) · `check:when` **0** ·
+`check-contrast.mjs --test` **0** (12 Fälle) — je über den **Exit-Code**, nicht
+über `| tail`. Die drei Dateien liegen auf Barrel-Ebene; `index.json` führt
+`v3/Grundlagen/Farbe` (4), `… /Raum und Fläche` (6), `… /Icons` (5) — 15
+Stories, **null** unter `Primitives`. Alle 15 laden und rendern, **null**
+`Runtime.exceptionThrown` und keine Konsolenmeldung außer dem
+`favicon.ico`-404 des Storybook-Rahmens; **null** gerendertes `**`;
+Exportnamen englisch (`Ramps` … `InUse`). `pnpm build` nicht gefahren (0117).
+
+**Variabel.**
+
+| Kriterium | Messung | Ergebnis |
+|---|---|---|
+| Hex 0 in den drei Stories | `grep -c '#[0-9A-Fa-f]\{6\}'` = 0 · 0 · 0 | erfüllt |
+| kein neues CSS | `git diff --stat src/styles/` war beim Messen **leer**; während der Abnahme landete dort fremde Arbeit (`v3.css` +18, `.v2oil__*` aus 0026) — an 0055 keine Zeile, und die 20 Kontrastangaben bleiben unberührt (`check:contrast` danach erneut Exit 0) | erfüllt |
+| jeder Farb-Token genau einmal in `Ramps` | **40** gerenderte Kacheln gegen `grep -c '^  --color-'` = **40**; jede Kachel aus ihrer *gerenderten* Farbe unabhängig nachgerechnet, `rgba`-Token über den Grund komponiert — **0 Abweicher** unter 40 × 2 Zahlen | erfüllt |
+| `warning-strong` mit „entfällt (A7, A9)" | gerendert `warning-strong · #9C5021 · 5,86:1 · 5,41:1 · entfällt (A7, A9) — Rückbau offen` | erfüllt |
+| `accent` nicht textfähig, `accent-700` textfähig | `accent` Text **nein**, Anmerkung „trägt keinen Text — unter 4,5:1" (3,5521); `accent-700` Text **ja**, „die einzige Akzentstufe für Text" (5,4453) | erfüllt |
+| „ohne Rolle" und „unbenutzt" gerechnet | „Ohne Rolle: **7**" gegen §3 durchgezählt (M29); „Unbenutzt: **5** — primary-900, accent-500, text-on-dark-muted, surface-raised, focus-ring"; die `rg`-Gegenprobe der Spec liefert **dieselben fünf** | erfüllt |
+| `Criticality` mit Registry-`kind`, `success` außerhalb | `danger` · `warning` · `info` · `neutral`, dazu die Zeile „Ausgang ‚erledigt'" mit `success`; Debug nennt `text-subtle` **und** was `app-chrome.css` daraus macht (`--color-text`) | erfüllt |
+| `Contrast` rechnet, statt zu zitieren | **37** Zeilen, jede aus den gerenderten Farben der Probe-Spalte nachgerechnet: **0** falsche Zahlen, **0** falsch gesetzte Marken; markiert sind genau die drei `info`-Zeilen (3,55 · 3,28 · 3,29). Gegenprobe **ohne** Eingriff in `tokens.css`: `--color-text-subtle` per `addScriptToEvaluateOnNewDocument` auf `#999999` → 4,88/4,51 wird **2,85/2,63** (unabhängig 2,8490 / 2,6298), beide Zeilen setzen die Marke „unter der Schwelle", `Ramps` zieht mit | erfüllt |
+| `Space` zeigt alle 12 Stufen | 12 Balken, gemessene Breiten 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64 · 80 · 96 px = ihre Token; keine Zwischengröße | erfüllt |
+| `Radius`: Einsatzort je Radius, 1-px-Regel | sechs Radien gemessen 0 · 2 · 4 · 6 · 10 · 999 px; „Rand: 1 px, nie dicker — die einzige Ausnahme ist der aktive Tab mit 2 px" (`v3.css:657` `.v2tab` `border-bottom: 2px`), daneben die 3-px-Zeile als benannter Abweichler (`v3.css:150` `.v2tbl__row.is-active` `border-left: 3px`); `none` → „kein Einsatzort in §2" | erfüllt |
+| `Elevation`: Rand **oder** Schatten, z-index-Leiter | gemessen „Richtig" Rand 1 px / Schatten `none` · „Auch richtig" Rand 0 / Schatten gesetzt · „Falsch" **beides**. Leiter 5 · 20 · 40 · 60/61 gegen `v3.css` nachgezählt (382, 1683 · 1384 · 1955, 2011 · 814, 859, 866, 1923). Alt-Leitern nachgeprüft: `components.css` 90/91 und 100, `booking.css` 1080/1081, `app-chrome.css` 50 und 200 | erfüllt |
+| `Widths`: 1280-px-Schwelle als Linie | gemessen 720 · 1080 · **1280** · 1440 px; `container-wide` als einzige in `rgb(59, 143, 196)` = `--color-accent`, alle anderen in `rgb(196, 204, 213)`; `content-measure` 686,375 px = 68 ch. Befund 10 nachgezählt: `max-width: 1160px` steht **dreimal** in `v3.css` (1646, 1648, 1721) | erfüllt |
+| `States`: vier Zustände an drei Elementen, V7 | 4 × 3 gerendert, je Zustand die Tonstufe benannt; V7-Satz steht („ausgewählt" trägt die Kante bzw. die Umkehr, „gesperrt" den Zeiger, „gedrückt" den flacheren Schatten). Gegenprobe mit **echtem** `mouseMoved` auf die Ruhe-Zeile: `rgba(0, 0, 0, 0)` → `rgb(244, 246, 248)` (= `--color-bg-soft`), Regel `.v2tbl__row.is-clickable:hover`; `CSS.forcePseudoState` liefert denselben Wert | erfüllt |
+| `Motion`: auslösbar, Fokusring, Reduced Motion | 9 Auslöser (3 Dauern × 3 Kurven), gemessene Dauern 0,12 / 0,18 / 0,28 s. Fokusring an **drei** Elementen über `CSS.forcePseudoState`: `.v2btn` `rgb(59, 143, 196) solid 2px`, Offset 2 px · `.v2tbl__row` ebenso · `.v2in` als benannte Ausnahme `outline: none`, Rand `rgb(26, 58, 92)` (= `--color-primary-700`, 11,6428) plus `rgba(59, 143, 196, 0.14) 0 0 0 3px`. Reduced Motion per `Emulation.setEmulatedMedia`: **alle** 181 Transition-Dauern fallen auf `1e-05s` (ohne Emulation 23 Elemente mit 0,12 / 0,18 / 0,2 / 0,28 / 0,3 s). Zählung 9 / 3 / 4 unabhängig bestätigt | erfüllt |
+| `Sizes`: beide Leitern, gemessene Praxis | Leitern 12/14/16 und 16/20/24, Strich 1,5. Praxis gerendert 12 (10×) · 13 (2×) · 14 (17×) · 15 (1×) · 16 (11×) · 20 (3×), Strich nur 1,5 (10×) — unabhängig gegen `size={…}` / `strokeWidth={…}` in `src/ui/v3` ohne Stories gezählt: **identisch** | erfüllt |
+| Vokabular (überholt durch 0087) | `pnpm check:icons` Exit 0; `Entities` und `Actions` führen die Registry-Einträge, „nur in Stories" separat | erfüllt (Ersatz) |
+| `WithWord`: die drei Bedingungen wörtlich | Wort für Wort wie §6 T8 (`design-guidelines.md:168`), dazu „`label` bleibt Pflicht und wird `aria-label` **und** `title`"; gemessen tragen **alle vier** `v2ibtn` beides (Schließen, Vorheriger Beleg, Nächster Beleg, Löschen). Kebab als Satz, nicht als Zeichen | erfüllt |
+| alle Stories unter `v3/Grundlagen/…` | 15 von 15, keine unter `Primitives` | erfüllt |
+
+### Mängel dieser Runde
+
+Keine. Weder blockierend noch klein — die Reihe M1 · M10 · M26 („eine
+handgeschriebene Behauptung neben einer gerechneten Zahl") reißt hier zum
+ersten Mal ab, weil der Satz jetzt gezählt wird und der Wächter zuerst sich
+selbst prüft.
+
+### Befunde am Set (nicht 0055)
+
+1. **Der Wächter liest drei von fünf Blättern.** `components.css:35` trägt eine
+   geltende Kontrastangabe (`#2E78A8` auf `#E3F0F8` „misst 4.14", unabhängig
+   4,1403 — richtig, und ohne `:1`), `booking.css` keine. Wer dort eine
+   geltende Angabe schreibt, bekommt sie nicht geprüft. Unverändert aus der
+   Vorrunde.
+2. **Markdown bleibt ungeschützt.** §12 und §3 der `design-guidelines.md`
+   tragen Kontrastzahlen (heute alle nachgerechnet und richtig, auch die
+   „4,88:1" in der Diagrammreihe von §3), aber `check:contrast` reicht von
+   Bauart nicht dorthin — genau die Lücke, aus der M27 entstanden ist. Ein
+   Lauf, der `docs/*.md` mitliest, fängt die siebte veraltete Zahl vor der
+   Abnahme.
+3. **Backticks rendern weiter als Zeichen** — `Entities` **22**, `Actions`
+   **28**, aus den `meaning`/`instead`-Strings der Icon-Registry. Gehört zu
+   `Icons.tsx` (0087), unverändert.
+4. **`pnpm check:icons` hält weiter zwei Dateien offen**
+   (`SourceDocumentDrawer.tsx`, `JournalEntryEditor.tsx`) — beide fremde
+   Sitzungen, mit Grund in `PENDING`.
+5. **§3 kennt `--color-primary-700` nicht**, obwohl er den Grundwert der Marke
+   stellt (`#1A3A5C`, derselbe Wert wie `--color-primary`). Die Seite steht
+   nach M29 richtig da; der Befund gehört §3 der `design-guidelines.md`, nicht
+   dieser Aufgabe.
+6. **`Elevation` gibt `--glow-accent` und `--glow-primary` denselben
+   Einsatzort-Satz** („aktiv, fokussiert, von Ludwig angefasst — sparsam"). Die
+   Zeile sagt damit nicht, wann welcher gilt — klein, und keine Zahl.
+7. **Kein Befund:** die drei gerenderten `**` in
+   `v3-grundlagen-typografie--registers` sind Pfad-Globs (`/clients/**`,
+   `/admin/**`, `/hilfe/**`), kein durchgereichtes Markdown. Hier notiert,
+   damit die nächste Runde sie nicht jagt.
+
+Abgenommen von / am: Claude (fremde Abnahme), 2026-09-07 — **abgenommen** ·
+Offene Punkte: keine an 0055. Alle Abnahmekriterien der Spec sind gemessen
+erfüllt; die 20 Kontrastangaben der drei Blätter und die zwölf Zeilen der
+§12-Tabelle stimmen auf vier Stellen; der Wächter fängt Zahl **und** Tokenwert
+in allen drei Blättern und in beide Richtungen, und seine eigene Anleitung
+trägt jetzt — wörtlich eingesetzt, mit richtiger Zahl grün und mit falscher
+rot. Die drei Zahlen, die dreimal von Hand geschrieben waren (Plaketten,
+ungeprüfte Angaben, Animationen), werden jetzt gerechnet.
+
+## Nach der dritten Wiederabnahme (2026-09-08)
+
+**Urteil: abgenommen**, ohne blockierenden und ohne neuen Mangel — die erste
+Aufgabe dieser Reihe, die eine Runde ohne Befund übersteht. Die drei Blocker
+und die sieben kleinen Punkte hielten alle der Gegenprobe stand; besonders
+zählt, dass der Kontrast-Wächter auf einer Kopie **in beide Richtungen**
+anschlägt: die vom Schlusstext vorgeschriebene Form mit richtiger Zahl grün,
+mit falscher rot, in `v3.css` wie in `app-chrome.css`.
+
+**Status: fertig.**
+
+### Was der Prüfer daneben gefunden hat — und was daraus folgt
+
+Vier Befunde am Set, zwei davon sind Lücken derselben Klasse, an der dieses
+Repo heute schon zweimal hing:
+
+1. **Der Kontrast-Wächter liest drei von fünf Blättern.** `components.css:35`
+   trägt eine geltende, korrekte Angabe (4,1403) außerhalb seiner Reichweite.
+2. **Markdown ist ganz ungeschützt.** Genau daraus entstand M27 — die sechste
+   veraltete Kontrastzahl stand in `design-guidelines.md`, nicht im CSS, und
+   fiel deshalb keinem Lauf auf.
+3. **Backticks rendern als Zeichen** in `Entities` (22 Stellen) und `Actions`
+   (28) — die Seite zeigt das Zeichen statt der Auszeichnung.
+4. **§3 kennt `--color-primary-700` nicht**, obwohl er der Grundwert der Marke
+   ist. Das ist der Befund, den M29 hinterlassen hat: die Seite zählt ihn
+   seither richtig als „ohne Rolle", die Richtlinie schweigt weiter.
+
+Die ersten beiden sind eigene Arbeit an `scripts/check-contrast.mjs` und
+werden dort erledigt; 3 und 4 stehen als Befunde.

@@ -32,8 +32,21 @@
 .banner__body { flex: 1; }
 .banner__title { font-weight: 600; }
 .banner__action { background: transparent; border: none; cursor: pointer; font: inherit; font-weight: 500; padding: 2px 4px; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-/* Die Toene kommen aus den Token: #2E78A8 auf #E3F0F8 misst 4.14 und liegt
-   unter der Schwelle — dieselbe Zahl, die 0112 an der Plakette geholt hat. */
+/* Alle vier Bannertöne halten die Schwelle für Text — nachgerechnet aus den
+   Farben, mit denen wirklich gemalt wird: info 4,69 · success 4,63 ·
+   warning 4,78 · danger 4,99.
+
+   Die Zahlen tragen kein `:1`, und das ist die Konvention und kein Versehen:
+   die vier Flächen sind **Hex-Literale** in diesem Blatt, keine Token, also
+   kann `check:contrast` sie nicht nachrechnen. Wer sie tokenisiert, darf die
+   Form `X.XX:1` schreiben und bekommt den Wächter dazu (eigene Aufgabe, V13).
+
+   Der Kommentar sagte bis 2026-09-08 „#2E78A8 auf #E3F0F8 misst 4.14 und
+   liegt unter der Schwelle" — er hat vor etwas gewarnt, das nicht (mehr) da
+   war: `#2E78A8` ist der alte Wert von `accent-700`, den 0112 dunkler gesetzt
+   hat. Die Zahl stimmte für die alte Farbe und für keine, die hier steht.
+   Gefunden, als der Wächter dieses Blatt zum ersten Mal las (Abnahme 0055,
+   dritte Runde). */
 .banner--info    { background: #E3F0F8; border-color: #C7DFEC; color: var(--color-accent-700); }
 .banner--success { background: #F0F6F2; border-color: #D5E3DB; color: var(--color-success); }
 .banner--warning { background: #F5EEE0; border-color: #E8DCBE; color: var(--color-warning); }

@@ -32,12 +32,19 @@
 import { readFileSync } from "node:fs";
 
 /**
- * All three stylesheets, not only the tokens: the fourth miscalculated ratio
+ * All five stylesheets, not only the tokens: the fourth miscalculated ratio
  * of the week sat in `v3.css` ("2.67:1 on bg-soft", measured against an
  * `accent-700` that has not existed since 0090). A guard that stops at the
- * token file checks half the claims.
+ * token file checks half the claims — and one that stops at three of five
+ * blades misses `components.css` (Abnahme 0055, dritte Runde).
  */
-const FILES = ["src/styles/tokens.css", "src/styles/v3.css", "src/styles/app-chrome.css"];
+const FILES = [
+  "src/styles/tokens.css",
+  "src/styles/v3.css",
+  "src/styles/app-chrome.css",
+  "src/styles/components.css",
+  "src/styles/booking.css",
+];
 const TOKEN_SOURCE = readFileSync(FILES[0], "utf8");
 
 /** `--color-x: #AABBCC;` → the map every claim is resolved against. */
@@ -144,6 +151,63 @@ export function claimsAus(lines, file = "") {
 }
 
 /**
+ * **Und die Doku, nicht nur die Blätter.** Die sechste falsche Kontrastzahl
+ * dieses Repos stand nicht im CSS, sondern in einer Tabelle in
+ * `design-guidelines.md` — „auf `success-bg` 4.46", gerechnet gegen eine
+ * Fläche, die 0112 ersetzt hatte. Kein Lauf hat sie gesehen, weil der Wächter
+ * nur Stylesheets las (Abnahme 0055, dritte Runde).
+ *
+ * Erfasst werden hier zwei Formen, beide eindeutig:
+ *
+ * - die **erste Zahl** einer Zeile, die mit einem Token beginnt — sie gilt
+ *   gegen Weiß, so wie die Tabellenüberschrift es sagt;
+ * - **„auf `<token>` <zahl>"** an beliebiger Stelle der Zeile.
+ *
+ * Klammerwerte (`4.88 (4.51)` = gegen `bg-soft`) und Schrägstrich-Paare
+ * (`--color-border` / `-strong`) bleiben ungeprüft und werden als solche
+ * gemeldet: sie hängen an einer Überschrift zwei Zeilen höher, und ein
+ * Wächter, der Prosa deutet, rät.
+ */
+const MARKDOWN = ["docs/design-guidelines.md"];
+
+export function claimsAusMarkdown(lines, file = "") {
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const token = line.match(/^\|\s*`(--color-[a-z0-9-]+)`/);
+    if (!token) continue;
+    const zellen = line.split("|");
+    if (zellen.length < 3) continue;
+    const wert = zellen[2];
+    // Der Grund, wo er dasteht: „auf `success-bg` 4.63".
+    for (const m of wert.matchAll(/auf\s+`?(--color-)?([a-z0-9-]+)`?\s+(\d+[.,]\d+)/g)) {
+      out.push({
+        file,
+        line: i + 1,
+        text: `${m[3]} auf ${m[2]}`,
+        claimed: Number(m[3].replace(",", ".")),
+        ground: m[2],
+        token: token[1],
+      });
+    }
+    // Die erste Zahl der Zelle gilt gegen Weiß — es sei denn, sie steht schon
+    // als Grund-Angabe darin.
+    const erste = wert.match(/^\s*(\d+[.,]\d+)/);
+    if (erste && !/^\s*\d+[.,]\d+\s*auf/.test(wert)) {
+      out.push({
+        file,
+        line: i + 1,
+        text: erste[1],
+        claimed: Number(erste[1].replace(",", ".")),
+        ground: "weiss",
+        token: token[1],
+      });
+    }
+  }
+  return out;
+}
+
+/**
  * Selbstprüfung. Sie steht hier, weil dieser Wächter zweimal an seiner
  * **eigenen Anleitung** gescheitert ist: die Form, die er vorschreibt, fiel
  * durch seinen Regex und wurde still gegen Weiß gerechnet — einmal als
@@ -197,6 +261,30 @@ function selbsttest() {
     [[5.52, "weiss"], [4.78, "warning-bg"]],
   );
 
+  // Und die Markdown-Form, aus der die sechste falsche Zahl kam.
+  const eineMd = (zeile) => {
+    const c = claimsAusMarkdown([zeile])[0];
+    return c ? [c.claimed, c.ground, c.token] : null;
+  };
+  pruefe(
+    "Markdown: Zahl gegen Weiß",
+    eineMd("| `--color-text-muted` | 6.69 | Text |"),
+    [6.69, "weiss", "--color-text-muted"],
+  );
+  pruefe(
+    "Markdown: Grund benannt",
+    claimsAusMarkdown(["| `--color-success` | 5.07 (4.68); auf `success-bg` 4.63 | Text |"]).map(
+      (c) => [c.claimed, c.ground],
+    ),
+    [[4.63, "success-bg"], [5.07, "weiss"]],
+  );
+  pruefe("Markdown: Zeile ohne Token", eineMd("| Kontrast | 4.5 | Schwelle |"), null);
+  pruefe(
+    "Markdown: Klammerwert bleibt ungeprüft",
+    claimsAusMarkdown(["| `--color-text-subtle` | 4.88 (4.51) | Text |"]).length,
+    1,
+  );
+
   // Und die Rechnung selbst, gegen von Hand nachgerechnete Werte.
   const rund = (x) => Math.round(x * 1e4) / 1e4;
   pruefe("Verhältnis text-subtle auf Weiß", rund(ratio("#717171", "#FFFFFF")), 4.8807);
@@ -208,13 +296,16 @@ function selbsttest() {
     console.error(`\ncheck:contrast — Selbstprüfung: ${schlecht} Fälle falsch.`);
     process.exit(1);
   }
-  console.log("check:contrast — Selbstprüfung in Ordnung, 12 Fälle.");
+  console.log("check:contrast — Selbstprüfung in Ordnung, 16 Fälle.");
   process.exit(0);
 }
 
 if (process.argv[2] === "--test") selbsttest();
 
-const claims = FILES.flatMap((file) => claimsAus(readFileSync(file, "utf8").split("\n"), file));
+const claims = [
+  ...FILES.flatMap((file) => claimsAus(readFileSync(file, "utf8").split("\n"), file)),
+  ...MARKDOWN.flatMap((file) => claimsAusMarkdown(readFileSync(file, "utf8").split("\n"), file)),
+];
 
 let bad = 0;
 let unchecked = 0;
