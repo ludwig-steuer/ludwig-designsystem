@@ -24,7 +24,7 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 | `recurring-rules/domain/*`: die drei Wortlisten | neu (`f0a0bd00`, L-242 und L-256) — Rhythmus, Richtung und die zwei Strategien stehen bei `RULE_INTERVAL_LABEL` | 0132–0135 nehmen die Wörter bis dahin als Prop mit rohem Rückfall |
 | `PreviewPosting.accounts` | reicht Nummer und Name **getrennt** durch (`f0a0bd00`) | 0134: damit fällt L-255 weg — die Vorschau muss keinen String mehr zerlegen |
 
-| `recurring-rules/domain/rule-draft.ts` | neu — Draft ↔ Regel, rein | 0135 führt seinen Entwurfstyp bis dahin selbst (dieselbe Form) |
+| `recurring-rules/domain/rule-draft.ts` | neu, trägt seit `75ba0647` **alle 17 Felder** — Draft ↔ Regel, rein | 0135 führt seinen Entwurfstyp bis dahin selbst (dieselbe Form); der Tausch wird ein Import |
 
 ## Erledigt mit dem Lauf vom 2026-09-08 (App `6ba47fb2`)
 

@@ -350,3 +350,22 @@ eine eigene Aufgabe.
 | … | … | ✓ / ✗ |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Nachtrag 2026-09-08 — zwei Props, deren Weglassen still schadet
+
+Beim Anschluss in der App sind zwei Fehler aufgefallen, die **nicht** am
+Baustein lagen, aber beide dasselbe Muster haben: eine optionale Prop wurde
+nicht übergeben, und der Baustein sah dadurch kaputt aus, ohne es zu sein.
+
+- **`onCriteriaChange` war nicht angeschlossen** — die Live-Trefferzahl blieb
+  stumm. Der Editor zeigt sie, wenn er sie bekommt; ohne die Prop fehlt der
+  ganze Rundlauf „wie viele Zahlungen trifft diese Regel gerade".
+- **Die Vorschau rechnete die Toleranz fest `null`**, statt sie aus dem
+  Entwurf zu nehmen — die angezeigte Sollstellung stimmte damit nicht mit
+  dem, was die Regel tut.
+
+Dasselbe Muster steht schon in 0134 für `RuleSummaryInput.matchPurposeRegex`:
+eine Prop, die man weglassen **darf**, deren Weglassen aber eine Aussage
+verfälscht statt sie nur zu unterdrücken. Für die Abnahme heißt das: bei
+einer optionalen Prop nicht nur prüfen, ob sie eine Story hat, sondern was
+ohne sie **behauptet** wird. „Fehlt" und „ist falsch" sehen im DOM gleich aus.
