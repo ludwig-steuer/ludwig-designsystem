@@ -453,13 +453,17 @@ keiner der Fragen, die diese Liste beantwortet — dieselbe Begründung, aus der
 0133 die Gültigkeits-Spalte weglässt, wenn die Grundgesamtheit schon „aktiv"
 heißt.
 
-**Und es sagt vermutlich nicht, was es behauptet.** `matches_documents` steht
-auf `true`, obwohl **keine** Regel ein Beleg-Kriterium trägt:
-`match_contract_number` und `match_document_text_regex` sind zu 0 % gefüllt
-(Befund **L-249**, offen). Solange das so ist, wäre die Spalte nicht bloß
-nutzlos, sondern eine Behauptung über einen Treffer, den die Daten nicht
-decken. Eine Spalte, die 29-mal dasselbe Falsche sagt, ist schlimmer als
-keine.
+~~**Und es sagt vermutlich nicht, was es behauptet.**~~ **Dieser zweite Grund
+war falsch, berichtigt am 2026-09-08.** Er las die Verteilung — 97 % `true`,
+während `match_contract_number` und `match_document_text_regex` zu 0 % gefüllt
+sind — als Widerspruch. Er war keiner: laut Domäne trägt auch das
+**Personenkonto** den Beleg-Treffer, und die 29 `true` sind genau die 29
+Regeln mit einem. Der echte Fehler saß im Schreibpfad (`updateRule` schrieb
+das Feld nicht) und ist mit `ba13b719` behoben (L-249, erledigt).
+
+Der Entscheid bleibt, aber er steht jetzt auf **einem** Bein statt auf zwei:
+das Feld unterscheidet nichts, solange 29 von 30 Regeln dasselbe tragen. Das
+reicht — eine Spalte muss trennen, sonst kostet sie nur Breite.
 
 **Wo das Feld hingehört, hat es schon einen Platz:** `RecurringRuleFacts`
 (0134) zeigt es — und zwar **nur bei `true`**, als Zeile im Auslöser-Block.

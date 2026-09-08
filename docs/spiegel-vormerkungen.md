@@ -28,6 +28,8 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 | `CaseFilter.withoutRecurringRule` in `accounting-cases/domain/case.ts` | neu (`4828f6c0`) — damit führt die Zahl „75 ohne Regel“ auf eine Liste mit 75 statt auf eine mit 104. **Das ist I12 in einer Zeile Domänencode**, und es zeigt, wo die Regel praktisch hinführt: nicht in die Anzeige, sondern in den Filter | 0131 und `CaseList` |
 
+| `matchesDocuments()` in `recurring-rules/domain/rule.ts` | neu (`ba13b719`, L-249) — eine Ableitung, zwei Schreiber | 0134 zeigt das Feld; rechnen tut es die Domäne |
+
 ## Erledigt mit dem Lauf vom 2026-09-08 (App `6ba47fb2`)
 
 Owner-Freigabe (Simon), einmalig, danach wieder eingefroren. Angekommen sind:
