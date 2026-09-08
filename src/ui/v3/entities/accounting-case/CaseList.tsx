@@ -1,7 +1,11 @@
-import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
+import {
+  CASE_LIST_TAB_LABEL,
+  type CaseListItem,
+  type CaseListTab as AnyCaseListTab,
+} from "@/ludwig/modules/accounting-cases/domain/case";
 import { DataTable, type ListPatch } from "../../patterns/DataTable";
 import type { TableDensity } from "../../primitives/Table";
-import { caseColumns, caseTracks, type CaseColumn } from "./case-columns";
+import { caseColumns, type CaseColumn } from "./case-columns";
 
 /**
  * The stock of one financial year (0082).
@@ -19,40 +23,64 @@ import { caseColumns, caseTracks, type CaseColumn } from "./case-columns";
  * all four populations.
  */
 
-export type CaseListTab = "laufend" | "belege" | "klaerung" | "alle";
+/**
+ * The four tabs that are a **table**. Narrowed from the mirror, not rewritten:
+ * `offen` shows bank rows and `schliessen` shows cards with the one bulk
+ * action, so neither is this component (see „Kann bewusst nicht"). A seventh
+ * tab added in the app therefore reaches this list by itself, and the app
+ * stops paying for the same narrowing a second time (`cases/page.tsx`
+ * repeated it, and got in through a cast).
+ */
+export type CaseListTab = Exclude<AnyCaseListTab, "offen" | "schliessen">;
 
 /**
  * Three of the four empty cases are a **success**, and they say so. Only
  * „alle" is a gap: a year without a single case has not started.
  */
-const EMPTY: Record<CaseListTab, { title: string; description: string; done: boolean }> = {
+/**
+ * The count turns „nothing to do" into a **result** (L6, T6) — and it is a
+ * different sentence in each tab: 117 closed cases and 117 cases whose papers
+ * are all in are two different statements, so the number cannot be one clause
+ * appended to all four. Without it every sentence still stands on its own; the
+ * caller who has the count (the page has it, it is in its own tab bar) says
+ * more with it.
+ */
+const EMPTY: Record<
+  CaseListTab,
+  { title: string; description: (count?: number) => string; done: boolean }
+> = {
   laufend: {
     title: "Kein Sachverhalt ist mehr offen.",
-    description: "Alles, was in diesem Wirtschaftsjahr angefangen wurde, ist abgeschlossen.",
+    description: (n) =>
+      n === undefined
+        ? "Alles, was in diesem Wirtschaftsjahr angefangen wurde, ist abgeschlossen."
+        : `Alle ${n} Sachverhalte dieses Wirtschaftsjahres sind abgeschlossen.`,
     done: true,
   },
   belege: {
     title: "Es fehlt keine Unterlage mehr.",
-    description: "Kein Sachverhalt wartet auf einen Beleg vom Mandanten.",
+    description: (n) =>
+      n === undefined
+        ? "Kein Sachverhalt wartet auf einen Beleg vom Mandanten."
+        : `Bei allen ${n} Sachverhalten liegt die Unterlage vor.`,
     done: true,
   },
   klaerung: {
     title: "Nichts wartet auf Bearbeitung.",
-    description: "Es gibt keine offene Frage und keinen Fall, der auf eine Entscheidung wartet.",
+    description: (n) =>
+      n === undefined
+        ? "Es gibt keine offene Frage und keinen Fall, der auf eine Entscheidung wartet."
+        : `Alle ${n} Sachverhalte sind bearbeitet — keine offene Frage, keine wartende Entscheidung.`,
     done: true,
   },
   alle: {
+    // No count here: this tab is empty because the stock is empty, so the
+    // number would be nought — and „0 Sachverhalte" says less than the sentence.
     title: "In diesem Wirtschaftsjahr gibt es noch keinen Sachverhalt.",
-    description: "Sobald ein Beleg eingeht oder eine Zahlung zugeordnet wird, entsteht der erste.",
+    description: () =>
+      "Sobald ein Beleg eingeht oder eine Zahlung zugeordnet wird, entsteht der erste.",
     done: false,
   },
-};
-
-const TAB_TITLE: Record<CaseListTab, string> = {
-  laufend: "Laufende Sachverhalte",
-  belege: "Wartet auf Unterlagen",
-  klaerung: "Zur Bearbeitung",
-  alle: "Alle Sachverhalte",
 };
 
 /**
@@ -74,10 +102,11 @@ export function CaseList({
   error,
   filtered,
   head,
+  emptyCount,
   density,
-  // Die zehn Spuren ergeben 1500 px, dazu neun Lücken à 10 und zweimal 18
-  // Polster: 1626. Darunter scrollt die Tabelle waagerecht, statt den
-  // Anzeigenamen zu quetschen.
+  // The ten tracks add up to 1500 px, plus nine 10-px gutters and twice 18 px
+  // of padding: 1626. Below that the table scrolls sideways instead of
+  // squeezing the display name.
   minWidth = 1630,
 }: {
   /** Which population — and with it, which empty case. */
@@ -90,7 +119,15 @@ export function CaseList({
   /** Sorting and paging travel through the URL, not through local state. */
   listHref?: (patch: ListPatch) => string;
   sort?: { key: string; dir: "asc" | "desc" };
-  pager?: { page: number; pageSize: number; totalItems: number; totalPages: number };
+  /** Like `DataTable` — `pageSizeOptions` included, or the page-size switch
+   *  cannot be reached through this component at all. */
+  pager?: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+    pageSizeOptions?: number[];
+  };
   loading?: boolean;
   error?: { message: string; retry?: React.ReactNode };
   /**
@@ -100,6 +137,12 @@ export function CaseList({
    */
   filtered?: { summary: string; resetHref: string };
   head?: { title?: React.ReactNode; sub?: React.ReactNode; actions?: React.ReactNode };
+  /**
+   * The stock behind an empty **success** — „Alle 117 … sind abgeschlossen."
+   * Without it the sentence stands without a number; the tab „alle" ignores
+   * it, because there the stock is what is missing.
+   */
+  emptyCount?: number;
   density?: TableDensity;
   minWidth?: number;
 }) {
@@ -116,7 +159,7 @@ export function CaseList({
       columns={cols}
       rowKey={(c) => c.caseId}
       head={{
-        title: head?.title ?? TAB_TITLE[tab],
+        title: head?.title ?? CASE_LIST_TAB_LABEL[tab],
         ...(head?.sub !== undefined ? { sub: head.sub } : {}),
         ...(head?.actions !== undefined ? { actions: head.actions } : {}),
       }}
@@ -128,19 +171,7 @@ export function CaseList({
       {...(loading ? { loading } : {})}
       {...(error ? { error } : {})}
       {...(filtered ? { filtered } : {})}
-      empty={{ title: empty.title, description: empty.description, done: empty.done }}
+      empty={{ title: empty.title, description: empty.description(emptyCount), done: empty.done }}
     />
   );
-}
-
-/**
- * The track list of the list's own column set — head and rows read the same.
- *
- * @when    Laying out the case list by hand, with `Table` instead of
- *          `CaseList` — the tracks have to match what `caseColumns()` builds.
- * @instead The whole list with sorting and pager → CaseList. One row inside
- *          foreign markup → CaseRow.
- */
-export function caseListTracks(columns?: CaseColumn[]): string {
-  return caseTracks(caseColumns(columns ? { columns } : {}));
 }

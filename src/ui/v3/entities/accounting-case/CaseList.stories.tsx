@@ -3,6 +3,7 @@ import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case
 import { CaseList, type CaseListTab } from "./CaseList";
 import type { CaseColumn } from "./case-columns";
 import { AppShell, TopBar } from "../../primitives/AppShell";
+import { Button } from "../../primitives/Button";
 import { FilterBar } from "../../primitives/FilterBar";
 import { Field, Input, Select } from "../../primitives/Form";
 import { NavList, type NavSection } from "../../primitives/NavList";
@@ -15,6 +16,8 @@ const meta: Meta<typeof CaseList> = {
 };
 export default meta;
 type Story = StoryObj<typeof CaseList>;
+
+const TABLE_TABS: CaseListTab[] = ["laufend", "belege", "klaerung", "alle"];
 
 const href = (c: CaseListItem) => `#fall-${c.caseId}`;
 const listHref = (patch: { sort?: string; dir?: string; page?: number }) =>
@@ -81,7 +84,7 @@ export const TabsSideBySide: Story = {
   name: "Tabs",
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)", maxWidth: 1620 }}>
-      {(["laufend", "belege", "klaerung", "alle"] as CaseListTab[]).map((tab) => (
+      {TABLE_TABS.map((tab) => (
         <CaseList key={tab} tab={tab} cases={[]} href={href} />
       ))}
     </div>
@@ -92,7 +95,13 @@ export const TabsSideBySide: Story = {
 export const Empty: Story = {
   render: () => (
     <div style={{ maxWidth: 1620 }}>
-      <CaseList tab="laufend" cases={[]} href={href} head={{ sub: "Musterbau GmbH · 2026" }} />
+      <CaseList
+        tab="laufend"
+        cases={[]}
+        href={href}
+        emptyCount={117}
+        head={{ sub: "Musterbau GmbH · 2026" }}
+      />
     </div>
   ),
 };
@@ -132,7 +141,11 @@ export const Error: Story = {
         tab="laufend"
         cases={[]}
         href={href}
-        error={{ message: "Die Sachverhalte konnten nicht geladen werden. Die Abfrage lief in eine Zeitüberschreitung." }}
+        error={{
+          message:
+            "Die Sachverhalte konnten nicht geladen werden. Die Abfrage lief in eine Zeitüberschreitung.",
+          retry: <Button variant="secondary" href="#erneut">Erneut laden</Button>,
+        }}
       />
     </div>
   ),
@@ -140,7 +153,9 @@ export const Error: Story = {
 
 /**
  * Der kürzere Satz des Partner-Reiters: sechs Punkte statt zehn, dafür das
- * **Wirtschaftsjahr** — weil diese Liste ihr Jahr verlässt.
+ * **Wirtschaftsjahr** — weil diese Liste ihr Jahr verlässt. Und weil sie
+ * neben anderer Arbeit steht, ist sie **dicht** gesetzt: `density` ist die
+ * Prop, die dieselbe Liste in einen schmaleren Zusammenhang bringt.
  */
 export const Columns: Story = {
   render: () => {
@@ -152,6 +167,7 @@ export const Columns: Story = {
           cases={CASES.slice(0, 3)}
           href={href}
           columns={picked}
+          density="compact"
           minWidth={900}
           head={{ title: "Sachverhalte", sub: "Bürobedarf Meier GmbH · alle Jahre" }}
         />
