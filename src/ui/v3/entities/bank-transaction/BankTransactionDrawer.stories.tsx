@@ -225,7 +225,11 @@ export const InUse: Story = {
     const [ref, setRef] = useState<string | null>(null);
     const [ziel, setZiel] = useState<string | null>(null);
     return (
-      <div style={{ maxWidth: 1400 }}>
+      // 1500 and not 1400: copying the list's own number would be a second
+      // truth again (acceptance M4). The frame is deliberately **wider** than
+      // the table's minimum width — that is how the story shows it does not
+      // scroll.
+      <div style={{ maxWidth: 1500 }}>
         {/* **Die Liste, nicht ihr Nachbau.** Die Story hatte `Table` mit
             `minWidth={1400}` von Hand aufgesetzt und die Zahl aus
             `BankTransactionList.tsx` abgeschrieben — eine zweite Wahrheit

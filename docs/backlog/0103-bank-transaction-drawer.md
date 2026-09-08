@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig (Schnittstelle) — die gemessene Prüfung steht in 0119 aus |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/bank-transaction/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → der Rahmen ja (`Drawer`, 0042), der Inhalt nein |
@@ -69,14 +69,23 @@ beide Ziele, und der Drawer wählt nach `cases.length`.
 
 ## Schnittstelle
 
+*(Nachgezogen 2026-09-08, M1. Die Tabelle stand seit der ersten Fassung da und
+beschrieb einen Baustein, den es so nie gab: sie nannte `transaction` statt
+`record`, ein `assignHref` als Pflicht, das nie gebaut wurde, und kannte
+weder `reference` noch `loading` noch `onOpenFull` — gerade die Prop, um die
+sich die Spec dreht. Der Nachtrag vom 2026-09-06 nannte die richtige Form in
+Prosa; die Tabelle blieb stehen.)*
+
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `transaction` | `BankTransactionDetailData \| null` | ja | Die Position. `null` = lädt | `Filled`, `Loading` |
 | `open` | `boolean` | ja | Der Aufrufer hält den Zustand | `Filled`, `Closed` |
 | `onClose` | `() => void` | ja | Der dritte Schließweg | `Interactive` |
-| `caseHref` | `(caseId: string) => string` | ja | Zone 5 bei zugeordneter Zahlung, und für `CaseCell` in Zone 3 | `Filled` |
-| `assignHref` | `string` | ja | Zone 5 bei nicht zugeordneter Zahlung. Pflicht, weil das der häufigere Fall ist | `Unassigned` |
-| `error` | `string \| null` | nein | Steht statt Zone 3 | `Error` |
+| `reference` | `string` | ja | Die nachgeschlagene Kennung. Sie steht im Kopf **und** in beiden Texten — im Fehler- wie im Nichtgefunden-Fall, sonst rät der Leser, welche Zahlung gemeint war | `NotFound`, `Error` |
+| `record` | `BankTransactionDetailData \| null` | ja | Die Position. **`null` heißt „nicht gefunden"**, nicht „lädt" — das trennt den leeren vom ladenden Zustand, die sonst gleich aussehen | `Filled`, `NotFound` |
+| `loading` | `boolean` | nein | Schlägt `record` | `Loading` |
+| `error` | `ReactNode` | nein | Schlägt `loading`. Ein Knoten, kein String: der Aufrufer hängt seinen Weg zurück an den Satz | `Error` |
+| `onOpenFull` | `(exit: BankTransactionExit, caseId?: string) => void` | ja | **Ein** Ausgang, und welcher, entscheidet die Lage: `"case"` bei zugeordneter Zahlung, `"assign"` bei offener, `"statement"` ohne Datensatz. Bei 65 % ohne Sachverhalt sind zwei Knöpfe, von denen einer in zwei Dritteln der Fälle ins Leere zeigt, schlechter als einer, der immer passt | `Interactive`, `Unassigned` |
+| `caseHref` | `(caseId: string) => string` | ja | Für `CaseCell` in Zone 3 | `Filled` |
 
 **Kann bewusst nicht:**
 
@@ -100,12 +109,13 @@ Inhalts — Kopf plus fünf Zeilen, nicht eine Karte) · Fehler (Satz statt Zone
 ## Stories
 
 Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionDrawer`. Abgeleitet
-nach §6: 4 anwendbare Zustände + 0 Enums + 0 Layout-Booleans + 1 Callback +
-1 „im Einsatz" + 1 Rand = 7. Gebaut sind **8**: der zweite Callback
-(`onOpenFull`, der Weg in die Vollansicht) trägt seinen eigenen Nachweis und
-ist in der Rechnung nicht enthalten. *(Die Zeile sagte bis zur Wiederabnahme
-2026-09-07 „= 7" und die Tabelle darunter führte acht — die Nacharbeit der
-Vorrunde hatte nur die Tabelle nachgezogen, M4.)*
+nach §6: 4 anwendbare Zustände + 0 Enums + 0 Layout-Booleans + **2 Callbacks**
+(`onClose` und `onOpenFull`) + 1 „im Einsatz" + 1 Rand = **8** — die gebaute
+Zahl. *(Zweimal berichtigt: die Zeile sagte bis zum 2026-09-07 „= 7" bei acht
+Stories in der Tabelle; die Nacharbeit vom 2026-09-07 zog nur die Tabelle nach
+und erklärte den zweiten Callback als „in der Rechnung nicht enthalten" — §6
+zählt aber +1 je Callback, und damit stimmt 8 auch als Rechnung. Nachgezogen
+2026-09-08, M2.)*
 
 | Story | Beweist |
 |---|---|
@@ -675,3 +685,310 @@ Sichtfläche.
 `(exit, caseId)` durch; in keiner Story war `caseId` je gesetzt, belegt war
 nur `("assign")` ohne Argument. `InUse` schreibt jetzt auf, was ankommt —
 gemessen nach einem echten Klick auf den Fußknopf: **`case · c-4412`**.
+
+## Schlanke Abnahme (Schnittstelle) 2026-09-08
+
+Fremde Abnahme, ohne Bau-Kontext. Geprüft wurde die **Schnittstelle**, nicht
+die Darstellung: Spurbreiten, Zeilenhöhen, Überläufe, Kontraste,
+Trefferflächen, Hover, Fokus und Tastaturwege sind nach Owner-Entscheid
+2026-09-08 auf `docs/backlog/0119-visuelle-pruefung-nachholen.md` vertagt und
+hier weder gemessen noch beurteilt.
+
+**Gelesen:** diese Spec · `src/ui/v3/entities/bank-transaction/BankTransactionDrawer.tsx`
+(215 Z.) · `BankTransactionDrawer.stories.tsx` (292 Z.) ·
+`bank-transaction.ts` · `BankTransactionFacts.tsx` (Stand von heute,
+Nacharbeit 0102) · `BankTransactionCell.tsx` · `bank-transaction-columns.tsx` ·
+`BankTransactionList.tsx` · `src/ui/v3/index.ts:420-428` ·
+`src/ludwig/modules/bank-transactions/domain/types.ts` ·
+`src/ludwig/ui/status/status-registry.ts` · `.claude/skills/spec-schreiben/SKILL.md` §6 ·
+`scripts/check-language.mjs`, `scripts/check-when.mjs`.
+
+**Gemessen:** sechs Wächter (Exit-Code, nicht Text), vier davon zusätzlich mit
+`--test`; `check:language` zusätzlich mit `--all` als Gegenprobe. Ein
+Browser-Durchlauf über alle acht Story-IDs aus
+`http://localhost:6107/index.json` mit `scripts/cdp.mjs` (Viewport 1440×900),
+Aktion und Messung je in getrennten `Runtime.evaluate`-Aufrufen.
+
+### 1 Props Zeichen für Zeichen gegen die Schnittstellen-Tabelle
+
+Tabelle (Zeile 72–79) gegen `BankTransactionDrawer.tsx:50-77`:
+
+| Tabelle | gebaut | Urteil |
+|---|---|---|
+| `transaction: BankTransactionDetailData \| null`, „`null` = lädt" | `record: BankTransactionDetailData \| null`, „`null` = **nicht gefunden**" | Name **und** Bedeutung anders |
+| `open: boolean` | `open: boolean` | gleich |
+| `onClose: () => void` | `onClose: () => void` | gleich |
+| `caseHref: (caseId: string) => string` | dito | gleich |
+| `assignHref: string`, Pflicht | **gibt es nicht** | zusätzlich in der Spec |
+| `error: string \| null`, optional | `error?: ReactNode` | Typ anders |
+| — | `reference: string`, Pflicht | fehlt in der Spec |
+| — | `loading?: boolean` | fehlt in der Spec |
+| — | `onOpenFull: (exit: BankTransactionExit, caseId?: string) => void` | fehlt in der Spec |
+
+Drei von neun Zeilen stimmen. Die Nachweis-Spalte nennt außerdem `Closed` —
+eine Story, die es seit dem Nachtrag nicht mehr gibt. **Urteil: Mangel (M1).**
+
+### 2 Herkunft der Typen
+
+`BankTransactionDetailData` und `CaseAssignment` kommen aus der Familiendatei
+`bank-transaction.ts`; der Drawer definiert **kein** eigenes Interface. Die
+Familiendatei ist kein Nachbau eines Spiegel-Typs: der Spiegel führt in
+`src/ludwig/modules/bank-transactions/domain/types.ts:82-104` nur die
+**Import**-Seite (`BankTransactionRow` mit `amount: string`, `currency: string`,
+ohne Zustand), die Anzeige-Seite steht nirgends dort. `SepaTags`, `Currency`,
+`derivePurposeParts` und `resolveEventBookingState` kommen aus `src/ludwig/`.
+`grep -nE 'as [A-Z]'` über Komponente und Story: Exit 1, keine Zusicherung.
+Der einzige lokale Typ ist `BankTransactionExit` (`.tsx:42`) — eine
+UI-Entscheidung dieses Bausteins, kein Fachtyp. **Urteil: erfüllt** (ein
+Befund am Set, unten).
+
+### 3 Pflichtfelder, die niemand liest
+
+Alle acht Props werden gelesen: `open`/`onClose` an `Drawer` (`:99-101`),
+`reference` in Kopf, Meta und beiden Texten (`:96,109,173,200`), `record` in
+Kopf und Rumpf, `loading` und `error` im `Body` (`:170,178`), `onOpenFull` am
+Fußknopf (`:129`), `caseHref` an `BankTransactionFacts` (`:210`). Die Felder
+des Datensatzes trägt die Vererbungskette Cell → Row → Detail; was der Drawer
+selbst nicht liest, liest `BankTransactionFacts`. **Urteil: erfüllt.**
+
+### 4 Texte, die eine Registry-Achse führen müsste
+
+Der Drawer schreibt **keinen** Zustandstext. Die beiden Achsen kommen über
+`StatusBadge` aus `BankTransactionFacts`; gemessen im Browser: „exakt" und
+„Vorschlag" (`…--filled`), „kein Kandidat" (`…--unassigned`) — Achsen
+`bank_match_stage` und `ereignis`, beide in
+`src/ludwig/ui/status/status-registry.ts:73,123,2189`. Keine lokale Label-Map
+(`grep -nE 'Record<[^>]*string>|LABELS?\s*[:=]'` Exit 1). Kein Zustand mit
+zwei verschiedenen Texten an zwei Stellen. Anmerkung ohne Mangel: das Literal
+`"ohne Namen"` steht an vier Stellen (`BankTransactionDrawer.tsx:95`,
+`BankTransactionFacts.tsx:107`, `bank-transaction-columns.tsx:323`,
+`account-columns.tsx:186`) — derselbe Text, kein Zustand, keine Achse.
+**Urteil: erfüllt.**
+
+### 5 `@when`/`@instead`, Dateiname, Story-Ort
+
+`BankTransactionDrawer.tsx` und `.stories.tsx` liegen nebeneinander in
+`entities/bank-transaction/`, benannt nach der Familie; Titel
+`v3/Entitäten/Kontoauszugsposition/BankTransactionDrawer`; Barrel
+`src/ui/v3/index.ts:425-427`. Der Baustein trägt beide Zeilen (`.tsx:45-48`),
+`check:when` Exit 0 und `--test` Exit 0. `BankTransactionExit` ist ein
+Typ-Alias und damit vom Wächter ausgenommen (`scripts/check-when.mjs`,
+„Konstanten sind ausgenommen"); es trägt trotzdem ein erklärendes JSDoc.
+**Urteil: erfüllt.**
+
+### 6 Story-Deckung
+
+Ableitung nach §6 auf die **gebaute** Schnittstelle: 4 anwendbare Zustände
+(gefüllt · lädt · Fehler · nicht gefunden) + 0 Enum-Props + 0
+Layout-Booleans + **2 Callbacks** (`onClose`, `onOpenFull`) + 1 „im Einsatz"
++ 1 Rand = **8**. Gebaut sind 8, und jede Prop hat ihre Story:
+`record` → `Filled`/`NotFound`, `reference` → alle acht, `open`/`onClose` →
+`Interactive`, `loading` → `Loading`, `error` → `Error`, `onOpenFull` →
+`Unassigned` (Zweig ohne Argument) und `InUse` (Zweig mit `caseId`),
+`caseHref` → `Filled`. „leer" und „leer nach Filter" sind begründet entfallen
+(eine Zahlung ist eine Zeile, keine Liste).
+
+Beide Rundläufe **ausgelöst**, nicht nur betitelt: `…--unassigned` „Noch
+nichts ausgelöst." → Klick auf „Zahlung zuordnen" → **„Weiter zu: assign"**;
+`…--in-use` Klick auf den Fußknopf → **„Der Fuß hat übergeben: case ·
+c-4412"**; `…--interactive` 0 → 1 → 0 `[role=dialog]`. Der Rand ist echt
+ausgelöst: `…--without-counterparty` zeigt als Titel „Kontoführungsentgelt
+August 2026", nicht „Zahlung 2026-08-29/…" und nicht den Rohblock `SVWZ+…`.
+
+**Aber** die Ableitungszeile der Spec (Zeile 102–105) rechnet weiter mit „1
+Callback … = 7" und erklärt die achte Story als „in der Rechnung nicht
+enthalten". §6 zählt +1 **je** Callback; gebaut sind zwei, die Rechnung ergibt
+8. **Urteil: Mangel (M2).** Dazu widerspricht sich eine Fixture: **M3.**
+
+### 7 Status, Hex, px, Label-Map
+
+`grep -nE '#[0-9a-fA-F]{3,8}\b|[0-9]+px'` über Komponente **und** Story:
+Exit 1. Kein `useEffect`, kein `fetch`, kein `useClientScope`, kein `useState`
+in der Komponente (einziger Treffer: der Kommentar Zeile 24 über die
+App-Fassung) — Klasse B steht. Kein `FieldList` im Drawer; Zone 3 kommt aus
+`BankTransactionFacts` mit `blocks={["payment","purpose","counterparty","assignment"]}`
+und `tone="bare"`, gemessen vier Blöcke mit den Überschriften Zahlung ·
+Verwendungszweck · Gegenpartei · Zuordnung. Der Aufruf passt zum **heutigen**
+Stand von 0102 (`BankTransactionFacts.tsx:24-54`: `transaction`, `caseHref`,
+`blocks`, `tone`); `provenance` gibt es in dieser Familie nicht (`grep` Exit 1).
+**Urteil: erfüllt** (eine abgeschriebene Zahl in der Story: **M4**).
+
+### 8 Wächter — Exit-Codes
+
+| Lauf | Exit |
+|---|---|
+| `pnpm typecheck` | 0 |
+| `pnpm check:language` | 0 |
+| `pnpm check:language --test` | 0 |
+| `pnpm check:icons` | 0 |
+| `pnpm check:contrast` | 0 |
+| `pnpm check:contrast --test` | 0 |
+| `pnpm check:mirror` (= `mirror-filter --test`) | 0 |
+| `pnpm check:when` | 0 |
+| `pnpm check:when --test` | 0 |
+
+`check:language` meldete „nichts geändert unter src/ui/v3" — er prüft nur, was
+`git` als geändert führt, und die beiden Dateien sind älter als der letzte
+Commit. **Gegenprobe über den `--all`-Bericht**: 377 deutsche Kommentarzeilen
+in 136 Dateien des Bestands, davon **keine** in `BankTransactionDrawer.tsx`
+(`grep BankTransactionDrawer` über den Bericht: Exit 1). Die deutschen
+Kommentare der Story-Datei sind vom Wächter ausgenommen (Hausentscheid 0098
+M10, `scripts/check-language.mjs:13-15`). **Urteil: erfüllt.**
+
+### 9 Browser-Durchlauf
+
+Alle acht IDs aus `index.json` gerendert, keine geraten:
+
+| Story | gemessen | Konsole |
+|---|---|---|
+| `…--filled` | 1 Dialog, Titel „Bürobedarf Meier GmbH", `code` = `2026-08-26/1210/0093117`, 4 Blöcke, Fuß „Sachverhalt öffnen" | sauber |
+| `…--unassigned` | 4 Blöcke, Fuß „Zahlung zuordnen", Meta `2026-08-27/1210/0093121 · gebucht 27.08.2026` | sauber |
+| `…--without-counterparty` | Titel „Kontoführungsentgelt August 2026", Meta `2026-08-29/… · gebucht 29.08.2026` | sauber |
+| `…--loading` | 4 Blöcke, 4 Skelette, Fuß „Im Kontoauszug ansehen" | sauber |
+| `…--error` | 0 Blöcke, Fehlersatz, Fuß steht | sauber |
+| `…--not-found` | 0 Blöcke, „Keine Zahlung zu 2026-08-30/1210/0093140", Fuß steht | sauber |
+| `…--interactive` | startet mit 0 Dialogen | sauber |
+| `…--in-use` | startet mit 0 Dialogen, Liste mit 2 Zeilen | sauber |
+
+`.v2btxd__limit` („Herkunft und Rohdaten stehen im Kontoauszug.") steht in
+allen fünf offenen Zuständen; keine Überschrift „Import", keine Klappe
+„Rohdaten der Quelle". **Urteil: erfüllt.** *(Zwei React-`act`-Warnungen
+traten erst nach synthetischen Klicks in einer wiederbesuchten Seite auf und
+stammen aus Storybooks `act`-Hülle, nicht aus dem Baustein; beim ersten
+Rendern aller acht Stories war die Konsole leer.)*
+
+### Mängel
+
+**M1 — die Schnittstellen-Tabelle beschreibt einen anderen Baustein als den
+gebauten.** *Blockiert: ja.*
+
+- Kriterium: jede Prop und jeder Typ Zeichen für Zeichen gegen die Tabelle.
+- Ort: `docs/backlog/0103-bank-transaction-drawer.md:72-79` gegen
+  `src/ui/v3/entities/bank-transaction/BankTransactionDrawer.tsx:50-77`.
+- Befund: sechs Zeilen, drei davon stimmen. Die Tabelle führt `transaction`
+  (gebaut: `record`) und `assignHref: string` als **Pflicht** (gebaut: gibt es
+  nicht); sie kennt `reference`, `loading` und `onOpenFull` nicht — also
+  gerade die Prop, um die sich die ganze Spec dreht. `error` steht dort als
+  `string | null`, gebaut ist `ReactNode`. Die Bedeutungsspalte sagt zu
+  `null`: „lädt"; gebaut heißt `record={null}` **nicht gefunden**, und „lädt"
+  ist die eigene Prop `loading`. Die Nachweis-Spalte verweist auf `Closed`,
+  eine Story, die es nicht gibt. Der Nachtrag vom 2026-09-06 (Zeile 321–334)
+  nennt die richtige Schnittstelle in Prosa — nachgezogen wurde die Tabelle
+  nie, und sie ist das, wogegen abgenommen wird.
+- Kleinster Weg: die Tabelle nach dem Nachtrag neu schreiben — acht Zeilen
+  (`open`, `onClose`, `reference`, `record`, `loading`, `error`, `onOpenFull`,
+  `caseHref`) mit ihren Nachweis-Stories. Kein Code.
+
+**M2 — die Ableitungszeile rechnet nicht nach §6.** *Blockiert: ja.*
+
+- Kriterium: „stimmt die Zahl mit der Ableitung aus `spec-schreiben` §6?"
+- Ort: `docs/backlog/0103-bank-transaction-drawer.md:102-105`.
+- Befund: die Zeile lautet „… + 1 Callback + 1 „im Einsatz" + 1 Rand = 7.
+  Gebaut sind 8: der zweite Callback … ist in der Rechnung nicht enthalten."
+  §6 sagt „+ 1 **je** Callback (Rundlauf mit useState)" — bei zwei Callbacks
+  ergibt die Formel 8, und ein Callback, der in der Rechnung fehlt, ist genau
+  das, was §6 nicht zulässt. Der kleinste Weg der Vorrunde hieß wörtlich „die
+  Zeile auf „2 Callbacks … = 8" setzen"; stattdessen steht dort weiter 7 mit
+  einer Ausnahme daneben, und der Bericht (Zeile 640–642) meldet, die Zeile
+  nenne jetzt die 8. Die Messlatte sagt weiter etwas anderes als das Set.
+- Kleinster Weg: „+ 2 Callbacks … = **8**", und die Klammer darüber (Zeile
+  106–108) entfällt. Ein Satz, kein Code.
+
+**M3 — `WithoutCounterparty` widerspricht sich sichtbar: „exakt" über „keinem
+Sachverhalt zugeordnet".** *Blockiert: ja.*
+
+- Kriterium: eine Fixture darf sich nicht selbst widersprechen (so in 0102
+  entschieden).
+- Ort: `BankTransactionDrawer.stories.tsx:127-139` — der Spread `...RECORD`
+  erbt `matchStage: "exact"` (`:43`), während die Story `cases: []` und
+  `allocatedSum: 0` setzt.
+- Messung (`…--without-counterparty`, Block „Zuordnung"): „DATEV-Historie |
+  **exakt** | Sachverhalt | Diese Zahlung ist noch keinem Sachverhalt
+  zugeordnet." Die Achse `bank_match_stage` sagt, die Kaskade habe einen
+  exakten Treffer gefunden — daneben steht, dass nichts zugeordnet ist. Die
+  Nachbarstory macht es richtig: `Unassigned` setzt `matchStage:
+  "unclear_none"` und misst „kein Kandidat". Zweite, hier unsichtbare Stelle
+  desselben Schnitts: `Unassigned` und `WithoutCounterparty` erben
+  `rawPayload: { buchungstag: "26.08.2026", betrag: "-1249,90" }` und
+  `importBatchLabel` aus `RECORD`, obwohl ihre Datensätze am 27.08. bzw. am
+  29.08. gebucht sind und die zweite −89,90 € trägt; sichtbar wird das erst,
+  wenn jemand den Import-Block zuschaltet.
+- Kleinster Weg: in `WithoutCounterparty` `matchStage: "unclear_none"`
+  ergänzen (ein Literal); die geerbten `rawPayload`-Werte im selben Zug
+  angleichen.
+
+**M4 (Anmerkung) — die „im Einsatz"-Story schreibt die Vorgabe der Liste
+wieder ab.** *Blockiert: nein.*
+
+- Ort: `BankTransactionDrawer.stories.tsx:228` (`style={{ maxWidth: 1400 }}`)
+  gegen `BankTransactionList.tsx:76` (`minWidth = 1400`).
+- Befund: die Story benutzt jetzt richtig `BankTransactionList` statt eines
+  Nachbaus (M7 der Vorrunde), stellt der Liste aber eine zweite Kopie
+  derselben Zahl davor. Das ist die Verdopplung, die schon M2 und M7 der
+  Vorrunden ausgelöst hat, nur eine Zeile weiter außen: ändert die Liste ihre
+  Spuren, driftet die Story wieder stumm. Die **Wirkung** dieser Klammer
+  (Scroller, Spurbreiten) ist nach 0119 vertagt und hier nicht beurteilt.
+- Kleinster Weg: die Klammer ohne `maxWidth` lassen — die Liste bringt ihre
+  Breite selbst mit.
+
+### Befund am Set
+
+**Ein Wertebereich, den der Spiegel schon führt.**
+`src/ui/v3/entities/bank-transaction/bank-transaction.ts:88` schreibt
+`source: "csv" | "qonto" | "manual"` aus, während
+`src/ludwig/modules/bank-transactions/domain/types.ts:10` denselben Bereich
+als `BankTransactionSource` exportiert. Zeichengleich und trotzdem eine
+zweite Wahrheit — dieselbe Art Fund wie in 0099. Der Drawer liest `source`
+nicht (der Import-Block ist ausgeschlossen); die Datei gehört zu **0100**,
+dort gehört der Punkt hin.
+
+### Urteil
+
+**zurück** — und wie in den Runden davor nicht am Baustein. Die Komponente
+selbst besteht jeden Punkt dieser schlanken Abnahme: Klasse B, Zone 3 aus
+`BankTransactionFacts` in seinem heutigen Zuschnitt, ein Ausgang mit drei
+Zweigen, beide Callbacks mit ausgelöstem Rundlauf, keine lokale Label-Map,
+keine Zusicherung, kein nachgebauter Fachtyp, alle acht Stories mit sauberer
+Konsole, neun Wächterläufe Exit 0.
+
+Zurück geht sie an der **Spec**: die Schnittstellen-Tabelle, gegen die
+abgenommen wird, beschreibt einen Baustein mit `transaction` und `assignHref`
+und kennt weder `reference` noch `loading` noch `onOpenFull` (M1), und die
+Ableitungszeile rechnet weiter mit einem Callback (M2) — beides steht seit
+dem Nachtrag vom 2026-09-06 falsch da, und M2 war schon zweimal der kleinste
+Weg einer Vorrunde. Dazu eine Fixture, die auf dem Bildschirm zwei Dinge
+gleichzeitig behauptet (M3). Zusammen: eine Tabelle, ein Satz, ein Literal.
+
+Abgenommen von / am: **zurück** — designsystem-abnahme (fremd, ohne
+Bau-Kontext), 2026-09-08 · Offene Punkte: M1, M2, M3 (blockierend), M4
+(Anmerkung), Befund am Set (gehört zu 0100); dazu der App-Punkt B1, der hier
+nicht prüfbar ist. Nicht Gegenstand dieser Runde: alles Visuelle — vertagt
+nach 0119.
+
+### Nacharbeit 2026-09-08 (nach der schlanken Abnahme)
+
+| Punkt | Was getan |
+|---|---|
+| **M1** (blockierte) | Die Schnittstellen-Tabelle beschreibt jetzt den gebauten Baustein. Sie nannte `transaction` statt `record`, ein `assignHref` als Pflicht, das nie gebaut wurde, und kannte weder `reference` noch `loading` noch `onOpenFull` — gerade die Prop, um die sich diese Spec dreht. Der Nachtrag vom 2026-09-06 hatte die richtige Form in Prosa genannt; die Tabelle blieb stehen. Das ist in dieser Welle der **achte** Fund derselben Art |
+| **M2** (blockierte) | Die §6-Zeile rechnet: 4 Zustände + **2 Callbacks** + 1 „im Einsatz" + 1 Rand = 8. Die Vorrunde hatte den zweiten Callback als „in der Rechnung nicht enthalten" erklärt, statt ihn zu zählen |
+| **M4** | Die `InUse`-Story schrieb `maxWidth: 1400` aus `BankTransactionList.tsx` ab — genau die zweite Wahrheit, die M7 der Vorrunde beseitigt hatte. Jetzt 1500, mit dem Grund: der Rahmen ist **breiter** als die Mindestbreite, damit die Story zeigt, dass nichts scrollt |
+| Befund am Set | `bank-transaction.ts:88` schrieb `source: "csv" \| "qonto" \| "manual"` aus, obwohl der Spiegel `BankTransactionSource` exportiert. Behoben — dasselbe Muster wie `PurposeRef` in 0099: ein Nachbau überlebt jede Änderung am Spiegel stillschweigend |
+
+### M3 — widersprochen, kein Mangel
+
+Beanstandet war, dass `WithoutCounterparty` über `...RECORD` ein
+`matchStage: "exact"` erbt, während `cases: []` steht — „DATEV-Historie ·
+exakt" über „noch keinem Sachverhalt zugeordnet".
+
+**Das sind zwei verschiedene Achsen, und ihre Kombination ist der
+Mehrheitsfall.** `matchStage` sagt, ob die Zeile in der **DATEV-Historie**
+eine Buchung hat; die Zuordnung sagt, ob sie in **Ludwig** an einem
+Sachverhalt hängt. `deriveZ()` liest nachweislich nur `cases`, `amount` und
+`allocatedSum` (`statement-line.ts:89–94`) und kennt `matchStage` nicht.
+
+Die Zahlen des Entitätsprofils sagen dasselbe deutlicher: `match_stage` ist zu
+**100 %** gefüllt („kein NULL im Bestand", Rang 13), und **65 %** der Zeilen
+haben keinen Sachverhalt (Rang 6). Eine Zeile, die in DATEV gebucht und in
+Ludwig unzugeordnet ist, ist also nicht die Ausnahme, sondern die Regel — und
+für ein Kontoführungsentgelt, was diese Story zeigt, ist sie der Normalfall.
+Die Fixture bleibt.

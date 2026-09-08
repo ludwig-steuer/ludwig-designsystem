@@ -1,4 +1,5 @@
 import type { SepaTags } from "@/ludwig/modules/bank-transactions/domain/statement-line";
+import type { BankTransactionSource } from "@/ludwig/modules/bank-transactions/domain/types";
 import type { Currency } from "@/ludwig/shared/money";
 import type { CaseLink } from "../accounting-case/case-title";
 
@@ -84,8 +85,10 @@ export interface BankTransactionDetailData extends BankTransactionRowData {
   counterpartyIban: string | null;
   /** Rank 12. */
   counterpartyBic: string | null;
-  /** Rank 14. */
-  source: "csv" | "qonto" | "manual";
+  /** Rank 14. The mirror carries the union (`types.ts:10`); writing the three
+   *  values out again is a copy that survives every change over there
+   *  unnoticed — the same find as in 0099. */
+  source: BankTransactionSource;
   /** Rank 15 — the import run: what it was called and when it ran. */
   importBatchLabel: string | null;
   importedAt: string;
