@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ActionBar } from "./ActionBar";
 import { ActionButton } from "./ActionButton";
 import { AmountCell } from "./Cells";
+import { Field, Input, Select } from "./Form";
 import { Card, CardHead, HeadRow, Row, Table } from "./Table";
 
 const meta: Meta<typeof ActionButton> = {
@@ -102,6 +103,77 @@ export const WithConfirm: Story = {
       }}
     >
       Stapel abnehmen
+    </ActionButton>
+  ),
+};
+
+/**
+ * **Erst fragen, dann tun** (0121): der Dialog erfragt einen Wert, und die
+ * Handlung bekommt ihn. Was im Dialog steht, gehört dem Aufrufer — hier ein
+ * Auswahlfeld, in der Bankseite der `CasePicker`. Der Knopf bleibt aus,
+ * solange nichts gewählt ist, und der zuletzt gewählte Wert steht danach im
+ * Ergebnis.
+ */
+export const AskForTarget: Story = {
+  render: function Render() {
+    const [done, setDone] = useState<string | null>(null);
+    return (
+      <div style={{ display: "grid", gap: "var(--space-3)", justifyItems: "start" }}>
+        <ActionButton<string>
+          variant="primary"
+          ask={{
+            title: "Umsatz einem Sachverhalt zuordnen",
+            confirmLabel: "Zuordnen",
+            initial: "",
+            valid: (v) => v !== "",
+            render: ({ value, set }) => (
+              <Field label="Sachverhalt" htmlFor="ask-case">
+                <Select id="ask-case" value={value} onChange={(e) => set(e.target.value)}>
+                  <option value="">Bitte wählen</option>
+                  <option value="2026-0412">2026-0412 · Wartung der Klimaanlage</option>
+                  <option value="2026-0413">2026-0413 · Beratung Q2 2026</option>
+                </Select>
+              </Field>
+            ),
+          }}
+          action={async (caseNumber) => {
+            await wait(400);
+            setDone(caseNumber);
+          }}
+        >
+          Zuordnen
+        </ActionButton>
+        {done ? <span className="v2muted">Zugeordnet an {done}.</span> : null}
+      </div>
+    );
+  },
+};
+
+/**
+ * `valid` sperrt: der Dialog steht offen, der Knopf ist aus, und es gibt
+ * keinen Weg zur Handlung — auch nicht über Enter. Hier ist der Anfangswert
+ * schon ungültig, damit der Fall ohne einen einzigen Klick sichtbar ist.
+ */
+export const AskInvalid: Story = {
+  render: () => (
+    <ActionButton<string>
+      variant="primary"
+      ask={{
+        title: "Neuen Sachverhalt anlegen",
+        confirmLabel: "Anlegen",
+        initial: "",
+        valid: (v) => v.trim().length >= 3,
+        render: ({ value, set }) => (
+          <Field label="Titel" htmlFor="ask-title" hint="Mindestens drei Zeichen.">
+            <Input id="ask-title" value={value} onChange={(e) => set(e.target.value)} />
+          </Field>
+        ),
+      }}
+      action={async () => {
+        await wait(400);
+      }}
+    >
+      Sachverhalt anlegen
     </ActionButton>
   ),
 };

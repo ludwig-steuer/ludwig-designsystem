@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useHotkeys } from "../patterns/Hotkeys";
-import { ActionButton, type ActionResult, type ConfirmSpec } from "./ActionButton";
+import { ActionButton, type ActionResult, type AskSpec, type ConfirmSpec } from "./ActionButton";
 import { TextButton } from "./TextButton";
 
 /**
@@ -243,13 +243,93 @@ export function SelectRowCell({ rowKey, label }: { rowKey: string; label: string
 }
 
 /** One action on every chosen row. `action` is a Server Action bound by the page. */
-export interface BulkAction {
+export interface BulkAction<Input = void> {
   label: string;
   /** Shown on the button (V14); it only fires while something is chosen. */
   hotkey?: string;
-  action: (keys: string[]) => Promise<ActionResult>;
+  action: (keys: string[], input: Input) => Promise<ActionResult>;
   confirm?: ConfirmSpec;
+  /**
+   * A dialog that asks something before the action runs (0121) — „12 Umsätze
+   * einem Sachverhalt zuordnen", and in it the picker.
+   *
+   * A **function** of the keys, because the dialog may name their number. It
+   * excludes `confirm`, the same way it does on `ActionButton`: `ask` is the
+   * confirmation dialog.
+   */
+  ask?: (keys: string[]) => AskSpec<Input>;
   tone?: "danger";
+}
+
+/**
+ * A list of bulk actions where each one may ask for something different.
+ *
+ * TypeScript has no existential type, so the list position cannot say „some
+ * `Input`, one per entry". This is that gap, named once and in one place —
+ * `bulkAction()` below keeps the checking where it belongs, inside the entry.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyBulkAction = BulkAction<any>;
+
+/**
+ * Types one entry of the list. Without it the caller has to annotate `input`
+ * by hand and nothing checks that `ask.initial` and `action`'s second
+ * parameter are the same thing — which is the very mistake 0121 exists to
+ * prevent.
+ *
+ * **Name the type**: `bulkAction<string>({…})`. A full `AskSpec` has `render`
+ * and `valid`, whose parameters put `Input` in a contravariant position, and
+ * inference then lands on `unknown`. One word at the call site says what is
+ * being asked for, and everything inside is checked against it.
+ *
+ * @when    Building `selection.actions` where an action asks something first.
+ * @instead An action that just runs → the plain object literal is enough.
+ */
+export function bulkAction<Input>(action: BulkAction<Input>): AnyBulkAction {
+  return action;
+}
+
+/**
+ * One button of the selection bar. Its own component because `ask` makes the
+ * action generic in what it asks for, and a `BulkAction[]` cannot carry one
+ * type parameter per entry — here each element gets its own.
+ */
+function BulkButton<Input>({
+  action: a,
+  keys,
+  onDone,
+}: {
+  action: BulkAction<Input>;
+  keys: ReadonlySet<string>;
+  onDone: () => void;
+}) {
+  // A failed action keeps the selection: whoever wants to try again should not
+  // have to pick the twelve rows a second time.
+  const run = async (result: ActionResult) => {
+    if (!result || !result.error) onDone();
+    return result;
+  };
+  return a.ask ? (
+    <ActionButton<Input>
+      size="sm"
+      variant={a.tone === "danger" ? "danger" : "secondary"}
+      hotkey={a.hotkey}
+      ask={a.ask([...keys])}
+      action={async (input) => run(await a.action([...keys], input))}
+    >
+      {a.label}
+    </ActionButton>
+  ) : (
+    <ActionButton
+      size="sm"
+      variant={a.tone === "danger" ? "danger" : "secondary"}
+      hotkey={a.hotkey}
+      confirm={a.confirm}
+      action={async () => run(await a.action([...keys], undefined as Input))}
+    >
+      {a.label}
+    </ActionButton>
+  );
 }
 
 /**
@@ -264,7 +344,7 @@ export function SelectionScopeBar({
   actions,
   fallback,
 }: {
-  actions: BulkAction[];
+  actions: AnyBulkAction[];
   /** The usual card actions — they come back as soon as the selection is empty. */
   fallback?: ReactNode;
 }) {
@@ -304,21 +384,7 @@ export function SelectionScopeBar({
             boxes.current.set(a.label, el);
           }}
         >
-          <ActionButton
-            size="sm"
-            variant={a.tone === "danger" ? "danger" : "secondary"}
-            hotkey={a.hotkey}
-            confirm={a.confirm}
-            action={async () => {
-              const result = await a.action([...keys]);
-              // A failed action keeps the selection: whoever wants to try
-              // again should not have to pick the twelve rows a second time.
-              if (!result || !result.error) clear();
-              return result;
-            }}
-          >
-            {a.label}
-          </ActionButton>
+          <BulkButton action={a} keys={keys} onDone={clear} />
         </span>
       ))}
     />

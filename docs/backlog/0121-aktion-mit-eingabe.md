@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
 | Stufe | `primitives/ActionButton` (0004) — durchgereicht von `Selection` (`BulkAction`) und `DataTable` (0057) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, unverändert: „mehrere Zeilen wählen, dann in einem Dialog sagen, wohin" ist kein Ludwig-Begriff |
 | Quelle | Blocker aus `[year]/banks/offen`, gemeldet von `ludwig-manager` 2026-09-08: die zwei Sammelaktionen der Zuordnung („Neuen Sachverhalt anlegen", „Bestehendem zuordnen") öffnen erst einen Dialog und feuern dann; `BulkAction.action: (keys) => Promise<ActionResult>` kann das nicht abbilden |
@@ -128,3 +128,46 @@ Abgeleitet nach §6: 0 neue Zustände (`ActionButton` hat seine fünf) +
 Ein Dialog, der beim Öffnen **lädt** (Vorschläge holen, bevor gefragt wird),
 wäre `ask.load?: (keys) => Promise<Input>` mit dem Ladezustand des Dialogs.
 Kein Platzhalter im Code: kommt, wenn eine Aufrufstelle ihn braucht.
+
+## Gebaut 2026-09-08
+
+`ActionButton` ist generisch über den erfragten Wert (`ActionButton<Input>`),
+`ask` und `confirm` schließen sich über zwei Prop-Formen aus, und `BulkAction`
+reicht durch. Drei Stories, alle im Browser durchgespielt.
+
+**Eine Sache, die die Spec nicht vorhergesehen hat: die Liste.**
+`selection.actions` ist ein Array, und TypeScript hat keinen existenziellen
+Typ — die Position kann nicht sagen „irgendein `Input`, je Eintrag ein
+anderer". Zwei Dinge fangen das:
+
+- **`AnyBulkAction`** (`BulkAction<any>`) ist diese Lücke, einmal benannt und
+  an einer Stelle. Sie steht in der Listen-Position, nirgends sonst.
+- **`bulkAction<Input>(…)`** typisiert den einzelnen Eintrag, damit die Prüfung
+  dort bleibt, wo sie hingehört: `ask.initial` und der zweite Parameter von
+  `action` sind nachweislich dasselbe. Ohne den Helfer müsste der Aufrufer
+  `input` von Hand annotieren, und **nichts** prüfte die Kopplung — genau der
+  Fehler, gegen den 0121 gebaut ist.
+- **Der Typ wird genannt, nicht erraten:** `bulkAction<string>({…})`. Ein
+  vollständiges `AskSpec` hat `render` und `valid`, deren Parameter `Input` in
+  eine kontravariante Position bringen; die Inferenz landet dann auf
+  `unknown`. Ein Wort an der Aufrufstelle sagt, wonach gefragt wird, und alles
+  darin wird dagegen geprüft.
+
+`BulkButton` ist als eigene kleine Komponente entstanden, weil ein Eintrag
+seinen Typparameter nur dort halten kann.
+
+**Im Browser gemessen** (`scripts/cdp.mjs`, drei Stories):
+
+| Story | Gemessen |
+|---|---|
+| `AskInvalid` | Dialog offen, Bestätigungsknopf `disabled` — kein Weg zur Handlung, auch nicht über Enter (`onConfirm` prüft `allowed`) |
+| `AskForTarget` | Nach der Auswahl ist der Knopf an; nach dem Bestätigen steht „Zugeordnet an 2026-0413" — die Handlung hat genau den Wert bekommen, den der Dialog hielt |
+| `BulkAsk` | Titel „7 Sachverhalte zuordnen" — die Zahl kommt aus den Schlüsseln, deshalb ist `ask` eine Funktion. Daneben eine Aktion ohne `ask` in derselben Liste |
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0. Im Barrel: `bulkAction`,
+`AnyBulkAction`, `AskSpec`.
+
+**Zwei Zusicherungen**, beide kommentiert und beide an der Union-Grenze: der
+Anfangswert ohne `ask` (`Input` ist dann `void`, was der Compiler über die
+Union nicht sieht) und `undefined as Input` im Zweig ohne `ask` in
+`BulkButton`.

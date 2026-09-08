@@ -64,6 +64,7 @@ export {
 export {
   ActionButton,
   type ActionResult,
+  type AskSpec,
   type ConfirmSpec,
 } from "./primitives/ActionButton";
 export {
@@ -182,6 +183,8 @@ export {
   SelectRowCell,
   SelectionScopeBar,
   useSelection,
+  bulkAction,
+  type AnyBulkAction,
   type BulkAction,
   type SelectionApi,
 } from "./primitives/Selection";

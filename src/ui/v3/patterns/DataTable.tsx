@@ -15,6 +15,7 @@ import {
   SelectRowCell,
   SelectionScope,
   SelectionScopeBar,
+  type AnyBulkAction,
   type BulkAction,
 } from "../primitives/Selection";
 import {
@@ -93,7 +94,7 @@ export interface RowAction {
   primary?: boolean;
 }
 
-export type { BulkAction };
+export type { AnyBulkAction, BulkAction };
 
 /** The grip column in front of the data — selection and chevron, `v3.css`. */
 const PICK = "var(--v2-tbl-pick)";
@@ -154,7 +155,7 @@ interface DataTableBase<T> {
   };
   /** Selection column, head box, bar in zone 1 (I5). */
   selection?: {
-    actions: BulkAction[];
+    actions: AnyBulkAction[];
     /** The text of the checkbox; without it the row key stands there. */
     label?: (row: T) => string;
   };

@@ -11,10 +11,19 @@ import {
 import { Button } from "../primitives/Button";
 import { AmountCell, MonoCell, Timestamp } from "../primitives/Cells";
 import { FieldList } from "../primitives/FieldList";
+import { Field, Select } from "../primitives/Form";
 import { FilterBar } from "../primitives/FilterBar";
 import { FilterChips, SearchInput } from "../primitives/Nav";
 import { TextButton } from "../primitives/TextButton";
-import { DataTable, type BulkAction, type ColumnDef, type ListPatch, type RowAction } from "./DataTable";
+import {
+  DataTable,
+  type AnyBulkAction,
+  type BulkAction,
+  type ColumnDef,
+  type ListPatch,
+  type RowAction,
+} from "./DataTable";
+import { bulkAction } from "../primitives/Selection";
 import { StatusBadge } from "./StatusBadge";
 import { StatusInfoButton } from "./StatusInfoButton";
 
@@ -344,6 +353,62 @@ export const Selection: Story = {
           actions,
           label: (c) => `Sachverhalt ${rowKey(c)} auswählen`,
         }}
+      />
+    );
+  },
+};
+
+/**
+ * **Die Sammelaktion, die erst fragt** (0121). „Zuordnen" öffnet einen Dialog
+ * mit dem Ziel darin; erst danach läuft die Handlung, und sie bekommt beides
+ * — die gewählten Zeilen **und** den erfragten Wert. Der Titel nennt die Zahl,
+ * deshalb ist `ask` eine Funktion der Schlüssel.
+ *
+ * Was im Dialog steht, kennt die Tabelle nicht: hier ein Auswahlfeld, in
+ * `banks/offen` der `CasePicker`. Ein Pattern kennt keine Entität.
+ */
+export const BulkAsk: Story = {
+  render: function Render() {
+    const [note, setNote] = useState<string | null>(null);
+    const actions: AnyBulkAction[] = [
+      bulkAction<string>({
+        label: "Zuordnen",
+        hotkey: "Z",
+        ask: (keys) => ({
+          title: `${keys.length} Sachverhalte zuordnen`,
+          confirmLabel: "Zuordnen",
+          initial: "",
+          valid: (v) => v !== "",
+          render: ({ value, set }) => (
+            <Field label="Ziel" htmlFor="bulk-target">
+              <Select id="bulk-target" value={value} onChange={(e) => set(e.target.value)}>
+                <option value="">Bitte wählen</option>
+                <option value="Bürobedarf Meier GmbH">Bürobedarf Meier GmbH</option>
+                <option value="Musterbau GmbH">Musterbau GmbH</option>
+              </Select>
+            </Field>
+          ),
+        }),
+        action: async (keys, target) => {
+          setNote(`${keys.length} zugeordnet an ${target}`);
+        },
+      }),
+      // Daneben eine, die einfach läuft — die Liste trägt beide Sorten.
+      { label: "Verwerfen", action: async () => setNote(null) },
+    ];
+    return (
+      <DataTable<CaseListItem>
+        rows={PAGE.slice(0, 8)}
+        columns={COLUMNS}
+        rowKey={rowKey}
+        head={{
+          title: "Sachverhalte 2026",
+          sub: note ?? "8 von 583 · zwei Zeilen wählen, dann Z",
+          actions: <TextButton href="#neu">Sachverhalt anlegen</TextButton>,
+        }}
+        sort={SORT}
+        href={href}
+        selection={{ actions, label: (c) => `Sachverhalt ${rowKey(c)} auswählen` }}
       />
     );
   },
