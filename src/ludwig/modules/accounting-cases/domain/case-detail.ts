@@ -9,7 +9,12 @@
  * war, ist die Wurzel von L-52: die Oberflächen bauten sich ihren
  * Anzeigetitel selbst, weil das Modell keinen trug.
  */
-import type { CaseDocumentNumberMode, CaseKind, CaseLifecycle } from "./case";
+import type {
+  CaseDisposition,
+  CaseDocumentNumberMode,
+  CaseKind,
+  CaseLifecycle,
+} from "./case";
 
 export interface CaseDetail {
   caseId: string;
@@ -67,8 +72,11 @@ export interface CaseDetail {
   /** Eigener Titel des Sachverhalts. Fehlte; `caseDisplayTitle` fiel deshalb
    *  überall auf die Art zurück. */
   title: string | null;
-  /** Achse `disposition`: wer am Zug ist — Agent, Kanzlei oder Mandant. */
-  disposition: string | null;
+  /** Achse `disposition`: wer am Zug ist — Agent, Kanzlei oder Mandant.
+   *  NULL = in Pipeline-Bearbeitung oder abgeschlossen. Dreiwertig, obwohl nur
+   *  zwei Werte geschrieben werden dürfen (`CASE_DISPOSITION_WRITABLE`): der
+   *  Altbestand trägt `client`. */
+  disposition: CaseDisposition | null;
   /** Offene Rückfragen an diesem Sachverhalt. Zählt, was noch niemand
    *  beantwortet hat — die Zahl steht am Reiter. */
   openClarificationsCount: number;

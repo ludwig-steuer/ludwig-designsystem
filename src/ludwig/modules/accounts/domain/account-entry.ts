@@ -189,6 +189,13 @@ export interface AccountFactsVM {
    * wären die teuerste Art, dieselbe Frage zweimal zu beantworten.
    */
   ludwigOnlyAmount: number | null;
+  /**
+   * Wie viele Sätze diesen Betrag ausmachen (L-209). Nicht `ludwigEntryCount`
+   * — der zählt alle Ludwig-Sätze des Jahres, also auch die, die in DATEV
+   * längst stehen. Wer den Satz „x Sätze über y €" schreibt, braucht diese
+   * Zahl; mit der anderen stünde dort eine größere, falsche.
+   */
+  ludwigOnlyCount: number | null;
 }
 
 /**
@@ -226,6 +233,7 @@ export function accountFacts(input: {
   months?: readonly AccountMonth[];
   datevBalance?: number | null;
   ludwigOnlyAmount?: number | null;
+  ludwigOnlyCount?: number | null;
 }): AccountFactsVM {
   // Σ Soll und Σ Haben aus den Monatswerten, statt sie an jeder Aufrufstelle
   // erneut zu summieren (L-94, Rang 7 des Entitätsprofils).
@@ -247,5 +255,6 @@ export function accountFacts(input: {
     totalCredit,
     datevBalance: input.datevBalance ?? null,
     ludwigOnlyAmount: input.ludwigOnlyAmount ?? null,
+    ludwigOnlyCount: input.ludwigOnlyCount ?? null,
   };
 }

@@ -43,4 +43,11 @@ export interface ExpectationRow {
   /** Ein Satz Kontext, der nicht in die Felder passt. Nie Betrag/Referenz/Datum. */
   note: string | null;
   createdAt: string;
+  /**
+   * Wann die Erwartung erledigt wurde; NULL = sie steht noch aus (L-205).
+   * Die Leser der Nachforderungsliste filtern `resolved_at is null` und sehen
+   * hier deshalb immer NULL — das Feld ist für die Sichten da, die eine
+   * erledigte Erwartung zeigen.
+   */
+  resolvedAt: string | null;
 }
