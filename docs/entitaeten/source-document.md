@@ -216,7 +216,7 @@ Karte ersetzen.
 | **Belegliste des Jahres** | Wenn ein Buchungsmonat abgeschlossen werden soll, will die Kanzlei alle Belege der Periode nach Eingangsdatum durchgehen, damit kein unerledigter Beleg im Jahr zurückbleibt. | alle Belege des Mandanten mit `received_date` im Jahr, `status <> 'deleted'` | Eingangsdatum ↓, dann Upload ↓ | 1–7 + Einordnung + Verarbeitung + Erledigt | Suche, Zeitraum, Kategorie, Partner, Sachverhalts-Status, „nur unerledigte", „offene Klärung" | keine | „keine Belege in dieser Periode" ≠ „keine Treffer" | 66 · 102 (Staging, 6 Mandanten-Jahre; echte Kanzlei um Größenordnungen mehr) | `/[year]/documents` |
 | **Stockende Belege** | Wenn die Pipeline etwas liegen lässt, will die Kanzlei sehen, welche Belege nicht weiterkommen, damit keiner still verschwindet. | zwei Ausprägungen: „in Verarbeitung" (Pipeline läuft) und „problematisch" (ohne Belegdatum oder ohne Extraktion, **jahresunabhängig**) — **keine eigene Route, sondern zwei Tabs der Belegliste** | älteste zuerst | Datei, Einordnung, Gegenpart, Eingang, Sachverhalt, Beleg-Zustand | keine | keine (Neustart je Zeile) | „keiner stockt" = Erfolg | 6 · 10 | `StuckDocumentsTable` (`variant="stuck" \| "inflight"`) |
 | **Upload & Inbox** | Wenn ein Stapel PDFs hochgeladen wird, will die Kanzlei sofort sehen, was daraus wurde, damit sie eine Fehl-Einordnung korrigiert, bevor sie weiterläuft. | alle Belege des Mandanten, **jahresunabhängig** | Upload ↓ | Datei, Einordnung, Konfidenz, Zustand | keine | keine | „nichts hochgeladen" | 64 · 102 | `/document-inbox` |
-| **Beleg einreichen** | Wenn der Buchungszyklus läuft, will die Kanzlei die eingeordneten Rechnungen an die Verarbeitung übergeben, damit sie im Zyklus gebucht werden. | `status='classified'` **und** qualifizierende Belegform | Upload ↑ | Datei, Belegform, Größe, Zustand | keine | **Einreichen** | „nichts einzureichen" = Erfolg | klein | `/[year]/review/upload` |
+| **Beleg einreichen** | Wenn der Buchungszyklus läuft, will die Kanzlei die eingeordneten Rechnungen an die Verarbeitung übergeben, damit sie im Zyklus gebucht werden. | `status='classified'` **und** qualifizierende Belegform | Upload ↑ | Datei, Belegform, Größe, Zustand | keine | **Einreichen** | „nichts einzureichen" = Erfolg | klein | **keine eigene Route mehr**: `review/*` ist am 2026-09-05 zurückgebaut, die Liste lebt als Zustand in Upload & Inbox (`/document-inbox`) — berichtigt 2026-09-08 |
 | **Belege am Sachverhalt** | Wenn jemand einen Sachverhalt prüft, will er die Belege sehen, auf denen er beruht, damit er die Buchung gegen das Papier halten kann. | Belege am Sachverhalt (über `document_received`) | Belegdatum ↑ | 1–5 + Verarbeitung | keine | keine | **zwei**: „kein Beleg zu erwarten" (mit Begründung, Erfolg) ≠ „keine verbundenen Belege" | 0 · 1 · max 20 | `BelegeTab` |
 | **Teilbelege** | Wenn ein Sammel-PDF zerlegt wurde, will die Kanzlei sehen, was daraus entstanden ist, damit sie die Spur vom Original zum Einzelbeleg behält. | Kinder mit `parent_source_doc_id = <dieser Beleg>` | Seitenbereich ↑ | 1–5 + Seitenbereich | keine | keine | entfällt (die Liste erscheint nur, wenn es Kinder gibt) | 0 · 0 · max 23 | `ChildDocsCard` |
 
@@ -225,10 +225,14 @@ Schnitt nach §8 (eigene Komponente nur bei eigenem Job **und** Unterschied in
 
 - **Belegliste, Inbox und Beleg-einreichen** unterscheiden sich in
   Grundgesamtheit und Spaltensatz, teils in der Sortierung und der
-  Massenaktion — aber alle drei sind lange, gefilterte, geblätterte
-  Listen mit eigener Route. Das ist `DataTable` (0057) mit je einem
-  Spaltensatz, nicht drei Komponenten; Vorbild `AccountEntries` (A11a).
-  Je Route zusätzlich ein Seitenprofil unter `docs/seiten/`.
+  Massenaktion. Das ist `DataTable` (0057) mit je einem Spaltensatz, nicht
+  drei Komponenten; Vorbild `AccountEntries` (A11a).
+
+  **Seitenprofile sind es zwei, nicht drei** (berichtigt 2026-09-08):
+  `review/*` ist am 2026-09-05 zurückgebaut, und „Beleg einreichen" hat
+  seither keine eigene Route — die Liste lebt als Zustand innerhalb von
+  Upload & Inbox. Ihr Spaltensatz `SUBMIT_COLUMNS` bleibt: verloren hat sie
+  ihre Route, nicht ihren Job.
 - **Stockende Belege**: zwei Ausprägungen, Unterschied nur in
   Grundgesamtheit und Leerfall → **ein** Spaltensatz mit `variant`-Prop,
   genau wie heute. Und weil beide Tabs derselben Route sind, teilen sie sich
