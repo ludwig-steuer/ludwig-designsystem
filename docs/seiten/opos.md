@@ -50,7 +50,7 @@ das von DATEV ab" — er gehört auf die Seite, nicht in ein Protokoll.
 |---|---|---|
 | Zum Replay-Cutoff springen (Experiment-Mandant) | selten, aber dann sofort | einen Knopf neben dem Stichtag |
 | Ein Personenkonto öffnen | beim Nachfassen | einen Klick auf die Zeile (`OpenItemRow onOpen`) |
-| Nach Alter gruppieren (Mahnstufen) | im Mahnlauf | eine Gruppierung, die es heute nicht gibt (`OpenItemAgeGroup` steht bereit) |
+| Nach Alter gruppieren (Mahnstufen) | im Mahnlauf | **gebaut am 2026-09-08** (App `3a8411c5`): `groupByAge` an der Regel, gezeigt mit `OpenItemAgeGroup` — der Baustein stand seit 0029 fertig daneben und war der eine von zwei unbedienten Jobs, dem nichts fehlte als ein Aufrufer (J-35) |
 
 ## Was hier nicht hingehört
 

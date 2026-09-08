@@ -21,6 +21,9 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 | `business-partners/domain/business-partner.ts` | `TYPICAL_NATURE` mit allen sechs Werten (L-222, `a38169f4`) | 0127–0129; **wer gegen den Spiegel baut, baut gegen die alte vierwertige Aufzählung** |
 | Achse `regel_modus` in `ui/status/status-registry.ts` | neu (L-243, `5e48d892`) | 0132 und 0134 zeigen den Modus über die Achse |
 
+| `recurring-rules/domain/*`: die drei Wortlisten | neu (`f0a0bd00`, L-242 und L-256) — Rhythmus, Richtung und die zwei Strategien stehen bei `RULE_INTERVAL_LABEL` | 0132–0135 nehmen die Wörter bis dahin als Prop mit rohem Rückfall |
+| `PreviewPosting.accounts` | reicht Nummer und Name **getrennt** durch (`f0a0bd00`) | 0134: damit fällt L-255 weg — die Vorschau muss keinen String mehr zerlegen |
+
 ## Erledigt mit dem Lauf vom 2026-09-08 (App `6ba47fb2`)
 
 Owner-Freigabe (Simon), einmalig, danach wieder eingefroren. Angekommen sind:

@@ -103,11 +103,18 @@ Geprüft gegen `docs/detailseiten-standard.md` (D1–D16).
 
 ## Abweichung vom Detailseiten-Standard
 
-- **D10 (eine Leiste, ein Mechanismus):** Die heutige Leiste mischt zwei
-  URL-Muster — drei Einträge sind `?tab=uebersicht&view=…`, die übrigen
-  `?tab=…` (`SvTabsBar`), dazu Unterreiter im Detail von Rang 5. Das ist
-  **keine begründete Ausnahme, sondern ein Befund** (L-259); die Unterreiter
-  von Rang 5 lösen sich in der Gegenüberstellung Beleg ↔ Buchung auf.
+- **D10 (eine Leiste, ein Mechanismus):** Die Leiste mischte zwei URL-Muster —
+  drei Einträge als `?tab=uebersicht&view=…`, die übrigen als `?tab=…`
+  (`SvTabsBar`), dazu Unterreiter im Detail von Rang 5. Das war **keine
+  begründete Ausnahme, sondern ein Befund** (L-259).
+
+  **Entschieden am 2026-09-08 (Owner): Weg 2 — die drei `view`-Einträge werden
+  Zonen der Übersicht** (§2.2 des Standards), keine Reiter. Damit bleibt genau
+  ein Mechanismus in der Leiste, und die drei Sichten wandern dorthin, wo der
+  Standard sie ohnehin vorsieht: untereinander im ersten Reiter, jede mit
+  ihrem Weg in die Vertiefung. Die App baut es; Abweichungen kommen als Zeilen
+  hierher. Die Unterreiter von Rang 5 lösen sich davon unabhängig in der
+  Gegenüberstellung Beleg ↔ Buchung auf.
 - **D12 (Rohdaten zuletzt):** Rang 8 bündelt heute Historie, Rohdaten und
   DATEV-Wahrheit in einer Zeile. Der Standard trennt sie: Historie → Verlauf,
   DATEV-Wahrheit → eigene fachliche Sicht, Rohdaten → letzter Reiter.
