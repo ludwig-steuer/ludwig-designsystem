@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **analysiert** |
+| Status | **geprüft** — zweiter Agent am 2026-09-08 (§10). Der blockierende Punkt **P1** ist eingearbeitet (Rang 1 ist jetzt abgeleitet), die Zahl 105 auf **104** berichtigt, und die zwei Befunde, die die Prüfung zusätzlich gefunden hat, stehen als **L-253** und **L-254** im Register. Die zwölf nicht blockierenden Punkte stehen im Abschnitt „Prüfung“ und gehören gelesen, bevor eine Spec daraus abgeleitet wird |
 | GLOSSARY | `### Recurring rule (Wiederkehr-Regel)` — englisch `recurring rule`, Ordner `entities/recurring-rule/` |
 | Tabelle | `ludwig.client_accounting_case_rule` (ex `client_recurring_charge_rule`, Rename 2026-06-16). **Keine Subtypen** — eine Tabelle, keine 1:1-Spezialisierung |
 | Typen | `src/ludwig/modules/recurring-rules/domain/` — `rule.ts` (`RecurringRule`, `RuleBookingMode`, `RuleDirection`, `RuleExpectedInterval`/`RULE_INTERVAL_LABEL`, `RuleDocumentNumberStrategy`, `RuleProfileSource`, `RuleBookingTemplate`, `RuleTemplateLine`, `matchTransaction()`, `matchSourceDoc()`, `accrualAmount()`, `effectiveAmountTolerance()`, `amountDeviation()`, `isRuleDueInPeriod()`, `accrualDueDate()`, `deriveRuleProfile()`, `prefillFromTransaction()`) · `rule-summary.ts` (`describeRecurringRule()`, `describeRuleSchedule()`, `hasAnyCriterion()`) · `booking-preview.ts` (`buildRulePreview()`, `needsModeReview()`) · `derive-recurring-candidates.ts` (`RecurringCandidate`, `RecurringCandidateClass`) |
@@ -36,8 +36,8 @@ beschreibt nur das dritte:
 | Was | Wo | Was es heißt |
 |---|---|---|
 | **Dauerrechnung** (`billing_mode = 'recurring'`) | `client_source_docs_invoices.billing_mode` · GLOSSARY `### Billing mode` | Azure-Klassifikation **am Rechnungsbeleg**: „einmal ausgestellt, gilt für viele künftige Perioden" (Miete, Leasing, Wartungsvertrag). `regular` sind auch die monatlich wiederkehrenden Einzelrechnungen (Telekom, Abo) — die Unterscheidung ist **eine Aussage über den Beleg**, nicht über die Wiederholung |
-| **Dauersachverhalt** (LDSV, `kind = 'recurring_charge'`) | `client_accounting_case.kind` · GLOSSARY `### Accounting case`, `### Dauersachverhalt mit wiederkehrenden Buchungen` | Die fachliche Klammer, die „**offen über mehrere Realisierungen**" bleibt. 105 Fälle im Bestand |
-| **Wiederkehr-Regel** — *dieses Profil* | `ludwig.client_accounting_case_rule` · GLOSSARY `### Recurring rule` | Das Regelwerk **am** Dauersachverhalt. 30 Zeilen im Bestand, an 29 der 105 Dauersachverhalte |
+| **Dauersachverhalt** (LDSV, `kind = 'recurring_charge'`) | `client_accounting_case.kind` · GLOSSARY `### Accounting case`, `### Dauersachverhalt mit wiederkehrenden Buchungen` | Die fachliche Klammer, die „**offen über mehrere Realisierungen**" bleibt. 104 Fälle im Bestand |
+| **Wiederkehr-Regel** — *dieses Profil* | `ludwig.client_accounting_case_rule` · GLOSSARY `### Recurring rule` | Das Regelwerk **am** Dauersachverhalt. 30 Zeilen im Bestand, an 29 der 104 Dauersachverhalte |
 
 Die Kette: eine `recurring`-Rechnung **eröffnet** einen Dauersachverhalt, und
 der **trägt** eine Wiederkehr-Regel. Der GLOSSARY-Eintrag `Billing mode`
@@ -142,7 +142,7 @@ eine Zeile ist 3,3 %, deshalb steht überall die absolute Zahl daneben.
 
 | Datenpunkt | Quelle | Rolle | Füllgrad | heute in | änderbar | Rang | ab Form | Beleg |
 |---|---|---|---|---|---|---|---|---|
-| Gegenpartei-Kriterium (`matchCounterpartyName`) | Spalte | Identität | **100 %** (30/30; p50 23 · p90 35 · max 46 Zeichen) | `RegelwerkTab` (im Klartext-Satz), `ZuordnungTab` (Kriterien-Tabelle), `RuleEditorForm` (erstes Feld), `RuleOverviewItem` (Query ohne Oberfläche) | Nutzer | 1 | XS | Füllgrad · erstes Feld des Editors · `describeRecurringRule()` setzt ihn an die Spitze des Satzes. **Die Regel hat kein eigenes Namensfeld** — woran ein Mensch sie erkennt, ist die Gegenpartei, auf die sie zielt |
+| Gegenpartei (`matchCounterpartyName ?? matchCounterpartyIban`) | **abgeleitet** aus zwei Spalten | Identität | Name **100 %** (30/30; p50 23 · p90 35 · max 46 Zeichen) — **aber nur im Import-Pfad** | `RegelwerkTab` (im Klartext-Satz), `ZuordnungTab` (Kriterien-Tabelle), `RuleEditorForm` (erstes Feld), `RuleOverviewItem` (Query ohne Oberfläche) | Nutzer | 1 | XS | **Berichtigt nach der Prüfung (P1).** Die 100 % sind eine Eigenschaft des F91-Imports, nicht des Feldes: `prefillFromTransaction()` (`rule.ts:708–724`) setzt bei vorhandener IBAN ausdrücklich `matchCounterpartyName: null` — eine **aus einer Zahlung gelernte** Regel trägt strukturell keinen Namen. Und die Ableitung, die hier als Beleg stand, entscheidet selbst so: `describeRecurringRule()` schreibt Name **oder** IBAN an derselben Satzstelle. Die Regel hat kein eigenes Namensfeld; woran ein Mensch sie erkennt, ist die Gegenpartei — und die steht in zwei Spalten |
 | Buchungsweise (`bookingMode`) | Spalte, Achse `regel_modus` | Zustand | **100 %** (`accrue_then_settle` 29 · `book_on_payment` 1 · `match_only` **0**) | `RegelwerkTab` (`StatusBadge axis="regel_modus"`), `Schritt3Wiederkehrend` (mit **falscher** lokaler Map, Befund L-243) | Nutzer | 2 | XS | Füllgrad · eigene Registry-Achse · Registry-Kommentar: „erscheint überall als farbiger Chip" |
 | Gültigkeit (`isActive`) | Spalte | Zustand **ohne Achse** → Befund L-241 | **100 %** (aktiv 29 · inaktiv 1) | `RegelwerkTab` (handgeschriebenes `Badge tone="success" dot` / `tone="neutral"`), `RuleEditorForm` (Kästchen „Regel aktiv") | Nutzer | 3 | XS | Eine inaktive Regel ordnet nichts zu und stellt nichts soll — das ist der zweite Zustand neben dem Modus. `valid_until` ist **kein** Ersatz (0 % gefüllt, laut GLOSSARY „rein informativ") |
 | Erwarteter Betrag | `abgeleitet: accrualAmount()` — `template.amount`, sonst `matchAmount` | Maß | 97 % (29/30); **in allen 30 Zeilen sind beide Felder gleich** | `Schritt5` („Erwartet"), `Schritt3Wiederkehrend` („Vorlage-Betrag"), `RegelwerkTab` (in der Buchungssatz-Vorschau) | Nutzer | 4 | S | Füllgrad · Spalte der einzigen gebauten Liste. Die Trennung Vorlagenbetrag ↔ Match-Kriterium ist absichtlich (`accrualAmount`-Kommentar, F40 Teil C) — die Form zeigt **einen** Betrag und nimmt ihn aus der Ableitung, nicht aus einer Spalte |
@@ -190,7 +190,7 @@ davon der einzige Abkömmling, den eine Form braucht, und sie kommt als Prop.
 
 | Relation | Richtung | Kardinalität | Rolle | ab Form | Darstellung | Beleg |
 |---|---|---|---|---|---|---|
-| Sachverhalt (`client_accounting_case`) | Eltern | 100 %. Umgekehrt: **97 % aller Sachverhalte ohne Regel**; von **105 Dauersachverhalten tragen 75 keine** (71 %), max 2 je Fall | Kontext | S (nur außerhalb des Falls) | **Inline** `CaseCell` → Profil `accounting-case` | Staging · `Schritt5` benennt jede Zeile so |
+| Sachverhalt (`client_accounting_case`) | Eltern | 100 %. Umgekehrt: **97 % aller Sachverhalte ohne Regel**; von **104 Dauersachverhalten tragen 75 keine** (72 %), max 2 je Fall | Kontext | S (nur außerhalb des Falls) | **Inline** `CaseCell` → Profil `accounting-case` | Staging · `Schritt5` benennt jede Zeile so |
 | Ereignisse (`client_accounting_event.recurring_rule_id`) | Kind | 13 % ohne (4/30) · p50 1 · p90 1 · **max 2**; Arten: `accrual` 26 · `payment_in` 1 | Maß + Zustand | S | **Zähler** in S („n Perioden") · **Liste** in L über `CaseTimeline` (0040) → Profil `accounting-case` | Staging · Unique `(recurring_rule_id, accrual_period)`: eine Sollstellung je Regel und Monat |
 | Buchungen (`client_journal_entry`) | Kind **über das Ereignis** | keine eigene Kante; **29 Sätze** mit `origin='recurring_rule'` (von 614 im Bestand) | Zustand | M | **eigene Form** `JournalEntryCell` → Profil `journal-entry`; heute die Tabelle „Automatisierte Buchungen" im `RegelwerkTab` | Staging · `JOURNAL_ORIGIN.recurring_rule` („Wird nicht nach DATEV exportiert") |
 | Buchungssatz-Vorschau | **keine Kante** — `abgeleitet: buildRulePreview()` | genau eine je Regel, 1–n Sätze (n = Split-Zeilen) | Erklärung | M | **eigene Form** `JournalEntryCell`, dessen `@when` sie namentlich nennt | `booking-preview.ts` · `RegelwerkTab` Z. 217 ff. |
@@ -305,7 +305,7 @@ Vorschau zeigt („passt die Regel so?").
 | `RecurringRuleRow` | **jetzt** | trägt alle drei Listen; existiert heute handgeschrieben in `Schritt5.tsx` | — |
 | `RecurringRuleList` „Erwartete Zahlungen" | **jetzt** | löst die einzige gebaute Regel-Liste ab; Leerfall ist heute unterschlagen | — |
 | `RecurringRuleFacts` | **jetzt** | existiert zweifach gerendert (`RegelwerkTab`, `ZuordnungTab`) und ein drittes Mal als generische Feldliste; trägt den Regelwerk-Reiter des `CaseDetailView` | — |
-| `RecurringRuleEditor` | **jetzt** | 16 Punkte mit änderbar = Nutzer; ersetzt zwei Formulare; bei **71 % Dauersachverhalten ohne Regel** ist das Anlegen der Normalfall, nicht der Rand | — |
+| `RecurringRuleEditor` | **jetzt** | 16 Punkte mit änderbar = Nutzer; ersetzt zwei Formulare; bei **72 % Dauersachverhalten ohne Regel** ist das Anlegen der Normalfall, nicht der Rand | — |
 | `RecurringRuleCell` | verworfen | keine fremde Zeile nennt die Regel; wo sie genannt würde, steht der Sachverhalt | — |
 | `RecurringRuleView` | verworfen | keine eigene Route; das Detail ist ein Reiter des `CaseDetailView` aus Facts + Editor | — |
 | `RecurringRuleDrawer` | verworfen | kein View, dem er folgen könnte; nachgeschlagen wird der Sachverhalt (`CaseDrawer`, 0098) | — |
@@ -437,13 +437,155 @@ mehr. Der Review-Text von 2026-08-27 ist an dieser Stelle veraltet.
 
 ## Prüfung
 
-Gehört dem zweiten Agenten. Er prüft zuerst alle Zeilen mit Beleg `Annahme`
-(hier: keine — jede Zeile trägt Füllgrad, Fundstelle oder GLOSSARY-Satz),
-dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
+Geprüft von Claude (zweiter Agent, Skill `entitaet-analysieren` §10) am
+2026-09-08, gegen die Quellen — Staging über den Pooler (nur `SELECT`, nur
+Aggregate), `ludwig/app` (nur gelesen), GLOSSARY, Registry-Spiegel — nicht
+gegen den Chat.
 
-| Zeile / Form | Einwand | Ergebnis | Geprüft von / am |
-|---|---|---|---|
-| | | | |
+**Urteil: ein blockierender Punkt (P1).** Der Status bleibt `analysiert`. Die
+Zahlen des Profils sind bis auf drei Stellen exakt, die zwei Einstufungen aus
+§1 tragen, und alle dreizehn Befunde treffen im Kern zu. Was reißt, ist genau
+das, wovor die Bestandswarnung selbst warnt: **Rang 1 ist aus der einen
+Hälfte des Wertebereichs abgelesen, die der Bestand kennt.**
+
+### Was nachgerechnet und nachgelesen wurde
+
+| Geprüft | Nachweis | Ergebnis |
+|---|---|---|
+| Zeilen mit Beleg `Annahme` (§10, erster Halt) | Spalte „Beleg" in beiden Tabellen durchgesehen | keine — die Behauptung stimmt buchstäblich. **Aber** Rang 1 ist der Sache nach eine (P1): sein Füllgrad von 100 % ist eine Eigenschaft des Import-Pfads, nicht des Feldes |
+| Alle 40 Füllgrade | `jsonb_each_text`-Abfrage über 30 Zeilen | **alle exakt**, inklusive der absoluten Zahlen (30/30, 29/30, 28/30, 27/30, 3/30, 2/30, 0/30) |
+| Alle Verteilungen | je `group by` | **alle exakt**: `booking_mode` 29·1·0 · `is_active` 29·1 · `expected_interval` 30 × `monthly` · Richtung 26·2·2 · `document_number_strategy` 26·3·1 · `profile_source` 24·5·1 · `priority` 30 × 100 · Toleranz 30 × 0,00 · `matches_documents` 29·1 · DMS 26·1·3 · Zahltag 22·3·3·1 (+1 NULL) |
+| Textlängen | `percentile_cont` | Name p50 23 · p90 35 · max 46 ✓ · Buchungstext p50 37,5→38 · p90 58 · max 60 ✓ · `datev_document_number` 29 × genau 8 Zeichen ✓ |
+| „in allen 30 Zeilen sind Vorlagen- und Match-Betrag gleich" | `is not distinct from` | ✓ (die eine NULL/NULL-Zeile eingeschlossen) |
+| Ereignisse je Regel | `left join` über 30 Regeln | 13 % ohne · p50 1 · p90 1 · max 2 ✓; Arten `accrual` 26 · `payment_in` 1 ✓ |
+| Buchungen | `client_journal_entry` | 614 gesamt, davon `origin='recurring_rule'` **29** ✓; `JOURNAL_ORIGIN.recurring_rule` = „Regelwerk", Beschreibung „Wird nicht nach DATEV exportiert." wörtlich (`src/ludwig/ui/status/status-registry.ts:1031`) ✓ |
+| Historie | `platform_audit_events` | `resource_kind='recurring_rule'` **0** ✓ · 18 benannte Werte, 14 ohne ✓ · `case.rule_created_by_agent` 6 · `case.rule_updated_by_agent` 3 · `case.recurring_created_by_agent` 79 · `onboarding.recurring_cases_created` 3 ✓ |
+| Bestand je Mandant, Anlagezeitraum | `group by client_id`, `min/max(created_at)` | 1 · 3 · 26 ✓ · 2026-08-21 bis 2026-09-07 ✓ |
+| **72 % (75 von 105)** | siehe **P2** | **75 stimmt, 105 nicht** |
+| „97 % aller Sachverhalte ohne Regel" (Schaubild) | 915 Sachverhalte, 96,83 % ohne | ✓ |
+| L-244 am Bestand | `like 'datev-wkb%'` = **0**, `like 'datev-wk:%'` = **29** | ✓ (war vorgeprüft, hier nur bestätigt) |
+| Die **drei Bedeutungen** von „recurring" | GLOSSARY Z. 490 `### Billing mode`, Z. 262 `### Accounting case` + Z. 513 `### LDSV mit WK`, Z. 500 `### Recurring rule` — alle vier Stellen wörtlich gelesen | **trägt.** Die Trennung ist so, wie das Profil sie beschreibt: `recurring` am Beleg ist eine Aussage über den Beleg (`regular` deckt ausdrücklich „auch monatlich wiederkehrende Einzelrechnungen wie Telekom/Abo"), `recurring_charge` ist der Vorgang, die Regel die Konfiguration. Auch der Fehlverweis stimmt: `Billing mode` schreibt „eröffnet einen **Dauersachverhalt** ([[Recurring rule]], `create_recurring_case`)" — der Link zeigt auf die Regel, der Satz meint den Sachverhalt (L-247 trifft zu). Genau **einen** Eintrag hat das Profil zu wenig gezählt: es sind vier Stellen, an denen das Wort steht, nicht drei — der Dauersachverhalt hat keinen eigenen `###`-Eintrag, er wohnt in zweien |
+| **`booking-preview.ts` = Ableitung, keine Entität** | `domain/booking-preview.ts` ganz gelesen (168 Z.) | **trägt.** Keine Tabelle, keine Persistenz, keine Identität, keine Registry-Achse, kein Lebenszyklus neben der Regel; reine Funktion ohne IO, deren Eingabe eine Regel und deren Ausgabe `PreviewPosting {debit, credit, amount, taxKey}` ist — ein Buchungssatz. §1 kennt für so etwas keine Entität; §5 kennt dafür die Zeile „Quelle: `abgeleitet: <funktion>`", und genau dort steht sie (Rang 9). Belegt ist auch der Verweis: `JournalEntryCard` trägt im `@when` „recurring rule preview" (`src/ui/v3/entities/journal-entry/JournalEntryCompact.tsx:125`) — **`JournalEntryCard`, nicht `JournalEntryCell`**, siehe P11 |
+| **`derive-recurring-candidates.ts` = zweite Entität ohne Tabelle** | `domain/derive-recurring-candidates.ts` (568 Z.), `onboarding/application/recurring-candidates-core.ts`, Registry `DAUERSACHVERHALT_UEBERNAHME` | **trägt, und die Begründung stimmt in jedem Teil.** Andere Quelle (`ops_datev_ingest_staging`) ✓ · keine Persistenz („on-read … keine Kandidaten-Persistenz", GLOSSARY Z. 511 wörtlich) ✓ · eigene Identität (`documentNumber`, „Die Belegnummer ist die Identität des DSV", Dateikopf) ✓ · `RECURRING_MIN_RUN = 3` (Z. 215) ✓ · herkunfts-agnostisch, `WK` nur Konfidenz-Signal ✓ · **drei** Klassen im Code (`RECURRING_CANDIDATE_CLASSES`, Z. 36–41), **vier** Werte in der Achse, `bereits_angelegt` als Pseudowert aus `alreadyExists` — beides wörtlich im Registry-Kommentar (`status-registry.ts:1607–1613`), ebenso „`nicht_uebernehmbar` heißt nicht ‚kommt nie'" ✓ · er *wird* keine Regel, seine Bestätigung **legt** über `create_recurring_case` Fall und Regel an ✓. Dass er trotzdem kein eigenes Profil bekommt (§1 Nr. 3: keine Tabelle, kein GLOSSARY-Eintrag), ist konsequent |
+| **Formen §7 — trägt jede empfohlene einen der sechs Gründe?** | je Form gegen §7 Nr. 1–6 | **ja, alle vier.** `RecurringRuleRow`: Nr. 1 (handgeschriebene Zeile in `Schritt5.tsx`) ✓, Nr. 2 (der Sachverhalt hat `CaseDetailView` **und** `CaseCard` im Set) ✓, Nr. 6 ✓ — dreifach belegt. `RecurringRuleFacts`: Nr. 1, zweifach gerendert ✓ (zwei getrennte Dateien, zwei Routen-Reiter, zwei auseinandergehende Feldsätze — das sind zwei Stellen, nicht eine). `RecurringRuleList`: Nr. 6, ein Job mit Screen ✓. `RecurringRuleEditor`: Nr. 4 ✓ — **nachgezählt: genau 16 Zeilen tragen `änderbar = Nutzer`** (Ränge 1, 2, 3, 4, 5, 7, 10, 11, 14, 16, 17, 18, 19, 20, 24, 25); der Grund hält, die Zahl ist mehrdeutig (P10) |
+| **Die drei verworfenen Formen** | §7 Nr. 3 / Nr. 5, `find app/(app) -name page.tsx \| grep -i rule` | **alle drei tragen.** `Cell`: kein Screen nennt die Regel — der Zeitstrahl zeigt das Ereignis, die Buchung zeigt nur `origin` als Wort „Regelwerk", die eine gebaute Liste benennt jede Zeile über ihren Sachverhalt. Formal greift Nr. 3 (die Regel ist FK-Ziel von `client_accounting_event`); das Profil sagt das selbst und beruft sich auf den Schlusssatz von §7 — zulässig, weil der Zweckteil von Nr. 3 („damit sie in fremden Zeilen genannt werden kann") unerfüllt ist. `View`: **keine Route** trägt `rule`/`recurring`/`regelwerk` im Namen; das Regelwerk ist ein Query-Parameter (`?tab=regelwerk`) am Sachverhalt ✓. `Drawer`: die Begründung mischt das Empfehlungs-Kriterium (Nr. 5) mit der Bau-Reihenfolge („der Drawer folgt dem View") — aber auch Nr. 5 selbst reißt, weil keine fremde Ansicht auf die Regel verweist. Ergebnis richtig, Begründung eine Stufe zu kurz |
+| **Listen §8** | drei Zeilen der Listen-Tabelle, `docs/backlog/0130`, `0131` | **trägt.** Jede Liste hat einen Job-Satz in der Form aus `seiten/TEMPLATE.md` ✓. Die zweite ist zu Recht eine eigene Komponente: sie unterscheidet sich in **vier** von fünf Merkmalen (Grundgesamtheit, Sortierung, Spaltensatz **und** Filter) — §8 verlangt zwei; das Profil zählt vorsichtiger als nötig. Die Zeile bleibt in beiden dieselbe (R17) ✓ |
+| **Zuschnitt §9** | Formen-/Zuschnitt-Tabelle, `ls docs/backlog/` | vier Formen „jetzt", unter der Fünf ✓ · `0130-recurring-candidate-list.md` und `0131-recurring-rule-overview-list.md` existieren, beide Status `offen`, beide tragen Auftrag, Quelle (Profil-Abschnitt) und Grund der Vertagung ✓ · alle referenzierten Nummern (0029, 0040, 0050, 0052, 0057, 0098) existieren ✓ |
+| „setzt auf" — gibt es die Bausteine? | `src/ui/v3/` | alle vorhanden: `FieldList`, `Time`, `DataTable`, `Disclosure`, `FilterBar`, `LongText`, `EmptyState`, `Callout`, `Combobox`, `AmountInput`, `Pagination`, `StatusBadge`, `StatusHeader`, `AmountCell`/`MonoCell` (`primitives/Cells.tsx`), `AccountCell` (`entities/account/Account.tsx`), `SelectionScope`/`SelectionBar` (`primitives/Selection.tsx`), `JournalEntryCell`/`JournalEntryCard` (`entities/journal-entry/JournalEntryCompact.tsx`), `CaseCell`, `TaxKeyField`, `AccountField` ✓ |
+| Kein Storybook, keine Seeds, keine Fixtures | `supabase/seed*.sql` (5 Dateien, 0 Treffer), `*.stories.tsx`, `testdata/` | ✓ — die einzigen Fixtures sind `__tests__/fixtures/datev-postings-{2024,2026}.json` für den Kandidaten-Ableiter, keine Regel-Zeilen |
+| `ui-repraesentationen.md` §1 führt drei Komponenten | Z. 290–296 | ✓ (`RegelwerkTab`, `RuleEditorForm`, `MatchingNoteForm`); `ZuordnungTab` steht dort unter einer anderen Entität (Z. 238) |
+| **Befunde L-240 … L-252** | jeder gegen den Code der App | **elf treffen zu** (L-240, L-241, L-242, L-243, L-244, L-245, L-246, L-247, L-248, L-249, L-250). **Zwei sind teilweise falsch:** L-251 (P5) und L-252 (P6). Details in den Mängeln |
+
+### Hält der Rang? Der Abdeck-Test
+
+Deckt man die Punkte ab Rang 8 ab, bleiben Gegenpartei, Buchungsweise,
+Gültigkeit, Betrag, Rhythmus, Sachverhalt, Richtung — eine Sachbearbeiterin
+erkennt die Regel daran zweifelsfrei. Der Schnitt bei k = 7 für die Zeile ist
+richtig. **Aber nur für die 30 Regeln, die es gibt.** Für den zweiten
+Anlage-Pfad ist Rang 1 leer (P1), und dann trägt die Zeile nichts als den
+Sachverhalt, den sie in ihrer eigenen Liste ohnehin nicht zeigt.
+
+### Beweist ein Füllgrad von 0 % hier etwas? (L-248 gegen sich selbst geprüft)
+
+Das Profil hält sich weitgehend an seine eigene Warnung: **keine Form-Marke
+und kein „verworfen" steht auf einer 0-%-Zahl**; jede Prozentzahl trägt die
+absolute Zahl daneben; Rang 19 sagt ausdrücklich, dass er sich nicht auf den
+Füllgrad stützt, sondern auf `prefillFromTransaction()`; Rang 24 nennt die
+Bedeutung des Fehlens statt der Zahl. Die §5-Regel „Füllgrad unter 20 % →
+nicht vor M" ist nirgends verletzt.
+
+Zwei Stellen halten es trotzdem nicht durch:
+
+- **Die Reihenfolge** folgt dem Füllgrad, auch wo das Profil sagt, dass sie es
+  nicht tue: die IBAN steht auf Rang 19 und ab L, obwohl dieselbe Zeile sie
+  „das stärkste Kriterium" nennt. Das ist P1.
+- **`payment_account_id`** (0 %) bekommt keine eigene abgeleitete Zeile,
+  obwohl §5 sie verlangt („Was bei Fehlen etwas bedeutet, wird zum
+  abgeleiteten Punkt mit eigener Zeile") und der Spaltenkommentar dem Fehlen
+  eine Bedeutung gibt („Ohne Wert wird das Konto der jeweiligen Transaktion
+  genutzt", Vorschau: „Bank (aus Zahlung)"). Sie steht nur als Satz in der
+  Beleg-Spalte von Rang 24 — klein, aber es ist dieselbe Bauform wie bei
+  Rang 4 und 17, die das Profil sonst sauber anwendet.
+
+### Mängel
+
+| # | Ort | Befund | Kleinster Weg | Blockiert |
+|---|---|---|---|---|
+| **P1** | Datenpunkte, **Rang 1** (Gegenpartei-Kriterium) und **Rang 19** (`matchCounterpartyIban`) | **Rang 1 steht auf einem Füllgrad, den allein der Import erzeugt.** `prefillFromTransaction()` (`recurring-rules/domain/rule.ts:708–724`) setzt bei vorhandener IBAN ausdrücklich `matchCounterpartyName: null` — eine aus einer Zahlung gelernte Regel trägt dann **keinen Namen**, strukturell, nicht zufällig. Die 100 % sind eine Eigenschaft des F91-Pfads. Und die Ableitung, die das Profil selbst als Beleg für Rang 1 anführt, entscheidet anders: `describeRecurringRule()` (`rule-summary.ts:49–56`) schreibt `name ? „mit Gegenpartei …" : iban ? „mit IBAN …" : ""` — Name **oder** IBAN, beide an derselben Stelle des Satzes; `hasAnyCriterion()` (Z. 26–31) behandelt sie ebenso gleichrangig. Heute macht Rang 1 die führende Spalte von `RecurringRuleRow` und den gesamten XS-Inhalt für jede Agenten-Regel leer | Rang 1 wird ein **abgeleiteter** Punkt „Gegenpartei-Kriterium (`abgeleitet: matchCounterpartyName ?? matchCounterpartyIban`)" — dieselbe Bauform, die das Profil bei Rang 4 (`accrualAmount()`) und Rang 17 (`effectiveAmountTolerance()`) schon benutzt. Die IBAN verliert in Rang 19 die Rolle **Identität** und bleibt dort als eigenes Kriterium mit Rolle Identität-Detail. Ein Satz dazu in Rang 12 (der Klartext-Satz liest sie mit) | **ja** — `RecurringRuleRow` ist die erste Form der Bau-Reihenfolge, und `spec-schreiben` nimmt Ränge wörtlich aus dem Profil |
+| **P2** | Kopf (Tabelle „recurring heißt dreierlei"), Relationen (Sachverhalt), Zuschnitt (`RecurringRuleEditor`), `befunde-app.md` L-247 | **Die 72 % stehen auf einer Grundgesamtheit, die der Bestand nicht hergibt.** Nachgerechnet: `kind='recurring_charge'` = **104**, davon **75 ohne Regel** = **72 %**. Die 75 stimmt exakt, die 105 nicht. Es gibt keine Lösch- oder Archivspalte an `client_accounting_case`, und seit 2026-08-31 ist kein Dauersachverhalt hinzugekommen — die 105 ist am heutigen Bestand nicht reproduzierbar | „105" → „104", „72 %" → „72 %" an den vier Stellen | nein — die Aussage wird dadurch stärker, nicht schwächer |
+| **P3** | Kopf „Bestandswarnung", Befund B9 / `befunde-app.md` L-248 | **„Neun Spalten stehen auf 0 %" sind elf.** Zu den neun genannten kommen `agent_run_id` und `template_tax_rate_percent` — beide führt das Profil an anderer Stelle selbst mit 0 % (Ränge 27 und 25). In der Warnung, an der die ganze Bewertung hängt, sollte die Zahl stimmen | zwei Namen ergänzen, „neun" → „elf" (in beiden Dateien) | nein |
+| **P4** | Datenpunkte Rang 18 · Relationen, Zeile „Historie" | **Zwei Befund-Verweise zeigen auf den falschen Befund.** Rang 18 nennt für `matches_documents = true` ohne Beleg-Kriterium „Befund L-248" — das ist **L-249**. Die Historien-Zeile nennt für „wer hat die Regel geändert" „Befund L-249" — das ist **L-250**. Beide Nummern sind in der Befunde-Liste desselben Dokuments richtig vergeben (B10 = L-249, B11 = L-250), nur die Rückverweise im Text sind verschoben | zwei Nummern | nein |
+| **P5** | Befund B12 / `befunde-app.md` L-251 / `docs/backlog/0130` | **Die behauptete Drift gibt es nicht.** Die vier handgeschriebenen `Badge`-Zweige (Admin-Seite Z. 884–893) tragen heute **wortgleich** Label und Ton der Achse: übernehmen/`success`, bereits angelegt/`info`, beendet erkannt/`neutral`, nicht übernehmbar/`warning` — verglichen gegen `status-registry.ts:1614–1619`. Die Duplikation ist ungesichert, aber driftfrei. Richtig bleibt: die Kopfzeile derselben Tabelle benutzt die Achse über `StatusHeader` (Z. 837–842), das `⚠` für `reviewFlag` steht in keiner Achse (Z. 888, String-Konkatenation im Etikett), `c.alreadyExists` überstimmt `c.klass` per Handkaskade, und zwei Leerfälle sind `<div>` statt `EmptyState` (Z. 820–825) | den Halbsatz „und sie sind bereits abgedriftet" streichen; das Argument ist „Duplikat ohne Sicherung", nicht „schon auseinander" | nein |
+| **P6** | Befund B13 / `befunde-app.md` L-252 · Formen-Tabelle · Heutige Darstellung · `docs/backlog/0131` | **Drei Zahlen in L-252 stimmen nicht.** Bestätigt: 205 Zeilen ✓, **kein Aufrufer** ✓ (repoweiter Grep über Tests, Scripts und Routen: genau vier Zeilen — Definition, Funktion, zwei Barrel-Zeilen), Barrel `server.ts` Z. 19–20 ✓. Falsch: `RuleOverviewItem` hat **23** Felder, nicht 22 · das ORDER BY heißt `r.is_active desc, c.case_number asc **nulls last**, r.priority asc` · unter `app/(app)/**` liegen **44** `page.tsx`, nicht 45 | drei Zahlen in Profil, Register und 0131 | nein — die Kernaussage „gebaut und nie angeschlossen" hält |
+| **P7** | Heutige Darstellung, Zeile `Schritt3Wiederkehrend` | **Zeilenzahl und Bauform stimmen nicht.** Die Datei hat **730** Zeilen (nicht ≈650). Sie ist **keine Karte je Dauersachverhalt**, sondern **eine** Karte („Dauersachverhalte", Z. 219–223) mit **einer** Tabelle (9 Kopfzellen, Z. 225–235) und einer aufklappbaren Zeile je Fall; die `{label,value}`-Paare erscheinen erst im aufgeklappten Detail unter der Überschrift „Regel & Periode" (Z. 378–387). „Wiederkehrende Buchungen freigeben" ist die **Seitenüberschrift** (Z. 200–202), nicht die Massenaktion — die Knöpfe heißen „Alle übernehmen" (Z. 541), „Ausgewählte freigeben" (Z. 549), „Restliche verwerfen" (Z. 556) | Form auf „L (Tabelle mit aufklappbarer Zeile je Fall)" ändern, die drei Knöpfe benennen | nein — der Punkt „die Regel hat dort keine Form, nur eine Feldliste" bleibt unberührt |
+| **P8** | Heutige Darstellung, Zeile `ZuordnungTab` | **„nichts ist hier änderbar" ist falsch**, und der Rückverweis ist keiner. Der Reiter bettet `MatchingNoteForm` ein (Z. 78–84) — Textfeld plus Speichern-Knopf, also sehr wohl änderbar; das Profil sagt das in derselben Tabelle eine Zeile weiter selbst. Der behauptete Rücksprung „jedes Kriterium schickt in den Regelwerk-Reiter zurück (Z. 158)" ist **Fließtext ohne Link** (Z. 156–160: „Kriterien ändern: Tab ‚Wiederkehrende Buchung' → ‚Regel bearbeiten'."), einmal für die ganze Tabelle; die Datei enthält kein `<a>` und kein `Link`. Nicht erfasst: ein **dritter** Abschnitt „Zugeordnete Zahlungen" (Z. 165, drei Spalten) und ein `EmptyState` für „keine Regel" (Z. 46–51) | „zu viel" umschreiben („die Kriterien sind read-only, die Notiz nicht; der Weg zum Editor ist ein Satz, kein Link"); den dritten Abschnitt in „zeigt" aufnehmen — er gehört der Relation Ereignisse, nicht der Regel | nein |
+| **P9** | Heutige Darstellung Zeile `Schritt5` · Listen-Tabelle Zeile 1 · Befund B4 / L-243 (a) | **Fundstellen und eine Begründung stimmen nicht.** `ErwarteteZahlungen` steht in Z. **77–113** (nicht 74–110), die rohe Ausgabe des Rhythmus in Z. **100** (nicht 99). Vor allem: `RULE_INTERVAL_LABEL` liegt **nicht „im selben Modul"**, sondern in `recurring-rules/domain/rule.ts:19` — ein anderes Modul. Der Fehler bleibt (die Konstante ist exportiert und wird in `RegelwerkTab.tsx:269` und auf der Admin-Seite benutzt), aber das Argument „liegt im selben Modul" trägt ihn nicht | Fundstellen berichtigen; „im selben Modul" → „im Domänen-Modul der Regel, exportiert und anderswo benutzt" | nein |
+| **P10** | Formen-Tabelle `RecurringRuleEditor` · Heutige Darstellung `RuleEditorForm` | **Dieselbe Zahl 16 meint zweimal etwas anderes.** Nachgezählt trägt das Profil genau 16 Datenpunkt-**Zeilen** mit `änderbar = Nutzer` — §7 Nr. 4 hält. Diese 16 Punkte stehen aber für rund **22 Spalten** (Rang 4, 17, 19 und 25 bündeln je zwei, Rang 18 drei). Das heutige Formular hat 16 beschriftete Felder in **17** `<input>`s (Z. 254/255: zwei Eingaben unter einem Label „Betrag (±Toleranz)"), und bei `booking_mode='match_only'` rendern nur zehn davon. Eine Spec, die „16 Felder" liest, baut den Editor zu klein | in der Formen-Zeile „16 Punkte (≈22 Spalten)" schreiben und die Zahl von der Bemerkung über die zwei Formulare trennen | nein |
+| **P11** | Datenpunkte Rang 9 · Relationen, Zeile „Buchungssatz-Vorschau" | **Die genannte Form ist die falsche der beiden.** Der `@when`, der die Vorschau namentlich nennt, gehört `JournalEntryCard` (`JournalEntryCompact.tsx:125`, „recurring rule preview"), nicht `JournalEntryCell` (Z. 63); dessen `@instead` schickt für „alle Zeilen des Satzes" ausdrücklich zur Card. Die Vorschau hat 1–n Sätze (Split-Vorlage), ist also der Card-Fall | in beiden Zellen `JournalEntryCard` nennen, `JournalEntryCell` nur für die einzeilige Nennung | nein |
+| **P12** | Datenpunkte Rang 4, Spalte „Quelle" | **Die Ableitung hat einen dritten Zweig.** `accrualAmount()` (`rule.ts:669–680`) ist dreistufig: `template.amount` → `template.lines` (Summe; bei Prozent-Vorlage Rückfall auf `matchAmount`) → `matchAmount`. Das Profil nennt nur den ersten und den letzten. Im Bestand unsichtbar (`template_lines` 0 %), für die Form aber relevant, weil Rang 21 die Split-Vorlage ausdrücklich vorsieht | den mittleren Zweig ergänzen | nein |
+| **P13** | Datenpunkte Rang 12 | **Der Klartext-Satz besteht aus sechs Rängen, nicht vier.** `describeRecurringRule()` liest `bookingMode` (2), `direction` (7), `matchCounterpartyName` (1), `matchCounterpartyIban` (**19**), `matchAmount` (4) und `matchAmountTolerance` (**17**). Dass gerade 19 und 17 fehlen, ist dieselbe Lücke wie P1 | „1, 2, 4, 7" → „1, 2, 4, 7, 17, 19" | nein (fällt mit P1) |
+
+### Zwei neue Befunde für `ludwig/app`
+
+Beide gehören ins Register; hier stehen sie nur, weil die Prüfung sie gefunden
+hat. Eingetragen sind sie **nicht** — das Register gehört nicht diesem
+Abschnitt.
+
+- **Kandidat für L-253 — `hasAnyCriterion()` und `matchTransaction()` sind
+  sich über den Zweck-Regex uneins.** `matchTransaction()`
+  (`domain/rule.ts:388–401`) zählt `matchPurposeRegex` als Kriterium
+  (`anyCriterion = true`); `hasAnyCriterion()` (`domain/rule-summary.ts:26–31`)
+  kennt nur Name, IBAN und Betrag. Eine Regel mit **nur** einem Zweck-Regex
+  trifft also Zahlungen, während `describeRecurringRule()` darüber schreibt:
+  „Diese Regel hat noch keine Match-Kriterien und greift daher bei keiner
+  Zahlung." Genau diesen Satz erhebt dieses Profil zur Anzeige-Regel („die
+  Form muss ihn zeigen") — das Set würde eine falsche Aussage getreu
+  rendern. Im Bestand unsichtbar, weil `match_purpose_regex` 0 % ist: derselbe
+  blinde Fleck wie L-248. Bis das entschieden ist, muss die Form den Satz als
+  **Prop** bekommen und ihn nicht selbst herleiten.
+- **Zusatz zu L-245 — der Editor legt neue Regeln mit `priority = 0` an.**
+  `RuleEditorForm.tsx:165` schreibt `priority: existingRule?.priority ?? 0`,
+  während der Agenten-Pfad `100` als Default führt
+  (`agent-booking-core.ts:3290`, `3542`) und alle 30 Regeln im Bestand auf
+  `100` stehen. Die Auswahl läuft über `order by priority asc`
+  (`rule-queries.ts:210,220`) und „pro Transaktion gewinnt die erste (nach
+  `priority`) passende Regel" (`rescan-service.ts:55`) — eine von Hand
+  angelegte zweite Regel sticht damit still jede importierte. Das ist die
+  scharfe Kante von L-245, die dort noch fehlt.
+- **Kandidat für die Schließung von L-249:** der Befund fragt „ist das
+  gemeint?". Der Code antwortet. `matchesDocumentsOf()`
+  (`infrastructure/rule-writes.ts:190–196`) leitet `matches_documents` aus
+  Vertragsnummer **oder** Belegtext-Regex **oder Personenkonto** ab, und der
+  Kommentar zwei Zeilen darüber (Z. 183–185) sagt ausdrücklich: „Der
+  Personenkonto- und Betrags-Match allein reicht — genau daraus besteht eine
+  aus der DATEV-Historie abgeleitete LDSV-Regel (F91)." Die erste Hälfte des
+  Befunds ist damit beantwortet; die zweite (die Belegseite ist in keiner
+  Oberfläche sichtbar) steht unverändert.
+
+### Beobachtungen ohne Mangel
+
+- **`<Entity>Facts` steht nicht im Formen-Vokabular** von
+  `ui-repraesentationen.md` §4.4 (Cell · Row · Card · View · Drawer · Picker)
+  und auch nicht in der Größentabelle von §7. Im Haus ist die Form trotzdem
+  etabliert — `CaseFacts`, `BankTransactionFacts`, `InvoiceLineFacts`,
+  `SourceDocumentFacts`. `RecurringRuleFacts` folgt also dem Bestand; die
+  Lücke liegt in §4.4, nicht im Profil.
+- **Der Registry-Pfad in §0 des Skills stimmt nicht mehr**: die Achsen liegen
+  im Spiegel unter `src/ludwig/ui/status/status-registry.ts`, nicht unter
+  `src/ui/v3/patterns/status-registry.ts`. Betrifft den Skill, nicht dieses
+  Profil.
+- Die Kandidaten-Kästchen auf der Admin-Seite sind `defaultChecked`
+  (Z. 850) — die Übernahme ist heute ein **Opt-out**. Für 0130 ist das die
+  Vorgabe, die eine Spec kennen muss; im Profil steht sie nicht.
+- `RegelwerkTab`: der Abschnitt „Erwartung" wird **bedingt** gerendert
+  (`hasExpectation`, Z. 255) — er verschwindet, wenn Rhythmus, Zahltag und
+  Laufzeit alle fehlen. Für `RecurringRuleFacts` ist das die Frage, ob eine
+  Gruppe verschwindet oder leer dasteht; die Spec entscheidet das.
+
+### Was der Prüfagent nicht entscheiden konnte
+
+Nichts. Alle drei Fragen des Prüfprompts sind beantwortet: Rang 1 hält **nicht**
+(P1), die drei verworfenen Formen halten, und beide Einstufungen aus §1 halten.
 
 ## Weiter
 
