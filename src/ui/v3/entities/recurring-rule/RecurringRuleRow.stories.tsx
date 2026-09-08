@@ -5,11 +5,10 @@ import { Card, CardHead, HeadRow, Table } from "../../primitives/Table";
 import { LABELS, LABELS_WITH_GAPS, caseLink } from "./fixtures";
 import {
   RECURRING_RULE_COLUMN_LABEL,
-  RecurringRuleRow,
   recurringRuleTracks,
   type RecurringRuleColumn,
-  type RecurringRuleRowProps,
-} from "./RecurringRuleRow";
+} from "./recurring-rule-columns";
+import { RecurringRuleRow, type RecurringRuleRowProps } from "./RecurringRuleRow";
 
 const meta: Meta<typeof RecurringRuleRow> = {
   title: "v3/Entitäten/Wiederkehr-Regel/RecurringRuleRow",

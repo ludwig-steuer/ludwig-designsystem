@@ -432,18 +432,28 @@ export {
 export { BankTransactionList } from "./entities/bank-transaction/BankTransactionList";
 export { BankTransactionWorklist } from "./entities/bank-transaction/BankTransactionWorklist";
 
-/* Wiederkehr-Regel — Zeile, Liste, Fakten, Editor (0132–0135) */
+/* Wiederkehr-Regel — Spaltensatz, Zeile, Listen, Fakten, Editor (0131–0135) */
 export {
-  RecurringRuleRow,
+  recurringRuleColumns,
   recurringRuleTracks,
   RECURRING_RULE_COLUMN_LABEL,
+  RECURRING_RULE_ROW_COLUMNS,
+  RECURRING_RULE_OVERDUE_COLUMNS,
+  RECURRING_RULE_BOOK_COLUMNS,
   type RecurringRuleColumn,
+  type RecurringRuleColumnOptions,
+  type RecurringRuleRowData,
+  type RecurringRuleListRow,
+} from "./entities/recurring-rule/recurring-rule-columns";
+export {
+  RecurringRuleRow,
   type RecurringRuleRowProps,
 } from "./entities/recurring-rule/RecurringRuleRow";
 export {
   RecurringRuleList,
   type RecurringRuleListItem,
 } from "./entities/recurring-rule/RecurringRuleList";
+export { RecurringRuleOverview } from "./entities/recurring-rule/RecurringRuleOverview";
 export {
   RecurringRuleFacts,
   type RecurringRulePreview,

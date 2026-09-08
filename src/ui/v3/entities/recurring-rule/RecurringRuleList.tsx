@@ -3,11 +3,11 @@ import { EmptyState } from "../../primitives/EmptyState";
 import { Card, CardHead, EmptyRow, HeadRow, Table } from "../../primitives/Table";
 import {
   RECURRING_RULE_COLUMN_LABEL,
-  RecurringRuleRow,
+  RECURRING_RULE_OVERDUE_COLUMNS,
   recurringRuleTracks,
-  type RecurringRuleColumn,
-  type RecurringRuleRowProps,
-} from "./RecurringRuleRow";
+  type RecurringRuleListRow,
+} from "./recurring-rule-columns";
+import { RecurringRuleRow } from "./RecurringRuleRow";
 import type { RecurringRuleLabels } from "./recurring-rule";
 
 /**
@@ -41,10 +41,7 @@ import type { RecurringRuleLabels } from "./recurring-rule";
  * one place where this list deviates from the interface written in 0133, and
  * it deviates in order to keep that interface's own sentence true).
  */
-export type RecurringRuleListItem = Omit<
-  RecurringRuleRowProps,
-  "labels" | "caseHref" | "columns"
-> & { id: string };
+export type RecurringRuleListItem = RecurringRuleListRow;
 
 /**
  * The case leads: this list has left its own case — it counts across every
@@ -54,17 +51,10 @@ export type RecurringRuleListItem = Omit<
  * **No validity column**, although the profile's list table names it: the
  * population is the **active** rules, so every row would carry the same word,
  * and a column with one value in every row is a dead column. The cell stays
- * available at the row; 0131 uses it.
+ * available at the row; 0131 uses it. The set itself lives in the catalogue,
+ * next to its two sisters — one place, three named sets.
  */
-const COLUMNS: RecurringRuleColumn[] = [
-  "case",
-  "counterparty",
-  "bookingMode",
-  "amount",
-  "interval",
-  "direction",
-  "lastPayment",
-];
+const COLUMNS = RECURRING_RULE_OVERDUE_COLUMNS;
 
 /** Below this the seven columns start squeezing each other instead of scrolling. */
 const MIN_WIDTH = 1180;

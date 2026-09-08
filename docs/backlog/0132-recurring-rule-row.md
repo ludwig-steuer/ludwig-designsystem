@@ -128,6 +128,26 @@ ein eigener Typ wäre die lokale Erfindung, die §5 verbietet.
 | `periodCount` | `number` | nein | Zähler der Ereignisse („3 Perioden") | `InUse` |
 | `lastPayment` | `{ date: string; amount: number } \| null` | nein | letzte zugeordnete Zahlung. **Prop fehlt** = die Spalte gibt es nicht; **`null`** = es gab noch keine Zahlung | `InUse` |
 | `columns` | `readonly RecurringRuleColumn[]` | nein | welche Zellen die Zeile rendert, in der Reihenfolge der Liste. Default: `counterparty`, `bookingMode`, `validity`, `amount`, `interval`, `direction` (Ränge 1–5, 7) | `InUse` |
+| `counterAccount` | `PreviewAccount \| null` | nein | Rang 10 — Gegenkonto der Vorlage, **Nummer und Name**; ohne Konto das Wort „ohne Gegenkonto" | 0131 `Filled` |
+| `personalAccount` | `PreviewAccount \| null` | nein | Rang 11 — Personenkonto; ohne Konto das Wort **„ohne Personenkonto"**, eine der drei Auffälligkeiten von J-54 | 0131 `Filled` |
+| `documentNumberStrategy` | `RuleDocumentNumberStrategy \| null` | nein | Rang 22 — Wort aus `labels.documentNumberStrategy`, ohne Wort roh (L-242) | 0131 `Filled`, `Edges` |
+| `caseRuleCount` | `number` | nein | wie viele Regeln **derselbe Fall** trägt. Ab 2 setzt die Sachverhalts-Zelle die Marke „2 Regeln" — der Doppelgriff aus L-245. Aus den sichtbaren Zeilen ist er nicht zählbar, sobald ein Filter greift (Befund **L-263**) | 0131 `Filled` |
+| `accountHref` | `(accountNumber: string) => string` | nein | Weg ins Kontenblatt für die beiden Konten. Ohne ihn stehen sie als Text — nie ein Knopf, der nichts tut | 0131 `Filled` |
+
+**Nachgetragen am 2026-09-08 beim Bau von 0131.** Die fünf Zeilen darüber sind
+die Erweiterung, die das Regelwerk des Mandanten gebraucht hat: sein
+Spaltensatz ist der des Profils (Ränge 1–7, **10, 11, 22**), und der
+Doppelgriff ist die dritte der drei Auffälligkeiten, wegen derer es die Seite
+gibt. Alle fünf sind **optional** — ohne sie rendert die Zeile wie zuvor, und
+die Stories von 0132 und 0133 sind unverändert. Kein Nachbau: R17 lässt für
+eine Entität genau eine Zeile zu, und deshalb kamen die Felder hierher statt
+in eine zweite Zeilen-Komponente.
+
+**Und die Zellen wohnen seither in `recurring-rule-columns.tsx`** — genau der
+Zug, den der Ausbau unten vorgesehen hat, mit 0131 als Auslöser. Die
+Schnittstelle der Zeile ändert das nicht: `RecurringRuleRow` rendert dieselben
+Zellen, nur liest sie sie jetzt aus dem Katalog, den `DataTable` ebenfalls
+liest (Muster `BankTransactionRow` ↔ `bankTransactionColumns`).
 
 Typen aus `src/ludwig/modules/recurring-rules/domain/rule.ts`
 (`RuleBookingMode`, `RuleDirection`, `RuleExpectedInterval`,
@@ -223,7 +243,7 @@ Höchstens drei, jede mit Default — der Bau wartet nicht.
 |---|---|---|
 | Ein Zeilenmodell statt zwölf Einzelfeldern | `rule: OverdueRecurringItem \| RuleOverviewItem` statt der Feld-Props | **L-240** ist gelöst — die zwei Anzeige-Typen liegen in `recurring-rules/domain/` |
 | Farbe für die Gültigkeit | `StatusBadge axis="regel_gueltigkeit"` statt des Wortes | **L-241** ist entschieden (Achse oder Farbe weg) |
-| Spaltendefinitionen für `DataTable` | `recurringRuleColumns()` in `recurring-rule-columns.tsx`, die Zeile rendert weiter dieselben Zellen | Aufgabe **0131** wird gebaut (sortierbar, filterbar, mandantenweit) |
+| ~~Spaltendefinitionen für `DataTable`~~ | ~~`recurringRuleColumns()` in `recurring-rule-columns.tsx`~~ | **Erledigt 2026-09-08 mit 0131.** Der Katalog steht, die Zeile rendert dieselben Zellen aus ihm |
 | `priority` als Spalte | `priority: number` | **L-245** zeigt zwei Regeln eines Falls nebeneinander — erst dann entscheidet die Rangfolge etwas Sichtbares. (~~L-254~~ ist seit `9a3ce2db` behoben: alle Schreiber setzen `RULE_PRIORITY_DEFAULT`, der Bestand streut **nicht**) |
 | Der Weg in den Editor aus der Zeile | `onEdit?: (ruleId: string) => void` | ein Screen verlangt ihn — die Fälligkeitsliste ist „Auskunft, keine Aufgabe" und braucht ihn nicht |
 

@@ -3855,3 +3855,23 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
    wieder ab — gemessen blieben sonst zwei von 23 Eingaben beim Speichern
    bedienbar. */
 .v2rredit__lock { border: 0; margin: 0; padding: 0; min-width: 0; }
+
+/* --- Das Regelwerk des Mandanten (0131) ---------------------------------- */
+
+/* Der Doppelgriff: zwei Regeln an **einem** Sachverhalt — die dritte der drei
+   Auffälligkeiten, wegen derer es die Seite gibt. Die Marke steht am
+   Sachverhalt, weil sie eine Aussage über den Fall ist und nicht über die
+   Regel, und sie trägt dieselbe Pille wie „ohne Kriterium": ein Wort, das
+   etwas feststellt. **Ohne Farbe** — zwei Regeln je Fall sind erlaubt (der
+   Tabellenkommentar lässt sie ausdrücklich zu), sie sind nur der Fall, den man
+   sehen will; R1 gäbe Farbe ohnehin nur über eine Registry-Achse her, und für
+   „zwei Regeln" gibt es keine.
+   Die Klasse gehört zum Zell-Vokabular der Zeile (`recurring-rule-columns`)
+   und steht trotzdem hier: ein Block am Stück am Dateiende ist der einzige
+   Ort ohne Konflikt, solange mehrere Sitzungen im selben Baum arbeiten. */
+.v2rrov__dup {
+  display: inline-block; padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-soft); color: var(--color-text-muted);
+  font-size: var(--fs-ui-xs); white-space: nowrap;
+}
