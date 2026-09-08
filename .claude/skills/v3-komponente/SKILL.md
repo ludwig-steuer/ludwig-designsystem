@@ -132,6 +132,35 @@ die der Baustein auf der Seite hat (Karte, Drawer, Reiter), nicht bei der des
 Story-Rahmens — deshalb ist „im Einsatz" ein fester Summand der
 Story-Ableitung (`spec-schreiben` §6) und keine Kür (0071, 2026-09-07).
 
+### Zwei Tiefen: schlank und gemessen
+
+Seit dem 2026-09-08 gilt für die laufende Welle die **schlanke Abnahme**. Sie
+prüft die **Schnittstelle**, nicht die Darstellung — Grund: die App zieht in
+einem Zug nach, wenn das Set steht. Ändert sich später eine Farbe, kostet das
+eine CSS-Zeile; ändert sich eine Prop, kostet es jede Aufrufstelle drüben.
+
+**Die schlanke Abnahme prüft:**
+
+- jede Prop gegen die Schnittstelle der Spec — Typ, Pflicht, Vorgabe
+- Typen aus `src/ludwig/`, keine lokale Neudefinition, keine `as`-Zusicherung
+- `@when`/`@instead` an jedem Export, Datei nach der Familie benannt
+- Story-Deckung: jede Prop ihre Story, jeder ausgeschlossene Zustand begründet
+- Status nur über die Registry, keine lokale Label-Map, kein Hex, kein px
+- die sechs Wächter über den **Exit-Code**, dazu ihre Selbstprüfungen (`--test`)
+- dass jede Story im Browser etwas zeigt und nichts in die Konsole schreibt
+
+Dafür genügt Lesen plus **ein** Durchlauf über die Stories; CDP-Messungen
+braucht sie nicht.
+
+**Vertagt nach `docs/backlog/0119-visuelle-pruefung-nachholen.md`:** Maße,
+Kontraste, Trefferflächen, Hover, Fokus, Tastaturwege — alles, was an vier
+Breiten gemessen wird. Wer eine schlanke Abnahme schreibt, vermerkt sie als
+**„schlanke Abnahme (Schnittstelle)"**, damit 0119 sie wiederfindet.
+
+Das ist keine Absenkung des Anspruchs, sondern eine Reihenfolge: die gemessene
+Prüfung hat in den ersten drei Wellen zwei Wurzelfehler gefunden, die das ganze
+Set betrafen. Solche Funde kommen wieder — sie kommen nur später.
+
 ### Womit gemessen wird
 
 `scripts/cdp.mjs` — **der Helfer aus dem Repo, keine eigene Kopie.** Er

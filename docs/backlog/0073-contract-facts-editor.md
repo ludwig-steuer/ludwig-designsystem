@@ -98,3 +98,24 @@ danach noch etwas bedeutet. Eine Abnahme ohne Nachweis ist keine.
 mit zwei Präzisierungen für den Tag, an dem er drankommt (Provenienz doppelt
 führen; Bestätigung braucht erst ein Ziel) und einem Auslöser, der nicht in
 unserer Hand liegt: die erste Zeile in der Tabelle.
+
+## Owner-Entscheid (2026-09-08): die Bestätigung fällt weg
+
+Auf die Frage aus der Schema-Prüfung — wohin „als geprüft bestätigen" soll,
+wenn es dafür kein Feld gibt — lautet der Entscheid: **die Handlung wird
+gestrichen.** Weder eine Spalte noch ein Audit-Ereignis; solange niemand die
+Bestätigung wirklich braucht, ist die ehrlichste Antwort, sie nicht zu bauen.
+
+Damit endet der Auftrag beim **Bearbeiten**: Vertragstyp, Gegenstand,
+Laufzeit, Primärbetrag und die buchungsrelevanten Fakten ändern — mehr nicht.
+Was das für die Spec heißt, wenn sie geschrieben wird:
+
+- Der Satz „und am Ende steht ‚als geprüft bestätigen'" fällt aus dem Ziel.
+- Keine `onConfirm`-Prop. Eine Prop, die nichts tut, wird nicht gebaut (A12);
+  kommt die Bestätigung später doch, kommt sie als Callback mit ihrem Ziel.
+- **L-213 ist damit erledigt** — nicht durch eine Änderung an der App, sondern
+  durch den Wegfall der Anforderung. Der Registereintrag sagt das.
+
+Der Blocker bleibt unverändert und liegt nicht bei uns: `client_source_docs_contracts`
+hat 0 Zeilen, also gibt es keinen Vertrag, an dem sich eine Bearbeitung
+abnehmen ließe.
