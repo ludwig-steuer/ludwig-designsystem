@@ -9,6 +9,7 @@
 | Baustein in v3 | `entities/accounting-case/case-columns.tsx` (0096) — die Liste selbst ist 0082 |
 | Fachliche Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md`, Abschnitt „Listen" (Status `geprüft`, 2026-09-05) |
 | Profil von / am | Claude, 2026-09-07 — angelegt, weil 0082 ohne Seitenprofil nicht gebaut werden darf (Profil §Listen) |
+| Überholt am | 2026-09-08 durch den Owner-Entscheid „Reiter sind keine Filter" — siehe den Abschnitt unten; die Ränge 1 und 5 und die Zweifel 1 und 2 sind entsprechend nachgezogen |
 
 ## Job
 
@@ -28,16 +29,19 @@
 
 | Rang | Frage der Rolle | Antwort steht in | Baustein |
 |---|---|---|---|
-| 1 | „Wie viel liegt an, und wovon?" | Reiter mit Vorratszähler je Grundgesamtheit | `Tabs` mit `count` |
+| 1 | „Wie viel liegt an, und wovon?" | **Der Vorratszähler der einen Liste**, nicht mehr eine Reiterleiste (Entscheid 2026-09-08). Die Aufteilung nach Zustand macht der Filter, und er sagt zugleich, wie viel er wegnimmt | Kopf der Karte (`head.sub`), `FilterBar` |
 | 2 | „Worum geht es in diesem Fall?" | Anzeigename, Gegenpart, Betrag — die ersten fünf Ränge | `caseColumns()` in `DataTable` |
 | 3 | „Bin **ich** dran?" | Spalte Zuständigkeit, Achse `disposition` | `StatusBadge` |
 | 4 | „Was hängt daran?" | Stand, offene Klärungen, Export | `StatusBadge` × 3 |
 | 5 | „Wie finde ich einen bestimmten?" | Suche und die drei Filter über der Tabelle | `FilterBar` |
 | 6 | „Und jetzt?" | Zeile führt in den Sachverhalt; nichts wird von hier aus entschieden | Zeilenlink |
 
-Rang 1 und 3 sind der Kern. Die Reiter sind **nicht** vier Listen, sondern
-vier Grundgesamtheiten derselben Liste — das Profil hat nachgemessen, dass
-Sortierung, Spaltensatz, Filter und Massenaktion in allen vier gleich sind.
+Rang 1 und 3 sind der Kern. Das Profil hat nachgemessen, dass Sortierung,
+Spaltensatz, Filter und Massenaktion in allen vier Reitern gleich sind — sie
+waren **nicht** vier Listen, sondern vier Grundgesamtheiten derselben. Genau
+das ist der Befund, aus dem der Entscheid vom 2026-09-08 folgt: was sich nur
+in der Grundgesamtheit unterscheidet, ist ein Filter und bekommt keinen
+Reiter.
 
 ## Nebenjobs
 
@@ -45,7 +49,7 @@ Sortierung, Spaltensatz, Filter und Massenaktion in allen vier gleich sind.
 |---|---|---|
 | Einen Fall über den Geschäftspartner suchen | selten (der Partner-Reiter ist der Ort dafür) | einen Klick mehr — kein eigener Filter hier |
 | Den Vorrat über Jahre hinweg sehen | selten | die Seite verlässt ihr Jahr nicht; das ist der Partner-Reiter |
-| Mehrere Fälle auf einmal schließen | am Ende eines Buchungslaufs | einen **eigenen Reiter** („Zum Schließen") mit eigener Form — Karten statt Zeilen, gruppiert nach `triage` |
+| Mehrere Fälle auf einmal schließen | am Ende eines Buchungslaufs | eine **eigene Ansicht** („Zum Schließen") — Karten statt Zeilen, gruppiert nach `triage`, mit der einzigen Massenaktion. Sie ist der Fall, für den ein Reiter da ist: andere Form, andere Handlung |
 
 ## Was hier nicht hingehört
 
@@ -64,9 +68,12 @@ Sortierung, Spaltensatz, Filter und Massenaktion in allen vier gleich sind.
 
 ## Zweifel am heutigen Format
 
-1. **Sechs Reiter, zwei Entitäten.** „Offene Zahlungen" steht zwischen fünf
-   Sachverhalts-Reitern. Wer ihn anklickt, bekommt eine andere Tabelle mit
-   anderen Spalten und weiß nicht, warum.
+1. **Sechs Reiter, zwei Entitäten — beantwortet 2026-09-08.** „Offene
+   Zahlungen" stand zwischen fünf Sachverhalts-Reitern; wer ihn anklickte,
+   bekam eine andere Tabelle und wusste nicht, warum. Der Owner-Entscheid
+   löst beides auf einmal: vier der sechs waren Filter, und die zwei, die
+   wirklich andere Ansichten sind („Offene Zahlungen", „Zum Schließen"),
+   bleiben als solche kenntlich — sie kommen zurück, wenn sie gebaut sind.
 2. **Vier Leerfall-Texte, aber nicht die eine Unterscheidung, auf die es
    ankommt.** Die Seite hat je Reiter einen eigenen Satz, aber keiner trennt
    „nichts offen" (Erfolg) von „keine Treffer" (Filter). Genau das ist der
@@ -76,6 +83,39 @@ Sortierung, Spaltensatz, Filter und Massenaktion in allen vier gleich sind.
    (Befund L-15). Wer nach Betrag sucht, blättert.
 4. **Ein Filter, der nichts tut** (siehe oben). Er verspricht eine Antwort auf
    Rang 3 und liefert sie nicht.
+
+## Owner-Entscheid 2026-09-08 — Reiter sind keine Filter
+
+`[year]/cases` bekommt vorübergehend **einen** Reiter, „Alle Sachverhalte",
+mit Liste, Suche und Filtern. Reiter kommen später zurück — ausschließlich
+für besondere Sachverhaltsarten mit **eigener Ansicht**. Zielbild ist
+**1 + n Sonderansichten**, nicht n Filter. Die Regel steht als Absatz unter
+R9 in `docs/web-ui-regeln.md`.
+
+Was das für diese Seite heißt:
+
+| Heute | Künftig |
+|---|---|
+| Reiterleiste mit Vorratszählern beantwortet Rang 1 | Der Kopf der einen Liste trägt den Vorrat; die Aufteilung macht der Filter und sagt dabei, wie viel er wegnimmt |
+| „Laufend", „Wartet auf Unterlagen", „Zur Bearbeitung", „Alle" | **ein** Reiter — die vier unterschieden sich nachweislich nur in der Grundgesamtheit |
+| „Offene Zahlungen" und „Zum Schließen" in derselben Leiste | Sonderansichten mit eigener Form; sie kommen als Reiter zurück, sobald sie gebaut sind (0081 für „Zum Schließen", die Bank-Seite für „Offene Zahlungen") |
+
+**Was der Entscheid für den Leerfall bedeutet — und das ist die eigentliche
+Folge.** Die vier Reiter trugen vier Leerfall-Sätze, und drei davon waren
+ein Erfolg („Kein Sachverhalt ist mehr offen."). Bei einer Liste gibt es
+diesen Satz nicht mehr von selbst: „nichts offen" wird zu einem **Filter mit
+leerem Ergebnis**, und ein leeres Filterergebnis ist normalerweise ein
+Bedienfehler, kein Erfolg. Wer die eine Liste baut, muss also entscheiden,
+woran sie einen erfolgreichen Filterstand von einem erfolglosen unterscheidet
+— sonst geht genau die Aussage verloren, die dieser Seite ihren Job gibt
+(„fertig ist sie, wenn kein Fall mehr auf sie wartet"). **Das ist eine offene
+Frage an den Owner, kein Bauauftrag.**
+
+**Kein Bauauftrag im Set** (Ansage `ludwig-manager`). `CaseList` (0082) bleibt
+wie gebaut: sie nimmt einen Reiter als Prop und kennt vier — beim nächsten
+Spiegel ist `CASE_LIST_TABS` gegen dieses Zielbild zu prüfen, und wenn die
+App auf einen Reiter geht, schrumpft `CaseListTab` von selbst mit (der Typ
+ist seit dem 2026-09-08 abgeleitet, nicht abgeschrieben).
 
 ## Vorbedingungen für den Bau
 

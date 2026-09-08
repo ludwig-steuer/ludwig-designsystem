@@ -416,3 +416,38 @@ Weg zurück im Fehler. `pnpm typecheck` und die fünf Wächter auf Exit 0.
 **Offen bleibt** die gemessene Prüfung (0119) — Spurbreiten, Zeilenhöhen,
 Kontraste, Trefferflächen, Hover, Fokus, Tastatur, und darin das
 Spec-Kriterium „vier Breiten, dieselbe Kante".
+
+### Nachtrag 2026-09-08 — der Owner-Entscheid trifft die Kernannahme
+
+„**Reiter sind keine Filter**": `[year]/cases` bekommt vorübergehend einen
+Reiter „Alle Sachverhalte" mit Liste, Suche und Filtern; Reiter kommen
+später zurück, aber nur für Sachverhaltsarten mit **eigener Ansicht**.
+Zielbild 1 + n Sonderansichten. Festgehalten in `docs/seiten/sachverhalte.md`
+und als Absatz unter R9 in `docs/web-ui-regeln.md`.
+
+**Kein Bauauftrag** (Ansage `ludwig-manager`), aber es gehört hierher, weil
+es die eine Entscheidung dieser Spec berührt: „**Der Reiter ist der
+Leerfall.**" Diese Spec hat aus vier Reitern eine Komponente gemacht, gerade
+weil sie sich in nichts als der Grundgesamtheit unterschieden — dieselbe
+Messung, aus der der Owner jetzt den umgekehrten Schluss zieht: was sich nur
+in der Grundgesamtheit unterscheidet, braucht keinen Reiter.
+
+Was das für `CaseList` heißt:
+
+- **Die Komponente bleibt richtig.** Sie nimmt den Reiter als Prop und ist
+  darin schon der eine Fall: geht die App auf einen Reiter, ruft sie
+  `tab="alle"` und alles Übrige steht. Weil `CaseListTab` seit heute aus
+  `src/ludwig/` **abgeleitet** ist (M1), schrumpft der Typ von selbst mit,
+  sobald drüben `CASE_LIST_TABS` schrumpft — nichts nachzuziehen.
+- **Was zur offenen Frage wird, ist `EMPTY`.** Drei der vier Leerfälle sind
+  ein **Erfolg** („Kein Sachverhalt ist mehr offen."). Mit einer Liste
+  entsteht dieser Zustand nicht mehr durch den Reiter, sondern durch einen
+  **Filter mit leerem Ergebnis** — und den behandelt `DataTable` über
+  `filtered` als Bedienfehler mit Weg zurück, nicht als Erfolg. Genau die
+  Aussage, die dieser Seite ihren Job gibt („fertig ist sie, wenn kein Fall
+  mehr auf sie wartet"), hängt daran. Wer die eine Liste baut, muss sagen,
+  woran sie einen erfolgreichen Filterstand von einem erfolglosen
+  unterscheidet. Steht als Frage im Seitenprofil; hier nichts geändert.
+- **`emptyCount` wird dabei wichtiger, nicht überflüssig:** die Zahl ist das,
+  was einen erfolgreichen Leerfall belegen kann, wenn der Reiter ihn nicht
+  mehr benennt.

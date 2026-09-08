@@ -66,6 +66,23 @@ Client-Component — wer Listen-Kontext aus der Query braucht, berechnet die
 `href`s in einem dünnen Client-Wrapper und reicht sie durch. Restliche
 Inline-Kopien beim nächsten Anfassen umstellen (`web-ui-offen.md` P8).
 
+**Ein Reiter ist eine eigene Ansicht, kein Filter** (Owner-Entscheid
+2026-09-08). Zeigen zwei Reiter dieselbe Tabelle mit derselben Sortierung,
+denselben Spalten und denselben Aktionen und unterscheiden sich nur in der
+Grundgesamtheit, dann sind sie ein **Filter**, der als Reiter verkleidet ist:
+er kostet eine Leiste, ist nicht kombinierbar, steht nicht in der URL neben
+den anderen Filtern und behauptet einen Wechsel des Ortes, wo nur eine
+Auswahl stattfindet. Ein Reiter ist gerechtfertigt, wenn hinter ihm eine
+**andere Ansicht** steht — andere Spalten, eine andere Form, eine andere
+Handlung, eine andere Entität. Zielbild jeder Liste ist deshalb **eine
+Ansicht plus n Sonderansichten**, nicht n Grundgesamtheiten.
+
+*Warum:* die Sachverhaltsliste hatte sechs Reiter, von denen vier dieselbe
+Tabelle zeigten (nachgemessen im Entitätsprofil: gleiche Sortierung, gleicher
+Spaltensatz, gleiche Filter, keine Massenaktion) — die Leiste versprach sechs
+Orte und hatte zwei. Betroffen: `docs/seiten/sachverhalte.md`,
+`CASE_LIST_TABS` und `CaseList` (0082).
+
 ### R15 — Slide-over: einbindbar oder screen-lokal, nichts dazwischen
 Ein Drawer ist **Klasse A**, wenn er eine Entität zeigt, die es überall geben
 kann (Beleg, Buchung, Konto, Zahlung): er lebt in `@/ui/drawers`
