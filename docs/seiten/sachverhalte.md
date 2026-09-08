@@ -126,11 +126,10 @@ Drei Dinge, die beim Bauen daran hängen:
    hier fehlt sie noch (der Spiegel ist eingefroren, siehe
    `docs/ludwig/README.md`). Vorher war der Standardstand nicht herstellbar —
    der Filter stand da und wirkte nicht (siehe „Was hier nicht hingehört").
-3. **„Eigene Zuständigkeit" heißt `accounting`**, so gelesen: die Achse hat
-   drei Werte, schreibbar sind zwei (`CASE_DISPOSITION_WRITABLE`), und die
-   Rolle dieser Seite ist die Kanzlei. Falls „eigene" auf den angemeldeten
-   Menschen zielen sollte statt auf die Rolle, wäre das ein anderer Filter
-   und ein Befund — die Achse kennt keine Person.
+3. **„Eigene Zuständigkeit" heißt `accounting`** — die **Rolle**, nicht der
+   angemeldete Mensch (Owner bestätigt 2026-09-08). Die Achse kennt
+   `agent`/`accounting`/`client` und keine Person; wer nach einer Person
+   filtern wollte, bräuchte einen anderen Filter und einen Befund.
 
 Im Set ist dafür **nichts zu bauen**: `CaseList` reicht `filtered` schon
 durch, und wer den Standardstand kennt, ist die Seite. Was `CaseList`
