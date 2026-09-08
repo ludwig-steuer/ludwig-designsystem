@@ -2,8 +2,13 @@ import { ActionIcon } from "../Icons";
 import type { ReactNode } from "react";
 
 import { RowActions } from "../primitives/ActionBar";
-import { ActionButton, type ActionResult, type ConfirmSpec } from "../primitives/ActionButton";
-import { Button } from "../primitives/Button";
+import {
+  ActionButton,
+  type ActionResult,
+  type AskSpec,
+  type ConfirmSpec,
+} from "../primitives/ActionButton";
+import { Button, type ButtonVariant } from "../primitives/Button";
 import { ErrorRow, TableLoading } from "../primitives/Cells";
 import { EmptyState } from "../primitives/EmptyState";
 import { ExpandableRow } from "../primitives/ExpandableRow";
@@ -81,17 +86,49 @@ export interface ColumnDef<T> {
 }
 
 /** One action on one row. Either a jump (`href`) or a Server Action (`action`). */
-export interface RowAction {
+export interface RowAction<Input = void> {
   label: string;
   icon?: ReactNode;
   /** A jump — drawer over a search param (L3) or a page. */
   href?: string;
-  /** A Server Action, bound to the row by the caller. */
-  action?: () => Promise<ActionResult>;
+  /** A Server Action, bound to the row by the caller. Gets what `ask` asked for. */
+  action?: (input: Input) => Promise<ActionResult>;
   confirm?: ConfirmSpec;
+  /**
+   * A dialog that asks something before the action runs (0121/0122) — the
+   * supplier for „Einzeln", the target for an assignment.
+   *
+   * The row is already known when the action is built, so this is a plain
+   * spec, not a function of it (unlike `BulkAction.ask`, which may name the
+   * number of chosen rows). It excludes `confirm` — `ask` **is** the
+   * confirmation dialog — and it excludes `href`, because a jump asks nothing.
+   */
+  ask?: AskSpec<Input>;
   tone?: "danger";
   /** Stays visible when the rest moves into the menu (E8). */
   primary?: boolean;
+}
+
+/**
+ * A list of row actions where each may ask for something different — the same
+ * gap as `AnyBulkAction`: TypeScript has no existential type, so the list
+ * position cannot say „some `Input`, one per entry".
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyRowAction = RowAction<any>;
+
+/**
+ * Types one row action. Without it the caller annotates `input` by hand and
+ * nothing checks that `ask.initial` and `action`'s parameter are the same
+ * thing — **name the type**: `rowAction<string>({…})`, because a full
+ * `AskSpec` puts `Input` in a contravariant position and inference lands on
+ * `unknown`.
+ *
+ * @when    Building `rowActions` where an action asks something first.
+ * @instead An action that just runs, or a jump → the plain object literal.
+ */
+export function rowAction<Input>(action: RowAction<Input>): AnyRowAction {
+  return action;
 }
 
 export type { AnyBulkAction, BulkAction };
@@ -126,7 +163,7 @@ interface DataTableBase<T> {
   /** From where it scrolls horizontally instead of squeezing. */
   minWidth?: number;
   /** The last column, always visible (V14): ≤ 2 inline, ≥ 3 primary plus menu. */
-  rowActions?: (row: T) => RowAction[];
+  rowActions?: (row: T) => AnyRowAction[];
   /**
    * A class for **one** row — for a state that belongs to the whole line and
    * not to a cell: a draft that is dimmed, a row that is struck through.
@@ -472,7 +509,7 @@ function bodyRow<T>(row: T, props: DataTableProps<T>): ReactNode {
  * the `primary` ones stay and the rest move into the menu. Always visible,
  * never on hover only — a hidden action does not exist for the keyboard (V14).
  */
-function rowActionCells(list: RowAction[]): ReactNode {
+function rowActionCells(list: AnyRowAction[]): ReactNode {
   if (list.length <= 2) return list.map(inlineAction);
   const primary = list.filter((a) => a.primary);
   const rest = list.filter((a) => !a.primary);
@@ -486,7 +523,40 @@ function rowActionCells(list: RowAction[]): ReactNode {
   );
 }
 
-function inlineAction(a: RowAction): ReactNode {
+/**
+ * The button of a row action. Its own component because `ask` and `confirm`
+ * exclude each other in `ActionButton`'s type: a spread hides which of the two
+ * a row carries, so the choice has to be two branches — and two branches in
+ * two renderers would be two copies of the same decision.
+ */
+function RowActionButton({
+  action: a,
+  size,
+  variant,
+}: {
+  action: AnyRowAction;
+  size: "xs" | "sm";
+  variant: ButtonVariant;
+}) {
+  const run = a.action ?? (async () => {});
+  return a.ask ? (
+    <ActionButton size={size} variant={variant} icon={a.icon} ask={a.ask} action={run}>
+      {a.label}
+    </ActionButton>
+  ) : (
+    <ActionButton
+      size={size}
+      variant={variant}
+      icon={a.icon}
+      confirm={a.confirm}
+      action={() => run(undefined)}
+    >
+      {a.label}
+    </ActionButton>
+  );
+}
+
+function inlineAction(a: AnyRowAction): ReactNode {
   if (a.href !== undefined) {
     return (
       <Button key={a.label} href={a.href} size="xs" variant="tertiary" icon={a.icon}>
@@ -495,20 +565,16 @@ function inlineAction(a: RowAction): ReactNode {
     );
   }
   return (
-    <ActionButton
+    <RowActionButton
       key={a.label}
+      action={a}
       size="xs"
       variant={a.tone === "danger" ? "danger" : "tertiary"}
-      icon={a.icon}
-      confirm={a.confirm}
-      action={a.action ?? (async () => {})}
-    >
-      {a.label}
-    </ActionButton>
+    />
   );
 }
 
-function menuAction(a: RowAction): ReactNode {
+function menuAction(a: AnyRowAction): ReactNode {
   if (a.href !== undefined) {
     return (
       <MenuItem key={a.label} href={a.href} icon={a.icon} tone={a.tone}>
@@ -525,15 +591,7 @@ function menuAction(a: RowAction): ReactNode {
       key={a.label}
       className={`v2menu__act${a.tone === "danger" ? " v2menu__act--danger" : ""}`}
     >
-      <ActionButton
-        size="sm"
-        variant="tertiary"
-        icon={a.icon}
-        confirm={a.confirm}
-        action={a.action ?? (async () => {})}
-      >
-        {a.label}
-      </ActionButton>
+      <RowActionButton action={a} size="sm" variant="tertiary" />
     </span>
   );
 }

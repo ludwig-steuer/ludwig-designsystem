@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
 | Stufe | `patterns/DataTable` — `RowAction`, Nachtrag zu **0121** |
 | Klassen-Test | wie 0121: ja, unverändert — „vor dem Ausführen etwas erfragen" ist kein Ludwig-Begriff |
 | Quelle | Rückmeldung `ludwig-manager` 2026-09-08 nach dem Bau von 0121 (Befund **L-219**): die Lieferantenwahl bei „Einzeln" musste als dritte **Sammel**aktion gebaut werden, weil die Zeilenaktion nicht fragen kann |
@@ -69,3 +69,29 @@ Rundlauf) + 0 „im Einsatz" (die vorhandene `RowActions`-Story ist der Ort) =
 ## Offene Fragen
 
 Keine. Der Schnitt folgt 0121, und der ist gebaut und in der App im Einsatz.
+
+## Gebaut 2026-09-08
+
+`RowAction<Input>` mit `ask`, dazu `AnyRowAction` und `rowAction<Input>()` —
+dieselbe Bauart wie bei `BulkAction` (0121), aus demselben Grund: TypeScript
+hat keinen existenziellen Typ, und ohne den Helfer prüft nichts, dass
+`ask.initial` und der Parameter von `action` dasselbe sind.
+
+**Ein Unterschied zu 0121:** `ask` ist hier **kein** Funktionstyp. Die Zeile
+steht schon fest, wenn die Aktion gebaut wird — nur die Sammelaktion muss die
+Zahl der gewählten Zeilen erst erfahren.
+
+**`RowActionButton` ist als eigene Komponente entstanden**, und das war nicht
+geplant: `ask` und `confirm` schließen sich in `ActionButton` im Typ aus, ein
+Spread verbirgt, welche von beiden eine Zeile trägt — die Wahl muss also zwei
+Zweige sein. Zwei Zweige in zwei Renderern (inline und Menü) wären zwei Kopien
+derselben Entscheidung gewesen.
+
+**Gemessen** (Story `RowAsk`, `scripts/cdp.mjs`): der Dialog öffnet mit
+gesperrtem Knopf, nach der Wahl bekommt die Handlung genau den Wert
+(„→ Musterbau GmbH" im Kopf), und die dritte Aktion wandert ins Menü (E8) —
+dort öffnet dieselbe Aktion denselben Dialog. Drei Sorten in einer Leiste:
+eine mit `ask`, eine mit `confirm`, ein `href`.
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0. Im Barrel: `rowAction`,
+`AnyRowAction`.

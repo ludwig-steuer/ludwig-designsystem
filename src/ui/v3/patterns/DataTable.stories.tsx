@@ -21,6 +21,7 @@ import {
   type BulkAction,
   type ColumnDef,
   type ListPatch,
+  rowAction,
   type RowAction,
 } from "./DataTable";
 import { bulkAction } from "../primitives/Selection";
@@ -409,6 +410,65 @@ export const BulkAsk: Story = {
         sort={SORT}
         href={href}
         selection={{ actions, label: (c) => `Sachverhalt ${rowKey(c)} auswählen` }}
+      />
+    );
+  },
+};
+
+/**
+ * **Die Zeilenaktion, die erst fragt** (0122). Dieselbe Mechanik wie bei der
+ * Sammelaktion, nur an einer Zeile: „Zuordnen" öffnet den Dialog, die Handlung
+ * bekommt den Wert. `ask` ist hier **kein** Funktionstyp — die Zeile steht
+ * schon fest, wenn die Aktion gebaut wird.
+ *
+ * Daneben eine Aktion mit `confirm` und ein `href`: drei Sorten in einer
+ * Leiste, und über zwei hinaus wandern sie ins Menü (E8) — dort öffnet
+ * dieselbe Aktion denselben Dialog.
+ */
+export const RowAsk: Story = {
+  render: function Render() {
+    const [note, setNote] = useState<string | null>(null);
+    return (
+      <DataTable<CaseListItem>
+        rows={PAGE.slice(0, 5)}
+        columns={COLUMNS}
+        rowKey={rowKey}
+        head={{ title: "Sachverhalte 2026", sub: note ?? "Zuordnen fragt erst" }}
+        sort={SORT}
+        href={href}
+        rowActions={(c) => [
+          rowAction<string>({
+            label: "Zuordnen",
+            primary: true,
+            ask: {
+              title: `Sachverhalt ${rowKey(c)} zuordnen`,
+              confirmLabel: "Zuordnen",
+              initial: "",
+              valid: (v) => v !== "",
+              render: ({ value, set }) => (
+                <Field label="Ziel" htmlFor={`row-target-${rowKey(c)}`}>
+                  <Select
+                    id={`row-target-${rowKey(c)}`}
+                    value={value}
+                    onChange={(e) => set(e.target.value)}
+                  >
+                    <option value="">Bitte wählen</option>
+                    <option value="Bürobedarf Meier GmbH">Bürobedarf Meier GmbH</option>
+                    <option value="Musterbau GmbH">Musterbau GmbH</option>
+                  </Select>
+                </Field>
+              ),
+            },
+            action: async (target) => setNote(`${rowKey(c)} → ${target}`),
+          }),
+          { label: "Prüfen", href: `#pruefen-${rowKey(c)}` },
+          {
+            label: "Verwerfen",
+            tone: "danger",
+            confirm: { title: "Verwerfen?", confirmLabel: "Verwerfen", tone: "danger" },
+            action: async () => setNote(`${rowKey(c)} verworfen`),
+          },
+        ]}
       />
     );
   },

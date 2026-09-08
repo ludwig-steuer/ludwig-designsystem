@@ -192,6 +192,8 @@ export {
 /* ── Patterns ── Arbeitsfläche */
 export {
   DataTable,
+  rowAction,
+  type AnyRowAction,
   type ColumnDef,
   type DataTableProps,
   type ListPatch,
