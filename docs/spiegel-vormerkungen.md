@@ -14,7 +14,8 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 | Was | Woher | Wer wartet |
 |---|---|---|
-| `CaseHeaderVM.disposition` | steht drüben, kommt aber **nicht** durch den Filter — `overview-vm.ts` hängt an Infrastruktur (**L-220**) | die Sachverhaltsansicht; sie liest die Zuständigkeit weiter über `CaseDetail` |
+| `CaseHeaderVM.disposition` | **spiegelbar seit `988d3dc5`** (L-220 erledigt): `overview-vm.ts` trägt nur noch Formen, die Regeln liegen in `application/case-overview.ts` | die Sachverhaltsansicht; bis zum Lauf liest sie die Zuständigkeit über `CaseDetail` |
+| `flow_error` in der Achse `bridge_datev` | neu (`b9f3707a`, L-221) — dazu ein Test, der die **ganze** Vertragsunion auf Deckungsgleichheit prüft | die DATEV-Seite zeigt die Achse schon; das Set hat dort keinen Baustein |
 
 ## Erledigt mit dem Lauf vom 2026-09-08 (App `6ba47fb2`)
 
