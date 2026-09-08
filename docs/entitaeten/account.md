@@ -285,15 +285,31 @@ Fünf Formen „jetzt" — die Obergrenze aus §9.
    Saldo nur über die Ludwig-Sätze. Führt der Spiegel die Liste an, führt er
    auch den Saldo.
 
-   **Entschieden am 2026-09-08 (Owner, über `ludwig-manager`):** der laufende
-   Saldo kommt aus dem Spiegel — **außer bei Sammelkonten.** Der Spiegel ist
-   die Nebenbuch-Sicht, seine Sammelkonto-Legs sind gedroppt; für ein
-   Sammelkonto wäre die Zahl nicht ungenau, sondern **falsch**. Dort steht
-   deshalb kein Saldo, sondern der Satz „über den Spiegel nicht darstellbar
-   (Sammelkonto)". Erkannt wird der Fall an der **Kontenfunktion** (Rang 14,
-   47 % gefüllt) — die damit zum ersten Mal etwas entscheidet und nicht nur
-   Kontext ist. Eine fehlende Zahl mit Grund ist eine Auskunft; eine falsche
-   Zahl ohne Grund ist keine.
+   **Entschieden und gebaut am 2026-09-08 (App-Commit `230cfa6c`):** der
+   laufende Saldo kommt aus dem Spiegel und folgt derselben Regel wie der
+   Ludwig-Saldo — aufsteigend übers Jahr rechnen, dann filtern. **Außer bei
+   Hauptbuch-Sammelkonten:** dort ist der Spiegel die Nebenbuch-Sicht mit
+   gedroppten Sammelkonto-Legs, die Zahl wäre nicht ungenau, sondern
+   **falsch**. Sie ist deshalb `null` und trägt den Satz
+   `mirrorBalanceUnavailable`. Eine fehlende Zahl mit Grund ist eine Auskunft;
+   eine falsche Zahl ohne Grund ist keine.
+
+   **Wie ein Sammelkonto erkannt wird — und wie nicht.** Es gibt **kein Feld
+   dafür**: `accounting_role` kennt nur `general_ledger`, `creditor`,
+   `debtor`, `revenue`, `other`. (Eine frühere Fassung dieses Absatzes nannte
+   die Kontenfunktion als Erkennungsmerkmal — das war geraten und ist falsch;
+   berichtigt nach der App-Meldung.) Stattdessen eine **Konstante je
+   Kontenrahmen** in `accounts/domain/collective-accounts.ts`: SKR04 1200 und
+   3300, SKR03 1400 und 1600.
+
+   Zwei Dinge daran sind wichtig genug, um sie hier festzuhalten:
+
+   - **Ein Nummernbereich wäre falsch.** Dieselbe Nummer bedeutet je
+     Kontenrahmen etwas anderes — 1400 und 1600 sind in SKR03 die
+     Sammelkonten, in SKR04 Vorsteuer und Kasse. Wer über Bereiche erkennt,
+     unterdrückt in SKR04 den Saldo zweier Konten, die ihn haben dürfen.
+   - **1210 und 3310 gehören nicht dazu** („ohne Kontokorrent") und stehen in
+     der App als ausdrücklicher Negativ-Test.
 
 **Befund fürs Design-System** (nicht die App): `MIRROR_MATCH` in
 `src/ui/v3/patterns/status-registry.ts` kennt sechs Werte plus `unreconciled`,
