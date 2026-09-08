@@ -45,4 +45,4 @@ Liste für den Tag, an dem `pnpm sync:ludwig` wieder läuft:
 |---|---|---|
 | `CaseFilter.disposition` als `CaseDisposition` | drüben mit `566693d5` erledigt (L-212), hier noch der alte Stand | 0083 kann seine Einengung fallen lassen |
 | Die zwei Mapper in `source-docs/domain/source-document-vm.ts` | neu drüben; ohne sie baut die Belegliste ihre Zellen weiter aus Rohfeldern | Seitenprofil `docs/seiten/belegliste.md`, „Vorbedingungen" |
-| `SourceDocumentDetail` als Union, `completedVia` als Achse | L-208 und L-215, drüben noch offen | 0074, 0076 — das Set führt die Union bis dahin selbst |
+| `SourceDocumentDetail` als Union, `completedVia` als Achse | **drüben gebaut 2026-09-08 (`bf9d8cfc`)**, hier noch nicht angekommen | 0074, 0076 — das Set löscht seine Kopie `source-document-detail.ts` beim Spiegeln. Achtung: `ContractBookingFact` kommt drüben über den Modul-Barrel `@/modules/contracts`, nicht über einen Deep-Import |
