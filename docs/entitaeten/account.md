@@ -283,7 +283,17 @@ Fünf Formen „jetzt" — die Obergrenze aus §9.
 6. **Der DATEV-Auszug kennt keinen Saldo.** `listAccountMirrorEntries`
    summiert Soll und Haben je Satz, aber die Kontoseite rechnet den laufenden
    Saldo nur über die Ludwig-Sätze. Führt der Spiegel die Liste an, führt er
-   auch den Saldo — siehe offene Frage 1.
+   auch den Saldo.
+
+   **Entschieden am 2026-09-08 (Owner, über `ludwig-manager`):** der laufende
+   Saldo kommt aus dem Spiegel — **außer bei Sammelkonten.** Der Spiegel ist
+   die Nebenbuch-Sicht, seine Sammelkonto-Legs sind gedroppt; für ein
+   Sammelkonto wäre die Zahl nicht ungenau, sondern **falsch**. Dort steht
+   deshalb kein Saldo, sondern der Satz „über den Spiegel nicht darstellbar
+   (Sammelkonto)". Erkannt wird der Fall an der **Kontenfunktion** (Rang 14,
+   47 % gefüllt) — die damit zum ersten Mal etwas entscheidet und nicht nur
+   Kontext ist. Eine fehlende Zahl mit Grund ist eine Auskunft; eine falsche
+   Zahl ohne Grund ist keine.
 
 **Befund fürs Design-System** (nicht die App): `MIRROR_MATCH` in
 `src/ui/v3/patterns/status-registry.ts` kennt sechs Werte plus `unreconciled`,
