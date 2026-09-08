@@ -31,6 +31,32 @@ import type { Currency } from "@/ludwig/shared/money";
 
 const KIND_AXIS = "konto_typ" as const;
 
+interface OpenItemRowCommon {
+  item: OpenItem;
+  currency?: Currency;
+  /** The reference date — „open" is never true in the abstract. */
+  asOf: string;
+}
+
+/**
+ * The two ways out of the row, and they exclude each other in the type.
+ *
+ * **`href` is the normal one.** The target is the personal account, and that
+ * is a URL — so the row gets an anchor, and with it the middle click, „open in
+ * new tab" and the status bar (`Row` §instead: „Click without a URL →
+ * ClickRow"). The row offered only `onOpen` until 2026-09-08, which forced the
+ * app into a client wrapper with `router.push` and cost exactly those three.
+ *
+ * `onOpen` stays for the caller who really has no URL — a selection inside a
+ * dialog, the duplicate check.
+ *
+ * **Not** to the case in either form: an open item carries no case id, and the
+ * app's view model has none either.
+ */
+type OpenItemRowWays =
+  | { href?: (personalAccount: string) => string; onOpen?: never }
+  | { onOpen?: (personalAccount: string) => void; href?: never };
+
 /**
  * @when    One line of the DATEV open-item list, on the OPOS page or in the
  *          duplicate check.
@@ -41,24 +67,15 @@ export function OpenItemRow({
   item,
   currency = "EUR",
   asOf,
-  onOpen,
-}: {
-  item: OpenItem;
-  currency?: Currency;
-  /** The reference date — „open" is never true in the abstract. */
-  asOf: string;
-  /**
-   * Jump to the personal account of the item. **Not** to the case: an open
-   * item carries no case id — the app's view model has none either, and the
-   * account is what the OPOS page navigates by.
-   */
-  onOpen?: (personalAccount: string) => void;
-}) {
+  ...ways
+}: OpenItemRowCommon & OpenItemRowWays) {
   // `Cells(...)` **as a function**, not as `<Cells />`: a component element is
   // one child to React, and `Row` would wrap it in a single `<td>` — the whole
   // row would collapse into one cell. Measured exactly that before this line
   // was changed (0106 wraps cells, and it cannot look inside a component).
   const parts = Cells({ item, currency, asOf });
+  if (ways.href) return <Row href={ways.href(item.personalAccount)}>{parts}</Row>;
+  const onOpen = ways.onOpen;
   return onOpen ? (
     <ClickRow
       onClick={() => onOpen(item.personalAccount)}

@@ -593,3 +593,31 @@ mitgezogen und bleibt lokal.
 (`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
 Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
 schreibt. Eine kurze Bestätigung steht aus.
+
+## Nachtrag 2026-09-08 — die Zeile bekommt einen Anker
+
+**Befund der App-Seite `[year]/opos`:** `OpenItemRow` bot nur
+`onOpen(personalAccount)`. Das Ziel ist aber das Personenkonto, und das ist
+eine **URL** — die eigene Regel steht wörtlich an `Row` (§instead: „Click
+without a URL → ClickRow"). Die App musste sich deshalb einen Client-Wrapper
+mit `router.push` bauen, und damit fielen mittlere Maustaste, „in neuem Tab
+öffnen" und die Statuszeile des Browsers weg. Drei Dinge, die ein Anker
+umsonst mitbringt.
+
+**Gebaut:** `href?: (personalAccount: string) => string`, das `onOpen` im Typ
+ausschließt. Eine Funktion und nicht ein fertiger String, weil die Zeile die
+Kontonummer hat und der Aufrufer sonst je Zeile eine Zeichenkette bauen
+müsste. `onOpen` bleibt für den Aufrufer, der wirklich keine URL hat — eine
+Auswahl im Dialog, die Dublettenprüfung.
+
+Nach `spec-schreiben` §3 Regel 2: ein `@when` deckt den Fall zu vier
+Fünfteln, das Fehlende ist eine Designentscheidung, die wiederkommt, und sie
+lässt sich in einem Halbsatz sagen.
+
+**Story `Linked`**, gemessen: drei `a.v2rowlink` mit `#konto-70021`,
+`#konto-10044`, `#konto-70118`. `Interactive` behält `onOpen` und hat keine.
+`pnpm typecheck` und die fünf Wächter auf Exit 0 — `check:when` hat dabei
+gemeldet, dass der neue Typ-Block den JSDoc von der Funktion weggeschoben
+hatte; er steht wieder da, wo er hingehört.
+
+Die App kann ihren Wrapper löschen.

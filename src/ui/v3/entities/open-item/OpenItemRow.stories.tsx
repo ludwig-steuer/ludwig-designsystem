@@ -177,7 +177,35 @@ export const Error: Story = {
   ),
 };
 
-/** Klick auf die Zeile öffnet den Sachverhalt; ohne `onOpen` ist sie nicht klickbar. */
+/**
+ * **Der Normalfall: `href`.** Das Ziel ist das Personenkonto, und das ist eine
+ * URL — die Zeile bekommt also einen Anker. Damit funktionieren mittlere
+ * Maustaste, „in neuem Tab öffnen" und die Statuszeile des Browsers; mit
+ * `onOpen` und `router.push` fällt das alles weg. Die Zeile bot bis zum
+ * 2026-09-08 nur den Rückruf an, und die App musste sich einen Client-Wrapper
+ * bauen (Befund der App-Seite `[year]/opos`).
+ *
+ * `href` und `onOpen` schließen einander im Typ aus.
+ */
+export const Linked: Story = {
+  render: () => (
+    <Frame sub="Stichtag 31.08.2026 · die Zeile führt aufs Personenkonto">
+      {ITEMS.slice(0, 3).map((i) => (
+        <OpenItemRow
+          key={i.externalDocumentNumber ?? i.personalAccount}
+          item={i}
+          asOf={AS_OF}
+          href={(acct) => `#konto-${acct}`}
+        />
+      ))}
+    </Frame>
+  ),
+};
+
+/**
+ * `onOpen` bleibt für den Aufrufer, der wirklich keine URL hat — eine Auswahl
+ * im Dialog, die Dublettenprüfung. Ohne beides ist die Zeile nicht klickbar.
+ */
 export const Interactive: Story = {
   render: function Render() {
     const [open, setOpen] = useState<string | null>(null);

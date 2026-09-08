@@ -6,6 +6,7 @@
 | Stufe | `patterns/DataTable` — `RowAction`, Nachtrag zu **0121** |
 | Klassen-Test | wie 0121: ja, unverändert — „vor dem Ausführen etwas erfragen" ist kein Ludwig-Begriff |
 | Quelle | Rückmeldung `ludwig-manager` 2026-09-08 nach dem Bau von 0121 (Befund **L-219**): die Lieferantenwahl bei „Einzeln" musste als dritte **Sammel**aktion gebaut werden, weil die Zeilenaktion nicht fragen kann |
+| Wartet darauf | **Zwei** Seiten, beide mit demselben Behelf: `banks/offen` (Lieferantenwahl) und Upload & Inbox (die Einordnungs-Korrektur, Rang 4 des Seitenprofils — eine Zeilenaktion, die vorerst Sammelaktion ist) |
 | Setzt voraus | 0121 (gebaut) — `AskSpec` und die Dialog-Mechanik stehen |
 | Spec von / am | Claude, 2026-09-08 |
 

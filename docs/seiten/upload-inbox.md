@@ -76,7 +76,13 @@ schwach war und der Neubau es besser machen sollte:
 2. **Der Worker war unsichtbar.** Ohne laufenden TS-Worker bleibt jeder
    Eingang auf `pending_classification` stehen — die Seite sagte das nicht,
    sie sah nur langsam aus. Ein Eingang, der länger als erwartet wartet,
-   muss das benennen.
+   muss das benennen. **Umgesetzt am 2026-09-08, und damit eine Regel dieser
+   Seite:** nach **drei Minuten** im selben Zustand sagt die Zeile „Wartet
+   seit n Minuten — läuft der Verarbeitungs-Worker?". Die Zahl gehört in den
+   Satz, nicht in einen Tooltip: sie ist der Unterschied zwischen „langsam"
+   und „steht". Drei Minuten, weil die Einordnung im Normalfall unter einer
+   bleibt — wer die Grenze verschiebt, verschiebt sie hier, nicht im Code
+   der Seite.
 3. **Zwei Wege zur Verarbeitung.** „Als Rechnung übergeben" und „Sachverhalt
    anlegen" standen gleichwertig nebeneinander, ohne dass die Seite sagte,
    wann welcher gilt. Der Neubau sollte den Regelfall zeigen und den anderen
