@@ -86,28 +86,49 @@ export interface ColumnDef<T> {
 }
 
 /** One action on one row. Either a jump (`href`) or a Server Action (`action`). */
-export interface RowAction<Input = void> {
+interface RowActionBase {
   label: string;
   icon?: ReactNode;
-  /** A jump — drawer over a search param (L3) or a page. */
-  href?: string;
-  /** A Server Action, bound to the row by the caller. Gets what `ask` asked for. */
-  action?: (input: Input) => Promise<ActionResult>;
-  confirm?: ConfirmSpec;
-  /**
-   * A dialog that asks something before the action runs (0121/0122) — the
-   * supplier for „Einzeln", the target for an assignment.
-   *
-   * The row is already known when the action is built, so this is a plain
-   * spec, not a function of it (unlike `BulkAction.ask`, which may name the
-   * number of chosen rows). It excludes `confirm` — `ask` **is** the
-   * confirmation dialog — and it excludes `href`, because a jump asks nothing.
-   */
-  ask?: AskSpec<Input>;
   tone?: "danger";
   /** Stays visible when the rest moves into the menu (E8). */
   primary?: boolean;
 }
+
+/**
+ * One action on one row — **exactly one of three shapes**, and the type says
+ * so instead of a comment.
+ *
+ * Until 2026-09-08 this was one interface with four independent optional
+ * fields, and both the spec and the comment beside it claimed an exclusion
+ * that did not exist: `{href, ask, action}` and `{confirm, ask}` compiled
+ * fine, and at run time one half was silently dropped. The acceptance of 0122
+ * proved it with a type probe.
+ *
+ * - **A jump.** `href`, and nothing else — a jump asks nothing and confirms
+ *   nothing.
+ * - **An action that asks first** (0121/0122). `ask` **is** the confirmation
+ *   dialog, so it carries `title`, `confirmLabel` and `tone` itself; `action`
+ *   gets what it asked for and is therefore required — `ask` without `action`
+ *   was a silent no-op.
+ * - **An action that just runs**, with an optional confirmation.
+ */
+export type RowAction<Input = void> = RowActionBase &
+  (
+    | { href: string; action?: never; ask?: never; confirm?: never }
+    | {
+        /** Gets what `ask` asked for. */
+        action: (input: Input) => Promise<ActionResult>;
+        ask: AskSpec<Input>;
+        href?: never;
+        confirm?: never;
+      }
+    | {
+        action: () => Promise<ActionResult>;
+        confirm?: ConfirmSpec;
+        href?: never;
+        ask?: never;
+      }
+  );
 
 /**
  * A list of row actions where each may ask for something different — the same

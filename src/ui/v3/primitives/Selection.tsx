@@ -242,24 +242,43 @@ export function SelectRowCell({ rowKey, label }: { rowKey: string; label: string
   );
 }
 
-/** One action on every chosen row. `action` is a Server Action bound by the page. */
-export interface BulkAction<Input = void> {
+interface BulkActionBase {
   label: string;
   /** Shown on the button (V14); it only fires while something is chosen. */
   hotkey?: string;
-  action: (keys: string[], input: Input) => Promise<ActionResult>;
-  confirm?: ConfirmSpec;
-  /**
-   * A dialog that asks something before the action runs (0121) — „12 Umsätze
-   * einem Sachverhalt zuordnen", and in it the picker.
-   *
-   * A **function** of the keys, because the dialog may name their number. It
-   * excludes `confirm`, the same way it does on `ActionButton`: `ask` is the
-   * confirmation dialog.
-   */
-  ask?: (keys: string[]) => AskSpec<Input>;
   tone?: "danger";
 }
+
+/**
+ * One action on every chosen row — **one of two shapes**, and the type says so.
+ *
+ * The same gap as `RowAction` had until 2026-09-08: an interface with
+ * independent optional fields, and a comment claiming an exclusion the
+ * compiler never checked (acceptance 0122, M1/M4).
+ *
+ * `action` is a Server Action bound by the page.
+ */
+export type BulkAction<Input = void> = BulkActionBase &
+  (
+    | {
+        /** Gets the keys **and** what `ask` asked for. */
+        action: (keys: string[], input: Input) => Promise<ActionResult>;
+        /**
+         * A dialog that asks something before the action runs (0121) — „12
+         * Umsätze einem Sachverhalt zuordnen", and in it the picker.
+         *
+         * A **function** of the keys, because the dialog may name their
+         * number. `ask` is the confirmation dialog, so it excludes `confirm`.
+         */
+        ask: (keys: string[]) => AskSpec<Input>;
+        confirm?: never;
+      }
+    | {
+        action: (keys: string[]) => Promise<ActionResult>;
+        confirm?: ConfirmSpec;
+        ask?: never;
+      }
+  );
 
 /**
  * A list of bulk actions where each one may ask for something different.
@@ -309,7 +328,9 @@ function BulkButton<Input>({
     if (!result || !result.error) onDone();
     return result;
   };
-  return a.ask ? (
+  // The union narrows here, so both branches call the right signature —
+  // the cast `undefined as Input` this needed before is gone with it.
+  return a.ask !== undefined ? (
     <ActionButton<Input>
       size="sm"
       variant={a.tone === "danger" ? "danger" : "secondary"}
@@ -325,7 +346,7 @@ function BulkButton<Input>({
       variant={a.tone === "danger" ? "danger" : "secondary"}
       hotkey={a.hotkey}
       confirm={a.confirm}
-      action={async () => run(await a.action([...keys], undefined as Input))}
+      action={async () => run(await a.action([...keys]))}
     >
       {a.label}
     </ActionButton>

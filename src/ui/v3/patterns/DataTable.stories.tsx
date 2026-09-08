@@ -437,9 +437,12 @@ export const RowAsk: Story = {
         sort={SORT}
         href={href}
         rowActions={(c) => [
+          // **Ohne `primary`** — und das ist der Nachweis: bei drei Aktionen
+          // zieht E8 alles außer den primären ins Menü, und dort muss dieselbe
+          // Aktion denselben Dialog öffnen. Mit `primary: true` blieb sie
+          // inline, und der Menü-Pfad war unbewiesen (Abnahme 0122, M2).
           rowAction<string>({
             label: "Zuordnen",
-            primary: true,
             ask: {
               title: `Sachverhalt ${rowKey(c)} zuordnen`,
               confirmLabel: "Zuordnen",
@@ -461,7 +464,7 @@ export const RowAsk: Story = {
             },
             action: async (target) => setNote(`${rowKey(c)} → ${target}`),
           }),
-          { label: "Prüfen", href: `#pruefen-${rowKey(c)}` },
+          { label: "Prüfen", href: `#pruefen-${rowKey(c)}`, primary: true },
           {
             label: "Verwerfen",
             tone: "danger",
