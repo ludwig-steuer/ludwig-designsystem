@@ -20,7 +20,9 @@ import type { CaseLink } from "../accounting-case/case-title";
 
 /** XS — what a foreign view needs to **name** a payment (ranks 1–4, 11). */
 export interface BankTransactionCellData {
-  id: string;
+  // No `id`: the cell reads none, and a mandatory field nobody reads makes
+  // every caller fetch one to show a line of text. The type stays structural —
+  // a row that carries an id still fits (acceptance 0100, M1).
   /** Rank 4. The **posting** date, never the value date (finding L-61). */
   postingDate: string;
   /**
@@ -49,6 +51,13 @@ export interface BankTransactionCellData {
  * a payment must not show it.
  */
 export interface BankTransactionRowData extends BankTransactionCellData {
+  /**
+   * The key of the row. It sits here and not on the cell: a list needs one
+   * (`rowKey`), a mention in running text does not — and a mandatory field
+   * nobody reads makes every caller fetch one to show a line of text
+   * (acceptance 0100, M1).
+   */
+  id: string;
   /**
    * Rank 5 and 13 — `client_bank_transactions.match_stage`, axis
    * `bank_match_stage` since `cc141f7b`. `null` means the cascade has not run,

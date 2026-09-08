@@ -15,7 +15,6 @@ export default meta;
 type Story = StoryObj<typeof BankTransactionCell>;
 
 const OUT: BankTransactionCellData = {
-  id: "bt-1",
   postingDate: "2026-08-26",
   amount: -1249.9,
   currency: "EUR",
@@ -26,7 +25,6 @@ const OUT: BankTransactionCellData = {
 };
 
 const IN: BankTransactionCellData = {
-  id: "bt-2",
   postingDate: "2026-08-27",
   amount: 1800,
   currency: "EUR",
@@ -56,7 +54,7 @@ export const WithoutCounterparty: Story = {
   render: () => (
     <div style={{ maxWidth: 520, padding: "var(--space-6)" }}>
       <BankTransactionCell
-        transaction={{ ...OUT, id: "bt-3", counterpartyName: null, amount: -89.9 }}
+        transaction={{ ...OUT, counterpartyName: null, amount: -89.9 }}
         href="#bt-3"
       />
     </div>
@@ -89,7 +87,15 @@ export const TagsAndPlainAccount: Story = {
   render: () => (
     <div style={{ maxWidth: 520, padding: "var(--space-6)" }}>
       <BankTransactionCell
-        transaction={{ ...OUT, id: "bt-4", sepaTags: { mref: "M-2026-08-4471" } }}
+        transaction={{
+          ...OUT,
+          // The edge: `.v2btx__who` clips, and no fixture was ever long
+          // enough to prove it (acceptance 0100, M3). 63 characters — the
+          // longest counterparty name on staging is of this kind.
+          counterpartyName:
+            "Stadtwerke München Versorgungs- und Netzgesellschaft mbH & Co. KG",
+          sepaTags: { mref: "M-2026-08-4471" },
+        }}
         account={{ label: "Commerzbank · 1210" }}
         href="#bt-1"
       />
@@ -141,7 +147,6 @@ export const InUseTimeline: Story = {
             <BankTransactionCell
               transaction={{
                 ...IN,
-                id: "bt-4",
                 postingDate: "2026-08-31",
                 amount: 249.9,
                 counterpartyName: "Bürobedarf Meier GmbH",
@@ -237,7 +242,7 @@ export const InUseGate: Story = {
           </Row>
           <Row>
             <BankTransactionCell
-              transaction={{ ...OUT, id: "bt-5", counterpartyName: null, amount: -412 }}
+              transaction={{ ...OUT, counterpartyName: null, amount: -412 }}
               href="#bt-5"
             />
             <span>

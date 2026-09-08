@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig (Schnittstelle) — die gemessene Prüfung steht in 0119 aus |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/bank-transaction/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: sie nennt eine Kontoauszugsposition und trägt deren Vorzeichen-Regel |
@@ -36,7 +36,7 @@ also, weil die Ablehnung nicht getragen hat.
 - **Zuschnitt:** eine Datei, ein Export. Sie ist **keine** kleine
   `BankTransactionRow`: die Zeile hat acht Punkte und lebt in einer Tabelle,
   die Zelle hat vier und lebt in fremdem Fließtext.
-- **Setzt auf:** `BankTransactionPurpose`, `Amount`, `Time`, `MonoCell`.
+- **Setzt auf:** `BankTransactionPurpose`, `Amount`, `Time`, `Link`.
 
 ## Das Vorzeichen ist die Richtung
 
@@ -56,14 +56,22 @@ Daraus folgt zweierlei, und beides ist ein Abnahmekriterium:
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `transaction` | `BankTransactionCellData` | ja | Die Position: `postingDate`, `amount`, `currency`, `counterpartyName`, `purpose`, `sepaTags` | `Filled` |
+| `transaction` | `BankTransactionCellData` | ja | Die Position: `postingDate`, `amount`, `currency`, `counterpartyName`, `purpose`, `sepaTags`. **Kein `id`** — die Zelle liest keins, und ein Pflichtfeld, das niemand liest, zwingt jeden Aufrufer, eines zu beschaffen, um eine Zeile Text zu zeigen. Der Schlüssel sitzt an `BankTransactionRowData`, wo die Liste ihn braucht (berichtigt 2026-09-08, M1) | `Filled` |
 | `account` | `{ label: string; href?: string }` | nein | Das Zahlungskonto — **nur wenn die Zelle kontofern steht**. Im Kontoauszug wäre es die Spalte, die die Seite ohnehin setzt | `WithAccount` |
 | `href` | `string` | nein | Wohin die Zelle führt; ohne sie ist sie Text | `Filled`, `Plain` |
 
 Der Typ ist die Teilmenge von `BankTransactionAssignmentRow`
 (`modules/bank-transactions/infrastructure/`), die diese Zelle braucht. Er
-liegt heute nicht im Spiegel — das ist Befund **L-56** und wird lokal
-deckungsgleich definiert.
+liegt heute nicht im Spiegel — das ist Befund **L-56**.
+
+**Nicht deckungsgleich, und mit Absicht** (berichtigt 2026-09-08, M2): drei
+Felder sind hier enger als drüben — `amount` ist `number` statt `string`
+(jede Form der Familie gibt Beträge an `Amount`, die Zahlen formatiert; einmal
+an der Grenze zu parsen ist ehrlich, fünfmal in fünf Komponenten ist dieselbe
+Entscheidung fünfmal), `currency` ist die Union `Currency` statt `string`, und
+`sepaTags` ist `SepaTags` statt `Record<string, string>`. Das ist durch die
+Freigabe (c) gedeckt und steht in L-56; der frühere Satz „wird lokal
+deckungsgleich definiert" stimmte nie.
 
 **Kann bewusst nicht:**
 
@@ -479,3 +487,241 @@ eigenen Worktree: **Exit 0**, kein ENOENT (Bauprüfung in 0117).
 
 **Status: Abnahme** — das Urteil war „zurück", also entscheidet die nächste
 Runde.
+
+## Schlanke Abnahme (Schnittstelle) 2026-09-08
+
+**Urteil: durch.** Kein blockierender Mangel. Die drei Props stehen Zeichen für
+Zeichen so im Code, wie die Schnittstellen-Tabelle sie nennt; die Fachtypen
+kommen aus dem Spiegel; alle sieben Wächter laufen auf Exit 0; alle sieben
+Stories rendern mit leerer Konsole. Vier Mängel, alle nicht blockierend, und
+**alle vier hängen an der Spec, nicht am Code** — das Muster von 0070, 0082,
+0095 und 0096.
+
+Dies ist die **schlanke** Tiefe (Owner-Entscheid 2026-09-08): geprüft wurde die
+Schnittstelle, nicht die Darstellung. Spurbreiten, Zeilenhöhen, Überläufe,
+Kontraste, Trefferflächen, Hover, Fokus und Tastaturwege sind nach
+`docs/backlog/0119-visuelle-pruefung-nachholen.md` vertagt und hier weder
+gemessen noch bewertet. Die Messungen der Wiederabnahme vom 2026-09-07 zu
+diesen Punkten wurden **nicht** nachgeprüft.
+
+**Gelesen:** die Spec ganz; `BankTransactionCell.tsx` (95 Zeilen),
+`BankTransactionCell.stories.tsx` (251 Zeilen), `bank-transaction.ts`
+(112 Zeilen), `src/styles/v3.css:3355–3373`, `src/ui/v3/index.ts:407–415`,
+`spec-schreiben` §6, `scripts/check-when.mjs` (Geltungsbereich), im Spiegel
+`modules/bank-transactions/domain/types.ts` und `.../statement-line.ts`,
+`shared/money.ts`, `ui/status/status-registry.ts`, in der App
+`apps/web/src/modules/bank-transactions/infrastructure/bank-transactions-queries.ts:160–172,379–403`.
+**Gemessen:** sieben Wächterläufe (Exit-Code, nicht Text) und ein
+Browser-Durchlauf über alle sieben Stories gegen den Dev-Server
+`http://localhost:6107` über `scripts/cdp.mjs` (eigener Port 9433,
+Story-IDs aus `/index.json`, nicht geraten).
+
+### 1 · Props Zeichen für Zeichen
+
+`BankTransactionCell.tsx:29–43` gegen die Tabelle der Spec (Zeilen 57–61):
+
+| Spec | Code | |
+|---|---|---|
+| `transaction` · `BankTransactionCellData` · Pflicht | `transaction: BankTransactionCellData` (Z. 30, 34) | ✓ |
+| `account` · `{ label: string; href?: string }` · optional | `account?: { label: string; href?: string }` (Z. 31, 40) | ✓ |
+| `href` · `string` · optional | `href?: string` (Z. 32, 42) | ✓ |
+
+Keine zusätzliche, keine fehlende, keine anders benannte Prop. Die
+Ausbau-Props `onPeek` und `showMatch` sind — richtig — **nicht** gebaut.
+
+Was die Tabelle **nicht** deckt: die Feldliste der Spalte „Bedeutung" nennt
+sechs Felder, der Typ hat sieben (**M1**), und die Herkunftsaussage darunter
+trägt nicht mehr (**M2**).
+
+### 2 · Herkunft der Typen
+
+- `Currency` ← `@/ludwig/shared/money` (`bank-transaction.ts:2`), `SepaTags` ←
+  `@/ludwig/modules/bank-transactions/domain/statement-line` (Z. 1, dort
+  `export type { SepaTags }` in Z. 101, ursprünglich aus `domain/sepa-tags.ts:34`).
+  Beide aus dem Spiegel, keiner lokal nachgebaut. ✓
+- `CaseLink` ← `../accounting-case/case-title` (0095), Set-eigener Typ, nicht
+  Fachtyp. ✓
+- `BankTransactionCellData` ist **lokal** definiert
+  (`bank-transaction.ts:22–42`). Das ist gedeckt: der Spiegel trägt die
+  **Import**-Seite (`domain/types.ts:81–102`, `BankTransactionRow`), die
+  Anzeige-Seite liegt in der `infrastructure/` der App (Befund L-56), und die
+  Freigabe (c) verlangt genau diese eine Familiendatei mit
+  `Detail ⊃ Row ⊃ Cell`. Die Verschachtelung steht so im Code (Z. 51, 71). ✓
+- **Verschärfungen:** drei Felder weichen vom App-Typ ab —
+  `amount: number` gegen `string`, `currency: Currency` gegen `string`,
+  `sepaTags?: SepaTags | null` gegen `Record<string, string> | null`
+  (App: `bank-transactions-queries.ts:164–165,385`). Alle drei sind im JSDoc
+  begründet und für die ganze Familie einmal entschieden; die Spec behauptet
+  aber das Gegenteil („deckungsgleich"). → **M2**, kein Codemangel.
+- `grep -nE '\bas [A-Z]'` über Komponente, Stories und Typdatei: **kein
+  Treffer** (Exit 1). Keine Zusicherung, nirgends. ✓
+
+### 3 · Deklaration, Ort, Namen
+
+| Kriterium | Nachweis | |
+|---|---|---|
+| `@when`/`@instead` an jedem Export | `BankTransactionCell.tsx:22–28`, direkt über dem einzigen Export; `check:when` Exit 0 (`--test`: 0, 11 Fälle; `--all`: Exit 0). Die vier Interfaces in `bank-transaction.ts` sind ausgenommen — der Wächter greift nur bei `function`/`class`/Pfeil-Konstanten (`check-when.mjs:47–52`) | ✓ |
+| Datei nach der Familie benannt | `entities/bank-transaction/BankTransactionCell.tsx` | ✓ |
+| Story daneben, richtige Gruppe | `BankTransactionCell.stories.tsx:11` Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionCell`; Barrel-Kommentar `src/ui/v3/index.ts:407` lautet `/* Kontoauszugsposition */`, Export in Z. 415, Typ in Z. 409 | ✓ |
+| Code englisch | `check:language` Exit 0; `--all` (Exit 1 wegen 377 Altzeilen in 136 Dateien) nennt **keine** Datei unter `entities/bank-transaction/`. Deutsch nur in Nutzer-Strings (`prefix="Buchung"`) und Story-JSDoc | ✓ |
+
+Beobachtung, kein Mangel: über dem `@when`-Block steht ein zweites JSDoc
+(Z. 7–20). Für den Wächter zählt der untere, für die IDE auch — der obere
+Beschreibungsblock hängt an nichts und erscheint im Hover nicht.
+
+### 4 · Story-Deckung
+
+Sieben Stories im Code, sieben in `index.json` des laufenden Servers, sieben in
+der Story-Tabelle der Spec. Ableitung §6: 2 Zustände + 0 Enums + 1
+Layout-Boolean + 0 Callbacks + 2 „im Einsatz" + 1 Rand = 6, plus
+`TagsAndPlainAccount` = **7**. Die Zahl stimmt.
+
+| Prop / Weg | Story | Gemessen im Browser |
+|---|---|---|
+| `transaction` | `--filled` | 2 Zellen, Gegenpartei · Datum · Betrag · Zweck alle vier im DOM |
+| `href` gesetzt | `--filled` | 2 Anker in den Zellen |
+| `href` fehlt | `--plain` | Anker im Story-Wurzelknoten = **0** |
+| `account` gesetzt | `--with-account` | `.v2btx__acct` = 1, darin ein Anker |
+| `account` nicht gesetzt | `--filled` | `.v2btx__acct` = 0 |
+| `account` ohne `href` | `--tags-and-plain-account` | `.v2btx__acct` = 1, `.v2btx__acct a` = 0 |
+| `transaction.sepaTags` | `--tags-and-plain-account` | Chip `MREF M-2026-08-4471`, während der Originalwert weiter `MREF+D-VR-50411866-0-001` trägt → die gesetzten Tags gewinnen |
+| `counterpartyName = null` | `--without-counterparty` | `.v2btx__what` = 0, `.v2btx__who .v2purp` = 1 |
+| im Einsatz 1 | `--in-use-timeline` | 2 Zellen in `Card`, darunter die alte Fassung (ohne Betrag, Datum ohne Jahr) |
+| im Einsatz 2 | `--in-use-gate` | 2 Zeilen in `Table cols="1fr 200px"`, Gate als eigene Spalte |
+
+Ausgeschlossen: `leer`, `leer nach Filter`, `lädt`, `Fehler` — begründet im
+Abschnitt „Verhalten" (die Zelle bekommt ihre Daten mit dem Eintrag, in dem sie
+steht). Trägt. `purpose: null` hat ebenfalls keine Story und ist mit „Fehlt der
+Zweck nie (100 % Füllung)" begründet. Trägt.
+
+**Die Zusammensetzung stimmt weiter nicht:** die Formel zählt „+1 Rand", die
+Story-Tabelle führt keinen. → **M3**, unverändert aus der Wiederabnahme vom
+2026-09-07 (dort M2): die Nacharbeit hat den `title` nachgezogen, die Fixture
+nicht.
+
+### 5 · Zustand, Farbe, Maße in der Komponente
+
+| Kriterium | Nachweis | |
+|---|---|---|
+| Kein Zustand in der Zelle | `grep` auf `StatusBadge`, `datev`, `matchStage` in `BankTransactionCell.tsx`: Exit 1. Im Browser: Elemente mit Status-Klasse **innerhalb** einer Zelle = 0 in allen sieben Stories | ✓ |
+| Status nur über die Registry | Die Zelle trägt keinen Status. Die Stories nehmen `StatusBadge`/`StatusInfoButton` mit `axis="bank_match_stage"`; beide lesen `@/ludwig/ui/status/status-registry` (`StatusBadge.tsx:5`, `StatusInfoButton.tsx:8`). `unclear_multi`/`unclear_none` stehen dort (Z. 1910–1911), gerendert kam „mehrdeutig" — keine lokale Label-Map | ✓ |
+| Kein Hex, kein px, kein `fontSize` in der Komponente | `grep -nE '#[0-9a-f]{3,8}\b\|[0-9]+px\|fontSize\|style='` auf `BankTransactionCell.tsx`: Exit **1**. Im Browser: Elemente mit Hex im `style` innerhalb der Zellen = 0 | ✓ |
+| Vorzeichen ohne Farbe | `--filled`: `-1.249,90 €` = `rgb(45, 45, 45)`, `1.800,00 €` = `rgb(45, 45, 45)` — identisch. Ebenso in `--in-use-timeline` (`-1.249,90 €` / `249,90 €`) und `--in-use-gate` | ✓ |
+| Zweck über `BankTransactionPurpose` | Kein `.purpose` im JSX; die Prop geht in beiden Zweigen an die Komponente (Z. 64, 90). Im DOM `.v2purp` in jeder Zelle | ✓ |
+| Buchungsdatum, so beschriftet | Alle sieben Stories, jede Zelle: `.v2btx__when` liest **„Buchung 26.08.2026"** (bzw. 27./31.08.) — sichtbar, mit Jahr, nicht im Tooltip. Der Blocker der Wiederabnahme ist damit weg | ✓ |
+| px in den Stories | Nur in `OldBlock` (`stories.tsx:170–207`) — der nachgebauten alten App-Fassung, deren Inline-Maße der Vergleich gerade zeigen soll — und in den `maxWidth`-Rahmen der Story-Gerüste. Nicht in der Komponente | ✓ |
+
+### 6 · Wächter (Exit-Code, nicht Textausgabe)
+
+| Befehl | Exit | zusätzlich |
+|---|---|---|
+| `pnpm typecheck` | **0** | |
+| `pnpm check:language` | **0** | `--test`: 0 (8 Fälle) · `--all`: 1, aber keine Zeile unter `entities/bank-transaction/` |
+| `pnpm check:icons` | **0** | 53 Zeichen in der Registry |
+| `pnpm check:contrast` | **0** | `--test`: 0 (16 Fälle) · Lauf: 33 Angaben nachgerechnet |
+| `pnpm check:mirror` | **0** | `--test`: 0 (8 Fälle); Spiegel eingefroren auf `f1c58c44` — Absicht |
+| `pnpm check:when` | **0** | `--test`: 0 (11 Fälle) · `--all`: 0 |
+
+`pnpm build` nicht gelaufen (Befund 0117, geteilter Baum); in der schlanken
+Tiefe auch nicht verlangt.
+
+### 7 · Browser-Durchlauf
+
+Alle sieben Story-IDs aus `http://localhost:6107/index.json`, je einzeln
+geladen, Aktion und Messung in getrennten `Runtime.evaluate`-Aufrufen, Helfer
+`scripts/cdp.mjs` (räumt selbst ab, keine eigene Kopie).
+
+| Story-ID | rendert | Konsole |
+|---|---|---|
+| `…banktransactioncell--filled` | 2 Zellen | leer |
+| `…--without-counterparty` | 1 Zelle | leer |
+| `…--with-account` | 1 Zelle | leer |
+| `…--tags-and-plain-account` | 1 Zelle | leer |
+| `…--plain` | 1 Zelle | leer |
+| `…--in-use-timeline` | 2 Zellen + alte Fassung | leer |
+| `…--in-use-gate` | 2 Zellen in der Tabelle | leer |
+
+Keine Warnung, kein Fehler, keine geworfene Ausnahme in sieben von sieben.
+
+### 8 · Mängel
+
+**M1 — die Schnittstellen-Tabelle nennt `id` nicht. Blockiert nicht.**
+Kriterium: jede Prop und jeder Typ Zeichen für Zeichen gegen die Tabelle.
+Ort: Spec Zeile 59 gegen `src/ui/v3/entities/bank-transaction/bank-transaction.ts:23`.
+Befund: die Spalte „Bedeutung" führt `postingDate`, `amount`, `currency`,
+`counterpartyName`, `purpose`, `sepaTags` — `BankTransactionCellData` verlangt
+zusätzlich ein **pflichtiges** `id: string`. Die Zelle liest es nicht
+(`BankTransactionCell.tsx:44` destrukturiert es nicht), aber jeder Aufrufer
+muss es liefern; für die Familie (`Row`, `Detail`) ist es richtig. Die Spec ist
+hinterher, nicht der Code.
+Kleinster Weg: `id` in die Feldliste der Zeile `transaction` aufnehmen, mit dem
+Halbsatz, dass die Zelle es nicht zeigt.
+
+**M2 — „deckungsgleich definiert" trägt nicht mehr. Blockiert nicht.**
+Kriterium: Herkunft der Typen; Spec-Aussage gegen Code.
+Ort: Spec Zeilen 63–66 gegen `bank-transaction.ts:34,35,41` und
+`ludwig/app/apps/web/src/modules/bank-transactions/infrastructure/bank-transactions-queries.ts:164,165,385`.
+Befund: die Spec sagt, der Typ sei „die Teilmenge von
+`BankTransactionAssignmentRow` … und wird lokal **deckungsgleich** definiert".
+Er ist es in drei Feldern nicht: `amount` ist `number` statt `string`,
+`currency` ist die Union `Currency` statt `string`, `sepaTags` ist `SepaTags`
+statt `Record<string, string>`. Zwei davon sind Verschärfungen. Alle drei sind
+im JSDoc begründet (einmal am Rand parsen statt in fünf Komponenten), beide
+Fachtypen kommen aus dem Spiegel, und die Freigabe (c) hat den Satz ohnehin
+durch die Familiendatei ersetzt — aber sie steht noch da und behauptet etwas
+anderes als der Code.
+Kleinster Weg: den Absatz auf den Stand der Freigabe (c) bringen und die drei
+Abweichungen benennen, statt „deckungsgleich" zu schreiben.
+
+**M3 — die Story-Formel zählt einen Rand, den keine Story trägt. Blockiert nicht.**
+Kriterium: Story-Deckung gegen `spec-schreiben` §6 („+1 Rand, falls die
+Komponente formatiert oder **kürzt**").
+Ort: Spec Zeilen 93–106 gegen `BankTransactionCell.stories.tsx:17–35` (Fixtures
+`OUT`/`IN`) und `src/styles/v3.css:3364–3368` (`.v2btx__who` mit
+`overflow: hidden; text-overflow: ellipsis; white-space: nowrap`).
+Befund: die Komponente kürzt nachweislich (die CSS-Regel und der eigens dafür
+gesetzte `title` in `BankTransactionCell.tsx:56` sagen es beide), aber der
+längste Name in allen sieben Stories ist „Bürobedarf Meier GmbH" (21 Zeichen).
+Die sechs Stories der Formel sind 2 Zustände + 1 Layout + 2 „im Einsatz" +
+`Plain` — und `Plain` ist ein Prop-Weg, kein Rand. Derselbe Punkt stand als M2
+in der Wiederabnahme vom 2026-09-07; die Nacharbeit hat den `title` ergänzt,
+die Fixture nicht. Gemessen wurde hier nur die Fixture-Länge, nicht das
+Kürzungsverhalten (vertagt nach 0119).
+Kleinster Weg: einer Fixture einen p90-langen Gegenparteinamen aus dem
+Entitätsprofil geben und die Story-Tabelle den Rand benennen lassen.
+
+**M4 — „Setzt auf" nennt einen Baustein, der nicht vorkommt, und übergeht
+einen, der es tut. Blockiert nicht.**
+Kriterium: Spec gegen Code.
+Ort: Spec Zeile 39 gegen `BankTransactionCell.tsx:1–4`.
+Befund: die Einordnung listet `BankTransactionPurpose`, `Amount`, `Time`,
+`MonoCell`. `MonoCell` steht in der Zelle nirgends — es ist in
+`BankTransactionFacts.tsx` gelandet, wo es hingehört. Dafür setzt die Zelle auf
+`Link`, den die Spec nicht nennt.
+Kleinster Weg: in Zeile 39 `MonoCell` durch `Link` ersetzen.
+
+### 9 · Gesamturteil
+
+**durch.** Die Schnittstelle ist die der Spec, die Typen kommen von dort, wo
+sie herkommen sollen, die Wächter sind grün, und alle sieben Stories rendern
+sauber. Die vier Mängel sind Buchhaltung an der Spec (M1, M2, M4) und eine
+fehlende Randfall-Fixture (M3) — keiner davon hält die Komponente auf.
+
+Abgenommen von / am: fremder Prüfer (schlanke Tiefe), 2026-09-08 ·
+Offene Punkte: M1, M2, M3, M4 — keiner blockierend ·
+Vertagt: die visuelle Prüfung nach 0119 · Nicht geprüft: `pnpm build` (0117),
+der App-Umzug (`EventStack.BankTransactionBlock`, `Schritt4.tsx`).
+
+### Nacharbeit 2026-09-08 (nach der schlanken Abnahme)
+
+Urteil war **durch**; die vier Punkte sind trotzdem abgearbeitet, zwei davon
+im Code:
+
+| Punkt | Was getan |
+|---|---|
+| **M1** | `id` ist aus `BankTransactionCellData` **entfernt** und sitzt jetzt an `BankTransactionRowData`, wo `rowKey` es braucht. Die Zelle las es nie; ein Pflichtfeld, das niemand liest, hätte jeden Aufrufer gezwungen, einen Schlüssel zu beschaffen, um eine Zeile Text zu zeigen. Der Typ bleibt strukturell — eine Zeile mit `id` passt weiter hinein, also bricht keine Aufrufstelle |
+| **M2** | Der Satz „wird lokal deckungsgleich definiert" ist ersetzt. Er stimmte nie: `amount` ist `number` statt `string`, `currency` die Union statt `string`, `sepaTags` typisiert statt `Record`. Die Spec nennt jetzt alle drei mit Grund |
+| **M3** | Der Rand hat seine Fixture: `TagsAndPlainAccount` trägt einen Gegenpart mit 63 Zeichen, an dem `.v2btx__who` sichtbar kürzt. Keine achte Story — der Rand gehört zu der, die ohnehin die volle Zelle zeigt |
+| **M4** | „Setzt auf" nennt `Link` statt `MonoCell` |
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0.
