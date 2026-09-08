@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
+| Status | fertig (Schnittstelle) — die gemessene Prüfung steht in 0119 aus |
 | Stufe | `patterns/DataTable` — `RowAction`, Nachtrag zu **0121** |
 | Klassen-Test | wie 0121: ja, unverändert — „vor dem Ausführen etwas erfragen" ist kein Ludwig-Begriff |
 | Quelle | Rückmeldung `ludwig-manager` 2026-09-08 nach dem Bau von 0121 (Befund **L-219**): die Lieferantenwahl bei „Einzeln" musste als dritte **Sammel**aktion gebaut werden, weil die Zeilenaktion nicht fragen kann |
@@ -256,3 +256,20 @@ der Fokus geht zurück auf den Auslöser, und die Bauart ist Zeichen für Zeiche
 die von 0121. Zurück geht es an zwei Stellen: der zugesagte Typausschluss
 existiert nicht (M1), und das Kriterium zum Menü hat keinen Nachweis, während
 Spec und Story behaupten, es sei gemessen (M2).
+
+### Nacharbeit 2026-09-08 (nach der schlanken Abnahme)
+
+| Punkt | Was getan |
+|---|---|
+| **M1** (blockierte) | **Der Ausschluss war nur ein Kommentar.** `RowAction` war ein Interface mit vier unabhängigen optionalen Feldern; sowohl Sprung-plus-Frage als auch Bestätigung-plus-Frage übersetzten, und zur Laufzeit fiel still eine Hälfte weg. Jetzt ist es eine Union über **drei** Formen: ein Sprung (`href` allein), eine Handlung die fragt (`ask` **mit** `action`), oder eine die läuft (`action`, `confirm` wahlfrei). Die Typprobe der Abnahme scheitert seither wie vorgesehen |
+| **M2** (blockierte) | Die `ask`-Aktion trug `primary` und blieb damit inline — der Menü-Pfad war unbewiesen, obwohl Spec und Story ihn behaupteten. Jetzt trägt „Prüfen" das `primary`, und gemessen steht „Zuordnen" **im Menü** und öffnet von dort denselben Dialog: offen, Bestätigungsknopf gesperrt, ein Auswahlfeld darin |
+| **M3** | Mit M1 erledigt: `ask` ohne `action` ist jetzt ein Typfehler statt eines stillen Leerlaufs |
+| **M4** | In 0121 nachgezogen — der Story-Name (`BulkAsk`, nicht `BulkAskInUse`) und dieselbe Union für `BulkAction` |
+
+**Was dieser Fund über die Welle sagt:** es ist der erste, bei dem die Spec
+nicht *hinter* dem Code lag, sondern **vor** ihm — sie beschrieb eine
+Eigenschaft, die niemand gebaut hatte, und der Kommentar im Code wiederholte
+sie. Zwei Texte, die einander bestätigen, ersetzen keine Prüfung; gezeigt hat
+es erst die Typprobe.
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0.

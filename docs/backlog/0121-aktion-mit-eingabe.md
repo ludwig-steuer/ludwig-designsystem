@@ -99,7 +99,7 @@ Abgeleitet nach §6: 0 neue Zustände (`ActionButton` hat seine fünf) +
 |---|---|
 | `AskForTarget` | Der Dialog mit einem Eingabefeld; `action` bekommt den Wert, der Bestätigungsknopf ist aus, solange nichts gewählt ist |
 | `AskInvalid` | `valid` sperrt: Dialog offen, Knopf aus, kein Weg zur Aktion |
-| `BulkAskInUse` | Der echte Fall: Auswahl in `DataTable`, „12 Umsätze zuordnen", im Dialog der `CasePicker` (0084), danach ist die Auswahl leer |
+| `BulkAsk` | Der echte Fall: Auswahl in `DataTable`, „12 Umsätze zuordnen", im Dialog der `CasePicker` (0084), danach ist die Auswahl leer *(Hieß in der Spec `BulkAskInUse`, gebaut ist `BulkAsk` — berichtigt 2026-09-08.)* |
 
 ## Abnahmekriterien (variabler Block)
 
@@ -171,3 +171,21 @@ seinen Typparameter nur dort halten kann.
 Anfangswert ohne `ask` (`Input` ist dann `void`, was der Compiler über die
 Union nicht sieht) und `undefined as Input` im Zweig ohne `ask` in
 `BulkButton`.
+
+### Nacharbeit 2026-09-08 (aus der Abnahme von 0122)
+
+**Der zugesagte Typausschluss existierte nicht.** Diese Spec schreibt seit dem
+ersten Entwurf, `ask` und `confirm` schlössen einander aus — als Typfehler,
+nicht als Laufzeitentscheidung. Bei `ActionButton` stimmt das, dort steht eine
+echte Union. `BulkAction` war dagegen ein Interface mit unabhängigen optionalen
+Feldern, und daneben ein Kommentar, der den Ausschluss behauptete. Beides
+zusammen übersetzte fehlerfrei, und zur Laufzeit fiel still eine Hälfte weg.
+Die Abnahme von 0122 hat es mit einer Typprobe belegt.
+
+`BulkAction` ist jetzt eine Union über zwei Formen: mit `ask` — dann bekommt
+`action` die Schlüssel **und** den Wert — oder mit wahlfreiem `confirm`, dann
+nur die Schlüssel. Die Probe scheitert seither wie vorgesehen.
+
+**Eine der beiden Zusicherungen ist dabei weggefallen:** `undefined as Input`
+in `BulkButton` gab es nur, weil der alte Typ nicht narrowte. Übrig bleibt die
+in `ActionButton`, und die ist begründet.
