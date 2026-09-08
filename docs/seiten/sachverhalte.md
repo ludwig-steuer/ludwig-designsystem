@@ -9,7 +9,7 @@
 | Baustein in v3 | `entities/accounting-case/case-columns.tsx` (0096) — die Liste selbst ist 0082 |
 | Fachliche Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md`, Abschnitt „Listen" (Status `geprüft`, 2026-09-05) |
 | Profil von / am | Claude, 2026-09-07 — angelegt, weil 0082 ohne Seitenprofil nicht gebaut werden darf (Profil §Listen) |
-| Überholt am | 2026-09-08 durch den Owner-Entscheid „Reiter sind keine Filter" — siehe den Abschnitt unten; die Ränge 1 und 5 und die Zweifel 1 und 2 sind entsprechend nachgezogen |
+| Überholt am | 2026-09-08 durch den Owner-Entscheid „Reiter sind keine Filter" — siehe den Abschnitt unten; Rang 1, der Nebenjob „Zum Schließen" und Zweifel 1 sind nachgezogen, Zweifel 2 ist beantwortet |
 
 ## Job
 
@@ -100,16 +100,42 @@ Was das für diese Seite heißt:
 | „Laufend", „Wartet auf Unterlagen", „Zur Bearbeitung", „Alle" | **ein** Reiter — die vier unterschieden sich nachweislich nur in der Grundgesamtheit |
 | „Offene Zahlungen" und „Zum Schließen" in derselben Leiste | Sonderansichten mit eigener Form; sie kommen als Reiter zurück, sobald sie gebaut sind (0081 für „Zum Schließen", die Bank-Seite für „Offene Zahlungen") |
 
-**Was der Entscheid für den Leerfall bedeutet — und das ist die eigentliche
-Folge.** Die vier Reiter trugen vier Leerfall-Sätze, und drei davon waren
-ein Erfolg („Kein Sachverhalt ist mehr offen."). Bei einer Liste gibt es
-diesen Satz nicht mehr von selbst: „nichts offen" wird zu einem **Filter mit
-leerem Ergebnis**, und ein leeres Filterergebnis ist normalerweise ein
-Bedienfehler, kein Erfolg. Wer die eine Liste baut, muss also entscheiden,
-woran sie einen erfolgreichen Filterstand von einem erfolglosen unterscheidet
-— sonst geht genau die Aussage verloren, die dieser Seite ihren Job gibt
-(„fertig ist sie, wenn kein Fall mehr auf sie wartet"). **Das ist eine offene
-Frage an den Owner, kein Bauauftrag.**
+**Was der Entscheid für den Leerfall bedeutet.** Die vier Reiter trugen vier
+Leerfall-Sätze, und drei davon waren ein Erfolg („Kein Sachverhalt ist mehr
+offen."). Bei einer Liste entsteht dieser Satz nicht mehr von selbst: „nichts
+offen" wird zu einem Filter mit leerem Ergebnis, und ein leeres
+Filterergebnis ist sonst ein Bedienfehler.
+
+**Entschieden am 2026-09-08 (Owner): der Filterstand unterscheidet die
+beiden.**
+
+| Stand | Leerfall | Was dasteht |
+|---|---|---|
+| **Standard, unverändert** — offen **und** eigene Zuständigkeit | **Erfolg** | Haken, ein Satz mit Zahl, dazu der Vorratszähler im Kopf als Beleg |
+| Suche oder ein Filter **verändert** | keine Treffer | Der Satz mit dem, was gefiltert wurde, und ein Weg zurück |
+
+Drei Dinge, die beim Bauen daran hängen:
+
+1. **Der Standard ist nicht „kein Filter".** Er setzt selbst zwei Bedingungen
+   (`excludeClosed: true` und die Zuständigkeit). Wer `filtered` als „es ist
+   überhaupt ein Filter gesetzt" berechnet, erreicht den Erfolgsfall **nie** —
+   die Bedingung ist „der Stand **weicht vom Standard ab**", nicht „ein Filter
+   ist gesetzt". Das ist die eine Falle dieser Regel.
+2. **Die Zuständigkeit ist seit dem 2026-09-08 filterbar.** `CaseFilter`
+   führt in der App `disposition?: CaseDisposition[]`; im gespiegelten Stand
+   hier fehlt sie noch (der Spiegel ist eingefroren, siehe
+   `docs/ludwig/README.md`). Vorher war der Standardstand nicht herstellbar —
+   der Filter stand da und wirkte nicht (siehe „Was hier nicht hingehört").
+3. **„Eigene Zuständigkeit" heißt `accounting`**, so gelesen: die Achse hat
+   drei Werte, schreibbar sind zwei (`CASE_DISPOSITION_WRITABLE`), und die
+   Rolle dieser Seite ist die Kanzlei. Falls „eigene" auf den angemeldeten
+   Menschen zielen sollte statt auf die Rolle, wäre das ein anderer Filter
+   und ein Befund — die Achse kennt keine Person.
+
+Im Set ist dafür **nichts zu bauen**: `CaseList` reicht `filtered` schon
+durch, und wer den Standardstand kennt, ist die Seite. Was `CaseList`
+beisteuert, ist `emptyCount` (0082, M3) — die Zahl, die den Erfolg belegt,
+wenn kein Reiter ihn mehr benennt.
 
 **Kein Bauauftrag im Set** (Ansage `ludwig-manager`). `CaseList` (0082) bleibt
 wie gebaut: sie nimmt einen Reiter als Prop und kennt vier — beim nächsten

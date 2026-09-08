@@ -439,15 +439,19 @@ Was das für `CaseList` heißt:
   `tab="alle"` und alles Übrige steht. Weil `CaseListTab` seit heute aus
   `src/ludwig/` **abgeleitet** ist (M1), schrumpft der Typ von selbst mit,
   sobald drüben `CASE_LIST_TABS` schrumpft — nichts nachzuziehen.
-- **Was zur offenen Frage wird, ist `EMPTY`.** Drei der vier Leerfälle sind
+- **Was `EMPTY` betrifft — beantwortet.** Drei der vier Leerfälle sind
   ein **Erfolg** („Kein Sachverhalt ist mehr offen."). Mit einer Liste
   entsteht dieser Zustand nicht mehr durch den Reiter, sondern durch einen
   **Filter mit leerem Ergebnis** — und den behandelt `DataTable` über
   `filtered` als Bedienfehler mit Weg zurück, nicht als Erfolg. Genau die
   Aussage, die dieser Seite ihren Job gibt („fertig ist sie, wenn kein Fall
-  mehr auf sie wartet"), hängt daran. Wer die eine Liste baut, muss sagen,
-  woran sie einen erfolgreichen Filterstand von einem erfolglosen
-  unterscheidet. Steht als Frage im Seitenprofil; hier nichts geändert.
+  mehr auf sie wartet"), hängt daran. **Beantwortet am 2026-09-08 (Owner):**
+  der Standardstand entscheidet — offen und eigene Zuständigkeit, unverändert
+  und leer heißt Erfolg; verändert und leer heißt „keine Treffer". Die Falle
+  liegt in der Berechnung: der Standard ist selbst ein Filter, `filtered` ist
+  also „weicht vom Standard ab", nicht „ein Filter ist gesetzt". Für `CaseList`
+  ändert sich nichts — die Seite kennt ihren Standardstand, `filtered` ist
+  schon durchgereicht. Wortlaut im Seitenprofil.
 - **`emptyCount` wird dabei wichtiger, nicht überflüssig:** die Zahl ist das,
   was einen erfolgreichen Leerfall belegen kann, wenn der Reiter ihn nicht
   mehr benennt.
