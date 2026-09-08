@@ -654,12 +654,24 @@ Die Kennung beginnt mit dem Buchungstag; nennt der Kopf darunter einen
 anderen, widerspricht sich der Drawer in seinen ersten zwei Zeilen. Gemessen
 stimmen beide jetzt überein (27.08. und 29.08.).
 
-M6 (der Zweig `("case", …)` ohne Auslöser) und M7 (`InUse` schreibt
-`minWidth` ab, statt die Liste zu benutzen) bleiben offen — beide brauchen
-eine Entscheidung über den Zuschnitt der Story, keine Reparatur.
+Damit sind alle Punkte dieser Runde erledigt.
 
 `pnpm typecheck`, `check:language`, `check:icons`, `check:contrast`,
 `check:mirror`, `check:when` je Exit 0. `pnpm build` lief in dieser Welle im
 eigenen Worktree: **Exit 0** (Bauprüfung in 0117).
 
 **Status: Abnahme.**
+
+**Nachtrag: M6 und M7 sind auch erledigt.**
+
+**M7 — die Story benutzt jetzt die Liste, statt sie nachzubauen.** `InUse`
+hatte `Table` mit `minWidth={1400}` von Hand aufgesetzt und die Zahl aus
+`BankTransactionList.tsx:76` abgeschrieben — eine zweite Wahrheit neben einer
+gepflegten. Gemessen steht dort jetzt die Liste selbst: drei Zeilen,
+`min-width: 1400px` aus ihrer eigenen Vorgabe, Scroller 1400 gegen 1366 px
+Sichtfläche.
+
+**M6 — der zweite Zweig des Fußes ist bewiesen.** `onOpenFull` reicht
+`(exit, caseId)` durch; in keiner Story war `caseId` je gesetzt, belegt war
+nur `("assign")` ohne Argument. `InUse` schreibt jetzt auf, was ankommt —
+gemessen nach einem echten Klick auf den Fußknopf: **`case · c-4412`**.

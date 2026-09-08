@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import { BankTransactionList } from "./BankTransactionList";
 import { BankTransactionDrawer } from "./BankTransactionDrawer";
 import { BankTransactionRow } from "./BankTransactionRow";
 import { bankTransactionColumns, bankTransactionTracks } from "./bank-transaction-columns";
@@ -225,40 +226,32 @@ export const Interactive: Story = {
 export const InUse: Story = {
   render: function Render() {
     const [ref, setRef] = useState<string | null>(null);
-    const DEF = bankTransactionColumns({ caseHref });
+    const [ziel, setZiel] = useState<string | null>(null);
     return (
       <div style={{ maxWidth: 1400 }}>
-        <Card>
-          <CardHead title="Kontoauszug August 2026" sub="Commerzbank · 1210" />
-          <Table cols={bankTransactionTracks(DEF)} minWidth={1400}>
-            <HeadRow>
-              {DEF.map((c) => (
-                <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
-                  {c.header}
-                </span>
-              ))}
-            </HeadRow>
-            <BankTransactionRow
-              transaction={RECORD}
-              caseHref={caseHref}
-              openHref="#zuordnen"
-            />
-            <BankTransactionRow
-              transaction={{
-                ...RECORD,
-                id: "bt-2",
-                cases: [],
-                allocatedSum: 0,
-                matchStage: "unclear_none",
-                counterpartyName: "Stadtwerke Musterstadt",
-                amount: -412,
-              }}
-              caseHref={caseHref}
-              openHref="#zuordnen"
-            />
-          </Table>
-        </Card>
-        <div style={{ padding: "var(--space-4)" }}>
+        {/* **Die Liste, nicht ihr Nachbau.** Die Story hatte `Table` mit
+            `minWidth={1400}` von Hand aufgesetzt und die Zahl aus
+            `BankTransactionList.tsx` abgeschrieben — eine zweite Wahrheit
+            neben einer gepflegten (Wiederabnahme 0103, M7). Jetzt steht hier
+            die Liste selbst; ihre Vorgabe gilt. */}
+        <BankTransactionList
+          transactions={[
+            RECORD,
+            {
+              ...RECORD,
+              id: "bt-2",
+              cases: [],
+              allocatedSum: 0,
+              matchStage: "unclear_none",
+              counterpartyName: "Stadtwerke Musterstadt",
+              amount: -412,
+            },
+          ]}
+          caseHref={caseHref}
+          openHref="#zuordnen"
+          head={{ title: "Kontoauszug August 2026", sub: "Commerzbank · 1210" }}
+        />
+        <div style={{ padding: "var(--space-4)", display: "flex", gap: "var(--space-3)" }}>
           {/* Die **Referenz**, nicht die id des Datensatzes: `reference` ist,
               was der Aufrufer nachschlägt — Buchungstag, Konto, laufende
               Nummer. `bt-1` ist unsere Fixture-id und stand hier zwei Runden
@@ -279,9 +272,22 @@ export const InUse: Story = {
             onClose={() => setRef(null)}
             reference={ref}
             record={RECORD}
-            onOpenFull={() => {}}
+            // **Beide Angaben, nicht nur der Ausgang.** Der Fuß reicht
+            // `(exit, caseId)` durch, und `caseId` war in keiner Story je
+            // gesetzt — bewiesen war nur `("assign")` ohne Argument
+            // (Wiederabnahme 0103, M6). `RECORD` trägt einen zugeordneten
+            // Fall, also kommt hier seine Kennung an.
+            onOpenFull={(exit, caseId) => {
+              setZiel(`${exit}${caseId ? ` · ${caseId}` : " · ohne Fall"}`);
+              setRef(null);
+            }}
             caseHref={caseHref}
           />
+        ) : null}
+        {ziel ? (
+          <p className="lw-body-sm" style={{ padding: "0 var(--space-4)" }}>
+            Der Fuß hat übergeben: <strong>{ziel}</strong>
+          </p>
         ) : null}
       </div>
     );
