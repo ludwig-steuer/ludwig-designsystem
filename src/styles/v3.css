@@ -718,6 +718,16 @@
   border-radius: var(--radius-md);
   padding: 14px 16px;
 }
+/* Die verlinkte Kachel: derselbe Block, nur als Anker — Farbe und Unterstrich
+   des Links werden zurückgenommen, die Kachel selbst ist das Ziel (I11). */
+a.v2kpi--link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+a.v2kpi--link:hover { border-color: var(--color-border-strong); background: var(--color-bg-soft); }
+a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .v2kpi__label {
   font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text-muted);
   margin-bottom: 6px;

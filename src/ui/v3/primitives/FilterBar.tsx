@@ -10,6 +10,15 @@ import { TextButton } from "./TextButton";
  * it holds no filter state, reads no URL, validates nothing. All of that is
  * domain knowledge and stays at the call site — otherwise the shell would
  * pull `useSearchParams` and with it the router into the design system.
+ *
+ * **It already works as a server form**, and that is worth saying because it
+ * is not obvious: no `"use client"`, no state, `submitLabel` renders a plain
+ * `type="submit"`, and `resetHref` is the link version of `onReset`. Wrap it
+ * in `<form method="get">` and the fields end up in the query string — no
+ * client component anywhere. The same holds for `Field`, `Input` and `Select`
+ * (`Form.tsx`), which are server components too. A page that reaches for its
+ * own `inputStyle` instead is not missing a building block (finding of the
+ * DATEV page, 2026-09-08).
  */
 
 /**

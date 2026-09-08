@@ -82,11 +82,21 @@ export const Active: Story = {
   },
 };
 
-/** Ohne Client-Zustand: `submitLabel` schickt das Formular, `resetHref` führt zurück. */
+/**
+ * **Ohne eine Zeile Client-Code.** `method="get"` schreibt die Felder in die
+ * Query, `submitLabel` rendert einen gewöhnlichen `type="submit"`, `resetHref`
+ * ist die Link-Fassung von `onReset` — und weder `FilterBar` noch `Field`,
+ * `Input` oder `Select` sind Client-Komponenten.
+ *
+ * Die Story stand hier schon, sagte aber nur `<form>`; damit war der Fall
+ * nicht als das erkennbar, was er ist. Eine Seite, die stattdessen ihr eigenes
+ * `inputStyle` baut, vermisst keinen Baustein (Befund der DATEV-Seite,
+ * 2026-09-08).
+ */
 export const ServerForm: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
-      <form>
+      <form method="get">
         <FilterBar activeCount={2} resetHref="#" submitLabel="Filtern">
           <CreditorFilter />
           <PeriodFilter />

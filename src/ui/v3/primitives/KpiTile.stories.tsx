@@ -23,6 +23,29 @@ export const SixColumns: Story = {
   ),
 };
 
+/**
+ * **Mit `href` führt die ganze Kachel** — dieselbe Regel wie bei der Zeile
+ * (I11): eine Zahl, die „wie viel" beantwortet und nicht „und jetzt?", ist
+ * eine Sackgasse mit Ziffern.
+ *
+ * Der Link umschließt die Kachel, statt im Untertitel zu sitzen: **ein**
+ * Fokus-Stopp für **ein** Ziel, mit eigenem Text und ohne `aria-label`. Die
+ * App hatte ihn mangels dieser Prop in den Untertitel gelegt, und damit war
+ * eine Ecke der Kachel ein zweiter Stopp.
+ *
+ * Nicht jede Zahl bekommt einen: „Summe Haben" führt nirgendwohin, und eine
+ * Kachel ohne Ziel bleibt ein Block.
+ */
+export const Linked: Story = {
+  render: () => (
+    <KpiGrid columns={3}>
+      <KpiTile label="Sätze" value="118" href="#buchungen" sub="im Spiegel dieses Jahres" />
+      <KpiTile label="Ohne Zuordnung" value="4" href="#offen" sub="warten auf einen Sachverhalt" />
+      <KpiTile label="Summe Haben" value="42.108,55 €" sub="stimmt überein" />
+    </KpiGrid>
+  ),
+};
+
 /** Weniger Spalten für schmale Flächen — die Kachel bleibt gleich. */
 export const ThreeColumns: Story = {
   render: () => (
