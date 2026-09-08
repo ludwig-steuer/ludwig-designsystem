@@ -250,7 +250,10 @@ export const ACTION_ICON = {
     icon: PanelRight,
     label: "Nachschlagen",
     meaning: "Das Objekt im Drawer neben der Arbeit öffnen — die Seite bleibt stehen.",
-    instead: "Die Seite wechseln → `open`.",
+    instead:
+      "Die Seite wechseln → `open`. Führt die Zeile ohnehin nur in den Drawer, " +
+      "steht hier **nichts**: ein Zeichen neben einem Klick, der dasselbe tut, " +
+      "ist Rauschen (Owner-Entscheid 2026-09-08).",
   },
   external: {
     icon: ExternalLink,

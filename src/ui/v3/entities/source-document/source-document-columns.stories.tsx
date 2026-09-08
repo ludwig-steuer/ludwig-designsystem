@@ -11,6 +11,7 @@ import {
 import { formQualifiesForInvoiceFlow } from "@/ludwig/modules/source-docs/domain/document-form-mapping";
 import type { SourceDocumentVM } from "./SourceDocument";
 import { DataTable } from "../../patterns/DataTable";
+import { ActionIcon } from "../../Icons";
 
 const meta: Meta = {
   title: "v3/Entitäten/Beleg/SourceDocumentColumns",
@@ -148,6 +149,45 @@ export const DocumentList: Story = {
           sort={{ key: "receivedDate", dir: "desc" }}
           href={listHref}
           pager={PAGER}
+          empty={{ title: "In dieser Periode ist kein Beleg eingegangen." }}
+        />
+      </div>
+    );
+  },
+};
+
+/**
+ * **Zwei Ziele, zwei Wege** (Owner-Entscheid 2026-09-08, Regel I11).
+ *
+ * Die Zeile führt zum Beleg — das ist der Sprung. Daneben steht `peek`
+ * (`PanelRight`, „Nachschlagen"): die **Belegvorschau** im Drawer, ohne die
+ * Seite zu verlassen. Als `RowAction` mit `href` auf den Such-Parameter, denn
+ * ein Drawer ist nach L3 eine URL — damit funktionieren mittlere Maustaste und
+ * „in neuem Tab", und der Weg überlebt einen Neuladen der Seite.
+ *
+ * Das Zeichen steht **nur hier**, wo es zwei Ziele gibt. Wo eine Zeile
+ * ohnehin nur den Drawer öffnet, wäre es ein Zeichen neben einem Klick, der
+ * dasselbe tut.
+ */
+export const RowAndPeek: Story = {
+  render: () => {
+    const cols = sourceDocumentColumns({ href, caseHref });
+    return (
+      <div style={{ maxWidth: 1900 }}>
+        <DataTable<SourceDocumentVM>
+          rows={DOCS.slice(0, 4)}
+          columns={cols}
+          rowKey={(d) => d.id}
+          head={{ title: "Belege 2026", sub: "Die Zeile führt zum Beleg, das Zeichen zeigt ihn" }}
+          minWidth={sourceDocumentMinWidth(cols)}
+          href={listHref}
+          rowActions={(d) => [
+            {
+              label: "Belegvorschau",
+              icon: <ActionIcon action="peek" size={14} />,
+              href: `?beleg=${d.id}`,
+            },
+          ]}
           empty={{ title: "In dieser Periode ist kein Beleg eingegangen." }}
         />
       </div>
