@@ -316,6 +316,22 @@ Vorschau zeigt („passt die Regel so?").
 
 Zusätzlich als Zeilen in `docs/befunde-app.md` eingetragen (L-240 bis L-252).
 
+**Zwei sind seit dem 2026-09-08 drüben erledigt** und dürfen nicht mehr als
+offen weitergereicht werden: ~~**L-253**~~ (App-Commit `2c0c888f` —
+`matchTransaction()` und `hasAnyCriterion()` lesen jetzt **eine** gemeinsame
+Liste `MATCH_CRITERIA`; der Widerspruch „greift bei keiner Zahlung", während
+sie greift, existiert nicht mehr. Neu und **optional** ist
+`RuleSummaryInput.matchPurposeRegex` — wer es beim Aufruf wegläßt, bekommt den
+alten falschen Satz) und ~~**L-254**~~ (`9a3ce2db` — `RULE_PRIORITY_DEFAULT = 100`
+für alle drei Schreiber). Die Formen zeigen `priority` weiterhin nicht; wann
+sie es tun, klärt **L-245**. Ebenfalls erledigt: ~~**L-244**~~ (`b7544542` —
+das Präfix heißt jetzt `datev-wk:`, die Warnung „Modus prüfen?" kann
+erscheinen) und die **Hälfte b** von **L-243** (`5e48d892` — die zwei lokalen
+Maps in `stapelabnahme/application/wiederkehrende.ts` sind weg). **L-243 a
+steht offen:** `Schritt5.tsx:100` gibt den Rhythmus weiter roh aus. Der Spiegel `src/ludwig/` ist eingefroren und
+kennt beides noch nicht — der Domänen-Stand gehört gegen `origin/staging`
+gelesen.
+
 **Beim Schreiben der Specs (2026-09-08) sind drei weitere dazugekommen**, sie
 stehen im Register und in der Spec, die sie gefunden hat: **L-255** — die
 Buchungssatz-Vorschau liefert fertige Beschriftungen statt Konten, `JournalEntryCard`
@@ -538,7 +554,7 @@ Beide gehören ins Register; hier stehen sie nur, weil die Prüfung sie gefunden
 hat. Eingetragen sind sie **nicht** — das Register gehört nicht diesem
 Abschnitt.
 
-- **Kandidat für L-253 — `hasAnyCriterion()` und `matchTransaction()` sind
+- **Kandidat für L-253** *(inzwischen erledigt, App-Commit `2c0c888f`)* **— `hasAnyCriterion()` und `matchTransaction()` waren
   sich über den Zweck-Regex uneins.** `matchTransaction()`
   (`domain/rule.ts:388–401`) zählt `matchPurposeRegex` als Kriterium
   (`anyCriterion = true`); `hasAnyCriterion()` (`domain/rule-summary.ts:26–31`)
@@ -550,7 +566,7 @@ Abschnitt.
   rendern. Im Bestand unsichtbar, weil `match_purpose_regex` 0 % ist: derselbe
   blinde Fleck wie L-248. Bis das entschieden ist, muss die Form den Satz als
   **Prop** bekommen und ihn nicht selbst herleiten.
-- **Zusatz zu L-245 — der Editor legt neue Regeln mit `priority = 0` an.**
+- **Zusatz zu L-245** *(als L-254 erledigt, App-Commit `9a3ce2db`)* **— der Editor legte neue Regeln mit `priority = 0` an.**
   `RuleEditorForm.tsx:165` schreibt `priority: existingRule?.priority ?? 0`,
   während der Agenten-Pfad `100` als Default führt
   (`agent-booking-core.ts:3290`, `3542`) und alle 30 Regeln im Bestand auf

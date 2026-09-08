@@ -6,6 +6,7 @@
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Buchungsweise (Sollstellung ⇄ Bei Zahlung), Personenkonto und Dauersachverhalt sind Ludwig-Fachbegriffe |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Datenpunkte" (Ränge 1–7), „Relationen", „Formen" (Zeile `RecurringRuleRow`), „Zuschnitt" (Marke **jetzt**) |
+| Domänen-Stand | gelesen gegen **`origin/staging`** in `ludwig/app` (2026-09-08), nicht gegen den eingefrorenen Spiegel `src/ludwig/`. **Erledigt, deshalb hier nicht mehr als offen geführt:** ~~L-253~~ (`2c0c888f` — `matchTransaction()` und `hasAnyCriterion()` lesen eine gemeinsame Liste `MATCH_CRITERIA`) · ~~L-254~~ (`9a3ce2db` — `RULE_PRIORITY_DEFAULT = 100` für alle drei Schreiber) · ~~L-244~~ (`b7544542` — das Präfix heißt jetzt `datev-wk:`, die Warnung kann erscheinen) · **L-243 b** (`5e48d892` — die lokalen Maps in `wiederkehrende.ts` sind weg). **Offen und tragend für diese Spec:** L-240, L-241, L-242, **L-243 a** (`Schritt5.tsx:100` gibt den Rhythmus weiter roh aus), L-245, L-249 und die drei neuen L-255 bis L-257. **Wer baut, holt vorher den Spiegel nach** (`scripts/sync-ludwig.sh`) — die eingefrorene Fassung kennt `MATCH_CRITERIA` und `RULE_PRIORITY_DEFAULT` noch nicht |
 | Ersetzt | die handgeschriebene Zeile in `ErwarteteZahlungen` (`modules/stapelabnahme/ui/Schritt5.tsx` Z. 77–113; die rohe Rhythmus-Ausgabe steht in Z. 100 — Fundstellen nach Prüfpunkt **P9** berichtigt) |
 | Blockiert | 0133 (`RecurringRuleList`), die sie in ihren Rahmen steckt · 0131 (Regelwerk des Mandanten, Backlog) · den Regelwerk-Reiter des `CaseDetailView`, sobald er mehr als eine Regel zeigen darf (L-245) |
 | Spec von / am | Claude, 2026-09-08 (Skill `spec-schreiben`) |
@@ -18,7 +19,8 @@ Treffer, greift sie überhaupt noch?** Heute steht dafür in Schritt 5 der
 Stapelabnahme eine von Hand gebaute Vierspalten-Zeile, die genau die zwei
 Angaben weglässt, die diese Fragen beantworten — Buchungsweise und Gültigkeit
 —, und den Rhythmus roh englisch ausgibt (`monthly` statt „monatlich",
-Befund L-243 a).
+Befund **L-243 a**, weiterhin offen — die Schwester **b**, die falsche
+Modus-Map in `wiederkehrende.ts`, ist drüben mit `5e48d892` behoben).
 
 Diese Zeile ist die erste Form der Familie: sie hat heute keinen einzigen
 Baustein im Set, und zwei Listen (0133 jetzt, 0131 später) setzen auf ihr auf.
@@ -87,15 +89,20 @@ genauso: Name **oder** IBAN an derselben Satzstelle.
 
 **Was die Zeile bewusst nicht zeigt:**
 
-- **`priority` (Rang 26)** — Owner-Entscheid vom 2026-09-08 zu **L-254 (erledigt `9a3ce2db`)**: neue
-  Regeln bekommen im Formular `priority: 0`, Agent und Bestand stehen auf
-  `100`, sortiert wird aufsteigend. Solange das nicht entschieden ist, wäre
-  eine Spalte, in der 30 von 30 Zeilen `100` steht, eine tote Spalte (derselbe
-  Fall wie „Rabatt", L-201).
+- **`priority` (Rang 26)** — Owner-Entscheid vom 2026-09-08, und er hält
+  gerade **weil** ~~L-254~~ drüben behoben ist (App-Commit `9a3ce2db`:
+  `RULE_PRIORITY_DEFAULT = 100` steht einmal in der Domäne, alle drei
+  Schreiber lesen sie — vorher schrieb das Formular still `0`). Seither trägt
+  jede Regel denselben Wert, und eine Spalte, in der 30 von 30 Zeilen `100`
+  steht, ist eine tote Spalte (derselbe Fall wie „Rabatt", L-201). Etwas zu
+  sehen gibt es erst, wenn ein Fall zwei Regeln zeigt (**L-245**, offen).
 - **den Klartext-Satz (Rang 12)** — er gehört ab M zu `RecurringRuleFacts`.
-  Die Zeile rechnet ihn **nicht** nach: `matchTransaction()` und
-  `hasAnyCriterion()` sind sich über den Zweck-Regex uneins (**L-253 (erledigt `2c0c888f`)**), und
-  eine zweite Ableitung im Set wäre die dritte Meinung.
+  Die Zeile rechnet ihn **nicht** nach: eine Form, die eine Ableitung der
+  Domäne nachbaut, ist die zweite Wahrheit. Genau daran ist die App gerade
+  hängengeblieben (~~L-253~~, behoben mit `2c0c888f`: `matchTransaction()`
+  und `hasAnyCriterion()` zählten über **zwei** Aufzählungen, von denen eine
+  den Zweck-Regex nicht kannte; heute lesen beide dieselbe Liste
+  `MATCH_CRITERIA`). Das Set macht daraus keine dritte.
 - **die geltende Toleranz (Rang 17)** — sie steht ab M, und im Bestand ist sie
   in allen 30 Zeilen `0,00`.
 
@@ -217,7 +224,7 @@ Höchstens drei, jede mit Default — der Bau wartet nicht.
 | Ein Zeilenmodell statt zwölf Einzelfeldern | `rule: OverdueRecurringItem \| RuleOverviewItem` statt der Feld-Props | **L-240** ist gelöst — die zwei Anzeige-Typen liegen in `recurring-rules/domain/` |
 | Farbe für die Gültigkeit | `StatusBadge axis="regel_gueltigkeit"` statt des Wortes | **L-241** ist entschieden (Achse oder Farbe weg) |
 | Spaltendefinitionen für `DataTable` | `recurringRuleColumns()` in `recurring-rule-columns.tsx`, die Zeile rendert weiter dieselben Zellen | Aufgabe **0131** wird gebaut (sortierbar, filterbar, mandantenweit) |
-| `priority` als Spalte | `priority: number` | **L-254 (erledigt `9a3ce2db`)** ist entschieden und der Bestand streut (heute 30 × `100`, das Formular schreibt `0`) |
+| `priority` als Spalte | `priority: number` | **L-245** zeigt zwei Regeln eines Falls nebeneinander — erst dann entscheidet die Rangfolge etwas Sichtbares. (~~L-254~~ ist seit `9a3ce2db` behoben: alle Schreiber setzen `RULE_PRIORITY_DEFAULT`, der Bestand streut **nicht**) |
 | Der Weg in den Editor aus der Zeile | `onEdit?: (ruleId: string) => void` | ein Screen verlangt ihn — die Fälligkeitsliste ist „Auskunft, keine Aufgabe" und braucht ihn nicht |
 
 ## Abnahmekriterien
@@ -238,13 +245,13 @@ Variabel (aus dieser Spec):
 - [ ] Fehlen Name **und** IBAN, steht „ohne Kriterium" — kein „—" (Story `WithoutCriterion`, am gerenderten Text gemessen)
 - [ ] Die Buchungsweise kommt aus `StatusBadge axis="regel_modus"`; alle drei Werte erscheinen, `match_only` eingeschlossen (Story `Modes`)
 - [ ] Die Gültigkeit ist ein **Wort ohne Farbe** — kein `tone`, kein `dot` (Story `Modes`, am Knoten gemessen: keine Ton-Klasse)
-- [ ] Der Rhythmus steht **deutsch** aus `RULE_INTERVAL_LABEL`; auf dem Bildschirm steht nie `monthly` (Story `Words`) — das ist die Ablösung von L-243 a
+- [ ] Der Rhythmus steht **deutsch** aus `RULE_INTERVAL_LABEL`; auf dem Bildschirm steht nie `monthly` (Story `Words`) — das ist die Ablösung von **L-243 a**, dem noch offenen Teil des Befunds
 - [ ] Ein Wert, für den `labels` kein Wort hat, erscheint **roh** statt zu verschwinden (Story `Words`, eine Zeile ohne Eintrag)
 - [ ] Die Zeile enthält **keine** Betrags- oder Toleranz-Ableitung: `grep -n "template\.\|matchAmount\|Tolerance" RecurringRuleRow.tsx` findet nichts
 - [ ] Die Zeile rendert **kein** `href` auf `Row`; die Wege stehen in den Zellen (Story `InUse`, Baum geprüft)
 - [ ] `columns` bestimmt Zellenzahl **und** Reihenfolge; `recurringRuleTracks(columns)` und die Kopfzeile decken sich (Story `InUse`, Spurenzahl gegen Zellenzahl gezählt)
 - [ ] `lastPayment: null` zeigt „noch keine", die fehlende Prop zeigt gar keine Spalte (Story `Edges` gegen `InUse`)
-- [ ] Die Zeile kennt kein `priority` (grep) — Owner-Entscheid zu L-254 (erledigt `9a3ce2db`)
+- [ ] Die Zeile kennt kein `priority` (grep) — Owner-Entscheid; sichtbar wird die Rangfolge erst mit L-245
 - [ ] Ersetzt die Zeile in `ErwarteteZahlungen` (`Schritt5.tsx`) ohne Funktionsverlust und zeigt zusätzlich Buchungsweise und Gültigkeit — **offen (App)**, die Ablösung ist ein eigener Schritt
 
 ## Abnahme

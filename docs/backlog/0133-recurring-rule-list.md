@@ -6,6 +6,7 @@
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Dauerzahlung, Buchungsweise, Sachverhalt |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Listen" (erste Zeile), „Formen" (Zeile `RecurringRuleList`), „Zuschnitt" (Marke **jetzt**) |
+| Domänen-Stand | gelesen gegen **`origin/staging`** in `ludwig/app` (2026-09-08), nicht gegen den eingefrorenen Spiegel `src/ludwig/`. **Erledigt, deshalb hier nicht mehr als offen geführt:** ~~L-253~~ (`2c0c888f` — `matchTransaction()` und `hasAnyCriterion()` lesen eine gemeinsame Liste `MATCH_CRITERIA`) · ~~L-254~~ (`9a3ce2db` — `RULE_PRIORITY_DEFAULT = 100` für alle drei Schreiber) · ~~L-244~~ (`b7544542` — das Präfix heißt jetzt `datev-wk:`, die Warnung kann erscheinen) · **L-243 b** (`5e48d892` — die lokalen Maps in `wiederkehrende.ts` sind weg). **Offen und tragend für diese Spec:** L-240, L-241, L-242, **L-243 a** (`Schritt5.tsx:100` gibt den Rhythmus weiter roh aus), L-245, L-249 und die drei neuen L-255 bis L-257. **Wer baut, holt vorher den Spiegel nach** (`scripts/sync-ludwig.sh`) — die eingefrorene Fassung kennt `MATCH_CRITERIA` und `RULE_PRIORITY_DEFAULT` noch nicht |
 | Ersetzt | `ErwarteteZahlungen` in `modules/stapelabnahme/ui/Schritt5.tsx` Z. 77–113 — die **einzige** heute gebaute Liste über Wiederkehr-Regeln |
 | Blockiert | nichts im Set. Sie ist die einzige Form der Familie, die heute einen Screen ablöst, und steht deshalb vor den Fakten |
 | Setzt voraus | **0132** (`RecurringRuleRow`) — die Liste ist der Rahmen um dieselbe Zeile |
@@ -29,7 +30,9 @@ Dinge sind daran falsch:
    nichts sieht, weiß nicht, ob geprüft wurde oder ob nichts zu prüfen war.
 2. **Man sieht nicht, ob die ausbleibende Zahlung überhaupt hätte gebucht
    werden sollen** — Buchungsweise (Rang 2) fehlt in der Spaltenliste, und der
-   Rhythmus steht roh englisch da (`monthly`, Befund L-243 a).
+   Rhythmus steht roh englisch da (`monthly`, Befund **L-243 a** — am
+   2026-09-08 gegen `origin/staging` nachgesehen: `Schritt5.tsx:100` gibt ihn
+   unverändert roh aus; nur die Schwester **b** ist behoben, `5e48d892`).
 
 ## Einordnung
 
@@ -183,7 +186,7 @@ Variabel (aus dieser Spec):
 - [ ] Bei null Zeilen steht die **Karte mit dem Erfolgssatz** — die Liste verschwindet nicht (Story `Empty`, am gerenderten Baum gemessen)
 - [ ] Der Sachverhalt ist die **erste** Zelle jeder Zeile und führt über `caseHref` zum Fall (Story `Filled`)
 - [ ] Die Buchungsweise steht in jeder Zeile als `StatusBadge axis="regel_modus"` (Story `Filled`) — sie fehlt heute in der App
-- [ ] Auf dem Bildschirm steht nie `monthly` (Story `Filled` und `Edges`) — Ablösung von L-243 a
+- [ ] Auf dem Bildschirm steht nie `monthly` (Story `Filled` und `Edges`) — Ablösung von **L-243 a**, dem noch offenen Teil des Befunds
 - [ ] Keine Gültigkeits-Spalte, kein Filter, keine Sammelaktion, keine Auswahl-Kästchen (Story `Filled`, Baum geprüft)
 - [ ] Der Kopf zeigt Zeitraum und Zähler; ohne `total` nur die Trefferzahl (Story `Filled` gegen `InUse`)
 - [ ] `lastPayment: null` zeigt „noch keine" (Story `Edges`)

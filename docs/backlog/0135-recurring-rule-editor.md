@@ -6,6 +6,7 @@
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Buchungsweise, Personenkonto, Gegenkonto, BU-Schlüssel, Sollstellung |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Datenpunkte" (die Punkte mit änderbar = **Nutzer**), „Formen" (Zeile `RecurringRuleEditor`), „Zuschnitt" (Marke **jetzt**) · Owner-Entscheid vom 2026-09-08 zum Leerfall |
+| Domänen-Stand | gelesen gegen **`origin/staging`** in `ludwig/app` (2026-09-08), nicht gegen den eingefrorenen Spiegel `src/ludwig/`. **Erledigt, deshalb hier nicht mehr als offen geführt:** ~~L-253~~ (`2c0c888f` — `matchTransaction()` und `hasAnyCriterion()` lesen eine gemeinsame Liste `MATCH_CRITERIA`) · ~~L-254~~ (`9a3ce2db` — `RULE_PRIORITY_DEFAULT = 100` für alle drei Schreiber) · ~~L-244~~ (`b7544542` — das Präfix heißt jetzt `datev-wk:`, die Warnung kann erscheinen) · **L-243 b** (`5e48d892` — die lokalen Maps in `wiederkehrende.ts` sind weg). **Offen und tragend für diese Spec:** L-240, L-241, L-242, **L-243 a** (`Schritt5.tsx:100` gibt den Rhythmus weiter roh aus), L-245, L-249 und die drei neuen L-255 bis L-257. **Wer baut, holt vorher den Spiegel nach** (`scripts/sync-ludwig.sh`) — die eingefrorene Fassung kennt `MATCH_CRITERIA` und `RULE_PRIORITY_DEFAULT` noch nicht |
 | Ersetzt | `modules/recurring-rules/ui/RuleEditorForm.tsx` (464 Z.) **und** `modules/recurring-rules/ui/MatchingNoteForm.tsx` (68 Z., ein Feld ohne jeden Kontext) |
 | Blockiert | nichts im Set — er ist die letzte Form der Familie |
 | Setzt voraus | **0134** (`RecurringRuleFacts`) als Vorschau („passt die Regel so?") |
@@ -101,15 +102,20 @@ gefaltet: eine Klappe darf nichts verstecken, was jemand eingetragen hat.
    gespeichert werden — die Datenbank erlaubt sie, und ein halbfertiger
    Entwurf ist ein legitimer Zwischenstand. Der Editor **warnt** mit dem Satz
    der Ableitung, er blockiert nicht. Den Satz liefert der Aufrufer
-   (`describeRecurringRule()`), der Editor leitet ihn nicht ab (**L-253 (erledigt `2c0c888f`)**).
+   (`describeRecurringRule()`), der Editor leitet ihn **nicht** ab: eine Form,
+   die eine Ableitung der Domäne nachbaut, ist die zweite Wahrheit — daran ist
+   die App gerade hängengeblieben (~~L-253~~, behoben mit `2c0c888f`: zwei
+   Aufzählungen derselben Kriterien, heute **eine** Liste `MATCH_CRITERIA`).
 5. **Die Vorschau ist ein Buchungssatz.** Sie kommt aus 0134 über
    `renderPreview` und zeigt die Vorschau mit `JournalEntryCard` — keine
    zweite Tabelle im Editor.
 
 **Was der Editor bewusst nicht ändert** (13 Spalten, wie heute): `priority`
-(Owner-Entscheid zu **L-254 (erledigt `9a3ce2db`)**: bis zur Entscheidung weder zeigen noch
-schreiben — heute schreibt das Formular still `0`, während Agent und Bestand
-auf `100` stehen und aufsteigend sortiert wird) · `validFrom`/`validUntil` ·
+(Owner-Entscheid — weder zeigen noch schreiben. ~~L-254~~ ist drüben behoben:
+seit `9a3ce2db` setzen alle drei Schreiber `RULE_PRIORITY_DEFAULT = 100`, das
+Formular schreibt keine `0` mehr. Damit ist der Wert überall gleich; wer ihn
+setzen können muss, braucht erst den Ort, an dem zwei Regeln eines Falls
+nebeneinander stehen — **L-245**, offen) · `validFrom`/`validUntil` ·
 `datevDocumentNumber` · `documentNumberStrategy` · `profileSource` ·
 `matchesDocuments` (abgeleitet aus der Belegseite, `rule-writes.ts:190`) ·
 `importReference` · `agentRunId` · `exportBatchId` · die DMS-Beleglinks ·
@@ -130,9 +136,9 @@ Datenverlust. Sie steht lesend im gefalteten Abschnitt und geht unverändert in
 | `onCriteriaChange` | `(criteria: RuleCriteria) => void` | nein | meldet jede Änderung an den Kriterien, damit der Aufrufer die Trefferzahl neu rechnet. **Der Editor rechnet sie nicht** — `matchTransaction()` ist eine Frage an die Bankzeilen, nicht an das Formular | `Interactive` |
 | `matchCount` | `{ matched: number; scanned: number } \| null` | nein | die Live-Trefferzahl als Kontrolle. `null` = noch nicht gerechnet; ohne die Prop steht dort nichts statt einer Null | `Interactive` |
 | `accounts` | `{ candidates: Partial<Record<AccountGroup, AccountCandidate[]>>; onSearch?: (q: string) => Promise<AccountCandidate[]>; onOpenLedger?: (n: string) => void }` | ja | Kandidaten und Suche für **beide** Kontofelder — Gegenkonto und Personenkonto lesen denselben Kontenrahmen | `Filled` |
-| `paymentAccounts` | `readonly { id: string; label: string }[]` | nein | Auswahl „Zahlungskonto". Leer = keine Auswahl; **kein Wert heißt „Konto der jeweiligen Transaktion"**, nicht „unbekannt" (Spaltenkommentar) — der Hinweis steht am Feld. Der Typ ist erfunden, weil der Spiegel keinen führt (**L-257**) | `Edges` |
+| `paymentAccounts` | `readonly { id: string; label: string }[]` | nein | Auswahl „Zahlungskonto". Leer = keine Auswahl; **kein Wert heißt „Konto der jeweiligen Transaktion"**, nicht „unbekannt" (Spaltenkommentar) — der Hinweis steht am Feld. Die Form des Typs ist nicht erfunden: die App deklariert genau sie als `PaymentAccountOption { id; label }` — allerdings in `recurring-rules/ui/RuleEditorForm.tsx`, also weder in `domain/` noch im Spiegel (**L-257**) | `Edges` |
 | `labels` | `RecurringRuleLabels` | ja | die deutschen Wörter, die der Spiegel nicht hat (Richtung: L-256) | `Filled` |
-| `summary` | `string` | nein | der Satz der Ableitung zum aktuellen Entwurf; ohne Kriterium ist er die Warnung. Der Editor formuliert ihn nicht (L-253 (erledigt `2c0c888f`)) | `Edges` |
+| `summary` | `string` | nein | der Satz der Ableitung zum aktuellen Entwurf; ohne Kriterium ist er die Warnung. Der Editor formuliert ihn nicht — und der Aufrufer gibt `describeRecurringRule()` auch `matchPurposeRegex` mit (seit `2c0c888f` optional im Typ, und wer es weglässt, bekommt den falschen Satz) | `Edges` |
 | `renderPreview` | `(draft: RecurringRuleDraft) => ReactNode` | nein | die Vorschau neben dem Formular — hier kommt `RecurringRuleFacts` (0134) hinein. Fehlt die Prop, fehlt die Vorschau (A12) | `InUse` |
 | `pending` | `boolean` | nein | Speichern läuft | `Pending` |
 | `error` | `string` | nein | der Fehler vom Server, über der Aktionszeile | `Error` |
@@ -164,8 +170,10 @@ hieße, den Entwurf zu teilen — und den teilt niemand.
   bekommt.
 - **Keine zweite Regel desselben Falls anlegen und ordnen.** Mehrere Regeln je
   Sachverhalt sind erlaubt (Tabellenkommentar), die Oberfläche kennt heute nur
-  eine (**L-245**), und welche gewinnt, entscheidet `priority` (**L-254 (erledigt `9a3ce2db`)**).
-  Solange beides offen ist, schreibt der Editor keine Rangfolge.
+  eine (**L-245**, offen), und welche gewinnt, entscheidet `priority` — die
+  seit `9a3ce2db` bei allen Schreibern gleich anfängt (~~L-254~~). Solange es
+  keinen Ort gibt, an dem zwei Regeln nebeneinander stehen, schreibt der
+  Editor keine Rangfolge.
 - **Keine Laufzeit ändern** (`validFrom`/`validUntil`): DATEV-Import,
   laut GLOSSARY „rein informativ"; die Beendigung läuft über „Regel aktiv".
 
@@ -238,7 +246,7 @@ Nicht anwendbar: `LeerNachFilter` — es wird nicht gefiltert.
 
 | Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
 |---|---|---|
-| Die Rangfolge mehrerer Regeln | `priority: number` im Entwurf, sichtbar als Feld | **L-254 (erledigt `9a3ce2db`)** ist entschieden **und** **L-245** zeigt mehrere Regeln je Fall |
+| Die Rangfolge mehrerer Regeln | `priority: number` im Entwurf, sichtbar als Feld | **L-245** zeigt mehrere Regeln je Fall — dann ist die Rangfolge eine Entscheidung und keine Konstante (~~L-254~~ ist seit `9a3ce2db` behoben) |
 | Die Split-Vorlage bearbeiten | `template.lines` schreibend, mit `percentSumIsComplete()` als Prüfung | ein Screen verlangt es; heute ist sie in **keiner** Oberfläche änderbar |
 | Ein getippter Typ für das Zahlungskonto | `paymentAccounts: readonly PaymentAccount[]` | **L-257** ist gelöst — der Spiegel führt den Typ |
 | Belegnummern-Strategie ändern | `documentNumberStrategy` im Entwurf | **L-242** hat Wörter, und jemand darf `fixed` wählen dürfen (es „bricht ab der zweiten Periode den OPOS-Ausgleich" — heute trägt es genau eine Regel) |
@@ -265,11 +273,11 @@ Variabel (aus dieser Spec):
 - [ ] Sollstellung ohne Personenkonto blockiert, und der Grund steht neben dem Knopf (Story `Invalid`)
 - [ ] Ein ungültiger Regex blockiert, geprüft mit `isValidRegex()` aus dem Spiegel: `grep -n "new RegExp" RecurringRuleEditor.tsx` findet nichts (Story `Invalid`)
 - [ ] Eine Regel **ohne Kriterium** lässt sich speichern und wird gewarnt, nicht blockiert (Story `New`: Speichern ist möglich, die Warnung steht da)
-- [ ] Der Editor formuliert keinen Satz selbst: `grep -n "describeRecurringRule\|hasAnyCriterion" RecurringRuleEditor.tsx` findet nichts (L-253 (erledigt `2c0c888f`))
+- [ ] Der Editor formuliert keinen Satz selbst: `grep -n "describeRecurringRule\|hasAnyCriterion\|MATCH_CRITERIA" RecurringRuleEditor.tsx` findet nichts
 - [ ] Der Editor rechnet keine Trefferzahl: `grep -n "matchTransaction" RecurringRuleEditor.tsx` findet nichts
 - [ ] Die Konten kommen als **Nummer** in den Entwurf, nie als Id (Story `Interactive`, ausgegebener Entwurf gemessen)
 - [ ] `template.lines` geht unverändert durch `onSubmit` und ist im Formular nicht änderbar (Story `Edges`, Entwurf vor und nach dem Speichern verglichen)
-- [ ] Der Entwurf trägt **kein** `priority` (grep) — Owner-Entscheid zu L-254 (erledigt `9a3ce2db`)
+- [ ] Der Entwurf trägt **kein** `priority` (grep) — Owner-Entscheid; die Rangfolge klärt L-245
 - [ ] `Strg`/`Cmd` + `Enter` speichert, `Esc` bricht ab; beide Tasten stehen sichtbar (Story `Interactive`)
 - [ ] `pending` sperrt jede Eingabe; `error` steht über der Aktionszeile und die Eingaben bleiben stehen (Stories `Pending`, `Error`)
 - [ ] Ersetzt `RuleEditorForm` **und** `MatchingNoteForm` ohne Funktionsverlust — die Notiz steht jetzt bei der Regel, zu der sie gehört — **offen (App)**

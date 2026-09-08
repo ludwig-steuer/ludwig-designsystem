@@ -6,6 +6,7 @@
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Sollstellung, Personenkonto, Belegfeld 1, DATEV-Steuerschlüssel |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Datenpunkte" (Ränge 1–28), „Relationen", „Formen" (Zeile `RecurringRuleFacts`), „Zuschnitt" (Marke **jetzt**) |
+| Domänen-Stand | gelesen gegen **`origin/staging`** in `ludwig/app` (2026-09-08), nicht gegen den eingefrorenen Spiegel `src/ludwig/`. **Erledigt, deshalb hier nicht mehr als offen geführt:** ~~L-253~~ (`2c0c888f` — `matchTransaction()` und `hasAnyCriterion()` lesen eine gemeinsame Liste `MATCH_CRITERIA`) · ~~L-254~~ (`9a3ce2db` — `RULE_PRIORITY_DEFAULT = 100` für alle drei Schreiber) · ~~L-244~~ (`b7544542` — das Präfix heißt jetzt `datev-wk:`, die Warnung kann erscheinen) · **L-243 b** (`5e48d892` — die lokalen Maps in `wiederkehrende.ts` sind weg). **Offen und tragend für diese Spec:** L-240, L-241, L-242, **L-243 a** (`Schritt5.tsx:100` gibt den Rhythmus weiter roh aus), L-245, L-249 und die drei neuen L-255 bis L-257. **Wer baut, holt vorher den Spiegel nach** (`scripts/sync-ludwig.sh`) — die eingefrorene Fassung kennt `MATCH_CRITERIA` und `RULE_PRIORITY_DEFAULT` noch nicht |
 | Ersetzt | die vier Abschnitte des `RegelwerkTab` (`modules/accounting-cases/ui/tabs/RegelwerkTab.tsx`, 361 Z.) · die Kriterien-Tabelle des `ZuordnungTab` (`…/tabs/ZuordnungTab.tsx`, 194 Z.) · die generische Feldliste `regelZeilen()` aus `modules/stapelabnahme/application/wiederkehrende.ts` (Z. 202–221) |
 | Blockiert | 0135 (`RecurringRuleEditor`), der die Fakten als Vorschau zeigt („passt die Regel so?") |
 | Setzt voraus | nichts im Set — sie steht neben 0132, nicht auf ihr |
@@ -25,7 +26,9 @@ das?** Heute wird ihr diese Antwort **dreimal verschieden** gegeben:
   dieselbe Regel gegen Belege rechnet,
 - `Schritt3Wiederkehrend` zeigt dieselbe Regel ein drittes Mal als generische
   `{label, value}`-Paare, mit zwei lokalen Wortlisten, von denen eine
-  **keinen** der drei echten `booking_mode`-Werte trifft (L-243 b).
+  **keinen** der drei echten `booking_mode`-Werte traf (L-243 b, drüben
+  behoben mit `5e48d892` — die dritte Fassung der Anzeige bleibt trotzdem eine
+  dritte).
 
 Drei Fassungen, die auseinandergehen. Diese Form ist die eine.
 
@@ -89,11 +92,16 @@ da** — kein „—", keine leere Zeile; eine Gruppe ohne Feld erscheint gar ni
 4. **Eine Regel ohne Kriterium ist wirkungslos, nicht leer.** Den Satz
    („Diese Regel hat noch keine Match-Kriterien und greift daher bei keiner
    Zahlung.") schreibt `describeRecurringRule()`; die Form **zeigt** ihn und
-   **rechnet ihn nicht nach**. Grund: `matchTransaction()` zählt
-   `matchPurposeRegex` als Kriterium, `hasAnyCriterion()` nicht (**L-253 (erledigt `2c0c888f`)**) —
-   eine Regel mit nur einem Zweck-Regex greift, während der Satz das Gegenteil
-   behauptet. Eine zweite Ableitung im Set wäre eine dritte Meinung; deshalb
-   kommt der Satz als **Prop**.
+   **rechnet ihn nicht nach**. Der Grund ist die Regel selbst, nicht ein
+   einzelner Fehler: **eine Form, die eine Ableitung der Domäne nachbaut, ist
+   die zweite Wahrheit** — und genau daran ist die App gerade hängengeblieben.
+   ~~L-253~~ (behoben am 2026-09-08, App-Commit `2c0c888f`) war derselbe Fall
+   eine Ebene tiefer: `matchTransaction()` und `hasAnyCriterion()` führten
+   **zwei** Aufzählungen derselben Kriterien, und eine kannte den Zweck-Regex
+   nicht — eine Regel griff, während der Satz daneben das Gegenteil behauptete.
+   Der Fix war nicht das fehlende Feld, sondern das Zusammenlegen zu **einer**
+   Liste `MATCH_CRITERIA`, die beide lesen. Ein Set, das den Satz selbst
+   herleitete, wäre die nächste Aufzählung; deshalb kommt er als **Prop**.
 
 **Eine begründete Abweichung vom Profil.** Die Formen-Tabelle schneidet M bei
 Rang 18 und schiebt 19–28 hinter `all`. Diese Spec zieht **19 (IBAN,
@@ -107,9 +115,11 @@ erscheinen also heute nicht.
 
 **Was die Fakten nicht zeigen:**
 
-- **`priority` (Rang 26)** — Owner-Entscheid zu **L-254 (erledigt `9a3ce2db`)**; alle 30 Zeilen
-  tragen `100`, das Formular schreibt `0`. Solange das offen ist, wäre die
-  Zahl irreführend.
+- **`priority` (Rang 26)** — Owner-Entscheid. ~~L-254~~ ist drüben behoben
+  (`9a3ce2db`: `RULE_PRIORITY_DEFAULT = 100` für alle drei Schreiber), und
+  seither trägt jede Regel denselben Wert: eine Zahl, die überall gleich ist,
+  erklärt nichts. Sie wird interessant, sobald ein Fall zwei Regeln zeigt
+  (**L-245**, offen).
 - **Die Historie** — die Regel hat keinen eigenen `resource_kind`
   (**L-250**); ihre Ereignisse hängen am Fall und stehen in `CaseTimeline`.
 - **Die automatisierten Buchungen** (Relation Buchungen, 29 Sätze im Bestand)
@@ -123,13 +133,13 @@ erscheinen also heute nicht.
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `rule` | `RecurringRule` | ja | die Regel, unverändert aus `src/ludwig/modules/recurring-rules/domain/rule.ts` | `Filled` |
-| `summary` | `string` | ja | der Klartext-Satz aus `describeRecurringRule(rule)`, vom Aufrufer gebildet (L-253 (erledigt `2c0c888f`)) | `WithoutCriterion` |
+| `summary` | `string` | ja | der Klartext-Satz aus `describeRecurringRule(rule)`, **vom Aufrufer** gebildet. Er gibt dabei `matchPurposeRegex` mit: das Feld ist in `RuleSummaryInput` seit `2c0c888f` **optional**, und wer es weglässt, bekommt für eine Regel mit nur einem Zweck-Regex wieder den falschen Satz | `WithoutCriterion` |
 | `schedule` | `string \| null` | ja | der Rhythmus-Satz aus `describeRuleSchedule(rule)`. `null` heißt: nichts hinterlegt → die Gruppe „Erwartung" **entfällt** | `Edges` |
 | `preview` | `{ lines: readonly JournalLine[]; automatic: boolean; note: string \| null }` | ja | die Buchungssatz-Vorschau aus `buildRulePreview()`, vom Aufrufer in Buchungszeilen übersetzt (**L-255**, siehe unten) | `Modes` |
 | `labels` | `RecurringRuleLabels` | ja | die deutschen Wörter, die der Spiegel nicht führt: Richtung (L-256), Belegnummern-Strategie und Herkunft des Profils (L-242). Ein Wert ohne Wort erscheint **roh** | `All` |
 | `all` | `boolean` | nein | zusätzlich die Gruppe „Herkunft" (Ränge 21–28). Default `false` — der Reiter des Falls zeigt die kurze Form, die Verwaltungssicht (0131) und der Support die lange | `All` |
 | `accountHref` | `(accountNumber: string) => string` | nein | Weg zum Kontoblatt hinter Gegen- und Personenkonto. Ohne ihn stehen beide als Text — nie als Knopf, der nichts tut | `InUse` |
-| `hints` | `readonly string[]` | nein | Hinweise des Aufrufers über der ersten Gruppe, als `Callout`. Heute gibt es genau einen: „Modus prüfen?" aus `needsModeReview()` — der kann derzeit nie erscheinen (**L-244**), und das Set baut die Heuristik **nicht** nach | `Modes` |
+| `hints` | `readonly string[]` | nein | Hinweise des Aufrufers über der ersten Gruppe, als `Callout`. Heute gibt es genau einen: „Modus prüfen?" aus `needsModeReview()`. Er **kann** seit `b7544542` erscheinen (~~L-244~~: das Präfix heißt jetzt `datev-wk:`), trifft im Bestand aber auf keine Regel — keine trägt zugleich `book_on_payment` und ein Personenkonto. Das Set baut die Heuristik **nicht** nach | `Modes` |
 | `currency` | `Currency` | nein | Default `EUR`. Existiert, weil `JournalEntryCard` eine Währung verlangt; die Regel hat keine Währungsspalte | `Filled` |
 
 Typen aus `src/ludwig/`: `RecurringRule`, `RuleBookingMode`,
@@ -219,8 +229,8 @@ Form lädt nichts.
 | Farbe für die Gültigkeit | `StatusBadge axis="regel_gueltigkeit"` | **L-241** ist entschieden |
 | Deutsche Wörter aus der Domäne statt aus `labels` | `labels` fällt weg | **L-242** und **L-256** sind gelöst |
 | Die Historie der Regel | `renderHistory?: () => ReactNode` oder eine eigene Gruppe | **L-250** ist entschieden (eigener `resource_kind` oder der Entscheid „bleibt am Fall") |
-| Der Hinweis „Modus prüfen?" aus der Ableitung | `hints` bleibt, der Aufrufer füllt sie | **L-244** ist behoben — heute kann die Heuristik nie feuern |
-| `priority`, wenn mehrere Regeln greifen | ein Feld in „Herkunft" | **L-254 (erledigt `9a3ce2db`)** ist entschieden und **L-245** zeigt zwei Regeln nebeneinander |
+| Ein zweiter Hinweis neben „Modus prüfen?" | `hints` bleibt, der Aufrufer füllt sie | eine zweite Ableitung liefert einen Satz, den die Sachbearbeiterin sehen muss (~~L-244~~ ist seit `b7544542` behoben; der erste Hinweis steht bereits) |
+| `priority`, wenn mehrere Regeln greifen | ein Feld in „Herkunft" | **L-245** zeigt zwei Regeln eines Falls nebeneinander (~~L-254~~ ist seit `9a3ce2db` behoben; der Bestand streut nicht) |
 
 ## Abnahmekriterien
 
@@ -237,7 +247,7 @@ Fest (gilt immer):
 Variabel (aus dieser Spec):
 
 - [ ] Ein Feld ohne Wert erscheint **nicht**; eine Gruppe ohne Feld erscheint nicht (Story `WithoutCriterion` und `Edges`, Zahl der gerenderten Zeilen gemessen)
-- [ ] Der Klartext-Satz kommt aus `summary` — die Form leitet ihn **nicht** ab: `grep -n "hasAnyCriterion\|describeRecurringRule" RecurringRuleFacts.tsx` findet nichts (L-253 (erledigt `2c0c888f`))
+- [ ] Der Klartext-Satz kommt aus `summary` — die Form leitet ihn **nicht** ab: `grep -n "hasAnyCriterion\|describeRecurringRule\|MATCH_CRITERIA" RecurringRuleFacts.tsx` findet nichts
 - [ ] Bei `preview.automatic === false` steht der Satz aus `preview.note`, und `JournalEntryCard` wird **nicht** mit null Zeilen gerendert (Story `Modes`, Baum gemessen)
 - [ ] Die Vorschau ist ein `JournalEntryCard`, keine eigene Tabelle (Story `Filled`, Klassenname am Knoten)
 - [ ] Die Form zerlegt keinen Beschriftungs-String: `grep -n "\.split(" RecurringRuleFacts.tsx` findet nichts (L-255)
