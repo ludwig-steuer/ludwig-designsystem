@@ -61,10 +61,11 @@ die App ihn heute schon hat.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `cases` | `CaseLink[]` | ja | Die Sachverhalte dieser Zeile. **Leer heißt „noch keiner"** und ist der häufigste Fall im Kontoauszug (65 %) | `None`, `Single`, `Many` |
+| `cases` | `readonly CaseLink[]` | ja | Die Sachverhalte dieser Zeile. **Leer heißt „noch keiner"** und ist der häufigste Fall im Kontoauszug (65 %) | `None`, `Single`, `Many` |
 | `href` | `(caseId: string) => string` | ja | Das Ziel je Fall. Die Zelle baut keine URL — sie kennt weder Mandant noch Jahr | `Single` |
 | `emptyHref` | `string` | nein | Wohin „offen" führt (der Zuordnungs-Reiter). Ohne die Prop ist „offen" ein Wort ohne Weg | `None` |
 | `showState` | `boolean` | nein, Default `true` | Der Zustand als Punkt hinter dem Namen. `false`, wo die Zeile den Zustand schon in einer eigenen Spalte führt | `WithoutState` |
+| `layout` | `"inline" \| "stacked"` | nein, Default **`inline`** | Wie die Zelle sich anordnet. `inline` ist **eine Zeile** — Kennung, dann der Name mit Ellipse, dann der Zustand; das gilt in Zeilen, weil sich eine Liste über ihre Zeilenhöhe liest. `stacked` ist die zweizeilige Form für Karten und Faktentafeln, wo Platz ist und der Name der Punkt ist (Owner-Entscheid 2026-09-08, Nachtrag unten) | `Layouts` |
 
 `CaseLink` ist die Teilmenge von `CaseListItem` (`src/ludwig/modules/accounting-cases/domain/case.ts`),
 die diese Zelle braucht:
@@ -75,12 +76,20 @@ interface CaseLink {
   caseNumber: string | null;
   fiscalYear: number | null;
   title: string | null;
-  kind: CaseKind;
+  /**
+   * `null`, wo der Aufrufer die Art nicht kennt — eine fremde Liste, die nur
+   * die **Nummer** trägt, darf keine erfinden. Der Belegkatalog hat genau das
+   * getan (`kind: "incoming_invoice"` für jeden Beleg) und damit ein falsches
+   * Abzeichen in die Zelle gesetzt; seit 0070 M2 ist das Feld nullbar, und
+   * `caseDisplayTitle` fällt ohne Art auf „Sachverhalt" zurück.
+   */
+  kind: CaseKind | null;
   counterpartyName: string | null;
   lifecycleStatus: CaseLifecycle | null;
   /** Nur im Kontoauszug: der Teilbetrag, der auf diesen Fall entfällt. */
   amount?: number | null;
-  currency?: string | null;
+  /** `Currency`, nicht `string`: eine Zusicherung an der Aufrufstelle ist eine Behauptung, kein Typ (0098 M1). */
+  currency?: Currency | null;
 }
 ```
 
@@ -115,7 +124,10 @@ Fehler gibt es nicht — die Zelle bekommt ihre Daten mit der Zeile.
 
 Titel `v3/Entitäten/Sachverhalt/CaseCell`. Abgeleitet nach §6: 3 anwendbare
 Zustände + 1 Layout-Boolean (`showState`) + 0 Callbacks + 1 „im Einsatz" +
-1 Rand = 6.
+1 Rand = 6. Gebaut sind **8**: `NarrowColumn` kam als zweiter Rand dazu (ein
+langer Name in einer schmalen Spur — der Fall, den ein weites Raster
+verbirgt), und `Layouts` beweist die Prop `layout`, die es bei der Ableitung
+noch nicht gab. Beide unter der Obergrenze von 10.
 
 | Story | Beweist |
 |---|---|
@@ -126,6 +138,7 @@ Zustände + 1 Layout-Boolean (`showState`) + 0 Callbacks + 1 „im Einsatz" +
 | `Fallbacks` | Rand: vier Zeilen, die die Kette durchspielen — mit `title`, ohne `title` (Art + Gegenpart), ohne beides (nur Art), ohne `caseNumber` (Kurz-ID) |
 | `NarrowColumn` | Rand: ein langer Name in einer 200-px-Spalte, darunter der Stapel — der Fall, den ein weites Raster verbirgt (Abnahme 2026-09-06) |
 | `InUse` | In einer `Table` als Spalte „Sachverhalt" neben Beleg und Betrag — wie `documents/page` sie heute baut |
+| `Layouts` | Beide Anordnungen in **derselben** 200-px-Spur: `inline` einzeilig, `stacked` zweizeilig — der Unterschied, an dem der Owner-Entscheid vom 2026-09-08 hängt |
 
 Nicht anwendbar: `lädt`, `Fehler` (Begründung im Verhalten), `leer nach
 Filter` (eine Zelle filtert nicht).
@@ -453,3 +466,160 @@ läuft in einem eigenen Worktree, Entscheid vom 2026-09-07).
 in **allen** Listen-Stories die Zeilenhöhe gleich der Nachbarzeilen, gemessen
 bei 700 und 1400 px; die `stacked`-Form unverändert; und dass keine
 Faktentafel oder Karte versehentlich auf `inline` gefallen ist.
+
+## Schlanke Abnahme (Schnittstelle) 2026-09-08
+
+**Urteil: zurück.** Der Code ist sauber — alle sechs Wächter grün, alle acht
+Stories rendern ohne Meldung, kein Fachtyp lokal nachgebaut, kein Cast, kein
+Hex, kein px, keine Label-Map. Zurück geht es an der **Schnittstelle in der
+Spec**: die Tabelle unter „Schnittstelle" führt die Prop `layout` nicht, und
+der `CaseLink`-Block darüber ist in zwei von neun Feldern veraltet — genau in
+den zweien, die spätere Abnahmen im Code korrigiert haben. Die App liest diese
+beiden Stellen; beide Mängel kosten dort eine Aufrufstelle, beide kosten hier
+drei Zeilen. Am Code ist nichts zu ändern.
+
+**Prüftiefe.** Geprüft wurde die Schnittstelle, nicht die Darstellung
+(Owner-Entscheid 2026-09-08, Skill `v3-komponente`, „Zwei Tiefen"). Spurbreiten,
+Zeilenhöhen, Überläufe, Kontrastzahlen, Trefferflächen, Hover, Fokus und
+Tastaturwege sind nach `0119-visuelle-pruefung-nachholen.md` vertagt. Damit ist
+auch die Messung, die der Nachtrag vom 2026-09-07 selbst verlangt — Zeilenhöhe
+gleich der Nachbarzeilen in allen Listen-Stories, bei 700 und 1400 px — **nicht**
+Teil dieser Abnahme; sie gehört nach 0119.
+
+### Geprüft
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| Jede Prop gegen die Schnittstelle (Typ, Pflicht, Vorgabe) | Code `CaseCell.tsx` Z. 26–52: `cases: readonly CaseLink[]` · `href: (caseId: string) => string` · `emptyHref?: string` · `showState?: boolean = true` · `layout?: "inline" \| "stacked" = "inline"`. Spec-Tabelle Z. 62–67 führt vier davon; `layout` fehlt (M1), `cases` ist dort ohne `readonly` (M4) | ✗ (M1) |
+| `CaseLink` gegen den Code | Spec Z. 73–84 gegen `case-title.ts` Z. 23–42: sieben Felder gleich, **`kind`** ist in der Spec `CaseKind`, im Code `CaseKind \| null` (seit 0070 M2 nötig), **`currency`** ist in der Spec `string \| null`, im Code `Currency \| null` (Nebenbefund der Abnahme 2026-09-06, Z. 332, und Kriterium Z. 347) | ✗ (M2) |
+| Typen aus `src/ludwig/`, keine lokale Neudefinition | `case-title.ts` Z. 1–6 zieht `caseDisplayTitle`, `CaseKind`, `CaseLifecycle` aus `@/ludwig/modules/accounting-cases/domain/case` und `Currency` aus `@/ludwig/shared/money`. `caseTitle()` ist die Durchreiche, keine zweite Ableitung (L-52). `CaseLink` ist der von der Spec bestellte Schnitt, kein Ansichtsmodell | ✓ |
+| Keine `as`-Zusicherung auf einen Fachtyp | `grep -nE "\bas [A-Za-z]\|as unknown"` über `CaseCell.tsx`, `case-title.ts`, `CaseCell.stories.tsx` → zwei Treffer, beide das Wort „as" in englischer Prosa im JSDoc (Z. 23, Z. 38), kein Cast | ✓ |
+| `@when`/`@instead` an jedem Export | `CaseCell.tsx` Z. 21–24; `case-title.ts` Z. 50–51 (`caseTitle`) und Z. 65–66 (`caseIdentifier`). `pnpm check:when` → Exit 0 (Konstanten und Typen sind nach der Regel des Wächters ausgenommen) | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `src/ui/v3/entities/accounting-case/CaseCell.tsx`, `CaseCell.stories.tsx` daneben, Titel `v3/Entitäten/Sachverhalt/CaseCell` | ✓ |
+| Story je Prop | `cases` → `Single`/`Many`/`None`; `href` → jede; `emptyHref` → `None` (mit und ohne); `showState` → `WithoutState`; **`layout` → `Layouts`**, und die Story belegt beide Werte in derselben 200-px-Spur: gemessen trägt dort ein `.v2case__one` die Klasse `v2case__one--inline`, das andere `v2case__one--stacked` | ✓ |
+| Die Vorgabe `inline` greift wirklich | Über alle Stories 19 `.v2case__one`; die 17 außerhalb von `Layouts` tragen ausnahmslos `v2case__one--inline`, obwohl keine von ihnen die Prop setzt | ✓ |
+| Story-Zahl gegen `spec-schreiben` §6 | Heute acht: `Single`, `Many`, `None`, `WithoutState`, `Fallbacks`, `Layouts`, `NarrowColumn`, `InUse` (`index.json`). Ableitung mit der neuen Prop: 3 Zustände + 1 Enum-Prop (`layout`) + 1 Layout-Boolean (`showState`) + 0 Callbacks + 1 „im Einsatz" + 1 Rand = **7**, dazu der zweite Rand `NarrowColumn`, den Nachtrag 1 verlangt = **8**. Unter der Obergrenze 10. Die Spec rechnet Z. 116–118 noch „= 6" und ihre Tabelle Z. 120–128 führt `Layouts` nicht (M3) | ✗ (M3) |
+| Ausgeschlossene Zustände begründet | `lädt`, `Fehler`, „leer nach Filter" — Begründung unter „Verhalten" (Z. 111–112) und Z. 130–131 | ✓ |
+| Status nur über die Registry | `StatusBadge axis="sachverhalt" info={false}` (`CaseCell.tsx` Z. 84); `grep -niE "label\|record<"` über beide Dateien → kein Treffer. Gerendert in `--many`: „Zur Prüfung" · „Klärung offen" · „Verbucht" — die Wörter der Achse | ✓ |
+| Kein Hex, kein px in der Komponente | `grep -nE '#[0-9a-fA-F]{3,8}\b'` und `grep -nE '[0-9]+px'` über `CaseCell.tsx` und `case-title.ts` → je kein Treffer | ✓ |
+| Die Zelle baut keine URL, rechnet und sortiert nicht | `grep -n "clients/"` → kein Treffer; `grep -nE "\.sort\(\|\.reduce\(\|\.filter\(\|Math\."` → kein Treffer. Gerendert: `href="#sachverhalt-c-2026-0412"` aus der Story-Funktion | ✓ |
+| Kein (i) an der Zelle | `document.querySelectorAll('button[aria-label*="erkl"]')` → 0 in allen acht Stories | ✓ |
+| Die Aufrufstellen im Set setzen `layout` richtig | `grep -rn "CaseCell" src/` findet drei Aufrufer: `source-document-columns.tsx` Z. 371 und Z. 395 (Liste, Vorgabe `inline`), `bank-transaction-columns.tsx` Z. 264 (Liste, Vorgabe `inline`), `BankTransactionFacts.tsx` Z. 218 (`layout="stacked"`). Keine weitere Faktentafel und keine Karte komponiert die Zelle — die Aussage des Nachtrags stimmt, und keine ist auf `inline` gefallen | ✓ |
+| Die sechs Wächter über den Exit-Code | `pnpm typecheck` (0 Zeilen Ausgabe) · `check:language` („2 angefasste Dateien geprüft") · `check:icons` („53 Zeichen in der Registry, 2 Datei(en) noch offen") · `check:contrast` („33 Angaben nachgerechnet") · `check:mirror` („8 Fälle", Spiegel gleich `f1c58c44`) · `check:when` — **je Exit 0**, je ein bis zwei Zeilen Gesamtausgabe, nichts abgeschnitten | ✓ |
+| Selbstprüfungen der Wächter | `check-language.mjs --test` (8 Fälle) · `check-contrast.mjs --test` (16) · `check-when.mjs --test` (11) · `mirror-filter.mjs --test` (8) — je Exit 0. `check-icons.mjs` hat keine | ✓ |
+| Ein Durchlauf über die Stories im Browser | Ein Skript über alle acht Story-IDs (`scripts/cdp.mjs` aus dem Repo, Dev-Server 6107). Jede Story rendert Text (`innerText` 11–445 Zeichen), jede zeigt die erwarteten Bausteine: `--single` 1 Zelle/1 Chip · `--many` 3 Fälle mit „812,50 €" · „96,20 €" · „341,20 €" · `--none` zweimal „offen", einmal als `<a href="#zuordnen">` · `--without-state` 0 Chips, Text bleibt · `--fallbacks` die vier Stufen inkl. Kennung `c-d4f9e1` · `--layouts` beide Anordnungen · `--narrow-column` und `--in-use` mit vollem `title` je Link. Kein Gedankenstrich in irgendeiner Story | ✓ |
+| Konsole | 24 Meldungen über acht Stories = **je drei**, in jeder Story dieselben: `[vite] connecting…`, `[vite] connected.`, der React-DevTools-Hinweis. Keine Warnung, keine Ausnahme, nichts aus der Komponente | ✓ |
+| offen (App): Ersatz der drei Fassungen, `lifecycleStatus` in den Queries (B3) | nicht in diesem Repo prüfbar | offen (App) |
+
+### Mängel
+
+1. **`layout` fehlt in der Schnittstellen-Tabelle.** — *Kriterium:* jede Prop
+   des Codes steht in der Schnittstelle der Spec, mit Typ, Pflicht und Vorgabe.
+   *Ort:* `docs/backlog/0095-case-cell.md` Z. 62–67 gegen `CaseCell.tsx` Z. 52.
+   *Befund:* die Prop steht nur in der Prosa des Nachtrags (Z. 400, 412) — die
+   Tabelle, aus der die App die Aufrufstelle abliest, kennt sie nicht, und
+   damit auch keine Nachweis-Story. Das ist die Prop, deren Vorgabe still
+   entscheidet: wer sie nicht kennt, bekommt in einer Faktentafel `inline` ohne
+   Typfehler und ohne Hinweis — der Fall, für den der Nachtrag `stacked`
+   überhaupt behalten hat. *Kleinster Weg:* eine Zeile in der Tabelle —
+   `` `layout` | `"inline" \| "stacked"` | nein, Default `inline` | … | `Layouts` ``.
+   **Blockiert.**
+
+2. **Der `CaseLink`-Block nennt zwei Typen falsch.** — *Kriterium:* keine
+   Abweichung zwischen dem Typ in der Spec und dem im Code. *Ort:* Spec Z. 78
+   und Z. 83 gegen `case-title.ts` Z. 35 und Z. 41. *Befund:* `kind` steht in
+   der Spec als `CaseKind`, im Code als `CaseKind | null` — die Lockerung aus
+   0070 M2, ohne die der Belegkatalog eine Art erfinden müsste (er tat es, und
+   das setzte ein falsches Abzeichen in die Zelle); `source-document-columns.tsx`
+   Z. 382 übergibt heute `kind: null` und wäre gegen den Typ der Spec nicht
+   übersetzbar. `currency` steht in der Spec als `string | null`, im Code als
+   `Currency | null` — die Korrektur, die die Abnahme vom 2026-09-06 selbst als
+   Nebenbefund notiert (Z. 332) und als Kriterium führt (Z. 347). Der Block ist
+   das, was die App kopiert; er ist an beiden Stellen der Stand vor zwei
+   Abnahmen. *Kleinster Weg:* zwei Zeilen im Block auf `CaseKind | null` und
+   `Currency | null` setzen, mit dem Halbsatz, warum `kind` null sein darf.
+   **Blockiert.**
+
+3. **Die Stories-Tabelle und die §6-Rechnung sind vom Stand vor `Layouts`.** —
+   *Kriterium:* jede Prop hat ihre Story, und die Zahl stimmt mit der Ableitung.
+   *Ort:* Spec Z. 116–118 und Z. 120–128. *Befund:* die Rechnung endet auf „= 6"
+   und kennt weder die Enum-Prop noch den zweiten Rand; die Tabelle führt sieben
+   Zeilen, der Baum acht. Die Story `Layouts` **existiert** und belegt die Prop
+   (oben gemessen) — es fehlt nur ihr Eintrag. *Kleinster Weg:* eine Zeile in
+   der Tabelle und die Rechnung auf „3 + 1 Enum + 1 Layout-Boolean + 1 im
+   Einsatz + 1 Rand = 7, dazu `NarrowColumn` aus Nachtrag 1 = 8". Blockiert
+   nicht — es kostet drüben keine Aufrufstelle.
+
+4. **`cases` ist im Code `readonly`, in der Spec nicht.** — *Kriterium:* Typ
+   gleich. *Ort:* Spec Z. 64 (`CaseLink[]`) gegen `CaseCell.tsx` Z. 33
+   (`readonly CaseLink[]`). *Befund:* die Erweiterung ist die richtige Richtung
+   — der Aufrufer darf mehr übergeben, nicht weniger —, aber sie steht nicht
+   geschrieben. *Kleinster Weg:* `readonly CaseLink[]` in die Tabelle. Blockiert
+   nicht.
+
+### Befunde am Set
+
+Nicht gemessen, nur im Vorbeigehen gesehen; nichts davon ist ein Mangel dieser
+Abnahme, mehreres gehört nach 0119.
+
+- **Zwei rohe px im CSS der Zelle.** `src/styles/v3.css` Z. 3212
+  (`.v2case--stack { gap: 2px }`) und Z. 3247 (`.v2case__none { padding: 1px … }`).
+  Beide sind Haarlinien und älter als der Umbau vom 2026-09-07; die Abnahmen
+  vom 2026-09-06 haben das Kriterium ausdrücklich auf die TSX-Dateien bezogen.
+  Trotzdem: es sind die einzigen zwei Maße dieses Blocks, die kein Token sind.
+- **Vier deutsche Kommentarzeilen in `CaseCell.tsx`** (Z. 80, 81, 86, 87 —
+  „Der Zustand als Chip…", „Der Teilbetrag kommt aus der Zuordnung…"). Sie
+  stammen aus dem ersten Bau (`d47ff29`); `check:language` prüft nach Absicht
+  nur die geänderten Zeilen und meldet sie deshalb zu Recht nicht. Der Kommentar,
+  den der Umbau vom 2026-09-07 dazugeschrieben hat, ist englisch. Wenn die Datei
+  ohnehin nochmal angefasst wird, wären es vier Zeilen.
+- **Die Tabelle unter „Schnittstelle" beschreibt `showState` noch als „Punkt"**
+  (Z. 67), ebenso die Stories-Tabelle Z. 122 („Zustandspunkt"). Seit der
+  Freigabe (a) ist es ein Chip. Reine Wortpflege.
+- **Der Baum bewegte sich während der Prüfung.** `BankTransactionFacts.tsx`
+  lag beim Lesen noch ungebunden im Arbeitsbaum (fremde Sitzung, mit
+  `BankTransactionRow` und `bank-transaction-columns`); inzwischen ist die
+  Fassung committet (`53a54f9`) und trägt `layout="stacked"` in Z. 218
+  unverändert. Alle Zeilennummern dieses Abschnitts sind gegen den Stand
+  `6b24684` nachgezogen, und die sechs Wächter sind auf diesem Stand ein
+  zweites Mal gelaufen — wieder je Exit 0 (`check:language` meldet dort
+  „nichts geändert", weil der Baum sauber war; der erste Lauf hatte zwei
+  angefasste Dateien).
+- **Zeilenhöhen, Ellipse, Fokus, Trefferflächen** in `Layouts`, `NarrowColumn`
+  und `InUse` sind hier nicht gemessen worden — sie sind der Kern dessen, was
+  der Nachtrag vom 2026-09-07 behauptet, und gehören nach
+  `0119-visuelle-pruefung-nachholen.md`.
+
+Geprüft von / am: Claude (Abnahme-Agent, schlanke Abnahme Schnittstelle),
+2026-09-08 · Nicht gebaut, nichts geändert, nichts gestaged · Offene Punkte:
+M1 und M2 (blockierend, je eine Zeile in dieser Spec), M3 und M4 (Pflege), die
+visuelle Prüfung (0119) und die App-Zeile (offen).
+
+## Nach der schlanken Abnahme (2026-09-08)
+
+Urteil war **zurück** — und zwar an der **Spec**, nicht am Code. Genau das ist
+der Wert dieser Prüftiefe: wer drüben gegen die Schnittstelle in der Spec
+baut statt gegen die Datei, bekommt Typen, die es nicht mehr gibt.
+
+**M1 (blockierend) — `layout` steht jetzt in der Schnittstelle.** Die Prop kam
+mit dem Owner-Entscheid vom 2026-09-08 dazu und stand nur in der Prosa des
+Nachtrags. Wer sie nicht kennt, bekommt in einer Faktentafel still `inline` —
+ohne Typfehler, mit falschem Bild. Sie hat jetzt ihre Zeile samt Vorgabe und
+Nachweis-Story.
+
+**M2 (blockierend) — der `CaseLink`-Block war in zwei Feldern veraltet.**
+`kind` stand als `CaseKind`, im Code ist es seit 0070 M2 `CaseKind | null` —
+und der Belegkatalog übergibt heute `kind: null`, wäre gegen den Spec-Typ also
+nicht übersetzbar. `currency` stand als `string | null` statt `Currency | null`
+(0098 M1). Beide Korrekturen hatten frühere Abnahmen im **Code** längst
+erzwungen; die Spec hat sie nicht mitbekommen.
+
+**Die zwei kleinen dazu:** `cases` ist im Code `readonly`, die Spec sagte es
+nicht; und die Story-Ableitung stand auf „= 6", gebaut sind **8**
+(`NarrowColumn` als zweiter Rand, `Layouts` für die neue Prop). Beide Zeilen
+sind nachgezogen, `Layouts` steht in der Tabelle.
+
+Am Code war nichts zu ändern — er war in allen fünf Punkten der Stand, den die
+Spec beschreiben sollte.
+
+**Status: Abnahme** — die nächste Runde entscheidet.
