@@ -78,6 +78,7 @@ export function SourceDocumentDrawer({
   loading,
   error,
   onOpenFull,
+  provenance,
 }: {
   open: boolean;
   onClose: () => void;
@@ -91,6 +92,16 @@ export function SourceDocumentDrawer({
   error?: ReactNode;
   /** The one way out, in the foot. */
   onOpenFull: () => void;
+  /**
+   * Provenance and DATEV filing in the facts (0120), passed to the card.
+   *
+   * Default **off**, and that is the recommendation: the drawer answers the
+   * one question that came up elsewhere (0052), and „where is this filed in
+   * DATEV" is not that question — whoever asks it is already on the document.
+   * It is a prop and not a fixed `false` because the drawer does not own that
+   * judgement: a page whose whole job is filing may well want it here.
+   */
+  provenance?: boolean;
 }) {
   return (
     <Drawer
@@ -121,7 +132,13 @@ export function SourceDocumentDrawer({
         ) : null
       }
     >
-      <DrawerBody reference={reference} record={record} loading={loading} error={error} />
+      <DrawerBody
+        reference={reference}
+        record={record}
+        loading={loading}
+        error={error}
+        provenance={provenance}
+      />
     </Drawer>
   );
 }
@@ -138,11 +155,13 @@ function DrawerBody({
   record,
   loading,
   error,
+  provenance,
 }: {
   reference: string;
   record: SourceDocumentQuickView | null;
   loading?: boolean;
   error?: ReactNode;
+  provenance?: boolean;
 }) {
   if (error) {
     // The reason plus the identifier, in one sentence — „Fehler beim Laden"
@@ -194,6 +213,7 @@ function DrawerBody({
       excerpt={record.excerpt}
       group={record.group}
       tone="bare"
+      provenance={provenance}
     >
       {/* Zone 4: what the glance does not answer. */}
       <p className="v2doc__limit">

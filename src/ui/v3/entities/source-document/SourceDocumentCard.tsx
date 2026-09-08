@@ -53,6 +53,15 @@ export interface SourceDocumentCardProps {
    * surface; `surface` in the view.
    */
   tone?: "surface" | "bare";
+  /**
+   * Passed to the facts (0120): provenance and DATEV filing.
+   *
+   * Default `false`, because the card does not know where it stands — it is
+   * the body of the detail **and** of the drawer, and every route to the facts
+   * runs through it. The caller decides: on in the detail page, off wherever
+   * the card stands beside other work.
+   */
+  provenance?: boolean;
   /** What the caller adds under the two columns — the drawer puts its limit there. */
   children?: ReactNode;
 }
@@ -75,6 +84,7 @@ export function SourceDocumentCard({
   partHref,
   missing,
   tone = "surface",
+  provenance,
   children,
 }: SourceDocumentCardProps) {
   const kind = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
@@ -103,6 +113,7 @@ export function SourceDocumentCard({
             group={group}
             missing={missing}
             tone={tone === "bare" ? "bare" : "surface"}
+            provenance={provenance}
           />
         </div>
       </div>

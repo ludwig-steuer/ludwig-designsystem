@@ -39,6 +39,12 @@ const INVOICE: SourceDocumentVM = {
   docDirection: "inbound",
   classDocumentKind: "original",
   caseNumber: "2026-0412",
+  // Herkunft und Ablage (0120) — nur `WithProvenance` zeigt sie.
+  classConfidence: 0.94,
+  classOverriddenAt: "2026-08-30T11:04:00Z",
+  datevRefSystem: "DUO",
+  datevRefFolder: "2026/08",
+  datevRefId: "DOC-4471-0088",
 };
 
 const SUMMARY =
@@ -84,6 +90,30 @@ export const Filled: Story = {
         document={INVOICE}
         summary={SUMMARY}
         previewUrl={PREVIEW}
+      />
+    </div>
+  ),
+};
+
+/**
+ * `provenance` (0120): Herkunft und Ablage als vierter Block der Fakten — das
+ * ist die Fassung der **Belegseite**.
+ *
+ * Die Prop steht hier und nicht nur an `SourceDocumentFacts`, weil jeder Weg
+ * zu den Fakten über diese Karte läuft: die Detailseite zeigt sie im ersten
+ * Reiter, der Drawer rendert dieselbe Karte. Ohne das Durchreichen wäre der
+ * Block von außen unerreichbar gewesen (Befund der App, 2026-09-08).
+ *
+ * Die Vorgabe ist `false`, weil die Karte nicht weiß, wo sie steht.
+ */
+export const WithProvenance: Story = {
+  render: () => (
+    <div style={{ padding: "var(--space-5)", maxWidth: 1500 }}>
+      <SourceDocumentCard
+        document={INVOICE}
+        summary={SUMMARY}
+        previewUrl={PREVIEW}
+        provenance
       />
     </div>
   ),

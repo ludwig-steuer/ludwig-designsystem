@@ -135,3 +135,46 @@ Frage 2 hat sich erledigt, weil L-217 vor dem Bau kam.
 **Was die App wissen muss:** nur `sourceDocumentFromDispatch` füllt die vier
 Felder, die Listen-Mapper nicht. Das reicht — `provenance` ist eine Prop der
 Detailform, und in der Liste hat keiner der drei Punkte einen Rang unter 13.
+
+## Nacharbeit 2026-09-08 — die Prop war von außen nicht erreichbar
+
+**Befund der App:** `provenance` hing an `SourceDocumentFacts`, aber weder
+`SourceDocumentCard` noch `SourceDocumentDrawer` reichten sie durch. Von der
+Belegseite aus war der Block damit nicht zu erreichen.
+
+Der Befund stimmt, und die Ursache ist eine falsche Annahme dieser Spec.
+Sie schrieb „`false` in der Karte (M), `true` im Detail und im Drawer (L)" —
+als stünde die Karte neben der Detailform. Die Kette ist aber:
+
+```
+SourceDocumentView  →  (Aufrufer setzt)  SourceDocumentCard  →  SourceDocumentFacts
+SourceDocumentDrawer  →                  SourceDocumentCard  →  SourceDocumentFacts
+```
+
+**Jeder** Weg zu den Fakten läuft über die Karte — sie ist nicht die Form M
+neben dem Detail, sondern dessen Rumpf. „Die Karte zeigt es nicht" war
+deshalb keine Größenregel, sondern ein Denkfehler.
+
+**Gebaut (Vorschlag (a) des Managers):**
+
+- `SourceDocumentCard.provenance?: boolean`, durchgereicht an die Fakten.
+  Vorgabe `false`, **weil die Karte nicht weiß, wo sie steht** — nicht, weil
+  eine Karte den Block nicht zeigen dürfte. Der Aufrufer entscheidet.
+- `SourceDocumentDrawer.provenance?: boolean`, durchgereicht an die Karte.
+  Vorgabe ebenfalls `false`, und das ist hier zusätzlich eine **Empfehlung**:
+  der Drawer beantwortet die eine Frage, die woanders aufkam (0052), und „wo
+  liegt der Beleg in DATEV" ist nicht diese Frage — wer sie stellt, ist schon
+  auf dem Beleg. Sie ist trotzdem eine Prop und kein festes `false`, weil der
+  Drawer dieses Urteil nicht besitzt: eine Seite, deren Arbeit die Ablage
+  **ist**, darf ihn hier wollen.
+- `SourceDocumentView` bekommt **nichts**: er baut die Karte nicht selbst,
+  sondern nimmt sie als `children`. Wer den View füllt, setzt die Prop an der
+  Karte.
+
+**Story `WithProvenance` an der Karte**, gemessen: Block da, „94 %",
+„DOC-4471-0088"; in `Filled` keins davon. Der Drawer bekommt keine eigene
+Story — er reicht die Prop nur weiter, wie er es mit `group` und `tone` schon
+tut, und eine Story, die sie dort auf `true` setzt, würde der Empfehlung
+widersprechen.
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0.
