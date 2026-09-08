@@ -140,8 +140,15 @@ export const STUCK_COLUMNS: SourceDocumentColumn[] = [
 export interface SourceDocumentColumnOptions {
   /** The row link; it sits on the leading point (`.v2rowlink`, I11). */
   href?: (document: SourceDocumentVM) => string;
-  /** Passed through to `CaseCell`. */
-  caseHref?: (caseId: string) => string;
+  /**
+   * Passed through to `CaseCell`. It gets the case **number**, not the id:
+   * `SourceDocumentVM` does not carry an id (L-207), and the two are provably
+   * different in this repo (`document-number/fixtures.ts:35` holds
+   * `caseId: "c-4412"` next to `caseNumber: "2026-0412"`). A caller that
+   * builds `/cases/{id}` from it links into the void — build it from the
+   * number, or wait for L-207.
+   */
+  caseHref?: (caseNumber: string) => string;
   columns?: SourceDocumentColumn[];
   /**
    * Which point carries the row link. Without it the counterparty leads
@@ -182,7 +189,7 @@ export function sourceDocumentColumns({
   columns = DOCUMENT_LIST_COLUMNS,
   lead: leadColumn,
   stuckVariant = "stuck",
-}: SourceDocumentColumnOptions): ColumnDef<SourceDocumentVM>[] {
+}: SourceDocumentColumnOptions = {}): ColumnDef<SourceDocumentVM>[] {
   const picked = new Set(columns);
   // Whichever of the two identity points comes first carries the row link —
   // unless the caller says otherwise (the stuck list leads with the file).
@@ -371,6 +378,10 @@ export function sourceDocumentColumns({
           <CaseCell
             cases={[
               {
+                // The number stands in for the id as long as the view model
+                // has none (L-207). `CaseCell` reads `caseId` for the React
+                // key and hands it to `caseHref` — both survive a number;
+                // a route built on it does not, which is why `caseHref` says so.
                 caseId: d.caseNumber,
                 caseNumber: d.caseNumber,
                 fiscalYear: null,
@@ -392,6 +403,10 @@ export function sourceDocumentColumns({
           // „—", and a dash claims the value is unknown; the case is not
           // unknown, there is none yet. `CaseCell` has the word and the
           // reasoning for exactly this (acceptance 0070, M4).
+          // No `emptyHref`: „offen" is a statement about this document, not
+          // an offer. A document list has no place to send anyone — the case
+          // is created from the document itself, and that path does not exist
+          // yet. A prop nobody fills is not built (spec-schreiben §8, A12).
           <CaseCell cases={[]} href={caseHref ?? (() => "#")} />
         ),
     },

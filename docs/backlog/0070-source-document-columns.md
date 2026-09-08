@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig (Schnittstelle) — die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/source-document/` — `SourceDocumentColumns` + kurze `SourceDocumentList` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Belegart, Einordnung und Erledigung sind Ludwig-Fachbegriffe |
 | Quelle | Entitätsprofil `docs/entitaeten/source-document.md`, Abschnitt „Listen" (sechs Job-Sätze) |
@@ -56,9 +56,11 @@ würde die Liste Entscheidungen treffen, die ihr nicht gehören.
   Profils es so entschieden hat: drei lange Listen, ein Katalog, kein
   dreifacher Baustein. Vorbild `accountEntryColumns` (A11a), Präzedenz seit
   0096 und 0101 in zwei weiteren Familien.
-- **Zuschnitt:** eine Datei mit drei Exporten —
+- **Zuschnitt:** eine Datei mit drei Funktionen —
   `sourceDocumentColumns()` (der Katalog), `sourceDocumentTracks()` (die
-  Spurliste aus derselben Quelle) und drei benannte Sätze. Dazu
+  Spurliste aus derselben Quelle) und `sourceDocumentMinWidth()` (die
+  Mindestbreite, aus derselben Quelle wie die Spuren, damit die Tabelle nicht
+  unter ihre eigenen Spalten schrumpft) — dazu vier benannte Sätze. Dazu
   `SourceDocumentList` als **eigene Datei** für die kurzen Listen: sie hat
   eine andere Frage (zwei Leerfälle statt Sortierung und Pager) und wird
   allein gebraucht.
@@ -76,19 +78,21 @@ Die Reihenfolge ist die des Profils und über alle drei Sätze dieselbe;
 | `counterparty` | 1 | Gegenpart; fehlt er (5–50 % je Ausprägung), führt der Dateiname |
 | `fileName` | 1b | Dateiname, in der Mitte gekürzt — die Kennung, die **jede** Ausprägung trägt |
 | `kind` | 2 | Belegart über `sourceDocTypeLabel()`, Belegform als Rückfall |
+| `form` | 2b | Belegform über `formatDocumentForm()` — **nicht** die Art: die Art ist, was der Beleg in Ludwig ist, die Form, was der Klassifikator vom Papier gelesen hat. Nur die Form entscheidet, ob ein Beleg zum Einreichen qualifiziert |
 | `amount` | 3 | Maß der Ausprägung, rechts mit `tnum`; leer, wo die Ausprägung keins hat |
 | `documentDate` | 4 | Belegdatum. NULL bleibt NULL — nie der Upload-Tag |
 | `identifier` | 5 | Kennung der Ausprägung, Rückfallkette Nummer → Dateiname → Kurz-ID |
 | `case` | 6 | Sachverhalt über `CaseCell` |
 | `receivedDate` | 7 | Eingang, `NOT NULL`, der Sortierschlüssel der Belegliste |
 | `classification` | — | Einordnung: Kategorie · Richtung · Belegform, je über ihre Achse |
-| `processing` | — | Verarbeitung, Achse `beleg` |
-| `completed` | — | Erledigt: Zeitpunkt und Weg, sonst „offen" |
-| `inboxState` | — | Achse `beleg_inbox` — der einzige Zustand, den jede Ausprägung trägt |
 | `confidence` | — | Achse `konfidenz` — wie sicher die Einordnung ist |
 | `size` | — | Dateigröße, rechts; nur beim Einreichen, wo die 25-MB-Grenze zählt |
+| `processing` | — | Verarbeitung, Achse `beleg` |
+| `stuckState` | — | Achse `beleg_haenger` — woran der Beleg hängt. Was sie über denselben Beleg sagt, entscheidet `stuckVariant` |
+| `inboxState` | — | Achse `beleg_inbox` — der einzige Zustand, den jede Ausprägung trägt |
+| `completed` | — | Erledigt: Zeitpunkt und Weg, sonst „offen" |
 
-### Die drei Sätze
+### Die vier Sätze
 
 | Satz | Liste | Spalten | Warum so |
 |---|---|---|---|
@@ -107,8 +111,10 @@ gehört dem Buchungsvorschlag (Befund L-80). Siehe „Nach der Abnahme".
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `href` | `(doc) => string` | nein | Der Zeilenlink; er liegt am führenden Punkt (`.v2rowlink`) | `DocumentList` |
-| `caseHref` | `(caseId: string) => string` | nein | Reicht an `CaseCell` durch | `DocumentList` |
+| `caseHref` | `(caseNumber: string) => string` | nein | Reicht an `CaseCell` durch. Der Parameter ist die Sachverhalts**nummer**, nicht seine Kennung: `SourceDocumentVM` trägt keine (L-207), und die beiden sind verschieden. Wer daraus `/cases/{id}` baut, verlinkt ins Leere | `DocumentList` |
 | `columns` | `SourceDocumentColumn[]` | nein, Default `DOCUMENT_LIST_COLUMNS` | Welche Punkte. Wählt aus, ordnet nicht um | `Inbox`, `Submit` |
+| `lead` | `"counterparty" \| "fileName"` | nein, abgeleitet | Welcher Punkt den Zeilenlink trägt. Ohne Angabe führt der Gegenpart, sobald er im Satz ist — richtig für vier der fünf Sätze und falsch für den stockenden, der mit der Datei führt | `Stuck` |
+| `stuckVariant` | `"stuck" \| "inflight"` | nein, Default `"stuck"` | Welche der beiden Hänger-Listen. Sie entscheidet, was die Achse `beleg_haenger` über denselben Beleg sagt; gelesen nur von der Spalte `stuckState` | `Stuck` |
 
 `SourceDocumentList` (kurze Liste): `documents`, `emptyKind`
 (`"none" | "not-expected"`), `reason`, `href`.
@@ -120,13 +126,22 @@ gehört dem Buchungsvorschlag (Befund L-80). Siehe „Nach der Abnahme".
 - **Den Leerfall raten.** „Kein Beleg zu erwarten" ist ein Erfolg mit
   Begründung, „keine verbundenen Belege" eine Lücke — die kurze Liste bekommt
   gesagt, welcher gilt.
+- **Dem leeren Sachverhalt einen Weg geben.** „offen" ist eine Aussage über
+  den Beleg, kein Angebot: eine Belegliste hat keinen Ort, an den sie schicken
+  könnte — der Sachverhalt entsteht aus dem Beleg heraus, und diesen Weg gibt
+  es noch nicht. `CaseCell.emptyHref` bleibt deshalb ungesetzt und bekommt
+  keine durchgereichte Prop (Sch6, entschieden 2026-09-08).
+
+Alle Angaben sind wahlfrei: `sourceDocumentColumns()` ohne Argument ist der
+Aufruf für die Belegliste.
 
 ### Stories
 
 Titel `v3/Entitäten/Beleg/SourceDocumentColumns` bzw. `…/SourceDocumentList`.
 Abgeleitet nach §6: 1 Zustand (gefüllt — lädt, leer und Fehler gehören
-`DataTable`) + 1 Enum (`columns`, drei Werte in **einer** Story) + 0 Layout +
-0 Callbacks + 1 „im Einsatz" + 1 Rand = 4 für den Katalog; für die Liste
+`DataTable`) + 3 Enums (`columns` mit vier Sätzen, `lead`, `stuckVariant` —
+jede Achse **eine** Story) + 0 Layout + 0 Callbacks + 1 „im Einsatz" +
+1 Rand = 6 für den Katalog; für die Liste
 2 Leerfälle + 1 gefüllt + 1 „im Einsatz" = 4. *(Berichtigt nach der
 Wiederabnahme 2026-09-07, M6: die Tabelle nannte `List` · `ListEmpty` ·
 `ListNotExpected` · `ListInUse`, der Baum führt `Filled` · `Empty` ·
@@ -953,3 +968,379 @@ ist er seit gestern schärfer.
 
 **Status: Abnahme** — das Urteil war „zurück", also entscheidet die nächste
 Runde.
+
+## Schlanke Abnahme (Schnittstelle) 2026-09-08
+
+Vierte fremde Abnahme, ohne Bau-Verlauf. **Schlank** nach dem Owner-Entscheid
+vom 2026-09-08 (Skill `v3-komponente`, „Zwei Tiefen"): geprüft wird die
+**Schnittstelle**, nicht die Darstellung. Gelesen wurden
+`source-document-columns.tsx`, `SourceDocumentList.tsx` und ihre zwei
+Story-Dateien Zeile für Zeile gegen den Spec-Teil (Zuschnitt Z. 59, Katalog
+Z. 74–89, Sätze Z. 93–98, Schnittstelle Z. 107–111, Stories Z. 124–144,
+Kriterien ab Z. 146); dazu **ein** Durchlauf über alle zehn Stories im
+Dev-Server auf 6107 mit `scripts/cdp.mjs`. **Nicht gebaut** (0117).
+
+**Ergebnis: zurück.** Es blockieren zwei Aussagen der Schnittstelle, die nicht
+stimmen — keine davon am gebauten Verhalten: **Sch1**, die Spec führt die
+Schnittstelle nicht, die der Code hat (zwei Props und zwei Werte der Union
+fehlen), und **Sch2**, `caseHref` verspricht im Typ einen `caseId` und bekommt
+eine Sachverhalts**nummer**. Beides trifft die App bei `[year]/documents`
+direkt, und beides ist eine Zeile.
+
+### Die Nacharbeit — was sie an der Schnittstelle geändert hat
+
+Gefragt war, ob die sieben Nacharbeiten die Schnittstelle bewegt haben. Sie
+haben es nicht — mit einer Einschränkung, die nicht 0070 gehört:
+
+- **`clipMiddle` ist als Import gefallen.** `source-document-columns.tsx:1–20`
+  führt ihn nicht mehr; der Export lebt weiter in `SourceDocument.tsx:120` und
+  wird dort von `FileName` gebraucht. Keine Signatur geändert. Seit heute ist
+  `noUnusedLocals` an (`tsconfig.json:13`) — ein toter Import wäre jetzt ein
+  Typfehler; `pnpm typecheck` steht auf Exit **0**.
+- **`SourceDocumentCompletion` zeigt Zeitpunkt und Weg** (`SourceDocument.tsx:198–214`).
+  Die Props sind unverändert (`{ document }`), die **Ausgabe** nicht: hinter
+  dem Abzeichen steht jetzt `<Time value={document.completedAt} …>`. Weil vier
+  Formen denselben Export benutzen, tragen Zeile, Zelle, Facts und Drawer die
+  Datumsangabe mit — im Browser gesehen in `SourceDocumentList--filled`:
+  „… Leistungsbeleg Eingangsrechnung **Gebucht 30.08.2026**". Kein Mangel an
+  0070; ein Punkt für die Formen (unten unter „Befunde am Set").
+- **M2 ist ohne Änderung an 0070 erledigt.** Der Owner-Entscheid steht als
+  **Vorgabe** in `CaseCell.tsx:31` (`layout = "inline"`); der Katalog übergibt
+  nichts und bekommt sie. Im Browser steht der Sachverhalt einzeilig
+  („2026-0412 Sachverhalt" in einer Zeile, `DocumentList`).
+- Sonst: keine Prop dazu, keine weg, keine umbenannt.
+
+### 1. Jede Prop und jeder Typ gegen die Schnittstelle
+
+`SourceDocumentColumnOptions` (`source-document-columns.tsx:140–158`), Zeichen
+für Zeichen gegen die Tabelle Z. 109–111:
+
+| Spec (Z.) | Code | Urteil |
+|---|---|---|
+| `href` · `(doc) => string` · nein | `href?: (document: SourceDocumentVM) => string` (Z. 142) | stimmt |
+| `caseHref` · `(caseId: string) => string` · nein | `caseHref?: (caseId: string) => string` (Z. 144) | Typ stimmt, der **Wert** nicht → **Sch2** |
+| `columns` · `SourceDocumentColumn[]` · nein, Default `DOCUMENT_LIST_COLUMNS` | `columns?: SourceDocumentColumn[]`, Vorgabe `DOCUMENT_LIST_COLUMNS` (Z. 145, 182) | stimmt |
+| — | `lead?: "counterparty" \| "fileName"` (Z. 152), Vorgabe abgeleitet: `counterparty`, wenn im Satz, sonst `fileName` (Z. 189–190) | **fehlt in der Spec** → Sch1 |
+| — | `stuckVariant?: StuckVariant` (Z. 157), Vorgabe `"stuck"` (Z. 184); `StuckVariant = "stuck" \| "inflight"` (Z. 160) | **fehlt in der Spec** → Sch1 |
+
+Die Union führt **sechzehn** Werte (Z. 39–55): `counterparty`, `fileName`,
+`kind`, **`form`**, `amount`, `documentDate`, `identifier`, `case`,
+`receivedDate`, `classification`, `processing`, `completed`, `inboxState`,
+`confidence`, `size`, **`stuckState`**. Die Katalog-Tabelle der Spec
+(Z. 76–89) führt **vierzehn** — `form` und `stuckState` fehlen, obwohl beide
+in der Sätze-Tabelle darunter vorkommen. Das ist derselbe Befund wie bei
+`CaseColumn` in 0096 (zehn statt dreizehn).
+
+`ORDER` (Z. 58–75) ist vollständig und deckt sich mit `defs`; die Vollzähligkeit
+erzwingt `Record<SourceDocumentColumn, ColumnDef<…>>` (Z. 205) — ein
+vergessener Wert wäre ein Typfehler.
+
+Die vier Sätze (Z. 81–138) stimmen mit der Sätze-Tabelle überein:
+`DOCUMENT_LIST_COLUMNS` zehn Punkte, `INBOX_COLUMNS` vier, `SUBMIT_COLUMNS`
+vier mit `form` statt `kind`, `STUCK_COLUMNS` sechs. Im Browser gemessene
+Köpfe, in genau dieser Ordnung:
+
+- `DocumentList` — Gegenpart · Belegart · Betrag · Belegdatum · Kennung ·
+  Sachverhalt · Eingang · Einordnung · Verarbeitung · Erledigt (**10**)
+- `Inbox`, verdreht übergeben (`["inboxState","confidence","classification","fileName"]`)
+  — Datei · Einordnung · Konfidenz · Erkennung: `columns` **wählt aus, ordnet
+  nicht um**
+- `Submit` — Datei · Belegform · Größe · Erkennung
+- `Stuck` — Gegenpart · Datei · Sachverhalt · Eingang · Einordnung ·
+  Beleg-Zustand, in **beiden** Tabellen gleich
+
+Die zwei weiteren Funktionen: `sourceDocumentTracks(columns: ColumnDef<SourceDocumentVM>[]): string`
+(Z. 508) und `sourceDocumentMinWidth(columns: ColumnDef<SourceDocumentVM>[]): number`
+(Z. 525). Beide nehmen die **gebauten** Spaltendefinitionen, nicht
+`SourceDocumentColumn[]` — das steht in der Spec nirgends, und
+`sourceDocumentMinWidth` steht in Zuschnitt und Schnittstelle überhaupt nicht
+(nur im Fließtext der ersten Nacharbeit, M4).
+
+`SourceDocumentList` (`SourceDocumentList.tsx:26–38`) gegen Z. 113–114:
+`documents: readonly SourceDocumentVM[]` (Pflicht), `emptyKind?: SourceDocumentEmptyKind`
+= `"none" | "not-expected"` mit Vorgabe `"none"` (Z. 18, 28), `reason?: string`,
+`href?: (document: SourceDocumentVM) => string`. **Stimmt.** Dass die Union
+einen eigenen exportierten Namen trägt (`SourceDocumentEmptyKind`), sagt die
+Spec nicht — im Barrel steht er, die App kann ihn also lesen.
+
+Barrel vollständig (`src/ui/v3/index.ts:315–327`): beide Dateien, drei
+Funktionen, vier Sätze, drei Typen (`SourceDocumentColumn`,
+`SourceDocumentColumnOptions`, `StuckVariant`) und `SourceDocumentEmptyKind`.
+
+### 2. Typen aus `src/ludwig/`
+
+- `SourceDocumentVM extends Omit<MirrorDocument, "detail">` mit
+  `MirrorDocument` aus `@/ludwig/modules/source-docs/domain/source-document-vm`
+  (`SourceDocument.tsx:3, 65`) — **keine lokale Neudefinition**; die vier
+  Zusatzfelder sind begründet und mit Befund (L-207, L-208) versehen.
+- `sourceDocTypeLabel` und `formatDocumentForm` aus
+  `@/ludwig/modules/source-docs/domain/…` (Z. 1–2), `SourceDocCompletionVia`
+  aus derselben Quelle re-exportiert.
+- `StatusAxis` kommt aus `@/ludwig/ui/status/status-registry` über
+  `StatusBadge`; `CaseLink` aus `case-title.ts`, dort `kind: CaseKind | null`
+  (`case-title.ts:35`) — der Katalog übergibt `kind: null` (Z. 382), erfindet
+  also nichts mehr.
+- **Keine `as`-Zusicherung** in beiden Dateien: `grep` nach ` as ` findet nur
+  Prosa in Kommentaren (Z. 23, 219, 220, 252, 364), keine Zusicherung.
+- Eine Ausnahme, bewusst und mit Befund: `stuckState()` (Z. 169) gibt `string`
+  zurück statt einer Union. Die vier Werte stehen in der Registry
+  (`status-registry.ts:632–635`: `wird_klassifiziert`, `wird_extrahiert`,
+  `nicht_extrahiert`, `datum_fehlt`), aber `StatusBadge.status` ist
+  `string | null | undefined` — der Compiler prüft sie nicht. Das ist die
+  Bauart des Bausteins, nicht ein Fehler dieser Datei; die Ableitung ist als
+  **L-81** schon nach `domain/` vorgemerkt.
+
+### 3. `@when`/`@instead`, Dateiname, Story-Ordner
+
+Alle vier exportierten Funktionen tragen beide Zeilen:
+`sourceDocumentColumns` (Z. 175–178), `sourceDocumentTracks` (Z. 505–506),
+`sourceDocumentMinWidth` (Z. 521–523), `SourceDocumentList`
+(`SourceDocumentList.tsx:21–24`). Konstanten und Typen sind nach der Regel des
+Wächters ausgenommen (`scripts/check-when.mjs`, „Konstanten sind ausgenommen"),
+tragen aber trotzdem je einen Satz, der sagt, wofür der Satz da ist.
+`pnpm check:when` Exit **0**.
+
+Datei nach der Familie: `source-document-columns.tsx` in
+`src/ui/v3/entities/source-document/`, wie `bank-transaction-columns.tsx`,
+`case-columns.tsx`, `account-columns.tsx` in ihren Familien. Stories liegen im
+selben Ordner, Titel `v3/Entitäten/Beleg/SourceDocumentColumns` und
+`…/SourceDocumentList` — genau wie in der Spec (Z. 125).
+
+### 4. Story-Deckung
+
+Jede Prop hat ihre Story:
+
+| Prop | Story |
+|---|---|
+| `href` | `DocumentList`, `Inbox`, `Submit`, `Stuck`, `Edges`, `AllFour` — im Browser **4 `.v2rowlink`** bei 4 Datenzeilen, also einer je Zeile |
+| `caseHref` | `DocumentList`, `Stuck`, `Edges`, `AllFour` |
+| `columns` | `Inbox` (verdreht übergeben), `Submit`, `Stuck`, `AllFour` |
+| `lead` | `Stuck` (beide Tabellen), `AllFour` |
+| `stuckVariant` | `Stuck` — beide Werte untereinander, dieselben zwei Belege |
+| `documents` | `Filled`, `InUse` |
+| `emptyKind` | `Empty` (`"none"`), `NotExpected` (`"not-expected"`) |
+| `reason` | `NotExpected` |
+| `href` (Liste) | `InUse` (`#teilbeleg-…`) |
+
+Zahl gegen §6: 1 anwendbarer Zustand (gefüllt) + 1 je Enum-Prop — und es sind
+**drei**: `columns`, `lead`, `stuckVariant` — + 0 Layout + 0 Callbacks + 1 „im
+Einsatz" + 1 Rand = **6**. Gebaut sind **6** (Obergrenze 10 eingehalten).
+Für die kurze Liste 1 gefüllt + 2 Leerfälle + 1 „im Einsatz" = **4**, gebaut
+**4**. Die ausgeschlossenen Zustände sind begründet: „lädt, leer und Fehler
+gehören `DataTable`" (Z. 126) für den Katalog, und für die Liste steht der
+Grund in der Story-Tabelle („die Liste bekommt fertige Belege als Prop, lädt
+nichts und filtert nichts"). **Die Ableitung in der Spec selbst rechnet
+weiter 4** — siehe Sch4.
+
+### 5. Status nur über die Registry
+
+Sieben Achsen, alle über `StatusBadge`/`StatusInfoButton`: `beleg_kategorie`,
+`beleg_richtung`, `dokumentgruppe` (Z. 411–413), `beleg` (Z. 431, 435),
+`beleg_erledigung` (Z. 443, über `SourceDocumentCompletion`), `beleg_haenger`
+(Z. 450, 452), `beleg_inbox` (Z. 459, 463). **Keine lokale Label-Map** — die
+einzigen deutschen Zeichenketten in der Datei sind Spaltenköpfe („Gegenpart",
+„Datei", „Belegart", „Belegform", „Betrag", „Belegdatum", „Kennung",
+„Sachverhalt", „Eingang", „Einordnung", „Verarbeitung", „Erledigt",
+„Beleg-Zustand", „Erkennung", „Konfidenz", „Größe") und das „—" der Leerfälle.
+**Kein Hex** (`grep -E "#[0-9a-fA-F]{3,8}"` in beiden Dateien: Exit 1).
+
+`px` steht als **Rasterspur** (16 `width:`-Angaben) und in den zwei Konstanten
+von `sourceDocumentMinWidth` (`GUTTER = 10`, `PADDING = 36`). Das ist die
+Präzedenz aller Spaltenkataloge des Sets — `case-columns.tsx` 13,
+`bank-transaction-columns.tsx` 9, `account-columns.tsx` 8 px-Spuren — und war
+schon in den drei vorigen Abnahmen so gewertet. Der Wortlaut des Kriteriums
+(„kein px") deckt sich nicht mit der Praxis; siehe „Befunde am Set".
+
+### 6. Die sechs Wächter über den Exit-Code
+
+Vollständig gelesen, nicht über `| tail` beurteilt:
+
+| Lauf | Exit | Selbstprüfung (`--test`) |
+|---|---|---|
+| `pnpm typecheck` | **0** | kennt kein `--test` (`error TS5023`), also keine |
+| `pnpm check:language` | **0** („2 angefasste Dateien geprüft") | **0**, 8 Fälle |
+| `pnpm check:icons` | **0** (53 Zeichen in der Registry) | **0** |
+| `pnpm check:contrast` | **0** (33 Angaben nachgerechnet) | **0**, 16 Fälle |
+| `pnpm check:mirror` | **0** (8 Fälle) | **0**, 8 Fälle |
+| `pnpm check:when` | **0** | **0**, 11 Fälle |
+
+`noUnusedLocals`/`noUnusedParameters` stehen beide auf `true`
+(`tsconfig.json:13–14`); der gefallene `clipMiddle`-Import wäre sonst ein
+Typfehler. Anmerkung ohne Mangel: `check:language` prüft nur die **angefassten**
+Dateien (hier zwei aus `bank-transaction/`); für 0070 sagt sein Exit-Code
+deshalb nichts — die Prüfung auf Englisch ist oben von Hand gemacht.
+
+### 7. Ein Durchlauf über die Stories
+
+Ein Skript, ein Browser über `scripts/cdp.mjs` aus dem Repo, 1440 px,
+Dev-Server 6107. Alle zehn Stories:
+
+| Story | rendert | Konsole |
+|---|---|---|
+| `DocumentList` | 10 Köpfe, 4 Datenzeilen, 4 Zeilenlinks | sauber |
+| `Inbox` | 4 Köpfe, 4 Zeilen, 94 % · 71 % · 88 % | sauber |
+| `Submit` | 4 Köpfe (Datei · Belegform · Größe · Erkennung), 402 kB | sauber |
+| `Stuck` | 2 Tabellen à 6 Köpfe, alle vier Werte der Achse | sauber |
+| `Edges` | 10 Köpfe, 4 Zeilen, „Beleg", „—", 96-Zeichen-Name | sauber |
+| `AllFour` | 4 Tabellen, 24 Köpfe, 1461 Zeichen | sauber |
+| `Filled` · `Empty` · `NotExpected` · `InUse` | 2 Zeilen · „Keine verbundenen Belege" · „Kein Beleg zu erwarten" + Begründung · `#teilbeleg-…` | sauber |
+
+Kein `sb-errordisplay` sichtbar (`display: none` in allen zehn), keine
+Ausnahme, keine `console.error`/`warn` aus dem Set. Das einzige, was fällt,
+ist ein **404 auf `/favicon.ico`** — Storybook selbst, nicht diese Dateien.
+
+Ehrlichkeitshalber vermerkt: im ersten Lauf stand `DocumentList` leer da
+(`len = 0`). Das war das kalte Übersetzen der ersten Story; mit 2,5 s mehr
+Wartezeit wiederholt, rendert sie ihre zehn Spalten. Gegenprobe im selben
+Lauf: `Inbox` unverändert.
+
+### Mängel
+
+**Sch1 (blockiert) — die Spec führt nicht die Schnittstelle, die gebaut ist.**
+Vier Stellen, alle im Spec-Teil, keine im Code:
+
+1. Die Tabelle Z. 109–111 nennt drei Props; `SourceDocumentColumnOptions` hat
+   **fünf**. Es fehlen `lead?: "counterparty" | "fileName"` (Vorgabe:
+   abgeleitet — `counterparty`, wenn im Satz, sonst `fileName`) und
+   `stuckVariant?: "stuck" | "inflight"` (Vorgabe `"stuck"`). Beide stehen als
+   *Erzählung* in „Nach der Abnahme vom 2026-09-07" und in der Sätze-Tabelle
+   (Z. 98) — aber die Schnittstelle ist die Tabelle, und die App liest sie.
+2. Die Katalog-Tabelle Z. 76–89 führt 14 Werte, die Union 16: `form` und
+   `stuckState` fehlen.
+3. Zuschnitt Z. 59 sagt „drei Exporte … und **drei** benannte Sätze";
+   exportiert sind **vier** Funktionen und **vier** Sätze —
+   `sourceDocumentMinWidth` kommt in Zuschnitt und Schnittstelle nicht vor.
+4. Die Überschrift Z. 91 heißt „Die **drei** Sätze"; die Tabelle darunter hat
+   vier Zeilen.
+
+Das ist derselbe Faden wie in 0095 (`kind: CaseKind` gegen `CaseKind | null`)
+und 0096 (`href` als `string` gegen eine Funktion, `CaseColumn` mit zehn statt
+dreizehn Werten): die Abnahmen haben den Code richtiggestellt, die Spec hat es
+nicht mitgeschrieben. Es blockiert, weil die App **als Nächstes** gegen genau
+diese Tabelle migriert: wer sie liest, kennt zwei Props und zwei Spaltenwerte
+nicht und baut den stockenden Satz danach falsch. Kleinster Weg: zwei Zeilen
+in die Schnittstellen-Tabelle, zwei in die Katalog-Tabelle, ein Wort in
+Z. 59 und eins in Z. 91. Kein Code.
+
+**Sch2 (blockiert) — `caseHref` verspricht eine Kennung und bekommt eine
+Nummer.** `source-document-columns.tsx:144` typt
+`caseHref?: (caseId: string) => string`, und Z. 374 füllt
+`caseId: d.caseNumber`. `CaseCell` ruft damit `href(c.caseId)`
+(`CaseCell.tsx:77`) — der Rückruf der App bekommt also **„2026-0412"**, nicht
+die Kennung des Sachverhalts.
+
+Dass die beiden im Set verschieden sind, steht eine Familie weiter
+schwarz auf weiß: `document-number/fixtures.ts:35` führt
+`caseId: "c-4412"` **neben** `caseNumber: "2026-0412"`, und `CasePicker`
+(Z. 101) gibt `c.caseId` als Wert heraus. Die Spiegel-VM des Belegs trägt
+keine Sachverhalts-Kennung — nur `caseNumber` und einen fertigen `caseHref`
+(`SourceDocument.tsx:87–89`, Befund L-207); der Katalog kann also gar nichts
+anderes übergeben. Der Fehler ist nicht die Übergabe, sondern der **Name im
+Typ**: er sagt der App das Gegenteil dessen, was ankommt.
+
+Es blockiert, weil es genau die Aufrufstelle trifft, die als Nächstes gebaut
+wird: `[year]/documents` gibt einen `caseHref` mit, und eine Route, die auf
+einer Kennung steht, führt ins Leere. Kleinster Weg, ohne Verhalten zu ändern:
+den Parameter `caseNumber` nennen — `caseHref?: (caseNumber: string) => string`
+— und den Satz in Spec und JSDoc dazuschreiben („der Katalog kennt nur die
+Nummer, L-207"). Eine Zeile hier, eine dort.
+
+**Sch3 (blockiert nicht, klein) — `sourceDocumentColumns()` verlangt ein
+Argument.** Z. 179–185 destrukturiert ohne Vorgabe, das Objekt selbst hat
+also keine: `sourceDocumentColumns()` ist ein Typfehler,
+`sourceDocumentColumns({})` nicht. Die Spec führt jede Prop als „nein" und
+sagt zum Objekt nichts; ein Leser erwartet nach so einer Tabelle einen
+Aufruf ohne Argumente. Kleinster Weg: `= {}` hinter das Destrukturieren, oder
+ein Satz in der Spec.
+
+**Sch4 (blockiert nicht, klein) — die Ableitung nach §6 rechnet 4 und listet
+6.** Z. 126–131 zählt „1 Zustand + **1** Enum (`columns`) … = **4** für den
+Katalog"; die Tabelle unmittelbar darunter (Z. 133–141) führt **sechs**
+Stories. Mit allen drei Enum-Props — `columns`, `lead`, `stuckVariant` —
+liefert §6 genau **6**, also die gebaute Zahl. Der Satz ist damit nicht bloß
+veraltet: er verfehlt das Ergebnis seiner eigenen Regel. (Die Wiederabnahme
+vom 2026-09-07 rechnete 5, weil sie `lead` nicht als Enum-Prop zählte.)
+Kleinster Weg: den Satz auf drei Enum-Props und 6 stellen.
+
+**Sch5 (blockiert nicht, klein) — die Katalog-Tabelle steht in einer anderen
+Reihenfolge als `ORDER`.** Die Tabelle Z. 76–89 listet
+… `classification` · `processing` · `completed` · `inboxState` · `confidence` ·
+`size`; `ORDER` (Z. 58–75) hat … `classification` · `confidence` · `size` ·
+`processing` · `stuckState` · `inboxState` · `completed`. Die Sätze-Tabelle
+(„Dateiname · Einordnung · Konfidenz · Zustand") und der gemessene Kopf der
+`Inbox` folgen dem **Code**, nicht der Katalog-Tabelle. Die Zeilen ohne Rang
+tragen zwar nur „—", aber wer eine Tabelle liest, liest ihre Reihenfolge als
+die Reihenfolge. Kleinster Weg: die sechs zustandslosen Zeilen in die
+Ordnung des Codes bringen.
+
+**Sch6 (blockiert nicht, klein) — der Leerfall des Sachverhalts hat kein
+Ziel.** Z. 395 ruft `<CaseCell cases={[]} href={…} />` ohne `emptyHref`, und
+`CaseCell` sagt zu dieser Prop selbst: „Without it the word stands without a
+way." Der Katalog bietet dem Aufrufer keine Prop, mit der er das Ziel setzen
+könnte — „offen" bleibt also in jeder Belegliste ein Wort ohne Weg. Das
+braucht eine Entscheidung (Prop dazu oder bewusst ohne), keine Reparatur.
+
+### Befunde am Set (gehören nicht zu 0070)
+
+- **`SourceDocumentCompletion` ist ein geteilter Export.** Der M5-Fix hat den
+  Zeitpunkt in ihn hineingelegt, und damit tragen ihn **vier** Formen mit:
+  Zeile, Zelle, Facts und Drawer-Kopf. Im Browser gesehen in
+  `SourceDocumentList--filled` („Gebucht 30.08.2026" in der Zeile). Wer 0074,
+  0076 oder 0084 wieder liest, sollte das Datum dort abnicken — abgenommen
+  wurde es dort ohne.
+- **Der Beleg kann `CaseCell` keine Kennung geben.** Die Spiegel-VM führt
+  weder `caseId` noch etwas, woraus er einer würde (L-207). Solange das so
+  ist, wird jeder Beleg-Baustein, der `CaseCell` benutzt, die Nummer in ein
+  Feld namens `caseId` legen — Sch2 ist nur die erste Stelle. Gehört zur
+  Spiegel-VM, nicht zu 0070.
+- **`StatusBadge.status` ist `string`.** Deshalb prüft kein Compiler die vier
+  Wörter, die `stuckState()` (Z. 169) an die Achse `beleg_haenger` gibt; sie
+  stimmen (`status-registry.ts:632–635`), aber ein Tippfehler fiele erst im
+  Browser auf. Eine Achse, deren Wertebereich die Registry kennt, könnte ihn
+  auch als Typ hergeben.
+- **Das Kriterium „kein px" trifft keinen Spaltenkatalog des Sets.** Vier
+  Kataloge, alle mit px-Spuren: `case-columns.tsx` 13, `bank-transaction-columns.tsx`
+  9, `account-columns.tsx` 8, dieser 16. Der Wortlaut sollte sagen, was
+  gemeint ist — kein px **im Abstand und in der Schrift**, Rasterspuren
+  ausgenommen —, sonst reißt ihn jede neue Spaltendatei formal.
+- **Die Achse `beleg_haenger` schreibt zwei Schreibweisen.** Unverändert seit
+  der letzten Runde: „wird klassifiziert", „wird extrahiert", „nicht
+  extrahiert" gegen „Datum fehlt" (`status-registry.ts:632–635`). Gehört der
+  Registry.
+
+### Nicht geprüft (vertagt nach `docs/backlog/0119-visuelle-pruefung-nachholen.md`)
+
+Spurbreiten, Zeilenhöhen, Überläufe, Kontraste, Trefferflächen, Hover, Fokus,
+Tastaturwege — und damit auch, ob die Reparatur an der Kennung (M1 der letzten
+Runde) und die an `.v2doccol__lead` (M7) an vier Breiten halten. Nichts davon
+ist in diesem Abschnitt gemessen; die Zahlen der vorigen Runden stehen
+unberührt.
+
+### Abgenommen von / am
+
+Claude (fremde Abnahme, ohne Bau-Verlauf), 2026-09-08 — **zurück**,
+blockierend sind Sch1 und Sch2. Beide sind Aussagen der Schnittstelle, keine
+Fehler im Verhalten: das Gebaute ist in sich stimmig, es steht nur nicht so in
+der Spec, und ein Name sagt das Gegenteil des Werts. Der Code selbst wurde für
+diese Abnahme nicht angefasst.
+
+### Nacharbeit 2026-09-08 (nach der schlanken Abnahme)
+
+Alle sechs Punkte erledigt, zwei davon im Code, vier in der Spec:
+
+| Punkt | Was getan | Wo |
+|---|---|---|
+| **Sch1** | Die Schnittstellen-Tabelle führt jetzt `lead` und `stuckVariant`, die Katalog-Tabelle `form` und `stuckState` (16, nicht 14), der Zuschnitt drei Funktionen statt zwei und vier Sätze statt drei, die Überschrift „Die vier Sätze" | Spec, §Zuschnitt · §Der Katalog · §Die vier Sätze · §Schnittstelle |
+| **Sch2** | `caseHref` heißt jetzt `(caseNumber: string) => string` und sagt im JSDoc, warum: die Spiegel-VM trägt keine Kennung (L-207), und die beiden sind im Set nachweislich verschieden. Ein Kommentar an der Übergabe hält fest, dass die Nummer für die Kennung einspringt, solange L-207 offen ist | `source-document-columns.tsx:143–151, 374` |
+| **Sch3** | `= {}` hinter das Destrukturieren; `sourceDocumentColumns()` ohne Argument ist jetzt der Aufruf für die Belegliste, und die Spec sagt das | Code + Spec §Kann bewusst nicht |
+| **Sch4** | Die §6-Rechnung nennt drei Enum-Props und kommt auf 6 — die gebaute Zahl | Spec, §Stories |
+| **Sch5** | Die sieben zustandslosen Zeilen der Katalog-Tabelle stehen in der Ordnung von `ORDER` | Spec, §Der Katalog |
+| **Sch6** | **Entschieden: bewusst ohne.** „offen" ist eine Aussage über den Beleg, kein Angebot — eine Belegliste hat keinen Ort, an den sie schicken könnte, weil der Sachverhalt aus dem Beleg heraus entsteht und dieser Weg noch nicht existiert. Keine durchgereichte Prop; eine Prop, die niemand füllt, wird nicht gebaut (A12) | `source-document-columns.tsx:392–395` + Spec §Kann bewusst nicht |
+
+Kein Verhalten geändert: die zwei Code-Änderungen sind ein Vorgabewert und
+zwei Kommentare. `pnpm typecheck` und die fünf Wächter stehen auf Exit 0.
+
+Die drei **Befunde am Set** bleiben stehen, sie gehören anderen Aufgaben: das
+Datum in `SourceDocumentCompletion` (0074, 0076, 0084 sollten es abnicken),
+die fehlende Kennung der Spiegel-VM (L-207 — Sch2 ist nur die erste Stelle,
+an der sie fehlt) und `StatusBadge.status` als `string` (L-81).
