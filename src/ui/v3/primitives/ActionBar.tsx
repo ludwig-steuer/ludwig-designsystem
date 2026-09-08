@@ -1,9 +1,16 @@
 import type { ReactNode } from "react";
 
 /**
- * Aktionsleiste mit fester Reihenfolge: primär, sekundär, tertiär, Infotext.
- * Die Reihenfolge steckt in der Komponente, damit sie nicht je Screen neu
- * verhandelt wird (Design `StapelSeite.dc.html` Z. 172–185).
+ * Action bar with a fixed order: primary, secondary, tertiary, info text. The
+ * order sits in the component so it is not renegotiated per screen (design
+ * `StapelSeite.dc.html` l. 172–185).
+ *
+ * **The three names are positions, not weights.** They are laid out left to
+ * right, and `variant` alone decides which button looks primary. A caller who
+ * reads them as weights puts the loud button first and gets the order
+ * backwards — that is what happened to `StepHeader`, where „Weiter" ended up
+ * left of „Zurück" (owner correction 2026-09-08). Where the pair has a
+ * direction, put it in the slots and let `variant` do the looks.
  *
  * @when    The actions of a screen or dialog footer, exactly one primary path.
  * @instead Actions on a single row → RowActions.

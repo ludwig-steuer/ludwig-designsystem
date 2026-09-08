@@ -203,3 +203,29 @@ App") — hier nicht erfüllbar, hält die Aufgabe nicht auf.
 `ActionIcon action="back"`; im DOM steht weiter `svg.lucide-chevron-left`,
 `width 14`, `stroke-width 1.5` — dasselbe Zeichen, dieselbe Größe wie vor
 `f58caa2`. Nichts verschwunden, nichts gesprungen.
+
+## Nachtrag 2026-09-08 — Zurück links, Weiter rechts (`2dabec6`)
+
+Der Owner hat für die Schritt-Seiten festgelegt: **„Zurück" links, „Weiter"
+rechts.** `app-7b` hat das direkt in `StepHeader` gebaut und uns den Commit
+zur Abnahme gegeben — ohne Spec, was gegen die Hausregel verstößt; die
+Änderung selbst ist richtig und bleibt.
+
+**Abgenommen.** Gelesen: der Diff, `ActionBar`, und alle Stellen mit einem
+Zurück-Weiter-Paar (nur diese eine). Die Slots sind getauscht, `variant`
+hält das Aussehen — „Zurück" bleibt ruhig, „Weiter" farbig; JSDoc und
+Kommentar sind mitgezogen, Englisch, `typecheck` und die Wächter grün. Kein
+zweiter Ort, an dem dieselbe Entscheidung nachzuziehen wäre.
+
+**Eine Ergänzung, weil die Falle bleibt:** `ActionBar` nennt seine Slots
+nach **Gewichten** (`primary`, `secondary`, `tertiary`), legt sie aber als
+**Positionen** von links nach rechts. Genau diese Lesart hat den Fehler
+erzeugt. Umbenennen wäre jede Aufrufstelle; stattdessen sagt der JSDoc der
+`ActionBar` es jetzt selbst — samt diesem Fall als Beispiel. Der deutsche
+Kopf der Datei ist bei der Gelegenheit Englisch geworden (CLAUDE.md: eine
+Datei, die ohnehin angefasst wird).
+
+**Keine eigene Guideline-Regel.** Die Richtung gilt heute für genau eine
+Komponente und steht dort mit Begründung. Kommt eine zweite Stelle mit
+einem Zurück-Weiter-Paar, wird daraus eine L-Regel — vorher wäre es eine
+Regel ohne zweiten Fall.
