@@ -18,7 +18,9 @@ const CASE = (over: Partial<CaseCardData> = {}): CaseCardData => ({
   kind: "incoming_invoice",
   counterpartyName: "Bürobedarf Meier GmbH",
   lifecycleStatus: "open",
-  amount: 1249.9,
+  // `totalAmount` ist der Betrag des Sachverhalts (Rang 4); `CaseLink.amount`
+  // gehört dem Bankauszug und wird hier nicht gesetzt (Abnahme M1).
+  totalAmount: 1249.9,
   currency: "EUR",
   summary:
     "Halbjährliche Wartung der Anlage im Obergeschoss. Die Rechnung liegt vor, " +
@@ -90,7 +92,13 @@ export const WithoutSubLists: Story = {
  * 3. ein Fall **ohne Nummer**: die Kennung fällt auf die ersten acht Zeichen
  *    der id zurück, wie überall in der Familie;
  * 4. ein Fall **ohne Gegenpart und ohne Betrag** — dann steht dort nichts,
- *    kein Gedankenstrich.
+ *    kein Gedankenstrich;
+ * 5. ein Fall **weder mit Titel noch mit Gegenpart**: die Rückfallkette hat
+ *    nichts, woraus sie einen Anzeigenamen baut, und die Art steht dann
+ *    **einmal** — im Namen, nicht noch einmal in der Faktenzeile. Dazu
+ *    `summaryLimit={40}`, die einzige Stelle, an der die Kürzung wirklich
+ *    greift: nur eine gekürzte Zusammenfassung trägt den vollen Text im
+ *    `title` (Abnahme 2026-09-08, M2/M3/M6).
  */
 export const Edges: Story = {
   render: () => (
@@ -104,20 +112,24 @@ export const Edges: Story = {
             "nach der Abnahme durch den Sachverständigen. Die Kanzlei hat die Aufteilung auf die Konten " +
             "geprüft und die Vorsteuer entsprechend aufgeteilt. Der Vorgang bleibt offen, bis die " +
             "Schlussrechnung vorliegt und der Restbetrag gebucht ist.",
-          amount: 1284900.55,
+          totalAmount: 1284900.55,
         })}
       />
-      <CaseCard case={CASE({ title: null, kind: "recurring_charge", counterpartyName: "Telekom Deutschland GmbH", amount: -89.9 })} />
+      <CaseCard case={CASE({ title: null, kind: "recurring_charge", counterpartyName: "Telekom Deutschland GmbH", totalAmount: -89.9 })} />
       <CaseCard case={CASE({ caseId: "c-9002abcdef01", caseNumber: null, fiscalYear: null, title: "Vortrag ohne Jahr" })} />
       <CaseCard
         case={CASE({
           title: "Umbuchung Verrechnungskonto",
           kind: "internal_transfer",
           counterpartyName: null,
-          amount: null,
+          totalAmount: null,
           summary: null,
           disposition: null,
         })}
+      />
+      <CaseCard
+        case={CASE({ title: null, counterpartyName: null, kind: "internal_transfer" })}
+        summaryLimit={40}
       />
     </Rahmen>
   ),

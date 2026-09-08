@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig (Schnittstelle) — die gemessene Prüfung steht in 0119 aus |
 | Freigabe | zurück 2026-09-07 — Neufassung auf einen Einsatzort nach Abschnitt „Freigabe", danach ohne zweite Runde freigegeben |
 | Stufe | `entities/accounting-case/` |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md`, Abschnitt „Formen" (Zeile `CaseCard`) und „Listen" (Zeile `PortalCaseList`) |
-| Auftrag | Die Karte, die der **Mandant** von einem Sachverhalt sieht: Anzeigename, Nummer, Art, Betrag, Eröffnet, Zusammenfassung — darunter seine offenen Fragen und Belegwünsche als Unterlisten. Ersetzt `modules/client-portal/ui/PortalCaseList.tsx` (396 Z.). |
+| Auftrag | Die Karte des Reiters **„Zum Schließen"**: Anzeigename, Bearbeitungsstand, Kennung, Betrag, Gegenpart, Zuständigkeit, Art und Zusammenfassung, darunter Belege und Buchungsvorschläge als Unterlisten. Ersetzt `CloseCasesPanel`. *(Der ursprüngliche Auftrag galt dem Mandantenportal und `PortalCaseList.tsx`; das Portal ist gelöscht, die Neufassung vom 2026-09-07 hat die Karte auf einen Einsatzort gestellt — die Kopfzeile war nicht nachgezogen, berichtigt 2026-09-08, M9.)* |
 | Zeigt (Ränge) | 1–7 und 11 — siehe Neufassung; die Zeile darüber galt dem gelöschten Portal |
 | Vertagt, weil | die Fünf-Formen-Grenze aus `entitaet-analysieren` §9 mit `CaseCell`, `CaseRow`, `CaseFacts`, `CaseDetailView` (0050) und `CaseDrawer` (0052 Schritt 3) voll ist — und weil der Inhalt der Karte die Klärung ist: sie hängt am Profil `docs/entitaeten/clarification.md` und an `ClarificationCard`. |
 | Angelegt von / am | Claude, 2026-09-05 (Skill `entitaet-analysieren` §9) |
@@ -81,7 +81,7 @@ Typen aus `src/ludwig/modules/accounting-cases/domain/case.ts`:
 |---|---|---|---|
 | `case` | `CaseCardVM` | Anzeigename-Bestandteile (`title`, `kind`, `counterpartyName`), `caseNumber`, `summary` — der Ausschnitt aus `CaseListItem`, den die Karte wirklich liest | `Filled` |
 | `href` | `string` (optional) | der Weg zum Sachverhalt. Ohne ihn ist der Kopf Text — nie ein Knopf, der nichts tut. Das Portal setzt ihn nicht: der Mandant hat keine Fallseite | `InPortal`, `InAcceptance` |
-| `meta` | `ReactNode` (optional) | die Zeile unter dem Kopf: im Portal Betrag und Eröffnet (Ränge 4, 9), in der Abnahme Personenkonto und Abnahme-Bucket (13, 25) | `InPortal`, `InAcceptance` |
+| ~~`meta`~~ | — | **Gestrichen mit der Neufassung.** Die Karte baut ihre Faktenzeile selbst; ein freier Knoten daneben wäre eine zweite Ordnung. **Folge, hier festgehalten:** das Personenkonto (Rang 13) hat damit keinen Ort mehr in dieser Form — es stand nur in `meta`. Wer es braucht, zeigt es über `aside` oder in der Liste, nicht in der Karte (Abnahme 2026-09-08, M8) |
 | `aside` | `ReactNode` (optional) | rechts im Kopf: eine Plakette, ein Zähler. Die Abnahme setzt hier den Bucket, das Portal nichts | `InAcceptance` |
 | `children` | `ReactNode` (optional) | was unter dem Fall hängt — Fragen und Belegwünsche bzw. Belege und Vorschläge. Ohne Kinder fällt der Bereich **samt Abstand** weg | `WithoutSubLists` |
 | `summaryLimit` | `number` (optional) | Vorgabe **160** Zeichen (Profil: p90 = 309, ungekürzt ist es ein Absatz und keine Karte); `0` zeigt sie ganz | `Edges` |
@@ -134,7 +134,7 @@ nur für eine Rolle.
 |---|---|
 | `Filled` | Kopf mit Anzeigename, Nummer und Art; Zusammenfassung auf 160 gekürzt mit `title`; Meta-Zeile und zwei Unterlisten |
 | `WithoutSubLists` | Ohne `children` fällt der Bereich **samt Abstand** weg — eine Karte ohne Unterlisten sieht nicht aus, als fehlte dort etwas. Das ist im Portal der **Normalfall**: `disposition='client'` trifft im Bestand null Zeilen |
-| `Edges` | Zusammenfassung mit 720 Zeichen (Maximum aus Staging), Fall ohne `title` (Rückfallkette greift), Fall ohne `caseNumber`, Fall ohne Gegenpart (dann nur die Art) |
+| `Edges` | Fünf Ränder: Zusammenfassung über der Grenze (die Fixture hat **500** Zeichen — das Maximum aus Staging ist 720, aber die Kürzung greift schon bei 160 und wird bei 500 sichtbar), Fall ohne `title`, Fall ohne `caseNumber`, Fall ohne Gegenpart und ohne Betrag, Fall **weder mit Titel noch mit Gegenpart** samt `summaryLimit={40}` |
 | `InPortal` | In der Portal-Liste: Betrag und Eröffnet in `meta`, Fragen und Belegwünsche als Kinder, kein `href`, **kein** Zustand und **keine** Zuständigkeit sichtbar |
 | `InAcceptance` | In der Abnahmeliste: Personenkonto in `meta`, Abnahme-Bucket in `aside`, Belege und Vorschläge als Kinder, mit `href` |
 
@@ -253,9 +253,12 @@ nicht aus eigenen Regeln, denn die Familie hat für beides genau eine.
 | `children` | `ReactNode` (optional) | was unter dem Fall hängt — Belege, Buchungsvorschläge. Ohne Kinder fällt der Bereich **samt Abstand** weg | `WithoutSubLists` |
 | `summaryLimit` | `number` (optional) | Vorgabe **160** Zeichen (Profil: p90 = 309, ungekürzt ist es ein Absatz und keine Karte); `0` zeigt sie ganz | `Edges` |
 
-**Die Karte zeigt** (Ränge kumulativ bis M): Anzeigename (1),
-Bearbeitungsstand (2), Kennung (3), Betrag (4), Gegenpart (5),
-Zuständigkeit (6), Art (7), Zusammenfassung (11).
+**Die Karte zeigt**: Anzeigename (1), Bearbeitungsstand (2), Kennung (3),
+Betrag (4), Gegenpart (5), Zuständigkeit (6), Art (7), Zusammenfassung (11).
+
+*Nicht kumulativ:* die Ränge 8–10 fehlen bewusst, sie gehören der Zeile und
+dem Detail. „Kumulativ bis M" stand hier und stimmte nicht (berichtigt
+2026-09-08, M9).
 
 Zwei Entscheide der Freigabe stecken darin:
 
@@ -393,3 +396,329 @@ Rollen-Variante, kein Bucket.
 `check:mirror`, `check:when` je Exit 0.
 
 **Status: Abnahme** — gebaut habe ich, abnehmen muss ein anderer.
+
+## Schlanke Abnahme (Schnittstelle) 2026-09-08
+
+Fremde Abnahme, schlanke Tiefe (Owner-Entscheid 2026-09-08): geprüft wird die
+**Schnittstelle**, nicht die Darstellung. Spurbreiten, Zeilenhöhen, Überläufe,
+Kontraste, Trefferflächen, Hover, Fokus und Tastaturwege sind nach
+`docs/backlog/0119-visuelle-pruefung-nachholen.md` vertagt und hier weder
+geprüft noch gemessen.
+
+**Gelesen:** `src/ui/v3/entities/accounting-case/CaseCard.tsx` (118 Z.) und
+`CaseCard.stories.tsx` (158 Z.), `case-title.ts`, `CaseDrawer.tsx`,
+`CasePicker.tsx`, `case-columns.tsx`, `CaseList.tsx` (die Geschwister der
+Familie), `src/ui/v3/primitives/Table.tsx` (`Card`/`CardHead`),
+`patterns/StatusBadge.tsx`, der Spiegel
+`src/ludwig/modules/accounting-cases/domain/case.ts`,
+`src/ludwig/shared/money.ts`, `src/ludwig/ui/status/status-registry.ts`
+(Achsen `sachverhalt`, `disposition`), `src/styles/v3.css` Z. 3630–3652,
+`src/ui/v3/index.ts` Z. 396, das Entitätsprofil
+`docs/entitaeten/accounting-case.md` (Datenpunkte, Formen), `spec-schreiben`
+§5–§7 und `docs/design-guidelines.md` Z2.
+
+**Gemessen:** ein Durchlauf über alle vier Stories mit `scripts/cdp.mjs` gegen
+`http://localhost:6107` bei 1400 px; Story-IDs aus `index.json`
+(`v3-entitäten-sachverhalt-casecard--filled`, `--without-sub-lists`,
+`--edges`, `--in-use`), Aktion und Messung getrennt. Ausgelesen je Karte:
+Kopftext, Link/Text, Unterzeile, `.actions`, die Knoten der Faktenzeile,
+Zeichenzahl der Zusammenfassung im DOM und im `title`, Vorhandensein von
+`.v2casecard__subs`, Kartenhöhe, `borderTopWidth`/`boxShadow` aus
+`getComputedStyle` und die Zahl der Gedankenstriche. Zusammen 9 Karten.
+
+**Wächter, Ergebnis ist der Exit-Code:** `pnpm typecheck` 0 · `check:icons` 0
+(auch `--test` 0) · `check:contrast` 0 (`--test` 0) · `check:mirror`
+(`mirror-filter --test`) 0 · `check:when` 0 (`--test` 0) · `check:language` 0.
+Gegenprobe, weil `check:language` ohne `--all` nur geänderte Dateien liest und
+`CaseCard.tsx` seit dem 2026-09-07 committet ist: der `--all`-Bericht (Exit 1,
+377 deutsche Kommentarzeilen in 136 Dateien des Bestands) nennt **keine** Zeile
+aus `CaseCard.tsx` oder `CaseCard.stories.tsx`. Die Kommentare sind englisch;
+die Bezeichner nicht durchgehend — siehe M10, den der Wächter bauartbedingt
+nicht sieht (er prüft Kommentare, keine Namen).
+
+### Feste Kriterien
+
+| Kriterium | Nachweis | Urteil |
+|---|---|---|
+| `typecheck` grün | Exit 0 | durch |
+| Datei nach der Familie benannt, Story daneben, Titel in der Gruppe | `CaseCard.tsx` + `CaseCard.stories.tsx` neben `CaseCell/CaseRow/CaseFacts/CasePicker`; Titel `v3/Entitäten/Sachverhalt/CaseCard` wie die sieben Geschwister | durch |
+| Code englisch; `@when`/`@instead` am Export | `check:when` Exit 0; `@when`/`@instead` an `CaseCard` (Z. 59–63); Kommentare englisch (`--all`-Bericht) | mit Mangel M10 (zwei deutsche Bezeichner) |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -E "#[0-9a-f]{3,8}\|[0-9]+px"` in `CaseCard.tsx` ohne Treffer (Exit 1); CSS nur Tokens (`v3.css` 3637–3652, einzige Ausnahme die Haarlinie `1px` wie im ganzen Blatt); Art aus `caseKindLabel` (Spiegel), Zustand und Zuständigkeit aus `resolveStatus` | durch |
+| Alle vier Stories vorhanden, drei ausgeschlossene Zustände begründet | `index.json` führt genau vier IDs; Begründung in der Spec Z. 303–305 | durch |
+| Prüfliste §9 | im Rahmen der schlanken Tiefe nur der Punkt „Rand **oder** Schatten": `borderTopWidth: 1px`, `boxShadow: none` an **allen 9** Karten; der Rest der Liste ist Darstellung → 0119 | durch, Rest vertagt |
+| Im Browser angesehen | vier Stories über CDP bei 1400 px gemessen | durch |
+
+### Variable Kriterien (Neufassung)
+
+| Kriterium | Nachweis | Urteil |
+|---|---|---|
+| Anzeigename aus `caseTitle()`, Kennung aus `caseIdentifier()`, keine zweite Kette | `grep` findet in der Datei nur diese beiden Aufrufe (Z. 81, 99) und keinen zweiten Rückfall; gemessen: `Edges` Karte 2 ohne `title` → Kopf „Dauersachverhalt: Telekom Deutschland GmbH", Karte 3 ohne Nummer → Unterzeile **`c-9002ab`** statt eines Strichs | durch |
+| Gegenpart in der Meta-Zeile, außer ohne `title` | gemessen: Karte 2 (`title: null`) Meta = Art · Betrag · Zuständigkeit, **ohne** Gegenpart; Karten 1 und 3 (mit `title`) Meta mit „Bürobedarf Meier GmbH" | durch |
+| Bearbeitungsstand im Kopf als `StatusBadge` (`sachverhalt`), Zuständigkeit in der Meta-Zeile (`disposition`), beides aus der Registry | gemessen: Kopf trägt „Zur Prüfung" bzw. „Klärung offen" — die Labels von `SACHVERHALT_LIFECYCLE` (`status-registry.ts` `open`/`needs_clarification`); Meta trägt „Kanzlei" bzw. „Agent" — die Labels von `DISPOSITION` (Z. 810–814). Keine Map in der Datei | durch, aber M7 |
+| Der Abnahme-Bucket erscheint nicht von selbst, `aside` ist der einzige Weg | gemessen: `.v2card__h .actions` existiert nur in `InUse` (3 von 3, Inhalt „übernehmen"), in `Filled`, `WithoutSubLists` und allen vier `Edges`-Karten `null`; der Gruppenkopf „Prüfen · 3" steht in `InUse` außerhalb jeder `.v2card` | durch |
+| Ein Fall ohne Betrag zeigt keinen Betrag und keinen Ersatzstrich | gemessen: `Edges` Karte 4 (`amount: null`) Meta = genau ein Knoten („Umbuchung"), 0 Gedankenstriche in der ganzen Karte | durch für das Verhalten — das **Feld** ist der Mangel M1 |
+| Zusammenfassung auf `summaryLimit` gekürzt, ganzer Text im `title`, gemessen | `Edges` Karte 1: **161** Zeichen im DOM (160 + Auslassungszeichen), **500** im `title` | durch für die Kürzung; M3, M4, M5 hängen daran |
+| Ohne `children` fällt der Bereich samt Abstand weg, Höhe gemessen | dieselbe Karte mit Kindern **268,7 px**, ohne **176,9 px**; `.v2casecard__subs` in `WithoutSubLists` nicht im DOM | durch |
+| Ohne `href` Text, mit `href` Link, Fokus per Tab | gemessen: `Edges` 0 von 4 Karten mit `<a>` im Kopf, `Filled`/`WithoutSubLists` 1 von 1, `InUse` 3 von 3 (`#c-4412`, `#c-4413`, `#c-4414`). Der **Fokus** ist nach 0119 vertagt und wurde nicht gemessen | durch, soweit in dieser Tiefe prüfbar |
+| Rand **oder** Schatten | `getComputedStyle` an allen 9 `.v2card`: `1px` / `none` | durch |
+| Ersetzt die Karte in `CloseCasesPanel.tsx` ohne Funktionsverlust | die Karte kann den Betrag ihres einzigen Aufrufers nicht lesen (M1) und hat für das Personenkonto keinen Ort mehr (M8) | **zurück** |
+
+### Mängel
+
+**M1 · Der Betrag kommt aus dem Feld des Bankauszugs, nicht aus dem des
+Sachverhalts.** — Kriterium „Die Karte zeigt … Betrag (4)" (Z. 256–258) und
+„Ersetzt die Karte in `CloseCasesPanel.tsx` ohne Funktionsverlust" (Z. 353).
+Ort: `CaseCard.tsx:32–36` (`c.amount`, `asCurrency(c.currency)`), Fixture
+`CaseCard.stories.tsx:21` (`amount: 1249.9`).
+Befund: `CaseCardData = CaseLink & Pick<CaseListItem, "summary" |
+"disposition">` holt den Betrag aus `CaseLink.amount`. Das Feld ist in
+`case-title.ts:38–39` ausdrücklich gewidmet: *„Only in the bank statement: the
+part of the amount that falls on this case"* — sein einziger anderer Leser im
+Set ist `BankTransactionRow.tsx:85`, und dort steht daneben die Währung der
+**Bankzeile**, nicht die des Falls. Der Betrag des Sachverhalts ist im Profil
+Rang 4 und heißt `totalAmount · currency`
+(`docs/entitaeten/accounting-case.md`, Zeile „Betrag"); genau den lesen alle
+Geschwister: `case-columns.tsx:159`, `CaseDrawer.tsx:110–111`,
+`CasePicker.tsx:30`. Der Spiegel kennt an `CaseListItem` **kein** `amount`
+(`case.ts:276–318`). Der einzige Einsatzort der Karte arbeitet mit
+`CaseListItem`n; da `amount` optional ist, hält der Compiler den Aufrufer
+zwar an der Währung an (`string | null` gegen `Currency | null`), sagt zum
+Betrag aber nichts — die Karte zeigt dann still gar keinen. Das ist der Fall
+aus 0100, nur andersherum: kein ungelesenes Pflichtfeld, sondern ein
+gelesenes, das der Aufrufer nicht hat.
+Kleinster Weg: `"totalAmount"` in den `Pick` aufnehmen und `c.totalAmount`
+lesen (Währung bleibt aus `CaseLink`), Fixtures entsprechend; oder — falls
+wirklich der Anteil gemeint ist — das in „Verhalten" hinschreiben und
+begründen, warum die Abnahmeliste ihn zeigt.
+**Blockiert: ja.**
+
+**M2 · Der Rand-Fall „ohne `title` und ohne Gegenpart" wird von keiner Fixture
+ausgelöst, und im Code stünde die Art dann zweimal.** — Kriterium: Story
+`Edges`, „Fall ohne Gegenpart (dann nur die Art)" (Z. 311).
+Ort: `CaseCard.stories.tsx:112–121` (Karte 4) und `CaseCard.tsx:31`.
+Befund: Karte 4 setzt `counterpartyName: null`, behält aber
+`title: "Umbuchung Verrechnungskonto"` — gemessen steht im Kopf der Titel, die
+Rückfallkette läuft also gar nicht. Der gemeinte Rand ist der, in dem
+`caseDisplayTitle` (`case.ts:465–475`) auf **die Art allein** fällt, und der
+verlangt `title = null` **und** `counterpartyName = null`. Keine der vier
+Karten hat beides. Träfe er ein, stünde die Art zweimal: einmal als
+Anzeigename im Kopf, einmal als erster Knoten der Faktenzeile
+(`CaseCard.tsx:31` schiebt sie ohne Bedingung hinein). Genau diese Doppelung
+hat `CaseDrawer.tsx:91–92 und 113–117` für dieselbe Entität schon einmal
+abgestellt (`kindInTitle`, Kommentar „the meta line must not say it a second
+time (M6)"). Der Fall „`title` fehlt, Gegenpart vorhanden" ist davon nicht
+betroffen — dort verhält sich der Drawer genauso wie die Karte, das ist die
+Hausart und kein Mangel.
+Kleinster Weg: in Karte 4 zusätzlich `title: null` setzen (dann löst die
+Fixture den Rand wirklich aus) und den Art-Knoten wie im Drawer unterdrücken,
+wenn der Anzeigename die Art selbst ist.
+Blockiert: nein.
+
+**M3 · `Filled` beweist die Kürzung nicht, die die Spec ihr zuschreibt.** —
+Kriterium: Stories-Tabelle, Zeile `Filled`: „Zusammenfassung auf 160 gekürzt
+mit `title`" (Z. 309).
+Ort: `CaseCard.stories.tsx:23–25`.
+Befund: die Fixture-Zusammenfassung hat **144** Zeichen; gemessen stehen in
+`Filled` 144 Zeichen im DOM und 144 im `title` — nichts ist gekürzt. Die
+Kürzung beweist allein `Edges`.
+Kleinster Weg: entweder die Fixture über 160 Zeichen bringen oder die Zeile
+`Filled` in der Spec auf das beschränken, was sie zeigt.
+Blockiert: nein.
+
+**M4 · Der `title` steht an jeder Zusammenfassung, nicht nur an der
+gekürzten.** — Kriterium „Verhalten": „Eine **gekürzte** Zusammenfassung trägt
+den ganzen Text im `title`" (Z. 291–292).
+Ort: `CaseCard.tsx:107` (`title={summary ?? undefined}`).
+Befund: gemessen tragen **8 von 8** Karten mit Zusammenfassung ein
+`title`-Attribut; in **7** davon ist es zeichengleich mit dem sichtbaren Text
+(144/144, 34/34, 49/49 …). Ein Hover, der den sichtbaren Satz wiederholt, ist
+kein Weg zurück, sondern Rauschen — und er nimmt dem Attribut die Aussage,
+dass hier etwas fehlt.
+Kleinster Weg: das Attribut nur setzen, wenn tatsächlich gekürzt wurde.
+Blockiert: nein.
+
+**M5 · Die Fixture des Rand-Falls hat 500 Zeichen, ihre Beschriftung nennt
+720.** — Kriterium: „Zusammenfassung mit 720 Zeichen (Maximum aus Staging)"
+(Z. 311).
+Ort: `CaseCard.stories.tsx:85` (JSDoc: „eine Zusammenfassung von 720
+Zeichen (Maximum aus Staging)") und `CaseCard.stories.tsx:100–106` (die
+Zeichenkette).
+Befund: nachgezählt **500** Zeichen, im Browser gemessen `title`-Länge
+**500**. 720 ist die Zahl des Profils (`summary`: p50 231 · p90 309 · max
+720) — sie ist in die Story-Beschriftung abgeschrieben, ohne dass die Fixture
+sie einlöst. Das Storybook zeigt die Beschriftung dem Leser. Die Kürzung
+selbst löst schon bei 500 aus, das Verhalten ist also belegt; die Zahl ist es
+nicht.
+Kleinster Weg: die Zeichenkette auf 720 verlängern (dann stimmt beides) oder
+beide Beschriftungen auf 500 setzen und den Bezug zum Maximum streichen.
+Blockiert: nein.
+
+**M6 · `summaryLimit` hat keine Story.** — Kriterium: Schnittstellen-Tabelle,
+Zeile `summaryLimit`, Story `Edges` (Z. 254); `spec-schreiben` §5: „Jede Prop
+bekommt in der Tabelle die Story, die sie beweist."
+Ort: `CaseCard.stories.tsx` (kein Vorkommen von `summaryLimit`).
+Befund: keine der vier Stories übergibt die Prop; `Edges` misst nur die
+Vorgabe 160. Der in der Spec eigens genannte Wert `0` („zeigt sie ganz") wird
+nirgends gezeigt — die einzige Ausprägung, die die Prop überhaupt sichtbar
+macht, fehlt.
+Kleinster Weg: eine fünfte Karte in `Edges` mit `summaryLimit={0}`; die Zahl
+der Stories bleibt bei vier.
+Blockiert: nein.
+
+**M7 · Derselbe Zustand heißt in zwei Formen der Familie zweierlei.** —
+Kriterium: „die Zuständigkeit in der Meta-Zeile über die Achse `disposition` —
+beides aus der Registry" (Z. 346).
+Ort: `CaseCard.tsx:45` gegen `CaseDrawer.tsx:123–127`.
+Befund: `disposition='accounting'` steht in der Faktenzeile der Karte als
+**„Kanzlei"** (gemessen) und in der Faktenzeile des Drawers als **„Kanzlei ist
+dran"**. Beide holen das Wort aus derselben Achse; das Prädikat hat der Drawer
+hinzugefügt, weil das nackte Wort nicht sagt, dass es eine Zuständigkeit ist.
+In der Karte steht es hinter dem Gegenpart — gemessen „Eingangsrechnung ·
+1.249,90 € · Bürobedarf Meier GmbH · Kanzlei" — und liest sich dort wie ein
+weiterer Name. Das ist der Fall aus 0101/L-218 in klein: die Achse führt den
+Zusatz nicht, also erfindet ihn jede Form für sich.
+Kleinster Weg: eine der beiden Fassungen übernehmen — den Drawer-Satz oder
+`StatusBadge axis="disposition"`; die Registry bleibt unberührt.
+Blockiert: nein.
+
+**M8 · Rang 13 (Personenkonto) hat keinen Ort mehr.** — Kriterium „Ersetzt die
+Karte in `CloseCasesPanel.tsx` ohne Funktionsverlust" (Z. 353).
+Ort: Spec Z. 248–258 (Schnittstelle der Neufassung).
+Befund: das Profil führt für die Abnahme-Rolle die Ränge „3, 7, 11, 13, 25"
+(Formen-Tabelle, Zeile `CaseCard`), und `CloseCasesPanel` zeigt heute je Fall
+„Nummer, Art, …, **Personenkonto**, Konfidenz, Zusammenfassung"
+(Profil, Zeile `CloseCasesPanel.tsx`). Die erste Fassung der Spec hatte dafür
+den Knoten `meta`; die Neufassung hat `meta` mit der Portal-Rolle gestrichen
+und Rang 13 nicht ersetzt — die Aufzählung „Die Karte zeigt" nennt ihn nicht,
+und `aside` ist als Ort der Liste („etwa ihre Auswahl") beschrieben und in
+`InUse` durch die Auswahl belegt.
+Kleinster Weg: einen Satz in die Spec — entweder Rang 13 kommt über `aside`
+bzw. `children`, oder er fällt bewusst weg und steht unter „Kann bewusst
+nicht".
+Blockiert: nein.
+
+**M9 · Die Kopfzeile beschreibt weiter das gelöschte Portal, und „kumulativ
+bis M" stimmt nicht.** — Kriterium: Freigabe 2026-09-07, „Kopfzeile
+bereinigen" (Z. 202).
+Ort: Spec Z. 9 (Zeile „Auftrag") und Z. 256.
+Befund: die Zeile „Auftrag" sagt weiter „Die Karte, die der **Mandant** von
+einem Sachverhalt sieht … Ersetzt `modules/client-portal/ui/PortalCaseList.tsx`" —
+den Bildschirm, den es seit dem 2026-09-05 nicht mehr gibt und dessen Streichung
+die ganze Neufassung trägt. Die Zeile „Zeigt (Ränge)" darunter ist bereinigt
+und **weiß** davon („die Zeile darüber galt dem gelöschten Portal") — der
+falsche Text steht trotzdem noch da, und wer nur die Kopfzeile liest, baut die
+falsche Komponente. Zweitens: „Die Karte zeigt (Ränge **kumulativ bis M**)" trifft
+nicht zu — das Profil sagt „Kumulativ: was S zeigt, zeigt M auch", und die
+Ränge 8 (offene Klärungen), 9 (Eröffnet) und 10 (Export-Zustand) stehen dort
+ab **S**, fehlen in der Aufzählung aber; ebenso 12–15 aus M. Die Aufzählung
+ist eine Auswahl, keine Strecke.
+Kleinster Weg: die Zeile „Auftrag" auf den einen Einsatzort umschreiben und
+„kumulativ bis M" durch „diese acht" ersetzen (oder die Auslassung mit einem
+Halbsatz begründen: 8–10 sind Spalten der Liste, 12–15 gehören `CaseFacts`).
+Blockiert: nein.
+
+**M10 · Zwei deutsche Bezeichner in einer neuen Datei.** — Kriterium: CLAUDE.md
+(„Code nur Englisch. Bezeichner, Props, Typen, Kommentare").
+Ort: `CaseCard.tsx:30` (`teile`) und `:83` (`gekuerzt`); in den Stories
+zusätzlich die Hilfsbausteine `Belege` und `Rahmen`
+(`CaseCard.stories.tsx:30, 45`).
+Befund: die Kommentare sind englisch (`check:language --all` nennt die Datei
+nicht), die Namen nicht. Der Wächter kann das nicht sehen — er liest
+Kommentare, keine Bezeichner. Die Ausnahme der CLAUDE.md („bestehende deutsche
+Bezeichner werden nicht in Masse umbenannt") gilt hier nicht: die Datei ist am
+2026-09-07 neu entstanden.
+Kleinster Weg: vier Umbenennungen (`parts`, `shortened`, `Documents`,
+`Frame`).
+Blockiert: nein.
+
+**M11 · Eine fehlende Art zeigt einen Gedankenstrich.** — Kriterium: die Regel
+der Karte, dass kein Ersatzstrich etwas behauptet (Z. 348 und Offene Frage 1,
+Z. 325–326: „kein Gedankenstrich, keine Null").
+Ort: `CaseCard.tsx:31`.
+Befund: `CaseCardData` erlaubt über `CaseLink` `kind: null` — bewusst, seit
+0070 M2 („a foreign list that only carries the case number must not have to
+invent one", `case-title.ts:28–35`). `caseKindLabel(null)` liefert dann **„—"**
+(`case.ts:73–76`), und die Karte schiebt diesen Strich ohne Bedingung in die
+Faktenzeile, während sie Betrag, Gegenpart und Zuständigkeit bei `null`
+weglässt. Keine Story zeigt den Fall. `CaseListItem.kind` ist NOT NULL, der
+Fall ist also selten — aber der Typ lässt ihn zu.
+Kleinster Weg: den Knoten nur bei `c.kind` einfügen, wie die drei anderen.
+Blockiert: nein.
+
+### Geprüft und **kein** Mangel
+
+- **`fiscalYear` liest die Karte nie**, obwohl es Pflichtfeld von
+  `CaseCardData` ist. Das trägt die Vererbungskette: `CaseLink` ist der
+  gemeinsame Schnitt der Familie (0095) und wird von `CaseCell` und
+  `CaseAssignment` mitgenutzt; `CaseFacts.tsx:145` liest das Feld. Das ist der
+  Fall aus 0102, nicht der aus 0100.
+- **Kein lokal nachgebauter Typ.** `CaseCardData` ist eine Verschneidung aus
+  `CaseLink` und einem `Pick` auf den Spiegel, kein zweites Ansichtsmodell;
+  `grep "as [A-Z]"` findet in Komponente und Story **keine** Zusicherung.
+- **Keine zweite Kette und keine lokale Label-Map.** Anzeigename und Kennung
+  über `caseTitle`/`caseIdentifier`, Art über `caseKindLabel` aus dem Spiegel,
+  Zustand und Zuständigkeit über `resolveStatus`.
+- **Die Karte setzt nicht auf `CaseFacts` auf**, obwohl das Profil sie in
+  „setzt auf" nennt. Kein Mangel: `CaseFacts` ist die Faktentafel der Ränge
+  11–16 als `FieldList`, nicht eine einzeilige Leiste; `CaseDrawer.tsx:102–130`
+  baut seine Meta-Zeile aus demselben Grund selbst.
+- **Reiter sind keine Filter** (Owner 2026-09-08): die Spec geht nicht mehr von
+  vier gleichwertigen Reitern aus — sie nennt einen Einsatzort, und
+  `CaseList.tsx:27–34` schließt `schliessen` ausdrücklich aus und verweist auf
+  diese Karte. Konsistent.
+- **Story-Zahl nach §6:** 2 Zustände + 0 Enum + 0 Layout-Boolean + 0 Callback
+  + 1 „im Einsatz" + 1 Rand = 4; vier Stories vorhanden, Untergrenze 3 für eine
+  Entitäts-Form eingehalten. Die Deckung je Prop stimmt bis auf `summaryLimit`
+  (M6); der Rand-Fall selbst ist da, löst aber einen seiner vier Fälle nicht
+  aus (M2) und trägt eine falsche Zahl (M5).
+
+### Gesamturteil
+
+**zurück.** Ein blockierender Punkt: **M1** — die Karte liest den Betrag aus
+`CaseLink.amount`, dem Anteil des Bankauszugs, während der Sachverhalt seinen
+Betrag in `totalAmount` trägt (Profil Rang 4, alle Geschwister der Familie).
+Ihr einziger Einsatzort arbeitet mit `CaseListItem`n, die dieses Feld nicht
+haben; der Compiler stolpert dabei über die Währung, nicht über den Betrag, so
+dass die Karte in der Abnahmeliste still ohne Betrag stünde. Damit ist das
+Kriterium „ersetzt `CloseCasesPanel.tsx` ohne Funktionsverlust" nicht erfüllt.
+
+Alles andere steht: die Kürzung mit ihrem Weg zurück, der verschwindende
+Unterlisten-Bereich samt Abstand, `aside` als einziger Weg neben den Kopf,
+Kennung und Anzeigename aus der Familie, Zustand und Zuständigkeit aus der
+Registry, Rand ohne Schatten — jedes davon gemessen. M2–M11 sind Nacharbeit an
+Spec, Fixtures und Namen; sie halten die Karte nicht auf, sobald M1 sitzt.
+
+Abgenommen von Claude (fremder Prüfer, hat nicht gebaut), 2026-09-08.
+
+### Nacharbeit 2026-09-08 (nach der schlanken Abnahme)
+
+| Punkt | Was getan |
+|---|---|
+| **M1** (blockierte) | **Der Betrag kam aus dem falschen Feld.** Die Karte las `CaseLink.amount` — das gehört dem Bankauszug und hält „den Teil des Betrags, der auf diesen Sachverhalt fällt". Rang 4 ist `totalAmount`, so lesen ihn `case-columns`, `CaseDrawer` und `CasePicker`. `CaseListItem` trägt gar kein `amount`: im einzigen Einsatzort hätte die Zahl schlicht gefehlt, und weil das Feld optional ist, hätte nichts es gemeldet. Jetzt im `Pick` und gelesen — und der Typcheck stolpert seither über jede Fixture, die noch `amount` setzt, was drei Stellen in den Stories waren |
+| **M2** | Die Art stand **zweimal**, sobald der Anzeigename auf sie zurückfällt („Umbuchung / Umbuchung"). `CaseDrawer` hatte das als sein M6 schon abgestellt; die Karte wiederholte es. Gemessen vorher „Umbuchung Zur Prüfung 2026-0412 **Umbuchung** 1.249,90 €", nachher ohne die zweite |
+| **M3/M4** | Der volle Text steht im `title` nur noch dort, wo wirklich gekürzt wurde. Sieben von acht Zusammenfassungen passen; ein `title`, der den sichtbaren Text Wort für Wort wiederholt, ist ein Tooltip, der nichts sagt. Gemessen: 2 von 5 Karten in `Edges` |
+| **M5** | Die Story-Beschreibung nennt die Zahl der Fixture (500) statt des Staging-Maximums (720) |
+| **M6** | `summaryLimit` hat seinen Nachweis — als fünfter Fall in `Edges`, wo die Kürzung bei 40 sichtbar greift |
+| **M8** | `meta` ist mit der Neufassung gestrichen worden, und damit hat **Rang 13 (Personenkonto) keinen Ort mehr** in dieser Form. Das steht jetzt als Folge in der Schnittstellen-Tabelle, statt unbemerkt zu bleiben |
+| **M9** | Der Auftrag im Kopf beschrieb weiter das gelöschte Mandantenportal; die Neufassung hatte die Karte längst auf „Zum Schließen" gestellt. Und „Ränge kumulativ bis M" stimmte nicht — 8 bis 10 fehlen bewusst |
+| **M10** | Die zwei deutschen Bezeichner (`teile`, `gekuerzt`) heißen `parts` und `clipped` |
+| **M11** | `kind: null` schrieb einen Gedankenstrich in eine Zeile, deren Regel „jeder Teil wahlfrei, keiner ein Gedankenstrich" lautet. Ein Fall ohne Art hat jetzt keinen Art-Teil |
+
+### M7 — widersprochen, kein Mangel
+
+Beanstandet war „Kanzlei" (Karte) gegen „Kanzlei ist dran" (Drawer) für
+denselben Zustand — mit Verweis auf das Vokabular-Muster von L-218.
+
+**Beide lesen dasselbe Registry-Label**, `resolveStatus("disposition", …).label`;
+keiner erfindet ein Wort. Was sie unterscheidet, ist die Grammatik ihres
+Ortes: in der Faktenzeile der Karte steht das Label **neben** anderen Werten
+(Art · Betrag · Gegenpart · Kanzlei) — dort ist ein Wort richtig und ein Satz
+falsch. Im Drawer steht es als eigene Aussage und braucht ein Prädikat; die
+Registry-Beschreibung sagt dort selbst „Die Kanzlei ist am Zug".
+
+Das unterscheidet den Fall von L-218, wo zwei Bausteine für einen Zustand
+zwei **verschiedene Begriffe** erfanden, weil die Achse keinen führte. Hier
+gibt es einen Begriff und zwei Satzstellungen.
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0. Gemessen in `Edges`: fünf
+Karten, zwei mit `title`, Beträge 1.284.900,55 € · 89,90 € · 1.249,90 €.

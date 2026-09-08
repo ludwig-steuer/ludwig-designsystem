@@ -23,15 +23,32 @@ import { caseKindLabel } from "@/ludwig/modules/accounting-cases/domain/case";
  */
 
 /** What the card reads: the family's link type plus two fields of the list item. */
-export type CaseCardData = CaseLink & Pick<CaseListItem, "summary" | "disposition">;
+export type CaseCardData = CaseLink &
+  Pick<CaseListItem, "summary" | "disposition" | "totalAmount">;
 
 /** One line of facts under the head — every part optional, none a dash. */
-function Meta({ case: c }: { case: CaseCardData }) {
-  const teile: ReactNode[] = [];
-  teile.push(<span key="kind">{caseKindLabel(c.kind)}</span>);
-  if (c.amount != null) {
-    teile.push(
-      <Amount key="amount" value={c.amount} currency={asCurrency(c.currency)} size="sm" />,
+function Meta({ case: c, name }: { case: CaseCardData; name: string }) {
+  const parts: ReactNode[] = [];
+  // The kind stands here **unless** the display name is already the kind — a
+  // case without a title and without a counterparty falls back to it, and then
+  // „Umbuchung / Umbuchung" says the same thing twice. `CaseDrawer` solved
+  // this before (its M6); this card repeated it (acceptance 2026-09-08, M2).
+  // `caseKindLabel(null)` is „—", and a dash in a row whose rule is „every
+  // part optional, none a dash" would be exactly that (acceptance M11). A case
+  // without a kind simply has no kind part.
+  if (c.kind && name !== caseKindLabel(c.kind)) {
+    parts.push(<span key="kind">{caseKindLabel(c.kind)}</span>);
+  }
+  // `totalAmount`, **not** `CaseLink.amount`: that one belongs to the bank
+  // statement and holds „the part of the amount that falls on this case"
+  // (`case-title.ts`). Rank 4 of the profile is the amount of the case itself,
+  // and `case-columns`, `CaseDrawer` and `CasePicker` all read it under that
+  // name. `CaseListItem` carries no `amount` at all, so in the one place this
+  // card is used the number would simply have been absent — and because the
+  // field is optional, nothing would have said so (acceptance 2026-09-08, M1).
+  if (c.totalAmount != null) {
+    parts.push(
+      <Amount key="amount" value={c.totalAmount} currency={asCurrency(c.currency)} size="sm" />,
     );
   }
   // The counterparty stands here **unless** there is no `title` — then the
@@ -39,14 +56,14 @@ function Meta({ case: c }: { case: CaseCardData }) {
   // the profile: in 51 % of the cases that do have a `title` it is not in
   // there, so leaving it out in general would be the more frequent mistake.
   if (c.title && c.counterpartyName) {
-    teile.push(<span key="who">{c.counterpartyName}</span>);
+    parts.push(<span key="who">{c.counterpartyName}</span>);
   }
   if (c.disposition) {
-    teile.push(<span key="disp">{resolveStatus("disposition", c.disposition).label}</span>);
+    parts.push(<span key="disp">{resolveStatus("disposition", c.disposition).label}</span>);
   }
   return (
     <div className="v2casecard__meta">
-      {teile.map((t, i) => (
+      {parts.map((t, i) => (
         <span key={i} className="v2casecard__metaitem">
           {t}
         </span>
@@ -80,7 +97,7 @@ export function CaseCard({
 }) {
   const name = caseTitle(c);
   const summary = c.summary ?? null;
-  const gekuerzt =
+  const clipped =
     summary && summaryLimit > 0 && summary.length > summaryLimit
       ? `${summary.slice(0, summaryLimit).trimEnd()}…`
       : summary;
@@ -100,12 +117,17 @@ export function CaseCard({
         actions={aside}
       />
       <div className="v2casecard__body">
-        <Meta case={c} />
-        {gekuerzt ? (
-          // The whole text in the `title`: a shortened value with no way to
-          // the whole one is a truncation, not a summary.
-          <p className="v2casecard__summary" title={summary ?? undefined}>
-            {gekuerzt}
+        <Meta case={c} name={name} />
+        {clipped ? (
+          // The whole text in the `title` — but **only where it was cut**:
+          // seven of eight summaries fit, and a `title` that repeats the
+          // visible text word for word is a tooltip that says nothing
+          // (acceptance 2026-09-08).
+          <p
+            className="v2casecard__summary"
+            {...(clipped !== summary ? { title: summary ?? undefined } : {})}
+          >
+            {clipped}
           </p>
         ) : null}
       </div>
