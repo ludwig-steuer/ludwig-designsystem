@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **geprüft** — zweiter Agent am 2026-09-08 (§10). Der blockierende Punkt **P1** ist eingearbeitet (Rang 1 ist jetzt abgeleitet), die Zahl 105 auf **104** berichtigt, und die zwei Befunde, die die Prüfung zusätzlich gefunden hat, stehen als **L-253** und **L-254** im Register. Die zwölf nicht blockierenden Punkte stehen im Abschnitt „Prüfung“ und gehören gelesen, bevor eine Spec daraus abgeleitet wird |
+| Status | **in Specs** — die vier Formen mit Marke „jetzt" liegen als Aufgaben `0132` (`RecurringRuleRow`), `0133` (`RecurringRuleList`), `0134` (`RecurringRuleFacts`) und `0135` (`RecurringRuleEditor`) unter `docs/backlog/`, geschrieben am 2026-09-08 mit Skill `spec-schreiben`. Davor: **geprüft** — zweiter Agent am 2026-09-08 (§10). Der blockierende Punkt **P1** ist eingearbeitet (Rang 1 ist jetzt abgeleitet), die Zahl 105 auf **104** berichtigt, und die zwei Befunde, die die Prüfung zusätzlich gefunden hat, stehen als **L-253** und **L-254** im Register. Die zwölf nicht blockierenden Punkte stehen im Abschnitt „Prüfung“ und gehören gelesen, bevor eine Spec daraus abgeleitet wird |
 | GLOSSARY | `### Recurring rule (Wiederkehr-Regel)` — englisch `recurring rule`, Ordner `entities/recurring-rule/` |
 | Tabelle | `ludwig.client_accounting_case_rule` (ex `client_recurring_charge_rule`, Rename 2026-06-16). **Keine Subtypen** — eine Tabelle, keine 1:1-Spezialisierung |
 | Typen | `src/ludwig/modules/recurring-rules/domain/` — `rule.ts` (`RecurringRule`, `RuleBookingMode`, `RuleDirection`, `RuleExpectedInterval`/`RULE_INTERVAL_LABEL`, `RuleDocumentNumberStrategy`, `RuleProfileSource`, `RuleBookingTemplate`, `RuleTemplateLine`, `matchTransaction()`, `matchSourceDoc()`, `accrualAmount()`, `effectiveAmountTolerance()`, `amountDeviation()`, `isRuleDueInPeriod()`, `accrualDueDate()`, `deriveRuleProfile()`, `prefillFromTransaction()`) · `rule-summary.ts` (`describeRecurringRule()`, `describeRuleSchedule()`, `hasAnyCriterion()`) · `booking-preview.ts` (`buildRulePreview()`, `needsModeReview()`) · `derive-recurring-candidates.ts` (`RecurringCandidate`, `RecurringCandidateClass`) |
@@ -302,10 +302,10 @@ Vorschau zeigt („passt die Regel so?").
 
 | Form / Liste | Marke | Grund | Backlog |
 |---|---|---|---|
-| `RecurringRuleRow` | **jetzt** | trägt alle drei Listen; existiert heute handgeschrieben in `Schritt5.tsx` | — |
-| `RecurringRuleList` „Erwartete Zahlungen" | **jetzt** | löst die einzige gebaute Regel-Liste ab; Leerfall ist heute unterschlagen | — |
-| `RecurringRuleFacts` | **jetzt** | existiert zweifach gerendert (`RegelwerkTab`, `ZuordnungTab`) und ein drittes Mal als generische Feldliste; trägt den Regelwerk-Reiter des `CaseDetailView` | — |
-| `RecurringRuleEditor` | **jetzt** | 16 Punkte mit änderbar = Nutzer; ersetzt zwei Formulare; bei **72 % Dauersachverhalten ohne Regel** ist das Anlegen der Normalfall, nicht der Rand | — |
+| `RecurringRuleRow` | **jetzt** | trägt alle drei Listen; existiert heute handgeschrieben in `Schritt5.tsx` | **Spec `0132`** |
+| `RecurringRuleList` „Erwartete Zahlungen" | **jetzt** | löst die einzige gebaute Regel-Liste ab; Leerfall ist heute unterschlagen | **Spec `0133`** |
+| `RecurringRuleFacts` | **jetzt** | existiert zweifach gerendert (`RegelwerkTab`, `ZuordnungTab`) und ein drittes Mal als generische Feldliste; trägt den Regelwerk-Reiter des `CaseDetailView` | **Spec `0134`** |
+| `RecurringRuleEditor` | **jetzt** | 16 Punkte mit änderbar = Nutzer; ersetzt zwei Formulare; bei **72 % Dauersachverhalten ohne Regel** ist das Anlegen der Normalfall, nicht der Rand | **Spec `0135`** |
 | `RecurringRuleCell` | verworfen | keine fremde Zeile nennt die Regel; wo sie genannt würde, steht der Sachverhalt | — |
 | `RecurringRuleView` | verworfen | keine eigene Route; das Detail ist ein Reiter des `CaseDetailView` aus Facts + Editor | — |
 | `RecurringRuleDrawer` | verworfen | kein View, dem er folgen könnte; nachgeschlagen wird der Sachverhalt (`CaseDrawer`, 0098) | — |
@@ -315,6 +315,13 @@ Vorschau zeigt („passt die Regel so?").
 ## Befunde für `ludwig/app`
 
 Zusätzlich als Zeilen in `docs/befunde-app.md` eingetragen (L-240 bis L-252).
+
+**Beim Schreiben der Specs (2026-09-08) sind drei weitere dazugekommen**, sie
+stehen im Register und in der Spec, die sie gefunden hat: **L-255** — die
+Buchungssatz-Vorschau liefert fertige Beschriftungen statt Konten, `JournalEntryCard`
+kann sie deshalb nicht nehmen (`0134`) · **L-256** — `RuleDirection` hat keine
+deutschen Wörter im Code (`0132`) · **L-257** — kein gespiegelter Typ für das
+Zahlungskonto (`0135`).
 
 - **B1 (L-240)** — **Zwei Anzeige-Typen der Regel sind nicht spiegelbar.**
   `OverdueRecurringItem` liegt in `accounting-cases/application/agent-reads-core.ts`

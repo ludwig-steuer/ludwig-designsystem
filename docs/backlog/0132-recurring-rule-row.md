@@ -1,0 +1,256 @@
+# 0132 · `RecurringRuleRow`
+
+| | |
+|---|---|
+| Status | **spec** |
+| Stufe | `entities/recurring-rule/` |
+| Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Buchungsweise (Sollstellung ⇄ Bei Zahlung), Personenkonto und Dauersachverhalt sind Ludwig-Fachbegriffe |
+| Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Datenpunkte" (Ränge 1–7), „Relationen", „Formen" (Zeile `RecurringRuleRow`), „Zuschnitt" (Marke **jetzt**) |
+| Ersetzt | die handgeschriebene Zeile in `ErwarteteZahlungen` (`modules/stapelabnahme/ui/Schritt5.tsx` Z. 77–113; die rohe Rhythmus-Ausgabe steht in Z. 100 — Fundstellen nach Prüfpunkt **P9** berichtigt) |
+| Blockiert | 0133 (`RecurringRuleList`), die sie in ihren Rahmen steckt · 0131 (Regelwerk des Mandanten, Backlog) · den Regelwerk-Reiter des `CaseDetailView`, sobald er mehr als eine Regel zeigen darf (L-245) |
+| Spec von / am | Claude, 2026-09-08 (Skill `spec-schreiben`) |
+
+## Ziel
+
+Die Buchhalterin sieht eine Wiederkehr-Regel in einer Liste und will drei
+Dinge wissen, bevor sie weiterliest: **wen betrifft sie, was tut sie bei einem
+Treffer, greift sie überhaupt noch?** Heute steht dafür in Schritt 5 der
+Stapelabnahme eine von Hand gebaute Vierspalten-Zeile, die genau die zwei
+Angaben weglässt, die diese Fragen beantworten — Buchungsweise und Gültigkeit
+—, und den Rhythmus roh englisch ausgibt (`monthly` statt „monatlich",
+Befund L-243 a).
+
+Diese Zeile ist die erste Form der Familie: sie hat heute keinen einzigen
+Baustein im Set, und zwei Listen (0133 jetzt, 0131 später) setzen auf ihr auf.
+
+## Einordnung
+
+- **Wiederverwenden:** kein `@when` in `src/ui/v3` nennt die Wiederkehr-Regel.
+  Der einzige Treffer, der sie überhaupt erwähnt, ist `JournalEntryCard`
+  („recurring rule preview") — und der zeigt die *Wirkung* der Regel, nicht die
+  Regel. `CaseRow` ist die Zeile des **Sachverhalts**, nicht die seiner
+  Konfiguration.
+- **Neu, weil:** `spec-schreiben` §3 **Nr. 5** — `ui-repraesentationen.md` §1
+  führt die Wiederkehr-Regel als eigene Entität, und keine vorhandene Form
+  (Zeile, Karte, Detail) deckt sie ab. Nr. 1–4 greifen nicht: kein `@when`
+  passt (Nr. 1, 2), die Zeile trägt Fachwörter (Nr. 3), und sie hat weder
+  eigenen Zustand noch eigenen Tastaturweg (Nr. 4).
+- **Zuschnitt:** **zwei Dateien**, eine Familie im Sinne von §4:
+  - `RecurringRuleRow.tsx` — die Zeile, dazu `recurringRuleTracks()` und die
+    Union `RecurringRuleColumn`, damit Kopfzeile und Zeilen dieselbe Spur
+    lesen (Muster `bankTransactionTracks`).
+  - `recurring-rule.ts` — das **Wörterbuch der Familie**
+    (`RecurringRuleLabels`, `ruleLabel()`), das Zeile, Fakten und Editor
+    gemeinsam brauchen. Zweimal dieselbe Wortliste wäre eine zweite Wahrheit
+    (Muster `invoice-line.ts` aus 0072).
+  
+  **Nicht getrennt** wird die Zeile von ihren Zellen: eine
+  `recurring-rule-columns.tsx` mit `ColumnDef`-Objekten braucht erst, wer
+  `DataTable` rahmt — das ist 0131. Der Auslöser steht im Ausbau; eine
+  Spaltendefinition auf Vorrat wäre A12.
+- **Setzt auf:** `Row` und `Table` (0106), `CaseCell` (0095), `StatusBadge`
+  (`axis="regel_modus"`), `AmountCell`, `MonoCell`, `Time`, `Badge`. Aus dem
+  Spiegel: `RULE_INTERVAL_LABEL`, `RuleBookingMode`, `RuleDirection`,
+  `RuleExpectedInterval` (`src/ludwig/modules/recurring-rules/domain/rule.ts`).
+
+## Was die Zeile zeigt
+
+Die Ränge 1–7 des Profils, in der Reihenfolge des Profils. Kumulativ: was XS
+zeigt, zeigt S auch.
+
+| Rang | Zelle | Woraus | Darstellung |
+|---|---|---|---|
+| 1 | Gegenpartei-Kriterium | **abgeleitet** `matchCounterpartyName ?? matchCounterpartyIban` | Text; IBAN in `MonoCell`. Ist **beides** leer, steht dort das Wort **„ohne Kriterium"** — nicht „—" |
+| 2 | Buchungsweise | `bookingMode` | `StatusBadge axis="regel_modus"` — drei Werte, `match_only` eingeschlossen |
+| 3 | Gültigkeit | `isActive` | **Wort ohne Farbe**: „aktiv" / „inaktiv" (bis L-241 entschieden ist) |
+| 4 | Erwarteter Betrag | `accrualAmount(rule)` **beim Aufrufer** | `AmountCell` (Default-Währung EUR — die Regel hat keine Währungsspalte) |
+| 5 | Rhythmus | `expectedInterval` über `RULE_INTERVAL_LABEL` | Wort; ohne Rhythmus „ohne Rhythmus" (das heißt: kein Überfälligkeits-Check) |
+| 6 | Sachverhalt | `caseId` + Nummer/Titel | `CaseCell` — **nur außerhalb seines Falls**, dann als **erste** Zelle |
+| 7 | Richtung | `expectedDirection` über `labels.direction` | Wort; fehlt das Wort, steht der Rohwert da (L-256) |
+
+Dazu zwei Zellen, die nicht aus der Spaltenliste der Regel stammen und
+deshalb nur erscheinen, wenn der Aufrufer sie bestellt:
+
+| Zelle | Woraus | Warum |
+|---|---|---|
+| Perioden | Relation Ereignisse, als **Zähler** | Das Profil sieht die Ereignisse in S als Zähler vor („n Perioden"); die Liste in L zeigt sie über `CaseTimeline` |
+| Letzte Zahlung | Datum + Betrag der letzten zugeordneten Zahlung | Die Spalte der Fälligkeitsliste (0133). `null` heißt **„noch keine"**, nicht „unbekannt" |
+
+**Rang 1 ist abgeleitet, nicht die Namensspalte.** Das ist der eine
+blockierende Punkt der Profilprüfung (**P1**): die 100 % Füllgrad von
+`match_counterparty_name` sind eine Eigenschaft des F91-Imports.
+`prefillFromTransaction()` (`rule.ts:708–724`) setzt bei vorhandener IBAN
+ausdrücklich `matchCounterpartyName: null` — eine aus einer Zahlung gelernte
+Regel trägt **strukturell** keinen Namen. Eine Zeile, die nur den Namen
+zeigte, wäre für jede Agenten-Regel leer. `describeRecurringRule()` entscheidet
+genauso: Name **oder** IBAN an derselben Satzstelle.
+
+**Was die Zeile bewusst nicht zeigt:**
+
+- **`priority` (Rang 26)** — Owner-Entscheid vom 2026-09-08 zu **L-254 (erledigt `9a3ce2db`)**: neue
+  Regeln bekommen im Formular `priority: 0`, Agent und Bestand stehen auf
+  `100`, sortiert wird aufsteigend. Solange das nicht entschieden ist, wäre
+  eine Spalte, in der 30 von 30 Zeilen `100` steht, eine tote Spalte (derselbe
+  Fall wie „Rabatt", L-201).
+- **den Klartext-Satz (Rang 12)** — er gehört ab M zu `RecurringRuleFacts`.
+  Die Zeile rechnet ihn **nicht** nach: `matchTransaction()` und
+  `hasAnyCriterion()` sind sich über den Zweck-Regex uneins (**L-253 (erledigt `2c0c888f`)**), und
+  eine zweite Ableitung im Set wäre die dritte Meinung.
+- **die geltende Toleranz (Rang 17)** — sie steht ab M, und im Bestand ist sie
+  in allen 30 Zeilen `0,00`.
+
+## Schnittstelle
+
+Die Zeile nimmt ihre Felder **einzeln** entgegen und definiert **kein
+Zeilenmodell**: `OverdueRecurringItem` und `RuleOverviewItem` liegen in
+`application/` bzw. `infrastructure/` und sind nicht gespiegelt (**L-240**);
+ein eigener Typ wäre die lokale Erfindung, die §5 verbietet.
+
+| Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
+|---|---|---|---|---|
+| `counterpartyName` | `string \| null` | ja | Rang 1a — `match_counterparty_name` | `Filled` |
+| `counterpartyIban` | `string \| null` | ja | Rang 1b — `match_counterparty_iban`; Name **oder** IBAN stehen an derselben Stelle (P1) | `LearnedFromPayment` |
+| `bookingMode` | `RuleBookingMode` | ja | Rang 2, als `StatusBadge axis="regel_modus"` | `Modes` |
+| `isActive` | `boolean` | ja | Rang 3, Wort ohne Farbe (L-241) | `Modes` |
+| `amount` | `number \| null` | ja | Rang 4 — **das Ergebnis von `accrualAmount(rule)`**, das der Aufrufer bildet. Die Zeile rechnet nicht: die Ableitung ist dreistufig (`template.amount` → Summe der Split-Zeilen → `matchAmount`, P12) und gehört in die Domäne | `Filled` |
+| `interval` | `RuleExpectedInterval \| null` | ja | Rang 5, Wort aus `RULE_INTERVAL_LABEL` | `Words` |
+| `direction` | `RuleDirection \| null` | ja | Rang 7, Wort aus `labels.direction` | `Words` |
+| `labels` | `RecurringRuleLabels` | ja | die deutschen Wörter, die der Spiegel nicht führt (L-242, L-256). Ein Wert ohne Wort erscheint **roh** | `Words` |
+| `case` | `CaseLink` | nein | Rang 6 — nur setzen, wo die Liste ihren Sachverhalt verlässt | `InUse` |
+| `caseHref` | `(caseId: string) => string` | nein | Weg zum Sachverhalt. Ohne ihn steht der Name ohne Weg — die Zeile baut keine URL, sie kennt weder Mandant noch Jahr | `InUse` |
+| `periodCount` | `number` | nein | Zähler der Ereignisse („3 Perioden") | `InUse` |
+| `lastPayment` | `{ date: string; amount: number } \| null` | nein | letzte zugeordnete Zahlung. **Prop fehlt** = die Spalte gibt es nicht; **`null`** = es gab noch keine Zahlung | `InUse` |
+| `columns` | `readonly RecurringRuleColumn[]` | nein | welche Zellen die Zeile rendert, in der Reihenfolge der Liste. Default: `counterparty`, `bookingMode`, `validity`, `amount`, `interval`, `direction` (Ränge 1–5, 7) | `InUse` |
+
+Typen aus `src/ludwig/modules/recurring-rules/domain/rule.ts`
+(`RuleBookingMode`, `RuleDirection`, `RuleExpectedInterval`,
+`RULE_INTERVAL_LABEL`) · `CaseLink` aus
+`entities/accounting-case/case-title.ts` · GLOSSARY: `recurring rule` im Code,
+„Wiederkehr-Regel" im Label.
+
+**Dreizehn Props — und §4 sagt: trotzdem eine Komponente.** Der Grund ist
+benannt und hat ein Ablaufdatum: elf davon sind Spalten **einer** Zeile, die
+nur deshalb einzeln kommen, weil ihr Modell nicht gespiegelt ist (L-240).
+Trennen würde nichts entkoppeln, sondern nur Durchreich-Props erzeugen — genau
+den Fall, für den §4 „zusammenlassen" sagt. Ist L-240 erledigt, schrumpfen
+zwölf Props auf eine (siehe Ausbau).
+
+**Was die Zeile bewusst nicht kann:**
+
+- **Kein `href` auf der Zeile.** `Row href` macht die ganze Zeile zum `<a>`;
+  ihre Zellen tragen ihre eigenen Wege (`CaseCell`). Ein Anker im Anker ist
+  ungültiges Markup — gemessen in 0101 als Hydration-Warnung.
+- **Nichts rechnen:** weder Betrag (`accrualAmount`) noch Toleranz
+  (`effectiveAmountTolerance`) noch „greift sie?" (`matchTransaction`). Alles
+  drei kommt fertig herein.
+- **Keine Farbe für die Gültigkeit**, solange `is_active` keine Registry-Achse
+  hat (L-241). R1 lässt Farbe nur über eine Achse zu.
+
+## Verhalten
+
+**Server-Component.** Die Zeile hat keinen Zustand, keinen Tastaturweg und
+kein Client-JS; das Auswählen, Aufklappen und Paginieren gehört dem Rahmen
+(0133, 0131).
+
+Zustände: **gefüllt** ist der Normalfall. Zwei Sonderfälle, die keine Fehler
+sind und deshalb ein Wort bekommen statt eines Gedankenstrichs:
+
+- **ohne Kriterium** (weder Name noch IBAN) — die Regel ist nicht leer,
+  sondern **wirkungslos**. Das Wort steht in der führenden Zelle; den ganzen
+  Satz („greift daher bei keiner Zahlung") schreibt die Ableitung und zeigt
+  `RecurringRuleFacts`.
+- **noch keine Zahlung** (`lastPayment: null`) — in der Fälligkeitsliste ist
+  genau das die Auskunft.
+
+Beides folgt der Hausregel von `CaseCell`: **„offen" ist eine Aussage, kein
+fehlender Wert** — ein Gedankenstrich hieße „unbekannt".
+
+Leer · leer nach Filter · lädt · Fehler sind Zustände der **Liste**, nicht der
+Zeile.
+
+## Stories
+
+Abgeleitet nach `spec-schreiben` §6: 2 anwendbare Zustände (gefüllt, ohne
+Kriterium) + 2 Enum-Achsen (`bookingMode`; Rhythmus und Richtung zusammen als
+Wörter) + 1 Ableitung, die das Profil berichtigt hat (P1) + 1 „im Einsatz" +
+1 Rand (die Zeile kürzt Namen und formatiert Beträge) = **7**.
+Titel `v3/Entitäten/Wiederkehr-Regel/RecurringRuleRow`.
+
+| Story | Beweist |
+|---|---|
+| `Filled` | Normalfall: „Musterfirma Immobilien GmbH", Sollstellung, aktiv, 1.800,00 €, monatlich, Zahlungsausgang |
+| `LearnedFromPayment` | die aus einer Zahlung gelernte Regel: **kein Name**, dafür die IBAN — Rang 1 ist abgeleitet (P1), die führende Zelle bleibt gefüllt |
+| `WithoutCriterion` | weder Name noch IBAN: **„ohne Kriterium"** statt „—" |
+| `Modes` | die drei Werte von `booking_mode` nebeneinander, `match_only` eingeschlossen (im Bestand 0 von 30), dazu eine inaktive Regel — Wort ohne Farbe |
+| `Words` | Rhythmus und Richtung als Wörter: `monthly`/`quarterly`/`yearly`, `payment_in`/`payment_out`/`null` — und **eine** Zeile mit einem Wert, für den `labels` kein Wort hat: er steht roh da (L-256) |
+| `InUse` | vier Zeilen in einer `Table` mit Kopfzeile, Spaltensatz der Fälligkeitsliste (`case` vorn, `lastPayment` hinten, dazu `periodCount`) — so, wie 0133 sie stellt |
+| `Edges` | Gegenpartei mit **46** Zeichen (Maximum im Bestand), Betrag `null`, Rhythmus `null`, `lastPayment: null`, und zwei Regeln desselben Sachverhalts untereinander (L-245) |
+
+Nicht anwendbar und warum: `Leer`, `LeerNachFilter`, `Laedt`, `Fehler` — eine
+Zeile ohne Daten wird nicht gerendert; alle vier Zustände trägt der Rahmen
+(0133). `Interaktiv` — die Zeile hat keinen Callback; `caseHref` baut eine
+URL, es ist kein Rundlauf.
+
+Daten der Stories: realistische Werte im Zuschnitt des Bestands
+(Musterfirma GmbH, 1.800,00 €, `monthly`, Zahltag 1., 8-stellige
+DATEV-Belegnummer), Typen aus `src/ludwig/`.
+
+## Offene Fragen
+
+Höchstens drei, jede mit Default — der Bau wartet nicht.
+
+1. **Wie heißt das Wort in der führenden Zelle, wenn Name und IBAN fehlen?**
+   *Ohne Antwort: „ohne Kriterium".* Es ist eine Aussage über die Regel, kein
+   fehlender Wert — dieselbe Bauform wie „offen" in `CaseCell`.
+2. **Trägt die Zeile den Perioden-Zähler?** *Ohne Antwort: ja, als optionale
+   Spalte `periods` („3 Perioden"), gedämpft.* Das Profil sieht die Ereignisse
+   in S als Zähler vor; ohne die Prop entsteht keine Spalte.
+3. **Gehört „Letzte Zahlung" an die Zeile oder in den Rahmen?** *Ohne Antwort:
+   an die Zeile, als optionale Spalte.* Der Rahmen kann keine Zelle
+   nachschieben, ohne die Spur (`grid-template-columns`) zu zerreißen — und
+   die Fälligkeitsliste ist ohne diese Spalte nicht zu beantworten.
+
+## Ausbau
+
+| Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Ein Zeilenmodell statt zwölf Einzelfeldern | `rule: OverdueRecurringItem \| RuleOverviewItem` statt der Feld-Props | **L-240** ist gelöst — die zwei Anzeige-Typen liegen in `recurring-rules/domain/` |
+| Farbe für die Gültigkeit | `StatusBadge axis="regel_gueltigkeit"` statt des Wortes | **L-241** ist entschieden (Achse oder Farbe weg) |
+| Spaltendefinitionen für `DataTable` | `recurringRuleColumns()` in `recurring-rule-columns.tsx`, die Zeile rendert weiter dieselben Zellen | Aufgabe **0131** wird gebaut (sortierbar, filterbar, mandantenweit) |
+| `priority` als Spalte | `priority: number` | **L-254 (erledigt `9a3ce2db`)** ist entschieden und der Bestand streut (heute 30 × `100`, das Formular schreibt `0`) |
+| Der Weg in den Editor aus der Zeile | `onEdit?: (ruleId: string) => void` | ein Screen verlangt ihn — die Fälligkeitsliste ist „Auskunft, keine Aufgabe" und braucht ihn nicht |
+
+## Abnahmekriterien
+
+Fest (gilt immer):
+
+- [ ] `pnpm typecheck` und `pnpm build` grün
+- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [ ] Code englisch; `@when`/`@instead` an jedem Export
+- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+
+Variabel (aus dieser Spec):
+
+- [ ] Rang 1 ist **abgeleitet**: bei fehlendem Namen steht die IBAN in derselben Zelle (Story `LearnedFromPayment`, gegen `Filled` gemessen)
+- [ ] Fehlen Name **und** IBAN, steht „ohne Kriterium" — kein „—" (Story `WithoutCriterion`, am gerenderten Text gemessen)
+- [ ] Die Buchungsweise kommt aus `StatusBadge axis="regel_modus"`; alle drei Werte erscheinen, `match_only` eingeschlossen (Story `Modes`)
+- [ ] Die Gültigkeit ist ein **Wort ohne Farbe** — kein `tone`, kein `dot` (Story `Modes`, am Knoten gemessen: keine Ton-Klasse)
+- [ ] Der Rhythmus steht **deutsch** aus `RULE_INTERVAL_LABEL`; auf dem Bildschirm steht nie `monthly` (Story `Words`) — das ist die Ablösung von L-243 a
+- [ ] Ein Wert, für den `labels` kein Wort hat, erscheint **roh** statt zu verschwinden (Story `Words`, eine Zeile ohne Eintrag)
+- [ ] Die Zeile enthält **keine** Betrags- oder Toleranz-Ableitung: `grep -n "template\.\|matchAmount\|Tolerance" RecurringRuleRow.tsx` findet nichts
+- [ ] Die Zeile rendert **kein** `href` auf `Row`; die Wege stehen in den Zellen (Story `InUse`, Baum geprüft)
+- [ ] `columns` bestimmt Zellenzahl **und** Reihenfolge; `recurringRuleTracks(columns)` und die Kopfzeile decken sich (Story `InUse`, Spurenzahl gegen Zellenzahl gezählt)
+- [ ] `lastPayment: null` zeigt „noch keine", die fehlende Prop zeigt gar keine Spalte (Story `Edges` gegen `InUse`)
+- [ ] Die Zeile kennt kein `priority` (grep) — Owner-Entscheid zu L-254 (erledigt `9a3ce2db`)
+- [ ] Ersetzt die Zeile in `ErwarteteZahlungen` (`Schritt5.tsx`) ohne Funktionsverlust und zeigt zusätzlich Buchungsweise und Gültigkeit — **offen (App)**, die Ablösung ist ein eigener Schritt
+
+## Abnahme
+
+| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+|---|---|---|
+| … | … | ✓ / ✗ |
+
+Abgenommen von / am: … · Offene Punkte: …

@@ -17,6 +17,10 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 | `CaseHeaderVM.disposition` | **spiegelbar seit `988d3dc5`** (L-220 erledigt): `overview-vm.ts` trägt nur noch Formen, die Regeln liegen in `application/case-overview.ts` | die Sachverhaltsansicht; bis zum Lauf liest sie die Zuständigkeit über `CaseDetail` |
 | `flow_error` in der Achse `bridge_datev` | neu (`b9f3707a`, L-221) — dazu ein Test, der die **ganze** Vertragsunion auf Deckungsgleichheit prüft | die DATEV-Seite zeigt die Achse schon; das Set hat dort keinen Baustein |
 
+| `recurring-rules/domain/rule.ts` und `rule-summary.ts` | `MATCH_CRITERIA` einmal statt zweimal (L-253, `2c0c888f`), Prioritäts-Konstante (L-254, `9a3ce2db`), `datev-wk:`-Präfix (L-244, `b7544542`) | 0132–0135 lesen bis dahin gegen `origin/staging` |
+| `business-partners/domain/business-partner.ts` | `TYPICAL_NATURE` mit allen sechs Werten (L-222, `a38169f4`) | 0127–0129; **wer gegen den Spiegel baut, baut gegen die alte vierwertige Aufzählung** |
+| Achse `regel_modus` in `ui/status/status-registry.ts` | neu (L-243, `5e48d892`) | 0132 und 0134 zeigen den Modus über die Achse |
+
 ## Erledigt mit dem Lauf vom 2026-09-08 (App `6ba47fb2`)
 
 Owner-Freigabe (Simon), einmalig, danach wieder eingefroren. Angekommen sind:
