@@ -208,7 +208,12 @@ export function bankTransactionColumns({
         t.matchStage ? (
           <StatusBadge axis="bank_match_stage" status={t.matchStage} info={false} />
         ) : (
-          <span className="v2muted">nicht gelaufen</span>
+          // NULL is not a value of the axis — the cascade has not run, which
+          // is not „no match". The axis has no word for it, so the word lives
+          // here; it lived here **twice** with two different wordings until
+          // 2026-09-08 (`BankTransactionFacts` said „Kaskade nicht gelaufen").
+          // That the word has to be written at all is finding L-218.
+          <span className="v2muted">Kaskade nicht gelaufen</span>
         ),
     },
     clarifications: {

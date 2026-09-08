@@ -77,12 +77,39 @@ function Frame({ children, sub }: { children: React.ReactNode; sub?: string }) {
 
 /**
  * Alle acht Punkte: ein zugeordneter Fall, die DATEV-Stufe als Wort, der
- * Buchungs-Zustand des **Ereignisses** — nicht der des Sachverhalts.
+ * Buchungs-Zustand des **Ereignisses** — nicht der des Sachverhalts, und Rang
+ * 8, die offene Klärung. Der Zähler steht hier bei 1: bei 0 zeigte die Story
+ * sieben Punkte und versprach acht (Abnahme 2026-09-08, M3).
  */
 export const Filled: Story = {
   render: () => (
     <Frame>
-      <BankTransactionRow transaction={BASE} caseHref={caseHref} openHref="#zuordnen" />
+      <BankTransactionRow
+        transaction={{ ...BASE, openClarificationsCount: 1 }}
+        caseHref={caseHref}
+        openHref="#zuordnen"
+      />
+    </Frame>
+  ),
+};
+
+/**
+ * `rowHref` legt den Zeilenlink auf den führenden Punkt (`.v2rowlink`, I11) —
+ * die ganze Zeile führt dann in die Zahlung. Sie schließt `expand` aus: eine
+ * Zeile, die aufklappt, führt nicht zugleich woanders hin.
+ *
+ * Und der Fall, den die Achse nicht kennt: `matchStage: null` heißt **die
+ * Kaskade ist nicht gelaufen** — nicht „kein Treffer". Die Registry führt
+ * dafür keinen Wert, deshalb steht das Wort in der Spalte (Befund L-218).
+ */
+export const RowLinkAndUnrun: Story = {
+  render: () => (
+    <Frame sub="Commerzbank · 1210 — die Zeile führt in die Zahlung">
+      <BankTransactionRow
+        transaction={{ ...BASE, matchStage: null }}
+        caseHref={caseHref}
+        rowHref={(t) => `#zahlung-${t.id}`}
+      />
     </Frame>
   ),
 };

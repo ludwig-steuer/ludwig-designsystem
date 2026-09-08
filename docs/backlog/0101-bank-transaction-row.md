@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig (Schnittstelle) — die gemessene Prüfung steht in 0119 aus |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/bank-transaction/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: acht Punkte dieser Entität, drei davon aus Ludwig-Ableitungen |
@@ -28,9 +28,12 @@ und ob DATEV sie kennt.
 - **Neu, weil:** `spec-schreiben` §3 Regel 5 — die Zeile existiert zweimal
   handgeschrieben, und keine vorhandene Form deckt sie ab.
 - **Zuschnitt:** eine Datei, ein Export plus die reinen Ableitungen daneben
-  in `bank-transaction-state.ts` (`deriveZ`, `restOf`, `datevMatchTitle`,
-  `deriveCaseIndicators`). Trennung nach §4 Absatz 1: die Ableitungen werden
-  allein gebraucht — die Worklist filtert über `deriveZ`, ohne zu zeichnen.
+  in `derive.ts` (`deriveZ`, `restOf`, `derivePurposeParts`). Trennung nach §4
+  Absatz 1: die Ableitungen werden allein gebraucht — die Worklist filtert über
+  `deriveZ`, ohne zu zeichnen. *(Berichtigt 2026-09-08, M2: die Spec nannte
+  eine Datei `bank-transaction-state.ts` und zwei Funktionen `datevMatchTitle`
+  und `deriveCaseIndicators`, die es alle drei nie gab — die DATEV-Stufe kommt
+  seit `cc141f7b` aus der Achse `bank_match_stage`, nicht aus einer Funktion.)*
 - **Setzt auf:** `Row`, `BankTransactionPurpose`, `CaseCell`, `Amount`,
   `Time`, `StatusBadge`, `Badge`, `ActionIcon`.
 
@@ -42,7 +45,7 @@ und ob DATEV sie kennt.
 | 2 | Betrag | `amount` + `currency`, rechts, Vorzeichen ohne Farbe |
 | 3 | Gegenpartei | `counterpartyName` |
 | 4 | Buchungsdatum | `postingDate` — **mit Jahr** |
-| 5 | DATEV-Haken | `datevMatchTitle(matchStage)` |
+| 5 | DATEV-Stufe | `matchStage` über die Achse `bank_match_stage`. `null` heißt **die Kaskade ist nicht gelaufen**, nicht „kein Treffer“ — die Achse führt dafür keinen Wert (Befund **L-218**) |
 | 6 | Sachverhalts-Zuordnung | `deriveZ()` — Z0 keiner · Z1 einer, erklärt · Z2 mehrere, erklärt · Z3 Rest offen |
 | 7 | Buchungs-Zustand des **Ereignisses** | Achse `ereignis` |
 | 8 | Offene Klärungen | Zähler, hängt am **Sachverhalt** |
@@ -69,6 +72,7 @@ kein Versehen und gehört als Kommentar in den Code.
 | `columns` | `BankTransactionColumn[]` | nein, Default alle acht | Welche Punkte. Die Worklist lässt Zuordnung und Buchungs-Zustand weg und nimmt stattdessen das Konto auf | `Columns` |
 | `accountLabel` | `string` | nein | Das Zahlungskonto — nur in der kontoübergreifenden Worklist | `Columns` |
 | `expanded` | `boolean` | nein | Die Unterzeilen je zugeordnetem Sachverhalt mit Teilbetrag und Summe | `Expanded` |
+| `rowHref` | `(t: BankTransactionRowData) => string` | nein | Der Zeilenlink am führenden Punkt (`.v2rowlink`, I11) — die ganze Zeile führt in die Zahlung. Schließt `expand` aus: eine Zeile, die aufklappt, führt nicht zugleich woanders hin (`BankTransactionList` erzwingt das im Typ) | `RowLinkAndUnrun` |
 
 **Kann bewusst nicht:**
 
@@ -110,11 +114,12 @@ Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionRow`. Abgeleitet nach
 
 | Story | Beweist |
 |---|---|
-| `Filled` | Alle acht Punkte, ein zugeordneter Fall, DATEV-Haken, Buchungs-Zustand |
+| `Filled` | Alle acht Punkte, ein zugeordneter Fall, DATEV-Stufe, Buchungs-Zustand — Rang 8 mit **einer** offenen Klärung, damit die Story ihr Versprechen hält |
 | `Unassigned` | Z0: „offen" mit `openHref` — die 65 %, um die es geht |
 | `Split` | Z3: zwei Fälle und eine Rest-Marke; der Betrag stimmt mit `restOf()` überein |
 | `Columns` | Der Spaltensatz der Worklist neben dem des Auszugs — dieselbe Zeile, zwei Auswahlen |
 | `Expanded` | Unterzeilen je Fall mit Teilbetrag und Summe |
+| `RowLinkAndUnrun` | Der Zeilenlink liegt am führenden Punkt — und `matchStage: null`, der Fall, den die Achse nicht kennt |
 | `InUse` | Sechs Zeilen in einer `Card`, Köpfe der Status-Spalten über `StatusHeader` (0077); ein Eingang und ein Ausgang in derselben Farbe |
 
 Nicht anwendbar: `leer nach Filter`, `lädt`, `Fehler`.
@@ -681,3 +686,218 @@ Trefferfläche.
 eigenen Worktree: **Exit 0** (Bauprüfung in 0117).
 
 **Status: Abnahme.**
+
+## Schlanke Abnahme (Schnittstelle) 2026-09-08
+
+Dritte Abnahme, fremd: Spec und Code gelesen, kein Chat-Verlauf, nicht der
+bauende Agent. **Schlanke Tiefe nach dem Owner-Entscheid vom 2026-09-08** —
+geprüft wird die **Schnittstelle**, nicht die Darstellung. Spurbreiten,
+Zeilenhöhen, Überläufe, Kontraste, Trefferflächen, Hover, Fokus und
+Tastaturwege sind nach `docs/backlog/0119-visuelle-pruefung-nachholen.md`
+vertagt und hier weder geprüft noch gemessen; die Zahlen der Wiederabnahme vom
+2026-09-07 stehen unangetastet weiter oben.
+
+Gelesen: `BankTransactionRow.tsx` (96 Z.), `bank-transaction-columns.tsx`
+(320 Z.), `BankTransactionRow.stories.tsx` (285 Z.), `bank-transaction.ts`
+(121 Z.), `derive.ts` (23 Z.), dazu zur Herkunft
+`src/ludwig/modules/bank-transactions/domain/statement-line.ts` und
+`…/types.ts`, `src/ludwig/ui/status/status-registry.ts`,
+`src/ui/v3/entities/accounting-case/case-title.ts` und `CaseCell.tsx`, sowie
+`.claude/skills/spec-schreiben/SKILL.md` §6. Der Arbeitsbaum war beim Prüfen
+sauber (`git status --short` leer) — gemessen ist der committete Stand.
+
+Gemessen im Browser über `scripts/cdp.mjs` gegen den laufenden Dev-Server 6107
+(headless Chromium, eigener Port, 1440 px). Story-IDs aus
+`http://localhost:6107/index.json`, nicht geraten. Aktion (Navigation) und
+Messung standen in **getrennten** `Runtime.evaluate`-Aufrufen. Gemessen wurde
+der gerenderte DOM, nie die gesetzte Prop. Bei den Wächtern zählt der
+**Exit-Code**, nicht die Textausgabe.
+
+### Wächter
+
+| Wächter | Aufruf | Exit |
+|---|---|---|
+| `pnpm typecheck` | `tsc --noEmit` | **0** |
+| `pnpm check:language` | ohne `--all` — meldet „nichts geändert unter src/ui/v3" (sauberer Baum), also **kein** Nachweis | 0, aber leer |
+| `check:language --all` | Bestandsbericht: 377 deutsche Zeilen in 136 Dateien → Exit 1. **Gegenprobe für diese Familie:** `grep -c bank-transaction` über den Bericht = **0** | 1 (Bestand), Familie sauber |
+| `pnpm check:icons` | — | **0** (kein `--test` vorhanden) |
+| `pnpm check:contrast` | — | **0** |
+| `pnpm check:mirror` | `mirror-filter --test` | **0** |
+| `pnpm check:when` | — | **0** |
+| Selbstprüfungen | `check-language --test` · `check-when --test` · `check-contrast --test` · `mirror-filter --test` | je **0** |
+
+`pnpm build` war in dieser Welle nicht Teil der schlanken Abnahme und ist nicht
+gelaufen; die Bauprüfung steht in 0117.
+
+### Schnittstelle, Zeichen für Zeichen
+
+| Spec-Tabelle | Code | Urteil |
+|---|---|---|
+| `transaction` · `BankTransactionRowData` · Pflicht | `BankTransactionRow.tsx:37` `transaction: BankTransactionRowData` | ✓ |
+| `caseHref` · `(caseId: string) => string` · Pflicht | `bank-transaction-columns.tsx:71` `caseHref: (caseId: string) => string`, erreichbar über `& BankTransactionColumnOptions` (`BankTransactionRow.tsx:43`) | ✓ |
+| `openHref` · `string` · optional | `:82` `openHref?: string` | ✓ |
+| `columns` · `BankTransactionColumn[]` · optional, Default alle acht | `:85` `columns?: BankTransactionColumn[]`; `DEFAULT_COLUMNS = ORDER.filter(c => c !== "account")` (`:67`) = **8** von 9 | ✓ |
+| `accountLabel` · `string` · optional | `:84` `accountLabel?: string` | ✓ |
+| `expanded` · `boolean` · optional | `BankTransactionRow.tsx:42` `expanded?: boolean` | ✓ |
+| — keine Zeile — | `:80` **`rowHref?: (t: BankTransactionRowData) => string`** | **M1** |
+
+Sieben Props am Bauteil, sechs in der Tabelle.
+
+### Kriterien
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Urteil |
+|---|---|---|
+| Herkunft der Typen: Fachtypen aus `src/ludwig/`, nichts lokal nachgebaut, nichts lokal verschärft | `SepaTags` und `Currency` kommen aus dem Spiegel (`bank-transaction.ts:1–2`), `CaseLink` aus 0095 (`case-title.ts:23`), alle vier Ableitungen aus dem Spiegel (`derive.ts:13–23`). `BankTransactionRowData` ist **kein** Nachbau: der gleichnamige Spiegeltyp (`domain/types.ts:82`) ist die **Import**-Zeile mit `amount: string`/`currency: string`, die Anzeigeseite hat dort keinen Typ — der Namens-Satz der Freigabe steht als Kommentar an `BankTransactionRow.tsx:13–18`. `CaseAssignment` erweitert `CaseLink` um genau zwei Felder, beide gelesen. `grep -nE '\bas [A-Z]'` über die fünf Dateien: **Exit 1**, keine Zusicherung | ✓ |
+| Kein Pflichtfeld, das niemand liest | Alle Pflichtfelder von `BankTransactionRowData` werden in den Zellen gelesen — bis auf `id`: `grep -n '\.id\b'` über `BankTransactionRow.tsx` und `bank-transaction-columns.tsx` = **0 Treffer**. Es zwingt aber niemanden zu etwas Wirkungslosem: die Liste liest es als Schlüssel (`BankTransactionList.tsx:119`, `BankTransactionWorklist.tsx:110` `rowKey={(t) => t.id}`), die Story `InUse` als `key`. So hat 0100 (M1) es entschieden, mit Kommentar an `bank-transaction.ts:54–59` | ✓ |
+| `@when`/`@instead` an jedem Export | `check:when` Exit 0. Von Hand nachgezählt: `BankTransactionRow` (`:26–31`), `bankTransactionTracks` (`:95–96`), `bankTransactionColumns` (`:103–106`) tragen beide Zeilen; `BankTransactionColumn` und `BankTransactionColumnOptions` sind Typ-Exporte und nach der Regel des Wächters ausgenommen | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/entities/bank-transaction/BankTransactionRow.tsx` + `.stories.tsx` im selben Ordner; `index.json` nennt Titel `v3/Entitäten/Kontoauszugsposition/BankTransactionRow` | ✓ |
+| Story-Zahl = Ableitung `spec-schreiben` §6 | `index.json`: genau **sechs** IDs (`--filled`, `--unassigned`, `--split`, `--columns`, `--expanded`, `--in-use`). Formel: 2 anwendbare Zustände + 1 Enum (`columns`) + 1 Layout-Boolean (`expanded`) + 0 Callbacks + 1 im Einsatz + 1 Rand = 6. `lädt`/`Fehler` gehören der Liste, `leer nach Filter` hat eine Zeile nicht — beides unter „Verhalten" begründet | ✓ |
+| Der gezählte Rand-Fall wird von einer Fixture wirklich ausgelöst | Rand = `Split`. Fixture `:125–140`: `amount −1249,90`, `allocatedSum 1100`, zwei Fälle → `deriveZ` = **Z3** (`statement-line.ts:89–94`), und gerendert steht `.v2btxrow__rest` = **„Rest 149,90 €"**. Nachgerechnet: `restOf` = \|−1249,90\| − 1100 = **149,90** ✓. `--in-use` Zeile 5 ebenso: „Rest 480,55 €" = 2480,55 − 2000 | ✓ |
+| Story-Deckung je Prop | `transaction`/`caseHref` in allen sechs · `openHref` in `--unassigned` (gemessen `a.v2case__nonelink` Text „offen", `href="#zuordnen"`) · `columns` **und** `accountLabel` in `--columns` · `expanded` in `--expanded` (`.v2btxrow__split` 1×, Unterzeilen „2026-0412 … 900,00 €", „2026-0488 … 200,00 €", „zugeordnet 1.100,00 €"). **`rowHref` von keiner Story:** `.v2rowlink` = **0** in allen sechs Stories | **M1** |
+| Status nur über `status-registry.ts`, keine lokale Label-Map | Rang 5 `StatusBadge axis="bank_match_stage"` (`:209`), Rang 7 `StatusBadge axis="ereignis"` über `resolveEventBookingState` (`:287–298`). Gemessene Badge-Wörter stammen ausnahmslos aus `BANK_MATCH_STAGE`/`EREIGNIS_BUCHUNG`: „exakt", „nah", „über Belegnummer", „mehrdeutig", „kein Kandidat", „außerhalb des Bestands", „ohne Konto", „Vorschlag", „Gebucht", „Buchung fehlt", „Keine Buchung nötig". Ausnahme: der `null`-Zweig → **M4** | **M4** |
+| Kein Hex, keine px in der Komponente | `grep -nE '#[0-9a-fA-F]{3,8}'` über die drei Bauteile: **Exit 1**. px nur als `ColumnDef.width` (8 Zeilen, Rastermaß) — dieselbe Bauform wie `case-columns.tsx` (12) und `source-document-columns.tsx` (14) | ✓ |
+| `columns` lässt weg und ordnet nicht um | `--columns`: alle vier Zeilen bekommen die Auswahl **verdreht** (`amount, matchStage, account, purpose, counterparty, postingDate`, `:182`/`:199`/`:214`/`:229`); gerendert steht jede Zeile in der Familien-Reihenfolge — Zelltexte Zeile 1: `["26.08.2026","Bürobedarf Meier GmbH","Wartung Klimaanlage …","Commerzbank · 1210","außerhalb des Bestands","−1.249,90 €"]`, deckungsgleich mit dem Kopf | ✓ |
+| Z0 zeigt „offen", nie einen Gedankenstrich | `--unassigned` und `--in-use` (2×): `a.v2case__nonelink` Text **„offen"**, `href="#zuordnen"`. Kein Gedankenstrich in der Sachverhalts-Spalte (die Treffer der Wortprobe im Seitentext stammen aus dem Kartenkopf „Commerzbank · 1210 — noch nicht zugeordnet") | ✓ |
+| Das Datum trägt das Jahr | `--filled` erste Zelle **„26.08.2026"** | ✓ |
+| Die vier offenen DATEV-Klassen tragen ihr Wort in `Columns` | `--columns` Badges, gemessen in dieser Reihenfolge: **„außerhalb des Bestands", „mehrdeutig", „kein Kandidat", „ohne Konto"** — alle vier, je einmal. M-B der Wiederabnahme ist damit wirklich behoben | ✓ |
+| Rang 8 als Zahl mit Wort, **ohne** Badge | `--split`: `span.v2btxrow__clar` „2 Klärungen", `.bdg` darin = **0**; `--in-use` Zeile 5 „1 Klärung", `.bdg` = 0. In `--filled` bleibt die Spalte leer → **M3** | **M3** |
+| Bei mehreren Fällen steht vor jedem Ereignis-Badge die Fallnummer | `--split`: `.v2btxrow__statefor` = `["2026-0412","2026-0488"]`, davor je ein Badge („Vorschlag", „Buchung fehlt"). Bei einem Fall (`--filled`) keine Nummer | ✓ |
+| Die vier Ableitungen liegen in einer eigenen Datei und rendern nichts | `derive.ts` 23 Zeilen, reiner Re-Export, kein JSX; `check:mirror` Exit 0. Die **Namen** stimmen aber nicht mit dem Zuschnitt-Absatz überein → **M2** | **M2** |
+| Rang 7 = Zustand des Ereignisses, Klärungszähler fallweit — beides als Kommentar im Code | `bank-transaction-columns.tsx:28–36` sagt beides wörtlich und englisch | ✓ |
+| Browser-Durchlauf über **alle** Stories, Konsole sauber | Alle sechs IDs gerendert, `#storybook-root` nicht leer (278/238/384/533/480/861 Zeichen Text), Zeilen 1/1/1/4/1/6. Konsole: nur `[vite] connecting/connected` und HMR-Meldungen; die einzige Fehlermeldung ist `404 http://localhost:6107/favicon.ico` (über `Network.responseReceived` nachgesehen — der Dev-Server, nicht das Bauteil). **Keine** React-Warnung, keine Hydrations-Meldung, keine Ausnahme. Dazu `a a` = 0 und `a button` = 0 in allen sechs Stories | ✓ |
+| offen (App): ersetzt die Zeile in `KontoauszugView` und `BankTransactionAssignmentTable`, dazu die dritte Route aus B3 | in diesem Repo nicht prüfbar | offen (App) |
+
+### Mängel
+
+**M1 — `rowHref` steht in keiner Zeile der Schnittstellen-Tabelle und in keiner Story. (blockiert)**
+*Kriterium:* Schnittstelle Zeichen für Zeichen · Story-Deckung je Prop.
+*Ort:* `src/ui/v3/entities/bank-transaction/bank-transaction-columns.tsx:80`,
+erreichbar am Bauteil über `& BankTransactionColumnOptions`
+(`src/ui/v3/entities/bank-transaction/BankTransactionRow.tsx:43`); Spec-Tabelle
+Zeilen 64–71.
+*Befund:* Das Bauteil nimmt sieben Props, die Tabelle nennt sechs. `rowHref`
+ist keine Kleinigkeit: es legt einen `.v2rowlink` über die Gegenpartei
+(`:148`), und `bankTransactionColumns` beschreibt in acht Zeilen Kommentar,
+warum der Link dort und nicht auf dem Datum sitzt — eine Entscheidung, die
+nirgends in der Spec steht. Gemessen ist `.v2rowlink` in **allen sechs**
+Stories von 0101 **0×**; belegt ist die Prop nur in
+`BankTransactionList.stories.tsx:94` und
+`BankTransactionWorklist.stories.tsx:161`. Dazu sagt die Ausbau-Tabelle
+(Zeile „Im Drawer nachschlagen") bis heute `onPeek?: () => void` und „0103 ist
+gebaut" — der Ausbau ist gekommen, aber als `rowHref`; auch diese Zeile ist
+nicht nachgezogen. Das steht seit der Wiederabnahme vom 2026-09-07 als M-D und
+wurde beim Abschluss ausdrücklich offen gelassen; damit beschreibt die Spec,
+gegen die abgenommen wird, die gebaute Schnittstelle in der zweiten Runde
+nicht.
+*Kleinster Weg:* eine Zeile in die Schnittstellen-Tabelle
+(`| rowHref | (t: BankTransactionRowData) => string | nein | Wohin die Zeile
+führt — der Drawer der einen Zahlung (0103); der Link sitzt auf der
+Gegenpartei | 0085/0086 |`), die Ausbau-Zeile von `onPeek` auf `rowHref`
+umschreiben und einen Satz, warum 0085/0086 den Nachweis tragen — sonst eine
+siebte Story.
+*Blockiert:* **ja.** Die Spec ist der Maßstab der Abnahme; solange sie die
+Schnittstelle nicht vollständig nennt, wird gegen etwas anderes abgenommen als
+gebaut wurde. Der Weg kostet zwei Tabellenzeilen.
+
+**M2 — Der Zuschnitt nennt eine Datei und zwei Ableitungen, die es nicht gibt. (blockiert nicht)**
+*Kriterium:* Herkunft der Ableitungen · Schnittstelle gegen Code.
+*Ort:* Spec, Abschnitt „Einordnung", Zeilen 30–33, gegen
+`src/ui/v3/entities/bank-transaction/derive.ts:13–23`.
+*Befund:* Die Spec sagt „eine Datei, ein Export plus die reinen Ableitungen
+daneben in `bank-transaction-state.ts` (`deriveZ`, `restOf`, `datevMatchTitle`,
+`deriveCaseIndicators`)". Drei Namen davon existieren im Repo nicht:
+`grep -rl` über `src/` findet **0** Treffer für `bank-transaction-state`,
+**0** für `datevMatchTitle`, **0** für `deriveCaseIndicators`. Tatsächlich
+heißt die Datei `derive.ts` und re-exportiert `deriveZ`, `restOf`,
+`derivePurposeParts` und `resolveEventBookingState`; „ein Export" sind
+inzwischen drei (`BankTransactionRow`, `bankTransactionColumns`,
+`bankTransactionTracks`). Der Nachtrag vom 2026-09-06 und der Abschnitt zu M2
+der ersten Abnahme nennen beides richtig — nur der Absatz, auf den das
+Abnahmekriterium „Die vier Ableitungen …" zeigt, ist nicht nachgezogen. Ein
+Kriterium, das auf zwei tote Namen zeigt, ist nicht prüfbar.
+*Kleinster Weg:* im Zuschnitt-Absatz `bank-transaction-state.ts` → `derive.ts`,
+die vier Namen auf die tatsächlichen tauschen und „ein Export" auf die drei
+Exporte der Familie erweitern.
+
+**M3 — `Filled` verspricht „alle acht Punkte" und zeigt Rang 8 leer. (blockiert nicht)**
+*Kriterium:* Story-Deckung — was die Stories-Tabelle behauptet, muss die
+Fixture auslösen.
+*Ort:* `src/ui/v3/entities/bank-transaction/BankTransactionRow.stories.tsx:44`
+(`openClarificationsCount: 0` in `BASE`) gegen die Stories-Tabelle der Spec,
+Zeile 113.
+*Befund:* Gemessen hat `--filled` acht Zellen, und die siebte (Klärung) ist der
+leere String; `.v2btxrow__clar` = **0** in dieser Story. Acht **Spalten**
+stehen, acht **Werte** nicht. Das Kriterium zu Rang 8 nennt `Split`, und dort
+steht der Wert („2 Klärungen", gemessen) — es blockiert also nichts, aber die
+Story, die „alle acht Punkte" beweisen soll, beweist sieben. Steht seit der
+Wiederabnahme vom 2026-09-07 als Befund 3.
+*Kleinster Weg:* entweder `openClarificationsCount: 1` in die `Filled`-Fixture,
+oder die Stories-Tabelle auf „alle acht Spalten" ändern.
+
+**M4 — Der `null`-Zweig von Rang 5 rendert ein Zustandswort ohne Registry und ohne Story. (blockiert nicht)**
+*Kriterium:* Status ausschließlich über `status-registry.ts`, keine lokale
+Label-Map · jeder Zustand hat eine Story.
+*Ort:* `src/ui/v3/entities/bank-transaction/bank-transaction-columns.tsx:210–212`.
+*Befund:* Ist `matchStage` `null`, steht dort
+`<span className="v2muted">nicht gelaufen</span>` — ein Literal im Bauteil.
+Der Text deckt sich mit `AXIS_SOURCE.bank_match_stage` in der Registry
+(`src/ludwig/ui/status/status-registry.ts:2812`: „NULL = Kaskade nicht
+gelaufen"), stammt aber nicht von dort; die Achse führt für NULL keinen Wert.
+Eine einzelne Zeichenkette ist keine Label-Map, deshalb nicht blockierend —
+aber keine der sechs Stories setzt `matchStage: null` (gemessen: `.v2muted`
+kommt in den sechs Stories genau **einmal** vor, und das ist der
+Gegenpartei-Ersatz „Kontoführungsentgelt August 2026" in `--in-use` Zeile 4).
+Ein Zustandswort, das keine Story zeigt, sieht bei der Abnahme niemand. Steht
+seit der Wiederabnahme als Befund 2.
+*Kleinster Weg:* eine Zeile mit `matchStage: null` in `Columns`, und ein Satz
+in der Spec, dass NULL bis auf Weiteres ein Wort außerhalb der Achse trägt —
+oder der Achse einen Wert für NULL geben (dann ist es kein Sonderfall mehr).
+
+### Was die Wiederabnahme offen ließ
+
+| Punkt der Wiederabnahme | Stand heute |
+|---|---|
+| M-A `StatusHeader`/Abstand am Kopf-(i) | an der Wurzel behoben (`DataTable` + `.v2tbl th:has(> .v2sinfo)`); die **Messung** des Abstands gehört zur Darstellung und ist nach 0119 vertagt — hier nicht nachgeprüft |
+| M-B vier offene DATEV-Klassen in `Columns` | **behoben**, gemessen alle vier Wörter je einmal in `--columns` |
+| M-C Story-Rahmen 2 px enger als die Tabelle | Überlauf — nach 0119 vertagt, hier nicht gemessen |
+| M-D `rowHref` ohne Zeile in der Schnittstelle | **unverändert offen** → M1 |
+| Befund 2 `nicht gelaufen` ohne Story | **unverändert offen** → M4 |
+| Befund 3 `Filled` ohne Rang-8-Wert | **unverändert offen** → M3 |
+
+**Gesamturteil: zurück.** Das Bauteil selbst ist dicht: die sieben Props sind
+sauber typisiert, kein Fachtyp ist lokal nachgebaut oder verschärft, keine
+Zusicherung, kein Hex, keine Label-Map, Status durchgehend über die Registry,
+`columns` wählt aus und ordnet nicht um (verdreht übergeben, richtig
+gerendert), Z0 sagt „offen", die Rest-Marke ist nachgerechnet, die vier
+offenen DATEV-Klassen stehen jetzt wirklich in `Columns`, alle sechs Stories
+rendern mit sauberer Konsole, und alle sieben Wächter samt Selbstprüfungen
+melden Exit 0. Zurück geht es an **einer** Stelle, und es ist dieselbe wie
+gestern: die Schnittstellen-Tabelle kennt `rowHref` nicht, obwohl die Prop
+gebaut, kommentiert und von zwei Schwesterbausteinen benutzt wird — und der
+Ausbau-Absatz nennt für dieselbe Erweiterung weiter `onPeek` (M1). M2 sind
+drei tote Namen im Zuschnitt, M3 eine Fixture-Zahl, M4 eine Story-Zeile.
+
+Abgenommen von / am: **nicht abgenommen** — geprüft von Claude
+(Abnahme-Agent, fremd), 2026-09-08, schlanke Tiefe · Offene Punkte: M1
+(blockierend), M2, M3, M4 · Vertagt nach 0119: alles Visuelle, einschließlich
+M-C der Vorrunde · Dazu offen (App): Ersatz der Zeile in `KontoauszugView`, in
+`BankTransactionAssignmentTable` und der dritten Route aus B3.
+
+### Nacharbeit 2026-09-08 (nach der schlanken Abnahme)
+
+| Punkt | Was getan |
+|---|---|
+| **M1** (blockierte) | `rowHref` steht in der Schnittstellen-Tabelle und hat mit `RowLinkAndUnrun` eine eigene Story. Gemessen: `.v2rowlink` einmal dort, null in `Filled` |
+| **M2** | Der Zuschnitt nannte eine Datei und zwei Funktionen, die es alle drei nie gab (`bank-transaction-state.ts`, `datevMatchTitle`, `deriveCaseIndicators`). Jetzt steht `derive.ts` da, mit dem Hinweis, dass die DATEV-Stufe seit `cc141f7b` aus der Achse kommt und nicht aus einer Funktion — deshalb heißt Rang 5 jetzt **DATEV-Stufe**, nicht mehr „DATEV-Haken" |
+| **M3** | `Filled` versprach acht Punkte und zeigte sieben: `openClarificationsCount` stand auf 0. Steht jetzt auf 1 |
+| **M4** | Der Fall `matchStage: null` hat seine Story (dieselbe wie M1 — beide gehören zur vollen Zeile). Und die **zwei Texte** für denselben Zustand sind einer: „Kaskade nicht gelaufen", wie ihn `BankTransactionFacts` schon sagte |
+
+**Der Befund hinter M4 ist der wichtigere Teil: L-218.** Die Achse
+`bank_match_stage` führt zwölf Werte und keinen für `NULL` — dabei heißt
+`NULL` etwas anderes als jeder von ihnen: die Kaskade ist **nicht gelaufen**,
+nicht „kein Kandidat". Also schreibt jeder Baustein das Wort selbst, und genau
+das war passiert: zwei Stellen, zwei Formulierungen. Der Text steht jetzt
+zweimal gleich im Set — bis die Achse einen Wert `not_run` bekommt, dann
+trägt ihn `StatusBadge` wie die anderen elf.
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0.
