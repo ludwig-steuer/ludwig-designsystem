@@ -100,8 +100,9 @@ function RailRow({ item }: { item: RailItem }) {
  *
  * It is a `PageHeader` (0002 A6), not a second head with its own markup: a
  * step of the review is a page like any other. What it adds is the way
- * forward and back, and those go into an `ActionBar` — the order primary →
- * secondary → tertiary comes from there and is not renegotiated per screen.
+ * forward and back, and those go into an `ActionBar`, which lays its slots
+ * out left to right: **back first, forward second, page actions last** — the
+ * same direction the steps themselves run in.
  *
  * @when    Header of every step in the rail: overline, title, lead, way forward and back.
  * @instead A page that is not a step of a rail → PageHeader directly.
@@ -144,6 +145,12 @@ export function StepHeader({
   // with no destination in its text. The disabled state stays for the first
   // and the last step — there the place has to hold, or the header jumps
   // (guidelines §2).
+  //
+  // **Back stands left, forward right** (owner 2026-09-08): the step sequence
+  // reads left to right, so the way back belongs on the left — what every
+  // wizard does. ActionBar's slots are positions, not weights: `variant`
+  // decides which button looks primary, so the way back takes the first slot
+  // and keeps its quiet secondary look.
   return (
     <PageHeader
       overline={overline}
@@ -154,6 +161,14 @@ export function StepHeader({
           <ActionBar
             primary={
               showNav ? (
+                <StepNav href={prevHref} onClick={onPrev} variant="secondary">
+                  <ActionIcon action="back" size={14} />
+                  Zurück
+                </StepNav>
+              ) : null
+            }
+            secondary={
+              showNav ? (
                 <StepNav href={nextHref} onClick={onNext} variant="primary">
                   {/* The arrow is a Lucide sign from the registry, not the
                       character „→" (T9, 0093 c): a text arrow is read aloud as
@@ -162,14 +177,6 @@ export function StepHeader({
                       character — the guideline wins, and §A6 is corrected. */}
                   {nextLabel ?? "Weiter"}
                   <ActionIcon action="forward" size={14} />
-                </StepNav>
-              ) : null
-            }
-            secondary={
-              showNav ? (
-                <StepNav href={prevHref} onClick={onPrev} variant="secondary">
-                  <ActionIcon action="back" size={14} />
-                  Zurück
                 </StepNav>
               ) : null
             }
