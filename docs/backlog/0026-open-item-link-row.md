@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | offen |
+| Status | Abnahme |
 | Freigabe | 2026-09-06 zurückgestellt — wartet auf einen Bildschirm, siehe Abschnitt „Freigabe" |
 | Stufe | `entities/open-item-link/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, eine Ausgleichs-Zuordnung ist Buchhaltung |
@@ -129,3 +129,107 @@ Entscheid: die Zeile wird gebaut, sobald eine Seite sie braucht — Kandidat ist
 `datev-truth/domain/open-item.ts` und wird gespiegelt. Die Aufgabe bleibt
 zurückgestellt — hier ist nur festgehalten, dass der Typ da ist, wenn sie
 drankommt: der lokale Nachbau, den die Spec vorsah, entfällt damit.
+
+## Neufassung 2026-09-08 nach dem Owner-Entscheid — der Ort steht
+
+**Der Bildschirm ist entschieden:** der **Saldo-/DATEV-Reiter der
+Sachverhaltsansicht** (`CaseDetailView`, 0050). Dort stehen heute die
+DATEV-OPOS-Zeilen; die Klammer gehört daneben, weil sie genau die Frage
+beantwortet, die dort aufkommt — welche Zahlung gleicht welche Rechnung aus,
+und zu wie viel. Damit greift §3 Regel 5 nicht mehr nur formal.
+
+Die fünf Auflagen der Freigabe vom 2026-09-06 sind eingearbeitet:
+
+**1. `payment` ist Pflicht, `Unpaid` fällt weg.** `client_open_item_links`
+erzwingt genau eine Zahlungsseite (Migration `20260815120000_open_item_links.sql`).
+Eine Rechnung ohne Zahlung ist keine Klammer — sie ist eine Erwartung (0025)
+oder ein offener Posten (0029). Die Story, die das Gegenteil zeigte, ist
+gestrichen.
+
+**2. Leer, lädt und Fehler gelten für eine Zeile nicht** — und das ist der
+Grund, nicht die Ausrede: die Zeile bekommt eine fertige Klammer als Prop. Was
+fehlen, laden oder scheitern kann, ist die **Liste** um sie herum; die steht
+im Reiter und bringt ihre eigenen Zustände mit.
+
+**3. „Verwaist" wird ein `Badge` mit Wort, keine Registry-Achse.** Die
+Registry kennt keine Achse dafür, und sie ist seit dem 2026-09-07 eingefroren.
+Ein einzelner Zustand ohne Wertebereich ist auch keine Achse — er ist ein
+Wort. **Befund für `ludwig/app`:** wenn die Klammer je mehr Zustände bekommt
+als „gilt" und „verwaist", gehört daraus eine Achse.
+
+**4. `OpenItemLink` kommt aus dem Spiegel** (`datev-truth/domain/open-item.ts`,
+seit App-Commit `52914c45`). Der lokale Nachbau, den die alte Spec vorsah,
+entfällt.
+
+**5. `Time` statt `Timestamp`.**
+
+### Schnittstelle (Neufassung)
+
+| Prop | Typ | Pflicht | Bedeutung | Story |
+|---|---|---|---|---|
+| `link` | `OpenItemLink` | ja | Die Klammer aus dem Spiegel — Konto, Belegfeld, zugeordneter Betrag, Herkunft, Begründung, verwaist seit | `Filled` |
+| `invoice` | `OpenItemSide` | ja | Die Rechnungsseite, wie sie in der Zeile steht | `Filled` |
+| `payment` | `OpenItemSide` | ja | Die Zahlungsseite. **Kein `null`** — ohne sie gibt es keine Klammer | `Filled` |
+| `currency` | `Currency` | nein | Vorgabe `"EUR"` | `Edges` |
+| `onOpen` | `(entryId: string) => void` | nein | Sprung in den Buchungssatz. Ohne ihn ist die Seite Text, kein Knopf, der nichts tut | `Roundtrip` |
+
+`OpenItemSide` ist der Ausschnitt, den die Zeile von einer Seite braucht:
+`{ entryId: string; label: string; date: string; amount: number }` — der
+Aufrufer weiß, ob die Seite eine Ludwig- oder eine Spiegel-Buchung ist
+(`invoiceJournalEntryId` gegen `invoiceMirrorEntryId`), die Zeile nicht.
+
+**Kann bewusst nicht:** eine Klammer setzen oder lösen (Handlung des Moduls),
+Skonto rechnen, oder raten — mehrdeutig heißt keine Klammer, so wie die
+Schreibregel es vorgibt.
+
+### Stories (Neufassung)
+
+Ableitung nach §6: **2 anwendbare Zustände** (gilt · verwaist) + 0 Enums + 0
+Layout-Booleans + 1 Callback + 1 „im Einsatz" + 1 Rand = **5**.
+
+| Story | Beweist |
+|---|---|
+| `Filled` | Beide Seiten mit Betrag rechts, der zugeordnete Betrag dazwischen, Herkunft und Belegfeld |
+| `Orphaned` | `orphanedAt` gesetzt: die Klammer bleibt als Spur stehen, zählt aber nicht mehr — Wort statt nur Farbe (V7) |
+| `Roundtrip` | `onOpen` mit `useState`: beide Seiten führen in ihren Buchungssatz |
+| `InUse` | Im Saldo-/DATEV-Reiter der Sachverhaltsansicht, neben den OPOS-Zeilen |
+| `Edges` | Teilzahlung (zugeordnet < Rechnung), Fremdwährung, langes Belegfeld, Klammer ohne Begründung |
+
+### Befunde für `ludwig/app`
+
+- **`matchedBy` hat keinen Wertebereich.** Der gespiegelte Typ sagt „Abgleich,
+  Hand, Regel", die Spalte ist ein freier String, und weder Registry noch
+  Label-Map kennen ihn. Die Zeile zeigt deshalb den Rohwert, wo sie kein Wort
+  hat — wie `caseKindLabel()` es vormacht. Ein Wertebereich (Achse oder
+  Label-Map neben `OpenItemLink`) gehört in die App.
+
+## Gebaut (2026-09-08)
+
+`src/ui/v3/entities/open-item-link/OpenItemLinkRow.tsx` samt Stories, CSS und
+Barrel-Eintrag. Fünf Stories wie abgeleitet. Gemessen gegen den Dev-Server
+`http://localhost:6107` über `scripts/cdp.mjs`, 1400 px.
+
+| | gemessen |
+|---|---|
+| `Filled` | eine Zeile, 45,9 px; Text „RE-4471 · Bürobedarf Meier GmbH · 26.08.2026 → Überweisung Commerzbank 1210 · 30.08.2026" |
+| `Orphaned` | das Wort **verwaist** steht da — `Badge`, keine erfundene Achse |
+| `Edges` | vier Zeilen, Höhen **45,9 und 44,9**, kein Überlauf |
+| `Roundtrip` | Klick auf die Rechnungsseite liefert `je-1` an `onOpen` |
+
+**Dabei einen eigenen Fehler gefunden und behoben:** das Belegfeld
+`SAMMEL-2026-08-KW35-NACHTRAG` brach die Zeile in der 140-px-Spur auf
+**66,8 px** auf, neben Nachbarn von 45,9. Genau der Ausreißer, den der
+Owner-Entscheid zu `CaseCell` heute für Listen abgestellt hat — eine Liste
+liest sich über ihre Zeilenhöhe. Das Belegfeld kürzt jetzt und trägt den
+ganzen Wert im `title`.
+
+Die fünf Auflagen der Freigabe stehen im Code: `payment` ohne `null` (die
+Story, die das Gegenteil zeigte, gibt es nicht mehr), „verwaist" als `Badge`
+mit Wort, `OpenItemLink` aus dem Spiegel statt lokalem Nachbau, `Time` statt
+`Timestamp`, und leer/lädt/Fehler sind mit Grund ausgeschlossen — die Zeile
+bekommt eine fertige Klammer, was fehlen kann, ist die Liste um sie herum.
+
+`pnpm typecheck`, `check:language`, `check:icons`, `check:contrast`,
+`check:mirror`, `check:when` je Exit 0.
+
+**Status: Abnahme** — gebaut habe ich, abnehmen muss ein anderer.

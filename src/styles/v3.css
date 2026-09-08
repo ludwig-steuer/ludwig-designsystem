@@ -3605,6 +3605,28 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2sinfo:hover { opacity: 1; color: var(--color-primary); }
 .v2sinfo:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 
+/* --- Ausgleichs-Klammer (0026) -------------------------------------------
+ * Zwei Seiten einer Zeile, dazwischen ein Pfeil: welche Zahlung gleicht welche
+ * Rechnung aus. Die Seiten schrumpfen, der Pfeil nicht — sonst steht er
+ * irgendwann zwischen zwei Auslassungszeichen und sagt nichts mehr.
+ */
+.v2oil__pair { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+.v2oil__arrow { flex: 0 0 auto; color: var(--color-text-subtle); }
+.v2oil__side {
+  display: flex; align-items: baseline; gap: var(--space-2); min-width: 0;
+  background: none; border: none; padding: 0; margin: 0;
+  font: inherit; color: inherit; text-align: left;
+}
+/* Nur mit `onOpen` ist die Seite ein Ziel — dann sieht man es auch. */
+button.v2oil__side { cursor: pointer; }
+button.v2oil__side:hover .v2oil__label { text-decoration: underline; }
+button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+.v2oil__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+/* Das Belegfeld kürzt mit: `SAMMEL-2026-08-KW35-NACHTRAG` brach die Zeile in
+   der 140-px-Spur auf 66,8 px auf, neben Nachbarn von 45,9 — und eine Liste
+   liest sich über ihre Zeilenhöhe. Der ganze Wert steht im `title` der Zelle. */
+.v2oil__beleg { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* --- Sachverhalts-Karte (0081) -------------------------------------------
  * Der Kopf trägt Namen und Zustand nebeneinander, darunter die Kennung. Der
  * Rumpf eine Zeile Fakten und die gekürzte Zusammenfassung. Was unter dem Fall

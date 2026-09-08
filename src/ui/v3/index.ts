@@ -383,6 +383,13 @@ export { CaseDetailView } from "./entities/accounting-case/CaseDetailView";
 export { CaseDrawer, type CaseQuickView } from "./entities/accounting-case/CaseDrawer";
 export { CaseRow } from "./entities/accounting-case/CaseRow";
 export { CaseList, caseListTracks, type CaseListTab } from "./entities/accounting-case/CaseList";
+/* `Ausgleichs-Klammer` — the row that holds an invoice and its payment together (0026) */
+export {
+  OpenItemLinkRow,
+  openItemLinkTracks,
+  type OpenItemSide,
+} from "./entities/open-item-link/OpenItemLinkRow";
+
 export { CaseCard, type CaseCardData } from "./entities/accounting-case/CaseCard";
 export { CasePicker } from "./entities/accounting-case/CasePicker";
 export {
