@@ -89,3 +89,29 @@ je einen Klick kosten. Rang 9 ist eine Taste (`J`/`K`, `Hotkeys` gibt es).
 Punkt 1–6 sind Vorschläge an die Spec, keine beschlossenen Änderungen. Die
 Reihenfolge oben ist die Prüfliste: jedes Element des Screens muss eine der
 neun Fragen beantworten, sonst fliegt es.
+
+## Detailseiten-Standard (Nachtrag 2026-09-08)
+
+Geprüft gegen `docs/detailseiten-standard.md` (D1–D16).
+
+| | |
+|---|---|
+| Layout | **D-L3 Randspalte** mit dem **Strang** darin — so gebaut (`CaseDetailView`, 0050). Die Zahl trägt das nicht: Ereignisse **p50 1 · p90 2 · max 38**, der Richtwert für einen Strang neben der Fläche ist `p90 ≥ 5`. Entscheid liegt beim Owner (Standard §11.3, vierte Zahl); bis dahin bleibt es beim Gebauten. |
+| Reiter | **Übersicht** (Rang 1–4) · **Details** · Beleg ↔ Buchung (Rang 5) · Rückfragen (6) · Plausibilität (6) · Saldo & Konten (7) · DATEV-Wahrheit (8) · **Verlauf** (8) · **Rohdaten** (8). Der Standard **ordnet** die Leiste, er kürzt sie nicht — die Frage aus Zweifel 3 („acht Reiter für einen Fall mit einem Ereignis") bleibt offen und gehört in die Spec. |
+| Zone 4 (Abrisse) | Ereignisse **4 % ohne · p50 1 · p90 2** → keine eigene Karte, der Strang steht in der Randspalte · Klärungen **87 % ohne · p50 0 · p90 1** → Zahl mit Weg in Zone 3 · Erwartungen **95 % ohne**, Klammern **95 % ohne**, Belegnummern **99 % ohne**, Regel **97 % ohne** → nichts auf der Übersicht |
+| Zone 5 (Verlauf) | die Zone nennt als Quelle den **Ereignis-Strang** (`CaseTimeline`, 0040), nicht das Audit-Log: dieses ist bei **43 % der Fälle leer** (p50 3 · p90 9 · max 84) und wäre in fast jedem zweiten Fall eine leere Zone |
+
+## Abweichung vom Detailseiten-Standard
+
+- **D10 (eine Leiste, ein Mechanismus):** Die heutige Leiste mischt zwei
+  URL-Muster — drei Einträge sind `?tab=uebersicht&view=…`, die übrigen
+  `?tab=…` (`SvTabsBar`), dazu Unterreiter im Detail von Rang 5. Das ist
+  **keine begründete Ausnahme, sondern ein Befund** (L-259); die Unterreiter
+  von Rang 5 lösen sich in der Gegenüberstellung Beleg ↔ Buchung auf.
+- **D12 (Rohdaten zuletzt):** Rang 8 bündelt heute Historie, Rohdaten und
+  DATEV-Wahrheit in einer Zeile. Der Standard trennt sie: Historie → Verlauf,
+  DATEV-Wahrheit → eigene fachliche Sicht, Rohdaten → letzter Reiter.
+- **Zweifel 6 ist damit entschieden, nicht offen:** Der Zweispalter öffnet
+  **nicht** erst ab zwei Einträgen. Das Layout wechselt nicht je Datensatz
+  (D3) — entweder die Randspalte gilt für die Entität oder nicht; was die Zahl
+  dazu sagt, steht oben in der Layout-Zeile.

@@ -25,6 +25,10 @@
 | R18 Buchungssatz-Editor | Aufgaben 0015 `JournalEntryEditor`, 0044 `JournalEntryCompact` |
 | R21 Stufen | README „Ordnung im Set" · Wächter-Test `stufen.test.ts` |
 
+Dazu ein eigener Block am Ende dieser Datei: **D1–D16 — Detailseiten**
+(seit 2026-09-08). Er regelt den Aufbau jeder Entitäts-Detailseite; die
+Langform mit Herleitung und Zahlen steht in `docs/detailseiten-standard.md`.
+
 ### R2 — Status-Spalten heißen nie bloß „Status"
 Jede Status-Spalte bekommt ein spezifisches Label („Abgleich",
 „Verarbeitung", …) plus Info-Icon mit Zustands-Legende — app-weit über
@@ -202,3 +206,48 @@ fachlichen Grund.
 neuen Komponente steht — „gibt es das schon, und wo gehört meine hin?". Ohne
 Stufe wandert Fachwissen in Primitives und Layout in Entitäts-Komponenten;
 danach ist jede Wiederverwendung ein Copy-Paste, weil das Original zu viel weiß.
+
+## D1–D16 — Detailseiten
+
+> **Kurzfassung.** Die Langform mit Herleitung, den drei Layouts, den fünf
+> Zonen und den gemessenen Zahlen steht in `docs/detailseiten-standard.md` —
+> bei Widerspruch gilt sie. Hier steht, was ein Agent beim Bauen und beim
+> Abnehmen nachschlägt. Die Regeln gelten für jede Detailseite **einer**
+> Entität (Sachverhalt, Beleg, Konto, Partner, Bankkonto, Mandant …), nicht
+> für Listen und nicht für Arbeitsflächen mit Schritt-Rail.
+>
+> **Abweichung nur mit einem Satz Begründung im Seitenprofil**
+> (`docs/seiten/<slug>.md`, Abschnitt „Abweichung vom Detailseiten-Standard").
+> Was dort nicht steht, gilt wie hier.
+
+**Der Rahmen:** Pager · Kopf · Signal · Reiter · Körper.
+**Die fünf Zonen des ersten Reiters:** Kopf · Mängel · Fakten · Abrisse · Verlauf.
+**Der Reiter-Satz:** Übersicht · Details · [entitätsspezifisch] · Verlauf · Rohdaten.
+**Die drei Layouts:** D-L1 Zonen untereinander (Vorgabe) · D-L2 Gegenüberstellung · D-L3 Randspalte (Zone 3 **oder** 5 neben der Arbeitsfläche).
+
+| | Regel | Woran man den Verstoß erkennt | Baustein |
+|---|---|---|---|
+| **D1 Überblick, nicht Bearbeitung** | Rang 1–4 des Seitenprofils stehen ohne Scrollen und ohne Klick. Die Übersicht **schreibt nicht**: Schreibwege sind die Aktionen oben rechts und der Weg hinaus aus einer Mängelzeile. | Ein Eingabefeld auf dem ersten Bildschirm, das niemand angefordert hat; eine Antwort von Rang ≤ 4, für die man einen Reiter öffnen muss. | Rahmen ohne eigene Höhe/Scroll um Slot 1–4 (0050, 0071, 0063) |
+| **D2 Mängel zuerst, mit Weg hinaus** | Zone 2 zeigt jedes Problem, Kritikalität absteigend (A7), jede Zeile mit einem Weg hinaus. Ganzer Datensatz → Zone 2; ein Wert → an seinem Wert als Mangel statt Leerzeile; im Reiter → Zähler mit `alarm`. Leer = Haken + Satz mit Zahl (L6). Dieselbe Sache nur an einem Ort. | Ein leeres Feld, wo ein Pflichtwert fehlt; ein Mangel, der erst im richtigen Reiter sichtbar wird; eine Mängelzeile ohne Ausweg; Rot ohne Stufe „Fehler". | `StatusCallout` (0049) · `Banner` · `Tabs count/alarm` · `SourceDocumentFacts missing` |
+| **D3 Ein Rahmen, fünf Slots** | Pager · Kopf · Signal · Reiter · Körper, immer in dieser Reihenfolge. Leerer Slot fällt mit seinem Abstand weg; gefüllter Slot bleibt auch mit einem Eintrag. | Eine Detailseite mit eigener Slot-Reihenfolge; eine leere Zeile, wo ein Slot nichts trägt; ein Layout, das je nach Datenmenge die Spaltenzahl wechselt. | `RecordPager` (0047), `EntityHeader` (0048), `StatusCallout` (0049), `Tabs` |
+| **D4 Fünf Zonen in fester Reihenfolge** | Der erste Reiter besteht aus Kopf · Mängel · Fakten · Abrisse · Verlauf. Fakten = Rang 1–6 des Entitätsprofils; Herkunft und Konfidenz nur bei einem Wert (0120). Abrisse in Reiterreihenfolge. | Eine Übersicht mit eigener Gliederung; Fakten unter den Abrissen; eine Herkunftszeile ohne Wert. | `EntityHeader`, `StatusCallout`, `FieldList`, `Card`+`DataTable`, `LogList` |
+| **D5 Drei Layouts, kein viertes** | D-L1 Zonen untereinander (Vorgabe) · D-L2 Gegenüberstellung, wenn gegen eine Quelle abgeglichen wird · D-L3 Randspalte, wenn es eine Arbeitsfläche (Liste mit Rang ≤ 4) gibt und Zone 3 **oder** 5 daneben mitgelesen wird — der Strang nur bei `p90 ≥ 5` (Zahl aus dem Entitätsprofil). | Ein Körper, der keinem der drei entspricht und keinen Satz im Seitenprofil hat; zwei Zonen zugleich in der Randspalte; ein Strang daneben ohne Zahl. | `MasterDetail`; 0071 / 0050 / 0063 |
+| **D6 Der Kopf trägt Kennung, Name, einen Zustand** | Pflicht: `overline`, `title`, `status` (**eine** Achse als `StatusBadge` mit (i) → `StatusInfoDialog`). Dazu, wo vorhanden: Prozessbild (Z7), Meta-Zeile, Kennzahl, Faktenzeile, Aktionen. | Kein Weg von der Marke zur Erklärung der Achse; eine Kennung nur in der URL; ein Symbol aus einer Statusachse; eine Kette ohne Prozessbild. | `EntityHeader` (0048), `StatusBadge`, `StatusInfoButton`, `ProcessStepper` (Platz fehlt: 0137) |
+| **D7 Was nie in den Kopf gehört** | Kein zweiter Zustand derselben Frage · keine leere Kennzahl · nichts zweimal · kein Formular · keine Zustandslogik als Fließtext · nicht die Liste, aus der die Leserin kam · keine zweite Entität mit eigenem Kopf. | „GESAMTBETRAG —" an der stärksten Stelle; derselbe Name in Titel, Meta und Fakten; vier Anzeigen für „wer ist am Zug"; „Zurück" ohne Ziel. | `EntityHeader` (leere Slots fallen weg), `RecordPager back` |
+| **D8 Aktionen oben rechts, ab drei ins Menü** | Alles Machbare in `EntityHeader actions`; höchstens zwei sichtbar, ab der dritten Handlung Menü mit sichtbarem Wort; bei genau einer Aktion **kein** Menü; Zerstörendes immer im Menü mit `tone="danger"`. Ausnahme: der nächste Schritt aus dem Zustand steht als **ein** Knopf im Signal-Slot und dann nicht zusätzlich im Kopf. | Drei und mehr Knöpfe im Kopf; ein Menü mit einem Eintrag; ein Kebab ohne Wort; dieselbe Handlung im Kopf und im Callout; „Löschen" als sichtbarer Knopf. | `EntityHeader actions`, `OverflowMenu` (0008), `ActionButton`, `StatusCallout actions` |
+| **D9 Wert, Aktion oder Formular** | Ein Wert auf der Seite → `InlineEdit` an seinem Platz, im Reiter „Details" (auch Zustände, auch mit Grund über `ReasonDialog`). Mehrere Werte zugleich, etwas Neues, etwas Laufendes → Aktion oben rechts. Werte, die nur zusammen Sinn ergeben → Formular im Detail/Reiter/Drawer, nie im Kopf, nie im Dialog. Ausnahme: Korrektur mit Rang ≤ 5 steht in Zone 3, mit einem Satz im Profil. | Ein „Bearbeiten"-Knopf, der die Seite in einen Formularmodus schaltet; ein Zustandswechsel, der den Wert nicht dort ändert, wo er steht; ein mehrfeldriges Formular im Dialog. | `InlineEdit` (0020), `CaseEditor` (0083), `ReasonDialog`, `JournalEntryEditor` (R18) |
+| **D10 Reiter sind Sichten, MECE, eine Leiste** | Ein Reiter ist eine andere Ansicht, nie ein Filter (R9). Jeder Inhalt in genau einem Reiter; zwei Tiefen derselben Frage sind eine Klappe. Keine Unterreiter, ein URL-Mechanismus. Reihenfolge nach Fragerang. Der Satz gehört der Entität (höchstens der Ausprägung), nicht dem Datensatz. | Zwei Reiter, gleiche Spalten, andere Grundgesamtheit; eine zweite Reiterebene; `?tab=` neben `?tab=x&view=y` in einer Leiste; ein Reiter, der bei manchen Datensätzen verschwindet. | `Tabs` (R9), `?tab=` (I1) |
+| **D11 Der Standard-Satz** | **Übersicht · Details · [entitätsspezifisch] · Verlauf · Rohdaten.** „Übersicht" heißt überall gleich; „Details" trägt die Felder samt `InlineEdit`; „Verlauf" steht, wo es einen Strang gibt; eine Liste mit Rang ≤ 4 steht vollständig in der Übersicht und hat dann keinen eigenen Reiter. | Ein erster Reiter, der nach der Entität oder der Ausprägung heißt; ein „Verlauf" ohne Strang dahinter; dieselbe Liste als Abriss **und** in voller Länge. | `Tabs`, `FieldList`, `LogBrowser`, `RawRecord` |
+| **D12 „Rohdaten" ist immer der letzte Reiter** | Jede Detailseite hat ihn, immer zuletzt, überall gleich benannt, für alle sichtbar, ohne Zähler und ohne Alarm, optisch auf der Debug-Stufe (A7). Er ist die einzige Technik-Sicht der Seite (T4). | Eine Detailseite ohne Rohdaten-Reiter; Rohdaten in der Mitte der Leiste; ein interner Name außerhalb dieses Reiters; ein Zähler daran. | `RawRecord` (0051), `Tabs` (leiser Reiter fehlt: 0136) |
+| **D13 Verknüpftes öffnet als Drawer, sonst Link** | Nachsehen → Drawer aus dem Katalog über eigenen Such-Parameter (`Esc`, Position bleibt). Kein Drawer, oder die Arbeit geht dort weiter → benannter Link. Nie eine eingebettete zweite Detailansicht. In Listen: `peek` nur, wenn die Zeile ein **zweites** Ziel hat. | Ein zweiter `EntityHeader`; ein Reiter, der Rang 1–4 einer anderen Entität beantwortet; zwei Drawer für zwei Quellen derselben Zeile; ein `peek` neben einer Zeile, die schon in den Drawer führt. | `*Drawer` (R15, I2), `Link`, `RowAction action="peek"` (I11) |
+| **D14 Karte, Feldliste, Tabelle — jede an ihrem Platz** | Tabelle immer in einer Karte mit Kopf und Spaltenkopf, auch leer. Feldliste für Label/Wert (`bare` in der Karte, `row` in der Faktenzeile, `soft` für die zweite Wahrheit). Karte mit Kopf für alles mit eigenem Namen oder eigenen Aktionen. Keine Karte in der Karte. | Frei schwebende Zeilen; eine zweite Feldliste für Werte, die eine andere Ansicht schon zeigt; verschachtelte Karten; ein Leerfall ohne Spaltenkopf. | `Card`/`CardHead`, `FieldList` (0006), `DataTable` (0057) |
+| **D15 Abriss nur mit Deckung, im Spaltensatz des Reiters** | Abriss-Karte nur bei `p50 ≥ 2` der Relation (Entitätsprofil); `p50 ≤ 1` → Zahl mit Weg in Zone 3; in der Mehrzahl leer → gar nichts. Der Abriss nimmt einen benannten Satz aus dem Spaltenkatalog der Entität. Zähler und Kacheln zählen nach **I12**. | Eine Karte, die bei den meisten Datensätzen leer ist; eigene Spalten im Abriss; Kachel 225, Liste 180; „—" in der Kennzahl; zwei gleich große Salden nebeneinander. | `sourceDocumentColumns()` (0070), `caseColumns()` (0096), `bankTransactionColumns()` (0101), `KpiTile href` (0126) |
+| **D16 Diagramm nur in Zone 4, erst ab vier Werten** | Nur Verlauf oder Vergleich. ≤ 3 Werte → Zahl plus Veränderung als Wort. 4–12 → Zahl plus `Sparkline`. Ablesbare Werte → `BarChart` in einer Karte. Höchstens zwei Reihen, Textalternative aus denselben Daten. | Ein Diagramm mit drei Balken; ein Diagramm im Kopf; eine dritte Diagrammfarbe; eine Reihe, die nur als Bild existiert. | `Sparkline` (0124), `BarChart` (0041, 0110), `KpiTile` |
+
+*Warum ein eigener Block:* Die Designsprache regelt Bausteine und Muster, R2–R21
+den Code der Oberfläche — aber **welche Seite wie aufgebaut ist**, stand
+nirgends, und deshalb hat jede Detailseite ihre eigene Antwort gefunden: drei
+Rahmen mit denselben Slots unter drei Namen, ein erster Reiter mit drei
+Aufschriften, vier Anzeigen für dieselbe Zustandsfrage. Der D-Block ist die
+Stelle, an der eine Detailseite künftig **nichts mehr entscheidet**, was schon
+entschieden ist.

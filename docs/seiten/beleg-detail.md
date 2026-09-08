@@ -114,3 +114,33 @@ Höchstens drei, jede mit Vorgabewert:
 3. **Gehört die Vor/Zurück-Navigation der Seite oder dem Baustein?** *Ohne
    Antwort: der Seite.* Sie kennt die Liste, aus der die Rolle kam; der
    Baustein bekommt nur `prevHref`/`nextHref` und die Position.
+
+## Detailseiten-Standard (Nachtrag 2026-09-08)
+
+Geprüft gegen `docs/detailseiten-standard.md` (D1–D16).
+
+| | |
+|---|---|
+| Layout | **D-L2 Gegenüberstellung** — Frage 1 aus §1.2 greift: die Aufgabe ist der Abgleich gegen das Original, das deshalb links und groß steht (Rang 2) und rechts die Fakten (Rang 3). |
+| Reiter | **Übersicht** (Rang 1–4) · **Details** (Rang 5) · Positionen (Nebenjob, nur Rechnungen) · Vorsteuer (Nebenjob, nur Rechnungen mit VSt-Fakten) · **Verlauf** (Rang 7–8, die Pipeline als Tiefe darin, Z6) · **Rohdaten** (Rang 9). Sechs bei Rechnungen, vier bei jeder anderen Belegart. |
+| Zone 4 (Abrisse) | Teilbelege **97 % ohne · p50 0 · p90 0** → keine Karte · Sachverhalt **p50 1 · p90 1 · max 2** → Zeile in Zone 3 · Positionen **p50 1 · p90 5 · max 22** → die einzige Abriss-Karte, und nur bei Rechnungen |
+| Zone 5 (Verlauf) | vorhanden: **p50 2 · p90 3 · max 8**, verteilt auf drei `resource_kind`-Werte (`source_doc` allein 977 von 1 085) — „die letzten fünf" ist hier eine Obergrenze, im Median stehen zwei |
+
+**Nachtrag zu „Offene Fragen" Nr. 1:** Der Standard (D12) hält den
+Rohdaten-Reiter als eigenen **letzten** Reiter fest; von den drei Reitern des
+Fehlerfalls wandert nur die Pipeline in den Verlauf. Die Entscheidung „vier
+Reiter" von 2026-09-07 gilt insoweit nicht mehr; der Befund für die App
+(`DOC_TABS`, `parseDocTab`) bleibt, mit L-260 als Zusatz zum Namen des ersten
+Reiters.
+
+## Abweichung vom Detailseiten-Standard
+
+- **D1/D9 (die Übersicht schreibt nicht):** Belegdatum, Einordnung, Erledigung
+  und DATEV-Ablage tragen ihr `InlineEdit` in **Zone 3 der Übersicht** — weil
+  das Profil die Korrektur des einen falschen Werts bei Rang 5 führt und
+  ausdrücklich „nie einen Wechsel der Ansicht" zulässt; das ist die
+  Hauptaufgabe dieser Seite, kein Nebenjob (Ausnahme nach §4.2 des Standards).
+- **D15 (Abriss nur mit Deckung):** Zone 4 besteht bei Rechnungen aus **einer**
+  Karte und ist bei jeder anderen Belegart leer — die gemessenen
+  Kardinalitäten geben nicht mehr her, und eine leere Zone ist besser als drei
+  leere Karten.

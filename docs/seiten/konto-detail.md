@@ -100,3 +100,25 @@ deshalb weg; mit ihm ist sie Ausbau. Dieselbe Begründung wie beim Kontoauszug
 3. **Führt eine Bewegungszeile in den Drawer oder auf den Sachverhalt?**
    *Ohne Antwort: in den Drawer* — der Sachverhalt ist der Fuß-Ausgang des
    Drawers, wie bei 0052.
+
+## Detailseiten-Standard (Nachtrag 2026-09-08)
+
+Geprüft gegen `docs/detailseiten-standard.md` (D1–D16).
+
+| | |
+|---|---|
+| Layout | **D-L3 Randspalte** mit den **Fakten** darin — so gebaut (`LedgerAccountView`, 0063, `minDetail={960}`). Frage 2 aus §1.2 greift: die Bewegungen sind die Arbeitsfläche (Rang 4), die Stammdaten werden daneben mitgelesen (Rang 6). Ein Faktenblock über der Liste drückt die Hauptantwort unter die Falz — das ist Zweifel 4 dieses Profils. |
+| Reiter | **Übersicht** (Rang 1–5, mit den Bewegungen in voller Länge) · **Details** (Rang 6–7, Stammdaten und LLM-Profil mit `InlineEdit`) · **Rohdaten**. Die Reiter „Buchungen" und „Monatsübersicht" entfallen wie in Zweifel 1 und 3 entschieden. |
+| Zone 4 (Abrisse) | Bewegungen **p50 4 · p90 20 · p99 250 · max 3.400** je Konto und Jahr — die Deckung trüge eine Abriss-Karte mühelos, aber die Liste ist die Arbeitsfläche und steht deshalb vollständig (s. Abweichung) · Monatsverlauf als `BarChart` über zwölf Monate (D16: ab vier Werten, hier zwölf) |
+| Zone 5 (Verlauf) | **entfällt**: die Historie des Kontos ist im Entitätsprofil als „viele" geführt, aber nicht erhoben, und es gibt keinen `resource_kind` für das Konto. Bis dahin keine Zone und kein Reiter „Verlauf" (D11). |
+
+## Abweichung vom Detailseiten-Standard
+
+- **D11/D15 (Abriss in Zone 4):** Die Bewegungen stehen **vollständig** in der
+  Übersicht statt als Abriss von fünf Zeilen mit eigenem Reiter — weil das
+  Profil sie bei Rang 4 als Hauptfläche führt und ein Abriss aus der
+  Hauptaufgabe einen Klick machen würde (benannte Ausnahme in §5.2 des
+  Standards). Sie hat deshalb **keinen** eigenen Reiter (MECE).
+- **D12 (Rohdaten zuletzt):** Heute hat die Seite keinen Rohdaten-Reiter (vier
+  Reiter: Übersicht, Buchungen, Monatsübersicht, LLM-Profil). Das ist keine
+  Ausnahme, sondern ein Befund für die App (**L-258**).

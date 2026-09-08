@@ -8,6 +8,10 @@
 | Entitäten | Profile in `docs/entitaeten/` — die Seite zeigt sie, definiert sie nicht |
 | Baustein in v3 | `entities/<entität>/<Name>View.tsx` (oder: noch keiner) |
 | Profil von / am | Agent oder Person, Datum |
+| Layout | `D-L1` Zonen · `D-L2` Gegenüberstellung · `D-L3` Randspalte — welches und **warum** (`docs/detailseiten-standard.md`) |
+| Reiter | Übersicht · Details · [entitätsspezifisch] · Verlauf · Rohdaten — die mittleren nach Fragerang |
+| Zonendeckung | welche der fünf Zonen die Übersicht trägt, und welche mit Zahl **nicht** (Abriss-Karte erst ab p50 ≥ 2, D15) |
+| Abweichungen vom Standard | je eine Zeile mit Satz — ohne Satz ist es keine Ausnahme, sondern ein Befund |
 
 ## Job
 
