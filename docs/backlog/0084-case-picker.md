@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig (Schnittstelle) — die gemessene Prüfung steht in 0119 aus |
 | Freigabe | 2026-09-07, ludwig-coordinator im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/accounting-case/` |
 | Quelle | Entitätsprofil `docs/entitaeten/accounting-case.md`, Abschnitt „Formen" (Zeile `CasePicker`) und „Heutige Darstellung" (letzte Zeile) |
 | Auftrag | Die Auswahl eines bestehenden Sachverhalts, wenn eine Bankzeile ihm zugeordnet wird. Ersetzt den `<select>` in `modules/bank-transactions/ui/BankTransactionAssignmentTable.tsx` (Z. 376–388), der heute „Nummer · Art · 40 Zeichen Zusammenfassung" in eine Optionszeile presst. |
 | Warum nicht so lassen | Bei p90 **190 offenen Sachverhalten** je Mandant und Jahr (Staging 2026-09-05) ist ein `<select>` keine Auswahl, sondern eine Liste. Und man wählt blind: Zustand, Betrag und Gegenpart stehen nicht in der Option. |
-| Vertagt, weil | die Suchachse offen ist — Offene Frage 3 des Profils. *Ohne Antwort gilt der Default:* `Combobox` mit Suche über Nummer, Gegenpart und Zusammenfassung; die Trefferzeile trägt Rang 1–4. Entschieden wird das hier, nicht im Profil. |
+| Vertagt, weil | die Suchachse offen ist — Offene Frage 3 des Profils. *Ohne Antwort gilt der Default:* `Combobox` mit Suche über Nummer, Gegenpart und Zusammenfassung; die Trefferzeile trägt Rang 1–5. Entschieden wird das hier, nicht im Profil. |
 | Setzt voraus | `CaseRow` bzw. `CaseCell` (erste Welle) · `Combobox` |
 | Angelegt von / am | Claude, 2026-09-05 (Skill `entitaet-analysieren` §9) |
 
@@ -77,10 +77,13 @@ Daten kommen als Props, der Picker lädt nichts. Typen aus `src/ludwig/`:
 | `onSearch` | `(query: string) => void` (optional) | Für die Serversuche. Der Picker filtert **immer selbst** über Anzeigename, Nummer, Gegenpart und Zusammenfassung; `onSearch` sagt dem Aufrufer nur, wonach gesucht wird, damit er nachladen kann | `ServerSearch` |
 | `loading` | `boolean` (optional) | die Suche läuft; das Feld bleibt bedienbar | `Loading` |
 | `error` | `string` (optional) | die Suche ist gescheitert — der Satz steht am Feld, nicht in der Liste | `Error` |
-| `disabled` | `boolean` (optional) | die Zeile ist schon zugeordnet oder gesperrt | `Disabled` |
-| `emptyText` | `string` (optional) | Vorgabe „Kein Sachverhalt mit diesem Suchbegriff." | `EmptyAfterFilter` |
+| `disabled` | `boolean` (optional) | die Zeile ist schon zugeordnet oder gesperrt | `Filled` (zweiter Picker) |
+| `emptyText` | `string` (optional) | Vorgabe „Kein Sachverhalt mit diesem Suchbegriff." — der Fall **nach** der Suche | `EmptyAfterFilter` |
+| `noCasesText` | `string` (optional) | Vorgabe für den Fall **ohne** Bestand: das Jahr hat noch keinen Sachverhalt. Zwei Sätze, weil `cases.length === 0` zwei Dinge heißen kann — „nichts gefunden" ist ein Suchergebnis, „noch keiner da" ein Zustand des Jahres (ergänzt 2026-09-08, M2) | `Empty` |
 
-**Die Trefferzeile** trägt die Ränge 1–4 des Profils, und zwar in dieser
+**Die Trefferzeile** trägt die Ränge 1–5 des Profils *(die Spec sagte an zwei
+Stellen „1–4"; gebaut sind fünf, und das Profil führt fünf — berichtigt
+2026-09-08)*, und zwar in dieser
 Verteilung:
 
 - `label` = **Anzeigename** (Rang 1) über `caseDisplayTitle({ title, kind, counterpartyName })`.
@@ -139,14 +142,14 @@ Zuschnitt wäre zu prüfen.
 
 | Story | Beweist |
 |---|---|
-| `Filled` | Zwölf Sachverhalte, Trefferzeile mit Anzeigename, Nummer, Zustand als Wort und Betrag; darunter einer ohne `title` (Rückfall greift) und einer ohne `caseNumber` |
+| `Filled` | Die Trefferzeile mit Anzeigename, Nummer, Zustand als Wort und Betrag; darunter einer ohne `title` (Rückfall greift) und einer ohne `caseNumber`. **Drei Fälle, nicht zwölf** — die Zahl stand ohne Zweck da, und was die Story beweist, beweisen drei so gut wie zwölf (berichtigt 2026-09-08, M3). Daneben ein **gesperrter** Picker: `disabled` neben bedienbar |
 | `Empty` | Kein Sachverhalt im Jahr — ein Befund über den Bestand, kein Fehler |
 | `EmptyAfterFilter` | Suchbegriff ohne Treffer: anderer Satz als `Empty` |
-| `Loading` | Die Serversuche läuft; das Feld bleibt bedienbar, die alte Liste verschwindet nicht |
+| `Loading` | Die Serversuche läuft; das Feld bleibt bedienbar. **Was die alte Liste tut, sagt diese Story nicht** — sie steht geschlossen da, und der Zusatz „die alte Liste verschwindet nicht“ behauptete etwas, das man ihr nicht ansieht (berichtigt 2026-09-08, M7) |
 | `Error` | Die Suche ist gescheitert — Satz am Feld, keine leere Liste |
 | `Roundtrip` | `useState`: wählen, abwählen, wieder wählen; dazu der Tastaturweg (↓↓ Enter, Escape) |
 | `InUse` | In der Zuordnungszeile einer Kontoauszugsposition, neben Betrag und Verwendungszweck — die Breite, in der er wirklich steht |
-| `Edges` | **Der Rand ist die Suche**: 190 Treffer (p90 aus Staging), und die Eingabe findet über alle vier Felder — „Telekom" über den Gegenpart, „0042" über die Nummer, „Klimaanlage" über den Anzeigenamen, ein Wort aus der Zusammenfassung, das in keiner Zeile steht. Dazu ein Betrag über eine Million, ein Sachverhalt ohne Nummer und einer ohne Gegenpart |
+| `Edges` | **Der Rand ist die Suche**: 191 Fälle — p90 aus Staging ist 190, die Fixture nimmt die drei Grundfälle dazu (berichtigt 2026-09-08, M8) — und die Eingabe findet über alle vier Felder — „Telekom" über den Gegenpart, „0042" über die Nummer, „Klimaanlage" über den Anzeigenamen, ein Wort aus der Zusammenfassung, das in keiner Zeile steht. Dazu ein Betrag über eine Million, ein Sachverhalt ohne Nummer und einer ohne Gegenpart |
 
 Daten aus `src/ludwig/`-Typen, Werte wie echte: Musterbau GmbH, 1.249,90 €,
 26.08.2026 — keine „Test 1".
@@ -286,3 +289,300 @@ Abnahme und mit Grund, nicht während ihr.
 `check:mirror`, `check:when` je Exit 0.
 
 **Status: Abnahme** — gebaut habe ich, abnehmen muss ein anderer.
+
+## Schlanke Abnahme (Schnittstelle) 2026-09-08
+
+Fremde Abnahme, Owner-Entscheid 2026-09-08: geprüft wurde die **Schnittstelle**,
+nicht die Darstellung. Spurbreiten, Zeilenhöhen, Überläufe, Kontraste,
+Trefferflächen, Hover, Fokusringe und Tastaturwege als Ergonomie stehen in
+`docs/backlog/0119-visuelle-pruefung-nachholen.md` — die Kriterien „Zeilenhöhe
+und Bedarf bei 190 Treffern" und „Prüfliste `design-guidelines.md` §9" sind
+deshalb **nicht** geprüft.
+
+**Gelesen:** `src/ui/v3/entities/accounting-case/CasePicker.tsx` (125 Z.) und
+`CasePicker.stories.tsx` (279 Z.) Zeile für Zeile · die Primitive
+`src/ui/v3/primitives/Combobox.tsx` (226 Z.), weil der Picker sein ganzes
+Verhalten von ihr erbt · `case-title.ts` (`caseIdentifier`) ·
+`src/ludwig/modules/accounting-cases/domain/case.ts` (`CaseListItem`,
+`caseDisplayTitle`) · `src/ludwig/shared/money.ts` (`asCurrency`, `formatMoney`) ·
+`src/ludwig/ui/status/status-registry.ts` (`resolveStatus`, `UNKNOWN`) ·
+`docs/entitaeten/accounting-case.md` (Datenpunkte, Formen, Offene Frage 3) ·
+`.claude/skills/spec-schreiben/SKILL.md` §5/§6 · `docs/backlog/0009-combobox.md`.
+
+**Gemessen:** alle acht Stories im Browser über `scripts/cdp.mjs` gegen den
+Dev-Server 6107, Story-IDs aus `http://localhost:6107/index.json`; Aktion und
+Messung in **getrennten** `Runtime.evaluate`-Aufrufen, der Zeiger nach jedem
+Klick auf (5, 850) geparkt, damit `onMouseEnter` die Markierung nicht
+verschiebt. Vier Messläufe (Tastatur-Rundlauf · Suche je Feld mit je einem
+frischen Seitenaufbau · die fünf Zustände · der Weg „wählen, dann suchen, dann
+weggehen").
+
+**Wächter, je Exit-Code:** `pnpm typecheck` 0 · `check:when` 0 · `check:icons` 0
+· `check:contrast` 0 · `check:mirror` (`--test`) 0 · `check:language` 0. Die
+Gegenprobe `check:language --all` gibt **1**, meldet aber nur den Bestand (377
+deutsche Kommentarzeilen in 136 Dateien) und **keine** Zeile aus `CasePicker`;
+der Wächter liest ausschließlich Kommentare, keine Bezeichner (siehe M9).
+
+### Je Kriterium
+
+| Kriterium | Nachweis | Urteil |
+|---|---|---|
+| `typecheck` grün | Exit 0 | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `entities/accounting-case/CasePicker{,.stories}.tsx`; Titel `v3/Entitäten/Sachverhalt/CasePicker`; Barrel `src/ui/v3/index.ts:397` | ✓ |
+| Code englisch; `@when`/`@instead` am Export | `check:when` Exit 0, Zeilen stehen an `CasePicker` (`CasePicker.tsx:56–58`). Englisch **nicht** erfüllt — vier deutsche Bezeichner | ✗ **M9** |
+| Kein Hex, kein px, keine lokale Label-Map | `grep` in `CasePicker.tsx`: kein Hex, kein `px`, keine Map; das Wort kommt aus `resolveStatus("sachverhalt", …)` (Z. 25). Einziges `px` im Set: `gridTemplateColumns` der `InUse`-Story (Z. 212), Spurbreite einer Story-Bühne | ✓ |
+| Alle acht Stories vorhanden | `index.json`: filled · empty · empty-after-filter · loading · error · roundtrip · in-use · edges | ✓ |
+| Anzeigename, Nummer, Zustand als Wort, Betrag; Name aus `caseDisplayTitle()` | `Filled` geöffnet, vier Zeilen gemessen: `Wartung der Klimaanlage · 2026-0412 · Zur Prüfung · 1.249,90 € · Bürobedarf Meier GmbH` und, ohne `title`, `Dauersachverhalt: Telekom Deutschland GmbH · 2026-0413 · Klärung offen · -89,90 €` — die Rückfallkette kommt aus dem Spiegel (`CasePicker.tsx:102`), nicht aus einer zweiten Kette | ✓ (Umfang: **M3**) |
+| Fall ohne `caseNumber` zeigt acht Zeichen der id | gemessen `Vortrag ohne Jahr · c-9002-a · …` — `caseIdentifier()` (`case-title.ts:68–70`), kein Ersatzstrich | ✓ |
+| Fall ohne `totalAmount` zeigt keinen Betrag | gemessen `Umbuchung Verrechnungskonto · 2026-0414 · Wartet auf Unterlagen` — nichts, kein Strich, keine Null (`CasePicker.tsx:30–32`) | ✓ |
+| Bearbeitungsstand als Wort aus der Registry | „Zur Prüfung", „Klärung offen", „Wartet auf Unterlagen" — alle drei stehen so in `status-registry.ts` unter der Achse `sachverhalt`; keine lokale Map in der Datei | ✓ |
+| `onChange` liefert die `caseId` und `null` beim Abwählen | `Roundtrip`, echte Anschläge: Enter → „Gewählt: c-4412"; Backspace im leeren Feld → „Gewählt: —". Der Rückruf bekommt nur `option.value` (`Combobox.tsx:108`) oder `null` (Z. 140) — **nie** einen leeren String und nie einen Wert, den es nicht gibt | ✓ |
+| Tastatur: Fokus markiert den ersten Treffer, ↓ geht einen weiter, Enter nimmt den markierten | gemessen: Fokus → `activeIndex 0`, ↓ → 1, ↓ → 2, Enter → `c-4414` („Umbuchung Verrechnungskonto", der **dritte**). Die korrigierte Spec-Zeile stimmt; die Story sagt weiter etwas anderes | ✓ (**M5**) |
+| `onSearch` bekommt den getippten Text; gefiltert wird immer im Picker | `Roundtrip` mit `onSearch`: der getippte Text steht unter „An `onSearch` gegangen"; `Edges` filtert bei gesetzter Prop weiter selbst (`Loading`-Story mit `onSearch` zeigt dieselbe Liste). Aber der Picker erfährt **nie**, wenn die Combobox ihren Suchbegriff selbst leert | ✗ **M1** |
+| `Empty` und `EmptyAfterFilter` tragen verschiedene Sätze | gemessen: „In diesem Wirtschaftsjahr gibt es noch keinen Sachverhalt." gegen (nach „xyz") „Kein Sachverhalt mit diesem Suchbegriff." | ✓ (Achse: **M7**) |
+| `Error` zeigt den Satz am Feld, die Liste bleibt | gemessen: vier Treffer stehen weiter in der Liste, der Satz steht darunter am Feld | ✓ |
+| `Loading` lässt das Feld bedienbar | gemessen: `input.disabled` false, „Tele" wird angenommen. Die alte Liste **verschwindet** aber (0 Treffer, nur „Suche läuft …") | ✓ / ✗ **M6** |
+| Suche über alle vier Felder | `Edges`, je ein frischer Seitenaufbau, echte Anschläge: `Telekom` → 1 (Gegenpart) · `0042` → 1 (Kennung, „Sanierung des Serverraums") · `Klimaanlage` → 1 (Anzeigename) · `Quartalsende` → 1 (**Zusammenfassung**, steht in keiner Zeile) · `xyz` → 0 mit dem Filtersatz · ohne Eingabe **191** | ✓ (Zahl: **M8**) |
+| Liste bei 190 Treffern scrollbar, Zeilen einzeilig | **nicht geprüft** — vertagt nach 0119 | — |
+| Ersetzt den `<select>` ohne Funktionsverlust | `InUse` gemessen: Betrag, Verwendungszweck, Picker in einer Zeile, Liste öffnet über der Karte. Der `<select>` selbst liegt in `ludwig/app` und ist hier nicht spiegelbar — mehr, als die Story zeigt, ist in diesem Repo nicht prüfbar; der Einbau ist ohnehin auf 0121 vertagt | ✓ soweit prüfbar |
+
+**Ohne Befund geprüft** (die Fallen dieser Welle): kein lokal nachgebauter Typ
+und keine lokale Verschärfung — `grep "\bas [A-Z]"` findet in beiden Dateien
+nichts, `CaseListItem`, `caseDisplayTitle` und `asCurrency` kommen aus dem
+Spiegel · kein Pflichtfeld, das die Komponente nicht liest · der Rückruf wird
+nie mit einem ungültigen Wert gerufen · leere Eingabe zeigt alle 191 Treffer
+(`matches` Z. 48–49) · `resolveStatus` mit `null` gäbe „—" statt eines Wortes
+(`status-registry.ts:2213`, und `if (stand)` fängt das nicht ab, weil „—"
+wahr ist), das trifft aber keinen echten Fall: `lifecycleStatus` ist im Profil
+zu **100 %** gefüllt (`accounting-case.md` Z. 78) — kein Mangel, nur eine tote
+Bedingung · die Zahlen der Spec stimmen gegen das Profil (`title` 53 %,
+`totalAmount` 52 % ⇒ 48 % ohne Betrag, p90 190 offene Fälle).
+
+### Mängel
+
+**M1 · Der Suchbegriff des Pickers überlebt das Feld — blockiert**
+Kriterium: „`onSearch` bekommt den getippten Text; gefiltert wird **immer** im
+Picker" · und die Nutzung als kontrollierte Eingabe mit `value`/`onChange`.
+Ort: `CasePicker.tsx:98` und `112–115`, zusammen mit `Combobox.tsx:107–111`
+(`pick`), `133–138` (Escape) und `149–154` (`onBlur`).
+Befund: Der Picker hält den Suchbegriff selbst, weil er selbst filtert. Die
+Combobox leert **ihren** Suchbegriff an drei Stellen — beim Nehmen, bei Escape
+und beim Verlassen — und ruft dabei `onSearch` nicht. Der Picker erfährt davon
+nichts und filtert weiter. Gemessen in `Edges` (191 Fälle), Aktion und Messung
+getrennt:
+
+- tippen „Telekom" → 1 Treffer; **Escape** → Feld leer; verlassen und wieder
+  hineingehen → Feld leer, Liste **1 von 191**.
+- tippen „Telekom", **Enter** → gewählt; verlassen und wieder hinein → Liste
+  **1 von 191**.
+- Der schwerste Fall (`Roundtrip`, vier Fälle): wählen (`Gewählt: c-4412`,
+  Feld zeigt „Wartung der Klimaanlage") → hineingehen → „Tele" tippen (1
+  Treffer) → **ohne zu wählen weggehen** → das Feld zeigt **nichts** mehr,
+  obwohl `value` unverändert `c-4412` ist; beim nächsten Hineingehen steht ein
+  leeres Feld über einer Liste mit einem von vier Einträgen.
+
+Der Grund für den letzten Punkt steht in derselben Primitive: `chosen` wird aus
+den **gefilterten** Optionen aufgelöst (`Combobox.tsx:92`), und der Text des
+geschlossenen Feldes ist `chosen?.label ?? ""` (Z. 105). Fällt der gewählte
+Fall aus dem stehengebliebenen Filter, ist die Auswahl unsichtbar. Die
+Primitive kennt die Absicht — Z. 96/97: „While the query is still the
+pre-filled choice, everything stays visible — otherwise focusing the field
+would narrow it to one hit" —, aber die Kurzschluss-Bedingung `if (onSearch ||
+…)` in Z. 97 macht genau diesen Schutz für jeden Aufrufer unerreichbar, der
+selbst filtert. Für 0121 (`ask.render`, Sammelaktion) ist das der Zustand, der
+nicht auftreten darf: das Feld behauptet „keiner gewählt", während der Aufrufer
+eine `caseId` hält.
+Kleinster Weg: Die Combobox sagt, wenn sie ihren Suchbegriff selbst leert —
+`onSearch?.("")` an denselben drei Stellen, an denen `setQuery("")` steht (drei
+Zeilen in `Combobox.tsx`), und ein Satz dazu in 0009. Im Picker allein ist es
+nicht behebbar: er erfährt nichts vom Schließen, und ohne `onSearch` fiele die
+Suche über Nummer und Zusammenfassung weg — der Grund, aus dem er selbst
+filtert.
+Blockiert: **ja**.
+
+**M2 · Die Schnittstelle der Spec kennt `noCasesText` nicht — blockiert nicht**
+Kriterium: Schnittstelle (§5 `spec-schreiben`: „Jede Prop bekommt in der
+Tabelle die Story, die sie beweist").
+Ort: Spec Z. 71–81 gegen `CasePicker.tsx:70` und `87–91`.
+Befund: Die Komponente hat **zehn** Props, die Tabelle führt neun. `noCasesText`
+(Vorgabe „In diesem Wirtschaftsjahr gibt es noch keinen Sachverhalt.") trägt
+genau die Unterscheidung, die der Abschnitt „Verhalten" zur Sache dieser
+Komponente erklärt, und steht nirgends in der Schnittstelle. Dieselbe Lücke
+hatte 0009 bei `name` (offener Punkt 5 dort).
+Kleinster Weg: eine Tabellenzeile, Story `Empty`.
+Blockiert: nein.
+
+**M3 · `Filled` zeigt vier Sachverhalte, die Spec verlangt zwölf — blockiert nicht**
+Kriterium: Story `Filled` („Zwölf Sachverhalte …").
+Ort: Spec Z. 142 gegen `CasePicker.stories.tsx:40–75` und `93–99`; gemessen
+vier Treffer im geöffneten Feld.
+Befund: Die vier Fälle decken alle **Eigenschaften** ab, die die Zeile daneben
+verlangt (mit Titel, ohne Titel, ohne Nummer, ohne Betrag) — nicht aber das,
+wofür die Zwölf da waren: zu sehen, wie sich die Liste liest, wenn sie eine
+ist. Vier Zeilen sind noch ein `<select>`.
+Kleinster Weg: die Fixture auf zwölf ziehen (die `Edges`-Schleife gibt es
+schon) — oder die Zahl in der Spec streichen und begründen.
+Blockiert: nein.
+
+**M4 · `disabled` hat keine Story — blockiert nicht**
+Kriterium: §5 — eine Prop ohne Story-Nachweis.
+Ort: Spec Z. 80 (Story `Filled`) und Z. 137–138 („`Disabled` … gehört zu
+`Filled`") gegen `CasePicker.stories.tsx:93–99`: `Filled` setzt `disabled`
+nicht, keine andere Story auch.
+Befund: Die Prop wird unverändert durchgereicht (`CasePicker.tsx:118`), und die
+Primitive zeigt den gesperrten Zustand in ihrer Story `Invalid`
+(`Combobox.stories.tsx:168–175`) — das Risiko ist klein, der benannte Nachweis
+fehlt trotzdem.
+Kleinster Weg: ein zweiter, gesperrter Picker in `Filled` (vier Zeilen).
+Blockiert: nein.
+
+**M5 · Die `Roundtrip`-Story behauptet den Tastaturweg, den es nicht gibt — blockiert nicht**
+Kriterium: Tastatur (Spec Z. 200 in der korrigierten Fassung).
+Ort: `CasePicker.stories.tsx:168–169` („↓ ↓ Enter nimmt den zweiten Treffer").
+Befund: Gemessen nimmt ↓ ↓ Enter den **dritten** (`c-4414`), weil der Fokus
+schon den ersten markiert — genau das, was die Spec vor dem Bau nachgezogen
+hat. Die Story sagt weiter das Alte, und sie ist der Text, den ein Leser in
+Storybook vor sich hat: zwei Texte für denselben Zustand.
+Kleinster Weg: „zweiten" → „dritten", mit dem Halbsatz zum Grund.
+Blockiert: nein.
+
+**M6 · `Loading`: die Spec verspricht die stehenbleibende Liste, gemessen verschwindet sie — blockiert nicht**
+Kriterium: Story `Loading` („das Feld bleibt bedienbar, die alte Liste
+verschwindet nicht").
+Ort: Spec Z. 145 gegen `Combobox.tsx:184–187`; gemessen: Feld offen, **0**
+Treffer, nur „Suche läuft …".
+Befund: Das bindende variable Kriterium („`Loading` lässt das Feld bedienbar")
+ist erfüllt — der Eingabe wurde „Tele" angenommen. Der Satz in der Story-Tabelle
+ist es nicht, und er kann es nicht sein: die Primitive setzt den Ladehinweis
+**an die Stelle** der Liste. Eines von beidem muss weichen.
+Kleinster Weg: den halben Satz in der Spec streichen — oder in 0009 den
+Hinweis über die Liste setzen statt an ihre Stelle.
+Blockiert: nein.
+
+**M7 · Ein Wert, zwei Bedeutungen: `cases.length === 0` — blockiert nicht**
+Kriterium: „Leer heißt zweierlei" (Spec Z. 124–127).
+Ort: `CasePicker.tsx:122` gegen Spec Z. 76 („die Treffer, fertig sortiert und
+**gefiltert** vom Aufrufer") und Z. 77 (`onSearch`).
+Befund: Der Picker unterscheidet den Befund über den Bestand vom Filterproblem
+allein an der Länge von `cases`. Nach der eigenen Schnittstelle ist `cases`
+aber das, was der Aufrufer schon gefiltert hat: im Serversuch-Pfad liefert eine
+leere Antwort deshalb den **Bestandssatz** für ein Filterproblem — die
+Verwechslung, gegen die der Abschnitt „Verhalten" geschrieben ist. Ohne
+`onSearch` tritt der Fall nicht auf, mit ihm zuverlässig.
+Kleinster Weg: in der Spec festschreiben, dass `cases` immer der ganze Bestand
+ist und `onSearch` nur sein Nachladen anstößt — oder eine eigene Angabe für den
+Bestandsbefund.
+Blockiert: nein.
+
+**M8 · `Edges` sagt 190 und enthält 191 — blockiert nicht**
+Kriterium: Story `Edges` (190 Treffer, p90 aus Staging).
+Ort: `CasePicker.stories.tsx:248–268` (4 + 1 + 186) gegen den Satz in Z. 272
+(„190 Sachverhalte"); gemessen ohne Eingabe **191** Treffer.
+Befund: Die Fixture widerspricht ihrer eigenen Bildunterschrift. Das
+Bau-Protokoll nennt 191 offen — nur die Story sagt etwas anderes.
+Kleinster Weg: 185 statt 186 in der Schleife, oder die Zahl im Satz.
+Blockiert: nein.
+
+**M9 · Deutsche Bezeichner in einer neuen Datei — blockiert**
+Kriterium: fest — „Code englisch".
+Ort: `CasePicker.tsx:24` (`teile`), `25` (`stand`), `51` (`feld`), `99`
+(`treffer`); in den Stories `77` (`Rahmen`), `175/184` (`suche`, `setSuche`,
+`alt`), `176` (`gewaehlt`), `248` (`viele`). Dazu ein deutsches Wort in einem
+englischen Kommentar (Z. 119: „because leer means two things").
+Befund: CLAUDE.md sagt „Code nur Englisch. **Bezeichner**, Props, Typen,
+Kommentare, JSDoc … Englisch"; die Ausnahme gilt dem Bestand, nicht einer am
+2026-09-07 neu angelegten Datei. Der Wächter deckt das nicht ab — er liest
+ausschließlich Kommentarzeilen (`check-language.mjs`, `kommentarZeilen`) und
+ohne `--all` nur die zuletzt geänderten Dateien; deshalb steht er auf 0 und die
+Gegenprobe `--all` nennt `CasePicker` nicht. Im übrigen v3-Code außerhalb der
+Stories tragen genau zwei Dateien deutsche Bezeichner
+(`JournalEntryEditor.tsx:832` und diese) — es ist kein Bestandsmuster, sondern
+ein Ausrutscher. Die Regel ist die, die in dieser Welle am häufigsten
+zurückfiel (0025 M3, 0044, 0063 M1, 0086).
+Kleinster Weg: vier Umbenennungen in der Komponente (`parts`, `state`, `field`,
+`hits`) und das eine Wort im Kommentar; die Story-Bezeichner beim nächsten
+Anfassen.
+Blockiert: **ja**.
+
+**M10 · Die Trefferzeile trägt Rang 1–5, die Spec sagt 1–4 — blockiert nicht**
+Kriterium: „Die Trefferzeile trägt die Ränge 1–4 des Profils" (Spec Z. 83).
+Ort: Spec Z. 83 gegen `docs/entitaeten/accounting-case.md` Z. 81 (Gegenpart =
+**Rang 5**), Z. 204 und Z. 309 („trägt jetzt Rang 1–5 statt 1–4").
+Befund: Die Aufzählung direkt darunter führt den Gegenpart selbst mit auf, und
+gemessen steht er in der Zeile („… · 1.249,90 € · Bürobedarf Meier GmbH").
+Gebaut ist also 1–5, wie das Profil es seit dem 2026-09-05 sagt; nur die
+Überschrift der Spec zählt noch die alte Zahl.
+Kleinster Weg: „1–4" → „1–5".
+Blockiert: nein.
+
+**M11 · Ein Pfad der Freigabe ist nur halb nachgezogen — blockiert nicht**
+Kriterium: Freigabe 2026-09-07 („Vor dem Bau in die Spec: … Registry-Pfad
+`src/ludwig/ui/status/status-registry.ts` (Achse `sachverhalt`)").
+Ort: Spec Z. 69 nennt weiter `patterns/status-registry.ts`; Z. 49 nennt den
+richtigen Pfad, und der Code importiert aus `@/ludwig/ui/status/status-registry`
+(`CasePicker.tsx:8`).
+Befund: Zwei Stellen derselben Spec nennen zwei Orte für dieselbe Registry.
+Kleinster Weg: Z. 69 auf den Pfad aus Z. 49 ziehen.
+Blockiert: nein.
+
+### Gesamturteil
+
+**Zurück.** Zwei blockierende Punkte:
+
+1. **M1** — der Suchbegriff des Pickers wird nie zurückgesetzt, weil die
+   Combobox ihr eigenes Leeren nicht meldet. Gemessen führt das zu einem leeren
+   Feld über einer gefilterten Liste und, schlimmer, zu einem Feld, das nichts
+   anzeigt, obwohl `value` gesetzt ist. Genau die Frage, die für 0121 zählt.
+2. **M9** — deutsche Bezeichner in einer neu angelegten Datei; das feste
+   Kriterium „Code englisch" ist nicht erfüllt, und der Wächter kann es nicht
+   sehen.
+
+Alles andere trägt: die vier Suchfelder finden nachweislich auch über
+Zusammenfassung und Gegenpart, die Trefferzeile löst alle vier Entscheide der
+Freigabe ein, der Rückruf bekommt nie einen ungültigen Wert, und die beiden
+Leersätze sind verschieden. Die neun übrigen Mängel sind Spec-Pflege und
+Story-Deckung — sie gehören in denselben Zug wie die Behebung von M1, halten
+die Aufgabe aber allein nicht auf.
+
+Abgenommen von / am: Claude (fremder Abnahme-Agent), 2026-09-08.
+
+### Nacharbeit 2026-09-08 (nach der schlanken Abnahme)
+
+**M1 (blockierte) — der Suchbegriff überlebte das Feld, und der Fix sitzt in
+`Combobox`.** Sie leert ihren `query` an drei Stellen (Nehmen, Escape,
+Verlassen) und rief dabei nie `onSearch`. Wer außen filtert — und der Picker
+tut das, weil `Combobox` nur `label` und `value` kennt —, filterte danach auf
+ein Wort, das niemand mehr sehen konnte.
+
+Der schwerste Fall war nicht die stehengebliebene Liste, sondern ein
+**widersprüchlicher Zustand**: `chosen` wird in `options` gesucht, und solange
+die noch gefiltert sind, hat ein gewählter Wert kein Label — das Feld stand
+leer, obwohl `value` gesetzt war. Genau der Zustand, den 0121 als
+kontrollierte Eingabe nicht haben darf.
+
+Alle drei Wege gehen jetzt durch **eine** Funktion (`clearQuery`), damit keiner
+die zweite Hälfte wieder vergessen kann. Gemessen im `Roundtrip`: wählen →
+„Tele" tippen → weggehen ⇒ das Feld zeigt „Wartung der Klimaanlage", `value`
+bleibt `c-4412`, und `onSearch` bekam „Klima", „", „Tele", „".
+
+*(Zwei Messungen zuvor sahen anders aus — ich hatte `blur()` statt `focusout`
+ausgelöst, und Reacts `onBlur` hängt an `focusout`. Der Fehler lag in der
+Messung, nicht im Code.)*
+
+| Weiterer Punkt | Was getan |
+|---|---|
+| **M9** (blockierte) | Vier deutsche Bezeichner in einer neu angelegten Datei (`teile`, `stand`, `feld`, `treffer`) plus zwei in den Stories heißen jetzt englisch. `check:language` sieht sie nicht — er liest Kommentare, keine Bezeichner |
+| **M2** | `noCasesText` steht in der Schnittstellen-Tabelle. Zehn Props, neun Zeilen — und gerade die fehlte, die den **zweiten** Leerfall trägt |
+| **M3** | `Filled` verspricht keine zwölf Fälle mehr, sondern nennt die drei, die es zeigt: die Zahl stand ohne Zweck da |
+| **M4** | `disabled` hat seinen Nachweis — als zweiter, gesperrter Picker in `Filled`. Die Spec nannte eine Story `Disabled`, die es nie gab |
+| **M6** | Die Story-Prosa behauptete „↓ ↓ Enter nimmt den zweiten Treffer". Gemessen ist es der dritte, weil der Fokus schon den ersten markiert — die Spec-Zeile war am 2026-09-07 berichtigt worden, die Story nicht |
+| **M7** | `Loading` behauptete, die alte Liste verschwinde nicht. Die Story steht geschlossen da; man sieht es ihr nicht an, also sagt sie es nicht mehr |
+| **M8** | `Edges` nennt 191 statt 190 — p90 ist 190, die Fixture nimmt die drei Grundfälle dazu |
+| **M10** | Die Ränge der Trefferzeile heißen 1–5, wie im Profil und im Bau; die Spec sagte an zwei Stellen 1–4 |
+
+**Nicht geändert: `cases.length === 0` trägt zwei Bedeutungen** — das ist der
+Grund, warum es `emptyText` **und** `noCasesText` gibt. „Nichts gefunden" ist
+ein Suchergebnis, „noch keiner da" ein Zustand des Jahres, und welcher gilt,
+weiß nur der Aufrufer. Beide Sätze stehen jetzt in der Tabelle.
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0.

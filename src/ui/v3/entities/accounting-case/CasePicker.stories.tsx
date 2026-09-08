@@ -94,6 +94,17 @@ export const Filled: Story = {
   render: () => (
     <Rahmen>
       <CasePicker label="Sachverhalt" value={null} onChange={() => {}} cases={CASES} />
+      {/* `disabled`: die Zeile ist schon zugeordnet oder gesperrt. Die Prop
+          hatte bis zum 2026-09-08 keinen Nachweis — die Spec nannte eine
+          Story `Disabled`, die es nie gab (Abnahme M4). Sie steht hier statt
+          in einer eigenen: gesperrt neben bedienbar ist die Aussage. */}
+      <CasePicker
+        label="Sachverhalt (gesperrt)"
+        value={CASES[0]?.caseId ?? null}
+        onChange={() => {}}
+        cases={CASES}
+        disabled
+      />
     </Rahmen>
   ),
 };
@@ -165,7 +176,9 @@ export const Error: Story = {
 
 /**
  * Rundlauf mit `useState`: wählen, abwählen, wieder wählen — dazu der
- * Tastaturweg (↓ ↓ Enter nimmt den zweiten Treffer, Escape schließt ohne
+ * Tastaturweg (↓ ↓ Enter nimmt den **dritten** Treffer — der Fokus markiert
+ * schon den ersten; die Spec-Zeile war 2026-09-07 berichtigt, diese nicht.
+ * Escape schließt ohne
  * Änderung). `onSearch` läuft mit und zeigt, was der Aufrufer bekäme; gefiltert
  * wird trotzdem im Picker.
  */
@@ -173,7 +186,7 @@ export const Roundtrip: Story = {
   render: function Render() {
     const [value, setValue] = useState<string | null>(null);
     const [suche, setSuche] = useState<string[]>([]);
-    const gewaehlt = CASES.find((c) => c.caseId === value);
+    const picked = CASES.find((c) => c.caseId === value);
     return (
       <Rahmen>
         <CasePicker
@@ -184,7 +197,7 @@ export const Roundtrip: Story = {
           onSearch={(q) => setSuche((alt) => [...alt.slice(-4), q])}
         />
         <p className="lw-body-sm">
-          Gewählt: <strong>{gewaehlt ? gewaehlt.caseId : "—"}</strong>
+          Gewählt: <strong>{picked ? picked.caseId : "—"}</strong>
         </p>
         <p className="lw-body-sm">
           An <code className="lw-mono">onSearch</code> gegangen:{" "}
@@ -245,7 +258,7 @@ export const InUse: Story = {
 export const Edges: Story = {
   render: function Render() {
     const [value, setValue] = useState<string | null>(null);
-    const viele: CaseListItem[] = [
+    const many: CaseListItem[] = [
       ...CASES,
       CASE({
         caseId: "c-9042",
@@ -272,7 +285,7 @@ export const Edges: Story = {
           190 Sachverhalte. Probieren Sie „Telekom", „0042", „Klimaanlage" oder
           „Quartalsende" — das letzte Wort steht in keiner Zeile.
         </p>
-        <CasePicker label="Sachverhalt" value={value} onChange={setValue} cases={viele} />
+        <CasePicker label="Sachverhalt" value={value} onChange={setValue} cases={many} />
       </Rahmen>
     );
   },

@@ -21,19 +21,19 @@ import { caseIdentifier } from "./case-title";
 
 /** What one hit says, in the order one reads it. */
 function hintOf(c: CaseListItem): string {
-  const teile: string[] = [caseIdentifier(c)];
-  const stand = resolveStatus("sachverhalt", c.lifecycleStatus).label;
-  if (stand) teile.push(stand);
+  const parts: string[] = [caseIdentifier(c)];
+  const state = resolveStatus("sachverhalt", c.lifecycleStatus).label;
+  if (state) parts.push(state);
   // No amount where there is none (48 % carry one): a dash would claim the
   // value is unknown, and „0,00 €" would be a lie. The currency comes from the
   // case, not from a prop — every case carries its own.
   if (c.totalAmount !== null) {
-    teile.push(formatMoney(money(c.totalAmount, asCurrency(c.currency))));
+    parts.push(formatMoney(money(c.totalAmount, asCurrency(c.currency))));
   }
   // The counterparty only where it is not already in the label: without a
   // `title` the fallback chain has put it there (Freigabe 2026-09-07).
-  if (c.title && c.counterpartyName) teile.push(c.counterpartyName);
-  return teile.join(" · ");
+  if (c.title && c.counterpartyName) parts.push(c.counterpartyName);
+  return parts.join(" · ");
 }
 
 /**
@@ -48,7 +48,7 @@ function matches(c: CaseListItem, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
   return [caseDisplayTitle(c), caseIdentifier(c), c.counterpartyName, c.summary].some(
-    (feld) => feld?.toLowerCase().includes(q),
+    (field) => field?.toLowerCase().includes(q),
   );
 }
 
@@ -96,8 +96,8 @@ export function CasePicker({
   // and hands over the hits — with `onSearch` always set, so the combobox does
   // not narrow a second time over the wrong fields.
   const [query, setQuery] = useState("");
-  const treffer = useMemo(() => cases.filter((c) => matches(c, query)), [cases, query]);
-  const options: ComboboxOption[] = treffer.map((c) => ({
+  const hits = useMemo(() => cases.filter((c) => matches(c, query)), [cases, query]);
+  const options: ComboboxOption[] = hits.map((c) => ({
     value: c.caseId,
     label: caseDisplayTitle(c),
     hint: hintOf(c),

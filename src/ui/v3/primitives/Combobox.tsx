@@ -104,9 +104,24 @@ export function Combobox({
   // The text in the field: while typing it is the query, otherwise the choice.
   const text = open ? query : (chosen?.label ?? "");
 
+  /**
+   * Clear the query — **and tell the caller.** With `onSearch` the filtering
+   * happens outside, so a query only this component forgets leaves the caller
+   * filtering on a word nobody can see. Worse, `chosen` is looked up in
+   * `options`: while those are still narrowed, a picked value has no label,
+   * and the field goes blank although `value` is set (acceptance 0084, M1).
+   *
+   * All three ways out of the query go through here, so none of them can
+   * forget the second half again.
+   */
+  function clearQuery() {
+    setQuery("");
+    onSearch?.("");
+  }
+
   function pick(option: ComboboxOption) {
     onChange(option.value);
-    setQuery("");
+    clearQuery();
     setOpen(false);
   }
 
@@ -133,7 +148,7 @@ export function Combobox({
     if (e.key === "Escape" && open) {
       e.preventDefault();
       setOpen(false);
-      setQuery("");
+      clearQuery();
       return;
     }
     // Backspace in the empty field clears the choice — the fastest way back.
@@ -149,7 +164,7 @@ export function Combobox({
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
             setOpen(false);
-            setQuery("");
+            clearQuery();
           }
         }}
       >
