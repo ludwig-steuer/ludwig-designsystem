@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein.** Der DATEV-Steuerschlüssel (BU) ist ein Fachbegriff mit eigenem Vokabular; ein Primitive darf ihn nicht kennen |
 | Quelle | `docs/v3-backlog.md` Z. 62 (`TaxKeySelect`, Teil des `Auswahlfeld`-Bedarfs); Vorlage `apps/web/src/ui/booking/TaxKeySelect.tsx` |
@@ -91,3 +91,16 @@ gibt es nicht, die Liste ist eine Konstante) + 1 Layout-Boolean
 - `null` ist wählbar und kommt als `null` zurück, nicht als leerer String
   (`Roundtrip`)
 - Ersetzt `TaxKeySelect` an beiden Stellen ohne Funktionsverlust
+
+## Gebaut 2026-09-08
+
+Gemessen (`scripts/cdp.mjs`, vier Stories):
+
+| Story | Gemessen |
+|---|---|
+| `Filled` | Zwölf Optionen, `v2mono` am Feld, erste Option „1 · Umsatzsteuerfrei (mit Vorsteuerabzug)", und darunter der Satz des gewählten Schlüssels |
+| `Empty` | Kein Erklärtext — es gibt nichts zu erklären |
+| `PassThrough` | 12 gegen **15** Optionen. Die Spec-Story sprach von „fünf Einträgen mehr"; es sind drei, und die Story sagt jetzt die gemessene Zahl |
+| `Roundtrip` | Abwählen liefert `null`, nicht `""` — die Achse kennt keinen leeren String, und ein Aufrufer, der ihn schriebe, würde ihn speichern |
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0.

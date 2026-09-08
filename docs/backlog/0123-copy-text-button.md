@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
 | Stufe | `primitives/` — Gruppe Aktion |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, unverändert: „diesen Text in die Zwischenablage" kennt kein Fachwort |
 | Quelle | `docs/v3-backlog.md` („KopierenKnopf", 3 Verwendungen); Vorlage `modules/datev-truth/ui/CopyTextButton.tsx` |
@@ -76,3 +76,18 @@ nicht, der Vorgang ist sofort; „leer" hat ein Knopf nicht) + 1 Fehler +
   im Ruhezustand (`Failed`)
 - Kein Icon ohne Wort (V11): beide Zustände tragen Aufschrift **und** Zeichen
 - Ersetzt die drei Kopierstellen der App ohne Funktionsverlust
+
+## Gebaut 2026-09-08
+
+Gemessen (`scripts/cdp.mjs`): der Klick schreibt genau den übergebenen Text in
+die Zwischenablage (über einen Stub abgefangen), die Aufschrift wechselt auf
+„Kopiert" mit dem Haken, und nach zwei Sekunden steht wieder das Wort da.
+Verweigert die Zwischenablage, bleibt die Aufschrift im Ruhezustand und der
+Satz steht daneben — ein Fehlschlag sieht nicht mehr aus wie ein Erfolg, der
+nicht kam.
+
+Ein Detail, das die Vorlage nicht hatte: der Zeitgeber wird beim Abbau
+abgeräumt. Ein Knopf, der vor seinen zwei Sekunden verschwindet, ruft sonst in
+einen Zustand zurück, den es nicht mehr gibt.
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0.

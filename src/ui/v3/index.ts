@@ -67,6 +67,8 @@ export {
   type AskSpec,
   type ConfirmSpec,
 } from "./primitives/ActionButton";
+export { CopyTextButton } from "./primitives/CopyTextButton";
+export { Sparkline } from "./primitives/Sparkline";
 export {
   OverflowMenu,
   MenuItem,
@@ -521,6 +523,7 @@ export {
   type EditorStatus,
   type Side,
 } from "./entities/journal-entry/JournalEntryEditor";
+export { TaxKeyField } from "./entities/journal-entry/TaxKeyField";
 export { JournalEntryGrid, type JournalEntryGridProps, type JournalGridMessage } from "./entities/journal-entry/JournalEntryGrid";
 export {
   journalLines,

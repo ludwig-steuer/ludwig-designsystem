@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
 | Stufe | `primitives/` — Gruppe Fläche |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: vier bis zwölf Zahlen als Verlauf, ohne Achsen und ohne Fachwort |
 | Quelle | `docs/v3-backlog.md` („`Sparkline` (4–12 Werte in der KPI-Kachel) … `v2spark` inline in `Schritt6Liste.tsx` (`aria-hidden`, ohne Text-Alternative)"); die Formen aus P23, die weder `BarChart` (0041) noch `Progress` (0045/0046) abdecken |
@@ -81,3 +81,19 @@ negative Werte, ein einzelner Ausreißer) = **4**.
   diesen Satz (`InUse`)
 - Kein Hex, keine px in der Komponente — Höhe und Farbe stehen in `.v2spark`
 - Ersetzt das Inline-Markup in `Schritt6Liste.tsx` ohne Funktionsverlust
+
+## Gebaut 2026-09-08
+
+Gemessen (`scripts/cdp.mjs`, drei Stories):
+
+| Story | Gemessen |
+|---|---|
+| `Filled` | `role="img"`, `aria-label` „6 Werte, März bis August, 1.200,00 €, …", sechs Balken, **alle** `aria-hidden`, einer mit `.is-now` |
+| `Gaps` | „keine Angabe" im Label an den zwei Lückenstellen, zwei Balken auf Höhe 0 — die Spur bleibt |
+| `TooFew` | Nichts im DOM: kein `.v2spark`, kein Label |
+
+Die Ober**grenze** ist beim Bauen dazugekommen und stand so nicht in der Spec:
+über zwölf Werten rendert die Komponente ebenfalls nichts. Der Grund ist
+derselbe wie unten — dann ist es ein Diagramm und gehört zu `BarChart`.
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0.
