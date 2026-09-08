@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig (Schnittstelle) — die gemessene Prüfung steht in 0119 aus |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/bank-transaction/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: achtzehn Felder dieser Entität, fünf davon aus SEPA |
@@ -82,8 +82,12 @@ Server-Component. `FieldList` je Block, Blöcke untereinander mit
 Überschrift. Zahlen rechts mit `tnum`, IBAN und BIC mono, Zeitpunkte über
 `Time`.
 
-Ein Feld ohne Wert lässt seine Zeile weg — mit **einer** Ausnahme: die
-Zuordnung. Dort heißt kein Wert etwas („noch keinem Sachverhalt
+Ein Feld ohne Wert lässt seine Zeile weg — mit **zwei** Ausnahmen: die
+Zuordnung, und der **Gegenpart**. Er ist die Identität der Zeile: dass er
+fehlt (3 %), ist eine Aussage über die Position und kein fehlendes Detail,
+also steht dort „ohne Namen" statt gar nichts. IBAN und BIC verschwinden,
+weil sie Details sind. *(Die zweite Ausnahme war gebaut, aber nicht
+aufgeschrieben — ergänzt 2026-09-08, M3, Nachweis `Edges`.)* Dort heißt kein Wert etwas („noch keinem Sachverhalt
 zugeordnet"), und das steht als Satz, nicht als Lücke. 65 % der Positionen
 sind dieser Fall.
 
@@ -104,9 +108,19 @@ nach §6: 3 anwendbare Zustände + 1 Enum (`blocks`) + 1 Enum (`tone`) +
 | `InDrawer` | `blocks` ohne „Import", `tone="bare"` — die Fassung für 0103 |
 | `RawPayload` | Rang 18 als `RawRecord`, aufklappbar |
 | `Split` | Rand: drei Sachverhalte mit Teilbeträgen und Rest |
+| `Edges` | Die drei Ränder, die nur diese Form hat: „ohne Namen" statt weggelassener Zeile, der EUR-Wert bei Abweichung, und zwei der offenen DATEV-Klassen mit ihrem Wort |
 | `InUse` | Unter einem Kopf mit Gegenpartei und Betrag — nichts steht zweimal |
 
-Nicht anwendbar: `leer nach Filter`, `lädt`, `Fehler`.
+Abgeleitet nach §6: 3 Zustände (gefüllt · ohne Zuordnung · ohne Tags) +
+2 Enums (`blocks`, `tone` — `InDrawer` deckt beide, `RawPayload` den dritten
+Blockschnitt) + 0 Callbacks + 1 „im Einsatz" + 2 Rand (`Split`, `Edges`) =
+**8**. *(Berichtigt 2026-09-08, M1: die Zeile stand seit der Freigabe vom
+2026-09-06 auf 7 und zählte einen Posten, den keine Story füllte, während
+`RawPayload` ohne Posten dastand.)*
+
+Nicht anwendbar: `lädt` und `Fehler` gehören dem Aufrufer (siehe „Verhalten");
+**`leer nach Filter`, weil die Komponente nicht filtert** — sie zeigt eine
+Position, keine Liste (ergänzt 2026-09-08, M2).
 
 ## Ausbau
 
@@ -115,10 +129,24 @@ Nicht anwendbar: `leer nach Filter`, `lädt`, `Fehler`.
 | Der Beleg, aus dem die Zeile stammt | `sourceDocument?: SourceDocumentLink` | L-45 ist entschieden und die Kante hat einen FK |
 | Die Match-Stufe als Chip statt als Wort | keine Prop — eine Achse (L-57) | die Achse ist da |
 
+**`id` bleibt Pflicht.** `BankTransactionDetailData` erbt es von
+`BankTransactionRowData`, und die Fakten lesen es nicht — anders als in 0100
+ist das hier **kein** Ballast: die Vererbungskette sagt „das Detail ist die
+Zeile plus mehr", und wer die Fakten zeigt, kommt immer von einer Zeile oder
+einer Liste, hat den Schlüssel also ohnehin. Entschieden 2026-09-08 (M7).
+
 ## Befunde für `ludwig/app`
 
-- **B1 (L-56)** — Der Detail-Typ liegt nicht im Spiegel; lokal
-  deckungsgleich definiert.
+- **B1 (L-56)** — ~~Der Detail-Typ liegt nicht im Spiegel~~ **Überholt seit
+  `cc141f7b`, berichtigt 2026-09-08 (M8):** der Spiegel führt
+  `BankTransactionRow` mit zehn der achtzehn Felder unter denselben Namen.
+  `bank-transaction.ts` deklariert sie trotzdem neu und **zwei enger**
+  (`amount: number` statt `string`, `currency: Currency` statt `string`) —
+  aus demselben Grund wie in 0100: jede Form der Familie gibt Beträge an
+  `Amount`, und einmal an der Grenze zu parsen ist ehrlicher als fünfmal.
+  Was offen bleibt, ist die andere Hälfte: die acht Detailfelder gibt es im
+  Spiegel weiterhin nicht. Mit `bank-transaction-vm.ts` (App-Commit
+  `a38b986a`) kommt der Rest — dann fällt der lokale Typ.
 - **B2 (L-57)** — Ohne Achse für `match_stage` steht die Stufe hier als
   Klartext ohne Ton. Die vier offenen Klassen bekommen damit **hier** zum
   ersten Mal ein Wort — in der Zeile sind sie unsichtbar.
@@ -497,3 +525,305 @@ Abwesenheit erscheint.
 eigenen Worktree: **Exit 0** (Bauprüfung in 0117).
 
 **Status: Abnahme.**
+
+## Schlanke Abnahme (Schnittstelle) 2026-09-08
+
+**Urteil: durch.** Kein blockierender Punkt. Die vier Props stehen Zeichen für
+Zeichen so im Code, wie die Schnittstellen-Tabelle sie führt — das war in
+dieser Welle bisher der Regelfund (0070, 0082, 0095, 0096, 0099, 0100) und ist
+hier zum ersten Mal in Ordnung. Acht nicht blockierende Mängel stehen unten;
+sechs davon trägt die Spec schon aus der Runde vom 2026-09-07 offen mit, einer
+ist beim Beheben eines dieser sechs neu entstanden (M5), einer betrifft einen
+Befund, der seit `cc141f7b` überholt ist (M8).
+
+Geprüft wurde die **Schnittstelle**, nicht die Darstellung. Spurbreiten,
+Zeilenhöhen, Überläufe, Kontraste, Trefferflächen, Hover, Fokus und
+Tastaturwege sind nach `docs/backlog/0119-visuelle-pruefung-nachholen.md`
+vertagt und hier weder gemessen noch beurteilt.
+
+**Gelesen:** diese Spec, `BankTransactionFacts.tsx` (263 Z.),
+`BankTransactionFacts.stories.tsx` (215 Z.), `bank-transaction.ts`,
+`derive.ts`, `accounting-case/CaseCell.tsx`, `accounting-case/case-title.ts`,
+`src/ludwig/modules/bank-transactions/domain/types.ts`,
+`src/ludwig/modules/bank-transactions/domain/statement-line.ts`,
+`src/ludwig/ui/status/status-registry.ts`, `src/ui/v3/index.ts`,
+`scripts/check-when.mjs`, Skill `spec-schreiben` §5/§6.
+**Stand des Baums:** HEAD `c09efa8`, `git status` **leer** — anders als am
+2026-09-07 stand der Baum still, alle Zahlen stammen aus einem einzigen Stand.
+**Gemessen:** die sieben Stories über `scripts/cdp.mjs` gegen den Dev-Server
+auf 6107, Story-IDs aus `GET /index.json`, bei 1400 px; Aktion (Disclosure
+öffnen) und Messung in getrennten `Runtime.evaluate`-Aufrufen.
+
+### 1 Die Schnittstelle, Zeichen für Zeichen
+
+| Spec (Tabelle) | Code (`BankTransactionFacts.tsx:44–55`) | Urteil |
+|---|---|---|
+| `transaction` · `BankTransactionDetailData` · Pflicht | `transaction: BankTransactionDetailData` (Z. 50) | ✓ |
+| `caseHref` · `(caseId: string) => string` · Pflicht | `caseHref: (caseId: string) => string` (Z. 51) | ✓ |
+| `blocks` · `BankTransactionFactBlock[]` · Default alle fünf | `blocks?: BankTransactionFactBlock[]` (Z. 53), Default `ALL_BLOCKS` mit genau fünf Werten (Z. 31–37) | ✓ |
+| `tone` · `"surface" \| "bare"` · Default `surface` | `tone?: "surface" \| "bare"` (Z. 54), Default `"surface"` (Z. 48) | ✓ |
+
+Keine fünfte Prop, keine fehlende, keine anders benannte. Exporte der Datei:
+`BankTransactionFactBlock` (Typ, Z. 24) und `BankTransactionFacts` (Z. 44) —
+die Tabelle nennt den Typ in der `blocks`-Zeile, er ist damit gedeckt.
+„Kann bewusst nicht": kein Schreibpfad — `grep -nE "onChange|onClick|onSubmit|[^s]action=|\"use (client|server)\""` Exit 1;
+im Browser trägt keine der sieben Stories ein `input`, `textarea`, `select`
+oder `form` (gemessen: 0 in allen sieben).
+
+### 2 Herkunft der Typen
+
+- Zusicherungen: `grep -nE '\bas [A-Z]'` über `BankTransactionFacts.tsx`,
+  `.stories.tsx`, `bank-transaction.ts`, `derive.ts` — Exit 1. Die
+  `as [React.ReactNode, React.ReactNode]` in den Zeilen-Arrays sind
+  Tupel-Formen, keine Fachtyp-Zusicherungen.
+- Aus dem Spiegel: `SepaTags` und `Currency` (`bank-transaction.ts:1–2`),
+  `CaseLink` (0095), `restOf` und `resolveEventBookingState` über `derive.ts`,
+  das nichts nachbaut, sondern re-exportiert (`derive.ts:13–23`), sowie
+  `caseIdentifier` (`BankTransactionFacts.tsx:2`) — der am 2026-09-07 noch
+  inline nachgebaute Ausdruck ist weg (M6 der Vorrunde, `53a54f9`).
+- Nachgebaut: `BankTransactionDetailData` — s. **M8**.
+- Lokale Map: `SOURCE` (`BankTransactionFacts.tsx:165–169`) übersetzt
+  `csv`/`qonto`/`manual`. Die Achsen-Union der Registry
+  (`status-registry.ts:95–135`) führt dafür **keine** Achse, und die Werte
+  sind kein Zustand, sondern eine Herkunft. Zehn gleichartige Wortlisten
+  stehen im Set (`Wizard.tsx:36`, `Review.tsx:57`, `Clarification.tsx:34`,
+  `ClarificationCard.tsx:52/61`, `datev-snapshot.ts:43`,
+  `journal-entry.ts:174`, `CaseFacts.tsx:56`, `AccountField.tsx:37`). Kein
+  Mangel dieser Spec.
+
+### 3 Pflichtfelder, die niemand liest
+
+Achtzehn Punkte, siebzehn gelesen. Nicht gelesen: `id`
+(`bank-transaction.ts:60`) — `grep -n '\.id\b'` über die Komponente Exit 1.
+S. **M7**.
+
+### 4 Wächter (Exit-Code, nicht Textausgabe)
+
+| Wächter | Exit | `--test` |
+|---|---|---|
+| `pnpm typecheck` | 0 | — |
+| `pnpm check:language` | 0 (prüft nur Geändertes: „nichts geändert") | 0, 8 Fälle |
+| `node scripts/check-language.mjs --all` | 1 | — |
+| `pnpm check:icons` | 0 | 0, 53 Zeichen |
+| `pnpm check:contrast` | 0 | 0, 16 Fälle |
+| `pnpm check:mirror` | 0 | 0, 8 Fälle |
+| `pnpm check:when` | 0 | 0, 11 Fälle |
+
+Gegenprobe zum `--all`-Bericht, wie verlangt: er meldet Exit 1 für den
+**Bestand** (377 deutsche Kommentarzeilen in 136 Dateien). Keine davon liegt in
+dieser Familie — `grep "bank-transaction"` über den Bericht findet nichts. Die
+Datei ist sauber, der Exit-Code gehört dem Altbestand.
+
+`check:when` Exit 0 bei einem `@when` und einem `@instead` an
+`BankTransactionFacts` (Z. 40–42). Der Typ-Export trägt keine — der Wächter
+nimmt ihn nach seiner eigenen Regel aus (`check-when.mjs`, `istBaustein`:
+nur `export function`/`export const … =>`).
+
+Kein Hex (`grep -nE "#[0-9a-fA-F]{3,8}"` Exit 1), kein px, keine Inline-Größe
+(`grep -nE "[0-9]+px|fontSize|minWidth|style=\{\{"` Exit 1). Auch das CSS der
+Komponente rechnet in Token (`v3.css:3411–3432`).
+
+### 5 Stories und ihre Deckung
+
+Sieben im Index, sieben in der Spec, dieselben Namen, alle unter
+`v3/Entitäten/Kontoauszugsposition/BankTransactionFacts` — die Gruppe ist der
+Barrel-Kommentar (`index.ts:407`), der Export steht in `index.ts:417–420`.
+Export-Namen englisch.
+
+| Prop / Zustand | Story | Gemessen |
+|---|---|---|
+| `transaction` | `Filled` | fünf Blöcke in der Folge Zahlung · Verwendungszweck · Gegenpartei · Zuordnung · Import |
+| `caseHref` | `Filled`, `Split` | `#fall-c-4412`; in `Split` drei verschiedene: `#fall-c-4412`, `#fall-c-4488`, `#fall-c-4501` |
+| `blocks` | `InDrawer`, `RawPayload` | vier Blöcke ohne Import; `["import"]` allein trägt genau einen Block |
+| `tone` | `InDrawer`, `InUse` | alle vier bzw. vier Blöcke mit `class="v2fields v2fields--bare"` |
+| gefüllt | `Filled` | s. o. |
+| leer (Zuordnung) | `Unassigned` | Zeilen „DATEV-Historie" **vor** „Sachverhalt", Satz „Diese Zahlung ist noch keinem Sachverhalt zugeordnet." |
+| ohne SEPA | `WithoutTags` | keiner der sieben Tags im Text, keine leere Chip-Reihe |
+| Rand | `Split` | drei Fälle, Zeilen „Nicht zugeordnet" (**300,55 €**, = 2.480,55 − 2.180) und „Offene Klärungen · 2 Rückfragen am Sachverhalt" — die Fixture löst den Rand-Fall wirklich aus, nicht nur der Titel |
+| im Einsatz | `InUse` | `26.08.2026` genau **einmal**, „Bürobedarf Meier GmbH" genau **einmal** (M6 der Vorrunde ist damit erledigt) |
+
+Rohdaten: `RawPayload` zeigt `<details open=false>` mit „Rohdaten der Quelle",
+`buchungstag` steht **nicht** im Text; nach einem Klick (getrennter Aufruf)
+`open=true` und sieben `.v2raw__key` alphabetisch. Rang 18 kommt also über
+`RawRecord`, nicht als Feldliste.
+
+Konsole über alle sieben Stories: sauber. Was ankommt, sind
+`[vite] connecting/connected`, der React-DevTools-Hinweis und ein `404
+http://localhost:6107/favicon.ico` (über `Network.responseReceived` als
+einziger Fehlschlag identifiziert) — Storybook-Rauschen, nichts aus der
+Komponente. Keine Ausnahme, keine Warnung.
+
+Zahl der Stories: die Ableitung in dieser Spec ergibt 7 und es sind 7 — die
+Rechnung geht aber nur zufällig auf, s. **M1**. Ausgeschlossene Zustände:
+`lädt` und `Fehler` mit Grund („gehören dem Aufrufer"), `leer nach Filter`
+ohne — s. **M2**.
+
+### 6 Status ausschließlich über die Registry
+
+Beide Zustände kommen als `StatusBadge`: `axis="bank_match_stage"`
+(`BankTransactionFacts.tsx:259`) und `axis="ereignis"` (Z. 234) über
+`resolveEventBookingState` aus dem Spiegel. Gemessen: „exakt", „kein
+Kandidat", „aufgeteilt", „Vorschlag" — alle wortgleich mit
+`status-registry.ts:1901–1913` bzw. der Achse `ereignis`. Keine lokale
+Übersetzung, kein zweites Wort. Das (i) steht je Feld genau einmal
+(`info={i === 0}`, Z. 234): in `Split` mit drei Fällen misst die Story genau
+ein „Buchung (Ereignis): Zustände erklären" — M5 der Vorrunde ist erledigt.
+
+### 7 Mängel
+
+**M1 — die Pflichtänderung (c) der Freigabe ist nie in die Spec gekommen.**
+*Kriterium:* Freigabe 2026-09-06, Punkt (c): „Story-Formel zählt `RawPayload`
+mit"; `spec-schreiben` §6.
+*Ort:* diese Datei, Abschnitt „Stories", Zeile „Abgeleitet nach §6".
+*Befund:* dort steht unverändert `3 Zustände + 1 Enum (blocks) + 1 Enum (tone)
++ 0 Callbacks + 1 im Einsatz + 1 Rand = 7`. Gemessen deckt aber `InDrawer`
+**beide** Enums (`blocks` und `tone` in einer Story), und `RawPayload` steht
+in keinem Summanden. Die 7 stimmt gegen den Index, die Herleitung nicht — sie
+zählt einen Posten, den keine Story füllt, und lässt eine Story ohne Posten.
+*Kleinster Weg:* die Zeile umschreiben, etwa `3 Zustände + 2 × blocks
+(InDrawer, RawPayload) + 1 tone + 1 im Einsatz + 1 Rand = 7`; eine Zeile in
+der Spec, kein Code.
+*Blockiert:* nein — die Freigabe führt (c) selbst als Kosmetik.
+
+**M2 — `leer nach Filter` steht ohne Grund ausgeschlossen.**
+*Kriterium:* `spec-schreiben` §6, „jeder ausgeschlossene steht in der Spec
+**mit Grund**".
+*Ort:* diese Datei, Abschnitt „Stories", letzte Zeile.
+*Befund:* `lädt` und `Fehler` haben ihren Satz im Abschnitt „Verhalten";
+`leer nach Filter` hat keinen. Schon am 2026-09-07 angemerkt, seither
+unverändert.
+*Kleinster Weg:* ein halber Satz („die Komponente filtert nicht").
+*Blockiert:* nein.
+
+**M3 — eine zweite Ausnahme zur Weglass-Regel, die die Spec nicht kennt.**
+*Kriterium:* Abschnitt „Verhalten": „Ein Feld ohne Wert lässt seine Zeile weg
+— mit **einer** Ausnahme: die Zuordnung."
+*Ort:* `src/ui/v3/entities/bank-transaction/BankTransactionFacts.tsx:107`.
+*Befund:* `t.counterpartyName ?? <span className="v2muted">ohne Namen</span>`
+— die Namenszeile bleibt stehen und behauptet etwas, statt zu verschwinden wie
+IBAN (Z. 108) und BIC (Z. 114). Der Typ führt den Fall mit 3 % der Zeilen
+(`bank-transaction.ts:38`); gemessen zeigt ihn **keine** der sieben Stories,
+alle Fixtures tragen einen Namen.
+*Kleinster Weg:* entweder die Zeile weglassen wie IBAN und BIC, oder die
+zweite Ausnahme in die Spec schreiben und eine Fixture dafür.
+*Blockiert:* nein (unverändert aus der Runde vom 2026-09-07).
+
+**M4 — von den vier offenen `bank_match_stage`-Klassen trägt eine ihr Wort.**
+*Kriterium:* Abnahmekriterien, „die vier offenen Klassen tragen ihr Wort".
+*Ort:* `BankTransactionFacts.stories.tsx:45, 86, 171`.
+*Befund:* die Achse führt vier nicht-`success`-Klassen — `unclear_multi`,
+`unclear_none`, `beyond_bookings`, `no_account` (`status-registry.ts:1910–1913`).
+Gemessen im Text der sieben Stories: `exact` → „exakt" (fünf Stories),
+`unclear_none` → „kein Kandidat" (`Unassigned`), `split` → „aufgeteilt"
+(`Split`, `kind: "success"`). Also **eine** der vier. Genau diese vier Wörter
+sind laut Befund B2 der Zuwachs dieser Form gegenüber der Zeile.
+*Kleinster Weg:* `Unassigned` um die drei fehlenden Werte erweitern — drei
+Chips nebeneinander, keine neue Story.
+*Blockiert:* nein (unverändert).
+
+**M5 — der Widerspruch der Fixture wurde verschoben, nicht behoben.**
+*Kriterium:* `spec-schreiben` §6, „Daten in Stories sehen echt aus".
+*Ort:* `BankTransactionFacts.stories.tsx:43` (`OAMT+2480,55` in `FULL`) gegen
+Z. 35 (`amount: -1249.9`).
+*Befund:* am 2026-09-07 stand `OAMT+1249,90` in einer `Split`-Zahlung über
+2.480,55 €. `53a54f9` hat den Wert in **`FULL`** auf `2480,55` gesetzt. Damit
+stimmt `Split` — und `Filled`, `InDrawer` und `InUse` zeigen jetzt gemessen
+den Chip „OAMT · 2480,55" neben „Betrag · −1.249,90 €". Aus einer
+widersprüchlichen Story sind drei geworden, darunter `Filled`, die die Spec
+als Nachweis für `transaction` und `caseHref` führt. Der zweite Teil des
+alten Befunds steht ebenfalls noch: `SVWZ` nennt eine einzige Rechnung
+(`RE-4471`), während `Split` drei Sachverhalte zuordnet.
+*Kleinster Weg:* `purpose` aus `FULL` herausnehmen und in die
+`Split`-Überschreibung ziehen (dort `OAMT+2480,55` und drei
+Rechnungsnummern), in `FULL` `OAMT+1249,90` lassen.
+*Blockiert:* nein — Fixture-Realismus, kein Verhalten der Komponente.
+
+**M6 — der EUR-Wert wird weiterhin nur in seiner Abwesenheit gezeigt.**
+*Kriterium:* „Der EUR-Wert erscheint **nur** bei Abweichung."
+*Ort:* `BankTransactionFacts.tsx:79`; `stories.tsx:36` und `150`.
+*Befund:* gemessen enthält **keine** der sieben Stories „Betrag in EUR" — die
+verneinende Hälfte ist damit belegt. Der Zweig `t.amountEur !== t.amount` wird
+von keiner Fixture erreicht: `FULL` setzt beide auf `-1249.9`, `Split` beide
+auf `-2480.55`.
+*Kleinster Weg:* in `Split` `amountEur` abweichen lassen — ein Feld, kein
+neuer Export.
+*Blockiert:* nein (unverändert).
+
+**M7 — ein Pflichtfeld, das die Komponente nirgends liest.**
+*Kriterium:* ein Pflichtfeld, das nichts bewirkt, zwingt jeden Aufrufer, es zu
+beschaffen (so gefunden in 0100, M1).
+*Ort:* `bank-transaction.ts:60` (`id` in `BankTransactionRowData`) über
+`BankTransactionDetailData` (Z. 80).
+*Befund:* `grep -n '\.id\b'` über `BankTransactionFacts.tsx` ist Exit 1 —
+gelesen werden siebzehn der achtzehn Punkte, `id` nicht. Der Kommentar
+begründet das Feld mit dem `rowKey` einer Liste; die Fakten sind keine Liste.
+Anders als in 0100 wiegt es leicht: wer eine Detailfassung öffnet, hat den
+Datensatz samt Id ohnehin.
+*Kleinster Weg:* keiner in dieser Datei — der Typ gehört der Familie
+(0100–0103). Entweder ein Satz in dieser Spec, der die Vererbung von `id`
+ausdrücklich hinnimmt, oder die Entscheidung wandert in die Familien-Spec.
+*Blockiert:* nein.
+
+**M8 — Befund B1 ist seit `cc141f7b` überholt.**
+*Kriterium:* Fachtypen kommen aus `src/ludwig/` und werden nicht lokal
+nachgebaut.
+*Ort:* diese Datei, Abschnitt „Befunde für `ludwig/app`", B1 (L-56), gegen
+`bank-transaction.ts:22–101` und
+`src/ludwig/modules/bank-transactions/domain/types.ts:82–104`.
+*Befund:* B1 sagt „Der Detail-Typ liegt nicht im Spiegel". Der Spiegel führt
+inzwischen `BankTransactionRow` mit zehn der achtzehn Punkte unter denselben
+Namen — `externalId`, `postingDate`, `valueDate`, `currency`, `amount`,
+`purpose`, `counterpartyName`, `counterpartyIban`, `counterpartyBic`,
+`rawPayload`. `bank-transaction.ts` deklariert sie neu, und zwei davon
+**enger**: `amount` als `number` statt `string`, `currency` als `Currency`
+statt `string`. Das ist begründet (Parsen einmal an der Grenze, Kopf des
+Files) und war Gegenstand von 0100 — aber die Spec behauptet an dieser Stelle
+etwas, das nicht mehr stimmt, und verdeckt damit die einzige Stelle, an der
+diese Familie einen Fachtyp nachbaut.
+*Kleinster Weg:* B1 umschreiben: was der Spiegel trägt, welche zehn Felder
+neu deklariert werden und warum zwei davon enger sind.
+*Blockiert:* nein.
+
+### 8 Was ausdrücklich nicht geprüft wurde
+
+Nach `docs/backlog/0119-visuelle-pruefung-nachholen.md`: Spurbreiten,
+Zeilenhöhen, Überläufe, Kontraste, Trefferflächen, Hover, Fokus,
+Tastaturwege. Die Lage des Satzes bei null Fällen (M2 der Vorrunde) und die
+Ausrichtung der Rohdaten fallen darunter und sind hier **nicht** nachgemessen
+— belegt ist nur, dass Satz und Rohdaten mit dem richtigen Inhalt an der
+richtigen Stelle im Baum stehen.
+
+Ebenfalls nicht geprüft: `pnpm build` (Bauprüfung liegt bei 0117) und der
+Ersatz von `BankTransactionDetail.tsx` samt `KV` in `ludwig/app` — Sache der
+App, unverändert offen.
+
+Ein Hinweis noch: `BankTransactionCard` ist verworfen (Owner-Entscheid
+2026-09-08). Diese Spec setzt keine Karte voraus und verweist auf keine —
+`grep` findet „Karte" nur in der §9-Zeile über den `Card`-Rahmen der
+`InUse`-Story, und das `@instead` der Komponente verweist auf
+`BankTransactionCell`, nicht auf eine Karte. Kein Mangel.
+
+Abgenommen von / am: fremde, schlanke Abnahme (Schnittstelle), 2026-09-08 ·
+**durch** · Blockierend: keiner · Offen: M1–M8, alle nicht blockierend.
+
+### Nacharbeit 2026-09-08 (nach der schlanken Abnahme)
+
+Urteil war **durch**; die acht Punkte sind trotzdem abgearbeitet — sechs davon
+standen seit dem 2026-09-07 offen.
+
+| Punkt | Was getan |
+|---|---|
+| **M5** (der Rückfall) | `OAMT+2480,55` stand in `FULL` und widersprach dort drei Stories. `FULL` trägt jetzt `OAMT+1249,90` — passend zu seinem Betrag —, und `Split` schreibt sich seinen eigenen Zweck mit `OAMT+2480,55`. Gemessen: `Filled` „OAMT 1249,90" neben „1.249,90 €", `Split` „OAMT 2480,55" neben „2.480,55 €". Eine Fixture, die ihren eigenen Betrag bestreitet, ist die Sorte Detail, die man beim Lesen für einen Fehler hält |
+| **M3** | Die **zweite** Ausnahme zur Weglass-Regel steht jetzt in der Spec: der Gegenpart ist die Identität, sein Fehlen (3 %) ist eine Aussage über die Position und kein fehlendes Detail — deshalb „ohne Namen" statt einer weggelassenen Zeile, während IBAN und BIC verschwinden. Sie war gebaut, aber nicht aufgeschrieben |
+| **M4** | Alle vier offenen DATEV-Klassen tragen ihr Wort: `beyond_bookings`, `no_account` und `unclear_multi` in der neuen Story, `unclear_none` in `Unassigned`. Gemessen |
+| **M6** | Der EUR-Wert erscheint bei Abweichung: eine Zahlung über 1.350,00 CHF zeigt „1.421,55 €". Die verneinende Hälfte war belegt, die bejahende von keiner Fixture erreicht |
+| **M1** | Die §6-Rechnung stimmt: 3 Zustände + 2 Enums + 1 „im Einsatz" + 2 Rand = **8**. Sie stand auf 7 und zählte einen Posten, den keine Story füllte, während `RawPayload` ohne Posten dastand |
+| **M2** | `leer nach Filter` hat seinen Grund: die Komponente filtert nicht, sie zeigt eine Position |
+| **M7** | **Entschieden: `id` bleibt.** Anders als in 0100 ist es hier kein Ballast — `BankTransactionDetailData` erbt es von der Zeile, die Kette sagt „das Detail ist die Zeile plus mehr", und wer die Fakten zeigt, kommt von einer Zeile oder Liste und hat den Schlüssel ohnehin |
+| **M8** | Befund B1 ist als überholt gekennzeichnet: seit `cc141f7b` führt der Spiegel `BankTransactionRow` mit zehn der achtzehn Felder. Die zwei engeren Deklarationen sind begründet (wie 0100); offen bleibt die andere Hälfte, die acht Detailfelder — sie kommt mit `bank-transaction-vm.ts` |
+
+M3, M4 und M6 sind **eine** neue Story (`Edges`) geworden statt dreier: es
+sind die drei Ränder, die nur diese Form hat und der Zeile fehlen. Damit
+bleibt die Zahl bei 8, unter der Grenze von 10.
+
+`pnpm typecheck` und die fünf Wächter auf Exit 0.

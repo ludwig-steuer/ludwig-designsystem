@@ -40,7 +40,7 @@ const FULL: BankTransactionDetailData = {
   counterpartyBic: "COBADEFFXXX",
   purpose:
     "EREF+0600496348 KREF+DA-77120 MREF+D-VR-50411866-0-001 " +
-    "CRED+DE87ZZZ00000001701 PURP+SUPP OAMT+2480,55 ABWA+Musterbau GmbH & Co. KG " +
+    "CRED+DE87ZZZ00000001701 PURP+SUPP OAMT+1249,90 ABWA+Musterbau GmbH & Co. KG " +
     "SVWZ+Wartung Klimaanlage, Leistung 08/2026, Rechnung RE-4471",
   matchStage: "exact",
   cases: [CASE()],
@@ -148,6 +148,11 @@ export const Split: Story = {
           ...FULL,
           amount: -2480.55,
           amountEur: -2480.55,
+          // Der Originalbetrag gehört zum Betrag **dieser** Story. Er stand
+          // bis zum 2026-09-08 in `FULL` und widersprach dort drei Stories
+          // (Abnahme M5) — eine Fixture, die ihren eigenen Betrag bestreitet,
+          // ist die Sorte Detail, die man beim Lesen für einen Fehler hält.
+          purpose: FULL.purpose?.replace("OAMT+1249,90", "OAMT+2480,55") ?? null,
           cases: [
             CASE({ amount: 1200 }),
             CASE({
@@ -170,6 +175,56 @@ export const Split: Story = {
           openClarificationsCount: 2,
           matchStage: "split",
         }}
+        caseHref={caseHref}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Die drei Ränder, die nur diese Form zeigt — und die der Zeile fehlen:
+ *
+ * 1. **Ohne Namen.** Die Gegenpartei-Zeile bleibt stehen und sagt „ohne
+ *    Namen", statt zu verschwinden wie IBAN und BIC. Das ist die **zweite**
+ *    Ausnahme zur Weglass-Regel: der Gegenpart ist die Identität, sein Fehlen
+ *    ist eine Aussage über die Zeile, kein fehlendes Detail (3 % der Zeilen).
+ * 2. **Der EUR-Wert bei Abweichung.** Er erscheint nur, wenn er vom Betrag
+ *    abweicht — hier eine Zahlung in Franken. In den anderen Stories fehlt er,
+ *    und das ist die andere Hälfte desselben Nachweises.
+ * 3. **Die offenen DATEV-Klassen mit ihrem Wort.** Drei stehen hier —
+ *    `beyond_bookings` („außerhalb des Bestands": kein Befund, nur keine
+ *    Vergleichsgrundlage), `no_account` und `unclear_multi` —, die vierte
+ *    (`unclear_none`) in `Unassigned`. Diese vier Wörter sind der Zuwachs
+ *    dieser Form gegenüber der Zeile (Befund B2); in der Zeile sind sie
+ *    unsichtbar.
+ */
+export const Edges: Story = {
+  render: () => (
+    <div style={{ maxWidth: 720, display: "grid", gap: "var(--space-5)", padding: "var(--space-6)" }}>
+      <BankTransactionFacts
+        transaction={{
+          ...FULL,
+          counterpartyName: null,
+          currency: "CHF",
+          amount: -1350,
+          amountEur: -1421.55,
+          matchStage: "beyond_bookings",
+          cases: [],
+          allocatedSum: 0,
+        }}
+        caseHref={caseHref}
+      />
+      <BankTransactionFacts
+        transaction={{
+          ...FULL,
+          matchStage: "no_account",
+          cases: [],
+          allocatedSum: 0,
+        }}
+        caseHref={caseHref}
+      />
+      <BankTransactionFacts
+        transaction={{ ...FULL, matchStage: "unclear_multi", cases: [], allocatedSum: 0 }}
         caseHref={caseHref}
       />
     </div>
