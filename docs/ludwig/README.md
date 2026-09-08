@@ -33,3 +33,16 @@ dahin eine eigene Kopie, die schon gegabelt war.
 
 **Pfade darin zeigen auf die App**, nicht auf dieses Repo. Übersetzung:
 `apps/web/src/ui/v2` → `src/ui/v3` hier, `src/styles/v2.css` → `src/styles/v3.css`.
+
+## Beim nächsten Spiegellauf fällig
+
+Der Spiegel ist bis zur Migration **eingefroren** (Owner-Entscheid
+2026-09-07); die Marke steht in `src/ludwig/GESPIEGELT_AUS.json`. Drüben ist
+seither Folgendes entstanden, das hier noch fehlt — kein Eilfall, sondern die
+Liste für den Tag, an dem `pnpm sync:ludwig` wieder läuft:
+
+| Was | Warum es hier fehlt | Wer wartet darauf |
+|---|---|---|
+| `CaseFilter.disposition` als `CaseDisposition` | drüben mit `566693d5` erledigt (L-212), hier noch der alte Stand | 0083 kann seine Einengung fallen lassen |
+| Die zwei Mapper in `source-docs/domain/source-document-vm.ts` | neu drüben; ohne sie baut die Belegliste ihre Zellen weiter aus Rohfeldern | Seitenprofil `docs/seiten/belegliste.md`, „Vorbedingungen" |
+| `SourceDocumentDetail` als Union, `completedVia` als Achse | L-208 und L-215, drüben noch offen | 0074, 0076 — das Set führt die Union bis dahin selbst |
