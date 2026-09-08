@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **spec** |
+| Status | **Abnahme** |
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Buchungsweise, Personenkonto, Gegenkonto, BU-Schlüssel, Sollstellung |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Datenpunkte" (die Punkte mit änderbar = **Nutzer**), „Formen" (Zeile `RecurringRuleEditor`), „Zuschnitt" (Marke **jetzt**) · Owner-Entscheid vom 2026-09-08 zum Leerfall |
@@ -281,6 +281,67 @@ Variabel (aus dieser Spec):
 - [ ] `Strg`/`Cmd` + `Enter` speichert, `Esc` bricht ab; beide Tasten stehen sichtbar (Story `Interactive`)
 - [ ] `pending` sperrt jede Eingabe; `error` steht über der Aktionszeile und die Eingaben bleiben stehen (Stories `Pending`, `Error`)
 - [ ] Ersetzt `RuleEditorForm` **und** `MatchingNoteForm` ohne Funktionsverlust — die Notiz steht jetzt bei der Regel, zu der sie gehört — **offen (App)**
+
+## Gebaut 2026-09-08
+
+Gebaut von Claude (Skill `v3-komponente`), **nicht abgenommen**.
+
+**Dateien:** `src/ui/v3/entities/recurring-rule/RecurringRuleEditor.tsx`
+(dazu `RecurringRuleAccounts`) · `RecurringRuleEditor.stories.tsx` (9 Stories)
+· `RecurringRuleDraft` in `recurring-rule.ts` · Export über
+`src/ui/v3/index.ts`.
+
+**Grün:** `pnpm typecheck` und die fünf Wächter auf Exit 0.
+
+**Gemessen** mit `scripts/cdp.mjs` auf 6107, alle 9 Stories angesehen — keine
+Konsolen-Ausgabe, keine Ausnahme:
+
+| Was | Messung |
+|---|---|
+| Ohne `defaultValue` zwölf Felder, drei Abschnitte gefaltet | `New`: sichtbare Feld-Beschriftungen = Gegenpartei · IBAN · Richtung · Betrag · Toleranz · Toleranz in Prozent · Buchungsweise · Gegenkonto · Vorlagenbetrag · Buchungstext · Rhythmus · Erwarteter Zahltag = **12**; `details.open` = false, false, false |
+| Ein gefalteter Abschnitt mit Inhalt steht offen | `Edges`: alle drei offen (Weitere Kriterien, Buchung im Detail, Notiz) gegen `New`, wo alle drei zu sind; `Invalid`: nur „Weitere Kriterien" offen (dort steht der Regex) |
+| Drei Wahlmöglichkeiten mit den Beschreibungen der Achse | `Modes`: je drei `input[type=radio]`, Beschriftungen und Hinweise aus `resolveStatus("regel_modus", …)`; bei `match_only` steht „Nur Zuordnung — es entsteht kein Buchungsvorschlag." statt der Vorlagenfelder |
+| Personenkonto nur bei `accrue_then_settle` | `Modes`, drei Formulare nebeneinander gemessen: 13 Beschriftungen (mit Personenkonto) · 12 (ohne) · 9 (`match_only`) |
+| Sollstellung ohne Personenkonto blockiert, Grund neben dem Knopf | `Invalid`: `.v2actionbar__info` = „Für die Sollstellung braucht die Regel ein Personenkonto. · Das Muster ist kein gültiger regulärer Ausdruck." — **beide** Gründe, dazu je einer am Feld |
+| Regex geprüft mit dem Spiegel | `grep -n "new RegExp" RecurringRuleEditor.tsx` → 0 Treffer; `isValidRegex` importiert aus `src/ludwig/…/rule.ts` |
+| Regel ohne Kriterium: warnen, nicht blockieren | `New`: `.v2note` = „Diese Regel hat noch keine Match-Kriterien und greift daher bei keiner Zahlung.", `.v2actionbar__info` = null (nichts blockiert), Speichern-Knopf aktiv |
+| Der Editor formuliert nichts selbst | `grep -n "describeRecurringRule\|hasAnyCriterion\|MATCH_CRITERIA" RecurringRuleEditor.tsx` → 0 Treffer |
+| Der Editor rechnet keine Trefferzahl | `grep -n "matchTransaction" RecurringRuleEditor.tsx` → 0 Treffer |
+| Konten als Nummer im Entwurf | `Interactive`, Entwurf nach dem Speichern gelesen: `template.counterAccountNumber` und `personalAccountNumber` sind Strings, keine Id |
+| `template.lines` unverändert und nicht änderbar | `Edges`: `.v2rredit__split input, … select` = **0**; der Entwurf nach `onSubmit` trägt `template.lines` unverändert |
+| Kein `priority` im Entwurf | `Interactive`: ausgegebener Entwurf hat 17 Schlüssel, `"priority" in draft` = **false**; `grep -n "priority" RecurringRuleEditor.tsx` → 0 Treffer |
+| Rundlauf über die zwei Callbacks | `Interactive`: vor dem Tippen „Treffer noch nicht gezählt."; nach `Input.insertText("Musterfirma")` (Aktion und Messung in **getrennten** `Runtime.evaluate`-Aufrufen) steht „9 von 251 geprüften Zahlungen treffen." |
+| `Strg`/`Cmd` + `Enter` speichert, beide Tasten sichtbar | `Interactive`: `Input.dispatchKeyEvent` mit `modifiers: 2` → der Entwurf erscheint mit `matchCounterpartyName: "Musterfirma"`. Sichtbare `.v2kbd`: `Strg+Enter` und (mit `onCancel`) `Esc` |
+| `pending` sperrt jede Eingabe | `Pending`: 25 Bedienelemente, davon **0** ohne `:disabled`; Gegenprobe `Filled`: 23 von 23 bedienbar |
+| `error` über der Aktionszeile, Eingaben bleiben | `Error`: `.v2note--danger` liegt oberhalb von `.v2actionbar` (Unterkante ≤ Oberkante), Feldwerte unverändert |
+| Vorschau als `RecurringRuleFacts` | `InUse`: `.v2rredit__preview .v2rrfacts` = 1, rechts neben dem Formular (Formular endet bei 674 px, Vorschau beginnt bei 698 px) |
+
+**Entscheidungen, die die Spec offen ließ:**
+
+1. **Der Modus einer neuen Regel ist `book_on_payment`.** Nicht gewählt,
+   sondern abgeleitet: `deriveRuleProfile()` hebt den Modus nur, wenn ein
+   Personenkonto dasteht — ein leerer Entwurf hat keines.
+2. **Ein Entwurf, der von außen kommt, gilt als geprüft.** `touched` startet
+   auf `defaultValue !== undefined`. Begründung: die Mängel einer geladenen
+   Regel sind Tatsachen, keine ungetippte Eingabe; ein leeres Formular bleibt
+   still, bis jemand speichert.
+3. **Die Aktionszeile nennt alle blockierenden Gründe**, nicht nur den ersten
+   (`Invalid` zeigt zwei). Zwei Dinge können zugleich blockieren, und eine
+   Leiste, die eines davon nennt, schickt jemanden ein zweites Mal zurück.
+4. **Richtung als `Select` mit „beide Richtungen"** statt eines dritten
+   Radios: ohne `expectedDirection` prüft `matchTransaction()` die Richtung
+   nicht — das ist eine Wahl, kein fehlender Wert.
+5. **Der Zahltag hat kein `null`-Wort**, er ist leer oder eine Zahl: die
+   Erwartung ohne Zahltag ist der Rhythmus allein, und den zeigt das Feld
+   darüber.
+
+**Neuer Befund im Set (Kandidat):** **`AccountField` hat kein `disabled`.**
+Beim ersten Messen blieben unter `pending` genau die zwei Kontofelder
+bedienbar (2 von 23). Der Editor umschließt sie deshalb mit einem nativen
+`fieldset[disabled]` (`Lock`, Klasse `.v2rredit__lock`) — das sperrt jedes
+Feld darin, gemessen 0 von 25 bedienbar. Sauber wäre eine `disabled`-Prop an
+`AccountField`; das ist eine Änderung an einem fremden Baustein und gehört in
+eine eigene Aufgabe.
 
 ## Abnahme
 

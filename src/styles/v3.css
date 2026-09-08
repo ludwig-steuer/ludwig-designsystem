@@ -3757,3 +3757,101 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
    24 × 24, also die Marke ohne ihr Polster (Wiederabnahme 0113, M7). */
 .bse__kontocell > .v2ibtn { flex: 0 0 auto; }
 .bse__kontoname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Wiederkehr-Regel (0132–0135) ─────────────────────────────────────────
+   Die vier Formen der Familie: Zeile, Liste, Fakten, Editor. Eigener
+   Abschnitt am Ende, nicht einsortiert — hier arbeiten mehrere Sitzungen im
+   selben Baum, und ein Block am Stück ist der einzige Ort ohne Konflikt.
+   Präfix `v2rr`: `v2r*` war vergeben (v2radio, v2raw, v2rowlink), `v2rr` frei.
+   ------------------------------------------------------------------------- */
+
+/* --- Die Zeile (0132) ---------------------------------------------------- */
+
+/* „ohne Kriterium" ist eine **Aussage**, kein fehlender Wert: eine Regel ohne
+   Kriterium ist nicht leer, sondern wirkungslos. Sie bekommt deshalb dieselbe
+   Pille wie „offen" in `CaseCell` — ein Gedankenstrich hieße „unbekannt", und
+   das wäre falsch. */
+.v2rrrow__none {
+  display: inline-block; padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-soft); color: var(--color-text-muted);
+  font-size: var(--fs-ui-xs);
+}
+/* Der Sachverhalt ohne Weg: Nummer und Titel nebeneinander, der Titel gibt
+   nach. `min-width: 0` am Flex-Kind, sonst schneidet die Spur ab, statt den
+   Text zu kürzen (Owner-Regel 2026-09-07). */
+.v2rrrow__case { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+.v2rrrow__caseno {
+  font-family: var(--font-mono); font-size: var(--fs-ui-xs);
+  color: var(--color-text-muted); white-space: nowrap;
+}
+/* Datum und Betrag der letzten Zahlung stehen nebeneinander — zwei Angaben,
+   eine Antwort. */
+.v2rrrow__last { display: flex; align-items: baseline; gap: var(--space-2); }
+
+/* --- Die Fakten (0134) --------------------------------------------------- */
+
+/* Die Form steht **frei**: Karte und Reiter setzt, wer sie einsetzt. Hier nur
+   der Abstand zwischen den Gruppen, kein Rahmen, kein Innenabstand. */
+.v2rrfacts { display: flex; flex-direction: column; gap: var(--space-5); }
+.v2rrfacts__head { display: flex; flex-direction: column; gap: var(--space-3); }
+/* Der Klartext-Satz der Domäne — er trägt den Kopf und ist der einzige Ort,
+   an dem „greift bei keiner Zahlung" überhaupt steht. */
+.v2rrfacts__summary { margin: 0; font-size: var(--fs-ui-md); line-height: var(--lh-ui-md); }
+.v2rrfacts__state { display: flex; align-items: center; gap: var(--space-3); }
+/* Die Gültigkeit ist ein **Wort ohne Farbe**, solange `is_active` keine
+   Registry-Achse hat (L-241): kein Ton, kein Punkt, keine Pille. R1 lässt
+   Farbe nur über eine Achse zu. */
+.v2rrfacts__validity { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v2rrfacts__group { display: flex; flex-direction: column; gap: var(--space-3); }
+/* Der Rhythmus-Satz steht über den Paaren und ist Fließtext, kein Wertfeld —
+   deshalb linksbündig und nicht in der rechten Spalte der Feldliste. */
+.v2rrfacts__sentence { margin: 0; font-size: var(--fs-ui); color: var(--color-text); }
+.v2rrfacts__aside { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+/* Betrag und geltende Toleranz sind **eine** Angabe, keine zwei Spalten. */
+.v2rrfacts__amount { display: inline-flex; align-items: baseline; gap: 2px; }
+.v2rrfacts__term { white-space: nowrap; }
+
+/* --- Der Editor (0135) --------------------------------------------------- */
+
+.v2rredit { display: flex; flex-direction: column; gap: var(--space-4); }
+/* Formular links, Vorschau rechts. Ohne `renderPreview` gibt es die zweite
+   Spalte gar nicht, dann trägt das Grid nur eine. */
+.v2rredit__cols { display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: flex-start; }
+.v2rredit__form { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: var(--space-5); }
+.v2rredit__preview { flex: 1 1 320px; min-width: 0; }
+.v2rredit__sec { display: flex; flex-direction: column; gap: var(--space-3); }
+/* Die Abschnittsüberschrift ist eine Beschriftung über Feldern — dieselbe
+   Stufe wie ein Spaltenkopf (0089), nicht die eines Kartentitels. */
+.v2rredit__sech {
+  margin: 0; font-size: var(--fs-ui-sm); font-weight: 700;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: 8px;
+}
+.v2rredit__hint { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-subtle); }
+.v2rredit__foot {
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: var(--space-3);
+}
+/* Die Trefferzahl ist die Kontrolle „passt die Regel so?" — sie steht bei den
+   Kriterien, nicht im Knopf, und ohne Farbe: sie ist eine Auskunft. */
+.v2rredit__hits { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+/* Die Split-Vorlage ist hier nur lesbar; sie wird beim Speichern unverändert
+   durchgereicht, weil sie über keine Oberfläche änderbar ist. */
+.v2rredit__split {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.v2rredit__splith { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v2rredit__splitrow {
+  display: grid; grid-template-columns: 80px minmax(0, 1fr) 110px;
+  gap: var(--space-2); font-size: var(--fs-ui-sm); align-items: baseline;
+}
+/* `AccountField` bringt kein `disabled` mit; ein `fieldset[disabled]` sperrt
+   nativ jedes Feld darin. Die Klasse nimmt dem Element Rahmen und Polster
+   wieder ab — gemessen blieben sonst zwei von 23 Eingaben beim Speichern
+   bedienbar. */
+.v2rredit__lock { border: 0; margin: 0; padding: 0; min-width: 0; }

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **spec** |
+| Status | **Abnahme** |
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Buchungsweise (Sollstellung ⇄ Bei Zahlung), Personenkonto und Dauersachverhalt sind Ludwig-Fachbegriffe |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Datenpunkte" (Ränge 1–7), „Relationen", „Formen" (Zeile `RecurringRuleRow`), „Zuschnitt" (Marke **jetzt**) |
@@ -253,6 +253,64 @@ Variabel (aus dieser Spec):
 - [ ] `lastPayment: null` zeigt „noch keine", die fehlende Prop zeigt gar keine Spalte (Story `Edges` gegen `InUse`)
 - [ ] Die Zeile kennt kein `priority` (grep) — Owner-Entscheid; sichtbar wird die Rangfolge erst mit L-245
 - [ ] Ersetzt die Zeile in `ErwarteteZahlungen` (`Schritt5.tsx`) ohne Funktionsverlust und zeigt zusätzlich Buchungsweise und Gültigkeit — **offen (App)**, die Ablösung ist ein eigener Schritt
+
+## Gebaut 2026-09-08
+
+Gebaut von Claude (Skill `v3-komponente`), **nicht abgenommen** — die Abnahme
+gehört einem anderen Agenten.
+
+**Dateien:** `src/ui/v3/entities/recurring-rule/RecurringRuleRow.tsx`
+(Zeile, `recurringRuleTracks()`, `RecurringRuleColumn`,
+`RECURRING_RULE_COLUMN_LABEL`) · `recurring-rule.ts` (Wörterbuch der Familie:
+`RecurringRuleLabels`, `ruleLabel()`, `RecurringRuleDraft`) ·
+`RecurringRuleRow.stories.tsx` (7 Stories) · `fixtures.ts` ·
+CSS als eigener Abschnitt am Ende von `src/styles/v3.css`, Präfix `v2rr`
+(vorher gegriffen: `v2r*` war mit `v2radio`, `v2raw`, `v2rowlink` belegt,
+`v2rr` frei) · Export über `src/ui/v3/index.ts`.
+
+**Grün:** `pnpm typecheck` und die fünf Wächter (`check:language`,
+`check:icons`, `check:contrast`, `check:mirror`, `check:when`) auf Exit 0.
+
+**Gemessen** mit `scripts/cdp.mjs` gegen den Dev-Server auf 6107, ein Browser
+für alle Messungen, alle 7 Stories angesehen — keine Konsolen-Ausgabe, keine
+Ausnahme in keiner Story:
+
+| Was | Messung |
+|---|---|
+| Rang 1 ist abgeleitet | `Filled` führende Zelle „Musterfirma Immobilien GmbH", `LearnedFromPayment` Zeile 2 „DE02 1203 0000 0000 2020 51" — dieselbe Zelle |
+| „ohne Kriterium" statt „—" | `WithoutCriterion` führende Zelle = `ohne Kriterium` (Text am Knoten gelesen) |
+| Buchungsweise aus der Registry | `Modes` Zellentext + Klasse: `Sollstellung`/`bdg bdg-info` · `Bei Zahlung`/`bdg bdg-success` · `Nur zuordnen`/`bdg bdg-neutral` — alle drei Werte |
+| Gültigkeit ohne Farbe | `Modes` Zelle 3: `aktiv`/`inaktiv`, `.bdg` = null, `.dot` = false |
+| Rhythmus deutsch | `Words`: `monatlich`, `vierteljährlich`, `jährlich`, `ohne Rhythmus` — `monthly` steht in keiner Story |
+| Wert ohne Wort steht roh | `Words` Zeile 5, Richtung = `payment_out` (labels ohne diesen Eintrag) |
+| Keine Ableitung in der Zeile | `grep -n "template\.\|matchAmount\|Tolerance" RecurringRuleRow.tsx` → 0 Treffer |
+| Kein `href` auf `Row` | `InUse`: `tr > td > a.v2rowlink` = 0, `a.v2case__link` = 4 |
+| `columns` bestimmt Zahl und Reihenfolge | `InUse`: Kopf 8 Zellen, jede Zeile 8 Zellen, `recurringRuleTracks` liefert 8 Spuren; Kopf- und Zeilenkanten decken sich bei 700/1100/1280/1400/1920 px (identische x-Werte) |
+| „noch keine" gegen fehlende Spalte | `InUse` Zeile 3 = `noch keine`, `Filled` hat die Spalte gar nicht |
+| Kein `priority` | `grep -n "priority" RecurringRuleRow.tsx` → 0 Treffer |
+| Eine Zeilenhöhe (V1) | 46–47 px in jeder Story, auch bei 46 Zeichen Gegenpartei (`Edges`: `scrollWidth` 323 gegen `clientWidth` 250, gekürzt mit `title`) |
+
+**Entscheidungen, die die Spec offen ließ:**
+
+1. **Richtung `null`** heißt „ohne Richtung", nicht „—". Die Spec regelt nur
+   den Fall „`labels` hat kein Wort" (dann roh); `expectedDirection = null`
+   ist aber eine Aussage — die Regel nimmt beide Richtungen (`matchTransaction`
+   prüft die Richtung dann nicht). Gleiche Bauform wie „ohne Rhythmus".
+2. **Ohne `caseHref`** rendert die Zelle Nummer und Titel als **Text** statt
+   `CaseCell` mit einer leeren URL: die Spec sagt „ohne ihn steht der Name ohne
+   Weg", und `CaseCell` verlangt ein `href`. Ein Link auf `""` wäre ein Knopf,
+   der nichts tut (I11).
+3. **Spaltenüberschriften** stehen als `RECURRING_RULE_COLUMN_LABEL` neben der
+   Zeile, damit Kopf und Zelle aus einer Quelle kommen. Das ist keine
+   Label-Map im Sinne von R1 (kein Status, keine Achse), sondern die
+   Beschriftung der Spur — dieselbe Bauform wie `header` in
+   `bankTransactionColumns`.
+
+**Befund am Rande:** `matchTransaction()` behandelt eine Regel ohne
+`expectedDirection` als „beide Richtungen"; ein Wort dafür gibt es im
+Domänen-Code nicht (`describeRecurringRule()` schreibt „passenden Umsatz").
+Die Zeile setzt „ohne Richtung" — gehört zu **L-256**, wenn der dort fällige
+Wortsatz entsteht.
 
 ## Abnahme
 

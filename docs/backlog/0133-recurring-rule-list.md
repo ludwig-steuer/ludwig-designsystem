@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **spec** |
+| Status | **Abnahme** |
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Dauerzahlung, Buchungsweise, Sachverhalt |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Listen" (erste Zeile), „Formen" (Zeile `RecurringRuleList`), „Zuschnitt" (Marke **jetzt**) |
@@ -192,6 +192,39 @@ Variabel (aus dieser Spec):
 - [ ] `lastPayment: null` zeigt „noch keine" (Story `Edges`)
 - [ ] 29 Zeilen rendern ohne Seitenumbruch und ohne horizontales Quetschen bei 1280 px (Story `Edges`, gemessen)
 - [ ] Ersetzt `ErwarteteZahlungen` in `Schritt5.tsx` ohne Funktionsverlust und zeigt zusätzlich Buchungsweise und den Leerfall — **offen (App)**
+
+## Gebaut 2026-09-08
+
+Gebaut von Claude (Skill `v3-komponente`), **nicht abgenommen**.
+
+**Dateien:** `src/ui/v3/entities/recurring-rule/RecurringRuleList.tsx` ·
+`RecurringRuleList.stories.tsx` (4 Stories) · Export über `src/ui/v3/index.ts`.
+
+**Grün:** `pnpm typecheck` und die fünf Wächter auf Exit 0.
+
+**Gemessen** mit `scripts/cdp.mjs` auf 6107, alle 4 Stories angesehen — keine
+Konsolen-Ausgabe, keine Ausnahme:
+
+| Was | Messung |
+|---|---|
+| Leerfall: Karte bleibt, Erfolgssatz | `Empty`: `.v2card` vorhanden, Spaltenkopf steht, `.v2empty__title` = „Alle erwarteten Dauerzahlungen sind im Zeitraum eingegangen.", `.v2empty__actions` = 0 (kein Ausweg-Knopf) |
+| Sachverhalt ist die erste Zelle | `Filled`: Kopf = Sachverhalt · Gegenpartei · Buchungsweise · Erwartet · Rhythmus · Richtung · Letzte Zahlung; Zelle 1 je Zeile = `2026-0413 …`, Weg über `caseHref` |
+| Buchungsweise in jeder Zeile | `Filled`: drei `.bdg` — Sollstellung, Bei Zahlung, Sollstellung |
+| Nie `monthly` auf dem Bildschirm | `Filled` und `Edges`: Volltext-Suche nach `monthly\|quarterly\|yearly\|payment_*` = 0 Treffer |
+| Kein Filter, keine Auswahl, keine Sortierung | `Filled`: `input[type=checkbox]` = 0, `.v2fbar/.v2chips/.v2selbar` = 0, `.v2sortlink` = 0 |
+| Kopf mit Zeitraum und Zähler | `Filled`: `sub` = „August 2026", `meta` = „3 von 27 Regeln"; `InUse` ohne `total` = „3 Regeln" |
+| `lastPayment: null` | `Filled` Zeile 3 und `Edges` Zeile 1: „noch keine" |
+| 29 Zeilen ohne Quetschen bei 1280 px | `Edges`: 29 Zeilen; bei 1280 px kein Seiten- und kein innerer Scroll (Tabelle 1246 px), Zeilenhöhe 47 px in allen 29 Zeilen. Bei 700 und 1100 px scrollt der innere Rahmen (`.v2tbl__scroll`), statt zu quetschen — Kopf- und Zeilenkanten decken sich bei allen fünf Breiten (700/1100/1280/1400/1920) |
+
+**Entscheidung, die die Spec offen ließ — und die einzige Abweichung von ihrer
+Schnittstelle:** `rules` ist getippt als
+`readonly (Omit<RecurringRuleRowProps, "labels" | "caseHref" | "columns"> & { id: string })[]`
+(exportiert als `RecurringRuleListItem`), nicht als
+`readonly (RecurringRuleRowProps & { id: string })[]`. Grund: die Spec führt
+`labels` und `caseHref` als **Props der Liste**, „an jede Zeile
+durchgereicht". Verlangte der Zeilentyp sie zusätzlich je Zeile, wären die
+beiden Listen-Props unerreichbar und jede der 29 Zeilen trüge dasselbe Objekt
+noch einmal. Der Rest der Schnittstelle steht wie in der Spec.
 
 ## Abnahme
 

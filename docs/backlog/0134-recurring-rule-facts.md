@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **spec** |
+| Status | **Abnahme** |
 | Stufe | `entities/recurring-rule/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein**: Sollstellung, Personenkonto, Belegfeld 1, DATEV-Steuerschlüssel |
 | Quelle | Entitätsprofil `docs/entitaeten/recurring-rule.md` (Status **geprüft**, 2026-09-08), Abschnitte „Datenpunkte" (Ränge 1–28), „Relationen", „Formen" (Zeile `RecurringRuleFacts`), „Zuschnitt" (Marke **jetzt**) |
@@ -257,6 +257,63 @@ Variabel (aus dieser Spec):
 - [ ] Ein Wert, für den `labels` kein Wort hat, erscheint roh (Story `All`)
 - [ ] Die Form hat keinen eigenen Rahmen und keinen eigenen Innenabstand (Story `InUse`, bei 1280 px und 1600 px gemessen)
 - [ ] Ersetzt die vier Abschnitte des `RegelwerkTab` **und** die Kriterien-Tabelle des `ZuordnungTab` ohne Funktionsverlust — und zeigt zusätzlich Belegnummer (Rang 8), Buchungstext (16) und die Belegseite (18) — **offen (App)**
+
+## Gebaut 2026-09-08
+
+Gebaut von Claude (Skill `v3-komponente`), **nicht abgenommen**.
+
+**Dateien:** `src/ui/v3/entities/recurring-rule/RecurringRuleFacts.tsx`
+(dazu `RecurringRulePreview` als Prop-Typ) · `RecurringRuleFacts.stories.tsx`
+(6 Stories) · Export über `src/ui/v3/index.ts`.
+
+**Grün:** `pnpm typecheck` und die fünf Wächter auf Exit 0.
+
+**Gemessen** mit `scripts/cdp.mjs` auf 6107, alle 6 Stories angesehen — keine
+Konsolen-Ausgabe, keine Ausnahme:
+
+| Was | Messung |
+|---|---|
+| Feld ohne Wert fehlt, Gruppe ohne Feld fehlt | `WithoutCriterion`: Gruppen = Wirkung · Erwartung (**„Auslöser" abwesend**), 7 Zeilen. `Edges`: Gruppen = Auslöser · Wirkung · Herkunft (**„Erwartung" abwesend**, `schedule: null`). `Filled`: 3 Gruppen, 11 Zeilen |
+| Satz kommt aus `summary` | `WithoutCriterion` Kopf = „Diese Regel hat noch keine Match-Kriterien und greift daher bei keiner Zahlung."; `grep -n "hasAnyCriterion\|describeRecurringRule\|MATCH_CRITERIA" RecurringRuleFacts.tsx` → 0 Treffer |
+| `automatic === false` | `Modes` Spalte 3 (`match_only`): `.v2je` = 0, `.v2je__empty` = 0, stattdessen die Zeile „Buchungsvorschlag § Nur Zuordnung — kein automatischer Buchungsvorschlag." |
+| Vorschau ist `JournalEntryCard` | `Filled`: genau eine `.v2je`, dazu die Nebenzeile „Zahlung später: 10001 Musterfirma Immobilien GmbH ⇄ Bank (aus Zahlung)" |
+| Kein Zerlegen von Beschriftungen | `grep -n "\.split(" RecurringRuleFacts.tsx` → 0 Treffer |
+| Betrag und Toleranz aus der Ableitung | `Filled`: „Betrag § 1.800,00 € § ± 0,00 €"; `Edges` mit 5 % Prozent-Toleranz auf 1.800 → „± 90,00 €" (die großzügigere gewinnt, gerechnet von `effectiveAmountTolerance`). `grep -n "template\.amount" RecurringRuleFacts.tsx` → 0 Treffer |
+| Konten als Nummer | `Filled`: „Gegenkonto § 4210", „Personenkonto § 10001" — `AccountCell`, keine Kontozeile, keine Id |
+| Gültigkeit ohne Farbe | `Filled`: `<span class="v2rrfacts__validity">aktiv</span>` — keine `.bdg`, kein `tone`, kein Punkt |
+| Wert ohne Wort steht roh | `All`: „Belegnummern-Strategie § fixed" (labels ohne diesen Eintrag) |
+| Kein eigener Rahmen, kein Innenabstand | `InUse` bei 1400 px: `padding` = 0px, Rahmenbreite 0, Hintergrund transparent; die Form füllt 858 von 898 px, die 20 px links kommen aus der Karte der Story. Bei 1280 px und 1600 px gleich |
+| Belegnummer der Dauerbuchung (Rang 8) | `Filled`: „Belegnummer der Dauerbuchung § 20260016" — sie steht in keiner Komponente der App |
+| Belegseite (Rang 18) | `Edges`: „Vertragsnummer § V-2019-4471", „Muster im Belegtext § Musterfirma.*Miete", „Belegseite § Die Regel bindet auch den Beleg an den Sachverhalt." |
+| Split-Vorlage | `Edges`: `.v2je__row` = 6 (Kopf + 4 Buchungszeilen + Summe), also drei Gegenkonto-Zeilen plus Bank |
+
+**Entscheidungen, die die Spec offen ließ:**
+
+1. **Die IBAN-Zeile (Rang 19) erscheint nur, wenn auch ein Name da ist.**
+   Fehlt der Name, **ist** die IBAN schon die Zeile „Gegenpartei" (Rang 1 ist
+   abgeleitet, P1) — sie ein zweites Mal zu zeigen behauptete zwei Kriterien,
+   wo eines steht.
+2. **`matchesDocuments` bekommt nur bei `true` eine Zeile** („Die Regel bindet
+   auch den Beleg an den Sachverhalt."). Ein `false` ist kein Wert, sondern
+   sein Fehlen — dieselbe Regel wie für jedes andere Feld. So bleibt der Fall
+   von **L-249** sichtbar: 29 von 30 Regeln tragen die Zeile, ohne ein
+   einziges Beleg-Kriterium darunter.
+3. **Die Gruppe „Herkunft" zeigt Rang 27 und 28 nicht.** Nicht aus
+   Zurückhaltung: der **gespiegelte Typ trägt sie nicht**. `RecurringRule` in
+   `src/ludwig/modules/recurring-rules/domain/rule.ts` hat weder `agentRunId`
+   noch `exportBatchId` noch `datevDocumentLinkSystem`/`…Guid`. Drei Felder zu
+   erfinden, um eine Gruppe zu füllen, wäre die lokale Neudefinition, die §5
+   verbietet — **neuer Befund**, siehe unten.
+4. **Der Klartext-Satz steht im Kopf, nicht in einer Gruppe**, weil er die
+   Ränge 1, 2, 4, 7, 17 und 19 zusammenfasst und damit über allen Gruppen
+   steht, nicht in einer.
+
+**Neuer Befund für `ludwig/app` (Kandidat):** der gespiegelte `RecurringRule`
+kennt **`agentRunId`, `exportBatchId` und die beiden `datevDocumentLink*`
+nicht**, obwohl das Profil sie als Ränge 27 und 28 führt und die Spec sie in
+„Herkunft" vorsieht. Entweder gehören sie in den Domänen-Typ, oder Rang 27/28
+gehören aus dem Profil — heute kann keine Form sie zeigen, ohne einen Typ zu
+erfinden.
 
 ## Abnahme
 

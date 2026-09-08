@@ -432,6 +432,32 @@ export {
 export { BankTransactionList } from "./entities/bank-transaction/BankTransactionList";
 export { BankTransactionWorklist } from "./entities/bank-transaction/BankTransactionWorklist";
 
+/* Wiederkehr-Regel — Zeile, Liste, Fakten, Editor (0132–0135) */
+export {
+  RecurringRuleRow,
+  recurringRuleTracks,
+  RECURRING_RULE_COLUMN_LABEL,
+  type RecurringRuleColumn,
+  type RecurringRuleRowProps,
+} from "./entities/recurring-rule/RecurringRuleRow";
+export {
+  RecurringRuleList,
+  type RecurringRuleListItem,
+} from "./entities/recurring-rule/RecurringRuleList";
+export {
+  RecurringRuleFacts,
+  type RecurringRulePreview,
+} from "./entities/recurring-rule/RecurringRuleFacts";
+export {
+  RecurringRuleEditor,
+  type RecurringRuleAccounts,
+} from "./entities/recurring-rule/RecurringRuleEditor";
+export {
+  ruleLabel,
+  type RecurringRuleLabels,
+  type RecurringRuleDraft,
+} from "./entities/recurring-rule/recurring-rule";
+
 /* Konto — die Seite (0063) und der Kontenplan als Spaltensatz (0062) */
 export { LedgerAccountView } from "./entities/account/LedgerAccountView";
 export {

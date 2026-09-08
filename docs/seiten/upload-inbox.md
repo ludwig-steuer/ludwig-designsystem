@@ -3,16 +3,21 @@
 | | |
 |---|---|
 | Status | Entwurf |
-| Route | `ludwig/app`: `app/(app)/clients/[clientSlug]/document-inbox/page.tsx` — **gelöscht 2026-09-05**, wird neu gebaut |
+| Route | `ludwig/app`: `app/(app)/clients/[clientSlug]/document-inbox/page.tsx` — am 2026-09-05 gelöscht, **seit 2026-09-08 wieder gebaut** und nach diesem Profil in Betrieb |
 | Heute gebaut in | nichts. Das Modul lebt: `modules/document-inbox/` — `ui/DocumentInbox.tsx` (Vorlage, nicht Vorbild), `ui/ClassificationEditor.tsx`, `application/*`, `server.ts` |
 | Entitäten | Beleg (`source-document`) · Klassifikation |
 | Baustein in v3 | noch keiner |
 | Fachliche Quelle | `ludwig/app`: `docs/topics/belege.md`, `docs/backlog/seitenrueckbau-2026-09.md` |
 | Profil von / am | Claude, 2026-09-06 · aus dem Rückbau-Dokument und dem erhaltenen Modul |
 
-Diese Seite ist der einzige Ort, an dem heute **gar nichts** steht: sie wurde
-mit dem Seiten-Rückbau gelöscht, weil sie neu gebaut wird. Das Profil ist
-deshalb kein Abgleich mit einem Screen, sondern die Vorgabe für den Neubau.
+Dieses Profil war die **Vorgabe für einen Neubau**: die Seite wurde mit dem
+Rückbau vom 2026-09-05 gelöscht, weil sie neu entstehen sollte. Sie ist am
+2026-09-08 nach diesem Profil gebaut worden und läuft — die Zeilen unten
+beschreiben also wieder einen Screen, nicht mehr eine Absicht.
+
+*(Der Satz „hier steht heute gar nichts" blieb drei Tage länger stehen als er
+stimmte und hat sich weitergetragen: das Jobs-Register hat daraus fünf Jobs
+als unbedient geführt, die längst einen Ort haben — berichtigt 2026-09-08.)*
 
 ## Job
 
