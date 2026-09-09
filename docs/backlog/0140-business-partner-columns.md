@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Arbeit** — freigegeben 2026-09-09 (Owner) |
+| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Kreditor, Debitor, Reifegrad, Verrechnungskonto |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (`geprüft`, 2026-09-09), Abschnitte „Listen" und „Formen" |
@@ -156,6 +156,32 @@ Variabel (aus dieser Spec):
 - [ ] Keine lokale Map für das USt-Profil (`grep -n "domestic_" .` → 0 Treffer)
 - [ ] Ersetzt die rohe `<table>` in `partners/page.tsx` samt `AccountCell` und
       `ClearingCell` ohne Funktionsverlust
+
+## Gebaut 2026-09-09
+
+`business-partner-columns.tsx` neben `BusinessPartner.tsx` — acht Spalten,
+sechs Exporte plus die zwei Helfer, fünf Stories. Rang 1 geht durch
+`BusinessPartnerCell` (0139), nicht durch eine zweite Namensausgabe.
+
+**Gemessen** (`scripts/cdp.mjs`, 1500 px):
+
+| Was | Gemessen |
+|---|---|
+| Kopfzeile | acht Wörter in der Rangordnung des Profils: Geschäftspartner · Kreditorkonto · Debitorkonto · Verrechnung · Reifegrad · Buchungen · Letzte Buchung · Ort |
+| **`columns` ordnet nicht um** | `Narrow` übergibt absichtlich verdreht (`bookings`, `partner`, `creditorAccount`) und rendert Geschäftspartner · Kreditorkonto · Buchungen — die Ordnung des Profils |
+| Leere Kontospalte | wirklich **leer** (`""`), kein Gedankenstrich. Der Abrechner zeigt in beiden Kontospalten nichts und in der Verrechnung `1360 · 1361` — so sagen die drei Spalten die Rolle ohne ein Wort |
+| `usageBookingCount: 0` | steht als **`0`**, nicht als Strich |
+| Reifegrad | „Bestätigt" · „Vorgeschlagen" · „Entwurf" aus der Registry-Achse `partner`, keine lokale Map |
+| Zeilenhöhe | 46–47 px durchgehend — keine Zeile bricht um |
+
+**Zwei Dinge sind beim Bauen weggefallen**, die aus dem Muster
+`account-columns.tsx` mitkopiert waren: die Sets `NUMERIC` und `SORTABLE`.
+Sie waren hier tot — `align` und `sortable` stehen direkt an den
+Spaltendefinitionen, wo man sie beim Lesen sucht, und ein Set daneben wäre eine
+zweite Stelle für dieselbe Auskunft.
+
+**Und eine Korrektur an der Prop:** `StatusBadge` heißt `status`, nicht
+`value`. Die Spec sagte nichts dazu, der Typcheck schon.
 
 ## Abnahme
 

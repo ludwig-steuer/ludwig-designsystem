@@ -463,8 +463,18 @@ export {
   type RecurringRuleAccounts,
 } from "./entities/recurring-rule/RecurringRuleEditor";
 
-/* Geschäftspartner — Zelle (0139) */
+/* Geschäftspartner — Zelle (0139), Spaltensatz (0140) */
 export { BusinessPartnerCell } from "./entities/business-partner/BusinessPartner";
+export {
+  businessPartnerColumns,
+  businessPartnerColumnOrder,
+  businessPartnerTracks,
+  PARTNER_LIST_COLUMNS,
+  PARTNER_COLUMN_LABEL,
+  type BusinessPartnerColumn,
+  type BusinessPartnerColumnOptions,
+  type BusinessPartnerRowData,
+} from "./entities/business-partner/business-partner-columns";
 
 /* Konto — die Seite (0063) und der Kontenplan als Spaltensatz (0062) */
 export { LedgerAccountView } from "./entities/account/LedgerAccountView";
