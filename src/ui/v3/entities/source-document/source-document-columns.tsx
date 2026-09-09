@@ -87,9 +87,9 @@ export const DOCUMENT_LIST_COLUMNS: SourceDocumentColumn[] = [
   // in the majority of them it is a GUID file name — „40B503E7-AFD0-64… .pdf",
   // nothing anybody reads. Where a real invoice number stands, it is not the
   // question *this* list answers: „is there anything left to do with this
-  // document", not „what is it called". It stays in the catalogue, and
-  // `STUCK_COLUMNS` keeps showing it — there the file name **is** the only
-  // identity a document has. Frees 170 px.
+  // document", not „what is it called". It stays in the **catalogue** —
+  // `STUCK_COLUMNS` never carried it, it shows `fileName`, which for a stuck
+  // document is the only identity there is. Frees 170 px.
   "case",
   "receivedDate",
   "classification",

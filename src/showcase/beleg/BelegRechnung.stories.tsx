@@ -82,6 +82,29 @@ export const DatumFehlt: Story = {
     const doc = belegFixture({ documentDate: datum, completedAt: null, completedVia: null });
     return (
       <BelegSeite document={doc} actions={menu}>
+        {datum ? null : (
+          // **Zone 2**, und die Mängelzeile in den Fakten dazu. Beides, nicht
+          // eins von beiden: die Zone sagt, dass etwas zu tun ist, und das
+          // Zeichen an der Zeile sagt, an welchem Wert (Owner-Entscheid zu
+          // Frage 3).
+          <Card>
+            <CardHead title="Zu klären" sub="1 Befund an diesem Beleg" />
+            <div style={{ padding: 16 }}>
+              <FieldList
+                tone="bare"
+                rows={[
+                  [
+                    "Belegdatum fehlt",
+                    <span key="d">
+                      Ohne Belegdatum fällt der Beleg aus jedem Jahresfilter.{" "}
+                      <InlineEdit label="Belegdatum" value="" onSave={async (v) => setDatum(v || null)} />
+                    </span>,
+                  ],
+                ]}
+              />
+            </div>
+          </Card>
+        )}
         <SourceDocumentCard
           document={doc}
           previewUrl={MUSTER_PDF}
@@ -397,9 +420,13 @@ export const MitBefunden: Story = {
 };
 
 /**
- * **R9 — erledigt ohne Buchung.** Der Kopf trägt **einen** Zustand, der Grund
- * steht im Tooltip daran — nicht als zweite Zeile darunter. Die Fakten sind
- * lesend, die einzige Aktion ist „Wieder öffnen".
+ * **R9 — erledigt.** Zwei Fassungen: ohne Buchung nötig, und ersetzt
+ * (`superseded`).
+ *
+ * Der Kopf trägt **einen** Zustand, der Grund steht im Tooltip daran — nicht
+ * als zweite Zeile darunter. Das Datum steht daneben, denn „erledigt" ohne
+ * Datum ist die Hälfte der Antwort, die man nicht prüfen kann. Beides kommt
+ * aus `SourceDocumentCompletion`, nicht aus einem Nachbau.
  */
 export const Erledigt: Story = {
   render: () => {
@@ -407,7 +434,12 @@ export const Erledigt: Story = {
       completedVia: "no_booking_required",
       completedReason: "Privatentnahme, gehört nicht in die Buchführung.",
     });
+    const ersetzt = belegFixture({
+      completedVia: "superseded",
+      completedReason: "Ersetzt durch R-2026-0058 — der Lieferant hat storniert und neu gestellt.",
+    });
     return (
+      <div style={{ display: "grid", gap: 40 }}>
       <BelegSeite
         document={doc}
         actions={
@@ -421,6 +453,21 @@ export const Erledigt: Story = {
       >
         <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary="Miete Musterstraße 12, August 2026" />
       </BelegSeite>
+
+      <BelegSeite
+        document={ersetzt}
+        actions={
+          <>
+            <Button variant="secondary" size="sm">
+              Wieder öffnen
+            </Button>
+            {menu}
+          </>
+        }
+      >
+        <SourceDocumentCard document={ersetzt} previewUrl={MUSTER_PDF} summary="Miete Musterstraße 12, August 2026" />
+      </BelegSeite>
+      </div>
     );
   },
 };

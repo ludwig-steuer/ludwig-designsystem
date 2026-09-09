@@ -37,10 +37,10 @@ const menu = (
 
 /** Die Zahlungskonten eines Mandanten — eines geführt, der Rest Kulisse. */
 const KONTEN = [
-  { id: "b-1", label: "Münchner Bank 107555539 · DE30701900000107555539", inUse: true },
+  { id: "b-1", label: "Testbank eG 100200300 · DE00 0000 0000 0000 0000 00", inUse: true },
   { id: "b-2", label: "Geldtransit", inUse: false },
   { id: "b-3", label: "Kasse", inUse: false },
-  { id: "b-4", label: "Bank (Postbank 3)", inUse: false },
+  { id: "b-4", label: "Bank (Zweitkonto 3)", inUse: false },
 ];
 
 /**
@@ -267,6 +267,51 @@ export const KontoauszugKontoWaehlen: Story = {
 };
 
 /**
+ * **A5, Variante `none`.** Es passt **kein** Konto — nicht „mehrdeutig",
+ * sondern „gar keins".
+ *
+ * Das ist ein anderer Satz und ein anderer Weg: die Auswahl steht leer und
+ * gesperrt, und daneben steht der Weg in die Stammdaten. **Kein Auto-Anlegen**
+ * — ein Zahlungskonto, das aus einem Beleg entsteht, wäre ein Konto, das
+ * niemand entschieden hat (`bank.md` R4/R5).
+ */
+export const KontoauszugKeinKonto: Story = {
+  render: () => {
+    const doc = belegFixture({
+      sourceDocType: "bank_statement_pdf",
+      fileName: "Kontoauszug-2026-08.pdf",
+      counterparty: null,
+      completedAt: null,
+      completedVia: null,
+      detail: null,
+      hasInvoiceRow: false,
+    });
+    return (
+      <BelegSeite document={doc} actions={menu}>
+        <Card>
+          <CardHead title="Zu klären" sub="1 Befund an diesem Beleg" />
+          <div style={{ padding: 16, display: "grid", gap: 12 }}>
+            <p className="v2muted" style={{ margin: 0 }}>
+              <strong>Kein Zahlungskonto passt.</strong> Weder die IBAN noch der Name im
+              Auszug führen zu einem Konto dieses Mandanten.
+            </p>
+            <div style={{ maxWidth: 420 }}>
+              <PaymentAccountField id="a5b-none" value={null} onChange={() => {}} accounts={[]} />
+            </div>
+            <div>
+              <Button variant="secondary" size="sm" href="?stammdaten=zahlungskonten">
+                Zahlungskonto anlegen
+              </Button>
+            </div>
+          </div>
+        </Card>
+        <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary={null} />
+      </BelegSeite>
+    );
+  },
+};
+
+/**
  * **A5b — Kontoauszug, falsch zugeordnet.** Die Rolle erkennt, dass der Auszug
  * am falschen Konto hängt. Die Korrektur läuft über die Faktenzeile, mit einem
  * Hinweis, was sie am Bestand tut: **die Buchungen bleiben, akzeptierte
@@ -316,6 +361,15 @@ export const KontoauszugFalschZugeordnet: Story = {
  */
 export const KreditkarteReisekosten: Story = {
   render: () => {
+    const reise = belegFixture({
+      sourceDocType: "travel_expense_report",
+      fileName: "Reisekosten-2026-08.pdf",
+      counterparty: null,
+      completedAt: null,
+      completedVia: null,
+      detail: null,
+      hasInvoiceRow: false,
+    });
     const doc = belegFixture({
       sourceDocType: "credit_card_statement",
       fileName: "Kreditkarte-2026-08.pdf",
@@ -330,6 +384,7 @@ export const KreditkarteReisekosten: Story = {
       belegFixture({ id: "kk-2", fileName: "Beleg-Bahn.pdf", counterparty: "Musterbahn AG" }),
     ];
     return (
+      <div style={{ display: "grid", gap: 40 }}>
       <BelegSeite document={doc} actions={menu}>
         <Card>
           <CardHead title="Kreditkartenabrechnung" sub="Karte …4711" />
@@ -352,6 +407,30 @@ export const KreditkarteReisekosten: Story = {
           partHref={(d) => `?beleg=${d.id}`}
         />
       </BelegSeite>
+
+      <BelegSeite document={reise} actions={menu}>
+        <Card>
+          <CardHead title="Reisekostenabrechnung" sub="dieselbe Registry-Regel, kein Sonderpfad" />
+          <div style={{ padding: 16 }}>
+            <FieldList
+              tone="bare"
+              rows={[
+                ["Zahlungskonto", "Testbank eG · Kreditkarte …4711 — über die Kartenkennung erkannt"],
+                ["Zeitraum", "01.08.2026 – 31.08.2026"],
+              ]}
+            />
+          </div>
+        </Card>
+        <SourceDocumentCard
+          document={reise}
+          previewUrl={MUSTER_PDF}
+          summary={null}
+          group={{ childCount: 2, completedChildCount: 0 }}
+          parts={kinder}
+          partHref={(d) => `?beleg=${d.id}`}
+        />
+      </BelegSeite>
+      </div>
     );
   },
 };

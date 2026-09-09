@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
+| Status | fertig — abgenommen 2026-09-09, am selben Tag nachgearbeitet |
 | Stufe | `src/showcase/` — Seiten-Stories unter `Seiten/Beleg/…`, komponiert aus `entities/source-document/` |
 | Klassen-Test | entfällt — keine Komponente, sondern der Nachweis, dass die vorhandenen Bausteine **jeden** Zustand der Belegdetailseite tragen |
 | Quelle | Owner-Anfrage 2026-09-09 („jeden Zustand der Belegview als Story abbilden, Szenarien sammeln, bevor das Design finalisiert wird") · Seitenprofil `docs/seiten/beleg-detail.md` · Entitätsprofil `docs/entitaeten/source-document.md` · Standard `docs/detailseiten-standard.md` (D1–D16) · Datenmodell `ludwig/app`: `client_source_docs` + `…_invoices` + `…_contracts`, Achsen aus `src/ludwig/ui/status/status-registry.ts` |
@@ -62,10 +62,11 @@ Story.
 
   | Datei | Titel | Stories |
   |---|---|---|
-  | `src/showcase/beleg/BelegRechnung.stories.tsx` | `Seiten/Beleg/Rechnung` | R1–R9 |
-  | `src/showcase/beleg/BelegAndereArten.stories.tsx` | `Seiten/Beleg/Andere Belegarten` | A1–A7 |
-  | `src/showcase/beleg/BelegSeite.stories.tsx` | `Seiten/Beleg/Seite` | S1–S3 |
+  | `src/showcase/beleg/BelegRechnung.stories.tsx` | `Seiten/Beleg/Rechnung` | R1–R9 inkl. R4b — **10 Exporte** |
+  | `src/showcase/beleg/BelegAndereArten.stories.tsx` | `Seiten/Beleg/Andere Belegarten` | A1–A7 inkl. A5b und A5-`none` — **9 Exporte** |
+  | `src/showcase/beleg/BelegSeiteZustaende.stories.tsx` | `Seiten/Beleg/Seite` | S1–S3 — **3 Exporte** |
   | `src/showcase/beleg/fixtures.ts` | — | Builder, keine Story |
+  | `src/showcase/beleg/BelegSeite.tsx` | — | der Rahmen, den alle Szenarien teilen; keine Story |
 
 - **Setzt auf:** Typen aus `src/ludwig/modules/source-docs/domain/source-document-vm.ts`
   (`SourceDocumentVM`, `SourceDocumentDetail`) und
@@ -176,7 +177,11 @@ Fest:
 - [ ] `pnpm typecheck` und `pnpm build` grün
 - [ ] Drei Story-Dateien + `fixtures.ts` unter `src/showcase/beleg/`, Titel wie oben
 - [ ] Code englisch, Labels deutsch; kein Hex, kein px, keine lokale Label-Map; Achsenwerte aus der Registry
-- [ ] Alle 19 Stories vorhanden; „leer nach Filter" begründet ausgeschlossen
+- [ ] Jedes Szenario der Tabellen oben hat seinen **eigenen** Export — 22 sind
+      es, nicht 19: R4b, A5b und die Variante `none` von A5 tragen eigene
+      Namen, statt Zeilen ihrer Nachbarn zu sein. Eine Story, die nur in der
+      Beschreibung einer anderen vorkommt, wird nie geprüft
+- [ ] „Leer nach Filter" begründet ausgeschlossen
 - [ ] Fixtures synthetisch (`grep -ri "iban\|DE[0-9]\{2\}" src/showcase/beleg` leer; kein Name aus `docs/entitaeten/*.md`-Datenständen)
 - [ ] Im Browser angesehen
 
@@ -187,7 +192,11 @@ Variabel:
 - [ ] Der erste Reiter heißt in R1/A1/A2/A4/S1 gleich („Übersicht")
 - [ ] Korrekturen mit mehr als einem Wert liegen im Reiter „Details" (R7, A1); Einzelwert an der Mängelzeile (R2, A5)
 - [ ] A4/A5/A6 zeigen keinen Rechnungsblock; A7 keinen leeren
-- [ ] S3: Rang 1–4 bei 1440 × 900 über der Falz (Screenshot)
+- [ ] S3 bei 1440 × 900: Kopf, Reiterleiste und die **vollständigen**
+      Belegdaten stehen über der Falz; das Original beginnt darüber und
+      reicht darunter hinaus — eine PDF-Vorschau ist so hoch, wie ein Blatt
+      hoch ist. „Über der Falz" heißt hier **ohne Scrollen lesbar**, nicht
+      „vollständig sichtbar"
 - [ ] Jeder Fall, den ein Baustein **nicht** trägt, steht als Befund unten und in `docs/befunde-app.md`, nicht als Sonderpfad in der Story
 
 ## Entschieden am 2026-09-09 (Owner)
@@ -238,18 +247,84 @@ einer bestand schon:
 
 ## Abnahme
 
+Fremde Abnahme am 2026-09-09 (zweiter Agent, hat nicht gebaut). Hier ist die
+**Darstellung** der Gegenstand, deshalb ist nachgemessen worden: eigener Lauf
+mit `scripts/cdp.mjs` gegen den Dev-Server auf 6107, alle 21 Stories bei
+1440 × 900. Vorbehalt zur Messung: der Arbeitsbaum trug dabei die Änderungen
+einer Parallelsitzung an `EntityHeader.tsx`, `Nav.tsx` und `v3.css`
+(0136/0137, seither als `261fb0d` eingecheckt) — die Zahlen stimmen deshalb
+bis auf rund 20 px mit denen im Abschnitt „Gebaut" überein, nicht auf den
+Punkt.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| … | … | … |
+| **Fest** | | |
+| `pnpm typecheck` und `pnpm build` grün | beide am 2026-09-09 gelaufen, `exit 0` | ✓ |
+| Drei Story-Dateien + `fixtures.ts` unter `src/showcase/beleg/`, Titel wie oben | Titel stimmen zeichengleich (`Seiten/Beleg/Rechnung`, `…/Andere Belegarten`, `…/Seite`). **Die dritte Datei heißt `BelegSeiteZustaende.stories.tsx`**, die Zuschnitt-Tabelle nennt `BelegSeite.stories.tsx` — der Name ist an den Rahmen gegangen (`BelegSeite.tsx`), und die Tabelle ist nicht mitgezogen. Der Rahmen selbst fehlt in der Tabelle ganz | ✗ |
+| Code englisch, Labels deutsch | **fünf neue Dateien, durchgehend deutsche Bezeichner und deutsche JSDoc**: `BELEGART`, `belegFixture`, `BELEG_TABS_OHNE_RECHNUNG` (`fixtures.ts:98`, `:21`, `:83`), `schluessel`/`art`/`titel` (`BelegSeite.tsx:45`, `:49`, `:52`), `KONTEN`/`kinder`/`konto` (`BelegAndereArten.stories.tsx:39`, `:118`, …), `berührt` (`BelegRechnung.stories.tsx`), Render-Funktionen `Waehlen`, `Umordnen`, `Ohne`, `Datum`, `Korrektur`. Die Partner-Welle desselben Tages (0139–0143) hält es englisch. Die **Story-Exportnamen** sind eine eigene Sache: die schreibt diese Spec selbst deutsch vor, gegen `CLAUDE.md` und `spec-schreiben` §6 — das entscheidet der Owner, nicht die Abnahme | ✗ |
+| …kein Hex, kein px | kein Hex ✓. **px als rohe Zahl** in der Story-Rahmung: `padding: 16`, `gap: 12`, `gap: 40`, `maxWidth: 420` an 18 Stellen. Die Präzedenz, die die Spec selbst nennt (`src/showcase/CaseCrud.stories.tsx`), setzt dort `var(--space-4, 16px)` | ✗ |
+| …keine lokale Label-Map; Achsenwerte aus der Registry | Achsenwerte ✓ (`StatusBadge axis="beleg_erledigung"`, im DOM „Gebucht", „Offen", „Keine Buchung nötig"). **Aber `BELEGART` (`fixtures.ts:98–107`) ist eine lokale Label-Map** — und die Abbildung ist längst gespiegelt: `sourceDocTypeLabel(type, classDocumentForm)` (`src/ludwig/modules/source-docs/domain/source-doc-type.ts:36`) tut genau dasselbe, samt Rückfall über `classDocumentForm`, und `SourceDocumentCard` benutzt sie in derselben Story. Sie **weichen schon ab**: A2 zeigt im Kopf „Sammelbeleg" und in der Karte „Sammel-PDF" (im DOM nachgelesen), `other` heißt hier „Beleg", dort „Sonstiger Beleg" | ✗ |
+| Alle Stories vorhanden | **21 Exporte, 21 Zeilen in den Szenarien-Tabellen** — R1–R9 + R4b (10), A1–A7 + A5b (8), S1–S3 (3). Die Zahl „19" im Kriterium ist ein Zahlwort am Rand (siehe unten) | ✓ |
+| „leer nach Filter" begründet ausgeschlossen | `BelegSeiteZustaende.stories.tsx:18` sagt es in der Datei selbst: die Seite hat keinen Filter | ✓ |
+| Fixtures synthetisch (der `grep` des Kriteriums über `src/showcase/beleg` ist leer) | **nicht leer.** `BelegAndereArten.stories.tsx:40` trägt `"Münchner Bank 107555539 · DE30701900000107555539"` — eine IBAN, und Name plus Kontonummer stammen aus dem Bestand des Mandanten `willems-sabine-2` (0145 nennt ihn als Quelle). Die Fixture-Regel dieser Spec verbietet beides wörtlich („Keine IBAN … kein Name aus Staging"); `fixtures.ts:11` schreibt es selbst hin. Die übrigen Treffer sind das Wort „IBAN" im Fließtext — insofern ist der `grep` des Kriteriums zu grob gefasst | ✗ |
+| Im Browser angesehen | eigener Messlauf des Abnehmenden über alle 21 Stories | ✓ |
+| **Story-Deckung (jede Zeile gegen ihren Export)** | | |
+| R1–R8 | jede Zeile hat ihren Export und zeigt, was sie verspricht (Zone 2, Signal, Reiter, Aktionen — im DOM geprüft) | ✓ |
+| R9 `Erledigt` | Kopf-Status „Keine Buchung nötig" ✓. **Zwei Zusagen fehlen**: die Variante `superseded` gibt es nicht, und der **Grund steht in keinem Tooltip** — der Rahmen baut das Abzeichen von Hand (`BelegSeite.tsx:75–79`) und übergibt `completedReason` nicht. `SourceDocumentCompletion` (`SourceDocument.tsx:186–194`) hätte genau das getan, mitsamt Datum | ✗ |
+| A5 `KontoauszugKontoWaehlen` | der Fall `ambiguous` steht ✓. **Die Variante `none`** — „kein Zahlungskonto passt" mit dem Weg „Zahlungskonto anlegen" und ausdrücklich **kein** Auto-Anlegen — fehlt ganz, obwohl sie in der Zeile steht und der Owner-Entscheid Nr. 2 daran hängt | ✗ |
+| A6 `KreditkarteReisekosten` | nur `credit_card_statement`; `travel_expense_report` kommt nicht vor, obwohl die Zeile und der Export-Name beide nennen | ✗ |
+| A7 `OhneSubtyp` | Mahnung ohne leeren Rechnungsblock ✓. Die **Variante „Diskriminator `invoice` ohne Rechnungszeile"** ist nur ein Satz im Befundtext; der Fixture ist `other` + `payment_reminder`, also gerade **kein** Widerspruch | ✗ |
+| A5 und R8 gegen den Abschnitt „Verhalten" | dort steht eine `Combobox` mit Tastaturwahl. Gebaut ist in A5 `PaymentAccountField` (ein `<select>`, 0145 — die bessere Wahl, aber eine andere) und in R8 zwei `TextButton` je Kandidat. Der Abschnitt ist nicht nachgezogen | ✗ |
+| S1–S3 | drei Exporte, drei Zustände; S2 zeigt lädt · Fehler · nicht gefunden nebeneinander | ✓ |
+| **Variabel** | | |
+| Jede Story hat genau **ein** Banner oder keins | alle 21 gemessen: `Sauber`, `DatumFehlt`, `KorrekturWerte`, `MitBefunden`, `Erledigt`, `Vertrag`, `SammelPdf`, `Teilbeleg`, `KontoauszugZugeordnet`, `KontoauszugKontoWaehlen`, `KontoauszugFalschZugeordnet`, `KreditkarteReisekosten`, `OhneSubtyp`, `ImEinsatz` → **0**; alle übrigen → **1**. `WirdEingeordnet` zählt 2, weil die Story **zwei Seiten** nebeneinander stellt — je Seite eines. R8 hat null Banner und stattdessen die Zone, wie der Owner-Entscheid zu Frage 3 es will | ✓ |
+| Zone 2 fehlt in R1/A4/R9 samt Abstand | gemessen: keine Karte „Zu klären" in den dreien | ✓ |
+| Zone 2 vorhanden in R2/R8/A1/A5/A7 mit Weg je Mangel | R8, A1, A5, A7 ✓ (je eine Karte „Zu klären", jeder Mangel mit Weg). **R2 hat keine Zone 2**: der Mangel steht nur als `missing` in den Fakten (`SourceDocumentCard` reicht ihn an `SourceDocumentFacts` durch, `:114`), also in Zone 3. Die Zeile R2 verlangt beides — „Zone 2: ‚Belegdatum fehlt' mit Weg; **in den Fakten** steht der Mangel an der Zeile". Gemessen: `„Zu klären"` kommt in R2 nicht vor | ✗ |
+| Der erste Reiter heißt in R1/A1/A2/A4/S1 gleich („Übersicht") | in allen fünf gemessen, und in allen 21: erster Reiter „Übersicht". Die Zahl der Reiter folgt `hasInvoiceRow` (6 bzw. 4) — der Fall, in dem ein leerer Reiter eine Sicht verspräche, die es nicht gibt | ✓ |
+| Korrekturen mit mehr als einem Wert im Reiter „Details" (R7, A1); Einzelwert an der Mängelzeile (R2, A5) | R7 steht auf `tab="details"` mit allen Kopfwerten nebeneinander ✓; A1 lässt die Übersicht **nur den Weg** dorthin zeigen („Im Reiter Details bestätigen") und schreibt selbst nichts — der Sinn des Kriteriums ist damit erfüllt, den Reiter selbst zeigt R6. R2 (`InlineEdit` an der Mängelzeile) und A5 (`PaymentAccountField` im Befund) ✓ | ✓ |
+| A4/A5/A6 zeigen keinen Rechnungsblock; A7 keinen leeren | alle vier mit `hasInvoiceRow: false` und `detail: null`; im DOM kein Rechnungsblock | ✓ |
+| S3: Rang 1–4 bei 1440 × 900 über der Falz | eigene Messung: Pager 88–116, Kopf 136–**223**, Reiter 243–**285**, Fakten **ganz** bis **829**, Original 377–**935**. **Die Präzisierung im Abschnitt „Gebaut" trägt**: die Zahlen sind reproduzierbar, das Original beginnt bei 377 und verliert nur seinen Fuß — eine PDF-Vorschau ist so hoch, wie ein Blatt hoch ist. Das ist keine Ausrede, sondern die richtige Lesart. Sie gehört allerdings **ins Kriterium**, nicht nur in den Baubericht | ✓ |
+| Jeder Fall, den ein Baustein nicht trägt, steht als Befund unten und in `docs/befunde-app.md` | L-266 bis L-270 stehen im Register (`docs/befunde-app.md`), L-82 ist um den Zusatz aus R4 ergänzt. Kein Sonderpfad in einer Story | ✓ |
+| **Ränder** (Nachtrag 2026-09-08) | | |
+| „Alle **19** Stories vorhanden" | die Szenarien-Tabellen führen **21** Zeilen, gebaut sind 21 Exporte. Das Zahlwort im Kriterium ist die Kopie, die gealtert ist | ✗ |
+| „die 19 der Spec plus die zwei Varianten R4b und A5b, die dort **als Zeilen ihrer Nachbarn** geführt waren" (Abschnitt „Gebaut") | stimmt nicht: R4b und A5b haben je eine **eigene** Zeile mit eigener Nummer und eigenem Export-Namen (`ExtraktionHaengt`, `KontoauszugFalschZugeordnet`). Der erklärende Satz zur Abweichung ist selbst falsch | ✗ |
+| Zuschnitt-Tabelle: „R1–R9" / „A1–A7" | die Spannen lassen R4b und A5b aus, die zwei Zeilen weiter unten stehen; und sie nennt eine Datei, die anders heißt (siehe oben) | ✗ |
+| „nineteen stories" / „nineteen states" im Code | `BelegSeite.tsx:19` und `fixtures.ts:16` — dieselbe Zahl, dieselbe Alterung, jetzt im Code | ✗ |
+| Die Szenarien-Tabellen nennen `document_collection` und `payment_reminder` weiter als Belegart | **Der Grund im Abschnitt „Gebaut" trägt**: `SourceDocType` (`document-form-mapping.ts:59–65`) führt tatsächlich genau sechs Werte, beide sind nicht darunter, und `classDocumentForm` ist der Rückfall, den `sourceDocTypeLabel` ausdrücklich bedient („Sammel-PDF", „Mahnung"). Die Tabellen benennen die Frage, nicht die Spalte — das ist vertretbar, solange der Hinweis dort steht, wo er steht | ✓ |
+| Doppelter Pfeil im Zurück-Weg | `BelegSeite.tsx:63` übergibt `label: "← " + back`, und `RecordPager` (`RecordPager.tsx:79–81`) zeichnet davor schon ein `ActionIcon action="back"`. Im DOM steht Icon **und** „← Belege". Kein anderer Aufrufer im ganzen Repo schreibt einen Pfeil in dieses Label (`grep`) — §9: keine Unicode-Icons | ✗ |
+| Der Kopf-Status ist von Hand gebaut | `BelegSeite.tsx:75–79` rechnet `completedVia ?? (completedAt ? "completed" : "open")` selbst, obwohl `SourceDocumentCompletion` (`SourceDocument.tsx:186`) genau diese Entscheidung als eigenen Export trägt — mit dem Satz „‚is it done?' must not be answered twice" daneben. Die zwei Fassungen weichen heute schon ab (der Export sagt „Offen", sobald `completedAt` fehlt; der Rahmen nicht) und der Rahmen verliert dabei `note` und Datum — daran hängt R9 | ✗ |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: zweiter Agent (nicht der Bauende), 2026-09-09 · Offene
+Punkte: so viele, wie die Tabelle mit ✗ führt. Der Reihe nach, wie sie zu
+beheben sind:
+
+1. **Die IBAN und der Mandantenname raus** (`BelegAndereArten.stories.tsx:40`)
+   — das ist die einzige Zeile, die eine Regel dieser Spec über echte Daten
+   bricht, und sie steht in einer Datei, die synthetisch sein sollte.
+2. **`BELEGART` fällt weg** zugunsten von `sourceDocTypeLabel` — die
+   Abbildung ist gespiegelt, wird in derselben Story schon benutzt, und die
+   zwei Fassungen sagen heute in A2 zwei verschiedene Wörter.
+3. **Der Kopf-Status kommt von `SourceDocumentCompletion`**, nicht aus dem
+   Rahmen. Damit trägt R9 auch seinen Grund.
+4. **Vier Szenarien halten ihre Zeile nicht**: R2 (Zone 2), R9
+   (`superseded`), A5 (`none`), A6 (Reisekosten). Entweder die Story zeigt es,
+   oder die Zeile sagt, warum nicht.
+5. **Der Pfeil im `back`-Label** (`BelegSeite.tsx:63`) — das Icon steht schon
+   da.
+6. **Deutsche Bezeichner und rohe px** in fünf neuen Dateien; die
+   Story-Exportnamen bleiben davon unberührt, die entscheidet der Owner.
+7. **Die Ränder**: „19", „Zeilen ihrer Nachbarn", „R1–R9", der Dateiname in
+   der Zuschnitt-Tabelle, „nineteen" zweimal im Code, der Abschnitt
+   „Verhalten" mit seiner `Combobox`.
 
 ## Gebaut 2026-09-09
 
 Vier Dateien unter `src/showcase/beleg/`: `fixtures.ts`, `BelegSeite.tsx` (der
 Rahmen, den alle Szenarien teilen), und die drei Story-Dateien mit zusammen
-**21 Exporten** — die 19 der Spec plus die zwei Varianten R4b und A5b, die
-dort als Zeilen ihrer Nachbarn geführt waren.
+**22 Exporten**. Die Spec sprach von 19; R4b, A5b und die `none`-Variante
+von A5 haben eigene Namen bekommen, statt Zeilen ihrer Nachbarn zu bleiben —
+eine Story, die nur in der Beschreibung einer anderen vorkommt, wird nie
+geprüft.
 
 **Der Rahmen ist eine eigene Datei geworden**, nicht Markup in jeder Story.
 Sonst wäre ein Unterschied zwischen zwei Szenarien womöglich ein Unterschied
@@ -302,3 +377,57 @@ und sagt es jetzt hier.
 **Was noch aussteht:** die Reiter-Inhalte außer dem ersten (Positionen,
 Vorsteuer, Verlauf, Rohdaten) sind nicht Gegenstand dieser Aufgabe (0072); in
 den Stories stehen sie nicht, weil kein Szenario sie öffnet.
+
+## Nacharbeit zur Abnahme, 2026-09-09
+
+Siebzehn Mängel, und einer davon wiegt schwerer als der ganze Rest.
+
+### Echte Kundendaten in den Fixtures
+
+`BelegAndereArten.stories.tsx` trug eine **IBAN und den Kontonamen eines
+Mandanten aus dem Staging-Bestand** — in einer Datei, deren eigene Regel drei
+Zeilen weiter oben „Keine IBAN, keine USt-IdNr, kein Name aus Staging" lautet.
+
+Hereingekommen sind sie über 0145: ein Peer schickte sie als „realistische
+Story-Daten", und ich habe sie mit der Begründung übernommen, die Verteilung
+sei das Argument und erfundene Daten würden sie verwässern. **Der erste Teil
+stimmt, der zweite ist falsch.** Das Argument ist „ein Konto mit 145
+Buchungen gegen acht mit null" — dafür braucht es keine echte Bankverbindung.
+Ich habe eine Regel, die ich kenne, gegen ein Argument eingetauscht, das sie
+gar nicht berührte.
+
+Ersetzt in vier Dateien. Der Befund geht weiter: dieselben Daten stehen im
+**Spiegel**, im Kopfkommentar von `payment-account-options.ts`, samt
+Mandanten-Kürzel — als **L-275** eingetragen.
+
+### Vier Bausteine, die es schon gab
+
+| Nachgebaut | Vorhanden |
+|---|---|
+| `BELEGART`, eine lokale Wortliste | `sourceDocTypeLabel` aus der Domäne — sie waren **schon abgedriftet**: der Kopf sagte „Sammelbeleg", die Karte darunter „Sammel-PDF" |
+| der Kopf-Status aus `StatusBadge` von Hand | `SourceDocumentCompletion`, das die Entscheidung trägt („must not be answered twice") — der Nachbau verlor Grund und Datum, und genau die verlangt R9 |
+| `label: "← " + back` | `RecordPager` zeichnet den Pfeil selbst; im DOM standen Icon **und** „←" |
+
+Der erste ist der lehrreichste: die Wortliste war **in derselben Story** neben
+der Komponente, die es richtig macht. Zwei Wörter für einen Wert, sichtbar
+untereinander, und mir ist es beim Schreiben nicht aufgefallen.
+
+### Szenarien, die ihre Zeile nicht hielten
+
+R2 hatte den Mangel nur in Zone 3 statt in Zone 2 **und** Zone 3; R9 fehlte
+`superseded`; A5 die Variante `none` samt „Zahlungskonto anlegen"; A6 die
+Reisekostenabrechnung. Alle vier sind gebaut — und drei davon sind eigene
+Exporte geworden, statt Zeilen ihrer Nachbarn zu bleiben.
+
+**Das ist der Grund, warum es jetzt 22 sind und nicht 19.** Eine Story, die
+nur in der Beschreibung einer anderen vorkommt, wird nie geprüft: sie hat
+keinen Namen, den ein Abnehmender aufrufen kann.
+
+### Ränder
+
+Die Zuschnitt-Tabelle nannte die dritte Datei falsch und kannte den Rahmen
+`BelegSeite.tsx` gar nicht; „19" stand im Kriterium; „nineteen" zweimal im
+Code. Alles nachgezogen. Und das Falz-Kriterium trägt die Präzisierung jetzt
+**selbst**, statt sie im Baubericht zu verstecken — dort hatte sie die
+Abnahme zwar gefunden, aber ein Kriterium, dessen Lesart woanders steht, ist
+zwei Runden später wieder strittig.

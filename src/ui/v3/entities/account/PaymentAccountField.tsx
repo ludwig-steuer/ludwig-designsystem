@@ -8,7 +8,7 @@ import { Select } from "../../primitives/Form";
  * over the whole SKR bank block: DATEV account function 10 throws bank, cash,
  * PSP and clearing accounts into one pot. **Hardly ever more than one of them
  * is actually in use.** Today they stand flat in one list, so the accountant
- * looks for her „Münchner Bank 107555539" between „Geldtransit", „Nebenkasse 2"
+ * looks for her „Testbank eG 100200300" between „Geldtransit", „Nebenkasse 2"
  * and „Schecks" — 24 accounts without a single booking.
  *
  * **Why an entity and not a primitive:** the mechanics would make sense
@@ -66,12 +66,12 @@ export function PaymentAccountField({
   invalid?: boolean;
   disabled?: boolean;
 }) {
-  const gefuehrt = accounts.filter((a) => a.inUse);
-  const weitere = accounts.filter((a) => !a.inUse);
+  const inUseAccounts = accounts.filter((a) => a.inUse);
+  const others = accounts.filter((a) => !a.inUse);
   // Headings only where they separate something. All in use or none in use and
   // a heading would claim a distinction that does not exist — which is not an
   // edge case: a fresh client has none, a small one exactly one of one.
-  const gruppieren = gefuehrt.length > 0 && weitere.length > 0;
+  const grouped = inUseAccounts.length > 0 && others.length > 0;
 
   // A value the list does not carry stays **visible**. The concrete case is a
   // recurring rule pointing at a retired account (`valid_until` set): today the
@@ -79,7 +79,7 @@ export function PaymentAccountField({
   // somebody narrows the list to the live ones on the server, that assignment
   // would vanish without a sound. A field that silently forgets a valid
   // assignment is worse than one unusual row.
-  const unbekannt = value !== null && !accounts.some((a) => a.id === value);
+  const unknownValue = value !== null && !accounts.some((a) => a.id === value);
 
   const option = (a: PaymentAccountOption) => (
     <option key={a.id} value={a.id}>
@@ -98,15 +98,15 @@ export function PaymentAccountField({
       disabled={disabled || accounts.length === 0}
     >
       <option value="">{placeholder}</option>
-      {unbekannt ? (
+      {unknownValue ? (
         <option value={value}>
           {value} {unknownLabel}
         </option>
       ) : null}
-      {gruppieren ? (
+      {grouped ? (
         <>
-          <optgroup label={IN_USE}>{gefuehrt.map(option)}</optgroup>
-          <optgroup label={REST}>{weitere.map(option)}</optgroup>
+          <optgroup label={IN_USE}>{inUseAccounts.map(option)}</optgroup>
+          <optgroup label={REST}>{others.map(option)}</optgroup>
         </>
       ) : (
         accounts.map(option)

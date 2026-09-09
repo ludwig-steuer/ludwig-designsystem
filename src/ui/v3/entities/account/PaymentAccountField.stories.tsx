@@ -20,7 +20,7 @@ type Story = StoryObj<typeof PaymentAccountField>;
  */
 const GEFUEHRT: PaymentAccountOption = {
   id: "a-1",
-  label: "Münchner Bank 107555539 · DE30701900000107555539",
+  label: "Testbank eG 100200300 · DE00 0000 0000 0000 0000 00",
   inUse: true,
 };
 
@@ -30,8 +30,8 @@ const WEITERE: PaymentAccountOption[] = [
   { id: "a-4", label: "Kasse", inUse: false },
   { id: "a-5", label: "Nebenkasse 1", inUse: false },
   { id: "a-6", label: "Schecks", inUse: false },
-  { id: "a-7", label: "Bank (Postbank 3)", inUse: false },
-  { id: "a-8", label: "BMW Bank 5007299755", inUse: false },
+  { id: "a-7", label: "Bank (Zweitkonto 3)", inUse: false },
+  { id: "a-8", label: "Musterbank Autofinanzierung", inUse: false },
   { id: "a-9", label: "Paypal", inUse: false },
 ];
 

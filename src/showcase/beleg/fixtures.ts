@@ -13,7 +13,7 @@ import type { SourceDocumentVM } from "@/ui/v3/entities/source-document/SourceDo
  *
  * One builder with the normal case as its default — a clean invoice — and each
  * story overrides only what it proves. That is the point of the whole task:
- * nineteen states of one page beside each other, and the difference between
+ * every state of one page beside each other, and the difference between
  * them readable in one line.
  */
 
@@ -87,21 +87,3 @@ export const BELEG_TABS_OHNE_RECHNUNG = BELEG_TABS.filter(
 export const tabHref = (key: string) => `?tab=${key}`;
 export const caseHref = "?sachverhalt=2026-0413";
 export const listHref = "?liste=belege";
-
-/**
- * The German word for a kind of document.
- *
- * Local to the showcase on purpose: the label of a kind lives in the app's
- * domain, not in the set, and these stories must not invent a second one that
- * later drifts. When the mapping is mirrored, this table goes.
- */
-export const BELEGART: Record<string, string> = {
-  invoice: "Rechnung",
-  contract: "Vertrag",
-  document_collection: "Sammelbeleg",
-  bank_statement_pdf: "Kontoauszug",
-  credit_card_statement: "Kreditkartenabrechnung",
-  travel_expense_report: "Reisekostenabrechnung",
-  payment_reminder: "Mahnung",
-  other: "Beleg",
-};
