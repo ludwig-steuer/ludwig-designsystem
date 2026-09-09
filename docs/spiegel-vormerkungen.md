@@ -12,7 +12,14 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-Nichts. Der Lauf vom 2026-09-09 hat die Liste geleert.
+| Was | Woher | Wer wartet |
+|---|---|---|
+| Achse `zyklus_stapel`: die Labels von `agent` und `prepared`, und die Kante `prepared → agent` (`trigger: "released_to_agent"`, `by: "user"` statt `agent_run_started`/`agent`) | **F177** in der App (`17764933` auf staging trägt es bereits) — der Übergang zum Agenten ist ab jetzt eine **menschliche Freigabe**, nicht mehr der Start eines Durchgangs | die Zyklus-Zeile im Beleg-Eingang zeigt bis dahin „bereit"/„Agent arbeitet" — inhaltlich falsch, aber ohne Folge (Meldung `ludwig-worker`, 2026-09-09) |
+
+**Nicht von Hand nachziehen.** Die Datei ist Spiegel; eine Handkopie darin
+wäre genau die zweite Wahrheit, gegen die der ganze Mechanismus steht — und
+sie fiele beim nächsten Lauf ohne Spur wieder heraus. Der Eintrag hier ist der
+richtige Ort, bis eine Freigabe für den Lauf vorliegt.
 
 ## Erledigt mit dem Lauf vom 2026-09-09 (App `ab7863d8`)
 
