@@ -1656,17 +1656,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   display: flex; align-items: center; justify-content: space-between;
   gap: var(--space-5); flex-wrap: wrap;
 }
-.s3nav { display: flex; align-items: center; gap: 14px; }
-.s3nav__pos { font-size: 13.5px; color: var(--color-text-muted); white-space: nowrap; }
-.s3nav__btn {
-  width: 32px; height: 32px; flex: 0 0 auto;
-  border-radius: var(--radius-md); border: 1px solid var(--color-border-strong);
-  background: var(--color-surface); color: var(--color-text);
-  font-size: 15px; line-height: 1; cursor: pointer;
-}
-.s3nav__btn:hover:not(:disabled) { background: var(--color-bg-soft); }
-.s3nav__btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.s3nav__btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+/* `.s3nav`, `.s3nav__pos` und `.s3nav__btn` sind mit F186 gefallen: der Pager
+   der Stapelabnahme ist `RecordPager`, und ein handgebauter Blätterer daneben
+   wäre eine zweite Antwort auf dieselbe Frage. Gemeldet von `ludwig-manager`
+   2026-09-10, hier nachgeprüft — kein Aufrufer im Set. */
 
 /* --- Der Fall-Kopf: Nummer, Titel, Betrag, Profil-Chips ------------------ */
 .s3case { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-5); }
@@ -3623,7 +3616,47 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    wodurch, das Datum wann. `baseline`, damit die Zahl auf der Schriftlinie des
    Wortes sitzt (Abnahme 0070, M5). */
 .v2doccompl { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; flex-wrap: wrap; }
-.v2doccompl > time { color: var(--color-text-subtle); font-size: var(--fs-ui-xs); }
+.v2doccompl__state { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; flex-wrap: wrap; }
+.v2doccompl time { color: var(--color-text-subtle); font-size: var(--fs-ui-xs); }
+/* Mit Begruendung wird aus der Zeile ein Block: Zustand oben, der Satz
+   darunter (0150). „Keine Buchung nötig" sagt, was geschah, nie warum — und
+   der Grund gehört dorthin, wo Platz ist, nicht nur in den Hover. */
+.v2doccompl--explain { flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+.v2doccompl__why {
+  color: var(--color-text-muted); font-size: var(--fs-ui-sm); line-height: var(--lh-ui);
+  text-wrap: pretty;
+  /* Am Element, nicht am Elternteil: die Wertespalte der Feldliste richtet
+     rechts aus, und Erben allein reichte hier nicht — der Satz stand
+     rechtsbündig unter der Marke (gemessen 2026-09-10). Ein Satz steht links,
+     auch neben Zahlen (V3). */
+  text-align: left;
+}
+
+/* --- Die Boxen neben den Fakten (0150) -----------------------------------
+ * Befunde und Klärungen, Umsatzsteuer, Verarbeitung: die Übersicht ist die
+ * Vorschau auf die Reiter darunter. Innen derselbe Abstand wie in jeder
+ * Karte — die Boxen bringen ihren Kopf selbst mit, deshalb steht hier nur der
+ * Rumpf. */
+.v2docaside {
+  display: flex; flex-direction: column; gap: var(--space-3);
+  padding: var(--space-3) var(--space-5) var(--space-4);
+}
+.v2docaside__none {
+  display: flex; align-items: center; gap: var(--space-2); margin: 0;
+  color: var(--color-text-muted); font-size: var(--fs-ui-sm);
+}
+/* Ein Mangel ist drei Dinge: was, was daraus folgt, und der Weg hinaus. Das
+   Zeichen steht auf der Schriftlinie der ersten Zeile, nicht mittig zum
+   ganzen Block — sonst wandert es mit der Länge des Satzes. */
+.v2docdef { display: flex; align-items: flex-start; gap: var(--space-2); }
+.v2docdef > svg { flex: 0 0 auto; margin-top: 1px; }
+.v2docdef__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.v2docdef__way { flex: 0 0 auto; }
+/* Der Rohtext der Quelle — englisch und sichtbar Maschinenwort. */
+.v2docdef__raw {
+  font-family: var(--font-mono); font-size: var(--fs-ui-xs);
+  color: var(--color-text-subtle); word-break: break-word;
+}
 
 /* --- Das (i) am Zustand (0077) ------------------------------------------
  * Trefferfläche **24 × 24**, das Hausmaß aus 0113 — das Zeichen selbst misst
@@ -3646,6 +3679,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   color: var(--color-text-muted); opacity: 0.65;
 }
 .v2sinfo:hover { opacity: 1; color: var(--color-primary); }
+/* Trägt der Knopf die Marke selbst (0150), hat er kein eigenes Aussehen: die
+   Marke ist das Ziel, der Knopf nur ihre Trefferfläche. Ohne das Zurücksetzen
+   erbte sie Mindestmaße und Innenabstand des (i) und stand schief in der
+   Zeile. */
+.v2sinfo--wrap {
+  min-width: 0; min-height: 0; padding: 0; margin-block: 0; opacity: 1;
+  color: inherit; text-align: left;
+}
+.v2sinfo--wrap:hover { color: inherit; }
 .v2sinfo:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 
 /* --- Ausgleichs-Klammer (0026) -------------------------------------------

@@ -105,6 +105,10 @@ export function SourceDocumentFacts({
   missing,
   tone = "surface",
   provenance,
+  title = "Belegdaten",
+  counterpartyHref,
+  explainCompletion,
+  batchHref,
 }: {
   /** The same row the list gets — kind, counterparty, both dates, completion, `detail`. */
   document: SourceDocumentVM;
@@ -136,6 +140,27 @@ export function SourceDocumentFacts({
    * already holds is a pass-through.
    */
   provenance?: boolean;
+  /**
+   * The heading **of the box**, not a line above it (0150).
+   *
+   * `FieldList` has carried a `title` since 0006; the card wrote „Belegdaten"
+   * as a bare line above it instead, and next to three boxes with a proper
+   * head that looked like a mistake. `null` switches it off — in the drawer
+   * the `Drawer` title already says whose facts these are.
+   */
+  title?: string | null;
+  /**
+   * Where the counterparty stands as a business partner (0150).
+   *
+   * The name is a **string** on the document — the VM carries no partner id
+   * (finding L-277). So the caller builds the link; without one the name stays
+   * plain text, exactly as before.
+   */
+  counterpartyHref?: string | null;
+  /** The reason of the completion as text, not only in the hover. */
+  explainCompletion?: boolean;
+  /** The batch that booked it — passed through to the completion. */
+  batchHref?: string | null;
 }) {
   const detail = resolveSourceDocumentDetail(document.sourceDocType, document.detail);
   const ident = sourceDocumentIdentifier(document);
@@ -147,7 +172,23 @@ export function SourceDocumentFacts({
   // summary, which not every document carries.
   const rows: [ReactNode, ReactNode][] = [
     ["Belegart", kind],
-    ["Gegenpart", document.counterparty ?? <span className="v2muted">—</span>],
+    [
+      "Gegenpart",
+      document.counterparty ? (
+        counterpartyHref ? (
+          // The partner is an entity of its own, and the name is the way to it
+          // (0139–0143). Without the link the name is a dead end — one has to
+          // search for the partner the document already names.
+          <a className="v2link" key="cp" href={counterpartyHref}>
+            {document.counterparty}
+          </a>
+        ) : (
+          document.counterparty
+        )
+      ) : (
+        <span className="v2muted">—</span>
+      ),
+    ],
     ["Belegdatum", <Time key="doc" value={document.documentDate ?? null} format="date" />],
     ["Eingang", <Time key="rec" value={document.receivedDate} format="date" />],
     [
@@ -167,7 +208,28 @@ export function SourceDocumentFacts({
       <Amount key="m" value={detail.measure.value} currency={detail.measure.currency} />,
     ]);
   }
-  rows.push(["Erledigung", <SourceDocumentCompletion key="done" document={document} />]);
+  // The payment account of a container document — statement, credit card,
+  // travel expenses (L-266). It hangs on the **document**, not on a subtype
+  // row: those three have none, and a registry entry keyed on `detail.kind`
+  // could never reach them. Absent means the document is not one of them; the
+  // one that is and has no account gets a defect, not an empty row (L-268).
+  if (document.paymentAccount) {
+    rows.push([
+      "Zahlungskonto",
+      <span key="pa" title={document.paymentAccount.iban ?? undefined}>
+        {document.paymentAccount.label}
+      </span>,
+    ]);
+  }
+  rows.push([
+    "Erledigung",
+    <SourceDocumentCompletion
+      key="done"
+      document={document}
+      {...(explainCompletion ? { explain: true } : {})}
+      {...(batchHref ? { href: batchHref } : {})}
+    />,
+  ]);
   if (summary) {
     // A summary is a paragraph, not a value: it keeps its row, but the text
     // runs left and without `tnum` — the field column aligns numbers right (V3).
@@ -200,7 +262,7 @@ export function SourceDocumentFacts({
 
   return (
     <div className="v2doc__facts">
-      <FieldList tone={tone} rows={withGaps} />
+      <FieldList tone={tone} {...(title ? { title } : {})} rows={withGaps} />
       {/* The block of the specialization. No entry, or a subtype row that
           contradicts the discriminator: no block — not one with a heading and
           „Keine Angaben." under it. */}

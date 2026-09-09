@@ -1,3 +1,9 @@
+import {
+  docDefects,
+  type DocDefect,
+  type DocDefectFacts,
+} from "@/ludwig/modules/source-docs/domain/doc-defects";
+import type { ClarificationVM } from "@/ui/v3/entities/clarification/Clarification";
 import type { SourceDocumentVM } from "@/ui/v3/entities/source-document/SourceDocument";
 
 // The family's own type, not the mirrored one: it adds `caseNumber` and
@@ -87,3 +93,73 @@ export const BELEG_TABS_OHNE_RECHNUNG = BELEG_TABS.filter(
 export const tabHref = (key: string) => `?tab=${key}`;
 export const caseHref = "?sachverhalt=2026-0413";
 export const listHref = "?liste=belege";
+
+/* ── Was die Übersicht neben den Fakten zeigt (0150) ──────────────────────── */
+
+/**
+ * Die Mängel eines Belegs — **aus der Domäne**, nicht von Hand gestellt:
+ * `docDefects()` entscheidet, was ein Mangel ist, und diese Fixtures liefern
+ * ihm nur die Rohangaben. Sonst zeigte die Story eine Auswahl, die es so nie
+ * gibt.
+ */
+export function belegMaengel(over: Partial<DocDefectFacts> = {}): DocDefect[] {
+  return docDefects({
+    documentDate: "2026-08-14",
+    inboxStatus: "classified",
+    openFindings: [],
+    partnerMatchOutcome: "matched",
+    recipientMatch: "match",
+    recipientMatchReason: null,
+    completedAt: null,
+    ...over,
+  });
+}
+
+/** Die USt einer gemischten Rechnung — zwei Sätze, das ist der Fall für die Box. */
+export const UST_GEMISCHT = {
+  net: 1512.61,
+  vat: 287.39,
+  gross: 1800,
+  currency: "EUR" as const,
+  rates: [
+    { rate: 19, net: 1310.92, vat: 249.08 },
+    { rate: 7, net: 201.69, vat: 38.31 },
+  ],
+  deductible: { value: true as const },
+};
+
+/**
+ * Der Verlauf eines Belegs in Kurzform. Die Wörter sind die der App
+ * (`platform_audit_events`), die Zeiten laufen rückwärts vom Eingang.
+ */
+export const VERLAUF = [
+  { id: "e-5", at: "2026-08-20T09:12:00Z", title: "Gebucht im Stapel 08/2026", kind: "Buchung", actor: "Kanzlei" },
+  { id: "e-4", at: "2026-08-16T07:40:00Z", title: "Dem Sachverhalt 2026-0413 zugeordnet", kind: "Zuordnung", actor: "Agent" },
+  { id: "e-3", at: "2026-08-15T18:22:00Z", title: "Werte extrahiert", kind: "Extraktion", actor: "System" },
+  { id: "e-2", at: "2026-08-15T18:20:00Z", title: "Als Eingangsrechnung eingeordnet", kind: "Einordnung", actor: "System" },
+  { id: "e-1", at: "2026-08-15T18:19:00Z", title: "Eingegangen aus dem Postfach", kind: "Eingang", actor: "System" },
+];
+
+export const vorsteuerHref = tabHref("vorsteuer");
+export const verlaufHref = tabHref("verlauf");
+export const partnerHref = "?geschaeftspartner=bp-880";
+export const stapelHref = "?stapel=2026-08";
+
+/**
+ * Eine offene Rückfrage an diesem Beleg — im Sichtmodell der Klärungs-Familie,
+ * nicht im Spiegel-VM: die Liste zeigt Zustand und Dringlichkeit, und die
+ * beiden gibt es nur hier.
+ *
+ * `type: "question"` und nicht `"comment"`: eine Frage wartet auf eine
+ * Antwort, ein Kommentar ist Zusammenhang. Dass sie an **diesem Beleg** hängt,
+ * sagt der Ort — die Box steht in seiner Übersicht.
+ */
+export const KLAERUNG: ClarificationVM = {
+  id: "cl-9001",
+  title: "Für die Bewirtung fehlen die Teilnehmer",
+  state: "open",
+  severity: "required",
+  type: "question",
+  audience: "client",
+  raisedAt: "2026-08-16T09:20:00Z",
+};

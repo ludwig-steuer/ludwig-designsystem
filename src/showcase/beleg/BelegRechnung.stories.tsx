@@ -8,10 +8,9 @@ import { Card, CardHead } from "@/ui/v3/primitives/Table";
 import { FieldList } from "@/ui/v3/primitives/FieldList";
 import { InlineEdit } from "@/ui/v3/primitives/InlineEdit";
 import { MenuItem, OverflowMenu } from "@/ui/v3/primitives/OverflowMenu";
-import { TextButton } from "@/ui/v3/primitives/TextButton";
 
-import { BelegSeite } from "./BelegSeite";
-import { belegFixture, MUSTER_PDF, caseHref } from "./fixtures";
+import { BelegSeite, uebersichtsBoxen } from "./BelegSeite";
+import { belegFixture, belegMaengel, KLAERUNG, MUSTER_PDF, caseHref, stapelHref } from "./fixtures";
 
 /**
  * Die Rechnung — neun Zustände derselben Seite (0144, R1–R9).
@@ -63,6 +62,8 @@ export const Sauber: Story = {
         document={belegFixture()}
         previewUrl={MUSTER_PDF}
         summary="Miete Musterstraße 12, August 2026"
+        batchHref={stapelHref}
+        {...uebersichtsBoxen()}
       />
     </BelegSeite>
   ),
@@ -375,45 +376,33 @@ export const KorrekturWerte: Story = {
  */
 export const MitBefunden: Story = {
   render: () => {
-    const doc = belegFixture({ completedAt: null, completedVia: null });
+    const doc = belegFixture({
+      completedAt: null,
+      completedVia: null,
+      documentDate: null,
+      counterparty: "Musterbau GmbH",
+    });
+    const maengel = belegMaengel({
+      documentDate: null,
+      openFindings: [
+        {
+          code: "duplicate_suspicion",
+          field: null,
+          message: "looks like invoice R-2026-0041 from the same vendor",
+        },
+      ],
+      partnerMatchOutcome: "ambiguous",
+      recipientMatch: "mismatch",
+      recipientMatchReason: "Rechnung lautet auf Beispiel Handels GmbH",
+    });
     return (
       <BelegSeite document={doc} actions={menu}>
-        <Card>
-          <CardHead title="Zu klären" sub="3 Befunde an diesem Beleg" />
-          <div style={{ padding: 16 }}>
-            <FieldList
-              tone="bare"
-              rows={[
-                [
-                  "Dublettenverdacht",
-                  <span key="d">
-                    Sieht aus wie R-2026-0041 vom selben Lieferanten.{" "}
-                    <TextButton onClick={() => {}}>Original öffnen</TextButton>
-                    {" · "}
-                    <TextButton onClick={() => {}}>kein Duplikat</TextButton>
-                  </span>,
-                ],
-                [
-                  "Gegenpart mehrdeutig",
-                  <span key="p">
-                    Zwei Stammsätze heißen „Musterbau GmbH".{" "}
-                    <TextButton onClick={() => {}}>Musterstadt wählen</TextButton>
-                    {" · "}
-                    <TextButton onClick={() => {}}>Beispielhausen wählen</TextButton>
-                  </span>,
-                ],
-                [
-                  "Empfänger passt nicht",
-                  <span key="e">
-                    Die Rechnung ist an eine andere Firma adressiert.{" "}
-                    <TextButton onClick={() => {}}>gehört nicht zum Mandanten</TextButton>
-                  </span>,
-                ],
-              ]}
-            />
-          </div>
-        </Card>
-        <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary="Miete Musterstraße 12, August 2026" />
+        <SourceDocumentCard
+          document={doc}
+          previewUrl={MUSTER_PDF}
+          summary="Miete Musterstraße 12, August 2026"
+          {...uebersichtsBoxen({ maengel, klaerungen: [KLAERUNG] })}
+        />
       </BelegSeite>
     );
   },
@@ -423,10 +412,15 @@ export const MitBefunden: Story = {
  * **R9 — erledigt.** Zwei Fassungen: ohne Buchung nötig, und ersetzt
  * (`superseded`).
  *
- * Der Kopf trägt **einen** Zustand, der Grund steht im Tooltip daran — nicht
- * als zweite Zeile darunter. Das Datum steht daneben, denn „erledigt" ohne
- * Datum ist die Hälfte der Antwort, die man nicht prüfen kann. Beides kommt
- * aus `SourceDocumentCompletion`, nicht aus einem Nachbau.
+ * Der Kopf trägt **einen** Zustand, das Datum daneben — „erledigt" ohne Datum
+ * ist die Hälfte der Antwort, die man nicht prüfen kann. Beides kommt aus
+ * `SourceDocumentCompletion`, nicht aus einem Nachbau.
+ *
+ * **Der Grund steht seit 0150 als Satz in den Fakten**, nicht mehr nur im
+ * Tooltip: „Keine Buchung nötig" sagt, was geschah, nie warum, und im Kopf ist
+ * für den Satz kein Platz. Wo der Beleg einen eigenen Grund trägt, steht
+ * dieser; sonst der Satz der Achse. Die Marke selbst ist anklickbar und öffnet
+ * die Erklärung aller Stufen.
  */
 export const Erledigt: Story = {
   render: () => {
@@ -451,7 +445,12 @@ export const Erledigt: Story = {
           </>
         }
       >
-        <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary="Miete Musterstraße 12, August 2026" />
+        <SourceDocumentCard
+          document={doc}
+          previewUrl={MUSTER_PDF}
+          summary="Miete Musterstraße 12, August 2026"
+          {...uebersichtsBoxen({ maengel: [] })}
+        />
       </BelegSeite>
 
       <BelegSeite
@@ -465,7 +464,12 @@ export const Erledigt: Story = {
           </>
         }
       >
-        <SourceDocumentCard document={ersetzt} previewUrl={MUSTER_PDF} summary="Miete Musterstraße 12, August 2026" />
+        <SourceDocumentCard
+          document={ersetzt}
+          previewUrl={MUSTER_PDF}
+          summary="Miete Musterstraße 12, August 2026"
+          {...uebersichtsBoxen({ maengel: [] })}
+        />
       </BelegSeite>
       </div>
     );

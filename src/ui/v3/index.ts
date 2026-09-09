@@ -338,6 +338,15 @@ export {
   SourceDocumentCard,
   type SourceDocumentCardProps,
 } from "./entities/source-document/SourceDocumentCard";
+export {
+  SourceDocumentDefects,
+  SourceDocumentHistory,
+  SourceDocumentVat,
+  type SourceDocumentDefectsProps,
+  type SourceDocumentHistoryProps,
+  type SourceDocumentVatProps,
+  type VatRateShare,
+} from "./entities/source-document/SourceDocumentAside";
 export { SourceDocumentView } from "./entities/source-document/SourceDocumentView";
 export {
   SOURCE_DOCUMENT_DETAILS,

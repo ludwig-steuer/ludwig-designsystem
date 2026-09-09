@@ -2,12 +2,14 @@ import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-d
 // The record, under a name that does not collide with the component family.
 import type { SourceDocumentVM as MirrorDocument } from "@/ludwig/modules/source-docs/domain/source-document-vm";
 import type { SourceDocCompletionVia } from "@/ludwig/modules/source-docs/domain/document-form-labels";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 import { Amount } from "../../primitives/Amount";
 import { Link } from "../../primitives/Link";
 import { Row } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { resolveSourceDocumentDetail } from "./source-document-detail";
 
 /**
@@ -203,22 +205,80 @@ export function sourceDocumentIdentifier(document: SourceDocumentVM): {
  * @instead The processing of an invoice → StatusBadge with axis `beleg`. The
  *          classification of the document → SourceDocumentClass.
  */
-export function SourceDocumentCompletion({ document }: { document: SourceDocumentVM }) {
+export function SourceDocumentCompletion({
+  document,
+  explain,
+  href,
+}: {
+  document: SourceDocumentVM;
+  /**
+   * The reason **as text** under the chip, not only in the hover (0150).
+   *
+   * „Keine Buchung nötig" is the case that made this necessary: the word says
+   * what happened, never why. Where there is room — the facts, the drawer —
+   * the sentence stands there; in a row or a cell it stays in the tooltip,
+   * because a second line per row is a second column of noise.
+   *
+   * The sentence is the one from the registry, and the free text of this one
+   * document comes **first** where there is one: it is the more specific
+   * answer, and a person wrote it.
+   */
+  explain?: boolean;
+  /**
+   * Where the batch that booked it stands — the way from „Gebucht" to the
+   * thing that did it (0150).
+   *
+   * Optional and passed in, because the document does not know it: there is
+   * no edge from `client_source_docs` to a booking cycle today (finding
+   * L-276). Whoever has the number hands over the link; whoever does not
+   * shows the state without one, as before.
+   */
+  href?: string | null;
+}) {
   const status = document.completedAt ? (document.completedVia ?? "completed") : "open";
+  const reason = document.completedReason
+    ? clipEnd(document.completedReason, MAX_REASON)
+    : null;
+  // The chip carries the state; the click carries the question „what else
+  // could it be?" — the same dialog the (i) opens, only with the whole chip as
+  // its target (0150). `info={false}` because the wrapper **is** the trigger:
+  // an (i) inside a button would be a button inside a button.
+  const chip = (
+    <StatusBadge axis="beleg_erledigung" status={status} info={false} note={reason} />
+  );
   return (
-    <span className="v2doccompl">
-      <StatusBadge
-        axis="beleg_erledigung"
-        status={status}
-        info={false}
-        note={document.completedReason ? clipEnd(document.completedReason, MAX_REASON) : null}
-      />
-      {/* „Done" means **when and how** (catalogue table of the spec).
-          The way stood there, the date did not — and „done" without a date is
-          the half of the answer one cannot check (acceptance 0070, M5). */}
-      {document.completedAt ? <Time value={document.completedAt} format="date" /> : null}
+    <span className={explain ? "v2doccompl v2doccompl--explain" : "v2doccompl"}>
+      <span className="v2doccompl__state">
+        <StatusInfoButton axis="beleg_erledigung" current={status}>
+          {chip}
+        </StatusInfoButton>
+        {/* „Done" means **when and how** (catalogue table of the spec).
+            The way stood there, the date did not — and „done" without a date is
+            the half of the answer one cannot check (acceptance 0070, M5). */}
+        {document.completedAt ? <Time value={document.completedAt} format="date" /> : null}
+        {href ? (
+          <a className="v2link" href={href}>
+            Zum Buchungsstapel
+          </a>
+        ) : null}
+      </span>
+      {explain ? <span className="v2doccompl__why">{completionReason(document)}</span> : null}
     </span>
   );
+}
+
+/**
+ * The sentence under the state: the free text of this document where there is
+ * one, otherwise the description of its state from the registry.
+ *
+ * Never both — the free text of a person answers the same question better
+ * than the general sentence, and two answers to one question read as a
+ * contradiction even when they agree.
+ */
+function completionReason(document: SourceDocumentVM): string {
+  if (document.completedReason) return document.completedReason;
+  const status = document.completedAt ? (document.completedVia ?? "completed") : "open";
+  return resolveStatus("beleg_erledigung", status).description ?? "";
 }
 
 /**

@@ -10,8 +10,10 @@ import { InlineEdit } from "@/ui/v3/primitives/InlineEdit";
 import { MenuItem, OverflowMenu } from "@/ui/v3/primitives/OverflowMenu";
 import { TextButton } from "@/ui/v3/primitives/TextButton";
 
+import { SourceDocumentDefects } from "@/ui/v3/entities/source-document/SourceDocumentAside";
+
 import { BelegSeite } from "./BelegSeite";
-import { belegFixture, MUSTER_PDF } from "./fixtures";
+import { belegFixture, belegMaengel, MUSTER_PDF } from "./fixtures";
 
 /**
  * Die anderen Belegarten — dieselbe Seite, andere Fakten (0144, A1–A7).
@@ -182,6 +184,13 @@ export const KontoauszugZugeordnet: Story = {
       completedVia: null,
       detail: null,
       hasInvoiceRow: false,
+      // Seit dem Spiegellauf vom 2026-09-10 trägt der Beleg sein Zahlungskonto
+      // selbst (L-266) — die Zeile entsteht in den Belegdaten, sobald es da ist.
+      paymentAccount: {
+        id: "pa-1",
+        label: "Testbank eG · Geschäftskonto",
+        iban: "DE00 0000 0000 0000 0000 00",
+      },
     });
     return (
       <BelegSeite
@@ -196,12 +205,16 @@ export const KontoauszugZugeordnet: Story = {
         }
       >
         <Card>
-          <CardHead title="Kontoauszug" sub="Der Auszug gehört zu einem Zahlungskonto" />
+          <CardHead title="Kontoauszug" sub="Was der Auszug enthält" />
           <div style={{ padding: 16 }}>
+            {/* Das **Zahlungskonto** steht seit 0150 in den Belegdaten — es
+                hängt am Beleg (`paymentAccount`), nicht an einer Karte, die
+                jede Seite selbst zusammensetzt. Hier bleibt, was der Container
+                zusätzlich mitbringt und wofür es im Modell noch kein Feld gibt
+                (Befund L-278). */}
             <FieldList
               tone="bare"
               rows={[
-                ["Zahlungskonto", "Testbank eG · Geschäftskonto — per IBAN erkannt"],
                 ["Zeitraum", "01.08.2026 – 31.08.2026"],
                 ["Zeilen", "146"],
               ]}
@@ -238,29 +251,36 @@ export const KontoauszugKontoWaehlen: Story = {
     });
     return (
       <BelegSeite document={doc} actions={menu}>
-        <Card>
-          <CardHead title="Zu klären" sub="1 Befund an diesem Beleg" />
-          <div style={{ padding: 16, display: "grid", gap: 12 }}>
-            <p className="v2muted" style={{ margin: 0 }}>
-              <strong>Zahlungskonto nicht eindeutig.</strong> Die IBAN im Auszug passt zu
-              keinem Konto; zwei kommen nach Name und Bank in Frage.
-            </p>
-            <div style={{ maxWidth: 420 }}>
-              <PaymentAccountField
-                id="a5-konto"
-                value={konto}
-                onChange={setKonto}
-                accounts={KONTEN}
-              />
-            </div>
-            {konto ? (
-              <p className="v2muted" style={{ margin: 0 }}>
-                Gewählt — die Zuordnung greift beim nächsten Import.
-              </p>
-            ) : null}
-          </div>
-        </Card>
-        <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary={null} />
+        <SourceDocumentCard
+          document={doc}
+          previewUrl={MUSTER_PDF}
+          summary={null}
+          // Der Mangel kommt aus `docDefects()`: `awaiting_input` heißt, der
+          // Auszug wartet auf sein Konto (F170). Der **Weg** ist das Feld
+          // selbst — ein Mangel ohne Weg wäre nur eine Meldung (L-268).
+          defects={
+            <SourceDocumentDefects
+              defects={belegMaengel({ inboxStatus: "awaiting_input" })}
+              actions={{
+                payment_account: (
+                  <div style={{ minWidth: 320 }}>
+                    <PaymentAccountField
+                      id="a5-konto"
+                      value={konto}
+                      onChange={setKonto}
+                      accounts={KONTEN}
+                    />
+                    {konto ? (
+                      <p className="v2muted" style={{ margin: "8px 0 0" }}>
+                        Gewählt — die Zuordnung greift beim nächsten Import.
+                      </p>
+                    ) : null}
+                  </div>
+                ),
+              }}
+            />
+          }
+        />
       </BelegSeite>
     );
   },

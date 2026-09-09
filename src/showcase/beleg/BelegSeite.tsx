@@ -10,7 +10,27 @@ import { RecordPager } from "@/ui/v3/primitives/RecordPager";
 
 import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
 
-import { BELEG_TABS, BELEG_TABS_OHNE_RECHNUNG, listHref, tabHref } from "./fixtures";
+import { ClarificationList } from "@/ui/v3/entities/clarification/Clarification";
+import {
+  SourceDocumentDefects,
+  SourceDocumentHistory,
+  SourceDocumentVat,
+} from "@/ui/v3/entities/source-document/SourceDocumentAside";
+import { TextButton } from "@/ui/v3/primitives/TextButton";
+
+import {
+  BELEG_TABS,
+  BELEG_TABS_OHNE_RECHNUNG,
+  belegMaengel,
+  KLAERUNG,
+  listHref,
+  partnerHref,
+  tabHref,
+  UST_GEMISCHT,
+  VERLAUF,
+  verlaufHref,
+  vorsteuerHref,
+} from "./fixtures";
 
 /**
  * The frame every scenario of 0144 is drawn in — pager, head, signal, tabs,
@@ -87,4 +107,46 @@ export function BelegSeite({
       {children}
     </SourceDocumentView>
   );
+}
+
+/**
+ * Die drei Boxen, die in **jeder** Übersicht neben den Fakten stehen (0150):
+ * was offen ist, was die Umsatzsteuer ergibt, was bisher geschah. Hier einmal
+ * gebaut, damit die Stories sich in dem unterscheiden, was sie zeigen wollen,
+ * und nicht darin, wie jemand die Seite zusammengesetzt hat.
+ */
+export function uebersichtsBoxen({
+  maengel = belegMaengel(),
+  klaerungen = [],
+}: {
+  maengel?: ReturnType<typeof belegMaengel>;
+  klaerungen?: readonly (typeof KLAERUNG)[];
+} = {}) {
+  return {
+    counterpartyHref: partnerHref,
+    defects: (
+      <SourceDocumentDefects
+        defects={maengel}
+        clarificationCount={klaerungen.length}
+        actions={{
+          document_date: <TextButton onClick={() => {}}>Datum eintragen</TextButton>,
+          partner: <TextButton onClick={() => {}}>Partner wählen</TextButton>,
+          recipient: <TextButton onClick={() => {}}>Gehört nicht hierher</TextButton>,
+          payment_account: <TextButton onClick={() => {}}>Konto zuordnen</TextButton>,
+        }}
+        {...(klaerungen.length > 0
+          ? {
+              clarifications: (
+                <ClarificationList
+                  clarifications={[...klaerungen]}
+                  empty={{ title: "Keine Rückfragen." }}
+                />
+              ),
+            }
+          : {})}
+      />
+    ),
+    vat: <SourceDocumentVat {...UST_GEMISCHT} href={vorsteuerHref} />,
+    history: <SourceDocumentHistory entries={VERLAUF} total={VERLAUF.length} href={verlaufHref} />,
+  };
 }

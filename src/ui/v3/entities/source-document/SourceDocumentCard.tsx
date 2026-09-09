@@ -64,6 +64,27 @@ export interface SourceDocumentCardProps {
   provenance?: boolean;
   /** What the caller adds under the two columns — the drawer puts its limit there. */
   children?: ReactNode;
+  /**
+   * The three boxes beside the facts (0150) — what is open, what the VAT
+   * amounts to, what has happened so far.
+   *
+   * The owner's rule for this page: **the overview is a preview of the tabs
+   * below it**, and what is wrong shows here rather than two clicks away. They
+   * are slots and not data, because each of them is fed from somewhere else —
+   * the defects from the domain, the VAT from the invoice line, the events
+   * from the audit log — and the card loads nothing (E2).
+   *
+   * The order is fixed: facts, then what somebody has to do, then the two
+   * previews. A box that moves depending on what is in it makes the page
+   * unreadable for whoever works through fifty of them in a row.
+   */
+  defects?: ReactNode;
+  vat?: ReactNode;
+  history?: ReactNode;
+  /** Where the counterparty stands as a business partner — passed to the facts. */
+  counterpartyHref?: string | null;
+  /** The batch that booked the document — passed to the facts. */
+  batchHref?: string | null;
 }
 
 /**
@@ -86,6 +107,11 @@ export function SourceDocumentCard({
   tone = "surface",
   provenance,
   children,
+  defects,
+  vat,
+  history,
+  counterpartyHref,
+  batchHref,
 }: SourceDocumentCardProps) {
   const kind = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
   return (
@@ -104,9 +130,11 @@ export function SourceDocumentCard({
           />
         </div>
 
-        {/* Rank 3 and 6 — what Ludwig read, and what the kind of document adds. */}
+        {/* Rank 3 and 6 — what Ludwig read, and what the kind of document adds.
+            The heading „Belegdaten" sits **inside** the box since 0150: it
+            stood above it as a bare line while three boxes beside it carried a
+            proper head, and `FieldList` has had a `title` since 0006. */}
         <div className="v2doccard__facts">
-          <div className="v2doc__h">Belegdaten</div>
           <SourceDocumentFacts
             document={document}
             summary={summary}
@@ -114,7 +142,15 @@ export function SourceDocumentCard({
             missing={missing}
             tone={tone === "bare" ? "bare" : "surface"}
             provenance={provenance}
+            {...(counterpartyHref ? { counterpartyHref } : {})}
+            {...(batchHref ? { batchHref } : {})}
+            // In the card there is room for the sentence under the state; in a
+            // row there is not, and that is where the tooltip stays.
+            explainCompletion
           />
+          {defects}
+          {vat}
+          {history}
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { ActionIcon } from "../Icons";
 import { AXIS_LABEL } from "./entity-icons";
@@ -11,6 +11,16 @@ interface StatusInfoButtonProps {
   axis: StatusAxis;
   /** Aktueller DB-Wert — im Dialog hervorgehoben. */
   current?: string | null;
+  /**
+   * The trigger itself, in place of the (i): then **the chip** is what opens
+   * the dialog (0150).
+   *
+   * Hit area and expectation are the reason. A 24 x 24 (i) beside a chip that
+   * looks clickable is the smaller of two targets, and whoever clicks the
+   * state wants to know what it means, not nothing. Where room and quiet
+   * matter — a list cell, a column head — the (i) stays.
+   */
+  children?: ReactNode;
 }
 
 /**
@@ -18,18 +28,19 @@ interface StatusInfoButtonProps {
  * mit allen Ausprägungen dieser Achse. Winziges Client-Island, damit
  * `StatusBadge` eine Server-Komponente bleiben kann.
  *
- * @when    „What can this status be?" right next to the status itself.
+ * @when    „What can this status be?" — as the (i) beside the status, or with
+ *          `children` as the chip itself.
  * @instead The legend without a trigger → StatusInfoDialog. Help on a field
  *          → Field `hint`. A whole page of explanation → ProseCard.
  */
-export function StatusInfoButton({ axis, current }: StatusInfoButtonProps) {
+export function StatusInfoButton({ axis, current, children }: StatusInfoButtonProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <button
         type="button"
-        className="v2sinfo"
+        className={children ? "v2sinfo v2sinfo--wrap" : "v2sinfo"}
         aria-label={`${AXIS_LABEL[axis]}: Zustände erklären`}
         title={`${AXIS_LABEL[axis]}: Zustände erklären`}
         onClick={(e) => {
@@ -40,7 +51,7 @@ export function StatusInfoButton({ axis, current }: StatusInfoButtonProps) {
           setOpen(true);
         }}
       >
-        <ActionIcon action="info" size={12} />
+        {children ?? <ActionIcon action="info" size={12} />}
       </button>
       <StatusInfoDialog axis={axis} current={current} open={open} onClose={() => setOpen(false)} />
     </>
