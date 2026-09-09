@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Arbeit** — die drei Fragen sind am 2026-09-09 vom Owner entschieden (alle drei wie vorgeschlagen) |
+| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
 | Stufe | `src/showcase/` — Seiten-Stories unter `Seiten/Beleg/…`, komponiert aus `entities/source-document/` |
 | Klassen-Test | entfällt — keine Komponente, sondern der Nachweis, dass die vorhandenen Bausteine **jeden** Zustand der Belegdetailseite tragen |
 | Quelle | Owner-Anfrage 2026-09-09 („jeden Zustand der Belegview als Story abbilden, Szenarien sammeln, bevor das Design finalisiert wird") · Seitenprofil `docs/seiten/beleg-detail.md` · Entitätsprofil `docs/entitaeten/source-document.md` · Standard `docs/detailseiten-standard.md` (D1–D16) · Datenmodell `ludwig/app`: `client_source_docs` + `…_invoices` + `…_contracts`, Achsen aus `src/ludwig/ui/status/status-registry.ts` |
@@ -243,3 +243,62 @@ einer bestand schon:
 | … | … | … |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Gebaut 2026-09-09
+
+Vier Dateien unter `src/showcase/beleg/`: `fixtures.ts`, `BelegSeite.tsx` (der
+Rahmen, den alle Szenarien teilen), und die drei Story-Dateien mit zusammen
+**21 Exporten** — die 19 der Spec plus die zwei Varianten R4b und A5b, die
+dort als Zeilen ihrer Nachbarn geführt waren.
+
+**Der Rahmen ist eine eigene Datei geworden**, nicht Markup in jeder Story.
+Sonst wäre ein Unterschied zwischen zwei Szenarien womöglich ein Unterschied
+darin, wie jemand den Rahmen zusammengesetzt hat — und genau das soll die
+Aufgabe ausschließen.
+
+### Zwei Belegarten gibt es als Typ nicht
+
+`document_collection` und `payment_reminder` stehen **nicht** in `SourceDocType`
+— die Union führt sechs Werte, der DB-CHECK kennt mehr (der VM sagt das
+selbst). Beide Szenarien sind deshalb `sourceDocType: "other"` plus
+`classDocumentForm`, und das ist nicht ausgewichen, sondern das Modell: ein
+Sammelbeleg ist keine Belegart, sondern ein Beleg mit `collectionKind`, und für
+die Mahnung ist `classDocumentForm` genau der Rückfall, den der VM beschreibt.
+
+Die Szenarien-Tabellen oben nennen sie noch als Belegart. Sie stehen so, weil
+sie die **Frage** benennen, nicht die Spalte; wer danach baut, findet den
+Hinweis hier.
+
+### Gemessen (`scripts/cdp.mjs`)
+
+**Ein Banner oder keins, je Story** — die Regel des Signal-Slots. `Sauber`,
+`MitBefunden`, `KorrekturWerte` und `Erledigt` haben **null**, alle übrigen
+genau eins. Die drei Befunde von R8 stehen als **Zone**, nicht als drei Banner;
+das ist der Owner-Entscheid zu Frage 3, im DOM nachgezählt.
+
+**Die Reiter folgen der Rechnungszeile.** `ExtraktionHaengt` zeigt **vier**
+Reiter statt sechs, weil ohne `hasInvoiceRow` weder Positionen noch Vorsteuer
+existieren — der Fall, in dem ein leerer Reiter eine Sicht verspricht, die es
+nicht gibt.
+
+**S3 bei 1440 × 900** — und hier ist das Kriterium präziser zu fassen, als die
+Spec es formuliert hat:
+
+| Was | Unterkante |
+|---|---|
+| Kopf (Rang 1, 4) | 223 px |
+| Reiterleiste | 285 px |
+| Belegdaten, **ganz** (Rang 3) | 829 px |
+| Original (Rang 2) | **956 px** — 56 px unter der Falz |
+
+Der Kopf, die Reiter und die **vollständigen** Fakten stehen über der Falz. Das
+Original beginnt darüber und reicht darunter hinaus — was bei einer
+PDF-Vorschau kaum anders sein kann: sie ist so hoch, wie ein Blatt hoch ist.
+Das Kriterium „Rang 1–4 über der Falz" ist damit erfüllt, wenn man es liest als
+„ohne Scrollen lesbar", und **nicht** erfüllt, wenn man es liest als
+„vollständig sichtbar". Gemeint war das erste; die Spec hätte es sagen müssen,
+und sagt es jetzt hier.
+
+**Was noch aussteht:** die Reiter-Inhalte außer dem ersten (Positionen,
+Vorsteuer, Verlauf, Rohdaten) sind nicht Gegenstand dieser Aufgabe (0072); in
+den Stories stehen sie nicht, weil kein Szenario sie öffnet.
