@@ -491,6 +491,10 @@ export {
 /* Konto — die Seite (0063) und der Kontenplan als Spaltensatz (0062) */
 export { LedgerAccountView } from "./entities/account/LedgerAccountView";
 export {
+  PaymentAccountField,
+  type PaymentAccountOption,
+} from "./entities/account/PaymentAccountField";
+export {
   accountColumns,
   accountTracks,
   accountMinWidth,
