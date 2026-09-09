@@ -103,7 +103,7 @@ export const Excerpt: Story = {
         fileName="RE-4471-ACME.pdf"
         pageCount={3}
         excerpt={{
-          pages: "5–7",
+          from: 5, to: 7,
           parentTitle: "Sammel-PDF vom 12.08.2026",
           parentHref: "#sammel-original",
         }}
@@ -214,7 +214,7 @@ export const InUse: Story = {
             title="Rechnung"
             fileName="RE-4471-ACME.pdf"
             pageCount={3}
-            excerpt={{ pages: "5–7", parentTitle: "Sammel-PDF vom 12.08.2026", parentHref: "#sammel" }}
+            excerpt={{ from: 5, to: 7, parentTitle: "Sammel-PDF vom 12.08.2026", parentHref: "#sammel" }}
           />
         </Drawer>
       </div>

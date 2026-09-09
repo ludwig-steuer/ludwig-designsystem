@@ -399,9 +399,11 @@ export const Group: Story = {
             receivedDate: "2026-08-12",
           }}
           group={{
-            pages: "5–7",
+            from: 5,
+            to: 7,
             parentTitle: "Sammel-PDF vom 12.08.2026",
             parentHref: "#sammel-original",
+            parentCollectionKind: "expense_report",
           }}
           tone="bare"
         />
@@ -410,7 +412,10 @@ export const Group: Story = {
         <SourceDocumentFacts
           document={{ ...INVOICE, id: "g4", caseNumber: null }}
           group={{
-            pages: "12–13",
+            // **Eine** Seite — der häufigste Fall: 68 von 99 Teilbelegen im
+            // Bestand sind Ein-Seiten-Ausschnitte, und die lasen sich bis
+            // 0076s Nacharbeit „Seiten 12".
+            from: 12,
             parentTitle: "Sammel-PDF vom 12.08.2026",
             parentHref: "#sammel-original",
           }}

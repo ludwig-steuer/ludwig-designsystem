@@ -86,6 +86,26 @@ const MAX_FILENAME_ROW = 48;
 const MAX_REASON = 280;
 
 /**
+ * A page range as the reader says it: „Seite 5" for one, „Seiten 4–5" for
+ * several.
+ *
+ * It exists because the range was a **string** until 0076's rework, and both
+ * places that rendered it wrote „Seiten {pages}" — so **68 of 99** part
+ * documents on staging read „Seiten 5". A single-page excerpt is the normal
+ * case, not the exception; the plural was wrong more often than right.
+ *
+ * Two lines above one of those places, `pageCount` already did it correctly.
+ * The rule the two together give: whoever knows the number picks the word —
+ * never the caller, who would then pick a different one.
+ *
+ * @when    A page range has to be named — the excerpt line, the facts row.
+ * @instead A count of pages („23 Seiten") → the caller has the number and the same choice.
+ */
+export function pageRangeLabel(from: number, to?: number): string {
+  return to !== undefined && to !== from ? `Seiten ${from}–${to}` : `Seite ${from}`;
+}
+
+/**
  * @when    A name or a freetext that has to fit into a row or a tooltip.
  * @instead A file name → clipMiddle, whose extension survives. Long prose in a
  *          cell that may fold open → LongText.

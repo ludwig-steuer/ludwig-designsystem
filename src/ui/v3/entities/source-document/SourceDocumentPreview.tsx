@@ -1,5 +1,6 @@
 import { Card, CardHead } from "../../primitives/Table";
 import { EmptyState } from "../../primitives/EmptyState";
+import { pageRangeLabel } from "./SourceDocument";
 
 /**
  * The original of a document, in a frame (0075).
@@ -53,7 +54,7 @@ export function SourceDocumentPreview({
    * The excerpt: `split_page_range` plus, where known, the way to the
    * collection original. `null` is a whole document — and says nothing.
    */
-  excerpt?: { pages: string; parentTitle?: string; parentHref?: string } | null;
+  excerpt?: { from: number; to?: number; parentTitle?: string; parentHref?: string } | null;
   /**
    * **Gone with the owner decision of 2026-09-07.** There was `md` (62vh) and
    * `lg` (78vh); at 1440 × 900 the taller one pushed „Belegdaten" below the
@@ -93,15 +94,15 @@ export function SourceDocumentPreview({
   );
 }
 
-/** „Seiten 5–7 aus Sammel-PDF vom 12.08.2026" — the range comes ready-made. */
+/** The excerpt line — a page range and where it was cut from — the range comes ready-made. */
 function ExcerptLine({
   excerpt,
 }: {
-  excerpt: { pages: string; parentTitle?: string; parentHref?: string };
+  excerpt: { from: number; to?: number; parentTitle?: string; parentHref?: string };
 }) {
   return (
     <>
-      Seiten {excerpt.pages}
+      {pageRangeLabel(excerpt.from, excerpt.to)}
       {excerpt.parentTitle ? (
         <>
           {" aus "}

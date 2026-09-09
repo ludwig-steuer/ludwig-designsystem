@@ -157,7 +157,7 @@ export const Teilbeleg: Story = {
           document={doc}
           previewUrl={MUSTER_PDF}
           summary="Stromabrechnung August 2026"
-          excerpt={{ pages: "4–5", parentTitle: "Sammel-August-2026.pdf", parentHref: "?beleg=d-0100" }}
+          excerpt={{ from: 4, to: 5, parentTitle: "Sammel-August-2026.pdf", parentHref: "?beleg=d-0100" }}
         />
       </BelegSeite>
     );

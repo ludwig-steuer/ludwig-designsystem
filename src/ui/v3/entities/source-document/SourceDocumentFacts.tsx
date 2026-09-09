@@ -14,6 +14,7 @@ import {
   clipMiddle,
   sourceDocumentIdentifier,
   type SourceDocumentVM,
+  pageRangeLabel,
 } from "./SourceDocument";
 import { resolveSourceDocumentDetail } from "./source-document-detail";
 
@@ -53,7 +54,23 @@ const MAX_FILENAME_CARD = 88;
  */
 export type SourceDocumentGroup =
   | { childCount: number; completedChildCount: number }
-  | { pages: string; parentTitle?: string; parentHref?: string };
+  | {
+      from: number;
+      to?: number;
+      parentTitle?: string;
+      parentHref?: string;
+      /**
+       * The clamp of the **original** — `collectionKind`, axis `dokumentgruppe`.
+       *
+       * It comes in through the group and not off `document`, because in this
+       * direction `document` is the **child**, and the child carries no clamp.
+       * It matters for booking: an expense report is not a batch scan
+       * (`belege.md` F104), and the deleted `ParentDocNotice` showed it as a
+       * badge. Today nothing is lost — all 12 originals on
+       * staging carry `not_connected` or nothing — but the row was missing.
+       */
+      parentCollectionKind?: string | null;
+    };
 
 /**
  * A value the document is **missing** and someone has to supply — the
@@ -294,11 +311,24 @@ function groupBlock(
     ]);
     return rows;
   }
-  return [
-    [
+  const rows: [ReactNode, ReactNode][] = [];
+  // The clamp first, as in the parent direction — it says what kind of thing
+  // the excerpt was cut out of, and that is read before the page numbers.
+  if (group.parentCollectionKind) {
+    rows.push([
+      "Klammer",
+      <StatusBadge
+        key="pk"
+        axis="dokumentgruppe"
+        status={group.parentCollectionKind}
+        info={false}
+      />,
+    ]);
+  }
+  rows.push([
       "Ausschnitt",
       <span key="x">
-        Seiten {group.pages}
+        {pageRangeLabel(group.from, group.to)}
         {group.parentTitle ? (
           <>
             {" aus "}
@@ -312,6 +342,6 @@ function groupBlock(
           </>
         ) : null}
       </span>,
-    ],
-  ];
+  ]);
+  return rows;
 }

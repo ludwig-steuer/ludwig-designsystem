@@ -51,7 +51,7 @@ export interface SourceDocumentQuickView {
   /** Why there is no preview — said in a sentence, not left blank. */
   previewUnavailableReason?: string | null;
   /** „Seiten 5–7 aus …" for a document cut out of a collection PDF. */
-  excerpt?: { pages: string; parentTitle?: string; parentHref?: string } | null;
+  excerpt?: { from: number; to?: number; parentTitle?: string; parentHref?: string } | null;
   /** The group block of the facts — original with its parts, or one of them. */
   group?: SourceDocumentGroup | null;
 }

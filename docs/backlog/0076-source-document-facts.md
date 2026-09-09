@@ -681,3 +681,47 @@ und Fehler trägt der Aufrufer (0042).
   ist — der nächste, der einen Drawer baut, findet die Antwort.
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05
+
+## Nacharbeit 2026-09-09 — zwei Befunde aus der App-Ablösung
+
+Gemeldet von `ludwig-worker` über `ludwig-manager`, gemessen auf Staging bei
+der Ablösung der Belegseite (Stufe L-267). Beide betreffen `groupBlock` in der
+**Kind**-Richtung, und beide waren seit 0076 da — die Seite hatte die
+`group`-Prop bis `82802f86` nie benutzt.
+
+**1. „Seiten 5" für einen einseitigen Ausschnitt.** Der Block schrieb fest
+`Seiten {pages}`, und **68 von 99** Teilbelegen im Bestand sind
+Ein-Seiten-Ausschnitte. Der Plural war also öfter falsch als richtig.
+
+Behoben nicht durch eine Fallunterscheidung an der Stelle, sondern durch die
+**Form der Prop**: aus `pages: string` wurde `from: number; to?: number`, und
+`pageRangeLabel()` bildet daraus „Seite 5" oder „Seiten 4–5". Die Ableitung
+liegt bei der Familie (`SourceDocument.tsx`) und wird von beiden Renderern
+benutzt — die Vorschau hatte denselben Fehler.
+
+Zwei Zeilen über einer der beiden Stellen machte `pageCount` es schon richtig
+(`${n} ${n === 1 ? "Seite" : "Seiten"}`). Die Regel, die beide zusammen
+ergeben: **wer die Zahl kennt, wählt das Wort** — nie der Aufrufer, der dann
+ein anderes wählt.
+
+**2. Keine Zeile für die Klammer des Originals.** In der Kind-Richtung fehlte
+`collectionKind` ganz. Der Grund, warum das nicht auffiel: `document` ist dort
+das **Kind**, und das Kind trägt keine Klammer — sie hängt am Original. Sie
+kommt jetzt über die Gruppe herein (`parentCollectionKind`), wo die
+Beziehung ohnehin steht.
+
+Fachlich ist sie buchungsrelevant: eine Auslagenabrechnung ist kein
+Stapelscan (`belege.md` F104), und das gelöschte `ParentDocNotice` zeigte sie
+als Marke. Heute geht nichts verloren — alle zwölf Originale auf Staging
+tragen `not_connected` oder nichts —, aber die Zeile fehlte.
+
+**Gemessen** (Story `Group`, 1100 px): „Seite 12" steht im Singular, „Seiten
+5–7" bei der Spanne, „Seiten 12" kommt nicht mehr vor, und die Klammer steht.
+
+### Was das für Aufrufer heißt
+
+`excerpt` und `group` haben eine andere Form: `pages: string` ist weg. Vier
+Signaturen sind betroffen (`SourceDocumentPreview`, `-Card`, `-Drawer`,
+`-Facts`), alle im Set nachgezogen. Wer die Seitenangabe als String hat
+(`splitPageRange`), zerlegt sie einmal beim Bauen des Sichtmodells — dort, wo
+das Format bekannt ist, statt in der Darstellung.
