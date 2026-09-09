@@ -159,6 +159,7 @@ meldet ihn hier — es erfindet keine Begriffe.
 
 | # | Befund | Zu tun | Quelle |
 |---|---|---|---|
+| **L-229** | **Auf die Partner-Stammdaten führt kein Schreibpfad mehr.** `update_business_partner` ist mit F127 als Agenten-Werkzeug gestrichen, eine Server Action gibt es nicht. Für das Design-System ist das die Begründung gegen einen `BusinessPartnerEditor` — sie wird dadurch stärker. Fachlich ist es eine **Owner-Frage**: ein falscher Ort oder eine falsche USt-IdNr. ist heute nur über einen erneuten Import zu korrigieren | entscheiden, ob das so bleiben soll; wenn nicht, den Schreibpfad benennen | `entitaeten/business-partner.md`, Prüfung 2026-09-09 |
 | **L-22** | `client_ledger_accounts.is_default` ist **tot**: 41.570 von 41.570 Zeilen `false` | befüllen oder droppen; die Anzeige lässt sie aus | `entitaeten/account.md` |
 | **L-23** | `client_accounting_case_expectation` hat `expected_amount`, aber **keine `currency`** | Spalte ergänzen; bis dahin nimmt der Aufrufer die des Sachverhalts | 0040 |
 | **L-24** | `client_accounting_case_expectation.clarification_id` ist **tot**: 0 von 45 Zeilen belegt, seit F125 auch fachlich abgelöst | Kandidat zum Entfernen | clarification B4 |
@@ -195,6 +196,7 @@ Ablösung doppelt Arbeit macht.
 
 | # | Befund | Quelle |
 |---|---|---|
+| **L-228** | `topVendors` wird je Seitenaufruf gerechnet und **nirgends gelesen**: ein Join über zwei Tabellen mit `limit 5` in `modules/clients/infrastructure/dashboard-queries.ts`, kein Treffer in `apps/web/src`. Die Kachel „Top Kreditoren" ist per Owner-Entscheid gestrichen (begründet im Kopfkommentar der Dashboard-Seite), die Abfrage blieb stehen | Abfrage entfernen, oder die Kachel wiederherstellen | `entitaeten/business-partner.md`, Prüfung 2026-09-09 |
 | ~~**L-31**~~ | Die beiden `RohdatenTab.tsx` sind Kopien voneinander; die Sachverhalt-Fassung ist die ältere (keine Klappe, keine `HEAVY_TABLES`, `<pre>` fest bei 360 px). **Wer sie ablöst, löst zwei Dateien ab.** Dazu drei Wahrheiten für denselben Wert: `true` vs. „ja", Zahl gruppiert vs. ungruppiert, Zeitstempel lokalisiert vs. roh. — **erledigt 2026-09-06 (App-Seite): Commit `7e452218`.** die beiden Rohdaten-Tabs sind eine generische `ui/RawDataView.tsx` | 0051 |
 | ~~**L-32**~~ | Zwei Antwort-Eingaben für dieselbe Frage: `AnswerInput` (Kanzlei) und die Kopie in `PortalCaseList.tsx`. `RueckfragenListe` nutzt bewusst dieselbe Eingabe wie der Sachverhalt — das Portal ist ausgeschert. — **erledigt 2026-09-06 (App-Seite): Commit `7e452218`.** das tote Portal-Modul samt `AnswerInput`-Kopie ist gelöscht | clarification B5 |
 | ~~**L-33**~~ | Zwei Sicht-Mechaniken, eine Bedeutung: `InvoiceLogsPanel` (Fachlich/Technisch/Beide + verbose, Client-State) und das Stapel-Log (Verlauf/Protokoll/Technik, URL). Mit 0053/0054 wird „Fachlich" = Tiefe ≤ 2, „Technisch" = Tiefe 3, „verbose" = schwerefreie Tiefe-3-Zeilen — **der Schalter fällt weg**. — **erledigt 2026-09-06 (App-Seite): Commit `e8b5eb77`.** die Log-Familie läuft über `LogList`/`LogBrowser`, der verbose-Schalter ist weg, und Level → Tiefe liegt in der Domäne | 0054 |
