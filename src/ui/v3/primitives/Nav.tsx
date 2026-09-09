@@ -11,20 +11,54 @@ import { Link } from "./Link";
  * JavaScript; `onPick` ist die Client-Variante.
  */
 
-export interface TabItem {
+interface TabItemBase {
   key: string;
   label: string;
-  /** Zähler rechts am Reiter — gedämpft, bei `alarm` rot und fett. */
-  count?: number;
-  /**
-   * Punkt anstelle des Zählers (0049): es gibt etwas, aber es lässt sich
-   * nicht zählen. Steht auch `count`, gewinnt die Zahl — zweimal dasselbe
-   * zu sagen hilft niemandem.
-   */
-  dot?: boolean;
-  alarm?: boolean;
   href?: string;
 }
+
+/**
+ * A tab — loud or quiet, never both.
+ *
+ * The union separates the two kinds: either the tab draws attention to itself
+ * (counter, dot, alarm), or it holds back (`quiet`). A quiet tab with a red
+ * counter would be a contradiction — `alarm` says „look here", `quiet` says
+ * „later".
+ *
+ * The exclusion lives in the **type**, not as a sentence in the JSDoc. That is
+ * the lesson from 0121/0122: an exclusion in a comment is broken by the first
+ * caller who does not read the comment, and the typechecker says nothing.
+ */
+export type TabItem = TabItemBase &
+  (
+    | {
+        /**
+         * The tab sits on the debug level (A7 `neutral`) and demands nothing:
+         * **resting colour one step back**, identical otherwise. Same height,
+         * same hit area, same hover, same focus ring, same active underline.
+         *
+         * Built for „Rohdaten", the last tab of every detail page (D12):
+         * visible to everyone, but not as important as „Positionen". Being
+         * visible is not the same as being prominent.
+         */
+        quiet: true;
+        count?: never;
+        dot?: never;
+        alarm?: never;
+      }
+    | {
+        quiet?: never;
+        /** Counter at the right of the tab — muted, red and bold with `alarm`. */
+        count?: number;
+        /**
+         * A dot instead of the counter (0049): there is something, but it
+         * cannot be counted. With `count` as well the number wins — saying the
+         * same thing twice helps nobody.
+         */
+        dot?: boolean;
+        alarm?: boolean;
+      }
+  );
 
 /**
  * @when    Views with their own content, one active; counter and alarm on the tab.
@@ -44,7 +78,7 @@ export function Tabs({
   return (
     <div className="v2tabs" role="tablist" aria-label={ariaLabel}>
       {items.map((it) => {
-        const cls = `v2tab${it.key === active ? " is-active" : ""}`;
+        const cls = `v2tab${it.key === active ? " is-active" : ""}${it.quiet ? " is-quiet" : ""}`;
         const body = (
           <>
             {it.label}

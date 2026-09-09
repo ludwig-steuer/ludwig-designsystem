@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec — geschrieben 2026-09-09 |
+| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
 | Stufe | `patterns/` (`EntityHeader`) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: ein Vorgang mit Phasen, dessen Kopf zeigt, wo er steht |
 | Quelle | `docs/detailseiten-standard.md` D6 · Designsprache Z7 |
@@ -167,3 +167,32 @@ Variabel (aus dieser Spec):
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
 | | | |
+
+## Gebaut 2026-09-09
+
+Eine Prop, eine CSS-Zeile, eine Story. Der `EntityHeader` hat jetzt zehn Slots.
+
+**Gemessen** (`scripts/cdp.mjs`, 1000 px, Story `WithProcess` — zwei Köpfe,
+mit und ohne die Prop):
+
+| Was | Mit `process` | Ohne |
+|---|---|---|
+| `.v2ehead__process` im DOM | ja | **nein** |
+| steht **nach** dem Titelblock | ja (`compareDocumentPosition` = 4) | — |
+| ein Badge **im** Prozess-Slot | **nein** — das wäre der D7-Verstoß | — |
+| Kopfhöhe | 269 px | **124 px** |
+
+Die letzte Zeile ist der Beweis für „leer heißt weg": ohne die Prop ist der
+Kopf nicht nur ohne Bild, sondern ohne dessen Platz — 145 px weniger, nicht
+145 px Leerraum.
+
+**Was der Bau bestätigt hat:** die Prop ist `ReactNode`, und der Kopf weiß
+nicht, dass ein Stepper darin steht. Damit trägt derselbe Platz auch
+`ProcessMini` auf einer schmalen Seite, ohne dass der Kopf davon erfährt.
+
+Der Nachweis dafür ist **kein** `grep` auf `ProcessPhase` — der Begriff steht
+zweimal in der Datei, beide Male im Kommentar, der genau das erklärt. Das ist
+derselbe Fehler wie in 0145 heute Vormittag: ein Kriterium, das den
+erklärenden Satz mitbestraft, treibt ihn aus dem Code. Der Nachweis ist der
+**Typ** — `process?: ReactNode`, und keine Zeile im Rumpf liest daraus etwas
+aus.

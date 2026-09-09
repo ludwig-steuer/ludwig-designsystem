@@ -11,6 +11,7 @@ import { PageHeader } from "../primitives/PageHeader";
 import { Popover } from "../primitives/Popover";
 import { RecordPager } from "../primitives/RecordPager";
 import { EntityHeader } from "./EntityHeader";
+import { ProcessStepper } from "./Process";
 import { StatusBadge } from "./StatusBadge";
 import { axisLegend } from "@/ludwig/ui/status/status-registry";
 
@@ -251,4 +252,61 @@ export const InUse: Story = {
       />
     </div>
   ),
+};
+
+/**
+ * `process` (0137): das Prozessbild einer Kette, als **eigene Zeile** zwischen
+ * Titelblock und Zusammenfassung.
+ *
+ * Z7 verlangt für jede mehrstufige Kette dieselbe Familie, und `ProcessStepper`
+ * trägt dafür die Zusage „im Detail-Header" — nur gab es dort bis heute keinen
+ * Platz. `meta` verlangt Inline-Elemente, `summary` ist eine Zeile Text; ein
+ * Stepper ist ein Block und passt in keins von beidem.
+ *
+ * **Badge und Stepper sind kein D7-Verstoß, solange sie nicht nebeneinander
+ * stehen.** Der Badge sitzt in der Titelzeile und antwortet „in welchem
+ * Zustand", das Bild eine Zeile darunter und antwortet „wo in der Kette". Der
+ * Verstoß wäre ein `StatusBadge` **im** `process`-Slot.
+ *
+ * Die zweite Karte zeigt denselben Kopf ohne die Prop: **leer heißt weg**, samt
+ * Abstand — dieselbe Regel wie bei `metric`, `summary` und `facts`, und der
+ * Grund, warum der Kopf mit zehn Slots nicht auseinanderfällt.
+ */
+export const WithProcess: Story = {
+  render: () => {
+    const phases = [
+      { key: "buchen", label: "Buchen", sub: "Agent", states: ["queued", "running", "proposed"], status: "done" as const },
+      { key: "pruefen", label: "Prüfen", sub: "Kanzlei", states: ["review", "returned", "approved"], status: "active" as const },
+      { key: "uebergeben", label: "Übergeben", sub: "Übertragung", states: ["exporting", "exported"], status: "pending" as const },
+      { key: "nachlesen", label: "Nachlesen", sub: "DATEV", states: ["mirrored", "reconciled"], status: "pending" as const },
+    ];
+    const kopf = (mitBild: boolean) => (
+      <EntityHeader
+        icon={<Layers size={20} strokeWidth={1.5} />}
+        overline="Stapel · 2026-08-A"
+        title="Buchungsstapel August 2026"
+        status={<StatusBadge axis="sachverhalt" status="needs_clarification" showIcon={false} />}
+        {...(mitBild
+          ? {
+              process: (
+                <ProcessStepper
+                  phases={phases}
+                  owner={{ key: "kanzlei", label: "Kanzlei", color: "var(--color-primary)" }}
+                  loops={{ returned: 2, reopened: 1 }}
+                  phaseSince={{ buchen: "26.08." }}
+                />
+              ),
+            }
+          : {})}
+        metric={{ label: "Gesamtbetrag", value: <Amount value={18450.2} currency="EUR" size="lg" /> }}
+        summary="41 Buchungen, zwei davon mit offener Rückfrage."
+      />
+    );
+    return (
+      <div style={{ maxWidth: 940, display: "grid", gap: 32 }}>
+        {kopf(true)}
+        {kopf(false)}
+      </div>
+    );
+  },
 };

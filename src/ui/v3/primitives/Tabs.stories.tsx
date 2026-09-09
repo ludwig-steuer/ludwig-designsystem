@@ -85,3 +85,54 @@ export const TabsWithDot: Story = {
     />
   ),
 };
+
+/**
+ * `quiet` (0136): der Reiter auf der **Debug-Stufe**. Gebaut für „Rohdaten",
+ * den letzten Reiter jeder Detailseite (D12) — für alle sichtbar, ohne Zähler,
+ * ohne Alarm, und optisch zurückgenommen.
+ *
+ * Sichtbarkeit ist nicht Prominenz: ein Reiter, der aussieht wie „Positionen",
+ * behauptet, er sei so wichtig wie „Positionen".
+ *
+ * **Gedämpft ist nur die Ruhefarbe.** Hover, Fokus und der aktive Zustand sind
+ * zeichengleich mit einem normalen Reiter — die zweite Leiste unten zeigt
+ * „Rohdaten" aktiv, und dort ist nichts leise. Ein leiser aktiver Reiter
+ * machte die Leiste zweideutig: welcher ist offen?
+ *
+ * Der Farbwert ist `--color-text-subtle` und **nicht** `--color-text-muted`:
+ * auf dem liegt die Ruhefarbe eines normalen Reiters bereits, die Prop wäre
+ * wirkungslos gewesen. Es ist die einzige Stufe darunter, die mit 4,88:1 noch
+ * über der AA-Grenze bleibt.
+ *
+ * `quiet` schließt `count`, `dot` und `alarm` aus — im **Typ**, nicht im Text.
+ * Diese Zeile wäre ein Typfehler:
+ * `{ key: "roh", label: "Rohdaten", quiet: true, count: 3 }`
+ */
+export const Quiet: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 28 }}>
+      <Demo
+        items={[
+          { key: "uebersicht", label: "Übersicht" },
+          { key: "details", label: "Details" },
+          { key: "positionen", label: "Positionen", count: 14 },
+          { key: "vorsteuer", label: "Vorsteuer", count: 2, alarm: true },
+          { key: "verlauf", label: "Verlauf" },
+          { key: "roh", label: "Rohdaten", quiet: true },
+        ]}
+      />
+      <Tabs
+        ariaLabel="Beleg mit aktiven Rohdaten"
+        active="roh"
+        items={[
+          { key: "uebersicht", label: "Übersicht" },
+          { key: "details", label: "Details" },
+          { key: "positionen", label: "Positionen", count: 14 },
+          { key: "vorsteuer", label: "Vorsteuer", count: 2, alarm: true },
+          { key: "verlauf", label: "Verlauf" },
+          { key: "roh", label: "Rohdaten", quiet: true },
+        ]}
+      />
+    </div>
+  ),
+};

@@ -658,6 +658,12 @@
   margin-bottom: -1px;
   display: inline-flex; align-items: center; gap: 6px;
 }
+/* Ein Reiter auf der Debug-Stufe (0136): eine Stufe leiser in Ruhe, sonst
+   nichts. Steht **vor** :hover und .is-active, damit beide sie schlagen —
+   wer den Reiter geöffnet hat, sieht dort hin, und ein leiser aktiver Reiter
+   machte die Leiste zweideutig. `--color-text-subtle` und nicht
+   `--color-text-muted`: auf dem liegt die Ruhefarbe schon. */
+.v2tab.is-quiet { color: var(--color-text-subtle); }
 .v2tab:hover { color: var(--color-text); }
 .v2tab.is-active { font-weight: 600; color: var(--color-primary); border-bottom-color: var(--color-primary); }
 .v2tab:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
@@ -2378,6 +2384,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2ehead__metric__value { font-size: 20px; font-weight: 600; line-height: 1.2; margin-top: 2px; }
 .v2ehead__actions { flex: 0 0 auto; display: flex; align-items: center; gap: var(--space-3); }
+/* Das Prozessbild (0137) — eigene Zeile zwischen Titelblock und Zusammenfassung.
+   Leer heißt weg, samt Abstand: dieselbe Regel wie bei jedem Slot des Kopfs,
+   und der Grund, warum er mit zehn Slots nicht auseinanderfällt. */
+.v2ehead__process { margin-top: var(--space-4); }
 .v2ehead__summary {
   margin-top: var(--space-4);
   font-size: 13.5px; line-height: 1.5; color: var(--color-text-muted);

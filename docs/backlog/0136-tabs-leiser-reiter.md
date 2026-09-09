@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec — geschrieben 2026-09-09 |
+| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
 | Stufe | `primitives/` (`Nav.tsx`, `Tabs`/`TabItem`) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: jede Anwendung mit einer Debug-Ansicht neben fachlichen Sichten |
 | Quelle | `docs/detailseiten-standard.md` D12 (Owner-Entscheid 2026-09-08) |
@@ -155,3 +155,33 @@ Variabel (aus dieser Spec):
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
 | | | |
+
+## Gebaut 2026-09-09
+
+`TabItem` ist jetzt eine **Union** über zwei Formen — laut (Zähler, Punkt,
+Alarm) oder leise (`quiet`), nie beides. Dazu eine CSS-Zeile und eine Story.
+
+**Gemessen** (`scripts/cdp.mjs`, 1100 px, Story `Quiet`):
+
+| Was | Gemessen |
+|---|---|
+| Ruhefarbe „Rohdaten" | `rgb(113, 113, 113)` = `#717171` = `--color-text-subtle` |
+| Ruhefarbe der Nachbarn | `rgb(92, 92, 92)` = `#5C5C5C` = `--color-text-muted` |
+| Höhe aller Reiter | **43 px**, auch des leisen — leise ist eine Frage der Farbe, nicht der Größe |
+| „Rohdaten" **aktiv** | `rgb(26, 58, 92)`, die Primärfarbe — der aktive Zustand ist **nicht** gedämpft |
+
+Der zweite und der vierte Punkt sind die eigentliche Prüfung: der Unterschied
+ist da, und er ist genau **eine** Stufe — hätte die Spec bei
+`--color-text-muted` bleiben dürfen, stünden in der ersten Spalte zweimal
+dieselbe Zahl.
+
+**Der Ausschluss steht im Typ.** `{ quiet: true, count: 3 }` ist ein
+Typfehler, kein Kommentarverstoß. Die Story nennt die Zeile, die es beweist,
+statt sie auskommentiert stehen zu lassen — ein auskommentierter Fehler wird
+nie wieder geprüft.
+
+**Der Sprachwächter hat mich dabei erwischt.** Die Union kam mit deutschen
+Kommentaren in `Nav.tsx` — eine Code-Datei, in der nur Englisch steht
+(CLAUDE.md). Die vorhandenen deutschen Zeilen daneben waren jahrelang
+unbeanstandet, weil der Wächter nur **angefasste** Dateien prüft; wer eine
+Datei anfasst, erbt sie. Übersetzt sind jetzt beide.
