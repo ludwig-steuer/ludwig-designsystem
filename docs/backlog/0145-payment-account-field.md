@@ -145,7 +145,9 @@ Variabel (aus dieser Spec):
       **nicht** verloren (`UnbekannterWert`, `select.value` gemessen)
 - [ ] Leere Liste: Feld ist `disabled`, ohne dass der Aufrufer es setzt (`Leer`)
 - [ ] Die weiteren Konten sind wählbar, keines ist `disabled` (`Gefuellt`)
-- [ ] Der Baustein leitet nichts ab: `grep -n "expects_statements\|bookingCount" PaymentAccountField.tsx` findet nichts
+- [ ] Der Baustein leitet nichts ab: `inUse` wird nur **gelesen**, nie
+      gerechnet. Prüfbar daran, dass `expects_statements` genau **einmal**
+      vorkommt — im Kommentar, der sagt, dass die Ableitung in der App bleibt
 - [ ] Ersetzt `UploadInbox.tsx:793` und das Feld in `RecurringRuleEditor.tsx:558`
       ohne Funktionsverlust
 
@@ -168,8 +170,12 @@ Der letzte Punkt ist der, um den es ging: hätte ich das Unbekannte weggelassen,
 stünde `select.value` auf `""`, und die nächste Speicherung hätte die Zuordnung
 gelöscht — lautlos.
 
-**Was das Feld nicht tut, geprüft:** `grep -n "expects_statements\|bookingCount"`
-findet nichts. Die Ableitung, was „geführt" heißt, bleibt in der App.
+**Ein Abnahmekriterium dieser Spec war so nicht prüfbar.** Es verlangte, dass
+`grep` den Begriff **nicht** findet — er steht aber genau einmal in der Datei,
+nämlich in dem Kommentar, der erklärt, dass die Ableitung in der App bleibt.
+Ein Kriterium, das den erklärenden Satz mitbestraft, treibt ihn aus dem Code.
+Es heißt jetzt „genau einmal, und zwar im Kommentar“.
+
 
 ## Abnahme
 
