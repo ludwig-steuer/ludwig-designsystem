@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Arbeit** — freigegeben 2026-09-09 (Owner) |
+| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Geschäftspartner, Personenkonto, Kreditor/Debitor |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (Status `geprüft`, 2026-09-09), Abschnitt „Formen", Zeile `BusinessPartnerCell` |
@@ -50,7 +50,7 @@ einen Weg, den es nicht gibt.
 | `shortName` | `string \| null` | nein | Rang 7 — steht **hinter** dem Namen, wenn er von ihm abweicht und Platz ist. Gleich, fehlend oder eine reine Kürzung des Namens: er entfällt | `WithShortName` |
 | `href` | `string` | nein | Der Weg zum Partner. Ohne ihn ist die Zelle Text — nicht jeder Ort hat einen Weg (L3: ein Suchparameter, kein Kontext) | `Filled` |
 | `account` | `{ number: string; role: "creditor" \| "debtor" } \| null` | nein | Rang 2 — die Personenkonto-Nummer, `mono`, hinter dem Namen. **Die Rolle kommt als Prop, nicht aus dem Satz:** `PartnerAccountRef` trägt nur `accountNumber` und `isInternal`; welche Rolle es ist, sagt der Schlüssel, unter dem der Aufrufer ihn geholt hat (`creditorAccount` gegen `debtorAccount`) | `WithAccount` |
-| `limit` | `number` | nein | Wo gekürzt wird. Vorgabe **33** — `MAX_COUNTERPARTY` aus `SourceDocument.tsx`, und das deckt den p90 des Namens (21 Zeichen) mit Abstand | `Edges` |
+| `limit` | `number` | nein | Wo gekürzt wird. Vorgabe **36** — `MAX_COUNTERPARTY` aus `SourceDocument.tsx`, das denselben Namen in derselben Art Zeile kürzt; es deckt den p90 des Namens (21 Zeichen) mit Abstand, das Maximum im Bestand ist 50 | `Edges` |
 
 **Kann bewusst nicht:**
 
@@ -73,7 +73,7 @@ abweicht — Kontonummer, wenn eine da ist. Mit `href` umschließt der Anker den
 (0140), und zwei Ziele in einem Anker wären I11 verletzt.
 
 **Kürzung.** Über `limit` hinaus wird hinten gekürzt, mit `title` am ganzen
-Namen. Der p90 liegt bei 21 Zeichen und das Maximum bei 50 — bei 33 bleiben
+Namen. Der p90 liegt bei 21 Zeichen und das Maximum bei 50 — bei 36 bleiben
 neun von zehn Namen unangetastet, und die restlichen sind lesbar gekürzt statt
 umgebrochen.
 
@@ -91,7 +91,7 @@ Kürzungsgrenze. Untergrenze für eine Entitäts-Form ist 3.
 | `Filled` | Name mit `href` und ohne — der Regelfall in beiden Ausprägungen |
 | `WithShortName` | Kurzname abweichend (steht), gleich (entfällt), Präfix des Namens (entfällt) |
 | `WithAccount` | Kreditor- und Debitornummer nebeneinander; die Rolle kommt aus der Prop, nicht aus dem Satz |
-| `Edges` | 50 Zeichen (Maximum im Bestand), genau 33, `shortName: null`, `account: null` — und ein Name, der aus einer Ziffernfolge besteht |
+| `Edges` | 50 Zeichen (Maximum im Bestand), genau 36, `shortName: null`, `account: null` — und ein Name, der aus einer Ziffernfolge besteht |
 | `InUse` | Die Zelle in fremdem Markup: in einer `FieldList`-Zeile (wie `CaseFacts` sie stellt) und in einer Tabellenzelle (wie `account-columns`) |
 
 Ausgelassen mit Grund: **lädt** und **Fehler** — eine Zelle hat keine eigenen
@@ -129,11 +129,36 @@ Variabel (aus dieser Spec):
       ist (`WithShortName`, dritte Zeile)
 - [ ] Mit `href` umschließt der Anker nur den Namen; die Kontonummer liegt
       außerhalb (`WithAccount`, DOM geprüft — I11)
-- [ ] Gekürzt wird bei `limit`, Vorgabe 33, mit `title` am ganzen Namen
+- [ ] Gekürzt wird bei `limit`, Vorgabe 36, mit `title` am ganzen Namen
       (`Edges`)
 - [ ] Die Kontonummer ist `mono` und behält führende Nullen (`WithAccount`)
 - [ ] Ersetzt die drei Namensausgaben in `CaseFacts`, `account-columns` und
       `Account.tsx` ohne Funktionsverlust
+
+## Gebaut 2026-09-09
+
+`BusinessPartnerCell` in `entities/business-partner/BusinessPartner.tsx` — die
+Datei trägt später auch die Fakten (0142), wie `Account.tsx` es für Konto-Zelle
+und -Fakten macht. Dazu vier CSS-Zeilen (`.v2bp*`) und fünf Stories.
+
+**Eine Zahl in dieser Spec war falsch, gefunden beim Bauen.** Die
+Schnittstelle nannte als Vorgabe **33** und berief sich dabei auf
+`MAX_COUNTERPARTY` aus `SourceDocument.tsx` — die Konstante ist **36**. Es
+gilt 36: die Zelle kürzt denselben Namen in derselben Art Zeile wie der Beleg,
+und zwei Grenzen für einen Namen wären eine zweite Wahrheit. Die drei Stellen
+in der Spec sind berichtigt.
+
+**Gemessen** (`scripts/cdp.mjs`, 1400 px):
+
+| Story | Gemessen |
+|---|---|
+| `WithShortName` | „MUSTERIMMO" steht; der gleiche Kurzname und die Kürzung „Musterbau Hande" stehen **nicht** — `.v2bp__short` fehlt in beiden Zeilen |
+| `WithAccount` | Der Anker trägt genau den Namen (`Musterfirma Immobilien GmbH`); im Kontoblock ist **kein** Anker (`ankerImKonto: false`) — I11 gehalten |
+| `Edges` | 50 Zeichen → „Musterfirma Immobilienverwaltung No…" mit `title` am ganzen Namen; genau 36 → ungekürzt und **ohne** `title`; führende Null bleibt (`0700123`) |
+| alle drei | Zellenhöhe **25 px** in jeder Zeile — die Zelle bleibt einzeilig, auch mit Kurzname und Konto |
+
+**Was der Bau nicht gebraucht hat:** keine neue Prop, kein Token, keine
+Registry-Achse. Der Grabstein ist wie geplant nicht gebaut (A12).
 
 ## Abnahme
 
