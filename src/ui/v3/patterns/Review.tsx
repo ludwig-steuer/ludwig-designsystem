@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 import { ActionIcon } from "../Icons";
 import { HeadRow, Table, rowCells } from "../primitives/Table";
 import { TableLoading } from "../primitives/Cells";
+import { Disclosure } from "../primitives/Disclosure";
 import { Progress } from "../primitives/Progress";
 
 /**
@@ -228,38 +229,111 @@ const PP_ICON: Record<CheckItem["state"], StateKind> = {
   open: "open",
 };
 
+/** One check, drawn the same way wherever it stands — alone or unfolded. */
+function CheckRow({ item }: { item: CheckItem }) {
+  return (
+    <div className="v2pp__row">
+      <StateIcon state={PP_ICON[item.state]} />
+      <span style={{ flex: "1 1 auto", minWidth: 0 }}>
+        <span className="v2pp__q">
+          {item.question} <span className="v2pp__code">{item.code}</span>
+        </span>
+        <span className="v2pp__why">{item.reason}</span>
+      </span>
+      {item.gate}
+      {item.jump}
+    </div>
+  );
+}
+
 /**
- * Check items as an accordion. Passed ones are summarized in a single line;
- * open, warned and failed ones individually, each with a reason.
+ * A group that says its size in one line and shows itself on demand.
  *
- * @when    Individual checks of a journal entry with reasons; passed ones in a single line.
+ * Through `Disclosure`, so this file stays a **server component**: opening,
+ * closing, keyboard and accessibility come from the native `<details>`. A
+ * `useState` here would have made `Checklist`, `Messages` and `StateIcon`
+ * client components too — for a fold-out that the platform already has.
+ *
+ * The codes stay in the summary: they are what somebody quotes, and reading
+ * them should not cost a click.
+ */
+function CheckGroup({
+  state,
+  summary,
+  items,
+}: {
+  state: StateKind;
+  summary: string;
+  items: CheckItem[];
+}) {
+  return (
+    <Disclosure
+      tone="quiet"
+      summary={
+        <span className="v2pp__sum">
+          <StateIcon state={state} />
+          {summary}
+          <span className="v2pp__code">{items.map((i) => i.code).join(" ")}</span>
+        </span>
+      }
+    >
+      {items.map((i) => (
+        <CheckRow item={i} key={i.code} />
+      ))}
+    </Disclosure>
+  );
+}
+
+/**
+ * Check items as an accordion — and **three** kinds of them, not two.
+ *
+ * Passed ones collapse into one line, and so do the ones that **could not
+ * run**: „kein Belegbetrag hinterlegt, nicht vergleichbar" says the same
+ * thing twelve times over. Red and yellow always stand alone.
+ *
+ * That third group is what this component was missing until 0148. It was
+ * built for „many passed, few open", and real data turns that around: a
+ * sparse entry has *nothing* to check against, and twelve rows of „not
+ * comparable" bury the one finding that matters. **„Not checkable" is a
+ * statement about the data, not about the entry** — and it is not a finding.
+ *
+ * For the same reason it gets its **own** sentence and its own icon: the
+ * passed line counts only the passed. Counting an unchecked item as an
+ * unremarkable one is the mistake the data itself warns about: one of those
+ * checks says in its own reason that unchecked is not the same as unremarkable.
+ *
+ * @when    Individual checks of a journal entry with reasons; passed and unrunnable ones each in a single line.
  * @instead Error that blocks saving → Messages.
  */
 export function CheckItems({ items }: { items: CheckItem[] }) {
   const passed = items.filter((i) => i.state === "green");
-  const open = items.filter((i) => i.state !== "green");
+  const notRun = items.filter((i) => i.state === "open");
+  // Red and yellow keep their own row. A finding that can hide is not a
+  // finding — not even twenty of them.
+  const findings = items.filter((i) => i.state === "red" || i.state === "yellow");
   return (
     <div className="v2pp">
-      {passed.length > 0 ? (
-        <div className="v2pp__ok">
-          <StateIcon state="done" />
-          {passed.length} von {items.length} Prüfpunkten bestanden
-          <span className="v2pp__code">{passed.map((b) => b.code).join(" ")}</span>
-        </div>
-      ) : null}
-      {open.map((i) => (
-        <div className="v2pp__row" key={i.code}>
-          <StateIcon state={PP_ICON[i.state]} />
-          <span style={{ flex: "1 1 auto", minWidth: 0 }}>
-            <span className="v2pp__q">
-              {i.question} <span className="v2pp__code">{i.code}</span>
-            </span>
-            <span className="v2pp__why">{i.reason}</span>
-          </span>
-          {i.gate}
-          {i.jump}
-        </div>
+      {findings.map((i) => (
+        <CheckRow item={i} key={i.code} />
       ))}
+      {passed.length > 0 ? (
+        <CheckGroup
+          state="done"
+          summary={`${passed.length} von ${items.length} Prüfpunkten bestanden`}
+          items={passed}
+        />
+      ) : null}
+      {notRun.length > 0 ? (
+        <CheckGroup
+          state="open"
+          summary={
+            notRun.length === 1
+              ? "1 Prüfpunkt nicht prüfbar"
+              : `${notRun.length} Prüfpunkte nicht prüfbar`
+          }
+          items={notRun}
+        />
+      ) : null}
       {items.length === 0 ? <div className="v2pp__ok">Keine Prüfpunkte für diesen Fall.</div> : null}
     </div>
   );

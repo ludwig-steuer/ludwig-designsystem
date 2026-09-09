@@ -3906,3 +3906,7 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 .v2bpdrawer { display: grid; gap: var(--space-5); }
 .v2bpdrawer__way { font-size: var(--fs-ui-sm); white-space: nowrap; }
 .v2bpdrawer__count { margin: 0; padding: var(--space-4); }
+
+/* Sammelzeile der Prüfpunkte (0148) — Zeichen, Satz, Codes in einer Zeile im
+   Kopf eines `Disclosure`. */
+.v2pp__sum { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }

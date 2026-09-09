@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Button } from "../primitives/Button";
 import { DetailPane, MasterDetail } from "./MasterDetail";
-import { Checklist, Messages, CheckItems, StateIcon, type ChecklistRow } from "./Review";
+import { Checklist, Messages, CheckItems, StateIcon, type CheckItem, type ChecklistRow } from "./Review";
 
 const meta: Meta<typeof Checklist> = { title: "v3/Patterns/Prüfen/Checklist", component: Checklist };
 export default meta;
@@ -115,8 +115,28 @@ export const StateIcons: Story = {
 };
 
 /**
- * Prüfpunkte: bestandene in **einer** Zeile, offene einzeln mit Begründung
- * und Weg zur Klärung (L7).
+ * Zwölf Prüfpunkte eines dünnen Satzes — Fragen und Begründungen wörtlich aus
+ * dem gemeldeten Fall. Keine Zahl, kein Name daraus ist echt; was echt ist,
+ * ist die **Verteilung**: nichts war prüfbar.
+ */
+const NICHT_PRUEFBAR: CheckItem[] = [
+  ["P-BETRAG", "Stimmt der gebuchte Betrag mit dem Beleg überein?", "Kein Belegbetrag hinterlegt — nicht vergleichbar."],
+  ["P-BELEG", "Stimmt die Belegnummer mit dem Beleg überein?", "Auf dem Beleg ist keine Nummer erkannt."],
+  ["P-BELEGFELD-PERIODE", "Folgt das Belegfeld der Schreibweise dieses Mandanten?", "Für diesen Mandanten ist keine Schreibweise hinterlegt."],
+  ["P-KONTO", "Passt das Sachkonto zur Leistung?", "Für diese Gegenpartei gibt es keine Vorbuchung."],
+  ["P-KONTO-NEU", "Wird dieses Konto erstmals bebucht?", "Konto wird bei dieser Gegenpartei erstmals bebucht."],
+  ["P-UST", "Passt der Steuerschlüssel zum ausgewiesenen Steuersatz?", "Auf dem Beleg ist kein Steuersatz erkannt — nicht vergleichbar."],
+  ["P-13B", "Ist die Umkehr der Steuerschuld richtig behandelt?", "Ob § 13b greift, ist am Beleg nicht vermerkt."],
+  ["P-EMPFAENGER", "Ist der Mandant der Rechnungsempfänger?", "Der Rechnungsempfänger ist nicht ausgelesen."],
+  ["P-LEISTUNG", "Liegt der Leistungszeitraum in dieser Periode?", "Kein Leistungszeitraum am Beleg."],
+  ["P-REGEL-BETRAG", "Entspricht der Betrag der hinterlegten Regel?", "Für diesen Sachverhalt greift keine Regel."],
+  ["P-VORMONAT", "Wurde im Vormonat gleich gebucht?", "Im Vormonat gab es hier keine Buchung."],
+  ["P-JUDGE", "Was sagt der Judge zu diesem Satz?", "Kein Judge-Verdikt — ungeprüft ist nicht dasselbe wie unauffällig."],
+].map(([code, question, reason]) => ({ code: code!, question: question!, reason: reason!, state: "open" as const }));
+
+/**
+ * Drei Gruppen nebeneinander: rot und gelb **einzeln**, bestandene in einer
+ * Zeile, nicht prüfbare in einer zweiten. Was zu tun ist, steht oben.
  */
 export const CheckItemsMixed: Story = {
   render: () => (
@@ -147,8 +167,34 @@ export const CheckItemsMixed: Story = {
             state: "open",
             jump: <button type="button" className="v2link">Zu Schritt 4</button>,
           },
+          {
+            code: "P21",
+            question: "Ist der Mandant der Rechnungsempfänger?",
+            reason: "Der Rechnungsempfänger ist nicht ausgelesen.",
+            state: "open",
+          },
         ]}
       />
+    </div>
+  ),
+};
+
+/**
+ * **Der gemeldete Fall** (Owner, 2026-09-09, an einem echten Journal-Satz):
+ * zwölf Prüfpunkte, und **keiner** konnte laufen. Kein Belegbetrag, keine
+ * Belegnummer, kein Steuersatz, kein Judge-Verdikt.
+ *
+ * Bis 0148 standen dafür zwölf Zeilen da. Jetzt ist es **eine** — und
+ * aufgeklappt stehen die zwölf mit ihrer Begründung.
+ *
+ * Das Zeichen ist bewusst **nicht** der Haken der bestandenen Punkte: „nicht
+ * prüfbar" ist keine Aussage über den Satz, sondern über die Datenlage. Einer
+ * der Punkte sagt das selbst — „ungeprüft ist nicht dasselbe wie unauffällig".
+ */
+export const CheckItemsAllOpen: Story = {
+  render: () => (
+    <div className="v2card">
+      <CheckItems items={NICHT_PRUEFBAR} />
     </div>
   ),
 };
