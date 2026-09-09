@@ -1,6 +1,6 @@
 {
-  "appHash": "ab7863d8d429d46ac9a03d8ec94b0091143e11b0",
+  "appHash": "9bbe16c42db326be921101cb37466db45905f048",
   "zweig": "staging",
   "datum": "2026-09-09",
-  "hinweis": "Kopien aus ludwig/app — nie hier bearbeiten. Einmaliger Lauf am 2026-09-09 mit Owner-Freigabe (Simon); danach wieder eingefroren — der nächste Lauf braucht wieder eine Freigabe. Anlass: L-222 war in der App behoben, im Spiegel nicht, und die Partner-Welle hätte den behobenen Fehler nachgebaut."
+  "hinweis": "Kopien aus ludwig/app — nie hier bearbeiten. Einmaliger Lauf am 2026-09-09 mit Owner-Freigabe (Simon), der zweite an diesem Tag; danach wieder eingefroren — der nächste Lauf braucht wieder eine Freigabe. Anlass: F177, die Achse `zyklus_stapel`."
 }

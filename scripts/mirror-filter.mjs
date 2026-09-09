@@ -54,6 +54,88 @@ export function haengtAmServer(source) {
   return importSpecifiers(source).some(istServerModul);
 }
 
+/**
+ * Die **Namen**, die eine Datei aus einem Modul des Spiegels holt.
+ *
+ * Gebraucht für die zweite Runde: eine Datei, die an keiner Infrastruktur
+ * hängt, kann trotzdem unspiegelbar sein — nämlich dann, wenn sie einen Namen
+ * holt, den der Spiegel nach der ersten Runde nicht mehr führt.
+ *
+ * Genau das ist am 2026-09-09 passiert: `BookingCycleKind` ist drüben von
+ * `domain/` nach `application/booking-cycle-core.ts` gewandert, einer
+ * `server-only`-Datei mit DB-Zugriff. Die erste Runde hat sie richtig
+ * aussortiert — und drei `stapelabnahme`-Dateien, die den Typ von dort holen,
+ * blieben stehen und brachen den Typcheck des ganzen Spiegels.
+ */
+export function moduleImporte(source) {
+  const ohneKommentare = source
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
+  const treffer = [];
+  const muster = /\bimport\s+(?:type\s+)?\{([^}]*)\}\s*from\s*["'](@\/modules\/[^"'\/]+)["']/g;
+  for (const m of ohneKommentare.matchAll(muster)) {
+    const namen = m[1]
+      .split(",")
+      .map((n) => n.replace(/^\s*type\s+/, "").split(/\s+as\s+/)[0].trim())
+      .filter(Boolean);
+    treffer.push({ modul: m[2].replace("@/modules/", ""), namen });
+  }
+  return treffer;
+}
+
+/** Was eine Datei selbst exportiert — grob, aber für die Frage genau genug. */
+function exportierteNamen(source) {
+  const namen = new Set();
+  for (const m of source.matchAll(
+    /^export\s+(?:declare\s+)?(?:type|interface|const|function|class|enum)\s+([A-Za-z0-9_$]+)/gm,
+  )) {
+    namen.add(m[1]);
+  }
+  for (const m of source.matchAll(/^export\s+(?:type\s+)?\{([^}]*)\}/gm)) {
+    for (const teil of m[1].split(",")) {
+      const n = teil.replace(/^\s*type\s+/, "").split(/\s+as\s+/).pop()?.trim();
+      if (n) namen.add(n);
+    }
+  }
+  return namen;
+}
+
+/**
+ * Zweite Runde: wer einen Namen holt, den der Spiegel nicht mehr führt, kann
+ * selbst nicht bleiben — und wer *ihn* dann holt, auch nicht. Deshalb bis zur
+ * Ruhe wiederholt.
+ */
+export function unerfuellbar(dateien, lies) {
+  const raus = new Set();
+  for (;;) {
+    const verfuegbar = new Map();
+    for (const f of dateien) {
+      if (raus.has(f)) continue;
+      const m = /modules\/([^/]+)\//.exec(f);
+      if (!m) continue;
+      const menge = verfuegbar.get(m[1]) ?? new Set();
+      for (const n of exportierteNamen(lies(f))) menge.add(n);
+      verfuegbar.set(m[1], menge);
+    }
+    let neu = 0;
+    for (const f of dateien) {
+      if (raus.has(f)) continue;
+      for (const { modul, namen } of moduleImporte(lies(f))) {
+        const menge = verfuegbar.get(modul);
+        // Ein Modul, das der Spiegel gar nicht führt, ist nicht diese Frage —
+        // dafür gibt es die erste Runde.
+        if (!menge) continue;
+        if (namen.some((n) => !menge.has(n))) {
+          raus.add(f);
+          neu++;
+          break;
+        }
+      }
+    }
+    if (neu === 0) return [...raus];
+  }
+}
+
 function alleDateien(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
     const p = join(dir, e.name);
@@ -87,7 +169,26 @@ function selbsttest() {
     console.error(`\nmirror-filter — ${schlecht} von ${faelle.length} Fällen falsch.`);
     process.exit(1);
   }
-  console.log(`mirror-filter — in Ordnung, ${faelle.length} Fälle geprüft.`);
+  // Die zweite Runde: der Fall vom 2026-09-09, und die zwei Nachbarfälle, in
+  // denen sie **nicht** greifen darf.
+  const dateien = {
+    "modules/a/domain/quelle.ts": 'export type Weg = "x";\nexport const K = 1;\n',
+    "modules/b/domain/nutzer.ts": 'import type { Weg } from "@/modules/a";\nexport type N = Weg;\n',
+    "modules/b/domain/vermisst.ts": 'import type { Fehlt } from "@/modules/a";\nexport type M = Fehlt;\n',
+    "modules/c/domain/kette.ts": 'import type { M } from "@/modules/b";\nexport type C = M;\n',
+    "modules/d/domain/fremd.ts": 'import type { X } from "@/modules/gibtesnicht";\nexport type D = X;\n',
+  };
+  const raus = unerfuellbar(Object.keys(dateien), (f) => dateien[f]).sort();
+  const erwartetRaus = ["modules/b/domain/vermisst.ts", "modules/c/domain/kette.ts"].sort();
+  if (JSON.stringify(raus) !== JSON.stringify(erwartetRaus)) {
+    console.error(`  ✗ zweite Runde: erwartet ${erwartetRaus.join(", ")}, gemessen ${raus.join(", ")}`);
+    console.error("\nmirror-filter — die zweite Runde ist falsch.");
+    process.exit(1);
+  }
+  console.log(
+    `mirror-filter — in Ordnung, ${faelle.length} Fälle geprüft, dazu die zweite Runde ` +
+      "(fehlender Name fliegt, Kette dahinter auch, fremdes Modul bleibt).",
+  );
   standHinweis();
 }
 
@@ -137,9 +238,14 @@ if (arg === "--test") {
 } else if (arg) {
   const dir = arg;
   if (!statSync(dir).isDirectory()) throw new Error(`kein Verzeichnis: ${dir}`);
-  for (const f of alleDateien(dir)) {
-    if (haengtAmServer(readFileSync(f, "utf8"))) console.log(f);
-  }
+  const lies = (f) => readFileSync(f, "utf8");
+  const alle = alleDateien(dir);
+  // Erste Runde: wer am Server hängt.
+  const amServer = alle.filter((f) => haengtAmServer(lies(f)));
+  for (const f of amServer) console.log(f);
+  // Zweite Runde: wer einen Namen holt, den nach der ersten keiner mehr führt.
+  const bleibt = alle.filter((f) => !amServer.includes(f));
+  for (const f of unerfuellbar(bleibt, lies)) console.log(f);
 } else {
   console.error("Aufruf: node scripts/mirror-filter.mjs <verzeichnis> | --test");
   process.exit(2);

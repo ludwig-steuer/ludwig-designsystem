@@ -12,14 +12,28 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-| Was | Woher | Wer wartet |
-|---|---|---|
-| Achse `zyklus_stapel`: die Labels von `agent` und `prepared`, und die Kante `prepared → agent` (`trigger: "released_to_agent"`, `by: "user"` statt `agent_run_started`/`agent`) | **F177** in der App (`17764933` auf staging trägt es bereits) — der Übergang zum Agenten ist ab jetzt eine **menschliche Freigabe**, nicht mehr der Start eines Durchgangs | die Zyklus-Zeile im Beleg-Eingang zeigt bis dahin „bereit"/„Agent arbeitet" — inhaltlich falsch, aber ohne Folge (Meldung `ludwig-worker`, 2026-09-09) |
+Nichts.
 
-**Nicht von Hand nachziehen.** Die Datei ist Spiegel; eine Handkopie darin
-wäre genau die zweite Wahrheit, gegen die der ganze Mechanismus steht — und
-sie fiele beim nächsten Lauf ohne Spur wieder heraus. Der Eintrag hier ist der
-richtige Ort, bis eine Freigabe für den Lauf vorliegt.
+## Erledigt mit dem zweiten Lauf vom 2026-09-09 (App `9bbe16c4`)
+
+Owner-Freigabe (Simon), danach wieder eingefroren. Angekommen ist **F177**: die
+Achse `zyklus_stapel` trennt jetzt „eröffnet" von „freigegeben" — `prepared`
+heißt nicht mehr zugleich „die Belege trudeln noch ein" und „der Agent darf
+ran", und die Kante `prepared → agent` trägt `trigger: "released_to_agent"`
+mit `by: "user"` statt `agent_run_started`/`agent`.
+
+**Der Lauf hat aber auch etwas gekostet, und das ist der Bericht wert.** Er
+brach zuerst den Typcheck des ganzen Spiegels: `BookingCycleKind` ist drüben
+von `domain/` in eine `server-only`-Datei mit DB-Zugriff gewandert, und drei
+`stapelabnahme`-Dateien holen ihn von dort. Der Filter hat die Server-Datei
+richtig aussortiert — und die drei Abhängigen stehen lassen, weil er nur die
+Datei selbst prüfte, nicht ihre Nachbarn.
+
+`scripts/mirror-filter.mjs` hat deshalb eine **zweite Runde** bekommen: wer
+einen Namen holt, den der Spiegel nach der ersten Runde nicht mehr führt, kann
+selbst nicht bleiben — und wer *ihn* dann holt, auch nicht. Damit fallen sechs
+Dateien (`checklist`, `gating`, `steps`, `deckungsluecke`, `rail`,
+`bereitschaft`), von denen das Set heute keine benutzt. Befund **L-274**.
 
 ## Erledigt mit dem Lauf vom 2026-09-09 (App `ab7863d8`)
 

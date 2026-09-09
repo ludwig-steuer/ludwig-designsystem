@@ -1,4 +1,5 @@
 /* Generiert von scripts/sync-ludwig.sh — nicht von Hand bearbeiten. */
+export * from "./domain/beleg-name";
 export * from "./domain/doc-direction-line";
 export * from "./domain/document-counterparty";
 export * from "./domain/document-form-labels";

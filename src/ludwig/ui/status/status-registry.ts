@@ -2029,21 +2029,26 @@ const ABGLEICH_LAUF: Record<string, StatusDescriptor> = {
  * Bearbeitung eines Zeitraums: er entsteht beim Eröffnen, trägt die Durchgänge
  * des Agenten und die Arbeit der Kanzlei, wird freigegeben und endet, wenn er
  * in DATEV wiedergefunden ist. Wer gerade dran ist, IST der Zustand.
+ *
+ * Der Übergang zum Agenten ist eine **menschliche Freigabe** (F177): „Belege
+ * vollständig" übergibt den Zyklus, kein Lauf greift ihn von selbst auf.
  */
 const ZYKLUS_STAPEL: Record<string, StatusDescriptor> = {
   agent: {
-    label: "Agent arbeitet",
-    kind: "info",
-    description: "Ein Durchgang läuft gerade in diesem Zyklus und bucht darin.",
-  },
-  prepared: {
-    label: "bereit",
+    label: "Beim Agenten",
     kind: "info",
     description:
-      "Der Zyklus ist offen, aber niemand arbeitet gerade darin — so wird er eröffnet, und so " +
-      "liegt er nach jedem Durchgang wieder da. Der nächste Agentenlauf greift ihn auf, die " +
-      "Kanzlei kann stattdessen die Prüfung übernehmen; mit offenen Nachforderungen heißt das " +
-      "„wartet auf Mandant\".",
+      "Freigegeben — der Agent ist dran. Ob gerade ein Durchgang läuft, sagt der offene Lauf, " +
+      "nicht dieser Zustand.",
+  },
+  prepared: {
+    label: "Vorbereitet",
+    kind: "info",
+    description:
+      "Eröffnet, aber noch nicht freigegeben: Belege dürfen weiter kommen, der Agent sieht den " +
+      "Zyklus nicht. „Belege vollständig\" auf der Eingangsseite (oder die Intake-API) übergibt " +
+      "ihn an den Agenten; die Kanzlei kann stattdessen die Prüfung übernehmen. Mit offenen " +
+      "Nachforderungen heißt das „wartet auf Mandant\".",
   },
   review: {
     label: "Kanzlei prüft",
@@ -2565,7 +2570,7 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       "System — elf Zustände über Agent, Kanzlei, Bridge und DATEV.",
     transitions: [
       { from: null, to: "prepared", trigger: "cycle_opened", label: "Zyklus eröffnet", by: "user" },
-      { from: "prepared", to: "agent", trigger: "agent_run_started", label: "ein Agentendurchgang greift den Zyklus auf", by: "agent" },
+      { from: "prepared", to: "agent", trigger: "released_to_agent", label: "Belege vollständig — der Zyklus ist an den Agenten übergeben", by: "user" },
       { from: "agent", to: "prepared", trigger: "agent_run_finished", label: "Durchgang beendet — der Zyklus liegt wieder bereit", by: "agent" },
       { from: "prepared", to: "review", trigger: "review_started", label: "die Kanzlei übernimmt die Abnahme statt des nächsten Durchgangs", by: "user" },
       { from: "review", to: "prepared", trigger: "returned_to_agent", label: "die Kanzlei gibt an den Agenten zurück", by: "user" },

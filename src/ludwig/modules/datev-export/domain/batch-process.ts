@@ -212,7 +212,8 @@ export function batchActions(state: string): BatchActionSet {
     case "agent":
       return {
         ...leer,
-        info: "Der Agent arbeitet — die Abnahme beginnt, wenn der Durchgang fertig ist.",
+        secondary: { key: "zur_abnahme", label: "Ansehen", variant: "secondary" },
+        info: "Der Agent arbeitet — quittieren lässt sich erst nach dem Durchgang, ansehen jederzeit.",
       };
     case "prepared":
       return {
@@ -265,7 +266,11 @@ export function batchActions(state: string): BatchActionSet {
         info: "Abgeschlossen — Änderungen gehen nur noch über Storno im Folgestapel.",
       };
     case "cancelled":
-      return { ...leer, info: "Abgebrochen — dieser Stapel wird nicht weitergeführt." };
+      return {
+        ...leer,
+        secondary: { key: "zur_abnahme", label: "Ansehen", variant: "secondary" },
+        info: "Abgebrochen — dieser Stapel wird nicht weitergeführt.",
+      };
     default:
       return leer;
   }

@@ -175,3 +175,40 @@ export const DOCUMENT_FORM_VALUES = Object.keys(DOCUMENT_FORM_ROUTING) as [strin
 export const INVOICE_FLOW_FORMS: readonly string[] = Object.entries(DOCUMENT_FORM_ROUTING)
   .filter(([, routing]) => routing.invoiceFlow)
   .map(([form]) => form);
+
+/**
+ * Belegarten, die zwingend ein Rechnungsdokument beschreiben. `refund` fehlt
+ * bewusst: eine Erstattung kann legitim auf einem Kontoauszug stehen.
+ *
+ * TS-Spiegel von `buchassi_shared.document_category.INVOICE_IMPLYING_KINDS`;
+ * `document-form-mapping.test.ts` hält beide Seiten deckungsgleich.
+ */
+export const INVOICE_IMPLYING_KINDS: readonly string[] = ["self_billing", "credit_note"];
+
+/**
+ * Belegart schlägt Belegform, wenn die Art ein Rechnungsdokument erzwingt.
+ *
+ * Der Klassifikator bestimmt beide Achsen unabhängig und prüft sie nie
+ * gegeneinander. Auf Staging standen deshalb sechs §14-UStG-Gutschriften der
+ * Leasingpartner als `credit_card_statement` da — `invoiceFlow: false`, also
+ * keine Rechnungszeile, keine Interpretation, kein Ereignis, keine Buchung.
+ *
+ * Rückgabe: korrigierte Form plus Grund (`null` = keine Korrektur).
+ */
+export function reconcileFormWithKind(
+  form: string | null | undefined,
+  kind: string | null | undefined,
+): { form: string | null; reason: string | null } {
+  const current = form ?? null;
+  if (current === null || !kind || !INVOICE_IMPLYING_KINDS.includes(kind)) {
+    return { form: current, reason: null };
+  }
+  if (routeDocumentForm(current).category !== "payment") return { form: current, reason: null };
+  return {
+    form: "commercial_invoice",
+    reason:
+      `Belegart '${kind}' ist ein Rechnungsdokument, die Belegform ` +
+      `'${current}' ein Zahlungsbeleg — Form auf 'commercial_invoice' ` +
+      `korrigiert, sonst fällt der Beleg aus der Rechnungs-Pipeline.`,
+  };
+}
