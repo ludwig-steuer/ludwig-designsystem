@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Specs** (2026-09-09) — 0139–0143 geschrieben; geprüft am 2026-09-09 vom zweiten Agenten |
+| Status | **gebaut** (2026-09-09) — 0139–0143 stehen, fremde Abnahme steht aus; geprüft am 2026-09-09 vom zweiten Agenten |
 | GLOSSARY | `### Business partner (Geschäftspartner)` — englisch `business partner`, Ordner `entities/business-partner/` |
 | Tabelle | `ludwig.client_business_partners` (46 Spalten) + `ludwig.client_business_partner_bank_aliases` (Lookup-Schlüssel, kein Subtyp) |
 | Typen | `src/ludwig/modules/business-partners/domain/business-partner.ts` — `BusinessPartnerListItem`, `BusinessPartnerDetail`, `PartnerAccountRef`, `PartnerPersonalAccount`, `BusinessPartnerFilter`, `VAT_PROFILE`, `TYPICAL_NATURE`, `PARTNER_NATURE_LABEL`, `ONBOARDING_STATE`, `PARTNER_ROLE_LABEL`; `domain/tabs.ts` — `PARTNER_TABS`, `PARTNER_TAB_LABEL` |

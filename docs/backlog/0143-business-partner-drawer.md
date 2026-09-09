@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Arbeit** — freigegeben 2026-09-09 (Owner) |
+| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Personenkonto, Sachverhalt, Buchungsverhalten |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (`geprüft`, 2026-09-09), Abschnitt „Formen" und **Offene Frage 3, vom Owner am 2026-09-09 beantwortet** |
@@ -92,7 +92,7 @@ den Fall, dass keiner der drei Abrisse die Frage war.
 
 | Story | Beweist |
 |---|---|
-| `Filled` | Der Regelfall: Fakten, ein Personenkonto, vier Sachverhalte als Zahl mit Weg, drei „mehr dazu"-Wege und der Fuß-Knopf |
+| `Filled` | Der Regelfall: Fakten, ein Personenkonto, vier Sachverhalte als Zahl mit Weg — **zwei** Wege plus der Fuß-Knopf. Den dritten gibt es heute nicht, weil seine Felder leer sind |
 | `WithoutAccounts` | Der Partner ohne jedes Personenkonto (2 von 14.950): die Kontenliste entfällt, der Weg auch |
 | `WithBehaviour` | Mit `renderBookingBehaviour`: der dritte Abriss steht; ohne die Prop steht er nicht — beide nebeneinander |
 | `Sparse` | Der häufigste Fall: ein Konto, kein Sachverhalt, kein Verhalten. **Ein** Abriss, nicht drei leere |
@@ -127,7 +127,8 @@ Variabel (aus dieser Spec):
 - [ ] Zone 3 kommt aus **`BusinessPartnerFacts`**, nicht aus einer zweiten
       Feldliste (`grep -n "FieldList" BusinessPartnerDrawer.tsx` → 0 Treffer)
 - [ ] Drei Abrisse mit **drei** eigenen Wegen, dazu der Fuß-Knopf ohne Reiter
-      (`Filled`, vier Ziele im DOM)
+      (`WithBehaviour`, vier Ziele im DOM — **nicht** `Filled`: dort fehlt der
+      dritte Abriss mangels Ableitung, und das ist der Regelfall)
 - [ ] Ein Abriss ohne Deckung entfällt **ganz** — keine leere Karte, keine
       Überschrift (`Sparse`: ein Abriss; `WithoutAccounts`: keiner)
 - [ ] Die Sachverhalte stehen als **Zahl mit Weg**, nicht als Liste (D15,
@@ -137,6 +138,37 @@ Variabel (aus dieser Spec):
 - [ ] `Esc` schließt, der Fokus kehrt zum Auslöser zurück (`Roundtrip`, V10)
 - [ ] Ersetzt den Sprung auf `/partners/[partnerId]` an den fünf genannten
       Stellen ohne Funktionsverlust
+
+## Gebaut 2026-09-09
+
+`BusinessPartnerDrawer.tsx`, fünf Stories. Zone 3 kommt aus
+`BusinessPartnerFacts` (0142), nicht aus einer zweiten Feldliste — das war der
+Grund, die Fakten zuerst zu bauen.
+
+**Ein Kriterium dieser Spec hing an der falschen Story.** Es verlangte „vier
+Ziele im DOM" in `Filled` — dort sind es **drei**: zwei Abriss-Wege und der
+Fuß-Knopf. Der dritte Abriss braucht `renderBookingBehaviour`, und der bleibt
+heute leer, weil die Ableitungen im Bestand zu 0 % gefüllt sind. Die Spec sagte
+beides und merkte den Widerspruch nicht. Das Kriterium steht jetzt an
+`WithBehaviour`, wo vier Ziele wirklich stehen.
+
+**Gemessen** (`scripts/cdp.mjs`, 1200 px, im `.v2drawer__b`):
+
+| Story | Abrisse | Wege im Körper | Fuß |
+|---|---|---|---|
+| `Filled` | 2 | „Alle Konten", „Sachverhalte" | „Geschäftspartner öffnen" |
+| `WithBehaviour` | 3 | dazu „Buchungen" | derselbe |
+| `Sparse` | 1 | „Alle Konten" | derselbe |
+| `WithoutAccounts` | 1 | „Sachverhalte" | derselbe |
+
+Ein Abriss ohne Deckung fehlt also **ganz** — keine leere Karte, keine
+Überschrift, kein Weg ins Leere. Und die Sachverhalte stehen als Zahl, nicht
+als Liste: unter den 168 Partnern mit einem ist der Median **eins**, und eine
+Karte, die eine Zeile zeigt und sich Abriss nennt, kostet Höhe und sagt nichts
+(D15).
+
+**Die Abweichung von A10 steht als Kommentar am Export**, nicht nur hier: wer
+den Drawer liest, soll wissen, warum er vier Ziele hat und nicht eins.
 
 ## Abnahme
 
