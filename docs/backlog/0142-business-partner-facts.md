@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Arbeit** — freigegeben 2026-09-09 (Owner) |
+| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: USt-Profil, Personenkonto, Reifegrad, DATEV-Herkunft |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (`geprüft`, 2026-09-09), Abschnitt „Formen", Zeile `BusinessPartnerFacts` |
@@ -64,7 +64,6 @@ dahin hätten 924 Partner ein `undefined` getragen.
 | `partner` | `BusinessPartnerDetail` | ja | Der Datensatz aus dem Spiegel. Die Form rechnet nichts | `Filled` |
 | `all` | `boolean` | nein | Zusätzlich „Verhalten" und „Herkunft". Vorgabe `false` — der Drawer zeigt die kurze Form, der View die ganze | `All` |
 | `accountHref` | `(accountNumber: string) => string` | nein | Der Weg zum Kontoblatt an jeder Nummer | `Filled` |
-| `partnerHref` | `(partnerId: string) => string` | nein | Nur für das **Grabstein-Ziel**: ein zusammengeführter Partner nennt seinen Nachfolger als `BusinessPartnerCell` | `Tombstone` |
 | `hints` | `readonly string[]` | nein | Sätze des Aufrufers über der ersten Gruppe — heute „Ohne Personenkonto: dieser Partner wird nirgends bebucht." | `Hints` |
 
 **Kann bewusst nicht:**
@@ -146,6 +145,34 @@ Variabel (aus dieser Spec):
 - [ ] Kein Eingabefeld, kein Speichern-Knopf (`grep -n "input\|onSave" .` → 0)
 - [ ] Ersetzt `MasterDataTab` und den Kopfblock der Partnerseite ohne
       Funktionsverlust
+
+## Gebaut 2026-09-09
+
+`BusinessPartnerFacts.tsx`, fünf Stories, fünf Gruppen. Drei Zeilen der Spec
+sind **nicht** gebaut, und keine davon aus Nachlässigkeit:
+
+| Zeile | Warum nicht |
+|---|---|
+| **Kontakt** (Rang 14) | `contactEmail` und `contactPhone` sind Spalten der Datenbank (14 % / 39 %) und stehen **nicht** am gespiegelten `BusinessPartnerDetail` — Befund **L-271** |
+| **Grabstein** (Rang 16) | ebenso: `mergedIntoPartnerId` ist ein Selbst-FK, die App fragt ihn an drei Stellen ab, der Typ kennt ihn nicht. Mit ihm fiel die Prop `partnerHref`, die nur ihn getragen hätte (A12) |
+| **Herkunft** (Rang 15) | das Feld gibt es, die **Wörter** nicht — Befund **L-272** |
+
+**Warum L-272 dazukam, obwohl die Spec die Zeile vorsah.** Die Spec ließ das
+USt-Profil weg, weil seine Wörter privat in `MasterDataTab.tsx` leben (L-223)
+und ein roher Schlüssel eine Auskunft behauptet, die er nicht gibt. Gebaut habe
+ich zuerst genau daneben `onboarding_import` roh hingeschrieben — dieselbe
+Sorte Wert, dieselbe Lücke, andere Behandlung. Die Messung hat es gezeigt.
+Inkonsequent zu sein wäre schlechter gewesen als jede der beiden
+Entscheidungen; jetzt fehlen beide Zeilen, und beide haben einen Befund.
+
+**Gemessen** (`scripts/cdp.mjs`, 900 px):
+
+| Story | Gemessen |
+|---|---|
+| `Filled` | **drei** Gruppen (Wer · Konten · Bewegung) — ohne `all` gibt es Verhalten und Herkunft nicht, auch nicht als leere Überschrift |
+| `All` | **fünf** Gruppen. „Typische Lieferung: Dienstleistung" — das Wort kommt aus `PARTNER_NATURE_LABEL`, das der Spiegellauf von heute Morgen gebracht hat; vorher hätten 924 Partner hier `undefined` getragen (~~L-222~~). Kein USt-Profil, keine rohe Herkunft |
+| `Sparse` | „Wer" hat **eine** Zeile, nicht vier: kein Kurzname, kein Ort, keine USt-IdNr. — und keine Striche an ihrer Stelle. So sehen 77 % des Bestands aus |
+| alle | Die `0` bei den Buchungen steht als `0`, rechtsbündig mit `v2num` |
 
 ## Abnahme
 
