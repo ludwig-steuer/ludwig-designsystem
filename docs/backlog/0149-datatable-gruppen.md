@@ -167,6 +167,26 @@ unverändert da und ist genau deshalb der Nachweis, dass die flache Tabelle
 sich nicht geändert hat. `InUse` gibt es in dieser Datei schon, die neue heißt
 darum `GroupsInUse`.
 
+## Fremdmessung aus `ludwig/app` (nicht die Abnahme)
+
+`app-ee` hat am 2026-09-10 gegen den Submodul-Stand `d74dc47` gemessen — also
+gegen den neuen Vertrag, `groups?: never` und `rows?: never` im Checkout
+nachgesehen:
+
+| Lauf | Ergebnis |
+|---|---|
+| `pnpm --filter @ludwig/web typecheck` | grün, keine Ausgabe — deckt jeden `DataTable`-Aufrufer in `apps/web` ab, die dreizehn Listenseiten eingeschlossen |
+| `pnpm --filter @ludwig/web test` | 405 Dateien, 3225 Tests, 1 übersprungen, grün |
+| `lint` | 0 Fehler, 46 Warnungen, alle aus dem Alt-Bestand (`@/ui/components`-Importe), keine aus `DataTable` |
+
+**Was das trägt:** die harte Grenze der Spec auf **Typ- und Testebene** — kein
+Aufrufer der App muss angefasst werden, obwohl `rows` aus der Basis in den
+flachen Zweig gewandert ist.
+
+**Was es nicht trägt:** kein Blick im Browser (dort läuft kein Dev-Server) und
+nichts außerhalb von `apps/web`. „Zeichengleiches DOM" bleibt damit offen und
+gehört in die Abnahme unten; die Story `Filled` ist dafür der Ort.
+
 ## Abnahmekriterien
 
 Fest (gilt immer):
