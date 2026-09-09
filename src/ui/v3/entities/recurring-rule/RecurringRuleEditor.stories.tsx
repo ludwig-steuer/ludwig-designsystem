@@ -16,10 +16,10 @@ import {
 import { Card, CardHead } from "../../primitives/Table";
 import type { AccountCandidate } from "../account/AccountField";
 import type { JournalLine } from "../journal-entry/JournalEntryCompact";
-import { LABELS, rule } from "./fixtures";
+import { rule } from "./fixtures";
 import { RecurringRuleFacts } from "./RecurringRuleFacts";
 import { RecurringRuleEditor, type RecurringRuleAccounts } from "./RecurringRuleEditor";
-import type { RecurringRuleDraft } from "./recurring-rule";
+import type { RuleDraft } from "@/ludwig/modules/recurring-rules/domain/rule-draft";
 
 const meta: Meta<typeof RecurringRuleEditor> = {
   title: "v3/Entitäten/Wiederkehr-Regel/RecurringRuleEditor",
@@ -48,9 +48,9 @@ const PAYMENT_ACCOUNTS = [
 ];
 
 /** Der Entwurf der importierten Regel — der Fall „ändern". */
-const FILLED: RecurringRuleDraft = draftOf(rule());
+const FILLED: RuleDraft = draftOf(rule());
 
-function draftOf(r: ReturnType<typeof rule>): RecurringRuleDraft {
+function draftOf(r: ReturnType<typeof rule>): RuleDraft {
   return {
     expectedDirection: r.expectedDirection,
     matchCounterpartyName: r.matchCounterpartyName,
@@ -73,7 +73,7 @@ function draftOf(r: ReturnType<typeof rule>): RecurringRuleDraft {
 }
 
 /** Der Satz der Ableitung zum Entwurf — der Editor formuliert ihn nicht. */
-function summaryOf(d: RecurringRuleDraft): string {
+function summaryOf(d: RuleDraft): string {
   return describeRecurringRule({
     bookingMode: d.bookingMode,
     direction: d.expectedDirection,
@@ -95,7 +95,7 @@ const NAMES: Record<string, string> = {
  * Entwurf. Der Editor kennt sie nur als `renderPreview` — er zeigt keine
  * zweite Tabelle.
  */
-function Preview({ draft }: { draft: RecurringRuleDraft }) {
+function Preview({ draft }: { draft: RuleDraft }) {
   const r = rule({ ...draft, template: draft.template });
   const built = buildRulePreview({
     bookingMode: r.bookingMode,
@@ -153,7 +153,6 @@ function Preview({ draft }: { draft: RecurringRuleDraft }) {
           summary={summaryOf(draft)}
           schedule={describeRuleSchedule(r)}
           preview={{ lines, automatic: built.automatic, note: built.note }}
-          labels={LABELS}
         />
       </div>
     </Card>
@@ -176,7 +175,6 @@ export const New: Story = {
       <RecurringRuleEditor
         onSubmit={noop}
         accounts={ACCOUNTS}
-        labels={LABELS}
         summary={summaryOf({ ...FILLED, matchCounterpartyName: null, matchCounterpartyIban: null, matchAmount: null })}
         paymentAccounts={PAYMENT_ACCOUNTS}
       />
@@ -195,7 +193,6 @@ export const Filled: Story = {
         defaultValue={FILLED}
         onSubmit={noop}
         accounts={ACCOUNTS}
-        labels={LABELS}
         summary={summaryOf(FILLED)}
         paymentAccounts={PAYMENT_ACCOUNTS}
       />
@@ -216,19 +213,16 @@ export const Modes: Story = {
         defaultValue={{ ...FILLED, bookingMode: "accrue_then_settle" }}
         onSubmit={noop}
         accounts={ACCOUNTS}
-        labels={LABELS}
       />
       <RecurringRuleEditor
         defaultValue={{ ...FILLED, bookingMode: "book_on_payment" }}
         onSubmit={noop}
         accounts={ACCOUNTS}
-        labels={LABELS}
       />
       <RecurringRuleEditor
         defaultValue={{ ...FILLED, bookingMode: "match_only" }}
         onSubmit={noop}
         accounts={ACCOUNTS}
-        labels={LABELS}
       />
     </div>
   ),
@@ -254,7 +248,6 @@ export const Invalid: Story = {
         }}
         onSubmit={noop}
         accounts={ACCOUNTS}
-        labels={LABELS}
         summary={summaryOf(FILLED)}
       />
     </div>
@@ -270,7 +263,6 @@ export const Pending: Story = {
         onSubmit={noop}
         onCancel={() => {}}
         accounts={ACCOUNTS}
-        labels={LABELS}
         pending
       />
     </div>
@@ -286,7 +278,6 @@ export const Error: Story = {
         onSubmit={noop}
         onCancel={() => {}}
         accounts={ACCOUNTS}
-        labels={LABELS}
         error="Die Regel konnte nicht gespeichert werden: das Personenkonto 10001 gibt es im Wirtschaftsjahr 2026 nicht."
       />
     </div>
@@ -302,7 +293,7 @@ export const Error: Story = {
  */
 function Roundtrip() {
   const [count, setCount] = useState<{ matched: number; scanned: number } | null>(null);
-  const [saved, setSaved] = useState<RecurringRuleDraft | null>(null);
+  const [saved, setSaved] = useState<RuleDraft | null>(null);
   return (
     <div style={{ maxWidth: 720, display: "grid", gap: 16 }}>
       <RecurringRuleEditor
@@ -318,7 +309,6 @@ function Roundtrip() {
         }}
         matchCount={count}
         accounts={ACCOUNTS}
-        labels={LABELS}
         paymentAccounts={PAYMENT_ACCOUNTS}
       />
       {saved ? (
@@ -346,7 +336,6 @@ function InSitu() {
             onSubmit={noop}
             onCancel={() => {}}
             accounts={ACCOUNTS}
-            labels={LABELS}
             summary={summaryOf(FILLED)}
             paymentAccounts={PAYMENT_ACCOUNTS}
             matchCount={{ matched: 8, scanned: 251 }}
@@ -400,7 +389,6 @@ export const Edges: Story = {
         }}
         onSubmit={noop}
         accounts={ACCOUNTS}
-        labels={LABELS}
         summary={summaryOf(FILLED)}
       />
     </div>

@@ -136,7 +136,6 @@ erscheinen also heute nicht.
 | `summary` | `string` | ja | der Klartext-Satz aus `describeRecurringRule(rule)`, **vom Aufrufer** gebildet. Er gibt dabei `matchPurposeRegex` mit: das Feld ist in `RuleSummaryInput` seit `2c0c888f` **optional**, und wer es weglässt, bekommt für eine Regel mit nur einem Zweck-Regex wieder den falschen Satz | `WithoutCriterion` |
 | `schedule` | `string \| null` | ja | der Rhythmus-Satz aus `describeRuleSchedule(rule)`. `null` heißt: nichts hinterlegt → die Gruppe „Erwartung" **entfällt** | `Edges` |
 | `preview` | `{ lines: readonly JournalLine[]; automatic: boolean; note: string \| null }` | ja | die Buchungssatz-Vorschau aus `buildRulePreview()`, vom Aufrufer in Buchungszeilen übersetzt (**L-255**, siehe unten) | `Modes` |
-| `labels` | `RecurringRuleLabels` | ja | die deutschen Wörter, die der Spiegel nicht führt: Richtung (L-256), Belegnummern-Strategie und Herkunft des Profils (L-242). Ein Wert ohne Wort erscheint **roh** | `All` |
 | `all` | `boolean` | nein | zusätzlich die Gruppe „Herkunft" (Ränge 21–28). Default `false` — der Reiter des Falls zeigt die kurze Form, die Verwaltungssicht (0131) und der Support die lange | `All` |
 | `accountHref` | `(accountNumber: string) => string` | nein | Weg zum Kontoblatt hinter Gegen- und Personenkonto. Ohne ihn stehen beide als Text — nie als Knopf, der nichts tut | `InUse` |
 | `hints` | `readonly string[]` | nein | Hinweise des Aufrufers über der ersten Gruppe, als `Callout`. Heute gibt es genau einen: „Modus prüfen?" aus `needsModeReview()`. Er **kann** seit `b7544542` erscheinen (~~L-244~~: das Präfix heißt jetzt `datev-wk:`), trifft im Bestand aber auf keine Regel — keine trägt zugleich `book_on_payment` und ein Personenkonto. Das Set baut die Heuristik **nicht** nach | `Modes` |
@@ -377,3 +376,28 @@ soll, muss eine Story zeigen, dass sie durchschlägt. Die Alternative wäre
 gewesen, die Prop zu streichen und `EUR` fest zu verdrahten; das wäre weniger
 Code, aber die Härte gehört nicht in eine Form, die den Betrag nur
 weitergibt.
+
+## Nachtrag zum Spiegellauf vom 2026-09-09 — eine Prop weniger
+
+Der Spiegel führt seit dem Lauf auf `ab7863d8` die vier Wortlisten der
+Wiederkehr-Regel selbst (`RULE_DIRECTION_LABEL`,
+`RULE_DOCUMENT_NUMBER_STRATEGY_LABEL`, `RULE_PROFILE_SOURCE_LABEL`, dazu das
+schon vorhandene `RULE_INTERVAL_LABEL`) — die Behebung von **L-242** und
+**L-256**. Damit fällt `labels` als Prop der Fakten.
+
+Was das praktisch ändert:
+
+- **`RecurringRuleLabels`, `ruleLabel()` und `RecurringRuleDraft` sind weg**,
+  und mit ihnen die Datei `entities/recurring-rule/recurring-rule.ts`. Sie war
+  ein Behelf mit Ablaufdatum, und das Datum ist eingetreten.
+- **Der Fall „Wert ohne Wort" gibt es nicht mehr.** `ruleLabel()` fiel auf den
+  Rohwert zurück, und drei Stories zeigten das ausdrücklich. Die neuen Listen
+  sind über ihren Schlüsseltyp **vollständig** (`Record<RuleDirection, string>`);
+  ein Wert ohne Wort ist damit kein Fall der Darstellung mehr, sondern ein
+  Typfehler. Die Nachweise dafür sind gestrichen, nicht umgeschrieben — sie
+  beweisen ein Verhalten, das es nicht mehr gibt.
+- **Die Story-Fixture hatte eigene Wörter erfunden.** `LABELS` schrieb für
+  `period_key` „Periodenkennung", die Domäne schreibt „aus dem Zeitraum
+  (z. B. 2026-03)"; für `derived` stand „abgeleitet" gegen „aus vorhandenen
+  Buchungen abgeleitet". Das war eine zweite Wahrheit, die niemandem auffiel,
+  weil sie plausibel klang. Jetzt gibt es nur noch eine.

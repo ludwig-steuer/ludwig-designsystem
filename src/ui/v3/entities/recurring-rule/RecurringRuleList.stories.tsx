@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { Card, CardHead } from "../../primitives/Table";
-import { LABELS, caseLink } from "./fixtures";
+import { caseLink } from "./fixtures";
 import { RecurringRuleList } from "./RecurringRuleList";
 import type { RecurringRuleListRow } from "./recurring-rule-columns";
 
@@ -61,7 +61,6 @@ export const Filled: Story = {
     <div style={{ maxWidth: 1400 }}>
       <RecurringRuleList
         rules={THREE}
-        labels={LABELS}
         caseHref={caseHref}
         period="August 2026"
         total={27}
@@ -78,7 +77,7 @@ export const Filled: Story = {
 export const Empty: Story = {
   render: () => (
     <div style={{ maxWidth: 1400 }}>
-      <RecurringRuleList rules={[]} labels={LABELS} caseHref={caseHref} period="August 2026" total={27} />
+      <RecurringRuleList rules={[]} caseHref={caseHref} period="August 2026" total={27} />
     </div>
   ),
 };
@@ -99,7 +98,6 @@ export const InUse: Story = {
       </Card>
       <RecurringRuleList
         rules={THREE}
-        labels={LABELS}
         caseHref={caseHref}
         period="August 2026"
         title="Offene Dauerbuchungen dieses Stapels"
@@ -146,7 +144,6 @@ export const Edges: Story = {
             }),
           ),
         ]}
-        labels={LABELS}
         caseHref={caseHref}
         period="August 2026"
         total={29}

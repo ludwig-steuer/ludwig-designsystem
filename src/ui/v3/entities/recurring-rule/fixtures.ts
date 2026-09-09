@@ -1,7 +1,6 @@
 import type { RecurringRule } from "@/ludwig/modules/recurring-rules/domain/rule";
 
 import type { CaseLink } from "../accounting-case/case-title";
-import type { RecurringRuleLabels } from "./recurring-rule";
 
 /**
  * Example data for the stories of the recurring-rule family.
@@ -12,42 +11,6 @@ import type { RecurringRuleLabels } from "./recurring-rule";
  * 23 characters. The values themselves are invented (Musterfirma GmbH,
  * 1.800,00 €); no customer data leaves the database.
  */
-
-/**
- * The German words the mirror does not carry. They live here so that four
- * story files do not write four versions of them.
- */
-export const LABELS: RecurringRuleLabels = {
-  direction: {
-    payment_in: "Zahlungseingang",
-    payment_out: "Zahlungsausgang",
-  },
-  documentNumberStrategy: {
-    period_key: "Periodenkennung",
-    from_document: "Nummer des Belegs",
-    fixed: "feste Belegnummer",
-  },
-  profileSource: {
-    derived: "abgeleitet",
-    agent: "vom Agenten",
-    human: "von Hand",
-    onboarding: "aus dem Onboarding",
-  },
-};
-
-/**
- * The same words with two gaps — the direction `payment_out` and the strategy
- * `fixed` have none.
- *
- * They exist so a story can show what happens when a value has no word: it
- * stands there **raw**. That is the point of L-242 and L-256 — visibly wrong
- * beats silently gone.
- */
-export const LABELS_WITH_GAPS: RecurringRuleLabels = {
-  direction: { payment_in: "Zahlungseingang" },
-  documentNumberStrategy: { period_key: "Periodenkennung", from_document: "Nummer des Belegs" },
-  profileSource: LABELS.profileSource,
-};
 
 /** The case a rule hangs on — named the way every list names it. */
 export function caseLink(over: Partial<CaseLink> = {}): CaseLink {

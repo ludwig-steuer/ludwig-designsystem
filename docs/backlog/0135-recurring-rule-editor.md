@@ -130,20 +130,19 @@ Datenverlust. Sie steht lesend im gefalteten Abschnitt und geht unverändert in
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `defaultValue` | `RecurringRuleDraft` | nein | **fehlt = neue Regel** — der Normalfall (72 %). Gesetzt = ändern. Der Aufrufer füllt sie beim Lernen aus einer Zahlung mit `prefillFromTransaction(txn)` | `New`, `Filled` |
+| `defaultValue` | `RuleDraft` | nein | **fehlt = neue Regel** — der Normalfall (72 %). Gesetzt = ändern. Der Aufrufer füllt sie beim Lernen aus einer Zahlung mit `prefillFromTransaction(txn)` | `New`, `Filled` |
 | `onSubmit` | `(draft: RecurringRuleDraft) => Promise<void>` | ja | speichert; der Editor kennt keine Route und kein Modul | `Interactive` |
 | `onCancel` | `() => void` | nein | ohne sie gibt es keinen Abbrechen-Knopf und `Esc` tut nichts | `InUse` |
 | `onCriteriaChange` | `(criteria: RuleCriteria) => void` | nein | meldet jede Änderung an den Kriterien, damit der Aufrufer die Trefferzahl neu rechnet. **Der Editor rechnet sie nicht** — `matchTransaction()` ist eine Frage an die Bankzeilen, nicht an das Formular | `Interactive` |
 | `matchCount` | `{ matched: number; scanned: number } \| null` | nein | die Live-Trefferzahl als Kontrolle. `null` = noch nicht gerechnet; ohne die Prop steht dort nichts statt einer Null | `Interactive` |
 | `accounts` | `{ candidates: Partial<Record<AccountGroup, AccountCandidate[]>>; onSearch?: (q: string) => Promise<AccountCandidate[]>; onOpenLedger?: (n: string) => void }` | ja | Kandidaten und Suche für **beide** Kontofelder — Gegenkonto und Personenkonto lesen denselben Kontenrahmen | `Filled` |
 | `paymentAccounts` | `readonly { id: string; label: string }[]` | nein | Auswahl „Zahlungskonto". Leer = keine Auswahl; **kein Wert heißt „Konto der jeweiligen Transaktion"**, nicht „unbekannt" (Spaltenkommentar) — der Hinweis steht am Feld. Die Form des Typs ist nicht erfunden: die App deklariert genau sie als `PaymentAccountOption { id; label }` — allerdings in `recurring-rules/ui/RuleEditorForm.tsx`, also weder in `domain/` noch im Spiegel (**L-257**) | `Edges` |
-| `labels` | `RecurringRuleLabels` | ja | die deutschen Wörter, die der Spiegel nicht hat (Richtung: L-256) | `Filled` |
 | `summary` | `string` | nein | der Satz der Ableitung zum aktuellen Entwurf; ohne Kriterium ist er die Warnung. Der Editor formuliert ihn nicht — und der Aufrufer gibt `describeRecurringRule()` auch `matchPurposeRegex` mit (seit `2c0c888f` optional im Typ, und wer es weglässt, bekommt den falschen Satz) | `Edges` |
 | `renderPreview` | `(draft: RecurringRuleDraft) => ReactNode` | nein | die Vorschau neben dem Formular — hier kommt `RecurringRuleFacts` (0134) hinein. Fehlt die Prop, fehlt die Vorschau (A12) | `InUse` |
 | `pending` | `boolean` | nein | Speichern läuft | `Pending` |
 | `error` | `string` | nein | der Fehler vom Server, über der Aktionszeile | `Error` |
 
-**`RecurringRuleDraft`** liegt in `recurring-rule.ts` und ist ein `Pick` des
+**`RuleDraft`** liegt in `recurring-rule.ts` und ist ein `Pick` des
 gespiegelten Typs — abgeleitet, nicht erfunden (Muster `RuleCriteria`,
 `AccrualRuleSlice` in derselben Domäne):
 
@@ -157,9 +156,11 @@ Pick<RecurringRule,
   | "isActive" | "template">
 ```
 
-**Zwölf Props — und §4 sagt: trotzdem eine Komponente.** Sechs davon sind
-Aufrufer-Werkzeuge (Speichern, Abbrechen, Trefferzahl, Kontenquelle,
-Vorschau, Fehler), sechs sind der Entwurf und seine Wörter. Sie zu trennen
+**So viele Props, wie die Tabelle darüber führt — und §4 sagt: trotzdem eine
+Komponente.** Die Mehrzahl sind Aufrufer-Werkzeuge (Speichern, Abbrechen,
+Trefferzahl, Kontenquelle, Vorschau, Fehler), der Rest ist der Entwurf. Seine
+Wörter waren bis zum Spiegellauf vom 2026-09-09 die zwölfte Prop; sie kommen
+jetzt aus der Domäne. Sie zu trennen
 hieße, den Entwurf zu teilen — und den teilt niemand.
 
 **Was der Editor bewusst nicht kann:**
@@ -288,7 +289,7 @@ Gebaut von Claude (Skill `v3-komponente`), **nicht abgenommen**.
 
 **Dateien:** `src/ui/v3/entities/recurring-rule/RecurringRuleEditor.tsx`
 (dazu `RecurringRuleAccounts`) · `RecurringRuleEditor.stories.tsx` (9 Stories)
-· `RecurringRuleDraft` in `recurring-rule.ts` · Export über
+· `RuleDraft` in `recurring-rule.ts` · Export über
 `src/ui/v3/index.ts`.
 
 **Grün:** `pnpm typecheck` und die fünf Wächter auf Exit 0.
@@ -351,7 +352,7 @@ stehen bei **0119**.
 
 | Kriterium | Nachweis (Datei:Zeile · Story · Befehl) | Ergebnis |
 |---|---|---|
-| **Schnittstellen-Tabelle Zeichen für Zeichen** | Alle zwölf Zeilen decken sich mit `RecurringRuleEditor.tsx:118–162`: `onSubmit`, `accounts` und `labels` Pflicht, die neun übrigen optional, Namen und Typen wie geschrieben. Der Inline-Typ von `accounts` steht im Code als exportiertes `RecurringRuleAccounts` (`:105–109`) — gleiche Form, zusätzlicher Name. `RecurringRuleDraft` ist der `Pick` aus der Spec, Feld für Feld (`recurring-rule.ts:68–87`) | ✓ |
+| **Schnittstellen-Tabelle Zeichen für Zeichen** | Alle zwölf Zeilen decken sich mit `RecurringRuleEditor.tsx:118–162`: `onSubmit`, `accounts` und `labels` Pflicht, die neun übrigen optional, Namen und Typen wie geschrieben. Der Inline-Typ von `accounts` steht im Code als exportiertes `RecurringRuleAccounts` (`:105–109`) — gleiche Form, zusätzlicher Name. `RuleDraft` ist der `Pick` aus der Spec, Feld für Feld (`recurring-rule.ts:68–87`) | ✓ |
 | **Der Prosa-Satz „Elf Props"** | Die Tabelle hat zwölf Zeilen, der Code zwölf Props; der Satz darunter zählt elf und teilt sie in „sechs Aufrufer-Werkzeuge, fünf Entwurf und Wörter" — die Rechnung geht nicht auf | ✗ |
 | `pnpm typecheck` grün | Exit 0 (ein Lauf für 0131–0135, 2026-09-08). `pnpm build` nach Owner-Entscheid 2026-09-07 nicht gelaufen | ✓ |
 | Datei nach der Familie, Story daneben, Titel in der Gruppe | `RecurringRuleEditor.tsx` · `.stories.tsx` · Titel `v3/Entitäten/Wiederkehr-Regel/RecurringRuleEditor` (`stories:25`) | ✓ |
@@ -372,7 +373,7 @@ stehen bei **0119**.
 | Der Editor rechnet keine Trefferzahl | `grep -n "matchTransaction" RecurringRuleEditor.tsx` → 0 Treffer; `MatchCount` (`:717–723`) zeigt nur, was hereinkommt, und ohne Prop **nichts** statt einer Null | ✓ |
 | Die Konten kommen als **Nummer** in den Entwurf | `AccountField onChange` schreibt `personalAccountNumber` (`:373`) bzw. `template.counterAccountNumber` (`:387`) als String; keine Id im Entwurf. Story `Interactive` | ✓ |
 | `template.lines` geht unverändert durch und ist nicht änderbar | `SplitTemplate` (`:689–707`) rendert nur Text, kein `input`; `updateTemplate` (`:181`) spreizt `draft.template` und lässt `lines` stehen. Story `Edges` | ✓ |
-| Der Entwurf trägt **kein** `priority` | `RecurringRuleDraft` (`recurring-rule.ts:68–87`) ohne `priority`; `grep -n "priority" RecurringRuleEditor.tsx` → 0 Treffer | ✓ |
+| Der Entwurf trägt **kein** `priority` | `RuleDraft` (`recurring-rule.ts:68–87`) ohne `priority`; `grep -n "priority" RecurringRuleEditor.tsx` → 0 Treffer | ✓ |
 | `Strg`/`Cmd` + `Enter` speichert, `Esc` bricht ab, beide sichtbar | `onKeyDown` (`:230–237`), `hotkey="Strg+Enter"` am `ActionButton` (`:620`) und `hotkey="Esc"` am Abbrechen-Knopf (`:633`), das es nur mit `onCancel` gibt | ✓ |
 | `pending` sperrt jede Eingabe; `error` über der Aktionszeile | Jedes Feld trägt `disabled={pending}`, die zwei `AccountField` sitzen im `Lock`-`fieldset[disabled]` (`:655–661`); der `error`-`Callout` (`:603`) steht **vor** `ActionBar` (`:615`). Stories `Pending`, `Error` | ✓ |
 | Nachtrag „was ohne die Prop behauptet wird" | Ohne `matchCount` steht **nichts** statt einer Null (`:718`); ohne `paymentAccounts` ist die Auswahl gesperrt und sagt „Konto der jeweiligen Zahlung" (`:555`, `:564`) — eine Aussage, kein leeres Feld (die Spec zitiert dafür „Konto der jeweiligen Transaktion"); ohne `renderPreview` fehlt die Vorschau ganz (`:592`); ohne `summary` fehlt die Warnung. Keine Prop, deren Fehlen etwas Falsches behauptet | ✓ |
@@ -428,3 +429,28 @@ Steuerschlüssel, die Klappe muss offen aufgehen.
 gegen 18): die Tabelle wurde beim Bauen mitgezogen, der Satz daneben nicht.
 Die Aufteilung darunter stimmte deshalb auch nicht mehr — sechs und sechs,
 nicht sechs und fünf.
+
+## Nachtrag zum Spiegellauf vom 2026-09-09 — eine Prop weniger
+
+Der Spiegel führt seit dem Lauf auf `ab7863d8` die vier Wortlisten der
+Wiederkehr-Regel selbst (`RULE_DIRECTION_LABEL`,
+`RULE_DOCUMENT_NUMBER_STRATEGY_LABEL`, `RULE_PROFILE_SOURCE_LABEL`, dazu das
+schon vorhandene `RULE_INTERVAL_LABEL`) — die Behebung von **L-242** und
+**L-256**. Damit fällt `labels` als Prop des Editors; `defaultValue`, `onSubmit` und `renderPreview` tragen jetzt `RuleDraft` aus dem gespiegelten `rule-draft.ts`.
+
+Was das praktisch ändert:
+
+- **`RecurringRuleLabels`, `ruleLabel()` und `RecurringRuleDraft` sind weg**,
+  und mit ihnen die Datei `entities/recurring-rule/recurring-rule.ts`. Sie war
+  ein Behelf mit Ablaufdatum, und das Datum ist eingetreten.
+- **Der Fall „Wert ohne Wort" gibt es nicht mehr.** `ruleLabel()` fiel auf den
+  Rohwert zurück, und drei Stories zeigten das ausdrücklich. Die neuen Listen
+  sind über ihren Schlüsseltyp **vollständig** (`Record<RuleDirection, string>`);
+  ein Wert ohne Wort ist damit kein Fall der Darstellung mehr, sondern ein
+  Typfehler. Die Nachweise dafür sind gestrichen, nicht umgeschrieben — sie
+  beweisen ein Verhalten, das es nicht mehr gibt.
+- **Die Story-Fixture hatte eigene Wörter erfunden.** `LABELS` schrieb für
+  `period_key` „Periodenkennung", die Domäne schreibt „aus dem Zeitraum
+  (z. B. 2026-03)"; für `derived` stand „abgeleitet" gegen „aus vorhandenen
+  Buchungen abgeleitet". Das war eine zweite Wahrheit, die niemandem auffiel,
+  weil sie plausibel klang. Jetzt gibt es nur noch eine.

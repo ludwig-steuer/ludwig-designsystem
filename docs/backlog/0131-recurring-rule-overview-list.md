@@ -146,7 +146,6 @@ entgegennimmt.
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `rules` | `readonly RecurringRuleListRow[]` | ja | die Zeilen **dieser Seite**, vom Aufrufer bereits sortiert und gefiltert (E1/E2 von `DataTable`) | `Filled` |
-| `labels` | `RecurringRuleLabels` | ja | die deutschen Wörter, die der Spiegel nicht führt (L-242, L-256); ein Wert ohne Wort steht **roh** da | `Filled` · `Edges` |
 | `ruleHref` | `(rule: RecurringRuleListRow) => string` | ja | Frage 4 des Profils: der Weg in den Regelwerk-Reiter des Sachverhalts. Er liegt auf der **ganzen Zeile** (I11) | `Filled` |
 | `accountHref` | `(accountNumber: string) => string` | nein | Weg ins Kontenblatt für Gegen- und Personenkonto. Ohne ihn stehen die Konten als Text — nie ein Knopf, der nichts tut | `Filled` |
 | `casesWithoutRule` | `{ count: number; href: string }` | nein | Frage 3 des Profils: die Dauersachverhalte **ohne** Regel, mit ihrem Weg. Trägt Zone 6 der Karte **und** den Leerfall. `count` zählt mit dem Filter, den `href` anwendet (**I12**) | `Empty` · `InUse` |
@@ -520,3 +519,28 @@ Fehler an ihren **Rändern**: eine Zeile zu wenig, ein Prosa-Satz mit der alten
 Zahl, ein Dateiname von vorgestern. Die Tabelle wird beim Bauen mitgezogen,
 der Fließtext daneben nicht — das ist die nächste Lücke im Ablauf, nachdem
 die erste geschlossen ist.
+
+## Nachtrag zum Spiegellauf vom 2026-09-09 — eine Prop weniger
+
+Der Spiegel führt seit dem Lauf auf `ab7863d8` die vier Wortlisten der
+Wiederkehr-Regel selbst (`RULE_DIRECTION_LABEL`,
+`RULE_DOCUMENT_NUMBER_STRATEGY_LABEL`, `RULE_PROFILE_SOURCE_LABEL`, dazu das
+schon vorhandene `RULE_INTERVAL_LABEL`) — die Behebung von **L-242** und
+**L-256**. Damit fällt `labels` als Prop der Übersicht.
+
+Was das praktisch ändert:
+
+- **`RecurringRuleLabels`, `ruleLabel()` und `RecurringRuleDraft` sind weg**,
+  und mit ihnen die Datei `entities/recurring-rule/recurring-rule.ts`. Sie war
+  ein Behelf mit Ablaufdatum, und das Datum ist eingetreten.
+- **Der Fall „Wert ohne Wort" gibt es nicht mehr.** `ruleLabel()` fiel auf den
+  Rohwert zurück, und drei Stories zeigten das ausdrücklich. Die neuen Listen
+  sind über ihren Schlüsseltyp **vollständig** (`Record<RuleDirection, string>`);
+  ein Wert ohne Wort ist damit kein Fall der Darstellung mehr, sondern ein
+  Typfehler. Die Nachweise dafür sind gestrichen, nicht umgeschrieben — sie
+  beweisen ein Verhalten, das es nicht mehr gibt.
+- **Die Story-Fixture hatte eigene Wörter erfunden.** `LABELS` schrieb für
+  `period_key` „Periodenkennung", die Domäne schreibt „aus dem Zeitraum
+  (z. B. 2026-03)"; für `derived` stand „abgeleitet" gegen „aus vorhandenen
+  Buchungen abgeleitet". Das war eine zweite Wahrheit, die niemandem auffiel,
+  weil sie plausibel klang. Jetzt gibt es nur noch eine.

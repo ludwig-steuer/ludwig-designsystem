@@ -124,7 +124,6 @@ ein eigener Typ wäre die lokale Erfindung, die §5 verbietet.
 | `amount` | `number \| null` | ja | Rang 4 — **das Ergebnis von `accrualAmount(rule)`**, das der Aufrufer bildet. Die Zeile rechnet nicht: die Ableitung ist dreistufig (`template.amount` → Summe der Split-Zeilen → `matchAmount`, P12) und gehört in die Domäne | `Filled` |
 | `interval` | `RuleExpectedInterval \| null` | ja | Rang 5, Wort aus `RULE_INTERVAL_LABEL` | `Words` |
 | `direction` | `RuleDirection \| null` | ja | Rang 7, Wort aus `labels.direction` | `Words` |
-| `labels` | `RecurringRuleLabels` | ja | die deutschen Wörter, die der Spiegel nicht führt (L-242, L-256). Ein Wert ohne Wort erscheint **roh** | `Words` |
 | `case` | `CaseLink` | nein | Rang 6 — nur setzen, wo die Liste ihren Sachverhalt verlässt | `InUse` |
 | `caseHref` | `(caseId: string) => string` | nein | Weg zum Sachverhalt. Ohne ihn steht der Name ohne Weg — die Zeile baut keine URL, sie kennt weder Mandant noch Jahr | `InUse` |
 | `periodCount` | `number` | nein | Zähler der Ereignisse („3 Perioden") | `InUse` |
@@ -157,10 +156,12 @@ Typen aus `src/ludwig/modules/recurring-rules/domain/rule.ts`
 `entities/accounting-case/case-title.ts` · GLOSSARY: `recurring rule` im Code,
 „Wiederkehr-Regel" im Label.
 
-**Achtzehn Props — und §4 sagt: trotzdem eine Komponente.** (Dreizehn waren
-es beim Schreiben der Spec; die fünf dazu kamen mit dem Katalog aus 0131 und
-stehen seither in der Tabelle darüber.) Der Grund ist
-benannt und hat ein Ablaufdatum: sechzehn davon sind Spalten **einer** Zeile, die
+**So viele Props, wie die Tabelle darüber führt — und §4 sagt: trotzdem eine
+Komponente.** (Die Zahl hat sich zweimal bewegt: dreizehn beim Schreiben der
+Spec, achtzehn mit dem Katalog aus 0131, eine weniger seit `labels` gefallen
+ist. Sie hier noch einmal auszuschreiben hieße, sie ein drittes Mal
+nachzuziehen — die Tabelle ist die Zahl.) Der Grund ist
+benannt und hat ein Ablaufdatum: fast alle davon sind Spalten **einer** Zeile, die
 nur deshalb einzeln kommen, weil ihr Modell nicht gespiegelt ist (L-240).
 Trennen würde nichts entkoppeln, sondern nur Durchreich-Props erzeugen — genau
 den Fall, für den §4 „zusammenlassen" sagt. Ist L-240 erledigt, schrumpfen
@@ -404,3 +405,28 @@ dazugab. Die Tabelle war mitgezogen worden, der Satz darunter nicht.
 beide liegen seit 0131 im Katalog. Jetzt steht dort, wo sie waren und warum
 sie umgezogen sind — das ist die Auskunft, die jemand braucht, der dem alten
 Satz gefolgt ist.
+
+## Nachtrag zum Spiegellauf vom 2026-09-09 — eine Prop weniger
+
+Der Spiegel führt seit dem Lauf auf `ab7863d8` die vier Wortlisten der
+Wiederkehr-Regel selbst (`RULE_DIRECTION_LABEL`,
+`RULE_DOCUMENT_NUMBER_STRATEGY_LABEL`, `RULE_PROFILE_SOURCE_LABEL`, dazu das
+schon vorhandene `RULE_INTERVAL_LABEL`) — die Behebung von **L-242** und
+**L-256**. Damit fällt `labels` als Prop der Zeile — und mit ihr der Zuschnitt-Grund für eine eigene Wörterbuch-Datei.
+
+Was das praktisch ändert:
+
+- **`RecurringRuleLabels`, `ruleLabel()` und `RecurringRuleDraft` sind weg**,
+  und mit ihnen die Datei `entities/recurring-rule/recurring-rule.ts`. Sie war
+  ein Behelf mit Ablaufdatum, und das Datum ist eingetreten.
+- **Der Fall „Wert ohne Wort" gibt es nicht mehr.** `ruleLabel()` fiel auf den
+  Rohwert zurück, und drei Stories zeigten das ausdrücklich. Die neuen Listen
+  sind über ihren Schlüsseltyp **vollständig** (`Record<RuleDirection, string>`);
+  ein Wert ohne Wort ist damit kein Fall der Darstellung mehr, sondern ein
+  Typfehler. Die Nachweise dafür sind gestrichen, nicht umgeschrieben — sie
+  beweisen ein Verhalten, das es nicht mehr gibt.
+- **Die Story-Fixture hatte eigene Wörter erfunden.** `LABELS` schrieb für
+  `period_key` „Periodenkennung", die Domäne schreibt „aus dem Zeitraum
+  (z. B. 2026-03)"; für `derived` stand „abgeleitet" gegen „aus vorhandenen
+  Buchungen abgeleitet". Das war eine zweite Wahrheit, die niemandem auffiel,
+  weil sie plausibel klang. Jetzt gibt es nur noch eine.

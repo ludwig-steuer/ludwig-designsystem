@@ -87,7 +87,6 @@ sie.
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `rules` | `readonly RecurringRuleListRow[]` | ja | die überfälligen Regeln in der Reihenfolge der Query. Der Typ ist `RecurringRuleRowData & { id: string }` aus dem Katalog (0131) — **ohne** `labels` und `caseHref`, die Props der Liste sind. `id` ist der Schlüssel der Zeile, nicht ihr Inhalt | `Filled` |
-| `labels` | `RecurringRuleLabels` | ja | die Wörter der Familie (L-242, L-256), an jede Zeile durchgereicht | `Filled` |
 | `caseHref` | `(caseId: string) => string` | ja | Weg zum Sachverhalt. Ohne Weg ist die Liste eine Sackgasse: die Nachfrage passiert **am Fall** | `Filled` |
 | `period` | `string` | nein | der Zeitraum des Stapels im Kopf („August 2026") | `Filled` |
 | `total` | `number` | nein | wie viele Regeln geprüft wurden — der Nenner des Zählers („3 von 27 Regeln"). Ohne ihn steht nur die Trefferzahl | `Filled` |
@@ -290,3 +289,28 @@ auch die ehrlichere Story: der Rahmen dort ist die Stapelabnahme, nicht das
 Regelwerk, und eine Liste in fremdem Rahmen heißt anders. Die Alternative wäre
 gewesen, die Nachweisspalte zu leeren — dann stünde eine Prop ohne Beleg da,
 und §5 sagt, die ist entweder überflüssig oder ihre Story fehlt.
+
+## Nachtrag zum Spiegellauf vom 2026-09-09 — eine Prop weniger
+
+Der Spiegel führt seit dem Lauf auf `ab7863d8` die vier Wortlisten der
+Wiederkehr-Regel selbst (`RULE_DIRECTION_LABEL`,
+`RULE_DOCUMENT_NUMBER_STRATEGY_LABEL`, `RULE_PROFILE_SOURCE_LABEL`, dazu das
+schon vorhandene `RULE_INTERVAL_LABEL`) — die Behebung von **L-242** und
+**L-256**. Damit fällt `labels` als Prop der Liste.
+
+Was das praktisch ändert:
+
+- **`RecurringRuleLabels`, `ruleLabel()` und `RecurringRuleDraft` sind weg**,
+  und mit ihnen die Datei `entities/recurring-rule/recurring-rule.ts`. Sie war
+  ein Behelf mit Ablaufdatum, und das Datum ist eingetreten.
+- **Der Fall „Wert ohne Wort" gibt es nicht mehr.** `ruleLabel()` fiel auf den
+  Rohwert zurück, und drei Stories zeigten das ausdrücklich. Die neuen Listen
+  sind über ihren Schlüsseltyp **vollständig** (`Record<RuleDirection, string>`);
+  ein Wert ohne Wort ist damit kein Fall der Darstellung mehr, sondern ein
+  Typfehler. Die Nachweise dafür sind gestrichen, nicht umgeschrieben — sie
+  beweisen ein Verhalten, das es nicht mehr gibt.
+- **Die Story-Fixture hatte eigene Wörter erfunden.** `LABELS` schrieb für
+  `period_key` „Periodenkennung", die Domäne schreibt „aus dem Zeitraum
+  (z. B. 2026-03)"; für `derived` stand „abgeleitet" gegen „aus vorhandenen
+  Buchungen abgeleitet". Das war eine zweite Wahrheit, die niemandem auffiel,
+  weil sie plausibel klang. Jetzt gibt es nur noch eine.

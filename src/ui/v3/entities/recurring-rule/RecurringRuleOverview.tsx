@@ -8,7 +8,6 @@ import {
   RECURRING_RULE_BOOK_COLUMNS,
   type RecurringRuleListRow,
 } from "./recurring-rule-columns";
-import type { RecurringRuleLabels } from "./recurring-rule";
 
 /**
  * The rule book of one client (0131) — every recurring rule side by side.
@@ -57,7 +56,6 @@ const MIN_WIDTH = 1620;
  */
 export function RecurringRuleOverview({
   rules,
-  labels,
   ruleHref,
   accountHref,
   casesWithoutRule,
@@ -70,8 +68,6 @@ export function RecurringRuleOverview({
 }: {
   /** The rows of this page, already sorted and filtered — the list does neither. */
   rules: readonly RecurringRuleListRow[];
-  /** The German words the mirror does not carry (L-242, L-256). */
-  labels: RecurringRuleLabels;
   /**
    * Question 4 of the page profile: the way into the rule tab of the case.
    *
@@ -110,7 +106,6 @@ export function RecurringRuleOverview({
     <DataTable<RecurringRuleListRow>
       rows={[...rules]}
       columns={recurringRuleColumns({
-        labels,
         columns: RECURRING_RULE_BOOK_COLUMNS,
         ...(accountHref ? { accountHref } : {}),
       })}

@@ -463,9 +463,6 @@ export {
   type RecurringRuleAccounts,
 } from "./entities/recurring-rule/RecurringRuleEditor";
 export {
-  ruleLabel,
-  type RecurringRuleLabels,
-  type RecurringRuleDraft,
 } from "./entities/recurring-rule/recurring-rule";
 
 /* Konto — die Seite (0063) und der Kontenplan als Spaltensatz (0062) */

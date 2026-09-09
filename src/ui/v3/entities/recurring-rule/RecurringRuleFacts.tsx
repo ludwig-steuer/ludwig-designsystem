@@ -5,6 +5,9 @@ import {
   effectiveAmountTolerance,
   RULE_INTERVAL_LABEL,
   type RecurringRule,
+  RULE_DIRECTION_LABEL,
+  RULE_DOCUMENT_NUMBER_STRATEGY_LABEL,
+  RULE_PROFILE_SOURCE_LABEL,
 } from "@/ludwig/modules/recurring-rules/domain/rule";
 import type { Currency } from "@/ludwig/shared/money";
 
@@ -17,7 +20,6 @@ import { LongText } from "../../primitives/LongText";
 import { Time } from "../../primitives/Time";
 import { AccountCell } from "../account/Account";
 import { JournalEntryCard, type JournalLine } from "../journal-entry/JournalEntryCompact";
-import { ruleLabel, type RecurringRuleLabels } from "./recurring-rule";
 
 /**
  * Everything one recurring rule is (0134) — trigger, effect, expectation.
@@ -69,7 +71,6 @@ export function RecurringRuleFacts({
   summary,
   schedule,
   preview,
-  labels,
   all = false,
   accountHref,
   hints,
@@ -92,8 +93,6 @@ export function RecurringRuleFacts({
    */
   schedule: string | null;
   preview: RecurringRulePreview;
-  /** The German words the mirror does not carry (L-242, L-256). */
-  labels: RecurringRuleLabels;
   /** Also the group „Herkunft" — the server stamps and the rarely-filled columns. */
   all?: boolean;
   /** The way to the account sheet. Without it both accounts are plain text. */
@@ -119,7 +118,7 @@ export function RecurringRuleFacts({
     ]);
   }
   if (rule.expectedDirection) {
-    trigger.push(["Richtung", ruleLabel(labels.direction, rule.expectedDirection)]);
+    trigger.push(["Richtung", RULE_DIRECTION_LABEL[rule.expectedDirection]]);
   }
   if (rule.matchAmount !== null) {
     trigger.push([
@@ -201,7 +200,7 @@ export function RecurringRuleFacts({
   const origin: Pair[] = [];
   if (all) {
     if (rule.profileSource) {
-      origin.push(["Herkunft des Profils", ruleLabel(labels.profileSource, rule.profileSource)]);
+      origin.push(["Herkunft des Profils", RULE_PROFILE_SOURCE_LABEL[rule.profileSource]]);
     }
     origin.push([
       "Zahlungskonto",
@@ -219,7 +218,7 @@ export function RecurringRuleFacts({
     }
     origin.push([
       "Belegnummern-Strategie",
-      ruleLabel(labels.documentNumberStrategy, rule.documentNumberStrategy),
+      RULE_DOCUMENT_NUMBER_STRATEGY_LABEL[rule.documentNumberStrategy],
     ]);
     if (rule.importReference) {
       origin.push(["Idempotenz-Anker", <MonoCell key="ir" value={rule.importReference} />]);

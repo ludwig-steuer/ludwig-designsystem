@@ -4,7 +4,7 @@ import { FilterBar } from "../../primitives/FilterBar";
 import { Field, Input, Select } from "../../primitives/Form";
 import { PageHeader } from "../../primitives/PageHeader";
 import { TextButton } from "../../primitives/TextButton";
-import { LABELS, LABELS_WITH_GAPS, caseLink } from "./fixtures";
+import { caseLink } from "./fixtures";
 import { RecurringRuleOverview } from "./RecurringRuleOverview";
 import type { RecurringRuleListRow } from "./recurring-rule-columns";
 
@@ -143,7 +143,6 @@ export const Filled: Story = {
     <div style={{ maxWidth: 1700 }}>
       <RecurringRuleOverview
         rules={EIGHT}
-        labels={LABELS}
         ruleHref={ruleHref}
         accountHref={accountHref}
         casesWithoutRule={{ count: 15, href: "#dauersachverhalte-ohne-regel" }}
@@ -168,14 +167,12 @@ export const Empty: Story = {
     <div style={{ maxWidth: 1700, display: "grid", gap: "var(--space-5)" }}>
       <RecurringRuleOverview
         rules={[]}
-        labels={LABELS}
         ruleHref={ruleHref}
         casesWithoutRule={{ count: 15, href: "#dauersachverhalte-ohne-regel" }}
         total={0}
       />
       <RecurringRuleOverview
         rules={[]}
-        labels={LABELS}
         ruleHref={ruleHref}
         casesWithoutRule={{ count: 0, href: "#dauersachverhalte-ohne-regel" }}
         total={0}
@@ -194,7 +191,6 @@ export const EmptyAfterFilter: Story = {
     <div style={{ maxWidth: 1700 }}>
       <RecurringRuleOverview
         rules={[]}
-        labels={LABELS}
         ruleHref={ruleHref}
         accountHref={accountHref}
         casesWithoutRule={{ count: 15, href: "#dauersachverhalte-ohne-regel" }}
@@ -217,7 +213,6 @@ export const Loading: Story = {
     <div style={{ maxWidth: 1700 }}>
       <RecurringRuleOverview
         rules={[]}
-        labels={LABELS}
         ruleHref={ruleHref}
         accountHref={accountHref}
         total={30}
@@ -235,7 +230,6 @@ export const Error: Story = {
     <div style={{ maxWidth: 1700 }}>
       <RecurringRuleOverview
         rules={[]}
-        labels={LABELS}
         ruleHref={ruleHref}
         total={30}
         error={{
@@ -283,7 +277,6 @@ export const InUse: Story = {
       </FilterBar>
       <RecurringRuleOverview
         rules={EIGHT}
-        labels={LABELS}
         ruleHref={ruleHref}
         accountHref={accountHref}
         casesWithoutRule={{ count: 15, href: "#dauersachverhalte-ohne-regel" }}
@@ -302,11 +295,10 @@ export const InUse: Story = {
  * ohne Rhythmus, ein Betrag `null`, ein Sachverhalt ohne Titel und eine Regel
  * ohne beide Konten.
  *
- * Dazu die Wortlücke: diese Story nimmt `LABELS_WITH_GAPS`, dem
- * `payment_out` und `fixed` fehlen. Beide stehen deshalb **roh** da. Sichtbar
- * falsch schlägt still verschwunden — die Lücke ist ein Befund der Domäne
- * (L-242, L-256), und eine Form, die sie versteckte, schlösse ihn, ohne ihn zu
- * beheben.
+ * Die Wortlücke, die diese Story bis zum 2026-09-09 mitzeigte, gibt es nicht
+ * mehr: die vier Wortlisten stehen seit dem Spiegellauf in der Domäne und sind
+ * über ihren Schlüsseltyp **vollständig**. Ein Wert ohne Wort ist damit kein
+ * Fall der Darstellung mehr, sondern ein Typfehler.
  */
 export const Edges: Story = {
   render: () => (
@@ -351,7 +343,6 @@ export const Edges: Story = {
             }),
           ),
         ]}
-        labels={LABELS_WITH_GAPS}
         ruleHref={ruleHref}
         accountHref={accountHref}
         casesWithoutRule={{ count: 74, href: "#dauersachverhalte-ohne-regel" }}

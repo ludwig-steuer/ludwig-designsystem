@@ -9,7 +9,9 @@ import {
   type RuleCriteria,
   type RuleDirection,
   type RuleExpectedInterval,
+  RULE_DIRECTION_LABEL,
 } from "@/ludwig/modules/recurring-rules/domain/rule";
+import type { RuleDraft } from "@/ludwig/modules/recurring-rules/domain/rule-draft";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 import { formatAmount, formatCount } from "../../format";
@@ -27,7 +29,6 @@ import {
   type AccountGroup,
 } from "../account/AccountField";
 import { TaxKeyField } from "../journal-entry/TaxKeyField";
-import { ruleLabel, type RecurringRuleDraft, type RecurringRuleLabels } from "./recurring-rule";
 
 /**
  * Building and changing a recurring rule (0135).
@@ -57,7 +58,7 @@ const NEW_BOOKING_MODE: RuleBookingMode = "book_on_payment";
  * value, and „not decided" is `null`, never `undefined` — the caller writes
  * this object into a row.
  */
-const EMPTY: RecurringRuleDraft = {
+const EMPTY: RuleDraft = {
   expectedDirection: null,
   matchCounterpartyName: null,
   matchCounterpartyIban: null,
@@ -123,15 +124,14 @@ export function RecurringRuleEditor({
   matchCount,
   accounts,
   paymentAccounts,
-  labels,
   summary,
   renderPreview,
   pending,
   error,
 }: {
   /** **Missing = a new rule** — the normal case. Set = changing one. */
-  defaultValue?: RecurringRuleDraft;
-  onSubmit: (draft: RecurringRuleDraft) => Promise<void>;
+  defaultValue?: RuleDraft;
+  onSubmit: (draft: RuleDraft) => Promise<void>;
   /** Without it there is no cancel button and `Esc` does nothing. */
   onCancel?: () => void;
   /**
@@ -148,7 +148,6 @@ export function RecurringRuleEditor({
    * itself"**, not „unknown" — the sentence stands at the field.
    */
   paymentAccounts?: readonly { id: string; label: string }[];
-  labels: RecurringRuleLabels;
   /**
    * The domain's sentence about the current draft; without a criterion it is
    * the warning. The editor does not phrase it — a form that rebuilds a
@@ -156,18 +155,18 @@ export function RecurringRuleEditor({
    */
   summary?: string;
   /** The preview beside the form — this is where `RecurringRuleFacts` goes. */
-  renderPreview?: (draft: RecurringRuleDraft) => ReactNode;
+  renderPreview?: (draft: RuleDraft) => ReactNode;
   pending?: boolean;
   error?: string;
 }) {
-  const [draft, setDraft] = useState<RecurringRuleDraft>(defaultValue ?? EMPTY);
+  const [draft, setDraft] = useState<RuleDraft>(defaultValue ?? EMPTY);
   // A draft that came from outside is not untouched input: its faults are
   // facts, and marking them only after the first attempt to save would hide
   // what is already wrong. An empty form stays quiet until somebody saves.
   const [touched, setTouched] = useState(defaultValue !== undefined);
   const ids = useIds();
 
-  function update(patch: Partial<RecurringRuleDraft>) {
+  function update(patch: Partial<RuleDraft>) {
     const next = { ...draft, ...patch };
     setDraft(next);
     // Outside the state updater on purpose: under StrictMode React runs the
@@ -178,7 +177,7 @@ export function RecurringRuleEditor({
     }
   }
 
-  function updateTemplate(patch: Partial<RecurringRuleDraft["template"]>) {
+  function updateTemplate(patch: Partial<RuleDraft["template"]>) {
     setDraft({ ...draft, template: { ...draft.template, ...patch } });
   }
 
@@ -275,7 +274,7 @@ export function RecurringRuleEditor({
                 <option value="">beide Richtungen</option>
                 {DIRECTIONS.map((d) => (
                   <option key={d} value={d}>
-                    {ruleLabel(labels.direction, d)}
+                    {RULE_DIRECTION_LABEL[d]}
                   </option>
                 ))}
               </Select>
@@ -689,7 +688,7 @@ function Section({
  * saving would be data loss. So it stands here, visible, and travels through
  * `onSubmit` as it came.
  */
-function SplitTemplate({ lines }: { lines: RecurringRuleDraft["template"]["lines"] }) {
+function SplitTemplate({ lines }: { lines: RuleDraft["template"]["lines"] }) {
   if (!lines?.length) return null;
   return (
     <div className="v2rredit__split">
@@ -728,7 +727,7 @@ function MatchCount({ count }: { count?: { matched: number; scanned: number } | 
 }
 
 /** Only the match criteria — what the caller needs to count hits. */
-function criteriaOf(draft: RecurringRuleDraft): RuleCriteria {
+function criteriaOf(draft: RuleDraft): RuleCriteria {
   return {
     expectedDirection: draft.expectedDirection,
     matchCounterpartyName: draft.matchCounterpartyName,

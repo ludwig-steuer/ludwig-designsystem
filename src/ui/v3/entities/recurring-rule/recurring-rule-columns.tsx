@@ -4,6 +4,8 @@ import {
   type RuleDirection,
   type RuleDocumentNumberStrategy,
   type RuleExpectedInterval,
+  RULE_DIRECTION_LABEL,
+  RULE_DOCUMENT_NUMBER_STRATEGY_LABEL,
 } from "@/ludwig/modules/recurring-rules/domain/rule";
 import type { PreviewAccount } from "@/ludwig/modules/recurring-rules/domain/booking-preview";
 
@@ -15,7 +17,6 @@ import { Time } from "../../primitives/Time";
 import { AccountCell } from "../account/Account";
 import { CaseCell } from "../accounting-case/CaseCell";
 import { caseIdentifier, caseTitle, type CaseLink } from "../accounting-case/case-title";
-import { ruleLabel, type RecurringRuleLabels } from "./recurring-rule";
 
 /**
  * The cells of a recurring rule — **once**, for the row and for `DataTable`
@@ -84,7 +85,7 @@ export interface RecurringRuleRowData {
   amount: number | null;
   /** Rank 5 — the word comes from `RULE_INTERVAL_LABEL`, never raw English. */
   interval: RuleExpectedInterval | null;
-  /** Rank 7 — the word comes from `labels`; a value without one shows raw. */
+  /** Rank 7 — the word comes from `RULE_DIRECTION_LABEL`, never raw English. */
   direction: RuleDirection | null;
   /** Rank 6 — set only where the list has left its own case. */
   case?: CaseLink;
@@ -102,7 +103,7 @@ export interface RecurringRuleRowData {
   counterAccount?: PreviewAccount | null;
   /** Rank 11 — mandatory for `accrue_then_settle`; missing is the anomaly. */
   personalAccount?: PreviewAccount | null;
-  /** Rank 22 — the word comes from `labels`; `fixed` breaks the OPOS match. */
+  /** Rank 22 — `RULE_DOCUMENT_NUMBER_STRATEGY_LABEL` has the word; `fixed` breaks the OPOS match. */
   documentNumberStrategy?: RuleDocumentNumberStrategy | null;
   /** The events of this rule as a counter („3 Perioden"). */
   periodCount?: number;
@@ -262,8 +263,6 @@ export function recurringRuleColumnOrder(
 const pick = recurringRuleColumnOrder;
 
 export interface RecurringRuleColumnOptions {
-  /** The German words the mirror does not carry (L-242, L-256). */
-  labels: RecurringRuleLabels;
   /**
    * Rank 6 — the way to the case, **on the case cell**.
    *
@@ -306,7 +305,6 @@ export function recurringRuleTracks(
  *          RecurringRuleFacts.
  */
 export function recurringRuleColumns({
-  labels,
   caseHref,
   accountHref,
   columns = RECURRING_RULE_ROW_COLUMNS,
@@ -317,7 +315,7 @@ export function recurringRuleColumns({
     width: TRACK[column],
     ...(NUMERIC.has(column) ? { align: "end" as const } : {}),
     ...(SORTABLE.has(column) ? { sortable: true } : {}),
-    cell: (rule: RecurringRuleRowData) => cell(column, rule, labels, caseHref, accountHref),
+    cell: (rule: RecurringRuleRowData) => cell(column, rule, caseHref, accountHref),
   }));
 }
 
@@ -325,7 +323,6 @@ export function recurringRuleColumns({
 function cell(
   column: RecurringRuleColumn,
   r: RecurringRuleRowData,
-  labels: RecurringRuleLabels,
   caseHref: ((caseId: string) => string) | undefined,
   accountHref: ((accountNumber: string) => string) | undefined,
 ) {
@@ -357,7 +354,7 @@ function cell(
     // that nobody knows which.
     case "direction":
       return (
-        ruleLabel(labels.direction, r.direction) ?? (
+        (r.direction ? RULE_DIRECTION_LABEL[r.direction] : null) ?? (
           <span className="v2muted">ohne Richtung</span>
         )
       );
@@ -371,7 +368,9 @@ function cell(
         <Account account={r.personalAccount} href={accountHref} missing="ohne Personenkonto" />
       );
     case "documentNumberStrategy":
-      return ruleLabel(labels.documentNumberStrategy, r.documentNumberStrategy ?? null);
+      return r.documentNumberStrategy
+        ? RULE_DOCUMENT_NUMBER_STRATEGY_LABEL[r.documentNumberStrategy]
+        : null;
     case "periods":
       return r.periodCount === undefined ? null : (
         <span className="v2muted">

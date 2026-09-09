@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { ReactNode } from "react";
 
 import { Card, CardHead, HeadRow, Table } from "../../primitives/Table";
-import { LABELS, LABELS_WITH_GAPS, caseLink } from "./fixtures";
+import { caseLink } from "./fixtures";
 import {
   RECURRING_RULE_COLUMN_LABEL,
   recurringRuleColumnOrder,
@@ -28,7 +28,6 @@ const BASE: RecurringRuleRowProps = {
   amount: 1800,
   interval: "monthly",
   direction: "payment_out",
-  labels: LABELS,
 };
 
 /** Die Standardspalten der Zeile — Ränge 1–5 und 7. */
@@ -154,17 +153,19 @@ export const Modes: Story = {
 /**
  * Rhythmus und Richtung als Wörter. Auf dem Bildschirm steht nie `monthly` —
  * das ist die Ablösung von **L-243 a**, wo `Schritt5.tsx:100` den Rohwert
- * ausgibt. Die letzte Zeile trägt eine Richtung, für die `labels` kein Wort
- * hat: sie steht **roh** da, statt still zu verschwinden (L-256).
+ * ausgibt. Beide Wörter kommen seit dem Spiegellauf vom 2026-09-09 aus der
+ * Domäne (`RULE_INTERVAL_LABEL`, `RULE_DIRECTION_LABEL`), nicht mehr als Prop
+ * von außen — womit die fünfte Zeile entfällt, die zeigte, was ohne Wort
+ * passiert: ohne Wort gibt es den Wert nicht mehr, der Typ deckt beide Mengen.
  */
 export const Words: Story = {
   render: () => (
-    <Frame sub="Rhythmus aus `RULE_INTERVAL_LABEL`, Richtung aus `labels`">
+    <Frame sub="Rhythmus und Richtung aus der Domäne">
       <RecurringRuleRow {...BASE} interval="monthly" direction="payment_in" />
       <RecurringRuleRow {...BASE} interval="quarterly" direction="payment_out" />
       <RecurringRuleRow {...BASE} interval="yearly" direction={null} />
       <RecurringRuleRow {...BASE} interval={null} direction="payment_in" />
-      <RecurringRuleRow {...BASE} labels={LABELS_WITH_GAPS} direction="payment_out" />
+      <RecurringRuleRow {...BASE} direction="payment_out" />
     </Frame>
   ),
 };

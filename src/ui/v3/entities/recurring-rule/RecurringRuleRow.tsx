@@ -39,14 +39,12 @@ export type RecurringRuleRowProps = RecurringRuleRowData & RecurringRuleColumnOp
  *          state → RecurringRuleList.
  */
 export function RecurringRuleRow({
-  labels,
   caseHref,
   accountHref,
   columns,
   ...data
 }: RecurringRuleRowProps) {
   const cols = recurringRuleColumns({
-    labels,
     ...(columns ? { columns } : {}),
     ...(caseHref ? { caseHref } : {}),
     ...(accountHref ? { accountHref } : {}),

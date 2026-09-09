@@ -14,7 +14,7 @@ import {
 
 import { Card, CardHead } from "../../primitives/Table";
 import type { JournalLine } from "../journal-entry/JournalEntryCompact";
-import { LABELS, rule } from "./fixtures";
+import { rule } from "./fixtures";
 import { RecurringRuleFacts, type RecurringRulePreview } from "./RecurringRuleFacts";
 
 const meta: Meta<typeof RecurringRuleFacts> = {
@@ -101,7 +101,6 @@ function facts(r: RecurringRule) {
     }),
     schedule: describeRuleSchedule(r),
     preview: previewOf(r),
-    labels: LABELS,
   };
 }
 
@@ -167,23 +166,15 @@ export const Modes: Story = {
 /**
  * Dieselbe Regel mit `all`: Herkunft des Profils, Zahlungskonto,
  * Belegnummern-Strategie und Idempotenz-Anker. Die Strategie ist hier `fixed`
- * — und `labels` hat dafür **kein Wort**: der Rohwert steht da, statt still zu
- * verschwinden (L-242). Genau eine Regel im Bestand trägt `fixed`, und die
- * bricht ab der zweiten Periode den OPOS-Ausgleich.
+ * — „fest vergeben", seit dem Spiegellauf vom 2026-09-09 ein Wort aus der
+ * Domäne statt eines von außen gereichten. Genau eine Regel im Bestand trägt
+ * `fixed`, und die bricht ab der zweiten Periode den OPOS-Ausgleich.
  */
 export const All: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <RecurringRuleFacts
         {...facts(rule({ documentNumberStrategy: "fixed", profileSource: "derived" }))}
-        labels={{
-          ...LABELS,
-          // Genau eine Lücke: für `fixed` fehlt das Wort, alles andere steht.
-          documentNumberStrategy: {
-            period_key: "Periodenkennung",
-            from_document: "Nummer des Belegs",
-          },
-        }}
         all
       />
     </div>

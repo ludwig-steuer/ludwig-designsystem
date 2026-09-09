@@ -9,7 +9,6 @@ import {
   type RecurringRuleListRow,
 } from "./recurring-rule-columns";
 import { RecurringRuleRow } from "./RecurringRuleRow";
-import type { RecurringRuleLabels } from "./recurring-rule";
 
 /**
  * The recurring rules whose payment did not arrive (0133).
@@ -58,7 +57,6 @@ const MIN_WIDTH = 1180;
  */
 export function RecurringRuleList({
   rules,
-  labels,
   caseHref,
   period,
   total,
@@ -67,15 +65,13 @@ export function RecurringRuleList({
   /**
    * The overdue rules in the order of the query — the list does not sort.
    *
-   * **Without `labels` and `caseHref`**: those two are props of the list and
-   * are handed to every row. Per row they would make the list's own two props
-   * unreachable and repeat the same object in every entry — the one place
-   * where this list deviates from the interface written in 0133, and it
-   * deviates in order to keep that interface's own sentence true.
+   * **Without `caseHref`**: that one is a prop of the list and is handed to
+   * every row. Per row it would make the list's own prop unreachable and
+   * repeat the same function in every entry — the one place where this list
+   * deviates from the interface written in 0133, and it deviates in order to
+   * keep that interface's own sentence true.
    */
   rules: readonly RecurringRuleListRow[];
-  /** The German words of the family, handed to every row (L-242, L-256). */
-  labels: RecurringRuleLabels;
   /**
    * The way to the case. Required: without it the list is a dead end — the
    * asking happens **at the case**, not at the rule.
@@ -118,7 +114,7 @@ export function RecurringRuleList({
           </EmptyRow>
         ) : (
           rules.map(({ id, ...rule }) => (
-            <RecurringRuleRow key={id} {...rule} labels={labels} caseHref={caseHref} columns={COLUMNS} />
+            <RecurringRuleRow key={id} {...rule} caseHref={caseHref} columns={COLUMNS} />
           ))
         )}
       </Table>
