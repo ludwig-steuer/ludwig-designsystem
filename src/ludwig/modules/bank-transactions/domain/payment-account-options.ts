@@ -5,7 +5,7 @@
  * Das Onboarding promotet den ganzen SKR-Bankblock zu Zahlungskonten (die
  * DATEV-Kontenfunktion 10 wirft Bank, Kasse, PSP und Verrechnungskonten in
  * einen Topf). Ein Mandant hat dadurch 25 bis 43 Konten, von denen faktisch
- * eines Geld bewegt — bei `willems-sabine-2` steht die „Münchner Bank" mit 145
+ * eines Geld bewegt — bei `beispiel-mandant` steht die „Stadtbank" mit 145
  * Buchungen zwischen 24 Karteileichen wie „Geldtransit", „Nebenkasse 2" und
  * „Bank (Postbank 3)". Wer einen Kontoauszug zuordnet, sucht sein Konto sonst
  * in einer Liste aus Kulisse.

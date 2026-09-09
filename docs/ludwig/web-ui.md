@@ -19,6 +19,14 @@ deshalb Lücken; sie werden nicht neu vergeben.
 - Beleg-Detail **jahres-los**: `clients/[clientSlug]/documents/[sourceDocId]`.
   Die alte `[year]`-Variante redirectet permanent — das Jahres-Segment war
   redundant und scheiterte bei Belegen ohne extrahiertes `invoice_date`.
+  Reiter: **Übersicht · Details · Positionen · Vorsteuer · Verlauf &
+  Befunde · Rohdaten** — sechs bei der Rechnung, vier beim Vertrag, drei beim
+  Kontoauszug; jeder Reiter nur, wo er etwas zeigt. „Details" trägt, was mehr
+  als einen Wert betrifft, Einzelwerte bleiben in der Übersicht an ihrem Wert.
+  Die **Pipeline** ist seit 2026-09-09 kein Reiter mehr, sondern aufklappbare
+  Tiefe im Verlauf; `?tab=pipeline` leitet dorthin (wie `?tab=buchung` und
+  `?tab=beleg` auf die Übersicht). Was über dem Inhalt steht, regelt
+  `belege.md` R33.
 - Geschäftspartner `clients/[clientSlug]/[year]/partners` (+ Detail
   `/partners/[partnerId]`) — die Liste ALLER Partner, nicht nur der
   Kreditoren (R14).
@@ -215,6 +223,15 @@ gedimmter Knopf ist keine Zugriffskontrolle. Der Einstieg (`…/abnahme` ohne
 Schritt) landet dort, wo die Arbeit liegt: Prüfung → 0, unterwegs → 9, in
 DATEV → 10.
 
+**Notiz und Klärung kennen dieses Gate nicht.** Eine Notiz am Sachverhalt, eine
+Frage an Mandant oder Agent und die Antwort auf eine offene Frage schreiben
+nichts fest — sie gehen in **jedem** Stapelzustand, auch während der Agent
+arbeitet (er nimmt sie im nächsten Durchgang mit) und nachdem der Stapel raus
+ist. Gegated bleibt nur das Quittieren: Freigeben, Hinweis + freigeben,
+Ablehnen. *Warum:* wer beim Durchsehen etwas bemerkt, soll es in dem Moment
+festhalten können, in dem er es bemerkt — sonst geht es verloren oder landet in
+einem zweiten Werkzeug (Owner 09.09.2026).
+
 Die Abnahme **baut keinen zweiten Kern nach**. Sie ruft die Kerne, die Agent
 und Stammdatenpflege ohnehin rufen (Abnahme, Klärung, Konvention, Freigabe);
 die Freigabe-Checkliste in Schritt 8 rechnet **dieselben Gates**, die der Agent
@@ -227,6 +244,11 @@ den Gate-Feldern in Menschen-Sprache gebaut (`domain/deckungsluecke.ts`), für
 Schritt 1 und 8 derselbe Satz; **gerechnet wird nur im Gate**. *Warum:* der
 Agent läuft autonom und kann die Lücke nicht zurückspielen — entscheiden muss
 der Mensch (Owner 03.09.2026).
+Was dem Mandanten **fehlt**, steht in Schritt 1 als fünfte Zeile „Fehlende
+Belege beim Mandanten": aufgeklappt die wartenden Sachverhalte, darunter der
+Knopf, der den Mail-Entwurf zur Nachforderung als Modal öffnet (F185). Sie ist
+Auskunft und Werkzeug, **kein Gate** — die Belegzeilen darüber listen
+vorhandene, unerledigte Belege, diese die fehlenden.
 Eigene **Oberflächen** hat sie sehr wohl: „kein zweiter Editor" heißt, dass der
 v2-Editor den alten ersetzt, nicht dass die Abnahme mit dem alten auskommen
 muss (F123 §0.2).
@@ -273,6 +295,18 @@ bis vier Wochen und soll nichts auswendig können müssen.
 wird das **einmal je Request** (`application/rail-status.ts`, `React.cache`)
 aus denselben Quellen, die die Schritte selbst zeigen — „6 von 58" heißt im
 Rail und in Schritt 8 dasselbe.
+
+**Der Rail zählt, er prüft nicht teuer.** Der Probe-Export rechnet die
+DATEV-Zerlegung *aller* noch nicht exportierten Sätze des Mandanten und kostet
+Sekunden; er lief auf jedem der elf Schritte mit, nur damit der Rail einen
+Zähler hat. Gerechnet wird er jetzt dort, wo er zählt: in Schritt 8 und im
+Freigabe-Guard (`getReleaseChecklist(…, { probeExport: true })`) — im Rail
+fehlt die Zeile, statt grün zu lügen. Dieselbe Trennung führt Gate 4d schon
+für den Agenten (`expensive`). Ebenso bleibt der DATEV-Spiegel-Abgleich der
+Gates 3a–3e in der Checkliste aus (`mirrorCheck: false`): er kostet Sekunden
+und die Abnahme zeigt seine Warnungen gar nicht — **der Agent behält ihn
+überall**, denn er soll die Doppelbuchung sehen, bevor er bucht.
+*Warum:* die Abnahme lud sonst ~6 s je Schritt (Owner 09.09.2026).
 
 **Diff-Modus:** ab der zweiten Runde steht auf Schritt 0, was der Agent seit
 der Rückgabe geändert hat (neu · ersetzt · beantwortet → gebucht · neue Fragen
@@ -342,11 +376,28 @@ jede verlangt eine andere Oberfläche. Der Schritt hat deshalb drei Reiter
   die Zeile wie im Vormonat?", also steht der Vormonatsvergleich als **Spalte**
   in einer Tabelle mit Haken, aufklappbarer Zeile und **Sammelfreigabe** in der
   Fußleiste. Wer 30 Mieten prüft, klickt nicht 30 Fälle durch.
-- **Einzelfälle** (`einzel`) — ein Fall füllt den Bildschirm: links der
-  `BuchungssatzEditor` mit seinen Prüfpunkten, rechts die Kontext-Zonen
-  (Gegenpartei · Beleg & USt · Zahlung · Regel & Periode · Notizen), unten die
+- **Einzelfälle** (`einzel`) — ein Fall füllt den Bildschirm, aufgebaut in
+  Zeilen (F181): oben Sachverhalt links, Gegenpartei rechts; dann **je
+  Buchungssatz eine Zeile** mit dem `BuchungssatzEditor` samt Prüfpunkten links
+  und dem, was am eigenen Ereignis dieses Satzes hängt, rechts — „Beleg & USt" oder
+  „Zahlung", beides zusammen, wenn beides da ist, sonst „Ohne Beleg und
+  Bankzeile"; unten in voller Breite „Regel & Periode", „Notizen" und die
   Entscheidungsleiste. Die Frage ist „ist dieser Satz richtig?", und die
-  Antwort braucht den Kontext neben der Zahl, nicht hinter einem Drawer.
+  Antwort braucht den Kontext neben der Zahl, nicht hinter einem Drawer — und
+  zwar den eigenen: ein Sachverhalt mit zwei Belegen zeigte vorher beiden
+  Sätzen denselben. Was rechts steht, entscheiden allein die Daten am Ereignis,
+  nicht die Satzart; ein Aufwand mit Bankzeile statt Beleg ist kein Fehler,
+  sondern die Auskunft „hier fehlt der Beleg, gebucht wurde von der
+  Auszugszeile".
+  Jede Satzkarte sagt in ihrem Kopf, **was für ein Satz** sie ist — Aufwand ·
+  Erlös · Zahlung · Geldtransit · Umbuchung, neben „Satz n von m" als
+  neutrales Badge (Satzart, GLOSSARY). Ein Fall trägt oft mehrere Karten, und
+  ohne diese Auskunft muss der Prüfende jede einzeln lesen, um zu wissen,
+  worauf er schaut. Die UI **liest die Spalte** `client_journal_entry.entry_kind`
+  (F184) und rechnet nichts nach; gestempelt wird beim Buchen aus den **Konten**
+  der Zeilen, nicht aus der Ereignisart: die sagt, woher der Vorgang kam, nicht
+  was der Satz tut. Ohne Wert (Satz ohne Zeilen) zeigt die Karte **kein** Badge
+  statt eines geratenen.
   Umschaltbar auf eine flache Sicht (`?sicht=liste`) für den gezielten Sprung.
 - **Liste** (`liste`) — beide Arten am Stück. Überblick und Ausdruck;
   entschieden wird in den anderen beiden.

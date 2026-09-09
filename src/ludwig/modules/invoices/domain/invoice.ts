@@ -379,6 +379,32 @@ export interface InvoiceDetail extends InvoiceListItem {
    *  (``review_disposition_reason``). NULL solange keine Eskalation. */
   reviewDispositionReason: string | null;
 
+  /**
+   * F18: offene, reparierbare Befunde der Interpretation
+   * (`missing_required_field`, `line_totals_mismatch`). Nicht leer ⟺
+   * `processing_status = 'review_needed'` (Migration 20260720090000). Sie
+   * stehen als Mangel mit Weg in der Zone „Zu klären" (L-269) und
+   * verschwinden mit `updateInvoiceExtraction`, das synchron re-validiert.
+   */
+  openFindings: InvoiceOpenFinding[];
+
+  /**
+   * Prüfung, ob der Beleg überhaupt an den Mandanten adressiert ist:
+   * `match` | `mismatch` | `uncertain` | `not_applicable`. `mismatch` ist ein
+   * Mangel mit Weg — der Beleg gehört dann jemand anderem.
+   */
+  recipientMatch: string | null;
+  /** Womit die Prüfung ihr Urteil begründet. */
+  recipientMatchReason: string | null;
+
+  /**
+   * F132-Stempel des Dublettenchecks gegen die DATEV-Buchungshistorie:
+   * ``suspected`` = jemand muss hinsehen, ``certain`` = der Check hat den
+   * Beleg selbst abgelegt, NULL = kein Treffer. Bis 2026-09-09 las ihn nur
+   * der Agent; er ist der letzte Rang des Signal-Slots (L-267).
+   */
+  datevHistoryDuplicate: string | null;
+
   // ── Kopfdaten / Extraktion ─────────────────────────────────────────────
   vendorTaxId: string | null;
   vendorUstId: string | null;
@@ -499,6 +525,16 @@ export interface InvoiceClarification {
   createdAt: string;
   answerPayload: unknown;
   answeredAt: string | null;
+}
+
+/** Ein offener, reparierbarer Befund am Beleg (`open_findings`, F18). */
+export interface InvoiceOpenFinding {
+  /** `missing_required_field`, `line_totals_mismatch`, … */
+  code: string;
+  /** Das betroffene Feld, wo der Befund eines nennt. */
+  field: string | null;
+  severity: string;
+  message: string;
 }
 
 export interface ProcessingErrorEntry {

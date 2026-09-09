@@ -164,6 +164,23 @@ export interface SourceDocumentVM {
    */
   splitPageRange?: string | null;
   /**
+   * Das Zahlungskonto, auf das ein Kontoauszug importiert wurde — und nur dort
+   * gefüllt (L-266). Container-Belegarten (Kontoauszug, Kreditkarten-
+   * abrechnung, Reisekostenabrechnung) haben keine eigenen Felder; **das** ist
+   * ihr Fakt, und ohne ihn blieb ihre Fakten-Spalte leer.
+   *
+   * `null` heißt „nicht importiert", nicht „kein Konto": die Verbindung hängt
+   * an der Datei (`stored_file_id`), und wo kein Import ist, ist auch kein
+   * Konto. Auf Staging trifft das 15 von 16 Auszugs-Belegen.
+   */
+  paymentAccount?: {
+    id: string;
+    /** Fertige Beschriftung, Name mit IBAN wo es eine gibt. */
+    label: string;
+    iban: string | null;
+  } | null;
+
+  /**
    * Das Sammel-PDF, aus dem er stammt. Teilbeleg ist eine **Beziehung**,
    * keine Belegart: ein `kind: "part"` müsste jede Stelle anfassen, die über
    * Belegarten entscheidet, und würde dabei nichts erklären, was diese eine
@@ -329,4 +346,42 @@ export function sourceDocumentFromDispatch(doc: {
     datevRefFolder: doc.datevRefFolder,
     datevRefId: doc.datevRefId,
   };
+}
+
+/**
+ * Der Seitenbereich eines Teilbelegs, zerlegt — `"5"` → `{ from: 5 }`,
+ * `"4-5"` → `{ from: 4, to: 5 }`.
+ *
+ * Die Darstellung bekommt Zahlen, keinen Text: ob „Seite 5" oder „Seiten 4–5"
+ * richtig ist, weiß nur, wer die Zahlen kennt, und 68 der 99 Teilbelege auf
+ * Staging sind Ein-Seiten-Ausschnitte. Das Zerlegen steht deshalb hier, an der
+ * einen Stelle, an der das Format der Spalte (`split_page_range`) bekannt ist.
+ *
+ * `"5-5"` ist dieselbe Angabe wie `"5"` und wird auch so geliefert. Was sich
+ * nicht als Seitenzahl lesen lässt, gibt `null` — ein Ausschnitt, dessen
+ * Grenzen niemand kennt, ist keine Angabe, und eine erfundene wäre schlimmer.
+ */
+export interface PageExcerpt {
+  from: number;
+  to?: number;
+}
+
+export function parsePageRange(value: string | null | undefined): PageExcerpt | null {
+  if (!value) return null;
+  // Bindestrich in der Spalte, Halbgeviertstrich in Texten, die jemand von
+  // Hand gepflegt hat — beide meinen dieselbe Spanne.
+  const parts = value.trim().split(/\s*[-–]\s*/);
+  if (parts.length > 2) return null;
+  const from = seitenzahl(parts[0]);
+  if (from === null) return null;
+  if (parts.length === 1) return { from };
+  const to = seitenzahl(parts[1]);
+  if (to === null || to < from) return null;
+  return to === from ? { from } : { from, to };
+}
+
+function seitenzahl(raw: string | undefined): number | null {
+  if (!raw || !/^\d+$/.test(raw)) return null;
+  const n = Number(raw);
+  return n >= 1 ? n : null;
 }

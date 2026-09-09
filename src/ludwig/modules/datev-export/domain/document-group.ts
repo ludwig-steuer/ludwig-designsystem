@@ -1,5 +1,6 @@
 /**
- * Beleggruppen-Sortierung des Buchungsstapels (BL-120).
+ * Belegablage-Gruppe (Beleggruppe) und die daraus folgende Stapel-Sortierung
+ * des Buchungsstapels (BL-120).
  *
  * Der Stapel folgt der klassischen Belegablage-Reihenfolge:
  *   1. Ausgangsrechnungen → 2. Eingangsrechnungen → 3. Kasse → 4. Bank →
@@ -27,43 +28,49 @@
  * Alt-Aufrufer) zählt als Sachkonto — die Sortierung degradiert dann sauber
  * zur alten Datums-Ordnung.
  *
+ * Nicht zu verwechseln mit der **Satzart** (`core/accounting/entry-kind.ts`):
+ * die Gruppe hier sagt, *wo der Beleg liegt*, die Satzart, *was der Satz tut*.
+ * Beide werden vom selben Helper gestempelt (`journal-entry-stamp.ts`), teilen
+ * aber bewusst keinen Klassifikations-Code.
+ *
  * WICHTIG: EXTF-Datei und JSON-Sequence (API-Export) müssen exakt dieselbe
- * Reihenfolge liefern — beide Builder nutzen `sortEntriesByBeleggruppe`.
+ * Reihenfolge liefern — beide Builder nutzen `sortEntriesByDocumentGroup`.
  */
 
-export type Beleggruppe =
-  | "ausgangsrechnungen"
-  | "eingangsrechnungen"
-  | "kasse"
+export type DocumentGroup =
+  | "outgoing_invoices"
+  | "incoming_invoices"
+  | "cash"
   | "bank"
-  | "sachbuchungen";
+  | "general_ledger";
 
-export const BELEGGRUPPE_RANK: Record<Beleggruppe, number> = {
-  ausgangsrechnungen: 1,
-  eingangsrechnungen: 2,
-  kasse: 3,
+export const DOCUMENT_GROUP_RANK: Record<DocumentGroup, number> = {
+  outgoing_invoices: 1,
+  incoming_invoices: 2,
+  cash: 3,
   bank: 4,
-  sachbuchungen: 5,
+  general_ledger: 5,
 };
 
-export const BELEGGRUPPE_LABEL: Record<Beleggruppe, string> = {
-  ausgangsrechnungen: "Ausgangsrechnungen",
-  eingangsrechnungen: "Eingangsrechnungen",
-  kasse: "Kasse",
+/** Anzeigetexte — englischer Schlüssel, deutsches Label daneben. */
+export const DOCUMENT_GROUP_LABEL: Record<DocumentGroup, string> = {
+  outgoing_invoices: "Ausgangsrechnungen",
+  incoming_invoices: "Eingangsrechnungen",
+  cash: "Kasse",
   bank: "Bank",
-  sachbuchungen: "Sachbuchungen",
+  general_ledger: "Sachbuchungen",
 };
 
 /** Konto-Meta einer Buchungszeile, soweit für die Gruppenzuordnung nötig. */
-export interface BeleggruppenLine {
+export interface DocumentGroupLine {
   /** `client_ledger_accounts.accounting_role` oder null/fehlend. */
   accountingRole?: string | null;
   /** `client_payment_accounts.kind` des Kontos, oder null/fehlend. */
   paymentAccountKind?: string | null;
 }
 
-/** Beleggruppe eines Buchungssatzes aus den Konten seiner Zeilen. */
-export function classifyBeleggruppe(lines: readonly BeleggruppenLine[]): Beleggruppe {
+/** Belegablage-Gruppe eines Buchungssatzes aus den Konten seiner Zeilen. */
+export function classifyDocumentGroup(lines: readonly DocumentGroupLine[]): DocumentGroup {
   let hasCash = false;
   let hasPayment = false;
   let hasEmployeeClearing = false;
@@ -76,28 +83,28 @@ export function classifyBeleggruppe(lines: readonly BeleggruppenLine[]): Beleggr
     if (l.accountingRole === "debtor") hasDebtor = true;
     else if (l.accountingRole === "creditor") hasCreditor = true;
   }
-  if (hasCash) return "kasse";
+  if (hasCash) return "cash";
   if (hasPayment) return "bank";
-  if (hasDebtor) return "ausgangsrechnungen";
-  if (hasCreditor || hasEmployeeClearing) return "eingangsrechnungen";
-  return "sachbuchungen";
+  if (hasDebtor) return "outgoing_invoices";
+  if (hasCreditor || hasEmployeeClearing) return "incoming_invoices";
+  return "general_ledger";
 }
 
 interface SortableEntry {
   id: string;
   bookingDate: string;
-  lines: readonly BeleggruppenLine[];
+  lines: readonly DocumentGroupLine[];
 }
 
 /**
- * DIE Stapel-Reihenfolge (BL-120): Beleggruppe → Buchungsdatum → id.
+ * DIE Stapel-Reihenfolge (BL-120): Belegablage-Gruppe → Buchungsdatum → id.
  * Ersetzt die frühere reine Datums-Sortierung in EXTF- und JSON-Builder.
  * Gibt eine sortierte Kopie zurück.
  */
-export function sortEntriesByBeleggruppe<T extends SortableEntry>(entries: readonly T[]): T[] {
+export function sortEntriesByDocumentGroup<T extends SortableEntry>(entries: readonly T[]): T[] {
   const ranked = entries.map((e) => ({
     entry: e,
-    rank: BELEGGRUPPE_RANK[classifyBeleggruppe(e.lines)],
+    rank: DOCUMENT_GROUP_RANK[classifyDocumentGroup(e.lines)],
   }));
   ranked.sort(
     (a, b) =>

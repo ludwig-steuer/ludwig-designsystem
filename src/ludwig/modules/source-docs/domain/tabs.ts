@@ -23,41 +23,64 @@
  */
 export const DOC_TABS = [
   "uebersicht",
+  "details",
   "positionen",
   "vorsteuer",
   "verlauf",
-  "pipeline",
   "rohdaten",
 ] as const;
 export type DocTab = (typeof DOC_TABS)[number];
 
 export const DOC_TAB_LABEL: Record<DocTab, string> = {
   uebersicht: "Übersicht",
+  details: "Details",
   positionen: "Positionen",
   vorsteuer: "Vorsteuer",
   verlauf: "Verlauf & Befunde",
-  pipeline: "Pipeline",
   rohdaten: "Rohdaten",
 };
 
 /**
  * Sichtbare Tabs. `positionen` und `vorsteuer` setzen eine Rechnungs-
  * Subtyp-Zeile voraus (Positionen/VSt-Fakten gibt es ausschließlich dort).
- * Verlauf, Pipeline und Rohdaten kann jede Belegart füllen.
+ * Verlauf und Rohdaten kann jede Belegart füllen.
+ *
+ * **`details` nur, wo es etwas zu korrigieren gibt** — die Korrektur-Maske
+ * einer Rechnung oder die Feldprüfung eines Vertrags. Ein Kontoauszug hat
+ * keine Werte, die ein Mensch richtigstellt; ein leerer Reiter verspricht eine
+ * Sicht, die es nicht gibt (derselbe Grund, aus dem Positionen und Vorsteuer
+ * ohne Rechnungszeile fehlen).
+ *
+ * Einzelwerte — Belegdatum, Einordnung, Erledigung, DATEV-Ablage — bleiben in
+ * der Übersicht an ihrem Wert (Seitenprofil, Abweichung zu D1/D9). In den
+ * Reiter gehört, was mehr als einen Wert betrifft.
  */
-export function availableDocTabs(args: { isInvoice: boolean }): DocTab[] {
-  return DOC_TABS.filter(
-    (tab) => args.isInvoice || (tab !== "positionen" && tab !== "vorsteuer"),
-  );
+export function availableDocTabs(args: { isInvoice: boolean; hasDetails?: boolean }): DocTab[] {
+  return DOC_TABS.filter((tab) => {
+    if (tab === "positionen" || tab === "vorsteuer") return args.isInvoice;
+    if (tab === "details") return args.hasDetails ?? false;
+    return true;
+  });
 }
+
+/**
+ * Alte Slugs derselben Ansicht, die als Deep-Links kursieren: „buchung" war
+ * die Übersicht bis 2026-07-20, „beleg" bis 2026-09-08 — und „pipeline" war
+ * bis 2026-09-09 ein eigener Reiter. Seit L-270 ist die Pipeline **Tiefe im
+ * Verlauf** (D12: drei Reiter beantworteten dieselbe Frage in drei Stufen);
+ * der alte Link landet deshalb im Verlauf, nicht auf der Übersicht.
+ */
+const ALTE_SLUGS: Record<string, DocTab> = {
+  buchung: "uebersicht",
+  beleg: "uebersicht",
+  pipeline: "verlauf",
+};
 
 export function parseDocTab(
   value: string | string[] | undefined,
   available: readonly DocTab[],
 ): DocTab {
   const raw = Array.isArray(value) ? value[0] : value;
-  // Zwei alte Slugs derselben Ansicht: „buchung" war sie bis 2026-07-20,
-  // „beleg" bis 2026-09-08. Beide kursieren als Deep-Links.
-  const slug = raw === "buchung" || raw === "beleg" ? "uebersicht" : raw;
+  const slug = (raw && ALTE_SLUGS[raw]) ?? raw;
   return available.includes(slug as DocTab) ? (slug as DocTab) : "uebersicht";
 }

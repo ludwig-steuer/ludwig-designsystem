@@ -23,6 +23,33 @@ DOCS="$REPO/docs/ludwig"
 [ -d "$SRC" ] || { echo "Ludwig-Quelle nicht gefunden: $SRC (LUDWIG_SRC setzen)"; exit 1; }
 SRC="$(cd "$SRC" && pwd)"
 
+# --- Aus HEAD spiegeln, nicht aus dem Arbeitsbaum ---------------------------
+# Bis 2026-09-10 nahm der Lauf, was drüben gerade auf der Platte lag. Beim Lauf
+# vom 2026-09-09 waren das vier uncommittete Dateien einer fremden Sitzung: der
+# Spiegel trug eine Stand-Notiz, die für seinen Inhalt nicht stimmte — und das
+# ist schlimmer als ein veralteter Spiegel, weil niemand es nachprüfen kann.
+# Gemeldet von `ludwig-manager`, behoben hier.
+#
+#   pnpm sync:ludwig              → HEAD der App
+#   LUDWIG_REF=<sha> pnpm sync:…  → genau dieser Stand
+#
+# `git archive` schreibt einen Baum, den es so wirklich gab. Ohne Git-Repo
+# drüben (etwa in einem entpackten Archiv) bleibt es beim Arbeitsbaum — dann
+# steht das aber im Protokoll.
+REF="${LUDWIG_REF:-HEAD}"
+if [ -d "$APP/.git" ]; then
+  REF_HASH="$(git -C "$APP" rev-parse --verify "$REF^{commit}")"
+  TMP="$(mktemp -d)"
+  trap 'rm -rf "$TMP"' EXIT
+  REL="${SRC#$APP/}"
+  git -C "$APP" archive "$REF_HASH" "$REL" | tar -x -C "$TMP"
+  SRC="$TMP/$REL"
+  echo "Quelle: $APP @ ${REF_HASH:0:8} (aus dem Commit, nicht aus dem Arbeitsbaum)"
+else
+  REF_HASH=""
+  echo "ACHTUNG: kein Git-Repo unter $APP — gespiegelt wird der Arbeitsbaum."
+fi
+
 rm -rf "$DST"
 mkdir -p "$DST"
 
@@ -67,7 +94,9 @@ echo "$(find "$DST" -name '*.ts' | wc -l | tr -d ' ') Interface-Dateien gespiege
 # Arbeitsbaum der App und meldet eine Abweichung als **Hinweis**, nicht als
 # Fehler.
 if [ -d "$APP/.git" ]; then
-  HASH="$(git -C "$APP" rev-parse HEAD)"
+  # Der **gespiegelte** Commit, nicht der, auf dem die App gerade steht: mit
+  # `LUDWIG_REF` sind das zwei verschiedene, und die Notiz gehört dem Inhalt.
+  HASH="$REF_HASH"
   ZWEIG="$(git -C "$APP" branch --show-current || echo '?')"
   cat > "$DST/GESPIEGELT_AUS.json" <<JSON
 {
@@ -93,7 +122,12 @@ rm -rf "$DOCS"
 mkdir -p "$DOCS"
 n=0
 for d in "${DOCS_TO_MIRROR[@]}"; do
-  if [ -f "$APP/$d" ]; then
+  # Aus demselben Commit wie der Code — sonst trüge ein Lauf Typen von gestern
+  # und eine Doku von heute.
+  if [ -n "$REF_HASH" ] && git -C "$APP" cat-file -e "$REF_HASH:$d" 2>/dev/null; then
+    git -C "$APP" show "$REF_HASH:$d" > "$DOCS/$(basename "$d")"
+    n=$((n + 1))
+  elif [ -z "$REF_HASH" ] && [ -f "$APP/$d" ]; then
     cp "$APP/$d" "$DOCS/$(basename "$d")"
     n=$((n + 1))
   else

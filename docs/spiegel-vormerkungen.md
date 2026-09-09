@@ -12,27 +12,33 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-**F184 — die Belegruppen heißen englisch.** In `ludwig/app` wird
-`datev-export/domain/beleggruppen.ts` zu `document-group.ts`: `DocumentGroup`,
-`classifyDocumentGroup`, `sortEntriesByDocumentGroup`, `DOCUMENT_GROUP_RANK`
-und `DOCUMENT_GROUP_LABEL`, die Werte englisch (`outgoing_invoices |
-incoming_invoices | cash | bank | general_ledger`). Gemeldet von
-`ludwig-manager` am 2026-09-09; der nächste Lauf holt es.
+Nichts.
 
-**Spiegelstand `edb126d0`.** `ludwig-manager` meldet die Typ-Box-Stufe auf
-staging (`InvoiceSidebar`, `GlanceCard`, `ContractDetail` weg, `tabs.ts`
-committet). Ein Lauf darauf ist **nicht** freigegeben — die Freigabe holt der
-Owner, nicht eine Nachbarsitzung.
+## Erledigt mit dem Lauf vom 2026-09-10 (App `d76b7030`)
 
-**Befund am Skript (offen): `sync-ludwig.sh` spiegelt aus dem Arbeitsbaum.**
-`rsync` nimmt, was drüben gerade liegt — beim Lauf vom 2026-09-09 waren das
-uncommittete Änderungen an `source-docs/domain/tabs.ts`,
-`invoices/domain/invoice.ts`, `bank-transactions/domain/payment-account-options.ts`
-und `source-document-vm.ts`. Der Spiegel trüge dann eine Stand-Notiz, die für
-seinen Inhalt nicht stimmt. Vorschlag von `ludwig-manager`, hier übernommen:
-aus `HEAD` spiegeln (`git -C <app> archive <sha> <pfade>`) oder den Lauf
-abbrechen, solange der Baum drüben nicht sauber ist. Fällig, bevor der nächste
-Lauf läuft.
+Owner-Freigabe (Simon, 2026-09-10), danach wieder eingefroren. **Der erste
+Lauf aus einem Commit statt aus dem Arbeitsbaum** — `sync-ludwig.sh` nimmt
+jetzt `git archive` und kennt `LUDWIG_REF`; der Befund von `ludwig-manager`
+ist damit erledigt, und die Stand-Notiz gehoert dem Inhalt, nicht dem Stand,
+auf dem die App gerade steht. Der Arbeitsbaum drueben war beim Lauf dirty, der
+Spiegel ist es nicht.
+
+Angekommen sind:
+
+| Datei | Was sie bringt |
+|---|---|
+| `source-docs/domain/doc-defects.ts` | `docDefects()` — die Maengel eines Belegs aus fuenf Quellen als **eine** Zone (L-269) |
+| `source-docs/domain/doc-signal.ts` | `docSignal()` — welches Banner gewinnt (L-267) |
+| `source-docs/domain/doc-processing.ts` | Fortschritt am **Beleg**, nicht an der Rechnungszeile (L-82) |
+| `source-document-vm.ts` | `paymentAccount` am VM (L-266, halb) |
+| `datev-export/domain/document-group.ts` | F184: die Belegruppen heissen englisch |
+| `datev-export/domain/booking-cycle.ts` | `BookingCycleKind` zurueck in `domain/` — sechs Dateien der Stapelabnahme kommen mit (L-274) |
+| `source-docs/domain/tabs.ts` | `pipeline` bildet auf `verlauf` ab (L-270) |
+| `payment-account-options.ts` | ohne den Mandantennamen (L-275) |
+
+Typcheck unmittelbar nach dem Lauf gruen. Zwei Dateien hat der Filter
+ausgesondert, beide zu Recht: `datev-truth/domain/sync-history.ts` und
+`stapelabnahme/domain/document-request-row.ts` holen Server-Code.
 
 ## Erledigt mit dem zweiten Lauf vom 2026-09-09 (App `9bbe16c4`)
 
