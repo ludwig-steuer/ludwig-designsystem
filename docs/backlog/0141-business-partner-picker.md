@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Arbeit** — freigegeben 2026-09-09 (Owner) |
+| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Kreditor, Personenkonto, Diverse-Pool |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (`geprüft`, 2026-09-09), Abschnitt „Formen", Zeile `BusinessPartnerPicker` |
@@ -74,6 +74,14 @@ Diverse-Wahl heißt `"__diverse"`; die beiden auseinanderzuhalten ist der Punkt.
 | `emptyText` | `string` | nein | Nichts passt zur Suche. Vorgabe „Kein Geschäftspartner mit diesem Suchbegriff." | `States` |
 | `noPartnersText` | `string` | nein | Es gibt **gar keinen** Partner — ein anderer Satz als „kein Treffer": der erste ist ein Befund über den Bestand, der zweite ein Problem mit der Suche. Vorgabe „Für diesen Mandanten sind noch keine Geschäftspartner importiert." | `States` |
 
+Dazu drei Exporte neben der Komponente, alle drei beim Bauen entstanden:
+
+| Export | Wofür |
+|---|---|
+| `BusinessPartnerPickerItem` | der Ausschnitt, den die Auswahl braucht |
+| `DIVERSE` | der Wert `"__diverse"` als Konstante — der Aufrufer muss ihn von `null` unterscheiden, und ein hingeschriebener String an zwei Stellen wäre eine zweite Wahrheit |
+| `filterBusinessPartners(partners, query)` | dieselbe Einschränkung über vier Felder, für einen Aufrufer, der im Client filtert statt auf dem Server |
+
 `BusinessPartnerPickerItem` ist ein Ausschnitt aus `BusinessPartnerListItem`:
 `businessPartnerId`, `legalName`, `shortName`, `city`, `creditorAccount`,
 `debtorAccount`, `ustIds`. Kein eigenes Modell — die Auswahl zeigt weniger als
@@ -144,6 +152,39 @@ Variabel (aus dieser Spec):
 - [ ] Zwei Leerfälle mit verschiedenen Sätzen (`States`)
 - [ ] Die Trefferzeile trägt **keinen** `href` (`Filled`, DOM geprüft)
 - [ ] Ersetzt `CreditorCombobox` in `OffenePostenWorklist` ohne Funktionsverlust
+
+## Gebaut 2026-09-09
+
+`BusinessPartnerPicker.tsx` — `"use client"`, weil die Auswahl den Suchbegriff
+selbst hält. Fünf Stories.
+
+**Ein Fehler, der es fast in den Commit geschafft hätte.** Die erste Fassung
+schrieb „der Picker filtert, nicht die Combobox" ins JSDoc und **filterte
+nicht**: sie reichte alle Kandidaten als Optionen durch und `onSearch`
+unverändert weiter. Das ist an beiden Enden falsch — mit `onSearch` schaltet
+die `Combobox` ihren eigenen Filter ab (dann filtert niemand), ohne `onSearch`
+filtert sie über `label` und `value` (dann wird eine Kontonummer nie
+gefunden). Jetzt hält die Auswahl den Suchbegriff selbst und schränkt vor dem
+Übergeben ein.
+
+Bemerkenswert daran ist, wie er sich versteckt hat: der Typcheck war grün, die
+Stories sahen richtig aus, und nur wer eine **Nummer** eintippt, merkt etwas.
+Genau der Fall, für den es diese Komponente gibt.
+
+**Gemessen** (`scripts/cdp.mjs`, 900 px, Story `Roundtrip`):
+
+| Eingabe | Treffer | Was das beweist |
+|---|---|---|
+| „Muster" | 4 | Name |
+| „MUSTERIMMO" | 1 | Kurzname |
+| „70123" | 1 | **Kontonummer** — die Frage, für die das Feld da ist |
+| „DE0000" | 1 | USt-IdNr. |
+| „Musterstadt" | **0** | der Ort steht in der Zeile und wird **nicht** gematcht |
+| leer | 6 | alle zurück |
+
+Und der Rückruf: nach `70123` und anschließendem Leeren steht im Protokoll
+`70123 › (leer)`. Das Leeren meldet sich also — die Falle aus 0084, in der
+`value` gesetzt und das Feld leer war, ist damit zu.
 
 ## Abnahme
 
