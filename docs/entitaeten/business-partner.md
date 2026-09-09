@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **geprüft** (2026-09-09, zweiter Agent) |
+| Status | **in Specs** (2026-09-09) — 0139–0143 geschrieben; geprüft am 2026-09-09 vom zweiten Agenten |
 | GLOSSARY | `### Business partner (Geschäftspartner)` — englisch `business partner`, Ordner `entities/business-partner/` |
 | Tabelle | `ludwig.client_business_partners` (46 Spalten) + `ludwig.client_business_partner_bank_aliases` (Lookup-Schlüssel, kein Subtyp) |
 | Typen | `src/ludwig/modules/business-partners/domain/business-partner.ts` — `BusinessPartnerListItem`, `BusinessPartnerDetail`, `PartnerAccountRef`, `PartnerPersonalAccount`, `BusinessPartnerFilter`, `VAT_PROFILE`, `TYPICAL_NATURE`, `PARTNER_NATURE_LABEL`, `ONBOARDING_STATE`, `PARTNER_ROLE_LABEL`; `domain/tabs.ts` — `PARTNER_TABS`, `PARTNER_TAB_LABEL` |
@@ -87,7 +87,7 @@ im Bestand leer.
 | Datenpunkt | Quelle | Rolle | Füllgrad | heute in | änderbar | Rang | ab Form | Beleg |
 |---|---|---|---|---|---|---|---|---|
 | Name (`legalName`) | Spalte | Identität | 100 % | Partnerliste (Link), Partnerkopf, `MasterDataTab`, `CreditorCombobox`, Karte „Gegenpartei"; als Fremdfeld in `case-columns`, `account-columns`, `CaseFacts` | Server (Import) · Agent | 1 | XS | Füllgrad · heute in sechs Formen |
-| **Personenkonto** (`creditorAccount` \| `debtorAccount`, je `PartnerAccountRef`: Rolle · Nummer · `isInternal`) | Spalten `creditor_account_number` / `debtor_account_number`, Wahrheit über `client_ledger_accounts` | Identität | **99,9 % tragen genau eines** (14.936 von 14.950). Einzeln gelesen: Debitor 87 %, Kreditor 13 % — **beide zusammen nur 27 Partner (0,18 %)**, keines nur 14 (davon 12 Abrechner) | Partnerliste (zwei Spalten), Partnerkopf (`AccountChip`: Rolle + Nummer + „intern"), `CreditorCombobox` (führt die Optionszeile) | Nutzer (beim Bestätigen) · Server | 2 | XS | **Prüfung 2026-09-09 — ein Datenpunkt, nicht zwei.** Der Partner trägt praktisch nie beide Nummern; getrennt gezählt fällt der Kreditor auf 13 % und stolperte über die 20-%-Regel aus §5, obwohl das Feld „Nummer, die dieser Partner trägt" fast lückenlos gefüllt ist. Es ist zugleich der schärfste Unterscheider im Satz: **6.288 verschiedene Debitornummern unter 6.396 Geschwistern**. Der Kopf rendert es schon so (`AccountChip`), die Freitextsuche sucht darüber („Name, USt-ID oder Kontonummer…"), und `CreditorCombobox` zeigt die Nummer **vor** dem Namen. `isInternal` gehört dazu: `PartnerAccountRef` verlangt wörtlich, dass der 89xxxx-Platzhalter **gezeigt** wird (F101 E2) — 15 solche Konten im Bestand |
+| **Personenkonto** (`creditorAccount` \| `debtorAccount`, je `PartnerAccountRef`: **nur** Nummer und `isInternal` — die Rolle steht im Schlüssel, unter dem er hängt, nicht im Satz) | Spalten `creditor_account_number` / `debtor_account_number`, Wahrheit über `client_ledger_accounts` | Identität | **99,9 % tragen genau eines** (14.936 von 14.950). Einzeln gelesen: Debitor 87 %, Kreditor 13 % — **beide zusammen nur 27 Partner (0,18 %)**, keines nur 14 (davon 12 Abrechner) | Partnerliste (zwei Spalten), Partnerkopf (`AccountChip`: Rolle + Nummer + „intern"), `CreditorCombobox` (führt die Optionszeile) | Nutzer (beim Bestätigen) · Server | 2 | XS | **Prüfung 2026-09-09 — ein Datenpunkt, nicht zwei.** Der Partner trägt praktisch nie beide Nummern; getrennt gezählt fällt der Kreditor auf 13 % und stolperte über die 20-%-Regel aus §5, obwohl das Feld „Nummer, die dieser Partner trägt" fast lückenlos gefüllt ist. Es ist zugleich der schärfste Unterscheider im Satz: **6.288 verschiedene Debitornummern unter 6.396 Geschwistern**. Der Kopf rendert es schon so (`AccountChip`), die Freitextsuche sucht darüber („Name, USt-ID oder Kontonummer…"), und `CreditorCombobox` zeigt die Nummer **vor** dem Namen. `isInternal` gehört dazu: `PartnerAccountRef` verlangt wörtlich, dass der 89xxxx-Platzhalter **gezeigt** wird (F101 E2) — 15 solche Konten im Bestand |
 | Reifegrad (`onboardingState`) | Spalte, Achse `partner` | Zustand | 100 % (`confirmed` 14.912 · `proposed` 36 · `draft` 2) | Partnerliste (`StatusBadge axis="partner"`, Spaltenkopf heißt dort „Onboarding"), Partnerkopf, Reiter „Alle / Bestätigt / Vorgeschlagen / Entwurf" | Nutzer (`proposed → confirmed`, einbahnig) | 3 | XS | Registry-Achse · V7 · nachgerechnet 2026-09-09 |
 | Buchungen (`usageBookingCount`) | `abgeleitet: Σ über die Personenkonten` — steht im Spiegel | Maß | **77 % haben 0** · p90 6 · max 4.298 | Partnerliste (Spalte), `MasterDataTab`, `AccountsTab` je Konto | Server | 4 | S | Staging · Präzedenz `account.md` Nachtrag: die Buchungsspalte beantwortet „Karteileiche oder nicht", nicht der Status |
 | Letzte Buchung (`lastBookingDate`) | `abgeleitet: max über die Personenkonten` — steht im Spiegel | Zeit | wie oben | Partnerliste, `MasterDataTab`, `AccountsTab` | Server | 5 | S | heute in der Liste |
@@ -267,11 +267,11 @@ Spaltendefinition. Präzedenz: `accountColumns()` (0062),
 
 | Form / Liste | Marke | Grund | Backlog |
 |---|---|---|---|
-| `BusinessPartnerCell` | **jetzt** | trägt Spalten, Fakten und Drawer; sechs v3-Stellen bauen sie heute nach | — |
-| `businessPartnerColumns()` | **jetzt** | die Liste existiert als rohe Tabelle und blockiert deren Ablösung | — |
-| `BusinessPartnerPicker` | **jetzt** | existiert als `CreditorCombobox`; die Ausgangsrechnung braucht ihn laut GLOSSARY ebenfalls | — |
-| `BusinessPartnerFacts` | **jetzt** | Zone 3 des Drawers und später des Views (0052); ersetzt `MasterDataTab` | — |
-| `BusinessPartnerDrawer` | **jetzt** | fünf fremde Ansichten verweisen auf den Partner, ohne ihn zeigen zu können | — |
+| `BusinessPartnerCell` | **jetzt** | trägt Spalten, Fakten und Drawer; sechs v3-Stellen bauen sie heute nach | **0139** |
+| `businessPartnerColumns()` | **jetzt** | die Liste existiert als rohe Tabelle und blockiert deren Ablösung | **0140** |
+| `BusinessPartnerPicker` | **jetzt** | existiert als `CreditorCombobox`; die Ausgangsrechnung braucht ihn laut GLOSSARY ebenfalls | **0141** |
+| `BusinessPartnerFacts` | **jetzt** | Zone 3 des Drawers und später des Views (0052); ersetzt `MasterDataTab` | **0142** |
+| `BusinessPartnerDrawer` | **jetzt** | fünf fremde Ansichten verweisen auf den Partner, ohne ihn zeigen zu können | **0143** |
 | `BusinessPartnerView` | Backlog | eigene Route mit fünf Reitern → erst Seitenprofil (`docs/backlog/README.md` Schritt 0b) | `docs/backlog/0127-business-partner-view.md` |
 | `BusinessPartnerList` „Stammsätze" | Backlog | eigene Route → erst Seitenprofil; die Spalten entstehen vorher | `docs/backlog/0128-business-partner-list.md` |
 | `BusinessPartnerCard` | Backlog | hängt an Ableitungen, die es nicht gibt (übliches Gegenkonto, üblicher Steuerschlüssel, letzte Buchungen) — und sie passt nicht mehr in die Fünf | `docs/backlog/0129-business-partner-card.md` |
@@ -365,7 +365,11 @@ L-227). Die Prüfung schließt einen und legt zwei nach (L-228, L-229).
    tragen weder Kreditor- noch Debitornummer, nur 27 Partner von 14.950 tragen
    beide Nummern, 14 tragen keine. Die drei Spalten kodieren die Rolle also
    eindeutig. In der **Zelle** (XS), wo nur eine Nummer Platz hat, kommt das
-   Wort über `PartnerAccountRef.role` mit — genau so, wie es der `AccountChip`
+   Wort über die Prop mit, unter der die Nummer hereinkommt (`creditorAccount`
+   gegen `debtorAccount`) — **nicht** über ein Feld: `PartnerAccountRef` trägt
+   nur `accountNumber` und `isInternal`. Berichtigt am 2026-09-09; die Prüfung
+   hatte hier ein `role` angenommen, das es nicht gibt. So macht es auch der
+   `AccountChip`
    im Partnerkopf schon macht.
 3. **Welche Kind-Liste zeigt der Drawer?** — **Beantwortet vom Owner am
    2026-09-09, und anders als der Default:** der Drawer ist eine **Übersicht**.
