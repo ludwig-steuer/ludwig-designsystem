@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | **in Arbeit** — die drei Fragen sind am 2026-09-09 vom Owner entschieden (alle drei wie vorgeschlagen) |
 | Stufe | `src/showcase/` — Seiten-Stories unter `Seiten/Beleg/…`, komponiert aus `entities/source-document/` |
 | Klassen-Test | entfällt — keine Komponente, sondern der Nachweis, dass die vorhandenen Bausteine **jeden** Zustand der Belegdetailseite tragen |
 | Quelle | Owner-Anfrage 2026-09-09 („jeden Zustand der Belegview als Story abbilden, Szenarien sammeln, bevor das Design finalisiert wird") · Seitenprofil `docs/seiten/beleg-detail.md` · Entitätsprofil `docs/entitaeten/source-document.md` · Standard `docs/detailseiten-standard.md` (D1–D16) · Datenmodell `ludwig/app`: `client_source_docs` + `…_invoices` + `…_contracts`, Achsen aus `src/ludwig/ui/status/status-registry.ts` |
@@ -10,7 +10,7 @@
 | Blockiert | die Finalisierung des Beleg-Detail-Designs und die App-Ablösung von `page.tsx` (671 Z.), `InvoiceSidebar`, `ContractDetail`, `ExtractionCorrectionCard` |
 | Spec von / am | Claude (`ludwig-manager`), 2026-09-09 · gesichtet und übernommen von `designsystem-worker` am 2026-09-09 |
 | Reihenfolge | **nach 0139–0143** (Partner-Welle). Sie hängt an keiner davon — sie steht hinten, weil die Partner-Welle zuerst freigegeben war |
-| Wartet auf | den Owner-Entscheid zu den drei offenen Fragen unten; bis dahin bleibt der Status `spec` |
+| Freigegeben | 2026-09-09 vom Owner (Simon), alle drei offenen Fragen wie vorgeschlagen entschieden |
 
 ## Gesichtet am 2026-09-09
 
@@ -190,17 +190,27 @@ Variabel:
 - [ ] S3: Rang 1–4 bei 1440 × 900 über der Falz (Screenshot)
 - [ ] Jeder Fall, den ein Baustein **nicht** trägt, steht als Befund unten und in `docs/befunde-app.md`, nicht als Sonderpfad in der Story
 
-## Offene Fragen
+## Entschieden am 2026-09-09 (Owner)
 
-1. **Typ-Box auflösen?** *Ohne Antwort: ja* — Lesen in die Fakten-Registry,
-   Schreiben in „Details". Die Stories R7/A1 zeigen beide Wege; der Owner
-   entscheidet an ihnen.
-2. **Zahlungskonto-Wahl auf der Belegseite oder nur am Import-Batch?** *Ohne
-   Antwort: auf der Belegseite als Mangel mit Weg*, denn hier landet die
-   Rolle, wenn der Kontoauszug in der Belegliste auffällt (`bank-offen` P1:
-   UI-Pfad fehlt noch).
-3. **Befunde als eigene Zone oder in den Fakten?** *Ohne Antwort: eigene
-   Zone 2* nach D4; die Fakten tragen zusätzlich das Zeichen an der Zeile.
+Alle drei wie vorgeschlagen — die Vorgaben gelten damit als Entscheid, nicht
+mehr als Rückfallwert:
+
+1. **Die Typ-Box wird aufgelöst.** Lesendes wandert in die Fakten-Registry,
+   Schreibendes in den Reiter „Details". `InvoiceSidebar` und `ContractDetail`
+   verschwinden damit; R7 und A1 zeigen beide Wege nebeneinander.
+2. **Die Zahlungskonto-Wahl steht auf der Belegseite**, als Mangel mit Weg —
+   nicht nur am Import-Batch. Begründung, die trägt: dort landet die Rolle,
+   wenn ihr der Kontoauszug in der Belegliste auffällt, und einen anderen
+   UI-Pfad gibt es heute nicht (**L-268**, `bank-offen` P1).
+3. **Befunde bekommen eine eigene Zone 2** nach D4. Die Fakten tragen
+   zusätzlich das Zeichen an der betroffenen Zeile — das ist kein zweiter
+   Ort für dieselbe Aussage, sondern der Mangel am Wert statt in einer
+   Sammelliste.
+
+Was daraus für den Bau folgt: **keine der drei Antworten braucht eine neue
+Prop.** Alle drei sind Kompositionen an der Aufrufstelle, so wie es der
+Abschnitt „Fixtures" ohnehin verlangt. Was danach als Prop nötig ist, geht als
+Ausbau an 0071 und 0076 — nicht vorher.
 
 ## Nachzuziehende Dokumente
 

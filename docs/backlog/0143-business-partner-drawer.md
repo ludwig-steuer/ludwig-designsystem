@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec — geschrieben 2026-09-09 |
+| Status | **in Arbeit** — freigegeben 2026-09-09 (Owner) |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Personenkonto, Sachverhalt, Buchungsverhalten |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (`geprüft`, 2026-09-09), Abschnitt „Formen" und **Offene Frage 3, vom Owner am 2026-09-09 beantwortet** |
