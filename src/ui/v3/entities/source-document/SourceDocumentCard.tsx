@@ -81,6 +81,11 @@ export interface SourceDocumentCardProps {
   defects?: ReactNode;
   vat?: ReactNode;
   history?: ReactNode;
+  /**
+   * The heading of the facts box. Default „Belegdaten"; `null` in the drawer,
+   * where the drawer title already names the document (0150).
+   */
+  factsTitle?: string | null;
   /** Where the counterparty stands as a business partner — passed to the facts. */
   counterpartyHref?: string | null;
   /** The batch that booked the document — passed to the facts. */
@@ -110,6 +115,7 @@ export function SourceDocumentCard({
   defects,
   vat,
   history,
+  factsTitle,
   counterpartyHref,
   batchHref,
 }: SourceDocumentCardProps) {
@@ -142,6 +148,7 @@ export function SourceDocumentCard({
             missing={missing}
             tone={tone === "bare" ? "bare" : "surface"}
             provenance={provenance}
+            {...(factsTitle !== undefined ? { title: factsTitle } : {})}
             {...(counterpartyHref ? { counterpartyHref } : {})}
             {...(batchHref ? { batchHref } : {})}
             // In the card there is room for the sentence under the state; in a

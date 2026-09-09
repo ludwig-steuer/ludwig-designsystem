@@ -207,6 +207,10 @@ function DrawerBody({
   return (
     <SourceDocumentCard
       document={record.document}
+      // No heading over the facts here: the drawer title already says whose
+      // facts these are, and „Belegdaten" under „Rechnung · Musterbau GmbH"
+      // would say it a second time (0150).
+      factsTitle={null}
       summary={record.summary}
       previewUrl={record.previewUrl}
       previewUnavailableReason={record.previewUnavailableReason}
