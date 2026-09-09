@@ -132,7 +132,7 @@ export const Layouts: Story = {
   render: () => (
     <div style={{ maxWidth: 620 }}>
       <Card>
-        <CardHead title="Dieselbe Spur, zwei Anordnungen" sub="200 px, langer Name" />
+        <CardHead title="Dieselbe Spur, drei Anordnungen" sub="200 px, langer Name" />
         <Table cols="110px 200px 1fr">
           <HeadRow>
             <span>Anordnung</span>
@@ -152,6 +152,13 @@ export const Layouts: Story = {
               <CaseCell cases={[{ ...ONE, title: LANG }]} href={href} layout="stacked" />
             </span>
             <span>Der Name behält seinen Platz, der Rest bricht um</span>
+          </Row>
+          <Row>
+            <span>number</span>
+            <span>
+              <CaseCell cases={[{ ...ONE, title: LANG }]} href={href} layout="number" />
+            </span>
+            <span>Nur die Kennung — und sie trägt den Weg</span>
           </Row>
         </Table>
       </Card>
@@ -241,6 +248,60 @@ export const InUse: Story = {
               <CaseCell cases={MANY} href={href} />
             </span>
             <AmountCell value={1249.9} />
+          </Row>
+        </Table>
+      </Card>
+    </div>
+  ),
+};
+
+/**
+ * `number` — die Kennung **statt des Titels**, und sie ist der Link.
+ *
+ * Für Listen, in denen der Sachverhalt eine Nebenspalte ist und sein Titel
+ * nichts sagt. Der Beleg-Katalog ist genau so ein Fall: er kennt die Nummer,
+ * aber nicht die Art, also fällt `caseTitle` auf ein allgemeines Wort zurück,
+ * das dann auch noch abgeschnitten wird — „2026-0494 Sachverhalt: …".
+ *
+ * Der Weg wandert dabei von der Titelzeile auf die Kennung. Ohne das gäbe es
+ * keinen mehr: in `inline` und `stacked` trägt ihn der Titel.
+ *
+ * Wohin er führt, entscheidet der Aufrufer — auf die Sachverhaltsseite, oder
+ * als Suchparameter in einen Drawer (L3). Die Zelle kennt den Unterschied
+ * nicht, und das ist richtig so.
+ *
+ * **Es ersetzt den Titel, nicht mehr.** Der Zustand hängt weiter an
+ * `showState`, der Betrag an seinem Feld — zwei Props, die sich heimlich
+ * überstimmen, wären schlimmer als eine, die weniger tut, als ihr Name
+ * verspricht. Die zweite Zeile unten zeigt das: dieselbe Anordnung mit Chip.
+ */
+export const NumberOnly: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <Card>
+        <CardHead title="Nur die Nummer" sub="110 px — so steht sie in der Belegliste" />
+        <Table cols="110px 1fr">
+          <HeadRow>
+            <span>Sachverhalt</span>
+            <span>Beleg</span>
+          </HeadRow>
+          <Row>
+            <span>
+              <CaseCell cases={[{ ...ONE, title: LANG }]} href={href} layout="number" />
+            </span>
+            <span>Rechnung R-2026-0042, Musterbau GmbH</span>
+          </Row>
+          <Row>
+            <span>
+              <CaseCell cases={[{ ...ONE, title: LANG }]} href={href} layout="number" showState={false} />
+            </span>
+            <span>Ohne Chip — so nimmt der Beleg-Katalog sie</span>
+          </Row>
+          <Row>
+            <span>
+              <CaseCell cases={[]} href={href} />
+            </span>
+            <span>Rechnung R-2026-0043, Beispiel-Energie AG — ohne Sachverhalt</span>
           </Row>
         </Table>
       </Card>

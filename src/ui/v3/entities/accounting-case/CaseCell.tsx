@@ -48,8 +48,20 @@ export function CaseCell({
    * `stacked` — the name keeps its place and everything else moves to the
    * next line. That is right where the cell has room and the name is the
    * point: a card, a facts panel, zone 1 of a drawer.
+  *
+   * `number` — **the identifier instead of the title**, and it carries the
+   * way. For a list in which the case is a side column and its title says
+   * nothing: the document catalogue knows the number but not the kind, so
+   * `caseTitle` falls back to a generic word and then gets cut off. A number
+   * that leads somewhere beats a name that does not name (0146).
+   *
+   * It replaces the **title**, nothing else: `showState` and the amount stay
+   * where they are. Two props that quietly overrule each other are worse than
+   * one that does less than its name suggests — a caller who wants the number
+   * alone passes `showState={false}` as well, the way the document catalogue
+   * does.
    */
-  layout?: "inline" | "stacked";
+  layout?: "inline" | "stacked" | "number";
 }) {
   if (cases.length === 0) {
     const word = "offen";
@@ -73,10 +85,20 @@ export function CaseCell({
           {/* The identifier leads: it is what a person searches for and quotes
               on the phone, and in a line it is the fixed part while the name
               is the one that gives way. */}
-          <code className="v2case__no">{caseIdentifier(c)}</code>
-          <Link href={href(c.caseId)} className="v2case__link" title={caseTitle(c)}>
-            {caseTitle(c)}
-          </Link>
+          {layout === "number" ? (
+            // The identifier **is** the link here: without a title there would
+            // be no way left, because in the other layouts the title carries it.
+            <Link href={href(c.caseId)} className="v2case__link">
+              <code className="v2case__no">{caseIdentifier(c)}</code>
+            </Link>
+          ) : (
+            <>
+              <code className="v2case__no">{caseIdentifier(c)}</code>
+              <Link href={href(c.caseId)} className="v2case__link" title={caseTitle(c)}>
+                {caseTitle(c)}
+              </Link>
+            </>
+          )}
           {/* Der Zustand als Chip, nicht als Punkt: Farbe steht nie allein
               (V7), und die Erklärung sitzt einmal am Spaltenkopf statt einmal
               je Zeile (R1, 0077). */}

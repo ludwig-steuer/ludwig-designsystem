@@ -219,7 +219,11 @@
   /* Maximale Content-Breite der App-Seiten. Ohne Deckel laufen Tabellen auf
      27"-Monitoren über 2000px breit — Spalten reißen auseinander, das Auge
      verliert die Zeile. */
-  --container-app:    1440px;
+  /* 1760px seit 2026-09-09 (Owner): der Deckel bleibt, er liegt nur höher.
+     1440 war zu eng für eine Liste mit zehn Spalten — die Belegliste wurde
+     rechts abgeschnitten. 1760 ist die Breite, bei der sie ganz steht, ohne
+     dass Fließtext auf Doppelmonitoren zerläuft. */
+  --container-app:    1760px;
 
   /* Drawer-Breiten als drei Stufen statt ad-hoc-Werte je Aufrufer (F113-T113.2):
      sm = Fakten-Liste, md = Detail-Ansicht, lg = breite Inhalte

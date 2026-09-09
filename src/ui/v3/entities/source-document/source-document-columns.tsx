@@ -83,7 +83,13 @@ export const DOCUMENT_LIST_COLUMNS: SourceDocumentColumn[] = [
   "kind",
   "amount",
   "documentDate",
-  "identifier",
+  // **No `identifier`** (owner decision 2026-09-09, seen on 165 real rows):
+  // in the majority of them it is a GUID file name — „40B503E7-AFD0-64… .pdf",
+  // nothing anybody reads. Where a real invoice number stands, it is not the
+  // question *this* list answers: „is there anything left to do with this
+  // document", not „what is it called". It stays in the catalogue, and
+  // `STUCK_COLUMNS` keeps showing it — there the file name **is** the only
+  // identity a document has. Frees 170 px.
   "case",
   "receivedDate",
   "classification",
@@ -366,13 +372,12 @@ export function sourceDocumentColumns({
     case: {
       key: "case",
       header: "Sachverhalt",
-      // Stays 170. Widening does not help: `.v2case__one` is `flex-wrap: wrap`,
-      // so the name gets its own line **before** anything shrinks — measured
-      // at 232 px the cell was still 46,7 px high, exactly as at 170. The
-      // two-line cell is by design (0095, „the name keeps its place"); that it
-      // makes this row the one 71,7 px outlier in a list of 48 px rows is a
-      // finding for `CaseCell`, not a track width here (acceptance 0070, M2).
-      width: "170px",
+      // 110 px since the cell shows the **number only** (0146). The old note
+      // here said 170 px could not be helped: `.v2case__one` wraps, so the
+      // name took its own line before anything shrank, and this row was the
+      // one 71,7 px outlier in a list of 48 px rows. With no name there is
+      // nothing to wrap — the outlier is gone, not managed.
+      width: "110px",
       cell: (d) =>
         d.caseNumber ? (
           <CaseCell
@@ -397,6 +402,12 @@ export function sourceDocumentColumns({
             ]}
             href={caseHref ?? (() => d.caseHref ?? "#")}
             showState={false}
+            // The number is the whole cell, and it carries the way. The title
+            // this catalogue could offer is generic — it knows the number, not
+            // the kind, so `caseTitle` falls back to a word that says nothing
+            // and then gets cut off. Where the way leads is the caller's
+            // business: the case page, or a drawer as a search param (L3).
+            layout="number"
           />
         ) : (
           // **`CaseCell`s word, not our own.** Without a case the cell said

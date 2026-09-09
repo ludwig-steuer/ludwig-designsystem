@@ -168,6 +168,18 @@ export const DocumentList: Story = {
  * Das Zeichen steht **nur hier**, wo es zwei Ziele gibt. Wo eine Zeile
  * ohnehin nur den Drawer öffnet, wäre es ein Zeichen neben einem Klick, der
  * dasselbe tut.
+ *
+ * **Und nicht in der Jahres-Belegliste** (Entscheid 2026-09-09, Aufgabe 0146).
+ * Dort führt die Zeile auf die Belegseite, und das Original steht dort als
+ * Rang 2 groß. Ein Drawer, der eine kleinere Fassung des Zeilenziels zeigt, ist
+ * dem „Zeichen neben einem Klick, der dasselbe tut" nur eine Handbreit
+ * entfernt — formal zwei Ziele, inhaltlich derselbe Gegenstand. Das Zeichen
+ * gehört dort dem **Geschäftspartner**, weil der eine Frage beantwortet, die
+ * die Belegseite offen lässt.
+ *
+ * Diese Story bleibt für den anderen Fall: eine Belegliste, deren Zeile
+ * **nicht** auf die Belegseite führt — die Belege am Sachverhalt etwa, wo die
+ * Zeile im Sachverhalt bleibt. Dort ist das Original wirklich das zweite Ziel.
  */
 export const RowAndPeek: Story = {
   render: () => {
