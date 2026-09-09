@@ -8,6 +8,7 @@ export * from "./domain/convention";
 export * from "./domain/document-number";
 export * from "./domain/expectation";
 export * from "./domain/mirror-hit";
+export * from "./domain/overview-vm";
 export * from "./domain/payment-term";
 export * from "./domain/payroll-payment";
 export * from "./domain/proposal-batch-spread";

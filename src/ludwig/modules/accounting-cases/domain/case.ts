@@ -372,6 +372,15 @@ export interface CaseFilter {
   /** „einmalig" = alle ``kind`` außer ``recurring_charge``;
    *  „dauer" = nur ``recurring_charge``. ``undefined`` = beides. */
   recurringMode?: "einmalig" | "dauer";
+  /**
+   * Nur Dauersachverhalte **ohne** Regelwerk.
+   *
+   * Der Weg, den die Zahl im Regelwerk des Mandanten trägt (J-54): 75 von 104
+   * Dauersachverhalten haben keine Regel. Eine Zahl mit einem Weg, der anders
+   * filtert als sie zählt, ist eine Behauptung (I12) — deshalb gibt es den
+   * Filter, und nicht nur die Zahl.
+   */
+  withoutRecurringRule?: boolean;
   /** F100: nur Sachverhalte mit diesem Belegnummern-Modus. Wer die noch nicht
    *  gesplitteten Sammelfälle sucht, findet sie sonst nicht. */
   documentNumberMode?: CaseDocumentNumberMode;
@@ -418,7 +427,7 @@ export function parseCaseListTab(value: string | string[] | undefined): CaseList
   const v = Array.isArray(value) ? value[0] : value;
   return (CASE_LIST_TABS as readonly string[]).includes(v ?? "")
     ? (v as CaseListTab)
-    : "laufend";
+    : "alle";
 }
 
 /**
@@ -445,9 +454,10 @@ export function caseFilterForListTab(
   const recurring = one(raw.recurring);
   const docMode = one(raw.belegnr);
   const q = one(raw.q)?.trim();
-  const dispo = one(raw.dispo) ?? CASE_DISPOSITION_DEFAULT;
+  const dispo = one(raw.dispo);
   const filter: CaseFilter = {
     fiscalYear,
+    withoutRecurringRule: one(raw.regel) === "ohne" ? true : undefined,
     recurringMode:
       recurring === "einmalig" || recurring === "dauer" ? recurring : undefined,
     searchQuery: q || undefined,
@@ -458,8 +468,11 @@ export function caseFilterForListTab(
   if ((CASE_DISPOSITION as readonly string[]).includes(dispo ?? "")) {
     filter.disposition = [dispo as CaseDisposition];
   }
-  // Ohne Angabe gilt der Standardstand — die Liste zeigt, was noch läuft.
-  const state = caseStateFilter(one(raw.state) ?? CASE_STATE_DEFAULT);
+  // Ohne Angabe kein Zustands- und kein Zuständigkeits-Filter: die Liste
+  // zeigt alle Sachverhalte des Wirtschaftsjahres. Bis 2026-09-09 legte sie
+  // still `laufend` + Zuständigkeit Kanzlei darauf — ein Filter, den man
+  // nirgends sah und deshalb auch nicht wegnehmen konnte.
+  const state = caseStateFilter(one(raw.state));
   if (state) Object.assign(filter, state);
   return filter;
 }
@@ -485,17 +498,13 @@ export const CASE_STATE_FILTER_LABEL: Record<CaseStateFilter, string> = {
 };
 
 /**
- * Der Standardstand der Liste: was noch läuft **und bei der Kanzlei liegt**.
+ * Der Arbeitsvorrat: was noch läuft **und bei der Kanzlei liegt**.
  *
- * Er ist nicht nur eine Vorauswahl, sondern die Bedingung für den
- * **Erfolgs-Leerfall**: eine leere Liste im unveränderten Standardstand heißt
- * „nichts mehr offen", eine leere Liste nach einem Filtergriff heißt „keine
- * Treffer". Ohne diesen Unterschied verschwindet die einzige Rückmeldung, an
- * der die Sachbearbeiterin sieht, dass sie fertig ist.
- *
- * Wichtig dabei: der Standardstand ist **selbst** ein Filter. „Gefiltert"
- * heißt deshalb nicht „irgendein Filter gesetzt" — sonst wäre der Erfolgsfall
- * nie erreichbar —, sondern „weicht vom Standardstand ab".
+ * Das ist der Stand der **Kacheln** (Mandanten-Startseite, Dashboard) — die
+ * Liste selbst zeigt seit 2026-09-09 ungefiltert alle Sachverhalte des
+ * Jahres. Wer eine Kachel verlinkt, hängt diesen Stand deshalb **sichtbar**
+ * an die URL (`?state=laufend&dispo=accounting`), sonst tischt der Klick mehr
+ * auf, als die Kachel gezählt hat.
  *
  * „Eigene Zuständigkeit" ist die **Rolle** `accounting`, nicht der angemeldete
  * Mensch: die Achse kennt Agent, Kanzlei und Mandant, keine Personen.
@@ -503,8 +512,20 @@ export const CASE_STATE_FILTER_LABEL: Record<CaseStateFilter, string> = {
 export const CASE_STATE_DEFAULT: CaseStateFilter = "laufend";
 export const CASE_DISPOSITION_DEFAULT: CaseDisposition = "accounting";
 
+/**
+ * Die Query, mit der eine Arbeitsvorrat-Kachel auf die Liste zeigt.
+ *
+ * Die Liste filtert seit 2026-09-09 nichts mehr von selbst — was die Kachel
+ * gezählt hat, muss deshalb in der URL stehen, sonst tischt der Klick mehr
+ * auf als die Zahl versprach (225 auf der Startseite, 180 in der Liste: wer
+ * das einmal sieht, glaubt keiner Zahl der Anwendung mehr).
+ */
+export function caseWorkloadListQuery(state: CaseStateFilter): string {
+  return `?state=${state}&dispo=${CASE_DISPOSITION_DEFAULT}`;
+}
+
 /** Die Parameter, die den Filterstand ausmachen — und nur die. */
-export const CASE_FILTER_PARAMS = ["q", "recurring", "dispo", "belegnr", "state"] as const;
+export const CASE_FILTER_PARAMS = ["q", "recurring", "dispo", "belegnr", "state", "regel"] as const;
 
 /**
  * Hat der Nutzer am Filter gedreht? „Unverändert" heißt: keiner der

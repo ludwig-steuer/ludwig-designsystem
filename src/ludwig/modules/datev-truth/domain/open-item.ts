@@ -91,3 +91,40 @@ export interface OpenItemLink {
   paymentJournalEntryId: string | null;
   paymentMirrorEntryId: string | null;
 }
+
+/**
+ * Posten nach Altersklasse, **älteste zuerst**.
+ *
+ * Die Klassen stehen oben von „noch nicht fällig" bis „über 90 Tage" — das
+ * ist die Ordnung der Regel. Auf dem Bildschirm zählt die andere Richtung:
+ * wer eine OPOS-Liste öffnet, sucht das, was am längsten liegt
+ * (Entitätsprofil 0029). Was nicht fällig ist, steht zuletzt.
+ *
+ * Eine Klasse ohne Posten kommt nicht vor — eine Überschrift über nichts ist
+ * keine Gliederung. Gruppiert wird, was übergeben wird: gibt der Aufrufer
+ * eine Seite hinein, bekommt er die Gruppen dieser Seite.
+ */
+export function groupByAge<T>(
+  items: readonly T[],
+  asOf: string,
+  read: (item: T) => { dueDate: string | null; amount: number | null },
+): { bucket: OpenItemAgeBucket; items: T[]; sum: number }[] {
+  const nach = new Map<OpenItemAgeBucket, T[]>();
+  const summe = new Map<OpenItemAgeBucket, number>();
+  for (const it of items) {
+    const { dueDate, amount } = read(it);
+    const bucket = openItemAgeBucket({ dueDate, asOf });
+    const liste = nach.get(bucket);
+    if (liste) liste.push(it);
+    else nach.set(bucket, [it]);
+    summe.set(bucket, (summe.get(bucket) ?? 0) + (amount ?? 0));
+  }
+  return [...OPEN_ITEM_AGE_BUCKETS]
+    .reverse()
+    .filter((b) => nach.has(b))
+    .map((bucket) => ({
+      bucket,
+      items: nach.get(bucket)!,
+      sum: summe.get(bucket) ?? 0,
+    }));
+}

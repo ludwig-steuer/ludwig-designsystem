@@ -12,6 +12,8 @@
  * (`immutable`); alles andere sind Kandidaten.
  */
 
+import { acceptanceEqual } from "@/ludwig/core/datev/belegfeld";
+
 export type DocumentNumberSource =
   /** Reimport hat den exportierten Satz mit geänderter Nummer erkannt. */
   | "datev_correction"
@@ -152,6 +154,55 @@ export function dominantDocumentNumber(
   entries: KnownDocumentNumber[],
 ): KnownDocumentNumber | null {
   return sortByDominance(entries)[0] ?? null;
+}
+
+export interface KnownCandidate {
+  /** Kandidat aus dem Verwendungszweck (Schreibweise des Betreffs). */
+  candidate: string;
+  /** Register-Treffer, dominanteste zuerst. */
+  entries: KnownDocumentNumber[];
+}
+
+/**
+ * Kandidaten aus einem Verwendungszweck, die das Register als Belegnummer
+ * KENNT — exakt oder akzeptanz-gleich.
+ *
+ * Befund #31: der Sammelzahlungs-Guard zählte jede Zahlenfolge mit fünf Ziffern
+ * als Belegnummer und lehnte damit vier eindeutige Einzelzahlungen ab — die
+ * Versicherungsscheinnummer, die Karten-ID, die Kundennummer und die
+ * Saisonkennung „2026/27" zählten mit. `extractDocumentNumberCandidates` ist
+ * bewusst schwach („Rauschen ist eingepreist — die Kandidaten sind nie
+ * dominant, solange eine echte Quelle existiert"); ein Guard, der hart
+ * ablehnt, muss die echte Quelle also erst fragen. Genau das tut
+ * `findDocumentNumberConflicts` schon, mit derselben Regel.
+ *
+ * Bewusst ohne `bank_purpose` und `case_summary`: beides sind selbst nur aus
+ * Freitext gezogene Tokens — ein Rausch-Token darf sich nicht über einen
+ * anderen Betreff selbst bestätigen. Dauersachverhalte aus dem Onboarding
+ * tragen ihre Nummer zusätzlich als `opos_anchor`/`journal_line`/
+ * `case_decision`; die zählen.
+ */
+export function resolveKnownDocumentNumbers(
+  candidates: readonly string[],
+  register: readonly KnownDocumentNumber[],
+): KnownCandidate[] {
+  const usable = register.filter(
+    (e) => e.source !== "bank_purpose" && e.source !== "case_summary",
+  );
+  if (candidates.length === 0 || usable.length === 0) return [];
+  const known: KnownCandidate[] = [];
+  for (const candidate of candidates) {
+    // Ein Kandidat, der zu einem schon gefundenen akzeptanz-gleich ist, ist
+    // dieselbe Nummer — nicht die zweite.
+    if (known.some((k) => k.candidate === candidate || acceptanceEqual(k.candidate, candidate))) {
+      continue;
+    }
+    const entries = usable.filter(
+      (e) => e.documentNumber === candidate || acceptanceEqual(e.documentNumber, candidate),
+    );
+    if (entries.length > 0) known.push({ candidate, entries: sortByDominance(entries) });
+  }
+  return known;
 }
 
 /**

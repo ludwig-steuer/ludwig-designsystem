@@ -14,7 +14,24 @@ export const VAT_PROFILE = [
 ] as const;
 export type VatProfile = (typeof VAT_PROFILE)[number];
 
-export const TYPICAL_NATURE = ["goods", "expense", "mixed", "unknown"] as const;
+/**
+ * Was der Geschäftspartner typischerweise liefert — Spiegel des DB-CHECK
+ * `client_business_partners_typical_nature_check`.
+ *
+ * Bis 2026-09-08 fehlten `service` und `investment`: die Aufzählung führte
+ * vier Werte, die Datenbank sechs. **924 Partner** des Bestands tragen die
+ * beiden fehlenden (877 + 47), und die Partner-Liste las
+ * `PARTNER_NATURE_LABEL[p.typicalNature]` ohne Fallback — für jeden dieser
+ * 924 stand dort `undefined` (L-222).
+ */
+export const TYPICAL_NATURE = [
+  "goods",
+  "service",
+  "expense",
+  "investment",
+  "mixed",
+  "unknown",
+] as const;
 export type TypicalNature = (typeof TYPICAL_NATURE)[number];
 
 /**
@@ -24,7 +41,9 @@ export type TypicalNature = (typeof TYPICAL_NATURE)[number];
  */
 export const PARTNER_NATURE_LABEL: Record<TypicalNature, string> = {
   goods: "Ware",
+  service: "Dienstleistung",
   expense: "Aufwand",
+  investment: "Anlagegut",
   mixed: "Gemischt",
   unknown: "—",
 };

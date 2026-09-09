@@ -23,7 +23,12 @@ import type { CheckKind } from "./check-kinds";
 export type ChecklistLevel = "blocked" | "warn" | "info";
 
 export interface ChecklistRow {
-  key: CheckKind | "not_checked";
+  /**
+   * `client_batch_masterdata` (F165) steht bewusst NICHT in `CHECK_KINDS`: die
+   * Zeile ist hart rot und nicht quittierbar, es gibt also nichts zu speichern
+   * — und der Deckungstest gegen den Migrations-CHECK bliebe sonst rot.
+   */
+  key: CheckKind | "not_checked" | "client_batch_masterdata";
   label: string;
   /** Was die Zeile misst, für den Tooltip. */
   hint: string;

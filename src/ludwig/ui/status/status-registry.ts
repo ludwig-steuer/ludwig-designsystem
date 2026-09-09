@@ -261,7 +261,10 @@ const BELEG_STAGE: Record<string, StatusDescriptor> = {
  *
  * Schreiber: Web-Upload setzt `pending_classification`, der Python-Classifier
  * setzt `classified` bzw. `classification_failed`, Reprocess setzt zurück auf
- * `pending_classification`, Soft-Delete setzt `deleted`.
+ * `pending_classification`, Soft-Delete setzt `deleted`. Der Web-Upload setzt
+ * zusätzlich `awaiting_input` für erkannte Kontoauszüge (F170); hinaus führt
+ * `importStatementForInboxEntry` — es setzt `classified` +
+ * `completed_via='import'`.
  *
  * Fallstricke:
  *  - **`classified` heißt NICHT „Belegform erkannt".** `class_document_form`
@@ -278,6 +281,7 @@ const BELEG_INBOX: Record<string, StatusDescriptor> = {
   pending_classification: { label: "Wird eingeordnet", kind: "neutral", description: "Dokument ist hochgeladen und wartet auf die Klassifizierung." },
   classified: { label: "Eingeordnet", kind: "success", description: "Dokumentart erkannt — der Beleg kann weiterverarbeitet werden." },
   classification_failed: { label: "Einordnung fehlgeschlagen", kind: "danger", description: "Die Dokumentart konnte nicht bestimmt werden. Es gibt keinen automatischen Wiederholungslauf — bitte manuell neu anstoßen." },
+  awaiting_input: { label: "Angabe nötig", kind: "warning", description: "Die Datei ist erkannt, aber eine Angabe fehlt — zum Beispiel das Bankkonto eines Kontoauszugs. Ohne sie wird nichts verarbeitet." },
   deleted: { label: "Gelöscht", kind: "neutral", description: "Aus der Liste entfernt. Datei und Historie bleiben erhalten." },
 };
 
@@ -995,6 +999,7 @@ const BUCHUNG_STATUS: Record<string, StatusDescriptor> = {
  * `deriveEntryDatevStage` (`modules/entries/domain/entry.ts`) aus `status` +
  * `exported_at` + `datev_mirror_entry_id`. Linearisiert den eindeutigen Weg
  * Vorschlag → Freigegeben → Exportiert → In DATEV bestätigt fürs UI.
+ * Seit F158 liefert `get_case` die Stufe je Satz als `datevStage`.
  *
  * Fallstricke:
  *  - **Exportiert ≠ angekommen** (Live-Learning: DATEV-Push antwortet 204,
@@ -1752,6 +1757,10 @@ const BELEGNUMMER_QUELLE: Record<string, StatusDescriptor> = {
  *    genau dieser Fall stundenlang als „läuft" im Dashboard.
  *  - `unreachable` und `server_error` trennen Netz von Gegenstelle: das eine
  *    ist VPN/URL/Port, das andere ein Fehler in DATEVconnect selbst.
+ *  - `flow_error` ist der einzige Wert, der **nicht** aus `DatevApiStatus`
+ *    kommt: `faultReportRequest.status` ist `datevApiStatus | "flow_error"`.
+ *    Er sagt, dass die Bridge selbst gestolpert ist, nicht DATEV — und er
+ *    kann gemeldet werden, bevor überhaupt ein Lauf angefangen hat.
  */
 const BRIDGE_DATEV: Record<string, StatusDescriptor> = {
   ok: { label: "DATEV in Ordnung", kind: "success", description: "Die Bridge erreicht DATEV und sieht Mandanten." },
@@ -1759,6 +1768,7 @@ const BRIDGE_DATEV: Record<string, StatusDescriptor> = {
   unreachable: { label: "DATEV nicht erreichbar", kind: "warning", description: "Der Host antwortet nicht — Netz, VPN, URL und Port prüfen." },
   server_error: { label: "DATEV-Serverfehler", kind: "danger", description: "DATEVconnect meldet einen Serverfehler." },
   unauthorized: { label: "Zugangsdaten abgelehnt", kind: "danger", description: "Benutzer oder Passwort abgelehnt, oder das Windows-Konto ist gesperrt." },
+  flow_error: { label: "Ablauf gescheitert", kind: "danger", description: "Die Bridge hat den Vorgang begonnen und ihn nicht zu Ende gebracht — kein DATEV-Problem, sondern eines im Ablauf selbst." },
 };
 
 /**
@@ -2460,6 +2470,12 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       { axis: "beleg_inbox", from: "classification_failed", to: "pending_classification", trigger: "classification_restarted", label: "von Hand neu angestoßen", by: "user" },
       { axis: "beleg_inbox", from: "classified", to: "pending_classification", trigger: "document_reprocessed", label: "Neuverarbeitung angestoßen", by: "user" },
       { axis: "beleg_inbox", from: "classified", to: "deleted", trigger: "document_soft_deleted", label: "aus der Liste entfernt — Datei und Historie bleiben", by: "user" },
+      // F170: ein erkannter Kontoauszug nimmt den Eingang, aber nicht die
+      // Klassifikation — er wartet auf das Bankkonto und geht danach als
+      // erledigt heraus (`completed_via='import'`).
+      { axis: "beleg_inbox", from: null, to: "awaiting_input", trigger: "statement_detected", label: "Kontoauszug erkannt — das Bankkonto steht nicht in der Datei", by: "system" },
+      { axis: "beleg_inbox", from: "awaiting_input", to: "classified", trigger: "statement_imported", label: "Bankkonto gewählt, Auszug importiert", by: "user" },
+      { axis: "beleg_inbox", from: "awaiting_input", to: "deleted", trigger: "document_soft_deleted", label: "aus der Liste entfernt, ohne importiert zu werden", by: "user" },
 
       // — Pipeline, Subtyp `client_source_docs_invoices.processing_status` —
       { from: null, to: "pending", trigger: "invoice_row_created", label: "Rechnungs-Stub angelegt, bevor die Pipeline läuft", by: "api" },

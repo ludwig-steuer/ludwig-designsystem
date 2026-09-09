@@ -1,6 +1,6 @@
 {
-  "appHash": "6ba47fb2bb1eccc5443ce0016cf93f6bd20d4b4f",
+  "appHash": "ab7863d8d429d46ac9a03d8ec94b0091143e11b0",
   "zweig": "staging",
-  "datum": "2026-09-08",
-  "hinweis": "Kopien aus ludwig/app — nie hier bearbeiten. Einmaliger Lauf am 2026-09-08 mit Owner-Freigabe (Simon); danach wieder eingefroren — der nächste Lauf braucht wieder eine Freigabe, auf Zuruf über ludwig-manager."
+  "datum": "2026-09-09",
+  "hinweis": "Kopien aus ludwig/app — nie hier bearbeiten. Einmaliger Lauf am 2026-09-09 mit Owner-Freigabe (Simon); danach wieder eingefroren — der nächste Lauf braucht wieder eine Freigabe. Anlass: L-222 war in der App behoben, im Spiegel nicht, und die Partner-Welle hätte den behobenen Fehler nachgebaut."
 }

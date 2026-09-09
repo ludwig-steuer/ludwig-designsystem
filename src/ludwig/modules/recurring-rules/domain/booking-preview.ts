@@ -53,6 +53,19 @@ export interface PreviewPosting {
   credit: string;
   amount: number | null;
   taxKey: string | null;
+  /**
+   * Dieselben zwei Konten wie in `debit`/`credit`, **unzerschnitten**.
+   *
+   * Die Label-Form („4200 Miete") reicht für einen Satz, nicht für eine
+   * Buchungszeile: `JournalLine` will Nummer und Name getrennt, und wo kein
+   * Konto feststeht, steht statt der Nummer ein Satz („Bank (aus Zahlung)").
+   * Ein Label an seinem ersten Leerzeichen zu zerschneiden und zu hoffen,
+   * dass davor eine Nummer stand, geht bei genau diesem Fall schief.
+   *
+   * `null` heißt: für diese Seite gibt es kein Konto, nur die Erklärung im
+   * Label.
+   */
+  accounts: { debit: PreviewAccount | null; credit: PreviewAccount | null };
 }
 
 export interface RuleBookingPreview {
@@ -82,12 +95,26 @@ function counterVsBank(
   bankLabel: string,
   amount: number | null,
   taxKey: string | null,
+  counterAccount: PreviewAccount | null,
+  bankAccount: PreviewAccount | null,
 ): PreviewPosting {
   // proposalSides ist die einzige Wahrheit — synthetisches Vorzeichen aus der Richtung.
   const { counterSide } = proposalSides(direction === "payment_out" ? -1 : 1);
   return counterSide === "debit"
-    ? { debit: counterLabel, credit: bankLabel, amount, taxKey }
-    : { debit: bankLabel, credit: counterLabel, amount, taxKey };
+    ? {
+        debit: counterLabel,
+        credit: bankLabel,
+        amount,
+        taxKey,
+        accounts: { debit: counterAccount, credit: bankAccount },
+      }
+    : {
+        debit: bankLabel,
+        credit: counterLabel,
+        amount,
+        taxKey,
+        accounts: { debit: bankAccount, credit: counterAccount },
+      };
 }
 
 /**
@@ -115,8 +142,20 @@ export function buildRulePreview(input: RulePreviewInput): RuleBookingPreview {
     const personalLabel = formatAccountLabel(input.personalAccount, PERSONAL_FALLBACK);
     const posting: PreviewPosting =
       counterSide === "debit"
-        ? { debit: counterLabel, credit: personalLabel, amount: input.amount, taxKey: input.taxKey }
-        : { debit: personalLabel, credit: counterLabel, amount: input.amount, taxKey: input.taxKey };
+        ? {
+            debit: counterLabel,
+            credit: personalLabel,
+            amount: input.amount,
+            taxKey: input.taxKey,
+            accounts: { debit: input.counterAccount, credit: input.personalAccount },
+          }
+        : {
+            debit: personalLabel,
+            credit: counterLabel,
+            amount: input.amount,
+            taxKey: input.taxKey,
+            accounts: { debit: input.personalAccount, credit: input.counterAccount },
+          };
     return {
       postings: [posting],
       automatic: true,
@@ -136,6 +175,8 @@ export function buildRulePreview(input: RulePreviewInput): RuleBookingPreview {
         bankLabel,
         line.amount,
         line.taxKey,
+        { accountNumber: line.accountNumber, accountName: line.accountName },
+        input.bankAccount,
       ),
     );
     return { postings, automatic: true, note: null };
@@ -143,7 +184,17 @@ export function buildRulePreview(input: RulePreviewInput): RuleBookingPreview {
 
   const counterLabel = formatAccountLabel(input.counterAccount, COUNTER_FALLBACK);
   return {
-    postings: [counterVsBank(direction, counterLabel, bankLabel, input.amount, input.taxKey)],
+    postings: [
+      counterVsBank(
+        direction,
+        counterLabel,
+        bankLabel,
+        input.amount,
+        input.taxKey,
+        input.counterAccount,
+        input.bankAccount,
+      ),
+    ],
     automatic: true,
     note: null,
   };
@@ -151,9 +202,15 @@ export function buildRulePreview(input: RulePreviewInput): RuleBookingPreview {
 
 /**
  * „Modus prüfen?"-Heuristik (F40 Konzept §4): eine aus dem DATEV-Import
- * (``datev-wkb:*``) als ``book_on_payment`` angelegte Regel, die aber ein
+ * (``datev-wk:*``) als ``book_on_payment`` angelegte Regel, die aber ein
  * Personenkonto trägt — starkes Signal für eine eigentlich als Sollstellung
  * gemeinte Vorlage, die still auf den Zahlungs-Default fiel. Reine Ableitung.
+ *
+ * Bis 2026-09-08 stand hier ``datev-wkb``, der Import schreibt aber
+ * ``datev-wk:<Belegnummer>`` (F91-Konvention). Die Warnung konnte damit nie
+ * erscheinen — auf keiner der 29 importierten Regeln des Bestands (L-244).
+ * Der Doppelpunkt gehört zur Prüfung: ohne ihn nähme sie jedes Präfix mit,
+ * das so anfängt.
  */
 export function needsModeReview(input: {
   bookingMode: RuleBookingMode;
@@ -162,7 +219,7 @@ export function needsModeReview(input: {
 }): boolean {
   return (
     input.bookingMode === "book_on_payment" &&
-    (input.importReference?.startsWith("datev-wkb") ?? false) &&
+    (input.importReference?.startsWith("datev-wk:") ?? false) &&
     input.personalAccountNumber != null
   );
 }

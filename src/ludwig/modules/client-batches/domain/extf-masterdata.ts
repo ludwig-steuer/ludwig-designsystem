@@ -51,6 +51,12 @@ export interface MasterdataFile {
   accounts: MasterdataAccount[];
   /** Zeilen ohne Nummer, ohne Namen oder mit unbestimmbarer Rolle. */
   skipped: Array<{ rowNo: number; accountNumber: string; reason: string }>;
+  /**
+   * DATEV-Mandantennummer aus dem Kopfsatz (Feld 12) — der Schutz vor dem
+   * Fremd-Upload, dieselbe Prüfung wie im Buchungsstapel-Import. Ohne sie
+   * benennt eine fremde Liste die Personenkonten dieses Mandanten um.
+   */
+  datevClientNumber: string | null;
 }
 
 export class ExtfMasterdataFormatError extends Error {
@@ -146,6 +152,8 @@ export function parseExtfMasterdata(
     );
   }
 
+  const datevClientNumber = (header[11] ?? "").trim() || null;
+
   const accounts: MasterdataAccount[] = [];
   const skipped: MasterdataFile["skipped"] = [];
   const seen = new Set<string>();
@@ -194,5 +202,5 @@ export function parseExtfMasterdata(
     accounts.push({ rowNo, accountNumber, name, accountingRole });
   }
 
-  return { accounts, skipped };
+  return { accounts, skipped, datevClientNumber };
 }

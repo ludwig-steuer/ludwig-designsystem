@@ -107,6 +107,23 @@ nicht zurück. *Warum:* zwei Listen neben zwei ID-Räumen waren derselbe
 Fehlerzustand wie zwei Detail-Shells (R5); ein Beleg, der in keiner Sicht
 auftaucht, ist ein verlorener Beleg.
 
+### R5b — Der Eingang nimmt alles, was die Kanzlei bekommt
+Die Ablagefläche des Eingangs (`clients/[clientSlug]/document-inbox`) nimmt
+PDF, Kontoauszüge (CSV/XLSX/CAMT-XML) und DATEV-Stapel (EXTF) — was die Datei
+ist, entscheidet der Server an den Bytes (`routeUploadedBytes`, belege.md R1),
+nicht der MIME-Typ des Browsers. Drei Ausgänge stehen in der Liste:
+
+- **Beleg** → Eingangszeile wie bisher (`pending_classification`).
+- **Kontoauszug** → Eingangszeile mit „Angabe nötig" (`awaiting_input`) und
+  einer Kontoauswahl in der Spalte „Einordnung"; ein Klick importiert und
+  erledigt die Zeile. CAMT trägt die eigene IBAN und importiert sofort.
+- **DATEV-Stapel** → keine Eingangszeile (der Stapel hat seine eigene Seite),
+  sondern eine Meldung unter der Ablagefläche, was importiert wurde.
+
+Was keinem davon entspricht, bleibt als Upload-Zeile mit dem Grund stehen und
+legt nichts an. *Warum:* der Weg, den ein Mensch benutzt, war der ärmere von
+zwei Kernen für dieselbe Schreibaktion (P31, F170).
+
 ### R6 — Label-Maps haben genau eine Quelle im Domain-Modul
 Fachvokabular-Labels (Belegformen, Belegrichtung, Belegart, …) wohnen
 genau einmal im zuständigen Domain-Modul (z. B.

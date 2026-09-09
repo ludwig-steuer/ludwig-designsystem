@@ -4,6 +4,7 @@
  * kein IO — die strukturierten Details (Kriterien, Buchungssatz) rendert der
  * Tab daneben; hier nur die menschlesbare Zusammenfassung.
  */
+import { hasMatchCriterion } from "./rule";
 import type { RuleBookingMode, RuleDirection, RuleExpectedInterval } from "./rule";
 
 export interface RuleSummaryInput {
@@ -13,6 +14,12 @@ export interface RuleSummaryInput {
   matchCounterpartyIban: string | null;
   matchAmount: number | null;
   matchAmountTolerance: number;
+  /**
+   * Fehlte bis 2026-09-08 in diesem Typ — und damit in der Zählung, die
+   * darauf aufbaut (L-253). Optional, weil nicht jeder Aufrufer der
+   * Zusammenfassung ihn führt; `undefined` heißt „nicht gesetzt".
+   */
+  matchPurposeRegex?: string | null;
 }
 
 function fmtEuro(amount: number): string {
@@ -21,13 +28,22 @@ function fmtEuro(amount: number): string {
   );
 }
 
-/** Hat die Regel überhaupt ein Match-Kriterium? Ohne greift sie bei nichts. */
+/**
+ * Hat die Regel überhaupt ein Match-Kriterium? Ohne greift sie bei nichts.
+ *
+ * Zählt über dieselbe Liste, die `matchTransaction` prüft (`MATCH_CRITERIA`)
+ * — vorher war es eine zweite, unvollständige Aufzählung: der Zweck-Regex
+ * fehlte, und eine Regel mit nur einem Regex galt hier als kriterienlos,
+ * während sie draußen zuschlug (L-253).
+ */
 export function hasAnyCriterion(input: RuleSummaryInput): boolean {
-  return (
-    !!input.matchCounterpartyName?.trim() ||
-    !!input.matchCounterpartyIban?.trim() ||
-    input.matchAmount != null
-  );
+  return hasMatchCriterion({
+    matchCounterpartyName: input.matchCounterpartyName,
+    matchCounterpartyIban: input.matchCounterpartyIban,
+    matchAmount: input.matchAmount,
+    matchAmountTolerance: input.matchAmountTolerance,
+    matchPurposeRegex: input.matchPurposeRegex ?? null,
+  } as unknown as Parameters<typeof hasMatchCriterion>[0]);
 }
 
 /**

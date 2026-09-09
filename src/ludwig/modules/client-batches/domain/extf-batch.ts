@@ -130,12 +130,20 @@ export interface BatchRejection {
 }
 
 export interface ExtfBatchHeader {
+  /** DATEV-Mandantennummer aus dem Kopfsatz (Feld 12) — Schutz vor Fremd-Upload. */
+  datevClientNumber: string | null;
   /** WJ-Beginn als ISO-Datum; löst 4-stellige `TTMM`-Belegdaten auf. */
   fiscalYearStart: string | null;
   /** Sachkontenlänge laut Stapel — Personenkonto = diese Länge + 1. */
   accountNumberLength: number | null;
   /** z. B. `skr04`, wenn der Header ihn führt. */
   accountFrameworkCode: string | null;
+  /** Feld 14 „Datum von" als ISO-Datum — der Zeitraum des Zyklus (F163). */
+  periodFrom: string | null;
+  /** Feld 15 „Datum bis" als ISO-Datum. */
+  periodTo: string | null;
+  /** Feld 16 „Bezeichnung" — hängt an die Ludwig-Benennung an, wenn gefüllt. */
+  label: string | null;
 }
 
 export interface ExtfBatch {
@@ -185,9 +193,13 @@ function parseHeader(cells: string[]): ExtfBatchHeader {
   const skl = Number.parseInt(at(13), 10);
   const skr = at(26);
   return {
+    datevClientNumber: at(11) || null,
     fiscalYearStart: yyyymmddToIso(at(12)),
     accountNumberLength: Number.isFinite(skl) && skl > 0 ? skl : null,
     accountFrameworkCode: skr ? `skr${skr.padStart(2, "0")}` : null,
+    periodFrom: yyyymmddToIso(at(14)),
+    periodTo: yyyymmddToIso(at(15)),
+    label: at(16) || null,
   };
 }
 
@@ -370,4 +382,56 @@ export function parseExtfBatch(bytes: Uint8Array): ExtfBatch {
   }
 
   return { header, rows, rejections };
+}
+
+/* ── Art und Vollständigkeit eines Stapels (F163) ─────────────────────── */
+
+/**
+ * Wovon handelt dieser Stapel? Die Antwort geht in die Ludwig-Benennung
+ * (`07-2026-EXT-Kasse`), damit die Kanzlei in der Liste sieht, was sie vor
+ * sich hat, ohne die Datei zu öffnen.
+ *
+ * Bewusst nur die beiden Fälle, die der Mandant tatsächlich liefert, und
+ * bewusst über **alle** Zeilen: ein Stapel, in dem eine einzige Zeile aus der
+ * Reihe fällt, ist kein Kassen-Stapel — dann bleibt der Name neutral, statt
+ * eine Aussage zu treffen, die die Kanzlei glaubt.
+ */
+export function classifyBatchSubtype(
+  rows: readonly ExtfBatchRow[],
+  cashAccountNumbers: ReadonlySet<string>,
+  debtorAccountNumbers: ReadonlySet<string>,
+): "cash" | "debtors" | null {
+  if (rows.length === 0) return null;
+  const touches = (row: ExtfBatchRow, set: ReadonlySet<string>) =>
+    set.has(row.debitAccount) || set.has(row.creditAccount);
+  if (rows.every((r) => touches(r, cashAccountNumbers))) return "cash";
+  if (
+    rows.every((r) => touches(r, debtorAccountNumbers)) &&
+    !rows.some((r) => touches(r, cashAccountNumbers))
+  ) {
+    return "debtors";
+  }
+  return null;
+}
+
+/**
+ * Ist dieser Satz nur die halbe Buchung? (R32 Fall b.)
+ *
+ * Zahlungskonto gegen Personenkonto heißt: der Mandant hat die Zahlung
+ * gebucht, welcher Aufwand dahintersteckt, entscheidet der reguläre Lauf am
+ * Beleg. Ein daran hängender Beleg ist deshalb **nicht** erledigt — die
+ * Belegseite fehlt noch. Alles andere (Debitor an Erlös, Aufwand an Kasse)
+ * ist fachlich vollständig.
+ */
+export function isHalfBooking(
+  lines: readonly { accountNumber: string }[],
+  paymentAccountNumbers: ReadonlySet<string>,
+  personalAccountNumbers: ReadonlySet<string>,
+): boolean {
+  const numbers = lines.map((l) => l.accountNumber);
+  const hasPayment = numbers.some((n) => paymentAccountNumbers.has(n));
+  const hasPersonal = numbers.some(
+    (n) => personalAccountNumbers.has(n) && !paymentAccountNumbers.has(n),
+  );
+  return hasPayment && hasPersonal;
 }

@@ -44,9 +44,16 @@ export interface InvoiceFilter {
   docCategory?: DocCategory[];
 }
 
+/**
+ * Die Reiter der Belegliste — **drei**, seit „Klärungsfragen" ein Filter ist.
+ *
+ * Die verbliebenen drei sind echte andere Ansichten: „Alle Belege" liest die
+ * Rechnungsliste, „In Verarbeitung" und „Problematisch" lesen die
+ * Beleg-Basistabelle mit eigenen Bedingungen. „Klärungsfragen" tat nichts
+ * davon — es filterte dieselbe Liste nach einem Feld.
+ */
 export const INVOICE_LIST_TABS = [
   "alle",
-  "klaerung",
   "verarbeitung",
   "problematisch",
 ] as const;
@@ -54,7 +61,6 @@ export type InvoiceListTab = (typeof INVOICE_LIST_TABS)[number];
 
 export const INVOICE_LIST_TAB_LABEL: Record<InvoiceListTab, string> = {
   alle: "Alle Belege",
-  klaerung: "Klärungsfragen",
   verarbeitung: "In Verarbeitung",
   problematisch: "Problematische Belege",
 };
@@ -76,6 +82,16 @@ const InvoiceFilterRawSchema = z.object({
   lifecycle: z.string().optional(),
   open: z.string().optional(),
   cat: z.string().optional(),
+  /** Geschäftspartner — kommt aus einem Klick auf den Kreditor in der Zeile. */
+  partner: z.string().uuid().optional(),
+  /**
+   * Offene Klärung. War bis 2026-09-08 ein **Reiter** („Klärungsfragen"),
+   * obwohl er dieselbe Liste nach einem Feld filterte — ein Reiter
+   * verspricht eine andere Ansicht und lieferte dieselbe (Owner-Entscheid
+   * „Reiter sind keine Filter"). Die zwei verbliebenen Reiter sind echte
+   * andere Listen: sie fragen andere Tabellen ab.
+   */
+  klaerung: z.string().optional(),
 });
 
 /**
@@ -160,6 +176,8 @@ export function parseInvoiceFilter(raw: RawSearchParams): InvoiceFilter {
     open: typeof raw.open === "string" ? raw.open : undefined,
     // Checkbox-Gruppe: mehrere `cat`-Werte kommen als Array an.
     cat: Array.isArray(raw.cat) ? raw.cat.join(",") : typeof raw.cat === "string" ? raw.cat : undefined,
+    partner: typeof raw.partner === "string" ? raw.partner : undefined,
+    klaerung: typeof raw.klaerung === "string" ? raw.klaerung : undefined,
   });
   if (!parsed.success) return {};
   const lifecycleStatus = parsed.data.lifecycle
@@ -177,6 +195,8 @@ export function parseInvoiceFilter(raw: RawSearchParams): InvoiceFilter {
     openOnly: parsed.data.open === "1" ? true : undefined,
     lifecycleStatus: lifecycleStatus && lifecycleStatus.length > 0 ? lifecycleStatus : undefined,
     docCategory: parsed.data.cat ? (parseDocCategories(parsed.data.cat) ?? undefined) : undefined,
+    businessPartnerId: parsed.data.partner,
+    hasOpenClarification: parsed.data.klaerung === "1" ? true : undefined,
   };
 }
 

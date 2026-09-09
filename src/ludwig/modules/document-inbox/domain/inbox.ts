@@ -24,6 +24,9 @@ export const INBOX_STATUS = [
   "classified",
   "classification_failed",
   "deleted",
+  /** F170: erkannt, aber eine Angabe von außen fehlt — heute das Bankkonto
+   *  eines Kontoauszugs. Nichts läuft, bis sie kommt. */
+  "awaiting_input",
 ] as const;
 export type InboxStatus = (typeof INBOX_STATUS)[number];
 
@@ -185,7 +188,37 @@ export type FinalizeUploadOutcome =
       existingInboxEntryId: string;
       uploadedAt: string;
       originalFileName: string | null;
-    };
+    }
+  /* F170 — der Eingang nimmt alles, was die Kanzlei bekommt. Was keine
+     Beleg-Zeile ergibt, meldet sich am Upload selbst. */
+  | {
+      kind: "client_batch";
+      batchImportId: string;
+      importedCount: number;
+      rejectedCount: number;
+      alreadyExists: boolean;
+    }
+  | {
+      kind: "client_batch_masterdata";
+      directoryEntries: number;
+      renamedPlaceholders: number;
+      nameConflicts: number;
+    }
+  /** Kontoauszug erkannt, Zahlungskonto fehlt — die Zeile steht auf `awaiting_input`. */
+  | { kind: "awaiting_payment_account"; inboxEntryId: string; format: string }
+  /** Kontoauszug erkannt UND zugeordnet (CAMT trägt die IBAN) — schon importiert. */
+  | {
+      kind: "statement_imported";
+      inboxEntryId: string;
+      format: string;
+      paymentAccountId: string;
+      batchId: string | null;
+      imported: number;
+      ignored: number;
+      warnings: string[];
+    }
+  /** Weder Beleg noch bekannter Auszug noch Stapel: abgewiesen, nicht geraten. */
+  | { kind: "unsupported"; reason: string };
 
 export type DeleteInboxOutcome =
   | { kind: "deleted" }

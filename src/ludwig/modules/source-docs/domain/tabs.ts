@@ -11,11 +11,18 @@
  * das Original. Eine Aufschrift, die wechselt, während der Inhalt gleich
  * bleibt, ist eine falsche Fährte (L-92).
  *
- * URL-Konvention: `?tab=<slug>`, der Default-Tab („beleg") trägt keinen
- * Param.
+ * **Seit 2026-09-08 heißt der erste „Übersicht"** (L-260). L-92 verglich nur
+ * die Belegarten untereinander und landete deshalb bei „Beleg" — über die
+ * Seiten hinweg ist auch der Entitätsname eine wechselnde Aufschrift für
+ * denselben Inhalt: die erste Ansicht des Datensatzes. Konto und Sachverhalt
+ * nennen sie längst so, der Detailseiten-Standard macht es zur Regel (D11).
+ *
+ * URL-Konvention: `?tab=<slug>`, der Default-Tab („uebersicht") trägt keinen
+ * Param. `beleg` und `buchung` leiten darauf um — beide kursieren als
+ * Deep-Links.
  */
 export const DOC_TABS = [
-  "beleg",
+  "uebersicht",
   "positionen",
   "vorsteuer",
   "verlauf",
@@ -25,7 +32,7 @@ export const DOC_TABS = [
 export type DocTab = (typeof DOC_TABS)[number];
 
 export const DOC_TAB_LABEL: Record<DocTab, string> = {
-  beleg: "Beleg",
+  uebersicht: "Übersicht",
   positionen: "Positionen",
   vorsteuer: "Vorsteuer",
   verlauf: "Verlauf & Befunde",
@@ -49,7 +56,8 @@ export function parseDocTab(
   available: readonly DocTab[],
 ): DocTab {
   const raw = Array.isArray(value) ? value[0] : value;
-  // "buchung" war bis 2026-07-20 der Slug der Rechnungs-Hauptansicht.
-  const slug = raw === "buchung" ? "beleg" : raw;
-  return available.includes(slug as DocTab) ? (slug as DocTab) : "beleg";
+  // Zwei alte Slugs derselben Ansicht: „buchung" war sie bis 2026-07-20,
+  // „beleg" bis 2026-09-08. Beide kursieren als Deep-Links.
+  const slug = raw === "buchung" || raw === "beleg" ? "uebersicht" : raw;
+  return available.includes(slug as DocTab) ? (slug as DocTab) : "uebersicht";
 }

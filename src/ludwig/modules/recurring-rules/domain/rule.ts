@@ -9,7 +9,34 @@
  * der Live-Vorschau im Regelwerk-Tab verwendet. Reine Funktion, keine IO.
  */
 
+/**
+ * Die Priorität, mit der eine neue Regel entsteht — für **alle** Schreiber.
+ *
+ * Sortiert wird aufsteigend (`order by priority asc`): die kleinste Zahl
+ * gewinnt, wenn mehrere Regeln auf dieselbe Zahlung passen. Bis 2026-09-08
+ * legte der Editor mit `0` an, Import und Agent mit `100` — jede von Hand
+ * angelegte Regel stach damit still jede importierte, ohne dass jemand eine
+ * Priorität gesetzt hätte (L-254).
+ *
+ * 100 ist die Mitte des erlaubten Bereichs (0..1000) und lässt Platz nach
+ * unten für „geht vor" und nach oben für „kommt zuletzt".
+ */
+export const RULE_PRIORITY_DEFAULT = 100;
+
 export type RuleDirection = "payment_in" | "payment_out";
+
+/**
+ * Welche Richtung die erwartete Zahlung hat.
+ *
+ * Die Wörter fehlten der Domäne ganz (L-256) — auf dem Bildschirm stand
+ * `payment_out`. Aus Sicht des Mandanten: „Geld geht raus" bzw. „Geld kommt
+ * rein"; „Zahlungsausgang"/„Zahlungseingang" sind die Fachwörter, die auch
+ * die Bankauszugs-Seite verwendet.
+ */
+export const RULE_DIRECTION_LABEL: Record<RuleDirection, string> = {
+  payment_out: "Zahlungsausgang",
+  payment_in: "Zahlungseingang",
+};
 
 /** Erwarteter Zahlungs-Rhythmus einer Regel (F04-T4.5). NULL = keine Erwartung. */
 export type RuleExpectedInterval = "monthly" | "quarterly" | "yearly";
@@ -59,8 +86,34 @@ export function rescanActionFor(mode: RuleBookingMode): "template" | "settle" | 
  */
 export type RuleDocumentNumberStrategy = "period_key" | "from_document" | "fixed";
 
+/**
+ * Woher die Belegnummer der erzeugten Buchung kommt.
+ *
+ * Kein Zustand, sondern eine Einstellung — deshalb hier und nicht in der
+ * Status-Registry (dieselbe Trennung wie bei `RULE_INTERVAL_LABEL`). Bis
+ * 2026-09-08 gab es die Wörter nirgends, und der Regelwerk-Reiter zeigte den
+ * englischen Schlüssel auf dem Bildschirm (L-242). Im Bestand: 26 ×
+ * `period_key`, 3 × `from_document`, 1 × `fixed`.
+ */
+export const RULE_DOCUMENT_NUMBER_STRATEGY_LABEL: Record<RuleDocumentNumberStrategy, string> = {
+  period_key: "aus dem Zeitraum (z. B. 2026-03)",
+  from_document: "aus dem Beleg",
+  fixed: "fest vergeben",
+};
+
 /** Woher die Profil-Werte einer Regel stammen (F108 [E4]). */
 export type RuleProfileSource = "derived" | "agent" | "human" | "onboarding";
+
+/**
+ * Wer die Regel aufgestellt hat. Auch das ist eine Herkunft, kein Zustand
+ * (L-242). Im Bestand: 24 × `onboarding`, 5 × `derived`.
+ */
+export const RULE_PROFILE_SOURCE_LABEL: Record<RuleProfileSource, string> = {
+  derived: "aus vorhandenen Buchungen abgeleitet",
+  agent: "vom Agenten angelegt",
+  human: "von Hand angelegt",
+  onboarding: "beim Onboarding übernommen",
+};
 
 /**
  * F108 [E4] — der Server leitet das Buchungsprofil ab, der Agent widerspricht
@@ -347,10 +400,73 @@ export function directionOf(amount: number): RuleDirection {
 }
 
 /**
+ * # Die Match-Kriterien einer Regel — **eine** Liste
+ *
+ * Bis 2026-09-08 gab es sie zweimal: `matchTransaction` prüfte vier
+ * Kriterien, `hasAnyCriterion` zählte drei. Eine Regel mit nur einem
+ * Zweck-Regex griff also auf Zahlungen, während die Oberfläche daneben
+ * schrieb „Diese Regel hat noch keine Match-Kriterien und greift daher bei
+ * keiner Zahlung" (L-253). Zwei Stellen, die dasselbe wissen mussten, und
+ * eine wusste es nicht.
+ *
+ * Jetzt steht jedes Kriterium einmal da, mit beiden Fragen, die man an es
+ * stellt: **ist es gesetzt** und **passt es**. Wer ein fünftes ergänzt,
+ * ergänzt es für beide Leser.
+ */
+export interface MatchCriterion {
+  key: "iban" | "name" | "amount" | "purpose";
+  /** Trägt die Regel dieses Kriterium überhaupt? */
+  isSet: (rule: RuleCriteria) => boolean;
+  /** Passt die Transaktion darauf? Nur gefragt, wenn `isSet`. */
+  matches: (rule: RuleCriteria, txn: MatchableTransaction) => boolean;
+}
+
+export const MATCH_CRITERIA: readonly MatchCriterion[] = [
+  {
+    key: "iban",
+    isSet: (r) => !!r.matchCounterpartyIban,
+    matches: (r, t) =>
+      normalizeIban(t.counterpartyIban) === normalizeIban(r.matchCounterpartyIban),
+  },
+  {
+    key: "name",
+    isSet: (r) => !!r.matchCounterpartyName?.trim(),
+    matches: (r, t) =>
+      (t.counterpartyName ?? "")
+        .toLowerCase()
+        .includes(r.matchCounterpartyName!.toLowerCase().trim()),
+  },
+  {
+    key: "amount",
+    isSet: (r) => r.matchAmount != null,
+    matches: (r, t) =>
+      Math.abs(Math.abs(t.amount) - Math.abs(r.matchAmount!)) <=
+      effectiveAmountTolerance(r) + 1e-9,
+  },
+  {
+    key: "purpose",
+    isSet: (r) => !!r.matchPurposeRegex?.trim(),
+    // Ein ungültiger Regex trifft nicht, statt zu werfen — die Validierung
+    // gehört in die Action.
+    matches: (r, t) => {
+      try {
+        return new RegExp(r.matchPurposeRegex!, "i").test(t.purpose ?? "");
+      } catch {
+        return false;
+      }
+    },
+  },
+];
+
+/** Trägt die Regel überhaupt ein Kriterium? Ohne greift sie bei nichts. */
+export function hasMatchCriterion(rule: RuleCriteria): boolean {
+  return MATCH_CRITERIA.some((c) => c.isSet(rule));
+}
+
+/**
  * Trifft die Transaktion die Regel? ALLE gesetzten Kriterien müssen
  * zutreffen (UND-Verknüpfung). Eine Regel ganz ohne Kriterien trifft
- * NICHTS (kein versehentlicher Catch-all). Ein ungültiger Regex trifft
- * nicht (statt zu werfen) — die Validierung gehört in die Action.
+ * NICHTS (kein versehentlicher Catch-all).
  */
 export function matchTransaction(
   txn: MatchableTransaction,
@@ -359,46 +475,8 @@ export function matchTransaction(
   if (rule.expectedDirection && directionOf(txn.amount) !== rule.expectedDirection) {
     return false;
   }
-
-  let anyCriterion = false;
-
-  if (rule.matchCounterpartyIban) {
-    anyCriterion = true;
-    if (normalizeIban(txn.counterpartyIban) !== normalizeIban(rule.matchCounterpartyIban)) {
-      return false;
-    }
-  }
-
-  if (rule.matchCounterpartyName && rule.matchCounterpartyName.trim() !== "") {
-    anyCriterion = true;
-    const needle = rule.matchCounterpartyName.toLowerCase().trim();
-    if (!(txn.counterpartyName ?? "").toLowerCase().includes(needle)) {
-      return false;
-    }
-  }
-
-  if (rule.matchAmount != null) {
-    anyCriterion = true;
-    const tolerance = effectiveAmountTolerance(rule);
-    if (Math.abs(Math.abs(txn.amount) - Math.abs(rule.matchAmount)) > tolerance + 1e-9) {
-      return false;
-    }
-  }
-
-  if (rule.matchPurposeRegex && rule.matchPurposeRegex.trim() !== "") {
-    anyCriterion = true;
-    let regex: RegExp;
-    try {
-      regex = new RegExp(rule.matchPurposeRegex, "i");
-    } catch {
-      return false;
-    }
-    if (!regex.test(txn.purpose ?? "")) {
-      return false;
-    }
-  }
-
-  return anyCriterion;
+  if (!hasMatchCriterion(rule)) return false;
+  return MATCH_CRITERIA.every((c) => !c.isSet(rule) || c.matches(rule, txn));
 }
 
 /** Minimaler Beleg-Ausschnitt, den der Beleg-Matcher braucht. */
@@ -721,4 +799,29 @@ export function prefillFromTransaction(txn: {
     matchAmountTolerancePercent: null,
     matchPurposeRegex: null,
   };
+}
+
+/**
+ * Greift die Regel auch auf **Belege**, nicht nur auf Zahlungen?
+ *
+ * Abgeleitet, nie gesetzt: der Wert ist eine Aussage über die Kriterien, und
+ * ein Feld, das man daneben pflegen kann, driftet. Ein Personenkonto genügt —
+ * genau daraus besteht eine aus der DATEV-Historie abgeleitete Regel (F91);
+ * die beiden Beleg-Kriterien sind der ausdrückliche Fall.
+ *
+ * Die Regel stand bis 2026-09-08 in `infrastructure/rule-writes.ts` und wurde
+ * nur beim **Anlegen** angewandt — beim Ändern blieb der Wert stehen (L-249).
+ * Sie steht jetzt hier, damit beide Schreiber dieselbe lesen und ein Test sie
+ * prüfen kann, ohne die Datenbank zu berühren.
+ */
+export function matchesDocuments(input: {
+  matchContractNumber?: string | null;
+  matchDocumentTextRegex?: string | null;
+  personalAccountNumber: string | null;
+}): boolean {
+  return (
+    input.matchContractNumber != null ||
+    input.matchDocumentTextRegex != null ||
+    input.personalAccountNumber != null
+  );
 }
