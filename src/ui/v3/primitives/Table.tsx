@@ -104,11 +104,21 @@ export type TableDensity = "compact" | "default" | "wide";
  */
 export function Table({
   cols,
+  sections,
   minWidth,
   density = "default",
   children,
 }: {
   cols: string;
+  /**
+   * Named row groups, one `<tbody>` each — the head row of a section, then its
+   * rows. Without it the table keeps its single body, which is what all 52
+   * callers before 0149 rely on.
+   *
+   * `children` stays for the column head row; a section carries only its own
+   * rows.
+   */
+  sections?: readonly { key: string; children: ReactNode }[];
   minWidth?: number;
   /** `compact` one line per row, `wide` room for a title plus a sub-line. */
   density?: TableDensity;
@@ -119,7 +129,18 @@ export function Table({
     // table and the body, `display: grid` on `tr` — measured in the review of
     // 0094 (finding B2) to give the full tree table · row · columnheader · cell.
     <table className="v2tbl" data-density={density} style={{ "--v2-cols": cols } as CSSProperties}>
+      {/* The column head row keeps its own body, sections or not — it belongs
+          to the table, not to any one of them. */}
       <tbody className="v2tbl__body">{children}</tbody>
+      {/* One `<tbody>` per section, because that **is** a row group. A single
+          body with five headings in it would make `scope="rowgroup"` a lie:
+          the first heading would claim every remaining cell, including the
+          other four sections (0149). */}
+      {sections?.map((s) => (
+        <tbody className="v2tbl__body" key={s.key}>
+          {s.children}
+        </tbody>
+      ))}
     </table>
   );
   if (!minWidth) return body;
@@ -276,12 +297,25 @@ export function Row({
  * @when    A heading over a group of rows, spanning every column.
  * @instead The column heads → HeadRow. Nothing to show → EmptyRow.
  */
-export function GroupRow({ children }: { children: ReactNode }) {
+export function GroupRow({
+  children,
+  select,
+}: {
+  children: ReactNode;
+  /** The checkbox for exactly this section — left of the word (0149). */
+  select?: ReactNode;
+}) {
   return (
     <tr>
-      <td className="v2tbl__group" colSpan={SPAN_ALL}>
+      {/* A **`<th scope="rowgroup">`**, not a `<td>` with `role`: the heading
+          of a row group is a header cell, and `<tbody>` is the group. Saying
+          it with ARIA would rebuild what the elements already are — and an
+          `aria-label` on a row group is announced inconsistently, while a
+          `<th>` is read as the header it is (0149). */}
+      <th className="v2tbl__group" colSpan={SPAN_ALL} scope="rowgroup">
+        {select}
         {children}
-      </td>
+      </th>
     </tr>
   );
 }

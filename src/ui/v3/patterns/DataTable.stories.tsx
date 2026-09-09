@@ -15,6 +15,7 @@ import { Field, Select } from "../primitives/Form";
 import { FilterBar } from "../primitives/FilterBar";
 import { FilterChips, SearchInput } from "../primitives/Nav";
 import { TextButton } from "../primitives/TextButton";
+import { formatAmount } from "../format";
 import {
   DataTable,
   type AnyBulkAction,
@@ -23,6 +24,7 @@ import {
   type ListPatch,
   rowAction,
   type RowAction,
+  type TableGroup,
 } from "./DataTable";
 import { bulkAction } from "../primitives/Selection";
 import { StatusBadge } from "./StatusBadge";
@@ -717,5 +719,236 @@ export const Override: Story = {
         minWidth={1600}
       />
     </div>
+  ),
+};
+
+/* ── Abschnitte (0149) ─────────────────────────────────────────────────────
+   Dieselbe Tabelle, nur mit einer Zeile mehr zwischen den Zeilen. Die Zahlen
+   im Kopf rechnet der Aufrufer — die Tabelle rechnet nichts (E2). */
+
+function kindGroup(kind: CaseKind, aside = true): TableGroup<CaseListItem> {
+  const rows = PAGE.filter((c) => c.kind === kind);
+  const sum = rows.reduce((n, c) => n + (c.totalAmount ?? 0), 0);
+  return {
+    key: kind,
+    label: caseKindLabel(kind),
+    rows,
+    ...(aside ? { aside: `${rows.length} · ${formatAmount(sum, "EUR")}` } : {}),
+  };
+}
+
+const KIND_GROUPS = [
+  {
+    ...kindGroup("incoming_invoice"),
+    // Z4: die Erklärung steht **einmal je Abschnitt**, nicht einmal je Zeile.
+    labelAside: "Lieferantenrechnungen mit Beleg",
+  },
+  kindGroup("recurring_charge"),
+  kindGroup("expense_report"),
+];
+
+/**
+ * Drei Abschnitte: Wort links, Anzahl und Summe rechts, darunter die Zeilen
+ * der Gruppe. Der Spaltenkopf steht **einmal** über allem — er gehört der
+ * Tabelle, nicht dem Abschnitt.
+ *
+ * Jeder Abschnitt ist ein eigenes `<tbody>`, seine Überschrift ein
+ * `<th scope="rowgroup">`. Damit gilt der Kopf genau für seine Zeilen; in
+ * einem einzigen `<tbody>` beanspruchte der erste Kopf auch die Zeilen der
+ * beiden anderen.
+ */
+export const WithGroups: Story = {
+  render: () => (
+    <DataTable<CaseListItem>
+      groups={KIND_GROUPS}
+      columns={COLUMNS}
+      rowKey={rowKey}
+      head={{ title: "Sachverhalte 2026", sub: "50 Sachverhalte nach Art" }}
+      sort={SORT}
+      href={href}
+      rowHref={(c) => `#sachverhalt-${rowKey(c)}`}
+    />
+  ),
+};
+
+/**
+ * Links: eine leere Gruppe **mit** `emptyHint` — die Leere ist die Auskunft
+ * („kein Satz in diesem Stapel"). Die dritte Gruppe ist ebenfalls leer, hat
+ * aber keinen Hinweis und **fällt ganz weg**: eine Überschrift über nichts
+ * ist Rauschen.
+ *
+ * Rechts: **alle** Gruppen leer. Dann greift der eine Leerzustand der Tabelle,
+ * nicht drei leere Köpfe untereinander.
+ */
+export const GroupEmpty: Story = {
+  render: () => (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <DataTable<CaseListItem>
+        groups={[
+          kindGroup("incoming_invoice", false),
+          {
+            key: "recurring_charge",
+            label: caseKindLabel("recurring_charge"),
+            rows: [],
+            emptyHint: "Kein Dauersachverhalt in diesem Stapel.",
+          },
+          { key: "expense_report", label: caseKindLabel("expense_report"), rows: [] },
+        ]}
+        columns={[NUMBER, TITLE, AMOUNT]}
+        rowKey={rowKey}
+        head={{ title: "Eine Gruppe leer", sub: "mit Hinweis — und eine ohne" }}
+      />
+      <DataTable<CaseListItem>
+        groups={[
+          { key: "incoming_invoice", label: caseKindLabel("incoming_invoice"), rows: [] },
+          { key: "recurring_charge", label: caseKindLabel("recurring_charge"), rows: [] },
+        ]}
+        columns={[NUMBER, TITLE, AMOUNT]}
+        rowKey={rowKey}
+        head={{ title: "Alle Gruppen leer", sub: "ein Leerzustand, keine Köpfe" }}
+        empty={{
+          title: "In diesem Stapel steht nichts.",
+          description: "Sobald ein Beleg eingeordnet ist, steht er hier.",
+        }}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Auswählen mit Abschnitten: das Kästchen im Gruppenkopf meint **genau** die
+ * Zeilen darunter, das im Spaltenkopf weiter alle. Zwei Zeilen einer Gruppe
+ * gewählt, und der Gruppenkopf steht auf `indeterminate` — die dritte Stellung
+ * eines Kästchens, die es dafür gibt.
+ *
+ * Die Umschalt-Auswahl läuft über alle Abschnitte hinweg in **Lesereihenfolge**:
+ * die Reihenfolge der Auswahl ist die, die man sieht.
+ */
+export const GroupSelection: Story = {
+  render: () => (
+    <DataTable<CaseListItem>
+      groups={KIND_GROUPS.map((g) => ({ ...g, rows: g.rows.slice(0, 4) }))}
+      columns={COLUMNS}
+      rowKey={rowKey}
+      head={{ title: "Sachverhalte 2026", sub: "nach Art, mit Auswahl" }}
+      selection={{
+        label: (c) => `${c.title} auswählen`,
+        actions: [
+          { label: "Exportieren", hotkey: "E", action: async () => {} },
+          { label: "Abschließen", action: async () => {} },
+        ] satisfies BulkAction[],
+      }}
+    />
+  ),
+};
+
+/* ── Die Buchungsübersicht aus F186 ───────────────────────────────────────
+   Der Fall, für den die Abschnitte bestellt wurden: ein Stapel Buchungssätze,
+   gruppiert nach Satzart. Die Beschreibung der Satzart steht am Kopf, nicht in
+   jeder Zeile — und die Satzart bekommt keine Status-Marke, weil sie keine
+   Kritikalitätsstufe hat (V6). */
+
+interface BatchRow {
+  id: string;
+  beleg: string;
+  konto: string;
+  kontoName: string;
+  text: string;
+  amount: number;
+}
+
+const BATCH: Array<[string, string, string, string, string, number]> = [
+  ["e-1", "RE-2026-4471", "8400", "Erlöse 19 % USt", "Beratung August", 4200],
+  ["e-2", "RE-2026-4472", "8400", "Erlöse 19 % USt", "Schulung Musterfirma", 1850],
+  ["a-1", "ER-8812", "6300", "Sonstige betriebliche Aufwendungen", "Wartung Klimaanlage", 1800],
+  ["a-2", "ER-8813", "6310", "Miete", "Miete Musterstraße 12, August", 1450],
+  ["a-3", "ER-8814", "6805", "Telefon", "Mobilfunk und Festnetz", 89],
+  ["b-1", "KA-09-114", "1200", "Bank", "Zahlungseingang Musterfirma GmbH", 4998],
+  ["b-2", "KA-09-115", "1200", "Bank", "Lastschrift Stadtwerke", 213.4],
+  ["k-1", "KB-09-31", "1600", "Kasse", "Porto und Verpackung", 24.9],
+  ["s-1", "UB-09-3", "1370", "Durchlaufende Posten", "Umbuchung Geldtransit", 500],
+];
+
+const BATCH_ROWS: BatchRow[] = BATCH.map(([id, beleg, konto, kontoName, text, amount]) => ({
+  id,
+  beleg,
+  konto,
+  kontoName,
+  text,
+  amount,
+}));
+
+/** Die fünf Satzarten mit ihrer Beschreibung — beides kommt aus der App. */
+const SATZARTEN: Array<[string, string, string]> = [
+  ["erloes", "Erlös", "Umsatz aus Lieferung oder Leistung"],
+  ["aufwand", "Aufwand", "Betrieblicher Aufwand mit Beleg"],
+  ["bank", "Bank", "Bewegung auf einem Zahlungskonto"],
+  ["kasse", "Kasse", "Barbewegung mit Kassenbeleg"],
+  ["sachkonto", "Sachkonto", "Umbuchung ohne Zahlung"],
+];
+
+const PREFIX: Record<string, string> = {
+  erloes: "e",
+  aufwand: "a",
+  bank: "b",
+  kasse: "k",
+  sachkonto: "s",
+};
+
+const BATCH_COLUMNS: ColumnDef<BatchRow>[] = [
+  { key: "beleg", header: "Belegfeld 1", width: "140px", cell: (r) => <MonoCell value={r.beleg} /> },
+  { key: "konto", header: "Konto", width: "90px", cell: (r) => <MonoCell value={r.konto} /> },
+  {
+    key: "text",
+    header: "Buchungstext",
+    cell: (r) => (
+      <span className="v2main">
+        {r.text}
+        <span className="v2sub"> · {r.kontoName}</span>
+      </span>
+    ),
+  },
+  {
+    key: "amount",
+    header: "Umsatz",
+    width: "130px",
+    align: "end",
+    cell: (r) => <AmountCell value={r.amount} currency="EUR" />,
+  },
+];
+
+/**
+ * Im Einsatz: Schritt 3 der Stapelabnahme (F186). Neun Sätze in fünf
+ * Abschnitten — die Sachbearbeiterin sieht „Aufwand · 3 · 3.339,00 €" und
+ * weiß, worauf sie schaut, bevor sie eine einzelne Zeile liest.
+ *
+ * Die Beschreibung der Satzart steht **einmal** am Kopf. In jeder Zeile wäre
+ * sie neunmal dasselbe Wort, und als Status-Marke wäre sie eine Aussage, die
+ * es nicht gibt: Aufwand ist nicht dringender als Erlös.
+ */
+export const GroupsInUse: Story = {
+  render: () => (
+    <DataTable<BatchRow>
+      groups={SATZARTEN.map(([key, label, note]) => {
+        const rows = BATCH_ROWS.filter((r) => r.id.startsWith(`${PREFIX[key]}-`));
+        const sum = rows.reduce((n, r) => n + r.amount, 0);
+        return {
+          key,
+          label,
+          labelAside: note,
+          rows,
+          aside: `${rows.length} · ${formatAmount(sum, "EUR")}`,
+          emptyHint: `Kein Satz der Art ${label} in diesem Stapel.`,
+        };
+      })}
+      columns={BATCH_COLUMNS}
+      rowKey={(r) => r.id}
+      head={{
+        title: "Stapel 09/2026",
+        sub: "9 Buchungssätze · 14.125,30 €",
+        actions: <Button variant="primary" size="sm">Stapel festschreiben</Button>,
+      }}
+      next={<TextButton href="#datev">Als DATEV-Datei ausgeben</TextButton>}
+    />
   ),
 };

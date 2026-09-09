@@ -91,6 +91,14 @@ export interface SelectionApi {
   /** Shift-click: add everything between the anchor and this key, in row order. */
   range: (key: string) => void;
   setAll: (checked: boolean) => void;
+  /**
+   * Switch **exactly these** keys — the section box of a grouped table (0149).
+   *
+   * Not `toggle` in a loop: that would move the shift-anchor once per row and
+   * leave it on the last one, so the next shift-click would take a range
+   * nobody drew.
+   */
+  setMany: (keys: readonly string[], checked: boolean) => void;
   clear: () => void;
   /** The keys of this page in row order — the head box and `range` read it. */
   order: readonly string[];
@@ -165,6 +173,17 @@ export function SelectionScope({
     setAll: (checked) => {
       anchor.current = null;
       setKeys(checked ? new Set(order) : new Set<string>());
+    },
+    setMany: (which, checked) => {
+      anchor.current = null;
+      setKeys((prev) => {
+        const next = new Set(prev);
+        for (const k of which) {
+          if (checked) next.add(k);
+          else next.delete(k);
+        }
+        return next;
+      });
     },
     clear: () => {
       anchor.current = null;
@@ -408,6 +427,42 @@ export function SelectionScopeBar({
           <BulkButton action={a} keys={keys} onDone={clear} />
         </span>
       ))}
+    />
+  );
+}
+
+/**
+ * @when    The head cell of a section in a grouped table: chooses exactly the rows of that section, partial selection as `indeterminate`.
+ * @instead Every row of the page → SelectAllCell. One row → SelectRowCell.
+ */
+export function SelectGroupCell({
+  rowKeys,
+  label,
+}: {
+  /** The keys of this section, in row order. */
+  rowKeys: readonly string[];
+  /** Names the section — „Aufwand auswählen", never „Alle" (T3). */
+  label: string;
+}) {
+  const { keys, setMany } = useSelection();
+  const box = useRef<HTMLInputElement>(null);
+  const all = rowKeys.length > 0 && rowKeys.every((k) => keys.has(k));
+  const some = !all && rowKeys.some((k) => keys.has(k));
+  // `indeterminate` is a property, not an attribute — React cannot set it.
+  useEffect(() => {
+    if (box.current) box.current.indeterminate = some;
+  }, [some]);
+  return (
+    <input
+      ref={box}
+      type="checkbox"
+      className="v2check"
+      checked={all}
+      // An empty section has nothing to choose — the same rule as in the head.
+      disabled={rowKeys.length === 0}
+      aria-label={label}
+      onChange={(e) => setMany(rowKeys, e.target.checked)}
+      onClick={(e) => e.stopPropagation()}
     />
   );
 }

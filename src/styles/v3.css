@@ -104,13 +104,17 @@
    sonst zur schrumpfenden anonymen Tabellenzelle. Gemessen war das
    Fehler-Feld 707 px breit in einer 1400-px-Tabelle und die Lade-Zeile 0 px.
    Die Zeile mit einer spannenden Zelle wird deshalb selbst ein Block. */
-.v2tbl tr:has(> td[colspan]) { display: block; }
+.v2tbl tr:has(> td[colspan]),
+/* Seit 0149 ist die Gruppenüberschrift ein `th[colspan]` — dieselbe Sonderzeile,
+   nur mit der Rolle, die sie immer hatte. Ohne diesen Selektor fiele sie in die
+   anonyme Tabellenzelle zurück, die dieser Umbau gerade befreit hat. */
+.v2tbl tr:has(> th[colspan]) { display: block; }
 /* Auch diese in `:where()`: mit 0-2-1 schlug sie jede Klassenregel — und zwar
    genau an den Sonderzellen, die dieser Umbau befreit hat (`__group`,
    `__empty`, `__detail`, `__error`, `__btxrow__split` stehen alle auf
    `colSpan`). Bewirkt hat sie dabei nichts: die Breiten sind mit und ohne sie
    identisch. Gefunden von der Abnahme des `:where()`-Umbaus, 2026-09-07. */
-:where(.v2tbl td[colspan]) { width: 100%; }
+:where(.v2tbl td[colspan], .v2tbl th[colspan]) { width: 100%; }
 .v2tbl__scroll { overflow-x: auto; }
 .v2tbl__inner { min-width: var(--v2-min, 0); }
 
@@ -190,7 +194,26 @@
   background: var(--color-bg-soft);
   border-top: 1px solid var(--color-border-subtle);
   border-bottom: 1px solid var(--color-border-subtle);
+  /* Seit 0149 ein `th`: der Browser zentriert das von sich aus, und zentriert
+     steht hier nichts (V3). */
+  text-align: left;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
 }
+/* Wort links, Zahl rechts — die Zahl rechnet der Aufrufer, die Tabelle stellt
+   sie nur (E2). `tnum`, weil Zahlen untereinander stehen sollen (V3). */
+.v2tbl__grouplabel { display: inline-flex; align-items: baseline; gap: var(--space-2); }
+.v2tbl__groupnote { font-weight: 400; color: var(--color-text-subtle); }
+.v2tbl__groupaside {
+  margin-left: auto;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+/* Die Box der Gruppe steht auf der Grundlinie des Wortes daneben schief —
+   sie ist ein Kästchen, kein Buchstabe. */
+.v2tbl__group > .v2check { align-self: center; }
 
 /* Aufgeklappter Inhalt unter einer Zeile — kein Modal, kein Drawer. Er ist
    jetzt eine eigene Zeile mit einer Zelle über alle Spalten. */

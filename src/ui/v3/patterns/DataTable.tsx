@@ -17,6 +17,7 @@ import { MenuItem, OverflowMenu } from "../primitives/OverflowMenu";
 import { Pagination } from "../primitives/Pagination";
 import {
   SelectAllCell,
+  SelectGroupCell,
   SelectRowCell,
   SelectionScope,
   SelectionScopeBar,
@@ -28,6 +29,7 @@ import {
   CardFoot,
   CardHead,
   EmptyRow,
+  GroupRow,
   HeadRow,
   Row,
   Table,
@@ -197,8 +199,6 @@ export type ListPatch = {
 };
 
 interface DataTableBase<T> {
-  /** The rows of **this page**, already sorted and filtered. */
-  rows: T[];
   columns: ColumnDef<T>[];
   /** Key for React, for the selection and for the fold-out. */
   rowKey: (row: T) => string;
@@ -242,14 +242,6 @@ interface DataTableBase<T> {
    * without it a sortable head stays a plain word and no pager is rendered.
    */
   href?: (patch: ListPatch) => string;
-  /** Zone 5 — the four numbers are `PageResult` without its `items`. */
-  pager?: {
-    page: number;
-    pageSize: number;
-    totalItems: number;
-    totalPages: number;
-    pageSizeOptions?: number[];
-  };
   /** Selection column, head box, bar in zone 1 (I5). */
   selection?: {
     actions: AnyBulkAction[];
@@ -273,11 +265,78 @@ interface DataTableBase<T> {
  * the same time be a link. Whoever needs both gets the chevron as a cell of
  * its own — that is in the backlog of 0057.
  */
+/** Zone 5 — the four numbers are `PageResult` without its `items`. */
+export interface TablePager {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  pageSizeOptions?: number[];
+}
+
+/**
+ * One named section of a grouped table (0149).
+ *
+ * The caller hands over rows that are **already sorted** and figures that are
+ * **already computed** — the table neither sorts nor counts (E2).
+ */
+export interface TableGroup<T> {
+  /** Stable key — also the key of the section. */
+  key: string;
+  /** The word in the head. Normal case, like a column head (A2). */
+  label: string;
+  /** Beside the word: what the classification means (Z4). */
+  labelAside?: ReactNode;
+  rows: readonly T[];
+  /** To the right in the head: a count, a sum — whatever the caller shows. */
+  aside?: ReactNode;
+  /**
+   * What stands there when `rows` is empty.
+   *
+   * Without it an empty section **is not rendered at all**: a heading over
+   * nothing is noise. With it the emptiness is the statement — a section that
+   * says no line of its kind is in this batch is worth a line.
+   */
+  emptyHint?: string;
+}
+
+/**
+ * The two shapes of one table, and with them the two exclusions that used to
+ * live in a sentence.
+ *
+ * **`rows` and `groups` are the discriminant** — one of the two is always
+ * there, and whichever it is decides the rest: a flat list may be paged, a
+ * grouped one may not. A section that runs over two pages is not a section
+ * any more, and an exclusion that only stands in a comment is broken by the
+ * first caller who does not read it (the lesson from 0121/0122 and 0136).
+ *
+ * Measured while building 0149: the exclusion has to be carried by a
+ * **required** prop. Written as an optional `groups?: never` in the flat
+ * branch it becomes a discriminant that no caller sets, and TypeScript then
+ * refuses the `{...(expand ? { expand } : {})}` spread that thirteen list
+ * pages are built on — the branch it picks is always the wrong one.
+ */
+type DataTableShape<T> =
+  | {
+      /** The rows of **this page**, already sorted and filtered. */
+      rows: T[];
+      /** Zone 5 — the page split into pages. */
+      pager?: TablePager;
+      groups?: never;
+    }
+  | {
+      /** Named sections instead of a flat list; each brings its own rows. */
+      groups: readonly TableGroup<T>[];
+      rows?: never;
+      pager?: never;
+    };
+
 export type DataTableProps<T> = DataTableBase<T> &
   (
     | { rowHref?: (row: T) => string; expand?: never }
     | { expand: (row: T) => ReactNode; rowHref?: never }
-  );
+  ) &
+  DataTableShape<T>;
 
 /**
  * @when    A list page: columns, page, sorting over the URL, selection with
@@ -290,6 +349,7 @@ export type DataTableProps<T> = DataTableBase<T> &
 export function DataTable<T>(props: DataTableProps<T>) {
   const {
     rows,
+    groups,
     columns,
     rowKey,
     head,
@@ -309,7 +369,12 @@ export function DataTable<T>(props: DataTableProps<T>) {
     // `props` itself, and here it stood twice and unused (0096 A3, found by
     // `noUnusedLocals`).
     expand,
-  } = props as DataTableBase<T> & { expand?: (row: T) => ReactNode };
+  } = props as DataTableBase<T> & {
+    expand?: (row: T) => ReactNode;
+    rows?: T[];
+    pager?: TablePager;
+    groups?: readonly TableGroup<T>[];
+  };
 
   // One grip track in front for each of selection and chevron, `max-content`
   // behind for the actions — the columns fall back to one share each. The
@@ -343,7 +408,15 @@ export function DataTable<T>(props: DataTableProps<T>) {
     </HeadRow>
   );
 
-  const body = loading ? (
+  // Sections or a flat list — from here on the rest of the card does not care
+  // which of the two it got. `all` is the page in **reading order**, and that
+  // is what the selection has to be counted and shift-clicked in.
+  const all = rows ?? groups?.flatMap((g) => [...g.rows]) ?? [];
+
+  // The four states that stand **instead** of rows, in the one body that the
+  // column head lives in — a state is not a section, and „lädt" split over
+  // five headings would be five statements about one wait.
+  const state = loading ? (
     <TableLoading
       rows={5}
       cols={columns.length}
@@ -352,9 +425,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
     />
   ) : error ? (
     <ErrorRow message={error.message} action={error.retry} />
-  ) : rows.length > 0 ? (
-    rows.map((row) => bodyRow(row, props))
-  ) : filtered ? (
+  ) : all.length > 0 ? null : filtered ? (
     <EmptyRow>
       <EmptyState
         inline
@@ -374,9 +445,21 @@ export function DataTable<T>(props: DataTableProps<T>) {
     </EmptyRow>
   ) : null;
 
+  const body = state ?? (groups ? null : rows?.map((row) => bodyRow(row, props)));
+
+  // A section without rows **is not rendered** — a heading over nothing is
+  // noise. Unless the caller says what its emptiness means: that no line of
+  // this kind is in the batch is a statement, and then the heading carries it.
+  const sections =
+    groups && !state
+      ? groups
+          .filter((g) => g.rows.length > 0 || g.emptyHint)
+          .map((g) => ({ key: g.key, children: section(g, props) }))
+      : undefined;
+
   // Zone 5 only stands under rows: a pager under „nothing here" would be a
   // second statement about the same emptiness.
-  const showPager = !loading && !error && rows.length > 0 && pager && href;
+  const showPager = !loading && !error && all.length > 0 && pager && href;
 
   const card = (
     <Card>
@@ -393,7 +476,12 @@ export function DataTable<T>(props: DataTableProps<T>) {
           )
         }
       />
-      <Table cols={cols} minWidth={minWidth ?? columnsMinWidth(columns)} density={density}>
+      <Table
+        cols={cols}
+        minWidth={minWidth ?? columnsMinWidth(columns)}
+        density={density}
+        {...(sections ? { sections } : {})}
+      >
         {headRow}
         {body}
       </Table>
@@ -418,9 +506,55 @@ export function DataTable<T>(props: DataTableProps<T>) {
   // `key` on the page: a page change empties the selection, because „12
   // ausgewählt" can only mean twelve of the rows in front of you (E1).
   return (
-    <SelectionScope key={pager?.page ?? 0} order={rows.map(rowKey)}>
+    <SelectionScope key={pager?.page ?? 0} order={all.map(rowKey)}>
       {card}
     </SelectionScope>
+  );
+}
+
+/**
+ * One section: its heading, then its rows (0149).
+ *
+ * The heading is a **row of its own over the full width**, not bold type in
+ * column one — and it carries what belongs to the section as a whole: the
+ * word, what the word means (`labelAside`, Z4), the figure the caller already
+ * computed (`aside`, E2) and, where the table can be picked from, the box for
+ * exactly these rows.
+ */
+function section<T>(group: TableGroup<T>, props: DataTableProps<T>): ReactNode {
+  const { rowKey, selection } = props;
+  return (
+    <>
+      <GroupRow
+        {...(selection
+          ? {
+              select: (
+                <SelectGroupCell
+                  rowKeys={group.rows.map(rowKey)}
+                  // The section names itself — „Alle auswählen" would be the
+                  // head box, and there are five of these on one page (T3).
+                  label={`${group.label} auswählen`}
+                />
+              ),
+            }
+          : {})}
+      >
+        <span className="v2tbl__grouplabel">
+          {group.label}
+          {group.labelAside ? (
+            <span className="v2tbl__groupnote">{group.labelAside}</span>
+          ) : null}
+        </span>
+        {group.aside ? <span className="v2tbl__groupaside">{group.aside}</span> : null}
+      </GroupRow>
+      {group.rows.length > 0 ? (
+        group.rows.map((row) => bodyRow(row, props))
+      ) : (
+        <EmptyRow>
+          <span className="v2muted">{group.emptyHint}</span>
+        </EmptyRow>
+      )}
+    </>
   );
 }
 
