@@ -12,7 +12,27 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-Nichts.
+**F184 — die Belegruppen heißen englisch.** In `ludwig/app` wird
+`datev-export/domain/beleggruppen.ts` zu `document-group.ts`: `DocumentGroup`,
+`classifyDocumentGroup`, `sortEntriesByDocumentGroup`, `DOCUMENT_GROUP_RANK`
+und `DOCUMENT_GROUP_LABEL`, die Werte englisch (`outgoing_invoices |
+incoming_invoices | cash | bank | general_ledger`). Gemeldet von
+`ludwig-manager` am 2026-09-09; der nächste Lauf holt es.
+
+**Spiegelstand `edb126d0`.** `ludwig-manager` meldet die Typ-Box-Stufe auf
+staging (`InvoiceSidebar`, `GlanceCard`, `ContractDetail` weg, `tabs.ts`
+committet). Ein Lauf darauf ist **nicht** freigegeben — die Freigabe holt der
+Owner, nicht eine Nachbarsitzung.
+
+**Befund am Skript (offen): `sync-ludwig.sh` spiegelt aus dem Arbeitsbaum.**
+`rsync` nimmt, was drüben gerade liegt — beim Lauf vom 2026-09-09 waren das
+uncommittete Änderungen an `source-docs/domain/tabs.ts`,
+`invoices/domain/invoice.ts`, `bank-transactions/domain/payment-account-options.ts`
+und `source-document-vm.ts`. Der Spiegel trüge dann eine Stand-Notiz, die für
+seinen Inhalt nicht stimmt. Vorschlag von `ludwig-manager`, hier übernommen:
+aus `HEAD` spiegeln (`git -C <app> archive <sha> <pfade>`) oder den Lauf
+abbrechen, solange der Baum drüben nicht sauber ist. Fällig, bevor der nächste
+Lauf läuft.
 
 ## Erledigt mit dem zweiten Lauf vom 2026-09-09 (App `9bbe16c4`)
 

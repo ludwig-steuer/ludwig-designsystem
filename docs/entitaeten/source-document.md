@@ -460,6 +460,23 @@ Beleg `Nutzer` in den Tabellen, nicht als Annahme.
    Der Vertrags-Editor bleibt 0073, bis die Extraktion Zeilen schreibt: ohne
    einen einzigen Vertrag im Bestand hätte die Abnahme keinen Nachweis.
 
+## Nachtrag 2026-09-10 — drei Felder aus der abgelösten `GlanceCard`
+
+`ludwig-manager` meldet aus der Ablösung (App-Stufe `edb126d0`, `InvoiceSidebar`,
+`GlanceCard` und `ContractDetail` sind drüben weg): die alte `GlanceCard` zeigte
+drei Werte, die die Registry-Ausprägung `invoice` heute **nicht** führt. In der
+App stehen sie jetzt nur noch im Reiter Rohdaten; nachgebaut wird dort nichts.
+
+| Wert | Warum er nicht in der Registry steht | Was dafür spricht, ihn aufzunehmen |
+|---|---|---|
+| Personenkonto des Gegenparts (DATEV-Kontonummer) | Er gehört dem Geschäftspartner, nicht dem Beleg — die Nummer steht am Partner (0139–0143) | Beim Buchen ist er die Frage: „auf welches Konto?" — er wäre ein Verweis, kein eigener Rang |
+| USt-IdNr. des **Empfängers** | Die Registry führt nur die des Ausstellers | Bei innergemeinschaftlichen Rechnungen ist der Empfänger die prüfrelevante Seite |
+| Umrechnungskurs samt Kursdatum | Die Registry zeigt nur „Original (CHF) 1.234,00" | Ohne Kurs ist der Eurobetrag nicht nachvollziehbar |
+
+**Entschieden wird hier, nicht in der App.** Bis dahin gilt: kein Rang, keine
+Zeile. Für eine Aufnahme braucht es je Wert einen Füllgrad aus §3 — ein Feld,
+das in 4 % der Rechnungen steht, ist kein Fakt der Karte.
+
 ## Prüfung
 
 Zweiter Agent, 2026-09-04, gegen Skill `entitaet-analysieren` §5–§9. Quellen:
