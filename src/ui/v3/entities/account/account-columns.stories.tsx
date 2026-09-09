@@ -3,12 +3,11 @@ import { Fragment } from "react";
 import {
   ACCOUNT_LIST_COLUMNS,
   accountColumns,
-  accountMinWidth,
   accountTracks,
   type AccountColumn,
 } from "./account-columns";
 import { ACCOUNT_CLASS_LABEL, type AccountRow } from "@/ludwig/modules/accounts/domain/account";
-import { DataTable } from "../../patterns/DataTable";
+import { columnsMinWidth, DataTable } from "../../patterns/DataTable";
 import { FilterBar } from "../../primitives/FilterBar";
 import { Field, Input, Select } from "../../primitives/Form";
 import { KpiGrid, KpiTile } from "../../primitives/KpiTile";
@@ -74,7 +73,7 @@ export const Filled: Story = {
           columns={cols}
           rowKey={(a) => a.key}
           head={{ title: "Konten 2026", sub: "Musterbau GmbH · nur bebuchte · 6.212 von 41.570" }}
-          minWidth={accountMinWidth(cols)}
+          minWidth={columnsMinWidth(cols)}
           sort={{ key: "account_number", dir: "asc" }}
           href={listHref}
           pager={{ ...PAGER, totalItems: 6212, totalPages: 125 }}
@@ -112,7 +111,7 @@ export const Catalog: Story = {
           columns={cols}
           rowKey={(a) => a.key}
           head={{ title: "Alle Konten", sub: "Mandant + SKR-Katalog (SKR03)" }}
-          minWidth={accountMinWidth(cols)}
+          minWidth={columnsMinWidth(cols)}
           empty={{ title: "Kein Konto." }}
         />
       </div>
@@ -144,7 +143,7 @@ export const Grouped: Story = {
       <div style={{ maxWidth: 1300 }}>
         <Card>
           <CardHead title="Konten 2026" sub="nach Klasse · nur bebuchte" />
-          <Table cols={accountTracks(cols)} minWidth={accountMinWidth(cols)}>
+          <Table cols={accountTracks(cols)} minWidth={columnsMinWidth(cols)}>
             <HeadRow>
               {cols.map((c) => (
                 // `aria-sort` und der ausgeschriebene Name gehören dazu, nicht
@@ -218,7 +217,7 @@ export const Personal: Story = {
           columns={cols}
           rowKey={(a) => a.key}
           head={{ title: "Personenkonten", sub: "Debitoren und Kreditoren" }}
-          minWidth={accountMinWidth(cols)}
+          minWidth={columnsMinWidth(cols)}
           empty={{ title: "Kein Personenkonto." }}
         />
       </div>
@@ -242,7 +241,7 @@ export const EmptyCases: Story = {
           columns={cols}
           rowKey={(a) => a.key}
           head={{ title: "Konten 2026", sub: "Bestand" }}
-          minWidth={accountMinWidth(cols)}
+          minWidth={columnsMinWidth(cols)}
           empty={{
             title: "In diesem Wirtschaftsjahr gibt es keinen Kontenrahmen.",
             description: "Sobald der erste DATEV-Import läuft, stehen die Konten hier.",
@@ -253,7 +252,7 @@ export const EmptyCases: Story = {
           columns={cols}
           rowKey={(a) => a.key}
           head={{ title: "Konten 2026", sub: "gefiltert" }}
-          minWidth={accountMinWidth(cols)}
+          minWidth={columnsMinWidth(cols)}
           filtered={{ summary: "Erlöse · nur bebuchte", resetHref: "#alle" }}
         />
       </div>
@@ -301,7 +300,7 @@ export const InUse: Story = {
           columns={cols}
           rowKey={(a) => a.key}
           head={{ title: "Konten 2026", sub: "nur bebuchte · 6.212 von 41.570" }}
-          minWidth={accountMinWidth(cols)}
+          minWidth={columnsMinWidth(cols)}
           sort={{ key: "usage_booking_count", dir: "desc" }}
           href={listHref}
           pager={{ ...PAGER, totalItems: 6212, totalPages: 125 }}

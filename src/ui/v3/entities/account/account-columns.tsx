@@ -286,25 +286,3 @@ export function accountTracks(columns: ColumnDef<AccountRow>[]): string {
   return columns.map((c) => c.width ?? "minmax(0, 1fr)").join(" ");
 }
 
-/**
- * The width below which the table scrolls instead of cutting a column off.
- * Fixed tracks plus the floor of the flexible one, the gutters between them
- * and the card padding (12px 18px — 36, measured, not the 70 an earlier note
- * in this set claimed).
- *
- * @when    A chart of accounts is built and needs its `minWidth`.
- * @instead A set whose columns never change → write the number down.
- */
-export function accountMinWidth(columns: ColumnDef<AccountRow>[]): number {
-  const GUTTER = 10;
-  const PADDING = 36;
-  const floor = (width: string | undefined): number => {
-    if (!width) return 0;
-    const min = /minmax\(\s*(\d+)px/.exec(width);
-    if (min?.[1]) return Number(min[1]);
-    const px = /^(\d+)px$/.exec(width.trim());
-    return px?.[1] ? Number(px[1]) : 0;
-  };
-  const tracks = columns.reduce((sum, c) => sum + floor(c.width), 0);
-  return tracks + GUTTER * Math.max(0, columns.length - 1) + PADDING;
-}

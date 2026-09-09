@@ -212,7 +212,6 @@ interface DataTableBase<T> {
   };
   /** Row measure (E9) — the page decides, not the reader. */
   density?: TableDensity;
-  /** From where it scrolls horizontally instead of squeezing. */
   /**
    * The width below which the table scrolls instead of squeezing.
    *

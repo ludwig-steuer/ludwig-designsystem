@@ -280,13 +280,13 @@ export const WithProcess: Story = {
       { key: "uebergeben", label: "Übergeben", sub: "Übertragung", states: ["exporting", "exported"], status: "pending" as const },
       { key: "nachlesen", label: "Nachlesen", sub: "DATEV", states: ["mirrored", "reconciled"], status: "pending" as const },
     ];
-    const kopf = (mitBild: boolean) => (
+    const head = (withPicture: boolean) => (
       <EntityHeader
         icon={<Layers size={20} strokeWidth={1.5} />}
         overline="Stapel · 2026-08-A"
         title="Buchungsstapel August 2026"
         status={<StatusBadge axis="sachverhalt" status="needs_clarification" showIcon={false} />}
-        {...(mitBild
+        {...(withPicture
           ? {
               process: (
                 <ProcessStepper
@@ -304,8 +304,8 @@ export const WithProcess: Story = {
     );
     return (
       <div style={{ maxWidth: 940, display: "grid", gap: 32 }}>
-        {kopf(true)}
-        {kopf(false)}
+        {head(true)}
+        {head(false)}
       </div>
     );
   },

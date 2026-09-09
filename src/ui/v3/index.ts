@@ -498,7 +498,6 @@ export {
 export {
   accountColumns,
   accountTracks,
-  accountMinWidth,
   ACCOUNT_LIST_COLUMNS,
   ACCOUNT_CATALOG_COLUMNS,
   type AccountColumn,
