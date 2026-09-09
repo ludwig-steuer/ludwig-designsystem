@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **entschieden 2026-09-09 (Owner)** — Weg 2 jetzt, Weg 1 mit 0127; die Folgeaufgaben stehen unten |
+| Status | **Weg 2 gebaut 2026-09-09** — die Slot-Namen sind vereinheitlicht; Weg 1 (der gemeinsame Rahmen) bleibt an 0127 |
 | Stufe | `patterns/` (falls gebaut) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: der Rahmen kennt keine Entität, nur Slots |
 | Quelle | `docs/detailseiten-standard.md` D3/D5 |
@@ -93,3 +93,39 @@ Diese Aufgabe endet nicht mit einer Komponente, sondern mit einem Entscheid.
       gemessenen Breiten als Kriterium
 - [ ] `docs/detailseiten-standard.md` §1.1 nennt danach genau einen Satz
       Slot-Namen, und die Rahmen tragen ihn
+
+## Weg 2 gebaut 2026-09-09 — und die Vorlage hatte zwei Fehler
+
+`nextAction` (0050) und `banner` (0071) heißen jetzt beide **`signal`**. Das
+war Weg 2. Nur ist er kleiner ausgefallen als diese Aufgabe behauptet hat,
+und der Grund lohnt das Nachlesen.
+
+**Erstens: `LedgerAccountView` hat gar keinen Signal-Slot.** Diese Aufgabe
+zählte `summary` + `chart` als „derselbe dritte Slot unter einem dritten
+Namen". Falsch — beide sind **Inhalt**: `summary` ist Rang 2 („wie viel liegt
+darauf", DATEV führt, Ludwig ist die Abweichung), `chart` ist Rang 3 („ist das
+viel oder wenig für dieses Konto"). Sie stehen zwischen Kopf und Reitern, wo
+sonst das Signal steht, und *das* hat mich getäuscht.
+
+Der Kontoseite fehlt der Slot also, statt ihn anders zu nennen. Ob sie einen
+braucht, ist eine Frage ans Seitenprofil und nicht an den Rahmen — hier wird
+keiner erfunden (A12).
+
+**Zweitens: „`aside` überall" war schon erfüllt**, und wo es fehlt, mit Grund.
+`CaseDetailView` und `LedgerAccountView` haben es, `SourceDocumentView` nicht
+— die Belegseite stellt Original und Fakten nebeneinander **in der Karte**,
+nicht als Master-Detail um den Körper herum. Ein `aside` dort wäre eine
+Fähigkeit, die niemand bestellt hat.
+
+**Was von Weg 2 übrig blieb: zwei Umbenennungen.** Das ist wenig, und es ist
+trotzdem richtig — eine Seite, die von einer Entität zur nächsten wechselt,
+soll nicht neu lernen müssen, wie die dritte Zeile heißt. Beide Props tragen
+jetzt den Satz „hieß bis 0138 …" an sich, damit niemand die alte Fassung
+sucht.
+
+**Für Weg 1 heißt das:** der gemeinsame Rahmen hätte weniger zu vereinheitlichen
+als gedacht — die drei unterscheiden sich in `chart` (nur Konto), `aside` (zwei
+von drei) und den gemessenen Randspaltenbreiten (460 px gegen 960 px). Ob das
+ein Rahmen mit drei Ausprägungen ist oder drei Rahmen mit einem Namensschema,
+entscheidet weiter **0127** — mit einem vierten Fall in der Hand statt mit
+einer Ähnlichkeit.

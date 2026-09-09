@@ -81,7 +81,7 @@ export function BelegSeite({
           {...(actions ? { actions } : {})}
         />
       }
-      {...(signal ? { banner: signal } : {})}
+      {...(signal ? { signal } : {})}
       tabs={<Tabs items={tabs.map((t) => ({ ...t, href: tabHref(t.key) }))} active={tab} ariaLabel="Beleg" />}
     >
       {children}

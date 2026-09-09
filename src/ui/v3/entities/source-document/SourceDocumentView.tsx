@@ -27,7 +27,7 @@ import type { ReactNode } from "react";
 export function SourceDocumentView({
   pager,
   header,
-  banner,
+  signal,
   tabs,
   children,
 }: {
@@ -40,12 +40,18 @@ export function SourceDocumentView({
   /** The document itself (`EntityHeader`, 0048) — rank 1 and 4. */
   header: ReactNode;
   /**
-   * What holds for the whole document and cannot wait for a tab: „wird
-   * eingeordnet" (and that the page refreshes itself), „Einordnung
-   * fehlgeschlagen", the notice of a parent document. Absent → the row
-   * disappears with its spacing, so nothing looks missing.
+   * The **signal** of the whole record: what holds for the whole document and
+   * cannot wait for a tab — „wird eingeordnet" (and that the page refreshes
+   * itself), „Einordnung fehlgeschlagen", a duplicate suspicion. Absent → the
+   * row disappears with its spacing, so nothing looks missing.
+   *
+   * **Exactly one**, never a stack: which one wins is a domain order, not a
+   * question of display (0144, finding L-267).
+   *
+   * Called `banner` until 0138 — same slot, same meaning, one name across the
+   * three detail frames (D3).
    */
-  banner?: ReactNode;
+  signal?: ReactNode;
   /** The tab bar (`Tabs`). Without tabs the row disappears. */
   tabs?: ReactNode;
   /** The content of the active tab — `SourceDocumentCard` sits in the first. */
@@ -55,7 +61,7 @@ export function SourceDocumentView({
     <div className="v2docview">
       {pager ? <div className="v2docview__pager">{pager}</div> : null}
       <div className="v2docview__head">{header}</div>
-      {banner ? <div className="v2docview__banner">{banner}</div> : null}
+      {signal ? <div className="v2docview__banner">{signal}</div> : null}
       {tabs ? <div className="v2docview__tabs">{tabs}</div> : null}
       <div className="v2docview__body">{children}</div>
     </div>

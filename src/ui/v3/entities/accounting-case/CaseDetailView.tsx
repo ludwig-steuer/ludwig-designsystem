@@ -23,7 +23,7 @@ import { MasterDetail } from "../../patterns/MasterDetail";
 export function CaseDetailView({
   pager,
   header,
-  nextAction,
+  signal,
   tabs,
   aside,
   children,
@@ -32,8 +32,16 @@ export function CaseDetailView({
   pager?: ReactNode;
   /** The file itself (`EntityHeader`, 0048). */
   header: ReactNode;
-  /** The one next action (`StatusCallout`, 0049) — absent when the case waits on someone else. */
-  nextAction?: ReactNode;
+  /**
+   * The **signal** of the whole record: the one next action
+   * (`StatusCallout`, 0049) — absent when the case waits on someone else.
+   *
+   * Called `nextAction` until 0138. The name has changed, not the meaning:
+   * three detail frames carried this slot under three names, and the standard
+   * describes them in **one** slot row (D3). A page that moves from one entity
+   * to the next should not have to relearn what the third row is called.
+   */
+  signal?: ReactNode;
   /** The tab bar (`Tabs`, 0049). Without tabs the row disappears. */
   tabs?: ReactNode;
   /** The strand on the left (`CaseTimeline`, 0040). Empty → one column. */
@@ -47,7 +55,7 @@ export function CaseDetailView({
           next action must not look as if something were missing there. */}
       {pager ? <div className="v2cdv__pager">{pager}</div> : null}
       <div className="v2cdv__head">{header}</div>
-      {nextAction ? <div className="v2cdv__next">{nextAction}</div> : null}
+      {signal ? <div className="v2cdv__next">{signal}</div> : null}
       {tabs ? <div className="v2cdv__tabs">{tabs}</div> : null}
       {aside ? (
         // 460 px instead of the default 620: what stands on the right are

@@ -54,11 +54,16 @@ verschieden. Die verbindlichen Namen sind:
 | 4 | **Reiter** | ab zwei Sichten | §5 | `Tabs` |
 | 5 | **Körper** | immer | der aktive Reiter; im ersten die fünf Zonen (§2) | je Layout |
 
-Die drei gebauten Rahmen nennen den dritten Slot dreimal anders
-(`nextAction` · `banner` · `summary`) und tragen doch dieselbe Sorte Inhalt.
-**Verbindlich sind die Namen oben**; ob daraus ein gemeinsamer Rahmen wird,
-entscheidet Aufgabe **0138** — bis dahin nimmt jeder neue Detailrahmen diese
-Namen und begründet jeden zusätzlichen Slot in seiner Spec.
+Der dritte Slot heißt seit **0138** in allen Rahmen, die einen haben,
+`signal` — bis dahin `nextAction` (0050) und `banner` (0071). Die Kontoseite
+(0063) hat **keinen**: ihr `summary` ist der Saldo (Rang 2) und `chart` die
+Einordnung (Rang 3), beide Inhalt und kein Signal. Ob sie eins braucht, ist
+eine Frage an ihr Seitenprofil, nicht an den Rahmen.
+
+**Verbindlich sind die Namen oben.** Ob aus den drei Rahmen einer wird,
+entscheidet **0127** mit einem vierten Fall in der Hand — bis dahin nimmt
+jeder neue Detailrahmen diese Namen und begründet jeden zusätzlichen Slot in
+seiner Spec.
 
 **Ein Slot ohne Inhalt fällt weg — mit seinem Abstand.** So ist es in allen
 drei Rahmen gebaut, und der Grund ist derselbe: eine leere Zeile sieht aus, als

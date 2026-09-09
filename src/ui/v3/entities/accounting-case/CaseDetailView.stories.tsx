@@ -132,7 +132,7 @@ export const Filled: Story = {
       <CaseDetailView
         pager={pager}
         header={head}
-        nextAction={
+        signal={
           <StatusCallout
             tone="warning"
             icon={<FileText size={16} strokeWidth={1.5} />}
@@ -274,7 +274,7 @@ export const InUse: Story = {
       <CaseDetailView
         pager={pager}
         header={head}
-        nextAction={
+        signal={
           <StatusCallout
             tone="warning"
             icon={<FileText size={16} strokeWidth={1.5} />}

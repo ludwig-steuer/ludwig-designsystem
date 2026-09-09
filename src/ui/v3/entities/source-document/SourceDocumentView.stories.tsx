@@ -165,7 +165,7 @@ export const Pending: Story = {
       <SourceDocumentView
         pager={PAGER}
         header={<Head document={SCAN} />}
-        banner={
+        signal={
           <Banner tone="info" title="Wird eingeordnet — die Seite aktualisiert sich selbst">
             Der Beleg ist hochgeladen und wartet auf die Klassifikation. Solange steht
             noch nicht fest, welche Art Beleg das ist.
