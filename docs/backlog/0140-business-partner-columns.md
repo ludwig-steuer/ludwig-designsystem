@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
+| Status | fertig — abgenommen 2026-09-09, am selben Tag nachgearbeitet; die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Kreditor, Debitor, Reifegrad, Verrechnungskonto |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (`geprüft`, 2026-09-09), Abschnitte „Listen" und „Formen" |
@@ -78,6 +78,12 @@ sechsmal von sieben leer stünde.
 | `columns` | `readonly BusinessPartnerColumn[]` | nein | **Welche** Zellen, nicht in welcher Ordnung: die Rangordnung gilt in jeder Form (dieselbe Regel wie bei 0132, dort am 2026-09-08 falsch beschrieben). Vorgabe `PARTNER_LIST_COLUMNS` | `Narrow` |
 
 Dazu die Exporte des Katalogs: `BusinessPartnerColumn` (die Union),
+`BusinessPartnerColumnOptions` (was `businessPartnerColumns()` nimmt — der
+Aufrufer, der die Optionen typisieren will, findet den Namen sonst nur im
+Code),
+`BusinessPartnerColumnOptions` (was `businessPartnerColumns()` nimmt — der
+Aufrufer, der die Optionen typisieren will, findet den Namen sonst nur im
+Code),
 `BusinessPartnerRowData` (was eine Zeile zeigt), `PARTNER_LIST_COLUMNS` (der
 eine benannte Satz), `PARTNER_COLUMN_LABEL`, `businessPartnerTracks()` und
 `businessPartnerColumnOrder()` — der letzte, weil eine von Hand gebaute
@@ -187,4 +193,55 @@ zweite Stelle für dieselbe Auskunft.
 
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| **Fest** | | |
+| `pnpm typecheck` und `pnpm build` grün | beide 2026-09-09 gelaufen, `exit 0` (`tsc --noEmit`; Storybook-Build nach `storybook-static`) | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `business-partner-columns.tsx` + `business-partner-columns.stories.tsx`, Titel `v3/Entitäten/Geschäftspartner/businessPartnerColumns` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `businessPartnerColumns` (`:175–179`), `businessPartnerColumnOrder` (`:107–111`), `businessPartnerTracks` (`:120–123`); die vier Typ-/Konstanten-Exporte tragen erklärendes JSDoc | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `PARTNER_COLUMN_LABEL` sind Spaltenköpfe, keine Werte-Map; der Reifegrad geht über `StatusBadge axis="partner"` (`:236`), Achse in `status-registry.ts:2187` und `:2619–2629`. px nur in `TRACK` als `grid-template-columns` — dieselbe Stelle wie `account-columns.tsx:136 ff.` | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | fünf von fünf: `Filled`, `Narrow`, `States`, `Edges`, `InUse`; lädt/Fehler/leer sind in der Spec `DataTable` und 0128 zugeschlagen | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | ohne Browser durchgegangen; die zwei App-Punkte („ersetzt ihr v1-Gegenstück", „in §11 auf v2 gesetzt") übersprungen (backlog/README) | ✓ |
+| Im Browser angesehen (Storybook) | schlanke Abnahme (Owner-Entscheid 2026-09-08): Pixel, Abstände und Farbwirkung gehen an 0119; kein Storybook gestartet | vertagt auf 0119 |
+| **Schnittstelle Zeichen für Zeichen** | | |
+| Drei Props, Name · Typ · Pflicht | `BusinessPartnerColumnOptions` `:150–156` — `partnerHref?`, `accountHref?`, `columns?: readonly BusinessPartnerColumn[]`: alle drei wie die Tabelle | ✓ |
+| Exporte vollständig genannt | die Spec nennt sechs plus `businessPartnerColumns()`. Die Datei exportiert **acht**: es fehlt `BusinessPartnerColumnOptions` (`:150`), die auch im Barrel steht (`index.ts:476`) | ✗ |
+| **Variabel** | | |
+| Rang 1 durch `BusinessPartnerCell` | `:193–199`; `grep -n legalName business-partner-columns.tsx` findet nur `:139` (Typ-Ausschnitt) und `:195` (Übergabe an die Zelle) | ✓ |
+| **Keine** Spalte mit einem Wort für die Rolle; die drei Kontospalten tragen sie | `PARTNER_ROLE_LABEL` wird in `src/ui` **nirgends** benutzt (grep → 0 außerhalb der Domäne). Die Kodierung ist vollständig: Story `Filled` Zeile 1 nur Kreditor, Zeile 2 nur Debitor, Zeile 3 beide (`10007` neben `70001`), Zeile 4 nur Verrechnung (`1360 · 1361` = Abrechner), Zeile 5 gar keins. Damit sind alle drei `PARTNER_ROLES` plus der Abrechner unterscheidbar | ✓ |
+| Leere Kontonummer bleibt leer | `accountCell()` gibt `null` zurück (`:169`) statt durch `MonoCell`s Gedankenstrich-Zweig (`Cells.tsx:222`) zu gehen — der Kommentar `:158–164` nennt genau diesen Grund; `Filled` Zeile 5 | ✓ |
+| `usageBookingCount: 0` steht als **0** | `formatCount()` (`:246`, `format.ts:83–85`) über `Intl.NumberFormat`; Stories `Edges` und `InUse` | ✓ |
+| Zahlen rechts mit `tnum`, Text links, nichts zentriert | `align: "end"` nur an `bookings` (`:242`) → `DataTable.tsx:410`/`:481` setzen `v2num`, `v3.css:215` (`text-align: right; font-variant-numeric: tabular-nums`). Kein `center` in der Datei | ✓ |
+| `columns` wählt aus und ordnet **nicht** um | `businessPartnerColumnOrder()` `:112–117` filtert `ORDER`; Kopf, Spuren und Zellen gehen alle drei durch dieselbe Funktion (`:127`, `:264`). Story `Narrow` übergibt absichtlich verdreht | ✓ |
+| Keine lokale Map für das USt-Profil | `grep -n domestic_ business-partner-columns.tsx` → 0 | ✓ |
+| Ersetzt die rohe `<table>` in `partners/page.tsx` samt `AccountCell` und `ClearingCell` | Migrationsschritt in `ludwig/app` (backlog/README) | offen (App) |
+
+**Offen (2026-09-09):** ein Punkt — `BusinessPartnerColumnOptions` steht im
+Code und im Barrel, aber nicht in der Aufzählung der Exporte. Eine Zeile in der
+Schnittstelle genügt.
+
+**Hinweis ohne Kriterium:** `ORDER` (`:43–52`) und `PARTNER_LIST_COLUMNS`
+(`:66–75`) sind heute zwei buchstabengleiche Achtlisten. Wer eine Spalte
+ergänzt, muss beide anfassen, und der Typcheck sagt nichts — dieselbe Sorte
+zweite Wahrheit, die der Bau bei `NUMERIC`/`SORTABLE` gerade entfernt hat.
+`PARTNER_LIST_COLUMNS` könnte `ORDER` sein, solange es nur einen Satz gibt.
+
+Das Kriterium „offen (App)" hat **keine** Zeile in `docs/befunde-app.md`,
+Abschnitt E — dort fehlt die ganze Geschäftspartner-Familie (0139–0143).
+
+## Nacharbeit zur Abnahme, 2026-09-09
+
+Ein Mangel und ein Hinweis, und der Hinweis war der wertvollere.
+
+**M1 — `BusinessPartnerColumnOptions` fehlte in der Aufzählung der Exporte.**
+Nachgetragen. Wer die Optionen typisieren will, fand den Namen sonst nur im
+Code.
+
+**Der Hinweis ohne Kriterium: `ORDER` und `PARTNER_LIST_COLUMNS` waren zwei
+buchstabengleiche Achtlisten.** Wer eine Spalte ergänzt, hätte beide anfassen
+müssen, und der Typcheck hätte geschwiegen — dieselbe zweite Wahrheit, die der
+Bau bei `NUMERIC`/`SORTABLE` gerade entfernt hatte, zwanzig Zeilen weiter oben
+wieder aufgebaut. Jetzt **ist** `PARTNER_LIST_COLUMNS` die Liste `ORDER`; ein
+zweiter Satz, der weniger zeigt, wählt daraus aus.
+
+Dass die Abnahme das ohne Kriterium gefunden hat, ist der Grund, warum sie ein
+anderer machen muss als der Bau: mir ist es beim Schreiben nicht aufgefallen,
+obwohl ich denselben Fehler im selben Vormittag schon einmal behoben hatte.

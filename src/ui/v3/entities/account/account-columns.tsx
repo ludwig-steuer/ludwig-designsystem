@@ -10,6 +10,7 @@ import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { MonoCell } from "../../primitives/Cells";
 import { Link } from "../../primitives/Link";
+import { BusinessPartnerCell } from "../business-partner/BusinessPartner";
 import { Time } from "../../primitives/Time";
 
 /**
@@ -217,17 +218,11 @@ export function accountColumns({
         // und Beteiligungs GmbH & Co. KG" is 49 characters and drove the row
         // to 67 px at **every** width. The track stays 200 px, the row does
         // not grow.
-        return (
-          <span className="v2trunc" title={name}>
-            {to ? (
-              <Link className="v2link" href={to}>
-                {name}
-              </Link>
-            ) : (
-              name
-            )}
-          </span>
-        );
+        // The cell (0139), so a partner name is written the same way here, in
+        // the case facts and in the account facts. It brings its own cut with
+        // the whole value in the `title` — the 200 px track and the 47 px row
+        // stay, because the name is still one line that cannot grow.
+        return <BusinessPartnerCell name={name} {...(to ? { href: to } : {})} />;
       },
     },
     origin: {

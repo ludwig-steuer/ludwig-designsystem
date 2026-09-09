@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
+| Status | fertig — abgenommen 2026-09-09, am selben Tag nachgearbeitet; die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Personenkonto, Sachverhalt, Buchungsverhalten |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (`geprüft`, 2026-09-09), Abschnitt „Formen" und **Offene Frage 3, vom Owner am 2026-09-09 beantwortet** |
@@ -77,6 +77,10 @@ den Fall, dass keiner der drei Abrisse die Frage war.
 | `renderBookingBehaviour` | `() => ReactNode` | nein | Der dritte Abriss. Fehlt er, fehlt der Abriss | `WithBehaviour` |
 | `accountHref` | `(accountNumber: string) => string` | nein | Weg zum Kontoblatt, in Fakten und Kontenliste | `Filled` |
 
+Dazu ein Export neben der Komponente: **`PartnerTab`** — die Union
+`"accounts" | "cases" | "bookings"`, die `tabHref` entgegennimmt. Wer den Weg
+baut, will sie importieren statt abschreiben.
+
 **Kann bewusst nicht:**
 
 - **Alles zeigen.** Belege (57 Partner im ganzen Bestand), Buchungssätze (94)
@@ -97,7 +101,7 @@ den Fall, dass keiner der drei Abrisse die Frage war.
 | `WithBehaviour` | Mit `renderBookingBehaviour`: der dritte Abriss steht; ohne die Prop steht er nicht — beide nebeneinander |
 | `Sparse` | Der häufigste Fall: ein Konto, kein Sachverhalt, kein Verhalten. **Ein** Abriss, nicht drei leere |
 | `Roundtrip` | `useState` über `open`; `Esc` schließt, der Fokus kehrt zum Auslöser zurück (V10) |
-| `InUse` | Aus einer `CaseFacts`-Zeile aufgegangen — die häufigste der fünf Stellen |
+| `InUse` | Aus einer `CaseFacts`-Zeile aufgegangen — die häufigste der fünf Stellen. Der Sachverhalt bleibt stehen, der Partner legt sich daneben |
 
 Ausgelassen mit Grund: **lädt** und **Fehler** — der Drawer zeigt, was er
 bekommt; wer nachlädt, ist der Aufrufer (Präzedenz `AccountDrawer` 0068).
@@ -130,11 +134,11 @@ Variabel (aus dieser Spec):
       (`WithBehaviour`, vier Ziele im DOM — **nicht** `Filled`: dort fehlt der
       dritte Abriss mangels Ableitung, und das ist der Regelfall)
 - [ ] Ein Abriss ohne Deckung entfällt **ganz** — keine leere Karte, keine
-      Überschrift (`Sparse`: ein Abriss; `WithoutAccounts`: keiner)
+      Überschrift (`Sparse`: ein Abriss; `WithoutAccounts`: **keiner** — die Story hat seit der Nacharbeit auch keinen `caseCount`)
 - [ ] Die Sachverhalte stehen als **Zahl mit Weg**, nicht als Liste (D15,
       `p50 1`) — `Filled`
 - [ ] Ohne `renderBookingBehaviour` gibt es den dritten Abriss nicht
-      (`WithBehaviour`, beide Fassungen nebeneinander)
+      (`WithBehaviour` zeigt ihn, `Filled` ist die Gegenprobe ohne ihn)
 - [ ] `Esc` schließt, der Fokus kehrt zum Auslöser zurück (`Roundtrip`, V10)
 - [ ] Ersetzt den Sprung auf `/partners/[partnerId]` an den fünf genannten
       Stellen ohne Funktionsverlust
@@ -174,4 +178,70 @@ den Drawer liest, soll wissen, warum er vier Ziele hat und nicht eins.
 
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| **Fest** | | |
+| `pnpm typecheck` und `pnpm build` grün | beide 2026-09-09 gelaufen, `exit 0` (`tsc --noEmit`; Storybook-Build nach `storybook-static`) | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `BusinessPartnerDrawer.tsx` + `BusinessPartnerDrawer.stories.tsx`, Titel `v3/Entitäten/Geschäftspartner/BusinessPartnerDrawer` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `BusinessPartnerDrawer` (`:68–71`); `PartnerTab` (`:38`) trägt einen erklärenden Einzeiler | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `.v2bpdrawer*` in `v3.css:3896–3898` nur über Tokens; px nur als `grid-template-columns` der Kontenliste (`:140`), wie in jeder anderen `Table`-Verwendung. Kein Status im Drawer selbst | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | **fünf von sechs** — `InUse` fehlt („Aus einer `CaseFacts`-Zeile aufgegangen — die häufigste der fünf Stellen"), und der Abschnitt „Gebaut" nennt keinen Grund. §6 verlangt die Einsatz-Story ausdrücklich | ✗ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | ohne Browser durchgegangen; die zwei App-Punkte („ersetzt ihr v1-Gegenstück", „in §11 auf v2 gesetzt") übersprungen (backlog/README) | ✓ |
+| Im Browser angesehen (Storybook) | schlanke Abnahme (Owner-Entscheid 2026-09-08): Pixel, Abstände und Farbwirkung gehen an 0119; kein Storybook gestartet | vertagt auf 0119 |
+| **Schnittstelle Zeichen für Zeichen** | | |
+| Neun Props, Name · Typ · Pflicht | `:72–112` — `partner`, `open`, `onClose`, `accounts`, `tabHref`, `href` pflichtig, `caseCount?`, `renderBookingBehaviour?`, `accountHref?` optional: alle neun wie die Tabelle | ✓ |
+| Exporte vollständig genannt | die Datei exportiert **zwei**: `BusinessPartnerDrawer` und `PartnerTab` (`:39`, im Barrel `index.ts:486–489`). Die Spec nennt `PartnerTab` nicht — sie schreibt den Union-Typ in der Zeile `tabHref` aus | ✗ |
+| **Variabel** | | |
+| Zone 3 kommt aus `BusinessPartnerFacts` | `:129–132`, ohne `all` (die kurze Form, wie 0142 sie vorsieht); `grep -n FieldList BusinessPartnerDrawer.tsx` → 0 | ✓ |
+| Drei Abrisse mit drei eigenen Wegen, dazu der Fuß-Knopf | `Abstract` dreimal (`:135`, `:169`, `:184`), je ein `Link` im Kartenkopf (`:58`), dazu der `footer`-Knopf (`:122–126`). In `WithBehaviour` stehen alle vier. **Die Verschiebung des Kriteriums von `Filled` auf `WithBehaviour` trägt:** `Filled` hat drei Ziele, weil der dritte Abriss die Ableitung braucht, die im Bestand zu 0 % gefüllt ist. Die Abweichung von A10 steht als Kommentar am Export (`:25–31`) | ✓ |
+| Ein Abriss ohne Deckung entfällt **ganz** | `:134`, `:165`, `:183` — keine leere Karte, keine Überschrift. Story `Sparse`: ein Abriss | ✓ |
+| Die Sachverhalte stehen als **Zahl mit Weg**, nicht als Liste | `:169–180`, `formatCount(caseCount)` in `v2num` plus Wort und Datum; Story `Filled` | ✓ |
+| Ohne `renderBookingBehaviour` gibt es den dritten Abriss nicht | `:113` ruft den Rückruf, `:183` prüft das Ergebnis; Gegenprobe `Filled` (ohne) gegen `WithBehaviour` (mit) | ✓ |
+| `Esc` schließt, der Fokus kehrt zum Auslöser zurück | `Drawer.tsx:140` (`Escape`) und `:107–118` (Rückgabe im Cleanup, `back.focus()`); Story `Roundtrip` mit Auslöser-Knopf | ✓ |
+| Ersetzt den Sprung auf `/partners/[partnerId]` an den fünf Stellen | Migrationsschritt in `ludwig/app` (backlog/README) | offen (App) |
+| **Ränder** (Nachtrag 2026-09-08) | | |
+| „(`Sparse`: ein Abriss; `WithoutAccounts`: **keiner**)" | `WithoutAccounts` übergibt `caseCount={1}` (`BusinessPartnerDrawer.stories.tsx:132`) und zeigt damit **einen** Abriss — die Messtabelle im Abschnitt „Gebaut" sagt dasselbe (`WithoutAccounts` \| 1 \| „Sachverhalte"). Die Klammer im Kriterium wurde nicht mitgezogen | ✗ |
+| „(`WithBehaviour`, beide Fassungen nebeneinander)" | `WithBehaviour` zeigt **eine** Fassung; zwei Drawer nebeneinander gehen auch nicht. Die Gegenprobe ist `Filled`. Das Story-JSDoc („Mit und ohne `renderBookingBehaviour`", Z. 140) verspricht dasselbe Falsche | ✗ |
+
+**Offen (2026-09-09):**
+
+1. Die Story `InUse` fehlt ohne Begründung — §6 verlangt sie, und die
+   `CaseFacts`-Zeile ist der häufigste der fünf Aufrufer.
+2. `PartnerTab` steht im Code und im Barrel, nicht in der Spec.
+3. Zwei Kriteriums-Klammern zeigen auf Stories, die etwas anderes zeigen
+   (`WithoutAccounts`: ein Abriss statt keiner; `WithBehaviour`: eine Fassung
+   statt zwei) — beim Verschieben des einen Kriteriums sind die Nachbarn
+   stehengeblieben.
+
+**Was tragfähig ist:** die vier Ziele statt eines Fuß-Knopfs. Die Abweichung
+von A10 steht im Owner-Entscheid, im Abschnitt „Warum drei Wege und nicht
+einer" **und** als Kommentar am Export — wer den Drawer liest, findet den
+Grund, ohne die Spec zu haben. Und die Verschiebung des Kriteriums von `Filled`
+auf `WithBehaviour` ist richtig: in `Filled` sind es drei Ziele, und das ist
+der Regelfall.
+
+Das Kriterium „offen (App)" hat **keine** Zeile in `docs/befunde-app.md`,
+Abschnitt E.
+
+## Nacharbeit zur Abnahme, 2026-09-09
+
+Drei Mängel: eine fehlende Story, ein nicht genannter Export, zwei Klammern,
+die ins Leere zeigten.
+
+**M1 — `InUse` fehlte.** §6 verlangt die Einsatz-Story, und gerade hier trägt
+sie etwas: der Drawer existiert, damit die Sachbearbeiterin den Sachverhalt
+**nicht** verlassen muss. Eine Story, die ihn ohne seinen Anlass zeigt, lässt
+genau das weg. Jetzt geht er aus einer `CaseFacts`-Zeile auf, und der
+Sachverhalt bleibt daneben stehen.
+
+**M2 — `PartnerTab` ist exportiert und stand nur im Union-Ausdruck der
+`tabHref`-Zeile.** Wer den Typ importieren will, findet ihn jetzt.
+
+**M3 — zwei Klammern zeigten ins Leere.** „`WithoutAccounts`: keiner" — die
+Story übergab `caseCount={1}` und zeigte einen Abriss; „`WithBehaviour`, beide
+Fassungen nebeneinander" — sie zeigt eine, die Gegenprobe ist `Filled`. Beim
+Verschieben des einen Kriteriums auf `WithBehaviour` sind die Nachbarn
+stehengeblieben. Genau das Muster aus dem Nachtrag vom 2026-09-08, und diesmal
+habe ich es beim Verschieben selbst erzeugt.
+
+Behoben ist beides an der Wurzel: `WithoutAccounts` hat jetzt **keinen**
+`caseCount` und damit wirklich keinen Abriss — der Fall, den das Kriterium
+beschreibt, existiert jetzt auch.

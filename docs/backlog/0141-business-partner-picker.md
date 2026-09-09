@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
+| Status | fertig — abgenommen 2026-09-09, am selben Tag nachgearbeitet; die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Kreditor, Personenkonto, Diverse-Pool |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (`geprüft`, 2026-09-09), Abschnitt „Formen", Zeile `BusinessPartnerPicker` |
 | Ersetzt | `CreditorCombobox` im Ask-Dialog „Lieferant des Einzelsachverhalts" (`OffenePostenWorklist`) |
-| Setzt voraus | `Combobox` (0084 — sucht selbst, weil sie die Nummer nicht findet) · **0139** `BusinessPartnerCell` für die Trefferzeile |
+| Setzt voraus | `Combobox` (0084) |
 | Spec von / am | Claude, 2026-09-09 |
 
 ## Ziel
@@ -30,7 +30,10 @@ die nach Nummern nicht findet, ist keine.
 - **Zuschnitt:** eigene Datei `BusinessPartnerPicker.tsx`. Präzedenz sind
   `AccountField` (0013) und `CasePicker` — beide filtern **selbst** und
   reichen nur die Treffer weiter, aus genau diesem Grund.
-- **Setzt auf:** `Combobox`, `MonoCell`, `BusinessPartnerCell`.
+- **Setzt auf:** `Combobox` — und **nur** die. Nicht `BusinessPartnerCell`,
+  nicht `MonoCell`: `ComboboxOption` nimmt `label` und `hint` als **Strings**,
+  keinen `ReactNode`. Die Trefferzeile ist deshalb Text, und die Kontonummer
+  steht ohne `mono` in der Beischrift.
 
 ## Der Picker filtert, nicht die Combobox
 
@@ -99,11 +102,16 @@ die Liste, nicht anderes.
 
 ## Verhalten
 
-**Eine Trefferzeile** trägt den Namen (über `BusinessPartnerCell`, ohne
-`href` — man wählt hier, man navigiert nicht), dahinter die Kontonummer `mono`
-und, wo vorhanden, den Ort als leisen Unterscheider. Bei zwei Partnern
-gleichen Namens ist das der Unterschied zwischen einer Auswahl und einem
-Ratespiel.
+**Eine Trefferzeile** trägt den Namen als Label und dahinter, als Beischrift,
+Kontonummer · Kurzname · Ort. Bei zwei Partnern gleichen Namens ist der Ort der
+Unterschied zwischen einer Auswahl und einem Ratespiel.
+
+**Ohne `BusinessPartnerCell` und ohne `mono`, und das ist eine Einschränkung
+der `Combobox`, keine Entscheidung dieser Aufgabe.** `ComboboxOption` führt
+`label` und `hint` als Strings; ein `ReactNode` als Beischrift wäre eine
+Erweiterung an 0084 und beträfe `CasePicker` und `AccountField` mit. Solange
+sie nicht da ist, ist die Zeile Text — und Text, der die Nummer enthält, ist
+immer noch besser als eine Zelle, die es nicht gibt.
 
 **Leeren muss `onSearch` rufen.** Das war der Fehler in 0084: die `Combobox`
 rief den Callback beim Leeren nicht, und es entstand ein Zustand, in dem
@@ -151,6 +159,8 @@ Variabel (aus dieser Spec):
       (`Diverse`, Rundlauf zeigt beide)
 - [ ] Zwei Leerfälle mit verschiedenen Sätzen (`States`)
 - [ ] Die Trefferzeile trägt **keinen** `href` (`Filled`, DOM geprüft)
+- [ ] Die Zeile ist Text, nicht `BusinessPartnerCell`: `ComboboxOption` nimmt
+      keine Knoten. Die Nummer steht in der Beischrift (`Filled`)
 - [ ] Ersetzt `CreditorCombobox` in `OffenePostenWorklist` ohne Funktionsverlust
 
 ## Gebaut 2026-09-09
@@ -190,4 +200,59 @@ Und der Rückruf: nach `70123` und anschließendem Leeren steht im Protokoll
 
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| **Fest** | | |
+| `pnpm typecheck` und `pnpm build` grün | beide 2026-09-09 gelaufen, `exit 0` (`tsc --noEmit`; Storybook-Build nach `storybook-static`) | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `BusinessPartnerPicker.tsx` + `BusinessPartnerPicker.stories.tsx`, Titel `v3/Entitäten/Geschäftspartner/BusinessPartnerPicker` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `BusinessPartnerPicker` (`:77–80`), `filterBusinessPartners` (`:164–169`); `BusinessPartnerPickerItem` (`:22`) und `DIVERSE` (`:34–40`) tragen erklärendes JSDoc | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | nichts davon in der Datei; der Reifegrad wird bewusst nicht gezeigt | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | fünf von fünf: `Filled`, `Roundtrip`, `Diverse`, `States`, `InUse`; jede der elf Props hat ihre Story | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | ohne Browser durchgegangen; die zwei App-Punkte („ersetzt ihr v1-Gegenstück", „in §11 auf v2 gesetzt") übersprungen (backlog/README) | ✓ |
+| Im Browser angesehen (Storybook) | schlanke Abnahme (Owner-Entscheid 2026-09-08): Pixel, Abstände und Farbwirkung gehen an 0119; kein Storybook gestartet | vertagt auf 0119 |
+| **Schnittstelle Zeichen für Zeichen** | | |
+| Elf Props, Name · Typ · Pflicht | `BusinessPartnerPicker.tsx:81–121` — `label`, `value`, `onChange`, `partners` pflichtig, `onSearch`, `allowDiverse`, `loading`, `error`, `disabled`, `emptyText`, `noPartnersText` optional; Vorgaben `false` (`:87`) und die zwei Leersätze (`:91–92`) wortgleich mit der Spec | ✓ |
+| Exporte vollständig genannt | genau die drei der Tabelle: `BusinessPartnerPickerItem`, `DIVERSE`, `filterBusinessPartners` (Barrel `index.ts:479–484`) — hier ist die Spec dem Bau nachgezogen | ✓ |
+| **Variabel** | | |
+| Suche über **vier** Felder | `matches()` `:59–65` über `legalName`, `shortName`, `numbers()` (Kreditor **und** Debitor, `:43–47`) und `ustIds`; Story `Roundtrip` mit je einem Suchbegriff | ✓ |
+| Der Ort wird **nicht** gematcht | `city` steht nur in `hintOf()` `:73`, nicht in `matches()`; „Musterstadt" bringt keinen Treffer, obwohl es in der Zeile steht | ✓ |
+| Leeren ruft `onSearch("")`; kein Zustand mit gesetztem `value` und leerem Feld | `:149–155` meldet jede Eingabe, auch die leere. Alle drei Auswege der `Combobox` (Escape, Blur, Auswahl) gehen durch `clearQuery()` (`Combobox.tsx:114–117`), das ebenfalls `onSearch("")` ruft — damit setzt der Picker seinen eigenen Suchbegriff zurück (`:126`), die Optionen sind wieder vollständig und `chosen` findet sein Label | ✓ |
+| „Ohne konkreten Lieferanten" von `value: null` unterscheidbar | `DIVERSE = "__diverse"` (`:41`), erste Option (`:130–132`); Story `Diverse` zeigt beide Fälle im Zähler | ✓ |
+| Zwei Leerfälle mit verschiedenen Sätzen | `:159` schaltet nach `partners.length` um; Story `States`, dritte und zweite Kachel | ✓ |
+| Die Trefferzeile trägt **keinen** `href` | `ComboboxOption` (`Combobox.tsx:20–27`) kennt kein `href`; die Option ist ein `<button role="option">` (`Combobox.tsx:210–214`) | ✓ |
+| Ersetzt `CreditorCombobox` in `OffenePostenWorklist` | Migrationsschritt in `ludwig/app` (backlog/README) | offen (App) |
+| **Ränder** (Nachtrag 2026-09-08) | | |
+| Abschnitt „Verhalten": „Eine Trefferzeile trägt den Namen (über `BusinessPartnerCell`, ohne `href`), dahinter die Kontonummer `mono`" — dazu „Setzt voraus: **0139** … für die Trefferzeile" und „Setzt auf: `Combobox`, `MonoCell`, `BusinessPartnerCell`" | Der Picker importiert **weder** `BusinessPartnerCell` **noch** `MonoCell`. Die Trefferzeile ist eine `ComboboxOption` aus zwei Strings (`label` + `hint`, `:133–140`), und `ComboboxOption` nimmt nur Strings (`Combobox.tsx:20–27`) — die beschriebene Zeile ist mit der heutigen `Combobox` nicht baubar. Drei Stellen der Spec beschreiben eine Zelle, die nicht existiert; das Gebaute ist stimmig, die Spec nicht | ✗ |
+
+**Offen (2026-09-09):** ein Punkt, aber ein struktureller — drei Stellen der
+Spec (Kopftabelle „Setzt voraus", „Einordnung → Setzt auf", „Verhalten")
+versprechen `BusinessPartnerCell` und eine `mono`-Kontonummer in der
+Trefferzeile. Gebaut ist Text in `label` + `hint`, weil `ComboboxOption` nichts
+anderes annimmt. Zu entscheiden ist, ob die Spec nachgibt (dann drei Sätze
+umschreiben) oder die `Combobox` einen `ReactNode` als Beischrift lernt — das
+wäre eine eigene Aufgabe an 0084 und beträfe auch `CasePicker` und
+`AccountField`.
+
+Das Kriterium „offen (App)" hat **keine** Zeile in `docs/befunde-app.md`,
+Abschnitt E.
+
+## Nacharbeit zur Abnahme, 2026-09-09
+
+Ein Mangel, und er ist der interessanteste der ganzen Welle: **die Spec
+beschrieb eine Trefferzeile, die mit der heutigen `Combobox` nicht baubar
+ist.**
+
+Drei Stellen versprachen `BusinessPartnerCell` und eine `mono`-Kontonummer in
+der Zeile. `ComboboxOption` führt aber `label` und `hint` als **Strings**,
+nicht als `ReactNode`. Der Code ist stimmig — er baut die Zeile aus zwei
+Strings —, die Spec war es nicht.
+
+**Nachgegeben hat die Spec**, und zwar nicht aus Bequemlichkeit: einen
+`ReactNode` als Beischrift zu erlauben, ist eine Erweiterung an **0084** und
+beträfe `CasePicker` und `AccountField` mit. Das ist eine eigene Aufgabe mit
+eigener Abnahme, keine Nebenwirkung dieser hier. Bis dahin steht die Nummer
+als Text in der Beischrift — und Text, der die Nummer enthält, ist immer noch
+besser als eine Zelle, die es nicht gibt.
+
+Was daraus zu lernen ist: eine Spec darf eine Zusammensetzung beschreiben, die
+sie nicht geprüft hat, nur wenn sie den Baustein darunter mitliest. `Combobox`
+stand in der Zeile „Setzt auf" — ihre Schnittstelle habe ich beim Schreiben
+nicht aufgeschlagen.

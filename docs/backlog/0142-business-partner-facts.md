@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
+| Status | fertig — abgenommen 2026-09-09, am selben Tag nachgearbeitet; die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: USt-Profil, Personenkonto, Reifegrad, DATEV-Herkunft |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (`geprüft`, 2026-09-09), Abschnitt „Formen", Zeile `BusinessPartnerFacts` |
 | Ersetzt | `MasterDataTab` (21 Felder in fünf Boxen) und den Kopfblock der Partnerseite |
-| Setzt voraus | **0139** `BusinessPartnerCell` (für das Grabstein-Ziel) · `FieldList` (0006) · `StatusBadge axis="partner"` · `Time`, `MonoCell` |
+| Setzt voraus | ~~**0139** `BusinessPartnerCell` (für das Grabstein-Ziel)~~ — der Grabstein ist nicht gebaut (L-271), damit auch die Zelle hier nicht gebraucht · `FieldList` (0006) · `StatusBadge axis="partner"` · `Time`, `MonoCell` |
 | Blockiert | **0143** `BusinessPartnerDrawer` und **0127** `BusinessPartnerView` — beide zeigen diese Fakten, aus **dieser** Komponente |
 | Spec von / am | Claude, 2026-09-09 |
 
@@ -99,7 +99,7 @@ erst beim ersten Zusammenführen auffiele und dann eine tote Auskunft stünde.
 | `Filled` | Der Regelfall ohne `all`: Wer, Konten, Bewegung — ein Partner mit Kreditorkonto, Ort und sechs Buchungen |
 | `All` | Derselbe Partner mit `all`: dazu Verhalten und Herkunft |
 | `Sparse` | Der häufigste Fall im Bestand: Name, ein Konto, `usageBookingCount: 0`, sonst nichts. Drei Zeilen, zwei Gruppen — keine leeren Striche |
-| `Tombstone` | Zusammengeführter Partner: die Zeile steht oben, der Nachfolger als Zelle mit Weg |
+| ~~`Tombstone`~~ | **Nicht gebaut**: `mergedIntoPartnerId` steht nicht am gespiegelten Typ (L-271). Die Story kommt mit dem Feld, nicht davor — eine Story über einen Zustand, den die Form nicht kennen kann, wäre erfunden |
 | `Hints` | Der Satz des Aufrufers über der ersten Gruppe |
 | `Edges` | Name mit 50 Zeichen, Beschreibung mit 101 (Maximum im Bestand), drei Verrechnungskonten, `city: null` bei gesetzter Anschrift |
 
@@ -133,15 +133,16 @@ Fest (gilt immer):
 Variabel (aus dieser Spec):
 
 - [ ] Ein Feld ohne Wert bekommt **keine** Zeile, eine Gruppe ohne Feld keine
-      Überschrift (`Sparse`: zwei Gruppen, drei Zeilen)
+      Überschrift (`Sparse`: **drei** Gruppen — Wer · Konten · Bewegung —, und die Gruppe „Wer" hat **eine** Zeile statt vier)
 - [ ] `usageBookingCount: 0` steht als **0**, nicht als Strich (`Sparse`)
 - [ ] Keine lokale Map für das USt-Profil; die Zeile entfällt, statt roh zu
-      stehen (`grep -n "domestic_" BusinessPartner.tsx` → 0 Treffer)
+      stehen (`grep -n "domestic_" BusinessPartnerFacts.tsx` → 0 Treffer)
 - [ ] Die typische Lieferung nutzt `PARTNER_NATURE_LABEL` aus dem Spiegel und
       trägt alle **sechs** Werte (`All`, ein `service`-Partner)
 - [ ] Der Reifegrad steht in „Herkunft", nicht in der ersten Gruppe (`All`)
-- [ ] Der Grabstein steht als erste Zeile und nennt den Nachfolger als Zelle
-      (`Tombstone`)
+- [ ] ~~Der Grabstein steht als erste Zeile und nennt den Nachfolger als Zelle~~
+      — **entfällt**, solange `mergedIntoPartnerId` nicht am gespiegelten Typ
+      steht (L-271). Kommt mit dem Feld zurück
 - [ ] Kein Eingabefeld, kein Speichern-Knopf (`grep -n "input\|onSave" .` → 0)
 - [ ] Ersetzt `MasterDataTab` und den Kopfblock der Partnerseite ohne
       Funktionsverlust
@@ -178,4 +179,59 @@ Entscheidungen; jetzt fehlen beide Zeilen, und beide haben einen Befund.
 
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| **Fest** | | |
+| `pnpm typecheck` und `pnpm build` grün | beide 2026-09-09 gelaufen, `exit 0` (`tsc --noEmit`; Storybook-Build nach `storybook-static`) | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `BusinessPartnerFacts.tsx` + `BusinessPartnerFacts.stories.tsx`, Titel `v3/Entitäten/Geschäftspartner/BusinessPartnerFacts` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | einziger Export `BusinessPartnerFacts`, JSDoc `:37–40`. Die Gruppen-Variablen heißen deutsch (`wer`, `konten`, `bewegung`, `verhalten`, `herkunft`) — lokale Namen, keine Bezeichner der Schnittstelle | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `.v2bpfacts*` in `v3.css:3890–3892` nur über Tokens; `PARTNER_NATURE_LABEL` kommt aus der Domäne (`:110`), der Reifegrad über `StatusBadge axis="partner"` (`:126`) | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | **fünf von sechs** — `Tombstone` fehlt. Der Grund steht im Abschnitt „Gebaut" (L-271, das Feld gibt es am Typ nicht) und trägt; die Stories-Tabelle und das zugehörige Kriterium wurden nicht mitgezogen | ✗ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | ohne Browser durchgegangen; die zwei App-Punkte („ersetzt ihr v1-Gegenstück", „in §11 auf v2 gesetzt") übersprungen (backlog/README) | ✓ |
+| Im Browser angesehen (Storybook) | schlanke Abnahme (Owner-Entscheid 2026-09-08): Pixel, Abstände und Farbwirkung gehen an 0119; kein Storybook gestartet | vertagt auf 0119 |
+| **Schnittstelle Zeichen für Zeichen** | | |
+| Vier Props, Name · Typ · Pflicht | `:41–57` — `partner: BusinessPartnerDetail`, `all?: boolean` (Vorgabe `false`), `accountHref?`, `hints?: readonly string[]`: alle vier wie die Tabelle. `partnerHref` ist mit dem Grabstein entfallen und in der Tabelle **richtig** nicht mehr aufgeführt. Kein weiterer Export | ✓ |
+| **Variabel** | | |
+| Feld ohne Wert bekommt keine Zeile, Gruppe ohne Feld keine Überschrift | je Zeile `:62–142`, je Gruppe `:163–166`. Story `Sparse`: drei Zeilen, keine Striche | ✓ |
+| `usageBookingCount: 0` steht als **0** | `:97` `formatCount()` in `v2num`; Story `Sparse` | ✓ |
+| Keine lokale Map für das USt-Profil; die Zeile entfällt, statt roh zu stehen | in `BusinessPartnerFacts.tsx` nur der erklärende Kommentar `:105–108`, keine Map und keine Zeile. (Der Nachweis-Befehl nennt `BusinessPartner.tsx` — dort stehen die Fakten nicht) | ✓ |
+| Typische Lieferung über `PARTNER_NATURE_LABEL`, alle **sechs** Werte | `:109–111`; die Map führt alle sechs (`business-partner.ts:41–48`), `unknown` wird als „—" gar nicht erst gezeigt. Story `All` mit `typicalNature: "service"` → „Dienstleistung" | ✓ |
+| Der Reifegrad steht in „Herkunft", nicht in der ersten Gruppe | `:124–127` im `herkunft`-Block; `wer` beginnt `:58` mit dem Namen. Story `All` | ✓ |
+| Der Grabstein steht als erste Zeile und nennt den Nachfolger als Zelle | **nicht gebaut.** Nachgeprüft: `BusinessPartnerDetail` (`business-partner.ts:113–134`) trägt weder `mergedIntoPartnerId` noch `contactEmail`/`contactPhone` — der Befund stimmt. L-271 steht mit Quelle in `docs/befunde-app.md:47`, L-272 in `:48`, beide mit Verweis auf den Abschnitt „Gebaut" dieser Spec. Die Ablösung hängt am Spiegel, also an der App | offen (App) |
+| Kein Eingabefeld, kein Speichern-Knopf | `grep -n "input\|onSave" BusinessPartnerFacts.tsx` → 0 | ✓ |
+| Ersetzt `MasterDataTab` und den Kopfblock der Partnerseite | Migrationsschritt in `ludwig/app` (backlog/README) | offen (App) |
+| **Ränder** (Nachtrag 2026-09-08) | | |
+| Vier Stellen beschreiben Zeilen, die der Abschnitt „Gebaut" begründet weglässt | Kopftabelle „Setzt voraus: **0139** `BusinessPartnerCell` (für das Grabstein-Ziel)" — die Datei importiert sie nicht; Gruppen-Tabelle führt **Kontakt (14)** in „Herkunft"; Abschnitt „Verhalten" sagt „die Zeile ist trotzdem gebaut"; Stories-Tabelle führt `Tombstone` | ✗ |
+| „(`Sparse`: zwei Gruppen, drei Zeilen)" | es sind **drei** Gruppen: Wer · Konten · Bewegung. „Bewegung" steht immer (`:165`, die `0` ist eine Aussage), und `Sparse` trägt ein Kreditorkonto. Dieselbe falsche Zahl steht im Story-JSDoc `BusinessPartnerFacts.stories.tsx:104` | ✗ |
+| Zwei Nachweis-Befehle greifen auf `BusinessPartner.tsx` | die Fakten stehen in `BusinessPartnerFacts.tsx`. Der Bau hat den Zuschnitt aus 0139 („eine Datei für Zelle **und** Fakten") verlassen, ohne ihn in einer der beiden Specs nachzuziehen | ✗ |
+
+**Offen (2026-09-09):**
+
+1. `Tombstone` fehlt in den Stories. Der Grund trägt (L-271 nachgeprüft), aber
+   die Stories-Tabelle und das Kriterium müssen ihn nennen — sonst liest die
+   nächste Runde eine Story, die es nicht gibt.
+2. Vier weitere Stellen beschreiben Kontakt und Grabstein als gebaut.
+3. „`Sparse`: zwei Gruppen" ist falsch — drei. Auch im Story-JSDoc.
+4. Zwei Nachweis-Befehle nennen die falsche Datei.
+
+Alle vier sind Textarbeit an der Spec; der Code ist an diesen Stellen der
+stimmigere von beiden. Die zwei Befunde L-271 und L-272 stehen sauber im
+Register (`docs/befunde-app.md:47–48`), mit Quelle und mit Vorschlag.
+
+Das Kriterium „offen (App)" hat **keine** Zeile in `docs/befunde-app.md`,
+Abschnitt E.
+
+## Nacharbeit zur Abnahme, 2026-09-09
+
+Vier Mängel, alle in der Spec — und alle mit derselben Wurzel: der Abschnitt
+„Gebaut" begründete drei nicht gebaute Zeilen, und **vier andere Stellen
+sprachen weiter, als wären sie da**.
+
+| Mangel | Was jetzt dasteht |
+|---|---|
+| Story `Tombstone` in der Tabelle, aber nicht gebaut | durchgestrichen, mit dem Grund: eine Story über einen Zustand, den die Form nicht kennen kann, wäre erfunden |
+| „Setzt voraus: 0139 für das Grabstein-Ziel" | durchgestrichen — ohne Grabstein wird die Zelle hier nicht gebraucht |
+| „(`Sparse`: zwei Gruppen, drei Zeilen)" | es sind **drei** Gruppen; „Bewegung" steht immer, weil die 0 eine Aussage ist |
+| zwei `grep`-Nachweise gegen `BusinessPartner.tsx` | die Fakten liegen in `BusinessPartnerFacts.tsx` |
+
+Der dritte ist der ärgerlichste: die Zahl stand auch im Story-JSDoc, also an
+der Stelle, die jemand liest, während er die Story ansieht — und dort widerlegt
+das Bild sie sofort.

@@ -11,6 +11,7 @@ import { FieldList } from "../../primitives/FieldList";
 import { Link } from "../../primitives/Link";
 import { Time } from "../../primitives/Time";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { BusinessPartnerCell } from "../business-partner/BusinessPartner";
 
 /**
  * Cell and facts of a ledger account (0066) — two steps of the same thing.
@@ -179,7 +180,15 @@ export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
     </span>,
   ]);
 
-  if (facts.partnerName) rows.push(["Geschäftspartner", facts.partnerName]);
+  if (facts.partnerName) {
+    // The cell (0139), so the name is written the same way here as in the
+    // chart of accounts and in the case facts. No `href`: the account sheet
+    // does not know the partner's id.
+    rows.push([
+      "Geschäftspartner",
+      <BusinessPartnerCell key="bp" name={facts.partnerName} />,
+    ]);
+  }
 
   rows.push([
     "Letzte Buchung",

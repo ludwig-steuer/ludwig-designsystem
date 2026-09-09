@@ -39,6 +39,11 @@ export type BusinessPartnerColumn =
 /**
  * The order of the points — one order for every form of this family, the
  * profile's rule. `columns` **selects**, it never reorders.
+ *
+ * It is also the one named set, so `PARTNER_LIST_COLUMNS` is this list and not
+ * a copy of it: the list has exactly one set today, and two identical arrays
+ * would mean a new column has to be added twice while the typechecker keeps
+ * quiet. A second set that shows *fewer* columns picks from here.
  */
 const ORDER: BusinessPartnerColumn[] = [
   "partner",
@@ -63,16 +68,7 @@ const ORDER: BusinessPartnerColumn[] = [
  * clearing filled means a settling partner (owner decision 2026-09-09: no
  * separate role column).
  */
-export const PARTNER_LIST_COLUMNS: readonly BusinessPartnerColumn[] = [
-  "partner",
-  "creditorAccount",
-  "debtorAccount",
-  "clearing",
-  "onboarding",
-  "bookings",
-  "lastBooking",
-  "city",
-];
+export const PARTNER_LIST_COLUMNS: readonly BusinessPartnerColumn[] = ORDER;
 
 /**
  * The word above each cell. Here and not in the caller, so head and cell say

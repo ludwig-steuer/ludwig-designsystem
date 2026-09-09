@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
+| Status | fertig — abgenommen 2026-09-09, am selben Tag nachgearbeitet; die gemessene Prüfung steht in 0119 aus |
 | Stufe | `entities/business-partner/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Geschäftspartner, Personenkonto, Kreditor/Debitor |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` (Status `geprüft`, 2026-09-09), Abschnitt „Formen", Zeile `BusinessPartnerCell` |
@@ -36,11 +36,15 @@ einen Weg, den es nicht gibt.
 - **Regel aus §3, die griff:** Nr. 5 — neue Entitäts-Form. Kein `@when` deckt
   „einen Geschäftspartner in fremdem Markup nennen"; `AccountCell` ist die
   Präzedenz für die Form, nicht für die Entität.
-- **Zuschnitt:** eine Datei `BusinessPartner.tsx` für **Zelle und Fakten**
-  (0142), wie `Account.tsx` es für Konto-Zelle und -Fakten macht. Die Fakten
-  kommen mit 0142 dazu; diese Spec baut nur die Zelle, in dieselbe Datei.
-- **Setzt auf:** `Link`, `MonoCell`, `Icons.partner`, und für die Kürzung das
-  Muster `clipEnd()` aus `SourceDocument.tsx`.
+- **Zuschnitt:** eigene Datei `BusinessPartner.tsx` für die Zelle. *Der Plan
+  war ursprünglich, die Fakten (0142) dazuzulegen wie `Account.tsx` es für
+  Konto-Zelle und -Fakten macht; gebaut wurden sie dann als eigene Datei
+  `BusinessPartnerFacts.tsx`, weil sie mit fünf Gruppen und drei Befunden zu
+  groß dafür wurden. Wer die Fakten sucht, findet sie dort.*
+- **Setzt auf:** `Link`, `MonoCell`, und für die Kürzung das Muster `clipEnd()`
+  aus `SourceDocument.tsx`. **Kein Icon** — ein Symbol vor jedem Partnernamen
+  wäre in einer Tabellenzelle Rauschen, und ein Icon ohne Wort verbietet §9
+  ohnehin.
 
 ## Schnittstelle
 
@@ -137,9 +141,9 @@ Variabel (aus dieser Spec):
 
 ## Gebaut 2026-09-09
 
-`BusinessPartnerCell` in `entities/business-partner/BusinessPartner.tsx` — die
-Datei trägt später auch die Fakten (0142), wie `Account.tsx` es für Konto-Zelle
-und -Fakten macht. Dazu vier CSS-Zeilen (`.v2bp*`) und fünf Stories.
+`BusinessPartnerCell` in `entities/business-partner/BusinessPartner.tsx`, dazu
+vier CSS-Zeilen (`.v2bp*`) und fünf Stories. Die Fakten (0142) sind **nicht**
+in dieselbe Datei gekommen — siehe Zuschnitt.
 
 **Eine Zahl in dieser Spec war falsch, gefunden beim Bauen.** Die
 Schnittstelle nannte als Vorgabe **33** und berief sich dabei auf
@@ -164,4 +168,67 @@ Registry-Achse. Der Grabstein ist wie geplant nicht gebaut (A12).
 
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| **Fest** | | |
+| `pnpm typecheck` und `pnpm build` grün | beide 2026-09-09 gelaufen, `exit 0` (`tsc --noEmit`; Storybook-Build nach `storybook-static`) | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `BusinessPartner.tsx` + `BusinessPartner.stories.tsx`, Titel `v3/Entitäten/Geschäftspartner/BusinessPartnerCell` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | einziger Export `BusinessPartnerCell`, JSDoc `BusinessPartner.tsx:49–50`; Bezeichner und Kommentare durchgehend englisch | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `.v2bp*` in `v3.css:3883–3886` nur über Tokens; die Zelle zeigt keinen Status | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | fünf von fünf: `Filled`, `WithShortName`, `WithAccount`, `Edges`, `InUse`; jede Prop hat ihre Story (`limit` in `Edges`, Z. 100) | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | ohne Browser durchgegangen; die zwei App-Punkte („ersetzt ihr v1-Gegenstück", „in §11 auf v2 gesetzt") übersprungen (backlog/README) | ✓ |
+| Im Browser angesehen (Storybook) | schlanke Abnahme (Owner-Entscheid 2026-09-08): Pixel, Abstände und Farbwirkung gehen an 0119; kein Storybook gestartet | vertagt auf 0119 |
+| **Schnittstelle Zeichen für Zeichen** | | |
+| Fünf Props, Name · Typ · Pflicht | `BusinessPartner.tsx:52–80` — `name: string`, `shortName?: string \| null`, `href?: string`, `account?: { number; role } \| null`, `limit?: number`: alle fünf wie die Tabelle. Kein weiterer Export | ✓ |
+| **Variabel** | | |
+| Keine Prop für einen Gegenpart-String | es gibt keine; der Nachweis-Befehl trifft aber nicht 0: `grep -n counterparty BusinessPartner.tsx` → **3 Treffer** (Z. 11, 13, 15), alle im JSDoc, das genau diese Regel erklärt | ✓ |
+| `name` trägt `legalName`; `shortName` eigene, optionale Prop | `BusinessPartner.tsx:64–66`; Story `WithShortName` | ✓ |
+| Kurzname entfällt bei Gleichheit **und** Präfix | `saysSomethingNew()` `BusinessPartner.tsx:41–46` (`a !== b && !b.startsWith(a)`); `WithShortName` Zeile 2 (gleich) und 3 („Musterbau Hande") | ✓ |
+| Anker umschließt nur den Namen | `:84–92` gegen `:100–107` — der Kontoblock liegt außerhalb des `Link` | ✓ |
+| Kürzung bei `limit`, Vorgabe **36**, `title` am ganzen Namen | `NAME_LIMIT = 36` (`:27`), `clip()` (`:29–32`) setzt `title` nur beim Kürzen. Die Berichtigung der Spec trägt: `MAX_COUNTERPARTY = 36` in `SourceDocument.tsx:84`, und `clip()` schneidet identisch zu `clipEnd()` (`SourceDocument.tsx:93`) — derselbe Name, derselbe Schnitt. Story `Edges` | ✓ |
+| Kontonummer `mono`, führende Nullen | `MonoCell` (`:105`); `Cells.tsx:222–227` gibt den Wert unverändert aus; `Edges` mit `0700123` | ✓ |
+| Ersetzt die drei Namensausgaben in `CaseFacts`, `account-columns` und `Account.tsx` | **nicht geschehen.** `CaseFacts.tsx:89–97` schreibt weiter `<Link>{c.counterpartyName}</Link>`, `account-columns.tsx:209–222` rendert `businessPartnerName` selbst mit eigenem `v2trunc`/`title`, `Account.tsx:182` setzt `facts.partnerName` als nackten Text. Alle drei liegen **in diesem Repo**, nicht in der App — also kein „offen (App)" | ✗ |
+| **Ränder** (Nachtrag 2026-09-08) | | |
+| Zuschnitt und Abschnitt „Gebaut": „eine Datei `BusinessPartner.tsx` für **Zelle und Fakten**" | die Fakten stehen in einer eigenen Datei `BusinessPartnerFacts.tsx` (0142). Beide Absätze beschreiben einen Schnitt, den es nicht gibt | ✗ |
+| Einordnung „Setzt auf: `Link`, `MonoCell`, `Icons.partner`" | `Icons` wird in `BusinessPartner.tsx` nicht importiert (grep → 0) | ✗ |
+
+**Offen (2026-09-09):**
+
+1. Die drei Namensausgaben in `CaseFacts`, `account-columns` und `Account.tsx`
+   sind nicht abgelöst — das ist Arbeit in diesem Repo, nicht in der App.
+   Entweder nachziehen oder das Kriterium mit Grund auf eine eigene Aufgabe
+   verschieben.
+2. Der Zuschnitt-Absatz und „Gebaut" behaupten eine Datei für Zelle und
+   Fakten; gebaut sind zwei. Ein Satz genügt, aber er fehlt in **beiden** Specs
+   (auch 0142 grept noch gegen `BusinessPartner.tsx`).
+3. „Setzt auf … `Icons.partner`" streichen.
+
+Nicht geprüft: Darstellung, Abstände, Zellenhöhe — schlanke Abnahme, vertagt
+auf 0119.
+
+## Nacharbeit zur Abnahme, 2026-09-09
+
+Drei Mängel: einer im Code, zwei in der Spec — und eine Begründung der Abnahme,
+die nicht trägt.
+
+**M1 — die drei Namensausgaben standen unverändert da.** Das Kriterium zielt
+auf **dieses** Repo, nicht auf die App: die Zelle war gebaut und niemand
+benutzte sie außer 0140. Jetzt gehen `CaseFacts`, `account-columns` und
+`AccountFacts` durch sie.
+
+**Die Abnahme hielt das für unmöglich, und das war ein Irrtum.** Sie schrieb,
+„quer über Entitäts-Familien zu importieren verbietet R21" — **R21 ist im
+Regelwerk der App ausdrücklich eine Lücke** (`docs/ludwig/web-ui.md`: „Die
+Regel-Nummern R2, R3, R4, R7, R9, R15, R18 und R21 sind deshalb Lücken"). Die
+Regel, die gilt, ist die Dreiteilung mit Importen **nur abwärts**; über
+Entitäts-Familien sagt sie nichts, und der Bestand tut es längst:
+`CaseFacts` importiert aus `account/`, `bank-transaction` importiert `CaseCell`,
+`JournalEntryEditor` importiert `AccountField`. Wäre der Einwand richtig
+gewesen, könnte diese Aufgabe ihr eigenes Ziel nicht erreichen.
+
+**M2 — der Zuschnitt nannte eine Datei, die es so nicht gibt.** Die Fakten
+sollten in `BusinessPartner.tsx` dazukommen; gebaut wurden sie als eigene
+Datei, weil sie mit fünf Gruppen zu groß dafür wurden. Steht jetzt da, samt
+dem Grund.
+
+**M3 — „Setzt auf `Icons.partner`"** stimmte nie: die Datei importiert kein
+Icon. Sie soll auch keins — ein Symbol vor jedem Partnernamen wäre in einer
+Tabellenzelle Rauschen.

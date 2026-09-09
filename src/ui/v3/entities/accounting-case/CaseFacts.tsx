@@ -4,10 +4,10 @@ import type { CaseDetail } from "@/ludwig/modules/accounting-cases/domain/case-d
 import type { CaseKind, CaseLifecycle } from "@/ludwig/modules/accounting-cases/domain/case";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { FieldList } from "../../primitives/FieldList";
-import { Link } from "../../primitives/Link";
 import { LongText } from "../../primitives/LongText";
 import { MonoCell } from "../../primitives/Cells";
 import { AccountCell } from "../account/Account";
+import { BusinessPartnerCell } from "../business-partner/BusinessPartner";
 import { Time } from "../../primitives/Time";
 
 /**
@@ -89,10 +89,12 @@ export function CaseFacts({
   if (c.counterpartyName) {
     add(
       "Geschäftspartner",
+      // The cell, not a second way of writing a name (0139). Without a
+      // partner id there is no partner behind the name — then it stays text.
       partnerHref && c.counterpartyPartnerId ? (
-        <Link href={partnerHref}>{c.counterpartyName}</Link>
+        <BusinessPartnerCell name={c.counterpartyName} href={partnerHref} />
       ) : (
-        c.counterpartyName
+        <BusinessPartnerCell name={c.counterpartyName} />
       ),
     );
   }

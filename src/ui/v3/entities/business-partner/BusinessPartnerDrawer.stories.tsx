@@ -7,6 +7,7 @@ import type {
 } from "@/ludwig/modules/business-partners/domain/business-partner";
 
 import { Button } from "../../primitives/Button";
+import { Card, CardHead } from "../../primitives/Table";
 import { FieldList } from "../../primitives/FieldList";
 import { BusinessPartnerDrawer, type PartnerTab } from "./BusinessPartnerDrawer";
 
@@ -110,9 +111,9 @@ export const Filled: Story = {
 };
 
 /**
- * Der Partner **ohne jedes Personenkonto** — zwei von 14.950. Die Kontenliste
- * entfällt ganz, und mit ihr ihr Weg: ein Abriss ohne Deckung ist keine leere
- * Karte, sondern gar keine.
+ * Der Partner **ohne jedes Personenkonto** — zwei von 14.950 — und ohne
+ * Sachverhalt. Damit fällt **jeder** Abriss weg: es bleiben die Fakten und der
+ * Fuß-Knopf. Ein Abriss ohne Deckung ist keine leere Karte, sondern gar keine.
  */
 export const WithoutAccounts: Story = {
   render: () => (
@@ -128,7 +129,6 @@ export const WithoutAccounts: Story = {
           lastBookingDate: null,
         })}
         accounts={[]}
-        caseCount={1}
         tabHref={tabHref}
         href="?partner=p-1"
       />
@@ -214,6 +214,54 @@ export const Roundtrip: Story = {
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Geschäftspartner nachschlagen
         </Button>
+        <BusinessPartnerDrawer
+          open={open}
+          onClose={() => setOpen(false)}
+          partner={detail()}
+          accounts={[konto({ accountId: "a-1" })]}
+          caseCount={4}
+          tabHref={tabHref}
+          href="?partner=p-1"
+          accountHref={accountHref}
+        />
+      </div>
+    );
+  },
+};
+
+/**
+ * Im Einsatz an der häufigsten der fünf Stellen: aus einer `CaseFacts`-Zeile
+ * aufgegangen. Der Sachverhalt bleibt stehen, der Partner legt sich daneben —
+ * genau dafür gibt es den Drawer, statt die Seite zu verlassen.
+ */
+export const InUse: Story = {
+  render: function Einsatz() {
+    const [open, setOpen] = useState(false);
+    return (
+      <div style={{ minHeight: 720, padding: 24, maxWidth: 680 }}>
+        <Card>
+          <CardHead title="Sachverhalt 2026-0413" sub="Miete Musterstraße 12" />
+          <div style={{ padding: 16 }}>
+            <FieldList
+              tone="bare"
+              rows={[
+                [
+                  "Geschäftspartner",
+                  <button
+                    key="p"
+                    type="button"
+                    className="v2link"
+                    onClick={() => setOpen(true)}
+                  >
+                    Musterfirma Immobilien GmbH
+                  </button>,
+                ],
+                ["Betrag", "1.800,00 €"],
+                ["Eröffnet", "01.08.2026"],
+              ]}
+            />
+          </div>
+        </Card>
         <BusinessPartnerDrawer
           open={open}
           onClose={() => setOpen(false)}
