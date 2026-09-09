@@ -58,6 +58,37 @@ import { StateIcon } from "./Review";
  * (`OverflowMenu.tsx`). Server Actions are serializable and may cross.
  */
 
+/**
+ * The width below which a table has to scroll instead of squeezing.
+ *
+ * Every fixed track plus the floor of every flexible one, the gutters between
+ * them and the card padding. It reads **only** `width` — nothing about it
+ * belongs to any one entity, which is why it lives here and not, as it did
+ * until 0147, inside a document catalogue where only that catalogue found it.
+ *
+ * `1fr` without a `minmax()` counts as zero: a flexible track without a floor
+ * has none, and inventing one would be a claim. Whoever wants a floor writes
+ * it into the track width, where it belongs.
+ *
+ * @when    A table is built by hand with `Table` and needs the same floor `DataTable` computes.
+ * @instead `DataTable` does it itself — pass `minWidth` only to overrule it.
+ */
+export function columnsMinWidth<T>(columns: readonly ColumnDef<T>[]): number {
+  const GUTTER = 10;
+  // `.v2tbl` sits in a card with `padding: 12px 18px` (v3.css) — 36 px.
+  // Measured while building 0085 and confirmed by its acceptance 2026-09-07.
+  const PADDING = 36;
+  const floor = (width: string | undefined): number => {
+    if (!width) return 0;
+    const min = /minmax\(\s*(\d+)px/.exec(width);
+    if (min?.[1]) return Number(min[1]);
+    const px = /^(\d+)px$/.exec(width.trim());
+    return px?.[1] ? Number(px[1]) : 0;
+  };
+  const tracks = columns.reduce((sum, c) => sum + floor(c.width), 0);
+  return tracks + GUTTER * Math.max(0, columns.length - 1) + PADDING;
+}
+
 export interface ColumnDef<T> {
   /** Also the sort name that goes into the URL. */
   key: string;
@@ -182,6 +213,15 @@ interface DataTableBase<T> {
   /** Row measure (E9) — the page decides, not the reader. */
   density?: TableDensity;
   /** From where it scrolls horizontally instead of squeezing. */
+  /**
+   * The width below which the table scrolls instead of squeezing.
+   *
+   * **An override, not a duty** (0147). Without it the table computes the
+   * floor from its own column widths; `0` switches it off for a table that
+   * *should* squeeze. It used to be a plain prop, and the one page that forgot
+   * it lost two columns off the right edge without a scrollbar — a prop you
+   * can forget is a bug waiting for its caller (finding L-273).
+   */
   minWidth?: number;
   /** The last column, always visible (V14): ≤ 2 inline, ≥ 3 primary plus menu. */
   rowActions?: (row: T) => AnyRowAction[];
@@ -354,7 +394,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
           )
         }
       />
-      <Table cols={cols} minWidth={minWidth} density={density}>
+      <Table cols={cols} minWidth={minWidth ?? columnsMinWidth(columns)} density={density}>
         {headRow}
         {body}
       </Table>

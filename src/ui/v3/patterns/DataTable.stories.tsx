@@ -640,3 +640,82 @@ export const InUse: Story = {
     );
   },
 };
+
+/**
+ * **Die Mindestbreite rechnet die Tabelle selbst** (0147) — links ohne
+ * `minWidth`, rechts mit `minWidth={0}`. Beide in einem **460 px** breiten
+ * Rahmen; die fünf Spalten fordern gerechnet 656 px, es ist also zu eng.
+ *
+ * Links entsteht ein innerer Scrollrahmen: die Spalten behalten ihre Breite,
+ * und wer nach rechts will, scrollt. Rechts quetscht die Tabelle, wie sie es
+ * bis 0147 überall tat — Spalten verlieren Breite, bis nichts mehr lesbar ist
+ * und am Ende welche aus dem Bild laufen.
+ *
+ * Der Anlass war ein echter Fall: die Jahres-Belegliste verlor bei 1456 px
+ * zwei Spalten nach rechts, **ohne** Scrollbalken. Die Rechnung dafür gab es
+ * seit Wochen — sie hieß `sourceDocumentMinWidth`, lag im Beleg-Katalog, und
+ * die Seite übergab sie nicht. Eine Prop, die man vergessen kann, ist ein
+ * Fehler, der auf seinen Aufrufer wartet (Befund L-273).
+ */
+export const AutoMinWidth: Story = {
+  render: () => (
+    <div style={{ display: "grid", gridTemplateColumns: "460px 460px", gap: 24 }}>
+      <div>
+        <div className="v2muted" style={{ marginBottom: 8 }}>ohne `minWidth` — gerechnet</div>
+        <DataTable<CaseListItem>
+          rows={PAGE.slice(0, 4)}
+          columns={COLUMNS}
+          rowKey={rowKey}
+          head={{ title: "Sachverhalte", sub: "scrollt statt zu quetschen" }}
+        />
+      </div>
+      <div>
+        <div className="v2muted" style={{ marginBottom: 8 }}>`minWidth={0}` — quetscht</div>
+        <DataTable<CaseListItem>
+          rows={PAGE.slice(0, 4)}
+          columns={COLUMNS}
+          rowKey={rowKey}
+          head={{ title: "Sachverhalte", sub: "so war es bis 0147 überall" }}
+          minWidth={0}
+        />
+      </div>
+    </div>
+  ),
+};
+
+/**
+ * `minWidth={0}` ist kein Notausgang, sondern ein gültiger Fall: eine Tabelle
+ * mit **einer** flexiblen Spalte hat keinen sinnvollen Boden, und ein
+ * gerechneter von 36 px wäre eine Behauptung. Wer quetschen will, sagt es.
+ */
+export const Squeeze: Story = {
+  render: () => (
+    <div style={{ maxWidth: 520 }}>
+      <DataTable<CaseListItem>
+        rows={PAGE.slice(0, 3)}
+        columns={[TITLE]}
+        rowKey={rowKey}
+        head={{ title: "Nur der Titel", sub: "eine flexible Spalte, kein Boden" }}
+        minWidth={0}
+      />
+    </div>
+  ),
+};
+
+/**
+ * `minWidth={n}` gewinnt über die Rechnung — der Aufrufer weiß es besser.
+ * Hier 1600 px, deutlich über dem, was die fünf Spalten fordern.
+ */
+export const Override: Story = {
+  render: () => (
+    <div style={{ maxWidth: 700 }}>
+      <DataTable<CaseListItem>
+        rows={PAGE.slice(0, 3)}
+        columns={COLUMNS}
+        rowKey={rowKey}
+        head={{ title: "Sachverhalte", sub: "minWidth = 1600" }}
+        minWidth={1600}
+      />
+    </div>
+  ),
+};

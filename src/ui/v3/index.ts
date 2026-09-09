@@ -194,6 +194,7 @@ export {
 /* ── Patterns ── Arbeitsfläche */
 export {
   DataTable,
+  columnsMinWidth,
   rowAction,
   type AnyRowAction,
   type ColumnDef,
