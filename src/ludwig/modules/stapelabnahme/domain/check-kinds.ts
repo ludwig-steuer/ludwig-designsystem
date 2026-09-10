@@ -10,6 +10,7 @@ export const CHECK_KINDS = [
   "statements_complete",
   "documents_handled",
   "bank_transactions_booked",
+  "bank_transactions_proposed",
   "clearing_accounts_zero",
   "export_simulation",
   "cases_proposed",

@@ -70,6 +70,21 @@ const TAX_ACCOUNTS_BY_FRAMEWORK: Record<"skr03" | "skr04", Record<string, TaxAcc
   },
 };
 
+/**
+ * Steuersatz je BU-Schlüssel in Prozent — nur die vier Standardschlüssel.
+ *
+ * §13b und igE (91/92/94/95, 18/19) stehen bewusst nicht drin: dort ist der
+ * Zahlbetrag netto, und ein „Satz auf den Bruttobetrag" wäre die falsche
+ * Rechnung. Die Kontennamen oben tragen denselben Satz im Klartext — diese
+ * Tabelle macht ihn rechenbar.
+ */
+export const TAX_KEY_RATE_PERCENT: Readonly<Record<string, number>> = {
+  "2": 7,
+  "3": 19,
+  "8": 7,
+  "9": 19,
+};
+
 function normalizeSkr(framework: string | null): "skr03" | "skr04" | null {
   const c = framework?.toLowerCase();
   return c === "skr03" || c === "skr04" ? c : null;

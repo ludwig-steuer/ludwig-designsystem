@@ -42,18 +42,30 @@ export interface InvoiceFilter {
   /** Belegkategorie (`client_source_docs.doc_category`, Achse
    *  `beleg_kategorie`) — was mit dem Beleg als Nächstes passiert. */
   docCategory?: DocCategory[];
+  /** Nur Belege, die dieser Buchungsstapel angefasst hat: ein Ereignis mit
+   *  seinem Stempel (`client_accounting_event.export_batch_id`) oder in ihm
+   *  mit Grund erledigt (`client_source_docs.completed_batch_id`). Kommt aus
+   *  dem Pfad der Stapel-Detailsicht, nicht aus dem Filterformular. */
+  exportBatchId?: string;
 }
 
 /**
- * Die Reiter der Belegliste — **drei**, seit „Klärungsfragen" ein Filter ist.
+ * Die Reiter der Belegliste — **vier**, seit der Rückstand einen eigenen hat.
  *
- * Die verbliebenen drei sind echte andere Ansichten: „Alle Belege" liest die
- * Rechnungsliste, „In Verarbeitung" und „Problematisch" lesen die
- * Beleg-Basistabelle mit eigenen Bedingungen. „Klärungsfragen" tat nichts
- * davon — es filterte dieselbe Liste nach einem Feld.
+ * „Alle Belege" liest die Rechnungsliste, „In Verarbeitung" und
+ * „Problematisch" lesen die Beleg-Basistabelle mit eigenen Bedingungen.
+ * „Klärungsfragen" tat nichts davon — es filterte dieselbe Liste nach einem
+ * Feld und ist deshalb heute ein Filter.
+ *
+ * „Offen" ist die Ausnahme, die die Regel bestätigt: derselbe Filter
+ * (`openOnly`), aber eine andere **Frage** — nicht „was ist in dieser Periode
+ * passiert", sondern „was liegt noch da, quer über alle Jahre, und seit
+ * wann". Deshalb lässt er den Jahres-Zeitraum fallen, dreht die Sortierung
+ * auf „ältester zuerst" und trägt eine Spalte, die sonst keine Liste hat.
  */
 export const INVOICE_LIST_TABS = [
   "alle",
+  "offen",
   "verarbeitung",
   "problematisch",
 ] as const;
@@ -61,6 +73,7 @@ export type InvoiceListTab = (typeof INVOICE_LIST_TABS)[number];
 
 export const INVOICE_LIST_TAB_LABEL: Record<InvoiceListTab, string> = {
   alle: "Alle Belege",
+  offen: "Offen",
   verarbeitung: "In Verarbeitung",
   problematisch: "Problematische Belege",
 };

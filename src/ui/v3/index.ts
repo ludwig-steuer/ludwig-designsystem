@@ -345,7 +345,6 @@ export {
   type SourceDocumentDefectsProps,
   type SourceDocumentHistoryProps,
   type SourceDocumentVatProps,
-  type VatRateShare,
 } from "./entities/source-document/SourceDocumentAside";
 export { SourceDocumentView } from "./entities/source-document/SourceDocumentView";
 export {

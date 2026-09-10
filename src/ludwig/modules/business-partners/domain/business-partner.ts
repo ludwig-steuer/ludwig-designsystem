@@ -1,6 +1,11 @@
 import { z } from "zod";
 import type { RawSearchParams } from "@/ludwig/shared";
 
+/**
+ * Umsatzsteuerliche Einordnung des Partners — Spiegel des DB-CHECK
+ * `client_business_partners_vat_profile_check`. Gefüllt bei 11 % des Bestands,
+ * aber bei **75 %** der Partner, auf die gebucht wird.
+ */
 export const VAT_PROFILE = [
   "domestic_standard",
   "domestic_reverse_charge",
@@ -44,6 +49,29 @@ export const PARTNER_NATURE_LABEL: Record<TypicalNature, string> = {
   service: "Dienstleistung",
   expense: "Aufwand",
   investment: "Anlagegut",
+  mixed: "Gemischt",
+  unknown: "—",
+};
+
+/**
+ * Die Worte dazu. Sie standen bis 2026-09-10 als private Map in
+ * `MasterDataTab.tsx` — der Grund, warum das Design-System die Zeile nicht
+ * zeigen konnte: der rohe Schlüssel behauptet eine Aussage, die er nicht
+ * macht („`domestic_reverse_charge`" sagt einem Buchhalter nichts), und eine
+ * zweite Map im Set wäre die zweite Wahrheit (Befund L-223).
+ *
+ * Wie `PARTNER_NATURE_LABEL` reines Vokabular, kein Status: keine Farbe, keine
+ * Reihenfolge, kein Fortschritt — deshalb hier und nicht in der
+ * Status-Registry.
+ */
+export const PARTNER_VAT_PROFILE_LABEL: Record<VatProfile, string> = {
+  domestic_standard: "Inland · Standard",
+  domestic_reverse_charge: "Inland · Reverse Charge",
+  eu_acquisition_or_service: "EU · Innergemeinschaftlich",
+  non_eu_reverse_charge: "Drittland · Reverse Charge",
+  small_business_exemption: "Kleinunternehmer (§ 19 UStG)",
+  tax_exempt: "Steuerfrei",
+  margin_scheme: "Differenzbesteuerung",
   mixed: "Gemischt",
   unknown: "—",
 };

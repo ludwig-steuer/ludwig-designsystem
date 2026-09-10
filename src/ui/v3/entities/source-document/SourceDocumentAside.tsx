@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { DocDefect, DocDefectKind } from "@/ludwig/modules/source-docs/domain/doc-defects";
+import type { VatRateShare } from "@/ludwig/modules/invoices/domain/vat-by-rate";
 import type { Currency } from "@/ludwig/shared/money";
 
 import { Amount } from "../../primitives/Amount";
@@ -153,13 +154,15 @@ function defectTitle(defect: DocDefect): string {
 
 /* ── Umsatzsteuer ────────────────────────────────────────────────────────── */
 
-/** One tax rate of the document, already added up by the caller (E2). */
-export interface VatRateShare {
-  /** 19, 7, 0 — the percentage, not a formatted string. */
-  rate: number;
-  net: number;
-  vat: number;
-}
+/**
+ * One tax rate of the document with its sums.
+ *
+ * **From the mirror since the run of 2026-09-10**: the box defined the shape
+ * locally while the app had no split by rate (finding L-279, filed this
+ * morning, built the same day). `vatByRate()` now derives it over there, and a
+ * second definition here would be the fork that finding warned about.
+ */
+export type { VatRateShare };
 
 export interface SourceDocumentVatProps {
   net: number | null;

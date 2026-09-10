@@ -35,6 +35,7 @@ export const CHECKLIST_ROW_KEYS = [
   "statements_complete",
   "documents_handled",
   "bank_transactions_booked",
+  "bank_transactions_proposed",
   "clearing_accounts_zero",
   "export_simulation",
   "cases_proposed",
@@ -53,7 +54,7 @@ export type ChecklistRowKey = (typeof CHECKLIST_ROW_KEYS)[number];
  * **SSOT ist `docs/reference/stapelarten.md`** — diese Konstante zieht nach;
  * `__tests__/stapelarten-katalog.test.ts` hält beides zusammen (F179).
  *
- * Beim Mandantenstapel bleibt, was den Weg nach DATEV betrifft. Die vier
+ * Beim Mandantenstapel bleibt, was den Weg nach DATEV betrifft. Die fünf
  * Gate-Zeilen und `cases_proposed` messen Teilschritte, die dort gar nicht
  * laufen; `client_batch_masterdata` gilt umgekehrt nur dort (F165).
  */
@@ -64,6 +65,7 @@ export const CHECKLIST_ROW_SCOPE: Record<
   statements_complete: { regular: true, clientBatch: false },
   documents_handled: { regular: true, clientBatch: false },
   bank_transactions_booked: { regular: true, clientBatch: false },
+  bank_transactions_proposed: { regular: true, clientBatch: false },
   clearing_accounts_zero: { regular: true, clientBatch: false },
   export_simulation: { regular: true, clientBatch: true },
   cases_proposed: { regular: true, clientBatch: false },

@@ -236,6 +236,10 @@ Die Abnahme **baut keinen zweiten Kern nach**. Sie ruft die Kerne, die Agent
 und Stammdatenpflege ohnehin rufen (Abnahme, Klärung, Konvention, Freigabe);
 die Freigabe-Checkliste in Schritt 8 rechnet **dieselben Gates**, die der Agent
 passieren muss (`computeBatchGates`) — der Gate-Text ist der Zeilen-Text.
+Schritt 1 und 8 stellen je Umsatz zwei Fragen: Sachverhalt, Buchungsvorschlag
+(F187) — in Schritt 1 ist eine offene Klärung ein zulässiger Zwischenstand
+(gelb), in Schritt 8 nicht (rot), denn freigegeben wird nur ein voll gebuchtes
+Bankkonto.
 Eine **Deckungslücke aus Gate 1a** (ein Datei-Import endet vor dem
 Periodenende) macht die Zeile „Kontoauszüge lückenlos" **gelb und
 quittierpflichtig**: Auszug nachliefern oder begründet quittieren, und die
@@ -366,11 +370,21 @@ Grenze.
 verbindet alles mit allem. Der Fehler zeigt sich nicht dort, wo er entsteht,
 sondern in einer beliebigen Story, die zufällig einen Badge rendert.
 
-### R20 — Schritt 3 der Abnahme hat drei Reiter, weil er zwei Prüffragen hat
+### R20 — Ein Reiter beantwortet *was*, eine Sicht *wie angesehen* — nie beide dieselbe Frage
 Das Grundmuster aus R16 (Todo-Liste links, Detail rechts) trägt Schritt 3
 nicht: „Stimmen die Vorschläge?" zerfällt in **zwei verschiedene Fragen**, und
-jede verlangt eine andere Oberfläche. Der Schritt hat deshalb drei Reiter
-(`?tab=wk|einzel|liste`, Design `Buchungsreview.dc.html` → Screen 3):
+jede verlangt eine andere Oberfläche.
+
+Die Aufteilung steht deshalb auf **zwei Ebenen mit je einer Frage** (F186):
+oben zwei Reiter **Wiederkehrende | Einzelfälle** (`?tab=wk|einzel`) — *welche
+Art von Fall?*; innen drei Sichten **Übersicht | Liste | Sachverhalt**
+(`?sicht=uebersicht|liste|fall`, Vorgabe `fall` ohne Parameter) — *wie sehe ich
+sie an?*. Bis F186 stand „Liste" auf **beiden** Ebenen und meinte zweierlei:
+ein Reiter neben den Arten und eine Sicht neben „Sachverhalt", mit zwei
+Tabellen über zwei verschiedene Vorräte. Ein `?tab=liste` aus einem Lesezeichen
+landet heute auf `?tab=einzel&sicht=liste` statt im Leeren.
+
+Die Reiter (Design `Buchungsreview.dc.html` → Screen 3):
 
 - **Wiederkehrende** (`wk`) — Dauersachverhalte aus Regeln. Die Frage ist „ist
   die Zeile wie im Vormonat?", also steht der Vormonatsvergleich als **Spalte**
@@ -398,9 +412,29 @@ jede verlangt eine andere Oberfläche. Der Schritt hat deshalb drei Reiter
   der Zeilen, nicht aus der Ereignisart: die sagt, woher der Vorgang kam, nicht
   was der Satz tut. Ohne Wert (Satz ohne Zeilen) zeigt die Karte **kein** Badge
   statt eines geratenen.
-  Umschaltbar auf eine flache Sicht (`?sicht=liste`) für den gezielten Sprung.
-- **Liste** (`liste`) — beide Arten am Stück. Überblick und Ausdruck;
-  entschieden wird in den anderen beiden.
+
+Die drei Sichten der Einzelfälle teilen sich **eine** Tabelle und dieselben
+Worte je Zeile — Nr. · Ampel · Datum · Gegenpartei · Buchung · Beleg · Betrag ·
+Stand:
+
+- **Übersicht** (`uebersicht`) — gruppiert nach **Satzart**, je Gruppe Kopf mit
+  Anzahl und Summe, Auswahl und Sammelfreigabe. Wer 118 Sätze abnimmt, sieht
+  zuerst, *worauf er schaut*: 42 Aufwendungen, 31 Zahlungen, 12 Geldtransite.
+  Leere Arten fallen weg. Sortiert wird **nach der Nummer**, nicht nach Ampel —
+  sonst springt die Gruppe nach jeder Freigabe um.
+- **Liste** (`liste`) — derselbe Vorrat flach, mit Satzart als Spalte und den
+  entschiedenen Fällen. Überblick und gezielter Sprung.
+- **Sachverhalt** (`fall`) — der Einzelfall wie oben beschrieben.
+
+**Die Nummer ist stabil und filterfest.** Sie kommt aus der
+**Vergabereihenfolge** (`case_number` aufsteigend, `nulls last`, Rückfall
+`created_at`, dann `caseId`) und wird **vor** jedem Filter über den ganzen
+Reiter-Vorrat vergeben. Der Pager zeigt „Sachverhalt 47 von 118" und bei
+aktivem Filter „· 12 im Filter"; vor/zurück springt durch die gefilterten, die
+Nummer bleibt die aus der Gesamtliste. Nach **Belegdatum** sortiert würde ein
+nachgereichter Januar-Beleg sich vorn einschieben und alle Nummern dahinter
+verschieben — eine Nummer, die man notieren oder am Telefon nennen kann, wäre
+das nicht.
 
 Geladen wird **je Reiter nur, was er zeigt**, und im Einzel-Reiter tief nur der
 eine sichtbare Fall (`?fall=`, `application/review-case.ts`). Die

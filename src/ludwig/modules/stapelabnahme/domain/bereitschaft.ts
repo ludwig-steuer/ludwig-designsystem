@@ -16,9 +16,16 @@
  * Deckungslücken kommen über `deckungsluecke.ts` in Worte (F141) — derselbe
  * Satz, den Schritt 8 zeigt.
  *
- * Die vierte Zeile kommt nicht aus einem Gate: Belege, die **ohne Buchung**
+ * Die letzte Zeile kommt nicht aus einem Gate: Belege, die **ohne Buchung**
  * erledigt wurden. Für die Gates sind sie fertig — genau deshalb sieht sie
  * sonst niemand mehr, und genau deshalb stehen sie hier (gelb, nie rot).
+ *
+ * Dazwischen stehen die zwei Fragen je Bank-Umsatz (F187): hat er einen
+ * Sachverhalt, hat er einen Buchungsvorschlag? Gate 2a beantwortet nur die
+ * erste; die zweite hatte bis dahin niemand gestellt, und ein Umsatz mit
+ * offener Klärung fiel aus jedem Zähler heraus. Hier ist die Klärung gelb —
+ * sie ist die Arbeit, die gerade läuft; Schritt 8 ist trotzdem rot, denn
+ * freigegeben wird nur ein voll gebuchtes Bankkonto.
  */
 
 import { belegAnzeigename } from "@/ludwig/modules/source-docs";
@@ -31,6 +38,8 @@ export interface BereitschaftsPunkt {
   key: string;
   /** Ziel für den Sprung in die Beleg-Ansicht; null bei Kontoauszügen. */
   sourceDocId: string | null;
+  /** Ziel für den Sprung in den Kontoauszug-Drawer; null bei Belegen. */
+  bankTransactionId?: string | null;
   label: string;
   /** Belegdatum, ISO; null wo es keins gibt. */
   datum: string | null;
@@ -40,7 +49,13 @@ export interface BereitschaftsPunkt {
 }
 
 export interface BereitschaftsZeile {
-  key: "belege_periode" | "belege_alle" | "auszuege" | "ohne_buchung";
+  key:
+    | "belege_periode"
+    | "belege_alle"
+    | "auszuege"
+    | "transactions_case"
+    | "transactions_proposal"
+    | "ohne_buchung";
   label: string;
   stand: BereitschaftsStand;
   /** „6 offen" bzw. „vollständig" — rechts in der Zeile. */
@@ -57,6 +72,67 @@ export interface GateEingang {
   openCount: number;
   open: Array<Record<string, unknown>>;
   warnings?: Array<Record<string, unknown>>;
+}
+
+/**
+ * Was die Funktion aus `loadBankBookingCoverage` braucht — strukturell, nicht
+ * als Import: die Domain zieht nichts aus `bank-transactions` (Deep-Import-
+ * Regel), und die Query-Struktur erfüllt diese Form.
+ */
+export interface CoverageEingang {
+  transactionsTotal: number;
+  withoutCase: number;
+  withoutProposal: number;
+  inClarification: number;
+  rows: Array<{
+    bankTransactionId: string;
+    postingDate: string;
+    amount: number;
+    counterpartyName: string | null;
+    purpose: string | null;
+    reason: "no_case" | "clarification_pending" | "agent_open";
+    clarificationSince: string | null;
+    caseNumber: string | null;
+  }>;
+}
+
+const EUR = new Intl.NumberFormat("de-DE", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const TAG = new Intl.DateTimeFormat("de-DE", {
+  timeZone: "Europe/Berlin",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
+/** ISO-Tag → `09.09.2026`, immer Berlin (sonst 2 h daneben). */
+function fmtDay(iso: string | null): string {
+  if (!iso) return "—";
+  return TAG.format(new Date(iso));
+}
+
+function umsatzPunkt(r: CoverageEingang["rows"][number]): BereitschaftsPunkt {
+  const problem =
+    r.reason === "no_case"
+      ? "Ohne Sachverhalt (Gate 2a)."
+      : r.reason === "clarification_pending"
+        ? `Klärung offen an Kanzlei/Mandant seit ${fmtDay(r.clarificationSince)}` +
+          `${r.caseNumber ? `, Sachverhalt ${r.caseNumber}` : ""}.`
+        : `Beim Agenten offen${r.caseNumber ? ` (${r.caseNumber})` : ""}.`;
+  return {
+    key: `tx-${r.bankTransactionId}`,
+    sourceDocId: null,
+    bankTransactionId: r.bankTransactionId,
+    label: `${fmtDay(r.postingDate)} · ${(r.amount < 0 ? "−" : "") + EUR.format(Math.abs(r.amount))} € · ${
+      r.counterpartyName ?? r.purpose ?? "—"
+    }`,
+    datum: r.postingDate,
+    problem,
+    hinweis: r.reason === "clarification_pending",
+  };
 }
 
 function str(v: unknown): string | null {
@@ -117,6 +193,14 @@ export function bereitschaftsZeilen(
   periodTo: string,
   /** Belege, die ohne Buchung erledigt wurden (`application/belege-ohne-buchung.ts`). */
   ohneBuchung: { punkte: BereitschaftsPunkt[]; total: number } = { punkte: [], total: 0 },
+  /** Deckung je Bank-Umsatz (`loadBankBookingCoverage`, F187). */
+  coverage: CoverageEingang = {
+    transactionsTotal: 0,
+    withoutCase: 0,
+    withoutProposal: 0,
+    inClarification: 0,
+    rows: [],
+  },
 ): BereitschaftsZeile[] {
   const belege = gate3f.open.map(belegPunkt);
   // Der Gate-Zähler ist ungedeckelt, die Liste nicht. Die Aufteilung kann
@@ -124,6 +208,13 @@ export function bereitschaftsZeilen(
   const nichtGelistet = Math.max(0, gate3f.openCount - gate3f.open.length);
   const periode = belege.filter((p) => p.datum != null && p.datum >= periodFrom);
   const nurAltlast = periode.length === 0 && gate3f.openCount > 0;
+
+  const ohneFall = coverage.rows.filter((r) => r.reason === "no_case").map(umsatzPunkt);
+  const ohneVorschlag = coverage.rows.filter((r) => r.reason !== "no_case").map(umsatzPunkt);
+  // „Vorschlag ODER offene Klärung" ist in Schritt 1 zulässig: die Klärung ist
+  // die Arbeit, die gerade läuft. Freigegeben wird trotzdem nicht — das sagt
+  // Schritt 8 (dort rot).
+  const echtOffen = Math.max(coverage.withoutProposal - coverage.inClarification, 0);
 
   const auszugPunkte = [
     ...gate1a.open.map((o, i) => kontoPunkt(o, i, false, periodTo)),
@@ -160,6 +251,32 @@ export function bereitschaftsZeilen(
       leerText: "Jedes aktive Zahlungskonto deckt den Zeitraum ab, der Saldenanschluss stimmt.",
       punkte: auszugPunkte,
       nichtGelistet: Math.max(0, gate1a.openCount - gate1a.open.length),
+    },
+    {
+      key: "transactions_case",
+      label: "Alle Umsätze haben einen Sachverhalt",
+      stand: coverage.withoutCase > 0 ? "offen" : "ok",
+      standText: zahl(coverage.withoutCase, ohneFall.length < coverage.withoutCase),
+      leerText: "Jeder Umsatz des Zeitraums hängt an einem Sachverhalt.",
+      punkte: ohneFall,
+      nichtGelistet: Math.max(0, coverage.withoutCase - ohneFall.length),
+    },
+    {
+      key: "transactions_proposal",
+      label: "Alle Umsätze haben einen Buchungsvorschlag",
+      stand: echtOffen > 0 ? "offen" : coverage.inClarification > 0 ? "hinweis" : "ok",
+      standText:
+        coverage.withoutProposal === 0
+          ? "vollständig"
+          : [
+              echtOffen > 0 ? `${echtOffen} offen` : null,
+              coverage.inClarification > 0 ? `${coverage.inClarification} in Klärung` : null,
+            ]
+              .filter((t) => t !== null)
+              .join(", "),
+      leerText: "Jeder Umsatz des Zeitraums trägt einen Buchungsvorschlag oder einen Verzichtsgrund.",
+      punkte: ohneVorschlag,
+      nichtGelistet: Math.max(0, coverage.withoutProposal - coverage.rows.length),
     },
     {
       key: "ohne_buchung",
