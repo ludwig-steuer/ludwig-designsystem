@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| Status | offen — vorgemerkt am 2026-09-10, geht 0152 voraus |
-| Stufe | `patterns/` — Nachfolger bzw. Verallgemeinerung von `MasterDetail` (0116) |
+| Status | **gebaut 2026-09-10** — Abnahme offen (nicht durch den Bauenden) |
+| Stufe | `patterns/Columns.tsx` — **neben** `MasterDetail` (0116), nicht als dessen Nachfolger; die beiden haben verschiedene `@when` |
 | Quelle | **Owner-Entscheid 2026-09-10**, überbracht von `ludwig-cto`; Brief F196 §2, §5, §5a, §8 (`ludwig/app` staging `672665f8`) |
 | Blockiert | 0152 (Sachverhalts-Szenarien) — deren Übersicht ist `list \| detail \| sidebar` |
 | Berührt | `docs/detailseiten-standard.md` §1.2 („drei Layouts") · `docs/seiten/sachverhalt-detail.md` (D-L1-Entscheid vom 2026-09-08) · `patterns/DetailView.tsx` (0127) |
-| Angelegt | Claude, 2026-09-10 |
+| Angelegt / gebaut | Claude, 2026-09-10 |
 
 ## Auftrag, wörtlich aus dem Entscheid
 
@@ -57,9 +57,47 @@ Standards muss das nachziehen — mit der Zuordnung:
    Muster muss sagen, welche Spalte zuerst weicht — und die Antwort ist nicht
    „die dritte", wenn dort die Rückfragen stehen.
 
-## Warum nicht sofort
+## Beantwortet von `ludwig-cto` (2026-09-10)
 
-Diese Aufgabe ist der Träger für 0152, nicht dessen Nebenprodukt: wer die
-Sachverhalts-Übersicht baut, ohne das Muster vorher zu schneiden, baut die
-dritte Spalte einmal für den Sachverhalt und danach noch einmal für alle
-anderen. Der Owner setzt die Reihenfolge.
+| Frage | Antwort |
+|---|---|
+| Freie Zahlen oder benannte Stufen? | **Benannte Stufen.** „Nach Gewicht variieren" heißt: die Seite wählt eine Stufe, sie erfindet keine Zahl. Die gemessenen 460 und 960 sind die ersten beiden; eine dritte für die schmale Notizspalte wird an der Sachverhalts-Übersicht **gemessen**, nicht geschätzt |
+| Was weicht beim Umbruch? | **Die dritte Spalte fällt unter die zweite, die erste nie.** Tragend ist der Strang, nicht die Notiz (Brief §5; Vorschlag an den Owner, noch nicht bestätigt — Alternative: Strang einklappbar) |
+| DATEV-Eintrag in der Timeline | Gleichrangig in der **Reihenfolge**, sichtbar verschieden in der **Zeile**: der Eintrag trägt das Wort „DATEV" als Quelle, Ludwig-Einträge ihren Buchungszustand aus der Achse `buchung`. Kein Icon allein (V7). In Spalte 2 hat der DATEV-Eintrag keine Handlungen |
+
+## Gebaut: `patterns/Columns.tsx`
+
+Vier Muster, zwei benannte Stufen, ein Umbruch — und `MasterDetail` bleibt,
+wo es ist. **Es wird nicht abgelöst:** es trägt „Liste mit Detail daneben"
+außerhalb eines Reiterrumpfs (Auswahl in einem Dialog, ein Log-Browser), und
+das ist eine andere Frage als „wie ist dieser Reiter geschnitten". Zwei
+Bausteine mit verschiedenen `@when`, kein Nachfolger.
+
+**Alle Spalten wachsen** (`flex-grow ≥ 1`), auch die schmalen — sonst bleibt
+eine umgebrochene Spalte schmal oben stehen, statt die Zeile zu nehmen.
+Gemessen 2026-09-10 bei 1100 px: mit `grow: 0` stand die Begleitspalte unter
+der Arbeitsfläche und war 360 statt 1068 px breit. Das Verhältnis machen die
+**Gewichte** (1 zu 2), nicht das Wachstumsverbot.
+
+### Messung (Spaltenbreiten in px)
+
+| Muster | 1440 | 1100 | 820 |
+|---|---|---|---|
+| `list-detail-aside` | 462 · 544 · 362, eine Zeile | 476 · 572, Notizen darunter über die **volle** Breite (1068) | drei Zeilen à 788 |
+| `split` | 694 · 694 | 524 · 524 | 384 · 384 |
+| `main-aside` (`table`) | 1005 · 383 | 1068, Begleiter darunter (1068) | 788 · 788 |
+
+Die dritte Spalte weicht also nach unten und **verschwindet nicht**, und die
+erste bleibt in jeder Breite stehen — wie im Brief verlangt.
+
+## Was 0152 noch braucht
+
+- **Die dritte Stufe** für die schmale Notizspalte — sie wird an der
+  Sachverhalts-Übersicht gemessen, sobald es dort echte Inhalte gibt.
+- **`DetailView` schmaler machen:** `aside` und `minDetail` gehören künftig
+  ins Muster, nicht in den Rahmen. Solange nur der Partner ihn nutzt (und der
+  braucht keine Randspalte), kostet das nichts — es soll aber passieren,
+  bevor die zweite Seite eine Randspalte über den Rahmen setzt.
+- **Standard §1.2 und `docs/seiten/sachverhalt-detail.md` nachziehen.** Steht
+  noch aus: solange 0152 nicht gebaut ist, wäre die neue Regel im Standard
+  eine Ankündigung ohne zweiten Fall.

@@ -229,10 +229,18 @@ const PP_ICON: Record<CheckItem["state"], StateKind> = {
   open: "open",
 };
 
-/** One check, drawn the same way wherever it stands — alone or unfolded. */
+/**
+ * One check, drawn the same way wherever it stands — alone or unfolded.
+ *
+ * **The reason carries the state's weight** (2026-09-10, owner). On a green
+ * check the sentence is a footnote and stays quiet; on a yellow or red one it
+ * is the most important thing in the row — „Sonst 5401, hier —" is *the*
+ * finding, and grey type made it look like an aside. The row therefore hands
+ * its state down to the sentence.
+ */
 function CheckRow({ item }: { item: CheckItem }) {
   return (
-    <div className="v2pp__row">
+    <div className={`v2pp__row v2pp__row--${item.state}`}>
       <StateIcon state={PP_ICON[item.state]} />
       <span style={{ flex: "1 1 auto", minWidth: 0 }}>
         <span className="v2pp__q">

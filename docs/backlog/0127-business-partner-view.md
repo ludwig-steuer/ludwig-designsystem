@@ -125,10 +125,14 @@ Variabel (aus dieser Spec):
 
 ## Offene Fragen
 
-1. **Führt der Zähler in die gefilterte Liste?** Belegliste und
-   Sachverhaltsliste brauchen dafür einen Filter auf `business_partner_id`.
-   *Ohne Antwort:* der Zähler steht ohne Weg — und das Fehlen ist ein Befund
-   für die App.
+1. ~~**Führt der Zähler in die gefilterte Liste?**~~ **Beantwortet am
+   2026-09-10** (ludwig-manager, geprüft): die **Belegliste** filtert wirklich
+   (`?partner=<uuid>` → `parseInvoiceFilter` → `businessPartnerId`), der Weg
+   steht. Die **Sachverhaltsliste** nicht: `?partner=` öffnet dort nur den
+   Drawer, das Filterfeld `counterpartyPartnerId` existiert im Kern
+   (`listCasesForClient`, F101), die Listenseite bildet den Parameter aber
+   nicht darauf ab. Der Sachverhalts-Zähler hat also **noch keinen Weg** — App-Befund,
+   von der App-Seite als Auftrag übernommen.
 2. **Wandern die drei bestehenden Rahmen auf `DetailView`?** *Ohne Antwort:*
    nein, sie bleiben; der Owner gibt die Migration frei.
 

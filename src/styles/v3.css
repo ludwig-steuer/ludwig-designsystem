@@ -1129,6 +1129,46 @@ select.v2in { padding-right: 26px; }
  * Der Ersatz für das Modal (L2): Liste links, Detail rechts, Detail bleibt
  * beim Scrollen stehen. Auswahl über `?sel=` — nicht über den Drawer-Param.
  */
+/* --- Die vier Spaltenmuster (0154) ---------------------------------------
+ * Owner-Entscheid 2026-09-10: der Rumpf eines Reiters ist immer eines von
+ * vier Mustern. Die Breite der Arbeitsfläche kommt als benannte Stufe über
+ * `--v2cols-main` — die Seite wählt eine Stufe, sie erfindet keine Zahl.
+ *
+ * Umgebrochen wird über den Flex-Sockel, nicht über eine `@media`-Regel: die
+ * Muster stehen einmal auf einer ganzen Seite und einmal in einem Drawer,
+ * und ein Fenstermaß sähe beide Male dasselbe. Dieselbe Lehre wie bei
+ * `.v2md--detail-breit` (0063) und `.v2doccard` (0071).
+ *
+ * **Was zuerst weicht, ist die dritte Spalte, nie die erste.** Wo drei
+ * Spalten stehen, ist die erste die Arbeitsfläche (der Strang) und die dritte
+ * das Mitgelesene (Notizen) — die dritte fällt nach unten, sie verschwindet
+ * nicht. */
+.v2cols { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: start; }
+.v2cols__list { flex: 1 1 380px; min-width: 0; }
+.v2cols__main { flex: 2 1 var(--v2cols-main, 460px); min-width: 0; }
+.v2cols__aside { flex: 1 1 320px; min-width: 0; }
+
+/* `list | detail`: die Liste schmal, die Arbeitsfläche breit.
+   **Alle Spalten wachsen** (`flex-grow ≥ 1`), auch die schmalen: nur so nimmt
+   eine umgebrochene Spalte die ganze Zeile, statt schmal oben stehen zu
+   bleiben. Gemessen 2026-09-10 bei 1100 px — mit `grow: 0` stand die
+   Begleitspalte unter der Arbeitsfläche und war 360 statt 1068 px breit. Das
+   Verhältnis machen die Gewichte (1 zu 2), nicht das Wachstumsverbot. */
+.v2cols--list-detail > .v2cols__list { flex: 1 1 440px; }
+
+/* `list | detail | sidebar`: dieselbe Ordnung, dazu die mitgelesene Spalte.
+   Sie steht zuletzt in der Quelle und fällt deshalb von selbst nach unten,
+   sobald die Zeile nicht mehr reicht — ohne eine Regel, die sie versteckt. */
+.v2cols--list-detail-aside > .v2cols__list { flex: 1 1 420px; }
+
+/* `50 | 50`: zwei gleiche Hälften. Hier gibt es keine Arbeitsfläche und keine
+   Beigabe — beide Seiten sind die Aussage (Original gegen Extraktion). */
+.v2cols--split > .v2cols__main,
+.v2cols--split > .v2cols__aside { flex: 1 1 380px; }
+
+/* `master | sidebar`: eine Fläche mit schmalem Begleiter. */
+.v2cols--main-aside > .v2cols__aside { flex: 1 1 360px; }
+
 .v2md { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--space-5); align-items: start; }
 .v2md__detail { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
 /* Umgekehrtes Gewicht: schmale Liste links, breites Detail rechts — für
@@ -1291,8 +1331,20 @@ select.v2in { padding-right: 26px; }
 }
 .v2pp__row:last-child { border-bottom: none; }
 .v2pp__q { font-weight: 500; color: var(--color-text); }
-.v2pp__why { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; line-height: 1.5; }
-.v2pp__code { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-subtle); }
+/* **Eine eigene Zeile.** Der Block war ein `span` ohne `display`, also inline —
+   die Begründung klebte hinter dem Prüfcode („P-KONTOSonst 5401, hier —"), und
+   `margin-top` tat an einem Inline-Element nichts. Gemeldet vom Owner
+   2026-09-10. */
+.v2pp__why { display: block; font-size: 12px; color: var(--color-text-muted); margin-top: 2px; line-height: 1.5; }
+/* Bei einem Befund ist die Begründung **die** Auskunft der Zeile, nicht ihre
+   Fußnote: gelb, rot und offen tragen sie im Textton. Grün bleibt leise — dort
+   sagt der Haken schon alles, und hundert schwarze Sätze untereinander wären
+   hundert Behauptungen von Wichtigkeit. */
+.v2pp__row--yellow > span > .v2pp__why,
+.v2pp__row--red > span > .v2pp__why,
+.v2pp__row--open > span > .v2pp__why { color: var(--color-text); }
+/* Luft vor dem Prüfcode: er steht hinter der Frage, nicht an ihr. */
+.v2pp__code { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-subtle); margin-left: var(--space-1); }
 
 /* --- Meldungen: Fehler blockieren, Warnungen brauchen eine Quittung ------- */
 .v2msg { display: flex; align-items: flex-start; gap: 8px; padding: 9px 12px; font-size: 12.5px; line-height: 1.5; border-radius: var(--radius-md); }
@@ -1533,6 +1585,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .ki__quote { font-style: italic; color: var(--color-text-subtle); }
 .ki__src svg { align-self: center; flex: 0 0 auto; }
+/* Eine Quelle, die man aufschlagen kann (0155): der Knopf sieht aus wie die
+   Zeile daneben, nur dass der Zeiger etwas verspricht. Kein zweites Aussehen
+   für dieselbe Sache — verschieden ist, was passiert, nicht wie es aussieht. */
+.ki__src--open {
+  background: none; border: none; padding: 0; margin: 0; width: 100%;
+  font: inherit; color: inherit; text-align: left; cursor: pointer;
+}
+.ki__src--open:hover .ki__art { color: var(--color-primary); }
+.ki__src--open:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 /* Dasselbe Paket in einer Zeile (0151): Urteil, Konfidenz, Zahl der Befunde.
    Der Text steht im Aufklapper der Zeile, nicht hier — eine Begründung von
    drei Zeilen je Zeile macht aus der Liste eine Wand. */

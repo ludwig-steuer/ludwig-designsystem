@@ -51,10 +51,28 @@ const QUELLE: Record<SourceKind, { Icon: LucideIcon; label: string }> = {
 export interface AiSource {
   key: string;
   art: SourceKind;
-  label: string;
+  /**
+   * What the source is **called** — „Rechnung 93846778", „§ 15 UStG".
+   *
+   * **Never an id.** Until 2026-09-10 a document source printed its UUID here,
+   * because the caller had nothing else: `442c83b4-3063-46a4-…` as the only
+   * word about a source is not information, it is a key nobody can look up.
+   * Without a name only the kind and the quote stand there — and both say more
+   * than an id.
+   */
+  label?: string | null;
   /** Wörtliches Zitat aus der Quelle, wenn es eines gibt. */
   quote?: string | null;
   href?: string | null;
+  /**
+   * **Open** the source without leaving the page (0155).
+   *
+   * The way into the entity's drawer: a document belongs beside the work, not
+   * in its place. This component knows no entity — it calls the callback, and
+   * the caller opens whatever is right. Without `onOpen` and without `href`
+   * the source stays text.
+   */
+  onOpen?: () => void;
 }
 
 /**
@@ -184,10 +202,21 @@ export function AiBookingNotesBody({
               <>
                 <Icon size={13} strokeWidth={1.5} />
                 <span className="ki__art">{label}</span>
-                <span>{s.label}</span>
+                {s.label ? <span>{s.label}</span> : null}
                 {s.quote ? <span className="ki__quote">„{s.quote}“</span> : null}
               </>
             );
+            // Opening beside beats jumping away: the document belongs **next
+            // to** the work. Only where there is no way beside it does the
+            // source become a link, and then in a new window — a half-checked
+            // entry must not be lost.
+            if (s.onOpen) {
+              return (
+                <button type="button" className="ki__src ki__src--open" key={s.key} onClick={s.onOpen}>
+                  {inner}
+                </button>
+              );
+            }
             return s.href ? (
               <a className="ki__src" href={s.href} key={s.key} target="_blank" rel="noreferrer">
                 {inner}

@@ -211,6 +211,11 @@ export {
 } from "./patterns/MasterDetail";
 export { DetailView } from "./patterns/DetailView";
 export {
+  Columns,
+  type ColumnPattern,
+  type ColumnWidth,
+} from "./patterns/Columns";
+export {
   TodoList,
   isOpen,
   nextOpen,

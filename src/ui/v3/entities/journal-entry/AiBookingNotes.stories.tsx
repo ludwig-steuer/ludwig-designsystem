@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { useState } from "react";
 
 import { AmountCell, MonoCell } from "../../primitives/Cells";
 import { Card, CardHead } from "../../primitives/Table";
@@ -29,6 +30,23 @@ type Story = StoryObj<typeof AiBookingNotesCell>;
 const QUELLEN: AiSource[] = [
   { key: "1", art: "regel", label: "Wiederkehr: Miete Musterstraße" },
   { key: "2", art: "beleg", label: "RE-2026-0042", quote: "Miete August 2026" },
+];
+
+/**
+ * Quellen, wie sie **heute aus der App kommen**: der Beleg trägt keine
+ * Bezeichnung, sondern seine Kennung. Genau das zeigt die Komponente seit dem
+ * 2026-09-10 nicht mehr — eine UUID ist kein Name, sie ist ein Schlüssel, den
+ * niemand nachschlagen kann.
+ *
+ * Stehen bleiben Art und Zitat, und das sagt mehr als „442c83b4-3063-…".
+ */
+const QUELLEN_OHNE_NAMEN: AiSource[] = [
+  {
+    key: "1",
+    art: "beleg",
+    quote: "Rechnung der Musterfirma Fahrradteile GmbH vom 16.07.2026 über 25,41 EUR",
+  },
+  { key: "2", art: "regel", label: "Präzedenz: dieselbe Buchung im Juni" },
 ];
 
 /**
@@ -112,6 +130,44 @@ export const Box: Story = {
       />
     </div>
   ),
+};
+
+/**
+ * **Quellen ohne Namen — und der Beleg, den man aufschlagen kann** (0155).
+ *
+ * Links: was die App heute liefert. Der Beleg trägt nur seine Kennung, und die
+ * zeigt die Komponente nicht mehr; Art und Zitat bleiben, und die sagen mehr.
+ *
+ * Rechts: dieselbe Quelle mit `onOpen`. Sie wird ein Knopf und schlägt den
+ * Beleg **neben** der Arbeit auf, statt von ihr weg zu springen — die halb
+ * geprüfte Buchung darf nicht verlorengehen. Welcher Drawer sich öffnet, weiß
+ * der Aufrufer; die Komponente kennt keine Entität.
+ */
+export const Quellen: Story = {
+  render: function Aufschlagen() {
+    const [offen, setOffen] = useState<string | null>(null);
+    return (
+      <div style={{ display: "grid", gap: 20, maxWidth: 720 }}>
+        <AiBookingNotes
+          verdict="confirm"
+          confidence="green"
+          rationale="Konto und Kreditor wie bei der Rechnung desselben Lieferanten im Juni."
+          sources={QUELLEN_OHNE_NAMEN}
+        />
+        <AiBookingNotes
+          verdict="confirm"
+          confidence="green"
+          rationale="Dieselben Quellen, diesmal mit einem Weg hinein."
+          sources={QUELLEN_OHNE_NAMEN.map((q) =>
+            q.art === "beleg" ? { ...q, onOpen: () => setOffen(q.key) } : q,
+          )}
+        />
+        <p className="v2muted" style={{ margin: 0 }}>
+          {offen ? "Der Aufrufer öffnet jetzt seinen Beleg-Drawer." : "Auf die Quelle Beleg klicken."}
+        </p>
+      </div>
+    );
+  },
 };
 
 /* ── Im Einsatz: die Buchungsübersicht der Stapelabnahme ─────────────────── */
