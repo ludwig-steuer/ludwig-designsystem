@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
-# Spiegelt aus Ludwig herüber, was hier gebraucht, aber drüben gepflegt wird:
-# die Interfaces (Datenmodell + Domänen-Typen) nach src/ludwig/ und die
-# maßgebliche Doku nach docs/ludwig/.
-#
-# Beides sind KOPIEN — nie hier bearbeiten, Änderungen gehören nach
-# ludwig/app. Dieses Script neu laufen lassen, wenn sich drüben etwas ändert.
+# Mirrors what ludwig/app maintains but this repo needs: the interfaces
+# (data model + domain types) into src/ludwig/ and the authoritative docs into
+# docs/ludwig/. Both are COPIES — never edit them here; rerun this script.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
-# Die App liegt neben dem Repo (Werkstatt) oder zwei Ebenen höher (als
-# Submodule unter app/packages/designsystem) — erster Treffer gewinnt.
+# The app sits next to this repo or two levels up (as the submodule under
+# app/packages/designsystem) — first hit wins.
 if [ -z "${LUDWIG_SRC:-}" ]; then
   for cand in "$REPO/../app/apps/web/src" "$REPO/../../apps/web/src"; do
     [ -d "$cand" ] && { LUDWIG_SRC="$cand"; break; }
@@ -23,19 +20,13 @@ DOCS="$REPO/docs/ludwig"
 [ -d "$SRC" ] || { echo "Ludwig-Quelle nicht gefunden: $SRC (LUDWIG_SRC setzen)"; exit 1; }
 SRC="$(cd "$SRC" && pwd)"
 
-# --- Aus HEAD spiegeln, nicht aus dem Arbeitsbaum ---------------------------
-# Bis 2026-09-10 nahm der Lauf, was drüben gerade auf der Platte lag. Beim Lauf
-# vom 2026-09-09 waren das vier uncommittete Dateien einer fremden Sitzung: der
-# Spiegel trug eine Stand-Notiz, die für seinen Inhalt nicht stimmte — und das
-# ist schlimmer als ein veralteter Spiegel, weil niemand es nachprüfen kann.
-# Gemeldet von `ludwig-manager`, behoben hier.
+# --- Mirror from HEAD, not from the working tree ------------------------------
+# Uncommitted files of another session once ended up in the mirror.
 #
-#   pnpm sync:ludwig              → HEAD der App
-#   LUDWIG_REF=<sha> pnpm sync:…  → genau dieser Stand
+#   pnpm sync:ludwig              → the app's HEAD
+#   LUDWIG_REF=<sha> pnpm sync:…  → exactly this commit
 #
-# `git archive` schreibt einen Baum, den es so wirklich gab. Ohne Git-Repo
-# drüben (etwa in einem entpackten Archiv) bleibt es beim Arbeitsbaum — dann
-# steht das aber im Protokoll.
+# Without a git repo over there it falls back to the working tree and logs it.
 REF="${LUDWIG_REF:-HEAD}"
 if [ -d "$APP/.git" ]; then
   REF_HASH="$(git -C "$APP" rev-parse --verify "$REF^{commit}")"
@@ -53,10 +44,8 @@ fi
 rm -rf "$DST"
 mkdir -p "$DST"
 
-# Pures Domänenwissen: DATEV-Regeln, geteilte Helfer, Fachtypen je Modul.
-# Dazu die Status-Registry (0080): sie liegt in der App unter `ui/status/`,
-# ist aber reines Vokabular und seit ludwig/app cf681257 importfrei — der
-# Ordner macht die Spiegelbarkeit nicht, die Import-Freiheit macht sie.
+# Pure domain knowledge: DATEV rules, shared helpers, domain types per module,
+# and the status registry (0080) — mirrorable because it has no imports.
 rsync -a --prune-empty-dirs \
   --exclude='__tests__/' \
   --exclude='*.test.ts' \
@@ -69,33 +58,27 @@ rsync -a --prune-empty-dirs \
   --exclude='*' \
   "$SRC/" "$DST/"
 
-# Server-gekoppelte Domain-Dateien gehören nicht ins Design-System. Entschieden
-# wird am **Import**, nicht am Text: ein Volltext-Grep hat zweimal in zwei Tagen
-# eine reine Datei aussortiert, weil das Wort in einem Kommentar oder an einer
-# Nachbarfunktion stand (`scripts/mirror-filter.mjs`, dort auch die Selbstprüfung).
+# Server-coupled domain files stay out. Imports decide, not text
+# (`scripts/mirror-filter.mjs`, self-test there).
 node "$(dirname "$0")/mirror-filter.mjs" "$DST" | xargs -r rm -f
 
-# Import-Pfade auf den Spiegel umbiegen.
+# Point import paths at the mirror.
 find "$DST" -name '*.ts' -exec sed -i '' \
   -e 's|from "@/core/|from "@/ludwig/core/|g' \
   -e 's|from "@/shared|from "@/ludwig/shared|g' \
   -e 's|from "@/modules/|from "@/ludwig/modules/|g' {} +
 
-# Modul-Barrels neu erzeugen: der echte Barrel in ludwig exportiert auch
-# Infrastruktur (DB, Server Actions) — hier soll er nur die Fachtypen zeigen.
+# Regenerate module barrels: the app's barrel also exports infrastructure;
+# here it shows only the domain types.
 node "$(dirname "$0")/mirror-barrels.mjs" "$DST"
 
 echo "$(find "$DST" -name '*.ts' | wc -l | tr -d ' ') Interface-Dateien gespiegelt nach src/ludwig/"
 
-# --- Stand festhalten -------------------------------------------------------
-# Der Spiegel ist seit 2026-09-07 eingefroren (Owner: das Set wird fertig, dann
-# zieht die App in einem Zug nach). Damit niemand raten muss, auf welchem Stand
-# er steht, schreibt der Zug ihn hin — `check:mirror` vergleicht ihn mit dem
-# Arbeitsbaum der App und meldet eine Abweichung als **Hinweis**, nicht als
-# Fehler.
+# --- Record the commit --------------------------------------------------------
+# The mirror is frozen since 2026-09-07; `check:mirror` compares this note with
+# the app and reports a difference as a hint, not an error.
 if [ -d "$APP/.git" ]; then
-  # Der **gespiegelte** Commit, nicht der, auf dem die App gerade steht: mit
-  # `LUDWIG_REF` sind das zwei verschiedene, und die Notiz gehört dem Inhalt.
+  # The mirrored commit, not the app's current one — with LUDWIG_REF they differ.
   HASH="$REF_HASH"
   ZWEIG="$(git -C "$APP" branch --show-current || echo '?')"
   cat > "$DST/GESPIEGELT_AUS.json" <<JSON
@@ -109,10 +92,10 @@ JSON
   echo "Stand vermerkt: $ZWEIG ${HASH:0:8}"
 fi
 
-# --- Doku aus der App -------------------------------------------------------
-# NUR was drüben SSOT ist: App-Architektur und App-Bestand. Die Designsprache
-# gehört diesem Repo (docs/design-guidelines.md) und wird NICHT gespiegelt.
-# Erweitern: eine Zeile "<pfad relativ zu ludwig/app>" ergänzen.
+# --- Docs from the app --------------------------------------------------------
+# Only what is the app's single source of truth: architecture and inventory.
+# The design language belongs to this repo and is not mirrored.
+# To extend: add a line "<path relative to ludwig/app>".
 DOCS_TO_MIRROR=(
   "GLOSSARY.md"                                          # Namens-SSOT: DE/EN je Begriff
   "docs/topics/web-ui.md"                                # Code-Regeln R1–R21
@@ -122,8 +105,7 @@ rm -rf "$DOCS"
 mkdir -p "$DOCS"
 n=0
 for d in "${DOCS_TO_MIRROR[@]}"; do
-  # Aus demselben Commit wie der Code — sonst trüge ein Lauf Typen von gestern
-  # und eine Doku von heute.
+  # Same commit as the code — otherwise types from yesterday meet docs from today.
   if [ -n "$REF_HASH" ] && git -C "$APP" cat-file -e "$REF_HASH:$d" 2>/dev/null; then
     git -C "$APP" show "$REF_HASH:$d" > "$DOCS/$(basename "$d")"
     n=$((n + 1))
@@ -180,10 +162,10 @@ MD
 
 echo "$n Dokumente gespiegelt nach docs/ludwig/"
 
-# --- Drift-Wache für die Design-Doku ----------------------------------------
-# Die gehört uns und wird NICHT überschrieben. Solange die alten Fassungen
-# drüben liegen, kann dort jemand ergänzen — das bliebe sonst unbemerkt.
-# Beim Einbinden als Submodule fallen die Quellen weg und die Wache schweigt.
+# --- Drift watch for the design docs -----------------------------------------
+# They are ours and are not overwritten. While the old versions still sit in the
+# app, someone could extend them there unnoticed. As a submodule the sources
+# disappear and the watch goes quiet.
 STAMPS="$REPO/.design-doc-stamps"
 declare -a OWNED=(
   "docs/ludwig-UX-guidelines-v2.md|design-guidelines.md"

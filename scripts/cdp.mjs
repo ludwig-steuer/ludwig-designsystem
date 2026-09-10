@@ -1,34 +1,23 @@
 /**
- * Messen im Browser, ohne dass ein Browser übrig bleibt.
+ * Measure in the browser without leaving a browser behind.
  *
- * Jede Abnahme in diesem Repo misst gegen den laufenden Dev-Server (Port 6107)
- * über das Chrome DevTools Protocol. Bis 2026-09-07 hatte jeder Prüfer seine
- * eigene Kopie dieses Helfers im Scratchpad — und jede Kopie ließ ihren Chrome
- * stehen, sobald das Messskript vor `proc.kill()` abbrach. Gezählt wurden an
- * einem Tag **388 Prozesse mit 38 GB**; die Maschine ging in die Knie, und die
- * fünf Prüfer einer Welle starben mitsamt ihrer Arbeit.
+ * Every acceptance measures the dev server (port 6107) over the Chrome
+ * DevTools Protocol. Before this shared helper, each reviewer's copy left its
+ * Chrome running when a script threw — 388 processes and 38 GB in one day.
  *
- * Deshalb steht der Helfer jetzt hier, einmal, und räumt selbst auf:
- *
- * - Der Browser läuft in einer **eigenen Prozessgruppe** und wird über sie
- *   beendet — sonst überleben Renderer, GPU- und Utility-Prozesse ihren Vater
- *   (auf ein Hauptfenster kommen rund zwei Dutzend).
- * - `exit`, `SIGINT`, `SIGTERM` und eine unbehandelte Ausnahme führen alle
- *   zum selben Abräumen. Ein Skript, das mitten in der Messung wirft, lässt
- *   nichts stehen.
- * - Das Profilverzeichnis wird mitgelöscht.
- *
- * Aufruf im Messskript:
+ * - The browser runs in its own process group and is killed through it;
+ *   renderer and GPU children outlive their parent otherwise.
+ * - `exit`, signals and uncaught errors all clean up, profile included.
  *
  *     import { launch, Session, url } from "../../scripts/cdp.mjs";
- *     const proc = await launch();          // Port aus CDP_PORT, sonst frei gewählt
+ *     await launch();                  // port from CDP_PORT, else derived from the pid
  *     const s = await Session.open();
  *     await s.goto(url("v3-primitives-…--filled"));
- *     await s.resize(1400);
  *     console.log(await s.eval(`return document.title`));
- *     // kein `proc.kill()` nötig — passiert von selbst
+ *     process.exit(0);                 // the open WebSocket keeps node alive otherwise
  *
- * `pnpm cdp:clean` räumt weg, was frühere Läufe hinterlassen haben.
+ * `--clean` removes leftovers older than ten minutes — of every session on
+ * this machine, so a long measurement of another session dies with them.
  */
 import { spawn, execSync } from "node:child_process";
 import { rmSync } from "node:fs";
@@ -38,14 +27,14 @@ const CHROME =
   process.env.CHROME_BIN ||
   `${process.env.HOME}/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`;
 
-/** Ein freier Port je Lauf: zwei Prüfer gleichzeitig dürfen sich nicht stören. */
+/** One port per run, so parallel reviewers do not collide. */
 const PORT = Number(process.env.CDP_PORT || 9300 + (process.pid % 600));
 const PROFILE_DIR = `/private/tmp/claude-501/cdp-profile-${PORT}`;
 
 let child = null;
 let cleanedUp = false;
 
-/** Die ganze Gruppe, nicht nur den Vater — die Kinder überleben ihn sonst. */
+/** The whole group, not only the parent — the children outlive it otherwise. */
 function cleanUp() {
   if (cleanedUp) return;
   cleanedUp = true;
@@ -54,14 +43,14 @@ function cleanUp() {
       try {
         process.kill(-child.pid, signal);
       } catch {
-        /* schon weg */
+        /* already gone */
       }
     }
   }
   try {
     rmSync(PROFILE_DIR, { recursive: true, force: true });
   } catch {
-    /* egal */
+    /* never mind */
   }
 }
 
@@ -92,7 +81,7 @@ export async function launch() {
       `--user-data-dir=${PROFILE_DIR}`,
       "about:blank",
     ],
-    // `detached`: eigene Prozessgruppe, damit `process.kill(-pid)` alle trifft.
+    // `detached`: own process group, so `process.kill(-pid)` reaches all of it.
     { stdio: "ignore", detached: true },
   );
   child.unref();
@@ -101,7 +90,7 @@ export async function launch() {
       const r = await fetch(`http://127.0.0.1:${PORT}/json/version`);
       if (r.ok) break;
     } catch {
-      /* noch nicht da */
+      /* not up yet */
     }
     await sleep(150);
   }
@@ -165,7 +154,7 @@ export class Session {
       try {
         if ((await this.eval("return document.readyState")) === "complete") break;
       } catch {
-        /* lädt noch */
+        /* still loading */
       }
     }
     await sleep(600);
@@ -219,14 +208,13 @@ export const ARROW_UP = ["ArrowUp", "ArrowUp", 38];
 export const ENTER = ["Enter", "Enter", 13];
 export const ESC = ["Escape", "Escape", 27];
 
-/** Die Adresse einer Story auf dem Dev-Server — nie gegen `storybook-static`. */
+/** A story's address on the dev server — never `storybook-static`. */
 export const url = (id, extra = "") =>
   `http://localhost:6107/iframe.html?id=${encodeURIComponent(id)}&viewMode=story${extra}`;
 
 /**
- * `--clean`: alles abräumen, was frühere Läufe stehen gelassen haben.
- * Nur Prozesse mit einem `cdp-profile-`-Verzeichnis und älter als zehn
- * Minuten — ein laufender Messlauf soll nicht mitsterben.
+ * `--clean`: kill processes with a `cdp-profile-` directory older than ten
+ * minutes. It cannot tell sessions apart.
  */
 function cleanStale() {
   const lines = execSync("ps -eo pid=,etime=,command=", { encoding: "utf8" }).split("\n");
@@ -258,7 +246,7 @@ function cleanStale() {
         try {
           process.kill(pid, sig);
         } catch {
-          /* schon weg */
+          /* already gone */
         }
       }
     }
@@ -278,6 +266,6 @@ function cleanStale() {
 }
 
 if (process.argv[2] === "--clean") {
-  cleanedUp = true; // der Aufräumer soll sich nicht selbst abräumen wollen
+  cleanedUp = true; // the cleaner must not try to clean itself up
   cleanStale();
 }

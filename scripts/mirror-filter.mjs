@@ -1,38 +1,25 @@
 #!/usr/bin/env node
 /**
- * Welche gespiegelten Dateien hängen an Infrastruktur?
+ * Which mirrored files depend on infrastructure?
  *
- * Der Spiegel nimmt nur, was ohne Server läuft. Bis 2026-09-07 entschied das
- * ein Volltext-Grep über `server-only`, `@/core/db`, `@/core/auth` und
- * `drizzle-orm` — und der hat zweimal in zwei Tagen eine **reine** Datei
- * aussortiert, weil das Wort in einem Kommentar oder an einer Nachbarfunktion
- * stand. Zuletzt `documentCounterparty()`: eine reine Funktion, die neben
- * einem Drizzle-SQL-Ausdruck wohnte (Befund L-36).
+ * The mirror keeps only what runs without a server. Imports decide, not text —
+ * a word in a comment used to drop pure files (finding L-36).
  *
- * Deshalb entscheidet jetzt der **Import**, nicht der Text. Gelesen werden nur
- * `import`-Anweisungen und `export … from`-Weiterleitungen; was in einem
- * Kommentar oder einer Zeichenkette steht, zählt nicht.
- *
- * Aufruf: `node scripts/mirror-filter.mjs <verzeichnis>` — gibt die Pfade aus,
- * die gelöscht gehören. `--test` fährt die Selbstprüfung.
+ * Run: `node scripts/mirror-filter.mjs <dir>` prints the paths to delete ·
+ * `--test` runs the self-test.
  */
 
 import { execSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-/** Ein Modul, das den Server voraussetzt. Präfix zählt: `@/core/db/x` auch. */
+/** A module that requires the server. Prefix match: `@/core/db/x` too. */
 const SERVER_MODULES = ["server-only", "@/core/db", "@/core/auth", "drizzle-orm"];
 
 const isServerModule = (spec) =>
   SERVER_MODULES.some((m) => spec === m || spec.startsWith(`${m}/`));
 
-/**
- * Die Modul-Bezeichner, die eine Datei wirklich importiert.
- *
- * Kommentare und Zeichenketten fallen vorher weg — sonst zählt ein
- * `// … drizzle-orm …` als Import, und genau das war der Fehler.
- */
+/** The module specifiers a file really imports — comments and strings removed first. */
 export function importSpecifiers(source) {
   const stripComments = source
     .replace(/\/\*[\s\S]*?\*\//g, " ")
@@ -49,23 +36,15 @@ export function importSpecifiers(source) {
   return specs;
 }
 
-/** Hängt die Datei an Infrastruktur? */
+/** Does the file depend on infrastructure? */
 export function dependsOnServer(source) {
   return importSpecifiers(source).some(isServerModule);
 }
 
 /**
- * Die **Namen**, die eine Datei aus einem Modul des Spiegels holt.
- *
- * Gebraucht für die zweite Runde: eine Datei, die an keiner Infrastruktur
- * hängt, kann trotzdem unspiegelbar sein — nämlich dann, wenn sie einen Namen
- * holt, den der Spiegel nach der ersten Runde nicht mehr führt.
- *
- * Genau das ist am 2026-09-09 passiert: `BookingCycleKind` ist drüben von
- * `domain/` nach `application/booking-cycle-core.ts` gewandert, einer
- * `server-only`-Datei mit DB-Zugriff. Die erste Runde hat sie richtig
- * aussortiert — und drei `stapelabnahme`-Dateien, die den Typ von dort holen,
- * blieben stehen und brachen den Typcheck des ganzen Spiegels.
+ * The names a file takes from a mirrored module. A file without
+ * infrastructure is still unmirrorable if it imports a name round one dropped
+ * (2026-09-09: `BookingCycleKind`).
  */
 export function moduleImports(source) {
   const stripComments = source
@@ -83,7 +62,7 @@ export function moduleImports(source) {
   return hits;
 }
 
-/** Was eine Datei selbst exportiert — grob, aber für die Frage genau genug. */
+/** What a file exports — rough, but exact enough for the question. */
 function exportedNames(source) {
   const namen = new Set();
   for (const m of source.matchAll(
@@ -101,9 +80,8 @@ function exportedNames(source) {
 }
 
 /**
- * Zweite Runde: wer einen Namen holt, den der Spiegel nicht mehr führt, kann
- * selbst nicht bleiben — und wer *ihn* dann holt, auch nicht. Deshalb bis zur
- * Ruhe wiederholt.
+ * Round two: whoever imports a dropped name is dropped too, repeated until
+ * nothing changes.
  */
 export function unsatisfiable(files, read) {
   const excluded = new Set();
@@ -122,8 +100,7 @@ export function unsatisfiable(files, read) {
       if (excluded.has(f)) continue;
       for (const { mod, namen } of moduleImports(read(f))) {
         const pool = available.get(mod);
-        // Ein Modul, das der Spiegel gar nicht führt, ist nicht diese Frage —
-        // dafür gibt es die erste Runde.
+        // A module the mirror never had is round one's question, not this one.
         if (!pool) continue;
         if (namen.some((n) => !pool.has(n))) {
           excluded.add(f);
@@ -143,9 +120,7 @@ function allFiles(dir) {
   });
 }
 
-/* ── Selbstprüfung ─────────────────────────────────────────────────────────
-   Die zwei Fälle, an denen der alte Filter gescheitert actual, und die zwei, an
-   denen er richtig lag. Läuft mit `node scripts/mirror-filter.mjs --test`. */
+/* ── Self-test: two cases the old filter got wrong, two it got right. `--test` ── */
 function selfTest() {
   const cases = [
     ["Kommentar nennt server-only", `/**\n * Läuft ohne server-only.\n */\nexport const A = 1;\n`, false],
@@ -169,8 +144,7 @@ function selfTest() {
     console.error(`\nmirror-filter — ${bad} von ${cases.length} Fällen falsch.`);
     process.exit(1);
   }
-  // Die zweite Runde: der Fall vom 2026-09-09, und die zwei Nachbarfälle, in
-  // denen sie **nicht** greifen darf.
+  // Round two: the 2026-09-09 case and two neighbours where it must not apply.
   const files = {
     "modules/a/domain/quelle.ts": 'export type Weg = "x";\nexport const K = 1;\n',
     "modules/b/domain/nutzer.ts": 'import type { Weg } from "@/modules/a";\nexport type N = Weg;\n',
@@ -193,16 +167,9 @@ function selfTest() {
 }
 
 /**
- * Zweite Prüfung: **steht der Spiegel noch auf dem Stand, auf dem er
- * eingefroren wurde?**
- *
- * Der Spiegel ist seit dem 2026-09-07 eingefroren (Owner-Entscheid: das Set
- * wird erst fertig, dann zieht die App in einem Zug nach). `sync-ludwig.sh`
- * schreibt dabei den App-Hash nach `src/ludwig/GESPIEGELT_AUS.json`. Läuft
- * die App inzwischen woanders, ist das **kein Fehler** — der Spiegel soll ja
- * stehen bleiben. Es ist ein Hinweis, damit niemand eine Abweichung für einen
- * Bug im Set hält, so wie „Abzugstiefe" zwei Runden lang für eine falsche
- * Beschriftung gehalten wurde (Abnahme 0027).
+ * Is the mirror still on the commit it was frozen at? A difference is no error
+ * — the mirror stays frozen until the migration (owner, 2026-09-07) — only a
+ * note, so nobody mistakes it for a bug.
  */
 function stateNote() {
   const marker = "src/ludwig/GESPIEGELT_AUS.json";
@@ -240,10 +207,10 @@ if (arg === "--test") {
   if (!statSync(dir).isDirectory()) throw new Error(`kein Verzeichnis: ${dir}`);
   const read = (f) => readFileSync(f, "utf8");
   const all = allFiles(dir);
-  // Erste Runde: wer am Server hängt.
+  // Round one: files that depend on the server.
   const onServer = all.filter((f) => dependsOnServer(read(f)));
   for (const f of onServer) console.log(f);
-  // Zweite Runde: wer einen Namen holt, den nach der ersten keiner mehr führt.
+  // Round two: files importing a name round one dropped.
   const kept = all.filter((f) => !onServer.includes(f));
   for (const f of unsatisfiable(kept, read)) console.log(f);
 } else {

@@ -220,14 +220,14 @@ export function check({ register, citations, files = [] }) {
 
   const known = new Set(register.entries.map((e) => e.id));
 
-  // Prüfung 1 — jedes Profil zitiert nur existierende Kennungen.
+  // Check 1 — every profile cites only existing ids.
   for (const { id, path, line } of citations) {
     if (!known.has(id)) {
       errors.push(`${path}:${line} — zitiert ${id}, die es im Register nicht gibt.`);
     }
   }
 
-  // Prüfung 3 — „ohne Ort" und `unbedient` sagen dasselbe.
+  // Check 3 — "no place" and `unbedient` say the same thing.
   for (const entry of register.entries) {
     const placeless = (entry.place ?? "").startsWith(NO_PLACE);
     if (entry.state === "unbedient" && !placeless) {
@@ -238,8 +238,8 @@ export function check({ register, citations, files = [] }) {
     }
   }
 
-  // Jede Kennung braucht eine Fundstelle, und jede Fundstelle eine Kennung —
-  // sonst ist das Nachtragen in die Profile nicht mechanisch möglich.
+  // Every id needs a source location and every location an id — otherwise
+  // carrying the ids into the profiles cannot be mechanical.
   const withSource = new Set(register.sources.map((s) => s.id));
   for (const entry of register.entries) {
     if (!withSource.has(entry.id)) {
@@ -256,8 +256,8 @@ export function check({ register, citations, files = [] }) {
     }
   }
 
-  // Prüfung 2 — jeder `bedient`-Job wird von mindestens einem Profil zitiert.
-  // Vor dem Umlegen des Schalters ein Hinweis, danach ein Fehler.
+  // Check 2 — every `bedient` job is cited by at least one profile.
+  // A hint before the switch is flipped, an error after.
   const cited = new Set(citations.map((c) => c.id));
   const uncited = register.entries.filter((e) => e.state === "bedient" && !cited.has(e.id));
   if (uncited.length) {
@@ -279,10 +279,7 @@ export function check({ register, citations, files = [] }) {
   return { errors, hints };
 }
 
-/* ── Selbstprüfung ───────────────────────────────────────────────────────────
-   Ein Wächter, der falsch anschlägt, ist schlimmer als keiner. Die Fälle unten
-   sind erfunden, nicht aus dem Bestand — sie prüfen den Wächter, nicht das
-   Register. `pnpm check:jobs --test`. */
+/* ── Self-test: invented cases that test the guard, not the register. `--test` ── */
 
 const HEAD_ARMED = "| Kennungen in Profilen | eingetragen |\n|---|---|\n\n";
 const HEAD_OPEN = "| Kennungen in Profilen | noch nicht eingetragen |\n|---|---|\n\n";
@@ -372,7 +369,7 @@ function selfTest() {
           ),
           [{ id: "J-01", path: "docs/seiten/test.md", line: 3 }],
         ),
-      // doppelt + nicht lückenlos (J-01 an der Stelle von J-02)
+      // duplicate + gap (J-01 where J-02 should be)
       { errors: 2, hints: 0 },
     ],
     [
@@ -432,8 +429,7 @@ function selfTest() {
     }
   }
 
-  // Der Zellen-Splitter für sich: ein maskiertes `|` darf keine Spalte öffnen,
-  // sonst rutscht der Zustand in die Nachbarspalte und der Wächter meldet Unsinn.
+  // The cell splitter on its own: an escaped `|` must not open a column.
   const splitCases = [
     ["schlichte Zeile", "| a | b | c |", ["a", "b", "c"]],
     ["maskiertes Rohr", '| a | "x" \\| "y" | c |', ["a", '"x" | "y"', "c"]],
@@ -455,7 +451,7 @@ function selfTest() {
   console.log(`check:jobs — Selbstprüfung in Ordnung, ${total} Fälle.`);
 }
 
-/* ── Lauf ────────────────────────────────────────────────────────────────── */
+/* ── Run ───────────────────────────────────────────────────────────────── */
 
 /** All profiles, without the templates — a template is a form, not a profile. */
 function profiles() {

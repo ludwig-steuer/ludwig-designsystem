@@ -78,7 +78,14 @@ export function commentLines(source, { css = false, shell = false, story = false
   const lines = source.split("\n");
   const out = [];
   if (shell) {
-    lines.forEach((l, i) => { if (/^\s*#(?!!)/.test(l)) out.push([i + 1, l.trim()]); });
+    // Heredoc bodies are file content (generated docs), not comments.
+    let heredoc = null;
+    lines.forEach((l, i) => {
+      if (heredoc) { if (l.trim() === heredoc) heredoc = null; return; }
+      const h = l.match(/<<-?\s*['"]?(\w+)['"]?/);
+      if (h) heredoc = h[1];
+      else if (/^\s*#(?!!)/.test(l)) out.push([i + 1, l.trim()]);
+    });
     return out;
   }
   let block = null;
@@ -192,9 +199,10 @@ function selfTest() {
   for (const [fn, input, expected] of cases) {
     if (fn(input) !== expected) { bad++; console.error(`  ✗ ${fn.name}(${input}): expected ${expected}`); }
   }
-  const js = 'const u = "https://x.y";\n// Das ist deutsch.\n/* Und das\n   auch. */\n';
+  const slash = "/";
+  const js = `const u = "https://x.y";\n${slash}${slash} Das ist deutsch.\n${slash}* Und das\n   auch. *${slash}\n`;
   if (commentLines(js).map((c) => c[0]).join(",") !== "2,3,4") { bad++; console.error("  ✗ comment reader"); }
-  const story = "/** Die Story zeigt den Leerfall. */\nexport const Empty = {};\n// Das ist Code.\n";
+  const story = `${slash}** Die Story zeigt den Leerfall. *${slash}\nexport const Empty = {};\n${slash}${slash} Das ist Code.\n`;
   if (commentLines(story, { story: true }).map((c) => c[0]).join(",") !== "3") { bad++; console.error("  ✗ story description skipped"); }
   if (bad) { console.error(`check:language — self-test: ${bad} cases wrong.`); process.exit(1); }
   console.log(`check:language — self-test passed, ${cases.length + 2} cases.`);

@@ -1,30 +1,17 @@
 #!/usr/bin/env node
 /**
- * Ersetzt die alten deutschen v3-Namen durch die englischen — für den Tag,
- * an dem `ludwig/app` auf v3 umsteigt (Aufgabe 0001).
+ * Replaces the old German v3 names with the English ones — for the day
+ * `ludwig/app` moves to v3 (task 0001).
  *
  *   node scripts/rename-to-v3.mjs --dry-run ../app/apps/web/src
  *   node scripts/rename-to-v3.mjs           ../app/apps/web/src
- *
- * Ohne `--dry-run` wird geschrieben. Die Zuordnung ist aus den Commits der
- * Umbenennungswelle abgeleitet, nicht aus dem Gedächtnis.
- *
- * Warum ein Script und keine „hieß früher"-Kommentare in den Komponenten:
- * beim Umstieg braucht man ein vollständiges Suchen-Ersetzen an einem Ort,
- * nicht zehn verstreute Notizen — und die Reihenfolge ist heikel (siehe unten).
  */
 import fs from "node:fs";
 import path from "node:path";
 
-/**
- * ACHTUNG Reihenfolge: längere Namen zuerst, sonst frisst die kürzere Regel
- * das Präfix. `Pruefpunkte` vor `Pruefpunkt`, `Meldungen` vor `Meldung`,
- * `StaffelstabKey`/`-Meta` vor `Staffelstab`, `BuchungssatzEditorProps` vor
- * `BuchungssatzEditor`. Das Array wird unten nach Länge sortiert, damit die
- * Regel auch bei Ergänzungen hält.
- */
+/** Longer names first, or the shorter rule eats the prefix — the array is sorted by length below. */
 const NAMES = {
-  // Komponenten und Funktionen
+  // Components and functions
   AbweichungsZelle: "DeviationCell",
   BuchungssatzEditorProps: "JournalEntryEditorProps",
   BuchungssatzEditor: "JournalEntryEditor",
@@ -47,7 +34,7 @@ const NAMES = {
   istOffen: "isOpen",
   naechsterOffener: "nextOpen",
 
-  // Typen
+  // Types
   EditorMeldung: "EditorMessage",
   KIQuelle: "AiSource",
   KonfidenzStufe: "ConfidenceLevel",
@@ -66,34 +53,25 @@ const NAMES = {
   VergleichsZeile: "ComparisonRow",
   ZustandsIcon: "StateKind",
 
-  // Props (nur die, die nach aussen sichtbar sind)
+  // Props (only the externally visible ones)
   gruppen: "groups",
   tasten: "keys",
   abschnitte: "segments",
 };
 
-/**
- * `Seite` -> `Side` steht bewusst NICHT in der Tabelle: das Wort kommt in
- * deutschem Fliesstext und in sichtbaren Labels vor („Ludwig-Seite"). Beim
- * Umstieg von Hand prüfen — nur der Typ des Buchungssatz-Editors ist gemeint.
- */
+/** `Seite` -> `Side` is deliberately absent: the word also occurs in German prose and labels. Check by hand. */
 const MANUAL = ["Seite -> Side (nur der Typ, nicht das Wort im Text)"];
 
 /**
- * Namen, die auch ausserhalb des Design-Systems vorkommen. Ein Probelauf gegen
- * `ludwig/app` fand `Meldung` 74x — überwiegend in deutschen Kommentaren
- * („Error mit sprechender Meldung") — und `Pruefpunkt` als EIGENEN Typ der App
- * in `modules/stapelabnahme/domain/pruefpunkte`, der nichts mit dem Set zu tun
- * hat. Blind ersetzt zerstört das fremden Code.
- *
- * Diese Namen werden nur mit `--include-risky` ersetzt, sonst nur gezählt.
+ * Names that also occur outside the design system (`Meldung`, and the app's
+ * own `Pruefpunkt` type). Replaced only with `--include-risky`, else counted.
  */
 const RISKY = new Set(["Meldung", "Meldungen", "Pruefpunkt", "Pruefpunkte", "gruppen", "tasten", "abschnitte", "istOffen"]);
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const includeRisky = args.includes("--include-risky");
-/** Nur Dateien anfassen, die überhaupt aus dem Set importieren. */
+/** Only touch files that import from the set at all. */
 const DS_IMPORT = /from\s+["'](@\/ui\/v[23]|@ludwig\/designsystem)/;
 const target = args.find((a) => !a.startsWith("--"));
 
@@ -120,7 +98,7 @@ const risky = new Map();
 
 for (const file of walk(target)) {
   const src = fs.readFileSync(file, "utf8");
-  // Datei ohne Set-Import: hier kann kein Name aus dem Set stehen.
+  // A file without a set import cannot contain a set name.
   if (!DS_IMPORT.test(src)) {
     skipped++;
     continue;

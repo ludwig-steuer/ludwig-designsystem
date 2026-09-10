@@ -1,22 +1,12 @@
 #!/usr/bin/env node
 /**
- * Wächter für die „Wann"-Regel des Sets (README, Zeile „Wann").
+ * Guard for the `@when`/`@instead` rule (README).
  *
- * Jeder Export, bei dem die Frage **„was nehme ich?"** entsteht, trägt im
- * JSDoc `@when` (der Fall, für den er da ist) und `@instead` (der Nachbarfall
- * mit Verweis). Das ist die greppbare Antwort auf genau diese Frage.
+ * Every export someone chooses between carries `@when` (its case) and
+ * `@instead` (the neighbouring case). Constants, fixtures and stories are
+ * exempt — nobody picks between two label tables.
  *
- * **Konstanten sind ausgenommen** — Label-Tabellen, Icon-Register, Fixtures.
- * Zwischen `ENTITY_ICON` und `OPEN_ITEM_AGE_LABEL` wählt niemand; sie bekommen
- * einen Satz, der sagt, was sie sind. Das ist der geschärfte Entscheid aus
- * 0093, und dieser Wächter ist seine andere Hälfte: die Abnahme von 0093 hat
- * angemerkt, dass (a) der einzige ihrer fünf Punkte ohne Skript war — und der
- * einzige, der zurückfiel. Elf Exporte standen bei der Prüfung schon wieder
- * ohne Zeilen da, die meisten in Dateien, die am selben Tag entstanden.
- *
- * Stories zählen nicht: ihre Exporte sind Bilder, keine Bausteine.
- *
- * Run: `pnpm check:when`
+ * Run: `pnpm check:when` · self-test: `--test`
  */
 
 import { readFileSync, readdirSync } from "node:fs";
@@ -33,35 +23,27 @@ const files = (dir) =>
   });
 
 /**
- * Ist der Export ein **Baustein**, zwischen denen jemand wählt — oder ein Wert?
- *
- * Die Frage „was nehme ich?" stellt sich bei Komponenten und Funktionen, nicht
- * bei einer Spurbreite oder einer Label-Tabelle. Entschieden wird an der Form
- * der Deklaration, nicht an der Schreibweise des Namens: `invoiceLineMinWidth`
- * ist camelCase und trotzdem eine Zahl.
- *
- * `fixtures.ts` ist ganz ausgenommen — Beispieldaten sind keine Bausteine,
- * auch wenn sie als Funktion daherkommen (0093).
+ * Is the export a building block (component, function) rather than a value?
+ * Decided by the declaration's form, not the name's casing. `fixtures.ts` is
+ * exempt.
  */
 const isBuildingBlock = (file, line) => {
   if (file.endsWith("/fixtures.ts")) return false;
   if (/^export\s+(?:async\s+)?(?:function|class)\s/.test(line)) return true;
-  // `export const x = (…) => …` und `export const x = function …`
+  // `export const x = (…) => …` and `export const x = function …`
   return /^export\s+const\s+[A-Za-z0-9_$]+\s*(?::[^=]+)?=\s*(?:async\s+)?(?:function\b|\([^)]*\)\s*(?::[^=]+)?=>|[A-Za-z0-9_$]+\s*=>)/.test(line);
 };
 
 /**
- * Das JSDoc **direkt** über einer Zeile. „Direkt" heißt: dazwischen stehen nur
- * Leerzeilen und Dekoratoren — ein zweites JSDoc dazwischen zählt als
- * abgerutscht und damit als fehlend (genau so ist es `SourceDocumentFacts`
- * ergangen, als 0071 einen Block dazwischenschob).
+ * The JSDoc directly above a line — only blank lines may sit between. A second
+ * JSDoc in between counts as missing.
  */
 export function jsdocAbove(lines, i) {
   let j = i - 1;
   while (j >= 0 && lines[j].trim() === "") j--;
   if (j < 0) return null;
   const line = lines[j].trim();
-  // Einzeiler: `/** … */` steht ganz in einer Zeile.
+  // One-liner: `/** … */` on a single line.
   if (line.startsWith("/**") && line.endsWith("*/")) return line;
   if (line !== "*/") return null;
   const end = j;
@@ -70,21 +52,14 @@ export function jsdocAbove(lines, i) {
 }
 
 /**
- * Trägt das JSDoc das Tag **als Tag**? `doc.includes("@when")` genügt nicht:
- * ein Tag zählt nur am Zeilenanfang (nach `/**` oder ` * `). Steht es mitten
- * in einer Zeile — so wie es entsteht, wenn ein englischer Block in einen
- * deutschen Einzeiler geschoben wird, ohne die Zeile zu brechen —, liest es
- * kein JSDoc-Leser als Tag, und dieser Wächter hat es dreimal durchgewinkt
- * (`Table.tsx`, gefunden von der Abnahme 0106).
+ * Does the JSDoc carry the tag as a tag? Only the start of a line counts —
+ * mid-line, no JSDoc reader sees it (acceptance 0106).
  */
 export function hatTag(doc, tag) {
   return new RegExp(`(^|\\n)\\s*(?:/\\*\\*)?\\s*\\*?\\s*@${tag}\\b`).test(doc);
 }
 
-/* ── Selbstprüfung ─────────────────────────────────────────────────────────
-   Ein Wächter, der falsch anschlägt, actual schlimmer als keiner: er lässt einen
-   Satz nachtragen, der schon dasteht. Die Fälle unten sind die, an denen der
-   erste Wurf dieses Skripts gescheitert actual. `pnpm check:when --test`. */
+/* ── Self-test: the cases the first version got wrong. `--test` ── */
 function selfTest() {
   const cases = [
     ["Einzeiler-JSDoc", ["/** Was das ist. */", "export const A_B = 1;"], 1, true],
@@ -101,7 +76,7 @@ function selfTest() {
       console.error(`  ✗ ${name}: erwartet ${expected}, gemessen ${actual}`);
     }
   }
-  // Und das Tag selbst: nur am Zeilenanfang zählt es.
+  // The tag itself: only at the start of a line.
   const tagCases = [
     ["Tag in eigener Zeile", "/**\n * Satz.\n * @when    Der Fall.\n */", true],
     ["Tag im Einzeiler", "/** @when Der Fall. */", true],
@@ -141,7 +116,7 @@ for (const file of files(ROOT)) {
     const doc = jsdocAbove(lines, i) ?? "";
     const wo = `${file}:${i + 1} ${name}`;
     if (!isBuildingBlock(file, lines[i])) {
-      // Ein Satz genügt — aber es muss einer da sein.
+      // One sentence is enough — but there must be one.
       if (!/[A-Za-zÄÖÜäöü]/.test(doc.replace(/[/*]/g, ""))) missing.push(`${wo} — Wert ohne Satz`);
       continue;
     }
