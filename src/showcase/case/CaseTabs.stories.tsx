@@ -1,0 +1,419 @@
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { ReactNode } from "react";
+
+import { CaseTimeline } from "@/ui/v3/entities/accounting-case/CaseTimeline";
+import { ClarificationList, type ClarificationVM } from "@/ui/v3/entities/clarification/Clarification";
+import { ClarificationCard } from "@/ui/v3/entities/clarification/ClarificationCard";
+import { DocumentNumberRegister } from "@/ui/v3/entities/document-number/DocumentNumberRegister";
+import { REGISTER, SOURCE_LABEL, STATE_LABEL } from "@/ui/v3/entities/document-number/fixtures";
+import { JournalEntryCard } from "@/ui/v3/entities/journal-entry/JournalEntryCompact";
+import { OpenItemRow } from "@/ui/v3/entities/open-item/OpenItemRow";
+import type { OpenItem } from "@/ui/v3/entities/open-item/open-item";
+import { OpenItemLinkRow, openItemLinkTracks } from "@/ui/v3/entities/open-item-link/OpenItemLinkRow";
+import type { LogEntry } from "@/ui/v3/patterns/Log";
+import { LogBrowser } from "@/ui/v3/patterns/LogBrowser";
+import { CheckItems, type CheckItem } from "@/ui/v3/patterns/Review";
+import { StatusInfoButton } from "@/ui/v3/patterns/StatusInfoButton";
+import { EmptyState } from "@/ui/v3/primitives/EmptyState";
+import { FieldList } from "@/ui/v3/primitives/FieldList";
+import { RawRecord } from "@/ui/v3/primitives/RawRecord";
+import { Card, CardHead, HeadRow, Table } from "@/ui/v3/primitives/Table";
+
+import { CasePage } from "./CasePage";
+import {
+  CLARIFICATION_ANSWERED,
+  CLARIFICATIONS,
+  DATEV_EVENT,
+  DOCUMENT_EVENT,
+  PAYMENT_EXPECTED,
+  PROPOSAL,
+  TODAY,
+  accountHref,
+} from "./fixtures";
+import { bracket, proposalPending } from "./scenarios";
+
+/**
+ * Die Reiter der Sachverhaltsseite — P3 aus 0152.
+ *
+ * Je Reiter eine Story: oben der Inhalt am Referenzfall, darunter derselbe
+ * Reiter **ohne Daten** mit seinem Leerzustand. Ein Leerzustand ist ein Satz
+ * mit Grund, kein Strich. Der Reiter „Stammdaten" steht unter Einzelfall.
+ */
+const meta: Meta<typeof CasePage> = {
+  title: "Seiten/Sachverhalt/Reiter",
+  component: CasePage,
+  parameters: { layout: "fullscreen" },
+};
+export default meta;
+type Story = StoryObj<typeof CasePage>;
+
+const accountingCase = proposalPending.accountingCase;
+
+/** The tab body: content first, then the same tab without data. */
+function Tab({ tab, children, empty }: { tab: string; children: ReactNode; empty: ReactNode }) {
+  return (
+    <CasePage accountingCase={accountingCase} tab={tab}>
+      <div className="v2stack">
+        {children}
+        <div className="lw-overline">Leerzustand</div>
+        {empty}
+      </div>
+    </CasePage>
+  );
+}
+
+/**
+ * **Ereignisse** — der ganze Strang, Ludwig und DATEV in einer Reihe, dazu
+ * die Buchung zum gewählten Beleg. Leer: „Noch nichts geschehen." — der Satz
+ * des Strangs selbst.
+ */
+export const Events: Story = {
+  render: () => (
+    <Tab
+      tab="ereignisse"
+      empty={
+        <Card>
+          <CardHead title="Ereignisse" sub="keine" />
+          <div className="v3boxbody">
+            <CaseTimeline events={[]} today={TODAY} />
+          </div>
+        </Card>
+      }
+    >
+      <Card>
+        <CardHead title="Ereignisse" sub="drei Einträge, eine Erwartung" />
+        <div className="v3boxbody">
+          <CaseTimeline
+            events={[DATEV_EVENT, DOCUMENT_EVENT]}
+            clarifications={[CLARIFICATION_ANSWERED]}
+            expectations={[PAYMENT_EXPECTED]}
+            today={TODAY}
+            selectedId={DOCUMENT_EVENT.id}
+          />
+        </div>
+      </Card>
+      <Card>
+        <CardHead title="Buchung zum Beleg" sub="Vorschlag vom 31.07." />
+        <div className="v3boxbody">
+          <JournalEntryCard lines={PROPOSAL} currency="EUR" accountHref={accountHref} />
+        </div>
+      </Card>
+    </Tab>
+  ),
+};
+
+const withDetail = (c: ClarificationVM) =>
+  c.state === "open"
+    ? { ...c, text: "Auf dem Konto ist für Juli kein Abgang an den Lieferanten zu finden.", answerKind: "yes_no" as const, answerOptions: ["Ja", "Nein"] }
+    : { ...c, text: "Der Mandant hat geantwortet: die Ersatzteile gehören zum Firmenwagen.", answerKind: "single_choice" as const, answerOptions: ["Firmenwagen", "Werkstattbestand"] };
+
+/**
+ * **Rückfragen** — die Liste mit Zustand je Zeile; aufgeklappt steht die
+ * Karte zum Lesen, beantwortet wird dort. Leer: warum es keine gibt.
+ */
+export const Clarifications: Story = {
+  render: () => (
+    <Tab
+      tab="rueckfragen"
+      empty={
+        <Card>
+          <CardHead title="Rückfragen" sub="keine" />
+          <div className="v3boxbody">
+            <ClarificationList
+              clarifications={[]}
+              empty={{ title: "Keine Rückfragen.", hint: "Der Agent fragt nach, wenn ihm etwas fehlt — bis dahin bleibt dieser Reiter leer." }}
+            />
+          </div>
+        </Card>
+      }
+    >
+      <Card>
+        <CardHead title="Rückfragen" sub="1 offen · 1 beantwortet" />
+        <div className="v3boxbody">
+          <ClarificationList
+            clarifications={CLARIFICATIONS}
+            renderDetail={(c) => <ClarificationCard clarification={withDetail(c)} />}
+          />
+        </div>
+      </Card>
+    </Tab>
+  ),
+};
+
+const CHECKS: CheckItem[] = [
+  { code: "P1", question: "Stimmt der Betrag mit dem Beleg überein?", reason: "25,41 € auf Beleg und Buchung.", state: "green" },
+  { code: "P2", question: "Ist die Rechnung schon in DATEV gebucht?", reason: "Im Spiegel steht nur die Gutschrift vom Juni.", state: "green" },
+  { code: "P3", question: "Trägt der Fall mehr als eine Belegnummer?", reason: "Zwei Kandidaten im Register — keine ist entschieden.", state: "yellow" },
+  { code: "P4", question: "Passt die Umsatzsteuer zum Konto?", reason: "Automatikkonto 5404 mit 19 %, kein Schlüssel nötig.", state: "green" },
+  { code: "P5", question: "Liegt eine Dublette vor?", reason: "Noch nicht geprüft — läuft mit dem nächsten Abgleich.", state: "open" },
+];
+
+/**
+ * **Plausibilität** — die Prüfpunkte P1–P5 und das Belegnummern-Register.
+ * Bestandene Punkte stehen zusammen in einer Zeile, Befunde einzeln.
+ */
+export const Plausibility: Story = {
+  render: () => (
+    <Tab
+      tab="plausibilitaet"
+      empty={
+        <Card>
+          <CardHead title="Plausibilität" sub="nicht geprüft" />
+          <div className="v3boxbody">
+            <EmptyState
+              inline
+              title="Noch nicht geprüft."
+              description="Die Prüfpunkte laufen, sobald ein Beleg oder eine Buchung am Fall hängt."
+            />
+          </div>
+        </Card>
+      }
+    >
+      <Card>
+        <CardHead title="Prüfpunkte" sub="1 Befund · 1 offen · 3 bestanden" />
+        <div className="v3boxbody">
+          <CheckItems items={CHECKS} />
+        </div>
+      </Card>
+      <Card>
+        <CardHead title="Belegnummern-Register" sub="bekannte Nummern dieses Falls" />
+        <div className="v3boxbody">
+          <DocumentNumberRegister entries={REGISTER} onPick={() => {}} sourceLabel={SOURCE_LABEL} stateLabel={STATE_LABEL} />
+        </div>
+      </Card>
+    </Tab>
+  ),
+};
+
+const OPEN_ITEM_COLS = "90px 100px 130px 100px 100px minmax(0, 1fr) 120px 190px 130px 130px";
+
+const openItem = (over: Partial<OpenItem> = {}): OpenItem => ({
+  kind: "creditor",
+  personalAccount: "71202",
+  externalDocumentNumber: "93846778",
+  invoiceDate: "2026-07-16",
+  dueDate: "2026-08-10",
+  grossAmount: 25.41,
+  openAtCutoff: 25.41,
+  amountApprox: false,
+  clearedAfterCutoff: false,
+  description: "Ersatzteile Firmenwagen",
+  dunningLevel: null,
+  ...over,
+});
+
+function OpenItemsCard({ title, sub, items }: { title: string; sub: string; items: OpenItem[] }) {
+  return (
+    <Card>
+      <CardHead title={title} sub={sub} />
+      <Table cols={OPEN_ITEM_COLS} minWidth={1300}>
+        <HeadRow>
+          <span>Art</span>
+          <span>Konto</span>
+          <span>Belegnummer</span>
+          <span>Datum</span>
+          <span>Fällig</span>
+          <span>Buchungstext</span>
+          <span>Mahnstufe</span>
+          <span>
+            Ausgleich <StatusInfoButton axis="opos_ausgleich" />
+          </span>
+          <span className="v2num">Brutto</span>
+          <span className="v2num">Offen</span>
+        </HeadRow>
+        {items.map((item) => (
+          <OpenItemRow key={`${item.personalAccount}-${item.externalDocumentNumber}`} item={item} asOf={TODAY} />
+        ))}
+      </Table>
+    </Card>
+  );
+}
+
+const PAID = bracket(1, "93846778 · Musterbau Fahrzeugteile GmbH", "noch keine Zahlung", 25.41, "71202", {
+  invoice: "2026-07-31",
+  payment: "2026-08-10",
+});
+
+/**
+ * **Saldo & Konten** — das Personenkonto mit seinem Saldo, der offene Posten
+ * und die Klammer, die ihn ausgleichen wird. Leer: ein Fall ohne Personenkonto
+ * hat hier bewusst nichts.
+ */
+export const BalanceAndAccounts: Story = {
+  render: () => (
+    <Tab
+      tab="saldo"
+      empty={
+        <Card>
+          <CardHead title="Saldo & Konten" sub="kein Personenkonto" />
+          <div className="v3boxbody">
+            <EmptyState
+              inline
+              title="Kein Personenkonto am Fall."
+              description="Der Sachverhalt bucht bewusst ohne Personenkonto — ein Saldo entsteht erst mit einem Konto."
+            />
+          </div>
+        </Card>
+      }
+    >
+      <Card>
+        <CardHead title="Personenkonto 71202" sub="Musterbau Fahrzeugteile GmbH" />
+        <div className="v3boxbody">
+          <FieldList
+            tone="bare"
+            split
+            rows={[
+              ["Soll", "21,82 €"],
+              ["Haben", "47,23 €"],
+              ["Saldo", "25,41 € Haben"],
+              ["Stand", "05.08.2026"],
+            ]}
+          />
+        </div>
+      </Card>
+      <OpenItemsCard title="Offene Posten" sub={`Stichtag ${TODAY.split("-").reverse().join(".")}`} items={[openItem()]} />
+      <Card>
+        <CardHead title="Ausgleich" sub="1 Klammer" />
+        <Table cols={openItemLinkTracks} minWidth={980}>
+          <HeadRow>
+            <span>Klammer</span>
+            <span>Belegfeld</span>
+            <span className="v2num">Rechnung</span>
+            <span className="v2num">Zahlung</span>
+            <span className="v2num">zugeordnet</span>
+            <span>Herkunft</span>
+            <span>Zustand</span>
+          </HeadRow>
+          <OpenItemLinkRow link={PAID.link} invoice={PAID.invoice} payment={PAID.payment} />
+        </Table>
+      </Card>
+    </Tab>
+  ),
+};
+
+/**
+ * **DATEV-Wahrheit** — was DATEV zu diesem Fall kennt: die Spiegel-Buchung
+ * und die offenen Posten laut DATEV. Lesend, ohne Handlungen. Leer: DATEV
+ * kennt den Fall noch nicht.
+ */
+export const DatevTruth: Story = {
+  render: () => (
+    <Tab
+      tab="datev"
+      empty={
+        <Card>
+          <CardHead title="DATEV-Wahrheit" sub="nichts gefunden" />
+          <div className="v3boxbody">
+            <EmptyState
+              inline
+              title="DATEV kennt zu diesem Fall noch nichts."
+              description="Nach dem nächsten Export und Abgleich stehen hier die gespiegelten Buchungen."
+            />
+          </div>
+        </Card>
+      }
+    >
+      <Card>
+        <CardHead title="Gutschrift aus DATEV" sub="30.06.2026 · Stapel 06-2026" />
+        <div className="v3boxbody">
+          <JournalEntryCard
+            lines={[
+              { side: "debit", accountNumber: "71202", accountName: "Musterbau Fahrzeugteile GmbH", amount: 21.82, text: "Gutschrift" },
+              { side: "credit", accountNumber: "5404", accountName: "Wareneingang 19 % VSt", amount: 21.82, text: "Gutschrift" },
+            ]}
+            currency="EUR"
+            accountHref={accountHref}
+          />
+          <p className="v2muted" style={{ margin: 0 }}>
+            Diese Buchung steht in DATEV. Ludwig zeigt sie, ändert sie nicht.
+          </p>
+        </div>
+      </Card>
+      <OpenItemsCard
+        title="Offene Posten laut DATEV"
+        sub="Stand des Spiegels 01.08.2026"
+        items={[openItem({ externalDocumentNumber: "GS-2026-0630", invoiceDate: "2026-06-30", dueDate: null, grossAmount: 21.82, openAtCutoff: 0, clearedAfterCutoff: true, description: "Gutschrift Juni" })]}
+      />
+    </Tab>
+  ),
+};
+
+const LOG: LogEntry[] = [
+  { id: "l1", at: "2026-07-31T16:02:00Z", message: "Sachverhalt aus dem Beleg eröffnet", actor: { kind: "agent", label: "Agent" }, depth: 1, level: "info" },
+  { id: "l2", at: "2026-07-31T16:03:00Z", message: "Beleg 93846778 angehängt", actor: { kind: "agent", label: "Agent" }, depth: 1, level: "info" },
+  { id: "l3", at: "2026-07-31T16:05:00Z", message: "Buchung vorgeschlagen: 5404 an 71202", actor: { kind: "agent", label: "Agent" }, depth: 2, level: "info", code: "booking.proposed" },
+  { id: "l4", at: "2026-07-31T16:05:30Z", message: "Judge: bestätigt, keine Dublette", actor: { kind: "agent", label: "Judge" }, depth: 2, level: "info", code: "booking.judged_by_agent" },
+  { id: "l5", at: "2026-08-01T09:12:00Z", message: "Rückfrage an den Mandanten gestellt", actor: { kind: "agent", label: "Agent" }, depth: 1, level: "info" },
+  { id: "l6", at: "2026-08-02T14:30:00Z", message: "Rückfrage beantwortet", actor: { kind: "user", label: "Mandant" }, depth: 1, level: "info" },
+  { id: "l7", at: "2026-07-31T16:04:10Z", message: "Schritt classify → propose", actor: { kind: "system", label: "System" }, depth: 3, level: "debug", code: "step.edge" },
+];
+
+/**
+ * **Protokoll** — drei Tiefen: der Verlauf (was ein Mensch erzählen würde),
+ * dazu die fachlichen Entscheidungen, dazu die Technik. Leer: es gibt noch
+ * keinen Eintrag.
+ */
+export const Log: Story = {
+  render: () => (
+    <Tab
+      tab="protokoll"
+      empty={
+        <Card>
+          <CardHead title="Protokoll" sub="keine Einträge" />
+          <div className="v3boxbody">
+            <LogBrowser entries={[]} emptyText="Noch kein Eintrag im Protokoll — der Fall ist gerade erst angelegt." />
+          </div>
+        </Card>
+      }
+    >
+      <Card>
+        <CardHead title="Protokoll" sub="7 Einträge in drei Tiefen" />
+        <div className="v3boxbody">
+          <LogBrowser entries={LOG} initialView={2} />
+        </div>
+      </Card>
+    </Tab>
+  ),
+};
+
+/**
+ * **Rohdaten** — der Datensatz, wie er in der Tabelle steht, für wen es genau
+ * wissen muss. Leer: ohne Datensatz keine Felder.
+ */
+export const RawData: Story = {
+  render: () => (
+    <Tab
+      tab="rohdaten"
+      empty={
+        <Card>
+          <CardHead title="Rohdaten" sub="kein Datensatz" />
+          <div className="v3boxbody">
+            <RawRecord record={{}} empty="Keine Felder — der Datensatz ist nicht geladen." />
+          </div>
+        </Card>
+      }
+    >
+      <Card>
+        <CardHead title="client_accounting_case" sub="1 Datensatz" />
+        <div className="v3boxbody">
+          <RawRecord
+            record={{
+              id: "c-0334",
+              case_number: "2026-0334",
+              kind: "incoming_invoice",
+              lifecycle_status: "open",
+              disposition: "agent",
+              counterparty_partner_id: "bp-4711",
+              personal_account_number: "71202",
+              document_number_mode: "single",
+              opened_at: "2026-07-31",
+              closed_at: null,
+              agent_run_id: "run-4b19c2",
+              export_batch_id: null,
+            }}
+          />
+        </div>
+      </Card>
+    </Tab>
+  ),
+};

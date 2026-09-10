@@ -227,8 +227,12 @@ gezogen (so sagt es auch die Erhebung).
 
 **Befund L-285:** Fremdtilgung und Gate-Mangel aus F206 fehlen im Spiegel.
 
-**Offen:** P3 (alle Reiter mit Inhalt und Leerzustand) — nach Absprache mit
-`ludwig-manager` als letzter Teil.
+**P3 — alle Reiter** (`CaseTabs` · `Seiten/Sachverhalt/Reiter`): `Events`,
+`Clarifications`, `Plausibility`, `BalanceAndAccounts`, `DatevTruth`, `Log`,
+`RawData` — je Reiter oben der Inhalt am Referenzfall, darunter derselbe
+Reiter ohne Daten mit seinem Leerzustand als Satz. Stammdaten steht unter
+Einzelfall (`MasterData`). Kein freies Raster: was zusammengehört, steht
+untereinander.
 
 ## Offene Fragen
 
