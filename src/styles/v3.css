@@ -3723,28 +3723,30 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   text-align: left;
 }
 
-/* --- Die Boxen neben den Fakten (0150) -----------------------------------
- * Befunde und Klärungen, Umsatzsteuer, Verarbeitung: die Übersicht ist die
- * Vorschau auf die Reiter darunter. Innen derselbe Abstand wie in jeder
- * Karte — die Boxen bringen ihren Kopf selbst mit, deshalb steht hier nur der
- * Rumpf. */
-.v2docaside {
+/* --- Der Rumpf einer Box unter ihrem Kopf (0150, verallgemeinert mit 0153) -
+ * Die Karten bringen ihren Kopf selbst mit (`CardHead`); hier steht nur, was
+ * darunter kommt — derselbe Innenabstand wie in jeder Karte. Der Name trug bis
+ * 0153 „doc", weil die erste Box am Beleg hing; seit die Zone ein Pattern ist,
+ * wäre das ein Fachwort in einer Regel, die keine Entität kennt. */
+.v2boxbody {
   display: flex; flex-direction: column; gap: var(--space-3);
   padding: var(--space-3) var(--space-5) var(--space-4);
 }
-.v2docaside__none {
+
+/* --- Was an einem Vorgang offen ist (0153) --------------------------------
+ * Ein Punkt ist drei Dinge: was, was daraus folgt, und der Weg hinaus. Das
+ * Zeichen steht auf der Schriftlinie der ersten Zeile, nicht mittig zum
+ * ganzen Block — sonst wandert es mit der Länge des Satzes. */
+.v2open__none {
   display: flex; align-items: center; gap: var(--space-2); margin: 0;
   color: var(--color-text-muted); font-size: var(--fs-ui-sm);
 }
-/* Ein Mangel ist drei Dinge: was, was daraus folgt, und der Weg hinaus. Das
-   Zeichen steht auf der Schriftlinie der ersten Zeile, nicht mittig zum
-   ganzen Block — sonst wandert es mit der Länge des Satzes. */
-.v2docdef { display: flex; align-items: flex-start; gap: var(--space-2); }
-.v2docdef > svg { flex: 0 0 auto; margin-top: 1px; }
-.v2docdef__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
-.v2docdef__way { flex: 0 0 auto; }
-/* Der Rohtext der Quelle — englisch und sichtbar Maschinenwort. */
-.v2docdef__raw {
+.v2open__row { display: flex; align-items: flex-start; gap: var(--space-2); }
+.v2open__row > svg { flex: 0 0 auto; margin-top: 1px; }
+.v2open__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.v2open__way { flex: 0 0 auto; }
+/* Der Rohtext der Quelle — sichtbar Maschinenwort, nicht als Satz verkleidet. */
+.v2open__raw {
   font-family: var(--font-mono); font-size: var(--fs-ui-xs);
   color: var(--color-text-subtle); word-break: break-word;
 }

@@ -8,7 +8,7 @@ import { Amount } from "../../primitives/Amount";
 import { Card, CardHead } from "../../primitives/Table";
 import { FieldList } from "../../primitives/FieldList";
 import { TextButton } from "../../primitives/TextButton";
-import { StateIcon } from "../../patterns/Review";
+import { OpenPoints } from "../../patterns/OpenPoints";
 import { Timeline, type TimelineItem } from "../../patterns/Timeline";
 
 /**
@@ -97,6 +97,7 @@ export interface SourceDocumentDefectsProps {
  * @when    The overview of a document: what is wrong and what is open, in one box.
  * @instead One missing value at the field it belongs to → SourceDocumentFacts `missing`.
  *          The whole history → SourceDocumentHistory. A single clarification → ClarificationCard.
+ *          The same zone on another entity → OpenPoints, this is its document half.
  */
 export function SourceDocumentDefects({
   defects,
@@ -105,43 +106,24 @@ export function SourceDocumentDefects({
   clarificationCount,
   moreHref,
 }: SourceDocumentDefectsProps) {
-  const count = defects.length + (clarificationCount ?? 0);
-  // Nothing wrong and nothing open is a **statement**, not an empty box: the
-  // reader came with a doubt, and „nichts offen" answers it (L6).
+  // **The words stay here, the box moved out.** Since 0153 `OpenPoints` draws
+  // the zone — what counts as a defect and what it is called only the document
+  // knows, and that is exactly the cut: the pattern knows no entity.
   return (
-    <Card>
-      <CardHead
-        title="Befunde und Klärungen"
-        sub={count === 0 ? "nichts offen" : `${count} offen`}
-        {...(moreHref ? { actions: <TextButton href={moreHref}>Alle ansehen</TextButton> } : {})}
-      />
-      <div className="v2docaside">
-        {defects.length === 0 && !clarifications ? (
-          <p className="v2docaside__none">
-            <StateIcon state="done" title="erledigt" /> An diesem Beleg ist nichts offen.
-          </p>
-        ) : null}
-        {defects.map((defect, i) => (
-          <div className="v2docdef" key={`${defect.kind}-${defect.code ?? i}`}>
-            <StateIcon state="warning" title="offen" />
-            <div className="v2docdef__body">
-              <span className="v2main">{defectTitle(defect)}</span>
-              <span className="v2sub">{DEFECT_HINT[defect.kind]}</span>
-              {/* The raw text of the source, where it says more than the code:
-                  English, and visibly the machine's own words — dressing it up
-                  as a German sentence would claim a translation nobody made. */}
-              {defect.message && defect.kind === "extraction" ? (
-                <span className="v2docdef__raw">{defect.message}</span>
-              ) : null}
-            </div>
-            {actions?.[defect.kind] ? (
-              <div className="v2docdef__way">{actions[defect.kind]}</div>
-            ) : null}
-          </div>
-        ))}
-        {clarifications}
-      </div>
-    </Card>
+    <OpenPoints
+      title="Befunde und Klärungen"
+      emptyText="An diesem Beleg ist nichts offen."
+      points={defects.map((defect, i) => ({
+        key: `${defect.kind}-${defect.code ?? i}`,
+        title: defectTitle(defect),
+        hint: DEFECT_HINT[defect.kind],
+        ...(defect.message && defect.kind === "extraction" ? { raw: defect.message } : {}),
+        ...(actions?.[defect.kind] ? { action: actions[defect.kind] } : {}),
+      }))}
+      {...(clarifications ? { extra: clarifications } : {})}
+      {...(clarificationCount ? { extraCount: clarificationCount } : {})}
+      {...(moreHref ? { moreHref } : {})}
+    />
   );
 }
 
@@ -234,7 +216,7 @@ export function SourceDocumentVat({
       {/* The body carries the padding, not the list: `tone="bare"` is
           borderless, and without a frame the amounts ran right up to the edge
           of the card (measured 2026-09-10 at 1440). */}
-      <div className="v2docaside">
+      <div className="v2boxbody">
         <FieldList tone="bare" rows={rows} />
       </div>
     </Card>
@@ -302,7 +284,7 @@ export function SourceDocumentHistory({
         sub={total ? `${total} Schritte` : undefined}
         {...(href ? { actions: <TextButton href={href}>Ganzer Verlauf</TextButton> } : {})}
       />
-      <div className="v2docaside">
+      <div className="v2boxbody">
         <Timeline
           entries={[...shown]}
           groupBy="none"

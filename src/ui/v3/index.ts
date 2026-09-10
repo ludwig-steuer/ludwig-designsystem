@@ -210,6 +210,7 @@ export {
   type ListItem,
 } from "./patterns/MasterDetail";
 export { DetailView } from "./patterns/DetailView";
+export { OpenPoints, type OpenPoint } from "./patterns/OpenPoints";
 export {
   Columns,
   type ColumnPattern,
