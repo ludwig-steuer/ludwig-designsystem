@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Spec** — geschrieben 2026-09-10, Bau in drei Wellen |
+| Status | **gebaut 2026-09-10** — alle drei Wellen und P3 (edb6d3f, 65c733b, 9a9e609); Abnahme je Welle offen, nicht durch den Bauenden |
 | Stufe | `src/showcase/case/` (Seiten-Stories) · dazu Erweiterungen an `entities/accounting-case/CaseTimeline.tsx` |
 | Klassen-Test | Die Seite gehört der App und lebt in `showcase/` — wie 0144 für den Beleg. Was an Bausteinen fehlt, wird `entities/` bzw. `patterns/`, nicht Teil der Seite |
 | Quelle | Design-Brief **F196** (`ludwig/app` staging `672665f8`), überbracht von `ludwig-cto` · Seitenprofil `docs/seiten/sachverhalt-detail.md` · Entitätsprofil `docs/entitaeten/accounting-case.md` |
