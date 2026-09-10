@@ -213,7 +213,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
   const [rows, setRows] = useState<EditorRow[]>(props.rows);
   const [mode, setMode] = useState<EditorMode>(props.mode ?? "simple");
   const [reason, setReason] = useState("");
-  const [journalOffen, setJournalOffen] = useState(false);
+  const [journalOpen, setJournalOpen] = useState(false);
   const [reversalOpen, setReversalOpen] = useState(false);
   const [reversalReason, setReversalReason] = useState("");
 
@@ -371,8 +371,8 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
         )}
 
         {contraAccount ? (
-          <div className="bse__gegen">
-            <span className="bse__gegen__label">
+          <div className="bse__contra">
+            <span className="bse__contra__label">
               {/* The side is fixed — it is the opposite side of the document. */}
               an {documentSide === "S" ? "H" : "S"}{" "}
               {editable && !locked && onContraAccountChange ? (
@@ -457,8 +457,8 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
         contraAccount={contraAccount}
         documentSide={documentSide}
         accountFramework={accountFramework}
-        open={editable || journalOffen}
-        onToggle={() => setJournalOffen((v) => !v)}
+        open={editable || journalOpen}
+        onToggle={() => setJournalOpen((v) => !v)}
       />
 
       {aiReview ? (

@@ -79,11 +79,11 @@ export const Clean: Story = {
  */
 export const DateMissing: Story = {
   render: function Datum() {
-    const [datum, setDatum] = useState<string | null>(null);
-    const doc = documentFixture({ documentDate: datum, completedAt: null, completedVia: null });
+    const [date, setDate] = useState<string | null>(null);
+    const doc = documentFixture({ documentDate: date, completedAt: null, completedVia: null });
     return (
       <DocumentPage document={doc} actions={menu}>
-        {datum ? null : (
+        {date ? null : (
           // **Zone 2**, und die Mängelzeile in den Fakten dazu. Beides, nicht
           // eins von beiden: die Zone sagt, dass etwas zu tun ist, und das
           // Zeichen an der Zeile sagt, an welchem Wert (Owner-Entscheid zu
@@ -98,7 +98,7 @@ export const DateMissing: Story = {
                     "Belegdatum fehlt",
                     <span key="d">
                       Ohne Belegdatum fällt der Beleg aus jedem Jahresfilter.{" "}
-                      <InlineEdit label="Belegdatum" value="" onSave={async (v) => setDatum(v || null)} />
+                      <InlineEdit label="Belegdatum" value="" onSave={async (v) => setDate(v || null)} />
                     </span>,
                   ],
                 ]}
@@ -111,7 +111,7 @@ export const DateMissing: Story = {
           previewUrl={MUSTER_PDF}
           summary="Miete Musterstraße 12, August 2026"
           missing={
-            datum
+            date
               ? []
               : [
                   {
@@ -121,7 +121,7 @@ export const DateMissing: Story = {
                       <InlineEdit
                         label="Belegdatum"
                         value=""
-                        onSave={async (v) => setDatum(v || null)}
+                        onSave={async (v) => setDate(v || null)}
                       />
                     ),
                   },

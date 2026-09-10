@@ -70,7 +70,7 @@ body { background: #FAFBFC; }
 .is-collapsed .sb__toggle:hover { background: rgba(255,255,255,0.10); color: #fff; }
 
 /* Sidebar — mandant switcher */
-.sb__mandant {
+.sb__client {
   width: calc(100% - 16px); margin: 12px 8px 8px;
   display: flex; align-items: center; gap: 10px;
   padding: 8px 10px; border-radius: 8px;
@@ -79,14 +79,14 @@ body { background: #FAFBFC; }
   color: #fff; cursor: pointer; text-align: left; text-decoration: none;
   transition: all 120ms;
 }
-.sb__mandant:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); }
-.sb__mandant-avatar { width: 32px; height: 32px; border-radius: 6px; background: linear-gradient(180deg, #2B5C8E 0%, #1A3A5C 100%); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); }
-.sb__mandant-text { flex: 1; min-width: 0; }
-.sb__mandant-text .num { font-family: var(--font-mono); font-size: 11px; color: #8FA3BB; }
-.sb__mandant-text .name { font-size: 13.5px; font-weight: 500; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sb__mandant .chev { color: #8FA3BB; flex-shrink: 0; }
-.is-collapsed .sb__mandant { width: 40px; height: 40px; margin: 12px auto 8px; padding: 0; justify-content: center; }
-.is-collapsed .sb__mandant-avatar { width: 32px; height: 32px; }
+.sb__client:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); }
+.sb__client-avatar { width: 32px; height: 32px; border-radius: 6px; background: linear-gradient(180deg, #2B5C8E 0%, #1A3A5C 100%); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); }
+.sb__client-text { flex: 1; min-width: 0; }
+.sb__client-text .num { font-family: var(--font-mono); font-size: 11px; color: #8FA3BB; }
+.sb__client-text .name { font-size: 13.5px; font-weight: 500; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb__client .chev { color: #8FA3BB; flex-shrink: 0; }
+.is-collapsed .sb__client { width: 40px; height: 40px; margin: 12px auto 8px; padding: 0; justify-content: center; }
+.is-collapsed .sb__client-avatar { width: 32px; height: 32px; }
 
 /* Sidebar — nav */
 .sb__nav { padding: 8px 8px; flex: 1; overflow-y: auto; }
@@ -132,8 +132,8 @@ body { background: #FAFBFC; }
 .is-collapsed .sb__navitem .label,
 .is-collapsed .sb__navitem .count { display: none; }
 .is-collapsed .sb__navlabel { display: none; }
-.is-collapsed .sb__mandant-text,
-.is-collapsed .sb__mandant .chev { display: none; }
+.is-collapsed .sb__client-text,
+.is-collapsed .sb__client .chev { display: none; }
 .is-collapsed .sb__user-text,
 .is-collapsed .sb__user > svg { display: none; }
 .sb__navitem .dot-badge { position: absolute; top: 6px; right: 8px; width: 6px; height: 6px; border-radius: 999px; background: #5BA4D1; box-shadow: 0 0 0 2px #14304B; }
@@ -178,7 +178,7 @@ body { background: #FAFBFC; }
    Container — das vermeidet die sonst entstehende Lücke, ohne das
    Band selbst per negativem Margin zu verschieben (was Sticky bricht
    und Children unters Band rutscht). :has() ist seit 2023 stabil. */
-.app__main:has(> .ludwig-mandant-band:first-child) { padding-top: 0; }
+.app__main:has(> .ludwig-client-band:first-child) { padding-top: 0; }
 
 .tb__crumb { font-size: 13px; color: var(--color-text-muted); }
 .tb__crumb strong { color: var(--color-text); font-weight: 500; }

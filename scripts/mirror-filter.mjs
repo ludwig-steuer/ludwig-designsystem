@@ -24,7 +24,7 @@ import { join } from "node:path";
 /** Ein Modul, das den Server voraussetzt. Präfix zählt: `@/core/db/x` auch. */
 const SERVER_MODULES = ["server-only", "@/core/db", "@/core/auth", "drizzle-orm"];
 
-const istServerModul = (spec) =>
+const isServerModule = (spec) =>
   SERVER_MODULES.some((m) => spec === m || spec.startsWith(`${m}/`));
 
 /**
@@ -34,7 +34,7 @@ const istServerModul = (spec) =>
  * `// … drizzle-orm …` als Import, und genau das war der Fehler.
  */
 export function importSpecifiers(source) {
-  const ohneKommentare = source
+  const stripComments = source
     .replace(/\/\*[\s\S]*?\*\//g, " ")
     .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
   const specs = [];
@@ -45,13 +45,13 @@ export function importSpecifiers(source) {
     /\bexport\s+[^;'"]*?\bfrom\s*["']([^"']+)["']/g,
     /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g,
   ];
-  for (const re of muster) for (const m of ohneKommentare.matchAll(re)) specs.push(m[1]);
+  for (const re of muster) for (const m of stripComments.matchAll(re)) specs.push(m[1]);
   return specs;
 }
 
 /** Hängt die Datei an Infrastruktur? */
-export function haengtAmServer(source) {
-  return importSpecifiers(source).some(istServerModul);
+export function dependsOnServer(source) {
+  return importSpecifiers(source).some(isServerModule);
 }
 
 /**
@@ -67,24 +67,24 @@ export function haengtAmServer(source) {
  * aussortiert — und drei `stapelabnahme`-Dateien, die den Typ von dort holen,
  * blieben stehen und brachen den Typcheck des ganzen Spiegels.
  */
-export function moduleImporte(source) {
-  const ohneKommentare = source
+export function moduleImports(source) {
+  const stripComments = source
     .replace(/\/\*[\s\S]*?\*\//g, " ")
     .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
-  const treffer = [];
+  const hits = [];
   const muster = /\bimport\s+(?:type\s+)?\{([^}]*)\}\s*from\s*["'](@\/modules\/[^"'\/]+)["']/g;
-  for (const m of ohneKommentare.matchAll(muster)) {
+  for (const m of stripComments.matchAll(muster)) {
     const namen = m[1]
       .split(",")
       .map((n) => n.replace(/^\s*type\s+/, "").split(/\s+as\s+/)[0].trim())
       .filter(Boolean);
-    treffer.push({ modul: m[2].replace("@/modules/", ""), namen });
+    hits.push({ mod: m[2].replace("@/modules/", ""), namen });
   }
-  return treffer;
+  return hits;
 }
 
 /** Was eine Datei selbst exportiert — grob, aber für die Frage genau genug. */
-function exportierteNamen(source) {
+function exportedNames(source) {
   const namen = new Set();
   for (const m of source.matchAll(
     /^export\s+(?:declare\s+)?(?:type|interface|const|function|class|enum)\s+([A-Za-z0-9_$]+)/gm,
@@ -105,49 +105,49 @@ function exportierteNamen(source) {
  * selbst nicht bleiben — und wer *ihn* dann holt, auch nicht. Deshalb bis zur
  * Ruhe wiederholt.
  */
-export function unerfuellbar(dateien, lies) {
-  const raus = new Set();
+export function unsatisfiable(files, read) {
+  const excluded = new Set();
   for (;;) {
-    const verfuegbar = new Map();
-    for (const f of dateien) {
-      if (raus.has(f)) continue;
+    const available = new Map();
+    for (const f of files) {
+      if (excluded.has(f)) continue;
       const m = /modules\/([^/]+)\//.exec(f);
       if (!m) continue;
-      const menge = verfuegbar.get(m[1]) ?? new Set();
-      for (const n of exportierteNamen(lies(f))) menge.add(n);
-      verfuegbar.set(m[1], menge);
+      const pool = available.get(m[1]) ?? new Set();
+      for (const n of exportedNames(read(f))) pool.add(n);
+      available.set(m[1], pool);
     }
-    let neu = 0;
-    for (const f of dateien) {
-      if (raus.has(f)) continue;
-      for (const { modul, namen } of moduleImporte(lies(f))) {
-        const menge = verfuegbar.get(modul);
+    let fresh = 0;
+    for (const f of files) {
+      if (excluded.has(f)) continue;
+      for (const { mod, namen } of moduleImports(read(f))) {
+        const pool = available.get(mod);
         // Ein Modul, das der Spiegel gar nicht führt, ist nicht diese Frage —
         // dafür gibt es die erste Runde.
-        if (!menge) continue;
-        if (namen.some((n) => !menge.has(n))) {
-          raus.add(f);
-          neu++;
+        if (!pool) continue;
+        if (namen.some((n) => !pool.has(n))) {
+          excluded.add(f);
+          fresh++;
           break;
         }
       }
     }
-    if (neu === 0) return [...raus];
+    if (fresh === 0) return [...excluded];
   }
 }
 
-function alleDateien(dir) {
+function allFiles(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
     const p = join(dir, e.name);
-    return e.isDirectory() ? alleDateien(p) : p.endsWith(".ts") ? [p] : [];
+    return e.isDirectory() ? allFiles(p) : p.endsWith(".ts") ? [p] : [];
   });
 }
 
 /* ── Selbstprüfung ─────────────────────────────────────────────────────────
-   Die zwei Fälle, an denen der alte Filter gescheitert ist, und die zwei, an
+   Die zwei Fälle, an denen der alte Filter gescheitert actual, und die zwei, an
    denen er richtig lag. Läuft mit `node scripts/mirror-filter.mjs --test`. */
-function selbsttest() {
-  const faelle = [
+function selfTest() {
+  const cases = [
     ["Kommentar nennt server-only", `/**\n * Läuft ohne server-only.\n */\nexport const A = 1;\n`, false],
     ["Kommentar nennt drizzle-orm", `// Dieselbe Regel wie der Drizzle-Ausdruck (drizzle-orm) daneben.\nexport function f() { return 1; }\n`, false],
     ["Zeichenkette nennt @/core/db", `export const HINT = "siehe @/core/db";\n`, false],
@@ -157,39 +157,39 @@ function selbsttest() {
     ["Unterpfad von @/core/auth", `import { user } from "@/core/auth/session";\n`, true],
     ["reiner Domänen-Import", `import type { X } from "./x";\nexport type Y = X;\n`, false],
   ];
-  let schlecht = 0;
-  for (const [name, quelle, erwartet] of faelle) {
-    const ist = haengtAmServer(quelle);
-    if (ist !== erwartet) {
-      schlecht++;
-      console.error(`  ✗ ${name}: erwartet ${erwartet}, gemessen ${ist}`);
+  let bad = 0;
+  for (const [name, source, expected] of cases) {
+    const actual = dependsOnServer(source);
+    if (actual !== expected) {
+      bad++;
+      console.error(`  ✗ ${name}: erwartet ${expected}, gemessen ${actual}`);
     }
   }
-  if (schlecht) {
-    console.error(`\nmirror-filter — ${schlecht} von ${faelle.length} Fällen falsch.`);
+  if (bad) {
+    console.error(`\nmirror-filter — ${bad} von ${cases.length} Fällen falsch.`);
     process.exit(1);
   }
   // Die zweite Runde: der Fall vom 2026-09-09, und die zwei Nachbarfälle, in
   // denen sie **nicht** greifen darf.
-  const dateien = {
+  const files = {
     "modules/a/domain/quelle.ts": 'export type Weg = "x";\nexport const K = 1;\n',
     "modules/b/domain/nutzer.ts": 'import type { Weg } from "@/modules/a";\nexport type N = Weg;\n',
     "modules/b/domain/vermisst.ts": 'import type { Fehlt } from "@/modules/a";\nexport type M = Fehlt;\n',
     "modules/c/domain/kette.ts": 'import type { M } from "@/modules/b";\nexport type C = M;\n',
     "modules/d/domain/fremd.ts": 'import type { X } from "@/modules/gibtesnicht";\nexport type D = X;\n',
   };
-  const raus = unerfuellbar(Object.keys(dateien), (f) => dateien[f]).sort();
-  const erwartetRaus = ["modules/b/domain/vermisst.ts", "modules/c/domain/kette.ts"].sort();
-  if (JSON.stringify(raus) !== JSON.stringify(erwartetRaus)) {
-    console.error(`  ✗ zweite Runde: erwartet ${erwartetRaus.join(", ")}, gemessen ${raus.join(", ")}`);
+  const excluded = unsatisfiable(Object.keys(files), (f) => files[f]).sort();
+  const expectedExcluded = ["modules/b/domain/vermisst.ts", "modules/c/domain/kette.ts"].sort();
+  if (JSON.stringify(excluded) !== JSON.stringify(expectedExcluded)) {
+    console.error(`  ✗ zweite Runde: erwartet ${expectedExcluded.join(", ")}, gemessen ${excluded.join(", ")}`);
     console.error("\nmirror-filter — die zweite Runde ist falsch.");
     process.exit(1);
   }
   console.log(
-    `mirror-filter — in Ordnung, ${faelle.length} Fälle geprüft, dazu die zweite Runde ` +
+    `mirror-filter — in Ordnung, ${cases.length} Fälle geprüft, dazu die zweite Runde ` +
       "(fehlender Name fliegt, Kette dahinter auch, fremdes Modul bleibt).",
   );
-  standHinweis();
+  stateNote();
 }
 
 /**
@@ -204,17 +204,17 @@ function selbsttest() {
  * Bug im Set hält, so wie „Abzugstiefe" zwei Runden lang für eine falsche
  * Beschriftung gehalten wurde (Abnahme 0027).
  */
-function standHinweis() {
-  const marke = "src/ludwig/GESPIEGELT_AUS.json";
-  if (!existsSync(marke)) {
+function stateNote() {
+  const marker = "src/ludwig/GESPIEGELT_AUS.json";
+  if (!existsSync(marker)) {
     console.log("  ℹ kein Stand vermerkt — `pnpm sync:ludwig` schreibt ihn beim nächsten Zug.");
     return;
   }
-  const { appHash, datum } = JSON.parse(readFileSync(marke, "utf8"));
+  const { appHash, datum } = JSON.parse(readFileSync(marker, "utf8"));
   const app = process.env.LUDWIG_APP ?? "../app";
-  let jetzt = null;
+  let now = null;
   try {
-    jetzt = execSync(`git -C ${JSON.stringify(app)} rev-parse HEAD`, {
+    now = execSync(`git -C ${JSON.stringify(app)} rev-parse HEAD`, {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
@@ -222,30 +222,30 @@ function standHinweis() {
     console.log(`  ℹ App nicht erreichbar (${app}) — Stand nicht vergleichbar.`);
     return;
   }
-  if (jetzt === appHash) {
+  if (now === appHash) {
     console.log(`  ✓ Spiegel und App stehen gleich (${appHash.slice(0, 8)}, eingefroren ${datum}).`);
   } else {
     console.log(
       `  ℹ Der Spiegel steht auf ${appHash.slice(0, 8)} (eingefroren ${datum}), die App auf ` +
-        `${jetzt.slice(0, 8)}. Das ist Absicht, solange das Set nicht fertig ist — kein Sync bis zur Migration.`,
+        `${now.slice(0, 8)}. Das ist Absicht, solange das Set nicht fertig ist — kein Sync bis zur Migration.`,
     );
   }
 }
 
 const arg = process.argv[2];
 if (arg === "--test") {
-  selbsttest();
+  selfTest();
 } else if (arg) {
   const dir = arg;
   if (!statSync(dir).isDirectory()) throw new Error(`kein Verzeichnis: ${dir}`);
-  const lies = (f) => readFileSync(f, "utf8");
-  const alle = alleDateien(dir);
+  const read = (f) => readFileSync(f, "utf8");
+  const all = allFiles(dir);
   // Erste Runde: wer am Server hängt.
-  const amServer = alle.filter((f) => haengtAmServer(lies(f)));
-  for (const f of amServer) console.log(f);
+  const onServer = all.filter((f) => dependsOnServer(read(f)));
+  for (const f of onServer) console.log(f);
   // Zweite Runde: wer einen Namen holt, den nach der ersten keiner mehr führt.
-  const bleibt = alle.filter((f) => !amServer.includes(f));
-  for (const f of unerfuellbar(bleibt, lies)) console.log(f);
+  const kept = all.filter((f) => !onServer.includes(f));
+  for (const f of unsatisfiable(kept, read)) console.log(f);
 } else {
   console.error("Aufruf: node scripts/mirror-filter.mjs <verzeichnis> | --test");
   process.exit(2);

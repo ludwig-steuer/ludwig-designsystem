@@ -13,7 +13,7 @@ export default meta;
 type Story = StoryObj<typeof ProcessStepper>;
 
 const AGENT: BatonMeta = { key: "agent", label: "Agent", color: "var(--color-accent)" };
-const MANDANT: BatonMeta = { key: "mandant", label: "Mandant", color: "var(--color-warning)" };
+const CLIENT: BatonMeta = { key: "mandant", label: "Mandant", color: "var(--color-warning)" };
 const FIRM: BatonMeta = { key: "kanzlei", label: "Kanzlei", color: "var(--color-primary)" };
 const BRIDGE: BatonMeta = { key: "bridge", label: "Übertragung", color: "var(--color-info)" };
 const DATEV: BatonMeta = { key: "datev", label: "DATEV", color: "var(--color-success)" };
@@ -78,7 +78,7 @@ export const InLog: Story = {
     <BatonBar
       segments={[
         { owner: AGENT, share: 0.1, title: "Agent · 26.08.–27.08. · 2 Tage" },
-        { owner: MANDANT, share: 0.55, title: "Mandant · 27.08.–05.09. · 9 Tage" },
+        { owner: CLIENT, share: 0.55, title: "Mandant · 27.08.–05.09. · 9 Tage" },
         { owner: AGENT, share: 0.05, title: "Agent · 05.09. · 4 Stunden" },
         { owner: FIRM, share: 0.3, title: "Kanzlei · 05.09.–10.09. · 5 Tage" },
       ]}
@@ -107,7 +107,7 @@ export const Empty: Story = {
 export const Holders: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-3)", padding: "var(--space-6)" }}>
-      {[AGENT, READY, MANDANT, FIRM, BRIDGE, DATEV, SPIEGEL, NOBODY].map((o) => (
+      {[AGENT, READY, CLIENT, FIRM, BRIDGE, DATEV, SPIEGEL, NOBODY].map((o) => (
         <Baton key={o.key} owner={o} />
       ))}
     </div>

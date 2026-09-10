@@ -228,7 +228,7 @@ export const Sources: Story = {
 
 interface BatchRow {
   id: string;
-  beleg: string;
+  document: string;
   account: string;
   text: string;
   amount: number;
@@ -253,7 +253,7 @@ const contra = (amount: number): JournalLine => ({
 const BATCH: BatchRow[] = [
   {
     id: "1",
-    beleg: "RE-2026-4471",
+    document: "RE-2026-4471",
     account: "6310",
     text: "Miete Musterstraße 12, August",
     amount: 1450,
@@ -268,7 +268,7 @@ const BATCH: BatchRow[] = [
   },
   {
     id: "2",
-    beleg: "ER-8812",
+    document: "ER-8812",
     account: "6300",
     text: "Wartung Klimaanlage",
     amount: 1800,
@@ -283,7 +283,7 @@ const BATCH: BatchRow[] = [
   },
   {
     id: "3",
-    beleg: "ER-8814",
+    document: "ER-8814",
     account: "6805",
     text: "Mobilfunk und Festnetz",
     amount: 89,
@@ -301,7 +301,7 @@ const BATCH: BatchRow[] = [
   },
   {
     id: "4",
-    beleg: "KB-09-31",
+    document: "KB-09-31",
     account: "1600",
     text: "Porto und Verpackung",
     amount: 24.9,
@@ -315,8 +315,8 @@ const BATCH: BatchRow[] = [
   },
 ];
 
-const SPALTEN: ColumnDef<BatchRow>[] = [
-  { key: "beleg", header: "Belegfeld 1", width: "140px", cell: (r) => <MonoCell value={r.beleg} /> },
+const COLUMNS: ColumnDef<BatchRow>[] = [
+  { key: "beleg", header: "Belegfeld 1", width: "140px", cell: (r) => <MonoCell value={r.document} /> },
   { key: "konto", header: "Konto", width: "80px", cell: (r) => <MonoCell value={r.account} /> },
   { key: "text", header: "Buchungstext", cell: (r) => <span className="v2main">{r.text}</span> },
   {
@@ -356,7 +356,7 @@ export const InUse: Story = {
   render: () => (
     <DataTable<BatchRow>
       rows={BATCH}
-      columns={SPALTEN}
+      columns={COLUMNS}
       rowKey={(r) => r.id}
       head={{ title: "Stapel 09/2026", sub: "4 Buchungssätze · 3 geprüft" }}
       // **Erst die Buchung, dann die Begründung** (Owner 2026-09-10). Wer eine

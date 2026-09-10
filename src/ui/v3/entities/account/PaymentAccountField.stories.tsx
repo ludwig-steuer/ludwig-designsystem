@@ -36,7 +36,7 @@ const OTHERS: PaymentAccountOption[] = [
   { id: "a-9", label: "Paypal", iban: null, inUse: false },
 ];
 
-const ALLE = [MAINTAINED, ...OTHERS];
+const ALL = [MAINTAINED, ...OTHERS];
 
 function Frame({ children, sub }: { children: React.ReactNode; sub: string }) {
   return (
@@ -60,7 +60,7 @@ function Frame({ children, sub }: { children: React.ReactNode; sub: string }) {
 export const Filled: Story = {
   render: () => (
     <Frame sub="1 geführt · 8 aus dem Kontenrahmen">
-      <PaymentAccountField id="pa-1" value={null} onChange={() => {}} accounts={ALLE} />
+      <PaymentAccountField id="pa-1" value={null} onChange={() => {}} accounts={ALL} />
     </Frame>
   ),
 };
@@ -96,7 +96,7 @@ export const MaintainedOnly: Story = {
  * dem Aufrufer zu überlassen hieße, dass jeder es sich merken muss — und einer
  * vergisst es.
  */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
     <Frame sub="kein Zahlungskonto im Mandanten">
       <PaymentAccountField id="pa-4" value={null} onChange={() => {}} accounts={[]} />
@@ -116,7 +116,7 @@ export const Leer: Story = {
 export const UnknownValue: Story = {
   render: () => (
     <Frame sub="stillgelegtes Konto, nicht mehr in der Auswahl">
-      <PaymentAccountField id="pa-5" value="a-99" onChange={() => {}} accounts={ALLE} />
+      <PaymentAccountField id="pa-5" value="a-99" onChange={() => {}} accounts={ALL} />
     </Frame>
   ),
 };
@@ -130,7 +130,7 @@ export const Interactive: Story = {
     const [value, setValue] = useState<string | null>("a-99");
     return (
       <Frame sub="wählen und abwählen">
-        <PaymentAccountField id="pa-6" value={value} onChange={setValue} accounts={ALLE} />
+        <PaymentAccountField id="pa-6" value={value} onChange={setValue} accounts={ALL} />
         <div className="v2muted" style={{ marginTop: 16 }}>
           Gewählt: <code>{value ?? "null"}</code>
         </div>
@@ -160,7 +160,7 @@ export const InUse: Story = {
                   id="pa-7"
                   value={value}
                   onChange={setValue}
-                  accounts={ALLE}
+                  accounts={ALL}
                   invalid={value === null}
                 />
               </Field>

@@ -115,11 +115,11 @@ export function claimsAus(lines, file = "") {
     const found = [];
     // Der Rückblick verhindert den Schnitt **innerhalb** einer Zahl: ohne ihn
     // trennte „11.64:1" vor der zweiten Eins und der Wächter las 1,64.
-    for (const teil of line.split(/(?<![\d.,])(?=\d+[.,]\d+\s*:\s*1)/)) {
-      const zahl = teil.match(/^(\d+[.,]\d+)\s*:\s*1/);
-      if (!zahl) continue;
-      const grund = teil.match(/auf\s+`?([A-Za-zäöü0-9-]+)`?/);
-      found.push({ text: zahl[0].trim(), claimed: zahl[1], ground: grund?.[1] });
+    for (const part of line.split(/(?<![\d.,])(?=\d+[.,]\d+\s*:\s*1)/)) {
+      const num = part.match(/^(\d+[.,]\d+)\s*:\s*1/);
+      if (!num) continue;
+      const groundMatch = part.match(/auf\s+`?([A-Za-zäöü0-9-]+)`?/);
+      found.push({ text: num[0].trim(), claimed: num[1], ground: groundMatch?.[1] });
     }
     if (!found.length) continue;
 
@@ -176,11 +176,11 @@ export function claimsAusMarkdown(lines, file = "") {
     const line = lines[i];
     const token = line.match(/^\|\s*`(--color-[a-z0-9-]+)`/);
     if (!token) continue;
-    const zellen = line.split("|");
-    if (zellen.length < 3) continue;
-    const wert = zellen[2];
+    const cells = line.split("|");
+    if (cells.length < 3) continue;
+    const value = cells[2];
     // Der Grund, wo er dasteht: „auf `success-bg` 4.63".
-    for (const m of wert.matchAll(/auf\s+`?(--color-)?([a-z0-9-]+)`?\s+(\d+[.,]\d+)/g)) {
+    for (const m of value.matchAll(/auf\s+`?(--color-)?([a-z0-9-]+)`?\s+(\d+[.,]\d+)/g)) {
       out.push({
         file,
         line: i + 1,
@@ -192,13 +192,13 @@ export function claimsAusMarkdown(lines, file = "") {
     }
     // Die erste Zahl der Zelle gilt gegen Weiß — es sei denn, sie steht schon
     // als Grund-Angabe darin.
-    const erste = wert.match(/^\s*(\d+[.,]\d+)/);
-    if (erste && !/^\s*\d+[.,]\d+\s*auf/.test(wert)) {
+    const first = value.match(/^\s*(\d+[.,]\d+)/);
+    if (first && !/^\s*\d+[.,]\d+\s*auf/.test(value)) {
       out.push({
         file,
         line: i + 1,
-        text: erste[1],
-        claimed: Number(erste[1].replace(",", ".")),
+        text: first[1],
+        claimed: Number(first[1].replace(",", ".")),
         ground: "weiss",
         token: token[1],
       });
@@ -215,34 +215,34 @@ export function claimsAusMarkdown(lines, file = "") {
  * Runden eins und zwei). Ein Wächter, dessen Abhilfe nicht wirkt, ist
  * schlimmer als keiner.
  */
-function selbsttest() {
-  let schlecht = 0;
-  const pruefe = (name, ist, soll) => {
-    if (JSON.stringify(ist) !== JSON.stringify(soll)) {
-      schlecht++;
-      console.error(`  ✗ ${name}: erwartet ${JSON.stringify(soll)}, gemessen ${JSON.stringify(ist)}`);
+function selfTest() {
+  let bad = 0;
+  const check = (name, actual, expected) => {
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      bad++;
+      console.error(`  ✗ ${name}: erwartet ${JSON.stringify(expected)}, gemessen ${JSON.stringify(actual)}`);
     }
   };
-  const eine = (zeile) => {
-    const c = claimsAus([zeile])[0];
+  const oneLine = (line) => {
+    const c = claimsAus([line])[0];
     return c ? [c.claimed, c.ground, c.token] : null;
   };
 
   // Die Form, die der Schlusstext vorschreibt — beide Token in Backticks.
-  pruefe(
+  check(
     "Anleitungsform",
-    eine("/* gemessen 2.87:1 (`--color-text-subtle` auf `--color-bg-soft`) */"),
+    oneLine("/* gemessen 2.87:1 (`--color-text-subtle` auf `--color-bg-soft`) */"),
     [2.87, "--color-bg-soft", "--color-text-subtle"],
   );
-  pruefe(
+  check(
     "Grund ohne Backtick",
-    eine("/* `--color-text-subtle`: 4.51:1 auf bg-soft */"),
+    oneLine("/* `--color-text-subtle`: 4.51:1 auf bg-soft */"),
     [4.51, "bg-soft", "--color-text-subtle"],
   );
-  pruefe("ohne Grund ist Weiß", eine("/* `--color-accent` 3.55:1 */"), [3.55, "weiss", "--color-accent"]);
-  pruefe("Zahl ohne `:1` ist keine Angabe", eine("/* opacity .5 ergab 2,11 */"), null);
-  pruefe("Komma wie Punkt", eine("/* `--color-text-muted` 6,69:1 */"), [6.69, "weiss", "--color-text-muted"]);
-  pruefe(
+  check("ohne Grund ist Weiß", oneLine("/* `--color-accent` 3.55:1 */"), [3.55, "weiss", "--color-accent"]);
+  check("Zahl ohne `:1` ist keine Angabe", oneLine("/* opacity .5 ergab 2,11 */"), null);
+  check("Komma wie Punkt", oneLine("/* `--color-text-muted` 6,69:1 */"), [6.69, "weiss", "--color-text-muted"]);
+  check(
     "Token erst darunter deklariert",
     (() => {
       const c = claimsAus(["  /* 4.88:1 auf Weiss */", "  --color-text-subtle: #717171;"])[0];
@@ -250,57 +250,57 @@ function selbsttest() {
     })(),
     [4.88, "--color-text-subtle"],
   );
-  pruefe(
+  check(
     "zweistellige Zahl bleibt ganz",
-    eine("/* den Kontrast traegt der Rahmen (--color-primary-700, 11.64:1 auf Weiss) */"),
+    oneLine("/* den Kontrast traegt der Rahmen (--color-primary-700, 11.64:1 auf Weiss) */"),
     [11.64, "Weiss", "--color-primary-700"],
   );
-  pruefe(
+  check(
     "zwei Angaben in einer Zeile, je eigener Grund",
     claimsAus(["/* 5.52:1, 4.78:1 auf warning-bg */"]).map((c) => [c.claimed, c.ground]),
     [[5.52, "weiss"], [4.78, "warning-bg"]],
   );
 
   // Und die Markdown-Form, aus der die sechste falsche Zahl kam.
-  const eineMd = (zeile) => {
-    const c = claimsAusMarkdown([zeile])[0];
+  const oneMd = (line) => {
+    const c = claimsAusMarkdown([line])[0];
     return c ? [c.claimed, c.ground, c.token] : null;
   };
-  pruefe(
+  check(
     "Markdown: Zahl gegen Weiß",
-    eineMd("| `--color-text-muted` | 6.69 | Text |"),
+    oneMd("| `--color-text-muted` | 6.69 | Text |"),
     [6.69, "weiss", "--color-text-muted"],
   );
-  pruefe(
+  check(
     "Markdown: Grund benannt",
     claimsAusMarkdown(["| `--color-success` | 5.07 (4.68); auf `success-bg` 4.63 | Text |"]).map(
       (c) => [c.claimed, c.ground],
     ),
     [[4.63, "success-bg"], [5.07, "weiss"]],
   );
-  pruefe("Markdown: Zeile ohne Token", eineMd("| Kontrast | 4.5 | Schwelle |"), null);
-  pruefe(
+  check("Markdown: Zeile ohne Token", oneMd("| Kontrast | 4.5 | Schwelle |"), null);
+  check(
     "Markdown: Klammerwert bleibt ungeprüft",
     claimsAusMarkdown(["| `--color-text-subtle` | 4.88 (4.51) | Text |"]).length,
     1,
   );
 
   // Und die Rechnung selbst, gegen von Hand nachgerechnete Werte.
-  const rund = (x) => Math.round(x * 1e4) / 1e4;
-  pruefe("Verhältnis text-subtle auf Weiß", rund(ratio("#717171", "#FFFFFF")), 4.8807);
-  pruefe("Verhältnis accent auf border-control", rund(ratio("#3B8FC4", "#8A8A8A")), 1.0289);
-  pruefe("Grund über Wort auflösbar", resolveGround("bg-soft") !== null, true);
-  pruefe("Grund über Token auflösbar", resolveGround("--color-border-control"), "#8A8A8A");
+  const rounded = (x) => Math.round(x * 1e4) / 1e4;
+  check("Verhältnis text-subtle auf Weiß", rounded(ratio("#717171", "#FFFFFF")), 4.8807);
+  check("Verhältnis accent auf border-control", rounded(ratio("#3B8FC4", "#8A8A8A")), 1.0289);
+  check("Grund über Wort auflösbar", resolveGround("bg-soft") !== null, true);
+  check("Grund über Token auflösbar", resolveGround("--color-border-control"), "#8A8A8A");
 
-  if (schlecht) {
-    console.error(`\ncheck:contrast — Selbstprüfung: ${schlecht} Fälle falsch.`);
+  if (bad) {
+    console.error(`\ncheck:contrast — Selbstprüfung: ${bad} Fälle falsch.`);
     process.exit(1);
   }
   console.log("check:contrast — Selbstprüfung in Ordnung, 16 Fälle.");
   process.exit(0);
 }
 
-if (process.argv[2] === "--test") selbsttest();
+if (process.argv[2] === "--test") selfTest();
 
 const claims = [
   ...FILES.flatMap((file) => claimsAus(readFileSync(file, "utf8").split("\n"), file)),

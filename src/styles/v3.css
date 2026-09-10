@@ -1712,13 +1712,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .bse__removed .v2link { display: inline-flex; align-items: center; gap: 4px; }
 
-.bse__gegen {
+.bse__contra {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: 9px 0;
   border-bottom: 1px solid var(--color-border-subtle);
   font-weight: 500;
 }
-.bse__gegen__label { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.bse__contra__label { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .bse__tag {
   font-size: 11px; color: var(--color-accent-700);
   background: var(--color-accent-50); border-radius: var(--radius-pill);
@@ -4049,7 +4049,7 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 .bse__head-end { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
 /* Ein Satz ohne Zeile ist ein Fehler des Aufrufers — er wird sichtbar
    abgefangen, nicht in eine leere Fläche gelegt. */
-.bse__leer { padding: var(--space-4) 0; }
+.bse__empty { padding: var(--space-4) 0; }
 .bse__msgs { margin-top: var(--space-3); }
 /* Die Kontozelle des **Lesers**: Nummer, Name und der Weg ins Kontenblatt
    nebeneinander. Sie heißt nicht `.bse__account` wie die Lesezelle des Editors

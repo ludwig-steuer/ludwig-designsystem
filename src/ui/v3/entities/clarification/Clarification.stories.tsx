@@ -229,7 +229,7 @@ export const LongQuestion: Story = {
   ),
 };
 
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
     <Card>
       <CardHead title="Rückfragen" sub="Sachverhalt SV-2026-0210" />

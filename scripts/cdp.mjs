@@ -40,47 +40,47 @@ const CHROME =
 
 /** Ein freier Port je Lauf: zwei Prüfer gleichzeitig dürfen sich nicht stören. */
 const PORT = Number(process.env.CDP_PORT || 9300 + (process.pid % 600));
-const PROFIL = `/private/tmp/claude-501/cdp-profile-${PORT}`;
+const PROFILE_DIR = `/private/tmp/claude-501/cdp-profile-${PORT}`;
 
-let kind = null;
-let abgeraeumt = false;
+let child = null;
+let cleanedUp = false;
 
 /** Die ganze Gruppe, nicht nur den Vater — die Kinder überleben ihn sonst. */
-function abraeumen() {
-  if (abgeraeumt) return;
-  abgeraeumt = true;
-  if (kind?.pid) {
+function cleanUp() {
+  if (cleanedUp) return;
+  cleanedUp = true;
+  if (child?.pid) {
     for (const signal of ["SIGTERM", "SIGKILL"]) {
       try {
-        process.kill(-kind.pid, signal);
+        process.kill(-child.pid, signal);
       } catch {
         /* schon weg */
       }
     }
   }
   try {
-    rmSync(PROFIL, { recursive: true, force: true });
+    rmSync(PROFILE_DIR, { recursive: true, force: true });
   } catch {
     /* egal */
   }
 }
 
-for (const ereignis of ["exit", "SIGINT", "SIGTERM", "SIGHUP"]) {
-  process.on(ereignis, abraeumen);
+for (const event of ["exit", "SIGINT", "SIGTERM", "SIGHUP"]) {
+  process.on(event, cleanUp);
 }
 process.on("uncaughtException", (e) => {
-  abraeumen();
+  cleanUp();
   console.error(e);
   process.exit(1);
 });
 process.on("unhandledRejection", (e) => {
-  abraeumen();
+  cleanUp();
   console.error(e);
   process.exit(1);
 });
 
 export async function launch() {
-  kind = spawn(
+  child = spawn(
     CHROME,
     [
       `--remote-debugging-port=${PORT}`,
@@ -89,13 +89,13 @@ export async function launch() {
       "--no-default-browser-check",
       "--disable-gpu",
       "--hide-scrollbars=false",
-      `--user-data-dir=${PROFIL}`,
+      `--user-data-dir=${PROFILE_DIR}`,
       "about:blank",
     ],
     // `detached`: eigene Prozessgruppe, damit `process.kill(-pid)` alle trifft.
     { stdio: "ignore", detached: true },
   );
-  kind.unref();
+  child.unref();
   for (let i = 0; i < 120; i++) {
     try {
       const r = await fetch(`http://127.0.0.1:${PORT}/json/version`);
@@ -105,7 +105,7 @@ export async function launch() {
     }
     await sleep(150);
   }
-  return { kill: abraeumen, pid: kind.pid, port: PORT };
+  return { kill: cleanUp, pid: child.pid, port: PORT };
 }
 
 export class Session {
@@ -156,10 +156,10 @@ export class Session {
     }
     return r.result.value;
   }
-  async goto(adresse) {
+  async goto(address) {
     await this.send("Page.enable");
     await this.send("Runtime.enable");
-    await this.send("Page.navigate", { url: adresse });
+    await this.send("Page.navigate", { url: address });
     for (let i = 0; i < 200; i++) {
       await sleep(100);
       try {
@@ -228,9 +228,9 @@ export const url = (id, extra = "") =>
  * Nur Prozesse mit einem `cdp-profile-`-Verzeichnis und älter als zehn
  * Minuten — ein laufender Messlauf soll nicht mitsterben.
  */
-function aufraeumen() {
-  const zeilen = execSync("ps -eo pid=,etime=,command=", { encoding: "utf8" }).split("\n");
-  const sekunden = (e) => {
+function cleanStale() {
+  const lines = execSync("ps -eo pid=,etime=,command=", { encoding: "utf8" }).split("\n");
+  const seconds = (e) => {
     let t = 0;
     if (e.includes("-")) {
       const [d, rest] = e.split("-");
@@ -242,13 +242,13 @@ function aufraeumen() {
     return t + p[0] * 3600 + p[1] * 60 + p[2];
   };
   const pids = [];
-  for (const z of zeilen) {
+  for (const z of lines) {
     const m = z.match(/^\s*(\d+)\s+(\S+)\s+(.*)$/);
     if (!m) continue;
     const [, pid, etime, cmd] = m;
     if (!cmd.includes("cdp-profile-") || !cmd.includes("--headless") || cmd.includes("--type="))
       continue;
-    if (sekunden(etime) > 600) pids.push(Number(pid));
+    if (seconds(etime) > 600) pids.push(Number(pid));
   }
   for (const pid of pids) {
     for (const sig of ["SIGTERM", "SIGKILL"]) {
@@ -263,21 +263,21 @@ function aufraeumen() {
       }
     }
   }
-  const lauf = execSync("ps -eo command=", { encoding: "utf8" });
-  let ordner = 0;
+  const run = execSync("ps -eo command=", { encoding: "utf8" });
+  let dir = 0;
   for (const d of execSync("ls -d /private/tmp/claude-501/cdp-profile-* 2>/dev/null || true", {
     encoding: "utf8",
   })
     .split("\n")
     .filter(Boolean)) {
-    if (lauf.includes(d.split("/").pop())) continue;
+    if (run.includes(d.split("/").pop())) continue;
     rmSync(d, { recursive: true, force: true });
-    ordner++;
+    dir++;
   }
-  console.log(`cdp:clean — ${pids.length} Messbrowser beendet, ${ordner} Profile entfernt.`);
+  console.log(`cdp:clean — ${pids.length} Messbrowser beendet, ${dir} Profile entfernt.`);
 }
 
 if (process.argv[2] === "--clean") {
-  abgeraeumt = true; // der Aufräumer soll sich nicht selbst abräumen wollen
-  aufraeumen();
+  cleanedUp = true; // der Aufräumer soll sich nicht selbst abräumen wollen
+  cleanStale();
 }

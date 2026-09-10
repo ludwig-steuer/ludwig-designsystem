@@ -34,8 +34,8 @@ const GROUPS: TodoGroup[] = [
 export const Filled: Story = {
   render: function Render() {
     const [sel, setSel] = useState<string | null>("a");
-    const alle = GROUPS.flatMap((g) => g.items);
-    const active = alle.find((i) => i.id === sel);
+    const all = GROUPS.flatMap((g) => g.items);
+    const active = all.find((i) => i.id === sel);
     return (
       <MasterDetail
         list={<TodoList groups={GROUPS} selectedId={sel} onSelect={setSel} />}
@@ -45,7 +45,7 @@ export const Filled: Story = {
               variant="primary"
               size="sm"
               hotkey="A"
-              onClick={() => setSel(nextOpen(alle, sel))}
+              onClick={() => setSel(nextOpen(all, sel))}
             >
               Erledigt
             </Button>

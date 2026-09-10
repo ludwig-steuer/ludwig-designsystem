@@ -1,229 +1,227 @@
 #!/usr/bin/env node
 /**
- * Wächter für „Code nur Englisch" (CLAUDE.md).
+ * Guard: no German in source code (CLAUDE.md, owner 2026-09-10).
  *
- * Kommentare und JSDoc unter `src/ui/v3/` sind englisch; deutsch ist nur, was
- * Nutzer sehen — Labels, Texte, Storybook-Titel. Die Regel steht seit jeher da
- * und ist die, die am häufigsten zurückfällt: allein am 2026-09-07 kam sie in
- * vier Abnahmen zurück (0025 M3, 0044, 0063 M1, 0086 Befund 1), **jedes Mal
- * eingeschleppt von der Nacharbeit, die einen anderen Mangel behob**. Wer
- * unter Zeitdruck einen Kommentar schreibt, schreibt ihn in seiner
- * Arbeitssprache.
+ * Checks every source file outside the mirror (`src/ludwig/`) for German in
+ * comments, declared identifiers, CSS class names and file names. German stays
+ * only where users read it: string literals, and story descriptions, which
+ * Storybook renders as text (house decision 0098 M10).
  *
- * Ausgenommen sind Story-Dateien: ihre JSDoc erscheinen in Storybook und sind
- * damit näher an „Strings, die Nutzer sehen" als an Code (Hausentscheid, 0098
- * M10). `src/ludwig/` ist gespiegelt und gehört der App.
+ * Comments are a ratchet: `scripts/language-baseline.json` counts the German
+ * comment lines per file that existed on 2026-09-10, and a file may only go
+ * down. Names, classes and file names have no baseline — they are clean.
  *
- * Erkannt wird an **deutschen Funktionswörtern**, nicht an Umlauten: „für" und
- * „größer" haben welche, „das", „nicht", „steht" nicht — und englische
- * Kommentare enthalten diese Wörter praktisch nie als ganzes Wort.
- *
- * **Er prüft, was gerade angefasst wurde, nicht den Bestand.** CLAUDE.md sagt:
- * „Bestehende deutsche Bezeichner werden nicht in Masse umbenannt; eine Datei,
- * die ohnehin angefasst wird, bekommt englische Namen." Genau so läuft er —
- * ohne Argumente nimmt er die Dateien, die `git` als geändert meldet. Der
- * Bestand (`--all`) ist ein Bericht, kein Tor: 388 Zeilen in 132 Dateien am
- * 2026-09-07 — die Zahl sinkt mit jeder Datei, die ohnehin angefasst wird.
- *
- * Run: `pnpm check:language` · Bestand: `--all` · Selbstprüfung: `--test`
+ * Run: `pnpm check:language` · shrink the baseline: `--update` · self-test: `--test`
  */
-
-import { execSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import ts from "typescript";
 
-const ROOT = "src/ui/v3";
+const ROOTS = ["src", "scripts", ".storybook"];
+const MIRROR = "src/ludwig/";
+const SOURCE = /\.(tsx?|mjs|cjs|js|css|sh)$/;
+const BASELINE = "scripts/language-baseline.json";
+
+// Function words carry German sentences and practically never occur as whole
+// words in English ones. Words that are also English fragments ("die", "in",
+// "so") are left out on purpose.
+const FUNCTION_WORDS = [
+  "aber", "auch", "auf", "aus", "beim", "dass", "dem", "den", "der", "des", "die", "doch",
+  "durch", "eine", "einen", "einer", "eines", "für", "hier", "ist", "jede", "jeder",
+  "kein", "keine", "macht", "nicht", "noch", "nur", "oder", "schon", "sich", "sind",
+  "sonst", "statt", "steht", "stehen", "über", "und", "vom", "von", "wenn", "werden",
+  "wie", "wird", "zeigt", "zwei", "zwischen",
+];
+const SENTENCE = new RegExp(`(?:^|[^\\p{L}])(${FUNCTION_WORDS.join("|")})(?![\\p{L}])`, "iu");
+
+// Words in names. `EXACT` must match a whole word, `PREFIX` may start a German
+// compound ("kontoauszug", "belegfeld"). ponytail: a lexicon, not a language
+// model — a German word outside it passes; add it when a review finds one.
+const EXACT = new Set(("soll haben voll alle leer offen breit jahr rolle titel suche ziel letzte zuletzt merke zahlen " +
+  "summe reise mit ohne und oder nicht nur fehler aktiv interaktiv varianten kopf lange frage karte sauber erledigt " +
+  "grund gegen netto brutto zweite arten quelle quellen regel regeln gesetz kasse belege buchen wert werte neu " +
+  "heute jetzt einfach im am zum zur bei nach vor unten oben rechts klein ist lies").split(" "));
+const PREFIX = ("beleg konto konten buchung klaer sachverhalt stapel vorschlag ereignis uebersicht zustaend pruef " +
+  "waehl gewaehl gefuell geoeff laed unguelt unvollst faelle vorgaeng mandant kanzlei steuer rechnung gutschrift " +
+  "zahlung waehrung verlauf protokoll notiz flaech zeile spalte seite rahmen erwart abnahme freigabe befund maengel " +
+  "mangel storno speicher loesch zurueck weitere gefuehrt vertrag erloes aufwand einsatz stamm kommentar vorschau " +
+  "zielgrupp eingeordnet gefunden bewegung anschrift herkunft verhalten umsatz gegenkonto betrag datum nummer monat " +
+  "stichtag privatant wohlgeform schluessel auszug frist plakett aehnlich leiste schritt").split(" ");
+
+export function words(name) {
+  return name
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+    .split(/[\s_\-.]+/)
+    .map((w) => w.toLowerCase())
+    .filter(Boolean);
+}
+
+export function isGermanName(name) {
+  if (/[äöüßÄÖÜ]/.test(name)) return true;
+  return words(name).some((w) => EXACT.has(w) || PREFIX.some((p) => w.startsWith(p)));
+}
+
+/** Is a comment line German? Quoted text does not count — that is a label. */
+export function isGermanComment(line) {
+  const bare = line.replace(/„[^"“]*["“]/g, " ").replace(/"[^"]*"/g, " ").replace(/`[^`]*`/g, " ");
+  return SENTENCE.test(bare);
+}
 
 /**
- * Wörter, die im Deutschen tragen und im Englischen nicht vorkommen. Kurze
- * Wörter, die auch englische Fragmente sein können („die" als Verb, „in",
- * „so"), stehen bewusst nicht drin.
+ * Comment lines of a file as `[lineNumber, text]`. In story files a JSDoc
+ * directly above `export const` / `const meta` is a description Storybook
+ * shows, so it is skipped.
  */
-const DEUTSCH = [
-  "aber","auch","auf","aus","beim","dass","dem","den","der","des","die","doch",
-  "durch","eine","einen","einer","eines","für","hier","ist","jede","jeder",
-  "kein","keine","macht","nicht","noch","nur","oder","schon","sich","sind",
-  "sonst","statt","steht","stehen","über","und","vom","von","wenn","werden",
-  "wie","wird","zeigt","zwei","über","zwischen",
-];
-const MUSTER = new RegExp(`(?:^|[^\\p{L}])(${DEUTSCH.join("|")})(?![\\p{L}])`, "iu");
-
-/** Kommentare einer Datei, als Zeilen mit ihrer Nummer. */
-export function kommentarZeilen(source) {
-  const out = [];
+export function commentLines(source, { css = false, shell = false, story = false } = {}) {
   const lines = source.split("\n");
-  let imBlock = false;
+  const out = [];
+  if (shell) {
+    lines.forEach((l, i) => { if (/^\s*#(?!!)/.test(l)) out.push([i + 1, l.trim()]); });
+    return out;
+  }
+  let block = null;
   for (let i = 0; i < lines.length; i++) {
     const l = lines[i];
     const t = l.trim();
-    if (imBlock) {
-      out.push([i + 1, t]);
-      if (t.includes("*/")) imBlock = false;
+    if (block) {
+      block.push([i + 1, t]);
+      if (t.includes("*/")) {
+        const next = lines.slice(i + 1).find((x) => x.trim() !== "") ?? "";
+        const description = story && block.doc && /^\s*(export\s+const|const\s+meta|export\s+default)/.test(next);
+        if (!description) out.push(...block);
+        block = null;
+      }
       continue;
     }
-    // Auch der JSX-Kommentar `{/* … */}`: er beginnt mit einer Klammer, und
-    // genau daran las der Wächter ihn nicht — ein deutscher Absatz in
-    // `MasterDetail.tsx` lief grün durch (0063, sechste Runde).
-    const blockAnfang = t.startsWith("/*") ? t : t.startsWith("{/*") ? t.slice(1) : null;
-    if (blockAnfang !== null) {
-      out.push([i + 1, blockAnfang]);
-      if (!blockAnfang.includes("*/")) imBlock = true;
+    const start = t.startsWith("/*") ? t : t.startsWith("{/*") ? t.slice(1) : null;
+    if (start !== null) {
+      const entry = [[i + 1, start]];
+      entry.doc = start.startsWith("/**");
+      if (start.includes("*/")) {
+        const next = lines.slice(i + 1).find((x) => x.trim() !== "") ?? "";
+        if (!(story && entry.doc && /^\s*(export\s+const|const\s+meta)/.test(next))) out.push(...entry);
+      } else block = entry;
       continue;
     }
-    // Zeilenkommentar — aber nicht das `//` in einer URL („https://…").
+    if (css) continue;
+    // A line comment — but not the `//` inside a URL.
     const m = l.match(/(^|[^:"'`\\])\/\/(.*)$/);
     if (m) out.push([i + 1, m[2].trim()]);
   }
   return out;
 }
 
-/** Ist die Zeile deutsch? Zeichenketten darin zählen nicht — das sind Labels. */
-export function istDeutsch(zeile) {
-  const ohneStrings = zeile.replace(/„[^"]*"/g, " ").replace(/"[^"]*"/g, " ").replace(/`[^`]*`/g, " ");
-  return MUSTER.test(ohneStrings);
+/** Declared identifiers (not object keys — those are data unless a type declares them). */
+export function declaredNames(file, source) {
+  const kind = file.endsWith(".tsx") ? ts.ScriptKind.TSX : file.endsWith(".ts") ? ts.ScriptKind.TS : ts.ScriptKind.JS;
+  const sf = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, kind);
+  const out = [];
+  (function visit(n) {
+    const p = n.parent;
+    if (ts.isIdentifier(n) && p && p.name === n && (
+      ts.isVariableDeclaration(p) || ts.isFunctionDeclaration(p) || ts.isParameter(p) || ts.isPropertySignature(p) ||
+      ts.isBindingElement(p) || ts.isInterfaceDeclaration(p) || ts.isTypeAliasDeclaration(p) || ts.isMethodDeclaration(p) ||
+      ts.isPropertyDeclaration(p) || ts.isClassDeclaration(p) || ts.isEnumMember(p) || ts.isEnumDeclaration(p)))
+      out.push([sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1, n.text]);
+    ts.forEachChild(n, visit);
+  })(sf);
+  return out;
 }
 
-const dateien = (dir) =>
-  readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
-    const p = join(dir, e.name);
-    if (e.isDirectory()) return dateien(p);
-    if (!/\.tsx?$/.test(e.name) || e.name.includes(".stories.")) return [];
-    return [p];
-  });
+const cssClasses = (source) => [...new Set([...source.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/\.(-?[a-zA-Z_][\w-]*)/g)].map((m) => m[1]))];
 
-function selbsttest() {
-  const faelle = [
-    ["englischer Satz", "The row keeps its width, the cell does not.", false],
-    ["deutscher Satz", "Die Zeile behält ihre Breite, die Zelle nicht.", true],
-    ["deutsch ohne Umlaut", "Der Wert steht rechts und wird nie zentriert.", true],
-    ["englisch mit Umlaut im Code-Span", "Uses `--color-größe` for the width.", false],
-    ["englisch mit deutschem Label", 'Shows „Keine Treffer" when empty.', false],
-    ["URL ist kein Kommentar", "const u = \"https://example.org/x\";", false],
-  ];
-  let schlecht = 0;
-  for (const [name, zeile, erwartet] of faelle) {
-    const ist = istDeutsch(zeile);
-    if (ist !== erwartet) {
-      schlecht++;
-      console.error(`  ✗ ${name}: erwartet ${erwartet}, gemessen ${ist} — „${zeile}"`);
+function sourceFiles(dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const p = join(dir, e.name);
+    if (p.startsWith(MIRROR) || e.name === "node_modules") return [];
+    if (e.isDirectory()) return sourceFiles(p);
+    return SOURCE.test(e.name) ? [p] : [];
+  });
+}
+
+/** Names the app's data model declares — German there is a finding for the app, not a defect here. */
+function mirrorNames() {
+  const out = new Set();
+  const walk = (dir) => readdirSync(dir, { withFileTypes: true }).forEach((e) => {
+    const p = join(dir, e.name);
+    if (e.isDirectory()) return walk(p);
+    if (/\.tsx?$/.test(e.name)) for (const [, n] of declaredNames(p, readFileSync(p, "utf8"))) out.add(n);
+  });
+  if (existsSync(MIRROR)) walk(MIRROR);
+  return out;
+}
+
+export function scan() {
+  const allowed = mirrorNames();
+  const comments = {};
+  const names = [];
+  for (const file of ROOTS.flatMap(sourceFiles)) {
+    const source = readFileSync(file, "utf8");
+    const opts = { css: file.endsWith(".css"), shell: file.endsWith(".sh"), story: file.includes(".stories.") };
+    const german = commentLines(source, opts).filter(([, t]) => isGermanComment(t));
+    if (german.length) comments[file] = german;
+    if (isGermanName(basename(file).replace(/\.(stories\.)?[a-z]+$/, ""))) names.push(`${file} — file name`);
+    if (opts.css) {
+      for (const c of cssClasses(source)) if (isGermanName(c)) names.push(`${file} — class .${c}`);
+    } else if (!opts.shell) {
+      for (const [line, n] of declaredNames(file, source)) if (!allowed.has(n) && isGermanName(n)) names.push(`${file}:${line} — ${n}`);
     }
   }
-  // Und der Kommentar-Leser selbst
-  const src = 'const u = "https://x.y";\n// Das ist deutsch.\n/* Und das\n   auch. */\n';
-  const z = kommentarZeilen(src).map((k) => k[0]);
-  if (z.join(",") !== "2,3,4") {
-    schlecht++;
-    console.error(`  ✗ Kommentar-Leser: erwartet Zeilen 2,3,4 — gemessen ${z.join(",") || "keine"}`);
+  return { comments, names };
+}
+
+function selfTest() {
+  const cases = [
+    [isGermanComment, "The row keeps its width, the cell does not.", false],
+    [isGermanComment, "Die Zeile behält ihre Breite, die Zelle nicht.", true],
+    [isGermanComment, "Der Wert steht rechts und wird nie zentriert.", true],
+    [isGermanComment, 'Shows „Keine Treffer" when empty.', false],
+    [isGermanName, "kontoName", true],
+    [isGermanName, "accountName", false],
+    [isGermanName, "TodoRow", false],
+    [isGermanName, "bse__kopf", true],
+    [isGermanName, "v3notes__meta", false],
+    [isGermanName, "BelegSeite", true],
+    [isGermanName, "counterpartyName", false],
+    [isGermanName, "summary", false],
+  ];
+  let bad = 0;
+  for (const [fn, input, expected] of cases) {
+    if (fn(input) !== expected) { bad++; console.error(`  ✗ ${fn.name}(${input}): expected ${expected}`); }
   }
-  // Der JSX-Kommentar über zwei Zeilen — die Lücke, die 0063 fand.
-  const jsx = '      {/* Detail vor Liste im DOM: wer linear liest,\n          bekommt die Arbeitsfläche zuerst. */}\n';
-  const zj = kommentarZeilen(jsx);
-  if (zj.length !== 2 || !zj.some(([, t]) => istDeutsch(t))) {
-    schlecht++;
-    console.error(`  ✗ JSX-Kommentar: erwartet 2 Zeilen, davon eine deutsch — gemessen ${zj.length}`);
+  const js = 'const u = "https://x.y";\n// Das ist deutsch.\n/* Und das\n   auch. */\n';
+  if (commentLines(js).map((c) => c[0]).join(",") !== "2,3,4") { bad++; console.error("  ✗ comment reader"); }
+  const story = "/** Die Story zeigt den Leerfall. */\nexport const Empty = {};\n// Das ist Code.\n";
+  if (commentLines(story, { story: true }).map((c) => c[0]).join(",") !== "3") { bad++; console.error("  ✗ story description skipped"); }
+  if (bad) { console.error(`check:language — self-test: ${bad} cases wrong.`); process.exit(1); }
+  console.log(`check:language — self-test passed, ${cases.length + 2} cases.`);
+}
+
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+  const arg = process.argv[2];
+  if (arg === "--test") { selfTest(); process.exit(0); }
+  const { comments, names } = scan();
+  const counts = Object.fromEntries(Object.entries(comments).map(([f, l]) => [f, l.length]).sort());
+  if (arg === "--update") {
+    writeFileSync(BASELINE, JSON.stringify(counts, null, 1) + "\n");
+    console.log(`check:language — baseline written: ${Object.values(counts).reduce((a, b) => a + b, 0)} German comment lines in ${Object.keys(counts).length} files.`);
+    process.exit(0);
   }
-  if (schlecht) {
-    console.error(`\ncheck:language — Selbstprüfung: ${schlecht} Fälle falsch.`);
+  const baseline = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, "utf8")) : {};
+  const grew = Object.entries(counts).filter(([f, n]) => n > (baseline[f] ?? 0));
+  for (const n of names) console.error(`  ✗ ${n}`);
+  for (const [f, n] of grew) {
+    console.error(`  ✗ ${f}: ${n} German comment lines, baseline ${baseline[f] ?? 0}`);
+    for (const [line, t] of comments[f].slice(0, 5)) console.error(`      ${line}: ${t.slice(0, 80)}`);
+  }
+  const left = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (names.length || grew.length) {
+    console.error(`\ncheck:language — ${names.length} German names, ${grew.length} files with new German comments. No German in source code (CLAUDE.md); German stays in user-facing strings and story descriptions.`);
     process.exit(1);
   }
-  console.log(`check:language — Selbstprüfung in Ordnung, ${faelle.length + 2} Fälle.`);
-}
-
-if (process.argv[2] === "--test") {
-  selbsttest();
-  process.exit(0);
-}
-
-const raus = (cmd) => {
-  try {
-    return execSync(cmd, { encoding: "utf8" }).split("\n");
-  } catch {
-    return [];
-  }
-};
-
-/**
- * Die **Zeilen**, die diese Änderung anfasst, je Datei.
- *
- * Nicht die ganze Datei: CLAUDE.md sagt „eine Datei, die ohnehin angefasst
- * wird, bekommt englische Namen" — gemeint ist, was man dabei schreibt, nicht
- * jeder Altbestand, den man mit anfasst. `Table.tsx` trägt Sätze von 2026-08;
- * wer dort eine Zeile ändert, soll nicht dreißig übersetzen müssen, aber auch
- * keine neue deutsche dazuschreiben.
- */
-function geaenderteZeilen() {
-  const proDatei = new Map();
-  // Auch der **letzte Commit**: sonst prüft der Wächter nach dem Committen
-  // nichts mehr, und genau so ist eine deutsche Zeile durchgerutscht — die
-  // Abnahme von 0027 fand sie mit `--all`, während `pnpm check:language` grün
-  // meldete, weil der Baum sauber war.
-  for (const bereich of ["HEAD~1", "HEAD", "--cached"]) {
-    let datei = null;
-    for (const zeile of raus(`git diff -U0 ${bereich}`)) {
-      const neu = zeile.match(/^\+\+\+ b\/(.+)$/);
-      if (neu) {
-        datei = neu[1];
-        continue;
-      }
-      const stueck = zeile.match(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/);
-      if (!stueck || !datei) continue;
-      if (!datei.startsWith(`${ROOT}/`) || !/\.tsx?$/.test(datei) || datei.includes(".stories.")) continue;
-      if (!existsSync(datei)) continue;
-      const von = Number(stueck[1]);
-      const wieviele = stueck[2] === undefined ? 1 : Number(stueck[2]);
-      const menge = proDatei.get(datei) ?? new Set();
-      for (let i = 0; i < wieviele; i++) menge.add(von + i);
-      proDatei.set(datei, menge);
-    }
-  }
-  // **Neue Dateien sieht `git diff` nicht.** Es vergleicht nur, was git schon
-  // kennt — eine gerade angelegte, ungestagte Datei kommt in keinem der drei
-  // Bereiche vor und läuft grün durch, ohne geprüft zu sein. Genau so wären am
-  // 2026-09-08 drei deutsche Zeilen in vier neuen Bausteinen durchgerutscht;
-  // sie fielen nur auf, weil der Bauende sie zwischendurch gestagt hat.
-  // Bei einer neuen Datei ist **jede** Zeile neu, also wird sie ganz geprüft.
-  for (const datei of raus("git ls-files --others --exclude-standard")) {
-    const pfad = datei.trim();
-    if (!pfad.startsWith(`${ROOT}/`) || !/\.tsx?$/.test(pfad) || pfad.includes(".stories.")) continue;
-    if (!existsSync(pfad)) continue;
-    const menge = proDatei.get(pfad) ?? new Set();
-    const zeilen = readFileSync(pfad, "utf8").split("\n").length;
-    for (let i = 1; i <= zeilen; i++) menge.add(i);
-    proDatei.set(pfad, menge);
-  }
-
-  return proDatei;
-}
-
-// Nur beim direkten Aufruf laufen: `kommentarZeilen` und `istDeutsch` sind
-// exportiert, damit man sie prüfen kann — ein Import darf dabei nicht den
-// ganzen Wächter starten und mit `process.exit` enden.
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
-const alle = process.argv[2] === "--all";
-const geaendert = alle ? null : geaenderteZeilen();
-const zuPruefen = alle ? dateien(ROOT) : [...geaendert.keys()];
-
-if (!alle && zuPruefen.length === 0) {
-  console.log("check:language — nichts geändert unter " + ROOT + ".");
-  process.exit(0);
-}
-
-const fehlt = [];
-for (const datei of zuPruefen) {
-  const zeilen = alle ? null : geaendert.get(datei);
-  for (const [nr, zeile] of kommentarZeilen(readFileSync(datei, "utf8"))) {
-    if (!alle && !zeilen.has(nr)) continue;
-    if (istDeutsch(zeile)) fehlt.push(`${datei}:${nr} — ${zeile.slice(0, 72)}`);
-  }
-}
-
-if (fehlt.length) {
-  for (const f of fehlt) console.error(`  ✗ ${f}`);
-  console.error(
-    `\ncheck:language — ${fehlt.length} deutsche Kommentarzeilen in ${zuPruefen.length} ${alle ? "Dateien des Bestands" : "angefassten Dateien"}. Code nur Englisch (CLAUDE.md); Deutsch bleibt in Nutzer-Strings und in den Story-JSDoc.`,
-  );
-  process.exit(1);
-}
-console.log(`check:language — in Ordnung, ${zuPruefen.length} ${alle ? "Dateien" : "angefasste Dateien"} geprüft.`);
+  const shrinkable = Object.entries(baseline).filter(([f, n]) => (counts[f] ?? 0) < n).length;
+  console.log(`check:language — ok. ${left} German comment lines left in ${Object.keys(counts).length} files${shrinkable ? `; baseline can shrink in ${shrinkable} files (--update)` : ""}.`);
 }

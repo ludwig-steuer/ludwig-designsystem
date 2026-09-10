@@ -120,8 +120,8 @@ export function JournalEntryGrid({
           Die Seite steht dabei, wie im Editor: sie ist die Gegenseite des
           Belegs, nicht wählbar. */}
       {contraAccount ? (
-        <div className="bse__gegen">
-          <span className="bse__gegen__label">
+        <div className="bse__contra">
+          <span className="bse__contra__label">
             <span className="v2muted">Gegenkonto</span> an{" "}
             {documentSide === "S" ? "H" : "S"}{" "}
             <span className="v2mono">{contraAccount.account}</span>
@@ -132,7 +132,7 @@ export function JournalEntryGrid({
       ) : null}
 
       {rows.length === 0 ? (
-        <p className="v2muted bse__leer">Keine Buchungszeilen.</p>
+        <p className="v2muted bse__empty">Keine Buchungszeilen.</p>
       ) : (
         <div className="bse__tbl" style={{ "--bse-cols": journalGridTracks[mode] } as CSSProperties}>
           <div className="bse__head" role="row">

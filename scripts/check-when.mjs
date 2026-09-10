@@ -24,10 +24,10 @@ import { join } from "node:path";
 
 const ROOT = "src/ui/v3";
 
-const dateien = (dir) =>
+const files = (dir) =>
   readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
     const p = join(dir, e.name);
-    if (e.isDirectory()) return dateien(p);
+    if (e.isDirectory()) return files(p);
     if (!/\.tsx?$/.test(e.name) || e.name.includes(".stories.")) return [];
     return [p];
   });
@@ -43,11 +43,11 @@ const dateien = (dir) =>
  * `fixtures.ts` ist ganz ausgenommen — Beispieldaten sind keine Bausteine,
  * auch wenn sie als Funktion daherkommen (0093).
  */
-const istBaustein = (datei, zeile) => {
-  if (datei.endsWith("/fixtures.ts")) return false;
-  if (/^export\s+(?:async\s+)?(?:function|class)\s/.test(zeile)) return true;
+const isBuildingBlock = (file, line) => {
+  if (file.endsWith("/fixtures.ts")) return false;
+  if (/^export\s+(?:async\s+)?(?:function|class)\s/.test(line)) return true;
   // `export const x = (…) => …` und `export const x = function …`
-  return /^export\s+const\s+[A-Za-z0-9_$]+\s*(?::[^=]+)?=\s*(?:async\s+)?(?:function\b|\([^)]*\)\s*(?::[^=]+)?=>|[A-Za-z0-9_$]+\s*=>)/.test(zeile);
+  return /^export\s+const\s+[A-Za-z0-9_$]+\s*(?::[^=]+)?=\s*(?:async\s+)?(?:function\b|\([^)]*\)\s*(?::[^=]+)?=>|[A-Za-z0-9_$]+\s*=>)/.test(line);
 };
 
 /**
@@ -56,17 +56,17 @@ const istBaustein = (datei, zeile) => {
  * abgerutscht und damit als fehlend (genau so ist es `SourceDocumentFacts`
  * ergangen, als 0071 einen Block dazwischenschob).
  */
-export function jsdocUeber(lines, i) {
+export function jsdocAbove(lines, i) {
   let j = i - 1;
   while (j >= 0 && lines[j].trim() === "") j--;
   if (j < 0) return null;
-  const zeile = lines[j].trim();
+  const line = lines[j].trim();
   // Einzeiler: `/** … */` steht ganz in einer Zeile.
-  if (zeile.startsWith("/**") && zeile.endsWith("*/")) return zeile;
-  if (zeile !== "*/") return null;
-  const ende = j;
+  if (line.startsWith("/**") && line.endsWith("*/")) return line;
+  if (line !== "*/") return null;
+  const end = j;
   while (j >= 0 && !lines[j].trim().startsWith("/**")) j--;
-  return j < 0 ? null : lines.slice(j, ende + 1).join("\n");
+  return j < 0 ? null : lines.slice(j, end + 1).join("\n");
 }
 
 /**
@@ -82,27 +82,27 @@ export function hatTag(doc, tag) {
 }
 
 /* ── Selbstprüfung ─────────────────────────────────────────────────────────
-   Ein Wächter, der falsch anschlägt, ist schlimmer als keiner: er lässt einen
+   Ein Wächter, der falsch anschlägt, actual schlimmer als keiner: er lässt einen
    Satz nachtragen, der schon dasteht. Die Fälle unten sind die, an denen der
-   erste Wurf dieses Skripts gescheitert ist. `pnpm check:when --test`. */
-function selbsttest() {
-  const faelle = [
+   erste Wurf dieses Skripts gescheitert actual. `pnpm check:when --test`. */
+function selfTest() {
+  const cases = [
     ["Einzeiler-JSDoc", ["/** Was das ist. */", "export const A_B = 1;"], 1, true],
     ["mehrzeiliges JSDoc", ["/**", " * Was das ist.", " */", "export const A_B = 1;"], 3, true],
     ["Leerzeile dazwischen", ["/** Was das ist. */", "", "export const A_B = 1;"], 2, true],
     ["gar kein JSDoc", ["export const A_B = 1;"], 0, false],
     ["nur ein //-Kommentar", ["// Was das ist.", "export const A_B = 1;"], 1, false],
   ];
-  let schlecht = 0;
-  for (const [name, lines, i, erwartet] of faelle) {
-    const ist = jsdocUeber(lines, i) !== null;
-    if (ist !== erwartet) {
-      schlecht++;
-      console.error(`  ✗ ${name}: erwartet ${erwartet}, gemessen ${ist}`);
+  let bad = 0;
+  for (const [name, lines, i, expected] of cases) {
+    const actual = jsdocAbove(lines, i) !== null;
+    if (actual !== expected) {
+      bad++;
+      console.error(`  ✗ ${name}: erwartet ${expected}, gemessen ${actual}`);
     }
   }
   // Und das Tag selbst: nur am Zeilenanfang zählt es.
-  const tagFaelle = [
+  const tagCases = [
     ["Tag in eigener Zeile", "/**\n * Satz.\n * @when    Der Fall.\n */", true],
     ["Tag im Einzeiler", "/** @when Der Fall. */", true],
     ["Tag ohne Stern", "/**\n   @when Der Fall.\n */", true],
@@ -110,53 +110,53 @@ function selbsttest() {
     ["Wort statt Tag", "/**\n * Sagt, wann@when gilt.\n */", false],
     ["gar kein Tag", "/**\n * Nur ein Satz.\n */", false],
   ];
-  for (const [name, doc, erwartet] of tagFaelle) {
-    const ist = hatTag(doc, "when");
-    if (ist !== erwartet) {
-      schlecht++;
-      console.error(`  ✗ ${name}: erwartet ${erwartet}, gemessen ${ist}`);
+  for (const [name, doc, expected] of tagCases) {
+    const actual = hatTag(doc, "when");
+    if (actual !== expected) {
+      bad++;
+      console.error(`  ✗ ${name}: erwartet ${expected}, gemessen ${actual}`);
     }
   }
-  if (schlecht) {
-    console.error(`\ncheck:when — Selbstprüfung: ${schlecht} von ${faelle.length + tagFaelle.length} Fällen falsch.`);
+  if (bad) {
+    console.error(`\ncheck:when — Selbstprüfung: ${bad} von ${cases.length + tagCases.length} Fällen falsch.`);
     process.exit(1);
   }
-  console.log(`check:when — Selbstprüfung in Ordnung, ${faelle.length + tagFaelle.length} Fälle.`);
+  console.log(`check:when — Selbstprüfung in Ordnung, ${cases.length + tagCases.length} Fälle.`);
 }
 
 if (process.argv[2] === "--test") {
-  selbsttest();
+  selfTest();
   process.exit(0);
 }
 
-const fehlt = [];
-for (const datei of dateien(ROOT)) {
-  const lines = readFileSync(datei, "utf8").split("\n");
+const missing = [];
+for (const file of files(ROOT)) {
+  const lines = readFileSync(file, "utf8").split("\n");
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(
       /^export\s+(?:async\s+)?(?:function|class)\s+([A-Za-z0-9_$]+)|^export\s+const\s+([A-Za-z0-9_$]+)\s*[:=]/,
     );
     if (!m) continue;
     const name = m[1] ?? m[2];
-    const doc = jsdocUeber(lines, i) ?? "";
-    const wo = `${datei}:${i + 1} ${name}`;
-    if (!istBaustein(datei, lines[i])) {
+    const doc = jsdocAbove(lines, i) ?? "";
+    const wo = `${file}:${i + 1} ${name}`;
+    if (!isBuildingBlock(file, lines[i])) {
       // Ein Satz genügt — aber es muss einer da sein.
-      if (!/[A-Za-zÄÖÜäöü]/.test(doc.replace(/[/*]/g, ""))) fehlt.push(`${wo} — Wert ohne Satz`);
+      if (!/[A-Za-zÄÖÜäöü]/.test(doc.replace(/[/*]/g, ""))) missing.push(`${wo} — Wert ohne Satz`);
       continue;
     }
     const hatWhen = hatTag(doc, "when");
     const hatInstead = hatTag(doc, "instead");
     if (!hatWhen || !hatInstead) {
-      fehlt.push(`${wo} — ${!hatWhen && !hatInstead ? "@when und @instead" : !hatWhen ? "@when" : "@instead"} fehlt`);
+      missing.push(`${wo} — ${!hatWhen && !hatInstead ? "@when und @instead" : !hatWhen ? "@when" : "@instead"} fehlt`);
     }
   }
 }
 
-if (fehlt.length) {
-  for (const f of fehlt) console.error(`  ✗ ${f}`);
+if (missing.length) {
+  for (const f of missing) console.error(`  ✗ ${f}`);
   console.error(
-    `\ncheck:when — ${fehlt.length} Exporte ohne die Zeilen, die sagen, wofür sie da sind. Die Regel steht im README („Wann"); Konstanten brauchen statt der Zeilen einen Satz (0093).`,
+    `\ncheck:when — ${missing.length} Exporte ohne die Zeilen, die sagen, wofür sie da sind. Die Regel steht im README („Wann"); Konstanten brauchen statt der Zeilen einen Satz (0093).`,
   );
   process.exit(1);
 }

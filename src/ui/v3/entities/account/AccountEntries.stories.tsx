@@ -168,7 +168,7 @@ export const LoadMore: Story = {
  * Nothing booked. That is a finding, not a filter problem (T6) — so the text
  * names the year and offers no button: the list is read-only.
  */
-export const Leer: Story = {
+export const Empty: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <AccountEntryList

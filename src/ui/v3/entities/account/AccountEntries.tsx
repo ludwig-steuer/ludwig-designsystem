@@ -117,9 +117,9 @@ function ContraAccounts({
   // px against 229 px of need at 1280 in the full set), and a clipped value
   // without a way to read it is no value. `AccountCell` only titles the *name*
   // it shortened itself, so the full list belongs on the box.
-  const alle = entry.contraAccounts.map((a) => `${a.number} ${a.name ?? ""}`.trim()).join(", ");
+  const all = entry.contraAccounts.map((a) => `${a.number} ${a.name ?? ""}`.trim()).join(", ");
   return (
-    <span className="v2ae__contra" title={alle}>
+    <span className="v2ae__contra" title={all}>
       <AccountCell
         number={first.number}
         name={first.name}
