@@ -53,6 +53,7 @@ export function CardHead({
   icon,
   meta,
   actions,
+  sticky,
 }: {
   title: ReactNode;
   sub?: ReactNode;
@@ -61,9 +62,21 @@ export function CardHead({
   /** Right of the title, **before** the actions (0049) — „1 Ereignis", a count, a date. */
   meta?: ReactNode;
   actions?: ReactNode;
+  /**
+   * The head stays in view while the card scrolls (F202).
+   *
+   * **The head, not the bar inside it.** A `position: sticky` never sticks
+   * beyond the bounds of its parent — a selection bar sitting in the head can
+   * only stick within the head, and the head is as tall as its content.
+   * Measured 2026-09-10: with `sticky` on the bar alone it scrolled away
+   * (top −565 instead of 0). If the head sticks, everything in it sticks —
+   * the title included, and while scrolling a long list that is more right
+   * than wrong.
+   */
+  sticky?: boolean;
 }) {
   return (
-    <div className="v2card__h">
+    <div className={sticky ? "v2card__h v2card__h--sticky" : "v2card__h"}>
       {icon ? <span className="v2card__ico">{icon}</span> : null}
       <div>
         <div className="title">{title}</div>

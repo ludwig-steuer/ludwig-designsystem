@@ -16,7 +16,12 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  /* `clip` statt `hidden`: beide schneiden an der Rundung ab, aber `hidden`
+     macht die Karte zum **Scroll-Container** — und an dem klebt dann jedes
+     `position: sticky` darin, statt am Fenster. Gemessen 2026-09-10 an der
+     Auswahl-Leiste (F202): mit `hidden` scrollte sie mit (top −565 statt 0).
+     Eine Karte, in der niemand scrollt, braucht keinen Scroll-Container. */
+  overflow: clip;
 }
 
 /* Kartenkopf — immer vorhanden, auch bei drei Zeilen. */
@@ -29,6 +34,12 @@
   justify-content: space-between;
   gap: 12px;
 }
+/* Der Kopf bleibt stehen, während die Karte scrollt (F202) — für Listen, die
+   am Stück abgearbeitet werden. **Der Kopf, nicht die Leiste darin:** ein
+   `sticky` klebt nie über sein Elternteil hinaus, und die Leiste im Kopf käme
+   über dessen Höhe nicht hinaus. Der Hintergrund ist ohnehin gesetzt, also
+   deckt der Kopf, was unter ihm durchläuft. */
+.v2card__h--sticky { position: sticky; top: 0; z-index: 5; }
 .v2card__h .title { font-size: 14px; font-weight: 600; color: var(--color-text); }
 .v2card__h .sub { font-size: 12px; color: var(--color-text-subtle); margin-top: 1px; }
 .v2card__h .actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
@@ -1049,6 +1060,19 @@ select.v2in { padding-right: 26px; }
   border-bottom: 1px solid var(--color-border-subtle);
   background: var(--color-accent-50);
   display: flex; align-items: center; gap: 12px;
+}
+/* Die Leiste bleibt stehen, während die Liste scrollt (F202). Nur wo eine
+   Liste am Stück abgearbeitet wird: wer zwanzig Zeilen abhakt, steht beim
+   letzten Haken am Tabellenende, und der Knopf, der alle freigibt, ist dann
+   aus dem Bild. Über fünf Zeilen klebt sie an nichts.
+
+   `--color-surface` statt der Akzentfläche wäre falsch: die Leiste **ist**
+   getönt, und beim Überlagern soll man sehen, dass etwas darüber liegt.
+   Modifikator an `.v2selbar`, kein neues Präfix — eine Datei behält ihres
+   (A13). */
+.v2selbar--sticky {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--color-accent-50);
 }
 .v2selbar__count { font-size: 12.5px; font-weight: 600; color: var(--color-accent-700); }
 .v2selbar__actions { display: flex; gap: 12px; margin-left: auto; align-items: center; }

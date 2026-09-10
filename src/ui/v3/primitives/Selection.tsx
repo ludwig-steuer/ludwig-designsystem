@@ -33,16 +33,29 @@ export function SelectionBar({
   actions,
   onClear,
   inline,
+  sticky,
 }: {
   count: number;
   actions: ReactNode;
   onClear: () => void;
   /** In the card header instead of its own band above the column head (0057 E5). */
   inline?: boolean;
+  /**
+   * The bar stays visible while the list scrolls (F202).
+   *
+   * For lists that are worked through in one go: whoever ticks twenty rows in
+   * a batch acceptance is at the bottom of the table when the last one is set,
+   * and the button that releases them all is then out of sight. Off by
+   * default — above a list of five rows a sticky bar is a bar that sticks to
+   * nothing.
+   */
+  sticky?: boolean;
 }) {
   if (count === 0) return null;
   return (
-    <div className={`v2selbar${inline ? " v2selbar--inline" : ""}`}>
+    <div
+      className={`v2selbar${inline ? " v2selbar--inline" : ""}${sticky ? " v2selbar--sticky" : ""}`}
+    >
       <span className="v2selbar__count">{count} ausgewählt</span>
       <span className="v2selbar__actions">
         {actions}
@@ -383,10 +396,13 @@ function BulkButton<Input>({
 export function SelectionScopeBar({
   actions,
   fallback,
+  sticky,
 }: {
   actions: AnyBulkAction[];
   /** The usual card actions — they come back as soon as the selection is empty. */
   fallback?: ReactNode;
+  /** Keep the bar in view while the list scrolls (F202). */
+  sticky?: boolean;
 }) {
   const { keys, clear } = useSelection();
   const count = keys.size;
@@ -417,6 +433,7 @@ export function SelectionScopeBar({
       inline
       count={count}
       onClear={clear}
+      {...(sticky ? { sticky } : {})}
       actions={actions.map((a) => (
         <span
           key={a.label}

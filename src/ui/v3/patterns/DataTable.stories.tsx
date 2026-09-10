@@ -362,6 +362,38 @@ export const Selection: Story = {
 };
 
 /**
+ * **Die Auswahl-Leiste bleibt stehen** (F202). Fünfzig Zeilen, und die Leiste
+ * klebt am oberen Rand, sobald man scrollt.
+ *
+ * Der Fall dafür ist die Stapelabnahme: wer zwanzig Zeilen abhakt, steht beim
+ * letzten Haken am Tabellenende — und der Knopf, der alle freigibt, ist dann
+ * aus dem Bild. Über einer Liste von fünf Zeilen wäre dieselbe Prop eine
+ * Leiste, die an nichts klebt; deshalb ist sie aus, wo der Aufrufer nichts
+ * sagt.
+ *
+ * Zum Ausprobieren: drei Zeilen wählen, dann scrollen.
+ */
+export const StickySelection: Story = {
+  render: function Render() {
+    const actions: BulkAction[] = [
+      { label: "Freigeben", hotkey: "F", action: async () => {} },
+      { label: "Zurückstellen", action: async () => {} },
+    ];
+    return (
+      <div style={{ maxHeight: 480, overflowY: "auto" }}>
+        <DataTable<CaseListItem>
+          rows={PAGE}
+          columns={COLUMNS}
+          rowKey={rowKey}
+          head={{ title: "Sachverhalte 2026", sub: "50 Zeilen — wählen, dann scrollen" }}
+          selection={{ actions, label: (c) => `${rowKey(c)} auswählen`, sticky: true }}
+        />
+      </div>
+    );
+  },
+};
+
+/**
  * **Die Sammelaktion, die erst fragt** (0121). „Zuordnen" öffnet einen Dialog
  * mit dem Ziel darin; erst danach läuft die Handlung, und sie bekommt beides
  * — die gewählten Zeilen **und** den erfragten Wert. Der Titel nennt die Zahl,

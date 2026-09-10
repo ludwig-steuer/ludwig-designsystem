@@ -247,6 +247,15 @@ interface DataTableBase<T> {
     actions: AnyBulkAction[];
     /** The text of the checkbox; without it the row key stands there. */
     label?: (row: T) => string;
+    /**
+     * The bar stays in view while the list scrolls (F202).
+     *
+     * For lists that are worked through in one go — whoever ticks twenty rows
+     * is at the bottom when the last one is set, and the button that releases
+     * them all is then out of sight. Off by default: above five rows a sticky
+     * bar sticks to nothing.
+     */
+    sticky?: boolean;
   };
   /** A filter is on: gives the empty text **after** the filter (T6). */
   filtered?: { summary: string; resetHref: string };
@@ -466,11 +475,16 @@ export function DataTable<T>(props: DataTableProps<T>) {
       <CardHead
         title={head.title}
         sub={head.sub}
+        {...(selection?.sticky ? { sticky: true } : {})}
         icon={head.icon}
         meta={head.meta}
         actions={
           selection ? (
-            <SelectionScopeBar actions={selection.actions} fallback={head.actions} />
+            <SelectionScopeBar
+              actions={selection.actions}
+              fallback={head.actions}
+              {...(selection.sticky ? { sticky: true } : {})}
+            />
           ) : (
             head.actions
           )
