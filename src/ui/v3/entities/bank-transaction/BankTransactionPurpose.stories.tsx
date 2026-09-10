@@ -10,13 +10,13 @@ const meta: Meta<typeof BankTransactionPurpose> = {
 export default meta;
 type Story = StoryObj<typeof BankTransactionPurpose>;
 
-/** Ein echter Block, wie eine VR-Bank ihn liefert: sechs der sieben Schlüssel. */
+/** A real block as a VR-Bank delivers it: six of the seven keys. */
 const FULL =
   "EREF+0600496348 KREF+DA-77120 MREF+D-VR-50411866-0-001 " +
   "CRED+DE87ZZZ00000001701 PURP+RINP OAMT+1596,88 " +
   "SVWZ+Wartung Klimaanlage, Leistung 08/2026, Rechnung RE-4471";
 
-/** Ein Zweck ohne Tag-Block — 10 % der Zeilen. Der Rohwert ist der Freitext. */
+/** A purpose without a tag block — 10 % of the rows. The raw value is the free text. */
 const PLAIN = "Dauerauftrag Miete Büro Musterstadt September 2026";
 
 /**
@@ -156,7 +156,7 @@ export const InUse: Story = {
             <BankTransactionPurpose purpose={"EREF+SW-2026-08 SVWZ+Abschlag Strom 08/2026"} />
             <AmountCell value={-412} />
           </Row>
-          {/* Die Zeile, die die Spalte sprengt: hier greift die Ellipse. */}
+          {/* The row that bursts the column: here the ellipsis applies. */}
           <Row>
             <span>29.08.2026</span>
             <span>Musterbau GmbH</span>

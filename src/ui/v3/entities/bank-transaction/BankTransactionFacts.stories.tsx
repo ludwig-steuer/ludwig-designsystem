@@ -148,10 +148,9 @@ export const Split: Story = {
           ...FULL,
           amount: -2480.55,
           amountEur: -2480.55,
-          // Der Originalbetrag gehört zum Betrag **dieser** Story. Er stand
-          // bis zum 2026-09-08 in `FULL` und widersprach dort drei Stories
-          // (Abnahme M5) — eine Fixture, die ihren eigenen Betrag bestreitet,
-          // ist die Sorte Detail, die man beim Lesen für einen Fehler hält.
+          // The original amount belongs to **this** story's amount. In `FULL` it
+          // contradicted three stories (M5) — a fixture disputing its own amount
+          // reads like a bug.
           purpose: FULL.purpose?.replace("OAMT+1249,90", "OAMT+2480,55") ?? null,
           cases: [
             CASE({ amount: 1200 }),
@@ -258,9 +257,9 @@ export const InUse: Story = {
             transaction={FULL}
             caseHref={caseHref}
             tone="bare"
-            // Ohne den Gegenpartei-Block: der Name steht schon im Kopf, und
-            // IBAN und BIC gehören zu ihm — sie ohne ihn zu zeigen wäre eine
-            // Feldliste ohne Betreff.
+            // Without the counterparty block: the name is already in the head,
+            // and IBAN and BIC belong to it — alone they would be a field list
+            // without a subject.
             blocks={["payment", "purpose", "assignment", "import"]}
           />
         </div>

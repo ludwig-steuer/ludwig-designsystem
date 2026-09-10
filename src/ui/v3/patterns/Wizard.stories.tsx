@@ -110,7 +110,7 @@ export const ManySteps: Story = {
   ),
 };
 
-/* ── InUse: der Ablauf des CsvImportWizard, mit laufendem Zurück/Weiter ──── */
+/* ── InUse: the CsvImportWizard flow, with working back/next ──────────────── */
 
 function ImportRun() {
   const [step, setStep] = useState(0);

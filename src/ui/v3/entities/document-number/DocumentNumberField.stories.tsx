@@ -146,11 +146,9 @@ export const Edge: Story = {
             sourceLabel={SOURCE_LABEL}
           />
         </Field>
-        {/* Derselbe Fall in **96 px** — der Spur, die Belegfeld 1 im
-            Buchungsraster hat. Genau hier riss das Layout dreimal, und
-            geprüft wurde es jedes Mal in der Story einer anderen Aufgabe;
-            der Baustein trägt seinen engen Fall jetzt selbst (Abnahme
-            2026-09-07, vierte Runde). */}
+        {/* The same case in **96 px** — the track document field 1 has in the
+            booking grid. The layout broke here three times, each time checked in
+            another task's story; the block now carries its narrow case itself. */}
         <Field label="Dieselbe Nummer in der Spur des Rasters" htmlFor="b10">
           <div style={{ width: 96 }}>
             <DocumentNumberField

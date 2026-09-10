@@ -83,7 +83,7 @@ export const StatusMenu: Story = {
   render: function Render() {
     const [status, setStatus] = useState("open");
     const [open, setOpen] = useState(false);
-    // Was von hier aus erreichbar ist — die Entscheidung des Aufrufers.
+    // What is reachable from here — the caller's decision.
     const next = axisLegend("sachverhalt", [
       "needs_clarification",
       "waiting_for_documents",

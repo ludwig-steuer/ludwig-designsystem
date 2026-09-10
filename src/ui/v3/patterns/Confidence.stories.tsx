@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-// Nur die Story greift nach oben in `entities/`: Spec 0078 verlangt für
-// `InUse` den Kopf der KI-Buchungshinweise. Der Baustein selbst kennt keine
-// Entität — Patterns importieren nicht aufwärts.
+// Only the story reaches up into `entities/`: spec 0078 asks the AI notes' head
+// for `InUse`. The block itself knows no entity — patterns do not import upwards.
 import { AiBookingNotes } from "../entities/journal-entry/AiBookingNotes";
 import { AmountCell } from "../primitives/Cells";
 import { FieldList } from "../primitives/FieldList";

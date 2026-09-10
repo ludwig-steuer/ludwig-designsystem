@@ -40,8 +40,8 @@ const INVOICE: SourceDocumentVM = {
   docDirection: "inbound",
   classDocumentKind: "original",
   caseNumber: "SV-118",
-  // Herkunft und Ablage (0120). Die Konfidenz trägt jeder Beleg, die beiden
-  // anderen nicht — deshalb stehen sie hier und fehlen in `NO_FILING` unten.
+  // Origin and filing (0120). Every document carries the confidence, not the
+  // other two — hence they stand here and are missing in `NO_FILING` below.
   classConfidence: 0.94,
   classOverriddenAt: "2026-08-30T11:04:00Z",
   datevRefSystem: "DUO",
@@ -412,9 +412,8 @@ export const Group: Story = {
         <SourceDocumentFacts
           document={{ ...INVOICE, id: "g4", caseNumber: null }}
           group={{
-            // **Eine** Seite — der häufigste Fall: 68 von 99 Teilbelegen im
-            // Bestand sind Ein-Seiten-Ausschnitte, und die lasen sich bis
-            // 0076s Nacharbeit „Seiten 12".
+            // **One** page — the most common case: 68 of 99 partial documents in
+            // stock are one-page excerpts.
             from: 12,
             parentTitle: "Sammel-PDF vom 12.08.2026",
             parentHref: "#sammel-original",
@@ -512,8 +511,8 @@ export const InUse: Story = {
       <div style={{ minHeight: 520 }}>
         <Card>
           <CardHead title="Sachverhalt SV-118 · Belege" sub="Zwei Belege am Vorgang" />
-          {/* Die Zeile ist seit 0106 ein `<tr>` und braucht ihre Tabelle; das
-              Spaltenmaß bringt `.v2doc__row` selbst mit. */}
+          {/* The row is a `<tr>` since 0106 and needs its table; `.v2doc__row`
+              brings its own column measures. */}
           <Table cols="minmax(0, 1fr)">
           <SourceDocumentRow document={{ ...INVOICE, href: "#beleg" }} />
           <SourceDocumentRow

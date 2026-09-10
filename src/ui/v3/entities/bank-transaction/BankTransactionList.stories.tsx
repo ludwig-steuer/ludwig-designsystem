@@ -47,8 +47,8 @@ const T = (over: Partial<BankTransactionRowData> = {}): BankTransactionRowData =
   ...over,
 });
 
-// Absteigend, wie der Kopf es sagt und wie das Profil es vorschreibt: das
-// jüngste Buchungsdatum steht oben.
+// Descending, as the head says and the profile prescribes: the latest booking
+// date on top.
 const ROWS: BankTransactionRowData[] = [
   T({ id: "bt-5", postingDate: "2026-08-30", amount: -2480.55, counterpartyName: "Handwerk Schulz KG", purpose: "EREF+RE-8817 SVWZ+Sanierung Serverraum, Teilrechnung 2 von 3", matchStage: "near", cases: [CASE({ caseId: "c-8817", caseNumber: "2026-0451", title: "Sanierung Serverraum", amount: 2000, eventBookingState: null })], allocatedSum: 2000, openClarificationsCount: 1 }),
   T({ id: "bt-4", postingDate: "2026-08-29", amount: -89.9, counterpartyName: null, purpose: "SVWZ+Kontoführungsentgelt August 2026", matchStage: "beyond_bookings", cases: [], allocatedSum: 0 }),
@@ -222,10 +222,8 @@ export const Extremes: Story = {
           T({
             id: "x-1",
             counterpartyName: null,
-            // Der lange Teil steht im **SVWZ**, nicht in der EREF-Kette: die
-            // Spalte zeigt den Klartext, die Kette landet im Aufklapper. Mit
-            // ihr allein maß der Zweck hier 125,9 px — der schmalste aller
-            // Stories, ausgerechnet im Randfall (Abnahme 0085, Befund 2).
+            // The long part is in **SVWZ**, not the EREF chain: the column shows the
+            // plain text, the chain goes into the foldout (0085, finding 2).
             purpose:
               "EREF+VERTRAGSNUMMER-2026-000441827-RATE-014-VON-036 SVWZ+Leasingrate Fuhrpark 014 von 036, Fahrzeug MUS-AB 1234, Sonderzahlung anteilig verrechnet",
             matchStage: "beyond_bookings",

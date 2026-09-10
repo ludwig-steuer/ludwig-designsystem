@@ -107,7 +107,7 @@ export const Edge: Story = {
   ),
 };
 
-/** Sechs Monate mit Soll und Haben — dieselbe Reihe für die drei Formen unten. */
+/** Six months with debit and credit — the same series for the three forms below. */
 const LEDGER = [
   { label: "Mär", value: 8420.5, secondary: 6180.0 },
   { label: "Apr", value: 7120.0, secondary: 9340.25 },

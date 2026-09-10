@@ -26,7 +26,7 @@ type Story = StoryObj<typeof RecurringRuleFacts>;
 
 const accountHref = (n: string) => `#konto-${n}`;
 
-/** Die Namen der Konten kennt der Aufrufer — die Regel trägt nur Nummern. */
+/** The caller knows the account names — the rule carries only numbers. */
 const NAMES: Record<string, string> = {
   "4210": "Miete",
   "4230": "Heizung",
@@ -36,11 +36,10 @@ const NAMES: Record<string, string> = {
 };
 
 /**
- * Die Übersetzung, die **der Aufrufer** macht (L-255): `buildRulePreview()`
- * liefert fertige Beschriftungen („4200 Miete", oder den Rückfall „Bank (aus
- * Zahlung)" ganz ohne Nummer), `JournalEntryCard` braucht Nummer und Name
- * getrennt. `automatic` und `note` gehen unverändert weiter — die Story baut
- * nur die Zeilen, und die Seiten kommen aus den Ableitungen der Domäne.
+ * The translation **the caller** does (L-255): `buildRulePreview()` delivers
+ * finished labels ("4200 Miete", or the fallback "Bank (aus Zahlung)" without a
+ * number), `JournalEntryCard` needs number and name apart. `automatic` and
+ * `note` pass through unchanged.
  */
 function previewOf(r: RecurringRule): RecurringRulePreview {
   const built = buildRulePreview({

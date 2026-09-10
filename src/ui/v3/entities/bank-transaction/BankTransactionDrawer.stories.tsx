@@ -89,10 +89,9 @@ export const Unassigned: Story = {
         <BankTransactionDrawer
           open
           onClose={() => {}}
-          // Referenz und Buchungstag sagen **denselben** Tag: die Kennung
-          // beginnt mit dem Buchungstag, und wenn der Kopf darunter einen
-          // anderen nennt, widerspricht sich der Drawer in seinen ersten zwei
-          // Zeilen (Wiederabnahme 0103, M3).
+          // Reference and booking day name the **same** day: the id starts with the
+          // booking day, and a different day in the head below would make the
+          // drawer contradict itself in its first two lines (0103, M3).
           reference="2026-08-27/1210/0093121"
           record={{
             ...RECORD,
@@ -126,7 +125,7 @@ export const WithoutCounterparty: Story = {
       reference="2026-08-29/1210/0088111"
       record={{
         ...RECORD,
-        // Derselbe Tag wie in der Referenz darüber (M3).
+        // The same day as in the reference above (M3).
         postingDate: "2026-08-29",
         counterpartyName: null,
         counterpartyIban: null,
@@ -230,11 +229,9 @@ export const InUse: Story = {
       // the table's minimum width — that is how the story shows it does not
       // scroll.
       <div style={{ maxWidth: 1500 }}>
-        {/* **Die Liste, nicht ihr Nachbau.** Die Story hatte `Table` mit
-            `minWidth={1400}` von Hand aufgesetzt und die Zahl aus
-            `BankTransactionList.tsx` abgeschrieben — eine zweite Wahrheit
-            neben einer gepflegten (Wiederabnahme 0103, M7). Jetzt steht hier
-            die Liste selbst; ihre Vorgabe gilt. */}
+        {/* **The list, not a rebuild of it.** The story used to set up `Table` with
+            a copied `minWidth={1400}` — a second truth next to a maintained one
+            (0103, M7). Now the list itself stands here. */}
         <BankTransactionList
           transactions={[
             RECORD,
@@ -253,12 +250,10 @@ export const InUse: Story = {
           head={{ title: "Kontoauszug August 2026", sub: "Commerzbank · 1210" }}
         />
         <div style={{ padding: "var(--space-4)", display: "flex", gap: "var(--space-3)" }}>
-          {/* Die **Referenz**, nicht die id des Datensatzes: `reference` ist,
-              was der Aufrufer nachschlägt — Buchungstag, Konto, laufende
-              Nummer. `bt-1` ist unsere Fixture-id und stand hier zwei Runden
-              lang; genau die Verwechslung, gegen die `reference` gebaut wurde
-              (Wiederabnahme 0103, M3). Sie stimmt jetzt mit `RECORD` überein:
-              derselbe Buchungstag, dasselbe Konto. */}
+          {/* The **reference**, not the record id: `reference` is what the caller
+              looks up — booking day, account, running number. `bt-1` is our
+              fixture id; confusing the two is what `reference` exists against
+              (0103, M3). It now matches `RECORD`. */}
           <button
             type="button"
             className="v2btn v2btn--ghost"
@@ -273,11 +268,9 @@ export const InUse: Story = {
             onClose={() => setRef(null)}
             reference={ref}
             record={RECORD}
-            // **Beide Angaben, nicht nur der Ausgang.** Der Fuß reicht
-            // `(exit, caseId)` durch, und `caseId` war in keiner Story je
-            // gesetzt — bewiesen war nur `("assign")` ohne Argument
-            // (Wiederabnahme 0103, M6). `RECORD` trägt einen zugeordneten
-            // Fall, also kommt hier seine Kennung an.
+            // **Both values, not only the exit.** The foot passes `(exit, caseId)`,
+            // and `caseId` was set in no story (0103, M6). `RECORD` carries an
+            // assigned case, so its id arrives here.
             onOpenFull={(exit, caseId) => {
               setTarget(`${exit}${caseId ? ` · ${caseId}` : " · ohne Fall"}`);
               setRef(null);

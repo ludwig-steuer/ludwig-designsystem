@@ -160,7 +160,7 @@ export const AutoFocusChild: Story = {
   render: () => (
     <Demo label="Mit Suchfeld öffnen" title="Suchen" size="md">
       <Field label="Suche" htmlFor="suche">
-        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- genau das ist der Nachweis */}
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- this is exactly the proof */}
         <input id="suche" className="v2in" autoFocus placeholder="Tippen Sie sofort los" />
       </Field>
     </Demo>

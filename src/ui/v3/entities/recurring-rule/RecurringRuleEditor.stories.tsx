@@ -44,10 +44,10 @@ const ACCOUNTS: RecurringRuleAccounts = {
 };
 
 /**
- * Die Zahlungskonten, wie das Feld sie bekommt (0145): **die Verteilung ist
- * das Argument.** Ein Mandant führt ein bis zwei Konten wirklich, und das
- * halbe SKR-Bankblock steht daneben — ohne die Gruppierung sucht die
- * Sachbearbeiterin ihre Bank zwischen „Geldtransit" und „Schecks".
+ * The payment accounts as the field receives them (0145): **the distribution is
+ * the argument.** A client really keeps one or two accounts, with half the SKR
+ * bank block next to them — without grouping the clerk searches their bank
+ * between "Geldtransit" and "Schecks".
  */
 const PAYMENT_ACCOUNTS: PaymentAccountOption[] = [
   { id: "pa-1", label: "Commerzbank · DE02 1204 0000 0000 5555 00", iban: null, inUse: true },
@@ -57,7 +57,7 @@ const PAYMENT_ACCOUNTS: PaymentAccountOption[] = [
   { id: "pa-5", label: "Schecks", iban: null, inUse: false },
 ];
 
-/** Der Entwurf der importierten Regel — der Fall „ändern". */
+/** The imported rule's draft — the "change" case. */
 const FILLED: RuleDraft = draftOf(rule());
 
 function draftOf(r: ReturnType<typeof rule>): RuleDraft {
@@ -82,7 +82,7 @@ function draftOf(r: ReturnType<typeof rule>): RuleDraft {
   };
 }
 
-/** Der Satz der Ableitung zum Entwurf — der Editor formuliert ihn nicht. */
+/** The derivation's sentence for the draft — the editor does not write it. */
 function summaryOf(d: RuleDraft): string {
   return describeRecurringRule({
     bookingMode: d.bookingMode,
@@ -101,9 +101,8 @@ const NAMES: Record<string, string> = {
 };
 
 /**
- * Die Vorschau, die der Aufrufer stellt: `RecurringRuleFacts` mit dem
- * Entwurf. Der Editor kennt sie nur als `renderPreview` — er zeigt keine
- * zweite Tabelle.
+ * The preview the caller provides: `RecurringRuleFacts` with the draft. The
+ * editor knows it only as `renderPreview` — it shows no second table.
  */
 function Preview({ draft }: { draft: RuleDraft }) {
   const r = rule({ ...draft, template: draft.template });
@@ -295,11 +294,10 @@ export const Error: Story = {
 };
 
 /**
- * Der Rundlauf: Tippen im Namensfeld meldet über `onCriteriaChange`, die Story
- * rechnet daraus eine Trefferzahl, und `matchCount` wandert zurück ins
- * Formular. Der Editor rechnet sie **nicht** selbst — ob eine Zahlung trifft,
- * ist eine Frage an die Bankzeilen. `Strg`/`Cmd` + `Enter` speichert, `Esc`
- * bricht ab; beide Tasten stehen sichtbar an der Aktionszeile.
+ * The round trip: typing in the name field reports via `onCriteriaChange`, the
+ * story computes a hit count, and `matchCount` returns to the form. The editor
+ * does **not** compute it — whether a payment matches is a question for the bank
+ * lines. `Ctrl`/`Cmd` + `Enter` saves, `Esc` cancels; both keys are shown.
  */
 function Roundtrip() {
   const [count, setCount] = useState<{ matched: number; scanned: number } | null>(null);
@@ -310,8 +308,8 @@ function Roundtrip() {
         onSubmit={async (draft) => setSaved(draft)}
         onCancel={() => setSaved(null)}
         onCriteriaChange={(c: RuleCriteria) => {
-          // Eine Zahl, die aus den Kriterien entsteht — die echte Zählung macht
-          // der Aufrufer gegen die Bankzeilen, die Story tut nur so.
+          // A number derived from the criteria — the caller does the real count
+          // against the bank lines; the story only pretends.
           const set = [c.matchCounterpartyName, c.matchCounterpartyIban, c.matchAmount].filter(
             (v) => v !== null && v !== "",
           ).length;
@@ -331,9 +329,8 @@ function Roundtrip() {
 export const Interactive: Story = { render: () => <Roundtrip /> };
 
 /**
- * Im Einsatz: im Reiter „Wiederkehrende Buchung" eines Sachverhalts —
- * Formular links, `RecurringRuleFacts` als Vorschau rechts über
- * `renderPreview`, Abbrechen daneben.
+ * In use: in a case's "Wiederkehrende Buchung" tab — form left,
+ * `RecurringRuleFacts` as preview right via `renderPreview`, cancel next to it.
  */
 function InSitu() {
   return (

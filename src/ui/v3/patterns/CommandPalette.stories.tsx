@@ -17,7 +17,7 @@ type Story = StoryObj<typeof CommandPalette>;
 
 const ICON = { size: 14, strokeWidth: 1.5, "aria-hidden": true } as const;
 
-/** Die Navigation der App — dieselbe Quelle, aus der die Gruppen entstehen. */
+/** The app's navigation — the same source the groups come from. */
 const SECTIONS: NavSection[] = [
   {
     label: "Arbeit",
@@ -183,10 +183,9 @@ export const InUse: Story = {
             crumb="Musterbau GmbH · 2026"
             search={
               <InputGroup prefix={<Search {...ICON} />} suffix={<Kbd>⌘K</Kbd>}>
-                {/* Klick statt Fokus: die Palette gibt den Fokus beim
-                    Schließen an dieses Feld zurück — beim Fokus zu öffnen
-                    würde sie damit sofort wieder aufziehen. Sichtbar bleibt
-                    der Weg trotzdem, die Taste steht am Feld (V14). */}
+                {/* Click instead of focus: the palette returns focus to this field
+                    on close — opening on focus would reopen it at once. The key
+                    stays visible at the field (V14). */}
                 <Input
                   className="v2search"
                   placeholder="Suchen oder Befehl wählen"

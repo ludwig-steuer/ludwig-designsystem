@@ -78,7 +78,7 @@ function account(over: Partial<PartnerPersonalAccount> & { accountId: string }):
   };
 }
 
-/** Der Drawer steht offen — so sieht ihn, wer aus einer Sachverhaltszeile kommt. */
+/** The drawer is open — as seen by someone coming from a case row. */
 function Open({ children }: { children: React.ReactNode }) {
   return <div style={{ minHeight: 720 }}>{children}</div>;
 }

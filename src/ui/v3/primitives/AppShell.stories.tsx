@@ -37,7 +37,7 @@ const SECTIONS: NavSection[] = [
   },
 ];
 
-/** Die Seitenleiste ist ein Slot: Kopf, Navigation, Fuß bringt der Aufrufer. */
+/** The sidebar is a slot: head, navigation and foot come from the caller. */
 const Sidebar = ({ collapsed }: { collapsed?: boolean }) => (
   <>
     <div className="sb__logo">{collapsed ? "L" : "Ludwig"}</div>

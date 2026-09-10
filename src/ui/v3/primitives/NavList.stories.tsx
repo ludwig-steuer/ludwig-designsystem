@@ -60,9 +60,8 @@ const SECTIONS: NavSection[] = [
 ];
 
 /**
- * Die Leiste bringt ihre Farbe aus `app-chrome.css` mit — `.app__sidebar` ist
- * dieselbe Fläche wie in der Shell. Ein Hex-Wert in der Story wäre ein zweiter
- * Ton neben dem einen, den es schon gibt.
+ * The bar brings its colour from `app-chrome.css` — `.app__sidebar` is the same
+ * surface as in the shell. A hex value in the story would be a second tone.
  */
 const Rail = ({ collapsed, children }: { collapsed?: boolean; children: React.ReactNode }) => (
   <div

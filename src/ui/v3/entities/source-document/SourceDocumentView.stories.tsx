@@ -63,9 +63,8 @@ const SCAN: SourceDocumentVM = {
 
 const PREVIEW = "data:application/pdf;base64,";
 
-// Vier Reiter, nicht sechs: „Monate" und „Rohdaten" beantworten dieselbe
-// Frage wie der Verlauf, nur tiefer — der View merkt davon nichts, er bekommt
-// die Liste, die er bekommt (Entscheid der Freigabe).
+// Four tabs, not six: "Monate" and "Rohdaten" answer the same question as the
+// history, only deeper — the view gets the list it gets (approval decision).
 const SECTIONS: NavSection[] = [
   {
     label: "Arbeit",
@@ -91,16 +90,15 @@ const TABS = [
   { key: "verlauf", label: "Verlauf & Befunde", count: 3, href: "#verlauf" },
 ];
 
-/** Der Kopf: Rang 1 und 4 — wer, welche Art, und **die Erledigung** als Zustand. */
+/** The head: ranks 1 and 4 — who, which kind, and **the completion** as state. */
 function Head({ document, actions }: { document: SourceDocumentVM; actions?: React.ReactNode }) {
   return (
     <EntityHeader
       icon={<EntityIcon entity="source-document" size={20} />}
       overline="Beleg · Musterbau GmbH"
       title={document.counterparty ?? "Noch nicht eingeordnet"}
-      // **Die Erledigung führt**, nicht die Verarbeitung: die Achse `beleg`
-      // hängt an der Rechnungszeile und hat für 16 % aller Belege gar keinen
-      // Wert (Befund L-42).
+      // **The completion leads**, not processing: the `beleg` axis hangs on the
+      // invoice row and has no value for 16 % of all documents (L-42).
       status={<SourceDocumentCompletion document={document} />}
       meta={<SourceDocumentClass document={document} />}
       {...(actions ? { actions } : {})}

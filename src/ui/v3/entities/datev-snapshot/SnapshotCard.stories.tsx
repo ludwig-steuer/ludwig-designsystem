@@ -54,9 +54,8 @@ export const WithDeviations: Story = {
             matchedLudwig: 4310,
             matchedSplit: 88,
             matchedCorrected: 366,
-            // 1.204 offene: der Hauptsatz zählt mit `formatCount`, und ohne
-            // eine vierstellige Zahl zeigte das keine Story (Wiederabnahme
-            // 0027, Punkt 2).
+            // 1,204 open: the main sentence counts with `formatCount`, and no story
+            // showed a four-digit number before (0027, point 2).
             newUnprocessed: 1_150,
             unclear: 54,
           },
@@ -86,10 +85,9 @@ export const Levels: Story = {
     <div
       style={{
         display: "grid",
-        // `auto-fit` statt fester vier Spalten: bei vier Spuren blieben den
-        // Karten unter 1100 px Fensterbreite 140 px, und der Inhalt lief um
-        // bis zu 81 px über — `.v2card` schneidet ihn dann ab, statt zu
-        // scrollen (Abnahme 0027). Umbrechen ist die Antwort, nicht Quetschen.
+        // `auto-fit` instead of four fixed columns: with four tracks the cards got
+        // 140 px below 1100 px and overflowed by up to 81 px, clipped by `.v2card`
+        // (0027). Wrapping is the answer, not squeezing.
         gridTemplateColumns: "repeat(auto-fit, minmax(15rem, 1fr))",
         gap: "var(--space-5)",
         padding: "var(--space-6)",
@@ -201,9 +199,8 @@ export const InGrid: Story = {
             matchedLudwig: 4102,
             matchedSplit: 74,
             matchedCorrected: 190,
-            // Genau **eine** offene Buchung: der Satz darüber muss dann
-            // „1 Buchung ist ungeklärt." heißen, nicht „1 Buchungen sind"
-            // (Abnahme 0027, M2).
+            // Exactly **one** open entry: the sentence above must then read
+            // "1 Buchung ist ungeklärt.", not "1 Buchungen sind" (0027, M2).
             newUnprocessed: 1,
             unclear: 0,
           },

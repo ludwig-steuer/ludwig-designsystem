@@ -30,7 +30,7 @@ const BASE: RecurringRuleRowProps = {
   direction: "payment_out",
 };
 
-/** Die Standardspalten der Zeile — Ränge 1–5 und 7. */
+/** The row's default columns — ranks 1–5 and 7. */
 const DEFAULT_COLUMNS: RecurringRuleColumn[] = [
   "counterparty",
   "bookingMode",
@@ -40,7 +40,7 @@ const DEFAULT_COLUMNS: RecurringRuleColumn[] = [
   "direction",
 ];
 
-/** Der Spaltensatz der Fälligkeitsliste: Sachverhalt vorn, letzte Zahlung hinten. */
+/** The due list's column set: case first, last payment last. */
 const LIST_COLUMNS: RecurringRuleColumn[] = [
   "case",
   "counterparty",
@@ -53,9 +53,9 @@ const LIST_COLUMNS: RecurringRuleColumn[] = [
 ];
 
 /**
- * Kopf und Spurmaße kommen aus **demselben** Satz wie die Zellen: `columns`
- * geht an `recurringRuleTracks` und an jede Zeile, sonst schiebt sich der Kopf
- * gegen die Zeile, sobald eine Breite sich ändert.
+ * Head and track measures come from the **same** set as the cells: `columns`
+ * goes to `recurringRuleTracks` and to every row, or the head shifts against the
+ * row as soon as a width changes.
  */
 function Frame({
   children,

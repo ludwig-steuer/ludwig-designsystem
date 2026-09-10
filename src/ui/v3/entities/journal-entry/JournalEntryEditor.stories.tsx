@@ -12,10 +12,9 @@ export default meta;
 type Story = StoryObj<typeof JournalEntryEditor>;
 
 /**
- * Die 24 Zustände aus `Buchungseditor-Zustände.dc.html`. Sie sind hier
- * nachgestellt, weil man im laufenden Screen immer nur einen sieht — und
- * gerade die seltenen (gesperrt, storniert, mehrere Fehler) sind die, bei
- * denen sich Fehler einnisten.
+ * The 24 states from `Buchungseditor-Zustände.dc.html`, re-enacted because the
+ * running screen shows only one at a time — and the rare ones (locked,
+ * reversed, several errors) are where bugs settle.
  */
 
 const CANDIDATES = {
@@ -362,9 +361,8 @@ export const S20_EditorOnly: Story = {
           reversedReason="Doppelt erfasst, siehe RE-4471-B."
         />
         <div style={{ height: "var(--space-5)" }} />
-        {/* Lesend, aber mit beiden Wegen hinaus: „Ändern" und „Löschen".
-            `deletable` ohne `onDelete` zeigte keinen Knopf — die Taste gäbe
-            es, aber nichts täte sie (V14). */}
+        {/* Read-only, but with both ways out: "Ändern" and "Löschen". `deletable`
+            without `onDelete` showed no button — the key would exist but do nothing (V14). */}
         <JournalEntryEditor
           {...BASE}
           status="accepted"
@@ -372,9 +370,8 @@ export const S20_EditorOnly: Story = {
           deletable
           onEdit={() => setLog((p) => [...p, "Ändern"])}
           onDelete={(reason) => setLog((p) => [...p, `Storniert: ${reason}`])}
-          // Der Weg ins Kontenblatt, auch **lesend**: er hing bis zur
-          // Wiederabnahme 0113 an keiner Editor-Story, seit die acht
-          // Lese-Stories in das Raster gezogen sind.
+          // The way into the ledger, **read-only** too: it hung on no editor story
+          // until 0113, since the eight reading stories moved into the grid.
           onOpenLedger={() => setLog((p) => [...p, "Kontenblatt"])}
         />
         <p className="v2muted">

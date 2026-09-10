@@ -1,8 +1,7 @@
 import type { Preview } from "@storybook/nextjs-vite";
 
-// Dieselbe Kette wie das Root-Layout: Tokens → App-Chrome → Komponenten →
-// domänenspezifische Styles → Tailwind. Ohne sie sähe hier nichts aus wie
-// in der App, und die Werkbank wäre wertlos.
+// The same chain as the root layout: tokens → app chrome → components → domain
+// styles → Tailwind. Without it nothing here would look like the app.
 import "../src/styles/index.css";
 
 const preview: Preview = {

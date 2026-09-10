@@ -38,12 +38,11 @@ function row(over: Partial<RecurringRuleListRow> & { id: string }): RecurringRul
 }
 
 /**
- * Acht Regeln eines Mandanten, sortiert wie die Query: Gültigkeit zuerst.
- * Darin **die drei Auffälligkeiten**, wegen derer es die Seite gibt — die
- * Versicherung ohne Personenkonto, die zwei Regeln an der Untermiete, und
- * ganz unten die abgeschaltete Reinigung. Dazu die eine Regel mit der
- * Belegnummern-Strategie `fixed`, die ab der zweiten Periode den
- * OPOS-Ausgleich bricht.
+ * Eight rules of one client, sorted like the query: validity first. Among them
+ * **the three oddities** the page exists for — the insurance without a personal
+ * account, the two rules on the sublease, and the switched-off cleaning at the
+ * bottom — plus one rule with the `fixed` number strategy, which breaks the
+ * OPOS clearing from the second period on.
  */
 const EIGHT: RecurringRuleListRow[] = [
   row({ id: "r-1" }),
@@ -56,8 +55,8 @@ const EIGHT: RecurringRuleListRow[] = [
     personalAccount: { accountNumber: "70012", accountName: "Stadtwerke Musterstadt" },
     documentNumberStrategy: "from_document",
   }),
-  // Die zweite Auffälligkeit: eine Regel ohne Personenkonto. Sie kann nicht
-  // sollstellen — und genau das steht als Wort in ihrer Zeile.
+  // The second oddity: a rule without a personal account. It cannot post a
+  // receivable — and exactly that stands as a word in its row.
   row({
     id: "r-3",
     counterpartyName: "Musterversicherung AG",
@@ -68,9 +67,8 @@ const EIGHT: RecurringRuleListRow[] = [
     counterAccount: { accountNumber: "4360", accountName: "Versicherungen" },
     personalAccount: null,
   }),
-  // Die dritte: zwei Regeln an einem Sachverhalt. Sie stehen nebeneinander,
-  // weil die Query nach Sachverhaltsnummer sortiert — und beide tragen die
-  // Marke, damit man sie auch einzeln erkennt.
+  // The third: two rules on one case. They stand together because the query
+  // sorts by case number — and both carry the mark, so each is recognisable alone.
   row({
     id: "r-4",
     counterpartyName: "Mustermieter GmbH",
@@ -118,8 +116,8 @@ const EIGHT: RecurringRuleListRow[] = [
     personalAccount: { accountNumber: "70044", accountName: "Musterleasing GmbH" },
     documentNumberStrategy: "fixed",
   }),
-  // Die erste Auffälligkeit: sie steht still. Ein Wort, kein Ton — eine Regel
-  // darf abgeschaltet sein, das ist kein Fehler.
+  // The first oddity: it stands still. A word, not a tone — a rule may be
+  // switched off; that is no error.
   row({
     id: "r-8",
     counterpartyName: "Musterreinigung e. K.",

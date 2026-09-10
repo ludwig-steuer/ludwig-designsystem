@@ -35,12 +35,9 @@ const SOURCES: AiSource[] = [
 ];
 
 /**
- * Quellen, wie sie **heute aus der App kommen**: der Beleg trägt keine
- * Bezeichnung, sondern seine Kennung. Genau das zeigt die Komponente seit dem
- * 2026-09-10 nicht mehr — eine UUID ist kein Name, sie ist ein Schlüssel, den
- * niemand nachschlagen kann.
- *
- * Stehen bleiben Art und Zitat, und das sagt mehr als „442c83b4-3063-…".
+ * Sources as they **come from the app today**: the document carries no name,
+ * only its id. Since 2026-09-10 the component no longer shows it — a UUID is no
+ * name but a key nobody can look up. Kind and quote remain, and they say more.
  */
 const SOURCES_WITHOUT_NAMES: AiSource[] = [
   {
@@ -105,8 +102,8 @@ export const CellEmpty: Story = {
         <AiBookingNotesCell verdict={null} />
       </div>
       <div style={{ border: "1px dashed var(--color-border)", padding: 8 }}>
-        {/* Nur die Konfidenz, ohne Urteil: der Agent war sich sicher, geprüft
-            hat es noch niemand. Auch das ist eine Auskunft. */}
+        {/* Only the confidence, no verdict: the agent was sure, nobody has checked
+            yet. That is information too. */}
         <AiBookingNotesCell verdict={null} confidence="green" />
       </div>
     </div>
@@ -224,7 +221,7 @@ export const Sources: Story = {
   },
 };
 
-/* ── Im Einsatz: die Buchungsübersicht der Stapelabnahme ─────────────────── */
+/* ── In use: the booking overview of the batch acceptance ─────────────────── */
 
 interface BatchRow {
   id: string;
@@ -237,7 +234,7 @@ interface BatchRow {
   rationale?: string;
   judgeReasoning?: string;
   errors?: string[];
-  /** Die Zeilen des Satzes — im Aufklapper steht die ganze Buchung. */
+  /** The entry's lines — the foldout shows the whole entry. */
   lines: JournalLine[];
 }
 
@@ -293,8 +290,8 @@ const BATCH: BatchRow[] = [
     judgeReasoning: "Der Beleg weist 7 % aus. Der Satz bucht 19 % — bitte manuell prüfen.",
     errors: ["Steuersatz widerspricht dem Beleg."],
     lines: [
-      // Der Konflikt, den der Judge beanstandet: Schlüssel auf einem
-      // Automatikkonto — beide Angaben stehen in der Zeile, die Marke gelb.
+      // The conflict the judge flags: a tax key on an automatic account — both
+      // values stand in the row, the badge yellow.
       { side: "debit", accountNumber: "6805", accountName: "Telefon", amount: 89, taxKey: "9", automaticRate: 19, text: "Mobilfunk und Festnetz" },
       contra(89),
     ],
@@ -305,7 +302,7 @@ const BATCH: BatchRow[] = [
     account: "1600",
     text: "Porto und Verpackung",
     amount: 24.9,
-    // Ohne Lauf: die Spalte bleibt leer, und das ist die Auskunft.
+    // Without a run: the column stays empty, and that is the information.
     verdict: null,
     confidence: null,
     lines: [
@@ -359,11 +356,10 @@ export const InUse: Story = {
       columns={COLUMNS}
       rowKey={(r) => r.id}
       head={{ title: "Stapel 09/2026", sub: "4 Buchungssätze · 3 geprüft" }}
-      // **Erst die Buchung, dann die Begründung** (Owner 2026-09-10). Wer eine
-      // Zeile aufklappt, will zuerst sehen, was gebucht wird — die Begründung
-      // erklärt etwas, das man vor Augen haben muss. Die Karte bringt die
-      // Kontowege und die BU-Spalte mit; die Hinweise stehen darunter, ohne
-      // eigenen Kopf (Urteil und Konfidenz stehen schon in der Zeile).
+      // **The entry first, then the reasoning** (owner 2026-09-10): whoever opens
+      // a row wants to see what is booked first — the reasoning explains something
+      // one needs in view. The card brings the account links and the tax key
+      // column; the notes stand below without a head of their own.
       expand={(r) => (
         <div style={{ display: "grid", gap: "var(--space-4)" }}>
           <JournalEntryCard

@@ -42,9 +42,8 @@ export const Filled: Story = {
  */
 export const Failed: Story = {
   render: function Render() {
-    // Der Stub steht in der Story, nicht in der Komponente: das Set kennt
-    // keine Testumgebung, und die Zwischenablage lässt sich nicht anders
-    // zum Scheitern bringen.
+    // The stub lives in the story, not the component: the set knows no test
+    // environment, and the clipboard cannot be made to fail otherwise.
     if (typeof navigator !== "undefined") {
       Object.defineProperty(navigator, "clipboard", {
         configurable: true,

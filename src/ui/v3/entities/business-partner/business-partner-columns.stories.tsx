@@ -17,8 +17,8 @@ const partnerHref = (id: string) => `?partner=${id}`;
 const accountHref = (n: string) => `?account=${n}`;
 
 /**
- * Der Bestand in sechs Zeilen: 14.950 Partner über sechs Mandanten, 77 % davon
- * ohne eine einzige Buchung. Die Werte sind erfunden, die Verhältnisse nicht.
+ * The stock in six rows: 14,950 partners across six clients, 77 % without a
+ * single entry. The values are made up, the proportions are not.
  */
 function partner(over: Partial<BusinessPartnerRowData> & { businessPartnerId: string }): BusinessPartnerRowData {
   return {

@@ -29,7 +29,7 @@ const T = (over: Partial<BankTransactionRowData>): BankTransactionRowData => ({
   ...over,
 });
 
-// Neueste zuerst — die Sortierung des Profils.
+// Newest first — the profile's sort order.
 const OPEN: BankTransactionRowData[] = [
   T({ id: "o-4", postingDate: "2026-08-31", amount: -1799, counterpartyName: "Fuhrpark Leasing AG", purpose: "EREF+VERTRAG-2026-000441827 SVWZ+Leasingrate 14 von 36", matchStage: "no_account" }),
   T({ id: "o-3", postingDate: "2026-08-28", amount: 240, counterpartyName: "Musterbau GmbH", purpose: "SVWZ+Gutschrift Retoure", matchStage: "unclear_multi" }),
@@ -138,10 +138,8 @@ export const AllOfAnAccount: Story = {
             ],
             allocatedSum: 1249.9,
           }),
-          // Ohne Gegenpartei — dann trägt der Verwendungszweck den Zeilenlink
-          // (N4). Bis zur Abnahme vom 2026-09-07 zeigte das keine Story dieser
-          // Liste: die namenlose Zeile stand in `Filled`, wo es keinen Link
-          // gibt, und der Link in dieser hier, wo jede Zeile einen Namen hat.
+          // Without counterparty — then the purpose carries the row link (N4). Before
+          // 2026-09-07 no story of this list showed it.
           T({
             id: "a-2",
             postingDate: "2026-08-25",
@@ -155,9 +153,8 @@ export const AllOfAnAccount: Story = {
         openHref="#zuordnen"
         head={{ title: "Zahlungen", sub: "Commerzbank · 1210 · alle 500" }}
         bulkActions={[]}
-        // Die Konfigurationsseite schlägt Zeilen nach — hier gehört der Weg
-        // ins Detail hin. Der Link sitzt auf der Gegenpartei, nicht auf dem
-        // Datum.
+        // The configuration page looks rows up — the way into the detail belongs
+        // here. The link sits on the counterparty, not the date.
         rowHref={(t) => `#zahlung-${t.id}`}
         listHref={(p) => `#konto?sort=${p.sort ?? ""}&dir=${p.dir ?? ""}&page=${p.page ?? 1}`}
         sort={{ key: "postingDate", dir: "desc" }}

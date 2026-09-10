@@ -31,10 +31,9 @@ function partner(
 }
 
 /**
- * Sechs Kandidaten, wie der Bestand sie stellt — darunter **zwei mit gleichem
- * Namen und verschiedenem Ort**. Genau dafür steht der Ort in der Zeile: bei
- * 149 Namensdubletten beim größten Mandanten ist er der Unterschied zwischen
- * einer Auswahl und einem Ratespiel.
+ * Six candidates as the stock provides them — including **two with the same name
+ * and different places**. That is why the place stands in the row: with 149
+ * duplicate names at the largest client it separates a choice from a guess.
  */
 const SECHS: BusinessPartnerPickerItem[] = [
   partner({ businessPartnerId: "p-1", shortName: "MUSTERIMMO" }),

@@ -39,7 +39,7 @@ const INVOICE: SourceDocumentVM = {
   docDirection: "inbound",
   classDocumentKind: "original",
   caseNumber: "2026-0412",
-  // Herkunft und Ablage (0120) — nur `WithProvenance` zeigt sie.
+  // Origin and filing (0120) — only `WithProvenance` shows them.
   classConfidence: 0.94,
   classOverriddenAt: "2026-08-30T11:04:00Z",
   datevRefSystem: "DUO",

@@ -37,9 +37,9 @@ const meta: Meta<typeof DataTable> = {
 export default meta;
 type Story = StoryObj<typeof DataTable>;
 
-/* ── Daten: die Sachverhalte eines Jahres ──────────────────────────────────
-   583 gedacht, 50 auf der Seite — die Größe, ab der Sortierung, Seitengröße
-   und Auswahl überhaupt eine Frage sind. */
+/* ── Data: a year's cases ─────────────────────────────────────────────────
+   583 imagined, 50 per page — the size where sorting, page size and selection
+   become questions at all. */
 
 const PARTNERS: Array<[string, string, CaseKind, number]> = [
   ["Musterfirma GmbH", "Eingangsrechnung: Musterfirma GmbH", "incoming_invoice", 1800],
@@ -77,8 +77,8 @@ const SUMMARIES = [
 function makeCase(i: number): CaseListItem {
   const [counterpartyName, title, kind, base] = PARTNERS[i % PARTNERS.length]!;
   const lifecycleStatus = LIFECYCLES[i % LIFECYCLES.length]!;
-  // Sieben Stunden je Zeile rückwärts ab dem 26.08.2026 — so steht die Liste
-  // absteigend nach „Eröffnet", wie `sort` es behauptet.
+  // Seven hours per row backwards from 2026-08-26 — so the list descends by
+  // "Eröffnet", as `sort` claims.
   const openedAt = new Date(Date.UTC(2026, 7, 26, 7, 40) - i * 7 * 3_600_000).toISOString();
   return {
     caseId: `case-${417 + i}`,
@@ -107,7 +107,7 @@ function makeCase(i: number): CaseListItem {
 const PAGE: CaseListItem[] = Array.from({ length: 50 }, (_, i) => makeCase(i));
 const rowKey = (c: CaseListItem) => c.caseNumber ?? c.caseId;
 
-/** Die Seite baut die URL — hier nur sichtbar gemacht, Storybook folgt keinem Link. */
+/** The page builds the URL — made visible here; Storybook follows no link. */
 const href = (patch: ListPatch) =>
   `?${new URLSearchParams(
     Object.entries(patch).map(([k, v]) => [k === "pageSize" ? "size" : k, String(v)]),
@@ -120,7 +120,7 @@ const NUMBER: ColumnDef<CaseListItem> = {
   cell: (c) => <MonoCell value={c.caseNumber} />,
 };
 
-/** Der Titel trägt die Gegenpartei schon in sich („<Belegart>: <Lieferant>"). */
+/** The title already contains the counterparty ("<kind>: <supplier>"). */
 const TITLE: ColumnDef<CaseListItem> = {
   key: "title",
   header: "Sachverhalt",
@@ -136,10 +136,10 @@ const AMOUNT: ColumnDef<CaseListItem> = {
   cell: (c) => <AmountCell value={c.totalAmount} currency={c.currency} />,
 };
 
-/** Z4: kein Kopf „Status" — die Achse heißt hier Bearbeitung. */
-// Die Status-Spalte trägt ihr (i) am Kopf, nicht in jeder Zeile (Z4) — und
-// zwar über `headerAside`, damit der Knopf **neben** dem Sortier-Link steht
-// und nicht darin: ein Knopf in einem `<a>` ist ungültiges HTML (0094 b).
+/** Z4: no "Status" head — the axis is called Bearbeitung here. */
+// The status column carries its (i) at the head, not in every row (Z4) — via
+// `headerAside`, so the button stands **next to** the sort link, not in it: a
+// button inside an `<a>` is invalid HTML (0094 b).
 const LIFECYCLE: ColumnDef<CaseListItem> = {
   key: "lifecycleStatus",
   header: "Bearbeitung",
@@ -163,7 +163,7 @@ const PAGER = { page: 1, pageSize: 50, totalItems: 583, totalPages: 12 };
 const HEAD = { title: "Sachverhalte 2026", sub: "583 Sachverhalte · 50 auf dieser Seite" };
 const SORT = { key: "openedAt", dir: "desc" } as const;
 
-/* ── Die zehn Stories ──────────────────────────────────────────────────── */
+/* ── The ten stories ─────────────────────────────────────────────────────── */
 
 /**
  * Der Normalfall: 50 von 583, sortiert nach „Eröffnet" absteigend — die
@@ -194,8 +194,8 @@ export const Filled: Story = {
  */
 export const Empty: Story = {
   render: () => (
-    // Nebeneinander, damit die beiden Texte im selben Blick stehen — dafür mit
-    // drei Spalten statt fünf, sonst passen zwei Karten nicht in eine Breite.
+    // Side by side, so both texts are in one view — with three columns instead
+    // of five, or two cards do not fit one width.
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
       <DataTable<CaseListItem>
         rows={[]}
@@ -428,7 +428,7 @@ export const BulkAsk: Story = {
           setNote(`${keys.length} zugeordnet an ${target}`);
         },
       }),
-      // Daneben eine, die einfach läuft — die Liste trägt beide Sorten.
+      // Next to it one that simply runs — the list carries both kinds.
       { label: "Verwerfen", action: async () => setNote(null) },
     ];
     return (
@@ -471,10 +471,9 @@ export const RowAsk: Story = {
         sort={SORT}
         href={href}
         rowActions={(c) => [
-          // **Ohne `primary`** — und das ist der Nachweis: bei drei Aktionen
-          // zieht E8 alles außer den primären ins Menü, und dort muss dieselbe
-          // Aktion denselben Dialog öffnen. Mit `primary: true` blieb sie
-          // inline, und der Menü-Pfad war unbewiesen (Abnahme 0122, M2).
+          // **Without `primary`** — that is the proof: with three actions E8 moves
+          // all but the primary ones into the menu, and there the same action must
+          // open the same dialog (0122, M2).
           rowAction<string>({
             label: "Zuordnen",
             ask: {
@@ -754,9 +753,9 @@ export const Override: Story = {
   ),
 };
 
-/* ── Abschnitte (0149) ─────────────────────────────────────────────────────
-   Dieselbe Tabelle, nur mit einer Zeile mehr zwischen den Zeilen. Die Zahlen
-   im Kopf rechnet der Aufrufer — die Tabelle rechnet nichts (E2). */
+/* ── Sections (0149) ───────────────────────────────────────────────────────
+   The same table with one more row between rows. The caller computes the
+   head's numbers — the table computes nothing (E2). */
 
 function kindGroup(kind: CaseKind, aside = true): TableGroup<CaseListItem> {
   const rows = PAGE.filter((c) => c.kind === kind);
@@ -772,7 +771,7 @@ function kindGroup(kind: CaseKind, aside = true): TableGroup<CaseListItem> {
 const KIND_GROUPS = [
   {
     ...kindGroup("incoming_invoice"),
-    // Z4: die Erklärung steht **einmal je Abschnitt**, nicht einmal je Zeile.
+    // Z4: the explanation stands **once per section**, not once per row.
     labelAside: "Lieferantenrechnungen mit Beleg",
   },
   kindGroup("recurring_charge"),
@@ -874,11 +873,10 @@ export const GroupSelection: Story = {
   ),
 };
 
-/* ── Die Buchungsübersicht aus F186 ───────────────────────────────────────
-   Der Fall, für den die Abschnitte bestellt wurden: ein Stapel Buchungssätze,
-   gruppiert nach Satzart. Die Beschreibung der Satzart steht am Kopf, nicht in
-   jeder Zeile — und die Satzart bekommt keine Status-Marke, weil sie keine
-   Kritikalitätsstufe hat (V6). */
+/* ── The booking overview from F186 ───────────────────────────────────────
+   The case the sections were ordered for: a batch of entries grouped by record
+   type. The type's description sits at the head, not in every row — and the
+   type gets no status badge, because it has no criticality (V6). */
 
 interface BatchRow {
   id: string;
@@ -910,7 +908,7 @@ const BATCH_ROWS: BatchRow[] = BATCH.map(([id, document, account, accountName, t
   amount,
 }));
 
-/** Die fünf Satzarten mit ihrer Beschreibung — beides kommt aus der App. */
+/** The five record types with their description — both come from the app. */
 const RECORD_TYPES: Array<[string, string, string]> = [
   ["revenue", "Erlös", "Umsatz aus Lieferung oder Leistung"],
   ["expense", "Aufwand", "Betrieblicher Aufwand mit Beleg"],

@@ -13,7 +13,7 @@ const meta: Meta<typeof StatusHeader> = {
 export default meta;
 type Story = StoryObj<typeof StatusHeader>;
 
-/* ── Daten: drei Belege eines Buchungslaufs ─────────────────────────────── */
+/* ── Data: three documents of a booking run ──────────────────────────────── */
 
 const DOCUMENTS = [
   { id: "BEL-2026-0412", partner: "Musterfirma GmbH", amount: 1800, doc: "in_progress", match: "matched_ludwig" },

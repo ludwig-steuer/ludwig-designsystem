@@ -16,10 +16,10 @@ const meta: Meta<typeof ExpectationRow> = {
 export default meta;
 type Story = StoryObj<typeof ExpectationRow>;
 
-/** Der Bezugstag aller Stories — sonst wechselt die Reife mit dem Kalender. */
+/** The reference day of all stories — otherwise maturity changes with the calendar. */
 const TODAY = "2026-09-06";
 
-/** Die Wörter der Belegarten gehören dem Aufrufer (kein Label ohne Achse). */
+/** The document kinds' words belong to the caller (no label without an axis). */
 const KIND_WORDS: Record<string, string> = {
   invoice: "Rechnung",
   receipt: "Beleg / Quittung",

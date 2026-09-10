@@ -45,8 +45,8 @@ const BASE: BankTransactionRowData = {
 };
 
 /**
- * Kopf und Spaltenmaße kommen aus **demselben** Satz wie die Zellen — sonst
- * schiebt sich der Kopf gegen die Zeile, sobald eine Breite sich ändert.
+ * Head and column measures come from the **same** set as the cells — otherwise
+ * the head shifts against the row as soon as a width changes.
  */
 const DEF = bankTransactionColumns({ caseHref: () => "#" });
 const COLS = bankTransactionTracks(DEF);
@@ -61,9 +61,8 @@ function Frame({ children, sub }: { children: React.ReactNode; sub?: string }) {
             {DEF.map((c) => (
               <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
                 {c.header}
-                {/* Das (i) kommt aus dem Spaltensatz, nicht aus einer Liste
-                    hier: von Hand gehängt fehlt ihm der Abstand, den die Regel
-                    setzt — gemessen 0 px statt 4 (Abnahme 0101, M5). */}
+                {/* The (i) comes from the column set, not a list here: hung by hand it
+                    lacks the spacing the rule sets (0 px instead of 4, 0101, M5). */}
                 {c.headerAside}
               </span>
             ))}
@@ -204,8 +203,8 @@ export const Columns: Story = {
             transaction={{ ...BASE, cases: [], allocatedSum: 0, matchStage: "beyond_bookings" }}
             caseHref={caseHref}
             accountLabel="Commerzbank · 1210"
-            // **Verdreht übergeben**: `columns` wählt aus, es ordnet nicht —
-            // die Zeile steht trotzdem in der Reihenfolge der Familie.
+            // **Passed in shuffled order**: `columns` selects, it does not order —
+            // the row still follows the family's order.
             columns={["amount", "matchStage", "account", "purpose", "counterparty", "postingDate"]}
           />
           <BankTransactionRow
@@ -221,8 +220,8 @@ export const Columns: Story = {
             }}
             caseHref={caseHref}
             accountLabel="Qonto · 4021"
-            // **Verdreht übergeben**: `columns` wählt aus, es ordnet nicht —
-            // die Zeile steht trotzdem in der Reihenfolge der Familie.
+            // **Passed in shuffled order**: `columns` selects, it does not order —
+            // the row still follows the family's order.
             columns={["amount", "matchStage", "account", "purpose", "counterparty", "postingDate"]}
           />
           <BankTransactionRow

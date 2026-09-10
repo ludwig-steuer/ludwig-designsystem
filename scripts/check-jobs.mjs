@@ -31,7 +31,7 @@
  * himself — this script was written before it. Until then the register's head
  * table carries the row
  *
- *     | Kennungen in Profilen | noch nicht eingetragen |
+ *     `| Kennungen in Profilen | noch nicht eingetragen |`
  *
  * and check 2 is reported as a hint, not an error: the run stays at exit 0 but
  * says how many entries are waiting. Whoever carries the ids into the profiles

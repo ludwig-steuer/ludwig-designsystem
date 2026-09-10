@@ -2,26 +2,19 @@ import { readFileSync } from "node:fs";
 import type { Plugin } from "vite";
 
 /**
- * Bildet die Server-Action-Grenze nach, die Next.js im Client-Bundle zieht.
+ * Recreates the server-action boundary Next.js draws in the client bundle.
  *
- * Eine Datei mit `"use server"` läuft **nie** im Browser: Next ersetzt sie im
- * Client-Bundle durch RPC-Stubs. Vite kennt diese Regel nicht und bündelt den
- * Rumpf mit — samt Drizzle und `postgres`, was im Browser an `Buffer is not
- * defined` scheitert.
+ * A `"use server"` file **never** runs in the browser: Next replaces it with RPC
+ * stubs. Vite does not know that rule and bundles the body — with Drizzle and
+ * `postgres`, which fails in the browser with `Buffer is not defined`. Almost the
+ * whole shared layer hangs on the server graph through `FlowModal` and
+ * `AppShell` (F111, finding B1).
  *
- * Betroffen ist nicht nur, wer eine Action aufruft: `@/ui/status` erreicht über
- * `FlowModal` das Modul `@/modules/invoices`, `@/ui/components` über
- * `AppShell`/`UserMenu` das Modul `@/modules/auth`. Damit hängt fast die ganze
- * geteilte Schicht am Server-Graphen (F111, Befund B1) — 28 von 41
- * Story-Dateien liefen darüber.
+ * The stub keeps the export names and throws when called: a story that really
+ * needs an action fails visibly instead of quietly showing something wrong.
  *
- * Der Stub behält die Export-Namen und wirft beim Aufruf. Eine Story, die
- * tatsächlich eine Action bräuchte, fällt damit sichtbar durch — statt still
- * etwas Falsches zu zeigen.
- *
- * `load` statt `transform`: der SWC-Transform von `@storybook/nextjs-vite`
- * läuft ebenfalls als `pre` und schreibt die Exporte vorher um. Wir lesen
- * deshalb das Original von der Platte.
+ * `load` instead of `transform`: `@storybook/nextjs-vite`'s SWC transform also
+ * runs as `pre` and rewrites the exports first, so the original is read from disk.
  */
 export function serverActionsStub(): Plugin {
   const USE_SERVER = /^\s*(?:\/\/[^\n]*\n|\/\*[\s\S]*?\*\/\s*)*["']use server["']/;
@@ -47,7 +40,7 @@ export function serverActionsStub(): Plugin {
       for (const m of source.matchAll(EXPORT_LIST)) {
         for (const part of m[1]!.split(",")) {
           const name = part.trim().split(/\s+as\s+/).pop()?.trim();
-          // `export type { X }`-Listen tragen kein Laufzeit-Symbol.
+          // `export type { X }` lists carry no runtime symbol.
           if (name && !name.startsWith("type ")) names.add(name);
         }
       }

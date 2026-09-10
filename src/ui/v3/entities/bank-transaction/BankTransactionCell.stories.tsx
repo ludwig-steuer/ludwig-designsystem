@@ -169,8 +169,8 @@ export const InUseTimeline: Story = {
 };
 
 /**
- * `EventStack.BankTransactionBlock` der App, nachgebaut mit ihren Inline-Maßen
- * — nur für den Vergleich in `InUseTimeline`, nicht als Baustein.
+ * The app's `EventStack.BankTransactionBlock`, rebuilt with its inline measures —
+ * only for comparison in `InUseTimeline`, not as a building block.
  */
 function OldBlock() {
   return (
@@ -225,11 +225,9 @@ export const InUseGate: Story = {
         <Table cols="1fr 200px">
           <HeadRow>
             <span>Position</span>
-            {/* Das (i) **einmal** am Spaltenkopf, nicht je Zeile: die Achse
-                erklärt sich einmal, und in einer Liste von hundert Zeilen
-                stünde sonst hundertmal dasselbe Zeichen. 0101 hat das für die
-                Zeilenfamilie abgeschafft, diese Story baute es nach
-                (Wiederabnahme 0100, M3). */}
+            {/* The (i) **once** at the column head, not per row: the axis explains
+                itself once; a hundred rows would repeat the sign a hundred times
+                (0101 removed it for the row family, 0100 M3). */}
             <span>
               Gate <StatusInfoButton axis="bank_match_stage" />
             </span>

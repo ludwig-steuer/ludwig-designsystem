@@ -115,9 +115,9 @@ export const StateIcons: Story = {
 };
 
 /**
- * Zwölf Prüfpunkte eines dünnen Satzes — Fragen und Begründungen wörtlich aus
- * dem gemeldeten Fall. Keine Zahl, kein Name daraus ist echt; was echt ist,
- * ist die **Verteilung**: nichts war prüfbar.
+ * Twelve checks of a thin entry — questions and reasons verbatim from the
+ * reported case. No number or name is real; what is real is the
+ * **distribution**: nothing was checkable.
  */
 const NOT_CHECKABLE: CheckItem[] = [
   ["P-BETRAG", "Stimmt der gebuchte Betrag mit dem Beleg überein?", "Kein Belegbetrag hinterlegt — nicht vergleichbar."],

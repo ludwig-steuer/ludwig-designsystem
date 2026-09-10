@@ -40,7 +40,7 @@ function Pair({
   caption?: string;
   totals?: boolean;
   accountHref?: (n: string) => string;
-  /** Für die BU-Spalte: sie kostet 132 px, die der Kontoname sonst hätte. */
+  /** For the tax key column: it costs 132 px the account name would otherwise get. */
   wide?: boolean;
 }) {
   return (

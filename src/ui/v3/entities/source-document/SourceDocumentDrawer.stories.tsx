@@ -191,9 +191,8 @@ export const InContext: Story = {
           <Table cols="140px 1fr 130px 120px 150px">
             <HeadRow>
               <span>Belegnr.</span>
-              {/* „Gegenpart", nicht „Lieferant": bei einer Ausgangsrechnung
-                  ist er der Kunde. Genau diese Beschriftung war der dritte
-                  Fall in Befund L-36. */}
+              {/* "Gegenpart", not "Lieferant": on an outgoing invoice it is the
+                  customer. This label was the third case in finding L-36. */}
               <span>Gegenpart</span>
               <span>Datum</span>
               <span className="v2num">Brutto</span>

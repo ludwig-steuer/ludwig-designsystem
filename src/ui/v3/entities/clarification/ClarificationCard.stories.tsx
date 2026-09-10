@@ -43,8 +43,8 @@ const AGENT_DETAIL: ClarificationDetailVM = {
     { kind: "source_doc", label: "Beleg RE-2026-4471", href: "#" },
     { kind: "ledger_account", label: "4670 Reisekosten Arbeitnehmer", href: "#" },
   ],
-  // Roh, wie es in der Zeile steht — die Wörter kommen aus der Domäne
-  // (`clarification_question_type` und das Modul, Befunde L-10 und L-11).
+  // Raw, as stored on the row — the words come from the domain
+  // (`clarification_question_type` and the module, findings L-10 and L-11).
   questionType: "agent_clarification",
   sourceModule: "booking-module",
   answerKind: "single_choice",

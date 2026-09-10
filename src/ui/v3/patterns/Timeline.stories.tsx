@@ -10,7 +10,7 @@ const meta: Meta<typeof Timeline> = { title: "v3/Patterns/Prüfen/Timeline", com
 export default meta;
 type Story = StoryObj<typeof Timeline>;
 
-/** Bewusst unsortiert übergeben — die Komponente sortiert. */
+/** Passed unsorted on purpose — the component sorts. */
 const CASE: TimelineItem[] = [
   {
     id: "e3",

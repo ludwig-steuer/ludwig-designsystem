@@ -22,7 +22,7 @@ const meta: Meta<typeof CaseTimeline> = {
 export default meta;
 type Story = StoryObj<typeof CaseTimeline>;
 
-/** Bis die Registry die Achse `ereignis_art` führt (Befund 1 der Spec). */
+/** Until the registry carries the `ereignis_art` axis (finding 1 of the spec). */
 
 const TODAY = "2026-09-03";
 
@@ -255,7 +255,7 @@ export const InUse: Story = {
   },
 };
 
-/** Das Detail, das der Aufrufer stellt — hier als Feldliste je Art. */
+/** The detail the caller provides — here a field list per kind. */
 function EntryDetail({ entry }: { entry: CaseTimelineEntry | null }) {
   if (entry === null) {
     return <DetailPane empty="Eintrag wählen für das Detail." />;
@@ -304,9 +304,9 @@ function EntryDetail({ entry }: { entry: CaseTimelineEntry | null }) {
 }
 
 /**
- * Der Rand: 44 Einträge über ein halbes Jahr mit Lückenzeilen, ein Titel mit
- * 85 Zeichen, Betrag 0 ohne Zelle, ein ersetztes Ereignis, eine erledigte
- * Erwartung (fehlt im Strang) und ein Zahlungsausgang mit Vorzeichen.
+ * The edge: 44 entries across half a year with gap rows, an 85-character title,
+ * amount 0 without a cell, a superseded event, a resolved expectation (absent
+ * from the strand) and an outgoing payment with its sign.
  */
 /**
  * Drei Einträge auf **demselben Tag**: die Erwartung steht vor der Klärung,

@@ -127,7 +127,7 @@ const SUBMITTABLE: SourceDocumentVM[] = [
 
 const PAGER = { page: 1, pageSize: 25, totalItems: 102, totalPages: 5 };
 
-/** Einer mit Rechnungszeile, einer ohne — die zwei Eingaben der Achse. */
+/** One with an invoice row, one without — the axis's two inputs. */
 const STUCK_PAIR: SourceDocumentVM[] = [DOCS[3]!, { ...DOCS[2]!, hasInvoiceRow: true }];
 
 /**
@@ -283,10 +283,8 @@ export const Stuck: Story = {
     });
     return (
       <div style={{ maxWidth: 1400, display: "grid", gap: "var(--space-6)" }}>
-        {/* **Dieselben zwei Belege** in beiden Tabellen — einer mit
-            Rechnungszeile, einer ohne. Nur so fallen alle vier Werte der
-            Achse: „nicht extrahiert" und „Datum fehlt" hier, „wird
-            klassifiziert" und „wird extrahiert" darunter. */}
+        {/* **The same two documents** in both tables — one with an invoice row,
+            one without. Only so do all four values of the axis appear. */}
         <DataTable<SourceDocumentVM>
           rows={STUCK_PAIR}
           columns={stuck}
@@ -333,9 +331,8 @@ export const Edges: Story = {
               documentDate: null,
             },
             {
-              // Ein Betrag **ohne Währung**: er steht als blanke Zahl da. Ein
-              // stilles „€" wäre eine erfundene Tatsache — bei einer Rechnung
-              // aus der Schweiz die falsche.
+              // An amount **without currency** stands as a bare number. A silent "€"
+              // would be an invented fact — the wrong one for a Swiss invoice.
               ...DOCS[0]!,
               id: "d10",
               fileName: "Invoice-CH-8841.pdf",

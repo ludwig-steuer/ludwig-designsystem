@@ -93,7 +93,7 @@ export const WithoutSelection: Story = {
   ),
 };
 
-/* ── Die Insel: sie hält die Auswahl selbst (0057) ─────────────────────── */
+/* ── The island: it holds the selection itself (0057) ─────────────────────── */
 
 const ISLAND_ROWS = [
   { key: "2026-0417", name: "Musterfirma GmbH", betrag: 1800 },

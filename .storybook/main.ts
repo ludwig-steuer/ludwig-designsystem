@@ -2,12 +2,10 @@ import type { StorybookConfig } from "@storybook/nextjs-vite";
 import { serverActionsStub } from "./server-actions-stub";
 
 /**
- * Storybook — die Werkbank für die **reinen** Darstellungskomponenten
- * (F111 Vorgabe 1: Props rein, JSX raus). Komponenten, die selbst laden
- * (Server Components, Server-Action-Aufrufer, die ladenden Drawer aus
- * `ui/drawers`), gehören hier NICHT hinein — sie stehen in `/dev/gallery`.
- *
- * Stories liegen neben der Komponente als `<Name>.stories.tsx`.
+ * Storybook — the workbench for the **pure** presentation components (F111 rule
+ * 1: props in, JSX out). Components that load data themselves (server
+ * components, server-action callers, the loading drawers) do NOT belong here —
+ * they live in `/dev/gallery`. Stories sit next to their component.
  */
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.@(ts|tsx)"],
@@ -15,21 +13,21 @@ const config: StorybookConfig = {
     name: "@storybook/nextjs-vite",
     options: {},
   },
-  // `reference/` liegt neben `src/`, wird aber als Vorlage gebraucht: die
-  // Artboards laufen dort unverändert, wie geliefert (eigenes `support.js`,
-  // eigenes `_ds`-Bundle) und werden nur eingebettet, nie nachgebaut.
+  // `reference/` sits next to `src/` but is needed as a template: the artboards
+  // run unchanged as delivered (own `support.js`, own `_ds` bundle) and are only
+  // embedded, never rebuilt.
   staticDirs: ["../public", { from: "../reference", to: "/reference" }],
   viteFinal: (config) => {
     config.plugins = [...(config.plugins ?? []), serverActionsStub()];
     return config;
   },
   core: {
-    // Kanzlei-Kontext: keine anonyme Nutzungstelemetrie nach außen.
+    // Practice context: no anonymous usage telemetry leaving the machine.
     disableTelemetry: true,
   },
   typescript: {
-    // Die Repo-Typprüfung läuft über `pnpm typecheck`; Storybook muss sie
-    // nicht doppeln (kostet nur Startzeit).
+    // The repo's type check runs via `pnpm typecheck`; Storybook need not repeat
+    // it (costs only start-up time).
     check: false,
   },
 };

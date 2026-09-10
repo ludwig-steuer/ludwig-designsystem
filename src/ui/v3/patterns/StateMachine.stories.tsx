@@ -12,20 +12,17 @@ export default meta;
 type Story = StoryObj<typeof StateMachine>;
 
 /*
-  **Nichts mehr von Hand.** Bis zum Spiegel-Zug vom 2026-09-07 standen hier
-  zwei Sätze als Konstanten, weil ihre Achsen in der Registry keine Maschine
-  hatten (Register L-75). Seither führt `STATE_MACHINES` zwölf Maschinen mit
-  englischem `trigger` und deutschem `label` — darunter genau diese zwei. Eine
-  Kopie daneben wäre wieder das Muster, das dieses Repo dreimal gerissen hat:
-  eine handgeschriebene Liste neben einer gepflegten.
+  **Nothing by hand any more.** Since the mirror run of 2026-09-07
+  `STATE_MACHINES` carries twelve machines with English `trigger` and German
+  `label` — these two included. A copy here would be a hand-written list next
+  to a maintained one again.
 */
 const CYCLE = STATE_MACHINES.export_batch!.transitions;
 const INBOX = STATE_MACHINES.document_processing!.transitions;
 
-/* Die **Spaltenordnung** bleibt Sache der Story: sie ist eine Aussage über das
-   Bild („`review` steht neben `agent`, weil es seinen Rang aus genau diesem
-   Übergang zieht"), keine Kopie von Daten. Alles andere — Übergänge, Wörter,
-   Beschreibung — kommt aus der Registry. */
+/* The **column order** stays the story's: it is a statement about the picture
+   ("`review` stands next to `agent` because it draws its rank from that
+   transition"), not a copy of data. Everything else comes from the registry. */
 const CYCLE_STATES = [
   "prepared",
   "agent",
@@ -110,10 +107,9 @@ export const Edge: Story = {
         axis="beleg_inbox"
         transitions={[
           ...INBOX,
-          // Zwei Übergänge, die die Registry **nicht** führt — genau der Rand,
-          // den diese Story zeigt: ein Ziel außerhalb der Achse und eine
-          // Schlinge auf sich selbst. Sie tragen `trigger` und `label` wie
-          // jeder andere Übergang seit dem Spiegel-Zug.
+          // Two transitions the registry does **not** have — exactly the edge this
+          // story shows: a target outside the axis and a self-loop. They carry
+          // `trigger` and `label` like every other transition.
           { from: "classification_failed", to: "quarantined", trigger: "quarantined", label: "Aussortiert" },
           { from: "pending_classification", to: "pending_classification", trigger: "reprocess", label: "Erneut anstoßen" },
         ]}
@@ -149,11 +145,9 @@ export const InUse: Story = {
               },
             ]}
           />
-          {/* `minWidth: 0`: ein Rasterkind ist so breit wie sein Inhalt, und
-              dann reicht die Mindestbreite des Diagramms durch — die Karte
-              schnitt den letzten Zustand um 55 px ab, statt dass der Behälter
-              in sich scrollt (Abnahme 0069, vierte Runde). Ein `overflow-x`
-              im Inneren schützt sich nicht selbst. */}
+          {/* `minWidth: 0`: a grid child is as wide as its content, and then the
+              diagram's minimum width pushes through — the card clipped the last
+              state by 55 px instead of the container scrolling (0069). */}
           <div style={{ minWidth: 0 }}>
             <div className="v2fields__h">Ablauf</div>
             <StateMachine

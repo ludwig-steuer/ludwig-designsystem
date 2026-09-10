@@ -16,9 +16,9 @@ export default meta;
 type Story = StoryObj<typeof OpenItemRow>;
 
 const AS_OF = "2026-08-31";
-// `minmax(0, 1fr)`, nicht `1fr`: sonst rechnen Kopf und Zeile die Spur je für
-// sich (gemessen 84 gegen 68 px). Und `minWidth` deckt die festen Spuren
-// **plus** neun Lücken à 10 px und zweimal 18 px Polster: 1090 + 90 + 36.
+// `minmax(0, 1fr)`, not `1fr`: otherwise head and row size the track each on
+// their own (84 vs 68 px). `minWidth` covers the fixed tracks **plus** nine
+// gaps of 10 px and twice 18 px padding: 1090 + 90 + 36.
 const COLS = "90px 100px 130px 100px 100px minmax(0, 1fr) 120px 190px 130px 130px";
 const MIN_WIDTH = 1300;
 
@@ -209,11 +209,9 @@ export const Linked: Story = {
 export const Interactive: Story = {
   render: function Render() {
     const [open, setOpen] = useState<string | null>(null);
-    // `minmax(0, 1fr)` statt der Vorgabe: eine Rasterspur ist `auto` und damit
-    // mindestens so breit wie ihr Inhalt — die Karte wuchs mit der Tabelle und
-    // schob die Seite, statt in sich zu scrollen. Gemessen bei 900 px: 418 px
-    // Überlauf (Abnahme 0029, S2). Dieselbe Falle wie im Belegnummern-Register
-    // (0014 M1), nur an der Spur statt am Kind.
+    // `minmax(0, 1fr)` instead of the default: a grid track is `auto` and so at
+    // least as wide as its content — the card grew with the table and pushed the
+    // page instead of scrolling (418 px overflow at 900 px, 0029 S2).
     return (
       <div
         style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: "var(--space-4)" }}
@@ -258,8 +256,8 @@ export const Edges: Story = {
       <OpenItemRow
         item={ITEM({
           personalAccount: "70311",
-          // 36 Zeichen — die Grenze von Belegfeld 1. Ohne sie kürzt in keiner
-    // Story eine Belegnummer, und M2 hätte keinen Nachweis (W1).
+          // 36 characters — document field 1's limit. Without it no story
+          // shortens a document number, and M2 would lack its proof (W1).
     externalDocumentNumber: "RE-9002-SAMMEL-2026-03-14-TEIL-002",
           openAtCutoff: 18.4,
           amountApprox: true,
@@ -279,17 +277,13 @@ export const InUse: Story = {
     <Frame sub="Stichtag 31.08.2026 · 5 Posten · 6.782,45 € offen">
       <OpenItemAgeGroup group={{ bucket: "d1_30", count: 1, sum: 1249.9 }} />
       <OpenItemRow item={ITEMS[0]!} asOf={AS_OF} />
-      {/* Die fünfte Klasse `d61_90` stand in keiner Story — jetzt steht sie
-          hier, damit alle fünf einmal gezeigt sind (Abnahme 0029, M6).
-
-          **Jede Gruppe trägt die Zahlen ihrer Zeile**: RE-4400 ist am
-          Stichtag 88 Tage überfällig (also `d61_90`) und steht in Franken,
-          AR-2026-0301 mit 143 Tagen in `d90plus`. Die erste Fassung hatte
-          beides vertauscht und die Summen aus der Luft gegriffen — die
-          Wiederabnahme hat es gefunden (W2). */}
+      {/* The fifth class `d61_90` was in no story — now all five are shown
+          (0029, M6). **Each group carries its row's numbers**: RE-4400 is 88 days
+          overdue on the cut-off date (`d61_90`) and in francs, AR-2026-0301 at
+          143 days in `d90plus` (W2). */}
       <OpenItemAgeGroup group={{ bucket: "d61_90", count: 1, sum: 212 }} currency="CHF" />
-      {/* Ein Posten in Franken: `currency` lief bis hierhin auf dem Default,
-          hatte also keinen Nachweis (M7). */}
+      {/* An item in francs: `currency` had only run on its default so far, so it
+          lacked proof (M7). */}
       <OpenItemRow item={ITEMS[4]!} asOf={AS_OF} currency="CHF" />
       <OpenItemAgeGroup group={{ bucket: "d90plus", count: 1, sum: 640 }} />
       <OpenItemRow item={ITEMS[3]!} asOf={AS_OF} />

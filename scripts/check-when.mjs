@@ -66,7 +66,7 @@ function selfTest() {
     ["mehrzeiliges JSDoc", ["/**", " * Was das ist.", " */", "export const A_B = 1;"], 3, true],
     ["Leerzeile dazwischen", ["/** Was das ist. */", "", "export const A_B = 1;"], 2, true],
     ["gar kein JSDoc", ["export const A_B = 1;"], 0, false],
-    ["nur ein //-Kommentar", ["// Was das ist.", "export const A_B = 1;"], 1, false],
+    ["only a line comment", ["// Was das ist.", "export const A_B = 1;"], 1, false],
   ];
   let bad = 0;
   for (const [name, lines, i, expected] of cases) {

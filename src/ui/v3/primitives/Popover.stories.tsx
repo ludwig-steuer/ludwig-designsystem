@@ -15,7 +15,7 @@ const meta: Meta<typeof Popover> = { title: "v3/Primitives/Dialog/Popover", comp
 export default meta;
 type Story = StoryObj<typeof Popover>;
 
-/** Die Kontokarte, wie ein Aufrufer sie für die Vorschau zusammensetzt. */
+/** The account card as a caller assembles it for the preview. */
 function AccountCard() {
   return (
     <FieldList

@@ -232,7 +232,7 @@ export const InUse: Story = {
           open={open}
           onClose={() => setOpen(false)}
           size="lg"
-          // Kein String, also trägt `ariaLabel` den Namen für den Screenreader.
+          // Not a string, so `ariaLabel` carries the name for screen readers.
           title={
             <>
               <span className="lw-numeric">6815</span> Bürobedarf
