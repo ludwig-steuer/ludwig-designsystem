@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **spec** 2026-09-10 — gebaut wird nach den Defaults der offenen Fragen, solange der Owner nicht anders entscheidet (`ludwig-manager`, 2026-09-10) |
+| Status | **gebaut 2026-09-10** nach den Defaults der offenen Fragen — Abnahme offen (nicht durch den Bauenden) |
 | Stufe | `src/showcase/partner/` (Seiten-Stories) — **keine** neue Komponente im Set |
 | Klassen-Test | Die Seite gehört der App und lebt in `showcase/`, wie 0144, 0152, 0157. Die Liste selbst ist `DataTable` mit `businessPartnerColumns()`; beides ist gebaut |
 | Quelle | Seitenprofil `docs/seiten/partner-liste.md` (`6490f97`, gegen die App geprüft von `ludwig-manager` am 2026-09-10) · Entitätsprofil `docs/entitaeten/business-partner.md` §Listen |
@@ -66,11 +66,11 @@ wird hier zu Ende entwickelt, bevor die App sie nachzieht.
 |---|---|---|---|---|
 | `InUse` | großer Mandant, 6.396 Partner, in `AppShell` | Reiter mit „Vorschläge 7", einzeilige Filterleiste, Liste nach Nutzung ↓, „1–25 von 6.396" | blättert, sortiert nach Name | Reiter, Filter, Kopf und erste Zeilen ohne Scrollen bei 1280 und 1440 × 900 |
 | `SearchByNumber` | Suche „10433" | genau eine Zeile, die Nummer in der Debitorspalte | klickt die Nummer → Konto-Drawer, `Esc` | Rang 1 und 6: die Suche trifft Kontonummern, der Drawer lässt die Liste stehen |
-| `SameName` | Suche „Musterfirma Service" | drei gleichnamige Partner mit verschiedenen Nummern und Orten | — | das Misslingen aus dem Profil tritt nicht ein: die Zeile unterscheidet |
+| `SameName` | Suche „Gebäudeservice" | drei gleichnamige „Musterfirma Gebäudeservice GmbH" mit verschiedenen Nummern und Orten | — | das Misslingen aus dem Profil tritt nicht ein: die Zeile unterscheidet |
 | `WithoutAccount` | Rolle „ohne Personenkonto", mittlerer Mandant | 12 Abrechner, nur die Verrechnungsspalte gefüllt; Kopf „12 von 572", Zusammenfassung mit Zurücksetzen | setzt zurück | der Filter ersetzt die Stat-Leiste; die Abrechner erklären sich selbst |
 | `NoResults` | Suche ohne Treffer | Leerfall **nach Filter**: was gefiltert ist, und der Weg zurück | — | ≠ Bestand leer |
 | `EmptyStock` | Mandant ohne Import | „Für diesen Mandanten sind keine Geschäftspartner importiert." mit Weg zum Onboarding | — | der Bestand-Leerfall |
-| `Proposals` | Sonderansicht, 18 Vorschläge | Spalte „Annehmen"; Dialog mit vorbelegter Nummer | nimmt an: gültig → die Zeile geht, der Zähler sinkt, Toast „Konto 70412 angelegt — 3 Buchungen umgezogen"; drei Ziffern → Knopf gesperrt; vergebene Nummer → Fehler im Dialog | der Annahme-Rundlauf mit seinem Fehlerweg |
+| `Proposals` | Sonderansicht, 18 Vorschläge | Spalte „Annehmen"; Dialog mit vorbelegter Nummer | nimmt an: gültig → die Zeile geht, der Zähler sinkt, Toast „Konto 70500 angelegt — 3 Buchungen umgezogen"; drei Ziffern → Knopf gesperrt; vergebene Nummer → Fehler im Dialog | der Annahme-Rundlauf mit seinem Fehlerweg |
 | `ProposalsDone` | Sonderansicht ohne Vorschläge | Haken und „Keine Vorschläge offen." | — | der dritte Leerfall ist ein **Erfolg** |
 | `LoadingAndError` | lädt · Fehler | Reiter und Filter stehen, die Liste als Skelett in Zeilenform; Fehler mit „Erneut laden" | — | V9 |
 | `Narrow` | `InUse` bei 1024 px | die Tabelle scrollt in ihrer Karte, die Seite nicht | — | die Mindestbreite der Spalten (1.180 px) bricht die Seite nicht |
@@ -116,6 +116,38 @@ Beim Owner (vorgelegt von `ludwig-manager`, 2026-09-10); gebaut wird nach Defaul
 
 App: **L-292** — die Annahme eines Vorschlags (`AcceptCreditorForm`) ist
 Handarbeit neben dem Set. Nichts für den Spiegel.
+
+## Gebaut (2026-09-10)
+
+**Dateien:** `src/showcase/partner/partner-list.tsx` (`PartnerListPage`:
+Reiter, Filter, Liste, Vorschläge mit Annahme, Konto-Drawer, Toast),
+`PartnerList.stories.tsx` (10 Exporte), `fixtures.ts` um `partnerStock()` und
+drei Bestände erweitert (6.396 · 572 · 544). `useHash` liegt seitdem in
+`src/showcase/hash.ts`, geteilt mit der Kontoseite (0157). Im Set nichts
+geändert.
+
+**Eine Abweichung von der Spec:** eine vergebene Nummer fängt der Dialog
+**vor** dem Absenden ab — Satz „Die Nummer … ist schon vergeben" und
+gesperrter Knopf. Gemessen: ein Fehler, den die Aktion zurückgibt, schließt den
+Dialog von `ActionButton ask`, und die Eingabe ist weg. Für die App heißt das:
+die Prüfung auf vergebene Nummern gehört in den Dialog, solange 0121 bei einem
+Aktionsfehler schließt.
+
+## Messung (CDP, 1440 × 900, sofern nicht anders genannt)
+
+| Kriterium | Ergebnis |
+|---|---|
+| `pnpm typecheck`, `check:language` | grün |
+| alle 10 Exporte rendern, kein Querlauf | ✓ 0 px, auch bei 1280 und in `Narrow` (1024) |
+| kein Text in 16 px | ✓ bis auf den Drawer-Titel des Set-Drawers und `sr-only` |
+| zwei Reiter, keine Stat-Leiste | ✓ „Geschäftspartner · Vorschläge 7" |
+| Vorratszähler, gefiltert „n von m" | ✓ „6.396 · meistgenutzte zuerst"; `WithoutAccount` „12 von 572" |
+| Suche trifft Kontonummer und Name | ✓ „10433" → 1 Zeile; „Gebäudeservice" → 3 Gleichnamige mit verschiedenen Nummern |
+| Sortierung | ✓ Standard Nutzung ↓; `#sort=legal_name&dir=asc` → „Beispiel Bau Aller GmbH" oben, der Kopf verliert „meistgenutzte zuerst" |
+| drei Leerfälle | ✓ „keine Geschäftspartner importiert" · „Keine Treffer" (nach Filter) · „Keine Vorschläge offen." (Haken) |
+| Annahme | ✓ vorbelegt 890571; „123" → Knopf gesperrt; „70001" → Satz im Dialog, Knopf gesperrt; „70500" → Dialog zu, Vorschläge 18 → 17, Toast „Konto 70500 angelegt — 3 Buchungen umgezogen." |
+| Konto-Drawer | ✓ Nummer 10433 öffnet „Konto 10433", die Liste bleibt |
+| erste Zeile ohne Scrollen | ✓ y = 352 in `AppShell` bei 1280 und 1440 |
 
 ## Abnahme
 

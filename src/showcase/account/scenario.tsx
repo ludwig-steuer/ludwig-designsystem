@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { AccountFacts, type AccountFactsVM } from "@/ui/v3/entities/account/Account";
@@ -32,6 +32,8 @@ import { DataTable } from "@/ui/v3/patterns/DataTable";
 import { OpenPoints, type OpenPoint } from "@/ui/v3/patterns/OpenPoints";
 import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 
+import { useHash, type Hash, type Patch } from "../hash";
+
 import { AccountPage } from "./AccountPage";
 import {
   balanceWord,
@@ -59,36 +61,6 @@ import {
  * way the app keeps it in the query: a story iframe reloads on `?`, not on
  * `#`, and `DataTable` knows rows only as links.
  */
-
-type Patch = Record<string, string | null>;
-
-function useHash(initial: string, live: boolean) {
-  const [hash, setHash] = useState(initial);
-  useEffect(() => {
-    if (!live) return;
-    // The iframe outlives the story; a hash left by the previous one must not leak in.
-    window.history.replaceState(null, "", `#${initial}`);
-    setHash(initial);
-    const onChange = () => setHash(window.location.hash.slice(1));
-    window.addEventListener("hashchange", onChange);
-    return () => window.removeEventListener("hashchange", onChange);
-  }, [initial, live]);
-
-  const params = useMemo(() => new URLSearchParams(hash), [hash]);
-  const href = (patch: Patch): string => {
-    const next = new URLSearchParams(hash);
-    for (const [key, value] of Object.entries(patch)) {
-      if (value === null) next.delete(key);
-      else next.set(key, value);
-    }
-    return `#${next.toString()}`;
-  };
-  const go = (patch: Patch) => {
-    if (live) window.location.hash = href(patch).slice(1);
-  };
-  return { params, href, go };
-}
-type Hash = ReturnType<typeof useHash>;
 
 /** Everything that narrows the list — cleared together. */
 const CLEAR_LIST: Patch = { q: null, origin: null, status: null, month: null, page: null };
