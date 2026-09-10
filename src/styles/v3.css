@@ -2777,6 +2777,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 .v2je__body { border-top: 1px solid var(--color-border-subtle); }
 
+/* Die Karte misst **sich selbst**, nicht das Fenster: sie steht einmal breit
+   im Aufklapper einer Stapelzeile und einmal in der 560-px-Spalte einer
+   Sachverhalts-Übersicht. Eine `@media`-Regel sähe beide Male dasselbe
+   Fenster (dieselbe Lehre wie bei `.v2doccard`, 0071). */
+.v2je { container-type: inline-size; container-name: je; }
+
 .v2je__row {
   display: grid;
   grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1.4fr) 104px 104px;
@@ -2794,6 +2800,20 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   grid-template-columns: 70px minmax(0, 1fr) 132px minmax(0, 1.4fr) 104px 104px;
 }
 .v2je__bu { display: inline-flex; align-items: baseline; gap: var(--space-1); flex-wrap: wrap; }
+
+/* **Unter 640 px fällt der Kontoname weg**, nicht der Buchungstext.
+   Gemessen 2026-09-10 in der Sachverhalts-Übersicht: bei 560 px Kartenbreite
+   überlappten die Köpfe („KontoBame", „BuchungstexSoll Umsatz") — sechs
+   Spalten mit fester BU passen dort nicht. Der Name ist die entbehrlichste
+   der sechs: die **Nummer** steht daneben und ist der Schlüssel, der Name
+   hängt weiter im `title`. Der Buchungstext dagegen ist das, was diese Zeile
+   von der nächsten unterscheidet. */
+@container je (max-width: 640px) {
+  .v2je__row { grid-template-columns: 70px minmax(0, 1.4fr) 92px 92px; }
+  .v2je--bu .v2je__row { grid-template-columns: 70px 112px minmax(0, 1fr) 92px 92px; }
+  .v2je__row > :nth-child(2):not(.v2je__bu) { display: none; }
+  .v2je--bu .v2je__row > :nth-child(2) { display: none; }
+}
 
 .v2je__row--head {
   font-weight: 600;
