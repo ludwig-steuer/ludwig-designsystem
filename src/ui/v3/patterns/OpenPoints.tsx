@@ -91,24 +91,24 @@ export function OpenPoints({
         sub={count === 0 ? "nichts offen" : `${count} offen`}
         {...(moreHref ? { actions: <TextButton href={moreHref}>Alle ansehen</TextButton> } : {})}
       />
-      <div className="v2boxbody">
+      <div className="v3boxbody">
         {points.length === 0 && !extra ? (
-          <p className="v2open__none">
+          <p className="v3open__none">
             <StateIcon state="done" title="erledigt" /> {emptyText}
           </p>
         ) : null}
         {points.map((point) => (
-          <div className="v2open__row" key={point.key}>
+          <div className="v3open__row" key={point.key}>
             <StateIcon state={point.state ?? "warning"} title="offen" />
-            <div className="v2open__body">
+            <div className="v3open__body">
               <span className="v2main">{point.title}</span>
               {point.hint ? <span className="v2sub">{point.hint}</span> : null}
               {/* The source's own words, where they say more than the sentence:
                   visibly raw. Dressing them up as German would claim a
                   translation nobody made. */}
-              {point.raw ? <span className="v2open__raw">{point.raw}</span> : null}
+              {point.raw ? <span className="v3open__raw">{point.raw}</span> : null}
             </div>
-            {point.action ? <div className="v2open__way">{point.action}</div> : null}
+            {point.action ? <div className="v3open__way">{point.action}</div> : null}
           </div>
         ))}
         {extra}

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | offen — Entscheid des Owners nötig, **kein** Bau ohne ihn |
+| Status | **entschieden 2026-09-10: Weg B** — neue Klassen `v3`, alte bleiben; das große Umbenennen (A) ist vertagt, nicht abgesagt |
 | Stufe | `src/styles/v3.css` und jede Komponente, die eine Klasse schreibt |
 | Quelle | Owner, 2026-09-10: „ich frage mich, warum du `v2` als Präfix nimmst — das ganze Designsystem ist eigentlich v3" |
 | Angelegt | Claude, 2026-09-10 |
@@ -64,14 +64,22 @@ Gegen A spricht nicht die Arbeit, sondern der Zeitpunkt: solange 0152 und die
 Sachverhaltsseite offen sind, würde ein 664-Klassen-Diff jede Abnahme
 überdecken.
 
-## Was der Owner entscheiden muss
+## Entschieden am 2026-09-10 (Owner): Weg B
 
-1. **Welcher Weg** — A, B oder C.
-2. Bei B: **gilt das Präfix auch für neue Klassen an alten Bausteinen?**
-   Vorschlag: nein. Eine Datei behält ihr Präfix, sonst stehen zwei in einer
-   Komponente.
-3. Bei A: **wann** — vor oder nach der App-Migration. Vorher heißt: die App
-   muss beim Einziehen mitziehen.
+> „B bitte erstmal, A machen wir irgendwann."
+
+**Ab sofort trägt jede neu erfundene Klasse das Präfix `v3`.** Die 664 alten
+bleiben, bis sie ohnehin angefasst werden. Die Regel steht als **A13** in
+`docs/design-guidelines.md` §13 — dort, wo sie beim Bauen gefunden wird.
+
+Die Folgefrage gilt nach dem Default aus dieser Spec: **eine Datei behält ihr
+Präfix.** Wer `Table.tsx` um eine Klasse erweitert, nennt sie `v2tbl__…` wie
+ihre Geschwister; zwei Präfixe in einer Komponente wären schlimmer als ein
+historisches. Neu heißt: eine Klasse, die es vorher nirgends gab, in einer
+Datei, die selbst neu ist.
+
+**Weg A ist vertagt, nicht abgesagt.** Er wird fällig, wenn die App-Migration
+ansteht — dann in einem Zug mit ihr, weil sie dieselben Klassen rendert.
 
 ## Nicht Teil dieser Aufgabe
 

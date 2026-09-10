@@ -216,7 +216,7 @@ export function SourceDocumentVat({
       {/* The body carries the padding, not the list: `tone="bare"` is
           borderless, and without a frame the amounts ran right up to the edge
           of the card (measured 2026-09-10 at 1440). */}
-      <div className="v2boxbody">
+      <div className="v3boxbody">
         <FieldList tone="bare" rows={rows} />
       </div>
     </Card>
@@ -284,7 +284,7 @@ export function SourceDocumentHistory({
         sub={total ? `${total} Schritte` : undefined}
         {...(href ? { actions: <TextButton href={href}>Ganzer Verlauf</TextButton> } : {})}
       />
-      <div className="v2boxbody">
+      <div className="v3boxbody">
         <Timeline
           entries={[...shown]}
           groupBy="none"

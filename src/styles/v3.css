@@ -1132,7 +1132,7 @@ select.v2in { padding-right: 26px; }
 /* --- Die vier Spaltenmuster (0154) ---------------------------------------
  * Owner-Entscheid 2026-09-10: der Rumpf eines Reiters ist immer eines von
  * vier Mustern. Die Breite der Arbeitsfläche kommt als benannte Stufe über
- * `--v2cols-main` — die Seite wählt eine Stufe, sie erfindet keine Zahl.
+ * `--v3cols-main` — die Seite wählt eine Stufe, sie erfindet keine Zahl.
  *
  * Umgebrochen wird über den Flex-Sockel, nicht über eine `@media`-Regel: die
  * Muster stehen einmal auf einer ganzen Seite und einmal in einem Drawer,
@@ -1143,10 +1143,10 @@ select.v2in { padding-right: 26px; }
  * Spalten stehen, ist die erste die Arbeitsfläche (der Strang) und die dritte
  * das Mitgelesene (Notizen) — die dritte fällt nach unten, sie verschwindet
  * nicht. */
-.v2cols { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: start; }
-.v2cols__list { flex: 1 1 380px; min-width: 0; }
-.v2cols__main { flex: 2 1 var(--v2cols-main, 460px); min-width: 0; }
-.v2cols__aside { flex: 1 1 320px; min-width: 0; }
+.v3cols { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: start; }
+.v3cols__list { flex: 1 1 380px; min-width: 0; }
+.v3cols__main { flex: 2 1 var(--v3cols-main, 460px); min-width: 0; }
+.v3cols__aside { flex: 1 1 320px; min-width: 0; }
 
 /* `list | detail`: die Liste schmal, die Arbeitsfläche breit.
    **Alle Spalten wachsen** (`flex-grow ≥ 1`), auch die schmalen: nur so nimmt
@@ -1154,20 +1154,20 @@ select.v2in { padding-right: 26px; }
    bleiben. Gemessen 2026-09-10 bei 1100 px — mit `grow: 0` stand die
    Begleitspalte unter der Arbeitsfläche und war 360 statt 1068 px breit. Das
    Verhältnis machen die Gewichte (1 zu 2), nicht das Wachstumsverbot. */
-.v2cols--list-detail > .v2cols__list { flex: 1 1 440px; }
+.v3cols--list-detail > .v3cols__list { flex: 1 1 440px; }
 
 /* `list | detail | sidebar`: dieselbe Ordnung, dazu die mitgelesene Spalte.
    Sie steht zuletzt in der Quelle und fällt deshalb von selbst nach unten,
    sobald die Zeile nicht mehr reicht — ohne eine Regel, die sie versteckt. */
-.v2cols--list-detail-aside > .v2cols__list { flex: 1 1 420px; }
+.v3cols--list-detail-aside > .v3cols__list { flex: 1 1 420px; }
 
 /* `50 | 50`: zwei gleiche Hälften. Hier gibt es keine Arbeitsfläche und keine
    Beigabe — beide Seiten sind die Aussage (Original gegen Extraktion). */
-.v2cols--split > .v2cols__main,
-.v2cols--split > .v2cols__aside { flex: 1 1 380px; }
+.v3cols--split > .v3cols__main,
+.v3cols--split > .v3cols__aside { flex: 1 1 380px; }
 
 /* `master | sidebar`: eine Fläche mit schmalem Begleiter. */
-.v2cols--main-aside > .v2cols__aside { flex: 1 1 360px; }
+.v3cols--main-aside > .v3cols__aside { flex: 1 1 360px; }
 
 .v2md { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--space-5); align-items: start; }
 .v2md__detail { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
@@ -3401,8 +3401,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    eigener Scroll-Container über den oberen Slots. Jeder Slot bekommt dieselbe
    Klasse: es gibt hier nichts zu unterscheiden außer der Reihenfolge, und eine
    Klasse je Slot wäre fünfmal dieselbe Regel. */
-.v2dv { display: flex; flex-direction: column; gap: var(--space-5); }
-.v2dv__slot { min-width: 0; }
+.v3dv { display: flex; flex-direction: column; gap: var(--space-5); }
+.v3dv__slot { min-width: 0; }
 
 .v2cdv { display: flex; flex-direction: column; gap: var(--space-5); }
 .v2cdv__pager,
@@ -3723,12 +3723,17 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   text-align: left;
 }
 
-/* --- Der Rumpf einer Box unter ihrem Kopf (0150, verallgemeinert mit 0153) -
+/* **Ab hier `v3`** (Owner-Entscheid A13, 2026-09-10): neu erfundene Klassen
+   tragen das Präfix des Sets, alte bleiben `v2`, bis sie ohnehin angefasst
+   werden. Eine Datei behält ihr Präfix — zwei in einer Komponente wären
+   schlimmer als ein historisches. Siehe `docs/backlog/0156-css-praefix-v2.md`.
+
+   --- Der Rumpf einer Box unter ihrem Kopf (0150, verallgemeinert mit 0153) -
  * Die Karten bringen ihren Kopf selbst mit (`CardHead`); hier steht nur, was
  * darunter kommt — derselbe Innenabstand wie in jeder Karte. Der Name trug bis
  * 0153 „doc", weil die erste Box am Beleg hing; seit die Zone ein Pattern ist,
  * wäre das ein Fachwort in einer Regel, die keine Entität kennt. */
-.v2boxbody {
+.v3boxbody {
   display: flex; flex-direction: column; gap: var(--space-3);
   padding: var(--space-3) var(--space-5) var(--space-4);
 }
@@ -3737,16 +3742,16 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
  * Ein Punkt ist drei Dinge: was, was daraus folgt, und der Weg hinaus. Das
  * Zeichen steht auf der Schriftlinie der ersten Zeile, nicht mittig zum
  * ganzen Block — sonst wandert es mit der Länge des Satzes. */
-.v2open__none {
+.v3open__none {
   display: flex; align-items: center; gap: var(--space-2); margin: 0;
   color: var(--color-text-muted); font-size: var(--fs-ui-sm);
 }
-.v2open__row { display: flex; align-items: flex-start; gap: var(--space-2); }
-.v2open__row > svg { flex: 0 0 auto; margin-top: 1px; }
-.v2open__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
-.v2open__way { flex: 0 0 auto; }
+.v3open__row { display: flex; align-items: flex-start; gap: var(--space-2); }
+.v3open__row > svg { flex: 0 0 auto; margin-top: 1px; }
+.v3open__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.v3open__way { flex: 0 0 auto; }
 /* Der Rohtext der Quelle — sichtbar Maschinenwort, nicht als Satz verkleidet. */
-.v2open__raw {
+.v3open__raw {
   font-family: var(--font-mono); font-size: var(--fs-ui-xs);
   color: var(--color-text-subtle); word-break: break-word;
 }

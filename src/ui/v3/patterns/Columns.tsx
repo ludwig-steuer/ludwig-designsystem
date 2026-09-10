@@ -79,14 +79,14 @@ export function Columns({
    */
   width?: ColumnWidth;
 }) {
-  const style = { "--v2cols-main": `${WIDTH[width]}px` } as CSSProperties;
+  const style = { "--v3cols-main": `${WIDTH[width]}px` } as CSSProperties;
   return (
-    <div className={`v2cols v2cols--${pattern}`} style={style}>
+    <div className={`v3cols v3cols--${pattern}`} style={style}>
       {list && pattern !== "split" && pattern !== "main-aside" ? (
-        <div className="v2cols__list">{list}</div>
+        <div className="v3cols__list">{list}</div>
       ) : null}
-      <div className="v2cols__main">{main}</div>
-      {aside && pattern !== "list-detail" ? <div className="v2cols__aside">{aside}</div> : null}
+      <div className="v3cols__main">{main}</div>
+      {aside && pattern !== "list-detail" ? <div className="v3cols__aside">{aside}</div> : null}
     </div>
   );
 }

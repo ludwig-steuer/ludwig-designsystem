@@ -87,11 +87,11 @@ export function DetailView({
   children: ReactNode;
 }) {
   return (
-    <div className="v2dv">
-      {pager ? <div className="v2dv__slot">{pager}</div> : null}
-      <div className="v2dv__slot">{header}</div>
-      {signal ? <div className="v2dv__slot">{signal}</div> : null}
-      {tabs ? <div className="v2dv__slot">{tabs}</div> : null}
+    <div className="v3dv">
+      {pager ? <div className="v3dv__slot">{pager}</div> : null}
+      <div className="v3dv__slot">{header}</div>
+      {signal ? <div className="v3dv__slot">{signal}</div> : null}
+      {tabs ? <div className="v3dv__slot">{tabs}</div> : null}
       {aside ? (
         <MasterDetail
           list={aside}
@@ -100,7 +100,7 @@ export function DetailView({
           {...(minDetail === undefined ? {} : { minDetail })}
         />
       ) : (
-        <div className="v2dv__slot">{children}</div>
+        <div className="v3dv__slot">{children}</div>
       )}
     </div>
   );
