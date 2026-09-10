@@ -3318,6 +3318,14 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2lav__tabs,
 .v2lav__body { min-width: 0; }
 
+/* Der gemeinsame Detailrahmen (0138 Weg 1, gebaut mit 0127). Dieselbe Bauart
+   wie die drei Entitäts-Rahmen darüber — eine Spalte, feste Reihenfolge, kein
+   eigener Scroll-Container über den oberen Slots. Jeder Slot bekommt dieselbe
+   Klasse: es gibt hier nichts zu unterscheiden außer der Reihenfolge, und eine
+   Klasse je Slot wäre fünfmal dieselbe Regel. */
+.v2dv { display: flex; flex-direction: column; gap: var(--space-5); }
+.v2dv__slot { min-width: 0; }
+
 .v2cdv { display: flex; flex-direction: column; gap: var(--space-5); }
 .v2cdv__pager,
 .v2cdv__head,

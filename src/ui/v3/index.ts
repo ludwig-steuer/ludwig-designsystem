@@ -209,6 +209,7 @@ export {
   type ListGroup,
   type ListItem,
 } from "./patterns/MasterDetail";
+export { DetailView } from "./patterns/DetailView";
 export {
   TodoList,
   isOpen,

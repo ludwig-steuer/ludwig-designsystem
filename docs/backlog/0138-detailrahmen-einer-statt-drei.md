@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Weg 2 gebaut 2026-09-09** — die Slot-Namen sind vereinheitlicht; Weg 1 (der gemeinsame Rahmen) bleibt an 0127 |
+| Status | **erledigt 2026-09-10** — Weg 2 am 2026-09-09 (Slot-Namen), Weg 1 mit 0127: `patterns/DetailView.tsx` steht, der Partner ist sein erster Aufrufer |
 | Stufe | `patterns/` (falls gebaut) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: der Rahmen kennt keine Entität, nur Slots |
 | Quelle | `docs/detailseiten-standard.md` D3/D5 |
