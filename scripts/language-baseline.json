@@ -10,7 +10,7 @@
  "src/showcase/document/DocumentInvoice.stories.tsx": 5,
  "src/showcase/document/DocumentOtherKinds.stories.tsx": 17,
  "src/showcase/partner/PartnerDetail.stories.tsx": 13,
- "src/styles/v3.css": 888,
+ "src/styles/v3.css": 663,
  "src/ui/v3/Brand.stories.tsx": 29,
  "src/ui/v3/Color.stories.tsx": 28,
  "src/ui/v3/Icons.stories.tsx": 16,

@@ -1035,20 +1035,19 @@ select.v2in { padding-right: 26px; }
 .v2bar__fill--warning { background: var(--color-warning); }
 .v2bar__fill--danger { background: var(--color-danger); }
 .v2bar__fill--success { background: var(--color-success); }
-/* Behauptet seinen Stil auch in einem Gruppenkopf (`.v2lp__grp`): ein Stand
-   ist ein Wert, keine Überschrift. Versalien gibt es dort seit 0089 keine
-   mehr, das Gewicht aber schon. */
+/* Keeps its style inside a group head (`.v2lp__grp`): a status is a value, not
+   a heading — no capitals since 0089, but the weight stays. */
 .v2bar__label {
   display: block; font-size: 11px; color: var(--color-text-subtle); margin-top: 3px;
   font-weight: 400;
 }
 .v2bar--sm { height: 4px; }
 .v2bar--lg { height: 10px; }
-/* Inline-Form (0046): die Zahl links, der Balken antwortet. Der Balken nimmt
-   den Platz, den der Aufrufer ihm lässt, und fällt sonst auf 120px zurück. */
+/* Inline form (0046): the number left, the bar answers. The bar takes the room
+   the caller leaves it, else 120px. */
 .v2prog--inline { display: flex; align-items: center; gap: 10px; }
-/* 120px als Eigenbreite, wächst nur, wo der Aufrufer wirklich Breite gibt:
-   `flex-basis` allein greift nicht, wo der Container schrumpft (ActionBar). */
+/* 120px as its own width, growing only where the caller really gives width:
+   `flex-basis` alone fails where the container shrinks (ActionBar). */
 .v2prog--inline .v2bar { width: 120px; flex: 1 1 auto; min-width: 48px; }
 .v2prog--inline .v2bar__label {
   margin-top: 0; white-space: nowrap;
@@ -1063,12 +1062,10 @@ select.v2in { padding-right: 26px; }
 .v2dot--warning { color: var(--color-warning); }
 .v2dot--danger { color: var(--color-danger); }
 
-/* Ladezustand: Zeilen in Zeilenhöhe, damit die Tabelle nicht springt. */
+/* Loading state: rows at row height, so the table does not jump. */
 .v2skel {
-  /* **`block`, sonst ist das Gerüst unsichtbar.** Es ist ein `<span>`; ohne
-     diese Zeile bleibt es `inline`, und dort wirken weder `height` noch die
-     inline gesetzte Breite. Gemessen: 40 Skelett-Spans à 0 × 0 px, der
-     Ladezustand zeigte fünf leere Zeilen — in jeder Liste des Sets. */
+  /* **`block`, or the skeleton is invisible**: it is a `<span>`, and inline
+     neither `height` nor the inline width apply — measured 0 × 0 px. */
   display: block;
   height: 11px; border-radius: var(--radius-sm);
   background: var(--color-bg-sunken);
@@ -1077,8 +1074,8 @@ select.v2in { padding-right: 26px; }
 @keyframes v2pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 @media (prefers-reduced-motion: reduce) { .v2skel { animation: none; } }
 
-/* Fehlerzustand einer Tabelle — der fünfte Zustand (UX-Guidelines V9). */
-/* Linksbündig wie jeder Inhalt — L4 kennt keine Ausnahme für den Fehler. */
+/* Error state of a table — the fifth state (V9). */
+/* Left-aligned like all content — L4 has no exception for errors. */
 .v2tbl__error {
   padding: 24px 18px;
   background: var(--color-danger-bg);
@@ -1087,83 +1084,62 @@ select.v2in { padding-right: 26px; }
   display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);
 }
 
-/* --- Master-Detail -------------------------------------------------------
- * Der Ersatz für das Modal (L2): Liste links, Detail rechts, Detail bleibt
- * beim Scrollen stehen. Auswahl über `?sel=` — nicht über den Drawer-Param.
+/* --- Master-detail -------------------------------------------------------
+ * The replacement for the modal (L2): list left, detail right, the detail stays
+ * while scrolling. Selection via `?sel=`, not the drawer param.
  */
-/* --- Die vier Spaltenmuster (0154) ---------------------------------------
- * Owner-Entscheid 2026-09-10: der Rumpf eines Reiters ist immer eines von
- * vier Mustern. Die Breite der Arbeitsfläche kommt als benannte Stufe über
- * `--v3cols-main` — die Seite wählt eine Stufe, sie erfindet keine Zahl.
+/* --- The four column patterns (0154) --------------------------------------
+ * Owner decision 2026-09-10: a tab body is always one of four patterns. The
+ * workspace width comes as a named step via `--v3cols-main` — the page picks a
+ * step, it invents no number.
  *
- * Umgebrochen wird über den Flex-Sockel, nicht über eine `@media`-Regel: die
- * Muster stehen einmal auf einer ganzen Seite und einmal in einem Drawer,
- * und ein Fenstermaß sähe beide Male dasselbe. Dieselbe Lehre wie bei
- * `.v2md--detail-wide` (0063) und `.v2doccard` (0071).
- *
- * **Was zuerst weicht, ist die dritte Spalte, nie die erste.** Wo drei
- * Spalten stehen, ist die erste die Arbeitsfläche (der Strang) und die dritte
- * das Mitgelesene (Notizen) — die dritte fällt nach unten, sie verschwindet
- * nicht. */
+ * Wrapping happens through the flex basis, not `@media`: the same pattern
+ * stands on a page and in a drawer, and a window measure would see both the
+ * same. **The third column gives way first, never the first** — it drops
+ * below, it does not disappear. */
 .v3cols { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: start; }
 .v3cols__list { flex: 1 1 380px; min-width: 0; }
 .v3cols__main { flex: 2 1 var(--v3cols-main, 460px); min-width: 0; }
 .v3cols__aside { flex: 1 1 320px; min-width: 0; }
 
-/* `list | detail`: die Liste schmal, die Arbeitsfläche breit.
-   **Alle Spalten wachsen** (`flex-grow ≥ 1`), auch die schmalen: nur so nimmt
-   eine umgebrochene Spalte die ganze Zeile, statt schmal oben stehen zu
-   bleiben. Gemessen 2026-09-10 bei 1100 px — mit `grow: 0` stand die
-   Begleitspalte unter der Arbeitsfläche und war 360 statt 1068 px breit. Das
-   Verhältnis machen die Gewichte (1 zu 2), nicht das Wachstumsverbot. */
+/* `list | detail`: narrow list, wide workspace. **All columns grow**
+   (`flex-grow ≥ 1`), so a wrapped column takes the full row instead of staying
+   narrow (measured 2026-09-10 at 1100 px: 360 instead of 1068 px). The weights
+   (1 to 2) make the ratio. */
 .v3cols--list-detail > .v3cols__list { flex: 1 1 440px; }
 
-/* `list | detail | sidebar`: dieselbe Ordnung, dazu die mitgelesene Spalte.
-   Sie steht zuletzt in der Quelle und fällt deshalb von selbst nach unten,
-   sobald die Zeile nicht mehr reicht — ohne eine Regel, die sie versteckt. */
+/* `list | detail | sidebar`: the same order plus the read-along column. It comes
+   last in the source, so it drops below on its own when the row runs out. */
 .v3cols--list-detail-aside > .v3cols__list { flex: 1 1 420px; }
 
-/* `50 | 50`: zwei gleiche Hälften. Hier gibt es keine Arbeitsfläche und keine
-   Beigabe — beide Seiten sind die Aussage (Original gegen Extraktion). */
+/* `50 | 50`: two equal halves — both sides are the statement (original vs
+   extraction). */
 .v3cols--split > .v3cols__main,
 .v3cols--split > .v3cols__aside { flex: 1 1 380px; }
 
-/* `master | sidebar`: eine Fläche mit schmalem Begleiter. */
+/* `master | sidebar`: one surface with a narrow companion. */
 .v3cols--main-aside > .v3cols__aside { flex: 1 1 360px; }
 
 .v2md { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--space-5); align-items: start; }
 .v2md__detail { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
-/* Umgekehrtes Gewicht: schmale Liste links, breites Detail rechts — für
- * Schritte, in denen das Detail der Arbeitsplatz ist und die Liste nur die
- * Auswahl trägt (Design `DR:757`, Schritt 2). Das Detail steht dann nicht
- * mehr fest: es ist der lange Teil der Seite.
+/* Reversed weight: narrow list left, wide detail right — for steps where the
+ * detail is the workplace and the list only selects. The detail is then the
+ * long part of the page, no longer sticky.
  *
- * **Mit Untergrenze, und die kennt der Aufrufer.** Ohne sie hielt die
- * Randspalte ihre 440 px bis zu jeder Breite und fiel nie auf eine Spalte
- * zurück — eine breite Tabelle daneben verlor ihre rechten Spalten in den
- * Querlauf (0063: die Haben-Spalte stand bei keiner Breite im Bild). Eine
- * feste Schwelle war aber auch falsch: mit 1.080 px kippte 0050 bei 1280
- * Fensterbreite in die Einspaltigkeit, obwohl seine Fakten bei 484 px lesbar
- * sind. Deshalb `--v2md-min` — der Umbruch geschieht über den Flex-Sockel,
- * nicht über eine Abfrage, denn eine Abfrage bräuchte die Schwelle als
- * Literal, und die gehört dem Aufrufer. */
+ * **With a minimum, owned by the caller** (`--v2md-min`): without it the side
+ * column kept 440 px at any width and a wide table lost its right columns
+ * (0063); a fixed threshold broke 0050 at 1280. Wrapping goes through the flex
+ * basis, because a query would need the threshold as a literal. */
 .v2md--detail-wide {
   display: flex;
-  /* `row-reverse` mit `wrap`, und im DOM steht das Detail zuerst. Damit
-     stimmen **beide** Fälle: nebeneinander läuft die Hauptachse von rechts
-     nach links, also steht die Liste links und die Arbeitsfläche rechts;
-     brechen sie um, bleibt das Detail in der ersten Zeile und damit oben.
-     Vorher machte das `wrap-reverse` — es dreht aber nur das Bild, im Baum
-     stand weiter Liste vor Detail, und wer linear liest, bekam bei jeder
-     Breite zuerst die Fakten (Wiederabnahme 0063). `align-items: start`
-     bleibt: gemessen stehen beide Hälften oben bündig. */
+  /* `row-reverse` with `wrap`, detail first in the DOM: side by side the list
+     stands left and the workspace right; wrapped, the detail stays on top —
+     and linear readers get the workspace first (0063). */
   flex-direction: row-reverse;
   flex-wrap: wrap;
-  /* Bei `row-reverse` liegt der Hauptachsen-Anfang rechts — auch der der
-     zweiten Zeile. Ohne dies stand die umgebrochene Randspalte rechts
-     eingerückt (gemessen 1440: left 968 statt 16). `flex-end` ist hier das
-     **linke** Ende; nebeneinander bleibt es folgenlos, weil die breite Hälfte
-     den Rest der Zeile ohnehin ausfüllt. */
+  /* With `row-reverse` the main-axis start is on the right — for the second row
+     too. Without this the wrapped side column stood indented right (left 968
+     instead of 16 at 1440). `flex-end` is the **left** end here. */
   justify-content: flex-end;
   gap: var(--space-5);
   align-items: start;
@@ -1173,9 +1149,9 @@ select.v2in { padding-right: 26px; }
 .v2md--detail-wide > .v2md__detail { flex: 1 1 var(--v2md-min, 620px); min-width: 0; }
 .v2md--detail-wide .v2md__detail { position: static; max-height: none; overflow: visible; }
 
-/* --- Klappbarer Gruppenkopf ---------------------------------------------
- * Über einer Tabelle oder Liste: Chevron, Label, Anzahl links, Befund rechts.
- * Design `DR:2151` — lange Kontenlisten sind nur zugeklappt lesbar.
+/* --- Collapsible group head ---------------------------------------------
+ * Above a table or list: chevron, label, count left, finding right — long
+ * account lists are only readable collapsed.
  */
 .v2grpbtn {
   display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 8px;
@@ -1186,28 +1162,26 @@ select.v2in { padding-right: 26px; }
   text-align: left; cursor: pointer;
 }
 .v2grpbtn:hover { background: var(--color-bg-soft); }
-/* Zugeklappt hängt sonst eine Trennlinie ohne Inhalt darunter. */
+/* Collapsed, a divider without content would hang below. */
 .v2grpbtn[aria-expanded="false"] { border-bottom: none; }
 .v2grpbtn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
 .v2grpbtn__chev { display: inline-block; width: 12px; font-size: 11px; color: var(--color-text-subtle); }
 .v2grpbtn__n { font-size: 12px; font-weight: 400; color: var(--color-text-subtle); }
 .v2grpbtn__flag { font-size: 11px; font-weight: 600; color: var(--color-danger); }
 
-/* --- Verlaufsbalken -----------------------------------------------------
- * Vier Monate als Balken neben denselben vier Zahlen: die Zahl sagt wie viel,
- * der Balken sagt in welche Richtung es geht. Der laufende Monat trägt den
- * Akzent, die Vormonate bleiben grau.
+/* --- Trend bars ---------------------------------------------------------
+ * Four months as bars next to the same four numbers: the number says how much,
+ * the bar which way it goes. The current month carries the accent.
  */
 .v2spark { display: flex; align-items: flex-end; gap: 3px; height: 56px; }
 .v2spark__b { flex: 1; min-height: 2px; border-radius: 2px 2px 0 0; background: var(--color-border-strong); }
 .v2spark__b.is-now { background: var(--color-accent-600); }
 .v2spark__ax { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--color-text-subtle); margin-top: 4px; }
 
-/* --- Vorgelegte Handlung ------------------------------------------------
- * Regel S13: wo der Möglichkeitsraum klar ist, legt Ludwig die Handlungen vor
- * statt ein leeres Feld hinzustellen. Eine Zeile je Handlung, volle Breite,
- * links ausgerichtet — der Text ist die Handlung, kein Stichwort.
- * Design `DR:2064`.
+/* --- Proposed action ----------------------------------------------------
+ * Rule S13: where the options are clear, Ludwig proposes the actions instead
+ * of an empty field. One row per action, full width, left-aligned — the text
+ * is the action, not a keyword.
  */
 .v2opt {
   display: block; width: 100%; text-align: left;
@@ -1269,14 +1243,14 @@ select.v2in { padding-right: 26px; }
 
 /* --- Prüf-Checkliste ----------------------------------------------------- */
 .v2chk__icon { display: flex; justify-content: center; }
-/* „106 von 118" darf nicht umbrechen — die Spalte ist knapp bemessen. */
+/* "106 von 118" must not wrap — the column is tight. */
 .v2chk__stand { white-space: nowrap; }
 .v2chk__jump { font-size: 11.5px; color: var(--color-accent-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2chk__label { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* --- Prüfpunkte (Akkordeon) ----------------------------------------------
- * Bestandene Punkte stehen zusammen in EINER Zeile (UX-Guidelines L7); nur was offen,
- * gewarnt oder gescheitert ist, bekommt eine eigene Zeile.
+/* --- Checks (accordion) -------------------------------------------------
+ * Passed checks share ONE row (L7); only open, warned or failed ones get their
+ * own row.
  */
 .v2pp { display: flex; flex-direction: column; }
 .v2pp__ok {
@@ -1293,22 +1267,20 @@ select.v2in { padding-right: 26px; }
 }
 .v2pp__row:last-child { border-bottom: none; }
 .v2pp__q { font-weight: 500; color: var(--color-text); }
-/* **Eine eigene Zeile.** Der Block war ein `span` ohne `display`, also inline —
-   die Begründung klebte hinter dem Prüfcode („P-KONTOSonst 5401, hier —"), und
-   `margin-top` tat an einem Inline-Element nichts. Gemeldet vom Owner
-   2026-09-10. */
+/* **A row of its own.** The block was a `span` without `display`, so inline —
+   the reason stuck to the check code ("P-KONTOSonst 5401, hier —"), and
+   `margin-top` did nothing (owner, 2026-09-10). */
 .v2pp__why { display: block; font-size: 12px; color: var(--color-text-muted); margin-top: 2px; line-height: 1.5; }
-/* Bei einem Befund ist die Begründung **die** Auskunft der Zeile, nicht ihre
-   Fußnote: gelb, rot und offen tragen sie im Textton. Grün bleibt leise — dort
-   sagt der Haken schon alles, und hundert schwarze Sätze untereinander wären
-   hundert Behauptungen von Wichtigkeit. */
+/* With a finding the reason **is** the row's message, not its footnote: yellow,
+   red and open carry it in the text tone. Green stays quiet — the tick says it
+   all, and a hundred black sentences would all claim importance. */
 .v2pp__row--yellow > span > .v2pp__why,
 .v2pp__row--red > span > .v2pp__why,
 .v2pp__row--open > span > .v2pp__why { color: var(--color-text); }
-/* Luft vor dem Prüfcode: er steht hinter der Frage, nicht an ihr. */
+/* Room before the check code: it stands after the question, not on it. */
 .v2pp__code { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-subtle); margin-left: var(--space-1); }
 
-/* --- Meldungen: Fehler blockieren, Warnungen brauchen eine Quittung ------- */
+/* --- Messages: errors block, warnings need an acknowledgement ------------- */
 .v2msg { display: flex; align-items: flex-start; gap: 8px; padding: 9px 12px; font-size: 12.5px; line-height: 1.5; border-radius: var(--radius-md); }
 .v2msg + .v2msg { margin-top: 6px; }
 .v2msg--error { background: var(--color-danger-bg); color: var(--color-danger); }
@@ -1318,25 +1290,16 @@ select.v2in { padding-right: 26px; }
 .v2msg__actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
 .v2msg svg { flex: 0 0 auto; margin-top: 1px; }
 
-/* --- Balken je Zeitabschnitt (0041, zweite Reihe und Linie 0110) ----------
-   Keine kategoriale Palette: die Balken sind grau, weil ein Wert keine
-   Kritikalitätsstufe trägt (V6/A7); der hervorgehobene trägt die Marke — und
-   zusätzlich zur Farbe ein kräftigeres Label (V7).
+/* --- Bars per period (0041, second series and line 0110) ------------------
+   No categorical palette: bars are grey because a value carries no criticality
+   (V6/A7); the highlighted one carries the brand and a bolder label (V7).
 
-   Die zweite Reihe: **zwei Graustufen, die beide ≥ 3:1 gegen Weiß stehen,
-   liegen zwangsläufig eng beieinander.** Gemessen sind es ΔE 8,5 — unter der
-   Grenze des `dataviz`-Skills für benachbarte Marken. Das Band zwischen
-   (`--color-text-subtle`, 4,88:1) und 3:1 gibt nicht mehr her: jede hellere
-   Stufe fällt unter die Kontrastschwelle, jede dunklere kommt der Marke
-   `--color-primary` zu nah (ΔE 8,4 zu `--color-text`).
-
-   Deshalb trennt eine **Haarlinie in der Flächenfarbe** die beiden, statt
-   die Farben zu spreizen: berühren sie sich nicht, sind sie im Sinne von
-   1.4.11 keine benachbarten Flächen mehr, und jede für sich hält ihre 3:1.
-   Sie liegt nur an der zweiten Reihe — die erste behält ihre Kante, damit
-   ein Balken nahe null nicht zu weißem Strich wird. Sie erledigt zugleich,
-   dass der Zwischenraum bei `grouped` unter 600 px Breite auf ein
-   Zehntelpixel schrumpft (Mangel M2 der Abnahme). */
+   The second series: two greys that both stay ≥ 3:1 on white necessarily sit
+   close together — the band between (`--color-text-subtle`, 4.88:1) and 3:1
+   allows no more. So a **hairline in the surface colour** separates them
+   instead of spreading the colours: not touching, they are no adjacent
+   surfaces under 1.4.11, and each keeps its 3:1. Only the second series gets
+   it, so a bar near zero does not become a white stroke. */
 .v2chart { display: block; }
 .v2chart__svg { display: block; width: 100%; height: 96px; }
 .v2chart__bar { fill: var(--color-text-subtle); }
@@ -1345,16 +1308,15 @@ select.v2in { padding-right: 26px; }
   fill: var(--color-border-control);
   stroke: var(--color-surface); stroke-width: 1;
 }
-/* Der hervorgehobene Abschnitt bleibt auch mit zweiter Reihe erkennbar: die
-   zweite Reihe wird dort ebenfalls kraeftiger, nur eine Stufe heller — die
-   Haarlinie haelt auch dieses Paar auseinander. */
+/* The highlighted period stays recognisable with a second series: that one
+   gets bolder too, one step lighter — the hairline keeps this pair apart as well. */
 .v2chart__bar--second.is-now { fill: var(--color-primary-500); }
-/* Die Linie ist keine Serie, sondern ein Bezug — deshalb die Akzentfarbe.
-   `non-scaling-stroke` steht am Element, weil `preserveAspectRatio="none"`
-   den Strich sonst verzerrt. */
-/* Der Saum unter der Bezugslinie: ohne ihn steht die Linie auf der zweiten
-   Balkenreihe (Abnahme 0110, M1) — `--color-accent` 1,03:1 auf `border-control`.
-   Er traegt keine Bedeutung und ist deshalb `aria-hidden`. */
+/* The line is no series but a reference — hence the accent colour.
+   `non-scaling-stroke` sits on the element; `preserveAspectRatio="none"` would
+   distort the stroke otherwise. */
+/* The hem under the reference line: without it the line stands on the second
+   bar series (0110, M1) — `--color-accent` 1.03:1 on `border-control`. It carries
+   no meaning, hence `aria-hidden`. */
 .v2chart__linehalo { stroke: var(--color-surface); stroke-width: 3.5; }
 .v2chart__line { stroke: var(--color-accent); stroke-width: 1.5; }
 .v2chart__zero { stroke: var(--color-border-strong); stroke-width: 0.4; }
@@ -1366,16 +1328,16 @@ select.v2in { padding-right: 26px; }
 .v2chart__tick.is-now { color: var(--color-text); font-weight: 600; }
 .v2chart__empty { margin: 0; font-size: 13px; color: var(--color-text-subtle); }
 
-/* Nur für Screenreader — die Werte als Tabelle neben dem Bild. */
+/* Screen readers only — the values as a table beside the picture. */
 .v2vh {
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;
   clip-path: inset(50%); white-space: nowrap; border: 0;
 }
 
-/* --- Befehlspalette (0039) ------------------------------------------------
-   Die Hülle ist der Dialog; hier steht nur die Liste. `cmdk` bringt Treffer,
-   Sortierung und Tastaturweg mit, keine Optik. */
+/* --- Command palette (0039) ----------------------------------------------
+   The shell is the dialog; only the list is here. `cmdk` brings hits, sorting
+   and keyboard path, no look. */
 .v2cmd { display: flex; flex-direction: column; gap: var(--space-3); min-height: 280px; }
 .v2cmd__in { width: 100%; box-sizing: border-box; }
 .v2cmd__list { max-height: 320px; overflow-y: auto; }
@@ -1401,10 +1363,9 @@ select.v2in { padding-right: 26px; }
 .v2cmd__label { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
 .v2cmd__hint { font-size: 12px; color: var(--color-text-subtle); }
 
-/* --- Popover-Familie (0038): Popover, Tooltip, HoverCard ------------------
-   Keine Stapelreihenfolge nötig — das Feld liegt im Top Layer des Browsers.
-   `inset: auto` hebt die Zentrierung auf, die der Browser einem Popover gibt —
-   Ort und Kante rechnet der Hook beim Öffnen aus. */
+/* --- Popover family (0038): Popover, Tooltip, HoverCard -----------------
+   No z-order needed — the panel lives in the browser's top layer. `inset: auto`
+   undoes the browser's centring; the hook computes place and edge on open. */
 .v2pop__anchor { display: inline-flex; }
 .v2pop {
   position: fixed;
@@ -1420,14 +1381,14 @@ select.v2in { padding-right: 26px; }
   font-size: 13.5px;
   line-height: 1.55;
 }
-/* Ein Satz, kein Absatz: was breiter wird, ist eine HoverCard. */
+/* One sentence, not a paragraph: anything wider is a HoverCard. */
 .v2pop--tip {
   max-width: 32ch;
   padding: var(--space-1) var(--space-2);
   font-size: 12.5px;
   color: var(--color-text-muted);
 }
-/* Die Karte bringt ihren eigenen Innenabstand mit (FieldList, Card). */
+/* The card brings its own padding (FieldList, Card). */
 .v2pop--card { padding: var(--space-3); }
 
 /* --- Kontenauswahl mit Kandidaten ---------------------------------------- */
@@ -1464,9 +1425,9 @@ select.v2in { padding-right: 26px; }
 .v2kf__why { grid-column: 2; font-size: 11.5px; color: var(--color-text-subtle); }
 .v2kf__empty { padding: 18px 12px; font-size: 13px; color: var(--color-text-subtle); }
 
-/* Ruhend steht Nummer und Name im Feld (0013): der Wert ist die Nummer, die
-   Wahl prüft man am Namen. Der Text des Feldes wird dafür durchsichtig, die
-   Schicht darüber trägt beides — der Tabstopp bleibt das Feld selbst. */
+/* At rest the field shows number and name (0013): the value is the number, the
+   choice is checked by the name. The field's text turns transparent, the layer
+   above carries both — the tab stop stays the field. */
 .v2kf__box { position: relative; display: flex; }
 .v2kf__in--rest { color: transparent; }
 .v2kf__in--ledger { padding-right: 30px; }
@@ -1479,28 +1440,27 @@ select.v2in { padding-right: 26px; }
   pointer-events: none; overflow: hidden;
 }
 .v2kf__in--ledger ~ .v2kf__shown { padding-right: 30px; }
-/* Der lange Kontoname kürzt sich, statt das Feld aufzubrechen. */
+/* A long account name shortens instead of breaking the field. */
 .v2kf__nm { color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2kf__ledger { position: absolute; top: 0; bottom: 0; right: 3px; display: flex; align-items: center; }
 
-/* Der Schritt-Kopf hat kein eigenes Markup mehr: `StepHeader` komponiert
-   `PageHeader` (0002 A6), seine eigenen Klassen sind damit gelöscht —
-   ein Seitenkopf, eine Optik. */
+/* The step head has no markup of its own: `StepHeader` composes `PageHeader`
+   (0002 A6) — one page head, one look. */
 
-/* --- Todo-Zeile: Zustands-Icon vor Titel und Nebenzeile ------------------- */
+/* --- Todo row: state icon before title and sub line ------------------------ */
 .v2todo { display: flex; align-items: flex-start; gap: 10px; }
 .v2todo__ico { flex: 0 0 auto; margin-top: 1px; line-height: 0; }
-/* Der Zahlenblock rechts in einer Listenzeile: rechtsbündig und tabellarisch,
- * damit Beträge untereinander vergleichbar bleiben (Design `DR:1997`). */
+/* The number block at the right of a list row: right-aligned and tabular, so
+ * amounts stay comparable. */
 .v2todo__right {
   margin-left: auto; flex: 0 0 auto; text-align: right;
   font-size: 13.5px; font-weight: 600; color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
-/* --- Marke ---------------------------------------------------------------
- * Ein Wort in einer Pille. Der Ton kodiert die Kritikalität und nichts
- * anderes (UX-Guidelines A7) — nie den Wert oder sein Vorzeichen.
+/* --- Badge ----------------------------------------------------------------
+ * A word in a pill. The tone encodes criticality and nothing else (A7) —
+ * never the value or its sign.
  */
 .v2pill {
   display: inline-flex; align-items: center; white-space: nowrap;
@@ -1547,27 +1507,26 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .ki__quote { font-style: italic; color: var(--color-text-subtle); }
 .ki__src svg { align-self: center; flex: 0 0 auto; }
-/* Eine Quelle, die man aufschlagen kann (0155): der Knopf sieht aus wie die
-   Zeile daneben, nur dass der Zeiger etwas verspricht. Kein zweites Aussehen
-   für dieselbe Sache — verschieden ist, was passiert, nicht wie es aussieht. */
+/* A source that can be opened (0155): the button looks like the row next to it;
+   only the pointer promises something. What differs is what happens, not the look. */
 .ki__src--open {
   background: none; border: none; padding: 0; margin: 0; width: 100%;
   font: inherit; color: inherit; text-align: left; cursor: pointer;
 }
 .ki__src--open:hover .ki__art { color: var(--color-primary); }
 .ki__src--open:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
-/* Dasselbe Paket in einer Zeile (0151): Urteil, Konfidenz, Zahl der Befunde.
-   Der Text steht im Aufklapper der Zeile, nicht hier — eine Begründung von
-   drei Zeilen je Zeile macht aus der Liste eine Wand. */
+/* The same package in a row (0151): verdict, confidence, number of findings. The
+   text sits in the row's foldout — three lines of reasoning per row would turn
+   the list into a wall. */
 .ki__cell { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }
 .ki__cellerr { color: var(--color-danger); font-size: var(--fs-ui-xs); white-space: nowrap; }
 
 /* ==========================================================================
-   Buchungssatz-Editor (F123 T123.3)
+   Journal entry editor (F123 T123.3)
 
-   Spaltenordnung ist DATEV: Datum · [Whg.] · Umsatz · S/H · BU · Konto ·
-   Beleg 1 · [Beleg 2] · Text · [KOST]. Anzeigen und Bearbeiten teilen sich
-   dasselbe Raster — sonst muss die Prüferin beim Korrigieren neu suchen.
+   Column order is DATEV's: date · [cur.] · amount · D/C · tax key · account ·
+   doc 1 · [doc 2] · text · [cost]. Reading and editing share the grid, so the
+   reviewer does not search again when correcting.
    ========================================================================== */
 
 .bse { font-size: 13px; }
@@ -1585,11 +1544,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .bse__rest.is-ok { color: var(--color-success); }
 .bse__rest.is-off { color: var(--color-danger); }
 
-/* Der Satz rollt waagerecht, statt eine Spalte verschwinden zu lassen. Mit
-   `minmax(0, 1fr)` an der Textspur fiel sie unter 900 px Fenster auf **0 px**
-   und der Kopf lief 32 px in „KOST" — die Spur hatte keine Untergrenze, und
-   das Raster keinen Ausweg (Abnahme 0044, M2). Die Untergrenze steht in
-   `journalGridTracks`, das Rollen hier. */
+/* The entry scrolls horizontally instead of dropping a column. With
+   `minmax(0, 1fr)` the text track fell to **0 px** below 900 px and the head ran
+   into "KOST" (0044, M2). The minimum lives in `journalGridTracks`, the
+   scrolling here. */
 .bse__tbl { --bse-cols: 1fr; overflow-x: auto; }
 .bse__head,
 .bse__cells {
@@ -1599,7 +1557,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   align-items: center;
 }
 .bse__head {
-  /* Spaltenkopf, also Beschriftung — wie `.v2tbl__head`. */
+  /* Column head, so a label — like `.v2tbl__head`. */
   font-size: var(--fs-ui-sm); font-weight: 600;
   color: var(--color-text-subtle);
   padding-bottom: 6px;
@@ -1610,7 +1568,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .bse__account { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bse__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* S/H ist ein Schalter, kein Select: zwei Werte, ein Klick. */
+/* D/C is a toggle, not a select: two values, one click. */
 .bse__sh {
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface);
@@ -1621,8 +1579,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .bse__sh:hover { background: var(--color-bg-soft); }
 
-/* Die abgeleitete Steuerzeile und der Rest-Anker stehen UNTER der Zeile —
-   sie sind Folge der Eingabe, nicht selbst Eingabe. */
+/* The derived tax line and the remainder anchor stand BELOW the row — they
+   follow from the input, they are not input. */
 .bse__note {
   display: flex; gap: 14px; flex-wrap: wrap;
   margin-top: 3px;
@@ -1661,10 +1619,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   color: var(--color-text-muted); text-align: left;
 }
 .bse__journal__body { border-top: 1px solid var(--color-border-subtle); }
-/* `.bse__journal__row` ist mit 0044 weggefallen: der Editor zeichnet sein
-   Journal jetzt über `JournalEntryCard`, und zwei Bilder desselben
-   Buchungssatzes gibt es nicht mehr. Der Rumpf bleibt, weil er die Klapp-
-   Fläche trägt. */
+/* `.bse__journal__row` is gone since 0044: the editor draws its journal with
+   `JournalEntryCard`. The body stays because it carries the fold area. */
 
 .bse__foot {
   display: flex; align-items: center; gap: 10px;
@@ -1673,32 +1629,28 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 
 /* ==========================================================================
-   Schritt 3 der Stapelabnahme — „Stimmen die Vorschläge?"
-   Design: `Buchungsreview.dc.html` → Screen 3 (Einzelfälle · Wiederkehrende ·
-   Liste). Die Maße stehen hier, damit in den Komponenten kein Pixelwert
-   auftaucht (UX-Guidelines A5).
+   Batch acceptance step 3 — "are the proposals right?"
+   Design `Buchungsreview.dc.html` → screen 3 (single cases · recurring · list).
+   The measures live here so no component carries a pixel value (A5).
    ========================================================================== */
 
-/* --- Fall-Navigation über dem Flow: ‹ 12 von 118 › + Sicht + Buckets ----- */
+/* --- Case navigation above the flow: ‹ 12 of 118 › + view + buckets ------- */
 .s3head {
   display: flex; align-items: center; justify-content: space-between;
   gap: var(--space-5); flex-wrap: wrap;
 }
-/* `.s3nav`, `.s3nav__pos` und `.s3nav__btn` sind mit F186 gefallen: der Pager
-   der Stapelabnahme ist `RecordPager`, und ein handgebauter Blätterer daneben
-   wäre eine zweite Antwort auf dieselbe Frage. Gemeldet von `ludwig-manager`
-   2026-09-10, hier nachgeprüft — kein Aufrufer im Set. */
+/* `.s3nav*` is gone since F186: the batch acceptance's pager is `RecordPager`,
+   and a hand-built pager next to it would be a second answer to one question. */
 
-/* --- Der Fall-Kopf: Nummer, Titel, Betrag, Profil-Chips ------------------ */
+/* --- The case head: number, title, amount, profile chips ---------------- */
 .s3case { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-5); }
 .s3case__title { font-size: 24px; font-weight: 600; color: var(--color-text); }
 .s3case__sub { font-size: 14.5px; color: var(--color-text-muted); margin-top: 4px; }
 .s3case__chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 420px; }
 
-/* --- Zwei Zonen: links der Buchungssatz, rechts sein Kontext -------------
-   Die Buchungsspalte hat Vorrang; unter 1160 px fällt der Kontext darunter,
-   statt den Satz zu quetschen — die Spaltenordnung des Satzes ist die
-   DATEV-gewohnte und darf nicht umbrechen. */
+/* --- Two zones: the entry left, its context right ------------------------
+   The entry column has priority; below 1160 px the context drops below instead
+   of squeezing the entry — its DATEV column order must not wrap. */
 .s3grid {
   display: grid; grid-template-columns: minmax(0, 1fr) 440px;
   gap: var(--space-6); align-items: start;
@@ -1707,7 +1659,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .s3zones { display: flex; flex-direction: column; gap: var(--space-4); position: sticky; top: 16px; }
 @media (max-width: 1160px) { .s3zones { position: static; } }
 
-/* Kopf einer Kontext-Zone: Überschrift links, ihre Öffner rechts. */
+/* Head of a context zone: heading left, its openers right. */
 .s3zone__h {
   display: flex; align-items: center; justify-content: space-between;
   gap: 8px; margin-bottom: var(--space-3);
@@ -1720,7 +1672,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .s3zone__grid > span:nth-child(odd) { color: var(--color-text-muted); }
 
-/* Eine USt-Prüfzeile: Punkt, Frage, Ergebnis. */
+/* A VAT check row: dot, question, result. */
 .s3vat { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; }
 .s3vat > i {
   width: 7px; height: 7px; border-radius: var(--radius-pill);
@@ -1729,16 +1681,16 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .s3vat__label { font-size: 12.5px; color: var(--color-text-muted); }
 .s3vat__result { font-size: 12.5px; color: var(--color-text); font-weight: 600; }
 
-/* Notiz-Eintrag in der Zone „Notizen". */
+/* A note entry in the "Notizen" zone. */
 .s3note { border-top: 1px solid var(--color-border-subtle); padding: 10px 0; }
 .s3note__h { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
 .s3note__who { font-size: 12px; font-weight: 600; color: var(--color-text); }
 .s3note__when { font-size: 11.5px; color: var(--color-text-subtle); }
 .s3note__body { font-size: 12.5px; color: var(--color-text-muted); line-height: 1.5; }
 
-/* --- Die Entscheidungsleiste: bleibt am unteren Rand stehen -------------
-   Sie ist im Blick, während oben gescrollt wird — wer 118 Sätze abnimmt,
-   soll den Weg zum Knopf nicht scrollen. */
+/* --- The decision bar: stays at the bottom edge --------------------------
+   It stays in view while the top scrolls — whoever accepts 118 entries should
+   not scroll to the button. */
 .s3bar {
   position: sticky; bottom: 0; z-index: 5;
   background: var(--color-surface); border-top: 1px solid var(--color-border);
@@ -1752,14 +1704,14 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .s3bar__info { font-size: 12px; color: var(--color-text-subtle); }
 .s3bar__sums { display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; font-size: 12px; color: var(--color-text-subtle); }
 
-/* Das aufgeklappte Kommentarfeld über der Leiste — Chips, Text, Bestätigen. */
+/* The unfolded comment field above the bar — chips, text, confirm. */
 .s3form {
   border: 1px solid var(--color-accent-600); background: var(--color-accent-50);
   border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5);
 }
 .s3form__title { font-size: 13.5px; font-weight: 600; margin-bottom: var(--space-3); }
 
-/* --- Prüfpunkt mit Quittung: der Haken gehört an den Befund -------------- */
+/* --- Check with acknowledgement: the tick belongs to the finding --------- */
 .s3cp {
   display: flex; gap: 10px; align-items: flex-start;
   border: 1px solid var(--color-border); border-radius: var(--radius-md);
@@ -1776,20 +1728,17 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .s3cp__q { font-weight: 400; color: var(--color-text); }
 .s3cp__why { font-size: 12.5px; color: var(--color-text-muted); margin-top: 3px; }
 
-/* --- Wiederkehrende: der Regel-Block neben den Sätzen -------------------- */
+/* --- Recurring: the rule block next to the entries ---------------------- */
 .s3wk__detail { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
 @media (max-width: 1160px) { .s3wk__detail { grid-template-columns: minmax(0, 1fr); } }
-/* `.s3wk__acts` ist mit F202 gefallen: der Reiter „Wiederkehrende" in Schritt 3
-   nutzt jetzt dieselbe `DataTable` wie die Einzelfälle, und deren Sammelaktionen
-   stehen in der Auswahl-Leiste. `.s3wk__detail` bleibt (ProposalFoldout),
-   `.s3bar*` ebenso — die Klassen tragen weiter die Entscheidungsleiste der
-   Fall-Sicht. Nachgeprüft im Set: keine der drei hat hier einen Aufrufer,
-   sie gehören der App. */
+/* `.s3wk__acts` is gone since F202: the "Wiederkehrende" tab uses the same
+   `DataTable` as the single cases, with bulk actions in the selection bar.
+   `.s3wk__detail` (ProposalFoldout) and `.s3bar*` stay — the app still uses them. */
 .s3wk__light { text-align: center; font-size: 13px; line-height: 1; }
 
 /* ---------------------------------------------------------------- Plakette */
-/* Punktfarbe je Tonstufe. Ersetzt die Hex-Map `KIND_DOT_COLOR` aus dem
-   v1-Badge — Farbe gehört ins CSS, nicht in die Komponente (V13, A5). */
+/* Dot colour per tone — replaces the v1 badge's hex map `KIND_DOT_COLOR`:
+   colour belongs in CSS, not the component (V13, A5). */
 .bdg-neutral .dot { background: var(--color-text-subtle); }
 .bdg-info    .dot { background: var(--color-accent); }
 .bdg-success .dot { background: var(--color-success); }
@@ -1797,8 +1746,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .bdg-danger  .dot { background: var(--color-danger); }
 
 /* ------------------------------------------------------------- Leerzustand */
-/* Linksbündig, anders als das v1-`.empty`: V3 verbietet zentrierten Text.
-   Der Rahmen kommt vom Container (Karte) — hier kein zweiter (L2). */
+/* Left-aligned, unlike the v1 `.empty`: V3 forbids centred text. The border
+   comes from the container (card) — no second one here (L2). */
 .v2empty {
   display: flex;
   flex-direction: column;
@@ -1830,16 +1779,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2empty__actions { display: flex; gap: var(--space-2); }
 
 /* --------------------------------------------------- Knopf: Erweiterungen */
-/* xs für dichte Zellen und Editoren. Liegt zwischen den beiden v1-Klassen,
-   die dafür heute per Inline-Style nachgebaut werden (.vconfirm 11px,
-   .rcard__edit 12px). Drückt die Tabellenzeile nicht auf (V1). */
+/* xs for dense cells and editors — between the two v1 classes rebuilt inline
+   today (.vconfirm 11px, .rcard__edit 12px). Does not push the row up (V1). */
 .v2btn--xs { font-size: var(--fs-ui-sm); padding: 4px 9px; border-radius: var(--radius-md); }
 
-/* Vollbreit statt größer — Ludwig kennt kein CTA-Format über md hinaus. */
+/* Full width instead of bigger — Ludwig has no CTA size above md. */
 .v2btn--full { width: 100%; justify-content: center; }
 
-/* Der erste Spinner des Design-Systems. Gleichmäßig, ohne Springen (§2);
-   steht nie allein, sondern immer neben einem Wort (V7). */
+/* The design system's first spinner. Even, without jumps (§2); never alone,
+   always next to a word (V7). */
 @keyframes v2spin {
   to { transform: rotate(360deg); }
 }
@@ -1855,19 +1803,19 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2btn--xs .v2spin { width: 12px; height: 12px; border-width: 1.5px; }
 
-/* Wer weniger Bewegung wünscht, bekommt sie nicht (WCAG 2.3.3). */
+/* Who wants less motion does not get it (WCAG 2.3.3). */
 @media (prefers-reduced-motion: reduce) {
   .v2spin { animation-duration: 2.4s; }
 }
 
 /* ==========================================================================
-   Bausteine aus dem Soll-Katalog (Aufgaben 0016, 0012, 0005, 0017, 0019)
+   Building blocks from the target catalogue (tasks 0016, 0012, 0005, 0017, 0019)
 
-   Angehängt statt einsortiert: an dieser Datei arbeiten mehrere Sitzungen
-   parallel, und ein Block am Ende kollidiert nicht mit ihren Änderungen.
+   Appended rather than sorted in: several sessions work on this file, and a
+   block at the end does not collide with their changes.
    ========================================================================== */
 
-/* --- Skeleton (0016) — die Ladefläche außerhalb der Tabelle --------------- */
+/* --- Skeleton (0016) — the loading surface outside the table -------------- */
 .v2skelgroup { display: grid; gap: var(--space-2); }
 .v2skel--card { height: 96px; border-radius: var(--radius-md); }
 .v2skel--field { height: 32px; border-radius: var(--radius-sm); }
@@ -1894,7 +1842,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2ibtn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .v2ibtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* --- Disclosure (0005) — der Aufklapper ---------------------------------- */
+/* --- Disclosure (0005) — the foldout ----------------------------------- */
 .v2disc { border-top: 1px solid var(--color-border-subtle); }
 .v2disc__sum {
   display: flex; align-items: center; gap: var(--space-2);
@@ -1911,22 +1859,19 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   transition: transform var(--duration-fast) var(--ease-standard);
 }
 .v2disc[open] > .v2disc__sum .v2disc__chev { transform: rotate(90deg); }
-/* Die Zusammenfassung nimmt die Breite, die übrig bleibt. Ohne das steht sie
-   in einem `<span>`, das nicht wächst — und eine Zeile darin (Klärung, 0059)
-   kann ihre rechte Spalte nicht herstellen: der Zustands-Chip endete bei
-   x = 517 statt am Zeilenrand. Betrifft jede Zeile mit rechter Spalte in
-   einem `<details>`, deshalb steht die Regel hier und nicht bei der Klärung
-   (0093 e). `count` rückt damit an den rechten Rand, wohin eine Zahl
-   ohnehin gehört. */
+/* The summary takes the remaining width. Otherwise it sits in a `<span>` that
+   does not grow, and a row inside it (clarification, 0059) cannot build its
+   right column. Applies to every row with a right column in a `<details>`, so
+   the rule lives here (0093 e); `count` moves to the right edge with it. */
 .v2disc__label { flex: 1 1 auto; min-width: 0; }
 .v2disc__count { color: var(--color-text-muted); font-weight: 400; }
 .v2disc__body { padding: 0 var(--space-2) var(--space-3); font-size: 13.5px; line-height: 1.55; }
 .v2disc--quiet > .v2disc__sum { color: var(--color-text-muted); font-weight: 400; }
 
-/* --- RadioGroup (0017) — eine aus wenigen Möglichkeiten ------------------- */
+/* --- RadioGroup (0017) — one of a few options --------------------------- */
 .v2radiogrp { display: flex; flex-direction: column; gap: 2px; border: none; padding: 0; margin: 0; }
-/* Die Legende ist das Label der Gruppe und steht immer allein in der ersten
-   Zeile — auch wenn die Optionen danach nebeneinander laufen. */
+/* The legend is the group's label and always stands alone on the first line —
+   even when the options run side by side after it. */
 .v2radiogrp > legend { float: left; width: 100%; margin-bottom: 4px; padding: 0; }
 .v2radiogrp > legend + * { clear: both; }
 .v2radiogrp--horizontal { flex-direction: row; flex-wrap: wrap; gap: var(--space-4); }
@@ -1946,14 +1891,14 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2radioline__hint { display: block; font-size: 12px; color: var(--color-text-subtle); margin-top: 1px; }
 
 /* --- AmountInput (0019) — Ziffern rechts, tabellarisch -------------------- */
-/* `sm` ist die Editor-Dichte, dieselben Maße wie die Zeile im Buchungseditor. */
+/* `sm` is the editor density — the same measures as the booking editor's row. */
 .v2in--sm { padding: 4px 7px; font-size: 12.5px; }
 .v2in--amount {
   text-align: right;
   font-variant-numeric: tabular-nums lining-nums;
 }
 
-/* --- PageHeader (0002) — der Anker jeder Seite --------------------------- */
+/* --- PageHeader (0002) — the anchor of every page ------------------------ */
 .v2phead { display: grid; gap: var(--space-2); padding-bottom: var(--space-4); }
 .v2phead__back {
   display: inline-flex; align-items: center; gap: 4px;
@@ -1975,12 +1920,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2phead__desc { font-size: 13.5px; color: var(--color-text-muted); margin: 4px 0 0; max-width: 68ch; }
 .v2phead__acts { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 
-/* --- FieldList tone="bare" (0006) — die Werteliste ohne Fläche ------------ */
+/* --- FieldList tone="bare" (0006) — the value list without a surface ------ */
 .v2fields--bare { background: none; border: none; border-radius: 0; padding: 0; }
 .v2fields--bare .v2fields__row { padding-left: 0; padding-right: 0; }
 .v2fields--bare .v2fields__h { padding-left: 0; padding-right: 0; background: none; }
 
-/* --- Toast (0007) — die flüchtige Rückmeldung ---------------------------- */
+/* --- Toast (0007) — the fleeting feedback -------------------------------- */
 .v2toasts {
   position: fixed; right: var(--space-5); bottom: var(--space-5);
   display: flex; flex-direction: column; gap: var(--space-2);
@@ -2006,7 +1951,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   .v2toast { animation: none; }
 }
 
-/* --- OverflowMenu (0008) — die Klappe für die selteneren Wege ------------- */
+/* --- OverflowMenu (0008) — the flap for the rarer paths ------------------- */
 .v2menu { position: relative; display: inline-block; }
 .v2menu__panel {
   position: absolute; top: 100%; right: 0; margin-top: 4px;
@@ -2030,9 +1975,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2menu__item:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
 .v2menu__item--danger { color: var(--color-danger); }
 .v2menu__item:disabled { opacity: 0.5; cursor: not-allowed; }
-/* Eine Handlung im Menü (0057): der `ActionButton` bringt Pending, Fehler und
-   die Rückfrage mit; hier bekommt er die Form eines Menüeintrags statt die
-   eines Knopfes — ein Knopf im Knopf wäre `MenuItem` darum. */
+/* An action in the menu (0057): `ActionButton` brings pending, error and the
+   confirmation; here it takes a menu item's shape instead of a button's. */
 .v2menu__act { display: block; }
 .v2menu__act .v2btn {
   width: 100%;
@@ -2062,7 +2006,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2iedit__acts { display: flex; align-items: center; gap: var(--space-2); margin-top: 4px; }
 .v2iedit__keys { font-size: 12px; color: var(--color-text-subtle); }
 
-/* --- Combobox (0009) — Suchen und wählen ---------------------------------- */
+/* --- Combobox (0009) — search and choose -------------------------------- */
 .v2cmb { position: relative; }
 .v2cmb .v2in { width: 100%; box-sizing: border-box; }
 .v2cmb__pop {
@@ -2086,19 +2030,18 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   text-align: left; cursor: pointer; border-radius: var(--radius-sm);
 }
 .v2cmb__opt:hover { background: var(--color-bg-soft); }
-/* Der hervorgehobene Treffer ist auch ohne Farbe erkennbar: halbfett (V7).
-   Das Häkchen davor markiert den bereits gewählten Wert. */
+/* The highlighted hit is recognisable without colour too: semibold (V7). The
+   tick before it marks the value already chosen. */
 .v2cmb__opt.is-active { background: var(--color-accent-50); font-weight: 600; }
 .v2cmb__mark { flex: 0 0 auto; width: 12px; color: var(--color-accent-700); line-height: 1; }
-/* Eine Trefferzeile ist **eine** Zeile: eine Liste, die man von oben nach
-   unten überfliegt, verträgt keine zwei Höhen. Gemessen in `CasePicker
-   --edges` brachen 52 von 191 Treffern um, weil Name und Hinweis zusammen zu
-   breit wurden (0084). Der ganze Wert steht im `title` am Knopf. */
+/* A hit is **one** line: a list skimmed top to bottom tolerates no two heights
+   (52 of 191 hits wrapped in `CasePicker --edges`, 0084). The full value sits in
+   the button's `title`. */
 .v2cmb__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2cmb__hint { font-size: 11.5px; color: var(--color-text-subtle); }
 .v2cmb__empty { padding: 14px 10px; font-size: 13px; color: var(--color-text-subtle); }
 
-/* --- FilterBar (0003) — die Filterzeile über der Karte -------------------- */
+/* --- FilterBar (0003) — the filter row above the card -------------------- */
 .v2fbar {
   display: flex; align-items: flex-end; gap: var(--space-3);
   flex-wrap: wrap; padding-bottom: var(--space-3);
@@ -2106,7 +2049,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2fbar__end { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
 .v2fbar__count { font-size: 12.5px; color: var(--color-text-muted); }
 
-/* --- FileDrop (0021) — die Dateiablage ------------------------------------ */
+/* --- FileDrop (0021) — the file drop ------------------------------------- */
 .v2drop {
   display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
   width: 100%; padding: var(--space-5);
@@ -2135,18 +2078,16 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2date__sep { font-size: 13px; color: var(--color-text-muted); }
 .v2date__presets { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 
-/* --- Timeline (0023) — der Verlauf ---------------------------------------- */
+/* --- Timeline (0023) — the history ---------------------------------------- */
 .v2tl { display: grid; gap: 2px; }
 .v2tl__day {
   font-size: 11px; font-weight: 600;
   color: var(--color-text-subtle);
   padding: var(--space-3) 0 4px;
 }
-/* **Keine Linie links, kein Einzug** (Owner 2026-09-10). Die Linie sollte den
-   Strang zusammenhalten und kostete dafür 12 px Einzug plus ihre eigene
-   Breite — auf 470 px Spaltenbreite ist das Platz, den die Zeile selbst
-   braucht. Zusammengehalten wird der Strang ohnehin von der Tagesüberschrift
-   und der gemeinsamen Zeitspalte; die Linie war Dekoration mit Kosten. */
+/* **No line on the left, no indent** (owner 2026-09-10): the line cost 12 px
+   indent plus its own width — room a 470 px column needs for the row. The day
+   headings and the shared time column hold the strand together anyway. */
 .v2tl__item {
   display: grid; grid-template-columns: 78px 1fr; gap: var(--space-3);
   padding: 6px 0;
