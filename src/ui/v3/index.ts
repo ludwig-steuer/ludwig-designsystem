@@ -211,6 +211,7 @@ export {
 } from "./patterns/MasterDetail";
 export { DetailView } from "./patterns/DetailView";
 export { OpenPoints, type OpenPoint } from "./patterns/OpenPoints";
+export { NoteFeed, type Note } from "./patterns/NoteFeed";
 export {
   Columns,
   type ColumnPattern,

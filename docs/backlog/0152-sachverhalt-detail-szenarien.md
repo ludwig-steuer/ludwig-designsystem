@@ -39,6 +39,22 @@ Gemessen am Brief, nicht geraten. Drei Lücken, alle in `CaseTimeline` (0040):
 | **Buchungen als Einträge** | §5: die Timeline trägt Belege, Zahlungen **und Buchungen** | Heute trägt sie Ereignisse; eine Buchung hängt am Ereignis. Zu klären: eigener Eintrag oder zweite Zeile am Ereignis |
 | **DATEV-Spiegel-Einträge** | §5/§7 (E1b): gleichrangig eingereiht, mit dem Wort „DATEV" als Quelle, in Spalte 2 lesend | Ein `source`-Feld am Eintrag; das Wort steht in der Zeile, nicht als Icon allein (V7) |
 
+> **Nachtrag 2026-09-10 — die Jetzt-Zeile ist wieder draußen** (Owner nach
+> der Vorschau von Welle 1). „Jetzt" — auf der Seite heißt es **„Zu tun"** —
+> steht **über** dem Strang, nicht darin: es ist der Standardzustand der
+> Seite, kein Ereignis, und im Strang war es ein Eintrag ohne Datum zwischen
+> lauter datierten. Es verhält sich weiter wie ein Eintrag (dieselbe Auswahl,
+> dieselbe Fläche in Spalte 2), aber es gehört der Seite. Deshalb sind
+> `showNow`, `NOW_ID` und `{ type: "now" }` aus `CaseTimeline` wieder
+> entfernt — eine Prop, die keine Seite mehr bedient, wird gelöscht (A12).
+> Die Abnahme prüft die erste Zeile der Tabelle oben also **nicht** mehr an
+> der Timeline, sondern an der Zeile „Zu tun" in den Seiten-Stories.
+>
+> Im selben Durchgang umbenannt: Reiter „Details" → **Stammdaten**, Reiter
+> „Verlauf" → **Protokoll** (die Prüfspur; „Ereignisse" bleibt der
+> Fach-Strang), und die Karte über dem Strang heißt wie ihr Reiter,
+> **Ereignisse**.
+
 Diese drei sind **Bau an der Entität**, nicht an der Seite — sie gehören in
 `CaseTimeline` und werden mit Welle 1 gebaut.
 

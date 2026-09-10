@@ -6,7 +6,6 @@ import {
   type CaseTimelineEntry,
   type CaseTimelineEvent,
   type CaseTimelineExpectation,
-  NOW_ID,
 } from "./CaseTimeline";
 import { Card, CardHead } from "../../primitives/Table";
 import { DetailPane, MasterDetail } from "../../patterns/MasterDetail";
@@ -187,9 +186,7 @@ export const Interactive: Story = {
           ? entry.event.id
           : entry.type === "clarification"
             ? entry.clarification.id
-            : entry.type === "expectation"
-              ? entry.expectation.id
-              : NOW_ID;
+            : entry.expectation.id;
     return (
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-6)", maxWidth: 980 }}>
         <div>
@@ -234,9 +231,7 @@ export const InUse: Story = {
           ? entry.event.id
           : entry.type === "clarification"
             ? entry.clarification.id
-            : entry.type === "expectation"
-              ? entry.expectation.id
-              : NOW_ID;
+            : entry.expectation.id;
     return (
       <MasterDetail
         list={
@@ -291,18 +286,6 @@ function EntryDetail({ entry }: { entry: CaseTimelineEntry | null }) {
             ["Antwort", c.answeredAt ? "Auf 6815, wie in den Vormonaten." : "— steht aus"],
           ]}
         />
-      </DetailPane>
-    );
-  }
-  if (entry.type === "now") {
-    // The now line belongs to no record — it is the point of view. What
-    // stands on the right is the page's decision; here it is the sentence
-    // that explains what it is.
-    return (
-      <DetailPane title="Jetzt" sub="der Standpunkt zwischen Gewesenem und Erwartetem">
-        <p className="v2muted" style={{ margin: 0 }}>
-          Ohne Auswahl steht hier, was jetzt zu tun ist.
-        </p>
       </DetailPane>
     );
   }

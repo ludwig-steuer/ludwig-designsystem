@@ -5,7 +5,6 @@ import {
   ArrowLeftRight,
   ArrowUpRight,
   BanknoteArrowDown,
-  Clock,
   FileQuestionMark,
   FileText,
   History,
@@ -130,12 +129,7 @@ export interface CaseTimelineExpectation {
 export type CaseTimelineEntry =
   | { type: "event"; event: CaseTimelineEvent }
   | { type: "clarification"; clarification: CaseTimelineClarification }
-  | { type: "expectation"; expectation: CaseTimelineExpectation }
-  /** The now line — it belongs to no record, it is the point of view. */
-  | { type: "now" };
-
-/** The key of the now line. It has no record, so it has no id of its own. */
-export const NOW_ID = "__now";
+  | { type: "expectation"; expectation: CaseTimelineExpectation };
 
 /** One icon per kind. The word comes from the registry or from `kindLabels`. */
 const EVENT_ICON: Record<string, LucideIcon> = {
@@ -200,7 +194,6 @@ export function CaseTimeline({
   onSelect,
   kindLabels,
   today,
-  showNow = false,
   loading,
 }: {
   events: CaseTimelineEvent[];
@@ -216,14 +209,6 @@ export function CaseTimeline({
   kindLabels?: Record<string, string>;
   /** Reference day `YYYY-MM-DD` for maturity and clarification state. */
   today?: string;
-  /**
-   * Show the now line (0152). Needs `today`.
-   *
-   * Off by default: beside other work the strand is an enumeration, and there
-   * „now" would be a line without a job. On the overview it is the point of
-   * view everything is read from.
-   */
-  showNow?: boolean;
   loading?: boolean;
 }) {
   const byId = new Map<string, CaseTimelineEntry>();
@@ -280,25 +265,6 @@ export function CaseTimeline({
           ) : null}
         </>,
       ),
-    });
-  }
-
-  // **The now line** (0152): the anchor between what happened and what is
-  // expected — and a selectable entry in its own right. Without a selection it
-  // stands for „what is to be done now", and that is the normal case: whoever
-  // opens the page has not clicked anything yet.
-  //
-  // It only appears when the caller names a day. Without `today` the strand
-  // has no reference point, and an invented „now" would sit on a date nobody
-  // set.
-  if (today && showNow) {
-    byId.set(NOW_ID, { type: "now" });
-    items.push({
-      id: NOW_ID,
-      at: today,
-      title: "Jetzt",
-      icon: <KindIcon of={Clock} label="Jetzt" />,
-      kind: "Jetzt",
     });
   }
 

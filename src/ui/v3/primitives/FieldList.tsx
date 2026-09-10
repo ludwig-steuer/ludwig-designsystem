@@ -9,6 +9,12 @@ import type { ReactNode } from "react";
  * Innenabstand — für Drawer, Detail und Zusammenfassung, wo die Karte schon
  * um die Liste herum steht (0006). Ohne `title` entfällt die Kopfzeile.
  *
+ * `split` lets the pairs stand in **two columns as soon as there is room for
+ * them** — measured on the list itself, not on the window (container query).
+ * A fact list that runs the full width of a detail page puts its label on the
+ * far left and its value on the far right, and the eye has to cross 900 px of
+ * nothing between them; in two columns the pair stays a pair.
+ *
  * `layout="row"` turns the pairs sideways (0049): label above value, pairs
  * next to each other — the facts line of a detail head, where four short
  * answers have to fit on one line.
@@ -22,6 +28,7 @@ export function FieldList({
   rows,
   tone = "surface",
   layout = "stack",
+  split = false,
   empty,
 }: {
   /** Without a title there is no header row — and no gap where it would be. */
@@ -30,13 +37,19 @@ export function FieldList({
   tone?: "surface" | "soft" | "bare";
   /** `row` puts the pairs next to each other, label above value (0049). */
   layout?: "stack" | "row";
+  /**
+   * Two columns of pairs from ~640 px of **list** width on. Off by default:
+   * the same list stands in drawers and side columns, and there two columns
+   * would be two narrow ones.
+   */
+  split?: boolean;
   empty?: string;
 }) {
   return (
     <div
       className={`v2fields${tone === "surface" ? "" : ` v2fields--${tone}`}${
         layout === "row" ? " v2fields--cols" : ""
-      }`}
+      }${split ? " v2fields--split" : ""}`}
     >
       {title ? <div className="v2fields__h">{title}</div> : null}
       {rows.length === 0 ? (

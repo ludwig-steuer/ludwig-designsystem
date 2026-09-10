@@ -4,7 +4,9 @@ import type {
   CaseTimelineEvent,
   CaseTimelineExpectation,
 } from "@/ui/v3/entities/accounting-case/CaseTimeline";
+import type { ClarificationVM } from "@/ui/v3/entities/clarification/Clarification";
 import type { JournalLine } from "@/ui/v3/entities/journal-entry/JournalEntryCompact";
+import type { Note } from "@/ui/v3/patterns/NoteFeed";
 
 /**
  * Synthetische Sachverhalte für die Seiten-Stories (0152).
@@ -20,7 +22,7 @@ import type { JournalLine } from "@/ui/v3/entities/journal-entry/JournalEntryCom
  * Regel aus 0144).
  */
 
-/** Der Referenztag aller Stories. Er entscheidet, wo die Jetzt-Zeile steht. */
+/** Der Referenztag aller Stories — Reife der Erwartungen, Zustand der Klärungen. */
 export const HEUTE = "2026-08-05";
 
 /** Der Fall selbst — eine Eingangsrechnung, an der ein Vorschlag hängt. */
@@ -127,16 +129,71 @@ export const VORSCHLAG: JournalLine[] = [
   },
 ];
 
-/** Die Reiter der Seite, in der Reihenfolge aus dem Brief (F196 §3). */
+/** Notizen am Fall — neueste oben, die Reihenfolge gehört dem Aufrufer. */
+export const NOTES: Note[] = [
+  {
+    id: "n-1",
+    at: "2026-08-02T14:30:00Z",
+    author: "Mandant",
+    text: "Die Ersatzteile gehören zum Firmenwagen, nicht zum Werkstattbestand.",
+  },
+  {
+    id: "n-2",
+    at: "2026-07-31T16:05:00Z",
+    author: "Agent",
+    text: "Beleg ohne Sachverhalt eingegangen, Fall eröffnet und Vorschlag gebucht.",
+  },
+];
+
+/**
+ * Die Rückfragen am Fall — eine offene, eine beantwortete.
+ *
+ * **Titel und Zustand, mehr nicht.** Die reiche Form mit Kontext, Frage und
+ * Empfehlung gibt es im Bestand nur bei 9 % (Erhebung 2026-09-10); der
+ * Regelfall ist genau das hier.
+ */
+export const CLARIFICATIONS: ClarificationVM[] = [
+  {
+    id: "cl-2",
+    title: "Wurde die Rechnung schon bezahlt?",
+    state: "open",
+    severity: "required",
+    type: "question",
+    audience: "client",
+    raisedAt: "2026-08-04T08:15:00Z",
+    href: "?tab=rueckfragen&klaerung=cl-2",
+  },
+  {
+    id: "cl-1",
+    title: "Gehören die Ersatzteile zum Firmenwagen oder zum Werkstattbestand?",
+    state: "answered",
+    severity: "optional",
+    type: "question",
+    audience: "client",
+    raisedAt: "2026-08-01T09:12:00Z",
+    answeredAt: "2026-08-02T14:30:00Z",
+    href: "?tab=rueckfragen&klaerung=cl-1",
+  },
+];
+
+/**
+ * Die Reiter der Seite, in der Reihenfolge aus dem Brief (F196 §3).
+ *
+ * **Zwei Namen sind gegenüber dem Brief geändert** (Owner 2026-09-10):
+ * „Details" hieß nichts — jeder Reiter zeigt Details — und heißt jetzt
+ * **Stammdaten**; „Verlauf" und „Ereignisse" klangen nach demselben, obwohl
+ * das eine die Fachereignisse sind und das andere die Prüfspur (wer hat wann
+ * was getan). Die Prüfspur heißt **Protokoll**.
+ */
 export const FALL_TABS = [
   { key: "uebersicht", label: "Übersicht" },
-  { key: "details", label: "Details" },
+  { key: "stammdaten", label: "Stammdaten" },
   { key: "ereignisse", label: "Ereignisse" },
   { key: "rueckfragen", label: "Rückfragen" },
   { key: "plausibilitaet", label: "Plausibilität" },
   { key: "saldo", label: "Saldo & Konten" },
   { key: "datev", label: "DATEV-Wahrheit" },
-  { key: "verlauf", label: "Verlauf" },
+  { key: "protokoll", label: "Protokoll" },
   { key: "rohdaten", label: "Rohdaten" },
 ];
 

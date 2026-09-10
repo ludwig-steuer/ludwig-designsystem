@@ -42,7 +42,10 @@
 .v2card__h--sticky { position: sticky; top: 0; z-index: 5; }
 .v2card__h .title { font-size: 14px; font-weight: 600; color: var(--color-text); }
 .v2card__h .sub { font-size: 12px; color: var(--color-text-subtle); margin-top: 1px; }
-.v2card__h .actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+/* Knöpfe bringen ihre Größe mit; ein Textlink erbt sie (`.v2link` sagt
+   `inherit`, weil er im Fließtext stehen soll). Im Kopf erbte er bis
+   2026-09-10 die 16 px des `body` und stand größer als der Titel daneben. */
+.v2card__h .actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; font-size: var(--fs-ui-sm); }
 
 /* Kartenfuß — Paginierung nutzt weiter `.pag` aus components.css. */
 .v2card__f {
@@ -800,6 +803,16 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2fields__row > span:first-child { color: var(--color-text-muted); }
 .v2fields__row > span:last-child { font-weight: 500; font-variant-numeric: tabular-nums lining-nums; text-align: right; }
 .v2fields__empty { font-size: 13.5px; color: var(--color-text-subtle); }
+/* Zwei Spalten Paare, sobald die Liste selbst breit genug ist (0152, Owner
+   2026-09-10). **Mehrspaltensatz, keine Container-Query**: `columns: 2 300px`
+   teilt nur, wenn jede Spalte 300 px bekommt — die Bedingung hängt damit an
+   der Liste, nicht am Fenster, und im Drawer bleibt sie einspaltig. (Eine
+   Container-Query kann den Container selbst nicht umstellen, nur seine
+   Kinder — der erste Versuch blieb gemessen `display: block`.)
+   Gelesen wird spaltenweise: die Ränge laufen links hinunter, dann rechts. */
+.v2fields--split { columns: 2 300px; column-gap: var(--space-6); }
+.v2fields--split .v2fields__row { break-inside: avoid; }
+.v2fields--split .v2fields__h { column-span: all; }
 
 /* --- Fließtext-Karte ---------------------------------------------------- */
 .v2prose {
@@ -2204,18 +2217,28 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   color: var(--color-text-subtle);
   padding: var(--space-3) 0 4px;
 }
+/* **Keine Linie links, kein Einzug** (Owner 2026-09-10). Die Linie sollte den
+   Strang zusammenhalten und kostete dafür 12 px Einzug plus ihre eigene
+   Breite — auf 470 px Spaltenbreite ist das Platz, den die Zeile selbst
+   braucht. Zusammengehalten wird der Strang ohnehin von der Tagesüberschrift
+   und der gemeinsamen Zeitspalte; die Linie war Dekoration mit Kosten. */
 .v2tl__item {
   display: grid; grid-template-columns: 78px 1fr; gap: var(--space-3);
-  padding: 6px 0 6px var(--space-3);
-  border-left: 1px solid var(--color-border-subtle);
-  font-size: 13.5px;
+  padding: 6px 0;
+  font-size: var(--fs-ui);
 }
 .v2tl__when { color: var(--color-text-muted); font-variant-numeric: tabular-nums lining-nums; }
 .v2tl__who { color: var(--color-text-muted); font-size: 12.5px; }
 .v2tl__title { color: var(--color-text); }
 /* Der Eintrag, der rechts im Detail offen steht (0040). Neben der Fläche
    trägt er `aria-current` — Farbe ist nie das einzige Signal (V7). */
-.v2tl__item.is-current { background: var(--color-accent-50); border-radius: var(--radius-sm); }
+.v2tl__item.is-current {
+  background: var(--color-accent-50); border-radius: var(--radius-sm);
+  /* Ohne den Einzug von vorher braucht die Fläche ihren eigenen — sonst
+     beginnt sie genau an der Ziffer. */
+  padding-left: var(--space-2); padding-right: var(--space-2);
+  margin-left: calc(-1 * var(--space-2)); margin-right: calc(-1 * var(--space-2));
+}
 .v2tl__item.is-current .v2tl__title { font-weight: 600; }
 /* Das Art-Icon vor dem Titel: einfarbig, die Farbe trägt der Badge (V6). */
 .v2tl__kind { display: inline-flex; color: var(--color-text-muted); }
@@ -2231,17 +2254,67 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2ct__state { min-width: 140px; display: inline-flex; align-items: center; gap: var(--space-2); }
 .v2tl__detail { margin-top: 2px; color: var(--color-text-muted); font-size: 12.5px; }
 
+/* --- Notizen an einem Vorgang (0158) --------------------------------------
+ * Zwei Zeilen je Notiz: Beschriftung über dem Text, nicht daneben. In einer
+ * Randspalte von 320 px nähme eine Datumsspalte ein Drittel der Breite für
+ * sechs Zeichen. */
+/* „Zu tun" über dem Strang (0152). Er ist kein Ereignis — er hat kein Datum,
+   und im Strang stünde er zwischen lauter datierten Zeilen an einer Stelle,
+   die niemand bestimmt hat. Er verhält sich trotzdem wie einer: dieselbe
+   Auswahlfläche wie `.v2tl__item.is-current`, dasselbe Ziel rechts. Deshalb
+   steht er direkt darüber und nicht in einer eigenen Karte. */
+.v3todo {
+  display: flex; align-items: baseline; gap: var(--space-3);
+  text-align: left; cursor: pointer;
+  padding: var(--space-2);
+  /* Er sitzt in der Polsterung des Kastens, seine Trennlinie aber am Rand:
+     die Linie gehört dem Kasten, nicht der Zeile. */
+  margin: 0 calc(-1 * var(--space-5)) var(--space-2);
+  padding-left: var(--space-5); padding-right: var(--space-5);
+  border: 0; border-bottom: var(--border-1-subtle); background: transparent;
+  font: inherit; font-size: var(--fs-ui); color: var(--color-text);
+}
+.v3todo:hover { background: var(--color-bg-soft); }
+.v3todo.is-active { background: var(--color-accent-50); }
+.v3todo__title { font-weight: 600; }
+.v3todo__sub { color: var(--color-text-muted); font-size: var(--fs-ui-sm); }
+
+.v3notes { display: flex; flex-direction: column; gap: var(--space-4); font-size: var(--fs-ui); line-height: var(--lh-ui); }
+.v3notes__item { display: flex; flex-direction: column; gap: 2px; }
+.v3notes__meta {
+  display: flex; gap: var(--space-1); flex-wrap: wrap;
+  font-size: var(--fs-ui-xs); color: var(--color-text-subtle);
+}
+/* Der Text steht in der Standardstufe — er ist der Inhalt, die Beschriftung
+   darüber ist die Beischrift. Das ist der Unterschied, den der Owner am
+   2026-09-10 an der Rückfragen-Box vermisst hat. */
+.v3notes__text {
+  margin: 0; font-size: var(--fs-ui); line-height: var(--lh-ui);
+  color: var(--color-text); text-wrap: pretty;
+  /* Eine Belegnummer oder URL ohne Leerzeichen bräche sonst aus 370 px aus. */
+  overflow-wrap: anywhere;
+}
+.v3notes__empty { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-subtle); }
+.v3notes__form { display: flex; flex-direction: column; gap: var(--space-2); }
+.v3notes__field { width: 100%; resize: vertical; }
+.v3notes__acts { display: flex; align-items: center; gap: var(--space-3); }
+/* Gescheitertes Speichern: der Text bleibt im Feld, der Satz sagt es. Rot, weil
+   es ein Fehler ist — der einzige Fall, in dem Rot erlaubt ist (V6). */
+.v3notes__error { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-danger); font-weight: 500; }
+
 /* --- ChoicePrompt (0028) — Frage mit Antwortoptionen ---------------------- */
 .v2ask { display: grid; gap: var(--space-4); }
 .v2ask__q { font-size: 14px; font-weight: 600; color: var(--color-text); }
 .v2ask__ctx { font-size: 12.5px; color: var(--color-text-muted); }
 .v2ask__foot { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .v2ask__why { font-size: 12.5px; color: var(--color-text-muted); }
+/* Die Lücke behält ihre gestrichelte Linie: sie **ist** die Aussage („hier
+   ist zwei Wochen nichts passiert"), nicht Dekoration. */
 .v2tl__gap {
   padding: var(--space-2) 0 var(--space-2) var(--space-3);
   margin-left: 78px;
   border-left: 1px dashed var(--color-border);
-  font-size: 12.5px; color: var(--color-text-subtle);
+  font-size: var(--fs-ui-sm); color: var(--color-text-subtle);
 }
 .v2tl__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .v2tl__empty { padding: var(--space-4) 0; }
@@ -2659,7 +2732,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* ── 0059 Klärung: Vorschau, Zeile, Liste ─────────────────────────────────
    Eine Klärung ist kein Spaltensatz, sondern Titel, Zustand und eine
    Meta-Zeile — deshalb eigene Blöcke statt `v2tbl`. */
-.v2cl { display: flex; flex-direction: column; }
+/* Die Liste nimmt ihre Größe aus dem Arbeitsregister, wie jede v3-Komponente
+   (`tokens.css`, A1). Ohne diese Zeile erbte sie das Leseregister des `body`,
+   16 px — in der Rückfragen-Box des Sachverhalts gemessen, und genau das war
+   die Frage des Owners am 2026-09-10 („warum ist der Text so groß?"). */
+.v2cl { display: flex; flex-direction: column; font-size: var(--fs-ui); line-height: var(--lh-ui); }
 .v2cl__item { border-top: 1px solid var(--color-border-subtle); }
 .v2cl__item:first-child { border-top: none; }
 
@@ -3781,9 +3858,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
  * darunter kommt — derselbe Innenabstand wie in jeder Karte. Der Name trug bis
  * 0153 „doc", weil die erste Box am Beleg hing; seit die Zone ein Pattern ist,
  * wäre das ein Fachwort in einer Regel, die keine Entität kennt. */
+/* Der Kastenkörper setzt das Arbeitsregister: was ein Aufrufer hineinlegt
+   — ein Satz, ein Absatz —, erbt sonst die 16 px des `body` (gemessen an E1b
+   von 0152, 2026-09-10). */
 .v3boxbody {
   display: flex; flex-direction: column; gap: var(--space-3);
   padding: var(--space-3) var(--space-5) var(--space-4);
+  font-size: var(--fs-ui); line-height: var(--lh-ui);
 }
 
 /* --- Was an einem Vorgang offen ist (0153) --------------------------------
@@ -3794,7 +3875,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   display: flex; align-items: center; gap: var(--space-2); margin: 0;
   color: var(--color-text-muted); font-size: var(--fs-ui-sm);
 }
-.v3open__row { display: flex; align-items: flex-start; gap: var(--space-2); }
+/* Die Zeile deklariert ihr Register — Titel und Ausweg (ein `.v2link`, der
+   `inherit` sagt) erbten sonst die 16 px des `body` (gemessen 2026-09-10). */
+.v3open__row { display: flex; align-items: flex-start; gap: var(--space-2); font-size: var(--fs-ui); line-height: var(--lh-ui); }
 .v3open__row > svg { flex: 0 0 auto; margin-top: 1px; }
 .v3open__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
 .v3open__way { flex: 0 0 auto; }

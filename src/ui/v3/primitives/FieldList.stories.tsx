@@ -131,3 +131,23 @@ export const FactsRow: Story = {
     </div>
   ),
 };
+
+/**
+ * `split` — zwei Spalten Paare, sobald die **Liste** breit genug ist.
+ *
+ * Die Bedingung hängt an ihr, nicht am Fenster: unten steht dieselbe Liste in
+ * 360 px und bleibt einspaltig, obwohl das Fenster breit ist. Ohne `split`
+ * liegen bei 1100 px Etikett und Wert 900 px auseinander — der Blick muss
+ * die Zeile queren, um ein Paar zu lesen.
+ */
+export const Split: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 20 }}>
+      <FieldList title="Zweispaltig ab 640 px" rows={[...LUDWIG, ...LUDWIG]} split />
+      <FieldList title="Ohne split — dieselben Zeilen" rows={[...LUDWIG, ...LUDWIG]} />
+      <div style={{ maxWidth: 360 }}>
+        <FieldList title="Zu schmal — bleibt einspaltig" rows={LUDWIG} split />
+      </div>
+    </div>
+  ),
+};

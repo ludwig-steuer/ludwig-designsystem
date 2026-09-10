@@ -67,6 +67,7 @@ export function CaseFacts({
   case: c,
   all = false,
   tone = "surface",
+  split = false,
   partnerHref,
   accountHref,
 }: {
@@ -74,6 +75,8 @@ export function CaseFacts({
   /** Also ranks 17–24 — the view shows them, the drawer does not. */
   all?: boolean;
   tone?: "surface" | "bare";
+  /** Two columns of pairs where the page gives them room — the Details tab. */
+  split?: boolean;
   /** The partner becomes a link (47 % have one). */
   partnerHref?: string;
   /** Personal and clearing account become links — **by number**: that is what the route runs on. */
@@ -166,5 +169,5 @@ export function CaseFacts({
   // mit tnum" — und genau das ist die Vorgabe-Form der `FieldList`. `row`
   // setzt das Label **über** den Wert und beides linksbündig; damit wäre der
   // Satz im Verhalten nicht eingelöst, sondern nur behauptet (Abnahme 0097).
-  return <FieldList rows={rows} tone={tone} />;
+  return <FieldList rows={rows} tone={tone} split={split} />;
 }

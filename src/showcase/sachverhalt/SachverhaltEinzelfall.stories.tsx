@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 
 import { CaseFacts } from "@/ui/v3/entities/accounting-case/CaseFacts";
+import { ClarificationList } from "@/ui/v3/entities/clarification/Clarification";
 import {
   CaseTimeline,
-  NOW_ID,
   type CaseTimelineEntry,
 } from "@/ui/v3/entities/accounting-case/CaseTimeline";
 import { AiBookingNotes } from "@/ui/v3/entities/journal-entry/AiBookingNotes";
@@ -13,8 +13,8 @@ import { Button } from "@/ui/v3/primitives/Button";
 import { StatusCallout } from "@/ui/v3/primitives/StatusCallout";
 import { Card, CardHead } from "@/ui/v3/primitives/Table";
 import { TextButton } from "@/ui/v3/primitives/TextButton";
+import { NoteFeed } from "@/ui/v3/patterns/NoteFeed";
 import { OpenPoints } from "@/ui/v3/patterns/OpenPoints";
-import { Timeline } from "@/ui/v3/patterns/Timeline";
 
 import { SachverhaltSeite } from "./SachverhaltSeite";
 import {
@@ -24,7 +24,9 @@ import {
   fallFixture,
   HEUTE,
   KLAERUNG_BEANTWORTET,
+  NOTES,
   partnerHref,
+  CLARIFICATIONS,
   tabHref,
   VORSCHLAG,
   ZAHLUNG_ERWARTET,
@@ -48,46 +50,61 @@ const meta: Meta<typeof SachverhaltSeite> = {
 export default meta;
 type Story = StoryObj<typeof SachverhaltSeite>;
 
+/** The key of the todo row. It stands for no record, so it has no id. */
+const TODO_ID = "__todo";
+
+/**
+ * „Zu tun" — der Standardzustand der Seite, **über** dem Strang.
+ *
+ * Er ist kein Ereignis: er hat kein Datum, und im Strang stünde er zwischen
+ * lauter datierten Zeilen an einer Stelle, die niemand bestimmt hat. Er
+ * verhält sich trotzdem wie einer — dieselbe Auswahl, dieselbe Fläche rechts —,
+ * und deshalb steht er direkt darüber statt in einer eigenen Karte.
+ */
+function TodoRow({ active, onClick }: { active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className={active ? "v3todo is-active" : "v3todo"}
+      onClick={onClick}
+      aria-current={active ? "true" : undefined}
+    >
+      <span className="v3todo__title">Zu tun</span>
+      <span className="v3todo__sub">1 offen · 1 Freigabe</span>
+    </button>
+  );
+}
+
 /**
  * Spalte 3 — lesend. Zusammenfassung, Notizen, Rückfragen; beantwortet wird
  * im Reiter Rückfragen, nicht hier (F196 §5).
  */
 function Notizen() {
   return (
-    <div style={{ display: "grid", gap: 16 }}>
+    <div className="v2stack">
       <Card>
         <CardHead title="Notizen" sub="zuletzt oben" />
         <div className="v3boxbody">
-          <Timeline
-            groupBy="none"
-            entries={[
-              {
-                id: "n-1",
-                at: "2026-08-02T14:30:00Z",
-                title: "Der Mandant bestätigt: Ersatzteile für den Firmenwagen.",
-                actor: "Mandant",
-              },
-              {
-                id: "n-2",
-                at: "2026-07-31T16:05:00Z",
-                title: "Beleg ohne Sachverhalt eingegangen, Fall vom Agenten eröffnet.",
-                actor: "Agent",
-              },
-            ]}
-          />
+          {/* Zwei Zeilen je Notiz statt Spalten — in 370 px nähme eine
+              Datumsspalte ein Drittel der Breite für sechs Zeichen (0158). */}
+          <NoteFeed notes={NOTES} onAdd={() => {}} />
         </div>
       </Card>
       <Card>
         <CardHead
           title="Rückfragen"
-          sub="1 beantwortet"
-          actions={<TextButton href={tabHref("rueckfragen")}>Alle ansehen</TextButton>}
+          sub="1 offen · 1 beantwortet"
+          actions={<TextButton tone="quiet" href={tabHref("rueckfragen")}>Alle</TextButton>}
         />
         <div className="v3boxbody">
-          <p className="v2muted" style={{ margin: 0 }}>
-            „Gehören die Ersatzteile zum Firmenwagen oder zum Werkstattbestand?" — beantwortet
-            am 02.08. vom Mandanten.
-          </p>
+          {/* **Die Liste der Klärungs-Familie**, nicht ein Absatz mit Text:
+              sie trägt je Zeile den Zustand und die Dringlichkeit, und der
+              Klick führt in den Reiter, wo beantwortet wird. Genau das ist der
+              Überblick, den die Spalte geben soll (Owner 2026-09-10). */}
+          <ClarificationList
+            clarifications={CLARIFICATIONS}
+            empty={{ title: "Keine Rückfragen." }}
+          />
         </div>
       </Card>
     </div>
@@ -95,20 +112,24 @@ function Notizen() {
 }
 
 /**
- * Spalte 2 bei „Jetzt": **was ist jetzt zu tun.** Drei Blöcke in fester
- * Reihenfolge — Offen, Fehlende Freigaben, Verlauf.
+ * Spalte 2 bei „Zu tun": **was ist jetzt zu tun.** Zwei Blöcke in fester
+ * Reihenfolge — Offen, Fehlende Freigaben. Was war, steht links im Strang.
  */
 function JetztFlaeche({ mitErwartung = true }: { mitErwartung?: boolean }) {
   return (
-    <div style={{ display: "grid", gap: 16 }}>
+    <div className="v2stack">
       <OpenPoints
         points={
           mitErwartung
             ? [
                 {
                   key: "zahlung",
-                  title: "Die Zahlung steht aus.",
-                  hint: "Erwartet bis 10.08.2026 — danach fragt Ludwig beim Mandanten nach.",
+                  title: "Die Zahlung an Musterbau Fahrzeugteile GmbH steht aus.",
+                  // **Was die Erwartung weiß, steht da** (Owner 2026-09-10):
+                  // Betrag, Frist, wie lange noch, welche Stufe. „Offen" ohne
+                  // diese vier ist eine Überschrift, keine Auskunft — und
+                  // genau sie entscheiden, ob heute etwas zu tun ist.
+                  hint: "25,41 € · fällig am 10.08.2026, in 5 Tagen · noch keine Mahnung — danach fragt Ludwig beim Mandanten nach.",
                   action: <TextButton onClick={() => {}}>Erwartung aufheben</TextButton>,
                 },
               ]
@@ -185,9 +206,9 @@ function EreignisFlaeche({ datev = false }: { datev?: boolean }) {
  * **E1 — der Vorschlag steht.** Der Referenzfall des Briefs.
  *
  * Die Übersicht ist `list | detail | sidebar`: links der Strang mit der
- * **Jetzt-Zeile**, in der Mitte die Arbeitsfläche, rechts die Notizen. Ohne
- * Auswahl ist „Jetzt" gewählt, und die Mitte zeigt, was zu tun ist; ein Klick
- * auf einen Eintrag zeigt dort den Vorgang.
+ * Zeile **„Zu tun"** darüber, in der Mitte die Arbeitsfläche, rechts Notizen
+ * und Rückfragen. Ohne Auswahl ist „Zu tun" gewählt, und die Mitte zeigt, was
+ * zu tun ist; ein Klick auf einen Eintrag zeigt dort den Vorgang.
  *
  * **Der Wechsel ändert nur Spalte 2.** Strang und Notizen bleiben stehen —
  * wer zwischen „was ist zu tun" und „was war das" hin- und herspringt, soll
@@ -195,17 +216,15 @@ function EreignisFlaeche({ datev = false }: { datev?: boolean }) {
  */
 export const VorschlagSteht: Story = {
   render: function Fall() {
-    const [gewaehlt, setGewaehlt] = useState<string>(NOW_ID);
+    const [gewaehlt, setGewaehlt] = useState<string>(TODO_ID);
     const fall = fallFixture({ disposition: "agent" });
     const waehlen = (entry: CaseTimelineEntry) =>
       setGewaehlt(
-        entry.type === "now"
-          ? NOW_ID
-          : entry.type === "event"
-            ? entry.event.id
-            : entry.type === "clarification"
-              ? entry.clarification.id
-              : entry.expectation.id,
+        entry.type === "event"
+          ? entry.event.id
+          : entry.type === "clarification"
+            ? entry.clarification.id
+            : entry.expectation.id,
       );
 
     return (
@@ -222,17 +241,26 @@ export const VorschlagSteht: Story = {
         strang={
           <Card>
             <CardHead
-              title="Verlauf"
+              title="Ereignisse"
               sub="alles zu diesem Fall"
-              actions={<TextButton href={tabHref("ereignisse")}>vergrößern →</TextButton>}
+              actions={
+                <TextButton tone="quiet" href={tabHref("ereignisse")}>
+                  vergrößern
+                </TextButton>
+              }
             />
+            {/* **„Zu tun" steht über dem Strang, nicht darin** (Owner
+                2026-09-10). Es ist der Standardzustand der Seite und kein
+                Ereignis — im Strang wäre es ein Eintrag ohne Datum zwischen
+                lauter datierten. Es verhält sich trotzdem wie einer: dieselbe
+                Auswahl, dieselbe Fläche rechts. */}
             <div className="v3boxbody">
+              <TodoRow active={gewaehlt === TODO_ID} onClick={() => setGewaehlt(TODO_ID)} />
               <CaseTimeline
                 events={[BELEG_EREIGNIS]}
                 clarifications={[KLAERUNG_BEANTWORTET]}
                 expectations={[ZAHLUNG_ERWARTET]}
                 today={HEUTE}
-                showNow
                 selectedId={gewaehlt}
                 onSelect={waehlen}
               />
@@ -241,7 +269,7 @@ export const VorschlagSteht: Story = {
         }
         notizen={<Notizen />}
       >
-        {gewaehlt === NOW_ID ? <JetztFlaeche /> : <EreignisFlaeche />}
+        {gewaehlt === TODO_ID ? <JetztFlaeche /> : <EreignisFlaeche />}
       </SachverhaltSeite>
     );
   },
@@ -262,13 +290,11 @@ export const MitDatevBuchung: Story = {
     const fall = fallFixture({ disposition: "agent" });
     const waehlen = (entry: CaseTimelineEntry) =>
       setGewaehlt(
-        entry.type === "now"
-          ? NOW_ID
-          : entry.type === "event"
-            ? entry.event.id
-            : entry.type === "clarification"
-              ? entry.clarification.id
-              : entry.expectation.id,
+        entry.type === "event"
+          ? entry.event.id
+          : entry.type === "clarification"
+            ? entry.clarification.id
+            : entry.expectation.id,
       );
 
     return (
@@ -277,16 +303,20 @@ export const MitDatevBuchung: Story = {
         strang={
           <Card>
             <CardHead
-              title="Verlauf"
+              title="Ereignisse"
               sub="Ludwig und DATEV in einer Reihe"
-              actions={<TextButton href={tabHref("ereignisse")}>vergrößern →</TextButton>}
+              actions={
+                <TextButton tone="quiet" href={tabHref("ereignisse")}>
+                  vergrößern
+                </TextButton>
+              }
             />
             <div className="v3boxbody">
+              <TodoRow active={gewaehlt === TODO_ID} onClick={() => setGewaehlt(TODO_ID)} />
               <CaseTimeline
                 events={[DATEV_EREIGNIS, BELEG_EREIGNIS]}
                 expectations={[ZAHLUNG_ERWARTET]}
                 today={HEUTE}
-                showNow
                 selectedId={gewaehlt}
                 onSelect={waehlen}
               />
@@ -295,7 +325,7 @@ export const MitDatevBuchung: Story = {
         }
         notizen={<Notizen />}
       >
-        {gewaehlt === NOW_ID ? (
+        {gewaehlt === TODO_ID ? (
           <JetztFlaeche />
         ) : (
           <EreignisFlaeche datev={gewaehlt === DATEV_EREIGNIS.id} />
@@ -305,16 +335,26 @@ export const MitDatevBuchung: Story = {
   },
 };
 
-/** Der Partner-Weg aus den Fakten — Spalte 2 zeigt sie im Reiter Details. */
-export const Fakten: Story = {
+/**
+ * Der Reiter **Stammdaten** — und der Grund, warum die Fakten nicht in der
+ * Randspalte stehen.
+ *
+ * Dort waren sie eine Liste, die niemand liest, während daneben gearbeitet
+ * wird; hier sind sie das Thema der Seite. Über die volle Breite stünde
+ * allerdings das Etikett ganz links und der Wert ganz rechts — deshalb
+ * **zwei Spalten Paare** (`split`), gemessen an der Liste, nicht am Fenster
+ * (Owner 2026-09-10).
+ */
+export const Stammdaten: Story = {
   render: () => (
-    <SachverhaltSeite fall={fallFixture({ disposition: "agent" })} tab="details">
+    <SachverhaltSeite fall={fallFixture({ disposition: "agent" })} tab="stammdaten">
       <Card>
-        <CardHead title="Details" sub="alle Angaben des Sachverhalts" />
+        <CardHead title="Stammdaten" sub="alle Angaben des Sachverhalts" />
         <div className="v3boxbody">
           <CaseFacts
             case={fallFixture({ disposition: "agent" })}
             all
+            split
             tone="bare"
             partnerHref={partnerHref}
             accountHref={accountHref}
