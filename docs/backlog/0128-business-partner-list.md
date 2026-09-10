@@ -1,13 +1,126 @@
-# 0128 · `BusinessPartnerList` — die Stammsatz-Liste der Geschäftspartner
+# 0128 · Die Geschäftspartner-Liste als Szenarien
 
 | | |
 |---|---|
-| Status | offen |
-| Stufe | `entities/business-partner/` |
-| Quelle | Entitätsprofil `docs/entitaeten/business-partner.md`, Abschnitte „Listen" (Zeile `BusinessPartnerList` „Stammsätze") und „Formen" |
-| Auftrag | Der Rahmen um `businessPartnerColumns()`: **Wenn eine Sachbearbeiterin eine Kontonummer oder einen Namen vor sich hat und nicht weiß, wer dahintersteht, will sie alle Geschäftspartner des Mandanten durchsuchen, damit sie den vorhandenen Stammsatz findet, statt einen zweiten anzulegen.** Grundgesamtheit: alle Partner des Mandanten ohne Grabsteine. Sortierung Name aufsteigend. Filter: Reifegrad (Reiter), Rolle (`PARTNER_ROLE_LABEL`), Freitext über Name, USt-IdNr. **und** Kontonummer. Keine Massenaktion. Zwei Leerfälle: „Für diesen Mandanten sind keine Geschäftspartner importiert" (Bestand, Verweis aufs Onboarding) ≠ „Keine Treffer" (Filter). Umfang p50 553 · p90 6.335 Zeilen je Mandant → `Pagination`, Serverfilter, Serversuche, Lade- und Fehlerfall. |
-| Vertagt, weil | Eigene Route (`/clients/:slug/:year/partners`) → nach `docs/backlog/README.md` Schritt 0b erst ein Seitenprofil unter `docs/seiten/`. Kopfzeile, Stat-Leiste (`getBusinessPartnerStats`: total, creditors, debtors, withoutAccount, withUstId), Vorratszähler und Reiter gehören der Seite, nicht der Liste — und ob die Stat-Leiste bleibt, ist eine Frage ans Seitenprofil. Die Spalten entstehen vorher: `businessPartnerColumns()` trägt die Marke „jetzt", die Seite setzt sie mit `DataTable` (0057) zusammen. |
-| Setzt voraus | Seitenprofil `docs/seiten/partner-liste.md` (fehlt) · `businessPartnerColumns()` und `BusinessPartnerCell` aus der Partner-Welle · `DataTable` (0057) · Befund **L-15** (`sort`/`dir` in `PageRequest`) — ohne ihn sortiert die Liste weiterhin nicht, obwohl `PARTNER_SORT_KEYS` schon dasteht · Befund **L-223** (rohes USt-Profil in der Spalte) und ~~**L-222**~~ (erledigt in der App, `a38169f4` — **aber nicht im Spiegel**: `src/ludwig/` steht eingefroren auf vier statt sechs Werten) |
-| Ersetzt | die rohe `<table className="tbl">` in `apps/web/src/app/(app)/clients/[clientSlug]/[year]/partners/page.tsx` samt lokalem `AccountCell` und `ClearingCell` |
-| Abgrenzung | **Die Dashboard-Kachel „Top Kreditoren"** ist **gestrichen** (Owner-Entscheid, begründet im Kopfkommentar der Dashboard-Seite; die Abfrage `topVendors` läuft noch ins Leere — Befund **L-228**). Sie war auch vorher keine zweite Ausprägung dieser Liste, obwohl ihr Job eigenständig war („wo wäre eine Abweichung teuer"): ihre drei Spalten sind Aggregate (Rechnungszahl, Summe), die `BusinessPartnerListItem` nicht führt. Sie gehört ins Seitenprofil des Dashboards — wie die Sparkline-Kachel, die dort schon wartet. **Die Vorschlagsliste** (`CreditorProposalsReview`) ist ebenfalls keine Ausprägung: sie zeigt Kandidaten aus dem Belegbestand (`vendor_name`, `invoice_count`, `match_signal`), die noch kein Partner sind — eine andere Entität mit eigenem Profil. |
-| Angelegt von / am | Claude, 2026-09-08 (Skill `entitaet-analysieren`, §9) |
+| Status | **spec** 2026-09-10 — gebaut wird nach den Defaults der offenen Fragen, solange der Owner nicht anders entscheidet (`ludwig-manager`, 2026-09-10) |
+| Stufe | `src/showcase/partner/` (Seiten-Stories) — **keine** neue Komponente im Set |
+| Klassen-Test | Die Seite gehört der App und lebt in `showcase/`, wie 0144, 0152, 0157. Die Liste selbst ist `DataTable` mit `businessPartnerColumns()`; beides ist gebaut |
+| Quelle | Seitenprofil `docs/seiten/partner-liste.md` (`6490f97`, gegen die App geprüft von `ludwig-manager` am 2026-09-10) · Entitätsprofil `docs/entitaeten/business-partner.md` §Listen |
+| Ersetzt | in `ludwig/app` `partners/page.tsx`: die vier Reiter, die Stat-Leiste (`Stat`, `getBusinessPartnerStats`), das rohe Filterformular mit Inline-`<select>`; dazu `AcceptCreditorForm` (Inline-Stile, Erfolg über `window.alert`) |
+| Blockiert | nichts |
+| Präzedenz | `src/showcase/account/` (0157): Szenario als Daten, Listenzustand im Hash |
+| Spec von / am | Claude — angelegt 2026-09-08 (Skill `entitaet-analysieren` §9), neu gefasst 2026-09-10 nach dem Seitenprofil |
+
+## Ziel
+
+Die Seite, auf der die Sachbearbeiterin den Partner zu einer Kontonummer, einem
+Namen oder einer USt-IdNr. findet, als Seiten-Stories: **eine** Liste statt
+vier Reitern, die Sonderansicht „Vorschläge" mit dem Annahme-Rundlauf und drei
+Leerfälle, die man auseinanderhält. Die App steht schon auf `DataTable` und
+`businessPartnerColumns()`. Was fehlt, ist die Seite **um** die Liste — sie
+wird hier zu Ende entwickelt, bevor die App sie nachzieht.
+
+## Was sich gegenüber der ersten Fassung geändert hat
+
+- **Keine Komponente `BusinessPartnerList`.** Die App hat die rohe `<table>`
+  schon abgelöst. Eine Listen-Komponente trüge nichts, was `DataTable` nicht
+  trägt; Kopfzeile, Filter und Pager gehören der Seite (`spec-schreiben` §3
+  Regel 1: ein `@when` deckt den Fall).
+- **L-15 ist für diese Liste erledigt.** Die App sortiert über
+  `parsePageRequest(raw, PARTNER_SORT_KEYS)`, standardmäßig nach Nutzung
+  absteigend, Name als zweiter Schlüssel (geprüft von `ludwig-manager`).
+- **Der Job endet nicht mehr mit „statt einen zweiten anzulegen".** Die App hat
+  keinen Anlegeweg; der einzige Schreibweg ist `acceptProposedCreditor`.
+- **„Top Kreditoren" ist keine Abgrenzung mehr**, sondern gestrichen (L-228).
+
+## Einordnung
+
+- **Wiederverwenden:** `DataTable` (Pager, Sortierung, `filtered`, `empty`) ·
+  `businessPartnerColumns()` (acht Spalten, sortierbar: Name, Reifegrad,
+  Buchungen, letzte Buchung; `columns` wählt aus) · `FilterBar` mit `Input`
+  und `Select` · `Tabs` · `ActionButton` mit `ask` (0121) für die Annahme ·
+  `ToastHost`/`useToast` für die Rückmeldung · `AccountDrawer` (0068).
+- **Neu im Set:** nichts. Die Annahme (DATEV-Nummer eines vorgeschlagenen
+  Kreditors) ist eine fachliche Zusammensetzung und gehört dem Modul der App.
+  Die Story baut sie aus `ActionButton` mit `ask` — als Vorlage für den Umbau
+  von `AcceptCreditorForm` (Befund L-292).
+- **Zuschnitt:** `PartnerList.stories.tsx` (`Seiten/Geschäftspartner/Liste`),
+  `partner-list.tsx` (die Seite aus Daten, Zustand im Hash wie 0157),
+  `fixtures.ts` um einen Listengenerator erweitert.
+
+## Die Seite
+
+| Zone | Inhalt | Baustein |
+|---|---|---|
+| Reiter | **Geschäftspartner** · **Vorschläge** mit Zähler | `Tabs` |
+| Filter | Suche „Name, USt-IdNr. oder Kontonummer" (trifft auch den Kurznamen) · Rolle: alle · Kreditoren · Debitoren · ohne Personenkonto · Reifegrad: Wörter aus der Registry | `FilterBar`, `Input`, `Select` |
+| Liste | Kopf „Geschäftspartner" mit Vorrat („6.396"; gefiltert „n von m"), acht Spalten, Sortierung Nutzung ↓, Pager 25/50 | `DataTable`, `businessPartnerColumns()` |
+| Vorschläge | Partner, Kreditorkonto, Reifegrad, Ort — dazu die Spalte „Annehmen": der Knopf öffnet einen Dialog mit der vorbelegten 89xxxx-Nummer, die Erklärung steht als Text im Dialog (nicht im Tooltip), die Nummer muss 4–20 Ziffern haben | `DataTable` mit `columns`, `ActionButton ask` |
+| Drawer | Kontonummer → Konto-Drawer; die Liste bleibt, wo sie war | `AccountDrawer` |
+
+**Keine Stat-Leiste** (Seitenprofil, Zweifel 2).
+
+## Szenarien (`Seiten/Geschäftspartner/Liste`)
+
+| Export | Stand | Sieht | Tut | Beweist |
+|---|---|---|---|---|
+| `InUse` | großer Mandant, 6.396 Partner, in `AppShell` | Reiter mit „Vorschläge 7", einzeilige Filterleiste, Liste nach Nutzung ↓, „1–25 von 6.396" | blättert, sortiert nach Name | Reiter, Filter, Kopf und erste Zeilen ohne Scrollen bei 1280 und 1440 × 900 |
+| `SearchByNumber` | Suche „10433" | genau eine Zeile, die Nummer in der Debitorspalte | klickt die Nummer → Konto-Drawer, `Esc` | Rang 1 und 6: die Suche trifft Kontonummern, der Drawer lässt die Liste stehen |
+| `SameName` | Suche „Musterfirma Service" | drei gleichnamige Partner mit verschiedenen Nummern und Orten | — | das Misslingen aus dem Profil tritt nicht ein: die Zeile unterscheidet |
+| `WithoutAccount` | Rolle „ohne Personenkonto", mittlerer Mandant | 12 Abrechner, nur die Verrechnungsspalte gefüllt; Kopf „12 von 572", Zusammenfassung mit Zurücksetzen | setzt zurück | der Filter ersetzt die Stat-Leiste; die Abrechner erklären sich selbst |
+| `NoResults` | Suche ohne Treffer | Leerfall **nach Filter**: was gefiltert ist, und der Weg zurück | — | ≠ Bestand leer |
+| `EmptyStock` | Mandant ohne Import | „Für diesen Mandanten sind keine Geschäftspartner importiert." mit Weg zum Onboarding | — | der Bestand-Leerfall |
+| `Proposals` | Sonderansicht, 18 Vorschläge | Spalte „Annehmen"; Dialog mit vorbelegter Nummer | nimmt an: gültig → die Zeile geht, der Zähler sinkt, Toast „Konto 70412 angelegt — 3 Buchungen umgezogen"; drei Ziffern → Knopf gesperrt; vergebene Nummer → Fehler im Dialog | der Annahme-Rundlauf mit seinem Fehlerweg |
+| `ProposalsDone` | Sonderansicht ohne Vorschläge | Haken und „Keine Vorschläge offen." | — | der dritte Leerfall ist ein **Erfolg** |
+| `LoadingAndError` | lädt · Fehler | Reiter und Filter stehen, die Liste als Skelett in Zeilenform; Fehler mit „Erneut laden" | — | V9 |
+| `Narrow` | `InUse` bei 1024 px | die Tabelle scrollt in ihrer Karte, die Seite nicht | — | die Mindestbreite der Spalten (1.180 px) bricht die Seite nicht |
+
+**10 Exporte.** Ausgeschlossen: keine eigene Story für die Sortierung
+(`InUse` tut es), keiner für den USt-Profil-Filter (siehe Ausbau).
+
+## Abnahmekriterien
+
+Fest:
+
+- [ ] `pnpm typecheck`, `pnpm build` und `check:language` grün
+- [ ] Code englisch, Storybook-Titel deutsch; kein Hex, kein px, keine lokale Label-Map, Reifegrad nur über die Registry
+- [ ] Fixtures synthetisch — kein Name, keine Nummer aus Staging
+- [ ] Im Browser angesehen, gemessen bei 1280 und 1440 × 900
+
+Variabel:
+
+- [ ] Zwei Reiter, keine Stat-Leiste (Code-Probe: kein Stat-Aufruf in der Szenario-Datei)
+- [ ] Vorratszähler im Kopf, gefiltert „n von m" (`InUse`, `WithoutAccount`)
+- [ ] Die Suche trifft Name, Kurzname, USt-IdNr. und Kontonummer (`SearchByNumber`, `SameName`)
+- [ ] Standardsortierung Nutzung ↓; der Kopf „Geschäftspartner" sortiert um (`InUse`)
+- [ ] Drei Leerfälle mit drei verschiedenen Sätzen (`EmptyStock`, `NoResults`, `ProposalsDone`)
+- [ ] Annahme: Nummer vorbelegt, 4–20 Ziffern, Fehler im Dialog, Erfolg: Zeile weg, Zähler −1, Toast (`Proposals`)
+- [ ] Die Kontonummer öffnet den Konto-Drawer, `Esc` schließt, die Liste bleibt (`SearchByNumber`)
+- [ ] Kein Querlauf der Seite bei 1280, 1440 und 1024 (`Narrow`)
+
+## Offene Fragen
+
+Beim Owner (vorgelegt von `ludwig-manager`, 2026-09-10); gebaut wird nach Default.
+
+1. **„Vorgeschlagen" als Sonderansicht?** *Default: ja.*
+2. **Fällt die Stat-Leiste?** *Default: ja.*
+3. **Standardsortierung Nutzung ↓?** *Default: ja, wie die App.*
+
+## Ausbau
+
+| Was fehlt | Was es trägt | Woran man merkt, dass es Zeit ist |
+|---|---|---|
+| Filter nach USt-Profil | `?vat=` kann der Loader schon (`parseBusinessPartnerFilter`) | eine Rolle fragt danach — heute bietet die Seite ihn nicht an, und kein Job braucht ihn |
+
+## Befunde
+
+App: **L-292** — die Annahme eines Vorschlags (`AcceptCreditorForm`) ist
+Handarbeit neben dem Set. Nichts für den Spiegel.
+
+## Abnahme
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| … | … | … |
+
+Abgenommen von / am: — (nicht durch den Bauenden)
