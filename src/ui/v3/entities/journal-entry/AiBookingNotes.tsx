@@ -16,6 +16,9 @@ import { useState } from "react";
 // Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
 // und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
 import { Confidence, type ConfidenceLevel } from "../../patterns/Confidence";
+import { StateIcon, type StateKind } from "../../patterns/Review";
+import { StatusInfoButton } from "../../patterns/StatusInfoButton";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { StatusBadge } from "../../patterns/StatusBadge";
 
 /**
@@ -283,6 +286,25 @@ export function AiBookingNotesBody({
 }
 
 /**
+ * Which mark stands for which verdict (owner, 2026-09-10).
+ *
+ * **Four verdicts, four marks — and every one carries its word in the hover.**
+ * The marks come from `StateIcon`, not from a new registry line: those four
+ * states exist there already, with colour and word, and a fifth vocabulary for
+ * the same four steps would be exactly the fork the icon registry is meant to
+ * prevent.
+ *
+ * `confirm_with_note` and `adjust` are both `info` on the axis — colour does
+ * not separate them, the mark does: a note is not a correction.
+ */
+const JUDGE_ICON: Record<JudgeVerdict, StateKind> = {
+  confirm: "done",
+  confirm_with_note: "info",
+  adjust: "edited",
+  flag: "warning",
+};
+
+/**
  * The same package in a row: what the judge said, and how sure the agent was
  * (0151).
  *
@@ -323,7 +345,18 @@ export function AiBookingNotesCell({
           With its word, like in the head of the box: a colour without a word
           is not a statement (V7), and „Sicher" costs 38 px. */}
       <Confidence level={confidence} />
-      {verdict ? <StatusBadge axis="judge" status={verdict} info={false} /> : null}
+      {/* **The verdict as a mark, not as a word** (owner, 2026-09-10): in the
+          batch acceptance the column carries four badges below each other, and
+          „Bestätigt mit Hinweis" is 148 px wide. The word is not gone, it is
+          one step deeper — in the hover, in the screen reader, and in the
+          dialog a click opens. V7 still holds: the coloured state has its
+          word, only not in the row.
+          The box keeps it visible — there is room there. */}
+      {verdict ? (
+        <StatusInfoButton axis="judge" current={verdict}>
+          <StateIcon state={JUDGE_ICON[verdict]} title={resolveStatus("judge", verdict).label} />
+        </StatusInfoButton>
+      ) : null}
       {/* The count, not the text: which finding it is stands in the fold-out.
           A number in the row is a reason to open it. */}
       {errors.length > 0 ? (
