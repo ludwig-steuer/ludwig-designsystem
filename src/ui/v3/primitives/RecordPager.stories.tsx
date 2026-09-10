@@ -56,7 +56,7 @@ export const WithoutBack: Story = {
 };
 
 /**
- * Die Client-Variante mit Tasten: `K` zurück, `J` weiter — probieren Sie es
+ * Die Client-Variante mit Tasten: `J` zurück, `K` weiter — probieren Sie es
  * aus. Beide Tasten stehen sichtbar neben den Pfeilen (V14); ohne `hotkeys`
  * steht dort nichts, weil eine angezeigte Taste, die nichts tut, eine Lüge
  * wäre. Die Zählung bleibt beim Blättern an derselben Stelle stehen.

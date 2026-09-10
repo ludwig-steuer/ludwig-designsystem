@@ -41,7 +41,7 @@ type PagerLinkProps = Common & {
 type PagerButtonProps = Common & {
   onPrev?: (() => void) | null;
   onNext?: (() => void) | null;
-  /** Bind `K`/`J` and show both as `Kbd`. Without it no key is shown (V14). */
+  /** Bind `J`/`K` and show both as `Kbd`. Without it no key is shown (V14). */
   hotkeys?: boolean;
   prevHref?: undefined;
   nextHref?: undefined;
@@ -62,10 +62,17 @@ export function RecordPager(props: PagerLinkProps | PagerButtonProps) {
 
   // Hooks run unconditionally; `enabled` decides whether they listen. In the
   // link variant there is nothing to bind — a key cannot follow an `href`.
+  // **J goes back, K goes forward** — the reverse of vim, on purpose
+  // (2026-09-10, owner). Written down so nobody „repairs" it back: the two
+  // keys sit under index and middle finger of the right hand, and the queue
+  // reads left to right. J, the left key, goes back; K, the right one, goes
+  // forward — the fingers stand like the arrows. Whoever knows vim loses a
+  // convention; whoever pages through documents all day gains the direction
+  // they can see.
   useHotkeys(
     [
-      { key: "k", label: "Vorheriger", handler: () => onPrev?.() },
-      { key: "j", label: "Nächster", handler: () => onNext?.() },
+      { key: "j", label: "Vorheriger", handler: () => onPrev?.() },
+      { key: "k", label: "Nächster", handler: () => onNext?.() },
     ],
     hotkeys && !isLinks,
   );
@@ -81,12 +88,12 @@ export function RecordPager(props: PagerLinkProps | PagerButtonProps) {
           {back.label}
         </Link>
       ) : null}
-      <Step dir="prev" target={prev} hotkey={hotkeys ? "K" : undefined} />
+      <Step dir="prev" target={prev} hotkey={hotkeys ? "J" : undefined} />
       <span className="v2pager__count">
         {label ? `${label} ` : ""}
         {formatCount(position)} von {formatCount(total)}
       </span>
-      <Step dir="next" target={next} hotkey={hotkeys ? "J" : undefined} />
+      <Step dir="next" target={next} hotkey={hotkeys ? "K" : undefined} />
     </div>
   );
 }
