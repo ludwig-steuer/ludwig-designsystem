@@ -81,6 +81,11 @@ const QUELLE: Record<SourceKind, { Icon: LucideIcon; label: string }> = {
  *
  * The list stands here so a caller does not have to guess: setting `onOpen` on
  * a kind that has no target builds a way the data cannot carry.
+ *
+ * **„Can", not „does".** A kind may be listed here and still arrive without
+ * `onOpen` — `klaerung` does today, because the app has no clarification
+ * drawer yet (only a route to the case). That is the right way round: the
+ * constant says what the **data** allows, the caller says what it has built.
  */
 export const QUELLE_AUFSCHLAGBAR: Record<SourceKind, boolean> = {
   bank: true,

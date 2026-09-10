@@ -5,6 +5,7 @@ import {
   ArrowLeftRight,
   ArrowUpRight,
   BanknoteArrowDown,
+  Clock,
   FileQuestionMark,
   FileText,
   History,
@@ -26,6 +27,7 @@ import type { Currency } from "@/ludwig/shared/money";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { calendarDay } from "../../format";
 import { Amount } from "../../primitives/Amount";
+import { Badge } from "../../primitives/Badge";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Timeline, type TimelineItem } from "../../patterns/Timeline";
 import { STATUS_REGISTRY } from "@/ludwig/ui/status/status-registry";
@@ -73,6 +75,26 @@ export interface CaseTimelineEvent {
   superseded?: boolean;
   /** `no_booking_required_reason` — the tooltip of the badge. */
   stateNote?: string | null;
+  /**
+   * Where the entry comes from, where that is not Ludwig itself (0152).
+   *
+   * **`datev` means: this came over from the mirror.** The brief calls for
+   * Ludwig's and DATEV's entries in **one** strand, sorted by date, and it is
+   * right — the history of a case is one, not two sources. But they are not
+   * the same thing: one can be worked on, the other is read. So the word
+   * DATEV stands **in the line**, not as a colour and not as an icon alone
+   * (V7), and the caller shows no actions for it.
+   */
+  source?: "ludwig" | "datev";
+  /**
+   * The state of the booking that hangs on this event — axis `buchung`.
+   *
+   * **A second line at the event, not a second entry** (0152, open question 1):
+   * an event and its booking are **one** operation. Two strand entries for it
+   * would be two claims about the same thing, and a case with 120 events would
+   * have a strand of 240 lines.
+   */
+  bookingState?: string | null;
 }
 
 /** One row of `ludwig.client_accounting_case_clarification`. */
@@ -108,7 +130,12 @@ export interface CaseTimelineExpectation {
 export type CaseTimelineEntry =
   | { type: "event"; event: CaseTimelineEvent }
   | { type: "clarification"; clarification: CaseTimelineClarification }
-  | { type: "expectation"; expectation: CaseTimelineExpectation };
+  | { type: "expectation"; expectation: CaseTimelineExpectation }
+  /** The now line — it belongs to no record, it is the point of view. */
+  | { type: "now" };
+
+/** The key of the now line. It has no record, so it has no id of its own. */
+export const NOW_ID = "__now";
 
 /** One icon per kind. The word comes from the registry or from `kindLabels`. */
 const EVENT_ICON: Record<string, LucideIcon> = {
@@ -173,6 +200,7 @@ export function CaseTimeline({
   onSelect,
   kindLabels,
   today,
+  showNow = false,
   loading,
 }: {
   events: CaseTimelineEvent[];
@@ -188,6 +216,14 @@ export function CaseTimeline({
   kindLabels?: Record<string, string>;
   /** Reference day `YYYY-MM-DD` for maturity and clarification state. */
   today?: string;
+  /**
+   * Show the now line (0152). Needs `today`.
+   *
+   * Off by default: beside other work the strand is an enumeration, and there
+   * „now" would be a line without a job. On the overview it is the point of
+   * view everything is read from.
+   */
+  showNow?: boolean;
   loading?: boolean;
 }) {
   const byId = new Map<string, CaseTimelineEntry>();
@@ -247,6 +283,25 @@ export function CaseTimeline({
     });
   }
 
+  // **The now line** (0152): the anchor between what happened and what is
+  // expected — and a selectable entry in its own right. Without a selection it
+  // stands for „what is to be done now", and that is the normal case: whoever
+  // opens the page has not clicked anything yet.
+  //
+  // It only appears when the caller names a day. Without `today` the strand
+  // has no reference point, and an invented „now" would sit on a date nobody
+  // set.
+  if (today && showNow) {
+    byId.set(NOW_ID, { type: "now" });
+    items.push({
+      id: NOW_ID,
+      at: today,
+      title: "Jetzt",
+      icon: <KindIcon of={Clock} label="Jetzt" />,
+      kind: "Jetzt",
+    });
+  }
+
   for (const ev of events) {
     // Achse zuerst (`ereignis_art`, L-02), Prop als Überschreibung, Rohwert
     // zuletzt — dieselbe Reihenfolge wie im Strang darunter.
@@ -268,11 +323,20 @@ export function CaseTimeline({
           tooltip — in the line it would be a fifth column.
         */
         <span title={ev.stateNote ?? undefined}>
+          {/* The source **before** the state: „where does this come from"
+              decides whether anything can be done with it at all. As a word,
+              not as a colour. */}
+          {ev.source === "datev" ? <Badge tone="neutral">DATEV</Badge> : null}
           <StatusBadge
             axis="ereignis"
             status={ev.superseded ? "superseded" : ev.state}
             info={false}
           />
+          {/* The booking is the second line of this event, not an entry of
+              its own — it stands beside it as a second badge. */}
+          {ev.bookingState ? (
+            <StatusBadge axis="buchung" status={ev.bookingState} info={false} />
+          ) : null}
         </span>,
       ),
       dim: ev.superseded,
