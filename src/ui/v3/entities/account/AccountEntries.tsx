@@ -58,6 +58,8 @@ export interface AccountEntry {
   markOfOrigin?: string | null;
   /** Only 2 % of the mirror entries carry one — it lives in the `title`, not in a column. */
   caseNumber?: string | null;
+  /** Balance after this movement, within its own source — shown only with `balance`. */
+  runningBalance?: number | null;
 }
 
 /**
@@ -147,6 +149,13 @@ export interface AccountEntryColumnOptions {
   variant?: "compact" | "full";
   /** Makes the contra accounts clickable — switching accounts in the drawer. */
   accountHref?: (number: string) => string;
+  /**
+   * The running balance as the last amount column. Only for **one** source:
+   * over both it would mix what is booked with what has not arrived yet
+   * (owner 2026-09-04). The page turns it on when its origin filter picks the
+   * DATEV side or the Ludwig side alone (0157).
+   */
+  balance?: boolean;
 }
 
 /**
@@ -157,6 +166,7 @@ export function accountEntryColumns({
   currency,
   variant = "compact",
   accountHref,
+  balance = false,
 }: AccountEntryColumnOptions): ColumnDef<AccountEntry>[] {
   const columns: ColumnDef<AccountEntry>[] = [
     {
@@ -229,6 +239,17 @@ export function accountEntryColumns({
       cell: (e) => (e.credit === null ? null : <AmountCell value={e.credit} currency={currency} />),
     },
   ];
+
+  if (balance) {
+    columns.push({
+      key: "runningBalance",
+      header: "Saldo",
+      width: "112px",
+      align: "end",
+      cell: (e) =>
+        e.runningBalance == null ? null : <AmountCell value={e.runningBalance} currency={currency} />,
+    });
+  }
 
   if (variant === "compact") return columns;
 

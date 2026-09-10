@@ -165,7 +165,7 @@
 /* ====================================================================
    PAGINATION
    ==================================================================== */
-.pag { display: flex; align-items: center; gap: 4px; padding: 10px 16px; border-top: 1px solid var(--color-border); background: #FAFBFC; }
+.pag { display: flex; align-items: center; gap: 4px; padding: 10px 16px; border-top: 1px solid var(--color-border); background: #FAFBFC; font-size: var(--fs-ui); }
 .pag .info { font-size: 12px; color: var(--color-text-muted); font-variant-numeric: tabular-nums; flex: 1; }
 .pag .page { min-width: 28px; height: 28px; padding: 0 8px; border-radius: 4px; border: 1px solid transparent; font: 500 12px var(--font-sans); color: var(--color-text-muted); background: transparent; cursor: pointer; font-variant-numeric: tabular-nums; }
 .pag .page:hover { background: var(--color-bg-sunken); color: var(--color-text); }

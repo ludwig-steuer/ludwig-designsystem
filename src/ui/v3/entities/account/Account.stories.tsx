@@ -61,6 +61,27 @@ export const Filled: Story = {
 };
 
 /**
+ * The master-data set for the side column of the account page (0157): the
+ * tiles above it carry balance, delta and last booking, so this block does
+ * not say them a second time.
+ */
+export const WithoutFigures: Story = {
+  render: () => (
+    <div style={{ maxWidth: 520 }}>
+      <AccountFacts
+        facts={{
+          ...BANK,
+          totalDebit: 612_004.2,
+          totalCredit: 427_784.05,
+          skrClassLabel: "Finanz- und Privatkonten",
+        }}
+        figures={false}
+      />
+    </div>
+  ),
+};
+
+/**
  * A freshly imported account knows almost nothing. Missing values keep their
  * row and show the em dash — the reader sees *that* the balance is unknown,
  * not a list that silently got shorter.

@@ -148,7 +148,18 @@ export interface AccountFactsVM extends MirrorAccountFacts {
  * @when    What kind of account this is, read-only — in its drawer, in its view, as the content of a HoverCard over an AccountCell.
  * @instead Just naming the account → AccountCell. Its movements → AccountEntryList. Chart of accounts, tax automation, monthly figures → AccountView.
  */
-export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
+export function AccountFacts({
+  facts,
+  figures = true,
+}: {
+  facts: AccountFactsVM;
+  /**
+   * `false` = the master-data set: no balance, delta, movement count or last
+   * booking. For the side column of the account page, where tiles above
+   * already carry those numbers — the same figure twice is D7 (0157, B4).
+   */
+  figures?: boolean;
+}) {
   const rows: [ReactNode, ReactNode][] = [
     [
       "Kontoart",
@@ -156,20 +167,23 @@ export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
       // in the chart shows the axis' own word for „unknown", not an empty cell.
       <StatusBadge key="role" axis="konto_typ" status={facts.accountingRole ?? ""} info={false} />,
     ],
-    [
+  ];
+
+  if (figures) {
+    rows.push([
       // The year rides on the label of the number it belongs to. Without it a
       // balance in a HoverCard says nothing about *which* year it is — and a
       // chart of accounts exists only per fiscal year (GLOSSARY F64). A row of
       // its own would repeat what the drawer's year switch already says.
       `Saldo in DATEV ${facts.fiscalYear}`,
       <Amount key="bal" value={facts.datevBalance} currency={facts.currency} />,
-    ],
-  ];
+    ]);
+  }
 
   // Two rows disappear instead of standing empty: both are findings, and
   // their absence is the good news. „Letzte Buchung" is the counter-example
   // — that it is unknown is something the reader wants to see.
-  if (facts.ludwigOnlyCount > 0) {
+  if (figures && facts.ludwigOnlyCount > 0) {
     rows.push([
       `+ ${facts.ludwigOnlyCount} nur in Ludwig`,
       <Amount key="lud" value={facts.ludwigOnlyAmount ?? null} currency={facts.currency} />,
@@ -195,7 +209,7 @@ export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
 
   if (facts.skrClassLabel) rows.push(["SKR-Klasse", facts.skrClassLabel]);
 
-  rows.push([
+  if (figures) rows.push([
     "Bewegungen",
     <span key="cnt">
       {formatCount(facts.datevEntryCount)} in DATEV
@@ -213,7 +227,7 @@ export function AccountFacts({ facts }: { facts: AccountFactsVM }) {
     ]);
   }
 
-  rows.push([
+  if (figures) rows.push([
     "Letzte Buchung",
     <Time key="last" value={facts.lastBookingDate ?? null} format="date" />,
   ]);

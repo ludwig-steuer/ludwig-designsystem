@@ -119,7 +119,8 @@ export const Filled: Story = {
  * The same rows through both variants. `compact` has seven columns for the
  * drawer, `full` adds batch, booking state and DATEV mark for the page —
  * and neither of them carries a running balance: over two sources it would
- * mix what is booked with what is not there yet (Owner 2026-09-04).
+ * mix what is booked with what is not there yet (Owner 2026-09-04). With one
+ * source it comes back — `Balance`.
  */
 export const Variants: Story = {
   render: () => (
@@ -141,6 +142,35 @@ export const Variants: Story = {
       </div>
     </div>
   ),
+};
+
+/**
+ * The running balance, back **with one source** (0157): filtered to the DATEV
+ * side it is the balance in DATEV after each movement. The page turns the
+ * column on; the list draws what it is given.
+ */
+export const Balance: Story = {
+  render: () => {
+    const datevSide = ENTRIES.filter((e) => e.origin === "datev" || e.origin === "mirrored");
+    // Oldest first to sum up, newest first to show.
+    let running = 0;
+    const rows = [...datevSide]
+      .reverse()
+      .map((e) => {
+        running = Math.round((running + (e.debit ?? 0) - (e.credit ?? 0)) * 100) / 100;
+        return { ...e, runningBalance: running };
+      })
+      .reverse();
+    return (
+      <DataTable
+        rows={rows}
+        columns={accountEntryColumns({ currency: "EUR", variant: "full", balance: true })}
+        rowKey={(e) => e.id}
+        head={{ title: "Konto 1210 · Bewegungen 2026", sub: "Herkunft: DATEV" }}
+        density="compact"
+      />
+    );
+  },
 };
 
 /** „Mehr laden" with the stock counter — the bank account has 2.937 movements. */
