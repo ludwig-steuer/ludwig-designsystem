@@ -110,7 +110,7 @@ const ENTRIES: AccountEntry[] = [
 export const Filled: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
-      <AccountEntryList entries={ENTRIES} currency="EUR" accountHref={(n) => `?konto=${n}`} />
+      <AccountEntryList entries={ENTRIES} currency="EUR" accountHref={(n) => `?account=${n}`} />
     </div>
   ),
 };
@@ -239,7 +239,7 @@ export const InUse: Story = {
             entries={ENTRIES}
             currency="EUR"
             total={2937}
-            accountHref={(n) => `?konto=${n}`}
+            accountHref={(n) => `?account=${n}`}
             more={
               <Button size="sm" variant="secondary" onClick={() => {}}>
                 Mehr laden

@@ -369,7 +369,7 @@ export const InUse: Story = {
           <JournalEntryCard
             lines={r.lines}
             currency="EUR"
-            accountHref={(n) => `?konto=${n}`}
+            accountHref={(n) => `?account=${n}`}
             totals={false}
           />
           {r.verdict || r.errors ? (

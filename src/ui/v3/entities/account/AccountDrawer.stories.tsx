@@ -124,7 +124,7 @@ export const Geoeffnet: Story = {
             note(`onYearChange → ${y}`);
           }}
           onOpenFull={() => note("onOpenFull — /clients/…/2026/accounts/1210")}
-          accountHref={(n) => `?konto=${n}`}
+          accountHref={(n) => `?account=${n}`}
         />
       </div>
     );

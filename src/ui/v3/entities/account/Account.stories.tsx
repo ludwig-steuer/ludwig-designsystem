@@ -160,13 +160,13 @@ export const InUse: Story = {
           <Row>
             <span>31.08.2026</span>
             <span>Reparatur März</span>
-            <AccountCell number="1210" name="Commerzbank" href="?konto=1210" />
+            <AccountCell number="1210" name="Commerzbank" href="?account=1210" />
           </Row>
           <Row>
             <span>30.08.2026</span>
             <span>Miete August</span>
             <HoverCard content={<AccountFacts facts={BANK} />}>
-              <AccountCell number="4210" name="Miete" href="?konto=4210" />
+              <AccountCell number="4210" name="Miete" href="?account=4210" />
             </HoverCard>
           </Row>
         </Table>

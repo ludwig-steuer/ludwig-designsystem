@@ -19,7 +19,7 @@ export default meta;
 type Story = StoryObj<typeof BusinessPartnerDrawer>;
 
 const tabHref = (t: PartnerTab) => `?partner=p-1&tab=${t}`;
-const accountHref = (n: string) => `?konto=${n}`;
+const accountHref = (n: string) => `?account=${n}`;
 
 function detail(over: Partial<BusinessPartnerDetail> = {}): BusinessPartnerDetail {
   return {

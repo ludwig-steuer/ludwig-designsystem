@@ -22,9 +22,10 @@ import { BusinessPartnerCell } from "../business-partner/BusinessPartner";
  * **here, once**, so that the drawer (0068) and the full view (0063) cannot
  * drift apart — the same reason `SourceDocumentFacts` exists.
  *
- * Both are server components: the way to the account sheet is an `href` over
- * a search param (L3), not a context. The app resolves it through
- * `AccountDrawerProvider` today; that becomes a URL on the way over.
+ * Both are server components: the way to the account is an `href` over a
+ * search param (L3), not a context — and it leads to the **drawer**, not to
+ * the account page. The app resolves it through `AccountDrawerProvider` today;
+ * that becomes a URL on the way over.
  */
 
 /**
@@ -43,8 +44,8 @@ function clip(text: string): { shown: string; title?: string } {
 }
 
 /**
- * @when    Naming an account inside foreign markup — a booking line, a contra account, running text; with `href` it leads to the account sheet.
- * @instead Choosing an account from candidates → AccountField. What kind of account it is → AccountFacts. The account next to a list → AccountDrawer.
+ * @when    Naming an account inside foreign markup — a booking line, a contra account, running text; with `href` it opens the account **drawer**.
+ * @instead Choosing an account from candidates → AccountField. What kind of account it is → AccountFacts. Everything about the account with its monthly figures → LedgerAccountView, and the drawer offers the way there in its foot (A10).
  */
 export function AccountCell({
   number,
@@ -58,7 +59,21 @@ export function AccountCell({
   number: string;
   /** `null` shows the number alone — no placeholder, no em dash. */
   name?: string | null;
-  /** The way to the account sheet. Without it the cell is plain text — never a button that does nothing. */
+  /**
+   * The way to the account — **the drawer, not the account page** (owner,
+   * 2026-09-10).
+   *
+   * Whoever meets an account number inside a booking line has a question, not
+   * a destination: „what sits on 6815?". The drawer answers it beside the
+   * work; the account page takes the work away and makes coming back a
+   * decision. Whoever really wants the whole sheet finds it in the drawer's
+   * foot (A10) — one click more for the rarer case, none for the common one.
+   *
+   * Technically that is a **search param**, not a path: the drawer is a URL
+   * (L3), so `?account=6815`, not `/accounts/6815`. The caller builds it; this
+   * component only knows that there is a way. Without one the cell is plain
+   * text — never a button that does nothing (V14).
+   */
   href?: string;
 }) {
   const cut = name ? clip(name) : null;
@@ -76,7 +91,7 @@ export function AccountCell({
 
   if (!href) return <span className="v2acc">{body}</span>;
   return (
-    <Link href={href} className="v2acc v2acc--link" title="Kontenblatt öffnen">
+    <Link href={href} className="v2acc v2acc--link" title="Konto aufschlagen">
       {/* The mark stands **only where there is a way**, never on plain text:
           it says „the account sheet is over here", and where nothing is over
           there it promises nothing (V14). The word beside it is the number

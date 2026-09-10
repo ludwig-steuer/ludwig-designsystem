@@ -146,7 +146,7 @@ export type BusinessPartnerRowData = Pick<
 export interface BusinessPartnerColumnOptions {
   /** The way to the partner — on the **name cell**, not on the whole row. */
   partnerHref?: (partnerId: string) => string;
-  /** The way to the account sheet, on every number: creditor, debtor, clearing. */
+  /** The way to the account **drawer**, on every number: creditor, debtor, clearing. */
   accountHref?: (accountNumber: string) => string;
   columns?: readonly BusinessPartnerColumn[];
 }

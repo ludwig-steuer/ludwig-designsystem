@@ -14,7 +14,7 @@ export default meta;
 type Story = StoryObj;
 
 const partnerHref = (id: string) => `?partner=${id}`;
-const accountHref = (n: string) => `?konto=${n}`;
+const accountHref = (n: string) => `?account=${n}`;
 
 /**
  * Der Bestand in sechs Zeilen: 14.950 Partner über sechs Mandanten, 77 % davon

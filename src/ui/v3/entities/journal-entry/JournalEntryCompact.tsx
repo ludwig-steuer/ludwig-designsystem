@@ -67,7 +67,7 @@ function sum(lines: readonly JournalLine[]): number {
  * cut at 40 characters. That is exactly what `AccountCell` does, and its
  * `@when` names this very place („a booking line, a contra account"). Two
  * copies means one of them stops being fixed, and this one had already lost
- * the way to the account sheet.
+ * the way to the account drawer.
  *
  * With `accountHref` the number becomes a way — with the account icon in
  * front of it, so the reader sees there is somewhere to go without reading
@@ -132,11 +132,14 @@ export function JournalEntryCell({
   /** Account name next to the number; `false` = numbers only, for narrow columns. */
   showNames?: boolean;
   /**
-   * The way to the account sheet, per account number (0155).
+   * The way to the account **drawer**, per account number (0155).
    *
-   * A search param, not a context (L3) — the drawer is a URL. Without it the
-   * numbers stay text: a cell that looks clickable and goes nowhere is worse
-   * than one that does not (V14).
+   * Not to the account page: whoever meets a number inside a booking line has
+   * a question, not a destination. The drawer answers it beside the work; the
+   * page takes the work away (owner, 2026-09-10). A search param, not a
+   * context — the drawer is a URL (L3). Without it the numbers stay text: a
+   * cell that looks clickable and goes nowhere is worse than one that does
+   * not (V14).
    */
   accountHref?: (accountNumber: string) => string;
 }) {
@@ -204,9 +207,10 @@ export function JournalEntryCard({
   /** Heading above the lines — posting text or „Buchungsvorschlag". */
   caption?: string;
   /**
-   * The way to the account sheet, per account number (0155) — same as in the
-   * cell. Here it matters more: every line names its own account, and the
-   * reader who wonders „what else sits on 6815?" is one click away.
+   * The way to the account **drawer**, per account number (0155) — same as in
+   * the cell. Here it matters more: every line names its own account, and the
+   * reader who wonders „what else sits on 6815?" is one click away, without
+   * leaving the entry they are checking.
    */
   accountHref?: (accountNumber: string) => string;
   /** Σ debit / Σ credit below the lines; `false` when the caller already carries the sum. */

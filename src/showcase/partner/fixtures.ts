@@ -65,7 +65,7 @@ export const PARTNER_TABS = [
 
 export const tabHref = (key: string) => `?tab=${key}`;
 export const listHref = "?liste=partner";
-export const accountHref = (n: string) => `?konto=${n}`;
+export const accountHref = (n: string) => `?account=${n}`;
 
 /** Die Wege der drei Zähler — in die Liste der Entität, auf diesen Partner gefiltert. */
 export const vorgaengeHref = {

@@ -128,7 +128,7 @@ export const WithoutTotals: Story = { render: () => <Pair lines={SPLIT} totals={
 export const MitKontoweg: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)" }}>
-      <Pair lines={STANDARD} accountHref={(n) => `?konto=${n}`} />
+      <Pair lines={STANDARD} accountHref={(n) => `?account=${n}`} />
       <div className="v2muted">ohne Weg — dieselben Zeilen, kein Zeichen:</div>
       <Pair lines={STANDARD} />
     </div>
@@ -162,7 +162,7 @@ export const MitSteuerschluessel: Story = {
         { side: "debit", accountNumber: "8400", accountName: "Erlöse 19 % USt", amount: 12, taxKey: "3", automaticRate: 19, text: "falscher Schlüssel" },
         { side: "credit", accountNumber: "70044", accountName: "Beispielbau Handels GmbH", amount: 117.36, text: "Rechnung R-4471" },
       ]}
-      accountHref={(n) => `?konto=${n}`}
+      accountHref={(n) => `?account=${n}`}
     />
   ),
 };

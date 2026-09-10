@@ -12,7 +12,7 @@ const meta: Meta<typeof BusinessPartnerFacts> = {
 export default meta;
 type Story = StoryObj<typeof BusinessPartnerFacts>;
 
-const accountHref = (n: string) => `?konto=${n}`;
+const accountHref = (n: string) => `?account=${n}`;
 
 function detail(over: Partial<BusinessPartnerDetail> = {}): BusinessPartnerDetail {
   return {
