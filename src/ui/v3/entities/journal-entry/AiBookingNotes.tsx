@@ -28,6 +28,11 @@ import { StatusBadge } from "../../patterns/StatusBadge";
  * Standardmäßig eingeklappt — außer der Judge will, dass hingesehen wird
  * (`flag`) oder es liegt ein Fehler an. Wer jedem bestätigten Satz seine
  * Begründung aufdrängt, macht die Begründung wertlos.
+ *
+ * **Collapsed is not the same as gone** (2026-09-10): the box stands as soon
+ * as there is something to read — `confirm` included. In the batch acceptance
+ * `confirm` is the normal case, and „why does this entry look like this?" is
+ * asked exactly there.
  */
 
 export type JudgeVerdict = "confirm" | "confirm_with_note" | "adjust" | "flag";
@@ -78,10 +83,21 @@ export function AiBookingNotes({
   const flagged = verdict === "flag" || errors.length > 0;
   const [open, setOpen] = useState(flagged);
 
-  // Ein bestätigter Satz ohne Befund braucht keinen Kasten: der Vorschlag ist
-  // die Aussage, nicht seine Begründung.
-  if (verdict === "confirm" && errors.length === 0) return null;
-  if (!verdict && errors.length === 0 && !rationale && !judgeReasoning) return null;
+  // **What is there gets shown — collapsed, but present.**
+  //
+  // Until 2026-09-10 the whole box disappeared on `confirm` without a finding,
+  // reasoning that „a confirmed entry is the statement, not its rationale".
+  // That holds for *pushing it at somebody*, not for taking it away: in the
+  // batch acceptance `confirm` is the normal case, so the rationale was
+  // missing exactly where a person works through a hundred entries and wants
+  // to know about one of them why it looks the way it does. Collapsed pushes
+  // nothing at anybody.
+  //
+  // Empty stays empty: no rationale, no judge sentence, no source and no
+  // finding means there is nothing to unfold, and then no box stands there.
+  const hatInhalt =
+    Boolean(rationale) || Boolean(judgeReasoning) || sources.length > 0 || errors.length > 0;
+  if (!hatInhalt) return null;
 
   return (
     <div className="ki">
@@ -94,7 +110,10 @@ export function AiBookingNotes({
         <span className="ki__title">
           KI-Buchungshinweise{flagged ? ": Bitte manuell prüfen" : ""}
         </span>
-        <Confidence level={confidence} compact />
+        {/* With its word, not just a dot: there is room here, and a colour
+            without a word is not a statement (V7). `compact` stays with the
+            booking line and the cell, where the column is narrow. */}
+        <Confidence level={confidence} />
         {verdict ? <StatusBadge axis="judge" status={verdict} info={false} /> : null}
       </button>
 

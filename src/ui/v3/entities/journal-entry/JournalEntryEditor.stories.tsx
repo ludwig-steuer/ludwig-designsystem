@@ -177,6 +177,67 @@ export const S23_JudgeFlaggedWithError: Story = {
 };
 
 /**
+ * **Der Regelfall der Stapelabnahme: bestätigt — und die Begründung steht
+ * trotzdem da.**
+ *
+ * Bis 2026-09-10 verschwand der ganze Kasten, sobald der Judge `confirm`
+ * sagte und kein Befund anlag. Der Gedanke dahinter war richtig — wer jedem
+ * bestätigten Satz seine Begründung aufdrängt, macht sie wertlos —, aber die
+ * Folge war falsch: in der Stapelabnahme ist `confirm` der Regelfall, und
+ * damit fehlte die Begründung genau dort, wo jemand hundert Sätze durchgeht
+ * und bei einem wissen will, warum er so aussieht.
+ *
+ * Jetzt gilt: **eingeklappt, aber vorhanden.** Aufgeklappt wird weiterhin nur,
+ * wo der Judge es verlangt (`flag`) oder ein Fehler anliegt.
+ *
+ * Die **Konfidenz steht als Wort** neben der Überschrift, nicht nur als
+ * farbiger Punkt: hier ist Platz, und eine Farbe ohne Wort ist keine Aussage
+ * (V7). `compact` bleibt der Buchungszeile, wo die Spalte schmal ist.
+ */
+export const S24_ConfirmedWithRationale: Story = {
+  render: () => (
+    <Frame>
+      <JournalEntryEditor
+        {...BASE}
+        editable={false}
+        aiReview={{
+          verdict: "confirm",
+          confidence: "green",
+          rationale:
+            "Der Lieferant ist als Vermieter hinterlegt, der Betrag entspricht der Vormonatsmiete, und die Laufzeit des Vertrags deckt den August.",
+          judgeReasoning: "Konto, Steuersatz und Betrag stimmen mit dem Vertrag überein.",
+          sources: [
+            { key: "1", art: "regel", label: "Wiederkehr: Miete Musterstraße" },
+            { key: "2", art: "beleg", label: "RE-2026-0042" },
+          ],
+        }}
+        onCancel={() => {}}
+        onSave={() => {}}
+      />
+    </Frame>
+  ),
+};
+
+/**
+ * Die Gegenprobe: **nichts zu sagen, also kein Kasten.** Ohne Begründung,
+ * ohne Judge-Satz, ohne Quelle und ohne Befund gibt es nichts aufzuklappen —
+ * und ein Kasten, der leer aufgeht, ist ein gebrochenes Versprechen.
+ */
+export const S25_NothingToExplain: Story = {
+  render: () => (
+    <Frame>
+      <JournalEntryEditor
+        {...BASE}
+        editable={false}
+        aiReview={{ verdict: "confirm", confidence: "green" }}
+        onCancel={() => {}}
+        onSave={() => {}}
+      />
+    </Frame>
+  ),
+};
+
+/**
  * Ohne Zeilen. Die Spec führt „leer" als **nicht anwendbar** — ein
  * Buchungssatz ohne Zeile ist kein Zustand des Editors, sondern ein Fehler
  * des Aufrufers. Die Story steht trotzdem hier, und genau deshalb: der Fehler

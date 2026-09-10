@@ -91,6 +91,32 @@ Standardkomponente hat einen Titel — er wurde nur nicht benutzt.
 | `KontoauszugZugeordnet` | Die Zeile Zahlungskonto aus `paymentAccount` (L-266) |
 | `KontoauszugKontoWaehlen` | Der Mangel `payment_account` mit `PaymentAccountField` als Weg (L-268) |
 
+## Was die Staging-Erhebung vom 2026-09-10 dazu sagt
+
+Nach dem Bau erhoben (`docs/entitaeten/source-document-staging-erhebung-2026-09-10.md`,
+N = 554). Zwei Zahlen gehören in die Abnahme, weil sie die Spec berühren:
+
+- **Die Mängel-Zone trägt im Regelfall eine Zeile, nie mehr als vier.**
+  44 % der Belege haben gar keinen Zustand, 35 % einen, 14 % zwei; drei oder
+  mehr sind 6 %, mehr als vier gibt es nicht. Die Box muss also **nicht**
+  kürzen — und die Story `MitBefunden` mit vier Zeilen ist der obere Rand des
+  Bestands, nicht der Alltag. (Die erste Fassung der Erhebung nannte 35 % für
+  „drei oder mehr"; das war ein NULL-Fehler in der Abfrage und ist dort
+  richtiggestellt.)
+- **Der Mangel `partner` zeigt einen Fall, den es auf Staging nicht gibt.**
+  `docDefects()` kennt ihn nur für `partner_match_outcome = 'ambiguous'` — und
+  der Wert kommt in 554 Belegen **null**mal vor. Häufigster Zustand überhaupt
+  ist „ohne Partner" mit 30,5 %, und zwar als `not_found` (162) und `skipped`
+  (149); für den hat die Domäne bewusst keinen Mangel, weil es keinen Weg
+  hinaus gibt. Das ist kein Fehler dieser Komponente — sie zeigt, was die
+  Domäne liefert —, aber wer 0150 abnimmt, sollte wissen, dass diese eine
+  Zeile im Bestand nie erscheint.
+
+Ebenfalls aus der Erhebung: die 53 Container-Belege (Kontoauszug,
+Kreditkarte) sind zu **null** Prozent an ein Zahlungskonto gebunden. Die Zeile
+„Zahlungskonto" ist gebaut und richtig, hat aber bis zur ersten Zuordnung
+keinen Wert zu zeigen.
+
 ## Abnahmekriterien
 
 Fest (gilt immer):

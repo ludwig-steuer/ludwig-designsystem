@@ -117,14 +117,26 @@ Details:
 
 Gezählt werden die 9 Zustände aus 1.2 (Klassifikation fehlgeschlagen, OCR-Fallback, Dublette, ohne Partner, Empfänger-Mismatch, Split Eltern/Kind, awaiting_input, Pipeline failed, review_needed).
 
-| Zustände gleichzeitig | Anzahl | % | ohne Split-Zustand: Anzahl | % |
-|---|---:|---:|---:|---:|
-| 0 | 157 | 28,3 | 159 | 28,7 |
-| 1 | 150 | 27,1 | 180 | 32,5 |
-| 2 | 54 | 9,7 | 47 | 8,5 |
-| 3+ | 193 | 34,8 | 168 | 30,3 |
+> **Korrigiert am 2026-09-10 (app-03).** Die erste Fassung dieser Tabelle war
+> ein Messfehler: die Summe der Zustände wird NULL, sobald ein Feld NULL ist
+> (`recipient_match`, `processing_status` bei Nicht-Rechnungen), und
+> `least(NULL, 3)` liefert in Postgres **3**. So sind 160 Belege in die
+> Gruppe „3+" gerutscht. Die NULL-sichere Nachmessung steht unten; die alte
+> Fassung nannte 34,8 % statt 6,1 %.
 
-Die „3+"-Gruppe wird von der Kombination *OCR-Fallback × ohne Partner × Split-Kind* bzw. *ohne Partner × Empfänger-Mismatch × OCR* getragen — d. h. Scans aus Sammel-PDFs ohne bekannten Kreditor.
+| Zustände gleichzeitig | Belege | % |
+|---|---:|---:|
+| 0 | 245 | 44,2 |
+| 1 | 195 | 35,2 |
+| 2 | 80 | 14,4 |
+| 3 | 29 | 5,2 |
+| 4 | 5 | 0,9 |
+| 5+ | 0 | 0 |
+
+**Der Alltag ist eine Zeile, das Maximum sind vier.** Mehr als drei Mängel
+haben fünf Belege (0,9 %), mehr als vier keiner — die Mängel-Zone der
+Belegübersicht (0150) muss deshalb nie kürzen, und ihr Regelfall ist eine
+einzige Zeile, nicht drei.
 
 ```sql
 -- Basis-View
