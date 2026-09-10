@@ -431,7 +431,7 @@ Seitenprofils — und derselbe Prüfstein, an dem die letzte Abnahme blockiert
 hat: „ein Chip lag bei x = 1509 in einer Fläche, die bei 1419 endet".
 
 *Messung:* `Filled`, `accountEntryColumns({ variant: "full" })` neben
-`aside`. Die Randspalte ist über `MasterDetail detailBreit` fest 440 px
+`aside`. Die Randspalte ist über `MasterDetail detailWide` fest 440 px
 (`grid-template-columns: minmax(0, 440px) minmax(0, 1fr)`), die Liste
 verlangt `minWidth={1180}`:
 
@@ -531,7 +531,7 @@ beschreibt der Abnahme-Text etwas anderes als der Code. Ein Satz genügt.
 ## Nach der zweiten Abnahme (2026-09-07): drei Blocker, und der schwerste lag nicht in dieser Datei
 
 **M2 erledigt — die Haben-Spalte stand bei keiner Breite im Bild.** Der Strang
-nimmt über `MasterDetail detailBreit` feste 440 px; daneben blieben der Liste
+nimmt über `MasterDetail detailWide` feste 440 px; daneben blieben der Liste
 gemessen 674 px auf der Seite (1440) und 514 bei 1280, während der volle
 Spaltensatz 1.180 verlangt. Soll, Haben und DATEV lagen im Querlauf — die zwei
 wichtigsten Zahlen eines Kontoauszugs waren nur zu erscrollen.
@@ -776,7 +776,7 @@ und Slot-Zeile auf `compact` umschreiben. Nicht beides offen lassen.
   eine Zahl aus 0063 in einem Baustein, den 0050 mitbenutzt; `01ebb7c` gibt
   sie dem Aufrufer zurück (`minDetail`). Der Nachweis dafür gehört zu 0050,
   nicht hierher — dort blockiert derselbe Befund als M4.
-- **`MasterDetail`, `style` im `detailBreit`-Zweig** (Stand `ed6e79a`): der
+- **`MasterDetail`, `style` im `detailWide`-Zweig** (Stand `ed6e79a`): der
   Stil landete am neuen Wrapper `.v2mdw` statt am Raster `.v2md`, während der
   andere Zweig ihn weiter am Raster setzt. Heute folgenlos — beide Aufrufer
   geben kein `style` —, aber ein stiller Unterschied zwischen zwei Zweigen
@@ -1503,14 +1503,14 @@ Dev-Server `http://localhost:6107`, CDP, `getBoundingClientRect`, Bedarf einer
 Zelle über einen ungebundenen Klon (`white-space: nowrap`, `max-width: none`).
 
 **M3 — die Reihenfolge im Dokument, `MasterDetail`.** Der Vorschlag der
-dritten Runde ist jetzt gebaut: im `detailBreit`-Zweig steht das **Detail vor
+dritten Runde ist jetzt gebaut: im `detailWide`-Zweig steht das **Detail vor
 der Liste** im Markup, und die Leserichtung im Nebeneinander stellt
 `flex-direction: row-reverse` her (`v3.css:1108–1122`, statt `wrap-reverse`).
 Damit stimmen beide Fälle statt einem:
 
 | | DOM-Reihenfolge | im Bild |
 |---|---|---|
-| nebeneinander (`DetailBreit` #0, 1440) | Detail, Liste | Liste links 16, Detail rechts 476 |
+| nebeneinander (`DetailWide` #0, 1440) | Detail, Liste | Liste links 16, Detail rechts 476 |
 | umgebrochen (`InUse`, 1440) | Detail, Liste | Detail top 688,5, Liste top 1003 |
 | umgebrochen (`InUse`, 1280) | Detail, Liste | Detail top 725,7, Liste top 1040,2 |
 
@@ -1520,7 +1520,7 @@ Randspalte stand gemessen bei `left` 968 statt 272 (1440). `justify-content:
 flex-end` (bei umgekehrter Hauptachse das linke Ende) setzt sie zurück auf
 272; nebeneinander bleibt es folgenlos, weil die breite Hälfte die Zeile
 ohnehin füllt. Nachgemessen bei 1440, 1280, 1000 und 860 an `InUse` und an
-allen drei Rahmen von `DetailBreit`. **Gegenprobe**, dass die Grundvariante
+allen drei Rahmen von `DetailWide`. **Gegenprobe**, dass die Grundvariante
 unberührt ist: `Filled` bei 1280 — Liste DOM-Kind 0 bei `left` 16 (808 px),
 Detail DOM-Kind 1 bei `left` 844 (420 px), unverändert.
 

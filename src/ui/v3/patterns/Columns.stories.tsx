@@ -20,14 +20,14 @@ const meta: Meta<typeof Columns> = {
 export default meta;
 type Story = StoryObj<typeof Columns>;
 
-function Block({ titel, zeilen = 3 }: { titel: string; zeilen?: number }) {
+function Block({ title: title, rows: rows = 3 }: { title: string; rows?: number }) {
   return (
     <Card>
-      <CardHead title={titel} />
+      <CardHead title={title} />
       <div style={{ padding: "12px 20px 16px" }}>
         <FieldList
           tone="bare"
-          rows={Array.from({ length: zeilen }, (_, i) => [`Zeile ${i + 1}`, "Wert"])}
+          rows={Array.from({ length: rows }, (_, i) => [`Zeile ${i + 1}`, "Wert"])}
         />
       </div>
     </Card>
@@ -43,8 +43,8 @@ export const ListDetail: Story = {
   render: () => (
     <Columns
       pattern="list-detail"
-      list={<Block titel="Liste" zeilen={6} />}
-      main={<Block titel="Detail" zeilen={4} />}
+      list={<Block title="Liste" rows={6} />}
+      main={<Block title="Detail" rows={4} />}
     />
   ),
 };
@@ -62,9 +62,9 @@ export const ListDetailAside: Story = {
   render: () => (
     <Columns
       pattern="list-detail-aside"
-      list={<Block titel="Strang" zeilen={8} />}
-      main={<Block titel="Arbeitsfläche" zeilen={5} />}
-      aside={<Block titel="Notizen" zeilen={3} />}
+      list={<Block title="Strang" rows={8} />}
+      main={<Block title="Arbeitsfläche" rows={5} />}
+      aside={<Block title="Notizen" rows={3} />}
     />
   ),
 };
@@ -80,8 +80,8 @@ export const Split: Story = {
   render: () => (
     <Columns
       pattern="split"
-      main={<Block titel="Original" zeilen={5} />}
-      aside={<Block titel="Was Ludwig gelesen hat" zeilen={5} />}
+      main={<Block title="Original" rows={5} />}
+      aside={<Block title="Was Ludwig gelesen hat" rows={5} />}
     />
   ),
 };
@@ -100,8 +100,8 @@ export const MainAside: Story = {
     <Columns
       pattern="main-aside"
       width="table"
-      main={<Block titel="Bewegungen" zeilen={8} />}
-      aside={<Block titel="Fakten" zeilen={4} />}
+      main={<Block title="Bewegungen" rows={8} />}
+      aside={<Block title="Fakten" rows={4} />}
     />
   ),
 };
@@ -116,7 +116,7 @@ export const MainAside: Story = {
  * erkämpft worden; eine dritte Stufe entsteht, wenn sie jemand misst — nicht,
  * wenn sie jemand braucht.
  */
-export const Stufen: Story = {
+export const Steps: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 32 }}>
       <div>
@@ -126,8 +126,8 @@ export const Stufen: Story = {
         <Columns
           pattern="main-aside"
           width="facts"
-          main={<Block titel="Arbeitsfläche" zeilen={3} />}
-          aside={<Block titel="Daneben" zeilen={2} />}
+          main={<Block title="Arbeitsfläche" rows={3} />}
+          aside={<Block title="Daneben" rows={2} />}
         />
       </div>
       <div>
@@ -137,8 +137,8 @@ export const Stufen: Story = {
         <Columns
           pattern="main-aside"
           width="table"
-          main={<Block titel="Arbeitsfläche" zeilen={3} />}
-          aside={<Block titel="Daneben" zeilen={2} />}
+          main={<Block title="Arbeitsfläche" rows={3} />}
+          aside={<Block title="Daneben" rows={2} />}
         />
       </div>
     </div>

@@ -882,9 +882,9 @@ export const GroupSelection: Story = {
 
 interface BatchRow {
   id: string;
-  beleg: string;
-  konto: string;
-  kontoName: string;
+  document: string;
+  account: string;
+  accountName: string;
   text: string;
   amount: number;
 }
@@ -901,42 +901,42 @@ const BATCH: Array<[string, string, string, string, string, number]> = [
   ["s-1", "UB-09-3", "1370", "Durchlaufende Posten", "Umbuchung Geldtransit", 500],
 ];
 
-const BATCH_ROWS: BatchRow[] = BATCH.map(([id, beleg, konto, kontoName, text, amount]) => ({
+const BATCH_ROWS: BatchRow[] = BATCH.map(([id, document, account, accountName, text, amount]) => ({
   id,
-  beleg,
-  konto,
-  kontoName,
+  document: document,
+  account: account,
+  accountName: accountName,
   text,
   amount,
 }));
 
 /** Die fünf Satzarten mit ihrer Beschreibung — beides kommt aus der App. */
-const SATZARTEN: Array<[string, string, string]> = [
-  ["erloes", "Erlös", "Umsatz aus Lieferung oder Leistung"],
-  ["aufwand", "Aufwand", "Betrieblicher Aufwand mit Beleg"],
+const RECORD_TYPES: Array<[string, string, string]> = [
+  ["revenue", "Erlös", "Umsatz aus Lieferung oder Leistung"],
+  ["expense", "Aufwand", "Betrieblicher Aufwand mit Beleg"],
   ["bank", "Bank", "Bewegung auf einem Zahlungskonto"],
-  ["kasse", "Kasse", "Barbewegung mit Kassenbeleg"],
-  ["sachkonto", "Sachkonto", "Umbuchung ohne Zahlung"],
+  ["cash", "Kasse", "Barbewegung mit Kassenbeleg"],
+  ["ledger", "Sachkonto", "Umbuchung ohne Zahlung"],
 ];
 
 const PREFIX: Record<string, string> = {
-  erloes: "e",
-  aufwand: "a",
+  revenue: "e",
+  expense: "a",
   bank: "b",
-  kasse: "k",
-  sachkonto: "s",
+  cash: "k",
+  ledger: "s",
 };
 
 const BATCH_COLUMNS: ColumnDef<BatchRow>[] = [
-  { key: "beleg", header: "Belegfeld 1", width: "140px", cell: (r) => <MonoCell value={r.beleg} /> },
-  { key: "konto", header: "Konto", width: "90px", cell: (r) => <MonoCell value={r.konto} /> },
+  { key: "beleg", header: "Belegfeld 1", width: "140px", cell: (r) => <MonoCell value={r.document} /> },
+  { key: "konto", header: "Konto", width: "90px", cell: (r) => <MonoCell value={r.account} /> },
   {
     key: "text",
     header: "Buchungstext",
     cell: (r) => (
       <span className="v2main">
         {r.text}
-        <span className="v2sub"> · {r.kontoName}</span>
+        <span className="v2sub"> · {r.accountName}</span>
       </span>
     ),
   },
@@ -961,7 +961,7 @@ const BATCH_COLUMNS: ColumnDef<BatchRow>[] = [
 export const GroupsInUse: Story = {
   render: () => (
     <DataTable<BatchRow>
-      groups={SATZARTEN.map(([key, label, note]) => {
+      groups={RECORD_TYPES.map(([key, label, note]) => {
         const rows = BATCH_ROWS.filter((r) => r.id.startsWith(`${PREFIX[key]}-`));
         const sum = rows.reduce((n, r) => n + r.amount, 0);
         return {

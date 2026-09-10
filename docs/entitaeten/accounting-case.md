@@ -186,7 +186,7 @@ auf den Backlog, bis es eines gibt.
 Der Partner-Reiter ist der **zweite Einsatzort derselben Zeile**: dieselbe
 `CaseRow` muss in der eigenen Liste und im Detail des Geschäftspartners
 funktionieren (§7 Nr. 2). Genau das ist die Wiederverwendung, die die Spec zu
-`CaseRow` mit zwei `ImEinsatz`-Stories beweisen soll — heute stehen dort zwei
+`CaseRow` mit zwei `InUse`-Stories beweisen soll — heute stehen dort zwei
 handgeschriebene Zeilen für eine Entität (R17).
 
 ## Formen

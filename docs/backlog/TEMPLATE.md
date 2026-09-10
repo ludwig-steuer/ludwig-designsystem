@@ -27,7 +27,7 @@ passiert. Kein Feature-Katalog.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `…` | `…` | ja/nein | ein Halbsatz | `Gefuellt` |
+| `…` | `…` | ja/nein | ein Halbsatz | `Filled` |
 
 Typen aus `src/ludwig/…`: … · GLOSSARY-Begriffe: englisch im Code, deutsch im Label.
 Was die Komponente **nicht** kann (bewusst): …
@@ -44,11 +44,11 @@ Abgeleitet nach `spec-schreiben` §6. Titel `v3/<Stufe>/<Gruppe>/<Name>`.
 
 | Story | Beweist |
 |---|---|
-| `Gefuellt` | Normalfall mit realistischen Daten |
-| `Leer` | Leerzustand mit Grund und Ausweg |
-| `Varianten` | alle Werte von `variant`/`tone` nebeneinander |
-| `Interaktiv` | Rundlauf über `onSelect` |
-| `ImEinsatz` | in `Card`/`MasterDetail`, wie auf der Seite |
+| `Filled` | Normalfall mit realistischen Daten |
+| `Empty` | Leerzustand mit Grund und Ausweg |
+| `Variants` | alle Werte von `variant`/`tone` nebeneinander |
+| `Interactive` | Rundlauf über `onSelect` |
+| `InUse` | in `Card`/`MasterDetail`, wie auf der Seite |
 
 Nicht anwendbare Zustände und warum: …
 

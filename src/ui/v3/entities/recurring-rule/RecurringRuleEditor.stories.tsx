@@ -38,7 +38,7 @@ const CANDIDATES: AccountCandidate[] = [
 ];
 
 const ACCOUNTS: RecurringRuleAccounts = {
-  candidates: { partner: CANDIDATES.slice(0, 2), alle: CANDIDATES },
+  candidates: { partner: CANDIDATES.slice(0, 2), all: CANDIDATES },
   onSearch: async (q) =>
     CANDIDATES.filter((c) => `${c.number} ${c.name}`.toLowerCase().includes(q.toLowerCase())),
 };

@@ -150,7 +150,7 @@ anzufassen.
 | `docDirection` | `DocDirection \| null` | nein | Einordnung, Achse `beleg_richtung`. NULL heißt „nicht anwendbar" (GLOSSARY) — kein Badge. | `Einordnung` |
 | `classDocumentKind` | `string \| null` | nein | Beleg-Charakter. Wird **nur gezeigt, wenn ≠ `original`** — 83 % tragen `original`, das ist der Normalfall und kein Hinweis wert. Keine Achse (B5) → Label über `formatDocumentKind()`, als `Badge`, nicht als `StatusBadge`. | `Einordnung` |
 | `collectionKind` | `string \| null` | nein | Dokumentgruppe, Achse `dokumentgruppe`. Nur am Sammeldokument. | `Einordnung` |
-| `caseNumber` / `caseHref` | `string \| null` | nein | Rang 6, als Inline des Sachverhalts. | `ImEinsatz` |
+| `caseNumber` / `caseHref` | `string \| null` | nein | Rang 6, als Inline des Sachverhalts. | `InUse` |
 | `href` | `string \| null` | nein | Ohne ihn ist die Zeile kein Link. | `Gefuellt` |
 
 Typen aus `src/ludwig/modules/source-docs/domain/`: `SourceDocType`,
@@ -227,7 +227,7 @@ Titel `v3/Entitäten/Beleg/SourceDocument`.
 | `Zustände` | Die Erledigung über alle sechs `completed_via`-Werte plus „Offen", mit dem Grund im `title` |
 | `Zelle` | `SourceDocumentCell` allein, in fremdem Markup (ein Satz, eine Buchungszeile) — mit und ohne `href` |
 | `Rand` | Was die Kürzung tut: 139-Zeichen-Dateiname, 56-Zeichen-Gegenpart, Beleg ohne Gegenpart, ohne Belegdatum, ohne alles außer Datei und Eingang |
-| `ImEinsatz` | Sechs Zeilen untereinander in einer `Card` — der Beleg-Tab eines Sachverhalts, gemischte Belegarten |
+| `InUse` | Sechs Zeilen untereinander in einer `Card` — der Beleg-Tab eines Sachverhalts, gemischte Belegarten |
 
 Sieben Stories: 1 Zustand (nur „gefüllt", die anderen vier oben begründet
 ausgeschlossen) + 1 je Enum-Achse (`Ausprägungen`, `Einordnung`, `Zustände`)
@@ -311,7 +311,7 @@ Quelltext geraten.
 | Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/source-document/SourceDocument.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Beleg/SourceDocument`, dieselbe Form wie Konto und Klärung | ✓ |
 | Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` an allen sieben Exporten (`clipEnd` 121, `clipMiddle` 136, `sourceDocumentIdentifier` 177, `SourceDocumentCompletion` 199, `Cell` 216, `Class` 257, `Row` 298). **Ein Kommentar ist deutsch**, `SourceDocument.tsx:384–385` — siehe Mangel 1 | ✗ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE '#[0-9a-fA-F]{3,8}\b\|[0-9]+px'` über die Dateien der Familie: ein einziger Treffer, `#30581` in einem Kommentar (TypeScript-Issue). Labels aus `sourceDocTypeLabel()` und `formatDocumentKind()`; Zustand über `StatusBadge axis="beleg_erledigung"` → `BELEG_ERLEDIGUNG` (`src/ludwig/ui/status/status-registry.ts:527`, acht Schlüssel: `open`, `completed` und die sechs `completed_via`-Werte) | ✓ |
-| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | sieben Stories, Namen wie in der Spec (`Gefuellt`, `Ausprägungen`, `Einordnung`, `Zustände`, `Zelle`, `Rand`, `ImEinsatz`); die vier nicht gebauten Zustände sind im Abschnitt „Verhalten" begründet, nicht als leere Story abgelegt | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | sieben Stories, Namen wie in der Spec (`Gefuellt`, `Ausprägungen`, `Einordnung`, `Zustände`, `Zelle`, `Rand`, `InUse`); die vier nicht gebauten Zustände sind im Abschnitt „Verhalten" begründet, nicht als leere Story abgelegt | ✓ |
 | Prüfliste `design-guidelines.md` §9 durchgegangen | gemessen in `--filled`: Zeilenhöhe 72,2 px bei Polsterung `12px 18px` — dieselbe Ordnung wie die abgenommene `ClarificationRow` (71 px, zwei Zeilen); Maß-Spalte `text-align: right` mit `lining-nums tabular-nums`, Text-Spalten `start`, nichts zentriert; Kontrast 13,77 (Gegenpart, Kennung, Maß, Marke), 4,88 (`.v2sub`), 4,81 (Sachverhalts-Link) — alle ≥ 4,5; Fokusring nach echten Tab-Anschlägen `2px solid rgb(59, 143, 196)` auf `.v2rowlink` und `.v2link`, `:focus-visible` trifft; Hover über `.v2tbl__row:has(.v2rowlink):hover`; die Zeile ist ganz klickbar — `elementFromPoint` bei 80 % Breite trifft `A.v2rowlink` (I11); Vorzeichen ohne Farbe (`-120,50 €` in `rgb(45,45,45)`); kein Icon ohne Wort, die Erledigung trägt 0 `<svg>` | ✓ |
 | Im Browser angesehen (Storybook), nicht nur gebaut | alle sieben Story-IDs geöffnet und gemessen; die Spaltenkanten von `--in-use` stehen über sechs Zeilen und fünf Belegarten auf identischen x-Werten (35 · 340 · 464 · 576 · 819 · 923 · 1035 · 1237) | ✓ |
 
@@ -336,7 +336,7 @@ Quelltext geraten.
 
 | Frage | Nachweis | Ergebnis |
 |---|---|---|
-| Hat jede Prop ihre Story? | alle 17 Felder des VM kommen in mindestens einer Story vor: `caseNumber`/`caseHref` in `Gefuellt` und `ImEinsatz`, `collectionKind` in `Einordnung` und `Ausprägungen`, `completedReason` in `Zustände`, `href` in `Gefuellt` und `Zelle`, der Rest wie in der Nachweis-Spalte der Schnittstelle | ✓ |
+| Hat jede Prop ihre Story? | alle 17 Felder des VM kommen in mindestens einer Story vor: `caseNumber`/`caseHref` in `Gefuellt` und `InUse`, `collectionKind` in `Einordnung` und `Ausprägungen`, `completedReason` in `Zustände`, `href` in `Gefuellt` und `Zelle`, der Rest wie in der Nachweis-Spalte der Schnittstelle | ✓ |
 | Stimmt die Zahl mit der Ableitung? | 7 = 1 Zustand + 3 Enum-Achsen + 1 Zusatz-Export + 1 Rand + 1 im Einsatz; keine Callback-Story, weil es keinen Callback gibt | ✓ |
 | Ist jeder ausgeschlossene Zustand begründet? | lädt, leer, leer nach Filter, Fehler — begründet im Abschnitt „Verhalten", nicht in einer leeren Story | ✓ |
 

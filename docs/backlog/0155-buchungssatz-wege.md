@@ -53,7 +53,7 @@ Zwei Handkopien, beide aus dem eigenen Haus:
 ## Abnahmekriterien
 
 - [ ] Eine Quelle ohne `label` zeigt Art und Zitat, **nie** eine Kennung
-- [ ] `QUELLE_AUFSCHLAGBAR` führt genau die drei Arten, die in den Daten eine
+- [ ] `SOURCE_OPENABLE` führt genau die drei Arten, die in den Daten eine
       Kennung tragen (`bank`, `beleg`, `klaerung`)
 - [ ] Das Konto-Zeichen steht **nur** an einer Nummer mit Weg
 - [ ] Der Weg ist ein Suchparameter (`?account=`), kein Pfad

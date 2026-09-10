@@ -215,7 +215,7 @@ Titel `v3/Entitäten/Beleg/SourceDocumentFacts`.
 | `Gruppe` | Der Block an der Relation, vier Fälle: ein Sammel-Original **ohne** Klammer-Typ („4 von 9 erledigt" — der Normalfall im Bestand), eines **mit**, ein Teilbeleg („Seiten 5–7 aus …") und eine **Rechnung**, die Teilbeleg ist: der Fall, den ein Renderer je Belegart verfehlt hätte |
 | `Toene` | `bare` (Drawer) und `surface` (Karte) nebeneinander |
 | `Rand` | 400-Zeichen-Zusammenfassung, 139-Zeichen-Dateiname, 868-Zeichen-Erledigungsgrund — alle drei Kürzungen, voller Text im `title` |
-| `ImEinsatz` | Im `SourceDocumentDrawer`, neben einer Liste: Kopf, Vorschau, Fakten, Grenze, ein Ausgang — der Nachzug in einem Bild |
+| `InUse` | Im `SourceDocumentDrawer`, neben einer Liste: Kopf, Vorschau, Fakten, Grenze, ein Ausgang — der Nachzug in einem Bild |
 
 Acht Stories: 2 anwendbare Zustände (`Gefuellt`, `Leer`; lädt und Fehler
 oben begründet ausgeschlossen) + 1 je Enum-Achse (`Ausprägungen` für die
@@ -267,7 +267,7 @@ Variabel (aus dieser Spec):
 - [ ] Ein Beleg ohne `group` bekommt keinen Block, auch keinen leeren (Story `Ausprägungen`)
 - [ ] `tone` verhält sich wie Zeile 4 der Schnittstelle (Story `Toene`)
 - [ ] Alle drei Kürzungen greifen, der volle Text steht im `title` (Story `Rand`)
-- [ ] `SourceDocumentDrawer` zeigt die **Erledigung** im Kopf, nicht `axis="beleg"` (Story `ImEinsatz`)
+- [ ] `SourceDocumentDrawer` zeigt die **Erledigung** im Kopf, nicht `axis="beleg"` (Story `InUse`)
 - [ ] `SourceDocumentDrawer` enthält kein `<iframe>` mehr (`grep -n "iframe" src/ui/v3/entities/source-document/SourceDocumentDrawer.tsx` findet nichts)
 - [ ] Ersetzt `BelegSummary` und `SourceDocFactsCard` ohne Funktionsverlust; die Rechnungs- und Vertragsfelder aus `GlanceCard` und `ContractDetail` stehen als Blöcke
 - [ ] Tut bewusst nicht: Positionen, Vorsteuer, Ändern — der Aufrufer löst es mit 0072 und 0071
@@ -287,7 +287,7 @@ gemessen.
 | Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `SourceDocumentFacts.tsx` + `.stories.tsx`, Titel `v3/Entitäten/Beleg/SourceDocumentFacts`; der Nachzug liegt in `SourceDocumentDrawer.tsx` mit eigener Story-Datei | ✓ |
 | Code englisch; `@when`/`@instead` an jedem Export | `SourceDocumentFacts.tsx:57–63` und `SourceDocumentDrawer.tsx:64–70`, dazu `resolveSourceDocumentDetail` (`source-document-detail.ts:230–236`); Kommentare durchgehend englisch | ✓ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | kein Hex, kein px in den drei Dateien (die Treffer der Stories liegen im Data-URI). Zustand über `axis="beleg_erledigung"` und `axis="dokumentgruppe"`, Belegart über `sourceDocTypeLabel()`, Vertragstyp über `contractTypeLabel()`. **Eine lokale Label-Map bleibt:** die Herkunft einer buchungsrelevanten Vertragsfakt, `source-document-detail.ts:191` — siehe Mangel 1 | ✗ |
-| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | acht Stories mit den Namen der Spec (`Gefuellt`, `Ausprägungen`, `Vertrag`, `Leer`, `Gruppe`, `Toene`, `Rand`, `ImEinsatz`); lädt und Fehler sind im Abschnitt „Verhalten" dem Aufrufer zugeschrieben (0042), leer nach Filter gibt es nicht | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | acht Stories mit den Namen der Spec (`Gefuellt`, `Ausprägungen`, `Vertrag`, `Leer`, `Gruppe`, `Toene`, `Rand`, `InUse`); lädt und Fehler sind im Abschnitt „Verhalten" dem Aufrufer zugeschrieben (0042), leer nach Filter gibt es nicht | ✓ |
 | Prüfliste `design-guidelines.md` §9 durchgegangen | Werte rechts mit `tabular-nums`, die Zusammenfassung als `.v2doc__prose` links ohne Ziffernstellung (die Nachbesserung aus 0052 hält); Kontraste wie in 0074 gemessen; kein Icon ohne Wort — die Erledigung steht als Wort mit Beschreibung im `title`; Karte mit Rand ohne Schatten. **Notiz:** `.v2fields__h` setzt `text-transform: uppercase`, die Blockköpfe erscheinen als „RECHNUNG", „VERTRAG", „DOKUMENTGRUPPE", der Zonen-Kopf als „BELEGDATEN" — Versalien (A2). Das kommt aus 0006 bzw. 0052 und betrifft das ganze Set; als Befund an die Grundlagen (0055), nicht als Mangel dieser Aufgabe | ✓ |
 | Im Browser angesehen (Storybook), nicht nur gebaut | vierzehn Story-IDs geöffnet; Feldzeilen je Ausprägung, Blockzahl, Zonenpositionen und Kürzungen gemessen | ✓ |
 
@@ -320,7 +320,7 @@ gemessen.
 | Der Fuß trägt genau eine Aktion | ein `<button>`: „Vollständige Belegansicht öffnen" | ✓ |
 | Vier Zustände in der Vorrangfolge `error` → `loading` → `record === null` → Inhalt | `--fehler` zeigt „Beleg RE-4471 konnte nicht geladen werden: …" trotz `record = null`; `--laedt` setzt `record` **und** `loading` und zeigt die Ladefläche; `--nicht-gefunden` den Leertext mit der Kennung; `--geoeffnet` den Inhalt. Fuß leer in Fehler und Leerfall | ✓ |
 | Der Fehlertext enthält `reference` wörtlich | „Beleg **RE-4471** konnte nicht geladen werden: Die Ablage antwortet nicht (Zeitüberschreitung nach 30 Sekunden)." | ✓ |
-| Sechs Drawer-Stories bleiben | `Geoeffnet`, `OhneVorschau`, `Laedt`, `Fehler`, `NichtGefunden`, `ImKontext` — dieselben sechs wie vor `000f2ad` (`git show 000f2ad^:…` zeigt dieselben Exportnamen). Die Spec spricht von „acht Stories"; es waren sechs, keine ist verloren gegangen | ✓ |
+| Sechs Drawer-Stories bleiben | `Geoeffnet`, `WithoutPreview`, `Laedt`, `Fehler`, `NotFound`, `InContext` — dieselben sechs wie vor `000f2ad` (`git show 000f2ad^:…` zeigt dieselben Exportnamen). Die Spec spricht von „acht Stories"; es waren sechs, keine ist verloren gegangen | ✓ |
 | Ladezustand hat die Form des Inhalts (Nachbesserung 2 der 0052-Abnahme) | gemessen bei 1440 × 900: Skelett `.v2doc__origskel` bei y = 101, 558 px, ohne Rahmen; das Original steht seit dem Nachzug bei y = 172 in einer Karte mit Kopf. Die Deckung, die die 0052-Abnahme hergestellt hatte, ist um 71 px und um den Kartenrahmen verloren — siehe Mangel 2 | ✗ |
 
 **Story-Deckung** (`spec-schreiben` §6)

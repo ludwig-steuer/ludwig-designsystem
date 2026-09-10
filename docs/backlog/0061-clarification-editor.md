@@ -116,7 +116,7 @@ Titel `v3/Entitäten/Klärung/ClarificationEditor`.
 | `Ungueltig` | leerer Titel und 180-Zeichen-Titel, Grund am Feld |
 | `Laedt` | `pending` am Knopf |
 | `Fehler` | `error` am Knopf, Eingabe bleibt erhalten |
-| `ImEinsatz` | im `Drawer` am Sachverhalt, wie auf der Seite |
+| `InUse` | im `Drawer` am Sachverhalt, wie auf der Seite |
 
 Sieben Stories; Editor-Untergrenze (gefüllt, leer, Fehler, lädt, ungültig)
 erfüllt. „Leer" ist der Startzustand von `Gefuellt` und bekommt keine eigene

@@ -64,7 +64,7 @@ export type SourceKind =
   | "gesetz"
   | "web";
 
-const QUELLE: Record<SourceKind, { Icon: LucideIcon; label: string }> = {
+const SOURCE_KIND: Record<SourceKind, { Icon: LucideIcon; label: string }> = {
   bank: { Icon: Banknote, label: "Kontoauszug" },
   beleg: { Icon: FileText, label: "Beleg" },
   history: { Icon: History, label: "Bisherige Buchungen" },
@@ -90,7 +90,7 @@ const QUELLE: Record<SourceKind, { Icon: LucideIcon; label: string }> = {
  * drawer yet (only a route to the case). That is the right way round: the
  * constant says what the **data** allows, the caller says what it has built.
  */
-export const QUELLE_AUFSCHLAGBAR: Record<SourceKind, boolean> = {
+export const SOURCE_OPENABLE: Record<SourceKind, boolean> = {
   bank: true,
   beleg: true,
   klaerung: true,
@@ -165,9 +165,9 @@ export function AiBookingNotes({
   //
   // Empty stays empty: no rationale, no judge sentence, no source and no
   // finding means there is nothing to unfold, and then no box stands there.
-  const hatInhalt =
+  const hasContent =
     Boolean(rationale) || Boolean(judgeReasoning) || sources.length > 0 || errors.length > 0;
-  if (!hatInhalt) return null;
+  if (!hasContent) return null;
 
   return (
     <div className="ki">
@@ -249,7 +249,7 @@ export function AiBookingNotesBody({
         <div className="ki__block">
           <div className="lw-overline">Quellen</div>
           {sources.map((s) => {
-            const { Icon, label } = QUELLE[s.art];
+            const { Icon, label } = SOURCE_KIND[s.art];
             const inner = (
               <>
                 <Icon size={13} strokeWidth={1.5} />

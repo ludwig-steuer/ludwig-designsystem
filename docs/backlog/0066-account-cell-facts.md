@@ -188,8 +188,8 @@ untereinander, damit die Stufen im Vergleich lesbar sind.
 | `Filled` | Sachkonto `1210 Commerzbank`, Saldo in DATEV, 2.937 Bewegungen, vier nur in Ludwig — `number`, `name`, `facts` |
 | `Unvollstaendig` | `accountName: null`, `datevBalance: null`, `lastBookingDate: null` — Geviertstriche, Zeilen bleiben stehen |
 | `Personenkonto` | `role: "creditor"`, `partnerName` gesetzt — die Partner-Zeile erscheint, der Chip wechselt |
-| `NurDatev` | `ludwigOnlyCount: 0` — die Nachtrags-Zeile **fehlt**, kein „0 nur in Ludwig" |
-| `SyncOffen` | `syncState: "local_only"` — der zweite Chip erscheint; im Normalfall ist er weg |
+| `DatevOnly` | `ludwigOnlyCount: 0` — die Nachtrags-Zeile **fehlt**, kein „0 nur in Ludwig" |
+| `SyncPending` | `syncState: "local_only"` — der zweite Chip erscheint; im Normalfall ist er weg |
 | `InUse` | Zelle als Gegenkonto in einer `Table`-Zeile mit `href`; Fakten in einer `HoverCard` über derselben Zelle — wie auf der Seite |
 | `Edges` | Kontoname 50 Zeichen (Ellipse + `title`), Nummer `0420` (führende Null), Saldo negativ und `0,00 €`, sechsstellige Personenkontonummer `890001` |
 
@@ -228,8 +228,8 @@ Variabel (aus dieser Spec):
 - [ ] Kontoname wird ab 40 Zeichen gekürzt, voller Name im `title` (Story `Edges`)
 - [ ] Führende Nullen bleiben stehen — `0420` wird nicht zu `420` (Story `Edges`)
 - [ ] Die Fakten stehen in der Reihenfolge Kopf · Saldo DATEV · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync (Story `Filled`, DOM-Reihenfolge)
-- [ ] `ludwigOnlyCount === 0` lässt die Nachtrags-Zeile **verschwinden**, nicht leer stehen (Story `NurDatev`)
-- [ ] `syncState === "synced"` zeigt **keinen** zweiten Chip; `local_only` zeigt ihn (Stories `Filled` vs. `SyncOffen`)
+- [ ] `ludwigOnlyCount === 0` lässt die Nachtrags-Zeile **verschwinden**, nicht leer stehen (Story `DatevOnly`)
+- [ ] `syncState === "synced"` zeigt **keinen** zweiten Chip; `local_only` zeigt ihn (Stories `Filled` vs. `SyncPending`)
 - [ ] Fehlende Werte zeigen den Geviertstrich und behalten ihre Zeile (Story `Unvollstaendig`)
 - [ ] Rolle und Sync-Zustand kommen aus der Registry (`konto_typ`, `konto_datev_sync`), nicht aus einer lokalen Map (`grep` findet keine Label-Map in `Account.tsx`)
 - [ ] `AccountFacts` rechnet nichts: kein `reduce`, keine Summenbildung in der Datei
@@ -274,17 +274,17 @@ je Exit 0 (in beiden Runden).
 | Datei nach der Familie benannt, Story daneben, Titel `v3/Entitäten/Konto/Account` | `src/ui/v3/entities/account/Account.tsx` + `.stories.tsx`; `index.json` zeigt `v3-entitäten-konto-account--*` | ✓ |
 | Code englisch; `@when`/`@instead` an **beiden** Exporten | `Account.tsx` an `AccountCell` und `AccountFacts`; Bezeichner und Kommentare englisch, Deutsch nur in Labels | ✓ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-f]{3,8}|[0-9]+px" Account.tsx` findet nichts; keine `Record<…>`-Map; `StatusBadge axis="konto_typ"`/`"konto_datev_sync"` | ✓ |
-| Alle sieben Stories vorhanden; ausgeschlossene Zustände begründet | `Filled`, `Unvollstaendig`, `Personenkonto`, `NurDatev`, `SyncOffen`, `InUse`, `Edges` — 7/7; „lädt"/„Fehler"/„leer nach Filter" in der Spec begründet ausgeschlossen | ✓ |
+| Alle sieben Stories vorhanden; ausgeschlossene Zustände begründet | `Filled`, `Unvollstaendig`, `Personenkonto`, `DatevOnly`, `SyncPending`, `InUse`, `Edges` — 7/7; „lädt"/„Fehler"/„leer nach Filter" in der Spec begründet ausgeschlossen | ✓ |
 | Prüfliste `design-guidelines.md` §9 durchgegangen | Runde 1 ✗ (Linkfarbe, Befund 1). Runde 2 nachgemessen: `a.v2acc .v2mono` = `rgb(46,120,168)` = `--color-accent-700` gegen `rgb(45,45,45)` in der Nachbarzelle — die verlinkte Zelle ist im Ruhezustand als Link erkennbar, Unterstrich bei Hover, Fokusring vorhanden | ✓ |
 | Im Browser angesehen (Storybook), nicht nur gebaut | alle sieben Stories in beiden Runden gerendert und gemessen | ✓ |
 | `number`/`name` wie Zeile 1–2; ohne `href` **kein** fokussierbares Element | `Filled`: Wurzel ist `<span class="v2acc">`, `querySelectorAll("a[href],button,input,select,textarea,[tabindex]")` → **0** | ✓ |
 | Mit `href` ist die Zelle ein `<a>`, kein `<button>` | `InUse`: zwei `A`-Elemente (`?konto=1210`, `?konto=4210`), `button`-Zahl im Story-Root **0** | ✓ |
 | Kontoname wird ab 40 Zeichen gekürzt, voller Name im `title` | `Edges`: gezeigt „Betriebs- und Geschäftsausstattung, ger…" (40 Zeichen inkl. Ellipse), `title` = der volle Name (48); der 37-Zeichen-Name daneben bleibt ungekürzt | ✓ |
 | Führende Nullen bleiben stehen | `Edges`: `<span class="v2mono">0420</span>` | ✓ |
-| Reihenfolge Kopf · Saldo · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | durch Abweichung 1 **gegenstandslos**. Gebaute Reihenfolge im DOM (`Personenkonto`): Kontoart · Saldo in DATEV 2026 · + 2 nur in Ludwig · Bewegungen · Geschäftspartner · Letzte Buchung; `SyncOffen` hängt DATEV-Abgleich an | ✓ (gegenstandslos) |
-| Wirtschaftsjahr (Rang 4) ist dargestellt, `fiscalYear` ist kein totes Feld (A12) | Runde 2, alle sieben Stories gemessen: das Label trägt überall das Jahr („Saldo in DATEV 2026") (`Filled`/`InUse`/`Edges` 2026, `ImKontext` folgt dem Schalter bis 2024). Den Jahresschalter des Drawers doppelt es nicht: der Schalter listet die wählbaren Jahre, das Label qualifiziert **eine** Zahl (Anmerkung 4) | ✓ |
-| `ludwigOnlyCount === 0` lässt die Nachtrags-Zeile verschwinden | `NurDatev`: vier Zeilen, kein „0 nur in Ludwig"; `Filled` hat fünf | ✓ |
-| `syncState === "synced"` zeigt keinen zweiten Chip; `local_only` zeigt ihn | `Filled`: keine Sync-Zeile · `SyncOffen`: Zeile „DATEV-Abgleich · Nur in Ludwig" | ✓ |
+| Reihenfolge Kopf · Saldo · + nur Ludwig · Bewegungen · Partner · letzte Buchung · Sync | durch Abweichung 1 **gegenstandslos**. Gebaute Reihenfolge im DOM (`Personenkonto`): Kontoart · Saldo in DATEV 2026 · + 2 nur in Ludwig · Bewegungen · Geschäftspartner · Letzte Buchung; `SyncPending` hängt DATEV-Abgleich an | ✓ (gegenstandslos) |
+| Wirtschaftsjahr (Rang 4) ist dargestellt, `fiscalYear` ist kein totes Feld (A12) | Runde 2, alle sieben Stories gemessen: das Label trägt überall das Jahr („Saldo in DATEV 2026") (`Filled`/`InUse`/`Edges` 2026, `InContext` folgt dem Schalter bis 2024). Den Jahresschalter des Drawers doppelt es nicht: der Schalter listet die wählbaren Jahre, das Label qualifiziert **eine** Zahl (Anmerkung 4) | ✓ |
+| `ludwigOnlyCount === 0` lässt die Nachtrags-Zeile verschwinden | `DatevOnly`: vier Zeilen, kein „0 nur in Ludwig"; `Filled` hat fünf | ✓ |
+| `syncState === "synced"` zeigt keinen zweiten Chip; `local_only` zeigt ihn | `Filled`: keine Sync-Zeile · `SyncPending`: Zeile „DATEV-Abgleich · Nur in Ludwig" | ✓ |
 | Fehlende Werte zeigen den Geviertstrich und behalten ihre Zeile | `Unvollstaendig`: „Saldo in DATEV 2026 —", „Letzte Buchung —"; Zeilen stehen | ✓ |
 | Rolle und Sync-Zustand aus der Registry | `konto_typ.general_ledger` → „Sachkonto", `konto_datev_sync.local_only` → „Nur in Ludwig"; keine Label-Map in der Datei | ✓ |
 | `AccountFacts` rechnet nichts | `grep -nE "\.reduce\(|\.filter\(|\.sort\("` findet nichts; nur `toLocaleString` | ✓ |
@@ -300,7 +300,7 @@ je Exit 0 (in beiden Runden).
 
 | # | Anmerkung (kein ✗) | Beleg |
 |---|---|---|
-| 4 | Im Drawer erscheint das Jahr zweimal, sobald der Schalter fehlt: `EinJahr` zeigt „2026" als Text in der `meta`-Zeile (so verlangt es 0068) und zwei Zeilen tiefer im Saldo-Label. Kein Widerspruch zu Abweichung 1 — dort ging es um die doppelte **Identität** —, aber die eine Stelle, an der das Jahr redundant liest. | Story `AccountDrawer/EinJahr`, DOM: fünf Jahreszahlen im Drawer, davon zwei im Kopf-/Fakten-Paar |
+| 4 | Im Drawer erscheint das Jahr zweimal, sobald der Schalter fehlt: `OneYear` zeigt „2026" als Text in der `meta`-Zeile (so verlangt es 0068) und zwei Zeilen tiefer im Saldo-Label. Kein Widerspruch zu Abweichung 1 — dort ging es um die doppelte **Identität** —, aber die eine Stelle, an der das Jahr redundant liest. | Story `AccountDrawer/OneYear`, DOM: fünf Jahreszahlen im Drawer, davon zwei im Kopf-/Fakten-Paar |
 
 Abgenommen von / am: Claude (Abnahme), 2026-09-04 (Runde 1) · 2026-09-04
 (Runde 2, nach Commit `0ae2dad`) · Ergebnis: **fertig** · Offene Punkte:

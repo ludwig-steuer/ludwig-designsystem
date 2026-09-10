@@ -23,7 +23,7 @@ function Draft({ draft }: { draft: ClarificationDraft | null }) {
   );
 }
 
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: function Round() {
     const [draft, setDraft] = useState<ClarificationDraft | null>(null);
     return (
@@ -49,7 +49,7 @@ export const Gefuellt: Story = {
   },
 };
 
-export const Kommentar: Story = {
+export const Comment: Story = {
   render: function Note() {
     const [draft, setDraft] = useState<ClarificationDraft | null>(null);
     return (
@@ -72,7 +72,7 @@ export const Kommentar: Story = {
 };
 
 /** All three audiences with the sentence that says what each one means. */
-export const Zielgruppen: Story = {
+export const Audiences: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)" }}>
       {(["client", "accounting", "agent"] as const).map((a) => (
@@ -96,7 +96,7 @@ export const Zielgruppen: Story = {
  * Two ways to be invalid: nothing typed (shown after the first attempt) and a
  * title beyond 140 characters (shown right away).
  */
-export const Ungueltig: Story = {
+export const Invalid: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)" }}>
       <Card>
@@ -115,7 +115,7 @@ export const Ungueltig: Story = {
   ),
 };
 
-export const Laedt: Story = {
+export const Loading: Story = {
   render: () => (
     <Card>
       <CardHead title="Sendet" sub="alle Felder gesperrt" />
@@ -126,7 +126,7 @@ export const Laedt: Story = {
   ),
 };
 
-export const Fehler: Story = {
+export const Error: Story = {
   render: () => (
     <Card>
       <CardHead title="Fehlgeschlagen" sub="Eingabe bleibt erhalten" />
@@ -141,7 +141,7 @@ export const Fehler: Story = {
 };
 
 /** Where it stands on the page: in a drawer next to the case. */
-export const ImEinsatz: Story = {
+export const InUse: Story = {
   render: function InDrawer() {
     const [open, setOpen] = useState(true);
     return (

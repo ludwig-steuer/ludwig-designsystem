@@ -486,7 +486,7 @@ Blockiert: nein.
 **M9 · Deutsche Bezeichner in einer neuen Datei — blockiert**
 Kriterium: fest — „Code englisch".
 Ort: `CasePicker.tsx:24` (`teile`), `25` (`stand`), `51` (`feld`), `99`
-(`treffer`); in den Stories `77` (`Rahmen`), `175/184` (`suche`, `setSuche`,
+(`treffer`); in den Stories `77` (`Rahmen`), `175/184` (`suche`, `setQuery`,
 `alt`), `176` (`gewaehlt`), `248` (`viele`). Dazu ein deutsches Wort in einem
 englischen Kommentar (Z. 119: „because leer means two things").
 Befund: CLAUDE.md sagt „Code nur Englisch. **Bezeichner**, Props, Typen,

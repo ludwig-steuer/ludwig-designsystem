@@ -28,7 +28,7 @@ import { listHref, PARTNER_TABS, tabHref } from "./fixtures";
  * Rahmen-Komponente wäre genau die Doppelung, die 0138 abstellen sollte; sie
  * hätte nichts getragen als ihren Namen.
  */
-export function PartnerSeite({
+export function PartnerPage({
   partner,
   tab = "uebersicht",
   signal,
@@ -49,10 +49,10 @@ export function PartnerSeite({
   // Rang 2 der Seite: die Nummer, unter der gebucht wird. 99,9 % der Partner
   // tragen **genau eine** — welche Rolle sie hat, steht im Schlüssel, unter
   // dem sie hängt, nicht im Satz.
-  const konto = partner.creditorAccount
-    ? { rolle: "Kreditor", ref: partner.creditorAccount }
+  const account = partner.creditorAccount
+    ? { role: "Kreditor", ref: partner.creditorAccount }
     : partner.debtorAccount
-      ? { rolle: "Debitor", ref: partner.debtorAccount }
+      ? { role: "Debitor", ref: partner.debtorAccount }
       : null;
 
   return (
@@ -78,10 +78,10 @@ export function PartnerSeite({
           status={<StatusBadge axis="partner" status={partner.onboardingState} />}
           meta={
             <>
-              {konto ? (
+              {account ? (
                 <span>
-                  {konto.rolle} <MonoCell value={konto.ref.accountNumber} />
-                  {konto.ref.isInternal ? <Badge tone="neutral">intern</Badge> : null}
+                  {account.role} <MonoCell value={account.ref.accountNumber} />
+                  {account.ref.isInternal ? <Badge tone="neutral">intern</Badge> : null}
                 </span>
               ) : partner.clearingAccounts.length > 0 ? (
                 // Der Abrechner: zwölf im Bestand, und **alle zwölf** tragen

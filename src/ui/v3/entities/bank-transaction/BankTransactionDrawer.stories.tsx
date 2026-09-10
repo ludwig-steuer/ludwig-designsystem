@@ -83,7 +83,7 @@ export const Filled: Story = {
  */
 export const Unassigned: Story = {
   render: function Render() {
-    const [ziel, setZiel] = useState<string | null>(null);
+    const [target, setTarget] = useState<string | null>(null);
     return (
       <>
         <BankTransactionDrawer
@@ -101,11 +101,11 @@ export const Unassigned: Story = {
             allocatedSum: 0,
             matchStage: "unclear_none",
           }}
-          onOpenFull={(exit, caseId) => setZiel(`${exit}${caseId ? ` · ${caseId}` : ""}`)}
+          onOpenFull={(exit, caseId) => setTarget(`${exit}${caseId ? ` · ${caseId}` : ""}`)}
           caseHref={caseHref}
         />
         <p className="v2muted" style={{ padding: "var(--space-4)" }}>
-          {ziel ? `Weiter zu: ${ziel}` : "Noch nichts ausgelöst."}
+          {target ? `Weiter zu: ${target}` : "Noch nichts ausgelöst."}
         </p>
       </>
     );
@@ -223,7 +223,7 @@ export const Interactive: Story = {
 export const InUse: Story = {
   render: function Render() {
     const [ref, setRef] = useState<string | null>(null);
-    const [ziel, setZiel] = useState<string | null>(null);
+    const [target, setTarget] = useState<string | null>(null);
     return (
       // 1500 and not 1400: copying the list's own number would be a second
       // truth again (acceptance M4). The frame is deliberately **wider** than
@@ -279,15 +279,15 @@ export const InUse: Story = {
             // (Wiederabnahme 0103, M6). `RECORD` trägt einen zugeordneten
             // Fall, also kommt hier seine Kennung an.
             onOpenFull={(exit, caseId) => {
-              setZiel(`${exit}${caseId ? ` · ${caseId}` : " · ohne Fall"}`);
+              setTarget(`${exit}${caseId ? ` · ${caseId}` : " · ohne Fall"}`);
               setRef(null);
             }}
             caseHref={caseHref}
           />
         ) : null}
-        {ziel ? (
+        {target ? (
           <p className="lw-body-sm" style={{ padding: "0 var(--space-4)" }}>
-            Der Fuß hat übergeben: <strong>{ziel}</strong>
+            Der Fuß hat übergeben: <strong>{target}</strong>
           </p>
         ) : null}
       </div>

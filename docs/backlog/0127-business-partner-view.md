@@ -28,7 +28,7 @@ zwischen Kopf und Reitern. Ein `BusinessPartnerView` hätte nichts getragen als
 seinen Namen.
 
 Also: `patterns/DetailView.tsx` mit den fünf Slots des Standards (D3), und der
-Showcase-Rahmen `PartnerSeite` setzt ihn zusammen — so wie `BelegSeite` es für
+Showcase-Rahmen `PartnerPage` setzt ihn zusammen — so wie `DocumentPage` es für
 0144 tut.
 
 **Die drei bestehenden Rahmen bleiben**, bis der Owner ihre Migration freigibt.
@@ -78,7 +78,7 @@ das weg.
 | Story | Beweist |
 |---|---|
 | `Normalfall` | Ein bestätigter Kreditor mit Buchungen — Rang 1–4 über der Falz |
-| `OhneBewegung` | Die Karteileiche, und sie ist der Regelfall: **77 %** haben null Buchungen |
+| `NoActivity` | Die Karteileiche, und sie ist der Regelfall: **77 %** haben null Buchungen |
 | `Vorgeschlagen` | Die einzige Handlung der Seite, als **ein** Knopf im Signal-Slot (D8) |
 | `Abrechner` | Verrechnungskonto an der Stelle des Personenkontos — sonst stünde dort nichts (12 Partner) |
 | `Namensdublette` | Zwei gleichnamige nebeneinander; die Kontonummer entscheidet, nicht der Ort |

@@ -32,7 +32,7 @@ export interface JournalEntryGridProps {
   status: JournalStatus;
   mode?: JournalMode;
   /** The two addresses of the switch. Without it there is no switch. */
-  modeHref?: { einfach: string; voll: string };
+  modeHref?: { simple: string; full: string };
   contraAccount?: ContraAccount | null;
   documentNumber?: string | null;
   documentAmount?: number | null;
@@ -70,7 +70,7 @@ export interface JournalEntryGridProps {
 export function JournalEntryGrid({
   rows,
   status,
-  mode = "einfach",
+  mode = "simple",
   modeHref,
   contraAccount = null,
   documentNumber,
@@ -81,20 +81,20 @@ export function JournalEntryGrid({
   onOpenLedger,
   messages,
 }: JournalEntryGridProps) {
-  const full = mode === "voll";
+  const full = mode === "full";
   const total = documentSideTotal(rows, documentSide);
   const rest = documentAmount == null ? null : documentAmount - total;
   const lines = journalLines(rows, contraAccount, documentSide, accountFramework);
 
   return (
     <div className="bse">
-      <div className="bse__kopf">
-        <span className="bse__beleg">
+      <div className="bse__head">
+        <span className="bse__doc">
           {documentNumber ? `Beleg ${documentNumber}` : "Ohne Belegnummer"}
           {documentAmount == null ? "" : ` · ${euro(documentAmount)}`}
         </span>
         <StatusBadge axis="buchung" status={status} info={false} />
-        <span className="bse__kopfrechts">
+        <span className="bse__head-end">
           {rest !== null && (full || Math.abs(rest) >= 0.005) ? (
             <span className={`bse__rest${Math.abs(rest) < 0.005 ? " is-ok" : " is-off"}`}>
               Rest {euro(rest)}
@@ -106,7 +106,7 @@ export function JournalEntryGrid({
               addresses there is no switch — and no printed key either, which
               is the case V14 forbids (0015 M5). */}
           {modeHref ? (
-            <Link className="v2link" href={full ? modeHref.einfach : modeHref.voll}>
+            <Link className="v2link" href={full ? modeHref.simple : modeHref.full}>
               {full ? "Einfach ◂" : "Voll ▸"}
             </Link>
           ) : null}
@@ -124,7 +124,7 @@ export function JournalEntryGrid({
           <span className="bse__gegen__label">
             <span className="v2muted">Gegenkonto</span> an{" "}
             {documentSide === "S" ? "H" : "S"}{" "}
-            <span className="v2mono">{contraAccount.konto}</span>
+            <span className="v2mono">{contraAccount.account}</span>
             <span className="v2muted">{contraAccount.name}</span>
             {contraAccount.tag ? <span className="bse__tag">{contraAccount.tag}</span> : null}
           </span>
@@ -167,7 +167,7 @@ export function JournalEntryGrid({
             <JournalEntryCard
               lines={lines.map((l) => ({
                 side: l.side === "S" ? ("debit" as const) : ("credit" as const),
-                accountNumber: l.konto,
+                accountNumber: l.account,
                 accountName: l.name,
                 text: l.text,
                 amount: l.amount,
@@ -193,9 +193,9 @@ function Row({
   onOpenLedger?: (accountNumber: string) => void;
 }) {
   const account = (
-    <span className="bse__kontocell">
-      <span className="v2mono">{row.konto}</span>
-      {row.kontoName ? <span className="v2muted bse__kontoname">{row.kontoName}</span> : null}
+    <span className="bse__account-cell">
+      <span className="v2mono">{row.account}</span>
+      {row.accountName ? <span className="v2muted bse__account-name">{row.accountName}</span> : null}
       {onOpenLedger ? (
         // `IconButton`, not a bare button with a class of its own: the
         // building block brings the hit area, the hover answer and the focus
@@ -203,9 +203,9 @@ function Row({
         // left a 14-px sign without an answer (acceptance 0113).
         <IconButton
           size="sm"
-          label={`Kontenblatt zu ${row.konto}`}
+          label={`Kontenblatt zu ${row.account}`}
           icon={<ActionIcon action="ledger" size={14} />}
-          onClick={() => onOpenLedger(row.konto)}
+          onClick={() => onOpenLedger(row.account)}
         />
       ) : null}
     </span>
@@ -216,17 +216,17 @@ function Row({
       <div className="bse__cells" role="row">
         <span>{row.datum}</span>
         {full ? <span className="v2muted">{row.currency ?? "EUR"}</span> : null}
-        <span className="v2num">{euro(rowAmount(row.umsatz))}</span>
+        <span className="v2num">{euro(rowAmount(row.amount))}</span>
         <span>{row.side}</span>
         <span>{row.bu || <span className="v2muted">—</span>}</span>
         {full ? account : null}
-        {full ? <span className="v2mono">{row.beleg1}</span> : account}
-        {full ? <span className="v2mono">{row.beleg2 ?? ""}</span> : null}
-        {full ? null : <span className="v2mono">{row.beleg1}</span>}
+        {full ? <span className="v2mono">{row.externalDocumentNumber}</span> : account}
+        {full ? <span className="v2mono">{row.externalDocumentNumber2 ?? ""}</span> : null}
+        {full ? null : <span className="v2mono">{row.externalDocumentNumber}</span>}
         <span className="v2trunc" title={row.text}>
           {row.text}
         </span>
-        {full ? <span className="v2muted">{row.kost1 ?? ""}</span> : null}
+        {full ? <span className="v2muted">{row.costCenter1 ?? ""}</span> : null}
       </div>
     </div>
   );

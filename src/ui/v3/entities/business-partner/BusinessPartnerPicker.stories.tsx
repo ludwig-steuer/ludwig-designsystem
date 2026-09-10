@@ -115,7 +115,7 @@ export const Filled: Story = {
 export const Roundtrip: Story = {
   render: function Rundlauf() {
     const [value, setValue] = useState<string | null>(null);
-    const [suche, setSuche] = useState<string[]>([]);
+    const [query, setQuery] = useState<string[]>([]);
     return (
       <Frame sub="Name · Kurzname · Kontonummer · USt-IdNr.">
         <BusinessPartnerPicker
@@ -123,14 +123,14 @@ export const Roundtrip: Story = {
           value={value}
           onChange={setValue}
           partners={SECHS}
-          onSearch={(q) => setSuche((alt) => [...alt.slice(-4), q === "" ? "(leer)" : q])}
+          onSearch={(q) => setQuery((alt) => [...alt.slice(-4), q === "" ? "(leer)" : q])}
         />
         <div style={{ marginTop: 16, display: "grid", gap: 4 }}>
           <div className="v2muted">
             Gewählt: <code>{value ?? "null"}</code>
           </div>
           <div className="v2muted">
-            onSearch: <code>{suche.join(" › ") || "—"}</code>
+            onSearch: <code>{query.join(" › ") || "—"}</code>
           </div>
         </div>
       </Frame>

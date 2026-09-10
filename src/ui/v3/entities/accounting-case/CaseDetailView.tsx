@@ -65,7 +65,7 @@ export function CaseDetailView({
         // sit exactly on the page width at 1280, and a browser with
         // space-taking scrollbars loses about 15 px and wraps unnoticed
         // (acceptance of 0116). 460 leaves 24 px of room.
-        <MasterDetail list={aside} detail={children} detailBreit minDetail={460} />
+        <MasterDetail list={aside} detail={children} detailWide minDetail={460} />
       ) : (
         <div className="v2cdv__body">{children}</div>
       )}

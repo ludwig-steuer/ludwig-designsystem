@@ -10,10 +10,10 @@ const meta: Meta<typeof CopyTextButton> = {
 export default meta;
 type Story = StoryObj<typeof CopyTextButton>;
 
-const SATZ =
+const SENTENCE =
   "26.08.2026\t1.249,90\tS\t51\t6815\t1200\tRE-4471\tWartung Klimaanlage 08/2026";
 
-const Rahmen = ({ children }: { children: React.ReactNode }) => (
+const Frame = ({ children }: { children: React.ReactNode }) => (
   <div style={{ padding: "var(--space-6)", display: "grid", gap: "var(--space-4)", justifyItems: "start" }}>
     {children}
   </div>
@@ -26,9 +26,9 @@ const Rahmen = ({ children }: { children: React.ReactNode }) => (
  */
 export const Filled: Story = {
   render: () => (
-    <Rahmen>
-      <CopyTextButton text={SATZ} label="Buchungssatz kopieren" />
-    </Rahmen>
+    <Frame>
+      <CopyTextButton text={SENTENCE} label="Buchungssatz kopieren" />
+    </Frame>
   ),
 };
 
@@ -54,9 +54,9 @@ export const Failed: Story = {
       });
     }
     return (
-      <Rahmen>
-        <CopyTextButton text={SATZ} label="Buchungssatz kopieren" />
-      </Rahmen>
+      <Frame>
+        <CopyTextButton text={SENTENCE} label="Buchungssatz kopieren" />
+      </Frame>
     );
   },
 };
@@ -64,11 +64,11 @@ export const Failed: Story = {
 /** Größen und Varianten — der Knopf reicht beides an `Button` durch. */
 export const Sizes: Story = {
   render: () => (
-    <Rahmen>
-      <CopyTextButton text={SATZ} label="Kopieren" size="xs" variant="tertiary" />
-      <CopyTextButton text={SATZ} label="Kopieren" size="sm" />
-      <CopyTextButton text={SATZ} label="Kopieren" size="md" variant="primary" />
-    </Rahmen>
+    <Frame>
+      <CopyTextButton text={SENTENCE} label="Kopieren" size="xs" variant="tertiary" />
+      <CopyTextButton text={SENTENCE} label="Kopieren" size="sm" />
+      <CopyTextButton text={SENTENCE} label="Kopieren" size="md" variant="primary" />
+    </Frame>
   ),
 };
 
@@ -85,9 +85,9 @@ export const InUse: Story = {
           sub="Buchung 2026-0412"
           actions={
             <CopyTextButton
-              text={SATZ}
+              text={SENTENCE}
               label="Buchungssatz kopieren"
-              title={SATZ}
+              title={SENTENCE}
               size="xs"
               variant="tertiary"
             />

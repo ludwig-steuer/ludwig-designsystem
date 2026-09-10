@@ -77,7 +77,7 @@ const RECORD: SourceDocumentQuickView = {
  * first and large, the core facts from the same component the full view uses,
  * the sentence about what the glance leaves open, and one way out.
  */
-export const Geoeffnet: Story = {
+export const Opened: Story = {
   render: function Render() {
     const [open, setOpen] = useState(true);
     const [opened, setOpened] = useState<string | null>(null);
@@ -102,7 +102,7 @@ export const Geoeffnet: Story = {
  * refused, a file still on its way. It says **why** there is nothing to see —
  * and gets no grey placeholder box in place of the document.
  */
-export const OhneVorschau: Story = {
+export const WithoutPreview: Story = {
   render: () => (
     <SourceDocumentDrawer
       open
@@ -131,7 +131,7 @@ export const OhneVorschau: Story = {
 };
 
 /** `loading` beats `record`: the head stands, the body is a quiet surface. */
-export const Laedt: Story = {
+export const Loading: Story = {
   render: () => (
     <SourceDocumentDrawer
       open
@@ -145,7 +145,7 @@ export const Laedt: Story = {
 };
 
 /** The reason carries the identifier — „Fehler beim Laden" would not say which document. */
-export const Fehler: Story = {
+export const Error: Story = {
   render: () => (
     <SourceDocumentDrawer
       open
@@ -159,7 +159,7 @@ export const Fehler: Story = {
 };
 
 /** `record={null}` is „not found", not „loading" — and the sentence says which key was looked up. */
-export const NichtGefunden: Story = {
+export const NotFound: Story = {
   render: () => (
     <SourceDocumentDrawer
       open
@@ -181,7 +181,7 @@ const CASES = [
  * The whole point: the list behind stays visible and keeps its place. Whoever
  * closes the drawer stands where they were.
  */
-export const ImKontext: Story = {
+export const InContext: Story = {
   render: function Render() {
     const [reference, setReference] = useState<string | null>(null);
     return (

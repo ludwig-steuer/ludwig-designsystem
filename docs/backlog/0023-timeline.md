@@ -179,7 +179,7 @@ Variabel (aus dieser Spec):
 
 | Kriterium | Nachweis (Story-ID · Befehl · Beobachtung) | Ergebnis |
 |---|---|---|
-| Unsortierte `entries` erscheinen sortiert | `v3-patterns-prozess-timeline--gefuellt` (Daten in der Reihenfolge e3, e1, e4, e2 übergeben): Gruppenköpfe „Montag, 31. August 2026", „Sonntag, 30.", „Samstag, 29.", „Mittwoch, 26.", Zeiten 16:02 / 11:12 / 13:05 / 09:40 | ✓ |
+| Unsortierte `entries` erscheinen sortiert | `v3-patterns-prozess-timeline--filled` (Daten in der Reihenfolge e3, e1, e4, e2 übergeben): Gruppenköpfe „Montag, 31. August 2026", „Sonntag, 30.", „Samstag, 29.", „Mittwoch, 26.", Zeiten 16:02 / 11:12 / 13:05 / 09:40 | ✓ |
 | Kein Ereignistyp lokal definiert; `kind` ist `string` mit Registry-Prop | `kind: string` ✓ und kein lokaler Ereignistyp ✓ — aber es gibt **keine** Registry-Prop. `kind` wird als roher Text ausgegeben (`.v2tl__who`), und der Punkt wird nicht nach `kind` eingefärbt; die Farbe kommt allein aus dem optionalen `state` über `StateIcon`. Damit ist die Antwort auf Offene Frage 3 nicht umgesetzt | ✗ |
 | Zeiten über `Timestamp`, nicht über eigenes `Intl` | `Timeline.tsx:37–53` legt drei eigene `Intl.DateTimeFormat` an (`DAY`, `MONTH`, `TIME`) und benutzt zusätzlich `toLocaleDateString("de-DE")`; `Timestamp` (`primitives/Cells.tsx:128`) wird nicht importiert. Im DOM steht folgerichtig **kein** `<time>`-Element (`document.querySelectorAll('time').length === 0`) | ✗ |
 | Lückenzeile ab sieben Tagen, mit der Zahl der Tage | `--mit-luecke`: zwischen dem 26.08. und dem 05.08. steht `.v2tl__gap` „20 Tage ohne Ereignis"; `GAP_DAYS = 7` | ✓ |

@@ -130,7 +130,7 @@ function Cells({
             buttons to the same legend. */}
         <StatusBadge
           axis="opos_ausgleich"
-          status={item.clearedAfterStichtag ? "spaeter_ausgeglichen" : "offen"}
+          status={item.clearedAfterCutoff ? "spaeter_ausgeglichen" : "offen"}
           note={`Stichtag ${formatTime(asOf, "date")}`}
           info={false}
         />
@@ -139,15 +139,15 @@ function Cells({
       {/* An approximated amount says so with „≈" and gives the reason in the
           title — a number that pretends to be exact is worse than none. */}
       <span className="v2num">
-        {item.amountApprox && item.openAtStichtag !== null ? (
+        {item.amountApprox && item.openAtCutoff !== null ? (
           <span
             className="v2amount"
             title="Genähert: Alt-Snapshot mit Teilzahlung oder Sammel-OP."
           >
-            ≈ {formatAmount(item.openAtStichtag, currency)}
+            ≈ {formatAmount(item.openAtCutoff, currency)}
           </span>
         ) : (
-          <AmountCell value={item.openAtStichtag} currency={currency} />
+          <AmountCell value={item.openAtCutoff} currency={currency} />
         )}
       </span>
     </>

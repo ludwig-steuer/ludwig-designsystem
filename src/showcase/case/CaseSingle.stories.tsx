@@ -16,20 +16,20 @@ import { TextButton } from "@/ui/v3/primitives/TextButton";
 import { NoteFeed } from "@/ui/v3/patterns/NoteFeed";
 import { OpenPoints } from "@/ui/v3/patterns/OpenPoints";
 
-import { SachverhaltSeite } from "./SachverhaltSeite";
+import { CasePage } from "./CasePage";
 import {
   accountHref,
-  BELEG_EREIGNIS,
-  DATEV_EREIGNIS,
-  fallFixture,
-  HEUTE,
-  KLAERUNG_BEANTWORTET,
+  DOCUMENT_EVENT,
+  DATEV_EVENT,
+  caseFixture,
+  TODAY,
+  CLARIFICATION_ANSWERED,
   NOTES,
   partnerHref,
   CLARIFICATIONS,
   tabHref,
-  VORSCHLAG,
-  ZAHLUNG_ERWARTET,
+  PROPOSAL,
+  PAYMENT_EXPECTED,
 } from "./fixtures";
 
 /**
@@ -42,13 +42,13 @@ import {
  *
  * Alle Daten sind erfunden.
  */
-const meta: Meta<typeof SachverhaltSeite> = {
+const meta: Meta<typeof CasePage> = {
   title: "Seiten/Sachverhalt/Einzelfall",
-  component: SachverhaltSeite,
+  component: CasePage,
   parameters: { layout: "fullscreen" },
 };
 export default meta;
-type Story = StoryObj<typeof SachverhaltSeite>;
+type Story = StoryObj<typeof CasePage>;
 
 /** The key of the todo row. It stands for no record, so it has no id. */
 const TODO_ID = "__todo";
@@ -79,7 +79,7 @@ function TodoRow({ active, onClick }: { active: boolean; onClick: () => void }) 
  * Spalte 3 — lesend. Zusammenfassung, Notizen, Rückfragen; beantwortet wird
  * im Reiter Rückfragen, nicht hier (F196 §5).
  */
-function Notizen() {
+function NotesColumn() {
   return (
     <div className="v2stack">
       <Card>
@@ -115,12 +115,12 @@ function Notizen() {
  * Spalte 2 bei „Zu tun": **was ist jetzt zu tun.** Zwei Blöcke in fester
  * Reihenfolge — Offen, Fehlende Freigaben. Was war, steht links im Strang.
  */
-function JetztFlaeche({ mitErwartung = true }: { mitErwartung?: boolean }) {
+function TodoPane({ withExpectation: withExpectation = true }: { withExpectation?: boolean }) {
   return (
     <div className="v2stack">
       <OpenPoints
         points={
-          mitErwartung
+          withExpectation
             ? [
                 {
                   key: "zahlung",
@@ -141,7 +141,7 @@ function JetztFlaeche({ mitErwartung = true }: { mitErwartung?: boolean }) {
         <CardHead title="Fehlende Freigaben" sub="1 Vorschlag" />
         <div className="v3boxbody">
           <JournalEntryCard
-            lines={VORSCHLAG}
+            lines={PROPOSAL}
             currency="EUR"
             caption="Buchungsvorschlag vom 31.07."
             accountHref={accountHref}
@@ -158,27 +158,27 @@ function JetztFlaeche({ mitErwartung = true }: { mitErwartung?: boolean }) {
 }
 
 /** Spalte 2 bei gewähltem Ereignis: der Vorgang mit Beleg, Buchung, Urteil. */
-function EreignisFlaeche({ datev = false }: { datev?: boolean }) {
+function EventPane({ fromDatev: fromDatev = false }: { fromDatev?: boolean }) {
   return (
     <Card>
       <CardHead
-        title={datev ? "Gutschrift aus DATEV" : "Rechnung 93846778"}
-        sub={datev ? "30.06.2026 · aus dem Spiegel übernommen" : "31.07.2026 · Beleg mit Vorschlag"}
+        title={fromDatev ? "Gutschrift aus DATEV" : "Rechnung 93846778"}
+        sub={fromDatev ? "30.06.2026 · aus dem Spiegel übernommen" : "31.07.2026 · Beleg mit Vorschlag"}
       />
       <div className="v3boxbody">
         <JournalEntryCard
           lines={
-            datev
+            fromDatev
               ? [
                   { side: "debit", accountNumber: "71202", accountName: "Musterbau Fahrzeugteile GmbH", amount: 21.82, text: "Gutschrift" },
                   { side: "credit", accountNumber: "5404", accountName: "Wareneingang 19 % VSt", amount: 21.82, text: "Gutschrift" },
                 ]
-              : VORSCHLAG
+              : PROPOSAL
           }
           currency="EUR"
           accountHref={accountHref}
         />
-        {datev ? (
+        {fromDatev ? (
           // **Lesend, ohne Handlungen.** Was aus dem Spiegel kommt, wurde in
           // DATEV gebucht — hier gibt es nichts freizugeben und nichts zu
           // ändern (F196 §8).
@@ -214,12 +214,12 @@ function EreignisFlaeche({ datev = false }: { datev?: boolean }) {
  * wer zwischen „was ist zu tun" und „was war das" hin- und herspringt, soll
  * dabei nicht die Übersicht verlieren.
  */
-export const VorschlagSteht: Story = {
+export const ProposalPending: Story = {
   render: function Fall() {
-    const [gewaehlt, setGewaehlt] = useState<string>(TODO_ID);
-    const fall = fallFixture({ disposition: "agent" });
-    const waehlen = (entry: CaseTimelineEntry) =>
-      setGewaehlt(
+    const [selected, setSelected] = useState<string>(TODO_ID);
+    const accountingCase = caseFixture({ disposition: "agent" });
+    const select = (entry: CaseTimelineEntry) =>
+      setSelected(
         entry.type === "event"
           ? entry.event.id
           : entry.type === "clarification"
@@ -228,8 +228,8 @@ export const VorschlagSteht: Story = {
       );
 
     return (
-      <SachverhaltSeite
-        fall={fall}
+      <CasePage
+        accountingCase={accountingCase}
         signal={
           <StatusCallout
             kicker="Nächster Schritt"
@@ -238,7 +238,7 @@ export const VorschlagSteht: Story = {
           />
         }
         actions={<Button variant="secondary" size="sm">Beleg anhängen</Button>}
-        strang={
+        timeline={
           <Card>
             <CardHead
               title="Ereignisse"
@@ -255,22 +255,22 @@ export const VorschlagSteht: Story = {
                 lauter datierten. Es verhält sich trotzdem wie einer: dieselbe
                 Auswahl, dieselbe Fläche rechts. */}
             <div className="v3boxbody">
-              <TodoRow active={gewaehlt === TODO_ID} onClick={() => setGewaehlt(TODO_ID)} />
+              <TodoRow active={selected === TODO_ID} onClick={() => setSelected(TODO_ID)} />
               <CaseTimeline
-                events={[BELEG_EREIGNIS]}
-                clarifications={[KLAERUNG_BEANTWORTET]}
-                expectations={[ZAHLUNG_ERWARTET]}
-                today={HEUTE}
-                selectedId={gewaehlt}
-                onSelect={waehlen}
+                events={[DOCUMENT_EVENT]}
+                clarifications={[CLARIFICATION_ANSWERED]}
+                expectations={[PAYMENT_EXPECTED]}
+                today={TODAY}
+                selectedId={selected}
+                onSelect={select}
               />
             </div>
           </Card>
         }
-        notizen={<Notizen />}
+        notes={<NotesColumn />}
       >
-        {gewaehlt === TODO_ID ? <JetztFlaeche /> : <EreignisFlaeche />}
-      </SachverhaltSeite>
+        {selected === TODO_ID ? <TodoPane /> : <EventPane />}
+      </CasePage>
     );
   },
 };
@@ -284,12 +284,12 @@ export const VorschlagSteht: Story = {
  * DATEV-Eintrag trägt sein Wort in der Zeile, und in Spalte 2 hat er **keine
  * Handlungen**. An dem einen kann man arbeiten, das andere wird gelesen.
  */
-export const MitDatevBuchung: Story = {
+export const WithDatevEntry: Story = {
   render: function Fall() {
-    const [gewaehlt, setGewaehlt] = useState<string>(DATEV_EREIGNIS.id);
-    const fall = fallFixture({ disposition: "agent" });
-    const waehlen = (entry: CaseTimelineEntry) =>
-      setGewaehlt(
+    const [selected, setSelected] = useState<string>(DATEV_EVENT.id);
+    const accountingCase = caseFixture({ disposition: "agent" });
+    const select = (entry: CaseTimelineEntry) =>
+      setSelected(
         entry.type === "event"
           ? entry.event.id
           : entry.type === "clarification"
@@ -298,9 +298,9 @@ export const MitDatevBuchung: Story = {
       );
 
     return (
-      <SachverhaltSeite
-        fall={fall}
-        strang={
+      <CasePage
+        accountingCase={accountingCase}
+        timeline={
           <Card>
             <CardHead
               title="Ereignisse"
@@ -312,25 +312,25 @@ export const MitDatevBuchung: Story = {
               }
             />
             <div className="v3boxbody">
-              <TodoRow active={gewaehlt === TODO_ID} onClick={() => setGewaehlt(TODO_ID)} />
+              <TodoRow active={selected === TODO_ID} onClick={() => setSelected(TODO_ID)} />
               <CaseTimeline
-                events={[DATEV_EREIGNIS, BELEG_EREIGNIS]}
-                expectations={[ZAHLUNG_ERWARTET]}
-                today={HEUTE}
-                selectedId={gewaehlt}
-                onSelect={waehlen}
+                events={[DATEV_EVENT, DOCUMENT_EVENT]}
+                expectations={[PAYMENT_EXPECTED]}
+                today={TODAY}
+                selectedId={selected}
+                onSelect={select}
               />
             </div>
           </Card>
         }
-        notizen={<Notizen />}
+        notes={<NotesColumn />}
       >
-        {gewaehlt === TODO_ID ? (
-          <JetztFlaeche />
+        {selected === TODO_ID ? (
+          <TodoPane />
         ) : (
-          <EreignisFlaeche datev={gewaehlt === DATEV_EREIGNIS.id} />
+          <EventPane fromDatev={selected === DATEV_EVENT.id} />
         )}
-      </SachverhaltSeite>
+      </CasePage>
     );
   },
 };
@@ -345,14 +345,14 @@ export const MitDatevBuchung: Story = {
  * **zwei Spalten Paare** (`split`), gemessen an der Liste, nicht am Fenster
  * (Owner 2026-09-10).
  */
-export const Stammdaten: Story = {
+export const MasterData: Story = {
   render: () => (
-    <SachverhaltSeite fall={fallFixture({ disposition: "agent" })} tab="stammdaten">
+    <CasePage accountingCase={caseFixture({ disposition: "agent" })} tab="stammdaten">
       <Card>
         <CardHead title="Stammdaten" sub="alle Angaben des Sachverhalts" />
         <div className="v3boxbody">
           <CaseFacts
-            case={fallFixture({ disposition: "agent" })}
+            case={caseFixture({ disposition: "agent" })}
             all
             split
             tone="bare"
@@ -361,6 +361,6 @@ export const Stammdaten: Story = {
           />
         </div>
       </Card>
-    </SachverhaltSeite>
+    </CasePage>
   ),
 };

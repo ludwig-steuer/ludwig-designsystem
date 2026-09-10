@@ -114,10 +114,10 @@ export function BarChart({
   // disappears (acceptance 0110, M2). It needs at least as much height as the
   // line takes away above and below.
   const MIN = 0.4;
-  const MIN_ZWEITE = 2.4;
-  const seg = (value: number, base: number, zweite = false) => ({
+  const MIN_SECOND = 2.4;
+  const seg = (value: number, base: number, second = false) => ({
     y: value < 0 ? y(base) : y(base + value),
-    height: Math.max((Math.abs(value) / span) * H, zweite ? MIN_ZWEITE : MIN),
+    height: Math.max((Math.abs(value) / span) * H, second ? MIN_SECOND : MIN),
   });
 
   const linePoints = (line ?? [])

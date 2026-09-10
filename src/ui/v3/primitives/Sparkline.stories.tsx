@@ -11,10 +11,10 @@ const meta: Meta<typeof Sparkline> = {
 export default meta;
 type Story = StoryObj<typeof Sparkline>;
 
-const MONATE = ["März", "April", "Mai", "Juni", "Juli", "August"];
+const MONTHS = ["März", "April", "Mai", "Juni", "Juli", "August"];
 const EUR = (v: number) => formatAmount(v, "EUR");
 
-const Rahmen = ({ children }: { children: React.ReactNode }) => (
+const Frame = ({ children }: { children: React.ReactNode }) => (
   <div style={{ maxWidth: 260, padding: "var(--space-6)" }}>{children}</div>
 );
 
@@ -29,13 +29,13 @@ const Rahmen = ({ children }: { children: React.ReactNode }) => (
  */
 export const Filled: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <Sparkline
         values={[1200, 940, 1310, 1180, 860, 1420]}
-        labels={MONATE}
+        labels={MONTHS}
         format={EUR}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -46,13 +46,13 @@ export const Filled: Story = {
  */
 export const Gaps: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <Sparkline
         values={[1200, null, 1310, null, 860, 1420]}
-        labels={MONATE}
+        labels={MONTHS}
         format={EUR}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -63,10 +63,10 @@ export const Gaps: Story = {
  */
 export const TooFew: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <p className="v2sub">Darunter steht nichts im DOM:</p>
-      <Sparkline values={[1200, 940, 1310]} labels={MONATE} format={EUR} />
-    </Rahmen>
+      <Sparkline values={[1200, 940, 1310]} labels={MONTHS} format={EUR} />
+    </Frame>
   ),
 };
 
@@ -84,7 +84,7 @@ export const InUse: Story = {
         <div style={{ padding: "var(--space-5)" }}>
           <Sparkline
             values={[1200, 940, 1310, 1180, 860, 1420]}
-            labels={MONATE}
+            labels={MONTHS}
             format={EUR}
             summary="Sechs Monate, März bis August: schwankend zwischen 860 und 1.420 €, zuletzt der höchste Wert."
           />

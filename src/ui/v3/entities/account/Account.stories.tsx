@@ -65,7 +65,7 @@ export const Filled: Story = {
  * row and show the em dash — the reader sees *that* the balance is unknown,
  * not a list that silently got shorter.
  */
-export const Unvollstaendig: Story = {
+export const Incomplete: Story = {
   render: () => (
     <Pair
       facts={{
@@ -83,7 +83,7 @@ export const Unvollstaendig: Story = {
 };
 
 /** A creditor account: the partner row appears, the chip changes. */
-export const Personenkonto: Story = {
+export const PersonalAccount: Story = {
   render: () => (
     <Pair
       facts={{
@@ -106,7 +106,7 @@ export const Personenkonto: Story = {
  * Everything Ludwig booked has arrived in DATEV. The follow-up row is **gone**
  * — not „0 nur in Ludwig", which would be a question without an answer.
  */
-export const NurDatev: Story = {
+export const DatevOnly: Story = {
   render: () => (
     <Pair
       facts={{ ...BANK, ludwigOnlyCount: 0, ludwigOnlyAmount: null }}
@@ -120,7 +120,7 @@ export const NurDatev: Story = {
  * staging). Only then does the second chip appear — in the normal case the
  * row is not there at all.
  */
-export const SyncOffen: Story = {
+export const SyncPending: Story = {
   render: () => (
     <Pair
       facts={{

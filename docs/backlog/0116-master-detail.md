@@ -50,8 +50,8 @@ Arbeitsfläche nach oben.
 |---|---|---|---|---|
 | `list` | `ReactNode` | ja | die Auswahl-Hälfte | `Filled` |
 | `detail` | `ReactNode` | ja | die Arbeits-Hälfte | `Filled` |
-| `detailBreit` | `boolean` | nein | dreht das Gewicht um: **440 px** links (ein CSS-Literal — der Aufrufer kann die Arbeitsfläche verschieben, die Randspalte nicht), der Rest rechts | `DetailBreit` |
-| `minDetail` | `number` | nein | wie viel die Arbeitsfläche braucht, bevor die beiden umbrechen. **Nur mit `detailBreit`** — ohne wird der Wert stillschweigend verworfen. Ohne die Prop gilt die Vorgabe des Stylesheets (620, die kleinste Tabelle des Sets) | `DetailBreit` |
+| `detailWide` | `boolean` | nein | dreht das Gewicht um: **440 px** links (ein CSS-Literal — der Aufrufer kann die Arbeitsfläche verschieben, die Randspalte nicht), der Rest rechts | `DetailWide` |
+| `minDetail` | `number` | nein | wie viel die Arbeitsfläche braucht, bevor die beiden umbrechen. **Nur mit `detailWide`** — ohne wird der Wert stillschweigend verworfen. Ohne die Prop gilt die Vorgabe des Stylesheets (620, die kleinste Tabelle des Sets) | `DetailWide` |
 | `style` | `CSSProperties` | nein | steht im Bestand, **hat aber keinen Nutzer**: kein Aufrufer im Repo übergibt sie, keine Story zeigt sie. Sie bleibt, weil sie da ist; einen Zweck schreibt diese Spec ihr nicht zu | — |
 
 Zwei weitere Exporte liegen in derselben Datei und gehören zur Familie:
@@ -76,13 +76,13 @@ durchgefahren, bis die Kippkante fiel.
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
 | `pnpm typecheck` und `pnpm build` grün | Exit-Code beider Läufe `0` (geprüft über `$?`, nicht über die letzte Zeile). `pnpm check:icons` und `pnpm check:contrast` ebenfalls `0` | erfüllt |
-| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` stehen an `MasterDetail`, `ListPane`, `DetailPane`. Englisch nur teilweise: `minDetail` und seine JSDoc sind englisch, `detailBreit`, dessen JSDoc und die Klasse `v2md--detail-breit` deutsch. `MasterDetail.tsx` wurde von `04ae1ad` nicht angefasst, damit greift die Ausnahme aus `CLAUDE.md` — Bestand wird nicht in Masse umbenannt | erfüllt (Bestand) |
+| Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` stehen an `MasterDetail`, `ListPane`, `DetailPane`. Englisch nur teilweise: `minDetail` und seine JSDoc sind englisch, `detailWide`, dessen JSDoc und die Klasse `v2md--detail-breit` deutsch. `MasterDetail.tsx` wurde von `04ae1ad` nicht angefasst, damit greift die Ausnahme aus `CLAUDE.md` — Bestand wird nicht in Masse umbenannt | erfüllt (Bestand) |
 | Kein Hex, kein px in der Komponente | Kein Hex. px doch: `minDetail = 620` und `` `${minDetail}px` `` stehen in `MasterDetail.tsx`, die Vorgabe 620 zusätzlich als `var(--v2md-min, 620px)` in `v3.css` — dieselbe Zahl an zwei Orten, der CSS-Sockel dabei tot, weil die Komponente die Variable immer setzt | offener Punkt 2 |
 | Prüfliste `design-guidelines.md` §9 | Der Punkt aus derselben Abnahme-Welle sitzt: beide Flex-Kinder tragen `min-width: 0`, gemessen kein Überlauf (`scrollWidth − clientWidth = 0` an Rahmen, Arbeitsfläche und Tabellen-Scroller, 1280 und 1440, beide Aufrufer, kein Dokumentüberlauf). Zustände `lädt` und `Fehler` fehlen — der Baustein trägt keinen Inhalt, die Spec fordert sie nicht | erfüllt, Rest offener Punkt 5 |
-| Umbruch ohne `minDetail` unter 1.080, mit `minDetail={484}` unter 944 | Story `DetailBreit`, Rahmen von 1400 in 1-px-Schritten abwärts. Vorgabe 620: bei 1080 nebeneinander (440 / 620), bei 1079 umgebrochen. 484: bei 944 nebeneinander (440 / 484), bei 943 umgebrochen. Gegenprobe 900: 1360 / 1359. Die Formel `440 + minDetail + 20` trifft dreimal, der Messwert reagiert also auf die Prop | erfüllt |
-| Im Umbruch steht die Arbeitsfläche oben | `DetailBreit`, zweiter Fall (1.000er Rahmen): `detail.top` 344,8 gegen `list.top` 584,8. `LedgerAccountView --in-use` bei 1280 im `AppShell`: `detail.top` 725,7 gegen `list.top` 1040,2 — die Bewegungstabelle steht über den Fakten, nicht mehr darunter | erfüllt |
-| Nebeneinander stehen beide oben bündig | Gleiche `top` bei ungleichen Höhen: `CaseDetailView --in-use` 1280 beide 464 (Höhen 302,4 / 372,8), 1440 beide 464 (302,4 / 331). `LedgerAccountView --in-use` 1440 beide 688,5 (217,6 / 294,5). `DetailBreit` im 1.100er Rahmen beide 58,4 | erfüllt |
-| Ohne `detailBreit` bleibt das alte Verhalten | `Filled`, `NothingSelected`, `Empty`, `EmptyAfterFilter`, je bei 1280 und 1440: `display: grid`, `grid-template-columns` 808px 420px bzw. 968px 420px, Detail also konstant 420, Liste links breit. Detail `position: sticky`, `top: 16px`, `max-height: 868px`, `overflow-y: auto`; beide Hälften `top: 16`; kein Dokumentüberlauf | erfüllt |
+| Umbruch ohne `minDetail` unter 1.080, mit `minDetail={484}` unter 944 | Story `DetailWide`, Rahmen von 1400 in 1-px-Schritten abwärts. Vorgabe 620: bei 1080 nebeneinander (440 / 620), bei 1079 umgebrochen. 484: bei 944 nebeneinander (440 / 484), bei 943 umgebrochen. Gegenprobe 900: 1360 / 1359. Die Formel `440 + minDetail + 20` trifft dreimal, der Messwert reagiert also auf die Prop | erfüllt |
+| Im Umbruch steht die Arbeitsfläche oben | `DetailWide`, zweiter Fall (1.000er Rahmen): `detail.top` 344,8 gegen `list.top` 584,8. `LedgerAccountView --in-use` bei 1280 im `AppShell`: `detail.top` 725,7 gegen `list.top` 1040,2 — die Bewegungstabelle steht über den Fakten, nicht mehr darunter | erfüllt |
+| Nebeneinander stehen beide oben bündig | Gleiche `top` bei ungleichen Höhen: `CaseDetailView --in-use` 1280 beide 464 (Höhen 302,4 / 372,8), 1440 beide 464 (302,4 / 331). `LedgerAccountView --in-use` 1440 beide 688,5 (217,6 / 294,5). `DetailWide` im 1.100er Rahmen beide 58,4 | erfüllt |
+| Ohne `detailWide` bleibt das alte Verhalten | `Filled`, `NothingSelected`, `Empty`, `EmptyAfterFilter`, je bei 1280 und 1440: `display: grid`, `grid-template-columns` 808px 420px bzw. 968px 420px, Detail also konstant 420, Liste links breit. Detail `position: sticky`, `top: 16px`, `max-height: 868px`, `overflow-y: auto`; beide Hälften `top: 16`; kein Dokumentüberlauf | erfüllt |
 | Die Untergrenze wirkt in beiden Aufrufern, ohne dass einer den anderen kippt | `CaseDetailView --in-use` (484): bei 1280 Rahmen 944 → nebeneinander 440 / 484; bei 1440 Rahmen 1104 → 440 / 644. `LedgerAccountView --in-use` (Vorgabe 620): bei 1280 Rahmen 976 → umgebrochen, die Tabelle über die vollen 976, Spalte `Haben` bei x 1125–1229 vollständig im Bild; bei 1440 Rahmen 1136 → nebeneinander 440 / 676, `Haben` bei 1285–1389 im Bild. Der Befund aus 0063 — die Haben-Spalte stand bei keiner Breite im Bild — ist bei beiden Breiten weg. Fenster-Kippkanten: 0050 bei 1280 / 1279, 0063 bei 1384 / 1383 | erfüllt, mit offenem Punkt 1 |
 
 Beide Entscheidungen halten an der Wirkung, in der Story und in beiden
@@ -179,7 +179,7 @@ Die Datei sollte den Bestand festhalten und tat es nur halb:
 - **`style` ist eine Prop ohne Nutzer** (null Aufrufer im Repo, keine Story).
   Sie steht im Bestand und bleibt; die Spec sagt das jetzt, statt ihr einen
   Zweck zuzuschreiben, den niemand ausübt.
-- **`minDetail` ohne `detailBreit`** wird stillschweigend verworfen. Auch das
+- **`minDetail` ohne `detailWide`** wird stillschweigend verworfen. Auch das
   steht jetzt da.
 - **Die 440 sind ein CSS-Literal**: der Aufrufer kann die Arbeitsfläche
   verschieben, die Randspalte nicht.

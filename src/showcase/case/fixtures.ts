@@ -23,10 +23,10 @@ import type { Note } from "@/ui/v3/patterns/NoteFeed";
  */
 
 /** Der Referenztag aller Stories — Reife der Erwartungen, Zustand der Klärungen. */
-export const HEUTE = "2026-08-05";
+export const TODAY = "2026-08-05";
 
 /** Der Fall selbst — eine Eingangsrechnung, an der ein Vorschlag hängt. */
-export function fallFixture(over: Partial<CaseFactsVM> = {}): CaseFactsVM {
+export function caseFixture(over: Partial<CaseFactsVM> = {}): CaseFactsVM {
   return {
     caseNumber: "2026-0334",
     kind: "incoming_invoice",
@@ -58,7 +58,7 @@ export function fallFixture(over: Partial<CaseFactsVM> = {}): CaseFactsVM {
  * `bookingState` ist die **zweite Marke am Ereignis**, kein eigener Eintrag:
  * ein Ereignis und seine Buchung sind ein Vorgang (0152, Frage 1).
  */
-export const BELEG_EREIGNIS: CaseTimelineEvent = {
+export const DOCUMENT_EVENT: CaseTimelineEvent = {
   id: "ev-1",
   kind: "document_received",
   date: "2026-07-31",
@@ -76,7 +76,7 @@ export const BELEG_EREIGNIS: CaseTimelineEvent = {
  * macht den Fall lesbar. Ohne sie stünde die Frage „hat das schon jemand
  * erfasst?" unbeantwortet auf der Seite.
  */
-export const DATEV_EREIGNIS: CaseTimelineEvent = {
+export const DATEV_EVENT: CaseTimelineEvent = {
   id: "ev-0",
   kind: "open_item_carryover",
   date: "2026-06-30",
@@ -89,7 +89,7 @@ export const DATEV_EREIGNIS: CaseTimelineEvent = {
 };
 
 /** Die offene Zahlungserwartung — der einzige Eintrag in der Zukunft. */
-export const ZAHLUNG_ERWARTET: CaseTimelineExpectation = {
+export const PAYMENT_EXPECTED: CaseTimelineExpectation = {
   id: "ex-1",
   kind: "payment",
   dueDate: "2026-08-10",
@@ -100,7 +100,7 @@ export const ZAHLUNG_ERWARTET: CaseTimelineExpectation = {
 };
 
 /** Eine beantwortete Rückfrage — sie steht im Strang, nicht in den Mängeln. */
-export const KLAERUNG_BEANTWORTET: CaseTimelineClarification = {
+export const CLARIFICATION_ANSWERED: CaseTimelineClarification = {
   id: "cl-1",
   type: "question",
   title: "Gehören die Ersatzteile zum Firmenwagen oder zum Werkstattbestand?",
@@ -111,7 +111,7 @@ export const KLAERUNG_BEANTWORTET: CaseTimelineClarification = {
 };
 
 /** Die Zeilen des Vorschlags: Aufwand gegen Kreditor, mit Automatikkonto. */
-export const VORSCHLAG: JournalLine[] = [
+export const PROPOSAL: JournalLine[] = [
   {
     side: "debit",
     accountNumber: "5404",

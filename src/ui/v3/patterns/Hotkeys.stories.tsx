@@ -40,13 +40,13 @@ export const Open: Story = { render: () => <HotkeyLegend groups={GROUPS} default
 export const OnButton: Story = {
   render: function Render() {
     const [n, setN] = useState(0);
-    const zaehlen = () => setN((v) => v + 1);
-    useHotkeys([{ key: "a", label: "Bestätigen", handler: zaehlen }]);
+    const count = () => setN((v) => v + 1);
+    useHotkeys([{ key: "a", label: "Bestätigen", handler: count }]);
     return (
       <div className="v2stack">
         <ActionBar
           primary={
-            <Button variant="primary" hotkey="A" onClick={zaehlen}>
+            <Button variant="primary" hotkey="A" onClick={count}>
               Bestätigen
             </Button>
           }

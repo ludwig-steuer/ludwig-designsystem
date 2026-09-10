@@ -38,7 +38,7 @@ Warnungen; nichts davon kann der Prototyp).
   Punkt 1 ist keine Prop, sondern eine Darstellungskorrektur an der internen
   `Journal`-Funktion.
 - **Zuschnitt:** zusammenlassen. Die drei teilen den Zustand des Editors
-  (`rows`, `gegenkonto`) und treten nie getrennt auf; trennen erzeugte nur
+  (`rows`, `contraAccount`) und treten nie getrennt auf; trennen erzeugte nur
   Durchreich-Props (§4). Ein Bau-Auftrag, eine Abnahme.
 - **Setzt auf:** `AccountField` (0013) fürs Gegenkonto,
   `DocumentNumberField` (0014) für Belegfeld 1.
@@ -114,7 +114,7 @@ Vorlage: `BuchungssatzEditor.dc.html` (`gkEditing`, `gkCandidates`,
   es sich gleich anfühlt und das Kontenblatt-Icon (0013) mitkommt.
 - **S/H des Gegenkontos wird nicht bearbeitbar.** Der Prototyp bietet einen
   Umschalter mit `s`/`h`/`+`/`−`; die Seite des Gegenkontos ist aber die
-  Gegenseite des Belegs und fällt aus `belegSide` — ein Umschalter dort
+  Gegenseite des Belegs und fällt aus `documentSide` — ein Umschalter dort
   erzeugte einen Satz, der nicht aufgeht. Das `≠` in der Summenzeile ist die
   ehrlichere Rückmeldung.
 
@@ -377,9 +377,9 @@ Deckung in **0113** nachholen, wo die Datei ohnehin geschnitten wird.
   in `docs/backlog/0113-journal-entry-grid.md` nennt
   `docs/backlog/0015-journal-entry-f109.md`; die Datei heißt
   `0015-journal-entry-editor-f109.md`.
-- **M16 — die deutschen Bezeichner der Altteile stehen weiter.** `gegenkonto`,
-  `belegSide`, `EditorRow.datum/umsatz/konto/beleg1`, `Kopf`, `Zeile`,
-  `Journal`, `Meldungsblock`, `summeBelegseite`, `speichern`, `journalOffen`
+- **M16 — die deutschen Bezeichner der Altteile stehen weiter.** `contraAccount`,
+  `documentSide`, `EditorRow.datum/amount/konto/externalDocumentNumber`, `Kopf`, `Zeile`,
+  `Journal`, `Meldungsblock`, `documentSideTotal`, `speichern`, `journalOffen`
   …; `CLAUDE.md` sagt „eine Datei, die ohnehin angefasst wird, bekommt
   englische Namen". Das ist eine Umbenennung durch die ganze Datei und eine
   eigene Runde wert — sinnvollerweise die von **0113**, die die Datei ohnehin
@@ -486,7 +486,7 @@ Kästchen, Speichern offen.
   `contraAccountCandidates`. Gesetzt → das Gegenkonto ist ein `AccountField`
   wie die Zeilen; weggelassen → Anzeige wie bisher.
 - **S/H bleibt fest.** Die Seite des Gegenkontos ist die Gegenseite des
-  Belegs und fällt aus `belegSide`; ein Umschalter dort erzeugte einen Satz,
+  Belegs und fällt aus `documentSide`; ein Umschalter dort erzeugte einen Satz,
   der nicht aufgeht. Das `≠` in der Summenzeile ist die ehrlichere Rückmeldung.
 - **Vierter Punkt, der Rest von 0013:** der Editor reicht `onOpenLedger`
   jetzt auch an die **Zeilen-Felder** durch. Vorher stand das Kontenblatt-Icon
@@ -602,6 +602,6 @@ den drei Aufträgen dieser Spec, jeder von ihnen ist eine echte Abweichung.
     `key: "alle"` an und erzeugt beim Tippen `Encountered two children with
     the same key`. Trifft **jeden** Aufrufer mit `alle`-Kandidaten und Suche →
     gehört zu **0013**, nicht hierher.
-  - M16 — die deutschen Bezeichner der Altteile (`gegenkonto`, `Kopf`,
-    `Zeile`, `summeBelegseite`) → **0113**, wenn die Datei ohnehin geteilt
+  - M16 — die deutschen Bezeichner der Altteile (`contraAccount`, `Kopf`,
+    `Zeile`, `documentSideTotal`) → **0113**, wenn die Datei ohnehin geteilt
     wird.

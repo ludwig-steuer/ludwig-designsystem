@@ -238,7 +238,7 @@ export function sourceDocumentColumns({
         // name is prose. The condition hangs on the content, not on the
         // column: written the other way round it put the file names in Inter
         // and the firms in mono (measured while fixing 0070, M2).
-        const zeigtDatei = !d.counterparty && !picked.has("fileName");
+        const showsFile = !d.counterparty && !picked.has("fileName");
         const body = d.counterparty ? (
           <span className="v2doc__keyname">{d.counterparty}</span>
         ) : picked.has("fileName") ? (
@@ -261,7 +261,7 @@ export function sourceDocumentColumns({
         // that is meant to prove the opposite (acceptance 0070, second round).
         return (
           <span
-            className={`v2doccol__lead${zeigtDatei ? " v2mono" : ""}`}
+            className={`v2doccol__lead${showsFile ? " v2mono" : ""}`}
             // The tooltip belongs to the **same branch** as the content. Built
             // unconditionally it promised a file where the cell deliberately
             // shows „—": measured in `Stuck`, row 1, text „—" with

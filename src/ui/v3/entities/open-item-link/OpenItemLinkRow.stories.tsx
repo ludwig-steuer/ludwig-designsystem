@@ -31,21 +31,21 @@ const LINK = (over: Partial<OpenItemLink> = {}): OpenItemLink => ({
   ...over,
 });
 
-const RECHNUNG: OpenItemSide = {
+const INVOICE: OpenItemSide = {
   entryId: "je-1",
   label: "RE-4471 · Bürobedarf Meier GmbH",
   date: "2026-08-26",
   amount: 1249.9,
 };
 
-const ZAHLUNG: OpenItemSide = {
+const PAYMENT: OpenItemSide = {
   entryId: "me-9",
   label: "Überweisung Commerzbank 1210",
   date: "2026-08-30",
   amount: 1249.9,
 };
 
-const Kopf = () => (
+const Head = () => (
   <HeadRow>
     <span>Klammer</span>
     <span>Belegfeld</span>
@@ -57,12 +57,12 @@ const Kopf = () => (
   </HeadRow>
 );
 
-const Rahmen = ({ children, sub }: { children: React.ReactNode; sub?: string }) => (
+const Frame = ({ children, sub }: { children: React.ReactNode; sub?: string }) => (
   <div style={{ maxWidth: 1100, padding: "var(--space-6)" }}>
     <Card>
       <CardHead title="Ausgleich" sub={sub ?? "Sachverhalt 2026-0412 · Personenkonto 70012"} />
       <Table cols={openItemLinkTracks} minWidth={980}>
-        <Kopf />
+        <Head />
         {children}
       </Table>
     </Card>
@@ -76,9 +76,9 @@ const Rahmen = ({ children, sub }: { children: React.ReactNode; sub?: string }) 
  */
 export const Filled: Story = {
   render: () => (
-    <Rahmen>
-      <OpenItemLinkRow link={LINK()} invoice={RECHNUNG} payment={ZAHLUNG} />
-    </Rahmen>
+    <Frame>
+      <OpenItemLinkRow link={LINK()} invoice={INVOICE} payment={PAYMENT} />
+    </Frame>
   ),
 };
 
@@ -92,13 +92,13 @@ export const Filled: Story = {
  */
 export const Orphaned: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <OpenItemLinkRow
         link={LINK({ orphanedAt: "2026-09-02", rationale: "Rechnung storniert und neu gestellt." })}
-        invoice={RECHNUNG}
-        payment={ZAHLUNG}
+        invoice={INVOICE}
+        payment={PAYMENT}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -108,23 +108,23 @@ export const Orphaned: Story = {
  */
 export const Roundtrip: Story = {
   render: function Render() {
-    const [ziel, setZiel] = useState<string | null>(null);
+    const [target, setTarget] = useState<string | null>(null);
     return (
       <div style={{ maxWidth: 1100, padding: "var(--space-6)" }}>
         <Card>
           <CardHead title="Ausgleich" sub="Beide Seiten sind Ziele" />
           <Table cols={openItemLinkTracks} minWidth={980}>
-            <Kopf />
+            <Head />
             <OpenItemLinkRow
               link={LINK()}
-              invoice={RECHNUNG}
-              payment={ZAHLUNG}
-              onOpen={setZiel}
+              invoice={INVOICE}
+              payment={PAYMENT}
+              onOpen={setTarget}
             />
           </Table>
         </Card>
         <p className="lw-body-sm">
-          Geöffnet: <strong>{ziel ?? "—"}</strong>
+          Geöffnet: <strong>{target ?? "—"}</strong>
         </p>
       </div>
     );
@@ -153,8 +153,8 @@ export const InUse: Story = {
         <Card>
           <CardHead title="Saldo und DATEV" sub="Personenkonto 70012 · Wirtschaftsjahr 2026" />
           <Table cols={openItemLinkTracks} minWidth={980}>
-            <Kopf />
-            <OpenItemLinkRow link={LINK()} invoice={RECHNUNG} payment={ZAHLUNG} />
+            <Head />
+            <OpenItemLinkRow link={LINK()} invoice={INVOICE} payment={PAYMENT} />
             <OpenItemLinkRow
               link={LINK({
                 id: "oil-2",
@@ -194,11 +194,11 @@ export const InUse: Story = {
  */
 export const Edges: Story = {
   render: () => (
-    <Rahmen sub="Vier Ränder">
+    <Frame sub="Vier Ränder">
       <OpenItemLinkRow
         link={LINK({ amountAllocated: 412.5, matchedBy: "Regel" })}
-        invoice={RECHNUNG}
-        payment={{ ...ZAHLUNG, amount: 412.5, label: "Teilzahlung Commerzbank 1210" }}
+        invoice={INVOICE}
+        payment={{ ...PAYMENT, amount: 412.5, label: "Teilzahlung Commerzbank 1210" }}
       />
       <OpenItemLinkRow
         link={LINK({ id: "oil-3", belegfeldValue: "INV-2026-0042", amountAllocated: 4820.75 })}
@@ -240,6 +240,6 @@ export const Edges: Story = {
         invoice={{ entryId: "je-5", label: "Kontoführungsentgelt", date: "2026-08-29", amount: 89.9 }}
         payment={{ entryId: "me-16", label: "Bankeinzug", date: "2026-08-29", amount: 89.9 }}
       />
-    </Rahmen>
+    </Frame>
   ),
 };

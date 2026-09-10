@@ -112,7 +112,7 @@ Variabel (aus dieser Spec):
 - [ ] Speichern mit nur Leerraum ist gesperrt (`Interactive`)
 - [ ] Abgelehntes Speichern lässt den Text im Feld und zeigt die Meldung (`SaveFails`)
 - [ ] In 370 px kein waagerechter Überlauf, auch bei 600 Zeichen (`InUse`, `Edge`)
-- [ ] Ersetzt die Notizen-Karte in `src/showcase/sachverhalt/` ohne Funktionsverlust
+- [ ] Ersetzt die Notizen-Karte in `src/showcase/case/` ohne Funktionsverlust
 
 ## Abnahme
 

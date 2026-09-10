@@ -46,8 +46,8 @@ export function parseAmount(raw: string): ParsedAmount {
   if (!t) return null;
   // Entweder deutsche Gruppierung („1.234.567,89") oder eine schlichte Zahl
   // mit höchstens einem Trenner („1234.56", „1234,56", „1234").
-  const wohlgeformt = /^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t) || /^-?\d+([.,]\d+)?$/.test(t);
-  if (!wohlgeformt) return "invalid";
+  const wellFormed = /^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t) || /^-?\d+([.,]\d+)?$/.test(t);
+  if (!wellFormed) return "invalid";
   const n = parseGermanAmount(t);
   return n === null ? "invalid" : n;
 }

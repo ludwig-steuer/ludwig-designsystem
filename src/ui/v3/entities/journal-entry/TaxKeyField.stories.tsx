@@ -11,7 +11,7 @@ const meta: Meta<typeof TaxKeyField> = {
 export default meta;
 type Story = StoryObj<typeof TaxKeyField>;
 
-const Rahmen = ({ children }: { children: React.ReactNode }) => (
+const Frame = ({ children }: { children: React.ReactNode }) => (
   <div style={{ maxWidth: 520, padding: "var(--space-6)", display: "grid", gap: "var(--space-5)" }}>
     {children}
   </div>
@@ -27,10 +27,10 @@ const Rahmen = ({ children }: { children: React.ReactNode }) => (
  */
 export const Filled: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <TaxKeyField value="9" onChange={() => {}} />
       <TaxKeyField value="9" onChange={() => {}} disabled />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -41,22 +41,22 @@ export const Filled: Story = {
  */
 export const Empty: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <TaxKeyField value={null} onChange={() => {}} />
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** Der Satz am Feld, wie bei jedem anderen Formularfeld. */
 export const Invalid: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <TaxKeyField
         value="9"
         onChange={() => {}}
         error="Dieser Schlüssel passt nicht zum Konto 6815 — die Historie trägt ihn dort nicht."
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -71,10 +71,10 @@ export const Invalid: Story = {
  */
 export const PassThrough: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <TaxKeyField value={null} onChange={() => {}} label="Ohne Durchreichen" />
       <TaxKeyField value={null} onChange={() => {}} label="Mit Durchreichen" allowPassThrough />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -83,12 +83,12 @@ export const Roundtrip: Story = {
   render: function Render() {
     const [key, setKey] = useState<string | null>("9");
     return (
-      <Rahmen>
+      <Frame>
         <TaxKeyField value={key} onChange={setKey} />
         <p className="lw-body-sm">
           Gewählt: <strong>{key === null ? "null (kein Schlüssel)" : key}</strong>
         </p>
-      </Rahmen>
+      </Frame>
     );
   },
 };

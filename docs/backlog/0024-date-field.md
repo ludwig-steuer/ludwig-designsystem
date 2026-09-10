@@ -164,7 +164,7 @@ Variabel (aus dieser Spec):
 |---|---|---|
 | Innen steckt `<input type="date">`, kein eigener Kalender | DOM aller Stories: ausschließlich `input[type=date]`, deutsche Anzeige „31.08.2026"; keine Kalender-Bibliothek im Import | ✓ |
 | Keine neue Abhängigkeit | `package.json` seit der Erstbestückung unverändert (`git log -- package.json`) | ✓ |
-| `onChange` gibt ISO, nie „26.08.2026" | `v3-primitives-formular-datefield--interaktiv` und `--rand`: Ausgabe „2026-08-01" | ✓ |
+| `onChange` gibt ISO, nie „26.08.2026" | `v3-primitives-formular-datefield--interactive` und `--rand`: Ausgabe „2026-08-01" | ✓ |
 | `to` vor `from` wird getauscht, nicht abgewiesen | `--rand`: „bis" auf 2026-08-01 gesetzt — danach steht von = 2026-08-01, bis = 2026-08-31 | ✓ |
 | Leeren gibt `null`, nicht `""` | `onChange(e.target.value \|\| null)` in `DateField`; `--leer` zeigt beide Felder leer | ✓ |
 | Schnellwahl löst genau ein `onChange` mit beiden Werten aus | `--mit-schnellwahl`: ein Klick auf „Vormonat" setzt beide Felder auf 2026-07-01 und 2026-07-31 | ✓ |
@@ -219,7 +219,7 @@ vorgegeben; die Hausregel in `CLAUDE.md` verlangt Englisch, und der Wunsch
 aus der Abnahme war, das an der Spec zu korrigieren statt an der Regel
 vorbeizuleben. Umbenannt: `Gefuellt` → `Filled`, `Leer` → `Empty`,
 `Interaktiv` → `Interactive`, `MitSchnellwahl` → `WithPresets`, `Grenzen` →
-`Bounds`, `Rand` → `Edges`, `ImEinsatz` → `InUse`; die Nachweise oben in
+`Bounds`, `Rand` → `Edges`, `InUse` → `InUse`; die Nachweise oben in
 dieser Spec zeigen auf die neuen Namen.
 
 ## Abnahmekriterien (Nachtrag)

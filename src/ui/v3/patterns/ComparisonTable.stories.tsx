@@ -45,14 +45,14 @@ export const Filled: Story = {
   render: function Render() {
     const [sel, setSel] = useState<string | undefined>("miete");
     return (
-      <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONTHS} rows={ROWS} selectedKey={sel} onSelect={setSel} />
+      <ComparisonTable title="Konten gegen Vormonate" monthLabels={MONTHS} rows={ROWS} selectedKey={sel} onSelect={setSel} />
     );
   },
 };
 
 /** Ohne `onSelect` ist die Tabelle eine Auskunft — keine Zeile ist klickbar. */
 export const ReadOnly: Story = {
-  render: () => <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONTHS} rows={ROWS} />,
+  render: () => <ComparisonTable title="Konten gegen Vormonate" monthLabels={MONTHS} rows={ROWS} />,
 };
 
 /** Nichts auffällig: der Untertitel sagt es, die Zeilen bleiben ruhig. */
@@ -60,7 +60,7 @@ export const NothingFlagged: Story = {
   render: () => (
     <ComparisonTable
       title="Konten gegen Vormonate"
-      monatsLabels={MONTHS}
+      monthLabels={MONTHS}
       rows={ROWS.map((z) => ({ ...z, flagged: false, acknowledged: false, tone: z.tooYoung ? "muted" : "neutral" }))}
     />
   ),
@@ -69,6 +69,6 @@ export const NothingFlagged: Story = {
 /** Leer: kein Vormonat, keine Zeile — und ein Satz, der das sagt. */
 export const Empty: Story = {
   render: () => (
-    <ComparisonTable title="Konten gegen Vormonate" monatsLabels={MONTHS} rows={[]} empty="Noch kein Vormonat zum Vergleichen." />
+    <ComparisonTable title="Konten gegen Vormonate" monthLabels={MONTHS} rows={[]} empty="Noch kein Vormonat zum Vergleichen." />
   ),
 };

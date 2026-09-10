@@ -7,7 +7,7 @@
 | Stufe | `entities/document-number/` |
 | Klassen-Test | nein — Belegfeld 1 ist eine DATEV-Ausnahme, die Rangordnung der Quellen ist Buchhaltungslogik |
 | Quelle | Anfrage Owner 2026-09-03 („Belegfeld 1 sollte ein Lupenicon haben, wodurch ich einen Drawer öffnen kann — sogenannter OPOS-Browser — aus dem als Ergebnis ein Belegfeld übernommen werden kann") |
-| Ersetzt | die nackten `<input>` für `beleg1` in `JournalEntryEditor` (Zeile + Gegenkonto) |
+| Ersetzt | die nackten `<input>` für `externalDocumentNumber` in `JournalEntryEditor` (Zeile + Gegenkonto) |
 | Blockiert | 0015 (Editor) |
 | Spec von / am | Claude, 2026-09-03 |
 
@@ -160,7 +160,7 @@ Variabel (aus dieser Spec):
 - [ ] Abweichung von `dominant` erscheint als Hinweis, nicht als Fehler (`Abweichend`)
 - [ ] `maxLength` hält bei 36, ohne stilles Abschneiden (`Rand`)
 - [ ] Tastatur ↑/↓/`Enter`/`Esc` (`Interaktiv`)
-- [ ] Ersetzt die `beleg1`-Inputs in `JournalEntryEditor` ohne Funktionsverlust (0015)
+- [ ] Ersetzt die `externalDocumentNumber`-Inputs in `JournalEntryEditor` ohne Funktionsverlust (0015)
 
 ## Offene Fragen
 
@@ -217,7 +217,7 @@ nur `ariaLabel`, in der Schnittstelle als „—" vorgesehen. Alle zehn IDs in
 | Abweichung von `dominant` als Hinweis, nicht als Fehler | `…field--diverging`: zwei `.v2dnf__hint` in `rgb(92,92,92)` (6,69:1), `role=null`, `aria-invalid` 0×, `.v2in--invalid` 0×, `[role=alert]` 0×. Klick auf die Nummer (`button.v2link`) setzt `b5` von „RE 2026 140" auf „RE-2026-0140", der Hinweis verschwindet; zweiter Klick ebenso für `b6` | ✓ (Layout s. M2) |
 | `maxLength` hält bei 36, ohne stilles Abschneiden | `…field--interactive`: Feld auf 8 Zeichen, `Input.insertText` mit 44 Zeichen → Wert 36 Zeichen **und** die Zeile „36 Zeichen — mehr trägt Belegfeld 1 in DATEV nicht." erscheint (vorher 0×). `…field--edge`: 36 Zeichen, Zeile steht. `maxLength=36` am Element | ✓ (Befund B7: keine Live-Region) |
 | Tastatur ↑/↓/`Enter`/`Esc` | `…register--interactive`, echte Tasten: Fokus in der Suche → ↓ → `document.activeElement` = `BUTTON.v2rowbtn[data-row=1]`, ↓ → `data-row=2`, ↑ → `data-row=1`, `Enter` → „Übernommen: …". `Esc` erreicht `document` mit `defaultPrevented=false` (Drawer gehört dem Aufrufer, M8). **Aber:** das erste ↓ überspringt die dominanteste Zeile (`data-row=0`) | ✗ **M5** (klein) |
-| Ersetzt die `beleg1`-Inputs in `JournalEntryEditor` ohne Funktionsverlust (0015) | `v3-entitäten-buchungssatz-journalentryeditor--document-number-across-rows`: `.v2dnf` ist **96 px** breit, der `dominant`-Hinweis bricht auf **10 Zeilen / 194 px**, die Buchungszeile wächst auf **265 px** (bei 1440 und bei 1280 gleich) | ✗ **M2** (blockiert) |
+| Ersetzt die `externalDocumentNumber`-Inputs in `JournalEntryEditor` ohne Funktionsverlust (0015) | `v3-entitäten-buchungssatz-journalentryeditor--document-number-across-rows`: `.v2dnf` ist **96 px** breit, der `dominant`-Hinweis bricht auf **10 Zeilen / 194 px**, die Buchungszeile wächst auf **265 px** (bei 1440 und bei 1280 gleich) | ✗ **M2** (blockiert) |
 
 ### Die Mängel vom 2026-09-06 — nachgemessen
 

@@ -46,8 +46,8 @@ sind.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `url` | `string \| null` | ja | Signierte URL des Originals. `null` heißt **es gibt keine**, nicht „lädt noch". | `Gefuellt`, `OhneVorschau` |
-| `unavailableReason` | `string \| null` | nein | Warum es keine gibt, in einem Satz. Ohne ihn steht der Standardsatz. Nie ein Platzhalterbild. | `OhneVorschau` |
+| `url` | `string \| null` | ja | Signierte URL des Originals. `null` heißt **es gibt keine**, nicht „lädt noch". | `Gefuellt`, `WithoutPreview` |
+| `unavailableReason` | `string \| null` | nein | Warum es keine gibt, in einem Satz. Ohne ihn steht der Standardsatz. Nie ein Platzhalterbild. | `WithoutPreview` |
 | `title` | `string` | nein | Überschrift des Rahmens, Vorgabe „Beleg". Beim Vertrag „Vertrag" — die **Belegart**, aus `sourceDocTypeLabel()` des Aufrufers, nicht hier abgeleitet. | `Ausprägungen` |
 | `pageCount` | `number \| null` | nein | Seitenzahl des Dokuments (100 % gefüllt, p90 3, max 27). Steht als Meta neben dem Titel. | `Gefuellt` |
 | `excerpt` | `{ pages: string; parentTitle?: string; parentHref?: string } \| null` | nein | Der Ausschnitt: `splitPageRange` („5-7") plus, wenn bekannt, der Weg zum Sammel-Original. `null` = ein ganzes Dokument. | `Teilbeleg` |
@@ -97,11 +97,11 @@ Titel `v3/Entitäten/Beleg/SourceDocumentPreview`.
 | Story | Beweist |
 |---|---|
 | `Gefuellt` | Ein dreiseitiges PDF mit Titel und Seitenzahl |
-| `OhneVorschau` | Beide Leerfälle nebeneinander: mit Begründung und ohne (Standardsatz) — kein Platzhalterbild in beiden |
+| `WithoutPreview` | Beide Leerfälle nebeneinander: mit Begründung und ohne (Standardsatz) — kein Platzhalterbild in beiden |
 | `Teilbeleg` | „Seiten 5–7 aus Sammel-PDF vom 12.08.2026" mit Weg zum Original; daneben dasselbe Dokument ohne `excerpt` |
 | `Ausprägungen` | Titel „Beleg", „Rechnung", „Vertrag", „Kontoauszug" — die Aufschrift kommt vom Aufrufer, die Vorschau bleibt dieselbe |
 | `Grenzen` | Die **eine** Höhe an ihren `clamp`-Grenzen. *(Hieß bis 2026-09-07 `Groessen` und stellte `md` neben `lg` — den Unterschied gibt es nicht mehr, und eine Story, die einen nicht existierenden Unterschied vorführt, lehrt das Gegenteil des Entscheids.)* |
-| `ImEinsatz` | In einem `Drawer` neben einer Liste — so, wie 0076 sie einsetzt |
+| `InUse` | In einem `Drawer` neben einer Liste — so, wie 0076 sie einsetzt |
 
 Sechs Stories: 2 anwendbare Zustände + 1 je Enum-Prop (`height`, plus
 `title` als Ausprägungs-Achse) + 1 Layout-Fall (`excerpt`) + 1 „im Einsatz".
@@ -140,8 +140,8 @@ Fest (gilt immer):
 
 Variabel (aus dieser Spec):
 
-- [ ] `url = null` zeigt einen **Satz**, keinen grauen Kasten in Dokumentform (Story `OhneVorschau`)
-- [ ] Ohne `unavailableReason` steht der Standardsatz, nicht nichts (Story `OhneVorschau`)
+- [ ] `url = null` zeigt einen **Satz**, keinen grauen Kasten in Dokumentform (Story `WithoutPreview`)
+- [ ] Ohne `unavailableReason` steht der Standardsatz, nicht nichts (Story `WithoutPreview`)
 - [ ] `excerpt` nennt Seitenbereich **und** Weg zum Original; ohne `excerpt` steht keine Zeile, kein „ganzes Dokument" (Story `Teilbeleg`)
 - [x] ~~`height` verhält sich wie Zeile 6 der Schnittstelle~~ — die Prop ist gestrichen (Owner 2026-09-07); an ihre Stelle tritt das Kriterium unten
 - [ ] Das `<iframe>` trägt ein sprechendes `title` mit dem Dateinamen (Story `Gefuellt`, im Browser geprüft)
@@ -162,7 +162,7 @@ und im DOM gemessen.
 | Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/source-document/SourceDocumentPreview.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Beleg/SourceDocumentPreview` | ✓ |
 | Code englisch; `@when`/`@instead` an jedem Export | ein Export, `SourceDocumentPreview.tsx:24–29` mit `@when` und `@instead` (Drawer, Facts, Cell). `ExcerptLine` ist nicht exportiert. Kommentare durchgehend englisch | ✓ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | in der Komponente kein Hex, kein px — die Höhe kommt über `.v2doc__orig` bzw. `.v2doc__orig--lg` aus `v3.css`; die Hex-Treffer der Story liegen im Data-URI, der das PDF ersetzt. Kein Zustand, also keine Achse nötig | ✓ |
-| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | sechs Stories, Namen wie in der Spec (`Gefuellt`, `OhneVorschau`, `Teilbeleg`, `Ausprägungen`, `Groessen`, `ImEinsatz`); lädt, Fehler und leer nach Filter sind in der Zustands-Tabelle der Spec begründet | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | sechs Stories, Namen wie in der Spec (`Gefuellt`, `WithoutPreview`, `Teilbeleg`, `Ausprägungen`, `Groessen`, `InUse`); lädt, Fehler und leer nach Filter sind in der Zustands-Tabelle der Spec begründet | ✓ |
 | Prüfliste `design-guidelines.md` §9 durchgegangen | Karte trägt **Rand ohne Schatten** (`1px solid`, `box-shadow: none`, Radius 6 px) — L2; der Leerfall ist ein Satz in `.v2empty--inline`, keine Fläche über 120 px mit eigenem Hintergrund (gemessen: null solche Kästen); Seitenzahl als Meta rechts im Kartenkopf, Text links; keine Versalien in der Komponente, keine Emoji; das `<iframe>` ist benannt (siehe unten) | ✓ |
 | Im Browser angesehen (Storybook), nicht nur gebaut | sechs Story-IDs geöffnet, Höhen, Titel und Leertexte gemessen | ✓ |
 
@@ -182,7 +182,7 @@ und im DOM gemessen.
 
 | Frage | Nachweis | Ergebnis |
 |---|---|---|
-| Hat jede Prop ihre Story? | `url` (`Gefuellt`, `OhneVorschau`), `unavailableReason` (`OhneVorschau`), `title` (`Ausprägungen`), `pageCount` (`Gefuellt`), `excerpt` (`Teilbeleg`), `height` (`Groessen`) — dazu die **siebte** Prop `fileName`, die in allen sechs Stories gesetzt ist, aber in der Schnittstellen-Tabelle der Spec fehlt (siehe offene Punkte) | ✓ |
+| Hat jede Prop ihre Story? | `url` (`Gefuellt`, `WithoutPreview`), `unavailableReason` (`WithoutPreview`), `title` (`Ausprägungen`), `pageCount` (`Gefuellt`), `excerpt` (`Teilbeleg`), `height` (`Groessen`) — dazu die **siebte** Prop `fileName`, die in allen sechs Stories gesetzt ist, aber in der Schnittstellen-Tabelle der Spec fehlt (siehe offene Punkte) | ✓ |
 | Stimmt die Zahl mit der Ableitung? | 6 = 2 anwendbare Zustände + 2 Enum-Achsen (`height`, `title`) + 1 Layout-Fall (`excerpt`) + 1 im Einsatz; kein Callback, keine Rand-Story — die Komponente formatiert und kürzt nichts | ✓ |
 | Ist jeder ausgeschlossene Zustand begründet? | lädt (Aufrufer zeigt `Skeleton`), Fehler (die Komponente ruft nichts), leer nach Filter (es wird nichts gefiltert) — alle drei in der Zustands-Tabelle der Spec | ✓ |
 
@@ -193,7 +193,7 @@ und im DOM gemessen.
   einem Abnahmekriterium verlangt („sprechendes `title` mit dem Dateinamen") —
   ohne sie wäre das Kriterium nicht erfüllbar. Nachzutragen ist die Zeile in
   der Spec, nicht die Prop im Code.
-- `ImEinsatz` stellt die Vorschau in einen nackten `Drawer` statt in
+- `InUse` stellt die Vorschau in einen nackten `Drawer` statt in
   `SourceDocumentDrawer`. Das ist richtig so: 0075 darf den Drawer nicht
   anfassen (Zeile „Nicht anfassen"), und den echten Einsatz zeigt
   `SourceDocumentFacts --in-use` aus 0076.

@@ -133,7 +133,7 @@ export interface ExpandableLine {
   lineText: string;
   externalDocumentNumber: string;
   externalDocumentNumber2: string;
-  kost1: string;
+  costCenter1: string;
   kost2: string;
 }
 
@@ -170,7 +170,7 @@ export function expandWithTaxLines(
       lineText: `${derived.ratePercent}% ${derived.account.accountName}`,
       externalDocumentNumber: l.externalDocumentNumber,
       externalDocumentNumber2: l.externalDocumentNumber2,
-      kost1: l.kost1,
+      costCenter1: l.costCenter1,
       kost2: l.kost2,
       taxForLineNo: baseLineNo,
     });

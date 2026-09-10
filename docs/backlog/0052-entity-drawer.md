@@ -106,8 +106,8 @@ Vier Zustände, alle im Drawer selbst, in dieser Vorrangfolge:
 |---|---|---|---|---|
 | `open` | `boolean` | ja | durchgereicht an `Drawer` | `Geoeffnet` |
 | `onClose` | `() => void` | ja | Escape, Scrim, Kreuz | `Geoeffnet` |
-| `reference` | `string` | ja | die Kennung, nach der gesucht wurde — steht im Kopf **und** in Fehler- und Leertext | `Fehler`, `NichtGefunden` |
-| `record` | `<Entity> \| null` | ja | die Daten; `null` heißt **nicht gefunden**, nicht „lädt" | `Geoeffnet`, `NichtGefunden` |
+| `reference` | `string` | ja | die Kennung, nach der gesucht wurde — steht im Kopf **und** in Fehler- und Leertext | `Fehler`, `NotFound` |
+| `record` | `<Entity> \| null` | ja | die Daten; `null` heißt **nicht gefunden**, nicht „lädt" | `Geoeffnet`, `NotFound` |
 | `loading` | `boolean` | nein | hat Vorrang vor `record` | `Laedt` |
 | `error` | `ReactNode` | nein | hat Vorrang vor `loading` | `Fehler` |
 | `onOpenFull` | `() => void` | ja | der eine Ausgang im Fuß | `Geoeffnet` |
@@ -150,8 +150,8 @@ Genau das ist das „Drawer-Preview" neben den Größen-Previews.
 | `Geoeffnet` | Zonen 1–5 mit echten Daten; Rundlauf über `onClose` und `onOpenFull` |
 | `Laedt` | `loading` schlägt `record`; Kopf steht, Körper ist Fläche |
 | `Fehler` | Grund **mit `reference` im Text** |
-| `NichtGefunden` | `record={null}`, ein Satz mit Bezug |
-| `ImKontext` | hinter dem Drawer eine Liste — der Kontext bleibt sichtbar, das ist der ganze Sinn |
+| `NotFound` | `record={null}`, ein Satz mit Bezug |
+| `InContext` | hinter dem Drawer eine Liste — der Kontext bleibt sichtbar, das ist der ganze Sinn |
 
 ## Umfang der ersten Runde
 
@@ -195,10 +195,10 @@ Variabel (aus dieser Spec):
 - [ ] Zone 3 verwendet **dieselbe** Komponente wie der View der Entität — kein zweiter Satz Feldzeilen (Nachweis: Import im Drawer zeigt auf die Komponente des Views)
 - [ ] Der Fuß trägt **genau eine** Aktion, und die führt in die Vollansicht (`Geoeffnet`)
 - [ ] Kein Schreibpfad: keine Prop, die Daten ändert; keine Formularfelder (`Geoeffnet`)
-- [ ] Alle vier Zustände in der Vorrangfolge `error` → `loading` → `record === null` → Inhalt (`Laedt`, `Fehler`, `NichtGefunden`)
+- [ ] Alle vier Zustände in der Vorrangfolge `error` → `loading` → `record === null` → Inhalt (`Laedt`, `Fehler`, `NotFound`)
 - [ ] Der Fehlertext enthält `reference` wörtlich (`Fehler`)
 - [ ] Der Drawer baut auf 0042 auf und definiert weder Scrim noch Kopf noch Fußleiste selbst
-- [ ] Hinter dem offenen Drawer bleibt der Kontext sichtbar (`ImKontext`)
+- [ ] Hinter dem offenen Drawer bleibt der Kontext sichtbar (`InContext`)
 - [ ] `@instead` schickt weiter: alle Fragen zur Entität → `<Entity>View`, Entscheidung → `Dialog`, ein Satz → `Popover`
 - [ ] Ersetzt `BelegDrawer` bzw. das Sachverhalts-Gegenstück in `apps/web/src/ui/drawers/` ohne Funktionsverlust — **offen (App)**, siehe `docs/backlog/README.md`
 
@@ -257,7 +257,7 @@ Die erste Abnahme fand drei Mängel; alle drei sind behoben:
    steht dort jetzt die Originalfläche in ihrer echten Höhe
    (`.v2doc__origskel`, dieselbe `clamp`-Höhe wie `.v2doc__orig`) plus fünf
    Faktenzeilen. Nachzusehen in `Laedt`.
-3. **Zone 2 ohne Vorschau hatte keine Story**: neu `OhneVorschau` — ein
+3. **Zone 2 ohne Vorschau hatte keine Story**: neu `WithoutPreview` — ein
    TIFF-Scan, der Grund steht als Satz, kein Platzhalter an der Stelle des
    Belegs. Damit sind es sechs Drawer-Stories statt fünf.
 
@@ -275,7 +275,7 @@ Zustände im DOM gemessen statt am Quelltext geraten.
 | Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/document/DocumentDrawer.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Beleg/DocumentDrawer` — dieselbe Form wie Konto, Sachverhalt, Buchungssatz | ✓ |
 | Code englisch; `@when`/`@instead` an jedem Export | `DocumentDrawer.tsx:45–51`, `DocumentFacts.tsx:38–43`; TSX-Kommentare englisch, CSS-Kommentare deutsch wie der gesamte Bestand in `v3.css` | ✓ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | in beiden `.tsx` kein Hex und kein px; die Treffer der Story liegen im Data-URI, der den PDF-Inhalt simuliert. Zustand über `StatusBadge axis="beleg"` → `BELEG_PROCESSING.processed` (`status-registry.ts:182`) | ✓ |
-| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | erste Runde: fünf Drawer-Stories `Geoeffnet`, `Laedt`, `Fehler`, `NichtGefunden`, `ImKontext`. Nach der Nachbesserung sechs — `OhneVorschau` deckt den einzigen ungezeigten Zonen-2-Zweig ab (**M3**). Zweite Abnahme selbst geprüft: die Story lädt, im Körper stehen `.v2sub`-Satz (18 px, ohne Rahmen, ohne Fläche) · Fakten-Block · Grenzsatz; `.v2doc__orig` fehlt, `iframe/img/embed/object` = 0 | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | erste Runde: fünf Drawer-Stories `Geoeffnet`, `Laedt`, `Fehler`, `NotFound`, `InContext`. Nach der Nachbesserung sechs — `WithoutPreview` deckt den einzigen ungezeigten Zonen-2-Zweig ab (**M3**). Zweite Abnahme selbst geprüft: die Story lädt, im Körper stehen `.v2sub`-Satz (18 px, ohne Rahmen, ohne Fläche) · Fakten-Block · Grenzsatz; `.v2doc__orig` fehlt, `iframe/img/embed/object` = 0 | ✓ |
 | Prüfliste `design-guidelines.md` §9 durchgegangen | erste Runde ✗ wegen V3 (**M1**). Zweite Abnahme nachgemessen in `DocumentFacts` → `Filled`: der Satz steht in `<p class="v2doc__prose">` mit `text-align: left` und `font-variant-numeric: normal`, beide Zeilen beginnen bündig bei x = 154 und enden bei 505 bzw. 346 (flatterrechts); die vier Werte darüber behalten `right` + `lining-nums tabular-nums`. Damit steht Text links und Zahlen rechts. Versalien und Kontraste wie in der ersten Runde | ✓ |
 | Im Browser angesehen, nicht nur gebaut | acht Stories, Rundlauf `onOpenFull` → Text erscheint, Escape und Kreuz schließen, Fokus kehrt auf „Ansehen" zurück | ✓ |
 
@@ -291,7 +291,7 @@ Zustände im DOM gemessen statt am Quelltext geraten.
 | Vier Zustände in der Vorrangfolge `error` → `loading` → `record === null` → Inhalt | `DrawerBody` prüft in dieser Reihenfolge (`DocumentDrawer.tsx:117–137`). `Laedt` setzt `record` **und** `loading` und zeigt die Fläche — `loading` schlägt `record`; `Fehler` setzt `record={null}` und zeigt den Fehler, nicht den Leertext. Zweite Abnahme, Form des Ladezustands (**M2**) bei 1600 × 1013 px nachgemessen: `.v2doc__origskel` 628 px hoch an y = 101, darunter fünf Skelettzeilen (87 px) — das Original in `Geoeffnet` steht an derselben Stelle (y = 101) und ist 602 px hoch; dieselbe Regel `clamp(320px, 62vh, 900px)`, die 26 px Unterschied sind genau der Überlauf, um den das `iframe` als Flex-Kind schrumpft (20 + 628 + 16 + 180 + 16 + 19 + 20 = 899 gegen 873 px Körper). Kopf und Fuß stehen in beiden Zuständen gleich | ✓ |
 | Der Fehlertext enthält `reference` wörtlich | „Beleg **RE-4471** konnte nicht geladen werden: Die Ablage antwortet nicht (Zeitüberschreitung nach 30 Sekunden)." | ✓ |
 | Baut auf 0042 auf, definiert weder Scrim noch Kopf noch Fußleiste selbst | die Komponente rendert nur `<Drawer title meta size footer>`; `.v2doc*` fasst Original, Zonen-Überschrift und Grenzsatz an, nichts vom Rahmen. Leerer Fuß verschwindet über `.v2drawer__foot:empty` aus 0042 | ✓ |
-| Hinter dem offenen Drawer bleibt der Kontext sichtbar (`ImKontext`) | gemessen bei 1219 px Fenster: Drawer x=119, Breite 1100 (`--drawer-lg` = `min(1100px, 94vw)`). Belegnummern-Spalte und Kartenkopf „Sachverhalt 118 · Belege" stehen hinter dem Scrim; nach dem Schließen steht der Fokus wieder auf „Ansehen" | ✓ |
+| Hinter dem offenen Drawer bleibt der Kontext sichtbar (`InContext`) | gemessen bei 1219 px Fenster: Drawer x=119, Breite 1100 (`--drawer-lg` = `min(1100px, 94vw)`). Belegnummern-Spalte und Kartenkopf „Sachverhalt 118 · Belege" stehen hinter dem Scrim; nach dem Schließen steht der Fokus wieder auf „Ansehen" | ✓ |
 | `@instead` schickt weiter | „Every question about the document … → DocumentView. A decision that has to be made now → Dialog. One sentence about it → Popover." — alle drei Ziele, dazu `DocumentFacts` | ✓ |
 | Ersetzt `BelegDrawer` in `apps/web/src/ui/drawers/` ohne Funktionsverlust | dieses Repo ist das ausgelagerte Set; die Ablösung ist ein eigener Schritt (`docs/backlog/README.md`) | offen (App) |
 
@@ -309,7 +309,7 @@ Zustände im DOM gemessen statt am Quelltext geraten.
 |---|---|---|---|
 | M1 | Die Zusammenfassung steht rechtsbündig. `DocumentFacts.tsx:55` hängt den Fließtext als `FieldList`-Zeile an; `.v2fields__row > span:last-child` setzt `text-align: right` und `tabular-nums`. In `DocumentFacts--filled` (520 px) bricht der Satz um und steht flatterlinks — Verstoß gegen §9 „Text links, Zahlen rechts, nichts zentriert" (V3). Der Kommentar in Z. 54 („A summary is a paragraph, not a value") sieht das Problem und baut es trotzdem | den Satz als eigenen Absatz **unter** die Feldzeilen setzen, nicht in die Wertspalte | **behoben** — anders gelöst als vorgeschlagen (die Zeile bleibt, der Text bekommt `.v2doc__prose`), das Kriterium ist damit erfüllt: nachgemessen links und ohne `tnum` |
 | M2 | Die Ladefläche hat nicht die Form des Inhalts. `DocumentDrawer.tsx:126` rendert ein einzelnes `Skeleton variant="card"` — `.v2skel--card` ist 96 px hoch — in einen Körper, dessen Inhalt rund 666 px Original plus fünf Feldzeilen ist. Story `Laedt`: ein kleiner Balken über gut 800 px Weiß. Die Zustandstabelle der Spec verlangt „ruhige Fläche **in der Form des Inhalts**" | zwei Flächen: eine hohe für Zone 2, `Skeleton lines={4}` für Zone 3 | **behoben** — 628 px Fläche + fünf Zeilen; nachgemessen gegen 602 px Original |
-| M3 | Der Fall „Beleg ohne Vorschau" hat keine Story. `previewUrl: null` und `previewUnavailableReason` (`DocumentDrawer.tsx:35–38`, Zweig Z. 144–148) sind der einzige Zonen-2-Zweig, den keine der acht Stories zeigt — und Zone 2 ist der Punkt, an dem gerade dieser Drawer sich beweisen soll. Die Hausregel „je Prop die Story, die sie beweist" ist für zwei Felder unerfüllt | eine sechste Drawer-Story `OhneVorschau` mit `previewUrl: null` und gesetztem Grund | **behoben** — Story vorhanden, Grund als Satz, kein Platzhalter im DOM |
+| M3 | Der Fall „Beleg ohne Vorschau" hat keine Story. `previewUrl: null` und `previewUnavailableReason` (`DocumentDrawer.tsx:35–38`, Zweig Z. 144–148) sind der einzige Zonen-2-Zweig, den keine der acht Stories zeigt — und Zone 2 ist der Punkt, an dem gerade dieser Drawer sich beweisen soll. Die Hausregel „je Prop die Story, die sie beweist" ist für zwei Felder unerfüllt | eine sechste Drawer-Story `WithoutPreview` mit `previewUrl: null` und gesetztem Grund | **behoben** — Story vorhanden, Grund als Satz, kein Platzhalter im DOM |
 
 **Befunde (kein Mangel, gehören woanders hin)**
 
@@ -332,10 +332,10 @@ dem DOM (`getBoundingClientRect`, `getComputedStyle`, Zeilenkästen über
 |---|---|---|
 | M1 — läuft die Zusammenfassung links, ohne Ziffernstellung? | `DocumentFacts` → `Filled`: die vier Werte stehen mit `text-align: right` und `font-variant-numeric: lining-nums tabular-nums`; die fünfte Zeile trägt `<p class="v2doc__prose">` mit `left` / `normal`. Die beiden Zeilenkästen des Satzes beginnen beide bei x = 154 und enden bei 505 und 346 — links bündig, rechts flatternd. Im Bild bestätigt | ✓ behoben |
 | M2 — hat die Ladefläche die Höhe des Originals? | `Laedt`: `.v2doc__origskel` an y = 101, 628 px hoch, darunter `.v2skelgroup` mit fünf Zeilen (87 px). `Geoeffnet`: das `iframe.v2doc__orig` an derselben Stelle, 602 px. Beide hängen an derselben Regel `clamp(320px, 62vh, 900px)` = 628 px; das Original schrumpft um 26 px, weil der gefüllte Körper (899 px Wunsch) den Platz (873 px) um genau diese 26 px überläuft. Kopf (81 px) und Fuß (60 px) sind in beiden Zuständen identisch | ✓ behoben |
-| M3 — Grund als Satz, kein Platzhalter? | `OhneVorschau`: der Körper hat drei Kinder — `.v2sub` mit „Das Format TIFF lässt sich nicht im Browser anzeigen. Die Datei liegt unverändert in der Ablage." (18 px hoch, `background: rgba(0,0,0,0)`, `border: 0`), dann der Fakten-Block, dann der Grenzsatz. `.v2doc__orig` = 0 Treffer, `.v2skel` = 0 Treffer, `iframe/img/embed/object` im Drawer = 0. Zone 2 entfällt also ersatzlos bis auf den erklärenden Satz | ✓ behoben |
+| M3 — Grund als Satz, kein Platzhalter? | `WithoutPreview`: der Körper hat drei Kinder — `.v2sub` mit „Das Format TIFF lässt sich nicht im Browser anzeigen. Die Datei liegt unverändert in der Ablage." (18 px hoch, `background: rgba(0,0,0,0)`, `border: 0`), dann der Fakten-Block, dann der Grenzsatz. `.v2doc__orig` = 0 Treffer, `.v2skel` = 0 Treffer, `iframe/img/embed/object` im Drawer = 0. Zone 2 entfällt also ersatzlos bis auf den erklärenden Satz | ✓ behoben |
 | GLOSSARY-Befund zu Recht zurückgezogen? | selbst nachgesehen: `docs/ludwig/GLOSSARY.md:787` führt `### Receipt / document` mit „English: `document`, `receipt` · German: `Beleg`, `Dokument`". Der Rückzug stimmt | ✓ |
 | Storybook-Titel richtig korrigiert? | Spec sagt jetzt `v3/Entitäten/<Entität>/<Entity>Drawer`; gebaut ist `title: "v3/Entitäten/Beleg/DocumentDrawer"` und `…/DocumentFacts`. Deckungsgleich | ✓ |
-| Nichts gebrochen | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe. `Geoeffnet`: Zonen weiter in der Reihenfolge Kopf y = 0 · Original y = 101 · Zonen-Überschrift y = 719 · Fakten y = 744 · Grenzsatz y = 914 · Fuß y = 953. `Fehler`: nur `.v2note--danger` mit „Beleg RE-4471 konnte nicht geladen werden: …", Fuß leer. `NichtGefunden`: `.v2empty--inline`, `text-align: start`. `ImKontext`: Klick auf „Ansehen" öffnet den Drawer, die Belegtabelle bleibt dahinter sichtbar. `DocumentFacts` → `Unvollstaendig` (drei Geviertstriche) und `InUse` unverändert | ✓ |
+| Nichts gebrochen | `pnpm typecheck` (`tsc --noEmit`) ohne Ausgabe. `Geoeffnet`: Zonen weiter in der Reihenfolge Kopf y = 0 · Original y = 101 · Zonen-Überschrift y = 719 · Fakten y = 744 · Grenzsatz y = 914 · Fuß y = 953. `Fehler`: nur `.v2note--danger` mit „Beleg RE-4471 konnte nicht geladen werden: …", Fuß leer. `NotFound`: `.v2empty--inline`, `text-align: start`. `InContext`: Klick auf „Ansehen" öffnet den Drawer, die Belegtabelle bleibt dahinter sichtbar. `DocumentFacts` → `Unvollstaendig` (drei Geviertstriche) und `InUse` unverändert | ✓ |
 
 **Befunde der zweiten Abnahme (kein Mangel)**
 

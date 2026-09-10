@@ -220,10 +220,10 @@ export function JournalEntryCard({
   const credit = sum(lines.filter((l) => l.side === "credit"));
   const balanced = Math.abs(debit - credit) < BALANCE_EPSILON;
   // The column only appears when a line has something in it.
-  const mitBu = lines.some((l) => l.taxKey || l.automaticRate !== null);
+  const withTaxKey = lines.some((l) => l.taxKey || l.automaticRate !== null);
 
   return (
-    <div className={mitBu ? "v2je v2je--bu" : "v2je"}>
+    <div className={withTaxKey ? "v2je v2je--bu" : "v2je"}>
       {caption ? <div className="v2je__caption">{caption}</div> : null}
       {lines.length === 0 ? (
         // An excerpt, not a screen — no EmptyState with a button.
@@ -237,7 +237,7 @@ export function JournalEntryCard({
                 before the text, as it does in the batch. It only appears when
                 a line has something in it — an empty column in every entry
                 would be a column that never says anything. */}
-            {mitBu ? <span>BU</span> : null}
+            {withTaxKey ? <span>BU</span> : null}
             <span>Buchungstext</span>
             <span className="v2num">Soll Umsatz</span>
             <span className="v2num">Haben Umsatz</span>
@@ -257,7 +257,7 @@ export function JournalEntryCard({
               <span className="v2muted v2je__clip" title={line.accountName ?? undefined}>
                 {line.accountName ?? ""}
               </span>
-              {mitBu ? <TaxCell line={line} /> : null}
+              {withTaxKey ? <TaxCell line={line} /> : null}
               <span className="v2je__clip" title={line.text ?? undefined}>
                 {line.text ?? ""}
               </span>
@@ -273,7 +273,7 @@ export function JournalEntryCard({
             <div className="v2je__row v2je__row--sum">
               <span />
               <span />
-              {mitBu ? <span /> : null}
+              {withTaxKey ? <span /> : null}
               {/* The only finding the card makes: it adds up what is there. */}
               <span>Σ Soll {balanced ? "=" : "≠"} Σ Haben</span>
               <span className="v2num">{formatAmount(debit, currency)}</span>

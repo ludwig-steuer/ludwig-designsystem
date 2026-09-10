@@ -9,7 +9,7 @@ import {
   AiBookingNotes,
   AiBookingNotesBody,
   AiBookingNotesCell,
-  QUELLE_AUFSCHLAGBAR,
+  SOURCE_OPENABLE,
   type AiSource,
   type JudgeVerdict,
 } from "./AiBookingNotes";
@@ -29,7 +29,7 @@ const meta: Meta<typeof AiBookingNotesCell> = {
 export default meta;
 type Story = StoryObj<typeof AiBookingNotesCell>;
 
-const QUELLEN: AiSource[] = [
+const SOURCES: AiSource[] = [
   { key: "1", art: "regel", label: "Wiederkehr: Miete Musterstraße" },
   { key: "2", art: "beleg", label: "RE-2026-0042", quote: "Miete August 2026" },
 ];
@@ -42,7 +42,7 @@ const QUELLEN: AiSource[] = [
  *
  * Stehen bleiben Art und Zitat, und das sagt mehr als „442c83b4-3063-…".
  */
-const QUELLEN_OHNE_NAMEN: AiSource[] = [
+const SOURCES_WITHOUT_NAMES: AiSource[] = [
   {
     key: "1",
     art: "beleg",
@@ -68,7 +68,7 @@ const QUELLEN_OHNE_NAMEN: AiSource[] = [
  */
 export const Cell: Story = {
   render: () => {
-    const faelle: [JudgeVerdict, ConfidenceLevel][] = [
+    const cases: [JudgeVerdict, ConfidenceLevel][] = [
       ["confirm", "green"],
       ["confirm_with_note", "green"],
       ["adjust", "yellow"],
@@ -76,7 +76,7 @@ export const Cell: Story = {
     ];
     return (
       <div style={{ display: "grid", gap: 12 }}>
-        {faelle.map(([verdict, confidence]) => (
+        {cases.map(([verdict, confidence]) => (
           <AiBookingNotesCell key={verdict} verdict={verdict} confidence={confidence} />
         ))}
         <AiBookingNotesCell
@@ -126,7 +126,7 @@ export const Box: Story = {
         confidence="green"
         rationale="Der Lieferant ist als Vermieter hinterlegt, der Betrag entspricht der Vormonatsmiete."
         judgeReasoning="Konto, Steuersatz und Betrag stimmen mit dem Vertrag überein."
-        sources={QUELLEN}
+        sources={SOURCES}
       />
       <AiBookingNotes
         verdict="flag"
@@ -154,10 +154,10 @@ export const Box: Story = {
  * 70003, 14 Buchungen, zuletzt 22.06." behauptet ein Dokument, wo eine
  * Zusammenfassung steht, und die kann man nicht aufschlagen.
  */
-export const Quellenarten: Story = {
+export const SourceKinds: Story = {
   render: function Arten() {
-    const [zuletzt, setZuletzt] = useState<string | null>(null);
-    const arten: { art: AiSource["art"]; citation: string }[] = [
+    const [lastOpened, setLastOpened] = useState<string | null>(null);
+    const kinds: { art: AiSource["art"]; citation: string }[] = [
       { art: "bank", citation: "Zahlung vom 28.07.2026 über 345,12 €" },
       { art: "beleg", citation: "Rechnung der Musterbau GmbH vom 16.07.2026" },
       { art: "history", citation: "Kreditor 70003, 14 Buchungen, zuletzt 22.06.2026" },
@@ -171,15 +171,15 @@ export const Quellenarten: Story = {
           verdict="confirm"
           confidence="green"
           rationale="Alle sechs Arten, die im Bestand vorkommen — die drei mit Ziel sind Knöpfe, die drei ohne bleiben Text."
-          sources={arten.map((a, i) => ({
+          sources={kinds.map((a, i) => ({
             key: String(i),
             art: a.art,
             quote: a.citation,
-            ...(QUELLE_AUFSCHLAGBAR[a.art] ? { onOpen: () => setZuletzt(a.art) } : {}),
+            ...(SOURCE_OPENABLE[a.art] ? { onOpen: () => setLastOpened(a.art) } : {}),
           }))}
         />
         <p className="v2muted" style={{ margin: 0 }}>
-          {zuletzt ? `Aufgeschlagen: ${zuletzt}` : "Die drei aufschlagbaren Arten reagieren auf einen Klick."}
+          {lastOpened ? `Aufgeschlagen: ${lastOpened}` : "Die drei aufschlagbaren Arten reagieren auf einen Klick."}
         </p>
       </div>
     );
@@ -197,27 +197,27 @@ export const Quellenarten: Story = {
  * geprüfte Buchung darf nicht verlorengehen. Welcher Drawer sich öffnet, weiß
  * der Aufrufer; die Komponente kennt keine Entität.
  */
-export const Quellen: Story = {
+export const Sources: Story = {
   render: function Aufschlagen() {
-    const [offen, setOffen] = useState<string | null>(null);
+    const [open, setOpen] = useState<string | null>(null);
     return (
       <div style={{ display: "grid", gap: 20, maxWidth: 720 }}>
         <AiBookingNotes
           verdict="confirm"
           confidence="green"
           rationale="Konto und Kreditor wie bei der Rechnung desselben Lieferanten im Juni."
-          sources={QUELLEN_OHNE_NAMEN}
+          sources={SOURCES_WITHOUT_NAMES}
         />
         <AiBookingNotes
           verdict="confirm"
           confidence="green"
           rationale="Dieselben Quellen, diesmal mit einem Weg hinein."
-          sources={QUELLEN_OHNE_NAMEN.map((q) =>
-            q.art === "beleg" ? { ...q, onOpen: () => setOffen(q.key) } : q,
+          sources={SOURCES_WITHOUT_NAMES.map((q) =>
+            q.art === "beleg" ? { ...q, onOpen: () => setOpen(q.key) } : q,
           )}
         />
         <p className="v2muted" style={{ margin: 0 }}>
-          {offen ? "Der Aufrufer öffnet jetzt seinen Beleg-Drawer." : "Auf die Quelle Beleg klicken."}
+          {open ? "Der Aufrufer öffnet jetzt seinen Beleg-Drawer." : "Auf die Quelle Beleg klicken."}
         </p>
       </div>
     );
@@ -229,7 +229,7 @@ export const Quellen: Story = {
 interface BatchRow {
   id: string;
   beleg: string;
-  konto: string;
+  account: string;
   text: string;
   amount: number;
   verdict: JudgeVerdict | null;
@@ -242,7 +242,7 @@ interface BatchRow {
 }
 
 /** Gegenkonto-Zeile zu einem Aufwand: Kreditor im Haben. */
-const gegen = (amount: number): JournalLine => ({
+const contra = (amount: number): JournalLine => ({
   side: "credit",
   accountNumber: "70044",
   accountName: "Beispielbau Handels GmbH",
@@ -250,11 +250,11 @@ const gegen = (amount: number): JournalLine => ({
   text: "Rechnung",
 });
 
-const STAPEL: BatchRow[] = [
+const BATCH: BatchRow[] = [
   {
     id: "1",
     beleg: "RE-2026-4471",
-    konto: "6310",
+    account: "6310",
     text: "Miete Musterstraße 12, August",
     amount: 1450,
     verdict: "confirm",
@@ -263,13 +263,13 @@ const STAPEL: BatchRow[] = [
     judgeReasoning: "Konto, Steuersatz und Betrag stimmen mit dem Vertrag überein.",
     lines: [
       { side: "debit", accountNumber: "6310", accountName: "Miete", amount: 1450, taxKey: "9", text: "Miete Musterstraße 12, August" },
-      gegen(1450),
+      contra(1450),
     ],
   },
   {
     id: "2",
     beleg: "ER-8812",
-    konto: "6300",
+    account: "6300",
     text: "Wartung Klimaanlage",
     amount: 1800,
     verdict: "adjust",
@@ -278,13 +278,13 @@ const STAPEL: BatchRow[] = [
     judgeReasoning: "Buchungstext präzisiert — fachlich unverändert.",
     lines: [
       { side: "debit", accountNumber: "6300", accountName: "Sonstige betriebliche Aufwendungen", amount: 1800, automaticRate: 19, text: "Wartung Klimaanlage" },
-      gegen(1800),
+      contra(1800),
     ],
   },
   {
     id: "3",
     beleg: "ER-8814",
-    konto: "6805",
+    account: "6805",
     text: "Mobilfunk und Festnetz",
     amount: 89,
     verdict: "flag",
@@ -296,13 +296,13 @@ const STAPEL: BatchRow[] = [
       // Der Konflikt, den der Judge beanstandet: Schlüssel auf einem
       // Automatikkonto — beide Angaben stehen in der Zeile, die Marke gelb.
       { side: "debit", accountNumber: "6805", accountName: "Telefon", amount: 89, taxKey: "9", automaticRate: 19, text: "Mobilfunk und Festnetz" },
-      gegen(89),
+      contra(89),
     ],
   },
   {
     id: "4",
     beleg: "KB-09-31",
-    konto: "1600",
+    account: "1600",
     text: "Porto und Verpackung",
     amount: 24.9,
     // Ohne Lauf: die Spalte bleibt leer, und das ist die Auskunft.
@@ -310,14 +310,14 @@ const STAPEL: BatchRow[] = [
     confidence: null,
     lines: [
       { side: "debit", accountNumber: "1600", accountName: "Kasse", amount: 24.9, text: "Porto und Verpackung" },
-      gegen(24.9),
+      contra(24.9),
     ],
   },
 ];
 
 const SPALTEN: ColumnDef<BatchRow>[] = [
   { key: "beleg", header: "Belegfeld 1", width: "140px", cell: (r) => <MonoCell value={r.beleg} /> },
-  { key: "konto", header: "Konto", width: "80px", cell: (r) => <MonoCell value={r.konto} /> },
+  { key: "konto", header: "Konto", width: "80px", cell: (r) => <MonoCell value={r.account} /> },
   { key: "text", header: "Buchungstext", cell: (r) => <span className="v2main">{r.text}</span> },
   {
     key: "ki",
@@ -355,7 +355,7 @@ const SPALTEN: ColumnDef<BatchRow>[] = [
 export const InUse: Story = {
   render: () => (
     <DataTable<BatchRow>
-      rows={STAPEL}
+      rows={BATCH}
       columns={SPALTEN}
       rowKey={(r) => r.id}
       head={{ title: "Stapel 09/2026", sub: "4 Buchungssätze · 3 geprüft" }}
@@ -404,7 +404,7 @@ export const InCard: Story = {
             confidence="green"
             rationale="Wiederkehrende Zahlung, Regel greift seit Januar."
             judgeReasoning="Der Betrag weicht um 12 € nach oben ab — Indexmiete, keine Reparaturpflicht."
-            sources={QUELLEN}
+            sources={SOURCES}
           />
         </div>
       </Card>

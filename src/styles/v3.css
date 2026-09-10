@@ -410,7 +410,7 @@
 .abn__korb .count.has-items { color: var(--color-warning); }
 
 /* --- Stapel-Kopf ------------------------------------------------------- */
-.abn__kopf {
+.abn__head {
   /* Sticky: die Stapelnummer und der Zustand müssen auf jedem Schritt und in
      jeder Scrollposition lesbar bleiben — sie sind der Kontext jeder
      Entscheidung auf dieser Seite. */
@@ -423,14 +423,14 @@
   padding: 14px 18px;
   margin-bottom: 16px;
 }
-.abn__kopf .line1 {
+.abn__head .line1 {
   display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
 }
-.abn__kopf .nr {
+.abn__head .nr {
   font-family: var(--font-mono); font-weight: 700;
   color: var(--color-primary); font-size: 15px;
 }
-.abn__kopf .line2 {
+.abn__head .line2 {
   font-size: 12.5px; color: var(--color-text-subtle); margin-top: 6px;
 }
 
@@ -479,7 +479,7 @@
 
 /* Druckansicht: nur die Checkliste, ohne Rahmen der App. */
 @media print {
-  .app__sidebar, .app__top, .abn__rail, .abn__kopf, .chk__exits, .v2card__h .actions { display: none !important; }
+  .app__sidebar, .app__top, .abn__rail, .abn__head, .chk__exits, .v2card__h .actions { display: none !important; }
   .abn { grid-template-columns: minmax(0, 1fr); }
   .v2card { border: none; box-shadow: none; }
 }
@@ -1174,7 +1174,7 @@ select.v2in { padding-right: 26px; }
  * Umgebrochen wird über den Flex-Sockel, nicht über eine `@media`-Regel: die
  * Muster stehen einmal auf einer ganzen Seite und einmal in einem Drawer,
  * und ein Fenstermaß sähe beide Male dasselbe. Dieselbe Lehre wie bei
- * `.v2md--detail-breit` (0063) und `.v2doccard` (0071).
+ * `.v2md--detail-wide` (0063) und `.v2doccard` (0071).
  *
  * **Was zuerst weicht, ist die dritte Spalte, nie die erste.** Wo drei
  * Spalten stehen, ist die erste die Arbeitsfläche (der Strang) und die dritte
@@ -1222,7 +1222,7 @@ select.v2in { padding-right: 26px; }
  * sind. Deshalb `--v2md-min` — der Umbruch geschieht über den Flex-Sockel,
  * nicht über eine Abfrage, denn eine Abfrage bräuchte die Schwelle als
  * Literal, und die gehört dem Aufrufer. */
-.v2md--detail-breit {
+.v2md--detail-wide {
   display: flex;
   /* `row-reverse` mit `wrap`, und im DOM steht das Detail zuerst. Damit
      stimmen **beide** Fälle: nebeneinander läuft die Hauptachse von rechts
@@ -1244,9 +1244,9 @@ select.v2in { padding-right: 26px; }
   align-items: start;
   grid-template-columns: none;
 }
-.v2md--detail-breit > .v2md__list { flex: 0 1 440px; min-width: 0; }
-.v2md--detail-breit > .v2md__detail { flex: 1 1 var(--v2md-min, 620px); min-width: 0; }
-.v2md--detail-breit .v2md__detail { position: static; max-height: none; overflow: visible; }
+.v2md--detail-wide > .v2md__list { flex: 0 1 440px; min-width: 0; }
+.v2md--detail-wide > .v2md__detail { flex: 1 1 var(--v2md-min, 620px); min-width: 0; }
+.v2md--detail-wide .v2md__detail { position: static; max-height: none; overflow: visible; }
 
 /* --- Klappbarer Gruppenkopf ---------------------------------------------
  * Über einer Tabelle oder Liste: Chevron, Label, Anzahl links, Befund rechts.
@@ -1647,12 +1647,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 .bse { font-size: 13px; }
 
-.bse__kopf {
+.bse__head {
   display: flex; align-items: center; gap: 10px;
   padding-bottom: 10px; margin-bottom: 10px;
   border-bottom: 1px solid var(--color-border-subtle);
 }
-.bse__beleg { font-weight: 600; color: var(--color-text); }
+.bse__doc { font-weight: 600; color: var(--color-text); }
 .bse__rest {
   font-family: var(--font-mono); font-size: 12.5px; font-weight: 600;
   font-variant-numeric: tabular-nums lining-nums;
@@ -1682,7 +1682,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .bse__row { padding: 6px 0; border-bottom: 1px solid var(--color-border-subtle); }
 .bse__row .v2in { padding: 4px 7px; font-size: 12.5px; width: 100%; box-sizing: border-box; }
-.bse__konto { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bse__account { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bse__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* S/H ist ein Schalter, kein Select: zwei Werte, ein Klick. */
@@ -3939,7 +3939,7 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 /* Das Belegfeld kürzt mit: `SAMMEL-2026-08-KW35-NACHTRAG` brach die Zeile in
    der 140-px-Spur auf 66,8 px auf, neben Nachbarn von 45,9 — und eine Liste
    liest sich über ihre Zeilenhöhe. Der ganze Wert steht im `title` der Zelle. */
-.v2oil__beleg { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2oil__doc { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* --- Sachverhalts-Karte (0081) -------------------------------------------
  * Der Kopf trägt Namen und Zustand nebeneinander, darunter die Kennung. Der
@@ -4046,21 +4046,21 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 
 /* Der Kopf trägt rechts Rest und Sichtwechsel. Im Editor stand dafür ein
    Inline-Stil; hier ist es eine Klasse, weil das Raster keine trägt. */
-.bse__kopfrechts { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
+.bse__head-end { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
 /* Ein Satz ohne Zeile ist ein Fehler des Aufrufers — er wird sichtbar
    abgefangen, nicht in eine leere Fläche gelegt. */
 .bse__leer { padding: var(--space-4) 0; }
 .bse__msgs { margin-top: var(--space-3); }
 /* Die Kontozelle des **Lesers**: Nummer, Name und der Weg ins Kontenblatt
-   nebeneinander. Sie heißt nicht `.bse__konto` wie die Lesezelle des Editors
+   nebeneinander. Sie heißt nicht `.bse__account` wie die Lesezelle des Editors
    — dieselbe Klasse hätte dort `display: flex` gesetzt und damit ihre Kürzung
    ausgeschaltet (Abnahme 0113, M4). */
-.bse__kontocell { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+.bse__account-cell { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
 /* Der Weg ins Kontenblatt schrumpft **nicht** mit: als Flex-Kind gab er
    nach, sobald der Kontoname die Zelle füllte — gemessen 14 × 24 px statt
    24 × 24, also die Marke ohne ihr Polster (Wiederabnahme 0113, M7). */
-.bse__kontocell > .v2ibtn { flex: 0 0 auto; }
-.bse__kontoname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bse__account-cell > .v2ibtn { flex: 0 0 auto; }
+.bse__account-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ── Wiederkehr-Regel (0132–0135) ─────────────────────────────────────────
    Die vier Formen der Familie: Zeile, Liste, Fakten, Editor. Eigener

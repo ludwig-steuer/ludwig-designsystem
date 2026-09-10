@@ -122,13 +122,13 @@ export const EmptyAfterFilter: Story = {
  * oben, und wer die Bewegungen suchte, scrollte erst an den Fakten vorbei
  * (Abnahme 0063).
  */
-export const DetailBreit: Story = {
+export const DetailWide: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)" }}>
       <div style={{ maxWidth: 1100 }}>
         <div className="v2fields__h">Vorgabe (620) — bei 1.100 px nebeneinander</div>
         <MasterDetail
-          detailBreit
+          detailWide
           list={<DetailPane title="Randspalte">Fakten, Zähler, Zustände.</DetailPane>}
           detail={<DetailPane title="Arbeitsfläche">Die Tabelle, die 620 px braucht.</DetailPane>}
         />
@@ -136,7 +136,7 @@ export const DetailBreit: Story = {
       <div style={{ maxWidth: 1000 }}>
         <div className="v2fields__h">Vorgabe (620) — bei 1.000 px umgebrochen</div>
         <MasterDetail
-          detailBreit
+          detailWide
           list={<DetailPane title="Randspalte">Steht jetzt unten.</DetailPane>}
           detail={<DetailPane title="Arbeitsfläche">Steht oben, wo sie hingehört.</DetailPane>}
         />
@@ -144,7 +144,7 @@ export const DetailBreit: Story = {
       <div style={{ maxWidth: 1000 }}>
         <div className="v2fields__h">minDetail 484 — bei 1.000 px nebeneinander</div>
         <MasterDetail
-          detailBreit
+          detailWide
           minDetail={484}
           list={<DetailPane title="Randspalte">Fakten.</DetailPane>}
           detail={<DetailPane title="Arbeitsfläche">Inhalt, der bei 484 px trägt.</DetailPane>}

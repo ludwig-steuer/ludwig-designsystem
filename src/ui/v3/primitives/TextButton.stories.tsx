@@ -71,17 +71,17 @@ export const AsLink: Story = {
 /** Rundlauf: der Aufrufer hält den Zustand, der Knopf löst nur aus. */
 export const Interactive: Story = {
   render: function Render() {
-    const [zurueckgestellt, setZurueckgestellt] = useState(false);
+    const [deferred, setDeferred] = useState(false);
     return (
       <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
         <span style={{ fontSize: 13 }}>
-          RE-4471 · {zurueckgestellt ? "zurückgestellt" : "offen"}
+          RE-4471 · {deferred ? "zurückgestellt" : "offen"}
         </span>
         <TextButton
-          tone={zurueckgestellt ? "quiet" : "default"}
-          onClick={() => setZurueckgestellt((v) => !v)}
+          tone={deferred ? "quiet" : "default"}
+          onClick={() => setDeferred((v) => !v)}
         >
-          {zurueckgestellt ? "Wieder aufnehmen" : "Zurückstellen"}
+          {deferred ? "Wieder aufnehmen" : "Zurückstellen"}
         </TextButton>
       </div>
     );

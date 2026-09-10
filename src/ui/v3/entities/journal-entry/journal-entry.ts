@@ -12,7 +12,7 @@ import { deriveTax } from "./tax-assist";
  */
 
 export type Side = "S" | "H";
-export type JournalMode = "einfach" | "voll";
+export type JournalMode = "simple" | "full";
 export type JournalStatus = "proposed" | "accepted" | "posted" | "reversed";
 
 /** One line of an entry, as it is read. The editor's row adds what it edits. */
@@ -21,21 +21,21 @@ export interface JournalRow {
   datum: string;
   currency?: string;
   /** Gross, German format („1.475,60"). */
-  umsatz: string;
+  amount: string;
   side: Side;
   /** DATEV tax key („9", „8", „94", …) or empty. */
   bu: string;
-  konto: string;
-  kontoName: string;
-  beleg1: string;
-  beleg2?: string;
+  account: string;
+  accountName: string;
+  externalDocumentNumber: string;
+  externalDocumentNumber2?: string;
   text: string;
-  kost1?: string;
+  costCenter1?: string;
 }
 
 /** The account that balances the entry — it stands above the rows, not in them. */
 export interface ContraAccount {
-  konto: string;
+  account: string;
   name: string;
   tag?: string;
 }
@@ -64,7 +64,7 @@ export function rowAmount(value: string | number | null | undefined): number {
  *          journalTotals. One row's own amount → rowAmount.
  */
 export function documentSideTotal(rows: readonly JournalRow[], side: Side): number {
-  return rows.filter((r) => r.side === side).reduce((sum, r) => sum + rowAmount(r.umsatz), 0);
+  return rows.filter((r) => r.side === side).reduce((sum, r) => sum + rowAmount(r.amount), 0);
 }
 
 /**
@@ -73,7 +73,7 @@ export function documentSideTotal(rows: readonly JournalRow[], side: Side): numb
  * saved; the card's is what gets shown.
  */
 export interface JournalBatchLine {
-  konto: string;
+  account: string;
   name: string;
   text: string;
   side: Side;
@@ -100,18 +100,18 @@ export function journalLines(
 ): JournalBatchLine[] {
   const lines: JournalBatchLine[] = [];
   for (const r of rows) {
-    const gross = rowAmount(r.umsatz);
+    const gross = rowAmount(r.amount);
     const tax = deriveTax(
-      { accountNumber: r.konto, taxKey: r.bu || null, amount: gross },
+      { accountNumber: r.account, taxKey: r.bu || null, amount: gross },
       accountFramework,
     );
     if (!tax) {
-      lines.push({ konto: r.konto, name: r.kontoName, text: r.text, side: r.side, amount: gross });
+      lines.push({ account: r.account, name: r.accountName, text: r.text, side: r.side, amount: gross });
       continue;
     }
-    lines.push({ konto: r.konto, name: r.kontoName, text: r.text, side: r.side, amount: tax.net });
+    lines.push({ account: r.account, name: r.accountName, text: r.text, side: r.side, amount: tax.net });
     lines.push({
-      konto: tax.account.accountNumber,
+      account: tax.account.accountNumber,
       name: tax.account.accountName,
       text: r.text,
       side: r.side,
@@ -119,11 +119,11 @@ export function journalLines(
     });
   }
 
-  if (contraAccount?.konto) {
+  if (contraAccount?.account) {
     const total = documentSideTotal(rows, documentSide);
     if (total !== 0) {
       lines.push({
-        konto: contraAccount.konto,
+        account: contraAccount.account,
         name: contraAccount.name,
         // The contra account has no text of its own — it takes the one of the
         // first line, the way the batch would.
@@ -144,10 +144,10 @@ export function journalLines(
  * @instead The sentence „Σ S … = Σ H …" → journalBalanceText. Only the
  *          document's own side → documentSideTotal.
  */
-export function journalTotals(lines: readonly JournalBatchLine[]): { soll: number; haben: number } {
+export function journalTotals(lines: readonly JournalBatchLine[]): { debit: number; credit: number } {
   return {
-    soll: lines.filter((l) => l.side === "S").reduce((s, l) => s + l.amount, 0),
-    haben: lines.filter((l) => l.side === "H").reduce((s, l) => s + l.amount, 0),
+    debit: lines.filter((l) => l.side === "S").reduce((s, l) => s + l.amount, 0),
+    credit: lines.filter((l) => l.side === "H").reduce((s, l) => s + l.amount, 0),
   };
 }
 
@@ -159,8 +159,8 @@ export function journalTotals(lines: readonly JournalBatchLine[]): { soll: numbe
  * @instead The two numbers on their own → journalTotals.
  */
 export function journalBalanceText(lines: readonly JournalBatchLine[]): string {
-  const { soll, haben } = journalTotals(lines);
-  return `Σ S ${euro(soll)} ${Math.abs(soll - haben) < 0.005 ? "=" : "≠"} Σ H ${euro(haben)}`;
+  const { debit: debit, credit: credit } = journalTotals(lines);
+  return `Σ S ${euro(debit)} ${Math.abs(debit - credit) < 0.005 ? "=" : "≠"} Σ H ${euro(credit)}`;
 }
 
 /**
@@ -172,6 +172,6 @@ export function journalBalanceText(lines: readonly JournalBatchLine[]): string {
  * one entry.
  */
 export const journalGridTracks: Record<JournalMode, string> = {
-  einfach: "88px 104px 40px 62px 148px 96px minmax(160px, 1fr)",
-  voll: "88px 56px 104px 40px 62px 148px 96px 96px minmax(160px, 1fr) 80px",
+  simple: "88px 104px 40px 62px 148px 96px minmax(160px, 1fr)",
+  full: "88px 56px 104px 40px 62px 148px 96px 96px minmax(160px, 1fr) 80px",
 };

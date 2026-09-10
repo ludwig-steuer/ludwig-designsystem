@@ -78,7 +78,7 @@ const COMMENT: ClarificationVM = {
 
 const ALL = [OPEN_REQUIRED, OPEN_CLIENT, DEFERRED, ANSWERED, COMMENT];
 
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: () => (
     <Card>
       <CardHead title="Rückfragen" sub="Sachverhalt SV-2026-0184" />
@@ -87,7 +87,7 @@ export const Gefuellt: Story = {
   ),
 };
 
-export const Zustaende: Story = {
+export const States: Story = {
   render: () => (
     <Card>
       <CardHead title="Zustände" sub="offen · zurückgestellt · beantwortet · blockierend" />
@@ -96,7 +96,7 @@ export const Zustaende: Story = {
   ),
 };
 
-export const Kommentar: Story = {
+export const Comment: Story = {
   render: () => (
     <Card>
       <CardHead title="Notiz am Sachverhalt" sub="keine Schwere, keine Antwort erwartet" />
@@ -106,7 +106,7 @@ export const Kommentar: Story = {
 };
 
 /** The batch review: grouped by who is asked, with the case in front. */
-export const ImStapel: Story = {
+export const InStack: Story = {
   render: () => {
     const rows: ClarificationVM[] = [
       { ...OPEN_REQUIRED, caseNumber: "SV-2026-0184", caseTitle: "Musterfirma GmbH · 1.800,00 €", href: "#" },
@@ -124,7 +124,7 @@ export const ImStapel: Story = {
 };
 
 /** `renderDetail` supplies what unfolds — in the app that is 0060. */
-export const MitKarte: Story = {
+export const WithCard: Story = {
   render: () => (
     <Card>
       <CardHead title="Rückfragen" sub="die blockierende Frage steht offen" />
@@ -145,7 +145,7 @@ export const MitKarte: Story = {
   ),
 };
 
-export const Vorschau: Story = {
+export const Preview: Story = {
   render: () => (
     <Card>
       <CardHead title="Begründung der Buchung" sub="worauf sie sich stützt" />
@@ -163,7 +163,7 @@ export const Vorschau: Story = {
  * neither frame: `toTodoItem` returns `null` for it, `CaseTimeline` skips it
  * (0059 „Mitbringsel") — a note is not work and not an event.
  */
-export const ImRahmen: Story = {
+export const InFrame: Story = {
   render: function Frames() {
     const [selected, setSelected] = useState<string | null>("c1");
     return (
@@ -208,7 +208,7 @@ export const ImRahmen: Story = {
 };
 
 /** A question that runs past the column: cut to one line, whole in the hover. */
-export const LangeFrage: Story = {
+export const LongQuestion: Story = {
   render: () => (
     <Card>
       <CardHead title="Lange Frage" sub="gekürzt auf eine Zeile, ganzer Text im Hover" />

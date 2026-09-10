@@ -121,7 +121,7 @@ export const Filled: Story = {
  * and neither of them carries a running balance: over two sources it would
  * mix what is booked with what is not there yet (Owner 2026-09-04).
  */
-export const Varianten: Story = {
+export const Variants: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)" }}>
       <div style={{ maxWidth: 720 }}>
@@ -144,7 +144,7 @@ export const Varianten: Story = {
 };
 
 /** „Mehr laden" with the stock counter — the bank account has 2.937 movements. */
-export const Nachladen: Story = {
+export const LoadMore: Story = {
   render: () => {
     const [shown, setShown] = useState(3);
     return (
@@ -181,7 +181,7 @@ export const Leer: Story = {
 };
 
 /** Loading: rows in the shape of the content, the column head stays in place. */
-export const Laedt: Story = {
+export const Loading: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <AccountEntryList entries={[]} currency="EUR" loading />
@@ -190,7 +190,7 @@ export const Laedt: Story = {
 };
 
 /** Loading failed — that is not the same as empty (V9). */
-export const Fehler: Story = {
+export const Error: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <AccountEntryList

@@ -311,16 +311,16 @@ const NO_ROLE: Role = { role: null, text: "—", fill: "—", edge: "—" };
  * Token, ohne dass ihn jemand nachzählte — zuletzt 0112, neununddreißig Minuten
  * nach der Nacharbeit, die ihn berichtigt hatte. Wer zählt, irrt nicht.
  */
-const PLAKETTEN = [...READERS.matchAll(/\.(bdg-[a-z]+)\s*\{([^}]*)\}/g)].map((m) => ({
+const BADGES = [...READERS.matchAll(/\.(bdg-[a-z]+)\s*\{([^}]*)\}/g)].map((m) => ({
   name: m[1] ?? "",
-  regeln: m[2] ?? "",
+  rules: m[2] ?? "",
 }));
-const mitHex = (prop: RegExp) => PLAKETTEN.filter((p) => prop.test(p.regeln)).map((p) => p.name);
-const hexFlaechen = mitHex(/background:\s*#/);
+const withHex = (prop: RegExp) => BADGES.filter((p) => prop.test(p.rules)).map((p) => p.name);
+const hexSurfaces = withHex(/background:\s*#/);
 // Der Rückblick trennt `color` von `border-color` — sonst zählt jeder Hex-Rand
 // als Hex-Text und der Satz behauptet das Gegenteil dessen, was dasteht.
-const hexText = mitHex(/(?<!-)color:\s*#/);
-const hexRaender = mitHex(/border-color:\s*#/);
+const hexText = withHex(/(?<!-)color:\s*#/);
+const hexBorders = withHex(/border-color:\s*#/);
 
 export const Roles: Story = {
   render: () => {
@@ -396,19 +396,19 @@ export const Roles: Story = {
             ? "Eine ungelesene Fläche heißt: wer sie zu brauchen scheint, holt sie woanders her."
             : "Jede Fläche des Satzes wird gelesen."}{" "}
           Die Plaketten sind der Fall, an dem das zu prüfen war — hier gezählt,
-          nicht behauptet: von {PLAKETTEN.length} Plaketten in{" "}
+          nicht behauptet: von {BADGES.length} Plaketten in{" "}
           <code className="lw-mono">app-chrome.css</code> stehen als Hex-Literal
           noch{" "}
           <strong>
-            <span className="lw-numeric">{hexFlaechen.length}</span>{" "}
-            {hexFlaechen.length === 1 ? "Fläche" : "Flächen"}
+            <span className="lw-numeric">{hexSurfaces.length}</span>{" "}
+            {hexSurfaces.length === 1 ? "Fläche" : "Flächen"}
           </strong>{" "}
-          ({hexFlaechen.join(", ") || "keine"}) und{" "}
+          ({hexSurfaces.join(", ") || "keine"}) und{" "}
           <strong>
-            <span className="lw-numeric">{hexRaender.length}</span>{" "}
-            {hexRaender.length === 1 ? "Rand" : "Ränder"}
+            <span className="lw-numeric">{hexBorders.length}</span>{" "}
+            {hexBorders.length === 1 ? "Rand" : "Ränder"}
           </strong>{" "}
-          ({hexRaender.join(", ") || "keiner"});{" "}
+          ({hexBorders.join(", ") || "keiner"});{" "}
           {hexText.length === 0 ? (
             <>den Text holen alle aus Token</>
           ) : (

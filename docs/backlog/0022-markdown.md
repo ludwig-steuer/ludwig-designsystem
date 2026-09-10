@@ -102,7 +102,7 @@ Regel §3.2: **eine** Prop, und ein Enum statt eines zweiten Booleans neben
 - Ohne `maxHeight` ist `overflow` wirkungslos; das steht in der `@when`-Zeile.
 - Im selben Zug bekommen die Story-Exporte in `Markdown.stories.tsx`
   englische Namen (`Gefuellt` → `Filled`, `Leer` → `Empty`, `Varianten` →
-  `Variants`, `Lang` → `Long`, `Unsicher` → `Unsafe`, `ImEinsatz` → `InUse`) —
+  `Variants`, `Lang` → `Long`, `Unsicher` → `Unsafe`, `InUse` → `InUse`) —
   `CLAUDE.md`: Story-Exportnamen sind englisch, und die Datei wird ohnehin
   angefasst.
 
@@ -168,7 +168,7 @@ Listenpunkt, Zitat und Tabelle stehen alle auf 13,5 px.
       scrollen ihn (Story `Reader`, im Browser beobachtet)
 - [ ] `overflow` ohne `maxHeight` ändert nichts — kein Rahmen, keine Höhe
 - [ ] Alle Story-Exporte in `Markdown.stories.tsx` englisch
-      (`grep -E "^export const (Gefuellt|Leer|Varianten|Lang|Unsicher|ImEinsatz)"` leer)
+      (`grep -E "^export const (Gefuellt|Leer|Varianten|Lang|Unsicher|InUse)"` leer)
 - [ ] Server-Component: die Datei trägt weiterhin kein `"use client"`
 
 ## Offene Fragen
@@ -211,7 +211,7 @@ Ein fester Punkt reißt neu. Jedes Kriterium einzeln, fest und variabel:
 | **A5 · Variabel** — `clamp`-Verhalten unverändert | `--long`: `DETAILS.v2mk--clamp`, geschlossen ist `.v2mk__body` 220 px hoch mit `linear-gradient`-Maske; Klick auf „Ganz lesen" → `open`, Höhe 220 → 850 px, `max-height: none`, Maske weg. Die Chrome-Regel `::details-content` aus dem Befund (`v3.css:1985`) greift, der Anriss ist sichtbar | ✓ |
 | **A5 · Variabel** — der Scrollbereich ist fokussierbar, Pfeiltasten scrollen ihn | `--reader`: ein Tab landet auf `.v2mk.v2mk--scroll` (`tabIndex: 0`), der Fokusring ist im Bild zu sehen; dreimal Pfeil-ab → `scrollTop` 0 → 120. Der Kopf des `DetailPane` („Bericht des Laufs · Stapel 2026-08") bleibt dabei stehen | ✓ |
 | **A5 · Variabel** — `overflow` ohne `maxHeight` ändert nichts | `Markdown.tsx:259` und `:274`: beide Sonderzweige stehen unter `if (maxHeight …)`; ohne `maxHeight` fällt die Komponente auf `<div className="v2mk">` (`:287`) — kein Rahmen, keine Höhe, kein `tabIndex`. Die `@when`-Zeile sagt es (`:214–218`) | ✓ |
-| **A5 · Variabel** — alle Story-Exporte englisch | `grep -E "^export const (Gefuellt\|Leer\|Varianten\|Lang\|Unsicher\|ImEinsatz)" Markdown.stories.tsx` → leer. Die acht Exporte heißen `Filled`, `Empty`, `Variants`, `Flow`, `Long`, `Unsafe`, `InUse`, `Reader` | ✓ |
+| **A5 · Variabel** — alle Story-Exporte englisch | `grep -E "^export const (Gefuellt\|Leer\|Varianten\|Lang\|Unsicher\|InUse)" Markdown.stories.tsx` → leer. Die acht Exporte heißen `Filled`, `Empty`, `Variants`, `Flow`, `Long`, `Unsafe`, `InUse`, `Reader` | ✓ |
 | **A5 · Variabel** — Server-Component: kein `"use client"` | `sed -n 1p Markdown.tsx` → `import { Fragment } from "react";`; die Datei trägt keine `"use client"`-Zeile, alle Zweige kommen ohne Zustand aus (`<details>` statt State) | ✓ |
 | **Variabel** — Größen aus der Leiter (Abgleich 2026-09-03) | `--filled`, gemessen: Absatz 13,5 px, Listenpunkt 13,5 px, Zitat 13,5 px, Tabellenzelle 13,5 px, Code-Block 12,5 px, `h2` 14 px. Deckt sich mit `v3.css:1954–1957` (`--fs-ui-lg` / `-md` / `--fs-ui` / `-sm`) und mit der Tabelle oben | ✓ |
 
@@ -282,7 +282,7 @@ Erweiterung A5. Gemessen in einem eigenen headless Chromium (1440 × 900) auf
 | **A5** — `overflow="scroll"` erzeugt `overflow-y: auto` und keine Maske, kein „Ganz lesen" | `--reader`, gemessen wie oben | ✓ |
 | **A5** — Tastatur: der Scrollbereich ist fokussierbar | `--reader`: `tabIndex: 0` am `.v2mk--scroll` | ✓ |
 | **A5** — `overflow` ohne `maxHeight` ändert nichts | Beide Sonderzweige stehen unter `if (maxHeight …)`; ohne `maxHeight` bleibt `<div className="v2mk">` | ✓ |
-| **A5** — alle Story-Exporte englisch | `grep -E "^export const (Gefuellt\|Leer\|Varianten\|Lang\|Unsicher\|ImEinsatz)" Markdown.stories.tsx` → leer | ✓ |
+| **A5** — alle Story-Exporte englisch | `grep -E "^export const (Gefuellt\|Leer\|Varianten\|Lang\|Unsicher\|InUse)" Markdown.stories.tsx` → leer | ✓ |
 | **A5** — Server-Component: kein `"use client"` | `grep -l '"use client"' src/ui/v3/primitives/Markdown.tsx` → kein Treffer | ✓ |
 
 **Nachtrag**

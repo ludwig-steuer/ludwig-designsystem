@@ -24,7 +24,7 @@ import type { SourceDocumentVM } from "@/ui/v3/entities/source-document/SourceDo
  */
 
 /** The clean invoice everything else is a deviation from. */
-export function belegFixture(over: Partial<SourceDocumentVM> = {}): SourceDocumentVM {
+export function documentFixture(over: Partial<SourceDocumentVM> = {}): SourceDocumentVM {
   return {
     id: "d-0042",
     fileName: "Rechnung-R-2026-0042.pdf",
@@ -76,7 +76,7 @@ export const MUSTER_PDF =
   "data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iago8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFI+PgplbmRvYmoKMiAwIG9iago8PC9UeXBlL1BhZ2VzL0tpZHNbMyAwIFJdL0NvdW50IDE+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlL1BhZ2UvUGFyZW50IDIgMCBSL01lZGlhQm94WzAgMCAzMDAgMTQwXS9SZXNvdXJjZXM8PC9Gb250PDwvRjE8PC9UeXBlL0ZvbnQvU3VidHlwZS9UeXBlMS9CYXNlRm9udC9IZWx2ZXRpY2E+Pj4+Pj4vQ29udGVudHMgNCAwIFI+PgplbmRvYmoKNCAwIG9iago8PC9MZW5ndGggNzA+PgpzdHJlYW0KQlQgL0YxIDE0IFRmIDIwIDgwIFRkIChNdXN0ZXItUmVjaG51bmcgUi0yMDI2LTAwNDIpIFRqIEVUCmVuZHN0cmVhbQplbmRvYmoKdHJhaWxlcgo8PC9Sb290IDEgMCBSPj4K";
 
 /** The six tabs of the page, in the order the standard fixes. */
-export const BELEG_TABS = [
+export const DOCUMENT_TABS = [
   { key: "uebersicht", label: "Übersicht" },
   { key: "details", label: "Details" },
   { key: "positionen", label: "Positionen" },
@@ -86,7 +86,7 @@ export const BELEG_TABS = [
 ];
 
 /** Tabs of a document that has no invoice line — positions and input tax go. */
-export const BELEG_TABS_OHNE_RECHNUNG = BELEG_TABS.filter(
+export const DOCUMENT_TABS_WITHOUT_INVOICE = DOCUMENT_TABS.filter(
   (t) => t.key !== "positionen" && t.key !== "vorsteuer",
 );
 
@@ -102,7 +102,7 @@ export const listHref = "?liste=belege";
  * ihm nur die Rohangaben. Sonst zeigte die Story eine Auswahl, die es so nie
  * gibt.
  */
-export function belegMaengel(over: Partial<DocDefectFacts> = {}): DocDefect[] {
+export function documentDefects(over: Partial<DocDefectFacts> = {}): DocDefect[] {
   return docDefects({
     documentDate: "2026-08-14",
     inboxStatus: "classified",
@@ -116,7 +116,7 @@ export function belegMaengel(over: Partial<DocDefectFacts> = {}): DocDefect[] {
 }
 
 /** Die USt einer gemischten Rechnung — zwei Sätze, das ist der Fall für die Box. */
-export const UST_GEMISCHT = {
+export const VAT_MIXED = {
   net: 1512.61,
   vat: 287.39,
   gross: 1800,
@@ -132,7 +132,7 @@ export const UST_GEMISCHT = {
  * Der Verlauf eines Belegs in Kurzform. Die Wörter sind die der App
  * (`platform_audit_events`), die Zeiten laufen rückwärts vom Eingang.
  */
-export const VERLAUF = [
+export const HISTORY = [
   { id: "e-5", at: "2026-08-20T09:12:00Z", title: "Gebucht im Stapel 08/2026", kind: "Buchung", actor: "Kanzlei" },
   { id: "e-4", at: "2026-08-16T07:40:00Z", title: "Dem Sachverhalt 2026-0413 zugeordnet", kind: "Zuordnung", actor: "Agent" },
   { id: "e-3", at: "2026-08-15T18:22:00Z", title: "Werte extrahiert", kind: "Extraktion", actor: "System" },
@@ -140,10 +140,10 @@ export const VERLAUF = [
   { id: "e-1", at: "2026-08-15T18:19:00Z", title: "Eingegangen aus dem Postfach", kind: "Eingang", actor: "System" },
 ];
 
-export const vorsteuerHref = tabHref("vorsteuer");
-export const verlaufHref = tabHref("verlauf");
+export const inputTaxHref = tabHref("vorsteuer");
+export const historyHref = tabHref("verlauf");
 export const partnerHref = "?geschaeftspartner=bp-880";
-export const stapelHref = "?stapel=2026-08";
+export const batchHref = "?stapel=2026-08";
 
 /**
  * Eine offene Rückfrage an diesem Beleg — im Sichtmodell der Klärungs-Familie,
@@ -154,7 +154,7 @@ export const stapelHref = "?stapel=2026-08";
  * Antwort, ein Kommentar ist Zusammenhang. Dass sie an **diesem Beleg** hängt,
  * sagt der Ort — die Box steht in seiner Übersicht.
  */
-export const KLAERUNG: ClarificationVM = {
+export const CLARIFICATION: ClarificationVM = {
   id: "cl-9001",
   title: "Für die Bewirtung fehlen die Teilnehmer",
   state: "open",

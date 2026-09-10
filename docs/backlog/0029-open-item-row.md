@@ -248,7 +248,7 @@ Abgenommen von / am: designsystem-abnahme (fremd, ohne Bauauftrag), 2026-09-07
 
 Entscheide: 1 fünf Klassen, Union zeichengleich in L-05: `notDue | d1_30 | d31_60 | d61_90 | d90plus` · 2 Mahnstufe als Wort nur > 0, bei `null` „—" · 3 keine Sachverhalts-Zahl in der Gruppe. Zuschnitt: Row + `OpenItemAgeGroup` bleiben (Gruppierung ist der Job, `DataTable` gruppiert nicht), `StatusHeader` auf der Ausgleich-Spalte; `openItemColumns` erst, wenn `opos/page` auf `DataTable` wandert.
 
-Vor dem Bau in die Spec: L-66 zitieren mit Übergangsregel; `Blockiert` auf `[year]/opos` und den Dubletten-Blick kürzen, Schritt 5 raus (der steht auf Erwartungen, 0025); Feldliste berichtigen — `dunning_level` ist optional im VM `OpenItemLine`, `openAtStichtag`/`clearedAfterStichtag`/`amountApprox` sind Felder des Seiten-VMs `OposStichtagItem`; `Timestamp` → `Time`.
+Vor dem Bau in die Spec: L-66 zitieren mit Übergangsregel; `Blockiert` auf `[year]/opos` und den Dubletten-Blick kürzen, Schritt 5 raus (der steht auf Erwartungen, 0025); Feldliste berichtigen — `dunning_level` ist optional im VM `OpenItemLine`, `openAtCutoff`/`clearedAfterCutoff`/`amountApprox` sind Felder des Seiten-VMs `OposStichtagItem`; `Timestamp` → `Time`.
 
 Befunde ins Register: **L-73** — L-05 gehört zu `datev-truth`, nicht `accounting-cases`, und das Modul braucht ein `domain/`; Bucket-Union wie oben festschreiben; L-66 um 0029 als Wartenden ergänzen.
 
@@ -270,8 +270,8 @@ statt einer lokalen Map — genau die Map, die `opos/page.tsx` heute hat (R1).
 
 **Feldliste berichtigt.** Der Typ ist der Schnitt des Seiten-VMs
 `OposStichtagItem` (`modules/datev-truth/application/opos-stichtag-core.ts`),
-nicht der Zeilen-VM `OpenItemLine`: `openAtStichtag`, `amountApprox` und
-`clearedAfterStichtag` sind Felder des Seiten-VMs, `dunningLevel` ist dort
+nicht der Zeilen-VM `OpenItemLine`: `openAtCutoff`, `amountApprox` und
+`clearedAfterCutoff` sind Felder des Seiten-VMs, `dunningLevel` ist dort
 optional. `Timestamp` gibt es im Set nicht — die Daten kommen über `Time`.
 
 **Was der Typ hier soll und wie lange.** `open-item.ts` definiert `OpenItem`

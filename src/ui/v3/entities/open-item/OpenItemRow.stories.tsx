@@ -29,9 +29,9 @@ const ITEM = (over: Partial<OpenItem> = {}): OpenItem => ({
   invoiceDate: "2026-07-14",
   dueDate: "2026-08-13",
   grossAmount: 1249.9,
-  openAtStichtag: 1249.9,
+  openAtCutoff: 1249.9,
   amountApprox: false,
-  clearedAfterStichtag: false,
+  clearedAfterCutoff: false,
   description: "Wartung Klimaanlage 08/2026",
   dunningLevel: null,
   ...over,
@@ -46,7 +46,7 @@ const ITEMS: OpenItem[] = [
     invoiceDate: "2026-06-02",
     dueDate: "2026-07-02",
     grossAmount: 1800,
-    openAtStichtag: 1800,
+    openAtCutoff: 1800,
     description: "Beratung Q2 2026",
     dunningLevel: 2,
   }),
@@ -56,7 +56,7 @@ const ITEMS: OpenItem[] = [
     invoiceDate: "2026-08-20",
     dueDate: "2026-09-19",
     grossAmount: 2480.55,
-    openAtStichtag: 2480.55,
+    openAtCutoff: 2480.55,
     description: "Sanierung Serverraum, Teilrechnung 2 von 3",
   }),
   ITEM({
@@ -66,8 +66,8 @@ const ITEMS: OpenItem[] = [
     invoiceDate: "2026-03-11",
     dueDate: "2026-04-10",
     grossAmount: 640,
-    openAtStichtag: 640,
-    clearedAfterStichtag: true,
+    openAtCutoff: 640,
+    clearedAfterCutoff: true,
     description: "Schulung Buchhaltung",
   }),
   ITEM({
@@ -76,7 +76,7 @@ const ITEMS: OpenItem[] = [
     invoiceDate: "2026-05-05",
     dueDate: "2026-06-04",
     grossAmount: 412,
-    openAtStichtag: 212,
+    openAtCutoff: 212,
     amountApprox: true,
     description: "Abschlag Strom 05/2026",
     dunningLevel: 1,
@@ -249,7 +249,7 @@ export const Edges: Story = {
           dueDate: null,
           invoiceDate: null,
           grossAmount: null,
-          openAtStichtag: null,
+          openAtCutoff: null,
           description: null,
           dunningLevel: 0,
         })}
@@ -261,7 +261,7 @@ export const Edges: Story = {
           // 36 Zeichen — die Grenze von Belegfeld 1. Ohne sie kürzt in keiner
     // Story eine Belegnummer, und M2 hätte keinen Nachweis (W1).
     externalDocumentNumber: "RE-9002-SAMMEL-2026-03-14-TEIL-002",
-          openAtStichtag: 18.4,
+          openAtCutoff: 18.4,
           amountApprox: true,
           description:
             "Sammel-OP aus dem Alt-Snapshot vom 14.03.2026: mehrere Teilzahlungen ohne " +

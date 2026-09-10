@@ -29,26 +29,26 @@ import { FALL_TABS, listHref, tabHref } from "./fixtures";
  * ist, und die Seite gehört der App. Was er hier tut, ist die Szenarien
  * vergleichbar halten.
  */
-export function SachverhaltSeite({
-  fall,
+export function CasePage({
+  accountingCase: accountingCase,
   tab = "uebersicht",
   signal,
   actions,
-  strang,
-  notizen,
+  timeline: timeline,
+  notes: notes,
   position = 3,
   total = 117,
   children,
 }: {
-  fall: CaseFactsVM;
+  accountingCase: CaseFactsVM;
   tab?: string;
   /** **Ein** nächster Schritt oder keiner — er entfällt, wenn der Fall auf jemand anderen wartet. */
   signal?: ReactNode;
   actions?: ReactNode;
   /** Spalte 1: der Strang. Er fällt **nie** weg (F196 §5). */
-  strang?: ReactNode;
+  timeline?: ReactNode;
   /** Spalte 3: Zusammenfassung, Notizen, Rückfragen — lesend. */
-  notizen?: ReactNode;
+  notes?: ReactNode;
   position?: number;
   total?: number;
   /** Spalte 2: die Arbeitsfläche. */
@@ -56,14 +56,14 @@ export function SachverhaltSeite({
 }) {
   // Der Anzeigename kommt aus der Domäne, nicht aus einer Regel hier:
   // Titel, sonst „<Art>: <Gegenpart>", sonst die Art allein (L-52).
-  const titel = caseDisplayTitle({
-    title: fall.title ?? null,
-    kind: fall.kind ?? null,
-    counterpartyName: fall.counterpartyName ?? null,
+  const title = caseDisplayTitle({
+    title: accountingCase.title ?? null,
+    kind: accountingCase.kind ?? null,
+    counterpartyName: accountingCase.counterpartyName ?? null,
   });
   // Die Art ist **keine** Achse — sie ist eine Eigenschaft, und ihr Wort steht
   // in der Domäne (`CASE_KIND_LABEL`), nicht in der Status-Registry.
-  const art = fall.kind ? caseKindLabel(fall.kind) : null;
+  const art = accountingCase.kind ? caseKindLabel(accountingCase.kind) : null;
 
   return (
     <DetailView
@@ -80,24 +80,24 @@ export function SachverhaltSeite({
       header={
         <EntityHeader
           icon={<EntityIcon entity="accounting-case" />}
-          overline={fall.caseNumber ? `Sachverhalt · ${fall.caseNumber}` : "Sachverhalt"}
-          title={titel}
+          overline={accountingCase.caseNumber ? `Sachverhalt · ${accountingCase.caseNumber}` : "Sachverhalt"}
+          title={title}
           // **Ein** führender Zustand: die Achse `sachverhalt`. Wer am Zug ist
           // (`disposition`) steht als Wort in der Meta-Zeile — zwei Marken für
           // zwei Fragen, nicht zwei Marken für eine (D6/D7).
-          status={<StatusBadge axis="sachverhalt" status={fall.lifecycleStatus} />}
+          status={<StatusBadge axis="sachverhalt" status={accountingCase.lifecycleStatus} />}
           meta={
             <>
-              {fall.disposition ? (
-                <span>{resolveStatus("disposition", fall.disposition).label}</span>
+              {accountingCase.disposition ? (
+                <span>{resolveStatus("disposition", accountingCase.disposition).label}</span>
               ) : null}
               {art ? <span>{art}</span> : null}
-              {fall.fiscalYear ? <span>WJ {fall.fiscalYear}</span> : null}
+              {accountingCase.fiscalYear ? <span>WJ {accountingCase.fiscalYear}</span> : null}
             </>
           }
           // Keine leere Kennzahl (D7): ohne Betrag steht hier nichts, nicht
           // „— €".
-          {...(fall.totalAmount
+          {...(accountingCase.totalAmount
             ? {
                 metric: {
                   label: "Betrag",
@@ -106,8 +106,8 @@ export function SachverhaltSeite({
                   // Aufrufer ist die Stelle, die sie herstellt.
                   value: (
                     <Amount
-                      value={fall.totalAmount}
-                      currency={(fall.currency as Currency | null) ?? null}
+                      value={accountingCase.totalAmount}
+                      currency={(accountingCase.currency as Currency | null) ?? null}
                     />
                   ),
                 },
@@ -125,12 +125,12 @@ export function SachverhaltSeite({
         />
       }
     >
-      {strang ? (
+      {timeline ? (
         <Columns
           pattern="list-detail-aside"
-          list={strang}
+          list={timeline}
           main={children}
-          {...(notizen ? { aside: notizen } : {})}
+          {...(notes ? { aside: notes } : {})}
         />
       ) : (
         children

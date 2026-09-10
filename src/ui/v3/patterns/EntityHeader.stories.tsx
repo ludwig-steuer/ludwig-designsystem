@@ -275,7 +275,7 @@ export const InUse: Story = {
 export const WithProcess: Story = {
   render: () => {
     const phases = [
-      { key: "buchen", label: "Buchen", sub: "Agent", states: ["queued", "running", "proposed"], status: "done" as const },
+      { key: "book", label: "Buchen", sub: "Agent", states: ["queued", "running", "proposed"], status: "done" as const },
       { key: "pruefen", label: "Prüfen", sub: "Kanzlei", states: ["review", "returned", "approved"], status: "active" as const },
       { key: "uebergeben", label: "Übergeben", sub: "Übertragung", states: ["exporting", "exported"], status: "pending" as const },
       { key: "nachlesen", label: "Nachlesen", sub: "DATEV", states: ["mirrored", "reconciled"], status: "pending" as const },
@@ -293,7 +293,7 @@ export const WithProcess: Story = {
                   phases={phases}
                   owner={{ key: "kanzlei", label: "Kanzlei", color: "var(--color-primary)" }}
                   loops={{ returned: 2, reopened: 1 }}
-                  phaseSince={{ buchen: "26.08." }}
+                  phaseSince={{ book: "26.08." }}
                 />
               ),
             }

@@ -33,7 +33,7 @@ function Pair({
   caption,
   totals,
   accountHref,
-  breit,
+  wide: wide,
 }: {
   lines: JournalLine[];
   showNames?: boolean;
@@ -41,10 +41,10 @@ function Pair({
   totals?: boolean;
   accountHref?: (n: string) => string;
   /** Für die BU-Spalte: sie kostet 132 px, die der Kontoname sonst hätte. */
-  breit?: boolean;
+  wide?: boolean;
 }) {
   return (
-    <div style={{ maxWidth: breit ? 900 : 620, display: "grid", gap: "var(--space-5)" }}>
+    <div style={{ maxWidth: wide ? 900 : 620, display: "grid", gap: "var(--space-5)" }}>
       <div>
         <div className="v2sub">JournalEntryCell</div>
         <JournalEntryCell
@@ -125,7 +125,7 @@ export const WithoutTotals: Story = { render: () => <Pair lines={SPLIT} totals={
  * Die Zelle ist seit heute `AccountCell` aus der Kontofamilie; vorher stand
  * hier eine Handkopie, die den Weg gar nicht kannte.
  */
-export const MitKontoweg: Story = {
+export const WithAccountLink: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)" }}>
       <Pair lines={STANDARD} accountHref={(n) => `?account=${n}`} />
@@ -152,10 +152,10 @@ export const MitKontoweg: Story = {
  * „Warenein…". Dort, wo die Karte im Einsatz steht — im Aufklapper einer
  * Stapelzeile —, ist sie breiter als hier.
  */
-export const MitSteuerschluessel: Story = {
+export const WithTaxKey: Story = {
   render: () => (
     <Pair
-      breit
+      wide
       lines={[
         { side: "debit", accountNumber: "6815", accountName: "Telefon", amount: 84, taxKey: "9", text: "Mobilfunk August" },
         { side: "debit", accountNumber: "5404", accountName: "Wareneingang 19 % VSt", amount: 21.36, automaticRate: 19, text: "Ersatzteile" },

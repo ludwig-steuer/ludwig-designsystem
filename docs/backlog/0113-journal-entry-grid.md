@@ -42,7 +42,7 @@ Vier Punkte, die dort gemessen und bewusst hierher verwiesen wurden:
 | M5 | `Alt+V` steht im Lese-Raster am Knopf und wirkt dort nicht (`if (!editable) return;`) — Taste binden oder nicht drucken (V14) |
 | M6 | `STATUS_TEXT` ist eine lokale Label-Map (R1) und liefert in `S19` den **falschen** Tooltip: auf dem Sichtwechsel-Knopf steht „Vorschlag" |
 | M12 | `▤` als Unicode-Icon im Lese-Raster, während das Bearbeiten-Raster `ActionIcon action="ledger"` nutzt (§9/A8) |
-| M16 | die deutschen Bezeichner der Altteile (`gegenkonto`, `Kopf`, `Zeile`, `summeBelegseite`) — die Datei wird ohnehin angefasst, also nach CLAUDE.md fällig |
+| M16 | die deutschen Bezeichner der Altteile (`contraAccount`, `Kopf`, `Zeile`, `documentSideTotal`) — die Datei wird ohnehin angefasst, also nach CLAUDE.md fällig |
 
 Dazu die Story-Deckung, die 0015 offenlässt: `onOpenTaxKey` und
 `quickActions` haben heute keine Story, weil die Datei mit 17 Stories schon
@@ -168,7 +168,7 @@ Variabel (aus dieser Spec):
 - [ ] Das Journal zeigt Konto · Kontoname · Buchungstext · Soll · Haben, und die Summenzeile stimmt mit `journalLines()` überein (Story `WithJournal`, nachgerechnet)
 - [ ] Der Weg ins Kontenblatt ist `ActionIcon action="ledger"`, kein Unicode-Zeichen (Story `WithLedgerLink`, `grep` auf `▤` ist leer)
 - [ ] Der Zustandstext kommt aus der Registry, nicht aus einer lokalen Map (`grep` auf `STATUS_TEXT` ist leer)
-- [ ] Die Bezeichner der herausgelösten Teile sind englisch (`grep` auf `gegenkonto`, `Kopf`, `Zeile`, `summeBelegseite` in der neuen Datei ist leer)
+- [ ] Die Bezeichner der herausgelösten Teile sind englisch (`grep` auf `contraAccount`, `Kopf`, `Zeile`, `documentSideTotal` in der neuen Datei ist leer)
 - [ ] Der Editor hat nach dem Schnitt 9 Stories, das Grid 8; beide unter 10 (`grep`)
 - [ ] `JournalEntryEditor` verhält sich unverändert — die Kriterien von 0015 gelten weiter und werden in derselben Runde gegengeprüft
 
@@ -370,10 +370,10 @@ in dem sich Raster und Editor unterscheiden könnten. *Vorschlag:* die Prop in
 Schnittstellen-Tabelle nachtragen.
 
 **M10 — die neuen Typen tragen deutsche Feldnamen.** `JournalRow` hat `datum`,
-`umsatz`, `konto`, `kontoName`, `beleg1`, `beleg2`, `kost1`; `ContraAccount`
+`amount`, `konto`, `accountName`, `externalDocumentNumber`, `externalDocumentNumber2`, `kost1`; `ContraAccount`
 hat `konto`, `name`, `tag`; `journalTotals` gibt `{ soll, haben }` zurück. Das
-Kriterium prüft ausdrücklich nur `gegenkonto`, `Kopf`, `Zeile`,
-`summeBelegseite` **in der neuen Datei** — dieser `grep` ist leer, das
+Kriterium prüft ausdrücklich nur `contraAccount`, `Kopf`, `Zeile`,
+`documentSideTotal` **in der neuen Datei** — dieser `grep` ist leer, das
 Kriterium ist also formal erfüllt. Aber die Spec schreibt `contraAccount` als
 `{ accountNumber; accountName? }`, und CLAUDE.md sagt „Code nur Englisch"; die
 Aussage im Bau, „die Bezeichner sind englisch", gilt nur für die Props. Der

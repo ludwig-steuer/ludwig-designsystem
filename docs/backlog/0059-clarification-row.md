@@ -79,13 +79,13 @@ Mandanten"), ist das der Punkt, an dem sie auf `DataTable` wechselt.
 | `state` | `ClarificationState` | ja | `open` · `deferred` · `answered`, aus `clarificationState()` in `@/ludwig/modules/accounting-cases/domain/case` — **abgeleitet, nie gespeichert** | `Zustaende` |
 | `severity` | `ClarificationSeverity` | ja | `required` · `optional` aus `@/ludwig/modules/invoices/domain/invoice`; Achse `klaerung` | `Zustaende` |
 | `type` | `ClarificationType` | ja | `question` · `comment`; ein Kommentar bekommt keine Antwortfläche und keinen Zähler | `Kommentar` |
-| `audience` | `"accounting" \| "client" \| "agent"` | ja | wer gefragt ist (Rang 4); trägt die Gruppierung der Liste | `ImStapel` |
+| `audience` | `"accounting" \| "client" \| "agent"` | ja | wer gefragt ist (Rang 4); trägt die Gruppierung der Liste | `InStack` |
 | `raisedAt` | `string` | ja | ISO-Zeitpunkt, `Time` mit `format="dateTime"` | `Gefuellt` |
 | `answeredAt` | `string \| null` | nein | Antwortzeitpunkt; steht in der Zeile als Datum, der Text erst in der Karte | `Zustaende` |
 | `deferredUntil` | `string \| null` | nein | Wiedervorlage-Tag; setzt `state` auf `deferred` und erscheint als Wort in der Zeile | `Zustaende` |
-| `caseNumber` | `string \| null` | nein | Sachverhaltsnummer — nur mit `showCase` | `ImStapel` |
-| `caseTitle` | `string \| null` | nein | Titel des Sachverhalts, zweizeilig neben der Nummer | `ImStapel` |
-| `href` | `string \| null` | nein | Ziel der Zeile. Ohne `href` ist die Zeile kein Link (Portal, Nur-Lesen) | `ImStapel` |
+| `caseNumber` | `string \| null` | nein | Sachverhaltsnummer — nur mit `showCase` | `InStack` |
+| `caseTitle` | `string \| null` | nein | Titel des Sachverhalts, zweizeilig neben der Nummer | `InStack` |
+| `href` | `string \| null` | nein | Ziel der Zeile. Ohne `href` ist die Zeile kein Link (Portal, Nur-Lesen) | `InStack` |
 
 Typen aus `src/ludwig/`: `ClarificationState`, `CLARIFICATION_STATES`,
 `ClarificationType` (`modules/accounting-cases/domain/case`),
@@ -106,18 +106,18 @@ weil er `@/ui/booking` importiert (Befund 1).
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `clarification` | `ClarificationVM` | ja | Rang 1–7 | `Gefuellt` |
-| `showCase` | `boolean` | nein | stellt Sachverhaltsnummer und -titel voran — für Listen außerhalb des Falls (Rolle Kontext, §5 des Profils) | `ImStapel` |
-| `detail` | `ReactNode` | nein | was beim Aufklappen erscheint; ohne `detail` klappt die Zeile nicht auf | `MitKarte` |
-| `defaultOpen` | `boolean` | nein | aufgeklappt starten — blockierende offene Fragen tun das heute | `MitKarte` |
+| `showCase` | `boolean` | nein | stellt Sachverhaltsnummer und -titel voran — für Listen außerhalb des Falls (Rolle Kontext, §5 des Profils) | `InStack` |
+| `detail` | `ReactNode` | nein | was beim Aufklappen erscheint; ohne `detail` klappt die Zeile nicht auf | `WithCard` |
+| `defaultOpen` | `boolean` | nein | aufgeklappt starten — blockierende offene Fragen tun das heute | `WithCard` |
 
 ### `ClarificationList` — die Liste
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `clarifications` | `readonly ClarificationVM[]` | ja | die Zeilen; die Liste sortiert **nicht** um, der Aufrufer liefert die Reihenfolge | `Gefuellt` |
-| `groupBy` | `"audience" \| "none"` | nein | Voreinstellung `"none"`; `"audience"` erzeugt drei Gruppen (Kanzlei · Mandant · Agent) wie die Abnahme heute | `ImStapel` |
-| `showCase` | `boolean` | nein | wird an jede Zeile durchgereicht | `ImStapel` |
-| `renderDetail` | `(c: ClarificationVM) => ReactNode` | nein | liefert das Aufgeklappte — in der App die `ClarificationCard` (0060). Ohne die Prop bleibt die Liste flach und Server-Komponente | `MitKarte` |
+| `groupBy` | `"audience" \| "none"` | nein | Voreinstellung `"none"`; `"audience"` erzeugt drei Gruppen (Kanzlei · Mandant · Agent) wie die Abnahme heute | `InStack` |
+| `showCase` | `boolean` | nein | wird an jede Zeile durchgereicht | `InStack` |
+| `renderDetail` | `(c: ClarificationVM) => ReactNode` | nein | liefert das Aufgeklappte — in der App die `ClarificationCard` (0060). Ohne die Prop bleibt die Liste flach und Server-Komponente | `WithCard` |
 | `empty` | `{ title: string; hint?: string }` | nein | Leerfall. Voreinstellung „Keine Rückfragen." — der Erfolgsfall, nicht ein Fehler | `Leer` |
 
 **Was die Familie bewusst nicht kann:** nicht laden, nicht sortieren, nicht
@@ -128,7 +128,7 @@ Antwort entgegennehmen (0060), keine eigene Frage stellen (0061).
 
 | Export | Signatur | Zweck | Nachweis |
 |---|---|---|---|
-| `toTodoItem` | `(c: ClarificationVM) => TodoItem \| null` | die offene Frage als Posten in `TodoList`; `state` → `StateKind` (`deferred` → `skipped`, damit der Sprung zur nächsten offenen sie überspringt), `blocking = severity === "required"`, `sub` trägt die Zielgruppe. **`null` für einen Kommentar** — dieselbe Regel wie im Strang, und sie wohnt im Mapper, nicht beim Aufrufer | `ImRahmen` |
+| `toTodoItem` | `(c: ClarificationVM) => TodoItem \| null` | die offene Frage als Posten in `TodoList`; `state` → `StateKind` (`deferred` → `skipped`, damit der Sprung zur nächsten offenen sie überspringt), `blocking = severity === "required"`, `sub` trägt die Zielgruppe. **`null` für einen Kommentar** — dieselbe Regel wie im Strang, und sie wohnt im Mapper, nicht beim Aufrufer | `InFrame` |
 
 Für den Timeline-Rahmen gibt es keinen Mapper — `CaseTimeline` (0040) nimmt
 Klärungen schon selbst auf.
@@ -178,11 +178,11 @@ Namen ihres Haupt-Exports, wie `Table` und `LogList`. Einen Export namens
 | `Gefuellt` | Zeile und Liste mit realistischen Daten (Musterfirma GmbH, 1.800,00 €, 26.08.2026) |
 | `Zustaende` | offen · zurückgestellt · beantwortet · blockierend vs. optional nebeneinander |
 | `Kommentar` | `type="comment"` — keine Schwere, keine Antwortfläche |
-| `ImStapel` | `groupBy="audience"` mit `showCase` — die Abnahme-Ansicht, vier Zeilen in drei Gruppen |
-| `MitKarte` | `renderDetail` + `defaultOpen` — das Aufklappen |
+| `InStack` | `groupBy="audience"` mit `showCase` — die Abnahme-Ansicht, vier Zeilen in drei Gruppen |
+| `WithCard` | `renderDetail` + `defaultOpen` — das Aufklappen |
 | `Vorschau` | `ClarificationCell` in einer fremden Zeile (Buchungs-Begründung) |
-| `ImRahmen` | dieselben Daten durch `toTodoItem` in `TodoList` und dieselbe Klärung in `CaseTimeline`; der Kommentar fehlt im Strang und steht in der Liste |
-| `LangeFrage` | Titel über die Spaltenbreite: eine Zeile, Rest im Hover |
+| `InFrame` | dieselben Daten durch `toTodoItem` in `TodoList` und dieselbe Klärung in `CaseTimeline`; der Kommentar fehlt im Strang und steht in der Liste |
+| `LongQuestion` | Titel über die Spaltenbreite: eine Zeile, Rest im Hover |
 | `Leer` | „Keine Rückfragen." mit Zusatz |
 
 Neun Stories, unter der Obergrenze. Nicht anwendbar: `Laedt`, `Fehler`
@@ -218,18 +218,18 @@ Variabel (aus dieser Spec):
       (`klaerung_status`, `klaerung`, `klaerung_typ`) — kein Literal im Code (Story `Zustaende`)
 - [ ] `state` wird **nicht** in der Komponente gerechnet: das VM trägt ihn,
       der Aufrufer nimmt `clarificationState()` aus `src/ludwig` (Story `Zustaende`)
-- [ ] `showCase` stellt Nummer und Titel des Sachverhalts voran (Story `ImStapel`)
+- [ ] `showCase` stellt Nummer und Titel des Sachverhalts voran (Story `InStack`)
 - [ ] `groupBy="audience"` erzeugt genau drei Gruppen in der Reihenfolge
-      Kanzlei · Mandant · Agent, leere Gruppen entfallen (Story `ImStapel`)
+      Kanzlei · Mandant · Agent, leere Gruppen entfallen (Story `InStack`)
 - [ ] Ohne `renderDetail` bleibt die Datei frei von `"use client"` (Blick in die Datei)
 - [ ] `CaseTimeline` überspringt Klärungen mit `type="comment"` und `toTodoItem`
-      gibt für sie `null` zurück — der Kommentar steht nur in der Liste (Story `ImRahmen`)
+      gibt für sie `null` zurück — der Kommentar steht nur in der Liste (Story `InFrame`)
 - [ ] Zurückgestellt erscheint als Wort mit Datum, nicht nur farblich (Story `Zustaende`)
-- [ ] Der Zustand steht **rechtsbündig** und wandert nicht mit der Titellänge (Story `LangeFrage`)
+- [ ] Der Zustand steht **rechtsbündig** und wandert nicht mit der Titellänge (Story `LongQuestion`)
 - [ ] Jedes Datum trägt sein Wort: offen „Gefragt vor …" (relativ, genaue Zeit
       im Hover), beantwortet „Beantwortet am …" (Story `Zustaende`)
 - [ ] Der Titel wird auf eine Zeile gekürzt und steht vollständig im
-      `title`-Hover (Story `LangeFrage`)
+      `title`-Hover (Story `LongQuestion`)
 - [ ] Ersetzt die Zeilen aus `ClarificationsBanner`, `Schritt2Liste` und
       `PortalCaseList` ohne Funktionsverlust — offen (App)
 
@@ -308,7 +308,7 @@ ohne eigene Breite, und das trifft **jede** Zeile mit rechter Spalte in einem
 nächsten Fall wieder überrascht.
 
 Das `<span>` heißt jetzt `.v2disc__label` und wächst (`flex: 1 1 auto`).
-Nachgemessen (Chromium headless, Story `MitKarte`): die aufklappbare Zeile
+Nachgemessen (Chromium headless, Story `WithCard`): die aufklappbare Zeile
 läuft von x = 47 bis 1415, der Zustands-Chip endet bei 1399 — am Zeilenrand,
 wie in der nicht aufklappbaren Zeile. Vorher endete er bei 517.
 
@@ -324,7 +324,7 @@ bleiben offen.
 
 ## Abnahmekriterien (Nachtrag)
 
-- [ ] Der Zustand steht auch in der aufklappbaren Zeile am rechten Rand (Story `MitKarte`, gemessen)
+- [ ] Der Zustand steht auch in der aufklappbaren Zeile am rechten Rand (Story `WithCard`, gemessen)
 - [ ] Die Regel steht in `Disclosure`, nicht im 0059-Block (`grep .v2disc__label`)
 - [ ] Die Meta-Zeile sagt „Beantwortet am …" (Story `Zustaende`)
 
@@ -374,7 +374,7 @@ ausgeschlossen.
 
 | Kriterium | Nachweis (Story-Kennung · Befehl · Messwert) | Ergebnis |
 |---|---|---|
-| Der Zustand steht auch in der aufklappbaren Zeile am rechten Rand (Story `MitKarte`, gemessen) | `--mit-karte`, beide Zeilen: `summary.v2disc__sum` läuft von 17 bis 1423, `.v2disc__label` und die darin liegende `.v2cl__row` von 47 bis 1415, der Chip endet bei **1399** — bei beiden gleich, obwohl der eine Titel 45 und der andere 52 Zeichen trägt und der eine zwei Chips hat, der andere einen. Vorher endete er bei 517. Vergleich mit der nicht aufklappbaren Zeile (`--gefuellt`): Zeile 17 bis 1423, Chip endet bei 1407. Die 8 px Unterschied sind das eigene `padding: var(--space-2)` des `<summary>`, das links dieselben 8 px (plus Chevron) kostet — die Spalte steht, sie sitzt nur um die Einrückung des Aufklappers weiter innen | ✓ |
+| Der Zustand steht auch in der aufklappbaren Zeile am rechten Rand (Story `WithCard`, gemessen) | `--mit-karte`, beide Zeilen: `summary.v2disc__sum` läuft von 17 bis 1423, `.v2disc__label` und die darin liegende `.v2cl__row` von 47 bis 1415, der Chip endet bei **1399** — bei beiden gleich, obwohl der eine Titel 45 und der andere 52 Zeichen trägt und der eine zwei Chips hat, der andere einen. Vorher endete er bei 517. Vergleich mit der nicht aufklappbaren Zeile (`--gefuellt`): Zeile 17 bis 1423, Chip endet bei 1407. Die 8 px Unterschied sind das eigene `padding: var(--space-2)` des `<summary>`, das links dieselben 8 px (plus Chevron) kostet — die Spalte steht, sie sitzt nur um die Einrückung des Aufklappers weiter innen | ✓ |
 | Die Regel steht in `Disclosure`, nicht im 0059-Block (`grep .v2disc__label`) | `.v2disc__label { flex: 1 1 auto; min-width: 0; }` steht in `v3.css:1705`, im Disclosure-Block (1682–1708), mit sieben Zeilen Begründung darüber. Im Klärungs-Block (2295–2320) steht keine Regel dazu; `.v2cl__item > .v2disc .v2cl__row` (`:2308`) setzt weiterhin nur `padding-left: 0`. Im Markup heißt das `<span className="v2disc__label">` (`Disclosure.tsx:50`) | ✓ |
 | Die Meta-Zeile sagt „Beantwortet am …" (Story `Zustaende`) | `--zustaende`, vierte Zeile: Meta liest „Kanzlei · Beantwortet am 21.08.2026". Im Code `Clarification.tsx:186–188` | ✓ |
 
@@ -421,7 +421,7 @@ benutzen `Disclosure` ebenfalls ohne `count`.
   Titel (`--mit-karte`, Bild). Fällt unter kein Kriterium und ist Geschmack,
   aber es ist die einzige Stelle, an der die aufklappbare Zeile anders wirkt
   als die flache.
-- **Die Story-Tabelle sagt „`ImStapel` … 12 Zeilen", die Story hat vier.**
+- **Die Story-Tabelle sagt „`InStack` … 12 Zeilen", die Story hat vier.**
   Die Gruppen stimmen (Kanzlei 2 · Mandant 1 · Agent 1), die Zahl im
   Spec-Text nicht. Betrifft kein Kriterium; entweder die Zahl korrigieren
   oder die Story auf die zwölf Zeilen bringen, die die Stapel-Abnahme

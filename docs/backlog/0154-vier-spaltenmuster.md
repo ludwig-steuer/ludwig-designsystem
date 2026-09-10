@@ -40,7 +40,7 @@ Standards muss das nachziehen — mit der Zuordnung:
 ## Was der Schnitt entscheiden muss
 
 1. **Verhältnis zu `MasterDetail` (0116).** Es trägt heute `list`/`detail`,
-   `detailBreit` und `minDetail`. Wird es das neue Pattern (dritte Spalte als
+   `detailWide` und `minDetail`. Wird es das neue Pattern (dritte Spalte als
    optionaler Slot), oder tritt ein neues daneben und `MasterDetail` wird sein
    Aufrufer? Für ein Weiterbauen spricht, dass die erkämpften Breiten dort
    schon leben; dagegen, dass „Master" und „Liste" im neuen Vokabular zwei

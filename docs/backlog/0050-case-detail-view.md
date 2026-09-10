@@ -318,7 +318,7 @@ Behauptung über die eigene Arbeit.
   Begründung stimmt nicht mehr mit der Wirkung überein. Ort einer Änderung
   wäre `MasterDetail` (0050-fremd) — **eigene Aufgabe, wenn jemand das Drittel
   wirklich will**.
-- **B3** — `MasterDetail` trägt den deutschen Prop-Namen `detailBreit`. Nach
+- **B3** — `MasterDetail` trägt den deutschen Prop-Namen `detailWide`. Nach
   CLAUDE.md ist ein bestehender Bezeichner in fremder Datei kein
   Umbenennungsgrund für diese Aufgabe; er fällt, wenn `MasterDetail` selbst
   angefasst wird.
@@ -417,7 +417,7 @@ Abschnitt fehlt mehr.
   Fenster ergibt das 440/484". Gemessen ergibt es heute 944/eine Spalte. Wenn
   M4 angefasst wird, gehört B2 auf den neuen Stand.
 - **B1** (0 px zwischen den zwei Karten in `SingleEvent`) und **B3** (deutscher
-  Prop-Name `detailBreit`) stehen unverändert und bleiben ohne Nacharbeit.
+  Prop-Name `detailWide`) stehen unverändert und bleiben ohne Nacharbeit.
 - Kleinigkeit im Text: vor `## Nicht in dieser Aufgabe` (Zeile 145) fehlt die
   Leerzeile nach der Ausbau-Tabelle. Rendert richtig, ist aber die einzige
   Stelle der Datei ohne Trennzeile.
@@ -617,7 +617,7 @@ Kein Mangel blockiert; alle 14 Kriterien messen grün.
   Abnahmen haben deutsche Story-JSDocs derselben Familie mit ✓ bewertet. Wie
   B3: fällt, wenn die Datei ohnehin angefasst wird.
 - **B1** (0 px zwischen den beiden Karten in `SingleEvent`) und **B3**
-  (deutscher Prop-Name `detailBreit`) stehen unverändert. **B2 ist erledigt**
+  (deutscher Prop-Name `detailWide`) stehen unverändert. **B2 ist erledigt**
   — die 440/484 bei 1280 sind heute das gewollte Bild.
 - Kleinigkeit, unverändert aus der letzten Runde: vor `## Nicht in dieser
   Aufgabe` fehlt weiter die Leerzeile nach der Ausbau-Tabelle.

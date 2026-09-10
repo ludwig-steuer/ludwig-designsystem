@@ -53,8 +53,8 @@ export function OpenItemLinkRow({
   /** Without it a side is text, never a button that does nothing. */
   onOpen?: (entryId: string) => void;
 }) {
-  const waehrung = asCurrency(currency);
-  const seite = (s: OpenItemSide) =>
+  const resolvedCurrency = asCurrency(currency);
+  const renderSide = (s: OpenItemSide) =>
     onOpen ? (
       <button type="button" className="v2oil__side" onClick={() => onOpen(s.entryId)}>
         <span className="v2oil__label">{s.label}</span>
@@ -70,28 +70,28 @@ export function OpenItemLinkRow({
   return (
     <Row>
       <span className="v2oil__pair">
-        {seite(invoice)}
+        {renderSide(invoice)}
         {/* The arrow is a picture and carries no meaning of its own — the two
             sides and the allocated amount say it. `aria-hidden` so it is not
             read out as a word. */}
         <span className="v2oil__arrow" aria-hidden="true">
           →
         </span>
-        {seite(payment)}
+        {renderSide(payment)}
       </span>
-      <span className="v2oil__beleg" title={link.belegfeldValue ?? undefined}>
+      <span className="v2oil__doc" title={link.belegfeldValue ?? undefined}>
         <MonoCell value={link.belegfeldValue} />
       </span>
       <span className="v2num">
-        <Amount value={invoice.amount} currency={waehrung} size="sm" />
+        <Amount value={invoice.amount} currency={resolvedCurrency} size="sm" />
       </span>
       <span className="v2num">
-        <Amount value={payment.amount} currency={waehrung} size="sm" />
+        <Amount value={payment.amount} currency={resolvedCurrency} size="sm" />
       </span>
       {/* The allocated amount is the point of the row: a payment may cover
           several receivables, and then it is smaller than both sides. */}
       <span className="v2num">
-        <Amount value={link.amountAllocated} currency={waehrung} size="sm" />
+        <Amount value={link.amountAllocated} currency={resolvedCurrency} size="sm" />
       </span>
       <span>
         {/* `matchedBy` has no value range — the mirrored type says „match, hand,

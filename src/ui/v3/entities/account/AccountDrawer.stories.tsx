@@ -85,7 +85,7 @@ const ENTRIES: AccountEntry[] = [
 const YEARS = [2024, 2025, 2026];
 
 /** The round trip: closing, switching the year, loading more, opening the full view. */
-export const Geoeffnet: Story = {
+export const Opened: Story = {
   render: () => {
     const [open, setOpen] = useState(true);
     const [year, setYear] = useState(2026);
@@ -136,7 +136,7 @@ export const Geoeffnet: Story = {
  * with the column head in place. Title and year stay, the footer is empty and
  * therefore invisible.
  */
-export const Laedt: Story = {
+export const Loading: Story = {
   render: () => (
     <div style={{ minHeight: 620 }}>
       <AccountDrawer
@@ -156,7 +156,7 @@ export const Laedt: Story = {
 };
 
 /** Loading failed — not the same as empty (V9). The footer stays empty. */
-export const Fehler: Story = {
+export const Error: Story = {
   render: () => (
     <div style={{ minHeight: 620 }}>
       <AccountDrawer
@@ -180,7 +180,7 @@ export const Fehler: Story = {
  * account can exist in 2026 and not in 2024. The year switch stays usable —
  * it is the way out.
  */
-export const NichtGefunden: Story = {
+export const NotFound: Story = {
   render: () => {
     const [year, setYear] = useState(2024);
     return (
@@ -202,7 +202,7 @@ export const NichtGefunden: Story = {
 };
 
 /** One fiscal year: no switch, the year stands as text in the meta line. */
-export const EinJahr: Story = {
+export const OneYear: Story = {
   render: () => (
     <div style={{ minHeight: 620 }}>
       <AccountDrawer
@@ -235,7 +235,7 @@ export const EinJahr: Story = {
  * visible behind it, and a click on a contra account **replaces** the content
  * — no second drawer stacks on top.
  */
-export const ImKontext: Story = {
+export const InContext: Story = {
   render: () => {
     const [account, setAccount] = useState<string | null>(null);
     const [year, setYear] = useState(2026);

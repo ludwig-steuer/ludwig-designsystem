@@ -32,9 +32,9 @@ export function Sparkline({
   // keeps the space.
   if (values.length < 4 || values.length > 12) return null;
 
-  const zahlen = values.filter((v): v is number => v !== null).map(Math.abs);
+  const points = values.filter((v): v is number => v !== null).map(Math.abs);
   // All-null or all-zero: without a reference every bar would be full height.
-  const max = zahlen.length > 0 ? Math.max(...zahlen) : 0;
+  const max = points.length > 0 ? Math.max(...points) : 0;
 
   const alternative =
     summary ??

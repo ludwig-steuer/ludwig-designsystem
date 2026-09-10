@@ -29,11 +29,11 @@ export interface OpenItem {
   dueDate: string | null;
   grossAmount: number | null;
   /** What was left on the reference date; `null` = not derivable from the lines. */
-  openAtStichtag: number | null;
+  openAtCutoff: number | null;
   /** The amount is an approximation — old snapshot with a part payment, or a collective item. */
   amountApprox: boolean;
   /** Settled today, but the settlement was booked **after** the reference date. */
-  clearedAfterStichtag: boolean;
+  clearedAfterCutoff: boolean;
   description: string | null;
   /**
    * `null` in old snapshots; `0` means „not dunned". The two are not the same

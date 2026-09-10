@@ -9,21 +9,21 @@ import { MenuItem, OverflowMenu } from "@/ui/v3/primitives/OverflowMenu";
 import { NavList, type NavSection } from "@/ui/v3/primitives/NavList";
 import { Skeleton } from "@/ui/v3/primitives/Skeleton";
 
-import { BelegSeite } from "./BelegSeite";
-import { belegFixture, listHref, MUSTER_PDF, caseHref } from "./fixtures";
+import { DocumentPage } from "./DocumentPage";
+import { documentFixture, listHref, MUSTER_PDF, caseHref } from "./fixtures";
 
 /**
  * Die Seite selbst — drei Zustände, die keinem Beleg gehören (0144, S1–S3).
  *
  * „Leer nach Filter" ist nicht anwendbar: die Seite hat keinen Filter.
  */
-const meta: Meta<typeof BelegSeite> = {
+const meta: Meta<typeof DocumentPage> = {
   title: "Seiten/Beleg/Seite",
-  component: BelegSeite,
+  component: DocumentPage,
   parameters: { layout: "fullscreen" },
 };
 export default meta;
-type Story = StoryObj<typeof BelegSeite>;
+type Story = StoryObj<typeof DocumentPage>;
 
 const menu = (
   <OverflowMenu label="Weitere Aktionen">
@@ -43,9 +43,9 @@ const menu = (
  *
  * Gescheitert ist etwas anderes: dann steht die Ursache da und ein Weg.
  */
-export const WirdEingeordnet: Story = {
+export const BeingClassified: Story = {
   render: () => {
-    const offen = belegFixture({
+    const open = documentFixture({
       sourceDocType: "other",
       classDocumentForm: null,
       fileName: "Scan-2026-09-09-14-32-08.pdf",
@@ -64,8 +64,8 @@ export const WirdEingeordnet: Story = {
     });
     return (
       <div style={{ display: "grid", gap: 40 }}>
-        <BelegSeite
-          document={offen}
+        <DocumentPage
+          document={open}
           signal={
             <Banner tone="info" title="Wird eingeordnet.">
               Ludwig liest gerade, was für ein Beleg das ist. Die Seite aktualisiert sich
@@ -74,11 +74,11 @@ export const WirdEingeordnet: Story = {
           }
           actions={menu}
         >
-          <SourceDocumentCard document={offen} previewUrl={MUSTER_PDF} summary={null} />
-        </BelegSeite>
+          <SourceDocumentCard document={open} previewUrl={MUSTER_PDF} summary={null} />
+        </DocumentPage>
 
-        <BelegSeite
-          document={{ ...offen, inboxStatus: "classification_failed" }}
+        <DocumentPage
+          document={{ ...open, inboxStatus: "classification_failed" }}
           signal={
             <Banner tone="danger" title="Einordnen fehlgeschlagen: das PDF ist verschlüsselt.">
               Ludwig konnte die Datei nicht öffnen. Über das Menü stoßen Sie das Einordnen
@@ -88,12 +88,12 @@ export const WirdEingeordnet: Story = {
           actions={menu}
         >
           <SourceDocumentCard
-            document={{ ...offen, inboxStatus: "classification_failed" }}
+            document={{ ...open, inboxStatus: "classification_failed" }}
             previewUrl={null}
             previewUnavailableReason="Die Datei ist verschlüsselt und lässt sich nicht anzeigen."
             summary={null}
           />
-        </BelegSeite>
+        </DocumentPage>
       </div>
     );
   },
@@ -108,7 +108,7 @@ export const WirdEingeordnet: Story = {
  * nennt den nächsten Schritt, und „nicht gefunden" führt zurück in die Liste,
  * aus der jemand kam.
  */
-export const LaedtFehlerNichtGefunden: Story = {
+export const LoadingErrorNotFound: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 40, padding: 24 }}>
       <div>
@@ -167,14 +167,14 @@ const NAV: NavSection[] = [
  * 1440 × 900 **über der Falz**? Der Kopf, das Signal (hier keins), das
  * Original und die ersten Fakten — ohne zu scrollen.
  */
-export const ImEinsatz: Story = {
+export const InUse: Story = {
   render: () => (
     <AppShell
       topbar={<TopBar crumb="Musterfirma GmbH · 2026" />}
       sidebar={<NavList sections={NAV} activePath="/belege" />}
     >
-      <BelegSeite
-        document={belegFixture()}
+      <DocumentPage
+        document={documentFixture()}
         back="Problematische Belege"
         position={3}
         total={117}
@@ -188,11 +188,11 @@ export const ImEinsatz: Story = {
         }
       >
         <SourceDocumentCard
-          document={belegFixture()}
+          document={documentFixture()}
           previewUrl={MUSTER_PDF}
           summary="Miete Musterstraße 12, August 2026"
         />
-      </BelegSeite>
+      </DocumentPage>
     </AppShell>
   ),
 };

@@ -254,10 +254,10 @@ export function accountEntryColumns({
   // dem Querlauf: bei 1440 px mit einer 440-px-Randspalte endete die sichtbare
   // Fläche bei 1419, der Chip bei 1509. Eine Antwort, die man wegscrollen
   // muss, ist keine.
-  const [datum, herkunft, ...rest] = columns;
+  const [datum, origin, ...rest] = columns;
   return [
     datum!,
-    herkunft!,
+    origin!,
     status,
     ...rest,
     {

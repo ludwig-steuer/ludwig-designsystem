@@ -12,8 +12,8 @@ type Story = StoryObj<typeof AccountField>;
 const CANDIDATES = {
   agent: [{ number: "6815", name: "Bürobedarf", reason: "aus der Position „Druckerpatronen“" }],
   partner: [{ number: "6820", name: "Porto", reason: "zuletzt 12× bei Bürobedarf GmbH" }],
-  aehnlich: [{ number: "6800", name: "Sonstige Betriebsausgaben", reason: "9 vergleichbare Belege" }],
-  belegposition: [{ number: "6845", name: "EDV-Zubehör", reason: "Positionstext „Toner“" }],
+  similar: [{ number: "6800", name: "Sonstige Betriebsausgaben", reason: "9 vergleichbare Belege" }],
+  documentLine: [{ number: "6845", name: "EDV-Zubehör", reason: "Positionstext „Toner“" }],
 };
 
 const ALL: AccountCandidate[] = [

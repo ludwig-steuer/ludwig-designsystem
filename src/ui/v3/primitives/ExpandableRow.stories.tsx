@@ -55,12 +55,12 @@ export const Expandable: Story = {
 /** Klick statt Link: die Zeile wählt aus, das Detail steht daneben. */
 export const Clickable: Story = {
   render: function Render() {
-    const zeilen = [
+    const rows = [
       { key: "a", name: "Vermieter Musterstraße", betrag: 1800 },
       { key: "b", name: "Werbeagentur Nord", betrag: 420 },
       { key: "c", name: "Bürobedarf GmbH", betrag: 64.9 },
     ];
-    const [aktiv, setAktiv] = useState("a");
+    const [active, setActive] = useState("a");
     return (
       <Card>
         <CardHead title="Fehlende Belege · 3" />
@@ -69,8 +69,8 @@ export const Clickable: Story = {
             <span>Gegenpartei</span>
             <span className="v2num">Betrag</span>
           </HeadRow>
-          {zeilen.map((z) => (
-            <ClickRow key={z.key} active={z.key === aktiv} onClick={() => setAktiv(z.key)}>
+          {rows.map((z) => (
+            <ClickRow key={z.key} active={z.key === active} onClick={() => setActive(z.key)}>
               <span className="v2main">{z.name}</span>
               <AmountCell value={z.betrag} />
             </ClickRow>
@@ -88,10 +88,10 @@ export const Clickable: Story = {
  */
 export const WithLead: Story = {
   render: function Render() {
-    const [gewaehlt, setGewaehlt] = useState<string[]>([]);
+    const [selected, setSelected] = useState<string[]>([]);
     return (
       <Card>
-        <CardHead title="Sachverhalte 2026" sub={`${gewaehlt.length} ausgewählt`} />
+        <CardHead title="Sachverhalte 2026" sub={`${selected.length} ausgewählt`} />
         <Table cols="32px 20px 1.6fr 120px">
           <HeadRow>
             <span />
@@ -107,10 +107,10 @@ export const WithLead: Story = {
               key={z.key}
               lead={
                 <SelectCell
-                  checked={gewaehlt.includes(z.key)}
+                  checked={selected.includes(z.key)}
                   label={`Sachverhalt ${z.key} auswählen`}
                   onChange={(c) =>
-                    setGewaehlt((g) => (c ? [...g, z.key] : g.filter((k) => k !== z.key)))
+                    setSelected((g) => (c ? [...g, z.key] : g.filter((k) => k !== z.key)))
                   }
                 />
               }

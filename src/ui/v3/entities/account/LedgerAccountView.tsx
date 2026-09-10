@@ -78,7 +78,7 @@ export function LedgerAccountView({
         // complete — the narrower width gave the better picture (acceptance
         // 0063, fourth round). 960 = fixed tracks plus gutters plus padding
         // plus room for text and contra account.
-        <MasterDetail list={aside} detail={children} detailBreit minDetail={960} />
+        <MasterDetail list={aside} detail={children} detailWide minDetail={960} />
       ) : (
         <div className="v2lav__body">{children}</div>
       )}

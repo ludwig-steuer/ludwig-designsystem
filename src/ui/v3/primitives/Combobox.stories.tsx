@@ -195,19 +195,19 @@ export const Interactive: Story = {
 /** Im Einsatz: zwei Felder in einer Karte, wie im Buchungseditor. */
 export const InUse: Story = {
   render: function Render() {
-    const [soll, setSoll] = useState<string | null>("6815");
-    const [haben, setHaben] = useState<string | null>("70021");
+    const [debit, setDebit] = useState<string | null>("6815");
+    const [credit, setCredit] = useState<string | null>("70021");
     return (
       <div style={{ maxWidth: 520 }}>
         <Card>
           <CardHead title="RE-4471 · Bürobedarf Meier GmbH" sub="1.249,90 €" />
           <div style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-4)" }}>
-            <Combobox label="Sollkonto" name="soll" value={soll} onChange={setSoll} options={ACCOUNTS} />
+            <Combobox label="Sollkonto" name="soll" value={debit} onChange={setDebit} options={ACCOUNTS} />
             <Combobox
               label="Habenkonto"
               name="haben"
-              value={haben}
-              onChange={setHaben}
+              value={credit}
+              onChange={setCredit}
               options={[
                 { value: "70021", label: "70021 · Bürobedarf Meier GmbH", group: "Personenkonten" },
                 { value: "70044", label: "70044 · Stadtwerke Musterstadt", group: "Personenkonten" },

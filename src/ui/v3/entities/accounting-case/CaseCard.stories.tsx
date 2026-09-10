@@ -29,7 +29,7 @@ const CASE = (over: Partial<CaseCardData> = {}): CaseCardData => ({
   ...over,
 });
 
-const Belege = () => (
+const Documents = () => (
   <Table cols="120px 1fr 130px">
     <Row>
       <span>26.08.2026</span>
@@ -44,7 +44,7 @@ const Belege = () => (
   </Table>
 );
 
-const Rahmen = ({ children }: { children: React.ReactNode }) => (
+const Frame = ({ children }: { children: React.ReactNode }) => (
   <div style={{ maxWidth: 720, padding: "var(--space-6)", display: "grid", gap: "var(--space-5)" }}>
     {children}
   </div>
@@ -61,11 +61,11 @@ const Rahmen = ({ children }: { children: React.ReactNode }) => (
  */
 export const Filled: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <CaseCard case={CASE()} href="#c-4412">
-        <Belege />
+        <Documents />
       </CaseCard>
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -75,9 +75,9 @@ export const Filled: Story = {
  */
 export const WithoutSubLists: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <CaseCard case={CASE()} href="#c-4412" />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -102,7 +102,7 @@ export const WithoutSubLists: Story = {
  */
 export const Edges: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <CaseCard
         case={CASE({
           summary:
@@ -131,7 +131,7 @@ export const Edges: Story = {
         case={CASE({ title: null, counterpartyName: null, kind: "internal_transfer" })}
         summaryLimit={40}
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -161,7 +161,7 @@ export const InUse: Story = {
               </label>
             }
           >
-            <Belege />
+            <Documents />
           </CaseCard>
         ))}
       </div>

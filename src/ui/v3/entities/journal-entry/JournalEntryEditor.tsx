@@ -58,7 +58,7 @@ const toNumber = (s: string | number | null | undefined) => {
  * mehrere Zeilen im selben Satz.
  */
 
-export type EditorMode = "einfach" | "voll";
+export type EditorMode = "simple" | "full";
 export type EditorStatus = "proposed" | "accepted" | "posted" | "reversed";
 export type Side = "S" | "H";
 
@@ -67,18 +67,18 @@ export interface EditorRow {
   datum: string;
   currency?: string;
   /** Brutto, deutsches Format („1.475,60"). */
-  umsatz: string;
+  amount: string;
   side: Side;
   /** DATEV-BU-Schlüssel („9", „8", „94", …) oder leer. */
   bu: string;
   /** Automatikkonten setzen den Schlüssel selbst — dann ist das Feld gesperrt. */
   buLocked?: boolean;
-  konto: string;
-  kontoName: string;
-  beleg1: string;
-  beleg2?: string;
+  account: string;
+  accountName: string;
+  externalDocumentNumber: string;
+  externalDocumentNumber2?: string;
   text: string;
-  kost1?: string;
+  costCenter1?: string;
   /** Kandidaten für das Konto-Feld dieser Zeile. */
   candidates?: Partial<Record<AccountGroup, AccountCandidate[]>>;
   /** Zeile ist gelöscht, aber rücknehmbar. */
@@ -105,11 +105,11 @@ export interface EditorAiReview {
 export interface JournalEntryEditorProps {
   rows: EditorRow[];
   /** Das Gegenkonto — die Zeile, die den Satz ausgleicht. */
-  gegenkonto: { konto: string; name: string; tag?: string } | null;
+  contraAccount: { account: string; name: string; tag?: string } | null;
   /** Beleg, gegen den der Rest gerechnet wird. */
-  belegNumber?: string | null;
-  belegAmount?: number | null;
-  belegSide?: Side;
+  documentNumber?: string | null;
+  documentAmount?: number | null;
+  documentSide?: Side;
   status: EditorStatus;
   editable: boolean;
   mode?: EditorMode;
@@ -133,7 +133,7 @@ export interface JournalEntryEditorProps {
   onEdit?: () => void;
   onDelete?: (reason: string) => void | Promise<void>;
   /** Kontenblatt eines Kontos öffnen (Drawer des Aufrufers). */
-  onOpenLedger?: (konto: string) => void;
+  onOpenLedger?: (account: string) => void;
   /**
    * Open the register of document numbers for **this row** (0014). Set → the
    * magnifier appears at the field; left out → no icon, like `AccountField`.
@@ -164,15 +164,15 @@ export interface JournalEntryEditorProps {
   /** Candidates for the contra-account field, in the shape `AccountField` takes. */
   contraAccountCandidates?: React.ComponentProps<typeof AccountField>["candidates"];
   /** Schnellfunktionen: Klärungskonto, wie letzte Buchung, Privatanteil. */
-  quickActions?: { klaerungskonto?: () => void; wieLetzte?: () => void; privatanteil?: () => void };
+  quickActions?: { clarificationAccount?: () => void; sameAsLast?: () => void; privateShare?: () => void };
 }
 
 
 /** Die Summe der Zeilen auf der Belegseite — daraus fällt der Rest. */
-function summeBelegseite(rows: readonly EditorRow[], belegSide: Side): number {
+function documentSideTotal(rows: readonly EditorRow[], documentSide: Side): number {
   return rows
-    .filter((r) => !r.removed && r.side === belegSide)
-    .reduce((s, r) => s + toNumber(r.umsatz), 0);
+    .filter((r) => !r.removed && r.side === documentSide)
+    .reduce((s, r) => s + toNumber(r.amount), 0);
 }
 
 /**
@@ -181,10 +181,10 @@ function summeBelegseite(rows: readonly EditorRow[], belegSide: Side): number {
  */
 export function JournalEntryEditor(props: JournalEntryEditorProps) {
   const {
-    gegenkonto,
-    belegNumber,
-    belegAmount,
-    belegSide = "S",
+    contraAccount: contraAccount,
+    documentNumber: documentNumber,
+    documentAmount: documentAmount,
+    documentSide: documentSide = "S",
     status,
     editable,
     locked,
@@ -211,23 +211,23 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
   } = props;
 
   const [rows, setRows] = useState<EditorRow[]>(props.rows);
-  const [mode, setMode] = useState<EditorMode>(props.mode ?? "einfach");
+  const [mode, setMode] = useState<EditorMode>(props.mode ?? "simple");
   const [reason, setReason] = useState("");
   const [journalOffen, setJournalOffen] = useState(false);
-  const [stornoOffen, setStornoOffen] = useState(false);
-  const [stornoGrund, setStornoGrund] = useState("");
+  const [reversalOpen, setReversalOpen] = useState(false);
+  const [reversalReason, setReversalReason] = useState("");
 
   useEffect(() => setRows(props.rows), [props.rows]);
 
-  const aktiv = useMemo(() => rows.filter((r) => !r.removed), [rows]);
-  const summe = summeBelegseite(rows, belegSide);
-  const rest = belegAmount == null ? null : belegAmount - summe;
+  const active = useMemo(() => rows.filter((r) => !r.removed), [rows]);
+  const total = documentSideTotal(rows, documentSide);
+  const rest = documentAmount == null ? null : documentAmount - total;
 
   // **Warnings do not block.** They stand there in plain sight and saving
   // goes through; only errors stop it. The acknowledgement was an attempt to
   // force a decision — and a forced acknowledgement gets clicked, not read
   // (owner decision, 2026-09-07).
-  const saveBlocked = errors.length > 0 || aktiv.length === 0;
+  const saveBlocked = errors.length > 0 || active.length === 0;
 
   /**
    * Do the active rows carry **different** values in document field 1? The
@@ -235,20 +235,20 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
    * the server reports later as check `P-BELEG`.
    */
   const documentNumbersDiffer =
-    aktiv.length > 1 && new Set(aktiv.map((r) => r.beleg1.trim())).size > 1;
+    active.length > 1 && new Set(active.map((r) => r.externalDocumentNumber.trim())).size > 1;
 
   const applyDocumentNumberToAll = useCallback((value: string) => {
-    setRows((rs) => rs.map((r) => (r.removed ? r : { ...r, beleg1: value })));
+    setRows((rs) => rs.map((r) => (r.removed ? r : { ...r, externalDocumentNumber: value })));
   }, []);
 
   const setRow = useCallback((id: string, patch: Partial<EditorRow>) => {
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   }, []);
 
-  const speichern = useCallback(() => {
+  const save = useCallback(() => {
     if (saveBlocked || !onSave) return;
-    void onSave(aktiv, reason.trim());
-  }, [saveBlocked, onSave, aktiv, reason]);
+    void onSave(active, reason.trim());
+  }, [saveBlocked, onSave, active, reason]);
 
   // Alt+V wechselt die Sicht, Ctrl+Enter speichert, Esc bricht ab. Alle drei
   // stehen sichtbar am jeweiligen Knopf.
@@ -257,15 +257,15 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
     function onKey(e: KeyboardEvent) {
       if (e.altKey && e.key.toLowerCase() === "v") {
         e.preventDefault();
-        setMode((m) => (m === "einfach" ? "voll" : "einfach"));
+        setMode((m) => (m === "simple" ? "full" : "simple"));
         return;
       }
       if (e.altKey && quickActions) {
         const k = e.key.toLowerCase();
         const fn =
-          k === "k" ? quickActions.klaerungskonto
-          : k === "w" ? quickActions.wieLetzte
-          : k === "p" ? quickActions.privatanteil
+          k === "k" ? quickActions.clarificationAccount
+          : k === "w" ? quickActions.sameAsLast
+          : k === "p" ? quickActions.privateShare
           : undefined;
         if (fn) {
           e.preventDefault();
@@ -275,7 +275,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
       }
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
-        speichern();
+        save();
         return;
       }
       if (e.key === "Escape" && onCancel) {
@@ -285,22 +285,22 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [editable, onCancel, quickActions, speichern]);
+  }, [editable, onCancel, quickActions, save]);
 
-  const voll = mode === "voll";
-  const cols = voll
+  const full = mode === "full";
+  const cols = full
     ? "88px 56px 104px 40px 62px 148px 96px 96px minmax(0,1fr) 80px 32px"
     : "88px 104px 40px 62px 148px 96px minmax(0,1fr) 32px";
 
   return (
     <div className="bse">
-      <Kopf
-        belegNumber={belegNumber}
-        belegAmount={belegAmount}
+      <Head
+        documentNumber={documentNumber}
+        documentAmount={documentAmount}
         status={status}
         rest={rest}
-        voll={voll}
-        onToggleMode={() => setMode(voll ? "einfach" : "voll")}
+        full={full}
+        onToggleMode={() => setMode(full ? "simple" : "full")}
       />
 
       {status === "reversed" ? (
@@ -326,35 +326,35 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
       <div className="bse__tbl" style={{ "--bse-cols": cols } as React.CSSProperties}>
         <div className="bse__head">
           <span>Datum</span>
-          {voll ? <span>Whg.</span> : null}
+          {full ? <span>Whg.</span> : null}
           <span className="v2num">Umsatz</span>
           <span>S/H</span>
           <span>BU</span>
           <span>Konto</span>
           <span>Beleg 1</span>
-          {voll ? <span>Beleg 2</span> : null}
+          {full ? <span>Beleg 2</span> : null}
           <span>Text</span>
-          {voll ? <span>KOST</span> : null}
+          {full ? <span>KOST</span> : null}
           <span />
         </div>
 
         {rows.map((r) =>
           r.removed ? (
             <div className="bse__removed" key={r.id}>
-              <span>Zeile entfernt · {r.konto} · {r.umsatz}</span>
+              <span>Zeile entfernt · {r.account} · {r.amount}</span>
               <button type="button" className="v2link" onClick={() => setRow(r.id, { removed: false })}>
                 <Undo2 size={12} strokeWidth={1.5} /> Löschen rückgängig machen
               </button>
             </div>
           ) : (
-            <Zeile
+            <EditorRow
               key={r.id}
               row={r}
-              voll={voll}
+              full={full}
               editable={editable && !locked}
               accountFramework={accountFramework}
               rest={rest}
-              loeschbar={aktiv.length > 1}
+              removable={active.length > 1}
               onChange={(patch) => setRow(r.id, patch)}
               onRemove={() => setRow(r.id, { removed: true })}
               onSearchAccounts={onSearchAccounts}
@@ -364,25 +364,25 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
               {...(dominantDocumentNumber ? { dominantDocumentNumber } : {})}
               {...(documentNumberSourceLabel ? { documentNumberSourceLabel } : {})}
               {...(documentNumbersDiffer
-                ? { onApplyDocumentNumberToAll: () => applyDocumentNumberToAll(r.beleg1) }
+                ? { onApplyDocumentNumberToAll: () => applyDocumentNumberToAll(r.externalDocumentNumber) }
                 : {})}
             />
           ),
         )}
 
-        {gegenkonto ? (
+        {contraAccount ? (
           <div className="bse__gegen">
             <span className="bse__gegen__label">
               {/* The side is fixed — it is the opposite side of the document. */}
-              an {belegSide === "S" ? "H" : "S"}{" "}
+              an {documentSide === "S" ? "H" : "S"}{" "}
               {editable && !locked && onContraAccountChange ? (
                 // The same field as in the rows: same behaviour, same
                 // keyboard, and the account-sheet icon (0013) comes along.
                 <AccountField
-                  value={gegenkonto.konto}
-                  {...(gegenkonto.name ? { valueName: gegenkonto.name } : {})}
-                  onChange={(konto, candidate) =>
-                    onContraAccountChange(konto, candidate?.name ?? gegenkonto.name)
+                  value={contraAccount.account}
+                  {...(contraAccount.name ? { valueName: contraAccount.name } : {})}
+                  onChange={(account, candidate) =>
+                    onContraAccountChange(account, candidate?.name ?? contraAccount.name)
                   }
                   candidates={contraAccountCandidates ?? {}}
                   {...(onSearchAccounts ? { onSearch: onSearchAccounts } : {})}
@@ -391,13 +391,13 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
                 />
               ) : (
                 <>
-                  {gegenkonto.konto} <span className="v2muted">{gegenkonto.name}</span>
-                  {gegenkonto.tag ? <span className="bse__tag">{gegenkonto.tag}</span> : null}
+                  {contraAccount.account} <span className="v2muted">{contraAccount.name}</span>
+                  {contraAccount.tag ? <span className="bse__tag">{contraAccount.tag}</span> : null}
                   {onOpenLedger ? (
                     <button
                       type="button"
                       className="v2link v2link--quiet"
-                      onClick={() => onOpenLedger(gegenkonto.konto)}
+                      onClick={() => onOpenLedger(contraAccount.account)}
                     >
                       Kontenblatt
                     </button>
@@ -405,7 +405,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
                 </>
               )}
             </span>
-            <span className="v2num">{euro(summe)}</span>
+            <span className="v2num">{euro(total)}</span>
           </div>
         ) : null}
       </div>
@@ -421,12 +421,12 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
                 {
                   id: `neu-${Date.now()}`,
                   datum: rs[0]?.datum ?? "",
-                  umsatz: rest && rest > 0 ? euro(rest).replace(/\s?€/, "") : "",
-                  side: belegSide,
+                  amount: rest && rest > 0 ? euro(rest).replace(/\s?€/, "") : "",
+                  side: documentSide,
                   bu: "",
-                  konto: "",
-                  kontoName: "",
-                  beleg1: rs[0]?.beleg1 ?? "",
+                  account: "",
+                  accountName: "",
+                  externalDocumentNumber: rs[0]?.externalDocumentNumber ?? "",
                   text: rs[0]?.text ?? "",
                 },
               ])
@@ -434,18 +434,18 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
           >
             + Zeile (Split)
           </button>
-          {quickActions?.klaerungskonto ? (
-            <button type="button" className="v2link v2link--quiet" onClick={quickActions.klaerungskonto}>
+          {quickActions?.clarificationAccount ? (
+            <button type="button" className="v2link v2link--quiet" onClick={quickActions.clarificationAccount}>
               Klärungskonto · Alt+K
             </button>
           ) : null}
-          {quickActions?.wieLetzte ? (
-            <button type="button" className="v2link v2link--quiet" onClick={quickActions.wieLetzte}>
+          {quickActions?.sameAsLast ? (
+            <button type="button" className="v2link v2link--quiet" onClick={quickActions.sameAsLast}>
               Wie letzte Buchung · Alt+W
             </button>
           ) : null}
-          {quickActions?.privatanteil ? (
-            <button type="button" className="v2link v2link--quiet" onClick={quickActions.privatanteil}>
+          {quickActions?.privateShare ? (
+            <button type="button" className="v2link v2link--quiet" onClick={quickActions.privateShare}>
               Privatanteil · Alt+P
             </button>
           ) : null}
@@ -453,9 +453,9 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
       ) : null}
 
       <Journal
-        rows={aktiv}
-        gegenkonto={gegenkonto}
-        belegSide={belegSide}
+        rows={active}
+        contraAccount={contraAccount}
+        documentSide={documentSide}
         accountFramework={accountFramework}
         open={editable || journalOffen}
         onToggle={() => setJournalOffen((v) => !v)}
@@ -472,7 +472,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
         />
       ) : null}
 
-      <Meldungsblock errors={errors} warnings={warnings} hints={hints} />
+      <MessageBlock errors={errors} warnings={warnings} hints={hints} />
 
       {editable ? (
         <>
@@ -487,7 +487,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
           </label>
           <div className="bse__foot">
             {deletable && onDelete ? (
-              <button type="button" className="v2link v2link--quiet" onClick={() => setStornoOffen(true)}>
+              <button type="button" className="v2link v2link--quiet" onClick={() => setReversalOpen(true)}>
                 Löschen
               </button>
             ) : null}
@@ -495,7 +495,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
             <Button variant="secondary" size="sm" hotkey="Esc" onClick={onCancel}>
               Abbrechen
             </Button>
-            <Button variant="primary" size="sm" hotkey="Ctrl+↵" disabled={saveBlocked} onClick={speichern}>
+            <Button variant="primary" size="sm" hotkey="Ctrl+↵" disabled={saveBlocked} onClick={save}>
               Speichern &amp; freigeben
               {errors.length > 0 ? ` · ${errors.length} Fehler` : ""}
             </Button>
@@ -504,7 +504,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
       ) : (
         <div className="bse__foot">
           {deletable && onDelete ? (
-            <button type="button" className="v2link v2link--quiet" onClick={() => setStornoOffen(true)}>
+            <button type="button" className="v2link v2link--quiet" onClick={() => setReversalOpen(true)}>
               Löschen
             </button>
           ) : null}
@@ -518,23 +518,23 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
       )}
 
       <Dialog
-        open={stornoOffen}
-        onClose={() => setStornoOffen(false)}
+        open={reversalOpen}
+        onClose={() => setReversalOpen(false)}
         title="Buchung entfernen?"
         kicker="Nicht umkehrbar"
         size="sm"
         footer={
           <>
-            <Button variant="secondary" size="sm" onClick={() => setStornoOffen(false)}>
+            <Button variant="secondary" size="sm" onClick={() => setReversalOpen(false)}>
               Abbrechen
             </Button>
             <Button
               variant="danger"
               size="sm"
-              disabled={stornoGrund.trim().length === 0}
+              disabled={reversalReason.trim().length === 0}
               onClick={() => {
-                void onDelete?.(stornoGrund.trim());
-                setStornoOffen(false);
+                void onDelete?.(reversalReason.trim());
+                setReversalOpen(false);
               }}
             >
               Buchung stornieren
@@ -549,8 +549,8 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
           <span className="v2field__label">Grund</span>
           <textarea
             className="v2in"
-            value={stornoGrund}
-            onChange={(e) => setStornoGrund(e.target.value)}
+            value={reversalReason}
+            onChange={(e) => setReversalReason(e.target.value)}
             placeholder="Warum wird storniert?"
           />
         </label>
@@ -559,33 +559,33 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
   );
 }
 
-function Kopf({
-  belegNumber,
-  belegAmount,
+function Head({
+  documentNumber: documentNumber,
+  documentAmount: documentAmount,
   status,
   rest,
-  voll,
+  full,
   onToggleMode,
 }: {
-  belegNumber?: string | null;
-  belegAmount?: number | null;
+  documentNumber?: string | null;
+  documentAmount?: number | null;
   status: EditorStatus;
   rest: number | null;
-  voll: boolean;
+  full: boolean;
   onToggleMode: () => void;
 }) {
   // Der Rest ist die wichtigste Zahl des Editors: geht er nicht auf null, ist
   // der Satz nicht fertig. Deshalb steht er im Kopf, nicht am Ende.
-  const zeigeRest = rest !== null && (voll || Math.abs(rest) >= 0.005);
+  const showRest = rest !== null && (full || Math.abs(rest) >= 0.005);
   return (
-    <div className="bse__kopf">
-      <span className="bse__beleg">
-        {belegNumber ? `Beleg ${belegNumber}` : "Ohne Belegnummer"}
-        {belegAmount == null ? "" : ` · ${euro(belegAmount)}`}
+    <div className="bse__head">
+      <span className="bse__doc">
+        {documentNumber ? `Beleg ${documentNumber}` : "Ohne Belegnummer"}
+        {documentAmount == null ? "" : ` · ${euro(documentAmount)}`}
       </span>
       <StatusBadge axis="buchung" status={status} info={false} />
       <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
-        {zeigeRest ? (
+        {showRest ? (
           <span className={`bse__rest${Math.abs(rest!) < 0.005 ? " is-ok" : " is-off"}`}>
             Rest {euro(rest!)}
             {Math.abs(rest!) < 0.005 ? " ✓" : ""}
@@ -595,22 +595,22 @@ function Kopf({
           type="button"
           className="v2link"
           onClick={onToggleMode}
-          title={voll ? "Zur einfachen Sicht" : "Zur vollen Sicht — alle DATEV-Spalten"}
+          title={full ? "Zur einfachen Sicht" : "Zur vollen Sicht — alle DATEV-Spalten"}
         >
-          {voll ? "Einfach ◂" : "Voll ▸"} · Alt+V
+          {full ? "Einfach ◂" : "Voll ▸"} · Alt+V
         </button>
       </span>
     </div>
   );
 }
 
-function Zeile({
+function EditorRow({
   row,
-  voll,
+  full,
   editable,
   accountFramework,
   rest,
-  loeschbar,
+  removable: removable,
   onChange,
   onRemove,
   onSearchAccounts,
@@ -622,15 +622,15 @@ function Zeile({
   onApplyDocumentNumberToAll,
 }: {
   row: EditorRow;
-  voll: boolean;
+  full: boolean;
   editable: boolean;
   accountFramework?: string | null;
   rest: number | null;
-  loeschbar: boolean;
+  removable: boolean;
   onChange: (patch: Partial<EditorRow>) => void;
   onRemove: () => void;
   onSearchAccounts?: (q: string) => Promise<AccountCandidate[]>;
-  onOpenLedger?: (konto: string) => void;
+  onOpenLedger?: (account: string) => void;
   onOpenTaxKey?: (bu: string) => void;
   onOpenDocumentNumberRegister?: (rowId: string) => void;
   dominantDocumentNumber?: KnownDocumentNumber | null;
@@ -638,11 +638,11 @@ function Zeile({
   /** Set → the "apply to all rows" button stands under this row's field. */
   onApplyDocumentNumberToAll?: () => void;
 }) {
-  const brutto = toNumber(row.umsatz);
+  const gross = toNumber(row.amount);
   // The tax line is derived, never typed — the same calculation that creates
   // the linked line on save.
-  const steuer = deriveTax(
-    { accountNumber: row.konto, taxKey: row.bu || null, amount: brutto },
+  const tax = deriveTax(
+    { accountNumber: row.account, taxKey: row.bu || null, amount: gross },
     accountFramework,
   );
 
@@ -652,15 +652,15 @@ function Zeile({
         {editable ? (
           <>
             <input className="v2in" type="date" value={row.datum} onChange={(e) => onChange({ datum: e.target.value })} aria-label="Buchungsdatum" />
-            {voll ? (
+            {full ? (
               <input className="v2in" value={row.currency ?? "EUR"} onChange={(e) => onChange({ currency: e.target.value })} aria-label="Währung" />
             ) : null}
             <input
               className="v2in v2num"
-              value={row.umsatz}
-              onChange={(e) => onChange({ umsatz: e.target.value })}
+              value={row.amount}
+              onChange={(e) => onChange({ amount: e.target.value })}
               onFocus={(e) => e.target.select()}
-              onBlur={(e) => onChange({ umsatz: euro(toNumber(e.target.value)).replace(/\s?€/, "") })}
+              onBlur={(e) => onChange({ amount: euro(toNumber(e.target.value)).replace(/\s?€/, "") })}
               aria-label="Umsatz"
             />
             <button
@@ -688,17 +688,17 @@ function Zeile({
               <option value="40">40</option>
             </select>
             <AccountField
-              value={row.konto}
+              value={row.account}
               // The loaded name belongs in the field, not only in the
               // journal: without it the row shows a bare number as soon as
               // the account is not among the candidates by chance.
               // `AccountField` has the prop for exactly this (0013).
-              {...(row.kontoName ? { valueName: row.kontoName } : {})}
+              {...(row.accountName ? { valueName: row.accountName } : {})}
               // The name comes along when the candidate carries it — without
               // it the row shows a number without a word, and the journal
               // beside it an empty account name.
-              onChange={(konto, candidate) =>
-                onChange(candidate ? { konto, kontoName: candidate.name } : { konto })
+              onChange={(account, candidate) =>
+                onChange(candidate ? { account: account, accountName: candidate.name } : { account: account })
               }
               candidates={row.candidates ?? {}}
               onSearch={onSearchAccounts}
@@ -715,8 +715,8 @@ function Zeile({
                 about the same rule. */}
             {documentNumberSourceLabel ? (
               <DocumentNumberField
-                value={row.beleg1}
-                onChange={(beleg1) => onChange({ beleg1 })}
+                value={row.externalDocumentNumber}
+                onChange={(externalDocumentNumber) => onChange({ externalDocumentNumber: externalDocumentNumber })}
                 sourceLabel={documentNumberSourceLabel}
                 {...(dominantDocumentNumber ? { dominant: dominantDocumentNumber } : {})}
                 {...(onOpenDocumentNumberRegister
@@ -724,17 +724,17 @@ function Zeile({
                   : {})}
               />
             ) : (
-              <input className="v2in" value={row.beleg1} onChange={(e) => onChange({ beleg1: e.target.value })} aria-label="Belegfeld 1" />
+              <input className="v2in" value={row.externalDocumentNumber} onChange={(e) => onChange({ externalDocumentNumber: e.target.value })} aria-label="Belegfeld 1" />
             )}
-            {voll ? (
-              <input className="v2in" value={row.beleg2 ?? ""} onChange={(e) => onChange({ beleg2: e.target.value })} aria-label="Belegfeld 2" />
+            {full ? (
+              <input className="v2in" value={row.externalDocumentNumber2 ?? ""} onChange={(e) => onChange({ externalDocumentNumber2: e.target.value })} aria-label="Belegfeld 2" />
             ) : null}
             <input className="v2in" value={row.text} onChange={(e) => onChange({ text: e.target.value })} aria-label="Buchungstext" />
-            {voll ? (
-              <input className="v2in" value={row.kost1 ?? ""} onChange={(e) => onChange({ kost1: e.target.value })} aria-label="KOST 1" />
+            {full ? (
+              <input className="v2in" value={row.costCenter1 ?? ""} onChange={(e) => onChange({ costCenter1: e.target.value })} aria-label="KOST 1" />
             ) : null}
             <span>
-              {loeschbar ? (
+              {removable ? (
                 <button type="button" className="v2link v2link--quiet" onClick={onRemove} aria-label="Zeile entfernen">
                   <Trash2 size={13} strokeWidth={1.5} />
                 </button>
@@ -744,24 +744,24 @@ function Zeile({
         ) : (
           <>
             <span>{row.datum}</span>
-            {voll ? <span>{row.currency ?? "EUR"}</span> : null}
-            <span className="v2num">{row.umsatz}</span>
+            {full ? <span>{row.currency ?? "EUR"}</span> : null}
+            <span className="v2num">{row.amount}</span>
             <span>{row.side}</span>
             <span>{row.bu || "—"}</span>
-            <span className="bse__konto">
-              {row.konto} <span className="v2muted">{row.kontoName}</span>
+            <span className="bse__account">
+              {row.account} <span className="v2muted">{row.accountName}</span>
             </span>
-            <span>{row.beleg1 || "—"}</span>
-            {voll ? <span>{row.beleg2 || "—"}</span> : null}
+            <span>{row.externalDocumentNumber || "—"}</span>
+            {full ? <span>{row.externalDocumentNumber2 || "—"}</span> : null}
             <span className="bse__text">{row.text}</span>
-            {voll ? <span>{row.kost1 || "—"}</span> : null}
+            {full ? <span>{row.costCenter1 || "—"}</span> : null}
             <span>
-              {onOpenLedger && row.konto ? (
+              {onOpenLedger && row.account ? (
                 <IconButton
                   size="sm"
-                  label={`Kontenblatt zu ${row.konto}`}
+                  label={`Kontenblatt zu ${row.account}`}
                   icon={<ActionIcon action="ledger" size={14} />}
-                  onClick={() => onOpenLedger(row.konto)}
+                  onClick={() => onOpenLedger(row.account)}
                 />
               ) : null}
             </span>
@@ -770,7 +770,7 @@ function Zeile({
       </div>
 
       <div className="bse__note">
-        {steuer ? (
+        {tax ? (
           <span>
             {onOpenTaxKey ? (
               <button type="button" className="v2link" onClick={() => onOpenTaxKey(row.bu)}>
@@ -780,15 +780,15 @@ function Zeile({
               <>BU {row.bu}</>
             )}
             {" · Netto "}
-            {euro(steuer.net)} · {steuer.ratePercent} % {euro(steuer.tax)} →{" "}
-            {steuer.account.accountNumber} · Brutto {euro(brutto)}
+            {euro(tax.net)} · {tax.ratePercent} % {euro(tax.tax)} →{" "}
+            {tax.account.accountNumber} · Brutto {euro(gross)}
           </span>
         ) : null}
         {editable && rest !== null && Math.abs(rest) >= 0.005 ? (
           <button
             type="button"
             className="v2link"
-            onClick={() => onChange({ umsatz: euro(toNumber(row.umsatz) + rest).replace(/\s?€/, "") })}
+            onClick={() => onChange({ amount: euro(toNumber(row.amount) + rest).replace(/\s?€/, "") })}
           >
             Rest {euro(rest)} einsetzen
           </button>
@@ -812,16 +812,16 @@ function Zeile({
  */
 function Journal({
   rows,
-  gegenkonto,
-  belegSide,
+  contraAccount: contraAccount,
+  documentSide: documentSide,
   accountFramework,
   open,
   onToggle,
 }: {
   rows: readonly EditorRow[];
   /** Die Zeile, die den Satz ausgleicht — sie steht oben separat, gehört aber dazu. */
-  gegenkonto: { konto: string; name: string } | null;
-  belegSide: Side;
+  contraAccount: { account: string; name: string } | null;
+  documentSide: Side;
   accountFramework?: string | null;
   open: boolean;
   onToggle: () => void;
@@ -829,50 +829,50 @@ function Journal({
   // The posting text comes along: the journal is the **DATEV batch order**
   // (account · account name · posting text · debit · credit), and without it
   // the column `JournalEntryCard` has for it would stay empty.
-  const zeilen: { konto: string; name: string; text: string; side: Side; amount: number }[] = [];
+  const lines: { account: string; name: string; text: string; side: Side; amount: number }[] = [];
   for (const r of rows) {
-    const brutto = toNumber(r.umsatz);
-    const steuer = deriveTax(
-      { accountNumber: r.konto, taxKey: r.bu || null, amount: brutto },
+    const gross = toNumber(r.amount);
+    const tax = deriveTax(
+      { accountNumber: r.account, taxKey: r.bu || null, amount: gross },
       accountFramework,
     );
-    if (!steuer) {
-      zeilen.push({ konto: r.konto, name: r.kontoName, text: r.text, side: r.side, amount: brutto });
+    if (!tax) {
+      lines.push({ account: r.account, name: r.accountName, text: r.text, side: r.side, amount: gross });
       continue;
     }
-    zeilen.push({ konto: r.konto, name: r.kontoName, text: r.text, side: r.side, amount: steuer.net });
-    zeilen.push({
-      konto: steuer.account.accountNumber,
-      name: steuer.account.accountName,
+    lines.push({ account: r.account, name: r.accountName, text: r.text, side: r.side, amount: tax.net });
+    lines.push({
+      account: tax.account.accountNumber,
+      name: tax.account.accountName,
       // The tax line carries the text of its own line: it is the same entry,
       // only split — in the batch the same text would stand there.
       text: r.text,
       side: r.side,
-      amount: steuer.tax,
+      amount: tax.tax,
     });
   }
   // Das Gegenkonto steht in der Oberfläche als eigene Zeile über dem Journal,
   // gehört aber in die Summe — sonst meldet „Σ S ≠ Σ H" einen Fehler, den es
   // nicht gibt.
-  if (gegenkonto?.konto) {
-    const summe = rows
-      .filter((r) => r.side === belegSide)
-      .reduce((sum, r) => sum + toNumber(r.umsatz), 0);
-    if (summe !== 0) {
-      zeilen.push({
-        konto: gegenkonto.konto,
-        name: gegenkonto.name,
+  if (contraAccount?.account) {
+    const total = rows
+      .filter((r) => r.side === documentSide)
+      .reduce((sum, r) => sum + toNumber(r.amount), 0);
+    if (total !== 0) {
+      lines.push({
+        account: contraAccount.account,
+        name: contraAccount.name,
         // The contra account has no text of its own — it takes the one of the
         // first line, the way the batch would.
         text: rows[0]?.text ?? "",
-        side: belegSide === "S" ? "H" : "S",
-        amount: summe,
+        side: documentSide === "S" ? "H" : "S",
+        amount: total,
       });
     }
   }
 
-  const soll = zeilen.filter((z) => z.side === "S").reduce((s, z) => s + z.amount, 0);
-  const haben = zeilen.filter((z) => z.side === "H").reduce((s, z) => s + z.amount, 0);
+  const debit = lines.filter((z) => z.side === "S").reduce((s, z) => s + z.amount, 0);
+  const credit = lines.filter((z) => z.side === "H").reduce((s, z) => s + z.amount, 0);
 
   return (
     <div className="bse__journal">
@@ -880,7 +880,7 @@ function Journal({
         <span className={`v2chev${open ? " is-open" : ""}`} />
         Journal (wird gespeichert)
         <span className="v2muted" style={{ marginLeft: "auto" }}>
-          Σ S {euro(soll)} {Math.abs(soll - haben) < 0.005 ? "=" : "≠"} Σ H {euro(haben)}
+          Σ S {euro(debit)} {Math.abs(debit - credit) < 0.005 ? "=" : "≠"} Σ H {euro(credit)}
         </span>
       </button>
       {open ? (
@@ -893,9 +893,9 @@ function Journal({
             head above, where it is visible while the body is collapsed.
           */}
           <JournalEntryCard
-            lines={zeilen.map((z) => ({
+            lines={lines.map((z) => ({
               side: z.side === "S" ? ("debit" as const) : ("credit" as const),
-              accountNumber: z.konto,
+              accountNumber: z.account,
               accountName: z.name,
               text: z.text,
               amount: z.amount,
@@ -916,7 +916,7 @@ function Journal({
  * warnings: a warning you **must** tick gets ticked, not read — and it would
  * hold up the entry at a place where nothing is wrong, only conspicuous.
  */
-function Meldungsblock({
+function MessageBlock({
   errors,
   warnings,
   hints,

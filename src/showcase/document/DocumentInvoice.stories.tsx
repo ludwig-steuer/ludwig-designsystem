@@ -9,8 +9,8 @@ import { FieldList } from "@/ui/v3/primitives/FieldList";
 import { InlineEdit } from "@/ui/v3/primitives/InlineEdit";
 import { MenuItem, OverflowMenu } from "@/ui/v3/primitives/OverflowMenu";
 
-import { BelegSeite, uebersichtsBoxen } from "./BelegSeite";
-import { belegFixture, belegMaengel, KLAERUNG, MUSTER_PDF, caseHref, stapelHref } from "./fixtures";
+import { DocumentPage, overviewBoxes } from "./DocumentPage";
+import { documentFixture, documentDefects, CLARIFICATION, MUSTER_PDF, caseHref, batchHref } from "./fixtures";
 
 /**
  * Die Rechnung — neun Zustände derselben Seite (0144, R1–R9).
@@ -18,13 +18,13 @@ import { belegFixture, belegMaengel, KLAERUNG, MUSTER_PDF, caseHref, stapelHref 
  * Alle Daten sind erfunden und erkennbar so. Was hier nicht trägt, ist ein
  * Befund an das Seitenprofil oder an die App, nicht an die Story.
  */
-const meta: Meta<typeof BelegSeite> = {
+const meta: Meta<typeof DocumentPage> = {
   title: "Seiten/Beleg/Rechnung",
-  component: BelegSeite,
+  component: DocumentPage,
   parameters: { layout: "fullscreen" },
 };
 export default meta;
-type Story = StoryObj<typeof BelegSeite>;
+type Story = StoryObj<typeof DocumentPage>;
 
 /**
  * Die selten gebrauchten Wege — nie in der ersten Reihe. Der Standard lässt
@@ -45,10 +45,10 @@ const menu = (
  * Das ist der Fall, an dem das Design entschieden wurde, und der Maßstab für
  * die achtzehn anderen: Rang 1–4 stehen ohne Scrollen über der Falz.
  */
-export const Sauber: Story = {
+export const Clean: Story = {
   render: () => (
-    <BelegSeite
-      document={belegFixture()}
+    <DocumentPage
+      document={documentFixture()}
       actions={
         <>
           <Button variant="secondary" size="sm" href={caseHref}>
@@ -59,13 +59,13 @@ export const Sauber: Story = {
       }
     >
       <SourceDocumentCard
-        document={belegFixture()}
+        document={documentFixture()}
         previewUrl={MUSTER_PDF}
         summary="Miete Musterstraße 12, August 2026"
-        batchHref={stapelHref}
-        {...uebersichtsBoxen()}
+        batchHref={batchHref}
+        {...overviewBoxes()}
       />
-    </BelegSeite>
+    </DocumentPage>
   ),
 };
 
@@ -77,12 +77,12 @@ export const Sauber: Story = {
  * Der Unterschied ist der Punkt. Ein leeres Feld sieht aus wie ein leeres
  * Feld; ein Mangel sagt, dass jemand etwas tun muss.
  */
-export const DatumFehlt: Story = {
+export const DateMissing: Story = {
   render: function Datum() {
     const [datum, setDatum] = useState<string | null>(null);
-    const doc = belegFixture({ documentDate: datum, completedAt: null, completedVia: null });
+    const doc = documentFixture({ documentDate: datum, completedAt: null, completedVia: null });
     return (
-      <BelegSeite document={doc} actions={menu}>
+      <DocumentPage document={doc} actions={menu}>
         {datum ? null : (
           // **Zone 2**, und die Mängelzeile in den Fakten dazu. Beides, nicht
           // eins von beiden: die Zone sagt, dass etwas zu tun ist, und das
@@ -128,7 +128,7 @@ export const DatumFehlt: Story = {
                 ]
           }
         />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -140,11 +140,11 @@ export const DatumFehlt: Story = {
  * Zustand, und das ist die Erledigung. „Wartet auf Prüfung" ist etwas, das
  * jemand tun soll — also gehört es ins Signal und in die erste Aktion.
  */
-export const WartetAufPruefung: Story = {
+export const AwaitingReview: Story = {
   render: () => {
-    const doc = belegFixture({ completedAt: null, completedVia: null });
+    const doc = documentFixture({ completedAt: null, completedVia: null });
     return (
-      <BelegSeite
+      <DocumentPage
         document={doc}
         signal={
           <Banner tone="info" title="Extrahiert — bitte bestätigen.">
@@ -162,7 +162,7 @@ export const WartetAufPruefung: Story = {
         }
       >
         <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary="Miete Musterstraße 12, August 2026" />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -172,9 +172,9 @@ export const WartetAufPruefung: Story = {
  * „läuft seit"; die Fakten sind leer und sagen das auch, statt Leerzeilen zu
  * zeigen. Außer dem Menü gibt es keine Aktion — es gibt nichts zu entscheiden.
  */
-export const ExtraktionLaeuft: Story = {
+export const ExtractionRunning: Story = {
   render: () => {
-    const doc = belegFixture({
+    const doc = documentFixture({
       processingStatus: "in_progress",
       completedAt: null,
       completedVia: null,
@@ -185,7 +185,7 @@ export const ExtraktionLaeuft: Story = {
       hasInvoiceRow: false,
     });
     return (
-      <BelegSeite
+      <DocumentPage
         document={doc}
         signal={
           <Banner tone="info" title="Wird ausgelesen — läuft seit 40 Sekunden.">
@@ -199,7 +199,7 @@ export const ExtraktionLaeuft: Story = {
           previewUrl={MUSTER_PDF}
           summary={null}
         />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -209,9 +209,9 @@ export const ExtraktionLaeuft: Story = {
  * Warnung steht **im selben Banner**, nicht in einem zweiten daneben: der
  * Slot trägt genau eines, und „läuft" und „läuft zu lange" sind eine Aussage.
  */
-export const ExtraktionHaengt: Story = {
+export const ExtractionStuck: Story = {
   render: () => {
-    const doc = belegFixture({
+    const doc = documentFixture({
       processingStatus: "in_progress",
       completedAt: null,
       completedVia: null,
@@ -222,7 +222,7 @@ export const ExtraktionHaengt: Story = {
       hasInvoiceRow: false,
     });
     return (
-      <BelegSeite
+      <DocumentPage
         document={doc}
         signal={
           <Banner tone="warning" title="Wird ausgelesen — läuft seit 4 Minuten.">
@@ -233,7 +233,7 @@ export const ExtraktionHaengt: Story = {
         actions={menu}
       >
         <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary={null} />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -243,9 +243,9 @@ export const ExtraktionHaengt: Story = {
  * Schritt**; die Fakten stehen, soweit Ludwig etwas lesen konnte. Ein Fehler,
  * der nur „fehlgeschlagen" sagt, lässt die Sachbearbeiterin ratlos zurück.
  */
-export const Fehlgeschlagen: Story = {
+export const Failed: Story = {
   render: () => {
-    const doc = belegFixture({
+    const doc = documentFixture({
       processingStatus: "failed",
       completedAt: null,
       completedVia: null,
@@ -253,7 +253,7 @@ export const Fehlgeschlagen: Story = {
       hasInvoiceRow: false,
     });
     return (
-      <BelegSeite
+      <DocumentPage
         document={doc}
         signal={
           <Banner tone="danger" title="Auslesen fehlgeschlagen: das PDF ist ein Scan ohne Text.">
@@ -271,7 +271,7 @@ export const Fehlgeschlagen: Story = {
         }
       >
         <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary={null} />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -281,11 +281,11 @@ export const Fehlgeschlagen: Story = {
  * ist ein Knopf. Die Eskalation ist damit sichtbar, statt nur im Verlauf zu
  * stehen.
  */
-export const AnKanzlei: Story = {
+export const WithFirm: Story = {
   render: () => {
-    const doc = belegFixture({ completedAt: null, completedVia: null });
+    const doc = documentFixture({ completedAt: null, completedVia: null });
     return (
-      <BelegSeite
+      <DocumentPage
         document={doc}
         tab="details"
         signal={
@@ -316,7 +316,7 @@ export const AnKanzlei: Story = {
             />
           </div>
         </Card>
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -329,17 +329,17 @@ export const AnKanzlei: Story = {
  * Übersicht schreibt nur über Aktionen und aus einer Mängelzeile (D9).
  * Korrigierte Werte tragen ein Zeichen „von Hand" mit Datum.
  */
-export const KorrekturWerte: Story = {
+export const CorrectedValues: Story = {
   render: function Korrektur() {
-    const [netto, setNetto] = useState("1.512,61");
-    const [nummer, setNummer] = useState("R-2026-0042");
-    const berührt = netto !== "1.512,61" || nummer !== "R-2026-0042";
+    const [net, setNet] = useState("1.512,61");
+    const [number, setNumber] = useState("R-2026-0042");
+    const touched = net !== "1.512,61" || number !== "R-2026-0042";
     return (
-      <BelegSeite document={belegFixture()} tab="details" actions={menu}>
+      <DocumentPage document={documentFixture()} tab="details" actions={menu}>
         <Card>
           <CardHead
             title="Kopfwerte"
-            sub={berührt ? "Von Hand korrigiert am 09.09.2026" : "Von Ludwig gelesen, Konfidenz 94 %"}
+            sub={touched ? "Von Hand korrigiert am 09.09.2026" : "Von Ludwig gelesen, Konfidenz 94 %"}
           />
           <div style={{ padding: 16 }}>
             <FieldList
@@ -348,12 +348,12 @@ export const KorrekturWerte: Story = {
                 ["Gegenpart", "Musterbau GmbH"],
                 [
                   "Rechnungsnummer",
-                  <InlineEdit key="n" label="Rechnungsnummer" value={nummer} onSave={async (v) => setNummer(v)} />,
+                  <InlineEdit key="n" label="Rechnungsnummer" value={number} onSave={async (v) => setNumber(v)} />,
                 ],
                 ["Belegdatum", "14.08.2026"],
                 [
                   "Netto",
-                  <InlineEdit key="net" label="Netto" value={netto} onSave={async (v) => setNetto(v)} />,
+                  <InlineEdit key="net" label="Netto" value={net} onSave={async (v) => setNet(v)} />,
                 ],
                 ["USt (19 %)", "287,39 €"],
                 ["Brutto", "1.800,00 €"],
@@ -361,7 +361,7 @@ export const KorrekturWerte: Story = {
             />
           </div>
         </Card>
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -374,15 +374,15 @@ export const KorrekturWerte: Story = {
  * eigenen Weg. Das ist der Owner-Entscheid zu Frage 3: eine Zone nach D4, und
  * die Fakten tragen zusätzlich das Zeichen an der betroffenen Zeile.
  */
-export const MitBefunden: Story = {
+export const WithFindings: Story = {
   render: () => {
-    const doc = belegFixture({
+    const doc = documentFixture({
       completedAt: null,
       completedVia: null,
       documentDate: null,
       counterparty: "Musterbau GmbH",
     });
-    const maengel = belegMaengel({
+    const defects = documentDefects({
       documentDate: null,
       openFindings: [
         {
@@ -396,14 +396,14 @@ export const MitBefunden: Story = {
       recipientMatchReason: "Rechnung lautet auf Beispiel Handels GmbH",
     });
     return (
-      <BelegSeite document={doc} actions={menu}>
+      <DocumentPage document={doc} actions={menu}>
         <SourceDocumentCard
           document={doc}
           previewUrl={MUSTER_PDF}
           summary="Miete Musterstraße 12, August 2026"
-          {...uebersichtsBoxen({ maengel, klaerungen: [KLAERUNG] })}
+          {...overviewBoxes({ defects: defects, clarifications: [CLARIFICATION] })}
         />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -422,19 +422,19 @@ export const MitBefunden: Story = {
  * dieser; sonst der Satz der Achse. Die Marke selbst ist anklickbar und öffnet
  * die Erklärung aller Stufen.
  */
-export const Erledigt: Story = {
+export const Done: Story = {
   render: () => {
-    const doc = belegFixture({
+    const doc = documentFixture({
       completedVia: "no_booking_required",
       completedReason: "Privatentnahme, gehört nicht in die Buchführung.",
     });
-    const ersetzt = belegFixture({
+    const replaced = documentFixture({
       completedVia: "superseded",
       completedReason: "Ersetzt durch R-2026-0058 — der Lieferant hat storniert und neu gestellt.",
     });
     return (
       <div style={{ display: "grid", gap: 40 }}>
-      <BelegSeite
+      <DocumentPage
         document={doc}
         actions={
           <>
@@ -449,12 +449,12 @@ export const Erledigt: Story = {
           document={doc}
           previewUrl={MUSTER_PDF}
           summary="Miete Musterstraße 12, August 2026"
-          {...uebersichtsBoxen({ maengel: [] })}
+          {...overviewBoxes({ defects: [] })}
         />
-      </BelegSeite>
+      </DocumentPage>
 
-      <BelegSeite
-        document={ersetzt}
+      <DocumentPage
+        document={replaced}
         actions={
           <>
             <Button variant="secondary" size="sm">
@@ -465,12 +465,12 @@ export const Erledigt: Story = {
         }
       >
         <SourceDocumentCard
-          document={ersetzt}
+          document={replaced}
           previewUrl={MUSTER_PDF}
           summary="Miete Musterstraße 12, August 2026"
-          {...uebersichtsBoxen({ maengel: [] })}
+          {...overviewBoxes({ defects: [] })}
         />
-      </BelegSeite>
+      </DocumentPage>
       </div>
     );
   },

@@ -19,17 +19,17 @@ import {
 import { TextButton } from "@/ui/v3/primitives/TextButton";
 
 import {
-  BELEG_TABS,
-  BELEG_TABS_OHNE_RECHNUNG,
-  belegMaengel,
-  KLAERUNG,
+  DOCUMENT_TABS,
+  DOCUMENT_TABS_WITHOUT_INVOICE,
+  documentDefects,
+  CLARIFICATION,
   listHref,
   partnerHref,
   tabHref,
-  UST_GEMISCHT,
-  VERLAUF,
-  verlaufHref,
-  vorsteuerHref,
+  VAT_MIXED,
+  HISTORY,
+  historyHref,
+  inputTaxHref,
 } from "./fixtures";
 
 /**
@@ -42,7 +42,7 @@ import {
  * difference in the document, never in how somebody happened to assemble the
  * frame.
  */
-export function BelegSeite({
+export function DocumentPage({
   document,
   signal,
   tab = "uebersicht",
@@ -70,9 +70,9 @@ export function BelegSeite({
   const art = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
   // Rank 1: the counterparty names the document; without one the kind does.
   // The file name is the last fallback and stands in the facts, not here.
-  const titel = document.counterparty ?? art;
+  const title = document.counterparty ?? art;
   // Positions and input tax only exist where there is an invoice row.
-  const tabs = document.hasInvoiceRow ? BELEG_TABS : BELEG_TABS_OHNE_RECHNUNG;
+  const tabs = document.hasInvoiceRow ? DOCUMENT_TABS : DOCUMENT_TABS_WITHOUT_INVOICE;
 
   return (
     <SourceDocumentView
@@ -92,7 +92,7 @@ export function BelegSeite({
         <EntityHeader
           icon={<EntityIcon entity="source-document" />}
           overline={art}
-          title={titel}
+          title={title}
           // **Ein** Zustand, und er kommt aus `SourceDocumentCompletion` — der
           // Baustein, der diese Entscheidung schon trägt („must not be
           // answered twice"). Der Nachbau hier verlor den Grund im Tooltip und
@@ -115,30 +115,30 @@ export function BelegSeite({
  * gebaut, damit die Stories sich in dem unterscheiden, was sie zeigen wollen,
  * und nicht darin, wie jemand die Seite zusammengesetzt hat.
  */
-export function uebersichtsBoxen({
-  maengel = belegMaengel(),
-  klaerungen = [],
+export function overviewBoxes({
+  defects: defects = documentDefects(),
+  clarifications: clarifications = [],
 }: {
-  maengel?: ReturnType<typeof belegMaengel>;
-  klaerungen?: readonly (typeof KLAERUNG)[];
+  defects?: ReturnType<typeof documentDefects>;
+  clarifications?: readonly (typeof CLARIFICATION)[];
 } = {}) {
   return {
     counterpartyHref: partnerHref,
     defects: (
       <SourceDocumentDefects
-        defects={maengel}
-        clarificationCount={klaerungen.length}
+        defects={defects}
+        clarificationCount={clarifications.length}
         actions={{
           document_date: <TextButton onClick={() => {}}>Datum eintragen</TextButton>,
           partner: <TextButton onClick={() => {}}>Partner wählen</TextButton>,
           recipient: <TextButton onClick={() => {}}>Gehört nicht hierher</TextButton>,
           payment_account: <TextButton onClick={() => {}}>Konto zuordnen</TextButton>,
         }}
-        {...(klaerungen.length > 0
+        {...(clarifications.length > 0
           ? {
               clarifications: (
                 <ClarificationList
-                  clarifications={[...klaerungen]}
+                  clarifications={[...clarifications]}
                   empty={{ title: "Keine Rückfragen." }}
                 />
               ),
@@ -146,7 +146,7 @@ export function uebersichtsBoxen({
           : {})}
       />
     ),
-    vat: <SourceDocumentVat {...UST_GEMISCHT} href={vorsteuerHref} />,
-    history: <SourceDocumentHistory entries={VERLAUF} total={VERLAUF.length} href={verlaufHref} />,
+    vat: <SourceDocumentVat {...VAT_MIXED} href={inputTaxHref} />,
+    history: <SourceDocumentHistory entries={HISTORY} total={HISTORY.length} href={historyHref} />,
   };
 }

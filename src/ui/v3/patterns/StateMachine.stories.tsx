@@ -19,14 +19,14 @@ type Story = StoryObj<typeof StateMachine>;
   Kopie daneben wäre wieder das Muster, das dieses Repo dreimal gerissen hat:
   eine handgeschriebene Liste neben einer gepflegten.
 */
-const ZYKLUS = STATE_MACHINES.export_batch!.transitions;
+const CYCLE = STATE_MACHINES.export_batch!.transitions;
 const INBOX = STATE_MACHINES.document_processing!.transitions;
 
 /* Die **Spaltenordnung** bleibt Sache der Story: sie ist eine Aussage über das
    Bild („`review` steht neben `agent`, weil es seinen Rang aus genau diesem
    Übergang zieht"), keine Kopie von Daten. Alles andere — Übergänge, Wörter,
    Beschreibung — kommt aus der Registry. */
-const ZYKLUS_STATES = [
+const CYCLE_STATES = [
   "prepared",
   "agent",
   "review",
@@ -52,7 +52,7 @@ const ZYKLUS_STATES = [
  * genau das ist der Beweis, dass der Weg über die Registry trägt.
  */
 export const Filled: Story = {
-  render: () => <StateMachine axis="zyklus_stapel" states={ZYKLUS_STATES} current="review" />,
+  render: () => <StateMachine axis="zyklus_stapel" states={CYCLE_STATES} current="review" />,
 };
 
 /**
@@ -158,8 +158,8 @@ export const InUse: Story = {
             <div className="v2fields__h">Ablauf</div>
             <StateMachine
               axis="zyklus_stapel"
-              states={ZYKLUS_STATES}
-              transitions={ZYKLUS}
+              states={CYCLE_STATES}
+              transitions={CYCLE}
               current="review"
             />
           </div>

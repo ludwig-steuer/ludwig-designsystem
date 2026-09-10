@@ -393,7 +393,7 @@ ersetzt `MonthlyBarChart` — offen (App).
   der Fokus in einem Feld liegt — richtig für „A", falsch für `⌘K`. C1
   braucht: `meta`-Bindungen feuern trotz `isTyping`.
 - **`Markdown.stories.tsx`** hat deutsche Exportnamen (`Gefuellt`, `Leer`,
-  `Lang`, `Unsicher`, `ImEinsatz`) — A5 zieht sie nach.
+  `Lang`, `Unsicher`, `InUse`) — A5 zieht sie nach.
 - **`ActionBar` wird nicht benutzt** — 0× in der App, 0× in den
   `PageHeader`-Stories. A6 macht es zur sichtbaren Regel; die Adoption in
   der App bleibt ein Schritt der Migration.

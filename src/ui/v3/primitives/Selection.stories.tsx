@@ -27,13 +27,13 @@ const ROWS = [
 /** Mehrfachauswahl: die Leiste erscheint erst, wenn etwas gewählt ist. */
 export const WithSelection: Story = {
   render: function Render() {
-    const [gewaehlt, setGewaehlt] = useState<string[]>(["a", "b"]);
+    const [selected, setSelected] = useState<string[]>(["a", "b"]);
     return (
       <Card>
         <CardHead title="Fehlende Belege · 3" />
         <SelectionBar
-          count={gewaehlt.length}
-          onClear={() => setGewaehlt([])}
+          count={selected.length}
+          onClear={() => setSelected([])}
           actions={
             <button type="button" className="v2link">
               Als nicht nötig markieren
@@ -49,16 +49,16 @@ export const WithSelection: Story = {
           {ROWS.map((z) => (
             <ClickRow
               key={z.key}
-              active={gewaehlt.includes(z.key)}
+              active={selected.includes(z.key)}
               onClick={() =>
-                setGewaehlt((g) => (g.includes(z.key) ? g.filter((k) => k !== z.key) : [...g, z.key]))
+                setSelected((g) => (g.includes(z.key) ? g.filter((k) => k !== z.key) : [...g, z.key]))
               }
             >
               <SelectCell
-                checked={gewaehlt.includes(z.key)}
+                checked={selected.includes(z.key)}
                 label={`${z.name} auswählen`}
                 onChange={(c) =>
-                  setGewaehlt((g) => (c ? [...g, z.key] : g.filter((k) => k !== z.key)))
+                  setSelected((g) => (c ? [...g, z.key] : g.filter((k) => k !== z.key)))
                 }
               />
               <span className="v2main">{z.name}</span>

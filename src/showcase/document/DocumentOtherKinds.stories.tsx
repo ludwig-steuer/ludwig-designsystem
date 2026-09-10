@@ -15,8 +15,8 @@ import { TextButton } from "@/ui/v3/primitives/TextButton";
 
 import { SourceDocumentDefects } from "@/ui/v3/entities/source-document/SourceDocumentAside";
 
-import { BelegSeite } from "./BelegSeite";
-import { belegFixture, belegMaengel, MUSTER_PDF } from "./fixtures";
+import { DocumentPage } from "./DocumentPage";
+import { documentFixture, documentDefects, MUSTER_PDF } from "./fixtures";
 
 /**
  * Die anderen Belegarten — dieselbe Seite, andere Fakten (0144, A1–A7).
@@ -25,13 +25,13 @@ import { belegFixture, belegMaengel, MUSTER_PDF } from "./fixtures";
  * Rechnung gibt?** Ein Container ohne eigene Felder, ein Sammel-PDF mit
  * Kindern, ein Kontoauszug, dessen Zahlungskonto niemand kennt.
  */
-const meta: Meta<typeof BelegSeite> = {
+const meta: Meta<typeof DocumentPage> = {
   title: "Seiten/Beleg/Andere Belegarten",
-  component: BelegSeite,
+  component: DocumentPage,
   parameters: { layout: "fullscreen" },
 };
 export default meta;
-type Story = StoryObj<typeof BelegSeite>;
+type Story = StoryObj<typeof DocumentPage>;
 
 const menu = (
   <OverflowMenu label="Weitere Aktionen">
@@ -41,7 +41,7 @@ const menu = (
 );
 
 /** Die Zahlungskonten eines Mandanten — eines geführt, der Rest Kulisse. */
-const KONTEN: PaymentAccountOption[] = [
+const ACCOUNTS: PaymentAccountOption[] = [
   {
     id: "b-1",
     label: "Testbank eG 100200300 · DE00 0000 0000 0000 0000 00",
@@ -63,9 +63,9 @@ const KONTEN: PaymentAccountOption[] = [
  * Details — dort wird bestätigt oder korrigiert, weil es mehr als ein Feld
  * betrifft (D9).
  */
-export const Vertrag: Story = {
+export const Contract: Story = {
   render: () => {
-    const doc = belegFixture({
+    const doc = documentFixture({
       sourceDocType: "contract",
       fileName: "Mietvertrag-Musterstrasse-12.pdf",
       counterparty: "Musterfirma Immobilien GmbH",
@@ -75,7 +75,7 @@ export const Vertrag: Story = {
       hasInvoiceRow: false,
     });
     return (
-      <BelegSeite document={doc} actions={menu}>
+      <DocumentPage document={doc} actions={menu}>
         <Card>
           <CardHead title="Zu klären" sub="1 Befund an diesem Beleg" />
           <div style={{ padding: 16 }}>
@@ -98,7 +98,7 @@ export const Vertrag: Story = {
           previewUrl={MUSTER_PDF}
           summary="Mietvertrag Musterstraße 12, unbefristet ab 01.01.2026"
         />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -110,7 +110,7 @@ export const Vertrag: Story = {
  */
 export const SammelPdf: Story = {
   render: () => {
-    const doc = belegFixture({
+    const doc = documentFixture({
       // **Kein eigener `sourceDocType`.** Ein Sammelbeleg ist `other` mit
       // gesetztem `collectionKind` — die Union beschreibt, was *geschrieben*
       // wird, und „Sammelbeleg" ist keine Belegart, sondern eine Eigenschaft.
@@ -126,12 +126,12 @@ export const SammelPdf: Story = {
       documentDate: null,
     });
     const kinder = [
-      belegFixture({ id: "k-1", fileName: "Teil-1.pdf", counterparty: "Musterbau GmbH", splitPageRange: "1–3" }),
-      belegFixture({ id: "k-2", fileName: "Teil-2.pdf", counterparty: "Beispiel-Energie AG", splitPageRange: "4–5" }),
-      belegFixture({ id: "k-3", fileName: "Teil-3.pdf", counterparty: "Testbank eG", splitPageRange: "6–23" }),
+      documentFixture({ id: "k-1", fileName: "Teil-1.pdf", counterparty: "Musterbau GmbH", splitPageRange: "1–3" }),
+      documentFixture({ id: "k-2", fileName: "Teil-2.pdf", counterparty: "Beispiel-Energie AG", splitPageRange: "4–5" }),
+      documentFixture({ id: "k-3", fileName: "Teil-3.pdf", counterparty: "Testbank eG", splitPageRange: "6–23" }),
     ];
     return (
-      <BelegSeite document={doc} actions={menu}>
+      <DocumentPage document={doc} actions={menu}>
         <SourceDocumentCard
           document={doc}
           previewUrl={MUSTER_PDF}
@@ -140,7 +140,7 @@ export const SammelPdf: Story = {
           parts={kinder}
           partHref={(d) => `?beleg=${d.id}`}
         />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -152,9 +152,9 @@ export const SammelPdf: Story = {
  * den ganzen Beleg, fordert aber nichts. Der Signal-Slot gehört dem, was
  * jemanden etwas angeht.
  */
-export const Teilbeleg: Story = {
+export const PartialDocument: Story = {
   render: () => {
-    const doc = belegFixture({
+    const doc = documentFixture({
       id: "k-2",
       fileName: "Teil-2.pdf",
       counterparty: "Beispiel-Energie AG",
@@ -162,14 +162,14 @@ export const Teilbeleg: Story = {
       parentSourceDocId: "d-0100",
     });
     return (
-      <BelegSeite document={doc} actions={menu}>
+      <DocumentPage document={doc} actions={menu}>
         <SourceDocumentCard
           document={doc}
           previewUrl={MUSTER_PDF}
           summary="Stromabrechnung August 2026"
           excerpt={{ from: 4, to: 5, parentTitle: "Sammel-August-2026.pdf", parentHref: "?beleg=d-0100" }}
         />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -182,9 +182,9 @@ export const Teilbeleg: Story = {
  * „Per IBAN erkannt" steht als Zeichen an der Zeile — die Zuordnung ist
  * eindeutig, und das darf man sehen.
  */
-export const KontoauszugZugeordnet: Story = {
+export const StatementAssigned: Story = {
   render: () => {
-    const doc = belegFixture({
+    const doc = documentFixture({
       sourceDocType: "bank_statement_pdf",
       fileName: "Kontoauszug-2026-08.pdf",
       counterparty: "Testbank eG",
@@ -201,7 +201,7 @@ export const KontoauszugZugeordnet: Story = {
       },
     });
     return (
-      <BelegSeite
+      <DocumentPage
         document={doc}
         actions={
           <>
@@ -230,7 +230,7 @@ export const KontoauszugZugeordnet: Story = {
           </div>
         </Card>
         <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary={null} />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -245,10 +245,10 @@ export const KontoauszugZugeordnet: Story = {
  * das Feld ist `PaymentAccountField` (0145) — es trennt die geführten Konten
  * von den 24 Karteileichen des Kontenrahmens.
  */
-export const KontoauszugKontoWaehlen: Story = {
+export const StatementChooseAccount: Story = {
   render: function Waehlen() {
-    const [konto, setKonto] = useState<string | null>(null);
-    const doc = belegFixture({
+    const [account, setAccount] = useState<string | null>(null);
+    const doc = documentFixture({
       sourceDocType: "bank_statement_pdf",
       fileName: "Kontoauszug-2026-08.pdf",
       counterparty: null,
@@ -258,7 +258,7 @@ export const KontoauszugKontoWaehlen: Story = {
       hasInvoiceRow: false,
     });
     return (
-      <BelegSeite document={doc} actions={menu}>
+      <DocumentPage document={doc} actions={menu}>
         <SourceDocumentCard
           document={doc}
           previewUrl={MUSTER_PDF}
@@ -268,17 +268,17 @@ export const KontoauszugKontoWaehlen: Story = {
           // selbst — ein Mangel ohne Weg wäre nur eine Meldung (L-268).
           defects={
             <SourceDocumentDefects
-              defects={belegMaengel({ inboxStatus: "awaiting_input" })}
+              defects={documentDefects({ inboxStatus: "awaiting_input" })}
               actions={{
                 payment_account: (
                   <div style={{ minWidth: 320 }}>
                     <PaymentAccountField
                       id="a5-konto"
-                      value={konto}
-                      onChange={setKonto}
-                      accounts={KONTEN}
+                      value={account}
+                      onChange={setAccount}
+                      accounts={ACCOUNTS}
                     />
-                    {konto ? (
+                    {account ? (
                       <p className="v2muted" style={{ margin: "8px 0 0" }}>
                         Gewählt — die Zuordnung greift beim nächsten Import.
                       </p>
@@ -289,7 +289,7 @@ export const KontoauszugKontoWaehlen: Story = {
             />
           }
         />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -303,9 +303,9 @@ export const KontoauszugKontoWaehlen: Story = {
  * — ein Zahlungskonto, das aus einem Beleg entsteht, wäre ein Konto, das
  * niemand entschieden hat (`bank.md` R4/R5).
  */
-export const KontoauszugKeinKonto: Story = {
+export const StatementWithoutAccount: Story = {
   render: () => {
-    const doc = belegFixture({
+    const doc = documentFixture({
       sourceDocType: "bank_statement_pdf",
       fileName: "Kontoauszug-2026-08.pdf",
       counterparty: null,
@@ -315,7 +315,7 @@ export const KontoauszugKeinKonto: Story = {
       hasInvoiceRow: false,
     });
     return (
-      <BelegSeite document={doc} actions={menu}>
+      <DocumentPage document={doc} actions={menu}>
         <Card>
           <CardHead title="Zu klären" sub="1 Befund an diesem Beleg" />
           <div style={{ padding: 16, display: "grid", gap: 12 }}>
@@ -334,7 +334,7 @@ export const KontoauszugKeinKonto: Story = {
           </div>
         </Card>
         <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary={null} />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -345,10 +345,10 @@ export const KontoauszugKeinKonto: Story = {
  * Hinweis, was sie am Bestand tut: **die Buchungen bleiben, akzeptierte
  * brechen ab** — Korrektur ohne Vorbeigreifen am Bestand.
  */
-export const KontoauszugFalschZugeordnet: Story = {
+export const StatementWronglyAssigned: Story = {
   render: function Umordnen() {
-    const [konto, setKonto] = useState<string | null>("b-3");
-    const doc = belegFixture({
+    const [account, setAccount] = useState<string | null>("b-3");
+    const doc = documentFixture({
       sourceDocType: "bank_statement_pdf",
       fileName: "Kontoauszug-2026-08.pdf",
       counterparty: "Testbank eG",
@@ -358,16 +358,16 @@ export const KontoauszugFalschZugeordnet: Story = {
       hasInvoiceRow: false,
     });
     return (
-      <BelegSeite document={doc} actions={menu}>
+      <DocumentPage document={doc} actions={menu}>
         <Card>
           <CardHead title="Kontoauszug" sub="Der Auszug gehört zu einem Zahlungskonto" />
           <div style={{ padding: 16, display: "grid", gap: 12 }}>
             <div style={{ maxWidth: 420 }}>
               <PaymentAccountField
                 id="a5b-konto"
-                value={konto}
-                onChange={setKonto}
-                accounts={KONTEN}
+                value={account}
+                onChange={setAccount}
+                accounts={ACCOUNTS}
               />
             </div>
             <p className="v2muted" style={{ margin: 0 }}>
@@ -377,7 +377,7 @@ export const KontoauszugFalschZugeordnet: Story = {
           </div>
         </Card>
         <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary={null} />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };
@@ -387,9 +387,9 @@ export const KontoauszugFalschZugeordnet: Story = {
  * kein Sonderpfad: ein Zahlungskonto (hier über die Kartenkennung erkannt) und
  * Kinder darunter.
  */
-export const KreditkarteReisekosten: Story = {
+export const CreditCardTravel: Story = {
   render: () => {
-    const reise = belegFixture({
+    const travel = documentFixture({
       sourceDocType: "travel_expense_report",
       fileName: "Reisekosten-2026-08.pdf",
       counterparty: null,
@@ -398,7 +398,7 @@ export const KreditkarteReisekosten: Story = {
       detail: null,
       hasInvoiceRow: false,
     });
-    const doc = belegFixture({
+    const doc = documentFixture({
       sourceDocType: "credit_card_statement",
       fileName: "Kreditkarte-2026-08.pdf",
       counterparty: "Testbank eG",
@@ -408,12 +408,12 @@ export const KreditkarteReisekosten: Story = {
       hasInvoiceRow: false,
     });
     const kinder = [
-      belegFixture({ id: "kk-1", fileName: "Beleg-Hotel.pdf", counterparty: "Musterhotel GmbH" }),
-      belegFixture({ id: "kk-2", fileName: "Beleg-Bahn.pdf", counterparty: "Musterbahn AG" }),
+      documentFixture({ id: "kk-1", fileName: "Beleg-Hotel.pdf", counterparty: "Musterhotel GmbH" }),
+      documentFixture({ id: "kk-2", fileName: "Beleg-Bahn.pdf", counterparty: "Musterbahn AG" }),
     ];
     return (
       <div style={{ display: "grid", gap: 40 }}>
-      <BelegSeite document={doc} actions={menu}>
+      <DocumentPage document={doc} actions={menu}>
         <Card>
           <CardHead title="Kreditkartenabrechnung" sub="Karte …4711" />
           <div style={{ padding: 16 }}>
@@ -434,9 +434,9 @@ export const KreditkarteReisekosten: Story = {
           parts={kinder}
           partHref={(d) => `?beleg=${d.id}`}
         />
-      </BelegSeite>
+      </DocumentPage>
 
-      <BelegSeite document={reise} actions={menu}>
+      <DocumentPage document={travel} actions={menu}>
         <Card>
           <CardHead title="Reisekostenabrechnung" sub="dieselbe Registry-Regel, kein Sonderpfad" />
           <div style={{ padding: 16 }}>
@@ -450,14 +450,14 @@ export const KreditkarteReisekosten: Story = {
           </div>
         </Card>
         <SourceDocumentCard
-          document={reise}
+          document={travel}
           previewUrl={MUSTER_PDF}
           summary={null}
           group={{ childCount: 2, completedChildCount: 0 }}
           parts={kinder}
           partHref={(d) => `?beleg=${d.id}`}
         />
-      </BelegSeite>
+      </DocumentPage>
       </div>
     );
   },
@@ -471,12 +471,12 @@ export const KreditkarteReisekosten: Story = {
  * Rechnungszeile gibt es nicht. Das ist ein Mangel mit Weg — die Belegart lässt
  * sich hier korrigieren —, kein stiller Zustand.
  */
-export const OhneSubtyp: Story = {
+export const WithoutSubtype: Story = {
   render: function Ohne() {
     const [art, setArt] = useState("Mahnung");
     return (
-      <BelegSeite
-        document={belegFixture({
+      <DocumentPage
+        document={documentFixture({
           // Eine Mahnung ist `other` plus Belegform — genau der Rückfall, für
           // den `classDocumentForm` da ist.
           sourceDocType: "other",
@@ -508,7 +508,7 @@ export const OhneSubtyp: Story = {
           </div>
         </Card>
         <SourceDocumentCard
-          document={belegFixture({
+          document={documentFixture({
             // Eine Mahnung ist `other` plus Belegform — genau der Rückfall, für
           // den `classDocumentForm` da ist.
           sourceDocType: "other",
@@ -523,7 +523,7 @@ export const OhneSubtyp: Story = {
           previewUrl={MUSTER_PDF}
           summary="Zahlungserinnerung zu R-2026-0042"
         />
-      </BelegSeite>
+      </DocumentPage>
     );
   },
 };

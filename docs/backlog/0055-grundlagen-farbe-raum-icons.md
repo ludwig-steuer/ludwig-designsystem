@@ -229,7 +229,7 @@ Exportnamen englisch.
 | `WithWord` | richtig · erlaubte Ausnahme · falsch (T8, T9, V7) |
 
 Nicht anwendbar: `Empty`, `EmptyAfterFilter`, `Loading`, `Error` — eine
-Token-Probe hat keine Daten und lädt nicht. `ImEinsatz` entfällt als eigene
+Token-Probe hat keine Daten und lädt nicht. `InUse` entfällt als eigene
 Story: `Roles`, `Elevation`, `States` und `WithWord` zeigen den Einsatz
 bereits am Beispiel; eine weitere Karte mit denselben Tokens bewiese nichts
 Neues.

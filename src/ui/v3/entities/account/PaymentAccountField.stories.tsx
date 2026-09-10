@@ -18,14 +18,14 @@ type Story = StoryObj<typeof PaymentAccountField>;
  * hier so, wie sie im Bestand aussieht: **ein** geführtes Konto mit 145
  * Buchungen, acht weitere mit null.
  */
-const GEFUEHRT: PaymentAccountOption = {
+const MAINTAINED: PaymentAccountOption = {
   id: "a-1",
   label: "Testbank eG 100200300 · DE00 0000 0000 0000 0000 00",
   iban: "DE00 0000 0000 0000 0000 00",
   inUse: true,
 };
 
-const WEITERE: PaymentAccountOption[] = [
+const OTHERS: PaymentAccountOption[] = [
   { id: "a-2", label: "Geldtransit", iban: null, inUse: false },
   { id: "a-3", label: "EC-Cash", iban: null, inUse: false },
   { id: "a-4", label: "Kasse", iban: null, inUse: false },
@@ -36,7 +36,7 @@ const WEITERE: PaymentAccountOption[] = [
   { id: "a-9", label: "Paypal", iban: null, inUse: false },
 ];
 
-const ALLE = [GEFUEHRT, ...WEITERE];
+const ALLE = [MAINTAINED, ...OTHERS];
 
 function Frame({ children, sub }: { children: React.ReactNode; sub: string }) {
   return (
@@ -57,7 +57,7 @@ function Frame({ children, sub }: { children: React.ReactNode; sub: string }) {
  * Die weiteren Konten bleiben **wählbar**. Eine falsch abgeleitete Erwartung
  * darf niemanden aussperren.
  */
-export const Gefuellt: Story = {
+export const Filled: Story = {
   render: () => (
     <Frame sub="1 geführt · 8 aus dem Kontenrahmen">
       <PaymentAccountField id="pa-1" value={null} onChange={() => {}} accounts={ALLE} />
@@ -73,7 +73,7 @@ export const Gefuellt: Story = {
  * Kein Randfall: ein frisch angelegter Mandant hat null geführte Konten, ein
  * kleiner genau eines von einem.
  */
-export const NurGefuehrte: Story = {
+export const MaintainedOnly: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 20 }}>
       <Frame sub="alle geführt — keine Gruppen">
@@ -81,11 +81,11 @@ export const NurGefuehrte: Story = {
           id="pa-2"
           value={null}
           onChange={() => {}}
-          accounts={[GEFUEHRT, { id: "a-10", label: "Testbank eG 4711", iban: null, inUse: true }]}
+          accounts={[MAINTAINED, { id: "a-10", label: "Testbank eG 4711", iban: null, inUse: true }]}
         />
       </Frame>
       <Frame sub="keines geführt — ebenso keine Gruppen">
-        <PaymentAccountField id="pa-3" value={null} onChange={() => {}} accounts={WEITERE} />
+        <PaymentAccountField id="pa-3" value={null} onChange={() => {}} accounts={OTHERS} />
       </Frame>
     </div>
   ),
@@ -113,7 +113,7 @@ export const Leer: Story = {
  * Mandanten und es fällt nicht auf; sobald jemand serverseitig auf die
  * geführten kürzt, verschwände genau diese Zuordnung lautlos.
  */
-export const UnbekannterWert: Story = {
+export const UnknownValue: Story = {
   render: () => (
     <Frame sub="stillgelegtes Konto, nicht mehr in der Auswahl">
       <PaymentAccountField id="pa-5" value="a-99" onChange={() => {}} accounts={ALLE} />
@@ -125,7 +125,7 @@ export const UnbekannterWert: Story = {
  * Der Rundlauf: wählen, abwählen, und der unbekannte Wert bleibt stehen, bis
  * etwas anderes gewählt wird.
  */
-export const Interaktiv: Story = {
+export const Interactive: Story = {
   render: function Rundlauf() {
     const [value, setValue] = useState<string | null>("a-99");
     return (
@@ -143,7 +143,7 @@ export const Interaktiv: Story = {
  * Im Einsatz: in `Field` innerhalb einer Zeile mit Aktionsknopf, so wie der
  * Beleg-Eingang die Kontoauswahl stellt.
  */
-export const ImEinsatz: Story = {
+export const InUse: Story = {
   render: function Einsatz() {
     const [value, setValue] = useState<string | null>(null);
     return (

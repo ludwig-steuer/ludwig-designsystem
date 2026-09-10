@@ -17,12 +17,12 @@ type Story = StoryObj<typeof JournalEntryGrid>;
 
 const ROW = (over: Partial<JournalRow> & { id: string }): JournalRow => ({
   datum: "26.08.2026",
-  umsatz: "1.000,00",
+  amount: "1.000,00",
   side: "S",
   bu: "9",
-  konto: "6815",
-  kontoName: "Bürobedarf",
-  beleg1: "RE-4471",
+  account: "6815",
+  accountName: "Bürobedarf",
+  externalDocumentNumber: "RE-4471",
   text: "Bürobedarf Meier GmbH",
   ...over,
 });
@@ -31,16 +31,16 @@ const ROWS: JournalRow[] = [
   ROW({ id: "r1" }),
   ROW({
     id: "r2",
-    umsatz: "475,60",
-    konto: "6845",
-    kontoName: "EDV-Zubehör",
+    amount: "475,60",
+    account: "6845",
+    accountName: "EDV-Zubehör",
     text: "Toner",
-    beleg2: "LS-9912",
-    kost1: "K-100",
+    externalDocumentNumber2: "LS-9912",
+    costCenter1: "K-100",
   }),
 ];
 
-const CONTRA = { konto: "70044", name: "Bürobedarf Meier GmbH", tag: "Kreditor" };
+const CONTRA = { account: "70044", name: "Bürobedarf Meier GmbH", tag: "Kreditor" };
 
 function Frame({ children, sub }: { children: React.ReactNode; sub?: string }) {
   return (
@@ -69,7 +69,7 @@ export const Simple: Story = {
 };
 
 /**
- * `mode="voll"` — zehn Spalten, und der Umschalter ist ein **Link**: der Modus
+ * `mode="full"` — zehn Spalten, und der Umschalter ist ein **Link**: der Modus
  * gehört zur Adresse, nicht zum Zustand. Ohne `modeHref` gibt es ihn nicht,
  * und damit auch keine gedruckte Taste ohne Wirkung (V14).
  */
@@ -79,8 +79,8 @@ export const Full: Story = {
       <JournalEntryGrid
         rows={ROWS}
         status="posted"
-        mode="voll"
-        modeHref={{ einfach: "?sicht=einfach", voll: "?sicht=voll" }}
+        mode="full"
+        modeHref={{ simple: "?sicht=einfach", full: "?sicht=voll" }}
         contraAccount={CONTRA}
         documentNumber="RE-4471"
         documentAmount={1475.6}
@@ -180,16 +180,16 @@ export const Edges: Story = {
         rows={[
           ROW({
             id: "e1",
-            kontoName: "Reparaturen und Instandhaltung von Betriebs- und Geschäftsausstattung",
-            umsatz: "12.480,55",
+            accountName: "Reparaturen und Instandhaltung von Betriebs- und Geschäftsausstattung",
+            amount: "12.480,55",
           }),
-          ROW({ id: "e2", umsatz: "-240,00", text: "Gutschrift Teillieferung", bu: "" }),
-          ROW({ id: "e3", umsatz: "0,00", text: "Nullzeile aus dem Import", konto: "6800", kontoName: "" }),
+          ROW({ id: "e2", amount: "-240,00", text: "Gutschrift Teillieferung", bu: "" }),
+          ROW({ id: "e3", amount: "0,00", text: "Nullzeile aus dem Import", account: "6800", accountName: "" }),
           ...ROWS.map((r) => ({ ...r, id: `${r.id}-b` })),
         ]}
         status="proposed"
-        mode="voll"
-        modeHref={{ einfach: "?sicht=einfach", voll: "?sicht=voll" }}
+        mode="full"
+        modeHref={{ simple: "?sicht=einfach", full: "?sicht=voll" }}
         contraAccount={CONTRA}
         documentNumber="RE-4471"
         documentAmount={1475.6}

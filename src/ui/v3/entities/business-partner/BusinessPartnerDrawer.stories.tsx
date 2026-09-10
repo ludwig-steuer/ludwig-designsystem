@@ -59,7 +59,7 @@ function detail(over: Partial<BusinessPartnerDetail> = {}): BusinessPartnerDetai
   };
 }
 
-function konto(over: Partial<PartnerPersonalAccount> & { accountId: string }): PartnerPersonalAccount {
+function account(over: Partial<PartnerPersonalAccount> & { accountId: string }): PartnerPersonalAccount {
   return {
     fiscalYear: 2026,
     fiscalYearStatus: "open",
@@ -79,7 +79,7 @@ function konto(over: Partial<PartnerPersonalAccount> & { accountId: string }): P
 }
 
 /** Der Drawer steht offen — so sieht ihn, wer aus einer Sachverhaltszeile kommt. */
-function Offen({ children }: { children: React.ReactNode }) {
+function Open({ children }: { children: React.ReactNode }) {
   return <div style={{ minHeight: 720 }}>{children}</div>;
 }
 
@@ -95,18 +95,18 @@ function Offen({ children }: { children: React.ReactNode }) {
  */
 export const Filled: Story = {
   render: () => (
-    <Offen>
+    <Open>
       <BusinessPartnerDrawer
         open
         onClose={() => {}}
         partner={detail()}
-        accounts={[konto({ accountId: "a-1" })]}
+        accounts={[account({ accountId: "a-1" })]}
         caseCount={4}
         tabHref={tabHref}
         href="?partner=p-1"
         accountHref={accountHref}
       />
-    </Offen>
+    </Open>
   ),
 };
 
@@ -117,7 +117,7 @@ export const Filled: Story = {
  */
 export const WithoutAccounts: Story = {
   render: () => (
-    <Offen>
+    <Open>
       <BusinessPartnerDrawer
         open
         onClose={() => {}}
@@ -132,7 +132,7 @@ export const WithoutAccounts: Story = {
         tabHref={tabHref}
         href="?partner=p-1"
       />
-    </Offen>
+    </Open>
   ),
 };
 
@@ -145,12 +145,12 @@ export const WithoutAccounts: Story = {
  */
 export const WithBehaviour: Story = {
   render: () => (
-    <Offen>
+    <Open>
       <BusinessPartnerDrawer
         open
         onClose={() => {}}
         partner={detail()}
-        accounts={[konto({ accountId: "a-1" })]}
+        accounts={[account({ accountId: "a-1" })]}
         caseCount={4}
         tabHref={tabHref}
         href="?partner=p-1"
@@ -168,7 +168,7 @@ export const WithBehaviour: Story = {
           </div>
         )}
       />
-    </Offen>
+    </Open>
   ),
 };
 
@@ -179,7 +179,7 @@ export const WithBehaviour: Story = {
  */
 export const Sparse: Story = {
   render: () => (
-    <Offen>
+    <Open>
       <BusinessPartnerDrawer
         open
         onClose={() => {}}
@@ -192,12 +192,12 @@ export const Sparse: Story = {
           lastBookingDate: null,
           businessDescription: null,
         })}
-        accounts={[konto({ accountId: "a-2", accountNumber: "70044", usageBookingCount: 0, lastBookingDate: null })]}
+        accounts={[account({ accountId: "a-2", accountNumber: "70044", usageBookingCount: 0, lastBookingDate: null })]}
         tabHref={tabHref}
         href="?partner=p-1"
         accountHref={accountHref}
       />
-    </Offen>
+    </Open>
   ),
 };
 
@@ -218,7 +218,7 @@ export const Roundtrip: Story = {
           open={open}
           onClose={() => setOpen(false)}
           partner={detail()}
-          accounts={[konto({ accountId: "a-1" })]}
+          accounts={[account({ accountId: "a-1" })]}
           caseCount={4}
           tabHref={tabHref}
           href="?partner=p-1"
@@ -266,7 +266,7 @@ export const InUse: Story = {
           open={open}
           onClose={() => setOpen(false)}
           partner={detail()}
-          accounts={[konto({ accountId: "a-1" })]}
+          accounts={[account({ accountId: "a-1" })]}
           caseCount={4}
           tabHref={tabHref}
           href="?partner=p-1"

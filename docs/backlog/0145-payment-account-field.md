@@ -73,10 +73,10 @@ ungewöhnliche Zeile.
 | `value` | `string \| null` | ja | Die gewählte `accountId`; `null` heißt „noch keins" | `Interaktiv` |
 | `onChange` | `(id: string \| null) => void` | ja | Wählen und Abwählen; das Feld hält nichts | `Interaktiv` |
 | `accounts` | `readonly PaymentAccountOption[]` | ja | Die Kandidaten. Reihenfolge innerhalb einer Gruppe bleibt, wie sie kommt | `Gefuellt` |
-| `id` | `string` | ja | Bindet das Wort an das Feld (`Field htmlFor`) — Pflicht aus demselben Grund wie dort (0104) | `ImEinsatz` |
+| `id` | `string` | ja | Bindet das Wort an das Feld (`Field htmlFor`) — Pflicht aus demselben Grund wie dort (0104) | `InUse` |
 | `placeholder` | `string` | nein | Die erste, leere Option. Vorgabe „Bankkonto wählen…" | `Leer` |
-| `unknownLabel` | `string` | nein | Der Zusatz am unbekannten Wert. Vorgabe „(nicht in der Liste)" | `UnbekannterWert` |
-| `invalid` | `boolean` | nein | Reicht an `Select` durch | `ImEinsatz` |
+| `unknownLabel` | `string` | nein | Der Zusatz am unbekannten Wert. Vorgabe „(nicht in der Liste)" | `UnknownValue` |
+| `invalid` | `boolean` | nein | Reicht an `Select` durch | `InUse` |
 | `disabled` | `boolean` | nein | Bei leerer Liste **von selbst** gesetzt | `Leer` |
 
 ```ts
@@ -106,11 +106,11 @@ export interface PaymentAccountOption {
 | Story | Beweist |
 |---|---|
 | `Gefuellt` | Ein geführtes Konto und acht weitere — zwei Gruppen mit Überschrift. Die Daten sind der echte Fall: „Testbank eG 100200300" mit 145 Buchungen gegen acht mit null |
-| `NurGefuehrte` | Alle `inUse` → **keine** Überschriften, flache Liste. Dazu die Gegenprobe: keines `inUse` → ebenso flach |
+| `MaintainedOnly` | Alle `inUse` → **keine** Überschriften, flache Liste. Dazu die Gegenprobe: keines `inUse` → ebenso flach |
 | `Leer` | Nur der Platzhalter, Feld gesperrt — ohne dass der Aufrufer `disabled` setzen muss |
-| `UnbekannterWert` | `value` zeigt auf ein stillgelegtes Konto, das nicht in der Liste steht: es steht als erste Option mit „(nicht in der Liste)" |
+| `UnknownValue` | `value` zeigt auf ein stillgelegtes Konto, das nicht in der Liste steht: es steht als erste Option mit „(nicht in der Liste)" |
 | `Interaktiv` | Rundlauf mit `useState` — wählen, abwählen, und der unbekannte Wert bleibt wählbar, bis etwas anderes gewählt wird |
-| `ImEinsatz` | In `Field` innerhalb einer Zeile mit Aktionsknopf, wie im Beleg-Eingang |
+| `InUse` | In `Field` innerhalb einer Zeile mit Aktionsknopf, wie im Beleg-Eingang |
 
 Ausgelassen mit Grund: **lädt** und **Fehler** — die Optionen kommen als Prop;
 wer lädt, ist der Aufrufer. **Leer nach Filter** gibt es nicht, das Feld
@@ -140,9 +140,9 @@ Variabel (aus dieser Spec):
 - [ ] Zwei Gruppen mit den Überschriften „Geführte Konten" und „Weitere Konten
       aus dem Kontenrahmen", geführte zuerst (`Gefuellt`, DOM)
 - [ ] Alle `inUse` **oder** keines → **keine** `<optgroup>` im DOM
-      (`NurGefuehrte`, beide Fassungen)
+      (`MaintainedOnly`, beide Fassungen)
 - [ ] Ein unbekanntes `value` steht als erste Option mit dem Zusatz und geht
-      **nicht** verloren (`UnbekannterWert`, `select.value` gemessen)
+      **nicht** verloren (`UnknownValue`, `select.value` gemessen)
 - [ ] Leere Liste: Feld ist `disabled`, ohne dass der Aufrufer es setzt (`Leer`)
 - [ ] Die weiteren Konten sind wählbar, keines ist `disabled` (`Gefuellt`)
 - [ ] Der Baustein leitet nichts ab: `inUse` wird nur **gelesen**, nie
@@ -162,9 +162,9 @@ keine Gestaltung.
 | Story | Gemessen |
 |---|---|
 | `Gefuellt` | zwei `optgroup` — „Geführte Konten" zuerst, „Weitere Konten aus dem Kontenrahmen" darunter; **keine** Option ist gesperrt |
-| `NurGefuehrte` | beide Fassungen (alle geführt · keines geführt) haben **null** `optgroup` — flache Liste |
+| `MaintainedOnly` | beide Fassungen (alle geführt · keines geführt) haben **null** `optgroup` — flache Liste |
 | `Leer` | `select.disabled === true`, eine Option: der Platzhalter. Der Aufrufer musste nichts setzen |
-| `UnbekannterWert` | `select.value === "a-99"` — der Wert **überlebt**. Die Option steht als erste nach dem Platzhalter und heißt „a-99 (nicht in der Liste)" |
+| `UnknownValue` | `select.value === "a-99"` — der Wert **überlebt**. Die Option steht als erste nach dem Platzhalter und heißt „a-99 (nicht in der Liste)" |
 
 Der letzte Punkt ist der, um den es ging: hätte ich das Unbekannte weggelassen,
 stünde `select.value` auf `""`, und die nächste Speicherung hätte die Zuordnung
@@ -192,7 +192,7 @@ Kriterien dieser Spec DOM-Aussagen sind.
 | Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `entities/account/PaymentAccountField.tsx` + `.stories.tsx`; Titel `v3/Entitäten/Konto/PaymentAccountField` (`.stories.tsx:10`) wie die fünf Nachbarn der Familie; Barrel `src/ui/v3/index.ts:494–497` führt beide Exporte | ✓ |
 | Code englisch; `@when`/`@instead` an jedem Export | `@when`/`@instead` an `PaymentAccountField` (`:45–46`); `PaymentAccountOption` (`:26`) trägt die erklärenden Zeilen je Feld. **Aber vier deutsche Bezeichner im Rumpf**: `gefuehrt` (`:69`), `weitere` (`:70`), `gruppieren` (`:74`), `unbekannt` (`:82`) — `grep` findet in ganz `src/ui/v3` **keine** zweite Datei mit deutschen Bezeichnern | ✗ |
 | Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | kein eigenes CSS, kein Hex und kein px in der Datei — das Feld ist ein `Select` mit `<optgroup>`. `IN_USE`/`REST` (`:41–42`) sind die zwei Überschriften, die die Spec ausdrücklich als den fachlichen Gehalt des Bausteins ausweist, keine Abbildung von Schlüsseln auf Wörter. Kein Status im Baustein | ✓ |
-| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | sechs Exporte, zeichengleich mit der Story-Tabelle: `Gefuellt`, `NurGefuehrte`, `Leer`, `UnbekannterWert`, `Interaktiv`, `ImEinsatz`. **lädt** und **Fehler** mit Grund ausgeschlossen (Optionen sind Prop), **leer nach Filter** gibt es nicht — das Feld filtert nicht | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | sechs Exporte, zeichengleich mit der Story-Tabelle: `Gefuellt`, `MaintainedOnly`, `Leer`, `UnknownValue`, `Interaktiv`, `InUse`. **lädt** und **Fehler** mit Grund ausgeschlossen (Optionen sind Prop), **leer nach Filter** gibt es nicht — das Feld filtert nicht | ✓ |
 | Prüfliste `design-guidelines.md` §9 durchgegangen | durchgegangen; die zwei App-Punkte übersprungen (backlog/README). Kontrast, Trefferfläche und Fokusring gehen als Darstellungsfragen an 0119 | ✓ |
 | Im Browser angesehen (Storybook), nicht nur gebaut | eigener Lauf des Abnehmenden mit `scripts/cdp.mjs` gegen den Dev-Server auf 6107, 900 px, alle sechs Stories — die Zahlen unten stammen aus diesem Lauf, nicht aus dem des Bauenden | ✓ |
 | **Schnittstelle Zeichen für Zeichen** | | |
@@ -202,8 +202,8 @@ Kriterien dieser Spec DOM-Aussagen sind.
 | Kleinigkeit am Rand | die Tabelle schreibt `onChange: (id: string \| null) => void`, der Code `(accountId: string \| null)` (`:61`). Derselbe Typ, anderer Parametername — keine Abweichung der Schnittstelle | ✓ |
 | **Variabel** | | |
 | Zwei Gruppen mit den zwei Überschriften, geführte zuerst | `Gefuellt` gemessen: `optgroup`-Labels `["Geführte Konten", "Weitere Konten aus dem Kontenrahmen"]` in dieser Reihenfolge, neun Optionen plus Platzhalter | ✓ |
-| Alle `inUse` **oder** keines → **keine** `<optgroup>` | `NurGefuehrte` gemessen, **beide** Fassungen in einer Story: alle geführt → 0 `optgroup` (3 Optionen), keines geführt → 0 `optgroup` (9 Optionen). Bedingung im Code `:74` | ✓ |
-| Ein unbekanntes `value` steht als erste Option mit dem Zusatz und geht nicht verloren | `UnbekannterWert` gemessen: `select.value === "a-99"`, erste Option nach dem Platzhalter `"a-99 (nicht in der Liste)"`. `Interaktiv` startet ebenso auf `a-99` und behält ihn | ✓ |
+| Alle `inUse` **oder** keines → **keine** `<optgroup>` | `MaintainedOnly` gemessen, **beide** Fassungen in einer Story: alle geführt → 0 `optgroup` (3 Optionen), keines geführt → 0 `optgroup` (9 Optionen). Bedingung im Code `:74` | ✓ |
+| Ein unbekanntes `value` steht als erste Option mit dem Zusatz und geht nicht verloren | `UnknownValue` gemessen: `select.value === "a-99"`, erste Option nach dem Platzhalter `"a-99 (nicht in der Liste)"`. `Interaktiv` startet ebenso auf `a-99` und behält ihn | ✓ |
 | Leere Liste: Feld ist `disabled`, ohne dass der Aufrufer es setzt | `Leer` gemessen: `select.disabled === true`, genau eine Option (der Platzhalter); die Story übergibt kein `disabled`. Code `:98` | ✓ |
 | Die weiteren Konten sind wählbar, keines ist `disabled` | `Gefuellt` gemessen: `option.disabled === false` bei allen zehn Optionen | ✓ |
 | `inUse` wird nur gelesen; `expects_statements` genau einmal, im Kommentar | `grep -rn "expects_statements" src/` → **ein** Treffer: `PaymentAccountField.tsx:34`, im JSDoc von `inUse`. Gerechnet wird nichts: `:69–70` filtern nur. **Die Umformulierung trägt** — die alte Fassung („`grep` findet nichts") hätte genau den Satz bestraft, der den Schnitt erklärt, und ihn aus dem Code getrieben | ✓ |

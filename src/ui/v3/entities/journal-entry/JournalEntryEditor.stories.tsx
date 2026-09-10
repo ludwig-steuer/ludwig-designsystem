@@ -26,24 +26,24 @@ const CANDIDATES = {
 const ROW: EditorRow = {
   id: "1",
   datum: "2026-08-21",
-  umsatz: "1.475,60",
+  amount: "1.475,60",
   side: "S",
   bu: "9",
-  konto: "6815",
-  kontoName: "Bürobedarf",
-  beleg1: "RE-4471",
+  account: "6815",
+  accountName: "Bürobedarf",
+  externalDocumentNumber: "RE-4471",
   text: "Bürobedarf August",
   candidates: CANDIDATES,
 };
 
-const AGAINST = { konto: "70044", name: "Bürobedarf Meier GmbH", tag: "Kreditor" };
+const AGAINST = { account: "70044", name: "Bürobedarf Meier GmbH", tag: "Kreditor" };
 
 const BASE = {
   rows: [ROW],
-  gegenkonto: AGAINST,
-  belegNumber: "RE-4471",
-  belegAmount: 1475.6,
-  belegSide: "S" as const,
+  contraAccount: AGAINST,
+  documentNumber: "RE-4471",
+  documentAmount: 1475.6,
+  documentSide: "S" as const,
   status: "proposed" as const,
   accountFramework: "skr04",
   onSearchAccounts: async () => [{ number: "6600", name: "Werbekosten" }],
@@ -89,11 +89,11 @@ export const S2_SplitFull: Story = {
     <Frame>
       <JournalEntryEditor
         {...BASE}
-        mode="voll"
+        mode="full"
         editable
         rows={[
-          { ...ROW, umsatz: "1.000,00", text: "Bürobedarf", kost1: "100" },
-          { ...ROW, id: "2", umsatz: "475,60", konto: "6845", kontoName: "EDV-Zubehör", text: "Toner", kost1: "200" },
+          { ...ROW, amount: "1.000,00", text: "Bürobedarf", costCenter1: "100" },
+          { ...ROW, id: "2", amount: "475,60", account: "6845", accountName: "EDV-Zubehör", text: "Toner", costCenter1: "200" },
         ]}
         onCancel={() => {}}
         onSave={() => {}}
@@ -109,7 +109,7 @@ export const S3_AutomaticAccount: Story = {
       <JournalEntryEditor
         {...BASE}
         editable
-        rows={[{ ...ROW, konto: "4400", kontoName: "Erlöse 19 % USt", buLocked: true }]}
+        rows={[{ ...ROW, account: "4400", accountName: "Erlöse 19 % USt", buLocked: true }]}
         hints={[{ code: "P-UST", message: "4400 ist ein Automatikkonto — der Steuerschlüssel kommt vom Konto." }]}
         onCancel={() => {}}
         onSave={() => {}}
@@ -125,7 +125,7 @@ export const S5_RemainderDoesNotBalance: Story = {
       <JournalEntryEditor
         {...BASE}
         editable
-        rows={[{ ...ROW, umsatz: "1.400,00" }]}
+        rows={[{ ...ROW, amount: "1.400,00" }]}
         warnings={[{ code: "P-BETRAG", message: "Beleg 1.475,60 €, gebucht 1.400,00 € — Abweichung 75,60 €." }]}
         onCancel={() => {}}
         onSave={() => {}}
@@ -141,7 +141,7 @@ export const S12_MultipleErrors: Story = {
       <JournalEntryEditor
         {...BASE}
         editable
-        rows={[{ ...ROW, umsatz: "1.400,00", konto: "" }]}
+        rows={[{ ...ROW, amount: "1.400,00", account: "" }]}
         errors={[
           { code: "P-SUMME", message: "Soll 1.400,00 € gegen Haben 1.475,60 €." },
           { code: "E-KONTO", message: "Für die erste Zeile fehlt das Konto." },
@@ -251,7 +251,7 @@ export const Empty: Story = {
       <JournalEntryEditor
         {...BASE}
         rows={[]}
-        gegenkonto={null}
+        contraAccount={null}
         editable
         hints={[{ code: "E-LEER", message: "Noch keine Zeile — mit „+ Zeile (Split)“ beginnen." }]}
         onCancel={() => {}}
@@ -275,15 +275,15 @@ export const Empty: Story = {
 export const DocumentNumberAcrossRows: Story = {
   render: function Render() {
     const [rows, setRows] = useState<EditorRow[]>([
-      { ...ROW, beleg1: "RE-4471" },
-      { ...ROW, id: "2", umsatz: "89,90", konto: "6820", kontoName: "Porto", beleg1: "", text: "Porto August" },
+      { ...ROW, externalDocumentNumber: "RE-4471" },
+      { ...ROW, id: "2", amount: "89,90", account: "6820", accountName: "Porto", externalDocumentNumber: "", text: "Porto August" },
     ]);
     return (
       <Frame>
         <JournalEntryEditor
           {...BASE}
           rows={rows}
-          key={rows.map((r) => r.beleg1).join("|")}
+          key={rows.map((r) => r.externalDocumentNumber).join("|")}
           editable
           documentNumberSourceLabel={SOURCE_LABEL}
           // The number that holds: the one from DATEV beats the computed one.
@@ -309,12 +309,12 @@ export const ContraAccountEditable: Story = {
       <Frame>
         <JournalEntryEditor
           {...BASE}
-          gegenkonto={gk}
+          contraAccount={gk}
           editable
-          onContraAccountChange={(konto, name) => setGk({ ...gk, konto, name })}
+          onContraAccountChange={(account, name) => setGk({ ...gk, account: account, name })}
           contraAccountCandidates={{
             partner: [{ number: "70044", name: "Bürobedarf Meier GmbH", reason: "Kreditor des Belegs" }],
-            alle: [{ number: "1200", name: "Bank" }],
+            all: [{ number: "1200", name: "Bank" }],
           }}
           onOpenLedger={() => {}}
           onSave={() => {}}
@@ -340,16 +340,16 @@ export const ContraAccountEditable: Story = {
  */
 export const S20_EditorOnly: Story = {
   render: function Render() {
-    const [protokoll, setProtokoll] = useState<string[]>([]);
+    const [log, setLog] = useState<string[]>([]);
     return (
       <Frame>
         <JournalEntryEditor
           {...BASE}
           editable
           quickActions={{
-            klaerungskonto: () => {},
-            wieLetzte: () => {},
-            privatanteil: () => {},
+            clarificationAccount: () => {},
+            sameAsLast: () => {},
+            privateShare: () => {},
           }}
           onOpenTaxKey={() => {}}
         />
@@ -370,15 +370,15 @@ export const S20_EditorOnly: Story = {
           status="accepted"
           editable={false}
           deletable
-          onEdit={() => setProtokoll((p) => [...p, "Ändern"])}
-          onDelete={(grund) => setProtokoll((p) => [...p, `Storniert: ${grund}`])}
+          onEdit={() => setLog((p) => [...p, "Ändern"])}
+          onDelete={(reason) => setLog((p) => [...p, `Storniert: ${reason}`])}
           // Der Weg ins Kontenblatt, auch **lesend**: er hing bis zur
           // Wiederabnahme 0113 an keiner Editor-Story, seit die acht
           // Lese-Stories in das Raster gezogen sind.
-          onOpenLedger={() => setProtokoll((p) => [...p, "Kontenblatt"])}
+          onOpenLedger={() => setLog((p) => [...p, "Kontenblatt"])}
         />
         <p className="v2muted">
-          {protokoll.length === 0 ? "Noch nichts ausgelöst." : protokoll.join(" · ")}
+          {log.length === 0 ? "Noch nichts ausgelöst." : log.join(" · ")}
         </p>
       </Frame>
     );

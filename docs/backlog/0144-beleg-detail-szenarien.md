@@ -62,11 +62,11 @@ Story.
 
   | Datei | Titel | Stories |
   |---|---|---|
-  | `src/showcase/beleg/BelegRechnung.stories.tsx` | `Seiten/Beleg/Rechnung` | R1–R9 inkl. R4b — **10 Exporte** |
-  | `src/showcase/beleg/BelegAndereArten.stories.tsx` | `Seiten/Beleg/Andere Belegarten` | A1–A7 inkl. A5b und A5-`none` — **9 Exporte** |
-  | `src/showcase/beleg/BelegSeiteZustaende.stories.tsx` | `Seiten/Beleg/Seite` | S1–S3 — **3 Exporte** |
-  | `src/showcase/beleg/fixtures.ts` | — | Builder, keine Story |
-  | `src/showcase/beleg/BelegSeite.tsx` | — | der Rahmen, den alle Szenarien teilen; keine Story |
+  | `src/showcase/document/DocumentInvoice.stories.tsx` | `Seiten/Beleg/Rechnung` | R1–R9 inkl. R4b — **10 Exporte** |
+  | `src/showcase/document/DocumentOtherKinds.stories.tsx` | `Seiten/Beleg/Andere Belegarten` | A1–A7 inkl. A5b und A5-`none` — **9 Exporte** |
+  | `src/showcase/document/DocumentPageStates.stories.tsx` | `Seiten/Beleg/Seite` | S1–S3 — **3 Exporte** |
+  | `src/showcase/document/fixtures.ts` | — | Builder, keine Story |
+  | `src/showcase/document/DocumentPage.tsx` | — | der Rahmen, den alle Szenarien teilen; keine Story |
 
 - **Setzt auf:** Typen aus `src/ludwig/modules/source-docs/domain/source-document-vm.ts`
   (`SourceDocumentVM`, `SourceDocumentDetail`) und
@@ -75,7 +75,7 @@ Story.
 
 ## Fixtures — Regeln
 
-- Ein Builder `belegFixture(overrides)` liefert eine vollständige
+- Ein Builder `documentFixture(overrides)` liefert eine vollständige
   `SourceDocumentVM` mit Vorgabewerten (Rechnung, sauber). Jede Story
   überschreibt nur, was sie beweist. Ein zweiter Builder `rechnungDetail(…)`
   bzw. `vertragDetail(…)` für die Ausprägung.
@@ -119,14 +119,14 @@ Jede Zeile ist eine Story. „Sieht" ist, was ohne Klick über der Falz steht;
 | Nr. | Export | Zustand (Achsen) | Sieht | Tut | Beweist |
 |---|---|---|---|---|---|
 | R1 | `Sauber` | `classified` · `processed` · `proposed` · erledigt `booking` · Sachverhalt 1 | Original, Fakten, „Zum Sachverhalt →", keine Mängel-Zone | nichts, Kontrolle | Rang 1–4 ohne Scrollen bei 1440 × 900 |
-| R2 | `DatumFehlt` | wie R1, aber `documentDate` NULL, offen | Zone 2: „Belegdatum fehlt" mit Weg; in den Fakten steht der Mangel an der Zeile, keine Leerzeile | Datum setzen (InlineEdit an der Mängelzeile) | häufigster Mangel ist als Mangel sichtbar, nicht als leeres Feld |
-| R3 | `WartetAufPruefung` | `processed` · Stage `extracted` · offen | Banner „extrahiert — Prüfung bestätigen"; Aktion „Prüfung bestätigen" als erste Aktion | bestätigt | das Review-Gate ist Signal + Aktion, nicht Kopf-Status |
-| R4 | `ExtraktionLaeuft` | `in_progress` · Stage `classified` | Fortschritt im Signal-Slot mit „läuft seit"; Fakten leer mit Hinweis, keine Aktionen außer Menü | wartet | Fortschritt hängt am Beleg, Fakten zeigen keine Leerzeilen |
-| R4b | `ExtraktionHaengt` | wie R4, Start vor 4 Minuten | Stall-Warnung im selben Banner, Menü bietet „Neu verarbeiten" | neu anstoßen | ein Banner, nicht zwei |
+| R2 | `DateMissing` | wie R1, aber `documentDate` NULL, offen | Zone 2: „Belegdatum fehlt" mit Weg; in den Fakten steht der Mangel an der Zeile, keine Leerzeile | Datum setzen (InlineEdit an der Mängelzeile) | häufigster Mangel ist als Mangel sichtbar, nicht als leeres Feld |
+| R3 | `AwaitingReview` | `processed` · Stage `extracted` · offen | Banner „extrahiert — Prüfung bestätigen"; Aktion „Prüfung bestätigen" als erste Aktion | bestätigt | das Review-Gate ist Signal + Aktion, nicht Kopf-Status |
+| R4 | `ExtractionRunning` | `in_progress` · Stage `classified` | Fortschritt im Signal-Slot mit „läuft seit"; Fakten leer mit Hinweis, keine Aktionen außer Menü | wartet | Fortschritt hängt am Beleg, Fakten zeigen keine Leerzeilen |
+| R4b | `ExtractionStuck` | wie R4, Start vor 4 Minuten | Stall-Warnung im selben Banner, Menü bietet „Neu verarbeiten" | neu anstoßen | ein Banner, nicht zwei |
 | R5 | `Fehlgeschlagen` | `failed` | Banner mit Ursache und nächstem Schritt; Fakten so weit vorhanden | neu verarbeiten / erledigen mit Grund | Fehler nennt Ursache **und** Weg |
-| R6 | `AnKanzlei` | `review_disposition = accounting`, Grund gesetzt | Banner „an die Kanzlei übergeben: <Grund>"; Reiter Details offen mit Korrektur-Feldern; Aktion „An Agent zurückgeben" | korrigiert oder gibt zurück | Eskalation ist sichtbar, der Weg zurück ist ein Knopf |
-| R7 | `KorrekturWerte` | wie R1, Rolle bezweifelt Betrag und Nummer | Reiter **Details**: Kopfwerte (Gegenpart, Nummer, Datum, Netto/USt/Brutto) als `InlineEdit`; Positionen mit „deaktivieren"; korrigierte Werte tragen ein Zeichen „von Hand" mit Provenienz | ändert zwei Werte, sieht die Summe nachrechnen | Korrektur betrifft mehr als einen Wert und lebt deshalb im Reiter, nicht in der Übersicht (D9) |
-| R8 | `MitBefunden` | `open_findings` 3 (Dublette `suspected`, Partner `ambiguous` mit 2 Kandidaten, Empfänger `mismatch`) | Zone 2 mit drei Mängeln, jeder mit Weg: Dublette → „Original öffnen"/„kein Duplikat"; Partner → `Combobox` mit Kandidaten; Empfänger → „gehört nicht zum Mandanten" | wählt Partner, verwirft Dublette | Mängel sind eine Zone, keine drei Kästen |
+| R6 | `WithFirm` | `review_disposition = accounting`, Grund gesetzt | Banner „an die Kanzlei übergeben: <Grund>"; Reiter Details offen mit Korrektur-Feldern; Aktion „An Agent zurückgeben" | korrigiert oder gibt zurück | Eskalation ist sichtbar, der Weg zurück ist ein Knopf |
+| R7 | `CorrectedValues` | wie R1, Rolle bezweifelt Betrag und Nummer | Reiter **Details**: Kopfwerte (Gegenpart, Nummer, Datum, Netto/USt/Brutto) als `InlineEdit`; Positionen mit „deaktivieren"; korrigierte Werte tragen ein Zeichen „von Hand" mit Provenienz | ändert zwei Werte, sieht die Summe nachrechnen | Korrektur betrifft mehr als einen Wert und lebt deshalb im Reiter, nicht in der Übersicht (D9) |
+| R8 | `WithFindings` | `open_findings` 3 (Dublette `suspected`, Partner `ambiguous` mit 2 Kandidaten, Empfänger `mismatch`) | Zone 2 mit drei Mängeln, jeder mit Weg: Dublette → „Original öffnen"/„kein Duplikat"; Partner → `Combobox` mit Kandidaten; Empfänger → „gehört nicht zum Mandanten" | wählt Partner, verwirft Dublette | Mängel sind eine Zone, keine drei Kästen |
 | R9 | `Erledigt` | erledigt `no_booking_required` mit Grund; Variante `superseded` | Kopf-Status „keine Buchung nötig" mit Tooltip-Grund; Aktion „Wieder öffnen"; Fakten lesend | öffnet wieder | ein Status im Kopf, der Grund im Tooltip, nicht als zweite Zeile |
 
 ### Andere Belegarten (`Seiten/Beleg/Andere Belegarten`)
@@ -136,19 +136,19 @@ Jede Zeile ist eine Story. „Sieht" ist, was ohne Klick über der Falz steht;
 | A1 | `Vertrag` | `contract`, Felder extrahiert, unbestätigt | Fakten aus der Vertrags-Registry (Typ, Laufzeit, Betrag, Booking-Facts mit Provenienz); Zone 2: „Felder nicht bestätigt" mit Weg | Reiter Details: bestätigt je Feld oder korrigiert | Vertrag ist dieselbe Seite mit anderen Fakten; erster Reiter heißt gleich |
 | A2 | `SammelPdf` | `document_collection`, 3 Kinder | Original ganz (23 Seiten), Fakten generisch, Zone 4: Teilbelege-Liste mit Seitenbereich als Hauptinhalt | öffnet ein Kind | Container zeigt Kinder, keinen leeren Rechnungsblock |
 | A3 | `Teilbeleg` | Kind von A2, Rechnung, Seiten 4–5 | Fakten-Zeile „Teil von <Original>, Seiten 4–5" mit Weg; sonst wie R1 | geht zum Original | Herkunft ist Fakt, nicht Banner |
-| A4 | `KontoauszugZugeordnet` | `bank_statement_pdf`, Zahlungskonto exakt getroffen (IBAN) | Fakten: Dokumentgruppe, Zahlungskonto „Testbank eG · Geschäftskonto" mit Zeichen „per IBAN erkannt", Zeitraum, Zeilenzahl; Weg „Zum Kontoauszug →" (Import-Batch) | nichts | Container hat einen Registry-Eintrag; die Seite bleibt nicht leer |
-| A5 | `KontoauszugKontoWaehlen` | `bank_statement_pdf`, Match `ambiguous` (2 Kandidaten) und Variante `none` | Zone 2: „Zahlungskonto nicht eindeutig" mit `Combobox` der Kandidaten (Name, Kennung, Bank) und Wahl; bei `none`: „kein Zahlungskonto passt" mit Weg „Zahlungskonto anlegen" (Stammdaten), **kein** Auto-Anlegen | wählt das Konto, Story zeigt den Rundlauf | die Auswahl ist ein Mangel mit Weg; Kandidaten vorgelegt, nicht geraten (bank.md R4/R5) |
-| A5b | `KontoauszugFalschZugeordnet` | wie A4, aber Rolle erkennt: falsches Konto | Fakten-Zeile Zahlungskonto mit `InlineEdit` → Kandidaten; Hinweis „Buchungen bleiben, akzeptierte brechen ab" | ordnet um | Korrektur ohne Vorbeigreifen am Bestand (`reassignImportBatch`) |
-| A6 | `KreditkarteReisekosten` | `credit_card_statement` bzw. `travel_expense_report` mit Kindern und Kartenkennung „…4711" | wie A4/A2 kombiniert: Zahlungskonto per Kartenende, Kinder darunter | nichts | dieselbe Registry-Regel wie Kontoauszug, kein Sonderpfad |
-| A7 | `OhneSubtyp` | `payment_reminder` (Mahnung), `other`; Variante Diskriminator `invoice` ohne Rechnungszeile | nur die generischen Zeilen; Zone 2: „Klassifikation prüfen" bei Widerspruch; Aktion „Klassifikation korrigieren" mit Belegart-Wahl | korrigiert die Belegart | kein leerer Rechnungsblock; Widerspruch ist ein Mangel mit Weg |
+| A4 | `StatementAssigned` | `bank_statement_pdf`, Zahlungskonto exakt getroffen (IBAN) | Fakten: Dokumentgruppe, Zahlungskonto „Testbank eG · Geschäftskonto" mit Zeichen „per IBAN erkannt", Zeitraum, Zeilenzahl; Weg „Zum Kontoauszug →" (Import-Batch) | nichts | Container hat einen Registry-Eintrag; die Seite bleibt nicht leer |
+| A5 | `StatementChooseAccount` | `bank_statement_pdf`, Match `ambiguous` (2 Kandidaten) und Variante `none` | Zone 2: „Zahlungskonto nicht eindeutig" mit `Combobox` der Kandidaten (Name, Kennung, Bank) und Wahl; bei `none`: „kein Zahlungskonto passt" mit Weg „Zahlungskonto anlegen" (Stammdaten), **kein** Auto-Anlegen | wählt das Konto, Story zeigt den Rundlauf | die Auswahl ist ein Mangel mit Weg; Kandidaten vorgelegt, nicht geraten (bank.md R4/R5) |
+| A5b | `StatementWronglyAssigned` | wie A4, aber Rolle erkennt: falsches Konto | Fakten-Zeile Zahlungskonto mit `InlineEdit` → Kandidaten; Hinweis „Buchungen bleiben, akzeptierte brechen ab" | ordnet um | Korrektur ohne Vorbeigreifen am Bestand (`reassignImportBatch`) |
+| A6 | `CreditCardTravel` | `credit_card_statement` bzw. `travel_expense_report` mit Kindern und Kartenkennung „…4711" | wie A4/A2 kombiniert: Zahlungskonto per Kartenende, Kinder darunter | nichts | dieselbe Registry-Regel wie Kontoauszug, kein Sonderpfad |
+| A7 | `WithoutSubtype` | `payment_reminder` (Mahnung), `other`; Variante Diskriminator `invoice` ohne Rechnungszeile | nur die generischen Zeilen; Zone 2: „Klassifikation prüfen" bei Widerspruch; Aktion „Klassifikation korrigieren" mit Belegart-Wahl | korrigiert die Belegart | kein leerer Rechnungsblock; Widerspruch ist ein Mangel mit Weg |
 
 ### Seite (`Seiten/Beleg/Seite`)
 
 | Nr. | Export | Zustand | Sieht | Beweist |
 |---|---|---|---|---|
-| S1 | `WirdEingeordnet` | `pending_classification`; Variante `classification_failed` mit Fehlertext | Banner „wird eingeordnet — die Seite aktualisiert sich selbst"; Belegart „Beleg", Fakten: Dateiname, Eingang; Aktionen gesperrt. Variante: Danger-Banner mit Ursache, Menü „Neu einordnen"/„Klassifikation korrigieren" | unklassifiziert ist ein Zustand der Seite, kein Fehler |
-| S2 | `LaedtFehlerNichtGefunden` | drei Zustände nebeneinander | Kopf-Skeleton; Fehler mit nächstem Schritt; „Beleg nicht gefunden" mit Weg zur Liste | drei der fünf Pflichtzustände |
-| S3 | `ImEinsatz` | R1 in `AppShell` mit Navigation und Pager `1/117`, back „← Problematische Belege" | die ganze Seite bei 1440 × 900 | Rang 1–4 über der Falz, gemessen |
+| S1 | `BeingClassified` | `pending_classification`; Variante `classification_failed` mit Fehlertext | Banner „wird eingeordnet — die Seite aktualisiert sich selbst"; Belegart „Beleg", Fakten: Dateiname, Eingang; Aktionen gesperrt. Variante: Danger-Banner mit Ursache, Menü „Neu einordnen"/„Klassifikation korrigieren" | unklassifiziert ist ein Zustand der Seite, kein Fehler |
+| S2 | `LoadingErrorNotFound` | drei Zustände nebeneinander | Kopf-Skeleton; Fehler mit nächstem Schritt; „Beleg nicht gefunden" mit Weg zur Liste | drei der fünf Pflichtzustände |
+| S3 | `InUse` | R1 in `AppShell` mit Navigation und Pager `1/117`, back „← Problematische Belege" | die ganze Seite bei 1440 × 900 | Rang 1–4 über der Falz, gemessen |
 
 Nicht anwendbar: „leer nach Filter" (die Seite hat keinen Filter).
 
@@ -175,7 +175,7 @@ Nicht anwendbar: „leer nach Filter" (die Seite hat keinen Filter).
 Fest:
 
 - [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Drei Story-Dateien + `fixtures.ts` unter `src/showcase/beleg/`, Titel wie oben
+- [ ] Drei Story-Dateien + `fixtures.ts` unter `src/showcase/document/`, Titel wie oben
 - [ ] Code englisch, Labels deutsch; kein Hex, kein px, keine lokale Label-Map; Achsenwerte aus der Registry
 - [ ] Jedes Szenario der Tabellen oben hat seinen **eigenen** Export — 22 sind
       es, nicht 19: R4b, A5b und die Variante `none` von A5 tragen eigene
@@ -260,8 +260,8 @@ Punkt.
 |---|---|---|
 | **Fest** | | |
 | `pnpm typecheck` und `pnpm build` grün | beide am 2026-09-09 gelaufen, `exit 0` | ✓ |
-| Drei Story-Dateien + `fixtures.ts` unter `src/showcase/beleg/`, Titel wie oben | Titel stimmen zeichengleich (`Seiten/Beleg/Rechnung`, `…/Andere Belegarten`, `…/Seite`). **Die dritte Datei heißt `BelegSeiteZustaende.stories.tsx`**, die Zuschnitt-Tabelle nennt `BelegSeite.stories.tsx` — der Name ist an den Rahmen gegangen (`BelegSeite.tsx`), und die Tabelle ist nicht mitgezogen. Der Rahmen selbst fehlt in der Tabelle ganz | ✗ |
-| Code englisch, Labels deutsch | **fünf neue Dateien, durchgehend deutsche Bezeichner und deutsche JSDoc**: `BELEGART`, `belegFixture`, `BELEG_TABS_OHNE_RECHNUNG` (`fixtures.ts:98`, `:21`, `:83`), `schluessel`/`art`/`titel` (`BelegSeite.tsx:45`, `:49`, `:52`), `KONTEN`/`kinder`/`konto` (`BelegAndereArten.stories.tsx:39`, `:118`, …), `berührt` (`BelegRechnung.stories.tsx`), Render-Funktionen `Waehlen`, `Umordnen`, `Ohne`, `Datum`, `Korrektur`. Die Partner-Welle desselben Tages (0139–0143) hält es englisch. Die **Story-Exportnamen** sind eine eigene Sache: die schreibt diese Spec selbst deutsch vor, gegen `CLAUDE.md` und `spec-schreiben` §6 — das entscheidet der Owner, nicht die Abnahme | ✗ |
+| Drei Story-Dateien + `fixtures.ts` unter `src/showcase/document/`, Titel wie oben | Titel stimmen zeichengleich (`Seiten/Beleg/Rechnung`, `…/Andere Belegarten`, `…/Seite`). **Die dritte Datei heißt `BelegSeiteZustaende.stories.tsx`**, die Zuschnitt-Tabelle nennt `DocumentPage.stories.tsx` — der Name ist an den Rahmen gegangen (`DocumentPage.tsx`), und die Tabelle ist nicht mitgezogen. Der Rahmen selbst fehlt in der Tabelle ganz | ✗ |
+| Code englisch, Labels deutsch | **fünf neue Dateien, durchgehend deutsche Bezeichner und deutsche JSDoc**: `BELEGART`, `documentFixture`, `DOCUMENT_TABS_WITHOUT_INVOICE` (`fixtures.ts:98`, `:21`, `:83`), `schluessel`/`art`/`titel` (`DocumentPage.tsx:45`, `:49`, `:52`), `KONTEN`/`kinder`/`konto` (`BelegAndereArten.stories.tsx:39`, `:118`, …), `berührt` (`BelegRechnung.stories.tsx`), Render-Funktionen `Waehlen`, `Umordnen`, `Ohne`, `Datum`, `Korrektur`. Die Partner-Welle desselben Tages (0139–0143) hält es englisch. Die **Story-Exportnamen** sind eine eigene Sache: die schreibt diese Spec selbst deutsch vor, gegen `CLAUDE.md` und `spec-schreiben` §6 — das entscheidet der Owner, nicht die Abnahme | ✗ |
 | …kein Hex, kein px | kein Hex ✓. **px als rohe Zahl** in der Story-Rahmung: `padding: 16`, `gap: 12`, `gap: 40`, `maxWidth: 420` an 18 Stellen. Die Präzedenz, die die Spec selbst nennt (`src/showcase/CaseCrud.stories.tsx`), setzt dort `var(--space-4, 16px)` | ✗ |
 | …keine lokale Label-Map; Achsenwerte aus der Registry | Achsenwerte ✓ (`StatusBadge axis="beleg_erledigung"`, im DOM „Gebucht", „Offen", „Keine Buchung nötig"). **Aber `BELEGART` (`fixtures.ts:98–107`) ist eine lokale Label-Map** — und die Abbildung ist längst gespiegelt: `sourceDocTypeLabel(type, classDocumentForm)` (`src/ludwig/modules/source-docs/domain/source-doc-type.ts:36`) tut genau dasselbe, samt Rückfall über `classDocumentForm`, und `SourceDocumentCard` benutzt sie in derselben Story. Sie **weichen schon ab**: A2 zeigt im Kopf „Sammelbeleg" und in der Karte „Sammel-PDF" (im DOM nachgelesen), `other` heißt hier „Beleg", dort „Sonstiger Beleg" | ✗ |
 | Alle Stories vorhanden | **21 Exporte, 21 Zeilen in den Szenarien-Tabellen** — R1–R9 + R4b (10), A1–A7 + A5b (8), S1–S3 (3). Die Zahl „19" im Kriterium ist ein Zahlwort am Rand (siehe unten) | ✓ |
@@ -270,14 +270,14 @@ Punkt.
 | Im Browser angesehen | eigener Messlauf des Abnehmenden über alle 21 Stories | ✓ |
 | **Story-Deckung (jede Zeile gegen ihren Export)** | | |
 | R1–R8 | jede Zeile hat ihren Export und zeigt, was sie verspricht (Zone 2, Signal, Reiter, Aktionen — im DOM geprüft) | ✓ |
-| R9 `Erledigt` | Kopf-Status „Keine Buchung nötig" ✓. **Zwei Zusagen fehlen**: die Variante `superseded` gibt es nicht, und der **Grund steht in keinem Tooltip** — der Rahmen baut das Abzeichen von Hand (`BelegSeite.tsx:75–79`) und übergibt `completedReason` nicht. `SourceDocumentCompletion` (`SourceDocument.tsx:186–194`) hätte genau das getan, mitsamt Datum | ✗ |
-| A5 `KontoauszugKontoWaehlen` | der Fall `ambiguous` steht ✓. **Die Variante `none`** — „kein Zahlungskonto passt" mit dem Weg „Zahlungskonto anlegen" und ausdrücklich **kein** Auto-Anlegen — fehlt ganz, obwohl sie in der Zeile steht und der Owner-Entscheid Nr. 2 daran hängt | ✗ |
-| A6 `KreditkarteReisekosten` | nur `credit_card_statement`; `travel_expense_report` kommt nicht vor, obwohl die Zeile und der Export-Name beide nennen | ✗ |
-| A7 `OhneSubtyp` | Mahnung ohne leeren Rechnungsblock ✓. Die **Variante „Diskriminator `invoice` ohne Rechnungszeile"** ist nur ein Satz im Befundtext; der Fixture ist `other` + `payment_reminder`, also gerade **kein** Widerspruch | ✗ |
+| R9 `Erledigt` | Kopf-Status „Keine Buchung nötig" ✓. **Zwei Zusagen fehlen**: die Variante `superseded` gibt es nicht, und der **Grund steht in keinem Tooltip** — der Rahmen baut das Abzeichen von Hand (`DocumentPage.tsx:75–79`) und übergibt `completedReason` nicht. `SourceDocumentCompletion` (`SourceDocument.tsx:186–194`) hätte genau das getan, mitsamt Datum | ✗ |
+| A5 `StatementChooseAccount` | der Fall `ambiguous` steht ✓. **Die Variante `none`** — „kein Zahlungskonto passt" mit dem Weg „Zahlungskonto anlegen" und ausdrücklich **kein** Auto-Anlegen — fehlt ganz, obwohl sie in der Zeile steht und der Owner-Entscheid Nr. 2 daran hängt | ✗ |
+| A6 `CreditCardTravel` | nur `credit_card_statement`; `travel_expense_report` kommt nicht vor, obwohl die Zeile und der Export-Name beide nennen | ✗ |
+| A7 `WithoutSubtype` | Mahnung ohne leeren Rechnungsblock ✓. Die **Variante „Diskriminator `invoice` ohne Rechnungszeile"** ist nur ein Satz im Befundtext; der Fixture ist `other` + `payment_reminder`, also gerade **kein** Widerspruch | ✗ |
 | A5 und R8 gegen den Abschnitt „Verhalten" | dort steht eine `Combobox` mit Tastaturwahl. Gebaut ist in A5 `PaymentAccountField` (ein `<select>`, 0145 — die bessere Wahl, aber eine andere) und in R8 zwei `TextButton` je Kandidat. Der Abschnitt ist nicht nachgezogen | ✗ |
 | S1–S3 | drei Exporte, drei Zustände; S2 zeigt lädt · Fehler · nicht gefunden nebeneinander | ✓ |
 | **Variabel** | | |
-| Jede Story hat genau **ein** Banner oder keins | alle 21 gemessen: `Sauber`, `DatumFehlt`, `KorrekturWerte`, `MitBefunden`, `Erledigt`, `Vertrag`, `SammelPdf`, `Teilbeleg`, `KontoauszugZugeordnet`, `KontoauszugKontoWaehlen`, `KontoauszugFalschZugeordnet`, `KreditkarteReisekosten`, `OhneSubtyp`, `ImEinsatz` → **0**; alle übrigen → **1**. `WirdEingeordnet` zählt 2, weil die Story **zwei Seiten** nebeneinander stellt — je Seite eines. R8 hat null Banner und stattdessen die Zone, wie der Owner-Entscheid zu Frage 3 es will | ✓ |
+| Jede Story hat genau **ein** Banner oder keins | alle 21 gemessen: `Sauber`, `DateMissing`, `CorrectedValues`, `WithFindings`, `Erledigt`, `Vertrag`, `SammelPdf`, `Teilbeleg`, `StatementAssigned`, `StatementChooseAccount`, `StatementWronglyAssigned`, `CreditCardTravel`, `WithoutSubtype`, `InUse` → **0**; alle übrigen → **1**. `BeingClassified` zählt 2, weil die Story **zwei Seiten** nebeneinander stellt — je Seite eines. R8 hat null Banner und stattdessen die Zone, wie der Owner-Entscheid zu Frage 3 es will | ✓ |
 | Zone 2 fehlt in R1/A4/R9 samt Abstand | gemessen: keine Karte „Zu klären" in den dreien | ✓ |
 | Zone 2 vorhanden in R2/R8/A1/A5/A7 mit Weg je Mangel | R8, A1, A5, A7 ✓ (je eine Karte „Zu klären", jeder Mangel mit Weg). **R2 hat keine Zone 2**: der Mangel steht nur als `missing` in den Fakten (`SourceDocumentCard` reicht ihn an `SourceDocumentFacts` durch, `:114`), also in Zone 3. Die Zeile R2 verlangt beides — „Zone 2: ‚Belegdatum fehlt' mit Weg; **in den Fakten** steht der Mangel an der Zeile". Gemessen: `„Zu klären"` kommt in R2 nicht vor | ✗ |
 | Der erste Reiter heißt in R1/A1/A2/A4/S1 gleich („Übersicht") | in allen fünf gemessen, und in allen 21: erster Reiter „Übersicht". Die Zahl der Reiter folgt `hasInvoiceRow` (6 bzw. 4) — der Fall, in dem ein leerer Reiter eine Sicht verspräche, die es nicht gibt | ✓ |
@@ -287,12 +287,12 @@ Punkt.
 | Jeder Fall, den ein Baustein nicht trägt, steht als Befund unten und in `docs/befunde-app.md` | L-266 bis L-270 stehen im Register (`docs/befunde-app.md`), L-82 ist um den Zusatz aus R4 ergänzt. Kein Sonderpfad in einer Story | ✓ |
 | **Ränder** (Nachtrag 2026-09-08) | | |
 | „Alle **19** Stories vorhanden" | die Szenarien-Tabellen führen **21** Zeilen, gebaut sind 21 Exporte. Das Zahlwort im Kriterium ist die Kopie, die gealtert ist | ✗ |
-| „die 19 der Spec plus die zwei Varianten R4b und A5b, die dort **als Zeilen ihrer Nachbarn** geführt waren" (Abschnitt „Gebaut") | stimmt nicht: R4b und A5b haben je eine **eigene** Zeile mit eigener Nummer und eigenem Export-Namen (`ExtraktionHaengt`, `KontoauszugFalschZugeordnet`). Der erklärende Satz zur Abweichung ist selbst falsch | ✗ |
+| „die 19 der Spec plus die zwei Varianten R4b und A5b, die dort **als Zeilen ihrer Nachbarn** geführt waren" (Abschnitt „Gebaut") | stimmt nicht: R4b und A5b haben je eine **eigene** Zeile mit eigener Nummer und eigenem Export-Namen (`ExtractionStuck`, `StatementWronglyAssigned`). Der erklärende Satz zur Abweichung ist selbst falsch | ✗ |
 | Zuschnitt-Tabelle: „R1–R9" / „A1–A7" | die Spannen lassen R4b und A5b aus, die zwei Zeilen weiter unten stehen; und sie nennt eine Datei, die anders heißt (siehe oben) | ✗ |
-| „nineteen stories" / „nineteen states" im Code | `BelegSeite.tsx:19` und `fixtures.ts:16` — dieselbe Zahl, dieselbe Alterung, jetzt im Code | ✗ |
+| „nineteen stories" / „nineteen states" im Code | `DocumentPage.tsx:19` und `fixtures.ts:16` — dieselbe Zahl, dieselbe Alterung, jetzt im Code | ✗ |
 | Die Szenarien-Tabellen nennen `document_collection` und `payment_reminder` weiter als Belegart | **Der Grund im Abschnitt „Gebaut" trägt**: `SourceDocType` (`document-form-mapping.ts:59–65`) führt tatsächlich genau sechs Werte, beide sind nicht darunter, und `classDocumentForm` ist der Rückfall, den `sourceDocTypeLabel` ausdrücklich bedient („Sammel-PDF", „Mahnung"). Die Tabellen benennen die Frage, nicht die Spalte — das ist vertretbar, solange der Hinweis dort steht, wo er steht | ✓ |
-| Doppelter Pfeil im Zurück-Weg | `BelegSeite.tsx:63` übergibt `label: "← " + back`, und `RecordPager` (`RecordPager.tsx:79–81`) zeichnet davor schon ein `ActionIcon action="back"`. Im DOM steht Icon **und** „← Belege". Kein anderer Aufrufer im ganzen Repo schreibt einen Pfeil in dieses Label (`grep`) — §9: keine Unicode-Icons | ✗ |
-| Der Kopf-Status ist von Hand gebaut | `BelegSeite.tsx:75–79` rechnet `completedVia ?? (completedAt ? "completed" : "open")` selbst, obwohl `SourceDocumentCompletion` (`SourceDocument.tsx:186`) genau diese Entscheidung als eigenen Export trägt — mit dem Satz „‚is it done?' must not be answered twice" daneben. Die zwei Fassungen weichen heute schon ab (der Export sagt „Offen", sobald `completedAt` fehlt; der Rahmen nicht) und der Rahmen verliert dabei `note` und Datum — daran hängt R9 | ✗ |
+| Doppelter Pfeil im Zurück-Weg | `DocumentPage.tsx:63` übergibt `label: "← " + back`, und `RecordPager` (`RecordPager.tsx:79–81`) zeichnet davor schon ein `ActionIcon action="back"`. Im DOM steht Icon **und** „← Belege". Kein anderer Aufrufer im ganzen Repo schreibt einen Pfeil in dieses Label (`grep`) — §9: keine Unicode-Icons | ✗ |
+| Der Kopf-Status ist von Hand gebaut | `DocumentPage.tsx:75–79` rechnet `completedVia ?? (completedAt ? "completed" : "open")` selbst, obwohl `SourceDocumentCompletion` (`SourceDocument.tsx:186`) genau diese Entscheidung als eigenen Export trägt — mit dem Satz „‚is it done?' must not be answered twice" daneben. Die zwei Fassungen weichen heute schon ab (der Export sagt „Offen", sobald `completedAt` fehlt; der Rahmen nicht) und der Rahmen verliert dabei `note` und Datum — daran hängt R9 | ✗ |
 
 Abgenommen von / am: zweiter Agent (nicht der Bauende), 2026-09-09 · Offene
 Punkte: so viele, wie die Tabelle mit ✗ führt. Der Reihe nach, wie sie zu
@@ -309,7 +309,7 @@ beheben sind:
 4. **Vier Szenarien halten ihre Zeile nicht**: R2 (Zone 2), R9
    (`superseded`), A5 (`none`), A6 (Reisekosten). Entweder die Story zeigt es,
    oder die Zeile sagt, warum nicht.
-5. **Der Pfeil im `back`-Label** (`BelegSeite.tsx:63`) — das Icon steht schon
+5. **Der Pfeil im `back`-Label** (`DocumentPage.tsx:63`) — das Icon steht schon
    da.
 6. **Deutsche Bezeichner und rohe px** in fünf neuen Dateien; die
    Story-Exportnamen bleiben davon unberührt, die entscheidet der Owner.
@@ -319,7 +319,7 @@ beheben sind:
 
 ## Gebaut 2026-09-09
 
-Vier Dateien unter `src/showcase/beleg/`: `fixtures.ts`, `BelegSeite.tsx` (der
+Vier Dateien unter `src/showcase/document/`: `fixtures.ts`, `DocumentPage.tsx` (der
 Rahmen, den alle Szenarien teilen), und die drei Story-Dateien mit zusammen
 **22 Exporten**. Die Spec sprach von 19; R4b, A5b und die `none`-Variante
 von A5 haben eigene Namen bekommen, statt Zeilen ihrer Nachbarn zu bleiben —
@@ -347,11 +347,11 @@ Hinweis hier.
 ### Gemessen (`scripts/cdp.mjs`)
 
 **Ein Banner oder keins, je Story** — die Regel des Signal-Slots. `Sauber`,
-`MitBefunden`, `KorrekturWerte` und `Erledigt` haben **null**, alle übrigen
+`WithFindings`, `CorrectedValues` und `Erledigt` haben **null**, alle übrigen
 genau eins. Die drei Befunde von R8 stehen als **Zone**, nicht als drei Banner;
 das ist der Owner-Entscheid zu Frage 3, im DOM nachgezählt.
 
-**Die Reiter folgen der Rechnungszeile.** `ExtraktionHaengt` zeigt **vier**
+**Die Reiter folgen der Rechnungszeile.** `ExtractionStuck` zeigt **vier**
 Reiter statt sechs, weil ohne `hasInvoiceRow` weder Positionen noch Vorsteuer
 existieren — der Fall, in dem ein leerer Reiter eine Sicht verspricht, die es
 nicht gibt.
@@ -426,7 +426,7 @@ keinen Namen, den ein Abnehmender aufrufen kann.
 ### Ränder
 
 Die Zuschnitt-Tabelle nannte die dritte Datei falsch und kannte den Rahmen
-`BelegSeite.tsx` gar nicht; „19" stand im Kriterium; „nineteen" zweimal im
+`DocumentPage.tsx` gar nicht; „19" stand im Kriterium; „nineteen" zweimal im
 Code. Alles nachgezogen. Und das Falz-Kriterium trägt die Präzisierung jetzt
 **selbst**, statt sie im Baubericht zu verstecken — dort hatte sie die
 Abnahme zwar gefunden, aber ein Kriterium, dessen Lesart woanders steht, ist

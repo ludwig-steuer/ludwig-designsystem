@@ -19,7 +19,7 @@ export function MasterDetail({
   list,
   detail,
   style,
-  detailBreit = false,
+  detailWide: detailWide = false,
   minDetail,
 }: {
   list: ReactNode;
@@ -29,7 +29,7 @@ export function MasterDetail({
    * Dreht das Gewicht um: schmale Liste, breites Detail — für Schritte, in
    * denen im Detail gearbeitet und in der Liste nur ausgewählt wird.
    */
-  detailBreit?: boolean;
+  detailWide?: boolean;
   /**
    * How much the wide half needs before the two stop standing next to each
    * other, in px. **The caller knows this, the pattern does not**: a table of
@@ -39,7 +39,7 @@ export function MasterDetail({
    */
   minDetail?: number;
 }) {
-  if (!detailBreit) {
+  if (!detailWide) {
     return (
       <div className="v2md" style={style}>
         <div>{list}</div>
@@ -58,7 +58,7 @@ export function MasterDetail({
   // when it cannot have it.
   return (
     <div
-      className="v2md v2md--detail-breit"
+      className="v2md v2md--detail-wide"
       style={
         { ...style, ...(minDetail ? { "--v2md-min": `${minDetail}px` } : {}) } as CSSProperties
       }

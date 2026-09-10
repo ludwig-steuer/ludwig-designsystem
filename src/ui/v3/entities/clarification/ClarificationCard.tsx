@@ -298,10 +298,10 @@ export function ClarificationCard({
   const isComment = c.type === "comment";
   // Die Wörter kommen aus der Domäne; eine Prop überschreibt sie nur, wenn
   // ein Aufrufer wirklich ein anderes braucht (L-10, L-11).
-  const frageWort =
+  const questionWord =
     c.questionTypeLabel ??
     (c.questionType ? clarificationQuestionTypeLabel(c.questionType) : null);
-  const herkunftWort =
+  const originWord =
     c.originLabel ?? (c.sourceModule ? clarificationModuleLabel(c.sourceModule) : null);
   // Without a loaded audit trail, asker and answerer still make a two-step
   // history — the same shape, so the card never has two ways to show a person.
@@ -347,8 +347,8 @@ export function ClarificationCard({
         </div>
         <p className="v2clc__meta">
           {isComment ? "Notiz" : `Gefragt ist: ${AUDIENCE_LABEL[c.audience]}`}
-          {frageWort ? ` · ${frageWort}` : ""}
-          {herkunftWort ? ` · ${herkunftWort}` : ""}
+          {questionWord ? ` · ${questionWord}` : ""}
+          {originWord ? ` · ${originWord}` : ""}
           {" · "}
           <Time value={c.raisedAt} format="dateTime" size="sm" />
         </p>

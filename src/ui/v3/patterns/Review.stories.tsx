@@ -38,13 +38,13 @@ const ROWS: ChecklistRow[] = [
 export const Filled: Story = {
   render: function Render() {
     const [sel, setSel] = useState<string | undefined>("4");
-    const zeile = ROWS.find((z) => z.key === sel);
+    const row = ROWS.find((z) => z.key === sel);
     return (
       <MasterDetail
         list={<Checklist rows={ROWS} activeKey={sel} onPick={setSel} />}
         detail={
-          <DetailPane title={zeile?.label} sub={zeile?.counter}>
-            {zeile ? (
+          <DetailPane title={row?.label} sub={row?.counter}>
+            {row ? (
               <>
                 <p style={{ fontSize: 13, lineHeight: 1.6, margin: "0 0 14px" }}>
                   Auszug 8 vom 29.08. weicht um 12,40 € vom gebuchten Saldo ab.
@@ -119,7 +119,7 @@ export const StateIcons: Story = {
  * dem gemeldeten Fall. Keine Zahl, kein Name daraus ist echt; was echt ist,
  * ist die **Verteilung**: nichts war prüfbar.
  */
-const NICHT_PRUEFBAR: CheckItem[] = [
+const NOT_CHECKABLE: CheckItem[] = [
   ["P-BETRAG", "Stimmt der gebuchte Betrag mit dem Beleg überein?", "Kein Belegbetrag hinterlegt — nicht vergleichbar."],
   ["P-BELEG", "Stimmt die Belegnummer mit dem Beleg überein?", "Auf dem Beleg ist keine Nummer erkannt."],
   ["P-BELEGFELD-PERIODE", "Folgt das Belegfeld der Schreibweise dieses Mandanten?", "Für diesen Mandanten ist keine Schreibweise hinterlegt."],
@@ -194,7 +194,7 @@ export const CheckItemsMixed: Story = {
 export const CheckItemsAllOpen: Story = {
   render: () => (
     <div className="v2card">
-      <CheckItems items={NICHT_PRUEFBAR} />
+      <CheckItems items={NOT_CHECKABLE} />
     </div>
   ),
 };

@@ -74,7 +74,7 @@ const CASES: CaseListItem[] = [
   }),
 ];
 
-const Rahmen = ({ children }: { children: React.ReactNode }) => (
+const Frame = ({ children }: { children: React.ReactNode }) => (
   <div style={{ maxWidth: 620, padding: "var(--space-6)" }}>{children}</div>
 );
 
@@ -92,7 +92,7 @@ const Rahmen = ({ children }: { children: React.ReactNode }) => (
  */
 export const Filled: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <CasePicker label="Sachverhalt" value={null} onChange={() => {}} cases={CASES} />
       {/* `disabled`: die Zeile ist schon zugeordnet oder gesperrt. Die Prop
           hatte bis zum 2026-09-08 keinen Nachweis — die Spec nannte eine
@@ -105,7 +105,7 @@ export const Filled: Story = {
         cases={CASES}
         disabled
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -116,9 +116,9 @@ export const Filled: Story = {
  */
 export const Empty: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <CasePicker label="Sachverhalt" value={null} onChange={() => {}} cases={[]} />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -130,12 +130,12 @@ export const EmptyAfterFilter: Story = {
   render: function Render() {
     const [value, setValue] = useState<string | null>(null);
     return (
-      <Rahmen>
+      <Frame>
         <p className="lw-body-sm" style={{ marginTop: 0 }}>
           Tippen Sie „xyz" — vier Sachverhalte sind da, keiner passt.
         </p>
         <CasePicker label="Sachverhalt" value={value} onChange={setValue} cases={CASES} />
-      </Rahmen>
+      </Frame>
     );
   },
 };
@@ -143,7 +143,7 @@ export const EmptyAfterFilter: Story = {
 /** Die Serversuche läuft. Das Feld bleibt bedienbar, die Liste verschwindet nicht. */
 export const Loading: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <CasePicker
         label="Sachverhalt"
         value={null}
@@ -152,7 +152,7 @@ export const Loading: Story = {
         onSearch={() => {}}
         loading
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -162,7 +162,7 @@ export const Loading: Story = {
  */
 export const Error: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <CasePicker
         label="Sachverhalt"
         value={null}
@@ -170,7 +170,7 @@ export const Error: Story = {
         cases={CASES}
         error="Die Suche ist gescheitert. Versuchen Sie es erneut."
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -185,25 +185,25 @@ export const Error: Story = {
 export const Roundtrip: Story = {
   render: function Render() {
     const [value, setValue] = useState<string | null>(null);
-    const [suche, setSuche] = useState<string[]>([]);
+    const [query, setQuery] = useState<string[]>([]);
     const picked = CASES.find((c) => c.caseId === value);
     return (
-      <Rahmen>
+      <Frame>
         <CasePicker
           label="Sachverhalt"
           value={value}
           onChange={setValue}
           cases={CASES}
-          onSearch={(q) => setSuche((alt) => [...alt.slice(-4), q])}
+          onSearch={(q) => setQuery((alt) => [...alt.slice(-4), q])}
         />
         <p className="lw-body-sm">
           Gewählt: <strong>{picked ? picked.caseId : "—"}</strong>
         </p>
         <p className="lw-body-sm">
           An <code className="lw-mono">onSearch</code> gegangen:{" "}
-          {suche.length === 0 ? "nichts" : suche.map((q) => `„${q}"`).join(", ")}
+          {query.length === 0 ? "nichts" : query.map((q) => `„${q}"`).join(", ")}
         </p>
-      </Rahmen>
+      </Frame>
     );
   },
 };
@@ -280,13 +280,13 @@ export const Edges: Story = {
       ),
     ];
     return (
-      <Rahmen>
+      <Frame>
         <p className="lw-body-sm" style={{ marginTop: 0 }}>
           190 Sachverhalte. Probieren Sie „Telekom", „0042", „Klimaanlage" oder
           „Quartalsende" — das letzte Wort steht in keiner Zeile.
         </p>
         <CasePicker label="Sachverhalt" value={value} onChange={setValue} cases={many} />
-      </Rahmen>
+      </Frame>
     );
   },
 };

@@ -109,7 +109,7 @@ Staging), in einem Zug:
   Dokument (361), die Historie eines Lieferanten (119) und eine Rückfrage
   (10). Neu sind `history` und `klaerung`; `bank` heißt jetzt „Kontoauszug",
   weil das die Zeile ist, die dahintersteht.
-- **`QUELLE_AUFSCHLAGBAR`** sagt, welche Art ein Ziel haben **kann** —
+- **`SOURCE_OPENABLE`** sagt, welche Art ein Ziel haben **kann** —
   gemessen: `bank`, `beleg` und `klaerung` tragen immer eine Kennung, `regel`
   in **47 von 47** Fällen keine. Wer `onOpen` an einer Art ohne Ziel setzt,
   baut einen Weg, den die Daten nicht tragen.

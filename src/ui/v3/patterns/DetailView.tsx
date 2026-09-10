@@ -96,7 +96,7 @@ export function DetailView({
         <MasterDetail
           list={aside}
           detail={children}
-          detailBreit
+          detailWide
           {...(minDetail === undefined ? {} : { minDetail })}
         />
       ) : (

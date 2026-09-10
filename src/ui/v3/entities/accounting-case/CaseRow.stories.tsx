@@ -122,7 +122,7 @@ const FULL = caseColumns({ href, counterpartyHref });
  * außerhalb der Karte — ausgerechnet die, für die der Satz gewählt wurde
  * (Abnahme 0096, M3).
  */
-function minBreite(columns: typeof FULL): number {
+function minWidth(columns: typeof FULL): number {
   const fest = columns.reduce((sum, c) => {
     const w = (c.width ?? "").trim();
     const px = /^(\d+)px$/.exec(w);
@@ -152,7 +152,7 @@ function Frame({
     <div style={{ maxWidth: 1400 }}>
       <Card>
         <CardHead title="Sachverhalte" sub={sub ?? "Musterbau GmbH · Wirtschaftsjahr 2026"} />
-        <Table cols={caseTracks(columns)} minWidth={minBreite(columns)}>
+        <Table cols={caseTracks(columns)} minWidth={minWidth(columns)}>
           <HeadRow>
             {columns.map((c) => (
               <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>

@@ -48,7 +48,7 @@ function cell(v: number | null, unit: "count" | "amount") {
 export function ComparisonTable({
   title,
   sub,
-  monatsLabels,
+  monthLabels: monthLabels,
   rows,
   selectedKey,
   onSelect,
@@ -57,7 +57,7 @@ export function ComparisonTable({
   title: string;
   sub?: string;
   /** The three previous months, in the same order as `m3`…`m1`. */
-  monatsLabels: [string, string, string, string];
+  monthLabels: [string, string, string, string];
   rows: ComparisonRow[];
   selectedKey?: string;
   onSelect?: (key: string) => void;
@@ -79,11 +79,11 @@ export function ComparisonTable({
         <HeadRow>
           <span />
           <span>Zeile</span>
-          <span className="v2num">{monatsLabels[0]}</span>
-          <span className="v2num">{monatsLabels[1]}</span>
-          <span className="v2num">{monatsLabels[2]}</span>
+          <span className="v2num">{monthLabels[0]}</span>
+          <span className="v2num">{monthLabels[1]}</span>
+          <span className="v2num">{monthLabels[2]}</span>
           <span className="v2num">Ø 3 Mon.</span>
-          <span className="v2num">{monatsLabels[3]}</span>
+          <span className="v2num">{monthLabels[3]}</span>
           <span className="v2num">Abw.</span>
         </HeadRow>
         {rows.length === 0 ? (

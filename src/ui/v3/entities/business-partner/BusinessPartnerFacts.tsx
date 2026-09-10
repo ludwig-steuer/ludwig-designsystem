@@ -71,15 +71,15 @@ export function BusinessPartnerFacts({
     wer.push(["USt-IdNr.", <MonoCell key="ust" value={partner.ustIds.join(" · ")} />]);
   }
 
-  const konten: Rows = [];
+  const accounts: Rows = [];
   if (partner.creditorAccount) {
-    konten.push(["Kreditorkonto", accountRow(partner.creditorAccount, accountHref)]);
+    accounts.push(["Kreditorkonto", accountRow(partner.creditorAccount, accountHref)]);
   }
   if (partner.debtorAccount) {
-    konten.push(["Debitorkonto", accountRow(partner.debtorAccount, accountHref)]);
+    accounts.push(["Debitorkonto", accountRow(partner.debtorAccount, accountHref)]);
   }
   if (partner.clearingAccounts.length > 0) {
-    konten.push([
+    accounts.push([
       partner.clearingAccounts.length === 1 ? "Verrechnungskonto" : "Verrechnungskonten",
       <span key="cl">
         {partner.clearingAccounts.map((a, i) => (
@@ -94,14 +94,14 @@ export function BusinessPartnerFacts({
 
   // Zero is an answer, not a gap: 77 % of the stock has never been posted to,
   // and that is the most useful thing this group says.
-  const bewegung: Rows = [
+  const activity: Rows = [
     ["Buchungen", <span key="n" className="v2num">{formatCount(partner.usageBookingCount)}</span>],
   ];
   if (partner.lastBookingDate) {
-    bewegung.push(["Letzte Buchung", <Time key="lb" value={partner.lastBookingDate} format="date" />]);
+    activity.push(["Letzte Buchung", <Time key="lb" value={partner.lastBookingDate} format="date" />]);
   }
 
-  const verhalten: Rows = [];
+  const behaviour: Rows = [];
   if (all) {
     // **The VAT profile, with the words of the domain** (L-223, resolved
     // 2026-09-10). It waited for `PARTNER_VAT_PROFILE_LABEL`: the map lived
@@ -115,24 +115,24 @@ export function BusinessPartnerFacts({
     // 2026-09-10). `unknown` is left out — a profile nobody determined is not
     // a profile, and an empty row would turn „not looked at" into „none".
     if (partner.vatProfile !== "unknown") {
-      verhalten.push(["USt-Profil", PARTNER_VAT_PROFILE_LABEL[partner.vatProfile]]);
+      behaviour.push(["USt-Profil", PARTNER_VAT_PROFILE_LABEL[partner.vatProfile]]);
     }
     if (partner.typicalNature !== "unknown") {
-      verhalten.push(["Typische Lieferung", PARTNER_NATURE_LABEL[partner.typicalNature]]);
+      behaviour.push(["Typische Lieferung", PARTNER_NATURE_LABEL[partner.typicalNature]]);
     }
     if (partner.businessDescription) {
-      verhalten.push(["Beschreibung", partner.businessDescription]);
+      behaviour.push(["Beschreibung", partner.businessDescription]);
     }
   }
 
-  const herkunft: Rows = [];
+  const origin: Rows = [];
   if (all) {
     // The maturity sits **here**, not at the top: it is `confirmed` for
     // 99.7 % of the stock, and a badge that almost always says the same thing
     // does not belong in the first place a reader looks. Where it is
     // `proposed` or `draft` it says something about the origin of the record,
     // not about the partner.
-    herkunft.push([
+    origin.push([
       "Reifegrad",
       <StatusBadge key="ob" axis="partner" status={partner.onboardingState} />,
     ]);
@@ -142,10 +142,10 @@ export function BusinessPartnerFacts({
     // source" nor in the domain. Writing the key on screen would be the same
     // mistake this file avoids two rows above, and being inconsistent about it
     // would be worse than either choice (finding L-272).
-    const anschrift = [partner.addressLine1, [partner.postalCode, partner.city].filter(Boolean).join(" ")]
+    const address = [partner.addressLine1, [partner.postalCode, partner.city].filter(Boolean).join(" ")]
       .filter((p) => p && p.length > 0)
       .join(", ");
-    if (anschrift) herkunft.push(["Anschrift", anschrift]);
+    if (address) origin.push(["Anschrift", address]);
     // **Kontakt (rank 14) is missing** — `contactEmail` and `contactPhone` are
     // columns in the database (14 % / 39 % filled) and are **not** on the
     // mirrored `BusinessPartnerDetail`. Inventing them here is what §5 forbids;
@@ -171,10 +171,10 @@ export function BusinessPartnerFacts({
         without inventing the field, so it waits for it.
       */}
       <FieldList title="Wer" tone="bare" rows={wer} />
-      {konten.length > 0 ? <FieldList title="Konten" tone="bare" rows={konten} /> : null}
-      {verhalten.length > 0 ? <FieldList title="Verhalten" tone="bare" rows={verhalten} /> : null}
-      <FieldList title="Bewegung" tone="bare" rows={bewegung} />
-      {herkunft.length > 0 ? <FieldList title="Herkunft" tone="bare" rows={herkunft} /> : null}
+      {accounts.length > 0 ? <FieldList title="Konten" tone="bare" rows={accounts} /> : null}
+      {behaviour.length > 0 ? <FieldList title="Verhalten" tone="bare" rows={behaviour} /> : null}
+      <FieldList title="Bewegung" tone="bare" rows={activity} />
+      {origin.length > 0 ? <FieldList title="Herkunft" tone="bare" rows={origin} /> : null}
     </div>
   );
 }

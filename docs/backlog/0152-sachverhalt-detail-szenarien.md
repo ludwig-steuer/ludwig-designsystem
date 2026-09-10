@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | Status | **Spec** — geschrieben 2026-09-10, Bau in drei Wellen |
-| Stufe | `src/showcase/sachverhalt/` (Seiten-Stories) · dazu Erweiterungen an `entities/accounting-case/CaseTimeline.tsx` |
+| Stufe | `src/showcase/case/` (Seiten-Stories) · dazu Erweiterungen an `entities/accounting-case/CaseTimeline.tsx` |
 | Klassen-Test | Die Seite gehört der App und lebt in `showcase/` — wie 0144 für den Beleg. Was an Bausteinen fehlt, wird `entities/` bzw. `patterns/`, nicht Teil der Seite |
 | Quelle | Design-Brief **F196** (`ludwig/app` staging `672665f8`), überbracht von `ludwig-cto` · Seitenprofil `docs/seiten/sachverhalt-detail.md` · Entitätsprofil `docs/entitaeten/accounting-case.md` |
 | Setzt voraus | **0154** (die vier Spaltenmuster) — gebaut · **0127**/`DetailView` — gebaut |
-| Präzedenz | `src/showcase/beleg/` (0144) |
+| Präzedenz | `src/showcase/document/` (0144) |
 | Spec von / am | Claude, 2026-09-10 |
 
 ## Ziel
@@ -65,7 +65,7 @@ sich gegenseitig bedingt:
 
 | Welle | Inhalt | Warum zuerst |
 |---|---|---|
-| **1 · Der Rahmen und der Referenzfall** | `SachverhaltSeite` (Rahmen), `fixtures.ts`, die drei `CaseTimeline`-Erweiterungen, **E1** `VorschlagSteht` und **E1b** `MitDatevBuchung` | E1 ist der Fall, an dem sich das Layout entscheidet: drei Spalten, Jetzt ↔ Eintrag, Rang 1–4 über der Falz. Was hier nicht trägt, trägt in keinem der anderen 19 |
+| **1 · Der Rahmen und der Referenzfall** | `CasePage` (Rahmen), `fixtures.ts`, die drei `CaseTimeline`-Erweiterungen, **E1** `ProposalPending` und **E1b** `WithDatevEntry` | E1 ist der Fall, an dem sich das Layout entscheidet: drei Spalten, Jetzt ↔ Eintrag, Rang 1–4 über der Falz. Was hier nicht trägt, trägt in keinem der anderen 19 |
 | **2 · Die übrigen Einzelfälle** | E2–E9 samt Varianten (10 Exporte) | Sie variieren denselben Rahmen — Zustände, Leerfälle, Eskalation |
 | **3 · Sammel, Dauer und die Seite** | S1–S5, P1–P4 | Die Extremfälle (120 Ereignisse, 12 Klärungen) und die Seitenzustände; sie prüfen, was die ersten beiden Wellen gebaut haben |
 

@@ -68,14 +68,14 @@ export const listHref = "?liste=partner";
 export const accountHref = (n: string) => `?account=${n}`;
 
 /** Die Wege der drei Zähler — in die Liste der Entität, auf diesen Partner gefiltert. */
-export const vorgaengeHref = {
-  faelle: "?liste=sachverhalte&partner=bp-4711",
-  belege: "?liste=belege&partner=bp-4711",
-  buchungen: "?liste=buchungen&partner=bp-4711",
+export const casesHref = {
+  cases: "?liste=sachverhalte&partner=bp-4711",
+  documents: "?liste=belege&partner=bp-4711",
+  journalEntries: "?liste=buchungen&partner=bp-4711",
 };
 
 /** Die Personenkonten je Wirtschaftsjahr — p90 sind zwei Zeilen. */
-export const KONTEN = [
-  { jahr: 2026, nummer: "70044", rolle: "Kreditor", intern: false, buchungen: 143 },
-  { jahr: 2025, nummer: "70044", rolle: "Kreditor", intern: false, buchungen: 208 },
+export const ACCOUNTS = [
+  { year: 2026, number: "70044", role: "Kreditor", intern: false, journalEntries: 143 },
+  { year: 2025, number: "70044", role: "Kreditor", intern: false, journalEntries: 208 },
 ];

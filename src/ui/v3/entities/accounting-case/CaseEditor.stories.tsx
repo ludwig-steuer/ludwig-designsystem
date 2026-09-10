@@ -20,7 +20,7 @@ const meta: Meta<typeof CaseKindEdit> = {
 export default meta;
 type Story = StoryObj<typeof CaseKindEdit>;
 
-const NUMMERN: KnownDocumentNumber[] = [
+const NUMBERS: KnownDocumentNumber[] = [
   {
     documentNumber: "RE-4471",
     source: "case_decision",
@@ -49,11 +49,11 @@ const NUMMERN: KnownDocumentNumber[] = [
 ];
 
 /** Regel 1 des Registers: kommt die Nummer aus DATEV, ist sie gesetzt. */
-const NUMMERN_MIT_DATEV: KnownDocumentNumber[] = NUMMERN.map((n, i) =>
+const NUMBERS_WITH_DATEV: KnownDocumentNumber[] = NUMBERS.map((n, i) =>
   i === 0 ? { ...n, source: "datev_correction", immutable: true } : n,
 );
 
-const Rahmen = ({ children }: { children: React.ReactNode }) => (
+const Frame = ({ children }: { children: React.ReactNode }) => (
   <div style={{ maxWidth: 620, padding: "var(--space-6)", display: "grid", gap: "var(--space-5)" }}>
     {children}
   </div>
@@ -68,11 +68,11 @@ export const Filled: Story = {
     const [kind, setKind] = useState<CaseKind>("incoming_invoice");
     const [disp, setDisp] = useState<CaseDisposition | null>("accounting");
     return (
-      <Rahmen>
+      <Frame>
         <CaseKindEdit value={kind} onSave={setKind} />
         <CaseDispositionEdit value={disp} onSave={setDisp} />
         <CaseDocumentNumberModeEdit value="single" onSave={() => {}} disabled />
-      </Rahmen>
+      </Frame>
     );
   },
 };
@@ -82,9 +82,9 @@ export const Kinds: Story = {
   render: function Render() {
     const [kind, setKind] = useState<CaseKind>("incoming_invoice");
     return (
-      <Rahmen>
+      <Frame>
         <CaseKindEdit value={kind} onSave={setKind} />
-      </Rahmen>
+      </Frame>
     );
   },
 };
@@ -98,7 +98,7 @@ export const Kinds: Story = {
  */
 export const Modes: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       {CASE_DOCUMENT_NUMBER_MODES.map((m) => (
         <CaseDocumentNumberModeEdit key={m} value={m} onSave={() => {}} />
       ))}
@@ -106,7 +106,7 @@ export const Modes: Story = {
       {CASE_DOCUMENT_NUMBER_MODES.map((m) => (
         <CaseDocumentNumberModeEdit key={`n-${m}`} value={m} onSave={() => {}} allowNone />
       ))}
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -121,10 +121,10 @@ export const Dispositions: Story = {
     const [a, setA] = useState<CaseDisposition | null>("agent");
     const [b, setB] = useState<CaseDisposition | null>(null);
     return (
-      <Rahmen>
+      <Frame>
         <CaseDispositionEdit value={a} onSave={setA} />
         <CaseDispositionEdit value={b} onSave={setB} />
-      </Rahmen>
+      </Frame>
     );
   },
 };
@@ -137,19 +137,19 @@ export const Dispositions: Story = {
 export const Downgrade: Story = {
   render: function Render() {
     const [mode, setMode] = useState<CaseDocumentNumberMode>("multiple");
-    const [letzte, setLetzte] = useState<string>("noch nichts");
+    const [last, setLast] = useState<string>("noch nichts");
     return (
-      <Rahmen>
+      <Frame>
         <CaseDocumentNumberModeEdit
           value={mode}
-          documentNumbers={NUMMERN}
+          documentNumbers={NUMBERS}
           onSave={(next, reason, keep) => {
             setMode(next);
-            setLetzte(`${next} · „${reason}" · Nummer ${keep ?? "—"}`);
+            setLast(`${next} · „${reason}" · Nummer ${keep ?? "—"}`);
           }}
         />
         <p className="lw-body-sm">
-          Zuletzt gespeichert: <strong>{letzte}</strong>
+          Zuletzt gespeichert: <strong>{last}</strong>
         </p>
         {/* **DATEV gewinnt** (Register-Regel 1): ist einer der Kandidaten
             `immutable`, ist die Frage „welche Nummer bleibt gültig" schon
@@ -159,10 +159,10 @@ export const Downgrade: Story = {
             (Abnahme M7). */}
         <CaseDocumentNumberModeEdit
           value="multiple"
-          documentNumbers={NUMMERN_MIT_DATEV}
+          documentNumbers={NUMBERS_WITH_DATEV}
           onSave={() => {}}
         />
-      </Rahmen>
+      </Frame>
     );
   },
 };
@@ -170,18 +170,18 @@ export const Downgrade: Story = {
 /** Speichern läuft: die Felder sind gesperrt, nichts springt. */
 export const Pending: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <CaseKindEdit value="incoming_invoice" onSave={() => {}} pending />
       <CaseDispositionEdit value="accounting" onSave={() => {}} pending />
       <CaseDocumentNumberModeEdit value="single" onSave={() => {}} pending />
-    </Rahmen>
+    </Frame>
   ),
 };
 
 /** `onSave` lehnt ab: das Feld bleibt offen und zeigt den Satz. */
 export const Failed: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <CaseKindEdit
         value="incoming_invoice"
         onSave={() => {
@@ -197,7 +197,7 @@ export const Failed: Story = {
         onSave={() => {}}
         error="Der Sachverhalt ist inzwischen geschlossen — die Zuständigkeit lässt sich nicht mehr ändern."
       />
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -208,7 +208,7 @@ export const Failed: Story = {
  */
 export const Invalid: Story = {
   render: () => (
-    <Rahmen>
+    <Frame>
       <CaseDocumentNumberModeEdit value="single" onSave={() => {}} />
       <p className="lw-body-sm">
         Angeboten sind nur <code className="lw-mono">multiple</code> und{" "}
@@ -216,7 +216,7 @@ export const Invalid: Story = {
         <code className="lw-mono">single</code> (der eigene Wert) und nicht{" "}
         <code className="lw-mono">none</code>.
       </p>
-    </Rahmen>
+    </Frame>
   ),
 };
 
@@ -230,34 +230,34 @@ export const Roundtrip: Story = {
     const [disp, setDisp] = useState<CaseDisposition | null>("agent");
     const [mode, setMode] = useState<CaseDocumentNumberMode>("single");
     const [log, setLog] = useState<string[]>([]);
-    const merke = (s: string) => setLog((alt) => [...alt.slice(-3), s]);
+    const remember = (s: string) => setLog((alt) => [...alt.slice(-3), s]);
     return (
-      <Rahmen>
+      <Frame>
         <CaseKindEdit
           value={kind}
           onSave={(n) => {
             setKind(n);
-            merke(`Art → ${n}`);
+            remember(`Art → ${n}`);
           }}
         />
         <CaseDispositionEdit
           value={disp}
           onSave={(n) => {
             setDisp(n);
-            merke(`Zuständigkeit → ${n}`);
+            remember(`Zuständigkeit → ${n}`);
           }}
         />
         <CaseDocumentNumberModeEdit
           value={mode}
           onSave={(n, reason) => {
             setMode(n);
-            merke(`Modus → ${n} („${reason}")`);
+            remember(`Modus → ${n} („${reason}")`);
           }}
         />
         <p className="lw-body-sm">
           Gespeichert: {log.length === 0 ? "nichts" : log.join(" · ")}
         </p>
-      </Rahmen>
+      </Frame>
     );
   },
 };
@@ -290,7 +290,7 @@ export const InUse: Story = {
               <CaseDispositionEdit value={disp} onSave={setDisp} />
               <CaseDocumentNumberModeEdit
                 value={mode}
-                documentNumbers={NUMMERN}
+                documentNumbers={NUMBERS}
                 onSave={(n) => setMode(n)}
               />
             </div>

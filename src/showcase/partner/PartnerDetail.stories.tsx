@@ -9,8 +9,8 @@ import { StatusCallout } from "@/ui/v3/primitives/StatusCallout";
 import { Card, CardHead, Table, Row, HeadRow } from "@/ui/v3/primitives/Table";
 import { TextButton } from "@/ui/v3/primitives/TextButton";
 
-import { PartnerSeite } from "./PartnerSeite";
-import { accountHref, KONTEN, partnerFixture, vorgaengeHref } from "./fixtures";
+import { PartnerPage } from "./PartnerPage";
+import { accountHref, ACCOUNTS, partnerFixture, casesHref } from "./fixtures";
 
 /**
  * Der Geschäftspartner — die Seite hinter dem Fuß-Knopf des Drawers (0127).
@@ -20,20 +20,20 @@ import { accountHref, KONTEN, partnerFixture, vorgaengeHref } from "./fixtures";
  * erfunden; die Zahlen, die den Schnitt begründen, stehen im Seitenprofil
  * `docs/seiten/partner-detail.md`.
  */
-const meta: Meta<typeof PartnerSeite> = {
+const meta: Meta<typeof PartnerPage> = {
   title: "Seiten/Geschäftspartner/Detail",
-  component: PartnerSeite,
+  component: PartnerPage,
   parameters: { layout: "fullscreen" },
 };
 export default meta;
-type Story = StoryObj<typeof PartnerSeite>;
+type Story = StoryObj<typeof PartnerPage>;
 
 /**
  * Die Personenkonten je Wirtschaftsjahr — **in der Übersicht**, nicht in
  * einem eigenen Reiter. Rang 2 der Seite, und p90 sind zwei Zeilen: ein
  * Reiter dafür wäre ein Klick auf die wichtigste Antwort.
  */
-function Konten() {
+function Accounts() {
   return (
     <Card>
       <CardHead title="Personenkonten" sub="je Wirtschaftsjahr" />
@@ -44,14 +44,14 @@ function Konten() {
           <th scope="col">Rolle</th>
           <th scope="col" className="v2num">Buchungen</th>
         </HeadRow>
-        {KONTEN.map((k) => (
-          <Row key={k.jahr}>
-            <span>{k.jahr}</span>
-            <a className="v2link" href={accountHref(k.nummer)}>
-              <MonoCell value={k.nummer} />
+        {ACCOUNTS.map((k) => (
+          <Row key={k.year}>
+            <span>{k.year}</span>
+            <a className="v2link" href={accountHref(k.number)}>
+              <MonoCell value={k.number} />
             </a>
-            <span>{k.rolle}</span>
-            <span className="v2num">{k.buchungen}</span>
+            <span>{k.role}</span>
+            <span className="v2num">{k.journalEntries}</span>
           </Row>
         ))}
       </Table>
@@ -65,16 +65,16 @@ function Konten() {
  * Entität, auf diesen Partner gefiltert — dort steht sie mit Sortierung,
  * Filter und Pager, hier stünde sie ohne.
  */
-function Vorgaenge({
-  faelle = 0,
-  belege = 0,
-  buchungen = 0,
+function Cases({
+  cases: cases = 0,
+  documents: documents = 0,
+  journalEntries: journalEntries = 0,
 }: {
-  faelle?: number;
-  belege?: number;
-  buchungen?: number;
+  cases?: number;
+  documents?: number;
+  journalEntries?: number;
 }) {
-  const zeile = (n: number, wort: string, href: string) =>
+  const row = (n: number, wort: string, href: string) =>
     [
       wort,
       n === 0 ? (
@@ -97,9 +97,9 @@ function Vorgaenge({
         <FieldList
           tone="bare"
           rows={[
-            zeile(faelle, "Sachverhalte", vorgaengeHref.faelle),
-            zeile(belege, "Belege", vorgaengeHref.belege),
-            zeile(buchungen, "Buchungssätze", vorgaengeHref.buchungen),
+            row(cases, "Sachverhalte", casesHref.cases),
+            row(documents, "Belege", casesHref.documents),
+            row(journalEntries, "Buchungssätze", casesHref.journalEntries),
           ]}
         />
       </div>
@@ -107,16 +107,16 @@ function Vorgaenge({
   );
 }
 
-function Uebersicht({
+function Overview({
   partner,
-  faelle,
-  belege,
-  buchungen,
+  cases: cases,
+  documents: documents,
+  journalEntries: journalEntries,
 }: {
   partner: ReturnType<typeof partnerFixture>;
-  faelle?: number;
-  belege?: number;
-  buchungen?: number;
+  cases?: number;
+  documents?: number;
+  journalEntries?: number;
 }) {
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -131,8 +131,8 @@ function Uebersicht({
           <BusinessPartnerFacts partner={partner} accountHref={accountHref} />
         </div>
       </Card>
-      <Konten />
-      <Vorgaenge faelle={faelle} belege={belege} buchungen={buchungen} />
+      <Accounts />
+      <Cases cases={cases} documents={documents} journalEntries={journalEntries} />
     </div>
   );
 }
@@ -150,13 +150,13 @@ function Uebersicht({
  * `updateBusinessPartner` existiert nicht, das Agenten-Tool ist mit F127
  * gestrichen.
  */
-export const Normalfall: Story = {
+export const Typical: Story = {
   render: () => {
     const partner = partnerFixture();
     return (
-      <PartnerSeite partner={partner}>
-        <Uebersicht partner={partner} faelle={4} belege={3} buchungen={12} />
-      </PartnerSeite>
+      <PartnerPage partner={partner}>
+        <Overview partner={partner} cases={4} documents={3} journalEntries={12} />
+      </PartnerPage>
     );
   },
 };
@@ -171,7 +171,7 @@ export const Normalfall: Story = {
  * USt-Profil und typische Lieferung leer sind (11 % bzw. 14 % im Gesamtbestand,
  * gegenüber 75 % und 79 % bei den benutzten).
  */
-export const OhneBewegung: Story = {
+export const NoActivity: Story = {
   render: () => {
     const partner = partnerFixture({
       legalName: "Testhandel Nord OHG",
@@ -187,9 +187,9 @@ export const OhneBewegung: Story = {
       addressLine1: null,
     });
     return (
-      <PartnerSeite partner={partner} position={4711}>
-        <Uebersicht partner={partner} />
-      </PartnerSeite>
+      <PartnerPage partner={partner} position={4711}>
+        <Overview partner={partner} />
+      </PartnerPage>
     );
   },
 };
@@ -201,7 +201,7 @@ export const OhneBewegung: Story = {
  * Er steht als **ein** Knopf im Signal-Slot und dann nicht zusätzlich im Kopf
  * (D8, Ausnahme für den nächsten Schritt aus dem Zustand).
  */
-export const Vorgeschlagen: Story = {
+export const Proposed: Story = {
   render: () => {
     const partner = partnerFixture({
       legalName: "Musterfirma Logistik GmbH",
@@ -212,7 +212,7 @@ export const Vorgeschlagen: Story = {
       source: "manual",
     });
     return (
-      <PartnerSeite
+      <PartnerPage
         partner={partner}
         signal={
           <StatusCallout
@@ -224,8 +224,8 @@ export const Vorgeschlagen: Story = {
           />
         }
       >
-        <Uebersicht partner={partner} belege={2} />
-      </PartnerSeite>
+        <Overview partner={partner} documents={2} />
+      </PartnerPage>
     );
   },
 };
@@ -238,7 +238,7 @@ export const Vorgeschlagen: Story = {
  * anderen die Nummer steht, **nichts**. Das ist Zweifel 2 des Seitenprofils,
  * und hier ist er behoben.
  */
-export const Abrechner: Story = {
+export const BillingProvider: Story = {
   render: () => {
     const partner = partnerFixture({
       legalName: "Musterfirma Reisekosten-Abrechnung",
@@ -255,9 +255,9 @@ export const Abrechner: Story = {
       lastBookingDate: "2026-08-30",
     });
     return (
-      <PartnerSeite partner={partner}>
-        <Uebersicht partner={partner} buchungen={38} />
-      </PartnerSeite>
+      <PartnerPage partner={partner}>
+        <Overview partner={partner} journalEntries={38} />
+      </PartnerPage>
     );
   },
 };
@@ -272,7 +272,7 @@ export const Abrechner: Story = {
  * Deshalb steht sie im Kopf, direkt hinter der Rolle, und nicht erst in den
  * Fakten.
  */
-export const Namensdublette: Story = {
+export const DuplicateName: Story = {
   render: () => {
     const a = partnerFixture({ city: "Musterstadt", creditorAccount: { accountNumber: "70044", isInternal: false } });
     const b = partnerFixture({
@@ -285,12 +285,12 @@ export const Namensdublette: Story = {
     });
     return (
       <div style={{ display: "grid", gap: 40 }}>
-        <PartnerSeite partner={a} position={12}>
-          <Uebersicht partner={a} faelle={4} belege={3} buchungen={12} />
-        </PartnerSeite>
-        <PartnerSeite partner={b} position={13}>
-          <Uebersicht partner={b} buchungen={6} />
-        </PartnerSeite>
+        <PartnerPage partner={a} position={12}>
+          <Overview partner={a} cases={4} documents={3} journalEntries={12} />
+        </PartnerPage>
+        <PartnerPage partner={b} position={13}>
+          <Overview partner={b} journalEntries={6} />
+        </PartnerPage>
       </div>
     );
   },
@@ -309,23 +309,23 @@ export const Reiter: Story = {
     const partner = partnerFixture();
     return (
       <div style={{ display: "grid", gap: 40 }}>
-        <PartnerSeite partner={partner} tab="details">
+        <PartnerPage partner={partner} tab="details">
           <Card>
             <CardHead title="Details" sub="alle Felder des Partners" />
             <div style={{ padding: "12px 20px 16px" }}>
               <BusinessPartnerFacts partner={partner} all accountHref={accountHref} />
             </div>
           </Card>
-        </PartnerSeite>
+        </PartnerPage>
 
-        <PartnerSeite partner={partner} tab="rohdaten">
+        <PartnerPage partner={partner} tab="rohdaten">
           <Card>
             <CardHead title="Rohdaten" sub="der Satz, wie er in der Tabelle steht" />
             <div style={{ padding: "12px 20px 16px" }}>
               <RawRecord record={partner as unknown as Record<string, unknown>} />
             </div>
           </Card>
-        </PartnerSeite>
+        </PartnerPage>
       </div>
     );
   },

@@ -5,7 +5,7 @@
 | Status | offen — vorgemerkt 2026-09-10, Bau nach den offenen 0152-Wellen |
 | Stufe | `src/showcase/konto/` (Seiten-Stories), dazu ein Ausbau an `accountEntryColumns` (0067) |
 | Quelle | Design-Brief **F198** (`ludwig/app`, `docs/backlog/F198-account-detail-scenarios-design-brief.md`), überbracht von `ludwig-manager`, Owner-Freigabe 2026-09-10 |
-| Präzedenz | `src/showcase/beleg/` (0144), `src/showcase/sachverhalt/` (0152) |
+| Präzedenz | `src/showcase/document/` (0144), `src/showcase/case/` (0152) |
 | Angelegt | Claude, 2026-09-10 |
 
 ## Auftrag (Kurzfassung des Briefs)

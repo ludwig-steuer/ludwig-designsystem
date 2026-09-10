@@ -41,7 +41,7 @@ Schnittstelle, die sie danach noch einmal umbenennen muss.
 **Rund 80 Story-Exportnamen** (`Gefuellt`, `Laedt`, `MitAuswahl`, …):
 `grep -rhoE '^export const [A-Za-z]+' src/ui/v3 --include='*.stories.tsx'`.
 
-**Props und interne Namen** (`gruppen`, `tasten`, `monatsLabels`, `detailBreit`,
+**Props und interne Namen** (`gruppen`, `tasten`, `monthLabels`, `detailWide`,
 `zelle()`, `inEingabe()` …) sowie **Kommentare und JSDoc** in allen Dateien:
 nicht gezählt, werden je Datei beim Anfassen mitgenommen.
 

@@ -110,8 +110,8 @@ export const Interactive: Story = {
 /** Im Editor: zwei Felder nebeneinander, die Ziffern fluchten. */
 export const InEditor: Story = {
   render: function Render() {
-    const [soll, setSoll] = useState<number | null>(1249.9);
-    const [haben, setHaben] = useState<number | null>(1249.9);
+    const [debit, setDebit] = useState<number | null>(1249.9);
+    const [credit, setCredit] = useState<number | null>(1249.9);
     return (
       <div
         style={{
@@ -125,8 +125,8 @@ export const InEditor: Story = {
           background: "var(--color-surface)",
         }}
       >
-        <AmountInput label="Soll" value={soll} onChange={setSoll} size="sm" />
-        <AmountInput label="Haben" value={haben} onChange={setHaben} size="sm" />
+        <AmountInput label="Soll" value={debit} onChange={setDebit} size="sm" />
+        <AmountInput label="Haben" value={credit} onChange={setCredit} size="sm" />
       </div>
     );
   },

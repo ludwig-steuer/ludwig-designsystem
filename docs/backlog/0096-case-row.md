@@ -554,7 +554,7 @@ auswählt. **Blockiert nicht.**
 
 **N1 (neu) — die Mindestbreite ist 25 px kleiner als der Spaltensatz selbst.**
 *Kriterium:* §9 („ein Baustein mit `minWidth` … scrollt, statt abzuschneiden")
-und die M3-Reparatur. *Ort:* `CaseRow.stories.tsx:116–122` — `minBreite()`
+und die M3-Reparatur. *Ort:* `CaseRow.stories.tsx:116–122` — `minWidth()`
 rechnet für jede Spur ohne reines `px`-Maß **175**, während
 `case-columns.tsx:103` dem Anzeigenamen `minmax(**200px**, 1fr)` gibt. Der
 Kommentar der Story (Z. 113: „24ch ≈ 175 px") widerspricht dabei dem
@@ -568,7 +568,7 @@ gescrollt bleibt rechts neben der letzten Spalte **0,0 px**, links stehen
 18 px (`padding: 9px 18px` bzw. `12px 18px`). In `…--columns` derselbe Effekt
 bei 700 px; ab 1100 px trägt der Satz und der Abstand ist wieder 18 px.
 Abgeschnitten wird **nichts** — der Scroller führt bis 1608 —, verloren geht
-das rechte Polster. *Kleinster Weg:* in `minBreite()` 200 statt 175 und den
+das rechte Polster. *Kleinster Weg:* in `minWidth()` 200 statt 175 und den
 `24ch`-Kommentar berichtigen. **Blockiert nicht.**
 
 **M7a (Rest aus der Vorrunde) — vier Firmen, eine Geschäftspartner-Id.**
@@ -645,7 +645,7 @@ Wiedervorlage offen (0117).
 Urteil war „zurück", kein Mangel blockierte. Alle vier erledigt, gemessen
 gegen den Dev-Server `http://localhost:6107` über CDP.
 
-**N1 — die Mindestbreite liest den Boden aus dem Satz.** `minBreite()` rechnete
+**N1 — die Mindestbreite liest den Boden aus dem Satz.** `minWidth()` rechnete
 flexible Spuren mit einer festen 175 („24ch ≈ 175 px"); der Satz gibt Rang 1
 seit der Nacharbeit `minmax(200px, 1fr)`. Eine Zahl neben der Wahrheit
 veraltet mit dem nächsten Commit — jetzt wird der Boden aus dem `minmax()`
@@ -770,7 +770,7 @@ Die Frage des Auftrags, Punkt für Punkt — **nein, keiner der vier**:
   Prop, kein neuer Wert in `CaseColumn` — `documents` und `bankTransactions`
   standen seit der Neufassung 2026-09-06 in der Union, sie hatte nur nie
   jemand gerendert.
-- **N1 (Mindestbreite).** Berührt allein `minBreite()` in der Story-Datei
+- **N1 (Mindestbreite).** Berührt allein `minWidth()` in der Story-Datei
   (Z. 126–141), eine Funktion, die weder exportiert noch von der Komponente
   gelesen wird. `Table minWidth` ist eine Prop von `Table`, nicht von `CaseRow`.
 - **M7a / M7b.** Fixture-Werte (`counterpartyPartnerId`,
@@ -788,7 +788,7 @@ Die Frage des Auftrags, Punkt für Punkt — **nein, keiner der vier**:
 
 - **M5 zu.** Zweiter Kopf in `…--columns` gemessen: `Belege` und `Zahlungen`
   stehen, sechs Zeilen im Bild, `a a` = 0.
-- **N1 zu (soweit schlank prüfbar).** `minBreite()` liest den Boden jetzt aus
+- **N1 zu (soweit schlank prüfbar).** `minWidth()` liest den Boden jetzt aus
   dem `minmax()` (`CaseRow.stories.tsx:137`) statt aus einer festen 175, und der
   Kommentar sagt das auch. Die **Messung** (client = scroll) gehört zu 0119 und
   wurde hier nicht wiederholt.
@@ -845,7 +845,7 @@ CLAUDE.md, „Code nur Englisch. Bezeichner, Props, Typen, Kommentare … eine
 Datei, die ohnehin angefasst wird, bekommt englische Namen." *Ort:*
 `CaseRow.stories.tsx` — `boden` (Z. 137, aus der N1-Reparatur), `zaehler` und
 `zaehlerCols` (Z. 223–224, aus der M5-Reparatur); dazu die schon vorher
-vorhandenen `minBreite` (Z. 126) und `fest` (Z. 127). *Befund:* `git show
+vorhandenen `minWidth` (Z. 126) und `fest` (Z. 127). *Befund:* `git show
 f1913b6 -- CaseRow.stories.tsx` zeigt `boden`, `zaehler`, `zaehlerCols` als
 **neue** Zeilen derselben Nacharbeit — die Datei wurde ohnehin angefasst, die
 Regel greift also. `pnpm check:language` bleibt grün, weil er Story-Dateien

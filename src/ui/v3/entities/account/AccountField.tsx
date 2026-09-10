@@ -31,18 +31,18 @@ export interface AccountCandidate {
   reason?: string;
 }
 
-export type AccountGroup = "agent" | "partner" | "aehnlich" | "belegposition" | "alle";
+export type AccountGroup = "agent" | "partner" | "similar" | "documentLine" | "all";
 
 /** The words of the four candidate groups — where a suggestion came from. */
 export const ACCOUNT_GROUP_LABEL: Record<AccountGroup, string> = {
   agent: "Vorschlag des Agenten",
   partner: "Zuletzt bei dieser Gegenpartei",
-  aehnlich: "Ähnliche Belege",
-  belegposition: "Aus der Beleg-Position",
-  alle: "Alle Konten",
+  similar: "Ähnliche Belege",
+  documentLine: "Aus der Beleg-Position",
+  all: "Alle Konten",
 };
 
-const GROUP_ORDER: AccountGroup[] = ["agent", "partner", "aehnlich", "belegposition", "alle"];
+const GROUP_ORDER: AccountGroup[] = ["agent", "partner", "similar", "documentLine", "all"];
 
 /**
  * @when    Choosing an account, with candidates from agent, partner, similar and document line — and, with `onOpenLedger`, the way to its account sheet.
@@ -151,7 +151,7 @@ export function AccountField({
       items: (candidates[g] ?? []).filter(matches),
     })).filter((g) => g.items.length > 0);
     if (hits && hits.length > 0) {
-      out.push({ key: "alle" as AccountGroup, label: ACCOUNT_GROUP_LABEL.alle, items: hits });
+      out.push({ key: "all" as AccountGroup, label: ACCOUNT_GROUP_LABEL.all, items: hits });
     }
     return out;
   }, [candidates, query, hits]);

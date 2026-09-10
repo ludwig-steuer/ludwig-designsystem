@@ -13,7 +13,7 @@ const L = ({ children }: { children: React.ReactNode }) => (
 );
 
 const MOMENT = "2026-08-26T09:12:00+02:00";
-const vorDreiTagen = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
 
 /** Fünf Arten zu sagen, wann — die absolute Zeit steht immer im `title`. */
 export const Formats: Story = {
@@ -29,11 +29,11 @@ export const Formats: Story = {
       </div>
       <div>
         <L>relative — zeigen Sie darauf, die absolute Zeit steht im Tooltip</L>
-        <Time value={vorDreiTagen} format="relative" />
+        <Time value={threeDaysAgo} format="relative" />
       </div>
       <div>
         <L>age — wie lange etwas schon liegt, ohne Datum davor</L>
-        <Time value={vorDreiTagen} format="age" />
+        <Time value={threeDaysAgo} format="age" />
       </div>
       <div>
         <L>month — für Achsen und Gruppenköpfe</L>
@@ -191,7 +191,7 @@ export const InUse: Story = {
           entries={[
             { id: "e1", at: "2026-08-26", title: "Beleg eingegangen", kind: "Beleg", actor: "Mandant" },
             { id: "e2", at: MOMENT, title: "Buchung vorgeschlagen", kind: "Buchung", actor: "Agent" },
-            { id: "e3", at: vorDreiTagen, title: "Rückfrage gestellt", kind: "Rückfrage", actor: "Kanzlei" },
+            { id: "e3", at: threeDaysAgo, title: "Rückfrage gestellt", kind: "Rückfrage", actor: "Kanzlei" },
           ]}
         />
       </div>

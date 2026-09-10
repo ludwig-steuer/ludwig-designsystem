@@ -51,14 +51,14 @@ Standardkomponente hat einen Titel — er wurde nur nicht benutzt.
 
 | Prop | Wo | Bedeutung | Nachweis |
 |---|---|---|---|
-| `defects` · `vat` · `history` | `SourceDocumentCard` | Die drei Boxen als Slots. Slots und nicht Daten, weil jede aus einer anderen Quelle kommt und die Karte nichts lädt (E2) | `Sauber`, `MitBefunden` |
+| `defects` · `vat` · `history` | `SourceDocumentCard` | Die drei Boxen als Slots. Slots und nicht Daten, weil jede aus einer anderen Quelle kommt und die Karte nichts lädt (E2) | `Sauber`, `WithFindings` |
 | `counterpartyHref` | Karte, Fakten | Der Gegenpart als Weg zum Geschäftspartner | `Sauber` |
 | `batchHref` | Karte, Fakten, Completion | Der Buchungsstapel, sobald es ihn gibt | `Sauber` |
 | `title` | `SourceDocumentFacts` | Der Kopf der Box; `null` im Drawer, wo der Drawer-Titel es sagt | `Sauber` |
 | `explainCompletion` | `SourceDocumentFacts` | Der Grund als Satz statt nur im Hover | `Erledigt` |
 | `explain` · `href` | `SourceDocumentCompletion` | Dasselbe eine Ebene tiefer | `Erledigt` |
 | `children` | `StatusInfoButton` | Der Auslöser selbst statt des (i) — die Marke wird klickbar | `Erledigt` |
-| `defects` · `actions` · `clarifications` | `SourceDocumentDefects` | Mängel aus `docDefects()`, je Art ein Weg, dazu die Rückfragen | `MitBefunden`, `KontoauszugKontoWaehlen` |
+| `defects` · `actions` · `clarifications` | `SourceDocumentDefects` | Mängel aus `docDefects()`, je Art ein Weg, dazu die Rückfragen | `WithFindings`, `StatementChooseAccount` |
 | `rates` · `deductible` · `specialCase` | `SourceDocumentVat` | Aufteilung nach Satz (erst ab zwei), Vorsteuer mit Grund | `Sauber` |
 | `entries` · `total` · `href` | `SourceDocumentHistory` | Die vier jüngsten Schritte, der Rest hinter einem Weg | `Sauber` |
 
@@ -86,10 +86,10 @@ Standardkomponente hat einen Titel — er wurde nur nicht benutzt.
 | Story | Beweist |
 |---|---|
 | `Sauber` | Die vier Boxen im Normalfall, Gegenpart verlinkt, „nichts offen" als Aussage |
-| `MitBefunden` | Vier Mängel aus `docDefects()` mit ihren Wegen, dazu eine offene Rückfrage in derselben Box |
+| `WithFindings` | Vier Mängel aus `docDefects()` mit ihren Wegen, dazu eine offene Rückfrage in derselben Box |
 | `Erledigt` | „Keine Buchung nötig" mit dem eigenen Grund als Satz; daneben `superseded` |
-| `KontoauszugZugeordnet` | Die Zeile Zahlungskonto aus `paymentAccount` (L-266) |
-| `KontoauszugKontoWaehlen` | Der Mangel `payment_account` mit `PaymentAccountField` als Weg (L-268) |
+| `StatementAssigned` | Die Zeile Zahlungskonto aus `paymentAccount` (L-266) |
+| `StatementChooseAccount` | Der Mangel `payment_account` mit `PaymentAccountField` als Weg (L-268) |
 
 ## Was die Staging-Erhebung vom 2026-09-10 dazu sagt
 
@@ -99,7 +99,7 @@ N = 554). Zwei Zahlen gehören in die Abnahme, weil sie die Spec berühren:
 - **Die Mängel-Zone trägt im Regelfall eine Zeile, nie mehr als vier.**
   44 % der Belege haben gar keinen Zustand, 35 % einen, 14 % zwei; drei oder
   mehr sind 6 %, mehr als vier gibt es nicht. Die Box muss also **nicht**
-  kürzen — und die Story `MitBefunden` mit vier Zeilen ist der obere Rand des
+  kürzen — und die Story `WithFindings` mit vier Zeilen ist der obere Rand des
   Bestands, nicht der Alltag. (Die erste Fassung der Erhebung nannte 35 % für
   „drei oder mehr"; das war ein NULL-Fehler in der Abfrage und ist dort
   richtiggestellt.)
