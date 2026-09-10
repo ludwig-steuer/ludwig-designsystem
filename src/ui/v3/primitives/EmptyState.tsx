@@ -5,26 +5,26 @@ export interface EmptyStateProps {
   icon?: ReactNode;
   /** Was fehlt, in einem Satzteil: „Keine offenen Belege". */
   title: string;
-  /** Warum es leer ist und was als Nächstes hilft. */
+  /** Why it is empty and what helps next. */
   description?: ReactNode;
-  /** Der Weg heraus — meist ein Button. */
+  /** The way out — usually a button. */
   action?: ReactNode;
-  /** Ohne Innenabstand, wenn schon eine Karte darum liegt. */
+  /** Without padding, when a card already surrounds it. */
   inline?: boolean;
   className?: string;
 }
 
 /**
- * „Nichts da" mit Grund und Ausweg.
+ * "Nothing here", with reason and way out.
  *
- * Drei Leerheiten sind zu unterscheiden (V9, T6) und brauchen verschiedene
- * Texte: noch nichts angelegt · alles erledigt · nichts trifft den Filter.
- * Der `title` sagt welche, die `description` sagt, was jetzt hilft.
+ * Three kinds of empty need different texts (V9, T6): nothing created yet ·
+ * everything done · nothing matches the filter. The `title` says which, the
+ * `description` what helps now.
  *
- * @when    Eine Liste, Karte oder Seite hat keinen Inhalt zu zeigen.
- * @instead Leere Tabelle innerhalb einer Karte → EmptyRow (bleibt im Raster).
- *          Ein Fehler statt Leere → ErrorRow bzw. StatusCallout tone="danger".
- *          Noch am Laden → TableLoading.
+ * @when    A list, card or page has no content to show.
+ * @instead An empty table inside a card → EmptyRow (stays in the grid).
+ *          An error instead of emptiness → ErrorRow or StatusCallout tone="danger".
+ *          Still loading → TableLoading.
  */
 export function EmptyState({
   icon,

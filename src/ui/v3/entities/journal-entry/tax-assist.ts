@@ -1,23 +1,17 @@
 /**
- * GUI-Steuerassistenz (BL-121) — pure Rechenlogik des manuellen Buchungs-Editors.
+ * Tax assistance of the journal entry editor (BL-121) — pure arithmetic.
  *
- * Der Editor arbeitet mit BRUTTO-Semantik: eine Sachzeile mit VSt-wirksamem
- * BU-Schlüssel (8/9) trägt den Bruttobetrag, die zugehörige Vorsteuer-Zeile
- * ist ABGELEITET — sie wird beim Anzeigen live gerechnet und beim Speichern
- * als explizite Zeile mit `taxForLineNo`-Verknüpfung expandiert (dasselbe
- * Modell wie `grossLines` im Agent-Submit). Beim Öffnen einer bestehenden
- * Buchung werden explizite Netto+Steuer-Paare wieder in die Brutto-Sicht
- * eingeklappt.
+ * The editor works in **gross**: a line with an input-tax key (8/9) carries the
+ * gross amount; its input-tax line is derived — computed live for display and
+ * expanded into an explicit line on save (`taxForLineNo`), the same model as
+ * `grossLines` in the agent submit. Opening a stored entry folds net + tax
+ * pairs back into gross.
  *
- * Rundung: nur EIN Betrag ist autoritativ (brutto). netto = round(brutto /
- * (1+satz)), steuer = brutto − netto → Netto + Steuer = Brutto per
- * Konstruktion, keine Kettenrundung, keine Cent-Drift.
+ * Rounding: only gross is authoritative. net = round(gross / (1 + rate)),
+ * tax = gross − net, so net + tax = gross by construction — no cent drift.
  *
- * Hinweis zur Kopplung: die Buchungs-Helfer halten sich sonst frei von
- * accounting-cases-Imports. Hier werden bewusst NUR pure Konstanten und
- * Lookups aus `domain/tax-keys` verwendet (Steuerkonten je SKR) —
- * dieselbe Wahrheit, die auch Agent-Submit und EXTF-Export nutzen; eine Kopie
- * würde bei der nächsten Kontenänderung driften.
+ * Only pure constants and lookups from `domain/tax-keys` are imported — the
+ * same truth the agent submit and the EXTF export use.
  */
 import {
   STANDARD_TAX_ACCOUNT_NUMBERS,
@@ -27,7 +21,7 @@ import {
 /** The only thing this file needed from the deleted `booking/types.ts` (0043). */
 type BookingSide = "debit" | "credit";
 
-/** BU-Schlüssel, die der Editor als Brutto-Zeile mit abgeleiteter VSt führt. */
+/** Tax keys the editor handles as a gross line with derived input tax. */
 const EDITOR_ASSIST_KEYS: ReadonlySet<string> = new Set(["8", "9"]);
 
 export interface DerivedTax {
@@ -39,7 +33,7 @@ export interface DerivedTax {
 }
 
 /**
- * Brutto → Netto/Steuer, Rundungsdifferenz sitzt auf der Steuerzeile.
+ * Gross → net/tax; the rounding difference sits on the tax line.
  *
  * @when    One gross amount has to be split at a known rate.
  * @instead Deciding whether a line gets tax assistance at all → deriveTax.
@@ -51,9 +45,8 @@ export function splitGross(grossAmount: number, ratePercent: number): { net: num
 }
 
 /**
- * Abgeleitete Vorsteuer-Zeile einer Editor-Zeile — `null`, wenn die Zeile
- * keine Assistenz bekommt (kein 8/9-Schlüssel, Framework unbekannt, Betrag
- * leer, oder die Zeile ist selbst ein Steuerkonto).
+ * The derived input-tax line of an editor line — `null` when the line gets no
+ * assistance (no 8/9 key, unknown chart, empty amount, or itself a tax account).
  *
  * @when    A line was entered and the editor asks whether it needs a tax line.
  * @instead Splitting a known gross at a known rate → splitGross.
@@ -82,11 +75,10 @@ export interface CollapsibleLine {
 }
 
 /**
- * Explizite Netto+Steuer-Paare wieder in die Brutto-Sicht einklappen (fürs
- * Öffnen bestehender Buchungen). Ein Paar = Steuerkonto-Zeile + Basiszeile
- * gleicher Seite mit passendem Schlüssel und Satz × Netto ±1 Cent. Nicht
- * zuordenbare Steuerzeilen bleiben als normale Zeilen stehen (Fallback =
- * bisheriges Verhalten, nichts geht verloren).
+ * Folds explicit net + tax pairs back into gross, for opening stored entries.
+ * A pair is a tax-account line plus a base line on the same side with matching
+ * key and rate × net ±1 cent. Unmatched tax lines stay as normal lines —
+ * nothing is lost.
  *
  * @when    Reading a stored entry back into the editor's assisted form.
  * @instead Writing it out again → expandWithTaxLines.
@@ -113,7 +105,7 @@ export function collapseTaxPairs<L extends CollapsibleLine>(
       if (!expectedAccount || expectedAccount.accountNumber !== taxLine.accountNumber) continue;
       const expectedTax = Math.round((Math.round(base.amount * 100) * rate) / 100);
       if (Math.abs(taxCents - expectedTax) > 1) continue;
-      // Paar gefunden: Basiszeile wird brutto, Steuerzeile verschwindet.
+      // Pair found: the base line becomes gross, the tax line disappears.
       out[bi] = { ...base, amount: (Math.round(base.amount * 100) + taxCents) / 100 };
       out[ti] = null;
       break;
@@ -126,7 +118,7 @@ export interface ExpandableLine {
   side: BookingSide;
   accountNumber: string;
   accountName: string;
-  /** Brutto, wenn die Zeile eine abgeleitete Steuerzeile bekommt. */
+  /** Gross, when the line gets a derived tax line. */
   amount: number;
   taxKey: string | null;
   taxRatePercent: number | null;
@@ -140,9 +132,9 @@ export interface ExpandableLine {
 export type ExpandedLine = ExpandableLine & { taxForLineNo: number | null };
 
 /**
- * Editor-Zeilen (Brutto-Semantik) → explizite Zeilen fürs Speichern: je
- * assistierter Zeile Netto-Basiszeile + verknüpfte Steuerzeile
- * (`taxForLineNo` = 1-basierte Position der Basiszeile im Ergebnis).
+ * Editor lines (gross) → explicit lines for saving: per assisted line a net
+ * base line plus a linked tax line (`taxForLineNo` = 1-based position of the
+ * base line in the result).
  *
  * @when    Writing the editor's assisted lines back out as real entry lines.
  * @instead Reading them in → collapseTaxPairs.

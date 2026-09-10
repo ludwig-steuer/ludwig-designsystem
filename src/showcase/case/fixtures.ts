@@ -9,23 +9,18 @@ import type { JournalLine } from "@/ui/v3/entities/journal-entry/JournalEntryCom
 import type { Note } from "@/ui/v3/patterns/NoteFeed";
 
 /**
- * Synthetische Sachverhalte für die Seiten-Stories (0152).
+ * Synthetic cases for the page stories (0152).
  *
- * **Keine echten Daten.** Namen sind erfunden und erkennbar so (Musterbau
- * GmbH, Beispiel-Energie AG, Testbank eG); Beträge sind glatt, Nummern frei
- * gewählt, das Jahr ist 2026. Der Referenzfall aus dem Brief F196 hat nur die
- * **Form** geliehen, keinen Inhalt.
- *
- * Ein Bauer je Baustein, und jede Story überschreibt nur, was sie beweist —
- * so ist ein Unterschied zwischen zwei Szenarien ein Unterschied im
- * Sachverhalt, nie darin, wie jemand die Fixture zusammengesetzt hat (die
- * Regel aus 0144).
+ * **No real data**: names are made up and recognisably so, amounts round,
+ * numbers arbitrary, the year is 2026. One builder per building block, and each
+ * story overrides only what it proves — so two scenarios differ in the case,
+ * never in how someone assembled the fixture (0144).
  */
 
-/** Der Referenztag aller Stories — Reife der Erwartungen, Zustand der Klärungen. */
+/** The reference day of all stories — decides expectation maturity and clarification state. */
 export const TODAY = "2026-08-05";
 
-/** Der Fall selbst — eine Eingangsrechnung, an der ein Vorschlag hängt. */
+/** The case itself — an incoming invoice with a proposal. */
 export function caseFixture(over: Partial<CaseFactsVM> = {}): CaseFactsVM {
   return {
     caseNumber: "2026-0334",
@@ -53,10 +48,9 @@ export function caseFixture(over: Partial<CaseFactsVM> = {}): CaseFactsVM {
 }
 
 /**
- * Der Beleg-Eingang mit seinem Vorschlag — das Ereignis, um das sich E1 dreht.
- *
- * `bookingState` ist die **zweite Marke am Ereignis**, kein eigener Eintrag:
- * ein Ereignis und seine Buchung sind ein Vorgang (0152, Frage 1).
+ * The document receipt with its proposal — the event E1 revolves around.
+ * `bookingState` is the **second mark on the event**, not an entry of its own:
+ * an event and its booking are one transaction (0152, question 1).
  */
 export const DOCUMENT_EVENT: CaseTimelineEvent = {
   id: "ev-1",
@@ -70,11 +64,9 @@ export const DOCUMENT_EVENT: CaseTimelineEvent = {
 };
 
 /**
- * Die Spiegel-Buchung aus DATEV — dieselbe Reihe, sichtbar andere Quelle.
- *
- * Sie liegt **vor** dem Beleg: der Vormonat ist schon gebucht, und genau das
- * macht den Fall lesbar. Ohne sie stünde die Frage „hat das schon jemand
- * erfasst?" unbeantwortet auf der Seite.
+ * The mirrored entry from DATEV — same strand, visibly different source. It
+ * lies **before** the document: last month is already booked, which answers
+ * "has anyone recorded this yet?".
  */
 export const DATEV_EVENT: CaseTimelineEvent = {
   id: "ev-0",
@@ -88,7 +80,7 @@ export const DATEV_EVENT: CaseTimelineEvent = {
   bookingState: "posted",
 };
 
-/** Die offene Zahlungserwartung — der einzige Eintrag in der Zukunft. */
+/** The open payment expectation — the only entry in the future. */
 export const PAYMENT_EXPECTED: CaseTimelineExpectation = {
   id: "ex-1",
   kind: "payment",
@@ -99,7 +91,7 @@ export const PAYMENT_EXPECTED: CaseTimelineExpectation = {
   currency: "EUR",
 };
 
-/** Eine beantwortete Rückfrage — sie steht im Strang, nicht in den Mängeln. */
+/** An answered clarification — it stands in the strand, not among the defects. */
 export const CLARIFICATION_ANSWERED: CaseTimelineClarification = {
   id: "cl-1",
   type: "question",
@@ -110,7 +102,7 @@ export const CLARIFICATION_ANSWERED: CaseTimelineClarification = {
   audience: "client",
 };
 
-/** Die Zeilen des Vorschlags: Aufwand gegen Kreditor, mit Automatikkonto. */
+/** The proposal's lines: expense against creditor, with an automatic account. */
 export const PROPOSAL: JournalLine[] = [
   {
     side: "debit",
@@ -129,7 +121,7 @@ export const PROPOSAL: JournalLine[] = [
   },
 ];
 
-/** Notizen am Fall — neueste oben, die Reihenfolge gehört dem Aufrufer. */
+/** Notes on the case — newest first; the order belongs to the caller. */
 export const NOTES: Note[] = [
   {
     id: "n-1",
@@ -146,11 +138,9 @@ export const NOTES: Note[] = [
 ];
 
 /**
- * Die Rückfragen am Fall — eine offene, eine beantwortete.
- *
- * **Titel und Zustand, mehr nicht.** Die reiche Form mit Kontext, Frage und
- * Empfehlung gibt es im Bestand nur bei 9 % (Erhebung 2026-09-10); der
- * Regelfall ist genau das hier.
+ * The clarifications of the case — one open, one answered. Title and state
+ * only: the rich form (context, question, recommendation) exists in just 9 %
+ * of the stock (survey 2026-09-10).
  */
 export const CLARIFICATIONS: ClarificationVM[] = [
   {
@@ -177,13 +167,9 @@ export const CLARIFICATIONS: ClarificationVM[] = [
 ];
 
 /**
- * Die Reiter der Seite, in der Reihenfolge aus dem Brief (F196 §3).
- *
- * **Zwei Namen sind gegenüber dem Brief geändert** (Owner 2026-09-10):
- * „Details" hieß nichts — jeder Reiter zeigt Details — und heißt jetzt
- * **Stammdaten**; „Verlauf" und „Ereignisse" klangen nach demselben, obwohl
- * das eine die Fachereignisse sind und das andere die Prüfspur (wer hat wann
- * was getan). Die Prüfspur heißt **Protokoll**.
+ * The page's tabs in the brief's order (F196 §3), with two renames by the
+ * owner (2026-09-10): "Details" → **Stammdaten**, and the audit trail
+ * "Verlauf" → **Protokoll**, so it no longer sounds like "Ereignisse".
  */
 export const FALL_TABS = [
   { key: "uebersicht", label: "Übersicht" },

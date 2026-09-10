@@ -1,42 +1,18 @@
 /**
- * `@/ui/v3` — das Komponenten-Set des neuen Design-Systems.
+ * `@/ui/v3` — the component set of the design system.
  *
- * Nebenläufig zu `@/ui/components`: der **Import-Pfad** trägt die Version,
- * kein Datei-Suffix. Ein Grep auf `@/ui/components` zeigt jederzeit den
- * Rest-Bestand der Migration — jedes Arbeitspaket senkt die Zahl, keines
- * erhöht sie.
+ * Nothing here knows a domain module: data and loaders come in as props, no
+ * server actions. Three tiers, imports only downward (R21): `primitives/` (no
+ * domain word), `patterns/` (workspace patterns, know process terms),
+ * `entities/<entity>/` (the forms of exactly one entity).
  *
- * Was hier liegt, kennt **kein Fachmodul**: Daten kommen als Props, Loader
- * als Prop, keine Server Actions, keine Modul-Importe.
+ * The group comments below are also the Storybook folders
+ * (`v3/<tier>/<group>/<Name>`). One file per family; every export carries
+ * `@when`/`@instead`. Tokens live in `src/styles/tokens.css`, classes in
+ * `src/styles/v3.css` — no hex value, no pixel size in a component (A5).
  *
- * Drei Stufen, drei Ordner (F128, `web-ui-regeln.md` R21): `primitives/` (kein
- * Fachwort), `patterns/` (Arbeitsflächen-Muster, kennt Prozessbegriffe),
- * `entities/<entität>/` (Darstellungsfamilie genau einer Entität). Importiert
- * wird nur abwärts — Primitives kennen keine Patterns, Patterns keine
- * Entitäten. Fachliche Zusammensetzungen wohnen im Modul, nicht hier.
- *
- * Die Gruppen-Kommentare unten (Aktion, Navigation, …) sind zugleich die
- * Storybook-Ordner: `v3/<Stufe>/<Gruppe>/<Name>`. Eine Datei je Familie,
- * jeder Export trägt `@when`/`@instead` — siehe README „Ordnung im Set".
- *
- * Tokens: `src/styles/tokens.css` ist die 1:1-Übernahme des Design-Systems,
- * Klassen und Maße stehen in `src/styles/v2.css`. Kein Hex-Wert, kein
- * Pixelmaß in einer Komponente (UX-Guidelines A5).
- *
- * Abweichung von der App: dort liegt `StatusBadge` außerhalb des Sets
- * (`@/ui/status`). Hier ist er ein Pattern — R1 macht ihn zur einen
- * erlaubten Status-Darstellung, und was der Barrel nicht führt, existiert
- * für einen Konsumenten des Design-Systems nicht; er baut sonst die lokalen
- * Label-Maps, die R1 gerade verbietet. Er setzt auf `Badge` auf: dort der
- * Ton, hier die Registry.
- *
- * `StatusHeader` ist seit 0077 hier (Owner 2026-09-04): Regel Z4 verlangt ihn
- * an jeder Status-Spalte, also muss der Barrel den Namen führen, den die
- * Prüfliste nennt. Er setzt auf `StatusInfoButton` auf und nimmt keine
- * Legende von Hand — die kommt aus der Registry (Z2).
- *
- * Weiter draußen bleiben `Drawer`/`UrlDrawer` (Wächter-Test) und `Tooltip`
- * (R2) — die hängen an App-Kontext.
+ * `StatusBadge` and `StatusHeader` are patterns here (R1, Z4): what the barrel
+ * does not export does not exist for a consumer.
  */
 
 /* ── Primitives ── Aktion */
@@ -77,7 +53,7 @@ export {
 export { ActionBar, RowActions } from "./primitives/ActionBar";
 export { Kbd } from "./primitives/Kbd";
 
-/* Rahmen — die Shell, außerhalb der Stufen (Soll-Katalog §11.7) */
+/* Rahmen — the shell, outside the tiers (target catalogue §11.7) */
 export { AppShell, TopBar } from "./primitives/AppShell";
 
 /* Navigation */
@@ -132,7 +108,7 @@ export { ToastHost, useToast, type Toast, type ToastTone } from "./primitives/To
 export { Skeleton, type SkeletonVariant } from "./primitives/Skeleton";
 export { Markdown, parseInline, parseMarkdown } from "./primitives/Markdown";
 
-/* Werte — ein Betrag, ein Zeitpunkt, eine Regel (P24) */
+/* Werte — an amount, a point in time, a rule (P24) */
 export { Amount, type AmountProps, type AmountSize } from "./primitives/Amount";
 export { Time, Duration, type TimeSize } from "./primitives/Time";
 export { LongText } from "./primitives/LongText";
@@ -149,7 +125,7 @@ export {
   type TimeLength,
 } from "./format";
 
-/* Daten — Reihen und Verläufe (0041, 0045) */
+/* Daten — series and trends (0041, 0045) */
 export { BarChart, type Bar, type BarLayout } from "./primitives/BarChart";
 export { Progress } from "./primitives/Progress";
 
@@ -247,7 +223,7 @@ export {
   type CommandItem,
 } from "./patterns/CommandPalette";
 
-/* Grundlagen — das Vokabular, das jeder Baustein teilt (0087) */
+/* Grundlagen — the vocabulary every building block shares (0087) */
 export {
   EntityIcon,
   ActionIcon,
@@ -315,8 +291,7 @@ export {
 } from "./entities/account/AccountEntries";
 export { AccountDrawer } from "./entities/account/AccountDrawer";
 
-/* Beleg — die lesende Familie, die Vorschau, die Fakten je Ausprägung,
-   die Nachschlag-Form (0052, 0074, 0075, 0076) */
+/* Beleg — the reading family, preview, facts per kind, lookup (0052, 0074–0076) */
 export {
   FileName,
   SourceDocumentCell,
@@ -374,8 +349,7 @@ export {
   type SourceDocumentGroup,
 } from "./entities/source-document/SourceDocumentFacts";
 
-/* Rechnungsposition — die Zeile, ihre Fakten, die Liste eines Belegs
-   (0072, 0114, 0115) */
+/* Rechnungsposition — the line, its facts, a document's list (0072, 0114, 0115) */
 export {
   InvoiceLineRow,
   invoiceLineTracks,
@@ -391,7 +365,7 @@ export {
   type InvoiceLineLabels,
 } from "./entities/invoice-line/invoice-line";
 
-/* Sachverhalt — der Verlauf über Ereignisse, Klärungen, Erwartungen (0040) */
+/* Sachverhalt — the history across events, clarifications, expectations (0040) */
 export {
   CaseTimeline,
   type CaseTimelineEntry,
@@ -400,7 +374,7 @@ export {
   type CaseTimelineExpectation,
 } from "./entities/accounting-case/CaseTimeline";
 
-/* Sachverhalt — die Zelle, ihr Name und ihre Kennung (0095) */
+/* Sachverhalt — the cell, its name and its number (0095) */
 export { CaseCell } from "./entities/accounting-case/CaseCell";
 export { CaseFacts, type CaseFactsVM } from "./entities/accounting-case/CaseFacts";
 export { CaseDetailView } from "./entities/accounting-case/CaseDetailView";
@@ -505,7 +479,7 @@ export {
   type PartnerTab,
 } from "./entities/business-partner/BusinessPartnerDrawer";
 
-/* Konto — die Seite (0063) und der Kontenplan als Spaltensatz (0062) */
+/* Konto — the page (0063) and the chart of accounts as a column set (0062) */
 export { LedgerAccountView } from "./entities/account/LedgerAccountView";
 export {
   PaymentAccountField,
@@ -559,14 +533,14 @@ export {
   type CaseLink,
 } from "./entities/accounting-case/case-title";
 
-/* Erwartung — was noch fehlt, als Chip und als Zeile (0025) */
+/* Erwartung — what is still missing, as chip and row (0025) */
 export {
   ExpectationChip,
   ExpectationRow,
   type ExpectationVM,
 } from "./entities/expectation/Expectation";
 
-/* Klärung — die lesende Familie: Vorschau, Zeile, Liste (0059) */
+/* Klärung — the reading family: preview, row, list (0059) */
 export {
   ClarificationCell,
   ClarificationRow,
@@ -589,7 +563,7 @@ export {
   type ClarificationDraft,
 } from "./entities/clarification/ClarificationEditor";
 
-/* Buchungssatz — die eine Buchungs-Oberfläche */
+/* Buchungssatz — the one booking surface */
 export {
   JournalEntryEditor,
   type JournalEntryEditorProps,
@@ -629,7 +603,7 @@ export {
   type SourceKind,
 } from "./entities/journal-entry/AiBookingNotes";
 
-/* Status — die eine erlaubte Status-Darstellung (R1). */
+/* Status — the one allowed status display (R1). */
 export {
   Confidence,
   type ConfidenceLevel,

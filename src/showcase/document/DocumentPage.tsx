@@ -62,11 +62,9 @@ export function DocumentPage({
   back?: string;
   children: ReactNode;
 }) {
-  // Aus der Domäne, nicht aus einer Tabelle hier: `sourceDocTypeLabel` kennt
-  // den Rückfall auf die Belegform bei `other` und wird von
-  // `SourceDocumentCard` in derselben Story ohnehin benutzt. Eine zweite
-  // Wortliste wäre eine zweite Wahrheit — und war schon eine: der Kopf sagte
-  // „Sammelbeleg", die Karte darunter „Sammel-PDF".
+  // From the domain, not a table here: `sourceDocTypeLabel` knows the fallback
+  // to the document form for `other`. A second word list was already a second
+  // truth once — the head said "Sammelbeleg", the card "Sammel-PDF".
   const art = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
   // Rank 1: the counterparty names the document; without one the kind does.
   // The file name is the last fallback and stands in the facts, not here.
@@ -81,8 +79,7 @@ export function DocumentPage({
           position={position}
           total={total}
           label="Beleg"
-          // Kein „←" im Text: `RecordPager` zeichnet den Pfeil selbst, und
-          // beides zusammen ergibt zwei.
+          // No "←" in the text: `RecordPager` draws the arrow itself.
           back={{ href: listHref, label: back }}
           prevHref="?beleg=vorher"
           nextHref="?beleg=nachher"
@@ -93,10 +90,9 @@ export function DocumentPage({
           icon={<EntityIcon entity="source-document" />}
           overline={art}
           title={title}
-          // **Ein** Zustand, und er kommt aus `SourceDocumentCompletion` — der
-          // Baustein, der diese Entscheidung schon trägt („must not be
-          // answered twice"). Der Nachbau hier verlor den Grund im Tooltip und
-          // das Datum, und genau die verlangt R9.
+          // **One** state, and it comes from `SourceDocumentCompletion`, which
+          // already carries this decision — the rebuild here lost the reason in
+          // the tooltip and the date, both required by R9.
           status={<SourceDocumentCompletion document={document} />}
           {...(actions ? { actions } : {})}
         />
@@ -110,10 +106,9 @@ export function DocumentPage({
 }
 
 /**
- * Die drei Boxen, die in **jeder** Übersicht neben den Fakten stehen (0150):
- * was offen ist, was die Umsatzsteuer ergibt, was bisher geschah. Hier einmal
- * gebaut, damit die Stories sich in dem unterscheiden, was sie zeigen wollen,
- * und nicht darin, wie jemand die Seite zusammengesetzt hat.
+ * The three boxes next to the facts in **every** overview (0150): what is open,
+ * what the VAT comes to, what has happened. Built once, so stories differ in
+ * what they show, not in how the page was assembled.
  */
 export function overviewBoxes({
   defects: defects = documentDefects(),

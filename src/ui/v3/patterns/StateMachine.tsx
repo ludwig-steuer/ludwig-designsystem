@@ -56,10 +56,9 @@ interface Box {
   row: number;
 }
 
-/* ── Layout ──────────────────────────────────────────────────────────────
-   Reine Funktionen, kein Messen: die Boxen liegen im CSS-Grid, die Kanten in
-   einem SVG mit derselben Rastereinheit. Kein ResizeObserver, keine
-   Bibliothek — die Karte ist so groß, wie das Raster sie macht. */
+/* ── Layout ─────────────────────────────────────────────────────────────
+   Pure functions, no measuring: boxes sit in a CSS grid, edges in an SVG on
+   the same grid unit. */
 
 /**
  * The grid, in one place. The numbers live **here** and not in `v3.css`,
@@ -70,12 +69,9 @@ interface Box {
  * second acceptance of 0069).
  */
 const COL = 150;
-// **72** ist die Höhe der Box — gemessen an allen 44 Boxen der sechs Stories,
-// nicht gerechnet: zwei Zeilen Beschriftung messen 19,375 px, die Wertzeile
-// 17,81, dazu Innenabstand und Ränder. Eine Summe hinzuschreiben hieße, sie
-// bei der nächsten Schriftstufe still falsch werden zu lassen; sie stand hier
-// zweimal falsch (60, dann 71). Die Zeile lässt über der Box weitere 20 px für
-// die Bögen darunter.
+// **72** is the box height, measured across all 44 boxes of the six stories —
+// not computed, so a new type step cannot silently break it. The row leaves
+// another 20 px above the box for the arcs below.
 const ROW = 92;
 const BOX_W = 126;
 const BOX_H = 72;
@@ -181,11 +177,8 @@ function edgePath(a: Box, b: Box, height: number): string {
     const mid = (x1 + x2) / 2;
     return `M ${x1} ${from.y} C ${mid} ${from.y}, ${mid} ${to.y}, ${x2} ${to.y}`;
   }
-  // Ein Bogen läuft **um** das Bild herum, nicht hindurch: die senkrechten
-  // Stücke liegen in den Spaltenlücken, das lange Stück über oder unter allem.
-  // Vorher stieg er bei der Zielbox senkrecht auf und durchquerte dabei, was
-  // in derselben Spalte darunter stand — der Pfeil schien dann aus der
-  // falschen Box zu kommen (Abnahme 0069).
+  // An arc runs **around** the picture, not through it: vertical pieces in the
+  // column gaps, the long piece above or below everything (acceptance 0069).
   const above = forward;
   const y = above ? -24 : height + 24;
   const lane = 12;
@@ -195,11 +188,9 @@ function edgePath(a: Box, b: Box, height: number): string {
   const by = b.row * ROW + BOX_H / 2;
   const aLane = above ? ax + lane : ax - lane;
   const bLane = bx - lane;
-  // Rechtwinklig statt geschwungen: eine Kurve schneidet auf dem Weg nach oben
-  // die Ecke der Box, an der sie vorbeiwill — gemessen hat „Quittung" so die
-  // obere linke Ecke von `inspection` gestreift. Die senkrechten Stücke liegen
-  // in den Lücken, das waagerechte über oder unter allem; damit kann der Weg
-  // keine fremde Box berühren.
+  // Right-angled, not curved: a curve clips the corner of the box it passes.
+  // With vertical pieces in the gaps and the horizontal one outside, the path
+  // cannot touch another box.
   const r = 8;
   const vDir = y < ay ? -1 : 1;
   return (
@@ -247,9 +238,8 @@ export function StateMachine({
   const edges = all.filter(isEdge);
   const entries = all.filter((t) => !isEdge(t));
   const values = order(axis, states, edges, current);
-  // Die DOM-Reihenfolge ist die Leserichtung: Spalte, dann Zeile. Damit läuft
-  // Tab die Karte ab, wie das Auge sie liest — und nicht in der Reihenfolge,
-  // in der die Zustände zufällig in der Registry stehen (0069, Tastatur).
+  // DOM order is reading order — column, then row — so Tab walks the map the
+  // way the eye reads it, not in registry order (0069).
   const boxes = layout(axis, values, edges).sort(
     (a, b) => a.column - b.column || a.row - b.row,
   );
@@ -276,8 +266,8 @@ export function StateMachine({
           }}
         >
           {hasEdges ? null : (
-            // Ein Verbinder, keine Kante: gepunktet und **ohne** Spitze — er
-            // sagt „Reihenfolge", nicht „Übergang" (0069).
+            // A connector, not an edge: dotted and **without** an arrowhead — it
+            // says "order", not "transition" (0069).
             <svg
               className="v2fsm__edges v2fsm__edges--dotted"
               width={width}
@@ -317,8 +307,7 @@ export function StateMachine({
               {edges.map((t) => {
                 const a = byValue.get(t.from);
                 const b = byValue.get(t.to);
-                // Ein Selbst-Übergang wird nicht gezeichnet — er steht im
-                // Popover unter „Hinaus durch" (Ausbau: die Schleife).
+                // A self-transition is not drawn — the popover lists it.
                 if (!a || !b || a === b) return null;
                 return (
                   <path
@@ -397,10 +386,9 @@ function StateBox({
   const entering = entries.filter((t) => t.to === box.value);
 
   return (
-    // Die **Zelle** liegt im Raster, nicht der Knopf: `Popover` hängt seinen
-    // Auslöser in ein `span.v2pop__anchor`, und damit wäre der Knopf kein
-    // Grid-Kind mehr — `grid-column` an ihm bliebe wirkungslos, die Boxen
-    // stünden im Auto-Flow und die Kanten zeigten ins Leere (Abnahme 0069).
+    // The **cell** sits in the grid, not the button: `Popover` wraps its trigger
+    // in `span.v2pop__anchor`, so the button is no grid child and
+    // `grid-column` on it would do nothing (0069).
     <div
       className="v2fsm__cell"
       style={{ gridColumn: box.column + 1, gridRow: box.row + 1 }}
@@ -417,12 +405,10 @@ function StateBox({
             {box.label}
           </span>
           <span className="v2fsm__meta">
-            {/* Bei einem Rohwert steht der Schlüssel schon oben — ihn zweimal
-                zu schreiben, sagt nichts zweimal (Abnahme 0069). */}
+            {/* For a raw value the key already stands above — no need to repeat it. */}
             {box.raw ? null : <code className="v2fsm__value">{box.value}</code>}
-            {/* Farbe steht nie allein (V7) — das Wort steht **neben** dem
-                Wert, nicht in einer dritten Zeile: drei Zeilen quetschten die
-                Beschriftung der aktuellen Box auf null (Abnahme 0069). */}
+            {/* Colour never alone (V7): the word stands **next to** the value, not in
+                a third line, which squeezed the current box's label to nothing. */}
             {current ? <span className="v2fsm__now">aktuell</span> : null}
           </span>
         </button>

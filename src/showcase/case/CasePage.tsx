@@ -17,17 +17,12 @@ import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { FALL_TABS, listHref, tabHref } from "./fixtures";
 
 /**
- * Der Rahmen jedes Szenarios von 0152 — und der erste Aufrufer, der beides
- * zusammensetzt, was heute entstanden ist: `DetailView` für die **Zeilen**,
- * `Columns` für die **Spalten** des Reiterrumpfs.
+ * The frame of every 0152 scenario: `DetailView` for the rows, `Columns` for
+ * the tab body's columns — head · signal · tabs · body (F196 §2, §5a). The
+ * overview is `list | detail | sidebar`: strand, workspace, notes.
  *
- * Genau die Ordnung, die F196 §2 und §5a verlangen: Kopf · Signal · Reiter ·
- * Inhalt, und der Inhalt ist immer eines der vier Spaltenmuster. Die Übersicht
- * ist `list | detail | sidebar` — Strang, Arbeitsfläche, Notizen.
- *
- * Er ist keine Komponente des Sets: er lebt in `showcase/`, weil er die Seite
- * ist, und die Seite gehört der App. Was er hier tut, ist die Szenarien
- * vergleichbar halten.
+ * Not a set component: it lives in `showcase/` because the page belongs to
+ * the app. It keeps the scenarios comparable.
  */
 export function CasePage({
   accountingCase: accountingCase,
@@ -42,27 +37,27 @@ export function CasePage({
 }: {
   accountingCase: CaseFactsVM;
   tab?: string;
-  /** **Ein** nächster Schritt oder keiner — er entfällt, wenn der Fall auf jemand anderen wartet. */
+  /** **One** next step or none — omitted when the case waits on someone else. */
   signal?: ReactNode;
   actions?: ReactNode;
-  /** Spalte 1: der Strang. Er fällt **nie** weg (F196 §5). */
+  /** Column 1: the strand. It **never** disappears (F196 §5). */
   timeline?: ReactNode;
   /** Spalte 3: Zusammenfassung, Notizen, Rückfragen — lesend. */
   notes?: ReactNode;
   position?: number;
   total?: number;
-  /** Spalte 2: die Arbeitsfläche. */
+  /** Column 2: the workspace. */
   children: ReactNode;
 }) {
-  // Der Anzeigename kommt aus der Domäne, nicht aus einer Regel hier:
-  // Titel, sonst „<Art>: <Gegenpart>", sonst die Art allein (L-52).
+  // The display name comes from the domain: title, else "<kind>: <counterparty>",
+  // else the kind alone (L-52).
   const title = caseDisplayTitle({
     title: accountingCase.title ?? null,
     kind: accountingCase.kind ?? null,
     counterpartyName: accountingCase.counterpartyName ?? null,
   });
-  // Die Art ist **keine** Achse — sie ist eine Eigenschaft, und ihr Wort steht
-  // in der Domäne (`CASE_KIND_LABEL`), nicht in der Status-Registry.
+  // The kind is **no** axis but a property; its word lives in the domain
+  // (`CASE_KIND_LABEL`), not in the status registry.
   const art = accountingCase.kind ? caseKindLabel(accountingCase.kind) : null;
 
   return (
@@ -82,9 +77,9 @@ export function CasePage({
           icon={<EntityIcon entity="accounting-case" />}
           overline={accountingCase.caseNumber ? `Sachverhalt · ${accountingCase.caseNumber}` : "Sachverhalt"}
           title={title}
-          // **Ein** führender Zustand: die Achse `sachverhalt`. Wer am Zug ist
-          // (`disposition`) steht als Wort in der Meta-Zeile — zwei Marken für
-          // zwei Fragen, nicht zwei Marken für eine (D6/D7).
+          // **One** leading state: the `sachverhalt` axis. Who is on turn
+          // (`disposition`) is a word in the meta line — two marks for two
+          // questions, not two for one (D6/D7).
           status={<StatusBadge axis="sachverhalt" status={accountingCase.lifecycleStatus} />}
           meta={
             <>
@@ -95,15 +90,13 @@ export function CasePage({
               {accountingCase.fiscalYear ? <span>WJ {accountingCase.fiscalYear}</span> : null}
             </>
           }
-          // Keine leere Kennzahl (D7): ohne Betrag steht hier nichts, nicht
-          // „— €".
+          // No empty metric (D7): without an amount nothing stands here, not "— €".
           {...(accountingCase.totalAmount
             ? {
                 metric: {
                   label: "Betrag",
-                  // `CaseDetail.currency` ist ein `string`, `Amount` will die
-                  // vier Währungen des Hauses — die Enge ist richtig, und der
-                  // Aufrufer ist die Stelle, die sie herstellt.
+                  // `CaseDetail.currency` is a `string`, `Amount` wants the four house
+                  // currencies — the narrowing is right, and the caller does it.
                   value: (
                     <Amount
                       value={accountingCase.totalAmount}

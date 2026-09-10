@@ -1,17 +1,15 @@
 import type { BusinessPartnerDetail } from "@/ludwig/modules/business-partners/domain/business-partner";
 
 /**
- * Synthetische Geschäftspartner für die Seiten-Stories (0127).
+ * Synthetic business partners for the page stories (0127). **No real data**:
+ * made-up names, no real VAT id or address, account numbers freely chosen in
+ * the SKR range.
  *
- * **Keine echten Daten.** Namen sind erfunden und erkennbar so (Musterfirma,
- * Beispielbau, Testhandel); keine echte USt-IdNr., keine Anschrift aus dem
- * Bestand. Kontonummern liegen im SKR-Bereich, sind aber frei gewählt.
- *
- * Ein Bauer mit dem Normalfall als Vorgabe — ein bestätigter Kreditor mit
- * Buchungen —, und jede Story überschreibt nur, was sie beweist. Die Zahlen
- * hinter den Fällen stehen im Seitenprofil `docs/seiten/partner-detail.md`:
- * 77 % der Partner haben **null** Buchungen, 99,9 % genau **ein**
- * Personenkonto, 12 von 14.950 sind Abrechner.
+ * One builder with the typical case as default — a confirmed creditor with
+ * entries — and each story overrides only what it proves. The numbers behind
+ * the cases are in `docs/seiten/partner-detail.md`: 77 % of partners have no
+ * entries, 99.9 % exactly one personal account, 12 of 14,950 are billing
+ * providers.
  */
 export function partnerFixture(over: Partial<BusinessPartnerDetail> = {}): BusinessPartnerDetail {
   return {
@@ -52,10 +50,9 @@ export function partnerFixture(over: Partial<BusinessPartnerDetail> = {}): Busin
 }
 
 /**
- * Die drei Reiter der Seite. **Drei, nicht fünf** — der Schnitt steht im
- * Seitenprofil: Konten ziehen in die Übersicht (Rang 2, p90 zwei Zeilen),
- * Belege und Sachverhalte werden Zähler (99–100 % ohne), „Technik" heißt
- * „Rohdaten" (D12).
+ * The page's three tabs — **three, not five** (page profile): accounts move
+ * into the overview, documents and cases become counters, "Technik" is called
+ * "Rohdaten" (D12).
  */
 export const PARTNER_TABS = [
   { key: "uebersicht", label: "Übersicht" },
@@ -67,14 +64,14 @@ export const tabHref = (key: string) => `?tab=${key}`;
 export const listHref = "?liste=partner";
 export const accountHref = (n: string) => `?account=${n}`;
 
-/** Die Wege der drei Zähler — in die Liste der Entität, auf diesen Partner gefiltert. */
+/** Where the three counters lead — the entity's list, filtered to this partner. */
 export const casesHref = {
   cases: "?liste=sachverhalte&partner=bp-4711",
   documents: "?liste=belege&partner=bp-4711",
   journalEntries: "?liste=buchungen&partner=bp-4711",
 };
 
-/** Die Personenkonten je Wirtschaftsjahr — p90 sind zwei Zeilen. */
+/** The personal accounts per fiscal year — p90 is two rows. */
 export const ACCOUNTS = [
   { year: 2026, number: "70044", role: "Kreditor", intern: false, journalEntries: 143 },
   { year: 2025, number: "70044", role: "Kreditor", intern: false, journalEntries: 208 },

@@ -4,8 +4,8 @@ import { Trash2, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { deriveTax } from "./tax-assist";
-// Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
-// und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
+// Direct import, not the barrel: `@/ui/status` also exports `FlowModal` and
+// pulls `@/modules/invoices` with the DB driver into the bundle (P22).
 import { ActionIcon } from "../../Icons";
 import { IconButton } from "../../primitives/IconButton";
 import { StatusBadge } from "../../patterns/StatusBadge";
@@ -22,9 +22,9 @@ import type { DocumentNumberSourceLabels } from "../document-number/document-num
 import { JournalEntryCard } from "./JournalEntryCompact";
 import { AiBookingNotes } from "./AiBookingNotes";
 
-// Beträge im Editor: eine Währung, ein Formatierer (T7, 0043). Der Editor
-// rechnet in Brutto und braucht aus einem Feldwert immer eine Zahl — deshalb
-// fällt `toNumber` auf 0 zurück, wo `parseAmount` `null`/`"invalid"` liefert.
+// One currency, one formatter (T7, 0043). The editor computes in gross and
+// always needs a number, so `toNumber` falls back to 0 where `parseAmount`
+// returns `null`/`"invalid"`.
 const euro = (n: number) => formatAmount(n, "EUR");
 const toNumber = (s: string | number | null | undefined) => {
   const n = parseAmount(String(s ?? "").replace("€", ""));
@@ -32,30 +32,18 @@ const toNumber = (s: string | number | null | undefined) => {
 };
 
 /**
- * Der eine Buchungssatz-Editor (F123 T123.3).
+ * The one journal entry editor (F123 T123.3).
  *
- * Gebaut nach dem F123-Artboard, das nicht mit ausgeliefert wurde. Das
- * F109-Pendant liegt unter `reference/f109-buchungsreview/` — ein zweiter
- * Entwurf derselben Komponente, abgeglichen am 2026-09-03: an drei Stellen
- * weiter als dieser Stand (Aufgaben 0013, 0015 und 0007), sonst nicht.
+ * **One component for reading and editing**: the mode changes, the grid stays,
+ * so whoever read an entry finds the same columns when correcting it.
  *
- * **Eine Komponente für Anzeigen und Bearbeiten.** Der Modus wechselt, das
- * Raster bleibt — wer eine Buchung gelesen hat, findet beim Korrigieren
- * dieselben Spalten an derselben Stelle. Ein zweiter Editor daneben (der alte
- * `ManualBookingDrawer`) hieße: zwei Wahrheiten über dasselbe.
+ * Column order is **DATEV's**: date · amount · D/C · tax key · account ·
+ * document field 1 · text — the order the audience has read for years.
+ * Amounts are **gross**, as on the document; the tax line is derived
+ * (`./tax-assist.ts`), not typed.
  *
- * Die Spaltenordnung ist **DATEV**, nicht Ludwig: Datum · Umsatz · S/H · BU ·
- * Konto · Beleg 1 · Text. Die Zielgruppe liest seit Jahren Buchungsstapel in
- * dieser Reihenfolge; jede andere kostet sie bei jeder Zeile einen Gedanken.
- *
- * Beträge sind **brutto**, wie auf dem Beleg. Die Steuerzeile leitet der
- * Editor ab und zeigt sie unter der Zeile — sie wird beim Speichern erzeugt
- * (`./tax-assist.ts`), nicht getippt.
- *
- * Was der Editor **nicht** kann: mehrere Sätze je Ereignis. `saveEventBooking`
- * konsolidiert auf einen Satz; der „+ weiterer Buchungssatz"-Knopf des Designs
- * entfällt deshalb (Owner-Entscheid 2026-08-30, F123 §5). Splits laufen über
- * mehrere Zeilen im selben Satz.
+ * It cannot hold several entries per event: `saveEventBooking` consolidates to
+ * one (owner, 2026-08-30). Splits are several lines in one entry.
  */
 
 export type EditorMode = "simple" | "full";
@@ -69,9 +57,9 @@ export interface EditorRow {
   /** Brutto, deutsches Format („1.475,60"). */
   amount: string;
   side: Side;
-  /** DATEV-BU-Schlüssel („9", „8", „94", …) oder leer. */
+  /** DATEV tax key ("9", "8", "94", …) or empty. */
   bu: string;
-  /** Automatikkonten setzen den Schlüssel selbst — dann ist das Feld gesperrt. */
+  /** Automatic accounts set the key themselves — then the field is locked. */
   buLocked?: boolean;
   account: string;
   accountName: string;
@@ -79,16 +67,16 @@ export interface EditorRow {
   externalDocumentNumber2?: string;
   text: string;
   costCenter1?: string;
-  /** Kandidaten für das Konto-Feld dieser Zeile. */
+  /** Candidates for this line's account field. */
   candidates?: Partial<Record<AccountGroup, AccountCandidate[]>>;
-  /** Zeile ist gelöscht, aber rücknehmbar. */
+  /** The line is deleted but can be restored. */
   removed?: boolean;
 }
 
 export interface EditorMessage {
   code: string;
   message: string;
-  /** Was den Befund behebt — der Knopf steht an der Message. */
+  /** What fixes the finding — the button sits at the message. */
   fixLabel?: string;
   onFix?: () => void;
 }
@@ -104,16 +92,16 @@ export interface EditorAiReview {
 
 export interface JournalEntryEditorProps {
   rows: EditorRow[];
-  /** Das Gegenkonto — die Zeile, die den Satz ausgleicht. */
+  /** The contra account — the line that balances the entry. */
   contraAccount: { account: string; name: string; tag?: string } | null;
-  /** Beleg, gegen den der Rest gerechnet wird. */
+  /** The document the remainder is computed against. */
   documentNumber?: string | null;
   documentAmount?: number | null;
   documentSide?: Side;
   status: EditorStatus;
   editable: boolean;
   mode?: EditorMode;
-  /** Der Satz ist gesperrt — mit Grund und dem einen erlaubten Ausweg. */
+  /** The entry is locked — with the reason and the one allowed way out. */
   locked?: { reason: string; actionLabel?: string; onAction?: () => void } | null;
   reversedReason?: string | null;
   deletable?: boolean;
@@ -122,9 +110,8 @@ export interface JournalEntryEditorProps {
   hints?: EditorMessage[];
   aiReview?: EditorAiReview | null;
   /**
-   * Kontenrahmen des Wirtschaftsjahres (`skr03`/`skr04`) — schaltet die
-   * Steuerassistenz frei. Ohne ihn wird keine Steuerzeile abgeleitet; der
-   * Editor rät keinen Rahmen.
+   * Chart of accounts of the fiscal year (`skr03`/`skr04`) — enables tax
+   * assistance. Without it no tax line is derived; the editor does not guess.
    */
   accountFramework?: string | null;
   onSearchAccounts?: (query: string) => Promise<AccountCandidate[]>;
@@ -132,7 +119,7 @@ export interface JournalEntryEditorProps {
   onCancel?: () => void;
   onEdit?: () => void;
   onDelete?: (reason: string) => void | Promise<void>;
-  /** Kontenblatt eines Kontos öffnen (Drawer des Aufrufers). */
+  /** Open an account's ledger (the caller's drawer). */
   onOpenLedger?: (account: string) => void;
   /**
    * Open the register of document numbers for **this row** (0014). Set → the
@@ -151,7 +138,7 @@ export interface JournalEntryEditorProps {
   dominantDocumentNumber?: KnownDocumentNumber | null;
   /** The words of the nine sources — a prop, because there is no axis (L-71). */
   documentNumberSourceLabel?: DocumentNumberSourceLabels;
-  /** Erklärung eines BU-Schlüssels öffnen. */
+  /** Open the explanation of a tax key. */
   onOpenTaxKey?: (bu: string) => void;
   /**
    * Set → the contra account is **editable**, with the same `AccountField` as
@@ -163,12 +150,12 @@ export interface JournalEntryEditorProps {
   onContraAccountChange?: (accountNumber: string, accountName: string) => void;
   /** Candidates for the contra-account field, in the shape `AccountField` takes. */
   contraAccountCandidates?: React.ComponentProps<typeof AccountField>["candidates"];
-  /** Schnellfunktionen: Klärungskonto, wie letzte Buchung, Privatanteil. */
+  /** Quick actions: clarification account, same as last entry, private share. */
   quickActions?: { clarificationAccount?: () => void; sameAsLast?: () => void; privateShare?: () => void };
 }
 
 
-/** Die Summe der Zeilen auf der Belegseite — daraus fällt der Rest. */
+/** The total of the lines on the document side — the remainder follows from it. */
 function documentSideTotal(rows: readonly EditorRow[], documentSide: Side): number {
   return rows
     .filter((r) => !r.removed && r.side === documentSide)
@@ -250,8 +237,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
     void onSave(active, reason.trim());
   }, [saveBlocked, onSave, active, reason]);
 
-  // Alt+V wechselt die Sicht, Ctrl+Enter speichert, Esc bricht ab. Alle drei
-  // stehen sichtbar am jeweiligen Knopf.
+  // Alt+V switches the view, Ctrl+Enter saves, Esc cancels — each shown at its button.
   useEffect(() => {
     if (!editable) return;
     function onKey(e: KeyboardEvent) {
@@ -574,8 +560,8 @@ function Head({
   full: boolean;
   onToggleMode: () => void;
 }) {
-  // Der Rest ist die wichtigste Zahl des Editors: geht er nicht auf null, ist
-  // der Satz nicht fertig. Deshalb steht er im Kopf, nicht am Ende.
+  // The remainder is the editor's most important number: unless it is zero the
+  // entry is not done. That is why it stands in the head, not at the end.
   const showRest = rest !== null && (full || Math.abs(rest) >= 0.005);
   return (
     <div className="bse__head">
@@ -807,8 +793,8 @@ function EditorRow({
 }
 
 /**
- * Was tatsächlich gespeichert wird — mit den abgeleiteten Steuerzeilen. Beim
- * Bearbeiten immer offen: wer brutto tippt, muss sehen, was daraus wird.
+ * What is actually saved, derived tax lines included. Always open while
+ * editing: whoever types gross must see what comes of it.
  */
 function Journal({
   rows,
@@ -819,7 +805,7 @@ function Journal({
   onToggle,
 }: {
   rows: readonly EditorRow[];
-  /** Die Zeile, die den Satz ausgleicht — sie steht oben separat, gehört aber dazu. */
+  /** The balancing line — shown separately on top, but part of the entry. */
   contraAccount: { account: string; name: string } | null;
   documentSide: Side;
   accountFramework?: string | null;
@@ -851,9 +837,8 @@ function Journal({
       amount: tax.tax,
     });
   }
-  // Das Gegenkonto steht in der Oberfläche als eigene Zeile über dem Journal,
-  // gehört aber in die Summe — sonst meldet „Σ S ≠ Σ H" einen Fehler, den es
-  // nicht gibt.
+  // The contra account is its own row above the journal but belongs in the
+  // total — otherwise "Σ D ≠ Σ C" reports an error that does not exist.
   if (contraAccount?.account) {
     const total = rows
       .filter((r) => r.side === documentSide)

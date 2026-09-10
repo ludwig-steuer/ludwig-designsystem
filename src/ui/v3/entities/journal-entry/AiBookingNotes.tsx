@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-// Direkt statt über das Barrel: `@/ui/status` exportiert auch `FlowModal`
-// und zieht darüber `@/modules/invoices` samt DB-Treiber ins Bundle (P22).
+// Direct import, not the barrel: `@/ui/status` also exports `FlowModal` and
+// pulls `@/modules/invoices` with the DB driver into the bundle (P22).
 import { Confidence, type ConfidenceLevel } from "../../patterns/Confidence";
 import { StateIcon, type StateKind } from "../../patterns/Review";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
@@ -22,22 +22,15 @@ import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { StatusBadge } from "../../patterns/StatusBadge";
 
 /**
- * Was der Agent sich gedacht hat (F123 T123.3, Design `AiBookingNotes.dc.html`).
+ * What the agent was thinking (F123 T123.3): the proposal's **rationale**
+ * (`agent_rationale`), the **judge's assessment** (`reasoning_short`) and the
+ * **sources** both rest on. Without them a proposal is a claim one can only
+ * believe or reject.
  *
- * Drei Dinge, die heute nirgends zusammen stehen: die **Begründung des
- * Vorschlags** (`agent_rationale`), die **Einschätzung des Judge**
- * (`reasoning_short`) und die **Quellen**, auf die sich beides stützt. Ohne
- * sie ist ein Buchungsvorschlag eine Behauptung, die man nur glauben oder
- * verwerfen kann.
- *
- * Standardmäßig eingeklappt — außer der Judge will, dass hingesehen wird
- * (`flag`) oder es liegt ein Fehler an. Wer jedem bestätigten Satz seine
- * Begründung aufdrängt, macht die Begründung wertlos.
- *
- * **Collapsed is not the same as gone** (2026-09-10): the box stands as soon
- * as there is something to read — `confirm` included. In the batch acceptance
- * `confirm` is the normal case, and „why does this entry look like this?" is
- * asked exactly there.
+ * Collapsed by default — unless the judge flags it or there is an error.
+ * **Collapsed is not gone** (2026-09-10): the box stands as soon as there is
+ * something to read, `confirm` included — in the batch acceptance that is the
+ * normal case, and exactly where "why does this entry look like this?" is asked.
  */
 
 export type JudgeVerdict = "confirm" | "confirm_with_note" | "adjust" | "flag";
@@ -113,7 +106,7 @@ export interface AiSource {
    * than an id.
    */
   label?: string | null;
-  /** Wörtliches Zitat aus der Quelle, wenn es eines gibt. */
+  /** Verbatim quote from the source, if there is one. */
   quote?: string | null;
   href?: string | null;
   /**
@@ -140,14 +133,14 @@ export function AiBookingNotes({
   errors = [],
 }: {
   verdict: JudgeVerdict | null;
-  /** Die Konfidenz des Vorschlags; `null` heißt kein Signal. */
+  /** The proposal's confidence; `null` means no signal. */
   confidence?: ConfidenceLevel | null;
-  /** `agent_rationale` — warum der Agent so gebucht hat. */
+  /** `agent_rationale` — why the agent booked it this way. */
   rationale?: string | null;
-  /** `reasoning_short` des Judge. */
+  /** The judge's `reasoning_short`. */
   judgeReasoning?: string | null;
   sources?: AiSource[];
-  /** Blockierende Befunde des Judge. */
+  /** The judge's blocking findings. */
   errors?: string[];
 }) {
   const flagged = verdict === "flag" || errors.length > 0;

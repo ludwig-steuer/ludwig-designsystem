@@ -14,19 +14,13 @@ import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 import { listHref, PARTNER_TABS, tabHref } from "./fixtures";
 
 /**
- * Der Rahmen, in dem jedes Szenario von 0127 gezeichnet wird — und der
- * **erste Aufrufer von `DetailView`** (0138 Weg 1).
+ * The frame every 0127 scenario is drawn in — and the first caller of
+ * `DetailView` (0138 way 1). Not a set component: the page belongs to the app;
+ * this keeps the scenarios comparable.
  *
- * Er ist keine Komponente des Sets: er lebt in `showcase/`, weil er die Seite
- * ist, und die Seite gehört der App. Was er hier tut, ist die Szenarien
- * vergleichbar halten — ein Unterschied zwischen zweien ist dann ein
- * Unterschied im Partner, nie darin, wie jemand den Rahmen zusammengesetzt hat.
- *
- * **Es gibt bewusst keinen `BusinessPartnerView`.** Der Partner braucht keinen
- * Slot, den `DetailView` nicht hat — kein Signal-Zusatz, keine Randspalte,
- * keinen zweiten Inhaltsblock zwischen Kopf und Reitern. Eine vierte
- * Rahmen-Komponente wäre genau die Doppelung, die 0138 abstellen sollte; sie
- * hätte nichts getragen als ihren Namen.
+ * **There is deliberately no `BusinessPartnerView`**: the partner needs no
+ * slot `DetailView` lacks, and a fourth frame component would carry nothing
+ * but its name.
  */
 export function PartnerPage({
   partner,
@@ -39,16 +33,15 @@ export function PartnerPage({
 }: {
   partner: BusinessPartnerDetail;
   tab?: string;
-  /** **Ein** Signal oder keins — welches gewinnt, entscheidet die Seite. */
+  /** **One** signal or none — the page decides which wins. */
   signal?: ReactNode;
   actions?: ReactNode;
   position?: number;
   total?: number;
   children: ReactNode;
 }) {
-  // Rang 2 der Seite: die Nummer, unter der gebucht wird. 99,9 % der Partner
-  // tragen **genau eine** — welche Rolle sie hat, steht im Schlüssel, unter
-  // dem sie hängt, nicht im Satz.
+  // Rank 2 of the page: the number booked under. 99.9 % of partners carry
+  // **exactly one**; its role is in the key it hangs under.
   const account = partner.creditorAccount
     ? { role: "Kreditor", ref: partner.creditorAccount }
     : partner.debtorAccount
@@ -72,9 +65,8 @@ export function PartnerPage({
           icon={<EntityIcon entity="partner" />}
           overline="Geschäftspartner"
           title={partner.legalName}
-          // **Ein** Zustand: der Reifegrad. Rolle, USt-Profil und typische
-          // Lieferung sind Eigenschaften, keine Achsen — sie stehen in den
-          // Fakten, nicht im Kopf (D6/D7).
+          // **One** state: the maturity. Role, VAT profile and typical delivery are
+          // properties, not axes — they stand in the facts, not the head (D6/D7).
           status={<StatusBadge axis="partner" status={partner.onboardingState} />}
           meta={
             <>
@@ -84,10 +76,9 @@ export function PartnerPage({
                   {account.ref.isInternal ? <Badge tone="neutral">intern</Badge> : null}
                 </span>
               ) : partner.clearingAccounts.length > 0 ? (
-                // Der Abrechner: zwölf im Bestand, und **alle zwölf** tragen
-                // weder Kreditor- noch Debitornummer. Ohne diese Zeile stünde
-                // bei ihnen nichts, wo bei allen anderen die Nummer steht
-                // (Zweifel 2 des Seitenprofils).
+                // The billing provider: twelve in stock, **all twelve** without a
+                // creditor or debtor number. Without this line nothing would stand
+                // where every other partner shows the number.
                 <span>
                   Verrechnung <MonoCell value={partner.clearingAccounts.map((a) => a.accountNumber).join(" · ")} />
                 </span>

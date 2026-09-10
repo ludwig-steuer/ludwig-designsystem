@@ -94,13 +94,12 @@ export const tabHref = (key: string) => `?tab=${key}`;
 export const caseHref = "?sachverhalt=2026-0413";
 export const listHref = "?liste=belege";
 
-/* ── Was die Übersicht neben den Fakten zeigt (0150) ──────────────────────── */
+/* ── What the overview shows next to the facts (0150) ─────────────────────── */
 
 /**
- * Die Mängel eines Belegs — **aus der Domäne**, nicht von Hand gestellt:
- * `docDefects()` entscheidet, was ein Mangel ist, und diese Fixtures liefern
- * ihm nur die Rohangaben. Sonst zeigte die Story eine Auswahl, die es so nie
- * gibt.
+ * A document's defects — **from the domain**: `docDefects()` decides what a
+ * defect is; these fixtures only feed it raw values. Otherwise the story would
+ * show a selection that never occurs.
  */
 export function documentDefects(over: Partial<DocDefectFacts> = {}): DocDefect[] {
   return docDefects({
@@ -115,7 +114,7 @@ export function documentDefects(over: Partial<DocDefectFacts> = {}): DocDefect[]
   });
 }
 
-/** Die USt einer gemischten Rechnung — zwei Sätze, das ist der Fall für die Box. */
+/** The VAT of a mixed invoice — two rates, which is the case for the box. */
 export const VAT_MIXED = {
   net: 1512.61,
   vat: 287.39,
@@ -129,8 +128,8 @@ export const VAT_MIXED = {
 };
 
 /**
- * Der Verlauf eines Belegs in Kurzform. Die Wörter sind die der App
- * (`platform_audit_events`), die Zeiten laufen rückwärts vom Eingang.
+ * A document's history in short. The words are the app's
+ * (`platform_audit_events`); times run backwards from receipt.
  */
 export const HISTORY = [
   { id: "e-5", at: "2026-08-20T09:12:00Z", title: "Gebucht im Stapel 08/2026", kind: "Buchung", actor: "Kanzlei" },
@@ -146,13 +145,9 @@ export const partnerHref = "?geschaeftspartner=bp-880";
 export const batchHref = "?stapel=2026-08";
 
 /**
- * Eine offene Rückfrage an diesem Beleg — im Sichtmodell der Klärungs-Familie,
- * nicht im Spiegel-VM: die Liste zeigt Zustand und Dringlichkeit, und die
- * beiden gibt es nur hier.
- *
- * `type: "question"` und nicht `"comment"`: eine Frage wartet auf eine
- * Antwort, ein Kommentar ist Zusammenhang. Dass sie an **diesem Beleg** hängt,
- * sagt der Ort — die Box steht in seiner Übersicht.
+ * An open clarification on this document — in the clarification family's view
+ * model, not the mirror VM: only that carries state and urgency. A question,
+ * not a comment: a question waits for an answer.
  */
 export const CLARIFICATION: ClarificationVM = {
   id: "cl-9001",

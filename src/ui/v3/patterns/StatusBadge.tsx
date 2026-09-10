@@ -5,17 +5,17 @@ import { StatusInfoButton } from "./StatusInfoButton";
 import { resolveStage, resolveStatus, type StatusAxis } from "@/ludwig/ui/status/status-registry";
 
 export interface StatusBadgeProps {
-  /** Welche Status-Achse — bestimmt Label, Farbe und Erklärung. */
+  /** Which status axis — decides label, colour and explanation. */
   axis: StatusAxis;
   status: string | null | undefined;
-  /** Nur `beleg`: erreichte Pipeline-Stufe (`processing_stage`) als Detail. */
+  /** Only `beleg`: the pipeline stage reached (`processing_stage`) as detail. */
   stage?: string | null;
-  /** Icon zeigen, sofern die Achse eines hat (Default true). */
+  /** Show the icon if the axis has one (default true). */
   showIcon?: boolean;
   /**
-   * (i) neben dem Chip: öffnet den gemeinsamen `StatusInfoDialog` mit ALLEN
-   * Ausprägungen der Achse. Default an. Abschalten, wo der Chip selbst schon
-   * klickbar ist (z.B. `EntityStatusBadgeButton`).
+   * (i) next to the chip: opens the shared `StatusInfoDialog` with ALL values
+   * of the axis. On by default; switch off where the chip itself is clickable
+   * (e.g. `EntityStatusBadgeButton`).
    */
   info?: boolean;
   /**
@@ -25,33 +25,26 @@ export interface StatusBadgeProps {
    */
   chevron?: boolean;
   /**
-   * Freitext dieses einen Objekts, an den Tooltip angehängt — der Grund einer
-   * Erledigung (`completed_reason`), die Notiz einer Ersetzung. Die Achse
-   * kennt ihn nicht: er gehört dem Datensatz, nicht dem Zustand. Er ersetzt
-   * nie das Wort auf der Marke (V7).
+   * Free text of this one record, appended to the tooltip — a completion's
+   * reason (`completed_reason`), a replacement's note. It belongs to the record,
+   * not the state, and never replaces the word on the badge (V7).
    */
   note?: string | null;
   className?: string;
 }
 
 /**
- * Der Status-Chip der App. Holt Label, Farbe und Erklärung aus der zentralen
- * Registry (`status-registry.ts`) — deshalb sieht derselbe Zustand überall
- * gleich aus, egal in welcher Ansicht er steht.
+ * The app's status chip. Label, colour and explanation come from the registry
+ * (`status-registry.ts`), so the same state looks the same everywhere.
  *
- * Drei Ebenen Erklärung, aufsteigend nach Tiefe:
- *  1. das Label selbst (deutsch),
- *  2. der Hover (`title`): Achse, Zustand, Bedeutung — ohne Client-JS,
- *  3. das (i): der gemeinsame `StatusInfoDialog` mit allen Ausprägungen der
- *     Achse, ihren DB-Werten und der technischen Herkunft.
+ * Three levels of explanation: the label, the hover (`title`: axis, state,
+ * meaning — no client JS), and the (i) with every value of the axis. The chip
+ * stays server-renderable; only the (i) is a client island.
  *
- * Der Chip bleibt server-tauglich; nur das (i) ist ein Client-Island. Für die
- * klickbare Variante mit Flow-Modal gibt es `EntityStatusBadgeButton`.
- *
- * @when    Ein Zustand aus einer Status-Achse (beleg, sachverhalt, buchung,
- *          job …). Die einzige erlaubte Status-Darstellung (R1).
- * @instead Eine Eigenschaft ohne Achse — Art, Rolle, Zähler → Badge.
- *          Ein Zustand mit Erklärsatz und Handlung → StatusCallout.
+ * @when    A state from a status axis (beleg, sachverhalt, buchung, job …). The
+ *          one allowed status display (R1).
+ * @instead A property without an axis — kind, role, counter → Badge.
+ *          A state with an explanation and an action → StatusCallout.
  */
 export function StatusBadge({
   axis,

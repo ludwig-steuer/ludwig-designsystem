@@ -17,24 +17,16 @@ import { Field, Input } from "./Form";
 export type ParsedAmount = number | null | "invalid";
 
 /**
- * Text aus dem Feld → Betrag.
+ * Field text → amount.
  *
- * **Die Rechnung gehört der App** (`parseGermanAmount`, `shared/money.ts`):
- * welcher Punkt ein Tausendertrenner ist und welcher ein Komma vertritt,
- * entscheidet seit 2026-09-07 eine Regel für beide Seiten (Befund L-01, App-
- * Commit `52914c45`). Hier steht nur noch, was ein **Eingabefeld** zusätzlich
- * braucht: die Unterscheidung zwischen „nichts getippt" und „getippt, aber
- * keine Zahl".
+ * **The parsing belongs to the app** (`parseGermanAmount`, `shared/money.ts`,
+ * finding L-01). This adds only what an input field needs on top: telling
+ * "nothing typed" from "typed, but no number". Hence the form check first —
+ * `parseGermanAmount` reads "12,3,4" as 123.4, right for an import, a silent
+ * reinterpretation in a field. What fails the form is `"invalid"`.
  *
- * Deshalb die Formprüfung davor. `parseGermanAmount` verwirft, was keine
- * Ziffer ist, und liest „12,3,4" als 123,4 — für einen Import ist das richtig,
- * für ein Feld wäre es eine stille Umdeutung dessen, was jemand getippt hat.
- * Was die Form nicht besteht, ist `"invalid"` und wird sichtbar bemängelt.
- *
- * Eine Schreibweise liest das Feld seither anders als vorher: „1.2345" ist
- * jetzt 12345 (der Punkt trennt Tausender, denn hinter ihm stehen vier
- * Ziffern) statt 1,2345. Das ist die Regel der App, und sie ist die richtige —
- * 1,2345 € gibt es nicht.
+ * "1.2345" reads as 12345 (the dot separates thousands before four digits) —
+ * the app's rule, and right: 1.2345 € does not exist.
  *
  * @when    Reading what someone typed into a money field — on blur, before
  *          saving.
@@ -44,8 +36,8 @@ export type ParsedAmount = number | null | "invalid";
 export function parseAmount(raw: string): ParsedAmount {
   const t = raw.replace(/[\s ]/g, "");
   if (!t) return null;
-  // Entweder deutsche Gruppierung („1.234.567,89") oder eine schlichte Zahl
-  // mit höchstens einem Trenner („1234.56", „1234,56", „1234").
+  // Either German grouping ("1.234.567,89") or a plain number with at most one
+  // separator ("1234.56", "1234,56", "1234").
   const wellFormed = /^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t) || /^-?\d+([.,]\d+)?$/.test(t);
   if (!wellFormed) return "invalid";
   const n = parseGermanAmount(t);
