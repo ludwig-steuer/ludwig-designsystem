@@ -21,18 +21,19 @@ type Story = StoryObj<typeof PaymentAccountField>;
 const GEFUEHRT: PaymentAccountOption = {
   id: "a-1",
   label: "Testbank eG 100200300 · DE00 0000 0000 0000 0000 00",
+  iban: "DE00 0000 0000 0000 0000 00",
   inUse: true,
 };
 
 const WEITERE: PaymentAccountOption[] = [
-  { id: "a-2", label: "Geldtransit", inUse: false },
-  { id: "a-3", label: "EC-Cash", inUse: false },
-  { id: "a-4", label: "Kasse", inUse: false },
-  { id: "a-5", label: "Nebenkasse 1", inUse: false },
-  { id: "a-6", label: "Schecks", inUse: false },
-  { id: "a-7", label: "Bank (Zweitkonto 3)", inUse: false },
-  { id: "a-8", label: "Musterbank Autofinanzierung", inUse: false },
-  { id: "a-9", label: "Paypal", inUse: false },
+  { id: "a-2", label: "Geldtransit", iban: null, inUse: false },
+  { id: "a-3", label: "EC-Cash", iban: null, inUse: false },
+  { id: "a-4", label: "Kasse", iban: null, inUse: false },
+  { id: "a-5", label: "Nebenkasse 1", iban: null, inUse: false },
+  { id: "a-6", label: "Schecks", iban: null, inUse: false },
+  { id: "a-7", label: "Bank (Zweitkonto 3)", iban: null, inUse: false },
+  { id: "a-8", label: "Musterbank Autofinanzierung", iban: null, inUse: false },
+  { id: "a-9", label: "Paypal", iban: null, inUse: false },
 ];
 
 const ALLE = [GEFUEHRT, ...WEITERE];
@@ -80,7 +81,7 @@ export const NurGefuehrte: Story = {
           id="pa-2"
           value={null}
           onChange={() => {}}
-          accounts={[GEFUEHRT, { id: "a-10", label: "Testbank eG 4711", inUse: true }]}
+          accounts={[GEFUEHRT, { id: "a-10", label: "Testbank eG 4711", iban: null, inUse: true }]}
         />
       </Frame>
       <Frame sub="keines geführt — ebenso keine Gruppen">

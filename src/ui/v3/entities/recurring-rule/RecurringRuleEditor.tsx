@@ -28,6 +28,10 @@ import {
   type AccountCandidate,
   type AccountGroup,
 } from "../account/AccountField";
+import {
+  PaymentAccountField,
+  type PaymentAccountOption,
+} from "../account/PaymentAccountField";
 import { TaxKeyField } from "../journal-entry/TaxKeyField";
 
 /**
@@ -146,8 +150,14 @@ export function RecurringRuleEditor({
   /**
    * The choice „Zahlungskonto". **No value means „the account of the payment
    * itself"**, not „unknown" — the sentence stands at the field.
+   *
+   * `PaymentAccountOption` since 0145 was finished: a client carries 25–43
+   * payment accounts because onboarding takes over the whole SKR bank block,
+   * and hardly ever more than one of them is in use. `inUse` is what splits
+   * the two groups — the caller derives it (`isPaymentAccountInUse()`), the
+   * field only shows the split.
    */
-  paymentAccounts?: readonly { id: string; label: string }[];
+  paymentAccounts?: readonly PaymentAccountOption[];
   /**
    * The domain's sentence about the current draft; without a criterion it is
    * the warning. The editor does not phrase it — a form that rebuilds a
@@ -557,19 +567,19 @@ export function RecurringRuleEditor({
               hint="Ohne Auswahl gilt das Konto der jeweiligen Zahlung."
               htmlFor={ids.paymentAccount}
             >
-              <Select
+              {/* `PaymentAccountField` (0145) instead of a bare `Select`: it
+                  puts the accounts in use above the dead wood of the chart.
+                  The placeholder keeps its sentence — here the empty choice is
+                  a **value** („the account of the payment itself"), not an
+                  unset field, and that is what the reader has to see. */}
+              <PaymentAccountField
                 id={ids.paymentAccount}
-                value={draft.paymentAccountId ?? ""}
-                disabled={pending || !paymentAccounts?.length}
-                onChange={(e) => setDraft({ ...draft, paymentAccountId: e.target.value || null })}
-              >
-                <option value="">Konto der jeweiligen Zahlung</option>
-                {paymentAccounts?.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.label}
-                  </option>
-                ))}
-              </Select>
+                value={draft.paymentAccountId}
+                accounts={paymentAccounts ?? []}
+                placeholder="Konto der jeweiligen Zahlung"
+                disabled={pending}
+                onChange={(paymentAccountId) => setDraft({ ...draft, paymentAccountId })}
+              />
             </Field>
             <SplitTemplate lines={draft.template.lines} />
           </Disclosure>

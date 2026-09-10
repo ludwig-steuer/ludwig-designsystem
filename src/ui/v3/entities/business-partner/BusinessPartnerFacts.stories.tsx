@@ -81,10 +81,16 @@ export const Filled: Story = {
  * dem Spiegellauf vom 2026-09-09 aus `PARTNER_NATURE_LABEL` — vorher hätten
  * 924 Partner hier ein `undefined` getragen (L-222).
  *
- * **Das USt-Profil fehlt bewusst.** Seine Wörter leben privat in
- * `MasterDataTab.tsx` (L-223); eine lokale Map wäre R1 verletzt, und
- * `domestic_standard` roh hingeschrieben behauptet eine Auskunft, die es der
- * Kanzlei nicht gibt.
+ * **Das USt-Profil steht jetzt dabei** (L-223, erledigt am 2026-09-10). Es
+ * hat auf seine Wörter gewartet: `PARTNER_VAT_PROFILE_LABEL` lag privat in
+ * `MasterDataTab.tsx`, und `domestic_reverse_charge` roh hingeschrieben hätte
+ * eine Auskunft behauptet, die es der Kanzlei nicht gibt.
+ *
+ * Es steht **vor** der typischen Lieferung, weil es die stärkere Antwort auf
+ * dieselbe Frage ist: gefüllt bei 11 % des Bestands, aber bei 75 % der
+ * Partner, auf die überhaupt gebucht wird. `unknown` fällt weg — ein Profil,
+ * das niemand bestimmt hat, ist keines, und eine leere Zeile machte aus
+ * „nicht angesehen" ein „hat keins".
  *
  * **Der Reifegrad steht in „Herkunft"**, nicht oben: er ist zu 99,7 %
  * `confirmed`, und eine Marke, die fast immer dasselbe sagt, gehört nicht an

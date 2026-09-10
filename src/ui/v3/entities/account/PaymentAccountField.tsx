@@ -1,3 +1,5 @@
+import type { PaymentAccountOption } from "@/ludwig/modules/bank-transactions/domain/payment-account-options";
+
 import { Select } from "../../primitives/Form";
 
 /**
@@ -23,20 +25,21 @@ import { Select } from "../../primitives/Form";
  * benefit of the grouping again.
  */
 
-export interface PaymentAccountOption {
-  id: string;
-  /** Name, with IBAN where there is a bank connection — formatted by the caller. */
-  label: string;
-  /**
-   * `true` = an account actually in use.
-   *
-   * **This component does not decide what that means.** It is a domain
-   * derivation (statement expectation `expects_statements` per `bank.md` R15a,
-   * booked lines, auto-assignment) and stays in the app; the flag arrives
-   * ready-made.
-   */
-  inUse: boolean;
-}
+/**
+ * The option **from the mirror**, not defined here.
+ *
+ * 0145 declared it locally — three fields, structurally the same as
+ * `bank-transactions/domain/payment-account-options.ts`, which already
+ * existed. That is a hand copy, and the house rule says the data model of the
+ * app has precedence (`spec-schreiben` §5). Found while replacing the bare
+ * `<select>` in `RecurringRuleEditor` on 2026-09-10: the app hands over what
+ * `toPaymentAccountOptions()` returns, and the two types differed by `iban`.
+ *
+ * **What `inUse` means is decided over there**, by `isPaymentAccountInUse()`:
+ * expects statements, or has booked lines, or carries an auto-assignment. The
+ * component only shows the split.
+ */
+export type { PaymentAccountOption };
 
 const IN_USE = "Geführte Konten";
 const REST = "Weitere Konten aus dem Kontenrahmen";

@@ -15,6 +15,7 @@ import {
 
 import { Card, CardHead } from "../../primitives/Table";
 import type { AccountCandidate } from "../account/AccountField";
+import type { PaymentAccountOption } from "../account/PaymentAccountField";
 import type { JournalLine } from "../journal-entry/JournalEntryCompact";
 import { rule } from "./fixtures";
 import { RecurringRuleFacts } from "./RecurringRuleFacts";
@@ -42,9 +43,18 @@ const ACCOUNTS: RecurringRuleAccounts = {
     CANDIDATES.filter((c) => `${c.number} ${c.name}`.toLowerCase().includes(q.toLowerCase())),
 };
 
-const PAYMENT_ACCOUNTS = [
-  { id: "pa-1", label: "Commerzbank · DE02 1204 0000 0000 5555 00" },
-  { id: "pa-2", label: "Qonto · DE89 1001 0100 0000 1234 56" },
+/**
+ * Die Zahlungskonten, wie das Feld sie bekommt (0145): **die Verteilung ist
+ * das Argument.** Ein Mandant führt ein bis zwei Konten wirklich, und das
+ * halbe SKR-Bankblock steht daneben — ohne die Gruppierung sucht die
+ * Sachbearbeiterin ihre Bank zwischen „Geldtransit" und „Schecks".
+ */
+const PAYMENT_ACCOUNTS: PaymentAccountOption[] = [
+  { id: "pa-1", label: "Commerzbank · DE02 1204 0000 0000 5555 00", iban: null, inUse: true },
+  { id: "pa-2", label: "Qonto · DE89 1001 0100 0000 1234 56", iban: null, inUse: true },
+  { id: "pa-3", label: "Geldtransit", iban: null, inUse: false },
+  { id: "pa-4", label: "Kasse", iban: null, inUse: false },
+  { id: "pa-5", label: "Schecks", iban: null, inUse: false },
 ];
 
 /** Der Entwurf der importierten Regel — der Fall „ändern". */

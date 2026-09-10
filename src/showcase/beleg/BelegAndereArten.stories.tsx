@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 
-import { PaymentAccountField } from "@/ui/v3/entities/account/PaymentAccountField";
+import {
+  PaymentAccountField,
+  type PaymentAccountOption,
+} from "@/ui/v3/entities/account/PaymentAccountField";
 import { SourceDocumentCard } from "@/ui/v3/entities/source-document/SourceDocumentCard";
 import { Button } from "@/ui/v3/primitives/Button";
 import { Card, CardHead } from "@/ui/v3/primitives/Table";
@@ -38,11 +41,16 @@ const menu = (
 );
 
 /** Die Zahlungskonten eines Mandanten — eines geführt, der Rest Kulisse. */
-const KONTEN = [
-  { id: "b-1", label: "Testbank eG 100200300 · DE00 0000 0000 0000 0000 00", inUse: true },
-  { id: "b-2", label: "Geldtransit", inUse: false },
-  { id: "b-3", label: "Kasse", inUse: false },
-  { id: "b-4", label: "Bank (Zweitkonto 3)", inUse: false },
+const KONTEN: PaymentAccountOption[] = [
+  {
+    id: "b-1",
+    label: "Testbank eG 100200300 · DE00 0000 0000 0000 0000 00",
+    iban: "DE00 0000 0000 0000 0000 00",
+    inUse: true,
+  },
+  { id: "b-2", label: "Geldtransit", iban: null, inUse: false },
+  { id: "b-3", label: "Kasse", iban: null, inUse: false },
+  { id: "b-4", label: "Bank (Zweitkonto 3)", iban: null, inUse: false },
 ];
 
 /**

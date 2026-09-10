@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import {
   PARTNER_NATURE_LABEL,
+  PARTNER_VAT_PROFILE_LABEL,
   type BusinessPartnerDetail,
   type PartnerAccountRef,
 } from "@/ludwig/modules/business-partners/domain/business-partner";
@@ -102,10 +103,20 @@ export function BusinessPartnerFacts({
 
   const verhalten: Rows = [];
   if (all) {
-    // **The VAT profile stays out until it has words.** `VAT_PROFILE_LABEL`
-    // lives privately in `MasterDataTab.tsx` (L-223); the domain carries none.
-    // A local map would break R1, and the raw key claims a statement it does
-    // not make: `domestic_reverse_charge` means nothing to an accountant.
+    // **The VAT profile, with the words of the domain** (L-223, resolved
+    // 2026-09-10). It waited for `PARTNER_VAT_PROFILE_LABEL`: the map lived
+    // privately in `MasterDataTab.tsx`, and a local copy here would have been
+    // the second vocabulary — the raw key claims a statement it does not make,
+    // „domestic_reverse_charge" means nothing to an accountant.
+    //
+    // It stands **before** the typical delivery, because it is the stronger
+    // answer to the same question: filled on only 11 % of the stock, but on
+    // 75 % of the partners anybody books against (measurement of the app,
+    // 2026-09-10). `unknown` is left out — a profile nobody determined is not
+    // a profile, and an empty row would turn „not looked at" into „none".
+    if (partner.vatProfile !== "unknown") {
+      verhalten.push(["USt-Profil", PARTNER_VAT_PROFILE_LABEL[partner.vatProfile]]);
+    }
     if (partner.typicalNature !== "unknown") {
       verhalten.push(["Typische Lieferung", PARTNER_NATURE_LABEL[partner.typicalNature]]);
     }
