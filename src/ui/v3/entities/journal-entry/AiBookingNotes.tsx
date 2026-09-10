@@ -5,6 +5,8 @@ import {
   ChevronRight,
   FileText,
   Globe,
+  HelpCircle,
+  History,
   Ruler,
   Scale,
   type LucideIcon,
@@ -37,15 +39,57 @@ import { StatusBadge } from "../../patterns/StatusBadge";
 
 export type JudgeVerdict = "confirm" | "confirm_with_note" | "adjust" | "flag";
 
-/** Woher eine Aussage kommt. Icon **und** Wort — ein Icon allein ist ein Rätsel. */
-export type SourceKind = "bank" | "beleg" | "regel" | "gesetz" | "web";
+/**
+ * Where a statement comes from. Icon **and** word — an icon alone is a riddle.
+ *
+ * **Seven kinds, not five** (2026-09-10, measured over 919 sources on
+ * staging). Until then „Beleg" bundled three different things: the document
+ * itself (361), a vendor's history (119) and a clarification (10). That is not
+ * merely imprecise, it is wrong — „Beleg · Kreditor 70003, 14 Buchungen,
+ * zuletzt 22.06." claims a document where an aggregation stands, and an
+ * aggregation cannot be opened.
+ *
+ * `contract` and `ledger_account` exist in the app's schema but are never
+ * written; they are missing here on purpose. Whoever writes them adds them.
+ */
+export type SourceKind =
+  | "bank"
+  | "beleg"
+  | "history"
+  | "klaerung"
+  | "regel"
+  | "gesetz"
+  | "web";
 
 const QUELLE: Record<SourceKind, { Icon: LucideIcon; label: string }> = {
-  bank: { Icon: Banknote, label: "Bank" },
+  bank: { Icon: Banknote, label: "Kontoauszug" },
   beleg: { Icon: FileText, label: "Beleg" },
+  history: { Icon: History, label: "Bisherige Buchungen" },
+  klaerung: { Icon: HelpCircle, label: "Rückfrage" },
   regel: { Icon: Ruler, label: "Regel" },
   gesetz: { Icon: Scale, label: "Gesetz" },
   web: { Icon: Globe, label: "Web" },
+};
+
+/**
+ * Which kinds **can** have a target — measured, not wished for.
+ *
+ * `bank`, `beleg` and `klaerung` always carry an id in the data, so there is
+ * something to open. `history` is an aggregation over many entries, `regel`
+ * carries **no** id at all (47 of 47 are prose), `gesetz` is a quotation, and
+ * `web` does not occur in the stock.
+ *
+ * The list stands here so a caller does not have to guess: setting `onOpen` on
+ * a kind that has no target builds a way the data cannot carry.
+ */
+export const QUELLE_AUFSCHLAGBAR: Record<SourceKind, boolean> = {
+  bank: true,
+  beleg: true,
+  klaerung: true,
+  history: false,
+  regel: false,
+  gesetz: false,
+  web: false,
 };
 
 export interface AiSource {

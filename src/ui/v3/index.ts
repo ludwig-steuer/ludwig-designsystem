@@ -621,6 +621,7 @@ export {
   AiBookingNotes,
   AiBookingNotesBody,
   AiBookingNotesCell,
+  QUELLE_AUFSCHLAGBAR,
   type JudgeVerdict,
   type AiSource,
   type SourceKind,

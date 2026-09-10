@@ -96,6 +96,34 @@ Variabel (aus dieser Spec):
 - Aufgeklappt: Befund rot, „Begründung des Vorschlags", „Einschätzung des
   Judge"; `.ki__h` im Aufklapper: **0**
 
+## Nachtrag 2026-09-10 — die Quellen
+
+Zwei Mängel des Owners und die Erhebung von `ludwig-worker2` (919 Quellen auf
+Staging), in einem Zug:
+
+- **Die Kennung verschwindet.** `label` ist optional; 370 der 919 Quellen
+  (40 %) zeigten bis heute eine rohe UUID, weil die App `citation || id ||
+  kind` schickte. Fehlt der Name, stehen Art und Zitat — und die sagen mehr.
+- **`onOpen` schlägt die Quelle auf**, statt von der Arbeit wegzuspringen.
+- **Sieben Arten statt fünf.** „Beleg" bündelte drei verschiedene Dinge: das
+  Dokument (361), die Historie eines Lieferanten (119) und eine Rückfrage
+  (10). Neu sind `history` und `klaerung`; `bank` heißt jetzt „Kontoauszug",
+  weil das die Zeile ist, die dahintersteht.
+- **`QUELLE_AUFSCHLAGBAR`** sagt, welche Art ein Ziel haben **kann** —
+  gemessen: `bank`, `beleg` und `klaerung` tragen immer eine Kennung, `regel`
+  in **47 von 47** Fällen keine. Wer `onOpen` an einer Art ohne Ziel setzt,
+  baut einen Weg, den die Daten nicht tragen.
+
+**Offen für die App:** `quellenArt()` in `buchungssatz-mapping.ts` bildet
+heute sieben Domain-Arten auf fünf ab und verliert dabei genau die
+Unterscheidung, die die Anzeige braucht. Solange das so ist, kommt eine
+Lieferantenhistorie hier als „Beleg" an. **Befund L-281.**
+
+**Vorgemerkt, nicht gebaut:** an Klärungen gibt es zwei weitere Arten
+(`datev_opos_bracket` 49, `datev_mirror_entry` 5) vom OPOS-Watchdog, ohne
+Zitat und ohne Kennung. Sie gehören ins Vokabular, sobald eine Form die
+Klärungsquellen zeigt — hier zeigt sie niemand.
+
 ## Abnahme
 
 | Kriterium | Nachweis | Ergebnis |

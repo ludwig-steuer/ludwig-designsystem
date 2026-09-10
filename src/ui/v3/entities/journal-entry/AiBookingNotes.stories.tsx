@@ -8,6 +8,7 @@ import {
   AiBookingNotes,
   AiBookingNotesBody,
   AiBookingNotesCell,
+  QUELLE_AUFSCHLAGBAR,
   type AiSource,
   type JudgeVerdict,
 } from "./AiBookingNotes";
@@ -130,6 +131,52 @@ export const Box: Story = {
       />
     </div>
   ),
+};
+
+/**
+ * **Die sieben Quellenarten, und welche ein Ziel haben.**
+ *
+ * Erhoben aus 919 Quellen auf Staging (2026-09-10). Drei tragen in den Daten
+ * immer eine Kennung und lassen sich aufschlagen — Kontoauszug (377), Beleg
+ * (361), Rückfrage (10). Vier sind Text: „Bisherige Buchungen" ist eine
+ * Aggregation über viele Sätze, „Regel" trägt in **47 von 47** Fällen keine
+ * Id, „Gesetz" ist ein Zitat, und „Web" kommt im Bestand nicht vor.
+ *
+ * **Warum sieben statt fünf:** bis heute hieß alles drei „Beleg" — das
+ * Dokument, die Lieferantenhistorie und die Rückfrage. „Beleg · Kreditor
+ * 70003, 14 Buchungen, zuletzt 22.06." behauptet ein Dokument, wo eine
+ * Zusammenfassung steht, und die kann man nicht aufschlagen.
+ */
+export const Quellenarten: Story = {
+  render: function Arten() {
+    const [zuletzt, setZuletzt] = useState<string | null>(null);
+    const arten: { art: AiSource["art"]; citation: string }[] = [
+      { art: "bank", citation: "Zahlung vom 28.07.2026 über 345,12 €" },
+      { art: "beleg", citation: "Rechnung der Musterbau GmbH vom 16.07.2026" },
+      { art: "history", citation: "Kreditor 70003, 14 Buchungen, zuletzt 22.06.2026" },
+      { art: "klaerung", citation: "Welche Teilnehmer waren dabei?" },
+      { art: "regel", citation: "Wiederkehr: Miete Musterstraße, monatlich zum 3." },
+      { art: "gesetz", citation: "§ 33 UStDV: Kleinbetragsrechnungen bis 250 €" },
+    ];
+    return (
+      <div style={{ display: "grid", gap: 20, maxWidth: 720 }}>
+        <AiBookingNotes
+          verdict="confirm"
+          confidence="green"
+          rationale="Alle sechs Arten, die im Bestand vorkommen — die drei mit Ziel sind Knöpfe, die drei ohne bleiben Text."
+          sources={arten.map((a, i) => ({
+            key: String(i),
+            art: a.art,
+            quote: a.citation,
+            ...(QUELLE_AUFSCHLAGBAR[a.art] ? { onOpen: () => setZuletzt(a.art) } : {}),
+          }))}
+        />
+        <p className="v2muted" style={{ margin: 0 }}>
+          {zuletzt ? `Aufgeschlagen: ${zuletzt}` : "Die drei aufschlagbaren Arten reagieren auf einen Klick."}
+        </p>
+      </div>
+    );
+  },
 };
 
 /**
