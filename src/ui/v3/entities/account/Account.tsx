@@ -6,6 +6,7 @@ import type { Currency } from "@/ludwig/shared/money";
 import { formatCount } from "../../format";
 
 import { Amount } from "../../primitives/Amount";
+import { EntityIcon } from "../../Icons";
 import { MonoCell } from "../../primitives/Cells";
 import { FieldList } from "../../primitives/FieldList";
 import { Link } from "../../primitives/Link";
@@ -76,6 +77,13 @@ export function AccountCell({
   if (!href) return <span className="v2acc">{body}</span>;
   return (
     <Link href={href} className="v2acc v2acc--link" title="Kontenblatt öffnen">
+      {/* The mark stands **only where there is a way**, never on plain text:
+          it says „the account sheet is over here", and where nothing is over
+          there it promises nothing (V14). The word beside it is the number
+          itself — an icon without a word is a riddle (V11), a number is not.
+          Owner, 2026-09-10: he wants to open the account from a booking line
+          without reading the number and searching for it. */}
+      <EntityIcon entity="ledger-account" size={12} />
       {body}
     </Link>
   );

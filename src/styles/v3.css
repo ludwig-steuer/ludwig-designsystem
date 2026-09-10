@@ -2805,6 +2805,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    die Linkfarbe des Sets — die Nummer bleibt dabei mono, der Name gedämpft. */
 
 .v2acc { white-space: nowrap; }
+/* Das Konto-Zeichen am Weg (Owner 2026-09-10): es steht **vor** der Nummer,
+   auf ihrer Schriftlinie, und traegt die Linkfarbe wie sie. Der Abstand ist
+   klein — Zeichen und Nummer sind ein Ziel, nicht zwei. */
+.v2acc--link > svg {
+  display: inline-block; vertical-align: -1px; margin-right: 3px;
+  color: var(--color-accent-700);
+}
 /* Die Nummer ist der Anker und trägt deshalb die Linkfarbe — `.v2mono` setzt
    sonst `--color-text` und die Zelle sähe im Ruhezustand aus wie Text ohne
    Ziel (Abnahme 0066). Der Name bleibt gedämpft: er beschreibt, er verlinkt

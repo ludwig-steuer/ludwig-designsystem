@@ -1,7 +1,8 @@
 import type { Currency } from "@/ludwig/shared/money";
 
 import { formatAmount } from "../../format";
-import { AmountCell, MonoCell } from "../../primitives/Cells";
+import { AmountCell } from "../../primitives/Cells";
+import { AccountCell } from "../account/Account";
 
 /**
  * Cell and card of a journal entry (0044) — the reading forms of the family,
@@ -35,27 +36,38 @@ export interface JournalLine {
 /** From here on an entry counts as unbalanced — half a cent is rounding. */
 const BALANCE_EPSILON = 0.005;
 
-/** Longer names are cut with an ellipsis; the full one hangs in the `title`. */
-const NAME_LIMIT = 40;
-
 function sum(lines: readonly JournalLine[]): number {
   return lines.reduce((total, line) => total + line.amount, 0);
 }
 
-/** Number and name of an account, the name muted and cut. */
-function AccountRef({ line, showName }: { line: JournalLine; showName: boolean }) {
+/**
+ * Number and name of an account — **`AccountCell` from the account family**.
+ *
+ * This file carried its own copy until 2026-09-10: mono number, muted name,
+ * cut at 40 characters. That is exactly what `AccountCell` does, and its
+ * `@when` names this very place („a booking line, a contra account"). Two
+ * copies means one of them stops being fixed, and this one had already lost
+ * the way to the account sheet.
+ *
+ * With `accountHref` the number becomes a way — with the account icon in
+ * front of it, so the reader sees there is somewhere to go without reading
+ * the number first (owner, 2026-09-10).
+ */
+function AccountRef({
+  line,
+  showName,
+  accountHref,
+}: {
+  line: JournalLine;
+  showName: boolean;
+  accountHref?: (accountNumber: string) => string;
+}) {
   return (
-    <>
-      <MonoCell value={line.accountNumber} />
-      {showName && line.accountName ? (
-        <span className="v2muted" title={line.accountName.length > NAME_LIMIT ? line.accountName : undefined}>
-          {" "}
-          {line.accountName.length > NAME_LIMIT
-            ? `${line.accountName.slice(0, NAME_LIMIT - 1)}…`
-            : line.accountName}
-        </span>
-      ) : null}
-    </>
+    <AccountCell
+      number={line.accountNumber}
+      {...(showName ? { name: line.accountName ?? null } : {})}
+      {...(accountHref ? { href: accountHref(line.accountNumber) } : {})}
+    />
   );
 }
 
@@ -67,12 +79,21 @@ export function JournalEntryCell({
   lines,
   currency,
   showNames = true,
+  accountHref,
 }: {
   /** The lines of the entry, exactly as they would be stored. */
   lines: readonly JournalLine[];
   currency: Currency;
   /** Account name next to the number; `false` = numbers only, for narrow columns. */
   showNames?: boolean;
+  /**
+   * The way to the account sheet, per account number (0155).
+   *
+   * A search param, not a context (L3) — the drawer is a URL. Without it the
+   * numbers stay text: a cell that looks clickable and goes nowhere is worse
+   * than one that does not (V14).
+   */
+  accountHref?: (accountNumber: string) => string;
 }) {
   // Empty renders the em dash like `AmountCell` does — the cell stands in
   // foreign markup and must not bring a box or a message of its own.
@@ -92,19 +113,20 @@ export function JournalEntryCell({
   if (debit && credit) {
     body = (
       <>
-        <AccountRef line={debit} showName={showNames} /> an <AccountRef line={credit} showName={showNames} />
+        <AccountRef line={debit} showName={showNames} accountHref={accountHref} /> an{" "}
+        <AccountRef line={credit} showName={showNames} accountHref={accountHref} />
       </>
     );
   } else if (debit && credits.length > 1) {
     body = (
       <>
-        <AccountRef line={debit} showName={showNames} /> an {credits.length} Konten
+        <AccountRef line={debit} showName={showNames} accountHref={accountHref} /> an {credits.length} Konten
       </>
     );
   } else if (credit && debits.length > 1) {
     body = (
       <>
-        {debits.length} Konten an <AccountRef line={credit} showName={showNames} />
+        {debits.length} Konten an <AccountRef line={credit} showName={showNames} accountHref={accountHref} />
       </>
     );
   } else {
@@ -130,11 +152,18 @@ export function JournalEntryCard({
   currency,
   caption,
   totals = true,
+  accountHref,
 }: {
   lines: readonly JournalLine[];
   currency: Currency;
   /** Heading above the lines — posting text or „Buchungsvorschlag". */
   caption?: string;
+  /**
+   * The way to the account sheet, per account number (0155) — same as in the
+   * cell. Here it matters more: every line names its own account, and the
+   * reader who wonders „what else sits on 6815?" is one click away.
+   */
+  accountHref?: (accountNumber: string) => string;
   /** Σ debit / Σ credit below the lines; `false` when the caller already carries the sum. */
   totals?: boolean;
 }) {
@@ -159,7 +188,16 @@ export function JournalEntryCard({
           </div>
           {lines.map((line, i) => (
             <div className="v2je__row" key={i}>
-              <span className="v2num">{line.accountNumber}</span>
+              {/* The number keeps its right-aligned column — the mark comes
+                  before it, inside the same cell, and does not shift the
+                  figures. */}
+              <span className="v2num">
+                {accountHref ? (
+                  <AccountCell number={line.accountNumber} href={accountHref(line.accountNumber)} />
+                ) : (
+                  line.accountNumber
+                )}
+              </span>
               <span className="v2muted v2je__clip" title={line.accountName ?? undefined}>
                 {line.accountName ?? ""}
               </span>

@@ -32,21 +32,34 @@ function Pair({
   showNames,
   caption,
   totals,
+  accountHref,
 }: {
   lines: JournalLine[];
   showNames?: boolean;
   caption?: string;
   totals?: boolean;
+  accountHref?: (n: string) => string;
 }) {
   return (
     <div style={{ maxWidth: 620, display: "grid", gap: "var(--space-5)" }}>
       <div>
         <div className="v2sub">JournalEntryCell</div>
-        <JournalEntryCell lines={lines} currency="EUR" showNames={showNames} />
+        <JournalEntryCell
+          lines={lines}
+          currency="EUR"
+          showNames={showNames}
+          {...(accountHref ? { accountHref } : {})}
+        />
       </div>
       <div>
         <div className="v2sub">JournalEntryCard</div>
-        <JournalEntryCard lines={lines} currency="EUR" caption={caption} totals={totals} />
+        <JournalEntryCard
+          lines={lines}
+          currency="EUR"
+          caption={caption}
+          totals={totals}
+          {...(accountHref ? { accountHref } : {})}
+        />
       </div>
     </div>
   );
@@ -96,6 +109,29 @@ export const WithoutTotals: Story = { render: () => <Pair lines={SPLIT} totals={
  * Where they really stand: the cell inside a table row of another entity, the
  * card next to a document with a caption.
  */
+/**
+ * **Mit Weg zum Konto** (Owner 2026-09-10): jede Kontonummer trägt das
+ * Konto-Zeichen und führt auf ihr Kontenblatt — als Suchparameter, denn der
+ * Drawer ist eine URL (L3).
+ *
+ * Das Zeichen steht **nur am Weg**. Ohne `accountHref` bleiben die Nummern
+ * Text: eine Zelle, die anklickbar aussieht und nirgends hingeht, ist
+ * schlimmer als eine, die es nicht tut (V14). Die Story darüber zeigt genau
+ * das — dieselben Zeilen, kein Weg, kein Zeichen.
+ *
+ * Die Zelle ist seit heute `AccountCell` aus der Kontofamilie; vorher stand
+ * hier eine Handkopie, die den Weg gar nicht kannte.
+ */
+export const MitKontoweg: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-6)" }}>
+      <Pair lines={STANDARD} accountHref={(n) => `?konto=${n}`} />
+      <div className="v2muted">ohne Weg — dieselben Zeilen, kein Zeichen:</div>
+      <Pair lines={STANDARD} />
+    </div>
+  ),
+};
+
 export const InUse: Story = {
   render: () => (
     <div style={{ maxWidth: 760, display: "grid", gap: "var(--space-5)" }}>
