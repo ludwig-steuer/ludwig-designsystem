@@ -3067,53 +3067,45 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   vertical-align: top;
 }
 
-/* --- StateMachine (0069) — die Landkarte einer Status-Achse ---------------
-   Die Boxen liegen im Grid, die Kanten in einem SVG darüber; beide rechnen in
-   derselben Einheit, die die Komponente setzt (Spalte 150, Zeile 92 — die Zahlen stehen in `StateMachine.tsx`). Deshalb
-   steht hier kein Maß für das Raster — es käme sonst zweimal vor und ginge
-   beim nächsten Anfassen auseinander. */
+/* --- StateMachine (0069) — the map of a status axis ------------------------
+   Boxes sit in the grid, edges in an SVG above; both use the unit the component
+   sets (column 150, row 92 — the numbers live in `StateMachine.tsx`), so no
+   grid measure stands here to drift apart. */
 .v2fsm { display: flex; flex-direction: column; gap: var(--space-3); }
 .v2fsm__lead {
   margin: 0; max-width: 68ch;
   font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text);
 }
-/* Wird die Karte breiter als ihr Platz, scrollt sie in sich — nie die Seite. */
+/* When the map is wider than its room, it scrolls inside — never the page. */
 .v2fsm__scroll { overflow-x: auto; padding: 26px 2px; }
-/* **Links 16 px Vorlauf im Raster selbst**, nicht als Polster am Behälter:
-   ein Rückweg in die erste Spalte greift bis x = −12 aus (−12,75 mit Strich),
-   und was links der Inhaltskante liegt, wird geschnitten und ist auch nicht
-   zu erreichen — Polster am Behälter verschiebt nur den Inhalt, nicht die
-   Zeichenfläche. Gemessen vorher: 166 von 466 px eines Pfades unsichtbar
-   (35,7 %), und was blieb, war eine Pfeilspitze links neben „bereit", zu der
-   keine Linie führte (Abnahme 0069, dritte Runde). Der Vorlauf gehört zum
-   scrollbaren Inhalt, ist also bei jeder Kartenbreite erreichbar. */
+/* **16 px lead-in on the left inside the grid**, not as container padding: a way
+   back into the first column reaches x = −12, and whatever lies left of the
+   content edge is clipped and unreachable — padding only moves the content, not
+   the drawing surface (0069: 35.7 % of one path was invisible). */
 .v2fsm__grid { position: relative; display: grid; margin-left: 16px; }
-/* Die Kanten liegen unter den Boxen: ein Pfeil, der über einem Wort endet,
-   sähe aus, als zeigte er auf den Rand statt auf den Zustand. */
+/* Edges lie under the boxes: an arrow ending over a word would seem to point at
+   the border rather than the state. */
 .v2fsm__edges { position: absolute; inset: 0; overflow: visible; z-index: 0; }
 .v2fsm__edges path {
   fill: none;
-  /* Nicht `--color-border-strong`: das sind 1,62 gegen die Karte, und V10
-     verlangt für eine tragende Linie ≥ 3:1. Die Linie nimmt deshalb
-     (`--color-border-control`, 3,45:1) — dasselbe Maß, aus dem der Rahmen
-     eines Eingabefelds seine Sichtbarkeit zieht (nachgerechnet 2026-09-06). */
+  /* Not `--color-border-strong` (1.62 against the card): V10 asks ≥ 3:1 for a
+     carrying line. So the line takes (`--color-border-control`, 3.45:1) — the
+     same measure an input's border draws its visibility from. */
   stroke: var(--color-border-control);
   stroke-width: 1.5;
 }
 .v2fsm__edges marker path { fill: var(--color-border-control); stroke: none; }
-/* Der Verbinder der Reihe: gepunktet, ohne Spitze — er behauptet keinen Weg. */
+/* The row's connector: dotted, no arrowhead — it claims no path. */
 .v2fsm__edges--dotted path { stroke-dasharray: 2 4; }
 
-/* Die Zelle liegt im Raster, der Knopf füllt sie: `Popover` schiebt einen
-   Anker dazwischen, deshalb kann der Knopf selbst kein Grid-Kind sein. */
+/* The cell sits in the grid, the button fills it: `Popover` inserts an anchor in
+   between, so the button itself cannot be a grid child. */
 .v2fsm__cell { position: relative; z-index: 1; display: block; }
 .v2fsm__cell > .v2pop__anchor { display: block; height: 100%; }
 .v2fsm__state {
   width: 100%; height: 100%;
-  /* Block, nicht Flex: als Flex-Kind verliert die Beschriftung ihr
-     `-webkit-box` (der Browser blockifiziert es zu `flow-root`), und mit ihm
-     die Ellipse nach zwei Zeilen — gemessen schnitt sie stumm bei 35,8 von
-     38 px ab (zweite Abnahme 0069). */
+  /* Block, not flex: as a flex child the label loses its `-webkit-box` (the
+     browser blockifies it to `flow-root`) and with it the two-line ellipsis (0069). */
   display: block;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
@@ -3125,26 +3117,24 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2fsm__state:hover { background: var(--color-bg-soft); }
 .v2fsm__state:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-/* Zwei Zeilen, dann Ellipse — und die Box ist hoch genug für beide. Vorher
-   schnitt die feste Höhe die zweite Zeile mittendurch, ohne `…` (Abnahme
-   0069): das Kürzen muss der Text tun, nicht der Kasten. */
+/* Two lines, then an ellipsis — and the box is tall enough for both. The text
+   must do the shortening, not the box (0069). */
 .v2fsm__label {
   font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .v2fsm__meta { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; max-width: 100%; }
-/* Der Schlüssel kann länger sein als die Box (`pending_classification`
-   misst 152 px in einem 126er Kasten) — er bekommt eine Ellipse und den
-   vollen Text im `title` des Popovers daneben (Abnahme 0069). */
+/* The key can be longer than the box (`pending_classification` measures 152 px
+   in a 126 box) — it gets an ellipsis and the full text in the popover's `title`. */
 .v2fsm__value {
   font-size: var(--fs-ui-xs); color: var(--color-text-muted);
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-/* „aktuell" statt nur Farbe (V7) — neben dem Wert, nicht darunter. */
+/* "aktuell" instead of colour alone (V7) — next to the value, not below. */
 .v2fsm__now { font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-muted); }
-/* Der aktuelle Zustand trägt **seinen** Ton, nicht immer denselben (V6): die
-   Farbe kommt aus der Registry, wie am Badge daneben (Abnahme 0069). */
+/* The current state carries **its** tone, not always the same (V6): the colour
+   comes from the registry, like the badge next to it (0069). */
 .v2fsm__state.is-current { border-color: var(--color-accent); background: var(--color-accent-50); }
 .v2fsm__state.is-current--info { border-color: var(--color-info); background: var(--color-info-bg); }
 .v2fsm__state.is-current--success { border-color: var(--color-success); background: var(--color-success-bg); }
@@ -3163,33 +3153,25 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2fsm__ways ul { margin: 2px 0 0; padding-left: var(--space-4); color: var(--color-text); }
 .v2fsm__src { font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
 
-/* --- Expectation (0025) — was noch fehlt, als Chip und als Zeile ---------- */
+/* --- Expectation (0025) — what is still missing, as chip and row ----------- */
 .v2exp__chip { display: inline-flex; align-items: baseline; gap: var(--space-2); }
 .v2exp__what { font-size: var(--fs-ui-sm); color: var(--color-text); }
 
-/* Die Zeile ist ein Raster, kein Fließtext: Frist und Reife stehen in jeder
-   Zeile an derselben Stelle, sonst sucht das Auge sie in jeder neu.
+/* The row is a grid, not running text: deadline and maturity stand in the same
+   place in every row, or the eye searches anew each time.
 
-   Die erste Spalte hat eine **feste** Breite und kein `max-content`: jede
-   Zeile ist ihr eigenes Raster, und `max-content` misst nur sich selbst — die
-   Marke „Zahlung offen" (94 px) schob den Titel ihrer Zeile 17 px weiter
-   nach rechts als „Beleg fehlt" (77 px), und die Spalte war keine. 104 px
-   fasst beide Wörter der Achse `erwartung_art`; ein längeres bekäme eine
-   Ellipse, aber die Achse hat genau zwei.
+   The first column has a **fixed** width, not `max-content`: each row is its own
+   grid, and `max-content` measures only itself. 104 px fits both words of the
+   `erwartung_art` axis.
 
-   **Und die Zeile misst sich selbst, nicht das Fenster.** Die festen Spuren
-   summieren sich mit den Rinnen auf 537 px, bevor der Titel ein Pixel
-   bekommt; in der Detailspalte der Sachverhaltsseite bleiben bei 1280 px
-   Fenster aber nur **484 px** (gemessen in `casedetailview--in-use`). Dort
-   lief die Zeile 538 px breit in einen 484-px-Behälter, der Titel 74 px in
-   die Betragsspalte, und die Karte bekam eine Bildlaufleiste (Abnahme 0025).
-   Eine `@media`-Regel könnte das nicht sehen: dasselbe Fenster trägt die
-   Zeile einmal breit (eigene Seite) und einmal schmal (Detailspalte). */
+   **And the row measures itself, not the window**: the fixed tracks add up to
+   537 px before the title gets a pixel, while the case page's detail column
+   leaves 484 px at 1280 (0025). The same window carries the row wide and narrow. */
 .v2exp { container-type: inline-size; container-name: exprow; }
 .v2exp__row {
   display: grid;
-  /* Schmal ist der Ausgangspunkt: Titel oben, alles Übrige darunter. So steht
-     die Zeile auch dort richtig, wo Container-Queries nicht greifen. */
+  /* Narrow is the default: title on top, everything else below — right even where
+     container queries do not apply. */
   grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: var(--space-2) var(--space-3);
@@ -3197,23 +3179,18 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   border-bottom: 1px solid var(--color-border-subtle);
   font-size: var(--fs-ui);
 }
-/* Ab **780 px** die sechs Spuren. Die Summe der festen Anteile liegt bei
-   537,7 px — dort *passen* sechs Spuren, aber der Titel bekäme 22 px, und die
-   Zeile wurde in dem Band gemessen **128,6 px** hoch, also schlechter als der
-   einspaltige Notfall darunter (75 px). Einzeilig wird sie erst ab rund
-   780 px Zeilenbreite (46,1 px). Das Tor gehört an die Breite, ab der der
-   Titel trägt, nicht an die, ab der er hineinpasst (Wiederabnahme 0025). */
+/* From **780 px** the six tracks: at 537 px they *fit*, but the title would get
+   22 px and the row grew to 128 px — worse than the single-column fallback
+   (75 px). The gate belongs at the width where the title carries (0025). */
 @container exprow (min-width: 780px) {
   .v2exp__row {
-    /* 126 px, nicht 110: der Franken-Betrag „1.234.567,89 CHF" misst 121,2 px
-       und ragte in die Rinne — der Wertebereich hört nicht bei Euro auf
-       (Wiederabnahme 0025, M9). */
+    /* 126 px, not 110: the franc amount "1.234.567,89 CHF" measures 121 px — the
+       value range does not stop at euro (0025, M9). */
     grid-template-columns: 104px minmax(0, 1fr) 126px max-content 110px max-content;
   }
 }
-/* Schmal: der Titel nimmt die ganze Breite, alles Übrige fließt darunter in
-   **einer** Reihe. Gestapelt wäre jede Zeile 148 px hoch — gemessen —, und
-   eine Liste aus fünf Erwartungen füllte den halben Bildschirm. */
+/* Narrow: the title takes the full width, everything else flows below in
+   **one** row. Stacked, every row would be 148 px tall. */
 @container exprow (max-width: 779.98px) {
   .v2exp__row { display: flex; flex-wrap: wrap; align-items: baseline; }
   .v2exp__title { flex: 1 1 100%; order: -1; }
@@ -3221,11 +3198,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2exp:last-child .v2exp__row { border-bottom: none; }
 .v2exp__title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-/* Der Titel kürzt, statt die Zeile zu dehnen — wie `.v2case` seit 0095.
-   An der **Klasse**, nicht an `:first-child`: der Titel ist in beiden Zweigen
-   ein Element mit `.v2exp__label`, und eine Positionsregel würde wieder die
-   Notiz treffen, sobald etwas anderes vorne steht (Wiederabnahme 0025, M11 —
-   Kommentar und Bau sagten Verschiedenes). */
+/* The title shortens instead of stretching the row — like `.v2case` since 0095.
+   On the **class**, not `:first-child`: a position rule would hit the note as
+   soon as something else stands first (0025, M11). */
 .v2exp__title > .v2exp__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2exp__note { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 .v2exp__due { font-size: var(--fs-ui-sm); color: var(--color-text-muted); white-space: nowrap; }
@@ -3233,27 +3208,23 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2exp__state,
 .v2exp__act { display: inline-flex; align-items: center; }
 
-/* --- CaseCell (0095) — der Sachverhalt in einer fremden Zeile ------------- */
-/* `flex`, nicht `inline-flex`: ein Inline-Kasten ist shrink-to-fit, und dann
-   greift die Ellipse am Namen nie — gemessen lief die Zelle 87 px über ihre
-   Spalte hinaus und der Chip überdruckte den Betrag der Nachbarspalte
-   (Abnahme 0095). Als Block nimmt sie die Breite, die die Spalte ihr gibt. */
+/* --- CaseCell (0095) — the case in a foreign row ------------------------- */
+/* `flex`, not `inline-flex`: an inline box is shrink-to-fit, and the name's
+   ellipsis never applies — the cell ran 87 px past its column (0095). As a
+   block it takes the width its column gives. */
 .v2case { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); min-width: 0; }
-/* Mehrere Fälle stehen untereinander, nicht hintereinander: im Kontoauszug
-   hängt an einer Zahlung schon mal ein halbes Dutzend, und in einer Zeile
-   wäre keiner mehr lesbar. */
+/* Several cases stack, they do not queue: a payment may carry half a dozen, and
+   in one line none would be readable. */
 .v2case--stack { display: grid; gap: 2px; }
-/* Zwei Anordnungen, eine Zelle (Owner-Entscheid 2026-09-07).
+/* Two arrangements, one cell (owner decision 2026-09-07).
 
-   `--inline` ist die Vorgabe und gilt in **Zeilen**: eine Liste liest sich über
-   ihre Zeilenhöhe, und eine Zelle, die 24 px höher ist als ihre Nachbarn, ist
-   ein Signal ohne Bedeutung. Kein Umbruch; die Kennung und der Zustand
-   behalten ihre Breite, der Name gibt nach und trägt seinen vollen Wert im
-   `title`.
+   `--inline` is the default and applies in **rows**: a list reads by its row
+   height, and a cell 24 px taller than its neighbours is a signal without
+   meaning. No wrap; id and state keep their width, the name gives way and
+   carries its full value in the `title`.
 
-   `--stacked` ist die alte Anordnung und bleibt für Karten und Faktentafeln:
-   dort ist Platz, der Name ist der Punkt, und was daneben steht, rückt in die
-   nächste Zeile (Abnahme 0095). */
+   `--stacked` stays for cards and fact panels: there is room, and the name is
+   the point (0095). */
 .v2case__one {
   display: flex; align-items: baseline;
   gap: var(--space-2); min-width: 0; width: 100%;
@@ -3264,18 +3235,17 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2case__link {
   color: var(--color-text); text-decoration: none; font-weight: 500;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  /* Mindestens acht Zeichen, sonst ist der Name keiner mehr. */
+  /* At least eight characters, or the name is no name any more. */
   flex: 1 1 auto; min-width: 8ch;
 }
 .v2case__link:hover { text-decoration: underline; }
-/* Die Nummer bricht nie um — sie ist das, was am Telefon gesagt wird. */
+/* The number never wraps — it is what gets said on the phone. */
 .v2case__no {
   font-family: var(--font-mono); font-size: var(--fs-ui-xs);
   color: var(--color-text-muted); white-space: nowrap;
 }
 .v2case__amt { margin-left: auto; }
-/* „offen" ist eine Aussage, kein fehlender Wert — deshalb ein Wort in einer
-   gedämpften Pille und nie ein Gedankenstrich. */
+/* "offen" is a statement, not a missing value — a word in a muted pill, never a dash. */
 .v2case__none {
   display: inline-block; padding: 1px var(--space-2);
   border-radius: var(--radius-pill);
@@ -3285,14 +3255,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2case__nonelink { color: inherit; text-decoration: none; }
 .v2case__nonelink:hover { text-decoration: underline; }
 
-/* --- CaseDetailView (0050) — der Rahmen der Sachverhalts-Seite ------------
-   Nur Reihenfolge und Abstand: die View ordnet, sie stellt nichts dar. Keine
-   eigene Höhe und kein Scroll-Container um die oberen Slots — die Ränge 1–4
-   müssen ohne Scrollen beantwortet sein. */
-/* Der Rahmen der Belegseite (0071) — dieselbe Bauart wie `.v2cdv`: eine
-   Spalte, feste Reihenfolge, kein eigener Scroll-Container über den oberen
-   Slots. Die Ränge 1–4 sollen ohne Scrollen dastehen; wer hier eine Höhe
-   setzt, nimmt genau das weg. */
+/* --- CaseDetailView (0050) — the frame of the case page -------------------
+   Order and spacing only: the view arranges, it shows nothing. No own height
+   and no scroll container around the top slots — ranks 1–4 must be answered
+   without scrolling. */
+/* The frame of the document page (0071) — built like `.v2cdv`: one column,
+   fixed order, no scroll container over the top slots. */
 .v2docview { display: flex; flex-direction: column; gap: var(--space-5); }
 .v2docview__pager,
 .v2docview__head,
@@ -3300,8 +3268,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2docview__tabs,
 .v2docview__body { min-width: 0; }
 
-/* Der Rahmen der Kontoseite (0063) — dieselbe Bauart wie `.v2cdv` und
-   `.v2docview`. */
+/* The frame of the account page (0063) — built like `.v2cdv` and `.v2docview`. */
 .v2lav { display: flex; flex-direction: column; gap: var(--space-5); }
 .v2lav__pager,
 .v2lav__head,
@@ -3310,11 +3277,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2lav__tabs,
 .v2lav__body { min-width: 0; }
 
-/* Der gemeinsame Detailrahmen (0138 Weg 1, gebaut mit 0127). Dieselbe Bauart
-   wie die drei Entitäts-Rahmen darüber — eine Spalte, feste Reihenfolge, kein
-   eigener Scroll-Container über den oberen Slots. Jeder Slot bekommt dieselbe
-   Klasse: es gibt hier nichts zu unterscheiden außer der Reihenfolge, und eine
-   Klasse je Slot wäre fünfmal dieselbe Regel. */
+/* The shared detail frame (0138 way 1, built with 0127) — built like the three
+   entity frames above. Every slot gets the same class: there is nothing to tell
+   apart but the order. */
 .v3dv { display: flex; flex-direction: column; gap: var(--space-5); }
 .v3dv__slot { min-width: 0; }
 
@@ -3325,45 +3290,40 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2cdv__tabs,
 .v2cdv__body { min-width: 0; }
 
-/* --- CaseDrawer (0098) — der Sachverhalt neben der Arbeit ----------------- */
+/* --- CaseDrawer (0098) — the case beside the work ------------------------- */
 .v2cdr__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
 .v2cdr__meta code { font-family: var(--font-mono); font-size: var(--fs-ui-xs); }
 .v2cdr__facts { padding: var(--space-4) var(--space-5) var(--space-5); }
-/* Die Grenze steht gedämpft und als Satz — sie ist kein Fehler, sondern die
-   Auskunft, wo der Rest steht (Zone 4). */
+/* The limit stands muted and as a sentence — not an error, but the answer to
+   where the rest is (zone 4). */
 .v2cdr__limit {
   margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui);
   color: var(--color-text-muted);
 }
 
-/* --- Verwendungszweck (0099) ---------------------------------------------
-   Der Freitext ist ein Satz, keine Kennung — deshalb nie mono. Mono sind nur
-   die Referenzwerte und der Originalblock. */
-/* `flex`, nicht `inline-flex`: shrink-to-fit gibt der Ellipse keine Grenze —
-   die Zeile lief bei 420 px Elternbreite auf 1426 px hinaus. Derselbe Fehler
-   wie in 0095, hier gleich vermieden. */
-/* `center`, nicht `baseline`: der Knopf hat `line-height: 0`, und an der
-   Grundlinie ausgerichtet zog er die Zeile um 2,46 px auseinander — gemessen
-   48,38 px mit (i) gegen 45,92 px ohne (Wiederabnahme 0099, M9). Die
-   Kürzung bleibt davon unberührt. */
+/* --- Purpose (0099) ------------------------------------------------------
+   Free text is a sentence, not an id — never mono. Only reference values and
+   the original block are mono. */
+/* `flex`, not `inline-flex`: shrink-to-fit gives the ellipsis no limit (the row
+   ran to 1426 px in a 420 px parent) — the 0095 mistake, avoided here. */
+/* `center`, not `baseline`: the button has `line-height: 0`, and baseline
+   alignment stretched the row by 2.46 px (0099, M9). */
 .v2purp--inline { display: flex; align-items: center; gap: var(--space-1); min-width: 0; max-width: 100%; }
-/* Die Kürzung macht CSS, nicht eine Zeichenzahl: eine Zahl stimmt bei einer
-   Grid-Spalte nie (Entscheid 3 der Freigabe). */
+/* CSS does the shortening, not a character count: a number never fits a grid
+   column (decision 3 of the approval). */
 .v2purp--inline .v2purp__text {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
 }
-/* Trefferfläche: das Icon misst 14 px, der Knopf **24 × 24** — das Hausmaß
-   aus 0113. Das Polster allein ergab 22 × 22 (14 + 2 × 4), also die Marke
-   knapp unter dem Maß; der Kommentar behauptete 24, gemessen waren es 22
-   (Wiederabnahme 0099, M9). Der negative Rand hält die Zeilenhöhe, damit die
-   Tabelle nicht wächst (WCAG 2.5.8). */
+/* Hit area: the icon measures 14 px, the button **24 × 24** — the house measure
+   from 0113 (padding alone gave 22 × 22). The negative margin keeps the row
+   height, so the table does not grow (WCAG 2.5.8). */
 .v2purp__info {
   background: none; border: none; cursor: pointer; line-height: 0;
   color: var(--color-text-subtle); flex: 0 0 auto;
   display: inline-flex; align-items: center; justify-content: center;
   min-width: var(--space-6); min-height: var(--space-6);
-  /* Nur senkrecht negativ: waagerecht wuerde der Knopf 4 px ueber die
-     rechte Kante ragen und die Zelle ueberlaufen lassen. */
+  /* Negative vertically only: horizontally the button would stick 4 px past the
+     right edge and overflow the cell. */
   padding: var(--space-1); margin-block: calc(-1 * var(--space-1));
 }
 .v2purp__info:hover { color: var(--color-primary); }
@@ -3372,18 +3332,17 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2purp__text { margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui); }
 .v2purp__refs { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
 .v2purp__ref { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--fs-ui-xs); }
-/* Der Schlüssel ist eine Kennung, kein Zustand: eigene, stille Marke statt
-   eines Badges — im Set heißt ein Badge „hier steht ein Zustand". */
+/* The key is an id, not a state: a quiet mark of its own instead of a badge —
+   in the set a badge means "a state stands here". */
 .v2purp__key {
   padding: 1px var(--space-1); border-radius: var(--radius-sm);
   background: var(--color-bg-sunken); color: var(--color-text-muted);
-  /* Keine Sperrung: 0089 hat sie im Set abgeschafft, sie war für Versalien
-     da. Mono trennt die Kennung schon genug. */
+  /* No letter-spacing: 0089 removed it from the set, it was for capitals. Mono
+     sets the id apart enough. */
   font: 500 var(--fs-ui-xs)/1.4 var(--font-mono);
 }
-/* Ein Zeiger, der auf nichts antwortet, ist ein Versprechen ohne Deckung —
-   §9 verlangt zu jedem `cursor: pointer` eine sichtbare Antwort (Abnahme
-   0099, M10). */
+/* A pointer that answers nothing is a promise without cover — §9 asks a visible
+   answer for every `cursor: pointer` (0099, M10). */
 .v2purp__raw summary { cursor: pointer; font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
 .v2purp__raw summary:hover { color: var(--color-text); text-decoration: underline; }
 .v2purp__raw pre {
@@ -3392,16 +3351,16 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   font-size: var(--fs-ui-xs); white-space: pre-wrap; word-break: break-word;
 }
 
-/* --- Kontoauszugsposition, genannt in fremder Ansicht (0100) --------------
-   Zwei Zeilen: der Zweck hat p90 84 Zeichen und passt neben Gegenpartei,
-   Datum und Betrag in keine. Der Betrag steht rechts, das Vorzeichen trägt
-   **keine** Farbe — Rot ist Kritikalität, ein Ausgang ist kein Fehler. */
+/* --- Bank line, named in a foreign view (0100) --------------------------------
+   Two lines: the purpose has p90 84 characters and fits next to counterparty,
+   date and amount in none. The amount stands right, its sign carries **no**
+   colour — red is criticality, an outgoing payment is no error. */
 .v2btx { display: grid; gap: 2px; min-width: 0; }
-/* `wrap`, weil Datum und Betrag mit `flex: 0 0 auto` sonst einen harten Boden
-   von rund 180 px setzen und die Zeile darunter in die Nachbarspalte malt. */
+/* `wrap`: with `flex: 0 0 auto` date and amount set a hard floor of about 180 px
+   and the row paints into the next column. */
 .v2btx__top { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-3); min-width: 0; }
-/* Ellipse **und** Boden — derselbe Fehler wie in 0095: ohne beides bricht der
-   Name um, wächst die Zeile, und ab 240 px steht er außerhalb seiner Box. */
+/* Ellipsis **and** floor — the 0095 mistake: without both the name wraps, the
+   row grows, and from 240 px it stands outside its box. */
 .v2btx__who {
   font-size: var(--fs-ui); font-weight: 600;
   flex: 1 1 auto; min-width: 8ch;
@@ -3413,28 +3372,23 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2btx__when { flex: 0 0 auto; color: var(--color-text-subtle); }
 .v2btx__what { min-width: 0; color: var(--color-text-muted); }
 
-/* --- Auszugszeile (0101) --------------------------------------------------
-   Die Unterzeilen laufen über die volle Breite der Zeile: sie beantworten
-   „geht das auf?", und dafür müssen Teilbeträge und Summe untereinander
-   stehen, nicht in der Spalte des Betrags. */
+/* --- Statement row (0101) --------------------------------------------------
+   The sub rows run the full width: they answer "does it add up?", so partial
+   amounts and the total must stand one above the other, not in the amount column. */
 .v2btxrow__cases { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .v2btxrow__rest { font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
 .v2btxrow__states { display: flex; flex-direction: column; gap: 2px; }
-/* Die Fallnummer steht **über** dem Badge, nicht daneben: nebeneinander
-   brauchte die Spur 187 px für den längsten Zustand („Keine Buchung nötig"),
-   und diese Breite hätte jede Zeile bezahlt — die Mehrfach-Zuordnung sind
-   4 %. Gestapelt kostet sie nur diese 4 % eine Zeile, und die sind ohnehin
-   die höchsten. Gemessen: 187 → 150 px Bedarf. */
+/* The case number stands **above** the badge, not beside it: side by side the
+   track needed 187 px for the longest state, paid by every row, while multiple
+   allocations are 4 %. Stacked, only those 4 % pay a line (187 → 150 px). */
 .v2btxrow__state { display: grid; justify-items: start; }
 .v2btxrow__statefor { font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
-/* Ein Zähler, kein Zustand: deshalb kein Badge, sondern die Zahl mit ihrem
-   Wort — die Achse `klaerung` ist eine Dringlichkeit je Rückfrage, und die
-   Zeile hat eine Anzahl über den Fall. */
+/* A counter, not a state: no badge but the number with its word — the
+   `klaerung` axis is an urgency per clarification, the row a count per case. */
 .v2btxrow__clar { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
-/* Seitlich 18 px wie jede Zelle der Tabelle (`__group`, `__empty`, `__detail`
-   fuehren dieselbe Zahl): mit den 16 des Tokens sass die rechte Kante der
-   Unterzeile neben der Betragsspalte, und die Aufteilung soll unter dem
-   Betrag stehen, den sie aufteilt (Abnahme 0101, M6). */
+/* 18 px sideways like every table cell (`__group`, `__empty`, `__detail`): with
+   the token's 16 the sub row's right edge sat beside the amount column, and the
+   split should stand under the amount it splits (0101, M6). */
 .v2btxrow__split {
   padding: var(--space-2) 18px var(--space-3);
   background: var(--color-bg-soft); border-bottom: 1px solid var(--color-border-subtle);
@@ -3448,31 +3402,22 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2btxrow__splittitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2btxrow__splitsum { border-top: 1px solid var(--color-border-subtle); margin-top: 2px; padding-top: 4px; font-weight: 600; }
 
-/* --- Fakten einer Kontoauszugsposition (0102) ----------------------------- */
+/* --- Facts of a bank line (0102) ----------------------------------------- */
 .v2btxf { display: grid; gap: var(--space-5); }
-/* Ein Satz ist Text, kein Wert: linksbündig, obwohl die Feldliste ihre Werte
-   rechts setzt (V3 — Text links, Zahlen rechts).
-
-   Drei Dinge sind dafür nötig, und zwei davon fehlten. `text-align` allein war
-   **wirkungslos**: der Satz saß in einem `<span>` mit `display: inline`, und
-   auf einem Inline-Kasten wirkt es nicht — gemessen standen die Zeilenkästen
-   mit und ohne die Regel byte-gleich rechtsbündig an der Wertkante
-   (Wiederabnahme 0102, M2). Der Satz braucht also einen **Blockkasten**, und
-   die Wertspalte der Feldliste — ein Flex-Kind mit `flex: 0 1 auto` — muss
-   die Zeile füllen, sonst schrumpft sie auf den Text und `space-between`
-   schiebt sie nach rechts.
-
-   Dass das hier steht und nicht in `FieldList`, ist ein Ausweg: die Feldliste
-   kann keinen Satz tragen, und jeder Aufrufer baut sich seinen eigenen
-   (Befund der Abnahme 0102, gehört 0058). */
+/* A sentence is text, not a value: left-aligned, although the field list sets
+   values right (V3). It needs a **block box** (`text-align` does nothing on an
+   inline span) and the field list's value column — a flex child with
+   `flex: 0 1 auto` — must fill the row, or `space-between` pushes it right.
+   That this lives here and not in `FieldList` is a workaround (finding of 0102,
+   belongs to 0058). */
 .v2btxf__note { display: block; text-align: left; font-weight: 400; }
 .v2fields__row:has(.v2btxf__note) > :last-child { flex: 1; min-width: 0; }
-/* Der Zweck ist ein langer Wert ohne Label — er nimmt den Rahmen der
-   Feldliste, aber nicht deren Zeile: rechtsbündiger Fließtext ist unlesbar. */
+/* The purpose is a long value without a label — it takes the field list's frame
+   but not its row: right-aligned prose is unreadable. */
 .v2btxf__purpose { padding: var(--space-3) var(--space-4) var(--space-1); }
 .v2fields--bare .v2btxf__purpose { padding-left: 0; padding-right: 0; }
 
-/* --- Zahlung neben der Arbeit (0103) -------------------------------------- */
+/* --- Payment beside the work (0103) -------------------------------------- */
 .v2btxd__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-3); }
 .v2btxd__skel { padding: var(--space-2) 0 var(--space-3); }
 .v2btxd__limit {
@@ -3484,14 +3429,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2oi__group { display: flex; justify-content: space-between; gap: var(--space-4); width: 100%; }
 .v2oi__groupnum { color: var(--color-text-muted); font-variant-numeric: tabular-nums lining-nums; }
 
-/* --- Belegfeld 1 und Belegnummern-Register (0014) ------------------------- */
+/* --- Document field 1 and document number register (0014) ---------------- */
 .v2dnf {
   display: grid;
   gap: var(--space-2);
-  /* Das Feld misst **sich selbst**: auf der eigenen Seite steht es in 420 px,
-     in der Buchungszeile des Editors in **96** (gemessen). Dort wuchs der
-     Hinweis auf zehn Zeilen und die Zeile auf 265 px statt 30 — eine
-     `@media`-Regel sähe beide Male dasselbe Fenster. */
+  /* The field measures **itself**: 420 px on its own page, **96** in the editor's
+     booking row, where the hint grew to ten lines and the row to 265 px — an
+     `@media` rule would see the same window both times. */
   container-type: inline-size;
   container-name: dnf;
 }
@@ -3499,16 +3443,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2dnf__in { width: 100%; font-family: var(--font-mono); }
 .v2dnf__in--search { padding-right: 34px; }
 .v2dnf__search { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
-/* Ein Hinweis, kein Fehler: eine Abweichung kann begruendet sein. */
+/* A hint, not an error: a deviation can have a reason. */
 .v2dnf__hint { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
-/* Eine 36-stellige Nummer ohne Trennzeichen hat keine Umbruchstelle; ohne
-   diese Zeile läuft sie waagerecht aus der Spalte. */
+/* A 36-digit number without separators has no break point; without this line
+   it runs out of the column. */
 .v2dnf__hint,
 .v2dnf__limit { overflow-wrap: anywhere; }
-/* Schmal bleibt die Nummer, der erklärende Satz geht in den `title`. Die
-   Kurzform steht **daneben**, nicht anstelle: `display: none` nähme sie auch
-   der Vorlesehilfe, und dann bliebe ein Knopf ohne Wort (Wiederabnahme 0014,
-   M2). Deshalb wandert der lange Satz aus dem Bild statt aus dem Baum. */
+/* Narrow, the number stays and the explaining sentence goes into the `title`.
+   The short form stands **beside** it, not instead: `display: none` would take it
+   from screen readers too (0014, M2). */
 .v2dnf__narrow { display: none; }
 @container dnf (max-width: 240px) {
   .v2dnf__wide {
@@ -3519,12 +3462,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
     white-space: nowrap;
   }
   .v2dnf__narrow { display: inline; }
-  /* Eine 36-stellige Nummer ohne Trennzeichen bricht sonst auf vier Zeilen —
-     und mit `nowrap` allein **läuft sie 200 px aus der Spalte**: der Absatz
-     ist ein Rasterkind (`min-width: auto`) und dehnt sich mit, der Knopf
-     darum schrumpft auf seinen Inhalt, also greift `max-width: 100%` am Text
-     ins Leere. Beide brauchen ihre Grenze, sonst hat keiner eine (Abnahme
-     0014, dritte Runde: gemessen 295,9 px Hinweis in einem 96-px-Feld). */
+  /* A 36-digit number would otherwise wrap into four lines — and with `nowrap`
+     alone it runs 200 px out of the column: the paragraph is a grid child
+     (`min-width: auto`) and stretches, the button shrinks to its content. Both
+     need their limit (0014). */
   .v2dnf__hint { min-width: 0; }
   .v2dnf__hint .v2link { max-width: 100%; overflow: hidden; }
   .v2dnf__num {
@@ -3543,8 +3484,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* --- DATEV-Stand als Karte (0027) ----------------------------------------- */
 .v2snap__pad { display: grid; gap: var(--space-4); padding: var(--space-5); }
 .v2snap__scope { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: flex-end; }
-/* Die fünf Zähler als Paare Wort/Zahl — die Zahl rechts, das Wort links,
-   damit die Spalte der Zahlen sich vergleichen lässt. */
+/* The five counters as word/number pairs — number right, word left, so the
+   column of numbers can be compared. */
 .v2snap__rec { display: grid; gap: var(--space-1); }
 .v2snap__reclabel {
   display: flex; align-items: center; gap: var(--space-1);
@@ -3554,20 +3495,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2snap__recword { color: var(--color-text-muted); }
 
 /* --- Sachverhalt als Zeile (0096) ----------------------------------------- */
-/* `display: block`: die Klasse sitzt an einem Span **in** der Zelle, und auf
-   einer Inline-Box wirkt weder `overflow` noch `text-overflow` noch
-   `min-width` — gemessen war der Span 165 px breit in einer 2-px-Zelle. */
-/* Kürzen statt wachsen — die eine Regel, die jede Zelle braucht, in der ein
-   Name steht, dessen Länge niemand begrenzt. Ohne sie kostet ein zu langer
-   Wert nicht Breite, sondern **Höhe**: gemessen 67 px statt 47 in der
-   Kontenliste (Abnahme 0062). `.v2caserow__name` war dieselbe Regel unter
-   einem Namen, der nur der Fallzeile gehört.
+/* `display: block`: the class sits on a span **in** the cell, and on an inline
+   box neither `overflow` nor `text-overflow` nor `min-width` apply. */
+/* Shorten instead of grow — the one rule every cell needs that holds a name of
+   unbounded length. Without it a long value costs height, not width (67 px
+   instead of 47 in the account list, 0062).
 
-   **Und sie wird nicht ein zweites Mal erfunden.** 0029 hatte daneben eine
-   eigene `.v2oi__text` gestellt — mit denselben drei Angaben, aber ohne
-   `display: block`. Auf einer Inline-Box wirkt keine davon: gemessen lief der
-   Buchungstext 1.035 px breit durch eine 182-px-Zelle, quer über vier
-   Spalten. Wer eine Zelle kürzen will, nimmt diese Klasse. */
+   **And it is not invented twice**: a copy without `display: block` let a
+   posting text run 1,035 px through a 182 px cell. Whoever wants to shorten a
+   cell takes this class. */
 .v2trunc,
 .v2caserow__name {
   display: block; min-width: 0;
@@ -3575,10 +3511,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2caserow__count { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 
-/* Zeile, deren Bedienelement ein Knopf ist (0106): derselbe Weg wie
-   `.v2rowlink` — der Knopf liegt in der ersten Zelle und deckt die Zeile ab.
-   Vorher trug die Zeile `role="button"`; ein `<tr>` kann das nicht sein, und
-   eine Zeile, die eine Schaltfläche ist, ist keine Zeile mehr. */
+/* A row whose control is a button (0106): the same way as `.v2rowlink` — the
+   button sits in the first cell and covers the row. A `<tr>` cannot carry
+   `role="button"`. */
 .v2rowbtn {
   background: none; border: none; padding: 0; margin: 0; font: inherit;
   color: inherit; text-align: inherit; cursor: pointer; width: 100%;
@@ -3593,19 +3528,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2rowbtn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; border-radius: var(--radius-sm); }
 .v2dnf__limit { margin: 0; font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
 
-/* --- Bewegung: wer sie abbestellt hat, bekommt keine (0093 b) -------------
-   **Eine Regel statt einer Liste.** Der erste Anlauf zählte Selektoren auf —
-   und die Abnahme fand prompt zwei, die fehlten (`.abn__step`, `.v2ibtn`),
-   und zwei, die es gar nicht gibt (`.v2dialog`). Eine Liste, die jede neue
-   Transition von Hand nachtragen muss, ist keine Deckung, sondern ein
-   Versprechen auf Wartung. Dazu trägt das Blatt drei Nachbarschichten
-   (`app-chrome.css` 16 Transitionen, `booking.css` 10, `components.css` 1),
-   die in jeder Story mitlaufen und keinen einzigen Block hatten.
-
-   **Übergänge** sind ausnahmslos Schmuck und fallen alle weg. **Animationen**
-   nicht: der Spinner und das Skelett *sagen* etwas, solange sie laufen — die
-   drei Blöcke, die sie schon bedienen (`.v2skel`, `.v2spin`, `.v2toast`),
-   bleiben deshalb, wie sie sind. */
+/* --- Motion: whoever opted out gets none (0093 b) --------------------------
+   **One rule instead of a list**: a selector list needs every new transition
+   added by hand and missed some. **Transitions** are decoration and all go.
+   **Animations** do not: spinner and skeleton *say* something while they run —
+   the three blocks already serving them (`.v2skel`, `.v2spin`, `.v2toast`) stay. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -3614,81 +3541,73 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
     transition-delay: 0s !important;
   }
 }
-/* Die Schleifen-Angabe: Zeichen und Zahl gehören zusammen (0093 c). */
+/* The loop count: sign and number belong together (0093 c). */
 .pz-loop { display: inline-flex; align-items: center; gap: 3px; }
 
-/* „Erledigt" trägt Weg **und** Zeitpunkt nebeneinander: das Abzeichen sagt
-   wodurch, das Datum wann. `baseline`, damit die Zahl auf der Schriftlinie des
-   Wortes sitzt (Abnahme 0070, M5). */
+/* "Erledigt" carries way **and** time side by side: the badge says how, the date
+   when. `baseline` so the number sits on the word's baseline (0070, M5). */
 .v2doccompl { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; flex-wrap: wrap; }
 .v2doccompl__state { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; flex-wrap: wrap; }
 .v2doccompl time { color: var(--color-text-subtle); font-size: var(--fs-ui-xs); }
-/* Mit Begruendung wird aus der Zeile ein Block: Zustand oben, der Satz
-   darunter (0150). „Keine Buchung nötig" sagt, was geschah, nie warum — und
-   der Grund gehört dorthin, wo Platz ist, nicht nur in den Hover. */
+/* With a reason the row becomes a block: state on top, the sentence below
+   (0150). "Keine Buchung nötig" says what happened, never why — and the reason
+   belongs where there is room, not only in the hover. */
 .v2doccompl--explain { flex-direction: column; align-items: flex-start; gap: var(--space-1); }
 .v2doccompl__why {
   color: var(--color-text-muted); font-size: var(--fs-ui-sm); line-height: var(--lh-ui);
   text-wrap: pretty;
-  /* Am Element, nicht am Elternteil: die Wertespalte der Feldliste richtet
-     rechts aus, und Erben allein reichte hier nicht — der Satz stand
-     rechtsbündig unter der Marke (gemessen 2026-09-10). Ein Satz steht links,
-     auch neben Zahlen (V3). */
+  /* On the element, not the parent: the field list's value column aligns right,
+     and inheriting was not enough — the sentence stood right-aligned under the
+     badge (measured 2026-09-10). A sentence stands left, even next to numbers (V3). */
   text-align: left;
 }
 
-/* **Ab hier `v3`** (Owner-Entscheid A13, 2026-09-10): neu erfundene Klassen
-   tragen das Präfix des Sets, alte bleiben `v2`, bis sie ohnehin angefasst
-   werden. Eine Datei behält ihr Präfix — zwei in einer Komponente wären
-   schlimmer als ein historisches. Siehe `docs/backlog/0156-css-praefix-v2.md`.
+/* **From here on `v3`** (owner decision A13, 2026-09-10): newly invented classes
+   carry the set's prefix, old ones stay `v2` until touched anyway. A file keeps
+   its prefix — two in one component would be worse than a historical one. See
+   `docs/backlog/0156-css-praefix-v2.md`.
 
-   --- Der Rumpf einer Box unter ihrem Kopf (0150, verallgemeinert mit 0153) -
- * Die Karten bringen ihren Kopf selbst mit (`CardHead`); hier steht nur, was
- * darunter kommt — derselbe Innenabstand wie in jeder Karte. Der Name trug bis
- * 0153 „doc", weil die erste Box am Beleg hing; seit die Zone ein Pattern ist,
- * wäre das ein Fachwort in einer Regel, die keine Entität kennt. */
-/* Der Kastenkörper setzt das Arbeitsregister: was ein Aufrufer hineinlegt
-   — ein Satz, ein Absatz —, erbt sonst die 16 px des `body` (gemessen an E1b
-   von 0152, 2026-09-10). */
+   --- The body of a box under its head (0150, generalised with 0153) --------
+ * Cards bring their own head (`CardHead`); only what comes below is here —
+ * the same padding as in every card. */
+/* The box body sets the working register: whatever a caller puts in — a
+   sentence, a paragraph — would otherwise inherit the body's 16 px (measured
+   on E1b of 0152, 2026-09-10). */
 .v3boxbody {
   display: flex; flex-direction: column; gap: var(--space-3);
   padding: var(--space-3) var(--space-5) var(--space-4);
   font-size: var(--fs-ui); line-height: var(--lh-ui);
 }
 
-/* --- Was an einem Vorgang offen ist (0153) --------------------------------
- * Ein Punkt ist drei Dinge: was, was daraus folgt, und der Weg hinaus. Das
- * Zeichen steht auf der Schriftlinie der ersten Zeile, nicht mittig zum
- * ganzen Block — sonst wandert es mit der Länge des Satzes. */
+/* --- What is open on a record (0153) --------------------------------------
+ * A point is three things: what, what follows, and the way out. The sign sits
+ * on the first line's baseline, not centred to the block — or it wanders with
+ * the sentence's length. */
 .v3open__none {
   display: flex; align-items: center; gap: var(--space-2); margin: 0;
   color: var(--color-text-muted); font-size: var(--fs-ui-sm);
 }
-/* Die Zeile deklariert ihr Register — Titel und Ausweg (ein `.v2link`, der
-   `inherit` sagt) erbten sonst die 16 px des `body` (gemessen 2026-09-10). */
+/* The row declares its register — title and way out (a `.v2link` saying
+   `inherit`) would otherwise inherit the body's 16 px (measured 2026-09-10). */
 .v3open__row { display: flex; align-items: flex-start; gap: var(--space-2); font-size: var(--fs-ui); line-height: var(--lh-ui); }
 .v3open__row > svg { flex: 0 0 auto; margin-top: 1px; }
 .v3open__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
 .v3open__way { flex: 0 0 auto; }
-/* Der Rohtext der Quelle — sichtbar Maschinenwort, nicht als Satz verkleidet. */
+/* The source's raw text — visibly machine words, not dressed up as a sentence. */
 .v3open__raw {
   font-family: var(--font-mono); font-size: var(--fs-ui-xs);
   color: var(--color-text-subtle); word-break: break-word;
 }
 
-/* --- Das (i) am Zustand (0077) ------------------------------------------
- * Trefferfläche **24 × 24**, das Hausmaß aus 0113 — das Zeichen selbst misst
- * 12. Vorher stand die Größe in Inline-Stilen mit `padding: 0`, und damit war
- * der Knopf so groß wie sein Zeichen: gemessen 12 × 12 in jeder Story, und
- * das an einer Stelle, die `StatusBadge` an **jedem** Chip rendert. Vier
- * Abnahmen an einem Tag haben es gemeldet (0099, 0100, 0103, 0105).
+/* --- The (i) at a state (0077) -------------------------------------------
+ * Hit area **24 × 24**, the house measure from 0113 — the sign itself is 12.
+ * Before, inline styles with `padding: 0` made the button as small as its sign
+ * (12 × 12), at a place `StatusBadge` renders at **every** chip.
  *
- * Der negative Rand hält die Zeilenhöhe: die Fläche wächst nach außen, die
- * Zeile bleibt, wo sie war. Nur senkrecht — waagerecht ragte der Knopf sonst
- * über die Zellkante (dieselbe Lehre wie bei `.v2purp__info`).
- *
- * Und eine Antwort auf Hover: ein Zeiger ohne Antwort ist ein Versprechen
- * ohne Deckung (§9). */
+ * The negative margin keeps the row height: the area grows outward. Vertically
+ * only — horizontally the button would stick over the cell edge (as with
+ * `.v2purp__info`). And an answer on hover: a pointer without one is a
+ * promise without cover (§9). */
 .v2sinfo {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: var(--space-6); min-height: var(--space-6);
@@ -3697,10 +3616,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   color: var(--color-text-muted); opacity: 0.65;
 }
 .v2sinfo:hover { opacity: 1; color: var(--color-primary); }
-/* Trägt der Knopf die Marke selbst (0150), hat er kein eigenes Aussehen: die
-   Marke ist das Ziel, der Knopf nur ihre Trefferfläche. Ohne das Zurücksetzen
-   erbte sie Mindestmaße und Innenabstand des (i) und stand schief in der
-   Zeile. */
+/* When the button carries the badge itself (0150) it has no look of its own:
+   the badge is the target, the button only its hit area. Without the reset it
+   inherited the (i)'s minimum size and padding and stood crooked in the row. */
 .v2sinfo--wrap {
   min-width: 0; min-height: 0; padding: 0; margin-block: 0; opacity: 1;
   color: inherit; text-align: left;
@@ -3708,10 +3626,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2sinfo--wrap:hover { color: inherit; }
 .v2sinfo:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 
-/* --- Ausgleichs-Klammer (0026) -------------------------------------------
- * Zwei Seiten einer Zeile, dazwischen ein Pfeil: welche Zahlung gleicht welche
- * Rechnung aus. Die Seiten schrumpfen, der Pfeil nicht — sonst steht er
- * irgendwann zwischen zwei Auslassungszeichen und sagt nichts mehr.
+/* --- Clearing bracket (0026) -------------------------------------------
+ * Two sides of a row with an arrow between: which payment clears which invoice.
+ * The sides shrink, the arrow does not — or it ends up between two ellipses
+ * saying nothing.
  */
 .v2oil__pair { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
 .v2oil__arrow { flex: 0 0 auto; color: var(--color-text-subtle); }
@@ -3720,27 +3638,26 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   background: none; border: none; padding: 0; margin: 0;
   font: inherit; color: inherit; text-align: left;
 }
-/* Nur mit `onOpen` ist die Seite ein Ziel — dann sieht man es auch. */
+/* Only with `onOpen` is the side a target — then it shows. */
 button.v2oil__side { cursor: pointer; }
 button.v2oil__side:hover .v2oil__label { text-decoration: underline; }
 button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 .v2oil__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-/* Das Belegfeld kürzt mit: `SAMMEL-2026-08-KW35-NACHTRAG` brach die Zeile in
-   der 140-px-Spur auf 66,8 px auf, neben Nachbarn von 45,9 — und eine Liste
-   liest sich über ihre Zeilenhöhe. Der ganze Wert steht im `title` der Zelle. */
+/* The document field shortens too: `SAMMEL-2026-08-KW35-NACHTRAG` stretched the
+   row in the 140 px track to 66.8 px next to neighbours of 45.9 — and a list
+   reads by its row height. The full value is in the cell's `title`. */
 .v2oil__doc { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* --- Sachverhalts-Karte (0081) -------------------------------------------
- * Der Kopf trägt Namen und Zustand nebeneinander, darunter die Kennung. Der
- * Rumpf eine Zeile Fakten und die gekürzte Zusammenfassung. Was unter dem Fall
- * hängt, kommt als Knoten und bekommt eine eigene Fläche — **oder gar keine**:
- * ohne Kinder fällt sie samt Abstand weg, damit eine Karte ohne Unterlisten
- * nicht aussieht, als fehlte dort etwas.
+/* --- Case card (0081) ----------------------------------------------------
+ * The head carries name and state side by side, the id below; the body a facts
+ * line and the shortened summary. What hangs under the case comes as nodes with
+ * a surface of its own — **or none**: without children it drops with its
+ * spacing, so a card without sub-lists does not look like something is missing.
  */
 .v2casecard__title { display: inline-flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
 .v2casecard__body { display: grid; gap: var(--space-2); padding: var(--space-4) var(--space-5); }
 .v2casecard__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); }
-/* Der Trenner steht **zwischen** den Angaben, nicht hinter der letzten. */
+/* The separator stands **between** the items, not after the last. */
 .v2casecard__metaitem + .v2casecard__metaitem::before {
   content: "·";
   margin-right: var(--space-3);
@@ -3755,33 +3672,29 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 .v2casecard__subs { border-top: 1px solid var(--color-border-subtle); }
 
 /* --- Belegliste: Spaltensätze (0070) -------------------------------------- */
-/* Wie `.v2doc__key`: der Name schrumpft, die Endung nicht. Ein reines
-   `text-overflow` am Elternteil schnitt genau die `.pdf` ab, für die die
-   Mitten-Kürzung da ist — gemessen stand sie 69 px außerhalb der Zelle. */
+/* Like `.v2doc__key`: the name shrinks, the extension does not. A plain
+   `text-overflow` on the parent cut exactly the `.pdf` the middle cut exists for. */
 .v2doccol__lead,
 .v2doccol__lead .v2rowlink { display: flex; align-items: baseline; min-width: 0; }
-/* Nur der Name schrumpft. Die Endung steht **hinter** ihm und behält ihre
-   Breite — `> *:not(.v2doc__keyname)` traf hier den Link selbst und nagelte
-   ihn fest: gemessen lag „.pdf" danach 150 px außerhalb der Zelle. */
+/* Only the name shrinks. The extension stands **after** it and keeps its width —
+   `> *:not(.v2doc__keyname)` hit the link itself and pinned it (".pdf" stood
+   150 px outside the cell). */
 .v2doccol__lead .v2doc__keyname + * { flex-shrink: 0; }
-/* Der Zeilen-Link erbt die Farbe und das Gewicht des führenden Punktes: er
-   ist die Zeile, nicht ein Wort darin — dieselbe Regel wie in der Zeile
-   (`.v2doc__lead`) und im Sachverhalts-Katalog. */
+/* The row link inherits the leading point's colour and weight: it is the row,
+   not a word in it — the same rule as in the row (`.v2doc__lead`). */
 .v2doccol__lead .v2rowlink { color: inherit; text-decoration: none; }
 .v2doccol__lead { font-weight: 600; }
-/* Führen soll **einer**. Zeigt die führende Zelle nur den Gedankenstrich —
-   im stockenden Satz hat die Gegenpart-Spalte keinen Wert und die Datei
-   führt —, dann stand sie daneben ebenso fett da (Abnahme 0070, M7). Der
-   Gedankenstrich ist kein Name, den man betonen könnte. */
+/* **One** should lead. When the leading cell shows only the dash — in the
+   stuck state the counterparty has no value and the file leads — it stood just
+   as bold (0070, M7). A dash is no name to emphasise. */
 .v2doccol__lead:has(> .v2muted),
 .v2doccol__lead:has(> .v2rowlink > .v2muted) { font-weight: 400; }
 
 /* ── Rechnungsposition (0072/0114/0115) ─────────────────────────────────── */
 
-/* Die Zeile trägt drei Zeilen in **einer** Zelle: Bezeichnung, Beschreibung
-   und darunter der Streifen mit dem, was Ludwig aus der Position gemacht hat.
-   Keine zweite Tabellenzeile, kein eigenes Raster — die Tabelle läuft mit
-   `density="wide"`, das ist genau der Fall, für den es die Stufe gibt. */
+/* The row carries three lines in **one** cell: description, detail and the strip
+   with what Ludwig made of the position. No second table row, no grid of its
+   own — the table runs with `density="wide"`, exactly the case for that step. */
 .v2ilrow__name { display: block; font-weight: 600; }
 .v2ilrow__desc { display: block; color: var(--color-text-subtle); font-size: 12px; }
 .v2ilrow__strip {
@@ -3791,131 +3704,119 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
   gap: var(--space-2);
   margin-top: var(--space-1);
 }
-/* Die Positionsnummer steht **links** wie jeder Text, aber mit Ziffernstellung:
-   sie ist eine Kennung, keine Größe (V3). */
+/* The position number stands **left** like any text, but with figure alignment:
+   it is an id, not a quantity (V3). */
 .v2ilrow__pos { font-variant-numeric: tabular-nums lining-nums; }
-/* Die betonte Netto-Summe. Die Hülle trägt das Gewicht — und muss deshalb
-   auch die Kante tragen: `.v2tbl :is(th,td) > .v2num` erreicht nur ein
-   direktes Kind, und eine `AmountCell` in einem Span verlöre die
-   Rechtsbündigkeit still (Abnahme 0072, gemessen 81 px Luft). */
+/* The emphasised net total. The wrapper carries the weight — and so must carry
+   the edge: `.v2tbl :is(th,td) > .v2num` only reaches a direct child, and an
+   `AmountCell` in a span would silently lose right alignment (0072). */
 .v2ilrow__total { display: block; text-align: right; font-weight: 600; }
 
-/* **Gedämpft wird über das Wort, nicht daneben:** `.v2ilrow__off` ist die
-   Plakette „deaktiviert", und die Zeile, die sie enthält, verliert ihre
-   Farbe. So kann es keine gedämpfte Zeile ohne Wort geben (V7) — die beiden
-   können nicht auseinanderlaufen, weil es nur eine Quelle gibt. Die Plakette
-   selbst behält ihre Farbe: sie ist der Grund, nicht der Zustand. */
+/* **Muting goes through the word, not beside it**: `.v2ilrow__off` is the
+   "deaktiviert" badge, and the row containing it loses its colour. So there can
+   be no muted row without a word (V7). The badge keeps its colour: it is the
+   reason, not the state. */
 .v2tbl__row:has(.v2ilrow__off) > td { color: var(--color-text-subtle); }
 .v2tbl__row:has(.v2ilrow__off) .v2ilrow__name { font-weight: 500; }
-/* Die Plakette behält ihre Farbe: `color: inherit` gab ihr den gedämpften Ton
-   der deaktivierten Zeile, und damit fielen `bdg-info` auf 4,20 und
-   `bdg-neutral` auf 4,23 — unter die 4,5, die 0112 gerade hergestellt hat.
-   Deaktiviert ist die **Zeile**, nicht die Aussage der Plakette (Abnahme
-   0112, M1). */
+/* The badge keeps its colour: `color: inherit` gave it the deactivated row's
+   muted tone, dropping `bdg-info` to 4.20 and `bdg-neutral` to 4.23 — below the
+   4.5 that 0112 had just established. The **row** is deactivated, not the
+   badge's statement (0112, M1). */
 .v2tbl__row:has(.v2ilrow__off) .v2ilrow__off { color: var(--color-warning); }
 
-/* Die Fakten stehen frei im Aufklapper — die Zeile ist der Rahmen. Mehrere
-   Blöcke untereinander, mit Luft dazwischen, ohne Kasten um den Kasten. */
+/* The facts stand free in the foldout — the row is the frame. Several blocks
+   stacked with air between, no box around the box. */
 .v2ilfacts { display: flex; flex-direction: column; gap: var(--space-4); }
 
-/* Die Liste lebt in einer Karte — die Hausregel aus `Table.tsx`: keine
-   frei schwebende Tabelle. Kopf und Fuß kommen von `CardHead`/`CardFoot`,
-   hier steht nur, wie die Probe im Fuß ausgerichtet ist. */
+/* The list lives in a card — the house rule from `Table.tsx`: no floating
+   table. Head and foot come from `CardHead`/`CardFoot`; only the footer check's
+   alignment is here. */
 .v2illist .v2card__f {
   display: flex;
   align-items: baseline;
   justify-content: flex-end;
   gap: var(--space-3);
 }
-/* Eine Abweichung ist ein Befund, kein Fehler: gedeckte Warnfarbe, und das
-   Wort steht ohnehin daneben (V7). */
+/* A deviation is a finding, not an error: a muted warning colour, and the word
+   stands next to it anyway (V7). */
 .v2illist__off { color: var(--color-warning); }
 
-/* ── Lese-Raster des Buchungssatzes (0113) ──────────────────────────────── */
+/* ── Reading grid of the journal entry (0113) ────────────────────────────── */
 
-/* Der Kopf trägt rechts Rest und Sichtwechsel. Im Editor stand dafür ein
-   Inline-Stil; hier ist es eine Klasse, weil das Raster keine trägt. */
+/* The head carries remainder and view switch on the right. The editor used an
+   inline style; here it is a class, because the grid has none. */
 .bse__head-end { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
-/* Ein Satz ohne Zeile ist ein Fehler des Aufrufers — er wird sichtbar
-   abgefangen, nicht in eine leere Fläche gelegt. */
+/* An entry without rows is the caller's mistake — caught visibly, not laid into
+   an empty surface. */
 .bse__empty { padding: var(--space-4) 0; }
 .bse__msgs { margin-top: var(--space-3); }
-/* Die Kontozelle des **Lesers**: Nummer, Name und der Weg ins Kontenblatt
-   nebeneinander. Sie heißt nicht `.bse__account` wie die Lesezelle des Editors
-   — dieselbe Klasse hätte dort `display: flex` gesetzt und damit ihre Kürzung
-   ausgeschaltet (Abnahme 0113, M4). */
+/* The **reader's** account cell: number, name and the way into the ledger side
+   by side. Not `.bse__account` like the editor's reading cell — that class would
+   set `display: flex` there and switch off its shortening (0113, M4). */
 .bse__account-cell { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
-/* Der Weg ins Kontenblatt schrumpft **nicht** mit: als Flex-Kind gab er
-   nach, sobald der Kontoname die Zelle füllte — gemessen 14 × 24 px statt
-   24 × 24, also die Marke ohne ihr Polster (Wiederabnahme 0113, M7). */
+/* The way into the ledger does **not** shrink: as a flex child it gave way once
+   the account name filled the cell (14 × 24 px instead of 24 × 24, 0113, M7). */
 .bse__account-cell > .v2ibtn { flex: 0 0 auto; }
 .bse__account-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* ── Wiederkehr-Regel (0132–0135) ─────────────────────────────────────────
-   Die vier Formen der Familie: Zeile, Liste, Fakten, Editor. Eigener
-   Abschnitt am Ende, nicht einsortiert — hier arbeiten mehrere Sitzungen im
-   selben Baum, und ein Block am Stück ist der einzige Ort ohne Konflikt.
-   Präfix `v2rr`: `v2r*` war vergeben (v2radio, v2raw, v2rowlink), `v2rr` frei.
+/* ── Recurring rule (0132–0135) ─────────────────────────────────────────
+   The family's four forms: row, list, facts, editor. Prefix `v2rr`: `v2r*` was
+   taken (v2radio, v2raw, v2rowlink).
    ------------------------------------------------------------------------- */
 
-/* --- Die Zeile (0132) ---------------------------------------------------- */
+/* --- The row (0132) ---------------------------------------------------- */
 
-/* „ohne Kriterium" ist eine **Aussage**, kein fehlender Wert: eine Regel ohne
-   Kriterium ist nicht leer, sondern wirkungslos. Sie bekommt deshalb dieselbe
-   Pille wie „offen" in `CaseCell` — ein Gedankenstrich hieße „unbekannt", und
-   das wäre falsch. */
+/* "ohne Kriterium" is a **statement**, not a missing value: a rule without a
+   criterion is not empty but ineffective. Hence the same pill as "offen" in
+   `CaseCell` — a dash would mean "unknown", which is wrong. */
 .v2rrrow__none {
   display: inline-block; padding: 1px var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--color-bg-soft); color: var(--color-text-muted);
   font-size: var(--fs-ui-xs);
 }
-/* Der Sachverhalt ohne Weg: Nummer und Titel nebeneinander, der Titel gibt
-   nach. `min-width: 0` am Flex-Kind, sonst schneidet die Spur ab, statt den
-   Text zu kürzen (Owner-Regel 2026-09-07). */
+/* The case without a link: number and title side by side, the title gives way.
+   `min-width: 0` on the flex child, or the track clips instead of shortening. */
 .v2rrrow__case { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
 .v2rrrow__caseno {
   font-family: var(--font-mono); font-size: var(--fs-ui-xs);
   color: var(--color-text-muted); white-space: nowrap;
 }
-/* Datum und Betrag der letzten Zahlung stehen nebeneinander — zwei Angaben,
-   eine Antwort. */
+/* Date and amount of the last payment side by side — two values, one answer. */
 .v2rrrow__last { display: flex; align-items: baseline; gap: var(--space-2); }
 
-/* --- Die Fakten (0134) --------------------------------------------------- */
+/* --- The facts (0134) --------------------------------------------------- */
 
-/* Die Form steht **frei**: Karte und Reiter setzt, wer sie einsetzt. Hier nur
-   der Abstand zwischen den Gruppen, kein Rahmen, kein Innenabstand. */
+/* The form stands **free**: card and tab are set by whoever uses it. Only the
+   gap between groups, no frame, no padding. */
 .v2rrfacts { display: flex; flex-direction: column; gap: var(--space-5); }
 .v2rrfacts__head { display: flex; flex-direction: column; gap: var(--space-3); }
-/* Der Klartext-Satz der Domäne — er trägt den Kopf und ist der einzige Ort,
-   an dem „greift bei keiner Zahlung" überhaupt steht. */
+/* The domain's plain sentence — it carries the head and is the only place that
+   says "greift bei keiner Zahlung". */
 .v2rrfacts__summary { margin: 0; font-size: var(--fs-ui-md); line-height: var(--lh-ui-md); }
 .v2rrfacts__state { display: flex; align-items: center; gap: var(--space-3); }
-/* Die Gültigkeit ist ein **Wort ohne Farbe**, solange `is_active` keine
-   Registry-Achse hat (L-241): kein Ton, kein Punkt, keine Pille. R1 lässt
-   Farbe nur über eine Achse zu. */
+/* Validity is a **word without colour** as long as `is_active` has no registry
+   axis (L-241): R1 allows colour only through an axis. */
 .v2rrfacts__validity { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 .v2rrfacts__group { display: flex; flex-direction: column; gap: var(--space-3); }
-/* Der Rhythmus-Satz steht über den Paaren und ist Fließtext, kein Wertfeld —
-   deshalb linksbündig und nicht in der rechten Spalte der Feldliste. */
+/* The rhythm sentence stands above the pairs and is prose, not a value field —
+   hence left-aligned, not in the field list's right column. */
 .v2rrfacts__sentence { margin: 0; font-size: var(--fs-ui); color: var(--color-text); }
 .v2rrfacts__aside { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
-/* Betrag und geltende Toleranz sind **eine** Angabe, keine zwei Spalten. */
+/* Amount and applicable tolerance are **one** value, not two columns. */
 .v2rrfacts__amount { display: inline-flex; align-items: baseline; gap: 2px; }
 .v2rrfacts__term { white-space: nowrap; }
 
-/* --- Der Editor (0135) --------------------------------------------------- */
+/* --- The editor (0135) --------------------------------------------------- */
 
 .v2rredit { display: flex; flex-direction: column; gap: var(--space-4); }
-/* Formular links, Vorschau rechts. Ohne `renderPreview` gibt es die zweite
-   Spalte gar nicht, dann trägt das Grid nur eine. */
+/* Form left, preview right. Without `renderPreview` there is no second column. */
 .v2rredit__cols { display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: flex-start; }
 .v2rredit__form { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: var(--space-5); }
 .v2rredit__preview { flex: 1 1 320px; min-width: 0; }
 .v2rredit__sec { display: flex; flex-direction: column; gap: var(--space-3); }
-/* Die Abschnittsüberschrift ist eine Beschriftung über Feldern — dieselbe
-   Stufe wie ein Spaltenkopf (0089), nicht die eines Kartentitels. */
+/* The section heading labels fields — the same step as a column head (0089),
+   not a card title's. */
 .v2rredit__sech {
   margin: 0; font-size: var(--fs-ui-sm); font-weight: 700;
   color: var(--color-text-muted);
@@ -3927,11 +3828,11 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
   display: flex; flex-wrap: wrap; align-items: center;
   justify-content: space-between; gap: var(--space-3);
 }
-/* Die Trefferzahl ist die Kontrolle „passt die Regel so?" — sie steht bei den
-   Kriterien, nicht im Knopf, und ohne Farbe: sie ist eine Auskunft. */
+/* The hit count is the check "does the rule fit?" — it stands with the criteria,
+   not in the button, and without colour: it is information. */
 .v2rredit__hits { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
-/* Die Split-Vorlage ist hier nur lesbar; sie wird beim Speichern unverändert
-   durchgereicht, weil sie über keine Oberfläche änderbar ist. */
+/* The split template is read-only here; it is passed through unchanged on save,
+   because no surface can edit it. */
 .v2rredit__split {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
@@ -3943,25 +3844,18 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
   display: grid; grid-template-columns: 80px minmax(0, 1fr) 110px;
   gap: var(--space-2); font-size: var(--fs-ui-sm); align-items: baseline;
 }
-/* `AccountField` bringt kein `disabled` mit; ein `fieldset[disabled]` sperrt
-   nativ jedes Feld darin. Die Klasse nimmt dem Element Rahmen und Polster
-   wieder ab — gemessen blieben sonst zwei von 23 Eingaben beim Speichern
-   bedienbar. */
+/* `AccountField` has no `disabled`; a `fieldset[disabled]` disables every field
+   inside natively. The class takes the element's border and padding away again
+   (two of 23 inputs stayed usable during save otherwise). */
 .v2rredit__lock { border: 0; margin: 0; padding: 0; min-width: 0; }
 
-/* --- Das Regelwerk des Mandanten (0131) ---------------------------------- */
+/* --- The client's rule set (0131) ---------------------------------------- */
 
-/* Der Doppelgriff: zwei Regeln an **einem** Sachverhalt — die dritte der drei
-   Auffälligkeiten, wegen derer es die Seite gibt. Die Marke steht am
-   Sachverhalt, weil sie eine Aussage über den Fall ist und nicht über die
-   Regel, und sie trägt dieselbe Pille wie „ohne Kriterium": ein Wort, das
-   etwas feststellt. **Ohne Farbe** — zwei Regeln je Fall sind erlaubt (der
-   Tabellenkommentar lässt sie ausdrücklich zu), sie sind nur der Fall, den man
-   sehen will; R1 gäbe Farbe ohnehin nur über eine Registry-Achse her, und für
-   „zwei Regeln" gibt es keine.
-   Die Klasse gehört zum Zell-Vokabular der Zeile (`recurring-rule-columns`)
-   und steht trotzdem hier: ein Block am Stück am Dateiende ist der einzige
-   Ort ohne Konflikt, solange mehrere Sitzungen im selben Baum arbeiten. */
+/* The double grip: two rules on **one** case — the third of the three oddities
+   the page exists for. The mark sits at the case, because it is a statement
+   about the case, not the rule, and carries the same pill as "ohne Kriterium".
+   **No colour**: two rules per case are allowed — they are just the case one
+   wants to see, and R1 gives colour only through a registry axis. */
 .v2rrov__dup {
   display: inline-block; padding: 1px var(--space-2);
   border-radius: var(--radius-pill);
@@ -3969,27 +3863,26 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
   font-size: var(--fs-ui-xs); white-space: nowrap;
 }
 
-/* Geschäftspartner-Zelle (0139) — Name, Kurzname, Kontonummer in einer Zeile.
-   Eine Zeile, weil die Zelle in fremden Tabellenzeilen steht und eine Zelle,
-   die höher ist als ihre Nachbarn, ein Signal ohne Bedeutung wäre (derselbe
-   Grund wie bei `.v2case` inline). */
+/* Business partner cell (0139) — name, short name, account number in one line:
+   the cell stands in foreign rows, and a cell taller than its neighbours would
+   be a signal without meaning (like `.v2case` inline). */
 .v2bp { display: inline-flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
 .v2bp__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2bp__short { color: var(--color-text-subtle); font-size: var(--fs-ui-xs); white-space: nowrap; }
 .v2bp__acc { flex-shrink: 0; }
 
-/* Geschäftspartner-Fakten (0142) — Gruppen untereinander, gleiche Abstände wie
-   die Fakten der anderen Entitäten. */
+/* Business partner facts (0142) — groups stacked, the same gaps as the other
+   entities' facts. */
 .v2bpfacts { display: grid; gap: var(--space-5); }
 .v2bpfacts__hints { display: grid; gap: var(--space-2); }
 .v2bpfacts__hints p { margin: 0; }
 
-/* Partner-Drawer (0143) — drei Abrisse untereinander, jeder mit eigenem Weg.
-   Die Fakten stehen ohne Karte darüber; die Abrisse tragen ihre eigene. */
+/* Partner drawer (0143) — three extracts stacked, each with its own way. The
+   facts stand without a card above; the extracts carry their own. */
 .v2bpdrawer { display: grid; gap: var(--space-5); }
 .v2bpdrawer__way { font-size: var(--fs-ui-sm); white-space: nowrap; }
 .v2bpdrawer__count { margin: 0; padding: var(--space-4); }
 
-/* Sammelzeile der Prüfpunkte (0148) — Zeichen, Satz, Codes in einer Zeile im
-   Kopf eines `Disclosure`. */
+/* Summary row of the checks (0148) — sign, sentence, codes in one line in a
+   `Disclosure`'s head. */
 .v2pp__sum { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }
