@@ -1,29 +1,25 @@
 import type { ReactNode } from "react";
 
-/**
- * Die Tonstufen einer Plakette — dieselbe Kritikalitätsskala wie überall im
- * Set (V6): Farbe sagt Dringlichkeit, nicht Kategorie.
- */
+/** The badge's tones — the set's criticality scale (V6): colour says urgency, not category. */
 export type BadgeTone = "neutral" | "info" | "success" | "warning" | "danger";
 
 export interface BadgeProps {
   tone?: BadgeTone;
-  /** Punkt vor dem Text — für Zustände, die auf einen Blick zählbar sein sollen. */
+  /** Dot before the text — for states that should be countable at a glance. */
   dot?: boolean;
   children: ReactNode;
   className?: string;
 }
 
 /**
- * Kurze Auszeichnung an einem Objekt: Art, Zähler, Rolle, Herkunft.
+ * A short mark on an object: kind, count, role, origin. Always carries a word —
+ * colour alone means nothing (V7).
  *
- * Trägt immer ein Wort — die Farbe allein bedeutet nichts (V7).
- *
- * @when    Eine Eigenschaft, die zum Objekt gehört und in einem Wort steht:
- *          Belegkategorie, Rolle, Anzahl, Herkunft.
- * @instead Ein Zustand aus einer Status-Achse → StatusBadge (holt Label und
- *          Ton aus der Registry, R1). Ein Hinweis mit Satz → Callout.
- *          Eine Zahl in einer Tabellenspalte → AmountCell.
+ * @when    A property of the object that fits one word: document category,
+ *          role, count, origin.
+ * @instead A state from a status axis → StatusBadge (label and tone from the
+ *          registry, R1). A note with a sentence → Callout. A number in a
+ *          table column → AmountCell.
  */
 export function Badge({ tone = "neutral", dot, children, className }: BadgeProps) {
   return (

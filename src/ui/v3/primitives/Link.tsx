@@ -1,17 +1,12 @@
 import type { AnchorHTMLAttributes, Ref } from "react";
 
 /**
- * Der Link des Design-Systems.
+ * The design system's link — deliberately a plain `<a>`: `next/link` would tie
+ * the bundle to the Next runtime, which does not exist in Storybook or other
+ * consumers. The components use only `<a>` semantics.
  *
- * Bewusst ein schlichtes `<a>`: `next/link` würde das Bundle an den
- * Next-Runtime koppeln, und außerhalb der App — in Claude Design, in einem
- * Storybook, in jedem anderen Konsumenten — existiert der nicht. Die
- * Komponenten nutzen ohnehin nur `<a>`-Semantik (href, target, download,
- * aria-current), kein Prefetch, kein Router-Feature.
- *
- * ponytail: Wenn die App v3 übernimmt und clientseitige Navigation braucht,
- * wird NUR diese Datei auf `next/link` umgestellt — nicht die sechs
- * Komponenten, die hier importieren.
+ * ponytail: when the app needs client-side navigation, only this file switches
+ * to `next/link`.
  *
  * @when    Anything that leads to a URL — in a row, in a sentence, on a card.
  * @instead An action without a URL → Button or TextButton. A whole row that

@@ -402,9 +402,8 @@ const REST: InvoiceLineItem[] = [
 ];
 
 /**
- * Die p90-Bezeichnung: 92 Zeichen, also die Grenze, an der die Zelle noch
- * stehen muss (p50 34 · p90 93 · max 251). Sie steht nicht in `ALL` — sie ist die
- * Messlatte der Zeile, nicht Teil der Rechnung.
+ * The p90 description: 92 characters, the length the cell must still hold
+ * (p50 34 · p90 93 · max 251). Not in `ALL` — it is the row's yardstick.
  */
 export const P90 = line({
   position: 2,
@@ -420,11 +419,9 @@ export const P90 = line({
 });
 
 /**
- * Eine **aktive** Summenzeile — `summary_total`, nicht deaktiviert. Sie ist
- * der Fall, für den es die Probe im Fuß gibt: der Beleg führt seine eigene
- * Summe als Position, sie zählt mit, und dadurch weicht die Summe der
- * Positionen vom Nettobetrag der Rechnung ab. Im Bestand gibt es 40 solcher
- * Zeilen. Sie steht **nicht** in `ALL`.
+ * An **active** summary line (`summary_total`, not deactivated) — the case the
+ * footer check exists for: it counts, so the lines' total deviates from the
+ * invoice's net amount. 40 such lines in stock. Not in `ALL`.
  */
 export const SUMMARY_TOTAL = line({
   position: 23,

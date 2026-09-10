@@ -85,7 +85,7 @@ export function CaseFacts({
   const rows: [ReactNode, ReactNode][] = [];
   const add = (label: ReactNode, value: ReactNode) => rows.push([label, value]);
 
-  // Rang 11 — lang genug, um sich die Restbreite zu nehmen; ungekürzt ist er ein Absatz.
+  // Rank 11 — long enough to take the remaining width; unshortened it is a paragraph.
   if (c.summary) add("Zusammenfassung", <LongText max={SUMMARY_MAX}>{c.summary}</LongText>);
 
   // Rang 12
@@ -102,7 +102,7 @@ export function CaseFacts({
     );
   }
 
-  // Rang 13 — NULL ist eine Aussage, kein fehlender Wert.
+  // Rank 13 — NULL is a statement, not a missing value.
   add(
     "Personenkonto",
     c.personalAccountNumber ? (
@@ -127,7 +127,7 @@ export function CaseFacts({
     );
   }
 
-  // Rang 15 — dass das Feld gesetzt ist, **ist** die Aussage.
+  // Rank 15 — that the field is set **is** the statement.
   if (c.documentNotRequiredReason) {
     add("Kein Beleg zu erwarten", c.documentNotRequiredReason);
   }
@@ -136,9 +136,8 @@ export function CaseFacts({
   add("Abgeschlossen", c.closedAt ? <Time value={c.closedAt} format="date" /> : "laufend");
 
   if (all) {
-    // Rang 17 — NULL ist auch hier eine Aussage.
-    // The mirror types the side as `string`; an unknown value is shown raw
-    // rather than silently dropped — visibly wrong beats quietly absent.
+    // Rank 17 — NULL is a statement here too. The mirror types the side as
+    // `string`; an unknown value is shown raw rather than dropped.
     add(
       "Gegenpartei-Seite",
       c.counterpartySide
@@ -160,14 +159,11 @@ export function CaseFacts({
     }
     if (c.agentRunId) add("Buchungslauf", <MonoCell value={c.agentRunId} />);
     if (c.exportBatchId) add("Buchungszyklus", <MonoCell value={c.exportBatchId} />);
-    // Rang 25 (Abnahme-Bucket) steht bewusst **nicht** hier: das Profil sagt
-    // selbst, er gehört zur Abnahmeliste — dort ist er die Gruppierung, hier
-    // wäre er eine Zahl ohne ihren Zusammenhang (Freigabe 2026-09-06).
+    // Rank 25 (acceptance bucket) is deliberately absent: it groups the
+    // acceptance list and would be a number without context here.
   }
 
-  // `stack`, nicht `row`: die Spec verspricht „Label links, Wert rechts, Zahlen
-  // mit tnum" — und genau das ist die Vorgabe-Form der `FieldList`. `row`
-  // setzt das Label **über** den Wert und beides linksbündig; damit wäre der
-  // Satz im Verhalten nicht eingelöst, sondern nur behauptet (Abnahme 0097).
+  // `stack`, not `row`: label left, value right, numbers with tnum — the spec's
+  // promise. `row` puts the label above the value (acceptance 0097).
   return <FieldList rows={rows} tone={tone} split={split} />;
 }

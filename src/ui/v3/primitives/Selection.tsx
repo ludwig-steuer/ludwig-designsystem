@@ -7,23 +7,22 @@ import { ActionButton, type ActionResult, type AskSpec, type ConfirmSpec } from 
 import { TextButton } from "./TextButton";
 
 /**
- * Mehrfachauswahl in einer Tabelle (F123 T123.1): Kästchen in der Zeile,
- * Leiste über dem Spaltenkopf. Zusammen mit `ClickRow` aus `./ExpandableRow`.
+ * Multi-select in a table (F123 T123.1): checkbox in the row, bar above the
+ * column head, together with `ClickRow` from `./ExpandableRow`.
  *
  * Two layers live here. `SelectionBar` and `SelectCell` are the dumb pair: the
  * caller holds the selection and passes `count`, `checked`, `onChange`.
  * `SelectionScope` and the three parts that read it are the island that holds
- * it — that is what a table over a whole page needs, and what `DataTable`
- * (0057) mounts. Both stay: a card with three rows does not need a context.
+ * it — what a table over a whole page needs, and what `DataTable` (0057)
+ * mounts. A card with three rows does not need a context.
  *
- * `useHotkeys` comes from `patterns/` — the one import upwards, the way
- * `RecordPager` already does it. It is a bare keydown listener without a
- * domain word; a second copy of it here would be the worse trade.
+ * `useHotkeys` comes from `patterns/` — the one import upwards, like
+ * `RecordPager`: a bare keydown listener, and a second copy would be worse.
  */
 
 /**
- * Auswahl-Leiste über dem Spaltenkopf — innerhalb der Karte, nicht im
- * Seitenkopf (Baukasten §4). Erscheint erst, wenn etwas ausgewählt ist.
+ * Selection bar above the column head — inside the card, not in the page head
+ * (§4). Appears once something is selected.
  *
  * @when    Actions on several selected rows at once.
  * @instead Action on exactly one row → RowActions.
@@ -68,7 +67,7 @@ export function SelectionBar({
 }
 
 /**
- * Auswahl-Kästchen als erste Zelle einer Zeile.
+ * Selection checkbox as a row's first cell.
  *
  * @when    First cell of every selectable row, together with SelectionBar.
  * @instead A single yes/no in a form → Checkbox. The head's box → SelectAllCell.
@@ -94,7 +93,7 @@ export function SelectCell({
   );
 }
 
-/* ── Die Insel, die die Auswahl hält (0057) ─────────────────────────────── */
+/* ── The island that holds the selection (0057) ─────────────────────────── */
 
 export interface SelectionApi {
   /** The chosen keys of this page. */

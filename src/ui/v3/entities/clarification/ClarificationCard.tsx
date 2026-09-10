@@ -118,20 +118,16 @@ export interface ClarificationDetailVM {
   facts?: readonly { label: string; value: string }[];
   sources?: readonly ClarificationSource[];
   /**
-   * Der Fragetyp, wie er in der Zeile steht. Das **Wort** dazu kommt aus der
-   * Domäne (`clarificationQuestionTypeLabel`, seit 2026-09-07, Befund L-10) —
-   * fünfzehn Typen, und ein unbekannter Slug wird lesbar gemacht statt
-   * verworfen.
+   * The question type as stored on the row. Its **word** comes from the domain
+   * (`clarificationQuestionTypeLabel`, finding L-10); an unknown slug is made
+   * readable, not dropped.
    */
   questionType?: string | null;
-  /**
-   * Das Modul, aus dem die Frage kam. Das Wort kommt aus der Domäne
-   * (`clarificationModuleLabel`, Befund L-11).
-   */
+  /** The module the question came from; the word comes from the domain (`clarificationModuleLabel`, L-11). */
   sourceModule?: string | null;
-  /** Überschreibung des Fragetyp-Worts, wenn ein Aufrufer eines braucht. */
+  /** Override of the question-type word, if a caller needs one. */
   questionTypeLabel?: string | null;
-  /** Überschreibung des Herkunfts-Worts („Buchungsvorschlag", „Kanzlei"). */
+  /** Override of the origin word ("Buchungsvorschlag", "Kanzlei"). */
   originLabel?: string | null;
   /**
    * `ClarificationAnswerKind` from `src/ludwig` is missing `document_upload`,
@@ -296,8 +292,8 @@ export function ClarificationCard({
   }
 
   const isComment = c.type === "comment";
-  // Die Wörter kommen aus der Domäne; eine Prop überschreibt sie nur, wenn
-  // ein Aufrufer wirklich ein anderes braucht (L-10, L-11).
+  // The words come from the domain; a prop overrides them only when a caller
+  // really needs another (L-10, L-11).
   const questionWord =
     c.questionTypeLabel ??
     (c.questionType ? clarificationQuestionTypeLabel(c.questionType) : null);

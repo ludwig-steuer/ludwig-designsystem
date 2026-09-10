@@ -113,12 +113,9 @@ export function JournalEntryGrid({
         </span>
       </div>
 
-      {/* Über dem Raster, wie die Spec es sagt: der Satz beginnt mit der
-          Gegenseite, die Zeilen darunter sind ihre Aufteilung. Und als
-          **eine** Gruppe, nicht als vier Spans in einem `space-between` —
-          sonst zerfallen sie über die ganze Breite (Wiederabnahme 0113, M4).
-          Die Seite steht dabei, wie im Editor: sie ist die Gegenseite des
-          Belegs, nicht wählbar. */}
+      {/* Above the grid, as the spec says: the entry starts with the contra side,
+          the rows below are its split — as **one** group, or the parts spread over
+          the full width (0113, M4). The side is shown, not selectable. */}
       {contraAccount ? (
         <div className="bse__contra">
           <span className="bse__contra__label">
@@ -144,9 +141,8 @@ export function JournalEntryGrid({
             {full ? <span>Konto</span> : null}
             <span>{full ? "Beleg 1" : "Konto"}</span>
             {full ? <span>Beleg 2</span> : null}
-            {/* Belegfeld 1 steht **vor** dem Buchungstext — die Ordnung des
-                DATEV-Stapels, und dieselbe, die der Editor führt. Das Raster
-                hatte sie getauscht (Wiederabnahme 0113, M5). */}
+            {/* Document field 1 comes **before** the posting text — DATEV's order,
+                the same as the editor's (0113, M5). */}
             {full ? null : <span className="v2mono">Beleg 1</span>}
             <span>Text</span>
             {full ? <span>KOST</span> : null}

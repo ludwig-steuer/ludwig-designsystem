@@ -2,15 +2,12 @@
 
 import type { CSSProperties, ReactNode } from "react";
 
-/**
- * Master-Detail und die beiden Flächen darin — das Arbeitsflächen-Muster des
- * Designs (F123 T123.1, seit F128 eigene Datei unter `patterns/`).
- */
+/** Master-detail and its two panes — the design's workspace pattern (F123 T123.1). */
 
 /**
- * Master-Detail: Liste links, Detail rechts und beim Scrollen stehenbleibend.
- * Der kanonische Ersatz für das Modal (UX-Guidelines L2) — die Auswahl gehört in einen
- * eigenen Such-Parameter (`?sel=`), nicht in den Drawer-Parameter (R8).
+ * Master-detail: list left, detail right and sticky while scrolling — the
+ * canonical replacement for the modal (L2). The selection belongs in its own
+ * search parameter (`?sel=`), not the drawer parameter (R8).
  *
  * @when    Picking from a list, working on the selected item on the right.
  * @instead Single confirmation without a list → Dialog. Sequence of steps → StepRail.
@@ -26,8 +23,8 @@ export function MasterDetail({
   detail: ReactNode;
   style?: CSSProperties;
   /**
-   * Dreht das Gewicht um: schmale Liste, breites Detail — für Schritte, in
-   * denen im Detail gearbeitet und in der Liste nur ausgewählt wird.
+   * Flips the weight: narrow list, wide detail — for steps where the work
+   * happens in the detail and the list only selects.
    */
   detailWide?: boolean;
   /**

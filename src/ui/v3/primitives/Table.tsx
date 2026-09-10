@@ -2,18 +2,13 @@ import { Children, Fragment, isValidElement, type CSSProperties, type ReactNode 
 import { Link } from "./Link";
 
 /**
- * v2-Tabellen-Baukasten (F118 §4, Design `Tabellen-Bausteine.dc.html`).
+ * Table building blocks (F118 §4). Core rule: **every table lives in a card**
+ * with card head and column head — even with three rows. Rows are separated by
+ * lines, never zebra stripes.
  *
- * Kernregel des Baukastens: **jede Tabelle lebt in einer Karte** mit
- * Kartenkopf und Spaltenkopf — auch bei drei Zeilen. Keine frei schwebenden
- * Zeilen. Getrennt wird über Linien, nie über Zebra-Streifen.
- *
- * Alles hier ist eine Server-Component (kein `"use client"`): die Bausteine
- * bekommen fertiges Markup und `href`s. Interaktion (Ausklappen, Auswahl)
- * baut der Aufrufer in seinem eigenen Client-Wrapper — die Primitive bleibt
- * dumm.
- *
- * Styling: `src/styles/v2.css`, Farben ausschließlich aus `tokens.css`.
+ * All server components: they receive finished markup and `href`s; interaction
+ * (expanding, selecting) lives in the caller's client wrapper. Styling:
+ * `src/styles/v3.css`, colours only from `tokens.css`.
  */
 
 /* ── Karte ──────────────────────────────────────────────────────────── */
@@ -108,8 +103,8 @@ export function CardFoot({ children }: { children: ReactNode }) {
 export type TableDensity = "compact" | "default" | "wide";
 
 /**
- * Grid-Tabelle. `cols` ist ein `grid-template-columns`-Wert, `minWidth`
- * erzwingt horizontales Scrollen statt Quetschen (viele Spalten).
+ * Grid table. `cols` is a `grid-template-columns` value; `minWidth` forces
+ * horizontal scrolling instead of squeezing.
  *
  * @when    Records of the same kind in columns, even with three rows; `density`
  *          when a page needs the tighter or the roomier row.

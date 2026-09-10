@@ -85,11 +85,10 @@ export function Timeline({
   groupBy?: "day" | "month" | "none";
   emptyText?: string;
   /**
-   * Wort je `kind` — eine **Überschreibung**. Für die Arten des Sachverhalts
-   * hat die Registry seit 2026-09-06 die Achse `ereignis_art` (Befund L-02),
-   * und der Strang schlägt dort selbst nach. Diese Prop ist für einen Strang,
-   * dessen Arten nicht in der Achse stehen — die Komponente erfindet kein
-   * Vokabular (0023).
+   * Word per `kind` — an **override**. Case event kinds have the registry axis
+   * `ereignis_art` (finding L-02), which the strand looks up itself. This prop
+   * is for a strand whose kinds are not in the axis; the component invents no
+   * vocabulary (0023).
    */
   kindLabels?: Record<string, string>;
   /**
@@ -175,9 +174,8 @@ function Entry({
   // ways — and inside the button they would stand without a gap.
   const title = <span className="v2tl__title">{item.title}</span>;
   // A kind without a word, and no actor: then the second line would repeat the
-  // icon in text — the entry stays one line (0040).
-  // Die Achse zuerst, die Prop als Überschreibung, der Rohwert zuletzt: ein
-  // unbekannter Wert verschwindet nicht, er fällt auf (L-02).
+  // icon in text — the entry stays one line (0040). Axis first, prop as
+  // override, raw value last: an unknown value does not vanish, it shows (L-02).
   const kindWord = item.kind
     ? (kindLabels?.[item.kind] ?? STATUS_REGISTRY.ereignis_art[item.kind]?.label ?? item.kind)
     : null;

@@ -248,12 +248,9 @@ export function accountEntryColumns({
       ),
   };
 
-  // **Der Zustand steht vorn, nicht hinten** (Abnahme 0063). Er beantwortet
-  // dieselbe Frage wie das Herkunfts-Zeichen zwei Spalten links — „sagen
-  // Ludwig und DATEV dasselbe?" —, und am rechten Rand lag er gemessen hinter
-  // dem Querlauf: bei 1440 px mit einer 440-px-Randspalte endete die sichtbare
-  // Fläche bei 1419, der Chip bei 1509. Eine Antwort, die man wegscrollen
-  // muss, ist keine.
+  // **The state comes first, not last** (acceptance 0063): it answers the same
+  // question as the origin mark two columns left — "do Ludwig and DATEV agree?"
+  // — and at the right edge it sat behind the horizontal scroll.
   const [datum, origin, ...rest] = columns;
   return [
     datum!,

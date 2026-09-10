@@ -4,11 +4,9 @@ import { Select } from "./Form";
 import { Link } from "./Link";
 
 /**
- * v2-Navigation (F123 T123.1): Reiter, Segment-Schalter, Filter-Chips, Suche.
- *
- * Alle vier tragen einen Zustand, keiner trägt Fachwissen — Zähler, Alarme
- * und Optionen kommen als Props. `href`-Varianten funktionieren ohne
- * JavaScript; `onPick` ist die Client-Variante.
+ * Navigation (F123 T123.1): tabs, segmented control, filter chips, search. All
+ * four carry state, none carries domain knowledge. `href` variants work without
+ * JavaScript; `onPick` is the client variant.
  */
 
 interface TabItemBase {
@@ -119,13 +117,13 @@ export function Tabs({
 export interface SegmentOption {
   key: string;
   label: string;
-  /** Zähler rechts am Label — gedämpft, wie `TabItem.count`: was diese Sicht zeigt. */
+  /** Count at the label's right — muted, like `TabItem.count`. */
   count?: number;
   href?: string;
 }
 
 /**
- * Segment-Schalter für gleichrangige Sichten auf dieselben Daten (Log).
+ * Segmented control for equal views of the same data (log).
  *
  * @when    Equal views of the same data (log: by time, by owner), with a
  *          count per view where the views differ in size.
@@ -180,8 +178,8 @@ export interface ChipOption {
 }
 
 /**
- * Filter-Chips, gruppiert nach Dimension — über der Karte, nie im Kartenkopf
- * (Baukasten §6). Die Gruppen-Überschrift sagt, wonach gefiltert wird.
+ * Filter chips grouped by dimension — above the card, never in its head (§6).
+ * The group heading says what is filtered by.
  *
  * @when    Narrowing down by dimension, above the card.
  * @instead In the card header. Full text → SearchInput.

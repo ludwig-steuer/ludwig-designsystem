@@ -8,10 +8,9 @@ import { axisLegend, type StatusAxis } from "@/ludwig/ui/status/status-registry"
 interface StatusInfoDialogProps {
   axis: StatusAxis;
   /**
-   * Aktueller DB-Wert — wird in der Liste hervorgehoben. `undefined` steht
-   * ausdrücklich mit drin: der Aufrufer reicht durch, was er hat, und unter
-   * `exactOptionalPropertyTypes` ist „die Prop fehlt" nicht dasselbe wie „die
-   * Prop ist undefined".
+   * Current DB value — highlighted in the list. `undefined` is allowed
+   * explicitly: under `exactOptionalPropertyTypes` a missing prop and an
+   * undefined one differ, and the caller passes on what it has.
    */
   current?: string | null | undefined;
   open: boolean;
@@ -19,14 +18,10 @@ interface StatusInfoDialogProps {
 }
 
 /**
- * DER Status-Dialog — einer für alle Achsen. Erklärt, was für ein Status das
- * ist (Achse + technische Herkunft) und listet **alle** Ausprägungen mit
- * Badge, Klartext, DB-Wert und Bedeutung. Der aktuell angezeigte Wert ist
- * hervorgehoben.
- *
- * Inhalt kommt vollständig aus `status-registry.ts` — hier steht kein
- * einziger Statustext. Eine neue Ausprägung in der Registry erscheint
- * automatisch, ohne dass jemand diese Datei anfassen muss.
+ * THE status dialog — one for every axis. Explains what kind of status it is
+ * (axis + technical origin) and lists **all** values with badge, text, DB
+ * value and meaning; the current one is highlighted. Every word comes from
+ * `status-registry.ts`, so a new value appears without touching this file.
  *
  * @when    All values of one status axis explained, with badge and DB value.
  * @instead One status as a chip → StatusBadge. The (i) that opens this →

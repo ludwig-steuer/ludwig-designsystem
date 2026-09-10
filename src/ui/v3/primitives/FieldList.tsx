@@ -1,23 +1,18 @@
 import type { ReactNode } from "react";
 
 /**
- * Label/Wert-Paare in einer Karte. `tone="soft"` tönt die Fläche — das Design
- * nutzt das, um die DATEV-Seite von der Ludwig-Seite zu trennen, ohne eine
- * zweite Überschrift zu brauchen.
+ * Label/value pairs in a card. `tone="soft"` tints the surface — the design
+ * uses it to set the DATEV side apart from the Ludwig side without a second
+ * heading. `tone="bare"` drops surface, border and padding, for drawers and
+ * details where a card already surrounds the list (0006). Without `title`
+ * there is no header row.
  *
- * `tone="bare"` stellt dieselben Zeilen frei: keine Fläche, kein Rahmen, kein
- * Innenabstand — für Drawer, Detail und Zusammenfassung, wo die Karte schon
- * um die Liste herum steht (0006). Ohne `title` entfällt die Kopfzeile.
- *
- * `split` lets the pairs stand in **two columns as soon as there is room for
- * them** — measured on the list itself, not on the window (container query).
- * A fact list that runs the full width of a detail page puts its label on the
- * far left and its value on the far right, and the eye has to cross 900 px of
- * nothing between them; in two columns the pair stays a pair.
+ * `split` sets the pairs in two columns once each gets 300 px (CSS columns,
+ * measured on the list, not the window): at full width a label on the far left
+ * and its value on the far right are no longer a pair.
  *
  * `layout="row"` turns the pairs sideways (0049): label above value, pairs
- * next to each other — the facts line of a detail head, where four short
- * answers have to fit on one line.
+ * next to each other — the facts line of a detail head.
  *
  * @when    Master data and properties of an item, read-only — in a card
  *          (`surface`/`soft`) or free-standing inside one (`bare`).
