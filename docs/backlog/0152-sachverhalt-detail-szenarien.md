@@ -71,6 +71,78 @@ abzunehmen hieße, den ersten Fehler 21 mal zu bauen.
 0153: was beim Beleg `SourceDocumentDefects` heißt, ist hier dieselbe Zone mit
 anderen Zeilen. Sie wird mit Welle 1 zum Pattern gehoben, nicht kopiert.
 
+## Welle 2, neu geschnitten nach der Erhebung (2026-09-10)
+
+`docs/entitaeten/accounting-case-staging-erhebung-2026-09-10.md`, 1.094 Fälle.
+**Sie stellt den Schnitt des Briefs auf den Kopf**, und das ist der Grund, warum
+Welle 2 nicht nach E2–E9 gebaut wird.
+
+### Was der Brief annimmt und der Bestand nicht hat
+
+| Szenario im Brief | Bestand |
+|---|---|
+| E7 Storno (`system_reversal`) | **0**. „reversed" sind zurückgezogene Vorschläge (`withdrawn_by_agent` 85) |
+| E5-Variante zurückgestellte Klärung | **0 von 234** |
+| E4-Variante Eskalationsstufe 2 | **0** (Stufe 1 genau einmal) |
+| `disposition = client` | **0** |
+| Judge-Korrekturen | 15 (`ai_edited`) — es gibt sie, aber selten |
+
+Fünf Szenarien für Zustände, die niemand je sieht. Sie werden **nicht**
+gebaut; was ein Zustand ohne Bestand braucht, ist kein Bild, sondern ein Satz
+im Profil.
+
+### Was größer ist als angenommen
+
+- **Mandantenstapel: max 508 Ereignisse**, nicht 120 wie im Brief. Die
+  Pagination in Spalte 1 ist damit keine Vorsichtsmaßnahme, sondern Pflicht.
+- **12 offene Klärungen** an einem Fall — die Notizspalte muss das tragen.
+- Klärungen nach S16 (Kontext + Frage + Empfehlung) gibt es nur bei **9 %**;
+  der Regelfall ist Titel + Text. Die Karte darf die reiche Form nicht
+  voraussetzen.
+
+### Der neue Schnitt: acht Ausprägungen decken 88 %
+
+| % | Ausprägung | Was sie zeigt |
+|---:|---|---|
+| 29 | **OPOS-Vortrag Ausgang** | ein Ereignis, **keine** Buchung — die stillste Seite des Bestands, und die häufigste |
+| 13 | Eingang, nur Beleg | der Fall ohne Zahlung |
+| 11 | Ausgang mit Zahlung | |
+| 10 | Eingang, Beleg + Zahlung mit Klammer | der „vollständige" Fall |
+| 9 | Mandantenstapel | 508 Ereignisse, 12 Klärungen |
+| 8 | Dauer **ohne** Regel | 75 % aller Dauerfälle |
+| 8 | Vortrag Eingang | |
+| 5 | Zahlung ohne Beleg | |
+
+Dazu vier Ränder mit je einer Story: Ausgleichsgruppe (20 Fälle, max 25
+Ereignisse), Spesen (8, max 38), Vertrag (2) und **Fall ohne ein einziges
+Ereignis** (41 — der ist real, nicht nur ein Story-Zustand).
+
+**Die stillste Seite ist die häufigste.** Das ist die Lehre für den Entwurf:
+was bei 29 % der Fälle zu sehen ist, sind ein Ereignis, kein Vorschlag, keine
+Klärung — und trotzdem muss die Seite dort etwas sagen.
+
+## Die Regel und ihre automatischen Buchungen
+
+Aus derselben Erhebung, weil der Brief sie nur streift:
+
+- **Zwölf Ereignisse, nicht eins.** Jeder Monat ist ein eigenes
+  `accrual`-Ereignis mit eigener Buchung; der Fall ist die Klammer. Ein Jahr
+  sind bis 25 Ereignisse.
+- **Eine Regel ist im Bestand ein Satz:** „monatlich am 1. erwartet Ludwig
+  einen Zahlungseingang von X über Y; gebucht wird Gegenkonto an Personenkonto,
+  Beleg per `period_key`". Prozent-Zeilen (`template_lines`), Toleranzen,
+  IBAN-/Regex-Kriterien und Lernnotiz sind **0 von 30** — sie stehen im Schema,
+  nicht in den Daten. Eine Fixture, die sie zeigt, erfände sie.
+- **Eine Regel-Buchung sieht anders aus als eine Agenten-Buchung.**
+  `proposal_rationale` trägt dort `rule_id`, `period`, `source`, `needs_review`
+  — **kein** `agent_rationale`, keine Quellen, keine Guard-Warnungen, **kein
+  Judge**. `AiBookingNotes` ist an so einem Satz also die falsche Form: zu
+  sehen sein soll die Herkunft „Regelwerk", die Regel als Satz mit Periode,
+  und `needs_review` als einziger Hinweis.
+
+**Befund für die App:** die Registry sagt zu `recurring_rule` „wird nicht
+exportiert" — 27 von 27 sind exportiert. **L-282.**
+
 ## Offene Fragen
 
 1. **Ist die Buchung ein eigener Timeline-Eintrag oder eine zweite Zeile am
