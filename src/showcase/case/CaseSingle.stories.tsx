@@ -6,6 +6,7 @@ import { Card, CardHead } from "@/ui/v3/primitives/Table";
 import { CasePage } from "./CasePage";
 import { accountHref, caseFixture, partnerHref } from "./fixtures";
 import { ScenarioPage } from "./scenario";
+import * as C from "./collective-scenarios";
 import * as S from "./scenarios";
 
 /**
@@ -142,6 +143,21 @@ export const JudgeFlagged: Story = { render: () => <ScenarioPage scenario={S.jud
  * die Freigabe ist gewöhnlich.
  */
 export const JudgeAdjusted: Story = { render: () => <ScenarioPage scenario={S.judgeAdjusted} /> };
+
+/**
+ * **Vertrag** (A12, E8). Ein Vertrag wird nicht gebucht, er begründet die
+ * monatlichen Raten: ein Beleg mit Grund „keine Buchung nötig" und eine Rate
+ * in der Zukunft, geplant. Dieselbe Seite, kein Sonderlayout.
+ */
+export const Contract: Story = { render: () => <ScenarioPage scenario={C.contract} /> };
+
+/**
+ * **Fall ohne Ereignis** (A13, 4 % — 41 Fälle). Die leere Seite ist real,
+ * nicht nur ein Story-Zustand: angelegt aus dem Onboarding-Import, noch
+ * nichts zugeordnet. Der Strang sagt es in einem Satz, die Mängel-Zone nennt
+ * die zwei Wege.
+ */
+export const NoEvents: Story = { render: () => <ScenarioPage scenario={C.noEvents} /> };
 
 /**
  * Der Reiter **Stammdaten** — und der Grund, warum die Fakten nicht in der

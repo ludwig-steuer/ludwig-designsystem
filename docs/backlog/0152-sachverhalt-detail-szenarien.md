@@ -201,6 +201,35 @@ Notizspalte, und Signal plus Karte wären dieselbe Aufforderung zweimal.
 im Bestand ist `reversed` in 85 von 86 Fällen ein zurückgezogener Vorschlag
 ohne Gegenbuchung. `ProposalWithdrawn` erklärt es am Ereignis mit einem Satz.
 
+## Welle 3 — gebaut (2026-09-10)
+
+| Export | Datei · Titel | Ausprägung | Punkt |
+|---|---|---|---|
+| `ClientBatch` | `CaseCollective` · Sammel und Dauer | A5 (9 %), 508 Ereignisse, 12 Rückfragen | — |
+| `RecurringWithRule` | ebd. | A9 (3 %), zwölf Abgrenzungen, kein Judge | 8 |
+| `ClearingGroup` · `ClearingGroupBalanced` | ebd. | A10 (2 %), Verrechnungskonto 1360, Rest offen / ausgeglichen | 9 |
+| `CollectivePayment` | ebd. | Modus „mehrere", zwölf Klammern (p90) | 10 |
+| `ExpenseReport` | ebd. | A11 (1 %), 36 Belege | — |
+| `Contract` | `CaseSingle` · Einzelfall | A12, E8 | — |
+| `NoEvents` | ebd. | A13 (4 %, 41 Fälle) | — |
+| `InUse` | `CasePageStates` · Seite | P1 | — |
+| `LoadingErrorNotFound` | ebd. | P2 | — |
+| `PartnerDrawer` | ebd. | P4 | — |
+
+**Lange Stränge ohne neue Prop.** Der Mandantenstapel und die
+Spesenabrechnung zeigen die jüngsten 20 Einträge und darunter den Weg in den
+Reiter Ereignisse, wo geblättert wird — Komposition an der Seite, nicht eine
+Pagination im Baustein. `CaseTimeline` bleibt, wie es ist.
+
+**Die Regel-Welt ist hochgerechnet.** Der Bestand zeigt Regel-Buchungen für
+genau einen Monat; zwölf Abgrenzungen sind die Form des Bestands, auf ein Jahr
+gezogen (so sagt es auch die Erhebung).
+
+**Befund L-285:** Fremdtilgung und Gate-Mangel aus F206 fehlen im Spiegel.
+
+**Offen:** P3 (alle Reiter mit Inhalt und Leerzustand) — nach Absprache mit
+`ludwig-manager` als letzter Teil.
+
 ## Offene Fragen
 
 1. **Ist die Buchung ein eigener Timeline-Eintrag oder eine zweite Zeile am
