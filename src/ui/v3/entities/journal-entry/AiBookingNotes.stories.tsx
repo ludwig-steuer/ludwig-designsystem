@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 
 import { AmountCell, MonoCell } from "../../primitives/Cells";
+import { JournalEntryCard, type JournalLine } from "./JournalEntryCompact";
 import { Card, CardHead } from "../../primitives/Table";
 import { DataTable, type ColumnDef } from "../../patterns/DataTable";
 import {
@@ -236,7 +237,18 @@ interface BatchRow {
   rationale?: string;
   judgeReasoning?: string;
   errors?: string[];
+  /** Die Zeilen des Satzes — im Aufklapper steht die ganze Buchung. */
+  lines: JournalLine[];
 }
+
+/** Gegenkonto-Zeile zu einem Aufwand: Kreditor im Haben. */
+const gegen = (amount: number): JournalLine => ({
+  side: "credit",
+  accountNumber: "70044",
+  accountName: "Beispielbau Handels GmbH",
+  amount,
+  text: "Rechnung",
+});
 
 const STAPEL: BatchRow[] = [
   {
@@ -249,6 +261,10 @@ const STAPEL: BatchRow[] = [
     confidence: "green",
     rationale: "Der Lieferant ist als Vermieter hinterlegt, der Betrag entspricht der Vormonatsmiete.",
     judgeReasoning: "Konto, Steuersatz und Betrag stimmen mit dem Vertrag überein.",
+    lines: [
+      { side: "debit", accountNumber: "6310", accountName: "Miete", amount: 1450, taxKey: "9", text: "Miete Musterstraße 12, August" },
+      gegen(1450),
+    ],
   },
   {
     id: "2",
@@ -260,6 +276,10 @@ const STAPEL: BatchRow[] = [
     confidence: "yellow",
     rationale: "Konto aus der Vorjahresbuchung desselben Lieferanten.",
     judgeReasoning: "Buchungstext präzisiert — fachlich unverändert.",
+    lines: [
+      { side: "debit", accountNumber: "6300", accountName: "Sonstige betriebliche Aufwendungen", amount: 1800, automaticRate: 19, text: "Wartung Klimaanlage" },
+      gegen(1800),
+    ],
   },
   {
     id: "3",
@@ -272,6 +292,12 @@ const STAPEL: BatchRow[] = [
     rationale: "Steuersatz aus der Positionszeile übernommen.",
     judgeReasoning: "Der Beleg weist 7 % aus. Der Satz bucht 19 % — bitte manuell prüfen.",
     errors: ["Steuersatz widerspricht dem Beleg."],
+    lines: [
+      // Der Konflikt, den der Judge beanstandet: Schlüssel auf einem
+      // Automatikkonto — beide Angaben stehen in der Zeile, die Marke gelb.
+      { side: "debit", accountNumber: "6805", accountName: "Telefon", amount: 89, taxKey: "9", automaticRate: 19, text: "Mobilfunk und Festnetz" },
+      gegen(89),
+    ],
   },
   {
     id: "4",
@@ -282,6 +308,10 @@ const STAPEL: BatchRow[] = [
     // Ohne Lauf: die Spalte bleibt leer, und das ist die Auskunft.
     verdict: null,
     confidence: null,
+    lines: [
+      { side: "debit", accountNumber: "1600", accountName: "Kasse", amount: 24.9, text: "Porto und Verpackung" },
+      gegen(24.9),
+    ],
   },
 ];
 
@@ -329,19 +359,32 @@ export const InUse: Story = {
       columns={SPALTEN}
       rowKey={(r) => r.id}
       head={{ title: "Stapel 09/2026", sub: "4 Buchungssätze · 3 geprüft" }}
-      expand={(r) =>
-        r.verdict || r.errors ? (
-          <AiBookingNotesBody
-            rationale={r.rationale}
-            judgeReasoning={r.judgeReasoning}
-            {...(r.errors ? { errors: r.errors } : {})}
+      // **Erst die Buchung, dann die Begründung** (Owner 2026-09-10). Wer eine
+      // Zeile aufklappt, will zuerst sehen, was gebucht wird — die Begründung
+      // erklärt etwas, das man vor Augen haben muss. Die Karte bringt die
+      // Kontowege und die BU-Spalte mit; die Hinweise stehen darunter, ohne
+      // eigenen Kopf (Urteil und Konfidenz stehen schon in der Zeile).
+      expand={(r) => (
+        <div style={{ display: "grid", gap: "var(--space-4)" }}>
+          <JournalEntryCard
+            lines={r.lines}
+            currency="EUR"
+            accountHref={(n) => `?konto=${n}`}
+            totals={false}
           />
-        ) : (
-          <p className="v2muted" style={{ margin: 0 }}>
-            Zu diesem Satz gibt es keine KI-Prüfung — er wurde von Hand gebucht.
-          </p>
-        )
-      }
+          {r.verdict || r.errors ? (
+            <AiBookingNotesBody
+              rationale={r.rationale}
+              judgeReasoning={r.judgeReasoning}
+              {...(r.errors ? { errors: r.errors } : {})}
+            />
+          ) : (
+            <p className="v2muted" style={{ margin: 0 }}>
+              Zu diesem Satz gibt es keine KI-Prüfung — er wurde von Hand gebucht.
+            </p>
+          )}
+        </div>
+      )}
     />
   ),
 };
