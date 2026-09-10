@@ -61,11 +61,9 @@ const E = (over: Partial<AccountEntry> & { id: string }): AccountEntry => ({
 });
 
 /**
- * **Alle vier Herkunftsklassen**, weil sie Rang 5 des Seitenprofils
- * beantworten („sagen Ludwig und DATEV dasselbe?"): nur in DATEV · von Ludwig
- * gebucht und bestätigt · von Ludwig exportiert und noch nicht
- * wiedergefunden · nur in Ludwig. Ein Zeichen je Zeile, kein zweiter Status
- * (R1) — der Abgleich je Zeile (`mirror_match`) ist Ausbau.
+ * **All four origin classes**, answering rank 5 ("do Ludwig and DATEV agree?"):
+ * only in DATEV · booked by Ludwig and confirmed · exported by Ludwig, not yet
+ * found again · only in Ludwig. One sign per row, no second status (R1).
  */
 const ENTRIES: AccountEntry[] = [
   E({ id: "e1" }),
@@ -90,22 +88,19 @@ const MONTHS: Bar[] = [
 ];
 
 /**
- * Das Bankkonto der Rand-Story. **Ein** Objekt für Kopf, Kennzahlen und
- * Randspalte: zwei Spreads waren zwei verschiedene DATEV-Salden desselben
- * Kontos auf einem Bildschirm — genau der Fall, den das Seitenprofil als
- * Misslingen der Seite nennt („wenn sie die zwei Quellen für eine hält").
+ * The bank account of the edge story. **One** object for head, figures and side
+ * column: two spreads showed two different DATEV balances of one account.
  */
 const BANK: AccountFactsVM = {
-  // Jedes Feld, das die Zahlen dieses Kontos betrifft — sonst zeigt die Karte
-  // den Kopf des einen und die Summen des anderen Kontos (Abnahme 0063, M3).
+  // Every field concerning this account's numbers — or the card shows one
+  // account's head and another's totals (0063, M3).
   ...FACTS,
   accountNumber: "1210",
   accountName: "Bank Commerzbank",
-  // `general_ledger`, nicht „bank": die Achse `konto_typ` kennt nur
-  // general_ledger | creditor | debtor | revenue | other, und `role: string`
-  // lässt einen Rohwert durch den Typecheck — im Bild stand zweimal das
-  // englische „bank" (Wiederabnahme 0063). Die Kontoart des Bankkontos ist
-  // die SKR-Klasse daneben.
+  // `general_ledger`, not "bank": the `konto_typ` axis knows only
+  // general_ledger | creditor | debtor | revenue | other, and `role: string` lets
+  // a raw value through the typecheck (0063). The bank account's kind is the
+  // SKR class next to it.
   accountingRole: "general_ledger",
   skrClassLabel: "Finanz- und Privatkonten",
   datevBalance: -184_221.55,
@@ -117,7 +112,7 @@ const BANK: AccountFactsVM = {
   lastBookingDate: "2026-08-31",
 };
 
-/** Ein Konto ohne jede Bewegung im Jahr — auch die letzte Buchung fehlt. */
+/** An account without any movement in the year — the last entry is missing too. */
 const UNUSED: AccountFactsVM = {
   ...FACTS,
   accountNumber: "4650",
@@ -128,8 +123,8 @@ const UNUSED: AccountFactsVM = {
   ludwigOnlyCount: 0,
   ludwigOnlyAmount: null,
   lastBookingDate: null,
-  // Ohne Bewegung gibt es auch keine Summen: „0 Buchungen" und daneben eine
-  // Σ-Zeile aus dem Nachbarkonto war der Fehler (M3).
+  // Without movement there are no totals: "0 Buchungen" next to a Σ row from the
+  // neighbouring account was the mistake (M3).
   totalDebit: 0,
   totalCredit: 0,
 };
@@ -181,17 +176,15 @@ function Head({ facts }: { facts: AccountFactsVM }) {
 }
 
 /**
- * Rang 2, wie der Owner ihn am 2026-09-04 entschieden hat: **DATEV führt,
- * Ludwig ist das Delta.** Kein zweiter, gleichrangiger Saldo — zwei gleich
- * große Zahlen nebeneinander laden dazu ein, sie zu addieren, und ein
- * vereinigter Saldo verbirgt genau die Abweichung, wegen der jemand hier ist.
+ * Rank 2 as the owner decided it on 2026-09-04: **DATEV leads, Ludwig is the
+ * delta.** No second, equal balance — two equal numbers invite adding them, and a
+ * merged balance hides exactly the deviation someone came for.
  */
 function Summary({ facts }: { facts: AccountFactsVM }) {
   return (
     <KpiGrid>
-      {/* **Eine** führende Zahl. Das Delta steht in ihrer Unterzeile, nicht
-          als gleich große Kachel daneben: zwei gleich große Zahlen laden dazu
-          ein, sie zu addieren — und genau das sagt die Spec selbst. */}
+      {/* **One** leading number. The delta is in its sub line, not an equal tile
+          next to it (the spec says so itself). */}
       <KpiTile
         label={`Saldo in DATEV ${facts.fiscalYear}`}
         value={formatAmount(facts.datevBalance, facts.currency)}
@@ -210,8 +203,8 @@ function Summary({ facts }: { facts: AccountFactsVM }) {
   );
 }
 
-/** Rang 3 — der Verlauf. Steht in `Filled` und in `InUse`, damit das
- *  Höhen-Kriterium auch dort messbar ist, wo die Ansicht wirklich steht. */
+/** Rank 3 — the history. In `Filled` and `InUse`, so the height criterion is
+ *  measurable where the view really stands. */
 function Chart() {
   return (
     <Card>
@@ -232,20 +225,14 @@ function Chart() {
 }
 
 function Movements({ entries, full = false }: { entries: AccountEntry[]; full?: boolean }) {
-  // **Neben dem Strang der kompakte Satz, ohne ihn der volle.** Auf der Seite
-  // bleiben der Liste neben der 440-px-Randspalte gemessen 1.134 px (1440) und
-  // 974 px (1280); die drei Spalten, die der volle Satz zusätzlich führt —
-  // Buchungszustand 148, Stapel 88, DATEV 64 — verlangen 300 px, die dort
-  // nicht sind, und die Haben-Spalte stand bei keiner Breite im Bild (Abnahme
-  // 0063). Der Strang trägt die Fakten; die Liste daneben beantwortet „was ist
-  // gebucht": Datum, Beleg, Text, Gegenkonto, Soll, Haben. Ohne Strang sind
-  // gemessen 1.398 px (1440) und 1.238 px (1280) da — dort trägt der volle
-  // Satz jede Spur bis auf das Gegenkonto, das mit `title` gekürzt wird.
+  // **Next to the strand the compact set, without it the full one.** Beside the
+  // 440 px side column the list gets 1,134 px (1440) and 974 px (1280); the full
+  // set's three extra columns need 300 px more (0063). Without the strand the
+  // full set fits every track but the contra account, shortened with `title`.
   //
-  // **Ohne „Stapel" im kompakten Satz.** Dort nimmt `aside` 440 px, und
-  // gemessen lag der Zustands-Chip dahinter im Querlauf — Rang 5 wäre
-  // unsichtbar gewesen. Der Stapel ist Rang 8 und die einzige Spalte, deren
-  // Verlust nichts kostet: die Nummer steht im Drawer der Buchung.
+  // **No "Stapel" in the compact set**: the state chip would sit in the
+  // horizontal scroll. The batch is rank 8 and costs nothing to drop — its number
+  // is in the entry's drawer.
   const cols = accountEntryColumns({ currency: "EUR", variant: full ? "full" : "compact" });
   return (
     <DataTable<AccountEntry>
@@ -254,11 +241,9 @@ function Movements({ entries, full = false }: { entries: AccountEntry[]; full?: 
       rowKey={(e) => e.id}
       head={{ title: "Bewegungen 2026", sub: "beide Quellen, neueste zuerst" }}
       minWidth={620}
-      // **Rang 5, zweite Hälfte.** Das Herkunfts-Zeichen unterscheidet drei
-      // Klassen; die vierte — „nur in Ludwig, noch nicht in DATEV" — ist die
-      // **gedämpfte Zeile** (Owner-Entscheid 2026-09-04). Ohne sie sahen eine
-      // gebuchte und eine ungebuchte Zeile gleich aus; `AccountEntryList`
-      // macht es im Drawer seit je so.
+      // **Rank 5, second half.** The origin sign tells three classes apart; the
+      // fourth — "only in Ludwig, not yet in DATEV" — is the **muted row** (owner
+      // decision 2026-09-04).
       rowClassName={(e) => (e.origin === "ludwig" ? "v2ae__row--draft" : undefined)}
       empty={{ title: "Auf diesem Konto ist im Jahr 2026 nichts gebucht." }}
     />
@@ -298,9 +283,8 @@ export const WithoutFacts: Story = {
   render: () => (
     <div style={{ padding: "var(--space-5)", maxWidth: 1600 }}>
       <LedgerAccountView header={<Head facts={FACTS} />} summary={<Summary facts={FACTS} />}>
-        {/* Die einzige Story ohne Randspalte — und damit die, in der der
-            **volle** Spaltensatz Platz hat: Buchungszustand, Stapel und DATEV
-            kommen dazu (Slot-Tabelle der Spec, `variant: "full"`). */}
+        {/* The only story without a side column — so the **full** column set
+            fits: booking state, batch and DATEV join (`variant: "full"`). */}
         <Movements entries={ENTRIES} full />
       </LedgerAccountView>
     </div>
@@ -384,8 +368,7 @@ export const LoadingAndError: Story = {
  */
 export const Edges: Story = {
   render: () => {
-    // Derselbe kompakte Satz wie in `Filled`: der Strang steht daneben, und
-    // ein Satz mit 1180 verlöre auch hier seine rechten Spalten (M2).
+    // The same compact set as in `Filled`: the strand stands next to it (M2).
     const cols = accountEntryColumns({ currency: "EUR", variant: "compact" });
     return (
       <div style={{ padding: "var(--space-5)", maxWidth: 1600 }}>
@@ -403,9 +386,8 @@ export const Edges: Story = {
             head={{ title: "Bewegungen 2026", sub: "beide Quellen, neueste zuerst" }}
             minWidth={620}
             sort={{ key: "postingDate", dir: "desc" }}
-            // Auch hier: die vierte Klasse von Rang 5 ist die gedämpfte Zeile
-            // (Owner-Entscheid 2026-09-04). Ohne sie sahen vier Zeilen gleich
-            // aus — der Mangel, den `Filled` schon behoben hatte (M4).
+            // Here too the fourth class of rank 5 is the muted row (owner
+            // decision 2026-09-04) — without it four rows looked alike (M4).
             rowClassName={(e) => (e.origin === "ludwig" ? "v2ae__row--draft" : undefined)}
             href={(p) => `#konto?page=${p.page ?? 1}`}
             pager={{ page: 1, pageSize: 50, totalItems: 3400, totalPages: 68 }}

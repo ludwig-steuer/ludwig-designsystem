@@ -210,9 +210,8 @@ export const InUse: Story = {
         description="190 offen. Wer am Zug ist, steht in der Spalte für die Zuständigkeit."
       />
       <Tabs items={TABS} active="laufend" ariaLabel="Sachverhaltsliste" />
-      {/* Der Filter steht **über** der Karte und gehört der Seite — `DataTable`
-          hält das in seinem `@instead` fest, und `CaseList` bringt ihn nicht
-          mit. */}
+      {/* The filter stands **above** the card and belongs to the page —
+          `DataTable` records that in its `@instead`, and `CaseList` does not bring it. */}
       <FilterBar resetHref="#alle">
         <Field label="Suche" htmlFor="q">
           <Input id="q" type="search" placeholder="Nummer, Gegenpart, Beleg" />

@@ -14,9 +14,8 @@ export default meta;
 type Story = StoryObj<typeof PaymentAccountField>;
 
 /**
- * Die Verteilung ist das Argument für den ganzen Baustein, deshalb steht sie
- * hier so, wie sie im Bestand aussieht: **ein** geführtes Konto mit 145
- * Buchungen, acht weitere mit null.
+ * The distribution is the argument for the whole block, so it stands here as in
+ * the stock: **one** maintained account with 145 entries, eight more with none.
  */
 const MAINTAINED: PaymentAccountOption = {
   id: "a-1",

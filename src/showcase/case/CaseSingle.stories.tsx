@@ -54,12 +54,9 @@ type Story = StoryObj<typeof CasePage>;
 const TODO_ID = "__todo";
 
 /**
- * „Zu tun" — der Standardzustand der Seite, **über** dem Strang.
- *
- * Er ist kein Ereignis: er hat kein Datum, und im Strang stünde er zwischen
- * lauter datierten Zeilen an einer Stelle, die niemand bestimmt hat. Er
- * verhält sich trotzdem wie einer — dieselbe Auswahl, dieselbe Fläche rechts —,
- * und deshalb steht er direkt darüber statt in einer eigenen Karte.
+ * "Zu tun" — the page's default state, **above** the strand. It is no event (it
+ * has no date) but behaves like one — same selection, same surface on the right —
+ * so it sits right above instead of in a card of its own.
  */
 function TodoRow({ active, onClick }: { active: boolean; onClick: () => void }) {
   return (
@@ -76,8 +73,8 @@ function TodoRow({ active, onClick }: { active: boolean; onClick: () => void }) 
 }
 
 /**
- * Spalte 3 — lesend. Zusammenfassung, Notizen, Rückfragen; beantwortet wird
- * im Reiter Rückfragen, nicht hier (F196 §5).
+ * Column 3 — read-only: summary, notes, clarifications; answering happens in
+ * the clarifications tab, not here (F196 §5).
  */
 function NotesColumn() {
   return (
@@ -85,8 +82,8 @@ function NotesColumn() {
       <Card>
         <CardHead title="Notizen" sub="zuletzt oben" />
         <div className="v3boxbody">
-          {/* Zwei Zeilen je Notiz statt Spalten — in 370 px nähme eine
-              Datumsspalte ein Drittel der Breite für sechs Zeichen (0158). */}
+          {/* Two lines per note instead of columns — in 370 px a date column would
+              take a third of the width for six characters (0158). */}
           <NoteFeed notes={NOTES} onAdd={() => {}} />
         </div>
       </Card>
@@ -97,10 +94,9 @@ function NotesColumn() {
           actions={<TextButton tone="quiet" href={tabHref("rueckfragen")}>Alle</TextButton>}
         />
         <div className="v3boxbody">
-          {/* **Die Liste der Klärungs-Familie**, nicht ein Absatz mit Text:
-              sie trägt je Zeile den Zustand und die Dringlichkeit, und der
-              Klick führt in den Reiter, wo beantwortet wird. Genau das ist der
-              Überblick, den die Spalte geben soll (Owner 2026-09-10). */}
+          {/* **The clarification family's list**, not a paragraph: each row carries
+              state and urgency, and a click leads to the tab where answering
+              happens — the overview this column should give (owner 2026-09-10). */}
           <ClarificationList
             clarifications={CLARIFICATIONS}
             empty={{ title: "Keine Rückfragen." }}
@@ -112,8 +108,8 @@ function NotesColumn() {
 }
 
 /**
- * Spalte 2 bei „Zu tun": **was ist jetzt zu tun.** Zwei Blöcke in fester
- * Reihenfolge — Offen, Fehlende Freigaben. Was war, steht links im Strang.
+ * Column 2 at "Zu tun": **what is to be done now.** Two blocks in fixed order —
+ * open points, missing approvals. What happened stands left in the strand.
  */
 function TodoPane({ withExpectation: withExpectation = true }: { withExpectation?: boolean }) {
   return (
@@ -125,10 +121,9 @@ function TodoPane({ withExpectation: withExpectation = true }: { withExpectation
                 {
                   key: "zahlung",
                   title: "Die Zahlung an Musterbau Fahrzeugteile GmbH steht aus.",
-                  // **Was die Erwartung weiß, steht da** (Owner 2026-09-10):
-                  // Betrag, Frist, wie lange noch, welche Stufe. „Offen" ohne
-                  // diese vier ist eine Überschrift, keine Auskunft — und
-                  // genau sie entscheiden, ob heute etwas zu tun ist.
+                  // **What the expectation knows, stands there** (owner 2026-09-10):
+                  // amount, deadline, time left, level — they decide whether
+                  // anything is due today.
                   hint: "25,41 € · fällig am 10.08.2026, in 5 Tagen · noch keine Mahnung — danach fragt Ludwig beim Mandanten nach.",
                   action: <TextButton onClick={() => {}}>Erwartung aufheben</TextButton>,
                 },
@@ -157,7 +152,7 @@ function TodoPane({ withExpectation: withExpectation = true }: { withExpectation
   );
 }
 
-/** Spalte 2 bei gewähltem Ereignis: der Vorgang mit Beleg, Buchung, Urteil. */
+/** Column 2 with an event selected: the transaction with document, entry, verdict. */
 function EventPane({ fromDatev: fromDatev = false }: { fromDatev?: boolean }) {
   return (
     <Card>
@@ -179,9 +174,8 @@ function EventPane({ fromDatev: fromDatev = false }: { fromDatev?: boolean }) {
           accountHref={accountHref}
         />
         {fromDatev ? (
-          // **Lesend, ohne Handlungen.** Was aus dem Spiegel kommt, wurde in
-          // DATEV gebucht — hier gibt es nichts freizugeben und nichts zu
-          // ändern (F196 §8).
+          // **Read-only, no actions.** What comes from the mirror was booked in
+          // DATEV — nothing to approve or change here (F196 §8).
           <p className="v2muted" style={{ margin: 0 }}>
             Diese Buchung steht in DATEV. Ludwig zeigt sie, ändert sie nicht.
           </p>
@@ -249,11 +243,8 @@ export const ProposalPending: Story = {
                 </TextButton>
               }
             />
-            {/* **„Zu tun" steht über dem Strang, nicht darin** (Owner
-                2026-09-10). Es ist der Standardzustand der Seite und kein
-                Ereignis — im Strang wäre es ein Eintrag ohne Datum zwischen
-                lauter datierten. Es verhält sich trotzdem wie einer: dieselbe
-                Auswahl, dieselbe Fläche rechts. */}
+            {/* **"Zu tun" stands above the strand, not in it** (owner 2026-09-10):
+                the page's default state, not an event — but it behaves like one. */}
             <div className="v3boxbody">
               <TodoRow active={selected === TODO_ID} onClick={() => setSelected(TODO_ID)} />
               <CaseTimeline

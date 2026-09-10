@@ -35,9 +35,8 @@ const NUMBERS: KnownDocumentNumber[] = [
   },
   {
     documentNumber: "RE-4488",
-    // Zwei Kandidaten aus **zwei** Quellen: eine Kandidatenliste, in der jede
-    // Nummer denselben Ursprung hat, zeigt nicht, wofür das Register da ist
-    // (Abnahme 2026-09-08, M10).
+    // Two candidates from **two** sources: a list where every number has the same
+    // origin does not show what the register is for (M10).
     source: "mirror_ref",
     accountNumber: "70012",
     caseId: "c-4412",
@@ -48,7 +47,7 @@ const NUMBERS: KnownDocumentNumber[] = [
   },
 ];
 
-/** Regel 1 des Registers: kommt die Nummer aus DATEV, ist sie gesetzt. */
+/** Register rule 1: a number from DATEV is set. */
 const NUMBERS_WITH_DATEV: KnownDocumentNumber[] = NUMBERS.map((n, i) =>
   i === 0 ? { ...n, source: "datev_correction", immutable: true } : n,
 );
@@ -151,12 +150,10 @@ export const Downgrade: Story = {
         <p className="lw-body-sm">
           Zuletzt gespeichert: <strong>{last}</strong>
         </p>
-        {/* **DATEV gewinnt** (Register-Regel 1): ist einer der Kandidaten
-            `immutable`, ist die Frage „welche Nummer bleibt gültig" schon
-            beantwortet — der Dialog sagt es und fragt nicht. Bis zum
-            2026-09-08 bot er alle Nummern an und **sperrte die kanonische**;
-            bestand die Liste nur aus DATEV-Nummern, hatte er keinen Ausgang
-            (Abnahme M7). */}
+        {/* **DATEV wins** (register rule 1): if a candidate is `immutable`, "which
+            number stays valid" is answered — the dialog says so and does not ask.
+            Before 2026-09-08 it offered all numbers and **locked the canonical
+            one**; with only DATEV numbers it had no way out (M7). */}
         <CaseDocumentNumberModeEdit
           value="multiple"
           documentNumbers={NUMBERS_WITH_DATEV}
@@ -188,10 +185,9 @@ export const Failed: Story = {
           throw new Error("Der Sachverhalt ist gesperrt, solange der Lauf läuft.");
         }}
       />
-      {/* Derselbe Satz, der andere Weg: `error` kommt von außen, statt aus
-          einem abgelehnten `onSave`. Die Prop hatte bis zum 2026-09-08 keinen
-          Nachweis (Abnahme M8). Der Modus-Editor liest sie nicht — er
-          speichert über den Dialog, und der trägt seinen eigenen Fehler. */}
+      {/* The same entry, the other way: `error` comes from outside instead of a
+          rejected `onSave` (M8). The mode editor does not read it — it saves
+          through the dialog, which carries its own error. */}
       <CaseDispositionEdit
         value="agent"
         onSave={() => {}}

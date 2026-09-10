@@ -17,18 +17,13 @@ type Story = StoryObj;
 const ASSETS = "/reference/design-system-v2/assets";
 const WORDMARK = `${ASSETS}/ludwig-logo.svg`;
 /**
- * Der Faktor der falschen Tafel — **eine** Zahl für Bild und Beschriftung.
- * Sie standen getrennt da: der Name sagte „64 %", der Stil `scaleX(0.64)`, und
- * wer eines von beidem ändert, hat wieder eine Tafel, die etwas anderes sagt
- * als sie zeigt (Wiederabnahme 0056, M9 — derselbe Fehlertyp wie M8 eine
- * Runde davor).
+ * The wrong board's factor — **one** number for picture and caption. Kept apart,
+ * changing one gave a board that says something other than it shows (0056, M9).
  */
 const SQUEEZE = 0.64;
 /**
- * Die **Dateien**, die den Namen als Text schreiben — **gerechnet**, nicht
- * abgeschrieben: die erste Fassung nannte drei Dateien, es waren vier, und mit
- * `CaseDetailView` sind es fünf. Eine Liste, die von Hand gepflegt wird,
- * veraltet mit dem nächsten Commit.
+ * The **files** that write the name as text — **computed**, not copied: a list
+ * maintained by hand goes stale with the next commit.
  */
 const LOGO_TEXT_SOURCES = import.meta.glob("./**/*.stories.tsx", {
   eager: true,
@@ -170,10 +165,9 @@ function Plate({
   return (
     <div>
       <Ground kind={ground}>
-        {/* Die Höhe als **Stil**, nicht als Attribut: Tailwinds Preflight setzt
-            `img { height: auto }`, und eine Autorenregel schlägt jedes
-            Präsentations-Attribut — egal, in welcher Reihenfolge die Blätter
-            laden. Gemessen stand ein `height={56}` sonst mit 205 px im Bild. */}
+        {/* Height as a **style**, not an attribute: Tailwind's preflight sets
+            `img { height: auto }`, and an author rule beats every presentational
+            attribute — a `height={56}` otherwise stood 205 px tall. */}
         <img src={src} alt={alt} style={{ height, width: "auto" }} />
       </Ground>
       <div
@@ -540,9 +534,9 @@ function Pair({
 }) {
   return (
     <div style={{ marginBottom: "var(--space-8)" }}>
-      {/* Eine echte Überschrift, kein fettes `div`: `Marks` und `Sizes` geben
-          ihren Abschnitten über `Section` ein `h3`, und zwei Gliederungen in
-          einer Datei sind für eine Vorlesehilfe keine (Abnahme 0056). */}
+      {/* A real heading, not a bold `div`: `Marks` and `Sizes` give their
+          sections an `h3` via `Section` — two outlines in one file are none for a
+          screen reader (0056). */}
       <h3
         style={{
           fontSize: "var(--fs-ui-md)",
@@ -651,22 +645,14 @@ export const Misuse: Story = {
           <div style={plate}>
             <img
               src={WORDMARK}
-              /* Das Bild **ist** die Aussage: ohne Namen bleibt die
-                   wichtigste Tafel der Seite für eine Vorlesehilfe stumm, und
-                   „richtig" wie „falsch" hießen beide „Ludwig" (Abnahme
-                   0056, M5). */
+              /* The picture **is** the statement: without a name the page's most
+                   important board stays silent for a screen reader, and "right" and
+                   "wrong" would both be called "Ludwig" (0056, M5). */
               alt={`Ludwig-Wortmarke, auf ${Math.round(SQUEEZE * 100)} % der Breite gestaucht`}
-              /* **`scaleX`, nicht zwei Maße.** Beide Maße im Stil stauchen
-                 nichts: `ludwig-logo.svg` trägt kein `preserveAspectRatio`,
-                 also gilt `xMidYMid meet`, und das Bild skaliert in den Kasten
-                 **hinein**, statt sich zu strecken — gemessen 100 × 25,5 in
-                 einem 100 × 40er Kasten, Verhältnis 2,989 gegen 3,010 im
-                 Original. Auch `object-fit: fill` ändert daran nichts. Die
-                 Abnahme vom 2026-09-06 hatte den **Kasten** gemessen (2,500)
-                 und daraus „staucht" geschlossen; der Kasten ist nicht das
-                 Bild. Erst die Transformation staucht wirklich: gemessen
-                 1,916, und die Bildmarke wird zum Hochrechteck (Abnahme
-                 0056, zweite Runde). */
+              /* **`scaleX`, not two sizes.** Two sizes in the style squash nothing:
+                 the SVG has no `preserveAspectRatio`, so `xMidYMid meet` scales it
+                 **into** the box instead of stretching it. Only the transform really
+                 squashes (measured 1.916, 0056 second round). */
               style={{
                 height: 40,
                 width: "auto",
@@ -740,8 +726,8 @@ export const Misuse: Story = {
         why={
           <>
             Der häufigste Fall, und er steht heute im eigenen Set:{" "}
-            {/* „Dateien", nicht „Stories": gezählt wird über die Quelldateien,
-                und `AppShell` trägt den Fall zweimal (Abnahme 0056). */}
+            {/* "Dateien", not "Stories": counted over source files, and `AppShell`
+                carries the case twice (0056). */}
             <strong>{LOGO_TEXT_STORIES.length} Dateien</strong> schreiben
             „Ludwig" beziehungsweise „L" als Text in den Sidebar-Kopf —{" "}
             {LOGO_TEXT_STORIES.map((f, i) => (

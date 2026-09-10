@@ -96,7 +96,7 @@ function Section({ title, lead, children }: { title: string; lead: ReactNode; ch
   );
 }
 
-/** `neutral` ist kein Urteil, sondern eine Einordnung — deshalb Textfarbe. */
+/** `neutral` is no verdict but a classification — hence the text colour. */
 function Mark({
   tone,
   children,
@@ -148,10 +148,9 @@ const LADDERS: { register: string; lead: string; steps: { px: number; follows: s
 ];
 
 /**
- * Die **zwei** Leitern von A8, getrennt gehalten: 12 · 14 · 16 ist die Leiter
- * der Handlungen, 16 · 20 · 24 die der Entitäten. Beide übereinanderzulegen
- * wäre bequem und falsch — ein `size={20}` an einem Handlungs-Zeichen steht
- * neben der Leiter, auch wenn 20 in der anderen vorkommt.
+ * A8's **two** ladders, kept apart: 12 · 14 · 16 for actions, 16 · 20 · 24 for
+ * entities. Merging them would be convenient and wrong — a `size={20}` on an
+ * action sign is off its ladder even though 20 occurs in the other.
  */
 const PRODUCTIVE_LADDER = [12, 14, 16];
 const READING_LADDER = [16, 20, 24];
@@ -206,12 +205,9 @@ export const Sizes: Story = {
                 ) : PRODUCTIVE_LADDER.includes(s.value) ? (
                   <Mark tone="success">produktive Leiter</Mark>
                 ) : (
-                  // 20 und 24 stehen **nur** auf der lesenden Leiter. Grün wäre
-                  // hier ein Freispruch, den die Zahl allein nicht hergibt:
-                  // welche Leiter gilt, entscheidet das Register des Zeichens.
-                  // Die Marken heißen wie die Register darüber — zwei Namen für
-                  // dieselbe Leiter hatten die Seite dreimal ungenau gemacht
-                  // (Abnahme 0055, M14).
+                  // 20 and 24 stand **only** on the reading ladder. Green here would be
+                  // an acquittal the number alone cannot give: the sign's register
+                  // decides which ladder applies (0055, M14).
                   <Mark tone="neutral">nur lesende Leiter</Mark>
                 )}
               </div>
@@ -237,12 +233,11 @@ export const Sizes: Story = {
 };
 
 
-/* ── Vocabulary: gelesen aus der Registry (0087) ──────────────────────── */
+/* ── Vocabulary: read from the registry (0087) ──────────────────────────── */
 
 /**
- * Eine Zeile je Eintrag. Sie kommt aus `Icons.tsx` — diese Story
- * pflegt keine eigene Liste mehr; was die Registry nicht führt, steht hier
- * nicht, und was hier fehlt, meldet `pnpm check:icons`.
+ * One row per entry, from `Icons.tsx` — this story keeps no list of its own;
+ * what the registry lacks, `pnpm check:icons` reports.
  */
 function Entry({ id, entry }: { id: string; entry: IconEntry; }) {
   const Icon = entry.icon;
@@ -292,9 +287,8 @@ export const Entities: Story = {
             Aus <code className="lw-mono">ENTITY_ICON</code> gerendert, nicht abgeschrieben: die Sidebar der
             App ist die Vorgabe, wo sie eine hat. Die Achsen der Status-Registry finden ihr Zeichen über die
             Abbildung Achse → Entität; die übrigen{" "}
-            {/* Gerechnet, nicht verdrahtet: `AXIS_ENTITY` sagt selbst, welche
-                Achse eine Entität nennt — die „− 3" war eine Zahl, die beim
-                nächsten Eintrag falsch geworden wäre (Abnahme 0055). */}
+            {/* Computed, not wired: `AXIS_ENTITY` says which axis names an entity —
+                a "− 3" would have been wrong with the next entry (0055). */}
             <span className="lw-numeric">
               {Object.keys(AXIS_LABEL).length - Object.keys(AXIS_ENTITY).length}
             </span>{" "}

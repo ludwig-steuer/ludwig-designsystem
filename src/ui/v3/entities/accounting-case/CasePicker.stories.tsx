@@ -94,10 +94,8 @@ export const Filled: Story = {
   render: () => (
     <Frame>
       <CasePicker label="Sachverhalt" value={null} onChange={() => {}} cases={CASES} />
-      {/* `disabled`: die Zeile ist schon zugeordnet oder gesperrt. Die Prop
-          hatte bis zum 2026-09-08 keinen Nachweis — die Spec nannte eine
-          Story `Disabled`, die es nie gab (Abnahme M4). Sie steht hier statt
-          in einer eigenen: gesperrt neben bedienbar ist die Aussage. */}
+      {/* `disabled`: the row is already assigned or locked. Shown here, not in a
+          story of its own: locked next to usable is the statement (M4). */}
       <CasePicker
         label="Sachverhalt (gesperrt)"
         value={CASES[0]?.caseId ?? null}

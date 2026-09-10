@@ -42,12 +42,8 @@ import { Todo } from "./Todo";
  * test that per-component stories cannot do — can the set carry a whole page?
  *
  * Where it cannot, a `Todo` marker names the backlog entry instead of local
- * markup filling in. Read the markers as the result of the test.
- *
- * **Stand 2026-09-03:** von acht Markern sind sechs durch echte Bausteine
- * ersetzt. Übrig bleiben zwei, und beide sind ehrlich: 0015 (der Editor
- * braucht sein zweispaltiges Journal) und die sieben Schritte, die dieser
- * Test bewusst nicht nachbaut.
+ * markup filling in. As of 2026-09-03 six of eight markers are real building
+ * blocks; the two left are 0015 and the seven steps this test does not rebuild.
  *
  * Reference: `reference/f109-buchungsreview/Buchungsreview.dc.html`
  * (screens 0–10), design brief §3 and §7.
@@ -182,9 +178,8 @@ function AcceptancePage() {
 
         {step === 3 ? (
           <>
-            {/* Der Filter steht über der Arbeitsfläche, nicht in einer ihrer
-                Spalten — sonst wird er zum Grid-Item und schiebt das Detail
-                in die falsche Spalte (im Browser gesehen, 2026-09-03). */}
+            {/* The filter stands above the workspace, not in one of its columns —
+                otherwise it becomes a grid item and pushes the detail aside. */}
             <FilterBar activeCount={filters} onReset={() => setFilters(0)}>
               <Field label="Zustand" htmlFor="zustand">
                 <Select id="zustand" defaultValue="offen" onChange={() => setFilters(1)}>
@@ -269,7 +264,7 @@ function AcceptancePage() {
   );
 }
 
-/** Die Seite lebt im `ToastHost` — sonst hätte die Quittung keinen Ort (0007). */
+/** The page lives in `ToastHost` — otherwise the confirmation has no place (0007). */
 function Page() {
   return (
     <ToastHost>

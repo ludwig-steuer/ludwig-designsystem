@@ -29,9 +29,9 @@ export default meta;
 type Story = StoryObj<typeof PartnerPage>;
 
 /**
- * Die Personenkonten je Wirtschaftsjahr — **in der Übersicht**, nicht in
- * einem eigenen Reiter. Rang 2 der Seite, und p90 sind zwei Zeilen: ein
- * Reiter dafür wäre ein Klick auf die wichtigste Antwort.
+ * The personal accounts per fiscal year — **in the overview**, not a tab of their
+ * own: rank 2 of the page with p90 two rows; a tab would cost a click on the most
+ * important answer.
  */
 function Accounts() {
   return (
@@ -60,10 +60,9 @@ function Accounts() {
 }
 
 /**
- * Zone 4: **drei Zähler statt drei Reiter.** Die Zahl ist die Antwort auf
- * „was läuft gerade mit ihm?", und der Weg führt in die Liste der jeweiligen
- * Entität, auf diesen Partner gefiltert — dort steht sie mit Sortierung,
- * Filter und Pager, hier stünde sie ohne.
+ * Zone 4: **three counters instead of three tabs.** The number answers "what is
+ * going on with them?", and the way leads to the entity's list filtered to this
+ * partner — with sorting, filter and pager there.
  */
 function Cases({
   cases: cases = 0,
@@ -78,8 +77,7 @@ function Cases({
     [
       wort,
       n === 0 ? (
-        // Null ist eine Auskunft, kein Weg: ein Link auf eine leere Liste
-        // führt ins Nichts.
+        // Zero is information, not a way: a link to an empty list leads nowhere.
         <span className="v2muted" key={wort}>
           keine
         </span>
@@ -123,11 +121,9 @@ function Overview({
       <Card>
         <CardHead title="Geschäftspartner" sub="wer das ist und was er üblicherweise liefert" />
         <div style={{ padding: "12px 20px 16px" }}>
-          {/* **Ohne `all`** — gemessen am 2026-09-10: mit `all` ist die Karte
-              1.160 px hoch, und „Personenkonten" beginnt bei y = 1.190. Die
-              Übersicht ist die Kurzfassung (Ränge 1–7), die ganze Liste steht
-              im Reiter „Details"; sonst beantwortet die Seite dieselbe Frage
-              zweimal und schiebt Zone 4 unter die Falz. */}
+          {/* **Without `all`** — measured 2026-09-10: with `all` the card is 1,160 px
+              tall and pushes zone 4 below the fold. The overview is the short form
+              (ranks 1–7); the full list is in the details tab. */}
           <BusinessPartnerFacts partner={partner} accountHref={accountHref} />
         </div>
       </Card>

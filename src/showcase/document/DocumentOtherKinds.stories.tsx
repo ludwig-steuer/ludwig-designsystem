@@ -40,7 +40,7 @@ const menu = (
   </OverflowMenu>
 );
 
-/** Die Zahlungskonten eines Mandanten — eines geführt, der Rest Kulisse. */
+/** A client's payment accounts — one maintained, the rest scenery. */
 const ACCOUNTS: PaymentAccountOption[] = [
   {
     id: "b-1",
@@ -111,9 +111,9 @@ export const Contract: Story = {
 export const SammelPdf: Story = {
   render: () => {
     const doc = documentFixture({
-      // **Kein eigener `sourceDocType`.** Ein Sammelbeleg ist `other` mit
-      // gesetztem `collectionKind` — die Union beschreibt, was *geschrieben*
-      // wird, und „Sammelbeleg" ist keine Belegart, sondern eine Eigenschaft.
+      // **No own `sourceDocType`.** A collective document is `other` with
+      // `collectionKind` set — the union describes what is *written*, and
+      // "Sammelbeleg" is a property, not a document kind.
       sourceDocType: "other",
       classDocumentForm: "document_collection",
       collectionKind: "mixed",
@@ -192,8 +192,8 @@ export const StatementAssigned: Story = {
       completedVia: null,
       detail: null,
       hasInvoiceRow: false,
-      // Seit dem Spiegellauf vom 2026-09-10 trägt der Beleg sein Zahlungskonto
-      // selbst (L-266) — die Zeile entsteht in den Belegdaten, sobald es da ist.
+      // Since the mirror run of 2026-09-10 the document carries its payment
+      // account itself (L-266) — the row appears in the document data once set.
       paymentAccount: {
         id: "pa-1",
         label: "Testbank eG · Geschäftskonto",
@@ -215,11 +215,9 @@ export const StatementAssigned: Story = {
         <Card>
           <CardHead title="Kontoauszug" sub="Was der Auszug enthält" />
           <div style={{ padding: 16 }}>
-            {/* Das **Zahlungskonto** steht seit 0150 in den Belegdaten — es
-                hängt am Beleg (`paymentAccount`), nicht an einer Karte, die
-                jede Seite selbst zusammensetzt. Hier bleibt, was der Container
-                zusätzlich mitbringt und wofür es im Modell noch kein Feld gibt
-                (Befund L-278). */}
+            {/* The **payment account** lives in the document data since 0150 — it
+                belongs to the document (`paymentAccount`). What remains here is what
+                the container adds and the model has no field for yet (L-278). */}
             <FieldList
               tone="bare"
               rows={[
@@ -263,9 +261,9 @@ export const StatementChooseAccount: Story = {
           document={doc}
           previewUrl={MUSTER_PDF}
           summary={null}
-          // Der Mangel kommt aus `docDefects()`: `awaiting_input` heißt, der
-          // Auszug wartet auf sein Konto (F170). Der **Weg** ist das Feld
-          // selbst — ein Mangel ohne Weg wäre nur eine Meldung (L-268).
+          // The defect comes from `docDefects()`: `awaiting_input` means the
+          // statement waits for its account (F170). The **way** is the field
+          // itself — a defect without a way would only be a message (L-268).
           defects={
             <SourceDocumentDefects
               defects={documentDefects({ inboxStatus: "awaiting_input" })}
@@ -477,8 +475,8 @@ export const WithoutSubtype: Story = {
     return (
       <DocumentPage
         document={documentFixture({
-          // Eine Mahnung ist `other` plus Belegform — genau der Rückfall, für
-          // den `classDocumentForm` da ist.
+          // A reminder is `other` plus document form — exactly the fallback
+          // `classDocumentForm` exists for.
           sourceDocType: "other",
           classDocumentForm: "payment_reminder",
           fileName: "Mahnung-Musterbau.pdf",
@@ -509,8 +507,8 @@ export const WithoutSubtype: Story = {
         </Card>
         <SourceDocumentCard
           document={documentFixture({
-            // Eine Mahnung ist `other` plus Belegform — genau der Rückfall, für
-          // den `classDocumentForm` da ist.
+            // A reminder is `other` plus document form — exactly the fallback
+            // `classDocumentForm` exists for.
           sourceDocType: "other",
           classDocumentForm: "payment_reminder",
             fileName: "Mahnung-Musterbau.pdf",

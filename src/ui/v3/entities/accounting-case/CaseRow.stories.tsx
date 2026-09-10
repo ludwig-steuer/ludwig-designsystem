@@ -59,9 +59,8 @@ const CASES: CaseListItem[] = [
   }),
   CASE({
     caseId: "c-4414",
-    // Ohne aufgelösten Geschäftspartner (47 % tragen einen, L-69): hier bleibt
-    // der Gegenpart ein Name ohne Ziel — und die Zeile zeigt gemessen keinen
-    // Anker. Vorher trugen alle vier Firmen dieselbe Id (Abnahme 0096, M7a).
+    // Without a resolved business partner (47 % have one, L-69): the
+    // counterparty stays a name without a target, and the row shows no anchor.
     counterpartyPartnerId: null,
     caseNumber: "2026-0414",
     kind: "recurring_charge",
@@ -87,9 +86,9 @@ const CASES: CaseListItem[] = [
     currency: null,
     lifecycleStatus: "needs_clarification",
     disposition: null,
-    // Der Fall der `Sparse`-Story: dünn an Stammdaten **und** ohne Klärung — so
-    // steht es in der Story-Tabelle der Spec, und eine Abnahme ändert die
-    // Kriterien nicht. Der Rand mit drei offenen steht in `Edges` (M7b).
+    // The `Sparse` story's case: thin on master data **and** without a
+    // clarification, as the spec's story table says. The edge with three open
+    // ones is in `Edges` (M7b).
     openClarificationsCount: 0,
     documentEventsCount: 0,
     bankEventsCount: 0,
@@ -116,23 +115,18 @@ const CASES: CaseListItem[] = [
 
 const FULL = caseColumns({ href, counterpartyHref });
 /**
- * Die Mindestbreite folgt dem **Spaltensatz**, nicht einer festen Zahl: die
- * festen Spuren plus Lücken plus Polster plus der Boden des Anzeigenamens
- * aus seinem eigenen `minmax()`. Mit einer festen 1630 blieben in `Columns` zwei Spalten
- * außerhalb der Karte — ausgerechnet die, für die der Satz gewählt wurde
- * (Abnahme 0096, M3).
+ * The minimum width follows the **column set**, not a fixed number: fixed tracks
+ * plus gaps plus padding plus the display name's floor from its own `minmax()`.
+ * A fixed 1630 left two columns outside the card in `Columns` (0096, M3).
  */
 function minWidth(columns: typeof FULL): number {
   const fest = columns.reduce((sum, c) => {
     const w = (c.width ?? "").trim();
     const px = /^(\d+)px$/.exec(w);
     if (px?.[1]) return sum + Number(px[1]);
-    // Der Boden einer flexiblen Spur steht **im Satz**, nicht hier: eine Zahl
-    // daneben veraltet mit dem nächsten Commit. `minmax(200px, 1fr)` hatte
-    // seit der Nacharbeit 200, diese Funktion rechnete weiter mit 175 — und
-    // die Mindestbreite lag 25 px unter dem Satz (1601 statt 1626), gemessen
-    // `.v2tbl__inner` clientWidth 1601 gegen scrollWidth 1608 (Abnahme 0096,
-    // N1). Deshalb wird der Boden aus dem `minmax()` gelesen.
+    // A flexible track's floor lives **in the set**, not here: a number next to
+    // it goes stale with the next commit (it did: 175 vs 200, 0096, N1). So the
+    // floor is read from the `minmax()`.
     const floor = /^minmax\(\s*(\d+)px/.exec(w);
     return sum + (floor?.[1] ? Number(floor[1]) : 175);
   }, 0);
@@ -157,10 +151,8 @@ function Frame({
             {columns.map((c) => (
               <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
                 {c.header}
-                {/* Das (i) kommt aus dem Spaltensatz (`headerAside`), nicht aus
-                    einer Liste hier: sonst steht es an anderen Spalten als in
-                    `DataTable` und ohne den Abstand, den die Regel setzt
-                    (Abnahme 0096, M4). */}
+                {/* The (i) comes from the column set (`headerAside`), not a list here:
+                    otherwise it stands at other columns than in `DataTable` (0096, M4). */}
                 {c.headerAside}
               </span>
             ))}
@@ -218,11 +210,9 @@ export const Columns: Story = {
       "name",
     ];
     const cols = caseColumns({ href, columns: picked });
-    // **Die zwei Zähler dazu.** `documents` und `bankTransactions` hatte im
-    // ganzen Set nie eine Story gerendert — ihre Spuren waren damit ungemessen
-    // (Abnahme 0096, M5). §6 verlangt zu einem Enum **alle** Werte
-    // nebeneinander; hier stehen sie in einem zweiten Satz, weil ein Satz mit
-    // allen dreizehn Spalten die Karte sprengt.
+    // **The two counters too.** `documents` and `bankTransactions` had never
+    // rendered in any story (0096, M5). §6 asks all values of an enum side by
+    // side; they stand in a second set, because all thirteen columns burst the card.
     const counters: CaseColumn[] = ["name", "number", "documents", "bankTransactions", "state"];
     const counterCols = caseColumns({ href, columns: counters });
     return (

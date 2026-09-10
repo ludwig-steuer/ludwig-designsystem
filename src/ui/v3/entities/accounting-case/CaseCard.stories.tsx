@@ -18,8 +18,8 @@ const CASE = (over: Partial<CaseCardData> = {}): CaseCardData => ({
   kind: "incoming_invoice",
   counterpartyName: "Bürobedarf Meier GmbH",
   lifecycleStatus: "open",
-  // `totalAmount` ist der Betrag des Sachverhalts (Rang 4); `CaseLink.amount`
-  // gehört dem Bankauszug und wird hier nicht gesetzt (Abnahme M1).
+  // `totalAmount` is the case's amount (rank 4); `CaseLink.amount` belongs to
+  // the bank statement and is not set here (M1).
   totalAmount: 1249.9,
   currency: "EUR",
   summary:

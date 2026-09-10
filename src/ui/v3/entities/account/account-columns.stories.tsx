@@ -92,9 +92,9 @@ export const Filled: Story = {
 export const Catalog: Story = {
   render: () => {
     const picked: AccountColumn[] = ["origin", "role", "name", "number", "skrClass"];
-    // `originLabels` übergeben, weil die App dieselbe Sache heute „SKR-Katalog"
-    // nennt (`ACCOUNT_SOURCE_LABEL.reference`) — die Wörter stehen in der
-    // Domäne nicht (Befund L-96), also entscheidet sie der Aufrufer.
+    // `originLabels` passed because the app calls the same thing "SKR-Katalog"
+    // (`ACCOUNT_SOURCE_LABEL.reference`) — the domain has no words for it (L-96),
+    // so the caller decides.
     const cols = accountColumns({
       href,
       columns: picked,
@@ -146,11 +146,10 @@ export const Grouped: Story = {
           <Table cols={accountTracks(cols)} minWidth={columnsMinWidth(cols)}>
             <HeadRow>
               {cols.map((c) => (
-                // `aria-sort` und der ausgeschriebene Name gehören dazu, nicht
-                // nur der Link: `DataTable` schreibt beides, und diese Story
-                // ist die **Vorlage**, die in die App kopiert wird. Ein
-                // Sortierkopf, der seinen Zustand nur mit einem Pfeil sagt,
-                // sagt ihn nicht (Z4, Abnahme 0062).
+                // `aria-sort` and the spelled-out name belong to it, not only the
+                // link: `DataTable` writes both, and this story is the **template**
+                // copied into the app. A sort head that says its state only with an
+                // arrow does not say it (Z4, 0062).
                 <th key={c.key} scope="col" aria-sort="none" className={c.align === "end" ? "v2num" : undefined}>
                   {c.sortable ? (
                     <Link

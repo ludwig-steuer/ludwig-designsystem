@@ -27,8 +27,8 @@ export default meta;
 type Story = StoryObj<typeof DocumentPage>;
 
 /**
- * Die selten gebrauchten Wege — nie in der ersten Reihe. Der Standard lässt
- * höchstens zwei Aktionen im Kopf; alles andere kommt hierher.
+ * The rarely used ways — never in the first row. The standard allows at most two
+ * actions in the head; everything else goes here.
  */
 const menu = (
   <OverflowMenu label="Weitere Aktionen">
@@ -84,10 +84,9 @@ export const DateMissing: Story = {
     return (
       <DocumentPage document={doc} actions={menu}>
         {date ? null : (
-          // **Zone 2**, und die Mängelzeile in den Fakten dazu. Beides, nicht
-          // eins von beiden: die Zone sagt, dass etwas zu tun ist, und das
-          // Zeichen an der Zeile sagt, an welchem Wert (Owner-Entscheid zu
-          // Frage 3).
+          // **Zone 2** plus the defect mark in the facts. Both: the zone says
+          // something is to be done, the mark at the row says at which value
+          // (owner decision on question 3).
           <Card>
             <CardHead title="Zu klären" sub="1 Befund an diesem Beleg" />
             <div style={{ padding: 16 }}>

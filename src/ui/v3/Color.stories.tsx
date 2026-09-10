@@ -251,11 +251,9 @@ type Role = { role: string | null; text: Allow; fill: Allow; edge: Allow; note?:
  */
 const ROLES: Record<string, Role> = {
   "--color-primary": { role: "Marke, Titel, Primär-Knopf", text: "ja", fill: "ja", edge: "ja", note: "App-Chrome, Überschrift 1–2" },
-  // Kein Eintrag für `--color-primary-700`: §3 nennt in der Primär-Zeile
-  // `--color-primary` mit `-600` und `-800`, den `-700` nicht — obwohl er
-  // deren Grundwert stellt. Nach der Regel dieser Seite („ohne Rolle heißt:
-  // §3 nennt den Token nicht") gehört er in die gerechnete Spalte, nicht in
-  // eine hier erfundene Zeile (Abnahme 0055, M29). Der Befund gehört §3.
+  // No entry for `--color-primary-700`: §3 names `--color-primary` with `-600`
+  // and `-800`, not `-700` — by this page's rule it belongs in the computed
+  // column, not an invented row (0055, M29). The finding belongs to §3.
   "--color-primary-600": { role: "Primär-Knopf, Hover", text: "ja", fill: "ja", edge: "ja" },
   "--color-primary-800": { role: "Primär-Knopf, gedrückt", text: "ja", fill: "ja", edge: "ja" },
   "--color-accent-700": { role: "Aktion, Link, aktiv", text: "ja", fill: "—", edge: "ja", note: "die einzige Akzentstufe für Text" },
@@ -266,10 +264,9 @@ const ROLES: Record<string, Role> = {
   "--color-accent-50": { role: "Fläche, Fokusring, aktive Zeile", text: "nein", fill: "ja", edge: "ja", note: "ausgewählte Zeile" },
   "--color-text": { role: "Text", text: "ja", fill: "—", edge: "—" },
   "--color-text-muted": { role: "Text", text: "ja", fill: "—", edge: "—" },
-  // Fläche „ja": 0110 hat den beiden zusätzlich die Rolle **Diagrammreihe**
-  // gegeben, und §3 führt sie seither so. Zwei Graustufen, die beide ≥ 3:1
-  // gegen Weiß stehen, liegen zwangsläufig eng — getrennt werden sie mit einer
-  // Haarlinie, nicht mit Farbe.
+  // Surface "ja": 0110 gave both the role **chart series**, and §3 lists them so.
+  // Two greys that both stay at least 3:1 on white necessarily sit close — a
+  // hairline separates them, not colour.
   "--color-text-subtle": { role: "Text · Diagrammreihe (1.)", text: "ja", fill: "ja", edge: "—", note: "kleinste Textstufe: Unterzeile, Spaltenkopf; erste Reihe im Balkenbild" },
   "--color-text-on-dark": { role: "Text auf Dunkel", text: "ja", fill: "—", edge: "—", note: "Sidebar, Hero" },
   "--color-text-on-dark-muted": { role: "Text auf Dunkel", text: "ja", fill: "—", edge: "—" },
@@ -300,16 +297,13 @@ const ROLES: Record<string, Role> = {
 const NO_ROLE: Role = { role: null, text: "—", fill: "—", edge: "—" };
 
 /**
- * Wer darf was? Die Spalten Text / Fläche / Rand sind der eigentliche Inhalt:
- * `--color-accent` trägt keinen Text, `--color-accent-700` schon. Dazu die
- * beiden gerechneten Spalten „ohne Rolle" und „unbenutzt".
+ * Who may do what? The text / surface / border columns are the real content:
+ * `--color-accent` carries no text, `--color-accent-700` does. Plus the two
+ * computed columns "ohne Rolle" and "unbenutzt".
  */
 /**
- * Die Plaketten aus `app-chrome.css`, **gerechnet statt geschrieben**. Der Satz
- * darunter hat dreimal danebengelegen (M1, M10, M26 der Abnahme 0055): er zählte
- * Hex-Flächen von Hand, und jedes Mal zog eine andere Aufgabe eine davon auf
- * Token, ohne dass ihn jemand nachzählte — zuletzt 0112, neununddreißig Minuten
- * nach der Nacharbeit, die ihn berichtigt hatte. Wer zählt, irrt nicht.
+ * The badges from `app-chrome.css`, **computed, not written**: a hand-counted
+ * sentence was wrong three times (0055). Counting by hand erred; computing does not.
  */
 const BADGES = [...READERS.matchAll(/\.(bdg-[a-z]+)\s*\{([^}]*)\}/g)].map((m) => ({
   name: m[1] ?? "",
@@ -317,8 +311,8 @@ const BADGES = [...READERS.matchAll(/\.(bdg-[a-z]+)\s*\{([^}]*)\}/g)].map((m) =>
 }));
 const withHex = (prop: RegExp) => BADGES.filter((p) => prop.test(p.rules)).map((p) => p.name);
 const hexSurfaces = withHex(/background:\s*#/);
-// Der Rückblick trennt `color` von `border-color` — sonst zählt jeder Hex-Rand
-// als Hex-Text und der Satz behauptet das Gegenteil dessen, was dasteht.
+// The lookbehind separates `color` from `border-color` — otherwise every hex
+// border counts as hex text and the sentence claims the opposite of what stands.
 const hexText = withHex(/(?<!-)color:\s*#/);
 const hexBorders = withHex(/border-color:\s*#/);
 
@@ -387,11 +381,9 @@ export const Roles: Story = {
           {withoutRole.map((r) => r.token.replace("--color-", "")).join(", ")}. Unbenutzt:{" "}
           <span className="lw-numeric">{unread.length}</span> —{" "}
           {unread.map((r) => r.token.replace("--color-", "")).join(", ")}.{" "}
-          {/* **Abgeleitet, nicht behauptet.** Die erste Fassung schrieb hier
-              „dass `success-bg` und `info-bg` niemand liest" — beide **werden**
-              gelesen (`v3.css`, die Zustands-Kacheln der `StateMachine`), und
-              genau diesen Fehler prangert die Seite an. Also nur noch das, was
-              die gerechnete Menge hergibt. */}
+          {/* **Derived, not claimed.** The first version wrote that nobody reads
+              `success-bg` and `info-bg` — both **are** read. So only what the
+              computed set yields. */}
           {unread.some((r) => r.token.endsWith("-bg"))
             ? "Eine ungelesene Fläche heißt: wer sie zu brauchen scheint, holt sie woanders her."
             : "Jede Fläche des Satzes wird gelesen."}{" "}
@@ -430,10 +422,10 @@ const SCALE: { level: string; kind: string; token: string; meaning: string; exam
   { level: "Fehler", kind: "danger", token: "--color-danger", meaning: "Jemand muss handeln, bevor es weitergeht.", example: "gescheitert, überfällig, Abweichung über ±100 %", axis: "job", status: "failed" },
   { level: "Warnung", kind: "warning", token: "--color-warning", meaning: "Quittierbar, weiter ist möglich.", example: "Klärung offen, Prüfung nötig, Abweichung ±50–100 %", axis: "klaerung_status", status: "open" },
   { level: "Hinweis", kind: "info", token: "--color-info", meaning: "Neutral informierend, keine Handlung.", example: "läuft, zur Prüfung, Abweichung ±15–50 %", axis: "job", status: "running" },
-  // Die Plakette daneben nimmt `--color-text` (gemessen `rgb(45,45,45)`), nicht
-  // `--color-text-subtle`: `.bdg-neutral` schreibt es so. Die Spalte nennt das
-  // Token der **Stufe**, die Plakette zeigt, was `app-chrome.css` daraus macht
-  // — ein Auseinandergehen, das hier stehen bleibt, bis eines von beiden zieht.
+  // The badge next to it takes `--color-text` (measured `rgb(45,45,45)`), not
+  // `--color-text-subtle`: `.bdg-neutral` says so. The column names the **step's**
+  // token, the badge shows what `app-chrome.css` makes of it — a divergence that
+  // stays visible until one side moves.
   { level: "Debug", kind: "neutral", token: "--color-text-subtle (Plakette: --color-text)", meaning: "Ohne Kritikalität — Technik-Sicht und Ruhezustände.", example: "eingereiht, zurückgestellt, Abweichung bis ±15 %", axis: "job", status: "queued" },
 ];
 

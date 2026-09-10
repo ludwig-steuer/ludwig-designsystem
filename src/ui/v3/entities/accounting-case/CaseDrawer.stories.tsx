@@ -38,10 +38,8 @@ const RECORD: CaseQuickView = {
 };
 
 /**
- * Die zweite Zeile hat ihren **eigenen** Sachverhalt. Beide teilten sich
- * vorher `RECORD`: die Liste zeigte „Stadtwerke Musterstadt · −412,00 €", der
- * Drawer daneben „Wartung der Klimaanlage · 1.249,90 € · Bürobedarf Meier
- * GmbH" — beides gleichzeitig im Bild (Abnahme 0098, M2).
+ * The second row has its **own** case. Both used to share `RECORD`, and list and
+ * drawer showed two different cases at once (0098, M2).
  */
 const RECORD_STROM: CaseQuickView = {
   eventCount: 2,

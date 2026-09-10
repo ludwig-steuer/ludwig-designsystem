@@ -29,8 +29,8 @@ const FACTS: AccountFactsVM = {
   ludwigEntryCount: 41,
   openProposalCount: 2,
   usageBookingCount: 3_412,
-  // Der Drawer lädt keine Monatswerte — deshalb stehen hier zwei Nullen,
-  // und deshalb zeigt der Block die Zeile „Σ Soll / Σ Haben" dort nicht.
+  // The drawer loads no monthly values — hence two zeros here, and hence no
+  // "Σ Soll / Σ Haben" row in the block.
   totalDebit: 0,
   totalCredit: 0,
   ludwigOnlyCount: 4,

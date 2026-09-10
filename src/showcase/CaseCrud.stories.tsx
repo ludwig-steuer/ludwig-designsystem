@@ -53,13 +53,8 @@ import { CASE_KIND, CASE_KIND_LABEL, type CaseListItem } from "@/ludwig/modules/
  *
  * A showcase page, not a component — nothing is exported from `@/ui/v3`, and
  * the app builds this screen itself. Where the set falls short, a `Todo`
- * marker names the backlog entry rather than local markup papering over it.
- *
- * **Stand 2026-09-03:** die zehn Marker dieser Seite sind bis auf einen durch
- * echte Bausteine ersetzt — PageHeader, FilterBar, OverflowMenu, ActionButton,
- * Combobox, DateField, Disclosure, Markdown, Timeline und Toast stehen. Was
- * bleibt, steht als Marker da und ist damit die ehrliche Antwort auf „was
- * fehlt dem Set noch".
+ * marker names the backlog entry rather than local markup papering over it;
+ * as of 2026-09-03 all but one of ten markers are real building blocks.
  *
  * Types come from `@/ludwig/modules/accounting-cases/domain/case` — the app's
  * data model is the given, per `spec-schreiben` §5.
@@ -164,7 +159,7 @@ function CasePage() {
         actions={<Button variant="primary" onClick={() => setCreating(true)}>Sachverhalt anlegen</Button>}
       />
 
-      {/* Die Filterleiste steht über der Karte, nie im Kartenkopf (0003). */}
+      {/* The filter bar stands above the card, never in its head (0003). */}
       <FilterBar activeCount={filters} onReset={() => setFilters(0)}>
         <Field label="Gegenpartei" htmlFor="gegenpartei">
           <Select id="gegenpartei" defaultValue="" onChange={() => setFilters(1)}>
@@ -412,9 +407,8 @@ function CasePage() {
 }
 
 /**
- * Der Verlauf eines Sachverhalts, wie ihn die App aus Ereignissen baut. Die
- * Schlüssel sind die der Domäne, die deutschen Wörter kommen als
- * `kindLabels` — die Komponente erfindet keine Vokabeln (0023).
+ * A case's history as the app builds it from events. The keys are the domain's;
+ * the German words come as `kindLabels` — the component invents no vocabulary (0023).
  */
 function historyOf(c: CaseListItem): TimelineItem[] {
   return [
@@ -448,9 +442,8 @@ function historyOf(c: CaseListItem): TimelineItem[] {
 }
 
 /**
- * Das deutsche Wort je Ereignis-Art. Es steht hier, nicht in der Komponente:
- * `src/ludwig/` führt keinen Ereignistyp, und `Timeline` erfindet keine
- * Vokabeln (Befund in Spec 0023).
+ * The German word per event kind. It lives here, not in the component:
+ * `src/ludwig/` has no event type, and `Timeline` invents no vocabulary (0023).
  */
 const EVENT_LABELS = {
   case_opened: "Sachverhalt",
@@ -458,7 +451,7 @@ const EVENT_LABELS = {
   booking_proposed: "Buchungsvorschlag",
 };
 
-/** Ein Ausschnitt der Partner, wie ihn die Suche liefern würde. */
+/** A slice of the partners, as the search would return it. */
 const PARTNERS = [
   { value: "p1", label: "Musterfirma GmbH", hint: "70021", group: "Zuletzt gebucht" },
   { value: "p2", label: "Stadtwerke Musterstadt", hint: "70044", group: "Zuletzt gebucht" },
@@ -466,7 +459,7 @@ const PARTNERS = [
   { value: "p4", label: "Restaurant Adler", hint: "70103", group: "Alle Partner" },
 ];
 
-/** Die Seite lebt im `ToastHost` — sonst hätte die Quittung keinen Ort (0007). */
+/** The page lives in `ToastHost` — otherwise the confirmation has no place (0007). */
 function Page() {
   return (
     <ToastHost>

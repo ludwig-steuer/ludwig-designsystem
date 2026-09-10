@@ -47,7 +47,7 @@ const MANY: CaseLink[] = [
   },
 ];
 
-/** Ein Fall: Anzeigename, Nummer, Zustand — alles in einer Zeile. */
+/** One case: display name, number, state — all in one line. */
 const LANG = "Wartung der Klimaanlage im Obergeschoss, zweiter Bauabschnitt";
 
 export const Single: Story = {
