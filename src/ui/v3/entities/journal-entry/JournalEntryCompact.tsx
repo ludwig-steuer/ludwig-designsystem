@@ -2,6 +2,7 @@ import type { Currency } from "@/ludwig/shared/money";
 
 import { formatAmount } from "../../format";
 import { AmountCell } from "../../primitives/Cells";
+import { Badge } from "../../primitives/Badge";
 import { AccountCell } from "../account/Account";
 
 /**
@@ -31,6 +32,25 @@ export interface JournalLine {
   amount: number;
   /** Posting text of the line — column 3 of the batch. */
   text?: string | null;
+  /** DATEV tax key (BU) of the line, e.g. „9" — `BookingLineVM.taxKey`. */
+  taxKey?: string | null;
+  /** Tax rate in percent where one was read — `BookingLineVM.taxRatePercent`. */
+  taxRatePercent?: number | null;
+  /**
+   * The **fixed rate of an automatic account**, where this account is one
+   * (`client_ledger_accounts.datev_tax_rate`).
+   *
+   * On such an account the account itself determines the tax, not a key. The
+   * caller resolves it — the component knows no chart of accounts (E2), and
+   * the app has the map already (`loadAutomaticAccountsByExec`).
+   *
+   * **The pair `taxKey` + `automaticRate` is the error the guard reports**
+   * (`findTaxKeysOnAutomaticAccounts`): a key sent on an automatic account is
+   * removed by the export or the batch is rejected — either way Ludwig then
+   * says something different from DATEV. The card shows both, so the conflict
+   * is visible where it happens.
+   */
+  automaticRate?: number | null;
 }
 
 /** From here on an entry counts as unbalanced — half a cent is rounding. */
@@ -68,6 +88,31 @@ function AccountRef({
       {...(showName ? { name: line.accountName ?? null } : {})}
       {...(accountHref ? { href: accountHref(line.accountNumber) } : {})}
     />
+  );
+}
+
+/**
+ * The tax part of a line: the DATEV key, and whether the account decides the
+ * tax by itself.
+ *
+ * **Both together is the error, not the rule.** On an automatic account the
+ * account's own rate applies; a key sent along is silently removed by the
+ * export or rejects the batch — either way Ludwig then says something other
+ * than DATEV (`core/datev/automatic-account.ts`). The card therefore shows
+ * both side by side where both are set: the conflict belongs on the line where
+ * it happens, not only in a guard message above it.
+ */
+function TaxCell({ line }: { line: JournalLine }) {
+  const key = line.taxKey?.trim();
+  return (
+    <span className="v2je__bu">
+      {key ? <span className="v2mono">{key}</span> : null}
+      {line.automaticRate !== null && line.automaticRate !== undefined ? (
+        <Badge tone={key ? "warning" : "neutral"}>
+          {`Automatik ${line.automaticRate} %`}
+        </Badge>
+      ) : null}
+    </span>
   );
 }
 
@@ -170,9 +215,11 @@ export function JournalEntryCard({
   const debit = sum(lines.filter((l) => l.side === "debit"));
   const credit = sum(lines.filter((l) => l.side === "credit"));
   const balanced = Math.abs(debit - credit) < BALANCE_EPSILON;
+  // The column only appears when a line has something in it.
+  const mitBu = lines.some((l) => l.taxKey || l.automaticRate !== null);
 
   return (
-    <div className="v2je">
+    <div className={mitBu ? "v2je v2je--bu" : "v2je"}>
       {caption ? <div className="v2je__caption">{caption}</div> : null}
       {lines.length === 0 ? (
         // An excerpt, not a screen — no EmptyState with a button.
@@ -182,6 +229,11 @@ export function JournalEntryCard({
           <div className="v2je__row v2je__row--head">
             <span className="v2num">Konto</span>
             <span>Kontoname</span>
+            {/* „BU" is DATEV's word for the tax key; the column stands
+                before the text, as it does in the batch. It only appears when
+                a line has something in it — an empty column in every entry
+                would be a column that never says anything. */}
+            {mitBu ? <span>BU</span> : null}
             <span>Buchungstext</span>
             <span className="v2num">Soll Umsatz</span>
             <span className="v2num">Haben Umsatz</span>
@@ -201,6 +253,7 @@ export function JournalEntryCard({
               <span className="v2muted v2je__clip" title={line.accountName ?? undefined}>
                 {line.accountName ?? ""}
               </span>
+              {mitBu ? <TaxCell line={line} /> : null}
               <span className="v2je__clip" title={line.text ?? undefined}>
                 {line.text ?? ""}
               </span>
@@ -216,6 +269,7 @@ export function JournalEntryCard({
             <div className="v2je__row v2je__row--sum">
               <span />
               <span />
+              {mitBu ? <span /> : null}
               {/* The only finding the card makes: it adds up what is there. */}
               <span>Σ Soll {balanced ? "=" : "≠"} Σ Haben</span>
               <span className="v2num">{formatAmount(debit, currency)}</span>

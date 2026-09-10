@@ -51,9 +51,15 @@ const QUELLEN_OHNE_NAMEN: AiSource[] = [
 ];
 
 /**
- * Die vier Urteile nebeneinander, jedes mit seiner Konfidenz. **Das Wort steht
- * dabei**, nicht nur die Farbe: „Bestätigt" in Grün und „Beanstandet" in Gelb
- * unterscheiden sich für ein Viertel der Männer nicht (V7).
+ * Die vier Urteile nebeneinander, jedes mit seiner Konfidenz. **Erst die
+ * Konfidenz, dann das Urteil** (Owner 2026-09-10): das ist die Reihenfolge der
+ * Arbeit — der Agent schlägt vor und sagt, wie sicher er war, dann urteilt der
+ * Judge darüber. Der Kasten hat es immer schon so gehalten; die Zelle war der
+ * Ausreißer.
+ *
+ * **Das Wort steht dabei**, nicht nur die Farbe: „Bestätigt" in Grün und
+ * „Beanstandet" in Gelb unterscheiden sich für ein Viertel der Männer nicht
+ * (V7).
  *
  * „Bestätigt mit Hinweis" und „Angepasst" sind beide `info` — die Achse
  * trennt sie im Wort, nicht in der Farbe, weil beide dasselbe bedeuten: der

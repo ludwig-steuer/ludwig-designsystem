@@ -315,10 +315,15 @@ export function AiBookingNotesCell({
   if (!verdict && !confidence && errors.length === 0) return null;
   return (
     <span className="ki__cell">
-      {verdict ? <StatusBadge axis="judge" status={verdict} info={false} /> : null}
-      {/* With its word, like in the head of the box: a colour without a word
+      {/* **Confidence first, verdict second** (owner, 2026-09-10). The order is
+          the order of the work: the agent proposes and says how sure it was,
+          then the judge rules on it. Reading „Bestätigt · Sicher" reverses
+          that — and the box above has always had it the other way round, so
+          the cell was the odd one out.
+          With its word, like in the head of the box: a colour without a word
           is not a statement (V7), and „Sicher" costs 38 px. */}
       <Confidence level={confidence} />
+      {verdict ? <StatusBadge axis="judge" status={verdict} info={false} /> : null}
       {/* The count, not the text: which finding it is stands in the fold-out.
           A number in the row is a reason to open it. */}
       {errors.length > 0 ? (

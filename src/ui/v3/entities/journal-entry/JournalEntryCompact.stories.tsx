@@ -33,15 +33,18 @@ function Pair({
   caption,
   totals,
   accountHref,
+  breit,
 }: {
   lines: JournalLine[];
   showNames?: boolean;
   caption?: string;
   totals?: boolean;
   accountHref?: (n: string) => string;
+  /** Für die BU-Spalte: sie kostet 132 px, die der Kontoname sonst hätte. */
+  breit?: boolean;
 }) {
   return (
-    <div style={{ maxWidth: 620, display: "grid", gap: "var(--space-5)" }}>
+    <div style={{ maxWidth: breit ? 900 : 620, display: "grid", gap: "var(--space-5)" }}>
       <div>
         <div className="v2sub">JournalEntryCell</div>
         <JournalEntryCell
@@ -129,6 +132,38 @@ export const MitKontoweg: Story = {
       <div className="v2muted">ohne Weg — dieselben Zeilen, kein Zeichen:</div>
       <Pair lines={STANDARD} />
     </div>
+  ),
+};
+
+/**
+ * **BU-Schlüssel und Automatikkonto** (Owner 2026-09-10). Die Spalte steht
+ * zwischen Kontoname und Buchungstext, wie im DATEV-Stapel, und sie kommt nur,
+ * wenn eine Zeile etwas darin stehen hat.
+ *
+ * Die dritte Zeile ist der Fall, um den es geht: **Schlüssel auf einem
+ * Automatikkonto**. Dort bestimmt der Kontosatz die Steuer; ein mitgesendeter
+ * Schlüssel wird beim Export still entfernt oder weist den Stapel ab — in
+ * beiden Fällen steht in Ludwig etwas anderes als in DATEV. Die Karte zeigt
+ * deshalb beides nebeneinander, und die Marke wird gelb: der Konflikt gehört
+ * an die Zeile, an der er entsteht, nicht nur in eine Guard-Meldung darüber.
+ *
+ * **Breiter als die übrigen Stories** (900 statt 620 px), und zwar mit Grund:
+ * die BU-Spalte nimmt 132 px, und bei 620 kürzt der Kontoname auf
+ * „Warenein…". Dort, wo die Karte im Einsatz steht — im Aufklapper einer
+ * Stapelzeile —, ist sie breiter als hier.
+ */
+export const MitSteuerschluessel: Story = {
+  render: () => (
+    <Pair
+      breit
+      lines={[
+        { side: "debit", accountNumber: "6815", accountName: "Telefon", amount: 84, taxKey: "9", text: "Mobilfunk August" },
+        { side: "debit", accountNumber: "5404", accountName: "Wareneingang 19 % VSt", amount: 21.36, automaticRate: 19, text: "Ersatzteile" },
+        { side: "debit", accountNumber: "8400", accountName: "Erlöse 19 % USt", amount: 12, taxKey: "3", automaticRate: 19, text: "falscher Schlüssel" },
+        { side: "credit", accountNumber: "70044", accountName: "Beispielbau Handels GmbH", amount: 117.36, text: "Rechnung R-4471" },
+      ]}
+      accountHref={(n) => `?konto=${n}`}
+    />
   ),
 };
 

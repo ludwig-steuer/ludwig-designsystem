@@ -2780,11 +2780,21 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2je__row {
   display: grid;
   grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1.4fr) 104px 104px;
+  align-items: baseline;
   gap: var(--space-2);
   padding: var(--space-1) 0;
   font-size: var(--fs-ui-sm);
   line-height: var(--lh-ui-sm);
 }
+/* Mit BU-Spalte (0155): sie steht zwischen Kontoname und Buchungstext und
+   ist so breit, wie „Automatik 19 %" braucht. Die Karte setzt die Klasse nur,
+   wenn eine Zeile etwas darin stehen hat — sonst bliebe eine Spalte leer, die
+   nie etwas sagt. */
+.v2je--bu .v2je__row {
+  grid-template-columns: 70px minmax(0, 1fr) 132px minmax(0, 1.4fr) 104px 104px;
+}
+.v2je__bu { display: inline-flex; align-items: baseline; gap: var(--space-1); flex-wrap: wrap; }
+
 .v2je__row--head {
   font-weight: 600;
   color: var(--color-text-muted);
