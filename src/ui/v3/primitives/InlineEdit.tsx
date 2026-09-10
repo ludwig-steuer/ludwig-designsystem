@@ -139,10 +139,9 @@ export function InlineEdit({
 
   return (
     <div className="v2iedit">
-      {/* Im Bearbeiten-Modus ist das Wort ein **Label**, kein `div`: die
-          Eingabe hatte sonst weder Namen noch Klickziel — dieselbe Krankheit
-          wie in `Field` vor 0104, nur außerhalb davon (Abnahme 0104). Im
-          Ruhezustand oben bleibt es ein `div`, dort gibt es kein Feld. */}
+      {/* While editing the word is a **label**, not a `div`: otherwise the input had
+          neither a name nor a click target (acceptance 0104). At rest it stays a
+          `div` — there is no field. */}
       <label className="v2field__label" htmlFor={fieldId}>
         {label}
       </label>

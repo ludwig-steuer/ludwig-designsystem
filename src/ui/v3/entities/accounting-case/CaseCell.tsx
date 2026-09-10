@@ -99,14 +99,13 @@ export function CaseCell({
               </Link>
             </>
           )}
-          {/* Der Zustand als Chip, nicht als Punkt: Farbe steht nie allein
-              (V7), und die Erklärung sitzt einmal am Spaltenkopf statt einmal
-              je Zeile (R1, 0077). */}
+          {/* The state as a chip, not a dot: colour never alone (V7), and the
+              explanation sits once at the column head, not per row (R1, 0077). */}
           {showState && c.lifecycleStatus ? (
             <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} info={false} />
           ) : null}
-          {/* Der Teilbetrag kommt aus der Zuordnung der Bankzeile, nicht aus
-              dem Sachverhalt — die Zelle rechnet ihn nicht (L-56). */}
+          {/* The partial amount comes from the bank line's allocation, not the
+              case — the cell does not compute it (L-56). */}
           {c.amount == null ? null : (
             <span className="v2case__amt">
               <AmountCell value={c.amount} currency={c.currency ?? "EUR"} />

@@ -25,18 +25,17 @@ type Props = {
 };
 
 /**
- * The positions of one invoice, in the order of the document.
+ * The positions of one invoice, in the document's order.
  *
- * > Wenn die Sachbearbeiterin einen Kontovorschlag prüft, will sie sehen,
- * > welche Positionen der Beleg hat und wie Ludwig jede eingeordnet hat,
- * > damit sie die eine Zeile findet, die falsch liegt.
+ * > When the clerk checks an account proposal, they want to see which positions
+ * > the document has and how Ludwig classified each, so that they find the one
+ * > line that is wrong.
  *
- * No pager, no filter, no loading state — measured: p50 1, p90 5, max 22
- * positions per invoice, and the tab is only fetched when it is opened. The
- * one-line case and the empty case deserve more care than the long one: half
- * of all invoices have exactly one position.
+ * No pager, filter or loading state — measured: p50 1, p90 5, max 22 positions,
+ * and the tab loads only when opened. Half of all invoices have exactly one
+ * position, so the one-line and the empty case get the care.
  *
- * @when    The positions of an invoice — the tab „Positionen".
+ * @when    The positions of an invoice — the tab "Positionen".
  * @instead One position → InvoiceLineRow. Its reasoning → InvoiceLineFacts.
  *          A long, sortable, filterable table → DataTable.
  */

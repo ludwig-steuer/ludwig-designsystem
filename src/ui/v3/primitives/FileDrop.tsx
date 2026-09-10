@@ -25,13 +25,9 @@ export interface DroppedFile {
 }
 
 /**
- * Why a file was turned away — in words, not in MIME.
- *
- * The rejected line used to read „Format nicht vorgesehen —
- * application/pdf,image/*." That is the `accept` attribute, and it belongs to
- * the file dialog, not in front of a clerk (T4/T5, found in the review of
- * 0021). What she needs is the ending she just tried and where the allowed
- * ones are written — and they are written in the `hint`, one line above.
+ * Why a file was turned away — in words, not MIME. The `accept` attribute
+ * belongs to the file dialog, not in front of a clerk (T4/T5): they need the
+ * ending they tried and where the allowed ones are written (the `hint`).
  */
 function rejectionReason(name: string, hint?: string): string {
   const dot = name.lastIndexOf(".");
@@ -110,10 +106,9 @@ export function FileDrop({
   const shown = [...files, ...rejected];
   return (
     <div>
-      {/* Kein `<label>`: das eigentliche `<input type="file">` ist verborgen,
-          bedient wird die Zone darunter, und die trägt ihr Wort selbst. Damit
-          eine Vorlesehilfe trotzdem hört, **wofür** die Zone da ist, hängt die
-          Überschrift als Beschreibung am Knopf (Abnahme 0104). */}
+      {/* No `<label>`: the real `<input type="file">` is hidden and the zone below
+          carries its own word. So a screen reader still hears **what** the zone is
+          for, the heading describes the button (acceptance 0104). */}
       <div className="v2field__label" id={labelId}>
         {label}
       </div>

@@ -30,13 +30,9 @@ export interface LogFilterState {
 
 const VIEWS = [1, 2, 3] as const;
 /**
- * Die drei Sichten mit ihren Wörtern — **aus dem gemeinsamen Vokabular**.
- *
- * Sie standen hier als Vorgabe, weil es sie in der App nur als lokale Liste in
- * `BatchLogPanel` gab (Befund L-17). Seit 2026-09-07 stehen sie in
- * `shared/log-views.ts` (App-Commit `52914c45`) und gelten für beide Seiten;
- * `viewLabels` bleibt als Überschreibung für einen Aufrufer, der ein anderes
- * Wort braucht.
+ * The three views with their words — **from the shared vocabulary**
+ * (`shared/log-views.ts`, finding L-17); `viewLabels` stays as an override for
+ * a caller that needs another word.
  */
 const DEFAULT_VIEW_LABELS: [string, string, string] = [
   LOG_VIEWS[0]!.label,

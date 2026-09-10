@@ -23,10 +23,9 @@ export interface WizardProps {
 }
 
 /**
- * Zeichen und Wort je Zustand — beides aus der Icon-Registry (0087). Das Wort
- * steht nicht daneben, sondern trägt die Plakette als `aria-label`: im Kopf
- * einer Spalte ist für ein zweites Wort kein Platz, und ohne es wäre der
- * Zustand nur Farbe und Form (V7).
+ * Sign and word per state, both from the icon registry (0087). The word is the
+ * badge's `aria-label` — a column head has no room for a second word, and
+ * without it the state would be colour and shape only (V7).
  */
 const STATE_ICON: Partial<Record<WizardStepState, ActionKey>> = {
   done: "confirm",

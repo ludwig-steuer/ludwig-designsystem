@@ -135,10 +135,9 @@ export function Checklist({
           <span>Sprung</span>
         </HeadRow>
         {loading ? (
-          // Die Form des Inhalts, nicht ein Kasten: so viele Zeilen, wie
-          // kommen werden — und mindestens vier, damit die Karte nicht in
-          // sich zusammenfällt. Der Spaltenkopf bleibt stehen; er ist die
-          // Zusage, was kommt.
+          // The shape of the content, not a box: as many rows as will come, at
+          // least four, so the card does not collapse. The column head stays —
+          // it promises what is coming.
           <TableLoading rows={Math.max(rows.length, 4)} cols={5} />
         ) : (
           rows.map((r) => (

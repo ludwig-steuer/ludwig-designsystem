@@ -232,8 +232,8 @@ export function ProcessStepper({
       </div>
       {parts.length > 0 ? (
         <div className="pz-loops">
-          {/* `join` ginge nicht mehr: die Teile sind Knoten, keine Strings —
-              das ist der Preis dafür, dass das Zeichen ein Zeichen ist. */}
+          {/* `join` no longer works: the parts are nodes, not strings — the price
+              of the sign being a sign. */}
           {logHref ? <Link href={logHref}>{joined(parts)}</Link> : joined(parts)}
         </div>
       ) : null}
@@ -251,11 +251,8 @@ export interface BatonSegment {
 
 /**
  * The baton bar above the log: the timeline from opening until now, each
- * section colored by owner.
- *
- * This is the one glance that answers „warum hat der August drei Wochen
- * gedauert?" — two days agent, nine days waiting for the client, one day
- * practice.
+ * section coloured by owner — the one glance that answers "why did August take
+ * three weeks?": two days agent, nine waiting for the client, one day practice.
  *
  * @when    Timeline above the log, colored by owner.
  * @instead One holder as a word with its sign → Baton. The phases of a

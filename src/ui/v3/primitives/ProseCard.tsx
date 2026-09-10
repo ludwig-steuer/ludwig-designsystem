@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * Fließtext in einer Karte: Abschnittskopf, 13,5 px Text.
+ * Running text in a card: section head, 13.5 px text.
  *
  * @when    Longer explanation or report meant to be read.
  * @instead Short note in the flow → Callout. Label/value pairs → FieldList.

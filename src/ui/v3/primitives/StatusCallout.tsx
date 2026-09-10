@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 
 /**
- * Kopf-Karte, die ihren Zustand über den Rahmen trägt: Kicker, Titel,
- * Nebenzeile, Aktionen rechts. Der Ton färbt Rahmen, Kicker und Nebenzeile —
- * das Wort im Kicker sagt dasselbe noch einmal (UX-Guidelines V7).
+ * Header card that carries its state in the frame: kicker, title, sub line,
+ * actions on the right. The tone colours frame, kicker and sub line; the
+ * kicker's word says it again (V7).
  *
  * @when    The header of an item whose state defines the page (batch, period).
  * @instead Note in the flow → Callout. Page-wide message → Banner.

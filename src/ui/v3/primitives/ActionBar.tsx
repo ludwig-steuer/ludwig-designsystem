@@ -39,10 +39,9 @@ export function ActionBar({
 }
 
 /**
- * Zeilen-Aktionen: ein tertiärer Knopf je Handlung, rechtsbündig. Kein Kebab —
- * ein Icon ohne Wort ist für die Zielgruppe ein Rätsel (UX-Guidelines V7).
- * Die benannte Ausnahme zu T8 (§6, Aufgabe 0012) deckt das Kebab **nicht**:
- * es ist weder konventionell genug noch folgenlos.
+ * Row actions: one tertiary button per action, right-aligned. No kebab — an
+ * icon without a word is a riddle for the audience (V7), and the T8 exception
+ * (§6, task 0012) does not cover it.
  *
  * @when    One to three actions at the right of a table row.
  * @instead More actions → OverflowMenu with a visible word next to the two

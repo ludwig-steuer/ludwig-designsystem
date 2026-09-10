@@ -24,11 +24,11 @@ interface StatusInfoButtonProps {
 }
 
 /**
- * Das (i) neben einem Status-Chip: öffnet den gemeinsamen `StatusInfoDialog`
- * mit allen Ausprägungen dieser Achse. Winziges Client-Island, damit
- * `StatusBadge` eine Server-Komponente bleiben kann.
+ * The (i) next to a status chip: opens the shared `StatusInfoDialog` with all
+ * values of the axis. A tiny client island, so `StatusBadge` stays a server
+ * component.
  *
- * @when    „What can this status be?" — as the (i) beside the status, or with
+ * @when    "What can this status be?" — as the (i) beside the status, or with
  *          `children` as the chip itself.
  * @instead The legend without a trigger → StatusInfoDialog. Help on a field
  *          → Field `hint`. A whole page of explanation → ProseCard.

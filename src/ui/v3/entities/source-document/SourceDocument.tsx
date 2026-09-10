@@ -35,11 +35,9 @@ import { resolveSourceDocumentDetail } from "./source-document-detail";
  */
 
 /**
- * Die sechs Wege, auf denen ein Beleg erledigt wird — **aus der Domäne**.
- *
- * Sie standen hier als lokale Union, weil `SOURCE_DOC_COMPLETION_VIA` drüben
- * fehlte (Befund L-47). Seit 2026-09-07 gibt es sie (App-Commit `7184a8ac`);
- * der Re-Export hält die Importe der Aufrufer.
+ * The six ways a document gets completed — **from the domain**
+ * (`SOURCE_DOC_COMPLETION_VIA`, finding L-47); the re-export keeps callers'
+ * imports.
  */
 export type { SourceDocCompletionVia };
 

@@ -269,8 +269,8 @@ export function CaseTimeline({
   }
 
   for (const ev of events) {
-    // Achse zuerst (`ereignis_art`, L-02), Prop als Überschreibung, Rohwert
-    // zuletzt — dieselbe Reihenfolge wie im Strang darunter.
+    // Axis first (`ereignis_art`, L-02), prop as override, raw value last — the
+    // same order as in the strand below.
     const label =
       kindLabels?.[ev.kind] ?? STATUS_REGISTRY.ereignis_art[ev.kind]?.label ?? ev.kind;
     const Glyph = EVENT_ICON[ev.kind] ?? FileText;

@@ -1,9 +1,9 @@
 /**
- * Langer Freitext, der eine Tabellenzeile sonst sprengt: bis `max` Zeichen
- * direkt, darüber als Teaser mit „mehr ▾" zum Ausklappen.
+ * Long free text that would burst a table row: up to `max` characters as is,
+ * beyond that a teaser with "mehr ▾" to expand.
  *
- * ponytail: natives `<details>` statt State — funktioniert in Server-
- * Komponenten, ohne Client-Bundle. Styling in `.more` (app-chrome.css).
+ * ponytail: native `<details>` instead of state — works in server components
+ * without a client bundle. Styling in `.more` (app-chrome.css).
  *
  * @when    Plain long text in a cell or a narrow column, clamped by
  *          character count.
@@ -13,7 +13,7 @@
 export function LongText({ children, max = 180 }: { children: string; max?: number }) {
   const text = children.trim();
   if (text.length <= max) return <>{text}</>;
-  // An der letzten Wortgrenze vor `max` schneiden, nicht mitten im Wort.
+  // Cut at the last word boundary before `max`, not mid-word.
   const cut = text.slice(0, max);
   const teaser = cut.slice(0, Math.max(cut.lastIndexOf(" "), Math.floor(max * 0.6))).trimEnd();
   return (

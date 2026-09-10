@@ -6,12 +6,10 @@ import type {
 } from "react";
 
 /**
- * v2-Formularbausteine (F123 T123.1). Ersetzen die rohen
- * `<input className="v2in">` und die lokalen `Feld()`-Helfer.
- *
- * `Field` trägt Label, Hinweis und Fehler; die Eingabe selbst bleibt ein
- * gewöhnliches Element, damit `name`/`defaultValue` in Server-Action-Formularen
- * unverändert funktionieren.
+ * Form building blocks (F123 T123.1), replacing raw `<input className="v2in">`
+ * and local field helpers. `Field` carries label, hint and error; the input
+ * stays a plain element so `name`/`defaultValue` keep working in server-action
+ * forms.
  *
  * @when    Every input with label, hint and error text.
  * @instead Account selection → AccountField. Read-only → FieldList.

@@ -214,14 +214,9 @@ export function accountColumns({
         const name = partnerName ? partnerName(a) : a.businessPartnerName;
         if (!name) return <span className="v2muted">—</span>;
         const to = partnerHref?.(a);
-        // A company name has no upper bound in the data — „Musterbau Handels-
-        // und Beteiligungs GmbH & Co. KG" is 49 characters and drove the row
-        // to 67 px at **every** width. The track stays 200 px, the row does
-        // not grow.
-        // The cell (0139), so a partner name is written the same way here, in
-        // the case facts and in the account facts. It brings its own cut with
-        // the whole value in the `title` — the 200 px track and the 47 px row
-        // stay, because the name is still one line that cannot grow.
+        // A company name has no upper bound — a GmbH & Co. KG runs to 49 characters.
+        // The cell (0139) writes a partner name the same way everywhere and cuts it
+        // with the full value in the `title`; the 200 px track and the 47 px row stay.
         return <BusinessPartnerCell name={name} {...(to ? { href: to } : {})} />;
       },
     },

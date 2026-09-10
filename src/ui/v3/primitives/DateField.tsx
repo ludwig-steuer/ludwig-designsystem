@@ -136,11 +136,10 @@ export function DateRangeField({
         min={min}
         max={max}
         disabled={disabled}
-        // Mit `id` trägt das Wort der Hülle den Namen („Zeitraum"); ein
-        // eigenes `aria-label` würde ihn **überschreiben**, und das Paar
-        // hätte gar keinen — gemessen im Barrierefreiheits-Baum
-        // (`superseded: true`, Abnahme von 0104). Ohne `id` steht das Feld
-        // allein und braucht sein Wort.
+        // With `id` the wrapper's word names the pair ("Zeitraum"); an own
+        // `aria-label` would **override** it and leave the pair unnamed
+        // (accessibility tree, acceptance 0104). Without `id` the field stands
+        // alone and needs its word.
         ariaLabel={id ? undefined : "Von"}
         onChange={(v) => onChange(v, to)}
       />

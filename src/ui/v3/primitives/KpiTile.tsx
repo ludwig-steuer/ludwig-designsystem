@@ -2,15 +2,12 @@ import type { CSSProperties, ReactNode } from "react";
 import { Link } from "./Link";
 
 /**
- * Kennzahl-Kachel der Detailseite (F123 T123.1): 19 px Sans, Rand statt Schatten.
+ * Figure tile of the detail page (F123 T123.1): 19 px sans, border instead of
+ * shadow — unlike the app's dashboard `Stat` (32 px serif, shadow).
  *
- * Abgrenzung zu `Stat`/`StatGrid` der App: das ist die Dashboard-Kachel
- * (32 px Serif, Schatten). Auf Detailseiten steht diese hier.
- *
- * **With `href` the whole tile leads there** — the same rule as `Row` (I11):
- * a figure that answers „how much" and not „and now?" is a dead end with
- * digits. Without it the tile stays a plain block; not every number has a
- * page behind it.
+ * **With `href` the whole tile leads there** — the same rule as `Row` (I11): a
+ * figure that answers "how much" but not "and now?" is a dead end. Without it
+ * the tile stays a plain block.
  *
  * @when    A number with a label in the header of a detail page; several in a `KpiGrid`.
  * @instead Number in a table column → AmountCell. Label/value pairs as text → FieldList.
