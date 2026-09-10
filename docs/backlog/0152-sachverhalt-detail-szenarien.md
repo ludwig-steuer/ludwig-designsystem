@@ -159,6 +159,48 @@ Aus derselben Erhebung, weil der Brief sie nur streift:
 **Befund für die App:** die Registry sagt zu `recurring_rule` „wird nicht
 exportiert" — 27 von 27 sind exportiert. **L-282.**
 
+## Welle 2 — gebaut (2026-09-10)
+
+Auftrag des Owners über `ludwig-manager`: 15–20 Szenarien mit Daten, damit
+das Design gegen sie optimiert werden kann. Grundlage ist der Schnitt aus der
+Erhebung, ergänzt um zehn Zustände, die die Sachbearbeiterin unterscheiden
+muss. Wo beides zusammenfällt, ist es **eine** Story.
+
+**Aufbau: ein Szenario ist ein Datenobjekt.** `src/showcase/case/scenario.tsx`
+trägt den Typ `CaseScenario` und `ScenarioPage`, die daraus die ganze Seite
+zeichnet; `scenarios.tsx` trägt die Daten. Zwei Stories unterscheiden sich
+damit nur im Fall — die Regel aus 0144 als Struktur, nicht als Vorsatz.
+
+| Export (`Seiten/Sachverhalt/Einzelfall`) | Ausprägung | Punkt des Auftrags | Signal |
+|---|---|---|---|
+| `ProposalPending` | A2 (13 %), E1 | — | Vorschlag prüfen |
+| `WithDatevEntry` | E1b | — | keins |
+| `OpenItemCarryover` | A1 (29 %) + A4 (8 %) | — | keins — wartet auf den Kunden |
+| `CompleteAndExported` | A3 (10 %) | 6 · exportiert | keins — nichts zu tun |
+| `RecurringWithoutRule` | A6 (8 %) | — | Vorschlag prüfen |
+| `AwaitingDocument` | A7 (5 %) | 2 · wartet auf Beleg | keins — wartet auf den Mandanten |
+| `AwaitingDocumentEscalated` | A7, Stufe 1 (einmal im Bestand) | 2 · Eskalation | keins; die Zeile ist rot, nicht der Kopf |
+| `OutgoingWithPayment` | A8 (11 %) | — | Zahlungseingang prüfen |
+| `ClarificationOpenFirm` | querliegend (43 Fälle) | 1 · Kanzlei am Zug | **keins**, die Antwort steht in Spalte 3 (S13) |
+| `ProposalWithdrawn` | querliegend (85 Buchungen) | 3 · zurückgezogen | keins — der Agent bucht neu |
+| `Superseded` | querliegend (14 Fälle) | 4 · ersetzt | keins, Verweis auf den Nachfolger |
+| `JudgeFlagged` | querliegend | 7 · beanstandet | Warnfarbe |
+| `JudgeAdjusted` | querliegend (`ai_edited` 15) | 7 · angepasst | Vorschlag prüfen |
+| `MasterData` | Reiter Stammdaten | — | — |
+
+**Nicht gebaut, weil der Bestand null ist** (Satz statt Story, die Regel oben):
+abgelehnt (`closed_rejected`, 0 — gezählt von `ludwig-manager` am
+2026-09-10), Storno-Buchung (`system_reversal`, 0), zurückgestellte Rückfrage
+(0 von 234), Eskalationsstufe 2 (0), `disposition = client` (0).
+
+**Abweichung vom Brief:** E5 sah für die offene Rückfrage ein Signal vor. Der
+Owner will es ohne — die Antwort mit ihren Optionen steht in der
+Notizspalte, und Signal plus Karte wären dieselbe Aufforderung zweimal.
+
+**Befund L-284:** die Achse `buchung` beschriftet `reversed` mit „Storniert";
+im Bestand ist `reversed` in 85 von 86 Fällen ein zurückgezogener Vorschlag
+ohne Gegenbuchung. `ProposalWithdrawn` erklärt es am Ereignis mit einem Satz.
+
 ## Offene Fragen
 
 1. **Ist die Buchung ein eigener Timeline-Eintrag oder eine zweite Zeile am

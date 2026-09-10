@@ -2626,7 +2626,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2cl__cell { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; max-width: 100%; }
 
 /* ── 0060 Klärungs-Karte: Frage, Verlauf, Antwort ───────────────────────── */
-.v2clc { display: flex; flex-direction: column; gap: var(--space-3); }
+/* The card declares its register: outside a box body its links and sources
+   would inherit the body's 16 px (measured in 0152, 2026-09-10). */
+.v2clc { display: flex; flex-direction: column; gap: var(--space-3); font-size: var(--fs-ui); line-height: var(--lh-ui); }
 .v2clc__head { display: flex; flex-direction: column; gap: var(--space-1); }
 .v2clc__title { margin: 0; font-size: var(--fs-ui); line-height: var(--lh-ui); font-weight: 600; }
 .v2clc__badges { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }

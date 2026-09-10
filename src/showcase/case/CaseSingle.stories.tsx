@@ -1,46 +1,24 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
 
 import { CaseFacts } from "@/ui/v3/entities/accounting-case/CaseFacts";
-import { ClarificationList } from "@/ui/v3/entities/clarification/Clarification";
-import {
-  CaseTimeline,
-  type CaseTimelineEntry,
-} from "@/ui/v3/entities/accounting-case/CaseTimeline";
-import { AiBookingNotes } from "@/ui/v3/entities/journal-entry/AiBookingNotes";
-import { JournalEntryCard } from "@/ui/v3/entities/journal-entry/JournalEntryCompact";
-import { Button } from "@/ui/v3/primitives/Button";
-import { StatusCallout } from "@/ui/v3/primitives/StatusCallout";
 import { Card, CardHead } from "@/ui/v3/primitives/Table";
-import { TextButton } from "@/ui/v3/primitives/TextButton";
-import { NoteFeed } from "@/ui/v3/patterns/NoteFeed";
-import { OpenPoints } from "@/ui/v3/patterns/OpenPoints";
 
 import { CasePage } from "./CasePage";
-import {
-  accountHref,
-  DOCUMENT_EVENT,
-  DATEV_EVENT,
-  caseFixture,
-  TODAY,
-  CLARIFICATION_ANSWERED,
-  NOTES,
-  partnerHref,
-  CLARIFICATIONS,
-  tabHref,
-  PROPOSAL,
-  PAYMENT_EXPECTED,
-} from "./fixtures";
+import { accountHref, caseFixture, partnerHref } from "./fixtures";
+import { ScenarioPage } from "./scenario";
+import * as S from "./scenarios";
 
 /**
- * Der Sachverhalt als Seite — Welle 1 von 0152 (Brief F196).
+ * Der Sachverhalt als Seite — die Einzelfälle aus 0152, Welle 1 und 2.
  *
- * Zwei Szenarien, und sie sind die, an denen sich das Layout entscheidet: der
- * Referenzfall mit einem Buchungsvorschlag, und derselbe Fall mit einer
- * Buchung, die aus DATEV hinzugekommen ist. Was hier nicht trägt, trägt in
- * keinem der anderen 19.
+ * Jede Story ist **ein Szenario als Daten**: der Rahmen, die drei Spalten und
+ * die Wege sind überall dieselben, und zwei Stories unterscheiden sich nur im
+ * Fall. Die Datenform jeder Ausprägung stammt aus der Staging-Erhebung vom
+ * 2026-09-10 (1.094 Fälle); Namen, Beträge und Nummern sind erfunden.
  *
- * Alle Daten sind erfunden.
+ * Nicht gebaut, weil es sie im Bestand nicht gibt: abgelehnte Fälle
+ * (`closed_rejected`, 0), Storno-Buchungen (0), zurückgestellte Rückfragen
+ * (0 von 234), Eskalationsstufe 2 (0) und `disposition = client` (0).
  */
 const meta: Meta<typeof CasePage> = {
   title: "Seiten/Sachverhalt/Einzelfall",
@@ -50,291 +28,125 @@ const meta: Meta<typeof CasePage> = {
 export default meta;
 type Story = StoryObj<typeof CasePage>;
 
-/** The key of the todo row. It stands for no record, so it has no id. */
-const TODO_ID = "__todo";
-
 /**
- * "Zu tun" — the page's default state, **above** the strand. It is no event (it
- * has no date) but behaves like one — same selection, same surface on the right —
- * so it sits right above instead of in a card of its own.
- */
-function TodoRow({ active, onClick }: { active: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      className={active ? "v3todo is-active" : "v3todo"}
-      onClick={onClick}
-      aria-current={active ? "true" : undefined}
-    >
-      <span className="v3todo__title">Zu tun</span>
-      <span className="v3todo__sub">1 offen · 1 Freigabe</span>
-    </button>
-  );
-}
-
-/**
- * Column 3 — read-only: summary, notes, clarifications; answering happens in
- * the clarifications tab, not here (F196 §5).
- */
-function NotesColumn() {
-  return (
-    <div className="v2stack">
-      <Card>
-        <CardHead title="Notizen" sub="zuletzt oben" />
-        <div className="v3boxbody">
-          {/* Two lines per note instead of columns — in 370 px a date column would
-              take a third of the width for six characters (0158). */}
-          <NoteFeed notes={NOTES} onAdd={() => {}} />
-        </div>
-      </Card>
-      <Card>
-        <CardHead
-          title="Rückfragen"
-          sub="1 offen · 1 beantwortet"
-          actions={<TextButton tone="quiet" href={tabHref("rueckfragen")}>Alle</TextButton>}
-        />
-        <div className="v3boxbody">
-          {/* **The clarification family's list**, not a paragraph: each row carries
-              state and urgency, and a click leads to the tab where answering
-              happens — the overview this column should give (owner 2026-09-10). */}
-          <ClarificationList
-            clarifications={CLARIFICATIONS}
-            empty={{ title: "Keine Rückfragen." }}
-          />
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-/**
- * Column 2 at "Zu tun": **what is to be done now.** Two blocks in fixed order —
- * open points, missing approvals. What happened stands left in the strand.
- */
-function TodoPane({ withExpectation: withExpectation = true }: { withExpectation?: boolean }) {
-  return (
-    <div className="v2stack">
-      <OpenPoints
-        points={
-          withExpectation
-            ? [
-                {
-                  key: "zahlung",
-                  title: "Die Zahlung an Musterbau Fahrzeugteile GmbH steht aus.",
-                  // **What the expectation knows, stands there** (owner 2026-09-10):
-                  // amount, deadline, time left, level — they decide whether
-                  // anything is due today.
-                  hint: "25,41 € · fällig am 10.08.2026, in 5 Tagen · noch keine Mahnung — danach fragt Ludwig beim Mandanten nach.",
-                  action: <TextButton onClick={() => {}}>Erwartung aufheben</TextButton>,
-                },
-              ]
-            : []
-        }
-        emptyText="An diesem Sachverhalt ist nichts offen."
-      />
-      <Card>
-        <CardHead title="Fehlende Freigaben" sub="1 Vorschlag" />
-        <div className="v3boxbody">
-          <JournalEntryCard
-            lines={PROPOSAL}
-            currency="EUR"
-            caption="Buchungsvorschlag vom 31.07."
-            accountHref={accountHref}
-            totals={false}
-          />
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button variant="primary" size="sm">Freigeben</Button>
-            <Button variant="secondary" size="sm">Ändern</Button>
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-/** Column 2 with an event selected: the transaction with document, entry, verdict. */
-function EventPane({ fromDatev: fromDatev = false }: { fromDatev?: boolean }) {
-  return (
-    <Card>
-      <CardHead
-        title={fromDatev ? "Gutschrift aus DATEV" : "Rechnung 93846778"}
-        sub={fromDatev ? "30.06.2026 · aus dem Spiegel übernommen" : "31.07.2026 · Beleg mit Vorschlag"}
-      />
-      <div className="v3boxbody">
-        <JournalEntryCard
-          lines={
-            fromDatev
-              ? [
-                  { side: "debit", accountNumber: "71202", accountName: "Musterbau Fahrzeugteile GmbH", amount: 21.82, text: "Gutschrift" },
-                  { side: "credit", accountNumber: "5404", accountName: "Wareneingang 19 % VSt", amount: 21.82, text: "Gutschrift" },
-                ]
-              : PROPOSAL
-          }
-          currency="EUR"
-          accountHref={accountHref}
-        />
-        {fromDatev ? (
-          // **Read-only, no actions.** What comes from the mirror was booked in
-          // DATEV — nothing to approve or change here (F196 §8).
-          <p className="v2muted" style={{ margin: 0 }}>
-            Diese Buchung steht in DATEV. Ludwig zeigt sie, ändert sie nicht.
-          </p>
-        ) : (
-          <AiBookingNotes
-            verdict="confirm"
-            confidence="green"
-            rationale="Konto und Kreditor wie bei der Rechnung desselben Lieferanten im Juni; das Kontoblatt 71202 zeigt für Juli keine Bewegung."
-            judgeReasoning="Kein Vorgriff, keine Dublette. Konto und Kreditor stimmen mit der Präzedenz überein."
-            sources={[
-              { key: "1", art: "beleg", quote: "Rechnung vom 16.07.2026 über 25,41 EUR", onOpen: () => {} },
-              { key: "2", art: "history", label: "Kreditor 71202, 14 Buchungen, zuletzt 22.06.2026" },
-            ]}
-          />
-        )}
-      </div>
-    </Card>
-  );
-}
-
-/**
- * **E1 — der Vorschlag steht.** Der Referenzfall des Briefs.
+ * **E1 — der Vorschlag steht.** Der Referenzfall des Briefs (Ausprägung A2,
+ * 13 %).
  *
- * Die Übersicht ist `list | detail | sidebar`: links der Strang mit der
- * Zeile **„Zu tun"** darüber, in der Mitte die Arbeitsfläche, rechts Notizen
- * und Rückfragen. Ohne Auswahl ist „Zu tun" gewählt, und die Mitte zeigt, was
- * zu tun ist; ein Klick auf einen Eintrag zeigt dort den Vorgang.
- *
- * **Der Wechsel ändert nur Spalte 2.** Strang und Notizen bleiben stehen —
- * wer zwischen „was ist zu tun" und „was war das" hin- und herspringt, soll
- * dabei nicht die Übersicht verlieren.
+ * Links der Strang mit der Zeile **„Zu tun"** darüber, in der Mitte die
+ * Arbeitsfläche, rechts Notizen und Rückfragen. Ohne Auswahl ist „Zu tun"
+ * gewählt; ein Klick auf einen Eintrag zeigt dort den Vorgang. Der Wechsel
+ * ändert nur Spalte 2.
  */
-export const ProposalPending: Story = {
-  render: function Fall() {
-    const [selected, setSelected] = useState<string>(TODO_ID);
-    const accountingCase = caseFixture({ disposition: "agent" });
-    const select = (entry: CaseTimelineEntry) =>
-      setSelected(
-        entry.type === "event"
-          ? entry.event.id
-          : entry.type === "clarification"
-            ? entry.clarification.id
-            : entry.expectation.id,
-      );
-
-    return (
-      <CasePage
-        accountingCase={accountingCase}
-        signal={
-          <StatusCallout
-            kicker="Nächster Schritt"
-            title="Der Buchungsvorschlag wartet auf Ihre Prüfung."
-            actions={<Button variant="primary" size="sm">Prüfen</Button>}
-          />
-        }
-        actions={<Button variant="secondary" size="sm">Beleg anhängen</Button>}
-        timeline={
-          <Card>
-            <CardHead
-              title="Ereignisse"
-              sub="alles zu diesem Fall"
-              actions={
-                <TextButton tone="quiet" href={tabHref("ereignisse")}>
-                  vergrößern
-                </TextButton>
-              }
-            />
-            {/* **"Zu tun" stands above the strand, not in it** (owner 2026-09-10):
-                the page's default state, not an event — but it behaves like one. */}
-            <div className="v3boxbody">
-              <TodoRow active={selected === TODO_ID} onClick={() => setSelected(TODO_ID)} />
-              <CaseTimeline
-                events={[DOCUMENT_EVENT]}
-                clarifications={[CLARIFICATION_ANSWERED]}
-                expectations={[PAYMENT_EXPECTED]}
-                today={TODAY}
-                selectedId={selected}
-                onSelect={select}
-              />
-            </div>
-          </Card>
-        }
-        notes={<NotesColumn />}
-      >
-        {selected === TODO_ID ? <TodoPane /> : <EventPane />}
-      </CasePage>
-    );
-  },
-};
+export const ProposalPending: Story = { render: () => <ScenarioPage scenario={S.proposalPending} /> };
 
 /**
  * **E1b — mit einer Buchung aus DATEV.** Derselbe Fall, dazu eine
- * Spiegel-Buchung vom Vormonat.
- *
- * Beide stehen in **einer** Reihe, nach Datum — die Geschichte eines Falls ist
- * eine, nicht zwei Quellen. Dasselbe sind sie trotzdem nicht: der
- * DATEV-Eintrag trägt sein Wort in der Zeile, und in Spalte 2 hat er **keine
- * Handlungen**. An dem einen kann man arbeiten, das andere wird gelesen.
+ * Spiegel-Buchung vom Vormonat — in **einer** Reihe mit den Ludwig-Einträgen,
+ * mit dem Wort „DATEV" in der Zeile und in Spalte 2 **ohne Handlungen**.
  */
-export const WithDatevEntry: Story = {
-  render: function Fall() {
-    const [selected, setSelected] = useState<string>(DATEV_EVENT.id);
-    const accountingCase = caseFixture({ disposition: "agent" });
-    const select = (entry: CaseTimelineEntry) =>
-      setSelected(
-        entry.type === "event"
-          ? entry.event.id
-          : entry.type === "clarification"
-            ? entry.clarification.id
-            : entry.expectation.id,
-      );
+export const WithDatevEntry: Story = { render: () => <ScenarioPage scenario={S.withDatevEntry} /> };
 
-    return (
-      <CasePage
-        accountingCase={accountingCase}
-        timeline={
-          <Card>
-            <CardHead
-              title="Ereignisse"
-              sub="Ludwig und DATEV in einer Reihe"
-              actions={
-                <TextButton tone="quiet" href={tabHref("ereignisse")}>
-                  vergrößern
-                </TextButton>
-              }
-            />
-            <div className="v3boxbody">
-              <TodoRow active={selected === TODO_ID} onClick={() => setSelected(TODO_ID)} />
-              <CaseTimeline
-                events={[DATEV_EVENT, DOCUMENT_EVENT]}
-                expectations={[PAYMENT_EXPECTED]}
-                today={TODAY}
-                selectedId={selected}
-                onSelect={select}
-              />
-            </div>
-          </Card>
-        }
-        notes={<NotesColumn />}
-      >
-        {selected === TODO_ID ? (
-          <TodoPane />
-        ) : (
-          <EventPane fromDatev={selected === DATEV_EVENT.id} />
-        )}
-      </CasePage>
-    );
-  },
+/**
+ * **OPOS-Vortrag** (A1, 29 % — die häufigste und die stillste Seite).
+ *
+ * Ein offener Posten aus DATEV, ein Ereignis, **keine** Buchung, kein Beleg,
+ * kein Signal: Ludwig wartet auf die Zahlung des Kunden. Die Seite sagt
+ * trotzdem etwas — woher der Posten kommt und dass nichts zu tun ist. Der
+ * Vortrag auf der Kreditorseite (A4, 8 %) ist dieselbe Seite.
+ */
+export const OpenItemCarryover: Story = { render: () => <ScenarioPage scenario={S.openItemCarryover} /> };
+
+/**
+ * **Vollständig und exportiert** (A3, 10 %; Punkt 6 des Auftrags).
+ *
+ * Beleg und Zahlung, beide gebucht und an DATEV übergeben, die Klammer
+ * ausgeglichen. Der gute Fall ist still: kein Signal, keine Handlung, der
+ * Export steht als Fakt und nicht als zweiter Zustand im Kopf. Ein Klick auf
+ * die Zahlung zeigt die Klammer.
+ */
+export const CompleteAndExported: Story = { render: () => <ScenarioPage scenario={S.completeAndExported} /> };
+
+/**
+ * **Dauersachverhalt ohne Regel** (A6, 8 % — drei von vier Dauerfällen).
+ *
+ * Der Normalfall: zwei Lastschriften, die zweite als Vorschlag. Die fehlende
+ * Regel ist kein Vorwurf, sondern ein Angebot: „aus der letzten Lastschrift
+ * anlegen".
+ */
+export const RecurringWithoutRule: Story = { render: () => <ScenarioPage scenario={S.recurringWithoutRule} /> };
+
+/**
+ * **Wartet auf Beleg** (A7, Punkt 2 des Auftrags; 26 Fälle
+ * `waiting_for_documents`).
+ *
+ * Zwei Abbuchungen, gebucht gegen das Personenkonto, die Rechnung ist beim
+ * Mandanten angefordert. **Kein Signal**: der Fall wartet auf jemand anderen.
+ * Die Erwartung ist keine Frage — sie steht mit Betrag, Frist und Stufe in der
+ * Mängel-Zone, mit drei Wegen.
+ */
+export const AwaitingDocument: Story = { render: () => <ScenarioPage scenario={S.awaitingDocument} /> };
+
+/**
+ * **Wartet auf Beleg, überfällig** — die eine Eskalation des Bestands (Stufe
+ * 1, genau einmal). Überfällig färbt die **Zeile**, nicht den Kopf.
+ */
+export const AwaitingDocumentEscalated: Story = {
+  render: () => <ScenarioPage scenario={S.awaitingDocumentEscalated} />,
 };
 
 /**
- * Der Reiter **Stammdaten** — und der Grund, warum die Fakten nicht in der
- * Randspalte stehen.
+ * **Ausgangsrechnung mit Zahlung** (A8, 11 %). Die Debitorenseite des
+ * Referenzfalls: die Rechnung ist gebucht, der Zahlungseingang wartet auf
+ * die Freigabe, und die Klammer zeigt, was er ausgleicht.
+ */
+export const OutgoingWithPayment: Story = { render: () => <ScenarioPage scenario={S.outgoingWithPayment} /> };
+
+/**
+ * **Rückfrage offen, die Kanzlei ist am Zug** (Punkt 1; 43 Fälle
+ * `needs_clarification` mit `disposition = accounting`).
  *
- * Dort waren sie eine Liste, die niemand liest, während daneben gearbeitet
- * wird; hier sind sie das Thema der Seite. Über die volle Breite stünde
- * allerdings das Etikett ganz links und der Wert ganz rechts — deshalb
- * **zwei Spalten Paare** (`split`), gemessen an der Liste, nicht am Fenster
- * (Owner 2026-09-10).
+ * Auf Wunsch des Owners **ohne Signal**: die Antwort steht rechts in der
+ * Notizspalte, mit Kontext, Empfehlung und den Antworten als Handlungen, dazu
+ * Freitext (S13). Der Brief (E5) hatte hier ein Signal vorgesehen — beides
+ * zusammen wäre dieselbe Aufforderung zweimal.
+ */
+export const ClarificationOpenFirm: Story = { render: () => <ScenarioPage scenario={S.clarificationOpenFirm} /> };
+
+/**
+ * **Vorschlag zurückgezogen** (Punkt 3; 85 Buchungen im Bestand).
+ *
+ * Was in den Daten „storniert" heißt, ist fast immer ein zurückgezogener
+ * Vorschlag — Storno-Buchungen gibt es keine. Der Fall hat danach keinen
+ * gültigen Vorschlag, und zu tun ist trotzdem nichts: der Agent bucht neu.
+ * Deshalb kein Signal, und der alte Vorschlag bleibt zum Nachlesen stehen.
+ */
+export const ProposalWithdrawn: Story = { render: () => <ScenarioPage scenario={S.proposalWithdrawn} /> };
+
+/**
+ * **Ersetzt** (Punkt 4; 14 Fälle `closed_superseded`). Beim Zusammenführen in
+ * einem anderen Sachverhalt aufgegangen: ein Verweis auf den Nachfolger,
+ * keine Handlungen.
+ */
+export const Superseded: Story = { render: () => <ScenarioPage scenario={S.superseded} /> };
+
+/**
+ * **Judge beanstandet** (Punkt 7). Der einzige Fall mit einem Signal in
+ * Warnfarbe: der Vorschlag steht, aber der Judge hat einen Fehler gefunden,
+ * und die Mängel-Zone nennt ihn mit dem Weg zur Änderung.
+ */
+export const JudgeFlagged: Story = { render: () => <ScenarioPage scenario={S.judgeFlagged} /> };
+
+/**
+ * **Judge angepasst** (Punkt 7). Der Judge hat Konto und Text korrigiert,
+ * bevor der Vorschlag die Kanzlei erreicht — das Urteil steht am Vorschlag,
+ * die Freigabe ist gewöhnlich.
+ */
+export const JudgeAdjusted: Story = { render: () => <ScenarioPage scenario={S.judgeAdjusted} /> };
+
+/**
+ * Der Reiter **Stammdaten** — und der Grund, warum die Fakten nicht in der
+ * Randspalte stehen: hier sind sie das Thema der Seite, in **zwei Spalten
+ * Paaren** (`split`), gemessen an der Liste, nicht am Fenster.
  */
 export const MasterData: Story = {
   render: () => (
