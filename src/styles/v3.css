@@ -1,30 +1,22 @@
 /* ==========================================================================
-   Ludwig v2 — Tabellen- und Listen-Bausteine
-   Quelle: claude-design `Tabellen-Bausteine.dc.html` (F118 §4).
+   Ludwig v3 — table and list building blocks (F118 §4)
 
-   Kompakter als der Bestand (`.section` / `.tbl` in app-chrome.css): Grid statt
-   <table>, 13.5px statt 14px, Spaltenkopf in 11.5px. Beide Sets leben
-   nebeneinander, bis alles migriert ist — die Trennung läuft über den
-   Import-Pfad (`@/ui/v2` gegen `@/ui/components`), nicht über Datei-Suffixe.
-
-   Farben kommen ausschließlich aus `tokens.css` (= `colors_and_type.css` des
-   Design-Systems). Kein zweites Farbsystem.
+   Compact tables and lists: 13.5px text, column heads 11.5px. Colours only
+   from `tokens.css` — no second colour system.
    ========================================================================== */
 
-/* --- Karte: der Rahmen jeder Tabelle und jeder Liste -------------------- */
+/* --- Card: the frame of every table and list ---------------------------- */
 .v2card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  /* `clip` statt `hidden`: beide schneiden an der Rundung ab, aber `hidden`
-     macht die Karte zum **Scroll-Container** — und an dem klebt dann jedes
-     `position: sticky` darin, statt am Fenster. Gemessen 2026-09-10 an der
-     Auswahl-Leiste (F202): mit `hidden` scrollte sie mit (top −565 statt 0).
-     Eine Karte, in der niemand scrollt, braucht keinen Scroll-Container. */
+  /* `clip`, not `hidden`: both cut at the radius, but `hidden` makes the card a
+     **scroll container**, and every `position: sticky` inside then sticks to
+     it instead of the window (measured 2026-09-10, F202). */
   overflow: clip;
 }
 
-/* Kartenkopf — immer vorhanden, auch bei drei Zeilen. */
+/* Card head — always there, even with three rows. */
 .v2card__h {
   padding: 14px 18px;
   border-bottom: 1px solid var(--color-border);
@@ -34,20 +26,18 @@
   justify-content: space-between;
   gap: 12px;
 }
-/* Der Kopf bleibt stehen, während die Karte scrollt (F202) — für Listen, die
-   am Stück abgearbeitet werden. **Der Kopf, nicht die Leiste darin:** ein
-   `sticky` klebt nie über sein Elternteil hinaus, und die Leiste im Kopf käme
-   über dessen Höhe nicht hinaus. Der Hintergrund ist ohnehin gesetzt, also
-   deckt der Kopf, was unter ihm durchläuft. */
+/* The head stays while the card scrolls (F202) — for lists worked through in
+   one go. **The head, not the bar inside it**: sticky never leaves its parent.
+   The background is set, so the head covers what passes beneath. */
 .v2card__h--sticky { position: sticky; top: 0; z-index: 5; }
 .v2card__h .title { font-size: 14px; font-weight: 600; color: var(--color-text); }
 .v2card__h .sub { font-size: 12px; color: var(--color-text-subtle); margin-top: 1px; }
-/* Knöpfe bringen ihre Größe mit; ein Textlink erbt sie (`.v2link` sagt
-   `inherit`, weil er im Fließtext stehen soll). Im Kopf erbte er bis
-   2026-09-10 die 16 px des `body` und stand größer als der Titel daneben. */
+/* Buttons bring their size; a text link inherits it (`.v2link` says `inherit`
+   so it can sit in running text). Before 2026-09-10 it inherited the body's
+   16 px here and stood larger than the title. */
 .v2card__h .actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; font-size: var(--fs-ui-sm); }
 
-/* Kartenfuß — Paginierung nutzt weiter `.pag` aus components.css. */
+/* Card foot — pagination keeps using `.pag` from components.css. */
 .v2card__f {
   padding: 12px 18px;
   border-top: 1px solid var(--color-border);
@@ -56,49 +46,36 @@
   color: var(--color-text-muted);
 }
 
-/* --- Tabelle: echtes <table>, Grid an der Zeile (0106) ------------------- */
-/* Bis 0106 war das hier ein Grid aus <div>s — ohne Zeilen, Spaltenköpfe und
-   Zellen. Der Umbau kostet kein Maß: das Grid sitzt an der **Zeile**, nicht am
-   Container, also behält jedes `tr` sein `grid-template-columns` samt `1fr`
-   und sein `gap`. Kein <colgroup>, kein einziges `role`. */
+/* --- Table: a real <table>, grid on the row (0106) ----------------------- */
+/* The grid sits on the **row**, not the container, so every `tr` keeps its
+   `grid-template-columns` and `gap` — no <colgroup>, no `role`. */
 .v2tbl, .v2tbl__body { display: block; }
 .v2tbl { border-collapse: collapse; width: 100%; text-align: left; }
-/* Der Reset steht in `:where()` und damit auf Spezifität **0-0-0**: jede Regel,
-   die nur an einer Klasse hängt, gewinnt wieder gegen ihn. Vorher war er
-   0-1-1 und schlug sie alle — die Falle hat an einem Tag viermal zugeschnappt
-   (Polster und Gewicht der Zwischenzeile, der Kopf der Aktionsspalte 125,8 px
-   neben seiner Spalte, das Polster der Aufteilungszeile), und die Abnahme
-   musste alle dreizehn Klassen einzeln durchmessen, die je an einem `td` oder
-   `th` landen. Sieben Gegen-Regeln, die nur dagegen anschrieben, sind mit
-   diesem `:where()` weggefallen (0106, Abnahme 2026-09-07). */
+/* The reset is in `:where()`, specificity **0-0-0**, so any single-class rule
+   beats it. At 0-1-1 it beat them all and needed seven counter-rules (0106). */
 :where(.v2tbl th, .v2tbl td) { display: block; min-width: 0; font-weight: inherit; padding: 0; }
-/* `th` steht standardmäßig zentriert — V3 zentriert nichts. Auch diese Zeile
-   in `:where()`: mit 0-1-1 schlug sie `.v2num` und die Zahlenspalten fielen
-   nach links, sobald die Gegen-Regel weg war (gemessen beim Umbau). */
+/* `th` centres by default — V3 centres nothing. Also in `:where()`, or it beats
+   `.v2num` and number columns fall to the left. */
 :where(.v2tbl th) { text-align: left; }
-/* **Zahlen rechts, auch in der Zelle.** Nach dem Umbau auf ein echtes
-   `<table>` (0106) war `.v2num` entweder ein Inline-Span in der Zelle — dort
-   tut `text-align` nichts — oder es verlor gegen `text-align: inherit` an der
-   Zelle selbst. Gemessen standen danach **alle** Zahlen des Sets links, bis zu
-   90 px vor ihrer Spurkante. Beide Wege sind hier abgedeckt: die Zelle mit der
-   Klasse, und der Span darin. */
+/* **Numbers right, in the cell too.** `.v2num` is either the cell's class or a
+   span inside it — `text-align` does nothing on an inline span, so both are
+   covered (0106: all numbers had fallen left). */
 .v2tbl :is(th, td) > .v2num { display: block; text-align: right; }
-/* `--v2-cols` setzt der Aufrufer (Table-Komponente), `--v2-min` optional für
-   horizontales Scrollen bei vielen Spalten. */
-/* Dichte (0057 E9): drei Blöcke, ein Satz Maße. `default` steht am `.v2tbl`
-   selbst, damit eine Tabelle ohne `data-density` unverändert bleibt. */
+/* The caller (Table) sets `--v2-cols`; `--v2-min` optionally, for horizontal
+   scrolling with many columns. */
+/* Density (0057 E9): three blocks, one set of measures. `default` sits on
+   `.v2tbl` itself, so a table without `data-density` is unchanged. */
 .v2tbl {
   --v2-cols: 1fr;
   --v2-row-y: 12px;
   --v2-row-fs: 13.5px;
   --v2-head-y: 9px;
   --v2-detail-y: 14px;
-  /* Breite der Griff-Spalten vor den Daten: Auswahl und Chevron (0057). */
+  /* Width of the handle columns before the data: selection and chevron (0057). */
   --v2-tbl-pick: 32px;
-  /* Die Aktionsspalte ist **fest**, nicht inhaltsbemessen: Kopf und Zeile sind
-     eigene Grids, und `max-content` rechnete jede Seite für sich — gemessen
-     54,2 px im Kopf gegen 176,4 px in der Zeile. Wer breitere Aktionen hat,
-     setzt das Token an seiner Tabelle hoch (0106). */
+  /* The action column is **fixed**, not content-sized: head and row are separate
+     grids, and `max-content` measured each on its own (54 vs 176 px). Wider
+     actions raise the token on their table (0106). */
   --v2-tbl-actions: 180px;
 }
 .v2tbl[data-density="compact"] {
@@ -113,21 +90,14 @@
   --v2-head-y: 11px;
   --v2-detail-y: 18px;
 }
-/* `colSpan` ist wirkungslos, seit die Zellen `display: block` sind (0106):
-   die Datenzeile ist ein Grid, und die Sonderzeile mit **einer** Zelle wird
-   sonst zur schrumpfenden anonymen Tabellenzelle. Gemessen war das
-   Fehler-Feld 707 px breit in einer 1400-px-Tabelle und die Lade-Zeile 0 px.
-   Die Zeile mit einer spannenden Zelle wird deshalb selbst ein Block. */
+/* `colSpan` does nothing since cells are `display: block` (0106): a special row
+   with **one** cell would become a shrinking anonymous table cell. So the row
+   with a spanning cell becomes a block itself. */
 .v2tbl tr:has(> td[colspan]),
-/* Seit 0149 ist die Gruppenüberschrift ein `th[colspan]` — dieselbe Sonderzeile,
-   nur mit der Rolle, die sie immer hatte. Ohne diesen Selektor fiele sie in die
-   anonyme Tabellenzelle zurück, die dieser Umbau gerade befreit hat. */
+/* Since 0149 the group heading is a `th[colspan]` — the same special row. */
 .v2tbl tr:has(> th[colspan]) { display: block; }
-/* Auch diese in `:where()`: mit 0-2-1 schlug sie jede Klassenregel — und zwar
-   genau an den Sonderzellen, die dieser Umbau befreit hat (`__group`,
-   `__empty`, `__detail`, `__error`, `__btxrow__split` stehen alle auf
-   `colSpan`). Bewirkt hat sie dabei nichts: die Breiten sind mit und ohne sie
-   identisch. Gefunden von der Abnahme des `:where()`-Umbaus, 2026-09-07. */
+/* Also in `:where()`: at 0-2-1 it beat every class rule on exactly the special
+   cells (`__group`, `__empty`, `__detail`, `__error`, `__btxrow__split`). */
 :where(.v2tbl td[colspan], .v2tbl th[colspan]) { width: 100%; }
 .v2tbl__scroll { overflow-x: auto; }
 .v2tbl__inner { min-width: var(--v2-min, 0); }
@@ -143,10 +113,8 @@
 
 .v2tbl__head {
   padding: var(--v2-head-y, 9px) 18px;
-  /* Ein Spaltenkopf beschriftet die Werte unter sich — dieselbe Rolle wie ein
-     Feld-Label, also dieselbe Stufe (0089, ergänzt in der Abnahme: der
-     Entscheid hatte den Spaltenkopf keiner Rolle zugeordnet, und so standen
-     `.v2tbl__head` und `.bse__head` verschieden da). */
+  /* A column head labels the values below it — the same role as a field label,
+     so the same step (0089). */
   font-size: var(--fs-ui-sm);
   color: var(--color-text-subtle);
   font-weight: 600;
@@ -158,22 +126,20 @@
   font-size: var(--v2-row-fs, 13.5px);
   color: var(--color-text);
 }
-/* Letzte Zeile ohne Trennlinie (Baukasten-Regel 1). Eine `ExpandableRow` legt
-   ihre Zeile in einen eigenen Wrapper, deshalb der zweite Selektor — sonst
-   verlöre jede aufklappbare Zeile ihre Trennlinie statt nur der letzten. */
+/* Last row without a divider (rule 1). An `ExpandableRow` wraps its row, hence
+   the second selector — otherwise every expandable row would lose its line. */
 .v2tbl__body > .v2tbl__row:last-child { border-bottom: none; }
 .v2tbl__row.is-clickable { cursor: pointer; transition: background var(--duration-fast) var(--ease-standard); }
 .v2tbl__row.is-clickable:hover { background: var(--color-bg-soft); }
 /* Aktive Zeile im Master-Detail: 3-px-Akzentleiste links (Baukasten §10). */
 .v2tbl__row.is-active { background: var(--color-accent-50); border-left: 3px solid var(--color-accent); padding-left: 15px; }
 
-/* `a.v2tbl__row` ist mit 0106 weggefallen: ein `<tr>` kann kein `<a>` sein,
-   der Zeilenlink liegt jetzt als `.v2rowlink` in der ersten Zelle. */
+/* `a.v2tbl__row` is gone since 0106: a `<tr>` cannot be an `<a>`; the row link
+   is a `.v2rowlink` in the first cell. */
 
-/* Zeile mit eigenen Aktionen: der Link mit `.v2rowlink` deckt die ganze Zeile
-   ab. So ist das Ziel überall in der Zeile klickbar, ohne <a> in <a> — und der
-   Link trägt weiter seinen eigenen Text, also braucht es kein aria-label. Was
-   sonst noch klickbar ist (zweiter Link, Zeilenmenü), liegt darüber. */
+/* Row with its own actions: the `.v2rowlink` covers the whole row — clickable
+   everywhere, no <a> in <a>, and the link keeps its own text, so no
+   aria-label. Anything else clickable sits above it. */
 .v2tbl__row:has(.v2rowlink) {
   position: relative;
   cursor: pointer;
@@ -186,8 +152,8 @@
 .v2tbl__row:has(.v2rowlink) summary,
 .v2tbl__row:has(.v2rowlink) button { position: relative; z-index: 2; }
 
-/* Sortierbarer Spaltenkopf (0057): ein Link, kein Zustand. Er erbt Farbe und
-   Größe des Kopfes — nur der Pfeil der aktiven Spalte kommt dazu. */
+/* Sortable column head (0057): a link, not state. It inherits the head's colour
+   and size; only the active column's arrow is added. */
 .v2sortlink {
   display: inline-flex; align-items: center; gap: 4px;
   color: inherit; text-decoration: none; cursor: pointer;
@@ -199,7 +165,7 @@
   border-radius: var(--radius-sm);
 }
 
-/* Zwischenüberschrift über eine volle Zeile — nicht Fettdruck in Spalte 1. */
+/* Subheading across a full row — not bold text in column 1. */
 .v2tbl__group {
   padding: 7px 18px;
   font-size: var(--fs-ui-sm);
@@ -208,15 +174,14 @@
   background: var(--color-bg-soft);
   border-top: 1px solid var(--color-border-subtle);
   border-bottom: 1px solid var(--color-border-subtle);
-  /* Seit 0149 ein `th`: der Browser zentriert das von sich aus, und zentriert
-     steht hier nichts (V3). */
+  /* A `th` since 0149: the browser centres it, and nothing is centred here (V3). */
   text-align: left;
   display: flex;
   align-items: baseline;
   gap: var(--space-3);
 }
-/* Wort links, Zahl rechts — die Zahl rechnet der Aufrufer, die Tabelle stellt
-   sie nur (E2). `tnum`, weil Zahlen untereinander stehen sollen (V3). */
+/* Word left, number right — the caller computes the number, the table only
+   shows it (E2). `tnum` so numbers line up (V3). */
 .v2tbl__grouplabel { display: inline-flex; align-items: baseline; gap: var(--space-2); }
 .v2tbl__groupnote { font-weight: 400; color: var(--color-text-subtle); }
 .v2tbl__groupaside {
@@ -225,12 +190,11 @@
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums lining-nums;
 }
-/* Die Box der Gruppe steht auf der Grundlinie des Wortes daneben schief —
-   sie ist ein Kästchen, kein Buchstabe. */
+/* The group's box sits crooked on the word's baseline — it is a box, not a letter. */
 .v2tbl__group > .v2check { align-self: center; }
 
-/* Aufgeklappter Inhalt unter einer Zeile — kein Modal, kein Drawer. Er ist
-   jetzt eine eigene Zeile mit einer Zelle über alle Spalten. */
+/* Expanded content under a row — no modal, no drawer: a row of its own with
+   one cell across all columns. */
 .v2tbl__detail {
   padding: var(--v2-detail-y, 14px) 18px calc(var(--v2-detail-y, 14px) + 2px) 46px;
   background: var(--color-bg-soft);
@@ -240,8 +204,8 @@
   line-height: 1.6;
 }
 
-/* Leerzustand innerhalb der Karte — der ehrliche Platzhalter (F118 §8).
-   Linksbündig wie jeder Inhalt: V3 zentriert nichts. */
+/* Empty state inside the card — the honest placeholder (F118 §8). Left-aligned
+   like all content: V3 centres nothing. */
 .v2tbl__empty {
   padding: 30px 18px;
   color: var(--color-text-subtle);
@@ -254,7 +218,7 @@
 .v2sub { font-size: 11.5px; color: var(--color-text-subtle); }
 .v2muted { color: var(--color-text-muted); }
 
-/* Chevron für ausklappbare Zeilen (45°, 180 ms). */
+/* Chevron for expandable rows (45°, 180 ms). */
 .v2chev {
   display: inline-block; width: 7px; height: 7px;
   border-right: 1.5px solid var(--color-text-muted);
@@ -264,11 +228,9 @@
 }
 .v2chev.is-open { transform: rotate(45deg); }
 
-/* Mit 0087 zeichnet die Zeile ihren Pfeil nicht mehr selbst — T9 lässt einen
-   Pfeil als Bedeutungsträger nur als Lucide-Zeichen zu. `--icon` nimmt die
-   gezeichneten Kanten zurück und dreht stattdessen das Zeichen darin. Die
-   gezeichnete Fassung bleibt, bis `JournalEntryEditor` nachzieht (die Datei
-   gehört gerade einer anderen Sitzung). */
+/* Since 0087 the row no longer draws its arrow — T9 allows a meaningful arrow
+   only as a Lucide sign. `--icon` removes the drawn edges and turns the sign
+   instead. The drawn version stays until `JournalEntryEditor` follows. */
 .v2chev--icon {
   width: auto; height: auto; border: none;
   display: inline-flex; align-items: center;
@@ -277,12 +239,11 @@
 }
 .v2chev--icon.is-open { transform: rotate(90deg); }
 
-/* Inline-Aktionen: Text-Link-Buttons rechtsbündig, kein Icon-Rätsel. */
+/* Inline actions: text-link buttons, right-aligned, no icon riddles. */
 .v2actions { display: flex; gap: 14px; justify-content: flex-end; align-items: center; }
-/* Die Schriftgroesse kommt aus dem Umfeld (0090): `font: 600 12.5px` hat sie
-   festgeschrieben, und ein Link im 13,5-px-Fliesstext wurde damit kleiner und
-   fetter als sein eigener Satz. Fest bleibt nur das Gewicht — daran erkennt
-   man ihn, und es traegt in jeder Groesse. */
+/* The font size comes from the surroundings (0090): a fixed 12.5px made a link
+   in 13.5px text smaller and bolder than its sentence. Only the weight is
+   fixed — that is what marks it, at any size. */
 .v2link {
   background: none; border: none; padding: 0;
   font-family: inherit; font-size: inherit; font-weight: 600;
@@ -290,35 +251,28 @@
 }
 .v2link:hover:not(:disabled) { text-decoration: underline; }
 .v2link--quiet { font-weight: 400; color: var(--color-text-muted); }
-/* Mit Icon eine Zeile, sonst bleibt er inline im Fließtext. */
+/* With an icon it is one line; otherwise it stays inline in running text. */
 .v2link--icon { display: inline-flex; align-items: center; gap: var(--space-1); }
 .v2link:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
-/* Gesperrt heißt **lesbar gesperrt**: `opacity: .5` auf der Linkfarbe ergab
-   gemessen 2,11 — unter jeder Schwelle, und damit ist der Weg nicht
-   „sichtbar und begründet", sondern nur noch zu ahnen (Abnahme 0065). Die
-   Zahl trägt kein `:1`: sie gilt für eine Deckkraft und für die verworfene
-   Variante, und beides rechnet `check:contrast` nicht nach. Statt Deckkraft
-   die gedämpfte Textfarbe: `--color-text-muted` steht mit 6,69:1 da, und der
-   Unterschied zum aktiven Link bleibt deutlich, weil dieser blau ist. */
-/* Gesperrt braucht eine **eigene** Stufe, nicht die des ruhigen Tons: mit
-   `--color-text-muted` waren „quiet + aktiv" und „quiet + gesperrt"
-   pixelgleich, und übrig blieb `cursor: not-allowed` — nichts, was man ohne
-   Maus sieht (Nachabnahme 0065). `--color-text-subtle` misst 4,88:1, liegt
-   also über der Schwelle und unter beiden aktiven Tönen. */
+/* Disabled means **readably disabled**: `opacity: .5` on the link colour
+   measured 2.11 — below every threshold (0065). Instead the muted text colour:
+   `--color-text-muted` 6.69:1, still clearly apart from the blue active link. */
+/* Disabled needs its **own** step, not the quiet tone's: with
+   `--color-text-muted` "quiet + active" and "quiet + disabled" were identical
+   (0065). `--color-text-subtle` 4.88:1 — above the threshold, below both
+   active tones. */
 .v2link:disabled { color: var(--color-text-subtle); cursor: not-allowed; }
 
 
 /* ==========================================================================
-   Stapelabnahme — der Rahmen (F118 T118.3)
+   Batch acceptance — the frame (F118 T118.3)
 
-   Der Designer kannte Ludwigs Rahmen nicht: sein Entwurf ist eine
-   Vollbild-Anwendung mit eigenem Kopf. In Ludwig bleiben App-Header und
-   Mandanten-Sidebar stehen; der Schritt-Rail ist eine ZWEITE, schmalere
-   Spalte innerhalb der Arbeitsfläche (F118 §1).
+   In Ludwig the app header and client sidebar stay; the step rail is a SECOND,
+   narrower column inside the workspace (F118 §1).
    ========================================================================== */
 
 .abn {
@@ -358,8 +312,8 @@
   margin-top: 6px; flex: 0 0 auto;
   background: var(--color-border-strong);
 }
-/* Die Ampel: der Punkt sagt, wie es um den Schritt steht — der Zähler
-   darunter sagt es noch einmal in Worten (UX-Guidelines V7). */
+/* The traffic light: the dot says how the step stands — the counter below says
+   it again in words (V7). */
 .abn__step--open .dot { background: var(--color-accent-600); }
 .abn__step--done .dot { background: var(--color-success); }
 .abn__step--blocked .dot { background: var(--color-danger); }
@@ -411,9 +365,8 @@
 
 /* --- Stapel-Kopf ------------------------------------------------------- */
 .abn__head {
-  /* Sticky: die Stapelnummer und der Zustand müssen auf jedem Schritt und in
-     jeder Scrollposition lesbar bleiben — sie sind der Kontext jeder
-     Entscheidung auf dieser Seite. */
+  /* Sticky: batch number and state must stay readable on every step and at
+     every scroll position — they are the context of every decision here. */
   position: sticky;
   top: 0;
   z-index: 5;
@@ -434,13 +387,12 @@
   font-size: 12.5px; color: var(--color-text-subtle); margin-top: 6px;
 }
 
-/* Bildschirm zu klein — kein Vorschau-Artefakt, sondern eine echte Grenze.
-   Schwelle auf Ludwigs Innenbreite umgerechnet: Sidebar (240) + Rail (224)
-   + zwei Spalten Arbeitsfläche brauchen zusammen rund 1280 px. */
+/* Screen too small — a real limit, not a preview artefact: sidebar (240) +
+   rail (224) + two workspace columns need about 1280 px. */
 .abn__toosmall { display: none; }
 @media (max-width: 1279px) {
-  /* Sperre, nicht Hinweis: unter 1280 px liegen Rail, Liste und Detail
-     übereinander — geprüft wird dann nicht mehr, sondern geraten. */
+  /* A lock, not a hint: below 1280 px rail, list and detail stack, and checking
+     turns into guessing. */
   .abn__toosmall {
     display: flex;
     flex-direction: column;
@@ -477,7 +429,7 @@
 
 .chk__exits { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
 
-/* Druckansicht: nur die Checkliste, ohne Rahmen der App. */
+/* Print view: only the checklist, without the app frame. */
 @media print {
   .app__sidebar, .app__top, .abn__rail, .abn__head, .chk__exits, .v2card__h .actions { display: none !important; }
   .abn { grid-template-columns: minmax(0, 1fr); }
@@ -485,15 +437,14 @@
 }
 
 /* ==========================================================================
-   Prozessbild (F119 §3) — dasselbe Bild in drei Größen
+   Process picture (F119 §3) — the same picture in three sizes
 
-   Vier Phasen mit Staffelstab. Zehn Zustände sind für die Sachbearbeiterin zu
-   viele Punkte; der Rohzustand steht als Unterzeile darunter. Rot gibt es nur
-   auf `failed` und auf „überfällig" — alles andere bleibt neutral, sonst
-   stumpft die Farbe ab.
+   Four phases with a baton. Ten states are too many dots for a clerk; the raw
+   state stands below as a sub line. Red only on `failed` and "overdue" —
+   everything else stays neutral, or the colour wears off.
    ========================================================================== */
 
-/* --- Mini-Strip: vier Segmente in der Listenzeile ---------------------- */
+/* --- Mini strip: four segments in the list row ------------------------- */
 .pz-mini { display: flex; gap: 3px; width: 64px; }
 .pz-mini span {
   display: block; height: 6px; flex: 1;
@@ -503,10 +454,9 @@
 .pz-mini span.is-active { background: var(--color-accent); }
 .pz-mini span.is-failed { background: var(--color-danger); }
 
-/* --- Staffelstab: wer hat den Stapel — Icon UND Wort ------------------- */
-/* Ein Raster, kein Flex: „niemand" bekommt kein Zeichen (0088), und ohne
-   feste erste Spur ruckte sein Wort 19 px nach links aus der Spalte, in der
-   die Batons untereinander stehen. Der Platz bleibt, das Zeichen nicht. */
+/* --- Baton: who holds the batch — icon AND word ------------------------- */
+/* A grid, not flex: "nobody" gets no sign (0088), and without a fixed first
+   track its word jumped 19 px left out of the batons' column. */
 .pz-owner {
   display: inline-grid; grid-template-columns: 14px auto; align-items: center;
   gap: 5px;
@@ -532,22 +482,21 @@
 .pz-stepper .raw { font-size: 11px; color: var(--color-text-subtle); margin-top: 3px; font-family: var(--font-mono); }
 .pz-stepper .now { margin-top: 4px; }
 
-/* Schleifen werden gezählt, nicht versteckt. */
+/* Loops are counted, not hidden. */
 .pz-loops { font-size: 12px; color: var(--color-text-muted); margin-top: 8px; }
 .pz-loops a { color: var(--color-accent-700); text-decoration: none; }
 .pz-loops a:hover { text-decoration: underline; }
 
-/* --- Staffel-Leiste: wo ist die Zeit hingegangen ----------------------- */
+/* --- Baton bar: where did the time go ---------------------------------- */
 .pz-staffel { display: flex; height: 20px; border-radius: var(--radius-sm); overflow: hidden; }
 .pz-staffel > span { display: block; border-right: 1px solid var(--color-surface); min-width: 2px; }
 .pz-staffel-legend { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
 .pz-staffel-legend > span { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--color-text-muted); }
 .pz-staffel-legend i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
 
-/* ── Eingabefelder ──────────────────────────────────────────────────────────
- * Tailwinds Preflight nimmt `input` den Rahmen; ohne eine eigene Regel ist ein
- * Textfeld optisch nicht von Fließtext zu unterscheiden. Eine Klasse für alle
- * v2-Formulare, statt in jedem Dialog dieselben vier Zeilen inline.
+/* ── Input fields ──────────────────────────────────────────────────────────
+ * Tailwind's preflight strips `input` of its border; without a rule a text
+ * field looks like running text. One class for all forms.
  */
 .v2in {
   border: 1px solid var(--color-border-strong);
@@ -566,27 +515,20 @@
 
 
 /* ==========================================================================
-   Ludwig v2 — generisches Primitiven-Set (F123 T123.1)
+   Ludwig v3 — generic primitives (F123 T123.1)
 
-   Quelle: `Tabellen-Bausteine.dc.html` §4–§10, `StapelSeite.dc.html`,
-   `PruefChecklist.dc.html`, `_ds/ui_kits/app/components.css`.
-
-   Regel UX-Guidelines A5: Hex-Werte und Pixelmaße stehen hier — nie in der Komponente.
-   Farben ausschließlich aus `tokens.css`.
+   A5: hex values and pixel sizes live here — never in the component. Colours
+   only from `tokens.css`.
    ========================================================================== */
 
-/* --- Stapel: der Ersatz für die nie definierte Klasse `stack` ----------- */
+/* --- Stack: the replacement for the never-defined class `stack` -------- */
 .v2stack { display: flex; flex-direction: column; gap: var(--space-4); }
 
-/* --- Knopf -------------------------------------------------------------
- * Nachgezogen an den Rahmen der App (`app-chrome.css` §BUTTONS, Owner
- * 2026-09-03): **flach im Ruhezustand**, Tiefe erst beim Hover, beim Drücken
- * ein halber Pixel Weg nach unten. Der Schatten im Ruhezustand ließ jeden
- * Primärknopf glänzen — das ist in Ludwig herausgenommen worden.
- * Kompakter als zuvor: Gewicht 500 statt 600, Zeilenhöhe aus dem Faktor statt
- * fixer 20 px, weniger Innenabstand (md 40 → 35 px hoch).
- * Höhe kommt aus Zeilenhöhe + Innenabstand, nicht aus `height` — sonst reißt
- * der Knopf bei zwei Zeilen Text.
+/* --- Button ------------------------------------------------------------
+ * Aligned with the app frame (`app-chrome.css` §BUTTONS, owner 2026-09-03):
+ * **flat at rest**, depth on hover, half a pixel down when pressed. Weight 500,
+ * line height from the factor, md 35 px high. Height comes from line height +
+ * padding, not `height`, or the button breaks with two lines of text.
  */
 .v2btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
@@ -645,12 +587,11 @@
 .v2btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .v2btn svg { flex: 0 0 auto; }
 
-/* --- Taste (0035) ---------------------------------------------------------
-   Die Taste steht an ihrer Handlung, nicht nur im Legende-Overlay (V14).
-   Rand `--color-border-control` (3.45:1), weil der Rand das ist, was eine
-   Taste als Taste lesbar macht — V10 verlangt dafür 3:1.
-   Im Knopf trägt sie dessen Farbe: eine helle Fläche auf dem primären Knopf
-   wäre ein Fremdkörper, `currentColor` bleibt in jeder Variante stimmig. */
+/* --- Key (0035) ---------------------------------------------------------
+   The key stands at its action, not only in the legend overlay (V14).
+   Border `--color-border-control` (3.45:1): the border is what makes a key
+   read as a key, and V10 asks 3:1 for it. Inside a button it takes the
+   button's colour — `currentColor` fits every variant. */
 .v2kbd {
   display: inline-flex;
   align-items: center;
@@ -666,13 +607,10 @@
   font-weight: 500;
   white-space: nowrap;
 }
-/* 0.85 statt der 0.7 des alten `.v2btn__key`: bei 0.7 fällt der Rand auf dem
-   tertiären Knopf auf 2.87 gegen bg-soft und damit unter die 3:1, die V10
-   verlangt; bei 0.85 sind es 3.79. **Beide Zahlen tragen kein `:1`** — sie
-   gelten für `--color-accent-700` bei Deckkraft, und Deckkraft rechnet
-   `check:contrast` nicht (es kennt nur volle Token). Bis 2026-09-07 stand
-   hier 2.67, gerechnet gegen das alte `accent-700` #2E78A8; seit 0090 ist es
-   ein anderes. */
+/* 0.85, not 0.7: at 0.7 the border on the tertiary button falls to 2.87 on
+   bg-soft, below V10's 3:1; at 0.85 it is 3.79. **No `:1` on either**: they
+   hold for `--color-accent-700` at an opacity, which `check:contrast` cannot
+   compute. */
 .v2btn .v2kbd {
   border-color: currentColor;
   background: transparent;
@@ -695,11 +633,10 @@
   margin-bottom: -1px;
   display: inline-flex; align-items: center; gap: 6px;
 }
-/* Ein Reiter auf der Debug-Stufe (0136): eine Stufe leiser in Ruhe, sonst
-   nichts. Steht **vor** :hover und .is-active, damit beide sie schlagen —
-   wer den Reiter geöffnet hat, sieht dort hin, und ein leiser aktiver Reiter
-   machte die Leiste zweideutig. `--color-text-subtle` und nicht
-   `--color-text-muted`: auf dem liegt die Ruhefarbe schon. */
+/* A tab on the debug step (0136): one step quieter at rest, nothing else.
+   Placed **before** :hover and .is-active so both beat it — an open quiet tab
+   would make the bar ambiguous. `--color-text-subtle`, because
+   `--color-text-muted` is already the resting colour. */
 .v2tab.is-quiet { color: var(--color-text-subtle); }
 .v2tab:hover { color: var(--color-text); }
 .v2tab.is-active { font-weight: 600; color: var(--color-primary); border-bottom-color: var(--color-primary); }
@@ -761,8 +698,8 @@
   border-radius: var(--radius-md);
   padding: 14px 16px;
 }
-/* Die verlinkte Kachel: derselbe Block, nur als Anker — Farbe und Unterstrich
-   des Links werden zurückgenommen, die Kachel selbst ist das Ziel (I11). */
+/* The linked tile: the same block as an anchor — link colour and underline are
+   taken back, the tile itself is the target (I11). */
 a.v2kpi--link {
   display: block;
   text-decoration: none;
@@ -803,13 +740,12 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2fields__row > span:first-child { color: var(--color-text-muted); }
 .v2fields__row > span:last-child { font-weight: 500; font-variant-numeric: tabular-nums lining-nums; text-align: right; }
 .v2fields__empty { font-size: 13.5px; color: var(--color-text-subtle); }
-/* Zwei Spalten Paare, sobald die Liste selbst breit genug ist (0152, Owner
-   2026-09-10). **Mehrspaltensatz, keine Container-Query**: `columns: 2 300px`
-   teilt nur, wenn jede Spalte 300 px bekommt — die Bedingung hängt damit an
-   der Liste, nicht am Fenster, und im Drawer bleibt sie einspaltig. (Eine
-   Container-Query kann den Container selbst nicht umstellen, nur seine
-   Kinder — der erste Versuch blieb gemessen `display: block`.)
-   Gelesen wird spaltenweise: die Ränge laufen links hinunter, dann rechts. */
+/* Two columns of pairs once the list itself is wide enough (0152, owner
+   2026-09-10). **CSS columns, no container query**: `columns: 2 300px` splits
+   only when each column gets 300 px — the condition hangs on the list, not the
+   window, and in a drawer it stays single. A container query cannot restyle
+   the container itself. Read column by column: ranks run down the left, then
+   the right. */
 .v2fields--split { columns: 2 300px; column-gap: var(--space-6); }
 .v2fields--split .v2fields__row { break-inside: avoid; }
 .v2fields--split .v2fields__h { column-span: all; }
@@ -827,10 +763,9 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 }
 .v2prose__body { font-size: 13.5px; line-height: 1.6; color: var(--color-text); }
 
-/* --- Zustands-Kopfkarte -------------------------------------------------
- * Ausnahme von „Rand ODER Schatten": das Design setzt beides, weil der
- * farbige Rand den Zustand trägt und der Schatten die Karte vom Seitengrund
- * abhebt.
+/* --- State header card --------------------------------------------------
+ * Exception to "border OR shadow": the coloured border carries the state, the
+ * shadow lifts the card off the page.
  */
 .v2callout {
   background: var(--color-surface);
@@ -869,9 +804,9 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2note--warning { background: var(--color-warning-bg); border-color: var(--color-warning); color: var(--color-warning); }
 
 /* --- Dialog -------------------------------------------------------------
- * Anatomie des Drawers aus dem Design-System (`.dr__h/.dr__body/.dr__foot`),
- * nur zentriert statt seitlich. Nur für Bestätigungen mit Folgen (L3) —
- * Details gehören ins Master-Detail oder in den Drawer.
+ * The drawer's anatomy (`.dr__h/.dr__body/.dr__foot`), centred instead of at the
+ * side. Only for confirmations with consequences (L3) — details belong in
+ * master-detail or the drawer.
  */
 .v2scrim {
   position: fixed; inset: 0; z-index: 60;
@@ -903,7 +838,7 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
   color: var(--color-text-subtle); margin-bottom: 3px;
 }
 .v2dlg__title { font-size: 15px; font-weight: 600; color: var(--color-text); }
-/* `.v2dlg__close` ist mit 0092 entfallen: das Kreuz ist ein `IconButton`. */
+/* `.v2dlg__close` is gone since 0092: the cross is an `IconButton`. */
 .v2dlg__body { padding: 18px; overflow-y: auto; font-size: 13.5px; line-height: 1.55; color: var(--color-text); }
 .v2dlg__foot {
   padding: 12px 18px;
@@ -913,10 +848,9 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 }
 
 /* --- Drawer (0042) -------------------------------------------------------
- * Der Slide-over von rechts, aus der App übernommen (`.lwdrawer*`, 29
- * Aufrufstellen) — dort mit Hex und px, hier ausschließlich aus Tokens.
- * Breiten als drei Stufen (`--drawer-sm/md/lg`), damit kein Aufrufer eine
- * eigene Zahl erfindet.
+ * The slide-over from the right, taken from the app (`.lwdrawer*`) — there with
+ * hex and px, here only tokens. Widths as three steps (`--drawer-sm/md/lg`), so
+ * no caller invents a number.
  */
 .v2drawer__scrim {
   position: fixed; inset: 0; z-index: 60;
@@ -957,17 +891,16 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
   font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm);
   color: var(--color-text-muted);
 }
-/* Kopf und Fuss stehen, der Body scrollt. */
+/* Head and foot stay, the body scrolls. */
 .v2drawer__b {
   flex: 1; min-height: 0; overflow-y: auto;
   padding: var(--space-5);
   display: flex; flex-direction: column; gap: var(--space-4);
   font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text);
 }
-/* Der Körper scrollt, also darf sein Inhalt nicht gestaucht werden: als
-   Flex-Spalte schrumpft er seine Kinder standardmäßig, und die Vorschau im
-   Beleg-Drawer stand mit 138 von 558 px da — abgeschnitten statt gescrollt
-   (gemessen in der Abnahme von 0076). */
+/* The body scrolls, so its content must not be squeezed: as a flex column it
+   shrinks its children by default — the document drawer's preview stood at
+   138 of 558 px, cut off instead of scrolled (0076). */
 .v2drawer__b > * { flex-shrink: 0; }
 .v2drawer__foot {
   flex-shrink: 0;
@@ -977,29 +910,21 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
   border-top: var(--border-1);
   background: var(--color-surface-head);
 }
-/* Footer-Slot ohne Inhalt (kein <DrawerFooter>) zeigt keine leere Leiste. */
+/* Footer slot without content (no <DrawerFooter>) shows no empty bar. */
 .v2drawer__foot:empty { display: none; }
 
 /* --- Formular ------------------------------------------------------------ */
 .v2field { display: flex; flex-direction: column; gap: 4px; }
-/* --- Beischriften ohne Versalien (0089) ---------------------------------
-   T3 verbietet Versalien und nennt `text-transform: uppercase` als
-   Gegenbeispiel; A2 sagt dasselbe für den Spaltenkopf. Die Beschriftungen des
-   Sets standen trotzdem in Overline-Typografie: 11 px, Sperrung, Versalien.
+/* --- Captions without capitals (0089) ---------------------------------
+   T3 forbids capitals. Three roles, three steps:
 
-   Drei Rollen, drei Stufen — die Farbe bleibt je Regel, wie sie war (der
-   Kontrast ist Sache von 0090):
+   · **Label of a value** (field, figure, chip row): 12.5 px, 600 — the same
+     step as a `FieldList`'s left column.
+   · **Overline** above a title (kicker, kind): 11.5 px, 600 — size and colour
+     set it apart, not the case.
+   · **Group and section head**: 12.5 px, 700.
 
-   · **Beschriftung eines Wertes** (Feld, Kennzahl, Chip-Reihe): 12,5 px, 600.
-     Dieselbe Stufe wie die linke Spalte einer `FieldList` — ein Wort liest
-     sich gleich, ob das Feld beschreibbar ist oder nicht.
-   · **Überzeile** über einem Titel (Kicker, Art): 11,5 px, 600. Sie steht
-     unter einem Titel, nicht neben einem Wert; Größe und Farbe trennen sie,
-     nicht die Schreibweise.
-   · **Gruppen- und Abschnittskopf**: 12,5 px, 700. Ein Kopf trägt sein
-     Gewicht, dazu meist schon Fläche und Linie.
-
-   Die Sperrung fällt überall weg: sie war für Versalien da. */
+   The letter-spacing goes everywhere: it was there for capitals. */
 .v2field__label {
   font-size: var(--fs-ui-sm); font-weight: 600;
   color: var(--color-text-muted);
@@ -1019,10 +944,10 @@ select.v2in { padding-right: 26px; }
 .v2checkline { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--color-text); cursor: pointer; }
 .v2search { min-width: 220px; font-size: 12.5px; }
 
-/* --- Feld mit Beigabe (0036) ---------------------------------------------
-   Der Rahmen liegt an der Gruppe, das Feld gibt seinen ab: sonst stehen zwei
-   Rahmen ineinander. Fokus, Fehler und Sperre erbt die Gruppe vom Feld über
-   `:focus-within` und `:has()` — kein Zustand, kein JavaScript. */
+/* --- Field with addon (0036) --------------------------------------------
+   The border sits on the group, the field gives up its own — otherwise two
+   borders nest. Focus, error and lock pass to the group via `:focus-within`
+   and `:has()` — no state, no JavaScript. */
 .v2ing {
   display: flex;
   align-items: center;
