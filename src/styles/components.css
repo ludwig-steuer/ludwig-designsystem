@@ -32,21 +32,12 @@
 .banner__body { flex: 1; }
 .banner__title { font-weight: 600; }
 .banner__action { background: transparent; border: none; cursor: pointer; font: inherit; font-weight: 500; padding: 2px 4px; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-/* Alle vier Bannertöne halten die Schwelle für Text — nachgerechnet aus den
-   Farben, mit denen wirklich gemalt wird: info 4,69 · success 4,63 ·
-   warning 4,78 · danger 4,99.
+/* All four banner tones meet the text threshold, computed from the colours
+   actually painted: info 4.69 · success 4.63 · warning 4.78 · danger 4.99.
 
-   Die Zahlen tragen kein `:1`, und das ist die Konvention und kein Versehen:
-   die vier Flächen sind **Hex-Literale** in diesem Blatt, keine Token, also
-   kann `check:contrast` sie nicht nachrechnen. Wer sie tokenisiert, darf die
-   Form `X.XX:1` schreiben und bekommt den Wächter dazu (eigene Aufgabe, V13).
-
-   Der Kommentar sagte bis 2026-09-08 „#2E78A8 auf #E3F0F8 misst 4.14 und
-   liegt unter der Schwelle" — er hat vor etwas gewarnt, das nicht (mehr) da
-   war: `#2E78A8` ist der alte Wert von `accent-700`, den 0112 dunkler gesetzt
-   hat. Die Zahl stimmte für die alte Farbe und für keine, die hier steht.
-   Gefunden, als der Wächter dieses Blatt zum ersten Mal las (Abnahme 0055,
-   dritte Runde). */
+   No `:1` on purpose: the four surfaces are **hex literals** here, not
+   tokens, so `check:contrast` cannot recompute them. Whoever tokenises them
+   may write `X.XX:1` and gets the guard with it (V13). */
 .banner--info    { background: #E3F0F8; border-color: #C7DFEC; color: var(--color-accent-700); }
 .banner--success { background: #F0F6F2; border-color: #D5E3DB; color: var(--color-success); }
 .banner--warning { background: #F5EEE0; border-color: #E8DCBE; color: var(--color-warning); }

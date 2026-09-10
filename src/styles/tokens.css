@@ -29,13 +29,9 @@
 
   /* Accent — Mittelblau. Used sparingly for links, focus, active states. */
   --color-accent:         #3B8FC4;
-  /* 5.45:1 auf Weiss, 5.03:1 auf bg-soft, 5.04:1 auf accent-50 — WCAG 1.4.3 AA.
-     Vorher #2E78A8: 4.81 auf Weiss, aber nur 4.44 auf bg-soft und 4.45 auf
-     accent-50, also unter 4.5 genau dort, wo Links am haeufigsten stehen —
-     in Zeilen und auf der aktiven Zeile (0090). Die zwei accent-50-Werte
-     standen bis zum 2026-09-07 als 4.85 und 4.28 hier; beide waren
-     verrechnet, der Schluss bleibt derselbe (die Pruefung hat sie zweimal
-     unabhaengig nachgerechnet, A4 will den gemessenen Wert). */
+  /* 5.45:1 on white, 5.03:1 on bg-soft, 5.04:1 on accent-50 — WCAG 1.4.3 AA.
+     Darker than the old #2E78A8, which fell below 4.5 exactly where links sit
+     most often: in rows and on the active row (0090). */
   --color-accent-700:     #2B6F9C;
   --color-accent-600:     #3B8FC4; /* base */
   --color-accent-500:     #5BA4D1;
@@ -73,17 +69,15 @@
   --color-info:           var(--color-accent);
   --color-info-bg:        var(--color-accent-50);
 
-  /* Scrim hinter Dialog und Drawer. */
+  /* Scrim behind dialog and drawer. */
   --color-scrim:          rgba(20, 36, 56, 0.30);
 
   /* Focus ring */
   --color-focus:          #3B8FC4;
   --color-focus-ring:     rgba(59, 143, 196, 0.32);
-  /* Weicher Ring innen am Feldrahmen (Eingabe im Fokus). Dekorativ: den
-     Kontrast trägt der Rahmen selbst (--color-primary-700, 11.64:1 auf Weiss)
-     — WCAG 1.4.11. Bis 2026-09-07 stand dort 9,4 (ohne Doppelpunkt geschrieben, weil
-     nur geltende Angaben die Form X:1 tragen); der Wert ergab sich gegen
-     keinen Grund des Satzes und war verrechnet (Abnahme 0055). */
+  /* Soft inner ring at the field border (input in focus). Decorative: the
+     border carries the contrast (--color-primary-700, 11.64:1 on white) —
+     WCAG 1.4.11. */
   --color-focus-ring-soft: rgba(59, 143, 196, 0.14);
 
   /* ====================================================================
@@ -113,9 +107,8 @@
   --fs-caption:   13px;   --lh-caption:   1.45;   --tr-caption:    0;
   --fs-overline:  12px;   --lh-overline:  1.40;
 
-  /* Produktives Register (A1, §1). Die Leiter, aus der **jede** v3-Komponente
-     ihre Größe nimmt — vorher stand jede Zahl einzeln in `v3.css`, und eine
-     neue Komponente riet. Das lesende Register bleibt bei --fs-body & Co. */
+  /* Productive register (A1, §1): the ladder **every** v3 component takes its
+     size from. The reading register stays with --fs-body & co. */
   --fs-ui-xl:    20px;    --lh-ui-xl:   1.25;   /* Seitentitel */
   --fs-ui-lg:    16px;    --lh-ui-lg:   1.35;   /* Karten-, Detailtitel */
   --fs-ui-md:    14px;    --lh-ui-md:   1.45;   /* Knopf, betonte Zeile */
@@ -169,8 +162,8 @@
                  0 24px 48px rgba(20, 36, 56, 0.10),
                  inset 0 1px 0 rgba(255, 255, 255, 0.7);
   --shadow-inset: inset 0 1px 2px rgba(20, 36, 56, 0.05);
-  /* Der Slide-over wirft nach links, nicht nach unten — sonst hat er an der
-     einzigen sichtbaren Kante keine. */
+  /* The slide-over casts its shadow to the left, not down — otherwise its only
+     visible edge would have none. */
   --shadow-drawer: -8px 0 24px rgba(20, 36, 56, 0.14),
                  -2px 0 6px rgba(20, 36, 56, 0.08);
 
@@ -216,18 +209,14 @@
   --container-base:   1080px;
   --container-wide:   1280px;
   --content-measure:  68ch;
-  /* Maximale Content-Breite der App-Seiten. Ohne Deckel laufen Tabellen auf
-     27"-Monitoren über 2000px breit — Spalten reißen auseinander, das Auge
-     verliert die Zeile. */
-  /* 1760px seit 2026-09-09 (Owner): der Deckel bleibt, er liegt nur höher.
-     1440 war zu eng für eine Liste mit zehn Spalten — die Belegliste wurde
-     rechts abgeschnitten. 1760 ist die Breite, bei der sie ganz steht, ohne
-     dass Fließtext auf Doppelmonitoren zerläuft. */
+  /* Maximum content width of app pages. Without a cap, tables on 27" monitors
+     run past 2000px — columns drift apart and the eye loses the row. */
+  /* 1760px since 2026-09-09 (owner): 1440 cut a ten-column list on the right;
+     1760 fits it without letting prose sprawl on dual monitors. */
   --container-app:    1760px;
 
-  /* Drawer-Breiten als drei Stufen statt ad-hoc-Werte je Aufrufer (F113-T113.2):
-     sm = Fakten-Liste, md = Detail-Ansicht, lg = breite Inhalte
-     (PDF-Vorschau, Kontoblatt-Tabelle). */
+  /* Drawer widths as three steps instead of ad-hoc values (F113-T113.2):
+     sm = fact list, md = detail view, lg = wide content (PDF preview, ledger). */
   --drawer-sm: clamp(340px, 34vw, 560px);
   --drawer-md: clamp(360px, 50vw, 880px);
   --drawer-lg: min(1100px, 94vw);
@@ -236,14 +225,11 @@
 /* ==========================================================================
    SEMANTIC TYPE STYLES
 
-   **Nur Klassen, keine Element-Selektoren.** Zwei Gründe, beide gemessen
-   (2026-09-03): `h1`–`h6` schlägt Tailwinds Preflight (`font-size: inherit`),
-   das in `index.css` nach dieser Datei lädt — die Element-Regel war wirkungslos.
-   Und `p` traf fremdes Markup: im Markdown-Reader stand der Absatz auf 16 px
-   (lesendes Register), während die Aufzählung daneben 13,5 px vom Container
-   erbte. Wer eine Stufe will, schreibt sie an: `<h2 class="lw-h2">`,
-   `<p class="lw-body">`. Ohne Klasse erbt ein Element die Größe seiner Fläche
-   — genau das, was eine Komponente braucht.
+   **Classes only, no element selectors** (measured 2026-09-03): `h1`–`h6`
+   lose to Tailwind's preflight, which loads after this file, and `p` hit
+   foreign markup. Whoever wants a step writes it: `<h2 class="lw-h2">`.
+   Without a class an element inherits its surface's size — exactly what a
+   component needs.
    ========================================================================== */
 
 .lw-display {
@@ -323,12 +309,9 @@
   color: var(--color-text-muted);
 }
 
-/* Die Überzeile ist **keine** benannte Ausnahme von T3 (0089): eine Regel, die
-   Versalien verbietet und eine ganze typografische Klasse davon ausnimmt, ist
-   keine Regel. Sie bleibt, was sie ist — die kleinste Stufe über dem Fließtext,
-   die eine Einordnung über einen Titel setzt —, aber sie tut es über Größe,
-   Gewicht und Farbe. Die Sperrung fällt mit den Versalien weg; sie war dazu da,
-   Großbuchstaben lesbar zu halten. */
+/* The overline is **no** exception to T3 (0089): it stays the smallest step
+   above running text that sets a category above a title — through size,
+   weight and colour, not capitals. The letter-spacing went with the capitals. */
 .lw-overline {
   font-family: var(--font-sans);
   font-weight: 600;

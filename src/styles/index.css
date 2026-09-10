@@ -1,26 +1,17 @@
-/* Die Schriften. In der App lädt sie next/font/google und setzt
-   `--font-*-loaded`; hier muss die Kette selbst dafür sorgen — alles, was
-   diese Datei nicht erreicht, rendert später in Systemschrift.
-   (@import muss vor allen anderen Regeln stehen.) */
+/* The fonts. In the app next/font/google loads them and sets `--font-*-loaded`;
+   here the chain must do it itself. (@import must precede all other rules.) */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 
-/* Dieselbe Kette wie das App-Layout — ohne die seitenspezifischen Styles,
-   die kein Design-System-Baustein braucht. */
+/* The same chain as the app layout — without page-specific styles no building
+   block needs. */
 
-/* **Preflight zuerst** (0111). Tailwinds Grundschicht lädt seit jeher zuletzt,
-   und bei gleicher Spezifität gewinnt die spätere Regel: `a { color: inherit }`
-   nahm jedem Link seine Farbe, `img { height: auto }` jedem Zeichen sein Maß.
-   Beides sind Regeln, die eine Grundschicht setzen darf — nur eben zuerst,
-   damit die eigenen Blätter sie überschreiben statt umgekehrt.
-
-   Als `@import`, nicht als `@tailwind base`: eine `@import`-Regel muss **vor**
-   jeder anderen Regel stehen, sonst verwirft der Browser sie. Ein `@tailwind`
-   an dieser Stelle hätte alle folgenden `@import`s ungültig gemacht — gemessen
-   im ersten Anlauf: sämtliche eigenen Blätter fielen aus, die Stories standen
-   in Systemschrift und schwarzem Text. */
+/* **Preflight first** (0111): at equal specificity the later rule wins, and
+   Tailwind's base layer used to load last — `a { color: inherit }` took every
+   link's colour. As `@import`, not `@tailwind base`: an `@import` must come
+   before every other rule, or the browser drops it and all imports after it. */
 @import "tailwindcss/base";
 
-/* Design-Tokens (CSS-Variablen) — die 1:1-Übernahme aus dem Design. */
+/* Design tokens (CSS variables) — taken 1:1 from the design. */
 @import "./tokens.css";
 
 /* App-Chrome (Buttons, Tabellen, Karten, Tabs). */
@@ -32,7 +23,7 @@
 /* Buchungs-Komponenten (Buchungssatz, Editor-Drawer, Combobox). */
 @import "./booking.css";
 
-/* v3-Bausteine (Tabellen/Listen des Design-Systems). */
+/* v3 building blocks (the design system's tables and lists). */
 @import "./v3.css";
 
 @tailwind components;

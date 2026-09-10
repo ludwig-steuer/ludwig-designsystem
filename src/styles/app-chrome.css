@@ -1,15 +1,7 @@
-/* Keine Versalien (0089): T3 und A2 kennen keine Ausnahme, und die
-   A5-Ausnahme für diese Datei deckt rohe Hex- und rgba()-Werte, nicht die
-   Schreibweise. Neun Stellen sind auf dieselben zwei Stufen gegangen wie in
-   `v3.css`: Beschriftung 12,5 px / 600, Überzeile 11,5 px / 600. Die
-   Sperrung fällt weg — sie war für Versalien da.
+/* App-only chrome on top of the design tokens.
+   No capitals (0089): labels 12.5 px / 600, overlines 11.5 px / 600, group
+   and section heads 12.5 px / 700 — the same three roles as in `v3.css`.
 
-   Die Rollen sind dieselben drei wie dort: Beschriftung eines Wertes
-   12,5 px / 600, Überzeile 11,5 px / 600, Gruppen- und Abschnittskopf
-   12,5 px / 700. `.sb__navlabel` und `.hero__summary > .lbl` sind Köpfe, die
-   `.lbl` an Kennzahl und Fakt sind Beschriftungen (nachgezogen 2026-09-06).
-
-   App-only chrome on top of design tokens
    Philosophy: flat surfaces, soft drop-shadow for depth, gradient ONLY on:
    - Primary buttons (call-to-action)
    - Dark sidebar (visual anchor)
@@ -91,8 +83,8 @@ body { background: #FAFBFC; }
 /* Sidebar — nav */
 .sb__nav { padding: 8px 8px; flex: 1; overflow-y: auto; }
 .sb__navlabel {
-  /* Gruppenkopf über Zeilen — dieselbe Rolle wie `.v2lp__grp` und
-     `.v2tbl__group`, also Gewicht 700 (0089, Abnahme 2026-09-06). */
+  /* Group head above rows — the same role as `.v2lp__grp` and
+     `.v2tbl__group`, so weight 700 (0089). */
   font-size: 12.5px; font-weight: 700;
   color: #6F8499;
   padding: 14px 12px 6px;
@@ -167,17 +159,14 @@ body { background: #FAFBFC; }
   display: flex; align-items: center; padding: 0 24px; gap: 16px;
 }
 .app__main    { grid-column: 2; overflow: auto; padding: 32px; background: #FAFBFC; }
-/* Content-Deckel: statt max-width am Inhalt wächst das seitliche Padding.
-   So bleiben die Full-Bleed-Ausbrüche (MandantBand, .bd-page — beide
-   margin-inline: -32px) korrekt am Content ausgerichtet, ohne dass jede
-   Seite einen eigenen Container braucht. */
+/* Content cap: instead of max-width on the content, the side padding grows.
+   Full-bleed breakouts (the client band, .bd-page — both margin-inline:
+   -32px) stay aligned without a container per page. */
 .app__main    { padding-inline: max(32px, calc((100% - var(--container-app)) / 2)); }
 
-/* MandantBand sitzt direkt an der TopBar: wenn das Band der erste
-   Child von .app__main ist, schlucken wir das 32px-Top-Padding hier am
-   Container — das vermeidet die sonst entstehende Lücke, ohne das
-   Band selbst per negativem Margin zu verschieben (was Sticky bricht
-   und Children unters Band rutscht). :has() ist seit 2023 stabil. */
+/* The client band sits right under the top bar: when it is the first child
+   of .app__main, the container swallows its 32px top padding — no gap, and no
+   negative margin on the band (which breaks sticky). */
 .app__main:has(> .ludwig-client-band:first-child) { padding-top: 0; }
 
 .tb__crumb { font-size: 13px; color: var(--color-text-muted); }
@@ -342,13 +331,13 @@ body { background: #FAFBFC; }
 .btn-tertiary:hover { color: var(--color-primary); }
 .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 5px; }
 .btn .icon { width: 16px; height: 16px; }
-/* Ein gesperrter Knopf muss gesperrt aussehen: ohne diese Regel bleibt ein
- * `disabled` Primärknopf optisch voll aktiv und der Klick verpufft stumm. */
+/* A disabled button must look disabled: without this rule a disabled primary
+ * button looks fully active and the click fizzles silently. */
 .btn:disabled, .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
 .btn:disabled:hover, .btn[disabled]:hover { background: inherit; }
 
-/* Dezente Sekundär-Aktionen (Text-Links) unter einem Primär-Button, z. B.
-   „Manuell buchen · Ablehnen" auf den Schließen-Karten. */
+/* Quiet secondary actions (text links) under a primary button, e.g.
+   "Manuell buchen · Ablehnen" on the closing cards. */
 .closecard-quiet { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--color-text-subtle); }
 .closecard-quiet button { background: none; border: none; padding: 0; font: inherit; color: var(--color-text-muted); cursor: pointer; }
 .closecard-quiet button:hover { color: var(--color-primary); text-decoration: underline; }
@@ -387,13 +376,13 @@ body { background: #FAFBFC; }
 .section__h h3 { margin: 0; font-size: 15px; font-weight: 600; color: var(--color-text); }
 .section__h .count { font-size: 12px; color: var(--color-text-muted); }
 .section__filters { padding: 10px 20px; border-bottom: 1px solid var(--color-border); display: flex; gap: 8px; align-items: center; background: #FAFBFC; }
-/* Fließtext/Freiform in einer Section — Tabellen bleiben randlos, Text nicht. */
+/* Prose in a section — tables stay borderless, text does not. */
 .section__body { padding: 16px 20px; font-size: 13.5px; line-height: 1.55; }
 .section__body > :first-child { margin-top: 0; }
 .section__body > :last-child { margin-bottom: 0; }
-/* Fließtext-Dokument in einer Section (Übergabebericht, Guidelines): mehr Luft
-   und Zeilenlänge auf Lesemaß — über die volle Bildschirmbreite liest sich kein
-   Absatz. Tabellen im Text bleiben absichtlich breit. */
+/* A prose document in a section (handover report, guidelines): more air and a
+   reading measure — no paragraph reads across the full screen. Tables in the
+   text stay wide on purpose. */
 .section__body.prose { padding: 22px 26px; }
 .section__body.prose p,
 .section__body.prose ul,
@@ -401,7 +390,7 @@ body { background: #FAFBFC; }
 .section__body.prose h3,
 .section__body.prose h4,
 .section__body.prose h5 { max-width: 820px; }
-/* Ausklappbarer Langtext (`<details>`) — Teaser im Summary, offen der Volltext. */
+/* Expandable long text (`<details>`) — teaser in the summary, full text when open. */
 .more > summary { cursor: pointer; list-style: none; }
 .more > summary::-webkit-details-marker { display: none; }
 .more > summary::after { content: " mehr ▾"; color: var(--color-primary); font-size: 0.92em; white-space: nowrap; }
@@ -418,8 +407,8 @@ body { background: #FAFBFC; }
 .tbl tbody tr { cursor: pointer; transition: background 100ms; }
 .tbl tbody tr:hover { background: var(--color-bg-soft); }
 .tbl tbody tr:last-child td { border-bottom: none; }
-/* I11 „Die Zeile ist das Ziel": ein Link mit .rowlink deckt seine Zeile ganz ab —
-   ein Fokus-Stopp mit eigenem Text, kein <a> in <a>. Vorbild .v2rowlink (v2.css). */
+/* I11 "the row is the target": a link with .rowlink covers its whole row —
+   one focus stop with its own text, no <a> in <a>. Model: .v2rowlink. */
 .tbl tbody tr:has(.rowlink) { position: relative; }
 .tbl .rowlink::after { content: ""; position: absolute; inset: 0; }
 .tbl .acct { font-family: var(--font-mono); font-size: 12.5px; }
@@ -429,8 +418,8 @@ body { background: #FAFBFC; }
 .tbl .doc-name { font-weight: 500; color: var(--color-text); }
 .tbl .doc-sub { font-size: 12px; color: var(--color-text-muted); }
 
-/* Condensed Variant — schmalere Zeilen für lange Listen (z.B. Konto-Auszug,
-   Buchungsstapel). Default-Tabelle bleibt luftig für UI-orientierte Listen. */
+/* Condensed variant — tighter rows for long lists (ledger, booking batch).
+   The default table stays airy for UI-oriented lists. */
 .tbl--condensed { font-size: 12.5px; }
 .tbl--condensed thead th { padding: 8px 14px; font-size: 10.5px; }
 .tbl--condensed tbody td { padding: 8px 14px; }
@@ -445,24 +434,21 @@ body { background: #FAFBFC; }
 /* Badges — flat */
 .bdg { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; line-height: 1.4; white-space: nowrap; }
 .bdg .dot { width: 6px; height: 6px; border-radius: 999px; }
-/* Kontrast gemessen (0112): der Vordergrund kommt aus dem Token, nicht als
-   eigener Hex — `--color-accent-700` misst 4.69:1 auf accent-100 (die Flaeche
-   dieser Marke), vorher waren es mit dem festen #2E78A8 nur 4.14. */
-/* Beide Seiten als Token, damit `check:contrast` das prueft, was hier steht:
-   der Waechter loest den **genannten** Grund auf, nicht die Flaeche, die
-   daneben als Hex steht — wer den Hex aendert, aendert die Zahl, ohne dass
-   es auffaellt (Abnahme 0112, M3). */
+/* Contrast measured (0112): the foreground comes from the token, not a hex —
+   `--color-accent-700` measures 4.69:1 on accent-100 (this badge's surface). */
+/* Both sides as tokens, so `check:contrast` checks what stands here: it
+   resolves the **named** ground, not the hex next to it (0112, M3). */
 .bdg-info { background: var(--color-accent-100); color: var(--color-accent-700); border-color: #C7DFEC; }
-/* (`--color-success`, 4.63:1 auf success-bg). Die Flaeche ist eine Stufe
-   heller als frueher, weil #3F7A5A auf dem alten #EBF2EE nur 4.46 trug und
-   das Gruen dunkler zu ziehen es aus dem Rest des Satzes herausbraeche. */
+/* (`--color-success`, 4.63:1 on success-bg). The surface is a step lighter
+   than before: the old one carried only 4.46, and darkening the green would
+   break it out of the palette. */
 .bdg-success { background: var(--color-success-bg); color: var(--color-success); border-color: #D5E3DB; }
 .bdg-warning { background: #F5EEE0; color: var(--color-warning); border-color: #E8DCBE; }
 .bdg-neutral { background: var(--color-bg-sunken); color: var(--color-text); border-color: var(--color-border); }
-/* Ludwig-Ergaenzung (F123): der DS-React-Badge kennt `danger`, das DS-CSS nicht. */
+/* Ludwig addition (F123): the DS React badge knows `danger`, the DS CSS does not. */
 .bdg-danger { background: var(--color-danger-bg); color: var(--color-danger); border-color: #E7CFCE; }
 
-/* Indeterminate-Progress — für laufende Pipeline-Runs (ProcessingProgress) */
+/* Indeterminate progress — for running pipeline runs (ProcessingProgress) */
 .progress-indeterminate {
   position: relative;
   width: 100%;
@@ -507,11 +493,10 @@ body { background: #FAFBFC; }
 .filter-search input:focus { border-color: rgba(59,143,196,0.55); box-shadow: 0 0 0 3px rgba(59,143,196,0.14); }
 
 /* ====================================================================
-   DETAIL-HERO — Kopf jeder Detailseite (Sachverhalt, Buchungslauf, …).
-   Eine weiße Karte wie `.section`: Icon + Titel + Sub-Zeile, rechts eine
-   Kennzahl, darunter optional Zusammenfassung und eine Fakten-Reihe.
-   Kam vom Sachverhalt (`.sv-hero`) und ist hier generisch, damit jede
-   Detailseite denselben Kopf trägt statt eines eigenen Eigenbaus.
+   DETAIL HERO — the head of every detail page (case, booking run, …): a white
+   card like `.section` with icon, title, sub line, a figure on the right,
+   optionally a summary and a facts row below. Generic, so every detail page
+   carries the same head.
    ==================================================================== */
 .hero {
   background: #fff; border: 1px solid var(--color-border); border-radius: 8px;
@@ -686,8 +671,8 @@ body { background: #FAFBFC; }
 .confdot--yellow { background: #D2B037; }
 .confdot--orange { background: #D9822B; }
 .confdot--red    { background: #C0392B; }
-/* Ludwig-Ergaenzung (F123): „keine Angabe" ist ein eigener Zustand — ein
-   leerer Punkt statt einer erfundenen Farbe. */
+/* Ludwig addition (F123): "no data" is a state of its own — an empty dot, not
+   an invented colour. */
 .confdot--none   { background: transparent; border: 1px solid var(--color-border-strong); }
 
 /* Source-link chip — shows which area of the doc Ludwig pulled this from */
@@ -750,16 +735,15 @@ body { background: #FAFBFC; }
 .lw-note .label { font-size: 11.5px; font-weight: 600; color: #2E78A8; margin-bottom: 2px; }
 
 /* ==========================================================================
-   Ergänzungen für die v3-Bausteine AppShell (0030) und NavList (0031).
+   Additions for the v3 blocks AppShell (0030) and NavList (0031).
 
-   Diese Datei ist die benannte Ausnahme zu A5 (Owner, 2026-09-03): der
-   Anwendungsrahmen behält seine rohen Hex- und rgba()-Werte. Neue Regeln
-   halten sich trotzdem an Tokens, wo es welche gibt — die Ausnahme ist
-   erlaubt, nicht verpflichtend.
+   This file is the named exception to A5 (owner, 2026-09-03): the app frame
+   keeps its raw hex and rgba() values. New rules still use tokens where they
+   exist.
    ========================================================================== */
 
-/* Sperre unter 1280 px (L1): darunter liegen Rail, Liste und Detail
-   übereinander, und dann wird nicht mehr geprüft, sondern geraten. */
+/* Lock below 1280 px (L1): below it rail, list and detail stack, and checking
+   turns into guessing. */
 .app__toonarrow { display: none; }
 @media (max-width: 1279px) {
   .app__toonarrow {
@@ -773,14 +757,14 @@ body { background: #FAFBFC; }
   .app__toonarrow span { max-width: 46ch; color: var(--color-text-muted); }
 }
 
-/* Eintrag ohne Icon: der erste Buchstabe hält den Platz, damit eingeklappt
-   kein leerer Knopf steht. */
+/* Entry without icon: the first letter holds the place, so no empty button
+   stands there when collapsed. */
 .sb__navinitial {
   display: inline-flex; align-items: center; justify-content: center;
   width: 18px; height: 18px;
   font-size: 12px; font-weight: 600; text-transform: none;
 }
-/* Roadmap-Eintrag: sichtbar, nicht klickbar. */
+/* Roadmap entry: visible, not clickable. */
 .sb__navitem.is-future { opacity: 0.45; cursor: not-allowed; }
 .sb__navitem.is-future:hover { background: none; }
 /* Ein rufender Zähler trägt zusätzlich das Wort im `title` (V7). */

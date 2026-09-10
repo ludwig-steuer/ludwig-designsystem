@@ -1,9 +1,9 @@
 /* ==========================================================================
-   Booking components — global, reusable across screens (Sachverhalt, Beleg …).
+   Booking components — global, reusable across screens (case, document …).
    Ported from the Ludwig Design System v2 "sachverhalt-screen" prototype
-   (sv.css / sv2.css). Buchungssatz, KI-Begründung, Freigabe-Leiste, generischer
-   Drawer (namespaced .lwdrawer*, weil components.css ein eigenes .drawer hat)
-   und der manuelle Buchungs-Editor. Tokens stammen aus tokens.css.
+   (sv.css / sv2.css): journal entry, AI rationale, approval bar, generic drawer
+   (namespaced .lwdrawer*, because components.css has its own .drawer) and the
+   manual booking editor. Tokens come from tokens.css.
    ========================================================================== */
 
 /* --- small shared helpers (also used by sachverhalt.css) ------------------ */
@@ -31,8 +31,8 @@
 .je__acct .name { font-size: 12.5px; color: var(--color-text); }
 .je__acct .tax { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; font-family: var(--font-mono); }
 
-/* Klickbare Kontonummer → öffnet den Konto-Historie-Drawer. Button auf
-   inline-Link zurückgesetzt; erbt Farbe/Font der umschließenden .num/.name. */
+/* Clickable account number → opens the account history drawer. Button reset
+   to an inline link; inherits colour/font of the surrounding .num/.name. */
 .lnk-acct { background: none; border: none; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
 .lnk-acct:hover { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--color-primary); }
 .lnk-acct:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; border-radius: 3px; }
@@ -54,7 +54,7 @@
   border: 1px solid var(--color-border);
 }
 
-/* DATEV-Export-Badge (F10-T10.2): Buchung ist raus — nur noch Storno. */
+/* DATEV export badge (F10-T10.2): the entry is out — only reversal remains. */
 .bk-export-chip {
   font-size: 10px; font-weight: 600; letter-spacing: 0.03em;
   text-transform: none; padding: 1px 7px; border-radius: 999px;
@@ -152,7 +152,7 @@
 .lwdrawer__close:hover { background: var(--color-bg-soft); color: var(--color-text); }
 .lwdrawer__b { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 .lwdrawer__foot { padding: 14px 20px; border-top: 1px solid var(--color-border); background: #FAFBFC; display: flex; align-items: center; gap: 8px; justify-content: flex-end; flex-shrink: 0; flex-wrap: wrap; }
-/* Footer-Slot ohne Inhalt (kein <DrawerFooter>) zeigt keine leere Leiste. */
+/* Footer slot without content (no <DrawerFooter>) shows no empty bar. */
 .lwdrawer__foot:empty { display: none; }
 
 /* ==========================================================================
