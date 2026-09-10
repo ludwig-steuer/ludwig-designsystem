@@ -1841,8 +1841,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* --- Wiederkehrende: der Regel-Block neben den Sätzen -------------------- */
 .s3wk__detail { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
 @media (max-width: 1160px) { .s3wk__detail { grid-template-columns: minmax(0, 1fr); } }
-.s3wk__acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: var(--space-4); }
-.s3wk__acts .is-right { margin-left: auto; }
+/* `.s3wk__acts` ist mit F202 gefallen: der Reiter „Wiederkehrende" in Schritt 3
+   nutzt jetzt dieselbe `DataTable` wie die Einzelfälle, und deren Sammelaktionen
+   stehen in der Auswahl-Leiste. `.s3wk__detail` bleibt (ProposalFoldout),
+   `.s3bar*` ebenso — die Klassen tragen weiter die Entscheidungsleiste der
+   Fall-Sicht. Nachgeprüft im Set: keine der drei hat hier einen Aufrufer,
+   sie gehören der App. */
 .s3wk__light { text-align: center; font-size: 13px; line-height: 1; }
 
 /* ---------------------------------------------------------------- Plakette */
