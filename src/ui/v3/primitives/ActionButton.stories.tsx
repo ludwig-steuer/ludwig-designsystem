@@ -63,7 +63,7 @@ export const Pending: Story = {
   ),
 };
 
-/** Fehler stehen neben dem Knopf — nicht im Dialog, nicht nur rot. */
+/** Fehler stehen neben dem Knopf, nicht nur rot. Mit `ask` stehen sie im Dialog — `AskFails`. */
 export const Failed: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-4)" }}>
@@ -176,6 +176,50 @@ export const AskInvalid: Story = {
       Sachverhalt anlegen
     </ActionButton>
   ),
+};
+
+/**
+ * **Fehler im Dialog** (0159). Die Nummer 70001 ist vergeben — das weiß erst
+ * der Server. Der Dialog bleibt offen, der Satz steht unter dem Feld, die
+ * Eingabe bleibt; wer weitertippt, löscht den Satz. Jede andere Nummer geht
+ * durch und schließt den Dialog.
+ */
+export const AskFails: Story = {
+  render: function Render() {
+    const [done, setDone] = useState<string | null>(null);
+    return (
+      <div style={{ display: "grid", gap: "var(--space-3)", justifyItems: "start" }}>
+        <ActionButton<string>
+          variant="primary"
+          pendingLabel="Wird angelegt …"
+          ask={{
+            title: "Kreditor annehmen",
+            confirmLabel: "Konto anlegen",
+            initial: "70001",
+            valid: (v) => /^\d{4,20}$/.test(v),
+            render: ({ value, set }) => (
+              <Field label="DATEV-Kontonummer" htmlFor="ask-number" hint="4 bis 20 Ziffern.">
+                <Input
+                  id="ask-number"
+                  inputMode="numeric"
+                  value={value}
+                  onChange={(e) => set(e.target.value.trim())}
+                />
+              </Field>
+            ),
+          }}
+          action={async (number) => {
+            await wait(500);
+            if (number === "70001") return { error: "Die Nummer 70001 ist inzwischen vergeben." };
+            setDone(number);
+          }}
+        >
+          Annehmen
+        </ActionButton>
+        {done ? <span className="v2muted">Konto {done} angelegt.</span> : null}
+      </div>
+    );
+  },
 };
 
 /** Rot nur für die Folge, nicht für den Weg dorthin. */

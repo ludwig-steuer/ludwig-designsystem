@@ -12,7 +12,8 @@ import { useHotkey } from "./hotkey";
  * 61 client components in the app rebuild pending, error and confirmation by
  * hand, 28 of them with `window.confirm` (an I2 violation). This is that job,
  * once: locked while running, error next to the button, an optional dialog in
- * front of it.
+ * front of it. With `ask` the error stands in the dialog instead, beside what
+ * was typed (0159).
  *
  * It deliberately does not report success — a completed action shows in the
  * result (the row is gone, the status changed), not in a text that has to
@@ -41,6 +42,12 @@ export interface ConfirmSpec {
  * It carries `title`, `confirmLabel` and `tone` itself because it **is** the
  * confirmation dialog — `ask` and `confirm` are mutually exclusive in the type
  * for that reason. Two dialogs for one act do not exist.
+ *
+ * **The dialog stays open until the action has answered** (0159). An error
+ * keeps what was typed and stands right under the content; a new input clears
+ * it; success closes as before. Not every error can be checked before sending
+ * — a number can be taken between the check and the send — and a dialog that
+ * closes on the error loses the one thing needed to try again.
  */
 export interface AskSpec<Input> {
   title: string;
@@ -134,19 +141,28 @@ export function ActionButton<Input = void>(props: PlainProps | AskProps<Input>) 
   /** Every opening starts from `initial` — a half-filled form does not survive
    *  a cancel, and there is no case that wants it to. */
   function open() {
-    if (ask) setValue(ask.initial);
+    if (ask) {
+      setValue(ask.initial);
+      setError(null);
+    }
     setAsking(true);
   }
 
-  async function run() {
-    if (pending) return; // two clicks, one action
+  /** `true` when the action went through — the dialog of `ask` closes only then. */
+  async function run(): Promise<boolean> {
+    if (pending) return false; // two clicks, one action
     setPending(true);
     setError(null);
     try {
       const result = props.ask ? await props.action(value) : await props.action();
-      if (result && typeof result === "object" && result.error) setError(result.error);
+      if (result && typeof result === "object" && result.error) {
+        setError(result.error);
+        return false;
+      }
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Die Handlung ist fehlgeschlagen.");
+      return false;
     } finally {
       setPending(false);
     }
@@ -155,12 +171,36 @@ export function ActionButton<Input = void>(props: PlainProps | AskProps<Input>) 
   /** Without `ask` nothing can be invalid, so the button behaves as before. */
   const allowed = !ask || !ask.valid || ask.valid(value);
 
-  function closeDialog() {
+  function close() {
     setAsking(false);
     // Back to where the click came from — otherwise the keyboard restarts at
     // the top of the page (V10).
     trigger.current?.querySelector("button")?.focus();
   }
+
+  /** Cancel, Escape, the cross. Not while the action runs — its answer belongs in the dialog. */
+  function cancel() {
+    if (pending) return;
+    // An error about an input that is gone would stand at the button without its cause.
+    if (ask) setError(null);
+    close();
+  }
+
+  async function confirmDialog() {
+    if (!allowed || pending) return;
+    if (!ask) {
+      close();
+      void run();
+      return;
+    }
+    if (await run()) close();
+  }
+
+  /** Typing again answers the error, so it goes. */
+  const edit = (next: Input) => {
+    setValue(next);
+    setError(null);
+  };
 
   return (
     <span className="v2act" ref={trigger}>
@@ -176,37 +216,43 @@ export function ActionButton<Input = void>(props: PlainProps | AskProps<Input>) 
       >
         {children}
       </Button>
-      {error ? <span className="v2act__err">{error}</span> : null}
+      {error && !asking ? <span className="v2act__err">{error}</span> : null}
       {dialog ? (
         <Dialog
           open={asking}
-          onClose={closeDialog}
-          onConfirm={() => {
-            if (!allowed) return;
-            closeDialog();
-            void run();
-          }}
+          onClose={cancel}
+          onConfirm={() => void confirmDialog()}
           title={dialog.title}
           footer={
             <>
-              <Button size="sm" onClick={closeDialog}>
+              <Button size="sm" onClick={cancel} disabled={pending}>
                 Abbrechen
               </Button>
               <Button
                 size="sm"
                 variant={dialog.tone === "danger" ? "danger" : "primary"}
                 disabled={!allowed}
-                onClick={() => {
-                  closeDialog();
-                  void run();
-                }}
+                loading={pending && Boolean(ask)}
+                loadingLabel={pendingLabel}
+                onClick={() => void confirmDialog()}
               >
                 {dialog.confirmLabel}
               </Button>
             </>
           }
         >
-          {ask ? ask.render({ value, set: setValue }) : props.confirm?.body}
+          {ask ? (
+            <>
+              {ask.render({ value, set: edit })}
+              {error ? (
+                <p className="v2act__err" role="alert">
+                  {error}
+                </p>
+              ) : null}
+            </>
+          ) : (
+            props.confirm?.body
+          )}
         </Dialog>
       ) : null}
     </span>

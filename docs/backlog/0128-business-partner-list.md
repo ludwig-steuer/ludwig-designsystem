@@ -129,9 +129,10 @@ geändert.
 **Eine Abweichung von der Spec:** eine vergebene Nummer fängt der Dialog
 **vor** dem Absenden ab — Satz „Die Nummer … ist schon vergeben" und
 gesperrter Knopf. Gemessen: ein Fehler, den die Aktion zurückgibt, schließt den
-Dialog von `ActionButton ask`, und die Eingabe ist weg. Für die App heißt das:
-die Prüfung auf vergebene Nummern gehört in den Dialog, solange 0121 bei einem
-Aktionsfehler schließt.
+Dialog von `ActionButton ask`, und die Eingabe ist weg. **Seit 0159**
+bleibt der Dialog auch bei einem Aktionsfehler offen und behält die Eingabe; die
+Vorabprüfung ist damit Bequemlichkeit, nicht mehr Notwendigkeit — eine Nummer,
+die zwischen Prüfung und Absenden vergeben wird, fängt der Dialog selbst.
 
 ## Messung (CDP, 1440 × 900, sofern nicht anders genannt)
 

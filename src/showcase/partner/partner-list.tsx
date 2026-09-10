@@ -116,8 +116,9 @@ function AcceptCell({
         title: `${row.legalName} annehmen`,
         confirmLabel: "Konto anlegen",
         initial: row.creditorAccount?.accountNumber ?? "",
-        // A number the page already knows as taken is caught here, in the
-        // dialog — an action error would close it and drop what was typed.
+        // A number the page already knows as taken is caught before sending;
+        // one taken in the meantime comes back from the action and stays in
+        // the dialog too (0159).
         valid: (v) => /^\d{4,20}$/.test(v) && !taken.has(v),
         render: ({ value, set }) => (
           <div className="v2stack">
