@@ -1533,6 +1533,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .ki__quote { font-style: italic; color: var(--color-text-subtle); }
 .ki__src svg { align-self: center; flex: 0 0 auto; }
+/* Dasselbe Paket in einer Zeile (0151): Urteil, Konfidenz, Zahl der Befunde.
+   Der Text steht im Aufklapper der Zeile, nicht hier — eine Begründung von
+   drei Zeilen je Zeile macht aus der Liste eine Wand. */
+.ki__cell { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.ki__cellerr { color: var(--color-danger); font-size: var(--fs-ui-xs); white-space: nowrap; }
 
 /* ==========================================================================
    Buchungssatz-Editor (F123 T123.3)

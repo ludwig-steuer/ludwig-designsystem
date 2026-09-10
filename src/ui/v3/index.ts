@@ -613,6 +613,8 @@ export {
 } from "./entities/journal-entry/JournalEntryCompact";
 export {
   AiBookingNotes,
+  AiBookingNotesBody,
+  AiBookingNotesCell,
   type JudgeVerdict,
   type AiSource,
   type SourceKind,

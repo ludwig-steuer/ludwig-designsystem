@@ -119,53 +119,135 @@ export function AiBookingNotes({
 
       {open ? (
         <div className="ki__body">
-          {errors.map((e, i) => (
-            <div className="v2msg v2msg--error" key={i} role="alert">
-              <span className="v2msg__body">{e}</span>
-            </div>
-          ))}
-
-          {rationale ? (
-            <div className="ki__block">
-              <div className="lw-overline">Begründung des Vorschlags</div>
-              <p className="ki__text">{rationale}</p>
-            </div>
-          ) : null}
-
-          {judgeReasoning ? (
-            <div className="ki__block">
-              <div className="lw-overline">Einschätzung des Judge</div>
-              <p className="ki__text">{judgeReasoning}</p>
-            </div>
-          ) : null}
-
-          {sources.length > 0 ? (
-            <div className="ki__block">
-              <div className="lw-overline">Quellen</div>
-              {sources.map((s) => {
-                const { Icon, label } = QUELLE[s.art];
-                const inner = (
-                  <>
-                    <Icon size={13} strokeWidth={1.5} />
-                    <span className="ki__art">{label}</span>
-                    <span>{s.label}</span>
-                    {s.quote ? <span className="ki__quote">„{s.quote}“</span> : null}
-                  </>
-                );
-                return s.href ? (
-                  <a className="ki__src" href={s.href} key={s.key} target="_blank" rel="noreferrer">
-                    {inner}
-                  </a>
-                ) : (
-                  <div className="ki__src" key={s.key}>
-                    {inner}
-                  </div>
-                );
-              })}
-            </div>
-          ) : null}
+          <AiBookingNotesBody
+            rationale={rationale}
+            judgeReasoning={judgeReasoning}
+            sources={sources}
+            errors={errors}
+          />
         </div>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * The content of the notes without the box around it (0151).
+ *
+ * Its own export because two places need the same four blocks: the box above,
+ * and the fold-out of a row in the booking overview, where the row already
+ * carries verdict and confidence and a second heading would say it twice
+ * (`spec-schreiben` §4 — a part that is needed elsewhere on its own).
+ *
+ * @when    The rationale, the judge's sentence and the sources — inside a box that already has a head.
+ * @instead With its own head and fold-out → AiBookingNotes. Only the verdict for a row → AiBookingNotesCell.
+ */
+export function AiBookingNotesBody({
+  rationale,
+  judgeReasoning,
+  sources = [],
+  errors = [],
+}: {
+  rationale?: string | null;
+  judgeReasoning?: string | null;
+  sources?: AiSource[];
+  errors?: string[];
+}) {
+  return (
+    <>
+      {errors.map((e, i) => (
+        <div className="v2msg v2msg--error" key={i} role="alert">
+          <span className="v2msg__body">{e}</span>
+        </div>
+      ))}
+
+      {rationale ? (
+        <div className="ki__block">
+          <div className="lw-overline">Begründung des Vorschlags</div>
+          <p className="ki__text">{rationale}</p>
+        </div>
+      ) : null}
+
+      {judgeReasoning ? (
+        <div className="ki__block">
+          <div className="lw-overline">Einschätzung des Judge</div>
+          <p className="ki__text">{judgeReasoning}</p>
+        </div>
+      ) : null}
+
+      {sources.length > 0 ? (
+        <div className="ki__block">
+          <div className="lw-overline">Quellen</div>
+          {sources.map((s) => {
+            const { Icon, label } = QUELLE[s.art];
+            const inner = (
+              <>
+                <Icon size={13} strokeWidth={1.5} />
+                <span className="ki__art">{label}</span>
+                <span>{s.label}</span>
+                {s.quote ? <span className="ki__quote">„{s.quote}“</span> : null}
+              </>
+            );
+            return s.href ? (
+              <a className="ki__src" href={s.href} key={s.key} target="_blank" rel="noreferrer">
+                {inner}
+              </a>
+            ) : (
+              <div className="ki__src" key={s.key}>
+                {inner}
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+/**
+ * The same package in a row: what the judge said, and how sure the agent was
+ * (0151).
+ *
+ * **The row is the wrong place for the text.** A booking overview shows a
+ * batch — 9 entries in the story, three-digit numbers in the stock —, and a
+ * rationale of three lines in every row turns the list into a wall. The cell
+ * answers „did anybody object?", the fold-out of the row answers „why?" with
+ * `AiBookingNotesBody`.
+ *
+ * **Empty stays empty.** No verdict and no confidence means an empty cell, not
+ * an em dash: a proposal that no judge has seen is not a proposal that was
+ * judged as nothing (V6, and the same rule the measure of a bank statement
+ * follows).
+ *
+ * @when    A column „KI-Prüfung" in a list of booking entries.
+ * @instead The whole package with its fold-out → AiBookingNotes. Only the text
+ *          inside a foreign box → AiBookingNotesBody. A state of the entry
+ *          itself (posted, reversed) → StatusBadge with axis `buchung`.
+ */
+export function AiBookingNotesCell({
+  verdict,
+  confidence = null,
+  errors = [],
+}: {
+  verdict: JudgeVerdict | null;
+  confidence?: ConfidenceLevel | null;
+  /** Blocking findings — the cell says **that** there are some, not which. */
+  errors?: string[];
+}) {
+  if (!verdict && !confidence && errors.length === 0) return null;
+  return (
+    <span className="ki__cell">
+      {verdict ? <StatusBadge axis="judge" status={verdict} info={false} /> : null}
+      {/* With its word, like in the head of the box: a colour without a word
+          is not a statement (V7), and „Sicher" costs 38 px. */}
+      <Confidence level={confidence} />
+      {/* The count, not the text: which finding it is stands in the fold-out.
+          A number in the row is a reason to open it. */}
+      {errors.length > 0 ? (
+        <span className="ki__cellerr">
+          {errors.length} {errors.length === 1 ? "Befund" : "Befunde"}
+        </span>
+      ) : null}
+    </span>
   );
 }
