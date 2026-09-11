@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-11** — Abnahme offen (nicht durch den Bauenden) |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, gegen 802b706) |
 | Stufe | `entities/recurring-rule/` — Erweiterung von `RecurringRuleFacts` (0134) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungsweise, Personenkonto und Belegnummern-Strategie gibt es nur an einer Ludwig-Regel |
 | Quelle | Owner 2026-09-11: „für wiederkehrende brauchen wir einen Tab mit den Einstellungen zu wiederkehrender Buchung — das braucht sicher eine Subkomponente mit der Konfiguration, wie diese angelegt und erklärt ist". Datengrundlage: `docs/entitaeten/recurring-rule-staging-erhebung-2026-09-11.md` (ludwig-manager, Abschnitte b–d) |
@@ -157,3 +157,6 @@ Variabel (aus dieser Spec):
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
 | | | |
+
+Fremde Abnahme am 2026-09-11 durch die Prüfer-Session (Auftrag `ludwig-manager`), gegen 802b706: **fertig.** `Explained` 9 Sätze, 5 Import-Marken, die Buchungsweise mit dem Wort der Achse `regel_modus`; ohne `explain` 0 Sätze in `Filled`, `WithoutCriterion`, `Modes`, `All`, `InUse`, `Edges`; Reiter `Recurrence` im `split` 710 · 710 (bei 1280: 630 · 630), kein Querlauf, Sätze in `--fs-ui-sm`.
+
