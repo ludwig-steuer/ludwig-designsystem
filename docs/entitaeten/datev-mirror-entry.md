@@ -10,7 +10,7 @@
 | Wichtigkeit | **hoch** — Roadmap der App (9be34746) Rang 2; Grundlage des Abgleichs vor jedem Buchungslauf |
 | Datenstand | Staging über den Pooler, **2026-09-11**, schreibgeschützte Sitzung: **46.056 Sätze, 112.354 Spiegel-Zeilen, 7 Mandanten**, 2025: 28.926 · 2026: 17.130. Nur `SELECT`, keine Kundendaten; Beispielwerte erfunden |
 | Bestandswarnung | **98 % sind `new_unprocessed`** — der Bestand ist älter als Ludwig. „Nur in DATEV" ist der Normalfall, kein Alarm; der eigentliche Sichtungs-Vorrat ist nach der Klassifikation `fremd_offen` (GLOSSARY: 638 statt 25.806 auf zwei Mandanten) |
-| Rückfrage | gestellt am 2026-09-11 an `ludwig-manager` — **offen**, die Defaults gelten |
+| Rückfrage | gestellt und **beantwortet** am 2026-09-11 (`ludwig-manager`, aus dem App-Stand): die Defaults der drei Fragen gelten; die sechs Anwendungsfälle der App sind den Formen zugeordnet (§Heutige Darstellung); kein Schreibweg, kein Auswahl-Dialog |
 | Analyse von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren`) |
 
 ## Was sie ist
@@ -110,6 +110,18 @@ außer in S, dort ab p90 38 mit `title`. Belegfeld 1 max 36 — nie gekürzt.
 | `StapelTab` (125 Z.) | Liste der Stapel + Drawer | Stapel, festgeschrieben, Prüfung | — | die Prüfungs-Spalte (563 × `not_specified`, Zweifel 5) |
 | Konto-Detail `DatevEntryDrawer` | Drawer | wie `DatevEntryDetail` | — | steht neben `LudwigEntryDrawer` für dieselbe Zeileneigenschaft (J-27) |
 
+**Aus der Rückfrage** (Manager, 2026-09-11) — die Anwendungsfälle der App und
+wo sie hier stehen: (a) Reiter DATEV-Wahrheit am Sachverhalt
+(`CaseDatevTruthTab`, Spiegel-Sätze des Falls + OPOS-Stichtag) → Liste „am
+Sachverhalt"; (b) Kontoseite und Konto-Drawer zeigen Spiegel-Sätze als
+Bewegungen in der Vereinigung (`AccountEntries`, F209) — das ist
+`AccountEntry`, nicht diese Entität, bleibt draußen; (c) Nachlese
+(`StapelVergleich`/`ReplayVergleich`) → 0165; (d) Bank-Deckung: Bankzeile ↔
+Spiegel-Treffer (962, `DatevCoveragePanel` an `banks/[accountId]`) → Nennung
+über `MirrorEntryCell`; (e) Stapel-Detail „Inhalt in DATEV" (J-20) → Liste
+„Inhalt eines DATEV-Stapels"; (f) Seitenprofil `datev-spiegel` → Liste
+„Buchungen in DATEV".
+
 **Im Set:** `SnapshotCard` (Kontext, Profil `datev-snapshot`),
 `ReconciliationTable` (0161, B1 — die Stories zeigen Paare mit
 `mirror_match`), `AccountEntryList` mit `source: "datev"` (Profil `account`).
@@ -141,9 +153,9 @@ ist `AccountEntryList` (Zeilen, nicht Sätze).
 | `MirrorEntryDrawer` | L | ja | 5 — FK-Ziel (Buchungssatz, Bankzeile, Ereignis) **und** nachgeschlagen aus Konto-Detail (J-27, heute `DatevEntryDrawer`), Bankzeile, Sachverhalt | wie Facts | wie Facts; Rohdaten als Ausgang (J-23, `RawRowDrawer` bleibt App) | `Drawer`, `MirrorEntryFacts` | `DatevEntryDrawer` |
 | `MirrorEntryList` | L | ja | 6 — drei Listen-Jobs | Zeile + Rahmen | — | `DataTable` (Pagination, Serverfilter), `MirrorEntryRow`, `EmptyState` | `BuchungenTab`, `EntryList` |
 | `MirrorEntryCard` | M | nein | die Karte „Satz mit seinen Zeilen" ist `JournalEntryCard` mit Spiegel-Zeilen (R8); der Kopf mit `mirror_match` steht an der Aufrufstelle | | | | |
-| `MirrorEntryEditor` | XL | nein | read-only per Definition (GLOSSARY) | | | | |
+| `MirrorEntryEditor` | XL | nein | read-only per Definition (GLOSSARY); auch ein `unclear`-Satz wird nicht von Hand zugeordnet (siehe Picker) | | | | |
 | `MirrorEntryView` | L | nein | keine Route je Spiegelsatz — der Drawer ist die L-Form | | | | |
-| `MirrorEntryPicker` | S | nein | kein Screen wählt einen Spiegelsatz aus; die Zuordnung macht der Abgleich (Server) | | | | |
+| `MirrorEntryPicker` | S | nein | **Zuordnung ist Agentensache:** unscharfe Treffer legt der Server dem Agenten vor, der bestätigt per MCP (Owner-Regel „Heuristik vorlegen, nicht stempeln", F158 `datevStage`) — kein Schreibweg in der Oberfläche, kein Auswahl-Dialog (Rückfrage, 2026-09-11) | | | | |
 
 Bau-Reihenfolge: `MirrorEntryCell` → `MirrorEntryRow` → `MirrorEntryFacts` →
 `MirrorEntryDrawer` → `MirrorEntryList`. Voraussetzung aus `journal-entry`:
@@ -176,6 +188,9 @@ kennt keinen Saldo).
 - **L-305** Die Spiegel-Klassifikation (`ludwig` · `technisch` · `opos_vortrag` · `zugeordnet` · `historisch` · `fremd_offen`) wird nur in `datev-mirror/infrastructure/reporting-queries.ts` gerechnet. Es gibt keine Domänen-Funktion und keine Achse. Die Liste kann deshalb nicht nach dem wirklichen Sichtungs-Vorrat filtern.
 
 ## Offene Fragen
+
+**Beantwortet am 2026-09-11** (`ludwig-manager`, aus dem App-Stand): alle drei
+Defaults gelten.
 
 1. **Der Einstieg „nur in DATEV" filtert nach `match_state = new_unprocessed` (44.973, 98 %) oder nach der Klassifikation `fremd_offen` (der Sichtungs-Vorrat)?** — ohne Antwort: `match_state` jetzt, die Klassifikation als Filter, sobald L-305 erledigt ist.
 2. **`MirrorEntryCell` nennt Konten und Betrag wie `JournalEntryCell`, nicht Stapel und Belegnummer (Roadmap)** — in der Nachlese stehen beide nebeneinander und müssen dasselbe sagen. — ohne Antwort: Konten + Betrag, Belegfeld 1 im `title`.
