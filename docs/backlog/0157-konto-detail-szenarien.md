@@ -187,3 +187,25 @@ Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (
 | P1 `seite--in-use`: erste Bewegung bei 1210 / 1243 | **offen** — Folge des Owner-Entscheids „Randspalte oben"; `ludwig-manager` fragt den Owner, ob das Kriterium oder das Layout nachgibt (z. B. Randspalte kompakter oder aufklappbar) | — |
 
 Mit freigegeben nach der Abnahme (L-289): die Mängelzone rechnet nicht mehr im Showcase, sondern mit `accountDefects()` aus dem Spiegel (F209, B6); Wörter und Wege setzt die Seite. Zeilen je Konto unverändert: K1 2, K2 2, K6 1, K7 2, K10 1, K12 1; K3–K5, K8, K9, K11 der Haken.
+
+## Nachtrag 2026-09-11 — Stammdaten-Spalte kompakt (Owner)
+
+Owner-Antwort auf die P1-Frage: die Randspalte bleibt oben, wird aber
+kompakt. Oben stehen nur Zeilen, die der Kopf nicht trägt (D7) —
+Kontenrahmen, eine gesperrte Kontenfunktion, Automatik, Σ Soll/Haben, höchstens
+drei; Kontoart, Klasse, Verrechnungskategorie und Partner stehen im Kopf. Der
+ganze Satz liegt hinter „Alle Stammdaten" (`Disclosure`).
+
+| Messung (1440 × 900) | vorher | jetzt |
+|---|---|---|
+| `seite--in-use`: Randspalte | 332–600 | 332–544 |
+| `seite--in-use`: Filterleiste · erste Bewegung | 1023 · 1210 | 967 · 1154 |
+| `seite--in-use` @1280: erste Bewegung | 1243 | 1187 |
+| K1 ohne AppShell: erste Bewegung | 834 | 834 (Randspalte daneben) |
+
+**P1 bleibt verfehlt.** Auch ohne Randspalte begann die Liste im AppShell
+unter der Falz (erste Bewegung 922, Messung vom 2026-09-10): über ihr stehen
+Mängel und Verlauf (266 px) und die Kacheln. Die kompakte Spalte kostet jetzt
+noch rund 230 px statt 290. Vorschlag an den Owner: P1 im AppShell auf „Kopf,
+Mängel und Kacheln ohne Scrollen" fassen — der Listenkopf folgt direkt darunter.
+

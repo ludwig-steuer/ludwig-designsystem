@@ -178,6 +178,9 @@ export const CLARIFICATIONS: ClarificationVM[] = [
 export const FALL_TABS = [
   { key: "uebersicht", label: "Übersicht" },
   { key: "ereignisse", label: "Ereignisse" },
+  // Every document the case rests on (owner 2026-09-11). English key: the app's
+  // `belege` becomes `documents` with F210.
+  { key: "documents", label: "Belege" },
   { key: "rueckfragen", label: "Rückfragen" },
   // Balances and accounts answer the same question as the checks: does it add up?
   { key: "plausibilitaet", label: "Plausibilität" },

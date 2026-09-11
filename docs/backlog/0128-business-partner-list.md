@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Arbeit** — fremd abgenommen 2026-09-11 mit zwei Mängeln, beide nachgearbeitet am selben Tag, Nachprüfung offen |
+| Status | **fertig** — fremd abgenommen 2026-09-11 samt Nachprüfung (c6f3f4d) |
 | Stufe | `src/showcase/partner/` (Seiten-Stories) — **keine** neue Komponente im Set |
 | Klassen-Test | Die Seite gehört der App und lebt in `showcase/`, wie 0144, 0152, 0157. Die Liste selbst ist `DataTable` mit `businessPartnerColumns()`; beides ist gebaut |
 | Quelle | Seitenprofil `docs/seiten/partner-liste.md` (`6490f97`, gegen die App geprüft von `ludwig-manager` am 2026-09-10) · Entitätsprofil `docs/entitaeten/business-partner.md` §Listen |
@@ -179,3 +179,7 @@ Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (
 |---|---|---|
 | `loading-and-error`: Querlauf 1328 px bei 1280 und 1024 | Ursache war der Story-Rahmen: ein Grid mit `auto`-Spalte wächst auf die Mindestbreite der Tabelle. Jetzt `gridTemplateColumns: minmax(0, 1fr)` | scrollW 1280 bei 1280, 1024 bei 1024 |
 | `proposals`: vorbelegte 890571 gilt als „schon vergeben" | die eigenen Konten des Partners zählen in seinem Dialog nicht als vergeben (`AcceptCell`, `isTaken`) | Dialog: Wert 890571, kein Satz, Knopf frei; „Konto anlegen" → Dialog zu, Toast „Konto 890571 angelegt — 3 Buchungen umgezogen.", Reiter „Vorschläge 17" |
+
+### Nachprüfung 2026-09-11 (Prüfer-Session, gegen c6f3f4d)
+
+**Fertig.** `loading-and-error`: scrollW gleich Viewport bei 1280 und 1024; `proposals`: 890571 annehmbar, Toast, Vorschläge 18 → 17.

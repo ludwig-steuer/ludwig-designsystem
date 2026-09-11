@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Arbeit** — fremd abgenommen 2026-09-11, Verhalten ok; nur die Story-Namen in der Spec waren nachzuziehen (erledigt am selben Tag), Nachprüfung offen |
+| Status | **fertig** — fremd abgenommen 2026-09-11 samt Nachprüfung (c6f3f4d) |
 | Stufe | `patterns/DetailView.tsx` (neu) · `src/showcase/partner/` (Seiten-Stories) |
 | Klassen-Test | Rahmen: „Ergäbe das auch in einer Versicherungs-App Sinn?" → **ja**, er kennt keine Entität, nur Slots → `patterns/`. Die Seite selbst gehört der App und lebt in `showcase/` |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` · Seitenprofil `docs/seiten/partner-detail.md` (mit dieser Aufgabe geschrieben) · Auftrag `app-03` im Namen des Owners, 2026-09-10 |
@@ -158,3 +158,7 @@ Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (
 ### Nacharbeit 2026-09-11 (durch den Bauenden, Nachprüfung offen)
 
 Story-Namen in Schnittstellen-, Stories- und Messungsteil auf die englischen Exporte gezogen: `Typical`, `Proposed`, `BillingProvider`, `DuplicateName`.
+
+### Nachprüfung 2026-09-11 (Prüfer-Session, gegen c6f3f4d)
+
+**Fertig.** Story-Namen in der Spec stimmen mit den Exporten überein.

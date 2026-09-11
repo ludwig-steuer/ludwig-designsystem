@@ -11,7 +11,7 @@ import {
 
 import type { CaseFactsVM } from "@/ui/v3/entities/accounting-case/CaseFacts";
 import { CaseTimeline } from "@/ui/v3/entities/accounting-case/CaseTimeline";
-import { ClarificationList, type ClarificationVM } from "@/ui/v3/entities/clarification/Clarification";
+import { ClarificationList, toTodoItem, type ClarificationVM } from "@/ui/v3/entities/clarification/Clarification";
 import { ClarificationCard } from "@/ui/v3/entities/clarification/ClarificationCard";
 import { DocumentNumberRegister } from "@/ui/v3/entities/document-number/DocumentNumberRegister";
 import { REGISTER, SOURCE_LABEL, STATE_LABEL } from "@/ui/v3/entities/document-number/fixtures";
@@ -49,6 +49,12 @@ import { bracket, proposalPending, recurringWithoutRule } from "./scenarios";
 import { Columns } from "@/ui/v3/patterns/Columns";
 import { MonoCell } from "@/ui/v3/primitives/Cells";
 import { Disclosure } from "@/ui/v3/primitives/Disclosure";
+import { SourceDocumentDrawer } from "@/ui/v3/entities/source-document/SourceDocumentDrawer";
+import { SourceDocumentList } from "@/ui/v3/entities/source-document/SourceDocumentList";
+import type { SourceDocumentVM } from "@/ui/v3/entities/source-document/SourceDocument";
+import { documentFixture, MUSTER_PDF } from "../document/fixtures";
+import { useHash } from "../hash";
+import { TodoList, type TodoItem } from "@/ui/v3/patterns/TodoList";
 
 /**
  * Die Reiter der Sachverhaltsseite — P3 aus 0152.
@@ -145,11 +151,15 @@ const withDetail = (c: ClarificationVM) =>
     : { ...c, text: "Der Mandant hat geantwortet: die Ersatzteile gehören zum Firmenwagen.", answerKind: "single_choice" as const, answerOptions: ["Firmenwagen", "Werkstattbestand"] };
 
 /**
- * **Rückfragen** — die Liste mit Zustand je Zeile; aufgeklappt steht die
- * Karte zum Lesen, beantwortet wird dort. Leer: warum es keine gibt.
+ * The questions as items to work through (`toTodoItem`, `TodoList`) — the list
+ * row itself is not a link, and the tab is where they get answered. J/K stay
+ * with the record pager of the page.
  */
-export const Clarifications: Story = {
-  render: () => (
+function ClarificationsTab() {
+  const items = CLARIFICATIONS.map(toTodoItem).filter((i): i is TodoItem => i !== null);
+  const [selectedId, setSelectedId] = useState<string | null>(items[0]?.id ?? null);
+  const selected = CLARIFICATIONS.find((c) => c.id === selectedId) ?? null;
+  return (
     <Tab
       tab="rueckfragen"
       empty={
@@ -164,18 +174,111 @@ export const Clarifications: Story = {
         </Card>
       }
     >
-      <Card>
-        <CardHead title="Rückfragen" sub="1 offen · 1 beantwortet" />
-        <div className="v3boxbody">
-          <ClarificationList
-            clarifications={CLARIFICATIONS}
-            renderDetail={(c) => <ClarificationCard clarification={withDetail(c)} />}
-          />
-        </div>
-      </Card>
+      <Columns
+        pattern="list-detail"
+        list={
+          <Card>
+            <CardHead title="Rückfragen" sub="1 offen · 1 beantwortet" />
+            <div className="v3boxbody">
+              <TodoList groups={[{ label: "Rückfragen", items }]} selectedId={selectedId} onSelect={setSelectedId} hotkeys={false} />
+            </div>
+          </Card>
+        }
+        main={
+          selected ? (
+            <ClarificationCard
+              clarification={withDetail(selected)}
+              mode={selected.state === "open" ? "answer" : "read"}
+              onAnswer={async () => {}}
+            />
+          ) : (
+            <EmptyState inline title="Keine Rückfrage gewählt." />
+          )
+        }
+      />
     </Tab>
-  ),
-};
+  );
+}
+
+/**
+ * The documents the reference case rests on, linked through its events — one
+ * invoice, which is the p90 of the stock (profile `accounting-case`).
+ */
+const CASE_DOCUMENTS: SourceDocumentVM[] = [
+  documentFixture({
+    id: "d-93846778",
+    fileName: "Rechnung-93846778.pdf",
+    counterparty: "Musterbau Fahrzeugteile GmbH",
+    documentDate: "2026-07-16",
+    receivedDate: "2026-07-31",
+    completedAt: null,
+    completedVia: null,
+    caseNumber: "2026-0334",
+    detail: { kind: "invoice", number: "93846778", gross: 25.41, currency: "EUR", net: 21.35, vat: 4.06, dueDate: "2026-08-10" },
+  }),
+];
+
+function DocumentsTab() {
+  const hash = useHash("", true);
+  const open = CASE_DOCUMENTS.find((d) => d.id === hash.params.get("document")) ?? null;
+  return (
+    <Tab
+      tab="documents"
+      empty={
+        <>
+          <Card>
+            <CardHead title="Belege" sub="keiner verbunden" />
+            <div className="v3boxbody">
+              <SourceDocumentList documents={[]} />
+            </div>
+          </Card>
+          <Card>
+            <CardHead title="Belege" sub="keiner zu erwarten" />
+            <div className="v3boxbody">
+              <SourceDocumentList
+                documents={[]}
+                emptyKind="not-expected"
+                reason="Interne Umbuchung zwischen zwei Sachkonten — es gibt keinen Beleg dazu."
+              />
+            </div>
+          </Card>
+        </>
+      }
+    >
+      <Card>
+        <CardHead title="Belege" sub="1 Beleg · über das Ereignis vom 31.07." />
+        <SourceDocumentList documents={CASE_DOCUMENTS} href={(d) => hash.href({ document: d.id })} />
+      </Card>
+      <SourceDocumentDrawer
+        open={open !== null}
+        onClose={() => hash.go({ document: null })}
+        reference={open?.fileName ?? ""}
+        record={
+          open
+            ? { document: open, previewUrl: MUSTER_PDF, summary: "Ersatzteile für den Firmenwagen, geliefert am 16.07." }
+            : null
+        }
+        onOpenFull={() => {}}
+      />
+    </Tab>
+  );
+}
+
+/**
+ * **Belege** — jeder Beleg, auf den sich der Fall stützt (Owner 2026-09-11),
+ * als Liste wie die Belegliste im Hauptmenü; ein Klick öffnet den Beleg-Drawer
+ * über der Seite (D13). Leer: zwei Sätze, denn „keiner verbunden" ist eine
+ * Lücke und „keiner zu erwarten" ein Erfolg mit Grund.
+ */
+export const Documents: Story = { render: () => <DocumentsTab /> };
+
+/**
+ * **Rückfragen** — Liste und Detail, wie die Rückfragen-Liste der Kanzlei
+ * (Owner 2026-09-11: Reiter je Art wie die Hauptseiten). Links jede Rückfrage
+ * mit ihrem Zustand, rechts die gewählte — die offene zum Beantworten, die
+ * beantwortete zum Lesen. Leer: warum es keine gibt.
+ */
+export const Clarifications: Story = { render: () => <ClarificationsTab /> };
 
 const CHECKS: CheckItem[] = [
   { code: "P1", question: "Stimmt der Betrag mit dem Beleg überein?", reason: "25,41 € auf Beleg und Buchung.", state: "green" },
@@ -220,6 +323,11 @@ export const Plausibility: Story = {
         </>
       }
     >
+      <Columns
+        pattern="main-aside"
+        width="table"
+        main={
+          <div className="v2stack">
       <Card>
         <CardHead title="Prüfpunkte" sub="1 Befund · 1 offen · 3 bestanden" />
         <div className="v3boxbody">
@@ -230,21 +338,6 @@ export const Plausibility: Story = {
         <CardHead title="Belegnummern-Register" sub="bekannte Nummern dieses Falls" />
         <div className="v3boxbody">
           <DocumentNumberRegister entries={REGISTER} onPick={() => {}} sourceLabel={SOURCE_LABEL} stateLabel={STATE_LABEL} />
-        </div>
-      </Card>
-      <Card>
-        <CardHead title="Personenkonto 71202" sub="Musterbau Fahrzeugteile GmbH" />
-        <div className="v3boxbody">
-          <FieldList
-            tone="bare"
-            split
-            rows={[
-              ["Soll", "21,82 €"],
-              ["Haben", "47,23 €"],
-              ["Saldo", "25,41 € Haben"],
-              ["Stand", "05.08.2026"],
-            ]}
-          />
         </div>
       </Card>
       <OpenItemsCard title="Offene Posten" sub={`Stichtag ${TODAY.split("-").reverse().join(".")}`} items={[openItem()]} />
@@ -263,6 +356,26 @@ export const Plausibility: Story = {
           <OpenItemLinkRow link={PAID.link} invoice={PAID.invoice} payment={PAID.payment} />
         </Table>
       </Card>
+          </div>
+        }
+        aside={
+      <Card>
+        <CardHead title="Personenkonto 71202" sub="Musterbau Fahrzeugteile GmbH" />
+        <div className="v3boxbody">
+          <FieldList
+            tone="bare"
+            split
+            rows={[
+              ["Soll", "21,82 €"],
+              ["Haben", "47,23 €"],
+              ["Saldo", "25,41 € Haben"],
+              ["Stand", "05.08.2026"],
+            ]}
+          />
+        </div>
+      </Card>
+        }
+      />
     </Tab>
   ),
 };
@@ -456,6 +569,9 @@ export const Recurrence: Story = {
         </Card>
       }
     >
+      <Columns
+        pattern="split"
+        main={
       <Card>
         <CardHead title="Regel" sub="aus dem Onboarding-Import" />
         <div className="v3boxbody">
@@ -482,6 +598,8 @@ export const Recurrence: Story = {
           />
         </div>
       </Card>
+        }
+        aside={
       <Card>
         <CardHead title="Gebucht vom Regelwerk" sub="zwölf Abgrenzungen, elf Zahlungen zugeordnet" />
         <Table cols="110px 160px minmax(0, 1fr)" minWidth={520}>
@@ -499,6 +617,8 @@ export const Recurrence: Story = {
           ))}
         </Table>
       </Card>
+        }
+      />
     </Tab>
   ),
 };
@@ -544,6 +664,11 @@ export const Technical: Story = {
         </>
       }
     >
+      <Columns
+        pattern="main-aside"
+        width="table"
+        main={
+          <div className="v2stack">
       <Card>
         <CardHead title="DATEV-Wahrheit · Gutschrift" sub="30.06.2026 · Stapel 06-2026" />
         <div className="v3boxbody">
@@ -571,6 +696,10 @@ export const Technical: Story = {
           <LogBrowser entries={LOG} initialView={2} />
         </div>
       </Card>
+          </div>
+        }
+        aside={
+          <div className="v2stack">
       <Card>
         <CardHead title="Herkunft des Datensatzes" sub="wer ihn angelegt hat, in welchem Lauf" />
         <div className="v3boxbody">
@@ -600,6 +729,9 @@ export const Technical: Story = {
           </Disclosure>
         </div>
       </Card>
+          </div>
+        }
+      />
     </Tab>
   ),
 };

@@ -260,10 +260,13 @@ function History({ months }: { months: MonthRow[] }) {
   );
 }
 
-/** Rank 6 in the margin: the master-data set, without the figures the tiles already carry (D7). */
+/**
+ * Rank 6 in the margin, compact (owner 2026-09-11): above the list stand only
+ * rows the head does not carry — kind, class, clearing type and partner are
+ * there already (D7). The whole set is one click away.
+ */
 function MasterData({ scenario }: { scenario: AccountScenario }) {
   const { facts, master } = scenario;
-  // Not in `AccountFactsVM` yet — finding B5, spec F209 in the app.
   const rows: [ReactNode, ReactNode][] = [
     [
       "Kontenrahmen",
@@ -274,15 +277,24 @@ function MasterData({ scenario }: { scenario: AccountScenario }) {
     rows.push(["Kontenfunktion", `${master.accountFunction} · für Buchungen gesperrt`]);
   }
   if (master.automaticTaxRate !== null) rows.push(["Automatik", `${master.automaticTaxRate} %`]);
-  if (master.clearingAccountType) {
-    rows.push(["Verrechnungskonto", resolveStatus("verrechnungskonto", master.clearingAccountType).label]);
+  if (facts.totalDebit !== 0 || facts.totalCredit !== 0) {
+    rows.push([
+      "Σ Soll / Σ Haben",
+      `${formatAmount(facts.totalDebit, facts.currency)} / ${formatAmount(facts.totalCredit, facts.currency)}`,
+    ]);
   }
+  const clearing: [ReactNode, ReactNode][] = master.clearingAccountType
+    ? [["Verrechnungskonto", resolveStatus("verrechnungskonto", master.clearingAccountType).label]]
+    : [];
   return (
     <Card>
       <CardHead title="Stammdaten" sub={`Wirtschaftsjahr ${YEAR}`} />
       <div className="v3boxbody">
-        <AccountFacts facts={facts} figures={false} />
-        <FieldList tone="bare" rows={rows} />
+        <FieldList tone="bare" rows={rows.slice(0, 3)} />
+        <Disclosure summary="Alle Stammdaten">
+          <AccountFacts facts={facts} figures={false} />
+          <FieldList tone="bare" rows={[...rows.slice(3), ...clearing]} />
+        </Disclosure>
       </div>
     </Card>
   );

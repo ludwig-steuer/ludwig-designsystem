@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Arbeit** — fremd abgenommen 2026-09-11 mit einem Mangel, nachgearbeitet am selben Tag, Nachprüfung offen |
+| Status | **fertig** — fremd abgenommen 2026-09-11 samt Nachprüfung (c6f3f4d) |
 | Stufe | `entities/journal-entry/` und `entities/account/` |
 | Quelle | Vier Owner-Wünsche vom 2026-09-10, beim Durchsehen der Stapelabnahme Schritt 3 |
 | Nachgetragen | Die Nummer stand ab dem ersten Wunsch in den Code-Kommentaren; diese Datei holt sie ein (Hausregel: eine Nummer wird nie zweimal vergeben, und eine Nummer im Code ohne Datei ist ein toter Verweis) |
@@ -86,3 +86,7 @@ Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (
 | BU-Spalte erscheint immer (`automaticRate !== null` ist bei `undefined` wahr) | `JournalEntryCompact.tsx`: `!= null` | `journalentrycompact--filled`, `--in-use`, `--edges`: keine `.v2je--bu`; `--with-tax-key`: Spalte da |
 
 Die App rendert `JournalEntryCompact`; dort verschwindet die leere BU-Spalte ohne Codeänderung.
+
+### Nachprüfung 2026-09-11 (Prüfer-Session, gegen c6f3f4d)
+
+**Fertig.** BU-Spalte nur noch in `journalentrycompact--with-tax-key`.

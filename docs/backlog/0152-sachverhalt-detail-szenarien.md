@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **in Arbeit** — fremd abgenommen 2026-09-11 mit einem Mangel, Nacharbeit gebaut am selben Tag, Nachprüfung offen; Reiter nach Zielgruppe neu geschnitten (4a64223), deren Abnahme offen |
+| Status | **fertig** für Einzelfall, Sammel und Dauer, Seite — fremd abgenommen 2026-09-11 samt Nachprüfung (c6f3f4d); die Reiter sind nach Zielgruppe neu geschnitten und warten auf ihre eigene Abnahme |
 | Stufe | `src/showcase/case/` (Seiten-Stories) · dazu Erweiterungen an `entities/accounting-case/CaseTimeline.tsx` |
 | Klassen-Test | Die Seite gehört der App und lebt in `showcase/` — wie 0144 für den Beleg. Was an Bausteinen fehlt, wird `entities/` bzw. `patterns/`, nicht Teil der Seite |
 | Quelle | Design-Brief **F196** (`ludwig/app` staging `672665f8`), überbracht von `ludwig-cto` · Seitenprofil `docs/seiten/sachverhalt-detail.md` · Entitätsprofil `docs/entitaeten/accounting-case.md` |
@@ -335,6 +335,48 @@ sonst der Satz.
 Die Einstellungen der Wiederkehr als eigener Baustein folgen als eigene
 Spec, gegen `docs/entitaeten/recurring-rule-staging-erhebung-2026-09-11.md`.
 
+## Nachtrag 2026-09-11 — Reiter je Art wie die Hauptseiten, Reiter „Belege"
+
+Owner nach dem Schnitt nach Zielgruppe: „warum nehmen wir nicht die gleichen
+[Muster] wie im Hauptmenü, je nach Patterntyp?" — und: „was mir fehlt, ist eine
+Seite mit allen verlinkten Dokumenten". Freigegeben mit „mach weiter".
+
+Jeder Reiter nimmt das Muster seiner Art — eine Liste sieht aus wie die
+Liste im Hauptmenü, eine Arbeitsfläche nimmt eines der vier Spaltenmuster
+(0154):
+
+| Reiter | Art | Muster | Baustein |
+|---|---|---|---|
+| Übersicht | Arbeitsfläche | `list-detail-aside` | unverändert |
+| Ereignisse | Liste mit Detail | `list-detail` | `CaseTimeline` · Journal-Sicht |
+| **Belege** (neu, Schlüssel `documents`) | Liste | eine Fläche, wie die Belegliste | `SourceDocumentList` (0070: „kurze Liste am Sachverhalt", p90 ein Beleg) · `SourceDocumentDrawer` beim Klick (D13) |
+| Rückfragen | Liste zum Abarbeiten | `list-detail` | `TodoList` über `toTodoItem` · `ClarificationCard` (offen: beantworten) |
+| Plausibilität | Fläche mit Begleiter | `main-aside`, Stufe `table` | Prüfpunkte, Register, offene Posten, Ausgleich · Randspalte: Saldo des Personenkontos |
+| Wiederkehr | Vergleich | `split` | links die Regel, rechts was sie gebucht hat |
+| Stammdaten | eine Fläche | keine Spalten | `CaseFacts` in zwei Spalten Paaren |
+| Technik | Fläche mit Begleiter | `main-aside`, Stufe `table` | DATEV-Wahrheit, Protokoll · Randspalte: Herkunft, Rohdaten |
+
+Schlüssel `documents` englisch: die App stellt `belege` mit F210 T210.2
+darauf um. Der Brief hatte „Verbundene Belege" gestrichen (O1, Default
+nein); der Owner will ihn.
+
+Leerfälle des Reiters Belege: „Keine verbundenen Belege" (eine Lücke) und
+„Kein Beleg zu erwarten" mit Grund (ein Erfolg) — die zwei Fälle, die
+`SourceDocumentList` schon unterscheidet.
+
+Rückfragen: `ClarificationList` verlinkt ihre Zeile nicht (nur die
+Fallnummer mit `showCase`); für die Auswahl nimmt der Reiter deshalb die
+Arbeitsliste `TodoList`, für die das Set `toTodoItem` schon hat. J/K bleiben
+beim Pager der Seite (`hotkeys={false}`).
+
+Gemessen bei 1440 × 900 (6107): alle sechs Reiter-Stories ohne Fehler, ohne
+Querlauf, ohne Text in 16 px. Ereignisse und Rückfragen `list-detail` 613 ·
+807; Plausibilität und Technik `main-aside` 1027 · 393; Wiederkehr `split`
+710 · 710. Belege: Klick auf die Zeile öffnet „Rechnung · Musterbau
+Fahrzeugteile GmbH" als Drawer, `#document=…`; Esc schließt ihn, der Hash ist
+wieder leer. Reiterleiste: Übersicht · Ereignisse · Belege · Rückfragen ·
+Plausibilität · (Wiederkehr) · Stammdaten · Technik.
+
 ## Offene Fragen
 
 1. **Ist die Buchung ein eigener Timeline-Eintrag oder eine zweite Zeile am
@@ -409,3 +451,7 @@ Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (
 | Erwartungs- und Klärungs-Einträge wählbar, Spalte 2 bleibt „Zu tun" | `ScenarioPage` zeigt je Eintrag seine Fläche: Ereignis → `EventPane`, Erwartung → `ExpectationPane` (`ExpectationRow`, was sie erledigt, „Erledigt"/„Aufheben"), Klärung → `ClarificationPane` (die Zeile mit Zustand und Weg in den Reiter; bei der beantwortbaren Frage die Karte); die Erstattung in `ExpenseReport` hat ein Detail bekommen | jeder Strang-Eintrag geklickt: `proposal-pending` 0 → „Erwartete Zahlung", 1 → „Rückfrage"; `awaiting-document(-escalated)` 0 → „Erwarteter Beleg"; `clarification-open-firm` 0 → „Rückfrage"; `client-batch` 0–11 → „Rückfrage"; `expense-report` 0 → „Erwarteter Beleg", 1 → „Erstattung Reisekosten Juli"; `seite--in-use` 0/1 wie `proposal-pending`; `with-datev-entry` 0 → „Erwartete Zahlung" |
 
 Die Reiter-Stories sind seit 4a64223 nach Zielgruppe geschnitten (Nachtrag oben) und warten auf ihre eigene Abnahme.
+
+### Nachprüfung 2026-09-11 (Prüfer-Session, gegen c6f3f4d)
+
+**Fertig.** 137 Strang-Einträge in 23 Stories geklickt, 137-mal wechselt Spalte 2; Falz unverändert. Die Reiter-Stories bleiben zurückgestellt (Owner-Wünsche zum Schnitt).
