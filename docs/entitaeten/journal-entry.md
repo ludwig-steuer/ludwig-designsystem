@@ -9,8 +9,8 @@
 | Status-Achsen | `buchung` (`status`) · `buchung_datev` (abgeleitet über `deriveEntryDatevStage()`: `status` + `exported_at` + `datev_mirror_entry_id`) · `buchung_origin` (`origin`) · `konfidenz` (Satz-Konfidenz über `Confidence`). **Ohne Achse, weil Arten:** Satzart (`entry_kind`), Beleggruppe (`document_group`). **Ohne Achse, obwohl Zustand:** `acceptance_quality` (nur ein Kommentar in der Registry) → L-294 |
 | Wichtigkeit | **hoch** — Kern-Entität (Datenmodell-Review §7); Roadmap der App `uikit-entity-roadmap-2026-09.md` (9be34746) Rang 1, Gewicht 19 |
 | Datenstand | Staging über den Pooler, **2026-09-11**, schreibgeschützte Sitzung: **1.720 Sätze, 3.752 Teilbuchungen, 6 Mandanten**. Nur `SELECT`, keine Kundendaten im Dokument; Beispielwerte sind erfunden (Musterfirma GmbH, 1.800,00 €). Die Roadmap hat dieselben Tabellen kurz vorher erhoben; wo sie abweicht, gilt diese Messung (`revenue` 576 statt 563) |
-| Bestandswarnung | `posted` kommt **nicht vor** (0 von 1.720) — die GoBD-Stufe liegt im Stapel. `client_import` (833 Sätze, 48 %) trägt **weder** Konfidenz noch Herleitung. `reversed` (86) heißt fast immer „vom Agenten zurückgezogen", nicht „storniert" (L-296). Ein Stapel mit 493 Sätzen ist zugleich ein Sammelsachverhalt — die Maxima der Listen „Stapel" und „Sachverhalt" sind derselbe Fall |
-| Rückfrage | gestellt am 2026-09-11 an `ludwig-manager` (beantwortet sie aus dem App-Stand) — **offen**, die Defaults gelten |
+| Bestandswarnung | `posted` kommt **nicht vor** (0 von 1.720) — die GoBD-Stufe liegt im Stapel. `client_import` (833 Sätze, 48 %) trägt **weder** Konfidenz noch Herleitung. `reversed` (86) heißt fast immer „vom Agenten zurückgezogen", nicht „storniert" — Befund L-284, in der App behoben (cccccac1: die Stufe heißt jetzt „Zurückgezogen"; im Spiegel erst nach dem Sync im F210-Fenster). Ein Stapel mit 493 Sätzen ist zugleich ein Sammelsachverhalt — die Maxima der Listen „Stapel" und „Sachverhalt" sind derselbe Fall |
+| Rückfrage | gestellt und **beantwortet** am 2026-09-11 (`ludwig-manager`, aus dem App-Stand): die Defaults der drei Fragen gelten; ein dritter Job für `JournalEntryList` (Export-Bucket); keine Auswahl-Dialoge mit Buchungssätzen |
 | Analyse von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren`) |
 
 ## Was sie ist
@@ -21,7 +21,7 @@ Sachbearbeiterin prüft ihn als **Vorschlag** (Schritt 3 der Stapelabnahme),
 nimmt ihn an oder gibt ihn zurück, und schlägt ihn später **nach** — am Konto,
 im Stapel, am Sachverhalt, an der Bankzeile. Je Ereignis ein Satz (p50 1 ·
 p90 1 · max 3 — zurückgezogene Vorschläge bleiben stehen, **Annahme**, siehe
-L-296).
+L-284).
 
 **Anzeige-Regeln** (wörtlich):
 
@@ -67,11 +67,11 @@ erDiagram
 
 | Datenpunkt | Quelle | Rolle | Füllgrad | heute in | änderbar | Rang | ab Form | Beleg |
 |---|---|---|---|---|---|---|---|---|
-| Buchungstext (`line_description` der führenden Zeile; `JournalEntryListItem.buchungstext`) | Zeile · in der App-Abfrage abgeleitet | Identität | 100 % · 173 Sätze (10 %) tragen mehr als einen Text | `BuchungenTabelle` (`e.bookingText`), `JournalEntryView` (`l.lineText`), `JournalEntryCard` (`caption`) | Nutzer · Judge (B8) | 1 | S | Füllgrad · GLOSSARY-Muster „Kreditor Leistung Zeitraum" · §5 „Rang 1 ist menschenlesbar". **Abweichung von der Roadmap** (dort Konten auf Rang 1) → Frage 1 |
+| Buchungstext (`line_description` der führenden Zeile; `JournalEntryListItem.buchungstext`) | Zeile · in der App-Abfrage abgeleitet | Identität | 100 % · 173 Sätze (10 %) tragen mehr als einen Text | `BuchungenTabelle` (`e.bookingText`), `JournalEntryView` (`l.lineText`), `JournalEntryCard` (`caption`) | Nutzer · Judge (B8) | 1 | S | Füllgrad · GLOSSARY-Muster „Kreditor Leistung Zeitraum" · §5 „Rang 1 ist menschenlesbar". **Abweichung von der Roadmap** (dort Konten auf Rang 1) → Frage 1, bestätigt (Manager 2026-09-11) |
 | Betrag (Σ Soll; `JournalEntryListItem.amount`) | abgeleitet: Summe der Soll-Zeilen | Maß | 100 % | `JournalEntryCell` (0044), `BuchungenTabelle` (`e.amount`), `Schritt3` (`l.amount`) | Nutzer | 2 | XS | Füllgrad · heute in |
 | Konto → Gegenkonto (Zeilen `account_number_snapshot`/`account_name_snapshot` · `side`) | Zeilen | Identität | 100 % · 177 Sätze (10 %) mit mehr als zwei Zeilen | `JournalEntryCell` (0044), `BuchungenTabelle` (`debitAccounts`/`creditAccounts`), `Schritt3` (`l.accountNumber`) | Nutzer | 3 | XS | Füllgrad · heute in |
 | Buchungsdatum (`booking_date`) | Spalte | Zeit | 100 % | `BuchungenTabelle`, `JournalEntryView` | Nutzer | 4 | S | Füllgrad · heute in |
-| Weg nach DATEV (`deriveEntryDatevStage()`) | abgeleitet: `status` + `exported_at` + `datev_mirror_entry_id` | Zustand (`buchung_datev`) | 100 % | `JournalEntryView` (`exportBatchState`, `exportedAt`) · `BuchungenTabelle` zeigt nur `status` | Server | 5 | S | Registry · `entry.ts`. Die Zeile zeigt die Stufe, nicht `status` allein → Frage 2 |
+| Weg nach DATEV (`deriveEntryDatevStage()`) | abgeleitet: `status` + `exported_at` + `datev_mirror_entry_id` | Zustand (`buchung_datev`) | 100 % | `JournalEntryView` (`exportBatchState`, `exportedAt`) · `BuchungenTabelle` zeigt nur `status` | Server | 5 | S | Registry · `entry.ts`. Die Zeile zeigt die Stufe, nicht `status` allein → Frage 2, bestätigt (Manager 2026-09-11) |
 | Belegfeld 1 (Zeilen `external_document_number`) | Zeile (führende) | Identität | 92 % · 16 Sätze mit mehr als einem | `BuchungenTabelle` (`e.belegfeld`), `ManualBookingDrawer` | Nutzer · Judge (B8) | 6 | S | Füllgrad · heute in |
 | Herkunft (`origin`) mit Konfidenz (`proposal_confidence`) | Spalte · Spalte (0–1) | Zustand (`buchung_origin`) · Maß | 100 % · 52 % — `ai_proposed`, `recurring_rule`, `manual` 100 %, `client_import` 0 % | `BuchungenTabelle` (`e.origin`), `JournalEntryView` (`entry.origin`), `BookingProposalView` (`entry.confidence`) | nie · Agent | 7 | S | Füllgrad je Herkunft · `ProvenanceMark` (0163) trägt beides in einer Marke. Konfidenz: 737 von 887 im obersten Fünftel |
 | Satzart (`entry_kind`) | Spalte, Server-Stempel | Identität (Art) | 100 % — `payment` 643 · `revenue` 576 · `expense` 330 · `money_transfer` 161 · `reclassification` 10 | Badge am Kopf der Buchungskarte in `Schritt3Einzel` (GLOSSARY) | Server | 8 | M | GLOSSARY Satzart · Wortliste fehlt im Spiegel (L-294) |
@@ -141,17 +141,29 @@ und `AiBookingNotesCell`, `TaxKeyField` (0125). `AccountEntryList` (Profil
 `account`) zeigt **Teilbuchungen** am Konto, nicht Sätze — dort ist die Zeile
 eine Kontobewegung.
 
+**Aus der Rückfrage** (Manager, 2026-09-11): Der Ludwig-Reiter des
+Konto-Drawers („nur in Ludwig", F209) zeigt `AccountEntries`, keine
+Buchungssätze — er bleibt draußen. Die Beleg-Seite zeigt unter „Gebucht"
+`JournalEntryCompact` — das bleibt so. Auswahl-Dialoge mit Buchungssätzen gibt
+es nicht; der Ausgleich läuft über `OpenItemLinkRow`.
+
 ## Listen
 
 | Liste | Job | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
 |---|---|---|---|---|---|---|---|---|---|
 | `JournalEntryList` „Inhalt des Stapels" | Wenn **die Kanzlei einen Stapel vor der Übergabe prüft**, will sie **sehen, welche Sätze drin sind, geordnet nach Beleggruppe**, damit **sie weiß, was nach DATEV geht, bevor es dort steht** | alle Sätze mit `export_batch_id` = Stapel | Beleggruppe (Abschnitt, Reihenfolge `DOCUMENT_GROUP_LABEL`), darin Buchungsdatum | 1–7 + Sachverhalt (Inline) | Herkunft, Weg nach DATEV | keine | „Der Stapel ist leer." ≠ „Keine Sätze für diesen Filter." | 79 · 343, max 493 → **Pagination, Serverfilter, Lade- und Fehlerfall** (§8) | Staging · `BuchungenTabelle` |
 | dieselbe Liste „Buchungen am Sachverhalt" | Wenn **die Sachbearbeiterin einen Sachverhalt prüft**, will sie **die Sätze sehen, die aus seinen Ereignissen entstanden sind**, damit **sie Beleg und Buchung gegeneinander halten kann** | Sätze der Ereignisse des Sachverhalts | Buchungsdatum | 1–7, ohne Sachverhalt | keine | keine | „Noch keine Buchung." (neutral) | 0 · 2, max 493 → Pagination nur am Sammelsachverhalt | Staging · Sachverhalt-Detailseite Rang 5 |
+| dieselbe Liste „Export-Bucket" | Wenn **die Kanzlei den DATEV-Export eines Zeitraums vorbereitet**, will sie **je Bucket sehen, welche Sätze exportiert, exportierbar, noch offen oder zurückgezogen sind**, damit **sie weiß, was mit dem nächsten Export geht — und einen exportierten Satz stornieren kann** | Sätze des Zeitraums, je Bucket (`bucketOf()` in `export-status-core.ts`, Achse `export_bucket`) | Buchungsdatum | 1–7 | Bucket (`exported` · `exportable` · `pending` · `reversed`) | keine; **Zeilenaktion** „stornieren" nur im Bucket `exported` | je Bucket eigener Satz: „Nichts exportierbar." ≠ „Keine Treffer." | nicht je Zeitraum gemessen; Obergrenze Sätze je Mandantenjahr p50 128 · max 1.096 → Pagination | Rückfrage (Manager, 2026-09-11) · `datev-export/application/export-status-core.ts` |
 | `JournalEntryReviewList` „Vorschläge prüfen" | Wenn **ein Buchungslauf durch ist**, will **die Buchhalterin die Vorschläge in der Reihenfolge abnehmen, in der sie Aufmerksamkeit brauchen**, damit **sie nicht alle Sätze gleichrangig durchklickt** (J-41) | `status ∈ {proposed, accepted}` im Stapel, Reiter nach Herkunft (F202) | nach Aufmerksamkeit: Judge-Verdikt, dann Konfidenz aufsteigend | 1–7 + KI-Prüfung (`AiBookingNotesCell`) | offen / alle, Herkunft | annehmen · zurückgeben | „Alles abgenommen." (Erfolg) ≠ „Keine Treffer." | offene Vorschläge je Stapel 23 · 41, max 45; `ai_proposed` je Stapel 44 · 219, max 260 | Staging · `Schritt3`/`Schritt3Einzel` |
 
-Die ersten beiden sind **eine** Komponente: sie unterscheiden sich in der
-Grundgesamtheit und in einer Spalte — das trägt ein Prop (`groupBy`,
-`columns`), keine zweite Liste (§8). „Vorschläge prüfen" unterscheidet sich in
+Die ersten drei sind **eine** Komponente: sie unterscheiden sich in der
+Grundgesamtheit, in einer Spalte und — beim Export-Bucket — im Filter und in
+einer Zeilenaktion. Das tragen Props (`groupBy`, `columns`, `filter`,
+`rowAction`), keine zweite Liste; so entschieden in der Rückfrage (Manager,
+2026-09-11). **Für die Prüfung:** nach §8 ist der Export-Bucket grenzwertig
+(Grundgesamtheit, Filter und Aktion weichen ab); das Argument für ein Prop ist,
+dass die Zeile, die Sortierung und der Rahmen dieselben bleiben und die Aktion
+eine einzelne Zeile betrifft, keine Massenaktion ist. „Vorschläge prüfen" unterscheidet sich in
 allen fünf (Grundgesamtheit, Sortierung, Filter, Massenaktion, Spaltensatz)
 und ist deshalb eine eigene Komponente — vertagt (§Zuschnitt). Die Konto-Frage
 „was liegt auf diesem Konto" beantwortet `AccountEntryList` mit Teilbuchungen,
@@ -167,7 +179,7 @@ sind Stapel, Sachverhalt und Stapelabnahme.
 | `JournalEntryCard` | M | **✓ gebaut** (0044) — bleibt | 2 — steht am Ereignis, am Kreditor, in der Regel-Vorschau | 1–3, 9 | Teilbuchungen als Liste | — | — |
 | `JournalEntryFacts` | L | ja | 1 — existiert als `JournalEntryView` (374 Z.) und `JournalEntryDetail` | alle ab 20 %: 1–8, 11–17 | Teilbuchungen als `JournalEntryGrid`, Herleitung als `ProvenanceNote` + `AiBookingNotesBody`, Spiegelbuchung, Stapel, Erwartungen | `FieldList`, `JournalEntryGrid`, `ProvenanceNote` (0163), `AiBookingNotesBody` | `JournalEntryView`, `JournalEntryDetail`, `BookingProposalView`/`KIBox` |
 | `JournalEntryDrawer` | L | ja | 5 — FK-Ziel (Erwartung, Spiegel) **und** nachgeschlagen aus Konto-Detail (J-27, heute `LudwigEntryDrawer`), Stapel und Bankzeile | wie `JournalEntryFacts` | wie Facts, Ausgang zum Sachverhalt im `footer` | `Drawer`, `JournalEntryFacts` | `LudwigEntryDrawer` |
-| `JournalEntryList` | L | ja | 6 — zwei Listen-Jobs („Inhalt des Stapels", „am Sachverhalt") | Zeile + Rahmen | — | `DataTable` (Gruppen, Pagination), `JournalEntryRow`, `EmptyState` | `BuchungenTabelle` |
+| `JournalEntryList` | L | ja | 6 — drei Listen-Jobs („Inhalt des Stapels", „am Sachverhalt", „Export-Bucket") | Zeile + Rahmen | — | `DataTable` (Gruppen, Pagination), `JournalEntryRow`, `EmptyState` | `BuchungenTabelle`, die Bucket-Listen des DATEV-Export-Panels |
 | `JournalEntryReviewList` | L | ja, **Backlog** | 6 — Job J-41 | Zeile + KI-Prüfung | — | `JournalEntryRow`, `AiBookingNotesCell`, `SelectionScope`/`SelectionBar` | Liste in `Schritt3` |
 | `JournalEntryEditor` | XL | **✓ gebaut** (0015) — bleibt | 4 — Zeilenfelder änderbar durch Nutzer | 1–9, 19 | — | — | `ManualBookingDrawer` (der Drawer bleibt Komposition der App) |
 | `JournalEntryView` | L | nein | keine Route je Buchungssatz — der Drawer ist die L-Form (wie bei der Bankposition) | | | | |
@@ -184,7 +196,7 @@ Bau-Reihenfolge: `JournalEntryRow` → `JournalEntryFacts` → `JournalEntryDraw
 | `JournalEntryRow` | jetzt | trägt beide Listen und den Reiter am Sachverhalt; ersetzt die Zeile von `BuchungenTabelle` | — |
 | `JournalEntryFacts` | jetzt | existiert zweimal in der App; B5 (`ProvenanceNote`) steht jetzt | — |
 | `JournalEntryDrawer` | jetzt | J-27 steht auf „halb", weil zwei Drawer eine Frage beantworten | — |
-| `JournalEntryList` („Inhalt des Stapels", „am Sachverhalt") | jetzt | ersetzt `BuchungenTabelle`; Ränge ohne Annahme belegt | — |
+| `JournalEntryList` („Inhalt des Stapels", „am Sachverhalt", „Export-Bucket") | jetzt | ersetzt `BuchungenTabelle`; Ränge ohne Annahme belegt | — |
 | `JournalEntryReviewList` „Vorschläge prüfen" | Backlog | hängt am Profil `export-batch` (Roadmap #3), an einem fehlenden Seitenprofil der Stapelabnahme, an B3 `DiffView` (`ai_edited`) und an einem Typ für das Judge-Verdikt (L-295) | `docs/backlog/0164-journal-entry-review-list.md` |
 | `JournalEntryView` · `JournalEntryPicker` · Profil „Teilbuchung" | verworfen | siehe Formen | — |
 
@@ -196,7 +208,7 @@ Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 
 - **L-294** Wortlisten fehlen im Spiegel: Die Satzart (`ENTRY_KIND_LABEL`, `core/accounting/entry-kind.ts`) wird nicht gespiegelt, und `acceptance_quality` hat weder Achse noch Wortliste. `JournalEntryVM` und `JournalEntryListItem` tragen weder `entryKind` noch `documentGroup`.
 - **L-295** `proposal_rationale` ist jsonb ohne Typ. Die Schlüssel sind `step`, `agent_rationale`, `judge` (Liste), `sources`, `belegfeld_source` (neun Werte), `guard_warnings`, `withdrawn_by_agent` und acht seltene. Die Domäne typisiert nur `sources`; `JournalEntryVM.rationale` flacht zu `string`.
-- **L-296** `reversed` ohne Storno-Buchung: Von 86 Sätzen hat keiner `reverses_entry_id`, 85 tragen `withdrawn_by_agent`. Die Registry sagt „Durch eine Storno-Buchung aufgehoben", und das stimmt für keinen.
+- ~~**L-296**~~ doppelt zu **L-284**, in der App erledigt (cccccac1 — `reversed` heißt „Zurückgezogen"). War: `reversed` ohne Storno-Buchung: Von 86 Sätzen hat keiner `reverses_entry_id`, 85 tragen `withdrawn_by_agent`. Die Registry sagt „Durch eine Storno-Buchung aufgehoben", und das stimmt für keinen.
 - **L-297** Wer angenommen hat, ist nicht nachvollziehbar: `reviewed_by_user_id` 0 % bei 616 gesetzten `reviewed_at`; `platform_audit_events` kennt keinen `resource_kind` für den Buchungssatz.
 - **L-298** Zwei Kanten für ein Paar mit Spiegelbuchung: `client_journal_entry.datev_mirror_entry_id` 319 gegen `client_datev_mirror_entries.matched_journal_entry_id` 348. `deriveEntryDatevStage()` liest nur die erste.
 - **L-299** `JournalEntryListItem` flacht Splits: ein Soll-, ein Haben-Konto, ein Belegfeld, ein Text. 177 Sätze (10 %) haben mehr als zwei Zeilen (max 36), 173 mehr als einen Buchungstext, 16 mehr als ein Belegfeld 1.
@@ -204,6 +216,9 @@ Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 - **L-301** Drei Teilbuchungen tragen einen Buchungstext über 60 Zeichen (max 124; zweimal `manual`, einmal `ai_proposed`). Die EXTF-Grenze ist 60, der Schema-CHECK erlaubt 300.
 
 ## Offene Fragen
+
+**Beantwortet am 2026-09-11** (`ludwig-manager`, aus dem App-Stand): alle drei
+Defaults gelten.
 
 1. **Rang 1 ist der Buchungstext, nicht die Konten** (Abweichung von der Roadmap) — die Sachbearbeiterin erkennt „Telekom Mobilfunk 03/26" unter 343 Sätzen eines Stapels, „6805 an 1800" wiederholt sich. — ohne Antwort: Buchungstext Rang 1, Konten Rang 3.
 2. **Die Zeile zeigt den Weg nach DATEV (`buchung_datev`, fünf Stufen), nicht `status` (vier)** — die Stufe enthält den Status und sagt zusätzlich „exportiert" und „in DATEV bestätigt". — ohne Antwort: `buchung_datev` in S, `buchung` nur im Kopf der Facts.
