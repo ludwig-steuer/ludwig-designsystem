@@ -45,6 +45,50 @@ Was ein späterer Lauf wissen muss, um heutiges Debugging zu überspringen.
   Wrapper im Textfluss (`minHeight:100vh`). `cardMode: "single"` allein reicht
   dafür nicht. Story-Args und `open: true` blieben unangetastet.
 
+## Re-Sync 2026-09-11 (Stand a86d99e)
+
+- **Umfang bewusst auf die 25 bestehenden Komponenten begrenzt** (Owner
+  2026-09-11). Das Set ist auf rund 138 v3-Komponenten gewachsen; der Rest
+  folgt in einem eigenen Lauf. Mechanik: `titleMap` setzt jeden anderen
+  Story-Titel auf `null`; `"Zellen": "AmountCell"` hält die AmountCell-Karte
+  (ihre Story heißt jetzt `v3/Primitives/Tabelle/Zellen`). **Nächster Lauf:
+  nur die `null`-Einträge der aufzunehmenden Komponenten löschen** — Seiten,
+  Referenz und Grundlagen bleiben `null`.
+- **[GENERAL] `next/link` war wieder im DS** (`JournalEntryGrid.tsx`) -> auf
+  `primitives/Link` umgestellt. Vor jedem Sync:
+  `grep -rn 'from "next/' src --include='*.tsx'`.
+- **[GENERAL] Checklist `root empty` — `rowCells is not a function`** -> die
+  Import-Regel erkennt ein Komponentenmodul am Dateinamen. `Review.tsx` heißt
+  wie keiner seiner Exporte, wird deshalb aus der Quelle in die Vorschau
+  gebündelt, und sein Import aus `./Table` landet auf dem globalen Objekt, dem
+  der interne Helfer `rowCells` fehlt -> `cfg.storyImports.shim:
+  ["src/ui/v3/patterns/Review.tsx"]`. Gleiches Symptom bei einer weiteren
+  Sammeldatei: Datei dort ergänzen.
+- **StatusInfoDialog: eigene Vorschau rief die alten Story-Exporte** (`Buchung`,
+  `Sachverhalt` …; seit 0001 `Entry`, `Case`, `Document`, `LegendOnly`) ->
+  Exporte umbenannt, `primaryStory: "Case"`. Eigene Vorschauen folgen
+  Umbenennungen in der Story nicht von selbst.
+- **`[GRID_OVERFLOW]` JournalEntryEditor, Pagination** -> `cardMode: "column"`.
+- **Gruppen verlieren Umlaute.** Der Konverter bildet die Gruppe aus dem
+  Titelsegment über `[^a-z0-9]` -> `-`: „Fläche" wird `fl-che`, „Prüfen"
+  `pr-fen`, „Arbeitsfläche" `arbeitsfl-che` — als Ordner und als Label im
+  Picker. Kein Config-Schalter; ein Fork von `common.mjs` verschöbe jeden
+  Prüfvertrag. Kosmetisch, bewusst hingenommen.
+- **conventions.md nannte alte Status-Achsen** (`beleg`, `sachverhalt`,
+  `buchung`; heute `document_processing`, `accounting_case`, `journal_entry`,
+  Status-Schlüssel unverändert) -> Regel und Beispiel korrigiert (Owner
+  2026-09-11). Bei jedem Sync die Achsen im Leitfaden gegen `STATUS_REGISTRY`
+  prüfen.
+- **StatusBadge-JSDoc nannte dieselben alten Achsen** (`stage`: „Only
+  `beleg`", `@when`: „beleg, sachverhalt, buchung") — das fließt in
+  `StatusBadge.d.ts` und `.prompt.md`, also in den API-Vertrag des
+  Design-Agents -> in `src/ui/v3/patterns/StatusBadge.tsx` auf
+  `document_processing` usw. korrigiert (nur Kommentare).
+- **Hohe Stories (MasterDetail/Detail Wide, StatusBadge/All Axes)** wirken auf
+  dem Bogen falsch skaliert: die Storybook-Aufnahme ist der ganze Root, die
+  Preview endet am 700-px-Viewport. Die Rohbilder in `compare/raw/` sind
+  gleich, wo sie sich überdecken — `match`, kein Fix.
+
 ## Was KEIN Defekt ist (dreimal unabhängig gemeldet — nicht erneut diagnostizieren)
 
 - **Storybook zeigt `#F4F6F8`, die Preview Weiß.** `.storybook/preview.ts` setzt
@@ -110,7 +154,14 @@ Beides nach dem Erstsync zu entscheiden, nicht mittendrin:
   sie bestehen und legt einen überflüssigen `minHeight:100vh`-Kasten darüber
   (harmlos, aber dann löschbar). Kommt eine weitere geöffnete Overlay-Story
   dazu, gilt dasselbe Muster.
-- **Story-Titel tragen das Präfix `v3/`.** Eine Umbenennung der Titel ändert
-  die Gruppen im Ziel und damit die Karten-Zuordnung.
+- **Die Gruppe ist das Titelsegment vor dem Namen** (`v3/Primitives/Fläche/Banner`
+  -> `fl-che`). Werden Story-Titel umsortiert, wandern alle Karten in neue
+  Ordner (so 2026-09-11: alle 25) — der Diff löscht die alten Pfade, das ist
+  gewollt.
+- **Der Umfang hängt an der `titleMap`-Sperrliste.** Ein Story-Titel, der nach
+  2026-09-11 dazukommt, hat keinen `null`-Eintrag und wird beim nächsten Sync
+  automatisch mitgenommen — dann bewusst entscheiden (aufnehmen oder `null`).
+- **`storyImports.shim` für `Review.tsx` hängt am Dateipfad.** Wird die Datei
+  umbenannt oder zerlegt, kommt `rowCells is not a function` zurück.
 - CSS hängt am Referenz-Storybook: Ändert sich die Style-Kette, muss
   `.design-sync/sb-reference` neu gebaut werden, sonst grading gegen alte Optik.

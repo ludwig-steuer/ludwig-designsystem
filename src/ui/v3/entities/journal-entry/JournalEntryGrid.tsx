@@ -1,9 +1,9 @@
-import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
 import { ActionIcon } from "../../Icons";
 import { Disclosure } from "../../primitives/Disclosure";
 import { IconButton } from "../../primitives/IconButton";
+import { Link } from "../../primitives/Link";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { JournalEntryCard } from "./JournalEntryCompact";
 import { formatAmount } from "../../format";

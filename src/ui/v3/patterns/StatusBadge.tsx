@@ -8,7 +8,7 @@ export interface StatusBadgeProps {
   /** Which status axis — decides label, colour and explanation. */
   axis: StatusAxis;
   status: string | null | undefined;
-  /** Only `beleg`: the pipeline stage reached (`processing_stage`) as detail. */
+  /** Only `document_processing`: the pipeline stage reached (`processing_stage`) as detail. */
   stage?: string | null;
   /** Show the icon if the axis has one (default true). */
   showIcon?: boolean;
@@ -41,8 +41,8 @@ export interface StatusBadgeProps {
  * meaning — no client JS), and the (i) with every value of the axis. The chip
  * stays server-renderable; only the (i) is a client island.
  *
- * @when    A state from a status axis (beleg, sachverhalt, buchung, job …). The
- *          one allowed status display (R1).
+ * @when    A state from a status axis (document_processing, accounting_case,
+ *          journal_entry, job …). The one allowed status display (R1).
  * @instead A property without an axis — kind, role, counter → Badge.
  *          A state with an explanation and an action → StatusCallout.
  */

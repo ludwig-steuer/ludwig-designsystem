@@ -53,7 +53,7 @@ function stage(inner: any) {
   };
 }
 
-export const Buchung = /* Buchung */ stage(compose(S, "Buchung"));
-export const Sachverhalt = /* Sachverhalt */ stage(compose(S, "Sachverhalt"));
-export const Beleg = /* Beleg */ stage(compose(S, "Beleg"));
-export const NurLegende = /* Nur Legende */ stage(compose(S, "NurLegende"));
+export const Entry = /* Entry */ stage(compose(S, "Entry"));
+export const Case = /* Case */ stage(compose(S, "Case"));
+export const Document = /* Document */ stage(compose(S, "Document"));
+export const LegendOnly = /* Legend Only */ stage(compose(S, "LegendOnly"));

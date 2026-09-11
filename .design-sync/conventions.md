@@ -49,10 +49,11 @@ richtiger als eine erfundene Zahl.
   Fehler. Jeder farbige Zustand trägt zusätzlich ein Wort oder Icon.
 - **Status nur über `StatusBadge`** — nie eine eigene Status-Beschriftung oder
   Farbzuordnung erfinden. Zwei Pflicht-Props: `axis` (die Status-Achse, z. B.
-  `beleg`, `sachverhalt`, `buchung`, `job`) und `status` (der technische
+  `document_processing` für Belege, `accounting_case` für Sachverhalte,
+  `journal_entry` für Buchungen, `job`) und `status` (der technische
   Schlüssel dieser Achse, z. B. `pending`, `in_progress`, `processed`,
-  `review_needed`, `failed` für `beleg`) — **nicht** das deutsche Label; das
-  setzt die Komponente selbst.
+  `review_needed`, `failed` für `document_processing`) — **nicht** das
+  deutsche Label; das setzt die Komponente selbst.
 - **Deutsch, immer „Sie", Buttons im Imperativ** („Beleg prüfen", nicht
   „Prüfung"). Fachbegriffe: Kanzlei (nicht Tenant), Mandant (nicht Client),
   Kreditor, Beleg, Sachverhalt, Buchung. Keine Emojis, keine Versalien.
@@ -83,7 +84,7 @@ richtiger als eine erfundene Zahl.
       <Row>
         <td>2026-08-21</td>
         <td>Bürobedarf Meier GmbH</td>
-        <td><StatusBadge axis="beleg" status="pending" /></td>
+        <td><StatusBadge axis="document_processing" status="pending" /></td>
         <AmountCell value={1475.6} />
       </Row>
     </Table>
