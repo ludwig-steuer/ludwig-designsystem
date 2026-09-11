@@ -3937,3 +3937,54 @@ a.v3prov:focus-visible { text-decoration: underline; }
 .v3prov__note .v2fields__row > :last-child { min-width: 0; text-align: left; font-weight: 400; }
 .v3prov__line .v2mono { overflow-wrap: anywhere; }
 
+/* --- Annotated (showcase): a page with its building blocks named on top, for
+   the detail-page guideline. The layer never takes a click — the page stays
+   usable underneath. The stage is the containing block of the boxes. */
+.v3annot { display: grid; gap: var(--space-4); padding: var(--space-4) 0 var(--space-6); }
+.v3annot__bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: 0 var(--space-5); }
+.v3annot__stage { position: relative; }
+.v3annot__layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.v3annot__box {
+  position: absolute;
+  border: 2px solid var(--color-accent-600);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-accent-600) 5%, transparent);
+}
+.v3annot__tag {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  max-width: calc(100% + 4px);
+  padding: 1px var(--space-2);
+  overflow: hidden;
+  font-size: var(--fs-ui-sm);
+  font-weight: 600;
+  color: var(--color-surface);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: var(--color-accent-600);
+  border-radius: var(--radius-md) 0 var(--radius-md) 0;
+}
+.v3annot__legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  padding: 0 var(--space-5);
+  list-style: none;
+}
+.v3annot__legend li { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-2); align-items: baseline; }
+.v3annot__legend li > .v2sub { grid-column: 2; }
+.v3annot__legend li.is-missing { opacity: 0.6; }
+.v3annot__n {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  font-size: var(--fs-ui-sm);
+  font-weight: 600;
+  color: var(--color-surface);
+  background: var(--color-accent-600);
+  border-radius: var(--radius-pill);
+}
+
