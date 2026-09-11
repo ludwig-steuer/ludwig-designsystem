@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **analysiert** |
+| Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen b849ddc); eine Nacharbeit (Ort der `EventPane`), siehe „Prüfung" |
 | GLOSSARY | Tabelle „Datenmodell-Schichten" → Zeile **Ereignis** (`client_accounting_event`, „Geschäftsereignis"), `### OPOS-Vortrag (open item carryover)` — Ordner `entities/accounting-event/`. **Kein eigener `###`-Eintrag** für das Ereignis (die Zeile der Schichten-Tabelle trägt Definition und Rolle) |
 | Tabelle | `ludwig.client_accounting_event` — „Punkt-in-Zeit-Ereignis (Belegeingang, Bankbewegung, manuelle Erfassung). Hängt 1:N am Sachverhalt, 1:0..1 an genau einer Quelle" (Tabellenkommentar; CHECK `num_nonnulls(source_doc_id, bank_transaction_id, datev_mirror_entry_id) <= 1`). Keine Subtypen |
 | Typen | `accounting-cases/domain/case.ts` — `EVENT_KINDS` · `case-event.ts` — `CaseEvent`, `CaseEventSourceDoc`, `CaseEventBankTransaction`, `CaseEventBooking` · `overview-vm.ts` — `TimelineEventVM`, `TimelineState`. **Nicht im Spiegel:** `deriveTitle()` (`accounting-cases/application/case-overview.ts`); die Spiegelbuchung als Quelle fehlt in beiden VMs → L-309 |
@@ -101,6 +101,7 @@ dem Grund im `title`, ganz in den Facts (`LongText`).
 | `sachverhalt/EventDetail.tsx` (467 Z.) | Detail | Art, Datum, Titel, Betrag, Zustand, Beleg-Fakten, Bankzeile, Buchung, Hinweise, blockierende Klärungen, Ersetzt, storniert | Spiegelbuchung, Regel, Herkunft | — |
 | `sachverhalt/SaldoView.tsx` (267 Z.) | Saldo je Konto mit Ereignis-Bezug | Art, Datum, Titel, Betrag, Buchung je Ereignis (`relatedEventIds`) | — | — |
 | `EventStack.tsx` (394 Z.) | Karte (Ereignis mit Beleg, Bankzeile, Buchung) | — | — | nur noch als Typ referenziert, 30 Hex-Literale (Roadmap) |
+| `stapelabnahme/ui/Schritt3Einzel.tsx` (Z. 884, F181) | Ereignis-Bezug je Buchungssatz in der Einzelprüfung | Art, Titel, Datum, Betrag, Beleg, Bankzeile | — | — |
 
 **Aus der Rückfrage** (Manager, 2026-09-11): Außerhalb des Sachverhalts gibt es
 **keine Liste und keine Auswahl** von Ereignissen — die Abnahme (Schritt 3)
@@ -112,9 +113,9 @@ nur serverseitig: durch Agent-Tools (`create_case_from_doc`/`_bank`,
 (`superseded_by_event_id`, 2 im Bestand).
 
 **Im Set:** `CaseTimeline` (0040, 0152) zeichnet die Ereignisse über den
-lokalen Typ `CaseTimelineEvent` (Befund 1 von 0040) samt einer eigenen
-`EventPane` (`CaseTimeline.tsx:291`); der Showcase-Sachverhalt hat eine zweite
-(`EntryPane`/`EventPane` in `src/showcase/case/scenario.tsx`) und den
+lokalen Typ `CaseTimelineEvent` (Befund 1 von 0040) — eine eigene
+Detailfläche hat sie nicht. Die Detailfläche des Showcase-Sachverhalts ist
+`EventPane` (`src/showcase/case/scenario.tsx:291`, über `EntryPane`); dazu der
 Sammelsachverhalt (`CaseCollective`). `JournalEntryCard` nennt in ihrem
 `@when` den „event stack".
 
@@ -134,7 +135,7 @@ zeichnet ihre Ereignis-Zeilen künftig mit `EventRow`.
 |---|---|---|---|---|---|---|---|
 | `EventCell` | XS | ja | 3 — FK-Ziel des Buchungssatzes (100 %), der Erwartung und des Ersatzes; genannt in `JournalEntryFacts` und `MirrorEntryFacts` (183 Vorträge). **Abweichung von der Roadmap** („kein Cell") | 1–2, Datum im `title`; Weg zum Sachverhalt mit `#event=` | — | `EntityIcon`, `Link` | die Nennung „Ereignis" im Detail des Buchungssatzes |
 | `EventRow` | S | ja | 1 — Zeile von `Timeline.tsx` und von `CaseTimeline` im Set · 2 — Kind des Sachverhalts | 1–7 | Buchung als Zustand (+ `JournalEntryCell` ab M), Quelle als `SourceDocumentCell` / `BankTransactionCell` / `MirrorEntryCell` | `StatusBadge` (`ereignis`), `AmountCell`, die Cells der Quellen | die Ereignis-Zeile in `CaseTimeline` (lokaler Typ `CaseTimelineEvent`) und in `Timeline.tsx` |
-| `EventFacts` | L | ja | 1 — existiert als `EventDetail.tsx` (467 Z.) und zweimal im Set | alle ab 20 %: 1–9; 10–12 nur wenn gesetzt | Buchung als `JournalEntryCard`, Quelle als Cell, Herkunft als `ProvenanceNote` | `FieldList`, `LongText`, `ProvenanceNote` (0163) | `EventDetail`, `EventPane` in `CaseTimeline` und im Showcase |
+| `EventFacts` | L | ja | 1 — existiert als `EventDetail.tsx` (467 Z.) und als `EventPane` im Showcase | alle ab 20 %: 1–9; 10–12 nur wenn gesetzt | Buchung als `JournalEntryCard`, Quelle als Cell, Herkunft als `ProvenanceNote` | `FieldList`, `LongText`, `ProvenanceNote` (0163) | `EventDetail`, `EventPane` im Showcase (`scenario.tsx:291`) |
 | `EventList` | L | ja | 6 — Job „Sammelsachverhalt" | Zeile + Rahmen | — | `DataTable` (Gruppen, Pagination), `EventRow`, `EmptyState` | die Ereignis-Liste im Showcase `CaseCollective` |
 | `EventCard` | M | nein | `EventStack` wird nur noch als Typ referenziert — kein Screen zeigt ein Ereignis als Karte in fremdem Kontext | | | | |
 | `EventEditor` | XL | nein | Titel (`deriveTitle()`), Notizen und Grund schreiben Server und Agent — keine Oberfläche (Rückfrage); die Facts zeigen an | | | | |
@@ -151,7 +152,7 @@ Nachtrag zu 0040, kein neues Pattern.
 |---|---|---|---|
 | `EventCell` | jetzt | trägt die Nennung am Buchungssatz und an der Spiegelbuchung | — |
 | `EventRow` | jetzt | trägt `CaseTimeline` und die Liste | — |
-| `EventFacts` | jetzt | ersetzt drei Detail-Flächen (App, `CaseTimeline`, Showcase) | — |
+| `EventFacts` | jetzt | ersetzt zwei Detailflächen (`EventDetail.tsx`, Showcase-`EventPane`) | — |
 | `EventList` | jetzt | der Sammelsachverhalt (508) braucht Filter und Pagination | — |
 | `EventCard` · `EventEditor` · `EventView` · `EventDrawer` · `EventPicker` | verworfen | siehe Formen | — |
 
@@ -182,7 +183,10 @@ dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
 
 | Zeile / Form | Einwand | Ergebnis | Geprüft von / am |
 |---|---|---|---|
-| | | | |
+| Kopf, Datenpunkte, Relationen | 24 Spalten verortet, CHECK `kind` = 7 = `EVENT_KINDS` = `ereignis_art`; Domäne, Registry und Aufrufer wie beschrieben; alle Aggregate reproduziert, auch L-310 (499 / 499) und L-311 (72 + 20) | bestätigt | Prüfer-Session, 2026-09-11 |
+| Im Set · `EventFacts` · Zuschnitt | `EventPane` liegt in `src/showcase/case/scenario.tsx:291`, nicht in `CaseTimeline.tsx` — `CaseTimeline` hat keine eigene Detailfläche; `EventFacts` ersetzt zwei, nicht drei | geändert | Prüfer-Session, 2026-09-11 |
+| Heutige Darstellung | `Schritt3Einzel` (F181, Z. 884) ist ein Aufrufer | Zeile ergänzt | Prüfer-Session, 2026-09-11 |
+| „Buchung fehlt" | 85 oder 83, je nach Ableitung | vermerkt | Prüfer-Session, 2026-09-11 |
 
 ## Weiter
 
