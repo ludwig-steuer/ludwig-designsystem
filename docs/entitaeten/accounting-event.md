@@ -10,7 +10,7 @@
 | Wichtigkeit | **hoch** — Roadmap der App (9be34746) Rang 4; das Profil `accounting-case` verweist zweimal hierher |
 | Datenstand | Staging über den Pooler, **2026-09-11**, schreibgeschützte Sitzung: **2.552 Ereignisse an 1.181 Sachverhalten, 7 Mandanten**, alle in EUR. Nur `SELECT`, keine Kundendaten; Beispielwerte erfunden |
 | Bestandswarnung | **Belegereignisse mit Beleg tragen den Betrag 0** (499 von 499), ohne Beleg den Betrag selbst (493) — die Hälfte der Belegereignisse zeigt heute keinen Betrag (L-310). Der größte Sammelsachverhalt trägt **508 Ereignisse in einem einzigen Monat** (2026-07) — eine Gruppierung nach Monat, wie die Roadmap sie vorschlägt, ergäbe eine Gruppe. `internal_transfer` und `adjustment` kommen nicht vor |
-| Rückfrage | gestellt am 2026-09-11 an `ludwig-manager` — **offen**, die Defaults gelten |
+| Rückfrage | gestellt und **beantwortet** am 2026-09-11 (`ludwig-manager`, aus dem App-Stand): die Defaults der drei Fragen gelten; Ereignisse entstehen nur serverseitig, außerhalb des Sachverhalts gibt es keine Liste und keine Auswahl; L-309–L-311 gehen als P-Einträge an die App |
 | Analyse von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren`) |
 
 ## Was sie ist
@@ -58,18 +58,18 @@ erDiagram
 | Datenpunkt | Quelle | Rolle | Füllgrad | heute in | änderbar | Rang | ab Form | Beleg |
 |---|---|---|---|---|---|---|---|---|
 | Art (`kind`) | Spalte | Identität (Art) | 100 % — `document_received` 992 · `open_item_carryover` 593 · `payment_in` 567 · `payment_out` 374 · `accrual` 26 | `Timeline.tsx` (Icon), `EventDetail`, `SaldoView`; im Set `CaseTimeline` | nie | 1 | XS | Füllgrad · Registry `ereignis_art` |
-| Titel (`title`, sonst `deriveTitle()`) | Spalte · abgeleitet in der App | Identität | 63 % — Rückfall bei 37 %; p50 16 · p90 58 · max 94 Zeichen | `Timeline.tsx`, `EventDetail`, `SaldoView`; im Set `CaseTimelineEvent.title` | Agent · Nutzer (**Annahme**, siehe Frage 3) | 2 | XS | Füllgrad · Spaltenkommentar. **Abweichung von der Roadmap** (dort Rang 4) — die Cell braucht ihn → Frage 1 |
+| Titel (`title`, sonst `deriveTitle()`) | Spalte · abgeleitet in der App | Identität | 63 % — Rückfall bei 37 %; p50 16 · p90 58 · max 94 Zeichen | `Timeline.tsx`, `EventDetail`, `SaldoView`; im Set `CaseTimelineEvent.title` | Agent · Server (`deriveTitle()`, `application/`) — kein Schreiber in der Oberfläche (Rückfrage) | 2 | XS | Füllgrad · Spaltenkommentar. **Abweichung von der Roadmap** (dort Rang 4) — die Cell braucht ihn → Frage 1 |
 | Datum (`event_date`) | Spalte | Zeit | 100 % · 399 außerhalb des Wirtschaftsjahres (Vorträge 394) | `Timeline.tsx`, `EventDetail`, `SaldoView` | nie | 3 | S | Füllgrad · Registry `open_item_carryover` |
 | Betrag (`amount`, bei Belegereignissen der Beleg-Betrag) | Spalte · abgeleitet | Maß (Richtung aus der Art) | 100 % gesetzt, aber 499 Belegereignisse mit 0 (L-310); negativ: 72 Vorträge, 20 Zahlungsausgänge (L-311) | `Timeline.tsx`, `EventDetail`, `SaldoView`, `EventStack` | nie | 4 | S | Staging · heute in; `CaseTimelineEvent.amount`: „0 means not set" |
 | Buchungszustand (`ereignis`, mit „Ersetzt" aus `superseded_by_event_id`) | abgeleitet aus den Buchungen am Ereignis | Zustand | 100 % — 65 % mit Satz; „Buchung fehlt" 85; „keine Buchung nötig" 833 | `Timeline.tsx` (`ev.state`), `EventDetail`; im Set `CaseTimelineEvent.state` | Server | 5 | S | Staging · Registry. Nicht in XS: die Cell steht am Buchungssatz, dessen Zustand dort schon steht |
 | Quelle (Beleg · Bankzeile · Spiegelbuchung, höchstens eine) | Eltern | Kontext | 51 % — Beleg 20 % · Bank 24 % · Spiegel 7 %; 49 % ohne (Vorträge ohne Spiegel, Sollstellungen) | `EventDetail` (`ev.doc`, `ev.bank`), `EventStack`; im Set `source: "datev"` | nie | 6 | S | Füllgrad · CHECK; die Spiegelbuchung fehlt in den VMs (L-309) |
-| Keine Buchung nötig — Grund (`no_booking_required_reason`) | Spalte | Erklärung | 33 % — Vorträge 100 %, Belege 18 %, Zahlungen 3 % bzw. 11 %; p50 65 · p90 319 · max 854 Zeichen | `EventDetail` (`ev.infoNote`); im Set `stateNote` als Tooltip | Agent — keine Oberfläche schreibt ihn (Code-Grep) | 7 | S als Zustand mit `title`, ab M als Text | Füllgrad · `CaseEvent` · Freitext ab M (§5) |
-| Notizen (`notes`) | Spalte | Erklärung | 58 % — p50 26 · p90 145 · max 165 | `EventStack` (`event.notes`) | Agent · Nutzer (**Annahme**) | 8 | M | Füllgrad |
+| Keine Buchung nötig — Grund (`no_booking_required_reason`) | Spalte | Erklärung | 33 % — Vorträge 100 %, Belege 18 %, Zahlungen 3 % bzw. 11 %; p50 65 · p90 319 · max 854 Zeichen | `EventDetail` (`ev.infoNote`); im Set `stateNote` als Tooltip | Agent über MCP — Audit `event.no_booking_required` 454-mal, alle vom Agenten; kein Schreiber in der Oberfläche (Rückfrage) | 7 | S als Zustand mit `title`, ab M als Text | Füllgrad · `CaseEvent` · Freitext ab M (§5) |
+| Notizen (`notes`) | Spalte | Erklärung | 58 % — p50 26 · p90 145 · max 165 | `EventStack` (`event.notes`) | Agent über MCP — kein Schreiber in der Oberfläche (Rückfrage) | 8 | M | Füllgrad |
 | Buchungssatz (Kind) | Kind | Zustand | 65 % mit Satz · p50 1 · max 3 | `EventDetail` (`ev.booking`), `SaldoView`, `EventStack` | — | 9 | M | Staging |
-| Aus Regel und Periode (`recurring_rule_id` · `accrual_period`) | Eltern · Spalte | Kontext · Zeit | 1 % · 1 % (nur Sollstellungen) | — | Server | 10 | L, nur wenn gesetzt | Füllgrad |
+| Aus Regel und Periode (`recurring_rule_id` · `accrual_period`) | Eltern · Spalte | Kontext · Zeit | 1 % · 1 % (nur Sollstellungen) | `recurringRuleId` an `TimelineEventVM` und `CaseEvent` seit App 09f7b439 — im Spiegel erst mit dem Sync im F210-Fenster | Server | 10 | L, nur wenn gesetzt | Füllgrad |
 | Teilzuordnung (`allocated_amount`) | Spalte | Maß | 1 % | — | Agent | 11 | L, nur wenn gesetzt (B4) | Füllgrad · Roadmap |
 | Herkunft (`agent_run_id` · `export_batch_id`) | Eltern | Verantwortung · Kontext | 26 % · 16 % | — | Server | 12 | L | Füllgrad · über `ProvenanceNote` (0163) und `BatchCell` |
-| Ersetzt durch (`superseded_by_event_id`) | Selbstbezug | Zustand | 0 % | `Timeline.tsx` (`ev.superseded`) | Agent (`supersede_event`) | — | als Zustand „Ersetzt" (Rang 5) | Spaltenkommentar F36 |
+| Ersetzt durch (`superseded_by_event_id`) | Selbstbezug | Zustand | 2 im Bestand (Merge) | `Timeline.tsx` (`ev.superseded`) | Agent (`supersede_event`) | — | als Zustand „Ersetzt" (Rang 5) | Spaltenkommentar F36 |
 
 Ausgelassen (Technik): `id`, `tenant_id`, `client_id`, `case_id` (Relation),
 `fiscal_year`, `fiscal_year_id` (setzt die Route), `currency` (immer EUR,
@@ -102,6 +102,15 @@ dem Grund im `title`, ganz in den Facts (`LongText`).
 | `sachverhalt/SaldoView.tsx` (267 Z.) | Saldo je Konto mit Ereignis-Bezug | Art, Datum, Titel, Betrag, Buchung je Ereignis (`relatedEventIds`) | — | — |
 | `EventStack.tsx` (394 Z.) | Karte (Ereignis mit Beleg, Bankzeile, Buchung) | — | — | nur noch als Typ referenziert, 30 Hex-Literale (Roadmap) |
 
+**Aus der Rückfrage** (Manager, 2026-09-11): Außerhalb des Sachverhalts gibt es
+**keine Liste und keine Auswahl** von Ereignissen — die Abnahme (Schritt 3)
+listet Buchungssätze (F181: Beleg und Bankzeile je Satz, nicht je Ereignis),
+Kontoseite und Konto-Drawer listen `AccountEntries`, die Bank-Arbeitsliste
+Bankzeilen, die Belegseite zeigt „Gebucht" über den Satz. Ereignisse entstehen
+nur serverseitig: durch Agent-Tools (`create_case_from_doc`/`_bank`,
+`attach`), durch das Regelwerk (Sollstellung je Periode) und durch den Merge
+(`superseded_by_event_id`, 2 im Bestand).
+
 **Im Set:** `CaseTimeline` (0040, 0152) zeichnet die Ereignisse über den
 lokalen Typ `CaseTimelineEvent` (Befund 1 von 0040) samt einer eigenen
 `EventPane` (`CaseTimeline.tsx:291`); der Showcase-Sachverhalt hat eine zweite
@@ -128,9 +137,9 @@ zeichnet ihre Ereignis-Zeilen künftig mit `EventRow`.
 | `EventFacts` | L | ja | 1 — existiert als `EventDetail.tsx` (467 Z.) und zweimal im Set | alle ab 20 %: 1–9; 10–12 nur wenn gesetzt | Buchung als `JournalEntryCard`, Quelle als Cell, Herkunft als `ProvenanceNote` | `FieldList`, `LongText`, `ProvenanceNote` (0163) | `EventDetail`, `EventPane` in `CaseTimeline` und im Showcase |
 | `EventList` | L | ja | 6 — Job „Sammelsachverhalt" | Zeile + Rahmen | — | `DataTable` (Gruppen, Pagination), `EventRow`, `EmptyState` | die Ereignis-Liste im Showcase `CaseCollective` |
 | `EventCard` | M | nein | `EventStack` wird nur noch als Typ referenziert — kein Screen zeigt ein Ereignis als Karte in fremdem Kontext | | | | |
-| `EventEditor` | XL | nein | `title`, `notes`, `no_booking_required_reason` höchstens als `InlineEdit` in den Facts (Roadmap); den Grund schreibt heute keine Oberfläche → Frage 3 | | | | |
+| `EventEditor` | XL | nein | Titel (`deriveTitle()`), Notizen und Grund schreiben Server und Agent — keine Oberfläche (Rückfrage); die Facts zeigen an | | | | |
 | `EventView` · `EventDrawer` | L | nein | keine Route je Ereignis; wer es nennt, führt zum Sachverhalt (`#event=`) | | | | |
-| `EventPicker` | S | nein | kein Screen wählt ein Ereignis aus (Rückfrage) | | | | |
+| `EventPicker` | S | nein | kein Screen wählt ein Ereignis aus — Ereignisse entstehen und verbinden sich serverseitig (Rückfrage) | | | | |
 
 Bau-Reihenfolge: `EventCell` → `EventRow` → `EventFacts` → `EventList`.
 `CaseTimeline` stellt danach ihre Ereignis-Zeile auf `EventRow` um — ein
@@ -157,6 +166,10 @@ Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 - **L-311** Die Vorzeichen-Konvention ist ungeklärt: 20 Zahlungsausgänge (mit negativer Bankzeile) und 72 Vorträge sind negativ, alle Zahlungseingänge positiv. Ob der Betrag die Richtung trägt oder die Art, steht nirgends.
 
 ## Offene Fragen
+
+**Beantwortet am 2026-09-11** (`ludwig-manager`, aus dem App-Stand): alle drei
+Defaults gelten; zu Frage 3 — Titel aus `deriveTitle()`, Notizen und Grund nur
+vom Agenten, kein Schreiber in der Oberfläche.
 
 1. **Rang 2 ist der Titel** (Roadmap: Rang 4) — die `EventCell` nennt das Ereignis am Buchungssatz, und dort unterscheidet „Rechnung Telekom" mehr als das Datum. — ohne Antwort: Titel Rang 2, Datum 3, Betrag 4.
 2. **Der Sammelsachverhalt gruppiert nach Buchungszustand, nicht nach Monat** — der größte trägt 508 Ereignisse in einem Monat. — ohne Antwort: Buchungszustand, „Buchung fehlt" zuerst.
