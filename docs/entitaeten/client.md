@@ -87,7 +87,7 @@ Freitext-Grenzen: Leitlinien bis 1.215 Zeichen — in den Facts als `LongText`.
 | Stapel | Kind | 2 je Mandant · max 4 | Zustand | S | **Inline** `BatchCell` (der offene) → Profil `export-batch`, 0166 | Staging |
 | Wirtschaftsjahre (`client_fiscal_years`) | Kind | p50 18 · max 21 | Kontext | L | **Zähler** | Staging |
 | Zahlungskonten | Kind | p50 25 · in Gebrauch 4 | Kontext | L | Defaults je Zahlungsart (`uebersicht`) über `PaymentAccountCell` → Profil `payment-account` | Staging |
-| Konventionen (`client_agent_notes`) | Kind | — | Erklärung | L | → Profil `convention` (Roadmap #8) | Roadmap |
+| Konventionen (`client_agent_notes`) | Kind | 6 von 7 Mandanten · p50 8 · p90 10 · max 10 | Erklärung | L | `ConventionList` → Profil `convention` | Staging 2026-09-11 |
 | Nutzer (`platform_client_users`) | Kind | 0 | — | — | nicht gezeigt | Staging |
 | Verlauf (`platform_audit_events`, `resource_kind = client`) | ohne FK | Notizen 89 · Monat vorbereitet 47 · Onboarding nicht bereit 11 · OPOS-Wächter 9 · Review abgeschlossen 8 · Neu-Onboarding 6 · stillgelegt 5 · Intervall abgeschlossen 4 · … | Verantwortung | L | Liste über `LogBrowser` | Staging |
 
