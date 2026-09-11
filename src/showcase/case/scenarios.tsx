@@ -76,7 +76,7 @@ export const bracket = (
 };
 
 const AGENT_SOURCES = [
-  { key: "1", art: "beleg" as const, quote: "Rechnung vom 16.07.2026 über 25,41 EUR", onOpen: () => {} },
+  { key: "1", art: "document" as const, quote: "Rechnung vom 16.07.2026 über 25,41 EUR", onOpen: () => {} },
   { key: "2", art: "history" as const, label: "Kreditor 71202, 14 Buchungen, zuletzt 22.06.2026" },
 ];
 

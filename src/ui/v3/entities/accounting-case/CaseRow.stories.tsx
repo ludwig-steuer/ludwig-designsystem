@@ -35,7 +35,7 @@ const CASE = (over: Partial<CaseListItem> = {}): CaseListItem => ({
   hasOpenDocumentRequest: false,
   openedAt: "2026-08-26",
   closedAt: null,
-  exportStatus: "offen",
+  exportStatus: "open",
   ...over,
 });
 
@@ -55,7 +55,7 @@ const CASES: CaseListItem[] = [
     documentEventsCount: 1,
     bankEventsCount: 2,
     openedAt: "2026-06-02",
-    exportStatus: "exportiert",
+    exportStatus: "exported",
   }),
   CASE({
     caseId: "c-4414",
@@ -109,7 +109,7 @@ const CASES: CaseListItem[] = [
     documentEventsCount: 2,
     bankEventsCount: 1,
     openedAt: "2026-08-20",
-    exportStatus: "teilweise",
+    exportStatus: "partial",
   }),
 ];
 

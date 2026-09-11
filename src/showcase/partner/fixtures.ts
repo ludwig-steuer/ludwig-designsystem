@@ -56,20 +56,24 @@ export function partnerFixture(over: Partial<BusinessPartnerDetail> = {}): Busin
  * "Rohdaten" (D12).
  */
 export const PARTNER_TABS = [
-  { key: "uebersicht", label: "Übersicht" },
+  { key: "overview", label: "Übersicht" },
   { key: "details", label: "Details" },
-  { key: "rohdaten", label: "Rohdaten" },
+  { key: "raw", label: "Rohdaten" },
 ];
 
 export const tabHref = (key: string) => `?tab=${key}`;
-export const listHref = "?liste=partner";
+// The list's own filter parameter, not a bundled `?list=` (the app has none).
+export const listHref = "?view=all";
 export const accountHref = (n: string) => `?account=${n}`;
 
-/** Where the three counters lead — the entity's list, filtered to this partner. */
+/**
+ * Where the three counters lead — the entity's list, filtered to this partner.
+ * The route differs per list; the filter is the same `?partner=`.
+ */
 export const casesHref = {
-  cases: "?liste=sachverhalte&partner=bp-4711",
-  documents: "?liste=belege&partner=bp-4711",
-  journalEntries: "?liste=buchungen&partner=bp-4711",
+  cases: "?partner=bp-4711",
+  documents: "?partner=bp-4711",
+  journalEntries: "?partner=bp-4711",
 };
 
 /** The personal accounts per fiscal year — p90 is two rows. */

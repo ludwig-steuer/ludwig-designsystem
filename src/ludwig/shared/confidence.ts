@@ -93,7 +93,7 @@ const BAND_LEVEL: Record<ConfidenceBand, ConfidenceLevel> = {
  * Rohwert → Ampelstufe der Achse `konfidenz`, oder `null` ohne Angabe.
  *
  * Der einzige Weg von einer Konfidenz zu einer Farbe. Die Farbe selbst kommt
- * weiterhin aus der Status-Registry (`resolveStatus("konfidenz", level)`) —
+ * weiterhin aus der Status-Registry (`resolveStatus("confidence", level)`) —
  * hier fällt nur die Stufe.
  */
 export function confidenceLevel(value: number | null | undefined): ConfidenceLevel | null {

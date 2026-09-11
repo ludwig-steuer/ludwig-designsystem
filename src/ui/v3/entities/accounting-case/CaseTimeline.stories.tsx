@@ -263,10 +263,10 @@ function EntryDetail({ entry }: { entry: CaseTimelineEntry | null }) {
   if (entry.type === "event") {
     const e = entry.event;
     return (
-      <DetailPane title={e.title} sub={`${STATUS_REGISTRY.ereignis_art[e.kind]?.label ?? e.kind} · ${e.date}`}>
+      <DetailPane title={e.title} sub={`${STATUS_REGISTRY.event_kind[e.kind]?.label ?? e.kind} · ${e.date}`}>
         <FieldList
           rows={[
-            ["Zustand", <StatusBadge key="s" axis="ereignis" status={e.state} />],
+            ["Zustand", <StatusBadge key="s" axis="event_booking" status={e.state} />],
             ["Betrag", <Amount key="a" value={e.amount} currency={e.currency} />],
             ["Datei", "RE-4471.pdf"],
             ["Zusammenfassung", "Schreibwaren und zwei Druckerpatronen, Steuersatz 19 %."],

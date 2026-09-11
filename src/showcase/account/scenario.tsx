@@ -128,7 +128,7 @@ function defectPoints(s: AccountScenario, href: Hash["href"]): OpenPoint[] {
           key: d.kind,
           state,
           title: `Rest ${formatAmount(d.amount, facts.currency)} nicht ausgeglichen.`,
-          hint: `Ein Verrechnungskonto „${resolveStatus("verrechnungskonto", master.clearingAccountType ?? "").label}“ soll auf 0,00 € aufgehen; ein Monatsrest ist üblich.`,
+          hint: `Ein Verrechnungskonto „${resolveStatus("clearing_account_type", master.clearingAccountType ?? "").label}“ soll auf 0,00 € aufgehen; ein Monatsrest ist üblich.`,
           ...(month ? { action: way(`Bewegungen ${MONTH_LONG[month - 1]}`, { month: String(month) }) } : {}),
         };
       }
@@ -284,7 +284,7 @@ function MasterData({ scenario }: { scenario: AccountScenario }) {
     ]);
   }
   const clearing: [ReactNode, ReactNode][] = master.clearingAccountType
-    ? [["Verrechnungskonto", resolveStatus("verrechnungskonto", master.clearingAccountType).label]]
+    ? [["Verrechnungskonto", resolveStatus("clearing_account_type", master.clearingAccountType).label]]
     : [];
   return (
     <Card>
@@ -331,7 +331,7 @@ function Overview({ scenario, hash }: { scenario: AccountScenario; hash: Hash })
   const active = [needle, origins.length, status, month].filter(Boolean).length;
   const summary = [
     origins.length ? `Herkunft: ${origins.map((o) => ORIGINS.find((x) => x.key === o)?.label).join(", ")}` : null,
-    status ? `Zustand: ${resolveStatus("buchung", status).label}` : null,
+    status ? `Zustand: ${resolveStatus("journal_entry", status).label}` : null,
     month ? `Monat: ${MONTH_LONG[Number(month) - 1]}` : null,
     needle ? `Suche „${q}“` : null,
   ]
@@ -423,8 +423,8 @@ export function DetailsTab({ scenario, partnerHref = null }: { scenario: Account
   const rows: [ReactNode, ReactNode][] = [
     ["Kontonummer", <span key="n" className="v2mono">{facts.accountNumber}</span>],
     ["Bezeichnung", facts.accountName ?? "—"],
-    ["Kontoart", <StatusBadge key="t" axis="konto_typ" status={facts.accountingRole ?? ""} info={false} />],
-    ["Zustand", <StatusBadge key="s" axis="konto" status={master.status} info={false} />],
+    ["Kontoart", <StatusBadge key="t" axis="ledger_account_type" status={facts.accountingRole ?? ""} info={false} />],
+    ["Zustand", <StatusBadge key="s" axis="ledger_account" status={master.status} info={false} />],
     ["SKR-Klasse", facts.skrClassLabel ?? "—"],
     ["Kontenrahmen", master.skrBaseCode ? `${master.accountFrameworkCode} · Basis ${master.skrBaseCode}` : master.accountFrameworkCode],
     ["Kontenfunktion", master.accountFunction === null ? "—" : String(master.accountFunction)],
@@ -437,7 +437,7 @@ export function DetailsTab({ scenario, partnerHref = null }: { scenario: Account
         "keiner"
       ),
     ],
-    ["DATEV-Abgleich", <StatusBadge key="d" axis="konto_datev_sync" status={facts.syncState ?? "synced"} info={false} />],
+    ["DATEV-Abgleich", <StatusBadge key="d" axis="ledger_account_datev_sync" status={facts.syncState ?? "synced"} info={false} />],
     ["Buchungen insgesamt", formatCount(facts.usageBookingCount)],
     ["Letzte Buchung", <Time key="l" value={facts.lastBookingDate ?? null} format="date" />],
   ];
@@ -453,7 +453,7 @@ export function DetailsTab({ scenario, partnerHref = null }: { scenario: Account
             <InlineEdit
               label="Verrechnungskonto"
               value={clearing}
-              renderValue={(v) => (v ? resolveStatus("verrechnungskonto", v).label : "keins")}
+              renderValue={(v) => (v ? resolveStatus("clearing_account_type", v).label : "keins")}
               renderInput={(p) => (
                 <Select
                   id={p.id}
@@ -465,7 +465,7 @@ export function DetailsTab({ scenario, partnerHref = null }: { scenario: Account
                   <option value="">keins</option>
                   {CLEARING_TYPES.map((t) => (
                     <option key={t} value={t}>
-                      {resolveStatus("verrechnungskonto", t).label}
+                      {resolveStatus("clearing_account_type", t).label}
                     </option>
                   ))}
                 </Select>
@@ -649,9 +649,9 @@ function EntryDrawer({ scenario, entry, hash }: { scenario: AccountScenario; ent
     [
       "Zustand",
       entry.origin === "exported" ? (
-        <StatusBadge key="z" axis="buchung_datev" status="exported" info={false} />
+        <StatusBadge key="z" axis="journal_entry_datev_stage" status="exported" info={false} />
       ) : ludwigSide ? (
-        <StatusBadge key="z" axis="buchung" status={entry.status ?? "proposed"} info={false} />
+        <StatusBadge key="z" axis="journal_entry" status={entry.status ?? "proposed"} info={false} />
       ) : (
         <StatusBadge key="z" axis="mirror_match" status={entry.matchState ?? "new_unprocessed"} info={false} />
       ),

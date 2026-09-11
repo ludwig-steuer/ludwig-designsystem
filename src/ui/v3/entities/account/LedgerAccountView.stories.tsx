@@ -150,7 +150,7 @@ const SECTIONS: NavSection[] = [
 ];
 
 const TABS = [
-  { key: "konto", label: "Konto", href: "#konto" },
+  { key: "account", label: "Konto", href: "#account" },
   { key: "llm", label: "LLM-Profil", href: "#llm" },
 ];
 
@@ -171,7 +171,7 @@ function Head({ facts }: { facts: AccountFactsVM }) {
       icon={<EntityIcon entity="ledger-account" size={20} />}
       overline={`Konto · Musterbau GmbH · ${facts.fiscalYear}`}
       title={`${facts.accountNumber} ${facts.accountName ?? ""}`.trim()}
-      status={<StatusBadge axis="konto_typ" status={facts.accountingRole} info={false} />}
+      status={<StatusBadge axis="ledger_account_type" status={facts.accountingRole} info={false} />}
       actions={<TextButton onClick={() => {}}>Zum Kontenplan →</TextButton>}
     />
   );
@@ -266,7 +266,7 @@ export const Filled: Story = {
         header={<Head facts={FACTS} />}
         summary={<Summary facts={FACTS} />}
         chart={<Chart />}
-        tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
+        tabs={<Tabs items={TABS} active="account" ariaLabel="Ansichten des Kontos" />}
         aside={<AccountFacts facts={FACTS} />}
       >
         <Movements entries={ENTRIES} />
@@ -326,7 +326,7 @@ export const Empty: Story = {
         pager={PAGER}
         header={<Head facts={UNUSED} />}
         summary={<Summary facts={UNUSED} />}
-        tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
+        tabs={<Tabs items={TABS} active="account" ariaLabel="Ansichten des Kontos" />}
         aside={<AccountFacts facts={UNUSED} />}
       >
         <Movements entries={[]} />
@@ -343,7 +343,7 @@ export const LoadingAndError: Story = {
         pager={PAGER}
         header={<Head facts={FACTS} />}
         summary={<Summary facts={FACTS} />}
-        tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
+        tabs={<Tabs items={TABS} active="account" ariaLabel="Ansichten des Kontos" />}
       >
         <Skeleton lines={6} label="Bewegungen werden geladen …" />
       </LedgerAccountView>
@@ -352,7 +352,7 @@ export const LoadingAndError: Story = {
         pager={PAGER}
         header={<Head facts={FACTS} />}
         summary={<Summary facts={FACTS} />}
-        tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
+        tabs={<Tabs items={TABS} active="account" ariaLabel="Ansichten des Kontos" />}
       >
         <Banner tone="danger" title="Die Bewegungen konnten nicht geladen werden">
           Der DATEV-Spiegel wird gerade neu aufgebaut.{" "}
@@ -378,7 +378,7 @@ export const Edges: Story = {
           pager={PAGER}
           header={<Head facts={BANK} />}
           summary={<Summary facts={BANK} />}
-          tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
+          tabs={<Tabs items={TABS} active="account" ariaLabel="Ansichten des Kontos" />}
           aside={<AccountFacts facts={BANK} />}
         >
           <DataTable<AccountEntry>
@@ -425,7 +425,7 @@ export const InUse: Story = {
         header={<Head facts={FACTS} />}
         summary={<Summary facts={FACTS} />}
         chart={<Chart />}
-        tabs={<Tabs items={TABS} active="konto" ariaLabel="Ansichten des Kontos" />}
+        tabs={<Tabs items={TABS} active="account" ariaLabel="Ansichten des Kontos" />}
         aside={<AccountFacts facts={FACTS} />}
       >
         <Movements entries={ENTRIES} />

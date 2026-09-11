@@ -62,7 +62,7 @@ export const DotOnly: Story = {
         <HeadRow>
           <span>Gegenpartei</span>
           <span className="v2num">Betrag</span>
-          <StatusHeader axis="konfidenz" label="Konfidenz" />
+          <StatusHeader axis="confidence" label="Konfidenz" />
         </HeadRow>
         {[
           ["Musterfirma GmbH", 1800, "green", 0.94],
@@ -120,8 +120,8 @@ export const InUse: Story = {
         rationale="Der Lieferant hat in den letzten zwölf Monaten dreimal auf 6815 gebucht; die Rechnung nennt Büromaterial."
         judgeReasoning="Konto plausibel, Steuerschlüssel geprüft. Der Betrag liegt über dem bisherigen Schnitt."
         sources={[
-          { key: "s1", art: "beleg", label: "Rechnung 2026-0412" },
-          { key: "s2", art: "regel", label: "Historie Bürobedarf GmbH" },
+          { key: "s1", art: "document", label: "Rechnung 2026-0412" },
+          { key: "s2", art: "rule", label: "Historie Bürobedarf GmbH" },
         ]}
       />
     </div>

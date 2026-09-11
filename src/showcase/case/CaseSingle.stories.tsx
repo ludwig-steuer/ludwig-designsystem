@@ -187,7 +187,7 @@ export const NewWithoutCounterparty: Story = { render: () => <ScenarioPage scena
  */
 export const MasterData: Story = {
   render: () => (
-    <CasePage accountingCase={caseFixture({ disposition: "agent" })} tab="stammdaten">
+    <CasePage accountingCase={caseFixture({ disposition: "agent" })} tab="master_data">
       <Card>
         <CardHead title="Stammdaten" sub="alle Angaben des Sachverhalts" />
         <div className="v3boxbody">

@@ -84,10 +84,10 @@ const SECTIONS: NavSection[] = [
 ];
 
 const TABS = [
-  { key: "beleg", label: "Beleg", href: "#beleg" },
-  { key: "positionen", label: "Positionen", href: "#positionen" },
-  { key: "vorsteuer", label: "Vorsteuer", href: "#vorsteuer" },
-  { key: "verlauf", label: "Verlauf & Befunde", count: 3, href: "#verlauf" },
+  { key: "document", label: "Beleg", href: "#document" },
+  { key: "lines", label: "Positionen", href: "#lines" },
+  { key: "input_tax", label: "Vorsteuer", href: "#input_tax" },
+  { key: "timeline", label: "Verlauf & Befunde", count: 3, href: "#timeline" },
 ];
 
 /** The head: ranks 1 and 4 — who, which kind, and **the completion** as state. */
@@ -140,7 +140,7 @@ export const Filled: Story = {
             }
           />
         }
-        tabs={<Tabs items={TABS} active="beleg" ariaLabel="Ansichten des Belegs" />}
+        tabs={<Tabs items={TABS} active="document" ariaLabel="Ansichten des Belegs" />}
       >
         <SourceDocumentCard
           document={INVOICE}
@@ -169,7 +169,7 @@ export const Pending: Story = {
             noch nicht fest, welche Art Beleg das ist.
           </Banner>
         }
-        tabs={<Tabs items={[TABS[0]!, TABS[3]!]} active="beleg" ariaLabel="Ansichten des Belegs" />}
+        tabs={<Tabs items={[TABS[0]!, TABS[3]!]} active="document" ariaLabel="Ansichten des Belegs" />}
       >
         <SourceDocumentCard
           document={SCAN}
@@ -198,7 +198,7 @@ export const OtherTab: Story = {
       <SourceDocumentView
         pager={PAGER}
         header={<Head document={INVOICE} />}
-        tabs={<Tabs items={TABS} active="verlauf" ariaLabel="Ansichten des Belegs" />}
+        tabs={<Tabs items={TABS} active="timeline" ariaLabel="Ansichten des Belegs" />}
       >
         <EmptyState
           inline
@@ -217,7 +217,7 @@ export const LoadingAndError: Story = {
       <SourceDocumentView
         pager={PAGER}
         header={<Head document={INVOICE} />}
-        tabs={<Tabs items={TABS} active="beleg" ariaLabel="Ansichten des Belegs" />}
+        tabs={<Tabs items={TABS} active="document" ariaLabel="Ansichten des Belegs" />}
       >
         <Skeleton lines={6} label="Beleg wird geladen …" />
       </SourceDocumentView>
@@ -225,7 +225,7 @@ export const LoadingAndError: Story = {
       <SourceDocumentView
         pager={PAGER}
         header={<Head document={INVOICE} />}
-        tabs={<Tabs items={TABS} active="beleg" ariaLabel="Ansichten des Belegs" />}
+        tabs={<Tabs items={TABS} active="document" ariaLabel="Ansichten des Belegs" />}
       >
         <Banner tone="danger" title="Der Beleg konnte nicht geladen werden">
           Die Datei liegt im Archiv und der Abruf ist abgelaufen.{" "}
@@ -287,7 +287,7 @@ export const InUse: Story = {
             }
           />
         }
-        tabs={<Tabs items={TABS} active="beleg" ariaLabel="Ansichten des Belegs" />}
+        tabs={<Tabs items={TABS} active="document" ariaLabel="Ansichten des Belegs" />}
       >
         <SourceDocumentCard document={INVOICE} previewUrl={PREVIEW} />
       </SourceDocumentView>

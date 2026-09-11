@@ -7,9 +7,9 @@ export default meta;
 type Story = StoryObj<typeof Segmented>;
 
 const VIEWS = [
-  { key: "verlauf", label: "Verlauf" },
-  { key: "protokoll", label: "Protokoll" },
-  { key: "technik", label: "Technik" },
+  { key: "timeline", label: "Verlauf" },
+  { key: "protocol", label: "Protokoll" },
+  { key: "technical", label: "Technik" },
 ];
 
 /**
@@ -18,7 +18,7 @@ const VIEWS = [
  */
 export const ThreeViews: Story = {
   render: function Render() {
-    const [active, setActive] = useState("verlauf");
+    const [active, setActive] = useState("timeline");
     return <Segmented options={VIEWS} active={active} ariaLabel="Log-Sicht" onPick={setActive} />;
   },
 };
@@ -48,13 +48,13 @@ export const TwoOptions: Story = {
  */
 export const WithCounts: Story = {
   render: function Render() {
-    const [active, setActive] = useState("protokoll");
+    const [active, setActive] = useState("protocol");
     return (
       <Segmented
         options={[
-          { key: "verlauf", label: "Verlauf", count: 12 },
-          { key: "protokoll", label: "Protokoll", count: 48 },
-          { key: "technik", label: "Technik", count: 300 },
+          { key: "timeline", label: "Verlauf", count: 12 },
+          { key: "protocol", label: "Protokoll", count: 48 },
+          { key: "technical", label: "Technik", count: 300 },
         ]}
         active={active}
         ariaLabel="Log-Sicht"

@@ -14,7 +14,7 @@ export default meta;
 type Story = StoryObj<typeof ProvenanceNote>;
 
 /** The origin as the caller's axis says it — here the one of the journal entry. */
-const origin = (status: string) => <StatusBadge axis="buchung_origin" status={status} info={false} />;
+const origin = (status: string) => <StatusBadge axis="journal_entry_origin" status={status} info={false} />;
 
 /** Icon and word of a source kind — the caller's word list, drawn from the icon registry. */
 const kind = (entity: "source-document" | "bank-transaction" | "journal-entry" | "recurring-rule", word: string) => (

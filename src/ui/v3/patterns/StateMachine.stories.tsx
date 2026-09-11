@@ -49,7 +49,7 @@ const CYCLE_STATES = [
  * genau das ist der Beweis, dass der Weg über die Registry trägt.
  */
 export const Filled: Story = {
-  render: () => <StateMachine axis="zyklus_stapel" states={CYCLE_STATES} current="review" />,
+  render: () => <StateMachine axis="export_batch" states={CYCLE_STATES} current="review" />,
 };
 
 /**
@@ -58,7 +58,7 @@ export const Filled: Story = {
  * durch die Mitte, einer unten herum. Ohne `current`: keine Box ist farbig.
  */
 export const Branching: Story = {
-  render: () => <StateMachine axis="beleg" />,
+  render: () => <StateMachine axis="document_processing" />,
 };
 
 /**
@@ -69,7 +69,7 @@ export const Branching: Story = {
 export const Sequence: Story = {
   render: () => (
     <StateMachine
-      axis="sachverhalt"
+      axis="accounting_case"
       states={[
         "open",
         "needs_clarification",
@@ -91,7 +91,7 @@ export const Sequence: Story = {
  * Escape schließt, Tab läuft die Boxen in Spaltenordnung ab.
  */
 export const Explain: Story = {
-  render: () => <StateMachine axis="beleg" current="review_needed" />,
+  render: () => <StateMachine axis="document_processing" current="review_needed" />,
 };
 
 /**
@@ -104,7 +104,7 @@ export const Edge: Story = {
   render: () => (
     <div style={{ maxWidth: 360, border: "var(--border-1)", borderRadius: "var(--radius-lg)", padding: "var(--space-4)" }}>
       <StateMachine
-        axis="beleg_inbox"
+        axis="document_inbox"
         transitions={[
           ...INBOX,
           // Two transitions the registry does **not** have — exactly the edge this
@@ -151,7 +151,7 @@ export const InUse: Story = {
           <div style={{ minWidth: 0 }}>
             <div className="v2fields__h">Ablauf</div>
             <StateMachine
-              axis="zyklus_stapel"
+              axis="export_batch"
               states={CYCLE_STATES}
               transitions={CYCLE}
               current="review"

@@ -50,7 +50,7 @@ export function Confidence({ level, value, compact = false }: ConfidenceProps) {
     );
   }
 
-  const { label, kind } = resolveStatus("konfidenz", level);
+  const { label, kind } = resolveStatus("confidence", level);
   const text = value == null ? label : `${label} · ${Math.round(value * 100)} %`;
 
   if (compact) {
@@ -58,8 +58,8 @@ export function Confidence({ level, value, compact = false }: ConfidenceProps) {
       <span
         className={`v2dot v2dot--${kind}`}
         role="img"
-        aria-label={`${AXIS_LABEL.konfidenz}: ${text}`}
-        title={`${AXIS_LABEL.konfidenz}: ${text}`}
+        aria-label={`${AXIS_LABEL.confidence}: ${text}`}
+        title={`${AXIS_LABEL.confidence}: ${text}`}
       >
         <i />
       </span>

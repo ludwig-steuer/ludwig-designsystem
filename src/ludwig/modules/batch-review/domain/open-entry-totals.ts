@@ -9,7 +9,7 @@ import { isRuleBooked } from "./rule-booked";
  *
  * Reiter-Zuordnung wie in Schritt 3: nach Herkunft der Sätze (F202).
  */
-export function offeneSatzSummen(
+export function openEntryTotals(
   cards: ReadonlyArray<{ proposals: ReadonlyArray<{ status: string; origin: string | null }> }>,
 ): { rule: number; individual: number } {
   let rule = 0;

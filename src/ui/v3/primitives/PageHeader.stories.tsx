@@ -33,7 +33,7 @@ export const WithMeta: Story = {
       title="Stapel 2026-08 · Bürobedarf"
       meta={
         <>
-          <StatusBadge axis="buchung" status="proposed" />
+          <StatusBadge axis="journal_entry" status="proposed" />
           <span style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
             zuletzt <Timestamp iso="2026-08-31T09:12:00Z" />
           </span>
@@ -115,7 +115,7 @@ export const InUse: Story = {
         back={{ href: "#", label: "Alle Stapel" }}
         overline="Musterbau GmbH · Wirtschaftsjahr 2026"
         title="Stapel 2026-08 · Bürobedarf"
-        meta={<StatusBadge axis="buchung" status="proposed" />}
+        meta={<StatusBadge axis="journal_entry" status="proposed" />}
         description="142 Sätze, davon 38 ungeprüft. Zwei Sätze über 1.000,00 € tragen einen Befund."
         actions={
           <ActionBar

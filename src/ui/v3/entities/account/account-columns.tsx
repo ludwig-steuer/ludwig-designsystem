@@ -194,10 +194,10 @@ export function accountColumns({
       // „Erlöskonto") measures 77 px as a badge, and the head with its (i)
       // fits beside it.
       width: "120px",
-      headerAside: <StatusInfoButton axis="konto_typ" />,
+      headerAside: <StatusInfoButton axis="ledger_account_type" />,
       cell: (a) =>
         a.accountingRole ? (
-          <StatusBadge axis="konto_typ" status={a.accountingRole} info={false} />
+          <StatusBadge axis="ledger_account_type" status={a.accountingRole} info={false} />
         ) : (
           <span className="v2muted">—</span>
         ),

@@ -60,15 +60,15 @@ export const Axes: Story = {
       <Table cols="1fr 1fr 1fr 1fr">
         <HeadRow>
           <StatusHeader axis="mirror_match" label="Abgleich" />
-          <StatusHeader axis="beleg" label="Verarbeitung" />
-          <StatusHeader axis="klaerung" label="Rückfrage" />
-          <StatusHeader axis="lauf" label="Lauf" />
+          <StatusHeader axis="document_processing" label="Verarbeitung" />
+          <StatusHeader axis="clarification_severity" label="Rückfrage" />
+          <StatusHeader axis="run_outcome" label="Lauf" />
         </HeadRow>
         <Row>
           <StatusBadge axis="mirror_match" status="matched_ludwig" info={false} />
-          <StatusBadge axis="beleg" status="in_progress" info={false} />
-          <StatusBadge axis="klaerung" status="required" info={false} />
-          <StatusBadge axis="lauf" status="running" info={false} />
+          <StatusBadge axis="document_processing" status="in_progress" info={false} />
+          <StatusBadge axis="clarification_severity" status="required" info={false} />
+          <StatusBadge axis="run_outcome" status="running" info={false} />
         </Row>
       </Table>
     </Card>
@@ -129,7 +129,7 @@ export const InUse: Story = {
           <span>Beleg</span>
           <span>Gegenpartei</span>
           <span className="v2num">Betrag</span>
-          <StatusHeader axis="beleg" label="Verarbeitung" />
+          <StatusHeader axis="document_processing" label="Verarbeitung" />
           <StatusHeader axis="mirror_match" label="Abgleich" />
         </HeadRow>
         {DOCUMENTS.map((d) => (
@@ -137,7 +137,7 @@ export const InUse: Story = {
             <MonoCell value={d.id} />
             <span className="v2main">{d.partner}</span>
             <AmountCell value={d.amount} />
-            <StatusBadge axis="beleg" status={d.doc} info={false} />
+            <StatusBadge axis="document_processing" status={d.doc} info={false} />
             <StatusBadge axis="mirror_match" status={d.match} info={false} />
           </Row>
         ))}

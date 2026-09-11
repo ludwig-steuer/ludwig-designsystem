@@ -149,7 +149,7 @@ export function BusinessPartnerFacts({
     // not about the partner.
     origin.push([
       "Reifegrad",
-      <StatusBadge key="ob" axis="partner" status={partner.onboardingState} />,
+      <StatusBadge key="ob" axis="business_partner" status={partner.onboardingState} />,
     ]);
     // **The origin stays out for the same reason as the VAT profile.** Its six
     // values are English keys (`onboarding_import`, `auto_profiled`, …) and no

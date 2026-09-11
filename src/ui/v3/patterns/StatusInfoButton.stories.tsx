@@ -6,6 +6,6 @@ export default meta;
 type Story = StoryObj<typeof StatusInfoButton>;
 
 /** Das (i) neben einem Chip oder in einem Spaltenkopf. */
-export const Entry: Story = { args: { axis: "buchung", current: "proposed" } };
-export const Document: Story = { args: { axis: "beleg", current: "processing" } };
-export const WithoutCurrentValue: Story = { args: { axis: "erwartung" } };
+export const Entry: Story = { args: { axis: "journal_entry", current: "proposed" } };
+export const Document: Story = { args: { axis: "document_processing", current: "processing" } };
+export const WithoutCurrentValue: Story = { args: { axis: "expectation_maturity" } };

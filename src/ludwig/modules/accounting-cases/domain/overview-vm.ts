@@ -80,6 +80,8 @@ export interface TimelineEventVM {
   superseded: boolean;
   /** ids der offenen Klärungen, die dieses Event blockieren */
   blockedClarificationIds: string[];
+  /** Die Wiederkehr-Regel hinter dem Ereignis — der Reiter „Zuordnung" zeigt nur ihre Treffer. */
+  recurringRuleId: string | null;
   doc: DocFactsVM | null;
   bank: BankVM | null;
   infoNote: string | null;

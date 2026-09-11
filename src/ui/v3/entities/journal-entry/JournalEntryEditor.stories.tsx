@@ -166,7 +166,7 @@ export const S23_JudgeFlaggedWithError: Story = {
           rationale: "Steuersatz aus der Positionszeile übernommen.",
           judgeReasoning: "Der Beleg weist 7 % aus. Der Satz bucht 19 % — bitte manuell prüfen.",
           errors: ["Steuersatz widerspricht dem Beleg."],
-          sources: [{ key: "1", art: "beleg", label: "RE-4471", quote: "zzgl. 7 % USt" }],
+          sources: [{ key: "1", art: "document", label: "RE-4471", quote: "zzgl. 7 % USt" }],
         }}
         onCancel={() => {}}
         onSave={() => {}}
@@ -206,8 +206,8 @@ export const S24_ConfirmedWithRationale: Story = {
             "Der Lieferant ist als Vermieter hinterlegt, der Betrag entspricht der Vormonatsmiete, und die Laufzeit des Vertrags deckt den August.",
           judgeReasoning: "Konto, Steuersatz und Betrag stimmen mit dem Vertrag überein.",
           sources: [
-            { key: "1", art: "regel", label: "Wiederkehr: Miete Musterstraße" },
-            { key: "2", art: "beleg", label: "RE-2026-0042" },
+            { key: "1", art: "rule", label: "Wiederkehr: Miete Musterstraße" },
+            { key: "2", art: "document", label: "RE-2026-0042" },
           ],
         }}
         onCancel={() => {}}

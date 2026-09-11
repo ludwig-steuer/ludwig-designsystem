@@ -346,7 +346,7 @@ export function RecurringRuleEditor({
               disabled={pending}
               onChange={(v) => update({ bookingMode: v as RuleBookingMode })}
               options={modes.map((m) => {
-                const desc = resolveStatus("regel_modus", m);
+                const desc = resolveStatus("rule_mode", m);
                 return {
                   value: m,
                   label: desc.label,

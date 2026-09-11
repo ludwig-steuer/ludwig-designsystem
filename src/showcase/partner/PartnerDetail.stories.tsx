@@ -314,7 +314,7 @@ export const Reiter: Story = {
           </Card>
         </PartnerPage>
 
-        <PartnerPage partner={partner} tab="rohdaten">
+        <PartnerPage partner={partner} tab="raw">
           <Card>
             <CardHead title="Rohdaten" sub="der Satz, wie er in der Tabelle steht" />
             <div style={{ padding: "12px 20px 16px" }}>

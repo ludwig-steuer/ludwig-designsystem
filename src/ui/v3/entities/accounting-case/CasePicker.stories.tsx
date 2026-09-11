@@ -33,7 +33,7 @@ const CASE = (over: Partial<CaseListItem> = {}): CaseListItem => ({
   hasOpenDocumentRequest: false,
   openedAt: "2026-08-26",
   closedAt: null,
-  exportStatus: "offen",
+  exportStatus: "open",
   ...over,
 });
 

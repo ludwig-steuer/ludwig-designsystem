@@ -101,7 +101,7 @@ export function ExpectationChip({
   const what = subject(expectation, documentKindLabel);
   return (
     <span className="v2exp__chip">
-      <StatusBadge axis="erwartung" status={maturity} info={false} />
+      <StatusBadge axis="expectation_maturity" status={maturity} info={false} />
       <span className="v2exp__what">
         {what ?? audienceWord(expectation.audience)}
         {/* The amount only shows on a payment: where a document is missing,
@@ -163,7 +163,7 @@ export function ExpectationRow({
       <div className="v2exp__row">
         <span className="v2exp__kind">
           <StatusBadge
-            axis="erwartung_art"
+            axis="expectation_kind"
             status={expectation.kind}
             info={false}
           />
@@ -202,7 +202,7 @@ export function ExpectationRow({
           fällig <Time value={expectation.dueDate} format="date" size="sm" />
         </span>
         <span className="v2exp__state">
-          <StatusBadge axis="erwartung" status={maturity} info={false} />
+          <StatusBadge axis="expectation_maturity" status={maturity} info={false} />
         </span>
         <span className="v2exp__act">
           {onResolve && maturity !== "resolved" ? (

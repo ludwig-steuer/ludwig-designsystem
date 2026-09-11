@@ -46,7 +46,7 @@ import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 export function DocumentPage({
   document,
   signal,
-  tab = "uebersicht",
+  tab = "overview",
   actions,
   position = 3,
   total = 117,
@@ -100,7 +100,7 @@ export function DocumentPage({
           // document is completed; completion always wins.
           status={
             inboxLeads ? (
-              <StatusBadge axis="beleg_inbox" status={document.inboxStatus ?? ""} />
+              <StatusBadge axis="document_inbox" status={document.inboxStatus ?? ""} />
             ) : (
               <SourceDocumentCompletion document={document} />
             )

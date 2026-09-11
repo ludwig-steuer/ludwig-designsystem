@@ -165,7 +165,7 @@ export function AccountFacts({
       "Kontoart",
       // `accountingRole` is nullable in the record: an account without a role
       // in the chart shows the axis' own word for „unknown", not an empty cell.
-      <StatusBadge key="role" axis="konto_typ" status={facts.accountingRole ?? ""} info={false} />,
+      <StatusBadge key="role" axis="ledger_account_type" status={facts.accountingRole ?? ""} info={false} />,
     ],
   ];
 
@@ -235,7 +235,7 @@ export function AccountFacts({
   if (facts.syncState && facts.syncState !== SYNC_SILENT) {
     rows.push([
       "DATEV-Abgleich",
-      <StatusBadge key="sync" axis="konto_datev_sync" status={facts.syncState} />,
+      <StatusBadge key="sync" axis="ledger_account_datev_sync" status={facts.syncState} />,
     ]);
   }
 

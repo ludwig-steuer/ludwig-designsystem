@@ -57,7 +57,7 @@ export function AccountPage({
   const cut = name.length > NAME_MAX ? `${name.slice(0, NAME_MAX - 1)}…` : name;
   const word = balanceWord(facts, master);
   const clearing = master.clearingAccountType
-    ? resolveStatus("verrechnungskonto", master.clearingAccountType).label
+    ? resolveStatus("clearing_account_type", master.clearingAccountType).label
     : null;
 
   return (
@@ -94,7 +94,7 @@ export function AccountPage({
             : {
                 // **One** state: the kind of account. Class, clearing type and
                 // partner are places in the frame, not colours (0063, D6).
-                status: <StatusBadge axis="konto_typ" status={facts.accountingRole ?? ""} info={false} />,
+                status: <StatusBadge axis="ledger_account_type" status={facts.accountingRole ?? ""} info={false} />,
                 meta: (
                   <>
                     {facts.skrClassLabel ? <span>{facts.skrClassLabel}</span> : null}

@@ -17,31 +17,31 @@
  * denselben Inhalt: die erste Ansicht des Datensatzes. Konto und Sachverhalt
  * nennen sie längst so, der Detailseiten-Standard macht es zur Regel (D11).
  *
- * URL-Konvention: `?tab=<slug>`, der Default-Tab („uebersicht") trägt keinen
+ * URL-Konvention: `?tab=<slug>`, der Default-Tab („overview") trägt keinen
  * Param. `beleg` und `buchung` leiten darauf um — beide kursieren als
  * Deep-Links.
  */
 export const DOC_TABS = [
-  "uebersicht",
+  "overview",
   "details",
-  "positionen",
-  "vorsteuer",
-  "verlauf",
-  "rohdaten",
+  "lines",
+  "input_tax",
+  "timeline",
+  "raw",
 ] as const;
 export type DocTab = (typeof DOC_TABS)[number];
 
 export const DOC_TAB_LABEL: Record<DocTab, string> = {
-  uebersicht: "Übersicht",
+  overview: "Übersicht",
   details: "Details",
-  positionen: "Positionen",
-  vorsteuer: "Vorsteuer",
-  verlauf: "Verlauf & Befunde",
-  rohdaten: "Rohdaten",
+  lines: "Positionen",
+  input_tax: "Vorsteuer",
+  timeline: "Verlauf & Befunde",
+  raw: "Rohdaten",
 };
 
 /**
- * Sichtbare Tabs. `positionen` und `vorsteuer` setzen eine Rechnungs-
+ * Sichtbare Tabs. `lines` und `input_tax` setzen eine Rechnungs-
  * Subtyp-Zeile voraus (Positionen/VSt-Fakten gibt es ausschließlich dort).
  * Verlauf und Rohdaten kann jede Belegart füllen.
  *
@@ -57,7 +57,7 @@ export const DOC_TAB_LABEL: Record<DocTab, string> = {
  */
 export function availableDocTabs(args: { isInvoice: boolean; hasDetails?: boolean }): DocTab[] {
   return DOC_TABS.filter((tab) => {
-    if (tab === "positionen" || tab === "vorsteuer") return args.isInvoice;
+    if (tab === "lines" || tab === "input_tax") return args.isInvoice;
     if (tab === "details") return args.hasDetails ?? false;
     return true;
   });
@@ -71,9 +71,9 @@ export function availableDocTabs(args: { isInvoice: boolean; hasDetails?: boolea
  * der alte Link landet deshalb im Verlauf, nicht auf der Übersicht.
  */
 const ALTE_SLUGS: Record<string, DocTab> = {
-  buchung: "uebersicht",
-  beleg: "uebersicht",
-  pipeline: "verlauf",
+  buchung: "overview",
+  beleg: "overview",
+  pipeline: "timeline",
 };
 
 export function parseDocTab(
@@ -82,5 +82,5 @@ export function parseDocTab(
 ): DocTab {
   const raw = Array.isArray(value) ? value[0] : value;
   const slug = (raw && ALTE_SLUGS[raw]) ?? raw;
-  return available.includes(slug as DocTab) ? (slug as DocTab) : "uebersicht";
+  return available.includes(slug as DocTab) ? (slug as DocTab) : "overview";
 }

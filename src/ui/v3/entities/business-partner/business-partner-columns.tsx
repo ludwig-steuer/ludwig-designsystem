@@ -229,7 +229,7 @@ export function businessPartnerColumns({
       header: PARTNER_COLUMN_LABEL.onboarding,
       width: TRACK.onboarding,
       sortable: true,
-      cell: (p) => <StatusBadge axis="partner" status={p.onboardingState} />,
+      cell: (p) => <StatusBadge axis="business_partner" status={p.onboardingState} />,
     },
     bookings: {
       key: "usage_booking_count",

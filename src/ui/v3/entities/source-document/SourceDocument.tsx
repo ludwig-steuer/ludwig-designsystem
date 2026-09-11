@@ -242,12 +242,12 @@ export function SourceDocumentCompletion({
   // its target (0150). `info={false}` because the wrapper **is** the trigger:
   // an (i) inside a button would be a button inside a button.
   const chip = (
-    <StatusBadge axis="beleg_erledigung" status={status} info={false} note={reason} />
+    <StatusBadge axis="document_completion" status={status} info={false} note={reason} />
   );
   return (
     <span className={explain ? "v2doccompl v2doccompl--explain" : "v2doccompl"}>
       <span className="v2doccompl__state">
-        <StatusInfoButton axis="beleg_erledigung" current={status}>
+        <StatusInfoButton axis="document_completion" current={status}>
           {chip}
         </StatusInfoButton>
         {/* „Done" means **when and how** (catalogue table of the spec).
@@ -276,7 +276,7 @@ export function SourceDocumentCompletion({
 function completionReason(document: SourceDocumentVM): string {
   if (document.completedReason) return document.completedReason;
   const status = document.completedAt ? (document.completedVia ?? "completed") : "open";
-  return resolveStatus("beleg_erledigung", status).description ?? "";
+  return resolveStatus("document_completion", status).description ?? "";
 }
 
 /**
@@ -341,20 +341,20 @@ export function SourceDocumentClass({ document }: { document: SourceDocumentVM }
   // show nothing at all.
   const badges = [
     document.docCategory ? (
-      <StatusBadge key="cat" axis="beleg_kategorie" status={document.docCategory} info={false} />
+      <StatusBadge key="cat" axis="document_category" status={document.docCategory} info={false} />
     ) : null,
     document.docDirection ? (
-      <StatusBadge key="dir" axis="beleg_richtung" status={document.docDirection} info={false} />
+      <StatusBadge key="dir" axis="document_direction" status={document.docDirection} info={false} />
     ) : null,
     // The character **has** an axis since 2026-09-07 (`beleg_charakter`,
     // App-Commit `7184a8ac`, finding L-37). It was a `Badge` with a raw word
     // while it had none — now it is a state like the three around it, with
     // the axis' own wording and its explanation.
     character ? (
-      <StatusBadge key="kind" axis="beleg_charakter" status={character} info={false} />
+      <StatusBadge key="kind" axis="document_character" status={character} info={false} />
     ) : null,
     document.collectionKind ? (
-      <StatusBadge key="coll" axis="dokumentgruppe" status={document.collectionKind} info={false} />
+      <StatusBadge key="coll" axis="collection_kind" status={document.collectionKind} info={false} />
     ) : null,
   ].filter(Boolean);
 

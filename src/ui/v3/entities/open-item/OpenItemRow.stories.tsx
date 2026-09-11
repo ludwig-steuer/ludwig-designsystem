@@ -98,7 +98,7 @@ function Frame({ children, sub }: { children: React.ReactNode; sub?: string }) {
             <span>Buchungstext</span>
             <span>Mahnstufe</span>
             <span>
-              Ausgleich <StatusInfoButton axis="opos_ausgleich" />
+              Ausgleich <StatusInfoButton axis="open_item_settlement" />
             </span>
             <span className="v2num">Brutto</span>
             <span className="v2num">Offen</span>

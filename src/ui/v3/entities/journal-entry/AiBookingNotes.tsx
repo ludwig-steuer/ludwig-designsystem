@@ -50,46 +50,46 @@ export type JudgeVerdict = "confirm" | "confirm_with_note" | "adjust" | "flag";
  */
 export type SourceKind =
   | "bank"
-  | "beleg"
+  | "document"
   | "history"
-  | "klaerung"
-  | "regel"
-  | "gesetz"
+  | "clarification"
+  | "rule"
+  | "law"
   | "web";
 
 const SOURCE_KIND: Record<SourceKind, { Icon: LucideIcon; label: string }> = {
   bank: { Icon: Banknote, label: "Kontoauszug" },
-  beleg: { Icon: FileText, label: "Beleg" },
+  document: { Icon: FileText, label: "Beleg" },
   history: { Icon: History, label: "Bisherige Buchungen" },
-  klaerung: { Icon: HelpCircle, label: "Rückfrage" },
-  regel: { Icon: Ruler, label: "Regel" },
-  gesetz: { Icon: Scale, label: "Gesetz" },
+  clarification: { Icon: HelpCircle, label: "Rückfrage" },
+  rule: { Icon: Ruler, label: "Regel" },
+  law: { Icon: Scale, label: "Gesetz" },
   web: { Icon: Globe, label: "Web" },
 };
 
 /**
  * Which kinds **can** have a target — measured, not wished for.
  *
- * `bank`, `beleg` and `klaerung` always carry an id in the data, so there is
- * something to open. `history` is an aggregation over many entries, `regel`
- * carries **no** id at all (47 of 47 are prose), `gesetz` is a quotation, and
+ * `bank`, `document` and `clarification` always carry an id in the data, so
+ * there is something to open. `history` is an aggregation over many entries,
+ * `rule` carries **no** id at all (47 of 47 are prose), `law` is a quotation, and
  * `web` does not occur in the stock.
  *
  * The list stands here so a caller does not have to guess: setting `onOpen` on
  * a kind that has no target builds a way the data cannot carry.
  *
  * **„Can", not „does".** A kind may be listed here and still arrive without
- * `onOpen` — `klaerung` does today, because the app has no clarification
+ * `onOpen` — `clarification` does today, because the app has no clarification
  * drawer yet (only a route to the case). That is the right way round: the
  * constant says what the **data** allows, the caller says what it has built.
  */
 export const SOURCE_OPENABLE: Record<SourceKind, boolean> = {
   bank: true,
-  beleg: true,
-  klaerung: true,
+  document: true,
+  clarification: true,
   history: false,
-  regel: false,
-  gesetz: false,
+  rule: false,
+  law: false,
   web: false,
 };
 

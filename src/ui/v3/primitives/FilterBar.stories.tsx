@@ -116,8 +116,8 @@ export const ManyFields: Story = {
         <Field label="Fälligkeit" htmlFor="falligkeit">
           <DateField id="falligkeit" value="2026-09-15" onChange={() => {}} />
         </Field>
-        <Field label="Konto" htmlFor="konto">
-          <Input id="konto" defaultValue="6815" style={{ width: 100 }} />
+        <Field label="Konto" htmlFor="account">
+          <Input id="account" defaultValue="6815" style={{ width: 100 }} />
         </Field>
         <Field label="Betrag ab" htmlFor="betrag-ab">
           <Input id="betrag-ab" defaultValue="100,00" style={{ width: 100 }} />

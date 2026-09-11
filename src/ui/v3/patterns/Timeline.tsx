@@ -177,7 +177,7 @@ function Entry({
   // icon in text — the entry stays one line (0040). Axis first, prop as
   // override, raw value last: an unknown value does not vanish, it shows (L-02).
   const kindWord = item.kind
-    ? (kindLabels?.[item.kind] ?? STATUS_REGISTRY.ereignis_art[item.kind]?.label ?? item.kind)
+    ? (kindLabels?.[item.kind] ?? STATUS_REGISTRY.event_kind[item.kind]?.label ?? item.kind)
     : null;
   const second = kindWord ? `${kindWord}${item.actor ? ` · ${item.actor}` : ""}` : item.actor;
   return (

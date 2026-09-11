@@ -334,7 +334,7 @@ function cell(
     case "counterparty":
       return <Counterparty name={r.counterpartyName} iban={r.counterpartyIban} />;
     case "bookingMode":
-      return <StatusBadge axis="regel_modus" status={r.bookingMode} info={false} />;
+      return <StatusBadge axis="rule_mode" status={r.bookingMode} info={false} />;
     // A word, no `tone` and no dot: R1 allows colour only through an axis, and
     // `is_active` has none (L-241). „inaktiv" is a statement about the rule,
     // not a warning — a rule can be switched off on purpose.

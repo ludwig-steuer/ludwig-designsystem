@@ -39,7 +39,7 @@ export const Filled: Story = {
         icon={<Layers size={20} strokeWidth={1.5} />}
         overline="Sachverhalt · 2026-0815"
         title="Eingangsrechnung: DomainFactory GmbH"
-        status={<StatusBadge axis="sachverhalt" status="needs_clarification" showIcon={false} />}
+        status={<StatusBadge axis="accounting_case" status="needs_clarification" showIcon={false} />}
         meta={
           <>
             <Badge tone="neutral">Eingangsrechnung</Badge>
@@ -80,7 +80,7 @@ export const WithoutMetric: Story = {
         icon={<Layers size={20} strokeWidth={1.5} />}
         overline="Sachverhalt · 2026-0816"
         title="Kassenbericht August"
-        status={<StatusBadge axis="sachverhalt" status="open" showIcon={false} />}
+        status={<StatusBadge axis="accounting_case" status="open" showIcon={false} />}
         facts={[
           ["Eröffnet", "29.08.2026"],
           ["Belegnummer", "—"],
@@ -90,7 +90,7 @@ export const WithoutMetric: Story = {
         icon={<Layers size={20} strokeWidth={1.5} />}
         overline="Sachverhalt · 2026-0816"
         title="Kassenbericht August"
-        status={<StatusBadge axis="sachverhalt" status="open" showIcon={false} />}
+        status={<StatusBadge axis="accounting_case" status="open" showIcon={false} />}
         metric={{ label: "Betrag des Belegs", value: <Amount value={318.4} currency="EUR" size="lg" /> }}
         facts={[
           ["Eröffnet", "29.08.2026"],
@@ -113,7 +113,7 @@ export const OtherEntity: Story = {
         icon={<Landmark size={20} strokeWidth={1.5} />}
         overline="Sachkonto · SKR04"
         title="6815 · Bürobedarf"
-        status={<StatusBadge axis="konto" status="active" showIcon={false} />}
+        status={<StatusBadge axis="ledger_account" status="active" showIcon={false} />}
         meta={
           <>
             <Badge tone="info">Aufwand</Badge>
@@ -131,7 +131,7 @@ export const OtherEntity: Story = {
         icon={<BookOpen size={20} strokeWidth={1.5} />}
         overline="Buchung · sv-2026-0140"
         title="6815 an 70044 · Bürobedarf August"
-        status={<StatusBadge axis="buchung" status="proposed" showIcon={false} />}
+        status={<StatusBadge axis="journal_entry" status="proposed" showIcon={false} />}
         metric={{ label: "Betrag", value: <Amount value={1475.6} currency="EUR" size="lg" /> }}
       />
     </div>
@@ -152,7 +152,7 @@ export const Editable: Story = {
     const [status, setStatus] = useState("needs_clarification");
     const [open, setOpen] = useState(false);
     const [summary, setSummary] = useState("");
-    const next = axisLegend("sachverhalt", [
+    const next = axisLegend("accounting_case", [
       "needs_clarification",
       "waiting_for_documents",
       "closed_accepted",
@@ -170,7 +170,7 @@ export const Editable: Story = {
               onOpenChange={setOpen}
               trigger={
                 <button type="button" className="v2btn v2btn--tertiary v2btn--sm">
-                  <StatusBadge axis="sachverhalt" status={status} info={false} showIcon={false} chevron />
+                  <StatusBadge axis="accounting_case" status={status} info={false} showIcon={false} chevron />
                 </button>
               }
             >
@@ -185,7 +185,7 @@ export const Editable: Story = {
                       setOpen(false);
                     }}
                   >
-                    <StatusBadge axis="sachverhalt" status={it.value} info={false} showIcon={false} />
+                    <StatusBadge axis="accounting_case" status={it.value} info={false} showIcon={false} />
                   </button>
                 ))}
               </div>
@@ -240,7 +240,7 @@ export const InUse: Story = {
         icon={<Layers size={20} strokeWidth={1.5} />}
         overline="Sachverhalt · 2026-0815"
         title="Eingangsrechnung: DomainFactory GmbH"
-        status={<StatusBadge axis="sachverhalt" status="needs_clarification" showIcon={false} />}
+        status={<StatusBadge axis="accounting_case" status="needs_clarification" showIcon={false} />}
         meta={
           <>
             <Badge tone="neutral">Eingangsrechnung</Badge>
@@ -285,7 +285,7 @@ export const WithProcess: Story = {
         icon={<Layers size={20} strokeWidth={1.5} />}
         overline="Stapel · 2026-08-A"
         title="Buchungsstapel August 2026"
-        status={<StatusBadge axis="sachverhalt" status="needs_clarification" showIcon={false} />}
+        status={<StatusBadge axis="accounting_case" status="needs_clarification" showIcon={false} />}
         {...(withPicture
           ? {
               process: (

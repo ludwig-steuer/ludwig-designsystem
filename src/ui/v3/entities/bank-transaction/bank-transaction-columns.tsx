@@ -192,7 +192,7 @@ export function bankTransactionColumns({
       // Z4: a status column carries its (i) — **once**, in the head. It goes
       // into `headerAside`, not `header`: a button inside the sort link would
       // be invalid HTML (acceptance 0101, M5).
-      headerAside: <StatusInfoButton axis="ereignis" />,
+      headerAside: <StatusInfoButton axis="event_booking" />,
       cell: (t) => <EventStateCell transaction={t} />,
     },
     matchStage: {
@@ -297,7 +297,7 @@ function EventStateCell({ transaction }: { transaction: BankTransactionRowData }
             {transaction.cases.length > 1 ? (
               <span className="v2btxrow__statefor">{caseIdentifier(c)}</span>
             ) : null}
-            <StatusBadge axis="ereignis" status={state.value} info={false} />
+            <StatusBadge axis="event_booking" status={state.value} info={false} />
           </span>
         );
       })}

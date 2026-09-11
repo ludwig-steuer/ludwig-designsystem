@@ -109,7 +109,7 @@ export function CaseCard({
           <span className="v2casecard__title">
             {href ? <Link href={href}>{name}</Link> : name}
             {c.lifecycleStatus ? (
-              <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} info={false} />
+              <StatusBadge axis="accounting_case" status={c.lifecycleStatus} info={false} />
             ) : null}
           </span>
         }

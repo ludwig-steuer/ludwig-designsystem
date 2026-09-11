@@ -162,7 +162,7 @@ export const InUse: Story = {
       <EntityHeader
         overline="Eingangsrechnung · 2026-0412"
         title="Wartung der Klimaanlage"
-        status={<StatusBadge axis="sachverhalt" status="open" />}
+        status={<StatusBadge axis="accounting_case" status="open" />}
         metric={{ label: "Gesamtbetrag", value: "1.249,90 €" }}
       />
       <CaseFacts case={FULL} partnerHref="#partner-8812" accountHref={accountHref} />

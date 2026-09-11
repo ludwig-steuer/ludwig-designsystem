@@ -434,9 +434,9 @@ export function sourceDocumentColumns({
       // Four axes stand in this cell; one (i) would explain one of them.
       headerAside: (
         <>
-          <StatusInfoButton axis="beleg_kategorie" />
-          <StatusInfoButton axis="beleg_richtung" />
-          <StatusInfoButton axis="dokumentgruppe" />
+          <StatusInfoButton axis="document_category" />
+          <StatusInfoButton axis="document_direction" />
+          <StatusInfoButton axis="collection_kind" />
         </>
       ),
       // 232 px, not 220: at 220 the two badges of the classification
@@ -454,11 +454,11 @@ export function sourceDocumentColumns({
       // badges below carry none: the head already explains the axis, and the
       // same button in every row said the same thing four times over
       // (acceptance 0070, M3).
-      headerAside: <StatusInfoButton axis="beleg" />,
+      headerAside: <StatusInfoButton axis="document_processing" />,
       width: "160px",
       cell: (d) =>
         d.processingStatus ? (
-          <StatusBadge axis="beleg" status={d.processingStatus} info={false} />
+          <StatusBadge axis="document_processing" status={d.processingStatus} info={false} />
         ) : (
           <span className="v2muted">—</span>
         ),
@@ -466,27 +466,27 @@ export function sourceDocumentColumns({
     completed: {
       key: "completed",
       header: "Erledigt",
-      headerAside: <StatusInfoButton axis="beleg_erledigung" />,
+      headerAside: <StatusInfoButton axis="document_completion" />,
       width: "170px",
       cell: (d) => <SourceDocumentCompletion document={d} />,
     },
     stuckState: {
       key: "stuckState",
       header: "Beleg-Zustand",
-      headerAside: <StatusInfoButton axis="beleg_haenger" />,
+      headerAside: <StatusInfoButton axis="document_stuck" />,
       width: "170px",
-      cell: (d) => <StatusBadge axis="beleg_haenger" status={stuckState(d.hasInvoiceRow, stuckVariant)} info={false} />,
+      cell: (d) => <StatusBadge axis="document_stuck" status={stuckState(d.hasInvoiceRow, stuckVariant)} info={false} />,
     },
     inboxState: {
       key: "inboxState",
       // **Not** „Zustand": Z4 forbids the empty word, and this column says
       // one specific thing — how far the classification of this document got.
       header: "Erkennung",
-      headerAside: <StatusInfoButton axis="beleg_inbox" />,
+      headerAside: <StatusInfoButton axis="document_inbox" />,
       width: "190px",
       cell: (d) =>
         d.inboxStatus ? (
-          <StatusBadge axis="beleg_inbox" status={d.inboxStatus} info={false} />
+          <StatusBadge axis="document_inbox" status={d.inboxStatus} info={false} />
         ) : (
           <span className="v2muted">—</span>
         ),

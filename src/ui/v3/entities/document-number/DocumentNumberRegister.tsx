@@ -174,7 +174,7 @@ export function DocumentNumberRegister({
                     </span>
                     {/* No second „DATEV": the badge in column 1 already says
                         it, and the same statement twice is noise. */}
-                    <span>{sourceLabel?.[e.source] ?? resolveStatus("belegnummer_quelle", e.source).label}</span>
+                    <span>{sourceLabel?.[e.source] ?? resolveStatus("document_number_source", e.source).label}</span>
                     <span className="v2mono">
                       {e.accountNumber ?? <span className="v2muted">—</span>}
                     </span>

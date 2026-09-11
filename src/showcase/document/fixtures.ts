@@ -77,22 +77,23 @@ export const MUSTER_PDF =
 
 /** The six tabs of the page, in the order the standard fixes. */
 export const DOCUMENT_TABS = [
-  { key: "uebersicht", label: "Übersicht" },
+  { key: "overview", label: "Übersicht" },
   { key: "details", label: "Details" },
-  { key: "positionen", label: "Positionen" },
-  { key: "vorsteuer", label: "Vorsteuer" },
-  { key: "verlauf", label: "Verlauf" },
-  { key: "rohdaten", label: "Rohdaten" },
+  { key: "lines", label: "Positionen" },
+  { key: "input_tax", label: "Vorsteuer" },
+  { key: "timeline", label: "Verlauf" },
+  { key: "raw", label: "Rohdaten" },
 ];
 
 /** Tabs of a document that has no invoice line — positions and input tax go. */
 export const DOCUMENT_TABS_WITHOUT_INVOICE = DOCUMENT_TABS.filter(
-  (t) => t.key !== "positionen" && t.key !== "vorsteuer",
+  (t) => t.key !== "lines" && t.key !== "input_tax",
 );
 
 export const tabHref = (key: string) => `?tab=${key}`;
-export const caseHref = "?sachverhalt=2026-0413";
-export const listHref = "?liste=belege";
+export const caseHref = "?case=2026-0413";
+// The list's own filter parameter, not a bundled `?list=` (the app has none).
+export const listHref = "?tab=all";
 
 /* ── What the overview shows next to the facts (0150) ─────────────────────── */
 
@@ -139,8 +140,8 @@ export const HISTORY = [
   { id: "e-1", at: "2026-08-15T18:19:00Z", title: "Eingegangen aus dem Postfach", kind: "Eingang", actor: "System" },
 ];
 
-export const inputTaxHref = tabHref("vorsteuer");
-export const historyHref = tabHref("verlauf");
+export const inputTaxHref = tabHref("input_tax");
+export const historyHref = tabHref("timeline");
 export const partnerHref = "?geschaeftspartner=bp-880";
 export const batchHref = "?stapel=2026-08";
 

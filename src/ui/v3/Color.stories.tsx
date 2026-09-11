@@ -418,9 +418,9 @@ export const Roles: Story = {
 
 /* ── Criticality ──────────────────────────────────────────────────────── */
 
-const SCALE: { level: string; kind: string; token: string; meaning: string; example: string; axis: "job" | "klaerung_status"; status: string }[] = [
+const SCALE: { level: string; kind: string; token: string; meaning: string; example: string; axis: "job" | "clarification"; status: string }[] = [
   { level: "Fehler", kind: "danger", token: "--color-danger", meaning: "Jemand muss handeln, bevor es weitergeht.", example: "gescheitert, überfällig, Abweichung über ±100 %", axis: "job", status: "failed" },
-  { level: "Warnung", kind: "warning", token: "--color-warning", meaning: "Quittierbar, weiter ist möglich.", example: "Klärung offen, Prüfung nötig, Abweichung ±50–100 %", axis: "klaerung_status", status: "open" },
+  { level: "Warnung", kind: "warning", token: "--color-warning", meaning: "Quittierbar, weiter ist möglich.", example: "Klärung offen, Prüfung nötig, Abweichung ±50–100 %", axis: "clarification", status: "open" },
   { level: "Hinweis", kind: "info", token: "--color-info", meaning: "Neutral informierend, keine Handlung.", example: "läuft, zur Prüfung, Abweichung ±15–50 %", axis: "job", status: "running" },
   // The badge next to it takes `--color-text` (measured `rgb(45,45,45)`), not
   // `--color-text-subtle`: `.bdg-neutral` says so. The column names the **step's**

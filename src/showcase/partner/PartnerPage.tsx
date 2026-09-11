@@ -24,7 +24,7 @@ import { listHref, PARTNER_TABS, tabHref } from "./fixtures";
  */
 export function PartnerPage({
   partner,
-  tab = "uebersicht",
+  tab = "overview",
   signal,
   actions,
   position = 12,
@@ -67,7 +67,7 @@ export function PartnerPage({
           title={partner.legalName}
           // **One** state: the maturity. Role, VAT profile and typical delivery are
           // properties, not axes — they stand in the facts, not the head (D6/D7).
-          status={<StatusBadge axis="partner" status={partner.onboardingState} />}
+          status={<StatusBadge axis="business_partner" status={partner.onboardingState} />}
           meta={
             <>
               {account ? (

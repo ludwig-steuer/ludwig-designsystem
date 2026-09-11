@@ -117,7 +117,7 @@ auftaucht, ist ein verlorener Beleg.
 
 ### R5b — Der Eingang nimmt alles, was die Kanzlei bekommt
 Die Ablagefläche des Eingangs (`clients/[clientSlug]/document-inbox`) nimmt
-PDF, Kontoauszüge (CSV/XLSX/CAMT-XML) und DATEV-Stapel (EXTF) — was die Datei
+PDF, Kontoauszüge (CSV/XLSX/CAMT-XML/MT940-STA) und DATEV-Stapel (EXTF) — was die Datei
 ist, entscheidet der Server an den Bytes (`routeUploadedBytes`, belege.md R1),
 nicht der MIME-Typ des Browsers. Drei Ausgänge stehen in der Liste:
 

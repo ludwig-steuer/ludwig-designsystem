@@ -9,8 +9,8 @@ import type { BookingCycleKind } from "@/ludwig/modules/datev-export";
  * schreiben darf — siehe `gating.ts`.
  */
 
-export interface AbnahmeStep {
-  /** Zugleich das URL-Segment: `…/abnahme/3`. */
+export interface ReviewStep {
+  /** Zugleich das URL-Segment: `…/review/3`. */
   n: number;
   /** Kurzname im Rail. */
   label: string;
@@ -24,7 +24,7 @@ export interface AbnahmeStep {
   title: string;
 }
 
-export const ABNAHME_STEPS: readonly AbnahmeStep[] = [
+export const REVIEW_STEPS: readonly ReviewStep[] = [
   { n: 0, label: "Ergebnis des Stapels", question: "Was hat der Agent geschafft?", title: "Abnahme Buchungsstapel" },
   { n: 1, label: "Vollständigkeit", question: "Ist alles da — und so viel wie sonst?", title: "Ist alles da?" },
   { n: 2, label: "Rückfragen", question: "Was will der Agent von mir?", title: "Rückfragen des Agenten" },
@@ -50,7 +50,7 @@ export const ABNAHME_STEPS: readonly AbnahmeStep[] = [
  * Vollständigkeit, Vorschläge, Bank, Offene Posten, Plausibilität,
  * Konventionen — gibt es dort nicht.
  */
-export const ABNAHME_STEP_SCOPE: Record<number, { regular: boolean; clientBatch: boolean }> = {
+export const REVIEW_STEP_SCOPE: Record<number, { regular: boolean; clientBatch: boolean }> = {
   0: { regular: true, clientBatch: true },
   1: { regular: true, clientBatch: false },
   2: { regular: true, clientBatch: true },
@@ -71,8 +71,8 @@ export const ABNAHME_STEP_SCOPE: Record<number, { regular: boolean; clientBatch:
  * ein Migrationsfehler) gilt als `regular`: lieber ein Schritt zu viel als eine
  * leere Abnahme.
  */
-export function abnahmeStepApplies(step: number, kind: BookingCycleKind): boolean {
-  const scope = ABNAHME_STEP_SCOPE[step];
+export function reviewStepApplies(step: number, kind: BookingCycleKind): boolean {
+  const scope = REVIEW_STEP_SCOPE[step];
   if (!scope) return false;
   return kind === "client_batch" ? scope.clientBatch : scope.regular;
 }
@@ -83,7 +83,7 @@ export const TRANSFER_STEP = 9;
 export const NACHLESE_STEP = 10;
 
 /** URL-Segment → Schritt. Unbekanntes ist `null`, damit die Route 404 gibt. */
-export function parseAbnahmeStep(raw: string | undefined): AbnahmeStep | null {
+export function parseReviewStep(raw: string | undefined): ReviewStep | null {
   if (raw === undefined || !/^\d{1,2}$/.test(raw)) return null;
-  return ABNAHME_STEPS.find((s) => s.n === Number(raw)) ?? null;
+  return REVIEW_STEPS.find((s) => s.n === Number(raw)) ?? null;
 }

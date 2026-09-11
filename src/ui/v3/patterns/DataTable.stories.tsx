@@ -143,10 +143,10 @@ const AMOUNT: ColumnDef<CaseListItem> = {
 const LIFECYCLE: ColumnDef<CaseListItem> = {
   key: "lifecycleStatus",
   header: "Bearbeitung",
-  headerAside: <StatusInfoButton axis="sachverhalt" />,
+  headerAside: <StatusInfoButton axis="accounting_case" />,
   width: "190px",
   sortable: true,
-  cell: (c) => <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} info={false} />,
+  cell: (c) => <StatusBadge axis="accounting_case" status={c.lifecycleStatus} info={false} />,
 };
 
 const OPENED: ColumnDef<CaseListItem> = {
@@ -926,8 +926,8 @@ const PREFIX: Record<string, string> = {
 };
 
 const BATCH_COLUMNS: ColumnDef<BatchRow>[] = [
-  { key: "beleg", header: "Belegfeld 1", width: "140px", cell: (r) => <MonoCell value={r.document} /> },
-  { key: "konto", header: "Konto", width: "90px", cell: (r) => <MonoCell value={r.account} /> },
+  { key: "document_number", header: "Belegfeld 1", width: "140px", cell: (r) => <MonoCell value={r.document} /> },
+  { key: "account", header: "Konto", width: "90px", cell: (r) => <MonoCell value={r.account} /> },
   {
     key: "text",
     header: "Buchungstext",

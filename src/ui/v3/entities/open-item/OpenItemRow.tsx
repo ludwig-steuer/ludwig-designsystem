@@ -29,7 +29,7 @@ import type { Currency } from "@/ludwig/shared/money";
  * claimed all three until the acceptance of 2026-09-07 measured them.)
  */
 
-const KIND_AXIS = "konto_typ" as const;
+const KIND_AXIS = "ledger_account_type" as const;
 
 interface OpenItemRowCommon {
   item: OpenItem;
@@ -129,7 +129,7 @@ function Cells({
             (acceptance of 0029, M3). Twenty rows would otherwise carry twenty
             buttons to the same legend. */}
         <StatusBadge
-          axis="opos_ausgleich"
+          axis="open_item_settlement"
           status={item.clearedAfterCutoff ? "spaeter_ausgeglichen" : "offen"}
           note={`Stichtag ${formatTime(asOf, "date")}`}
           info={false}

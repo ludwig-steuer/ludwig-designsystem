@@ -26,7 +26,7 @@ const RailLayout = ({ items }: { items: RailItem[] }) => (
       ariaLabel="Prüfschritte"
       items={items}
       head={
-        <div className="abn__railhead">
+        <div className="review__railhead">
           <div className="lw-overline">Stapelabnahme</div>
         </div>
       }

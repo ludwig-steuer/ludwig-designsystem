@@ -17,7 +17,7 @@ const meta: Meta<typeof CaseList> = {
 export default meta;
 type Story = StoryObj<typeof CaseList>;
 
-const TABLE_TABS: CaseListTab[] = ["laufend", "belege", "klaerung", "alle"];
+const TABLE_TABS: CaseListTab[] = ["active", "waiting_for_documents", "needs_clarification", "all"];
 
 const href = (c: CaseListItem) => `#fall-${c.caseId}`;
 const listHref = (patch: { sort?: string; dir?: string; page?: number }) =>
@@ -43,16 +43,16 @@ const CASE = (over: Partial<CaseListItem> = {}): CaseListItem => ({
   hasOpenDocumentRequest: false,
   openedAt: "2026-08-26",
   closedAt: null,
-  exportStatus: "offen",
+  exportStatus: "open",
   ...over,
 });
 
 const CASES: CaseListItem[] = [
   CASE(),
-  CASE({ caseId: "c-4413", caseNumber: "2026-0413", kind: "outgoing_invoice", title: "Beratung Q2 2026", counterpartyName: "Musterbau GmbH", totalAmount: 1800, lifecycleStatus: "closed_accepted", disposition: "agent", openClarificationsCount: 0, openedAt: "2026-06-02", exportStatus: "exportiert" }),
+  CASE({ caseId: "c-4413", caseNumber: "2026-0413", kind: "outgoing_invoice", title: "Beratung Q2 2026", counterpartyName: "Musterbau GmbH", totalAmount: 1800, lifecycleStatus: "closed_accepted", disposition: "agent", openClarificationsCount: 0, openedAt: "2026-06-02", exportStatus: "exported" }),
   CASE({ caseId: "c-4414", caseNumber: "2026-0414", kind: "recurring_charge", title: "Abschlag Strom 08/2026", counterpartyName: "Stadtwerke Musterstadt", counterpartyPartnerId: null, totalAmount: 412, lifecycleStatus: "waiting_for_documents", disposition: "client", openClarificationsCount: 0, openedAt: "2026-08-28", exportStatus: null }),
   CASE({ caseId: "c-4415", caseNumber: "2026-0415", kind: "internal_transfer", title: null, counterpartyName: null, totalAmount: null, currency: null, lifecycleStatus: "needs_clarification", disposition: null, openClarificationsCount: 3, openedAt: "2026-09-01", exportStatus: null }),
-  CASE({ caseId: "c-4416", caseNumber: "2026-0416", title: "Sanierung Serverraum, Teilrechnung 2 von 3", counterpartyName: "Handwerk Schulz KG", totalAmount: 2480.55, openClarificationsCount: 0, openedAt: "2026-08-20", exportStatus: "teilweise" }),
+  CASE({ caseId: "c-4416", caseNumber: "2026-0416", title: "Sanierung Serverraum, Teilrechnung 2 von 3", counterpartyName: "Handwerk Schulz KG", totalAmount: 2480.55, openClarificationsCount: 0, openedAt: "2026-08-20", exportStatus: "partial" }),
 ];
 
 const PAGER = { page: 1, pageSize: 25, totalItems: 190, totalPages: 8 };
@@ -62,7 +62,7 @@ export const Filled: Story = {
   render: () => (
     <div style={{ maxWidth: 1620 }}>
       <CaseList
-        tab="laufend"
+        tab="active"
         cases={CASES}
         href={href}
         counterpartyHref={(c) => (c.counterpartyPartnerId ? `#partner-${c.counterpartyPartnerId}` : undefined)}
@@ -96,7 +96,7 @@ export const Empty: Story = {
   render: () => (
     <div style={{ maxWidth: 1620 }}>
       <CaseList
-        tab="laufend"
+        tab="active"
         cases={[]}
         href={href}
         emptyCount={117}
@@ -115,7 +115,7 @@ export const EmptyAfterFilter: Story = {
   render: () => (
     <div style={{ maxWidth: 1620 }}>
       <CaseList
-        tab="laufend"
+        tab="active"
         cases={[]}
         href={href}
         filtered={{ summary: "Bürobedarf · Dauersachverhalt", resetHref: "#alle" }}
@@ -128,7 +128,7 @@ export const EmptyAfterFilter: Story = {
 export const Loading: Story = {
   render: () => (
     <div style={{ maxWidth: 1620 }}>
-      <CaseList tab="laufend" cases={[]} href={href} loading />
+      <CaseList tab="active" cases={[]} href={href} loading />
     </div>
   ),
 };
@@ -138,7 +138,7 @@ export const Error: Story = {
   render: () => (
     <div style={{ maxWidth: 1620 }}>
       <CaseList
-        tab="laufend"
+        tab="active"
         cases={[]}
         href={href}
         error={{
@@ -163,7 +163,7 @@ export const Columns: Story = {
     return (
       <div style={{ maxWidth: 1180 }}>
         <CaseList
-          tab="alle"
+          tab="all"
           cases={CASES.slice(0, 3)}
           href={href}
           columns={picked}
@@ -182,10 +182,10 @@ const SECTIONS: NavSection[] = [
 ];
 
 const TABS: TabItem[] = [
-  { key: "laufend", label: "Laufende Sachverhalte", count: 190 },
-  { key: "belege", label: "Wartet auf Unterlagen", count: 19 },
-  { key: "klaerung", label: "Zur Bearbeitung", count: 34, alarm: true },
-  { key: "alle", label: "Alle Sachverhalte", count: 915 },
+  { key: "active", label: "Laufende Sachverhalte", count: 190 },
+  { key: "waiting_for_documents", label: "Wartet auf Unterlagen", count: 19 },
+  { key: "needs_clarification", label: "Zur Bearbeitung", count: 34, alarm: true },
+  { key: "all", label: "Alle Sachverhalte", count: 915 },
 ];
 
 /**
@@ -209,7 +209,7 @@ export const InUse: Story = {
         title="Sachverhalte"
         description="190 offen. Wer am Zug ist, steht in der Spalte für die Zuständigkeit."
       />
-      <Tabs items={TABS} active="laufend" ariaLabel="Sachverhaltsliste" />
+      <Tabs items={TABS} active="active" ariaLabel="Sachverhaltsliste" />
       {/* The filter stands **above** the card and belongs to the page —
           `DataTable` records that in its `@instead`, and `CaseList` does not bring it. */}
       <FilterBar resetHref="#alle">
@@ -217,15 +217,15 @@ export const InUse: Story = {
           <Input id="q" type="search" placeholder="Nummer, Gegenpart, Beleg" />
         </Field>
         <Field label="Art" htmlFor="art">
-          <Select id="art" defaultValue="alle">
-            <option value="alle">alle</option>
+          <Select id="art" defaultValue="all">
+            <option value="all">alle</option>
             <option value="dauer">Dauersachverhalt</option>
             <option value="einmalig">einmalig</option>
           </Select>
         </Field>
       </FilterBar>
       <CaseList
-        tab="laufend"
+        tab="active"
         cases={CASES}
         href={href}
         counterpartyHref={(c) => (c.counterpartyPartnerId ? `#partner-${c.counterpartyPartnerId}` : undefined)}

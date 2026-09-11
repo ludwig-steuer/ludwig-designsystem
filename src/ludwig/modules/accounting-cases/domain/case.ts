@@ -339,7 +339,7 @@ export function deriveClarificationLifecycle(
 }
 
 /** Abgeleiteter DATEV-Export-Status je Sachverhalt (F18-T18.2). */
-export type CaseExportStatus = "exportiert" | "teilweise" | "offen";
+export type CaseExportStatus = "exported" | "partial" | "open";
 
 /**
  * Leitet den Export-Status aus den akzeptierten Buchungen eines Sachverhalts ab
@@ -351,9 +351,9 @@ export function deriveCaseExportStatus(
   exportedCount: number,
 ): CaseExportStatus | null {
   if (acceptedCount <= 0) return null;
-  if (exportedCount <= 0) return "offen";
-  if (exportedCount >= acceptedCount) return "exportiert";
-  return "teilweise";
+  if (exportedCount <= 0) return "open";
+  if (exportedCount >= acceptedCount) return "exported";
+  return "partial";
 }
 
 export interface CaseFilter {
@@ -371,7 +371,7 @@ export interface CaseFilter {
   searchQuery?: string;
   /** „einmalig" = alle ``kind`` außer ``recurring_charge``;
    *  „dauer" = nur ``recurring_charge``. ``undefined`` = beides. */
-  recurringMode?: "einmalig" | "dauer";
+  recurringMode?: "one_off" | "recurring";
   /**
    * Nur Dauersachverhalte **ohne** Regelwerk.
    *
@@ -405,29 +405,29 @@ export function isRecurringKind(kind: CaseKind | null | undefined): boolean {
 }
 
 export const CASE_LIST_TABS = [
-  "laufend",
-  "offen",
-  "belege",
-  "klaerung",
-  "schliessen",
-  "alle",
+  "active",
+  "payments",
+  "waiting_for_documents",
+  "needs_clarification",
+  "to_close",
+  "all",
 ] as const;
 export type CaseListTab = (typeof CASE_LIST_TABS)[number];
 
 export const CASE_LIST_TAB_LABEL: Record<CaseListTab, string> = {
-  laufend: "Laufende Sachverhalte",
-  offen: "Offene Zahlungen",
-  belege: "Wartet auf Unterlagen",
-  klaerung: "Zur Bearbeitung",
-  schliessen: "Zum Schließen",
-  alle: "Alle Sachverhalte",
+  active: "Laufende Sachverhalte",
+  payments: "Offene Zahlungen",
+  waiting_for_documents: "Wartet auf Unterlagen",
+  needs_clarification: "Zur Bearbeitung",
+  to_close: "Zum Schließen",
+  all: "Alle Sachverhalte",
 };
 
 export function parseCaseListTab(value: string | string[] | undefined): CaseListTab {
   const v = Array.isArray(value) ? value[0] : value;
   return (CASE_LIST_TABS as readonly string[]).includes(v ?? "")
     ? (v as CaseListTab)
-    : "alle";
+    : "all";
 }
 
 /**
@@ -442,7 +442,7 @@ export function parseCaseListTab(value: string | string[] | undefined): CaseList
  * es ein Filter (`?state=`), und die Liste hat einen Reiter.
  *
  * ``null`` für die zwei Ansichten, die keine Sachverhaltsliste sind
- * (``offen``/``schliessen``).
+ * (``payments``/``to_close``).
  */
 /** Ein Such-Parameter ist erst dann eine Partner-Id, wenn er wie eine aussieht. */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -452,12 +452,12 @@ export function caseFilterForListTab(
   raw: Record<string, string | string[] | undefined>,
   fiscalYear: number,
 ): CaseFilter | null {
-  if (tab === "offen" || tab === "schliessen") return null;
+  if (tab === "payments" || tab === "to_close") return null;
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
   const recurring = one(raw.recurring);
-  const docMode = one(raw.belegnr);
+  const docMode = one(raw.docno);
   const q = one(raw.q)?.trim();
-  const dispo = one(raw.dispo);
+  const dispo = one(raw.disposition);
   // `?partner=` öffnet den Drawer **und** filtert die Liste: der Klick auf den
   // Gegenpart fragt „was liegt bei dem noch?" — eine ungefilterte Liste
   // dahinter beantwortet eine andere Frage (0127). Nur eine echte UUID zählt;
@@ -465,9 +465,9 @@ export function caseFilterForListTab(
   const partner = one(raw.partner);
   const filter: CaseFilter = {
     fiscalYear,
-    withoutRecurringRule: one(raw.regel) === "ohne" ? true : undefined,
+    withoutRecurringRule: one(raw.rule) === "none" ? true : undefined,
     recurringMode:
-      recurring === "einmalig" || recurring === "dauer" ? recurring : undefined,
+      recurring === "one_off" || recurring === "recurring" ? recurring : undefined,
     searchQuery: q || undefined,
     documentNumberMode: (CASE_DOCUMENT_NUMBER_MODES as readonly string[]).includes(docMode ?? "")
       ? (docMode as CaseDocumentNumberMode)
@@ -489,19 +489,19 @@ export function caseFilterForListTab(
 /**
  * Die Zustands-Auswahl der Liste — genau das, was vorher drei Reiter taten.
  *
- * `laufend` ist kein Wert der Achse, sondern ihre Verneinung: alles außer
+ * `active` ist kein Wert der Achse, sondern ihre Verneinung: alles außer
  * geschlossen. Deshalb steht er hier neben den Achsenwerten und nicht in
  * `CASE_LIFECYCLE`.
  */
 export const CASE_STATE_FILTERS = [
-  "laufend",
+  "active",
   "waiting_for_documents",
   "needs_clarification",
 ] as const;
 export type CaseStateFilter = (typeof CASE_STATE_FILTERS)[number];
 
 export const CASE_STATE_FILTER_LABEL: Record<CaseStateFilter, string> = {
-  laufend: "Nur laufende",
+  active: "Nur laufende",
   waiting_for_documents: "Wartet auf Unterlagen",
   needs_clarification: "Zur Bearbeitung",
 };
@@ -512,13 +512,13 @@ export const CASE_STATE_FILTER_LABEL: Record<CaseStateFilter, string> = {
  * Das ist der Stand der **Kacheln** (Mandanten-Startseite, Dashboard) — die
  * Liste selbst zeigt seit 2026-09-09 ungefiltert alle Sachverhalte des
  * Jahres. Wer eine Kachel verlinkt, hängt diesen Stand deshalb **sichtbar**
- * an die URL (`?state=laufend&dispo=accounting`), sonst tischt der Klick mehr
+ * an die URL (`?state=active&disposition=accounting`), sonst tischt der Klick mehr
  * auf, als die Kachel gezählt hat.
  *
  * „Eigene Zuständigkeit" ist die **Rolle** `accounting`, nicht der angemeldete
  * Mensch: die Achse kennt Agent, Kanzlei und Mandant, keine Personen.
  */
-export const CASE_STATE_DEFAULT: CaseStateFilter = "laufend";
+export const CASE_STATE_DEFAULT: CaseStateFilter = "active";
 export const CASE_DISPOSITION_DEFAULT: CaseDisposition = "accounting";
 
 /**
@@ -530,17 +530,17 @@ export const CASE_DISPOSITION_DEFAULT: CaseDisposition = "accounting";
  * das einmal sieht, glaubt keiner Zahl der Anwendung mehr).
  */
 export function caseWorkloadListQuery(state: CaseStateFilter): string {
-  return `?state=${state}&dispo=${CASE_DISPOSITION_DEFAULT}`;
+  return `?state=${state}&disposition=${CASE_DISPOSITION_DEFAULT}`;
 }
 
 /** Die Parameter, die den Filterstand ausmachen — und nur die. */
 export const CASE_FILTER_PARAMS = [
   "q",
   "recurring",
-  "dispo",
-  "belegnr",
+  "disposition",
+  "docno",
   "state",
-  "regel",
+  "rule",
   "partner",
 ] as const;
 
@@ -562,7 +562,7 @@ export function caseFilterIsDefault(
 export function caseStateFilter(
   value: string | undefined,
 ): Pick<CaseFilter, "excludeClosed" | "lifecycleStatus"> | null {
-  if (value === "laufend") return { excludeClosed: true };
+  if (value === "active") return { excludeClosed: true };
   if (value === "waiting_for_documents") {
     return { excludeClosed: true, lifecycleStatus: ["waiting_for_documents"] };
   }

@@ -224,7 +224,7 @@ export function CaseTimeline({
       resolvedAt: e.resolvedAt,
       today,
     });
-    const word = resolveStatus("erwartung_art", e.kind).label;
+    const word = resolveStatus("expectation_kind", e.kind).label;
     byId.set(e.id, { type: "expectation", expectation: e });
     items.push({
       id: e.id,
@@ -235,7 +235,7 @@ export function CaseTimeline({
       ),
       right: rightEnd(
         amountCell(e.amount, e.currency),
-        <StatusBadge axis="erwartung" status={maturity} info={false} />,
+        <StatusBadge axis="expectation_maturity" status={maturity} info={false} />,
       ),
     });
   }
@@ -248,7 +248,7 @@ export function CaseTimeline({
       deferredUntil: c.deferredUntil,
       today,
     });
-    const word = resolveStatus("klaerung_typ", c.type).label;
+    const word = resolveStatus("clarification_type", c.type).label;
     byId.set(c.id, { type: "clarification", clarification: c });
     items.push({
       id: c.id,
@@ -258,10 +258,10 @@ export function CaseTimeline({
       right: rightEnd(
         null,
         <>
-          <StatusBadge axis="klaerung_status" status={state} info={false} />
+          <StatusBadge axis="clarification" status={state} info={false} />
           {/* Blocking is a second axis, and only while the question is open. */}
           {state !== "answered" && c.severity === "required" ? (
-            <StatusBadge axis="klaerung" status="required" info={false} />
+            <StatusBadge axis="clarification_severity" status="required" info={false} />
           ) : null}
         </>,
       ),
@@ -272,7 +272,7 @@ export function CaseTimeline({
     // Axis first (`ereignis_art`, L-02), prop as override, raw value last — the
     // same order as in the strand below.
     const label =
-      kindLabels?.[ev.kind] ?? STATUS_REGISTRY.ereignis_art[ev.kind]?.label ?? ev.kind;
+      kindLabels?.[ev.kind] ?? STATUS_REGISTRY.event_kind[ev.kind]?.label ?? ev.kind;
     const Glyph = EVENT_ICON[ev.kind] ?? FileText;
     byId.set(ev.id, { type: "event", event: ev });
     items.push({
@@ -294,14 +294,14 @@ export function CaseTimeline({
               not as a colour. */}
           {ev.source === "datev" ? <Badge tone="neutral">DATEV</Badge> : null}
           <StatusBadge
-            axis="ereignis"
+            axis="event_booking"
             status={ev.superseded ? "superseded" : ev.state}
             info={false}
           />
           {/* The booking is the second line of this event, not an entry of
               its own — it stands beside it as a second badge. */}
           {ev.bookingState ? (
-            <StatusBadge axis="buchung" status={ev.bookingState} info={false} />
+            <StatusBadge axis="journal_entry" status={ev.bookingState} info={false} />
           ) : null}
         </span>,
       ),

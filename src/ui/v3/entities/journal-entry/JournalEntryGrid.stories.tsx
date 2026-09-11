@@ -215,10 +215,10 @@ export const InUse: Story = {
         tabs={
           <Tabs
             items={[
-              { key: "buchung", label: "Buchung" },
-              { key: "beleg", label: "Beleg" },
+              { key: "journal_entry", label: "Buchung" },
+              { key: "document", label: "Beleg" },
             ]}
-            active="buchung"
+            active="journal_entry"
             ariaLabel="Ansichten des Sachverhalts"
           />
         }

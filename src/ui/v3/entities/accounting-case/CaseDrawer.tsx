@@ -105,7 +105,7 @@ export function CaseDrawer({
                 matters: a record whose number differs from the reference. */}
             <code>{reference}</code>
             {record.facts.lifecycleStatus ? (
-              <StatusBadge axis="sachverhalt" status={record.facts.lifecycleStatus} info={false} />
+              <StatusBadge axis="accounting_case" status={record.facts.lifecycleStatus} info={false} />
             ) : null}
             {record.facts.totalAmount == null ? null : (
               <Amount value={record.facts.totalAmount} currency={asCurrency(record.facts.currency)} size="sm" />

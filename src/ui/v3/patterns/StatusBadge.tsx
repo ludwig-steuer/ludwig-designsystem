@@ -57,7 +57,7 @@ export function StatusBadge({
   className,
 }: StatusBadgeProps) {
   const desc = resolveStatus(axis, status);
-  const stageDesc = axis === "beleg" ? resolveStage(stage) : null;
+  const stageDesc = axis === "document_processing" ? resolveStage(stage) : null;
   const entity = AXIS_ENTITY[axis];
   const raw = typeof status === "string" ? status.trim() : "";
   const title = [

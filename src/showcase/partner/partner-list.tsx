@@ -220,7 +220,7 @@ function PartnerList({
   const summary = [
     needle ? `Suche „${q}“` : null,
     view === "all" && role && role in PARTNER_ROLE_LABEL ? PARTNER_ROLE_LABEL[role as keyof typeof PARTNER_ROLE_LABEL] : null,
-    view === "all" && state ? resolveStatus("partner", state).label : null,
+    view === "all" && state ? resolveStatus("business_partner", state).label : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -293,7 +293,7 @@ function PartnerList({
               <option value="">Alle Reifegrade</option>
               {ONBOARDING_STATE.map((s) => (
                 <option key={s} value={s}>
-                  {resolveStatus("partner", s).label}
+                  {resolveStatus("business_partner", s).label}
                 </option>
               ))}
             </Select>

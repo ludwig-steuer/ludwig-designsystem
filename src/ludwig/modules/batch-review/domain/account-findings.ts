@@ -1,4 +1,4 @@
-import type { Vergleich } from "./vergleich";
+import type { Comparison } from "./comparison";
 
 /**
  * Was an einem Konto auffällt (F123 T123.6 / C-Abgleich 6-E).
@@ -14,33 +14,33 @@ import type { Vergleich } from "./vergleich";
  * reihenweise Fehlalarm melden.
  */
 
-export type BefundArt =
+export type FindingKind =
   /** In den Vormonaten nie bebucht, jetzt schon. */
-  | "erstmals"
+  | "first_booked"
   /** Sonst immer bebucht, diesen Monat nicht. */
-  | "fehlt"
+  | "missing"
   /** Die Zahl weicht vom Schnitt ab. */
-  | "abweichung"
+  | "deviation"
   /** Das Konto steht auf der anderen Seite als sonst. */
-  | "vorzeichen"
+  | "sign"
   /** Der Steuerschlüssel streut oder passt nicht zum Automatikkonto. */
-  | "konsistenz"
+  | "consistency"
   /** Vorsteuer-Befund am Konto. */
-  | "vorsteuer";
+  | "input_tax";
 
-export interface KontoBefund {
-  art: BefundArt;
+export interface AccountFinding {
+  kind: FindingKind;
   /** Wie dringend hingesehen werden muss. */
   level: "info" | "warn" | "block";
   /** Was los ist — ein Satz, in der Sprache der Buchhalterin. */
   text: string;
 }
 
-export interface BefundInput {
+export interface FindingInput {
   accountNumber: string;
   accountName: string | null;
   accountingRole: string | null;
-  vergleich: Vergleich;
+  vergleich: Comparison;
   /**
    * Wie oft welcher Steuerschlüssel diesen Monat auf dem Konto stand.
    * Streuung ist ein Befund: dasselbe Konto mit BU 9 **und** BU 8 im selben
@@ -58,14 +58,14 @@ export interface BefundInput {
 
 const SEITE: Record<string, string> = { debit: "Soll", credit: "Haben", gemischt: "beiden Seiten" };
 
-export function deriveKontoBefunde(input: BefundInput): KontoBefund[] {
-  const out: KontoBefund[] = [];
+export function deriveAccountFindings(input: FindingInput): AccountFinding[] {
+  const out: AccountFinding[] = [];
   const v = input.vergleich;
 
   // 1. Erstmals bebucht — der Vergleich kann es nicht in Prozent sagen.
   if (v.avg === 0 && v.current !== 0 && !v.tooYoung) {
     out.push({
-      art: "erstmals",
+      kind: "first_booked",
       level: "warn",
       text: "In den Vormonaten nie bebucht, diesen Monat schon.",
     });
@@ -75,7 +75,7 @@ export function deriveKontoBefunde(input: BefundInput): KontoBefund[] {
   //    fehlende Zeile keine Zeile ist.
   if (v.current === 0 && v.avg !== null && v.avg !== 0 && !v.tooYoung) {
     out.push({
-      art: "fehlt",
+      kind: "missing",
       level: "warn",
       text: "Sonst jeden Monat bebucht, diesen Monat nicht.",
     });
@@ -83,14 +83,14 @@ export function deriveKontoBefunde(input: BefundInput): KontoBefund[] {
 
   // 3. Abweichung — nur wenn beide Seiten Zahlen haben.
   if (v.flagged && v.deviationPct !== null) {
-    out.push({ art: "abweichung", level: "warn", text: v.explanation });
+    out.push({ kind: "deviation", level: "warn", text: v.explanation });
   }
 
   // 4. Vorzeichen — ein Aufwandskonto im Haben ist fast immer eine
   //    Gutschrift oder ein Fehler, nie Routine.
   if (input.side && input.usualSide && input.side !== input.usualSide) {
     out.push({
-      art: "vorzeichen",
+      kind: "sign",
       level: "warn",
       text: `Steht diesen Monat im ${SEITE[input.side] ?? input.side}, sonst im ${
         SEITE[input.usualSide] ?? input.usualSide
@@ -102,7 +102,7 @@ export function deriveKontoBefunde(input: BefundInput): KontoBefund[] {
   const keys = Object.entries(input.taxKeys ?? {}).filter(([, n]) => n > 0);
   if (keys.length > 1) {
     out.push({
-      art: "konsistenz",
+      kind: "consistency",
       level: "warn",
       text: `Zwei Steuerschlüssel auf demselben Konto: ${keys
         .map(([k, n]) => `BU ${k} (${n}×)`)
@@ -114,14 +114,14 @@ export function deriveKontoBefunde(input: BefundInput): KontoBefund[] {
     keys[0]![0] !== input.usualTaxKey
   ) {
     out.push({
-      art: "konsistenz",
+      kind: "consistency",
       level: "warn",
       text: `Diesen Monat BU ${keys[0]![0]}, sonst BU ${input.usualTaxKey}.`,
     });
   }
   if (input.isAutomatic && keys.length > 0) {
     out.push({
-      art: "konsistenz",
+      kind: "consistency",
       level: "block",
       text: "Automatikkonto mit gesetztem Steuerschlüssel — DATEV rechnet dann doppelt.",
     });
@@ -131,11 +131,11 @@ export function deriveKontoBefunde(input: BefundInput): KontoBefund[] {
 }
 
 /** Die Gruppen des Designs — Reihenfolge ist die Reihenfolge der Dringlichkeit. */
-export const BEFUND_GRUPPEN: { art: BefundArt; titel: string; erklaerung: string }[] = [
-  { art: "erstmals", titel: "Erstmals bebucht", erklaerung: "Neue Konten in dieser Periode." },
-  { art: "fehlt", titel: "Fehlt diesen Monat", erklaerung: "Sonst bebucht, jetzt ohne Bewegung." },
-  { art: "abweichung", titel: "Abweichung", erklaerung: "Die Zahl weicht vom Schnitt ab." },
-  { art: "vorzeichen", titel: "Unerwartetes Vorzeichen", erklaerung: "Andere Seite als sonst." },
-  { art: "konsistenz", titel: "Steuerschlüssel", erklaerung: "Streuung oder Automatikkonto." },
-  { art: "vorsteuer", titel: "Vorsteuer", erklaerung: "Befunde aus der USt-Prüfung." },
+export const FINDING_GROUPS: { kind: FindingKind; title: string; explanation: string }[] = [
+  { kind: "first_booked", title: "Erstmals bebucht", explanation: "Neue Konten in dieser Periode." },
+  { kind: "missing", title: "Fehlt diesen Monat", explanation: "Sonst bebucht, jetzt ohne Bewegung." },
+  { kind: "deviation", title: "Abweichung", explanation: "Die Zahl weicht vom Schnitt ab." },
+  { kind: "sign", title: "Unerwartetes Vorzeichen", explanation: "Andere Seite als sonst." },
+  { kind: "consistency", title: "Steuerschlüssel", explanation: "Streuung oder Automatikkonto." },
+  { kind: "input_tax", title: "Vorsteuer", explanation: "Befunde aus der USt-Prüfung." },
 ];

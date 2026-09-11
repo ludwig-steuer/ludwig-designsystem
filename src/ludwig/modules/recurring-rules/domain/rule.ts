@@ -115,6 +115,79 @@ export const RULE_PROFILE_SOURCE_LABEL: Record<RuleProfileSource, string> = {
   onboarding: "beim Onboarding übernommen",
 };
 
+/** Die Frage, die eine Regel-Einstellung beantwortet — die Gruppen der Faktenansicht. */
+export type RuleSettingGroup = "match" | "book" | "expect" | "origin";
+
+export interface RuleSettingHelp {
+  group: RuleSettingGroup;
+  /** Was die Einstellung bewirkt, in einem Satz; `null`, wo das Etikett schon alles sagt. */
+  help: string | null;
+  /** Setzt nur der Import — die Maske zeigt sie, bearbeitet sie aber nicht. */
+  imported: boolean;
+}
+
+const EXACT_MATCH = "Muss genau übereinstimmen.";
+const ALSO_MATCHES_DOCUMENTS = "Dieselbe Regel ordnet auch Belege zu.";
+const ENDS_BY_ACTIVE_FLAG = "Beendet wird die Regel über „aktiv“, nicht über ein Enddatum.";
+
+/**
+ * # Was die Einstellungen einer Regel bewirken (L-293)
+ *
+ * Ein Satz je Einstellung, die eine Erklärung braucht, nach der Frage, die sie
+ * beantwortet: erkennen (`match`), buchen (`book`), erwarten (`expect`),
+ * Herkunft (`origin`). Einstellungen, die nur der Import setzt, sind markiert.
+ *
+ * Wortgleich mit `RecurringRuleFacts` im Design-System (0160, `explain`) — die
+ * Sätze standen dort zuerst fest im Code. Hier ist ihre Heimat: das DS liest sie
+ * nach dem Spiegel-Sync von hier und streicht seine eigenen.
+ *
+ * Der Buchungsmodus fehlt bewusst: er erklärt sich über die Beschreibungen
+ * seiner Registry-Achse. Die Schlüssel sind Felder von `RecurringRule` — eine
+ * Umbenennung fällt im Typcheck auf.
+ */
+export const RULE_SETTING_HELP: Partial<Record<keyof RecurringRule, RuleSettingHelp>> = {
+  matchCounterpartyName: {
+    group: "match",
+    help: "Der Name im Umsatz muss ihn enthalten; Groß- und Kleinschreibung zählen nicht.",
+    imported: false,
+  },
+  matchCounterpartyIban: { group: "match", help: EXACT_MATCH, imported: false },
+  expectedDirection: {
+    group: "match",
+    help: "Umsätze in die andere Richtung prüft die Regel gar nicht.",
+    imported: false,
+  },
+  matchAmount: {
+    group: "match",
+    help: "Trifft, wenn der Umsatz höchstens um die Toleranz abweicht; von absoluter und prozentualer Toleranz gilt die großzügigere.",
+    imported: false,
+  },
+  matchPurposeRegex: {
+    group: "match",
+    help: "Ein regulärer Ausdruck über den Verwendungszweck; Groß- und Kleinschreibung zählen nicht.",
+    imported: false,
+  },
+  matchContractNumber: { group: "match", help: ALSO_MATCHES_DOCUMENTS, imported: false },
+  matchDocumentTextRegex: { group: "match", help: ALSO_MATCHES_DOCUMENTS, imported: false },
+  matchingNote: { group: "match", help: "Für Menschen und den Agenten — kein Kriterium.", imported: false },
+  datevDocumentNumber: {
+    group: "book",
+    help: "Belegfeld 1 jeder Sollstellung — daran hängt der Ausgleich des offenen Postens.",
+    imported: true,
+  },
+  expectedInterval: {
+    group: "expect",
+    help: "Rhythmus und Zahltag sind kein Kriterium: sie sagen nur, wann Ludwig die Zahlung erwartet.",
+    imported: false,
+  },
+  validFrom: { group: "expect", help: ENDS_BY_ACTIVE_FLAG, imported: true },
+  validUntil: { group: "expect", help: ENDS_BY_ACTIVE_FLAG, imported: true },
+  profileSource: { group: "origin", help: null, imported: true },
+  template: { group: "origin", help: "In der Maske nur lesend.", imported: true },
+  documentNumberStrategy: { group: "origin", help: null, imported: true },
+  importReference: { group: "origin", help: "Woran der Import die Regel wiedererkennt.", imported: true },
+};
+
 /**
  * F108 [E4] — der Server leitet das Buchungsprofil ab, der Agent widerspricht
  * begründet.

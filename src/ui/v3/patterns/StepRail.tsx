@@ -51,7 +51,7 @@ export function StepRail({
   ariaLabel: string;
 }) {
   return (
-    <nav className="abn__rail" aria-label={ariaLabel}>
+    <nav className="review__rail" aria-label={ariaLabel}>
       {head}
       {items.map((it) => (
         <RailRow key={it.key} item={it} />
@@ -63,7 +63,7 @@ export function StepRail({
 
 function RailRow({ item }: { item: RailItem }) {
   const cls =
-    `abn__step abn__step--${item.tone}` +
+    `review__step review__step--${item.tone}` +
     (item.current ? " is-current" : "") +
     (item.tone === "dimmed" ? " is-dimmed" : "");
   const inner = (

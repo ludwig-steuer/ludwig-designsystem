@@ -14,7 +14,7 @@
  * Rein und ohne IO — deshalb testbar.
  */
 
-export interface GateZeile {
+export interface GateRow {
   /** Die Bankzeile, wenn es eine gibt — für den Kontoauszug-Drawer. */
   transactionId: string | null;
   /** Was in der ersten Spalte steht. Nie leer. */
@@ -61,11 +61,11 @@ export function isHinweis(befund: { kind: string | null; clearingAccountType?: s
  */
 export const DUBLETTEN_ARTEN = new Set(["summary"]);
 
-export interface GeteilteBefunde {
+export interface SplitFindings {
   /** Was den Stapel wirklich aufhält. */
-  maengel: GateZeile[];
+  defects: GateRow[];
   /** Was gesehen werden will, aber nicht blockiert. */
-  hinweise: GateZeile[];
+  notices: GateRow[];
 }
 
 /**
@@ -73,7 +73,7 @@ export interface GeteilteBefunde {
  * verschwindet nie, nur weil sie unbenannt ist.
  */
 export function istMangel(raw: unknown): boolean {
-  const z = leseGateZeile(raw);
+  const z = readGateRow(raw);
   if (z.kind === null) return true;
   return !isHinweis(z) && !DUBLETTEN_ARTEN.has(z.kind);
 }
@@ -82,15 +82,15 @@ export function istMangel(raw: unknown): boolean {
  * Ein Gate-Ergebnis in Mängel und Hinweise teilen. Zusammenfassungszeilen
  * fallen weg.
  */
-export function teileGateBefunde(open: readonly unknown[]): GeteilteBefunde {
-  const maengel: GateZeile[] = [];
-  const hinweise: GateZeile[] = [];
+export function splitGateFindings(open: readonly unknown[]): SplitFindings {
+  const defects: GateRow[] = [];
+  const notices: GateRow[] = [];
   for (const raw of open) {
-    const z = leseGateZeile(raw);
+    const z = readGateRow(raw);
     if (z.kind !== null && DUBLETTEN_ARTEN.has(z.kind)) continue;
-    (isHinweis(z) ? hinweise : maengel).push(z);
+    (isHinweis(z) ? notices : defects).push(z);
   }
-  return { maengel, hinweise };
+  return { defects, notices };
 }
 
 /** `"1.234,50"`, `"1234.50"` und `1234.5` ergeben alle dieselbe Zahl. */
@@ -115,7 +115,7 @@ function ersterText(o: Record<string, unknown>, keys: string[]): string | null {
   return null;
 }
 
-export function leseGateZeile(raw: unknown): GateZeile {
+export function readGateRow(raw: unknown): GateRow {
   const o = (typeof raw === "object" && raw !== null ? raw : {}) as Record<string, unknown>;
 
   // Beide Schreibweisen — Gate 2a und Gate 4d benennen dieselbe Sache anders.
@@ -123,10 +123,10 @@ export function leseGateZeile(raw: unknown): GateZeile {
 
   // Ein Konto ist seine Nummer UND sein Name — „1590" allein sagt der
   // Buchhalterin nicht, was sie ansehen soll (Owner 2026-09-08).
-  const kontoName = ersterText(o, ["accountName"]);
+  const accountName = ersterText(o, ["accountName"]);
   const kontoNummer = ersterText(o, ["accountNumber"]);
   const label =
-    (kontoNummer !== null && kontoName !== null ? `${kontoNummer} · ${kontoName}` : null) ??
+    (kontoNummer !== null && accountName !== null ? `${kontoNummer} · ${accountName}` : null) ??
     ersterText(o, [
       "label",
       "accountNumber",

@@ -1,4 +1,4 @@
-import { vergleiche, type BatchContribution, type KontoVergleich } from "./vergleich";
+import { compare, type BatchContribution, type AccountComparison } from "./comparison";
 
 /**
  * „Dieser Stapel" neben den Ist-Saldo legen (F197).
@@ -11,7 +11,7 @@ import { vergleiche, type BatchContribution, type KontoVergleich } from "./vergl
  * Rein und ohne IO: die Query lädt beide Seiten, diese Funktion legt sie
  * übereinander.
  */
-export function mergeBatchContribution<T extends KontoVergleich>(
+export function mergeBatchContribution<T extends AccountComparison>(
   rows: T[],
   contribution: BatchContribution[],
 ): (T & { batchAmount: number })[] {
@@ -40,7 +40,7 @@ export function mergeBatchContribution<T extends KontoVergleich>(
       ludwig: { m3: null, m2: null, m1: null, current: 0 },
       datevCurrent: 0,
       // Kein Vormonat, kein Ist: die Engine sagt „zu jung", markiert nichts.
-      vergleich: vergleiche({ m3: null, m2: null, m1: null, current: 0 }, "amount"),
+      vergleich: compare({ m3: null, m2: null, m1: null, current: 0 }, "amount"),
       batchAmount: c.amount,
       // Der Cast ist die ehrliche Stelle: eine angehängte Zeile trägt nur die
       // Felder von `KontoVergleich`, nicht die Zusätze eines engeren `T`

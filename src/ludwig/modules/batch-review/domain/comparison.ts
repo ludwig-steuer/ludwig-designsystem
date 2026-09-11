@@ -11,13 +11,13 @@
  * die Schwelle.
  */
 
-export type VergleichKind =
+export type ComparisonKind =
   /** Beträge in Euro — Schwelle absolut UND relativ. */
   | "amount"
   /** Stückzahlen (Belege, Zeilen) — nur relativ. */
   | "count";
 
-export interface VergleichInput {
+export interface ComparisonInput {
   /** Der Monat vor drei Monaten. `null` = es gab ihn noch nicht. */
   m3: number | null;
   m2: number | null;
@@ -25,7 +25,7 @@ export interface VergleichInput {
   current: number;
 }
 
-export interface Vergleich extends VergleichInput {
+export interface Comparison extends ComparisonInput {
   /** Schnitt über die vorhandenen Vormonate; `null`, wenn keiner da ist. */
   avg: number | null;
   /** Abweichung gegen den Schnitt in Prozent; `null` ohne Schnitt. */
@@ -45,7 +45,7 @@ export interface Vergleich extends VergleichInput {
 }
 
 /** Die Voreinstellung aus dem Brief. Je Mandant konfigurierbar: nicht in v1. */
-export const VERGLEICH_SCHWELLEN = {
+export const COMPARISON_THRESHOLDS = {
   amount: { relative: 0.5, absolute: 500 },
   count: { relative: 0.3, absolute: 0 },
 } as const;
@@ -53,7 +53,7 @@ export const VERGLEICH_SCHWELLEN = {
 const PCT = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
 const NUM = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 });
 
-export function vergleiche(input: VergleichInput, kind: VergleichKind): Vergleich {
+export function compare(input: ComparisonInput, kind: ComparisonKind): Comparison {
   const prior = [input.m3, input.m2, input.m1].filter((v): v is number => v != null);
   const tooYoung = prior.length < 2;
 
@@ -89,7 +89,7 @@ export function vergleiche(input: VergleichInput, kind: VergleichKind): Vergleic
   }
 
   const deviationPct = (delta / Math.abs(avg)) * 100;
-  const schwelle = VERGLEICH_SCHWELLEN[kind];
+  const schwelle = COMPARISON_THRESHOLDS[kind];
   const relativeHit = Math.abs(deviationPct) >= schwelle.relative * 100;
   const absoluteHit = Math.abs(delta) >= schwelle.absolute;
   const flagged = !tooYoung && relativeHit && absoluteHit;
@@ -116,7 +116,7 @@ export function vergleiche(input: VergleichInput, kind: VergleichKind): Vergleic
 }
 
 /** Auffällige zuerst, dann nach Größe der Abweichung. */
-export function sortByAuffaelligkeit<T extends { vergleich: Vergleich }>(rows: T[]): T[] {
+export function sortByAuffaelligkeit<T extends { vergleich: Comparison }>(rows: T[]): T[] {
   return [...rows].sort((a, b) => {
     if (a.vergleich.flagged !== b.vergleich.flagged) return a.vergleich.flagged ? -1 : 1;
     return Math.abs(b.vergleich.deviationPct ?? 0) - Math.abs(a.vergleich.deviationPct ?? 0);
@@ -163,7 +163,7 @@ export function monatsKuerzel(period: string): [string, string, string, string] 
  * (`mergeBatchContribution`) ihn benutzen können, ohne die Application-Schicht
  * mit ihrem `server-only` zu importieren.
  */
-export interface KontoVergleich {
+export interface AccountComparison {
   accountNumber: string;
   accountName: string | null;
   /** `expense` / `revenue` / `creditor` / … — für Gruppierung und Filter. */
@@ -181,7 +181,7 @@ export interface KontoVergleich {
    * `m3`/`m2`/`m1`/`avg` sind damit DATEV, `current` ist Ludwig — die beiden
    * Seiten der einen Frage „buchen wir den Monat wie sonst?".
    */
-  vergleich: Vergleich;
+  vergleich: Comparison;
 }
 
 /**

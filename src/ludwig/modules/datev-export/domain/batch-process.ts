@@ -117,42 +117,42 @@ export function batchOwner(state: string, openDocumentRequests = 0): BatchOwnerM
 }
 
 /** Grobfilter der Stapel-Liste — dieselbe Gruppierung wie die Phasen. */
-export type BatchListFilter = "alle" | "offen" | "unterwegs" | "in_datev";
+export type BatchListFilter = "all" | "open" | "in_transit" | "in_datev";
 
-const FILTER_STATES: Record<Exclude<BatchListFilter, "alle">, readonly string[]> = {
-  offen: ["agent", "prepared", "review"],
-  unterwegs: ["ready", "exporting", "inspection", "failed"],
+const FILTER_STATES: Record<Exclude<BatchListFilter, "all">, readonly string[]> = {
+  open: ["agent", "prepared", "review"],
+  in_transit: ["ready", "exporting", "inspection", "failed"],
   in_datev: ["confirmed", "mirrored", "closed"],
 };
 
 /**
- * Search-Param → Tab. Unbekanntes fällt auf „alle" zurück, nie auf leer.
+ * Search-Param → Tab. Unbekanntes fällt auf „all" zurück, nie auf leer.
  *
- * `nur_datev` ist kein Filter über die Ludwig-Stapel, sondern eine andere
+ * `datev_only` ist kein Filter über die Ludwig-Stapel, sondern eine andere
  * Quelle (Spiegel-Stapel ohne Gegenstück) — er lebt trotzdem im selben
  * Tab-Set, weil die Nutzerin dort dieselbe Frage stellt: „welche Stapel gibt
  * es zu diesem Mandanten?"
  */
-export function parseStapelTabFilter(
+export function parseBatchListTab(
   raw: string | string[] | undefined,
-): BatchListFilter | "nur_datev" {
+): BatchListFilter | "datev_only" {
   const value = Array.isArray(raw) ? raw[0] : raw;
-  return value === "offen" ||
-    value === "unterwegs" ||
+  return value === "open" ||
+    value === "in_transit" ||
     value === "in_datev" ||
-    value === "nur_datev"
+    value === "datev_only"
     ? value
-    : "alle";
+    : "all";
 }
 
 /** Nur die Zustands-Filter — ohne den Fremdquellen-Tab. */
 export function parseBatchListFilter(raw: string | string[] | undefined): BatchListFilter {
   const value = Array.isArray(raw) ? raw[0] : raw;
-  return value === "offen" || value === "unterwegs" || value === "in_datev" ? value : "alle";
+  return value === "open" || value === "in_transit" || value === "in_datev" ? value : "all";
 }
 
 export function matchesBatchFilter(state: string, filter: BatchListFilter): boolean {
-  return filter === "alle" ? true : FILTER_STATES[filter].includes(state);
+  return filter === "all" ? true : FILTER_STATES[filter].includes(state);
 }
 
 /**

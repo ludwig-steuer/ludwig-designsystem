@@ -331,12 +331,12 @@ export function ClarificationCard({
         <h3 className="v2clc__title">{c.title}</h3>
         <div className="v2clc__badges">
           {isComment ? (
-            <StatusBadge axis="klaerung_typ" status="comment" info={false} />
+            <StatusBadge axis="clarification_type" status="comment" info={false} />
           ) : (
             <>
-              <StatusBadge axis="klaerung_status" status={c.state} info={false} />
+              <StatusBadge axis="clarification" status={c.state} info={false} />
               {c.state !== "answered" && c.severity === "required" ? (
-                <StatusBadge axis="klaerung" status="required" info={false} />
+                <StatusBadge axis="clarification_severity" status="required" info={false} />
               ) : null}
             </>
           )}

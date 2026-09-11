@@ -30,8 +30,8 @@ export default meta;
 type Story = StoryObj<typeof AiBookingNotesCell>;
 
 const SOURCES: AiSource[] = [
-  { key: "1", art: "regel", label: "Wiederkehr: Miete Musterstraße" },
-  { key: "2", art: "beleg", label: "RE-2026-0042", quote: "Miete August 2026" },
+  { key: "1", art: "rule", label: "Wiederkehr: Miete Musterstraße" },
+  { key: "2", art: "document", label: "RE-2026-0042", quote: "Miete August 2026" },
 ];
 
 /**
@@ -42,10 +42,10 @@ const SOURCES: AiSource[] = [
 const SOURCES_WITHOUT_NAMES: AiSource[] = [
   {
     key: "1",
-    art: "beleg",
+    art: "document",
     quote: "Rechnung der Musterfirma Fahrradteile GmbH vom 16.07.2026 über 25,41 EUR",
   },
-  { key: "2", art: "regel", label: "Präzedenz: dieselbe Buchung im Juni" },
+  { key: "2", art: "rule", label: "Präzedenz: dieselbe Buchung im Juni" },
 ];
 
 /**
@@ -131,7 +131,7 @@ export const Box: Story = {
         rationale="Steuersatz aus der Positionszeile übernommen."
         judgeReasoning="Der Beleg weist 7 % aus. Der Satz bucht 19 % — bitte manuell prüfen."
         errors={["Steuersatz widerspricht dem Beleg."]}
-        sources={[{ key: "1", art: "beleg", label: "RE-4471", quote: "zzgl. 7 % USt" }]}
+        sources={[{ key: "1", art: "document", label: "RE-4471", quote: "zzgl. 7 % USt" }]}
       />
     </div>
   ),
@@ -156,11 +156,11 @@ export const SourceKinds: Story = {
     const [lastOpened, setLastOpened] = useState<string | null>(null);
     const kinds: { art: AiSource["art"]; citation: string }[] = [
       { art: "bank", citation: "Zahlung vom 28.07.2026 über 345,12 €" },
-      { art: "beleg", citation: "Rechnung der Musterbau GmbH vom 16.07.2026" },
+      { art: "document", citation: "Rechnung der Musterbau GmbH vom 16.07.2026" },
       { art: "history", citation: "Kreditor 70003, 14 Buchungen, zuletzt 22.06.2026" },
-      { art: "klaerung", citation: "Welche Teilnehmer waren dabei?" },
-      { art: "regel", citation: "Wiederkehr: Miete Musterstraße, monatlich zum 3." },
-      { art: "gesetz", citation: "§ 33 UStDV: Kleinbetragsrechnungen bis 250 €" },
+      { art: "clarification", citation: "Welche Teilnehmer waren dabei?" },
+      { art: "rule", citation: "Wiederkehr: Miete Musterstraße, monatlich zum 3." },
+      { art: "law", citation: "§ 33 UStDV: Kleinbetragsrechnungen bis 250 €" },
     ];
     return (
       <div style={{ display: "grid", gap: 20, maxWidth: 720 }}>
@@ -210,7 +210,7 @@ export const Sources: Story = {
           confidence="green"
           rationale="Dieselben Quellen, diesmal mit einem Weg hinein."
           sources={SOURCES_WITHOUT_NAMES.map((q) =>
-            q.art === "beleg" ? { ...q, onOpen: () => setOpen(q.key) } : q,
+            q.art === "document" ? { ...q, onOpen: () => setOpen(q.key) } : q,
           )}
         />
         <p className="v2muted" style={{ margin: 0 }}>
@@ -313,8 +313,8 @@ const BATCH: BatchRow[] = [
 ];
 
 const COLUMNS: ColumnDef<BatchRow>[] = [
-  { key: "beleg", header: "Belegfeld 1", width: "140px", cell: (r) => <MonoCell value={r.document} /> },
-  { key: "konto", header: "Konto", width: "80px", cell: (r) => <MonoCell value={r.account} /> },
+  { key: "document_number", header: "Belegfeld 1", width: "140px", cell: (r) => <MonoCell value={r.document} /> },
+  { key: "account", header: "Konto", width: "80px", cell: (r) => <MonoCell value={r.account} /> },
   { key: "text", header: "Buchungstext", cell: (r) => <span className="v2main">{r.text}</span> },
   {
     key: "ki",

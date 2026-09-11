@@ -32,11 +32,10 @@
  *
  * ## Sprache
  * **Technischer Name englisch, Anzeige deutsch** (AGENTS.md → Naming). Die
- * Status-*Werte* und die Auslöser der Übergänge halten sich daran; die
- * *Achsen-Keys* noch nicht: 54 von 72 sind deutsch, weil diese Datei sich
- * einmal auf „bewusst und dokumentiert" berufen hat. Genau das ist die
- * Ausnahme, die es nicht mehr gibt — F150 T150.2 benennt sie um. Bis dahin
- * hier keine neuen deutschen Keys anlegen.
+ * Status-*Werte*, die Auslöser der Übergänge und seit F210 auch die
+ * *Achsen-Keys* halten sich daran (bis dahin waren 54 von 72 deutsch, weil
+ * die Datei sich einmal auf „bewusst und dokumentiert" berufen hatte). Der
+ * Registry-Test „Achsen-Schlüssel sind englisch" hält das fest.
  *
  * ## Neue Achse hinzufügen
  * 1. Map mit Block-Kommentar anlegen: DB-Spalte (oder „ephemer"), wer den Wert
@@ -50,86 +49,86 @@
  */
 /**
  * Status-Achsen der App. Namensschema: Entität, bei mehreren Achsen an
- * derselben Entität mit Suffix (`beleg` / `beleg_stage` / `beleg_inbox`).
+ * derselben Entität mit Suffix (`document_processing` / `document_stage` / `document_inbox`).
  */
 export type StatusAxis =
   // — Beleg & Pipeline —
-  | "beleg"
-  | "beleg_stage"
-  | "beleg_charakter"
-  | "beleg_erledigung"
-  | "beleg_haenger"
-  | "beleg_inbox"
-  | "beleg_kategorie"
-  | "dokumentgruppe"
-  | "beleg_richtung"
+  | "document_processing"
+  | "document_stage"
+  | "document_character"
+  | "document_completion"
+  | "document_stuck"
+  | "document_inbox"
+  | "document_category"
+  | "collection_kind"
+  | "document_direction"
   | "job"
   | "upload"
   | "dispatch"
   // — Sachverhalt —
-  | "sachverhalt"
-  | "ereignis_art"
-  | "belegnummern_modus"
-  | "ereignis"
+  | "accounting_case"
+  | "event_kind"
+  | "document_number_mode"
+  | "event_booking"
   | "disposition"
-  | "klaerung"
-  | "klaerung_status"
-  | "klaerung_typ"
-  | "erwartung"
-  | "erwartung_art"
+  | "clarification_severity"
+  | "clarification"
+  | "clarification_type"
+  | "expectation_maturity"
+  | "expectation_kind"
   | "triage"
   // — Buchung & Export —
-  | "buchung"
-  | "zyklus_stapel"
-  | "buchung_datev"
-  | "buchung_origin"
-  | "konfidenz"
+  | "journal_entry"
+  | "export_batch"
+  | "journal_entry_datev_stage"
+  | "journal_entry_origin"
+  | "confidence"
   | "judge"
   | "export_case"
   | "export_bucket"
   // — Buchungslauf —
-  | "lauf"
-  | "lauf_gate"
+  | "run_outcome"
+  | "run_gate"
   // — Stammdaten —
-  | "partner"
-  | "konto"
-  | "konto_datev_sync"
-  | "konto_typ"
-  | "verrechnungskonto"
-  | "benutzer"
-  | "benutzer_art"
-  | "rolle"
-  | "zyklus"
-  | "zahlungsweg"
-  | "mandant_betrieb"
-  | "dauersachverhalt_uebernahme"
+  | "business_partner"
+  | "ledger_account"
+  | "ledger_account_datev_sync"
+  | "ledger_account_type"
+  | "clearing_account_type"
+  | "user"
+  | "user_kind"
+  | "role"
+  | "booking_cycle"
+  | "payment_method"
+  | "client_operation"
+  | "recurring_case_adoption"
   | "token"
-  | "regel_modus"
+  | "rule_mode"
   | "integration"
-  | "mandant_onboarding"
-  | "mandant_onboarding_verdict"
+  | "client_onboarding"
+  | "client_onboarding_verdict"
   // — Wissen —
-  | "konvention"
-  | "konvention_herkunft"
-  | "produktbefund"
-  | "produktbefund_prio"
+  | "convention"
+  | "convention_origin"
+  | "product_finding"
+  | "product_finding_priority"
   // — DATEV-Abgleich —
-  | "kontoauszug_erwartung"
-  | "opos_ausgleich"
-  | "opos_zeilenart"
-  | "datev_verknuepfung"
-  | "plausibilitaet"
-  | "belegnummer_quelle"
+  | "statement_expectation"
+  | "open_item_settlement"
+  | "open_item_line_kind"
+  | "datev_link"
+  | "plausibility"
+  | "document_number_source"
   | "bank_match_stage"
   | "mirror_match"
-  | "abgleich_lauf"
-  | "stapel_commit"
-  | "datev_pruefung"
+  | "reconciliation_run"
+  | "batch_commit"
+  | "datev_check"
   // — Betrieb —
   | "actor_kind"
   | "bridge_datev"
-  | "vst_fakt"
-  | "vst_regel"
+  | "input_tax_fact"
+  | "input_tax_rule"
   | "log_level"
   | "health"
   | "readiness";
@@ -139,7 +138,7 @@ export type StatusAxis =
  * Buchung). Nur sie haben ein Icon und ein Flow-Modal. Bleibt als eigener
  * Typ erhalten, weil `EntityStatusBadgeButton` genau diese drei bedient.
  */
-export type EntityType = "beleg" | "sachverhalt" | "buchung";
+export type EntityType = "document_processing" | "accounting_case" | "journal_entry";
 
 /**
  * Die fünf Farbrollen, die ein Status tragen kann. Hier definiert und nicht
@@ -214,7 +213,7 @@ export interface StatusDescriptor {
  *    erledigt, solange am Beleg-Ereignis eine lebende Buchung hängt
  *    (Trigger aus `20260820170000`).
  */
-const BELEG_PROCESSING: Record<string, StatusDescriptor> = {
+const DOCUMENT_PROCESSING: Record<string, StatusDescriptor> = {
   pending: { label: "Wartet", kind: "neutral", description: "Beleg liegt vor, die Verarbeitung hat noch nicht begonnen." },
   in_progress: { label: "In Bearbeitung", kind: "info", description: "Die Pipeline verarbeitet den Beleg gerade." },
   processed: { label: "Prozessiert", kind: "success", description: "Pipeline vollständig durchlaufen — klassifiziert, interpretiert, bereit für den Sachverhalt." },
@@ -241,7 +240,7 @@ const BELEG_PROCESSING: Record<string, StatusDescriptor> = {
  *    Schreiber mehr; Buchungsvorschläge entstehen on-demand am Sachverhalt.
  *    Wert bleibt gelistet, damit Altdaten korrekt anzeigen.
  */
-const BELEG_STAGE: Record<string, StatusDescriptor> = {
+const DOCUMENT_STAGE: Record<string, StatusDescriptor> = {
   classified: { label: "Klassifiziert", kind: "neutral", description: "Belegart erkannt (Cheap-Classifier)." },
   // Zwischenstufe des BEDI-Sampling-Light-Passes (Classifier + Preprocessor
   // ohne Interpreter) — Cutoff beim Onboarding. Fehlte hier bis 2026-07-20,
@@ -277,7 +276,7 @@ const BELEG_STAGE: Record<string, StatusDescriptor> = {
  *    verknüpfte Historie). JEDE Listen-Query muss `status <> 'deleted'`
  *    filtern — das wird nicht zentral erzwungen.
  */
-const BELEG_INBOX: Record<string, StatusDescriptor> = {
+const DOCUMENT_INBOX: Record<string, StatusDescriptor> = {
   pending_classification: { label: "Wird eingeordnet", kind: "neutral", description: "Dokument ist hochgeladen und wartet auf die Klassifizierung." },
   classified: { label: "Eingeordnet", kind: "success", description: "Dokumentart erkannt — der Beleg kann weiterverarbeitet werden." },
   classification_failed: { label: "Einordnung fehlgeschlagen", kind: "danger", description: "Die Dokumentart konnte nicht bestimmt werden. Es gibt keinen automatischen Wiederholungslauf — bitte manuell neu anstoßen." },
@@ -338,7 +337,7 @@ const BELEG_INBOX: Record<string, StatusDescriptor> = {
  *    Unterschied (Pauschalen, Bewirtung) wirkt am Einzelbeleg, nicht an der
  *    Gruppe.
  */
-const DOKUMENTGRUPPE: Record<string, StatusDescriptor> = {
+const COLLECTION_KIND: Record<string, StatusDescriptor> = {
   expense_report: {
     label: "Auslagenabrechnung",
     kind: "info",
@@ -383,7 +382,7 @@ const DOKUMENTGRUPPE: Record<string, StatusDescriptor> = {
   },
 };
 
-const BELEG_KATEGORIE: Record<string, StatusDescriptor> = {
+const DOCUMENT_CATEGORY: Record<string, StatusDescriptor> = {
   performance: { label: "Leistungsbeleg", kind: "info", description: "Belegt eine Leistung oder Lieferung samt Zahlungsaufforderung oder Gutschrift — Rechnungen, Bons, Lieferscheine, Mahnungen. Grundlage für Aufwand, Ertrag, Forderung, Verbindlichkeit." },
   payment: { label: "Zahlungsbeleg", kind: "info", description: "Belegt den tatsächlichen Geldfluss auf einem Geldkonto — Kontoauszug, Kreditkartenabrechnung, eigener Kassenabschluss. Wird gegen die Einzelbelege abgeglichen, nicht selbst als Rechnung gebucht." },
   foundation: { label: "Nachweisbeleg", kind: "info", description: "Rechts- & Basisbeleg: rechtliche Nachweis- oder Berechnungsgrundlage ohne eigene Rechnungsstellung — Verträge, Bescheide, Versicherungsscheine. Dient oft als Dauerbeleg für wiederkehrende Abbuchungen." },
@@ -416,7 +415,7 @@ const BELEG_KATEGORIE: Record<string, StatusDescriptor> = {
  *    Belege bekommen keinen Invoice-Subtyp. Bewusste Lücke, siehe
  *    `docs/topics/belege.md` R10.
  */
-const BELEG_RICHTUNG: Record<string, StatusDescriptor> = {
+const DOCUMENT_DIRECTION: Record<string, StatusDescriptor> = {
   inbound: { label: "Eingangsrechnung", kind: "info", description: "Der Mandant ist Leistungsempfänger — ein Lieferant stellt ihm etwas in Rechnung. Bucht Aufwand und zieht Vorsteuer." },
   outbound: { label: "Ausgangsrechnung", kind: "info", description: "Der Mandant hat den Beleg selbst ausgestellt — nachgewiesen über eigene USt-IdNr. oder Firmierung. Bucht Erlös und schuldet Umsatzsteuer." },
   internal: { label: "Interner Vorgang", kind: "neutral", description: "Weder Ein- noch Ausgang — ein rein interner Vorgang. Der Werteraum kennt den Wert, vergeben wird er heute noch nicht." },
@@ -442,7 +441,7 @@ const BELEG_RICHTUNG: Record<string, StatusDescriptor> = {
  * Fallstricke:
  *  - **Job-Erfolg ≠ Beleg-Erfolg.** Der Ingest-Handler wirft nicht; der Job
  *    wird `succeeded`, auch wenn der Beleg intern auf `failed` landete. Diese
- *    Achse und `beleg` sind entkoppelt.
+ *    Achse und `document_processing` sind entkoppelt.
  *  - `attempts` zählt beim Claim hoch, nicht beim Fehler — `max_attempts=3`
  *    bedeutet 3 Läufe, nicht 4.
  *  - Der Reaper schreibt beim Requeue eine `error`-Message. Ein Job in
@@ -514,9 +513,9 @@ const DISPATCH_STATE: Record<string, StatusDescriptor> = {
  * (`modules/source-docs/domain/document-form-labels.ts`), gleiche Quelle wie
  * das Python-Enum.
  *
- * Vierte und letzte Einordnungs-Achse des Belegs neben `beleg_kategorie`
- * (was als Nächstes passiert), `beleg_richtung` (ein- oder ausgehend) und
- * `dokumentgruppe` (einzeln oder Sammel-PDF). Sie stand als Einzige nicht in
+ * Vierte und letzte Einordnungs-Achse des Belegs neben `document_category`
+ * (was als Nächstes passiert), `document_direction` (ein- oder ausgehend) und
+ * `collection_kind` (einzeln oder Sammel-PDF). Sie stand als Einzige nicht in
  * der Registry — die Belegliste zeigte den Wert als Abzeichen ohne Achse
  * (L-37).
  *
@@ -528,7 +527,7 @@ const DISPATCH_STATE: Record<string, StatusDescriptor> = {
  *  - `original` ist mit 83 % der Normalfall und wird in Listen bewusst nicht
  *    gezeigt — der Normalfall ist keine Nachricht.
  */
-const BELEG_CHARAKTER: Record<string, StatusDescriptor> = {
+const DOCUMENT_CHARACTER: Record<string, StatusDescriptor> = {
   original: { label: "Normal-Beleg", kind: "neutral", description: "Berechnet eine Leistung — der Normalfall." },
   credit_note: { label: "Stornogutschrift", kind: "info", description: "Nimmt eine frühere Rechnung ganz oder teilweise zurück." },
   self_billing: { label: "§14-UStG-Gutschrift", kind: "info", description: "Der Leistungsempfänger rechnet ab — keine Rücknahme, sondern eine Rechnung aus der anderen Richtung." },
@@ -540,9 +539,9 @@ const BELEG_CHARAKTER: Record<string, StatusDescriptor> = {
  * Erledigung eines Belegs — `client_source_docs.completed_via`, plus zwei
  * Werte, die keine Spaltenwerte sind.
  *
- * Sie ist der Zustand, den **jede** Belegart trägt: die Achse `beleg`
+ * Sie ist der Zustand, den **jede** Belegart trägt: die Achse `document_processing`
  * (Verarbeitung) lebt am Rechnungs-Subtyp und hat für 16 % der Belege nie
- * einen Wert, `beleg_inbox` steht im Bestand bei 383 von 384 Belegen auf
+ * einen Wert, `document_inbox` steht im Bestand bei 383 von 384 Belegen auf
  * demselben Wert. „Ist der Beleg durch?" beantwortet nur diese Achse.
  *
  * Wertebereich: DB-CHECK `client_source_docs_completed_via_check`
@@ -570,7 +569,7 @@ const BELEG_CHARAKTER: Record<string, StatusDescriptor> = {
  *  - Bestand (2026-09-04): booking 171 · manual 77 · no_booking_required 26 ·
  *    superseded 7 · case_closed 1 · import 0.
  */
-const BELEG_ERLEDIGUNG: Record<string, StatusDescriptor> = {
+const DOCUMENT_COMPLETION: Record<string, StatusDescriptor> = {
   open: {
     label: "Offen",
     kind: "info",
@@ -632,7 +631,7 @@ const BELEG_ERLEDIGUNG: Record<string, StatusDescriptor> = {
  * Belegdatum gefunden. Das ist ein fachlicher Mangel, kein technischer
  * Abbruch, und deshalb `warning` und nicht `danger`.
  */
-const BELEG_HAENGER: Record<string, StatusDescriptor> = {
+const DOCUMENT_STUCK: Record<string, StatusDescriptor> = {
   wird_klassifiziert: { label: "wird klassifiziert", kind: "info", description: "Der Beleg wird gerade klassifiziert — es gibt noch keine Invoice-Zeile." },
   wird_extrahiert: { label: "wird extrahiert", kind: "info", description: "Die Grunddaten werden gerade extrahiert." },
   nicht_extrahiert: { label: "nicht extrahiert", kind: "danger", description: "Keine Extraktion vorhanden — es gibt keine Invoice-Zeile." },
@@ -670,7 +669,7 @@ const BELEG_HAENGER: Record<string, StatusDescriptor> = {
  *    seit `20260705113000` weg. Alter Code, der darauf filtert, matcht still
  *    nichts.
  */
-const SACHVERHALT_LIFECYCLE: Record<string, StatusDescriptor> = {
+const ACCOUNTING_CASE_LIFECYCLE: Record<string, StatusDescriptor> = {
   // Pseudowert, KEIN DB-Wert: der Sachverhalt existiert noch nicht, weil der
   // Beleg noch in der Pipeline steckt (`lifecycle_status IS NULL`). Kommt aus
   // dem Dashboard-KPI `countInPipeline` (`dashboard-queries.ts`) und wird dort
@@ -711,7 +710,7 @@ const SACHVERHALT_LIFECYCLE: Record<string, StatusDescriptor> = {
  *  - Bestandsfälle wurden auf `single`/`multiple` zurückgesetzt;
  *    `per_period` entsteht nur vorwärts.
  */
-const BELEGNUMMERN_MODUS: Record<string, StatusDescriptor> = {
+const DOCUMENT_NUMBER_MODE: Record<string, StatusDescriptor> = {
   single: { label: "Eine Belegnummer", kind: "info", description: "Genau EINE Nummer über den ganzen Vorgang — Einzelrechnung oder Dauersachverhalt mit Dauerrechnung. Ein zweiter Beleg mit abweichender Nummer wird abgelehnt." },
   per_period: { label: "Je Periode eine", kind: "info", description: "Dauersachverhalt ohne Dauerrechnung: jede Periode bringt eine eigene Rechnung mit eigener Nummer. Jede Zahlung braucht die entschiedene Nummer ihrer Periode." },
   multiple: { label: "Mehrere Belegnummern", kind: "warning", description: "Sammelzahlung, OPOS-Pool oder Mandantenstapel — mehrere Nummern nebeneinander. Ziel ist der Split in Einzelsachverhalte; ohne ausgeglichene Klammer schließt der Fall nicht." },
@@ -727,16 +726,16 @@ const BELEGNUMMERN_MODUS: Record<string, StatusDescriptor> = {
  * gesetzt → `no_booking_required`; jüngster journal_entry in
  * (proposed|accepted|posted) → dessen Status; sonst → `open`.
  *
- * ## Warum eine eigene Achse neben `sachverhalt` und `buchung`
+ * ## Warum eine eigene Achse neben `accounting_case` und `journal_entry`
  * Ein Sachverhalt kann mehrere Ereignisse tragen (Beleg UND Zahlung), und
- * kreditorisch gebucht braucht **jedes** seinen eigenen Satz. Der
+ * im Buchungsstil `creditor` braucht **jedes** seinen eigenen Satz. Der
  * Sachverhalts-Status sagt deshalb nichts darüber, ob eine bestimmte Zahlung
  * gebucht ist — steht derselbe Sachverhalt zweimal im Kontoauszug, ist unter
  * Umständen nur eine der beiden Zahlungen verbucht. Wo eine Zeile ein
  * Ereignis IST (Kontoauszug, Timeline), gehört diese Achse hin, nicht
- * `sachverhalt`.
+ * `accounting_case`.
  *
- * Von `buchung` unterscheidet sie sich am unteren Ende: dort gibt es kein
+ * Von `journal_entry` unterscheidet sie sich am unteren Ende: dort gibt es kein
  * „es existiert noch gar kein Satz", genau der Zustand ist hier der wichtige.
  *
  * Fallstrick: **`open` heißt fehlende Arbeit, nicht „in Ordnung".** Wer
@@ -744,7 +743,7 @@ const BELEGNUMMERN_MODUS: Record<string, StatusDescriptor> = {
  * `no_booking_required_reason` — sonst zählt das Ereignis dauerhaft als
  * unvollständig (Gate 3f, `unbooked_events` im Lauf-Abschluss).
  */
-const EREIGNIS_BUCHUNG: Record<string, StatusDescriptor> = {
+const EVENT_BOOKING: Record<string, StatusDescriptor> = {
   open: {
     label: "Buchung fehlt",
     kind: "warning",
@@ -830,7 +829,7 @@ const DISPOSITION: Record<string, StatusDescriptor> = {
  * Zustand einer Klärungsfrage (F105) — **berechnet** aus `answered_at` und
  * `deferred_until` (`clarificationState` in `domain/case.ts`).
  *
- * Nicht zu verwechseln mit der Achse `klaerung`: die sagt, ob eine Frage die
+ * Nicht zu verwechseln mit der Achse `clarification_severity`: die sagt, ob eine Frage die
  * Buchung blockiert (required/optional), diese sagt, wo die Frage steht.
  *
  * Fallstricke:
@@ -843,7 +842,7 @@ const DISPOSITION: Record<string, StatusDescriptor> = {
  *    offen. Der Termin ist dann nur Sicherheitsnetz.
  *  - Ab der dritten Verschiebung darf nur noch ein Mensch verschieben.
  */
-const KLAERUNG_STATUS: Record<string, StatusDescriptor> = {
+const CLARIFICATION_STATUS: Record<string, StatusDescriptor> = {
   open: { label: "Offen", kind: "warning", description: "Wartet auf eine Antwort und steht auf der Arbeitsliste." },
   deferred: { label: "Zurückgestellt", kind: "neutral", description: "Bewusst nicht jetzt dran — kommt am Wiedervorlage-Tag von selbst zurück. Nicht erledigt." },
   answered: { label: "Beantwortet", kind: "success", description: "Beantwortet oder als gegenstandslos aufgelöst." },
@@ -860,12 +859,12 @@ const KLAERUNG_STATUS: Record<string, StatusDescriptor> = {
  * (`core/db/clarification-open.ts`) — wer sie in einer Query selbst schreibt,
  * zählt Kommentare als offene Fragen.
  */
-const KLAERUNG_TYP: Record<string, StatusDescriptor> = {
+const CLARIFICATION_TYPE: Record<string, StatusDescriptor> = {
   question: { label: "Frage", kind: "info", description: "Erwartet eine Reaktion. Steht auf der Arbeitsliste, solange sie unbeantwortet und nicht zurückgestellt ist." },
   comment: { label: "Kommentar", kind: "neutral", description: "Kontext ohne Aktion — Merkposten, Begründung, Zwischenstand. Blockiert nichts und wird nie beantwortet." },
 };
 
-const KLAERUNG_SEVERITY: Record<string, StatusDescriptor> = {
+const CLARIFICATION_SEVERITY: Record<string, StatusDescriptor> = {
   required: { label: "Blockierend", kind: "warning", description: "Muss beantwortet werden, bevor gebucht werden kann." },
   optional: { label: "Optional", kind: "neutral", description: "Hilfreich, aber die Buchung kann auch ohne Antwort erfolgen." },
 };
@@ -889,7 +888,7 @@ const KLAERUNG_SEVERITY: Record<string, StatusDescriptor> = {
  *    keine Eskalation (bewusstes Restrisiko, im Code vermerkt).
  *  - `pending` entlastet das Buch-Gate, `due` und `escalated` nicht mehr.
  */
-const ERWARTUNG_REIFE: Record<string, StatusDescriptor> = {
+const EXPECTATION_MATURITY: Record<string, StatusDescriptor> = {
   pending: { label: "Läuft", kind: "neutral", description: "Die Frist läuft noch — normaler Lauf der Dinge, keine Arbeit." },
   due: { label: "Fällig", kind: "warning", description: "Die Frist ist verstrichen. Der Sachverhalt zählt wieder als offene Arbeit." },
   escalated: { label: "Eskaliert", kind: "danger", description: "Mehrfach überfällig — ein Vorbereitungslauf hat sie hochgestuft." },
@@ -905,7 +904,7 @@ const ERWARTUNG_REIFE: Record<string, StatusDescriptor> = {
  * erwartete Zahlung sind dieselbe Liste, nur andersherum — und genau diese
  * Liste braucht der Kontoauszugs-Abgleich zum Matching.
  */
-const ERWARTUNG_ART: Record<string, StatusDescriptor> = {
+const EXPECTATION_KIND: Record<string, StatusDescriptor> = {
   document: { label: "Beleg fehlt", kind: "warning", description: "Zu diesem Sachverhalt fehlt noch ein Beleg." },
   payment: { label: "Zahlung offen", kind: "info", description: "Die Buchung steht, die Zahlung ist noch nicht eingegangen bzw. geleistet." },
 };
@@ -951,7 +950,7 @@ const TRIAGE: Record<string, StatusDescriptor> = {
  *  - `open_item_carryover` ist kein Vorgang des Jahres, sondern ein
  *    übernommener offener Posten aus DATEV. Er trägt kein eigenes Dokument.
  */
-const EREIGNIS_ART: Record<string, StatusDescriptor> = {
+const EVENT_KIND: Record<string, StatusDescriptor> = {
   document_received: { label: "Beleg eingegangen", kind: "neutral", description: "Ein Dokument ist dem Sachverhalt zugeordnet worden." },
   payment_in: { label: "Zahlungseingang", kind: "neutral", description: "Geld ist auf einem Konto des Mandanten eingegangen." },
   payment_out: { label: "Zahlungsausgang", kind: "neutral", description: "Geld hat ein Konto des Mandanten verlassen." },
@@ -987,11 +986,11 @@ const EREIGNIS_ART: Record<string, StatusDescriptor> = {
  * Nicht verwechseln mit `acceptance_quality` (wie wurde angenommen) und
  * `origin` (woher kam die Zeile) — eigene Achsen an derselben Tabelle.
  */
-const BUCHUNG_STATUS: Record<string, StatusDescriptor> = {
+const JOURNAL_ENTRY_STATUS: Record<string, StatusDescriptor> = {
   proposed: { label: "Vorschlag", kind: "info", description: "Buchungsvorschlag des Agenten — wartet auf Freigabe, geht so noch nicht nach DATEV." },
   accepted: { label: "Freigegeben", kind: "success", description: "Vom Reviewer freigegeben und bereit für den DATEV-Export." },
   posted: { label: "Gebucht", kind: "success", description: "In DATEV festgeschrieben — nur noch stornierbar, nicht mehr änderbar." },
-  reversed: { label: "Storniert", kind: "neutral", description: "Durch eine Storno-Buchung aufgehoben." },
+  reversed: { label: "Zurückgezogen", kind: "neutral", description: "Gilt nicht mehr. Meist hat der Agent den Vorschlag zurückgezogen oder die Kanzlei ihn abgelehnt; seltener wurde eine freigegebene Buchung vor der Festschreibung storniert." },
 };
 
 /**
@@ -1008,7 +1007,7 @@ const BUCHUNG_STATUS: Record<string, StatusDescriptor> = {
  *  - `posted` (Status-Achse) zählt als `in_datev`: der Wert entsteht heute
  *    nur über den DATEV-Import und heißt „ist in DATEV bereits Ist".
  */
-const BUCHUNG_DATEV_STAGE: Record<string, StatusDescriptor> = {
+const JOURNAL_ENTRY_DATEV_STAGE: Record<string, StatusDescriptor> = {
   proposed: { label: "Vorschlag", kind: "info", description: "Buchungsvorschlag — wartet auf Freigabe durch die Kanzlei." },
   accepted: { label: "Freigegeben", kind: "success", description: "Von der Kanzlei freigegeben — steht für den nächsten DATEV-Export bereit." },
   exported: { label: "Exportiert", kind: "info", description: "An DATEV übergeben, aber dort noch nicht wiedergefunden. Export ist eine Behauptung — bestätigt ist die Buchung erst mit dem Abgleich." },
@@ -1030,7 +1029,7 @@ const BUCHUNG_DATEV_STAGE: Record<string, StatusDescriptor> = {
  *    unmarkiert.
  *  - `system_reversal` ist vorgesehen, der Flow existiert noch nicht.
  */
-const BUCHUNG_ORIGIN: Record<string, StatusDescriptor> = {
+const JOURNAL_ENTRY_ORIGIN: Record<string, StatusDescriptor> = {
   ai_proposed: { label: "KI-Vorschlag", kind: "info", description: "Vom Agenten vorgeschlagen und unverändert übernommen." },
   manual: { label: "Manuell", kind: "neutral", description: "Von Hand erfasst — oder ein Vorschlag, den jemand korrigiert hat." },
   recurring_rule: { label: "Regelwerk", kind: "info", description: "Vom Regelwerk wiederkehrender Buchungen erzeugt. Wird nicht nach DATEV exportiert." },
@@ -1051,7 +1050,7 @@ const BUCHUNG_ORIGIN: Record<string, StatusDescriptor> = {
  * Agenten noch vom Judge geschrieben und von niemandem gelesen; Altwerte
  * bleiben stehen.
  */
-const KONFIDENZ: Record<string, StatusDescriptor> = {
+const CONFIDENCE: Record<string, StatusDescriptor> = {
   green: { label: "Sicher", kind: "success", description: "Eindeutig belegt (Historie oder Vertrag)." },
   yellow: { label: "Plausibel", kind: "info", description: "Gut gestützt, aber nicht durch Historie oder Vertrag bestätigt." },
   orange: { label: "Unsicher", kind: "warning", description: "Bitte Konto und Steuerschlüssel prüfen." },
@@ -1084,9 +1083,9 @@ const JUDGE_VERDICT: Record<string, StatusDescriptor> = {
  * keinen Eintrag: dann wird gar kein Chip gezeigt.
  */
 const EXPORT_CASE: Record<string, StatusDescriptor> = {
-  exportiert: { label: "Exportiert", kind: "success", description: "Alle freigegebenen Buchungen sind in einem DATEV-Stapel." },
-  teilweise: { label: "Teilweise", kind: "warning", description: "Ein Teil der freigegebenen Buchungen wartet noch auf den Export." },
-  offen: { label: "Nicht exportiert", kind: "info", description: "Freigegeben, aber noch in keinem DATEV-Stapel." },
+  exported: { label: "Exportiert", kind: "success", description: "Alle freigegebenen Buchungen sind in einem DATEV-Stapel." },
+  partial: { label: "Teilweise", kind: "warning", description: "Ein Teil der freigegebenen Buchungen wartet noch auf den Export." },
+  open: { label: "Nicht exportiert", kind: "info", description: "Freigegeben, aber noch in keinem DATEV-Stapel." },
 };
 
 /**
@@ -1139,7 +1138,7 @@ const EXPORT_BUCKET: Record<string, StatusDescriptor> = {
  *  - `blocked` heißt „der letzte Übergangsversuch wurde abgelehnt", nicht
  *    „für immer fest": wird das Gate grün, geht es genau dort weiter.
  */
-const LAUF_OUTCOME: Record<string, StatusDescriptor> = {
+const RUN_OUTCOME: Record<string, StatusDescriptor> = {
   completed: { label: "Durchgelaufen", kind: "success", description: "Alle Teilschritte bis 4a grün — der Lauf hat mit finish_agent_run abgeschlossen und einen Übergabebericht hinterlassen." },
   incomplete: { label: "Unvollständig abgeschlossen", kind: "warning", description: "Abgeschlossen, aber mindestens ein Teilschritt trägt kein grünes Ergebnis — Arbeit für den nächsten Lauf oder einen Menschen." },
   superseded: { label: "Abgebrochen (Folgelauf)", kind: "warning", description: "Nie abgeschlossen; der Start des nächsten Laufs hat den Lauf automatisch geschlossen. Kein Bericht, keine Kennzahlen." },
@@ -1165,7 +1164,7 @@ const LAUF_OUTCOME: Record<string, StatusDescriptor> = {
  *    derselbe Schritt kann später `passed` sein (Gates sind zustandsbasiert).
  *  - `running` ist ein Pseudowert der UI für die offene Zeile — kein DB-Wert.
  */
-const LAUF_GATE: Record<string, StatusDescriptor> = {
+const RUN_GATE: Record<string, StatusDescriptor> = {
   passed: { label: "Bestanden", kind: "success", description: "Der Agent hat im Schritt gearbeitet und ihn grün verlassen." },
   auto_passed: { label: "Automatisch grün", kind: "success", description: "Nichts zu tun: der Server hat das Gate aus den Daten heraus als erfüllt gerechnet. Erledigt, nicht übersprungen." },
   blocked: { label: "Blockiert", kind: "danger", description: "Übergang abgelehnt — das Gate war zu diesem Zeitpunkt rot. Zweimal dasselbe Gate = Eskalation an den Menschen. Kein Endzustand: wird das Gate grün, geht es weiter." },
@@ -1196,7 +1195,7 @@ const LAUF_GATE: Record<string, StatusDescriptor> = {
  *  - `proposed → confirmed` ist der einzige implementierte Übergang, und er
  *    ist einbahnig.
  */
-const PARTNER_STATE: Record<string, StatusDescriptor> = {
+const BUSINESS_PARTNER_STATE: Record<string, StatusDescriptor> = {
   draft: { label: "Entwurf", kind: "neutral", description: "Angelegt, aber noch nicht ausgearbeitet." },
   proposed: { label: "Vorgeschlagen", kind: "warning", description: "Automatisch erkannt oder neu angelegt — wartet auf Bestätigung durch die Kanzlei." },
   confirmed: { label: "Bestätigt", kind: "success", description: "Geprüft und bebuchbar." },
@@ -1216,7 +1215,7 @@ const PARTNER_STATE: Record<string, StatusDescriptor> = {
  *  - `archived` gibt es seit dem Rename NICHT mehr. Code, der es schreibt,
  *    läuft in eine Constraint-Verletzung; Filter darauf sind No-ops.
  */
-const KONTO_STATUS: Record<string, StatusDescriptor> = {
+const LEDGER_ACCOUNT_STATUS: Record<string, StatusDescriptor> = {
   active: { label: "Aktiv", kind: "success", description: "Importiert oder bereits bebucht — steht für Buchungen bereit." },
   inactive: { label: "Inaktiv", kind: "neutral", description: "Angelegt, aber noch nie bebucht." },
 };
@@ -1235,7 +1234,7 @@ const KONTO_STATUS: Record<string, StatusDescriptor> = {
  *    Anlegen eine echte.
  *  - Der Bridge-Writeback (`setPersonalAccountDatev`) stellt auf `synced`.
  */
-const KONTO_DATEV_SYNC: Record<string, StatusDescriptor> = {
+const LEDGER_ACCOUNT_DATEV_SYNC: Record<string, StatusDescriptor> = {
   local_only: { label: "Nur in Ludwig", kind: "warning", description: "Ludwig kennt das Konto, DATEV noch nicht — der nächste Export legt es an (ggf. 89xxxx-Platzhalter)." },
   creation_pending: { label: "Anlage läuft", kind: "info", description: "Anlage an die DATEV-Bridge übergeben, Antwort steht aus." },
   synced: { label: "In DATEV", kind: "success", description: "Nummer (und ggf. DATEV-GUID) stehen — Writeback erledigt." },
@@ -1248,7 +1247,7 @@ const KONTO_DATEV_SYNC: Record<string, StatusDescriptor> = {
  * `20260509130000_rename_account_role_skr_class.sql`. Kein Status im engeren
  * Sinn, wird aber überall als farbiger Chip neben dem Status gezeigt.
  */
-const KONTO_TYP: Record<string, StatusDescriptor> = {
+const LEDGER_ACCOUNT_TYPE: Record<string, StatusDescriptor> = {
   general_ledger: { label: "Sachkonto", kind: "neutral", description: "Normales Sachkonto des Kontenrahmens." },
   creditor: { label: "Kreditor", kind: "info", description: "Personenkonto eines Lieferanten." },
   debtor: { label: "Debitor", kind: "info", description: "Personenkonto eines Kunden." },
@@ -1272,7 +1271,7 @@ const KONTO_TYP: Record<string, StatusDescriptor> = {
  * `shareholder` und `payroll_liability` tragen zulässig einen Saldo — sie
  * bewusst nicht als „Fehler" färben.
  */
-const VERRECHNUNGSKONTO: Record<string, StatusDescriptor> = {
+const CLEARING_ACCOUNT_TYPE: Record<string, StatusDescriptor> = {
   credit_card: {
     label: "Kreditkarte",
     kind: "info",
@@ -1341,7 +1340,7 @@ const VERRECHNUNGSKONTO: Record<string, StatusDescriptor> = {
  * RLS-Prüfung nach dem Annehmen der Einladung nicht. Die Autorisierung liest
  * die Mitgliedschaft; wer den Account-Status prüft, prüft das Falsche.
  */
-const BENUTZER_STATUS: Record<string, StatusDescriptor> = {
+const USER_STATUS: Record<string, StatusDescriptor> = {
   active: { label: "Aktiv", kind: "success", description: "Zugang eingerichtet und nutzbar." },
   invited: { label: "Eingeladen", kind: "warning", description: "Einladung verschickt, aber noch nicht angenommen." },
   disabled: { label: "Deaktiviert", kind: "neutral", description: "Zugang gesperrt." },
@@ -1351,7 +1350,7 @@ const BENUTZER_STATUS: Record<string, StatusDescriptor> = {
  * `platform_users.kind` — Art des Benutzerkontos. Wertebereich: `USER_KINDS`
  * (`modules/auth/domain/role.ts`), DB-CHECK `platform_users_kind_check`.
  */
-const BENUTZER_ART: Record<string, StatusDescriptor> = {
+const USER_KIND: Record<string, StatusDescriptor> = {
   tenant_user: { label: "Steuerberater", kind: "info", description: "Mitarbeiter der Kanzlei." },
   client_user: { label: "Mandant", kind: "neutral", description: "Zugang auf Mandantenseite — sieht nur das Mandantenportal." },
   platform_admin: { label: "Plattform-Admin", kind: "warning", description: "Vollzugriff über alle Kanzleien hinweg." },
@@ -1366,7 +1365,7 @@ const BENUTZER_ART: Record<string, StatusDescriptor> = {
  * Selbstheilung. Fehlt in manchen älteren Label-Maps, weshalb dort still
  * „unbekannt" erschien.
  */
-const ROLLE: Record<string, StatusDescriptor> = {
+const ROLE: Record<string, StatusDescriptor> = {
   platform_admin: { label: "Plattform-Admin", kind: "warning", description: "Vollzugriff über alle Kanzleien hinweg." },
   tenant_user: { label: "Steuerberater", kind: "info", description: "Mitarbeiter der Kanzlei." },
   client_user: { label: "Mandant", kind: "neutral", description: "Zugang auf Mandantenseite." },
@@ -1387,7 +1386,7 @@ const ROLLE: Record<string, StatusDescriptor> = {
  *  - Lesende Pfade filtern hart auf `open` und liefern ohne offenen Zyklus
  *    LEER statt zu fehlern — eine häufige Ursache für „alles weg".
  */
-const ZYKLUS: Record<string, StatusDescriptor> = {
+const BOOKING_CYCLE: Record<string, StatusDescriptor> = {
   open: { label: "Offen", kind: "success", description: "Buchungsjahr ist offen — es kann gebucht werden." },
   closed: { label: "Geschlossen", kind: "neutral", description: "Abgeschlossenes Jahr, in der Regel importierter Bestand. Buchungen sind gesperrt." },
 };
@@ -1425,7 +1424,7 @@ const INTEGRATION: Record<string, StatusDescriptor> = {
  * `booking_mode` als binär behandelt („bucht bei Zahlung, sonst Sollstellung"),
  * ist ein stiller Bug — bei `match_only` entsteht GAR KEIN Vorschlag.
  */
-const REGEL_MODUS: Record<string, StatusDescriptor> = {
+const RULE_MODE: Record<string, StatusDescriptor> = {
   book_on_payment: { label: "Bei Zahlung", kind: "success", description: "Gebucht wird erst, wenn die Zahlung eintrifft — Aufwand/Erlös direkt gegen die Bank." },
   accrue_then_settle: { label: "Sollstellung", kind: "info", description: "Zur Fälligkeit wird sollgestellt; die Zahlung gleicht später das Personenkonto aus." },
   match_only: { label: "Nur zuordnen", kind: "neutral", description: "Die Zahlung wird nur dem Sachverhalt zugeordnet — es entsteht KEIN Buchungsvorschlag." },
@@ -1451,7 +1450,7 @@ const REGEL_MODUS: Record<string, StatusDescriptor> = {
  *    eine neue Konvention zum selben Thema ersetzt die alte, beide bleiben
  *    `active`, aber nur die neue ist die gültige.
  */
-const KONVENTION_STATUS: Record<string, StatusDescriptor> = {
+const CONVENTION_STATUS: Record<string, StatusDescriptor> = {
   pending_approval: { label: "Wartet auf Freigabe", kind: "warning", description: "Kanzlei-Konvention: gilt für alle Mandanten der Kanzlei und wirkt erst, wenn ein Mensch sie freigibt. Der Agent sieht sie, wendet sie aber nicht an." },
   active: { label: "Gilt", kind: "success", description: "Wird beim Buchen angewendet — es sei denn, eine Mandantenregel zum selben Thema sticht sie." },
   archived: { label: "Archiviert", kind: "neutral", description: "Erledigt: auffindbar, aber außerhalb dessen, was der Agent beim Buchen liest." },
@@ -1470,7 +1469,7 @@ const KONVENTION_STATUS: Record<string, StatusDescriptor> = {
  * Fallstrick: `derived_from_bookings` ohne N ist wertlos; der DB-CHECK
  * verlangt `derived_from_count` genau dort.
  */
-const KONVENTION_HERKUNFT: Record<string, StatusDescriptor> = {
+const CONVENTION_ORIGIN: Record<string, StatusDescriptor> = {
   onboarding: { label: "Im Onboarding erfasst", kind: "success", description: "Ein Mensch hat die Frage im Onboarding beantwortet — der primäre Erfassungsort." },
   tenant_confirmed: { label: "Von der Kanzlei bestätigt", kind: "success", description: "Aus einer beantworteten Klärung destilliert oder ausdrücklich freigegeben." },
   derived_from_bookings: { label: "Aus Buchungen abgeleitet", kind: "info", description: "Aus einer Menge gleichartiger Buchungen erschlossen; die Anzahl steht daneben." },
@@ -1487,7 +1486,7 @@ const KONVENTION_HERKUNFT: Record<string, StatusDescriptor> = {
  * es irgendwann als neues Tool oder geänderten Ablauf. `prepared` = Spec `F<n>`
  * oder `P<n>` geschrieben; `accepted` = umgesetzt, gesetzt von dem, der umsetzt.
  */
-const PRODUKTBEFUND: Record<string, StatusDescriptor> = {
+const PRODUCT_FINDING: Record<string, StatusDescriptor> = {
   open: { label: "Liegt vor", kind: "info", description: "Eingereicht, noch nicht gesichtet." },
   backlog: { label: "Im Backlog", kind: "warning", description: "Gesichtet und angenommen, aber noch nicht umgesetzt. Wann er drankommt, sagt die Dringlichkeit — nicht der Status." },
   prepared: { label: "Vorbereitet", kind: "info", description: "Spec (F<n>) oder P-Eintrag geschrieben, Entscheidungen getroffen — wartet auf die Umsetzung. Übernommen setzt, wer sie umsetzt." },
@@ -1507,7 +1506,7 @@ const PRODUKTBEFUND: Record<string, StatusDescriptor> = {
  * Farbe kodiert die Kritikalität, nicht die Reihenfolge — dieselbe Skala wie
  * überall sonst (Fehler → Warnung → Hinweis → beiläufig).
  */
-const PRODUKTBEFUND_PRIO: Record<string, StatusDescriptor> = {
+const PRODUCT_FINDING_PRIORITY: Record<string, StatusDescriptor> = {
   critical: { label: "Sehr hoch", kind: "danger", description: "Blockiert den Buchungslauf oder erzeugt falsche Buchungen — vor allem anderen." },
   high: { label: "Hoch", kind: "warning", description: "Kostet in jedem Lauf Zeit oder Genauigkeit — kommt als nächstes dran." },
   medium: { label: "Mittel", kind: "info", description: "Echter Mangel, aber mit Umweg lebbar." },
@@ -1526,7 +1525,7 @@ const PRODUKTBEFUND_PRIO: Record<string, StatusDescriptor> = {
  * Review-Abschluss `ready`, jeder Abbruch `failed`.
  *
  * Fallstricke:
- *  - **Nicht mit dem Verdict verwechseln** (`mandant_onboarding_verdict`):
+ *  - **Nicht mit dem Verdict verwechseln** (`client_onboarding_verdict`):
  *    der ist die abgeleitete Agenten-Sicht inkl. Readiness, das hier der rohe
  *    Fortschritt.
  *  - **Kein Auto-Retry.** Weder `failed` noch ein in `processing` hängen
@@ -1537,7 +1536,7 @@ const PRODUKTBEFUND_PRIO: Record<string, StatusDescriptor> = {
  *  - `ready` ⇄ `review`: ein Re-Onboarding wirft den Mandanten zurück in den
  *    Review, der Zustand ist also nicht terminal.
  */
-const MANDANT_ONBOARDING: Record<string, StatusDescriptor> = {
+const CLIENT_ONBOARDING: Record<string, StatusDescriptor> = {
   created: { label: "Angelegt", kind: "neutral", description: "Mandant existiert in Ludwig, das Onboarding hat noch nicht begonnen — wartet auf den nächsten Bridge-Poll." },
   importing: { label: "Daten werden geholt", kind: "info", description: "Die Bridge lädt Stammdaten, Konten und Buchungshistorie aus DATEV." },
   processing: { label: "Wird aufbereitet", kind: "info", description: "Die Onboarding-Pipeline verarbeitet die geladenen Daten. Bleibt sie hängen, hilft nur ein manueller Neustart — von selbst läuft nichts weiter." },
@@ -1566,7 +1565,7 @@ const MANDANT_ONBOARDING: Record<string, StatusDescriptor> = {
  *    Kontenplan kein Befund, sondern der Zwischenstand. Blocker und Warnungen
  *    reisen trotzdem mit — sie sind nur noch kein Endergebnis.
  */
-const MANDANT_ONBOARDING_VERDICT: Record<string, StatusDescriptor> = {
+const CLIENT_ONBOARDING_VERDICT: Record<string, StatusDescriptor> = {
   onboarded: { label: "Onboardet", kind: "success", description: "Onboarding abgeschlossen — der Mandant ist buchbar." },
   running: { label: "Läuft gerade", kind: "info", description: "Der Onboarding-Lauf ist unterwegs (Import oder Verarbeitung). Blocker und Warnungen sind ein Zwischenstand, kein Ergebnis — später nochmal fragen." },
   needs_human: { label: "Mensch nötig", kind: "warning", description: "Kein Fehler, aber jemand muss draufschauen: entweder steht die Review-Freigabe aus oder die Konfiguration hat Hinweise." },
@@ -1583,7 +1582,7 @@ const MANDANT_ONBOARDING_VERDICT: Record<string, StatusDescriptor> = {
  * es beendet nur die Kontoauszugs-Anforderung ab dem Stichtag. Alte Auszüge
  * und Buchungen des Kontos bleiben vollständig zählbar.
  */
-const ZAHLUNGSWEG: Record<string, StatusDescriptor> = {
+const PAYMENT_METHOD: Record<string, StatusDescriptor> = {
   aktiv: { label: "aktiv", kind: "success", description: "Konto zählt für die Bankdeckung, Auszüge werden angefordert." },
   abgeschaltet: { label: "abgeschaltet", kind: "neutral", description: "`valid_until` abgelaufen — keine Kontoauszugs-Anforderung mehr." },
 };
@@ -1600,7 +1599,7 @@ const ZAHLUNGSWEG: Record<string, StatusDescriptor> = {
  * Antwort auf „warum ist der hier zweimal": derselbe DATEV-Mandant mit
  * Stichtag, Export gesperrt.
  */
-const MANDANT_BETRIEB: Record<string, StatusDescriptor> = {
+const CLIENT_OPERATION: Record<string, StatusDescriptor> = {
   aktiv: { label: "aktiv", kind: "success", description: "Agent und Bridge-Sync laufen normal." },
   stillgelegt: { label: "stillgelegt", kind: "neutral", description: "Daten bleiben erhalten, aber kein Agentenzugriff und kein Sync." },
   replay: { label: "Replay", kind: "info", description: "Experiment-Stand desselben DATEV-Mandanten mit Stichtag — Export gesperrt." },
@@ -1620,7 +1619,7 @@ const MANDANT_BETRIEB: Record<string, StatusDescriptor> = {
  *  - `nicht_uebernehmbar` heißt nicht „kommt nie" — der Fall kann später über
  *    den Beleg-Weg als Dauerrechnung entstehen.
  */
-const DAUERSACHVERHALT_UEBERNAHME: Record<string, StatusDescriptor> = {
+const RECURRING_CASE_ADOPTION: Record<string, StatusDescriptor> = {
   uebernehmen: { label: "übernehmen", kind: "success", description: "Vorselektiert — die Freigabe legt Dauersachverhalt und Regel an." },
   bereits_angelegt: { label: "bereits angelegt", kind: "info", description: "Eine Regel mit dieser Belegnummer existiert schon (Re-Onboarding) — wird übersprungen." },
   beendet_erkannt: { label: "beendet erkannt", kind: "neutral", description: "Lücke von drei Intervallen oder mehr zum jüngsten festgeschriebenen Monat — wird nicht angelegt." },
@@ -1653,7 +1652,7 @@ const TOKEN: Record<string, StatusDescriptor> = {
  * Auszug im Zeitraum, ist das bei `erwartet*` ein Fehler und bei `keine*`
  * nur ein Hinweis — dieselbe Lücke, zwei Bedeutungen.
  */
-const KONTOAUSZUG_ERWARTUNG: Record<string, StatusDescriptor> = {
+const STATEMENT_EXPECTATION: Record<string, StatusDescriptor> = {
   erwartet: { label: "Erwartet", kind: "success", description: "Abgeleitet: das Konto ist bebucht und seine IBAN steht als Bankverbindung in den DATEV-Stammdaten. Fehlt der Auszug im Zeitraum, ist Gate 1a rot." },
   erwartet_hand: { label: "Erwartet (Hand)", kind: "success", description: "Ein Mensch hat die Erwartung im Stammdaten-Formular gesetzt — der nächste DATEV-Abgleich lässt sie stehen." },
   keine: { label: "Keine", kind: "neutral", description: "Abgeleitet: keine IBAN in den DATEV-Bankverbindungen oder nie bebucht. Ein fehlender Auszug ist hier nur ein Hinweis." },
@@ -1669,7 +1668,7 @@ const KONTOAUSZUG_ERWARTUNG: Record<string, StatusDescriptor> = {
  * nicht mehr ist — beim Blättern auf einen anderen Stichtag wechselt
  * derselbe Posten die Stufe, ohne dass sich etwas geändert hat.
  */
-const OPOS_AUSGLEICH: Record<string, StatusDescriptor> = {
+const OPEN_ITEM_SETTLEMENT: Record<string, StatusDescriptor> = {
   offen: { label: "offen", kind: "warning", description: "Bis heute nicht ausgeglichen." },
   spaeter_ausgeglichen: { label: "nach Stichtag ausgeglichen", kind: "neutral", description: "Zum Stichtag offen, inzwischen ausgeglichen." },
 };
@@ -1682,7 +1681,7 @@ const OPOS_AUSGLEICH: Record<string, StatusDescriptor> = {
  * kein eigener Zustand der Buchung, sondern das Ergebnis dieser Reihenfolge.
  * Dieselbe Rechnung ist in einer anderen Klammer gedeckt.
  */
-const OPOS_ZEILENART: Record<string, StatusDescriptor> = {
+const OPEN_ITEM_LINE_KIND: Record<string, StatusDescriptor> = {
   sollstellung: { label: "Sollstellung", kind: "neutral", description: "Rechnung oder Rate — erhöht den offenen Rest; bereits getilgt." },
   sollstellung_offen: { label: "Sollstellung offen", kind: "warning", description: "Rechnung oder Rate, die durch die bisherigen Zahlungen der Klammer noch nicht gedeckt ist (älteste zuerst getilgt)." },
   zahlung: { label: "Zahlung", kind: "success", description: "Ausgleich oder Zahlung der Kanzlei — mindert den offenen Rest." },
@@ -1701,7 +1700,7 @@ const OPOS_ZEILENART: Record<string, StatusDescriptor> = {
  * Sachverhalts-Nummer — die kann auch an einer Buchung stehen, die Ludwig nie
  * geschrieben hat.
  */
-const DATEV_VERKNUEPFUNG: Record<string, StatusDescriptor> = {
+const DATEV_LINK: Record<string, StatusDescriptor> = {
   opos_source: { label: "Quelle OPOS-Vortrag", kind: "neutral", description: "Diese Spiegel-Buchung ist die Sollstellung des offenen Postens." },
   link_invoice: { label: "Klammer: Rechnung", kind: "neutral", description: "Rechnungsseite der Ausgleichs-Zuordnung (F77)." },
   link_payment: { label: "Klammer: Zahlung", kind: "neutral", description: "Zahlungsseite der Ausgleichs-Zuordnung (F77)." },
@@ -1718,7 +1717,7 @@ const DATEV_VERKNUEPFUNG: Record<string, StatusDescriptor> = {
  * „für diesen Sachverhalt fehlt die Grundlage" — deshalb `neutral` und nicht
  * `info`. Kein Check ist ein Blocker; auch `warn` hält nichts auf.
  */
-const PLAUSIBILITAET: Record<string, StatusDescriptor> = {
+const PLAUSIBILITY: Record<string, StatusDescriptor> = {
   ok: { label: "in Ordnung", kind: "success", description: "Der Check greift und findet nichts zu beanstanden." },
   warn: { label: "prüfen", kind: "warning", description: "Befund — kein Blocker, aber jemand sollte hinschauen." },
   info: { label: "nicht anwendbar", kind: "neutral", description: "Für diesen Sachverhalt fehlt die Grundlage, etwa ein Personenkonto oder ein OPOS-Anker." },
@@ -1735,7 +1734,7 @@ const PLAUSIBILITAET: Record<string, StatusDescriptor> = {
  * Alle Werte tragen `neutral`: die Quelle sagt, woher die Nummer kommt, nicht
  * ob sie richtig ist (V6).
  */
-const BELEGNUMMER_QUELLE: Record<string, StatusDescriptor> = {
+const DOCUMENT_NUMBER_SOURCE: Record<string, StatusDescriptor> = {
   datev_correction: { label: "in DATEV korrigiert", kind: "neutral", description: "Jemand hat die Nummer in DATEV richtiggestellt — die stärkste Quelle." },
   opos_anchor: { label: "OPOS-Anker (DATEV)", kind: "neutral", description: "Aus dem offenen Posten in DATEV übernommen." },
   mirror_ref: { label: "DATEV-Spiegel", kind: "neutral", description: "Aus einer gespiegelten DATEV-Buchung." },
@@ -1787,7 +1786,7 @@ const BRIDGE_DATEV: Record<string, StatusDescriptor> = {
  * „für diesen Beleg ohne Bedeutung" ist erledigt. Nur `unknown` blockiert
  * eine Regel, die den Fakt braucht.
  */
-const VST_FAKT: Record<string, StatusDescriptor> = {
+const INPUT_TAX_FACT: Record<string, StatusDescriptor> = {
   yes: { label: "Ja", kind: "success", description: "Der Fakt liegt vor." },
   no: { label: "Nein", kind: "danger", description: "Der Fakt liegt nicht vor." },
   uncertain: { label: "Unsicher", kind: "warning", description: "Widersprüchliche Signale — ein Mensch klärt." },
@@ -1797,13 +1796,13 @@ const VST_FAKT: Record<string, StatusDescriptor> = {
 
 /**
  * Ergebnis einer Katalog-Regel der Vorsteuer-Beurteilung — **berechnet,
- * ephemer**, maschinelle Auswertung über den Einzelfakten (`VST_FAKT`).
+ * ephemer**, maschinelle Auswertung über den Einzelfakten (`INPUT_TAX_FACT`).
  *
  * Fallstrick: `unknown` heißt hier „nicht ermittelbar", nicht „egal" — ein
  * Pflicht-Fakt fehlt, und die Regel ist vor dem Vorsteuerabzug zu klären.
  * Nur `fail` sperrt den Steuerschlüssel und blockt den Submit.
  */
-const VST_REGEL: Record<string, StatusDescriptor> = {
+const INPUT_TAX_RULE: Record<string, StatusDescriptor> = {
   pass: { label: "Bestanden", kind: "success", description: "Regel erfüllt — kein Hindernis." },
   fail: { label: "Verletzt", kind: "danger", description: "Vorsteuer-Schlüssel gesperrt, der Submit blockt." },
   unknown: { label: "Nicht ermittelbar", kind: "warning", description: "Ein Pflicht-Fakt fehlt — vor dem Vorsteuerabzug klären." },
@@ -1904,7 +1903,7 @@ const READINESS: Record<string, StatusDescriptor> = {
  * grünes Häkchen für die acht und schwieg über den Rest, obwohl allein
  * `beyond_bookings` 328 von 1281 Zeilen trägt (L-57).
  *
- * Die acht Treffer-Stufen sind nach fallender Sicherheit geordnet: `beleg`
+ * Die acht Treffer-Stufen sind nach fallender Sicherheit geordnet: `document_processing`
  * ist ein Treffer über die Belegnummer, `residual` ein Rest, der nach Abzug
  * aller anderen übrig blieb. Sie tragen trotzdem alle `success` — getroffen
  * ist getroffen; wie schwierig es war, sagt das Label.
@@ -2004,7 +2003,7 @@ const MIRROR_MATCH: Record<string, StatusDescriptor> = {
  * Anforderungs-Flag `client_fiscal_years.datev_resync_requested_at`).
  * `requested` ist abgeleitet: Flag gesetzt, aber noch kein Lauf gestartet.
  */
-const ABGLEICH_LAUF: Record<string, StatusDescriptor> = {
+const RECONCILIATION_RUN: Record<string, StatusDescriptor> = {
   requested: {
     label: "angefordert",
     kind: "info",
@@ -2038,7 +2037,7 @@ const ABGLEICH_LAUF: Record<string, StatusDescriptor> = {
  * Der Übergang zum Agenten ist eine **menschliche Freigabe** (F177): „Belege
  * vollständig" übergibt den Zyklus, kein Lauf greift ihn von selbst auf.
  */
-const ZYKLUS_STAPEL: Record<string, StatusDescriptor> = {
+const EXPORT_BATCH: Record<string, StatusDescriptor> = {
   agent: {
     label: "Beim Agenten",
     kind: "info",
@@ -2114,7 +2113,7 @@ const ZYKLUS_STAPEL: Record<string, StatusDescriptor> = {
  * deshalb `true`/`false`, damit die technische Anzeige am Chip dem DB-Wert
  * entspricht. Aufrufer übergeben `String(isCommitted)`.
  */
-const STAPEL_COMMIT: Record<string, StatusDescriptor> = {
+const BATCH_COMMIT: Record<string, StatusDescriptor> = {
   false: {
     label: "offen",
     kind: "info",
@@ -2131,7 +2130,7 @@ const STAPEL_COMMIT: Record<string, StatusDescriptor> = {
  * DATEV-`inspection_status` je Stapel (Prüfungsergebnis aus
  * `accounting-sequences`). `not_specified`/NULL = keine Angabe.
  */
-const DATEV_PRUEFUNG: Record<string, StatusDescriptor> = {
+const DATEV_CHECK: Record<string, StatusDescriptor> = {
   not_specified: {
     label: "keine Angabe",
     kind: "neutral",
@@ -2161,75 +2160,75 @@ const DATEV_PRUEFUNG: Record<string, StatusDescriptor> = {
 };
 
 export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor>> = {
-  beleg: BELEG_PROCESSING,
-  beleg_stage: BELEG_STAGE,
-  beleg_charakter: BELEG_CHARAKTER,
-  beleg_erledigung: BELEG_ERLEDIGUNG,
-  beleg_haenger: BELEG_HAENGER,
-  beleg_inbox: BELEG_INBOX,
-  beleg_kategorie: BELEG_KATEGORIE,
-  dokumentgruppe: DOKUMENTGRUPPE,
-  beleg_richtung: BELEG_RICHTUNG,
+  document_processing: DOCUMENT_PROCESSING,
+  document_stage: DOCUMENT_STAGE,
+  document_character: DOCUMENT_CHARACTER,
+  document_completion: DOCUMENT_COMPLETION,
+  document_stuck: DOCUMENT_STUCK,
+  document_inbox: DOCUMENT_INBOX,
+  document_category: DOCUMENT_CATEGORY,
+  collection_kind: COLLECTION_KIND,
+  document_direction: DOCUMENT_DIRECTION,
   job: JOB_STATUS,
   upload: UPLOAD_PHASE,
   dispatch: DISPATCH_STATE,
-  sachverhalt: SACHVERHALT_LIFECYCLE,
-  ereignis_art: EREIGNIS_ART,
-  belegnummern_modus: BELEGNUMMERN_MODUS,
-  ereignis: EREIGNIS_BUCHUNG,
+  accounting_case: ACCOUNTING_CASE_LIFECYCLE,
+  event_kind: EVENT_KIND,
+  document_number_mode: DOCUMENT_NUMBER_MODE,
+  event_booking: EVENT_BOOKING,
   disposition: DISPOSITION,
-  klaerung: KLAERUNG_SEVERITY,
-  klaerung_status: KLAERUNG_STATUS,
-  klaerung_typ: KLAERUNG_TYP,
-  erwartung: ERWARTUNG_REIFE,
-  erwartung_art: ERWARTUNG_ART,
+  clarification_severity: CLARIFICATION_SEVERITY,
+  clarification: CLARIFICATION_STATUS,
+  clarification_type: CLARIFICATION_TYPE,
+  expectation_maturity: EXPECTATION_MATURITY,
+  expectation_kind: EXPECTATION_KIND,
   triage: TRIAGE,
-  buchung: BUCHUNG_STATUS,
-  buchung_datev: BUCHUNG_DATEV_STAGE,
-  buchung_origin: BUCHUNG_ORIGIN,
-  konfidenz: KONFIDENZ,
+  journal_entry: JOURNAL_ENTRY_STATUS,
+  journal_entry_datev_stage: JOURNAL_ENTRY_DATEV_STAGE,
+  journal_entry_origin: JOURNAL_ENTRY_ORIGIN,
+  confidence: CONFIDENCE,
   judge: JUDGE_VERDICT,
   export_case: EXPORT_CASE,
   export_bucket: EXPORT_BUCKET,
-  zyklus_stapel: ZYKLUS_STAPEL,
-  lauf: LAUF_OUTCOME,
-  lauf_gate: LAUF_GATE,
-  partner: PARTNER_STATE,
-  konto: KONTO_STATUS,
-  konto_datev_sync: KONTO_DATEV_SYNC,
-  konto_typ: KONTO_TYP,
-  verrechnungskonto: VERRECHNUNGSKONTO,
-  benutzer: BENUTZER_STATUS,
-  benutzer_art: BENUTZER_ART,
-  rolle: ROLLE,
-  zyklus: ZYKLUS,
-  regel_modus: REGEL_MODUS,
+  export_batch: EXPORT_BATCH,
+  run_outcome: RUN_OUTCOME,
+  run_gate: RUN_GATE,
+  business_partner: BUSINESS_PARTNER_STATE,
+  ledger_account: LEDGER_ACCOUNT_STATUS,
+  ledger_account_datev_sync: LEDGER_ACCOUNT_DATEV_SYNC,
+  ledger_account_type: LEDGER_ACCOUNT_TYPE,
+  clearing_account_type: CLEARING_ACCOUNT_TYPE,
+  user: USER_STATUS,
+  user_kind: USER_KIND,
+  role: ROLE,
+  booking_cycle: BOOKING_CYCLE,
+  rule_mode: RULE_MODE,
   integration: INTEGRATION,
-  konvention: KONVENTION_STATUS,
-  konvention_herkunft: KONVENTION_HERKUNFT,
-  produktbefund: PRODUKTBEFUND,
-  produktbefund_prio: PRODUKTBEFUND_PRIO,
-  mandant_onboarding: MANDANT_ONBOARDING,
-  mandant_onboarding_verdict: MANDANT_ONBOARDING_VERDICT,
+  convention: CONVENTION_STATUS,
+  convention_origin: CONVENTION_ORIGIN,
+  product_finding: PRODUCT_FINDING,
+  product_finding_priority: PRODUCT_FINDING_PRIORITY,
+  client_onboarding: CLIENT_ONBOARDING,
+  client_onboarding_verdict: CLIENT_ONBOARDING_VERDICT,
   bank_match_stage: BANK_MATCH_STAGE,
   mirror_match: MIRROR_MATCH,
-  abgleich_lauf: ABGLEICH_LAUF,
-  stapel_commit: STAPEL_COMMIT,
-  datev_pruefung: DATEV_PRUEFUNG,
-  kontoauszug_erwartung: KONTOAUSZUG_ERWARTUNG,
-  opos_ausgleich: OPOS_AUSGLEICH,
-  opos_zeilenart: OPOS_ZEILENART,
-  datev_verknuepfung: DATEV_VERKNUEPFUNG,
-  plausibilitaet: PLAUSIBILITAET,
-  belegnummer_quelle: BELEGNUMMER_QUELLE,
-  zahlungsweg: ZAHLUNGSWEG,
-  mandant_betrieb: MANDANT_BETRIEB,
-  dauersachverhalt_uebernahme: DAUERSACHVERHALT_UEBERNAHME,
+  reconciliation_run: RECONCILIATION_RUN,
+  batch_commit: BATCH_COMMIT,
+  datev_check: DATEV_CHECK,
+  statement_expectation: STATEMENT_EXPECTATION,
+  open_item_settlement: OPEN_ITEM_SETTLEMENT,
+  open_item_line_kind: OPEN_ITEM_LINE_KIND,
+  datev_link: DATEV_LINK,
+  plausibility: PLAUSIBILITY,
+  document_number_source: DOCUMENT_NUMBER_SOURCE,
+  payment_method: PAYMENT_METHOD,
+  client_operation: CLIENT_OPERATION,
+  recurring_case_adoption: RECURRING_CASE_ADOPTION,
   token: TOKEN,
   actor_kind: ACTOR_KIND,
   bridge_datev: BRIDGE_DATEV,
-  vst_fakt: VST_FAKT,
-  vst_regel: VST_REGEL,
+  input_tax_fact: INPUT_TAX_FACT,
+  input_tax_rule: INPUT_TAX_RULE,
   log_level: LOG_LEVEL,
   health: HEALTH,
   readiness: READINESS,
@@ -2274,12 +2273,12 @@ export function axisLegend(
 /** Erreichte Pipeline-Stufe (`processing_stage`) auflösen — nur Beleg. */
 export function resolveStage(stage: string | null | undefined): StatusDescriptor | null {
   if (!stage) return null;
-  return resolveStatus("beleg_stage", stage);
+  return resolveStatus("document_stage", stage);
 }
 
 /**
  * Die Stufen, die ein Fortschrittsbalken als Knoten zeigt. Bewusst NICHT alle
- * Werte von `beleg_stage`: `extracted` ist eine Onboarding-Zwischenstufe des
+ * Werte von `document_stage`: `extracted` ist eine Onboarding-Zwischenstufe des
  * Light-Passes und `proposed` eine historische Endstufe — beide bekommen
  * keinen eigenen Knoten, sonst zeigt der normale Beleg-Flow Phasen, die er
  * nie durchläuft.
@@ -2328,13 +2327,13 @@ export function resolveEffectiveBelegStatus(
   lifecycleStatus: string | null | undefined,
 ): (StatusDescriptor & { value: string }) | null {
   if (processingStatus === "failed") {
-    return { value: "failed", ...resolveStatus("beleg", "failed") };
+    return { value: "failed", ...resolveStatus("document_processing", "failed") };
   }
   if (lifecycleStatus) {
-    return { value: lifecycleStatus, ...resolveStatus("sachverhalt", lifecycleStatus) };
+    return { value: lifecycleStatus, ...resolveStatus("accounting_case", lifecycleStatus) };
   }
   if (processingStatus) {
-    return { value: processingStatus, ...resolveStatus("beleg", processingStatus) };
+    return { value: processingStatus, ...resolveStatus("document_processing", processingStatus) };
   }
   return null;
 }
@@ -2376,7 +2375,7 @@ export function resolveEventBookingState(
           : input.planned
             ? "planned"
             : "open";
-  const desc = resolveStatus("ereignis", value);
+  const desc = resolveStatus("event_booking", value);
   // Die hinterlegte Begründung schlägt den generischen Erklärtext — sie ist
   // die eigentliche Antwort auf „warum wird hier nicht gebucht?".
   return value === "no_booking_required" && input.noBookingRequiredReason
@@ -2454,8 +2453,8 @@ export interface StateMachine {
  *
  * ## Was hier NICHT steht
  * Die 45 Achsen, die keinen Prozess abbilden. Sie sagen, *was* etwas ist
- * (`beleg_kategorie`, `actor_kind`) oder werden bei jedem Aufruf neu gerechnet
- * (`konfidenz`, `mahnstufe`) — beides hat keine Übergänge, weil sich nichts
+ * (`document_category`, `actor_kind`) oder werden bei jedem Aufruf neu gerechnet
+ * (`confidence`, `mahnstufe`) — beides hat keine Übergänge, weil sich nichts
  * bewegt. Sie werden Klassen und ziehen in eine eigene Datei um (F151).
  * Eine fehlende Maschine ist deshalb **keine** automatische Lücke; offen sind
  * heute nur die dreizehn kurzen Achsen aus Rang 3 (Owner 2026-09-07:
@@ -2465,27 +2464,27 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
   /* ── Beleg ──────────────────────────────────────────────────────────── */
 
   document_processing: {
-    axis: "beleg",
+    axis: "document_processing",
     description:
       "Der Weg eines Belegs durch die Verarbeitung — EIN Prozess über drei Spalten. " +
-      "`beleg_inbox` (Supertyp, jede Belegart) läuft zuerst, `beleg` (Rechnungs-Subtyp) danach, " +
-      "und `beleg_stage` ist die Position *innerhalb* von `in_progress`, kein eigener Weg. " +
+      "`document_inbox` (Supertyp, jede Belegart) läuft zuerst, `document_processing` (Rechnungs-Subtyp) danach, " +
+      "und `document_stage` ist die Position *innerhalb* von `in_progress`, kein eigener Weg. " +
       "Dass die Aufteilung künstlich ist, zeigt `resolveEffectiveBelegStatus`: die Funktion " +
       "existiert nur, um zwei Achsen für einen einzigen Chip wieder zusammenzurechnen (F151).",
     transitions: [
       // — Eingang, Supertyp `client_source_docs.status` —
-      { axis: "beleg_inbox", from: null, to: "pending_classification", trigger: "document_uploaded", label: "Datei hochgeladen", by: "user" },
-      { axis: "beleg_inbox", from: "pending_classification", to: "classified", trigger: "classification_succeeded", label: "Klassifikator hat die Dokumentart erkannt", by: "system" },
-      { axis: "beleg_inbox", from: "pending_classification", to: "classification_failed", trigger: "classification_failed", label: "Dokumentart nicht bestimmbar — es gibt keinen automatischen Wiederholungslauf", by: "system" },
-      { axis: "beleg_inbox", from: "classification_failed", to: "pending_classification", trigger: "classification_restarted", label: "von Hand neu angestoßen", by: "user" },
-      { axis: "beleg_inbox", from: "classified", to: "pending_classification", trigger: "document_reprocessed", label: "Neuverarbeitung angestoßen", by: "user" },
-      { axis: "beleg_inbox", from: "classified", to: "deleted", trigger: "document_soft_deleted", label: "aus der Liste entfernt — Datei und Historie bleiben", by: "user" },
+      { axis: "document_inbox", from: null, to: "pending_classification", trigger: "document_uploaded", label: "Datei hochgeladen", by: "user" },
+      { axis: "document_inbox", from: "pending_classification", to: "classified", trigger: "classification_succeeded", label: "Klassifikator hat die Dokumentart erkannt", by: "system" },
+      { axis: "document_inbox", from: "pending_classification", to: "classification_failed", trigger: "classification_failed", label: "Dokumentart nicht bestimmbar — es gibt keinen automatischen Wiederholungslauf", by: "system" },
+      { axis: "document_inbox", from: "classification_failed", to: "pending_classification", trigger: "classification_restarted", label: "von Hand neu angestoßen", by: "user" },
+      { axis: "document_inbox", from: "classified", to: "pending_classification", trigger: "document_reprocessed", label: "Neuverarbeitung angestoßen", by: "user" },
+      { axis: "document_inbox", from: "classified", to: "deleted", trigger: "document_soft_deleted", label: "aus der Liste entfernt — Datei und Historie bleiben", by: "user" },
       // F170: ein erkannter Kontoauszug nimmt den Eingang, aber nicht die
       // Klassifikation — er wartet auf das Bankkonto und geht danach als
       // erledigt heraus (`completed_via='import'`).
-      { axis: "beleg_inbox", from: null, to: "awaiting_input", trigger: "statement_detected", label: "Kontoauszug erkannt — das Bankkonto steht nicht in der Datei", by: "system" },
-      { axis: "beleg_inbox", from: "awaiting_input", to: "classified", trigger: "statement_imported", label: "Bankkonto gewählt, Auszug importiert", by: "user" },
-      { axis: "beleg_inbox", from: "awaiting_input", to: "deleted", trigger: "document_soft_deleted", label: "aus der Liste entfernt, ohne importiert zu werden", by: "user" },
+      { axis: "document_inbox", from: null, to: "awaiting_input", trigger: "statement_detected", label: "Kontoauszug erkannt — das Bankkonto steht nicht in der Datei", by: "system" },
+      { axis: "document_inbox", from: "awaiting_input", to: "classified", trigger: "statement_imported", label: "Bankkonto gewählt, Auszug importiert", by: "user" },
+      { axis: "document_inbox", from: "awaiting_input", to: "deleted", trigger: "document_soft_deleted", label: "aus der Liste entfernt, ohne importiert zu werden", by: "user" },
 
       // — Pipeline, Subtyp `client_source_docs_invoices.processing_status` —
       { from: null, to: "pending", trigger: "invoice_row_created", label: "Rechnungs-Stub angelegt, bevor die Pipeline läuft", by: "api" },
@@ -2500,16 +2499,16 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       // — Stufen innerhalb von `in_progress`, `…invoices.processing_stage`.
       //   Resume-Anker des Workflows, nicht nur Anzeige: ein von Hand
       //   gesetzter Wert kann Belege dauerhaft überspringen lassen. —
-      { axis: "beleg_stage", from: null, to: "classified", trigger: "stage_classified", label: "Belegart erkannt (Cheap-Classifier)", by: "system" },
-      { axis: "beleg_stage", from: "classified", to: "extracted", trigger: "stage_extracted", label: "Grunddaten ausgelesen — Schnelldurchlauf des Onboardings, hier endet er", by: "system" },
-      { axis: "beleg_stage", from: "classified", to: "preprocessed", trigger: "stage_preprocessed", label: "OCR und Strukturierung durch", by: "system" },
-      { axis: "beleg_stage", from: "preprocessed", to: "interpreted", trigger: "stage_interpreted", label: "fachliche Bedeutung ermittelt (Rolle, Positionen, Lieferant)", by: "system" },
-      { axis: "beleg_stage", from: "interpreted", to: "proposed", trigger: "stage_proposed", label: "historisch — seit 2026-07-06 entstehen Vorschläge am Sachverhalt", by: "system" },
+      { axis: "document_stage", from: null, to: "classified", trigger: "stage_classified", label: "Belegart erkannt (Cheap-Classifier)", by: "system" },
+      { axis: "document_stage", from: "classified", to: "extracted", trigger: "stage_extracted", label: "Grunddaten ausgelesen — Schnelldurchlauf des Onboardings, hier endet er", by: "system" },
+      { axis: "document_stage", from: "classified", to: "preprocessed", trigger: "stage_preprocessed", label: "OCR und Strukturierung durch", by: "system" },
+      { axis: "document_stage", from: "preprocessed", to: "interpreted", trigger: "stage_interpreted", label: "fachliche Bedeutung ermittelt (Rolle, Positionen, Lieferant)", by: "system" },
+      { axis: "document_stage", from: "interpreted", to: "proposed", trigger: "stage_proposed", label: "historisch — seit 2026-07-06 entstehen Vorschläge am Sachverhalt", by: "system" },
     ],
   },
 
   document_completion: {
-    axis: "beleg_erledigung",
+    axis: "document_completion",
     description:
       "Ob der Beleg fachlich durch ist — die zweite, parallele Achse des Belegs. Sie folgt der " +
       "BUCHUNG, nicht der Pipeline: „Pipeline durchgelaufen\" heißt nicht „fertig\", und ein " +
@@ -2531,7 +2530,7 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
   /* ── Sachverhalt und Buchung ────────────────────────────────────────── */
 
   accounting_case: {
-    axis: "sachverhalt",
+    axis: "accounting_case",
     description:
       "Der fachliche Weg eines Sachverhalts durch den Review. `needs_clarification` sticht " +
       "`waiting_for_documents`: wer eine echte Rückfrage offen hat, zeigt das, auch wenn " +
@@ -2552,13 +2551,14 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
   },
 
   journal_entry: {
-    axis: "buchung",
+    axis: "journal_entry",
     description:
       "Die Audit-Achse der Buchung. Exportiert wird ausschließlich `accepted`, nicht `posted` — " +
       "der Reviewer gibt für DATEV frei, er schreibt nicht fest. `posted` ist für eine künftige " +
       "eigene Festschreibung reserviert und entsteht heute nur über den DATEV-Import.",
     transitions: [
       { from: null, to: "proposed", trigger: "booking_proposed", label: "Vorschlag am Sachverhalt entstanden", by: "agent" },
+      { from: "proposed", to: "reversed", trigger: "proposal_withdrawn", label: "zurückgezogen — meist vom Agenten (proposal_rationale.withdrawn_by_agent), sonst von der Kanzlei abgelehnt (review_reject_reason)", by: "agent" },
       { from: "proposed", to: "accepted", trigger: "booking_released", label: "für DATEV freigegeben", by: "user" },
       { from: "accepted", to: "proposed", trigger: "release_withdrawn", label: "Freigabe zurückgenommen — nur solange nicht exportiert", by: "user" },
       { from: "accepted", to: "posted", trigger: "found_posted_in_datev", label: "der DATEV-Import meldet den Satz als dort bereits Ist", by: "system" },
@@ -2568,7 +2568,7 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
   },
 
   export_batch: {
-    axis: "zyklus_stapel",
+    axis: "export_batch",
     description:
       "Der Buchungszyklus: die Klammer um die Bearbeitung eines Zeitraums, vom Eröffnen bis " +
       "zum Wiederfinden in DATEV. Wer gerade dran ist, IST der Zustand. Die längste Kette im " +
@@ -2609,7 +2609,7 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
   },
 
   client_onboarding: {
-    axis: "mandant_onboarding",
+    axis: "client_onboarding",
     description:
       "Der Weg eines Mandanten bis zur Buchbarkeit. Wird selten durchlaufen, dann aber von " +
       "jemandem, der nicht weiß, was noch fehlt. Nichts läuft von selbst weiter: weder " +
@@ -2627,7 +2627,7 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
   },
 
   business_partner: {
-    axis: "partner",
+    axis: "business_partner",
     description:
       "Vom erkannten Namen zum bebuchbaren Geschäftspartner. Der Weg ist kurz, die Frage " +
       "„warum hängt der noch\" häufig — sie beantwortet sich mit `proposed`.",
@@ -2641,7 +2641,7 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
   },
 
   run_gate: {
-    axis: "lauf_gate",
+    axis: "run_gate",
     description:
       "Die Tore eines Agentenlaufs. `running` ist der DB-Wert NULL — der Schritt ist betreten " +
       "und noch offen. `blocked` ist kein Endzustand: wird das Gate grün, geht es weiter; " +
@@ -2709,75 +2709,75 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
  * Farbe bedeutet je nach Achse etwas anderes.
  */
 export const AXIS_LABEL: Record<StatusAxis, string> = {
-  beleg: "Beleg",
-  beleg_stage: "Verarbeitungsstufe",
-  beleg_charakter: "Beleg-Charakter",
-  beleg_erledigung: "Erledigung",
-  beleg_haenger: "Beleg-Zustand",
-  beleg_inbox: "Dokument",
-  beleg_kategorie: "Belegkategorie",
-  dokumentgruppe: "Art der Dokumentgruppe",
-  beleg_richtung: "Belegrichtung",
+  document_processing: "Beleg",
+  document_stage: "Verarbeitungsstufe",
+  document_character: "Beleg-Charakter",
+  document_completion: "Erledigung",
+  document_stuck: "Beleg-Zustand",
+  document_inbox: "Dokument",
+  document_category: "Belegkategorie",
+  collection_kind: "Art der Dokumentgruppe",
+  document_direction: "Belegrichtung",
   job: "Auftrag",
   upload: "Upload",
   dispatch: "Stapellauf",
-  sachverhalt: "Sachverhalt",
-  ereignis_art: "Ereignisart",
-  belegnummern_modus: "Belegnummern-Modus",
-  ereignis: "Buchung (Ereignis)",
+  accounting_case: "Sachverhalt",
+  event_kind: "Ereignisart",
+  document_number_mode: "Belegnummern-Modus",
+  event_booking: "Buchung (Ereignis)",
   disposition: "Zuständig",
-  klaerung: "Rückfrage",
-  klaerung_status: "Stand",
-  klaerung_typ: "Art",
-  erwartung: "Reife",
-  erwartung_art: "Erwartet",
+  clarification_severity: "Rückfrage",
+  clarification: "Stand",
+  clarification_type: "Art",
+  expectation_maturity: "Reife",
+  expectation_kind: "Erwartet",
   triage: "Prüfempfehlung",
-  buchung: "Buchung",
-  buchung_datev: "Weg nach DATEV",
-  buchung_origin: "Herkunft",
-  konfidenz: "Sicherheit",
+  journal_entry: "Buchung",
+  journal_entry_datev_stage: "Weg nach DATEV",
+  journal_entry_origin: "Herkunft",
+  confidence: "Sicherheit",
   judge: "Judge",
   export_case: "DATEV-Export",
   export_bucket: "DATEV-Export",
-  lauf: "Buchungslauf",
-  lauf_gate: "Gate",
-  partner: "Geschäftspartner",
-  konto: "Konto",
-  konto_datev_sync: "DATEV-Sync",
-  konto_typ: "Kontoart",
-  verrechnungskonto: "Verrechnungskonto",
-  benutzer: "Zugang",
-  benutzer_art: "Benutzerart",
-  rolle: "Rolle",
-  zyklus: "Buchungsjahr",
-  regel_modus: "Buchungsweise",
+  run_outcome: "Buchungslauf",
+  run_gate: "Gate",
+  business_partner: "Geschäftspartner",
+  ledger_account: "Konto",
+  ledger_account_datev_sync: "DATEV-Sync",
+  ledger_account_type: "Kontoart",
+  clearing_account_type: "Verrechnungskonto",
+  user: "Zugang",
+  user_kind: "Benutzerart",
+  role: "Rolle",
+  booking_cycle: "Buchungsjahr",
+  rule_mode: "Buchungsweise",
   integration: "Bank-Anbindung",
-  konvention: "Konvention",
-  konvention_herkunft: "Herkunft",
-  produktbefund: "Produktbefund",
-  produktbefund_prio: "Dringlichkeit",
-  mandant_onboarding: "Onboarding",
-  mandant_onboarding_verdict: "Onboarding-Urteil",
+  convention: "Konvention",
+  convention_origin: "Herkunft",
+  product_finding: "Produktbefund",
+  product_finding_priority: "Dringlichkeit",
+  client_onboarding: "Onboarding",
+  client_onboarding_verdict: "Onboarding-Urteil",
   bank_match_stage: "DATEV-Historie",
   mirror_match: "DATEV-Abgleich",
-  abgleich_lauf: "Abgleich-Lauf",
-  zyklus_stapel: "Buchungszyklus",
-  stapel_commit: "Festschreibung",
-  datev_pruefung: "DATEV-Prüfung",
-  kontoauszug_erwartung: "Kontoauszug",
-  opos_ausgleich: "Ausgleich",
-  opos_zeilenart: "Zeilenart",
-  datev_verknuepfung: "Verknüpfung",
-  plausibilitaet: "Ergebnis",
-  belegnummer_quelle: "Quelle",
-  zahlungsweg: "Zahlungsweg-Zustand",
-  mandant_betrieb: "Betriebszustand",
-  dauersachverhalt_uebernahme: "Übernahme",
+  reconciliation_run: "Abgleich-Lauf",
+  export_batch: "Buchungszyklus",
+  batch_commit: "Festschreibung",
+  datev_check: "DATEV-Prüfung",
+  statement_expectation: "Kontoauszug",
+  open_item_settlement: "Ausgleich",
+  open_item_line_kind: "Zeilenart",
+  datev_link: "Verknüpfung",
+  plausibility: "Ergebnis",
+  document_number_source: "Quelle",
+  payment_method: "Zahlungsweg-Zustand",
+  client_operation: "Betriebszustand",
+  recurring_case_adoption: "Übernahme",
   token: "Token",
   actor_kind: "Akteur",
   bridge_datev: "Bridge",
-  vst_fakt: "Vorsteuer-Fakt",
-  vst_regel: "Vorsteuer-Regel",
+  input_tax_fact: "Vorsteuer-Fakt",
+  input_tax_rule: "Vorsteuer-Regel",
   log_level: "Level",
   health: "Systemcheck",
   readiness: "Konfiguration",
@@ -2791,75 +2791,75 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
  * bewusst der DB-Bezeichner, nicht die Übersetzung.
  */
 export const AXIS_SOURCE: Record<StatusAxis, string> = {
-  beleg: "client_source_docs_invoices.processing_status",
-  beleg_stage: "client_source_docs_invoices.processing_stage",
-  beleg_charakter: "client_source_docs.class_document_kind",
-  beleg_erledigung: "client_source_docs.completed_via (+ completed_at)",
-  beleg_haenger: "berechnet — hasInvoiceRow + Listen-Variante (ephemer)",
-  beleg_inbox: "client_source_docs.status",
-  beleg_kategorie: "client_source_docs.doc_category",
-  dokumentgruppe: "client_source_docs.collection_kind",
-  beleg_richtung: "client_source_docs_invoices.doc_direction",
+  document_processing: "client_source_docs_invoices.processing_status",
+  document_stage: "client_source_docs_invoices.processing_stage",
+  document_character: "client_source_docs.class_document_kind",
+  document_completion: "client_source_docs.completed_via (+ completed_at)",
+  document_stuck: "berechnet — hasInvoiceRow + Listen-Variante (ephemer)",
+  document_inbox: "client_source_docs.status",
+  document_category: "client_source_docs.doc_category",
+  collection_kind: "client_source_docs.collection_kind",
+  document_direction: "client_source_docs_invoices.doc_direction",
   job: "ops_jobs.status",
   upload: "ephemer — React-State im Browser, keine DB-Spalte",
   dispatch: "ephemer — React-State im Verarbeitungs-Panel",
-  sachverhalt: "client_accounting_case.lifecycle_status",
-  ereignis_art: "client_accounting_event.kind",
-  belegnummern_modus: "client_accounting_case.document_number_mode",
-  ereignis: "abgeleitet aus den Buchungen am Ereignis (keine Spalte)",
+  accounting_case: "client_accounting_case.lifecycle_status",
+  event_kind: "client_accounting_event.kind",
+  document_number_mode: "client_accounting_case.document_number_mode",
+  event_booking: "abgeleitet aus den Buchungen am Ereignis (keine Spalte)",
   disposition: "client_accounting_case.disposition",
-  klaerung: "client_accounting_case_clarification.severity",
-  klaerung_status: "berechnet aus client_accounting_case_clarification.answered_at / deferred_until",
-  klaerung_typ: "client_accounting_case_clarification.type",
-  erwartung: "berechnet aus client_accounting_case_expectation.due_date / escalation_level / resolved_at",
-  erwartung_art: "client_accounting_case_expectation.kind",
+  clarification_severity: "client_accounting_case_clarification.severity",
+  clarification: "berechnet aus client_accounting_case_clarification.answered_at / deferred_until",
+  clarification_type: "client_accounting_case_clarification.type",
+  expectation_maturity: "berechnet aus client_accounting_case_expectation.due_date / escalation_level / resolved_at",
+  expectation_kind: "client_accounting_case_expectation.kind",
   triage: "abgeleitet — domain/acceptance-triage.ts (keine Spalte)",
-  buchung: "client_journal_entry.status",
-  buchung_datev: "abgeleitet — status + exported_at + datev_mirror_entry_id (keine Spalte)",
-  buchung_origin: "client_journal_entry.origin",
-  konfidenz: "abgeleitet — client_journal_entry.proposal_confidence gebandet (entryConfLevel); Zeilen-Spalte seit 2026-08-29 tot",
+  journal_entry: "client_journal_entry.status",
+  journal_entry_datev_stage: "abgeleitet — status + exported_at + datev_mirror_entry_id (keine Spalte)",
+  journal_entry_origin: "client_journal_entry.origin",
+  confidence: "abgeleitet — client_journal_entry.proposal_confidence gebandet (entryConfLevel); Zeilen-Spalte seit 2026-08-29 tot",
   judge: "client_journal_entry.proposal_rationale (JSON, keine Spalte)",
   export_case: "abgeleitet — deriveCaseExportStatus (keine Spalte)",
   export_bucket: "abgeleitet — bucketOf in export-status-core.ts",
-  lauf: "abgeleitet — runOutcome in agent-runs-view.ts (keine Spalte)",
-  lauf_gate: "client_agent_run_steps.gate_result (NULL = Schritt noch offen)",
-  partner: "client_business_partners.onboarding_state",
-  konto: "client_ledger_accounts.status",
-  konto_datev_sync: "client_ledger_accounts.datev_sync_state",
-  konto_typ: "client_ledger_accounts.accounting_role",
-  verrechnungskonto: "client_ledger_accounts.clearing_account_type",
-  benutzer: "platform_tenant_users.status",
-  benutzer_art: "platform_users.kind",
-  rolle: "berechnet — modules/auth/domain/role.ts (keine Spalte)",
-  zyklus: "client_fiscal_years.status",
-  regel_modus: "client_accounting_case_rule.booking_mode",
+  run_outcome: "abgeleitet — runOutcome in agent-runs-view.ts (keine Spalte)",
+  run_gate: "client_agent_run_steps.gate_result (NULL = Schritt noch offen)",
+  business_partner: "client_business_partners.onboarding_state",
+  ledger_account: "client_ledger_accounts.status",
+  ledger_account_datev_sync: "client_ledger_accounts.datev_sync_state",
+  ledger_account_type: "client_ledger_accounts.accounting_role",
+  clearing_account_type: "client_ledger_accounts.clearing_account_type",
+  user: "platform_tenant_users.status",
+  user_kind: "platform_users.kind",
+  role: "berechnet — modules/auth/domain/role.ts (keine Spalte)",
+  booking_cycle: "client_fiscal_years.status",
+  rule_mode: "client_accounting_case_rule.booking_mode",
   integration: "client_external_integrations.status",
-  konvention: "client_agent_notes.status",
-  konvention_herkunft: "client_agent_notes.origin",
-  produktbefund: "platform_product_feedback.status",
-  produktbefund_prio: "platform_product_feedback.priority (NULL = ungesichtet)",
-  mandant_onboarding: "platform_clients.onboarding_state",
-  mandant_onboarding_verdict: "abgeleitet — get-onboarding-status-core.ts (keine Spalte)",
+  convention: "client_agent_notes.status",
+  convention_origin: "client_agent_notes.origin",
+  product_finding: "platform_product_feedback.status",
+  product_finding_priority: "platform_product_feedback.priority (NULL = ungesichtet)",
+  client_onboarding: "platform_clients.onboarding_state",
+  client_onboarding_verdict: "abgeleitet — get-onboarding-status-core.ts (keine Spalte)",
   bank_match_stage: "client_bank_transactions.match_stage (NULL = Kaskade nicht gelaufen)",
   mirror_match: "client_datev_mirror_entries.match_state (NULL = nicht abgeglichen)",
-  abgleich_lauf: "ops_datev_sync_runs.status + client_fiscal_years.datev_resync_requested_at",
-  zyklus_stapel: "client_datev_export_batches.state",
-  stapel_commit: "client_datev_sequences.is_committed (boolean)",
-  datev_pruefung: "client_datev_sequences.inspection_status",
-  kontoauszug_erwartung: "berechnet — DATEV-Bankverbindungen + client_payment_accounts.statement_expected",
-  opos_ausgleich: "berechnet — OPOS-Bestand zum Stichtag (ephemer)",
-  opos_zeilenart: "berechnet — Ausgleichs-Klammer F77 (ephemer)",
-  datev_verknuepfung: "berechnet — VIA_LABEL in modules/datev-truth (ephemer)",
-  plausibilitaet: "berechnet — PlausibilityCheck.verdict (ephemer)",
-  belegnummer_quelle: "berechnet — Dominanz-Rangfolge der Belegnummern-Quellen (ephemer)",
-  zahlungsweg: "berechnet — client_payment_accounts.valid_until",
-  mandant_betrieb: "berechnet — platform_clients.is_active + replay_cutoff_date",
-  dauersachverhalt_uebernahme: "berechnet — RecurringCandidateClass aus der DATEV-Buchungshistorie (F91)",
+  reconciliation_run: "ops_datev_sync_runs.status + client_fiscal_years.datev_resync_requested_at",
+  export_batch: "client_datev_export_batches.state",
+  batch_commit: "client_datev_sequences.is_committed (boolean)",
+  datev_check: "client_datev_sequences.inspection_status",
+  statement_expectation: "berechnet — DATEV-Bankverbindungen + client_payment_accounts.statement_expected",
+  open_item_settlement: "berechnet — OPOS-Bestand zum Stichtag (ephemer)",
+  open_item_line_kind: "berechnet — Ausgleichs-Klammer F77 (ephemer)",
+  datev_link: "berechnet — VIA_LABEL in modules/datev-truth (ephemer)",
+  plausibility: "berechnet — PlausibilityCheck.verdict (ephemer)",
+  document_number_source: "berechnet — Dominanz-Rangfolge der Belegnummern-Quellen (ephemer)",
+  payment_method: "berechnet — client_payment_accounts.valid_until",
+  client_operation: "berechnet — platform_clients.is_active + replay_cutoff_date",
+  recurring_case_adoption: "berechnet — RecurringCandidateClass aus der DATEV-Buchungshistorie (F91)",
   token: "berechnet — platform_agent_tokens.revoked_at + expires_at",
   actor_kind: "platform_audit_events.actor_kind",
   bridge_datev: "berechnet — DatevApiStatus, von der on-prem Bridge gemeldet (ephemer)",
-  vst_fakt: "berechnet — VatFact.value aus den Belegdaten (ephemer)",
-  vst_regel: "berechnet — Katalog-Regel über den Vorsteuer-Fakten (ephemer)",
+  input_tax_fact: "berechnet — VatFact.value aus den Belegdaten (ephemer)",
+  input_tax_rule: "berechnet — Katalog-Regel über den Vorsteuer-Fakten (ephemer)",
   log_level: "client_invoice_traces.level",
   health: "berechnet — modules/health/aggregate.ts (ephemer)",
   readiness: "berechnet — Onboarding-Aggregat (ephemer)",

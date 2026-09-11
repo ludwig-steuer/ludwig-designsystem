@@ -108,7 +108,7 @@ function EventsTab() {
   const [selected, setSelected] = useState<string>(DOCUMENT_EVENT.id);
   return (
     <Tab
-      tab="ereignisse"
+      tab="events"
       empty={
         <Card>
           <CardHead title="Ereignisse" sub="keine" />
@@ -165,7 +165,7 @@ function ClarificationsTab() {
   const selected = CLARIFICATIONS.find((c) => c.id === selectedId) ?? null;
   return (
     <Tab
-      tab="rueckfragen"
+      tab="clarifications"
       empty={
         <Card>
           <CardHead title="Rückfragen" sub="keine" />
@@ -301,7 +301,7 @@ const CHECKS: CheckItem[] = [
 export const Plausibility: Story = {
   render: () => (
     <Tab
-      tab="plausibilitaet"
+      tab="plausibility"
       empty={
         <>
           <Card>
@@ -415,7 +415,7 @@ function OpenItemsCard({ title, sub, items }: { title: string; sub: string; item
           <span>Buchungstext</span>
           <span>Mahnstufe</span>
           <span>
-            Ausgleich <StatusInfoButton axis="opos_ausgleich" />
+            Ausgleich <StatusInfoButton axis="open_item_settlement" />
           </span>
           <span className="v2num">Brutto</span>
           <span className="v2num">Offen</span>
@@ -562,7 +562,7 @@ function RuleOffer() {
 export const Recurrence: Story = {
   render: () => (
     <Tab
-      tab="regelwerk"
+      tab="rules"
       of={recurringWithRule.accountingCase}
       empty={
         <Card>
@@ -617,7 +617,7 @@ export const Recurrence: Story = {
           {MONTHS.map((m) => (
             <Row key={m}>
               <span>{pad(m)}/2026</span>
-              <StatusBadge axis="buchung" status={m === 12 ? "proposed" : "posted"} info={false} />
+              <StatusBadge axis="journal_entry" status={m === 12 ? "proposed" : "posted"} info={false} />
               <span>{m === 12 ? "noch keine eingegangen" : `Zahlungseingang vom 03.${pad(m)}.2026`}</span>
             </Row>
           ))}

@@ -8,6 +8,7 @@ import {
   RULE_DIRECTION_LABEL,
   RULE_DOCUMENT_NUMBER_STRATEGY_LABEL,
   RULE_PROFILE_SOURCE_LABEL,
+  RULE_SETTING_HELP,
 } from "@/ludwig/modules/recurring-rules/domain/rule";
 import type { Currency } from "@/ludwig/shared/money";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
@@ -114,11 +115,12 @@ export function RecurringRuleFacts({
   const tolerance = effectiveAmountTolerance(rule);
   const t = rule.template;
 
-  // The sentences describe the match as the domain runs it (`matchTransaction`);
-  // they belong in the domain and move there with L-293.
-  const say = (value: ReactNode, help: string | null, imported = false): ReactNode => {
+  // The sentences are the domain's (`RULE_SETTING_HELP`, L-293): what a setting
+  // does in the match or the proposal, and whether only the import sets it.
+  const say = (value: ReactNode, field: keyof RecurringRule): ReactNode => {
     if (!explain) return value;
-    const line = [help, imported ? "setzt der Import" : null].filter(Boolean).join(" · ");
+    const setting = RULE_SETTING_HELP[field];
+    const line = [setting?.help, setting?.imported ? "setzt der Import" : null].filter(Boolean).join(" · ");
     return (
       <span className="v2rrfacts__cell">
         {value}
@@ -126,7 +128,6 @@ export function RecurringRuleFacts({
       </span>
     );
   };
-  const EXACT = "Muss genau übereinstimmen.";
 
   const trigger: Pair[] = [];
   // Rank 1 is derived: name **or** IBAN, in the same place — a rule learned
@@ -138,14 +139,14 @@ export function RecurringRuleFacts({
     trigger.push([
       "Gegenpartei",
       rule.matchCounterpartyName
-        ? say(counterparty, "Der Name im Umsatz muss ihn enthalten; Groß- und Kleinschreibung zählen nicht.")
-        : say(<MonoCell value={counterparty} />, EXACT),
+        ? say(counterparty, "matchCounterpartyName")
+        : say(<MonoCell value={counterparty} />, "matchCounterpartyIban"),
     ]);
   }
   if (rule.expectedDirection) {
     trigger.push([
       "Richtung",
-      say(RULE_DIRECTION_LABEL[rule.expectedDirection], "Umsätze in die andere Richtung prüft die Regel gar nicht."),
+      say(RULE_DIRECTION_LABEL[rule.expectedDirection], "expectedDirection"),
     ]);
   }
   if (rule.matchAmount !== null) {
@@ -162,19 +163,19 @@ export function RecurringRuleFacts({
           {formatAmount(tolerance, currency)}
         </span>
       </span>,
-      "Trifft, wenn der Umsatz höchstens um die Toleranz abweicht; von absoluter und prozentualer Toleranz gilt die großzügigere.",
+      "matchAmount",
       ),
     ]);
   }
   if (rule.matchCounterpartyName && rule.matchCounterpartyIban) {
-    trigger.push(["IBAN", say(<MonoCell key="iban" value={rule.matchCounterpartyIban} />, EXACT)]);
+    trigger.push(["IBAN", say(<MonoCell key="iban" value={rule.matchCounterpartyIban} />, "matchCounterpartyIban")]);
   }
   if (rule.matchPurposeRegex) {
     trigger.push([
       "Muster im Verwendungszweck",
       say(
         <MonoCell key="pr" value={rule.matchPurposeRegex} />,
-        "Ein regulärer Ausdruck über den Verwendungszweck; Groß- und Kleinschreibung zählen nicht.",
+        "matchPurposeRegex",
       ),
     ]);
   }
@@ -182,10 +183,10 @@ export function RecurringRuleFacts({
   // all today is the second half of L-249 — and 29 of 30 rules carry
   // `matches_documents` without a single document criterion to show for it.
   if (rule.matchContractNumber) {
-    trigger.push(["Vertragsnummer", say(<MonoCell key="cn" value={rule.matchContractNumber} />, "Dieselbe Regel ordnet auch Belege zu.")]);
+    trigger.push(["Vertragsnummer", say(<MonoCell key="cn" value={rule.matchContractNumber} />, "matchContractNumber")]);
   }
   if (rule.matchDocumentTextRegex) {
-    trigger.push(["Muster im Belegtext", say(<MonoCell key="dr" value={rule.matchDocumentTextRegex} />, "Dieselbe Regel ordnet auch Belege zu.")]);
+    trigger.push(["Muster im Belegtext", say(<MonoCell key="dr" value={rule.matchDocumentTextRegex} />, "matchDocumentTextRegex")]);
   }
   if (rule.matchesDocuments) {
     trigger.push(["Belegseite", "Die Regel bindet auch den Beleg an den Sachverhalt."]);
@@ -193,7 +194,7 @@ export function RecurringRuleFacts({
   if (rule.matchingNote) {
     trigger.push([
       "Zuordnungs-Notiz",
-      say(<LongText key="note">{rule.matchingNote}</LongText>, "Für Menschen und den Agenten — kein Kriterium."),
+      say(<LongText key="note">{rule.matchingNote}</LongText>, "matchingNote"),
     ]);
   }
 
@@ -205,8 +206,7 @@ export function RecurringRuleFacts({
       "Belegnummer der Dauerbuchung",
       say(
         <MonoCell key="dn" value={rule.datevDocumentNumber} />,
-        "Belegfeld 1 jeder Sollstellung — daran hängt der Ausgleich des offenen Postens.",
-        true,
+        "datevDocumentNumber",
       ),
     ]);
   }
@@ -234,7 +234,7 @@ export function RecurringRuleFacts({
       // One sentence for rhythm and pay day: neither is a criterion of the match.
       expectation.push([
         "Rhythmus",
-        say(RULE_INTERVAL_LABEL[rule.expectedInterval], "Rhythmus und Zahltag sind kein Kriterium: sie sagen nur, wann Ludwig die Zahlung erwartet."),
+        say(RULE_INTERVAL_LABEL[rule.expectedInterval], "expectedInterval"),
       ]);
     }
     if (rule.expectedDayOfMonth !== null) {
@@ -245,8 +245,7 @@ export function RecurringRuleFacts({
         "Laufzeit",
         say(
           <Validity key="v" from={rule.validFrom} until={rule.validUntil} />,
-          "Beendet wird die Regel über „aktiv“, nicht über ein Enddatum.",
-          true,
+          "validFrom",
         ),
       ]);
     }
@@ -255,14 +254,14 @@ export function RecurringRuleFacts({
   const origin: Pair[] = [];
   if (all) {
     if (rule.profileSource) {
-      origin.push(["Herkunft des Profils", say(RULE_PROFILE_SOURCE_LABEL[rule.profileSource], null, true)]);
+      origin.push(["Herkunft des Profils", say(RULE_PROFILE_SOURCE_LABEL[rule.profileSource], "profileSource")]);
     }
     origin.push([
       "Zahlungskonto",
       rule.paymentAccountId ?? "Konto der jeweiligen Zahlung",
     ]);
     if (t.lines?.length) {
-      origin.push(["Split-Vorlage", say(`${t.lines.length} Gegenkonto-Zeilen`, "In der Maske nur lesend.", true)]);
+      origin.push(["Split-Vorlage", say(`${t.lines.length} Gegenkonto-Zeilen`, "template")]);
     }
     if (t.taxKey) origin.push(["Steuerschlüssel", <MonoCell key="tk" value={t.taxKey} />]);
     if (t.taxRatePercent !== null) {
@@ -273,12 +272,12 @@ export function RecurringRuleFacts({
     }
     origin.push([
       "Belegnummern-Strategie",
-      say(RULE_DOCUMENT_NUMBER_STRATEGY_LABEL[rule.documentNumberStrategy], null, true),
+      say(RULE_DOCUMENT_NUMBER_STRATEGY_LABEL[rule.documentNumberStrategy], "documentNumberStrategy"),
     ]);
     if (rule.importReference) {
       origin.push([
         "Idempotenz-Anker",
-        say(<MonoCell key="ir" value={rule.importReference} />, "Woran der Import die Regel wiedererkennt.", true),
+        say(<MonoCell key="ir" value={rule.importReference} />, "importReference"),
       ]);
     }
     // Ranks 27 and 28 of the profile — the agent run, the export batch and the
@@ -297,11 +296,11 @@ export function RecurringRuleFacts({
           // The booking mode explains itself with the words of its axis — no
           // sentence of our own beside the registry's (0160).
           <p className="v2rrfacts__aside">
-            {`${resolveStatus("regel_modus", rule.bookingMode).label}: ${resolveStatus("regel_modus", rule.bookingMode).description ?? ""}`}
+            {`${resolveStatus("rule_mode", rule.bookingMode).label}: ${resolveStatus("rule_mode", rule.bookingMode).description ?? ""}`}
           </p>
         ) : null}
         <div className="v2rrfacts__state">
-          <StatusBadge axis="regel_modus" status={rule.bookingMode} />
+          <StatusBadge axis="rule_mode" status={rule.bookingMode} />
           {/* A word, no `tone` and no dot: R1 allows colour only through an
               axis, and `is_active` has none (L-241). */}
           <span className="v2rrfacts__validity">{rule.isActive ? "aktiv" : "inaktiv"}</span>

@@ -28,7 +28,7 @@ export const Filled: Story = {
       <div style={{ maxWidth: 420 }}>
         <Combobox
           label="Gegenkonto"
-          name="konto"
+          name="account"
           value={v}
           onChange={setV}
           options={ACCOUNTS}

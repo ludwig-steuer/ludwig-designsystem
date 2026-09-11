@@ -175,7 +175,7 @@ function StrandCard({
         title="Ereignisse"
         sub={s.timelineSub}
         actions={
-          <TextButton tone="quiet" href={tabHref("ereignisse")}>
+          <TextButton tone="quiet" href={tabHref("events")}>
             vergrößern
           </TextButton>
         }
@@ -193,7 +193,7 @@ function StrandCard({
         {shown.hidden > 0 ? (
           // The overview shows the newest entries; paging lives in the events tab,
           // where the list has sorting and a pager (0152 W3).
-          <TextButton href={tabHref("ereignisse")}>
+          <TextButton href={tabHref("events")}>
             {`${shown.hidden} ältere Einträge im Reiter Ereignisse`}
           </TextButton>
         ) : null}
@@ -291,7 +291,7 @@ function BracketCard({ brackets }: { brackets: ScenarioBracket[] }) {
 function EventPane({ detail: d }: { detail: EventDetail }) {
   const ruleRows: [ReactNode, ReactNode][] = d.rule
     ? [
-        ["Herkunft", <StatusBadge key="o" axis="buchung_origin" status="recurring_rule" info={false} />],
+        ["Herkunft", <StatusBadge key="o" axis="journal_entry_origin" status="recurring_rule" info={false} />],
         ["Regel", d.rule.sentence],
         ["Periode", d.rule.period],
         ...(d.rule.needsReview
@@ -321,7 +321,7 @@ function EventPane({ detail: d }: { detail: EventDetail }) {
             <FieldList
               tone="bare"
               rows={[
-                ["Herkunft", <StatusBadge key="o" axis="buchung_origin" status="client_import" info={false} />],
+                ["Herkunft", <StatusBadge key="o" axis="journal_entry_origin" status="client_import" info={false} />],
                 ["Urteil", "Keins — der Mandant hat selbst gebucht, die Kanzlei nimmt ab."],
               ]}
             />
@@ -402,7 +402,7 @@ function ClarificationPane({
         title="Rückfrage"
         sub={c.state === "open" ? "offen" : c.state === "answered" ? "beantwortet" : ""}
         actions={
-          <TextButton tone="quiet" href={c.href ?? tabHref("rueckfragen")}>
+          <TextButton tone="quiet" href={c.href ?? tabHref("clarifications")}>
             Im Reiter öffnen
           </TextButton>
         }
@@ -485,7 +485,7 @@ function NotesColumn({ scenario: s }: { scenario: CaseScenario }) {
           title="Rückfragen"
           sub={clarificationSub(s.clarificationList)}
           actions={
-            <TextButton tone="quiet" href={tabHref("rueckfragen")}>
+            <TextButton tone="quiet" href={tabHref("clarifications")}>
               Alle
             </TextButton>
           }

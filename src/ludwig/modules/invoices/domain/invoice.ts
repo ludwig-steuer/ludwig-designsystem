@@ -64,18 +64,18 @@ export interface InvoiceFilter {
  * auf „ältester zuerst" und trägt eine Spalte, die sonst keine Liste hat.
  */
 export const INVOICE_LIST_TABS = [
-  "alle",
-  "offen",
-  "verarbeitung",
-  "problematisch",
+  "all",
+  "open",
+  "processing",
+  "problems",
 ] as const;
 export type InvoiceListTab = (typeof INVOICE_LIST_TABS)[number];
 
 export const INVOICE_LIST_TAB_LABEL: Record<InvoiceListTab, string> = {
-  alle: "Alle Belege",
-  offen: "Offen",
-  verarbeitung: "In Verarbeitung",
-  problematisch: "Problematische Belege",
+  all: "Alle Belege",
+  open: "Offen",
+  processing: "In Verarbeitung",
+  problems: "Problematische Belege",
 };
 
 export function parseInvoiceListTab(
@@ -84,7 +84,7 @@ export function parseInvoiceListTab(
   const v = Array.isArray(value) ? value[0] : value;
   return (INVOICE_LIST_TABS as readonly string[]).includes(v ?? "")
     ? (v as InvoiceListTab)
-    : "alle";
+    : "all";
 }
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -104,7 +104,7 @@ const InvoiceFilterRawSchema = z.object({
    * „Reiter sind keine Filter"). Die zwei verbliebenen Reiter sind echte
    * andere Listen: sie fragen andere Tabellen ab.
    */
-  klaerung: z.string().optional(),
+  clarification: z.string().optional(),
 });
 
 /**
@@ -190,7 +190,7 @@ export function parseInvoiceFilter(raw: RawSearchParams): InvoiceFilter {
     // Checkbox-Gruppe: mehrere `cat`-Werte kommen als Array an.
     cat: Array.isArray(raw.cat) ? raw.cat.join(",") : typeof raw.cat === "string" ? raw.cat : undefined,
     partner: typeof raw.partner === "string" ? raw.partner : undefined,
-    klaerung: typeof raw.klaerung === "string" ? raw.klaerung : undefined,
+    clarification: typeof raw.clarification === "string" ? raw.clarification : undefined,
   });
   if (!parsed.success) return {};
   const lifecycleStatus = parsed.data.lifecycle
@@ -209,7 +209,7 @@ export function parseInvoiceFilter(raw: RawSearchParams): InvoiceFilter {
     lifecycleStatus: lifecycleStatus && lifecycleStatus.length > 0 ? lifecycleStatus : undefined,
     docCategory: parsed.data.cat ? (parseDocCategories(parsed.data.cat) ?? undefined) : undefined,
     businessPartnerId: parsed.data.partner,
-    hasOpenClarification: parsed.data.klaerung === "1" ? true : undefined,
+    hasOpenClarification: parsed.data.clarification === "1" ? true : undefined,
   };
 }
 

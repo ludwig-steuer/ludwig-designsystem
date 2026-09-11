@@ -514,7 +514,7 @@ export const InUse: Story = {
           icon={<EntityIcon entity="accounting-case" size={20} />}
           overline="Sachverhalt · 2026-0815"
           title="Eingangsrechnung: Musterfirma GmbH"
-          status={<StatusBadge axis="sachverhalt" status="open" info={false} />}
+          status={<StatusBadge axis="accounting_case" status="open" info={false} />}
         />
       </Section>
 
@@ -529,8 +529,8 @@ export const InUse: Story = {
         }
       >
         <div style={{ display: "flex", gap: "var(--space-5)", alignItems: "center" }}>
-          <StatusBadge axis="beleg" status="in_progress" info={false} />
-          <StatusBadge axis="sachverhalt" status="needs_clarification" info={false} />
+          <StatusBadge axis="document_processing" status="in_progress" info={false} />
+          <StatusBadge axis="accounting_case" status="needs_clarification" info={false} />
           <IconButton label="Schließen" icon={<ActionIcon action="close" size={14} />} />
         </div>
       </Section>

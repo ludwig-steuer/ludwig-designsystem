@@ -196,8 +196,8 @@ export const recurringWithRule: CaseScenario = {
       rows: [
         ["Regel", RULE_SENTENCE],
         ["Rhythmus", "monatlich am 1., seit 01/2026"],
-        ["Herkunft", <StatusBadge key="o" axis="buchung_origin" status="recurring_rule" info={false} />],
-        ["Weiter", <TextButton key="w" href={tabHref("regelwerk")}>Regel ansehen</TextButton>],
+        ["Herkunft", <StatusBadge key="o" axis="journal_entry_origin" status="recurring_rule" info={false} />],
+        ["Weiter", <TextButton key="w" href={tabHref("rules")}>Regel ansehen</TextButton>],
       ],
     },
   },
@@ -388,7 +388,7 @@ export const collectivePayment: CaseScenario = {
     facts: {
       title: "Belegnummern",
       rows: [
-        ["Modus", <StatusBadge key="m" axis="belegnummern_modus" status="multiple" info={false} />],
+        ["Modus", <StatusBadge key="m" axis="document_number_mode" status="multiple" info={false} />],
         ["Klammern", `12, zusammen ${euro(POOL_TOTAL)} € — Rest 0,00 €`],
       ],
     },

@@ -34,11 +34,11 @@
 
 import { belegAnzeigename } from "@/ludwig/modules/source-docs";
 
-import { deckungsLueckeAus } from "./deckungsluecke";
+import { coverageGapFrom } from "./coverage-gap";
 
-export type BereitschaftsStand = "offen" | "hinweis" | "ok";
+export type ReadinessState = "open" | "notice" | "ok";
 
-export interface BereitschaftsPunkt {
+export interface ReadinessItem {
   key: string;
   /** Ziel für den Sprung in die Beleg-Ansicht; null bei Kontoauszügen. */
   sourceDocId: string | null;
@@ -52,22 +52,22 @@ export interface BereitschaftsPunkt {
   hinweis: boolean;
 }
 
-export interface BereitschaftsZeile {
+export interface ReadinessRow {
   key:
-    | "belege_periode"
-    | "belege_alle"
-    | "belege_nach_zeitraum"
-    | "auszuege"
+    | "documents_period"
+    | "documents_all"
+    | "documents_after_period"
+    | "statements"
     | "transactions_case"
     | "transactions_proposal"
-    | "ohne_buchung";
+    | "unbooked";
   label: string;
-  stand: BereitschaftsStand;
+  stand: ReadinessState;
   /** „6 offen" bzw. „vollständig" — rechts in der Zeile. */
   standText: string;
   /** Was im aufgeklappten Zustand steht, wenn nichts offen ist. */
   leerText: string;
-  punkte: BereitschaftsPunkt[];
+  punkte: ReadinessItem[];
   /** Über dem Listen-Deckel des Gates: so viele Posten fehlen in der Liste. */
   nichtGelistet: number;
 }
@@ -119,7 +119,7 @@ function fmtDay(iso: string | null): string {
   return TAG.format(new Date(iso));
 }
 
-function umsatzPunkt(r: CoverageEingang["rows"][number]): BereitschaftsPunkt {
+function umsatzPunkt(r: CoverageEingang["rows"][number]): ReadinessItem {
   const problem =
     r.reason === "no_case"
       ? "Ohne Sachverhalt (Gate 2a)."
@@ -144,7 +144,7 @@ function str(v: unknown): string | null {
   return typeof v === "string" && v.length > 0 ? v : null;
 }
 
-function belegPunkt(o: Record<string, unknown>, i: number): BereitschaftsPunkt {
+function belegPunkt(o: Record<string, unknown>, i: number): ReadinessItem {
   return {
     key: str(o.sourceDocId) ?? `beleg-${i}`,
     sourceDocId: str(o.sourceDocId),
@@ -173,7 +173,7 @@ function kontoPunkt(
   i: number,
   hinweis: boolean,
   periodTo: string,
-): BereitschaftsPunkt {
+): ReadinessItem {
   return {
     key: `konto-${hinweis ? "w" : "o"}-${i}`,
     sourceDocId: null,
@@ -181,7 +181,7 @@ function kontoPunkt(
     datum: null,
     // Blocker tragen `problem`, Gate-Warnungen `warning` — ohne das zweite
     // stand hier ein leerer Hinweis (F141).
-    problem: deckungsLueckeAus(o, periodTo)?.text ?? str(o.problem) ?? str(o.warning) ?? "",
+    problem: coverageGapFrom(o, periodTo)?.text ?? str(o.problem) ?? str(o.warning) ?? "",
     hinweis,
   };
 }
@@ -191,13 +191,13 @@ function zahl(n: number, gedeckelt: boolean): string {
   return `${gedeckelt ? "mind. " : ""}${n} offen`;
 }
 
-export function bereitschaftsZeilen(
+export function readinessRows(
   gate1a: GateEingang,
   gate3f: GateEingang,
   periodFrom: string,
   periodTo: string,
   /** Belege, die ohne Buchung erledigt wurden (`application/belege-ohne-buchung.ts`). */
-  ohneBuchung: { punkte: BereitschaftsPunkt[]; total: number } = { punkte: [], total: 0 },
+  ohneBuchung: { punkte: ReadinessItem[]; total: number } = { punkte: [], total: 0 },
   /** Deckung je Bank-Umsatz (`loadBankBookingCoverage`, F187). */
   coverage: CoverageEingang = {
     transactionsTotal: 0,
@@ -207,8 +207,8 @@ export function bereitschaftsZeilen(
     rows: [],
   },
   /** Offene Belege nach dem Periodenende (`application/docs-after-period.ts`, F203). */
-  afterPeriod: { punkte: BereitschaftsPunkt[]; total: number } = { punkte: [], total: 0 },
-): BereitschaftsZeile[] {
+  afterPeriod: { punkte: ReadinessItem[]; total: number } = { punkte: [], total: 0 },
+): ReadinessRow[] {
   const belege = gate3f.open.map(belegPunkt);
   // Der Gate-Zähler ist ungedeckelt, die Liste nicht. Die Aufteilung kann
   // deshalb nur zählen, was geliefert wurde — das sagt die Zeile dann auch.
@@ -230,9 +230,9 @@ export function bereitschaftsZeilen(
 
   return [
     {
-      key: "belege_periode",
+      key: "documents_period",
       label: "Alle Belege der Periode erledigt",
-      stand: periode.length > 0 ? "offen" : nurAltlast ? "hinweis" : "ok",
+      stand: periode.length > 0 ? "open" : nurAltlast ? "notice" : "ok",
       standText: zahl(periode.length, nichtGelistet > 0),
       leerText: nurAltlast
         ? "In dieser Periode ist jeder Beleg abgeschlossen — offen ist nur Älteres (Zeile darunter)."
@@ -241,29 +241,29 @@ export function bereitschaftsZeilen(
       nichtGelistet,
     },
     {
-      key: "belege_alle",
+      key: "documents_all",
       label: "Alle Belege einschließlich Vorperioden erledigt",
-      stand: gate3f.openCount === 0 ? "ok" : periode.length > 0 ? "offen" : "hinweis",
+      stand: gate3f.openCount === 0 ? "ok" : periode.length > 0 ? "open" : "notice",
       standText: zahl(gate3f.openCount, false),
       leerText: "Jeder Beleg bis zum Ende des Zeitraums ist abgeschlossen.",
       punkte: belege,
       nichtGelistet,
     },
     {
-      key: "belege_nach_zeitraum",
+      key: "documents_after_period",
       label: "Belege nach dem Zeitraum",
       // Nie rot: Gate 3f zählt sie nicht, sie gehören dem nächsten Lauf.
-      stand: afterPeriod.total > 0 ? "hinweis" : "ok",
+      stand: afterPeriod.total > 0 ? "notice" : "ok",
       standText: afterPeriod.total === 0 ? "keine" : `${afterPeriod.total} später datiert`,
       leerText: "Kein offener Beleg ist nach dem Ende des Zeitraums datiert.",
       punkte: afterPeriod.punkte,
       nichtGelistet: Math.max(0, afterPeriod.total - afterPeriod.punkte.length),
     },
     {
-      key: "auszuege",
+      key: "statements",
       label: "Alle Kontoauszüge erledigt",
       stand:
-        gate1a.openCount > 0 ? "offen" : (gate1a.warnings?.length ?? 0) > 0 ? "hinweis" : "ok",
+        gate1a.openCount > 0 ? "open" : (gate1a.warnings?.length ?? 0) > 0 ? "notice" : "ok",
       standText: zahl(gate1a.openCount, gate1a.openCount > gate1a.open.length),
       leerText: "Jedes aktive Zahlungskonto deckt den Zeitraum ab, der Saldenanschluss stimmt.",
       punkte: auszugPunkte,
@@ -272,7 +272,7 @@ export function bereitschaftsZeilen(
     {
       key: "transactions_case",
       label: "Alle Umsätze haben einen Sachverhalt",
-      stand: coverage.withoutCase > 0 ? "offen" : "ok",
+      stand: coverage.withoutCase > 0 ? "open" : "ok",
       standText: zahl(coverage.withoutCase, ohneFall.length < coverage.withoutCase),
       leerText: "Jeder Umsatz des Zeitraums hängt an einem Sachverhalt.",
       punkte: ohneFall,
@@ -281,7 +281,7 @@ export function bereitschaftsZeilen(
     {
       key: "transactions_proposal",
       label: "Alle Umsätze haben einen Buchungsvorschlag",
-      stand: echtOffen > 0 ? "offen" : coverage.inClarification > 0 ? "hinweis" : "ok",
+      stand: echtOffen > 0 ? "open" : coverage.inClarification > 0 ? "notice" : "ok",
       standText:
         coverage.withoutProposal === 0
           ? "vollständig"
@@ -296,11 +296,11 @@ export function bereitschaftsZeilen(
       nichtGelistet: Math.max(0, coverage.withoutProposal - coverage.rows.length),
     },
     {
-      key: "ohne_buchung",
+      key: "unbooked",
       label: "Belege ohne Buchung — mit Begründung erledigt",
       // Nie rot: hier fehlt nichts, hier wurde entschieden. Aber gesehen
       // werden soll die Entscheidung (Owner 2026-09-08).
-      stand: ohneBuchung.total > 0 ? "hinweis" : "ok",
+      stand: ohneBuchung.total > 0 ? "notice" : "ok",
       standText: ohneBuchung.total === 0 ? "keine" : `${ohneBuchung.total} Beleg(e)`,
       leerText: "Jeder erledigte Beleg dieses Zeitraums trägt eine Buchung.",
       punkte: ohneBuchung.punkte,

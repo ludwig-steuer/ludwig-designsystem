@@ -71,14 +71,14 @@ export interface ClarificationVM {
 
 function stateBadges(c: ClarificationVM) {
   if (c.type === "comment") {
-    return <StatusBadge axis="klaerung_typ" status="comment" info={false} />;
+    return <StatusBadge axis="clarification_type" status="comment" info={false} />;
   }
   return (
     <>
-      <StatusBadge axis="klaerung_status" status={c.state} info={false} />
+      <StatusBadge axis="clarification" status={c.state} info={false} />
       {/* Severity is a second axis and only matters while the answer is out. */}
       {c.state !== "answered" && c.severity === "required" ? (
-        <StatusBadge axis="klaerung" status="required" info={false} />
+        <StatusBadge axis="clarification_severity" status="required" info={false} />
       ) : null}
     </>
   );

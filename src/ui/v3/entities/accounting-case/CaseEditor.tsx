@@ -156,13 +156,13 @@ export function CaseDocumentNumberModeEdit({
         }}
         pending={pending}
         disabled={disabled}
-        renderValue={(v) => resolveStatus("belegnummern_modus", v).label}
+        renderValue={(v) => resolveStatus("document_number_mode", v).label}
         renderInput={({ value: v, onChange, ...rest }) => (
           <Select {...rest} value={v} onChange={(e) => onChange(e.target.value)}>
-            <option value={value}>{resolveStatus("belegnummern_modus", value).label}</option>
+            <option value={value}>{resolveStatus("document_number_mode", value).label}</option>
             {allowed.map((m) => (
               <option key={m} value={m}>
-                {resolveStatus("belegnummern_modus", m).label}
+                {resolveStatus("document_number_mode", m).label}
               </option>
             ))}
           </Select>
@@ -181,7 +181,7 @@ export function CaseDocumentNumberModeEdit({
         title="Belegnummern-Modus ändern"
         kicker={
           target
-            ? `${resolveStatus("belegnummern_modus", value).label} → ${resolveStatus("belegnummern_modus", target).label}`
+            ? `${resolveStatus("document_number_mode", value).label} → ${resolveStatus("document_number_mode", target).label}`
             : undefined
         }
         label="Grund"

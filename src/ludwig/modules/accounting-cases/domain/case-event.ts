@@ -107,6 +107,9 @@ export interface CaseEvent {
   /** Gesetzt = an diesem Ereignis entsteht absichtlich nie eine Buchung; der
    *  Text ist die Begründung und wird dem Nutzer angezeigt. */
   noBookingRequiredReason: string | null;
+  /** Die Wiederkehr-Regel, die dieses Ereignis angelegt oder ihm eine Zahlung
+   *  zugeordnet hat (`client_accounting_event.recurring_rule_id`). */
+  recurringRuleId: string | null;
   sourceDoc: CaseEventSourceDoc | null;
   bankTransaction: CaseEventBankTransaction | null;
   booking: CaseEventBooking | null;

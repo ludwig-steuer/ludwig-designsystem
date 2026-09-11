@@ -16,17 +16,17 @@
  * Anzeige-Vokabular ohne Modulbezug und gehören deshalb hierher.
  */
 
-export type LogView = "verlauf" | "protokoll" | "technik";
+export type LogView = "timeline" | "protocol" | "technical";
 
 export const LOG_VIEWS: ReadonlyArray<{ key: LogView; label: string; hint: string }> = [
-  { key: "verlauf", label: "Verlauf", hint: "Die Geschichte — was ein Mensch erzählen würde." },
-  { key: "protokoll", label: "Protokoll", hint: "Dazu jede fachliche Entscheidung: Klärungen, Buchungen, Konventionen." },
-  { key: "technik", label: "Technik", hint: "Dazu die Innereien: Schritt-Kanten, rohe Action-Codes." },
+  { key: "timeline", label: "Verlauf", hint: "Die Geschichte — was ein Mensch erzählen würde." },
+  { key: "protocol", label: "Protokoll", hint: "Dazu jede fachliche Entscheidung: Klärungen, Buchungen, Konventionen." },
+  { key: "technical", label: "Technik", hint: "Dazu die Innereien: Schritt-Kanten, rohe Action-Codes." },
 ];
 
 /** Tiefe je Sicht — 1 zeigt am wenigsten, 3 alles. */
 export const LOG_VIEW_DEPTH: Record<LogView, 1 | 2 | 3> = {
-  verlauf: 1,
-  protokoll: 2,
-  technik: 3,
+  timeline: 1,
+  protocol: 2,
+  technical: 3,
 };

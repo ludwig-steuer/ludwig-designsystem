@@ -25,17 +25,17 @@ import { caseColumns, type CaseColumn } from "./case-columns";
 
 /**
  * The four tabs that are a **table**. Narrowed from the mirror, not rewritten:
- * `offen` shows bank rows and `schliessen` shows cards with the one bulk
+ * `payments` shows bank rows and `to_close` shows cards with the one bulk
  * action, so neither is this component (see „Kann bewusst nicht"). A seventh
  * tab added in the app therefore reaches this list by itself, and the app
  * stops paying for the same narrowing a second time (`cases/page.tsx`
  * repeated it, and got in through a cast).
  */
-export type CaseListTab = Exclude<AnyCaseListTab, "offen" | "schliessen">;
+export type CaseListTab = Exclude<AnyCaseListTab, "payments" | "to_close">;
 
 /**
  * Three of the four empty cases are a **success**, and they say so. Only
- * „alle" is a gap: a year without a single case has not started.
+ * `all` is a gap: a year without a single case has not started.
  */
 /**
  * The count turns „nothing to do" into a **result** (L6, T6) — and it is a
@@ -49,7 +49,7 @@ const EMPTY: Record<
   CaseListTab,
   { title: string; description: (count?: number) => string; done: boolean }
 > = {
-  laufend: {
+  active: {
     title: "Kein Sachverhalt ist mehr offen.",
     description: (n) =>
       n === undefined
@@ -57,7 +57,7 @@ const EMPTY: Record<
         : `Alle ${n} Sachverhalte dieses Wirtschaftsjahres sind abgeschlossen.`,
     done: true,
   },
-  belege: {
+  waiting_for_documents: {
     title: "Es fehlt keine Unterlage mehr.",
     description: (n) =>
       n === undefined
@@ -65,7 +65,7 @@ const EMPTY: Record<
         : `Bei allen ${n} Sachverhalten liegt die Unterlage vor.`,
     done: true,
   },
-  klaerung: {
+  needs_clarification: {
     title: "Nichts wartet auf Bearbeitung.",
     description: (n) =>
       n === undefined
@@ -73,7 +73,7 @@ const EMPTY: Record<
         : `Alle ${n} Sachverhalte sind bearbeitet — keine offene Frage, keine wartende Entscheidung.`,
     done: true,
   },
-  alle: {
+  all: {
     // No count here: this tab is empty because the stock is empty, so the
     // number would be nought — and „0 Sachverhalte" says less than the sentence.
     title: "In diesem Wirtschaftsjahr gibt es noch keinen Sachverhalt.",

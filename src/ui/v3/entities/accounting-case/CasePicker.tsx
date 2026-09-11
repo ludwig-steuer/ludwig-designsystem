@@ -22,7 +22,7 @@ import { caseIdentifier } from "./case-title";
 /** What one hit says, in the order one reads it. */
 function hintOf(c: CaseListItem): string {
   const parts: string[] = [caseIdentifier(c)];
-  const state = resolveStatus("sachverhalt", c.lifecycleStatus).label;
+  const state = resolveStatus("accounting_case", c.lifecycleStatus).label;
   if (state) parts.push(state);
   // No amount where there is none (48 % carry one): a dash would claim the
   // value is unknown, and „0,00 €" would be a lie. The currency comes from the

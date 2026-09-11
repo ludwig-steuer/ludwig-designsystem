@@ -8,7 +8,7 @@ import { STATUS_REGISTRY, axisLegend, type StatusAxis } from "@/ludwig/ui/status
 const meta: Meta<typeof StatusBadge> = {
   title: "v3/Patterns/Prüfen/StatusBadge",
   component: StatusBadge,
-  args: { axis: "sachverhalt", status: "open" },
+  args: { axis: "accounting_case", status: "open" },
 };
 export default meta;
 type Story = StoryObj<typeof StatusBadge>;
@@ -50,27 +50,27 @@ export const AllAxes: Story = {
 export const CoreAxes: Story = {
   render: () => (
     <div>
-      <AxisBlock axis="beleg" />
-      <AxisBlock axis="sachverhalt" />
-      <AxisBlock axis="buchung" />
+      <AxisBlock axis="document_processing" />
+      <AxisBlock axis="accounting_case" />
+      <AxisBlock axis="journal_entry" />
     </div>
   ),
 };
 
 /** Einzelner Chip mit (i) — öffnet die Legende der ganzen Achse. */
-export const WithInfoDialog: Story = { args: { axis: "buchung", status: "proposed", info: true } };
+export const WithInfoDialog: Story = { args: { axis: "journal_entry", status: "proposed", info: true } };
 
 /** Nur beim Beleg: die erreichte Pipeline-Stufe als Detail am Chip. */
 export const DocumentWithStage: Story = {
-  args: { axis: "beleg", status: "processing", stage: "preprocessed", info: false },
+  args: { axis: "document_processing", status: "processing", stage: "preprocessed", info: false },
 };
 
 /** Unbekannter DB-Wert — die Registry fällt sichtbar zurück, statt zu lügen. */
 export const UnknownValue: Story = {
-  args: { axis: "sachverhalt", status: "gibt_es_nicht", info: false },
+  args: { axis: "accounting_case", status: "gibt_es_nicht", info: false },
 };
 /** `null` (Spalte noch nicht gesetzt). */
-export const WithoutValue: Story = { args: { axis: "buchung", status: null, info: false } };
+export const WithoutValue: Story = { args: { axis: "journal_entry", status: null, info: false } };
 
 /**
  * `chevron` (0049): der Chip als Auslöser eines Menüs. Die Folgezustände
@@ -84,7 +84,7 @@ export const StatusMenu: Story = {
     const [status, setStatus] = useState("open");
     const [open, setOpen] = useState(false);
     // What is reachable from here — the caller's decision.
-    const next = axisLegend("sachverhalt", [
+    const next = axisLegend("accounting_case", [
       "needs_clarification",
       "waiting_for_documents",
       "closed_accepted",
@@ -97,7 +97,7 @@ export const StatusMenu: Story = {
           onOpenChange={setOpen}
           trigger={
             <button type="button" className="v2btn v2btn--tertiary v2btn--sm">
-              <StatusBadge axis="sachverhalt" status={status} info={false} chevron />
+              <StatusBadge axis="accounting_case" status={status} info={false} chevron />
             </button>
           }
         >
@@ -112,7 +112,7 @@ export const StatusMenu: Story = {
                   setOpen(false);
                 }}
               >
-                <StatusBadge axis="sachverhalt" status={it.value} info={false} />
+                <StatusBadge axis="accounting_case" status={it.value} info={false} />
               </button>
             ))}
           </div>

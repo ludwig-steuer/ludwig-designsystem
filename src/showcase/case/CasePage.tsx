@@ -26,7 +26,7 @@ import { FALL_TABS, listHref, tabHref } from "./fixtures";
  */
 export function CasePage({
   accountingCase: accountingCase,
-  tab = "uebersicht",
+  tab = "overview",
   signal,
   actions,
   timeline: timeline,
@@ -80,7 +80,7 @@ export function CasePage({
           // **One** leading state: the `sachverhalt` axis. Who is on turn
           // (`disposition`) is a word in the meta line — two marks for two
           // questions, not two for one (D6/D7).
-          status={<StatusBadge axis="sachverhalt" status={accountingCase.lifecycleStatus} />}
+          status={<StatusBadge axis="accounting_case" status={accountingCase.lifecycleStatus} />}
           meta={
             <>
               {accountingCase.disposition ? (
@@ -112,7 +112,7 @@ export function CasePage({
       {...(signal ? { signal } : {})}
       tabs={
         <Tabs
-          items={FALL_TABS.filter((t) => t.key !== "regelwerk" || accountingCase.kind === "recurring_charge").map(
+          items={FALL_TABS.filter((t) => t.key !== "rules" || accountingCase.kind === "recurring_charge").map(
             (t) => ({ ...t, href: tabHref(t.key) }),
           )}
           active={tab}

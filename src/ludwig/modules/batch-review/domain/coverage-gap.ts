@@ -1,4 +1,4 @@
-import type { GateEingang } from "./bereitschaft";
+import type { GateEingang } from "./readiness";
 import type { ChecklistRow } from "./checklist";
 
 /**
@@ -16,7 +16,7 @@ import type { ChecklistRow } from "./checklist";
 /** Was für die Checkliste aus einer Zeile gebraucht wird — ohne Quittungs-Felder. */
 type RohZeile = Omit<ChecklistRow, "acknowledged" | "note" | "acknowledgedBy" | "acknowledgedAt">;
 
-export interface Deckungsluecke {
+export interface CoverageGap {
   paymentAccountId: string | null;
   label: string;
   /** yyyy-mm-dd — bis hierhin deckt der Auszug. */
@@ -36,10 +36,10 @@ function fmtDate(iso: string): string {
 }
 
 /** Eine Gate-Warnung → Lücke oder `null` (ohne `coveredTo` ist es keine). */
-export function deckungsLueckeAus(
+export function coverageGapFrom(
   o: Record<string, unknown>,
   periodTo: string,
-): Deckungsluecke | null {
+): CoverageGap | null {
   const coveredTo = str(o.coveredTo);
   if (coveredTo == null) return null;
 
@@ -65,10 +65,10 @@ export function deckungsLueckeAus(
 }
 
 /** Alle Lücken aus `gate.warnings` — die meisten Tage zuerst, dann nach Label. */
-export function deckungsLuecken(gate: GateEingang, periodTo: string): Deckungsluecke[] {
+export function coverageGaps(gate: GateEingang, periodTo: string): CoverageGap[] {
   return (gate.warnings ?? [])
-    .map((o) => deckungsLueckeAus(o, periodTo))
-    .filter((l): l is Deckungsluecke => l != null)
+    .map((o) => coverageGapFrom(o, periodTo))
+    .filter((l): l is CoverageGap => l != null)
     .sort((a, b) => b.uncoveredDays - a.uncoveredDays || a.label.localeCompare(b.label));
 }
 
@@ -78,7 +78,7 @@ export function deckungsLuecken(gate: GateEingang, periodTo: string): Deckungslu
  * Auszug nach, verfällt eine alte Quittung; ist die Lücke geschlossen, ist die
  * Zeile wieder grün, ohne dass jemand quittieren muss.
  */
-export function auszugsZeileErgaenzen(row: RohZeile, luecken: Deckungsluecke[]): RohZeile {
+export function completeStatementLine(row: RohZeile, luecken: CoverageGap[]): RohZeile {
   if (luecken.length === 0) return row;
   return {
     ...row,

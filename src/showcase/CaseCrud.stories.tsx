@@ -81,7 +81,7 @@ const CASES: CaseListItem[] = [
     hasOpenDocumentRequest: false,
     openedAt: "2026-08-26T09:12:00Z",
     closedAt: null,
-    exportStatus: "offen",
+    exportStatus: "open",
   },
   {
     caseId: "c2",
@@ -125,7 +125,7 @@ const CASES: CaseListItem[] = [
     hasOpenDocumentRequest: false,
     openedAt: "2026-08-12T14:05:00Z",
     closedAt: "2026-08-30T11:00:00Z",
-    exportStatus: "exportiert",
+    exportStatus: "exported",
   },
 ];
 
@@ -214,7 +214,7 @@ function CasePage() {
                 </TextButton>
                 <span>{c.counterpartyName}</span>
                 <AmountCell value={c.totalAmount} />
-                <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} />
+                <StatusBadge axis="accounting_case" status={c.lifecycleStatus} />
                 <RowActions>
                   <TextButton onClick={() => setEditing(c)}>Bearbeiten</TextButton>
                   <OverflowMenu size="xs">

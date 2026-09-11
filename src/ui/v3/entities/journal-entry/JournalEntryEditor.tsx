@@ -569,7 +569,7 @@ function Head({
         {documentNumber ? `Beleg ${documentNumber}` : "Ohne Belegnummer"}
         {documentAmount == null ? "" : ` · ${euro(documentAmount)}`}
       </span>
-      <StatusBadge axis="buchung" status={status} info={false} />
+      <StatusBadge axis="journal_entry" status={status} info={false} />
       <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
         {showRest ? (
           <span className={`bse__rest${Math.abs(rest!) < 0.005 ? " is-ok" : " is-off"}`}>

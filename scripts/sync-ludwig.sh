@@ -53,6 +53,7 @@ rsync -a --prune-empty-dirs \
   --include='core/datev/**.ts' \
   --include='core/documents/*.ts' \
   --include='core/accounting/clearing-account.ts' \
+  --include='core/accounting/payment-account-kind.ts' \
   --include='shared/*.ts' \
   --include='modules/*/domain/**.ts' \
   --include='ui/status/status-registry.ts' \

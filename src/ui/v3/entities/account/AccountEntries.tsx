@@ -207,7 +207,7 @@ export function accountEntryColumns({
           {variant === "compact" && e.origin === "exported" ? (
             <>
               {" "}
-              <StatusBadge axis="buchung_datev" status="exported" info={false} />
+              <StatusBadge axis="journal_entry_datev_stage" status="exported" info={false} />
             </>
           ) : null}
         </span>
@@ -261,9 +261,9 @@ export function accountEntryColumns({
     width: "148px",
     cell: (e) =>
       e.origin === "exported" ? (
-        <StatusBadge axis="buchung_datev" status="exported" info={false} />
+        <StatusBadge axis="journal_entry_datev_stage" status="exported" info={false} />
       ) : e.status ? (
-        <StatusBadge axis="buchung" status={e.status} info={false} />
+        <StatusBadge axis="journal_entry" status={e.status} info={false} />
       ) : (
         <span className="v2muted">—</span>
       ),

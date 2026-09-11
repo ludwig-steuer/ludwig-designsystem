@@ -11,7 +11,7 @@ export type BankTransactionSource = "csv" | "qonto" | "manual";
 
 /**
  * Unterstützte Bank-Datei-Formate. Erweitern, sobald ein neuer Parser
- * dazukommt (MT940, OFX, …). Die Format-Detection (`infrastructure/
+ * dazukommt (OFX, …). Die Format-Detection (`infrastructure/
  * format-detection.ts`) entscheidet anhand des Datei-Headers.
  */
 export type BankFileFormatId =
@@ -19,7 +19,8 @@ export type BankFileFormatId =
   | "qonto-de-v1"
   | "camt-053"
   | "vr-bank-mt940-xlsx"
-  | "commerzbank-csv";
+  | "commerzbank-csv"
+  | "mt940-sta";
 
 /**
  * Beschreibt ein Quell-Feld im erkannten Format und worauf es im

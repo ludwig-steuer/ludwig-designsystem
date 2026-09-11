@@ -176,22 +176,24 @@ export const CLARIFICATIONS: ClarificationVM[] = [
  * audit and support — DATEV truth, log and raw data.
  */
 export const FALL_TABS = [
-  { key: "uebersicht", label: "Übersicht" },
-  { key: "ereignisse", label: "Ereignisse" },
-  // Every document the case rests on (owner 2026-09-11). English key: the app's
-  // `belege` becomes `documents` with F210.
+  { key: "overview", label: "Übersicht" },
+  { key: "events", label: "Ereignisse" },
+  // Every document the case rests on (owner 2026-09-11). Keys are the app's
+  // where it has the tab (F210: `CASE_TABS`), English where only the set has it.
   { key: "documents", label: "Belege" },
-  { key: "rueckfragen", label: "Rückfragen" },
+  { key: "clarifications", label: "Rückfragen" },
   // Balances and accounts answer the same question as the checks: does it add up?
-  { key: "plausibilitaet", label: "Plausibilität" },
+  { key: "plausibility", label: "Plausibilität" },
   // Rule and assignment in one tab (F196 O2); only a recurring case has it.
-  { key: "regelwerk", label: "Wiederkehr" },
-  { key: "stammdaten", label: "Stammdaten" },
+  { key: "rules", label: "Wiederkehr" },
+  { key: "master_data", label: "Stammdaten" },
   { key: "technical", label: "Technik" },
 ];
 
 export const tabHref = (key: string) => `?tab=${key}`;
-export const listHref = "?liste=sachverhalte";
+// The list comes back with its own filter parameters, as the app passes them
+// (`listContextToParams`) — the case list's default is active, for accounting.
+export const listHref = "?state=active&disposition=accounting";
 export const partnerHref = "?partner=bp-4711";
 export const accountHref = (n: string) => `?account=${n}`;
 export const eventHref = (id: string) => `?event=${id}`;

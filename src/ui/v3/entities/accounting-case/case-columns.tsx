@@ -129,13 +129,13 @@ export function caseColumns({
       // — a button inside the sort link would be invalid HTML. Until now the
       // stories hung it into their own head by hand and covered the gap
       // (finding M9 of the acceptance of 0070, family-wide).
-      headerAside: <StatusInfoButton axis="sachverhalt" />,
+      headerAside: <StatusInfoButton axis="accounting_case" />,
       // 190 px, not 160: „Wartet auf Unterlagen" measures 179 px, and a state
       // that bursts its column is the colour without the word (V7).
       width: "190px",
       cell: (c) =>
         c.lifecycleStatus ? (
-          <StatusBadge axis="sachverhalt" status={c.lifecycleStatus} info={false} />
+          <StatusBadge axis="accounting_case" status={c.lifecycleStatus} info={false} />
         ) : (
           <span className="v2muted">—</span>
         ),

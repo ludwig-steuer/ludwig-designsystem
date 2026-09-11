@@ -71,5 +71,5 @@ export function visibleInBatchLog(action: string, outcome: string, view: BatchLo
 
 export function parseBatchLogView(raw: string | string[] | undefined): BatchLogView {
   const value = Array.isArray(raw) ? raw[0] : raw;
-  return value === "protokoll" || value === "technik" ? value : "verlauf";
+  return value === "protocol" || value === "technical" ? value : "timeline";
 }

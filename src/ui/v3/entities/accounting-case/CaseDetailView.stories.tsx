@@ -54,21 +54,21 @@ const SECTIONS: NavSection[] = [
 ];
 
 const TABS: TabItem[] = [
-  { key: "uebersicht", label: "Übersicht" },
+  { key: "overview", label: "Übersicht" },
   { key: "belege", label: "Belege", count: 2 },
   { key: "buchungen", label: "Buchungen", count: 1 },
   { key: "klaerungen", label: "Klärungen", count: 1, alarm: true },
   { key: "erwartungen", label: "Was fehlt", count: 1 },
   { key: "datev", label: "DATEV", dot: true },
-  { key: "plausibilitaet", label: "Plausibilität" },
-  { key: "verlauf", label: "Verlauf" },
+  { key: "plausibility", label: "Plausibilität" },
+  { key: "timeline", label: "Verlauf" },
 ];
 
 const head = (
   <EntityHeader
     overline="Eingangsrechnung · 2026-0412"
     title="Wartung der Klimaanlage"
-    status={<StatusBadge axis="sachverhalt" status="open" />}
+    status={<StatusBadge axis="accounting_case" status="open" />}
     meta="Kanzlei ist dran · Wirtschaftsjahr 2026"
     metric={{ label: "Gesamtbetrag", value: "1.249,90 €" }}
   />
@@ -141,7 +141,7 @@ export const Filled: Story = {
             actions={<TextButton href="#klaerung">Zur Klärung</TextButton>}
           />
         }
-        tabs={<Tabs items={TABS} active="uebersicht" ariaLabel="Sachverhalt" />}
+        tabs={<Tabs items={TABS} active="overview" ariaLabel="Sachverhalt" />}
         aside={strand}
       >
         {facts}
@@ -161,7 +161,7 @@ export const SingleEvent: Story = {
       <CaseDetailView
         pager={pager}
         header={head}
-        tabs={<Tabs items={TABS.slice(0, 3)} active="uebersicht" ariaLabel="Sachverhalt" />}
+        tabs={<Tabs items={TABS.slice(0, 3)} active="overview" ariaLabel="Sachverhalt" />}
       >
         <Card>
           <CardHead title="Verlauf" sub="1 Eintrag" />
@@ -202,7 +202,7 @@ export const Waiting: Story = {
           <EntityHeader
             overline="Eingangsrechnung · 2026-0498"
             title="Bewirtung Restaurant Adler"
-            status={<StatusBadge axis="sachverhalt" status="waiting_for_documents" />}
+            status={<StatusBadge axis="accounting_case" status="waiting_for_documents" />}
             meta="Mandant ist dran · wartet auf Unterlagen"
             metric={{ label: "Gesamtbetrag", value: "128,40 €" }}
           />
@@ -239,11 +239,11 @@ export const TabsWithCountAndDot: Story = {
         tabs={
           <Tabs
             items={[
-              { key: "uebersicht", label: "Übersicht" },
+              { key: "overview", label: "Übersicht" },
               { key: "klaerungen", label: "Klärungen", count: 3, alarm: true },
               { key: "datev", label: "DATEV", dot: true },
             ]}
-            active="uebersicht"
+            active="overview"
             ariaLabel="Sachverhalt"
           />
         }
@@ -283,7 +283,7 @@ export const InUse: Story = {
             actions={<TextButton href="#klaerung">Zur Klärung</TextButton>}
           />
         }
-        tabs={<Tabs items={TABS} active="uebersicht" ariaLabel="Sachverhalt" />}
+        tabs={<Tabs items={TABS} active="overview" ariaLabel="Sachverhalt" />}
         aside={strand}
       >
         {facts}

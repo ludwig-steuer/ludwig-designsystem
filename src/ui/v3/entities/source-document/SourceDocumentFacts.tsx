@@ -361,7 +361,7 @@ function groupBlock(
     if (document.collectionKind) {
       rows.push([
         "Klammer",
-        <StatusBadge key="k" axis="dokumentgruppe" status={document.collectionKind} info={false} />,
+        <StatusBadge key="k" axis="collection_kind" status={document.collectionKind} info={false} />,
       ]);
     }
     rows.push(["Teilbelege", <span key="n" className="v2num">{group.childCount}</span>]);
@@ -381,7 +381,7 @@ function groupBlock(
       "Klammer",
       <StatusBadge
         key="pk"
-        axis="dokumentgruppe"
+        axis="collection_kind"
         status={group.parentCollectionKind}
         info={false}
       />,

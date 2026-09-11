@@ -18,7 +18,7 @@ export const WithCounters: Story = {
       items={[
         { key: "alle", label: "Alle", count: 118 },
         { key: "offen", label: "Offen", count: 12 },
-        { key: "unterwegs", label: "Unterwegs", count: 3 },
+        { key: "in_transit", label: "Unterwegs", count: 3 },
         { key: "datev", label: "In DATEV", count: 103 },
       ]}
     />
@@ -76,8 +76,8 @@ export const TabsWithDot: Story = {
   render: () => (
     <Demo
       items={[
-        { key: "uebersicht", label: "Übersicht" },
-        { key: "rueckfragen", label: "Rückfragen", count: 2, alarm: true },
+        { key: "overview", label: "Übersicht" },
+        { key: "clarifications", label: "Rückfragen", count: 2, alarm: true },
         { key: "saldo", label: "Saldo & Konten", dot: true },
         { key: "plausi", label: "Plausibilität", dot: true, alarm: true },
         { key: "historie", label: "Historie", count: 12, dot: true },
@@ -113,11 +113,11 @@ export const Quiet: Story = {
     <div style={{ display: "grid", gap: 28 }}>
       <Demo
         items={[
-          { key: "uebersicht", label: "Übersicht" },
+          { key: "overview", label: "Übersicht" },
           { key: "details", label: "Details" },
-          { key: "positionen", label: "Positionen", count: 14 },
-          { key: "vorsteuer", label: "Vorsteuer", count: 2, alarm: true },
-          { key: "verlauf", label: "Verlauf" },
+          { key: "lines", label: "Positionen", count: 14 },
+          { key: "input_tax", label: "Vorsteuer", count: 2, alarm: true },
+          { key: "timeline", label: "Verlauf" },
           { key: "roh", label: "Rohdaten", quiet: true },
         ]}
       />
@@ -125,11 +125,11 @@ export const Quiet: Story = {
         ariaLabel="Beleg mit aktiven Rohdaten"
         active="roh"
         items={[
-          { key: "uebersicht", label: "Übersicht" },
+          { key: "overview", label: "Übersicht" },
           { key: "details", label: "Details" },
-          { key: "positionen", label: "Positionen", count: 14 },
-          { key: "vorsteuer", label: "Vorsteuer", count: 2, alarm: true },
-          { key: "verlauf", label: "Verlauf" },
+          { key: "lines", label: "Positionen", count: 14 },
+          { key: "input_tax", label: "Vorsteuer", count: 2, alarm: true },
+          { key: "timeline", label: "Verlauf" },
           { key: "roh", label: "Rohdaten", quiet: true },
         ]}
       />

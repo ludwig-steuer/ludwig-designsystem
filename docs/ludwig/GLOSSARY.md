@@ -230,8 +230,8 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `posting text`
 - German: `Buchungstext`
-- Definition: Der Freitext einer Buchung (`client_journal_entry.description`), der im DATEV-EXTF-Export in der Spalte „Buchungstext" landet. Konvention (F14-T14.5): kurz, deutsch, Nominalstil, **max. 60 Zeichen** (EXTF-Feldgrenze), Muster `<Kreditor-Kurzname> <Leistung> <Zeitraum>`; keine Konto-/Steuerinfos, keine Rechnungsnummer (die gehört in `external_document_number`/Belegfeld 1).
-- Data type: column `ludwig.client_journal_entry.description text` (Schema-Grenze 300, Konvention 60); Mandanten-Override `ludwig.platform_clients.posting_text_convention text` (Freitext, NULL = globaler Standard).
+- Definition: Der Freitext einer Teilbuchung (`client_journal_entry_line.line_description`), der im DATEV-EXTF-Export in der Spalte „Buchungstext" landet. Konvention (F14-T14.5): kurz, deutsch, Nominalstil, **max. 60 Zeichen** (EXTF-Feldgrenze), Muster `<Kreditor-Kurzname> <Leistung> <Zeitraum>`; keine Konto-/Steuerinfos, keine Rechnungsnummer (die gehört in `external_document_number`/Belegfeld 1).
+- Data type: column `ludwig.client_journal_entry_line.line_description text` (kein CHECK; das Agent-Tool nimmt bis 300 Zeichen an, der Export kürzt auf 60 mit Warnung — `buchung-offen` P36); Mandanten-Override `ludwig.platform_clients.posting_text_convention text` (Freitext, NULL = globaler Standard).
 - Notes: Der Standard ist eine **Playbook-Anweisung** (`get_guideline(name='playbook')` Phase 4), kein Schema-Constraint — keine harte Submit-Validierung. Der MCP-Agent liest `posting_text_convention` über `get_client_profile`; ist es gesetzt, überschreibt es den globalen Standard. Pflege über die Mandanten-Konfigurationsseite (Web).
 
 ### Journal entry line (Teilbuchung)

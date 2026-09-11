@@ -1,6 +1,6 @@
 import type { BookingCycleKind } from "@/ludwig/modules/datev-export";
 
-import { abnahmeStepApplies, LAST_REVIEW_STEP, NACHLESE_STEP, TRANSFER_STEP } from "./steps";
+import { reviewStepApplies, LAST_REVIEW_STEP, NACHLESE_STEP, TRANSFER_STEP } from "./steps";
 
 /**
  * Wer darf in der Abnahme was — abgeleitet aus dem Stapel-Zustand
@@ -24,7 +24,7 @@ export type StepAccess =
   /** Nicht klickbar — es gibt dort in diesem Zustand nichts zu sehen. */
   | "dimmed";
 
-export interface AbnahmeBanner {
+export interface ReviewBanner {
   tone: "info" | "warning" | "danger";
   text: string;
   /** Was der Zustand als Nächstes erlaubt — der Knopf steht im Kopf. */
@@ -37,12 +37,12 @@ export interface AbnahmeBanner {
   at?: string | null;
 }
 
-export interface AbnahmeGating {
+export interface ReviewGating {
   /** Darf die Kanzlei in den Schritten 0–8 überhaupt schreiben? */
   writable: boolean;
   /** Wohin „Öffnen" springt, wenn kein Schritt in der URL steht. */
   entryStep: number;
-  banner: AbnahmeBanner | null;
+  banner: ReviewBanner | null;
 }
 
 /**
@@ -52,12 +52,12 @@ export interface AbnahmeGating {
 const IN_TRANSFER = new Set(["ready", "exporting", "inspection", "failed"]);
 const IN_DATEV = new Set(["confirmed", "mirrored", "closed"]);
 
-export function abnahmeGating(state: string, at?: string | null): AbnahmeGating {
+export function reviewGating(state: string, at?: string | null): ReviewGating {
   const g = gatingOhneZeit(state);
   return g.banner ? { ...g, banner: { ...g.banner, at: at ?? null } } : g;
 }
 
-function gatingOhneZeit(state: string): AbnahmeGating {
+function gatingOhneZeit(state: string): ReviewGating {
   if (state === "agent") {
     return {
       writable: false,
@@ -140,9 +140,9 @@ function gatingOhneZeit(state: string): AbnahmeGating {
 export function stepAccess(state: string, step: number, kind: BookingCycleKind): StepAccess {
   // Was in dieser Stapelart nicht gilt, ist nicht gedimmt-weil-später, sondern
   // gar nicht da (F179) — der Rail blendet es aus.
-  if (!abnahmeStepApplies(step, kind)) return "dimmed";
+  if (!reviewStepApplies(step, kind)) return "dimmed";
   if (step === NACHLESE_STEP) return IN_DATEV.has(state) ? "readonly" : "dimmed";
-  const gating = abnahmeGating(state);
+  const gating = reviewGating(state);
   // Der Transportschritt ist immer lesbar: „was ginge jetzt raus?" ist auch vor
   // der Prüfung eine sinnvolle Frage (F178).
   if (step === TRANSFER_STEP) return IN_TRANSFER.has(state) ? "active" : "readonly";

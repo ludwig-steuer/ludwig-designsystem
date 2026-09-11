@@ -129,7 +129,7 @@ export function CaseFacts({
   if (c.documentNumberMode) {
     add(
       "Belegnummern",
-      <StatusBadge axis="belegnummern_modus" status={c.documentNumberMode} info={false} />,
+      <StatusBadge axis="document_number_mode" status={c.documentNumberMode} info={false} />,
     );
   }
 

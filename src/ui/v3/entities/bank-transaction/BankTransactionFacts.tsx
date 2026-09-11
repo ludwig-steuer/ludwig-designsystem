@@ -232,7 +232,7 @@ function Assignment({
             // once, and with three cases three word-identical marks stood
             // under each other (acceptance 0102). Same rule the column of
             // this family follows — there it sits in the head.
-            <StatusBadge key={c.caseId} axis="ereignis" status={state.value} info={i === 0} />,
+            <StatusBadge key={c.caseId} axis="event_booking" status={state.value} info={i === 0} />,
           ] as [React.ReactNode, React.ReactNode];
         }),
         // The rest, from the same source as the row: both forms have to say
