@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | **gebaut** — wartet auf fremde Abnahme |
 | Stufe | `patterns/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: woher ein Wert kommt — Maschine, Regel, Mensch, Import —, wer ihn gesetzt hat und warum, fragt jede Anwendung mit Vorschlägen und Importen |
 | Quelle | UI-Kit-Roadmap `docs/backlog/uikit-entity-roadmap-2026-09.md` (ludwig/app 9be34746), Abschnitt B, **B5** „Provenance / Rationale"; Reihenfolge laut Übergabe: B5 vor Entität #1 (Buchungssatz). Auftrag über `ludwig-manager`, 2026-09-11 |
@@ -146,6 +146,37 @@ Variabel (aus dieser Spec):
 - [ ] Das Wort der Herkunft kommt vom Aufrufer — das Pattern enthält keine Wortliste und keine Achse
 - [ ] „Von Hand korrigiert" steht nur, wenn gesetzt, mit wer und wann (`Corrected`)
 - [ ] In 360 px Breite kein Querlauf, kein Text in 16 px (`Edges`)
+
+## Gebaut 2026-09-11
+
+- `patterns/Provenance.tsx` mit `ProvenanceMark`, `ProvenanceNote` und den
+  Typen `Provenance`, `ProvenanceSource`; Export im Barrel unter „Prüfen".
+- **Abweichung von „Verhalten":** Server-Komponente, nicht Client —
+  `Disclosure` ist ein natives `<details>`, das Aufklappen braucht kein JS.
+- Die Zusammenfassung der Herleitung trägt Herkunft und Konfidenz, aber nicht
+  den Satz der Marke: die Begründung steht aufgeklappt direkt darunter, die
+  Vorlesehilfe hörte sie sonst zweimal.
+- Die Herleitung ist Prosa, keine Stammdaten: `FieldList` setzt Werte rechts,
+  hier stehen sie links in einer gemeinsamen Label-Spalte (Subgrid). Das ist
+  derselbe Umweg wie `.v2btxf__note` — Befund aus 0102, gehört zu 0058
+  (`FieldList` braucht eine Prosa-Zeile).
+- Ein langer Regel-Code bricht um (`overflow-wrap: anywhere`), statt quer zu
+  laufen.
+- Die Story `Mark` zeigt die Marke in einer Feldliste **und** in einer
+  Tabellenzelle; Quellenart in allen Stories über `EntityIcon`.
+- CSS `.v3prov*` am Ende von `v3.css`.
+
+## Messung (6107)
+
+| Kriterium | Ergebnis |
+|---|---|
+| `pnpm typecheck`, alle Wächter | grün |
+| Reihenfolge, fehlende Zeilen | `Note` Herkunft · Regel · Konfidenz · Begründung · Quellen; `Sparse` nur Herkunft; `Corrected` Herkunft · Begründung · Von Hand korrigiert |
+| Zusammenfassung zugeklappt | „KI-Vorschlag · (Konfidenz: Sicher · 92 %) · Agent · Lauf 4b19c2 · 31.07.2026" — die Konfidenz kompakt mit `aria-label` und `title` |
+| Satz der Marke | alle vier Marken in `Mark` mit `title` und gleichem Satz in `.v2vh`; mit `href` `A`, ohne `SPAN`; Begründung über 160 Zeichen gekürzt mit „…" |
+| Quellen | jede mit Zeichen (`svg`) und Wort; Zitat in „…"; Link nur bei `href` (2 von 3 in `Note`) |
+| Wort der Herkunft | fünf Marken in `Origins` aus `buchung_origin`; das Pattern enthält kein Wort einer Achse |
+| 360 px (`Edges`) | `scrollWidth` 360, kein Element über den Rand, kein Text in 16 px, 12 Quellen |
 
 ## Abnahme
 

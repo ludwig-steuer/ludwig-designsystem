@@ -3919,3 +3919,21 @@ a.v3period__cell:focus-visible { text-decoration: underline; }
 .v3period__legend li { display: inline-flex; align-items: center; gap: var(--space-1); }
 .v3period__empty { margin: 0; padding: var(--space-4) var(--space-5); font-size: var(--fs-ui); color: var(--color-text-muted); }
 
+/* --- Provenance (0163): the origin of a value beside it, and its derivation
+   one click further. The words come from the caller's axis. */
+.v3prov { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--fs-ui-sm); color: inherit; text-decoration: none; }
+a.v3prov:hover,
+a.v3prov:focus-visible { text-decoration: underline; }
+.v3prov__line { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--fs-ui-sm); }
+.v3prov__sources { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.v3prov__sources li { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
+.v3prov__kind { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-text-muted); }
+.v3prov__quote { color: var(--color-text-muted); }
+/* A derivation is prose, not master data: one label column for all rows
+   (subgrid), values reading left (V3) — the same workaround as .v2btxf__note,
+   finding of 0102 for 0058. A long rule code breaks instead of running wide. */
+.v3prov__note .v2fields { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-4); }
+.v3prov__note .v2fields__row { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+.v3prov__note .v2fields__row > :last-child { min-width: 0; text-align: left; font-weight: 400; }
+.v3prov__line .v2mono { overflow-wrap: anywhere; }
+

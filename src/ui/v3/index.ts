@@ -254,6 +254,12 @@ export {
   type ReconciliationPair,
 } from "./patterns/ReconciliationTable";
 export { PeriodGrid, type PeriodCell, type PeriodColumn, type PeriodRow } from "./patterns/PeriodGrid";
+export {
+  ProvenanceMark,
+  ProvenanceNote,
+  type Provenance,
+  type ProvenanceSource,
+} from "./patterns/Provenance";
 export { Timeline, type TimelineItem } from "./patterns/Timeline";
 export {
   ChoicePrompt,
