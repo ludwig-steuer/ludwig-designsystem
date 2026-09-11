@@ -160,3 +160,12 @@ Variabel (aus dieser Spec):
 
 Fremde Abnahme am 2026-09-11 durch die Prüfer-Session (Auftrag `ludwig-manager`), gegen 802b706: **fertig.** `Explained` 9 Sätze, 5 Import-Marken, die Buchungsweise mit dem Wort der Achse `regel_modus`; ohne `explain` 0 Sätze in `Filled`, `WithoutCriterion`, `Modes`, `All`, `InUse`, `Edges`; Reiter `Recurrence` im `split` 710 · 710 (bei 1280: 630 · 630), kein Querlauf, Sätze in `--fs-ui-sm`.
 
+## Nachtrag 2026-09-11 — die Sätze kommen aus der Domäne (L-293)
+
+Mit dem Spiegel-Lauf des F210-Fensters (App `c48d8042`, DS `6e92c0d`) liest
+`RecurringRuleFacts` die Erklärungen aus `RULE_SETTING_HELP`
+(`recurring-rules/domain/rule.ts`): je Einstellung ihr Satz und ob nur der
+Import sie setzt. Die festen Sätze im Set sind gestrichen; `say()` nimmt jetzt
+den Feldnamen statt des Satzes. Die Ausgabe ist wortgleich — die Sätze waren in
+beiden Repos dieselben —, die Stories bleiben unverändert.
+

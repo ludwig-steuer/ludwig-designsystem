@@ -88,7 +88,7 @@ if [ -d "$APP/.git" ]; then
   "appHash": "$HASH",
   "zweig": "$ZWEIG",
   "datum": "$(date +%Y-%m-%d)",
-  "hinweis": "Kopien aus ludwig/app — nie hier bearbeiten. Eingefroren bis zur Migration (Owner-Entscheid 2026-09-07)."
+  "hinweis": "Kopien aus ludwig/app — nie hier bearbeiten. Eingefroren (Owner-Entscheid 2026-09-07); jeder Lauf braucht eine Owner-Ausnahme und steht in docs/spiegel-vormerkungen.md."
 }
 JSON
   echo "Stand vermerkt: $ZWEIG ${HASH:0:8}"

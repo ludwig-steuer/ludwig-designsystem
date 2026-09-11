@@ -14,6 +14,22 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 Nichts.
 
+## Erledigt mit dem Lauf vom 2026-09-11 (App `c48d8042`)
+
+Owner-Ausnahme für das F210-Fenster (Simon, über `ludwig-manager`,
+2026-09-11), danach wieder eingefroren; der Spiegel steht auf `c48d8042`.
+DS-Commit `6e92c0d`. Angekommen sind: die **englischen Achsen-Schlüssel** der
+Registry (T210.1) · `CASE_LIST_TABS` englisch (`active`, `payments`,
+`waiting_for_documents`, `needs_clarification`, `to_close`, `all`) · englische
+Reiter- und Filter-Schlüssel (`CASE_TABS`, die Beleg-Reiter, `BatchListFilter`,
+`LogView`, `CaseExportStatus`) · `batch-review/domain` statt `stapelabnahme` ·
+`RULE_SETTING_HELP` (L-293) · `recurringRuleId` an `CaseEvent` und
+`TimelineEventVM` · `core/accounting/payment-account-kind.ts`, **neu in der
+Pfadliste** von `sync-ludwig.sh` (L-312).
+
+**Ein Behelf ist dabei gefallen:** die festen Erklärsätze in
+`RecurringRuleFacts` — die Sätze kommen jetzt aus `RULE_SETTING_HELP`.
+
 ## Erledigt mit dem Lauf vom 2026-09-10 (App `d76b7030`)
 
 Owner-Freigabe (Simon, 2026-09-10), danach wieder eingefroren. **Der erste
