@@ -125,7 +125,7 @@ Spiegel-Treffer (962, `DatevCoveragePanel` an `banks/[accountId]`) → Nennung
 **Im Set:** `SnapshotCard` (Kontext, Profil `datev-snapshot`),
 `ReconciliationTable` (0161, B1 — die Stories zeigen Paare mit
 `mirror_match`), `AccountEntryList` mit `source: "datev"` (Profil `account`) — deren Spalte
-„Herkunft" zeigt `mark_of_origin` heute als rohen Code (`AccountEntries.tsx:291`,
+„DATEV" zeigt `mark_of_origin` heute als rohen Code (`AccountEntries.tsx:291`,
 „SV"); sie zieht nach, sobald L-304 eine vollständige Wortliste bringt.
 
 ## Listen
