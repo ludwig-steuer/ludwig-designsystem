@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| Status | **analysiert** |
+| Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen 9373438), ohne Nacharbeit; siehe „Prüfung" |
 | GLOSSARY | `### Client`, `### Replay client (Replay-Mandant)`, `### Client number`, `### Mandanten-Profil`, `### Client onboarding`, `### Booking style`, `### Booking interval`, `### Booking closed until` — Ordner `entities/client/` |
 | Tabelle | `ludwig.platform_clients` — „A company or business entity managed by a tenant … A client belongs to exactly one tenant" (GLOSSARY). Keine Subtypen; der Replay-Mandant ist ein Mandant mit `replay_cutoff_date` |
 | Typen | `clients/domain/client.ts` — `ClientListItem`, `ClientDetail`. **Nicht im Spiegel:** die offene Arbeit je Mandant (`ClientOpenWork`, `OpenWorkCounts` in `accounting-cases/infrastructure/case-queries.ts:799/883`) → L-316; die Abbildung der Rechtsform (`LEGAL_FORM_MAP`, `onboarding/application/derive-client-config.ts:51`) → L-315 |
 | Status-Achsen | `mandant_betrieb` (aktiv · stillgelegt · Replay — abgeleitet aus `is_active` + `replay_cutoff_date`) · `mandant_onboarding` (`onboarding_state`, 6 Werte) · `mandant_onboarding_verdict` (abgeleitet) |
-| Wichtigkeit | **mittel** — Roadmap der App (9be34746) Rang 6; FK-Ziel von 44 Tabellen, aber fast überall Kontext der Route |
+| Wichtigkeit | **mittel** — Roadmap der App (9be34746) Rang 6; FK-Ziel von 45 Tabellen, aber fast überall Kontext der Route |
 | Datenstand | Staging über den Pooler, **2026-09-11**, schreibgeschützte Sitzung: **7 Mandanten in 2 Kanzleien** (6 + 1), 3 aktiv. Nur `SELECT`, keine Kundendaten; Beispielwerte erfunden |
 | Bestandswarnung | Sieben Zeilen tragen keine Verteilung: alle `ready`, alle `creditor`, alle `soll`, alle monatliche USt. **Das Mandanten-Profil ist leer:** `vat_specialties` und `expense_profile` sind bei allen sieben leere Listen (der Füllgrad 100 % täuscht), `business_model` und `industry` 0 %, Geschäftsbeschreibung und Leitlinien je bei einem |
 | Rückfrage | gestellt und **beantwortet** am 2026-09-11 (`ludwig-manager`, aus dem App-Stand): die Defaults der drei Fragen gelten; sechs Anwendungsfälle zugeordnet; keine Auswahl-Dialoge außer dem Switcher |
@@ -49,7 +49,7 @@ erDiagram
   CLIENT ||..o{ AUDIT_EVENT : "resource_kind client"
 ```
 
-Dazu 38 weitere Kind-Tabellen — der Mandant ist Kontext fast aller Daten.
+Dazu 39 weitere Kind-Tabellen — der Mandant ist Kontext fast aller Daten.
 
 ## Datenpunkte
 
@@ -136,7 +136,7 @@ sondern eine Spalte der ersten: die Zeile trägt den offenen Stapel als
 
 | Form | Größe | Empfehlung | Grund (§7 Nr.) | zeigt (Ränge) | Relationen | setzt auf | ersetzt |
 |---|---|---|---|---|---|---|---|
-| `ClientCell` | XS | ja | 3 — FK-Ziel von 44 Tabellen; genannt in Übersichten über Mandanten (0166), in Admin-Listen, im Verlauf | 1–3 (Name, DATEV-Nr im `title`, Betriebszustand als Wort bei stillgelegt/Replay) | — | `EntityIcon` (`client`), `StatusBadge` (`mandant_betrieb`) | die Nennungen im Dashboard und in Admin-Tabellen |
+| `ClientCell` | XS | ja | 3 — FK-Ziel von 45 Tabellen; genannt in Übersichten über Mandanten (0166), in Admin-Listen, im Verlauf | 1–3 (Name, DATEV-Nr im `title`, Betriebszustand als Wort bei stillgelegt/Replay) | — | `EntityIcon` (`client`), `StatusBadge` (`mandant_betrieb`) | die Nennungen im Dashboard und in Admin-Tabellen |
 | `ClientRow` | S | ja | 1 — Zeile der Dashboard-Tabelle | 1–7 | offene Arbeit als Zähler mit Weg, offener Stapel als `BatchCell` | `Row`/`DataTable`-Spalten, `KpiTile`-artige Zähler, `BatchCell` | Zeilen von `dashboard/page.tsx` |
 | `ClientList` | L | ja | 6 — Job „Meine Mandanten" | Zeile + Rahmen | — | `DataTable`, `ClientRow`, `FilterBar` (ab 20), `EmptyState` | Tabelle in `dashboard/page.tsx` |
 | `ClientFacts` | L | ja | 1 — drei Konfigurationsseiten (`stammdaten`, `uebersicht`, `profil`) zeigen dieselben Gruppen | alle ab 20 % in Gruppen: Rahmen (8), Konventionen (9), DATEV (10), Identität (11), Profil und Leitlinien (12) | Zahlungskonten-Defaults über `PaymentAccountCell` | `FieldList` je Gruppe, `LongText` | die Anzeige in `stammdaten`, `uebersicht`, `profil` |
@@ -165,8 +165,8 @@ Vier Formen „jetzt".
 
 Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 
-- **L-315** `legal_form` hält rohe DATEV-Codes: `S00009` (4), `S00001` (2), dazu einmal `GmbH` als Text. Die Abbildung `LEGAL_FORM_MAP` (`onboarding/application/derive-client-config.ts:51`) greift für diese Codes nicht und liegt in `application/`; die Domäne hat keine Wortliste.
-- **L-316** Die offene Arbeit je Mandant (`ClientOpenWork`, `OpenWorkCounts`) liegt in `accounting-cases/infrastructure/case-queries.ts:799/883` und wird nicht gespiegelt. Die Zeile des Dashboards hat im Set keinen Typ.
+- **L-315** `legal_form` hält rohe DATEV-Codes: `S00009` (4), `S00001` (2), dazu einmal `GmbH` als Text. `LEGAL_FORM_MAP` (`onboarding/application/derive-client-config.ts:51`, angewandt Z. 120) reicht unbekannte Werte durch und liegt in `application/`; gezeigt wird der Code in `configuration/stammdaten/page.tsx:46` und im `ClientMasterDataForm`. App P13, mit Owner-Frage: Bedeutung von `S00001` / `S00009` und die DATEV-Quelle der Liste sind im Repo nirgends erklärt.
+- **L-316** Die offene Arbeit je Mandant (`ClientOpenWork`, `OpenWorkCounts`) liegt in `accounting-cases/infrastructure/case-queries.ts:799/883` und wird nicht gespiegelt. Die Zeile des Dashboards hat im Set keinen Typ. App P32.
 - **L-317** Das GLOSSARY nennt für den Buchungsstil noch `kreditorisch` / `direkt`, der Bestand trägt `creditor` (App cccccac1). Dasselbe gilt für den CHECK in `datenmodell.json`. **Kein eigener Eintrag:** Verweis auf den Doku-Sweep F210 T210.6 und den Generator nach dem db-reset.
 
 ## Offene Fragen
@@ -185,7 +185,9 @@ dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
 
 | Zeile / Form | Einwand | Ergebnis | Geprüft von / am |
 |---|---|---|---|
-| | | | |
+| Kopf, Datenpunkte, Relationen, §7–§9 | 55 Spalten verortet, CHECKs = Registry-Achsen; Domäne, Application und Aufrufer wie beschrieben; alle Aggregate reproduziert; 0169 als Backlog korrekt | bestätigt, ohne Nacharbeit | Prüfer-Session, 2026-09-11 |
+| Wichtigkeit · `ClientCell` · Schaubild | `platform_clients` ist FK-Ziel von 45 Tabellen (45 Constraints in `schema.ts`, 45 auf Staging), nicht 44 | geändert | Prüfer-Session, 2026-09-11 |
+| L-315, L-316 | App-Nachzählung ohne Abweichung in der Sache; `LEGAL_FORM_MAP` reicht unbekannte Werte durch | L-315 → App P13 (mit Owner-Frage), L-316 → App P32 | ludwig-manager (ludwig-worker), 2026-09-11 |
 
 ## Weiter
 
