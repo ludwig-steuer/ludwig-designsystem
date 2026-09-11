@@ -56,11 +56,11 @@ erDiagram
   BUSINESS_PARTNER ||--o{ JOURNAL_ENTRY : "18 % · je Partner p50 1 · max 20"
   JOURNAL_ENTRY ||--|{ JOURNAL_ENTRY_LINE : "p50 2 · p90 3 · max 36"
   LEDGER_ACCOUNT ||--o{ JOURNAL_ENTRY_LINE : "je Konto p50 2 · p90 7 · max 340 Sätze"
-  JOURNAL_ENTRY |o--o| DATEV_MIRROR_ENTRY : "319 Köpfe · 348 Spiegelzeilen (L-298)"
+  JOURNAL_ENTRY |o--o| DATEV_MIRROR_ENTRY : "319 Kopf-Kanten · 29 Aufteilungs-Zeilen an 14 Sätzen (L-298)"
   JOURNAL_ENTRY ||--o{ EXPECTATION : "89 Erwartungen"
   JOURNAL_ENTRY |o--o| JOURNAL_ENTRY : "Storno · 0 %"
   ACCOUNTING_CASE ||..o{ JOURNAL_ENTRY : "über das Ereignis · 55 % ohne · p90 2 · max 493"
-  JOURNAL_ENTRY ||..o{ AUDIT_EVENT : "0 — kein resource_kind (L-297)"
+  JOURNAL_ENTRY ||..o{ AUDIT_EVENT : "über den Sachverhalt: booking.accept 166 (L-297)"
 ```
 
 ## Datenpunkte
@@ -79,7 +79,7 @@ erDiagram
 | Geschäftspartner (`business_partner_id`) | Eltern | Kontext | 18 % (`ai_proposed` 37 %) | — | Server (aus den Zeilen) | 10 | M | Füllgrad unter 20 % · GLOSSARY (Denormalisierung für OPOS) |
 | Stapel und Export (`export_batch_id` · `exported_at` · `export_ref`) | Eltern · Spalten | Kontext | 92 % · 39 % · 99 % | `JournalEntryView` (`exportFileName`, `exportRef`, `exportBatchId`, `exportBatchState`) | Server | 11 | L | Füllgrad · heute in |
 | Herleitung (`proposal_rationale`: `agent_rationale`, `judge`, `sources`, `step`, `belegfeld_source`, `guard_warnings`) | Spalte, jsonb **ohne Typ** (L-295) | Erklärung | 52 % — Schlüssel: `step` 857 · `agent_rationale` 857 · `judge` 797 (Liste) · `sources` 722 · `belegfeld_source` 538 · `guard_warnings` 88 · `withdrawn_by_agent` 87 | `BookingProposalView`/`KIBox`, `BookingRationale`, `RationaleSources`; im Set `AiBookingNotes` | Agent | 12 | L | Füllgrad · Begründung p50 281 · p90 652 · max 2.459 Zeichen · Quellen je Satz p50 1 · p90 2 · max 4 (Beleg 363, Bankzeile 378, Lieferanten-Historie 119, Regel 47, Klärung 12, Gesetz 6) |
-| Annahme (`acceptance_quality` · `reviewed_at`) | Spalten | Verantwortung | 38 % · 36 % (nur `accepted`: unverändert 627 · bearbeitet 15 · von Hand 3 · leer 27) | Kennzahl „Annahmequalität" (`acceptance-quality.ts`), `JournalEntryView` (`originLabel()`, lokale Wortliste Z. 18–30) | Server | 13 | L | Füllgrad · **wer** fehlt: `reviewed_by_user_id` 0 % (L-297) |
+| Annahme (`acceptance_quality` · `reviewed_at`) | Spalten | Verantwortung | 38 % · 36 % (nur `accepted`: unverändert 627 · bearbeitet 15 · von Hand 3 · leer 27) | Kennzahl „Annahmequalität" (`acceptance-quality.ts`), `JournalEntryView` (`originLabel()`, lokale Wortliste Z. 18–30) | Server | 13 | L | Füllgrad · **wer**: `reviewed_by_user_id` hat keinen Schreiber; Einzel-Annahmen stehen im Verlauf des Sachverhalts (L-297) |
 | Beleggruppe (`document_group`) | Spalte, Server-Stempel | Kontext | 100 % — `bank` 593 · `outgoing_invoices` 567 · `cash` 340 · `incoming_invoices` 198 · `general_ledger` 22 | `BuchungenTabelle` (Abschnitte) | Server | 14 | L | GLOSSARY Satzart („sortiert den Stapel für die Ablage") · `DOCUMENT_GROUP_LABEL` |
 | Mandantenstapel (`import_reference` · `batch_import_id`) | Spalte · Eltern | Kontext | 48 % = alle `client_import` | — | nie | 15 | L | Füllgrad |
 | Beleglink (`source_document_link`) | Spalte | Kontext | 29 % | — | nie | 16 | L | Füllgrad · Spaltenkommentar F72 |
@@ -116,11 +116,11 @@ der Herleitung steht in der Marke als ein Satz bis 160 Zeichen
 | Geschäftspartner (`business_partner_id`) | Eltern | 18 % · Sätze je Partner p50 1 · p90 6 · max 20 | Kontext | M | **Inline** `BusinessPartnerCell` | Staging |
 | Agent-Lauf (`agent_run_id`) | Eltern | 42 % (`ai_proposed` 83 %) | Verantwortung | L | **Inline** in `ProvenanceNote` („wer") | Staging |
 | Mandantenstapel-Lauf (`batch_import_id`) | Eltern | 48 % = alle `client_import` | Kontext | L | **Inline** | Staging |
-| DATEV-Spiegelbuchung | Eltern (Kopf) und Kind (Spiegel-Seite) | 319 Köpfe zeigen hin, 348 Spiegelzeilen zurück — nur an `accepted` (L-298) | Zustand (`buchung_datev`) | S | als **Stufe** in S · **Inline** `MirrorEntryCell` in L → Profil `datev-mirror-entry` (Roadmap #2) | Staging |
+| DATEV-Spiegelbuchung | Eltern (Kopf) und Kind (Spiegel-Seite) | 319 Kopf-Kanten; dazu 29 `matched_split`-Zeilen an 14 Sätzen, deren Kopf-Spalte gewollt leer bleibt — nur an `accepted` (L-298) | Zustand (`buchung_datev`) | S | als **Stufe** in S · **Inline** `MirrorEntryCell` in L → Profil `datev-mirror-entry` (Roadmap #2) | Staging |
 | Erwartungen (`origin_journal_entry_id`) | Kind | 89 Erwartungen tragen einen Satz als Ursprung | Kontext | L | **Liste** über `ExpectationRow` ✓ → Profil `expectation` (Roadmap #10) | Staging |
 | Storno (`reverses_entry_id`) | Selbstbezug | 0 % | Zustand | L | **Inline**, nur wenn gesetzt | Staging |
 | Rechnungsspur (`client_invoice_traces.journal_entry_id`) | Kind | 0 | — | — | nicht gezeigt | Staging |
-| Verlauf (`platform_audit_events`) | ohne FK | **0** — kein `resource_kind` für den Buchungssatz unter rund 10.400 Ereignissen | Verantwortung | L | fehlt (L-297) | Staging |
+| Verlauf (`platform_audit_events`) | ohne FK | kein eigener `resource_kind`; Einzel-Annahmen stehen als `booking.accept` am Sachverhalt (166, immer mit Person), Sammel-Annahmen gar nicht | Verantwortung | L | **Liste** über den Verlauf des Sachverhalts (`Log`, 0053) — Lücke L-297 | Staging |
 
 ## Heutige Darstellung
 
@@ -209,11 +209,11 @@ Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 - **L-294** Wortlisten fehlen im Spiegel: Die Satzart (`ENTRY_KIND_LABEL`, `core/accounting/entry-kind.ts`) wird nicht gespiegelt, und `acceptance_quality` hat weder Achse noch Wortliste — `JournalEntryView` baut sich deshalb eine lokale (`originLabel()`, Z. 18–30). `JournalEntryVM` und `JournalEntryListItem` tragen weder `entryKind` noch `documentGroup`.
 - **L-295** `proposal_rationale` ist jsonb ohne Typ. Die Schlüssel sind `step`, `agent_rationale`, `judge` (Liste), `sources`, `belegfeld_source` (neun Werte), `guard_warnings`, `withdrawn_by_agent` und acht seltene. Die Domäne typisiert nur `sources`; `JournalEntryVM.rationale` flacht zu `string`.
 - ~~**L-296**~~ doppelt zu **L-284**, in der App erledigt (cccccac1 — `reversed` heißt „Zurückgezogen"). War: `reversed` ohne Storno-Buchung: Von 86 Sätzen hat keiner `reverses_entry_id`, 85 tragen `withdrawn_by_agent`. Die Registry sagt „Durch eine Storno-Buchung aufgehoben", und das stimmt für keinen.
-- **L-297** Wer angenommen hat, ist nicht nachvollziehbar: `reviewed_by_user_id` 0 % bei 616 gesetzten `reviewed_at`; `platform_audit_events` kennt keinen `resource_kind` für den Buchungssatz.
-- **L-298** Zwei Kanten für ein Paar mit Spiegelbuchung: `client_journal_entry.datev_mirror_entry_id` 319 gegen `client_datev_mirror_entries.matched_journal_entry_id` 348. `deriveEntryDatevStage()` liest nur die erste.
-- **L-299** `JournalEntryListItem` flacht Splits: ein Soll-, ein Haben-Konto, ein Belegfeld, ein Text. 177 Sätze (10 %) haben mehr als zwei Zeilen (max 36), 173 mehr als einen Buchungstext, 16 mehr als ein Belegfeld 1.
-- **L-300** `datenmodell.json` ist veraltet: `entry_kind`, `document_group` und `source_doc_id` fehlen, `beleggruppe` steht noch drin (Roadmap-Kopf: „die JSON ist nachzuziehen").
-- **L-301** Drei Teilbuchungen tragen einen Buchungstext über 60 Zeichen (max 124; zweimal `manual`, einmal `ai_proposed`). Die EXTF-Grenze ist 60, der Schema-CHECK erlaubt 300.
+- **L-297** Sammel-Annahmen schreiben weder Person noch Ereignis: Einzel-Annahmen stehen als `booking.accept` im Verlauf des Sachverhalts (166-mal, immer mit Person); die drei Sammelwege in `close-actions.ts` schreiben nichts, und `reviewed_by_user_id` hat keinen Schreiber. App P33.
+- **L-298** Keine zwei Wahrheiten — 348 = 319 Kopf-Kanten + 29 Aufteilungs-Zeilen an 14 Sätzen —, aber `deriveEntryDatevStage()` liest nur die Kopf-Kante: 14 aufgeteilte Sätze zeigen „exportiert" statt „in DATEV". App P34.
+- **L-299** Der flache `JournalEntryListItem` (ein Konto je Seite) wird nur von `CreditorRecentBookingsCard` gerendert; `BuchungenTabelle` fasst die Konten schon zusammen (`string_agg`). Für die Zeile gilt trotzdem: bei 177 Sätzen mit mehr als zwei Zeilen sagt sie „+n". App P35.
+- **L-300** `datenmodell.json` ist veraltet: `entry_kind`, `document_group` und `source_doc_id` fehlen, `beleggruppe` steht noch drin (Roadmap-Kopf: „die JSON ist nachzuziehen") — wird per Generator gelöst.
+- **L-301** Die 60-Zeichen-Grenze greift erst beim Export: drei Teilbuchungen tragen mehr (max 124), Ludwig kürzt beim Export mit Warnung (`build-buchungsstapel-csv.ts:1299`); DATEV schneidet nicht. Die 300 sind die zod-Grenze des Agent-Tools, kein CHECK. App P36.
 
 ## Offene Fragen
 
@@ -237,7 +237,8 @@ dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
 | Liste „Export-Bucket" | Sätze je Mandantenjahr p50 89 (6 Mandantenjahre), nicht 128 | geändert | Prüfer-Session, 2026-09-11 |
 | Liste „Export-Bucket" (§8) | weicht in 3 von 5 Merkmalen ab — nach §8 eigentlich eine eigene Komponente | Prop-Begründung vertretbar; die Spec beweist die drei Ausprägungen mit je einer `InUse`-Story (in den Startprompt übernommen) | Prüfer-Session, 2026-09-11 |
 | Konfidenz-Verteilung | „737 von 887 im obersten Fünftel" nicht reproduzierbar; bei ≥ 0,8 sind es 774 | geändert auf 774 | Prüfer-Session, 2026-09-11 |
-| GLOSSARY „Posting text" | nennt noch `client_journal_entry.description` — der Text liegt an der Teilbuchung | an die App (Manager) | Prüfer-Session, 2026-09-11 |
+| GLOSSARY „Posting text" | nennt noch `client_journal_entry.description` — der Text liegt an der Teilbuchung | in der App berichtigt (`line_description`; die 300 sind die zod-Grenze des Agent-Tools) | Prüfer-Session, 2026-09-11 |
+| Befunde L-297, L-298, L-299, L-301 | Staging-Nachzählung der App: Einzel-Annahmen sind auditiert; 348 = 319 + 29 Aufteilungs-Zeilen; der flache Listeneintrag hat nur einen Aufrufer; Ludwig kürzt beim Export selbst | berichtigt; App P33–P36; L-300 per Generator | ludwig-manager (ludwig-worker), 2026-09-11 |
 
 ## Weiter
 

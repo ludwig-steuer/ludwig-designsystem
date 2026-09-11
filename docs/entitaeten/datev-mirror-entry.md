@@ -46,7 +46,7 @@ erDiagram
   DATEV_SEQUENCE ||..o{ MIRROR_ENTRY : "accounting_sequence_id (Text) · je Stapel p50 26 · p90 219 · max 3.332"
   MIRROR_ENTRY ||--|{ MIRROR_ENTRY_LINE : "p50 2 · p90 3 · max 5"
   LEDGER_ACCOUNT ||..o{ MIRROR_ENTRY_LINE : "account_number · je Konto p50 4 · p90 25 · max 5.965"
-  MIRROR_ENTRY |o--o| JOURNAL_ENTRY : "348 hin · 319 zurück (L-298)"
+  MIRROR_ENTRY |o--o| JOURNAL_ENTRY : "319 Kopf-Kanten + 29 Aufteilungs-Zeilen an 14 Sätzen"
   ACCOUNTING_CASE ||..o{ MIRROR_ENTRY : "ludwig_case_number (Text) · 2 % · je Nummer p50 1 · max 25"
   MIRROR_ENTRY ||--o{ BANK_TRANSACTION_MATCH : "962 Treffer · max 2 je Satz"
   MIRROR_ENTRY ||--o{ ACCOUNTING_EVENT : "183 Ereignisse"
@@ -93,7 +93,7 @@ außer in S, dort ab p90 38 mit `title`. Belegfeld 1 max 36 — nie gekürzt.
 | Konten (über `account_number`, Text) | Eltern, ohne FK | je Konto und Mandant p50 4 · p90 25 · p99 289 · max 5.965 | Identität | XS | **Inline** `AccountCell` mit Weg zum Konto-Drawer; die Liste je Konto ist `AccountEntryList` (Profil `account`), nicht hier | Staging |
 | DATEV-Stapel (`accounting_sequence_id` → `client_datev_sequences`, Text) | Eltern, ohne FK | 567 Stapel · je Stapel p50 26 · p90 219 · max 3.332 | Kontext | S | **Inline** (Stapelnummer, festgeschrieben ja/nein) · Liste „Inhalt eines Stapels" | Staging · J-20 |
 | Snapshots (`first_seen` / `last_seen`) | Eltern | 100 % · Snapshots je Mandant p50 6 · min 2 · max 12 | Zeit | L | **Inline** (Stichtag) · Kontext `SnapshotCard` ✓ | Staging |
-| Buchungssatz | Eltern und Kind | 348 Spiegelsätze zeigen hin, 319 Buchungssätze zurück (L-298) | Zustand | L | **Inline** `JournalEntryCell` · Paar in der Nachlese (`ReconciliationTable`, 0161) | Staging |
+| Buchungssatz | Eltern und Kind | 348 Spiegelsätze zeigen hin: 319 über die Kopf-Kante des Buchungssatzes, 29 `matched_split`-Zeilen an 14 aufgeteilten Sätzen (dort bleibt die Kopf-Spalte gewollt leer) | Zustand | L | **Inline** `JournalEntryCell` · Paar in der Nachlese (`ReconciliationTable`, 0161) | Staging |
 | Sachverhalt (`ludwig_case_number`, Text) | Eltern, ohne FK | 627 Nummern · je Nummer p50 1 · p90 2 · max 25 | Kontext | M | **Inline** `CaseCell` · Liste am Sachverhalt | Staging · `CaseDatevTruthTab` |
 | Bankzeilen-Treffer (`client_bank_transaction_matches.mirror_entry_id`) | Kind | 962 Treffer an 961 Sätzen, max 2 | Kontext | L | **Inline** `BankTransactionCell` | Staging |
 | Ereignisse (`client_accounting_event.datev_mirror_entry_id`) | Kind | 183 | Kontext | L | **Inline** → Profil `accounting-event` | Staging |
@@ -166,7 +166,7 @@ Fünf Formen „jetzt" — die Obergrenze.
 ## Befunde für `ludwig/app`
 
 Alle zusätzlich als Zeile in `docs/befunde-app.md`. Dazu gehören hierher, schon
-geführt: **L-298** (zwei Kanten Buchungssatz ↔ Spiegel), **L-221** (Achse
+geführt: **L-298** (`deriveEntryDatevStage()` liest nur die Kopf-Kante — 14 aufgeteilte Sätze zeigen „exportiert"), **L-221** (Achse
 `abgleich_lauf` ohne Wort für die Bridge-Störung), **L-30** (der DATEV-Auszug
 kennt keinen Saldo).
 
