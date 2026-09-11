@@ -4,7 +4,7 @@
 |---|---|
 | Status | Entwurf |
 | Route | `ludwig/app`: `app/(app)/clients/[clientSlug]/[year]/banks/[accountId]/page.tsx` |
-| Heute gebaut in | `modules/bank-transactions/ui/KontoauszugView.tsx` (631 Z.), `kontoauszug-presentation.tsx` |
+| Heute gebaut in | `app/(app)/clients/[clientSlug]/[year]/banks/[accountId]/page.tsx` (264 Z.) mit `PageHeader` (Z. 215) und `BankTransactionList` (Z. 241) des Sets; Helfer in `kontoauszug-presentation.tsx` (178 Z.). `KontoauszugView.tsx` gibt es nicht mehr (Prüfung `payment-account`, 2026-09-11) |
 | Entitäten | Kontoauszugsposition (`bank-transaction`), am Rand Sachverhalt und Konto |
 | Baustein in v3 | `entities/bank-transaction/bank-transaction-columns.tsx` (0101) — die Liste selbst ist 0085 |
 | Fachliche Quelle | Entitätsprofil `docs/entitaeten/bank-transaction.md`, Abschnitt „Listen" (Status `geprüft`, 2026-09-05) |
