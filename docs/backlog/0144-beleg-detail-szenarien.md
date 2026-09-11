@@ -431,3 +431,32 @@ Code. Alles nachgezogen. Und das Falz-Kriterium trägt die Präzisierung jetzt
 **selbst**, statt sie im Baubericht zu verstecken — dort hatte sie die
 Abnahme zwar gefunden, aber ein Kriterium, dessen Lesart woanders steht, ist
 zwei Runden später wieder strittig.
+
+## Nachtrag 2026-09-11 — Beleg, der eine Angabe braucht
+
+Quelle: Design-Brief `docs/backlog/beleg-angabe-noetig-design-brief.md`
+(ludwig/app 4a426f90, überbracht von `ludwig-cto`), Owner-Entscheid vom
+selben Tag: **eine fehlende Angabe wird an genau einer Stelle beantwortet —
+am Beleg, in der Mängel-Box rechts.** Die Eingangsliste zeigt nur Zustand und
+Weg. Der führende Zustand im Kopf ist der, der etwas will.
+
+| Eingang | Kopf | Mängel-Box | Story |
+|---|---|---|---|
+| `awaiting_input`, Konten da | `beleg_inbox` „Angabe nötig" statt „Offen" | Zahlungskonto fehlt: `PaymentAccountField` + „Auszug importieren" (secondary, sm), gesperrt bis zur Wahl; nach dem Import keine Box, Kopf wieder `SourceDocumentCompletion` | `StatementChooseAccount` (A5) |
+| `awaiting_input`, keine Konten | dito | Feld leer, Import gesperrt, „Zahlungskonto anlegen →" | `StatementWithoutAccount` (A5b) |
+| `classification_failed` | `beleg_inbox` „Einordnung fehlgeschlagen" | keine; Signal wie bisher | `BeingClassified`, zweiter Rahmen (gab es schon) |
+| alles andere, nicht erledigt | „Offen" wie bisher | nach `docDefects` | unverändert |
+| erledigt | Erledigung — immer, auch wenn der Eingang noch `awaiting_input` trüge | keine | unverändert |
+
+Umgesetzt in `DocumentPage`: `inboxLeads` = nicht erledigt und Eingang
+`awaiting_input` oder `classification_failed` → `StatusBadge axis="beleg_inbox"`,
+sonst `SourceDocumentCompletion`. Keine neue Komponente, keine neue Farbe
+(warning, danger, info wie A7).
+
+**Wortlaut:** der Brief schreibt „Einordnung gescheitert"; die Registry
+beschriftet `classification_failed` mit **„Einordnung fehlgeschlagen"**, und
+der Kopf nimmt das Wort der Registry. Ändern müsste es die App.
+
+Eine Story der Eingangsliste gibt es im Set nicht — laut Brief wird keine
+angelegt.
+

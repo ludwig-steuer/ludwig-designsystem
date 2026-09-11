@@ -31,6 +31,7 @@ import {
   historyHref,
   inputTaxHref,
 } from "./fixtures";
+import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 
 /**
  * The frame every scenario of 0144 is drawn in — pager, head, signal, tabs,
@@ -72,6 +73,9 @@ export function DocumentPage({
   // Positions and input tax only exist where there is an invoice row.
   const tabs = document.hasInvoiceRow ? DOCUMENT_TABS : DOCUMENT_TABS_WITHOUT_INVOICE;
 
+  const inboxLeads =
+    !document.completedAt &&
+    (document.inboxStatus === "awaiting_input" || document.inboxStatus === "classification_failed");
   return (
     <SourceDocumentView
       pager={
@@ -90,10 +94,17 @@ export function DocumentPage({
           icon={<EntityIcon entity="source-document" />}
           overline={art}
           title={title}
-          // **One** state, and it comes from `SourceDocumentCompletion`, which
-          // already carries this decision — the rebuild here lost the reason in
-          // the tooltip and the date, both required by R9.
-          status={<SourceDocumentCompletion document={document} />}
+          // **One** state. It comes from `SourceDocumentCompletion` — unless the
+          // inbox wants something from the reader (owner 2026-09-11): an answer is
+          // missing or the classification failed. Then that leads, until the
+          // document is completed; completion always wins.
+          status={
+            inboxLeads ? (
+              <StatusBadge axis="beleg_inbox" status={document.inboxStatus ?? ""} />
+            ) : (
+              <SourceDocumentCompletion document={document} />
+            )
+          }
           {...(actions ? { actions } : {})}
         />
       }

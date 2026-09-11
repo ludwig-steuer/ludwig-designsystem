@@ -242,10 +242,17 @@ export const StatementAssigned: Story = {
  * Die Kandidaten werden **vorgelegt, nicht geraten** (`bank.md` R4/R5), und
  * das Feld ist `PaymentAccountField` (0145) — es trennt die geführten Konten
  * von den 24 Karteileichen des Kontenrahmens.
+ *
+ * **Seit 2026-09-11 (Owner) wird die Angabe nur hier gegeben**, in der
+ * Mängel-Box — die Eingangsliste zeigt nur den Zustand und den Weg. Der Kopf
+ * sagt „Angabe nötig" (Achse `beleg_inbox`) statt „Offen": der Zustand, der
+ * etwas will, führt. „Auszug importieren" greift, sobald ein Konto gewählt ist;
+ * danach verschwindet die Box und der Kopf zeigt wieder die Erledigung.
  */
 export const StatementChooseAccount: Story = {
-  render: function Waehlen() {
+  render: function ChooseAccount() {
     const [account, setAccount] = useState<string | null>(null);
+    const [imported, setImported] = useState(false);
     const doc = documentFixture({
       sourceDocType: "bank_statement_pdf",
       fileName: "Kontoauszug-2026-08.pdf",
@@ -254,6 +261,8 @@ export const StatementChooseAccount: Story = {
       completedVia: null,
       detail: null,
       hasInvoiceRow: false,
+      // F170: the statement is recognised, its account is not in the file.
+      inboxStatus: imported ? "classified" : "awaiting_input",
     });
     return (
       <DocumentPage document={doc} actions={menu}>
@@ -261,31 +270,29 @@ export const StatementChooseAccount: Story = {
           document={doc}
           previewUrl={MUSTER_PDF}
           summary={null}
-          // The defect comes from `docDefects()`: `awaiting_input` means the
-          // statement waits for its account (F170). The **way** is the field
-          // itself — a defect without a way would only be a message (L-268).
-          defects={
-            <SourceDocumentDefects
-              defects={documentDefects({ inboxStatus: "awaiting_input" })}
-              actions={{
-                payment_account: (
-                  <div style={{ minWidth: 320 }}>
-                    <PaymentAccountField
-                      id="a5-konto"
-                      value={account}
-                      onChange={setAccount}
-                      accounts={ACCOUNTS}
-                    />
-                    {account ? (
-                      <p className="v2muted" style={{ margin: "8px 0 0" }}>
-                        Gewählt — die Zuordnung greift beim nächsten Import.
-                      </p>
-                    ) : null}
-                  </div>
+          // The defect comes from `docDefects()`; its **way** is the field and
+          // the import — a defect without a way would only be a message (L-268).
+          {...(imported
+            ? {}
+            : {
+                defects: (
+                  <SourceDocumentDefects
+                    defects={documentDefects({ inboxStatus: "awaiting_input" })}
+                    actions={{
+                      payment_account: (
+                        <div style={{ display: "grid", gap: 8, minWidth: 320 }}>
+                          <PaymentAccountField id="a5-konto" value={account} onChange={setAccount} accounts={ACCOUNTS} />
+                          <div>
+                            <Button variant="secondary" size="sm" disabled={!account} onClick={() => setImported(true)}>
+                              Auszug importieren
+                            </Button>
+                          </div>
+                        </div>
+                      ),
+                    }}
+                  />
                 ),
-              }}
-            />
-          }
+              })}
         />
       </DocumentPage>
     );
@@ -300,6 +307,9 @@ export const StatementChooseAccount: Story = {
  * gesperrt, und daneben steht der Weg in die Stammdaten. **Kein Auto-Anlegen**
  * — ein Zahlungskonto, das aus einem Beleg entsteht, wäre ein Konto, das
  * niemand entschieden hat (`bank.md` R4/R5).
+ *
+ * Seit 2026-09-11 in derselben Mängel-Box wie A5 und mit demselben Kopf
+ * „Angabe nötig"; der Import bleibt gesperrt, bis es ein Konto gibt.
  */
 export const StatementWithoutAccount: Story = {
   render: () => {
@@ -311,27 +321,33 @@ export const StatementWithoutAccount: Story = {
       completedVia: null,
       detail: null,
       hasInvoiceRow: false,
+      inboxStatus: "awaiting_input",
     });
     return (
       <DocumentPage document={doc} actions={menu}>
-        <Card>
-          <CardHead title="Zu klären" sub="1 Befund an diesem Beleg" />
-          <div style={{ padding: 16, display: "grid", gap: 12 }}>
-            <p className="v2muted" style={{ margin: 0 }}>
-              <strong>Kein Zahlungskonto passt.</strong> Weder die IBAN noch der Name im
-              Auszug führen zu einem Konto dieses Mandanten.
-            </p>
-            <div style={{ maxWidth: 420 }}>
-              <PaymentAccountField id="a5b-none" value={null} onChange={() => {}} accounts={[]} />
-            </div>
-            <div>
-              <Button variant="secondary" size="sm" href="?stammdaten=zahlungskonten">
-                Zahlungskonto anlegen
-              </Button>
-            </div>
-          </div>
-        </Card>
-        <SourceDocumentCard document={doc} previewUrl={MUSTER_PDF} summary={null} />
+        <SourceDocumentCard
+          document={doc}
+          previewUrl={MUSTER_PDF}
+          summary={null}
+          defects={
+            <SourceDocumentDefects
+              defects={documentDefects({ inboxStatus: "awaiting_input" })}
+              actions={{
+                payment_account: (
+                  <div style={{ display: "grid", gap: 8, minWidth: 320 }}>
+                    <PaymentAccountField id="a5b-none" value={null} onChange={() => {}} accounts={[]} />
+                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                      <Button variant="secondary" size="sm" disabled>
+                        Auszug importieren
+                      </Button>
+                      <TextButton href="?stammdaten=zahlungskonten">Zahlungskonto anlegen →</TextButton>
+                    </div>
+                  </div>
+                ),
+              }}
+            />
+          }
+        />
       </DocumentPage>
     );
   },
