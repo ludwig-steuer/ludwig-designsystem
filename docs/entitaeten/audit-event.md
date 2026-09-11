@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **analysiert** |
+| Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen 01d269a/d7cdb00); Zahlen-Nacharbeiten und die Nachzählung der App eingearbeitet, siehe „Prüfung" |
 | GLOSSARY | `### Audit event` — Ordner `entities/audit-event/` (bleibt leer, siehe Formen) |
 | Tabelle | `ludwig.platform_audit_events` — „Generisches Audit-Log: Nutzer-/Systemaktionen mit Actor, Action, Outcome und optionalem Resource-/Tenant-Kontext. Immutable (kein updated_at)." (Tabellenkommentar). Polymorph über `resource_kind` / `resource_id` — die Historie **jeder** Entität |
 | Typen | `audit-log/domain/types.ts` — `ACTOR_KINDS`, `AuditOutcome`, `AuditSource`, `AuditEvent`, `AuditEventFilter`, **`auditEventToLogEntry()`** (die Abbildung auf die Zeile des Sets) · `shared/log-views.ts` — `LOG_VIEWS`, `LOG_VIEW_DEPTH` (Verlauf · Protokoll · Technik) · `datev-export/domain/batch-log.ts` — `batchLogDepth()` (Tiefe je Aktion, nur für den Stapel) |
@@ -54,9 +54,9 @@ Gestrichelt: `resource_kind` / `resource_id` ohne FK — 21 Arten im Bestand.
 |---|---|---|---|---|---|---|---|---|
 | Meldung (`message`) | Spalte | Erklärung (der Satz für den Menschen) | 100 % · p50 77 · p90 339 · max 12.397 Zeichen | `LogList` über `auditEventToLogEntry()` (`AuditLogTable`), `HistorieTab` | nie | 1 | S | Füllgrad · Domäne: „die Meldung ist der Satz für den Menschen" |
 | Zeit (`occurred_at`) | Spalte | Zeit | 100 % | `LogList`, `HistorieTab` | nie | 2 | S | Füllgrad |
-| Akteur (`actor_kind` · `actor_label`) | Spalten | Verantwortung | 100 % · 99 % — Agent 9.528 · Nutzer 553 · API 174 · System 109 · CLI 8 | `LogList` (Akteur), `HistorieTab` (lokales Wort „Mensch") | nie | 3 | S | Füllgrad · Registry `actor_kind` („Nutzer") |
+| Akteur (`actor_kind` · `actor_label`) | Spalten | Verantwortung | 100 % · 99 % — Agent 9.528 · Nutzer 553 · API 174 · System 109 · CLI 8 | `LogList` (Akteur), `HistorieTab` (eigene Akteur-Wörter — drei von fünf weichen ab) | nie | 3 | S | Füllgrad · Registry `actor_kind` („Nutzer") |
 | Ergebnis als Schwere (`outcome` → `level`) | Spalte · abgeleitet | Zustand (`log_level`) | 100 % — Erfolg 10.190 · Fehler 157 · teilweise 25 | `LogList` (Schwere) | nie | 4 | S | Domäne |
-| Aktion (`action`) | Spalte | Identität (Code, Filterschlüssel) | 100 % — 111 Codes in 30 Namensräumen (`case` 25 · `document` 11 · `datev_export` 7 · `booking` 6 …) | `LogList` (Code), `HistorieTab` (lokale Wörter für 11) | nie | 5 | S (Code), Wort fehlt (L-318) | Staging · Domäne |
+| Aktion (`action`) | Spalte | Identität (Code, Filterschlüssel) | 100 % — 111 Codes in 32 Namensräumen (`case` 25 · `document` 11 · `datev_export` 7 · `booking` 6 …) | `LogList` (Code), `HistorieTab` (lokale Wörter für 11) | nie | 5 | S (Code), Wort fehlt (L-318) | Staging · Domäne |
 | Bezug (`resource_kind` · `resource_id`) | Spalten, ohne FK | Kontext | 100 % (22 ohne) — 21 Arten | `LogList` (Bezug, heute `kind:id` roh) | nie | 6 | S, nur außerhalb der Entität | Staging · Domäne (L-319) |
 | Quelle (`source`) | Spalte | Kontext (Technik) | 77 % — web 7.815 · bridge 112 · workflows 43 · worker 16 | `LogList` (Quelle) | nie | 7 | S (Admin) | Füllgrad |
 | Mandant · Kanzlei (`client_id` · `tenant_id`) | Eltern | Kontext | 77 % · 93 % | Betriebs-Log | nie | 8 | S, nur im Betriebs-Log | Füllgrad |
@@ -113,8 +113,8 @@ does this stand the way it stands?"), `NoteFeed` die Kommentare.
 
 | Liste | Job | Grundgesamtheit | Sortierung | Spalten | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
 |---|---|---|---|---|---|---|---|---|---|
-| „Historie dieser Entität" | Wenn **die Sachbearbeiterin an einem Sachverhalt, Beleg oder Stapel fragt, wer was entschieden hat**, will sie **dessen Einträge in der Reihenfolge sehen** | `resource_kind` + `resource_id` | Zeit | Zeit, Akteur, Meldung (Code und Bezug fallen weg) | Sicht (Verlauf / Protokoll / Technik) | keine | „Noch nichts geschehen." | Sachverhalt 4 · 10, max 92; Beleg 2 · 3, max 8; Stapel 3 · 14, max 23 → keine Pagination | Staging · `HistorieTab` |
-| „Log des Mandanten" | Wenn **die Kanzlei fragt, was bei einem Mandanten passiert ist**, will sie **das Log nach Akteur, Aktion, Zeitraum und Ergebnis eingrenzen** | `client_id` | Zeit absteigend | alle außer Mandant | Akteur, Aktion, Zeitraum, Ergebnis, Sicht | keine | „Keine Einträge für diesen Filter." | je Mandant 1.170 (max 2.374); je Mandant und Tag 50 · 444, max 1.222 → **Pagination, Serverfilter** | Staging · `configuration/logs` |
+| „Historie dieser Entität" | Wenn **die Sachbearbeiterin an einem Sachverhalt, Beleg oder Stapel fragt, wer was entschieden hat**, will sie **dessen Einträge in der Reihenfolge sehen** | `resource_kind` + `resource_id` | Zeit | Zeit, Akteur, Meldung (Code und Bezug fallen weg) | Sicht (Verlauf / Protokoll / Technik) | keine | „Noch nichts geschehen." | Sachverhalt 4 · 10, max 92; Beleg 2 · 3, max 8; Stapel 3 · 15, max 23 → keine Pagination | Staging · `HistorieTab` |
+| „Log des Mandanten" | Wenn **die Kanzlei fragt, was bei einem Mandanten passiert ist**, will sie **das Log nach Akteur, Aktion, Zeitraum und Ergebnis eingrenzen** | `client_id` | Zeit absteigend | alle außer Mandant | Akteur, Aktion, Zeitraum, Ergebnis, Sicht | keine | „Keine Einträge für diesen Filter." | je Mandant 1.170 (max 2.374); je Mandant und Tag 85 · 545, max 1.222 → **Pagination, Serverfilter** | Staging · `configuration/logs` |
 | „Betriebs-Log" | Wenn **die Admin einen Fehler plattformweit sucht**, will sie **alle Einträge mit zehn Filtern eingrenzen** | alles | Zeit absteigend | alle | zehn Felder, darunter Quelle und Fehlschläge (157 + 25 teilweise) | keine | „Keine Einträge für diesen Filter." | 10.372 in zwei Monaten → Pagination, Serverfilter | Staging · `admin/audit-log` |
 
 **Alle drei sind `LogList` bzw. `LogBrowser`** (§3 Regel 1: ein `@when` deckt
@@ -148,9 +148,9 @@ Umbau der App, keine Form des Sets.
 
 Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 
-- **L-318** Die Aktionen haben keine Wortliste: 111 Codes in 30 Namensräumen. `HistorieTab.tsx` hält eine lokale Liste für 11 (`ACTION_LABEL`), dazu eigene Akteur-Wörter („Mensch" statt „Nutzer" wie in der Registry). Ein Filter nach Aktion zeigt sonst Codes.
-- **L-319** Der Bezug ist technisch: `auditEventToLogEntry()` nennt die Ressource als `${resourceKind}:${resourceId}` (eine UUID). Die Abbildung braucht einen Namen je Ressource — Sachverhaltsnummer, Belegtitel, Stapelnummer —, etwa über einen `resourceLabel`-Resolver neben `resourceHref`.
-- **L-320** Die Tiefe (Verlauf · Protokoll · Technik, `LogEntry.depth`) gibt es nur für den Stapel (`batchLogDepth()`, `STORY_ACTIONS`). Für Sachverhalt, Beleg und Mandant fehlt die Einordnung; ihre Historie kennt nur eine Tiefe, und der Sachverhalt baut deshalb seinen eigenen Verlauf.
+- **L-318** Die Aktionen haben keine Wortliste: 111 Codes in 32 Namensräumen. `HistorieTab.tsx` hält eine lokale Liste für 11 (`ACTION_LABEL`); am Sachverhalt kommen 34 Aktionen vor, die 11 Wörter decken 4.520 von 8.238 Einträgen (55 %). Dazu eigene Akteur-Wörter, die in drei von fünf von der Registry abweichen (`cli` und `api` erscheinen als „System", `user` als „Mensch"). Ein Filter nach Aktion zeigt sonst Codes. App P34.
+- **L-319** Der Bezug ist technisch: `auditEventToLogEntry()` nennt die Ressource als `${resourceKind}:${resourceId}` (eine UUID). Die Abbildung braucht einen Namen je Ressource — Sachverhaltsnummer, Belegtitel, Stapelnummer —, etwa über einen `resourceLabel`-Resolver neben `resourceHref`. App P35.
+- **L-320** Die Tiefe (Verlauf · Protokoll · Technik, `LogEntry.depth`) gibt es nur für den Stapel (`batchLogDepth()`, `STORY_ACTIONS`). Für Sachverhalt, Beleg und Mandant fehlt die Einordnung; ihre Historie kennt nur eine Tiefe, und der Sachverhalt baut deshalb seinen eigenen Verlauf. App P36.
 
 ## Offene Fragen
 
@@ -169,7 +169,11 @@ dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
 
 | Zeile / Form | Einwand | Ergebnis | Geprüft von / am |
 |---|---|---|---|
-| | | | |
+| Kopf, Datenpunkte, Relationen, Formen | 16 Spalten verortet, CHECKs = Domäne und Registry; null eigene Formen nach §3 Regel 1 richtig, `LogList` deckt die Zeile mit `refs` und `depth`; Aufrufer und Aggregate belegt | bestätigt | Prüfer-Session, 2026-09-11 |
+| Aktion | 32 Namensräume, nicht 30 | geändert | Prüfer-Session, 2026-09-11 |
+| Liste „Log des Mandanten" | je Mandant und Tag p50 85 · p90 545 · max 1.222, nicht 50 · 444 (Folge unverändert) | geändert | Prüfer-Session, 2026-09-11 |
+| Liste „Historie" | Stapel p90 15 (`percentile_disc`), nicht 14 | geändert | Prüfer-Session, 2026-09-11 |
+| Akteur · L-318 | App-Nachzählung: die Akteur-Wörter in `HistorieTab` weichen in drei von fünf ab (`cli`, `api` → „System"), nicht nur „Mensch" statt „Nutzer"; am Sachverhalt 34 Aktionen, die 11 lokalen Wörter decken 4.520 von 8.238 (55 %) | geändert; L-318–L-320 → App P34–P36 | ludwig-manager (ludwig-worker), 2026-09-11 |
 
 ## Weiter
 
