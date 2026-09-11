@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | **gebaut 2026-09-11** — Abnahme offen (nicht durch den Bauenden) |
 | Stufe | `patterns/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: welcher Monat ist abgedeckt, welcher offen, wo klafft eine Lücke — das fragt jede Anwendung mit Perioden (Beitragsmonate, Meldezeiträume) |
 | Quelle | UI-Kit-Roadmap `docs/backlog/uikit-entity-roadmap-2026-09.md` (ludwig/app 9be34746), Abschnitt B, **B2** „PeriodGrid / SpanTimeline"; Reihenfolge laut Übergabe: B2 vor Entität #3 (Stapel). Auftrag über `ludwig-manager`, 2026-09-11 |
@@ -136,6 +136,37 @@ Variabel (aus dieser Spec):
 - [ ] 24 Spalten bei 1024 px: kein Querlauf der Seite, das Raster scrollt in der Karte (`Narrow`)
 - [ ] Kein Text in 16 px
 - [ ] Ersetzt `CycleTimeline` ohne Funktionsverlust (Jahr, Zustand, Weg) — belegt an `FiscalYears`
+
+## Gebaut 2026-09-11
+
+- `patterns/PeriodGrid.tsx` (Server-Komponente), Export im Barrel unter
+  „Prüfen" mit `PeriodCell`, `PeriodColumn`, `PeriodRow`.
+- Das Raster ist eine echte Tabelle (`th scope="col"`/`"row"`), damit die
+  Vorlesehilfe Zeitraum und Gegenstand nennt; die Gegenstandsspalte steht beim
+  Scrollen (`position: sticky`).
+- `Review.tsx` exportiert zusätzlich `stateLabel(state)` — das Wort, das
+  `StateIcon` als Namen trägt — für die Legende. Additiv, eine Wortliste.
+- CSS `.v3period*` am Ende von `v3.css`.
+
+**Beim Messen gefunden:** die Texte nur für die Vorlesehilfe (`.v2vh`, absolut
+positioniert) entkamen dem scrollenden Raster und verbreiterten die Seite um
+744 px (`Narrow`). `.v3period` ist deshalb `position: relative`. Und: das Set
+verwendete an zwei Stellen eine Klasse `sr-only`, die es nicht gibt
+(`Cells.tsx`, `Skeleton.tsx`) — „Wird geladen …" stand dort sichtbar in 16 px;
+eigener Commit, jetzt `v2vh`.
+
+## Messung (6107)
+
+| Kriterium | Ergebnis |
+|---|---|
+| `pnpm typecheck`, alle Wächter | grün |
+| Zeichen und Satz je Zelle | alle Zellen mit Zeichen tragen einen Satz als `aria-label` und `title`; die Lücke: „Auszug Mai fehlt — erwartet bis 05.06.2026." |
+| „nicht vorgesehen" | Kasse ohne Auszugserwartung: leere Zellen, Satz nur für die Vorlesehilfe (unsichtbar gemessen: 0 sichtbare Hilfstexte) |
+| laufender Zeitraum | `aria-current="date"` an „Aug" bzw. „2026" bzw. „Aug 26" |
+| Legende nur vorkommende Zustände | `StatementCoverage` Fehler · Warnung · offen · erledigt; `FiscalYears` offen · erledigt |
+| Links nur mit `href` | `Batches` 7, `FiscalYears` 18, `StatementCoverage` 0 |
+| Querlauf | 0 in allen sechs Stories; `Narrow` bei 1024: Raster 990 breit, scrollt auf 1897 |
+| 16 px | kein Text |
 
 ## Abnahme
 

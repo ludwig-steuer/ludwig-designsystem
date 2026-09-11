@@ -3896,3 +3896,26 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 /* Summary row of the checks (0148) — sign, sentence, codes in one line in a
    `Disclosure`'s head. */
 .v2pp__sum { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }
+
+/* --- PeriodGrid (0162): periods as columns, one state per cell, a gap is a
+   cell with a statement. The subject column stays while the grid scrolls in
+   its card. */
+/* `relative`: the screen-reader texts (`.v2vh`, absolute) must stay inside the
+   scroller — without it the last column's head widened the page (measured). */
+.v3period { position: relative; overflow-x: auto; padding: 0 var(--space-5) var(--space-4); font-size: var(--fs-ui); }
+.v3period__grid { border-collapse: collapse; min-width: max-content; }
+.v3period__grid th,
+.v3period__grid td { padding: var(--space-2) var(--space-3); text-align: left; border-bottom: 1px solid var(--color-border); white-space: nowrap; }
+.v3period__grid thead th { font-size: var(--fs-ui-sm); font-weight: 500; color: var(--color-text-muted); }
+.v3period__grid .is-current { background: var(--color-accent-50); }
+.v3period__grid thead th.is-current { color: var(--color-text); font-weight: 600; }
+.v3period__subject { position: sticky; left: 0; background: var(--color-surface); font-weight: 500; }
+.v3period__cell { display: inline-flex; align-items: center; gap: var(--space-1); color: inherit; text-decoration: none; }
+a.v3period__cell:hover,
+a.v3period__cell:focus-visible { text-decoration: underline; }
+.v3period__label { font-size: var(--fs-ui-sm); font-variant-numeric: tabular-nums; }
+.v3period__summary { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v3period__legend { display: flex; flex-wrap: wrap; gap: var(--space-4); margin: var(--space-3) 0 0; padding: 0; list-style: none; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v3period__legend li { display: inline-flex; align-items: center; gap: var(--space-1); }
+.v3period__empty { margin: 0; padding: var(--space-4) var(--space-5); font-size: var(--fs-ui); color: var(--color-text-muted); }
+

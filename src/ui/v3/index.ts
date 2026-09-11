@@ -238,6 +238,7 @@ export {
 /* Prüfen */
 export {
   StateIcon,
+  stateLabel,
   Checklist,
   CheckItems,
   Messages,
@@ -252,6 +253,7 @@ export {
   type PairKind,
   type ReconciliationPair,
 } from "./patterns/ReconciliationTable";
+export { PeriodGrid, type PeriodCell, type PeriodColumn, type PeriodRow } from "./patterns/PeriodGrid";
 export { Timeline, type TimelineItem } from "./patterns/Timeline";
 export {
   ChoicePrompt,

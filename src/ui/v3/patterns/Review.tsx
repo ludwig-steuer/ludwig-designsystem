@@ -81,6 +81,17 @@ export function StateIcon({ state, title }: { state: StateKind; title?: string }
   );
 }
 
+/**
+ * The word of a state, for a legend beside the icons — the same word the
+ * icon carries as its name.
+ *
+ * @when    A legend or a sentence names a state that stands as an icon elsewhere.
+ * @instead The icon with its word as its accessible name → StateIcon.
+ */
+export function stateLabel(state: StateKind): string {
+  return ICONS[state].label;
+}
+
 /* ── Checklist ─────────────────────────────────────────────────────────── */
 
 export interface ChecklistRow {

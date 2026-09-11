@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-11** — Abnahme offen (nicht durch den Bauenden) |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, gegen 8efa8d5) |
 | Stufe | `patterns/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: zwei Systeme Zeile für Zeile abgleichen (Vertragsbestand ↔ Zahlungseingang) gibt es überall, wo zwei Quellen dasselbe behaupten |
 | Quelle | UI-Kit-Roadmap `docs/backlog/uikit-entity-roadmap-2026-09.md` (ludwig/app 9be34746), Abschnitt B, **B1** „ReconciliationPair / MatchTable"; Reihenfolge laut Übergabe: B1 vor Entität #2 (Spiegelbuchung). Auftrag über `ludwig-manager`, 2026-09-11 |
@@ -170,3 +170,6 @@ Variabel (aus dieser Spec):
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
 | | | |
+
+Fremde Abnahme am 2026-09-11 durch die Prüfer-Session (Auftrag `ludwig-manager`), gegen 8efa8d5: **fertig.** `Kinds`: fünf Abweichungen, dann „Übereinstimmend"; zugeklappt Satz, Zahl und „anzeigen"; `Interactive` 4 → 15 → 4 Zeilen; `OneSided` dreimal der Name der Quelle, kein Strich; `AllSame` Leerzustand mit `done` und 318 Zeilen nach „anzeigen"; Links nur mit `pairHref`; 8 × 2 Messungen ohne Querlauf; statische Checks grün.
+
