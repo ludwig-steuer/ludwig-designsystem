@@ -10,7 +10,7 @@
 | Wichtigkeit | **mittel** — Roadmap der App (9be34746) Rang 7; `web-ui.md` R10 („die eine Admin-Log"), R11 |
 | Datenstand | Staging über den Pooler, **2026-09-11**, schreibgeschützte Sitzung: **10.372 Ereignisse**, 2026-07-11 bis 2026-09-11, 7 Mandanten, 111 verschiedene Aktionen. Nur `SELECT`, keine Kundendaten; Beispielwerte erfunden |
 | Bestandswarnung | **92 % schreibt der Agent** (9.528). `source` fehlt bei 23 % (Zeilen vor F49). Die Nachricht ist p50 77 · p90 339 Zeichen, aber **max 12.397**; die Nutzlast p90 986 Zeichen |
-| Rückfrage | gestellt am 2026-09-11 an `ludwig-manager` — **offen**, die Defaults gelten |
+| Rückfrage | gestellt und **beantwortet** am 2026-09-11 (`ludwig-manager`, aus dem App-Stand): die Defaults der drei Fragen gelten; die drei Tiefen sind Owner-Regel für **jede** Entität (Z6, Owner 2026-08-28); sieben Anwendungsfälle zugeordnet; keine Auswahl-Dialoge; L-318–L-320 gehen als P-Einträge an die App |
 | Analyse von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren`) |
 
 ## Was sie ist
@@ -84,6 +84,26 @@ aufgeklappt (`LongText`); die Nutzlast bleibt zugeklappt.
 | `accounting-cases/ui/tabs/HistorieTab.tsx` (116 Z.) | Verlauf am Sachverhalt | Zeit, Akteur, Aktion als Wort, Meldung, Nutzlast | die Tiefe (Verlauf / Protokoll / Technik) | eine **lokale Wortliste** für 11 von 111 Aktionen (`ACTION_LABEL`) und eigene Akteur-Wörter („Mensch" statt „Nutzer") |
 | Reiter „Audit-Log" der Admin-Mandantenakte · `SourceDocVerlaufTab` (Beleg) | Verlauf | wie oben | — | — |
 
+**Aus der Rückfrage** (Manager, 2026-09-11) — die Anwendungsfälle der App und
+wo sie hier stehen: (a) der Verlauf am Sachverhalt (`HistorieTab`, L-320) und
+die Reiter aus dem Umbau 0152 (Technik: DATEV-Wahrheit, Protokoll, Herkunft,
+Rohdaten); (b) die Belegseite — die vier jüngsten Schritte am Beleg, der Rest
+im Verlauf, die Pipeline als Tiefe im Verlauf (L-270); Owner-Regel: das
+Beleg-Log ist nur Interpretation, Begründungen des Agenten gehören an den
+Sachverhalt (`proposal_rationale` + Audit), nie ins Beleg-Log; (c) die
+Historie-Reiter an Konto und Partner; (d) Mandanten-Log und Betriebs-Log →
+die zwei `LogBrowser`-Konfigurationen; (e) der Reiter Log am Stapel mit
+`batchLogDepth()` und der Staffel (`BatonBar` aus dem Audit); (f) der
+Buchungslauf (`client_agent_runs`, Step-Log) ist eine eigene Entität, kein
+Audit; (g) künftig das MCP-Aufrufprotokoll (F211, `ops_mcp_call_logs`) als
+Quelle der Technik-Tiefe — Anmerkung, nicht bauen.
+
+**Die drei Tiefen sind Owner-Regel für jede Entität** („Log mit Sichten
+Verlauf / Protokoll / Technik", Owner 2026-08-28, Z6). Das Muster dafür steht
+im Set schon: `LogEntry.depth` (1 · 2 · 3) und die Sicht von `LogBrowser`. Was
+fehlt, ist allein die Zuordnung der Aktionen je Modul (L-320) — nicht je
+Aufrufer neu, sondern einmal je Modul in der Domäne.
+
 **Im Set:** `LogList` (0053) und `LogBrowser` (0054) sind die Form — mit
 `LogEntry.depth` für die drei Sichten, `refs` für den Bezug, `payload` zum
 Aufklappen. `Timeline` trägt die fachliche Geschichte eines Objekts (@when „Why
@@ -134,6 +154,10 @@ Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 
 ## Offene Fragen
 
+**Beantwortet am 2026-09-11** (`ludwig-manager`, aus dem App-Stand): alle drei
+Defaults gelten; zu Frage 3 — die Zuordnung je Modul ist richtig, das Muster
+(`depth` + Filter) gehört an `LogList` / `LogBrowser` und steht dort schon.
+
 1. **Keine eigene Form** — `LogList` / `LogBrowser` tragen alle drei Listen, die Abbildung liegt in der Domäne. — ohne Antwort: so.
 2. **Der Bezug nennt die Ressource mit Namen** — über einen Resolver des Aufrufers neben `resourceHref`. — ohne Antwort: ja (L-319).
 3. **Wer ordnet die Aktionen den Tiefen zu?** — ohne Antwort: je Modul eine Liste wie `STORY_ACTIONS` beim Stapel, Fehlschläge steigen immer in den Verlauf (L-320).
@@ -169,8 +193,9 @@ Startprompt (neue Sitzung, nach Status `geprüft`):
 ```
 Für die Entität Audit-Ereignis (`audit event`) liegt das geprüfte Profil unter
 docs/entitaeten/audit-event.md. Es empfiehlt keine eigene Form: die Zeile ist LogList, die Listen
-sind LogBrowser-Konfigurationen. Schreibe keine Spec für eine Form; prüfe stattdessen mit Skill
-spec-schreiben, ob LogList/LogBrowser für die drei Listen eine Prop fehlt (Bezug mit Namen,
-Tiefe je Eintrag), und trage das als Nachtrag in 0053 bzw. 0054 ein, sobald L-318 bis L-320
-in der App erledigt sind. Nur eigene Dateien stagen. Setze am Ende den Status des Profils auf „in Specs".
+sind LogBrowser-Konfigurationen, und LogEntry trägt Tiefe (`depth`) und Bezug mit Namen
+(`refs[].label`) schon. Schreibe keine Spec. Sobald L-318 bis L-320 in der App erledigt sind,
+prüfe mit Skill spec-schreiben nur, ob LogBrowser die Tiefe in allen drei Listen ohne neue Prop
+trägt; wenn nicht, ein Nachtrag zu 0054. Nur eigene Dateien stagen. Setze am Ende den Status des
+Profils auf „in Specs".
 ```
