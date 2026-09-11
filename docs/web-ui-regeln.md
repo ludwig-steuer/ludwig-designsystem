@@ -25,7 +25,7 @@
 | R18 Buchungssatz-Editor | Aufgaben 0015 `JournalEntryEditor`, 0044 `JournalEntryCompact` |
 | R21 Stufen | README „Ordnung im Set" · Wächter-Test `stufen.test.ts` |
 
-Dazu ein eigener Block am Ende dieser Datei: **D1–D16 — Detailseiten**
+Dazu ein eigener Block am Ende dieser Datei: **D1–D26 — Detailseiten**
 (seit 2026-09-08). Er regelt den Aufbau jeder Entitäts-Detailseite; die
 Langform mit Herleitung und Zahlen steht in `docs/detailseiten-standard.md`.
 
@@ -207,7 +207,7 @@ neuen Komponente steht — „gibt es das schon, und wo gehört meine hin?". Ohn
 Stufe wandert Fachwissen in Primitives und Layout in Entitäts-Komponenten;
 danach ist jede Wiederverwendung ein Copy-Paste, weil das Original zu viel weiß.
 
-## D1–D16 — Detailseiten
+## D1–D26 — Detailseiten
 
 > **Kurzfassung.** Die Langform mit Herleitung, den drei Layouts, den fünf
 > Zonen und den gemessenen Zahlen steht in `docs/detailseiten-standard.md` —
@@ -223,7 +223,7 @@ danach ist jede Wiederverwendung ein Copy-Paste, weil das Original zu viel weiß
 **Der Rahmen:** Pager · Kopf · Signal · Reiter · Körper.
 **Die fünf Zonen des ersten Reiters:** Kopf · Mängel · Fakten · Abrisse · Verlauf.
 **Der Reiter-Satz:** Übersicht · Details · [entitätsspezifisch] · Verlauf · Rohdaten.
-**Die drei Layouts:** D-L1 Zonen untereinander (Vorgabe) · D-L2 Gegenüberstellung · D-L3 Randspalte (Zone 3 **oder** 5 neben der Arbeitsfläche).
+**Die drei Layouts:** D-L1 Zonen untereinander (Vorgabe) · D-L2 Gegenüberstellung · D-L3 Randspalte (Zone 3 **oder** 5 neben der Arbeitsfläche) — seit 0154 Muster des Reiterinhalts: Fläche ohne Spalten · `split` · `main-aside`/`list-detail`, dazu `list-detail-aside` (D17).
 
 | | Regel | Woran man den Verstoß erkennt | Baustein |
 |---|---|---|---|
@@ -243,6 +243,16 @@ danach ist jede Wiederverwendung ein Copy-Paste, weil das Original zu viel weiß
 | **D14 Karte, Feldliste, Tabelle — jede an ihrem Platz** | Tabelle immer in einer Karte mit Kopf und Spaltenkopf, auch leer. Feldliste für Label/Wert (`bare` in der Karte, `row` in der Faktenzeile, `soft` für die zweite Wahrheit). Karte mit Kopf für alles mit eigenem Namen oder eigenen Aktionen. Keine Karte in der Karte. | Frei schwebende Zeilen; eine zweite Feldliste für Werte, die eine andere Ansicht schon zeigt; verschachtelte Karten; ein Leerfall ohne Spaltenkopf. | `Card`/`CardHead`, `FieldList` (0006), `DataTable` (0057) |
 | **D15 Abriss nur mit Deckung, im Spaltensatz des Reiters** | Abriss-Karte nur bei `p50 ≥ 2` der Relation (Entitätsprofil); `p50 ≤ 1` → Zahl mit Weg in Zone 3; in der Mehrzahl leer → gar nichts. Der Abriss nimmt einen benannten Satz aus dem Spaltenkatalog der Entität. Zähler und Kacheln zählen nach **I12**. | Eine Karte, die bei den meisten Datensätzen leer ist; eigene Spalten im Abriss; Kachel 225, Liste 180; „—" in der Kennzahl; zwei gleich große Salden nebeneinander. | `sourceDocumentColumns()` (0070), `caseColumns()` (0096), `bankTransactionColumns()` (0101), `KpiTile href` (0126) |
 | **D16 Diagramm nur in Zone 4, erst ab vier Werten** | Nur Verlauf oder Vergleich. ≤ 3 Werte → Zahl plus Veränderung als Wort. 4–12 → Zahl plus `Sparkline`. Ablesbare Werte → `BarChart` in einer Karte. Höchstens zwei Reihen, Textalternative aus denselben Daten. | Ein Diagramm mit drei Balken; ein Diagramm im Kopf; eine dritte Diagrammfarbe; eine Reihe, die nur als Bild existiert. | `Sparkline` (0124), `BarChart` (0041, 0110), `KpiTile` |
+| **D17 Jeder Reiter hat ein Spaltenmuster** | Der Inhalt eines Reiters ist eine Fläche ohne Spalten oder eines der vier Muster von `Columns`: `list-detail-aside`, `list-detail`, `split`, `main-aside` (Stufen `facts` 460 px, `table` 960 px). Breiten folgen dem Gewicht, das Muster nicht. Beim Umbruch fällt die dritte Spalte nach unten; `main-aside` bricht die Randspalte nach oben. D-L1 ist die Fläche ohne Spalten, D-L2 `split`, D-L3 `main-aside` oder `list-detail`. | Ein Reiter mit eigenem Raster; ein Muster, das je Datensatz wechselt; eine Randspalte, die beim Umbruch unter die Liste rutscht. | `Columns` (0154), `DetailView` (0138) |
+| **D18 Reiter nehmen das Muster ihrer Art** | Wie die Hauptseiten: eine Liste sieht aus wie ihre Liste im Hauptmenü (benannter Spaltensatz aus dem Katalog der Entität), eine Liste zum Abarbeiten ist `list-detail`, ein Vergleich `split`, eine Fläche mit Begleiter `main-aside`, die Übersicht mit Strang `list-detail-aside`. | Eine Belegliste im Reiter mit eigenen Spalten; ein Abarbeiten ohne Detail daneben; ein Vergleich untereinander. | Spaltenkataloge (0070, 0096, 0101), `TodoList`, `Columns` |
+| **D19 Reiter nach Zielgruppe; der letzte heißt `raw` oder `technical`** | Die Reiter der Sachbearbeitung zuerst; was nur Prüfung und Support lesen, steht in **einem** letzten Reiter. Zeigt er nur Rohdaten, heißt er „Rohdaten" mit Schlüssel `raw` (Beleg, Konto, Partner); bündelt er DATEV-Wahrheit, Protokoll, Herkunft und Rohdaten, heißt er „Technik" mit Schlüssel `technical` (Sachverhalt) — D12 gilt dann für den letzten, eingeklappten Abschnitt darin. Reiter-Schlüssel sind englisch (F210), der erste trägt keinen Parameter (I1); eine Liste kommt über ihre eigenen Filterparameter zurück, nie über ein gebündeltes `?list=`. | „Technik" mit nur Rohdaten darin; DATEV-Wahrheit als Reiter mitten in der Sachbearbeitung; ein deutscher Reiter-Schlüssel; `?list=`. | `Tabs` (leiser Reiter, 0136), `Disclosure`, `RawRecord` (0051) |
+| **D20 Die Randspalte ist kompakt** | Oben stehen nur Zeilen, die der Kopf nicht trägt, höchstens drei; der Rest liegt hinter „Alle …" (`Disclosure`). Offene Erwartungen stehen in der Randspalte der Übersicht; unter „Zu tun" nur, wenn sie fällig sind (Reife `due` oder `escalated`). | Die Kontoart in Kopf und Randspalte; eine Erwartung in Strang, „Zu tun" und Randspalte zugleich; zehn Stammdatenzeilen über der Liste. | `Columns main-aside`, `FieldList`, `Disclosure`, `ExpectationRow` (0025) |
+| **D21 Die Mängel-Zone zeichnet ein Pattern** | Zone 2 ist `OpenPoints`; die Entität liefert fertige Punkte (Titel, Satz, Weg, Zustand) und die Wörter. `OpenPoints` zeigt nur, was an **diesem** Datensatz offen ist — jede Prüfung mit Urteil ist `Checklist`, ein Vorrat über viele Datensätze `TodoList`. | Eine Entität, die ihre Mängelzone selbst zeichnet; grüne Prüfungen in der Mängelzone; ein „nichts offen", das verschwindet. | `OpenPoints` (0153), `SourceDocumentDefects`, `defectPoints()` |
+| **D22 Ein Signal oder keins** | Der Signal-Slot trägt höchstens eine Meldung. Wartet der Datensatz auf jemand anderen — den Mandanten, DATEV, den Agenten —, steht dort nichts: die Wartezeit ist eine Erwartung oder ein Zustand im Kopf, keine Aufforderung an die Leserin. | Zwei Banner übereinander; „Warten auf Unterlagen" als Signal mit Knopf, obwohl im Haus niemand etwas tun kann. | `StatusCallout` (0049), `Banner` |
+| **D23 Jeder Leerfall ist ein Satz mit Grund** | Leer ist nie ein Strich und nie ein Verschwinden: eine Zone, eine Liste, ein Reiter ohne Inhalt sagt, warum. Ein Erfolg (Haken, Satz mit Zahl) und eine Lücke (fehlt, weil …) sind zwei verschiedene Sätze. | „—" als Inhalt einer Zone; ein Reiter, der weiß bleibt; „Keine Treffer" für einen Erfolg. | `EmptyState`, `DataTable empty`, `OpenPoints` |
+| **D24 Nichts zweimal auf dem ersten Bildschirm** | Eine Zahl oder ein Name steht auf dem ersten Bildschirm einmal — zwischen Kopf, Kacheln, Randspalte und Mängelzeilen. Steht der Saldo im Kopf, fällt die Kachel; steht der Betrag im Kopf, wiederholt ihn der Satz darunter nicht. | Derselbe Saldo in Kopf und Kachel; derselbe Betrag im Kopf und in der „Zu tun"-Zeile. | `EntityHeader metric`, `KpiTile` |
+| **D25 Die Herkunft steht neben dem Wert** | Woher ein Wert kommt (KI-Vorschlag, Regel, Mensch, Import), steht als Marke neben ihm; die Herleitung — Regel, Konfidenz, Begründung, Quellen — eingeklappt eine Stufe tiefer. Nie als eigene Zone, nie als leere Zeile. | Eine Spalte „Herkunft" mit rohem Code; eine Begründung, die nirgends lesbar ist; „Begründung: —". | `ProvenanceMark`, `ProvenanceNote` (0163) |
+| **D26 Ein Verlauf, drei Tiefen** | Die Geschichte eines Datensatzes ist **eine** Liste mit den Sichten Verlauf · Protokoll · Technik, nie drei Reiter; Fehlschläge stehen immer im Verlauf. Welche Aktion in welche Tiefe gehört, entscheidet die Domäne je Modul, nicht der Aufrufer. | „Protokoll" und „Technik" als eigene Reiter; ein gescheiterter Export nur in der Technik-Sicht; eine Tiefe, die jede Seite selbst rechnet. | `LogList` / `LogBrowser` (`LogEntry.depth`, 0053/0054), `BatonBar` |
 
 *Warum ein eigener Block:* Die Designsprache regelt Bausteine und Muster, R2–R21
 den Code der Oberfläche — aber **welche Seite wie aufgebaut ist**, stand

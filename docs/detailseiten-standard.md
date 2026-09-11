@@ -33,9 +33,10 @@ einer Entität mit den erhobenen Zahlen ihres Entitätsprofils kollidiert, gilt
 die Zahl und die Seite bekommt eine Abweichung (§9). Die drei Stellen, an
 denen das heute schon der Fall ist, stehen mit ihren Zahlen in §11.3.
 
-**Die Regeln heißen D1–D16.** Die Tabelle Regel · Verstoß · Baustein steht in
+**Die Regeln heißen D1–D26.** Die Tabelle Regel · Verstoß · Baustein steht in
 §8 und noch einmal als D-Block in `docs/web-ui-regeln.md`; §1–§7 tragen die
-Begründung.
+Begründung von D1–D16. D17–D26 ziehen die Entscheide seit dem 2026-09-08 nach,
+die bis dahin nur in Specs und Briefen standen; §13 ordnet sie ein.
 
 ---
 
@@ -97,6 +98,11 @@ was **auf** ihr steht, muss vollständig bleiben. Die gemessenen Werte stehen im
 Kommentar der beiden Rahmen (460 px neben Fakten, 960 px neben einer
 siebenspaltigen Tabelle). Sie sind Messergebnisse, keine Geschmacksfragen, und
 werden nicht ohne neue Messung geändert.
+
+**Seit 0154 (D17):** die drei Layouts sind Muster des **Reiterinhalts**, nicht
+der Seite, und heißen wie die Muster von `Columns` — D-L1 ist die Fläche ohne
+Spalten, D-L2 `split`, D-L3 `main-aside` bzw. `list-detail`; dazu kommt
+`list-detail-aside` für die Übersicht mit Strang (§13).
 
 ## 2 Die erste Ansicht: fünf Zonen (D1, D2, D4)
 
@@ -404,7 +410,7 @@ Textalternative sagt dasselbe wie das Bild.
 
 ---
 
-## 8 Die sechzehn Regeln
+## 8 Die Regeln D1–D26
 
 | | Regel | Woran man den Verstoß erkennt | Baustein |
 |---|---|---|---|
@@ -424,6 +430,16 @@ Textalternative sagt dasselbe wie das Bild.
 | **D14 Karte, Feldliste, Tabelle — jede an ihrem Platz** | Tabelle immer in einer Karte mit Kopf und Spaltenkopf, auch leer. Feldliste für Label/Wert (`bare` in der Karte, `row` in der Faktenzeile, `soft` für die zweite Wahrheit). Karte mit Kopf für alles mit eigenem Namen oder eigenen Aktionen. Keine Karte in der Karte. | Frei schwebende Zeilen; eine zweite Feldliste für Werte, die eine andere Ansicht schon zeigt; verschachtelte Karten; ein Leerfall ohne Spaltenkopf. | `Card`/`CardHead`, `FieldList` (0006), `DataTable` (0057) |
 | **D15 Abriss nur mit Deckung, im Spaltensatz des Reiters** | Abriss-Karte nur bei `p50 ≥ 2` der Relation (Entitätsprofil); `p50 ≤ 1` → Zahl mit Weg in Zone 3; in der Mehrzahl leer → gar nichts. Der Abriss nimmt einen benannten Satz aus dem Spaltenkatalog der Entität. Zähler und Kacheln zählen nach **I12**. | Eine Karte, die bei den meisten Datensätzen leer ist; eigene Spalten im Abriss; Kachel 225, Liste 180; „—" in der Kennzahl; zwei gleich große Salden nebeneinander. | `sourceDocumentColumns()` (0070), `caseColumns()` (0096), `bankTransactionColumns()` (0101), `KpiTile href` (0126) |
 | **D16 Diagramm nur in Zone 4, erst ab vier Werten** | Nur Verlauf oder Vergleich. ≤ 3 Werte → Zahl plus Veränderung als Wort. 4–12 → Zahl plus `Sparkline`. Ablesbare Werte → `BarChart` in einer Karte. Höchstens zwei Reihen, Textalternative aus denselben Daten. | Ein Diagramm mit drei Balken; ein Diagramm im Kopf; ein Diagramm ohne Frage dahinter; eine dritte Diagrammfarbe; eine Reihe, die nur als Bild existiert. | `Sparkline` (0124), `BarChart` (0041, 0110), `KpiTile` |
+| **D17 Jeder Reiter hat ein Spaltenmuster** | Der Inhalt eines Reiters ist eine Fläche ohne Spalten oder eines der vier Muster von `Columns`: `list-detail-aside`, `list-detail`, `split`, `main-aside` (Stufen `facts` 460 px, `table` 960 px). Breiten folgen dem Gewicht, das Muster nicht. Beim Umbruch fällt die dritte Spalte nach unten; `main-aside` bricht die Randspalte nach oben. D-L1 ist die Fläche ohne Spalten, D-L2 `split`, D-L3 `main-aside` oder `list-detail`. | Ein Reiter mit eigenem Raster; ein Muster, das je Datensatz wechselt; eine Randspalte, die beim Umbruch unter die Liste rutscht. | `Columns` (0154), `DetailView` (0138) |
+| **D18 Reiter nehmen das Muster ihrer Art** | Wie die Hauptseiten: eine Liste sieht aus wie ihre Liste im Hauptmenü (benannter Spaltensatz aus dem Katalog der Entität), eine Liste zum Abarbeiten ist `list-detail`, ein Vergleich `split`, eine Fläche mit Begleiter `main-aside`, die Übersicht mit Strang `list-detail-aside`. | Eine Belegliste im Reiter mit eigenen Spalten; ein Abarbeiten ohne Detail daneben; ein Vergleich untereinander. | Spaltenkataloge (0070, 0096, 0101), `TodoList`, `Columns` |
+| **D19 Reiter nach Zielgruppe; der letzte heißt `raw` oder `technical`** | Die Reiter der Sachbearbeitung zuerst; was nur Prüfung und Support lesen, steht in **einem** letzten Reiter. Zeigt er nur Rohdaten, heißt er „Rohdaten" mit Schlüssel `raw` (Beleg, Konto, Partner); bündelt er DATEV-Wahrheit, Protokoll, Herkunft und Rohdaten, heißt er „Technik" mit Schlüssel `technical` (Sachverhalt) — D12 gilt dann für den letzten, eingeklappten Abschnitt darin. Reiter-Schlüssel sind englisch (F210), der erste trägt keinen Parameter (I1); eine Liste kommt über ihre eigenen Filterparameter zurück, nie über ein gebündeltes `?list=`. | „Technik" mit nur Rohdaten darin; DATEV-Wahrheit als Reiter mitten in der Sachbearbeitung; ein deutscher Reiter-Schlüssel; `?list=`. | `Tabs` (leiser Reiter, 0136), `Disclosure`, `RawRecord` (0051) |
+| **D20 Die Randspalte ist kompakt** | Oben stehen nur Zeilen, die der Kopf nicht trägt, höchstens drei; der Rest liegt hinter „Alle …" (`Disclosure`). Offene Erwartungen stehen in der Randspalte der Übersicht; unter „Zu tun" nur, wenn sie fällig sind (Reife `due` oder `escalated`). | Die Kontoart in Kopf und Randspalte; eine Erwartung in Strang, „Zu tun" und Randspalte zugleich; zehn Stammdatenzeilen über der Liste. | `Columns main-aside`, `FieldList`, `Disclosure`, `ExpectationRow` (0025) |
+| **D21 Die Mängel-Zone zeichnet ein Pattern** | Zone 2 ist `OpenPoints`; die Entität liefert fertige Punkte (Titel, Satz, Weg, Zustand) und die Wörter. `OpenPoints` zeigt nur, was an **diesem** Datensatz offen ist — jede Prüfung mit Urteil ist `Checklist`, ein Vorrat über viele Datensätze `TodoList`. | Eine Entität, die ihre Mängelzone selbst zeichnet; grüne Prüfungen in der Mängelzone; ein „nichts offen", das verschwindet. | `OpenPoints` (0153), `SourceDocumentDefects`, `defectPoints()` |
+| **D22 Ein Signal oder keins** | Der Signal-Slot trägt höchstens eine Meldung. Wartet der Datensatz auf jemand anderen — den Mandanten, DATEV, den Agenten —, steht dort nichts: die Wartezeit ist eine Erwartung oder ein Zustand im Kopf, keine Aufforderung an die Leserin. | Zwei Banner übereinander; „Warten auf Unterlagen" als Signal mit Knopf, obwohl im Haus niemand etwas tun kann. | `StatusCallout` (0049), `Banner` |
+| **D23 Jeder Leerfall ist ein Satz mit Grund** | Leer ist nie ein Strich und nie ein Verschwinden: eine Zone, eine Liste, ein Reiter ohne Inhalt sagt, warum. Ein Erfolg (Haken, Satz mit Zahl) und eine Lücke (fehlt, weil …) sind zwei verschiedene Sätze. | „—" als Inhalt einer Zone; ein Reiter, der weiß bleibt; „Keine Treffer" für einen Erfolg. | `EmptyState`, `DataTable empty`, `OpenPoints` |
+| **D24 Nichts zweimal auf dem ersten Bildschirm** | Eine Zahl oder ein Name steht auf dem ersten Bildschirm einmal — zwischen Kopf, Kacheln, Randspalte und Mängelzeilen. Steht der Saldo im Kopf, fällt die Kachel; steht der Betrag im Kopf, wiederholt ihn der Satz darunter nicht. | Derselbe Saldo in Kopf und Kachel; derselbe Betrag im Kopf und in der „Zu tun"-Zeile. | `EntityHeader metric`, `KpiTile` |
+| **D25 Die Herkunft steht neben dem Wert** | Woher ein Wert kommt (KI-Vorschlag, Regel, Mensch, Import), steht als Marke neben ihm; die Herleitung — Regel, Konfidenz, Begründung, Quellen — eingeklappt eine Stufe tiefer. Nie als eigene Zone, nie als leere Zeile. | Eine Spalte „Herkunft" mit rohem Code; eine Begründung, die nirgends lesbar ist; „Begründung: —". | `ProvenanceMark`, `ProvenanceNote` (0163) |
+| **D26 Ein Verlauf, drei Tiefen** | Die Geschichte eines Datensatzes ist **eine** Liste mit den Sichten Verlauf · Protokoll · Technik, nie drei Reiter; Fehlschläge stehen immer im Verlauf. Welche Aktion in welche Tiefe gehört, entscheidet die Domäne je Modul, nicht der Aufrufer. | „Protokoll" und „Technik" als eigene Reiter; ein gescheiterter Export nur in der Technik-Sicht; eine Tiefe, die jede Seite selbst rechnet. | `LogList` / `LogBrowser` (`LogEntry.depth`, 0053/0054), `BatonBar` |
 
 ## 9 Was der Standard vom Seitenprofil verlangt
 
@@ -461,6 +477,16 @@ Ohne Satz keine Abweichung: was dort nicht steht, gilt wie im Standard.
 - [ ] **D14** Jede Tabelle in einer Karte mit Spaltenkopf; keine verschachtelten Karten
 - [ ] **D15** Jeder Abriss mit `p50 ≥ 2` belegt, im Spaltensatz seines Reiters; jede Zahl mit Weg zählt nach I12
 - [ ] **D16** Kein Diagramm unter vier Werten, keines außerhalb Zone 4; höchstens zwei Reihen; Textalternative vorhanden
+- [ ] **D17** Jeder Reiterinhalt ist eine Fläche oder eines der vier Muster; der Umbruch wie festgelegt
+- [ ] **D18** Jeder Reiter nimmt das Muster seiner Art; Listen im Spaltensatz ihrer Hauptliste
+- [ ] **D19** Letzter Reiter `raw` oder `technical`; Schlüssel englisch; kein `?list=`
+- [ ] **D20** Randspalte oben höchstens drei Zeilen, die der Kopf nicht trägt; Erwartungen rechts, „Zu tun" nur fällig
+- [ ] **D21** Zone 2 ist `OpenPoints` mit den Punkten der Entität
+- [ ] **D22** Höchstens ein Signal; keins, wenn der Datensatz auf jemand anderen wartet
+- [ ] **D23** Jeder Leerfall ein Satz mit Grund; Erfolg und Lücke sind zwei Sätze
+- [ ] **D24** Keine Zahl, kein Name zweimal auf dem ersten Bildschirm
+- [ ] **D25** Herkunft als Marke neben dem Wert, Herleitung eingeklappt
+- [ ] **D26** Ein Verlauf mit drei Sichten; Fehlschläge im Verlauf
 - [ ] Abweichungen stehen als Zeile im Seitenprofil (§9)
 
 ## 11 Entscheide, und wo die Zahlen widersprechen
@@ -592,8 +618,21 @@ Abweichung in `sachverhalt-detail.md`.
 | D14 | V5 · `FieldList` JSDoc · `konto-detail` Zweifel 4 (Fakten in die Randspalte) | eine Tabelle Inhalt → Form |
 | D15 | I12 · `konto-detail` Zweifel 2 · Spaltenkataloge 0070/0096/0101 · die Kardinalitäten der Entitätsprofile | die Deckungsschwelle `p50 ≥ 2` |
 | D16 | `Sparkline` (0124, unter vier Werten nichts) · `konto-detail` Rang 3/Zweifel 3 · §3 Diagrammreihe | die Stufen ≤ 3 / 4–12 / ablesbar, und „nur in Zone 4" |
+| D17 | 0154 (Owner-Entscheid 2026-09-10) · 0157 (Randspalte beim Umbruch nach oben, Owner 2026-09-11) | die drei Layouts als Muster des Reiters, nicht der Seite |
+| D18 | 0152 Nachtrag „Reiter je Art wie die Hauptseiten" (Owner 2026-09-11) | für jede Detailseite |
+| D19 | Nachtrag „Reiter nach Zielgruppe" unten (Owner 2026-09-11) · F210-Abgleich mit der App (2026-09-11) | die Schlüssel `raw` und `technical`, englische Schlüssel, kein `?list=` |
+| D20 | 0157 Nachtrag „Stammdaten-Spalte kompakt" · 0152 Nachtrag „Erwartungen in der Randspalte" (Owner 2026-09-11) | für jede Randspalte |
+| D21 | 0153 (`ludwig-cto`, 2026-09-10) · 0150 | die Abgrenzung `OpenPoints` · `Checklist` · `TodoList` |
+| D22 | 0144 („ein Banner oder keins, je Story") · 0152 W2 · 0157 (genau ein Signal in K8 und K9) | die Wartezeit auf jemand anderen als Grund, dass es entfällt |
+| D23 | V9, T6, L6 · 0152 W2 · `SourceDocumentList` (zwei Leerfälle) · 0162 `Empty` | für jede Zone und jeden Reiter |
+| D24 | 0157 („der Saldo steht einmal, im Kopf") · 0152 (die Zu-tun-Zeile wiederholt den Betrag nicht) | D7 über den Kopf hinaus |
+| D25 | 0120 (Herkunft nur bei einem Wert) · 0163 | Marke und Herleitung als ein Pattern |
+| D26 | Z6 (Owner 2026-08-28, „Log mit Sichten") · Rückfrage audit-event (2026-09-11) · L-320 | die Zuordnung Aktion → Tiefe je Modul in der Domäne |
 
 ## Nachtrag 2026-09-11 — Reiter nach Zielgruppe (Sachverhalt)
+
+**Seit dem 2026-09-11 Regel D19** (§8, §13): der Schlüssel des letzten Reiters
+sagt, ob er bündelt (`technical`) oder nur Rohdaten zeigt (`raw`).
 
 Owner-Entscheid an der Sachverhaltsseite (0152): die Reiter werden nach
 Zielgruppe geschnitten. Die Reiter der Sachbearbeitung kommen zuerst; was nur
@@ -602,3 +641,37 @@ des Datensatzes —, steht in **einem** letzten Reiter „Technik". Salden gehö
 zur Plausibilität. Für Beleg, Konto und Partner gilt D11/D12 unverändert, bis
 der Owner den Schnitt dort ebenfalls will; dann ersetzt dieser Nachtrag die
 Reiterfolge in D11.
+
+## 13 Die Regeln D17–D26 — Entscheide seit dem 2026-09-08
+
+Der Standard vom 2026-09-08 ist das Format; es wird nicht neu verhandelt. Seit
+dem Tag sind an Beleg (0144, 0150), Sachverhalt (0152), Konto (0157) und an
+Patterns (0153, 0154, 0163) Entscheide gefallen, die das Format **ausfüllen** —
+welche Spalten ein Reiter hat, wie der letzte heißt, was in der Randspalte
+steht. Sie standen bis heute nur in Specs und Briefen. D17–D26 holen sie
+hierher, mit ihrer Herkunft in §12.
+
+**Die Layouts als Spaltenmuster (D17).** Aus 0154:
+
+| bis 2026-09-10 | seit 0154 | Referenz |
+|---|---|---|
+| D-L1 Zonen untereinander | eine Fläche ohne Spalten | Stammdaten des Sachverhalts |
+| D-L2 Gegenüberstellung | `split` | Beleg (Original gegen Extraktion), Wiederkehr (Regel gegen ihre Buchungen) |
+| D-L3 Randspalte | `main-aside` (Stufe `facts` oder `table`) bzw. `list-detail` | Konto (Bewegungen neben Stammdaten), Plausibilität und Technik des Sachverhalts |
+| — | `list-detail-aside` | die Übersicht des Sachverhalts: Strang, gewählter Eintrag, Notizen |
+
+Beim Umbruch fällt die dritte Spalte nach unten; `main-aside` bricht die
+Randspalte **über** die Arbeitsfläche (0154, Nachtrag), weil dort gelesen wird,
+wogegen die Liste geprüft wird.
+
+**Welche Bausteine die Regeln tragen und wo sie schwach sind**, steht im
+Pattern-Inventar `docs/detailseiten-pattern.md`; die Beispielseiten mit
+beschrifteten Slots und Zonen stehen im Storybook unter „Muster/Detailseite".
+
+**Offen beim Owner — Unterseiten-Navigation.** Trägt ein Reiter viele Punkte,
+liegt eine senkrechte Navigation links nahe („linksbündige Reiter",
+Owner 2026-09-11). D10 verbietet eine zweite Reiterebene. *Ohne Antwort:*
+ein Abschnitts-Index innerhalb des Reiters — Sprungmarken links, die Abschnitte
+bleiben auf einer Seite, der URL-Mechanismus bleibt `?tab=` —; entschieden wird
+er D27.
+
