@@ -175,7 +175,7 @@ export function TableLoading({
       ))}
       <tr>
         <td colSpan={999}>
-          <span className="sr-only">Wird geladen …</span>
+          <span className="v2vh">Wird geladen …</span>
         </td>
       </tr>
     </>

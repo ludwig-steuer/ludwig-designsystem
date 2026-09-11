@@ -29,7 +29,7 @@ export function Skeleton({
 }) {
   return (
     <div className="v2skelgroup">
-      <span className="sr-only">{label}</span>
+      <span className="v2vh">{label}</span>
       {variant === "lines" ? (
         Array.from({ length: lines }, (_, i) => (
           <span
