@@ -259,7 +259,7 @@ export function AccountField({
                     onClick={() => choose(c)}
                   >
                     <span className="v2kf__num">{c.number}</span>
-                    <span className="v2kf__name">{c.name}</span>
+                    <span>{c.name}</span>
                     {c.reason ? <span className="v2kf__why">{c.reason}</span> : null}
                   </button>
                 ))}

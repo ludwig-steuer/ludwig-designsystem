@@ -19,6 +19,7 @@
     "sync:ludwig": "./scripts/sync-ludwig.sh",
     "check:mirror": "node scripts/mirror-filter.mjs --test",
     "check:when": "node scripts/check-when.mjs",
+    "check:classes": "node scripts/check-classes.mjs",
     "check:language": "node scripts/check-language.mjs",
     "check:jobs": "node scripts/check-jobs.mjs",
     "cdp:clean": "node scripts/cdp.mjs --clean"

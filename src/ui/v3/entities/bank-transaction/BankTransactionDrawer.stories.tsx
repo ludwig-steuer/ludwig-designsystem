@@ -202,7 +202,7 @@ export const Interactive: Story = {
     const [open, setOpen] = useState(false);
     return (
       <div style={{ padding: "var(--space-6)" }}>
-        <button type="button" className="v2btn v2btn--ghost" onClick={() => setOpen(true)}>
+        <button type="button" className="v2btn v2btn--tertiary v2btn--sm" onClick={() => setOpen(true)}>
           Zahlung ansehen
         </button>
         <BankTransactionDrawer
@@ -256,7 +256,7 @@ export const InUse: Story = {
               (0103, M3). It now matches `RECORD`. */}
           <button
             type="button"
-            className="v2btn v2btn--ghost"
+            className="v2btn v2btn--tertiary v2btn--sm"
             onClick={() => setRef("2026-08-26/1210/0093117")}
           >
             Erste Zahlung nachschlagen

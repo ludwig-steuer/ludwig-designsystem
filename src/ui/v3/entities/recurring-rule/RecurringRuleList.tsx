@@ -84,7 +84,7 @@ export function RecurringRuleList({
   title?: string;
 }) {
   return (
-    <Card className="v2rrlist">
+    <Card>
       <CardHead
         title={title}
         {...(period ? { sub: period } : {})}
