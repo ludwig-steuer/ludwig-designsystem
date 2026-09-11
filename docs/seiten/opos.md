@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | Status | Entwurf |
-| Route | `ludwig/app`: `app/(app)/clients/[clientSlug]/[year]/opos/page.tsx` (278 Z.) |
+| Route | `ludwig/app`: `app/(app)/clients/[clientSlug]/[year]/open-items/page.tsx` (299 Z.; bis F210 `opos/page.tsx`) |
 | Heute gebaut in | der Seite selbst — zwei Handtabellen, keine eigene Komponente |
 | Entitäten | Offener Posten (`open-item`), am Rand Personenkonto |
 | Baustein in v3 | `entities/open-item/OpenItemRow.tsx` (0029, abgenommen) — eine Listen-Komponente gibt es nicht |
-| Kein Entitätsprofil | Es gibt keins für den offenen Posten (`docs/entitaeten/` führt account, accounting-case, bank-transaction, clarification, invoice-line, source-document). Dieses Profil steht deshalb allein auf 0029 und der Seite — beim nächsten Anfassen der Familie ist das die Lücke, die zuerst zu schließen ist |
+| Entitätsprofil | `docs/entitaeten/open-item.md` (2026-09-11) — Formen, Listen und die Befunde L-325–L-328; bis dahin stand dieses Profil allein auf 0029 und der Seite |
 | Fachliche Quelle | `docs/topics/datev.md` (OPOS-Rekonstruktion), F85-T85.2b für den Abgleich |
 | Profil von / am | Claude (ludwig-worker), 2026-09-08 |
 
