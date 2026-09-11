@@ -40,12 +40,12 @@ import {
   DATEV_EVENT,
   DOCUMENT_EVENT,
   PAYMENT_EXPECTED,
-  PROPOSAL,
   TODAY,
   accountHref,
 } from "./fixtures";
 import { recurringWithRule } from "./collective-scenarios";
-import { bracket, proposalPending, recurringWithoutRule } from "./scenarios";
+import { EntryPane, entryId, type CaseScenario } from "./scenario";
+import { bracket, proposalPending, recurringWithoutRule, withDatevEntry } from "./scenarios";
 import { Columns } from "@/ui/v3/patterns/Columns";
 import { MonoCell } from "@/ui/v3/primitives/Cells";
 import { Disclosure } from "@/ui/v3/primitives/Disclosure";
@@ -97,14 +97,16 @@ function Tab({
   );
 }
 
-/**
- * **Ereignisse** — der ganze Strang, Ludwig und DATEV in einer Reihe; rechts
- * der gewählte Eintrag mit seiner Buchung, so wie in der Übersicht
- * (`list-detail`). Leer: „Noch nichts geschehen." — der Satz des Strangs
- * selbst.
- */
-export const Events: Story = {
-  render: () => (
+/** The reference case with its DATEV entry and the answered question — the entries the strand shows. */
+const EVENTS_CASE: CaseScenario = {
+  ...withDatevEntry,
+  clarifications: [CLARIFICATION_ANSWERED],
+  clarificationList: CLARIFICATIONS,
+};
+
+function EventsTab() {
+  const [selected, setSelected] = useState<string>(DOCUMENT_EVENT.id);
+  return (
     <Tab
       tab="ereignisse"
       empty={
@@ -127,23 +129,25 @@ export const Events: Story = {
                 clarifications={[CLARIFICATION_ANSWERED]}
                 expectations={[PAYMENT_EXPECTED]}
                 today={TODAY}
-                selectedId={DOCUMENT_EVENT.id}
+                selectedId={selected}
+                onSelect={(entry) => setSelected(entryId(entry))}
               />
             </div>
           </Card>
         }
-        main={
-          <Card>
-            <CardHead title="Rechnung 93846778" sub="31.07.2026 · Vorschlag" />
-            <div className="v3boxbody">
-              <JournalEntryCard lines={PROPOSAL} currency="EUR" accountHref={accountHref} />
-            </div>
-          </Card>
-        }
+        main={<EntryPane scenario={EVENTS_CASE} selected={selected} />}
       />
     </Tab>
-  ),
-};
+  );
+}
+
+/**
+ * **Ereignisse** — die vergrößerte Timeline (Brief §3): der ganze Strang,
+ * Ludwig und DATEV in einer Reihe; rechts der gewählte Eintrag mit derselben
+ * Fläche wie in der Übersicht — Ereignis, Erwartung oder Rückfrage. Leer:
+ * „Noch nichts geschehen." — der Satz des Strangs selbst.
+ */
+export const Events: Story = { render: () => <EventsTab /> };
 
 const withDetail = (c: ClarificationVM) =>
   c.state === "open"

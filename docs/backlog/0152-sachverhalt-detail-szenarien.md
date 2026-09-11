@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **fertig** für Einzelfall, Sammel und Dauer, Seite — fremd abgenommen 2026-09-11 samt Nachprüfung (c6f3f4d); die Reiter sind nach Zielgruppe neu geschnitten und warten auf ihre eigene Abnahme |
+| Status | **fertig** — fremd abgenommen 2026-09-11 samt Nachprüfung (c6f3f4d) und Reiter-Abnahme (b32de20); danach der Reiter Ereignisse wählbar gemacht (Hinweis des Prüfers) |
 | Stufe | `src/showcase/case/` (Seiten-Stories) · dazu Erweiterungen an `entities/accounting-case/CaseTimeline.tsx` |
 | Klassen-Test | Die Seite gehört der App und lebt in `showcase/` — wie 0144 für den Beleg. Was an Bausteinen fehlt, wird `entities/` bzw. `patterns/`, nicht Teil der Seite |
 | Quelle | Design-Brief **F196** (`ludwig/app` staging `672665f8`), überbracht von `ludwig-cto` · Seitenprofil `docs/seiten/sachverhalt-detail.md` · Entitätsprofil `docs/entitaeten/accounting-case.md` |
@@ -455,3 +455,22 @@ Die Reiter-Stories sind seit 4a64223 nach Zielgruppe geschnitten (Nachtrag oben)
 ### Nachprüfung 2026-09-11 (Prüfer-Session, gegen c6f3f4d)
 
 **Fertig.** 137 Strang-Einträge in 23 Stories geklickt, 137-mal wechselt Spalte 2; Falz unverändert. Die Reiter-Stories bleiben zurückgestellt (Owner-Wünsche zum Schnitt).
+
+### Reiter-Abnahme 2026-09-11 (Prüfer-Session, gegen b32de20)
+
+**Fertig.** `Events`, `Documents`, `Clarifications`, `Plausibility`,
+`Recurrence`, `Technical`: 12 von 12 Messungen ohne Querlauf, das Muster je
+Reiter wie im Nachtrag, Leerfälle mit Grund, der Beleg-Drawer öffnet und
+schließt über `#document=`.
+
+Hinweis des Prüfers, kein Mangel: im Reiter Ereignisse war die Auswahl fest
+verdrahtet (`selectedId` ohne `onSelect`). Nachgezogen: der Reiter ist die
+vergrößerte Timeline (Brief §3) und wählbar; rechts steht dieselbe Fläche wie
+in der Übersicht — `EntryPane` aus `scenario.tsx`, einmal gebaut, von beiden
+benutzt (Ereignis, Erwartung, Rückfrage, sonst „Zu tun").
+
+Gemessen (6107, 1440 × 900): `seiten-sachverhalt-reiter--events` — vier
+Einträge geklickt, vier Flächen: „Erwartete Zahlung", „Rückfrage", „Rechnung
+93846778", „Gutschrift aus DATEV"; kein Querlauf. Die Übersichten unverändert:
+27 Stories, 139 Einträge, keiner ohne eigene Fläche.
+

@@ -110,7 +110,7 @@ export interface CaseScenario {
 /** The key of the todo row. It stands for no record, so it has no id. */
 export const TODO_ID = "__todo";
 
-const entryId = (entry: CaseTimelineEntry) =>
+export const entryId = (entry: CaseTimelineEntry) =>
   entry.type === "event"
     ? entry.event.id
     : entry.type === "clarification"
@@ -499,17 +499,35 @@ function NotesColumn({ scenario: s }: { scenario: CaseScenario }) {
 }
 
 /**
+ * Column 2 for the selected entry — an event, an expectation or a
+ * clarification; nothing selected is „Zu tun". Every selectable entry changes
+ * this pane (acceptance 0152), and the overview and the events tab show the
+ * same one.
+ */
+export function EntryPane({ scenario: s, selected }: { scenario: CaseScenario; selected: string }) {
+  const detail = s.details[selected];
+  const expectation = s.expectations?.find((e) => e.id === selected);
+  const strand = s.clarifications?.find((c) => c.id === selected);
+  const clarification = s.clarificationList.find((c) => c.id === selected) ?? (strand ? fromStrand(strand) : undefined);
+  if (detail) return <EventPane detail={detail} />;
+  if (expectation) return <ExpectationPane expectation={expectation} today={s.today} />;
+  if (clarification) {
+    return (
+      <ClarificationPane
+        clarification={clarification}
+        {...(s.answerable?.id === clarification.id ? { answerable: s.answerable } : {})}
+      />
+    );
+  }
+  return <TodoPane todo={s.todo} />;
+}
+
+/**
  * The overview tab of one scenario: strand left, workspace in the middle, notes
  * right. Selecting an entry changes **only** column 2.
  */
 export function ScenarioPage({ scenario: s }: { scenario: CaseScenario }) {
   const [selected, setSelected] = useState<string>(s.initialSelection ?? TODO_ID);
-  const detail = s.details[selected];
-  // Every selectable entry changes column 2 — events, expectations and
-  // clarifications alike (acceptance 0152).
-  const expectation = s.expectations?.find((e) => e.id === selected);
-  const strand = s.clarifications?.find((c) => c.id === selected);
-  const clarification = s.clarificationList.find((c) => c.id === selected) ?? (strand ? fromStrand(strand) : undefined);
   const { action, ...callout } = s.signal ?? { kicker: "", title: "" };
   return (
     <CasePage
@@ -526,18 +544,7 @@ export function ScenarioPage({ scenario: s }: { scenario: CaseScenario }) {
       timeline={<StrandCard scenario={s} selected={selected} onSelect={setSelected} />}
       notes={<NotesColumn scenario={s} />}
     >
-      {detail ? (
-        <EventPane detail={detail} />
-      ) : expectation ? (
-        <ExpectationPane expectation={expectation} today={s.today} />
-      ) : clarification ? (
-        <ClarificationPane
-          clarification={clarification}
-          {...(s.answerable?.id === clarification.id ? { answerable: s.answerable } : {})}
-        />
-      ) : (
-        <TodoPane todo={s.todo} />
-      )}
+      <EntryPane scenario={s} selected={selected} />
     </CasePage>
   );
 }
