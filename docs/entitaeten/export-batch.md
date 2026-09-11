@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **analysiert** |
+| Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen 600e543); eine Nacharbeit (acht Reiter), siehe „Prüfung" |
 | GLOSSARY | `### Buchungszyklus / Stapel` (englisch `booking cycle`, `export batch`), `### Export marking / export batch`, `### Buchungsstapel (EXTF)`, `### Stapelabnahme` — Ordner `entities/export-batch/` |
 | Tabelle | `ludwig.client_datev_export_batches` — „Zyklus, Stapel und Exportvorgang sind dieselbe Zeile" (GLOSSARY). Keine Subtypen; die Art (`kind`) trennt `regular` und `client_batch` (Mandantenstapel) |
 | Typen | `datev-export/domain/booking-cycle.ts` — `BOOKING_CYCLE_KINDS` · `batch-process.ts` — `BATCH_PHASES`, `batchPhaseProgress()`, `batchOwner()`, `BatchListFilter`, `matchesBatchFilter()`, `batchOpenLabel()`, `batchActions()` · `staffel.ts` — `staffelSegmente()`, `humanDuration()` · `batch-log.ts` · `stapelabnahme/domain/` — `ABNAHME_STEPS`, `ABNAHME_STEP_SCOPE`, `abnahmeGating()`, `railZaehler()`. **Nicht im Spiegel:** die Formen, die Liste und Detail lesen (`AgentBatchQueueItem`, `BookingCyclePeriod` und die Zähler in `datev-export/application/booking-cycle-core.ts`, server-only) → L-306 |
@@ -60,7 +60,7 @@ erDiagram
 | Datenpunkt | Quelle | Rolle | Füllgrad | heute in | änderbar | Rang | ab Form | Beleg |
 |---|---|---|---|---|---|---|---|---|
 | Stapelnummer (`stapelnummer`, `YYYY-NNNN` je Mandant) | Spalte, bei der Eröffnung vergeben | Identität | 100 % | `StapelListeScreen` (`cycle.stapelnummer`), Abnahme-Kopf | Server | 1 | XS | Füllgrad · GLOSSARY spricht so: „Stapel 2026-0009 wartet auf deine Abnahme" → Frage 1 |
-| Zeitraum (`period_from` · `period_to`) | Spalten | Zeit | 100 % · p50 30 Tage, max 56 (Nachzügler ziehen den Beginn vor) | `StapelListeScreen` | Nutzer (beim Anlegen) | 2 | S | Füllgrad · GLOSSARY „Nachzügler" |
+| Zeitraum (`period_from` · `period_to`) | Spalten | Zeit | 100 % · p50 30 Tage, max 57 inklusiv (Nachzügler ziehen den Beginn vor) | `StapelListeScreen` | Nutzer (beim Anlegen) | 2 | S | Füllgrad · GLOSSARY „Nachzügler" |
 | Zustand und wer dran ist (`state` · `batchOwner()`) | Spalte · abgeleitet (mit offenen Nachforderungen) | Zustand (`zyklus_stapel`) | 100 % — `confirmed` 8 · `prepared` 5 · `review` 1 | `StapelListeScreen` (`cycle.state`, zehn Stellen); im Set `ProcessMini`, `Baton` | Server (Übergänge) | 3 | XS | Füllgrad · GLOSSARY „Wer dran ist, IST der Zustand" |
 | Art (`kind`; Nachtrag über `supplements_batch_id`) | Spalte · Eltern | Identität (Art) | 100 % — `regular` 12 · `client_batch` 2 · Nachtrag 0 % | `StapelListeScreen` (`cycle.supplementsBatchId`) | Server | 4 | S | Füllgrad · heute in · Wortliste fehlt (L-308) |
 | Bezeichnung (`description`, z. B. „08-2026-Ludwig") | Spalte | Identität | 100 % · p50 14 · max 21 Zeichen | `StapelListeScreen` (`cycle.description`) | Server | 5 | S | Füllgrad · heute in |
@@ -102,7 +102,7 @@ Freitext-Grenzen: Bezeichnung max 21 Zeichen — nie gekürzt.
 | Komponente | Form | zeigt | fehlt | zu viel |
 |---|---|---|---|---|
 | `StapelListeScreen` (`datev-export/ui`, 523 Z.) | Liste | Nummer, Zeitraum, Zustand, wer dran ist, Bezeichnung, Umfang nach Status, Nachforderungen mit Frist, neue Belege seit Prüfung, Nachtrag, Durchgänge, DATEV-Stapel, Nachlese-Summe | — | — |
-| `StapelDetailScreen` (1.090 Z.) | Detail, sechs Reiter (Übersicht · Durchgänge · Buchungen · Artefakte · DATEV · Log) | Zähler: Sätze nach Status, Rückfragen (offen / gesamt, Mandant / Kanzlei), Belege im Zeitraum / erledigt, Sachverhalte, Ereignisse, Läufe mit Beginn / Ende | — | alles in einer Datei |
+| `StapelDetailScreen` (1.090 Z.) | Detail, acht Reiter (Übersicht · Durchgänge · Belege · Buchungen · Artefakte · DATEV · Log · Experiment — der letzte nur bei Experiment-Mandanten; `StapelDetailScreen.tsx:74–84`) | Zähler: Sätze nach Status, Rückfragen (offen / gesamt, Mandant / Kanzlei), Belege im Zeitraum / erledigt, Sachverhalte, Ereignisse, Läufe mit Beginn / Ende | — | alles in einer Datei |
 | `BatchActions` (457 Z.), `StapelZeilenmenue` (245 Z.), `ExportBatchRowActions` (173 Z.), `ResetBatchButton`, `ExportBatchDownloadButton` | Aktionen | die Übergänge je Zustand (`batchActions()`) | — | dieselben Übergänge an drei Orten (Kopf, Zeilenmenü, Zeilenaktionen) |
 | `AbnahmeRahmen` (`stapelabnahme/ui`, 229 Z.) | Rahmen der Abnahme | Rail mit Zählern (`railZaehler()`) | — | — |
 | `DatevExportSection`, `ExportBatchDetailSection`, `OpenExportOverview` | — | nicht gemountet (Roadmap: löschen oder heben) | | |
@@ -149,7 +149,7 @@ keine Form dieser Entität.
 | `BatchRow` | S | ja | 1 — Zeile von `StapelListeScreen` | 1–7 | Buchungssätze als Zähler nach Status, Nachtrag als `BatchCell` | `Row`/`DataTable`-Spalten, `ProcessMini` ✓, `Baton` ✓, `StatusBadge` (`zyklus_stapel`) | Zeilen von `StapelListeScreen`, `StapelZeilenmenue` (die Übergänge über `batchActions()`) |
 | `BatchCard` | M | ja, **Backlog** | Job genannt (Roadmap: „der offene Stapel auf Jahresstart/Dashboard mit nächstem Schritt", I10), kein gemounteter Screen | 1–7 + nächster Schritt | — | `BatchRow`, `ProcessStepper` | `OpenExportOverview` (tot) |
 | `BatchFacts` | L | ja | 1 — der Reiter „Übersicht" von `StapelDetailScreen` | alle ab 20 %: 1–7, Zähler 8–10, 11, 13, 15 | Rückfragen, Läufe, Sachverhalte, Ereignisse als Zähler | `FieldList`, `ProcessStepper` ✓, `StatusCallout` ✓, `BatonBar` ✓ | Übersicht von `StapelDetailScreen` |
-| `BatchView` | L | ja, **Backlog** | 1 — eigene Route `stapel/[batchId]` mit sechs Reitern und der Stapelabnahme als Prozess — braucht zuerst ein Seitenprofil (§8) | Kopf + Reiter | alle Listen der Kinder | `BatchFacts`, `JournalEntryList`, `LogBrowser`, Detailseiten-Standard | `StapelDetailScreen` |
+| `BatchView` | L | ja, **Backlog** | 1 — eigene Route `stapel/[batchId]` mit acht Reitern und der Stapelabnahme als Prozess — braucht zuerst ein Seitenprofil (§8) | Kopf + Reiter | alle Listen der Kinder | `BatchFacts`, `JournalEntryList`, `LogBrowser`, Detailseiten-Standard | `StapelDetailScreen` |
 | `BatchList` | L | ja | 6 — Job „Stapel des Jahres" | Zeile + Rahmen | — | `DataTable` (Client-Filter), `BatchRow`, `Segmented` für `BatchListFilter`, `EmptyState` | `StapelListeScreen` |
 | `BatchDrawer` | L | nein | wer einen Stapel nennt, will dorthin (Route), nicht nachschlagen — keine fremde Ansicht fragt ihn ab (Roadmap: „nur über eigene Liste erreichbar") | | | | |
 | `BatchEditor` | XL | nein | die Übergänge sind Aktionen (`batchActions()`, `ActionButton confirm`); Anlegen ist ein Dialog mit Server-Vorschau (`planManualBatch`) → Frage 3 | | | | |
@@ -166,7 +166,7 @@ Bau-Reihenfolge: `BatchCell` → `BatchRow` → `BatchFacts` → `BatchList`.
 | `BatchFacts` | jetzt | existiert als Übersicht von `StapelDetailScreen` | — |
 | `BatchList` „Stapel des Jahres" | jetzt | ersetzt `StapelListeScreen` | — |
 | `BatchCard` + Liste „Offene Stapel aller Mandanten" | Backlog | Job nur genannt, kein gemounteter Screen; hängt am Profil `client` (Roadmap #6) | `docs/backlog/0166-open-batches-overview.md` |
-| `BatchView` (Stapel-Detailseite) | Backlog | eigene Route mit sechs Reitern — zuerst ein Seitenprofil `docs/seiten/stapel-detail.md` (Reiter nach Zielgruppe, Detailseiten-Standard) | `docs/backlog/0167-batch-detail-page.md` |
+| `BatchView` (Stapel-Detailseite) | Backlog | eigene Route mit acht Reitern — zuerst ein Seitenprofil `docs/seiten/stapel-detail.md` (Reiter nach Zielgruppe, Detailseiten-Standard) | `docs/backlog/0167-batch-detail-page.md` |
 | `BatchDrawer` · `BatchEditor` · `BatchPicker` | verworfen | siehe Formen | — |
 
 Vier Formen „jetzt".
@@ -195,6 +195,9 @@ dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
 
 | Zeile / Form | Einwand | Ergebnis | Geprüft von / am |
 |---|---|---|---|
+| Kopf, Datenpunkte, Relationen | 24 Spalten verortet, elf FK-Constraints belegt, CHECK `state` = 11 Werte = Achse `zyklus_stapel`; Domäne und Aufrufer wie beschrieben; Aggregate reproduziert, auch L-307 | bestätigt | Prüfer-Session, 2026-09-11 |
+| Heutige Darstellung `StapelDetailScreen` · `BatchView` · 0167 | acht Reiter, nicht sechs: Übersicht · Durchgänge · Belege · Buchungen · Artefakte · DATEV · Log · Experiment (`StapelDetailScreen.tsx:74–84`, Experiment nur bei Experiment-Mandanten) | geändert; 0167 geht von acht Reitern plus Stapelabnahme aus | Prüfer-Session, 2026-09-11 |
+| Zeitraum · Umfang | Zeitraum max 57 Tage inklusiv (nicht 56); p50 der gestempelten Sätze 43 mit `percentile_disc` (44,5 mit `percentile_cont`) | Zeitraum geändert; p50 bleibt als Mittelwert der beiden mittleren Stapel stehen | Prüfer-Session, 2026-09-11 |
 | L-306, L-307, L-308 · Bestandswarnung | App-Nachzählung: Zahlen stimmen (14 Stapel, `regular` 12, `client_batch` 2, 0 Nachträge); die Oberfläche leitet den Umfang schon ab; die 44 Differenz sind zurückgezogene Vorschläge mit Stempel; die Wörter der Art sind verstreut | L-307 neu gefasst, L-306/L-308 bestätigt; App P17, P24, P25 | ludwig-manager (ludwig-worker), 2026-09-11 |
 
 ## Weiter
