@@ -68,6 +68,7 @@ export function CaseFacts({
   all = false,
   tone = "surface",
   split = false,
+  technical = true,
   partnerHref,
   accountHref,
 }: {
@@ -77,6 +78,11 @@ export function CaseFacts({
   tone?: "surface" | "bare";
   /** Two columns of pairs where the page gives them room — the Details tab. */
   split?: boolean;
+  /**
+   * With `all`: also anchor, creator, booking run and cycle. `false` where a
+   * technical tab of the same page carries them (owner 2026-09-11, 0152).
+   */
+  technical?: boolean;
   /** The partner becomes a link (47 % have one). */
   partnerHref?: string;
   /** Personal and clearing account become links — **by number**: that is what the route runs on. */
@@ -144,8 +150,8 @@ export function CaseFacts({
         ? (SIDE_LABEL[c.counterpartySide as keyof typeof SIDE_LABEL] ?? c.counterpartySide)
         : "bewusst keine",
     );
-    if (c.batchOposReference) add("Anker", <MonoCell value={c.batchOposReference} />);
-    if (c.createdByLabel) add("Angelegt von", c.createdByLabel);
+    if (technical && c.batchOposReference) add("Anker", <MonoCell value={c.batchOposReference} />);
+    if (technical && c.createdByLabel) add("Angelegt von", c.createdByLabel);
     if (c.fiscalYear != null) add("Wirtschaftsjahr", String(c.fiscalYear));
     if (c.expectedInterval) add("Abrechnungsrhythmus", c.expectedInterval);
     if (c.clearingAccountNumber) {
@@ -157,8 +163,8 @@ export function CaseFacts({
         />,
       );
     }
-    if (c.agentRunId) add("Buchungslauf", <MonoCell value={c.agentRunId} />);
-    if (c.exportBatchId) add("Buchungszyklus", <MonoCell value={c.exportBatchId} />);
+    if (technical && c.agentRunId) add("Buchungslauf", <MonoCell value={c.agentRunId} />);
+    if (technical && c.exportBatchId) add("Buchungszyklus", <MonoCell value={c.exportBatchId} />);
     // Rank 25 (acceptance bucket) is deliberately absent: it groups the
     // acceptance list and would be a number without context here.
   }

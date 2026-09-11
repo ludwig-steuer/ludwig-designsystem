@@ -90,6 +90,25 @@ export const All: Story = {
   ),
 };
 
+/**
+ * `all` mit `technical={false}`: der Reiter „Stammdaten", wenn dieselbe Seite
+ * einen Reiter „Technik" hat (Owner 2026-09-11). Anker, Angelegt von,
+ * Buchungslauf und Buchungszyklus stehen dort, hier nicht.
+ */
+export const WithoutTechnical: Story = {
+  render: () => (
+    <div style={{ maxWidth: 720 }}>
+      <CaseFacts
+        case={{ ...FULL, exportBatchId: "2026-0042" }}
+        all
+        technical={false}
+        partnerHref="#partner-8812"
+        accountHref={accountHref}
+      />
+    </div>
+  ),
+};
+
 /** `tone="bare"` unter einer Überschrift — die Fassung für Zone 3 des Drawers (0052). */
 export const InDrawer: Story = {
   render: () => (

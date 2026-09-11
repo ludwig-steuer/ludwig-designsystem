@@ -46,6 +46,9 @@ import {
 } from "./fixtures";
 import { recurringWithRule } from "./collective-scenarios";
 import { bracket, proposalPending, recurringWithoutRule } from "./scenarios";
+import { Columns } from "@/ui/v3/patterns/Columns";
+import { MonoCell } from "@/ui/v3/primitives/Cells";
+import { Disclosure } from "@/ui/v3/primitives/Disclosure";
 
 /**
  * Die Reiter der Sachverhaltsseite — P3 aus 0152.
@@ -89,9 +92,10 @@ function Tab({
 }
 
 /**
- * **Ereignisse** — der ganze Strang, Ludwig und DATEV in einer Reihe, dazu
- * die Buchung zum gewählten Beleg. Leer: „Noch nichts geschehen." — der Satz
- * des Strangs selbst.
+ * **Ereignisse** — der ganze Strang, Ludwig und DATEV in einer Reihe; rechts
+ * der gewählte Eintrag mit seiner Buchung, so wie in der Übersicht
+ * (`list-detail`). Leer: „Noch nichts geschehen." — der Satz des Strangs
+ * selbst.
  */
 export const Events: Story = {
   render: () => (
@@ -106,24 +110,31 @@ export const Events: Story = {
         </Card>
       }
     >
-      <Card>
-        <CardHead title="Ereignisse" sub="drei Einträge, eine Erwartung" />
-        <div className="v3boxbody">
-          <CaseTimeline
-            events={[DATEV_EVENT, DOCUMENT_EVENT]}
-            clarifications={[CLARIFICATION_ANSWERED]}
-            expectations={[PAYMENT_EXPECTED]}
-            today={TODAY}
-            selectedId={DOCUMENT_EVENT.id}
-          />
-        </div>
-      </Card>
-      <Card>
-        <CardHead title="Buchung zum Beleg" sub="Vorschlag vom 31.07." />
-        <div className="v3boxbody">
-          <JournalEntryCard lines={PROPOSAL} currency="EUR" accountHref={accountHref} />
-        </div>
-      </Card>
+      <Columns
+        pattern="list-detail"
+        list={
+          <Card>
+            <CardHead title="Ereignisse" sub="drei Einträge, eine Erwartung" />
+            <div className="v3boxbody">
+              <CaseTimeline
+                events={[DATEV_EVENT, DOCUMENT_EVENT]}
+                clarifications={[CLARIFICATION_ANSWERED]}
+                expectations={[PAYMENT_EXPECTED]}
+                today={TODAY}
+                selectedId={DOCUMENT_EVENT.id}
+              />
+            </div>
+          </Card>
+        }
+        main={
+          <Card>
+            <CardHead title="Rechnung 93846778" sub="31.07.2026 · Vorschlag" />
+            <div className="v3boxbody">
+              <JournalEntryCard lines={PROPOSAL} currency="EUR" accountHref={accountHref} />
+            </div>
+          </Card>
+        }
+      />
     </Tab>
   ),
 };
@@ -175,7 +186,9 @@ const CHECKS: CheckItem[] = [
 ];
 
 /**
- * **Plausibilität** — die Prüfpunkte P1–P5 und das Belegnummern-Register.
+ * **Plausibilität** — die Prüfpunkte P1–P5, das Belegnummern-Register und,
+ * seit dem Schnitt nach Zielgruppe (Owner 2026-09-11), **Saldo & Konten**:
+ * Personenkonto, offene Posten, Ausgleich. Alles eine Frage — geht es auf?
  * Bestandene Punkte stehen zusammen in einer Zeile, Befunde einzeln.
  */
 export const Plausibility: Story = {
@@ -183,16 +196,28 @@ export const Plausibility: Story = {
     <Tab
       tab="plausibilitaet"
       empty={
+        <>
+          <Card>
+            <CardHead title="Plausibilität" sub="nicht geprüft" />
+            <div className="v3boxbody">
+              <EmptyState
+                inline
+                title="Noch nicht geprüft."
+                description="Die Prüfpunkte laufen, sobald ein Beleg oder eine Buchung am Fall hängt."
+              />
+            </div>
+          </Card>
         <Card>
-          <CardHead title="Plausibilität" sub="nicht geprüft" />
+          <CardHead title="Saldo & Konten" sub="kein Personenkonto" />
           <div className="v3boxbody">
             <EmptyState
               inline
-              title="Noch nicht geprüft."
-              description="Die Prüfpunkte laufen, sobald ein Beleg oder eine Buchung am Fall hängt."
+              title="Kein Personenkonto am Fall."
+              description="Der Sachverhalt bucht bewusst ohne Personenkonto — ein Saldo entsteht erst mit einem Konto."
             />
           </div>
         </Card>
+        </>
       }
     >
       <Card>
@@ -206,6 +231,37 @@ export const Plausibility: Story = {
         <div className="v3boxbody">
           <DocumentNumberRegister entries={REGISTER} onPick={() => {}} sourceLabel={SOURCE_LABEL} stateLabel={STATE_LABEL} />
         </div>
+      </Card>
+      <Card>
+        <CardHead title="Personenkonto 71202" sub="Musterbau Fahrzeugteile GmbH" />
+        <div className="v3boxbody">
+          <FieldList
+            tone="bare"
+            split
+            rows={[
+              ["Soll", "21,82 €"],
+              ["Haben", "47,23 €"],
+              ["Saldo", "25,41 € Haben"],
+              ["Stand", "05.08.2026"],
+            ]}
+          />
+        </div>
+      </Card>
+      <OpenItemsCard title="Offene Posten" sub={`Stichtag ${TODAY.split("-").reverse().join(".")}`} items={[openItem()]} />
+      <Card>
+        <CardHead title="Ausgleich" sub="1 Klammer" />
+        <Table cols={openItemLinkTracks} minWidth={980}>
+          <HeadRow>
+            <span>Klammer</span>
+            <span>Belegfeld</span>
+            <span className="v2num">Rechnung</span>
+            <span className="v2num">Zahlung</span>
+            <span className="v2num">zugeordnet</span>
+            <span>Herkunft</span>
+            <span>Zustand</span>
+          </HeadRow>
+          <OpenItemLinkRow link={PAID.link} invoice={PAID.invoice} payment={PAID.payment} />
+        </Table>
       </Card>
     </Tab>
   ),
@@ -259,110 +315,6 @@ const PAID = bracket(1, "93846778 · Musterbau Fahrzeugteile GmbH", "noch keine 
   invoice: "2026-07-31",
   payment: "2026-08-10",
 });
-
-/**
- * **Saldo & Konten** — das Personenkonto mit seinem Saldo, der offene Posten
- * und die Klammer, die ihn ausgleichen wird. Leer: ein Fall ohne Personenkonto
- * hat hier bewusst nichts.
- */
-export const BalanceAndAccounts: Story = {
-  render: () => (
-    <Tab
-      tab="saldo"
-      empty={
-        <Card>
-          <CardHead title="Saldo & Konten" sub="kein Personenkonto" />
-          <div className="v3boxbody">
-            <EmptyState
-              inline
-              title="Kein Personenkonto am Fall."
-              description="Der Sachverhalt bucht bewusst ohne Personenkonto — ein Saldo entsteht erst mit einem Konto."
-            />
-          </div>
-        </Card>
-      }
-    >
-      <Card>
-        <CardHead title="Personenkonto 71202" sub="Musterbau Fahrzeugteile GmbH" />
-        <div className="v3boxbody">
-          <FieldList
-            tone="bare"
-            split
-            rows={[
-              ["Soll", "21,82 €"],
-              ["Haben", "47,23 €"],
-              ["Saldo", "25,41 € Haben"],
-              ["Stand", "05.08.2026"],
-            ]}
-          />
-        </div>
-      </Card>
-      <OpenItemsCard title="Offene Posten" sub={`Stichtag ${TODAY.split("-").reverse().join(".")}`} items={[openItem()]} />
-      <Card>
-        <CardHead title="Ausgleich" sub="1 Klammer" />
-        <Table cols={openItemLinkTracks} minWidth={980}>
-          <HeadRow>
-            <span>Klammer</span>
-            <span>Belegfeld</span>
-            <span className="v2num">Rechnung</span>
-            <span className="v2num">Zahlung</span>
-            <span className="v2num">zugeordnet</span>
-            <span>Herkunft</span>
-            <span>Zustand</span>
-          </HeadRow>
-          <OpenItemLinkRow link={PAID.link} invoice={PAID.invoice} payment={PAID.payment} />
-        </Table>
-      </Card>
-    </Tab>
-  ),
-};
-
-/**
- * **DATEV-Wahrheit** — was DATEV zu diesem Fall kennt: die Spiegel-Buchung
- * und die offenen Posten laut DATEV. Lesend, ohne Handlungen. Leer: DATEV
- * kennt den Fall noch nicht.
- */
-export const DatevTruth: Story = {
-  render: () => (
-    <Tab
-      tab="datev"
-      empty={
-        <Card>
-          <CardHead title="DATEV-Wahrheit" sub="nichts gefunden" />
-          <div className="v3boxbody">
-            <EmptyState
-              inline
-              title="DATEV kennt zu diesem Fall noch nichts."
-              description="Nach dem nächsten Export und Abgleich stehen hier die gespiegelten Buchungen."
-            />
-          </div>
-        </Card>
-      }
-    >
-      <Card>
-        <CardHead title="Gutschrift aus DATEV" sub="30.06.2026 · Stapel 06-2026" />
-        <div className="v3boxbody">
-          <JournalEntryCard
-            lines={[
-              { side: "debit", accountNumber: "71202", accountName: "Musterbau Fahrzeugteile GmbH", amount: 21.82, text: "Gutschrift" },
-              { side: "credit", accountNumber: "5404", accountName: "Wareneingang 19 % VSt", amount: 21.82, text: "Gutschrift" },
-            ]}
-            currency="EUR"
-            accountHref={accountHref}
-          />
-          <p className="v2muted" style={{ margin: 0 }}>
-            Diese Buchung steht in DATEV. Ludwig zeigt sie, ändert sie nicht.
-          </p>
-        </div>
-      </Card>
-      <OpenItemsCard
-        title="Offene Posten laut DATEV"
-        sub="Stand des Spiegels 01.08.2026"
-        items={[openItem({ externalDocumentNumber: "GS-2026-0630", invoiceDate: "2026-06-30", dueDate: null, grossAmount: 21.82, openAtCutoff: 0, clearedAfterCutoff: true, description: "Gutschrift Juni" })]}
-      />
-    </Tab>
-  ),
-};
 
 const LOG: LogEntry[] = [
   { id: "l1", at: "2026-07-31T16:02:00Z", message: "Sachverhalt aus dem Beleg eröffnet", actor: { kind: "agent", label: "Agent" }, depth: 1, level: "info" },
@@ -551,70 +503,101 @@ export const Recurrence: Story = {
   ),
 };
 
+/** What the master data leaves to this tab — only rows with a value, as `CaseFacts` does. */
+function originRows(c: CaseFactsVM): [ReactNode, ReactNode][] {
+  const rows: [ReactNode, ReactNode][] = [];
+  if (c.batchOposReference) rows.push(["Anker", <MonoCell key="a" value={c.batchOposReference} />]);
+  if (c.createdByLabel) rows.push(["Angelegt von", c.createdByLabel]);
+  if (c.agentRunId) rows.push(["Buchungslauf", <MonoCell key="r" value={c.agentRunId} />]);
+  if (c.exportBatchId) rows.push(["Buchungszyklus", <MonoCell key="b" value={c.exportBatchId} />]);
+  return rows;
+}
+
 /**
- * **Protokoll** — drei Tiefen: der Verlauf (was ein Mensch erzählen würde),
- * dazu die fachlichen Entscheidungen, dazu die Technik. Leer: es gibt noch
- * keinen Eintrag.
+ * **Technik** — was Prüfung und Support lesen, nicht die Sachbearbeitung
+ * (Owner 2026-09-11: Reiter nach Zielgruppe). Untereinander: was DATEV zu
+ * diesem Fall kennt, das Protokoll in drei Tiefen, die Herkunft des
+ * Datensatzes und — eingeklappt — die Rohdaten. Leer: je Block sein Satz.
  */
-export const Log: Story = {
+export const Technical: Story = {
   render: () => (
     <Tab
-      tab="protokoll"
+      tab="technical"
       empty={
-        <Card>
-          <CardHead title="Protokoll" sub="keine Einträge" />
-          <div className="v3boxbody">
-            <LogBrowser entries={[]} emptyText="Noch kein Eintrag im Protokoll — der Fall ist gerade erst angelegt." />
-          </div>
-        </Card>
+        <>
+          <Card>
+            <CardHead title="DATEV-Wahrheit" sub="nichts gefunden" />
+            <div className="v3boxbody">
+              <EmptyState
+                inline
+                title="DATEV kennt zu diesem Fall noch nichts."
+                description="Nach dem nächsten Export und Abgleich stehen hier die gespiegelten Buchungen."
+              />
+            </div>
+          </Card>
+          <Card>
+            <CardHead title="Protokoll" sub="keine Einträge" />
+            <div className="v3boxbody">
+              <LogBrowser entries={[]} emptyText="Noch kein Eintrag im Protokoll — der Fall ist gerade erst angelegt." />
+            </div>
+          </Card>
+        </>
       }
     >
+      <Card>
+        <CardHead title="DATEV-Wahrheit · Gutschrift" sub="30.06.2026 · Stapel 06-2026" />
+        <div className="v3boxbody">
+          <JournalEntryCard
+            lines={[
+              { side: "debit", accountNumber: "71202", accountName: "Musterbau Fahrzeugteile GmbH", amount: 21.82, text: "Gutschrift" },
+              { side: "credit", accountNumber: "5404", accountName: "Wareneingang 19 % VSt", amount: 21.82, text: "Gutschrift" },
+            ]}
+            currency="EUR"
+            accountHref={accountHref}
+          />
+          <p className="v2muted" style={{ margin: 0 }}>
+            Diese Buchung steht in DATEV. Ludwig zeigt sie, ändert sie nicht.
+          </p>
+        </div>
+      </Card>
+      <OpenItemsCard
+        title="Offene Posten laut DATEV"
+        sub="Stand des Spiegels 01.08.2026"
+        items={[openItem({ externalDocumentNumber: "GS-2026-0630", invoiceDate: "2026-06-30", dueDate: null, grossAmount: 21.82, openAtCutoff: 0, clearedAfterCutoff: true, description: "Gutschrift Juni" })]}
+      />
       <Card>
         <CardHead title="Protokoll" sub="7 Einträge in drei Tiefen" />
         <div className="v3boxbody">
           <LogBrowser entries={LOG} initialView={2} />
         </div>
       </Card>
-    </Tab>
-  ),
-};
-
-/**
- * **Rohdaten** — der Datensatz, wie er in der Tabelle steht, für wen es genau
- * wissen muss. Leer: ohne Datensatz keine Felder.
- */
-export const RawData: Story = {
-  render: () => (
-    <Tab
-      tab="rohdaten"
-      empty={
-        <Card>
-          <CardHead title="Rohdaten" sub="kein Datensatz" />
-          <div className="v3boxbody">
-            <RawRecord record={{}} empty="Keine Felder — der Datensatz ist nicht geladen." />
-          </div>
-        </Card>
-      }
-    >
       <Card>
-        <CardHead title="client_accounting_case" sub="1 Datensatz" />
+        <CardHead title="Herkunft des Datensatzes" sub="wer ihn angelegt hat, in welchem Lauf" />
         <div className="v3boxbody">
-          <RawRecord
-            record={{
-              id: "c-0334",
-              case_number: "2026-0334",
-              kind: "incoming_invoice",
-              lifecycle_status: "open",
-              disposition: "agent",
-              counterparty_partner_id: "bp-4711",
-              personal_account_number: "71202",
-              document_number_mode: "single",
-              opened_at: "2026-07-31",
-              closed_at: null,
-              agent_run_id: "run-4b19c2",
-              export_batch_id: null,
-            }}
-          />
+          <FieldList tone="bare" rows={originRows(accountingCase)} />
+        </div>
+      </Card>
+      <Card>
+        <CardHead title="Rohdaten" sub="client_accounting_case · 1 Datensatz" />
+        <div className="v3boxbody">
+          <Disclosure summary="Datensatz anzeigen">
+            <RawRecord
+              record={{
+                id: "c-0334",
+                case_number: "2026-0334",
+                kind: "incoming_invoice",
+                lifecycle_status: "open",
+                disposition: "agent",
+                counterparty_partner_id: "bp-4711",
+                personal_account_number: "71202",
+                document_number_mode: "single",
+                opened_at: "2026-07-31",
+                closed_at: null,
+                agent_run_id: "run-4b19c2",
+                export_batch_id: null,
+              }}
+            />
+          </Disclosure>
         </div>
       </Card>
     </Tab>

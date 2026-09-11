@@ -92,15 +92,10 @@ export const proposalPending: CaseScenario = {
   clarifications: [CLARIFICATION_ANSWERED],
   expectations: [PAYMENT_EXPECTED],
   todo: {
-    sub: "1 offen · 1 Freigabe",
-    points: [
-      {
-        key: "payment",
-        title: "Die Zahlung an Musterbau Fahrzeugteile GmbH steht aus.",
-        hint: "25,41 € · fällig am 10.08.2026, in 5 Tagen · noch keine Mahnung — danach fragt Ludwig beim Mandanten nach.",
-        ways: ["Erwartung aufheben"],
-      },
-    ],
+    sub: "1 Freigabe",
+    // The payment is expected, not due — it stands under „Erwartungen" on the right.
+    points: [],
+    emptyText: "Nichts offen außer dem Vorschlag darunter.",
     approval: { caption: "Buchungsvorschlag vom 31.07.", lines: PROPOSAL },
   },
   details: {
@@ -182,7 +177,7 @@ export const openItemCarryover: CaseScenario = {
       rows: [
         ["Offener Posten", "aus DATEV, Stichtag 01.06.2026"],
         ["Anker", "mirror-opos:10412/2026-0418"],
-        ["Weiter", <TextButton key="d" href={tabHref("datev")}>DATEV-Wahrheit ansehen</TextButton>],
+        ["Weiter", <TextButton key="d" href={tabHref("technical")}>DATEV-Wahrheit ansehen</TextButton>],
       ],
     },
   },
@@ -357,16 +352,10 @@ const awaitingDocumentBase: CaseScenario = {
     { id: "ex-a7", kind: "document", dueDate: "2026-08-19", escalationLevel: 0, counterpartyName: "Testhandel Bürobedarf KG", amount: 86, currency: "EUR" },
   ],
   todo: {
-    sub: "1 Beleg fehlt",
-    points: [
-      {
-        key: "document",
-        title: "Die Rechnung von Testhandel Bürobedarf KG fehlt.",
-        hint: "Erbeten bis 19.08.2026, in 14 Tagen · noch keine Mahnung — der Mandant ist gefragt.",
-        state: "open",
-        ways: ["Beleg anhängen", "Erledigt", "Aufheben"],
-      },
-    ],
+    sub: "wartet auf den Mandanten",
+    // Asked for and not yet due: the expectation stands on the right, not here.
+    points: [],
+    emptyText: "Nichts zu tun: die Rechnung ist beim Mandanten angefordert.",
   },
   details: Object.fromEntries(
     ["ev-a7-1", "ev-a7-2"].map((id, i) => [

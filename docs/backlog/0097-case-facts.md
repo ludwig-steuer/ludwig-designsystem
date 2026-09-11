@@ -545,3 +545,17 @@ M1 in 0098). Wer `CaseFactsVM` künftig woanders anzeigt, geht über
 
 Abgenommen von / am: **abgenommen**, fremde Nachabnahme, 2026-09-07 — für
 0097 unverändert richtig; der offene Punkt steht in 0098 (M1).
+
+## Nachtrag 2026-09-11 — `technical`
+
+Owner-Entscheid zur Sachverhaltsseite (0152): die Reiter sind nach
+Zielgruppe geschnitten, und ein Reiter „Technik" trägt, was Prüfung und
+Support lesen. Die Stammdaten zeigen die technischen Zeilen deshalb nicht
+mehr.
+
+| Prop | Typ | Default | Wirkung | Story |
+|---|---|---|---|---|
+| `technical` | `boolean` | `true` | mit `all`: Anker, Angelegt von, Buchungslauf und Buchungszyklus; `false` lässt sie weg | `WithoutTechnical` |
+
+Additiv, breaking: nein. Drawer und Karte setzen `all` nicht und sind nicht
+betroffen.

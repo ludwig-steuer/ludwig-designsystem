@@ -194,6 +194,7 @@ export const MasterData: Story = {
           <CaseFacts
             case={caseFixture({ disposition: "agent" })}
             all
+            technical={false}
             split
             tone="bare"
             partnerHref={partnerHref}

@@ -477,16 +477,10 @@ export const expenseReport: CaseScenario = {
   expectations: [{ id: "ex-e", kind: "document", dueDate: "2026-08-20", escalationLevel: 0, counterpartyName: null, amount: 64.2, currency: "EUR" }],
   timelineLimit: 20,
   todo: {
-    sub: "1 Beleg fehlt",
-    points: [
-      {
-        key: "receipt",
-        title: "Ein Tankbeleg über 64,20 € fehlt.",
-        hint: "Erbeten bis 20.08.2026, in 15 Tagen · noch keine Mahnung.",
-        state: "open",
-        ways: ["Beleg anhängen", "Aufheben"],
-      },
-    ],
+    sub: "wartet auf einen Beleg",
+    // Asked for and not yet due: the expectation stands on the right, not here.
+    points: [],
+    emptyText: "Nichts zu tun: der fehlende Tankbeleg ist erbeten.",
   },
   details: Object.fromEntries(
     RECEIPTS.map((e): [string, EventDetail] => [

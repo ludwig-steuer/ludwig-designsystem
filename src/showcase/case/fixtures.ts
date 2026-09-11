@@ -171,18 +171,20 @@ export const CLARIFICATIONS: ClarificationVM[] = [
  * owner (2026-09-10): "Details" → **Stammdaten**, and the audit trail
  * "Verlauf" → **Protokoll**, so it no longer sounds like "Ereignisse".
  */
+/**
+ * Split by audience (owner 2026-09-11): the clerk's tabs first, then one tab for
+ * audit and support — DATEV truth, log and raw data.
+ */
 export const FALL_TABS = [
   { key: "uebersicht", label: "Übersicht" },
-  { key: "stammdaten", label: "Stammdaten" },
   { key: "ereignisse", label: "Ereignisse" },
   { key: "rueckfragen", label: "Rückfragen" },
+  // Balances and accounts answer the same question as the checks: does it add up?
   { key: "plausibilitaet", label: "Plausibilität" },
-  { key: "saldo", label: "Saldo & Konten" },
-  { key: "datev", label: "DATEV-Wahrheit" },
   // Rule and assignment in one tab (F196 O2); only a recurring case has it.
   { key: "regelwerk", label: "Wiederkehr" },
-  { key: "protokoll", label: "Protokoll" },
-  { key: "rohdaten", label: "Rohdaten" },
+  { key: "stammdaten", label: "Stammdaten" },
+  { key: "technical", label: "Technik" },
 ];
 
 export const tabHref = (key: string) => `?tab=${key}`;

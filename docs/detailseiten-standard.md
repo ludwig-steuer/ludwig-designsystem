@@ -592,3 +592,13 @@ Abweichung in `sachverhalt-detail.md`.
 | D14 | V5 · `FieldList` JSDoc · `konto-detail` Zweifel 4 (Fakten in die Randspalte) | eine Tabelle Inhalt → Form |
 | D15 | I12 · `konto-detail` Zweifel 2 · Spaltenkataloge 0070/0096/0101 · die Kardinalitäten der Entitätsprofile | die Deckungsschwelle `p50 ≥ 2` |
 | D16 | `Sparkline` (0124, unter vier Werten nichts) · `konto-detail` Rang 3/Zweifel 3 · §3 Diagrammreihe | die Stufen ≤ 3 / 4–12 / ablesbar, und „nur in Zone 4" |
+
+## Nachtrag 2026-09-11 — Reiter nach Zielgruppe (Sachverhalt)
+
+Owner-Entscheid an der Sachverhaltsseite (0152): die Reiter werden nach
+Zielgruppe geschnitten. Die Reiter der Sachbearbeitung kommen zuerst; was nur
+Prüfung und Support lesen — DATEV-Wahrheit, Protokoll, Rohdaten, die Herkunft
+des Datensatzes —, steht in **einem** letzten Reiter „Technik". Salden gehören
+zur Plausibilität. Für Beleg, Konto und Partner gilt D11/D12 unverändert, bis
+der Owner den Schnitt dort ebenfalls will; dann ersetzt dieser Nachtrag die
+Reiterfolge in D11.

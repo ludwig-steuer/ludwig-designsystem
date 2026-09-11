@@ -32,6 +32,8 @@ import { TextButton } from "@/ui/v3/primitives/TextButton";
 
 import { CasePage } from "./CasePage";
 import { accountHref, tabHref } from "./fixtures";
+import { ExpectationRow, type ExpectationVM } from "@/ui/v3/entities/expectation/Expectation";
+import { EmptyState } from "@/ui/v3/primitives/EmptyState";
 
 /**
  * A case page as **data**: every scenario of 0152 is one `CaseScenario`, and
@@ -355,6 +357,40 @@ function clarificationSub(list: ClarificationVM[]) {
 }
 
 /** Column 3 — notes and clarifications. An answerable question stands on top. */
+/**
+ * Who fetches it (F125). The office in 121 of 135 in stock (survey 2026-09-11),
+ * so that is what the showcase assumes; the strand carries no audience.
+ */
+const toExpectation = (e: CaseTimelineExpectation): ExpectationVM => ({
+  id: e.id,
+  kind: e.kind,
+  dueDate: e.dueDate,
+  escalationLevel: e.escalationLevel,
+  audience: "accounting",
+  expectedCounterpartyName: e.counterpartyName ?? null,
+  expectedAmount: e.amount ?? null,
+  resolvedAt: e.resolvedAt ?? null,
+});
+
+/** What the case still waits for — read along, beside notes and questions (owner 2026-09-11). */
+function ExpectationsCard({ scenario: s }: { scenario: CaseScenario }) {
+  const open = (s.expectations ?? []).filter((e) => !e.resolvedAt);
+  return (
+    <Card>
+      <CardHead title="Erwartungen" sub={open.length ? `${open.length} offen` : "keine"} />
+      <div className="v3boxbody">
+        {open.length ? (
+          open.map((e) => (
+            <ExpectationRow key={e.id} expectation={toExpectation(e)} today={s.today} currency={e.currency} />
+          ))
+        ) : (
+          <EmptyState inline title="Keine Erwartungen offen." description="Ludwig wartet bei diesem Fall auf keinen Beleg und keine Zahlung." />
+        )}
+      </div>
+    </Card>
+  );
+}
+
 function NotesColumn({ scenario: s }: { scenario: CaseScenario }) {
   return (
     <div className="v2stack">
@@ -367,6 +403,7 @@ function NotesColumn({ scenario: s }: { scenario: CaseScenario }) {
           <NoteFeed notes={s.notes} onAdd={() => {}} />
         </div>
       </Card>
+      <ExpectationsCard scenario={s} />
       <Card>
         <CardHead
           title="Rückfragen"

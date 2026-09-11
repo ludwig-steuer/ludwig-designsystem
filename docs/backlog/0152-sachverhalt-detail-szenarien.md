@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** — alle drei Wellen und P3 (edb6d3f, 65c733b, 9a9e609); **Nachtrag 2026-09-11**: Abgleich mit Brief §7 (E6, E9, Reiter Wiederkehr). Abnahme je Welle offen, nicht durch den Bauenden |
+| Status | **gebaut 2026-09-10** — alle drei Wellen und P3 (edb6d3f, 65c733b, 9a9e609); **Nachtrag 2026-09-11**: Abgleich mit Brief §7 (E6, E9, Reiter Wiederkehr); **Reiter nach Zielgruppe, Erwartungen rechts** (Owner, gleicher Tag). Abnahme je Welle offen, nicht durch den Bauenden |
 | Stufe | `src/showcase/case/` (Seiten-Stories) · dazu Erweiterungen an `entities/accounting-case/CaseTimeline.tsx` |
 | Klassen-Test | Die Seite gehört der App und lebt in `showcase/` — wie 0144 für den Beleg. Was an Bausteinen fehlt, wird `entities/` bzw. `patterns/`, nicht Teil der Seite |
 | Quelle | Design-Brief **F196** (`ludwig/app` staging `672665f8`), überbracht von `ludwig-cto` · Seitenprofil `docs/seiten/sachverhalt-detail.md` · Entitätsprofil `docs/entitaeten/accounting-case.md` |
@@ -283,6 +283,57 @@ Querlauf und ohne Text in 16 px. „Wiederkehr" erscheint bei `Recurrence` und
 `RecurringWithRule`, nicht bei `Events` und `Log`; zwölf Zeilen; der Knopf
 öffnet den Editor mit „Beispiel-Energie AG" und 142,00 €. Der Kopfbetrag
 kommt in Spalte 2 bei keiner Story mit Betrag vor.
+
+## Nachtrag 2026-09-11 — Reiter nach Zielgruppe, Erwartungen in der Randspalte
+
+Owner-Entscheid nach der Vorschau („leg das mal alles so an"):
+
+**Sieben Reiter statt zehn, nach Zielgruppe.** Für die Sachbearbeitung
+Übersicht · Ereignisse · Rückfragen · Plausibilität · Wiederkehr (nur
+Dauerfall) · Stammdaten; für Prüfung und Support **Technik**.
+
+| vorher | jetzt |
+|---|---|
+| Saldo & Konten | in **Plausibilität** — Personenkonto, offene Posten, Ausgleich unter Prüfpunkten und Register; eine Frage: geht es auf? |
+| DATEV-Wahrheit · Protokoll · Rohdaten | ein Reiter **Technik**, untereinander; dazu die Herkunft des Datensatzes; Rohdaten eingeklappt (`Disclosure`) |
+| Stammdaten mit Anker, Angelegt von, Buchungslauf, Buchungszyklus | diese vier stehen in Technik; `CaseFacts` bekommt dafür `technical={false}` (0097) |
+| Ereignisse: Strang, darunter die Box „Buchung zum Beleg" | `list-detail` wie die Übersicht: links der Strang, rechts der gewählte Eintrag; die Box entfällt |
+
+Schlüssel des neuen Reiters: `technical` (englisch, weil nicht aus der App;
+die übrigen Schlüssel des Showcase bleiben, bis F210 die Namen der App
+umstellt). „Technik" weicht vom Detailseiten-Standard ab (dort heißt der
+letzte Reiter „Rohdaten") — Nachtrag dort; Beleg, Konto und Partner bleiben,
+bis der Owner den Schnitt auch dort will.
+
+**Erwartungen in der Randspalte.** Jede Übersicht trägt rechts einen Block
+„Erwartungen" zwischen Notizen und Rückfragen: `ExpectationRow` (0025) je
+offene Erwartung, sonst ein Satz. Grundlage:
+`docs/entitaeten/expectation-staging-erhebung-2026-09-11.md` — 135
+Erwartungen an 132 Fällen, höchstens zwei je Fall; 72 offene
+Zahlungserwartungen hängen an geschlossenen Fällen und waren auf der
+Fallseite bisher unsichtbar.
+
+**„Zu tun" nennt eine Erwartung nur, wenn sie fällig ist** (Reife `due`
+oder `escalated`). Die laufende steht nur rechts — sonst stünde dieselbe
+Erwartung dreimal auf der Seite (Strang, Zu tun, Randspalte).
+`ProposalPending`, `AwaitingDocument` und `ExpenseReport` verlieren deshalb
+ihren Punkt; `AwaitingDocumentEscalated` behält ihn.
+
+Reiter-Stories jetzt: `Events`, `Clarifications`, `Plausibility`,
+`Recurrence`, `Technical` (statt `BalanceAndAccounts`, `DatevTruth`, `Log`,
+`RawData`).
+
+Gemessen bei 1440 × 900 auf einem Storybook aus einem Worktree (6128), alle
+Stories unter `Seiten/Sachverhalt/`: keine Fehler, kein Querlauf, kein Text in
+16 px, der aus diesem Umbau stammt. Reiter: sechs, beim Dauerfall sieben.
+Ereignisse: Liste bei x = 0, Detail bei x = 633, beide oben bündig.
+Stammdaten ohne die vier technischen Zeilen, Technik mit ihnen (soweit
+belegt). Erwartungen: eine Zeile in `ProposalPending`, `AwaitingDocument`,
+`AwaitingDocumentEscalated`, `ExpenseReport`, `InUse`, `PartnerDrawer`,
+sonst der Satz.
+
+Die Einstellungen der Wiederkehr als eigener Baustein folgen als eigene
+Spec, gegen `docs/entitaeten/recurring-rule-staging-erhebung-2026-09-11.md`.
 
 ## Offene Fragen
 
