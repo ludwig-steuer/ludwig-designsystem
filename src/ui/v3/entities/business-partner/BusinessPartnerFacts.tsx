@@ -42,6 +42,7 @@ function accountRow(account: PartnerAccountRef, accountHref?: (n: string) => str
 export function BusinessPartnerFacts({
   partner,
   all = false,
+  underHead = false,
   accountHref,
   hints,
 }: {
@@ -52,11 +53,18 @@ export function BusinessPartnerFacts({
    * the short form, the view the whole.
    */
   all?: boolean;
+  /**
+   * The facts stand under the partner's own head — the overview of the full
+   * view. The head already names him, his city and the account he is booked
+   * under, so those rows drop (D7, owner 2026-09-11). The drawer has no such
+   * head and shows everything.
+   */
+  underHead?: boolean;
   accountHref?: (accountNumber: string) => string;
   /** Sentences of the caller above the first group. */
   hints?: readonly string[];
 }) {
-  const wer: Rows = [["Name", partner.legalName]];
+  const wer: Rows = underHead ? [] : [["Name", partner.legalName]];
   // The short name only where it says something the name does not: it is
   // capped at 15 characters and 53 % sit exactly at the cap, so most of them
   // are the name with its tail cut off.
@@ -66,19 +74,26 @@ export function BusinessPartnerFacts({
   ) {
     wer.push(["Kurzname", partner.shortName]);
   }
-  if (partner.city) wer.push(["Ort", partner.city]);
+  if (partner.city && !underHead) wer.push(["Ort", partner.city]);
   if (partner.ustIds.length > 0) {
     wer.push(["USt-IdNr.", <MonoCell key="ust" value={partner.ustIds.join(" · ")} />]);
   }
 
+  // Under the head, the account the head names drops — in the head's order:
+  // creditor, else debtor, else the clearing accounts.
+  const headNames = {
+    creditor: underHead && Boolean(partner.creditorAccount),
+    debtor: underHead && !partner.creditorAccount && Boolean(partner.debtorAccount),
+    clearing: underHead && !partner.creditorAccount && !partner.debtorAccount,
+  };
   const accounts: Rows = [];
-  if (partner.creditorAccount) {
+  if (partner.creditorAccount && !headNames.creditor) {
     accounts.push(["Kreditorkonto", accountRow(partner.creditorAccount, accountHref)]);
   }
-  if (partner.debtorAccount) {
+  if (partner.debtorAccount && !headNames.debtor) {
     accounts.push(["Debitorkonto", accountRow(partner.debtorAccount, accountHref)]);
   }
-  if (partner.clearingAccounts.length > 0) {
+  if (partner.clearingAccounts.length > 0 && !headNames.clearing) {
     accounts.push([
       partner.clearingAccounts.length === 1 ? "Verrechnungskonto" : "Verrechnungskonten",
       <span key="cl">
@@ -170,7 +185,7 @@ export function BusinessPartnerFacts({
         wanted the row built before the first merge; that is not possible
         without inventing the field, so it waits for it.
       */}
-      <FieldList title="Wer" tone="bare" rows={wer} />
+      {wer.length > 0 ? <FieldList title="Wer" tone="bare" rows={wer} /> : null}
       {accounts.length > 0 ? <FieldList title="Konten" tone="bare" rows={accounts} /> : null}
       {behaviour.length > 0 ? <FieldList title="Verhalten" tone="bare" rows={behaviour} /> : null}
       <FieldList title="Bewegung" tone="bare" rows={activity} />

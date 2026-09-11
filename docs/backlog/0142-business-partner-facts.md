@@ -235,3 +235,19 @@ sprachen weiter, als wären sie da**.
 Der dritte ist der ärgerlichste: die Zahl stand auch im Story-JSDoc, also an
 der Stelle, die jemand liest, während er die Story ansieht — und dort widerlegt
 das Bild sie sofort.
+
+## Nachtrag 2026-09-11 — `underHead` (D7)
+
+Owner-Entscheid über `ludwig-manager`: auf der eigenen Seite des Partners
+steht nichts zweimal. Die Übersicht (0127) zeigte unter dem Kopf noch einmal
+Name (= Titel), Ort und Kreditorkonto (= Meta).
+
+| Prop | Typ | Default | Wirkung | Story |
+|---|---|---|---|---|
+| `underHead` | `boolean` | `false` | Name, Ort und das Konto, das der Kopf nennt (Kreditor, sonst Debitor, sonst die Verrechnungskonten), fallen weg; eine leere Gruppe „Wer" verliert ihre Überschrift | `UnderHead` |
+
+Gleiche Form wie `AccountFacts figures={false}` (0157). Der Drawer (0143)
+setzt die Prop nicht und zeigt weiter alles; der Reiter „Details" der
+Partnerseite auch nicht — dort ist der ganze Datensatz das Thema. Additiv,
+breaking: nein. Stories: 6 statt 5.
+

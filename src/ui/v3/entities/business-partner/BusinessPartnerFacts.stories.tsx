@@ -186,3 +186,37 @@ export const Edges: Story = {
     </Frame>
   ),
 };
+
+/**
+ * Mit `underHead`: die Fakten unter dem Kopf der eigenen Seite — die
+ * Übersicht des Partners. Name, Ort und das Konto, unter dem gebucht wird,
+ * stehen dort schon; hier fallen sie weg (D7, Owner 2026-09-11). Übrig bleibt,
+ * was der Kopf nicht sagt: Kurzname, USt-IdNr., Bewegung.
+ *
+ * Rechts der Abrechner ohne Personenkonto: sein Kopf nennt die
+ * Verrechnungskonten, also fallen sie hier. Der Drawer hat keinen solchen Kopf
+ * und zeigt weiter alles (`Filled`).
+ */
+export const UnderHead: Story = {
+  render: () => (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "start" }}>
+      <Frame sub="unter dem Kopf — Name, Ort, Kreditorkonto stehen dort">
+        <BusinessPartnerFacts partner={detail()} underHead accountHref={accountHref} />
+      </Frame>
+      <Frame sub="der Abrechner — der Kopf nennt die Verrechnungskonten">
+        <BusinessPartnerFacts
+          partner={detail({
+            legalName: "Beispiel-Payments B.V.",
+            shortName: null,
+            city: null,
+            ustIds: [],
+            creditorAccount: null,
+            clearingAccounts: [{ accountNumber: "1370", isInternal: false }],
+          })}
+          underHead
+          accountHref={accountHref}
+        />
+      </Frame>
+    </div>
+  ),
+};

@@ -124,7 +124,7 @@ function Overview({
           {/* **Without `all`** — measured 2026-09-10: with `all` the card is 1,160 px
               tall and pushes zone 4 below the fold. The overview is the short form
               (ranks 1–7); the full list is in the details tab. */}
-          <BusinessPartnerFacts partner={partner} accountHref={accountHref} />
+          <BusinessPartnerFacts partner={partner} underHead accountHref={accountHref} />
         </div>
       </Card>
       <Accounts />
