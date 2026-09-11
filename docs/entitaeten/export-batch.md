@@ -10,7 +10,7 @@
 | Wichtigkeit | **hoch** — Roadmap der App (9be34746) Rang 3: „Jeder Wochenlauf beginnt und endet hier" |
 | Datenstand | Staging über den Pooler, **2026-09-11**, schreibgeschützte Sitzung: **14 Stapel, 6 Mandanten** (2 je Mandant, max 4); Verlauf 96 Audit-Ereignisse an 15 Stapeln. Nur `SELECT`, keine Kundendaten; Beispielwerte erfunden |
 | Bestandswarnung | **Kein Stapel ist über die Bridge gelaufen:** `datev_operation_id`, `datev_sequence_id`, `inspection_status`, `datev_error` 0 %; die 8 `confirmed` sind CSV-Exporte (`file_name`, `metrics`, `datev_protocol` je 57 % = 8 von 14). Nur drei der elf Zustände kommen vor (`confirmed` 8 · `prepared` 5 · `review` 1) — die Stories müssen alle elf aus dem CHECK zeigen (Roadmap). `entry_count` zählt die exportierten Sätze, nicht den Inhalt (L-307) |
-| Rückfrage | gestellt am 2026-09-11 an `ludwig-manager` — **offen**, die Defaults gelten |
+| Rückfrage | gestellt und **beantwortet** am 2026-09-11 (`ludwig-manager`, aus dem App-Stand): die Defaults der drei Fragen gelten; sieben Anwendungsfälle zugeordnet (§Heutige Darstellung); keine Auswahl-Dialoge — die Zuordnung Beleg → Stapel macht der Server (`period_to`, F203) |
 | Analyse von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren`) |
 
 ## Was sie ist
@@ -107,6 +107,21 @@ Freitext-Grenzen: Bezeichnung max 21 Zeichen — nie gekürzt.
 | `AbnahmeRahmen` (`stapelabnahme/ui`, 229 Z.) | Rahmen der Abnahme | Rail mit Zählern (`railZaehler()`) | — | — |
 | `DatevExportSection`, `ExportBatchDetailSection`, `OpenExportOverview` | — | nicht gemountet (Roadmap: löschen oder heben) | | |
 
+**Aus der Rückfrage** (Manager, 2026-09-11) — die Anwendungsfälle der App und
+wo sie hier stehen: (a) Stapelliste des Jahres → `BatchList`; (b) Stapel-Detail
+mit Reitern (u. a. Buchungen, Vergleich/Nachlese) → 0167; (c) **die
+Stapelabnahme** (Route `stapel/[id]/abnahme/[schritt]`, Modul
+`stapelabnahme` → `batch-review` mit F210; Schritte Mengengerüst … Buchungssätze
+… OPOS … Konventionen … Verprobung … Nachlese) — die größte Ansicht auf einen
+Stapel, ohne Seitenprofil; sie ist der Grund, warum 0167 ein Seitenprofil
+`stapel-detail` braucht, das die Abnahme als Prozess (`ProcessStepper`)
+einschließt; (d) die Beleg-Seite „Gebucht" nennt den Stapel (L-280), der
+Sachverhalt trägt einen Chip `export_case` → `BatchCell`; (e) der Nachtrag, den
+F200 bei der Freigabe für offene Vorschläge anlegt → L-308; (f) Startseite
+„offene Stapel" als Weiche (Owner-Entscheid 2026-09-08) → 0166; (g)
+`DatevExportSection`, `ExportBatchDetailSection`, `OpenExportOverview` sind
+nirgends gemountet — tot, kein Job.
+
 **Im Set:** `Process` — `ProcessMini` (Zustand in der Zeile), `Baton` (wer
 dran ist), `ProcessStepper` (Kopf), `BatonBar` (Zeitachse über dem Log);
 `StepRail`/`StepHeader`/`ProgressBar`, `StateMachine`, `StatusCallout` (@when
@@ -130,11 +145,11 @@ keine Form dieser Entität.
 
 | Form | Größe | Empfehlung | Grund (§7 Nr.) | zeigt (Ränge) | Relationen | setzt auf | ersetzt |
 |---|---|---|---|---|---|---|---|
-| `BatchCell` | XS | ja | 3 — FK-Ziel von elf Tabellen; genannt am Buchungssatz, an der Klärung, am Lauf, als „Nachtrag zu" | 1, 3 (Nummer, Zustand als `Baton`); Zeitraum im `title` | — | `Baton` ✓, `Link` auf die Route | die Nennungen „Stapel 2026-0007" in Abnahme-Kopf, Buchungssatz, Klärung |
+| `BatchCell` | XS | ja | 3 — FK-Ziel von elf Tabellen; genannt am Buchungssatz, an der Klärung, am Lauf, als „Nachtrag zu", auf der Beleg-Seite „Gebucht" (L-280) und im Sachverhalt-Chip `export_case` | 1, 3 (Nummer, Zustand als `Baton`); Zeitraum im `title` | — | `Baton` ✓, `Link` auf die Route | die Nennungen „Stapel 2026-0007" in Abnahme-Kopf, Buchungssatz, Klärung |
 | `BatchRow` | S | ja | 1 — Zeile von `StapelListeScreen` | 1–7 | Buchungssätze als Zähler nach Status, Nachtrag als `BatchCell` | `Row`/`DataTable`-Spalten, `ProcessMini` ✓, `Baton` ✓, `StatusBadge` (`zyklus_stapel`) | Zeilen von `StapelListeScreen`, `StapelZeilenmenue` (die Übergänge über `batchActions()`) |
 | `BatchCard` | M | ja, **Backlog** | Job genannt (Roadmap: „der offene Stapel auf Jahresstart/Dashboard mit nächstem Schritt", I10), kein gemounteter Screen | 1–7 + nächster Schritt | — | `BatchRow`, `ProcessStepper` | `OpenExportOverview` (tot) |
 | `BatchFacts` | L | ja | 1 — der Reiter „Übersicht" von `StapelDetailScreen` | alle ab 20 %: 1–7, Zähler 8–10, 11, 13, 15 | Rückfragen, Läufe, Sachverhalte, Ereignisse als Zähler | `FieldList`, `ProcessStepper` ✓, `StatusCallout` ✓, `BatonBar` ✓ | Übersicht von `StapelDetailScreen` |
-| `BatchView` | L | ja, **Backlog** | 1 — eigene Route `stapel/[batchId]` mit sechs Reitern — braucht zuerst ein Seitenprofil (§8) | Kopf + Reiter | alle Listen der Kinder | `BatchFacts`, `JournalEntryList`, `LogBrowser`, Detailseiten-Standard | `StapelDetailScreen` |
+| `BatchView` | L | ja, **Backlog** | 1 — eigene Route `stapel/[batchId]` mit sechs Reitern und der Stapelabnahme als Prozess — braucht zuerst ein Seitenprofil (§8) | Kopf + Reiter | alle Listen der Kinder | `BatchFacts`, `JournalEntryList`, `LogBrowser`, Detailseiten-Standard | `StapelDetailScreen` |
 | `BatchList` | L | ja | 6 — Job „Stapel des Jahres" | Zeile + Rahmen | — | `DataTable` (Client-Filter), `BatchRow`, `Segmented` für `BatchListFilter`, `EmptyState` | `StapelListeScreen` |
 | `BatchDrawer` | L | nein | wer einen Stapel nennt, will dorthin (Route), nicht nachschlagen — keine fremde Ansicht fragt ihn ab (Roadmap: „nur über eigene Liste erreichbar") | | | | |
 | `BatchEditor` | XL | nein | die Übergänge sind Aktionen (`batchActions()`, `ActionButton confirm`); Anlegen ist ein Dialog mit Server-Vorschau (`planManualBatch`) → Frage 3 | | | | |
@@ -165,6 +180,9 @@ Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 - **L-308** Die Art des Stapels hat keine Wortliste: `BOOKING_CYCLE_KINDS` (`regular`, `client_batch`) steht ohne Wörter da; „Mandantenstapel" und „Nachtrag" (aus `supplements_batch_id`) stehen nur im GLOSSARY.
 
 ## Offene Fragen
+
+**Beantwortet am 2026-09-11** (`ludwig-manager`, aus dem App-Stand): alle drei
+Defaults gelten.
 
 1. **Rang 1 ist die Stapelnummer, nicht der Zeitraum** — die App spricht so („Stapel 2026-0009 wartet auf deine Abnahme"), und der Zeitraum steht gleich daneben. — ohne Antwort: Stapelnummer Rang 1, Zeitraum Rang 2.
 2. **Der Umfang in der Zeile sind die gestempelten Sätze nach Status, nicht `entry_count`** — ohne Antwort: abgeleitet; `entry_count` nur in den Facts als „exportiert".
