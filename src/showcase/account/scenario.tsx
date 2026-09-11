@@ -36,7 +36,6 @@ import { useHash, type Hash, type Patch } from "../hash";
 
 import { AccountPage } from "./AccountPage";
 import {
-  balanceWord,
   CLEARING_TYPES,
   contraFacts,
   LOCKED_FUNCTION,
@@ -138,40 +137,39 @@ function accountDefects(s: AccountScenario, href: Hash["href"]): OpenPoint[] {
   return points;
 }
 
-/** Zone 3 — four tiles, none twice; the ones with a way count like the list they open (I12). */
+/**
+ * Zone 3 — tiles, none twice; the ones with a way count like the list they open
+ * (I12). The balance is not among them: it stands in the head, and only there
+ * (D7, owner 2026-09-11). Without a mirror balance the head carries the delta
+ * instead — then that tile goes as well.
+ */
 function Figures({ scenario, href }: { scenario: AccountScenario; href: Hash["href"] }) {
-  const { facts, master } = scenario;
-  const word = balanceWord(facts, master);
-  return (
-    <KpiGrid columns={4}>
+  const { facts } = scenario;
+  const tiles = [
+    facts.datevBalance === null ? null : (
       <KpiTile
-        label={`Saldo in DATEV ${YEAR}`}
-        value={facts.datevBalance === null ? "noch keiner" : formatAmount(facts.datevBalance, facts.currency)}
-        sub={
-          facts.datevBalance === null
-            ? "DATEV kennt das Konto noch nicht"
-            : (word ?? `${movementCount(facts.datevEntryCount)} in DATEV`)
-        }
-      />
-      <KpiTile
+        key="ludwig"
         label="Nur in Ludwig"
         value={formatAmount(facts.ludwigOnlyAmount ?? 0, facts.currency)}
         sub={movementCount(facts.ludwigOnlyCount)}
         {...(facts.ludwigOnlyCount > 0 ? { href: href({ ...CLEAR_LIST, origin: "ludwig" }) } : {})}
       />
-      <KpiTile
-        label="Offene Vorschläge"
-        value={formatCount(facts.openProposalCount)}
-        sub={facts.openProposalCount > 0 ? "warten auf Freigabe" : "keine"}
-        {...(facts.openProposalCount > 0 ? { href: href({ ...CLEAR_LIST, status: "proposed" }) } : {})}
-      />
-      <KpiTile
-        label="Letzte Buchung"
-        value={<Time value={facts.lastBookingDate ?? null} format="date" />}
-        sub={`${formatCount(facts.usageBookingCount)} Buchungen insgesamt`}
-      />
-    </KpiGrid>
-  );
+    ),
+    <KpiTile
+      key="proposals"
+      label="Offene Vorschläge"
+      value={formatCount(facts.openProposalCount)}
+      sub={facts.openProposalCount > 0 ? "warten auf Freigabe" : "keine"}
+      {...(facts.openProposalCount > 0 ? { href: href({ ...CLEAR_LIST, status: "proposed" }) } : {})}
+    />,
+    <KpiTile
+      key="last"
+      label="Letzte Buchung"
+      value={<Time value={facts.lastBookingDate ?? null} format="date" />}
+      sub={`${formatCount(facts.usageBookingCount)} Buchungen insgesamt`}
+    />,
+  ].filter(Boolean);
+  return <KpiGrid columns={tiles.length}>{tiles}</KpiGrid>;
 }
 
 /** The text alternative of the chart (V7), and its replacement under four booked months (D16). */

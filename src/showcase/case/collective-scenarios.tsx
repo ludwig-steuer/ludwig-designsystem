@@ -197,7 +197,7 @@ export const recurringWithRule: CaseScenario = {
         ["Regel", RULE_SENTENCE],
         ["Rhythmus", "monatlich am 1., seit 01/2026"],
         ["Herkunft", <StatusBadge key="o" axis="buchung_origin" status="recurring_rule" info={false} />],
-        ["Weiter", <TextButton key="w" href={tabHref("wiederkehr")}>Regel ansehen</TextButton>],
+        ["Weiter", <TextButton key="w" href={tabHref("regelwerk")}>Regel ansehen</TextButton>],
       ],
     },
   },

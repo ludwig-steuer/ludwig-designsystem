@@ -114,6 +114,16 @@ export const OutgoingWithPayment: Story = { render: () => <ScenarioPage scenario
 export const ClarificationOpenFirm: Story = { render: () => <ScenarioPage scenario={S.clarificationOpenFirm} /> };
 
 /**
+ * **An die Kanzlei übergeben** (E6; 27 offene Fälle mit `disposition =
+ * accounting` ohne Rückfrage).
+ *
+ * Der Agent fragt nicht, er gibt ab: zwei offene Rechnungen passen gleich gut,
+ * und raten wäre schlechter als übergeben. Das Signal nennt den Grund, die
+ * Mängel-Zone die zwei Wege — selbst zuordnen oder mit Hinweis zurückgeben.
+ */
+export const HandedToFirm: Story = { render: () => <ScenarioPage scenario={S.handedToFirm} /> };
+
+/**
  * **Vorschlag zurückgezogen** (Punkt 3; 85 Buchungen im Bestand).
  *
  * Was in den Daten „storniert" heißt, ist fast immer ein zurückgezogener
@@ -158,6 +168,17 @@ export const Contract: Story = { render: () => <ScenarioPage scenario={C.contrac
  * die zwei Wege.
  */
 export const NoEvents: Story = { render: () => <ScenarioPage scenario={C.noEvents} /> };
+
+/**
+ * **Frisch aus einer Bankzeile, ohne Gegenpart** (E9; rund 5 % der Fälle haben
+ * keinen Gegenpart).
+ *
+ * Kein Titel, kein Betrag, kein Personenkonto: der Kopf heißt nach der Art,
+ * und keine Kennzahl steht leer. Was fehlt, ist kein Strich, sondern ein
+ * Mangel mit Weg — der Gegenpart zuerst, denn aus ihm folgen Konto und
+ * Vorschlag.
+ */
+export const NewWithoutCounterparty: Story = { render: () => <ScenarioPage scenario={S.newWithoutCounterparty} /> };
 
 /**
  * Der Reiter **Stammdaten** — und der Grund, warum die Fakten nicht in der

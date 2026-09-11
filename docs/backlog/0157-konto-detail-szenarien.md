@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** — Abnahme offen (nicht durch den Bauenden) |
+| Status | **gebaut 2026-09-10**, beide Owner-Fragen am 2026-09-11 entschieden und nachgebaut — Abnahme offen (nicht durch den Bauenden) |
 | Stufe | `src/showcase/account/` (Seiten-Stories; Code englisch, Owner 2026-09-10), dazu Ausbauten an `accountEntryColumns` (0067) und `AccountFacts` (0066) |
 | Quelle | Design-Brief **F198** (`ludwig/app`, `docs/backlog/F198-account-detail-scenarios-design-brief.md`), überbracht von `ludwig-manager`, Owner-Freigabe 2026-09-10 |
 | Präzedenz | `src/showcase/document/` (0144), `src/showcase/case/` (0152) |
@@ -100,7 +100,9 @@ Details, Rohdaten, drei Drawer), `AccountKinds.stories.tsx`
 | Drawer | ✓ Ludwig-Satz (Karte, Zustand, Begründung, große Ansicht, Weg zum Sachverhalt), DATEV-Satz (Spiegel-Zustand), Konto 1600, Partner (K4) |
 | P6 bei 1024 | ✓ Randspalte unter der Hauptfläche, nichts fällt weg |
 | kein Text in 16 px | ✓ bis auf den Drawer-Titel (Überschrift des Set-Drawers) |
-| P1: Kopf, Kacheln und Anfang der Liste ohne Scrollen | **teilweise**: Kopf und Kacheln ✓; Listenkopf und Spaltenköpfe stehen bei y = 798 (1440) und 831 (1280) über der Falz, die erste Datenzeile bei 922 und 954 knapp darunter. Ohne AppShell (K1) steht sie bei 834 |
+| P1: Kopf, Kacheln und Anfang der Liste ohne Scrollen | **teilweise**: Kopf und Kacheln ✓; ohne AppShell (K1) steht die erste Datenzeile bei 834. **Im AppShell stehen seit 2026-09-11 die Stammdaten über der Liste** (Owner-Entscheid unten): Stammdaten y = 332–600, erste Datenzeile bei 1210 (1440) und 1243 (1280) statt 922 und 954 |
+| Saldo nur einmal (D7, Owner 2026-09-11) | ✓ Kopf-Kennzahl bleibt, keine Saldo-Kachel; drei Kacheln, in K7 zwei („Nur in Ludwig" steht dort im Kopf) |
+| Randspalte beim Umbruch über der Liste | ✓ `InUse` 1440 und 1280, `Narrow`, K1 bei 1024: Stammdaten oben; K1 bei 1440 und 1920 weiter nebeneinander |
 
 ## Abweichungen vom Brief
 
@@ -116,7 +118,20 @@ Details, Rohdaten, drei Drawer), `AccountKinds.stories.tsx`
    Herkunft; `#status=proposed` erreicht man über die Kachel, und die Liste
    nennt den Filter mit „Zurücksetzen".
 
-## Offen für den Owner
+## Entschieden (Owner 2026-09-11, über `ludwig-manager`)
+
+Beide Fragen „fixen":
+
+1. **Die Randspalte bricht über die Liste.** Umgesetzt im Muster selbst:
+   `main-aside` bricht mit `flex-wrap: wrap-reverse` (0154, Nachtrag) —
+   einziger Aufrufer außerhalb der Pattern-Stories ist diese Seite. Der
+   Preis steht in der Messung: im AppShell rückt die erste Bewegung um
+   288 px nach unten.
+2. **Der Saldo steht einmal, im Kopf.** Die Kachel „Saldo in DATEV" fällt;
+   ohne Spiegelsaldo (K7) trägt der Kopf „Nur in Ludwig", dann fällt auch
+   diese Kachel.
+
+Die ursprünglichen Fragen zum Nachlesen:
 
 - **Randspalte im AppShell unter der Liste.** `main-aside` mit Stufe `table`
   (960 px, 0154/0063) plus 360 px Randspalte braucht 1.340 px Inhaltsbreite;

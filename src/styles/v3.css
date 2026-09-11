@@ -1113,7 +1113,11 @@ select.v2in { padding-right: 26px; }
 .v3cols--split > .v3cols__main,
 .v3cols--split > .v3cols__aside { flex: 1 1 380px; }
 
-/* `master | sidebar`: one surface with a narrow companion. */
+/* `master | sidebar`: one surface with a narrow companion. When the row runs
+   out the companion goes **above** the surface (owner 2026-09-11, 0157): it
+   says what the surface is about, and under 25 rows nobody finds it.
+   `wrap-reverse` stacks the lines bottom-up; `align-items: start` stays top. */
+.v3cols--main-aside { flex-wrap: wrap-reverse; }
 .v3cols--main-aside > .v3cols__aside { flex: 1 1 360px; }
 
 .v2md { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--space-5); align-items: start; }

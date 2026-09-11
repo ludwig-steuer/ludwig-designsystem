@@ -112,7 +112,9 @@ export function CasePage({
       {...(signal ? { signal } : {})}
       tabs={
         <Tabs
-          items={FALL_TABS.map((t) => ({ ...t, href: tabHref(t.key) }))}
+          items={FALL_TABS.filter((t) => t.key !== "regelwerk" || accountingCase.kind === "recurring_charge").map(
+            (t) => ({ ...t, href: tabHref(t.key) }),
+          )}
           active={tab}
           ariaLabel="Sachverhalt"
         />

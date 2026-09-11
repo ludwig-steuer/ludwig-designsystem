@@ -1,6 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
+import { buildRulePreview } from "@/ludwig/modules/recurring-rules/domain/booking-preview";
+import { accrualAmount, accrualSides } from "@/ludwig/modules/recurring-rules/domain/rule";
+import type { RuleDraft } from "@/ludwig/modules/recurring-rules/domain/rule-draft";
+import {
+  describeRecurringRule,
+  describeRuleSchedule,
+} from "@/ludwig/modules/recurring-rules/domain/rule-summary";
+
+import type { CaseFactsVM } from "@/ui/v3/entities/accounting-case/CaseFacts";
 import { CaseTimeline } from "@/ui/v3/entities/accounting-case/CaseTimeline";
 import { ClarificationList, type ClarificationVM } from "@/ui/v3/entities/clarification/Clarification";
 import { ClarificationCard } from "@/ui/v3/entities/clarification/ClarificationCard";
@@ -10,14 +19,19 @@ import { JournalEntryCard } from "@/ui/v3/entities/journal-entry/JournalEntryCom
 import { OpenItemRow } from "@/ui/v3/entities/open-item/OpenItemRow";
 import type { OpenItem } from "@/ui/v3/entities/open-item/open-item";
 import { OpenItemLinkRow, openItemLinkTracks } from "@/ui/v3/entities/open-item-link/OpenItemLinkRow";
+import { rule } from "@/ui/v3/entities/recurring-rule/fixtures";
+import { RecurringRuleEditor, type RecurringRuleAccounts } from "@/ui/v3/entities/recurring-rule/RecurringRuleEditor";
+import { RecurringRuleFacts } from "@/ui/v3/entities/recurring-rule/RecurringRuleFacts";
 import type { LogEntry } from "@/ui/v3/patterns/Log";
 import { LogBrowser } from "@/ui/v3/patterns/LogBrowser";
 import { CheckItems, type CheckItem } from "@/ui/v3/patterns/Review";
+import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 import { StatusInfoButton } from "@/ui/v3/patterns/StatusInfoButton";
+import { Button } from "@/ui/v3/primitives/Button";
 import { EmptyState } from "@/ui/v3/primitives/EmptyState";
 import { FieldList } from "@/ui/v3/primitives/FieldList";
 import { RawRecord } from "@/ui/v3/primitives/RawRecord";
-import { Card, CardHead, HeadRow, Table } from "@/ui/v3/primitives/Table";
+import { Card, CardHead, HeadRow, Row, Table } from "@/ui/v3/primitives/Table";
 
 import { CasePage } from "./CasePage";
 import {
@@ -30,7 +44,8 @@ import {
   TODAY,
   accountHref,
 } from "./fixtures";
-import { bracket, proposalPending } from "./scenarios";
+import { recurringWithRule } from "./collective-scenarios";
+import { bracket, proposalPending, recurringWithoutRule } from "./scenarios";
 
 /**
  * Die Reiter der Sachverhaltsseite — P3 aus 0152.
@@ -50,9 +65,20 @@ type Story = StoryObj<typeof CasePage>;
 const accountingCase = proposalPending.accountingCase;
 
 /** The tab body: content first, then the same tab without data. */
-function Tab({ tab, children, empty }: { tab: string; children: ReactNode; empty: ReactNode }) {
+function Tab({
+  tab,
+  children,
+  empty,
+  of = accountingCase,
+}: {
+  tab: string;
+  children: ReactNode;
+  empty: ReactNode;
+  /** Another case than the reference — a tab that belongs to one kind only. */
+  of?: CaseFactsVM;
+}) {
   return (
-    <CasePage accountingCase={accountingCase} tab={tab}>
+    <CasePage accountingCase={of} tab={tab}>
       <div className="v2stack">
         {children}
         <div className="lw-overline">Leerzustand</div>
@@ -347,6 +373,183 @@ const LOG: LogEntry[] = [
   { id: "l6", at: "2026-08-02T14:30:00Z", message: "Rückfrage beantwortet", actor: { kind: "user", label: "Mandant" }, depth: 1, level: "info" },
   { id: "l7", at: "2026-07-31T16:04:10Z", message: "Schritt classify → propose", actor: { kind: "system", label: "System" }, depth: 3, level: "debug", code: "step.edge" },
 ];
+
+/* ── Wiederkehr: the rent rule behind `RecurringWithRule` ─────────────────── */
+
+const RENT = rule({
+  id: "r-8801",
+  caseId: "c-0044",
+  expectedDirection: "payment_in",
+  matchCounterpartyName: recurringWithRule.accountingCase.counterpartyName ?? null,
+  matchAmount: 1190,
+  personalAccountNumber: "10870",
+  importReference: "datev-wk:20260044",
+  datevDocumentNumber: "20260044",
+  template: {
+    counterAccountNumber: "8400",
+    taxKey: null,
+    taxRatePercent: null,
+    description: "Miete Halle Musterstraße 12",
+    lines: null,
+    amount: 1190,
+  },
+});
+const RENT_AMOUNT = accrualAmount(RENT) ?? 0;
+const RENT_SIDES = accrualSides("payment_in");
+/** The rule carries numbers only; the caller knows the names (L-255). */
+const RENT_BUILT = buildRulePreview({
+  bookingMode: RENT.bookingMode,
+  direction: RENT.expectedDirection,
+  counterAccount: { accountNumber: "8400", accountName: "Erlöse 19 % USt" },
+  personalAccount: { accountNumber: "10870", accountName: "Beispiel-Mieter GmbH" },
+  bankAccount: null,
+  lines: null,
+  taxKey: null,
+  amount: RENT_AMOUNT,
+});
+const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** The last direct debit of `RecurringWithoutRule`, as the draft the offer opens with. */
+const ENERGY_DRAFT: RuleDraft = {
+  expectedDirection: "payment_out",
+  matchCounterpartyName: recurringWithoutRule.accountingCase.counterpartyName ?? null,
+  matchCounterpartyIban: null,
+  matchAmount: 142,
+  matchAmountTolerance: 0,
+  matchAmountTolerancePercent: null,
+  matchPurposeRegex: null,
+  matchContractNumber: null,
+  matchDocumentTextRegex: null,
+  expectedInterval: "monthly",
+  expectedDayOfMonth: 4,
+  bookingMode: "book_on_payment",
+  personalAccountNumber: null,
+  paymentAccountId: null,
+  matchingNote: null,
+  isActive: true,
+  template: {
+    counterAccountNumber: "4240",
+    taxKey: null,
+    taxRatePercent: null,
+    description: "Abschlag Strom",
+    lines: null,
+    amount: 142,
+  },
+};
+const ENERGY_ACCOUNTS: RecurringRuleAccounts = {
+  candidates: {
+    partner: [{ number: "4240", name: "Gas, Strom, Wasser", reason: "Zuletzt bei dieser Gegenpartei" }],
+    all: [
+      { number: "4240", name: "Gas, Strom, Wasser" },
+      { number: "1200", name: "Bank" },
+    ],
+  },
+};
+
+/** The empty state of the tab is an offer: prefilled from the last payment, created in the editor (0135). */
+function RuleOffer() {
+  const [editing, setEditing] = useState(false);
+  if (editing)
+    return (
+      <RecurringRuleEditor
+        defaultValue={ENERGY_DRAFT}
+        accounts={ENERGY_ACCOUNTS}
+        summary={describeRecurringRule({
+          bookingMode: ENERGY_DRAFT.bookingMode,
+          direction: ENERGY_DRAFT.expectedDirection,
+          matchCounterpartyName: ENERGY_DRAFT.matchCounterpartyName,
+          matchCounterpartyIban: ENERGY_DRAFT.matchCounterpartyIban,
+          matchAmount: ENERGY_DRAFT.matchAmount,
+          matchAmountTolerance: ENERGY_DRAFT.matchAmountTolerance,
+        })}
+        onSubmit={async () => setEditing(false)}
+        onCancel={() => setEditing(false)}
+      />
+    );
+  return (
+    <EmptyState
+      inline
+      title="Noch keine Regel."
+      description="Bis dahin schlägt der Agent jede Lastschrift einzeln vor. Aus der letzten angelegt, bucht das Regelwerk monatlich auf 4240 — die Felder sind vorbefüllt."
+      action={
+        <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
+          Regel aus der Lastschrift vom 04.08. anlegen
+        </Button>
+      }
+    />
+  );
+}
+
+/**
+ * **Wiederkehr** — nur beim Dauersachverhalt; Regelwerk und Zuordnung sind
+ * **ein** Reiter (F196 O2). Oben die Regel als Satz mit Vorschau, darunter,
+ * was das Regelwerk gebucht hat und welche Zahlung jeweils dazugehört.
+ *
+ * Leer heißt hier: ein Dauerfall **ohne** Regel, drei von vier im Bestand.
+ * Der Leerzustand ist ein Angebot, vorbefüllt aus der letzten Lastschrift —
+ * kein Vorwurf. Ein Klick öffnet den Editor.
+ */
+export const Recurrence: Story = {
+  render: () => (
+    <Tab
+      tab="regelwerk"
+      of={recurringWithRule.accountingCase}
+      empty={
+        <Card>
+          <CardHead title="Wiederkehr" sub={`${recurringWithoutRule.accountingCase.counterpartyName ?? ""} · ohne Regel`} />
+          <div className="v3boxbody">
+            <RuleOffer />
+          </div>
+        </Card>
+      }
+    >
+      <Card>
+        <CardHead title="Regel" sub="aus dem Onboarding-Import" />
+        <div className="v3boxbody">
+          <RecurringRuleFacts
+            rule={RENT}
+            summary={describeRecurringRule({
+              bookingMode: RENT.bookingMode,
+              direction: RENT.expectedDirection,
+              matchCounterpartyName: RENT.matchCounterpartyName,
+              matchCounterpartyIban: RENT.matchCounterpartyIban,
+              matchAmount: RENT.matchAmount,
+              matchAmountTolerance: RENT.matchAmountTolerance,
+            })}
+            schedule={describeRuleSchedule(RENT)}
+            preview={{
+              lines: [
+                { side: RENT_SIDES.personalSide, accountNumber: "10870", accountName: "Beispiel-Mieter GmbH", amount: RENT_AMOUNT },
+                { side: RENT_SIDES.counterSide, accountNumber: "8400", accountName: "Erlöse 19 % USt", amount: RENT_AMOUNT },
+              ],
+              automatic: RENT_BUILT.automatic,
+              note: RENT_BUILT.note,
+            }}
+            accountHref={accountHref}
+          />
+        </div>
+      </Card>
+      <Card>
+        <CardHead title="Gebucht vom Regelwerk" sub="zwölf Abgrenzungen, elf Zahlungen zugeordnet" />
+        <Table cols="110px 160px minmax(0, 1fr)" minWidth={520}>
+          <HeadRow>
+            <span>Periode</span>
+            <span>Abgrenzung</span>
+            <span>Zahlung</span>
+          </HeadRow>
+          {MONTHS.map((m) => (
+            <Row key={m}>
+              <span>{pad(m)}/2026</span>
+              <StatusBadge axis="buchung" status={m === 12 ? "proposed" : "posted"} info={false} />
+              <span>{m === 12 ? "noch keine eingegangen" : `Zahlungseingang vom 03.${pad(m)}.2026`}</span>
+            </Row>
+          ))}
+        </Table>
+      </Card>
+    </Tab>
+  ),
+};
 
 /**
  * **Protokoll** — drei Tiefen: der Verlauf (was ein Mensch erzählen würde),

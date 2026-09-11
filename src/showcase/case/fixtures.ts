@@ -179,6 +179,8 @@ export const FALL_TABS = [
   { key: "plausibilitaet", label: "Plausibilität" },
   { key: "saldo", label: "Saldo & Konten" },
   { key: "datev", label: "DATEV-Wahrheit" },
+  // Rule and assignment in one tab (F196 O2); only a recurring case has it.
+  { key: "regelwerk", label: "Wiederkehr" },
   { key: "protokoll", label: "Protokoll" },
   { key: "rohdaten", label: "Rohdaten" },
 ];

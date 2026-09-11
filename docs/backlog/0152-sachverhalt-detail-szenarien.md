@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** — alle drei Wellen und P3 (edb6d3f, 65c733b, 9a9e609); Abnahme je Welle offen, nicht durch den Bauenden |
+| Status | **gebaut 2026-09-10** — alle drei Wellen und P3 (edb6d3f, 65c733b, 9a9e609); **Nachtrag 2026-09-11**: Abgleich mit Brief §7 (E6, E9, Reiter Wiederkehr). Abnahme je Welle offen, nicht durch den Bauenden |
 | Stufe | `src/showcase/case/` (Seiten-Stories) · dazu Erweiterungen an `entities/accounting-case/CaseTimeline.tsx` |
 | Klassen-Test | Die Seite gehört der App und lebt in `showcase/` — wie 0144 für den Beleg. Was an Bausteinen fehlt, wird `entities/` bzw. `patterns/`, nicht Teil der Seite |
 | Quelle | Design-Brief **F196** (`ludwig/app` staging `672665f8`), überbracht von `ludwig-cto` · Seitenprofil `docs/seiten/sachverhalt-detail.md` · Entitätsprofil `docs/entitaeten/accounting-case.md` |
@@ -234,6 +234,56 @@ Reiter ohne Daten mit seinem Leerzustand als Satz. Stammdaten steht unter
 Einzelfall (`MasterData`). Kein freies Raster: was zusammengehört, steht
 untereinander.
 
+## Nachtrag 2026-09-11 — Abgleich mit der Szenarienliste des Briefs
+
+Auf Wunsch des Owners die Liste aus F196 §7 Punkt für Punkt gegen das
+Gebaute gehalten. Welle 2 und 3 waren nach der Erhebung geschnitten, nicht
+nach dem Brief; drei Punkte des Briefs **mit Bestand** fehlten deshalb.
+
+| Brief | gebaut als | Stand |
+|---|---|---|
+| E1 · E1b | `ProposalPending` · `WithDatevEntry` | ✓ |
+| E2 Ausgeglichen | `CompleteAndExported` | ✓ |
+| E3 OPOS-Vortrag | `OpenItemCarryover` | ✓ in der Form der Erhebung (A1) |
+| E4 Wartet auf Beleg, überfällig | `AwaitingDocument` · `AwaitingDocumentEscalated` | ✓ Stufe 1 statt 2 (Stufe 2: 0) |
+| E5 Rückfrage offen | `ClarificationOpenFirm` | ✓; zurückgestellt: 0 von 234 |
+| **E6 Bei der Kanzlei abgegeben** | **`HandedToFirm`** | **neu** — 27 offene Fälle bei der Kanzlei ohne Rückfrage |
+| E7 Ersetzt und storniert | `Superseded`, `ProposalWithdrawn`; „keine Buchung nötig" in `OpenItemCarryover`, `RecurringWithRule`, `Contract` | ✓; Storno-Buchung: 0 |
+| E8 Vertrag | `Contract` | ✓ |
+| **E9 Neu, ohne alles** | **`NewWithoutCounterparty`** | **neu** — rund 5 % der Fälle ohne Gegenpart |
+| S1 Sammel, Zentralregulierer | `CollectivePayment` + Reiter Plausibilität | ✓; ein gefülltes Belegnummern-Register hat der Bestand nicht (0 %) |
+| S2 Dauersachverhalt | `RecurringWithRule` + **Reiter Wiederkehr** | **Reiter neu** |
+| S3 Dauer ohne Regel | `RecurringWithoutRule` + Leerzustand des Reiters | **Angebot neu** |
+| S4 Ausgleichsgruppe | `ClearingGroup` · `ClearingGroupBalanced` | ✓ |
+| S5 Mandantenstapel | `ClientBatch` | ✓ mit 508 statt 120 |
+| P1–P4 | `InUse` · `LoadingErrorNotFound` · Reiter · `PartnerDrawer` | ✓ |
+
+**Reiter Wiederkehr** (`Seiten/Sachverhalt/Reiter` · `Recurrence`): der
+Schlüssel ist `regelwerk` aus `CASE_TABS` der App, die Beschriftung
+„Wiederkehr" (O2: Regelwerk und Zuordnung in **einem** Reiter). `CasePage`
+zeigt ihn nur bei `recurring_charge`. Oben `RecurringRuleFacts` mit Vorschau,
+darunter die zwölf Abgrenzungen mit der zugeordneten Zahlung. Der
+Leerzustand ist der Dauerfall **ohne** Regel: ein Angebot mit Knopf, dahinter
+der vorbefüllte `RecurringRuleEditor` (0135). Der Weg „Regel ansehen" in
+`RecurringWithRule` zeigte bis heute auf `?tab=wiederkehr`, einen Reiter, den
+es nicht gab.
+
+**D7 auf dieser Seite** (Owner 2026-09-11, zur Kontoseite entschieden): der
+Kopfbetrag steht in Spalte 2 nicht noch einmal. `CompleteAndExported` und die
+beiden `AwaitingDocument`-Stories nannten ihn im Satz; das tun sie nicht mehr.
+
+Neuer Stand: **26 Szenarien** (Einzelfall 18 samt Stammdaten, Sammel und
+Dauer 6, dazu `NoEvents` und `Contract` in Einzelfall), 3 Seitenzustände,
+**8 Reiter**.
+
+Gemessen bei 1440 × 900 auf einem eigenen Storybook aus einem Worktree
+(6107 blieb für die Abnahme unberührt): `HandedToFirm` ein Signal,
+`NewWithoutCounterparty` keins und keine Kennzahl im Kopf; beide ohne
+Querlauf und ohne Text in 16 px. „Wiederkehr" erscheint bei `Recurrence` und
+`RecurringWithRule`, nicht bei `Events` und `Log`; zwölf Zeilen; der Knopf
+öffnet den Editor mit „Beispiel-Energie AG" und 142,00 €. Der Kopfbetrag
+kommt in Spalte 2 bei keiner Story mit Betrag vor.
+
 ## Offene Fragen
 
 1. **Ist die Buchung ein eigener Timeline-Eintrag oder eine zweite Zeile am
@@ -266,6 +316,12 @@ Variabel (je Welle):
 - [ ] **W3** 120 Ereignisse brechen das Layout nicht (Pagination in Spalte 1)
 - [ ] **W3** Kein Gegenpart bei `adjustment_only` ist **kein Mangel** —
       NULL heißt dort „hat bewusst keins"
+- [ ] **Nachtrag** Kein Gegenpart bei einer Eingangsrechnung **ist** ein
+      Mangel mit Weg (`NewWithoutCounterparty`)
+- [ ] **Nachtrag** „Wiederkehr" nur beim Dauersachverhalt; sein Leerzustand
+      ist ein Angebot, kein Strich (`Recurrence`)
+- [ ] **Nachtrag** Der Kopfbetrag steht nicht ein zweites Mal auf der
+      Übersicht (D7)
 
 ## Abnahme
 

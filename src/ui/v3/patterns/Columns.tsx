@@ -27,6 +27,9 @@ import type { CSSProperties, ReactNode } from "react";
  * is the working surface and the notes are the companion — dropping the third
  * column would take the notes away, dropping the first would take the work.
  *
+ * One exception: in `main-aside` the companion goes **above** the surface
+ * (owner 2026-09-11, 0157). There it is the facts the surface is read against,
+ * and under 25 rows of movements nobody finds them.
  */
 
 /** The four, and no fifth. A pattern nobody named is a grid somebody invented. */

@@ -226,7 +226,7 @@ export const completeAndExported: CaseScenario = {
       rows: [
         ["DATEV-Export", <StatusBadge key="e" axis="export_case" status="exportiert" info={false} />],
         ["Stapel", "07-2026, übergeben am 01.08.2026"],
-        ["Ausgleich", "Rechnung und Zahlung über 214,20 € — Rest 0,00 €"],
+        ["Ausgleich", "Rechnung und Zahlung gleichen sich aus — Rest 0,00 €"],
       ],
     },
   },
@@ -362,7 +362,7 @@ const awaitingDocumentBase: CaseScenario = {
       {
         key: "document",
         title: "Die Rechnung von Testhandel Bürobedarf KG fehlt.",
-        hint: "86,00 € · erbeten bis 19.08.2026, in 14 Tagen · noch keine Mahnung — der Mandant ist gefragt.",
+        hint: "Erbeten bis 19.08.2026, in 14 Tagen · noch keine Mahnung — der Mandant ist gefragt.",
         state: "open",
         ways: ["Beleg anhängen", "Erledigt", "Aufheben"],
       },
@@ -408,7 +408,7 @@ export const awaitingDocumentEscalated: CaseScenario = {
       {
         key: "document",
         title: "Die Rechnung von Testhandel Bürobedarf KG ist überfällig.",
-        hint: "86,00 € · erbeten bis 29.07.2026, seit 7 Tagen überfällig · einmal gemahnt (Stufe 1).",
+        hint: "Erbeten bis 29.07.2026, seit 7 Tagen überfällig · einmal gemahnt (Stufe 1).",
         state: "error",
         ways: ["Beleg anhängen", "Erledigt", "Aufheben"],
       },
@@ -769,6 +769,111 @@ export const judgeAdjusted: CaseScenario = {
         judgeReasoning: "Konto 4970 statt 4900, wie in den Vormonaten; Buchungstext auf die Entgeltaufstellung angepasst.",
       },
       actions: ["Freigeben", "Ändern"],
+    },
+  },
+  notes: [],
+  clarificationList: [],
+};
+
+/* ── Brief F196 §7, matched against the stock on 2026-09-11 ─────────────── */
+
+/** E6 — the agent handed the case to the firm without a question (27 open cases with `disposition = accounting`). */
+export const handedToFirm: CaseScenario = {
+  accountingCase: caseFixture({
+    caseNumber: "2026-0377",
+    openedAt: "2026-07-29",
+    summary: "Abbuchung ohne Rechnungsnummer; zwei offene Rechnungen desselben Lieferanten passen gleich gut.",
+    counterpartyName: "Beispiel-Versand GmbH",
+    counterpartyPartnerId: "bp-7020",
+    personalAccountNumber: "71733",
+    disposition: "accounting",
+    totalAmount: 734.8,
+    currency: "EUR",
+  }),
+  today: TODAY,
+  signal: {
+    kicker: "Nächster Schritt",
+    title: "Der Agent hat den Fall an die Kanzlei übergeben: welche Rechnung ist bezahlt?",
+    action: "Selbst zuordnen",
+  },
+  timelineSub: "eine Abbuchung",
+  events: [
+    event("ev-h-pay", "payment_out", "2026-07-29", "Abbuchung Beispiel-Versand GmbH", -734.8, "blocked", {
+      stateNote: "Nicht gebucht: der Agent hat an die Kanzlei übergeben.",
+    }),
+  ],
+  todo: {
+    sub: "an die Kanzlei übergeben",
+    points: [
+      {
+        key: "handed",
+        title: "Zwei offene Rechnungen passen zur Abbuchung.",
+        hint: "RE-4410 und RE-4471 lauten auf denselben Betrag, die Abbuchung nennt keine Nummer. Ordnen Sie selbst zu, oder geben Sie den Fall mit einem Hinweis an den Agenten zurück.",
+        state: "returned",
+        ways: ["Selbst zuordnen", "An den Agenten zurückgeben"],
+      },
+    ],
+  },
+  details: {
+    "ev-h-pay": {
+      title: "Abbuchung Beispiel-Versand GmbH",
+      sub: "29.07.2026 · nicht gebucht",
+      origin: "none",
+      note: "Kein Vorschlag: statt zwischen zwei gleich guten offenen Posten zu raten, hat der Agent an die Kanzlei übergeben.",
+    },
+  },
+  notes: [
+    {
+      id: "n-h",
+      at: "2026-07-29T09:40:00Z",
+      author: "Agent",
+      text: "An die Kanzlei übergeben: RE-4410 und RE-4471 sind beide offen und gleich hoch, die Abbuchung nennt keine Rechnungsnummer.",
+    },
+  ],
+  clarificationList: [],
+};
+
+/** E9 — just founded from a bank line: no counterparty (about 5 % of cases), so no account, no proposal, no amount. */
+export const newWithoutCounterparty: CaseScenario = {
+  accountingCase: caseFixture({
+    caseNumber: "2026-0419",
+    openedAt: "2026-08-04",
+    summary: null,
+    counterpartyName: null,
+    counterpartyPartnerId: null,
+    personalAccountNumber: null,
+    counterpartySide: null,
+    createdByLabel: "Agent · aus einer Bankzeile",
+    disposition: "agent",
+    totalAmount: null,
+  }),
+  today: TODAY,
+  timelineSub: "eine Abbuchung",
+  events: [event("ev-n-pay", "payment_out", "2026-08-04", "SEPA-Lastschrift ohne Namen", -49.9, "open")],
+  todo: {
+    sub: "2 offen",
+    points: [
+      {
+        key: "counterparty",
+        title: "Der Gegenpart fehlt.",
+        hint: "Die Lastschrift nennt nur eine Gläubiger-ID, und kein Geschäftspartner trägt sie. Mit dem Partner steht auch das Personenkonto fest.",
+        state: "open",
+        ways: ["Partner wählen"],
+      },
+      {
+        key: "booking",
+        title: "Die Abbuchung ist nicht gebucht.",
+        hint: "Der Agent schlägt vor, sobald der Gegenpart feststeht.",
+        state: "open",
+      },
+    ],
+  },
+  details: {
+    "ev-n-pay": {
+      title: "SEPA-Lastschrift ohne Namen",
+      sub: "04.08.2026 · nicht gebucht",
+      origin: "none",
+      note: "Noch kein Vorschlag: ohne Gegenpart kennt der Agent das Konto nicht.",
     },
   },
   notes: [],

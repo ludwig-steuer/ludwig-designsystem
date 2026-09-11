@@ -101,3 +101,14 @@ erste bleibt in jeder Breite stehen — wie im Brief verlangt.
 - **Standard §1.2 und `docs/seiten/sachverhalt-detail.md` nachziehen.** Steht
   noch aus: solange 0152 nicht gebaut ist, wäre die neue Regel im Standard
   eine Ankündigung ohne zweiten Fall.
+
+## Nachtrag 2026-09-11 — `main-aside` bricht die Randspalte nach oben
+
+Owner-Entscheid zur Kontoseite (0157): beim Umbruch steht die Randspalte
+**über** der Arbeitsfläche, nicht darunter — dort sind es die Stammdaten,
+gegen die die Bewegungen gelesen werden, und unter 25 Zeilen findet sie
+niemand. Umgesetzt als `flex-wrap: wrap-reverse` an `.v3cols--main-aside`;
+die Reihenfolge im DOM bleibt Fläche, dann Randspalte. Die übrigen drei
+Muster brechen wie bisher (die dritte Spalte fällt nach unten). Aufrufer von
+`main-aside` sind heute nur die Kontoseite und die Stories dieses Musters;
+breaking: nein.
