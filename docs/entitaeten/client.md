@@ -10,7 +10,7 @@
 | Wichtigkeit | **mittel** — Roadmap der App (9be34746) Rang 6; FK-Ziel von 44 Tabellen, aber fast überall Kontext der Route |
 | Datenstand | Staging über den Pooler, **2026-09-11**, schreibgeschützte Sitzung: **7 Mandanten in 2 Kanzleien** (6 + 1), 3 aktiv. Nur `SELECT`, keine Kundendaten; Beispielwerte erfunden |
 | Bestandswarnung | Sieben Zeilen tragen keine Verteilung: alle `ready`, alle `creditor`, alle `soll`, alle monatliche USt. **Das Mandanten-Profil ist leer:** `vat_specialties` und `expense_profile` sind bei allen sieben leere Listen (der Füllgrad 100 % täuscht), `business_model` und `industry` 0 %, Geschäftsbeschreibung und Leitlinien je bei einem |
-| Rückfrage | gestellt am 2026-09-11 an `ludwig-manager` — **offen**, die Defaults gelten |
+| Rückfrage | gestellt und **beantwortet** am 2026-09-11 (`ludwig-manager`, aus dem App-Stand): die Defaults der drei Fragen gelten; sechs Anwendungsfälle zugeordnet; keine Auswahl-Dialoge außer dem Switcher |
 | Analyse von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren`) |
 
 ## Was sie ist
@@ -102,6 +102,22 @@ Freitext-Grenzen: Leitlinien bis 1.215 Zeichen — in den Facts als `LongText`.
 | `configuration/profil/page.tsx` (72 Z.) | Editor | Profil und Leitlinien | — | — |
 | `ClientCreateForm`, `ClientMasterDataForm` (101 Z.), `ClientActiveToggle`, `DeleteClientButton`, `OnboardingWizard`, Admin-Mandantenseite (969 Z.) | Admin | Anlage, Stammdaten, Aktivierung, Löschen, Onboarding | — | — |
 
+**Aus der Rückfrage** (Manager, 2026-09-11) — die Anwendungsfälle der App und
+wo sie hier stehen: (a) die Startseite als Weiche („die Zahl zählt mit dem
+Filter ihres Ziels", Owner 2026-09-08) → `ClientRow` mit offener Arbeit und
+`BatchCell`; (b) Mandanten-Switcher in der Sidebar und Mandanten-Band — Picker
+und Kopf bleiben App, sie nennen den Mandanten über `ClientCell`; (c) die
+Konfiguration, 18 Seiten der Welle 3 (Stammdaten, Übersicht, Profil,
+Bankkonten, Verrechnungskonten, Kontenplan, Regelwerk, DATEV-Integration …) →
+`ClientFacts` nach Gruppen, die Editoren bleiben App; (d) Admin und Betrieb —
+Löschung als Job `client_delete` (unumkehrbar), Re-Onboarding (idempotent,
+„Bestätigtes nie überschreiben"), Einladung, Testkanzlei mit Token (F121 §8),
+Bereitschaftsprüfung (ready / warnings / blocked) → alles 0169, mit
+Seitenprofil; (e) der Replay-Mandant teilt DATEV-GUID und -Nummer mit dem
+Original und trägt eigene Reiter (Stapel-Detail „Experiment") → der
+Betriebszustand in XS; (f) Konventionen (`client_agent_notes`, Roadmap #8),
+Kanzlei und Nutzer sind eigene Entitäten.
+
 **Im Set:** kein Baustein. `Icons.tsx` führt `client` im Zeichen-Register;
 `StatusCallout` trägt eine Bereitschaft, deren Inhalt App bleibt.
 
@@ -151,9 +167,12 @@ Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 
 - **L-315** `legal_form` hält rohe DATEV-Codes: `S00009` (4), `S00001` (2), dazu einmal `GmbH` als Text. Die Abbildung `LEGAL_FORM_MAP` (`onboarding/application/derive-client-config.ts:51`) greift für diese Codes nicht und liegt in `application/`; die Domäne hat keine Wortliste.
 - **L-316** Die offene Arbeit je Mandant (`ClientOpenWork`, `OpenWorkCounts`) liegt in `accounting-cases/infrastructure/case-queries.ts:799/883` und wird nicht gespiegelt. Die Zeile des Dashboards hat im Set keinen Typ.
-- **L-317** Das GLOSSARY nennt für den Buchungsstil noch `kreditorisch` / `direkt`, der Bestand trägt `creditor` (App cccccac1). Dasselbe gilt für den CHECK in `datenmodell.json` (Generator, vgl. L-300).
+- **L-317** Das GLOSSARY nennt für den Buchungsstil noch `kreditorisch` / `direkt`, der Bestand trägt `creditor` (App cccccac1). Dasselbe gilt für den CHECK in `datenmodell.json`. **Kein eigener Eintrag:** Verweis auf den Doku-Sweep F210 T210.6 und den Generator nach dem db-reset.
 
 ## Offene Fragen
+
+**Beantwortet am 2026-09-11** (`ludwig-manager`, aus dem App-Stand): alle drei
+Defaults gelten.
 
 1. **Der Betriebszustand steht schon in XS** — ein Replay-Mandant teilt DATEV-GUID und -Nummer mit dem Original; ohne das Wort ist die Nennung mehrdeutig. — ohne Antwort: ja, als Wort bei stillgelegt und Replay, nichts bei aktiv.
 2. **Der Onboarding-Zustand erscheint nur, wenn er nicht `ready` ist** — im Bestand sind alle `ready`. — ohne Antwort: so.
