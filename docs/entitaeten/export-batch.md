@@ -9,7 +9,7 @@
 | Status-Achsen | `zyklus_stapel` (`state`, 11 Werte) · `datev_pruefung` (`inspection_status`) · `stapel_commit` (am DATEV-Stapel) · `lauf` / `lauf_gate` an den Buchungsläufen. **Wer dran ist** ist abgeleitet (`batchOwner()`), keine Achse. **Ohne Wortliste:** die Art (`kind`) → L-308 |
 | Wichtigkeit | **hoch** — Roadmap der App (9be34746) Rang 3: „Jeder Wochenlauf beginnt und endet hier" |
 | Datenstand | Staging über den Pooler, **2026-09-11**, schreibgeschützte Sitzung: **14 Stapel, 6 Mandanten** (2 je Mandant, max 4); Verlauf 96 Audit-Ereignisse an 15 Stapeln. Nur `SELECT`, keine Kundendaten; Beispielwerte erfunden |
-| Bestandswarnung | **Kein Stapel ist über die Bridge gelaufen:** `datev_operation_id`, `datev_sequence_id`, `inspection_status`, `datev_error` 0 %; die 8 `confirmed` sind CSV-Exporte (`file_name`, `metrics`, `datev_protocol` je 57 % = 8 von 14). Nur drei der elf Zustände kommen vor (`confirmed` 8 · `prepared` 5 · `review` 1) — die Stories müssen alle elf aus dem CHECK zeigen (Roadmap). `entry_count` zählt die exportierten Sätze, nicht den Inhalt (L-307) |
+| Bestandswarnung | **Kein Stapel ist über die Bridge gelaufen:** `datev_operation_id`, `datev_sequence_id`, `inspection_status`, `datev_error` 0 %; die 8 `confirmed` sind CSV-Exporte (`file_name`, `metrics`, `datev_protocol` je 57 % = 8 von 14). Nur drei der elf Zustände kommen vor (`confirmed` 8 · `prepared` 5 · `review` 1) — die Stories müssen alle elf aus dem CHECK zeigen (Roadmap). `entry_count` zählt die exportierten Sätze, nicht den Inhalt (L-307); die 44 Sätze Differenz am bestätigten Stapel (216 bei 260) sind zurückgezogene Agent-Vorschläge vom 2026-09-10, die nach F199 den Stempel behalten — nie exportiert, kein Storno nach Freigabe |
 | Rückfrage | gestellt und **beantwortet** am 2026-09-11 (`ludwig-manager`, aus dem App-Stand): die Defaults der drei Fragen gelten; sieben Anwendungsfälle zugeordnet (§Heutige Darstellung); keine Auswahl-Dialoge — die Zuordnung Beleg → Stapel macht der Server (`period_to`, F203) |
 | Analyse von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren`) |
 
@@ -64,7 +64,7 @@ erDiagram
 | Zustand und wer dran ist (`state` · `batchOwner()`) | Spalte · abgeleitet (mit offenen Nachforderungen) | Zustand (`zyklus_stapel`) | 100 % — `confirmed` 8 · `prepared` 5 · `review` 1 | `StapelListeScreen` (`cycle.state`, zehn Stellen); im Set `ProcessMini`, `Baton` | Server (Übergänge) | 3 | XS | Füllgrad · GLOSSARY „Wer dran ist, IST der Zustand" |
 | Art (`kind`; Nachtrag über `supplements_batch_id`) | Spalte · Eltern | Identität (Art) | 100 % — `regular` 12 · `client_batch` 2 · Nachtrag 0 % | `StapelListeScreen` (`cycle.supplementsBatchId`) | Server | 4 | S | Füllgrad · heute in · Wortliste fehlt (L-308) |
 | Bezeichnung (`description`, z. B. „08-2026-Ludwig") | Spalte | Identität | 100 % · p50 14 · max 21 Zeichen | `StapelListeScreen` (`cycle.description`) | Server | 5 | S | Füllgrad · heute in |
-| Umfang (gestempelte Sätze nach Status) | abgeleitet: Buchungssätze mit `export_batch_id`, geteilt nach `status` | Maß | 100 % — je Stapel 0 · 0 · 0 · 1 · 2 · 10 · 43 · 46 · 79 · 81 · 232 · 260 · 343 · 493 | `StapelListeScreen` (`entriesProposed`, `entriesAccepted`, `entriesReversed`, `entryCount`) | Server | 6 | S | Staging · heute in. **Nicht** `entry_count` — der zählt die exportierten (L-307) → Frage 2 |
+| Umfang (gestempelte Sätze nach Status) | abgeleitet: Buchungssätze mit `export_batch_id`, geteilt nach `status` | Maß | 100 % — je Stapel 0 · 0 · 0 · 1 · 2 · 10 · 43 · 46 · 79 · 81 · 232 · 260 · 343 · 493 | `StapelListeScreen` (`entriesProposed`, `entriesAccepted`, `entriesReversed`, `entryCount`) | Server | 6 | S | Staging · heute in — die App zählt schon so (Unterabfrage, `booking-cycle-core.ts:788`). **Nicht** `entry_count` — der zählt die exportierten (L-307) → Frage 2 |
 | Nachforderungen (`openDocumentRequests` · `documentRequestDueDate`) | abgeleitet in der App | Zustand | nicht gemessen | `StapelListeScreen` | Server | 7 | S | heute in; schaltet `batchOwner()` auf „Mandant (wartet)" |
 | Rückfragen offen / gesamt (Mandant · Kanzlei) | abgeleitet (Stempel an der Klärung) | Zustand | 95 an 6 Stapeln · p50 9,5 · p90 34,5 · max 35 | `StapelDetailScreen` (`clarificationsOpen*`) | Server | 8 | M | Staging · heute in |
 | Neue Belege seit Prüfung (`newDocsSinceReview`) | abgeleitet in der App | Zustand | nicht gemessen | `StapelListeScreen` | Server | 9 | M | heute in |
@@ -175,9 +175,9 @@ Vier Formen „jetzt".
 
 Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 
-- **L-306** Die Formen des Stapels stehen in server-only-Code: `AgentBatchQueueItem`, `BookingCyclePeriod` und die Zähler, die `StapelListeScreen` liest (`entriesAccepted`, `entriesProposed`, `entriesReversed`, `openDocumentRequests`, `newDocsSinceReview`, Nachlese-Summe), liegen in `datev-export/application/booking-cycle-core.ts` und werden nicht gespiegelt. Dasselbe Muster wie L-274, das für die Art gelöst wurde.
-- **L-307** `entry_count` zählt die exportierten Sätze, nicht den Inhalt: offene Stapel tragen 0 bei 46, 343 und 493 gestempelten Sätzen, ein bestätigter 216 bei 260. Die Spalte hat keinen Kommentar, und der Name verspricht den Inhalt.
-- **L-308** Die Art des Stapels hat keine Wortliste: `BOOKING_CYCLE_KINDS` (`regular`, `client_batch`) steht ohne Wörter da; „Mandantenstapel" und „Nachtrag" (aus `supplements_batch_id`) stehen nur im GLOSSARY.
+- **L-306** Die Formen des Stapels stehen in server-only-Code: `AgentBatchQueueItem`, `BookingCyclePeriod` und die Zähler, die `StapelListeScreen` liest (`entriesAccepted`, `entriesProposed`, `entriesReversed`, `openDocumentRequests`, `newDocsSinceReview`, Nachlese-Summe), liegen in `datev-export/application/booking-cycle-core.ts` und werden nicht gespiegelt. Dasselbe Muster wie L-274, das für die Art gelöst wurde. Bestätigt, App P24.
+- **L-307** Name und Bedeutung von `entry_count`: Die Oberfläche zählt den Umfang schon aus den Stempeln (Unterabfragen in `booking-cycle-core.ts:788` und `booking-cycle-detail.ts:168`). `entry_count` lesen nur die Nachlese (`StapelVergleich.tsx:457`, „von n" — nach der Freigabe gleich exportiert, also richtig) und toter Code. Die 0 an offenen Stapeln ist nirgends sichtbar, verspricht aber im Namen den Inhalt. App P17, mit Owner-Frage: abschaffen, `exported_count` oder nachführen.
+- **L-308** Die Art des Stapels hat keine Wortliste: `BOOKING_CYCLE_KINDS` (`regular`, `client_batch`) steht ohne Wörter da. Die Wörter sind verstreut: `client-batches`, die Stammdaten-Seite, „↳ Nachtrag" in `StapelListeScreen.tsx:403`, „Nachtrag zu …" in `StapelDetailScreen.tsx:283`. Bestätigt, App P25.
 
 ## Offene Fragen
 
@@ -195,7 +195,7 @@ dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
 
 | Zeile / Form | Einwand | Ergebnis | Geprüft von / am |
 |---|---|---|---|
-| | | | |
+| L-306, L-307, L-308 · Bestandswarnung | App-Nachzählung: Zahlen stimmen (14 Stapel, `regular` 12, `client_batch` 2, 0 Nachträge); die Oberfläche leitet den Umfang schon ab; die 44 Differenz sind zurückgezogene Vorschläge mit Stempel; die Wörter der Art sind verstreut | L-307 neu gefasst, L-306/L-308 bestätigt; App P17, P24, P25 | ludwig-manager (ludwig-worker), 2026-09-11 |
 
 ## Weiter
 
