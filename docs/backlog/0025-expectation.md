@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig |
+| Status | fertig · **Nachtrag 2026-09-11 offen** (Aufheben, Spiegelfelder) |
 | Freigabe | 2026-09-06, designsystem-f0 im Auftrag des Owners — Entscheide und Pflichtänderungen vor dem Bau im Abschnitt „Freigabe" |
 | Stufe | `entities/expectation/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, „was noch fehlt" hängt am Sachverhalt |
@@ -999,3 +999,29 @@ außerdem das Richtige (Klasse statt Position).
 Literal-Union nachgeschrieben, obwohl `ExpectationAudience`
 (`domain/expectation.ts`) denselben Wertebereich führt. Jetzt importiert —
 `resolvedAt` ist damit tatsächlich das einzige lokale Feld (L-205).
+
+## Nachtrag 2026-09-11 — aus dem Profil `expectation` (offen)
+
+Quelle: `docs/entitaeten/expectation.md`, Abschnitte „Heutige Darstellung" und
+„Zuschnitt". Drei Punkte, alle an der Zeile; Chip und Stories bleiben.
+
+1. **„Aufheben" fehlt.** Die Erwartung hat zwei Wege von Hand —
+   `resolution = manual` („Erledigt") und `obsolete` („Aufheben", gegenstandslos).
+   Die Zeile kennt nur `onResolve`; `FehltPanel` und die `ExpectationPane` des
+   Showcase bauen „Aufheben" daneben von Hand. Ausbau: `onDismiss?: (id) =>
+   void` neben `onResolve`, mit derselben Regel („ohne die Prop kein Knopf").
+   Der Grund dazu kommt vom Aufrufer (`ReasonDialog`, offene Frage 2 des Profils).
+2. **`resolvedAt` kommt aus dem Spiegel.** L-205 ist erledigt: `ExpectationRow`
+   in `domain/expectation.ts` trägt `resolvedAt`. Das lokale Feld in
+   `ExpectationVM` fällt weg; der Kommentar, es sei das einzige Feld ohne
+   Spiegel-Herkunft, ebenso.
+3. **Die Belegart-Wörter kommen aus dem Spiegel.** Seit 2026-09-11 führt
+   `domain/expectation-labels.ts` `EXPECTED_DOC_KIND_LABEL` und
+   `expectedDocKindLabel()` — die eine Map, die Kern und Panel teilen. Die Zeile
+   nimmt sie als Vorgabe; `documentKindLabel` bleibt nur, wenn ein Aufrufer
+   andere Wörter braucht — sonst entfällt die Prop. Die Begründung in 0025
+   („eine Map hier wäre eine dritte Wahrheit") gilt nicht mehr: es gibt jetzt
+   eine erste.
+
+Abnahme: die Stories `Interactive` und `InCase` zeigen „Aufheben"; ein Grep über
+`Expectation.tsx` findet kein lokales `resolvedAt` mehr.

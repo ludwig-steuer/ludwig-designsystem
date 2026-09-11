@@ -117,7 +117,7 @@ der Herleitung steht in der Marke als ein Satz bis 160 Zeichen
 | Agent-Lauf (`agent_run_id`) | Eltern | 42 % (`ai_proposed` 83 %) | Verantwortung | L | **Inline** in `ProvenanceNote` („wer") | Staging |
 | Mandantenstapel-Lauf (`batch_import_id`) | Eltern | 48 % = alle `client_import` | Kontext | L | **Inline** | Staging |
 | DATEV-Spiegelbuchung | Eltern (Kopf) und Kind (Spiegel-Seite) | 319 Kopf-Kanten; dazu 29 `matched_split`-Zeilen an 14 Sätzen, deren Kopf-Spalte gewollt leer bleibt — nur an `accepted` (L-298) | Zustand (`buchung_datev`) | S | als **Stufe** in S · **Inline** `MirrorEntryCell` in L → Profil `datev-mirror-entry` (Roadmap #2) | Staging |
-| Erwartungen (`origin_journal_entry_id`) | Kind | 89 Erwartungen tragen einen Satz als Ursprung | Kontext | L | **Liste** über `ExpectationRow` ✓ → Profil `expectation` (Roadmap #10) | Staging |
+| Erwartungen (`origin_journal_entry_id`) | Kind | 89 Erwartungen tragen einen Satz als Ursprung | Kontext | L | **Liste** über `ExpectationRow` ✓ → Profil `expectation` | Staging |
 | Storno (`reverses_entry_id`) | Selbstbezug | 0 % | Zustand | L | **Inline**, nur wenn gesetzt | Staging |
 | Rechnungsspur (`client_invoice_traces.journal_entry_id`) | Kind | 0 | — | — | nicht gezeigt | Staging |
 | Verlauf (`platform_audit_events`) | ohne FK | kein eigener `resource_kind`; Einzel-Annahmen stehen als `booking.accept` am Sachverhalt (166, immer mit Person), Sammel-Annahmen gar nicht | Verantwortung | L | **Liste** über den Verlauf des Sachverhalts (`Log`, 0053) — Lücke L-297 | Staging |
