@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | **gebaut 2026-09-11** — Abnahme offen (nicht durch den Bauenden) |
 | Stufe | `patterns/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: zwei Systeme Zeile für Zeile abgleichen (Vertragsbestand ↔ Zahlungseingang) gibt es überall, wo zwei Quellen dasselbe behaupten |
 | Quelle | UI-Kit-Roadmap `docs/backlog/uikit-entity-roadmap-2026-09.md` (ludwig/app 9be34746), Abschnitt B, **B1** „ReconciliationPair / MatchTable"; Reihenfolge laut Übergabe: B1 vor Entität #2 (Spiegelbuchung). Auftrag über `ludwig-manager`, 2026-09-11 |
@@ -103,6 +103,7 @@ Titel `v3/Patterns/Prüfen/ReconciliationTable`.
 | `Interactive` | Auf- und Zuklappen, Zeile als Link (`pairHref`) |
 | `LoadingAndError` | zwei der fünf Zustände |
 | `Edges` | Aufteilung in fünf Teile, lange Texte, 500 Übereinstimmungen |
+| `InUse` | die Nachlese wie `StapelVergleich`: KPI-Zeile darüber, Zeilen als Weg ins Detail |
 
 Nicht anwendbar: „leer nach Filter" (das Pattern filtert nicht; der Aufrufer
 nutzt den Leerzustand von `DataTable`).
@@ -136,6 +137,33 @@ Variabel (aus dieser Spec):
 - [ ] Das Pattern kennt keine Entität: keine Fachtypen, das Wort des Zustands kommt vom Aufrufer
 - [ ] Kein Querlauf bei 1440 und 1024; Tabelle scrollt in ihrer Karte (`Edges`)
 - [ ] Ersetzt `StapelVergleich`/`ReplayVergleich` und `DatevCoveragePanel` ohne Funktionsverlust — belegt an einer `InUse`-artigen Story mit KPI-Zeile darüber
+
+## Gebaut 2026-09-11
+
+- `patterns/ReconciliationTable.tsx` (Client-Komponente), Export im Barrel
+  unter „Prüfen" mit `PairKind` und `ReconciliationPair`.
+- Gebaut auf `DataTable` mit Abschnitten (0149): „Abweichungen" mit der Zahl im
+  Kopf; „Übereinstimmend" zugeklappt als **leerer Abschnitt mit Satz**
+  (`emptyHint`) und dem Weg „anzeigen" / „ausblenden" im Kopf (`aside`) — keine
+  neue Mechanik in `DataTable`.
+- Nichts weicht ab: kein Abschnitt, sondern der Leerzustand von `DataTable`
+  mit `done` — „Alle 318 Paare stimmen überein." — und demselben Weg.
+- Die Spalte „Weg" erscheint nur, wenn ein Paar eine Handlung trägt.
+- Acht Stories (`InUse` zusätzlich zur Tabelle oben, als Beleg für den Ersatz
+  von `StapelVergleich`).
+
+## Messung (6107)
+
+| Kriterium | Ergebnis |
+|---|---|
+| `pnpm typecheck`, alle Wächter | grün |
+| Reihenfolge der Abweichungen | `Filled`: nur links (RE-4492) · nur rechts (KB-0831, KB-0832) · geändert · aufgeteilt · unklar |
+| Übereinstimmungen zugeklappt | `Filled` „40 Paare stimmen überein.", `OneSided` „47 …", `Edges` „500 …"; `Interactive`: „anzeigen" → 12 Zeilen, „ausblenden" → wieder die Zeile |
+| Fehlende Seite als Satz | „nicht in DATEV heute", „nicht in Ludwig exportiert", „nicht in Kontoauszug" |
+| Alles stimmt | `AllSame`: „Alle 318 Paare stimmen überein." mit „anzeigen" → 318 Zeilen |
+| Zeilen als Link nur mit `pairHref` | `Interactive` 3, `InUse` 6 Links (`#paar=…`); `Filled` ohne `pairHref` 0 |
+| Laden, Fehler | `LoadingAndError`: Kopf und Spaltenköpfe stehen, Skelett bzw. Satz |
+| Querlauf, 16 px | 0 bei 1440, `Edges` bei 1024: 0; kein Text in 16 px |
 
 ## Abnahme
 

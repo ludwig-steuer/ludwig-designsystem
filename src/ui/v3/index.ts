@@ -247,6 +247,11 @@ export {
   type StateKind,
 } from "./patterns/Review";
 export { ComparisonTable, type ComparisonRow } from "./patterns/ComparisonTable";
+export {
+  ReconciliationTable,
+  type PairKind,
+  type ReconciliationPair,
+} from "./patterns/ReconciliationTable";
 export { Timeline, type TimelineItem } from "./patterns/Timeline";
 export {
   ChoicePrompt,
