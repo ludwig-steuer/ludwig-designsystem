@@ -144,3 +144,11 @@ Reiters.
   Karte und ist bei jeder anderen Belegart leer — die gemessenen
   Kardinalitäten geben nicht mehr her, und eine leere Zone ist besser als drei
   leere Karten.
+
+- **D17 (jeder Reiter hat ein Spaltenmuster):** Die Übersicht stellt Original
+  und Fakten in `SourceDocumentCard` (0071) mit einem eigenen Raster gegenüber
+  (`.v2doccard__cols`) statt in `Columns split`. Die Karte ist älter als 0154
+  und steht zugleich im Drawer. Nachgezogen wird sie mit S4 des
+  Pattern-Inventars (`docs/detailseiten-pattern.md`; Prüfung `ludwig-manager`
+  2026-09-11).
+

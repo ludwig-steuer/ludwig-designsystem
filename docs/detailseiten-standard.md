@@ -329,13 +329,18 @@ Kontoseite (§11.3, Nr. 2).
 Der letzte Reiter heißt auf jeder Detailseite „Rohdaten", zeigt `RawRecord` und
 ist **für alle sichtbar** (§11.1). Er trägt keinen Zähler, keinen Punkt und nie
 einen Alarm — er fordert nichts. Optisch steht er auf der Debug-Stufe der Skala
-(A7 `neutral`), nicht auf der Stufe der fachlichen Reiter; das kann die
-`Tabs`-Primitive heute nicht (Aufgabe 0136).
+(A7 `neutral`), nicht auf der Stufe der fachlichen Reiter; das trägt die
+`Tabs`-Primitive seit 0136.
 
 Er ist zugleich die **einzige Technik-Sicht der Seite** (T4): interne Namen
 (`source_doc`, Tabellen- und Spaltennamen, Job-Ids) dürfen hier stehen — und
 nur hier. Ein interner Name, der in die Übersicht durchschlägt, ist ein
 Verstoß, auch wenn er einen Reiter weiter erlaubt wäre.
+
+**Seit D19 mit einer Ausnahme.** Bündelt der letzte Reiter DATEV-Wahrheit,
+Protokoll, Herkunft und Rohdaten, heißt er „Technik" (`technical`). Dann gilt
+dieser Abschnitt für ihn als Ganzes — zuletzt, leise, ohne Zähler, die einzige
+Technik-Sicht —, und „Rohdaten" ist darin der letzte, eingeklappte Abschnitt.
 
 ## 6 Verknüpfte Entitäten (D13)
 
@@ -418,14 +423,14 @@ Textalternative sagt dasselbe wie das Bild.
 | **D2 Mängel zuerst, mit Weg hinaus** | Zone 2 zeigt jedes Problem, Kritikalität absteigend (A7), jede Zeile mit einem Weg hinaus. Ganzer Datensatz → Zone 2; ein Wert → an seinem Wert als Mangel statt Leerzeile; im Reiter → Zähler mit `alarm`. Leer = Haken + Satz mit Zahl (L6). Dieselbe Sache nur an einem Ort. | Ein leeres Feld, wo ein Pflichtwert fehlt; ein Mangel, der erst im richtigen Reiter sichtbar wird; eine Mängelzeile ohne Ausweg; zwei Meldungen über dieselbe Sache; Rot für etwas, das keine Stufe „Fehler" ist. | `StatusCallout` (0049) · `Banner` · `Tabs count/alarm` · `SourceDocumentFacts missing` |
 | **D3 Ein Rahmen, fünf Slots** | Pager · Kopf · Signal · Reiter · Körper, immer in dieser Reihenfolge. Leerer Slot fällt mit seinem Abstand weg; gefüllter Slot bleibt auch mit einem Eintrag. | Eine Detailseite mit eigener Slot-Reihenfolge; eine leere Zeile, wo ein Slot nichts trägt; ein Layout, das je nach Datenmenge die Spaltenzahl wechselt. | `RecordPager` (0047), `EntityHeader` (0048), `StatusCallout` (0049), `Tabs` |
 | **D4 Fünf Zonen in fester Reihenfolge** | Der erste Reiter besteht aus Kopf · Mängel · Fakten · Abrisse · Verlauf. Fakten = Rang 1–6 des Entitätsprofils; Herkunft und Konfidenz nur bei einem Wert (0120). Abrisse in Reiterreihenfolge. | Eine Übersicht mit eigener Gliederung; Fakten unter den Abrissen; ein Block, der in keine Zone gehört und trotzdem oben steht; eine Herkunftszeile ohne Wert. | `EntityHeader`, `StatusCallout`, `FieldList`, `Card`+`DataTable`, `LogList` |
-| **D5 Drei Layouts, kein viertes** | D-L1 Zonen untereinander (Vorgabe) · D-L2 Gegenüberstellung, wenn gegen eine Quelle abgeglichen wird · D-L3 Randspalte, wenn es eine Arbeitsfläche (Liste mit Rang ≤ 4) gibt und Zone 3 **oder** 5 daneben mitgelesen wird — der Strang nur bei `p90 ≥ 5`. | Ein Körper, der keinem der drei entspricht und keinen Satz im Seitenprofil hat; zwei Zonen zugleich in der Randspalte; ein Strang daneben ohne Zahl aus dem Entitätsprofil. | `MasterDetail`; 0071 / 0050 / 0063 |
+| **D5 Drei Layouts, kein viertes** | D-L1 Zonen untereinander (Vorgabe) · D-L2 Gegenüberstellung, wenn gegen eine Quelle abgeglichen wird · D-L3 Randspalte, wenn es eine Arbeitsfläche (Liste mit Rang ≤ 4) gibt und Zone 3 **oder** 5 daneben mitgelesen wird — der Strang nur bei `p90 ≥ 5`. Seit 0154 sind die drei Layouts Muster von `Columns` (D17); `list-detail-aside` ist D-L3 mit dem Strang links, kein viertes. | Ein Körper, der keinem der drei entspricht und keinen Satz im Seitenprofil hat; zwei Zonen zugleich in der Randspalte; ein Strang daneben ohne Zahl aus dem Entitätsprofil. | `MasterDetail`; 0071 / 0050 / 0063 |
 | **D6 Der Kopf trägt Kennung, Name, einen Zustand** | Pflicht: `overline`, `title`, `status` (**eine** Achse als `StatusBadge` mit (i) → `StatusInfoDialog`). Dazu, wo es sie gibt: Prozessbild (Z7), Meta-Zeile, Kennzahl, Faktenzeile, Aktionen. | Kein Weg von der Marke zur Erklärung der Achse; eine Kennung, die nur in der URL steht; ein Symbol aus einer Statusachse; eine Kette ohne Prozessbild. | `EntityHeader` (0048), `StatusBadge`, `StatusInfoButton`, `ProcessStepper` (Platz im Kopf: Spec **0137**) |
 | **D7 Was nie in den Kopf gehört** | Kein zweiter Zustand derselben Frage · keine leere Kennzahl · nichts zweimal · kein Formular · keine Zustandslogik als Fließtext · nicht die Liste, aus der die Leserin kam · keine zweite Entität mit eigenem Kopf. | „GESAMTBETRAG —" an der stärksten Stelle; derselbe Name in Titel, Meta und Fakten; vier Anzeigen für „wer ist am Zug"; ein „Zurück" ohne Namen des Ziels. | `EntityHeader` (leere Slots fallen weg), `RecordPager back` |
 | **D8 Aktionen oben rechts, ab drei ins Menü** | Alles Machbare in `EntityHeader actions`; höchstens zwei sichtbar, ab der dritten Handlung Menü mit sichtbarem Wort; bei genau einer Aktion **kein** Menü; Zerstörendes immer im Menü mit `tone="danger"`. Ausnahme: der nächste Schritt aus dem Zustand steht als **ein** Knopf im Signal-Slot und dann nicht zusätzlich im Kopf. | Drei und mehr Knöpfe nebeneinander im Kopf; ein Menü mit einem Eintrag; ein Kebab ohne Wort; dieselbe Handlung im Kopf und im Callout; „Löschen" als sichtbarer Knopf. | `EntityHeader actions`, `OverflowMenu` (0008), `ActionButton`, `StatusCallout actions` |
 | **D9 Wert, Aktion oder Formular** | Ein Wert auf der Seite → `InlineEdit` an seinem Platz, im Reiter „Details" (auch Zustände, auch mit Grund über `ReasonDialog`). Mehrere Werte zugleich, etwas Neues, etwas Laufendes → Aktion oben rechts. Werte, die nur zusammen Sinn ergeben → Formular im Detail/Reiter/Drawer, nie im Kopf und nie im Dialog. Ausnahme: Korrektur mit Rang ≤ 5 steht in Zone 3, mit einem Satz im Profil. | Ein „Bearbeiten"-Knopf, der die Seite in einen Formularmodus schaltet; ein Zustandswechsel, der den Wert nicht dort ändert, wo er steht; ein mehrfeldriges Formular in einem Dialog; ein `InlineEdit` in der Übersicht ohne Satz im Profil. | `InlineEdit` (0020), `CaseEditor` (0083), `ReasonDialog`, `JournalEntryEditor` (R18) |
 | **D10 Reiter sind Sichten, MECE, eine Leiste** | Ein Reiter ist eine andere Ansicht, nie ein Filter (R9). Jeder Inhalt in genau einem Reiter; zwei Tiefen derselben Frage sind eine Klappe. Keine Unterreiter, ein URL-Mechanismus. Reihenfolge nach Fragerang. Der Satz gehört der Entität (höchstens der Ausprägung), nicht dem Datensatz. | Zwei Reiter, gleiche Spalten, andere Grundgesamtheit; eine zweite Reiterebene; `?tab=` neben `?tab=x&view=y` in einer Leiste; ein Reiter, der bei manchen Datensätzen verschwindet. | `Tabs` (R9), `?tab=` (I1) |
-| **D11 Der Standard-Satz** | **Übersicht · Details · [entitätsspezifisch] · Verlauf · Rohdaten.** „Übersicht" heißt überall gleich; „Details" trägt die Felder samt `InlineEdit`; „Verlauf" steht, wo es einen Strang gibt; eine Liste mit Rang ≤ 4 steht vollständig in der Übersicht und hat dann keinen eigenen Reiter. | Ein erster Reiter, der nach der Entität oder der Ausprägung heißt; ein „Verlauf" ohne Strang dahinter; dieselbe Liste als Abriss **und** in voller Länge in der Übersicht. | `Tabs`, `FieldList`, `LogBrowser`, `RawRecord` |
-| **D12 „Rohdaten" ist immer der letzte Reiter** | Jede Detailseite hat ihn, immer zuletzt, überall gleich benannt, für alle sichtbar, ohne Zähler und ohne Alarm, optisch auf der Debug-Stufe (A7). Er ist die einzige Technik-Sicht der Seite (T4). | Eine Detailseite ohne Rohdaten-Reiter; Rohdaten in der Mitte der Leiste; ein interner Name außerhalb dieses Reiters; ein Zähler daran. | `RawRecord` (0051), `Tabs` (leiser Reiter: Spec **0136**) |
+| **D11 Der Standard-Satz** | **Übersicht · Details · [entitätsspezifisch] · Verlauf · Rohdaten.** „Übersicht" heißt überall gleich; „Details" trägt die Felder samt `InlineEdit`; „Verlauf" steht, wo es einen Strang gibt; eine Liste mit Rang ≤ 4 steht vollständig in der Übersicht und hat dann keinen eigenen Reiter. Die Reiter dazwischen folgen der Art (D18); bündelt der letzte Reiter Technik, heißt er „Technik" (D19). | Ein erster Reiter, der nach der Entität oder der Ausprägung heißt; ein „Verlauf" ohne Strang dahinter; dieselbe Liste als Abriss **und** in voller Länge in der Übersicht. | `Tabs`, `FieldList`, `LogBrowser`, `RawRecord` |
+| **D12 „Rohdaten" ist immer der letzte Reiter** | Jede Detailseite hat ihn, immer zuletzt, überall gleich benannt, für alle sichtbar, ohne Zähler und ohne Alarm, optisch auf der Debug-Stufe (A7). Er ist die einzige Technik-Sicht der Seite (T4). Bündelt der letzte Reiter Technik (D19), steht „Rohdaten" darin als letzter, eingeklappter Abschnitt, und „Technik" ist die Technik-Sicht. | Eine Detailseite ohne Rohdaten-Reiter; Rohdaten in der Mitte der Leiste; ein interner Name außerhalb dieses Reiters; ein Zähler daran. | `RawRecord` (0051), `Tabs` (leiser Reiter, 0136) |
 | **D13 Verknüpftes öffnet als Drawer, sonst Link** | Nachsehen → Drawer aus dem Katalog über eigenen Such-Parameter (`Esc`, Position bleibt). Kein Drawer, oder die Arbeit geht dort weiter → benannter Link. Nie eine eingebettete zweite Detailansicht. In Listen: `peek` nur, wenn die Zeile ein **zweites** Ziel hat. | Ein zweiter `EntityHeader`; ein Reiter, der Rang 1–4 einer anderen Entität beantwortet; zwei Drawer für zwei Quellen derselben Zeile; ein `peek` neben einer Zeile, die schon in den Drawer führt. | `*Drawer` (R15, I2), `Link`, `RowAction action="peek"` (I11) |
 | **D14 Karte, Feldliste, Tabelle — jede an ihrem Platz** | Tabelle immer in einer Karte mit Kopf und Spaltenkopf, auch leer. Feldliste für Label/Wert (`bare` in der Karte, `row` in der Faktenzeile, `soft` für die zweite Wahrheit). Karte mit Kopf für alles mit eigenem Namen oder eigenen Aktionen. Keine Karte in der Karte. | Frei schwebende Zeilen; eine zweite Feldliste für Werte, die eine andere Ansicht schon zeigt; verschachtelte Karten; ein Leerfall ohne Spaltenkopf. | `Card`/`CardHead`, `FieldList` (0006), `DataTable` (0057) |
 | **D15 Abriss nur mit Deckung, im Spaltensatz des Reiters** | Abriss-Karte nur bei `p50 ≥ 2` der Relation (Entitätsprofil); `p50 ≤ 1` → Zahl mit Weg in Zone 3; in der Mehrzahl leer → gar nichts. Der Abriss nimmt einen benannten Satz aus dem Spaltenkatalog der Entität. Zähler und Kacheln zählen nach **I12**. | Eine Karte, die bei den meisten Datensätzen leer ist; eigene Spalten im Abriss; Kachel 225, Liste 180; „—" in der Kennzahl; zwei gleich große Salden nebeneinander. | `sourceDocumentColumns()` (0070), `caseColumns()` (0096), `bankTransactionColumns()` (0101), `KpiTile href` (0126) |
@@ -465,14 +470,14 @@ Ohne Satz keine Abweichung: was dort nicht steht, gilt wie im Standard.
 - [ ] **D2** Jeder Mangel hat Ort **und** Ausweg; kein fehlender Pflichtwert als Leerzeile; leer = Haken + Satz mit Zahl
 - [ ] **D3** Slots in der Reihenfolge Pager · Kopf · Signal · Reiter · Körper; leere Slots fallen weg
 - [ ] **D4** Zonen in der Reihenfolge Kopf · Mängel · Fakten · Abrisse · Verlauf; Fakten = Rang 1–6 des Entitätsprofils
-- [ ] **D5** Layout benannt (D-L1/2/3) und begründet; bei D-L3 die Zahl genannt
+- [ ] **D5** Layout benannt (D-L1/2/3) und begründet, als Muster von `Columns` (D17); bei D-L3 die Zahl genannt
 - [ ] **D6** Kennung, Name, **ein** führender Zustand mit Weg zur Erklärung; Prozessbild, wo eine Kette existiert
 - [ ] **D7** Keine leere Kennzahl, nichts zweimal, kein zweiter Zustand derselben Frage, kein Formular im Kopf
 - [ ] **D8** Höchstens zwei Aktionen sichtbar; kein Menü bei einer Aktion; der nächste Schritt genau einmal; Zerstörendes im Menü
 - [ ] **D9** Je Änderung entschieden: Wert · Aktion · Formular; `InlineEdit` in „Details", Ausnahmen mit Satz
 - [ ] **D10** Jeder Reiter eine eigene Ansicht, kein Filter, keine Unterreiter, ein URL-Mechanismus, Reihenfolge = Fragerang
-- [ ] **D11** Satz = Übersicht · Details · [entitätsspezifisch] · Verlauf · Rohdaten; keine Liste doppelt
-- [ ] **D12** Letzter Reiter „Rohdaten", ohne Zähler, leise, für alle sichtbar; kein interner Name außerhalb
+- [ ] **D11** Satz = Übersicht · Details · [entitätsspezifisch] · Verlauf · Rohdaten — der letzte „Technik", wenn er bündelt (D19); keine Liste doppelt
+- [ ] **D12** Letzter Reiter „Rohdaten" — oder „Technik" mit den Rohdaten als letztem Abschnitt (D19) —, ohne Zähler, leise, für alle sichtbar; kein interner Name außerhalb
 - [ ] **D13** Jede fremde Entität: Drawer oder Link — nie eingebettet; `peek` nur bei zwei Zielen
 - [ ] **D14** Jede Tabelle in einer Karte mit Spaltenkopf; keine verschachtelten Karten
 - [ ] **D15** Jeder Abriss mit `p50 ≥ 2` belegt, im Spaltensatz seines Reiters; jede Zahl mit Weg zählt nach I12
@@ -620,7 +625,7 @@ Abweichung in `sachverhalt-detail.md`.
 | D16 | `Sparkline` (0124, unter vier Werten nichts) · `konto-detail` Rang 3/Zweifel 3 · §3 Diagrammreihe | die Stufen ≤ 3 / 4–12 / ablesbar, und „nur in Zone 4" |
 | D17 | 0154 (Owner-Entscheid 2026-09-10) · 0157 (Randspalte beim Umbruch nach oben, Owner 2026-09-11) | die drei Layouts als Muster des Reiters, nicht der Seite |
 | D18 | 0152 Nachtrag „Reiter je Art wie die Hauptseiten" (Owner 2026-09-11) | für jede Detailseite |
-| D19 | Nachtrag „Reiter nach Zielgruppe" unten (Owner 2026-09-11) · F210-Abgleich mit der App (2026-09-11) | die Schlüssel `raw` und `technical`, englische Schlüssel, kein `?list=` |
+| D19 | 0152 Nachtrag „Reiter nach Zielgruppe" (Owner 2026-09-11; Schlüssel `technical`) und der Nachtrag unten · F210 T210.2 (englische Schlüssel: `rohdaten` → `raw`, `historie` → `history`; `technical` kennt die App nicht) · Fixture-Konvention 0144/0128 (eine Liste kommt über ihre eigenen Filterparameter zurück) und Entscheid `ludwig-manager` 2026-09-11 (das Set folgt der App) | die Schlüssel `raw` und `technical` als Paar für jede Detailseite, kein `?list=` |
 | D20 | 0157 Nachtrag „Stammdaten-Spalte kompakt" · 0152 Nachtrag „Erwartungen in der Randspalte" (Owner 2026-09-11) | für jede Randspalte |
 | D21 | 0153 (`ludwig-cto`, 2026-09-10) · 0150 | die Abgrenzung `OpenPoints` · `Checklist` · `TodoList` |
 | D22 | 0144 („ein Banner oder keins, je Story") · 0152 W2 · 0157 (genau ein Signal in K8 und K9) | die Wartezeit auf jemand anderen als Grund, dass es entfällt |
@@ -657,7 +662,7 @@ hierher, mit ihrer Herkunft in §12.
 |---|---|---|
 | D-L1 Zonen untereinander | eine Fläche ohne Spalten | Stammdaten des Sachverhalts |
 | D-L2 Gegenüberstellung | `split` | Beleg (Original gegen Extraktion), Wiederkehr (Regel gegen ihre Buchungen) |
-| D-L3 Randspalte | `main-aside` (Stufe `facts` oder `table`) bzw. `list-detail` | Konto (Bewegungen neben Stammdaten), Plausibilität und Technik des Sachverhalts |
+| D-L3 Randspalte | `main-aside` (Stufe `facts` oder `table`), wenn eine Fläche einen Begleiter hat · `list-detail`, wenn eine Liste abgearbeitet wird und der gewählte Eintrag daneben steht — die Frage aus D18 | `main-aside`: Konto (Bewegungen neben Stammdaten), Plausibilität und Technik des Sachverhalts · `list-detail`: Ereignisse und Belege des Sachverhalts |
 | — | `list-detail-aside` | die Übersicht des Sachverhalts: Strang, gewählter Eintrag, Notizen |
 
 Beim Umbruch fällt die dritte Spalte nach unten; `main-aside` bricht die
@@ -666,7 +671,8 @@ wogegen die Liste geprüft wird.
 
 **Welche Bausteine die Regeln tragen und wo sie schwach sind**, steht im
 Pattern-Inventar `docs/detailseiten-pattern.md`; die Beispielseiten mit
-beschrifteten Slots und Zonen stehen im Storybook unter „Muster/Detailseite".
+beschrifteten Slots und Zonen stehen im Storybook unter „Muster/Detailseite"
+(Beleg, Sachverhalt, Konto).
 
 **Offen beim Owner — Unterseiten-Navigation.** Trägt ein Reiter viele Punkte,
 liegt eine senkrechte Navigation links nahe („linksbündige Reiter",
