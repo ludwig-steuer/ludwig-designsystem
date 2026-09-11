@@ -25,14 +25,20 @@ export interface GateZeile {
   problem: string;
   /** Die Befundart, wie das Gate sie benennt (`kind`); null, wenn keine da ist. */
   kind: string | null;
+  /** Verrechnungskonto-Kategorie bei `clearing_balance` (Gate 4d); sonst null. */
+  clearingAccountType: string | null;
 }
 
 /**
- * Befundarten, die die Abnahme als **Hinweis** zeigt statt als Mangel
+ * Befunde, die die Abnahme als **Hinweis** zeigt statt als Mangel
  * (Owner-Entscheid 2026-09-08):
  *
  *  - `clearing_balance` — ein Verrechnungskonto steht nicht auf null. Ein
  *    Saldo will angesehen werden, aber er macht den Stapel nicht falsch.
+ *    **Außer Zentralregulierung** (`central_settlement`, F206, Owner
+ *    2026-09-10): dort geht jede Abrechnung auf null auf, ein Saldo heißt,
+ *    eine Abrechnung ist nicht aufgelöst — bei 10160 hat das die Kanzlei
+ *    gemerkt, nicht Ludwig. Quittiert wird er wie jeder Mangel.
  *
  * Für den **Agenten** bleibt der Befund Arbeitsauftrag: die Gates rechnen
  * unverändert, nur die Kanzlei-Ansicht stuft sie ein.
@@ -42,7 +48,9 @@ export interface GateZeile {
  * sondern ein gewöhnlicher offener Posten (`sachverhalt.md` S18) — sie steht
  * in Schritt 5 bei den offenen Posten und wird nirgends quittiert.
  */
-export const HINWEIS_ARTEN = new Set(["clearing_balance"]);
+export function isHinweis(befund: { kind: string | null; clearingAccountType?: string | null }): boolean {
+  return befund.kind === "clearing_balance" && befund.clearingAccountType !== "central_settlement";
+}
 
 /**
  * Befundarten, die in der Abnahme **nichts** zu suchen haben: Gate 4d fasst
@@ -65,9 +73,9 @@ export interface GeteilteBefunde {
  * verschwindet nie, nur weil sie unbenannt ist.
  */
 export function istMangel(raw: unknown): boolean {
-  const kind = leseGateZeile(raw).kind;
-  if (kind === null) return true;
-  return !HINWEIS_ARTEN.has(kind) && !DUBLETTEN_ARTEN.has(kind);
+  const z = leseGateZeile(raw);
+  if (z.kind === null) return true;
+  return !isHinweis(z) && !DUBLETTEN_ARTEN.has(z.kind);
 }
 
 /**
@@ -80,7 +88,7 @@ export function teileGateBefunde(open: readonly unknown[]): GeteilteBefunde {
   for (const raw of open) {
     const z = leseGateZeile(raw);
     if (z.kind !== null && DUBLETTEN_ARTEN.has(z.kind)) continue;
-    (z.kind !== null && HINWEIS_ARTEN.has(z.kind) ? hinweise : maengel).push(z);
+    (isHinweis(z) ? hinweise : maengel).push(z);
   }
   return { maengel, hinweise };
 }
@@ -138,5 +146,12 @@ export function leseGateZeile(raw: unknown): GateZeile {
     ersterText(o, ["problem", "reason", "note", "blockedReason"]) ??
     (tx ? "Auszugszeile ohne Sachverhalt." : "Ohne nähere Angabe des Gates.");
 
-  return { transactionId: tx, label, amount, problem, kind: ersterText(o, ["kind"]) };
+  return {
+    transactionId: tx,
+    label,
+    amount,
+    problem,
+    kind: ersterText(o, ["kind"]),
+    clearingAccountType: ersterText(o, ["clearingAccountType"]),
+  };
 }

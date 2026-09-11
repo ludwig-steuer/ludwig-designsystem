@@ -155,3 +155,44 @@ export function monatsKuerzel(period: string): [string, string, string, string] 
   const k = (off: number) => fmt.format(new Date(Date.UTC(y!, (m ?? 1) - 1 - off, 15)));
   return [k(3), k(2), k(1), k(0)];
 }
+
+/**
+ * Ein Sachkonto mit seinem Monatsvergleich — die Zeile von Schritt 6.
+ *
+ * Der Typ steht in der Domäne und nicht bei der Query, damit reine Funktionen
+ * (`mergeBatchContribution`) ihn benutzen können, ohne die Application-Schicht
+ * mit ihrem `server-only` zu importieren.
+ */
+export interface KontoVergleich {
+  accountNumber: string;
+  accountName: string | null;
+  /** `expense` / `revenue` / `creditor` / … — für Gruppierung und Filter. */
+  accountingRole: string | null;
+  /**
+   * Was **Ludwig** selbst festgeschrieben hat — dieselben vier Monate, über
+   * alle Stapel. Nur `accepted`: ein Vorschlag ist Arbeitsstand, kein Ist.
+   * `null` heißt „in dem Monat keine Zeile", nicht „null Euro".
+   */
+  ludwig: { m3: number | null; m2: number | null; m1: number | null; current: number };
+  /** Was der **DATEV**-Spiegel im laufenden Monat trägt. */
+  datevCurrent: number;
+  /**
+   * Ø der DATEV-Vormonate gegen den Ludwig-Wert des laufenden Monats.
+   * `m3`/`m2`/`m1`/`avg` sind damit DATEV, `current` ist Ludwig — die beiden
+   * Seiten der einen Frage „buchen wir den Monat wie sonst?".
+   */
+  vergleich: Vergleich;
+}
+
+/**
+ * Was der laufende Stapel je Konto **vorschlägt** (F197).
+ *
+ * Getrennt vom Ist-Saldo: `amount` summiert nur Sätze mit `status='proposed'`
+ * aus diesem Stapel, Soll positiv wie im Monatsvergleich.
+ */
+export interface BatchContribution {
+  accountNumber: string;
+  accountName: string | null;
+  accountingRole: string | null;
+  amount: number;
+}

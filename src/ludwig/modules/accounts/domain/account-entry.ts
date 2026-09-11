@@ -200,12 +200,40 @@ export interface AccountFactsVM {
    * Zahl; mit der anderen stünde dort eine größere, falsche.
    */
   ludwigOnlyCount: number | null;
+
+  // — 2026-09-11 ergänzt (F209, B5): die Stammdaten der Randspalte (Rang 6) —
+
+  /** `client_ledger_accounts.status`. */
+  status: "active" | "inactive";
+  /** Kontenrahmen des Wirtschaftsjahres (`skr03`/`skr04`) — hängt am Jahr, nicht am Konto (F64). */
+  accountFrameworkCode: string | null;
+  /** Nummer des SKR-Katalogeintrags, über `account_framework_entry_id`. */
+  skrBaseCode: string | null;
+  /** DATEV-Hauptfunktionsnummer, roh (`konten.md` R10) — 12 sperrt Buchungen (R18). */
+  accountFunction: number | null;
+  /** Fester Satz des Automatikkontos (`datev_tax_rate`, R9); `null` = kein Automatikkonto. */
+  automaticTaxRate: number | null;
+  /** Verrechnungskonto-Kategorie (R21), Achse `verrechnungskonto`; `null` = keines. */
+  clearingAccountType: string | null;
+  /** Der Geschäftspartner hinter einem Personenkonto — der Weg `?partner=`. */
+  businessPartnerId: string | null;
+  /** LLM-Profil: die Definition, ohne die Belegbegriffe. */
+  description: string | null;
+  /** LLM-Profil: die Belegbegriffe. */
+  documentTerms: string[];
+  /** Wann das Embedding zuletzt erzeugt wurde. */
+  embeddingCreatedAt: string | null;
+  /**
+   * Ludwig-Sätze, die exportiert und im Spiegel **nicht** wiedergefunden sind
+   * (Herkunft `exported`). Zählt wie der Filter `?origin=exported` (I12).
+   */
+  exportedNotFoundCount: number;
 }
 
 /**
  * Ein Monat auf dem Konto — die Balken des Verlaufs.
  *
- * Lag als `AccountMonthTotals` in `accounting-cases/infrastructure`; die
+ * Lag früher als eigener Typ in `accounting-cases/infrastructure`; die
  * Monatswerte gehören zum Konto, nicht zum Sachverhalt, und der Spiegel nimmt
  * aus `infrastructure/` nichts (L-95).
  */
@@ -214,6 +242,8 @@ export interface AccountMonth {
   month: number;
   debit: number;
   credit: number;
+  /** Bewegungen des Monats — aus derselben Vereinigung wie die Liste (F209, B1). */
+  count: number;
 }
 
 /**
@@ -238,6 +268,17 @@ export function accountFacts(input: {
   datevBalance?: number | null;
   ludwigOnlyAmount?: number | null;
   ludwigOnlyCount?: number | null;
+  status: "active" | "inactive";
+  accountFrameworkCode?: string | null;
+  skrBaseCode?: string | null;
+  accountFunction?: number | null;
+  automaticTaxRate?: number | null;
+  clearingAccountType?: string | null;
+  businessPartnerId?: string | null;
+  description?: string | null;
+  documentTerms?: readonly string[];
+  embeddingCreatedAt?: string | null;
+  exportedNotFoundCount?: number;
 }): AccountFactsVM {
   // Σ Soll und Σ Haben aus den Monatswerten, statt sie an jeder Aufrufstelle
   // erneut zu summieren (L-94, Rang 7 des Entitätsprofils).
@@ -260,6 +301,17 @@ export function accountFacts(input: {
     datevBalance: input.datevBalance ?? null,
     ludwigOnlyAmount: input.ludwigOnlyAmount ?? null,
     ludwigOnlyCount: input.ludwigOnlyCount ?? null,
+    status: input.status,
+    accountFrameworkCode: input.accountFrameworkCode ?? null,
+    skrBaseCode: input.skrBaseCode ?? null,
+    accountFunction: input.accountFunction ?? null,
+    automaticTaxRate: input.automaticTaxRate ?? null,
+    clearingAccountType: input.clearingAccountType ?? null,
+    businessPartnerId: input.businessPartnerId ?? null,
+    description: input.description ?? null,
+    documentTerms: [...(input.documentTerms ?? [])],
+    embeddingCreatedAt: input.embeddingCreatedAt ?? null,
+    exportedNotFoundCount: input.exportedNotFoundCount ?? 0,
   };
 }
 
@@ -278,10 +330,118 @@ export function accountFacts(input: {
  */
 export type AccountEntryOrigin = "datev" | "mirrored" | "exported" | "ludwig";
 
+/** Die vier Klassen als Wort — für Filter-Zusammenfassungen (F209). */
+export const ACCOUNT_ENTRY_ORIGIN_LABEL: Record<AccountEntryOrigin, string> = {
+  datev: "Nur in DATEV",
+  mirrored: "In DATEV bestätigt",
+  exported: "Exportiert, nicht wiedergefunden",
+  ludwig: "Nur in Ludwig",
+};
+
+/** Alle vier, in der Reihenfolge der Label-Map — zum Prüfen von URL-Werten. */
+export const ACCOUNT_ENTRY_ORIGINS = Object.keys(ACCOUNT_ENTRY_ORIGIN_LABEL) as AccountEntryOrigin[];
+
 export function accountEntryOrigin(entry: AccountEntry): AccountEntryOrigin {
   if (entry.source === "datev") {
     return entry.matchState?.startsWith("matched_") ? "mirrored" : "datev";
   }
   if (entry.datevMirrorEntryId) return "mirrored";
   return entry.exportedAt ? "exported" : "ludwig";
+}
+
+/**
+ * # Der Verlauf aus derselben Menge wie die Liste (F209, B1)
+ *
+ * Bis 2026-09-11 rechnete der Monatsverlauf in SQL nur über
+ * `client_journal_entry_line` — die Ludwig-Seite. Die Liste daneben ist die
+ * Vereinigung beider Seiten; das Diagramm widersprach damit der Kennzahl.
+ * Jetzt entsteht er aus genau den Einträgen, die die Liste zeigt.
+ *
+ * Immer zwölf Monate; ein Monat ohne Bewegung ist ein leerer Monat, kein
+ * fehlender. Einträge ohne Datum oder aus einem anderen Jahr zählen nicht.
+ */
+export function accountMonths(entries: readonly AccountEntry[], year: number): AccountMonth[] {
+  const months: AccountMonth[] = Array.from({ length: 12 }, (_, i) => ({
+    month: i + 1,
+    debit: 0,
+    credit: 0,
+    count: 0,
+  }));
+  const prefix = `${year}-`;
+  for (const e of entries) {
+    if (!e.postingDate?.startsWith(prefix)) continue;
+    const month = Number(e.postingDate.slice(5, 7));
+    const target = months[month - 1];
+    if (!target) continue;
+    target.debit += e.debitAmount;
+    target.credit += e.creditAmount;
+    target.count += 1;
+  }
+  return months;
+}
+
+/**
+ * Zahl und Betrag (Soll − Haben) je Herkunftsklasse — die **eine** Ableitung,
+ * aus der Kacheln, Mängel und der Filter `?origin=` zählen (I12). Alle vier
+ * Klassen sind immer da, auch mit null.
+ */
+export function accountOriginTotals(
+  entries: readonly AccountEntry[],
+): Record<AccountEntryOrigin, { count: number; amount: number }> {
+  const totals: Record<AccountEntryOrigin, { count: number; amount: number }> = {
+    datev: { count: 0, amount: 0 },
+    mirrored: { count: 0, amount: 0 },
+    exported: { count: 0, amount: 0 },
+    ludwig: { count: 0, amount: 0 },
+  };
+  for (const e of entries) {
+    const t = totals[accountEntryOrigin(e)];
+    t.count += 1;
+    t.amount += e.debitAmount - e.creditAmount;
+  }
+  return totals;
+}
+
+/**
+ * Das LLM-Profil liegt als ein Text vor: „<Definition> Belegbegriffe: <a>, <b>."
+ * Stand bis 2026-09-11 als lokale Funktion auf der Kontoseite.
+ */
+export function splitAccountDescription(text: string | null): {
+  description: string | null;
+  documentTerms: string[];
+} {
+  if (!text) return { description: null, documentTerms: [] };
+  const marker = "Belegbegriffe:";
+  const idx = text.indexOf(marker);
+  if (idx === -1) {
+    const description = text.trim();
+    return { description: description || null, documentTerms: [] };
+  }
+  const description = text.slice(0, idx).trim();
+  const documentTerms = text
+    .slice(idx + marker.length)
+    .replace(/\.$/, "")
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+  return { description: description || null, documentTerms };
+}
+
+/**
+ * Welche Seite eine Bewegungs-Id meint — für den **einen** Drawer-Parameter
+ * `?entry=` (F209, B2). Die Quelle steht nicht in der URL, der Server liest
+ * sie aus den Daten. Trifft die Id beide Tabellen, ist das ein Fehler und kein
+ * Fall zum Raten.
+ */
+export function entrySourceFromHits(
+  ludwigHit: boolean,
+  datevHit: boolean,
+  entryId: string,
+): AccountEntrySource | null {
+  if (ludwigHit && datevHit) {
+    throw new Error(`entry id ${entryId} matches a Ludwig and a DATEV entry`);
+  }
+  if (ludwigHit) return "ludwig";
+  if (datevHit) return "datev";
+  return null;
 }

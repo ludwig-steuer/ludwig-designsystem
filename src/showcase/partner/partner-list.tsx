@@ -6,6 +6,7 @@ import {
   PARTNER_ROLES,
 } from "@/ludwig/modules/business-partners/domain/business-partner";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
+import { MASTER_FIELDS } from "@/ui/v3/entities/account/fixtures";
 import type { AccountFactsVM } from "@/ui/v3/entities/account/Account";
 import { AccountDrawer } from "@/ui/v3/entities/account/AccountDrawer";
 import type { AccountEntry } from "@/ui/v3/entities/account/AccountEntries";
@@ -70,6 +71,7 @@ function accountFacts(p: PartnerListRow, number: string): { facts: AccountFactsV
   }));
   return {
     facts: {
+      ...MASTER_FIELDS,
       accountNumber: number,
       accountName: p.legalName,
       accountingRole: role,

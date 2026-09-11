@@ -444,6 +444,9 @@ export function parseCaseListTab(value: string | string[] | undefined): CaseList
  * ``null`` für die zwei Ansichten, die keine Sachverhaltsliste sind
  * (``offen``/``schliessen``).
  */
+/** Ein Such-Parameter ist erst dann eine Partner-Id, wenn er wie eine aussieht. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function caseFilterForListTab(
   tab: CaseListTab,
   raw: Record<string, string | string[] | undefined>,
@@ -455,6 +458,11 @@ export function caseFilterForListTab(
   const docMode = one(raw.belegnr);
   const q = one(raw.q)?.trim();
   const dispo = one(raw.dispo);
+  // `?partner=` öffnet den Drawer **und** filtert die Liste: der Klick auf den
+  // Gegenpart fragt „was liegt bei dem noch?" — eine ungefilterte Liste
+  // dahinter beantwortet eine andere Frage (0127). Nur eine echte UUID zählt;
+  // ein Rest-Parameter aus einer alten URL filtert sonst auf nichts.
+  const partner = one(raw.partner);
   const filter: CaseFilter = {
     fiscalYear,
     withoutRecurringRule: one(raw.regel) === "ohne" ? true : undefined,
@@ -464,6 +472,7 @@ export function caseFilterForListTab(
     documentNumberMode: (CASE_DOCUMENT_NUMBER_MODES as readonly string[]).includes(docMode ?? "")
       ? (docMode as CaseDocumentNumberMode)
       : undefined,
+    counterpartyPartnerId: partner && UUID_RE.test(partner) ? partner : undefined,
   };
   if ((CASE_DISPOSITION as readonly string[]).includes(dispo ?? "")) {
     filter.disposition = [dispo as CaseDisposition];
@@ -525,7 +534,15 @@ export function caseWorkloadListQuery(state: CaseStateFilter): string {
 }
 
 /** Die Parameter, die den Filterstand ausmachen — und nur die. */
-export const CASE_FILTER_PARAMS = ["q", "recurring", "dispo", "belegnr", "state", "regel"] as const;
+export const CASE_FILTER_PARAMS = [
+  "q",
+  "recurring",
+  "dispo",
+  "belegnr",
+  "state",
+  "regel",
+  "partner",
+] as const;
 
 /**
  * Hat der Nutzer am Filter gedreht? „Unverändert" heißt: keiner der

@@ -1,4 +1,3 @@
-import type { AccountStatus } from "@/ludwig/modules/accounts/domain/account";
 import type { AccountMonth } from "@/ludwig/modules/accounts/domain/account-entry";
 import type {
   BusinessPartnerDetail,
@@ -6,6 +5,7 @@ import type {
 } from "@/ludwig/modules/business-partners/domain/business-partner";
 import type { AccountFactsVM } from "@/ui/v3/entities/account/Account";
 import type { AccountEntry, AccountEntryOrigin } from "@/ui/v3/entities/account/AccountEntries";
+import { MASTER_FIELDS } from "@/ui/v3/entities/account/fixtures";
 
 import { partnerFixture } from "../partner/fixtures";
 
@@ -47,37 +47,10 @@ export const CLEARING_TYPES = [
 /** DATEV account function 12: the account is locked for postings (R18). */
 export const LOCKED_FUNCTION = 12;
 
-/**
- * What the side column and the details tab need and `AccountFactsVM` does not
- * carry yet — finding B5. The names are the ones agreed for the app spec
- * (ludwig-manager, 2026-09-10), so stories and spec say the same.
- */
-export interface AccountMaster {
-  status: AccountStatus;
-  accountFrameworkCode: string;
-  skrBaseCode: string | null;
-  accountFunction: number | null;
-  automaticTaxRate: number | null;
-  /** Axis `verrechnungskonto`. */
-  clearingAccountType: string | null;
-  businessPartnerId: string | null;
-  description: string | null;
-  documentTerms: string[];
-  embeddingCreatedAt: string | null;
-}
+/** The master data of the side column and the details tab (B5) — on `AccountFactsVM` since F209. */
+export type AccountMaster = Omit<typeof MASTER_FIELDS, "exportedNotFoundCount">;
 
-const MASTER: AccountMaster = {
-  status: "active",
-  accountFrameworkCode: "SKR04",
-  skrBaseCode: null,
-  accountFunction: null,
-  automaticTaxRate: null,
-  clearingAccountType: null,
-  businessPartnerId: null,
-  description: null,
-  documentTerms: [],
-  embeddingCreatedAt: null,
-};
+const MASTER: AccountMaster = MASTER_FIELDS;
 
 export const profile = (
   description: string,
@@ -159,6 +132,7 @@ export function contraFacts(number: string): AccountFactsVM | null {
   const a = KNOWN.find((k) => k.number === number);
   if (!a) return null;
   return {
+    ...MASTER_FIELDS,
     accountNumber: a.number,
     accountName: a.name,
     accountingRole: a.role,
@@ -303,7 +277,10 @@ export function scenario(input: ScenarioInput): AccountScenario {
     r2(list.reduce((total, e) => total + pick(e), 0));
   const ludwigOnly = entries.filter((e) => e.origin === "ludwig");
 
+  const master: AccountMaster = { ...MASTER, ...input.master };
   const facts: AccountFactsVM = {
+    ...master,
+    exportedNotFoundCount: entries.filter((e) => e.origin === "exported").length,
     accountNumber: input.number,
     accountName: input.name,
     accountingRole: input.role,
@@ -337,7 +314,7 @@ export function scenario(input: ScenarioInput): AccountScenario {
 
   return {
     facts,
-    master: { ...MASTER, ...input.master },
+    master,
     entries,
     months,
     pageSize: input.pageSize ?? 25,

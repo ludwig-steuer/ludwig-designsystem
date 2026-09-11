@@ -20,6 +20,7 @@ import { EntityIcon } from "../../Icons";
 import { DataTable } from "../../patterns/DataTable";
 import { EntityHeader } from "../../patterns/EntityHeader";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { MASTER_FIELDS } from "./fixtures";
 
 const meta: Meta<typeof LedgerAccountView> = {
   title: "v3/Entitäten/Konto/LedgerAccountView",
@@ -30,6 +31,7 @@ export default meta;
 type Story = StoryObj<typeof LedgerAccountView>;
 
 const FACTS: AccountFactsVM = {
+  ...MASTER_FIELDS,
   accountNumber: "4930",
   accountName: "Bürobedarf",
   accountingRole: "general_ledger",

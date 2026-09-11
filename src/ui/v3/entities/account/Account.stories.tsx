@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { HoverCard } from "../../primitives/Popover";
 import { Card, CardHead, HeadRow, Row, Table } from "../../primitives/Table";
 import { AccountCell, AccountFacts, type AccountFactsVM } from "./Account";
+import { MASTER_FIELDS } from "./fixtures";
 
 /**
  * Every story shows both exports one below the other: what fits into a
@@ -16,6 +17,7 @@ export default meta;
 type Story = StoryObj<typeof AccountFacts>;
 
 const BANK: AccountFactsVM = {
+  ...MASTER_FIELDS,
   accountNumber: "1210",
   accountName: "Commerzbank",
   accountingRole: "general_ledger",

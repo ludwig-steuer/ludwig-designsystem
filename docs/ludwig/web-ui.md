@@ -149,9 +149,13 @@ Der Rahmen dafür ist `UrlDrawer` (`@/ui/components`); wo es für die Entität
 schon einen einbindbaren Drawer gibt, nimmt man den statt Rahmen + Inhalt
 selbst zusammenzusetzen (Drawer-Katalog: `apps/web/AGENTS.md` §7, Klassen und Aufbau im Design-System-Repo, `docs/design-system.md`). Für Buchungen gibt es bewusst zwei Inhalte
 statt einer Misch-Ansicht: `DatevEntryDrawer` (was DATEV kennt) und
-`LudwigEntryDrawer` (was Ludwig gebucht hat); Konto-Detailseite:
-`?entry=` DATEV, `?buchung=` Ludwig. *Warum:* Mischen würde verwischen,
-welche Seite die Wahrheit trägt.
+`LudwigEntryDrawer` (was Ludwig gebucht hat). Die Konto-Detailseite öffnet
+beide über **einen** Parameter `?entry=<id>`: welche Seite die Id meint,
+bestimmt der Server aus den Daten (`resolveAccountEntrySource`, F209) und
+wählt danach den Inhalt — die zwei Inhalte bleiben getrennt, nur der
+Parameter ist einer. *Warum:* Mischen würde verwischen, welche Seite die
+Wahrheit trägt; zwei Parameter für eine Frage ließen den Aufrufer raten, was
+der Server ohnehin weiß.
 
 ### R10 — `platform_audit_events` ist die eine Admin-Log
 Jeder relevante Prozessschritt (Import, Export, Agent-Aktion, File-Op,
@@ -239,7 +243,8 @@ passieren muss (`computeBatchGates`) — der Gate-Text ist der Zeilen-Text.
 Schritt 1 und 8 stellen je Umsatz zwei Fragen: Sachverhalt, Buchungsvorschlag
 (F187) — in Schritt 1 ist eine offene Klärung ein zulässiger Zwischenstand
 (gelb), in Schritt 8 nicht (rot), denn freigegeben wird nur ein voll gebuchtes
-Bankkonto.
+Bankkonto. Schritt 8 stellt eine dritte Frage: freigegeben? Eine Auszugszeile,
+die nur einen Vorschlag trägt, ist dort ein Mangel (F201).
 Eine **Deckungslücke aus Gate 1a** (ein Datei-Import endet vor dem
 Periodenende) macht die Zeile „Kontoauszüge lückenlos" **gelb und
 quittierpflichtig**: Auszug nachliefern oder begründet quittieren, und die
@@ -248,11 +253,41 @@ den Gate-Feldern in Menschen-Sprache gebaut (`domain/deckungsluecke.ts`), für
 Schritt 1 und 8 derselbe Satz; **gerechnet wird nur im Gate**. *Warum:* der
 Agent läuft autonom und kann die Lücke nicht zurückspielen — entscheiden muss
 der Mensch (Owner 03.09.2026).
+**Schritt 4** („Geht die Bank auf?") zeigt die Gates 2a und 4d als
+aufklappbare Zeilen wie Schritt 1 und rechnet sie mit `forRelease` wie
+Schritt 8 — ein Vorschlag ohne Freigabe ist kein Gebucht (F201). Darunter der
+**Bankabgleich** je Zahlungskonto (`stapelabnahme/domain/bank-reconciliation.ts`):
+Saldo nach Übertragung gegen den Endsaldo des jüngsten Import-Batch, der im
+Zeitraum endet. Der Saldo nach Übertragung ist eine Brücke: DATEV laut Spiegel
+ab Wirtschaftsjahresbeginn, dazu die freigegebenen Zeilen jedes Ludwig-Stapels,
+den DATEV noch nicht hat (der aktuelle gesondert), und freigegebene Sätze ohne
+Stapel, die einzeln nicht im Spiegel stehen — Vorschläge zählen nie. Ein Stapel
+hat DATEV, sobald ein lebender Spiegel-Satz zu ihm gehört (ID-Kante oder
+`export_ref`); dann zählt der ganze Stapel nur über DATEV, nie nach Datum, weil
+DATEV und Ludwig denselben Monat parallel buchen. Die offenen Umsätze mit Grund erklären
+die Differenz, ein Rest heißt: Buchung ohne Auszugszeile, falscher Monat oder
+Auszug unvollständig. Der EB-Wert aus dem DATEV-Spiegel ist der Anker — ohne
+ihn ist ein stimmender Saldo gelb. *Warum:* Top Fahrrad 07-2026, 50,03 € Esso
+als Vorschlag ohne Freigabe, Schritt 4 meldete „sauber".
+
+| Bedingung (Vorrang von oben) | Stand | Text |
+|---|---|---|
+| keine Umsätze und keine Buchungen im Zeitraum | grau | in diesem Zeitraum nicht bebucht |
+| Bankkonto ohne Auszugssaldo | gelb | kein Auszugssaldo hinterlegt |
+| Kasse/PayPal ohne Auszug | grün | Saldo Buchhaltung, kein Auszug |
+| Differenz ≥ 0,005 € | rot | Differenz … € |
+| Differenz 0, kein EB-Wert im Spiegel | gelb | stimmt — ohne EB-Wert im Spiegel |
+| sonst | grün | stimmt mit dem Auszug überein |
+
 Was dem Mandanten **fehlt**, steht in Schritt 1 als fünfte Zeile „Fehlende
 Belege beim Mandanten": aufgeklappt die wartenden Sachverhalte, darunter der
 Knopf, der den Mail-Entwurf zur Nachforderung als Modal öffnet (F185). Sie ist
 Auskunft und Werkzeug, **kein Gate** — die Belegzeilen darüber listen
 vorhandene, unerledigte Belege, diese die fehlenden.
+Die Zeile „Belege ohne Buchung" zeigt zehn und führt in eine **Detailansicht**
+desselben Schritts (`?sicht=ohne-buchung`, die Seitenleiste bleibt): alle
+Belege als aufklappbare Tabelle, je Zeile „Zurück in die Bearbeitung" mit
+Einwand an den Agenten (belege.md R14d).
 Eigene **Oberflächen** hat sie sehr wohl: „kein zweiter Editor" heißt, dass der
 v2-Editor den alten ersetzt, nicht dass die Abnahme mit dem alten auskommen
 muss (F123 §0.2).
@@ -317,6 +352,14 @@ der Rückgabe geändert hat (neu · ersetzt · beantwortet → gebucht · neue F
 · neue Konventionen). Warum ein Punkt *unverändert* offen blieb, sagt das
 Playbook nicht — diese Zeile bleibt leer und sagt das auch.
 
+**Schritt 6** stellt neben den Ist-Saldo des laufenden Monats die Spalte
+„Dieser Stapel": die Summe der **Vorschläge dieses Stapels** je Konto
+(`getBatchContribution`, nur `status='proposed'`, Personenkonten wie sonst
+draußen). Sie ist Auskunft und zählt **nicht** in die Abweichung — der
+Vergleich misst Ist gegen Ist, sonst verglichen wir Äpfel mit Absichten. Ein
+Konto, das erst dieser Stapel bebucht, steht deshalb mit leerem Vergleich in
+der Liste, aber es steht da (F197).
+
 Was der Bestand nicht hergibt, bleibt **leer statt geraten**: kein
 Platzhalter-Kasten, keine erfundene Begründung, keine Kette, die es im Schema
 nicht gibt. Der Leerzustand sagt, was fehlen würde und warum. „Leer statt
@@ -377,19 +420,30 @@ jede verlangt eine andere Oberfläche.
 
 Die Aufteilung steht deshalb auf **zwei Ebenen mit je einer Frage** (F186):
 oben zwei Reiter **Wiederkehrende | Einzelfälle** (`?tab=wk|einzel`) — *welche
-Art von Fall?*; innen drei Sichten **Übersicht | Liste | Sachverhalt**
+Fälle?*; innen drei Sichten **Übersicht | Liste | Sachverhalt**
 (`?sicht=uebersicht|liste|fall`, Vorgabe `fall` ohne Parameter) — *wie sehe ich
 sie an?*. Bis F186 stand „Liste" auf **beiden** Ebenen und meinte zweierlei:
 ein Reiter neben den Arten und eine Sicht neben „Sachverhalt", mit zwei
 Tabellen über zwei verschiedene Vorräte. Ein `?tab=liste` aus einem Lesezeichen
 landet heute auf `?tab=einzel&sicht=liste` statt im Leeren.
 
-Die Reiter (Design `Buchungsreview.dc.html` → Screen 3):
+Die Reiter (Design `Buchungsreview.dc.html` → Screen 3) trennen nach der
+**Herkunft der Sätze**, nicht nach der Sachverhaltsart (F202,
+`domain/rule-booked.ts`): unter **Wiederkehrende** (`wk`) steht ein Fall nur,
+wenn **alle** seine Sätze im Stapel aus der Regel kommen (`origin =
+'recurring_rule'`); gemischt, von Hand korrigiert oder vom Agenten individuell
+gebucht heißt **Einzelfälle** (`einzel`) — auch für einen Dauersachverhalt. Ein
+Fall steht nie in beiden Reitern. *Warum:* bei 61015 standen 21 von 23
+„Wiederkehrenden" mit Agent-Sätzen in einer Tabelle, die für Regel-Haken gebaut
+war — ohne KI-Begründung und ohne die drei Sichten.
 
-- **Wiederkehrende** (`wk`) — Dauersachverhalte aus Regeln. Die Frage ist „ist
-  die Zeile wie im Vormonat?", also steht der Vormonatsvergleich als **Spalte**
-  in einer Tabelle mit Haken, aufklappbarer Zeile und **Sammelfreigabe** in der
-  Fußleiste. Wer 30 Mieten prüft, klickt nicht 30 Fälle durch.
+Beide Reiter sind **eine** Komponente (`Schritt3Einzel` mit `variant`), die
+Wörter unterscheiden sich, Sichten, Filter, Hotkeys und Aktionen nicht:
+
+- **Wiederkehrende** (`wk`) — die Frage ist „ist die Zeile wie im Vormonat?";
+  die Antwort steht im Aufklapper **rechts** in der Kontext-Zone „Regel &
+  Periode" (Modus, Vorlage-Betrag, Intervall, Periode, Vormonatsvergleich,
+  offene Klärung). Wer 30 Mieten prüft, hakt sie in der Übersicht gesammelt ab.
 - **Einzelfälle** (`einzel`) — ein Fall füllt den Bildschirm, aufgebaut in
   Zeilen (F181): oben Sachverhalt links, Gegenpartei rechts; dann **je
   Buchungssatz eine Zeile** mit dem `BuchungssatzEditor` samt Prüfpunkten links
@@ -414,8 +468,15 @@ Die Reiter (Design `Buchungsreview.dc.html` → Screen 3):
   statt eines geratenen.
 
 Die drei Sichten der Einzelfälle teilen sich **eine** Tabelle und dieselben
-Worte je Zeile — Nr. · Ampel · Datum · Gegenpartei · Buchung · Beleg · Betrag ·
-Stand:
+Worte je Zeile — Nr. · Datum · Gegenpartei · Buchung · KI-Prüfung · Beleg ·
+Betrag · Stand. Das Datum steht ohne Uhrzeit, die Buchung mit Kontonamen („4930
+Bürobedarf an 1200 Bank"). „KI-Prüfung" (`AiBookingNotesCell`) zeigt Urteil des
+Judge und Konfidenz mit Wort; ohne Urteil und Konfidenz bleibt sie leer. Jede
+Zeile klappt auf (`ui/ProposalFoldout.tsx`, für beide Reiter): links der Satz
+als kompakter Journal-Viewer (`JournalEntryCard`), darunter Begründung und
+Judge-Satz (`AiBookingNotesBody`, ohne zweiten Kopf) — oder ein Satz, **warum**
+es keine KI-Prüfung gibt (von Hand, Regel, Import, Storno, noch nicht geprüft);
+rechts, nur bei regelgebuchten Fällen, die Kontext-Zone „Regel & Periode":
 
 - **Übersicht** (`uebersicht`) — gruppiert nach **Satzart**, je Gruppe Kopf mit
   Anzahl und Summe, Auswahl und Sammelfreigabe. Wer 118 Sätze abnimmt, sieht
@@ -436,15 +497,16 @@ nachgereichter Januar-Beleg sich vorn einschieben und alle Nummern dahinter
 verschieben — eine Nummer, die man notieren oder am Telefon nennen kann, wäre
 das nicht.
 
-Geladen wird **je Reiter nur, was er zeigt**, und im Einzel-Reiter tief nur der
-eine sichtbare Fall (`?fall=`, `application/review-case.ts`). Die
-Wiederkehrenden kommen aus **vier** Abfragen für die ganze Tabelle
-(`application/wiederkehrende.ts`), nicht aus acht je Zeile.
+Geladen wird **je Reiter nur, was er zeigt**, und tief nur der eine sichtbare
+Fall (`?fall=`, `application/review-case.ts`). Die Kontext-Zone der
+Wiederkehrenden kommt aus **vier** Abfragen für den ganzen Reiter
+(`application/rule-context.ts`), nicht aus acht je Zeile.
 
 Der Vormonatsvergleich ist **nicht** die Drei-Monats-Engine aus Schritt 6
 (`domain/vergleich.ts`), sondern `domain/vormonat.ts`: ein Dauersachverhalt hat
 genau einen Bezugswert, und eine Engine, die unter zwei Vormonaten schweigt,
-beantwortet hier die falsche Frage.
+beantwortet hier die falsche Frage. Er steht als Zeile „Vormonat" in der
+Kontext-Zone des Aufklappers.
 
 Was das Design zeigt und der Bestand nicht hergibt, fehlt **sichtbar** statt
 geraten: einen zweiten Buchungssatz je Ereignis legt der Editor nicht an

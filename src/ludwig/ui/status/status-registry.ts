@@ -1320,6 +1320,11 @@ const VERRECHNUNGSKONTO: Record<string, StatusDescriptor> = {
     kind: "warning",
     description:
       "Umbuchung zwischen zwei eigenen Geldkonten. Muss auf null stehen. Trotz DATEV-Kontenfunktion 10 KEIN Zahlungskonto — niemand zahlt „per Geldtransit\".",
+  },  central_settlement: {
+    label: "Zentralregulierung",
+    kind: "warning",
+    description:
+      "Zentralregulierer (DZB, ZEG …): die Lieferantenrechnungen laufen einzeln auf die Kreditoren, die Sammellastschrift geht gegen dieses Konto, die Abrechnung löst es je Position auf. Muss je Abrechnung auf null stehen. Kein Zahlungskonto.",
   },
 };
 

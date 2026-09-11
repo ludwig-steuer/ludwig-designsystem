@@ -10,6 +10,7 @@ import { AccountCell } from "./Account";
 import type { AccountFactsVM } from "./Account";
 import { AccountDrawer } from "./AccountDrawer";
 import type { AccountEntry } from "./AccountEntries";
+import { MASTER_FIELDS } from "./fixtures";
 
 const meta: Meta<typeof AccountDrawer> = {
   title: "v3/Entitäten/Konto/AccountDrawer",
@@ -19,6 +20,7 @@ export default meta;
 type Story = StoryObj<typeof AccountDrawer>;
 
 const FACTS: AccountFactsVM = {
+  ...MASTER_FIELDS,
   accountNumber: "1210",
   accountName: "Commerzbank",
   accountingRole: "general_ledger",

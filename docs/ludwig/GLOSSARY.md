@@ -224,7 +224,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Buchhaltung abgeschlossen bis`
 - Definition: Date (inclusive) up to which the client's bookkeeping is considered closed. Stored as a **date**, not a period, so a later interval change does not distort the state. Initially filled in onboarding from the end of the last imported DATEV posting batch (max `posting_date` in the mirror); advanced by the DATEV export when the user checks "Intervall abschließen".
 - Data type: column (`ludwig.platform_clients.booking_closed_until date`)
-- Notes: `start_agent_run` derives the run period from it (persisted as `client_agent_runs.period_from/period_to`) and `list_open_transactions(from)` hides bank transactions before the period — closed intervals are no longer agent work. No upper bound: newer transactions (beyond `period_to`) stay bookable; `period_to` is only the close target for the export.
+- Notes: `start_agent_run` derives the run period from it (persisted as `client_agent_runs.period_from/period_to`) and `list_open_transactions(from)` hides bank transactions before the period — closed intervals are no longer agent work. `period_to` is the close target and the upper bound of the run: `list_docs(open)`, `list_open_transactions` and Gate 2a end there (`docsAfterPeriod` / `transactionsAfterPeriod` count the rest); later documents and transactions belong to the next run.
 
 ### Posting text (Buchungstext)
 
@@ -258,6 +258,14 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
   Belegfeld 1 (F33). Der Buchungs-Judge darf genau diese Felder direkt
   korrigieren (Kriterium B8) — Konto, Betrag und Steuerschlüssel bleiben ihm
   verwehrt.
+
+### Mirror entry line (Spiegel-Zeile)
+
+- English: `mirror entry line`
+- German: `Spiegel-Zeile`
+- Definition: Ein Leg (Konto, Soll/Haben, Betrag, BU-Schlüssel, Steuersatz, Gegenkonto) eines DATEV-Spiegel-Satzes als eigene Zeile. 1:1-Entfaltung des jsonb `client_datev_mirror_entries.lines`, gepflegt per Trigger; `line_no` 1-basiert in Array-Reihenfolge.
+- Table: `ludwig.client_datev_mirror_entry_lines` (F208, Migration 20260911120000)
+- Notes: `lines` bleibt der Schreib-Vertrag, die Tabelle ist die Leseform für Fragen mit Kontofilter (`docs/topics/datev.md` R2).
 
 ### Accounting case (Sachverhalt)
 
@@ -465,10 +473,11 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - English: `clearing account` / `clearing account type`
 - German: `Verrechnungskonto` / `Verrechnungskonto-Kategorie`
 - Table: `ludwig.client_ledger_accounts.clearing_account_type` (F103, Migration 20260826100000); Vokabular in `apps/web/src/core/accounting/clearing-account.ts`
-- Definition: Ein Sachkonto, das nicht Aufwand, Erlös, Anlage oder Zahlungsmittel ist, sondern eine Bewegung **zwischenparkt**, bis eine Gegenbewegung sie auflöst. Kennzeichen: wiederkehrender Ausgleich, Zielsaldo null. Acht Kategorien: `credit_card` · `employee_expense` · `shareholder` · `payroll` · `payroll_liability` · `payment_gateway` · `suspense` · `money_transit`. NULL = kein Verrechnungskonto.
+- Definition: Ein Sachkonto, das nicht Aufwand, Erlös, Anlage oder Zahlungsmittel ist, sondern eine Bewegung **zwischenparkt**, bis eine Gegenbewegung sie auflöst. Kennzeichen: wiederkehrender Ausgleich, Zielsaldo null. Neun Kategorien: `credit_card` · `employee_expense` · `shareholder` · `payroll` · `payroll_liability` · `payment_gateway` · `suspense` · `money_transit` · `central_settlement`. NULL = kein Verrechnungskonto.
 - Data type: Enum-Spalte am jahresgebundenen Sachkonto (CHECK), NULL erlaubt.
 - Notes:
-  - **Zwei abgeleitete Achsen, nicht je Konto gepflegt**: *Zielsaldo null* (`payroll`, `suspense`, `money_transit` dauerhaft, `credit_card`/`employee_expense`/`payment_gateway` je Abrechnung) steuert die Verprobung im Buchungslauf; `shareholder` und `payroll_liability` tragen bis zur Zahlung zu Recht einen Saldo und bleiben draußen. *Zahlungsfähig* (`credit_card`, `employee_expense`, `payment_gateway`) entscheidet, ob ein `client_payment_accounts`-Eintrag entstehen darf.
+  - **Zwei abgeleitete Achsen, nicht je Konto gepflegt**: *Zielsaldo null* (`payroll`, `suspense`, `money_transit` dauerhaft, `credit_card`/`employee_expense`/`payment_gateway`/`central_settlement` je Abrechnung) steuert die Verprobung im Buchungslauf; `shareholder` und `payroll_liability` tragen bis zur Zahlung zu Recht einen Saldo und bleiben draußen. *Zahlungsfähig* (`credit_card`, `employee_expense`, `payment_gateway`) entscheidet, ob ein `client_payment_accounts`-Eintrag entstehen darf.
+  - **`central_settlement` = Zentralregulierer** (DZB, ZEG, F206): die Lieferantenrechnungen stehen einzeln auf den Kreditoren, die Sammellastschrift geht gegen das Konto, die Abrechnung löst es je Position auf. Kein Zahlungskonto; ein Saldo ist in der Abnahme ein Mangel, kein Hinweis.
   - **Die Kategorie schlägt die DATEV-Kontenfunktion in beide Richtungen**: `1360 Geldtransit` wird trotz Kontenfunktion 10 kein Zahlungskonto, `1617 Corporate Card` wird trotz Kontenfunktion 13 eines.
   - **Vorgeschlagen, vom Menschen bestätigt, nie vom Agenten gesetzt.** Einziger Schreibpfad: `confirmClearingAccounts`; Einstiege sind das Onboarding-Review und der Tab „Verrechnungskonten" in den Mandanteneinstellungen. Der Agent liest sie über `list_clearing_accounts`.
   - **Jahresgebunden** wie der Kontenplan (F64): beim Anlegen eines neuen WJ übernimmt der Konten-Upsert die Kategorie aus dem Vorjahr, wo das Zieljahr noch keine trägt — eine Übernahme, keine Bestätigung.
@@ -558,6 +567,14 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Definition: Protokoll-Zeile eines Bank-Transaktions-Imports (CSV/Qonto): Konto, Quelle, Datei/Label, Anzahl eingefügter Zeilen, Auslöser. Transaktionen referenzieren ihren Batch.
 - Data type: `ludwig.client_bank_import_batches`; FK `client_bank_transactions.import_batch_id`.
 - Notes: Muster-Zwilling von `client_datev_export_batches` (Export-Seite). Ersetzt seit 2026-07-11 den früheren FK `import_audit_event_id` auf `platform_audit_events` — das Audit-Log ist Seitenkanal, kein Datenanker, und bleibt dadurch archivierbar/purgebar. Der Import schreibt weiterhin zusätzlich ein Audit-Event (ohne FK).
+
+### Bank reconciliation (Bankabgleich)
+
+- English: `bank reconciliation`
+- German: `Bankabgleich`
+- Definition: Je Zahlungskonto der Saldo nach Übertragung — DATEV laut Spiegel plus die freigegebenen Ludwig-Sätze, die DATEV noch nicht hat, ab Wirtschaftsjahresbeginn bis Periodenende — gegen den Endsaldo des Auszugs (jüngster Import-Batch, der im Zeitraum endet). Die Umsätze ohne freigegebene Buchung erklären die Differenz; was übrig bleibt, erklärt kein offener Umsatz.
+- Data type: abgeleitet, nicht persistiert — Lese-Pfad `loadPaymentAccountReconciliation` (`bank-transactions`), Bewertung `reconcileBankAccounts` in `apps/web/src/modules/stapelabnahme/domain/bank-reconciliation.ts`.
+- Notes: Gezeigt in Schritt 4 der Abnahme (`docs/topics/web-ui.md` R16). Der EB-Wert aus dem DATEV-Spiegel ist der Anker; fehlt er, ist ein stimmender Saldo nur gelb. **Saldo nach Übertragung** (F205): eine Brücke — DATEV laut Spiegel, dazu je Ludwig-Stapel, den DATEV noch nicht hat, seine freigegebenen Zeilen (ganz oder gar nicht: ein lebender Spiegel-Satz über ID-Kante oder `export_ref` heißt, der Stapel ist da), dazu freigegebene Sätze ohne Stapel, die einzeln nicht im Spiegel stehen. Introduced 2026-09-10 (F204).
 
 ### Agent work queue
 
@@ -1779,9 +1796,9 @@ The project rule is English names for all code, schemas, and columns (see decisi
   - **Wer dran ist, IST der Zustand**: `agent` (beim Agenten — freigegeben) → `prepared` (vorbereitet, wartet auf Freigabe) → `review` (Kanzlei prüft) → `ready` (freigegeben, geschnitten) → `exporting` → `inspection` → `confirmed` (DATEV quittiert) → `mirrored` (im Spiegel wiedergefunden, Nachlese offen) → `closed`. Daneben `failed` (human-hold) und `cancelled` (nur Bestand ohne Zyklus).
   - **Freigabe an den Agenten** (`release to agent`, F177): das fachliche Signal „Belege vollständig", das einen Zyklus von `prepared` auf `agent` hebt — Knopf im Beleg-Eingang oder `POST /api/intake/v1/clients/{clientId}/release`, beide über `releaseBatchesToAgent`. Ein Mensch bzw. das einspielende Werkzeug gibt es, nie der Agent (kein MCP-Tool); freigegeben wird **pro Mandant**, also alles, was `prepared` ist. Ohne Freigabe steht der Zyklus nicht in der Agent-Queue: er sammelt noch Belege. Nach jedem Durchgang fällt er auf `prepared` zurück und braucht ein neues Signal.
   - **Zwei Arten** (`kind`, F163): `regular` = Ludwig bearbeitet den Zeitraum; `client_batch` = ein vom Mandanten gelieferter EXTF-Stapel (*Mandantenstapel*), der nur dessen Sätze trägt. Er steht **neben** dem offenen regulären, geht in der Agent-Queue vor Nachtrag und regulärem Stapel durch, wird ohne Schnitt freigegeben und schreibt `booking_closed_until` nicht fort.
-  - **Je Mandant genau ein offener regulärer Zyklus**, je Zeitraum genau ein offener — beide Eindeutigkeiten gelten nur für `kind='regular'`. Ein zweiter Zyklus für einen schon freigegebenen Zeitraum ist ein **Nachtrag** (`supplements_batch_id`): steht in der Agent-Queue vor dem regulären und schreibt `booking_closed_until` nicht fort.
+  - **Je Mandant genau ein offener regulärer Zyklus**, je Zeitraum genau ein offener — beide Eindeutigkeiten gelten nur für `kind='regular'`. Ein zweiter Zyklus für einen schon freigegebenen Zeitraum ist ein **Nachtrag** (`supplements_batch_id`): steht in der Agent-Queue vor dem regulären und schreibt `booking_closed_until` nicht fort. Die Freigabe legt ihn für offene Vorschläge automatisch an (F200, `prepared`).
   - **CSV** (`runDatevExport` → `markBatchExported`) bleibt der Altweg: EXTF-Datei-Download, `state='confirmed'`, `exported_at` sofort gesetzt — kein Zyklus, nur Transport.
-  - **Bridge** (`createExportvorgang`): die Freigabe claimt die `accepted`-Sätze des Zyklus und **schneidet** den Rest (verliert den Stempel, fällt dem nächsten Zyklus zu), setzt `ready`; die on-prem Bridge pusht per Polling und stempelt `exported_at` erst nach der DATEV-Quittung (`applyDatevResult`, `confirmed`).
+  - **Bridge** (`createExportvorgang`): die Freigabe claimt die `accepted`-Sätze mit dem Stempel des Stapels (nie einen Zeitraum, F199) und setzt `ready` — **ohne Schnitt**: der Stempel bleibt, offene Vorschläge gehen in einen automatisch angelegten Nachtrag (F200); die on-prem Bridge pusht per Polling und stempelt `exported_at` erst nach der DATEV-Quittung (`applyDatevResult`, `confirmed`).
 - Data type: table `ludwig.client_datev_export_batches` (`stapelnummer`, `description`, `kind ∈ regular|client_batch`, `state ∈ agent|prepared|review|ready|exporting|inspection|confirmed|mirrored|closed|failed|cancelled`, `period_from/to`, `entry_count`, `supplements_batch_id`, `datev_sequence_id`); Stapelnummer-Vergabe geteilt via `nextStapelnummer(tx, clientId, year)`. Status-Achse `zyklus_stapel` in der Registry.
 - Example: Der Zyklus `2026-0007` / `08-2026-Ludwig` steht auf `review`; die Kanzlei gibt ihn zurück an den Agenten, der einen zweiten Durchgang darin fährt.
 - **Nachzügler / carry-over entries**: Buchungen, die **vor** dem gewählten Stapel-Zeitraum liegen und noch keinem Stapel zugeordnet sind — typisch die Rechnung, die erst nach dem Monatsexport hereinkam und nachgebucht wurde. Sie gehen standardmäßig mit (`includeEarlierUnbatched`, Wizard-Schritt 1, default an, mit Zähler + separater Auflistung in der Vorschau), weil sie sonst bis zum nächsten Export desselben Alt-Zeitraums liegen bleiben — für die Umsatzsteuer-Meldung müssen sie raus. Der Stapel-**Beginn** wird dafür auf das älteste Nachzügler-Datum vorgezogen (Dateiname, `period_from`, EXTF-Header, DATEV-`date_from` ziehen mit); der gewählte Zeitraum bleibt im Audit als `requestedFrom` + `carryOverCount`. Grenze: nur dasselbe Wirtschaftsjahr (`carryOverRange`) — ein EXTF-Stapel umfasst genau eines.

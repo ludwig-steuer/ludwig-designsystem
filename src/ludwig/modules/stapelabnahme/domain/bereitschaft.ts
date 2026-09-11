@@ -16,6 +16,10 @@
  * Deckungslücken kommen über `deckungsluecke.ts` in Worte (F141) — derselbe
  * Satz, den Schritt 8 zeigt.
  *
+ * Hinter der Gesamtzeile stehen die Belege, die **nach** dem Zeitraum datiert
+ * sind (F203). Gate 3f liefert sie nicht — für diesen Stapel zählen sie nicht,
+ * deshalb gelb, nie rot. Gehört einer doch hinein, ist sein Belegdatum falsch.
+ *
  * Die letzte Zeile kommt nicht aus einem Gate: Belege, die **ohne Buchung**
  * erledigt wurden. Für die Gates sind sie fertig — genau deshalb sieht sie
  * sonst niemand mehr, und genau deshalb stehen sie hier (gelb, nie rot).
@@ -52,6 +56,7 @@ export interface BereitschaftsZeile {
   key:
     | "belege_periode"
     | "belege_alle"
+    | "belege_nach_zeitraum"
     | "auszuege"
     | "transactions_case"
     | "transactions_proposal"
@@ -201,6 +206,8 @@ export function bereitschaftsZeilen(
     inClarification: 0,
     rows: [],
   },
+  /** Offene Belege nach dem Periodenende (`application/docs-after-period.ts`, F203). */
+  afterPeriod: { punkte: BereitschaftsPunkt[]; total: number } = { punkte: [], total: 0 },
 ): BereitschaftsZeile[] {
   const belege = gate3f.open.map(belegPunkt);
   // Der Gate-Zähler ist ungedeckelt, die Liste nicht. Die Aufteilung kann
@@ -241,6 +248,16 @@ export function bereitschaftsZeilen(
       leerText: "Jeder Beleg bis zum Ende des Zeitraums ist abgeschlossen.",
       punkte: belege,
       nichtGelistet,
+    },
+    {
+      key: "belege_nach_zeitraum",
+      label: "Belege nach dem Zeitraum",
+      // Nie rot: Gate 3f zählt sie nicht, sie gehören dem nächsten Lauf.
+      stand: afterPeriod.total > 0 ? "hinweis" : "ok",
+      standText: afterPeriod.total === 0 ? "keine" : `${afterPeriod.total} später datiert`,
+      leerText: "Kein offener Beleg ist nach dem Ende des Zeitraums datiert.",
+      punkte: afterPeriod.punkte,
+      nichtGelistet: Math.max(0, afterPeriod.total - afterPeriod.punkte.length),
     },
     {
       key: "auszuege",
