@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **analysiert** |
+| Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen 63a2c95); zwei Nacharbeiten und die Nachzählung der App eingearbeitet, siehe „Prüfung" |
 | GLOSSARY | `### Payment account`, `### Statement expectation (Auszugserwartung)`, `### Payment account retirement` (Zahlungsweg-Abschaltung) — Ordner `entities/payment-account/`; Verrechnungskonto-Kategorie bleibt im Profil `account` |
 | Tabelle | `ludwig.client_payment_accounts` — „Eigene Bank-/Kassen-/Kreditkartenkonten des Mandanten mit IBAN" (Tabellenkommentar). Keine Subtypen; `kind` ist „nur UI-Kategorisierung (IBAN-Feld, Icon), nicht Routing-Trigger" (GLOSSARY) |
 | Typen | `bank-transactions/domain/payment-account-options.ts` — `PaymentAccountFacts`, `PaymentAccountOption`, `isPaymentAccountInUse()`, `toPaymentAccountOptions()`. **Nicht im Spiegel:** die Wortliste der Art (`core/accounting/payment-account-kind.ts`) → L-312; `PaymentAccountWithStats` (`bank-transactions/infrastructure/bank-transactions-queries.ts:230`) → L-314 |
@@ -40,7 +40,7 @@ welches eine Zahlungsart automatisch bekommt und welches abgeschaltet wird.
 ```mermaid
 erDiagram
   CLIENT ||--o{ PAYMENT_ACCOUNT : "p50 25 · max 43 · in Gebrauch 4"
-  LEDGER_ACCOUNT ||--o{ PAYMENT_ACCOUNT : "Sachkonto · 100 % · 38 bebucht"
+  LEDGER_ACCOUNT ||--o{ PAYMENT_ACCOUNT : "Sachkonto · 100 % · 25 bebucht"
   EXTERNAL_INTEGRATION |o--o{ PAYMENT_ACCOUNT : "0 %"
   PAYMENT_ACCOUNT ||--o{ BANK_TRANSACTION : "10 Konten · max 952"
   PAYMENT_ACCOUNT ||--o{ BANK_IMPORT_BATCH : "16 an 10 Konten"
@@ -53,9 +53,9 @@ erDiagram
 | Datenpunkt | Quelle | Rolle | Füllgrad | heute in | änderbar | Rang | ab Form | Beleg |
 |---|---|---|---|---|---|---|---|---|
 | Name (`display_name`) | Spalte | Identität | 100 % · p50 18 · max 40 Zeichen | `banks/page.tsx`, `bankkonten/page.tsx`; im Set `PaymentAccountField`, `SourceDocumentFacts` | Nutzer | 1 | XS | Füllgrad · heute in |
-| Art (`kind`) | Spalte | Identität (Art) | 100 % — `bank` 133 · `employee_clearing` 22 · `cash` 21 · `credit_card` 16 · `paypal` 3 · `other` 0 | `banks/page.tsx`, `bankkonten/page.tsx` (lokale Wörter) | Nutzer | 2 | XS (Zeichen), S (Wort) | Füllgrad · GLOSSARY; Wortliste nicht im Spiegel und zweimal lokal kopiert (L-312) |
+| Art (`kind`) | Spalte | Identität (Art) | 100 % — `bank` 133 · `employee_clearing` 22 · `cash` 21 · `credit_card` 16 · `paypal` 3 · `other` 0 | `PaymentAccountForm` (Wortliste aus `core/`), `PaymentChannelActivitySection` (abweichende Kopie), `banks/page.tsx:96` (roher Code im Badge) | Nutzer | 2 | XS (Zeichen), S (Wort) | Füllgrad · GLOSSARY; Wortliste nicht im Spiegel, eine abweichende Kopie (L-312) |
 | Kennung (IBAN maskiert · Kartenkennung `external_account_id`) | Spalten | Identität | 6 % · 7 % — Bank 12 von 133, Kreditkarte 13 von 16 | `banks/page.tsx`, `bankkonten/page.tsx`; im Set IBAN im `title` (`SourceDocumentFacts`) | Nutzer | 3 | S | Füllgrad; fehlt sie, heißt das „nur Sachkonto, kein Auszugskanal" (Roadmap) |
-| Sachkonto (`fy_ledger_account_id`) | Eltern | Kontext | 100 % · 38 davon bebucht | `banks/page.tsx` (`ledgerAccountNumber`/`Name`), `bankkonten/page.tsx` | Nutzer | 4 | S | Füllgrad · heute in |
+| Sachkonto (`fy_ledger_account_id`) | Eltern | Kontext | 100 % · 25 davon bebucht (Buchungszeilen) | `banks/page.tsx` (`ledgerAccountNumber`/`Name`), `bankkonten/page.tsx` | Nutzer | 4 | S | Füllgrad · heute in |
 | In Gebrauch (`isPaymentAccountInUse()`) | abgeleitet: erwartet Auszüge ∨ Bankzeilen ∨ Auto-Zuordnung | Zustand | 23 von 195 | im Set `PaymentAccountField` (geführt / weitere) | Server | 5 | S | Domäne · Staging |
 | Auszugserwartung (`expects_statements` · `expects_statements_manual`) | Spalte · Spalte | Zustand (`kontoauszug_erwartung`) | 4 erwartet (3 von Hand, 1 abgeleitet), 3 „keine (Hand)" | `bankkonten/page.tsx` (`StatementExpectationCell`) | Server · Nutzer (Hand) | 6 | S | Füllgrad · GLOSSARY (Gate 1a) |
 | Bewegung im Jahr (Zu-/Abfluss, Netto, Anzahl, erste/letzte) | abgeleitet aus den Bankzeilen (`PaymentAccountWithStats`) | Maß | an 10 Konten | `banks/page.tsx` (`txInflow`, `txOutflow`, `txNet`, `txCount`, `minDate`, `maxDate`) | Server | 7 | S | heute in; VM in der Infrastruktur (L-314) |
@@ -87,11 +87,11 @@ Freitext-Grenzen: Name max 40 — nie gekürzt.
 
 | Komponente | Form | zeigt | fehlt | zu viel |
 |---|---|---|---|---|
-| `[year]/banks/page.tsx` (180 Z.) | Liste, Tabelle inline | Name, Art, IBAN, Sachkonto, Anbindung, Zu-/Abfluss, Netto, Anzahl, erste/letzte Bewegung | Auszugserwartung, offene Zahlungen je Konto | — |
-| `configuration/bankkonten/page.tsx` (372 Z.) | Konfiguration, Zellen inline (`StatementExpectationCell`, `AutoAssignOverview`, `IntegrationCell`) | Name, Art, IBAN, Sachkonto, Auszugserwartung, Aktivitätsfenster, Anbindung, Auto-Zuordnung mit Kanal-Lücken | — | **eigene Wortlisten** für Art (Z. 205, „Kredit-/EC-Karte") und Zahlungsart (Z. 207) |
+| `[year]/banks/page.tsx` (180 Z.) | Liste, Tabelle inline | Name, Art, IBAN, Sachkonto, Anbindung, Zu-/Abfluss, Netto, Anzahl, erste/letzte Bewegung | Auszugserwartung, offene Zahlungen je Konto | die Art als roher Code im Badge (Z. 96) |
+| `configuration/bankkonten/page.tsx` (372 Z.) | Konfiguration, Zellen inline (`StatementExpectationCell`, `AutoAssignOverview`, `IntegrationCell`) | Name, Art, IBAN, Sachkonto, Auszugserwartung, Aktivitätsfenster, Anbindung, Auto-Zuordnung mit Kanal-Lücken | — | eine eigene Wortliste der **Zahlungsart** (`PAYMENT_METHOD_LABEL`, Z. 203–209, „Kredit-/EC-Karte") und ihr Wertebereich als Literal (Z. 211) — L-313 |
 | `PaymentAccountForm` (313 Z.) · `PaymentAccountIbanForm` (nicht gemountet) · `PaymentAccountIntegrationLink` | Editor | die änderbaren Felder | — | zwei Formulare für eine Entität |
-| `PaymentChannelActivitySection` (164 Z.) | Abschalt-Vorschläge | letzte Bewegung, Vorschlag, Befristung | — | eine dritte Wortliste der Art (Z. 14) |
-| Kopf von `KontoauszugView` (631 Z.) | Kopf | Kontoname, Nummer, Zeitraum (Seitenprofil `kontoauszug` Rang 1) | — | — |
+| `PaymentChannelActivitySection` (164 Z.) | Abschalt-Vorschläge | letzte Bewegung, Vorschlag, Befristung | — | eine abweichende Kopie der Kontoart-Wörter (Z. 11: „PayPal" statt „PayPal / Zahlungsdienstleister", „Sonstige", ohne `employee_clearing`) — L-312 |
+| Kontoauszugsseite `banks/[accountId]/page.tsx` (264 Z.) | Kopf + Liste | Kopf über `PageHeader` des Sets (Z. 215), die Positionen über `BankTransactionList` des Sets (Z. 241); `kontoauszug-presentation.tsx` (178 Z.) sind Helfer | — | — |
 
 **Aus der Rückfrage** (Manager, 2026-09-11) — die Anwendungsfälle der App und
 wo sie hier stehen: (a) `banks/page.tsx` → `PaymentAccountList`; (b) die
@@ -102,9 +102,10 @@ Abschalt-Vorschläge) → `PaymentAccountSettingsList` + `PaymentAccountEditor`;
 angegeben, führender Zustand „Angabe nötig" (L-266/L-268, F213) →
 `PaymentAccountField` + `PaymentAccountCell` in der Mängel-Box; (e)
 Regel-Editor und `RecurringRuleFacts` → `PaymentAccountCell`; (f) **die
-Stapelabnahme je Zahlungskonto** — Schritt 1 (Mengengerüst) und Schritt 4
-(Bankabgleich, Gates mit `forRelease` als aufklappbare Zeilen, F204) — eine
-Liste „Konten des Stapels", die dieser Schnitt nicht nannte → 0168; (g) das
+Stapelabnahme je Zahlungskonto** — Schritt 4 (Bankabgleich, Gates mit
+`forRelease` als aufklappbare Zeilen, F204; `Schritt4.tsx:228`); Schritt 1
+(Mengengerüst) listet heute nicht je Konto — eine Liste „Konten des Stapels",
+die dieser Schnitt nicht nannte → 0168; (g) das
 Onboarding legt Zahlungskonten aus DATEV an (zwei Schreiber per UPSERT) —
 keine Oberfläche; (h) der Guard „Zahlungskonto-Bindung" (Kontonummer ↔
 Zahlungskonto) — nur Server.
@@ -120,13 +121,13 @@ Bauen, gehört zu 0134), `PeriodGrid` mit Story `StatementCoverage` (0162),
 
 | Liste | Job | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
 |---|---|---|---|---|---|---|---|---|---|
-| `PaymentAccountList` „Konten mit Bewegung" | Wenn **die Sachbearbeiterin die Woche beginnt**, will sie **sehen, welches Konto Bewegung hat und wo Zahlungen ohne Sachverhalt liegen**, damit **sie weiß, welchen Auszug sie öffnen muss** | Konten in Gebrauch mit Bewegung im Jahr oder Auszugserwartung | Bewegung absteigend (**Annahme** zur heutigen Reihenfolge) | 1–7 + offene Zahlungen | keine | keine | „Kein Konto hat in diesem Jahr Bewegung — Auszug importieren." | 4 je Mandant → keine Pagination, kein Filter | Staging · `banks/page.tsx` |
+| `PaymentAccountList` „Konten mit Bewegung" | Wenn **die Sachbearbeiterin die Woche beginnt**, will sie **sehen, welches Konto Bewegung hat und wo Zahlungen ohne Sachverhalt liegen**, damit **sie weiß, welchen Auszug sie öffnen muss** | Konten in Gebrauch mit Bewegung im Jahr oder Auszugserwartung | heute `auto_assign_payment_method nulls last, kind, display_name` (`bank-transactions-queries.ts:389`), Spalten sortierbar — **Entscheidung:** Bewegung absteigend, weil der Job fragt, wo Bewegung ist | 1–7 + offene Zahlungen | keine | keine | „Kein Konto hat in diesem Jahr Bewegung — Auszug importieren." | 4 je Mandant → keine Pagination, kein Filter | Staging · `banks/page.tsx` |
 | `PaymentAccountSettingsList` „Bankkonten & Kasse konfigurieren" | Wenn **ein Mandant eingerichtet wird**, will **die Kanzlei festlegen, welche Konten Auszüge liefern, welches Konto welche Zahlungsart bekommt und welche abgeschaltet werden**, damit **der Buchungslauf nur für geführte Konten Auszüge fordert** | alle Zahlungskonten des Mandanten, geführte zuerst (Abschnitte „in Gebrauch" / „weitere") | Auto-Zuordnung, Art, Name (Reihenfolge der Query) | 1–4, 6, 8, 9, 12 | in Gebrauch | Abschaltung bestätigen (Vorschläge mit Häkchen) | „Keine Zahlungskonten — sie entstehen mit dem DATEV-Abgleich." | 25 · 43 je Mandant → Abschnitte, keine Pagination | Staging · `bankkonten/page.tsx`, `PaymentChannelActivitySection` |
 
 Die beiden unterscheiden sich in drei von fünf Merkmalen (Grundgesamtheit,
 Spaltensatz, Massenaktion) — nach §8 zwei Komponenten (Frage 2, bestätigt).
 Eine dritte Ausprägung kennt die Stapelabnahme: **„Konten des Stapels"** mit
-Deckung (Schritt 1) und Gates (Schritt 4) je Konto — eigene Grundgesamtheit,
+den Gates je Konto (Schritt 4; Schritt 1 listet heute nicht je Konto) — eigene Grundgesamtheit,
 eigener Spaltensatz, aufklappbare Zeilen; nach §8 wieder eine eigene
 Komponente, vertagt als 0168, bis die Stapelabnahme ein Seitenprofil hat.
 
@@ -140,7 +141,7 @@ Komponente, vertagt als 0168, bis die Stapelabnahme ein Seitenprofil hat.
 | `PaymentAccountSettingsList` | L | ja | 6 — Job „konfigurieren", eigene Ausprägung nach §8 | Zeile (Konfigurations-Spalten) + Abschnitte + Abschalt-Vorschläge | — | `DataTable` (Gruppen), `PaymentAccountRow`, `SelectionBar` für die Bestätigung | `bankkonten/page.tsx` (Zellen inline), `PaymentChannelActivitySection` |
 | `PaymentAccountEditor` | XL | ja | 4 — änderbar = Nutzer: Name, Art, IBAN/BIC/Bank, Kartenkennung, Auszugserwartung (Hand), Auto-Zuordnung, Befristung | 1–4, 6, 8, 11, 12 | Sachkonto als `AccountField` | `Field`, `Select`, `AccountField` | `PaymentAccountForm`, `PaymentAccountIbanForm` |
 | `PaymentAccountField` | S | **✓ gebaut** (0145) — bleibt | 3 — Auswahl am Kontoauszug, an der Regel, am Import | | | | |
-| `PaymentAccountFacts` | L | nein | der Kopf des Kontoauszugs ist ein `CardHead` mit drei Werten (Seitenprofil `kontoauszug` Rang 1) — **Abweichung von der Roadmap** → Frage 1 | | | | |
+| `PaymentAccountFacts` | L | nein | der Kopf der Kontoauszugsseite ist heute der `PageHeader` des Sets (`banks/[accountId]/page.tsx:215`), im Seitenprofil `kontoauszug` ein `CardHead` mit drei Werten (Rang 1) — **Abweichung von der Roadmap** (Frage 1, bestätigt) | | | | |
 | `PaymentAccountCard` | M | nein | kein Screen zeigt das Konto als Karte; die Konfiguration ist eine Tabelle | | | | |
 | `PaymentAccountView` · `PaymentAccountDrawer` | L | nein | die Route `banks/[accountId]` ist der Kontoauszug, das Konto ihr Kopf; wer ein Konto nennt, will dorthin | | | | |
 
@@ -165,9 +166,9 @@ Fünf Formen „jetzt" — die Obergrenze.
 
 Alle zusätzlich als Zeile in `docs/befunde-app.md`.
 
-- **L-312** Die Wortliste der Kontoart liegt in `core/accounting/payment-account-kind.ts` und wird nicht gespiegelt. Zwei Stellen halten eigene, abweichende Kopien: `bankkonten/page.tsx` Z. 205 („Kredit-/EC-Karte") und `PaymentChannelActivitySection.tsx` Z. 14 („Kreditkarte").
-- **L-313** Die Zahlungsart der Auto-Zuordnung (`bank_transfer`, `direct_debit`, `credit_card`, `paypal`, `cash`, `other`) hat Wörter nur lokal in `bankkonten/page.tsx` Z. 207.
-- **L-314** `PaymentAccountWithStats` (Bewegung, Anzahl, erste/letzte Bewegung, Anbindung) liegt in `bank-transactions/infrastructure/bank-transactions-queries.ts:230` und wird nicht gespiegelt. Die Domäne kennt nur die Teilmenge `PaymentAccountFacts`.
+- **L-312** Die Wortliste der Kontoart hat eine Quelle, `core/accounting/payment-account-kind.ts` (`PaymentAccountForm` liest sie), und wird nicht gespiegelt: `sync-ludwig.sh` nimmt aus `core/accounting/` nur `clearing-account.ts`. Dazu genau eine abweichende Kopie in `PaymentChannelActivitySection.tsx:11` („PayPal" statt „PayPal / Zahlungsdienstleister", „Sonstige" statt „Sonstiges", ohne `employee_clearing`), und `[year]/banks/page.tsx:96` zeigt den rohen Code im Badge. App P14; die Datei geht im F210-Fenster in die Spiegel-Liste.
+- **L-313** Die Zahlungsart der Auto-Zuordnung hat keine Wortliste in der Domäne. Der Wertebereich steht als Literal an vier Stellen (`bankkonten/page.tsx:211`, `PaymentAccountForm.tsx:17`, `payment-account-actions.ts:21`, `payment-account-wizard-queries.ts:7`), die Wörter an zwei (`PAYMENT_METHOD_LABEL` + `ROUTING_ROWS` in `bankkonten/page.tsx`, `PaymentAccountForm.tsx:190`). App P15.
+- **L-314** `PaymentAccountWithStats` (Bewegung, Anzahl, erste/letzte Bewegung, Anbindung) liegt in `bank-transactions/infrastructure/bank-transactions-queries.ts:230` und wird nicht gespiegelt. Die Domäne kennt nur die Teilmenge `PaymentAccountFacts`. Bestätigt, App P16.
 
 ## Offene Fragen
 
@@ -176,7 +177,7 @@ Defaults gelten.
 
 1. **Kein `PaymentAccountFacts`** (Roadmap: der Kopf des Kontoauszugs) — das Seitenprofil `kontoauszug` setzt dort einen `CardHead` mit Name, Nummer, Zeitraum. — ohne Antwort: keine eigene Form; die Konfigurationswerte zeigt der Editor.
 2. **Die Konfiguration ist eine eigene Liste** (`PaymentAccountSettingsList`), nicht dieselbe mit Props — drei von fünf Merkmalen weichen ab. — ohne Antwort: zwei Komponenten.
-3. **Welche Wortliste der Art gilt?** `payment-account-kind.ts` („Mitarbeiter-Auslagen", „Kreditkarte") oder die lokale Kopie der Konfiguration („Kredit-/EC-Karte")? — ohne Antwort: die aus `core/`, sobald sie gespiegelt ist (F210-Fenster).
+3. **Welche Wortliste der Art gilt?** — **erledigt:** „Kredit-/EC-Karte" ist die Zahlungsart, keine Kopie der Kontoart; es gilt `core/accounting/payment-account-kind.ts`, sobald sie gespiegelt ist (F210-Fenster).
 
 ## Prüfung
 
@@ -185,7 +186,12 @@ dann die Ränge gegen „Heutige Darstellung", dann die Formen gegen §7.
 
 | Zeile / Form | Einwand | Ergebnis | Geprüft von / am |
 |---|---|---|---|
-| | | | |
+| Kopf, Datenpunkte, Relationen | 22 Spalten, CHECKs, Wortlisten-Fundstellen deckungsgleich mit der App-Nachzählung; `PaymentAccountSettingsList` als eigene Komponente bestätigt; Aggregate reproduziert | bestätigt | Prüfer-Session, 2026-09-11 |
+| Liste „Konten mit Bewegung" · Sortierung | heute `auto_assign_payment_method nulls last, kind, display_name` (`bank-transactions-queries.ts:389`), Spalten sortierbar | als Ist übernommen, „Bewegung absteigend" als Entscheidung gekennzeichnet | Prüfer-Session, 2026-09-11 |
+| Heutige Darstellung · `PaymentAccountFacts` | `KontoauszugView (631 Z.)` existiert nicht — die Seite ist `banks/[accountId]/page.tsx` (264 Z.) mit `PageHeader` (:215) und `BankTransactionList` (:241) des Sets | berichtigt; die Entscheidung bleibt | Prüfer-Session, 2026-09-11 |
+| Liste „Konten des Stapels" (0168) | Schritt 1 listet heute nicht je Zahlungskonto, nur Schritt 4 (`Schritt4.tsx:228`) | berichtigt, auch in 0168 | Prüfer-Session, 2026-09-11 |
+| Sachkonto | „38 bebucht" nicht reproduziert — 25 über `account_id` (die 38 waren die Vereinigung mit „in Gebrauch") | berichtigt auf 25 | Prüfer-Session, 2026-09-11 |
+| L-312, L-313, L-314 · Art | App-Nachzählung: „Kredit-/EC-Karte" ist die Zahlungsart; eine Quelle der Kontoart, eine abweichende Kopie, ein roher Code; der Wertebereich der Zahlungsart an vier Stellen | berichtigt; Frage 3 erledigt; App P14–P16 | ludwig-manager (ludwig-worker), 2026-09-11 |
 
 ## Weiter
 
