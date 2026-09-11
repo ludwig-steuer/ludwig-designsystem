@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig · **Nachtrag 2026-09-11 offen** (Prosa-Zeile) |
+| Status | fertig · **Nachtrag 2026-09-11 spezifiziert** (Prosa), Bau folgt |
 | Stufe | `primitives/` — Erweiterung eines vorhandenen Exports |
 | Klassen-Test | entfällt — keine neue Komponente |
 | Quelle | `docs/v3-backlog.md` — „Danach": `Werteliste`, 10 lokale `Row({label})`-Helfer + 10 `<dl>` |
@@ -136,3 +136,51 @@ Frage mit Default: ohne Antwort eine Prop je Liste (`values="prose"`: Werte
 links, eine Label-Spalte) und für die einzelne Zeile ein Wert-Wrapper, den die
 Liste per `:has()` erkennt, wie heute `.v2btxf__note`.
 
+### Spec zum Nachtrag (2026-09-11)
+
+**Einordnung.** Regel 2 aus `spec-schreiben` §3: das `@when` von `FieldList`
+deckt den Fall zu vier Fünfteln — es fehlt allein, wie ein Wert steht, der ein
+Satz ist. Die Entscheidung kommt wieder (zwei Aufrufer heute; `ExpectationFacts`
+und `JournalEntryFacts` tragen Begründungen als nächste) und lässt sich in einem
+Halbsatz an die `@when`-Zeile hängen. Keine neue Datei: `FieldList.tsx` bekommt
+eine Prop und einen zweiten Export in derselben Familie.
+
+**Schnittstelle.**
+
+| Prop / Export | Typ | Default | Was | Nachweis (Story) |
+|---|---|---|---|---|
+| `values` | `"data" \| "prose"` | `"data"` | `prose`: jeder Wert ist ein Satz — links, normales Gewicht, eine gemeinsame Label-Spalte für alle Zeilen (Subgrid), damit die Sätze untereinander beginnen | `Prose` |
+| `FieldProse` | `{ children: ReactNode }` | — | eine Zeile Prosa zwischen Werten: der Satz steht links und in normalem Gewicht, die Wertspalte nimmt den Rest der Zeile | `ProseRow` |
+
+**Kann bewusst nicht:** `values="prose"` zusammen mit `split` oder
+`layout="row"` — Sätze in zwei Spalten oder in einer Faktenzeile sind kein Fall;
+die Liste lässt beide dann weg. Kein Kürzen: ein langer Satz bricht um; wer
+kürzen will, nimmt `LongText` als Wert.
+
+**Verhalten.** Server-Component, bleibt es. Die Label-Spalte ist so breit wie das
+längste Label (`auto`), die Werte nehmen den Rest (`minmax(0, 1fr)`) — ein
+langer Code bricht, statt die Liste zu sprengen. Kopfzeile und Leerfall
+überspannen beide Spalten. `FieldProse` wirkt nur in der Wertspalte seiner
+Zeile; die Nachbarzeilen bleiben rechtsbündig und fett.
+
+**Ersetzt:** in `v3.css` `.v2btxf__note` samt `:has()`-Regel (0102) und
+`.v3prov__note .v2fields*` (0163). `BankTransactionFacts` nimmt `FieldProse`,
+`ProvenanceNote` nimmt `values="prose"`.
+
+**Stories:** zwei dazu, dann neun (Grenze 10) — `Prose` (dieselben Zeilen als
+`data` und als `prose` nebeneinander) und `ProseRow` (eine Prosazeile zwischen
+Werten, dazu auf 360 px verengt). Keine neuen Zustände: Leer verhält sich wie
+bisher und ist belegt (`Empty`).
+
+**Abnahmekriterien** — fest wie oben, dazu:
+
+- [ ] `values="prose"`: jeder Wert beginnt links, Gewicht 400, alle Werte auf derselben x-Position (Story `Prose`, gemessen)
+- [ ] `FieldProse`: der Satz beginnt in der Wertspalte links, nicht am rechten Rand; die Nachbarzeilen bleiben rechtsbündig mit Gewicht 500 (Story `ProseRow`)
+- [ ] 360 px: der Satz bricht um, nichts läuft über (Story `ProseRow`)
+- [ ] `v3.css` enthält weder `v2btxf__note` noch `v3prov__note` (`grep`)
+- [ ] `ProvenanceNote` (Stories `Note`, `Edges`) und die Zuordnung ohne Sachverhalt in `BankTransactionFacts` stehen wie vorher — Positionen vor und nach dem Umbau gemessen
+- [ ] `FieldProse` trägt `@when`/`@instead`; der JSDoc von `FieldList` nennt `prose`
+- [ ] die bestehenden Stories rendern unverändert, die Zahl steigt um genau 2
+
+**Offene Fragen:** die des Nachtrags — ohne Antwort beides, Prop und Wrapper.
+Keine weitere.
