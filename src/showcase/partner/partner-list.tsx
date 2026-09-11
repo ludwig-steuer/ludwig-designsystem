@@ -110,6 +110,10 @@ function AcceptCell({
 }) {
   const toast = useToast();
   const id = `accept-${row.businessPartnerId}`;
+  // Its own reserved 89xxxx number is what the dialog proposes — keeping it is
+  // allowed, so it does not count as taken (acceptance 0128).
+  const own = new Set(accountsOf(row).map((a) => a.accountNumber));
+  const isTaken = (v: string) => taken.has(v) && !own.has(v);
   return (
     <ActionButton<string>
       size="xs"
@@ -121,7 +125,7 @@ function AcceptCell({
         // A number the page already knows as taken is caught before sending;
         // one taken in the meantime comes back from the action and stays in
         // the dialog too (0159).
-        valid: (v) => /^\d{4,20}$/.test(v) && !taken.has(v),
+        valid: (v) => /^\d{4,20}$/.test(v) && !isTaken(v),
         render: ({ value, set }) => (
           <div className="v2stack">
             <p className="v2sub">
@@ -131,7 +135,7 @@ function AcceptCell({
             <Field label="DATEV-Kontonummer (4–20 Ziffern)" htmlFor={id}>
               <Input id={id} inputMode="numeric" value={value} onChange={(e) => set(e.target.value.trim())} />
             </Field>
-            {taken.has(value) ? (
+            {isTaken(value) ? (
               <p className="v2sub" role="alert">
                 Die Nummer {value} ist schon vergeben. Wählen Sie eine andere.
               </p>
@@ -141,7 +145,7 @@ function AcceptCell({
       }}
       action={async (number) => {
         await wait(400);
-        if (taken.has(number)) return { error: `Die Nummer ${number} ist schon vergeben.` };
+        if (isTaken(number)) return { error: `Die Nummer ${number} ist schon vergeben.` };
         onAccepted(row.businessPartnerId, number);
         toast.show({
           text:

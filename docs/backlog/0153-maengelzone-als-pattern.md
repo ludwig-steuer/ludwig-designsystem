@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** — Abnahme offen (nicht durch den Bauenden) |
-| Stufe | `patterns/` (heute `entities/source-document/SourceDocumentAside.tsx`) |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
+| Stufe | `patterns/OpenPoints.tsx` |
 | Quelle | `ludwig-cto` beim Sichten des Sachverhalts-Briefs (F196 §9, Verweis auf R21), 2026-09-10 · gebaut wurde die Zone mit 0150 |
 | Ausgelöst von | 0152 — die Sachverhalts-Übersicht braucht dieselbe Zone, und damit sind es zwei Screens |
 | Angelegt | Claude, 2026-09-10 |
@@ -73,3 +73,17 @@ nichts offen." im guten, keine alte Klasse mehr im DOM.
 3. Verhältnis zu `TodoList` (0054) und `Checklist` (`patterns/Review.tsx`):
    drei Bausteine für „was ist noch zu tun" sind zwei zu viel. Der Schnitt
    muss sagen, was jeder von ihnen **nicht** ist.
+
+## Abnahme
+
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Pattern nimmt fertige Zeilen (`OpenPoint[]`) | `patterns/OpenPoints.tsx`; Aufrufer Beleg (`SourceDocumentAside.tsx`), Sachverhalt (`showcase/case/scenario.tsx`), Konto (`showcase/account/scenario.tsx`) | ok |
+| Name ohne Fachwort, Abgrenzungstabelle im JSDoc | `OpenPoints.tsx:25–26` Tabelle `Checklist`/`TodoList`, `@instead :54` | ok |
+| Alte Klassen weg (`.v2docaside` → `.v3boxbody`, `.v2docdef*` → `.v2open*`) | `grep -rn 'v2docaside\|v2docdef' src` leer; DOM der Beleg-Stories: 0 | ok |
+| Beleg-Stories: vier Punkte im Mangelfall, „nichts offen" im guten | `beleg-rechnung--with-findings` 4 `.v3open__row`; `--clean` `.v3open__none` „An diesem Beleg ist nichts offen."; Sachverhalt „An diesem Sachverhalt ist nichts offen." | ok |
+| Spec beschreibt das Gebaute | Abschnitt „Gebaut" stimmt; Kopfzeile „Stufe" nennt noch `entities/source-document/SourceDocumentAside.tsx` als Ort | Hinweis (Stufe-Zeile veraltet: heute `patterns/OpenPoints.tsx`) |
+
+**Urteil: fertig.**

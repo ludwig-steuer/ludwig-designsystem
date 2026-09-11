@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** — Abnahme offen (nicht durch den Bauenden) |
+| Status | **in Arbeit** — fremd abgenommen 2026-09-11 mit einem Mangel, nachgearbeitet am selben Tag, Nachprüfung offen |
 | Stufe | `entities/journal-entry/` und `entities/account/` |
 | Quelle | Vier Owner-Wünsche vom 2026-09-10, beim Durchsehen der Stapelabnahme Schritt 3 |
 | Nachgetragen | Die Nummer stand ab dem ersten Wunsch in den Code-Kommentaren; diese Datei holt sie ein (Hausregel: eine Nummer wird nie zweimal vergeben, und eine Nummer im Code ohne Datei ist ein toter Verweis) |
@@ -64,6 +64,25 @@ Zwei Handkopien, beide aus dem eigenen Haus:
 
 ## Abnahme
 
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761 (für 0152/0157 bca4b7d); statische Checks alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| Quelle ohne `label`: Art und Zitat, nie Kennung | `AiBookingNotes.tsx:250` `s.label ? … : null`; `--source-kinds`: „Kontoauszug „Zahlung vom 28.07.2026 …"", 0 UUIDs | ok |
+| `SOURCE_OPENABLE` = bank, beleg, klaerung | `AiBookingNotes.tsx:86–94`; im DOM sind genau diese drei `BUTTON.ki__src--open`, `history/regel/gesetz` `DIV` | ok |
+| Konto-Zeichen nur an Nummer mit Weg | `journalentrycompact--with-account-link`: Links `?account=1200/4400` mit Icon; zweite Karte ohne `href`: 0 Icons an `.v2mono` | ok |
+| Weg ist Suchparameter | `href="?account=6815"` etc. | ok |
+| BU-Spalte nur, wenn eine Zeile etwas darin hat | **`--filled`, `--in-use`, `--edges`: `.v2je--bu` gesetzt und Kopfzelle „BU" da, alle BU-Zellen leer.** Ursache `JournalEntryCompact.tsx:223`: `lines.some((l) => l.taxKey \|\| l.automaticRate !== null)` — `undefined !== null` ist wahr, die Spalte erscheint immer | **Mangel** |
+| Schlüssel **und** Automatikmarke färben gelb | `--with-tax-key`: Zelle „3 Automatik 19 %" → `bdg bdg-warning`; „Automatik 19 %" allein → `bdg-neutral` | ok |
+| Im Aufklapper Buchung vor Begründung, kein zweiter Kopf | `aibookingnotes--in-use`: Buchungsgitter (Index 0) vor „Begründung des Vorschlags" (162/194/201); `.ki__h` = 0 | ok |
+| Spec beschreibt das Gebaute | Tabelle Wünsche/Umsetzung stimmt | ok |
+
+**Urteil: in Arbeit.** Mangel: BU-Spalte in `v3-entitäten-buchungssatz-journalentrycompact--filled` (und `--in-use`, `--edges`) sichtbar, obwohl keine Zeile Schlüssel oder Automatik trägt — erwartet: keine Spalte (`JournalEntryCompact.tsx:223`, `!= null` statt `!== null`).
+
+### Nacharbeit 2026-09-11 (durch den Bauenden, Nachprüfung offen)
+
+| Mangel | Nacharbeit | Messung (6107) |
+|---|---|---|
+| BU-Spalte erscheint immer (`automaticRate !== null` ist bei `undefined` wahr) | `JournalEntryCompact.tsx`: `!= null` | `journalentrycompact--filled`, `--in-use`, `--edges`: keine `.v2je--bu`; `--with-tax-key`: Spalte da |
+
+Die App rendert `JournalEntryCompact`; dort verschwindet die leere BU-Spalte ohne Codeänderung.

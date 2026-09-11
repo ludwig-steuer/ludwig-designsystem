@@ -45,12 +45,12 @@ import {
   r2,
   sideOf,
   YEAR,
-  ZERO_TARGET,
   type AccountMaster,
   type AccountScenario,
   type MonthRow,
   type Movement,
 } from "./fixtures";
+import { accountDefects } from "@/ludwig/modules/accounts/domain/account-defects";
 
 /**
  * An account page as **data**: every scenario of 0157 is one `AccountScenario`,
@@ -76,65 +76,80 @@ const hasProfile = (m: AccountMaster) => Boolean(m.description && m.embeddingCre
 
 /**
  * What is open on the account, criticality descending (A7), each with a way.
- * It stands in for `accountDefects()`, which the domain does not have yet
- * (B6) — so zone and tiles count from the same place.
+ * **Which** defects and how many come from the domain (`accountDefects`, F209
+ * B6, L-289); the words and the ways are the page's — the domain says that,
+ * not how.
  */
-function accountDefects(s: AccountScenario, href: Hash["href"]): OpenPoint[] {
+function defectPoints(s: AccountScenario, href: Hash["href"]): OpenPoint[] {
   const { facts, master, entries } = s;
   const way = (label: string, patch: Patch) => (
     <TextButton href={href({ ...CLEAR_LIST, ...patch })}>{label}</TextButton>
   );
-  const points: OpenPoint[] = [];
-
-  const exported = entries.filter((e) => e.origin === "exported").length;
-  if (exported > 0) {
-    points.push({
-      key: "exported",
-      state: "warning",
-      title: `${movementCount(exported)} exportiert, in DATEV nicht wiedergefunden.`,
-      hint: "Der Export hat sie übergeben; der DATEV-Spiegel kennt sie nicht.",
-      action: way("Nur diese zeigen", { origin: "exported" }),
-    });
+  const origins: Record<AccountEntryOrigin, { count: number; amount: number }> = {
+    datev: { count: 0, amount: 0 },
+    mirrored: { count: 0, amount: 0 },
+    ludwig: { count: 0, amount: 0 },
+    exported: { count: 0, amount: 0 },
+  };
+  for (const e of entries) {
+    origins[e.origin].count += 1;
+    origins[e.origin].amount += (e.debit ?? 0) - (e.credit ?? 0);
   }
-  if (facts.ludwigOnlyCount > 0) {
-    points.push({
-      key: "ludwig",
-      state: "info",
-      title: `${movementCount(facts.ludwigOnlyCount)} über ${formatAmount(facts.ludwigOnlyAmount, facts.currency)} nur in Ludwig.`,
-      hint: "Noch nicht an DATEV übergeben.",
-      action: way("Nur diese zeigen", { origin: "ludwig" }),
-    });
-  }
-  if (master.clearingAccountType && ZERO_TARGET.includes(master.clearingAccountType) && facts.datevBalance) {
-    const last = entries.find((e) => sideOf(e.origin) === "datev");
-    const month = last ? Number(last.postingDate.slice(5, 7)) : null;
-    points.push({
-      key: "rest",
-      state: "info",
-      title: `Rest ${formatAmount(facts.datevBalance, facts.currency)} nicht ausgeglichen.`,
-      hint: `Ein Verrechnungskonto „${resolveStatus("verrechnungskonto", master.clearingAccountType).label}“ soll auf 0,00 € aufgehen; ein Monatsrest ist üblich.`,
-      ...(month ? { action: way(`Bewegungen ${MONTH_LONG[month - 1]}`, { month: String(month) }) } : {}),
-    });
-  }
-  if (facts.syncState === "local_only") {
-    points.push({
-      key: "local",
-      state: "info",
-      title: "DATEV kennt das Konto noch nicht.",
-      hint: "Der nächste Export legt es an.",
-      action: <TextButton href="#exports">Zum Export</TextButton>,
-    });
-  }
-  if (!hasProfile(master)) {
-    points.push({
-      key: "profile",
-      state: "info",
-      title: "Kein LLM-Profil.",
-      hint: "Der Agent findet dieses Konto nicht über Belegbegriffe.",
-      action: way("Beschreibung schreiben", { tab: "details" }),
-    });
-  }
-  return points;
+  return accountDefects({
+    origins,
+    clearingAccountType: master.clearingAccountType,
+    datevBalance: facts.datevBalance ?? null,
+    datevSyncState: facts.syncState ?? null,
+    description: master.description,
+    embeddingCreatedAt: master.embeddingCreatedAt,
+  }).map((d): OpenPoint => {
+    const state = d.severity === "warning" ? "warning" : "info";
+    switch (d.kind) {
+      case "exported_not_mirrored":
+        return {
+          key: d.kind,
+          state,
+          title: `${movementCount(d.count ?? 0)} exportiert, in DATEV nicht wiedergefunden.`,
+          hint: "Der Export hat sie übergeben; der DATEV-Spiegel kennt sie nicht.",
+          action: way("Nur diese zeigen", { origin: "exported" }),
+        };
+      case "ludwig_only":
+        return {
+          key: d.kind,
+          state,
+          title: `${movementCount(d.count ?? 0)} über ${formatAmount(d.amount, facts.currency)} nur in Ludwig.`,
+          hint: "Noch nicht an DATEV übergeben.",
+          action: way("Nur diese zeigen", { origin: "ludwig" }),
+        };
+      case "clearing_residual": {
+        const last = entries.find((e) => sideOf(e.origin) === "datev");
+        const month = last ? Number(last.postingDate.slice(5, 7)) : null;
+        return {
+          key: d.kind,
+          state,
+          title: `Rest ${formatAmount(d.amount, facts.currency)} nicht ausgeglichen.`,
+          hint: `Ein Verrechnungskonto „${resolveStatus("verrechnungskonto", master.clearingAccountType ?? "").label}“ soll auf 0,00 € aufgehen; ein Monatsrest ist üblich.`,
+          ...(month ? { action: way(`Bewegungen ${MONTH_LONG[month - 1]}`, { month: String(month) }) } : {}),
+        };
+      }
+      case "datev_unknown":
+        return {
+          key: d.kind,
+          state,
+          title: "DATEV kennt das Konto noch nicht.",
+          hint: "Der nächste Export legt es an.",
+          action: <TextButton href="#exports">Zum Export</TextButton>,
+        };
+      case "llm_profile_missing":
+        return {
+          key: d.kind,
+          state,
+          title: "Kein LLM-Profil.",
+          hint: "Der Agent findet dieses Konto nicht über Belegbegriffe.",
+          action: way("Beschreibung schreiben", { tab: "details" }),
+        };
+    }
+  });
 }
 
 /**
@@ -165,7 +180,8 @@ function Figures({ scenario, href }: { scenario: AccountScenario; href: Hash["hr
     <KpiTile
       key="last"
       label="Letzte Buchung"
-      value={<Time value={facts.lastBookingDate ?? null} format="date" />}
+      // No dash as a value (D7): an account nobody posted to says so.
+      value={facts.lastBookingDate ? <Time value={facts.lastBookingDate} format="date" /> : "noch keine"}
       sub={`${formatCount(facts.usageBookingCount)} Buchungen insgesamt`}
     />,
   ].filter(Boolean);
@@ -329,7 +345,7 @@ function Overview({ scenario, hash }: { scenario: AccountScenario; hash: Hash })
             pattern="split"
             main={
               <OpenPoints
-                points={accountDefects(scenario, href)}
+                points={defectPoints(scenario, href)}
                 emptyText={`Ludwig und DATEV stimmen überein — ${movementCount(entries.length)}, keine offen.`}
               />
             }

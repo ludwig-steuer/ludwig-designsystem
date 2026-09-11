@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → **nein.** Der DATEV-Steuerschlüssel (BU) ist ein Fachbegriff mit eigenem Vokabular; ein Primitive darf ihn nicht kennen |
 | Quelle | `docs/v3-backlog.md` Z. 62 (`TaxKeySelect`, Teil des `Auswahlfeld`-Bedarfs); Vorlage `apps/web/src/ui/booking/TaxKeySelect.tsx` |
@@ -104,3 +104,20 @@ Gemessen (`scripts/cdp.mjs`, vier Stories):
 | `Roundtrip` | Abwählen liefert `null`, nicht `""` — die Achse kennt keinen leeren String, und ein Aufrufer, der ihn schriebe, würde ihn speichern |
 
 `pnpm typecheck` und die fünf Wächter auf Exit 0.
+
+## Abnahme
+
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Optionen aus `DATEV_TAX_KEYS`, kein Literal | `TaxKeyField.tsx:4` Import, `:58` Liste; `grep '"[0-9]{1,2}"'` leer | ok |
+| Schlüssel `mono`, Label daneben nicht | Option „**9** · Vorsteuer 19 %"; `.v2mono` am Feld | ok |
+| `description` nur bei Auswahl | `--filled`: „Eingangsseite: aus dem Bruttobetrag werden 19 % Vorsteuer …"; `--empty`: nur „Steuerschlüssel (BU)" | ok |
+| Ohne `allowPassThrough` fehlen Durchreich-Schlüssel | `--pass-through`: 12 gegen 15 Optionen (inkl. „Kein Steuerschlüssel") | ok |
+| `null` wählbar, kommt als `null` zurück | `--roundtrip`: „3" → „Gewählt: 3"; „" → „Gewählt: null (kein Schlüssel)" | ok |
+| `disabled`, `error` | `--filled` zweites Feld `disabled`; `--invalid` rendert | ok |
+| Ersetzt `TaxKeySelect` | — | offen (App) |
+| Spec beschreibt das Gebaute | „fünf Einträge mehr" → drei, im Gebaut-Absatz berichtigt | ok |
+
+**Urteil: fertig.**

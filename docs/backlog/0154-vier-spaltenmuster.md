@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** — Abnahme offen (nicht durch den Bauenden) |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `patterns/Columns.tsx` — **neben** `MasterDetail` (0116), nicht als dessen Nachfolger; die beiden haben verschiedene `@when` |
 | Quelle | **Owner-Entscheid 2026-09-10**, überbracht von `ludwig-cto`; Brief F196 §2, §5, §5a, §8 (`ludwig/app` staging `672665f8`) |
 | Blockiert | 0152 (Sachverhalts-Szenarien) — deren Übersicht ist `list \| detail \| sidebar` |
@@ -85,7 +85,7 @@ der Arbeitsfläche und war 360 statt 1068 px breit. Das Verhältnis machen die
 |---|---|---|---|
 | `list-detail-aside` | 462 · 544 · 362, eine Zeile | 476 · 572, Notizen darunter über die **volle** Breite (1068) | drei Zeilen à 788 |
 | `split` | 694 · 694 | 524 · 524 | 384 · 384 |
-| `main-aside` (`table`) | 1005 · 383 | 1068, Begleiter darunter (1068) | 788 · 788 |
+| `main-aside` (`table`) | 1005 · 383 | 1068, Begleiter **darüber** (1068; seit 2026-09-11, Nachtrag unten) | 788 · 788 |
 
 Die dritte Spalte weicht also nach unten und **verschwindet nicht**, und die
 erste bleibt in jeder Breite stehen — wie im Brief verlangt.
@@ -112,3 +112,19 @@ die Reihenfolge im DOM bleibt Fläche, dann Randspalte. Die übrigen drei
 Muster brechen wie bisher (die dritte Spalte fällt nach unten). Aufrufer von
 `main-aside` sind heute nur die Kontoseite und die Stories dieses Musters;
 breaking: nein.
+
+## Abnahme
+
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Vier Muster, zwei Stufen, `MasterDetail` bleibt | `columns--list-detail`, `--list-detail-aside`, `--split`, `--main-aside` rendern; `MasterDetail` unverändert vorhanden | ok |
+| Breiten @1440 wie Messtabelle | `list-detail-aside` 462·544·362 ✓; `split` 694·694 ✓; `main-aside` 1005·383 ✓ | ok |
+| @1100: dritte Spalte fällt nach unten, volle Breite; erste bleibt | `list-detail-aside`: 476·572, aside 1068 breit, top 364 (darunter); `split` 524·524 | ok |
+| @820: drei Zeilen à 788 | `list-detail-aside` 788/788/788 (tops 16/364/619) | ok |
+| Nachtrag: `main-aside` bricht **nach oben** (`wrap-reverse`) | `flex-wrap: wrap-reverse` gemessen; @1100 aside top 16, main top 240; @820 dito; @1440 nebeneinander | ok |
+| Kein Querlauf | scrollW = vw bei 1440/1100/820 | ok |
+| Spec beschreibt das Gebaute | Messtabelle: `main-aside` @1100 „1068, Begleiter **darunter**" und Satz „Die dritte Spalte weicht also nach unten" — seit bca4b7d für `main-aside` **darüber**; der Nachtrag sagt es, die Tabelle darüber nicht | Hinweis (Tabellenzeile veraltet) |
+
+**Urteil: fertig** — Tabellenzeile `main-aside`@1100 in der Spec nachziehen.

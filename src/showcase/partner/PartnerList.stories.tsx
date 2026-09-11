@@ -93,7 +93,9 @@ export const ProposalsDone: Story = { render: () => <PartnerListPage stock={done
 /** **Lädt und Fehler** — Reiter und Filter stehen, die Liste hat die Form ihres Inhalts. */
 export const LoadingAndError: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: "var(--space-6)" }}>
+    // One column that may shrink: an `auto` grid column grows to the table's
+    // minimum width and pushed the page sideways (acceptance 0128).
+    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: "var(--space-6)" }}>
       <PartnerListPage stock={largeStock} live={false} loading />
       <PartnerListPage stock={largeStock} live={false} error="Die Geschäftspartner konnten nicht geladen werden." />
     </div>

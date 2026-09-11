@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10**, beide Owner-Fragen am 2026-09-11 entschieden und nachgebaut — Abnahme offen (nicht durch den Bauenden) |
+| Status | **in Arbeit** — fremd abgenommen 2026-09-11 mit zwei Mängeln; K6 nachgearbeitet, P1 wartet auf den Owner (Kriterium oder Layout) |
 | Stufe | `src/showcase/account/` (Seiten-Stories; Code englisch, Owner 2026-09-10), dazu Ausbauten an `accountEntryColumns` (0067) und `AccountFacts` (0066) |
 | Quelle | Design-Brief **F198** (`ludwig/app`, `docs/backlog/F198-account-detail-scenarios-design-brief.md`), überbracht von `ludwig-manager`, Owner-Freigabe 2026-09-10 |
 | Präzedenz | `src/showcase/document/` (0144), `src/showcase/case/` (0152) |
@@ -150,3 +150,40 @@ App (gesammelt in F209, `ludwig-worker`): L-286 (B1 Monatsverlauf), L-287
 `accountDefects()`), L-290 (B7 zwei Loader), L-291 (B8 Schreibweg
 Verrechnungskonto). B3 und B4 sind im Set erledigt (oben).
 
+## Abnahme
+
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761 (für 0152/0157 bca4b7d); statische Checks alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Fest: typecheck · build · Sprache · Registry | Checks oben, alle 0 | ok |
+| Übersicht ist `master \| sidebar` (Code-Probe) | `scenario.tsx` → `Columns pattern="main-aside"`; DOM `.v3cols--main-aside` in allen Konten-Stories | ok |
+| Rahmen + Fixtures + zwei Story-Dateien, 19 Exporte | `AccountPage.tsx`, `fixtures.ts`, `AccountKinds.stories.tsx` (13), `AccountPageStates.stories.tsx` (6); alle 19 IDs rendern (`skr03` heißt `seiten-konto-konten--skr-03`) | ok |
+| Kein Querlauf bei 1440/1280, Narrow bei 1024 | `m-bca.txt`: scrollW = vw in allen 19×2 Messungen; `narrow`@1024 = 1024; K1@1024 = 1024, @1920 = 1920 | ok |
+| Genau ein Signal in K8 und K9, sonst keins | `disappeared` 1, `locked` 1 (Callout 181–298); alle anderen 0 | ok |
+| Der Kopf zeigt einen Zustand | `.v2ehead span[title]`: genau „Kontoart: Sachkonto · …" (StatusBadge) je Story | ok |
+| Keine leere Kennzahl (K6 = 0,00, K7 = Delta) | Kopf: K6 „Saldo in DATEV 0,00 €", K7 „Nur in Ludwig 540,00 €" ✓. **Aber** Kachel K6 (`unused`): „Letzte Buchung **—** 0 Buchungen insgesamt" — ein Gedankenstrich als Kennzahlwert (19 px `SPAN.v2muted`), D7 | **Mangel** |
+| Saldo nur einmal (D7, 2026-09-11) | Kopf „Saldo in DATEV · Rest 1.240,50 €"; Kacheln K1: Nur in Ludwig · Offene Vorschläge · Letzte Buchung (3); K7: 2 Kacheln | ok |
+| Zone 2 mit Weg je Zeile in K1/K2/K6/K7/K10; Haken in K3/K4/K5/K8/K9/K11 | K1 2 Zeilen („Nur diese zeigen", „Bewegungen Juli"), K2 2, K6 1 („Beschreibung schreiben"), K7 2 („Nur diese zeigen", „Zum Export"), K10 1; K3/K4/K4b/K5/K8/K9/K11 „Ludwig und DATEV stimmen überein — n Bewegungen, keine offen." | ok |
+| Kachel „nur in Ludwig" und Filterliste zählen gleich (K1: 110) | Kachel 110; `#origin=ludwig` → Pager „1–25 von 110"; `#status=proposed` → „1–25 von 110"; `#origin=datev` → „von 450" | ok |
+| K2 mit 3.400 Zeilen paginiert | `bank-account`: „1–50 von 3.400", 68 Seiten | ok |
+| P1 bei 1280 und 1440×900: Kopf, Kacheln und Anfang der Liste ohne Scrollen | `seite--in-use` @1440: Kopf 136–249 ✓, Stammdaten (Randspalte, jetzt oben) 332–600, Kacheln ab 620, **Filterleiste 1023–1070, Listenkopf und erste Zeile darunter** (Spec: erste Zeile 1210); @1280: Filterleiste 1023–1103, erste Zeile ≈ 1243. Ohne AppShell (K1 @1440): Filterleiste 647–694, erste Zeile 781–820 ✓ | **Mangel** (in der Spec selbst als „teilweise" vermerkt; Folge des Owner-Entscheids „Randspalte oben" — Kriterium und Layout widersprechen sich, einer muss nachgeben) |
+| P5: Saldospalte nur bei einer Quelle | Spec-Messung; Code `accountEntryColumns({ balance })` (`AccountEntries.tsx:165/243`), `runningBalance` | ok (Code-Probe) |
+| P6 bei 1024: Randspalte fällt um, nichts fällt weg | `narrow`/K1 @1024: aside 244–512 **über** main 532–2305, volle Breite 1024; kein Querlauf | ok |
+| Randspalte beim Umbruch **über** der Liste (2026-09-11) | `in-use` @1440: aside 332–600 vor main 620; @1280 dito; K1 @1440/1920 nebeneinander (aside x=1047 / 1367) | ok |
+| Kein Text in 16 px | fs≥16: Titel 19, KPI-Werte 19, Callout 17, Leerzustand 18, Drawer-Titel 16 (Set), `sr-only` | ok |
+| Alle Reiter in P3 mit Inhalt und Leerzustand | `all-tabs`: zwei Rahmen (Details 244–1355, Rohdaten 1623–3547), Leerzustand „ohne LLM-Profil" | ok |
+| Drawer (P4) | `drawers`: `#entry=m2-109` öffnet „Bewegung KB-0110 … Konto 1460 …", Partner-Drawer in K4 | ok |
+| Bausteine additiv: `accountEntryColumns({balance})`, `AccountFacts figures`, `.v2fbar`/`.pag` auf `--fs-ui` | Code: `AccountEntries.tsx:158`, `Account.tsx:153 figures = true`; DOM: `.v2fbar` 13,5 px, `nav.pag` keine Schrift ≥ 16 px | ok |
+| Spec beschreibt das Gebaute | Nachtrag 2026-09-11 + Messtabelle stimmen (Kacheln 3/2, Randspalte oben). Alter Satz in 0154-Tabelle s. dort | ok |
+
+**Urteil: in Arbeit.** Mängel: (1) `seiten-konto-seite--in-use` @1440/1280 — Liste beginnt bei y ≈ 1023 (Filterleiste), erste Bewegung ≈ 1210/1243, Kriterium verlangt „Anfang der Liste ohne Scrollen"; (2) `seiten-konto-konten--unused` Kachel „Letzte Buchung —" (D7: Satz oder weglassen).
+
+### Nacharbeit 2026-09-11 (durch den Bauenden, Nachprüfung offen)
+
+| Mangel | Nacharbeit | Messung (6107, 1440 × 900) |
+|---|---|---|
+| K6 `unused`: Kachel „Letzte Buchung —" (D7) | ohne letzte Buchung steht „noch keine" | `unused`: „Letzte Buchung · noch keine · 0 Buchungen insgesamt" |
+| P1 `seite--in-use`: erste Bewegung bei 1210 / 1243 | **offen** — Folge des Owner-Entscheids „Randspalte oben"; `ludwig-manager` fragt den Owner, ob das Kriterium oder das Layout nachgibt (z. B. Randspalte kompakter oder aufklappbar) | — |
+
+Mit freigegeben nach der Abnahme (L-289): die Mängelzone rechnet nicht mehr im Showcase, sondern mit `accountDefects()` aus dem Spiegel (F209, B6); Wörter und Wege setzt die Seite. Zeilen je Konto unverändert: K1 2, K2 2, K6 1, K7 2, K10 1, K12 1; K3–K5, K8, K9, K11 der Haken.

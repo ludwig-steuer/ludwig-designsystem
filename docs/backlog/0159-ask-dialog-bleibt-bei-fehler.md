@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** — Abnahme offen (nicht durch den Bauenden) |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `primitives/ActionButton` (0004, 0121) — wirkt durch `DataTable` (`rowAction` mit `ask`) und `Selection` (`BulkAction` mit `ask`) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, unverändert: ein Dialog, der bei einem Fehler zugeht und die Eingabe verliert, ist überall falsch |
 | Quelle | Befund beim Bau von 0128 (Annahme eines Vorschlags); Auftrag von `ludwig-manager` 2026-09-10: „bei Fehler bleibt der Dialog offen, der Fehlersatz steht am Feld, die Eingabe bleibt; Erfolg schließt wie bisher" |
@@ -89,8 +89,16 @@ Keine Codeänderung nötig; das Verhalten ändert sich für alle mit `ask`.
 
 ## Abnahme
 
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| … | … | … |
+| typecheck, check:language | Checks oben | ok |
+| `AskFails`: Fehler im Dialog, Eingabe bleibt, Satz geht beim Weitertippen, Erfolg schließt | `v3-primitives-aktion-actionbutton--ask-fails`: 70001 → Dialog offen, Wert „70001", `role=alert` „Die Nummer 70001 ist inzwischen vergeben.", **kein** `.v2act__err` außerhalb des Dialogs; „2" tippen → Satz weg; 70002 → Dialog zu, „Konto 70002 angelegt.", Fokus auf `BUTTON:Annehmen` | ok |
+| Während die Aktion läuft: Abbrechen gesperrt, Escape schließt nicht | Knöpfe „Abbrechen(disabled)", „Wird angelegt …(disabled)"; Escape → Dialog bleibt | ok |
+| Wieder öffnen: `initial`, kein alter Fehlersatz | nach Fehler + Abbrechen → neu öffnen: Wert 70001, `alert: null` | ok |
+| `AskForTarget`, `AskInvalid`, `WithConfirm`, `Failed` wie vorher | AskForTarget: Auswahl 2026-0412 → „Zugeordnet an 2026-0412.", Dialog zu; AskInvalid: „x" → Knopf gesperrt, gültig → zu; WithConfirm: Dialog zu; Failed: Fehler neben dem Knopf, kein Dialog | ok |
+| 0128 `Proposals` läuft weiter durch | s. 0128 (123/70001/70500) | ok |
+| Spec beschreibt das Gebaute | Verhaltens-Tabelle stimmt mit DOM; Schnittstelle unverändert | ok |
 
-Abgenommen von / am: — (nicht durch den Bauenden)
+**Urteil: fertig.**

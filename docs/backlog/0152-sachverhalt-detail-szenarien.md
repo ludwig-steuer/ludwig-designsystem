@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** — alle drei Wellen und P3 (edb6d3f, 65c733b, 9a9e609); **Nachtrag 2026-09-11**: Abgleich mit Brief §7 (E6, E9, Reiter Wiederkehr); **Reiter nach Zielgruppe, Erwartungen rechts** (Owner, gleicher Tag). Abnahme je Welle offen, nicht durch den Bauenden |
+| Status | **in Arbeit** — fremd abgenommen 2026-09-11 mit einem Mangel, Nacharbeit gebaut am selben Tag, Nachprüfung offen; Reiter nach Zielgruppe neu geschnitten (4a64223), deren Abnahme offen |
 | Stufe | `src/showcase/case/` (Seiten-Stories) · dazu Erweiterungen an `entities/accounting-case/CaseTimeline.tsx` |
 | Klassen-Test | Die Seite gehört der App und lebt in `showcase/` — wie 0144 für den Beleg. Was an Bausteinen fehlt, wird `entities/` bzw. `patterns/`, nicht Teil der Seite |
 | Quelle | Design-Brief **F196** (`ludwig/app` staging `672665f8`), überbracht von `ludwig-cto` · Seitenprofil `docs/seiten/sachverhalt-detail.md` · Entitätsprofil `docs/entitaeten/accounting-case.md` |
@@ -376,6 +376,36 @@ Variabel (je Welle):
 
 ## Abnahme
 
-| Welle | Nachweis | Ergebnis |
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761 (für 0152/0157 bca4b7d); statische Checks alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
+**Zurückgestellt, Reiter-Schnitt offen:** `Seiten/Sachverhalt/Reiter` (P3, alle 8 Exporte inkl. `Recurrence`) — nicht abgenommen (Koordinator 2026-09-11). Die Nachtrags-Kriterien, die nur am Reiter Wiederkehr hängen, stehen unten als zurückgestellt.
+
+| Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| Fest: typecheck · build · Sprache · @when · Registry | Checks oben, alle 0 (bca4b7d) | ok |
+| Alle Story-IDs existieren, kein Querlauf | 18 Einzelfall + 6 Sammel/Dauer + 3 Seite bei 1440 und 1280: `scrollW == vw` überall (`m0152.txt`, `m-bca.txt`). `CollectivePayment`: Klammer-Tabelle (`minWidth 980`) scrollt in `.v2tbl__inner`, Seite nicht | ok |
+| W1 Rang 1–4 bei 1440×900 ohne Scrollen | `einzelfall--proposal-pending` @1440: Kopf 48–161, Status im Kopf, Signal 181–277, „Zu tun" 443–481, erster Strang-Eintrag 536–599. `seite--in-use` (AppShell) @1440: Signal 269–365, „Zu tun" 531–569, erster Eintrag 624–687; @1280: 645–730 | ok |
+| W1 Wechsel Jetzt ↔ Eintrag ändert **nur** Spalte 2 | `w1b.txt`: jeder Strang-Eintrag in 23 Seiten-Stories geklickt. Bei Ereignissen: Spalte 1 nur Auswahlmarke, Spalte 3 und Kopf byte-gleich, Spalte 2 wechselt ✓. **Aber:** Erwartungen und Klärungen haben keinen `details`-Eintrag → der Eintrag wird `aria-current`, „Zu tun" verliert `is-active`, **Spalte 2 bleibt „Zu tun"** (`COL2-UNCHANGED`): `proposal-pending` Einträge 0+1, `with-datev-entry` 0, `awaiting-document(-escalated)` 0, `clarification-open-firm` 0, `client-batch` 0–11 (alle 12 Rückfragen), `expense-report` 0+1, `seite--in-use` und `--partner-drawer` 0+1 | **Mangel** |
+| W1 Ludwig- und DATEV-Einträge in **einer** Reihe, Wort „DATEV", keine Handlungen in Spalte 2 | `with-datev-entry`: ein `.v2tl`, Eintrag 3 „Gutschrift desselben Kreditors 21,82 € **DATEV** Gebucht Gebucht" (Badge-Wort, kein Icon allein); gewählt → Spalte 2 „Gutschrift aus DATEV … Diese Buchung steht in DATEV", `mainButtons = []` | ok |
+| W1 Mängel-Zone ist ein Pattern (0153) | `patterns/OpenPoints.tsx`; Aufrufer `showcase/case/scenario.tsx`, `showcase/account/scenario.tsx`, `entities/source-document/SourceDocumentAside.tsx`; `grep v2docaside|v2docdef src` = 0 | ok |
+| W2 Jeder Leerfall trägt einen Satz, keinen Strich | `no-events`: „Noch nichts geschehen."; Offen-Box: „An diesem Sachverhalt ist nichts offen." / „Nichts offen: beide Ereignisse sind gebucht …"; Rückfragen: „Keine Rückfragen."; Notizen: „keine". Gedankenstriche nur in Tabellenzellen (Klammer-Tabelle Belegfeld, Log-Spalte, Rohdaten `closed_at`) — keine Leerzustände | ok |
+| W2 Genau ein Signal oder keins; entfällt, wenn der Fall auf jemand anderen wartet | `signals` je Story ≤ 1 (m0152/m-bca): 1 bei ProposalPending, RecurringWithoutRule, OutgoingWithPayment, JudgeFlagged, JudgeAdjusted, ClientBatch, CollectivePayment, HandedToFirm, InUse, PartnerDrawer; **0** bei AwaitingDocument(+Escalated), ClarificationOpenFirm, ProposalWithdrawn, Superseded, OpenItemCarryover, CompleteAndExported, Contract, NoEvents, NewWithoutCounterparty | ok |
+| W3 120 (508) Ereignisse brechen das Layout nicht | `client-batch`: 20 Einträge + „488 ältere Einträge im Reiter Ereignisse"; scrollW 1440/1280 = vw; `expense-report` 21 Einträge dito | ok |
+| W3 Kein Gegenpart bei `adjustment_only` ist kein Mangel | `client-batch`: Kopf ohne Gegenpart, keine Kennzahl „—" (`dashes=0`), Offen-Box: „12 Rückfragen …", „508 Buchungen … Abnahme" — keine Gegenpart-Zeile | ok |
+| Nachtrag: Kein Gegenpart bei Eingangsrechnung **ist** ein Mangel mit Weg | `new-without-counterparty`: Offen „Der Gegenpart fehlt. … Partner wählen" (Weg), zweite Zeile „nicht gebucht"; Kopf ohne Kennzahl (`metric: null`), kein Signal | ok |
+| Nachtrag: „Wiederkehr" nur beim Dauersachverhalt; Leerzustand ein Angebot | Reiterleiste: `recurring-with-rule` und `reiter--recurrence` tragen „Wiederkehr", `reiter--events`/`--log` nicht ✓. Leerzustand/Angebot am Reiter selbst: **zurückgestellt** (Reiter-Schnitt) | zurückgestellt |
+| Nachtrag: Kopfbetrag nicht ein zweites Mal auf der Übersicht (D7) | `complete-and-exported` Kopf 214,20 € — Spalte 2 ohne „214,20"; `awaiting-document(-escalated)` Kopf 86,00 € — Spalte 2 ohne „86,00" | ok |
+| Kein Text ≥ 16 px im Arbeitsregister | fs≥16 nur Titel (19 px), Callout-Titel (17), Leerzustand-Titel (18), Drawer-Titel (16, Set-Drawer), AppShell-Hinweis „Zu schmal" | ok |
+| Spec beschreibt das Gebaute | Welle-2/3-Tabellen + Nachtrag 2026-09-11 decken alle 27 Seiten-Exporte; `FALL_TABS`-Reiter im Nachtrag genannt | ok |
+
+**Hinweis:** DATEV-Zeile zeigt zwei Badges „Gebucht" (Achse `ereignis` + Achse `buchung`, beide beschriftet „Gebucht") — dasselbe Wort zweimal in einer Zeile.
+
+**Urteil: in Arbeit.** Mangel: Erwartungs- und Klärungs-Einträge im Strang sind wählbar, ohne dass Spalte 2 wechselt (Story-IDs oben; Ursache `scenario.tsx` `ScenarioPage`: `selected === TODO_ID || !detail ? <TodoPane/>`). Entweder ein Detail je Eintrag oder Einträge ohne Detail nicht wählbar. Reiter-Stories zurückgestellt.
+
+### Nacharbeit 2026-09-11 (durch den Bauenden, Nachprüfung offen)
+
+| Mangel | Nacharbeit | Messung (6107, 1440 × 900) |
+|---|---|---|
+| Erwartungs- und Klärungs-Einträge wählbar, Spalte 2 bleibt „Zu tun" | `ScenarioPage` zeigt je Eintrag seine Fläche: Ereignis → `EventPane`, Erwartung → `ExpectationPane` (`ExpectationRow`, was sie erledigt, „Erledigt"/„Aufheben"), Klärung → `ClarificationPane` (die Zeile mit Zustand und Weg in den Reiter; bei der beantwortbaren Frage die Karte); die Erstattung in `ExpenseReport` hat ein Detail bekommen | jeder Strang-Eintrag geklickt: `proposal-pending` 0 → „Erwartete Zahlung", 1 → „Rückfrage"; `awaiting-document(-escalated)` 0 → „Erwarteter Beleg"; `clarification-open-firm` 0 → „Rückfrage"; `client-batch` 0–11 → „Rückfrage"; `expense-report` 0 → „Erwarteter Beleg", 1 → „Erstattung Reisekosten Juli"; `seite--in-use` 0/1 wie `proposal-pending`; `with-datev-entry` 0 → „Erwartete Zahlung" |
+
+Die Reiter-Stories sind seit 4a64223 nach Zielgruppe geschnitten (Nachtrag oben) und warten auf ihre eigene Abnahme.

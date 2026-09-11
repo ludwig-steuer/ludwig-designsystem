@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** — Abnahme offen (nicht durch den Bauenden) |
+| Status | **in Arbeit** — fremd abgenommen 2026-09-11, Verhalten ok; nur die Story-Namen in der Spec waren nachzuziehen (erledigt am selben Tag), Nachprüfung offen |
 | Stufe | `patterns/DetailView.tsx` (neu) · `src/showcase/partner/` (Seiten-Stories) |
 | Klassen-Test | Rahmen: „Ergäbe das auch in einer Versicherungs-App Sinn?" → **ja**, er kennt keine Entität, nur Slots → `patterns/`. Die Seite selbst gehört der App und lebt in `showcase/` |
 | Quelle | Entitätsprofil `docs/entitaeten/business-partner.md` · Seitenprofil `docs/seiten/partner-detail.md` (mit dieser Aufgabe geschrieben) · Auftrag `app-03` im Namen des Owners, 2026-09-10 |
@@ -62,9 +62,9 @@ Aus dem Seitenprofil, jede Streichung mit Zahl:
 
 | Prop | Bedeutung | Nachweis |
 |---|---|---|
-| `pager` | Woher die Leserin kam, wo der nächste Satz ist | `Normalfall` |
+| `pager` | Woher die Leserin kam, wo der nächste Satz ist | `Typical` |
 | `header` | Der Satz selbst (`EntityHeader`) — Pflicht | alle |
-| `signal` | **Eines** für den ganzen Satz, nie ein Stapel | `Vorgeschlagen` |
+| `signal` | **Eines** für den ganzen Satz, nie ein Stapel | `Proposed` |
 | `tabs` | Die Reiterleiste; ohne sie fällt die Zeile weg | alle |
 | `aside` | Was **neben** dem Körper mitgelesen wird (D-L3); leer → eine Spalte | — (der Partner braucht keine) |
 | `minDetail` | Der Boden der Körperspalte, ohne Default | — |
@@ -77,11 +77,11 @@ das weg.
 
 | Story | Beweist |
 |---|---|
-| `Normalfall` | Ein bestätigter Kreditor mit Buchungen — Rang 1–4 über der Falz |
+| `Typical` | Ein bestätigter Kreditor mit Buchungen — Rang 1–4 über der Falz |
 | `NoActivity` | Die Karteileiche, und sie ist der Regelfall: **77 %** haben null Buchungen |
-| `Vorgeschlagen` | Die einzige Handlung der Seite, als **ein** Knopf im Signal-Slot (D8) |
-| `Abrechner` | Verrechnungskonto an der Stelle des Personenkontos — sonst stünde dort nichts (12 Partner) |
-| `Namensdublette` | Zwei gleichnamige nebeneinander; die Kontonummer entscheidet, nicht der Ort |
+| `Proposed` | Die einzige Handlung der Seite, als **ein** Knopf im Signal-Slot (D8) |
+| `BillingProvider` | Verrechnungskonto an der Stelle des Personenkontos — sonst stünde dort nichts (12 Partner) |
+| `DuplicateName` | Zwei gleichnamige nebeneinander; die Kontonummer entscheidet, nicht der Ort |
 | `Reiter` | „Details" mit allen 16 Rängen, „Rohdaten" statt „Technik" |
 
 ## Messung 2026-09-10 (1440 × 900)
@@ -138,6 +138,23 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761 (für 0152/0157 bca4b7d); statische Checks alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| Fest: typecheck, build, @when, kein px, Registry | Checks oben; `DetailView.tsx` JSDoc | ok |
+| Fünf Slots in Reihenfolge D3; leerer Slot fällt mit Abstand weg | `partner-detail--typical`: `v2pager 0–28 · v2ehead 48–161 · v2tabs 181–224 · Körper 244–968` (kein Signal-Slot, gleicher 20-px-Abstand); `--proposed`: `v2callout 184–301` zwischen Kopf und Reitern | ok |
+| `minDetail` ohne Default | `DetailView.tsx:85 minDetail?: number`, `:100` nur durchgereicht | ok |
+| Kopf trägt **einen** Zustand | `.v2ehead [title]`: „Geschäftspartner: Bestätigt" (1 Badge + Info-Knopf); Rolle/Ort als Meta-Text | ok |
+| Abrechner: Verrechnungskonto an der Kontostelle | `--billing-provider` Kopf: „Verrechnung 1370 · 1371" statt „Kreditor 7xxxx" | ok |
+| Drei Reiter, „Rohdaten" zuletzt | „Übersicht Details Rohdaten" in allen sechs Exporten | ok |
+| Zähler auf null ist kein Link | `--no-activity`: „Sachverhalte keine" / „Belege keine" ohne `<a>`; `--typical`: „Sachverhalte 4 ansehen" mit Link | ok |
+| Übersicht schreibt nicht | 0 `input/textarea/select`, keine Bearbeiten-Knöpfe in `--typical` | ok |
+| Rang 4 über der Falz | `--typical` @1440: Karte „Personenkonten" 558, „Vorgänge" 775 (< 900) | ok |
+| Spec beschreibt das Gebaute | **Stories-Tabelle nennt `Normalfall`, `Vorgeschlagen`, `Abrechner`, `Namensdublette`; gebaut (Owner-Regel „Code englisch") sind `Typical`, `Proposed`, `BillingProvider`, `DuplicateName` (`PartnerDetail.stories.tsx`). Schnittstellen-Tabelle „Nachweis: Normalfall/Vorgeschlagen" ebenso** | **Mangel (Spec-Nachzug)** |
+
+**Urteil: in Arbeit** — nur Doku: Story-Namen in Spec 0127 (Stories-Tabelle, Nachweis-Spalte, Messungs-Absatz) auf die englischen Exporte ziehen. Verhalten vollständig ok.
+
+### Nacharbeit 2026-09-11 (durch den Bauenden, Nachprüfung offen)
+
+Story-Namen in Schnittstellen-, Stories- und Messungsteil auf die englischen Exporte gezogen: `Typical`, `Proposed`, `BillingProvider`, `DuplicateName`.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | gebaut 2026-09-10 — Abnahme offen (nicht durch den Bauenden) |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `entities/journal-entry/` — zwei Exporte mehr in `AiBookingNotes.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Judge, Buchungsvorschlag und Konfidenz sind Ludwigs Prüfkette |
 | Quelle | Owner, 2026-09-10: „gibt es die Review-Ansicht auch als Compact View — mit den Buchungshinweisen und Judge-Ergebnissen, gleiches Paket?" |
@@ -126,6 +126,17 @@ Klärungsquellen zeigt — hier zeigt sie niemand.
 
 ## Abnahme
 
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| Zelle zeigt Urteil über Achse `judge` | `aibookingnotes--cell`: Badge-`title` „Judge: Zustände erklären" (StatusBadge) in 5 Zellen | ok |
+| Konfidenz mit Wort | Zellen „Sicher", „Plausibel", „Geraten 2 Befunde" | ok |
+| Ohne Urteil und Konfidenz nichts, kein Gedankenstrich | `--cell-empty`: Zelle mit Konfidenz allein „Sicher"; `--in-use` 4. Zeile ohne Zelle; `dashes = 0` | ok |
+| Aufklapper ohne zweiten Kopf | `--in-use` alle Zeilen aufgeklappt: `.ki__h` in Aufklappern = 0 | ok |
+| Vier Blöcke einmal im Code | `AiBookingNotes.tsx:185` Kasten rendert `AiBookingNotesBody`; `:208` Body, `:320` Cell | ok |
+| Zeile ohne KI-Prüfung sagt warum | 4. Aufklapper: „Zu diesem Satz gibt es keine KI-Prüfung — er wurde von Hand gebucht." | ok |
+| Nachtrag Quellen: keine UUID, sieben Arten, `SOURCE_OPENABLE` | `--sources`/`--source-kinds`/`--box` aufgeklappt: 0 UUID-Treffer; Arten Kontoauszug · Beleg · Bisherige Buchungen · Rückfrage · Regel · Gesetz; `SOURCE_OPENABLE` = bank/beleg/klaerung true | ok |
+| Spec beschreibt das Gebaute | Tabelle Exporte + Props stimmen | ok |
+
+**Urteil: fertig.**

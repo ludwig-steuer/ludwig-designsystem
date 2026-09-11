@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `primitives/` — Gruppe Fläche |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: vier bis zwölf Zahlen als Verlauf, ohne Achsen und ohne Fachwort |
 | Quelle | `docs/v3-backlog.md` („`Sparkline` (4–12 Werte in der KPI-Kachel) … `v2spark` inline in `Schritt6Liste.tsx` (`aria-hidden`, ohne Text-Alternative)"); die Formen aus P23, die weder `BarChart` (0041) noch `Progress` (0045/0046) abdecken |
@@ -97,3 +97,21 @@ Die Ober**grenze** ist beim Bauen dazugekommen und stand so nicht in der Spec:
 derselbe wie unten — dann ist es ein Diagramm und gehört zu `BarChart`.
 
 `pnpm typecheck` und die fünf Wächter auf Exit 0.
+
+## Abnahme
+
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| 4–12 Werte → je ein Balken, letzte Spur `.is-now` | `sparkline--filled`: 6 `.v2spark__b`, 1 `.is-now` | ok |
+| `null` lässt Balken weg, Spur bleibt | `--gaps`: 6 Balken, Lücken `height: 0px`, Label „keine Angabe" an zwei Stellen | ok |
+| Unter vier Werten nichts im DOM | `--too-few`: kein `.v2spark`, nur Story-Text | ok |
+| `role="img"` + `aria-label`, Balken `aria-hidden` | Filled: `role=img`, Label „6 Werte, März bis August, 1.200,00 €, …", 6/6 `aria-hidden` | ok |
+| Ohne `summary` alle Werte in `format`; mit `summary` genau der Satz | Filled: Werte formatiert; `--in-use`: „Sechs Monate, März bis August: schwankend …" | ok |
+| Erste/letzte Beschriftung | `.v2spark__ax` „März / August" | ok |
+| Kein Hex, keine px in der Komponente | Höhe/Farbe in `.v2spark`; Balken tragen Inline-`height: NN%` (Lücke `0px`) | ok (Hinweis: Inline-Prozentwerte) |
+| Ersetzt Inline-Markup in `Schritt6Liste.tsx` | — | offen (App) |
+| Spec beschreibt das Gebaute | Obergrenze 12 im „Gebaut"-Absatz ergänzt | ok |
+
+**Urteil: fertig.**

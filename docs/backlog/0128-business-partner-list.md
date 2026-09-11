@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** nach den Defaults der offenen Fragen — Abnahme offen (nicht durch den Bauenden) |
+| Status | **in Arbeit** — fremd abgenommen 2026-09-11 mit zwei Mängeln, beide nachgearbeitet am selben Tag, Nachprüfung offen |
 | Stufe | `src/showcase/partner/` (Seiten-Stories) — **keine** neue Komponente im Set |
 | Klassen-Test | Die Seite gehört der App und lebt in `showcase/`, wie 0144, 0152, 0157. Die Liste selbst ist `DataTable` mit `businessPartnerColumns()`; beides ist gebaut |
 | Quelle | Seitenprofil `docs/seiten/partner-liste.md` (`6490f97`, gegen die App geprüft von `ludwig-manager` am 2026-09-10) · Entitätsprofil `docs/entitaeten/business-partner.md` §Listen |
@@ -152,8 +152,30 @@ die zwischen Prüfung und Absenden vergeben wird, fängt der Dialog selbst.
 
 ## Abnahme
 
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761 (für 0152/0157 bca4b7d); statische Checks alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| … | … | … |
+| Fest: typecheck, build, check:language | Checks oben | ok |
+| Code englisch, Titel deutsch, Reifegrad über Registry | `partner-list.tsx`: Registry-Wörter im Select („Entwurf · Vorgeschlagen · Bestätigt"), `check:language` 0 | ok |
+| Fixtures synthetisch | `fixtures.ts` `partnerStock()` generiert („Beispielhandel …", „Musterfirma …") | ok |
+| Gemessen bei 1280 und 1440 | `m0128.txt`, 10 Exporte × 2 | ok |
+| Zwei Reiter, keine Stat-Leiste | Tabs „Geschäftspartner · Vorschläge 7"; `grep Stat partner-list.tsx` leer | ok |
+| Vorratszähler, gefiltert „n von m" | `in-use` Kopf „6.396 · meistgenutzte zuerst"; `without-account` „12 von 572" | ok |
+| Suche trifft Name, Kurzname, USt-IdNr., Kontonummer | `search-by-number` „10433" → 1 Zeile; `same-name` „Gebäudeservice" → 3 Gleichnamige (10901 / 11377 / 12260) | ok (Kurzname/USt-IdNr. nicht per Story belegbar — nur Code) |
+| Standardsortierung Nutzung ↓, Kopf sortiert um | `in-use`: `aria-sort` Buchungen=descending; Klick auf „Geschäftspartner" → `#sort=legal_name&dir=asc`, aria-sort ascending, Kopf verliert „meistgenutzte zuerst" | ok |
+| Drei Leerfälle, drei Sätze | „Keine Treffer für „Suche „Zeppelin"". Filter zurücksetzen" · „Für diesen Mandanten sind keine Geschäftspartner importiert. … Zum Onboarding" · „Keine Vorschläge offen. Jeder Kreditor hat seine DATEV-Nummer." | ok (Hinweis: doppelte Anführungszeichen „Suche „Zeppelin"" im Satz) |
+| Annahme: vorbelegt, 4–20 Ziffern, Fehler im Dialog, Erfolg: Zeile weg, Zähler −1, Toast | `proposals`: Dialog „Beispiel Elektro Berg GmbH annehmen", **vorbelegt 890571 — aber sofort „Die Nummer 890571 ist schon vergeben." und Knopf gesperrt**; „123" → gesperrt ✓; „70001" → Satz, gesperrt ✓; „70500" → Dialog zu, 19→18 Zeilen, Reiter 18→17, Toast „Konto 70500 angelegt — 3 Buchungen umgezogen." ✓ | **Mangel** (Vorbelegung) |
+| Kontonummer öffnet Konto-Drawer, Esc schließt, Liste bleibt | „10433" → `.v2drawer.is-open` „Konto 10433"; Esc → zu; Tabellen-HTML byte-gleich | ok |
+| Kein Querlauf bei 1280, 1440, 1024 | 9 von 10 Exporten ✓. **`loading-and-error`: scrollW 1328 bei 1280 (+48 px) und bei 1024 (+304 px)** — `.v2stack` 1328 px breit (Skelett-/Fehler-Fassung) | **Mangel** |
+| Kein Text 16 px | nur `sr-only` und AppShell-Hinweis | ok |
+| Erste Zeile ohne Scrollen (InUse) | @1440 und @1280: Reiter 108–151, Filter 167–214, erste Datenzeile 301–340 | ok |
 
-Abgenommen von / am: — (nicht durch den Bauenden)
+**Urteil: in Arbeit.** Mängel: (1) `seiten-geschäftspartner-liste--loading-and-error` @1280 scrollW 1328 (erwartet 1280), @1024 1328 (erwartet 1024); (2) `--proposals`: die vorbelegte Nummer 890571 gilt als „schon vergeben" (`partner-list.tsx:182` zählt die eigenen 89xxxx-Konten des vorgeschlagenen Partners zu `taken`) — die Vorbelegung ist damit nie annehmbar.
+
+### Nacharbeit 2026-09-11 (durch den Bauenden, Nachprüfung offen)
+
+| Mangel | Nacharbeit | Messung (6107) |
+|---|---|---|
+| `loading-and-error`: Querlauf 1328 px bei 1280 und 1024 | Ursache war der Story-Rahmen: ein Grid mit `auto`-Spalte wächst auf die Mindestbreite der Tabelle. Jetzt `gridTemplateColumns: minmax(0, 1fr)` | scrollW 1280 bei 1280, 1024 bei 1024 |
+| `proposals`: vorbelegte 890571 gilt als „schon vergeben" | die eigenen Konten des Partners zählen in seinem Dialog nicht als vergeben (`AcceptCell`, `isTaken`) | Dialog: Wert 890571, kein Satz, Knopf frei; „Konto anlegen" → Dialog zu, Toast „Konto 890571 angelegt — 3 Buchungen umgezogen.", Reiter „Vorschläge 17" |

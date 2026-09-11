@@ -347,6 +347,82 @@ function EventPane({ detail: d }: { detail: EventDetail }) {
   );
 }
 
+/** Column 2 when an expectation is selected: what is awaited, and what settles it. */
+function ExpectationPane({ expectation: e, today }: { expectation: CaseTimelineExpectation; today: string }) {
+  return (
+    <Card>
+      <CardHead
+        title={e.kind === "document" ? "Erwarteter Beleg" : "Erwartete Zahlung"}
+        sub={`fällig am ${e.dueDate.split("-").reverse().join(".")}`}
+      />
+      <div className="v3boxbody">
+        <ExpectationRow expectation={toExpectation(e)} today={today} currency={e.currency} />
+        <p className="v2muted" style={{ margin: 0 }}>
+          {e.kind === "document"
+            ? "Erledigt sich, sobald der Beleg eingeht — nicht durch eine Antwort."
+            : "Erledigt sich, sobald die Zahlung eingeht oder der Saldo auf der Belegnummer aufgeht."}
+        </p>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button variant="secondary" size="sm">
+            Erledigt
+          </Button>
+          <Button variant="secondary" size="sm">
+            Aufheben
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/** A clarification known only from the strand, as the list row needs it. */
+const fromStrand = (c: CaseTimelineClarification): ClarificationVM => ({
+  id: c.id,
+  title: c.title,
+  type: c.type,
+  severity: c.severity,
+  audience: c.audience ?? "accounting",
+  raisedAt: c.raisedAt,
+  answeredAt: c.answeredAt ?? null,
+  state: c.answeredAt ? "answered" : "open",
+  href: `?tab=rueckfragen&klaerung=${c.id}`,
+});
+
+/** Column 2 when a clarification is selected: the question itself; it is answered on the right or in its tab. */
+function ClarificationPane({
+  clarification: c,
+  answerable,
+}: {
+  clarification: ClarificationVM;
+  answerable?: ClarificationVM & ClarificationDetailVM;
+}) {
+  return (
+    <Card>
+      <CardHead
+        title="Rückfrage"
+        sub={c.state === "open" ? "offen" : c.state === "answered" ? "beantwortet" : ""}
+        actions={
+          <TextButton tone="quiet" href={c.href ?? tabHref("rueckfragen")}>
+            Im Reiter öffnen
+          </TextButton>
+        }
+      />
+      <div className="v3boxbody">
+        {answerable ? (
+          <>
+            <ClarificationCard clarification={answerable} />
+            <p className="v2muted" style={{ margin: 0 }}>
+              Beantwortet wird rechts — die Antworten stehen dort als Handlungen.
+            </p>
+          </>
+        ) : (
+          <ClarificationList clarifications={[c]} empty={{ title: "Keine Rückfragen." }} />
+        )}
+      </div>
+    </Card>
+  );
+}
+
 function clarificationSub(list: ClarificationVM[]) {
   const open = list.filter((c) => c.state === "open").length;
   const answered = list.filter((c) => c.state === "answered").length;
@@ -429,6 +505,11 @@ function NotesColumn({ scenario: s }: { scenario: CaseScenario }) {
 export function ScenarioPage({ scenario: s }: { scenario: CaseScenario }) {
   const [selected, setSelected] = useState<string>(s.initialSelection ?? TODO_ID);
   const detail = s.details[selected];
+  // Every selectable entry changes column 2 — events, expectations and
+  // clarifications alike (acceptance 0152).
+  const expectation = s.expectations?.find((e) => e.id === selected);
+  const strand = s.clarifications?.find((c) => c.id === selected);
+  const clarification = s.clarificationList.find((c) => c.id === selected) ?? (strand ? fromStrand(strand) : undefined);
   const { action, ...callout } = s.signal ?? { kicker: "", title: "" };
   return (
     <CasePage
@@ -445,7 +526,18 @@ export function ScenarioPage({ scenario: s }: { scenario: CaseScenario }) {
       timeline={<StrandCard scenario={s} selected={selected} onSelect={setSelected} />}
       notes={<NotesColumn scenario={s} />}
     >
-      {selected === TODO_ID || !detail ? <TodoPane todo={s.todo} /> : <EventPane detail={detail} />}
+      {detail ? (
+        <EventPane detail={detail} />
+      ) : expectation ? (
+        <ExpectationPane expectation={expectation} today={s.today} />
+      ) : clarification ? (
+        <ClarificationPane
+          clarification={clarification}
+          {...(s.answerable?.id === clarification.id ? { answerable: s.answerable } : {})}
+        />
+      ) : (
+        <TodoPane todo={s.todo} />
+      )}
     </CasePage>
   );
 }

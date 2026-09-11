@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme** — gebaut 2026-09-09, fremde Abnahme steht aus |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `patterns/` (`CheckItems` in `Review.tsx`) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: jede Prüfliste hat Punkte, die durchfallen, und Punkte, die mangels Daten gar nicht laufen konnten |
 | Quelle | Owner-Beobachtung 2026-09-09 an einem echten Journal-Satz: zwölf Prüfpunkte, alle „nicht vergleichbar" |
@@ -119,9 +119,19 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| Zwölf `open` → **eine** Zeile | `checklist--check-items-all-open`: 0 Einzelzeilen außerhalb `<details>`, eine Sammelzeile „12 Prüfpunkte nicht prüfbar P-BETRAG …" | ok |
+| Aufgeklappt alle zwölf mit Frage und Begründung | `<details>` enthält 12 `.v2pp__q` + 12 `.v2pp__why` | ok |
+| `red`/`yellow` immer einzeln | `--check-items-mixed`: außerhalb `v2pp__row--red`, `v2pp__row--yellow`; grün (3) und offen (2) gesammelt | ok |
+| Bestandene Zeile zählt nur bestandene | Mixed: „3 von 7 Prüfpunkten bestanden P01 P02 P03" (nicht 5 von 7) | ok |
+| Offene Sammelzeile ohne Haken | `summary` „nicht prüfbar": nur `lucide-chevron-right`, kein `.v2pp__ok` | ok |
+| `CheckItemsAllGreen`, `CheckItemsEmpty` unverändert | „12 von 12 Prüfpunkten bestanden" (1 Sammelzeile, aufklappbar); „Keine Prüfpunkte für diesen Fall." | ok |
+| Spec beschreibt das Gebaute | Tabelle „Vorher/Nachher" und Gebaut-Absatz (`Disclosure`) stimmen | ok |
+
+**Urteil: fertig.**
 
 ## Gebaut 2026-09-09
 

@@ -220,7 +220,8 @@ export function JournalEntryCard({
   const credit = sum(lines.filter((l) => l.side === "credit"));
   const balanced = Math.abs(debit - credit) < BALANCE_EPSILON;
   // The column only appears when a line has something in it.
-  const withTaxKey = lines.some((l) => l.taxKey || l.automaticRate !== null);
+  // `!= null`: an optional rate that was never set is `undefined`, not `null` (acceptance 0155).
+  const withTaxKey = lines.some((l) => l.taxKey || l.automaticRate != null);
 
   return (
     <div className={withTaxKey ? "v2je v2je--bu" : "v2je"}>

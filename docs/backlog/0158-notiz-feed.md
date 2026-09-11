@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-10** — Abnahme offen (nicht durch den Bauenden) |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `patterns/NoteFeed.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, sobald dort jemand etwas an einem Vorgang festhält; kein Fachwort in Props oder Texten |
 | Quelle | **Owner-Feedback 2026-09-10** zur Sachverhaltsseite (0152 Welle 1): „die Notizen-Ansicht verschwendet Platz — `[vor wann] · [wer]`, darunter der Text in anderer Schrift, dazu „Notiz hinzufügen" mit ausklappendem Feld, als eigene Unterkomponente" |
@@ -116,8 +116,19 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
-| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
-|---|---|---|
-| … | … | |
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
 
-Abgenommen von / am: … · Offene Punkte: …
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Fest: Datei/Story/Titel, @when, `"use client"` begründet | `patterns/NoteFeed.tsx` + `NoteFeed.stories.tsx`, Titel `v3/Patterns/Arbeitsfläche/NoteFeed`; `head -1` `"use client"` | ok |
+| Ohne `onAdd` kein Knopf, kein Feld | `notefeed--filled`: `buttons = []`, kein `.v3notes__field` | ok |
+| Beischrift `--fs-ui-xs` über Text `--fs-ui` | `--in-use`: meta 11,5 px (= `--fs-ui-xs`), text 13,5 px (= `--fs-ui`) | ok |
+| Zeit relativ innerhalb einer Woche, danach Datum; Datum+Uhrzeit im `title` | `--edge`: „in dieser Minute", „vor 5 Minuten", „vorgestern", dann „01.09.2026", „07.08.2025"; jedes `title="11.09.2026, 09:48"` u. ä. | ok |
+| Speichern mit Leerraum gesperrt | `--interactive`: Feld auf, Fokus im Feld; „   " → „Speichern(disabled)"; Text → aktiv; Speichern → Notiz oben „in dieser Minute · Kanzlei Testnotiz …", Feld zu | ok |
+| Abgelehntes Speichern: Text bleibt, Meldung | `--save-fails`: während Promise „Speichern(disabled)/Abbrechen(disabled)"; danach Wert „Diese Notiz scheitert", `.v3notes__error[role=alert]` „Die Notiz wurde nicht gespeichert. Ihr Text steht noch im Feld." | ok |
+| In 370 px kein Überlauf, auch bei 600 Zeichen | `--edge`: Feed 370 px, `scrollWidth` 370; `--in-use` 328 px, `scrollWidth` 328 | ok |
+| Ersetzt die Notizen-Karte in `showcase/case` | `scenario.tsx` importiert `NoteFeed` (Spalte 3) | ok |
+| Leertext | `--empty`: „Noch keine Notiz." + Knopf | ok |
+| Spec beschreibt das Gebaute | Props-Tabelle = Code (`notes`, `onAdd`, `addLabel`, `placeholder`, `empty`) | ok |
+
+**Urteil: fertig.**

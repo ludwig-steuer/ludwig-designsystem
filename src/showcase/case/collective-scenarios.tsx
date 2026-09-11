@@ -482,8 +482,8 @@ export const expenseReport: CaseScenario = {
     points: [],
     emptyText: "Nichts zu tun: der fehlende Tankbeleg ist erbeten.",
   },
-  details: Object.fromEntries(
-    RECEIPTS.map((e): [string, EventDetail] => [
+  details: Object.fromEntries([
+    ...RECEIPTS.map((e): [string, EventDetail] => [
       e.id,
       {
         title: e.title,
@@ -496,7 +496,21 @@ export const expenseReport: CaseScenario = {
         ai: { verdict: "confirm", confidence: "green", judgeReasoning: "Reisekosten gegen das Durchlaufkonto der Abrechnung." },
       },
     ]),
-  ),
+    // The reimbursement is an entry of the strand too — it needs its own pane (acceptance 0152).
+    [
+      "ev-e-pay",
+      {
+        title: "Erstattung Reisekosten Juli",
+        sub: "02.08.2026 · gebucht",
+        lines: [
+          line("debit", "1590", "Durchlaufende Posten", RECEIPT_TOTAL, "Erstattung Juli"),
+          line("credit", "1200", "Bank", RECEIPT_TOTAL, "Erstattung Juli"),
+        ],
+        origin: "agent",
+        ai: { verdict: "confirm", confidence: "green", judgeReasoning: "Die Erstattung gleicht das Durchlaufkonto der Abrechnung aus." },
+      },
+    ] as [string, EventDetail],
+  ]),
   notes: [],
   clarificationList: [],
 };

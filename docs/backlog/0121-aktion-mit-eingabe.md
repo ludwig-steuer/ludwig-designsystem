@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `primitives/ActionButton` (0004) — durchgereicht von `Selection` (`BulkAction`) und `DataTable` (0057) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, unverändert: „mehrere Zeilen wählen, dann in einem Dialog sagen, wohin" ist kein Ludwig-Begriff |
 | Quelle | Blocker aus `[year]/banks/offen`, gemeldet von `ludwig-manager` 2026-09-08: die zwei Sammelaktionen der Zuordnung („Neuen Sachverhalt anlegen", „Bestehendem zuordnen") öffnen erst einen Dialog und feuern dann; `BulkAction.action: (keys) => Promise<ActionResult>` kann das nicht abbilden |
@@ -111,7 +111,7 @@ Abgeleitet nach §6: 0 neue Zustände (`ActionButton` hat seine fünf) +
 - `ask` und `confirm` zusammen sind ein **Typfehler** (Abnahme prüft die
   Typdefinition, nicht das Verhalten)
 - Über `BulkAction` kommen Keys **und** Wert an, und die Auswahl leert sich
-  nach Erfolg wie bei jeder anderen Sammelaktion (`BulkAskInUse`)
+  nach Erfolg wie bei jeder anderen Sammelaktion (`BulkAsk`)
 - Ersetzt in `[year]/banks/offen` die alte Arbeitsliste ohne Funktionsverlust
 
 ## Offene Fragen
@@ -189,3 +189,19 @@ nur die Schlüssel. Die Probe scheitert seither wie vorgesehen.
 **Eine der beiden Zusicherungen ist dabei weggefallen:** `undefined as Input`
 in `BulkButton` gab es nur, weil der alte Typ nicht narrowte. Übrig bleibt die
 in `ActionButton`, und die ist begründet.
+
+## Abnahme
+
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Ohne `ask` Signatur unverändert | Typprobe C (`action={async () => ({})}`) kompiliert; `pnpm typecheck` 0 | ok |
+| `ask.render` bekommt `value`/`set`, Knopf spiegelt `valid` | `--ask-invalid`: leer → „Anlegen(disabled)", „x" → disabled, gültig → Dialog zu | ok |
+| `action` bekommt den Wert des Dialogs | `--ask-for-target`: Select 2026-0412 → „Zugeordnet an 2026-0412." | ok |
+| `ask` + `confirm` = Typfehler | Typproben A (`ActionButton`) und B (`bulkAction`, TS2345) | ok |
+| Über `BulkAction` kommen Keys **und** Wert an, Auswahl leert sich (`BulkAsk`) | `datatable--bulk-ask`: 8 Zeilen gewählt → Dialog „8 Sachverhalte zuordnen" (Zahl aus den Keys), Picker im Dialog, „Zuordnen(disabled)" bis Wahl | ok (Leeren der Auswahl nach Erfolg nicht durchgespielt; Spec-Messung des Bauenden) |
+| Ersetzt in `[year]/banks/offen` | — | offen (App) |
+| Spec beschreibt das Gebaute | Story `BulkAsk` (berichtigt), Nacharbeit 2026-09-08 dokumentiert; Kriterium nennt noch `BulkAskInUse` in Klammern | ok (Hinweis: Kriterien-Zeile sagt `BulkAskInUse`) |
+
+**Urteil: fertig.**

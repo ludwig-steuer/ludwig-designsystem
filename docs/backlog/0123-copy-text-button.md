@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-08, fremde Abnahme steht aus |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `primitives/` — Gruppe Aktion |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, unverändert: „diesen Text in die Zwischenablage" kennt kein Fachwort |
 | Quelle | `docs/v3-backlog.md` („KopierenKnopf", 3 Verwendungen); Vorlage `modules/datev-truth/ui/CopyTextButton.tsx` |
@@ -91,3 +91,18 @@ abgeräumt. Ein Knopf, der vor seinen zwei Sekunden verschwindet, ruft sonst in
 einen Zustand zurück, den es nicht mehr gibt.
 
 `pnpm typecheck` und die fünf Wächter auf Exit 0.
+
+## Abnahme
+
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Klick schreibt genau `text` | `copytextbutton--filled` mit Stub auf `navigator.clipboard.writeText`: `["26.08.2026\t1.249,90\tS\t51\t6815\t1200\tRE-4471\tWartung Klimaanlage 08/2026"]` | ok |
+| „Kopiert", nach zwei Sekunden wieder `label` | nach Klick „Kopiert" + `lucide-check`; nach 2,2 s „Buchungssatz kopieren" + `lucide-copy` | ok |
+| Wirft die Zwischenablage: Satz am Knopf, Aufschrift bleibt | `--failed` (Stub rejected): Label „Buchungssatz kopieren", `.v2act__err` „Die Zwischenablage ist nicht erreichbar. Text von Hand markieren und kopieren." | ok |
+| Kein Icon ohne Wort (V11) | beide Zustände: 1 SVG + Text; `--sizes` 3 Knöpfe mit Icon+„Kopieren"; `--in-use` mit `title` | ok |
+| Ersetzt drei Kopierstellen | — | offen (App) |
+| Spec beschreibt das Gebaute | Props `text/label/title/size/variant` wie Tabelle | ok |
+
+**Urteil: fertig.**

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | gebaut 2026-09-09 — Abnahme offen (nicht durch den Bauenden) |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `patterns/` (`DataTable`), dazu eine Prop an `primitives/Table` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: benannte Abschnitte in einer Tabelle kennen keine Entität |
 | Quelle | Auftrag `app-ee` im Namen des Owners, 2026-09-09 — `ludwig/app`, `docs/backlog/F186-buchungsreview-uebersicht.md` Teil A (`a3032a79`) |
@@ -200,7 +200,7 @@ Fest (gilt immer):
 Variabel (aus dieser Spec):
 
 - [ ] **Ohne `groups` ist das DOM zeichengleich mit vorher** — ein `<tbody>`,
-      dieselben Zeilen (`WithoutGroups`, gegen den Stand vor 0149 verglichen)
+      dieselben Zeilen (`Filled`, gegen den Stand vor 0149 verglichen)
 - [ ] Je Gruppe **ein** `<tbody>`, dessen erste Zeile ein
       `<th scope="rowgroup">` ist (`WithGroups`, im DOM)
 - [ ] Kein `role="rowgroup"` und kein `aria-label` an einer Zeilengruppe
@@ -215,6 +215,18 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| Ohne `groups` DOM wie vorher: ein `<tbody>`, dieselben Zeilen | `datatable--filled`: 1 `tbody`, 3 Zeilen, kein `th[scope=rowgroup]`; App-Typecheck/Tests laut Fremdmessung grün | ok (kein Vorher-DOM verfügbar; Struktur wie Spec) |
+| Je Gruppe ein `<tbody>`, erste Zeile `<th scope="rowgroup">` | `--with-groups`: 4 `tbody`, 3 Gruppenköpfe „Eingangsrechnung … 2", „Dauersachverhalt 19 · 12.451,90 €", „Auslagen 6 · 2.239,20 €", `colSpan` SPAN_ALL, jeweils erste Zeile ihres `tbody` | ok |
+| Kein `role="rowgroup"`, kein `aria-label` an Zeilengruppe | DOM 0/0; `grep` in `DataTable.tsx`/`Table.tsx`: nur Kommentare und Sortier-Link | ok |
+| `groups` + `pager` Typfehler | Typprobe D | ok |
+| Leere Gruppe ohne `emptyHint` nicht im DOM | `--group-empty`: 2 Gruppenköpfe + Satz „Kein Dauersachverhalt in diesem Stapel.", dritte Gruppe fehlt | ok |
+| Alle Gruppen leer → ein Leerzustand | rechts: 1 `tbody`, 0 Köpfe, „In diesem Stapel steht nichts. …" | ok |
+| Kopf-Kästchen wählt genau seine Gruppe, Teilauswahl `indeterminate` | `--group-selection`: eine Zeile → Gruppenbox `indeterminate=true`; Gruppenbox → 4/4 dieser Gruppe `checked`, andere Gruppen unverändert | ok |
+| `DataTable.tsx` ohne `"use client"` | `head -1` = `import { ActionIcon } …` | ok |
+| Spec beschreibt das Gebaute | `Filled` statt `WithoutGroups`, `GroupsInUse` — im Text berichtigt; Kriterium nennt noch `WithoutGroups` | ok (Hinweis) |
+
+**Urteil: fertig.**

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | gebaut 2026-09-10 — Abnahme offen (nicht durch den Bauenden) |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, Endstand c2a2761) |
 | Stufe | `entities/source-document/` (neu: `SourceDocumentAside.tsx`), dazu eine Prop an `patterns/StatusInfoButton` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Mängel, Umsatzsteuer und Belegverlauf sind Belegfelder. Der klickbare Status-Chip dagegen schon — er ist deshalb eine Prop am Pattern, keine Komponente hier |
 | Quelle | Owner, 2026-09-10 — elf Punkte zur Belegansicht, wörtlich im Abschnitt „Auftrag" |
@@ -51,16 +51,16 @@ Standardkomponente hat einen Titel — er wurde nur nicht benutzt.
 
 | Prop | Wo | Bedeutung | Nachweis |
 |---|---|---|---|
-| `defects` · `vat` · `history` | `SourceDocumentCard` | Die drei Boxen als Slots. Slots und nicht Daten, weil jede aus einer anderen Quelle kommt und die Karte nichts lädt (E2) | `Sauber`, `WithFindings` |
-| `counterpartyHref` | Karte, Fakten | Der Gegenpart als Weg zum Geschäftspartner | `Sauber` |
-| `batchHref` | Karte, Fakten, Completion | Der Buchungsstapel, sobald es ihn gibt | `Sauber` |
-| `title` | `SourceDocumentFacts` | Der Kopf der Box; `null` im Drawer, wo der Drawer-Titel es sagt | `Sauber` |
-| `explainCompletion` | `SourceDocumentFacts` | Der Grund als Satz statt nur im Hover | `Erledigt` |
-| `explain` · `href` | `SourceDocumentCompletion` | Dasselbe eine Ebene tiefer | `Erledigt` |
-| `children` | `StatusInfoButton` | Der Auslöser selbst statt des (i) — die Marke wird klickbar | `Erledigt` |
+| `defects` · `vat` · `history` | `SourceDocumentCard` | Die drei Boxen als Slots. Slots und nicht Daten, weil jede aus einer anderen Quelle kommt und die Karte nichts lädt (E2) | `Clean`, `WithFindings` |
+| `counterpartyHref` | Karte, Fakten | Der Gegenpart als Weg zum Geschäftspartner | `Clean` |
+| `batchHref` | Karte, Fakten, Completion | Der Buchungsstapel, sobald es ihn gibt | `Clean` |
+| `title` | `SourceDocumentFacts` | Der Kopf der Box; `null` im Drawer, wo der Drawer-Titel es sagt | `Clean` |
+| `explainCompletion` | `SourceDocumentFacts` | Der Grund als Satz statt nur im Hover | `Done` |
+| `explain` · `href` | `SourceDocumentCompletion` | Dasselbe eine Ebene tiefer | `Done` |
+| `children` | `StatusInfoButton` | Der Auslöser selbst statt des (i) — die Marke wird klickbar | `Done` |
 | `defects` · `actions` · `clarifications` | `SourceDocumentDefects` | Mängel aus `docDefects()`, je Art ein Weg, dazu die Rückfragen | `WithFindings`, `StatementChooseAccount` |
-| `rates` · `deductible` · `specialCase` | `SourceDocumentVat` | Aufteilung nach Satz (erst ab zwei), Vorsteuer mit Grund | `Sauber` |
-| `entries` · `total` · `href` | `SourceDocumentHistory` | Die vier jüngsten Schritte, der Rest hinter einem Weg | `Sauber` |
+| `rates` · `deductible` · `specialCase` | `SourceDocumentVat` | Aufteilung nach Satz (erst ab zwei), Vorsteuer mit Grund | `Clean` |
+| `entries` · `total` · `href` | `SourceDocumentHistory` | Die vier jüngsten Schritte, der Rest hinter einem Weg | `Clean` |
 
 **Kann bewusst nicht:**
 
@@ -85,9 +85,9 @@ Standardkomponente hat einen Titel — er wurde nur nicht benutzt.
 
 | Story | Beweist |
 |---|---|
-| `Sauber` | Die vier Boxen im Normalfall, Gegenpart verlinkt, „nichts offen" als Aussage |
+| `Clean` | Die vier Boxen im Normalfall, Gegenpart verlinkt, „nichts offen" als Aussage |
 | `WithFindings` | Vier Mängel aus `docDefects()` mit ihren Wegen, dazu eine offene Rückfrage in derselben Box |
-| `Erledigt` | „Keine Buchung nötig" mit dem eigenen Grund als Satz; daneben `superseded` |
+| `Done` | „Keine Buchung nötig" mit dem eigenen Grund als Satz; daneben `superseded` |
 | `StatementAssigned` | Die Zeile Zahlungskonto aus `paymentAccount` (L-266) |
 | `StatementChooseAccount` | Der Mangel `payment_account` mit `PaymentAccountField` als Weg (L-268) |
 
@@ -155,6 +155,19 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (Auftrag `ludwig-manager`). Prüfstand c2a2761; statische Checks (typecheck, check:language, check:when, check:contrast, check:icons, check:jobs, check:mirror, build) auf 6d58b58 und bca4b7d alle grün. Messungen per `scripts/cdp.mjs` auf einem eigenen Storybook der Prüfer-Session.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| | | |
+| Fest: typecheck, build, @when, kein px | Checks oben | ok |
+| „Belegdaten" in der Box; `.v2doc__h` über den Fakten nicht mehr im DOM | `beleg-rechnung--clean/--with-findings/--done`, `andere-belegarten--statement-*`: `.v2doc__h` = 0; Fakten-Karte trägt den Kopf innen (Titel = Belegart „Rechnung"/„Kontoauszug") | ok (Hinweis: Kopf heißt Belegart, nicht „Belegdaten") |
+| Vier Boxen in fester Reihenfolge | Clean: Rechnung 217 · Befunde und Klärungen 798 · Umsatzsteuer 926 · Verarbeitung 1220; WithFindings: 217 · 798 · 1242 · 1536; Done: gleiche Folge | ok |
+| Erledigungs-Chip ist ein Knopf und öffnet den Status-Dialog | `.v2sinfo--wrap` = `BUTTON` („Gebucht", „Offen", „Keine Buchung nötig", „Ersetzt"); Klick → `.v2dlg` „Erledigung" | ok |
+| `no_booking_required`: Grund als Text | `--done`: „Erledigung Keine Buchung nötig 20.08.2026 Privatentnahme, gehört nicht in die Buchführung." | ok |
+| Gegenpart Link, wo `counterpartyHref` | Clean/Done: `<a href*=partner>` „Musterbau GmbH"; Kontoauszug-Stories ohne Link | ok |
+| Jeder Mangel aus `docDefects()` deutscher Satz, Rohtext darunter | WithFindings: 4 `.v3open__row` (Belegdatum · Dublette mit `.v3open__raw` · Gegenpart mehrdeutig · Empfänger), je Satz; Wege bei 3 von 4 (Dublette bewusst ohne) | ok |
+| Keine Zeile über die Kartenkante (1440) | `cardOverflow = 0` in fünf Stories; scrollW 1440 | ok |
+| `SourceDocumentAside.tsx` ohne `"use client"` | `head -1` = `import type { ReactNode }` | ok |
+| Spec beschreibt das Gebaute | Stories `Sauber`/`Erledigt` heißen `Clean`/`Done` (englische Exporte), Schnittstellen-Tabelle nennt `Sauber`, `Erledigt` | Hinweis (Spec-Nachzug wie 0127, Story-Namen) |
+
+**Urteil: fertig** — mit dem Hinweis, die Story-Namen in der Nachweis-Spalte nachzuziehen (`Sauber`→`Clean`, `Erledigt`→`Done`).
