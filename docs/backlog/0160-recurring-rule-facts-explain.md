@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | **gebaut 2026-09-11** — Abnahme offen (nicht durch den Bauenden) |
 | Stufe | `entities/recurring-rule/` — Erweiterung von `RecurringRuleFacts` (0134) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungsweise, Personenkonto und Belegnummern-Strategie gibt es nur an einer Ludwig-Regel |
 | Quelle | Owner 2026-09-11: „für wiederkehrende brauchen wir einen Tab mit den Einstellungen zu wiederkehrender Buchung — das braucht sicher eine Subkomponente mit der Konfiguration, wie diese angelegt und erklärt ist". Datengrundlage: `docs/entitaeten/recurring-rule-staging-erhebung-2026-09-11.md` (ludwig-manager, Abschnitte b–d) |
@@ -123,6 +123,34 @@ Variabel (aus dieser Spec):
 - [ ] Rhythmus und Zahltag sagen, dass sie kein Kriterium sind
 - [ ] Ohne `explain` sind `Filled`, `WithoutCriterion`, `Modes`, `All`, `InUse`, `Edges` unverändert
 - [ ] Der Reiter Wiederkehr (0152, `Recurrence`) zeigt die Regel mit `explain`; kein Querlauf bei 1440, kein Text in 16 px
+
+## Gebaut 2026-09-11
+
+- `RecurringRuleFacts` hat `explain` (Default `false`). Ein Helfer `say()`
+  hängt den Satz als Unterzeile an den Wert (`.v2rrfacts__cell`,
+  `.v2rrfacts__help`: `--fs-ui-sm`, gedämpft); „setzt der Import" folgt nach
+  einem Mittelpunkt.
+- Die Buchungsweise steht mit `resolveStatus("regel_modus", …)` — Wort und
+  Beschreibung der Registry — unter dem Satz der Regel.
+- Story `Explained` (`all` + `explain`); der Reiter Wiederkehr der
+  Sachverhaltsseite (0152, `Recurrence`) zeigt die Regel mit `all` und `explain`.
+
+**Zwei Abweichungen von der Tabelle oben**, beide gegen Wiederholung:
+
+1. Gegenkonto, Personenkonto und Buchungstext tragen **einen** Satz über der
+   Gruppe „Wirkung" statt dreimal denselben an jeder Zeile.
+2. Rhythmus und Zahltag teilen sich einen Satz („Rhythmus und Zahltag sind
+   kein Kriterium …"), er steht am Rhythmus.
+
+## Messung (6107, 1440 × 900)
+
+| Kriterium | Ergebnis |
+|---|---|
+| `pnpm typecheck`, alle Wächter | grün |
+| `Explained`: Satz je Einstellung | 9 Sätze; Buchungsweise „Sollstellung: Zur Fälligkeit wird sollgestellt …" aus der Registry |
+| „setzt der Import" genau an den Import-Einstellungen | an Belegnummer der Dauerbuchung, Laufzeit, Herkunft des Profils, Belegnummern-Strategie, Idempotenz-Anker — die sechste (Split-Vorlage) zeigt die Beispielregel nicht; an keiner anderen Zeile |
+| Ohne `explain` unverändert | `Filled`, `WithoutCriterion`, `Modes`, `All`, `InUse`, `Edges`: 0 Sätze |
+| Reiter Wiederkehr | 9 Sätze, 5 Marken, kein Querlauf, kein Text in 16 px |
 
 ## Abnahme
 

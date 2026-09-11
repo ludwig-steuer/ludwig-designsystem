@@ -3813,6 +3813,9 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 /* Amount and applicable tolerance are **one** value, not two columns. */
 .v2rrfacts__amount { display: inline-flex; align-items: baseline; gap: 2px; }
 .v2rrfacts__term { white-space: nowrap; }
+/* `explain` (0160): the value, and its sentence below in the working register. */
+.v2rrfacts__cell { display: flex; flex-direction: column; gap: var(--space-1); }
+.v2rrfacts__help { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 
 /* --- The editor (0135) --------------------------------------------------- */
 

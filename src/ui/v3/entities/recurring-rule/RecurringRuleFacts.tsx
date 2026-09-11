@@ -10,6 +10,7 @@ import {
   RULE_PROFILE_SOURCE_LABEL,
 } from "@/ludwig/modules/recurring-rules/domain/rule";
 import type { Currency } from "@/ludwig/shared/money";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 import { formatAmount } from "../../format";
 import { StatusBadge } from "../../patterns/StatusBadge";
@@ -72,6 +73,7 @@ export function RecurringRuleFacts({
   schedule,
   preview,
   all = false,
+  explain = false,
   accountHref,
   hints,
   currency = "EUR",
@@ -95,6 +97,13 @@ export function RecurringRuleFacts({
   preview: RecurringRulePreview;
   /** Also the group „Herkunft" — the server stamps and the rarely-filled columns. */
   all?: boolean;
+  /**
+   * Every setting gets its sentence — what it does in the match or in the
+   * proposal — and what only the import sets says so (0160). For the tab where
+   * the rule is **read**, not just recognised; `all` decides which settings
+   * stand, `explain` how they are described.
+   */
+  explain?: boolean;
   /** The way to the account sheet. Without it both accounts are plain text. */
   accountHref?: (accountNumber: string) => string;
   /** Sentences of the caller above the first group — today „Modus prüfen?". */
@@ -105,6 +114,20 @@ export function RecurringRuleFacts({
   const tolerance = effectiveAmountTolerance(rule);
   const t = rule.template;
 
+  // The sentences describe the match as the domain runs it (`matchTransaction`);
+  // they belong in the domain and move there with L-293.
+  const say = (value: ReactNode, help: string | null, imported = false): ReactNode => {
+    if (!explain) return value;
+    const line = [help, imported ? "setzt der Import" : null].filter(Boolean).join(" · ");
+    return (
+      <span className="v2rrfacts__cell">
+        {value}
+        {line ? <span className="v2rrfacts__help">{line}</span> : null}
+      </span>
+    );
+  };
+  const EXACT = "Muss genau übereinstimmen.";
+
   const trigger: Pair[] = [];
   // Rank 1 is derived: name **or** IBAN, in the same place — a rule learned
   // from a payment carries no name at all. Where the IBAN already stands as
@@ -114,15 +137,21 @@ export function RecurringRuleFacts({
   if (counterparty) {
     trigger.push([
       "Gegenpartei",
-      rule.matchCounterpartyName ? counterparty : <MonoCell value={counterparty} />,
+      rule.matchCounterpartyName
+        ? say(counterparty, "Der Name im Umsatz muss ihn enthalten; Groß- und Kleinschreibung zählen nicht.")
+        : say(<MonoCell value={counterparty} />, EXACT),
     ]);
   }
   if (rule.expectedDirection) {
-    trigger.push(["Richtung", RULE_DIRECTION_LABEL[rule.expectedDirection]]);
+    trigger.push([
+      "Richtung",
+      say(RULE_DIRECTION_LABEL[rule.expectedDirection], "Umsätze in die andere Richtung prüft die Regel gar nicht."),
+    ]);
   }
   if (rule.matchAmount !== null) {
     trigger.push([
       "Betrag",
+      say(
       <span key="amount" className="v2rrfacts__amount">
         <AmountCell value={accrualAmount(rule)} currency={currency} />
         {/* One number, not two columns side by side: of the absolute and the
@@ -133,28 +162,39 @@ export function RecurringRuleFacts({
           {formatAmount(tolerance, currency)}
         </span>
       </span>,
+      "Trifft, wenn der Umsatz höchstens um die Toleranz abweicht; von absoluter und prozentualer Toleranz gilt die großzügigere.",
+      ),
     ]);
   }
   if (rule.matchCounterpartyName && rule.matchCounterpartyIban) {
-    trigger.push(["IBAN", <MonoCell key="iban" value={rule.matchCounterpartyIban} />]);
+    trigger.push(["IBAN", say(<MonoCell key="iban" value={rule.matchCounterpartyIban} />, EXACT)]);
   }
   if (rule.matchPurposeRegex) {
-    trigger.push(["Muster im Verwendungszweck", <MonoCell key="pr" value={rule.matchPurposeRegex} />]);
+    trigger.push([
+      "Muster im Verwendungszweck",
+      say(
+        <MonoCell key="pr" value={rule.matchPurposeRegex} />,
+        "Ein regulärer Ausdruck über den Verwendungszweck; Groß- und Kleinschreibung zählen nicht.",
+      ),
+    ]);
   }
   // The document side of the same rule (F94). That it stands in no surface at
   // all today is the second half of L-249 — and 29 of 30 rules carry
   // `matches_documents` without a single document criterion to show for it.
   if (rule.matchContractNumber) {
-    trigger.push(["Vertragsnummer", <MonoCell key="cn" value={rule.matchContractNumber} />]);
+    trigger.push(["Vertragsnummer", say(<MonoCell key="cn" value={rule.matchContractNumber} />, "Dieselbe Regel ordnet auch Belege zu.")]);
   }
   if (rule.matchDocumentTextRegex) {
-    trigger.push(["Muster im Belegtext", <MonoCell key="dr" value={rule.matchDocumentTextRegex} />]);
+    trigger.push(["Muster im Belegtext", say(<MonoCell key="dr" value={rule.matchDocumentTextRegex} />, "Dieselbe Regel ordnet auch Belege zu.")]);
   }
   if (rule.matchesDocuments) {
     trigger.push(["Belegseite", "Die Regel bindet auch den Beleg an den Sachverhalt."]);
   }
   if (rule.matchingNote) {
-    trigger.push(["Zuordnungs-Notiz", <LongText key="note">{rule.matchingNote}</LongText>]);
+    trigger.push([
+      "Zuordnungs-Notiz",
+      say(<LongText key="note">{rule.matchingNote}</LongText>, "Für Menschen und den Agenten — kein Kriterium."),
+    ]);
   }
 
   const effect: Pair[] = [];
@@ -163,7 +203,11 @@ export function RecurringRuleFacts({
   if (rule.datevDocumentNumber) {
     effect.push([
       "Belegnummer der Dauerbuchung",
-      <MonoCell key="dn" value={rule.datevDocumentNumber} />,
+      say(
+        <MonoCell key="dn" value={rule.datevDocumentNumber} />,
+        "Belegfeld 1 jeder Sollstellung — daran hängt der Ausgleich des offenen Postens.",
+        true,
+      ),
     ]);
   }
   if (t.counterAccountNumber) {
@@ -187,27 +231,38 @@ export function RecurringRuleFacts({
   const expectation: Pair[] = [];
   if (schedule) {
     if (rule.expectedInterval) {
-      expectation.push(["Rhythmus", RULE_INTERVAL_LABEL[rule.expectedInterval]]);
+      // One sentence for rhythm and pay day: neither is a criterion of the match.
+      expectation.push([
+        "Rhythmus",
+        say(RULE_INTERVAL_LABEL[rule.expectedInterval], "Rhythmus und Zahltag sind kein Kriterium: sie sagen nur, wann Ludwig die Zahlung erwartet."),
+      ]);
     }
     if (rule.expectedDayOfMonth !== null) {
       expectation.push(["Erwarteter Zahltag", `${rule.expectedDayOfMonth}. des Monats`]);
     }
     if (rule.validFrom || rule.validUntil) {
-      expectation.push(["Laufzeit", <Validity key="v" from={rule.validFrom} until={rule.validUntil} />]);
+      expectation.push([
+        "Laufzeit",
+        say(
+          <Validity key="v" from={rule.validFrom} until={rule.validUntil} />,
+          "Beendet wird die Regel über „aktiv“, nicht über ein Enddatum.",
+          true,
+        ),
+      ]);
     }
   }
 
   const origin: Pair[] = [];
   if (all) {
     if (rule.profileSource) {
-      origin.push(["Herkunft des Profils", RULE_PROFILE_SOURCE_LABEL[rule.profileSource]]);
+      origin.push(["Herkunft des Profils", say(RULE_PROFILE_SOURCE_LABEL[rule.profileSource], null, true)]);
     }
     origin.push([
       "Zahlungskonto",
       rule.paymentAccountId ?? "Konto der jeweiligen Zahlung",
     ]);
     if (t.lines?.length) {
-      origin.push(["Split-Vorlage", `${t.lines.length} Gegenkonto-Zeilen`]);
+      origin.push(["Split-Vorlage", say(`${t.lines.length} Gegenkonto-Zeilen`, "In der Maske nur lesend.", true)]);
     }
     if (t.taxKey) origin.push(["Steuerschlüssel", <MonoCell key="tk" value={t.taxKey} />]);
     if (t.taxRatePercent !== null) {
@@ -218,10 +273,13 @@ export function RecurringRuleFacts({
     }
     origin.push([
       "Belegnummern-Strategie",
-      RULE_DOCUMENT_NUMBER_STRATEGY_LABEL[rule.documentNumberStrategy],
+      say(RULE_DOCUMENT_NUMBER_STRATEGY_LABEL[rule.documentNumberStrategy], null, true),
     ]);
     if (rule.importReference) {
-      origin.push(["Idempotenz-Anker", <MonoCell key="ir" value={rule.importReference} />]);
+      origin.push([
+        "Idempotenz-Anker",
+        say(<MonoCell key="ir" value={rule.importReference} />, "Woran der Import die Regel wiedererkennt.", true),
+      ]);
     }
     // Ranks 27 and 28 of the profile — the agent run, the export batch and the
     // DMS document link — are missing here because the **mirrored type does
@@ -235,6 +293,13 @@ export function RecurringRuleFacts({
     <div className="v2rrfacts">
       <div className="v2rrfacts__head">
         <p className="v2rrfacts__summary">{summary}</p>
+        {explain ? (
+          // The booking mode explains itself with the words of its axis — no
+          // sentence of our own beside the registry's (0160).
+          <p className="v2rrfacts__aside">
+            {`${resolveStatus("regel_modus", rule.bookingMode).label}: ${resolveStatus("regel_modus", rule.bookingMode).description ?? ""}`}
+          </p>
+        ) : null}
         <div className="v2rrfacts__state">
           <StatusBadge axis="regel_modus" status={rule.bookingMode} />
           {/* A word, no `tone` and no dot: R1 allows colour only through an
@@ -250,7 +315,11 @@ export function RecurringRuleFacts({
       ))}
 
       <Group title="Auslöser" rows={trigger} />
-      <Group title="Wirkung" rows={effect}>
+      <Group
+        title="Wirkung"
+        rows={effect}
+        lead={explain && effect.length > 0 ? "Gegenkonto, Personenkonto und Buchungstext stehen so in jedem Vorschlag dieser Regel." : null}
+      >
         {preview.automatic ? (
           <>
             <JournalEntryCard lines={preview.lines} currency={currency} caption="Buchungsvorschlag" />

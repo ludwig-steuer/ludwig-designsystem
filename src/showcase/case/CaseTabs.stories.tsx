@@ -599,6 +599,8 @@ export const Recurrence: Story = {
               note: RENT_BUILT.note,
             }}
             accountHref={accountHref}
+            all
+            explain
           />
         </div>
       </Card>

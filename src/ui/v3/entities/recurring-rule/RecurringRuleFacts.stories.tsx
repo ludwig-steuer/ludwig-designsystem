@@ -181,6 +181,21 @@ export const All: Story = {
 };
 
 /**
+ * `explain` mit `all` (0160): jede Einstellung mit ihrem Satz — woran die
+ * Regel eine Zahlung erkennt, was sie bucht, wann sie sie erwartet. Die
+ * Buchungsweise erklärt sich mit dem Wort ihrer Achse; was nur der Import
+ * setzt, sagt „setzt der Import". Rhythmus und Zahltag sind ausdrücklich
+ * **kein** Kriterium.
+ */
+export const Explained: Story = {
+  render: () => (
+    <div style={{ maxWidth: 720 }}>
+      <RecurringRuleFacts {...facts(rule())} all explain accountHref={accountHref} />
+    </div>
+  ),
+};
+
+/**
  * Im Einsatz: im Reiter „Wiederkehrende Buchung" eines Sachverhalts, in einer
  * Karte und mit `accountHref` — so stellt der `CaseDetailView` sie. Die Form
  * bringt selbst **keinen** Rahmen und keinen Innenabstand mit.
