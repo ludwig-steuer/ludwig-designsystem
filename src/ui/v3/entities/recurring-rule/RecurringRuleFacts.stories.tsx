@@ -173,8 +173,11 @@ export const All: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <RecurringRuleFacts
-        {...facts(rule({ documentNumberStrategy: "fixed", profileSource: "derived" }))}
+        {...facts(rule({ documentNumberStrategy: "fixed", profileSource: "derived", paymentAccountId: "pa-1" }))}
         all
+        paymentAccounts={[
+          { id: "pa-1", label: "Stadtbank · Geschäftskonto", iban: "DE89 3704 0044 0532 0130 00", inUse: true },
+        ]}
       />
     </div>
   ),

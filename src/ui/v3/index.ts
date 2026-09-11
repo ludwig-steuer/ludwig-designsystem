@@ -470,6 +470,7 @@ export {
 /* Geschäftspartner — Zelle (0139), Spaltensatz (0140), Auswahl (0141),
    Fakten (0142), Drawer (0143) */
 export { BusinessPartnerCell } from "./entities/business-partner/BusinessPartner";
+export { PaymentAccountCell, type PaymentAccountRef } from "./entities/payment-account/PaymentAccount";
 export {
   businessPartnerColumns,
   businessPartnerColumnOrder,

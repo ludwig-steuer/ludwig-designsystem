@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/payment-account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: ein Zahlungskonto des Mandanten mit IBAN und Kontoauszug ist Buchhaltung |
 | Quelle | Entitätsprofil `docs/entitaeten/payment-account.md` (geprüft), Abschnitte „Datenpunkte" (Rang 1–3), „Formen" (`PaymentAccountCell`), „Zuschnitt" (jetzt, Bau-Reihenfolge 1) |
@@ -76,7 +76,7 @@ als Weg; im Einsatz; Rand, weil die Zelle umbricht.
 | `Filled` | Bankkonto mit IBAN (Label mit IBAN, `title`) · Kasse ohne IBAN (Label allein, kein `title`) |
 | `Linked` | `href`: der Name ist der Link, das Zeichen nicht |
 | `Edges` | 40-Zeichen-Name mit IBAN in 200 px: bricht um, kein Überlauf |
-| `InUse` | in `SourceDocumentFacts` (Kontoauszug) und in `RecurringRuleFacts` mit `all` |
+| `InUse` | in `SourceDocumentFacts` (Kontoauszug); `RecurringRuleFacts` zeigt die Zelle in ihrer Story `All` |
 
 Nicht anwendbar: leer, lädt, Fehler — die Zelle bekommt ein Konto oder wird
 nicht gezeigt (Verhalten). Die Untergrenze 3 der Entitätsform ist mit vier
@@ -107,7 +107,7 @@ Variabel (aus dieser Spec):
 - [ ] mit `href` ist nur der Name ein Link; das Zeichen ist `aria-hidden` (Story `Linked`, DOM)
 - [ ] 200 px: der Text bricht um, `scrollWidth` = `clientWidth` (Story `Edges`, gemessen)
 - [ ] `SourceDocumentFacts` nennt das Zahlungskonto über die Zelle, ohne eigene Spanne (Story `InUse`, Grep)
-- [ ] `RecurringRuleFacts` zeigt keine UUID mehr: mit der Liste der Konten die Zelle, ohne sie „hinterlegt"; ohne Konto an der Regel weiter „Konto der jeweiligen Zahlung" (Story `InUse`, Grep auf `paymentAccountId ??`)
+- [ ] `RecurringRuleFacts` zeigt keine UUID mehr: mit der Liste der Konten die Zelle, ohne sie „hinterlegt"; ohne Konto an der Regel weiter „Konto der jeweiligen Zahlung" (Story `All` von `RecurringRuleFacts`; Grep: kein `paymentAccountId ??` mehr)
 - [ ] das Zeichen kommt aus `ENTITY_ICON["bank-account"]`, nicht aus einem lokalen Import
 
 ## Offene Fragen
@@ -120,3 +120,28 @@ Variabel (aus dieser Spec):
    `paymentAccountId`. — ohne Antwort: eine Prop
    `paymentAccounts?: readonly PaymentAccountOption[]`, dieselbe Liste, die der
    `RecurringRuleEditor` schon bekommt; die Facts schlagen die Id darin nach.
+
+## Gebaut (2026-09-11)
+
+`entities/payment-account/PaymentAccount.tsx` mit `PaymentAccountCell` und dem
+Typ `PaymentAccountRef` (`Pick` aus `PaymentAccountOption`), beide im Barrel;
+Regeln `.v2pacc*` in `v3.css`. `SourceDocumentFacts` nennt das Konto über die
+Zelle. `RecurringRuleFacts` bekommt `paymentAccounts?` (offene Frage 2,
+Default) und zeigt die Zelle, ohne Liste „hinterlegt", ohne Konto an der Regel
+wie bisher „Konto der jeweiligen Zahlung"; ihre Story `All` trägt jetzt ein
+Konto. Das Zeichen sitzt auf der ersten Zeile, nicht in der Mitte eines
+umbrochenen Labels.
+
+Gemessen (CDP, Storybook 6107, 1100 px):
+
+| Story | Beobachtung |
+|---|---|
+| `paymentaccountcell--filled` | Bank: `title` = IBAN; Kasse: kein `title`; Zeichen `aria-hidden` |
+| `--linked` | der Name ist das `<a>`, das Zeichen steht davor außerhalb |
+| `--edges` | 200 px: das Label bricht auf fünf Zeilen um, kein Überlauf (`scrollWidth` = `clientWidth`) |
+| `--in-use` | Zeile „Zahlungskonto" in `SourceDocumentFacts`: Zeichen, „Stadtbank · Geschäftskonto", `title` IBAN |
+| `recurringrulefacts--all` | Zeile „Zahlungskonto": die Zelle; keine UUID im Seitentext |
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when`,
+`check:icons` und `pnpm build` grün; Screenshots angesehen. Abnahme durch einen
+anderen Agenten steht aus.

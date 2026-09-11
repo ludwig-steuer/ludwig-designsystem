@@ -17,6 +17,7 @@ import {
   pageRangeLabel,
 } from "./SourceDocument";
 import { resolveSourceDocumentDetail } from "./source-document-detail";
+import { PaymentAccountCell } from "../payment-account/PaymentAccount";
 
 /**
  * The facts of a document — the generic ones, and what the specialization adds
@@ -216,9 +217,7 @@ export function SourceDocumentFacts({
   if (document.paymentAccount) {
     rows.push([
       "Zahlungskonto",
-      <span key="pa" title={document.paymentAccount.iban ?? undefined}>
-        {document.paymentAccount.label}
-      </span>,
+      <PaymentAccountCell key="pa" account={document.paymentAccount} />,
     ]);
   }
   rows.push([

@@ -3885,6 +3885,12 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 .v2bp__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2bp__short { color: var(--color-text-subtle); font-size: var(--fs-ui-xs); white-space: nowrap; }
 .v2bp__acc { flex-shrink: 0; }
+/* PaymentAccountCell (0174): the sign before the name. The label wraps and is
+   never cut — a name has at most 40 characters, with its IBAN 64 (profile). */
+.v2pacc { display: inline-flex; align-items: baseline; gap: var(--space-1); min-width: 0; }
+/* On the first line, not the middle of a wrapped label: a quarter em down centres 14 px on a 21 px line. */
+.v2pacc > svg { flex-shrink: 0; align-self: flex-start; margin-block-start: 0.25em; color: var(--color-text-muted); }
+.v2pacc__name { overflow-wrap: anywhere; }
 
 /* Business partner facts (0142) — groups stacked, the same gaps as the other
    entities' facts. */

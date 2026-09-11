@@ -22,6 +22,8 @@ import { LongText } from "../../primitives/LongText";
 import { Time } from "../../primitives/Time";
 import { AccountCell } from "../account/Account";
 import { JournalEntryCard, type JournalLine } from "../journal-entry/JournalEntryCompact";
+import type { PaymentAccountOption } from "@/ludwig/modules/bank-transactions/domain/payment-account-options";
+import { PaymentAccountCell } from "../payment-account/PaymentAccount";
 
 /**
  * Everything one recurring rule is (0134) — trigger, effect, expectation.
@@ -76,6 +78,7 @@ export function RecurringRuleFacts({
   all = false,
   explain = false,
   accountHref,
+  paymentAccounts,
   hints,
   currency = "EUR",
 }: {
@@ -107,6 +110,12 @@ export function RecurringRuleFacts({
   explain?: boolean;
   /** The way to the account sheet. Without it both accounts are plain text. */
   accountHref?: (accountNumber: string) => string;
+  /**
+   * The client's payment accounts — the same list `RecurringRuleEditor` gets
+   * (0174). The rule carries only `paymentAccountId`, so the account is looked
+   * up here; without the list the row says one is on file, never the id.
+   */
+  paymentAccounts?: readonly PaymentAccountOption[];
   /** Sentences of the caller above the first group — today „Modus prüfen?". */
   hints?: readonly string[];
   /** The rule has no currency column; every amount on it is euro. */
@@ -256,10 +265,7 @@ export function RecurringRuleFacts({
     if (rule.profileSource) {
       origin.push(["Herkunft des Profils", say(RULE_PROFILE_SOURCE_LABEL[rule.profileSource], "profileSource")]);
     }
-    origin.push([
-      "Zahlungskonto",
-      rule.paymentAccountId ?? "Konto der jeweiligen Zahlung",
-    ]);
+    origin.push(["Zahlungskonto", paymentAccountOf(rule.paymentAccountId, paymentAccounts)]);
     if (t.lines?.length) {
       origin.push(["Split-Vorlage", say(`${t.lines.length} Gegenkonto-Zeilen`, "template")]);
     }
@@ -385,3 +391,15 @@ function Validity({ from, until }: { from: string | null; until: string | null }
   );
 }
 
+/**
+ * The rule's payment account: the cell when the list knows the id, a word when
+ * it does not — never the id itself, which belongs to the raw data (0174).
+ */
+function paymentAccountOf(
+  id: string | null,
+  accounts: readonly PaymentAccountOption[] | undefined,
+): ReactNode {
+  if (id === null) return "Konto der jeweiligen Zahlung";
+  const account = accounts?.find((a) => a.id === id);
+  return account ? <PaymentAccountCell key="pa" account={account} /> : "hinterlegt";
+}
