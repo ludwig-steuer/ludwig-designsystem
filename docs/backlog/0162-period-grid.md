@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **gebaut 2026-09-11** — Abnahme offen (nicht durch den Bauenden) |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, gegen 9ece0c3) |
 | Stufe | `patterns/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: welcher Monat ist abgedeckt, welcher offen, wo klafft eine Lücke — das fragt jede Anwendung mit Perioden (Beitragsmonate, Meldezeiträume) |
 | Quelle | UI-Kit-Roadmap `docs/backlog/uikit-entity-roadmap-2026-09.md` (ludwig/app 9be34746), Abschnitt B, **B2** „PeriodGrid / SpanTimeline"; Reihenfolge laut Übergabe: B2 vor Entität #3 (Stapel). Auftrag über `ludwig-manager`, 2026-09-11 |
@@ -173,3 +173,6 @@ eigener Commit, jetzt `v2vh`.
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
 | | | |
+
+Fremde Abnahme am 2026-09-11 durch die Prüfer-Session (Auftrag `ludwig-manager`), gegen 9ece0c3: **fertig.** Alle Zellen mit `title` und `aria-label`, die Lücke im Mai mit Satz, „nicht vorgesehen" nur als `v2vh`, `aria-current` am laufenden Zeitraum, Legende nur mit vorkommenden Zuständen, Gegenstandsspalte sticky, Links nur mit `href`; 6 × 2 Messungen ohne Querlauf, `Narrow` scrollt in der Karte. Der Fix 2ca2152 ist bestätigt: `seiten-konto-seite--loading-error-not-found` ohne sichtbaren Lade-Text (vorher viermal in 16 px) — sichtbar war er nur im Storybook des Sets; die App erzeugt `.sr-only` über Tailwind.
+
