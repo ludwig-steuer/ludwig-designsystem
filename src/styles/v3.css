@@ -3416,7 +3416,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    inline span) and the field list's value column — a flex child with
    `flex: 0 1 auto` — must fill the row, or `space-between` pushes it right.
    That this lives here and not in `FieldList` is a workaround (finding of 0102,
-   belongs to 0058). */
+   belongs to 0006). */
 .v2btxf__note { display: block; text-align: left; font-weight: 400; }
 .v2fields__row:has(.v2btxf__note) > :last-child { flex: 1; min-width: 0; }
 /* The purpose is a long value without a label — it takes the field list's frame
@@ -3930,8 +3930,8 @@ a.v3prov:focus-visible { text-decoration: underline; }
 .v3prov__kind { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-text-muted); }
 .v3prov__quote { color: var(--color-text-muted); }
 /* A derivation is prose, not master data: one label column for all rows
-   (subgrid), values reading left (V3) — the same workaround as .v2btxf__note,
-   finding of 0102 for 0058. A long rule code breaks instead of running wide. */
+   (subgrid), values reading left (V3) — the same workaround as .v2btxf__note;
+   second caller, so the prose row is due in FieldList (0006, addendum). A long rule code breaks instead of running wide. */
 .v3prov__note .v2fields { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-4); }
 .v3prov__note .v2fields__row { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
 .v3prov__note .v2fields__row > :last-child { min-width: 0; text-align: left; font-weight: 400; }

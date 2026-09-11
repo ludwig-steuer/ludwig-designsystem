@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| Status | **gebaut** — wartet auf fremde Abnahme |
+| Status | **fertig** — fremd abgenommen 2026-09-11 (Prüfer-Session, gegen 867fb3a) |
 | Stufe | `patterns/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: woher ein Wert kommt — Maschine, Regel, Mensch, Import —, wer ihn gesetzt hat und warum, fragt jede Anwendung mit Vorschlägen und Importen |
 | Quelle | UI-Kit-Roadmap `docs/backlog/uikit-entity-roadmap-2026-09.md` (ludwig/app 9be34746), Abschnitt B, **B5** „Provenance / Rationale"; Reihenfolge laut Übergabe: B5 vor Entität #1 (Buchungssatz). Auftrag über `ludwig-manager`, 2026-09-11 |
-| Ersetzt | nichts unmittelbar — die allgemeine Form fehlt. Heute steht die Antwort entitätsgebunden oder gar nicht: `AiBookingNotes` (Buchungssatz), der Block „Herkunft und Ablage" in `SourceDocumentFacts` (0120), die Spalte „Herkunft" an `OpenItemLinkRow` (`matched_by`, `rationale` 100 % gefüllt, nirgends lesbar), Belegnummer (`decided_by_kind`, `rationale`), Konvention (`origin`, `rationale`) |
+| Ersetzt | nichts unmittelbar — die allgemeine Form fehlt. Heute steht die Antwort entitätsgebunden oder gar nicht: `AiBookingNotes` (Buchungssatz), der Block „Herkunft und Ablage" in `SourceDocumentFacts` (0120), die Spalte „Herkunft" an `OpenItemLinkRow` (`matched_by`, `rationale` 100 % gefüllt, nirgends lesbar), Belegnummer (`decided_by_kind`, `rationale`), Konvention (`origin`, `rationale`); **Ablösekandidat** `ProvMark` in `apps/web/src/modules/contracts/ui/ContractDetail.tsx:97` — eine eigene Herkunftsmarke je Vertragsfeld (KI sicher mit Prozent, KI unsicher „bitte prüfen", vom Menschen geprüft; Klassen `pmark*`), genau die Frage von `ProvenanceMark` (Hinweis ludwig-worker, 2026-09-11) |
 | Blockiert | Entität #1 `journal-entry` (Herleitung in `JournalEntryFacts`, `proposal_rationale` 52 %, `step_code`), die Ausgleichs-Zuordnung (#11), Konvention (#8), Belegnummer |
 | Spec von / am | Claude, 2026-09-11 |
 
@@ -158,8 +158,13 @@ Variabel (aus dieser Spec):
   Vorlesehilfe hörte sie sonst zweimal.
 - Die Herleitung ist Prosa, keine Stammdaten: `FieldList` setzt Werte rechts,
   hier stehen sie links in einer gemeinsamen Label-Spalte (Subgrid). Das ist
-  derselbe Umweg wie `.v2btxf__note` — Befund aus 0102, gehört zu 0058
-  (`FieldList` braucht eine Prosa-Zeile).
+  derselbe Umweg wie `.v2btxf__note`. Mit zwei Aufrufern ist die Prosa-Zeile
+  fällig: Nachtrag in 0006 (`FieldList`). Der Verweis „gehört 0058" in 0102
+  war falsch — 0058 ist der verworfene `ClarificationDrawer`.
+- **Namensgleichheit in der App:** `apps/web/src/modules/contracts/domain/contract.ts:7`
+  hat `type ProvenanceSource = "ai" | "manual"`. Heute keine Kollision (kein
+  `export *`); wer die Vertragsseite auf `ProvenanceMark` umstellt, importiert
+  einen der beiden mit Alias (Hinweis ludwig-worker, 2026-09-11).
 - Ein langer Regel-Code bricht um (`overflow-wrap: anywhere`), statt quer zu
   laufen.
 - Die Story `Mark` zeigt die Marke in einer Feldliste **und** in einer
@@ -183,3 +188,6 @@ Variabel (aus dieser Spec):
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
 | | | |
+
+Fremde Abnahme am 2026-09-11 durch die Prüfer-Session (Auftrag `ludwig-manager`), gegen 867fb3a: **fertig.** Zeilen in fester Reihenfolge, leere fehlen; Zusammenfassung mit Herkunft, Konfidenz (`aria-label`), wer und wann; Marke `A[href]`/`SPAN` mit `title` und `v2vh`; Quellen mit `EntityIcon` und Wort, Links nur mit `href`; kein Achsen-Zugriff im Pattern; 7 × 3 Messungen ohne Querlauf, kein Text in 16 px. Hinweis ohne Mangel: in `Mark` ragte die Marke der Feldliste bei 360 px 13 px über den Rand — die Story-Zeile bricht jetzt um.
+

@@ -85,14 +85,14 @@ export const Mark: Story = {
         rows={[
           [
             "Konto",
-            <span key="k" style={{ display: "inline-flex", gap: 12, alignItems: "center" }}>
+            <span key="k" style={{ display: "inline-flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 12, alignItems: "center" }}>
               5404 Wareneingang 19 %
               <ProvenanceMark provenance={PROPOSAL} href="#provenance" />
             </span>,
           ],
           [
             "Belegnummer",
-            <span key="b" style={{ display: "inline-flex", gap: 12, alignItems: "center" }}>
+            <span key="b" style={{ display: "inline-flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 12, alignItems: "center" }}>
               93846778
               <ProvenanceMark
                 provenance={{ origin: <span>aus dem Beleg</span>, rationale: "Die Rechnungsnummer steht im Kopf des Belegs." }}
@@ -103,7 +103,7 @@ export const Mark: Story = {
         ]}
       />
       <Card>
-        <Table cols="minmax(0, 1fr) 160px minmax(0, 1fr)">
+        <Table cols="minmax(0, 1fr) auto max-content">
           <HeadRow>
             <span>Rechnung</span>
             <span>Konto</span>

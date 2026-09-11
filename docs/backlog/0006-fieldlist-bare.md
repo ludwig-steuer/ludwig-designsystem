@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig |
+| Status | fertig · **Nachtrag 2026-09-11 offen** (Prosa-Zeile) |
 | Stufe | `primitives/` — Erweiterung eines vorhandenen Exports |
 | Klassen-Test | entfällt — keine neue Komponente |
 | Quelle | `docs/v3-backlog.md` — „Danach": `Werteliste`, 10 lokale `Row({label})`-Helfer + 10 `<dl>` |
@@ -113,3 +113,26 @@ Abgenommen von / am: Claude (Abnahme), 2026-09-03 · Offene Punkte: keine.
 Hinweis: der JSDoc-Kopf von `FieldList.tsx` ist deutsch (bestand schon vor
 0006, der neue Absatz führt ihn fort) — die Hausregel will englische
 Kommentare; sauber wäre, ihn beim nächsten Anfassen der Datei zu übersetzen.
+
+## Nachtrag 2026-09-11 — die Feldliste kann keinen Satz tragen
+
+`FieldList` setzt jeden Wert rechtsbündig in fetter Schrift (`.v2fields__row >
+span:last-child`). Für Stammdaten ist das richtig, für einen Satz nicht:
+rechtsbündige Prosa ist unlesbar (V3). Zwei Aufrufer bauen sich deshalb heute
+denselben Umweg in `v3.css`:
+
+| Aufrufer | Umweg | Form |
+|---|---|---|
+| `BankTransactionFacts` (0102) | `.v2btxf__note` + `.v2fields__row:has(.v2btxf__note) > :last-child { flex: 1 }` | **eine** Zeile Prosa zwischen Stammdaten |
+| `ProvenanceNote` (0163) | `.v3prov__note .v2fields` als Grid mit Subgrid, Werte links, Gewicht 400 | die **ganze** Liste ist Prosa, eine gemeinsame Label-Spalte |
+
+Die Bedingung aus 0102 („jeder Aufrufer baut sich seinen eigenen") ist mit dem
+zweiten Aufrufer erfüllt. Der Verweis „gehört 0058" in 0102 war falsch — 0058
+ist der verworfene `ClarificationDrawer`; gemeint war diese Spec.
+
+**Auftrag für `spec-schreiben`:** beide Formen tragen — eine Zeile Prosa und
+eine Liste aus Prosa —, danach beide Umwege aus `v3.css` streichen. Offene
+Frage mit Default: ohne Antwort eine Prop je Liste (`values="prose"`: Werte
+links, eine Label-Spalte) und für die einzelne Zeile ein Wert-Wrapper, den die
+Liste per `:has()` erkennt, wie heute `.v2btxf__note`.
+
