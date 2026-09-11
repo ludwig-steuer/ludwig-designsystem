@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig · **Nachtrag 2026-09-11 spezifiziert** (Prosa), Bau folgt |
+| Status | fertig · **Nachtrag 2026-09-11 gebaut, Abnahme offen** (Prosa) |
 | Stufe | `primitives/` — Erweiterung eines vorhandenen Exports |
 | Klassen-Test | entfällt — keine neue Komponente |
 | Quelle | `docs/v3-backlog.md` — „Danach": `Werteliste`, 10 lokale `Row({label})`-Helfer + 10 `<dl>` |
@@ -184,3 +184,25 @@ bisher und ist belegt (`Empty`).
 
 **Offene Fragen:** die des Nachtrags — ohne Antwort beides, Prop und Wrapper.
 Keine weitere.
+
+### Gebaut (2026-09-11)
+
+`FieldList` trägt `values?: "data" | "prose"`, die Familie einen zweiten Export
+`FieldProse` (auch im Barrel). In `v3.css` stehen die Regeln bei der Feldliste
+(`.v2fields--prose`, `.v2fields__prose`); `.v2btxf__note` samt `:has()`-Regel
+und `.v3prov__note .v2fields*` sind gestrichen. `ProvenanceNote` nimmt
+`values="prose"` und verliert seinen Wrapper, `BankTransactionFacts` nimmt
+`FieldProse`. Stories `Prose` und `ProseRow` dazu — neun.
+
+Gemessen vor und nach dem Umbau (CDP, Storybook 6107), Anfang der ersten
+Textzeile je Wert:
+
+| Story | vorher | nachher |
+|---|---|---|
+| `provenance--note`, `--edges` | Label x 24, Werte x 119, links, 400 | unverändert |
+| `banktransactionfacts--unassigned`, Zeile „Sachverhalt" | Satz x 153, Spalte 538 px | unverändert; Nachbarzeilen rechts, 500 |
+| `fieldlist--prose` | — | als Daten rechts, 500, x 131–157; als Prosa alle Werte x 504, links, 400 |
+| `fieldlist--prose-row` | — | Satz x 129, links, 400; Nachbarn rechts, 500; bei 360 px bricht der Satz um, kein Überlauf |
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
+`pnpm build` grün. Abnahme durch einen anderen Agenten steht aus.

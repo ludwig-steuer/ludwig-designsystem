@@ -3,7 +3,7 @@ import { resolveEventBookingState, restOf } from "./derive";
 import { caseIdentifier } from "../accounting-case/case-title";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Amount } from "../../primitives/Amount";
-import { FieldList } from "../../primitives/FieldList";
+import { FieldList, FieldProse } from "../../primitives/FieldList";
 import { MonoCell } from "../../primitives/Cells";
 import { Disclosure } from "../../primitives/Disclosure";
 import { RawRecord } from "../../primitives/RawRecord";
@@ -197,9 +197,7 @@ function Assignment({
           ["DATEV-Historie", <MatchStage key="m" stage={t.matchStage} />],
           [
             "Sachverhalt",
-            <span key="n" className="v2btxf__note">
-              Diese Zahlung ist noch keinem Sachverhalt zugeordnet.
-            </span>,
+            <FieldProse key="n">Diese Zahlung ist noch keinem Sachverhalt zugeordnet.</FieldProse>,
           ],
         ]}
       />

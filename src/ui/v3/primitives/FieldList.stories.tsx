@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { FieldList } from "./FieldList";
+import type { ReactNode } from "react";
+import { FieldList, FieldProse } from "./FieldList";
 
 const meta: Meta<typeof FieldList> = { title: "v3/Primitives/Fläche/FieldList", component: FieldList };
 export default meta;
@@ -150,4 +151,51 @@ export const Split: Story = {
       </div>
     </div>
   ),
+};
+
+const DERIVATION: [string, string][] = [
+  ["Herkunft", "Vom Agenten vorgeschlagen, 31.07.2026"],
+  ["Regel", "Konto nach der Präzedenz dieses Lieferanten."],
+  [
+    "Begründung",
+    "Konto und Kreditor wie bei der Rechnung desselben Lieferanten im Juni; das Kontoblatt zeigt für Juli keine Bewegung, die Rechnung war also noch nicht erfasst.",
+  ],
+];
+
+/**
+ * `values="prose"`: the same rows as data and as prose, side by side. As data
+ * the sentences hang on the right edge in bold; as prose they read left, in
+ * normal weight, and start on one line because one label column serves all
+ * rows.
+ */
+export const Prose: Story = {
+  render: () => (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <FieldList title="Als Daten" rows={DERIVATION} />
+      <FieldList title="Als Prosa" rows={DERIVATION} values="prose" />
+    </div>
+  ),
+};
+
+/**
+ * `FieldProse`: one sentence among ordinary values. Only its row changes — the
+ * sentence reads left and takes the rest of the row, the neighbours stay
+ * right-aligned. Below, the same list at 360 px: the sentence wraps.
+ */
+export const ProseRow: Story = {
+  render: () => {
+    const rows: [string, ReactNode][] = [
+      ["DATEV-Historie", "abgeglichen"],
+      ["Sachverhalt", <FieldProse key="n">Diese Zahlung ist noch keinem Sachverhalt zugeordnet.</FieldProse>],
+      ["Betrag", "1.249,90 €"],
+    ];
+    return (
+      <div style={{ display: "grid", gap: 20 }}>
+        <FieldList title="Zuordnung" rows={rows} />
+        <div style={{ maxWidth: 360 }}>
+          <FieldList title="Zuordnung, 360 px" rows={rows} />
+        </div>
+      </div>
+    );
+  },
 };

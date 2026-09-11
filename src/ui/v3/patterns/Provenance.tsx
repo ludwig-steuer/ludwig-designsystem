@@ -193,9 +193,7 @@ export function ProvenanceNote({
       }
       {...(defaultOpen ? { defaultOpen } : {})}
     >
-      <div className="v3prov__note">
-        <FieldList tone="bare" rows={rows} />
-      </div>
+      <FieldList tone="bare" values="prose" rows={rows} />
     </Disclosure>
   );
 }

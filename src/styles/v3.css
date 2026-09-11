@@ -749,6 +749,19 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2fields--split { columns: 2 300px; column-gap: var(--space-6); }
 .v2fields--split .v2fields__row { break-inside: avoid; }
 .v2fields--split .v2fields__h { column-span: all; }
+/* Prose (0006, addendum 2026-09-11): a sentence is text, not a value — it reads
+   left and in normal weight (V3). `values="prose"` makes the whole list a grid
+   with one label column for all rows (subgrid), so the sentences start on one
+   line; a long code breaks instead of running wide. `FieldProse` does it for a
+   single row: the sentence needs a block box (`text-align` does nothing on an
+   inline span), and its value column must fill the row, or `space-between`
+   pushes it right. */
+.v2fields--prose { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-4); }
+.v2fields--prose > .v2fields__h, .v2fields--prose > .v2fields__empty { grid-column: 1 / -1; }
+.v2fields--prose .v2fields__row { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+.v2fields--prose .v2fields__row > span:last-child { min-width: 0; text-align: left; font-weight: 400; }
+.v2fields__prose { display: block; text-align: left; font-weight: 400; }
+.v2fields__row:has(> span:last-child > .v2fields__prose) > span:last-child { flex: 1; min-width: 0; }
 
 /* --- Fließtext-Karte ---------------------------------------------------- */
 .v2prose {
@@ -3411,14 +3424,6 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 /* --- Facts of a bank line (0102) ----------------------------------------- */
 .v2btxf { display: grid; gap: var(--space-5); }
-/* A sentence is text, not a value: left-aligned, although the field list sets
-   values right (V3). It needs a **block box** (`text-align` does nothing on an
-   inline span) and the field list's value column — a flex child with
-   `flex: 0 1 auto` — must fill the row, or `space-between` pushes it right.
-   That this lives here and not in `FieldList` is a workaround (finding of 0102,
-   belongs to 0006). */
-.v2btxf__note { display: block; text-align: left; font-weight: 400; }
-.v2fields__row:has(.v2btxf__note) > :last-child { flex: 1; min-width: 0; }
 /* The purpose is a long value without a label — it takes the field list's frame
    but not its row: right-aligned prose is unreadable. */
 .v2btxf__purpose { padding: var(--space-3) var(--space-4) var(--space-1); }
@@ -3929,12 +3934,7 @@ a.v3prov:focus-visible { text-decoration: underline; }
 .v3prov__sources li { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
 .v3prov__kind { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-text-muted); }
 .v3prov__quote { color: var(--color-text-muted); }
-/* A derivation is prose, not master data: one label column for all rows
-   (subgrid), values reading left (V3) — the same workaround as .v2btxf__note;
-   second caller, so the prose row is due in FieldList (0006, addendum). A long rule code breaks instead of running wide. */
-.v3prov__note .v2fields { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-4); }
-.v3prov__note .v2fields__row { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
-.v3prov__note .v2fields__row > :last-child { min-width: 0; text-align: left; font-weight: 400; }
+/* A long rule code breaks instead of running wide. */
 .v3prov__line .v2mono { overflow-wrap: anywhere; }
 
 /* --- Annotated (showcase): a page with its building blocks named on top, for
