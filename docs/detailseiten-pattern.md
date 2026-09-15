@@ -50,7 +50,7 @@ kein Bau wartet.
 
 | | Spec | Art | Warum in diesem Rang | Owner-Frage — ohne Antwort |
 |---|---|---|---|---|
-| **S1** | `FieldList`: Prosa-Zeile (Nachtrag 0006) | ausbessern | fällig — zwei Aufrufer bauen denselben Umweg; jede weitere Herleitung, Notiz oder Begründung in Zone 3 wäre der dritte | Eine Prop für die ganze Liste (Werte links, eine Label-Spalte) **und** ein Wert-Wrapper für die einzelne Zeile? — *beides* |
+| **S1** ✓ | `FieldList`: Prosa-Zeile (Nachtrag 0006, gebaut 2026-09-11) | ausbessern | fällig — zwei Aufrufer bauen denselben Umweg; jede weitere Herleitung, Notiz oder Begründung in Zone 3 wäre der dritte | Eine Prop für die ganze Liste (Werte links, eine Label-Spalte) **und** ein Wert-Wrapper für die einzelne Zeile? — *beides* |
 | **S2** ✓ | B3 `DiffView` (0179, gebaut 2026-09-15): Vorher / Nachher feldweise | ergänzen | blockiert 0164 und 0165; der Weg vom korrigierten Wert zu seiner Änderung (`ProvenanceNote`) endet heute bei „wer und wann" | Nur die geänderten Felder oder alle mit Markierung? — *nur die geänderten, Rest eingeklappt* |
 | **S3** ✓ | `Columns`: Stufe für die schmale Spalte, `aside`/`minDetail` aus `DetailView` ins Muster (0184, gebaut 2026-09-15) | ausbessern | die Notizspalte des Sachverhalts ist die einzige ungemessene Breite; ein zweiter Rahmen mit Randspalte würde den Umweg kopieren | Beim Umbruch fällt Spalte 3 nach unten oder klappt Spalte 1 ein (0152, offene Frage 2)? — *nach unten, wie gebaut* |
 | **S4** ✓ | `SourceDocumentCard` auf `Columns split` (0185, gebaut 2026-09-15) | ausbessern | D17: der Beleg ist die einzige Detailseite, deren Gegenüberstellung ein eigenes Raster hat (`.v2doccard__cols`); die Karte steht auch im Drawer (`tone="bare"`), der Umbau trifft beide | — |
