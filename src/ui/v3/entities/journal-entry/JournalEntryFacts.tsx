@@ -69,6 +69,7 @@ export function JournalEntryFacts({
   judgeReasoning = null,
   sources = [],
   batchHref,
+  accountHref,
   caseHref,
   tone = "surface",
 }: {
@@ -79,6 +80,8 @@ export function JournalEntryFacts({
   /** The sources of the decision, already in the kinds this kit knows. */
   sources?: readonly AiSource[];
   batchHref?: (batchId: string) => string;
+  /** The way to the account drawer, per account number (0155) — into the grid. */
+  accountHref?: (accountNumber: string) => string;
   caseHref?: (caseId: string) => string;
   /** `bare` for the drawer, where a card already stands around it (0052). */
   tone?: "surface" | "bare";
@@ -193,16 +196,15 @@ export function JournalEntryFacts({
         </Banner>
       ) : null}
 
-      {/* Two nachtrags on 0113 live here: the grid offers only `onOpenLedger`,
-          a callback, so a server form cannot give it the way to the account
-          (0155 settled that everywhere else with an `accountHref`); and it
-          always draws its own status badge, so the state stands twice as soon
-          as a form above it shows the way to DATEV (D24). */}
+      {/* No status in the grid's head: the way to DATEV stands above, and the
+          state twice in one view is what D24 forbids (nachtrag 0113). */}
       <JournalEntryGrid
         rows={rows}
         status={entry.status}
+        showStatus={false}
         documentNumber={documentNumber}
         documentAmount={amount}
+        {...(accountHref ? { accountHref } : {})}
       />
 
       <div className="v2stack">

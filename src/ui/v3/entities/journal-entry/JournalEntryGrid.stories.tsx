@@ -240,3 +240,23 @@ export const InUse: Story = {
     </div>
   ),
 };
+
+/**
+ * Inside a form that already says where the entry stands (0176): the head
+ * keeps the document and the balance, the state chip is gone — twice would be
+ * D24 — and the way to the ledger is a **URL**, so middle click works.
+ */
+export const InAForm: Story = {
+  render: () => (
+    <Frame sub="in JournalEntryFacts">
+      <JournalEntryGrid
+        rows={ROWS}
+        status="accepted"
+        showStatus={false}
+        documentNumber="RE-4471"
+        documentAmount={1475.6}
+        accountHref={(account) => `#account=${account}`}
+      />
+    </Frame>
+  ),
+};

@@ -689,7 +689,7 @@ nicht mehr eine gelöschte Story, sondern sagt, wohin sie gezogen ist.
 Kontoname die Zelle füllte. Gemessen mit p90-Namen: **24 × 24 px** mit
 `flex: 0 0 auto`, **14 × 24** ohne (Gegenprobe im laufenden Bild).
 
-## Nachtrag 2026-09-15 — aus dem Bau von 0176 (offen)
+## Nachtrag 2026-09-15 — aus dem Bau von 0176 (**gebaut**, Abnahme offen)
 
 `JournalEntryFacts` (0176) komponiert das Raster. Zwei Dinge fehlen ihm dafür:
 
@@ -706,3 +706,15 @@ Kontoname die Zelle füllte. Gemessen mit p90-Namen: **24 × 24 px** mit
 
 Beides ist klein und gehört in dieselbe Datei; bis dahin trägt 0176 die
 Doppelung sichtbar in seinem Abschnitt „Gebaut".
+
+### Gebaut (2026-09-15)
+
+`accountHref?: (accountNumber: string) => string` steht neben `onOpenLedger`;
+sind beide gesetzt, gewinnt die URL — mittlere Maustaste und „in neuem Tab
+öffnen" gehören zu einem Ziel, das eine hat (0155). `showStatus` (Vorgabe
+`true`) nimmt dem Kopf sein `StatusBadge`, wo die Form darüber schon sagt, wo
+der Satz steht. Story `InAForm` zeigt beides.
+
+Gemessen (CDP, 1000 px): im Kopf des Rasters **kein** Badge mehr, zwei
+Konto-Wege als `<a href>`; in `JournalEntryFacts` steht der Zustand nur noch
+einmal, als „Weg nach DATEV".

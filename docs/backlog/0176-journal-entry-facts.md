@@ -149,14 +149,11 @@ um (Formwechsel, keine Ableitung). Beides im Barrel.
    `RationaleSourceLike.kind` ist ein freier String, `AiSource.art` eine der
    fünf Arten des Sets — die Zuordnung kennt nur der Aufrufer. Eine Map hier
    wäre eine dritte Wahrheit neben App und Set.
-2. **Kein `accountHref`.** Das Raster (0113) kennt nur `onOpenLedger`, einen
-   Callback; eine Server-Form kann keinen übergeben. Nachtrag auf 0113
-   geschrieben.
-3. **Der Zustand steht zweimal.** Das Raster zeichnet immer sein eigenes
-   `StatusBadge` („Freigegeben"), darüber steht der Weg nach DATEV („In DATEV
-   bestätigt"). Das ist D24 verletzt und sichtbar: derselbe Nachtrag auf 0113
-   verlangt eine Prop, die den Kopf des Rasters auf den Beleg beschränkt. Bis
-   dahin bleibt es stehen, statt den Weg nach DATEV zu opfern — er ist Rang 5.
+2. ~~**Kein `accountHref`.**~~ **Erledigt am 2026-09-15**: das Raster nimmt
+   jetzt `accountHref`, und die Form reicht es durch (Nachtrag 0113, gebaut).
+3. ~~**Der Zustand steht zweimal.**~~ **Erledigt am 2026-09-15**: das Raster
+   nimmt `showStatus={false}`, die Form setzt es. Der Zustand steht nur noch
+   als „Weg nach DATEV" — gemessen in der Story `InUse`.
 
 Gemessen (CDP, Storybook 6107, 1000 px, im Story-Iframe):
 

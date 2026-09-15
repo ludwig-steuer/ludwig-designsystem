@@ -231,6 +231,7 @@ export const InUse: Story = {
         judgeReasoning="Keine Beanstandung."
         caseHref={caseHref}
         batchHref={batchHref}
+        accountHref={(account) => `#account=${account}`}
         tone="bare"
       />
     </Frame>

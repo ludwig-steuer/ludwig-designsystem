@@ -42,6 +42,19 @@ export interface JournalEntryGridProps {
   accountFramework?: string | null;
   /** The way into the ledger, per row. Without it the rows carry no link. */
   onOpenLedger?: (accountNumber: string) => void;
+  /**
+   * The same way as a URL — what 0155 settled everywhere else: a search
+   * param, not a callback. A server form cannot hand over `onOpenLedger`
+   * (nachtrag 0113, found in 0176). Both set: the URL wins, because middle
+   * click and „open in new tab" belong to a target that has one.
+   */
+  accountHref?: (accountNumber: string) => string;
+  /**
+   * The state chip in the head. `false` where the form around it already
+   * shows the way to DATEV — the state twice in one view is D24 (nachtrag
+   * 0113, found in 0176).
+   */
+  showStatus?: boolean;
   messages?: {
     errors?: readonly JournalGridMessage[];
     warnings?: readonly JournalGridMessage[];
@@ -79,6 +92,8 @@ export function JournalEntryGrid({
   journal = false,
   accountFramework,
   onOpenLedger,
+  accountHref,
+  showStatus = true,
   messages,
 }: JournalEntryGridProps) {
   const full = mode === "full";
@@ -93,7 +108,7 @@ export function JournalEntryGrid({
           {documentNumber ? `Beleg ${documentNumber}` : "Ohne Belegnummer"}
           {documentAmount == null ? "" : ` · ${euro(documentAmount)}`}
         </span>
-        <StatusBadge axis="journal_entry" status={status} info={false} />
+        {showStatus ? <StatusBadge axis="journal_entry" status={status} info={false} /> : null}
         <span className="bse__head-end">
           {rest !== null && (full || Math.abs(rest) >= 0.005) ? (
             <span className={`bse__rest${Math.abs(rest) < 0.005 ? " is-ok" : " is-off"}`}>
@@ -148,7 +163,13 @@ export function JournalEntryGrid({
             {full ? <span>KOST</span> : null}
           </div>
           {rows.map((row) => (
-            <Row key={row.id} row={row} full={full} onOpenLedger={onOpenLedger} />
+            <Row
+              key={row.id}
+              row={row}
+              full={full}
+              {...(onOpenLedger ? { onOpenLedger } : {})}
+              {...(accountHref ? { accountHref } : {})}
+            />
           ))}
         </div>
       )}
@@ -183,16 +204,27 @@ function Row({
   row,
   full,
   onOpenLedger,
+  accountHref,
 }: {
   row: JournalRow;
   full: boolean;
   onOpenLedger?: (accountNumber: string) => void;
+  accountHref?: (accountNumber: string) => string;
 }) {
   const account = (
     <span className="bse__account-cell">
       <span className="v2mono">{row.account}</span>
       {row.accountName ? <span className="v2muted bse__account-name">{row.accountName}</span> : null}
-      {onOpenLedger ? (
+      {accountHref ? (
+        // The URL wins over the callback: middle click, „open in new tab" and
+        // the status bar belong to a target that has one (0155).
+        <IconButton
+          size="sm"
+          label={`Kontenblatt zu ${row.account}`}
+          icon={<ActionIcon action="ledger" size={14} />}
+          href={accountHref(row.account)}
+        />
+      ) : onOpenLedger ? (
         // `IconButton`, not a bare button with a class of its own: the
         // building block brings the hit area, the hover answer and the focus
         // ring with it — the invented `.v2iconbtn` was in no stylesheet and
