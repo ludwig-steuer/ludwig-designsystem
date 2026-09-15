@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen 04ecb0f); drei Nacharbeiten und ein dokumentierter Einwand, siehe „Prüfung" |
+| Status | **in Specs** — `JournalEntryRow` 0175, `JournalEntryFacts` 0176, `JournalEntryDrawer` 0177, `JournalEntryList` 0178, alle gebaut und auf fremder Abnahme (2026-09-15). Davor **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen 04ecb0f); drei Nacharbeiten und ein dokumentierter Einwand, siehe „Prüfung" |
 | GLOSSARY | `### Journal entry` (englisch `journal entry`, deutsch „Buchung"), `### Bookkeeping entry (Buchung)` (Herkunft, Lebenslauf), `### Journal entry line (Teilbuchung)`, `### Satzart (was ein Buchungssatz tut)` (`entry kind`), `### Proposed posting` — Ordner `entities/journal-entry/` |
 | Tabelle | `ludwig.client_journal_entry` (Kopf) + `ludwig.client_journal_entry_line` (Teilbuchungen, Side-Pattern). Keine Subtypen. Die Teilbuchung ist Kind **ohne eigenes Gesicht** — sie ist die Zeile des Grids —, deshalb ein Profil für beide |
 | Typen | `src/ludwig/modules/entries/domain/entry.ts` — `ENTRY_ORIGIN`, `ENTRY_STATUS`, `ENTRY_DATEV_STAGE`, `deriveEntryDatevStage()`, `JournalEntryListItem`, `EntryFilter` · `entries/domain/journal-entry-vm.ts` — `JournalEntryVM`, `BookingLineVM`, `RationaleSourceLike`, `CompactBookingVM` · `accounting-cases/domain/rationale-source.ts` — `RationaleSourceSchema` (nur die Quellen der Herleitung) · `datev-export/domain/document-group.ts` — `DOCUMENT_GROUP_LABEL`. **Fehlt im Spiegel:** die Wortliste der Satzart (`ENTRY_KIND_LABEL`, App `core/accounting/entry-kind.ts`) → L-294 |
@@ -193,10 +193,10 @@ Bau-Reihenfolge: `JournalEntryRow` → `JournalEntryFacts` → `JournalEntryDraw
 
 | Form / Liste | Marke | Grund | Backlog |
 |---|---|---|---|
-| `JournalEntryRow` | jetzt | trägt beide Listen und den Reiter am Sachverhalt; ersetzt die Zeile von `BuchungenTabelle` | — |
-| `JournalEntryFacts` | jetzt | existiert zweimal in der App; B5 (`ProvenanceNote`) steht jetzt | — |
-| `JournalEntryDrawer` | jetzt | J-27 steht auf „halb", weil zwei Drawer eine Frage beantworten | — |
-| `JournalEntryList` („Inhalt des Stapels", „am Sachverhalt", „Export-Bucket") | jetzt | ersetzt `BuchungenTabelle`; Ränge ohne Annahme belegt | — |
+| `JournalEntryRow` | jetzt | trägt beide Listen und den Reiter am Sachverhalt; ersetzt die Zeile von `BuchungenTabelle` | `docs/backlog/0175-journal-entry-row.md` |
+| `JournalEntryFacts` | jetzt | existiert zweimal in der App; B5 (`ProvenanceNote`) steht jetzt | `docs/backlog/0176-journal-entry-facts.md` |
+| `JournalEntryDrawer` | jetzt | J-27 steht auf „halb", weil zwei Drawer eine Frage beantworten | `docs/backlog/0177-journal-entry-drawer.md` |
+| `JournalEntryList` („Inhalt des Stapels", „am Sachverhalt", „Export-Bucket") | jetzt | ersetzt `BuchungenTabelle`; Ränge ohne Annahme belegt | `docs/backlog/0178-journal-entry-list.md` |
 | `JournalEntryReviewList` „Vorschläge prüfen" | Backlog | hängt am Profil `export-batch` (Roadmap #3), an einem fehlenden Seitenprofil der Stapelabnahme, an B3 `DiffView` (`ai_edited`) und an einem Typ für das Judge-Verdikt (L-295) | `docs/backlog/0164-journal-entry-review-list.md` |
 | `JournalEntryView` · `JournalEntryPicker` · Profil „Teilbuchung" | verworfen | siehe Formen | — |
 
