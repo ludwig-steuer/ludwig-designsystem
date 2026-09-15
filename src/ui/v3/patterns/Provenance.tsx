@@ -30,11 +30,24 @@ export interface ProvenanceSource {
   quote?: string | null;
   /** The way to the source; without it the source is text. */
   href?: string | null;
+  /**
+   * Open the source **beside** the work instead of leading away — a drawer
+   * (0186). Only a client caller has one; a server form simply does not pass
+   * it, and then `href` or plain text stands there.
+   */
+  onOpen?: (() => void) | undefined;
 }
 
 export interface Provenance {
-  /** The word of the origin — a `StatusBadge` of the caller's axis. */
-  origin: ReactNode;
+  /**
+   * The word of the origin — a `StatusBadge` of the caller's axis.
+   *
+   * **Optional only where the frame already says it** (0186): inside the box
+   * „KI-Buchungshinweise" the origin stands in the title, and a row repeating
+   * it would be the same statement twice. Everywhere else it belongs here —
+   * without it the row is absent, never empty.
+   */
+  origin?: ReactNode;
   /** Who: „Agent · Lauf 4b19c2", a person, „DATEV-Import". */
   actor?: ReactNode;
   /** When, ISO. */
@@ -118,23 +131,65 @@ function Origin({ provenance: p }: { provenance: Provenance }) {
  *          after, field by field → DiffView (B3).
  */
 export function ProvenanceNote({
-  provenance: p,
+  provenance,
   defaultOpen = false,
+  extra,
 }: {
   provenance: Provenance;
   /** Begin open — for instance when someone corrected the value. */
   defaultOpen?: boolean;
+  /**
+   * What the caller hangs under the rows — at a booking entry the judge's
+   * sentence and its findings (0186). The pattern holds the place; it knows no
+   * judge.
+   */
+  extra?: ReactNode;
 }) {
-  const rows: [ReactNode, ReactNode][] = [
-    [
+  const p = provenance;
+  return (
+    <Disclosure
+      summary={
+        <span className="v3prov__line">
+          {/* No sentence here: the reason stands right below, open. */}
+          <span className="v3prov">
+            <Origin provenance={p} />
+          </span>
+          {p.actor ? <span className="v2sub">{p.actor}</span> : null}
+          {p.at ? <Time value={p.at} format="date" size="sm" /> : null}
+        </span>
+      }
+      {...(defaultOpen ? { defaultOpen } : {})}
+    >
+      <ProvenanceRows provenance={p} />
+      {extra}
+    </Disclosure>
+  );
+}
+
+/**
+ * The rows of a derivation **without** the disclosure around it (0186).
+ *
+ * Its own export because two places need the same rows: the note above, and
+ * the box „KI-Buchungshinweise" at a booking entry, which brings its own head
+ * with verdict and confidence — there the origin stands in the title, and the
+ * row is absent instead of repeating it.
+ *
+ * @when    The derivation inside a frame that already has its own head.
+ * @instead With its own summary line → ProvenanceNote. Only the origin beside
+ *          a value → ProvenanceMark.
+ */
+export function ProvenanceRows({ provenance: p }: { provenance: Provenance }) {
+  const rows: [ReactNode, ReactNode][] = [];
+  if (p.origin || p.actor || p.at) {
+    rows.push([
       "Herkunft",
       <span key="o" className="v3prov__line">
         {p.origin}
         {p.actor ? <span>{p.actor}</span> : null}
         {p.at ? <Time value={p.at} format="date" /> : null}
       </span>,
-    ],
-  ];
+    ]);
+  }
   if (p.rule) {
     rows.push([
       "Regel",
@@ -162,7 +217,18 @@ export function ProvenanceNote({
         {p.sources.map((s) => (
           <li key={s.key}>
             <span className="v3prov__kind">{s.kind}</span>
-            {s.href ? <Link href={s.href}>{s.label ?? "öffnen"}</Link> : s.label ? <span>{s.label}</span> : null}
+            {/* Opening beside beats jumping away (0151): where the caller has
+                a drawer, the source is a button; where it has a URL, a link;
+                otherwise it stays text. */}
+            {s.onOpen ? (
+              <button type="button" className="v2link" onClick={s.onOpen}>
+                {s.label ?? "öffnen"}
+              </button>
+            ) : s.href ? (
+              <Link href={s.href}>{s.label ?? "öffnen"}</Link>
+            ) : s.label ? (
+              <span>{s.label}</span>
+            ) : null}
             {s.quote ? <span className="v3prov__quote">„{s.quote}“</span> : null}
           </li>
         ))}
@@ -179,21 +245,6 @@ export function ProvenanceNote({
     ]);
   }
 
-  return (
-    <Disclosure
-      summary={
-        <span className="v3prov__line">
-          {/* No sentence here: the reason stands right below, open. */}
-          <span className="v3prov">
-            <Origin provenance={p} />
-          </span>
-          {p.actor ? <span className="v2sub">{p.actor}</span> : null}
-          {p.at ? <Time value={p.at} format="date" size="sm" /> : null}
-        </span>
-      }
-      {...(defaultOpen ? { defaultOpen } : {})}
-    >
-      <FieldList tone="bare" values="prose" rows={rows} />
-    </Disclosure>
-  );
+  if (rows.length === 0) return null;
+  return <FieldList tone="bare" values="prose" rows={rows} />;
 }

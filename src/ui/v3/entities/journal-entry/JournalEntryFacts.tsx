@@ -14,7 +14,7 @@ import { Link } from "../../primitives/Link";
 import { Time } from "../../primitives/Time";
 import { CaseCell } from "../accounting-case/CaseCell";
 import type { CaseLink } from "../accounting-case/case-title";
-import { AiBookingNotesBody, type AiSource } from "./AiBookingNotes";
+import { AiBookingNotesBody, aiSourcesToProvenance, type AiSource } from "./AiBookingNotes";
 import { JournalEntryGrid } from "./JournalEntryGrid";
 import { documentSideTotal, toJournalRows } from "./journal-entry";
 
@@ -96,7 +96,6 @@ export function JournalEntryFacts({
     // hands in is the same statement: found again in DATEV.
     datevMirrorEntryId: context.mirrorEntry ? context.mirrorEntry.label : null,
   });
-  const hasAi = Boolean(judgeReasoning) || sources.length > 0;
 
   const facts: [ReactNode, ReactNode][] = [
     ["Buchungsdatum", <Time key="d" value={entry.bookingDate} format="date" />],
@@ -207,30 +206,28 @@ export function JournalEntryFacts({
         {...(accountHref ? { accountHref } : {})}
       />
 
-      <div className="v2stack">
-        <ProvenanceNote
-          defaultOpen
-          provenance={{
-            origin: <StatusBadge axis="journal_entry_origin" status={entry.origin} info={false} />,
-            ...(context.agentRun ? { actor: context.agentRun } : {}),
-            ...(entry.createdAt ? { at: entry.createdAt } : {}),
-            ...(context.stepCode
-              ? { rule: { code: context.stepCode, sentence: "Teilschritt des Buchungslaufs." } }
-              : {}),
-            ...(entry.confidence != null
-              ? { confidence: { level: confidenceLevel(entry.confidence), value: entry.confidence } }
-              : {}),
-            ...(hasAi ? {} : { rationale: entry.rationale }),
-          }}
-        />
-        {hasAi ? (
-          <AiBookingNotesBody
-            rationale={entry.rationale}
-            judgeReasoning={judgeReasoning}
-            sources={[...sources]}
-          />
-        ) : null}
-      </div>
+      {/* **One** derivation, not two (0186): origin, rule, confidence, reason
+          and sources are the rows of the note; what only exists at a booking
+          entry — the judge's sentence — hangs under them. */}
+      <ProvenanceNote
+        defaultOpen
+        provenance={{
+          origin: <StatusBadge axis="journal_entry_origin" status={entry.origin} info={false} />,
+          ...(context.agentRun ? { actor: context.agentRun } : {}),
+          ...(entry.createdAt ? { at: entry.createdAt } : {}),
+          ...(context.stepCode
+            ? { rule: { code: context.stepCode, sentence: "Teilschritt des Buchungslaufs." } }
+            : {}),
+          ...(entry.confidence != null
+            ? { confidence: { level: confidenceLevel(entry.confidence), value: entry.confidence } }
+            : {}),
+          ...(entry.rationale ? { rationale: entry.rationale } : {}),
+          ...(sources.length > 0 ? { sources: aiSourcesToProvenance(sources) } : {}),
+        }}
+        {...(judgeReasoning
+          ? { extra: <AiBookingNotesBody judgeReasoning={judgeReasoning} /> }
+          : {})}
+      />
 
       {exportRows.length > 0 ? (
         <FieldList title="Export und Stapel" tone={tone} rows={exportRows} />

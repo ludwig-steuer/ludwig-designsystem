@@ -19,6 +19,7 @@ import { Confidence, type ConfidenceLevel } from "../../patterns/Confidence";
 import { StateIcon, type StateKind } from "../../patterns/Review";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
+import { ProvenanceRows, type ProvenanceSource } from "../../patterns/Provenance";
 import { StatusBadge } from "../../patterns/StatusBadge";
 
 /**
@@ -195,6 +196,36 @@ export function AiBookingNotes({
 }
 
 /**
+ * The sources of a proposal as the pattern takes them (0186) — icon and word
+ * stay the vocabulary of this entity, the rendering is the one of every other
+ * derivation.
+ *
+ * @when    Handing an entry's sources to ProvenanceNote or ProvenanceRows.
+ * @instead The whole box with head and verdict → AiBookingNotes.
+ */
+export function aiSourcesToProvenance(sources: readonly AiSource[]): ProvenanceSource[] {
+  return sources.map((s) => ({
+    key: s.key,
+    kind: <SourceKindMark art={s.art} />,
+    ...(s.label ? { label: s.label } : {}),
+    ...(s.quote ? { quote: s.quote } : {}),
+    ...(s.href ? { href: s.href } : {}),
+    ...(s.onOpen ? { onOpen: s.onOpen } : {}),
+  }));
+}
+
+/** Icon and word of a source kind — the vocabulary of this entity, not of the pattern. */
+function SourceKindMark({ art }: { art: SourceKind }) {
+  const { Icon, label } = SOURCE_KIND[art];
+  return (
+    <>
+      <Icon size={13} strokeWidth={1.5} />
+      <span className="ki__art">{label}</span>
+    </>
+  );
+}
+
+/**
  * The content of the notes without the box around it (0151).
  *
  * Its own export because two places need the same four blocks: the box above,
@@ -224,54 +255,20 @@ export function AiBookingNotesBody({
         </div>
       ))}
 
-      {rationale ? (
-        <div className="ki__block">
-          <div className="lw-overline">Begründung des Vorschlags</div>
-          <p className="ki__text">{rationale}</p>
-        </div>
-      ) : null}
+      {/* One rendering of a derivation, not a second one (0186): reason and
+          sources are the rows of `ProvenanceRows`, like everywhere else. The
+          origin is absent here — it stands in the head of this box. */}
+      <ProvenanceRows
+        provenance={{
+          ...(rationale ? { rationale } : {}),
+          ...(sources.length > 0 ? { sources: aiSourcesToProvenance(sources) } : {}),
+        }}
+      />
 
       {judgeReasoning ? (
         <div className="ki__block">
           <div className="lw-overline">Einschätzung des Judge</div>
           <p className="ki__text">{judgeReasoning}</p>
-        </div>
-      ) : null}
-
-      {sources.length > 0 ? (
-        <div className="ki__block">
-          <div className="lw-overline">Quellen</div>
-          {sources.map((s) => {
-            const { Icon, label } = SOURCE_KIND[s.art];
-            const inner = (
-              <>
-                <Icon size={13} strokeWidth={1.5} />
-                <span className="ki__art">{label}</span>
-                {s.label ? <span>{s.label}</span> : null}
-                {s.quote ? <span className="ki__quote">„{s.quote}“</span> : null}
-              </>
-            );
-            // Opening beside beats jumping away: the document belongs **next
-            // to** the work. Only where there is no way beside it does the
-            // source become a link, and then in a new window — a half-checked
-            // entry must not be lost.
-            if (s.onOpen) {
-              return (
-                <button type="button" className="ki__src ki__src--open" key={s.key} onClick={s.onOpen}>
-                  {inner}
-                </button>
-              );
-            }
-            return s.href ? (
-              <a className="ki__src" href={s.href} key={s.key} target="_blank" rel="noreferrer">
-                {inner}
-              </a>
-            ) : (
-              <div className="ki__src" key={s.key}>
-                {inner}
-              </div>
-            );
-          })}
         </div>
       ) : null}
     </>

@@ -140,3 +140,11 @@ Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (
 | Spec beschreibt das Gebaute | Tabelle Exporte + Props stimmen | ok |
 
 **Urteil: fertig.**
+
+## Nachtrag 2026-09-15 — Begründung und Quellen kommen aus dem Pattern (0186)
+
+Der Kasten bleibt, wie er ist: Kopf mit Titel, Konfidenz und Urteil, Inhalt
+eingeklappt. Was darunter steht, rendert jetzt `ProvenanceRows` (0163/0186) —
+dieselben Zeilen wie an jeder anderen Herleitung. Eigenes Markup behalten nur
+die Befunde und der Judge-Satz; `aiSourcesToProvenance()` übersetzt die Quellen
+in die Form des Patterns.

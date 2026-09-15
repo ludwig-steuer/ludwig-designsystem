@@ -4,7 +4,13 @@ import { EntityIcon } from "../Icons";
 import { FieldList } from "../primitives/FieldList";
 import { Card, CardHead, HeadRow, Row, Table } from "../primitives/Table";
 import { StatusBadge } from "./StatusBadge";
-import { ProvenanceMark, ProvenanceNote, type Provenance, type ProvenanceSource } from "./Provenance";
+import {
+  ProvenanceMark,
+  ProvenanceNote,
+  ProvenanceRows,
+  type Provenance,
+  type ProvenanceSource,
+} from "./Provenance";
 
 const meta: Meta<typeof ProvenanceNote> = {
   title: "v3/Patterns/Prüfen/Provenance",
@@ -203,3 +209,50 @@ export const Edges: Story = {
     </div>
   ),
 };
+
+/**
+ * The rows without the disclosure (0186) — for a frame that has its own head.
+ * On the left with its origin, on the right without: inside a box titled „KI-
+ * Buchungshinweise" the origin stands in the title, and the row is **absent**
+ * instead of repeating it. A source with `onOpen` is a button, one with `href`
+ * a link, one with neither text.
+ */
+export const Rows: Story = {
+  render: () => (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+      <ProvenanceRows provenance={PROPOSAL} />
+      <ProvenanceRows
+        provenance={{
+          rationale: PROPOSAL.rationale,
+          sources: [
+            { key: "o", kind: kind("source-document", "Beleg"), label: "Rechnung 93846778", onOpen: () => {} },
+            ...SOURCES.slice(1),
+          ],
+        }}
+      />
+    </div>
+  ),
+};
+
+/**
+ * `extra` hält den Platz für das, was **nur** der Aufrufer hat — am
+ * Buchungssatz das Urteil des Judge. Das Pattern kennt keinen Judge; es lässt
+ * ihm Raum unter den Zeilen.
+ */
+export const WithVerdict: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <ProvenanceNote
+        defaultOpen
+        provenance={PROPOSAL}
+        extra={
+          <div className="ki__block">
+            <div className="lw-overline">Einschätzung des Judge</div>
+            <p className="ki__text">Konto und Steuerschlüssel passen zur Präzedenz; keine Beanstandung.</p>
+          </div>
+        }
+      />
+    </div>
+  ),
+};
+

@@ -257,6 +257,7 @@ export { PeriodGrid, type PeriodCell, type PeriodColumn, type PeriodRow } from "
 export {
   ProvenanceMark,
   ProvenanceNote,
+  ProvenanceRows,
   type Provenance,
   type ProvenanceSource,
 } from "./patterns/Provenance";

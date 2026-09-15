@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `patterns/` (Erweiterung von `Provenance`, 0163) und `entities/journal-entry/` (0151) |
 | Klassen-Test | die Erweiterung: „auch in einer Versicherungs-App?" → ja, eine Herleitung mit Platz für das, was der Aufrufer anfügt |
 | Quelle | `docs/detailseiten-pattern.md` Spec **S8**; Ausbau-Zeile in `docs/backlog/0163-provenance.md` |
@@ -73,3 +73,19 @@ Variabel (aus dieser Spec):
 ## Offene Fragen
 
 Keine.
+
+## Gebaut (2026-09-15)
+
+`ProvenanceRows` ist ein eigener Export; `ProvenanceNote` setzt ihn und hängt
+`extra` darunter. `Provenance.origin` ist optional — fehlt sie, fehlt die Zeile
+„Herkunft" ganz. `ProvenanceSource` kennt `onOpen`, damit eine Quelle neben der
+Arbeit aufgehen kann; `aiSourcesToProvenance()` bringt die Quellen des
+Buchungssatzes in die Form des Patterns, mit Zeichen und Wort der Entität.
+
+`AiBookingNotesBody` rendert Begründung und Quellen nicht mehr selbst,
+`JournalEntryFacts` zeigt **eine** Herleitung: Herkunft · Regel · Konfidenz ·
+Begründung · Quellen, darunter die Einschätzung des Judge. Angesehen bei
+1000 px.
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
+`pnpm build` grün. Abnahme durch einen anderen Agenten steht aus.

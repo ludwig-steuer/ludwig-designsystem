@@ -57,6 +57,6 @@ kein Bau wartet.
 | **S5** | Mangel am Wert im Set (neu, R21) | ergänzen | sobald ein zweiter Konsument ihn zeigt — der Sachverhalt ohne Gegenpart ist der erste Kandidat | Eigene Komponente oder eine Zeile der `FieldList` mit Satz und Weg? — *eine `FieldList`-Zeile* |
 | **S6** | B6 `BalanceCheck`: geht es auf? (neu) | ergänzen | Saldo und Soll/Haben stehen heute in drei Formen; D24 verlangt sie einmal | — |
 | **S7** | Abschnitts-Index im Reiter (neu, D27) | ergänzen | die Owner-Frage „senkrechte Reiter" | Senkrechte Unterreiter oder Sprungmarken im Reiter? — *Sprungmarken, keine zweite Reiterebene (D10)* |
-| **S8** | `AiBookingNotes` auf `ProvenanceNote` (Nachtrag 0163) | ausbessern | zwei Formen derselben Herleitung, sobald `JournalEntryFacts` gebaut wird | — |
+| **S8** ✓ | `AiBookingNotes` auf `ProvenanceNote` (0186, gebaut 2026-09-15) | ausbessern | zwei Formen derselben Herleitung, sobald `JournalEntryFacts` gebaut wird | — |
 | **S9** | B4 `AllocationEditor` | ergänzen | Backlog — 1 % der Ereignisse; erst der Sammelsachverhalt verlangt es | Jetzt oder mit dem Sammelsachverhalt? — *mit dem Sammelsachverhalt* |
 | **S10** | `LogBrowser`: Tiefe in allen drei Listen (Prüfung, ggf. Nachtrag 0054) | prüfen | nach App P34–P36; das Muster trägt die Tiefe schon | — |

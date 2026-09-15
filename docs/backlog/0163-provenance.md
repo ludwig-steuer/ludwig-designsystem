@@ -191,3 +191,10 @@ Variabel (aus dieser Spec):
 
 Fremde Abnahme am 2026-09-11 durch die Prüfer-Session (Auftrag `ludwig-manager`), gegen 867fb3a: **fertig.** Zeilen in fester Reihenfolge, leere fehlen; Zusammenfassung mit Herkunft, Konfidenz (`aria-label`), wer und wann; Marke `A[href]`/`SPAN` mit `title` und `v2vh`; Quellen mit `EntityIcon` und Wort, Links nur mit `href`; kein Achsen-Zugriff im Pattern; 7 × 3 Messungen ohne Querlauf, kein Text in 16 px. Hinweis ohne Mangel: in `Mark` ragte die Marke der Feldliste bei 360 px 13 px über den Rand — die Story-Zeile bricht jetzt um.
 
+## Nachtrag 2026-09-15 — der Ausbau ist gebaut (0186)
+
+„`AiBookingNotes` baut Begründung und Quellen noch selbst" — seit 0186 nicht
+mehr. Die Zeilen der Herleitung sind ein eigener Export (`ProvenanceRows`), die
+KI-Hinweise nehmen ihn, und `ProvenanceNote` hält mit `extra` den Platz für das
+Urteil des Judge. Dazu: `origin` ist optional, wo der Rahmen sie schon nennt,
+und eine Quelle kann mit `onOpen` neben der Arbeit aufgehen.
