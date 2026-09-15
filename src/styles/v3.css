@@ -1165,7 +1165,9 @@ select.v2in { padding-right: 26px; }
 
 /* `50 | 50`: two equal halves — both sides are the statement (original vs
    extraction). */
-.v3cols--split > .v3cols__main,
+/* The two halves of a comparison are equal until the content says otherwise:
+   both floors are named steps, and the extra space is shared evenly (0185). */
+.v3cols--split > .v3cols__main { flex: 1 1 var(--v3cols-main, 380px); }
 .v3cols--split > .v3cols__aside { flex: 1 1 var(--v3cols-aside, 380px); }
 
 /* `master | sidebar`: one surface with a narrow companion. When the row runs
@@ -2560,31 +2562,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  /* **The card measures itself, not the window**: it stands on a page (wide)
-     and in a drawer (1,060 px) — an `@media` rule would see the same window
-     both times and give the original 484 px in the drawer. */
-  container-type: inline-size;
-  container-name: doccard;
 }
-.v2doccard__cols {
-  display: grid;
-  /* One column is the default, two the exception — right even where container
-     queries do not apply. */
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
-  align-items: start;
-}
-/* Two columns from **960 px card width** — the sum of the minima: 560 original,
-   384 facts, 16 gutter. Measured in `SourceDocumentView` → `InUse` inside the
-   `AppShell`: at 1280 (the L1 minimum) the card gets 976 px, at 1440 1,136 —
-   1280 → 560 / 400, 1440 → 560 / 560, 1600 → 720 / 560, no overflow. */
-/* **Why 384, not 400**: 400 would put the gate at 976 px — exactly the card
-   width in a 1280 px window; a window with a classic scrollbar would fall to
-   one column unnoticed. The 16 px buy that case free; 384–399 only occurs
-   between 1264 and 1279 px, behind the L1 lock. */
-@container doccard (min-width: 960px) {
-  .v2doccard__cols { grid-template-columns: minmax(560px, 1fr) minmax(384px, 560px); }
-}
+/* The two columns are `Columns split` since 0185 — the floors `document` (560)
+   and `record` (384) carry what the container query used to: the card breaks
+   at about 960 px of its own width, and both halves share the extra space. */
 .v2doccard__facts { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
 .v2doccard__orig { min-width: 0; }
 .v2doccard__parts { display: flex; flex-direction: column; gap: var(--space-2); }

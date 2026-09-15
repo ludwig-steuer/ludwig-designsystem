@@ -187,3 +187,37 @@ export const AsideSteps: Story = {
   ),
 };
 
+/**
+ * Zwei Hälften, zwei Böden (0185). Oben `split` wie bisher — beide Hälften
+ * gleich, Boden 380. Unten die Belegkarte: links das Original auf `document`
+ * (560), rechts die Belegdaten auf `record` (384). Der zusätzliche Platz wird
+ * in beiden Fällen gleichmäßig geteilt; verschieden ist nur, wo sie anfangen.
+ */
+export const SplitWeights: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 32 }}>
+      <div>
+        <div className="v2muted" style={{ marginBottom: 8 }}>
+          split — gleiche Hälften
+        </div>
+        <Columns
+          pattern="split"
+          main={<Block title="Links" rows={3} />}
+          aside={<Block title="Rechts" rows={3} />}
+        />
+      </div>
+      <div>
+        <div className="v2muted" style={{ marginBottom: 8 }}>
+          split — document 560 gegen record 384
+        </div>
+        <Columns
+          pattern="split"
+          width="document"
+          asideWidth="record"
+          main={<Block title="Original" rows={4} />}
+          aside={<Block title="Belegdaten" rows={3} />}
+        />
+      </div>
+    </div>
+  ),
+};

@@ -145,10 +145,9 @@ Reiters.
   Kardinalitäten geben nicht mehr her, und eine leere Zone ist besser als drei
   leere Karten.
 
-- **D17 (jeder Reiter hat ein Spaltenmuster):** Die Übersicht stellt Original
-  und Fakten in `SourceDocumentCard` (0071) mit einem eigenen Raster gegenüber
-  (`.v2doccard__cols`) statt in `Columns split`. Die Karte ist älter als 0154
-  und steht zugleich im Drawer. Nachgezogen wird sie mit S4 des
-  Pattern-Inventars (`docs/detailseiten-pattern.md`; Prüfung `ludwig-manager`
-  2026-09-11).
+- ~~**D17 (jeder Reiter hat ein Spaltenmuster)**~~ — **erledigt am 2026-09-15
+  mit 0185**: `SourceDocumentCard` rendert `Columns split` mit den benannten
+  Böden `document` (560) und `record` (384); das eigene Raster und die
+  Container-Query der Karte sind weg. Die Messung vorher/nachher steht in
+  `docs/backlog/0185-source-document-card-columns.md`.
 

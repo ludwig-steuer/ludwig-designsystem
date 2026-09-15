@@ -49,10 +49,14 @@ export type ColumnPattern = "list-detail" | "list-detail-aside" | "split" | "mai
  * 440 px strand the posting text was 98 px wide at 1440 and the contra account
  * lost its name in every row; at 1384 the view stood side by side with **zero**
  * pixels of text, at 1383 it wrapped and was complete).
+ *
+ * `document` 560 px — the original of a document beside what was read out of
+ * it (measured in 0071/0150: below that the preview cannot be read, and the
+ * card then stacks instead of shrinking it).
  */
-export type ColumnWidth = "facts" | "table";
+export type ColumnWidth = "facts" | "table" | "document";
 
-const WIDTH: Record<ColumnWidth, number> = { facts: 460, table: 960 };
+const WIDTH: Record<ColumnWidth, number> = { facts: 460, table: 960, document: 560 };
 
 /**
  * The floor of the **companion** column — the second half of the decision,
@@ -66,10 +70,15 @@ const WIDTH: Record<ColumnWidth, number> = { facts: 460, table: 960 };
  * `facts` 360 px — a block of field rows beside a table, the master data of an
  * account (0157). Wider than notes because a field row carries a label **and**
  * its value on one line.
+ *
+ * `record` 384 px — the facts of a record beside its original (0150). **Why
+ * 384 and not 400**: 400 puts the gate at 976 px, which is exactly the card
+ * width in a 1280 px window — a browser with a space-taking scrollbar would
+ * fall to one column there unnoticed.
  */
-export type ColumnAsideWidth = "notes" | "facts";
+export type ColumnAsideWidth = "notes" | "facts" | "record";
 
-const ASIDE_WIDTH: Record<ColumnAsideWidth, number> = { notes: 320, facts: 360 };
+const ASIDE_WIDTH: Record<ColumnAsideWidth, number> = { notes: 320, facts: 360, record: 384 };
 
 /**
  * @when    The body of a tab that has more than one column — one of the four
@@ -84,7 +93,7 @@ export function Columns({
   list,
   main,
   aside,
-  width = "facts",
+  width,
   asideWidth,
 }: {
   pattern: ColumnPattern;
@@ -95,8 +104,9 @@ export function Columns({
   /** Read along: notes, facts, the second half of a comparison. */
   aside?: ReactNode;
   /**
-   * Which step the main surface stands on. Ignored by `split`, where both
-   * halves are equal by definition.
+   * Which step the main surface stands on. In `split` it is the floor of the
+   * **left** half and **optional**: without it both halves keep the same floor
+   * (0185) — „widths follow the weight, the pattern does not" (owner, 0154).
    */
   width?: ColumnWidth;
   /**
@@ -105,8 +115,11 @@ export function Columns({
    */
   asideWidth?: ColumnAsideWidth;
 }) {
+  // In `split` the floor is only set when the caller names one: the two halves
+  // of a comparison are equal until the content says otherwise (0185).
+  const mainFloor = pattern === "split" ? (width ? WIDTH[width] : null) : WIDTH[width ?? "facts"];
   const style = {
-    "--v3cols-main": `${WIDTH[width]}px`,
+    ...(mainFloor === null ? {} : { "--v3cols-main": `${mainFloor}px` }),
     ...(asideWidth ? { "--v3cols-aside": `${ASIDE_WIDTH[asideWidth]}px` } : {}),
   } as CSSProperties;
   return (

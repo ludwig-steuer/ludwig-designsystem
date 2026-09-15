@@ -171,3 +171,12 @@ Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (
 | Spec beschreibt das Gebaute | Stories `Sauber`/`Erledigt` heißen `Clean`/`Done` (englische Exporte), Schnittstellen-Tabelle nennt `Sauber`, `Erledigt` | Hinweis (Spec-Nachzug wie 0127, Story-Namen) |
 
 **Urteil: fertig** — mit dem Hinweis, die Story-Namen in der Nachweis-Spalte nachzuziehen (`Sauber`→`Clean`, `Erledigt`→`Done`).
+
+## Nachtrag 2026-09-15 — die Karte ist jetzt `Columns split` (0185)
+
+Die zwei Spalten der Belegkarte kommen nicht mehr aus `.v2doccard__cols` mit
+eigener Container-Query, sondern aus dem Muster (D17). Die beiden gemessenen
+Böden dieser Abnahme leben als benannte Schritte weiter: `document` 560 für das
+Original, `record` 384 für die Belegdaten — samt der Begründung, warum 384 und
+nicht 400. Was sich ändert: bei 1136 px Kartenbreite teilen sich die Hälften
+den Platz gleichmäßig (646 / 470 statt 560 / 560). Messung in 0185.

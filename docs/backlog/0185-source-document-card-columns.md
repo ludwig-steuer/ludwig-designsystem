@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `patterns/` (Erweiterung von `Columns`, 0154/0184) und `entities/source-document/` |
 | Klassen-Test | die Erweiterung: „auch in einer Versicherungs-App?" → ja, zwei benannte Böden für zwei Hälften |
 | Quelle | `docs/detailseiten-pattern.md` Spec **S4**; Befund der fremden Prüfung (`ludwig-manager`, 2026-09-11): der Beleg erfüllt D17 nicht; Abweichungszeile in `docs/seiten/beleg-detail.md` |
@@ -88,3 +88,36 @@ Variabel (aus dieser Spec):
    die Fakten (heute 720 gegen 560 bei 1600)? — ohne Antwort: **nein**, der
    zusätzliche Platz wird gleichmäßig verteilt; der Unterschied bleibt der
    Boden. Das hält `split` bei „zwei Hälften" und kostet bei 1600 rund 70 px.
+
+## Gebaut (2026-09-15)
+
+`Columns`: `split` liest jetzt beide Böden; neue Schritte `document` 560 (links)
+und `record` 384 (rechts). Ohne `width` bleibt `split` bei 380 — die drei
+bestehenden Aufrufer ändern sich nicht. `SourceDocumentCard` rendert
+`Columns split`; `.v2doccard__cols` und die Container-Query der Karte sind weg.
+
+Gemessen (CDP, Story `SourceDocumentView · InUse`), vorher gegen nachher:
+
+| Fenster | Karte | vorher | nachher |
+|---|---|---|---|
+| 2000 | 1696 | (Fakten bei 560 gedeckelt) | 926 / 750 |
+| 1600 | 1296 | 720 / 560 | 726 / 550 |
+| 1440 | 1136 | 560 / 560 | **646 / 470** |
+| 1280 | 976 | 560 / 400 | 566 / 390 |
+| 1244 | 940 | gestapelt | gestapelt |
+| 1100 | 796 | gestapelt | gestapelt |
+
+**Eine sichtbare Änderung, und zwar bei 1440.** Das alte Raster ließ die
+Fakten-Spalte bis 560 wachsen und gab dem Original den Rest; jetzt teilen sich
+beide den zusätzlichen Platz gleichmäßig. Das Original wird dadurch breiter
+(646 statt 560) und die Fakten schmaler (470 statt 560) — beide bleiben
+deutlich über ihrem gemessenen Boden, und das Original ist Rang 2 der Seite.
+Wer den Deckel zurück will, sagt es: er wäre ein `max-width` am Schritt
+`record`, kein neues Muster.
+
+Das Tor bleibt, wo es war: zwischen 940 und 976 px Kartenbreite, also bei
+rund 960 — genau die Summe der beiden Böden plus Rinne.
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
+`pnpm build` grün; bei 1440 angesehen. Abnahme durch einen anderen Agenten
+steht aus.

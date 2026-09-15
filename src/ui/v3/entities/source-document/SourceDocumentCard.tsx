@@ -7,6 +7,7 @@ import {
   type SourceDocumentGap,
   type SourceDocumentGroup,
 } from "./SourceDocumentFacts";
+import { Columns } from "../../patterns/Columns";
 import { SourceDocumentList } from "./SourceDocumentList";
 import { SourceDocumentPreview } from "./SourceDocumentPreview";
 import type { SourceDocumentVM } from "./SourceDocument";
@@ -122,11 +123,17 @@ export function SourceDocumentCard({
   const kind = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
   return (
     <div className="v2doccard">
-      <div className="v2doccard__cols">
-        {/* Rank 2 — the paper, first and large, and **not** behind a click:
-            whoever is here brought a doubt, and the original is what settles
-            it (page profile, rank 2). */}
-        <div className="v2doccard__orig">
+      {/* D-L2 as the pattern, not as a grid of its own (0185): the original is
+          the left half with the floor `document` (560), the facts the right
+          one with `record` (384) — both measured in 0071 and 0150. */}
+      <Columns
+        pattern="split"
+        width="document"
+        asideWidth="record"
+        main={
+          /* Rank 2 — the paper, first and large, and **not** behind a click:
+             whoever is here brought a doubt, and the original is what settles
+             it (page profile, rank 2). */
           <SourceDocumentPreview
             url={previewUrl ?? null}
             unavailableReason={previewUnavailableReason}
@@ -134,13 +141,13 @@ export function SourceDocumentCard({
             fileName={document.fileName}
             excerpt={excerpt}
           />
-        </div>
-
-        {/* Rank 3 and 6 — what Ludwig read, and what the kind of document adds.
-            The heading „Belegdaten" sits **inside** the box since 0150: it
-            stood above it as a bare line while three boxes beside it carried a
-            proper head, and `FieldList` has had a `title` since 0006. */}
-        <div className="v2doccard__facts">
+        }
+        aside={
+          /* Rank 3 and 6 — what Ludwig read, and what the kind of document adds.
+             The heading „Belegdaten" sits **inside** the box since 0150: it
+             stood above it as a bare line while three boxes beside it carried a
+             proper head, and `FieldList` has had a `title` since 0006. */
+          <div className="v2doccard__facts">
           <SourceDocumentFacts
             document={document}
             summary={summary}
@@ -158,8 +165,9 @@ export function SourceDocumentCard({
           {defects}
           {vat}
           {history}
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       {parts && parts.length > 0 ? (
         <div className="v2doccard__parts">

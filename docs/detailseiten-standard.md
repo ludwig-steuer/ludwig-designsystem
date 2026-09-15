@@ -83,7 +83,7 @@ eine Seite, auf die keine passt, ist eine Abweichung nach §9.
 | | Layout | Körper | Wann | Gebaut als |
 |---|---|---|---|---|
 | **D-L1** | **Zonen untereinander** *(Vorgabe)* | die fünf Zonen aus §2, gestapelt, volle Breite | immer, solange keine Variante greift | `SourceDocumentView` (0071) ohne Randspalte; `LedgerAccountView` (0063) mit leerem `aside` |
-| **D-L2** | **Gegenüberstellung** | Zone 3 und 4 nebeneinander: die Quelle links und groß, das Abgeleitete rechts | die Aufgabe ist ein **Abgleich gegen eine Quelle** — Original gegen Extraktion, DATEV gegen Ludwig | `SourceDocumentCard`: Vorschau links, Fakten rechts (`MasterDetail`) |
+| **D-L2** | **Gegenüberstellung** | Zone 3 und 4 nebeneinander: die Quelle links und groß, das Abgeleitete rechts | die Aufgabe ist ein **Abgleich gegen eine Quelle** — Original gegen Extraktion, DATEV gegen Ludwig | `SourceDocumentCard`: Vorschau links, Fakten rechts (`Columns split`, seit 0185) |
 | **D-L3** | **Randspalte** | **eine** der Zonen 3 oder 5 wandert in eine schmale Spalte neben der Arbeitsfläche; die Reihenfolge der übrigen bleibt | es gibt eine **Arbeitsfläche** (eine Liste mit Rang ≤ 4) **und** etwas, das daneben mitgelesen wird: der Strang (Sachverhalt) oder die Fakten (Konto) | `CaseDetailView` (0050): `aside` = `CaseTimeline`, `minDetail={460}` · `LedgerAccountView` (0063): `aside` = `AccountFacts`, `minDetail={960}` |
 
 **Welches Layout — erste zutreffende Frage gewinnt:**
