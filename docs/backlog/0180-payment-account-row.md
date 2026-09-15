@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/payment-account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: IBAN, SKR-Konto, Auszugserwartung, DATEV-Anbindung |
 | Quelle | Entitätsprofil `docs/entitaeten/payment-account.md` (geprüft), Abschnitte „Datenpunkte" (Rang 1–9, 12), „Listen", „Formen", „Zuschnitt" (jetzt, Bau-Reihenfolge 2) |
@@ -148,3 +148,33 @@ Variabel (aus dieser Spec):
 2. Wohin führt der Name? — ohne Antwort: **zum Kontoauszug** des Kontos
    (`banks/[accountId]`), nicht in die Konfiguration; wer konfigurieren will,
    ist schon dort.
+
+## Gebaut (2026-09-15)
+
+`payment-account-columns.tsx` (dreizehn Spalten, zwei Vorgaben,
+`paymentAccountTracks()`), `PaymentAccountRow.tsx` und der Zeilen-Typ samt
+`statementExpectationOf()` in `payment-account.ts`. Alles im Barrel.
+
+Die Ableitung der Auszugserwartung steht **einmal**, in `payment-account.ts`:
+beide Listen lesen sie gleich, und das Konto selbst trägt den Wert nicht (die
+Achse ist berechnet).
+
+Gemessen (CDP, Storybook 6107, 1400 px):
+
+| Story | Beobachtung |
+|---|---|
+| `Filled` | Konto · Art · Kennung · Sachkonto · Kontoauszug · Zeilen · Eingänge · Ausgänge · Saldo · Zeitraum; Beträge rechtsbündig, der Zeitraum als zwei Daten |
+| `Settings` | Auto-Zuordnung, Anbindung und Zahlungsweg statt der Bewegung |
+| `Kinds` | die sechs Arten mit den Wörtern der gespiegelten Liste |
+| `Edges` | ohne IBAN und ohne Kartenkennung steht „—"; das abgeschaltete Konto zeigt „abgeschaltet", der Name bleibt ungestrichen |
+| `Columns` | derselbe Satz in `DataTable` mit Sortierpfeil an „Saldo" |
+| `InUse` | drei Konten in einer Karte, jeder Name führt zum Auszug |
+
+**Ein Fund aus dem ersten Blick:** die Spalte „Zeilen" zeigte „145,00" — ein
+Zähler, gerendert wie ein Betrag. Jetzt `formatCount()`; die Zahl steht ohne
+Nachkommastellen.
+
+Kein Überlauf: die breite Tabelle scrollt in ihrem Rahmen, die Seite nicht.
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
+`pnpm build` grün; Screenshots angesehen. Abnahme durch einen anderen Agenten
+steht aus.

@@ -471,6 +471,19 @@ export {
    Fakten (0142), Drawer (0143) */
 export { BusinessPartnerCell } from "./entities/business-partner/BusinessPartner";
 export { PaymentAccountCell, type PaymentAccountRef } from "./entities/payment-account/PaymentAccount";
+export { PaymentAccountRow } from "./entities/payment-account/PaymentAccountRow";
+export {
+  paymentAccountColumns,
+  paymentAccountTracks,
+  MOVEMENT_COLUMNS,
+  SETTINGS_COLUMNS,
+  type PaymentAccountColumn,
+  type PaymentAccountColumnOptions,
+} from "./entities/payment-account/payment-account-columns";
+export {
+  statementExpectationOf,
+  type PaymentAccountRowData,
+} from "./entities/payment-account/payment-account";
 export { DiffView, type DiffRow, type DiffSide } from "./patterns/DiffView";
 export { JournalEntryRow } from "./entities/journal-entry/JournalEntryRow";
 export {
