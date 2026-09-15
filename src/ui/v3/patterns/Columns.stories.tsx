@@ -144,3 +144,46 @@ export const Steps: Story = {
     </div>
   ),
 };
+
+/**
+ * Die zweite Hälfte derselben Entscheidung: die Randspalte hat seit 0184
+ * eigene Stufen. `notes` 320 px trägt Notizen, Rückfragen und Erwartungen —
+ * gemessen an der Sachverhalts-Übersicht, wo die drei Spalten bis 1280 px
+ * nebeneinander stehen und die Randspalte dort 330 px hat. `facts` 360 px
+ * trägt Feldzeilen neben einer Tabelle (Kontoseite, 0157): eine Feldzeile hat
+ * Etikett **und** Wert auf einer Zeile und braucht deshalb mehr.
+ *
+ * Ohne die Prop entscheidet das Muster: `main-aside` steht auf `facts`, die
+ * übrigen auf `notes`.
+ */
+export const AsideSteps: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 32 }}>
+      <div>
+        <div className="v2muted" style={{ marginBottom: 8 }}>
+          notes — 320 px
+        </div>
+        <Columns
+          pattern="list-detail-aside"
+          asideWidth="notes"
+          list={<Block title="Strang" rows={4} />}
+          main={<Block title="Arbeitsfläche" rows={3} />}
+          aside={<Block title="Notizen" rows={2} />}
+        />
+      </div>
+      <div>
+        <div className="v2muted" style={{ marginBottom: 8 }}>
+          facts — 360 px
+        </div>
+        <Columns
+          pattern="list-detail-aside"
+          asideWidth="facts"
+          list={<Block title="Strang" rows={4} />}
+          main={<Block title="Arbeitsfläche" rows={3} />}
+          aside={<Block title="Stammdaten" rows={2} />}
+        />
+      </div>
+    </div>
+  ),
+};
+

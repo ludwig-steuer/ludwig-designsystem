@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 
-import { MasterDetail } from "./MasterDetail";
-
 /**
  * The frame of a detail page — five slots, always in this order (0138 way 1).
  *
@@ -10,7 +8,8 @@ import { MasterDetail } from "./MasterDetail";
  * their own frame around it: `CaseDetailView` (0050), `SourceDocumentView`
  * (0071), `LedgerAccountView` (0063). Three files, one structure — the same
  * `flex column` with the same gap, the same „an empty slot drops out with its
- * spacing", the same `MasterDetail` at the bottom.
+ * spacing". The columns of the body were once part of it too; since 0184 they
+ * live in `Columns` (0154), where the four patterns are.
  *
  * 0138 held the decision open on purpose: *„three frames with the same
  * structure can still be three frames that happen to look alike; only the
@@ -32,17 +31,15 @@ import { MasterDetail } from "./MasterDetail";
  * slot with its own reason — YAGNI until then.
  *
  * @when    The page around one record: pager, head, signal, tabs, body.
- * @instead A list with a detail beside it → MasterDetail. The content of the
- *          first tab → the entity's own `…Facts`. One record beside other work
- *          → the entity's drawer.
+ * @instead Columns inside the body → Columns. A list with a detail beside it →
+ *          MasterDetail. The content of the first tab → the entity's own
+ *          `…Facts`. One record beside other work → the entity's drawer.
  */
 export function DetailView({
   pager,
   header,
   signal,
   tabs,
-  aside,
-  minDetail,
   children,
 }: {
   /**
@@ -64,26 +61,13 @@ export function DetailView({
   /** The tab bar (`Tabs`). Without tabs the row disappears. */
   tabs?: ReactNode;
   /**
-   * What is read **beside** the body instead of above it — the strand of a
-   * case, the facts of an account (layout D-L3).
+   * The content of the active tab.
    *
-   * Empty → one column, and that is the default (D-L1). A side column is the
-   * exception and needs a sentence in the page profile.
+   * **Columns live in the body, not in the frame** (0184): a tab with more
+   * than one column wraps its content in `Columns` (0154) and picks one of the
+   * four patterns. Until 2026-09-15 this frame offered `aside`/`minDetail` and
+   * that carries nothing sends the next caller down the old road.
    */
-  aside?: ReactNode;
-  /**
-   * The floor of the body column, in pixels, when there is an `aside`.
-   *
-   * **It has no default, and that is the point.** Both existing values were
-   * fought for in acceptances against a measured page: 460 beside the facts of
-   * a case (0050 — the default 620 dropped the view into one column at a
-   * 1280 px window), 960 beside the seven-column table of an account (0063 —
-   * at 620 the posting text was 98 px wide and the contra account lost its
-   * name in every row). A frame that invented a number here would quietly
-   * overrule both.
-   */
-  minDetail?: number;
-  /** The content of the active tab. */
   children: ReactNode;
 }) {
   return (
@@ -92,16 +76,7 @@ export function DetailView({
       <div className="v3dv__slot">{header}</div>
       {signal ? <div className="v3dv__slot">{signal}</div> : null}
       {tabs ? <div className="v3dv__slot">{tabs}</div> : null}
-      {aside ? (
-        <MasterDetail
-          list={aside}
-          detail={children}
-          detailWide
-          {...(minDetail === undefined ? {} : { minDetail })}
-        />
-      ) : (
-        <div className="v3dv__slot">{children}</div>
-      )}
+      <div className="v3dv__slot">{children}</div>
     </div>
   );
 }

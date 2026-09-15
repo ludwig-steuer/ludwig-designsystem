@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `patterns/` — Erweiterung von `Columns` (0154), Kürzung von `DetailView` (0138) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: zwei benannte Spaltenbreiten, kein Fachwort |
 | Quelle | `docs/backlog/0154-vier-spaltenmuster.md`, Abschnitt „Was 0152 noch braucht" (Punkte 1 und 2); `docs/detailseiten-pattern.md` Spec **S3** |
@@ -99,3 +99,22 @@ Variabel (aus dieser Spec):
    Antwort: **nicht in dieser Aufgabe**; beide haben eigene Specs und
    gemessene Abnahmen, und der Umzug ist ein eigener Schritt mit eigener
    Messung (Vormerkung in 0154).
+
+## Gebaut (2026-09-15)
+
+`Columns` trägt `asideWidth` mit den Stufen `notes` 320 und `facts` 360; die
+Regel liest `--v3cols-aside`, die musterspezifischen Vorgaben bleiben stehen.
+`DetailView` hat weder `aside` noch `minDetail` mehr und rendert den Körper in
+genau einem Slot.
+
+Gemessen (CDP, 1440 px, vorher und nachher):
+
+| Story | vorher | nachher |
+|---|---|---|
+| `Columns · MainAside` | 1005 · 383 | unverändert |
+| `Columns · ListDetailAside` | 462 · 544 · 362 | unverändert |
+| `Seiten/Sachverhalt/Einzelfall` | 470 · 560 · 370 | unverändert |
+| `Columns · AsideSteps` (neu) | — | `notes` 462 · 544 · 362 · `facts` 452 · 524 · 392 |
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
+`pnpm build` grün. Abnahme durch einen anderen Agenten steht aus.

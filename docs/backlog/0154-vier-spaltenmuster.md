@@ -92,15 +92,19 @@ erste bleibt in jeder Breite stehen — wie im Brief verlangt.
 
 ## Was 0152 noch braucht
 
-- **Die dritte Stufe** für die schmale Notizspalte — sie wird an der
-  Sachverhalts-Übersicht gemessen, sobald es dort echte Inhalte gibt.
-- **`DetailView` schmaler machen:** `aside` und `minDetail` gehören künftig
-  ins Muster, nicht in den Rahmen. Solange nur der Partner ihn nutzt (und der
-  braucht keine Randspalte), kostet das nichts — es soll aber passieren,
-  bevor die zweite Seite eine Randspalte über den Rahmen setzt.
-- **Standard §1.2 und `docs/seiten/sachverhalt-detail.md` nachziehen.** Steht
-  noch aus: solange 0152 nicht gebaut ist, wäre die neue Regel im Standard
-  eine Ankündigung ohne zweiten Fall.
+- ~~**Die dritte Stufe** für die schmale Notizspalte~~ — **erledigt 2026-09-15
+  mit 0184**: an der Sachverhalts-Übersicht gemessen (1600 · 1440 · 1280 →
+  410 · 370 · 330 px, Umbruch zwischen 1280 und 1180) und als Stufe `notes`
+  320 px benannt; `facts` 360 px daneben für Feldzeilen.
+- ~~**`DetailView` schmaler machen**~~ — **erledigt 2026-09-15 mit 0184**:
+  `aside` und `minDetail` sind weg; kein Aufrufer hatte sie je übergeben.
+- ~~**Standard §1.2 nachziehen**~~ — **erledigt 2026-09-15**: §1.2 nennt
+  `Columns` und alle vier Stufen. `docs/seiten/sachverhalt-detail.md` braucht
+  nichts: der Owner hat die Seite am 2026-09-08 auf D-L1 gestellt, sie hat
+  keine Randspalte.
+- **Offen:** `CaseDetailView` (0050) und `LedgerAccountView` (0063) bauen ihre
+  Randspalte noch selbst mit `MasterDetail`. Der Umzug auf `Columns` ist ein
+  eigener Schritt mit eigener Messung (0184, offene Frage 1).
 
 ## Nachtrag 2026-09-11 — `main-aside` bricht die Randspalte nach oben
 

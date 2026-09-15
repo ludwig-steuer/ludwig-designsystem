@@ -1151,7 +1151,7 @@ select.v2in { padding-right: 26px; }
 .v3cols { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: start; }
 .v3cols__list { flex: 1 1 380px; min-width: 0; }
 .v3cols__main { flex: 2 1 var(--v3cols-main, 460px); min-width: 0; }
-.v3cols__aside { flex: 1 1 320px; min-width: 0; }
+.v3cols__aside { flex: 1 1 var(--v3cols-aside, 320px); min-width: 0; }
 
 /* `list | detail`: narrow list, wide workspace. **All columns grow**
    (`flex-grow ≥ 1`), so a wrapped column takes the full row instead of staying
@@ -1166,14 +1166,14 @@ select.v2in { padding-right: 26px; }
 /* `50 | 50`: two equal halves — both sides are the statement (original vs
    extraction). */
 .v3cols--split > .v3cols__main,
-.v3cols--split > .v3cols__aside { flex: 1 1 380px; }
+.v3cols--split > .v3cols__aside { flex: 1 1 var(--v3cols-aside, 380px); }
 
 /* `master | sidebar`: one surface with a narrow companion. When the row runs
    out the companion goes **above** the surface (owner 2026-09-11, 0157): it
    says what the surface is about, and under 25 rows nobody finds it.
    `wrap-reverse` stacks the lines bottom-up; `align-items: start` stays top. */
 .v3cols--main-aside { flex-wrap: wrap-reverse; }
-.v3cols--main-aside > .v3cols__aside { flex: 1 1 360px; }
+.v3cols--main-aside > .v3cols__aside { flex: 1 1 var(--v3cols-aside, 360px); }
 
 .v2md { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--space-5); align-items: start; }
 .v2md__detail { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }

@@ -92,12 +92,15 @@ eine Seite, auf die keine passt, ist eine Abweichung nach §9.
 2. Gibt es eine **Arbeitsfläche** (eine Liste, die das Profil bei Rang ≤ 4 führt) und daneben etwas, das mitgelesen wird? → **D-L3**, und das Profil nennt, welche Zone in der Spalte steht — der Strang nur, wenn seine Zahl es trägt (§2.4).
 3. Sonst → **D-L1**.
 
-Die Randspalte ist in D-L2 und D-L3 dieselbe Mechanik (`MasterDetail`), aber
-nicht dieselbe Breite: was **neben** der Fläche steht, muss lesbar bleiben, und
-was **auf** ihr steht, muss vollständig bleiben. Die gemessenen Werte stehen im
-Kommentar der beiden Rahmen (460 px neben Fakten, 960 px neben einer
-siebenspaltigen Tabelle). Sie sind Messergebnisse, keine Geschmacksfragen, und
-werden nicht ohne neue Messung geändert.
+Die Randspalte ist in D-L2 und D-L3 dieselbe Mechanik — seit 0154 `Columns`,
+nicht mehr `MasterDetail` —, aber nicht dieselbe Breite: was **neben** der
+Fläche steht, muss lesbar bleiben, und was **auf** ihr steht, muss vollständig
+bleiben. Beide Seiten der Entscheidung sind **benannte Stufen** (0184): die
+Arbeitsfläche steht auf `facts` 460 px oder `table` 960 px, die Randspalte auf
+`notes` 320 px oder `facts` 360 px. Alle vier Zahlen sind Messergebnisse,
+keine Geschmacksfragen — 320 etwa ist an der Sachverhalts-Übersicht gemessen,
+wo die drei Spalten bis 1280 px nebeneinander stehen —, und sie werden nicht
+ohne neue Messung geändert.
 
 **Seit 0154 (D17):** die drei Layouts sind Muster des **Reiterinhalts**, nicht
 der Seite, und heißen wie die Muster von `Columns` — D-L1 ist die Fläche ohne

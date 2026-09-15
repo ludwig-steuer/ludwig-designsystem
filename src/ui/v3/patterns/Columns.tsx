@@ -55,6 +55,23 @@ export type ColumnWidth = "facts" | "table";
 const WIDTH: Record<ColumnWidth, number> = { facts: 460, table: 960 };
 
 /**
+ * The floor of the **companion** column — the second half of the decision,
+ * named for the same reason as the first (0184).
+ *
+ * `notes` 320 px — notes, clarifications, expectations. Measured on the case
+ * overview: at a 1280 px window the three columns still stand side by side and
+ * the companion has 330 px; between 1280 and 1180 it drops below. That is the
+ * order 0154 asks for — the companion gives way first, the list never does.
+ *
+ * `facts` 360 px — a block of field rows beside a table, the master data of an
+ * account (0157). Wider than notes because a field row carries a label **and**
+ * its value on one line.
+ */
+export type ColumnAsideWidth = "notes" | "facts";
+
+const ASIDE_WIDTH: Record<ColumnAsideWidth, number> = { notes: 320, facts: 360 };
+
+/**
  * @when    The body of a tab that has more than one column — one of the four
  *          patterns, never a grid of its own.
  * @instead One surface without columns → nothing, that is the normal case. A
@@ -68,6 +85,7 @@ export function Columns({
   main,
   aside,
   width = "facts",
+  asideWidth,
 }: {
   pattern: ColumnPattern;
   /** Left column — required by `list-detail` and `list-detail-aside`. */
@@ -81,8 +99,16 @@ export function Columns({
    * halves are equal by definition.
    */
   width?: ColumnWidth;
+  /**
+   * Which step the companion stands on. Without it the pattern decides:
+   * `main-aside` carries facts beside a table (360), the others notes (320).
+   */
+  asideWidth?: ColumnAsideWidth;
 }) {
-  const style = { "--v3cols-main": `${WIDTH[width]}px` } as CSSProperties;
+  const style = {
+    "--v3cols-main": `${WIDTH[width]}px`,
+    ...(asideWidth ? { "--v3cols-aside": `${ASIDE_WIDTH[asideWidth]}px` } : {}),
+  } as CSSProperties;
   return (
     <div className={`v3cols v3cols--${pattern}`} style={style}>
       {list && pattern !== "split" && pattern !== "main-aside" ? (
