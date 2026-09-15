@@ -2,6 +2,7 @@ import { PAYMENT_ACCOUNT_KIND_LABEL } from "@/ludwig/core/accounting/payment-acc
 import type { Currency } from "@/ludwig/shared/money";
 
 import { formatCount } from "../../format";
+import { Link } from "../../primitives/Link";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
@@ -34,7 +35,8 @@ export type PaymentAccountColumn =
   | "period"
   | "autoAssign"
   | "integration"
-  | "channelState";
+  | "channelState"
+  | "unassigned";
 
 export interface PaymentAccountColumnOptions {
   columns?: readonly PaymentAccountColumn[];
@@ -42,6 +44,8 @@ export interface PaymentAccountColumnOptions {
   statementHref?: (accountId: string) => string;
   /** The way to the ledger account drawer (0155). */
   accountHref?: (accountNumber: string) => string;
+  /** The way to the payments of this account that carry no case yet. */
+  unassignedHref?: (accountId: string) => string;
 }
 
 /** What the year's page reads: does this account move, and how much. */
@@ -56,6 +60,7 @@ export const MOVEMENT_COLUMNS: readonly PaymentAccountColumn[] = [
   "outflow",
   "net",
   "period",
+  "unassigned",
 ];
 
 /** What the configuration reads: what is set on this account. */
@@ -81,7 +86,7 @@ const money = (account: PaymentAccountRowData): Currency => account.currency ?? 
 export function paymentAccountColumns(
   options: PaymentAccountColumnOptions = {},
 ): ColumnDef<PaymentAccountRowData>[] {
-  const { columns = MOVEMENT_COLUMNS, statementHref, accountHref } = options;
+  const { columns = MOVEMENT_COLUMNS, statementHref, accountHref, unassignedHref } = options;
   const all: Record<PaymentAccountColumn, ColumnDef<PaymentAccountRowData>> = {
     account: {
       key: "account",
@@ -122,11 +127,15 @@ export function paymentAccountColumns(
         a.ledgerAccountNumber === null || a.ledgerAccountNumber === undefined ? (
           <span className="v2muted">—</span>
         ) : (
-          <AccountCell
-            number={a.ledgerAccountNumber}
-            name={a.ledgerAccountName ?? null}
-            {...(accountHref ? { href: accountHref(a.ledgerAccountNumber) } : {})}
-          />
+          // The name is clipped, not wrapped: the row of a table keeps its
+          // height, and the whole value stays in the `title` of the cell.
+          <span className="v2trunc">
+            <AccountCell
+              number={a.ledgerAccountNumber}
+              name={a.ledgerAccountName ?? null}
+              {...(accountHref ? { href: accountHref(a.ledgerAccountNumber) } : {})}
+            />
+          </span>
         ),
     },
     statementExpectation: {
@@ -208,6 +217,21 @@ export function paymentAccountColumns(
         ) : (
           <span className="v2muted">—</span>
         ),
+    },
+    unassigned: {
+      key: "unassigned",
+      header: "Offene Zahlungen",
+      width: "150px",
+      align: "end",
+      cell: (a) => {
+        const open = a.unassignedCount ?? null;
+        // Zero is the goal here, not an empty cell: a number that says „none
+        // left" is a result and gets a word (L6).
+        if (open === null) return <span className="v2muted">—</span>;
+        if (open === 0) return <span className="v2sub">alles zugeordnet</span>;
+        const text = `${formatCount(open)} offen`;
+        return unassignedHref ? <Link href={unassignedHref(a.id)}>{text}</Link> : <span>{text}</span>;
+      },
     },
     channelState: {
       key: "channelState",

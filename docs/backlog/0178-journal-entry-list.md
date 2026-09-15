@@ -149,3 +149,12 @@ Abnahme durch einen anderen Agenten steht aus.
 
 **Offene Frage 1 bleibt offen** (Abschnitte gegen Pager beim Stapel): gebaut
 ist beides, die Seite entscheidet. Der Default steht in der Spec.
+
+## Nachtrag 2026-09-15 — Mindestbreite
+
+Beim Bau der Zahlungskonten-Listen (0181/0182) bei 1000 px gemessen: eine
+Tabelle, deren Spalten überwiegend `fr`-Spuren sind, quetscht sich zusammen,
+bis Namen einen Buchstaben je Zeile tragen — `DataTable` rechnet ihren Boden
+aus den Spaltenbreiten, und `minmax(0, 1fr)` steuert dazu nichts bei (0147,
+Befund L-273). `JournalEntryList` hat deshalb jetzt `minWidth` mit Vorgabe
+1180; darunter scrollt die Tabelle in ihrem Rahmen, die Seite nicht.

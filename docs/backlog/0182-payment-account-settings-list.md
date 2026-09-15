@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/payment-account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Auszugserwartung, Zahlungsart, DATEV-Anbindung |
 | Quelle | Entitätsprofil `docs/entitaeten/payment-account.md`, Abschnitt „Listen" (zweite Zeile), „Zuschnitt" |
@@ -86,3 +86,20 @@ Variabel (aus dieser Spec):
 ## Offene Fragen
 
 Keine — die Entscheidungen stehen im Profil.
+
+## Gebaut (2026-09-15)
+
+`PaymentAccountSettingsList.tsx`, im Barrel.
+
+Gemessen (CDP, Storybook 6107):
+
+| Story | Beobachtung |
+|---|---|
+| `Filled` | „In Gebrauch · 2 Konten" über „Weitere aus dem Kontenrahmen · 2 Konten"; Zeilenaktion „Bearbeiten"; keine Häkchen |
+| `Retire` | mit der Massenaktion stehen die Häkchen in jeder Zeile und im Kopf; die Abschaltung fragt nach |
+| `NoneInUse` | „In Gebrauch · 0 Konten" mit dem Satz „Kein Konto ist in Gebrauch — noch erwartet der Buchungslauf keinen Auszug." |
+| `Empty` | „Keine Zahlungskonten." mit dem Weg über den DATEV-Abgleich |
+| `LoadingAndError` | Rahmen bleibt stehen |
+
+`pnpm typecheck`, alle vier Guards und `pnpm build` grün; Screenshots
+angesehen. Abnahme durch einen anderen Agenten steht aus.

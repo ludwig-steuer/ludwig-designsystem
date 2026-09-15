@@ -28,6 +28,8 @@ export type PaymentAccountRowData = PaymentAccountFacts & {
   integrationStatus?: string | null;
   /** Set = the payment channel is switched off (`valid_until`). */
   validUntil?: string | null;
+  /** Bank lines of this account that carry no case yet — 0 is the goal. */
+  unassignedCount?: number | null;
   currency?: Currency;
 };
 

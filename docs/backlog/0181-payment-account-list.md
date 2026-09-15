@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/payment-account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Kontoauszug, Sachkonto, Zahlungen ohne Sachverhalt |
 | Quelle | Entitätsprofil `docs/entitaeten/payment-account.md`, Abschnitt „Listen" (erste Zeile), „Zuschnitt" |
@@ -84,3 +84,21 @@ Variabel (aus dieser Spec):
 ## Offene Fragen
 
 Keine — die Entscheidungen stehen im Profil.
+
+## Gebaut (2026-09-15)
+
+`PaymentAccountList.tsx`, im Barrel. Die Spalte „Offene Zahlungen" ist neu im
+Katalog (0180): eine Zahl mit Weg, und bei 0 der Satz „alles zugeordnet" statt
+einer Null (L6).
+
+Gemessen (CDP, Storybook 6107):
+
+| Story | Beobachtung |
+|---|---|
+| `Filled` | drei Konten, kein Pager, kein Filter; „3 offen" führt zu den Zahlungen ohne Sachverhalt, „alles zugeordnet" steht ohne Weg |
+| `Sorted` | Sortierpfeil an „Saldo", der Zustand kommt über die URL |
+| `Empty` | „Kein Konto hat in diesem Jahr Bewegung." mit dem Satz zum Import |
+| `LoadingAndError` | Kopf und Spaltenkopf bleiben stehen |
+
+`pnpm typecheck`, alle vier Guards und `pnpm build` grün; Screenshots
+angesehen. Abnahme durch einen anderen Agenten steht aus.

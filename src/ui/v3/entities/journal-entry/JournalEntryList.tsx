@@ -40,6 +40,14 @@ export type JournalEntryListProps = Shape & {
   error?: Table["error"];
   rowActions?: Table["rowActions"];
   density?: Table["density"];
+  /**
+   * The width below which the table scrolls instead of squeezing.
+   *
+   * With a default, because most of these columns are `fr` tracks and a floor
+   * computed from them would be zero: measured at 1000 px, the names then
+   * broke one character per line (0178, first browser pass).
+   */
+  minWidth?: number;
   /** The whole row leads into the entry — its drawer (0177). */
   entryHref?: (entryId: string) => string;
   accountHref?: (accountNumber: string) => string;
@@ -120,6 +128,7 @@ export function JournalEntryList(props: JournalEntryListProps): ReactNode {
     error,
     rowActions,
     density,
+    minWidth = 1180,
     entryHref,
     accountHref,
     caseHref,
@@ -143,6 +152,7 @@ export function JournalEntryList(props: JournalEntryListProps): ReactNode {
     ...(error ? { error } : {}),
     ...(rowActions ? { rowActions } : {}),
     ...(density ? { density } : {}),
+    minWidth,
     ...(entryHref ? { rowHref: (entry: JournalEntryRowData) => entryHref(entry.entryId) } : {}),
   };
 

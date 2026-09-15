@@ -472,6 +472,8 @@ export {
 export { BusinessPartnerCell } from "./entities/business-partner/BusinessPartner";
 export { PaymentAccountCell, type PaymentAccountRef } from "./entities/payment-account/PaymentAccount";
 export { PaymentAccountRow } from "./entities/payment-account/PaymentAccountRow";
+export { PaymentAccountList } from "./entities/payment-account/PaymentAccountList";
+export { PaymentAccountSettingsList } from "./entities/payment-account/PaymentAccountSettingsList";
 export {
   paymentAccountColumns,
   paymentAccountTracks,
