@@ -476,6 +476,7 @@ export {
   JournalEntryFacts,
   type JournalEntryFactsContext,
 } from "./entities/journal-entry/JournalEntryFacts";
+export { JournalEntryDrawer } from "./entities/journal-entry/JournalEntryDrawer";
 export {
   journalEntryColumns,
   journalEntryTracks,

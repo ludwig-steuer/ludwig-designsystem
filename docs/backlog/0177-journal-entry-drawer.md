@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: ein Buchungssatz mit Teilbuchungen und DATEV-Weg |
 | Quelle | Entitätsprofil `docs/entitaeten/journal-entry.md` (geprüft), Abschnitte „Formen" (`JournalEntryDrawer`, §7 Nr. 5), „Zuschnitt" (jetzt, Bau-Reihenfolge 3); Drawer-Regeln aus 0052 und A10 |
@@ -115,3 +115,29 @@ Variabel (aus dieser Spec):
    dem Fuß genau einen Weg; der Stapel steht als Link in den Fakten.
 2. Soll der Drawer den Satz selbst laden dürfen? — ohne Antwort: **nein**, der
    Aufrufer lädt; das Set kennt keinen Loader (Hausregel).
+
+## Gebaut (2026-09-15)
+
+`JournalEntryDrawer.tsx` (`"use client"`), im Barrel. Zone 3 ist
+`JournalEntryFacts` mit `tone="bare"` — dieselbe Komponente wie in der vollen
+Ansicht, kein zweiter Satz Zeilen. Die Fakten bekommen **kein** `caseHref`:
+der Weg steht einmal, im Fuß.
+
+Gemessen (CDP, Storybook 6107, 1200 px):
+
+| Story | Beobachtung |
+|---|---|
+| `Open` | Titel „RE-4471", Meta „Meier Bürobedarf August 2026"; Gruppen Der Satz · Export und Stapel · Zusammenhang; Fuß „Sachverhalt öffnen →" mit genau einem Link |
+| `Loading` | Titel „Buchungssatz", Skelett in der Form des Inhalts, **kein** Fuß |
+| `Error` | Banner „Der Buchungssatz konnte nicht geladen werden." samt Id, kein Fuß |
+| `NotFound` | „Diesen Buchungssatz gibt es nicht mehr." mit dem Hinweis auf den Sachverhalt, kein Fuß |
+| `WithoutCase` | kein Fuß; „Zusammenhang" fällt hier ganz weg, weil der Kontext nur die Satzart trägt |
+| `InUse` | der Knopf öffnet, Escape schließt (`stillOpen` false) |
+
+Der Fokus-Rücksprung nach dem Schließen ließ sich hier nicht messen — die
+Story läuft im Storybook-Rahmen, dessen eigene Tabelle den Fokus fängt. Er
+gehört dem `Drawer` (0042) und ist dort abgenommen.
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
+`pnpm build` grün; Screenshots angesehen. Abnahme durch einen anderen Agenten
+steht aus.
