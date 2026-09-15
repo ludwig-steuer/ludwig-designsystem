@@ -1,3 +1,5 @@
+import type { JournalEntryListItem } from "@/ludwig/modules/entries/domain/entry";
+
 import { formatAmount } from "../../format";
 import { parseAmount } from "../../primitives/AmountInput";
 import { deriveTax } from "./tax-assist";
@@ -174,4 +176,21 @@ export function journalBalanceText(lines: readonly JournalBatchLine[]): string {
 export const journalGridTracks: Record<JournalMode, string> = {
   simple: "88px 104px 40px 62px 148px 96px minmax(160px, 1fr)",
   full: "88px 56px 104px 40px 62px 148px 96px 96px minmax(160px, 1fr) 80px",
+};
+
+/**
+ * One entry as a list row needs it (0175) — the app's list item plus the three
+ * points it does not carry yet (**L-335**): the confidence of a proposal, the
+ * document group the batch list groups by, and how many lines the entry has.
+ *
+ * They are optional on purpose: the row shows what it is given and claims
+ * nothing where the app is silent. The day the list type carries them, the
+ * intersection here falls away.
+ */
+export type JournalEntryRowData = JournalEntryListItem & {
+  confidence?: number | null;
+  documentGroup?: string | null;
+  lineCount?: number | null;
+  /** Title of the case — without it the cell says „Sachverhalt" (L-335). */
+  caseTitle?: string | null;
 };

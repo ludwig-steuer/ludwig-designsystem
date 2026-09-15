@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Soll und Haben, Belegfeld 1, der Weg nach DATEV |
 | Quelle | Entitätsprofil `docs/entitaeten/journal-entry.md` (geprüft), Abschnitte „Datenpunkte" (Rang 1–7), „Listen", „Formen", „Zuschnitt" (jetzt, Bau-Reihenfolge 1) |
@@ -46,6 +46,8 @@ export type JournalEntryRowData = JournalEntryListItem & {
   lineCount?: number | null;
   /** Beleggruppe, die Abschnitte der Stapel-Liste (L-335). */
   documentGroup?: string | null;
+  /** Titel des Sachverhalts; ohne ihn sagt die Zelle „Sachverhalt" (L-335). */
+  caseTitle?: string | null;
 };
 ```
 
@@ -151,3 +153,31 @@ Variabel (aus dieser Spec):
    Facts; die Liste gruppiert nach Beleggruppe, nicht nach Art.
 2. Ist die ganze Zeile ein Link oder nur eine Zelle? — ohne Antwort: **die
    ganze Zeile**, wie bei `BankTransactionRow` und `SourceDocumentRow`.
+
+## Gebaut (2026-09-15)
+
+`journal-entry-columns.tsx` liefert `journalEntryColumns()`,
+`journalEntryTracks()` und `DEFAULT_JOURNAL_ENTRY_COLUMNS`;
+`JournalEntryRow.tsx` setzt dieselben Zellen in ein `Row`. Der Zeilen-Typ
+`JournalEntryRowData` steht in `journal-entry.ts` und schneidet die vier Felder
+an, die der Listen-Typ der App nicht führt (L-335). Alles im Barrel.
+
+Gemessen (CDP, Storybook 6107, 1400 px, im Story-Iframe):
+
+| Kriterium | Beobachtung |
+|---|---|
+| Spaltensatz und Reihenfolge | Datum · Belegfeld 1 · Buchungstext · Konten · USt · Betrag · Weg nach DATEV · Herkunft; mit `case` als neunter |
+| Stufe aus der Ableitung | Story `Stages`: Vorschlag · Freigegeben · Exportiert · In DATEV bestätigt · Storniert — aus `status`, `exportedAt` und `datevMirrorEntryId` |
+| Herkunft mit und ohne Konfidenz | Story `Origins`: KI-Vorschlag (mit Punkt) · Regelwerk · Manuell · Mandantenstapel (ohne) |
+| Das (i) steht im Kopf | Tabelle mit fünf Zeilen: genau **zwei** Knöpfe, beide in der Kopfzeile |
+| Kürzung | Story `Edges`: 60 Zeichen sichtbar, 122 im `title` |
+| Mehr als zwei Teilbuchungen | Story `Edges`: „5 Zeilen · 1.234.567,89 €" statt „A an B" |
+| Zeile als Link | Story `InUse`: ein `a.v2rowlink` je Zeile in der Leitzelle, dazu vier Kontowege — **keine** verschachtelten Anker (`a a` = 0) |
+| Kein Überlauf | in allen sechs Stories `scrollWidth` = `clientWidth` |
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when`,
+`check:icons`, `check:jobs` und `pnpm build` grün; Screenshots angesehen.
+Abnahme durch einen anderen Agenten steht aus.
+
+**Offene Frage 1 ist mit dem Bau beantwortet:** die Satzart steht nicht in der
+Zeile. Frage 2 ebenso: die ganze Zeile ist der Link.

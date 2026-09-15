@@ -471,6 +471,15 @@ export {
    Fakten (0142), Drawer (0143) */
 export { BusinessPartnerCell } from "./entities/business-partner/BusinessPartner";
 export { PaymentAccountCell, type PaymentAccountRef } from "./entities/payment-account/PaymentAccount";
+export { JournalEntryRow } from "./entities/journal-entry/JournalEntryRow";
+export {
+  journalEntryColumns,
+  journalEntryTracks,
+  DEFAULT_JOURNAL_ENTRY_COLUMNS,
+  type JournalEntryColumn,
+  type JournalEntryColumnOptions,
+} from "./entities/journal-entry/journal-entry-columns";
+export type { JournalEntryRowData } from "./entities/journal-entry/journal-entry";
 export {
   businessPartnerColumns,
   businessPartnerColumnOrder,
