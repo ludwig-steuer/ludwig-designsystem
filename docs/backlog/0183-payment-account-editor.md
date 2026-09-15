@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/payment-account/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: IBAN, SKR-Konto, Kontoauszugs-Erwartung, DATEV-Zahlungsart |
 | Quelle | Entitätsprofil `docs/entitaeten/payment-account.md`, „Formen" (`PaymentAccountEditor`, §7 Nr. 4), „Zuschnitt" |
@@ -127,3 +127,25 @@ Variabel (aus dieser Spec):
 2. Darf die Art nachträglich geändert werden? — ohne Antwort: **ja**; sie ist
    „nur UI-Kategorisierung" (GLOSSARY), und der Aufrufer sperrt sie, wo er es
    besser weiß.
+
+## Gebaut (2026-09-15)
+
+`PaymentAccountEditor.tsx` (`"use client"`), dazu `PaymentAccountDraft` und
+`emptyPaymentAccountDraft()` in `payment-account.ts`. Alles im Barrel.
+
+Gemessen und angesehen (CDP, Storybook 6107):
+
+| Story | Beobachtung |
+|---|---|
+| `Edit` | drei Gruppen in der Reihenfolge der Spec; jedes Feld mit seinem Wort über `Field htmlFor`; Speichern und Abbrechen unten rechts |
+| `New` | leeres Formular, Speichern aus, bis die Bezeichnung steht |
+| `Kinds` | Kasse ohne Kennung mit dem Satz dazu, Kreditkarte mit Kartenkennung |
+| `Pending` | Knöpfe aus, Felder lesbar |
+| `Error` | die Meldung steht über dem Formular, nicht an einem Feld |
+
+Die Auszugserwartung steht als **dreiwertige** Auswahl, nicht als Haken:
+„Automatisch entscheiden" hält die Ableitung offen, die beiden anderen Werte
+sind die Hand-Entscheidung.
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
+`pnpm build` grün. Abnahme durch einen anderen Agenten steht aus.

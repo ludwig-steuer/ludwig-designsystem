@@ -49,3 +49,48 @@ export function statementExpectationOf(account: PaymentAccountRowData): string {
   if (account.expectsStatements) return byHand ? "erwartet_hand" : "erwartet";
   return byHand ? "keine_hand" : "keine";
 }
+
+/**
+ * What a person may set on a payment account (0183).
+ *
+ * **Local, and that is a finding** (L-337): the mirror carries no draft for
+ * this entity — the recurring rule brings its `RuleDraft` along, this one has
+ * none. The field names follow the columns, so the swap stays a swap.
+ */
+export interface PaymentAccountDraft {
+  displayName: string;
+  kind: PaymentAccountKind;
+  iban: string | null;
+  bic: string | null;
+  bankName: string | null;
+  /** Card identifier where there is no IBAN (`external_account_id`). */
+  externalAccountId: string | null;
+  ledgerAccountNumber: string | null;
+  /** `null` = leave it derived; `true`/`false` = a human decided. */
+  expectsStatements: boolean | null;
+  autoAssignPaymentMethod: string | null;
+  /** Set = switched off from that day (`valid_until`). */
+  validUntil: string | null;
+}
+
+/**
+ * An empty draft — a new account starts as a bank account, the common case in
+ * onboarding.
+ *
+ * @when    Opening PaymentAccountEditor without a `defaultValue`.
+ * @instead Changing an existing account → hand its draft in.
+ */
+export function emptyPaymentAccountDraft(): PaymentAccountDraft {
+  return {
+    displayName: "",
+    kind: "bank",
+    iban: null,
+    bic: null,
+    bankName: null,
+    externalAccountId: null,
+    ledgerAccountNumber: null,
+    expectsStatements: null,
+    autoAssignPaymentMethod: null,
+    validUntil: null,
+  };
+}

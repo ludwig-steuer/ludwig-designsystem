@@ -474,6 +474,11 @@ export { PaymentAccountCell, type PaymentAccountRef } from "./entities/payment-a
 export { PaymentAccountRow } from "./entities/payment-account/PaymentAccountRow";
 export { PaymentAccountList } from "./entities/payment-account/PaymentAccountList";
 export { PaymentAccountSettingsList } from "./entities/payment-account/PaymentAccountSettingsList";
+export { PaymentAccountEditor } from "./entities/payment-account/PaymentAccountEditor";
+export {
+  emptyPaymentAccountDraft,
+  type PaymentAccountDraft,
+} from "./entities/payment-account/payment-account";
 export {
   paymentAccountColumns,
   paymentAccountTracks,

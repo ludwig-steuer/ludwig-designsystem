@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen 63a2c95); zwei Nacharbeiten und die Nachzählung der App eingearbeitet, siehe „Prüfung" |
+| Status | **in Specs** — `PaymentAccountCell` 0174, `PaymentAccountRow` 0180, `PaymentAccountList` 0181, `PaymentAccountSettingsList` 0182, `PaymentAccountEditor` 0183, alle gebaut und auf fremder Abnahme (2026-09-15). Davor **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen 63a2c95); zwei Nacharbeiten und die Nachzählung der App eingearbeitet, siehe „Prüfung" |
 | GLOSSARY | `### Payment account`, `### Statement expectation (Auszugserwartung)`, `### Payment account retirement` (Zahlungsweg-Abschaltung) — Ordner `entities/payment-account/`; Verrechnungskonto-Kategorie bleibt im Profil `account` |
 | Tabelle | `ludwig.client_payment_accounts` — „Eigene Bank-/Kassen-/Kreditkartenkonten des Mandanten mit IBAN" (Tabellenkommentar). Keine Subtypen; `kind` ist „nur UI-Kategorisierung (IBAN-Feld, Icon), nicht Routing-Trigger" (GLOSSARY) |
 | Typen | `bank-transactions/domain/payment-account-options.ts` — `PaymentAccountFacts`, `PaymentAccountOption`, `isPaymentAccountInUse()`, `toPaymentAccountOptions()`. **Nicht im Spiegel:** die Wortliste der Art (`core/accounting/payment-account-kind.ts`) → L-312; `PaymentAccountWithStats` (`bank-transactions/infrastructure/bank-transactions-queries.ts:230`) → L-314 |
@@ -152,10 +152,10 @@ Bau-Reihenfolge: `PaymentAccountCell` → `PaymentAccountRow` →
 
 | Form / Liste | Marke | Grund | Backlog |
 |---|---|---|---|
-| `PaymentAccountCell` | jetzt | trägt die Nennung in Beleg, Regel, Bankzeile, Import — heute steht dort die rohe Id | — |
+| `PaymentAccountCell` | jetzt | trägt die Nennung in Beleg, Regel, Bankzeile, Import — heute steht dort die rohe Id | `docs/backlog/0174-payment-account-cell.md` |
 | `PaymentAccountRow` | jetzt | trägt beide Listen | — |
 | `PaymentAccountList` | jetzt | ersetzt die Tabelle in `banks/page.tsx` | — |
-| `PaymentAccountSettingsList` | jetzt | ersetzt die Konfigurationsseite und die Abschalt-Vorschläge | — |
+| `PaymentAccountSettingsList` | jetzt | ersetzt die Konfigurationsseite und die Abschalt-Vorschläge | `docs/backlog/0182-payment-account-settings-list.md` |
 | `PaymentAccountEditor` | jetzt | ersetzt zwei Formulare | — |
 | „Konten des Stapels" (Deckung und Gate je Konto) | Backlog | eigene Ausprägung nach §8; hängt am Seitenprofil der Stapelabnahme (0167) | `docs/backlog/0168-payment-account-coverage-list.md` |
 | `PaymentAccountFacts` · `Card` · `View` · `Drawer` | verworfen | siehe Formen | — |
