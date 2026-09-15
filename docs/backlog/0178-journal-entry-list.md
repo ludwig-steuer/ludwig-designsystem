@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Beleggruppen, Weg nach DATEV, Export-Buckets |
 | Quelle | Entitätsprofil `docs/entitaeten/journal-entry.md` (geprüft), Abschnitt „Listen" (drei Jobs) und „Zuschnitt" (jetzt, Bau-Reihenfolge 4) |
@@ -118,3 +118,34 @@ Variabel (aus dieser Spec):
    anbietet.
 2. Bekommt die Liste eine Summe im Kopf? — ohne Antwort: **nein**, die Summe
    gehört dem Stapel, nicht seiner Liste; der Aufrufer setzt sie in `head.meta`.
+
+## Gebaut (2026-09-15)
+
+`JournalEntryList.tsx` mit der Liste und `journalEntriesByDocumentGroup()`, im
+Barrel. Die Liste hält vier Entscheidungen fest und rechnet sonst nichts: der
+Zeilenschlüssel ist `entryId`, die Spalten kommen aus 0175, die Abschnitte
+folgen `DOCUMENT_GROUP_LABEL`, und Abschnitte schließen einen Pager aus (die
+Form ist dieselbe Unterscheidung wie in `DataTable`).
+
+**Ein Fund aus dem Bau, sofort behoben:** `JournalEntryCell` hängte den Betrag
+hinter die Konten, und die Zeile hat eine eigene Betragsspalte — die Zahl stand
+zweimal (D24). `JournalEntryCell` hat dafür jetzt `showAmount`; der Spaltensatz
+setzt sie auf `false` (Nachtrag auf 0044, erledigt).
+
+Gemessen (CDP, Storybook 6107, 1400 px):
+
+| Story | Beobachtung |
+|---|---|
+| `InBatch` | vier Abschnitte in der Reihenfolge der Wortliste — Ausgangsrechnungen · Eingangsrechnungen · Bank —, „Ohne Beleggruppe" zuletzt; Zähler „1 Satz" / „2 Sätze"; fünf Zeilen, jede ein Link in den Satz |
+| `AtCase` | flach, zwei Zeilen, **keine** Spalte „Sachverhalt", kein Pager |
+| `InBucket` | Pager „1–25 von 343" mit Seiten 1 · 2 · … · 14, Sortierpfeil an „Datum", Zeilenaktion „Stornieren" in Warnfarbe |
+| `Empty` | drei verschiedene Sätze; „Nichts exportierbar." trägt `done` |
+| `Filtered` | „Keine Treffer für …" mit dem Filtertext und „Filter zurücksetzen" |
+| `LoadingAndError` | Kopf und Spaltenkopf bleiben stehen; der Fehler nennt seine Meldung |
+
+Kein Überlauf in allen sechs Stories. `pnpm typecheck`, `check:classes`,
+`check:language`, `check:when` und `pnpm build` grün; Screenshots angesehen.
+Abnahme durch einen anderen Agenten steht aus.
+
+**Offene Frage 1 bleibt offen** (Abschnitte gegen Pager beim Stapel): gebaut
+ist beides, die Seite entscheidet. Der Default steht in der Spec.

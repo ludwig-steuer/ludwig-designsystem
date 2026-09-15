@@ -596,3 +596,15 @@ unverändert aus" ist im Wortlaut gerissen (vier Spalten wurden fünf) — ohne
 Informationsverlust und mit Begründung, aber die Zeile gehört in die Tabelle
 „Abweichungen von der Spec", damit die nächste Abnahme nicht denselben
 Widerspruch findet.
+
+## Nachtrag 2026-09-15 — `showAmount`, aus dem Bau von 0178 (erledigt)
+
+`JournalEntryCell` hängt den Betrag hinter die Konten — richtig, wo die Zelle
+in fremdem Markup oder in einem Satz steht. In einer **Tabelle** mit eigener
+Betragsspalte steht die Zahl damit zweimal in einer Zeile (D24), sichtbar
+geworden im Spaltensatz `journalEntryColumns()` (0175): „6815 an 70021 ·
+1.249,90 €" neben der Spalte „Betrag 1.249,90 €".
+
+Gelöst mit einer Prop statt mit einer zweiten Zelle: `showAmount?: boolean`,
+Vorgabe `true`. Der Spaltensatz setzt sie auf `false`; bei mehr als zwei
+Teilbuchungen steht dort nur noch „n Zeilen".

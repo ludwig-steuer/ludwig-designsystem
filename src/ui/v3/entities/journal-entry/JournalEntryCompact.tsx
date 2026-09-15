@@ -124,6 +124,7 @@ export function JournalEntryCell({
   lines,
   currency,
   showNames = true,
+  showAmount = true,
   accountHref,
 }: {
   /** The lines of the entry, exactly as they would be stored. */
@@ -131,6 +132,12 @@ export function JournalEntryCell({
   currency: Currency;
   /** Account name next to the number; `false` = numbers only, for narrow columns. */
   showNames?: boolean;
+  /**
+   * The amount behind the accounts; `false` where the row has its own amount
+   * column — saying it twice in one row is what D24 forbids (nachtrag to 0044,
+   * found while building the list 0178).
+   */
+  showAmount?: boolean;
   /**
    * The way to the account **drawer**, per account number (0155).
    *
@@ -183,6 +190,7 @@ export function JournalEntryCell({
     body = <>{lines.length} Zeilen</>;
   }
 
+  if (!showAmount) return <span className="v2je__cell">{body}</span>;
   return (
     <span className="v2je__cell">
       {body} <span className="v2muted">·</span>{" "}

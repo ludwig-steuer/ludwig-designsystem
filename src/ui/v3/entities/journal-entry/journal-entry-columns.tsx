@@ -137,19 +137,15 @@ export function journalEntryColumns(
         const lines = entryLines(e);
         const count = e.lineCount ?? lines.length;
         const currency = e.currency as Currency;
-        if (count > 2) {
-          return (
-            <span className="v2je__cell">
-              {count} Zeilen <span className="v2muted">·</span>{" "}
-              <AmountCell value={e.amount} currency={currency} />
-            </span>
-          );
-        }
+        // No amount here: the row has its own column for it, and a number
+        // that stands twice in one row is what D24 forbids (0044, nachtrag).
+        if (count > 2) return <span className="v2je__cell">{count} Zeilen</span>;
         return (
           <JournalEntryCell
             lines={lines}
             currency={currency}
             showNames={false}
+            showAmount={false}
             {...(accountHref ? { accountHref } : {})}
           />
         );

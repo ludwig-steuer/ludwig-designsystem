@@ -171,7 +171,7 @@ Gemessen (CDP, Storybook 6107, 1400 px, im Story-Iframe):
 | Herkunft mit und ohne Konfidenz | Story `Origins`: KI-Vorschlag (mit Punkt) · Regelwerk · Manuell · Mandantenstapel (ohne) |
 | Das (i) steht im Kopf | Tabelle mit fünf Zeilen: genau **zwei** Knöpfe, beide in der Kopfzeile |
 | Kürzung | Story `Edges`: 60 Zeichen sichtbar, 122 im `title` |
-| Mehr als zwei Teilbuchungen | Story `Edges`: „5 Zeilen · 1.234.567,89 €" statt „A an B" |
+| Mehr als zwei Teilbuchungen | Story `Edges`: „5 Zeilen" statt „A an B" — seit dem Bau von 0178 **ohne** den Betrag: er steht in seiner eigenen Spalte, und zweimal in einer Zeile verstößt gegen D24 (Nachtrag auf 0044, `showAmount`) |
 | Zeile als Link | Story `InUse`: ein `a.v2rowlink` je Zeile in der Leitzelle, dazu vier Kontowege — **keine** verschachtelten Anker (`a a` = 0) |
 | Kein Überlauf | in allen sechs Stories `scrollWidth` = `clientWidth` |
 

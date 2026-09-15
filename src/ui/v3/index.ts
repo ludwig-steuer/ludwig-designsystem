@@ -478,6 +478,11 @@ export {
 } from "./entities/journal-entry/JournalEntryFacts";
 export { JournalEntryDrawer } from "./entities/journal-entry/JournalEntryDrawer";
 export {
+  JournalEntryList,
+  journalEntriesByDocumentGroup,
+  type JournalEntryListProps,
+} from "./entities/journal-entry/JournalEntryList";
+export {
   journalEntryColumns,
   journalEntryTracks,
   DEFAULT_JOURNAL_ENTRY_COLUMNS,
