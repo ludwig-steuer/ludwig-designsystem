@@ -736,6 +736,11 @@ function rowActionCells(list: AnyRowAction[]): ReactNode {
  * exclude each other in `ActionButton`'s type: a spread hides which of the two
  * a row carries, so the choice has to be two branches — and two branches in
  * two renderers would be two copies of the same decision.
+ *
+ * `action` goes through **unwrapped**: this renders on the server, and
+ * `ActionButton` is a client island. A bound Server Action crosses that line,
+ * a fresh closure around it does not — Next refuses it at render time
+ * („Functions cannot be passed directly to Client Components", LUDWIG-WEB-61).
  */
 function RowActionButton({
   action: a,
@@ -746,7 +751,9 @@ function RowActionButton({
   size: "xs" | "sm";
   variant: ButtonVariant;
 }) {
-  const run = a.action ?? (async () => {});
+  // Only actions reach this component (`href` renders a `Button` upstream), so
+  // `action` is set; the widened parameter lets one value fit both branches.
+  const run = a.action as (input?: unknown) => Promise<ActionResult>;
   return a.ask ? (
     <ActionButton size={size} variant={variant} icon={a.icon} ask={a.ask} action={run}>
       {a.label}
@@ -757,7 +764,7 @@ function RowActionButton({
       variant={variant}
       icon={a.icon}
       confirm={a.confirm}
-      action={() => run(undefined)}
+      action={run}
     >
       {a.label}
     </ActionButton>
