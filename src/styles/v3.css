@@ -756,6 +756,48 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
    single row: the sentence needs a block box (`text-align` does nothing on an
    inline span), and its value column must fill the row, or `space-between`
    pushes it right. */
+/* DiffView (0179): two states of one record, field by field. The old value is
+   muted, the new one is not struck through — changed is not deleted (V6). The
+   container query, not a media query: the form stands in drawers and columns,
+   and only its own width decides whether the two states still fit side by
+   side. */
+.v3diff {
+  container-type: inline-size;
+  display: grid; gap: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+.v3diff--bare { background: none; border: none; border-radius: 0; padding: 0; }
+.v3diff__head, .v3diff__row {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: baseline;
+}
+.v3diff__head {
+  font-size: var(--fs-ui-sm); font-weight: 700; color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: 10px;
+}
+.v3diff__head .v2sub { display: block; font-weight: 400; }
+.v3diff__rows { display: grid; gap: var(--space-2); }
+.v3diff__row { font-size: 13.5px; padding: 5px 0; }
+.v3diff__label { color: var(--color-text-muted); }
+.v3diff__before { color: var(--color-text-muted); overflow-wrap: anywhere; }
+.v3diff__after { overflow-wrap: anywhere; }
+.v3diff__word { display: none; }
+.v3diff__equal { margin: 0; font-size: 13.5px; }
+.v3diff__fold { display: inline-flex; flex-wrap: wrap; gap: var(--space-2); align-items: baseline; font-size: 13.5px; }
+@container (max-width: 560px) {
+  .v3diff__head { display: none; }
+  .v3diff__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+  .v3diff__word {
+    display: inline; margin-right: var(--space-2);
+    color: var(--color-text-subtle); font-size: var(--fs-ui-xs);
+  }
+}
 .v2fields--prose { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-4); }
 .v2fields--prose > .v2fields__h, .v2fields--prose > .v2fields__empty { grid-column: 1 / -1; }
 .v2fields--prose .v2fields__row { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }

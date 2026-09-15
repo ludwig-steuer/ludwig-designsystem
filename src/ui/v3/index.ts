@@ -471,6 +471,7 @@ export {
    Fakten (0142), Drawer (0143) */
 export { BusinessPartnerCell } from "./entities/business-partner/BusinessPartner";
 export { PaymentAccountCell, type PaymentAccountRef } from "./entities/payment-account/PaymentAccount";
+export { DiffView, type DiffRow, type DiffSide } from "./patterns/DiffView";
 export { JournalEntryRow } from "./entities/journal-entry/JournalEntryRow";
 export {
   JournalEntryFacts,

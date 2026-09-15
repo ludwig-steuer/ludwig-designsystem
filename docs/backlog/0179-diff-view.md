@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `patterns/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: zwei Stände eines Datensatzes nebeneinander, geändert hervorgehoben — kein Fachwort im Namen, in den Props oder in den Texten |
 | Quelle | App-Roadmap `uikit-entity-roadmap-2026-09.md` Abschnitt B, **B3**; `docs/detailseiten-pattern.md` Spec **S2** |
@@ -120,3 +120,32 @@ Variabel (aus dieser Spec):
 2. Braucht das Pattern eine Zusammenfassung („3 von 8 Feldern geändert")? —
    ohne Antwort: **ja**, als Unterzeile des Aufklappers; eine eigene Prop
    bekommt sie nicht.
+
+## Gebaut (2026-09-15)
+
+`patterns/DiffView.tsx` mit `DiffRow` und `DiffSide`, Regeln `.v3diff*` in
+`v3.css`, im Barrel.
+
+**Eine Abweichung von der Spec:** kein `"use client"`. Der Aufklapper ist
+`Disclosure`, und die Primitive ist ein natives `<details>` — die Form bleibt
+damit server-renderbar, wie `ProvenanceNote` (0163). Die Spec hatte eine
+Client-Komponente angenommen; der Zustand liegt im Browser, nicht in React.
+
+Gemessen (CDP, Storybook 6107, 1200 px):
+
+| Kriterium | Beobachtung |
+|---|---|
+| Geänderte oben, unveränderte im Aufklapper | `Changed`: drei Zeilen stehen, der Aufklapper sagt „5 unveränderte Felder · 3 von 8 geändert" |
+| `unchanged="show"` / `"hide"` | `ManyFields`: acht Zeilen ohne Aufklapper · drei Zeilen, die unveränderten ganz weg |
+| Nichts geändert | `AllUnchanged`: „Unverändert übernommen." und darunter alle acht im Aufklapper |
+| Nichts durchgestrichen | `text-decoration-line: none` am alten Wert, Farbe `--color-text-muted` |
+| Schmal | `Edges` bei 360 px: der Kopf entfällt, die Zeile hat **eine** Spalte, jedes Wort steht vor seinem Stand |
+| Ohne Fachwort | `grep` über Datei und Stories: keine Entität in Namen, Props oder Texten |
+
+**Bewusst nicht rechtsbündig:** die beiden Wertspalten mischen Text und Zahlen;
+die Zahl trägt ihre Tabellenziffern über `AmountCell`, die Spalte bleibt links.
+Rechtsbündig wäre V3 für eine reine Zahlenspalte — die ist das hier nicht.
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
+`pnpm build` grün; Screenshots angesehen. Abnahme durch einen anderen Agenten
+steht aus.
