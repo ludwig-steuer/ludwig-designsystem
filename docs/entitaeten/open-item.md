@@ -10,7 +10,7 @@
 | Wichtigkeit | App-Roadmap (9be34746) Rang 9, 12 Punkte: „Row und Altersgruppe stehen (0029), Seitenprofil liegt, Liste und Profil fehlen — kleinster Schritt zur fertigen Seite" |
 | Datenstand | Staging über den Pooler, **2026-09-11**, schreibgeschützte Sitzung: **59.962 Zeilen** in 24 Abzügen von 7 Mandanten, 3.255 davon nicht ausgeglichen. Gemessen am **jüngsten Abzug je Mandant**: 12.875 Zeilen, **947 offene Zeilen = 658 offene Posten** (423 Debitoren, 235 Kreditoren). „Offen" ist hier `is_cleared = false` im jüngsten Abzug — eine Näherung an die Stichtagsrechnung der App, nicht diese. Nur `SELECT`, keine Kundendaten; Beispielwerte erfunden. Perzentile diskret |
 | Bestandswarnung | **71 % der offenen Posten sind über 90 Tage überfällig** (470 von 658). Das ist kein Messfehler, sondern der Grund, warum die Liste die ältesten zuerst zeigt |
-| Rückfrage | gestellt am 2026-09-11 an `ludwig-manager` — Defaults gelten, bis sie beantwortet ist |
+| Rückfrage | gestellt am 2026-09-11, **beantwortet am 2026-09-15** (`ludwig-manager`): die Defaults aller drei Fragen gelten; sechs Anwendungsfälle zugeordnet; die Ablehnung von `OpenItemCell` und `OpenItemDrawer` ist angenommen, die Korrektur zu Schritt 5 geht in die Roadmap-Doku |
 | Analyse von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren`) |
 
 ## Was sie ist
@@ -112,6 +112,16 @@ Freitext-Grenzen: keine Kürzung nötig — Buchungstext max 60, Belegnummer max
 | `Step5List` (App, Stapelabnahme) | Block „DATEV-Stand" am Posten der Erwartung | nichts: `rows={[]}` | alles — der Block ist nie verdrahtet (L-328) | ein Leersatz, der eine Aussage behauptet |
 | Showcase `CaseTabs` (Set) · Plausibilität und Technik | Liste in einer Karte | `OpenItemRow` × n unter eigenem Kopf | — | eigener Tabellenkopf (`OpenItemsCard`) |
 
+**Aus der Rückfrage** (`ludwig-manager`, 2026-09-15) — die Anwendungsfälle und
+wo sie hier stehen: (a) die Seite `open-items` (J-07) → `OpenItemList`;
+(b) der Sachverhalt — „OPOS laut DATEV" in der Plausibilität und die Karte im
+Technik-Reiter → `OpenItemList` und `OpenItemCard`; (c) das Personenkonto mit
+seinen Posten → dieselbe Liste; (d) die Zuordnung von Zahlungen zu offenen
+Posten (`match-payments-to-opos-cases`) läuft server- und agentenseitig, **ohne
+UI**; (e) der Ausgleich gehört zu #11 `open-item-link` samt Backlog 0171;
+(f) der Owner-Merkposten „OPOS-Altersgruppierung als Nebenjob" ist offen — der
+Baustein dafür steht seit 0029 (`OpenItemAgeGroup`).
+
 ## Listen
 
 | Liste | Job | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
@@ -163,6 +173,11 @@ Bau-Reihenfolge: `OpenItemCard` → `OpenItemList` (die Zeile steht).
 - **L-328** — Schritt 5 zeigt den DATEV-Stand nie (`rows={[]}`).
 
 ## Offene Fragen
+
+**Beantwortet am 2026-09-15** (`ludwig-manager`): alle drei Defaults gelten —
+der jüngste Abzug ist der Stichtag, der Leerfall bleibt wie vorgeschlagen, bis
+der Owner entscheidet, und die Gruppe „ohne Fälligkeit" kommt, sobald L-327
+gelöst ist.
 
 1. Welcher Stichtag gilt ohne Wahl — heute oder der Stand des Abzugs? Heute
    liegt fast immer nach dem Abzug (p50 12 Tage), der Banner stünde bei jedem

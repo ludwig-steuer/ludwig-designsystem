@@ -10,7 +10,7 @@
 | Wichtigkeit | Roadmap Rang 8 (Entitäten-Roadmap 2026-09). Datenmodell-Review 2026-08-27: K3 (drei Grabstein-Mechanismen, niedrig) und K4 (Prompt-Kontext am Mandanten gegen den Speicher, mittel) |
 | Datenstand | Staging über den Pooler, **2026-09-11**, schreibgeschützte Sitzung: **47 Konventionen**, 46 für einen Mandanten (6 von 7 Mandanten), 1 für eine Kanzlei. Nur `SELECT`, keine Kundendaten; Beispielwerte erfunden. Perzentile diskret |
 | Bestandswarnung | **Alle 47 stammen vom Agenten** (`source = agent`), keine von einem Menschen; `origin = onboarding` kommt nicht vor. Knapp die Hälfte ist nach R15b keine Konvention (L-323) |
-| Rückfrage | gestellt am 2026-09-11 an `ludwig-manager` — Defaults gelten, bis sie beantwortet ist |
+| Rückfrage | gestellt am 2026-09-11, **beantwortet am 2026-09-15** (`ludwig-manager`): die Defaults aller drei Fragen gelten; vier Anwendungsfälle zugeordnet, keine Auswahl-Dialoge; dazu zwei Owner-Regeln für die Form (unten) |
 | Analyse von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren`) |
 
 ## Was sie ist
@@ -38,6 +38,14 @@ gelten soll.
   niemand versteht warum" (`ClientAgentNotesPanel`, R15c).
 - Zwei Wege hinaus: **Archivieren** heißt „gilt nicht mehr", **Löschen** heißt
   „hätte nie hier stehen dürfen" (`ClientAgentNotesPanel`, R15d).
+- **„Der Agent weniger, das Onboarding mehr"** (Owner über `ludwig-manager`,
+  2026-09-15): statische Buchungskreise werden **im Onboarding** als Konvention
+  erfasst, nicht erst im Lauf beobachtet. Dass heute keine der 47 Regeln die
+  Herkunft `onboarding` trägt, ist die Lücke, nicht der Zustand — die Form muss
+  also auch dort bedienbar sein.
+- **Keine sich selbst veraltenden Listen** (Owner, 2026-09-15; die Mitarbeiter-
+  liste wurde deshalb abgelehnt). Das verschärft R15b: eine Aufzählung von
+  Instanzen veraltet mit der ersten Änderung und gehört in die Stammdaten.
 
 **Keine Konvention in diesem Sinn:** die Buchungstext-Konvention
 (`platform_clients.posting_text_convention`) und die übrigen
@@ -110,6 +118,14 @@ drei Stellen, die dieselbe Zeile bauen:
 | `Step7` · `KonventionZeile` (`batch-review/ui`) | Tabelle in der Stapelabnahme, gruppiert zu entscheiden · bestätigt · verworfen | Thema, Regel, Begründung kursiv, „zum selben Thema schon verworfen", Geltung, Stand, `ConventionActions` (Bestätigen, Freigeben, Verwerfen) | `StatusBadge` — Stand in eigenen Wörtern („beobachtet", „verworfen") statt der Registry | — |
 | Admin · Kanzlei · Reiter „Konventionen" (`admin/tenants/[tenantId]/page.tsx`) | Tabelle | Thema, Regel, „Warum", Quelle · Datum, `StatusBadge` für Freigabe und Herkunft, `TenantConventionActions` (Freigeben, Archivieren); der Reiter zählt die Wartenden | — | ein rohes `<table>` neben einer `Card` des Sets |
 
+**Aus der Rückfrage** (`ludwig-manager`, 2026-09-15) — die Anwendungsfälle der
+App und wo sie hier stehen: (a) das Konventionen-Panel am Mandanten (Profil und
+Konfiguration, drei Panels) → `ConventionList` „des Mandanten"; (b) Schritt 7
+der Stapelabnahme, neu und bestätigt → Backlog 0170; (c) der Kanzlei-Reiter im
+Admin, Freigabe und Archiv → dieselbe `ConventionList`; (d) **Schreiber ist
+heute nur der Agent** (MCP) — nach der Owner-Regel oben kommt das Onboarding
+dazu. Auswahl-Dialoge gibt es keine.
+
 ## Listen
 
 | Liste | Job | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
@@ -135,7 +151,7 @@ im Set; die ersten beiden sind Teile der Mandanten- und der Kanzlei-Seite.
 | `ConventionList` | L | ja | 6 — zwei Listen-Jobs, eine Komponente | Zeilen 1–7, die Begründung aufklappbar als `ProvenanceNote`; je Zeile die Wege, die ihr Stand erlaubt: Archivieren, Löschen (mit Bestätigung), Freigeben (nur wartende Kanzleiregel) — als optionale Callbacks | — | `Card`, `CardHead`, `DataTable`, `EmptyState`, `ActionButton` `confirm` (0159), `OverflowMenu` (0008) | `ClientAgentNotesPanel` (Liste), Kanzlei-Tabelle mit `TenantConventionActions` |
 | `ConventionView` | L | nein | keine Route je Regel; alles, was eine Regel hat, trägt die Zeile samt Herleitung | | | | |
 | `ConventionDrawer` | L | nein | 5 greift nicht: keine fremde Ansicht verweist auf eine Konvention | | | | |
-| `ConventionForm` | XL | ja | 4 — Thema und Regel sind beim Anlegen änderbar = Nutzer; das Anlegen steht heute im Panel. **Kein Bearbeiten:** eine neue Regel zum selben Thema löst die alte ab (R15d) | Thema, Regel, Begründung (offene Frage 3); Hinweis nach R15b bei mehr als 200 Zeichen oder bei Betrag, Datum, Belegnummer — ein Satz, keine Sperre | — | `Field`, `Input`, `Textarea`, `Button` | das Anlegen im `ClientAgentNotesPanel` |
+| `ConventionForm` | XL | ja | 4 — Thema und Regel sind beim Anlegen änderbar = Nutzer; das Anlegen steht heute im Panel, und das Onboarding soll dieselbe Form bekommen (Owner 2026-09-15). **Kein Bearbeiten:** eine neue Regel zum selben Thema löst die alte ab (R15d) | Thema, Regel, Begründung (optional); Hinweis nach R15b bei mehr als 200 Zeichen, bei Betrag, Datum, Belegnummer und bei einer Aufzählung von Instanzen — ein Satz, keine Sperre | — | `Field`, `Input`, `Textarea`, `Button` | das Anlegen im `ClientAgentNotesPanel` |
 
 Bau-Reihenfolge: `ConventionRow` → `ConventionList` → `ConventionForm`.
 
@@ -164,6 +180,8 @@ Bau-Reihenfolge: `ConventionRow` → `ConventionList` → `ConventionForm`.
   Bestand.
 
 ## Offene Fragen
+
+**Beantwortet am 2026-09-15** (`ludwig-manager`): alle drei Defaults gelten.
 
 1. Zeigt die Liste frühere Fassungen einer Regel (Kette bis 4)? — ohne Antwort:
    **nein**, wie heute; die Zeile nennt „ersetzt n frühere Fassungen", sobald die

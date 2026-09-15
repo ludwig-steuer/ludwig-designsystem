@@ -10,7 +10,7 @@
 | Wichtigkeit | App-Roadmap (9be34746) Rang 10 |
 | Datenstand | Staging, **2026-09-11**: Erhebung `docs/entitaeten/expectation-staging-erhebung-2026-09-11.md` (Code-Stand `46d976cb`), am selben Tag nachgezählt — unverändert: **135 Erwartungen** an 132 Sachverhalten, 6 Mandanten; 119 offen, 94 davon überfällig; 16 erledigt. Nur `SELECT`, keine Kundendaten; Beispielwerte erfunden |
 | Bestandswarnung | **Keine Nutzerin hat je eine Erwartung erledigt** — die 2 von Hand erledigten sind Klicks des Agenten; 14 erledigte der Abgleich. **Eskaliert ist eine** von 94 überfälligen (L-331). Zahlungserwartungen gibt es praktisch erst seit KW 2026-09-07 |
-| Rückfrage | gestellt am 2026-09-11 an `ludwig-manager` — Defaults gelten, bis sie beantwortet ist |
+| Rückfrage | gestellt am 2026-09-11, **beantwortet am 2026-09-15** (`ludwig-manager`): die Defaults aller drei Fragen gelten; sechs Anwendungsfälle zugeordnet. „Aufheben" mit Pflichtgrund ist zugleich eine Owner-Frage der App (P8) — das Set baut den Default, die App folgt dem Owner |
 | Analyse von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren`) |
 
 ## Was sie ist
@@ -99,6 +99,17 @@ Rest im `title` (0025 M8). Gegenpartei max 49, Referenz max 41: ungekürzt.
 | Stapelabnahme Schritt 5 (App, `Step5List`, 364 Z.) | Liste mit Detail | Zahlungserwartungen gruppiert nach überfällig · in Frist · zurückgestellt und je Gegenpartei mit Summe; Detail „Der Posten": Betrag, Fällig, Fristquelle, Richtung, „Mahnstufe", Grund der Wiedervorlage; „DATEV-Stand" | der DATEV-Stand (immer leer, L-328) | die Eskalation heißt „Mahnstufe" (L-332); `FRIST_QUELLE` als lokale Map |
 | Showcase `case` (Set): Randspalte „Erwartungen", `CaseTimeline`, `ExpectationPane` | Zeile, Strang-Eintrag, Detail | beide Arten, auch an abgeschlossenen Sachverhalten; im Detail `ExpectationRow`, der Satz, was sie erledigt, „Erledigt" und „Aufheben" von Hand | — | die Knöpfe von Hand neben der Zeile |
 
+**Aus der Rückfrage** (`ludwig-manager`, 2026-09-15) — die Anwendungsfälle und
+wo sie hier stehen: (a) das Panel „Fehlt" und der Rückfragen-Reiter am
+Sachverhalt → `ExpectationRow` samt Nachtrag 0025 und `ExpectationFacts`;
+(b) Schritt 1 der Stapelabnahme, Nachforderung per Mail
+(`document-request-report-core`) → Backlog 0172; (c) Schritt 5 → Backlog 0173;
+(d) die Randspalte des Sachverhalts (0152) → `ExpectationRow`; (e) der
+Bank-Abgleich — Zahlungserwartung gegen Bankzeile
+(`ensurePaymentExpectationForBooking`, Matching serverseitig), **ohne UI**;
+(f) das MCP-Tool `expect_document`, ebenfalls ohne UI. Dass Zahlungserwartungen
+abgeschlossener Sachverhalte rechts stehen, ist als L-329 zugleich App-Frage P8.
+
 ## Listen
 
 | Liste | Job | Grundgesamtheit | Sortierung | Spalten (Ränge) | Filter | Massenaktion | Leerfall | Umfang p50 · p90 | Beleg |
@@ -153,6 +164,11 @@ Bau-Reihenfolge: Nachtrag 0025 (Zeile) → `ExpectationFacts`.
   **L-210** ist mit dem Spiegel c48d8042 erledigt (`ExpectationKind` einmal).
 
 ## Offene Fragen
+
+**Beantwortet am 2026-09-15** (`ludwig-manager`): alle drei Defaults gelten —
+anlegen tun weiter Agent und Server, „Aufheben" bekommt einen Pflichtgrund
+(App-seitig Owner-Frage P8), und die Zahlungserwartungen abgeschlossener
+Sachverhalte stehen in der Randspalte.
 
 1. Soll die Sachbearbeiterin eine Erwartung selbst anlegen können? Heute tun
    das nur Agent und Server. — ohne Antwort: **nein**; kein Formular, der Weg
