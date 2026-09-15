@@ -492,6 +492,7 @@ export {
   statementExpectationOf,
   type PaymentAccountRowData,
 } from "./entities/payment-account/payment-account";
+export { BalanceCheck, type BalanceLine } from "./patterns/BalanceCheck";
 export { DiffView, type DiffRow, type DiffSide } from "./patterns/DiffView";
 export { JournalEntryRow } from "./entities/journal-entry/JournalEntryRow";
 export {

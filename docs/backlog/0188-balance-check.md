@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `patterns/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: Anfang plus Bewegungen gegen ein Ziel, die Differenz mit Vorzeichen — kein Fachwort |
 | Quelle | App-Roadmap `uikit-entity-roadmap-2026-09.md` Abschnitt B, **B6**; `docs/detailseiten-pattern.md` Spec **S6** |
@@ -104,3 +104,29 @@ Variabel (aus dieser Spec):
    die Zwischensumme ist eine zweite Zahl für dieselbe Aussage.
 2. Gehört „Rest einsetzen" als Weg dazu? — ohne Antwort: **nein**, das ist eine
    Aktion des Editors; das Pattern stellt fest, es bucht nicht.
+
+## Gebaut (2026-09-15)
+
+`src/ui/v3/patterns/BalanceCheck.tsx`, Server-Component, sechs Stories unter
+`v3/Patterns/Prüfen/BalanceCheck`, CSS `.v3bal*` in `src/styles/v3.css`.
+
+Eine Abweichung von der Spec: die Vorgabe für `off` lautete „Es fehlen X" —
+gebaut ist stattdessen die vorzeichenrichtige Differenz plus **zu wenig.** bzw.
+**zu viel.** Der Satz der Spec hätte die Zahl ein zweites Mal genannt, direkt
+neben ihr. Wer einen eigenen Satz übergibt, ersetzt damit die Zahl: `off`
+nennt sie meist selbst, und zweimal dieselbe Zahl in einer Zeile ist eine zu
+viel. Frage 1 blieb bei der Vorgabe (keine Zwischensumme), Frage 2 ebenso
+(keine Handlung).
+
+Gemessen im Story-iframe (900 px, `Edges` bei 360 px): Zahlen aller Zeilen auf
+derselben rechten Kante (475 px in `Statement`) mit
+`lining-nums tabular-nums`, Etiketten links auf 37 px. `Statement` zeigt eine
+Ergebniszeile „Geht auf." mit Haken und **ohne** „0,00 €"; `Off` zeigt
+„−12,40 € zu wenig." mit Zeichen und Wort; `Edges` belegt die Toleranz —
+0,004 € geht auf, 0,006 € nicht. `tone="bare"` in `InUse` misst
+`background: rgba(0,0,0,0)`, `border-top: 0px`, `padding: 0px` — keine zweite
+Fläche im Kartenfuß.
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when`,
+`check:icons`, `check:jobs` und `pnpm build` grün. Abnahme durch einen anderen
+Agenten steht aus.

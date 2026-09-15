@@ -756,6 +756,37 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
    single row: the sentence needs a block box (`text-align` does nothing on an
    inline span), and its value column must fill the row, or `space-between`
    pushes it right. */
+/* BalanceCheck (0188): the summands, the target, and one result line. Figures
+   right with tabular numerals (V3); the result carries a sign, a sign-word and
+   a mark, never colour alone (V6/V7). */
+.v3bal {
+  display: grid; gap: var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+.v3bal--bare { background: none; border: none; border-radius: 0; padding: 0; }
+.v3bal__row {
+  display: grid; grid-template-columns: minmax(0, 1fr) max-content;
+  gap: var(--space-4); align-items: baseline;
+  font-size: 13.5px; padding: 3px 0;
+}
+.v3bal__row--target {
+  border-top: 1px solid var(--color-border-subtle);
+  margin-top: var(--space-2); padding-top: var(--space-2);
+  font-weight: 500;
+}
+.v3bal__label { display: grid; gap: 2px; color: var(--color-text-muted); }
+.v3bal__row--target .v3bal__label { color: var(--color-text); }
+.v3bal__result {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2);
+  margin: var(--space-2) 0 0; font-size: 13.5px;
+}
+.v3bal__result.is-ok { color: var(--color-success); }
+.v3bal__result.is-off { color: var(--color-warning); }
+.v3bal__result .v2amount { font-weight: 600; }
+
 /* DiffView (0179): two states of one record, field by field. The old value is
    muted, the new one is not struck through — changed is not deleted (V6). The
    container query, not a media query: the form stands in drawers and columns,
