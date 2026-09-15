@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Teilbuchungen, BU-Schlüssel, der Weg nach DATEV |
 | Quelle | Entitätsprofil `docs/entitaeten/journal-entry.md` (geprüft), Abschnitte „Datenpunkte" (Rang 1–8, 11–17), „Relationen", „Formen", „Zuschnitt" (jetzt, Bau-Reihenfolge 2) |
@@ -136,3 +136,40 @@ Variabel (aus dieser Spec):
 2. Zeigt die Form die Erwartungen, die aus dem Satz entstanden sind? — ohne
    Antwort: **nein**, das ist die Liste der Seite; die Form nennt sie nicht
    einmal als Zahl.
+
+## Gebaut (2026-09-15)
+
+`JournalEntryFacts.tsx` mit `JournalEntryFactsContext`; `toJournalRows()` in
+`journal-entry.ts` setzt die `BookingLineVM` der App auf die Zeile des Rasters
+um (Formwechsel, keine Ableitung). Beides im Barrel.
+
+**Drei Abweichungen von der Spec, jede mit Grund:**
+
+1. **`sources` ist eine eigene Prop**, nicht `entry.sources`.
+   `RationaleSourceLike.kind` ist ein freier String, `AiSource.art` eine der
+   fünf Arten des Sets — die Zuordnung kennt nur der Aufrufer. Eine Map hier
+   wäre eine dritte Wahrheit neben App und Set.
+2. **Kein `accountHref`.** Das Raster (0113) kennt nur `onOpenLedger`, einen
+   Callback; eine Server-Form kann keinen übergeben. Nachtrag auf 0113
+   geschrieben.
+3. **Der Zustand steht zweimal.** Das Raster zeichnet immer sein eigenes
+   `StatusBadge` („Freigegeben"), darüber steht der Weg nach DATEV („In DATEV
+   bestätigt"). Das ist D24 verletzt und sichtbar: derselbe Nachtrag auf 0113
+   verlangt eine Prop, die den Kopf des Rasters auf den Beleg beschränkt. Bis
+   dahin bleibt es stehen, statt den Weg nach DATEV zu opfern — er ist Rang 5.
+
+Gemessen (CDP, Storybook 6107, 1000 px, im Story-Iframe):
+
+| Kriterium | Beobachtung |
+|---|---|
+| Gruppen in der Reihenfolge | `Filled`: Der Satz · Raster · Herleitung · Zusammenhang; `Exported` zusätzlich „Export und Stapel" |
+| Leere Gruppen fehlen | `WithoutAi`: keine Herleitungs-Zeilen außer der Herkunft, kein „Export und Stapel", keine Quellen |
+| Stufe aus der Ableitung | `Exported`: „In DATEV bestätigt" aus `exportedAt` und der Spiegelbuchung des Kontexts |
+| Nichts zweimal | `Filled`: Begründung, Judge-Satz und Quellen **nur** in `AiBookingNotesBody`; die `ProvenanceNote` trägt Herkunft, Regel, Konfidenz |
+| Hinweise mit Folge | `LockedAndBlocked`: zwei Banner, jeder mit dem Satz, was daraus folgt; `Repaired`: der Befund des Judge samt Kriterien |
+| Ränder | `Edges`: zwölf Zeilen im Raster, Begründung über 400 Zeichen, siebenstelliger Betrag — kein Überlauf |
+| `tone="bare"` | `InUse`: drei `v2fields--bare`, keine zweite Fläche in der Karte |
+
+`pnpm typecheck`, `check:classes`, `check:language`, `check:when`,
+`check:icons` und `pnpm build` grün; Screenshots angesehen. Abnahme durch einen
+anderen Agenten steht aus.

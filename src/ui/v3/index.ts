@@ -473,6 +473,10 @@ export { BusinessPartnerCell } from "./entities/business-partner/BusinessPartner
 export { PaymentAccountCell, type PaymentAccountRef } from "./entities/payment-account/PaymentAccount";
 export { JournalEntryRow } from "./entities/journal-entry/JournalEntryRow";
 export {
+  JournalEntryFacts,
+  type JournalEntryFactsContext,
+} from "./entities/journal-entry/JournalEntryFacts";
+export {
   journalEntryColumns,
   journalEntryTracks,
   DEFAULT_JOURNAL_ENTRY_COLUMNS,

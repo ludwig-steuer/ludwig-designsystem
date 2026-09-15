@@ -688,3 +688,21 @@ nicht mehr eine gelöschte Story, sondern sagt, wohin sie gezogen ist.
 **M7 — der Knopf schrumpfte mit.** Als Flex-Kind gab er nach, sobald der
 Kontoname die Zelle füllte. Gemessen mit p90-Namen: **24 × 24 px** mit
 `flex: 0 0 auto`, **14 × 24** ohne (Gegenprobe im laufenden Bild).
+
+## Nachtrag 2026-09-15 — aus dem Bau von 0176 (offen)
+
+`JournalEntryFacts` (0176) komponiert das Raster. Zwei Dinge fehlen ihm dafür:
+
+1. **Der Weg zum Konto.** Das Raster kennt nur `onOpenLedger`, einen Callback.
+   Eine Server-Form kann keinen übergeben, und 0155 hat für jede andere Stelle
+   entschieden: der Weg ist ein `accountHref` (ein Suchparameter, kein
+   Kontext). Ausbau: `accountHref?: (accountNumber: string) => string`, und
+   `onOpenLedger` bleibt für den Aufrufer, der wirklich keine URL hat.
+2. **Der eigene Zustand.** Das Raster zeichnet immer sein eigenes
+   `StatusBadge`. Steht darüber eine Form, die den Weg nach DATEV zeigt, sagt
+   die Seite den Zustand zweimal — und ab „exportiert" sogar mit zwei
+   verschiedenen Wörtern (D24). Ausbau: eine Prop, die den Kopf des Rasters
+   auf den Beleg beschränkt (`showStatus={false}`), nicht ein zweiter Rahmen.
+
+Beides ist klein und gehört in dieselbe Datei; bis dahin trägt 0176 die
+Doppelung sichtbar in seinem Abschnitt „Gebaut".

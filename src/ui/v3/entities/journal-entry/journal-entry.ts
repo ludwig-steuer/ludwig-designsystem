@@ -1,3 +1,5 @@
+import type { BookingLineVM } from "@/ludwig/modules/entries/domain/journal-entry-vm";
+import type { Currency } from "@/ludwig/shared/money";
 import type { JournalEntryListItem } from "@/ludwig/modules/entries/domain/entry";
 
 import { formatAmount } from "../../format";
@@ -194,3 +196,38 @@ export type JournalEntryRowData = JournalEntryListItem & {
   /** Title of the case — without it the cell says „Sachverhalt" (L-335). */
   caseTitle?: string | null;
 };
+
+/**
+ * The lines of a stored entry as the reading grid takes them (0176).
+ *
+ * A change of shape, not a derivation: `BookingLineVM` is the app's line,
+ * `JournalRow` the grid's row, and they differ in three names and in the
+ * format of the amount — the grid reads it as German text, because that is
+ * what the editor writes into the same field.
+ *
+ * @when    Showing the lines of a stored entry in JournalEntryGrid.
+ * @instead Naming an entry inside a foreign row → JournalEntryCell. Editing →
+ *          JournalEntryEditor, which owns its own rows.
+ */
+export function toJournalRows(entry: {
+  bookingDate: string | null;
+  currency: Currency;
+  lines: readonly BookingLineVM[];
+}): JournalRow[] {
+  return entry.lines.map((line, index) => ({
+    id: `${line.side}-${index}`,
+    datum: entry.bookingDate ?? "",
+    currency: entry.currency,
+    // `null` as the currency is the decimal without a sign — the grid puts the
+    // euro next to the column, not into every cell.
+    amount: formatAmount(line.amount, null),
+    side: line.side === "debit" ? "S" : "H",
+    bu: line.taxKey ?? "",
+    account: line.accountNumber,
+    accountName: line.accountName,
+    externalDocumentNumber: line.externalDocumentNumber ?? "",
+    text: line.lineText ?? "",
+    ...(line.externalDocumentNumber2 ? { externalDocumentNumber2: line.externalDocumentNumber2 } : {}),
+    ...(line.kost1 ? { costCenter1: line.kost1 } : {}),
+  }));
+}
