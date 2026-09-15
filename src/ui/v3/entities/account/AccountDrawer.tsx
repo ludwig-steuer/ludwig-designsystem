@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { Banner } from "../../primitives/Banner";
 import { Button } from "../../primitives/Button";
-import { Drawer } from "../../primitives/Drawer";
+import { Drawer, DrawerFullView } from "../../primitives/Drawer";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Segmented } from "../../primitives/Nav";
 import { Select } from "../../primitives/Form";
@@ -131,9 +131,7 @@ export function AccountDrawer({
         // itself (0042). A10 asks for the way where there is something to
         // open — not for a dead button over an error message.
         loading || error || notFound ? null : (
-          <Button variant="secondary" size="sm" onClick={onOpenFull}>
-            Volles Konto öffnen
-          </Button>
+          <DrawerFullView onClick={onOpenFull} />
         )
       }
     >

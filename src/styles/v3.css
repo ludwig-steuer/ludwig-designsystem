@@ -830,16 +830,19 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
   padding: 20px 24px;
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-5);
 }
+.v2callout--success { border-color: var(--color-success); }
 .v2callout--warning { border-color: var(--color-warning); }
 .v2callout--danger { border-color: var(--color-danger); }
 .v2callout__kicker {
   font-size: var(--fs-ui-xs); font-weight: 600;
   color: var(--color-text-subtle); margin-bottom: 6px;
 }
+.v2callout--success .v2callout__kicker { color: var(--color-success); }
 .v2callout--warning .v2callout__kicker { color: var(--color-warning); }
 .v2callout--danger .v2callout__kicker { color: var(--color-danger); }
 .v2callout__title { font-size: 17px; font-weight: 600; color: var(--color-primary); margin-bottom: 4px; }
 .v2callout__sub { font-size: 13.5px; color: var(--color-text-muted); }
+.v2callout--success .v2callout__sub { color: var(--color-success); }
 .v2callout--warning .v2callout__sub { color: var(--color-warning); }
 .v2callout--danger .v2callout__sub { color: var(--color-danger); }
 .v2callout__actions { display: flex; gap: 10px; flex-shrink: 0; }
@@ -1267,10 +1270,20 @@ select.v2in { padding-right: 26px; }
   border-bottom: 1px solid var(--color-border);
   font-size: var(--fs-ui-sm); font-weight: 700;
   color: var(--color-text-subtle);
-  display: flex; justify-content: space-between; gap: 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
-.v2lp__grp + .v2lp__grp,
-.v2lp__item + .v2lp__grp { border-top: 1px solid var(--color-border); }
+/* As a `<summary>` (TodoList, 0187): every group folds, one may start folded.
+   The chevron turns like the Disclosure's; a folded head keeps one line to
+   its neighbour, not two. */
+summary.v2lp__grp { cursor: pointer; list-style: none; }
+summary.v2lp__grp::-webkit-details-marker { display: none; }
+summary.v2lp__grp:hover { background: var(--color-bg-soft); }
+summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.v2lp__grplabel { flex: 1 1 auto; min-width: 0; }
+.v2lp__chev { flex: 0 0 auto; transition: transform var(--duration-fast) var(--ease-standard); }
+.v2lp details[open] > .v2lp__grp .v2lp__chev { transform: rotate(90deg); }
+.v2lp details:not([open]) > .v2lp__grp { border-bottom: none; }
+.v2lp details:not(:first-child) > .v2lp__grp { border-top: 1px solid var(--color-border); }
 .v2lp__item {
   display: block; width: 100%; text-align: left;
   background: none; border: none; cursor: pointer; text-decoration: none;
@@ -1723,6 +1736,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .s3zone__h__acts { display: flex; gap: 8px; flex-shrink: 0; }
 .s3zone__name { font-size: 15px; font-weight: 600; color: var(--color-text); }
+/* The running text of a zone — the case summary. One step below the body
+   register; a bare `<p>` inherited 16 px and outgrew its neighbours (0187). */
+.s3zone__text { font-size: var(--fs-body-sm); line-height: var(--lh-body-sm); margin: 0 0 var(--space-4); }
 .s3zone__line { font-size: 12.5px; color: var(--color-text-muted); margin-top: 2px; }
 .s3zone__grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: 12.5px;
@@ -2390,6 +2406,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* 3 · StatusCallout `icon`: left of the kicker, in the tone's colour. The text
    block pushes the actions right, so the symbol stays at the text. */
 .v2callout__ico { flex: 0 0 auto; align-self: start; line-height: 0; margin-top: 3px; color: var(--color-text-subtle); }
+.v2callout--success .v2callout__ico { color: var(--color-success); }
 .v2callout--warning .v2callout__ico { color: var(--color-warning); }
 .v2callout--danger .v2callout__ico { color: var(--color-danger); }
 .v2callout__ico + div { margin-right: auto; }

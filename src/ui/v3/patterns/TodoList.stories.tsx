@@ -29,7 +29,7 @@ const GROUPS: TodoGroup[] = [
 
 /**
  * Das Grundmuster jedes Prüfschritts: Zustands-Icon, Titel, Nebenzeile.
- * `J`/`K` gehen durch die Liste, `Enter` öffnet — probieren Sie es aus.
+ * `J` geht zurück, `K` nach vorn (wie der `RecordPager`), `Enter` öffnet — probieren Sie es aus.
  */
 export const Filled: Story = {
   render: function Render() {
@@ -56,6 +56,22 @@ export const Filled: Story = {
         }
       />
     );
+  },
+};
+
+/**
+ * Eine Gruppe beginnt zugeklappt (`collapsed`): die technischen Details
+ * bleiben erreichbar, verstellen aber nicht die Fragen. `J`/`K` überspringen
+ * sie, bis der Kopf sie aufklappt.
+ */
+export const Collapsed: Story = {
+  render: function Render() {
+    const [sel, setSel] = useState<string | null>("a");
+    const groups: TodoGroup[] = [
+      GROUPS[0]!,
+      { ...GROUPS[1]!, label: "Technische Details", meta: "3 zu quittieren", collapsed: true },
+    ];
+    return <TodoList groups={groups} selectedId={sel} onSelect={setSel} />;
   },
 };
 

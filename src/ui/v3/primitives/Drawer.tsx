@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { Button } from "./Button";
 import { trapTab } from "./focus";
 import { IconButton } from "./IconButton";
 
@@ -199,4 +200,29 @@ export function Drawer({
 export function DrawerFooter({ children }: { children: ReactNode }) {
   const slot = useContext(DrawerFooterSlot);
   return slot ? createPortal(children, slot) : null;
+}
+
+/**
+ * The one button in zone 5 (A10, 0052): the way from the drawer into the full
+ * view — same word, same look in every drawer (0187). `href` for a page,
+ * `onClick` for a caller that routes itself.
+ *
+ * @when    The `footer` of an entity drawer — always, and as its only button.
+ * @instead An exit that is a different verb (assign, look up) → the same button with its own `children`. A writing action → none; the drawer looks up, it does not act.
+ */
+export function DrawerFullView({
+  href,
+  onClick,
+  children = "Vollansicht öffnen",
+}: { children?: ReactNode } & ({ href: string; onClick?: undefined } | { href?: undefined; onClick: () => void })) {
+  const icon = <ActionIcon action="open" size={14} />;
+  return href ? (
+    <Button variant="secondary" size="sm" icon={icon} href={href}>
+      {children}
+    </Button>
+  ) : (
+    <Button variant="secondary" size="sm" icon={icon} onClick={onClick}>
+      {children}
+    </Button>
+  );
 }

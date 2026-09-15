@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
+import { ActionIcon } from "../Icons";
 import { useHotkeys } from "./Hotkeys";
 import { StateIcon, type StateKind } from "./Review";
 
@@ -9,12 +10,18 @@ import { StateIcon, type StateKind } from "./Review";
  * The basic pattern of every review step (F123 T123.2, Leitbrief §8).
  *
  * A list of items, each with a state icon, title, secondary line and badges on
- * the right. `J`/`K` move through the list, `Enter` opens the detail. After an
- * action the selection jumps to the **next open** item — so the reviewer does
- * not have to return to the list after every tick.
+ * the right. `J`/`K` move through the list — J back, K forward, the reverse of
+ * vim on purpose; the reason stands in `RecordPager` and is not repeated here
+ * (0187). `Enter` opens the detail. After an action the selection jumps to
+ * the **next open** item — so the reviewer does not have to return to the
+ * list after every tick.
  *
  * The jump can be switched off (`autoAdvance`): whoever scans a list instead
  * of working through it wants to keep the selection.
+ *
+ * A group can start folded (`collapsed`): native `<details>`, the person at
+ * the screen opens it, and `J`/`K` skip what is folded — a selection nobody
+ * sees is none.
  */
 
 export interface TodoItem {
@@ -34,6 +41,8 @@ export interface TodoGroup {
   /** On the right in the group header instead of the bare count — e.g. „3 Posten · 4.812 €". */
   meta?: React.ReactNode;
   items: TodoItem[];
+  /** Starts folded; the head opens it. For what must stay reachable but not in the way (0187). */
+  collapsed?: boolean;
 }
 
 /** What counts as "open" — the jump skips everything else. */
@@ -77,7 +86,15 @@ export function TodoList({
   emptyText?: string;
   hotkeys?: boolean;
 }) {
-  const flat = useMemo(() => groups.flatMap((g) => g.items), [groups]);
+  // Which groups are folded right now — the `<details>` owns the toggle,
+  // this only mirrors it so the keys skip what is out of sight.
+  const [closed, setClosed] = useState<ReadonlySet<string>>(
+    () => new Set(groups.filter((g) => g.collapsed).map((g) => g.label)),
+  );
+  const flat = useMemo(
+    () => groups.filter((g) => !closed.has(g.label)).flatMap((g) => g.items),
+    [groups, closed],
+  );
 
   const jumpTo = useCallback(
     (delta: number) => {
@@ -91,8 +108,8 @@ export function TodoList({
 
   const bindings = useMemo(
     () => [
-      { key: "j", label: "Nächster Punkt", handler: () => jumpTo(1) },
-      { key: "k", label: "Voriger Punkt", handler: () => jumpTo(-1) },
+      { key: "j", label: "Voriger Punkt", handler: () => jumpTo(-1) },
+      { key: "k", label: "Nächster Punkt", handler: () => jumpTo(1) },
       {
         key: "Enter",
         label: "Punkt öffnen",
@@ -118,11 +135,24 @@ export function TodoList({
       {groups
         .filter((g) => g.items.length > 0)
         .map((g) => (
-          <div key={g.label}>
-            <div className="v2lp__grp">
-              <span>{g.label}</span>
+          <details
+            key={g.label}
+            open={!g.collapsed}
+            onToggle={(e) => {
+              const { open } = e.currentTarget;
+              setClosed((prev) => {
+                const next = new Set(prev);
+                if (open) next.delete(g.label);
+                else next.add(g.label);
+                return next;
+              });
+            }}
+          >
+            <summary className="v2lp__grp">
+              <ActionIcon action="collapse" size={14} className="v2lp__chev" />
+              <span className="v2lp__grplabel">{g.label}</span>
               <span>{g.meta ?? g.items.length}</span>
-            </div>
+            </summary>
             {g.items.map((it) => (
               <button
                 key={it.id}
@@ -142,7 +172,7 @@ export function TodoList({
                 {it.badges ? <span className="v2lp__badges">{it.badges}</span> : null}
               </button>
             ))}
-          </div>
+          </details>
         ))}
     </div>
   );

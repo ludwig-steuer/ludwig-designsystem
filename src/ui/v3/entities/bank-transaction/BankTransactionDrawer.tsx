@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 
 import { ActionIcon } from "../../Icons";
-import { Button } from "../../primitives/Button";
 import { Callout } from "../../primitives/Callout";
-import { Drawer } from "../../primitives/Drawer";
+import { Drawer, DrawerFullView } from "../../primitives/Drawer";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Amount } from "../../primitives/Amount";
 import { Skeleton } from "../../primitives/Skeleton";
@@ -123,13 +122,7 @@ export function BankTransactionDrawer({
         ) : null
       }
       footer={
-        <Button
-          variant="primary"
-          icon={<ActionIcon action="open" size={16} />}
-          onClick={() => onOpenFull(exit, first?.caseId)}
-        >
-          {exitLabel}
-        </Button>
+        <DrawerFullView onClick={() => onOpenFull(exit, first?.caseId)}>{exitLabel}</DrawerFullView>
       }
     >
       <Body

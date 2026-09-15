@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Amount } from "./Amount";
 import { Button } from "./Button";
 import { AmountCell } from "./Cells";
-import { Drawer, DrawerFooter, type DrawerSize } from "./Drawer";
+import { Drawer, DrawerFooter, DrawerFullView, type DrawerSize } from "./Drawer";
 import { Field, Textarea } from "./Form";
 import { FieldList } from "./FieldList";
 import { HeadRow, Row, Table } from "./Table";
@@ -123,6 +123,46 @@ export const WithFooter: Story = {
           {open === "ohne"
             ? "Ohne Aktionen bleibt die Fußzone weg — sie klappt bei leerem Inhalt zusammen."
             : "Die Aktionen stehen unten und bleiben stehen, während der Inhalt scrollt."}
+        </Drawer>
+      </>
+    );
+  },
+};
+
+/**
+ * Zone 5 (A10): jeder Entity-Drawer trägt **denselben** Knopf in die
+ * Vollansicht — als Link mit `href` oder als Knopf mit `onClick`, das Wort
+ * nur dort anders, wo der Ausgang ein anderes Verb ist (Bankzeile).
+ */
+export const FullView: Story = {
+  render: function Render() {
+    const [open, setOpen] = useState<"link" | "button" | null>(null);
+    return (
+      <>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button variant="secondary" onClick={() => setOpen("link")}>
+            Mit Link
+          </Button>
+          <Button variant="secondary" onClick={() => setOpen("button")}>
+            Mit Knopf
+          </Button>
+        </div>
+        <Drawer
+          open={open !== null}
+          onClose={() => setOpen(null)}
+          title="Konto 4400"
+          meta="Erlöse 19 % USt · 2026"
+          footer={
+            open === "link" ? (
+              <DrawerFullView href="#konto-4400" />
+            ) : (
+              <DrawerFullView onClick={() => setOpen(null)} />
+            )
+          }
+        >
+          <p style={{ marginTop: 0 }}>
+            Der Fuß trägt genau einen Knopf, und der führt in die Vollansicht.
+          </p>
         </Drawer>
       </>
     );

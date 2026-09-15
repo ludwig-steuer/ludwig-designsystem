@@ -5,9 +5,8 @@ import { asCurrency } from "@/ludwig/shared/money";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Amount } from "../../primitives/Amount";
 import { ActionIcon } from "../../Icons";
-import { Button } from "../../primitives/Button";
 import { Callout } from "../../primitives/Callout";
-import { Drawer } from "../../primitives/Drawer";
+import { Drawer, DrawerFullView } from "../../primitives/Drawer";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Skeleton } from "../../primitives/Skeleton";
 import { Card, CardHead } from "../../primitives/Table";
@@ -138,9 +137,7 @@ export function CaseDrawer({
         // Zone 5 stands **in the error case too** — deliberately unlike the
         // document drawer: whoever cannot load the case wants the full view
         // all the more (decision of the Freigabe, 2026-09-06).
-        <Button variant="primary" icon={<ActionIcon action="open" size={16} />} onClick={onOpenFull}>
-          Sachverhalt öffnen
-        </Button>
+        <DrawerFullView onClick={onOpenFull} />
       }
     >
       <DrawerBody

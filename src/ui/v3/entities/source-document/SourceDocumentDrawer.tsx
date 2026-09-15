@@ -1,13 +1,12 @@
 "use client";
 
-import { FileWarning, Maximize2 } from "lucide-react";
+import { FileWarning } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
 
-import { Button } from "../../primitives/Button";
 import { Callout } from "../../primitives/Callout";
-import { Drawer } from "../../primitives/Drawer";
+import { Drawer, DrawerFullView } from "../../primitives/Drawer";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Skeleton } from "../../primitives/Skeleton";
 import { Card, CardHead } from "../../primitives/Table";
@@ -126,9 +125,7 @@ export function SourceDocumentDrawer({
       // button, nothing that writes.
       footer={
         record ? (
-          <Button variant="primary" icon={<Maximize2 size={16} strokeWidth={1.5} />} onClick={onOpenFull}>
-            Vollständige Belegansicht öffnen
-          </Button>
+          <DrawerFullView onClick={onOpenFull} />
         ) : null
       }
     >

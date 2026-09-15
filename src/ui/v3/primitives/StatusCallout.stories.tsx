@@ -55,6 +55,20 @@ export const Failed: Story = {
   ),
 };
 
+/** Erfolg (0187): grüner Rahmen, und das Wort im Kicker sagt es — Schritt 0 der Abnahme, wenn der Agent durch ist. */
+export const Done: Story = {
+  render: () => (
+    <StatusCallout
+      tone="success"
+      icon={<CircleCheck size={20} strokeWidth={1.5} />}
+      kicker="Agent fertig"
+      title="Periode 08/2026 · Musterfirma GmbH"
+      sub="118 Sätze vorgeschlagen, keine offene Frage."
+      actions={<Button variant="primary">Abnahme beginnen</Button>}
+    />
+  ),
+};
+
 /** Ohne Handlung — abgeschlossene Stapel brauchen keinen Knopf. */
 export const WithoutAction: Story = {
   render: () => (

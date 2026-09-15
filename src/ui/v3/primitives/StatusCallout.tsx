@@ -16,7 +16,7 @@ export function StatusCallout({
   sub,
   actions,
 }: {
-  tone?: "neutral" | "warning" | "danger";
+  tone?: "neutral" | "success" | "warning" | "danger";
   /**
    * Left of the kicker, in the colour of the tone (0049) — part of the tone,
    * not of the text. The word in the kicker stays either way (V7).

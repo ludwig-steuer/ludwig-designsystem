@@ -3,8 +3,7 @@
 import type { JournalEntryVM } from "@/ludwig/modules/entries/domain/journal-entry-vm";
 
 import { Banner } from "../../primitives/Banner";
-import { Button } from "../../primitives/Button";
-import { Drawer } from "../../primitives/Drawer";
+import { Drawer, DrawerFullView } from "../../primitives/Drawer";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Skeleton } from "../../primitives/Skeleton";
 import type { AiSource } from "./AiBookingNotes";
@@ -82,9 +81,7 @@ export function JournalEntryDrawer({
         // itself (0042). A10 asks for the way where there is something to
         // open — not for a dead button over an error.
         loading || error || gone || !caseHref ? null : (
-          <Button variant="secondary" size="sm" href={caseHref}>
-            Sachverhalt öffnen →
-          </Button>
+          <DrawerFullView href={caseHref} />
         )
       }
     >

@@ -6,9 +6,8 @@ import type {
 } from "@/ludwig/modules/business-partners/domain/business-partner";
 
 import { formatCount } from "../../format";
-import { Button } from "../../primitives/Button";
 import { MonoCell } from "../../primitives/Cells";
-import { Drawer } from "../../primitives/Drawer";
+import { Drawer, DrawerFullView } from "../../primitives/Drawer";
 import { Link } from "../../primitives/Link";
 import { Card, CardHead, HeadRow, Row, Table } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
@@ -120,9 +119,7 @@ export function BusinessPartnerDrawer({
       ariaLabel={partner.legalName}
       size="lg"
       footer={
-        <Button variant="secondary" size="sm" href={href}>
-          Geschäftspartner öffnen
-        </Button>
+        <DrawerFullView href={href} />
       }
     >
       <div className="v2bpdrawer">
