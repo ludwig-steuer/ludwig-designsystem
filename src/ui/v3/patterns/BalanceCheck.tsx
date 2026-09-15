@@ -97,10 +97,12 @@ export function BalanceCheck({
           says nothing (V7). */}
       <p className={`v3bal__result${ok ? " is-ok" : " is-off"}`}>
         <StateIcon state={ok ? "done" : "warning"} title={ok ? "geht auf" : "geht nicht auf"} />
-        {ok || custom ? null : (
-          <span className="v2amount">{formatAmount(difference, currency, true)}</span>
-        )}
-        <span>{ok ? balanced : (custom ?? (difference < 0 ? "zu wenig." : "zu viel."))}</span>
+        <span className="v3bal__says">
+          {ok || custom ? null : (
+            <span className="v2amount">{formatAmount(difference, currency, true)}</span>
+          )}
+          {ok ? balanced : (custom ?? (difference < 0 ? "zu wenig." : "zu viel."))}
+        </span>
       </p>
     </div>
   );

@@ -125,12 +125,12 @@ export const Edges: Story = {
       />
       <BalanceCheck
         currency="EUR"
-        lines={[{ key: "sum", label: "Summe der Zeilen", value: 1000.004 }]}
+        lines={[{ key: "sum", label: "Summe der Zeilen", value: 1000.004, hint: "genau 1.000,004 € — vier Tausendstel unter der Grenze" }]}
         target={{ label: "Endsaldo laut Auszug", value: 1000 }}
       />
       <BalanceCheck
         currency="EUR"
-        lines={[{ key: "sum", label: "Summe der Zeilen", value: 1000.006 }]}
+        lines={[{ key: "sum", label: "Summe der Zeilen", value: 1000.006, hint: "genau 1.000,006 € — ein Tausendstel darüber" }]}
         target={{ label: "Endsaldo laut Auszug", value: 1000 }}
       />
     </div>

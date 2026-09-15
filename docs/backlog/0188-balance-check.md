@@ -127,6 +127,11 @@ Ergebniszeile „Geht auf." mit Haken und **ohne** „0,00 €"; `Off` zeigt
 `background: rgba(0,0,0,0)`, `border-top: 0px`, `padding: 0px` — keine zweite
 Fläche im Kartenfuß.
 
+Nachtrag am selben Tag: die Ergebniszeile ist ein Gitter mit eigener Spalte
+für das Zeichen — ein langer Satz des Aufrufers bricht daneben um, statt das
+Zeichen auf eine eigene Zeile zu schieben. In `Edges` nennen zwei Hinweise die
+Tausendstel, die die Anzeige rundet.
+
 `pnpm typecheck`, `check:classes`, `check:language`, `check:when`,
 `check:icons`, `check:jobs` und `pnpm build` grün. Abnahme durch einen anderen
 Agenten steht aus.

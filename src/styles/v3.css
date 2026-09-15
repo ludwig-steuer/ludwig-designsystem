@@ -779,10 +779,15 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 }
 .v3bal__label { display: grid; gap: 2px; color: var(--color-text-muted); }
 .v3bal__row--target .v3bal__label { color: var(--color-text); }
+/* The mark keeps its own column, so a long sentence wraps beside it instead of
+   pushing it onto a line of its own. */
 .v3bal__result {
-  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2);
+  display: grid; grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-2); align-items: baseline;
   margin: var(--space-2) 0 0; font-size: 13.5px;
 }
+.v3bal__result svg { position: relative; top: 2px; }
+.v3bal__says .v2amount { margin-right: var(--space-2); }
 .v3bal__result.is-ok { color: var(--color-success); }
 .v3bal__result.is-off { color: var(--color-warning); }
 .v3bal__result .v2amount { font-weight: 600; }
