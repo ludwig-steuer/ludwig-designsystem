@@ -39,7 +39,7 @@ Abnahme, Messung oder Befund. Reifegrad:
 | **Herkunft** | D25 | `ProvenanceMark`, `ProvenanceNote` (0163) | fertig | `AiBookingNotes` baut Begründung und Quellen noch selbst (0163, Ausbau) | **S8** |
 | **Vorher / Nachher** | D25 (von Hand korrigiert) | `DiffView` (0179, B3) | gebaut, Abnahme offen | Blockiert 0164 (bearbeitete Vorschläge) und 0165 (Nachlese `matched_corrected`); `ProvenanceNote` nennt nur wer und wann | **S2** |
 | **Aufteilung** | — | — | fehlt (B4 `AllocationEditor`) | `allocated_amount` bei 1 % der Ereignisse; erst der Sammelsachverhalt verlangt es | **S9** |
-| **Saldo-Prüfung** | D24 | Meldungen im `JournalEntryEditor`, Saldo-Randspalte in Plausibilität | fehlt (B6 `BalanceCheck`) | „Soll = Haben", „Verrechnungskonto auf 0", „Rest x" stehen heute in drei Formen | **S6** |
+| **Saldo-Prüfung** | D24 | Meldungen im `JournalEntryEditor`, Saldo-Randspalte in Plausibilität | `BalanceCheck` (0188) | „Soll = Haben", „Verrechnungskonto auf 0", „Rest x" stehen heute in drei Formen | **S6** |
 | **Abgleich zweier Quellen** | — | `ReconciliationTable` (0161), `PeriodGrid` (0162) | fertig | Für 0165 fehlt die Achse der Paar-Arten (L-303 → App P20) | — |
 
 ## 2 Spec-Liste — Pattern ausbessern oder ergänzen
@@ -55,7 +55,7 @@ kein Bau wartet.
 | **S3** ✓ | `Columns`: Stufe für die schmale Spalte, `aside`/`minDetail` aus `DetailView` ins Muster (0184, gebaut 2026-09-15) | ausbessern | die Notizspalte des Sachverhalts ist die einzige ungemessene Breite; ein zweiter Rahmen mit Randspalte würde den Umweg kopieren | Beim Umbruch fällt Spalte 3 nach unten oder klappt Spalte 1 ein (0152, offene Frage 2)? — *nach unten, wie gebaut* |
 | **S4** ✓ | `SourceDocumentCard` auf `Columns split` (0185, gebaut 2026-09-15) | ausbessern | D17: der Beleg ist die einzige Detailseite, deren Gegenüberstellung ein eigenes Raster hat (`.v2doccard__cols`); die Karte steht auch im Drawer (`tone="bare"`), der Umbau trifft beide | — |
 | **S5** | Mangel am Wert im Set (neu, R21) | ergänzen | sobald ein zweiter Konsument ihn zeigt — der Sachverhalt ohne Gegenpart ist der erste Kandidat | Eigene Komponente oder eine Zeile der `FieldList` mit Satz und Weg? — *eine `FieldList`-Zeile* |
-| **S6** | B6 `BalanceCheck`: geht es auf? (neu) | ergänzen | Saldo und Soll/Haben stehen heute in drei Formen; D24 verlangt sie einmal | — |
+| **S6** ✓ | B6 `BalanceCheck` (0188, gebaut 2026-09-15): geht es auf? | ergänzen | Saldo und Soll/Haben stehen heute in drei Formen; D24 verlangt sie einmal | — |
 | **S7** | Abschnitts-Index im Reiter (neu, D27) | ergänzen | die Owner-Frage „senkrechte Reiter" | Senkrechte Unterreiter oder Sprungmarken im Reiter? — *Sprungmarken, keine zweite Reiterebene (D10)* |
 | **S8** ✓ | `AiBookingNotes` auf `ProvenanceNote` (0186, gebaut 2026-09-15) | ausbessern | zwei Formen derselben Herleitung, sobald `JournalEntryFacts` gebaut wird | — |
 | **S9** | B4 `AllocationEditor` | ergänzen | Backlog — 1 % der Ereignisse; erst der Sammelsachverhalt verlangt es | Jetzt oder mit dem Sammelsachverhalt? — *mit dem Sammelsachverhalt* |
