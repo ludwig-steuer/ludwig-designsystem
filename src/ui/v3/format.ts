@@ -226,14 +226,50 @@ export function formatTime(
   if (!value) return "—";
   const d = toDate(value);
   if (Number.isNaN(d.getTime())) return "—";
-  if (format === "date") return length === "long" ? DATE_LONG.format(d) : DATE.format(d);
-  if (format === "time") return CLOCK.format(d);
-  if (format === "month") return MONTH.format(d);
   if (format === "relative") return formatRelative(d, now);
   if (format === "age") return formatAge(d, now);
-  if (length === "short") return DT_SHORT.format(d);
-  if (length === "long") return DT_LONG.format(d);
-  return DT_MEDIUM.format(d);
+  return formatterFor(format, length).format(d);
+}
+
+/** The `Intl` instance behind a format and a length — one table for the point and the span. */
+function formatterFor(format: TimeRangeFormat | "time", length: TimeLength): Intl.DateTimeFormat {
+  if (format === "date") return length === "long" ? DATE_LONG : DATE;
+  if (format === "time") return CLOCK;
+  if (format === "month") return MONTH;
+  if (length === "short") return DT_SHORT;
+  if (length === "long") return DT_LONG;
+  return DT_MEDIUM;
+}
+
+/** A span reads like a point: no `relative`, no `age`, no clock without its day. */
+export type TimeRangeFormat = "date" | "dateTime" | "month";
+
+/**
+ * `01.–31.03.2026` · `28.12.2026 – 04.01.2027` · `26.08.2026, 09:12–17:30` ·
+ * `März–Mai 2026` — the shared part said once. Where the span folds is the
+ * locale's decision (`formatRange`), not ours. One end alone is that end
+ * alone; no end is the dash; a reversed pair is swapped, a span has no
+ * direction.
+ *
+ * @when    A span between two points in time becomes a string outside a
+ *          component — the period of a batch, the coverage of a statement.
+ * @instead Drawing it → DateRange. Elapsed seconds → formatDuration. Whole
+ *          days between the ends → daysBetween.
+ */
+export function formatTimeRange(
+  from: string | Date | null,
+  to: string | Date | null,
+  format: TimeRangeFormat = "date",
+  length: TimeLength = "medium",
+): string {
+  if (!from || !to) return formatTime(from ?? to, format, length);
+  const a = toDate(from);
+  const b = toDate(to);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return "—";
+  const f = formatterFor(format, length);
+  // ICU appends „Uhr" to a folded clock range and to nothing else; the
+  // points never say it, so the span does not either.
+  return (a <= b ? f.formatRange(a, b) : f.formatRange(b, a)).replace(/ Uhr$/, "");
 }
 
 /**

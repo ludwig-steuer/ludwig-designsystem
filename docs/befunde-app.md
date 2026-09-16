@@ -345,6 +345,7 @@ hier durch Nachsehen, nicht durch eine Meldung.
 | `BankTransactionDrawer` (0103) | `ui/drawers/BankTransactionDrawer.tsx` | Klasse A → B: die drei Aufrufer bringen die Zeile künftig mit |
 | `StateMachine` (0069) | nichts — der Baustein ist neu. **Wartet auf L-74:** sobald die Übergänge als Daten im Spiegel stehen, bekommt `StatusInfoDialog` seine vierte Stufe und zeigt Liste **und** Diagramm (Umschalter) | `FlowModal` bleibt die Kette Beleg → Sachverhalt → Buchung und ist davon nicht betroffen |
 | `Drawer` + `ClarificationCard mode="read"` (0058) | `RationaleSources`, Verweis `kind='clarification'` — er führt heute auf die Sachverhaltsseite und reißt damit den Vorgang auf, in dem die Rolle gerade steckt (Buchungs-Begründung lesen) | **Kein Baustein im Set**: der Rahmen ist Markup an der Aufrufstelle (rund acht Zeilen plus Loader — `RationaleSource` trägt nur die Id). Der Ausgang „Zum Sachverhalt →" gehört in `Drawer.footer`, wie bei 0098; die Karte kennt ihn nicht und soll ihn nicht kennen |
+| `DateRange` (0189) | sieben Handgriffe in vier Schreibweisen: `StapelTab.tsx:90` und `banks/page.tsx:169` (zwei Daten mit `–`), `banks/[accountId]/page.tsx:45`, `ImportResultSummary.tsx:52` („bis"), `Step9.tsx:120` (rohes ISO), `ExportBatchDetailSection.tsx:65`, `admin/…/clients/[clientId]/page.tsx:639` (Spalte „Zeitraum") | `01.–31.03.2026` faltet die Locale; ein Ende allein bleibt ein Datum, das Wort davor (`seit`) setzt `Time prefix` |
 
 ## F · Bleibt in der App — benannte Kompositionen (Owner 2026-09-04)
 

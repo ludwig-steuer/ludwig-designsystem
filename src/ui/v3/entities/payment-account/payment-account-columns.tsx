@@ -7,7 +7,7 @@ import type { ColumnDef } from "../../patterns/DataTable";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { AmountCell, MonoCell } from "../../primitives/Cells";
-import { Time } from "../../primitives/Time";
+import { DateRange } from "../../primitives/Time";
 import { AccountCell } from "../account/Account";
 import { PaymentAccountCell } from "./PaymentAccount";
 import { statementExpectationOf, type PaymentAccountRowData } from "./payment-account";
@@ -183,15 +183,7 @@ export function paymentAccountColumns(
       key: "period",
       header: "Zeitraum",
       width: "minmax(0, 1fr)",
-      cell: (a) =>
-        a.firstMovement && a.lastMovement ? (
-          <span>
-            <Time value={a.firstMovement} format="date" length="short" size="sm" /> –{" "}
-            <Time value={a.lastMovement} format="date" length="short" size="sm" />
-          </span>
-        ) : (
-          <span className="v2muted">—</span>
-        ),
+      cell: (a) => <DateRange from={a.firstMovement ?? null} to={a.lastMovement ?? null} size="sm" />,
     },
     autoAssign: {
       key: "autoAssign",

@@ -110,12 +110,13 @@ export { Markdown, parseInline, parseMarkdown } from "./primitives/Markdown";
 
 /* Werte — an amount, a point in time, a rule (P24) */
 export { Amount, type AmountProps, type AmountSize } from "./primitives/Amount";
-export { Time, Duration, type TimeSize } from "./primitives/Time";
+export { Time, Duration, DateRange, type TimeSize } from "./primitives/Time";
 export { LongText } from "./primitives/LongText";
 export {
   formatAmount,
   formatTime,
   formatTimeFull,
+  formatTimeRange,
   formatDuration,
   formatBytes,
   formatCount,
@@ -123,6 +124,7 @@ export {
   calendarDay,
   type TimeFormat,
   type TimeLength,
+  type TimeRangeFormat,
 } from "./format";
 
 /* Daten — series and trends (0041, 0045) */

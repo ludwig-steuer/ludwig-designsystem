@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Fragment } from "react";
 import { AmountCell } from "./Cells";
 import { Card, CardHead, HeadRow, Row, Table } from "./Table";
-import { Duration, Time } from "./Time";
+import { DateRange, Duration, Time } from "./Time";
 import { Timeline } from "../patterns/Timeline";
 
 const meta: Meta<typeof Time> = { title: "v3/Primitives/Werte/Time", component: Time };
@@ -13,7 +14,11 @@ const L = ({ children }: { children: React.ReactNode }) => (
 );
 
 const MOMENT = "2026-08-26T09:12:00+02:00";
-const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+const threeDaysAgo = ago(3 * DAY);
 
 /** Fünf Arten zu sagen, wann — die absolute Zeit steht immer im `title`. */
 export const Formats: Story = {
@@ -196,6 +201,135 @@ export const InUse: Story = {
         />
       </div>
     </Card>
+    </div>
+  ),
+};
+
+/**
+ * Ein Zeitraum zum Lesen (0189): der gemeinsame Teil steht einmal, wo die
+ * Spanne faltet, entscheidet die Locale. Gleicher Tag mit zwei Uhrzeiten ist
+ * ein Tag. Ein Ende allein ist dieses Ende; keines ist der Gedankenstrich.
+ */
+export const Ranges: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-3)" }}>
+      <div>
+        <L>date — im Monat</L>
+        <DateRange from="2026-03-01" to="2026-03-31" />
+      </div>
+      <div>
+        <L>date — über den Jahreswechsel</L>
+        <DateRange from="2026-12-28" to="2027-01-04" />
+      </div>
+      <div>
+        <L>date — gleicher Tag: ein Datum, kein Strich</L>
+        <DateRange from="2026-03-01" to="2026-03-01" />
+      </div>
+      <div>
+        <L>date, long</L>
+        <DateRange from="2026-03-01" to="2026-03-31" length="long" />
+      </div>
+      <div>
+        <L>dateTime — gleicher Tag, zwei Uhrzeiten</L>
+        <DateRange from={MOMENT} to="2026-08-26T17:30:00+02:00" format="dateTime" />
+      </div>
+      <div>
+        <L>dateTime — zwei Tage</L>
+        <DateRange from={MOMENT} to="2026-08-28T17:30:00+02:00" format="dateTime" />
+      </div>
+      <div>
+        <L>dateTime, short</L>
+        <DateRange from={MOMENT} to="2026-08-28T17:30:00+02:00" format="dateTime" length="short" />
+      </div>
+      <div>
+        <L>month</L>
+        <DateRange from="2026-03-01" to="2026-05-31" format="month" />
+      </div>
+      <div>
+        <L>nur ein Ende — das Wort davor setzt der Aufrufer mit Time prefix</L>
+        <DateRange from="2026-03-01" to={null} />
+      </div>
+      <div>
+        <L>kein Ende</L>
+        <DateRange from={null} to={null} />
+      </div>
+      <div>
+        <L>verkehrt herum — getauscht, nicht gemeldet</L>
+        <DateRange from="2026-03-31" to="2026-03-01" />
+      </div>
+      <div>
+        <L>unlesbar</L>
+        <DateRange from="kein Datum" to="2026-03-31" />
+      </div>
+      <div>
+        <L>sm</L>
+        <DateRange from="2026-03-01" to="2026-03-31" size="sm" />
+      </div>
+    </div>
+  ),
+};
+
+/**
+ * Wie lange her — `relative` kippt nach einer Woche aufs Datum (T7: eine
+ * relative Zeit allein ist keine Antwort, wenn jemand eine Periode prüft),
+ * `age` nicht: eine Klärung, die 13 Tage liegt, muss das sagen. Die absolute
+ * Zeit steht bei beiden im Tooltip.
+ */
+export const Relative: Story = {
+  render: () => (
+    <div style={{ display: "grid", gridTemplateColumns: "180px 1fr 1fr", gap: "var(--space-2) var(--space-4)", alignItems: "baseline" }}>
+      <L>Abstand</L>
+      <L>relative</L>
+      <L>age</L>
+      {(
+        [
+          ["5 Minuten", ago(5 * MINUTE)],
+          ["3 Stunden", ago(3 * HOUR)],
+          ["gestern", ago(DAY)],
+          ["3 Tage", threeDaysAgo],
+          ["13 Tage", ago(13 * DAY)],
+          ["40 Tage", ago(40 * DAY)],
+          ["morgen", ago(-(DAY + HOUR))],
+        ] as const
+      ).map(([label, value]) => (
+        <Fragment key={label}>
+          <span style={{ color: "var(--color-text-muted)", fontSize: 13 }}>{label}</span>
+          <Time value={value} format="relative" />
+          <Time value={value} format="age" />
+        </Fragment>
+      ))}
+    </div>
+  ),
+};
+
+const FORMATS = ["date", "dateTime", "time", "relative", "age", "month"] as const;
+const LENGTHS = ["short", "medium", "long"] as const;
+const SIZES = ["sm", "md"] as const;
+
+/**
+ * Jede Kombination `format` × `length` × `size` an einem Zeitpunkt (Owner
+ * 2026-09-16). `length` wirkt nur bei `date` (long) und `dateTime`; die
+ * übrigen Zeilen sind absichtlich gleich — die Achse ist dort keine.
+ */
+export const Matrix: Story = {
+  render: () => (
+    <div style={{ display: "grid", gridTemplateColumns: "100px repeat(3, 1fr)", gap: "var(--space-2) var(--space-4)", alignItems: "baseline" }}>
+      <L>format</L>
+      {LENGTHS.map((l) => (
+        <L key={l}>{l}</L>
+      ))}
+      {FORMATS.map((f) =>
+        SIZES.map((sz) => (
+          <Fragment key={`${f}-${sz}`}>
+            <span style={{ color: "var(--color-text-muted)", fontSize: 13 }}>
+              {f} · {sz}
+            </span>
+            {LENGTHS.map((l) => (
+              <Time key={l} value={f === "relative" || f === "age" ? threeDaysAgo : MOMENT} format={f} length={l} size={sz} />
+            ))}
+          </Fragment>
+        )),
+      )}
     </div>
   ),
 };
