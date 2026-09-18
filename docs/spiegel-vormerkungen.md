@@ -12,8 +12,19 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-- `statementExpectationOf` (F235) — angekündigt von `a2`, 2026-09-18; war
-  beim Lauf vom 2026-09-18 noch nicht auf staging.
+- **F235** (App `b7201625`, Auszugserwartung dreistufig) — angekündigt von
+  `a2`, Auftrag von `a1`, 2026-09-18; beim Lauf vom 2026-09-18 noch nicht auf
+  origin/staging. Die Achse `statement_expectation` hat dann `required` /
+  `expected` / `none` statt `erwartet`/`erwartet_hand`/`keine`/`keine_hand`.
+  Neu drüben: `core/accounting/statement-expectation.ts`
+  (`STATEMENT_EXPECTATION_LEVELS`, Typ `StatementExpectationLevel`),
+  importfrei — **steht schon in der Pfadliste** von `sync-ludwig.sh`; ohne sie
+  sortiert der Filter `batch-review/domain/statement-coverage.ts` aus. Im Set
+  nachziehen: `statementExpectationOf`, `PaymentAccountRowData`
+  (`statementExpectation` effektiv, `statementExpectationManual:
+  StatementExpectationLevel | null` = Herkunft Hand), `PaymentAccountDraft` im
+  Editor (drei Stufen plus „Automatisch"), Spec-Nachtrag 0180 und 0183,
+  `docs/entitaeten/payment-account.md` Z. 60, 0180 Z. 74.
 
 ## Erledigt mit dem Lauf vom 2026-09-18 (App `08f56032`)
 
