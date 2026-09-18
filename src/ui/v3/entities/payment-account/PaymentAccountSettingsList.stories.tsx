@@ -33,7 +33,7 @@ const IN_USE: PaymentAccountRowData[] = [
     ledgerAccountNumber: "1000",
     ledgerAccountName: "Kasse",
     expectsStatements: false,
-    expectsStatementsManual: true,
+    statementExpectationManual: "none",
     autoAssignPaymentMethod: "Barzahlung",
     txCount: 27,
   }),

@@ -1720,23 +1720,23 @@ const TOKEN: Record<string, StatusDescriptor> = {
 };
 
 /**
- * Auszugserwartung eines Zahlungskontos — **berechnet** aus zwei Quellen:
- * dem DATEV-Abgleich (bebucht + IBAN in den Stammdaten) und der Hand-Setzung
- * im Stammdaten-Formular (`client_payment_accounts.statement_expected`).
+ * Auszugserwartung eines Zahlungskontos (F235, `bank.md` R15a/R15b) — drei
+ * Stufen, die Werte spiegeln den DB-CHECK (`STATEMENT_EXPECTATION_LEVELS`).
+ * Effektiv in `client_payment_accounts.statement_expectation`, die
+ * Hand-Entscheidung daneben in `statement_expectation_manual`.
  *
- * Die Herkunft steht deshalb im Wert und nicht daneben: nur die
- * Hand-Entscheidung überlebt den nächsten DATEV-Abgleich, die abgeleitete
- * wird überschrieben. Wer „Keine (Hand)" sieht, weiß, dass das so bleibt.
+ * Die Ableitung kennt nur Pflicht oder Keine; „Sollte kommen" setzt ein
+ * Mensch. Die Herkunft steht nicht im Wert, sondern als „von Hand" daneben —
+ * nur die Hand-Entscheidung überlebt den nächsten DATEV-Abgleich.
  *
- * Fallstrick: an dieser Achse hängt Gate 1a des Buchungslaufs. Fehlt ein
- * Auszug im Zeitraum, ist das bei `erwartet*` ein Fehler und bei `keine*`
- * nur ein Hinweis — dieselbe Lücke, zwei Bedeutungen.
+ * Fallstrick: an dieser Achse hängt Gate 1a des Buchungslaufs. Dieselbe Lücke
+ * ist bei Pflicht ein Blocker, bei „Sollte kommen" ein Hinweis und bei Keine
+ * eine Warnung „ruht".
  */
 const STATEMENT_EXPECTATION: Record<string, StatusDescriptor> = {
-  erwartet: { label: "Erwartet", kind: "success", description: "Abgeleitet: das Konto ist bebucht und seine IBAN steht als Bankverbindung in den DATEV-Stammdaten. Fehlt der Auszug im Zeitraum, ist Gate 1a rot." },
-  erwartet_hand: { label: "Erwartet (Hand)", kind: "success", description: "Ein Mensch hat die Erwartung im Stammdaten-Formular gesetzt — der nächste DATEV-Abgleich lässt sie stehen." },
-  keine: { label: "Keine", kind: "neutral", description: "Abgeleitet: keine IBAN in den DATEV-Bankverbindungen oder nie bebucht. Ein fehlender Auszug ist hier nur ein Hinweis." },
-  keine_hand: { label: "Keine (Hand)", kind: "neutral", description: "Ein Mensch hat die Erwartung abgewählt — typisch für Verrechnungs- und Geldtransit-Konten, zu denen es keinen Auszug gibt." },
+  required: { label: "Pflicht", kind: "success", description: "Fehlt der Auszug im Zeitraum, blockt Gate 1a den Buchungslauf (mit Begründung überspringbar) und die Abnahme zeigt rot. Die Ableitung setzt Pflicht, wenn das Konto bebucht ist und seine IBAN als Bankverbindung in den DATEV-Stammdaten steht." },
+  expected: { label: "Sollte kommen", kind: "info", description: "Auszüge kommen, oft verspätet. Fehlt einer, ist das ein gelber Hinweis in der Abnahme und eine Zeile im Block „Kontoauszüge“ der Belegnachforderung; der Buchungslauf blockt nicht. Setzt nur ein Mensch." },
+  none: { label: "Keine", kind: "neutral", description: "Kein Auszug erwartet — Verrechnungs-, Geldtransit- und Kassenkonten, ruhende Konten. In Schritt 1 der Abnahme eingeklappt unter „Weitere Zahlungskonten“." },
 };
 
 /**
@@ -2949,7 +2949,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   export_batch: "client_datev_export_batches.state",
   batch_commit: "client_datev_sequences.is_committed (boolean)",
   datev_check: "client_datev_sequences.inspection_status",
-  statement_expectation: "berechnet — DATEV-Bankverbindungen + client_payment_accounts.statement_expected",
+  statement_expectation: "client_payment_accounts.statement_expectation (Hand: statement_expectation_manual)",
   open_item_settlement: "berechnet — OPOS-Bestand zum Stichtag (ephemer)",
   open_item_line_kind: "berechnet — Ausgleichs-Klammer F77 (ephemer)",
   datev_link: "berechnet — VIA_LABEL in modules/datev-truth (ephemer)",

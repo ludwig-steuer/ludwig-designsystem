@@ -1,4 +1,5 @@
 import type { PaymentAccountKind } from "@/ludwig/core/accounting/payment-account-kind";
+import type { StatementExpectationLevel } from "@/ludwig/core/accounting/statement-expectation";
 import type { PaymentAccountFacts } from "@/ludwig/modules/bank-transactions/domain/payment-account-options";
 import type { Currency } from "@/ludwig/shared/money";
 
@@ -23,8 +24,10 @@ export type PaymentAccountRowData = PaymentAccountFacts & {
   net?: number | null;
   firstMovement?: string | null;
   lastMovement?: string | null;
-  /** A human set the statement expectation by hand. */
-  expectsStatementsManual?: boolean | null;
+  /** The level in force (`statement_expectation`, F235). */
+  statementExpectation?: StatementExpectationLevel | null;
+  /** The level a human set (`statement_expectation_manual`); `null` = derived. */
+  statementExpectationManual?: StatementExpectationLevel | null;
   integrationStatus?: string | null;
   /** Set = the payment channel is switched off (`valid_until`). */
   validUntil?: string | null;
@@ -36,18 +39,21 @@ export type PaymentAccountRowData = PaymentAccountFacts & {
 /**
  * Which value of the axis `statement_expectation` the account carries.
  *
- * Derived from two columns, as the axis says: whether statements are expected,
- * and whether a human decided it. The rule stands here so that both lists read
- * it the same way — the account itself carries no such value (the axis is
- * computed, `status-registry.ts`).
+ * The level in force when the caller has it; otherwise the human's decision;
+ * otherwise `expectsStatements`. The last step is exact, not a guess: the
+ * app's derivation only ever sets `required` or `none` (`expected` is set by a
+ * human, registry), and `expects_statements` mirrors „not none" (F235). Where a
+ * human set the level is an addition, not part of the value (0180 addendum).
  *
  * @when    Showing the statement expectation of an account.
  * @instead The word of a kind → PAYMENT_ACCOUNT_KIND_LABEL.
  */
-export function statementExpectationOf(account: PaymentAccountRowData): string {
-  const byHand = account.expectsStatementsManual === true;
-  if (account.expectsStatements) return byHand ? "erwartet_hand" : "erwartet";
-  return byHand ? "keine_hand" : "keine";
+export function statementExpectationOf(account: PaymentAccountRowData): StatementExpectationLevel {
+  return (
+    account.statementExpectation ??
+    account.statementExpectationManual ??
+    (account.expectsStatements ? "required" : "none")
+  );
 }
 
 /**
@@ -66,8 +72,8 @@ export interface PaymentAccountDraft {
   /** Card identifier where there is no IBAN (`external_account_id`). */
   externalAccountId: string | null;
   ledgerAccountNumber: string | null;
-  /** `null` = leave it derived; `true`/`false` = a human decided. */
-  expectsStatements: boolean | null;
+  /** `null` = leave it derived; otherwise the level a human sets (F235). */
+  statementExpectationManual: StatementExpectationLevel | null;
   autoAssignPaymentMethod: string | null;
   /** Set = switched off from that day (`valid_until`). */
   validUntil: string | null;
@@ -89,7 +95,7 @@ export function emptyPaymentAccountDraft(): PaymentAccountDraft {
     bankName: null,
     externalAccountId: null,
     ledgerAccountNumber: null,
-    expectsStatements: null,
+    statementExpectationManual: null,
     autoAssignPaymentMethod: null,
     validUntil: null,
   };

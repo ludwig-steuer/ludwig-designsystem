@@ -242,7 +242,9 @@ einem zweiten Werkzeug (Owner 09.09.2026).
 Die Abnahme **baut keinen zweiten Kern nach**. Sie ruft die Kerne, die Agent
 und Stammdatenpflege ohnehin rufen (Abnahme, Klärung, Konvention, Freigabe);
 die Freigabe-Checkliste in Schritt 8 rechnet **dieselben Gates**, die der Agent
-passieren muss (`computeBatchGates`) — der Gate-Text ist der Zeilen-Text.
+passieren muss (`computeBatchGates`). Gelesen wird dort nie der Gate-Text des
+Agenten, sondern je Zeile und Befundart ein Kanzlei-Satz
+(`batch-review/domain/checkpoint-texts.ts`, F246).
 Schritt 1 und 8 stellen je Umsatz zwei Fragen: Sachverhalt, Buchungsvorschlag
 (F187) — in Schritt 1 ist eine offene Klärung ein zulässiger Zwischenstand
 (gelb), in Schritt 8 nicht (rot), denn freigegeben wird nur ein voll gebuchtes
@@ -255,28 +257,49 @@ Quittung verfällt, sobald sich die Deckungsgrenze bewegt. Der Wortlaut wird aus
 den Gate-Feldern in Menschen-Sprache gebaut (`domain/coverage-gap.ts`), für
 Schritt 1 und 8 derselbe Satz; **gerechnet wird nur im Gate**. *Warum:* der
 Agent läuft autonom und kann die Lücke nicht zurückspielen — entscheiden muss
-der Mensch (Owner 03.09.2026).
-**Schritt 4 „Kontenausgleich"** (F220, vorher „Bank") hat zwei Abschnitte.
-**„Geht die Bank auf?"** zeigt die Gates 2a und 4d als aufklappbare Zeilen wie
-Schritt 1 und rechnet sie mit `forRelease` wie Schritt 8 — ein Vorschlag ohne
-Freigabe ist kein Gebucht (F201). Darunter der **Bankabgleich** je
-Zahlungskonto (`batch-review/domain/bank-reconciliation.ts`): Saldo nach
-Übertragung gegen den Endsaldo des jüngsten Import-Batch, der im Zeitraum
-endet. Der Saldo nach Übertragung ist eine Brücke: DATEV laut Spiegel ab
+der Mensch (Owner 03.09.2026). Lücken an Konten mit „Sollte kommen" sind nicht
+quittierpflichtig (`bank.md` R15b).
+**Schritt 4 „Kontenausgleich"** (F220, vorher „Bank"; F245) hat drei Karten,
+in dieser Reihenfolge: **Bankkonten → Verrechnungskonten → Prüfpunkte** — die
+Bank ist die wichtigste Aussage des Schritts. **„Bankkonten"** zeigt je
+Zahlungskonto (`batch-review/domain/bank-reconciliation.ts`) fünf Zahlen ohne
+Aufklappen: **DATEV-Stand** · **Dieser Stapel** (grau, wenn DATEV ihn schon
+hat) · **Saldo neu** · **Saldo laut Auszug** · **Differenz**. Saldo laut
+Auszug ist der Endsaldo des **jüngsten Auszugs nach Auszugsende** (nicht nach
+Importzeit — ein nachgereichter älterer Auszug schlägt ihn nicht), darunter
+sein Datum; ist die Auszugsdatei ein Quelldokument (gleiche `stored_file_id`),
+öffnet der Betrag den Beleg-Drawer über `?document=`. Ohne Saldo steht „kein
+Auszugssaldo". Saldo neu ist eine Brücke: DATEV-Stand ab
 Wirtschaftsjahresbeginn, dazu die freigegebenen Zeilen jedes Ludwig-Stapels,
 den DATEV noch nicht hat (der aktuelle gesondert), und freigegebene Sätze ohne
-Stapel, die einzeln nicht im Spiegel stehen — Vorschläge zählen nie. Ein Stapel
-hat DATEV, sobald ein lebender Spiegel-Satz zu ihm gehört (ID-Kante oder
+Stapel, die einzeln nicht im DATEV-Bestand stehen — Vorschläge zählen nie. Ein
+Stapel hat DATEV, sobald ein lebender Spiegel-Satz zu ihm gehört (ID-Kante oder
 `export_ref`); dann zählt der ganze Stapel nur über DATEV, nie nach Datum, weil
-DATEV und Ludwig denselben Monat parallel buchen. Die offenen Umsätze mit Grund erklären
-die Differenz, ein Rest heißt: Buchung ohne Auszugszeile, falscher Monat oder
-Auszug unvollständig. Der EB-Wert aus dem DATEV-Spiegel ist der Anker — ohne
-ihn ist ein stimmender Saldo gelb. *Warum:* Top Fahrrad 07-2026, 50,03 € Esso
-als Vorschlag ohne Freigabe, Schritt 4 meldete „sauber". Am Ende des
-Abschnitts steht als eigene Zeile **„Zahlungskonten ohne Umsätze"**: Konten
-ohne Umsatz und Buchung im Zeitraum — grau, aber **gelb, wenn der Vormonat
-Umsätze hatte** („Vormonat n Umsätze, jetzt keine — fehlt ein Auszug?";
-derselbe Zähler wie in Schritt 1, `application/statement-coverage.ts`).
+DATEV und Ludwig denselben Monat parallel buchen. **Aufgeklappt** steht nur die
+Brücke in drei Zeilen — letzter Stand DATEV · ± dieser Stapel · = neuer Saldo;
+„Frühere Stapel, in DATEV noch nicht angekommen" und „Freigegeben ohne Stapel"
+kommen je als eine Zeile dazu, **nur wenn ≠ 0**, sonst wiche der neue Saldo
+still von der Zeile ab. Darunter der Rest-Satz, wenn offene Umsätze die
+Differenz nicht erklären (Buchung ohne Auszugszeile, falscher Monat, Auszug
+unvollständig), und ohne Eröffnungswert aus DATEV der Hinweis, dass der Saldo
+ohne Anfang läuft — ohne ihn ist ein stimmender Saldo gelb. **„Buchungen
+anzeigen"** setzt `?bookings=<Konto>` und zeigt die freigegebenen Sätze dieses
+Stapels auf dem Konto als Tabelle (`loadBankAccountBatchLines`, dieselbe Menge
+wie „dieser Stapel"), darunter die Umsätze ohne freigegebene Buchung mit
+Grund; ein Wert, der zu keinem Konto passt, wird ignoriert. *Warum:* Top
+Fahrrad 07-2026, 50,03 € Esso als Vorschlag ohne Freigabe, Schritt 4 meldete
+„sauber". Am Ende der Karte steht als eigene Zeile **„Zahlungskonten ohne
+Umsätze"**: Konten ohne Umsatz und Buchung im Zeitraum — grau, aber **gelb,
+wenn der Vormonat Umsätze hatte** („Vormonat n Umsätze, jetzt keine — fehlt
+ein Auszug?"; derselbe Zähler wie in Schritt 1,
+`application/statement-coverage.ts`). **„Prüfpunkte"** zeigt die Gates 2a und
+4d als aufklappbare Zeilen in Klartext, gerechnet mit `forRelease` wie Schritt
+8 — ein Vorschlag ohne Freigabe ist kein Gebucht (F201): **Jede Auszugszeile
+ist zugeordnet** (2a) · **Jede Auszugszeile ist gebucht** (4d: Geldfluss ohne
+freigegebene Buchung) · **Sammelsachverhalte gehen auf** (4d: Rest im
+Sammelsachverhalt) · **Zentralregulierung ausgeglichen** nur, wenn betroffen
+(`splitReconciliationChecks`, `domain/gate-row.ts`). Schritt 8 führt dieselben
+Prüfpunkte wortgleich (`BANK_CHECK_LABELS`, F246).
 **„Verrechnungskonten"** (`application/clearing-balances.ts`,
 `ui/ClearingAccountsCard.tsx`, F243) teilt die bestätigten Verrechnungskonten
 in drei Gruppen: mit Bewegung im Zeitraum → **„Im Stapel bebucht"**, egal
@@ -292,8 +315,7 @@ zählt als Bestand. *Warum:* Gate 4d rechnet mit Vorschlägen; Schritt 4 zeigt
 dieselbe Zahl und sagt, was davon noch nicht freigegeben ist (Owner). Null ist
 grün, ein Rest gelb; Konten ohne Zielsaldo null (`shareholder`,
 `payroll_liability`) tragen ihren Saldo ohne Warnung. Nie ein Blocker — Gate
-4d hält den Stapel bei Zielsaldo-null-Konten ohnehin auf. Was im aufgeklappten Bankzustand steht,
-entscheidet der Owner noch (web-ui-offen P41).
+4d hält den Stapel bei Zielsaldo-null-Konten ohnehin auf.
 
 | Bedingung (Vorrang von oben) | Stand | Text |
 |---|---|---|
@@ -316,7 +338,9 @@ letzte Buchung im Zeitraum, Anzahl der Umsätze, daneben die **Anzahl des
 Vormonats** als Plausibilität, Stand nach A7 — rot bei Gate-1a-Blocker oder
 Deckungslücke (F141) oder wenn ein Konto still geworden ist (0 Umsätze,
 Vormonat > 0), gelb bei mehr als fünf umsatzlosen Tagen vor Periodenende,
-sonst grün. Oben stehen die Konten mit Auszugserwartung (`bank.md`
+sonst grün. Bei der Stufe „Sollte kommen" ist rot ohne Gate-1a-Blocker gelb
+(Lücke, still geworden); ein Blocker wie der Saldenanschluss bleibt rot.
+Oben stehen die Konten mit Auszugserwartung Pflicht oder „Sollte kommen" (`bank.md`
 R15a/R15b), die übrigen gültigen Zahlungskonten eingeklappt unter
 „Weitere Zahlungskonten"; ein roter Stand wird nie eingeklappt
 (`isStatementCoverageActive`, `partitionStatementCoverage`). Die Kontozeile
@@ -330,7 +354,12 @@ Auskunft und Werkzeug, **kein Gate** — die Belegzeilen darüber listen
 vorhandene, unerledigte Belege, diese die fehlenden. Die Mail nennt außerdem
 die Sammeldokumente, aus denen nicht alle Seiten gebucht sind, mit
 Seitenbereichen und unabhängig von der Monatsauswahl (F236, kein PDF-Anhang);
-der Knopf erscheint deshalb auch ohne fehlende Position.
+der Knopf erscheint deshalb auch ohne fehlende Position. Darunter steht der
+Block **„Kontoauszüge"**: Konten mit Pflicht oder „Sollte kommen", deren
+Auszug im Zeitraum fehlt (ab der Deckungsgrenze bzw. der ganze Zeitraum ohne
+Auszug und Umsatz) — nicht bei einem unverarbeiteten Auszugs-Beleg, der liegt
+schon vor. Sie zählen in der Ampel der Zeile mit und stehen als eigener Block
+im Mail-Entwurf (`missingStatementRequests`).
 Die Zeile „Belege ohne Buchung" zeigt zehn — je Beleg mit „Zurück an den
 Agenten" (Einwand, R14d) — und führt in eine **Detailansicht** desselben
 Schritts (`?view=unbooked`, die Seitenleiste bleibt): alle Belege als
@@ -453,8 +482,10 @@ Fehler). Der Kopf nennt den Stichtag des Spiegels und den Abruf — sonst
 vergleicht man Stände; ohne Spiegel steht „kein DATEV-Stand", kein Fehler. Der
 Side-Link „Alle offenen Posten" führt auf `[year]/open-items?cutoff=<periodTo>`
 — die Volliste bleibt dort, die Abnahme zeigt den Ausschnitt zum Periodenende.
-Schritt 5 hat **zwei Reiter** (`?tab=`, Helfer `ui/step-tabs.ts`).
-**Offene Posten**: Unter den Überschriften Debitoren und Kreditoren steht je
+Schritt 5 hat **zwei Reiter** (`?tab=`, Helfer `ui/step-tabs.ts`), beide mit
+demselben Segment Debitoren | Kreditoren (`?side=`, Default Debitoren) — die
+Seite bleibt beim Reiterwechsel stehen.
+**Offene Posten**: Auf der gewählten Seite steht je
 Personenkonto ein Ausklapper, sortiert nach Kontonummer; der Kopf zeigt Konto
 (Link auf den Konto-Drawer) · Posten · Summe Rest · ältesten und neuesten
 Rechnungstag · höchste Mahnstufe. Darin steht eine Zeile je DATEV-Posten mit
@@ -465,8 +496,7 @@ Rechnungsseiten-Zeilen der effektiven Sicht, Belegnummer nach F230
 nicht. Zahlungserwartungen ohne DATEV-Posten stehen am Konto als „nur Ludwig
 erwartet"; die Spalte „Zahlungserwartung" zeigt Ludwigs Reife (Achse
 `expectation_maturity`, keine Mahnstufe). **Mahnwesen**: die Erwartungsliste
-(überfällig · in Frist · wartend), im Segment Debitoren | Kreditoren
-(`?side=`, Default Debitoren), mit Klärung an den Mandanten und Wiedervorlage;
+(überfällig · in Frist · wartend) der gewählten Seite, mit Klärung an den Mandanten und Wiedervorlage;
 im Detail der eindeutig zugeordnete DATEV-Posten. Das Mahnwesen selbst bleibt
 DATEV (R4).
 
@@ -476,6 +506,27 @@ DATEV (R4).
 im Stapel, ausgegraut, je Zeile Rhythmus, Betrag und „zuletzt gebucht am … ·
 Stapel …" — Auskunft, keine Aufgabe, damit ein Quartals- oder Jahresfall nicht
 für verschwunden gehalten wird.
+
+**Schritt 8 „Prüfprotokoll"** (F246, `ui/Step8.tsx`) ist eine Tabelle der
+Prüfpunkte in **Schritt-Reihenfolge**: Kontoauszüge lückenlos · Belege
+bearbeitet (1) · Rückfragen beantwortet (2) · Sachverhalte mit
+Buchungsvorschlag · Buchungen freigegeben · Probe-Export fehlerfrei (3) · die
+Bank-Prüfpunkte **wortgleich mit Schritt 4** (zugeordnet · gebucht ·
+Sammelsachverhalte gehen auf · Zentralregulierung ausgeglichen nur mit Befund)
+· Neue Konventionen entschieden (7); im Mandantenstapel zuletzt
+„Personenkonten vollständig". Spalten: Zeichen · Prüfpunkt · **Stand** (was
+offen ist als Zahl — „3 offen", „erledigt", „quittiert"; nie „0 von 1") ·
+**Was zu tun ist** (ein Kanzlei-Satz je Zeile und darunter ein Link, der die
+Handlung nennt, z. B. „Belege ohne Buchung öffnen →"; hat die Zeile genau
+einen Befund mit Ziel, führt er direkt dorthin) · Quittung. Eine offene Zeile
+mit Befunden **klappt auf**: je Befund der Gegenstand, verlinkt auf sein
+Objekt (Auszugszeile, Beleg, Sachverhalt, Konto — `findingHref`), darunter ein
+Kanzlei-Satz nach Befundart; gedeckelt bei 20, dann „… und n weitere im
+Schritt". Offene Posten (5), Plausibilität (6) und „bleibt bei DATEV" (AfA,
+BWA, UStVA) sind **keine Zeilen**, sondern ein Satz unter der Tabelle.
+*Warum:* die Tabelle ist das Protokoll der Freigabe — was sie nicht bedingt,
+gehört nicht hinein, und was die Kanzlei tun soll, steht als Satz da statt als
+Tooltip voller Codes (Owner-Entscheid zu F246).
 
 **Schritt 8** hat zwei Ausgänge (`ui/ReviewExits.tsx`, Anker `#exits` — „Weiter"
 springt auf dieser Seite dorthin, nicht nach Schritt 9). **Freigeben** schreibt
@@ -709,3 +760,42 @@ jemand überhaupt sieht, entscheidet `listClientsForSession` (Kanzlei bzw.
 eigene Mandanten), nicht die Zuweisung.
 *Warum:* wer sechs Mandanten betreut, fängt bei seinen an — aber jeder in der
 Kanzlei muss jeden finden können, wenn ein Kollege fehlt.
+
+### R22 — Jede Überschriften-Ebene beantwortet eine andere Frage
+Sechs Ebenen, jede mit ihrer Frage und ihrer Form:
+
+1. **Ortszeile** — *wo bin ich?* — Pfad/Position, nur in Abläufen und tiefer
+   Navigation.
+2. **Seitentitel**, genau ein H1 — *was ist diese Seite?* — Substantiv,
+   wortgleich mit dem Navigationseintrag.
+3. **Seitenbeschreibung** — *was tue ich hier?* — ein Satz, nur wenn sie mehr
+   sagt als der Titel.
+4. **Box-Titel** — *welcher Teil?* — Substantiv des Inhalts, nur bei ≥ 2 Boxen.
+5. **Box-Untertext** — *was zeigt der Teil, wie lese ich ihn?* — ein bis zwei
+   kurze Sätze.
+6. **Spalten-/Feld-/Status-Label** — spezifisch + Info-Tooltip.
+
+Regeln:
+
+- Keine Ebene wiederholt Wörter oder Aussage der Ebene darüber; eine Box
+  allein trägt keinen Titel.
+- Eine grammatische Form je Ebene: Titel = Substantiv, Beschreibung = Satz.
+  Fragen sind keine Titel.
+- Titel = Navigationseintrag — ein Name je Seite.
+- Status, Zahlen, Daten stehen nie im Titel, sondern in Meta oder Badge.
+- Anwender-Sprache: Zielgruppe sind Buchhalter und Steuerberater — keine
+  internen Codes, keine Systembegriffe („Gate", „Spiegel", „Payload"), keine
+  Ticketnummern.
+- Handlungen stehen auf Buttons.
+- Titel haben höchstens drei Wörter.
+- Leerzustand: der Titel bleibt, der Untertext sagt den Zustand.
+- Anrede „Sie".
+
+Stand: angewandt in der Stapelabnahme (F244) — Schritt-Texte in
+`modules/batch-review/domain/steps.ts` (`label` = Rail-Eintrag und H1,
+`description` = Lead), Overline nur „Schritt n", der Stapel-Kopf nennt den
+Stapel in einer Zeile. App-weit offen → `web-ui-offen.md` P46.
+*Warum:* In der Stapelabnahme sagten Overline, Seitentitel, Lead und erster
+Box-Titel viermal dasselbe („Vollständigkeit" / „Ist alles da?"), keine Ebene
+sagte, was zu tun ist, und der Box-Untertext erklärte Interna (Owner-Durchgang
+zu F244).

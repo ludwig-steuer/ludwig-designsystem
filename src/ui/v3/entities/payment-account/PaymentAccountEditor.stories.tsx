@@ -20,7 +20,7 @@ const BANK: PaymentAccountDraft = {
   bankName: "Stadtbank eG",
   externalAccountId: null,
   ledgerAccountNumber: "1200",
-  expectsStatements: true,
+  statementExpectationManual: "required",
   autoAssignPaymentMethod: null,
   validUntil: null,
 };

@@ -116,3 +116,32 @@ export function clearingAccountTypeLabel(value: string | null | undefined): stri
 export function isClearingAccountType(value: unknown): value is ClearingAccountType {
   return typeof value === "string" && (CLEARING_ACCOUNT_TYPES as readonly string[]).includes(value);
 }
+
+export type StatementRegime = "statement" | "clearing" | "bank";
+
+/** F229: der Stichtag der Auszugserwartung gilt nur am Zahlungsdienstleister-Konto. */
+export const STATEMENTS_FROM_ONLY_FOR_PAYMENT_GATEWAY =
+  "Ein Stichtag für die Auszugserwartung gilt nur für Zahlungsdienstleister-Konten (Verrechnungskonto-Kategorie „Zahlungsdienstleister“).";
+
+/**
+ * F229: Wie ein Zahlungskonto den Nachweis schuldet (`bank.md` R15e).
+ *  - bank      — echtes Bankkonto/Kasse (kein Verrechnungskonto): unverändert wie heute.
+ *  - statement — PSP-Konto (clearing_account_type='payment_gateway') MIT Auszugserwartung
+ *                ab Stichtag: wird gebucht wie eine Bank (B7, Gate 1a greifen).
+ *  - clearing  — PSP-Konto OHNE Auszugserwartung (oder vor dem Stichtag): Durchlaufkonto,
+ *                Restsaldo = Hinweis (Gate 4d), B7 schweigt.
+ * Werte englisch, spiegeln nichts aus der DB — deshalb kein CHECK.
+ */
+export function statementRegime(input: {
+  clearingAccountType: string | null;
+  expectsStatements: boolean;
+  /** yyyy-mm-dd, inklusiv; null = seit jeher. */
+  expectsStatementsFrom: string | null;
+  /** Buchungs-/Stichtag, gegen den geprüft wird (yyyy-mm-dd); ohne Datum zählt nur der Schalter. */
+  onDate?: string | null;
+}): StatementRegime {
+  if (input.clearingAccountType !== "payment_gateway") return "bank";
+  const from = input.expectsStatementsFrom;
+  const onDate = input.onDate ?? null;
+  return input.expectsStatements && (from == null || onDate == null || onDate >= from) ? "statement" : "clearing";
+}

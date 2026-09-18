@@ -643,7 +643,15 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Prüfpunkt`
 - Definition: Eine Frage, die ein Buchungssatz an die Prüferin stellt — „Stimmt der Steuerschlüssel zum Beleg?", „Trägt das Personenkonto ein Belegfeld?". Serverseitig abgeleitet aus dem, was ohnehin geladen ist; kein eigener Read je Satz.
 - Data type: fester Katalog **P-SUMME … P-JUDGE** (23 Codes) in `apps/web/src/core/accounting/pruefpunkte.ts`. Quittungen: `ludwig.client_review_checks` mit `check_kind='proposal_checkpoint'`.
-- Notes: **Vier Zustände**, und der vierte ist der wichtige: `green` geprüft und in Ordnung · `yellow` auffällig, freigeben nach Quittung · `red` so nicht richtig · **`open` nicht geprüft, weil die Angabe fehlt**. Ein Prüfpunkt, der mangels Belegdaten grün wird, ist eine Lüge. Bestandene Punkte stehen zusammengefasst in **einer** Zeile; eine eigene Zeile bekommt nur, was noch eine Entscheidung braucht. Zu unterscheiden von der *Klärung* — die geht an einen Menschen, der Prüfpunkt an die Prüferin selbst.
+- Notes: **Vier Zustände**, und der vierte ist der wichtige: `green` geprüft und in Ordnung · `yellow` auffällig, freigeben nach Quittung · `red` so nicht richtig · **`open` nicht geprüft, weil die Angabe fehlt**. Ein Prüfpunkt, der mangels Belegdaten grün wird, ist eine Lüge. Bestandene Punkte stehen zusammengefasst in **einer** Zeile; eine eigene Zeile bekommt nur, was noch eine Entscheidung braucht. Zu unterscheiden von der *Klärung* — die geht an einen Menschen, der Prüfpunkt an die Prüferin selbst. Nicht zu verwechseln mit dem *Check point* der Stapelabnahme (gleicher deutscher Name, `web-ui-offen.md` P45).
+
+### Check point (Prüfpunkt der Stapelabnahme)
+
+- English: `check point` (`CHECKPOINT_TEXTS`, `BANK_CHECK_LABELS`)
+- German: `Prüfpunkt`
+- Definition: Eine Zeile des Prüfprotokolls in Schritt 8 der *Stapelabnahme* — „Kontoauszüge lückenlos", „Jede Auszugszeile ist gebucht" usw. Derselbe Name steht in dem Schritt, der seine Befunde zeigt (Schritt 4: die Bank-Prüfpunkte wortgleich). Je Prüfpunkt: Stand (was offen ist), was zu tun ist (Kanzlei-Satz + Link) und die aufklappbaren Befunde.
+- Data type: Zeilen-Key `ChecklistRowKey` (`batch-review/domain/checklist.ts`); Texte in `batch-review/domain/checkpoint-texts.ts`; Quittung gelber Zeilen in `ludwig.client_review_checks` (`check_kind` = Zeilen-Key).
+- Notes: Nicht das *Review item* am Buchungssatz (P-SUMME…P-JUDGE), auch wenn beide „Prüfpunkt" heißen (Doppelbelegung offen, `web-ui-offen.md` P45). Der Agenten-Text eines Befunds (`problem`) erscheint im Prüfprotokoll nie (F246).
 
 ### Review score (Prüfbedarf)
 
@@ -1319,12 +1327,20 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 
 ### Statement expectation (Auszugserwartung)
 
-- English: `statement expectation`
-- German: `Auszugserwartung`
-- Definition: Die Antwort auf „welches Konto muss Kontoauszüge liefern?" — abgeleitet, aber vom Menschen überschreibbar. Abgeleitet wahr genau dann, wenn eine **Bankverbindung des Mandanten aus den DATEV-Stammdaten** (`addressees` → `platform_clients.datev_bank_accounts`) über die IBAN ein Zahlungskonto trifft, **dessen Sachkonto in der Buchungshistorie bebucht ist**. Beides ist nötig: `kind='bank'` allein sagt nichts, weil die DATEV-Kontenfunktion 10 Kasse, PSP und Verrechnungskonten mitzählt und `tagPaymentAccounts` deshalb den ganzen SKR-Bankblock promotet (Staging: 80 Konten `kind='bank'`, davon 5 mit IBAN; 61015 hat 61 promotete und faktisch eine Bank).
-- Data type: `client_payment_accounts.expects_statements` (boolean) + `statement_activity_from` / `statement_activity_to` (date), geschrieben von `syncStatementExpectations` (`clients/application/payment-account-activity-core.ts`) nach jedem DATEV-Abgleich **und nach jeder Änderung am Zahlungskonto**, idempotent und non-fatal. Daneben `expects_statements_manual` (boolean, nullable): NULL = Ableitung gilt, true/false = ein Mensch hat im Stammdaten-Form entschieden und die Ableitung fasst das Konto nicht mehr an.
+- English: `statement expectation` — `required` · `expected` · `none`
+- German: `Auszugserwartung` — Pflicht · Sollte kommen · Keine
+- Definition: Die Antwort auf „welches Konto muss Kontoauszüge liefern — und wie hart?" in drei Stufen: **Pflicht** (fehlt der Auszug, blockt Gate 1a), **Sollte kommen** (Konto liefert oft verspätet; fehlt der Auszug, ist das ein Hinweis und eine Zeile in der Belegnachforderung), **Keine**. Abgeleitet wird nur Pflicht oder Keine, „Sollte kommen" setzt ein Mensch. Abgeleitet Pflicht genau dann, wenn eine **Bankverbindung des Mandanten aus den DATEV-Stammdaten** (`addressees` → `platform_clients.datev_bank_accounts`) über die IBAN ein Zahlungskonto trifft, **dessen Sachkonto in der Buchungshistorie bebucht ist**. Beides ist nötig: `kind='bank'` allein sagt nichts, weil die DATEV-Kontenfunktion 10 Kasse, PSP und Verrechnungskonten mitzählt und `tagPaymentAccounts` deshalb den ganzen SKR-Bankblock promotet (Staging: 80 Konten `kind='bank'`, davon 5 mit IBAN; 61015 hat 61 promotete und faktisch eine Bank).
+- Data type: `client_payment_accounts.statement_expectation` (text, CHECK `required`/`expected`/`none`, effektiv) + `statement_activity_from` / `statement_activity_to` (date), geschrieben von `syncStatementExpectations` (`clients/application/payment-account-activity-core.ts`) nach jedem DATEV-Abgleich **und nach jeder Änderung am Zahlungskonto**, idempotent und non-fatal. Daneben `statement_expectation_manual` (text, nullable): NULL = Ableitung gilt, sonst hat ein Mensch im Stammdaten-Form entschieden und die Ableitung fasst das Konto nicht mehr an. `expects_statements` (boolean) bleibt als Spiegel „Stufe ≠ Keine" (CHECK) für Leser, die nur „erwartet überhaupt?" fragen; `expects_statements_manual` ist abgelöst und wird weder gelesen noch geschrieben. Typ und Werte: `core/accounting/statement-expectation.ts`.
 - Example: 61015 — `1211 Commerzbank` (IBAN in den Stammdaten, 3757 Spiegel-Legs) erwartet Auszüge; die 60 weiteren promoteten Bankkonten (Kasse, Paypal, Ebay, Geldtransit) nicht.
-- Notes: Die Zuordnung Bankverbindung ↔ Fibu-Konto liefert DATEVconnect **nicht** (geprüft 2026-08-25 gegen die Kanzlei-Installation und beide OpenAPI-Specs — sie lebt im Zahlungsverkehr-Teil, den das Desktop-PlugIn nicht exponiert); die IBAN ist deshalb die einzige Kante. Das Aktivitätsfenster ist der Rahmen jeder Lückenprüfung — außerhalb ist ein fehlender Auszug keine Lücke. Abgrenzung zur [[Payment account retirement]]: die Abschaltung ist eine Entscheidung über die **Zukunft** eines Kontos, die Auszugserwartung eine Aussage über den **Nachweis**, den es im Zeitraum schuldet. Das Feld bindet Gate 1a des Buchungslaufs: mit Erwartung ist ein fehlender Auszug ein Blocker, ohne nur eine Warnung. Introduced 2026-08-29 (W8/P10, `bank.md` R15a); Hand-Override, Sichtbarkeit und Gate-Bindung 2026-08-30 (`bank.md` R15b) — die reine Ableitung hatte CLIENT-61015 auf 24 von 24 Konten „keine Erwartung" gestellt, weil die IBAN erst nach dem Onboarding von Hand nachgetragen wird.
+- Notes: Die Zuordnung Bankverbindung ↔ Fibu-Konto liefert DATEVconnect **nicht** (geprüft 2026-08-25 gegen die Kanzlei-Installation und beide OpenAPI-Specs — sie lebt im Zahlungsverkehr-Teil, den das Desktop-PlugIn nicht exponiert); die IBAN ist deshalb die einzige Kante. Das Aktivitätsfenster ist der Rahmen jeder Lückenprüfung — außerhalb ist ein fehlender Auszug keine Lücke. Abgrenzung zur [[Payment account retirement]]: die Abschaltung ist eine Entscheidung über die **Zukunft** eines Kontos, die Auszugserwartung eine Aussage über den **Nachweis**, den es im Zeitraum schuldet. Das Feld bindet Gate 1a des Buchungslaufs: bei Pflicht ist ein fehlender Auszug ein Blocker, bei Sollte kommen ein Hinweis (nicht quittierpflichtig in der Abnahme), bei Keine eine Warnung „ruht". Introduced 2026-08-29 (W8/P10, `bank.md` R15a); Hand-Override, Sichtbarkeit und Gate-Bindung 2026-08-30 (`bank.md` R15b) — die reine Ableitung hatte CLIENT-61015 auf 24 von 24 Konten „keine Erwartung" gestellt, weil die IBAN erst nach dem Onboarding von Hand nachgetragen wird.
+
+### Statement regime (Auszugs-Regime)
+
+- English: `statement regime` — `bank` · `statement` · `clearing`
+- German: `Auszugs-Regime` — Bank-Regime / Verrechnungs-Regime
+- Definition: Wie ein Zahlungskonto seinen Nachweis schuldet. `bank` = echtes Bankkonto/Kasse (kein Verrechnungskonto), unverändert. Bei Zahlungsdienstleister-Konten (`clearing_account_type='payment_gateway'`): `statement` (**Bank-Regime**) = Auszugserwartung gesetzt und Buchungstag ≥ Stichtag — gebucht wie eine Bank, ein fehlender Auszug ist ein Mangel; `clearing` (**Verrechnungs-Regime**) = keine Erwartung oder vor dem Stichtag — Durchlaufkonto, Restsaldo ist ein Hinweis, die Umbuchung zur Giro-Zeile legt der Server an.
+- Data type: berechnet — `statementRegime` (`core/accounting/clearing-account.ts`) aus `client_payment_accounts.expects_statements` und `expects_statements_from` (date, inklusiv, nur ein Mensch setzt ihn). Status-Achse: Legende der Spalte „Kontoauszug" (`statement_expectation`).
+- Notes: F229, `bank.md` R15e. Default aus der Historie (`proposeStatementRegime`), im Onboarding vorgelegt, vom Menschen bestätigt.
 
 ### Payment account retirement
 
@@ -1907,10 +1923,20 @@ The project rule is English names for all code, schemas, and columns (see decisi
 
 - English: `account clearing` (review step 4)
 - German: **Kontenausgleich**; bis F220 hieß der Schritt „Bank"
-- Definition: Schritt 4 der *Stapelabnahme* — „Gehen die Konten auf?". Zwei Abschnitte: **Geht die Bank auf?** (Gate 2a, Verprobung 4d, der Bankabgleich je Zahlungskonto mit der F205-Brücke, am Ende die Zeile „Zahlungskonten ohne Umsätze") und **Verrechnungskonten** (drei Gruppen: Im Stapel bebucht · Saldo offen ohne Bewegung · Ausgeglichen; mit Vorschlägen gerechnet wie Gate 4d, offene Vorschläge als Warnhinweis; aufgeklappt die Zeilen des Zeitraums als „warum").
+- Definition: Schritt 4 der *Stapelabnahme* — „Prüfen, ob Bank- und Verrechnungskonten zum Periodenende aufgehen." Drei Karten (F245): **Bankkonten** (je Zahlungskonto DATEV-Stand · dieser Stapel · *Saldo neu* · *Saldo laut Auszug* · Differenz, aufgeklappt die Brücke, auf Abruf die Buchungen; am Ende die Zeile „Zahlungskonten ohne Umsätze"), **Verrechnungskonten** (drei Gruppen: Im Stapel bebucht · Saldo offen ohne Bewegung · Ausgeglichen; mit Vorschlägen gerechnet wie Gate 4d, offene Vorschläge als Warnhinweis; aufgeklappt die Zeilen des Zeitraums als „warum") und **Prüfpunkte** (zugeordnet · gebucht · Sammelsachverhalte gehen auf, aus Gate 2a und 4d).
 - Data type: `batch-review/domain/steps.ts` (n = 4), `ui/Step4.tsx`, `domain/bank-reconciliation.ts`, `application/clearing-balances.ts`, `domain/clearing-state.ts`, `ui/ClearingAccountsCard.tsx`.
 - Example: „Schritt 4 zeigt 1360 Geldtransit mit 12,00 € Rest — zwei Zeilen im Zeitraum erklären ihn."
 - Notes: Der Saldo je Zahlungskonto wohnt **nur** hier, nicht in Schritt 1 (Owner 2026-09-15). Umbenannt mit F220.
+
+### Saldo neu (Schritt 4)
+
+- English: `booked balance` (`BankReconciliationRow.bookedBalance`)
+- German: **Saldo neu** — DATEV-Stand plus dieser Stapel, plus frühere Stapel, die DATEV noch nicht hat, plus Freigegebenes ohne Stapel; Vorschläge zählen nie (`domain/bank-reconciliation.ts`).
+
+### Saldo laut Auszug (Schritt 4)
+
+- English: `statement balance` (`statementBalance`, `statementDate`, `statementSourceDocId`)
+- German: **Saldo laut Auszug** — Endsaldo des jüngsten Auszugs, der im Zeitraum endet, geordnet nach Auszugsende; mit Datum und, wenn die Auszugsdatei ein Quelldokument ist, dem Beleg (`reconciliation-queries.ts`).
 
 ### Offene Posten in der Stapelabnahme (Schritt 5)
 

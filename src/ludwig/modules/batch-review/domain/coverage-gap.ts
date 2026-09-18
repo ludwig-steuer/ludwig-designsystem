@@ -13,8 +13,8 @@ import type { ChecklistRow } from "./checklist";
  * im Gate**; hier wird nur formuliert.
  */
 
-/** Was für die Checkliste aus einer Zeile gebraucht wird — ohne Quittungs-Felder. */
-type RohZeile = Omit<ChecklistRow, "acknowledged" | "note" | "acknowledgedBy" | "acknowledgedAt">;
+/** Was aus einer Checklisten-Zeile gebraucht wird — die Texte kommen später. */
+type Zeile = Pick<ChecklistRow, "done" | "total" | "openCount" | "level" | "valueHash" | "items">;
 
 export interface CoverageGap {
   paymentAccountId: string | null;
@@ -64,9 +64,14 @@ export function coverageGapFrom(
   };
 }
 
-/** Alle Lücken aus `gate.warnings` — die meisten Tage zuerst, dann nach Label. */
+/**
+ * Alle Lücken aus `gate.warnings` — die meisten Tage zuerst, dann nach Label.
+ * Lücken an Konten mit „Sollte kommen" sind ein Hinweis in Schritt 1, nicht
+ * quittierpflichtig in Schritt 8 (F235).
+ */
 export function coverageGaps(gate: GateEingang, periodTo: string): CoverageGap[] {
   return (gate.warnings ?? [])
+    .filter((o) => o.statementExpectation !== "expected")
     .map((o) => coverageGapFrom(o, periodTo))
     .filter((l): l is CoverageGap => l != null)
     .sort((a, b) => b.uncoveredDays - a.uncoveredDays || a.label.localeCompare(b.label));
@@ -78,17 +83,18 @@ export function coverageGaps(gate: GateEingang, periodTo: string): CoverageGap[]
  * Auszug nach, verfällt eine alte Quittung; ist die Lücke geschlossen, ist die
  * Zeile wieder grün, ohne dass jemand quittieren muss.
  */
-export function completeStatementLine(row: RohZeile, luecken: CoverageGap[]): RohZeile {
+export function completeStatementLine<Z extends Zeile>(row: Z, luecken: CoverageGap[]): Z {
   if (luecken.length === 0) return row;
   return {
     ...row,
     done: 0,
     total: 1,
+    openCount: row.openCount + luecken.length,
     // Hatte das Gate Blocker, bleibt die Zeile rot — die Lücke kommt dazu.
     level: row.done >= row.total ? "warn" : row.level,
     items: [
       ...row.items,
-      ...luecken.map((l) => ({ text: l.label, problem: l.text })),
+      ...luecken.map((l) => ({ text: l.label, note: l.text, href: null })),
     ].slice(0, 20),
     valueHash: `${row.valueHash}|${luecken
       .map((l) => `${l.paymentAccountId ?? l.label}:${l.coveredTo}`)

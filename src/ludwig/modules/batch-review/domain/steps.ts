@@ -12,31 +12,25 @@ import type { BookingCycleKind } from "@/ludwig/modules/datev-export";
 export interface ReviewStep {
   /** Zugleich das URL-Segment: `…/review/3`. */
   n: number;
-  /** Kurzname im Rail. */
+  /** Eintrag im Rail und Überschrift des Screens — ein Substantiv. */
   label: string;
-  /** Die Frage, die der Schritt beantwortet — der Lead unter der Überschrift. */
-  question: string;
-  /**
-   * Die Überschrift des Screens. Sie ist nicht das Rail-Label: im Rail steht
-   * „1 · Vollständigkeit" als Wegweiser, über dem Screen steht die Sache
-   * selbst. Die Nummer trägt die Overline.
-   */
-  title: string;
+  /** Ein Satz: was der Prüfer hier tut. */
+  description: string;
 }
 
 export const REVIEW_STEPS: readonly ReviewStep[] = [
-  { n: 0, label: "Ergebnis des Stapels", question: "Was hat der Agent geschafft?", title: "Abnahme Buchungsstapel" },
-  { n: 1, label: "Vollständigkeit", question: "Ist alles da — und so viel wie sonst?", title: "Ist alles da?" },
-  { n: 2, label: "Rückfragen", question: "Was will der Agent von mir?", title: "Rückfragen des Agenten" },
-  { n: 3, label: "Buchungsvorschläge", question: "Stimmen die Vorschläge?", title: "Buchungsvorschläge" },
+  { n: 0, label: "Ergebnis des Stapels", description: "Sehen, was der Agent erledigt hat und wo er nicht fertig wurde – danach beginnt die Abnahme." },
+  { n: 1, label: "Vollständigkeit", description: "Prüfen, ob alle Kontoauszüge und Belege des Zeitraums da sind – und ob es so viele sind wie sonst." },
+  { n: 2, label: "Rückfragen", description: "Die Fragen des Agenten beantworten, damit er die betroffenen Sachverhalte fertig buchen kann." },
+  { n: 3, label: "Buchungsvorschläge", description: "Jeden Vorschlag prüfen und übernehmen, ändern oder an den Agenten zurückgeben." },
   // F220: „Kontenausgleich" — Banken, Verrechnungskonten, ruhende Zahlungskonten (Owner 2026-09-15).
-  { n: 4, label: "Kontenausgleich", question: "Gehen die Konten auf?", title: "Kontenausgleich" },
-  { n: 5, label: "Offene Posten", question: "Wer schuldet wem?", title: "Offene Posten" },
-  { n: 6, label: "Plausibilität", question: "Sieht der Monat aus wie sonst?", title: "Plausibilität der Konten" },
-  { n: 7, label: "Konventionen", question: "Was hat der Agent gelernt?", title: "Was der Agent gelernt hat" },
-  { n: 8, label: "Prüfprotokoll", question: "Freigeben oder zurückgeben?", title: "Prüfprotokoll und Freigabe" },
-  { n: 9, label: "Übergabe an DATEV", question: "Ist der Stapel angekommen?", title: "Übergabe an DATEV" },
-  { n: 10, label: "Nachlese", question: "Was hat DATEV anders gemacht?", title: "Nachlese" },
+  { n: 4, label: "Kontenausgleich", description: "Prüfen, ob Bank- und Verrechnungskonten zum Periodenende aufgehen." },
+  { n: 5, label: "Offene Posten", description: "Sehen, wer zum Periodenende wem wie viel schuldet – und ob das zu DATEV passt." },
+  { n: 6, label: "Plausibilität", description: "Die Konten des Monats mit den letzten drei Monaten vergleichen und Ausreißer klären." },
+  { n: 7, label: "Konventionen", description: "Bestätigen oder verwerfen, was der Agent in diesem Stapel als Regel gelernt hat." },
+  { n: 8, label: "Prüfprotokoll", description: "Alle Prüfpunkte auf einen Blick – dann den Stapel freigeben oder an den Agenten zurückgeben." },
+  { n: 9, label: "Übergabe an DATEV", description: "Den freigegebenen Stapel an DATEV übertragen und sehen, ob er angekommen ist." },
+  { n: 10, label: "Nachlese", description: "Vergleichen, was DATEV aus den übertragenen Sätzen gemacht hat." },
 ];
 
 /**

@@ -27,6 +27,12 @@ export interface GateRow {
   kind: string | null;
   /** Verrechnungskonto-Kategorie bei `clearing_balance` (Gate 4d); sonst null. */
   clearingAccountType: string | null;
+  /** Der Sachverhalt, wenn der Befund einen nennt — für den Sprung in Schritt 3. */
+  caseId: string | null;
+  /** Der Beleg, wenn der Befund einen nennt — für den Beleg-Drawer. */
+  sourceDocId: string | null;
+  /** Das Konto, wenn der Befund eins nennt — für `?bookings=` in Schritt 4. */
+  accountNumber: string | null;
 }
 
 /**
@@ -153,5 +159,47 @@ export function readGateRow(raw: unknown): GateRow {
     problem,
     kind: ersterText(o, ["kind"]),
     clearingAccountType: ersterText(o, ["clearingAccountType"]),
+    caseId: ersterText(o, ["caseId"]),
+    sourceDocId: ersterText(o, ["sourceDocId", "documentId"]),
+    accountNumber: kontoNummer,
   };
+}
+
+/**
+ * Wohin ein Befund in der Abnahme führt (F246) — Pfad-Suffix hinter
+ * `…/review/`, `null` ohne Gegenstand. Die Bankzeile öffnet ihren Drawer nur
+ * in den Schritten, die ihn haben (1 und 4).
+ */
+export function findingHref(step: number, z: GateRow): string | null {
+  if (z.transactionId && (step === 1 || step === 4)) return `${step}?transactionId=${z.transactionId}`;
+  if (z.sourceDocId) return `${step}?document=${z.sourceDocId}`;
+  if (z.caseId) return `3?case=${z.caseId}`;
+  if (z.accountNumber && step === 4) return `4?bookings=${z.accountNumber}`;
+  return null;
+}
+
+/** Die Befunde von Gate 4d, wie Schritt 4 sie als Prüfpunkte zeigt (F245). */
+export interface ReconciliationChecks {
+  /** Geld ist geflossen, eine freigegebene Buchung fehlt — „Jede Auszugszeile ist gebucht". */
+  booked: GateRow[];
+  /** Sammelsachverhalt mit Rest — „Sammelsachverhalte gehen auf". */
+  collective: GateRow[];
+  /** Alles andere, heute nur der Saldo der Zentralregulierung; die Zeile steht nur, wenn hier etwas ist. */
+  other: GateRow[];
+}
+
+const GELDFLUSS_OHNE_BUCHUNG = new Set(["waived_but_paid", "bank_line_proposed_only"]);
+
+/**
+ * Die Mängel von Gate 4d in drei Prüfpunkte in Klartext — statt einer Zeile
+ * „Verprobung", die niemand versteht (Owner 2026-09-18).
+ */
+export function splitReconciliationChecks(defects: readonly GateRow[]): ReconciliationChecks {
+  const checks: ReconciliationChecks = { booked: [], collective: [], other: [] };
+  for (const z of defects) {
+    if (z.kind !== null && GELDFLUSS_OHNE_BUCHUNG.has(z.kind)) checks.booked.push(z);
+    else if (z.kind === "case_remainder") checks.collective.push(z);
+    else checks.other.push(z);
+  }
+  return checks;
 }

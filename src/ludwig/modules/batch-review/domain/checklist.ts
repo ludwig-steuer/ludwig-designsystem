@@ -25,26 +25,34 @@ import type { CheckKind } from "./check-kinds";
 export type ChecklistLevel = "blocked" | "warn" | "info";
 
 /**
- * Die Keys, die `getReleaseChecklist` bauen kann — und nur die. Nicht jeder
+ * Die Keys, die `getReleaseChecklist` bauen kann — und nur die, in der
+ * Reihenfolge der Schritte (F246). Nicht jeder
  * `CheckKind` ist eine Checklisten-Zeile: `account_comparison` und die anderen
  * sind Einzel-Quittungen an ihrem Gegenstand (F123). Umgekehrt ist
- * `not_checked` reiner Kontext und `client_batch_masterdata` (F165) bewusst
- * kein `CheckKind` — nicht quittierbar, nichts zu speichern.
+ * `not_checked` reiner Kontext und `client_batch_masterdata` (F165) sowie
+ * `central_settlement_zero` (F246) bewusst kein `CheckKind` — rot, nicht
+ * quittierbar, nichts zu speichern.
  */
 export const CHECKLIST_ROW_KEYS = [
   "statements_complete",
   "documents_handled",
+  "questions_answered",
+  "cases_proposed",
+  "entries_accepted",
+  "export_simulation",
   "bank_transactions_booked",
   "bank_transactions_proposed",
   "clearing_accounts_zero",
-  "export_simulation",
-  "cases_proposed",
-  "entries_accepted",
-  "questions_answered",
+  "central_settlement_zero",
   "conventions_decided",
   "client_batch_masterdata",
   "not_checked",
-] as const satisfies readonly (CheckKind | "not_checked" | "client_batch_masterdata")[];
+] as const satisfies readonly (
+  | CheckKind
+  | "not_checked"
+  | "client_batch_masterdata"
+  | "central_settlement_zero"
+)[];
 
 export type ChecklistRowKey = (typeof CHECKLIST_ROW_KEYS)[number];
 
@@ -54,7 +62,7 @@ export type ChecklistRowKey = (typeof CHECKLIST_ROW_KEYS)[number];
  * **SSOT ist `docs/reference/stapelarten.md`** — diese Konstante zieht nach;
  * `__tests__/stapelarten-katalog.test.ts` hält beides zusammen (F179).
  *
- * Beim Mandantenstapel bleibt, was den Weg nach DATEV betrifft. Die fünf
+ * Beim Mandantenstapel bleibt, was den Weg nach DATEV betrifft. Die sechs
  * Gate-Zeilen und `cases_proposed` messen Teilschritte, die dort gar nicht
  * laufen; `client_batch_masterdata` gilt umgekehrt nur dort (F165).
  */
@@ -64,13 +72,14 @@ export const CHECKLIST_ROW_SCOPE: Record<
 > = {
   statements_complete: { regular: true, clientBatch: false },
   documents_handled: { regular: true, clientBatch: false },
+  questions_answered: { regular: true, clientBatch: true },
+  cases_proposed: { regular: true, clientBatch: false },
+  entries_accepted: { regular: true, clientBatch: true },
+  export_simulation: { regular: true, clientBatch: true },
   bank_transactions_booked: { regular: true, clientBatch: false },
   bank_transactions_proposed: { regular: true, clientBatch: false },
   clearing_accounts_zero: { regular: true, clientBatch: false },
-  export_simulation: { regular: true, clientBatch: true },
-  cases_proposed: { regular: true, clientBatch: false },
-  entries_accepted: { regular: true, clientBatch: true },
-  questions_answered: { regular: true, clientBatch: true },
+  central_settlement_zero: { regular: true, clientBatch: false },
   conventions_decided: { regular: true, clientBatch: false },
   client_batch_masterdata: { regular: false, clientBatch: true },
   not_checked: { regular: true, clientBatch: true },
@@ -82,16 +91,28 @@ export function checklistRowApplies(key: ChecklistRowKey, kind: BookingCycleKind
   return kind === "client_batch" ? scope.clientBatch : scope.regular;
 }
 
+export interface ChecklistItem {
+  text: string;
+  note: string | null;
+  href: string | null;
+}
+
 export interface ChecklistRow {
   key: ChecklistRowKey;
   label: string;
-  /** Was die Zeile misst, für den Tooltip. */
-  hint: string;
+  /** Was zu tun ist, als Kanzlei-Satz (F246); leer, wenn die Zeile erledigt ist. */
+  todo: string;
   done: number;
   total: number;
+  /** Wie viel offen ist, ungedeckelt — das zeigt „Stand" in Schritt 8. */
+  openCount: number;
   level: ChecklistLevel;
   /** Prüfschritt, auf den die Zeile springt (`null` = kein Sprung). */
   jumpStep: number | null;
+  /** Linktext des Sprungs, als Handlung. */
+  jumpLabel: string | null;
+  /** Pfad-Suffix hinter `…/review/`, z. B. `4?bookings=1800` oder `3#without-proposal`. */
+  jumpHref: string | null;
   /** Quittiert und noch gültig (Wert unverändert)? */
   acknowledged: boolean;
   /** Grund der Quittung, wenn einer angegeben wurde. */
@@ -104,8 +125,12 @@ export interface ChecklistRow {
    * Quittung; ändert er sich, wird die Zeile wieder gelb.
    */
   valueHash: string;
-  /** Die offenen Gegenstände, gedeckelt — der Zähler daneben ist ungedeckelt. */
-  items: Array<{ text: string; problem: string | null }>;
+  /**
+   * Die offenen Gegenstände, gedeckelt — `openCount` ist ungedeckelt. `note`
+   * ist ein Kanzlei-Satz (nie der Agenten-Text), `href` ein Pfad-Suffix wie
+   * `jumpHref`.
+   */
+  items: ChecklistItem[];
   /**
    * Agenten-Sicht (Schritt 0): so viel hat der Agent erledigt — gebucht ODER
    * gefragt. Fehlt, gilt `done`. Weicht nur ab, wo die Freigabe strenger
@@ -150,7 +175,7 @@ export function releaseVerdict(rows: readonly ChecklistRow[]): ReleaseVerdict {
   return {
     canRelease: blocked.length === 0 && warn.length === 0,
     blockingReason: first
-      ? `${first.label}: ${first.total - first.done} offen` +
+      ? `${first.label}: ${first.openCount} offen` +
         (first.jumpStep === null ? "" : ` → Schritt ${first.jumpStep}`)
       : null,
     openBlocked: blocked.length,
@@ -168,7 +193,8 @@ export function checklistAsNote(rows: readonly ChecklistRow[]): string {
             r.note ? `: ${r.note}` : ""
           }`
         : "";
-      return `${mark} ${r.label}: ${r.done} von ${r.total}${ack}`;
+      const items = r.items.map((i) => `\n  – ${i.text}${i.note ? `: ${i.note}` : ""}`).join("");
+      return `${mark} ${r.label}: ${r.done} von ${r.total}${ack}${items}`;
     })
     .join("\n");
 }

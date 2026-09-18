@@ -12,19 +12,25 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-- **F235** (App `b7201625`, Auszugserwartung dreistufig) — angekündigt von
-  `a2`, Auftrag von `a1`, 2026-09-18; beim Lauf vom 2026-09-18 noch nicht auf
-  origin/staging. Die Achse `statement_expectation` hat dann `required` /
-  `expected` / `none` statt `erwartet`/`erwartet_hand`/`keine`/`keine_hand`.
-  Neu drüben: `core/accounting/statement-expectation.ts`
-  (`STATEMENT_EXPECTATION_LEVELS`, Typ `StatementExpectationLevel`),
-  importfrei — **steht schon in der Pfadliste** von `sync-ludwig.sh`; ohne sie
-  sortiert der Filter `batch-review/domain/statement-coverage.ts` aus. Im Set
-  nachziehen: `statementExpectationOf`, `PaymentAccountRowData`
-  (`statementExpectation` effektiv, `statementExpectationManual:
-  StatementExpectationLevel | null` = Herkunft Hand), `PaymentAccountDraft` im
-  Editor (drei Stufen plus „Automatisch"), Spec-Nachtrag 0180 und 0183,
-  `docs/entitaeten/payment-account.md` Z. 60, 0180 Z. 74.
+Nichts.
+
+## Erledigt mit dem zweiten Lauf vom 2026-09-18 (App `1276540f`)
+
+Owner-Ausnahme (Simon, 2026-09-18, auf den Auftrag von `a1`), gelaufen,
+sobald F235 auf origin/staging lag; danach wieder eingefroren. Angekommen:
+**F235** — die Achse `statement_expectation` mit `required` / `expected` /
+`none` und `core/accounting/statement-expectation.ts`
+(`STATEMENT_EXPECTATION_LEVELS`, `StatementExpectationLevel`,
+`isStatementExpectationLevel`), neu in der Pfadliste · F246 (Schritt 8):
+`batch-review/domain/checkpoint-texts.ts`.
+
+`batch-review/domain/statement-coverage.ts` ist wieder draußen, diesmal zu
+Recht: seit F235 holt sie `accounting-cases/server`. Das Set benutzt sie
+nicht. Im Set nachgezogen nach dem Nachtrag zu 0180 und 0183:
+`statementExpectationOf` gibt die Stufe zurück, `PaymentAccountRowData` trägt
+`statementExpectation` und `statementExpectationManual`, die Zelle zeigt „von
+Hand“ als Zusatz, der Editor hat Automatisch und die drei Stufen. Typcheck
+und Wächter grün.
 
 ## Erledigt mit dem Lauf vom 2026-09-18 (App `08f56032`)
 

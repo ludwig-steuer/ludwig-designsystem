@@ -223,3 +223,15 @@ DATEV-Bankverbindungen, Konto bebucht) gehört der App.
 - [ ] `statementExpectationOf` gibt `StatementExpectationLevel` zurück; ohne `statementExpectation` gilt Hand vor Ableitung (Typcheck, Lesen)
 - [ ] „von Hand“ steht nur an Konten mit `statementExpectationManual` (Story `Filled`)
 - [ ] Die Stufe trägt das Wort der Registry — „Pflicht“, „Sollte kommen“, „Keine“ (Story `Filled`)
+
+### Gebaut (Nachtrag, 2026-09-18)
+
+Mit dem Spiegel-Lauf auf App `1276540f`. Gemessen (CDP, Storybook 6107,
+1400 px): `Filled` zeigt „Pflicht“ ohne Zusatz, „Keine“ und „Sollte kommen“
+je mit „von Hand“ in einer eigenen Zeile unter dem Badge; `Settings`,
+`Edges`, `Columns`, `InUse`, `PaymentAccountList` und
+`PaymentAccountSettingsList` zeigen „von Hand“ nur an Konten mit
+`statementExpectationManual`. Die Grep nach `expectsStatementsManual`,
+`erwartet_hand`, `keine_hand` im Set ist leer. `pnpm typecheck`,
+`check:language`, `check:when`, `check:classes`, `check:mirror` grün. Abnahme
+durch einen anderen Agenten steht aus.

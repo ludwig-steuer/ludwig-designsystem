@@ -144,7 +144,11 @@ export function paymentAccountColumns(
       headerAside: <StatusInfoButton axis="statement_expectation" />,
       width: "150px",
       cell: (a) => (
-        <StatusBadge axis="statement_expectation" status={statementExpectationOf(a)} info={false} />
+        <>
+          <StatusBadge axis="statement_expectation" status={statementExpectationOf(a)} info={false} />
+          {/* Where the level comes from is an addition, not a status of its own (F235). */}
+          {a.statementExpectationManual ? <div className="v2sub">von Hand</div> : null}
+        </>
       ),
     },
     txCount: {

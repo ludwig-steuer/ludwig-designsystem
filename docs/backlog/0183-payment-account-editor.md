@@ -185,3 +185,13 @@ Buchungslauf bewirken.
 `currentStatementExpectation?: StatementExpectationLevel`. Auslöser: die App
 tauscht `PaymentAccountForm` gegen den Editor. Die Lücke bestand schon vor
 F235.
+
+### Gebaut (Nachtrag, 2026-09-18)
+
+Gemessen (CDP, Storybook 6107): alle fünf Stories haben die Auswahl
+`auto` · `required` · `expected` · `none` mit „Automatisch entscheiden“,
+„Pflicht“, „Sollte kommen“, „Keine“; `Edit` steht auf `required`, `New` auf
+Automatisch. Die Wörter kommen über `resolveStatus` aus der Registry, auch im
+Hinweis. `onSubmit` liefert `statementExpectationManual`; Automatisch ist
+`null` (Code gelesen: `isStatementExpectationLevel("auto")` ist falsch,
+nicht gemessen). Abnahme durch einen anderen Agenten steht aus.

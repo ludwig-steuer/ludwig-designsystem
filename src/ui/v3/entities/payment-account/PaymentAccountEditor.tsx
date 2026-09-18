@@ -7,6 +7,12 @@ import {
   PAYMENT_ACCOUNT_KIND_LABEL,
   type PaymentAccountKind,
 } from "@/ludwig/core/accounting/payment-account-kind";
+import {
+  STATEMENT_EXPECTATION_LEVELS,
+  isStatementExpectationLevel,
+  type StatementExpectationLevel,
+} from "@/ludwig/core/accounting/statement-expectation";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 import { Banner } from "../../primitives/Banner";
 import { Button } from "../../primitives/Button";
@@ -35,10 +41,12 @@ function identifierOf(kind: PaymentAccountKind): "iban" | "card" | "none" {
   return "none";
 }
 
+/** The word of a level — from the registry, not from a list here (F235). */
+const levelLabel = (level: StatementExpectationLevel) => resolveStatus("statement_expectation", level).label;
+
 const EXPECTATION_OPTIONS = [
   { value: "auto", label: "Automatisch entscheiden" },
-  { value: "yes", label: "Auszug erwartet" },
-  { value: "no", label: "Kein Auszug" },
+  ...STATEMENT_EXPECTATION_LEVELS.map((level) => ({ value: level, label: levelLabel(level) })),
 ];
 
 /**
@@ -93,7 +101,7 @@ export function PaymentAccountEditor({
   };
 
   const identifier = identifierOf(draft.kind);
-  const expectation = draft.expectsStatements === null ? "auto" : draft.expectsStatements ? "yes" : "no";
+  const expectation = draft.statementExpectationManual ?? "auto";
   const canSave = draft.displayName.trim() !== "" && !pending;
 
   return (
@@ -207,13 +215,13 @@ export function PaymentAccountEditor({
       <Field
         label="Kontoauszug"
         htmlFor={ids.expectation}
-        hint={'„Automatisch entscheiden" hält die Ableitung aus IBAN und Buchungen offen.'}
+        hint={`${levelLabel("required")}: fehlt der Auszug, blockt der Buchungslauf. ${levelLabel("expected")}: fehlt er, ist es ein Hinweis. ${levelLabel("none")}: keine Prüfung. „Automatisch entscheiden" hält die Ableitung aus IBAN und Buchungen offen.`}
       >
         <Select
           id={ids.expectation}
           value={expectation}
           onChange={(e) =>
-            set("expectsStatements", e.target.value === "auto" ? null : e.target.value === "yes")
+            set("statementExpectationManual", isStatementExpectationLevel(e.target.value) ? e.target.value : null)
           }
           disabled={pending}
         >
