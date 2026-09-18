@@ -385,3 +385,21 @@ function seitenzahl(raw: string | undefined): number | null {
   const n = Number(raw);
   return n >= 1 ? n : null;
 }
+
+/** F236: Buchungszustand eines Belegs — hängt ein lebender Satz dran (über sein Ereignis oder `source_doc_id`, F163)? */
+export const DOCUMENT_BOOKING_STATES = ["booked", "unbooked", "open"] as const;
+export type DocumentBookingState = (typeof DOCUMENT_BOOKING_STATES)[number];
+
+/** F236: Seitenbereiche lesbar — sortiert, Überlappende und Angrenzende zusammengezogen. */
+export function formatPageRanges(ranges: readonly PageExcerpt[]): string {
+  const merged: { from: number; to: number }[] = [];
+  for (const r of [...ranges].sort((a, b) => a.from - b.from)) {
+    const last = merged[merged.length - 1];
+    const to = r.to ?? r.from;
+    if (last && r.from <= last.to + 1) last.to = Math.max(last.to, to);
+    else merged.push({ from: r.from, to });
+  }
+  if (merged.length === 0) return "";
+  const text = merged.map((r) => (r.to === r.from ? `${r.from}` : `${r.from}–${r.to}`)).join(", ");
+  return merged.length === 1 && merged[0]!.to === merged[0]!.from ? `Seite ${text}` : `Seiten ${text}`;
+}

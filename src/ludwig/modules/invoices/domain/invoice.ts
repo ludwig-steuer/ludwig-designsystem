@@ -361,6 +361,9 @@ export interface BookingProposalLine {
   creditAccountName: string | null;
 }
 
+/** Spiegelt `buchassi_shared.preprocessing.ExtractionSource` (R37). */
+export type ExtractionSource = "ocr" | "embedded_xml";
+
 export interface InvoiceDetail extends InvoiceListItem {
   // ── Identitäten (technisch — nur im Pipeline-Tab anzeigen) ─────────────
   /** Die Detailansicht hängt immer an einer echten Rechnungszeile. */
@@ -419,6 +422,10 @@ export interface InvoiceDetail extends InvoiceListItem {
   datevHistoryDuplicate: string | null;
 
   // ── Kopfdaten / Extraktion ─────────────────────────────────────────────
+  /** R37: Woher die Feldwerte stammen; `null` = keine Extraktion oder eine ältere ohne Angabe. */
+  extractionSource: ExtractionSource | null;
+  vendorAddress: string | null;
+  customerAddress: string | null;
   vendorTaxId: string | null;
   vendorUstId: string | null;
   customerId: string | null;

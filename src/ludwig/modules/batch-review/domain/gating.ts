@@ -49,8 +49,13 @@ export interface ReviewGating {
  * Zustände, in denen der Stapel unterwegs ist: die Sätze sind geclaimt und
  * gesperrt, die Abnahme ist ein Nachschlagewerk.
  */
-const IN_TRANSFER = new Set(["ready", "exporting", "inspection", "failed"]);
-const IN_DATEV = new Set(["confirmed", "mirrored", "closed"]);
+export const IN_TRANSFER = new Set(["ready", "exporting", "inspection", "failed"]);
+export const IN_DATEV = new Set(["confirmed", "mirrored", "closed"]);
+
+/** Ist der Stapel freigegeben — unterwegs oder in DATEV angekommen? (F228) */
+export function batchReleased(state: string): boolean {
+  return IN_TRANSFER.has(state) || IN_DATEV.has(state);
+}
 
 export function reviewGating(state: string, at?: string | null): ReviewGating {
   const g = gatingOhneZeit(state);

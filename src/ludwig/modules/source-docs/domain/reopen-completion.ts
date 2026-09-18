@@ -1,5 +1,5 @@
 /**
- * Zurück in die Bearbeitung (belege.md R14d) — wann ein erledigter Beleg
+ * Zurück an den Agenten (belege.md R14d) — wann ein erledigter Beleg
  * wieder geöffnet werden darf, und wie der Einwand der Kanzlei beim Agenten
  * ankommt.
  *

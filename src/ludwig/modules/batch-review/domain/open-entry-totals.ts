@@ -1,4 +1,4 @@
-import { isRuleBooked } from "./rule-booked";
+import type { ReviewTab } from "@/ludwig/modules/accounting-cases";
 
 /**
  * Wie viele offene Vorschläge die Karten der Abnahme zeigen — je Reiter (F200).
@@ -7,17 +7,14 @@ import { isRuleBooked } from "./rule-booked";
  * Karte auftauchen — sonst sieht ein fehlender Satz aus wie einer im anderen
  * Reiter (Willems 07-2026: elf Vorschläge standen in „Wiederkehrende").
  *
- * Reiter-Zuordnung wie in Schritt 3: nach Herkunft der Sätze (F202).
+ * Reiter-Zuordnung wie in Schritt 3: nach Prüfbedarf des Falls (F232).
  */
-export function openEntryTotals(
-  cards: ReadonlyArray<{ proposals: ReadonlyArray<{ status: string; origin: string | null }> }>,
-): { rule: number; individual: number } {
-  let rule = 0;
-  let individual = 0;
+export function openEntryTotals<
+  C extends { proposals: ReadonlyArray<{ status: string; origin: string | null }> },
+>(cards: ReadonlyArray<C>, tabOf: (card: C) => ReviewTab): Record<ReviewTab, number> {
+  const out: Record<ReviewTab, number> = { needs_review: 0, likely_correct: 0, client_batch: 0 };
   for (const c of cards) {
-    const n = c.proposals.filter((p) => p.status === "proposed").length;
-    if (isRuleBooked(c)) rule += n;
-    else individual += n;
+    out[tabOf(c)] += c.proposals.filter((p) => p.status === "proposed").length;
   }
-  return { rule, individual };
+  return out;
 }

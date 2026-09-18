@@ -1,6 +1,5 @@
 /* Generiert von scripts/sync-ludwig.sh — nicht von Hand bearbeiten. */
 export * from "./domain/acceptance-quality";
-export * from "./domain/acceptance-triage";
 export * from "./domain/case-detail";
 export * from "./domain/case-event";
 export * from "./domain/case";
@@ -11,9 +10,11 @@ export * from "./domain/expectation";
 export * from "./domain/mirror-hit";
 export * from "./domain/overview-vm";
 export * from "./domain/payment-term";
+export * from "./domain/payment-without-document";
 export * from "./domain/payroll-payment";
 export * from "./domain/proposal-batch-spread";
 export * from "./domain/rationale-source";
+export * from "./domain/review-score";
 export * from "./domain/tabs";
 export * from "./domain/tax-keys";
 export * from "./domain/vat-rules";

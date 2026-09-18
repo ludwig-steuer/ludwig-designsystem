@@ -106,6 +106,15 @@ export interface ChecklistRow {
   valueHash: string;
   /** Die offenen Gegenstände, gedeckelt — der Zähler daneben ist ungedeckelt. */
   items: Array<{ text: string; problem: string | null }>;
+  /**
+   * Agenten-Sicht (Schritt 0): so viel hat der Agent erledigt — gebucht ODER
+   * gefragt. Fehlt, gilt `done`. Weicht nur ab, wo die Freigabe strenger
+   * rechnet als die Agentenarbeit: eine Rückfrage statt Vorschlag, ein
+   * Vorschlag, der nur noch auf die Freigabe wartet (F201).
+   */
+  agentDone?: number;
+  /** Davon mit offener Rückfrage an Kanzlei/Mandant statt Vorschlag. */
+  asked?: number;
 }
 
 /** Eine Zeile ist erledigt, wenn nichts offen ist oder die Quittung noch gilt. */

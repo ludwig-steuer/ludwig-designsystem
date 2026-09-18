@@ -23,6 +23,7 @@
  */
 export const DOC_TABS = [
   "overview",
+  "e_invoice",
   "details",
   "lines",
   "input_tax",
@@ -33,6 +34,7 @@ export type DocTab = (typeof DOC_TABS)[number];
 
 export const DOC_TAB_LABEL: Record<DocTab, string> = {
   overview: "Übersicht",
+  e_invoice: "E-Rechnung",
   details: "Details",
   lines: "Positionen",
   input_tax: "Vorsteuer",
@@ -54,9 +56,13 @@ export const DOC_TAB_LABEL: Record<DocTab, string> = {
  * Einzelwerte — Belegdatum, Einordnung, Erledigung, DATEV-Ablage — bleiben in
  * der Übersicht an ihrem Wert (Seitenprofil, Abweichung zu D1/D9). In den
  * Reiter gehört, was mehr als einen Wert betrifft.
+ *
+ * `e_invoice` nur, wenn die Werte aus der eingebetteten E-Rechnung stammen
+ * (R37) — der Reiter ist zugleich der Hinweis darauf.
  */
-export function availableDocTabs(args: { isInvoice: boolean; hasDetails?: boolean }): DocTab[] {
+export function availableDocTabs(args: { isInvoice: boolean; hasDetails?: boolean; isEInvoice?: boolean }): DocTab[] {
   return DOC_TABS.filter((tab) => {
+    if (tab === "e_invoice") return args.isEInvoice ?? false;
     if (tab === "lines" || tab === "input_tax") return args.isInvoice;
     if (tab === "details") return args.hasDetails ?? false;
     return true;

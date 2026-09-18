@@ -14,6 +14,13 @@ export interface ClientListItem {
   replayCutoffDate: string | null;
   /** `platform_clients.is_active` — false = stillgelegt (Zwilling eines neu importierten Mandanten). */
   isActive: boolean;
+  /**
+   * Zuständiger Kanzlei-Mitarbeiter (`platform_clients.responsible_user_id`,
+   * F242) — Information und Filter, keine Zugriffsgrenze. NULL = niemand.
+   */
+  responsibleUserId: string | null;
+  /** Anzeigename des Zuständigen (`platform_users.display_name`). */
+  responsibleDisplayName: string | null;
   invoiceCount: number;
 }
 

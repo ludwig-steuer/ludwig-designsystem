@@ -1,4 +1,4 @@
-import type { MembershipStatus, UserKind } from "@/ludwig/modules/auth";
+import type { MembershipStatus, StaffRole, UserKind } from "@/ludwig/modules/auth";
 
 export interface TenantSummary {
   tenantId: string;
@@ -29,11 +29,25 @@ export interface UserSummary {
 }
 
 export interface UserDetail extends UserSummary {
+  /** Team-Rolle (F148) — nur beim Ludwig-Team, sonst null. */
+  staffRole: StaffRole | null;
   lastSignInAt: string | null;
   clientMemberships: Array<{
     clientId: string;
     clientName: string;
     role: string;
     status: MembershipStatus;
+  }>;
+  /**
+   * Alle Mandanten der Kanzlei des Users mit ihrem Zuständigen (F242) — für
+   * die Karte „Zuständig für". Leer ohne Kanzlei-Mitgliedschaft.
+   */
+  tenantClients: Array<{
+    clientId: string;
+    displayName: string;
+    datevClientNumber: string | null;
+    isActive: boolean;
+    responsibleUserId: string | null;
+    responsibleDisplayName: string | null;
   }>;
 }

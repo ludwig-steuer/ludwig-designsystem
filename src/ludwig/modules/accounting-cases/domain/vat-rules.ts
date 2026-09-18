@@ -140,6 +140,11 @@ export interface VatAssessmentInput {
      * wenn der Beleg keine USt-IdNr. trägt.
      */
     partnerCountryCode: string | null;
+    /**
+     * `client_source_docs_invoices.vendor_country_code` — das Land laut Beleg
+     * (ISO-2 aus der Extraktion), drittes Sitzland-Signal (F224).
+     */
+    invoiceCountryCode: string | null;
     documentForm: string | null;
     /** match | mismatch | uncertain | not_applicable | null (BL-17). */
     recipientMatch: string | null;
@@ -223,6 +228,8 @@ export interface ReverseChargeOrigin {
   vendorUstId: string | null;
   /** client_business_partners.country_code des verknüpften Partners. */
   partnerCountryCode: string | null;
+  /** client_source_docs_invoices.vendor_country_code (F224) — das Land laut Beleg. */
+  invoiceCountryCode: string | null;
 }
 
 export interface ReverseChargeCaseResult {
@@ -231,8 +238,9 @@ export interface ReverseChargeCaseResult {
   /** Warum — wörtlich verwendbar in Fakt-Rationale und Submit-Fehler. */
   rationale: string;
   /** `domestic`: Aussteller sitzt im Inland (Bauleistung u. a., nicht abgeleitet).
-   *  `unknown`: kein Sitzland-Signal. Beide führen zu `code = null`. */
-  gap: "domestic" | "unknown" | null;
+   *  `unknown`: kein Sitzland-Signal. `conflict`: Beleg-Land ≠ Partner-Land
+   *  (F224) — der Server entscheidet nicht, die Kanzlei. Alle führen zu `code = null`. */
+  gap: "domestic" | "unknown" | "conflict" | null;
 }
 
 /**
@@ -240,10 +248,12 @@ export interface ReverseChargeCaseResult {
  * SITZ, nicht über den Steuerschlüssel: 94 deckt EU-Leistung und Drittland
  * gleichermaßen ab, DATEV unterscheidet sie erst über diesen Code (REW02191).
  *
- * Reihenfolge: USt-IdNr. am Beleg schlägt das Land am Geschäftspartner (die
- * IdNr. steht auf DEM Beleg, das Partner-Land ist Stammdatum). Die
+ * Reihenfolge: USt-IdNr. am Beleg schlägt das Land (die IdNr. steht auf DEM
+ * Beleg und ist eindeutig). Land laut Beleg (`vendor_country_code`, F224) und
+ * Land am Geschäftspartner (Stammdatum) sind gleichrangig — widersprechen sie
+ * sich, wird nicht gestempelt, sondern abgelehnt (`gap: "conflict"`). Die
  * OSS-Sondernummer `EU…` ist kein Sitzland-Signal (§ 18i UStG) — sie fällt auf
- * das Partner-Land zurück; §13b entsteht in dem Fall ohnehin nicht (VST-XB-5).
+ * das Land zurück; §13b entsteht in dem Fall ohnehin nicht (VST-XB-5).
  */
 export function deriveReverseChargeCase(origin: ReverseChargeOrigin): ReverseChargeCaseResult {
   const prefix = vatIdPrefix(origin.vendorUstId);
@@ -268,33 +278,49 @@ export function deriveReverseChargeCase(origin: ReverseChargeOrigin): ReverseCha
         };
   }
 
-  const country = origin.partnerCountryCode?.trim().toUpperCase();
-  if (country && country.length === 2) {
+  const inv = isoCountry(origin.invoiceCountryCode);
+  const partner = isoCountry(origin.partnerCountryCode);
+  if (inv && partner && inv !== partner) {
+    return {
+      code: null,
+      gap: "conflict",
+      rationale: `Widerspruch: Beleg nennt ${inv}, Geschäftspartner ${partner}`,
+    };
+  }
+  const country = inv ?? partner;
+  if (country) {
+    const source = inv ? `Land laut Beleg: ${country}` : `Land am Geschäftspartner: ${country}`;
     if (country === "DE") {
       return {
         code: null,
         gap: "domestic",
-        rationale: "Land am Geschäftspartner: DE — Aussteller sitzt im Inland",
+        rationale: `${source} — Aussteller sitzt im Inland`,
       };
     }
     return EU_COUNTRIES.has(country)
       ? {
           code: 7,
           gap: null,
-          rationale: `Sachverhalt 7 — sonstige Leistung eines EU-Unternehmers (Land am Geschäftspartner: ${country})`,
+          rationale: `Sachverhalt 7 — sonstige Leistung eines EU-Unternehmers (${source})`,
         }
       : {
           code: 1,
           gap: null,
-          rationale: `Sachverhalt 1 — Drittland (Land am Geschäftspartner: ${country})`,
+          rationale: `Sachverhalt 1 — Drittland (${source})`,
         };
   }
 
   return {
     code: null,
     gap: "unknown",
-    rationale: "Nicht ableitbar: keine USt-IdNr. am Beleg, kein Land am Geschäftspartner",
+    rationale: "Nicht ableitbar: keine USt-IdNr. am Beleg, kein Land am Beleg, kein Land am Geschäftspartner",
   };
+}
+
+/** ISO-2 in Großbuchstaben, sonst `null` — alles andere ist kein Sitzland-Signal. */
+function isoCountry(raw: string | null | undefined): string | null {
+  const code = raw?.trim().toUpperCase();
+  return code && code.length === 2 ? code : null;
 }
 
 function fact(
@@ -413,6 +439,7 @@ export function deriveVatFacts(input: VatAssessmentInput): VatFact[] {
     const rcCase = deriveReverseChargeCase({
       vendorUstId: inv.vendorUstId,
       partnerCountryCode: inv.partnerCountryCode,
+      invoiceCountryCode: inv.invoiceCountryCode,
     });
     out.push(
       fact(

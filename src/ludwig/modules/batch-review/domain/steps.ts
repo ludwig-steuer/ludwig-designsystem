@@ -29,7 +29,8 @@ export const REVIEW_STEPS: readonly ReviewStep[] = [
   { n: 1, label: "Vollständigkeit", question: "Ist alles da — und so viel wie sonst?", title: "Ist alles da?" },
   { n: 2, label: "Rückfragen", question: "Was will der Agent von mir?", title: "Rückfragen des Agenten" },
   { n: 3, label: "Buchungsvorschläge", question: "Stimmen die Vorschläge?", title: "Buchungsvorschläge" },
-  { n: 4, label: "Bank", question: "Geht die Bank auf?", title: "Bank und Zahlungen" },
+  // F220: „Kontenausgleich" — Banken, Verrechnungskonten, ruhende Zahlungskonten (Owner 2026-09-15).
+  { n: 4, label: "Kontenausgleich", question: "Gehen die Konten auf?", title: "Kontenausgleich" },
   { n: 5, label: "Offene Posten", question: "Wer schuldet wem?", title: "Offene Posten" },
   { n: 6, label: "Plausibilität", question: "Sieht der Monat aus wie sonst?", title: "Plausibilität der Konten" },
   { n: 7, label: "Konventionen", question: "Was hat der Agent gelernt?", title: "Was der Agent gelernt hat" },

@@ -6,6 +6,7 @@ export * from "./domain/doc-processing";
 export * from "./domain/doc-signal";
 export * from "./domain/document-age";
 export * from "./domain/document-counterparty";
+export * from "./domain/document-filing";
 export * from "./domain/document-form-labels";
 export * from "./domain/document-form-mapping";
 export * from "./domain/reopen-completion";

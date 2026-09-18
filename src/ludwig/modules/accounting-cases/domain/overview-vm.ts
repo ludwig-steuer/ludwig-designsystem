@@ -23,6 +23,7 @@
  */
 import type { JournalEntryVM } from "@/ludwig/modules/entries";
 import { CASE_KIND_LABEL } from "./case";
+import type { VatWithoutDocumentApproval } from "./case-detail";
 import type {
   CaseDisposition,
   CaseDocumentNumberMode,
@@ -179,6 +180,8 @@ export interface CaseHeaderVM {
   kindLabel: string;
   /** F100 — Belegnummern-Modus; steht im Kopf neben Art und Lifecycle. */
   documentNumberMode: CaseDocumentNumberMode;
+  /** F222 — Freigabe „Vorsteuer ohne Beleg"; steht im Kopf, wird dort aufgehoben. */
+  vatWithoutDocumentApproval: VatWithoutDocumentApproval | null;
   lifecycleStatus: CaseLifecycle | null;
   /**
    * Wer am Zug ist (Achse `disposition`). Das ist die **zweite Frage** der

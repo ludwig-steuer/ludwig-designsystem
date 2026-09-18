@@ -205,6 +205,8 @@ export const CLARIFICATION_QUESTION_TYPE_LABEL: Record<string, string> = {
   recurring_amount_deviation: "Betrag weicht vom Dauersachverhalt ab",
   recurring_document_number_format: "Belegnummer passt nicht zum Muster",
   recurring_no_input: "Dauersachverhalt ohne Eingang",
+  vat_without_document_precedent: "Vorsteuer ohne Beleg: Freigabe?",
+  payment_without_document: "Zahlung ohne Beleg: Zweck und Umsatzsteuer",
   opos_anchor: "Offener Posten als Anker",
   opos_carryover: "Offener Posten aus dem Vortrag",
   opos_clearing_mismatch: "Ausgleich passt nicht zum offenen Posten",

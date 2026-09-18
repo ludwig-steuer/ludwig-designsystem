@@ -30,3 +30,46 @@ export type ConventionOrigin = (typeof CONVENTION_ORIGINS)[number];
 export function isConfirmed(origin: ConventionOrigin): boolean {
   return origin !== "agent_observed";
 }
+
+/**
+ * Die Sichten der Konventionsliste im Profil. `current` ist alles, was der
+ * Agent noch sieht (nicht archiviert) — der Standard, weil Archiviertes nur
+ * noch auffindbar sein soll, nicht im Weg.
+ */
+export const CONVENTION_VIEWS = ["current", "active", "pending_approval", "archived", "all"] as const;
+export type ConventionView = (typeof CONVENTION_VIEWS)[number];
+
+export interface ConventionFilter {
+  view: ConventionView;
+  scope?: ConventionScope;
+  origin?: ConventionOrigin;
+  topic?: string;
+  /** Freitext über Thema, Regel, Warum und Partner. */
+  q?: string;
+}
+
+/**
+ * Eine Zeile gegen die Filter der Liste. Gefiltert wird auf der geladenen
+ * Liste, nicht in SQL: die Kollision (Kanzleiregel gestochen) rechnet über
+ * alle Zeilen, und die Zähler der Chips brauchen ohnehin alle.
+ */
+export function matchesConventionFilter(
+  n: {
+    scope: ConventionScope;
+    status: ConventionStatus;
+    origin: ConventionOrigin;
+    topic: string;
+    note: string;
+    rationale: string | null;
+    businessPartnerName: string | null;
+  },
+  f: ConventionFilter,
+): boolean {
+  if (f.view === "current" ? n.status === "archived" : f.view !== "all" && n.status !== f.view) return false;
+  if (f.scope && n.scope !== f.scope) return false;
+  if (f.origin && n.origin !== f.origin) return false;
+  if (f.topic && n.topic !== f.topic) return false;
+  if (!f.q) return true;
+  const needle = f.q.toLowerCase();
+  return [n.topic, n.note, n.rationale, n.businessPartnerName].some((s) => s?.toLowerCase().includes(needle));
+}

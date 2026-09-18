@@ -1,4 +1,5 @@
 /* Generiert von scripts/sync-ludwig.sh — nicht von Hand bearbeiten. */
+export * from "./domain/e-invoice-facts";
 export * from "./domain/invoice";
 export * from "./domain/trace-module";
 export * from "./domain/vat-by-rate";

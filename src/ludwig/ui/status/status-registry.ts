@@ -57,6 +57,8 @@ export type StatusAxis =
   | "document_stage"
   | "document_character"
   | "document_completion"
+  | "document_filing"
+  | "document_booking"
   | "document_stuck"
   | "document_inbox"
   | "document_category"
@@ -76,7 +78,7 @@ export type StatusAxis =
   | "clarification_type"
   | "expectation_maturity"
   | "expectation_kind"
-  | "triage"
+  | "review_tab"
   // — Buchung & Export —
   | "journal_entry"
   | "export_batch"
@@ -97,6 +99,7 @@ export type StatusAxis =
   | "clearing_account_type"
   | "user"
   | "user_kind"
+  | "staff_role"
   | "role"
   | "booking_cycle"
   | "payment_method"
@@ -620,6 +623,75 @@ const DOCUMENT_COMPLETION: Record<string, StatusDescriptor> = {
 };
 
 /**
+ * DUO-Ablage eines Belegs (F216) — abgeleitet aus `client_source_docs.filed_at`
+ * und `filing_failed_at`: `filed_at` gesetzt → `filed`, sonst
+ * `filing_failed_at` gesetzt → `failed`, sonst `pending`.
+ *
+ * Schreiber: ausschließlich das DUO-Sync-Werkzeug über
+ * `POST /api/intake/v1/clients/{id}/filing-results`. Ludwig legt nichts
+ * selbst ab; die Achse zeigt, was das Werkzeug gemeldet hat.
+ *
+ * Fallstricke:
+ *  - Die Achse hat nur Sinn, wenn der Beleg einen Stapel trägt
+ *    (`export_batch_id`) UND der Stapel quittiert ist (`filing_path`
+ *    eingefroren). Davor steht „Ablage steht aus" — das ist kein Fehler.
+ *  - `failed` ist nicht endgültig: der Beleg bleibt in der Queue, das
+ *    Werkzeug versucht es beim nächsten Lauf erneut. `filed` dagegen bleibt
+ *    auch nach einem späteren `failed`.
+ *  - Farben nach A7: `failed` = Fehler, `pending` = Hinweis, `filed` = neutral
+ *    (ein abgelegter Beleg verlangt nichts mehr).
+ */
+const DOCUMENT_FILING: Record<string, StatusDescriptor> = {
+  pending: {
+    label: "Ablage steht aus",
+    kind: "info",
+    description:
+      "Der Beleg wartet darauf, dass das DUO-Werkzeug ihn nach dem DATEV-Push in Unternehmen Online einsortiert.",
+  },
+  filed: {
+    label: "In DUO abgelegt",
+    kind: "neutral",
+    description: "Das DUO-Werkzeug hat den Beleg an seinem Ablageort abgelegt — oder gemeldet, dass er dort schon liegt.",
+  },
+  failed: {
+    label: "Ablage gescheitert",
+    kind: "danger",
+    description:
+      "Der letzte Ablage-Versuch des DUO-Werkzeugs ist gescheitert; die Meldung steht daneben. Der Beleg bleibt in der Warteschlange.",
+  },
+};
+
+/**
+ * Hängt am Beleg ein lebender Buchungssatz? — **berechnet**, keine Spalte
+ * (F236). `booked`, wenn ein Satz mit `status <> 'reversed'` am Beleg hängt,
+ * über sein Ereignis oder über `journal_entry.source_doc_id` (F163); sonst
+ * `unbooked`, wenn `completed_at` gesetzt ist; sonst `open`. Das ist das
+ * Prädikat von `listUnbookedDocuments`, nur dreiwertig. Schreiber: keiner —
+ * der Wert folgt aus Buchung und Erledigung.
+ *
+ * Fallstrick: nicht `document_completion`. Die spiegelt `completed_via`, den
+ * Weg der Erledigung; ein erledigter Beleg kann ohne Buchung sein.
+ */
+const DOCUMENT_BOOKING: Record<string, StatusDescriptor> = {
+  booked: {
+    label: "gebucht",
+    kind: "neutral",
+    description: "Am Beleg hängt ein Buchungssatz, der nicht storniert ist — Vorschlag oder freigegeben.",
+  },
+  unbooked: {
+    label: "ohne Buchung",
+    kind: "warning",
+    description:
+      "Der Beleg ist erledigt, ohne dass ein Buchungssatz an ihm hängt — Ludwig oder die Kanzlei hat entschieden, ihn nicht zu buchen. Die Begründung steht am Beleg.",
+  },
+  open: {
+    label: "offen",
+    kind: "info",
+    description: "Der Beleg ist noch nicht erledigt und trägt keinen Buchungssatz — er ist noch in Arbeit.",
+  },
+};
+
+/**
  * Warum ein Beleg in der Hänger-Liste steht — **berechnet, ephemer** aus
  * zwei Angaben: ob es eine Invoice-Zeile gibt (`hasInvoiceRow`) und ob die
  * Liste die noch laufenden oder die steckengebliebenen zeigt.
@@ -910,28 +982,22 @@ const EXPECTATION_KIND: Record<string, StatusDescriptor> = {
 };
 
 /**
- * Triage-Bucket für den Abschluss-Screen — **rein abgeleitet**, keine
- * DB-Spalte, kein LLM (`domain/acceptance-triage.ts`). Fasst Judge-Verdikt
- * und Zeilen-Ampeln zu einer Empfehlung zusammen, wie genau ein Vorschlag
- * angesehen werden sollte.
+ * Reiter der Abnahme nach Prüfbedarf (F232) — **rein abgeleitet**, keine
+ * DB-Spalte, kein LLM (`domain/review-score.ts`). Summiert Tragweite,
+ * Judge-Urteil samt Konfidenz (nur wo ein Judge erwartet wird), den
+ * schlechtesten Prüfpunkt und die Präzedenz zu einem Score; ab der Schwelle
+ * (`REVIEW_SCORING.threshold`) „Bitte anschauen". Auf Sachverhalts-Ebene gilt
+ * der höchste Score seiner Sätze.
  *
- * Regel (in dieser Reihenfolge): kein Verdikt oder `flag` → prüfen; schlechteste
- * Ampel rot → prüfen; `adjust` → kurz ansehen; `confirm` mit gelb/orange →
- * kurz ansehen; sonst durchwinken. Auf Sachverhalts-Ebene gilt der
- * schlechteste Bucket seiner Vorschläge.
- *
- * Fallstrick: **Ungeprüft ist nicht grün.** Ein Vorschlag ohne Judge-Verdikt
- * landet bewusst in „prüfen", nicht in „durchwinken" — ebenso ein Sachverhalt
- * ganz ohne Vorschlag. **Ausnahme** (F69): ein importierter Mandantenstapel
- * (`origin='client_import'`) hat nie ein Verdikt und ist trotzdem nicht
- * ungeprüft — der Mandant hat gebucht. Er bekommt den eigenen Bucket
- * „übernehmen".
+ * Fallstrick: **bewusst nicht gejudgt ist nicht ungeprüft.** Ein Regel-Satz
+ * hat nie ein Verdikt und zählt dafür nichts; ein Agent-Vorschlag ohne
+ * Verdikt dagegen schon. Ein importierter Mandantenstapel
+ * (`origin='client_import'`) bekommt den eigenen Reiter.
  */
-const TRIAGE: Record<string, StatusDescriptor> = {
-  pruefen: { label: "Prüfen", kind: "warning", description: "Genau ansehen — ungeprüft, beanstandet oder mit roter Ampel." },
-  kurz_ansehen: { label: "Kurz ansehen", kind: "info", description: "Vom Judge angepasst oder mit gelber Ampel — ein Blick genügt meist." },
-  durchwinker: { label: "Durchwinker", kind: "success", description: "Bestätigt und unauffällig — kann ohne Detailprüfung freigegeben werden." },
-  uebernehmen: { label: "Übernehmen", kind: "info", description: "Vom Mandanten selbst gebucht (Stapel-Import) — nicht vom Agenten vorgeschlagen, kein Judge-Verdikt." },
+const REVIEW_TAB: Record<string, StatusDescriptor> = {
+  needs_review: { label: "Bitte anschauen", kind: "warning", description: "Score ab 50: beanstandet, unsicher oder steuerlich heikel." },
+  likely_correct: { label: "Wahrscheinlich richtig", kind: "success", description: "Bestätigt, unauffällig oder schon mehrfach so gebucht." },
+  client_batch: { label: "Mandantenstapel", kind: "info", description: "Vom Mandanten selbst gebucht (Stapel-Import) — nicht vom Agenten vorgeschlagen, kein Judge-Verdikt." },
 };
 
 /**
@@ -1041,7 +1107,7 @@ const JOURNAL_ENTRY_ORIGIN: Record<string, StatusDescriptor> = {
  * Ampel je **Buchungssatz** — **keine Spalte**, sondern gebandet aus
  * `client_journal_entry.proposal_confidence` (`entryConfLevel` in
  * `ui/booking/format.ts`: ≥85 grün, ≥70 gelb, ≥50 orange, <50 rot; manuell
- * gebucht = grün). Dieselbe Ableitung speist Abnahme-UI und Triage.
+ * gebucht = grün). Dieselbe Ableitung speist Abnahme-UI und Prüfbedarf.
  *
  * Owner-Entscheid 2026-08-29: Bewertung nur auf Satzebene, der Mensch liest
  * den Satz ohnehin ganz. Die frühere Zeilen-Ampel
@@ -1353,7 +1419,21 @@ const USER_STATUS: Record<string, StatusDescriptor> = {
 const USER_KIND: Record<string, StatusDescriptor> = {
   tenant_user: { label: "Steuerberater", kind: "info", description: "Mitarbeiter der Kanzlei." },
   client_user: { label: "Mandant", kind: "neutral", description: "Zugang auf Mandantenseite — sieht nur das Mandantenportal." },
-  platform_admin: { label: "Plattform-Admin", kind: "warning", description: "Vollzugriff über alle Kanzleien hinweg." },
+  platform_staff: { label: "Ludwig-Team", kind: "warning", description: "Mitarbeiter von Ludwig; Rechte ergeben sich aus der Team-Rolle." },
+};
+
+/**
+ * `platform_users.staff_role` — Team-Rolle des Ludwig-Personals (F148).
+ * Pflicht bei `kind = platform_staff`, sonst NULL. Wertebereich: `STAFF_ROLES`
+ * (`modules/auth/domain/role.ts`, Reihenfolge = Rang), DB-CHECK
+ * `platform_users_staff_role_check`. Die höhere Rolle hält alle Rechte der
+ * niedrigeren; welches Recht welche Rolle braucht, steht in
+ * `modules/auth/domain/permissions.ts`.
+ */
+const STAFF_ROLE: Record<string, StatusDescriptor> = {
+  support: { label: "Support", kind: "info", description: "Betreut Kanzleien: anlegen, einladen, onboarden." },
+  technical: { label: "Technik", kind: "info", description: "Zusätzlich plattformweit: löschen, User, Agent-Verbindungen." },
+  admin: { label: "Admin", kind: "warning", description: "Zusätzlich: Team-Rollen vergeben." },
 };
 
 /**
@@ -1366,7 +1446,7 @@ const USER_KIND: Record<string, StatusDescriptor> = {
  * „unbekannt" erschien.
  */
 const ROLE: Record<string, StatusDescriptor> = {
-  platform_admin: { label: "Plattform-Admin", kind: "warning", description: "Vollzugriff über alle Kanzleien hinweg." },
+  platform_staff: { label: "Ludwig-Team", kind: "warning", description: "Mitarbeiter von Ludwig; Rechte ergeben sich aus der Team-Rolle." },
   tenant_user: { label: "Steuerberater", kind: "info", description: "Mitarbeiter der Kanzlei." },
   client_user: { label: "Mandant", kind: "neutral", description: "Zugang auf Mandantenseite." },
   pending: { label: "Ohne Zuordnung", kind: "danger", description: "Angemeldet, aber keiner Kanzlei und keinem Mandanten zugeordnet — der Zugang ist unvollständig." },
@@ -1487,11 +1567,11 @@ const CONVENTION_ORIGIN: Record<string, StatusDescriptor> = {
  * oder `P<n>` geschrieben; `accepted` = umgesetzt, gesetzt von dem, der umsetzt.
  */
 const PRODUCT_FINDING: Record<string, StatusDescriptor> = {
-  open: { label: "Liegt vor", kind: "info", description: "Eingereicht, noch nicht gesichtet." },
+  open: { label: "Offen", kind: "info", description: "Eingereicht, noch nicht gesichtet." },
   backlog: { label: "Im Backlog", kind: "warning", description: "Gesichtet und angenommen, aber noch nicht umgesetzt. Wann er drankommt, sagt die Dringlichkeit — nicht der Status." },
-  prepared: { label: "Vorbereitet", kind: "info", description: "Spec (F<n>) oder P-Eintrag geschrieben, Entscheidungen getroffen — wartet auf die Umsetzung. Übernommen setzt, wer sie umsetzt." },
+  prepared: { label: "Vorbereitet für Entwicklung", kind: "info", description: "Spec (F<n>) oder P-Eintrag geschrieben, Entscheidungen getroffen — wartet auf die Umsetzung. Übernommen setzt, wer sie umsetzt." },
   accepted: { label: "Übernommen", kind: "success", description: "Umgesetzt und committet, oder direkt behoben." },
-  rejected: { label: "Kein Befund", kind: "neutral", description: "Angesehen und verworfen — kein Produktmangel." },
+  rejected: { label: "Abgelehnt", kind: "neutral", description: "Angesehen und abgelehnt — kein Produktmangel." },
 };
 
 /**
@@ -2164,6 +2244,8 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   document_stage: DOCUMENT_STAGE,
   document_character: DOCUMENT_CHARACTER,
   document_completion: DOCUMENT_COMPLETION,
+  document_filing: DOCUMENT_FILING,
+  document_booking: DOCUMENT_BOOKING,
   document_stuck: DOCUMENT_STUCK,
   document_inbox: DOCUMENT_INBOX,
   document_category: DOCUMENT_CATEGORY,
@@ -2182,7 +2264,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   clarification_type: CLARIFICATION_TYPE,
   expectation_maturity: EXPECTATION_MATURITY,
   expectation_kind: EXPECTATION_KIND,
-  triage: TRIAGE,
+  review_tab: REVIEW_TAB,
   journal_entry: JOURNAL_ENTRY_STATUS,
   journal_entry_datev_stage: JOURNAL_ENTRY_DATEV_STAGE,
   journal_entry_origin: JOURNAL_ENTRY_ORIGIN,
@@ -2200,6 +2282,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   clearing_account_type: CLEARING_ACCOUNT_TYPE,
   user: USER_STATUS,
   user_kind: USER_KIND,
+  staff_role: STAFF_ROLE,
   role: ROLE,
   booking_cycle: BOOKING_CYCLE,
   rule_mode: RULE_MODE,
@@ -2527,6 +2610,20 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
     ],
   },
 
+  document_filing: {
+    axis: "document_filing",
+    description:
+      "Ob das DUO-Werkzeug den Beleg nach dem DATEV-Push in Unternehmen Online einsortiert hat (F216). " +
+      "Dritte, parallele Achse des Belegs: sie beginnt erst, wenn der Beleg einen Stapel trägt und der " +
+      "Stapel quittiert ist. `failed` ist kein Endzustand — der Beleg bleibt in der Queue.",
+    transitions: [
+      { from: null, to: "pending", trigger: "batch_confirmed", label: "der Stapel des Belegs ist quittiert, der Ablageort steht fest", by: "system" },
+      { from: "pending", to: "filed", trigger: "filing_reported", label: "das Werkzeug meldet filed oder skipped", by: "api" },
+      { from: "pending", to: "failed", trigger: "filing_failed", label: "das Werkzeug meldet failed mit Grund", by: "api" },
+      { from: "failed", to: "filed", trigger: "filing_reported", label: "erneuter Versuch gelungen", by: "api" },
+    ],
+  },
+
   /* ── Sachverhalt und Buchung ────────────────────────────────────────── */
 
   accounting_case: {
@@ -2713,6 +2810,8 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   document_stage: "Verarbeitungsstufe",
   document_character: "Beleg-Charakter",
   document_completion: "Erledigung",
+  document_filing: "DUO-Ablage",
+  document_booking: "Buchung am Beleg",
   document_stuck: "Beleg-Zustand",
   document_inbox: "Dokument",
   document_category: "Belegkategorie",
@@ -2731,7 +2830,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   clarification_type: "Art",
   expectation_maturity: "Reife",
   expectation_kind: "Erwartet",
-  triage: "Prüfempfehlung",
+  review_tab: "Prüfbedarf",
   journal_entry: "Buchung",
   journal_entry_datev_stage: "Weg nach DATEV",
   journal_entry_origin: "Herkunft",
@@ -2748,6 +2847,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   clearing_account_type: "Verrechnungskonto",
   user: "Zugang",
   user_kind: "Benutzerart",
+  staff_role: "Team-Rolle",
   role: "Rolle",
   booking_cycle: "Buchungsjahr",
   rule_mode: "Buchungsweise",
@@ -2795,6 +2895,8 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   document_stage: "client_source_docs_invoices.processing_stage",
   document_character: "client_source_docs.class_document_kind",
   document_completion: "client_source_docs.completed_via (+ completed_at)",
+  document_filing: "client_source_docs.filed_at / filing_failed_at (F216)",
+  document_booking: "berechnet — lebender Satz über Ereignis oder journal_entry.source_doc_id, sonst completed_at (F236)",
   document_stuck: "berechnet — hasInvoiceRow + Listen-Variante (ephemer)",
   document_inbox: "client_source_docs.status",
   document_category: "client_source_docs.doc_category",
@@ -2813,7 +2915,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   clarification_type: "client_accounting_case_clarification.type",
   expectation_maturity: "berechnet aus client_accounting_case_expectation.due_date / escalation_level / resolved_at",
   expectation_kind: "client_accounting_case_expectation.kind",
-  triage: "abgeleitet — domain/acceptance-triage.ts (keine Spalte)",
+  review_tab: "abgeleitet — Summe aus Tragweite, Judge-Urteil, Konfidenz, schlechtestem Prüfpunkt und Präzedenz; ab 50 bitte anschauen (domain/review-score.ts, keine Spalte)",
   journal_entry: "client_journal_entry.status",
   journal_entry_datev_stage: "abgeleitet — status + exported_at + datev_mirror_entry_id (keine Spalte)",
   journal_entry_origin: "client_journal_entry.origin",
@@ -2830,6 +2932,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   clearing_account_type: "client_ledger_accounts.clearing_account_type",
   user: "platform_tenant_users.status",
   user_kind: "platform_users.kind",
+  staff_role: "platform_users.staff_role",
   role: "berechnet — modules/auth/domain/role.ts (keine Spalte)",
   booking_cycle: "client_fiscal_years.status",
   rule_mode: "client_accounting_case_rule.booking_mode",

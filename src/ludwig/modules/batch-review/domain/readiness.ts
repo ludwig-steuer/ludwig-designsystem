@@ -34,7 +34,6 @@
 
 import { belegAnzeigename } from "@/ludwig/modules/source-docs";
 
-import { coverageGapFrom } from "./coverage-gap";
 
 export type ReadinessState = "open" | "notice" | "ok";
 
@@ -55,13 +54,14 @@ export interface ReadinessItem {
 export interface ReadinessRow {
   key:
     | "documents_period"
-    | "documents_all"
+    | "documents_before_period"
     | "documents_after_period"
-    | "statements"
     | "transactions_case"
     | "transactions_proposal"
     | "unbooked";
   label: string;
+  /** Was die Zeile prüft — ein Satz, sichtbar unter dem Label (F220, kein Tooltip). */
+  hint: string;
   stand: ReadinessState;
   /** „6 offen" bzw. „vollständig" — rechts in der Zeile. */
   standText: string;
@@ -168,34 +168,14 @@ function belegPunkt(o: Record<string, unknown>, i: number): ReadinessItem {
   };
 }
 
-function kontoPunkt(
-  o: Record<string, unknown>,
-  i: number,
-  hinweis: boolean,
-  periodTo: string,
-): ReadinessItem {
-  return {
-    key: `konto-${hinweis ? "w" : "o"}-${i}`,
-    sourceDocId: null,
-    label: str(o.label) ?? str(o.accountNumber) ?? str(o.name) ?? "—",
-    datum: null,
-    // Blocker tragen `problem`, Gate-Warnungen `warning` — ohne das zweite
-    // stand hier ein leerer Hinweis (F141).
-    problem: coverageGapFrom(o, periodTo)?.text ?? str(o.problem) ?? str(o.warning) ?? "",
-    hinweis,
-  };
-}
-
 function zahl(n: number, gedeckelt: boolean): string {
   if (n === 0) return "vollständig";
   return `${gedeckelt ? "mind. " : ""}${n} offen`;
 }
 
 export function readinessRows(
-  gate1a: GateEingang,
   gate3f: GateEingang,
   periodFrom: string,
-  periodTo: string,
   /** Belege, die ohne Buchung erledigt wurden (`application/belege-ohne-buchung.ts`). */
   ohneBuchung: { punkte: ReadinessItem[]; total: number } = { punkte: [], total: 0 },
   /** Deckung je Bank-Umsatz (`loadBankBookingCoverage`, F187). */
@@ -213,8 +193,13 @@ export function readinessRows(
   // Der Gate-Zähler ist ungedeckelt, die Liste nicht. Die Aufteilung kann
   // deshalb nur zählen, was geliefert wurde — das sagt die Zeile dann auch.
   const nichtGelistet = Math.max(0, gate3f.openCount - gate3f.open.length);
-  const periode = belege.filter((p) => p.datum != null && p.datum >= periodFrom);
-  const nurAltlast = periode.length === 0 && gate3f.openCount > 0;
+  // F220: drei disjunkte Mengen — vor der Periode · in der Periode · nach der
+  // Periode (die dritte kommt nicht aus Gate 3f, sondern aus `afterPeriod`).
+  // Vorher enthielt „einschließlich Vorperioden" die Periodenzeile noch einmal.
+  // Ein Beleg ohne Datum zählt zur Periode: er ist offen, und „vorher" wäre
+  // eine Behauptung.
+  const periode = belege.filter((p) => p.datum == null || p.datum >= periodFrom);
+  const vorher = belege.filter((p) => p.datum != null && p.datum < periodFrom);
 
   const ohneFall = coverage.rows.filter((r) => r.reason === "no_case").map(umsatzPunkt);
   const ohneVorschlag = coverage.rows.filter((r) => r.reason !== "no_case").map(umsatzPunkt);
@@ -223,35 +208,32 @@ export function readinessRows(
   // Schritt 8 (dort rot).
   const echtOffen = Math.max(coverage.withoutProposal - coverage.inClarification, 0);
 
-  const auszugPunkte = [
-    ...gate1a.open.map((o, i) => kontoPunkt(o, i, false, periodTo)),
-    ...(gate1a.warnings ?? []).map((o, i) => kontoPunkt(o, i, true, periodTo)),
-  ];
-
   return [
     {
       key: "documents_period",
-      label: "Alle Belege der Periode erledigt",
-      stand: periode.length > 0 ? "open" : nurAltlast ? "notice" : "ok",
+      label: "Belege in der Periode",
+      hint: "Jeder Beleg mit Datum im Zeitraum ist zugeordnet und gebucht — oder mit Begründung nicht gebucht (Gate 3f).",
+      stand: periode.length > 0 ? "open" : "ok",
       standText: zahl(periode.length, nichtGelistet > 0),
-      leerText: nurAltlast
-        ? "In dieser Periode ist jeder Beleg abgeschlossen — offen ist nur Älteres (Zeile darunter)."
-        : "Jeder Beleg mit Datum in dieser Periode ist abgeschlossen.",
+      leerText: "Jeder Beleg mit Datum in dieser Periode ist abgeschlossen.",
       punkte: periode,
       nichtGelistet,
     },
     {
-      key: "documents_all",
-      label: "Alle Belege einschließlich Vorperioden erledigt",
-      stand: gate3f.openCount === 0 ? "ok" : periode.length > 0 ? "open" : "notice",
-      standText: zahl(gate3f.openCount, false),
-      leerText: "Jeder Beleg bis zum Ende des Zeitraums ist abgeschlossen.",
-      punkte: belege,
-      nichtGelistet,
+      key: "documents_before_period",
+      label: "Belege vor der Periode",
+      hint: "Ältere Belege, die noch offen sind — Altlast, hält den Stapel nicht auf, soll aber gesehen werden.",
+      // Altlast blockt nicht: gelb, nie rot.
+      stand: vorher.length > 0 ? "notice" : "ok",
+      standText: vorher.length === 0 ? "vollständig" : `${vorher.length} offen`,
+      leerText: "Kein Beleg aus einer früheren Periode ist mehr offen.",
+      punkte: vorher,
+      nichtGelistet: 0,
     },
     {
       key: "documents_after_period",
       label: "Belege nach dem Zeitraum",
+      hint: "Offene Belege, die nach dem Periodenende datiert sind — sie gehören dem nächsten Lauf.",
       // Nie rot: Gate 3f zählt sie nicht, sie gehören dem nächsten Lauf.
       stand: afterPeriod.total > 0 ? "notice" : "ok",
       standText: afterPeriod.total === 0 ? "keine" : `${afterPeriod.total} später datiert`,
@@ -260,18 +242,9 @@ export function readinessRows(
       nichtGelistet: Math.max(0, afterPeriod.total - afterPeriod.punkte.length),
     },
     {
-      key: "statements",
-      label: "Alle Kontoauszüge erledigt",
-      stand:
-        gate1a.openCount > 0 ? "open" : (gate1a.warnings?.length ?? 0) > 0 ? "notice" : "ok",
-      standText: zahl(gate1a.openCount, gate1a.openCount > gate1a.open.length),
-      leerText: "Jedes aktive Zahlungskonto deckt den Zeitraum ab, der Saldenanschluss stimmt.",
-      punkte: auszugPunkte,
-      nichtGelistet: Math.max(0, gate1a.openCount - gate1a.open.length),
-    },
-    {
       key: "transactions_case",
       label: "Alle Umsätze haben einen Sachverhalt",
+      hint: "Jede Auszugszeile im Zeitraum hängt an einem Sachverhalt (Gate 2a).",
       stand: coverage.withoutCase > 0 ? "open" : "ok",
       standText: zahl(coverage.withoutCase, ohneFall.length < coverage.withoutCase),
       leerText: "Jeder Umsatz des Zeitraums hängt an einem Sachverhalt.",
@@ -281,6 +254,7 @@ export function readinessRows(
     {
       key: "transactions_proposal",
       label: "Alle Umsätze haben einen Buchungsvorschlag",
+      hint: "Jede Auszugszeile trägt einen Buchungsvorschlag oder eine laufende Klärung.",
       stand: echtOffen > 0 ? "open" : coverage.inClarification > 0 ? "notice" : "ok",
       standText:
         coverage.withoutProposal === 0
@@ -298,6 +272,7 @@ export function readinessRows(
     {
       key: "unbooked",
       label: "Belege ohne Buchung — mit Begründung erledigt",
+      hint: "Ludwig hat entschieden, nicht zu buchen — die Begründung soll jemand gegenlesen.",
       // Nie rot: hier fehlt nichts, hier wurde entschieden. Aber gesehen
       // werden soll die Entscheidung (Owner 2026-09-08).
       stand: ohneBuchung.total > 0 ? "notice" : "ok",

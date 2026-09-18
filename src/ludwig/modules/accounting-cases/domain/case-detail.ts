@@ -43,6 +43,11 @@ export interface CaseDetail {
    */
   documentNotRequiredReason: string | null;
   /**
+   * F222: Kanzlei-Freigabe „Vorsteuer ohne Beleg" an diesem Sachverhalt —
+   * VST-DOC-1 wird hier zur Warnung, die Beleg-Erwartung bleibt offen.
+   */
+  vatWithoutDocumentApproval: VatWithoutDocumentApproval | null;
+  /**
    * F75-T75.3: Das EINE Personenkonto dieses Sachverhalts (Kreditor, Debitor
    * oder Diverse-Konto) — vom Server abgeleitet, für Buchungen bindend. NULL
    * heißt „hat bewusst keins" (Sammel, interne Umbuchung, reine Sachbuchung),
@@ -98,4 +103,12 @@ export interface CaseDetail {
   agentRunId: string | null;
   /** Der Stapel, in dem seine Buchungen nach DATEV gingen. */
   exportBatchId: string | null;
+}
+
+/** F222 — wer die Vorsteuer ohne Beleg wann und warum freigegeben hat. */
+export interface VatWithoutDocumentApproval {
+  approvedAt: string;
+  approvedBy: string;
+  reason: string;
+  clarificationId: string | null;
 }

@@ -12,14 +12,28 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-- `accounting-cases/domain/case.ts`: `CLARIFICATION_QUESTION_TYPE_LABEL`
-  kennt zwei Fragetypen von staging noch nicht — `vat_without_document_precedent`
-  (F222, App `4e00d093`) und `payment_without_document` (F237, App
-  `dcc99efc`). Bis zum Lauf zeigt `ClarificationCard` ohne
-  `questionTypeLabel` den lesbar gemachten Slug; die App reicht das Label
-  aus ihrer eigenen Domäne über `questionTypeLabel` durch. Gemeldet von
-  `a2`, 2026-09-18.
-- `statementExpectationOf` (F235) — angekündigt von `a2`, 2026-09-18.
+- `statementExpectationOf` (F235) — angekündigt von `a2`, 2026-09-18; war
+  beim Lauf vom 2026-09-18 noch nicht auf staging.
+
+## Erledigt mit dem Lauf vom 2026-09-18 (App `08f56032`)
+
+Owner-Ausnahme (Simon, 2026-09-18, auf den Nachzug von `a2`), danach wieder
+eingefroren. Angekommen sind: die beiden Fragetypen in
+`CLARIFICATION_QUESTION_TYPE_LABEL` — `vat_without_document_precedent` (F222)
+und `payment_without_document` (F237) · die Registry mit der neuen Achse
+`document_filing` (F216, ohne Icon wie jede Nebenachse), `REVIEW_TAB` und
+`STAFF_ROLE`; `TRIAGE` ist weg (heute `needs_review`/`likely_correct`/
+`client_batch`), `platform_admin` heißt `platform_staff` · 14 neue
+Domänen-Dateien, darunter `payment-without-document.ts`, `review-score.ts`,
+`auth/domain/permissions.ts` und sieben aus `batch-review/domain` ·
+`acceptance-triage.ts` ist drüben gelöscht.
+
+Der Filter hat vier Dateien ausgesondert, alle holen Server- oder
+Application-Code: `batch-review/domain/bank-reconciliation.ts`,
+`collection-family.ts`, `document-request-row.ts` und
+`datev-truth/domain/sync-history.ts`. Typcheck, die sieben Wächter und der
+Storybook-Build unmittelbar nach dem Lauf grün; im Set hing kein alter
+Registry-Wert.
 
 ## Erledigt mit dem Lauf vom 2026-09-11 (App `c48d8042`)
 
