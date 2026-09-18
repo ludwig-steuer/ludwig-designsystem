@@ -19,8 +19,9 @@ export interface RailItem {
   key: string;
   /** The number in front of the label — at the same time the jump key. */
   index: number;
+  /** The only text of the row besides the counter — no second line under
+   *  it (owner 2026-09-18). */
   label: string;
-  sub: string;
   tone: RailTone;
   /** „3 von 18 offen", „bereit" — `null` where there is nothing to count. */
   counterText: string | null;
@@ -73,7 +74,6 @@ function RailRow({ item }: { item: RailItem }) {
         <span className="label">
           {item.index} · {item.label}
         </span>
-        <span className="question">{item.sub}</span>
         {item.counterText ? <span className="count">{item.counterText}</span> : null}
       </span>
     </>

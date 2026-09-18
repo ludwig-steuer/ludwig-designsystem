@@ -68,7 +68,6 @@ function railItems(activeIndex: number): RailItem[] {
     key: String(i),
     index: i,
     label: s.label,
-    sub: s.sub,
     tone: i === activeIndex ? "open" : s.open > 0 ? "open" : "done",
     counterText: s.total === 0 ? null : `${s.open} / ${s.total} offen`,
     href: null,

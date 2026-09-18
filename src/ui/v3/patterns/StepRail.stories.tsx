@@ -7,17 +7,17 @@ export default meta;
 type Story = StoryObj<typeof StepRail>;
 
 const STEPS: RailItem[] = [
-  { key: "0", index: 0, label: "Ergebnis des Stapels", sub: "Was der Agent geschafft hat", tone: "neutral", counterText: null, href: "#" },
-  { key: "1", index: 1, label: "Vollständigkeit", sub: "Belege, Bank, Salden", tone: "done", counterText: "erledigt", href: "#" },
-  { key: "2", index: 2, label: "Rückfragen", sub: "Fragen, Overrides", tone: "open", counterText: "2 von 5 offen", href: "#" },
-  { key: "3", index: 3, label: "Buchungsvorschläge", sub: "Sachverhalt für Sachverhalt", tone: "open", counterText: "14 von 116 offen", href: "#", current: true },
-  { key: "4", index: 4, label: "Bank", sub: "Auszug gegen Buchung", tone: "open", counterText: "1 von 2 offen", href: "#" },
-  { key: "5", index: 5, label: "Offene Posten", sub: "Wer schuldet wem", tone: "done", counterText: "nichts überfällig", href: "#" },
-  { key: "6", index: 6, label: "Plausibilität", sub: "Konten gegen Vormonate", tone: "open", counterText: "7 auffällig", href: "#" },
-  { key: "7", index: 7, label: "Konventionen", sub: "Was der Agent gelernt hat", tone: "open", counterText: "2 von 3 offen", href: "#" },
-  { key: "8", index: 8, label: "Prüfprotokoll", sub: "Freigeben oder zurückgeben", tone: "blocked", counterText: "3 Blocker", href: "#" },
-  { key: "9", index: 9, label: "Übergabe an DATEV", sub: "Weg zu DATEV", tone: "neutral", counterText: null, href: "#" },
-  { key: "10", index: 10, label: "Nachlese", sub: "Was DATEV anders gemacht hat", tone: "dimmed", counterText: null, href: null, disabledReason: "Die Nachlese füllt sich, sobald DATEV den Stapel gespiegelt hat." },
+  { key: "0", index: 0, label: "Ergebnis des Stapels", tone: "neutral", counterText: null, href: "#" },
+  { key: "1", index: 1, label: "Vollständigkeit", tone: "done", counterText: "erledigt", href: "#" },
+  { key: "2", index: 2, label: "Rückfragen", tone: "open", counterText: "2 von 5 offen", href: "#" },
+  { key: "3", index: 3, label: "Buchungsvorschläge", tone: "open", counterText: "14 von 116 offen", href: "#", current: true },
+  { key: "4", index: 4, label: "Bank", tone: "open", counterText: "1 von 2 offen", href: "#" },
+  { key: "5", index: 5, label: "Offene Posten", tone: "done", counterText: "nichts überfällig", href: "#" },
+  { key: "6", index: 6, label: "Plausibilität", tone: "open", counterText: "7 auffällig", href: "#" },
+  { key: "7", index: 7, label: "Konventionen", tone: "open", counterText: "2 von 3 offen", href: "#" },
+  { key: "8", index: 8, label: "Prüfprotokoll", tone: "blocked", counterText: "3 Blocker", href: "#" },
+  { key: "9", index: 9, label: "Übergabe an DATEV", tone: "neutral", counterText: null, href: "#" },
+  { key: "10", index: 10, label: "Nachlese", tone: "dimmed", counterText: null, href: null, disabledReason: "Die Nachlese füllt sich, sobald DATEV den Stapel gespiegelt hat." },
 ];
 
 const RailLayout = ({ items }: { items: RailItem[] }) => (
@@ -61,7 +61,7 @@ export const NothingComputedYet: Story = {
   ),
 };
 
-/** Der Screen-Header: Nummer in der Overline, die Sache in der Überschrift. */
+/** The screen header: the number in the overline, the subject in the title. */
 export const ScreenHeader: Story = {
   render: () => (
     <div style={{ maxWidth: 900 }}>
