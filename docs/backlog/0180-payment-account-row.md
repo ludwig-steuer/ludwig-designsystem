@@ -71,7 +71,7 @@ liegt in der Infrastruktur), nicht eine eigene Wahrheit.
 | `kind` | 2 | das Wort aus `PAYMENT_ACCOUNT_KIND_LABEL` |
 | `identifier` | 3 | IBAN, sonst Kartenkennung, sonst „—" (`MonoCell`) |
 | `ledgerAccount` | 4 | `AccountCell` mit Nummer und Name |
-| `statementExpectation` | 6 | `StatusBadge statement_expectation`, Stufe vom Aufrufer (`erwartet`, `erwartet_hand`, `keine`, `keine_hand`) |
+| `statementExpectation` | 6 | `StatusBadge statement_expectation` mit der Stufe (`required`, `expected`, `none`), dahinter der Zusatz „von Hand“, wo ein Mensch sie gesetzt hat — Nachtrag F235 |
 | `txCount` | 7 | Zahl der Bankzeilen im Jahr |
 | `inflow`, `outflow`, `net` | 7 | `AmountCell`, rechtsbündig |
 | `period` | 7 | erste bis letzte Bewegung (`Time`) |
@@ -178,3 +178,48 @@ Kein Überlauf: die breite Tabelle scrollt in ihrem Rahmen, die Seite nicht.
 `pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
 `pnpm build` grün; Screenshots angesehen. Abnahme durch einen anderen Agenten
 steht aus.
+
+## Nachtrag 2026-09-18 — Auszugserwartung dreistufig (F235)
+
+**Anlass.** Die App hat mit F235 (`b7201625`) die Achse
+`statement_expectation` umgebaut: drei Stufen `required` („Pflicht“),
+`expected` („Sollte kommen“) und `none` („Keine“) statt `erwartet`,
+`erwartet_hand`, `keine`, `keine_hand`. Die Herkunft „von Hand“ steckt nicht
+mehr im Schlüssel, sie steht in einer eigenen Spalte
+(`statement_expectation_manual`). Auftrag von `a1`, Namen aus der App.
+
+**Einordnung.** Regel 2 aus §3: die Zeile deckt den Fall, es ändern sich
+ein Feld und eine Zelle. Keine neue Datei, keine neue Story.
+
+**Schnittstelle.** In `PaymentAccountRowData`:
+
+| Feld | Typ | Was | Nachweis |
+|---|---|---|---|
+| ~~`expectsStatementsManual`~~ | ~~`boolean \| null`~~ | entfällt | Grep |
+| `statementExpectation` | `StatementExpectationLevel \| null`, optional | die wirksame Stufe (`statement_expectation`) | Story `Filled` |
+| `statementExpectationManual` | `StatementExpectationLevel \| null`, optional | die Hand-Entscheidung (`statement_expectation_manual`); `null` = abgeleitet | Story `Filled` |
+
+`StatementExpectationLevel` kommt aus dem Spiegel
+(`core/accounting/statement-expectation.ts`), nicht als lokaler Typ. Beide
+Felder bleiben Teil von **L-314**: die App liest sie in der Infrastruktur.
+
+`statementExpectationOf(account)` liefert `StatementExpectationLevel`, nicht
+mehr `string`: die wirksame Stufe, sonst die Hand-Entscheidung, sonst
+`expectsStatements ? "required" : "none"`. Die letzte Stufe ist exakt, keine
+Näherung: die Ableitung setzt nur Pflicht oder Keine („Sollte kommen“ setzt
+nur ein Mensch, Registry), und `expects_statements` ist drüben der Spiegel von
+„≠ none“.
+
+**Zelle.** `StatusBadge` mit der Stufe; ist `statementExpectationManual`
+gesetzt, steht dahinter leise „von Hand“ (das Wort der App). Die Herkunft ist
+ein Zusatz, kein eigener Status.
+
+**Kann bewusst nicht:** die Stufe ableiten. Die Regel (IBAN in den
+DATEV-Bankverbindungen, Konto bebucht) gehört der App.
+
+**Abnahmekriterien** — fest wie oben, dazu:
+
+- [ ] `expectsStatementsManual` und die Schlüssel `erwartet*`/`keine*` kommen im Set nicht mehr vor (Grep)
+- [ ] `statementExpectationOf` gibt `StatementExpectationLevel` zurück; ohne `statementExpectation` gilt Hand vor Ableitung (Typcheck, Lesen)
+- [ ] „von Hand“ steht nur an Konten mit `statementExpectationManual` (Story `Filled`)
+- [ ] Die Stufe trägt das Wort der Registry — „Pflicht“, „Sollte kommen“, „Keine“ (Story `Filled`)

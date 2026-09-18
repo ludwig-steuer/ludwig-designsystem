@@ -36,8 +36,8 @@ export interface PaymentAccountDraft {
   bankName: string | null;
   externalAccountId: string | null;
   ledgerAccountNumber: string | null;
-  /** `null` = abgeleitet lassen; `true`/`false` = der Mensch entscheidet. */
-  expectsStatements: boolean | null;
+  /** `null` = abgeleitet lassen; sonst entscheidet der Mensch (Nachtrag F235). */
+  statementExpectationManual: StatementExpectationLevel | null;
   autoAssignPaymentMethod: string | null;
   /** Gesetzt heißt: ab diesem Tag abgeschaltet. */
   validUntil: string | null;
@@ -149,3 +149,39 @@ sind die Hand-Entscheidung.
 
 `pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
 `pnpm build` grün. Abnahme durch einen anderen Agenten steht aus.
+
+## Nachtrag 2026-09-18 — Auszugserwartung dreistufig (F235)
+
+**Anlass.** Wie 0180: F235 (`b7201625`) macht die Auszugserwartung
+dreistufig. Das Formular der App (`PaymentAccountForm`) hat seitdem vier
+Einträge: „Automatisch“ und die drei Stufen.
+
+**Einordnung.** Regel 2 aus §3: ein Feld im Entwurf ändert Typ und Namen,
+die Auswahl einen Eintrag. Keine neue Story.
+
+**Schnittstelle.** In `PaymentAccountDraft`:
+
+| Feld | Typ | Was | Nachweis |
+|---|---|---|---|
+| ~~`expectsStatements`~~ | ~~`boolean \| null`~~ | entfällt | Grep |
+| `statementExpectationManual` | `StatementExpectationLevel \| null` | `null` = „Automatisch entscheiden“; sonst die Stufe, die der Mensch setzt | Story `Edit` |
+
+Der Name ist der des App-Formulars; `emptyPaymentAccountDraft()` setzt `null`.
+
+**Verhalten.** Die Auswahl hat vier Einträge: „Automatisch entscheiden“,
+dann die drei Stufen in der Reihenfolge von `STATEMENT_EXPECTATION_LEVELS`.
+Die Wörter der Stufen kommen aus der Registry, nicht aus einer Liste in
+der Datei. Der Hinweis unter dem Feld sagt, was die drei Stufen im
+Buchungslauf bewirken.
+
+**Abnahmekriterien** — fest wie oben, dazu:
+
+- [ ] Die Auszugserwartung hat vier Einträge: Automatisch und drei Stufen, keinen Haken (Story `Edit`, DOM)
+- [ ] Die Wörter der Stufen kommen aus der Registry (Grep: keine Liste mit „Pflicht“ im Editor)
+- [ ] `onSubmit` liefert `statementExpectationManual` mit `null` für Automatisch (Story `Edit`)
+
+**Ausbau.** Die App zeigt hinter „Automatisch“ die heute wirksame Stufe
+(„Automatisch — aktuell: Pflicht“). Tragen würde das eine Prop
+`currentStatementExpectation?: StatementExpectationLevel`. Auslöser: die App
+tauscht `PaymentAccountForm` gegen den Editor. Die Lücke bestand schon vor
+F235.
