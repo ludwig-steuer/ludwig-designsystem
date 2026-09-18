@@ -12,7 +12,14 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-Nichts.
+- `accounting-cases/domain/case.ts`: `CLARIFICATION_QUESTION_TYPE_LABEL`
+  kennt zwei Fragetypen von staging noch nicht — `vat_without_document_precedent`
+  (F222, App `4e00d093`) und `payment_without_document` (F237, App
+  `dcc99efc`). Bis zum Lauf zeigt `ClarificationCard` ohne
+  `questionTypeLabel` den lesbar gemachten Slug; die App reicht das Label
+  aus ihrer eigenen Domäne über `questionTypeLabel` durch. Gemeldet von
+  `a2`, 2026-09-18.
+- `statementExpectationOf` (F235) — angekündigt von `a2`, 2026-09-18.
 
 ## Erledigt mit dem Lauf vom 2026-09-11 (App `c48d8042`)
 
