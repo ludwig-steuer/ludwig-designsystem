@@ -332,7 +332,9 @@ export function GroupRow({
  * The empty state inside the card — the column heads stay put.
  *
  * @when    The table has no rows and says so inside the card.
- * @instead Still loading → TableLoading. Loading failed → ErrorRow.
+ * @instead Still loading → TableLoading. Loading failed → ErrorRow. No `<Table>`
+ *          around it (a card that only says „nothing here") → EmptyState
+ *          inline — a bare row outside a table is dropped by the HTML parser.
  */
 export function EmptyRow({ children }: { children: ReactNode }) {
   return (

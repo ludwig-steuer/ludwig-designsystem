@@ -1,15 +1,16 @@
 import type { ReactNode } from "react";
 
 export interface EmptyStateProps {
-  /** Lucide-Icon, 1.5 px Strich — optional, nie allein tragend (T8). */
+  /** Lucide icon, 1.5 px stroke — optional, never carrying the meaning alone (T8). */
   icon?: ReactNode;
-  /** Was fehlt, in einem Satzteil: „Keine offenen Belege". */
+  /** What is missing, in one phrase: „Keine offenen Belege". */
   title: string;
   /** Why it is empty and what helps next. */
   description?: ReactNode;
   /** The way out — usually a button. */
   action?: ReactNode;
-  /** Without padding, when a card already surrounds it. */
+  /** Less padding, when a card already surrounds it — directly in a Card it
+   *  takes the card's inset (the Card itself has none). */
   inline?: boolean;
   className?: string;
 }

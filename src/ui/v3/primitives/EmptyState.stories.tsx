@@ -13,7 +13,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Noch nichts angelegt — der Weg hinein steht als Handlung daneben. */
+/** Nothing created yet — the way in stands next to it as an action. */
 export const NothingYet: Story = {
   args: {
     icon: <Inbox size={18} strokeWidth={1.5} />,
@@ -24,7 +24,7 @@ export const NothingYet: Story = {
   },
 };
 
-/** Alles erledigt — kein Handlungsbedarf, also auch keine Handlung. */
+/** Everything done — nothing to act on, so no action either. */
 export const AllDone: Story = {
   args: {
     icon: <FileText size={18} strokeWidth={1.5} />,
@@ -33,7 +33,7 @@ export const AllDone: Story = {
   },
 };
 
-/** Nichts trifft den Filter — der Ausweg ist das Zurücksetzen, nicht das Anlegen. */
+/** Nothing matches the filter — the way out is resetting, not creating. */
 export const EmptyAfterFilter: Story = {
   args: {
     icon: <Filter size={18} strokeWidth={1.5} />,
@@ -43,7 +43,7 @@ export const EmptyAfterFilter: Story = {
   },
 };
 
-/** Ohne Frame und Innenabstand, wenn schon eine Karte darum liegt (L2). */
+/** Directly in a Card without a table (L2): it takes the card's inset, not its own frame. */
 export const InCard: Story = {
   args: { title: "Keine Zahlungen zugeordnet" },
   render: () => (
@@ -57,7 +57,7 @@ export const InCard: Story = {
   ),
 };
 
-/** Ohne Icon — der Text trägt allein. */
+/** Without an icon — the text carries it alone. */
 export const TextOnly: Story = {
   args: {
     title: "Keine Einträge",

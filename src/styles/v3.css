@@ -1861,6 +1861,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   padding: var(--space-8) var(--space-6);
 }
 .v2empty--inline { padding: var(--space-6) 0; }
+/* A Card has no padding of its own (tables run to its border), so `inline`
+   directly in it takes the card's horizontal inset — the one CardHead and the
+   cells use — or the text sits on the border. */
+.v2card > .v2empty--inline { padding-inline: 18px; }
 .v2empty__ico {
   width: 32px; height: 32px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -2569,6 +2573,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* Head and foot of the log browser (0054). The head sits above the table,
    never in the card head (§6); the foot carries "Ältere laden". */
 .v2log__head { padding: var(--space-3) var(--space-5) 0; }
+/* The empty state lines up with the head, not with the card border. */
+.v2logb > .v2empty--inline { padding-inline: var(--space-5); }
 .v2log__foot {
   padding: var(--space-3) var(--space-5);
   border-top: var(--border-1-subtle);
