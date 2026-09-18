@@ -315,6 +315,10 @@ export function CaseTimeline({
       loading={loading}
       selectedId={selectedId}
       emptyText="Noch nichts geschehen."
+      // Calendar days under day headings: a time column would stay empty, and
+      // the distance between two events says nothing in a case (owner 2026-09-18).
+      showTime={false}
+      gapDays={false}
       onOpen={
         onSelect
           ? (id) => {

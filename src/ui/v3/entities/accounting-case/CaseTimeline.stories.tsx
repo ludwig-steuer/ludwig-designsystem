@@ -304,7 +304,7 @@ function EntryDetail({ entry }: { entry: CaseTimelineEntry | null }) {
 }
 
 /**
- * The edge: 44 entries across half a year with gap rows, an 85-character title,
+ * The edge: 44 entries across half a year (no gap rows since 2026-09-18), an 85-character title,
  * amount 0 without a cell, a superseded event, a resolved expectation (absent
  * from the strand) and an outgoing payment with its sign.
  */

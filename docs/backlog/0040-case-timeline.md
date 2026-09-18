@@ -990,3 +990,30 @@ Reihenfolge wie im Grundstrang (0023): Achse, dann `kindLabels` als
 Überschreibung, dann der Rohwert. Die lokale `KIND_LABELS` der Stories ist
 weg — mit einer sichtbaren Folge: `accrual` heißt in der Achse **Abgrenzung**,
 die Story sagte „Sollstellung".
+
+## Nachtrag 2026-09-18 — ohne Zeit, ohne Lückenzeile (Owner)
+
+**Anlass.** Owner direkt: im Sachverhalt keine Uhrzeit, keine Zeile
+„N Tage ohne Ereignis“, der Eintrag linksbündig, die ganze Zeile klickbar.
+Die Mittel stehen im Grundstrang (0023, Nachtrag vom selben Tag).
+
+**Änderung.** `CaseTimeline` übergibt fest `showTime={false}` und
+`gapDays={false}`; keine neue Prop. Alle Einträge sind Kalendertage unter
+Tagesköpfen — die Zeitspalte war hier immer leer. Die klickbare Zeile kommt
+mit `onSelect` aus dem Grundstrang.
+
+**Abnahmekriterien (Nachtrag)**
+
+1. `--interactive` und Seite `Seiten/Sachverhalt/Reiter` → `Events`: kein
+   `.v2tl__when`, kein `.v2tl__gap`, Kopf jedes Eintrags am linken Rand.
+2. Klick irgendwo in der Zeile wählt den Eintrag; der Tooltip am Badge
+   (`stateNote`) bleibt erreichbar.
+
+**Stand.** Gebaut 2026-09-18; in `seiten-sachverhalt-reiter--events`
+nachgesehen (vier Einträge, alle mit Kopf bei gleicher x-Lage, keine Zeit,
+keine Lücke, Hover grau, geöffneter Eintrag blau). Fremde Abnahme steht aus.
+
+**Für die App.** Der Sachverhalt drüben nutzt noch die eigene
+`sachverhalt/Timeline.tsx` (`SachverhaltScreen.tsx:176`), nicht diesen
+Strang — dort ändert sich erst etwas, wenn die App auf `CaseTimeline`
+umstellt (steht in „Ersetzt“ oben).

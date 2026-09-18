@@ -464,3 +464,47 @@ Komponente erfindet weiterhin kein Vokabular.
 Die lokale `KIND_LABELS`-Map der Stories ist weg. Gemessen ändert sich dabei
 ein Wort: `accrual` heißt in der Achse **Abgrenzung**, die Story sagte
 „Sollstellung". Die Achse gilt.
+
+## Nachtrag 2026-09-18 — ohne Zeit, ganze Zeile klickbar (Owner)
+
+**Anlass.** Owner direkt, an der Story `Filled`: im Sachverhalt braucht der
+Strang keine Uhrzeit und keine Zeile „N Tage ohne Ereignis“. Die Zeitspalte
+ist 78 px breit und bleibt es auch, wenn sie leer ist — bei Kalendertagen
+unter Tagesköpfen also ein Loch vor jedem Eintrag. Und die ganze Zeile soll
+klickbar sein, nicht nur der Titel.
+
+**Einordnung.** Regel 2 aus §3: das Pattern deckt den Fall, es kommen ein
+Schalter und ein Wert dazu. Keine neue Datei. Vorgaben bleiben, wie sie
+waren: ein Verlauf mit Uhrzeit (Audit, Lauf) braucht die Spalte.
+
+**Schnittstelle.**
+
+| Prop | Typ | Vorgabe | Was | Nachweis |
+|---|---|---|---|---|
+| `showTime` | `boolean` | `true` | `false`: keine Zeitspalte, der Eintrag beginnt am Rand; bei `groupBy="none"` fällt damit auch das Datum weg | Story `WithoutTime` |
+| `gapDays` | `number \| false` | `7` | `false`: keine Lückenzeile | Story `WithoutTime` |
+| `onOpen` | wie bisher | — | jetzt ist die **ganze Zeile** das Ziel, nicht nur der Titel | Stories `Interactive`, `WithoutTime` |
+
+**Verhalten der Zeile.** Der Titel bleibt die eine Schaltfläche für Tastatur
+und Screenreader. Die Zeile nimmt zusätzlich den Mausklick und färbt sich
+beim Überfahren (`--color-bg-soft`, der geöffnete Eintrag bleibt
+`--color-accent-50`). Ein Klick auf den Titel oder auf „Einzelheiten“ gehört
+diesen und zählt nicht doppelt. Kein Overlay über der Zeile: es würde die
+Tooltips der Badges schlucken (`stateNote` in 0040).
+
+**Abnahmekriterien (Nachtrag)**
+
+1. `showTime={false}` rendert kein `.v2tl__when`, und der Kopf des Eintrags
+   beginnt am linken Rand des Strangs (plus Innenabstand der Fläche) —
+   `getBoundingClientRect` in `--without-time`.
+2. `gapDays={false}` rendert kein `.v2tl__gap`, auch über 21 Tage Abstand
+   (`--without-time`, Eintrag vom 5. August).
+3. Klick auf Betrag oder zweite Zeile öffnet den Eintrag; Klick auf
+   „Einzelheiten“ öffnet ihn **nicht** mit (`--without-time`).
+4. Ohne `onOpen` hat die Zeile weder Zeiger noch Hover-Fläche (`--filled`).
+5. Die Vorgaben ändern nichts an bestehenden Aufrufern: `--filled`,
+   `--with-gap`, `--grouping` sehen aus wie vorher.
+
+**Stand.** Gebaut 2026-09-18; im Browser nachgesehen (`--without-time`:
+kein `<time>`, keine Lückenzeile, Klick auf Betrag → `e3`, auf zweite Zeile
+→ `e1`, auf „Einzelheiten“ bleibt `e1`). Fremde Abnahme steht aus.

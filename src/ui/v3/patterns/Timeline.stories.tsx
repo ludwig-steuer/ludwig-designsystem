@@ -151,7 +151,11 @@ export const Grouping: Story = {
   },
 };
 
-/** Ohne `onOpen` ist der Verlauf Text; mit ihm wird jeder Eintrag ein Weg. */
+/**
+ * Ohne `onOpen` ist der Verlauf Text; mit ihm wird jeder Eintrag ein Weg —
+ * die **ganze Zeile**, nicht nur der Titel. „Einzelheiten" bleibt sein eigener
+ * Knopf und öffnet den Eintrag nicht mit.
+ */
 export const Interactive: Story = {
   render: function Render() {
     const [open, setOpen] = useState<string | null>(null);
@@ -224,6 +228,42 @@ export const InUse: Story = {
       </Card>
     </div>
   ),
+};
+
+/**
+ * Ohne Uhrzeit und ohne Lückenzeile, wie im Sachverhalt: `showTime={false}`
+ * nimmt die Zeitspalte weg, der Eintrag beginnt am Rand; `gapDays={false}`
+ * schweigt über den Abstand. Der Tag steht im Gruppenkopf. Die ganze Zeile
+ * ist klickbar (Owner 2026-09-18).
+ */
+export const WithoutTime: Story = {
+  render: function Render() {
+    const [open, setOpen] = useState<string | null>("e2");
+    return (
+      <div style={{ maxWidth: 620, display: "grid", gap: "var(--space-4)" }}>
+        <Timeline
+          entries={[
+            ...CASE,
+            {
+              id: "e0",
+              at: "2026-08-05T08:00:00Z",
+              kind: "Sachverhalt",
+              actor: "System",
+              title: "Sachverhalt aus dem OPOS-Vortrag gegründet",
+              state: "info",
+            },
+          ]}
+          showTime={false}
+          gapDays={false}
+          selectedId={open}
+          onOpen={setOpen}
+        />
+        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+          Geöffnet: {open ?? "nichts"}
+        </div>
+      </div>
+    );
+  },
 };
 
 /**

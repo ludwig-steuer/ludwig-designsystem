@@ -75,6 +75,7 @@ export function Timeline({
   emptyText = "Noch nichts geschehen.",
   kindLabels,
   gapDays = GAP_DAYS,
+  showTime = true,
   loading,
   onOpen,
   selectedId,
@@ -95,10 +96,19 @@ export function Timeline({
    * From how many days without an event the gap is worth a line. Seven is the
    * working week: what falls inside it is normal, what stands above it is a
    * statement. A strand of years sets it higher, a strand of one day lower.
+   * `false`: no gap line at all — where the distance says nothing (the case
+   * history, owner 2026-09-18).
    */
-  gapDays?: number;
+  gapDays?: number | false;
+  /**
+   * The time column on the left. `false` drops it and the entry starts at the
+   * edge: the day stands in the group heading, and a strand of calendar days
+   * would otherwise keep an empty column — a hole in front of every entry
+   * (owner 2026-09-18). With `groupBy="none"` it also drops the date.
+   */
+  showTime?: boolean;
   loading?: boolean;
-  /** Without it an entry is text, not a control. */
+  /** Without it an entry is text, not a control; with it the whole row is the target. */
   onOpen?: (id: string) => void;
   /** The entry that is open next to the strand — marked, `aria-current`. */
   selectedId?: string | null;
@@ -121,7 +131,7 @@ export function Timeline({
     // It used to sit inside the group branch, so `groupBy="none"` never showed
     // one — and that is the mode in which the strand has the least else to
     // say (found in the acceptance of 0107).
-    if (lastAt) {
+    if (lastAt && gapDays !== false) {
       const days = daysBetween(lastAt, e.at);
       if (days >= gapDays) {
         rows.push(
@@ -147,25 +157,28 @@ export function Timeline({
         item={e}
         onOpen={onOpen}
         showDate={groupBy === "none"}
+        showTime={showTime}
         kindLabels={kindLabels}
         selected={selectedId != null && e.id === selectedId}
       />,
     );
   }
 
-  return <div className="v2tl">{rows}</div>;
+  return <div className={`v2tl${showTime ? "" : " v2tl--notime"}`}>{rows}</div>;
 }
 
 function Entry({
   item,
   onOpen,
   showDate,
+  showTime,
   kindLabels,
   selected,
 }: {
   item: TimelineItem;
   onOpen?: (id: string) => void;
   showDate: boolean;
+  showTime: boolean;
   kindLabels?: Record<string, string>;
   selected: boolean;
 }) {
@@ -181,21 +194,34 @@ function Entry({
     : null;
   const second = kindWord ? `${kindWord}${item.actor ? ` · ${item.actor}` : ""}` : item.actor;
   return (
+    // The row is the pointer target, the title stays the one control for
+    // keyboard and screen reader. A click on the title or on „Einzelheiten"
+    // is theirs and is not counted twice (owner 2026-09-18). No overlay over
+    // the row: it would swallow the tooltips of the badges (`stateNote`).
     <div
-      className={`v2tl__item${selected ? " is-current" : ""}${item.dim ? " v2muted" : ""}`}
+      className={`v2tl__item${onOpen ? " is-target" : ""}${selected ? " is-current" : ""}${item.dim ? " v2muted" : ""}`}
       aria-current={selected ? "true" : undefined}
+      onClick={
+        onOpen
+          ? (e) => {
+              if (!(e.target as Element).closest("a, button, summary, input")) onOpen(item.id);
+            }
+          : undefined
+      }
     >
-      <time
-        className="v2tl__when"
-        dateTime={dayOnly ? item.at : new Date(item.at).toISOString()}
-        title={formatTimeFull(item.at)}
-      >
-        {dayOnly
-          ? showDate
-            ? formatTime(item.at, "date")
-            : ""
-          : `${showDate ? `${formatTime(item.at, "date")} ` : ""}${formatTime(item.at, "time")}`}
-      </time>
+      {showTime ? (
+        <time
+          className="v2tl__when"
+          dateTime={dayOnly ? item.at : new Date(item.at).toISOString()}
+          title={formatTimeFull(item.at)}
+        >
+          {dayOnly
+            ? showDate
+              ? formatTime(item.at, "date")
+              : ""
+            : `${showDate ? `${formatTime(item.at, "date")} ` : ""}${formatTime(item.at, "time")}`}
+        </time>
+      ) : null}
       <div>
         <div className="v2tl__head">
           {item.icon}

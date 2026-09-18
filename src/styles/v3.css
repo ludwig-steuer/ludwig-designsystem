@@ -2203,18 +2203,25 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   padding: 6px 0;
   font-size: var(--fs-ui);
 }
+/* Without the time column the entry starts at the edge (owner 2026-09-18). */
+.v2tl--notime .v2tl__item { grid-template-columns: 1fr; }
 .v2tl__when { color: var(--color-text-muted); font-variant-numeric: tabular-nums lining-nums; }
 .v2tl__who { color: var(--color-text-muted); font-size: 12.5px; }
 .v2tl__title { color: var(--color-text); }
-/* The entry open in the detail on the right (0040). Besides the surface it
-   carries `aria-current` — colour is never the only signal (V7). */
-.v2tl__item.is-current {
-  background: var(--color-accent-50); border-radius: var(--radius-sm);
-  /* Without the old indent the surface needs its own — otherwise it starts right
-     at the digit. */
+/* A surface — hover on a clickable entry, the open one — needs its own inset,
+   otherwise it starts right at the digit; the negative margin keeps the text
+   where it stands. */
+.v2tl__item.is-target, .v2tl__item.is-current {
+  border-radius: var(--radius-sm);
   padding-left: var(--space-2); padding-right: var(--space-2);
   margin-left: calc(-1 * var(--space-2)); margin-right: calc(-1 * var(--space-2));
 }
+/* With `onOpen` the whole row is the target, not only the title (owner 2026-09-18). */
+.v2tl__item.is-target { cursor: pointer; }
+.v2tl__item.is-target:hover { background: var(--color-bg-soft); }
+/* The entry open in the detail on the right (0040). Besides the surface it
+   carries `aria-current` — colour is never the only signal (V7). */
+.v2tl__item.is-current, .v2tl__item.is-current:hover { background: var(--color-accent-50); }
 .v2tl__item.is-current .v2tl__title { font-weight: 600; }
 /* The kind icon before the title: single-coloured, the badge carries colour (V6). */
 .v2tl__kind { display: inline-flex; color: var(--color-text-muted); }
@@ -2287,6 +2294,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   border-left: 1px dashed var(--color-border);
   font-size: var(--fs-ui-sm); color: var(--color-text-subtle);
 }
+.v2tl--notime .v2tl__gap { margin-left: 0; }
 .v2tl__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .v2tl__empty { padding: var(--space-4) 0; }
 
