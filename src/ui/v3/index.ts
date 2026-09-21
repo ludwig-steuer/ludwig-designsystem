@@ -424,6 +424,7 @@ export {
   type BankTransactionCellData,
   type BankTransactionRowData,
   type BankTransactionDetailData,
+  type BankTransactionFactsData,
   type CaseAssignment,
 } from "./entities/bank-transaction/bank-transaction";
 export { BankTransactionPurpose } from "./entities/bank-transaction/BankTransactionPurpose";
@@ -431,6 +432,7 @@ export { BankTransactionCell } from "./entities/bank-transaction/BankTransaction
 export { BankTransactionRow } from "./entities/bank-transaction/BankTransactionRow";
 export {
   BankTransactionFacts,
+  BankTransactionFoldout,
   type BankTransactionFactBlock,
 } from "./entities/bank-transaction/BankTransactionFacts";
 export {
