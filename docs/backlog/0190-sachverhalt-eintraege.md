@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme — gebaut 2026-09-21, fremde Abnahme steht aus |
 | Stufe | `src/showcase/case/` (Seiten-Stories) — dazu Befunde an `entities/` |
 | Klassen-Test | keiner nötig: es entsteht **keine** neue Komponente. Was hier gebaut wird, sind Stories auf vorhandenen Bausteinen; was dabei fehlt, steht als Befund unten |
 | Quelle | Owner-Auftrag, überbracht von `ludwig-worker3` am 2026-09-18 (35 Datensätze aus `apps/web/src/core/db/schema/_generated/schema.ts`, Beispiel-Sachverhalt 2026-0142: Eingangsrechnung Müller Bürotechnik GmbH, RE-24-0815, 1.190,00 €, Kreditor 70112) |
@@ -191,3 +191,24 @@ kein Baustein; die Zahl kommt aus dem Auftrag. Regeln trotzdem:
   behelfsmäßige `FieldList`.
 - Der Katalog ist die natürliche Stelle für weitere Fälle: jeder neue
   Ereignistyp der App bekommt hier seine Story, bevor die Seite ihn zeigt.
+
+## Stand des Baus (2026-09-21)
+
+`src/showcase/case/CaseEntries.stories.tsx`, Titel `Seiten/Sachverhalt/Einträge`,
+**36 Stories** — 35 Einträge plus `PaymentSignBothWays`. Typecheck und die vier
+Wächter (`when`, `classes`, `language`, `icons`) grün, Stichproben im Browser
+ohne Konsolenmeldung:
+
+- `--payment-share-of-batch`: die Zeile zeigt −3.570,00 €, der Anteil von
+  1.190,00 € steht daneben — Befund B-02 sichtbar gemacht statt versteckt.
+- `--booking-exported`: `JournalEntryFacts` mit Stapel, LudwigAI-Referenz und
+  „Festgeschrieben".
+- `--mirror-split`: Behelfs-Liste mit Badge „aufgeteilt (Kanzlei)" und dem
+  Hinweis auf B-08.
+- `--question-answered`: Verlauf mit „Gefragt von Buchungsagent" und
+  „Beantwortet von Mandant".
+- `--payment-sign-both-ways`: beide Zeilen lesen −1.190,00 €, bei `amount:
+  -1190` **und** bei `amount: 1190`.
+
+Nicht gebaut, wie in der Spec vorgesehen: die neun Lücken B-01 … B-09. Sie
+stehen in den Stories als Satz, nicht als Platzhalter im Code.
