@@ -459,16 +459,13 @@ Fakten (`application/batch-facts.ts`): **Belege verarbeitet** x von y
 Satz). Beim Mandantenstapel entfallen die drei Fakten (Schritte 1/3/4 gelten
 dort nicht) und es steht „Personenkonten vollständig" (F165). Die frühere
 Prüfung-Tabelle (eine Zeile je Rail-Schritt) und die sechs Kennzahl-Kacheln
-sind weg — sie beantworteten „wie viel", nicht „bin ich dran". Tabelle
-„Durchgänge" und Übergabebericht bleiben. Der Übergabebericht ist
+sind weg — sie beantworteten „wie viel", nicht „bin ich dran". Ebenso die
+Tabelle „Durchgänge" und der Diff-Block „Seit Ihrer letzten Abnahme-Runde"
+(Owner 2026-09-21): die Durchgänge stehen am Stapel (Tab „Durchgänge"). Es
+bleibt der Übergabebericht des letzten Durchgangs. Er ist
 Agent-Markdown mit fester Struktur — drei Abschnitte „Was gemacht wurde",
 „Auffälligkeiten", „Was jetzt zu tun ist", ohne Schritt-Kürzel und Tool-Namen;
 die Vorlage steht im Playbook (`agent-playbooks.md` „5a — Bericht").
-
-**Diff-Modus:** ab der zweiten Runde steht auf Schritt 0, was der Agent seit
-der Rückgabe geändert hat (neu · ersetzt · beantwortet → gebucht · neue Fragen
-· neue Konventionen). Warum ein Punkt *unverändert* offen blieb, sagt das
-Playbook nicht — diese Zeile bleibt leer und sagt das auch.
 
 **Schritt 5** beginnt mit der **OPOS-Gesamtübersicht** (F221, Owner
 2026-09-15: Achse Kreditoren / Debitoren, beide Quellen): zwei Zeilen
@@ -799,3 +796,17 @@ Stapel in einer Zeile. App-weit offen → `web-ui-offen.md` P46.
 Box-Titel viermal dasselbe („Vollständigkeit" / „Ist alles da?"), keine Ebene
 sagte, was zu tun ist, und der Box-Untertext erklärte Interna (Owner-Durchgang
 zu F244).
+
+### R23 — Sachverhalt-Detail: ein Strang, eine Karte
+Der **Strang** ist das DS-`CaseTimeline` (`CaseStrandCard.tsx`): Ereignisse,
+Fragen und offene Erwartungen, eine Zeile je Eintrag; Beleg-Angaben stehen im
+Detail darunter, Notizen nicht im Strang. Fragen und Notizen stehen in **einer**
+Karte „Rückfragen und Notizen" (`ClarificationList` + `ClarificationCard` +
+`ClarificationEditor`) — die Notiz ist `type = 'comment'` derselben Tabelle.
+Eine Antwortfläche gibt es nur bei `audience = accounting`. Ein Schreibweg je
+Art: Notiz → `addCaseComment`, Frage → `raiseCaseClarification`; Fragen an
+den Mandanten von Hand weist die Action ab. Zähler und Blocker zählen nur
+Fragen (F249). Ein im Saldo-Block gewähltes Konto hebt seine Ereignisse im
+Strang hervor (`focusIds`), die übrigen treten zurück, ohne zu verschwinden.
+Was DATEV schon gebucht hat, steht darunter als `MirrorEntryList`; Betrag und
+Konten rechnet `toMirrorEntryVM` in der Domain, nicht die Karte (F251).

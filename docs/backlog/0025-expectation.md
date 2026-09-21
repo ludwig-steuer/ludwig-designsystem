@@ -1025,3 +1025,19 @@ Quelle: `docs/entitaeten/expectation.md`, Abschnitte „Heutige Darstellung" und
 
 Abnahme: die Stories `Interactive` und `InCase` zeigen „Aufheben"; ein Grep über
 `Expectation.tsx` findet kein lokales `resolvedAt` mehr.
+
+## Nachtrag 2026-09-21 — wodurch erledigt (F251, B-06)
+
+Seit dem Spiegel-Lauf auf App `9048bce1` trägt die gespiegelte
+`ExpectationRow` `resolution` und `resolvedByEvent`, und die Domäne das Wort
+dazu (`expectationResolutionLabel`: Eingegangen · Von Hand erledigt ·
+Hinfällig — Befund L-332 damit erledigt). `ExpectationVM` erbt beides.
+
+`ExpectationRow` zeigt unter dem Titel, sobald eine Erwartung erledigt ist:
+das Wort und — wo es eines gibt — das Ereignis, das sie eingelöst hat, als
+Eintrag mit Tag („Eingegangen · durch „Zahlung Hofmann …" vom 02.04.2026").
+Nie die Id. Von Hand erledigt und hinfällig haben kein Ereignis; dann steht
+nur das Wort.
+
+**Abnahmekriterium:** Story `Resolved` mit allen drei Werten.
+**Stand:** gebaut und im Browser nachgesehen, fremde Abnahme steht aus.

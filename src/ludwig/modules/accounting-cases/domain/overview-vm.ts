@@ -90,10 +90,20 @@ export interface TimelineEventVM {
   blockedClarificationIds: string[];
   /** Die Wiederkehr-Regel hinter dem Ereignis — der Reiter „Zuordnung" zeigt nur ihre Treffer. */
   recurringRuleId: string | null;
+  /** Ihr lesbares Etikett (Vorlagentext, sonst Gegenpartei) — nie die Id (F251). */
+  recurringRuleLabel: string | null;
   /** Periode der Sollstellung („YYYY-MM"); der Ausgleich trägt sie nicht. */
   accrualPeriod: string | null;
   /** Nur am Server-Zwilling (Verrechnungs-Regime): die auslösende Bankzeile. */
   passThroughOfBankTransactionId: string | null;
+  /** Dieselbe Bankzeile als Etikett (F251, B-04); `null` ohne Treffer. */
+  passThroughBankTransaction: {
+    postingDate: string;
+    amount: number;
+    currency: string;
+    counterpartyName: string | null;
+    purpose: string | null;
+  } | null;
   /** Freitext am Ereignis (`notes`) — Skonto-Differenz, Korrekturgrund,
    *  Zuordnungs-Hinweis. Nicht zu verwechseln mit `infoNote`/`openNote`, die
    *  den Zustand erklären. */
@@ -150,6 +160,43 @@ export interface ClarificationVM {
   deferredReason: string | null;
   /** Wie oft schon verschoben; ab der dritten darf nur noch ein Mensch. */
   deferredCount: number;
+}
+
+/**
+ * Ein Eintrag der Klärungs-Tabelle, **roh**: Frage ODER Notiz (F249).
+ *
+ * `ClarificationVM` daneben bleibt die Form der Fragen-Zähler und -Banner;
+ * dieser Eintrag trägt zusätzlich die Felder, die die Karte des
+ * Design-Systems zeigt (Kontext, Frage, Empfehlung, belegte Zahlen), und die
+ * Daten roh (ISO), weil die Karte selbst formatiert.
+ */
+export interface CaseClarificationEntry {
+  id: string;
+  entryType: "question" | "comment";
+  title: string | null;
+  /** `professional_text` — der volle Text. */
+  text: string;
+  /** Die Frage als eigener Satz, wo sie getrennt steht. */
+  question: string | null;
+  context: string | null;
+  recommendation: string | null;
+  facts: Array<{ label: string; value: string }>;
+  severity: "required" | "optional";
+  audience: "accounting" | "client" | "agent";
+  questionType: string;
+  sourceModule: string;
+  answerKind: string;
+  answerOptions: string[];
+  allowFreeText: boolean;
+  /** ISO, unformatiert — die DS-Karte macht den Tag daraus. */
+  createdAt: string;
+  answeredAt: string | null;
+  deferredUntil: string | null;
+  deferredReason: string | null;
+  deferredCount: number;
+  /** Anzeigename des Antwortenden; null = Agent/System. */
+  authorName: string | null;
+  sources: ClarificationSourceVM[];
 }
 
 /** Quelle an einer Rückfrage — `ledger_account` trägt die aufgelöste Kontonummer. */
@@ -237,7 +284,10 @@ export interface CaseOverviewVM {
   header: CaseHeaderVM;
   events: TimelineEventVM[];
   saldoAccounts: SaldoAccountVM[];
+  /** Nur Fragen — Zähler, Banner und Blocker hängen daran. */
   clarifications: ClarificationVM[];
+  /** Fragen **und** Notizen, roh, für die Karte „Rückfragen und Notizen" (F249). */
+  clarificationEntries: CaseClarificationEntry[];
   nextAction: NextActionVM | null;
   saldoNote: string | null;
 }

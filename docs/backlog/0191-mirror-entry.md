@@ -229,3 +229,15 @@ sie je selbst.
 **Nächster Schritt, nicht in dieser Welle:** die Sachverhaltsseite zeigt die
 Karte „In DATEV gebucht" noch nicht — dafür braucht das Szenario ein Feld
 `mirrorEntries`, und das ist eine Änderung an 0152. Auf Zuruf.
+
+## Nachtrag 2026-09-21 — die App bildet auf diese Sicht ab (F251)
+
+Mit F251 (App `9048bce1`) liegt `CaseMirrorEntry` in
+`datev-truth/domain/mirror-entry-vm.ts`, und `toMirrorEntryVM` übersetzt ihn
+**in `MirrorEntryVM` dieses Sets**. Die Sicht bleibt also die des Sets; eine
+zweite Form entsteht nicht. `summarizeMirrorEntry` ist drüben weg — **L-339
+erledigt**, und L-302 für den Fall am Sachverhalt ebenso.
+
+Owner-Entscheid (über `acto`): die App blendet die Karte „In DATEV gebucht"
+bei leerer Liste aus (App `ad17bc98`). Der Leerzustand von `MirrorEntryList`
+bleibt für andere Aufrufer; am Sachverhalt wird er nicht gebraucht.

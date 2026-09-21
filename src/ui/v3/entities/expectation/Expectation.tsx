@@ -8,7 +8,9 @@ import type {
   ExpectationAudience,
   ExpectationRow as Expectation,
 } from "@/ludwig/modules/accounting-cases/domain/expectation";
+import { expectationResolutionLabel } from "@/ludwig/modules/accounting-cases/domain/expectation-labels";
 import type { Currency } from "@/ludwig/shared/money";
+import { STATUS_REGISTRY } from "@/ludwig/ui/status/status-registry";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { AmountCell } from "../../primitives/Cells";
 import { Time } from "../../primitives/Time";
@@ -186,6 +188,24 @@ export function ExpectationRow({
           )}
           {expectation.note ? (
             <span className="v2exp__note">{expectation.note}</span>
+          ) : null}
+          {/* **How** it was settled, once it is (F251, B-06): the word from the
+              domain, and the event that settled it — as an entry, never as
+              its id. Without either there is nothing to say. */}
+          {expectation.resolution ? (
+            <span className="v2exp__note">
+              {expectationResolutionLabel(expectation.resolution)}
+              {expectation.resolvedByEvent ? (
+                <>
+                  {" · durch „"}
+                  {expectation.resolvedByEvent.title ??
+                    STATUS_REGISTRY.event_kind[expectation.resolvedByEvent.kind]?.label ??
+                    expectation.resolvedByEvent.kind}
+                  {"“ vom "}
+                  <Time value={expectation.resolvedByEvent.date} format="date" size="sm" />
+                </>
+              ) : null}
+            </span>
           ) : null}
         </span>
         <span className="v2num">

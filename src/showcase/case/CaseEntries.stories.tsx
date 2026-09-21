@@ -579,17 +579,27 @@ export const InternalTransfer: Story = {
 /**
  * **15 · Verrechnungs-Zwilling (PayPal).** Der Server legt ihn an, wenn Geld
  * über ein Verrechnungskonto läuft; er hat **keine** Bankzeile als Quelle,
- * sondern hängt an einer fremden. Drüben gibt es das Feld seit `c478af21`
- * (`passThroughOfBankTransactionId`), im Strang steht es trotzdem nicht: eine
- * rohe Id ist keine Aussage. Die Zeile braucht die Bankzeile mit Wort und Weg
- * — Befund B-04 bleibt offen, jetzt als Frage nach dem Etikett.
+ * sondern hängt an einer fremden. Seit F251 kommt sie als **Etikett**
+ * (`passThroughBankTransaction`, B-04): die Zeile sagt „aus der Bankzeile vom
+ * 09.03.2026 (PayPal Europe)", die Fläche zeigt die Bankzeile selbst.
  */
 export const PassThroughTwin: Story = {
   render: () => (
     <Entry
       sub="Verrechnung Bank/PayPal"
       selected="evt-15"
-      events={[ev("evt-15", "adjustment", "2026-03-09", "Umbuchung Bank/PayPal", 89.9, "posted", { bookingState: "posted" })]}
+      events={[
+        ev("evt-15", "adjustment", "2026-03-09", "Umbuchung Bank/PayPal", 89.9, "posted", {
+          bookingState: "posted",
+          passThroughBankTransaction: {
+            postingDate: "2026-03-09",
+            amount: -89.9,
+            currency: "EUR",
+            counterpartyName: "PayPal Europe",
+            purpose: "PP.4711.PP Büromaterial",
+          },
+        }),
+      ]}
     >
       <Pane title="Umbuchung Bank/PayPal" sub="09.03.2026 · vom Server angelegt">
         <JournalEntryCard
@@ -600,10 +610,9 @@ export const PassThroughTwin: Story = {
           currency="EUR"
           accountHref={accountHref}
         />
-        <p className="v2muted" style={{ margin: 0 }}>
-          Entstanden aus der PayPal-Zeile vom 09.03.; die Id dazu trägt das Ereignis, ein Wort
-          dafür noch nicht (Befund B-04).
-        </p>
+        <BankTransactionCell
+          transaction={bank("2026-03-09", -89.9, "PayPal Europe", "PP.4711.PP Büromaterial")}
+        />
       </Pane>
     </Entry>
   ),
@@ -643,9 +652,8 @@ export const ManualCorrection: Story = {
 
 /**
  * **17 · Sollstellung einer Dauerbuchung.** Je Regel und Periode genau eine.
- * Die Periode steht seit `accrualPeriod` (B-05) in der Zeile. Die **Regel**
- * bleibt draußen: `recurringRuleId` ist eine Id, und eine rohe Id sagt
- * niemandem, welche Regel gemeint ist — sie braucht ihr Wort vom Aufrufer.
+ * Periode (`accrualPeriod`, B-05) und Regel (`recurringRuleLabel`, F251) stehen
+ * in der zweiten Zeile — die Regel mit ihrem Wort, nicht mit ihrer Id.
  */
 export const RecurringAccrual: Story = {
   render: () => (
@@ -656,6 +664,7 @@ export const RecurringAccrual: Story = {
         ev("evt-17", "accrual", "2026-03-01", "Miete März 2026", 2380, "posted", {
           bookingState: "posted",
           accrualPeriod: "2026-03",
+          recurringRuleLabel: "Miete Büro Leopoldstr. 12",
         }),
       ]}
     >
@@ -668,9 +677,7 @@ export const RecurringAccrual: Story = {
             ["Vertrag", "Mietvertrag vom 02.01.2026"],
           ]}
         />
-        <p className="v2muted" style={{ margin: 0 }}>
-          Die Regel selbst nennt die Zeile nicht — dafür bräuchte sie deren Wort, nicht die Id.
-        </p>
+
       </Pane>
     </Entry>
   ),
@@ -1031,8 +1038,8 @@ export const DocumentExpected: Story = {
 /**
  * **27 · Zahlung erwartet und erfüllt.** Die Erwartung ist aufgelöst und
  * verschwindet damit aus dem Strang; im Strang steht das Ereignis, das sie
- * erfüllt hat. **Wodurch** sie erledigt wurde, kann die Zeile heute nicht
- * sagen (Befund B-06).
+ * erfüllt hat. **Wodurch** sie erledigt wurde, sagt die Zeile seit F251
+ * (B-06): „Eingegangen · durch „Zahlung Hofmann …" vom 02.04.2026".
  */
 export const PaymentExpectationMet: Story = {
   render: () => (
@@ -1067,14 +1074,12 @@ export const PaymentExpectationMet: Story = {
             expectedCounterpartyName: "Hofmann Logistik KG",
             expectedAmount: 4760,
             resolvedAt: "2026-04-02T08:40:00Z",
+            resolution: "matched",
+            resolvedByEvent: { kind: "payment_in", date: "2026-04-02", title: "Zahlung Hofmann Logistik AR-2026-031" },
           }}
           today={TODAY}
           currency="EUR"
         />
-        <FieldList tone="bare" rows={[["Erledigt durch", "Zahlungseingang vom 02.04.2026 (AR-2026-031)"]]} />
-        <p className="v2muted" style={{ margin: 0 }}>
-          Den Verweis auf das lösende Ereignis trägt die Erwartung im Set noch nicht (Befund B-06).
-        </p>
       </Pane>
     </Entry>
   ),

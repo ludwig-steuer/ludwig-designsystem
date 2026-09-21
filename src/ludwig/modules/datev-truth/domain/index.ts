@@ -5,3 +5,8 @@ export {
   type OpenItemAgeBucket,
   type OpenItemLink,
 } from "./open-item";
+export {
+  toMirrorEntryVM,
+  type CaseMirrorEntry,
+  type CaseMirrorLine,
+} from "./mirror-entry-vm";

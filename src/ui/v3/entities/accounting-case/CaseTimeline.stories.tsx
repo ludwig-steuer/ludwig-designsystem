@@ -172,7 +172,9 @@ export const EntryKinds: Story = {
 };
 
 /**
- * Drei Angaben am Ereignis, die bis `c478af21` fehlten (0190, B-02/B-03/B-05):
+ * Angaben am Ereignis, die bis `c478af21` bzw. F251 fehlten (0190, B-02 bis B-05):
+ * dazu das **Wort der Regel** hinter einer Sollstellung und die **Bankzeile**,
+ * aus der ein Verrechnungs-Zwilling entstand — beide als Etikett, nie als Id.
  * der **Anteil** an einer Sammelzahlung statt der ganzen Bankzeile (die steht
  * im Tooltip der Zahl), der **eine Satz** am Ereignis und die **Periode** einer
  * Sollstellung. Satz und Periode stehen in der zweiten Zeile — die Art steckt
@@ -186,7 +188,8 @@ export const ShareNotePeriod: Story = {
         events={[
           { id: "s1", kind: "payment_out", date: "2026-03-20", title: "Anteil Sammelüberweisung", amount: 3570, allocatedAmount: -1190, note: "Split: RE-24-0815 / RE-24-0822 / RE-24-0840", currency: "EUR", state: "posted" },
           { id: "s2", kind: "payment_out", date: "2026-03-11", title: "Zahlung RE-24-0815 abzgl. 2 % Skonto", amount: 1166.2, note: "Differenz 23,80 € = Skonto", currency: "EUR", state: "posted" },
-          { id: "s3", kind: "accrual", date: "2026-03-01", title: "Miete März 2026", amount: 2380, accrualPeriod: "2026-03", currency: "EUR", state: "posted" },
+          { id: "s3", kind: "accrual", date: "2026-03-01", title: "Miete März 2026", amount: 2380, accrualPeriod: "2026-03", recurringRuleLabel: "Miete Büro Leopoldstr. 12", currency: "EUR", state: "posted" },
+          { id: "s4", kind: "adjustment", date: "2026-03-09", title: "Umbuchung Bank/PayPal", amount: 89.9, currency: "EUR", state: "posted", passThroughBankTransaction: { postingDate: "2026-03-09", amount: -89.9, currency: "EUR", counterpartyName: "PayPal Europe", purpose: "PP.4711.PP Büromaterial" } },
         ]}
       />
     </div>

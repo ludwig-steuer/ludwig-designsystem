@@ -12,28 +12,26 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-**F251 (App `9048bce1`, gemeldet von `ludwig-worker3` am 2026-09-21).**
-Voraussetzungen für den Lauf: der Commit liegt auf origin/staging (beim
-Eintrag noch nicht) **und** eine Owner-Ausnahme vom Freeze. Bringt:
+Nichts.
 
-- `TimelineEventVM.passThroughBankTransaction` / `CaseEvent.passThroughBankTransaction`
-  — `{ postingDate, amount, currency, counterpartyName, purpose } | null`, die
-  Bankzeile am Verrechnungs-Zwilling (B-04), Form = `BankTransactionCellData`.
-- `TimelineEventVM.recurringRuleLabel` / `CaseEvent.recurringRuleLabel` —
-  `string | null`, Vorlagentext, sonst Gegenpartei der Regel.
-- Erwartung: `resolvedByEvent` — `{ kind, date, title } | null` (B-06).
-- `accounting-cases/domain/expectation-labels.ts`:
-  `EXPECTATION_RESOLUTION_LABEL` + `expectationResolutionLabel()` — matched
-  „Eingegangen", manual „Von Hand erledigt", obsolete „Hinfällig" (L-332).
-- `datev-truth/domain/mirror-entry-vm.ts`: `CaseMirrorEntry`, `CaseMirrorLine`,
-  `toMirrorEntryVM` — vorher Infrastruktur (L-339, Teil von L-302).
+## Erledigt mit dem zweiten Lauf vom 2026-09-21 (App `9048bce1`, F251)
 
-**Im Set danach:** `CaseTimelineEvent` um Zwilling und Regelwort erweitern
-(0040), `ExpectationRow` zeigt „Eingegangen · durch <Ereignis>" (0025),
-`MirrorEntryVM` gegen `CaseMirrorEntry` prüfen und die lokale Sicht ablösen,
-wo sie deckungsgleich ist (0191, L-302/L-339). Stories 15, 17, 27 in 0190
-nachziehen. `JournalEntryFacts.entryHref` verdrahtet die App erst mit der
-Ablösung von `EventDetail` — dort ist nichts zu tun.
+Owner-Ausnahme (Simon, 2026-09-21, überbracht von `acto`), einmalig, danach
+wieder eingefroren. Gespiegelt aus `9048bce1`; die Spitze `ad17bc98` ändert
+an den gespiegelten Pfaden nichts (geprüft). Angekommen:
+`passThroughBankTransaction` und `recurringRuleLabel` an Ereignis und
+`TimelineEventVM` · `resolvedByEvent` an der Erwartung ·
+`expectation-labels.ts` mit `EXPECTATION_RESOLUTION_LABEL` /
+`expectationResolutionLabel` (L-332) · `datev-truth/domain/mirror-entry-vm.ts`
+mit `CaseMirrorEntry` und `toMirrorEntryVM` (L-339) · daneben
+`CaseClarificationEntry` (F249), `clients/domain/client-year-hints.ts` (F250),
+`case-detail-ds-mapping.ts`. Typcheck und `check:mirror` grün.
+
+Im Set nachgezogen: Regelwort und Zwilling im Strang (Nachtrag 0040),
+„wodurch erledigt" in der Erwartungszeile (Nachtrag 0025), Katalog-Stories 15,
+17, 27. **`mirror-entry-vm.ts` importiert `MirrorEntryVM` aus
+`@ludwig/designsystem`** — die Domäne der App bildet auf die Sicht des Sets
+ab; im Spiegel löst sich das auf das Set selbst auf.
 
 ## Erledigt mit dem Lauf vom 2026-09-21 (App `c478af21`)
 

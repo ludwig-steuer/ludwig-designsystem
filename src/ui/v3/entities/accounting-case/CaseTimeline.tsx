@@ -22,9 +22,10 @@ import {
   type ClarificationType,
   type ExpectationKind,
 } from "@/ludwig/modules/accounting-cases/domain/case";
+import type { TimelineEventVM } from "@/ludwig/modules/accounting-cases/domain/overview-vm";
 import type { Currency } from "@/ludwig/shared/money";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
-import { calendarDay, formatAmount } from "../../format";
+import { calendarDay, formatAmount, formatTime } from "../../format";
 import { Amount } from "../../primitives/Amount";
 import { Badge } from "../../primitives/Badge";
 import { StatusBadge } from "../../patterns/StatusBadge";
@@ -82,6 +83,18 @@ export interface CaseTimelineEvent {
   note?: string | null;
   /** `accrual_period` („2026-03") — which period this charge belongs to (B-05). */
   accrualPeriod?: string | null;
+  /**
+   * The rule behind a recurring charge, **as a word** (F251): its template
+   * text, else its counterparty. The rule table has no name column; the id
+   * alone says nothing in a line, so the strand shows only this.
+   */
+  recurringRuleLabel?: TimelineEventVM["recurringRuleLabel"];
+  /**
+   * The bank line a pass-through twin was created from (F251, B-04). The twin
+   * has no bank line of its own, so without this the entry cannot say where it
+   * came from.
+   */
+  passThroughBankTransaction?: TimelineEventVM["passThroughBankTransaction"];
   currency: Currency;
   /** Value of axis `ereignis`: open · proposed · accepted · posted · … */
   state: string;
@@ -338,7 +351,15 @@ export function CaseTimeline({
       ev.allocatedAmount != null &&
       ev.amount != null &&
       Math.abs(ev.allocatedAmount) !== Math.abs(ev.amount);
-    const sub = [ev.accrualPeriod ? `Periode ${periodLabel(ev.accrualPeriod)}` : null, ev.note]
+    const twin = ev.passThroughBankTransaction;
+    const sub = [
+      ev.accrualPeriod ? `Periode ${periodLabel(ev.accrualPeriod)}` : null,
+      ev.recurringRuleLabel ? `Regel: ${ev.recurringRuleLabel}` : null,
+      twin
+        ? `aus der Bankzeile vom ${formatTime(twin.postingDate, "date")}${twin.counterpartyName ? ` (${twin.counterpartyName})` : ""}`
+        : null,
+      ev.note,
+    ]
       .filter(Boolean)
       .join(" · ");
     items.push({

@@ -1951,7 +1951,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 
 - English: `review round`
 - German: **Abnahme-Runde** (veraltet: „Review")
-- Definition: Ein Durchlauf der *Stapelabnahme* durch die Kanzlei. Ein Stapel kann mehrere haben: nach „Zurück an den Agenten" fährt der Agent einen weiteren *Durchgang*, und die nächste Runde öffnet im Diff-Modus gegen den Stand beim Rücklauf.
+- Definition: Ein Durchlauf der *Stapelabnahme* durch die Kanzlei. Ein Stapel kann mehrere haben: nach „Zurück an den Agenten" fährt der Agent einen weiteren *Durchgang*, und die nächste Runde beginnt.
 - Data type: abgeleitet — Zahl der `export_batch.returned_to_agent`-Ereignisse in `platform_audit_events` + 1 (`BookingCycleDetail.round`). Es gibt **kein** Zählerfeld.
 - Example: „Runde 2 nach Rücklauf vom 20.08."
 - Notes: Gegenstück zum *Agent-Durchgang* — der Agent fährt Durchgänge, die Kanzlei Runden; beide hängen am selben Stapel. Bewusst abgeleitet: ein Zähler und die Audit-Spur würden auseinanderlaufen.

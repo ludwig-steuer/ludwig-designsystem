@@ -59,4 +59,6 @@ export interface ExpectationRow {
   resolution: ExpectationResolution | null;
   /** Das Ereignis, das sie eingelöst hat; nur bei `resolution='matched'`. */
   resolvedByEventId: string | null;
+  /** Dasselbe Ereignis als Etikett (F251, B-06) — `null` ohne Id oder Treffer. */
+  resolvedByEvent: { kind: string; date: string; title: string | null } | null;
 }

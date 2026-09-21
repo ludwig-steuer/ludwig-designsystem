@@ -119,6 +119,9 @@ export interface CaseEvent {
   /** Die Wiederkehr-Regel, die dieses Ereignis angelegt oder ihm eine Zahlung
    *  zugeordnet hat (`client_accounting_event.recurring_rule_id`). */
   recurringRuleId: string | null;
+  /** Lesbares Etikett der Regel (F251): Vorlagentext, sonst Gegenpartei. Die
+   *  Regel-Tabelle hat keine Namensspalte. */
+  recurringRuleLabel: string | null;
   /** Periode der Sollstellung (`accrual_period`, „YYYY-MM"); der Ausgleich
    *  einer Dauerbuchung trägt sie NICHT — dort steht NULL. */
   accrualPeriod: string | null;
@@ -126,6 +129,15 @@ export interface CaseEvent {
    *  ihn ausgelöst hat (`pass_through_of_bank_transaction_id`). Der Zwilling
    *  selbst hat keine eigene Bankzeile. */
   passThroughOfBankTransactionId: string | null;
+  /** Die Bankzeile dazu als Etikett (F251, B-04) — `null`, wenn keine Id oder
+   *  keine Zeile. Form = DS `BankTransactionCellData`. */
+  passThroughBankTransaction: {
+    postingDate: string;
+    amount: number;
+    currency: string;
+    counterpartyName: string | null;
+    purpose: string | null;
+  } | null;
   sourceDoc: CaseEventSourceDoc | null;
   bankTransaction: CaseEventBankTransaction | null;
   booking: CaseEventBooking | null;

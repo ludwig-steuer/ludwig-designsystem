@@ -153,6 +153,60 @@ export const Maturities: Story = {
   ),
 };
 
+/**
+ * **Wodurch erledigt** (F251, B-06): das Wort aus der Domäne
+ * (`expectationResolutionLabel` — Eingegangen · Von Hand erledigt · Hinfällig)
+ * und das Ereignis, das sie eingelöst hat, als Eintrag mit Tag — nie als Id.
+ * Von Hand erledigt und hinfällig haben kein Ereignis; dann steht nur das Wort.
+ */
+export const Resolved: Story = {
+  render: () => (
+    <div style={{ maxWidth: 860 }}>
+      <ExpectationRow
+        expectation={{
+          ...BASE,
+          id: "r1",
+          kind: "payment",
+          audience: "accounting",
+          expectedCounterpartyName: "Hofmann Logistik KG",
+          dueDate: "2026-04-09",
+          resolvedAt: "2026-04-02T08:40:00Z",
+          resolution: "matched",
+          resolvedByEvent: { kind: "payment_in", date: "2026-04-02", title: "Zahlung Hofmann Logistik AR-2026-031" },
+        }}
+        today={TODAY}
+        currency="EUR"
+      />
+      <ExpectationRow
+        expectation={{
+          ...BASE,
+          id: "r2",
+          dueDate: "2026-08-20",
+          resolvedAt: "2026-08-29T10:00:00Z",
+          resolution: "manual",
+          resolvedByEvent: null,
+        }}
+        today={TODAY}
+        documentKindLabel={KIND_WORDS}
+        currency="EUR"
+      />
+      <ExpectationRow
+        expectation={{
+          ...BASE,
+          id: "r3",
+          dueDate: "2026-08-20",
+          resolvedAt: "2026-08-25T10:00:00Z",
+          resolution: "obsolete",
+          resolvedByEvent: null,
+        }}
+        today={TODAY}
+        documentKindLabel={KIND_WORDS}
+        currency="EUR"
+      />
+    </div>
+  ),
+};
+
 /** Nichts offen ist ein Erfolg, kein Filterproblem — der Satz sagt es (T6). */
 export const Empty: Story = {
   render: () => (

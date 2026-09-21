@@ -929,11 +929,11 @@ const CLARIFICATION_STATUS: Record<string, StatusDescriptor> = {
  * Fallstrick: „offen" heißt seitdem `answered_at is null` UND
  * `type='question'`. Die Bedingung wohnt an genau einer Stelle
  * (`core/db/clarification-open.ts`) — wer sie in einer Query selbst schreibt,
- * zählt Kommentare als offene Fragen.
+ * zählt Notizen als offene Fragen.
  */
 const CLARIFICATION_TYPE: Record<string, StatusDescriptor> = {
   question: { label: "Frage", kind: "info", description: "Erwartet eine Reaktion. Steht auf der Arbeitsliste, solange sie unbeantwortet und nicht zurückgestellt ist." },
-  comment: { label: "Kommentar", kind: "neutral", description: "Kontext ohne Aktion — Merkposten, Begründung, Zwischenstand. Blockiert nichts und wird nie beantwortet." },
+  comment: { label: "Notiz", kind: "neutral", description: "Notiz: Kontext ohne Aktion — Merkposten, Begründung, Zwischenstand. Blockiert nichts und wird nie beantwortet." },
 };
 
 const CLARIFICATION_SEVERITY: Record<string, StatusDescriptor> = {

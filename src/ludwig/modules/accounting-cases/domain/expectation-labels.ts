@@ -1,3 +1,5 @@
+import type { ExpectationResolution } from "./expectation";
+
 /**
  * Die Belegart einer Beleg-Erwartung als Wort — **eine** Map für den Kern
  * (Rationale-Texte) und das Panel „Fehlt". Lag bis 2026-09-11 zweimal vor,
@@ -18,4 +20,19 @@ export const EXPECTED_DOC_KIND_LABEL: Record<string, string> = {
 /** Unbekannte oder fehlende Belegart heißt „Unterlage", nie leer. */
 export function expectedDocKindLabel(kind: string | null | undefined): string {
   return (kind ? EXPECTED_DOC_KIND_LABEL[kind] : undefined) ?? "Unterlage";
+}
+
+/**
+ * Wodurch eine Erwartung erledigt wurde, als Wort (F251, DS-Befund L-332).
+ * Die DB kennt drei Werte (`ExpectationResolution`), das Wort stand nirgends.
+ */
+export const EXPECTATION_RESOLUTION_LABEL: Record<ExpectationResolution, string> = {
+  matched: "Eingegangen",
+  manual: "Von Hand erledigt",
+  obsolete: "Hinfällig",
+};
+
+/** Unbekannt oder leer → „—" — eine offene Erwartung hat keine Erledigung. */
+export function expectationResolutionLabel(r: string | null | undefined): string {
+  return (r ? EXPECTATION_RESOLUTION_LABEL[r as ExpectationResolution] : undefined) ?? "—";
 }

@@ -1090,3 +1090,18 @@ bleibt ganz** — herausnehmen hieße eine Lücke zeigen, die nichts bedeutet.
 
 **Abnahmekriterium.** `--focus`: die beiden Raten voll, Rechnung und Rückfrage
 blass. **Stand:** gebaut und im Browser nachgesehen, fremde Abnahme steht aus.
+
+## Nachtrag 2026-09-21 — Regel und Zwilling mit Wort (F251)
+
+Mit dem Spiegel-Lauf auf App `9048bce1` (F251) kommen die zwei Etiketten, die
+0190 als B-04 und als Rest von B-05 offen hielt. An `CaseTimelineEvent`, typisiert
+aus `TimelineEventVM`:
+
+| Feld | zeigt in der zweiten Zeile |
+|---|---|
+| `recurringRuleLabel` | „Regel: Miete Büro Leopoldstr. 12" — Vorlagentext, sonst Gegenpartei der Regel |
+| `passThroughBankTransaction` | „aus der Bankzeile vom 09.03.2026 (PayPal Europe)" — die Bankzeile, aus der ein Verrechnungs-Zwilling entstand |
+
+Die Ids (`recurringRuleId`, `passThroughOfBankTransactionId`) bleiben weiter
+draußen. **Abnahmekriterium:** `--share-note-period` zeigt beide Zeilen.
+**Stand:** gebaut und im Browser nachgesehen, fremde Abnahme steht aus.
