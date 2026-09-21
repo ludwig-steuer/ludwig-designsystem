@@ -12,7 +12,28 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-Nichts.
+**F251 (App `9048bce1`, gemeldet von `ludwig-worker3` am 2026-09-21).**
+Voraussetzungen für den Lauf: der Commit liegt auf origin/staging (beim
+Eintrag noch nicht) **und** eine Owner-Ausnahme vom Freeze. Bringt:
+
+- `TimelineEventVM.passThroughBankTransaction` / `CaseEvent.passThroughBankTransaction`
+  — `{ postingDate, amount, currency, counterpartyName, purpose } | null`, die
+  Bankzeile am Verrechnungs-Zwilling (B-04), Form = `BankTransactionCellData`.
+- `TimelineEventVM.recurringRuleLabel` / `CaseEvent.recurringRuleLabel` —
+  `string | null`, Vorlagentext, sonst Gegenpartei der Regel.
+- Erwartung: `resolvedByEvent` — `{ kind, date, title } | null` (B-06).
+- `accounting-cases/domain/expectation-labels.ts`:
+  `EXPECTATION_RESOLUTION_LABEL` + `expectationResolutionLabel()` — matched
+  „Eingegangen", manual „Von Hand erledigt", obsolete „Hinfällig" (L-332).
+- `datev-truth/domain/mirror-entry-vm.ts`: `CaseMirrorEntry`, `CaseMirrorLine`,
+  `toMirrorEntryVM` — vorher Infrastruktur (L-339, Teil von L-302).
+
+**Im Set danach:** `CaseTimelineEvent` um Zwilling und Regelwort erweitern
+(0040), `ExpectationRow` zeigt „Eingegangen · durch <Ereignis>" (0025),
+`MirrorEntryVM` gegen `CaseMirrorEntry` prüfen und die lokale Sicht ablösen,
+wo sie deckungsgleich ist (0191, L-302/L-339). Stories 15, 17, 27 in 0190
+nachziehen. `JournalEntryFacts.entryHref` verdrahtet die App erst mit der
+Ablösung von `EventDetail` — dort ist nichts zu tun.
 
 ## Erledigt mit dem Lauf vom 2026-09-21 (App `c478af21`)
 
