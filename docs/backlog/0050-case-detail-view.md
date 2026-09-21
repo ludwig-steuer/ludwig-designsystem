@@ -648,3 +648,25 @@ Einträge gezeigt und die Arbeitsfläche daneben verschmälert.
 
 Die gemessenen 460 px aus der Abnahme bleiben gültig — sie gelten dem Slot,
 nicht dieser Seite.
+
+## Nachtrag 2026-09-21 — die dritte Spalte (F249)
+
+**Anlass.** Die App braucht für das Sachverhalt-Detail das Dreispalten-Layout
+der Showcase-Seite (0152: Strang · Arbeitsfläche · Nebenbei-Lesen) und fragte,
+`CasePage` zu exportieren (F249, `ludwig-worker3`).
+
+**Einordnung.** `CasePage` bleibt in `showcase/`: sie ist eine **Seite** —
+Titel-Ableitung, Reiter mit ihren Wegen, der Pager mit der Liste, das
+Kopf-Metrum samt offenem Rest — und Seiten gehören der App (Klassen-Test von
+0152). Was der App fehlte, ist der **Rahmen**, und den gibt es als
+exportierte Entität: diese hier. Sie kannte nur zwei Spalten.
+
+**Schnittstelle.** `notes?: ReactNode` — die rechte Spalte. Mit `aside`
+(Strang) **und** `notes` stellt die Ansicht `Columns list-detail-aside` auf
+(Breiten des Musters, 0184); ohne `notes` bleibt sie zweispaltig wie bisher,
+kein Aufrufer ändert sich.
+
+**Abnahmekriterium.** `--three-columns` bei 1600 px: drei Spalten auf einer
+Höhe (16–496 · 516–1096 · 1116–1496); bei 1200 px bricht die rechte Spalte
+nach unten, wie das Muster es vorsieht. `--filled` unverändert zweispaltig.
+**Stand:** gebaut und im Browser nachgesehen, fremde Abnahme steht aus.

@@ -194,6 +194,31 @@ export const ShareNotePeriod: Story = {
 };
 
 /**
+ * `focusIds`: ein Filter woanders auf der Seite — hier „Ereignisse auf Konto
+ * 1200" — zeigt sich im Strang, ohne etwas herauszunehmen. Die gewählten
+ * Einträge stehen, die übrigen treten zurück und bleiben lesbar; eine Lücke im
+ * Strang wäre eine Aussage, die niemand gemacht hat (F249, vormals `dimSet`).
+ */
+export const Focus: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <CaseTimeline
+        today={TODAY}
+        focusIds={["f2", "f3"]}
+        events={[
+          { id: "f1", kind: "document_received", date: "2026-03-04", title: "Rechnung RE-24-0815", amount: 1190, currency: "EUR", state: "posted" },
+          { id: "f2", kind: "payment_out", date: "2026-03-18", title: "1. Rate RE-24-0815", amount: 500, currency: "EUR", state: "posted" },
+          { id: "f3", kind: "payment_out", date: "2026-04-15", title: "2. Rate (Rest) RE-24-0815", amount: 690, currency: "EUR", state: "posted" },
+        ]}
+        clarifications={[
+          { id: "f4", type: "question", title: "Ist die Rechnung vollständig?", raisedAt: "2026-03-06T09:00:00Z", severity: "optional", audience: "accounting" },
+        ]}
+      />
+    </div>
+  ),
+};
+
+/**
  * **Ein Zustandswort je Eintrag** (Owner 2026-09-18). Ereignis und Buchung
  * haben zwei Achsen, die dieselben vier Wörter führen — `proposed` heißt in
  * beiden „Vorschlag". Das Badge der Buchung steht deshalb nur, wo es etwas

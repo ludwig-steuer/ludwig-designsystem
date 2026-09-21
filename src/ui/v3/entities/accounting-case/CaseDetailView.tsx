@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { Columns } from "../../patterns/Columns";
 import { MasterDetail } from "../../patterns/MasterDetail";
 
 /**
@@ -26,6 +27,7 @@ export function CaseDetailView({
   signal,
   tabs,
   aside,
+  notes,
   children,
 }: {
   /** Above everything: the supply is the frame (`RecordPager`, 0047). */
@@ -46,6 +48,14 @@ export function CaseDetailView({
   tabs?: ReactNode;
   /** The strand on the left (`CaseTimeline`, 0040). Empty → one column. */
   aside?: ReactNode;
+  /**
+   * The third column on the right — read along: questions and notes, what the
+   * case still waits for (0152, owner 2026-09-18). With it the view is the
+   * three-column overview (`Columns list-detail-aside`, 0184); without it the
+   * two columns stay as they were. Needs `aside`: a right column without the
+   * strand has nothing to stand beside.
+   */
+  notes?: ReactNode;
   /** The content of the active tab — `CaseFacts` sits in here on the first one. */
   children: ReactNode;
 }) {
@@ -57,7 +67,11 @@ export function CaseDetailView({
       <div className="v2cdv__head">{header}</div>
       {signal ? <div className="v2cdv__next">{signal}</div> : null}
       {tabs ? <div className="v2cdv__tabs">{tabs}</div> : null}
-      {aside ? (
+      {aside && notes ? (
+        // The overview of the case (0152): strand · workspace · read along.
+        // The widths are the pattern's (0184) — the view sets none of its own.
+        <Columns pattern="list-detail-aside" list={aside} main={children} aside={notes} />
+      ) : aside ? (
         // 460 px instead of the default 620: what stands on the right are
         // facts, not a table — they stay readable in the detail column, and
         // with the default the view fell into a single column at a 1280 px

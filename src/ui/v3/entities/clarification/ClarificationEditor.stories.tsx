@@ -93,6 +93,32 @@ export const Audiences: Story = {
 };
 
 /**
+ * `audiences` schränkt ein, wer **hier** gefragt werden darf (F249): eine
+ * Rückfrage an den Mandanten legt die Kanzlei nicht von Hand an, die Aktion
+ * weist sie ab — also bietet das Formular sie nicht an. Oben zwei erlaubte
+ * Adressaten, unten einer: dann ist die Wahl weg und ein Satz sagt, wer
+ * gefragt ist. Die Vorbelegung `client` fällt auf den ersten erlaubten.
+ */
+export const LimitedAudiences: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-6)" }}>
+      <Card>
+        <CardHead title="Kanzlei oder Agent" sub="audiences = accounting, agent" />
+        <div style={{ padding: "var(--space-4)" }}>
+          <ClarificationEditor audiences={["accounting", "agent"]} onSubmit={async () => {}} />
+        </div>
+      </Card>
+      <Card>
+        <CardHead title="Nur die Kanzlei" sub="audiences = accounting" />
+        <div style={{ padding: "var(--space-4)" }}>
+          <ClarificationEditor audiences={["accounting"]} onSubmit={async () => {}} />
+        </div>
+      </Card>
+    </div>
+  ),
+};
+
+/**
  * Two ways to be invalid: nothing typed (shown after the first attempt) and a
  * title beyond 140 characters (shown right away).
  */

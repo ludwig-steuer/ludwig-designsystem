@@ -151,6 +151,38 @@ export const Filled: Story = {
 };
 
 /**
+ * Die Übersicht in **drei Spalten** (0152): links der Strang, in der Mitte die
+ * Arbeitsfläche, rechts, was man nebenher liest — Rückfragen und Notizen,
+ * Erwartungen. `notes` macht aus der Ansicht das Muster `list-detail-aside`
+ * (0184); ohne `notes` bleibt sie zweispaltig wie in `Filled`. Das ist der
+ * Rahmen, den die App für das Sachverhalt-Detail braucht (F249).
+ */
+export const ThreeColumns: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1480 }}>
+      <CaseDetailView
+        pager={pager}
+        header={head}
+        tabs={<Tabs items={TABS} active="overview" ariaLabel="Sachverhalt" />}
+        aside={strand}
+        notes={
+          <Card>
+            <CardHead title="Rückfragen und Notizen" sub="1 offen · 1 Notiz" />
+            <div className="v3boxbody">
+              <p className="v2muted" style={{ margin: 0 }}>
+                Hier stehen Rückfragen und Notizen — im Einsatz die Liste aus 0059.
+              </p>
+            </div>
+          </Card>
+        }
+      >
+        {facts}
+      </CaseDetailView>
+    </div>
+  ),
+};
+
+/**
  * Ein einziges Ereignis: kein `aside`, einspaltig — der Strang steht **im
  * Inhalt**, über den Fakten. Eine Timeline-Karte mit einer Zeile ist kein
  * Drittel der Breite wert; in voller Breite steht dieselbe Zeile lesbar da.

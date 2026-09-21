@@ -69,6 +69,7 @@ export function ClarificationEditor({
   error,
   audienceHint,
   unfoldLabel,
+  audiences,
 }: {
   defaultType?: ClarificationType;
   defaultAudience?: ClarificationAudience;
@@ -85,14 +86,28 @@ export function ClarificationEditor({
    * the prop the form stands open, as in a dialog (owner 2026-09-18).
    */
   unfoldLabel?: string;
+  /**
+   * Who may be asked **here** — the options offered, in this order. The app
+   * decides who may be addressed by hand: a question to the client created in
+   * the office is refused by the server action (F249), so the form must not
+   * offer it. Absent: all three. With one left the choice disappears and a
+   * sentence names who is asked.
+   */
+  audiences?: readonly ClarificationAudience[];
 }) {
+  const offered = audiences
+    ? AUDIENCE_OPTIONS.filter((o) => audiences.includes(o.value))
+    : AUDIENCE_OPTIONS;
+  const startAudience = offered.some((o) => o.value === defaultAudience)
+    ? defaultAudience
+    : (offered[0]?.value ?? defaultAudience);
   const [unfolded, setUnfolded] = useState(!unfoldLabel);
   const [type, setType] = useState<ClarificationType>(defaultType);
   const titleId = useId();
   const textId = useId();
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
-  const [audience, setAudience] = useState<ClarificationAudience>(defaultAudience);
+  const [audience, setAudience] = useState<ClarificationAudience>(startAudience);
   const [severity, setSeverity] = useState<ClarificationSeverity>("optional");
   const [touched, setTouched] = useState(false);
 
@@ -214,14 +229,22 @@ export function ClarificationEditor({
 
       {isComment ? null : (
         <>
-          <RadioGroup
-            name="clarification-audience"
-            label="Wer soll antworten"
-            value={audience}
-            onChange={(v) => setAudience(v as ClarificationAudience)}
-            disabled={pending}
-            options={AUDIENCE_OPTIONS}
-          />
+          {offered.length > 1 ? (
+            <RadioGroup
+              name="clarification-audience"
+              label="Wer soll antworten"
+              value={audience}
+              onChange={(v) => setAudience(v as ClarificationAudience)}
+              disabled={pending}
+              options={offered}
+            />
+          ) : offered[0] ? (
+            // One choice is no choice — a radio with a single option asks a
+            // question that has only one answer.
+            <div className="v2muted">
+              Gefragt ist: {offered[0].label}. {offered[0].hint}
+            </div>
+          ) : null}
           {audienceHint ? <Callout tone="soft">{audienceHint}</Callout> : null}
 
           <RadioGroup

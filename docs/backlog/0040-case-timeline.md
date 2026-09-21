@@ -1074,3 +1074,19 @@ dazu liefert.
 3. `note` und `accrualPeriod` stehen in der zweiten Zeile, mit „·" getrennt.
 
 **Stand.** Gebaut 2026-09-21, im Browser nachgesehen. Fremde Abnahme steht aus.
+
+## Nachtrag 2026-09-21 — Fokus statt Filter (F249)
+
+**Anlass.** Die App hat mit F249 (App `15789207`) ihr Sachverhalt-Detail auf
+`CaseTimeline` umgestellt und dabei eine Fähigkeit verloren: beim Kontofilter
+in der Saldo-Ansicht hob ihr eigener Strang die Ereignisse des gewählten
+Kontos hervor und blasste die übrigen ab (`dimSet`).
+
+**Schnittstelle.** `focusIds?: readonly string[] | null` — nur diese Einträge
+stehen voll, alle anderen treten zurück (dieselbe blasse Fläche wie ein
+ersetztes Ereignis), bleiben aber lesbar und wählbar. Gilt für Ereignisse,
+Klärungen und Erwartungen. `null` oder ohne: alle, wie sie sind. **Der Strang
+bleibt ganz** — herausnehmen hieße eine Lücke zeigen, die nichts bedeutet.
+
+**Abnahmekriterium.** `--focus`: die beiden Raten voll, Rechnung und Rückfrage
+blass. **Stand:** gebaut und im Browser nachgesehen, fremde Abnahme steht aus.

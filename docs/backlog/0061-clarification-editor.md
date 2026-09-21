@@ -222,3 +222,21 @@ weiter, das Zuklappen hängt hinter dem `await`.
 
 **Stand.** Gebaut 2026-09-18, im Browser nachgesehen (Punkt 1 und 2; Punkt 3
 zur Hälfte — die Showcase-Fassung wirft nicht). Fremde Abnahme steht aus.
+
+## Nachtrag 2026-09-21 — wer hier gefragt werden darf (F249)
+
+**Anlass.** Die App legt mit F249 Rückfragen über diesen Editor an. Eine
+Rückfrage an den **Mandanten** darf die Kanzlei nicht von Hand anlegen — die
+Server-Aktion weist sie ab —, der Editor bot „Mandant" aber an.
+
+**Schnittstelle.** `audiences?: readonly ClarificationAudience[]` — die
+angebotenen Adressaten in dieser Reihenfolge; ohne die Prop alle drei. Liegt
+`defaultAudience` nicht darunter, gilt der erste erlaubte. Bleibt nur einer,
+fällt die Auswahl weg und ein Satz nennt, wer gefragt ist („Gefragt ist:
+Kanzlei. …") — ein Radio mit einer Option fragt etwas, das nur eine Antwort
+hat. Wer gefragt werden darf, entscheidet die App, nicht das Set.
+
+**Abnahmekriterium.** `--limited-audiences`: oben zwei Optionen, Kanzlei
+vorgewählt (Vorgabe `client` fiel zurück); unten keine Optionen, der Satz
+„Gefragt ist: Kanzlei." **Stand:** gebaut und im Browser nachgesehen, fremde
+Abnahme steht aus.

@@ -228,6 +228,7 @@ export function CaseTimeline({
   kindLabels,
   today,
   loading,
+  focusIds,
 }: {
   events: CaseTimelineEvent[];
   clarifications?: CaseTimelineClarification[];
@@ -243,7 +244,17 @@ export function CaseTimeline({
   /** Reference day `YYYY-MM-DD` for maturity and clarification state. */
   today?: string;
   loading?: boolean;
+  /**
+   * Only these entries stand out; every other one steps back, readable but
+   * pale — a filter elsewhere on the page („events of account 1200") shown in
+   * the strand without removing anything from it. `null` or absent: all
+   * entries as they are. The app had this as `dimSet` in its own strand
+   * (F249); the strand stays whole, because a gap would be a statement.
+   */
+  focusIds?: readonly string[] | null;
 }) {
+  const focus = focusIds ? new Set(focusIds) : null;
+  const outOfFocus = (id: string) => focus !== null && !focus.has(id);
   const byId = new Map<string, CaseTimelineEntry>();
   const items: TimelineItem[] = [];
 
@@ -262,6 +273,7 @@ export function CaseTimeline({
     items.push({
       id: e.id,
       at: e.dueDate,
+      ...(outOfFocus(e.id) ? { dim: true } : {}),
       title: e.counterpartyName ? `${word}: ${e.counterpartyName}` : word,
       icon: (
         <KindIcon of={e.kind === "payment" ? BanknoteArrowDown : FileQuestionMark} label={word} />
@@ -286,6 +298,7 @@ export function CaseTimeline({
     items.push({
       id: c.id,
       at: calendarDay(c.raisedAt),
+      ...(outOfFocus(c.id) ? { dim: true } : {}),
       title: c.title,
       icon: <KindIcon of={MessageCircleQuestionMark} label={word} />,
       right: rightEnd(
@@ -360,7 +373,7 @@ export function CaseTimeline({
           ) : null}
         </span>,
       ),
-      dim: ev.superseded,
+      dim: ev.superseded || outOfFocus(ev.id),
     });
   }
 
