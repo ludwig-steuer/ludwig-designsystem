@@ -393,6 +393,7 @@ export {
 /* Sachverhalt — the cell, its name and its number (0095) */
 export { CaseCell } from "./entities/accounting-case/CaseCell";
 export { CaseFacts, type CaseFactsVM } from "./entities/accounting-case/CaseFacts";
+export { CaseAmount } from "./entities/accounting-case/CaseAmount";
 export { CaseDetailView } from "./entities/accounting-case/CaseDetailView";
 export { CaseDrawer, type CaseQuickView } from "./entities/accounting-case/CaseDrawer";
 export { CaseRow } from "./entities/accounting-case/CaseRow";

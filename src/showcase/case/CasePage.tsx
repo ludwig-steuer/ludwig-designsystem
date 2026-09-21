@@ -5,7 +5,7 @@ import type { CaseFactsVM } from "@/ui/v3/entities/accounting-case/CaseFacts";
 import { caseDisplayTitle, caseKindLabel } from "@/ludwig/modules/accounting-cases/domain/case";
 
 import { EntityIcon } from "@/ui/v3/Icons";
-import { Amount } from "@/ui/v3/primitives/Amount";
+import { CaseAmount } from "@/ui/v3/entities/accounting-case/CaseAmount";
 import { Tabs } from "@/ui/v3/primitives/Nav";
 import { RecordPager } from "@/ui/v3/primitives/RecordPager";
 import { Columns } from "@/ui/v3/patterns/Columns";
@@ -24,27 +24,6 @@ import { FALL_TABS, listHref, tabHref } from "./fixtures";
  * Not a set component: it lives in `showcase/` because the page belongs to
  * the app. It keeps the scenarios comparable.
  */
-/**
- * The rest after the payments so far, under the amount (B-01). Only where it
- * says something the amount does not: partly paid, or fully covered. When
- * nothing is paid yet the rest **is** the amount — writing it twice is what
- * D24 forbids.
- */
-function OpenRest({ open, total, currency }: { open: number | null; total: number; currency: Currency | null }) {
-  if (open === null || Math.abs(open) === Math.abs(total)) return null;
-  return (
-    <span className="v2sub" style={{ display: "block" }}>
-      {open === 0 ? (
-        "gedeckt"
-      ) : (
-        <>
-          offen <Amount value={open} currency={currency} size="sm" />
-        </>
-      )}
-    </span>
-  );
-}
-
 export function CasePage({
   accountingCase: accountingCase,
   tab = "overview",
@@ -119,17 +98,11 @@ export function CasePage({
                   // `CaseDetail.currency` is a `string`, `Amount` wants the four house
                   // currencies — the narrowing is right, and the caller does it.
                   value: (
-                    <>
-                      <Amount
-                        value={accountingCase.totalAmount}
-                        currency={(accountingCase.currency as Currency | null) ?? null}
-                      />
-                      <OpenRest
-                        open={accountingCase.openAmount ?? null}
-                        total={accountingCase.totalAmount}
-                        currency={(accountingCase.currency as Currency | null) ?? null}
-                      />
-                    </>
+                    <CaseAmount
+                      amount={accountingCase.totalAmount}
+                      openAmount={accountingCase.openAmount ?? null}
+                      currency={(accountingCase.currency as Currency | null) ?? null}
+                    />
                   ),
                 },
               }

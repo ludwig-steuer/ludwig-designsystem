@@ -2308,6 +2308,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2tl__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .v2tl__empty { padding: var(--space-4) 0; }
 
+/* --- CaseAmount (0192) — the rest under the amount -------------------------- */
+.v3camt__rest { display: block; font-weight: 400; }
+
 /* --- MirrorEntry (0191) — what stands in DATEV ---------------------------- */
 .v3mir { display: flex; flex-direction: column; font-size: var(--fs-ui); line-height: var(--lh-ui); }
 .v3mir__item { border-top: 1px solid var(--color-border-subtle); padding: var(--space-3) 0; }
