@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| Status | Entwurf |
-| Route | `ludwig/app`: `app/(app)/clients/[clientSlug]/[year]/cases/[caseId]/page.tsx` (418 Z.) |
-| Heute gebaut in | `modules/accounting-cases/ui/sachverhalt/` — `SachverhaltScreen.tsx` (1815 Z.), `parts.tsx` (522 Z., `Hero` · `NextActionBar` · `SvTabsBar`), `FehltPanel.tsx`, `RaiseClarificationForm.tsx` |
+| Status | Entwurf — Kopf nachgezogen 2026-09-21 (F257); der Rumpf beschreibt noch die Alt-Ansicht vom 2026-09-03 |
+| Route | `ludwig/app`: `app/(app)/clients/[clientSlug]/[year]/cases/[caseId]/page.tsx` (317 Z., Stand App `a16cc297`) |
+| Heute gebaut in | `modules/accounting-cases/ui/case-page/` — `CasePageFrame.tsx`, `CaseOverview.tsx`, `CaseRouteMenu.tsx` und `tabs/*` (`EventsTab`, `DocumentsTab`, `ClarificationsTab`, `PlausibilityTab`, `MasterDataTab`, `RecurrenceTab`, `TechnicalTab`). Neu gebaut mit F257 (App `a16cc297`, 2026-09-21) nach der Vorlage 0152: dreispaltig (Strang · Arbeitsfläche · Rückfragen und Notizen), Reiter-Satz wie `FALL_TABS`. Die Alt-Ansicht (`ui/sachverhalt/`, `SachverhaltScreen.tsx`, `parts.tsx`) ist gelöscht |
 | Entitäten | Sachverhalt (`accounting-case`, Profil fehlt noch) · Ereignis · Klärung · Erwartung · Buchung · Beleg |
-| Baustein in v3 | noch keiner — Aufgabe 0050 |
+| Baustein in v3 | Rahmen `CaseDetailView` (0050, mit `notes` dreispaltig seit 2026-09-21) · Strang `CaseTimeline` (0040) · Kopf `EntityHeader` + `CaseAmount` (0192) · `RecordPager` (0047, ohne Menge nur der Rückweg) · Rückfragen und Notizen `ClarificationList`/`Card`/`Editor` (0059–0061) · Spiegel `MirrorEntryList` (0191) · Vorlage der ganzen Seite: `src/showcase/case/` (0152) |
 | Fachliche Quelle | `ludwig/app`: `docs/topics/sachverhalt.md` (Zustände, Regeln S1–S3) |
 | Profil von / am | Claude, 2026-09-03 · Screenshot der heutigen Implementierung |
 

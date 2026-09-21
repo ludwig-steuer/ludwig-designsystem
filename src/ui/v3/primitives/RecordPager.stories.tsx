@@ -56,6 +56,16 @@ export const WithoutBack: Story = {
 };
 
 /**
+ * **Ohne Menge** (F257): die Seite wurde direkt geöffnet — über einen Link,
+ * die Suche, ein Lesezeichen —, nicht aus einer Liste. Dann gibt es nichts zu
+ * zählen und nichts zu blättern: ohne `position` und `total` steht nur der Weg
+ * zurück. Pfeile ohne Menge versprächen ein „Nächstes", das es nicht gibt.
+ */
+export const BackOnly: Story = {
+  render: () => <RecordPager back={{ href: "/cases", label: "Sachverhalte" }} />,
+};
+
+/**
  * Die Client-Variante mit Tasten: `J` zurück, `K` weiter — probieren Sie es
  * aus. Beide Tasten stehen sichtbar neben den Pfeilen (V14); ohne `hotkeys`
  * steht dort nichts, weil eine angezeigte Taste, die nichts tut, eine Lüge

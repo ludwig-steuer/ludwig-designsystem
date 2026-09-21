@@ -201,3 +201,21 @@ Regel beweist sich jetzt am eigenen Baustein statt an einer fremden Liste.
 Dazu: fünf Zähler im Set formatierten weiter selbst (`toLocaleString` in
 `AccountEntries`, `account-columns`, `Account`, `BankTransactionWorklist`) —
 genau das, wovor der neue JSDoc warnt. Sie lesen jetzt `formatCount`.
+
+## Nachtrag 2026-09-21 — ohne Menge nur der Rückweg (F257, `acto`)
+
+**Anlass.** Die neu gebaute Sachverhalt-Detailseite (App `a16cc297`) wird auch
+ohne `from`-Query geöffnet — über einen Link, die Suche, ein Lesezeichen. Dann
+gibt es keine Listenmenge zum Blättern, und die App setzte ersatzweise einen
+Textknopf „← Sachverhalte" statt des Pagers.
+
+**Schnittstelle.** `position` und `total` sind optional. Fehlen sie, zeigt der
+Pager **nur den Rückweg** (`back`): keinen Zähler und keine Pfeile — Pfeile
+ohne Menge versprächen ein „Nächstes", das es nicht gibt. Ohne Menge und ohne
+`back` rendert er nichts. Mit beiden Zahlen bleibt alles wie bisher; die Regel
+„am Ende der Menge bleibt der Pfeil sichtbar und inaktiv" gilt weiter, denn
+das ist ein Ende, keine fehlende Menge.
+
+**Abnahmekriterium.** Story `BackOnly`: ein Link „Sachverhalte" auf `/cases`,
+kein `.v2pager__count`, keine Pfeile. **Stand:** gebaut und im Browser
+nachgesehen, fremde Abnahme steht aus.

@@ -19,9 +19,15 @@ import { Link } from "./Link";
  */
 
 type Common = {
-  /** 1-based, the way the caller counts. */
-  position: number;
-  total: number;
+  /**
+   * 1-based, the way the caller counts. `position` and `total` together make
+   * the queue; **without them there is none** — the record was opened
+   * directly, not out of a list (a link, a search, a bookmark) — and the
+   * pager shows only the way back: no count, no arrows (owner 2026-09-21,
+   * F257). Arrows without a queue would promise a „next" that does not exist.
+   */
+  position?: number;
+  total?: number;
   /** What is counted, singular — „Sachverhalt". Without it: just „3 von 117". */
   label?: string;
   /** The way back into the queue, named („Sachverhalte"). */
@@ -49,7 +55,8 @@ type PagerButtonProps = Common & {
 
 /**
  * @when    One record out of a queue is in focus and the next one follows
- *          without a detour through the list.
+ *          without a detour through the list — or, without `position` and
+ *          `total`, a record opened directly that only needs its way back.
  * @instead Pages of a list (page 2 of 9) → Pagination. Steps of a process in
  *          a fixed order → StepRail. Narrowing a list down → FilterBar.
  */
@@ -80,14 +87,21 @@ export function RecordPager(props: PagerLinkProps | PagerButtonProps) {
   const prev = isLinks ? props.prevHref ?? null : onPrev ?? null;
   const next = isLinks ? props.nextHref ?? null : onNext ?? null;
 
+  const backLink = back ? (
+    <Link href={back.href} className="v2pager__back">
+      <ActionIcon action="back" size={14} />
+      {back.label}
+    </Link>
+  ) : null;
+
+  // No queue: only the way back. Without that either there is nothing to say.
+  if (position === undefined || total === undefined) {
+    return backLink ? <div className="v2pager">{backLink}</div> : null;
+  }
+
   return (
     <div className="v2pager">
-      {back ? (
-        <Link href={back.href} className="v2pager__back">
-          <ActionIcon action="back" size={14} />
-          {back.label}
-        </Link>
-      ) : null}
+      {backLink}
       <Step dir="prev" target={prev} hotkey={hotkeys ? "J" : undefined} />
       <span className="v2pager__count">
         {label ? `${label} ` : ""}

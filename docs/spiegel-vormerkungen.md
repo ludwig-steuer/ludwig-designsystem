@@ -12,7 +12,12 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-Nichts.
+**Achse `case_account_balance`** (gemeldet von `acto`, 2026-09-21, F257) — der
+Saldo-Stand eines Kontos im Sachverhalt: `must_clear` / `cleared` / `stays`
+(Namen geplant). Der App-Commit steht noch aus; `acto` meldet ihn. Danach
+Spiegel-Lauf (braucht eine Owner-Ausnahme), damit `StatusBadge` die Achse
+kennt. Im Set ist bis dahin nichts zu tun — eine Achse, die der Spiegel nicht
+führt, erfindet das Set nicht.
 
 ## Erledigt mit dem zweiten Lauf vom 2026-09-21 (App `9048bce1`, F251)
 
