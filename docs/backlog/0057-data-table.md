@@ -380,3 +380,29 @@ bei 67 endet.
 - [ ] Im Ladezustand hat jede Zeile so viele Zellen wie die Kopfzeile, und die
       rechten Kanten sind deckungsgleich — gemessen, mit `selection`,
       `expand` und `rowActions` je einzeln und zusammen
+
+## Nachtrag 2026-09-21 — die Griff-Spalten zählen zum Boden (Fehler, gemeldet von `a1`)
+
+**Fehler.** `DataTable` setzte `minWidth={minWidth ?? columnsMinWidth(columns)}`,
+und `columnsMinWidth` summierte nur die Spalten des Aufrufers. Die Spuren, die
+`DataTable` selbst davor- und dahintersetzt — Auswahl und Aufklapper
+(`--v2-tbl-pick`, je 32 px), Aktionen (`--v2-tbl-actions`, 180 px), je mit
+10 px Rinne —, fehlten. In Schritt 3 der Abnahme (alle drei) waren das 274 px:
+lag die Kartenbreite zwischen gerechnetem und echtem Bedarf, kam kein
+Scrollbalken, das Raster lief über, und `.v2card { overflow: clip }` schnitt
+Prüfbedarf und Aktionen ab.
+
+**Behebung.** `columnsMinWidth(columns, handles?)` nimmt die Griffe als
+optionales zweites Argument `{ selection, expand, actions }` und zählt ihre
+Spuren samt Rinnen mit; `DataTable` übergibt, was es selbst rendert. Die
+Pixelwerte stehen als `TRACK_PICK`/`TRACK_ACTIONS` neben dem Rechner, mit
+Verweis auf die Tokens in `v3.css` — der Server kann eine CSS-Variable nicht
+lesen, also steht die Zahl an zwei Stellen, und beide Stellen sagen das.
+Bestehende Aufrufer ohne zweites Argument rechnen wie bisher.
+
+**Abnahmekriterium.** Story `HandlesInFloor`: fünf Spalten plus alle drei
+Griffe in einem 800-px-Rahmen. Gemessen: Boden 930 px (656 + 274), der
+Rahmen scrollt (930 > 798), die Aktionsspalte ist erreichbar statt
+abgeschnitten. **Stand:** gebaut und gemessen, fremde Abnahme steht aus.
+Der Override in der App (`batch-review/ui/Step3Single.tsx`, `ponytail:`) kann
+mit dem nächsten Zeigerhub weg.

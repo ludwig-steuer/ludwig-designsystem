@@ -717,6 +717,33 @@ export const AutoMinWidth: Story = {
 };
 
 /**
+ * Die **Griff-Spalten** zählen mit (a1, 2026-09-21): Auswahl und Aufklapper
+ * davor, Aktionen dahinter — zusammen 274 px, die der gerechnete Boden bis
+ * dahin nicht kannte. Der Rahmen hier ist 800 px breit, also breiter als die
+ * fünf Spalten allein (656 px) und schmaler als der echte Bedarf (930 px):
+ * genau die Lücke, in der kein Scrollbalken kam und die Karte rechts
+ * **abschnitt**. Jetzt scrollt sie, und die Aktionen sind erreichbar.
+ */
+export const HandlesInFloor: Story = {
+  render: () => (
+    <div style={{ width: 800 }}>
+      <DataTable<CaseListItem>
+        rows={PAGE.slice(0, 4)}
+        columns={COLUMNS}
+        rowKey={rowKey}
+        head={{ title: "Sachverhalte", sub: "Auswahl, Aufklapper und Aktionen" }}
+        selection={{ actions: [{ label: "Freigeben", hotkey: "F", action: async () => {} }] }}
+        expand={(c) => <FieldList tone="bare" rows={[["Zusammenfassung", c.summary]]} />}
+        rowActions={(c) => [
+          { label: "Öffnen", href: `#sachverhalt-${rowKey(c)}` },
+          { label: "Zurückstellen", action: async () => {} },
+        ]}
+      />
+    </div>
+  ),
+};
+
+/**
  * `minWidth={0}` ist kein Notausgang, sondern ein gültiger Fall: eine Tabelle
  * mit **einer** flexiblen Spalte hat keinen sinnvollen Boden, und ein
  * gerechneter von 36 px wäre eine Behauptung. Wer quetschen will, sagt es.

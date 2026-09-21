@@ -72,10 +72,21 @@ import { StateIcon } from "./Review";
  * has none, and inventing one would be a claim. Whoever wants a floor writes
  * it into the track width, where it belongs.
  *
+ * The handle tracks `DataTable` puts around the columns — selection and
+ * fold-out in front, actions behind — count too (`handles`). They are in the
+ * grid, so they have to be in the floor: without them the grid overflowed a
+ * card between the computed and the real width, no scrollbar came, and
+ * `.v2card { overflow: clip }` cut off the right end — 274 px in step 3 of
+ * the batch review (selection + fold-out + actions, reported by a1
+ * 2026-09-21).
+ *
  * @when    A table is built by hand with `Table` and needs the same floor `DataTable` computes.
  * @instead `DataTable` does it itself — pass `minWidth` only to overrule it.
  */
-export function columnsMinWidth<T>(columns: readonly ColumnDef<T>[]): number {
+export function columnsMinWidth<T>(
+  columns: readonly ColumnDef<T>[],
+  handles: { selection?: boolean; expand?: boolean; actions?: boolean } = {},
+): number {
   const GUTTER = 10;
   // `.v2tbl` sits in a card with `padding: 12px 18px` (v3.css) — 36 px.
   // Measured while building 0085 and confirmed by its acceptance 2026-09-07.
@@ -87,9 +98,24 @@ export function columnsMinWidth<T>(columns: readonly ColumnDef<T>[]): number {
     const px = /^(\d+)px$/.exec(width.trim());
     return px?.[1] ? Number(px[1]) : 0;
   };
-  const tracks = columns.reduce((sum, c) => sum + floor(c.width), 0);
-  return tracks + GUTTER * Math.max(0, columns.length - 1) + PADDING;
+  const handleTracks = [
+    handles.selection ? TRACK_PICK : null,
+    handles.expand ? TRACK_PICK : null,
+    handles.actions ? TRACK_ACTIONS : null,
+  ].filter((w): w is number => w !== null);
+  const tracks =
+    columns.reduce((sum, c) => sum + floor(c.width), 0) + handleTracks.reduce((sum, w) => sum + w, 0);
+  const count = columns.length + handleTracks.length;
+  return tracks + GUTTER * Math.max(0, count - 1) + PADDING;
 }
+
+/**
+ * The handle tracks in pixels. **The same numbers as `--v2-tbl-pick` and
+ * `--v2-tbl-actions` in v3.css** — the grid reads the tokens, the floor these;
+ * the server cannot read a CSS variable. Change both together.
+ */
+const TRACK_PICK = 32;
+const TRACK_ACTIONS = 180;
 
 export interface ColumnDef<T> {
   /** Also the sort name that goes into the URL. */
@@ -492,7 +518,14 @@ export function DataTable<T>(props: DataTableProps<T>) {
       />
       <Table
         cols={cols}
-        minWidth={minWidth ?? columnsMinWidth(columns)}
+        minWidth={
+          minWidth ??
+          columnsMinWidth(columns, {
+            selection: Boolean(selection),
+            expand: Boolean(expand),
+            actions: Boolean(rowActions),
+          })
+        }
         density={density}
         {...(sections ? { sections } : {})}
       >

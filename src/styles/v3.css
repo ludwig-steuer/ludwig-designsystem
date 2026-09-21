@@ -71,12 +71,13 @@
   --v2-row-fs: 13.5px;
   --v2-head-y: 9px;
   --v2-detail-y: 14px;
-  /* Width of the handle columns before the data: selection and chevron (0057). */
+  /* Width of the handle columns before the data: selection and chevron (0057).
+     DataTable's floor counts it as TRACK_PICK — change both together. */
   --v2-tbl-pick: 32px;
   /* The action column is **fixed**, not content-sized: head and row are separate
      grids, and `max-content` measured each on its own (54 vs 176 px). Wider
      actions raise the token on their table (0106). */
-  --v2-tbl-actions: 180px;
+  --v2-tbl-actions: 180px; /* = TRACK_ACTIONS in DataTable.tsx — change both together */
 }
 .v2tbl[data-density="compact"] {
   --v2-row-y: 7px;
