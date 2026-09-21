@@ -212,3 +212,17 @@ ohne Konsolenmeldung:
 
 Nicht gebaut, wie in der Spec vorgesehen: die neun Lücken B-01 … B-09. Sie
 stehen in den Stories als Satz, nicht als Platzhalter im Code.
+
+## Stand der Befunde (2026-09-21, nach App `c478af21` und 0191)
+
+| Befund | Stand |
+|---|---|
+| B-01 Restbetrag | Feld drüben (`CaseHeaderVM.openAmount`), **wartet auf den Spiegel-Lauf** |
+| B-02 Anteil | **erledigt** — `CaseTimelineEvent.allocatedAmount` (Nachtrag 0040), Story 8 zeigt den Anteil |
+| B-03 Satz am Ereignis | **erledigt** — `note`, Stories 8, 9, 16 |
+| B-04 Verrechnungs-Zwilling | Feld drüben als Id; **offen**, bis ein Wort für die Bankzeile mitkommt |
+| B-05 Periode | **erledigt** — `accrualPeriod`, Stories 17, 18; die Regel selbst braucht ebenfalls ihr Wort statt der Id |
+| B-06 Auflösung der Erwartung | Felder drüben (`resolution`, `resolvedByEventId`); **offen** — für `resolution` gibt es keine Wortliste (L-332), und das lösende Ereignis braucht ein Etikett |
+| B-07 Storno-Bezug | Feld drüben am gespiegelten `JournalEntryVM`; **wartet auf den Spiegel-Lauf** |
+| B-08 Spiegelbuchung | **erledigt** — 0191, Stories 31–34 |
+| B-09 Vorsteuer ohne Beleg | **erledigt** — `CaseFacts` (0191), Story 35 |

@@ -1045,3 +1045,32 @@ woher der Eintrag kommt, nicht in welchem Zustand er ist.
 „Gebucht" / „Buchung fehlt · Zurückgezogen" / „Benötigt Antwort · Vorschlag";
 Reiter Ereignisse: je ein Wort). `bookingState` hatte bis dahin **keine**
 Story — jetzt hat es eine. Fremde Abnahme steht aus.
+
+## Nachtrag 2026-09-21 — Anteil, Satz und Periode am Ereignis (0190)
+
+**Anlass.** Die App trägt seit `c478af21` (staging) drei Felder am Ereignis,
+die der Katalog 0190 als Lücken B-02, B-03 und B-05 gemeldet hatte.
+
+**Schnittstelle an `CaseTimelineEvent`.**
+
+| Feld | Typ | Was |
+|---|---|---|
+| `allocatedAmount` | `number \| null` | der Anteil **dieses** Falls an einer Zahlung, die mehrere begleicht. Er ersetzt den Betrag in der Zeile; die ganze Bankzeile steht im Tooltip der Zahl („Anteil an 3.570,00 €"). Das Vorzeichen kommt weiter aus der Art |
+| `note` | `string \| null` | der eine Satz am Ereignis — nicht `stateNote`, die am Badge hängt und sagt, warum nicht gebucht wird |
+| `accrualPeriod` | `string \| null` | „2026-03" → „Periode 03/2026" in der zweiten Zeile |
+
+Satz und Periode stehen über `TimelineItem.sub` (Nachtrag 0023).
+
+**Bewusst nicht gezogen:** `recurringRuleId` und
+`passThroughOfBankTransactionId` (B-04) — beides sind Ids, und eine rohe Id in
+der Zeile sagt niemandem etwas. Sie kommen, sobald der Aufrufer Wort und Weg
+dazu liefert.
+
+**Abnahmekriterien (Nachtrag)**
+
+1. Ein Ereignis mit `amount: 3570`, `allocatedAmount: -1190` zeigt −1.190,00 €
+   und im Tooltip „Anteil an 3.570,00 €" (`--share-note-period`).
+2. Ohne `allocatedAmount` oder bei gleichem Betrag hat die Zahl keinen Tooltip.
+3. `note` und `accrualPeriod` stehen in der zweiten Zeile, mit „·" getrennt.
+
+**Stand.** Gebaut 2026-09-21, im Browser nachgesehen. Fremde Abnahme steht aus.

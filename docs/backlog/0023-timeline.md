@@ -508,3 +508,18 @@ Tooltips der Badges schlucken (`stateNote` in 0040).
 **Stand.** Gebaut 2026-09-18; im Browser nachgesehen (`--without-time`:
 kein `<time>`, keine Lückenzeile, Klick auf Betrag → `e3`, auf zweite Zeile
 → `e1`, auf „Einzelheiten“ bleibt `e1`). Fremde Abnahme steht aus.
+
+## Nachtrag 2026-09-21 — eine zweite Zeile, die der Aufrufer schreibt
+
+**Anlass.** Der Sachverhalt trägt die Art seines Eintrags im Zeichen, also blieb
+die zweite Zeile leer — während das Ereignis einen Satz zu sagen hatte
+(„Differenz 23,80 € = Skonto", „Periode 03/2026"; 0190, B-03/B-05).
+
+**Schnittstelle.** `TimelineItem.sub?: string` — steht in der zweiten Zeile
+**neben** Art und Akteur, nicht an ihrer Stelle; ohne sie bleibt der Eintrag
+einzeilig wie bisher (0040).
+
+**Abnahmekriterium.** In `v3-entitäten-sachverhalt-casetimeline--share-note-period`
+trägt jeder der drei Einträge seine zweite Zeile; in `--filled` von 0023
+(ohne `sub`) ändert sich nichts. **Stand:** gebaut und im Browser nachgesehen,
+fremde Abnahme steht aus.

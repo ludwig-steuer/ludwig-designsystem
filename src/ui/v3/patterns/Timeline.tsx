@@ -38,6 +38,14 @@ export interface TimelineItem {
   kind?: string;
   /** Who caused it: „Agent", „Kanzlei", „System". */
   actor?: string;
+  /**
+   * A second line the caller writes itself — where kind and actor say nothing.
+   * The case strand carries its kind in the icon, so its second line was empty
+   * while the event had a sentence to make („Differenz 23,80 € = Skonto",
+   * „Periode 03/2026"). It stands **next to** kind and actor, not instead
+   * (owner 2026-09-21).
+   */
+  sub?: string;
   /** Icon of the kind, in front of the title; carries its word as `title`. */
   icon?: ReactNode;
   /** Superseded, withdrawn, historic: the entry steps back but stays readable. */
@@ -192,7 +200,8 @@ function Entry({
   const kindWord = item.kind
     ? (kindLabels?.[item.kind] ?? STATUS_REGISTRY.event_kind[item.kind]?.label ?? item.kind)
     : null;
-  const second = kindWord ? `${kindWord}${item.actor ? ` · ${item.actor}` : ""}` : item.actor;
+  const who = kindWord ? `${kindWord}${item.actor ? ` · ${item.actor}` : ""}` : item.actor;
+  const second = [who, item.sub].filter(Boolean).join(" · ");
   return (
     // The row is the pointer target, the title stays the one control for
     // keyboard and screen reader. A click on the title or on „Einzelheiten"

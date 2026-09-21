@@ -368,10 +368,10 @@ export const PaymentInTwoRates: Story = {
 
 /**
  * **8 · Anteil an einer Sammelzahlung.** Eine Überweisung über 3.570,00 €
- * begleicht drei Rechnungen; auf diesen Fall entfallen 1.190,00 €. **Der
- * Strang zeigt den vollen Betrag** — `allocated_amount` hat an
- * `CaseTimelineEvent` kein Feld (Befund B-02). Genau das sieht man hier: die
- * Zeile sagt 3.570,00 €, und das ist an diesem Fall falsch.
+ * begleicht drei Rechnungen; auf diesen Fall entfallen 1.190,00 €. Seit
+ * `allocatedAmount` (B-02, App `c478af21`) zeigt die Zeile **den Anteil**, und
+ * der volle Betrag der Bankzeile steht im Tooltip der Zahl — er gehört zur
+ * Zahlung, aber nicht zu diesem Fall.
  */
 export const PaymentShareOfBatch: Story = {
   render: () => (
@@ -379,7 +379,11 @@ export const PaymentShareOfBatch: Story = {
       sub="Anteil einer Sammelzahlung"
       selected="evt-08"
       events={[
-        ev("evt-08", "payment_out", "2026-03-20", "Anteil Sammelüberweisung", 3570, "posted", { bookingState: "posted" }),
+        ev("evt-08", "payment_out", "2026-03-20", "Anteil Sammelüberweisung", 3570, "posted", {
+          bookingState: "posted",
+          allocatedAmount: -1190,
+          note: "Split: RE-24-0815 / RE-24-0822 / RE-24-0840",
+        }),
       ]}
     >
       <Pane title="Sammelüberweisung vom 20.03.2026" sub="drei Rechnungen in einem Auftrag">
@@ -394,8 +398,8 @@ export const PaymentShareOfBatch: Story = {
           ]}
         />
         <p className="v2muted" style={{ margin: 0 }}>
-          Die Strangzeile zeigt 3.570,00 €, weil dem Ereignis das Feld für den Anteil fehlt
-          (Befund B-02).
+          Die Strangzeile zeigt den Anteil dieses Falls; die ganze Bankzeile steht im Tooltip
+          der Zahl.
         </p>
       </Pane>
     </Entry>
@@ -404,8 +408,9 @@ export const PaymentShareOfBatch: Story = {
 
 /**
  * **9 · Zahlung mit Skonto.** Gezahlt sind 1.166,20 €, die Differenz von
- * 23,80 € ist Skonto. Der Satz dazu steht heute nur in der Fläche: am
- * Ereignis gibt es kein Feld für eine Notiz (Befund B-03).
+ * 23,80 € ist Skonto. Der Satz dazu steht seit `note` (B-03) in der zweiten
+ * Zeile des Eintrags — dort, wo die Art stünde, wenn sie nicht schon im
+ * Zeichen steckte.
  */
 export const PaymentWithDiscount: Story = {
   render: () => (
@@ -415,6 +420,7 @@ export const PaymentWithDiscount: Story = {
       events={[
         ev("evt-09", "payment_out", "2026-03-11", "Zahlung RE-24-0815 abzgl. 2 % Skonto", 1166.2, "posted", {
           bookingState: "posted",
+          note: "Differenz 23,80 € = Skonto",
         }),
       ]}
     >
@@ -572,8 +578,10 @@ export const InternalTransfer: Story = {
 /**
  * **15 · Verrechnungs-Zwilling (PayPal).** Der Server legt ihn an, wenn Geld
  * über ein Verrechnungskonto läuft; er hat **keine** Bankzeile als Quelle,
- * sondern hängt an einer fremden. Woran, kann die Zeile heute nicht sagen —
- * `pass_through_of_bank_transaction_id` hat kein Feld (Befund B-04).
+ * sondern hängt an einer fremden. Drüben gibt es das Feld seit `c478af21`
+ * (`passThroughOfBankTransactionId`), im Strang steht es trotzdem nicht: eine
+ * rohe Id ist keine Aussage. Die Zeile braucht die Bankzeile mit Wort und Weg
+ * — Befund B-04 bleibt offen, jetzt als Frage nach dem Etikett.
  */
 export const PassThroughTwin: Story = {
   render: () => (
@@ -592,8 +600,8 @@ export const PassThroughTwin: Story = {
           accountHref={accountHref}
         />
         <p className="v2muted" style={{ margin: 0 }}>
-          Entstanden aus der PayPal-Zeile vom 09.03. — den Verweis trägt das Ereignis heute nicht
-          (Befund B-04).
+          Entstanden aus der PayPal-Zeile vom 09.03.; die Id dazu trägt das Ereignis, ein Wort
+          dafür noch nicht (Befund B-04).
         </p>
       </Pane>
     </Entry>
@@ -602,15 +610,20 @@ export const PassThroughTwin: Story = {
 
 /**
  * **16 · Korrektur von Hand.** Kein Beleg, keine Zahlung: ein Mensch bucht um.
- * Der Grund („Hinweis Kanzlei, Abnahme 03/2026") steht in der Fläche, nicht in
- * der Zeile (Befund B-03).
+ * Der Grund („Hinweis Kanzlei, Abnahme 03/2026") steht seit B-03 in der Zeile
+ * selbst und nicht nur in der Fläche.
  */
 export const ManualCorrection: Story = {
   render: () => (
     <Entry
       sub="Korrektur von Hand"
       selected="evt-16"
-      events={[ev("evt-16", "adjustment", "2026-03-31", "Skonto auf Erhaltene Skonti umbuchen", 23.8, "posted", { bookingState: "posted" })]}
+      events={[
+        ev("evt-16", "adjustment", "2026-03-31", "Skonto auf Erhaltene Skonti umbuchen", 23.8, "posted", {
+          bookingState: "posted",
+          note: "Hinweis Kanzlei, Abnahme 03/2026",
+        }),
+      ]}
     >
       <Pane title="Skonto umbuchen" sub="31.03.2026 · von Hand">
         <JournalEntryCard
@@ -629,15 +642,21 @@ export const ManualCorrection: Story = {
 
 /**
  * **17 · Sollstellung einer Dauerbuchung.** Je Regel und Periode genau eine.
- * Welche Regel und welche Periode, steht heute nur im Titel — `recurringRuleId`
- * und `accrual_period` haben am Ereignis kein Feld (Befund B-05).
+ * Die Periode steht seit `accrualPeriod` (B-05) in der Zeile. Die **Regel**
+ * bleibt draußen: `recurringRuleId` ist eine Id, und eine rohe Id sagt
+ * niemandem, welche Regel gemeint ist — sie braucht ihr Wort vom Aufrufer.
  */
 export const RecurringAccrual: Story = {
   render: () => (
     <Entry
       sub="Sollstellung März"
       selected="evt-17"
-      events={[ev("evt-17", "accrual", "2026-03-01", "Miete März 2026", 2380, "posted", { bookingState: "posted" })]}
+      events={[
+        ev("evt-17", "accrual", "2026-03-01", "Miete März 2026", 2380, "posted", {
+          bookingState: "posted",
+          accrualPeriod: "2026-03",
+        }),
+      ]}
     >
       <Pane title="Miete März 2026" sub="01.03.2026 · aus der Dauerbuchung">
         <FieldList
@@ -649,7 +668,7 @@ export const RecurringAccrual: Story = {
           ]}
         />
         <p className="v2muted" style={{ margin: 0 }}>
-          Regel und Periode trägt das Ereignis heute nicht (Befund B-05).
+          Die Regel selbst nennt die Zeile nicht — dafür bräuchte sie deren Wort, nicht die Id.
         </p>
       </Pane>
     </Entry>
@@ -668,7 +687,7 @@ export const RecurringPayment: Story = {
       selected="evt-18"
       events={[
         ev("evt-18", "payment_out", "2026-03-03", "Dauerauftrag Miete 03/2026", 2380, "posted", { bookingState: "posted" }),
-        ev("evt-17", "accrual", "2026-03-01", "Miete März 2026", 2380, "posted"),
+        ev("evt-17", "accrual", "2026-03-01", "Miete März 2026", 2380, "posted", { accrualPeriod: "2026-03" }),
       ]}
     >
       <Pane title="Dauerauftrag Miete 03/2026" sub="03.03.2026">

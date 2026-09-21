@@ -24,7 +24,7 @@ import {
 } from "@/ludwig/modules/accounting-cases/domain/case";
 import type { Currency } from "@/ludwig/shared/money";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
-import { calendarDay } from "../../format";
+import { calendarDay, formatAmount } from "../../format";
 import { Amount } from "../../primitives/Amount";
 import { Badge } from "../../primitives/Badge";
 import { StatusBadge } from "../../patterns/StatusBadge";
@@ -67,6 +67,21 @@ export interface CaseTimelineEvent {
   title: string;
   /** `amount`; `null` or 0 means „not set" — then no amount. */
   amount: number | null;
+  /**
+   * The share of **this** case in a payment that settles several (B-02).
+   * `amount` is then the whole bank line — 3.570 € for three invoices — and
+   * that number is simply wrong at this case, so the share is what shows; the
+   * whole stands in the amount's tooltip (app `c478af21`).
+   */
+  allocatedAmount?: number | null;
+  /**
+   * The one sentence at the event (B-03): „Differenz 23,80 € = Skonto",
+   * „Hinweis Kanzlei, Abnahme 03/2026". It is **not** `stateNote` — that one
+   * hangs on the state badge and says why nothing is booked.
+   */
+  note?: string | null;
+  /** `accrual_period` („2026-03") — which period this charge belongs to (B-05). */
+  accrualPeriod?: string | null;
   currency: Currency;
   /** Value of axis `ereignis`: open · proposed · accepted · posted · … */
   state: string;
@@ -151,9 +166,27 @@ function KindIcon({ of: Glyph, label }: { of: LucideIcon; label: string }) {
   );
 }
 
-function amountCell(value: number | null | undefined, currency: Currency, negative = false) {
+function amountCell(
+  value: number | null | undefined,
+  currency: Currency,
+  negative = false,
+  title?: string,
+) {
   if (value === null || value === undefined || value === 0) return null;
-  return <Amount value={negative ? -Math.abs(value) : value} currency={currency} size="sm" />;
+  return (
+    <Amount
+      value={negative ? -Math.abs(value) : value}
+      currency={currency}
+      size="sm"
+      {...(title ? { title } : {})}
+    />
+  );
+}
+
+/** „2026-03" → „03/2026". The period is a month, not a day — no day is shown. */
+function periodLabel(period: string): string {
+  const [year, month] = period.split("-");
+  return year && month ? `${month}/${year}` : period;
 }
 
 /**
@@ -285,13 +318,29 @@ export function CaseTimeline({
       kindLabels?.[ev.kind] ?? STATUS_REGISTRY.event_kind[ev.kind]?.label ?? ev.kind;
     const Glyph = EVENT_ICON[ev.kind] ?? FileText;
     byId.set(ev.id, { type: "event", event: ev });
+    // The share beats the whole where there is one (B-02): at this case the
+    // whole bank line is not this case's number.
+    const shown = ev.allocatedAmount ?? ev.amount;
+    const partial =
+      ev.allocatedAmount != null &&
+      ev.amount != null &&
+      Math.abs(ev.allocatedAmount) !== Math.abs(ev.amount);
+    const sub = [ev.accrualPeriod ? `Periode ${periodLabel(ev.accrualPeriod)}` : null, ev.note]
+      .filter(Boolean)
+      .join(" · ");
     items.push({
       id: ev.id,
       at: ev.date,
       title: ev.title,
+      ...(sub ? { sub } : {}),
       icon: <KindIcon of={Glyph} label={label} />,
       right: rightEnd(
-        amountCell(ev.amount, ev.currency, ev.kind === "payment_out"),
+        amountCell(
+          shown,
+          ev.currency,
+          ev.kind === "payment_out",
+          partial ? `Anteil an ${formatAmount(Math.abs(ev.amount ?? 0), ev.currency)}` : undefined,
+        ),
         /*
           A superseded event is not worked on any more: it carries that state
           instead of its booking state; the entry itself stays selectable.
