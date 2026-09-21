@@ -220,9 +220,14 @@ stehen in den Stories als Satz, nicht als Platzhalter im Code.
 | B-01 Restbetrag | **erledigt** — Spiegel-Lauf `c478af21`, der Kopf zeigt „offen …" oder „gedeckt" unter dem Betrag (Nachtrag 0152) |
 | B-02 Anteil | **erledigt** — `CaseTimelineEvent.allocatedAmount` (Nachtrag 0040), Story 8 zeigt den Anteil |
 | B-03 Satz am Ereignis | **erledigt** — `note`, Stories 8, 9, 16 |
-| B-04 Verrechnungs-Zwilling | Feld drüben als Id; **offen** — das Etikett (Bankzeile als `BankTransactionCellData`) kommt mit **F250** |
-| B-05 Periode | **erledigt** — `accrualPeriod`, Stories 17, 18; der Name der Regel neben `recurringRuleId` kommt mit **F250** |
-| B-06 Auflösung der Erwartung | Felder drüben (`resolution`, `resolvedByEventId`); **offen** — Wortliste (L-332) und Etikett des lösenden Ereignisses kommen mit **F250** |
+| B-04 Verrechnungs-Zwilling | Feld drüben als Id; **offen** — das Etikett (Bankzeile als `BankTransactionCellData`) kommt mit **F251** |
+| B-05 Periode | **erledigt** — `accrualPeriod`, Stories 17, 18; der Name der Regel neben `recurringRuleId` kommt mit **F251** |
+| B-06 Auflösung der Erwartung | Felder drüben (`resolution`, `resolvedByEventId`); **offen** — Wortliste (L-332) und Etikett des lösenden Ereignisses kommen mit **F251** |
 | B-07 Storno-Bezug | **erledigt** — Spiegel-Lauf `c478af21`, `JournalEntryFacts` nennt den aufgehobenen Satz als Weg (Nachtrag 0176) |
 | B-08 Spiegelbuchung | **erledigt** — 0191, Stories 31–34 |
 | B-09 Vorsteuer ohne Beleg | **erledigt** — `CaseFacts` (0191), Story 35 |
+
+**Herkunft der offenen Etiketten:** App-Spec **F251** (anfangs als „F250"
+gemeldet; die Nummer war seit App `664b9190` an das Mandantenjahr-Dashboard
+vergeben). F251 umfasst B-04, den Regelnamen, B-06, L-339, das Verdrahten von
+`entryHref` und den DS-Zeiger auf ≥ `f3ebf63`.

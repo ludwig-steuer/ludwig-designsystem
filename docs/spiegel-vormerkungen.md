@@ -28,7 +28,7 @@ nichts weggefallen, was das Set benutzt.
 
 Im Set nachgezogen: B-01 (der offene Rest unter dem Betrag im Kopf) und B-07
 (der Storno-Satz nennt den aufgehobenen, als Weg). B-02/B-03/B-05 waren schon
-mit `0f6fe58` gezogen. **Bewusst nicht gezogen**, bis F250 Etiketten liefert:
+mit `0f6fe58` gezogen. **Bewusst nicht gezogen**, bis F251 Etiketten liefert:
 `passThroughOfBankTransactionId` (B-04), `recurringRuleId`, `resolution` und
 `resolvedByEventId` (B-06) — rohe Ids und ein Wert ohne Wortliste.
 
