@@ -50,4 +50,13 @@ export interface ExpectationRow {
    * erledigte Erwartung zeigen.
    */
   resolvedAt: string | null;
+  /**
+   * Wodurch sie erledigt wurde: `matched` = ein Ereignis hat sie eingelöst
+   * (dann trägt `resolvedByEventId` es), `manual` = ein Mensch hat sie von
+   * Hand abgehakt, `obsolete` = sie war gegenstandslos. NULL, solange sie
+   * aussteht (dasselbe Paar wie `resolved_at`, DB-CHECK `resolution_pair`).
+   */
+  resolution: ExpectationResolution | null;
+  /** Das Ereignis, das sie eingelöst hat; nur bei `resolution='matched'`. */
+  resolvedByEventId: string | null;
 }

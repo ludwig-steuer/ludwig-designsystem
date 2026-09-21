@@ -338,9 +338,10 @@ export const PaymentOutFull: Story = {
 
 /**
  * **7 · Teilzahlung in zwei Raten.** Zwei Ereignisse auf eine Rechnung. Nach
- * der ersten Rate sind 690,00 € offen — **das steht heute nur am offenen
- * Posten, nicht am Ereignis** (Befund B-01 in 0190): der Strang zeigt zwei
- * Zahlungen, nicht den Rest dazwischen.
+ * der ersten Rate sind 690,00 € offen. Der Rest gehört nicht an das Ereignis,
+ * sondern an den Fall: seit `openAmount` (B-01, App `c478af21`) steht er im
+ * Kopf der Seite unter dem Betrag — „offen 690,00 €", bei voller Zahlung
+ * „gedeckt" (`seiten-sachverhalt-einzelfall--outgoing-with-payment`).
  */
 export const PaymentInTwoRates: Story = {
   render: () => (
@@ -359,7 +360,7 @@ export const PaymentInTwoRates: Story = {
         />
         <FieldList tone="bare" rows={[["Offen nach dieser Rate", "690,00 €"]]} />
         <p className="v2muted" style={{ margin: 0 }}>
-          Der Rest steht am offenen Posten, nicht am Ereignis (Befund B-01).
+          Der Rest steht im Kopf der Seite, unter dem Betrag (`openAmount`).
         </p>
       </Pane>
     </Entry>
@@ -1169,8 +1170,8 @@ export const BookingExported: Story = {
 /**
  * **30 · Storno.** Zwei Sätze, nicht einer: der stornierte bleibt stehen, der
  * Storno kommt dazu. Der Strang zeigt beides am selben Ereignis — „Gebucht ·
- * Zurückgezogen". **Woher** der Storno kommt, sagt der Satz heute nicht
- * (Befund B-07).
+ * Zurückgezogen". Der Storno-Satz nennt seit `reversesEntryId` (B-07, App
+ * `c478af21`) den Satz, den er aufhebt — als Weg, nicht als Id.
  */
 export const BookingReversed: Story = {
   render: () => (
@@ -1179,27 +1180,44 @@ export const BookingReversed: Story = {
       selected="evt-01"
       events={[ev("evt-01", "document_received", "2026-03-04", "Rechnung RE-24-0815", 1190, "posted", { bookingState: "reversed" })]}
     >
-      <Pane title="Storno" sub="12.03.2026 · der Vorschlag gilt nicht mehr">
-        <JournalEntryCard
-          lines={[
-            line("debit", "70112", "Müller Bürotechnik GmbH", 1190, "Storno RE-24-0815"),
-            line("credit", "6815", "Bürobedarf", 1000, "Storno RE-24-0815", { taxKey: "9", taxRatePercent: 19 }),
-          ]}
-          currency="EUR"
-          caption="Storno-Satz je-30"
-          accountHref={accountHref}
-        />
-        <FieldList
-          tone="bare"
-          rows={[
-            ["Storniert", "je-28 vom 04.03.2026"],
-            ["Grund", "Korrekturrechnung mit 10 % Rabatt"],
-          ]}
-        />
-        <p className="v2muted" style={{ margin: 0 }}>
-          Den Verweis auf den stornierten Satz trägt das Set noch nicht (Befund B-07).
-        </p>
-      </Pane>
+      <JournalEntryFacts
+        entry={{
+          journalEntryId: "je-30",
+          status: "accepted",
+          origin: "system_reversal",
+          confidence: null,
+          bookingDate: "2026-03-12",
+          rationale: null,
+          isLocked: false,
+          blocked: false,
+          currency: "EUR",
+          reversesEntryId: "je-28",
+          lines: [
+            {
+              side: "debit",
+              accountNumber: "70112",
+              accountName: "Müller Bürotechnik GmbH",
+              amount: 1190,
+              taxKey: null,
+              taxRatePercent: null,
+              lineText: "Storno RE-24-0815",
+              externalDocumentNumber: "RE-24-0815",
+            },
+            {
+              side: "credit",
+              accountNumber: "6815",
+              accountName: "Bürobedarf",
+              amount: 1000,
+              taxKey: "9",
+              taxRatePercent: 19,
+              lineText: "Storno RE-24-0815",
+              externalDocumentNumber: "RE-24-0815",
+            },
+          ],
+        }}
+        accountHref={accountHref}
+        entryHref={(id) => `#entry=${id}`}
+      />
     </Entry>
   ),
 };

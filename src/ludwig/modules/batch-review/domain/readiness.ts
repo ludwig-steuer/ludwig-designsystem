@@ -49,6 +49,8 @@ export interface ReadinessItem {
   problem: string;
   /** Ein Gate-Hinweis ohne Blocker steht in derselben Liste, aber gelb. */
   hinweis: boolean;
+  /** Beleg hängt an einem Sachverhalt — nur dann bietet Schritt 1 „Keine Buchung nötig" an (F248). */
+  hasCase?: boolean;
 }
 
 export interface ReadinessRow {
@@ -165,6 +167,7 @@ function belegPunkt(o: Record<string, unknown>, i: number): ReadinessItem {
     datum: str(o.docDate),
     problem: str(o.problem) ?? "",
     hinweis: false,
+    hasCase: o.hasCase === true,
   };
 }
 

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { CaseDetail } from "@/ludwig/modules/accounting-cases/domain/case-detail";
+import type { CaseHeaderVM } from "@/ludwig/modules/accounting-cases/domain/overview-vm";
 import type { CaseKind, CaseLifecycle } from "@/ludwig/modules/accounting-cases/domain/case";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { FieldList } from "../../primitives/FieldList";
@@ -44,6 +45,13 @@ import { Time } from "../../primitives/Time";
  * ranks are in the entity profile, not here — a second list goes stale.
  */
 export interface CaseFactsVM extends Partial<CaseDetail> {
+  /**
+   * What is still open after the payments so far (B-01, app c478af21) — from
+   * the header's view model, not from `CaseDetail`. The facts do not show it:
+   * it belongs next to the amount in the head (D24, the amount once), and the
+   * page puts it there. 0 = covered; `null` = no document to measure against.
+   */
+  openAmount?: CaseHeaderVM["openAmount"];
   caseNumber: string | null;
   kind: CaseKind;
   lifecycleStatus: CaseLifecycle | null;

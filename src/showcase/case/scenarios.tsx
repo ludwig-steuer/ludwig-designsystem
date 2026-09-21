@@ -414,6 +414,8 @@ export const outgoingWithPayment: CaseScenario = {
     counterpartySide: "debtor",
     disposition: "agent",
     totalAmount: 2380,
+    // Paid in full — the head says „gedeckt" under the amount (B-01).
+    openAmount: 0,
     currency: "EUR",
   }),
   today: TODAY,

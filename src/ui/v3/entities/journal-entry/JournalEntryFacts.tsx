@@ -71,6 +71,7 @@ export function JournalEntryFacts({
   batchHref,
   accountHref,
   caseHref,
+  entryHref,
   tone = "surface",
 }: {
   entry: JournalEntryVM;
@@ -83,6 +84,11 @@ export function JournalEntryFacts({
   /** The way to the account drawer, per account number (0155) — into the grid. */
   accountHref?: (accountNumber: string) => string;
   caseHref?: (caseId: string) => string;
+  /**
+   * The way to another entry — used by a reversal to reach the entry it undoes
+   * (B-07). Without it the banner says what happened, but offers no way.
+   */
+  entryHref?: (journalEntryId: string) => string;
   /** `bare` for the drawer, where a card already stands around it (0052). */
   tone?: "surface" | "bare";
 }) {
@@ -184,6 +190,20 @@ export function JournalEntryFacts({
       {entry.blocked ? (
         <Banner tone="warning" title="Blockiert.">
           Eine offene Rückfrage hält den Satz — so geht er nicht nach DATEV.
+        </Banner>
+      ) : null}
+      {/* A reversal undoes an earlier entry (B-07, app c478af21). Only the
+          reversal carries the reference; the undone entry stands on
+          `reversed`. The id itself is no statement, so it is a way, not text. */}
+      {entry.reversesEntryId ? (
+        <Banner tone="neutral" title="Storniert einen früheren Satz.">
+          Beide Sätze bleiben stehen — der ursprüngliche und dieser, der ihn aufhebt.
+          {entryHref ? (
+            <>
+              {" "}
+              <Link href={entryHref(entry.reversesEntryId)}>Ursprünglichen Satz öffnen</Link>
+            </>
+          ) : null}
         </Banner>
       ) : null}
       {entry.repairedFrom ? (

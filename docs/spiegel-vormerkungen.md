@@ -14,6 +14,24 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 Nichts.
 
+## Erledigt mit dem Lauf vom 2026-09-21 (App `c478af21`)
+
+Owner-Ausnahme (Simon, 2026-09-21, überbracht von `ludwig-worker3`),
+gelaufen, sobald `c478af21` auf origin/staging lag; danach wieder
+eingefroren. Angekommen sind die sieben Felder, die der Katalog 0190 als
+Lücken B-01 … B-07 gemeldet hatte: an `TimelineEventVM`/`CaseEvent`
+`allocatedAmount`, `note`, `accrualPeriod`, `passThroughOfBankTransactionId` ·
+an der Erwartung `resolution` und `resolvedByEventId` · an `JournalEntryVM`
+und `CaseEventBooking` `reversesEntryId` · an `CaseHeaderVM` `openAmount`.
+Nebenbei `readiness.ts` `hasCase` (F248). Typcheck und `check:mirror` grün,
+nichts weggefallen, was das Set benutzt.
+
+Im Set nachgezogen: B-01 (der offene Rest unter dem Betrag im Kopf) und B-07
+(der Storno-Satz nennt den aufgehobenen, als Weg). B-02/B-03/B-05 waren schon
+mit `0f6fe58` gezogen. **Bewusst nicht gezogen**, bis F250 Etiketten liefert:
+`passThroughOfBankTransactionId` (B-04), `recurringRuleId`, `resolution` und
+`resolvedByEventId` (B-06) — rohe Ids und ein Wert ohne Wortliste.
+
 ## Erledigt mit dem zweiten Lauf vom 2026-09-18 (App `1276540f`)
 
 Owner-Ausnahme (Simon, 2026-09-18, auf den Auftrag von `a1`), gelaufen,

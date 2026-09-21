@@ -69,6 +69,13 @@ export interface TimelineEventVM {
   rawDate: string;
   title: string;
   amount: number | null;
+  /**
+   * Der Anteil dieses Sachverhalts an einer Sammelzahlung; NULL = das
+   * Ereignis deckt den ganzen Betrag. Anzuzeigen ist `allocatedAmount ??
+   * amount`: bei der Sammelzahlung ist `amount` die ganze Bankzeile, und wer
+   * nur ihn zeigt, schreibt an diesen Fall einen fremden Betrag.
+   */
+  allocatedAmount: number | null;
   currency: string;
   state: TimelineState;
   source: "doc" | "bank" | null;
@@ -83,6 +90,14 @@ export interface TimelineEventVM {
   blockedClarificationIds: string[];
   /** Die Wiederkehr-Regel hinter dem Ereignis — der Reiter „Zuordnung" zeigt nur ihre Treffer. */
   recurringRuleId: string | null;
+  /** Periode der Sollstellung („YYYY-MM"); der Ausgleich trägt sie nicht. */
+  accrualPeriod: string | null;
+  /** Nur am Server-Zwilling (Verrechnungs-Regime): die auslösende Bankzeile. */
+  passThroughOfBankTransactionId: string | null;
+  /** Freitext am Ereignis (`notes`) — Skonto-Differenz, Korrekturgrund,
+   *  Zuordnungs-Hinweis. Nicht zu verwechseln mit `infoNote`/`openNote`, die
+   *  den Zustand erklären. */
+  note: string | null;
   doc: DocFactsVM | null;
   bank: BankVM | null;
   infoNote: string | null;
@@ -192,6 +207,14 @@ export interface CaseHeaderVM {
    */
   disposition: CaseDisposition | null;
   totalAmount: number | null;
+  /**
+   * Was nach den bisherigen Zahlungen offen ist: Σ Belege − Σ Zahlungen, mit
+   * derselben Formel wie `loadCaseOpenPayments` (allocation-core) —
+   * Ersetztes zählt nicht, je Zahlung gilt `allocatedAmount ?? amount`.
+   * 0 = gedeckt. NULL = kein Beleg-Ereignis, an dem sich ein Rest messen
+   * ließe (OPOS-Vortrag, reine Umbuchung).
+   */
+  openAmount: number | null;
   currency: string;
   openedAt: string;
   closedAt: string | null;

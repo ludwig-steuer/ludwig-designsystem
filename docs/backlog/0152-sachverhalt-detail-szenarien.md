@@ -515,3 +515,15 @@ Frage beantworten ließ.
 
 **Stand.** Gebaut 2026-09-18, im Browser nachgesehen (Kriterien 1–5).
 Fremde Abnahme steht aus.
+
+## Nachtrag 2026-09-21 — der offene Rest im Kopf (B-01)
+
+`CaseHeaderVM.openAmount` ist seit dem Spiegel-Lauf auf App `c478af21` da:
+Σ Belege − Σ Zahlungen, 0 = gedeckt, `null` = kein Beleg, an dem sich ein
+Rest messen ließe. `CaseFactsVM` nimmt ihn als optionales Feld auf, die
+Fakten zeigen ihn **nicht**: er gehört neben den Betrag (D24, der Betrag
+einmal). Der Kopf zeigt unter dem Betrag „offen 690,00 €" oder „gedeckt" —
+und **nichts**, solange nichts gezahlt ist, denn dann ist der Rest der Betrag
+und stünde zweimal da. Nachweis: `seiten-sachverhalt-einzelfall--outgoing-with-payment`
+(„Betrag 2.380,00 € · gedeckt"). **Stand:** gebaut, im Browser nachgesehen,
+fremde Abnahme steht aus.

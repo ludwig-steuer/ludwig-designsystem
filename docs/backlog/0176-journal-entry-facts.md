@@ -170,3 +170,13 @@ Gemessen (CDP, Storybook 6107, 1000 px, im Story-Iframe):
 `pnpm typecheck`, `check:classes`, `check:language`, `check:when`,
 `check:icons` und `pnpm build` grün; Screenshots angesehen. Abnahme durch einen
 anderen Agenten steht aus.
+
+## Nachtrag 2026-09-21 — der Storno-Satz nennt, was er aufhebt (B-07)
+
+`JournalEntryVM.reversesEntryId` ist seit dem Spiegel-Lauf auf App `c478af21`
+da. Gesetzt ist es **nur am Storno-Satz**; der aufgehobene trägt `reversed`.
+Die Fakten zeigen dann einen Hinweis „Storniert einen früheren Satz" — beide
+Sätze bleiben stehen — und, mit der neuen Prop `entryHref?: (journalEntryId)
+=> string`, den Weg „Ursprünglichen Satz öffnen". Die Id selbst steht nicht
+da: sie sagt niemandem etwas. Story `Reversal`; im Katalog 0190 Eintrag 30.
+**Stand:** gebaut und im Browser nachgesehen, fremde Abnahme steht aus.

@@ -36,6 +36,8 @@ export interface CaseEventBooking {
   journalEntryId: string;
   status: string;
   origin: string;
+  /** Der Satz, den dieser storniert (`reverses_entry_id`); NULL = kein Storno. */
+  reversesEntryId: string | null;
   bookingDate: string;
   isLocked: boolean;
   proposalConfidence: number | null;
@@ -98,6 +100,13 @@ export interface CaseEvent {
   eventDate: string;
   fiscalYear: number;
   amount: number;
+  /**
+   * Der Anteil DIESES Sachverhalts an einer Sammelzahlung
+   * (`allocated_amount`); NULL = das Ereignis deckt den ganzen Betrag. Wer
+   * den fachlichen Betrag will, nimmt `allocatedAmount ?? amount` — `amount`
+   * allein ist bei der Sammelzahlung der Betrag der ganzen Bankzeile.
+   */
+  allocatedAmount: number | null;
   currency: string;
   notes: string | null;
   /** Optionaler kurzer Anzeigename (vom Agenten/Menschen gesetzt); NULL → deriveTitle. */
@@ -110,6 +119,13 @@ export interface CaseEvent {
   /** Die Wiederkehr-Regel, die dieses Ereignis angelegt oder ihm eine Zahlung
    *  zugeordnet hat (`client_accounting_event.recurring_rule_id`). */
   recurringRuleId: string | null;
+  /** Periode der Sollstellung (`accrual_period`, „YYYY-MM"); der Ausgleich
+   *  einer Dauerbuchung trägt sie NICHT — dort steht NULL. */
+  accrualPeriod: string | null;
+  /** Nur am Server-Zwilling im Verrechnungs-Regime: die Bank-Transaktion, die
+   *  ihn ausgelöst hat (`pass_through_of_bank_transaction_id`). Der Zwilling
+   *  selbst hat keine eigene Bankzeile. */
+  passThroughOfBankTransactionId: string | null;
   sourceDoc: CaseEventSourceDoc | null;
   bankTransaction: CaseEventBankTransaction | null;
   booking: CaseEventBooking | null;

@@ -167,6 +167,31 @@ export const Repaired: Story = {
   ),
 };
 
+/**
+ * Der Storno-Satz (B-07): er hebt einen früheren auf und nennt ihn — als Weg,
+ * nicht als rohe Id. Beide Sätze bleiben stehen; der ursprüngliche trägt
+ * `reversed`, dieser den Verweis. Ohne `entryHref` sagt der Hinweis, was
+ * geschah, bietet aber keinen Weg.
+ */
+export const Reversal: Story = {
+  render: () => (
+    <Frame title="Buchungssatz" sub="Storno">
+      <JournalEntryFacts
+        entry={entry({
+          journalEntryId: "je-30",
+          status: "accepted",
+          origin: "system_reversal",
+          confidence: null,
+          rationale: null,
+          reversesEntryId: "je-28",
+          lines: entry().lines.map((l) => ({ ...l, side: l.side === "debit" ? "credit" : "debit" })),
+        })}
+        entryHref={(id) => `#entry=${id}`}
+      />
+    </Frame>
+  ),
+};
+
 /** Locked and blocked: each says what follows from it, not just that it is so. */
 export const LockedAndBlocked: Story = {
   render: () => (

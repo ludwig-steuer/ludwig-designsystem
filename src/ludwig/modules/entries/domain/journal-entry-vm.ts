@@ -80,6 +80,12 @@ export interface JournalEntryVM {
   status: BookingStatus;
   /** `ai_proposed` | `manual` | `recurring_rule` | `system_reversal` | `client_import`. */
   origin: string;
+  /**
+   * Der Satz, den dieser storniert (`reverses_entry_id`). Gesetzt nur am
+   * Storno-Satz (`origin='system_reversal'`); der stornierte trägt den
+   * Rückverweis nicht, er steht auf `status='reversed'`.
+   */
+  reversesEntryId?: string | null;
   /** Wie freigegeben: `ai_unmodified` | `ai_edited` | `manual_only` | `imported`. */
   acceptanceQuality?: string | null;
   /** Raw `0..1` confidence, or NULL for non-AI bookings. */

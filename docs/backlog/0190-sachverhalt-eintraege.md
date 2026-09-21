@@ -217,12 +217,12 @@ stehen in den Stories als Satz, nicht als Platzhalter im Code.
 
 | Befund | Stand |
 |---|---|
-| B-01 Restbetrag | Feld drüben (`CaseHeaderVM.openAmount`), **wartet auf den Spiegel-Lauf** |
+| B-01 Restbetrag | **erledigt** — Spiegel-Lauf `c478af21`, der Kopf zeigt „offen …" oder „gedeckt" unter dem Betrag (Nachtrag 0152) |
 | B-02 Anteil | **erledigt** — `CaseTimelineEvent.allocatedAmount` (Nachtrag 0040), Story 8 zeigt den Anteil |
 | B-03 Satz am Ereignis | **erledigt** — `note`, Stories 8, 9, 16 |
-| B-04 Verrechnungs-Zwilling | Feld drüben als Id; **offen**, bis ein Wort für die Bankzeile mitkommt |
-| B-05 Periode | **erledigt** — `accrualPeriod`, Stories 17, 18; die Regel selbst braucht ebenfalls ihr Wort statt der Id |
-| B-06 Auflösung der Erwartung | Felder drüben (`resolution`, `resolvedByEventId`); **offen** — für `resolution` gibt es keine Wortliste (L-332), und das lösende Ereignis braucht ein Etikett |
-| B-07 Storno-Bezug | Feld drüben am gespiegelten `JournalEntryVM`; **wartet auf den Spiegel-Lauf** |
+| B-04 Verrechnungs-Zwilling | Feld drüben als Id; **offen** — das Etikett (Bankzeile als `BankTransactionCellData`) kommt mit **F250** |
+| B-05 Periode | **erledigt** — `accrualPeriod`, Stories 17, 18; der Name der Regel neben `recurringRuleId` kommt mit **F250** |
+| B-06 Auflösung der Erwartung | Felder drüben (`resolution`, `resolvedByEventId`); **offen** — Wortliste (L-332) und Etikett des lösenden Ereignisses kommen mit **F250** |
+| B-07 Storno-Bezug | **erledigt** — Spiegel-Lauf `c478af21`, `JournalEntryFacts` nennt den aufgehobenen Satz als Weg (Nachtrag 0176) |
 | B-08 Spiegelbuchung | **erledigt** — 0191, Stories 31–34 |
 | B-09 Vorsteuer ohne Beleg | **erledigt** — `CaseFacts` (0191), Story 35 |
