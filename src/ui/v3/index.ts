@@ -77,6 +77,7 @@ export {
 
 export { Pagination } from "./primitives/Pagination";
 export { RecordPager } from "./primitives/RecordPager";
+export { PeriodJump, periodPage, type PeriodCount } from "./primitives/PeriodJump";
 
 /* Formular */
 export { Field, Input, InputGroup, Textarea, Select, Checkbox } from "./primitives/Form";

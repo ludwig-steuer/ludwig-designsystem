@@ -8,6 +8,7 @@ import { FilterBar } from "../../primitives/FilterBar";
 import { Field, Input, Select } from "../../primitives/Form";
 import { Button } from "../../primitives/Button";
 import { PageHeader } from "../../primitives/PageHeader";
+import { PeriodJump, periodPage, type PeriodCount } from "../../primitives/PeriodJump";
 
 const meta: Meta<typeof BankTransactionList> = {
   title: "v3/Entitäten/Kontoauszugsposition/BankTransactionList",
@@ -291,6 +292,70 @@ export const InUse: Story = {
         pager={{ page: 1, pageSize: 25, totalItems: 7, totalPages: 1 }}
         head={{ title: "Kontoauszug", sub: "Commerzbank · 1210 · 01.04. bis 30.04.2026" }}
         booked={{ booked: 3, total: 7 }}
+        expand={(t) => <BankTransactionFoldout transaction={t} caseHref={caseHref} />}
+      />
+    </div>
+  ),
+};
+
+// The year of the account, counted by month under the page's filter (0194).
+const MONTHS: PeriodCount[] = [
+  { date: "2025-05", count: 21 },
+  { date: "2025-06", count: 19 },
+  { date: "2025-07", count: 24 },
+  { date: "2025-08", count: 16 },
+  { date: "2025-09", count: 22 },
+  { date: "2025-10", count: 18 },
+  { date: "2025-11", count: 23 },
+  { date: "2025-12", count: 31 },
+  { date: "2026-01", count: 12 },
+  { date: "2026-02", count: 19 },
+  { date: "2026-03", count: 26 },
+  { date: "2026-04", count: 7 },
+];
+
+/**
+ * **Sprung zu einem Monat** (0194) — die Sonderansicht, die nur erscheint, wo
+ * die Seite sie ausdrücklich einbaut: unter dem Filter, über der Liste. Jede
+ * Säule führt über `periodPage` auf die Seite, auf der ihr Monat beginnt;
+ * „Springe zu" nimmt ein Datum. Nur bei Sortierung nach Buchungsdatum — nach
+ * Betrag sortiert gibt es keinen „Punkt März". Die Zeilen sind der
+ * April-Ausschnitt der Fixture, nicht eine volle Seite von 25.
+ */
+export const JumpToMonth: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1460, display: "grid", gap: "var(--space-4)" }}>
+      <PageHeader overline="Musterbau GmbH · Wirtschaftsjahr 2026" title="Commerzbank · 1210" />
+      <FilterBar resetHref="#alle">
+        <Field label="Suche" htmlFor="q2">
+          <Input id="q2" type="search" placeholder="Zweck, IBAN, Betrag" />
+        </Field>
+        <Field label="Buchung" htmlFor="b2">
+          <Select id="b2" defaultValue="alle">
+            <option value="alle">alle</option>
+            <option value="nicht-gebucht">nicht gebucht</option>
+          </Select>
+        </Field>
+      </FilterBar>
+      <PeriodJump
+        periods={MONTHS}
+        href={(month) =>
+          listHref({ sort: "postingDate", dir: "desc", page: periodPage(MONTHS, month, { pageSize: 25, dir: "desc" }) })
+        }
+        current={{ from: "2026-04-30", to: "2026-04-01" }}
+        unit={["Zahlung", "Zahlungen"]}
+        ariaLabel="Kontoauszug: zu einem Monat springen"
+        dateForm={{ action: "#auszug", name: "ab", hidden: { sort: "postingDate", dir: "desc" } }}
+      />
+      <BankTransactionList
+        transactions={STATEMENT_004}
+        caseHref={caseHref}
+        openHref="#zuordnen"
+        listHref={listHref}
+        sort={{ key: "postingDate", dir: "desc" }}
+        pager={{ page: 1, pageSize: 25, totalItems: 238, totalPages: 10 }}
+        head={{ title: "Kontoauszug", sub: "Commerzbank · 1210 · 01.05.2025 bis 30.04.2026" }}
+        booked={{ booked: 201, total: 238 }}
         expand={(t) => <BankTransactionFoldout transaction={t} caseHref={caseHref} />}
       />
     </div>
