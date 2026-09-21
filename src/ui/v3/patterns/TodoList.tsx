@@ -77,6 +77,7 @@ export function TodoList({
   onOpen,
   emptyText = "Nichts zu prüfen.",
   hotkeys = true,
+  collapsible = true,
 }: {
   groups: TodoGroup[];
   selectedId: string | null;
@@ -85,11 +86,19 @@ export function TodoList({
   onOpen?: (id: string) => void;
   emptyText?: string;
   hotkeys?: boolean;
+  /**
+   * `false`: the groups do not fold — no `<details>`, no chevron, no toggle;
+   * a plain head (label and count) and the items, always open, and
+   * `collapsed` is ignored. For a list of one or two short groups, where a
+   * toggle carries nothing (owner 2026-09-21, the client-year dashboard:
+   * „nur die Boxen anzeigen").
+   */
+  collapsible?: boolean;
 }) {
   // Which groups are folded right now — the `<details>` owns the toggle,
   // this only mirrors it so the keys skip what is out of sight.
   const [closed, setClosed] = useState<ReadonlySet<string>>(
-    () => new Set(groups.filter((g) => g.collapsed).map((g) => g.label)),
+    () => new Set(collapsible ? groups.filter((g) => g.collapsed).map((g) => g.label) : []),
   );
   const flat = useMemo(
     () => groups.filter((g) => !closed.has(g.label)).flatMap((g) => g.items),
@@ -122,7 +131,12 @@ export function TodoList({
   );
   useHotkeys(bindings, hotkeys);
 
-  if (flat.length === 0) {
+  // „Nothing to do" hangs on the **groups**, not on what is unfolded: folding
+  // the last open group used to empty `flat`, and the list replaced itself
+  // with the empty text — the heads were gone, nothing could be unfolded
+  // again (reported by the owner on the client-year dashboard, 2026-09-21).
+  // `flat` only drives J/K.
+  if (groups.every((g) => g.items.length === 0)) {
     return (
       <div className="v2lp">
         <div className="v2lp__empty">{emptyText}</div>
@@ -130,11 +144,47 @@ export function TodoList({
     );
   }
 
+  const item = (it: TodoItem) => (
+    <button
+      key={it.id}
+      type="button"
+      className={`v2lp__item v2todo${it.id === selectedId ? " is-active" : ""}`}
+      aria-current={it.id === selectedId}
+      onClick={() => (it.id === selectedId && onOpen ? onOpen(it.id) : onSelect(it.id))}
+    >
+      <span className="v2todo__ico">
+        <StateIcon state={it.state} />
+      </span>
+      <span style={{ minWidth: 0 }}>
+        <span className="v2lp__title">{it.title}</span>
+        {it.sub ? <span className="v2lp__sub">{it.sub}</span> : null}
+      </span>
+      {it.right ? <span className="v2todo__right">{it.right}</span> : null}
+      {it.badges ? <span className="v2lp__badges">{it.badges}</span> : null}
+    </button>
+  );
+
+  const visible = groups.filter((g) => g.items.length > 0);
+
+  if (!collapsible) {
+    return (
+      <div className="v2lp">
+        {visible.map((g) => (
+          <div key={g.label} role="group" aria-label={g.label}>
+            <div className="v2lp__grp">
+              <span className="v2lp__grplabel">{g.label}</span>
+              <span>{g.meta ?? g.items.length}</span>
+            </div>
+            {g.items.map(item)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="v2lp">
-      {groups
-        .filter((g) => g.items.length > 0)
-        .map((g) => (
+      {visible.map((g) => (
           <details
             key={g.label}
             open={!g.collapsed}
@@ -153,25 +203,7 @@ export function TodoList({
               <span className="v2lp__grplabel">{g.label}</span>
               <span>{g.meta ?? g.items.length}</span>
             </summary>
-            {g.items.map((it) => (
-              <button
-                key={it.id}
-                type="button"
-                className={`v2lp__item v2todo${it.id === selectedId ? " is-active" : ""}`}
-                aria-current={it.id === selectedId}
-                onClick={() => (it.id === selectedId && onOpen ? onOpen(it.id) : onSelect(it.id))}
-              >
-                <span className="v2todo__ico">
-                  <StateIcon state={it.state} />
-                </span>
-                <span style={{ minWidth: 0 }}>
-                  <span className="v2lp__title">{it.title}</span>
-                  {it.sub ? <span className="v2lp__sub">{it.sub}</span> : null}
-                </span>
-                {it.right ? <span className="v2todo__right">{it.right}</span> : null}
-                {it.badges ? <span className="v2lp__badges">{it.badges}</span> : null}
-              </button>
-            ))}
+            {g.items.map(item)}
           </details>
         ))}
     </div>

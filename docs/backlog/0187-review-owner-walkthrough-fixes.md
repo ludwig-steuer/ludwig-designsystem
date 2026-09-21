@@ -168,3 +168,31 @@ nach Klick auf den Knopf weiter zu, nach Klick auf die Zeile offen; kein
 Knopf im `<summary>`; Rahmen 16–896 px, Zeile 17–895 px (innerhalb der
 Rahmenlinie); Rahmenfarbe `rgb(140, 96, 30)` = Warnton. Fremde Abnahme steht
 aus.
+
+## Nachtrag 2026-09-21 — TodoList: zugeklappt ist nicht leer, und Gruppen ohne Klappe (Owner über `acto`)
+
+**Fehler.** Klappte man die letzte offene Gruppe zu, wurde die Liste der
+sichtbaren Einträge (`flat`) leer, und der Früh-Return ersetzte die ganze
+Liste durch `emptyText` — die `<details>` verschwanden, nichts ließ sich wieder
+aufklappen. Gemeldet vom Owner auf dem Mandanten-Dashboard. **Behebung:**
+„leer" hängt an den Gruppen (`groups.every((g) => g.items.length === 0)`),
+`flat` treibt nur noch J/K.
+
+**Neue Prop.** `collapsible?: boolean`, Vorgabe `true`. Bei `false` klappt
+nichts: kein `<details>`, kein Pfeil, kein Umschalter — ein ruhiger Kopf mit
+Wort und Zähler, darunter die Einträge, immer offen; `collapsed` zählt dann
+nicht. Für eine Weiche aus ein, zwei kurzen Gruppen, wo der Aufklapper nichts
+trägt (Mandantenjahr „Was zu tun ist", Owner: „nur die Boxen anzeigen").
+
+**Abnahmekriterien (Nachtrag)**
+
+1. `--single-group-collapsed`: die einzige Gruppe steht zugeklappt da, ihr
+   Kopf bleibt, sie lässt sich öffnen; kein „Nichts zu prüfen.".
+2. `--filled`: beide Gruppen zuklappen → beide Köpfe bleiben, keine
+   Leeranzeige; wieder aufklappen geht.
+3. `--not-collapsible`: kein `<details>`, kein Pfeil, beide Köpfe als ruhige
+   Zeile (`cursor: auto`), alle sechs Einträge sichtbar, auch in der Gruppe
+   mit `collapsed`.
+
+**Stand.** Gebaut 2026-09-21 und gemessen (Kriterien 1–3). Fremde Abnahme
+steht aus.

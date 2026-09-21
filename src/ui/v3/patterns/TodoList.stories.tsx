@@ -75,6 +75,48 @@ export const Collapsed: Story = {
   },
 };
 
+/**
+ * **Die einzige Gruppe zugeklappt** (Fehler, Owner 2026-09-21): der Kopf bleibt
+ * stehen und lässt sich wieder aufklappen. Bis dahin ersetzte sich die Liste
+ * durch „Nichts zu prüfen." — die Gruppe war weg und kam nicht zurück, obwohl
+ * drei Punkte darin lagen. „Leer" heißt: keine Gruppe hat Einträge, nicht:
+ * nichts ist aufgeklappt.
+ */
+export const SingleGroupCollapsed: Story = {
+  render: function Render() {
+    const [sel, setSel] = useState<string | null>(null);
+    return (
+      <TodoList
+        groups={[{ ...GROUPS[0]!, collapsed: true }]}
+        selectedId={sel}
+        onSelect={setSel}
+        hotkeys={false}
+      />
+    );
+  },
+};
+
+/**
+ * `collapsible={false}`: keine Klappe, kein Pfeil — nur der Gruppenkopf mit
+ * Zähler und die Einträge, immer offen; `collapsed` zählt dann nicht. Für eine
+ * Weiche aus ein, zwei kurzen Gruppen, wo ein Aufklapper nichts trägt (Owner
+ * 2026-09-21, Mandantenjahr „Was zu tun ist": „nur die Boxen anzeigen").
+ */
+export const NotCollapsible: Story = {
+  render: function Render() {
+    const [sel, setSel] = useState<string | null>(null);
+    return (
+      <TodoList
+        groups={[GROUPS[0]!, { ...GROUPS[1]!, collapsed: true }]}
+        selectedId={sel}
+        onSelect={setSel}
+        collapsible={false}
+        hotkeys={false}
+      />
+    );
+  },
+};
+
 /** Nichts mehr offen — der Leerzustand sagt, was geprüft wurde. */
 export const AllDone: Story = {
   render: () => (
