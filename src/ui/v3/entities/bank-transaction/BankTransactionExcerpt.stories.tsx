@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { BankTransactionExcerpt } from "./BankTransactionExcerpt";
-import { STATEMENT_004 } from "./fixtures";
+import { SIX_CASE_SPLIT, STATEMENT_004, TWO_PAYMENTS_ONE_CASE } from "./fixtures";
 
 const meta: Meta<typeof BankTransactionExcerpt> = {
   title: "v3/Entitäten/Kontoauszugsposition/BankTransactionExcerpt",
@@ -30,6 +30,7 @@ export const Filled: Story = {
         transactions={STATEMENT_004}
         caseHref={caseHref}
         openHref="#zuordnen"
+        statementHref="#konto-1210"
       />
     </div>
   ),
@@ -112,6 +113,44 @@ export const InStep: Story = {
         transactions={STATEMENT_004.filter((t) => t.id === "l3")}
         caseHref={caseHref}
         rowHref={(t) => `#zahlung-${t.id}`}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Der Split in die **Gegenrichtung** (Owner): mehrere Zahlungen, **ein**
+ * Sachverhalt — eine Rechnung über 2.480,55 € in zwei Überweisungen. Beide
+ * Zeilen nennen denselben Sachverhalt mit Nummer und Namen; jede trägt ihr
+ * eigenes Ereignis und ihren eigenen Stand: die erste gebucht, die zweite ein
+ * Vorschlag.
+ */
+export const ManyPaymentsOneCase: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1000 }}>
+      <BankTransactionExcerpt
+        title="Zahlungen zu 2026-0451"
+        sub="Sanierung Serverraum · 2.480,55 € in zwei Raten"
+        transactions={TWO_PAYMENTS_ONE_CASE}
+        caseHref={caseHref}
+        statementHref="#konto-1210"
+      />
+    </div>
+  ),
+};
+
+/**
+ * Eine Sammelzahlung über **sechs** Sachverhalte — so viele erlaubt der Kern
+ * der App. Die Zeile nennt die Zahl, die Teilbeträge stehen aufgeklappt
+ * darunter, je mit ihrem Stand.
+ */
+export const SixCases: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1000 }}>
+      <BankTransactionExcerpt
+        title="Zahlung"
+        transactions={[SIX_CASE_SPLIT]}
+        caseHref={caseHref}
       />
     </div>
   ),

@@ -1,4 +1,6 @@
 import { Amount } from "../../primitives/Amount";
+import { StatusBadge } from "../../patterns/StatusBadge";
+import { resolveEventBookingState } from "./derive";
 import { caseIdentifier } from "../accounting-case/case-title";
 import { Row } from "../../primitives/Table";
 import {
@@ -82,12 +84,28 @@ function SplitRows({ transaction }: { transaction: BankTransactionRowData }) {
           <div className="v2btxrow__splitrow" key={c.caseId}>
             <span>{caseIdentifier(c)}</span>
             <span className="v2btxrow__splittitle">{c.title ?? c.counterpartyName}</span>
+            {/* The state of this case's event, here and not only in the row:
+                from three cases on the row condenses (0193), and „which one
+                holds it up" has to stay answerable per case. */}
+            <span>
+              <StatusBadge
+                axis="event_booking"
+                status={
+                  resolveEventBookingState({
+                    proposalStatus: c.eventBookingState,
+                    noBookingRequiredReason: c.noBookingRequiredReason,
+                  }).value
+                }
+                info={false}
+              />
+            </span>
             <Amount value={c.amount ?? null} currency={transaction.currency} size="sm" />
           </div>
         ))}
         <div className="v2btxrow__splitrow v2btxrow__splitsum">
           <span />
           <span>zugeordnet</span>
+          <span />
           <Amount value={transaction.allocatedSum} currency={transaction.currency} size="sm" />
         </div>
       </td>

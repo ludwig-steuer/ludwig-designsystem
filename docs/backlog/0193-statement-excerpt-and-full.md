@@ -271,3 +271,42 @@ Haken, „Vorschlag", „Buchung fehlt" mit „Rest 480,55 €", „offen", „G
 Split aufgeklappt) · `banktransactionlist--booked` („April 2026 · 3 von 7
 gebucht", Spalten Datum · Gegenpartei · Verwendungszweck · Sachverhalt ·
 Buchung · Klärung · Betrag). Typecheck und Wächter grün.
+
+## Nachtrag 2026-09-21 — Weg zum ganzen Auszug, Split in beide Richtungen, Zahlungskonto-Drawer (Owner über `acto`)
+
+**1. „Gesamten Kontoauszug öffnen" im Ausschnitt.** `BankTransactionExcerpt`
+bekommt `statementHref?: string` mit **festem Platz** (Kartenkopf, rechts)
+und **festen Worten** („Gesamten Kontoauszug öffnen") — nicht jedem Aufrufer
+über `actions` überlassen. Ziel in der App: `/clients/[slug]/[year]/banks/
+[accountId]`, gegebenenfalls mit `?tx=` auf die Zeile. **Über mehrere Konten:**
+ein Ausschnitt deckt **ein** Konto; Zeilen mehrerer Konten sind mehrere
+Ausschnitte, jeder mit seinem Weg. Ein Link je Zeile wäre eine sechste Spalte
+im festen Satz und eine zweite Art, dasselbe zu sagen.
+
+**2. Split in beide Richtungen.**
+- **Mehrere Zahlungen → ein Sachverhalt** (Story `ManyPaymentsOneCase`):
+  2.000,00 € gebucht und 480,55 € als Vorschlag, beide zu 2026-0451. Erkennbar
+  ist der gemeinsame Sachverhalt an **derselben Nummer und demselben Namen**
+  in beiden Zeilen; jede trägt ihr eigenes Ereignis und ihren eigenen Stand.
+- **Sammelzahlung über sechs Sachverhalte** (Story `SixCases`): gestapelt
+  wurde die Zeile sechsfach hoch, und die Aufteilung darunter wiederholte
+  alles. **Ab drei Sachverhalten verdichtet die Zeile** (`STACK_MAX = 2`, der
+  Bestand hatte nie mehr als zwei): Sachverhalt „6 Sachverhalte", Buchung
+  jeder Stand einmal mit Anzahl („Gebucht ×3 · Freigegeben · Vorschlag ×2").
+  Die **Aufteilung trägt jetzt den Stand je Sachverhalt** (eine Spalte mehr in
+  `.v2btxrow__splitrow`) — so bleibt „welcher hält auf?" je Fall lesbar, auch
+  in der Liste mit Aufklapper.
+
+**3. `PaymentAccountDrawer`** (Owner-Entscheid: immer die **letzten** Zeilen,
+nach Buchungstag absteigend, eine feste Zahl, gebucht oder nicht). Kopf aus
+dem Zahlungskonto (Name, Art im Kopf, IBAN bzw. Kartenkennung, Sachkonto),
+darunter `BankTransactionExcerpt` mit `PAYMENT_ACCOUNT_DRAWER_LINES = 10` —
+etwa zwei Wochen eines viel bewegten Kontos. Der **eine** Ausweg ist der Fuß
+des Drawers, „Gesamten Kontoauszug öffnen" (`DrawerFullView`); der Ausschnitt
+darin trägt keinen zweiten Link auf dasselbe Ziel. Der Aufrufer lädt die
+Zeilen schon so; der Drawer kürzt, was länger ist, sortiert aber nicht.
+Stories `Filled` · `Empty` · `Loading`.
+
+**Stand.** Gebaut 2026-09-21, im Browser nachgesehen (`--many-payments-one-case`,
+`--six-cases`, `paymentaccountdrawer--filled`). Typecheck und Wächter grün.
+Fremde Abnahme steht aus.

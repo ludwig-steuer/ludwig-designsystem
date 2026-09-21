@@ -78,6 +78,9 @@ const DEFAULT_COLUMNS: BankTransactionColumn[] = ORDER.filter(
   (c) => c !== "account" && c !== "matchStage" && c !== "payment",
 );
 
+/** Up to this many cases stand one per line in a row; beyond, the row condenses (0193). */
+const STACK_MAX = 2;
+
 /**
  * The excerpt (0193): a fixed set for a handful of rows in a foreign place —
  * date, payment (counterparty over purpose), case, booking, amount. Fixed on
@@ -312,6 +315,21 @@ function CasesCell({
   openHref?: string;
 }) {
   const z = deriveZ(transaction);
+  // From three cases on the row names the count: stacked, six cases made the
+  // line six times as high, and the split under it repeats them anyway with
+  // their part amounts (0193). The stock never had more than two.
+  if (transaction.cases.length > STACK_MAX) {
+    return (
+      <span className="v2btxrow__cases">
+        <span>{transaction.cases.length} Sachverhalte</span>
+        {z === "Z3" ? (
+          <span className="v2btxrow__rest">
+            Rest <Amount value={restOf(transaction)} currency={transaction.currency} size="sm" />
+          </span>
+        ) : null}
+      </span>
+    );
+  }
   return (
     <span className="v2btxrow__cases">
       {/* **Without the part amounts.** They are what `expanded` is for; in
@@ -348,6 +366,28 @@ function CasesCell({
 function EventStateCell({ transaction }: { transaction: BankTransactionRowData }) {
   if (transaction.cases.length === 0) return null;
   if (transaction.settled) return <BookedMark transaction={transaction} />;
+  // From three cases on: each state once, with how often it occurs — the
+  // split under the row carries the state per case (0193).
+  if (transaction.cases.length > STACK_MAX) {
+    const counts = new Map<string, number>();
+    for (const c of transaction.cases) {
+      const value = resolveEventBookingState({
+        proposalStatus: c.eventBookingState,
+        noBookingRequiredReason: c.noBookingRequiredReason,
+      }).value;
+      counts.set(value, (counts.get(value) ?? 0) + 1);
+    }
+    return (
+      <span className="v2btxrow__states">
+        {[...counts].map(([value, n]) => (
+          <span className="v2btxrow__state v2btxrow__state--count" key={value}>
+            <StatusBadge axis="event_booking" status={value} info={false} />
+            {n > 1 ? <span className="v2sub">×{n}</span> : null}
+          </span>
+        ))}
+      </span>
+    );
+  }
   return (
     <span className="v2btxrow__states">
       {transaction.cases.map((c) => {

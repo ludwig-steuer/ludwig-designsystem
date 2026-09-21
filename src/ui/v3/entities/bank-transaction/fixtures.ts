@@ -123,3 +123,57 @@ export const STATEMENT_004: BankTransactionRowData[] = [
     settled: false,
   }),
 ];
+
+/**
+ * The other direction of a split (0193, owner): **several payments, one
+ * case** — an invoice of 2.480,55 € paid in two transfers. The same case
+ * stands in both lines, each with its own event and its own booking state.
+ */
+export const TWO_PAYMENTS_ONE_CASE: BankTransactionRowData[] = [
+  line({
+    id: "p1",
+    postingDate: "2026-04-10",
+    amount: -2000,
+    counterpartyName: "Handwerk Schulz KG",
+    purpose: "EREF+RE-8817 SVWZ+Sanierung Serverraum, Abschlag",
+    matchStage: "near",
+    cases: [assignment({ caseId: "c-0451", caseNumber: "2026-0451", title: "Sanierung Serverraum", amount: 2000, eventBookingState: "posted" })],
+    allocatedSum: 2000,
+    settled: true,
+  }),
+  line({
+    id: "p2",
+    postingDate: "2026-04-30",
+    amount: -480.55,
+    counterpartyName: "Handwerk Schulz KG",
+    purpose: "EREF+RE-8817 SVWZ+Sanierung Serverraum, Rest",
+    matchStage: "near",
+    cases: [assignment({ caseId: "c-0451", caseNumber: "2026-0451", title: "Sanierung Serverraum", amount: 480.55, eventBookingState: "proposed" })],
+    allocatedSum: 480.55,
+    settled: false,
+  }),
+];
+
+/**
+ * A collective payment over **six** cases — the most the app's allocation
+ * core allows (0193, owner). The stock never had more than two; the cell has
+ * to carry six anyway.
+ */
+export const SIX_CASE_SPLIT: BankTransactionRowData = line({
+  id: "s6",
+  postingDate: "2026-04-22",
+  amount: -4312.4,
+  counterpartyName: "Büro-Service Nord GmbH",
+  purpose: "EREF+SAMMEL-0422 SVWZ+Sammelzahlung RE-1101 RE-1102 RE-1103 RE-1104 RE-1105 RE-1106",
+  matchStage: "exact",
+  cases: [
+    assignment({ caseId: "c-1101", caseNumber: "2026-1101", title: "Druckerpapier März", amount: 412.4, eventBookingState: "posted" }),
+    assignment({ caseId: "c-1102", caseNumber: "2026-1102", title: "Toner Farblaser", amount: 890, eventBookingState: "posted" }),
+    assignment({ caseId: "c-1103", caseNumber: "2026-1103", title: "Bürostühle", amount: 1540, eventBookingState: "accepted" }),
+    assignment({ caseId: "c-1104", caseNumber: "2026-1104", title: "Wartung Kopierer", amount: 620, eventBookingState: "proposed" }),
+    assignment({ caseId: "c-1105", caseNumber: "2026-1105", title: "Ordner und Hefter", amount: 150, eventBookingState: "posted" }),
+    assignment({ caseId: "c-1106", caseNumber: "2026-1106", title: "Kaffeemaschine Service", amount: 700, eventBookingState: "proposed" }),
+  ],
+  allocatedSum: 4312.4,
+  settled: false,
+});

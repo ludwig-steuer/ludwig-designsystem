@@ -476,6 +476,10 @@ export {
    Fakten (0142), Drawer (0143) */
 export { BusinessPartnerCell } from "./entities/business-partner/BusinessPartner";
 export { PaymentAccountCell, type PaymentAccountRef } from "./entities/payment-account/PaymentAccount";
+export {
+  PaymentAccountDrawer,
+  PAYMENT_ACCOUNT_DRAWER_LINES,
+} from "./entities/payment-account/PaymentAccountDrawer";
 export { PaymentAccountRow } from "./entities/payment-account/PaymentAccountRow";
 export { PaymentAccountList } from "./entities/payment-account/PaymentAccountList";
 export { PaymentAccountSettingsList } from "./entities/payment-account/PaymentAccountSettingsList";
