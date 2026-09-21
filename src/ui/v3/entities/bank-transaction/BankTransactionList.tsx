@@ -1,4 +1,5 @@
 import { DataTable, type ListPatch } from "../../patterns/DataTable";
+import { formatCount } from "../../format";
 import type { TableDensity } from "../../primitives/Table";
 import {
   bankTransactionColumns,
@@ -74,6 +75,7 @@ export function BankTransactionList({
   footer,
   density,
   minWidth = 1400,
+  booked,
 }: {
   /** The rows of **this page**, already sorted and filtered. */
   transactions: BankTransactionRowData[];
@@ -104,6 +106,12 @@ export function BankTransactionList({
    * horizontally instead of cutting a column off.
    */
   minWidth?: number;
+  /**
+   * How many lines are done, out of how many — „212 von 251 gebucht" in the
+   * head (0193). Counted by the caller with the domain's rule (L-340), over
+   * the whole filter, not over this page.
+   */
+  booked?: { booked: number; total: number };
 } & RowWayProps) {
   const cols = bankTransactionColumns({
     caseHref,
@@ -117,7 +125,19 @@ export function BankTransactionList({
       rows={transactions}
       columns={cols}
       rowKey={(t) => t.id}
-      head={head}
+      head={
+        booked
+          ? {
+              ...head,
+              sub: (
+                <>
+                  {head.sub ? <>{head.sub} · </> : null}
+                  {formatCount(booked.booked)} von {formatCount(booked.total)} gebucht
+                </>
+              ),
+            }
+          : head
+      }
       minWidth={minWidth}
       {...(density ? { density } : {})}
       {...(listHref ? { href: listHref } : {})}

@@ -2309,6 +2309,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2tl__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .v2tl__empty { padding: var(--space-4) 0; }
 
+/* --- Statement excerpt and booking mark (0193) ------------------------------ */
+/* Counterparty over purpose in one cell — the excerpt has no room for two. */
+.v3btxpay { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+/* The mark of a finished line: tick and word, in the success tone (A7). */
+.v3btxbooked { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--fs-ui-sm); color: var(--color-success); }
+
 /* --- CaseAmount (0192) — the rest under the amount -------------------------- */
 .v3camt__rest { display: block; font-weight: 400; }
 

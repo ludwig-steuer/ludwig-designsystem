@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BankTransactionList } from "./BankTransactionList";
+import { STATEMENT_004 } from "./fixtures";
 import type { BankTransactionRowData, CaseAssignment } from "./bank-transaction";
 import { Amount } from "../../primitives/Amount";
 import { FilterBar } from "../../primitives/FilterBar";
@@ -281,5 +282,39 @@ export const InUse: Story = {
         head={HEAD}
       />
     </div>
+  ),
+};
+
+/**
+ * **„x von y gebucht"** im Kopf (0193): gezählt vom Aufrufer mit der Regel der
+ * Domäne (L-340), über den ganzen Filter, nicht über diese Seite. In der
+ * Spalte Buchung je Zeile der Haken oder das, was sie aufhält. Standardspalten
+ * nach 0193 — die DATEV-Historie ist nicht mehr dabei.
+ */
+export const Booked: Story = {
+  render: () => (
+    <BankTransactionList
+      transactions={STATEMENT_004}
+      caseHref={(id) => `#fall-${id}`}
+      openHref="#zuordnen"
+      head={{ title: "Commerzbank · 1210", sub: "April 2026" }}
+      booked={{ booked: 3, total: 7 }}
+    />
+  ),
+};
+
+/**
+ * Zuschaltbar (0193): Valuta, IBAN, Quelle und Import stehen im Drawer; die
+ * **DATEV-Historie** schaltet der Aufrufer als Spalte zu, wo die Prüffrage vor
+ * dem Lauf gestellt wird. Hier derselbe Auszug mit ihr.
+ */
+export const OptionalColumns: Story = {
+  render: () => (
+    <BankTransactionList
+      transactions={STATEMENT_004}
+      caseHref={(id) => `#fall-${id}`}
+      head={{ title: "Commerzbank · 1210", sub: "mit DATEV-Historie" }}
+      columns={["postingDate", "counterparty", "purpose", "cases", "eventState", "matchStage", "clarifications", "amount"]}
+    />
   ),
 };

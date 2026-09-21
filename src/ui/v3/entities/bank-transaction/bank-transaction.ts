@@ -71,6 +71,14 @@ export interface BankTransactionRowData extends BankTransactionCellData {
   allocatedSum: number;
   /** Rank 8 — open clarifications of the case, not of the line. */
   openClarificationsCount: number;
+  /**
+   * Is this payment **done** — fully assigned (Z1/Z2) and every event
+   * accepted, posted or „no booking required" (0193)? The answer comes from
+   * the app's domain (`isSettled`, finding L-340), not from here: filter,
+   * count and mark have to use one rule. `undefined` — the caller does not
+   * know yet — shows no mark at all; the set does not work it out itself.
+   */
+  settled?: boolean;
 }
 
 /**

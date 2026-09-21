@@ -438,6 +438,7 @@ export {
   type BankTransactionExit,
 } from "./entities/bank-transaction/BankTransactionDrawer";
 export { BankTransactionList } from "./entities/bank-transaction/BankTransactionList";
+export { BankTransactionExcerpt } from "./entities/bank-transaction/BankTransactionExcerpt";
 export { BankTransactionWorklist } from "./entities/bank-transaction/BankTransactionWorklist";
 
 /* Wiederkehr-Regel — Spaltensatz, Zeile, Listen, Fakten, Editor (0131–0135) */
@@ -583,6 +584,7 @@ export type {
 export {
   bankTransactionColumns,
   bankTransactionTracks,
+  COMPACT_COLUMNS,
   type BankTransactionColumn,
   type BankTransactionColumnOptions,
 } from "./entities/bank-transaction/bank-transaction-columns";

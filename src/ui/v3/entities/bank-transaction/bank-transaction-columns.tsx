@@ -8,6 +8,7 @@ import {
 import { caseIdentifier } from "../accounting-case/case-title";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { Link } from "../../primitives/Link";
+import { StateIcon } from "../../patterns/Review";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { Amount } from "../../primitives/Amount";
@@ -39,6 +40,7 @@ import type { BankTransactionRowData } from "./bank-transaction";
 
 export type BankTransactionColumn =
   | "postingDate"
+  | "payment"
   | "counterparty"
   | "purpose"
   | "account"
@@ -55,6 +57,7 @@ export type BankTransactionColumn =
  */
 const ORDER: BankTransactionColumn[] = [
   "postingDate",
+  "payment",
   "counterparty",
   "purpose",
   "account",
@@ -65,7 +68,29 @@ const ORDER: BankTransactionColumn[] = [
   "amount",
 ];
 
-const DEFAULT_COLUMNS: BankTransactionColumn[] = ORDER.filter((c) => c !== "account");
+/**
+ * The full statement (0193): the owner's five ranks plus the clarification.
+ * The DATEV history, the account and the compact `payment` column are
+ * switched on by the caller — the history answers a check before the run,
+ * not the daily question „is this done?".
+ */
+const DEFAULT_COLUMNS: BankTransactionColumn[] = ORDER.filter(
+  (c) => c !== "account" && c !== "matchStage" && c !== "payment",
+);
+
+/**
+ * The excerpt (0193): a fixed set for a handful of rows in a foreign place —
+ * date, payment (counterparty over purpose), case, booking, amount. Fixed on
+ * purpose: an excerpt that looks different at every place is the problem it
+ * exists to solve.
+ */
+export const COMPACT_COLUMNS: readonly BankTransactionColumn[] = [
+  "postingDate",
+  "payment",
+  "cases",
+  "eventState",
+  "amount",
+];
 
 export interface BankTransactionColumnOptions {
   /** Where a case leads. Required — the set builds no URL of its own. */
@@ -124,6 +149,35 @@ export function bankTransactionColumns({
       // ambiguous across financial years — and it is the **posting** date,
       // not the value date (finding L-61).
       cell: (t) => <Time value={t.postingDate} format="date" length="short" size="sm" />,
+    },
+    payment: {
+      key: "payment",
+      header: "Zahlung",
+      // Counterparty over purpose, the two first ranks in one cell — the
+      // excerpt has no room for two tracks of text. Without a counterparty
+      // (3 % of the stock) the purpose moves up and is the identity.
+      width: "minmax(0, 1fr)",
+      cell: (t) => {
+        const text = derivePurposeParts(t.purpose, t.sepaTags).text.trim();
+        const name = t.counterpartyName ?? (text || "ohne Namen");
+        const head = <span className="v2main v2trunc" title={name}>{name}</span>;
+        return (
+          <span className="v3btxpay">
+            {rowHref ? (
+              <Link className="v2rowlink" href={rowHref(t)}>
+                {head}
+              </Link>
+            ) : (
+              head
+            )}
+            {t.counterpartyName && text ? (
+              <span className="v2sub v2trunc" title={text}>
+                {text}
+              </span>
+            ) : null}
+          </span>
+        );
+      },
     },
     counterparty: {
       key: "counterparty",
@@ -280,9 +334,20 @@ function CasesCell({
   );
 }
 
-/** Rank 7 — the state of the **event**, one badge per assigned case. */
+/**
+ * Rank 7 and the owner's „fully booked" (0193) in **one** cell. Done → one
+ * mark with its word; otherwise the state of every event, which says what
+ * holds the line up. Side by side the two would say the same thing for almost
+ * every line — the doubling the owner removed from the case strand the same
+ * day (0040).
+ *
+ * The cell does not decide what „done" means: that is `settled`, set by the
+ * caller from the domain (L-340). Without it the cell shows the events as
+ * before and no mark.
+ */
 function EventStateCell({ transaction }: { transaction: BankTransactionRowData }) {
   if (transaction.cases.length === 0) return null;
+  if (transaction.settled) return <BookedMark transaction={transaction} />;
   return (
     <span className="v2btxrow__states">
       {transaction.cases.map((c) => {
@@ -301,6 +366,31 @@ function EventStateCell({ transaction }: { transaction: BankTransactionRowData }
           </span>
         );
       })}
+    </span>
+  );
+}
+
+/**
+ * The mark of a finished line: a tick and the word „gebucht" (owner
+ * 2026-09-21). A line whose events need no booking is finished too — the
+ * tooltip names, per event, how it was finished („Keine Buchung nötig"), so
+ * the exception is said where it applies instead of weakening the word for
+ * every other line.
+ */
+function BookedMark({ transaction }: { transaction: BankTransactionRowData }) {
+  const how = transaction.cases
+    .map((c) => {
+      const word = resolveEventBookingState({
+        proposalStatus: c.eventBookingState,
+        noBookingRequiredReason: c.noBookingRequiredReason,
+      }).label;
+      return transaction.cases.length > 1 ? `${caseIdentifier(c)}: ${word}` : word;
+    })
+    .join(" · ");
+  return (
+    <span className="v3btxbooked" title={how}>
+      <StateIcon state="done" />
+      gebucht
     </span>
   );
 }

@@ -2,13 +2,28 @@
 
 | | |
 |---|---|
-| Status | spec — **Konzept zur Freigabe**, noch nicht gebaut |
+| Status | Abnahme — freigegeben und gebaut 2026-09-21, fremde Abnahme steht aus |
 | Stufe | `entities/bank-transaction/` (Familie der Auszugszeile) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Sachverhalt, Buchungszustand am Ereignis, DATEV-Historie und die Zuordnungsstufen Z0–Z3 sind Ludwig |
 | Quelle | Owner-Auftrag vom 2026-09-21, überbracht von `acto` (Rangfolge je Zeile, sieben Beispielzeilen aus Auszug 004 der Commerzbank) · Entitätsprofil `docs/entitaeten/bank-transaction.md` · Seitenprofil `docs/seiten/kontoauszug.md` |
 | Ersetzt | in der App vier Handbauten des kompakten Falls: Karte „Zahlung" in `batch-review/ui/Step3Single.tsx`, „Umsätze ohne freigegebene Buchung" in Schritt 4, die `FieldList` im `EventPane` von `CaseOverview`, `BookingCoveragePanel`/`DatevCoveragePanel` auf der Bankkonto-Seite |
 | Setzt voraus | `bankTransactionColumns()` (0101) ✓ · `BankTransactionRow` (0102) ✓ · `BankTransactionList` (0101) ✓ · `DataTable` mit `sections` (0149) ✓ · `deriveZ`/`restOf` im Spiegel ✓ · **neu in der App:** eine Ableitung „erledigt" in `statement-line.ts` (Befund L-340) |
 | Spec von / am | Claude, 2026-09-21 |
+
+## Entscheide des Owners (2026-09-21, über `acto`)
+
+1. **Das Wort am Haken ist „gebucht"**, nicht „erledigt". Der Fall
+   `no_booking_required` (Beispielzeile 6) trägt trotzdem den Haken; der
+   Tooltip „keine Buchung nötig" trägt die Ausnahme. Filter und Zähler heißen
+   entsprechend „nicht gebucht" und „212 von 251 gebucht".
+2. **`accepted` zählt als fertig.**
+3. **Keine Gruppierung je Auszug.** Abschnittsköpfe mit Anfangs- und
+   Endsaldo sind aus dieser Spec gestrichen; die flache Liste ist der
+   Standard. Salden gehören nicht zu diesem Pattern — L-58 bleibt eigen, und
+   der Saldo steht, wenn überhaupt, unter der Liste, wie im Seitenprofil.
+
+Alles andere wie vorgeschlagen. Wo die folgenden Abschnitte etwas anderes
+sagen, gilt dieser.
 
 ## Ziel
 
@@ -220,3 +235,39 @@ Mit den sieben Beispielzeilen aus Auszug 004:
   zuschaltbaren Spalten der Nutzerin gibt statt nur dem Aufrufer.
 - Summen je Abschnitt (Eingänge, Ausgänge) im Abschnittskopf, sobald L-58 die
   Salden liefert und jemand danach fragt.
+
+## Stand des Baus (2026-09-21)
+
+Gebaut nach den Entscheiden des Owners:
+
+- `BankTransactionRowData.settled?: boolean` — gesetzt vom Aufrufer aus der
+  Domäne (L-340). Ohne es kein Haken.
+- Spalte **Buchung** (`eventState`) zusammengeführt: `settled` → Haken mit
+  „gebucht" und Tooltip je Ereignis („2026-0290: Gebucht · 2026-0291:
+  Freigegeben", „Keine Buchung nötig"); sonst die Badges der Ereignisse.
+- Neue Spalte `payment` („Zahlung": Gegenpartei über Zweck), Satz
+  `COMPACT_COLUMNS` exportiert.
+- `BankTransactionExcerpt` (neue Form, Server-Komponente) mit dem festen Satz.
+- `BankTransactionList`: `booked={{ booked, total }}` → „x von y gebucht" im
+  Kopf; **Standardspalten ohne DATEV-Historie** (zuschaltbar über `columns`).
+- Stile `.v3btxpay`, `.v3btxbooked`; Fixture `STATEMENT_004` mit den sieben
+  Zeilen.
+
+**Zwei Bau-Entscheidungen, die vom Konzepttext abweichen:**
+
+1. **Nicht fertige Zeilen zeigen die Badges aller Ereignisse**, nicht nur der
+   aufhaltenden. Welches Ereignis „fertig" ist, ist schon ein Teil der Regel
+   aus L-340; filterte das Set selbst, hätte es die Regel ein zweites Mal. Das
+   Wort des Badges sagt ohnehin, welches aufhält.
+2. **Der Ausschnitt zeigt den Split gleich aufgeklappt** (Teilbeträge unter der
+   Zeile), ohne Aufklapper: bei einer Handvoll Zeilen ist das Auskunft, und
+   die Karte bleibt eine Server-Komponente.
+
+**Folge für die App:** die Kontoauszug-Seite zeigt die DATEV-Historie nur
+noch, wenn sie die Spalte über `columns` zuschaltet.
+
+Im Browser nachgesehen: `banktransactionexcerpt--filled` (sieben Zeilen: drei
+Haken, „Vorschlag", „Buchung fehlt" mit „Rest 480,55 €", „offen", „Geplant";
+Split aufgeklappt) · `banktransactionlist--booked` („April 2026 · 3 von 7
+gebucht", Spalten Datum · Gegenpartei · Verwendungszweck · Sachverhalt ·
+Buchung · Klärung · Betrag). Typecheck und Wächter grün.
