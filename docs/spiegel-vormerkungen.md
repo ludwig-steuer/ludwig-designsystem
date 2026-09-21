@@ -18,6 +18,16 @@ Saldo-Stand eines Kontos im Sachverhalt: `must_clear` / `cleared` / `stays`
 **Wartet nur noch auf die Owner-Ausnahme vom Freeze** (von `acto` angefragt);
 danach Spiegel-Lauf, damit `StatusBadge` die Achse kennt.
 
+**`isSettled` und die neuen Felder der Auszugszeile** (gemeldet von `acto`,
+2026-09-21, 0193/0194) — `isSettled` in
+`bank-transactions/domain/statement-line.ts` (L-340) und an
+`StatementLineVM` in `bank-transaction-vm.ts` die Felder `settled`,
+`counterpartyIban` und die Detailfelder. Liegt in drei Commits auf `staging`,
+beim Eintrag **lokal, nicht gepusht**. Wartet auf den Push und die
+Owner-Ausnahme vom Freeze. Im Set ist bis dahin nichts zu tun: die Formen
+lesen `settled` und `counterpartyIban` schon als Props
+(`BankTransactionRowData`), der Lauf gleicht nur die Typen ab.
+
 **`docs/topics/web-ui.md` — Schritt 0 ohne „Abnahme beginnen"** (gemeldet von
 `a2`, 2026-09-21, App `31e60889`, beim Eintrag noch nicht auf origin/staging;
 der Owner entscheidet den Push). Der Satz ist in der Quelle der App schon
