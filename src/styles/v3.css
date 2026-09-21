@@ -2298,6 +2298,34 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2tl__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .v2tl__empty { padding: var(--space-4) 0; }
 
+/* --- MirrorEntry (0191) — what stands in DATEV ---------------------------- */
+.v3mir { display: flex; flex-direction: column; font-size: var(--fs-ui); line-height: var(--lh-ui); }
+.v3mir__item { border-top: 1px solid var(--color-border-subtle); padding: var(--space-3) 0; }
+.v3mir__item:first-child { border-top: none; }
+.v3mir__row { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+/* Text left, the number block right — it must not move with the text length. */
+.v3mir__head { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+/* Amount and badge each keep their column, even when one is empty: otherwise
+   the numbers of the rows spread over the width of the widest badge — measured
+   in the acceptance of 0040, where ten amounts ended across 86 px. The widest
+   word of the axis measures 152 px. */
+.v3mir__state { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
+.v3mir__amt { min-width: 96px; display: inline-flex; justify-content: flex-end; }
+.v3mir__badge { min-width: 160px; display: inline-flex; }
+/* „6815 · 0650 an 70112": the accounts of one side stay one group. */
+.v3mir__accpair { display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; }
+.v3mir__accs { display: inline-flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; }
+.v3mir__meta {
+  display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap;
+  font-size: var(--fs-ui-sm); color: var(--color-text-subtle);
+}
+/* The mention in a foreign row: sign, word, accounts, amount — one line. */
+.v3mir__cell { display: inline-flex; align-items: baseline; gap: var(--space-3); min-width: 0; }
+.v3mir__from {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  font-size: var(--fs-ui-sm); color: var(--color-text-muted);
+}
+
 /* --- Markdown (0022) — text we did not write ------------------------------ */
 /* One size for the whole block: paragraph, list, quote and cell inherit it
    (the paragraph once stood at 16 px because of a `p` rule in `tokens.css`). */

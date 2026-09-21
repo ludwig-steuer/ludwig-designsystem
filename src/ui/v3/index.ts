@@ -598,6 +598,16 @@ export {
   type ExpectationVM,
 } from "./entities/expectation/Expectation";
 
+/* DATEV-Spiegelbuchung — the reading family: preview, row, list (0191) */
+export {
+  MirrorEntryCell,
+  MirrorEntryRow,
+  MirrorEntryList,
+  mirrorEntryAccounts,
+  type MirrorEntryVM,
+  type MirrorEntryLine,
+} from "./entities/datev-mirror-entry/MirrorEntry";
+
 /* Klärung — the reading family: preview, row, list (0059) */
 export {
   ClarificationCell,

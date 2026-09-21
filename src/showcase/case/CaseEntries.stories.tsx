@@ -15,18 +15,22 @@ import {
   ClarificationCard,
   type ClarificationDetailVM,
 } from "@/ui/v3/entities/clarification/ClarificationCard";
+import { CaseFacts } from "@/ui/v3/entities/accounting-case/CaseFacts";
+import {
+  MirrorEntryList,
+  type MirrorEntryVM,
+} from "@/ui/v3/entities/datev-mirror-entry/MirrorEntry";
 import { ExpectationRow } from "@/ui/v3/entities/expectation/Expectation";
 import { AiBookingNotes } from "@/ui/v3/entities/journal-entry/AiBookingNotes";
 import { JournalEntryCard, type JournalLine } from "@/ui/v3/entities/journal-entry/JournalEntryCompact";
 import { JournalEntryFacts } from "@/ui/v3/entities/journal-entry/JournalEntryFacts";
 import { SourceDocumentCell } from "@/ui/v3/entities/source-document/SourceDocument";
 import { Columns } from "@/ui/v3/patterns/Columns";
-import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 import { FieldList } from "@/ui/v3/primitives/FieldList";
 import { Card, CardHead } from "@/ui/v3/primitives/Table";
 
 import { documentFixture } from "../document/fixtures";
-import { accountHref } from "./fixtures";
+import { accountHref, caseFixture } from "./fixtures";
 
 /**
  * Der Katalog der 35 typischen Einträge am Sachverhalt (0190).
@@ -1181,37 +1185,31 @@ export const BookingReversed: Story = {
   ),
 };
 
-/**
- * Stopgap for the four mirror entries: debit and credit as rows, plus the
- * state of the match. **The set has no form for the DATEV mirror entry at a
- * case** (finding B-08); this is as far as today gets.
- */
-function MirrorPane({
-  title,
-  sub,
-  state,
-  rows,
-}: {
-  title: string;
-  sub: string;
-  state: string;
-  rows: [string, string][];
-}) {
-  return (
-    <Pane title={title} sub={sub}>
-      <StatusBadge axis="mirror_match" status={state} />
-      <FieldList tone="bare" rows={rows} />
-      <p className="v2muted" style={{ margin: 0 }}>
-        Behelf: die Spiegelbuchung hat im Set keine eigene Form (Befund B-08).
-      </p>
-    </Pane>
-  );
-}
+/** The mirror records of the reference case, as the new family shows them (0191). */
+const mirror = (over: Partial<MirrorEntryVM> = {}): MirrorEntryVM => ({
+  id: "mir-31",
+  description: "Müller Bürotechnik Bürobedarf",
+  amount: 1190,
+  currency: "EUR",
+  postingDate: "2026-03-04",
+  matchState: "matched_ludwig",
+  externalDocumentNumber: "RE-24-0815",
+  sequenceId: "2026-03",
+  sequenceCommitted: true,
+  exportRef: "LW-7F3A2C91",
+  caseNumber: "2026-0142",
+  lines: [
+    { side: "debit", accountNumber: "6815", accountName: "Bürobedarf", amount: 1190 },
+    { side: "credit", accountNumber: "70112", accountName: "Müller Bürotechnik GmbH", amount: 1190 },
+  ],
+  ...over,
+});
 
 /**
  * **31 · DATEV-Spiegel: bestätigt.** Der Export ist drüben angekommen und
  * wiedergefunden — über die LudwigAI-Referenz. Das ist der Endzustand einer
- * Buchung: nicht „exportiert", sondern **bestätigt**.
+ * Buchung: nicht „exportiert", sondern **bestätigt**. Seit 0191 zeigt das die
+ * Familie `MirrorEntry` statt einer Behelfs-Liste.
  */
 export const MirrorMatched: Story = {
   render: () => (
@@ -1220,16 +1218,9 @@ export const MirrorMatched: Story = {
       selected="evt-01"
       events={[ev("evt-01", "document_received", "2026-03-04", "Rechnung RE-24-0815", 1190, "posted", { bookingState: "posted" })]}
     >
-      <MirrorPane
-        title="DATEV-Spiegel"
-        sub="04.03.2026 · Müller Bürotechnik Bürobedarf"
-        state="matched_ludwig"
-        rows={[
-          ["Referenz", "LW-7F3A2C91"],
-          ["Soll", "6815 · 1.190,00 €"],
-          ["Haben", "70112 · 1.190,00 €"],
-        ]}
-      />
+      <Pane title="In DATEV gebucht" sub="ein Satz · bestätigt">
+        <MirrorEntryList entries={[mirror()]} />
+      </Pane>
     </Entry>
   ),
 };
@@ -1245,16 +1236,22 @@ export const MirrorCorrected: Story = {
       selected="evt-01"
       events={[ev("evt-01", "document_received", "2026-03-04", "Rechnung RE-24-0815", 1190, "posted", { bookingState: "posted" })]}
     >
-      <MirrorPane
-        title="DATEV-Spiegel"
-        sub="Müller Bürotechnik – auf 6845 umgebucht"
-        state="matched_corrected"
-        rows={[
-          ["Referenz", "LW-7F3A2C91"],
-          ["Ludwig", "6815 an 70112 · 1.190,00 €"],
-          ["DATEV", "6845 an 70112 · 1.190,00 €"],
-        ]}
-      />
+      <Pane title="In DATEV gebucht" sub="ein Satz · von der Kanzlei geändert">
+        <MirrorEntryList
+          entries={[
+            mirror({
+              id: "mir-32",
+              matchState: "matched_corrected",
+              description: "Müller Bürotechnik – auf 6845 umgebucht",
+              lines: [
+                { side: "debit", accountNumber: "6845", accountName: "Werbekosten", amount: 1190 },
+                { side: "credit", accountNumber: "70112", accountName: "Müller Bürotechnik GmbH", amount: 1190 },
+              ],
+            }),
+          ]}
+        />
+        <FieldList tone="bare" rows={[["Bei uns", "6815 an 70112 · 1.190,00 €"]]} />
+      </Pane>
     </Entry>
   ),
 };
@@ -1271,17 +1268,32 @@ export const MirrorSplit: Story = {
       selected="evt-01"
       events={[ev("evt-01", "document_received", "2026-03-04", "Rechnung RE-24-0815", 1190, "posted", { bookingState: "posted" })]}
     >
-      <MirrorPane
-        title="DATEV-Spiegel"
-        sub="ein Satz, zwei Teile"
-        state="matched_split"
-        rows={[
-          ["Referenz", "LW-7F3A2C91"],
-          ["Teil 1", "6815 · 714,00 €"],
-          ["Teil 2", "0650 · 476,00 €"],
-          ["Summe", "1.190,00 € — entspricht dem Ludwig-Satz"],
-        ]}
-      />
+      <Pane title="In DATEV gebucht" sub="ein Satz · in zwei Teile zerlegt">
+        <MirrorEntryList
+          entries={[
+            mirror({
+              id: "mir-33a",
+              matchState: "matched_split",
+              amount: 714,
+              lines: [
+                { side: "debit", accountNumber: "6815", accountName: "Bürobedarf", amount: 714 },
+                { side: "credit", accountNumber: "70112", accountName: "Müller Bürotechnik GmbH", amount: 714 },
+              ],
+            }),
+            mirror({
+              id: "mir-33b",
+              matchState: "matched_split",
+              amount: 476,
+              description: "Müller Bürotechnik Büroeinrichtung",
+              lines: [
+                { side: "debit", accountNumber: "0650", accountName: "Büroeinrichtung", amount: 476 },
+                { side: "credit", accountNumber: "70112", accountName: "Müller Bürotechnik GmbH", amount: 476 },
+              ],
+            }),
+          ]}
+        />
+        <FieldList tone="bare" rows={[["Zusammen", "1.190,00 € — entspricht unserem Satz"]]} />
+      </Pane>
     </Entry>
   ),
 };
@@ -1304,25 +1316,34 @@ export const MirrorForeignEntry: Story = {
         }),
       ]}
     >
-      <MirrorPane
-        title="DATEV-Spiegel"
-        sub="31.03.2026 · Skontoertrag Müller"
-        state="new_unprocessed"
-        rows={[
-          ["Referenz", "keine — nicht aus Ludwig exportiert"],
-          ["Soll", "70112 · 23,80 €"],
-          ["Sachverhalt", "2026-0142 (über die Belegnummer erkannt)"],
-        ]}
-      />
+      <Pane title="In DATEV gebucht" sub="ein Satz · ohne uns">
+        <MirrorEntryList
+          entries={[
+            mirror({
+              id: "mir-34",
+              matchState: "new_unprocessed",
+              description: "Skontoertrag Müller",
+              postingDate: "2026-03-31",
+              amount: 23.8,
+              exportRef: null,
+              markOfOrigin: "RE",
+              lines: [
+                { side: "debit", accountNumber: "70112", accountName: "Müller Bürotechnik GmbH", amount: 23.8 },
+                { side: "credit", accountNumber: "3736", accountName: "Erhaltene Skonti", amount: 23.8 },
+              ],
+            }),
+          ]}
+        />
+      </Pane>
     </Entry>
   ),
 };
 
 /**
  * **35 · Freigabe „Vorsteuer ohne Beleg".** Ein Mensch hat entschieden, dass
- * die Vorsteuer ohne Rechnung gezogen wird — mit Datum, Person und Grund. Das
- * hängt am Sachverhalt selbst, nicht an einem Ereignis; **`CaseFacts` kennt
- * das Feld heute nicht** (Befund B-09), deshalb hier als Liste.
+ * die Vorsteuer ohne Rechnung gezogen wird — mit Tag und Grund. Das hängt am
+ * Sachverhalt selbst, nicht an einem Ereignis, und steht deshalb in den
+ * Stammdaten (`CaseFacts`, seit 0191). Ohne Freigabe steht die Zeile nicht da.
  */
 export const VatWithoutDocumentApproved: Story = {
   render: () => (
@@ -1342,19 +1363,23 @@ export const VatWithoutDocumentApproved: Story = {
         },
       ]}
     >
-      <Pane title="Vorsteuer ohne Beleg" sub="freigegeben am 20.03.2026">
-        <FieldList
-          tone="bare"
-          rows={[
-            ["Freigegeben am", "20.03.2026, 12:00"],
-            ["Durch", "Sachbearbeiterin (usr-sb-02)"],
-            ["Grund", "Abo-Rechnung liegt im GitHub-Konto, Mandant reicht nach"],
-            ["Rückfrage", "cl-35 — Beleg angefordert"],
-          ]}
+      <Pane title="Stammdaten" sub="Sachverhalt 2026-0171">
+        <CaseFacts
+          case={caseFixture({
+            caseNumber: "2026-0171",
+            kind: "incoming_invoice",
+            summary: "Abo GitHub Team; gezahlt, Rechnung liegt noch nicht vor.",
+            counterpartyName: "GitHub, Inc.",
+            personalAccountNumber: "70455",
+            vatWithoutDocumentApproval: {
+              approvedAt: "2026-03-20T10:00:00Z",
+              approvedBy: "usr-sb-02",
+              reason: "Abo-Rechnung liegt im GitHub-Konto, Mandant reicht nach",
+              clarificationId: "cl-35",
+            },
+          })}
+          accountHref={accountHref}
         />
-        <p className="v2muted" style={{ margin: 0 }}>
-          Die Freigabe steht am Sachverhalt; eine Form dafür fehlt im Set (Befund B-09).
-        </p>
       </Pane>
     </Entry>
   ),

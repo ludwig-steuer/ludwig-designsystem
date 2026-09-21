@@ -35,6 +35,32 @@ const FULL: CaseFactsVM = {
   exportBatchId: null,
 };
 
+/**
+ * Die Freigabe „Vorsteuer ohne Beleg" (0191, B-09): jemand hat einmal
+ * entschieden, dass die Vorsteuer ohne Rechnung gezogen wird — ab da ist das
+ * eine Eigenschaft des Falls, keine Zeile im Verlauf. Tag und Grund stehen
+ * zusammen; **ohne Freigabe steht die Zeile gar nicht da** (Gegenprobe:
+ * `Filled`), denn sie ist die Ausnahme und kein leeres Feld.
+ */
+export const VatWithoutDocument: Story = {
+  render: () => (
+    <div style={{ maxWidth: 720 }}>
+      <CaseFacts
+        case={{
+          ...FULL,
+          vatWithoutDocumentApproval: {
+            approvedAt: "2026-03-20T10:00:00Z",
+            approvedBy: "usr-sb-02",
+            reason: "Abo-Rechnung liegt im GitHub-Konto, Mandant reicht nach",
+            clarificationId: "cl-35",
+          },
+        }}
+        accountHref={accountHref}
+      />
+    </div>
+  ),
+};
+
 /** Die Ränge 11–16 mit Werten; Partner und Konto sind Links. */
 export const Filled: Story = {
   render: () => (

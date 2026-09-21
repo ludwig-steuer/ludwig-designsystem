@@ -138,6 +138,26 @@ export function CaseFacts({
     add("Kein Beleg zu erwarten", c.documentNotRequiredReason);
   }
 
+  /*
+    The approval „input tax without a document" (0191, B-09). It stands with
+    the facts, not in the strand: somebody decided it once, and from then on it
+    is a property of the case.
+
+    **Without an approval there is no line** — no „—". An approval is the
+    exception; an empty field would claim that every case has one and this one
+    is missing it. The reason stands next to the day, because a date alone does
+    not say why the deduction was allowed.
+  */
+  if (c.vatWithoutDocumentApproval) {
+    add(
+      "Vorsteuer ohne Beleg",
+      <>
+        freigegeben am <Time value={c.vatWithoutDocumentApproval.approvedAt} format="date" />
+        {c.vatWithoutDocumentApproval.reason ? ` · ${c.vatWithoutDocumentApproval.reason}` : ""}
+      </>,
+    );
+  }
+
   // Rang 16
   add("Abgeschlossen", c.closedAt ? <Time value={c.closedAt} format="date" /> : "laufend");
 
