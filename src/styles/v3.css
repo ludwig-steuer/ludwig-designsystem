@@ -878,6 +878,16 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2callout--warning .v2callout__sub { color: var(--color-warning); }
 .v2callout--danger .v2callout__sub { color: var(--color-danger); }
 .v2callout__actions { display: flex; gap: 10px; flex-shrink: 0; }
+/* With `details`: the head row on top, the fold-out across the full width
+   below it, inside the same frame. The fold reaches the frame's edges — its
+   divider belongs to the card, not to the text — so it takes back the card's
+   padding (20px 24px above) and gives it to its own summary and body. */
+.v2callout--folds { flex-direction: column; align-items: stretch; gap: 0; }
+.v2callout__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); }
+.v2callout--folds > .v2disc { margin: var(--space-4) -24px -20px; }
+.v2callout--folds > .v2disc > .v2disc__sum { padding: var(--space-3) 24px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.v2callout--folds > .v2disc[open] > .v2disc__sum { border-radius: 0; }
+.v2callout--folds > .v2disc > .v2disc__body { padding: 0 24px 20px; }
 
 /* --- Hinweisbox --------------------------------------------------------- */
 .v2note {

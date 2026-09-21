@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AlertTriangle, CircleCheck, Clock } from "lucide-react";
+import { Badge } from "./Badge";
 import { Button } from "./Button";
+import { Link } from "./Link";
+import { HeadRow, Row, Table } from "./Table";
 import { StatusCallout } from "./StatusCallout";
 
 const meta: Meta<typeof StatusCallout> = { title: "v3/Primitives/Fläche/StatusCallout", component: StatusCallout };
@@ -110,6 +113,78 @@ export const NextAction: Story = {
         title="Beleg fehlt"
         sub="Ohne Beleg kann der Sachverhalt nicht gebucht werden."
         actions={<Button variant="secondary" size="sm">Beleg anfordern</Button>}
+      />
+    </div>
+  ),
+};
+
+const TASKS: { task: string; state: "done" | "open"; word: string; href: string }[] = [
+  { task: "Kontoauszüge abgeglichen", state: "done", word: "erledigt", href: "#schritt-1" },
+  { task: "Belege den Zahlungen zugeordnet", state: "done", word: "erledigt", href: "#schritt-2" },
+  { task: "Buchungen vorgeschlagen", state: "done", word: "erledigt", href: "#schritt-3" },
+  { task: "Dauerbuchungen gesollt", state: "done", word: "erledigt", href: "#schritt-4" },
+  { task: "Erwartungen geprüft", state: "done", word: "erledigt", href: "#schritt-5" },
+  { task: "Rückfragen gestellt", state: "open", word: "2 offen", href: "#schritt-6" },
+  { task: "Umsatzsteuer abgestimmt", state: "open", word: "Differenz 12,40 €", href: "#schritt-7" },
+];
+
+function TaskTable({ tasks }: { tasks: typeof TASKS }) {
+  return (
+    <Table cols="minmax(0, 1fr) auto auto">
+      <HeadRow>
+        <span>Aufgabe</span>
+        <span>Stand</span>
+        <span>Schritt</span>
+      </HeadRow>
+      {tasks.map((t) => (
+        <Row key={t.task}>
+          <span>{t.task}</span>
+          <Badge tone={t.state === "done" ? "success" : "warning"}>{t.word}</Badge>
+          <Link href={t.href}>öffnen</Link>
+        </Row>
+      ))}
+    </Table>
+  );
+}
+
+/**
+ * **Eine Box statt zwei** (Owner 2026-09-21, Schritt 0 der Stapelabnahme):
+ * der Kopf sagt das Ergebnis, darunter klappt im **selben Rahmen** auf, was
+ * der Agent erledigt hat. Zu ist der Standard — der Kopf ist schon die
+ * Antwort, die Tabelle der Beleg dafür. Der Knopf steht im Kopf, nicht in der
+ * aufklappbaren Zeile: ein Klick auf ihn klappt nichts auf. Der Ton färbt den
+ * ganzen Rahmen, auch um die aufgeklappte Tabelle.
+ *
+ * Darunter derselbe Kopf, wenn der Agent durch ist, und einmal offen
+ * (`defaultOpen`).
+ */
+export const WithDetails: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 16, maxWidth: 880 }}>
+      <StatusCallout
+        tone="warning"
+        kicker="Ergebnis"
+        title="Der Agent ist an 2 Stellen nicht fertig"
+        sub="Zwei Rückfragen sind offen, die Umsatzsteuer weicht um 12,40 € ab."
+        actions={<Button variant="primary">Abnahme beginnen</Button>}
+        details={{ summary: "5 von 7 Aufgaben erledigt", children: <TaskTable tasks={TASKS} /> }}
+      />
+      <StatusCallout
+        kicker="Ergebnis"
+        title="Der Agent ist fertig"
+        sub="Alle sieben Aufgaben sind erledigt."
+        actions={<Button variant="primary">Abnahme beginnen</Button>}
+        details={{
+          summary: "7 von 7 Aufgaben erledigt",
+          children: <TaskTable tasks={TASKS.map((t) => ({ ...t, state: "done", word: "erledigt" }))} />,
+        }}
+      />
+      <StatusCallout
+        tone="warning"
+        kicker="Ergebnis"
+        title="Der Agent ist an 2 Stellen nicht fertig"
+        actions={<Button variant="primary">Abnahme beginnen</Button>}
+        details={{ summary: "5 von 7 Aufgaben erledigt", children: <TaskTable tasks={TASKS} />, defaultOpen: true }}
       />
     </div>
   ),

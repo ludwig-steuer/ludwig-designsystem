@@ -125,3 +125,46 @@ sechs Drawer ist `a|button.v2btn.v2btn--secondary.v2btn--sm` mit Icon.
 `pnpm typecheck`, `check:classes`, `check:language`, `check:when`,
 `check:mirror` und `pnpm build` (im Worktree) grün. Abnahme durch einen
 anderen Agenten steht aus.
+
+## Nachtrag 2026-09-21 — Schritt 0 als eine Box (Owner über `a1`)
+
+**Anlass.** Schritt 0 der Stapelabnahme (`batch-review/ui/Step0.tsx`) stellt
+zwei Boxen untereinander: das `StatusCallout` mit dem Ergebnis („Der Agent ist
+an 2 Stellen nicht fertig", Knopf „Abnahme beginnen") und darunter eine
+`Disclosure` „Was der Agent erledigt hat — 5 von 7 Aufgaben" mit der Tabelle.
+Owner: „das ist eigentlich eine Sache, warum zwei Boxen."
+
+**Einordnung.** Regel 2 aus `spec-schreiben` §3: das Callout deckt den Fall
+zu vier Fünfteln, es fehlt **eine** Prop. Keine neue Komponente: Kopf und
+Beleg sind eine Aussage, und ein zweiter Baustein, der nur beides
+zusammensteckt, wäre eine Komposition ohne eigenen Zustand.
+
+**Schnittstelle.** `StatusCallout.details?: { summary: ReactNode; children:
+ReactNode; defaultOpen?: boolean }`. Mit ihr steht unter dem Kopf eine Zeile
+zum Aufklappen, und der Inhalt klappt **im selben Rahmen** auf; ohne sie
+bleibt das Callout, wie es war.
+
+- Der Ton färbt den ganzen Rahmen, auch um den aufgeklappten Teil.
+- Der Knopf steht im Kopf, nie im `<summary>` — ein Klick auf ihn klappt
+  nichts auf.
+- Server-Komponente: die Klappe ist die `Disclosure` (natives `<details>`).
+- Zu ist der Standard: der Kopf ist schon die Antwort, die Tabelle der Beleg.
+- Der Fall „fertig" (neutral, alle Aufgaben erledigt) nutzt dieselbe Box.
+
+**Abnahmekriterien (Nachtrag)**
+
+1. Story `WithDetails`: drei Callouts (Warnung zu, neutral zu, Warnung offen),
+   jedes **ein** Rahmen; kein zweites `.v2callout` und keine lose
+   `.v2disc` daneben.
+2. Klick auf „Abnahme beginnen" ändert `details.open` nicht; Klick auf die
+   Zeile öffnet.
+3. `summary` enthält keinen `<button>`.
+4. Die aufklappbare Zeile reicht von Rahmenkante zu Rahmenkante; ihr
+   Trennstrich gehört zur Karte, nicht zum Text.
+5. Ohne `details` rendern alle bisherigen Stories unverändert.
+
+**Stand.** Gebaut 2026-09-21. Gemessen in `--with-details`: vor dem Klick zu,
+nach Klick auf den Knopf weiter zu, nach Klick auf die Zeile offen; kein
+Knopf im `<summary>`; Rahmen 16–896 px, Zeile 17–895 px (innerhalb der
+Rahmenlinie); Rahmenfarbe `rgb(140, 96, 30)` = Warnton. Fremde Abnahme steht
+aus.
