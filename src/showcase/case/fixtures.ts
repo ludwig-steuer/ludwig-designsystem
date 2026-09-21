@@ -4,9 +4,8 @@ import type {
   CaseTimelineEvent,
   CaseTimelineExpectation,
 } from "@/ui/v3/entities/accounting-case/CaseTimeline";
-import type { ClarificationVM } from "@/ui/v3/entities/clarification/Clarification";
 import type { JournalLine } from "@/ui/v3/entities/journal-entry/JournalEntryCompact";
-import type { Note } from "@/ui/v3/patterns/NoteFeed";
+import type { ScenarioClarification } from "./scenario";
 
 /**
  * Synthetic cases for the page stories (0152).
@@ -121,28 +120,54 @@ export const PROPOSAL: JournalLine[] = [
   },
 ];
 
-/** Notes on the case — newest first; the order belongs to the caller. */
-export const NOTES: Note[] = [
-  {
-    id: "n-1",
-    at: "2026-08-02T14:30:00Z",
-    author: "Mandant",
-    text: "Die Ersatzteile gehören zum Firmenwagen, nicht zum Werkstattbestand.",
-  },
-  {
-    id: "n-2",
-    at: "2026-07-31T16:05:00Z",
-    author: "Agent",
-    text: "Beleg ohne Sachverhalt eingegangen, Fall eröffnet und Vorschlag gebucht.",
-  },
+/**
+ * A note as the table stores it: `type = 'comment'`, the whole content in the
+ * text — none of the 30 in stock carries context or facts (survey
+ * 2026-09-18). Audience and severity are required columns and mean nothing
+ * here, as in the table.
+ */
+export const note = (
+  id: string,
+  raisedAt: string,
+  sourceModule: "agent" | "web",
+  title: string,
+  text: string,
+): ScenarioClarification => ({
+  id,
+  type: "comment",
+  title,
+  text,
+  raisedAt,
+  sourceModule,
+  state: "open",
+  severity: "optional",
+  audience: "accounting",
+});
+
+/** Notes on the case — one by the firm, one by the agent. */
+export const NOTES: ScenarioClarification[] = [
+  note(
+    "n-1",
+    "2026-08-02T14:30:00Z",
+    "web",
+    "Telefonat mit dem Mandanten",
+    "Die Ersatzteile gehören zum Firmenwagen, nicht zum Werkstattbestand.",
+  ),
+  note(
+    "n-2",
+    "2026-07-31T16:05:00Z",
+    "agent",
+    "Fall eröffnet und Vorschlag gebucht",
+    "Beleg ohne Sachverhalt eingegangen; der Agent hat den Fall eröffnet und den Vorschlag gebucht.",
+  ),
 ];
 
 /**
- * The clarifications of the case — one open, one answered. Title and state
- * only: the rich form (context, question, recommendation) exists in just 9 %
- * of the stock (survey 2026-09-10).
+ * The clarifications of the case — one open, one answered. Title, state and a
+ * text only: the rich form (context, question, recommendation) exists in just
+ * 9 % of the stock (survey 2026-09-10).
  */
-export const CLARIFICATIONS: ClarificationVM[] = [
+export const CLARIFICATIONS: ScenarioClarification[] = [
   {
     id: "cl-2",
     title: "Wurde die Rechnung schon bezahlt?",
@@ -152,6 +177,9 @@ export const CLARIFICATIONS: ClarificationVM[] = [
     audience: "client",
     raisedAt: "2026-08-04T08:15:00Z",
     href: "?tab=rueckfragen&klaerung=cl-2",
+    text: "Auf dem Konto ist für Juli kein Abgang an den Lieferanten zu finden.",
+    answerKind: "yes_no",
+    answerOptions: ["Ja", "Nein"],
   },
   {
     id: "cl-1",
@@ -163,6 +191,9 @@ export const CLARIFICATIONS: ClarificationVM[] = [
     raisedAt: "2026-08-01T09:12:00Z",
     answeredAt: "2026-08-02T14:30:00Z",
     href: "?tab=rueckfragen&klaerung=cl-1",
+    text: "Der Mandant hat geantwortet: die Ersatzteile gehören zum Firmenwagen.",
+    answerKind: "single_choice",
+    answerOptions: ["Firmenwagen", "Werkstattbestand"],
   },
 ];
 

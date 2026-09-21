@@ -44,9 +44,8 @@ const CASE_PINS: readonly Pin[] = [
   { selector: ".v3cols__list", label: "CaseTimeline", rule: "Zone 5 · der fachliche Strang, links; nennt seine Quelle (§2.2)" },
   { selector: ".v3open__body, .v3open__none", label: "OpenPoints", rule: "D2, D21 · Zone 2: was an diesem Fall offen ist" },
   { selector: ".v2card", match: "Fehlende Freigaben", label: "JournalEntryCard · Freigabe", rule: "D9 · die Arbeitsfläche in Spalte 2" },
-  { selector: ".v3notes", label: "NoteFeed", rule: "D20 · Randspalte: Notizen am Vorgang" },
   { selector: ".v2exp", label: "ExpectationRow", rule: "D20 · offene Erwartungen rechts, unter „Zu tun“ nur fällig" },
-  { selector: ".v2card", match: "Rückfragen", label: "ClarificationList", rule: "D20 · Randspalte: Rückfragen" },
+  { selector: ".v2card", match: "Rückfragen und Notizen", label: "ClarificationList · ClarificationEditor", rule: "D20 · Randspalte: Rückfragen und Notizen in einer Liste, eine Tabelle (Owner 2026-09-18)" },
 ];
 
 const ACCOUNT_PINS: readonly Pin[] = [

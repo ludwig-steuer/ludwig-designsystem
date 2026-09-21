@@ -198,3 +198,27 @@ Zwei Anmerkungen ohne Mangel, für die nächste Berührung der Datei:
    (der Editor hält seinen Entwurf intern, eine Vorbelegung gäbe es erst mit der
    kontrollierten Variante aus „Ausbau"). Der Untertitel der Karte sagt das;
    geprüft wurde durch Tippen.
+
+## Nachtrag 2026-09-18 — eingeklappt in der Randspalte (Owner)
+
+**Anlass.** Die Karte „Rückfragen und Notizen" trägt das Formular jetzt selbst
+(„Kommentar zufügen", Owner 2026-09-18). Ein dauerhaft offenes Formular in
+einer 370-px-Randspalte verlangt etwas, das niemand vorhatte — dieselbe
+Erfahrung wie beim Notizfeld (0158).
+
+**Schnittstelle.** `unfoldLabel?: string`. Gesetzt, steht an der Stelle des
+Formulars ein Textknopf mit diesem Wort; ein Klick klappt das Formular auf,
+„Abbrechen" und ein gespeicherter Entwurf klappen es wieder zu und leeren die
+Felder. Ohne die Prop steht das Formular offen, wie im Dialog. Ein
+abgelehntes Speichern lässt den Entwurf stehen — die Zusage aus 0061 gilt
+weiter, das Zuklappen hängt hinter dem `await`.
+
+**Abnahmekriterien (Nachtrag)**
+
+1. Mit `unfoldLabel` steht zuerst nur der Knopf, kein `form.v2cle`.
+2. Nach dem Klick steht das Formular; „Abbrechen" klappt es zu.
+3. Nach erfolgreichem `onSubmit` ist das Formular zu und leer; wirft
+   `onSubmit`, bleibt es offen und der Text steht noch da.
+
+**Stand.** Gebaut 2026-09-18, im Browser nachgesehen (Punkt 1 und 2; Punkt 3
+zur Hälfte — die Showcase-Fassung wirft nicht). Fremde Abnahme steht aus.

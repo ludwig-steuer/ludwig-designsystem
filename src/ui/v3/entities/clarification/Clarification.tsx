@@ -230,6 +230,7 @@ export function ClarificationList({
   groupBy = "none",
   showCase,
   renderDetail,
+  openBlocking = true,
   empty,
 }: {
   /** The list does not reorder — the caller owns the order. */
@@ -238,6 +239,12 @@ export function ClarificationList({
   showCase?: boolean;
   /** In the app the `ClarificationCard` (0060); without it the list stays flat. */
   renderDetail?: (c: ClarificationVM) => ReactNode;
+  /**
+   * An open blocking question folds open by itself. `false` where it already
+   * stands open elsewhere on the page — the case's „Zu tun" — so the same
+   * answer form does not appear twice (owner 2026-09-18).
+   */
+  openBlocking?: boolean;
   empty?: { title: string; hint?: string };
 }) {
   if (clarifications.length === 0) {
@@ -258,7 +265,7 @@ export function ClarificationList({
       detail={renderDetail?.(c)}
       // A blocking question that is still open is the reason the case stands
       // still — it opens itself, the way the banner does today.
-      defaultOpen={c.state === "open" && c.severity === "required" && c.type === "question"}
+      defaultOpen={openBlocking && c.state === "open" && c.severity === "required" && c.type === "question"}
     />
   );
 
@@ -316,4 +323,29 @@ export function toTodoItem(c: ClarificationVM): TodoItem | null {
     sub: AUDIENCE_LABEL[c.audience],
     blocking: c.severity === "required",
   };
+}
+
+/** Open and blocking first, then open, then deferred; answered questions and notes last. */
+const CASE_RANK: Record<ClarificationState, number> = { open: 1, deferred: 2, answered: 3 };
+
+function caseRank(c: ClarificationVM) {
+  if (c.type === "comment") return 3;
+  return c.state === "open" && c.severity === "required" ? 0 : CASE_RANK[c.state];
+}
+
+/**
+ * The order of the list at the case (J-49): what holds the case up first,
+ * then open, then deferred, then the rest — answered questions and notes
+ * together, newest first (owner 2026-09-18). A new array; the list itself
+ * still does not reorder, so the batch and the portal keep their own order.
+ *
+ * @when    Questions and notes of **one** case in one list — side column,
+ *          clarifications tab.
+ * @instead Grouped by who is asked (batch review) → `groupBy="audience"` on
+ *          the caller's order. Items to work through → toTodoItem.
+ */
+export function sortForCase<T extends ClarificationVM>(list: readonly T[]): T[] {
+  return [...list].sort(
+    (a, b) => caseRank(a) - caseRank(b) || b.raisedAt.localeCompare(a.raisedAt),
+  );
 }

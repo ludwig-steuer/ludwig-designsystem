@@ -132,3 +132,13 @@ Fremde Abnahme am 2026-09-11 durch eine Prüfer-Session, die nichts gebaut hat (
 | Spec beschreibt das Gebaute | Props-Tabelle = Code (`notes`, `onAdd`, `addLabel`, `placeholder`, `empty`) | ok |
 
 **Urteil: fertig.**
+
+## Nachtrag 2026-09-18 — der Sachverhalt nutzt es nicht mehr (Owner)
+
+Notizen am Sachverhalt sind Klärungen vom Typ `comment` und stehen seit
+2026-09-18 in **einer** Liste mit den Rückfragen (Nachträge 0059/0152). Damit
+hat `NoteFeed` im Set **keinen Aufrufer mehr**: die Stories stehen, das Muster
+bleibt für Datensätze ohne Klärungstabelle (Beleg, Konto, Lauf).
+
+Das ist ein Punkt für den Owner, kein Alleingang: bekommt keiner dieser
+Datensätze eine Notizspur, gehört das Muster gestrichen statt gepflegt.

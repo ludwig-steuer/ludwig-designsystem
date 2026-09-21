@@ -5,12 +5,14 @@ import { useId, useState } from "react";
 import type { ClarificationType } from "@/ludwig/modules/accounting-cases/domain/case";
 import type { ClarificationSeverity } from "@/ludwig/modules/invoices/domain/invoice";
 
+import { ActionIcon } from "../../Icons";
 import { ActionBar } from "../../primitives/ActionBar";
 import { ActionButton } from "../../primitives/ActionButton";
 import { Button } from "../../primitives/Button";
 import { Callout } from "../../primitives/Callout";
 import { Field, Input, Textarea } from "../../primitives/Form";
 import { RadioGroup } from "../../primitives/RadioGroup";
+import { TextButton } from "../../primitives/TextButton";
 import type { ClarificationAudience } from "./Clarification";
 
 /**
@@ -66,6 +68,7 @@ export function ClarificationEditor({
   pending,
   error,
   audienceHint,
+  unfoldLabel,
 }: {
   defaultType?: ClarificationType;
   defaultAudience?: ClarificationAudience;
@@ -75,7 +78,15 @@ export function ClarificationEditor({
   pending?: boolean;
   error?: string;
   audienceHint?: string;
+  /**
+   * Folded behind a text button with this label — the form comes on click,
+   * „Abbrechen" and a stored draft fold it again. A permanently open form in a
+   * side column demands something nobody intended (NoteFeed, 0158); without
+   * the prop the form stands open, as in a dialog (owner 2026-09-18).
+   */
+  unfoldLabel?: string;
 }) {
+  const [unfolded, setUnfolded] = useState(!unfoldLabel);
   const [type, setType] = useState<ClarificationType>(defaultType);
   const titleId = useId();
   const textId = useId();
@@ -98,6 +109,15 @@ export function ClarificationEditor({
       : "Überschrift und Text sind Pflicht."
     : null;
 
+  // Folding throws the draft away only on cancel; a rejected save keeps it
+  // (the promise throws before the reset).
+  const cancel = unfoldLabel
+    ? () => {
+        setUnfolded(false);
+        onCancel?.();
+      }
+    : onCancel;
+
   async function send() {
     setTouched(true);
     if (blocked || pending) return;
@@ -107,6 +127,20 @@ export function ClarificationEditor({
       text: text.trim(),
       ...(isComment ? {} : { audience, severity }),
     });
+    if (unfoldLabel) {
+      setTitle("");
+      setText("");
+      setTouched(false);
+      setUnfolded(false);
+    }
+  }
+
+  if (!unfolded) {
+    return (
+      <TextButton icon={<ActionIcon action="add" size={14} />} onClick={() => setUnfolded(true)}>
+        {unfoldLabel}
+      </TextButton>
+    );
   }
 
   return (
@@ -118,7 +152,7 @@ export function ClarificationEditor({
           e.preventDefault();
           void send();
         }
-        if (e.key === "Escape" && onCancel) onCancel();
+        if (e.key === "Escape" && cancel) cancel();
       }}
     >
       <RadioGroup
@@ -229,8 +263,8 @@ export function ClarificationEditor({
           </ActionButton>
         }
         tertiary={
-          onCancel ? (
-            <Button variant="tertiary" size="sm" onClick={onCancel} disabled={pending}>
+          cancel ? (
+            <Button variant="tertiary" size="sm" onClick={cancel} disabled={pending}>
               Abbrechen
             </Button>
           ) : undefined

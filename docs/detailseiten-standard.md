@@ -666,7 +666,7 @@ hierher, mit ihrer Herkunft in §12.
 | D-L1 Zonen untereinander | eine Fläche ohne Spalten | Stammdaten des Sachverhalts |
 | D-L2 Gegenüberstellung | `split` | Beleg (Original gegen Extraktion), Wiederkehr (Regel gegen ihre Buchungen) |
 | D-L3 Randspalte | `main-aside` (Stufe `facts` oder `table`), wenn eine Fläche einen Begleiter hat · `list-detail`, wenn eine Liste abgearbeitet wird und der gewählte Eintrag daneben steht — die Frage aus D18 | `main-aside`: Konto (Bewegungen neben Stammdaten), Plausibilität und Technik des Sachverhalts · `list-detail`: Ereignisse und Belege des Sachverhalts |
-| — | `list-detail-aside` | die Übersicht des Sachverhalts: Strang, gewählter Eintrag, Notizen |
+| — | `list-detail-aside` | die Übersicht des Sachverhalts: Strang, gewählter Eintrag, Rückfragen und Notizen |
 
 Beim Umbruch fällt die dritte Spalte nach unten; `main-aside` bricht die
 Randspalte **über** die Arbeitsfläche (0154, Nachtrag), weil dort gelesen wird,

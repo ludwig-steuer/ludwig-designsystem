@@ -9,11 +9,19 @@ import {
   type CaseTimelineEvent,
   type CaseTimelineExpectation,
 } from "@/ui/v3/entities/accounting-case/CaseTimeline";
-import { ClarificationList, type ClarificationVM } from "@/ui/v3/entities/clarification/Clarification";
+import {
+  ClarificationList,
+  sortForCase,
+  type ClarificationVM,
+} from "@/ui/v3/entities/clarification/Clarification";
 import {
   ClarificationCard,
   type ClarificationDetailVM,
 } from "@/ui/v3/entities/clarification/ClarificationCard";
+import {
+  ClarificationEditor,
+  type ClarificationDraft,
+} from "@/ui/v3/entities/clarification/ClarificationEditor";
 import { AiBookingNotes } from "@/ui/v3/entities/journal-entry/AiBookingNotes";
 import { JournalEntryCard, type JournalLine } from "@/ui/v3/entities/journal-entry/JournalEntryCompact";
 import {
@@ -21,7 +29,6 @@ import {
   openItemLinkTracks,
   type OpenItemSide,
 } from "@/ui/v3/entities/open-item-link/OpenItemLinkRow";
-import { NoteFeed, type Note } from "@/ui/v3/patterns/NoteFeed";
 import { OpenPoints, type OpenPoint } from "@/ui/v3/patterns/OpenPoints";
 import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 import { Button } from "@/ui/v3/primitives/Button";
@@ -100,12 +107,51 @@ export interface CaseScenario {
     facts?: { title: string; rows: [ReactNode, ReactNode][] };
   };
   details: Record<string, EventDetail>;
-  notes: Note[];
-  clarificationList: ClarificationVM[];
-  /** An open question the firm answers right in column 3 (S13). */
-  answerable?: ClarificationVM & ClarificationDetailVM;
+  /**
+   * Questions **and** notes of the case — one table, one list (owner
+   * 2026-09-18). With `text` an entry carries its card and folds open.
+   */
+  clarificationList: ScenarioClarification[];
   initialSelection?: string;
 }
+
+/** A question or a note; the detail fields make it a card (0060). */
+export type ScenarioClarification = ClarificationVM & Partial<ClarificationDetailVM>;
+
+/** The card of an entry that has one. `answerKind` is a filler for a note — as in the table. */
+export const cardOf = (c: ScenarioClarification): (ClarificationVM & ClarificationDetailVM) | null =>
+  c.text == null ? null : { ...c, text: c.text, answerKind: c.answerKind ?? "free_text" };
+
+/**
+ * Answerable where the firm is the one asked — the page is the firm's
+ * (profile: `answer` when `audience` matches the viewer's role).
+ */
+export const cardMode = (c: ClarificationVM) =>
+  c.type === "question" && c.state === "open" && c.audience === "accounting" ? "answer" : "read";
+
+/** What a row folds open to: its card, without the title the row already shows. */
+export function renderCard(list: readonly ScenarioClarification[]) {
+  return function CardOf(row: ClarificationVM) {
+    const found = list.find((c) => c.id === row.id);
+    const card = found ? cardOf(found) : null;
+    return card ? (
+      <ClarificationCard clarification={card} showTitle={false} mode={cardMode(card)} onAnswer={async () => {}} />
+    ) : undefined;
+  };
+}
+
+/** A draft from the editor as the entry the list shows until the page reloads. */
+export const fromDraft = (d: ClarificationDraft): ScenarioClarification => ({
+  id: `new-${Date.now()}`,
+  type: d.type,
+  title: d.title,
+  text: d.text,
+  state: "open",
+  severity: d.severity ?? "optional",
+  audience: d.audience ?? "accounting",
+  raisedAt: new Date().toISOString(),
+  sourceModule: "web",
+});
 
 /** The key of the todo row. It stands for no record, so it has no id. */
 export const TODO_ID = "__todo";
@@ -202,7 +248,15 @@ function StrandCard({
   );
 }
 
-function TodoPane({ todo }: { todo: CaseScenario["todo"] }) {
+/**
+ * „Zu tun": the defects, and every question open for the firm as a row of its
+ * own that folds open to its card — answered right here (owner 2026-09-18). A
+ * blocking one is open from the start.
+ */
+function TodoPane({ todo, clarifications }: { todo: CaseScenario["todo"]; clarifications: ScenarioClarification[] }) {
+  // What the firm has to answer — a question to the client waits on the
+  // client and stands first in the side column, not here.
+  const open = sortForCase(clarifications.filter((c) => cardMode(c) === "answer"));
   const points: OpenPoint[] = todo.points.map((p) => ({
     key: p.key,
     title: p.title,
@@ -227,6 +281,10 @@ function TodoPane({ todo }: { todo: CaseScenario["todo"] }) {
       <OpenPoints
         points={points}
         emptyText={todo.emptyText ?? "An diesem Sachverhalt ist nichts offen."}
+        extra={
+          open.length ? <ClarificationList clarifications={open} renderDetail={renderCard(clarifications)} /> : undefined
+        }
+        extraCount={open.length}
       />
       {todo.approval ? (
         <Card>
@@ -388,13 +446,16 @@ const fromStrand = (c: CaseTimelineClarification): ClarificationVM => ({
   href: `?tab=rueckfragen&klaerung=${c.id}`,
 });
 
-/** Column 2 when a clarification is selected: the question itself; it is answered on the right or in its tab. */
+/**
+ * Column 2 when a clarification is selected in the strand: the strand is the
+ * preview, this is the large view — answered right here (owner 2026-09-18).
+ */
 function ClarificationPane({
   clarification: c,
-  answerable,
+  card,
 }: {
   clarification: ClarificationVM;
-  answerable?: ClarificationVM & ClarificationDetailVM;
+  card: (ClarificationVM & ClarificationDetailVM) | null;
 }) {
   return (
     <Card>
@@ -408,13 +469,8 @@ function ClarificationPane({
         }
       />
       <div className="v3boxbody">
-        {answerable ? (
-          <>
-            <ClarificationCard clarification={answerable} />
-            <p className="v2muted" style={{ margin: 0 }}>
-              Beantwortet wird rechts — die Antworten stehen dort als Handlungen.
-            </p>
-          </>
+        {card ? (
+          <ClarificationCard clarification={card} mode={cardMode(card)} onAnswer={async () => {}} />
         ) : (
           <ClarificationList clarifications={[c]} empty={{ title: "Keine Rückfragen." }} />
         )}
@@ -423,11 +479,17 @@ function ClarificationPane({
   );
 }
 
-function clarificationSub(list: ClarificationVM[]) {
-  const open = list.filter((c) => c.state === "open").length;
-  const answered = list.filter((c) => c.state === "answered").length;
+export function clarificationSub(list: readonly ClarificationVM[]) {
+  const questions = list.filter((c) => c.type === "question");
+  const open = questions.filter((c) => c.state === "open").length;
+  const answered = questions.filter((c) => c.state === "answered").length;
+  const notes = list.length - questions.length;
   if (list.length === 0) return "keine";
-  return [open ? `${open} offen` : null, answered ? `${answered} beantwortet` : null]
+  return [
+    open ? `${open} offen` : null,
+    answered ? `${answered} beantwortet` : null,
+    notes ? (notes === 1 ? "1 Notiz" : `${notes} Notizen`) : null,
+  ]
     .filter(Boolean)
     .join(" · ");
 }
@@ -467,33 +529,57 @@ function ExpectationsCard({ scenario: s }: { scenario: CaseScenario }) {
   );
 }
 
+/**
+ * Questions and notes in **one** card: they share a table and a timeline in
+ * the data, and apart they looked like two things (owner 2026-09-18). Open and
+ * blocking first; every row folds open to its card, the form sits below it,
+ * folded.
+ */
+export function ClarificationsCard({
+  list,
+  onAdd,
+}: {
+  list: readonly ScenarioClarification[];
+  onAdd?: (entry: ScenarioClarification) => void;
+}) {
+  return (
+    <Card>
+      <CardHead
+        title="Rückfragen und Notizen"
+        sub={clarificationSub(list)}
+        actions={
+          <TextButton tone="quiet" href={tabHref("clarifications")}>
+            Alle
+          </TextButton>
+        }
+      />
+      <div className="v3boxbody">
+        <ClarificationList
+          clarifications={sortForCase(list)}
+          renderDetail={renderCard(list)}
+          // Open blocking questions stand open in „Zu tun" already.
+          openBlocking={false}
+          empty={{ title: "Keine Rückfragen und keine Notizen." }}
+        />
+        {onAdd ? (
+          <ClarificationEditor
+            defaultType="comment"
+            unfoldLabel="Notiz oder Rückfrage hinzufügen"
+            onSubmit={async (d) => onAdd(fromDraft(d))}
+          />
+        ) : null}
+      </div>
+    </Card>
+  );
+}
+
+/** Column 3 — questions and notes, then what the case still waits for. */
 function NotesColumn({ scenario: s }: { scenario: CaseScenario }) {
+  const [list, setList] = useState(s.clarificationList);
   return (
     <div className="v2stack">
-      {s.answerable ? (
-        <ClarificationCard clarification={s.answerable} mode="answer" onAnswer={async () => {}} />
-      ) : null}
-      <Card>
-        <CardHead title="Notizen" sub={s.notes.length ? "zuletzt oben" : "keine"} />
-        <div className="v3boxbody">
-          <NoteFeed notes={s.notes} onAdd={() => {}} />
-        </div>
-      </Card>
+      <ClarificationsCard list={list} onAdd={(entry) => setList((l) => [entry, ...l])} />
       <ExpectationsCard scenario={s} />
-      <Card>
-        <CardHead
-          title="Rückfragen"
-          sub={clarificationSub(s.clarificationList)}
-          actions={
-            <TextButton tone="quiet" href={tabHref("clarifications")}>
-              Alle
-            </TextButton>
-          }
-        />
-        <div className="v3boxbody">
-          <ClarificationList clarifications={s.clarificationList} empty={{ title: "Keine Rückfragen." }} />
-        </div>
-      </Card>
     </div>
   );
 }
@@ -508,18 +594,16 @@ export function EntryPane({ scenario: s, selected }: { scenario: CaseScenario; s
   const detail = s.details[selected];
   const expectation = s.expectations?.find((e) => e.id === selected);
   const strand = s.clarifications?.find((c) => c.id === selected);
-  const clarification = s.clarificationList.find((c) => c.id === selected) ?? (strand ? fromStrand(strand) : undefined);
+  const listed = s.clarificationList.find((c) => c.id === selected);
+  const clarification = listed ?? (strand ? fromStrand(strand) : undefined);
   if (detail) return <EventPane detail={detail} />;
   if (expectation) return <ExpectationPane expectation={expectation} today={s.today} />;
   if (clarification) {
     return (
-      <ClarificationPane
-        clarification={clarification}
-        {...(s.answerable?.id === clarification.id ? { answerable: s.answerable } : {})}
-      />
+      <ClarificationPane clarification={clarification} card={listed ? cardOf(listed) : null} />
     );
   }
-  return <TodoPane todo={s.todo} />;
+  return <TodoPane todo={s.todo} clarifications={s.clarificationList} />;
 }
 
 /**

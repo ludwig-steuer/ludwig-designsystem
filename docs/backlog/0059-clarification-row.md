@@ -435,3 +435,39 @@ benutzen `Disclosure` ebenfalls ohne `count`.
   beschreibt die alte Lage.
 
 Abgenommen von / am: **Claude (Abnahme-Agent), 2026-09-05**
+
+## Nachtrag 2026-09-18 — eine Liste für Fragen und Notizen (Owner)
+
+**Anlass.** Owner direkt: „Rückfrage und Notiz sind quasi dieselbe Entität mit
+unterschiedlichen Zuständen" — eine Tabelle, eine Zeitachse, also auch **eine**
+Liste. Im Sachverhalt standen sie in zwei Karten, weil die Notizen über das
+Muster `NoteFeed` (0158) mit eigenem Typ liefen. Dazu: die offene Rückfrage
+soll direkt dort beantwortet werden, wo sie steht.
+
+**Einordnung.** Regel 2 aus §3: die Familie deckt den Fall schon
+(`type: "comment"` trägt Zeile, Liste und Karte seit 0059/0060). Es fehlten
+die Reihenfolge und ein Schalter. Keine neue Datei, keine neue Form.
+
+**Schnittstelle.**
+
+| Neu | Typ | Was | Nachweis |
+|---|---|---|---|
+| `sortForCase(list)` | `<T extends ClarificationVM>(readonly T[]) => T[]` | die Reihenfolge der Liste **am Fall** (J-49): blockierend offen, offen, zurückgestellt, dann der Rest — beantwortete Fragen und Notizen zusammen, jüngste zuerst. Neues Array; die Liste selbst sortiert weiterhin nicht, Stapel und Portal behalten ihre Ordnung | Story `seiten-sachverhalt-einzelfall--proposal-pending` (Randspalte) |
+| `ClarificationList.openBlocking` | `boolean`, Vorgabe `true` | `false`, wo die blockierende Frage auf derselben Seite schon offen steht — im Sachverhalt ist das „Zu tun". Sonst stünde dasselbe Antwortformular zweimal auf der Seite | Randspalte der Übersicht |
+
+**Abnahmekriterien (Nachtrag)**
+
+1. `sortForCase` stellt eine offene blockierende Frage vor eine offene ohne
+   Schwere, diese vor eine zurückgestellte, und danach Beantwortetes und
+   Notizen gemischt nach Datum absteigend.
+2. Mit `openBlocking={false}` ist in der Randspalte kein `<details open>`,
+   obwohl eine offene blockierende Frage in der Liste steht.
+3. Eine Notiz klappt auf und zeigt ihren Text; sie trägt das Badge der Achse,
+   keine Zustands-Badges, und erscheint nie als offen.
+
+**Stand.** Gebaut 2026-09-18, im Browser nachgesehen. Fremde Abnahme steht aus.
+
+**Befund für die App (L-338).** Die Achse `clarification_type` sagt zum Wert
+`comment` „Kommentar", die Oberfläche sagt überall **Notiz** (Editor, Karte,
+Owner). Ein Wort, zwei Namen — gehört in der Domäne vereinheitlicht; das Set
+schlägt die Achse nach und erfindet nichts.

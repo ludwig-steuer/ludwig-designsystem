@@ -11,6 +11,7 @@ import {
   DATEV_EVENT,
   DOCUMENT_EVENT,
   NOTES,
+  note,
   PAYMENT_EXPECTED,
   PROPOSAL,
   TODAY,
@@ -115,8 +116,7 @@ export const proposalPending: CaseScenario = {
       actions: ["Freigeben", "Ändern"],
     },
   },
-  notes: NOTES,
-  clarificationList: CLARIFICATIONS,
+  clarificationList: [...CLARIFICATIONS, ...NOTES],
 };
 
 export const withDatevEntry: CaseScenario = {
@@ -189,7 +189,6 @@ export const openItemCarryover: CaseScenario = {
       note: "Keine Buchung nötig — der Posten ist in DATEV gebucht. Ludwig führt ihn weiter, bis die Zahlung kommt.",
     },
   },
-  notes: [],
   clarificationList: [],
 };
 
@@ -253,7 +252,6 @@ export const completeAndExported: CaseScenario = {
       ],
     },
   },
-  notes: [],
   clarificationList: [],
 };
 
@@ -324,7 +322,6 @@ export const recurringWithoutRule: CaseScenario = {
       actions: ["Freigeben", "Ändern"],
     },
   },
-  notes: [],
   clarificationList: [],
 };
 
@@ -376,10 +373,9 @@ const awaitingDocumentBase: CaseScenario = {
       },
     ]),
   ),
-  notes: [
-    { id: "n-a7", at: "2026-07-30T09:00:00Z", author: "Agent", text: "Rechnung beim Mandanten angefordert; zwei Abbuchungen über je 43,00 €." },
+  clarificationList: [
+    note("n-a7", "2026-07-30T09:00:00Z", "agent", "Rechnung beim Mandanten angefordert", "Zwei Abbuchungen über je 43,00 € ohne Beleg — die Rechnung ist beim Mandanten angefordert."),
   ],
-  clarificationList: [],
 };
 
 /** A7 with point 2 — waiting for the document; the case waits on someone else. */
@@ -473,7 +469,6 @@ export const outgoingWithPayment: CaseScenario = {
       actions: ["Freigeben", "Ändern"],
     },
   },
-  notes: [],
   clarificationList: [],
 };
 
@@ -512,17 +507,8 @@ export const clarificationOpenFirm: CaseScenario = {
   clarifications: [
     { id: "cl-q1", type: "question", title: OPEN_QUESTION.title, raisedAt: OPEN_QUESTION.raisedAt, severity: "required", audience: "accounting" },
   ],
-  todo: {
-    sub: "1 Rückfrage",
-    points: [
-      {
-        key: "question",
-        title: "Die Rückfrage zur Rechnung WZ-2026-118 ist offen.",
-        hint: "Ohne Antwort bucht der Agent nicht — die Antwort steht rechts zur Auswahl.",
-        state: "question",
-      },
-    ],
-  },
+  // The question is the point itself — it stands in „Zu tun" with its answer (owner 2026-09-18).
+  todo: { sub: "1 Rückfrage", points: [] },
   details: {
     "ev-q-doc": {
       title: "Rechnung WZ-2026-118",
@@ -531,19 +517,19 @@ export const clarificationOpenFirm: CaseScenario = {
       note: "Noch kein Vorschlag: der Agent bucht, sobald die Rückfrage beantwortet ist.",
     },
   },
-  notes: [],
-  clarificationList: [OPEN_QUESTION],
-  answerable: {
-    ...OPEN_QUESTION,
-    text: "Die Rechnung nennt einen Akku-Bohrhammer für 500,00 € netto.",
-    context: "Netto 500,00 € liegt genau an der Grenze; der Mandant hat 2025 ähnliche Geräte sofort in den Aufwand gebucht.",
-    question: "Soll der Bohrhammer als geringwertiges Wirtschaftsgut sofort in den Aufwand oder ins Anlagevermögen?",
-    recommendation: "Sofort in den Aufwand (4855), wie im Vorjahr.",
-    answerKind: "single_choice",
-    answerOptions: ["Geringwertig, sofort Aufwand (4855)", "Anlagevermögen (0480)"],
-    allowFreeText: true,
-    sources: [{ kind: "source_doc", label: "Rechnung WZ-2026-118", href: "#" }],
-  },
+  clarificationList: [
+    {
+      ...OPEN_QUESTION,
+      text: "Die Rechnung nennt einen Akku-Bohrhammer für 500,00 € netto.",
+      context: "Netto 500,00 € liegt genau an der Grenze; der Mandant hat 2025 ähnliche Geräte sofort in den Aufwand gebucht.",
+      question: "Soll der Bohrhammer als geringwertiges Wirtschaftsgut sofort in den Aufwand oder ins Anlagevermögen?",
+      recommendation: "Sofort in den Aufwand (4855), wie im Vorjahr.",
+      answerKind: "single_choice",
+      answerOptions: ["Geringwertig, sofort Aufwand (4855)", "Anlagevermögen (0480)"],
+      allowFreeText: true,
+      sources: [{ kind: "source_doc", label: "Rechnung WZ-2026-118", href: "#" }],
+    },
+  ],
 };
 
 /** Point 3 — the agent withdrew its proposal (85 entries in stock). */
@@ -590,10 +576,9 @@ export const proposalWithdrawn: CaseScenario = {
       note: "Zurückgezogen am 25.07.2026 — der Vorschlag steht hier zum Nachlesen und gilt nicht mehr.",
     },
   },
-  notes: [
-    { id: "n-w", at: "2026-07-25T08:10:00Z", author: "Agent", text: "Vorschlag zurückgezogen: zur Rechnung gehört die Gutschrift GS-2231." },
+  clarificationList: [
+    note("n-w", "2026-07-25T08:10:00Z", "agent", "Vorschlag zurückgezogen", "Zur Rechnung gehört die Gutschrift GS-2231. Der Agent bucht neu, sobald sie zugeordnet ist."),
   ],
-  clarificationList: [],
 };
 
 /** Point 4 — merged into another case (14 cases, `closed_superseded`). */
@@ -648,7 +633,6 @@ export const superseded: CaseScenario = {
       note: "Ersetzt — das Ereignis lebt im Sachverhalt 2026-0334 weiter.",
     },
   },
-  notes: [],
   clarificationList: [],
 };
 
@@ -709,7 +693,6 @@ export const judgeFlagged: CaseScenario = {
       actions: ["Ändern", "Trotzdem freigeben"],
     },
   },
-  notes: [],
   clarificationList: [],
 };
 
@@ -760,7 +743,6 @@ export const judgeAdjusted: CaseScenario = {
       actions: ["Freigeben", "Ändern"],
     },
   },
-  notes: [],
   clarificationList: [],
 };
 
@@ -811,15 +793,9 @@ export const handedToFirm: CaseScenario = {
       note: "Kein Vorschlag: statt zwischen zwei gleich guten offenen Posten zu raten, hat der Agent an die Kanzlei übergeben.",
     },
   },
-  notes: [
-    {
-      id: "n-h",
-      at: "2026-07-29T09:40:00Z",
-      author: "Agent",
-      text: "An die Kanzlei übergeben: RE-4410 und RE-4471 sind beide offen und gleich hoch, die Abbuchung nennt keine Rechnungsnummer.",
-    },
+  clarificationList: [
+    note("n-h", "2026-07-29T09:40:00Z", "agent", "An die Kanzlei übergeben", "RE-4410 und RE-4471 sind beide offen und gleich hoch, die Abbuchung nennt keine Rechnungsnummer."),
   ],
-  clarificationList: [],
 };
 
 /** E9 — just founded from a bank line: no counterparty (about 5 % of cases), so no account, no proposal, no amount. */
@@ -865,6 +841,5 @@ export const newWithoutCounterparty: CaseScenario = {
       note: "Noch kein Vorschlag: ohne Gegenpart kennt der Agent das Konto nicht.",
     },
   },
-  notes: [],
   clarificationList: [],
 };

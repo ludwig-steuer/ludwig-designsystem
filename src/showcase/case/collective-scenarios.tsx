@@ -131,7 +131,6 @@ export const clientBatch: CaseScenario = {
     ],
   },
   details: Object.fromEntries(BATCH_EVENTS.map((e) => [e.id, batchDetail(e)])),
-  notes: [],
   clarificationList: BATCH_QUESTIONS,
 };
 
@@ -233,7 +232,6 @@ export const recurringWithRule: CaseScenario = {
       },
     ]),
   ]),
-  notes: [],
   clarificationList: [],
 };
 
@@ -293,7 +291,6 @@ const clearingBase = (last: number): Omit<CaseScenario, "todo"> => {
             },
       ]),
     ),
-    notes: [],
     clarificationList: [],
   };
 };
@@ -432,7 +429,6 @@ export const collectivePayment: CaseScenario = {
       actions: ["Freigeben", "Ändern"],
     },
   },
-  notes: [],
   clarificationList: [],
   initialSelection: "ev-p-pay",
 };
@@ -511,7 +507,6 @@ export const expenseReport: CaseScenario = {
       },
     ] as [string, EventDetail],
   ]),
-  notes: [],
   clarificationList: [],
 };
 
@@ -566,7 +561,6 @@ export const contract: CaseScenario = {
       note: "Geplant: gebucht wird die Rate, wenn ihr Monat beginnt.",
     },
   },
-  notes: [],
   clarificationList: [],
 };
 
@@ -601,6 +595,5 @@ export const noEvents: CaseScenario = {
     ],
   },
   details: {},
-  notes: [],
   clarificationList: [],
 };

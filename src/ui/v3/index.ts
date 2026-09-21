@@ -603,6 +603,7 @@ export {
   ClarificationCell,
   ClarificationRow,
   ClarificationList,
+  sortForCase,
   toTodoItem,
   type ClarificationVM,
   type ClarificationAudience,

@@ -11,8 +11,9 @@ import {
 
 import type { CaseFactsVM } from "@/ui/v3/entities/accounting-case/CaseFacts";
 import { CaseTimeline } from "@/ui/v3/entities/accounting-case/CaseTimeline";
-import { ClarificationList, toTodoItem, type ClarificationVM } from "@/ui/v3/entities/clarification/Clarification";
+import { ClarificationList, sortForCase, toTodoItem } from "@/ui/v3/entities/clarification/Clarification";
 import { ClarificationCard } from "@/ui/v3/entities/clarification/ClarificationCard";
+import { ClarificationEditor } from "@/ui/v3/entities/clarification/ClarificationEditor";
 import { DocumentNumberRegister } from "@/ui/v3/entities/document-number/DocumentNumberRegister";
 import { REGISTER, SOURCE_LABEL, STATE_LABEL } from "@/ui/v3/entities/document-number/fixtures";
 import { JournalEntryCard } from "@/ui/v3/entities/journal-entry/JournalEntryCompact";
@@ -31,6 +32,7 @@ import { Button } from "@/ui/v3/primitives/Button";
 import { EmptyState } from "@/ui/v3/primitives/EmptyState";
 import { FieldList } from "@/ui/v3/primitives/FieldList";
 import { RawRecord } from "@/ui/v3/primitives/RawRecord";
+import { Segmented } from "@/ui/v3/primitives/Nav";
 import { Card, CardHead, HeadRow, Row, Table } from "@/ui/v3/primitives/Table";
 
 import { CasePage } from "./CasePage";
@@ -38,13 +40,23 @@ import {
   CLARIFICATION_ANSWERED,
   CLARIFICATIONS,
   DATEV_EVENT,
+  NOTES,
   DOCUMENT_EVENT,
   PAYMENT_EXPECTED,
   TODAY,
   accountHref,
 } from "./fixtures";
 import { recurringWithRule } from "./collective-scenarios";
-import { EntryPane, entryId, type CaseScenario } from "./scenario";
+import {
+  EntryPane,
+  cardMode,
+  cardOf,
+  clarificationSub,
+  entryId,
+  fromDraft,
+  type CaseScenario,
+  type ScenarioClarification,
+} from "./scenario";
 import { bracket, proposalPending, recurringWithoutRule, withDatevEntry } from "./scenarios";
 import { Columns } from "@/ui/v3/patterns/Columns";
 import { MonoCell } from "@/ui/v3/primitives/Cells";
@@ -149,30 +161,43 @@ function EventsTab() {
  */
 export const Events: Story = { render: () => <EventsTab /> };
 
-const withDetail = (c: ClarificationVM) =>
-  c.state === "open"
-    ? { ...c, text: "Auf dem Konto ist für Juli kein Abgang an den Lieferanten zu finden.", answerKind: "yes_no" as const, answerOptions: ["Ja", "Nein"] }
-    : { ...c, text: "Der Mandant hat geantwortet: die Ersatzteile gehören zum Firmenwagen.", answerKind: "single_choice" as const, answerOptions: ["Firmenwagen", "Werkstattbestand"] };
+type ClarificationFilter = "open" | "all" | "notes";
+
+const FILTERED: Record<ClarificationFilter, (c: ScenarioClarification) => boolean> = {
+  open: (c) => c.type === "question" && c.state === "open",
+  all: () => true,
+  notes: (c) => c.type === "comment",
+};
+
+/** A note in the list of the tab: selectable like a question, never counted as open. */
+const noteItem = (c: ScenarioClarification): TodoItem => ({ id: c.id, state: "info", title: c.title, sub: "Notiz" });
 
 /**
- * The questions as items to work through (`toTodoItem`, `TodoList`) — the list
- * row itself is not a link, and the tab is where they get answered. J/K stay
- * with the record pager of the page.
+ * The large view of questions **and** notes (owner 2026-09-18): the list on
+ * the left with a filter and the form on top, the selected entry as its card
+ * on the right — the open question to answer, the rest to read. List and
+ * detail stay, as decided for the tab on 2026-09-11.
  */
 function ClarificationsTab() {
-  const items = CLARIFICATIONS.map(toTodoItem).filter((i): i is TodoItem => i !== null);
-  const [selectedId, setSelectedId] = useState<string | null>(items[0]?.id ?? null);
-  const selected = CLARIFICATIONS.find((c) => c.id === selectedId) ?? null;
+  const [list, setList] = useState<ScenarioClarification[]>([...CLARIFICATIONS, ...NOTES]);
+  const [filter, setFilter] = useState<ClarificationFilter>("all");
+  const shown = sortForCase(list.filter(FILTERED[filter]));
+  const questions = shown.map(toTodoItem).filter((i): i is TodoItem => i !== null);
+  const notes = shown.filter((c) => c.type === "comment").map(noteItem);
+  const [selectedId, setSelectedId] = useState<string | null>(shown[0]?.id ?? null);
+  const selected = list.find((c) => c.id === selectedId);
+  const card = selected ? cardOf(selected) : null;
+  const count = (f: ClarificationFilter) => list.filter(FILTERED[f]).length;
   return (
     <Tab
       tab="clarifications"
       empty={
         <Card>
-          <CardHead title="Rückfragen" sub="keine" />
+          <CardHead title="Rückfragen und Notizen" sub="keine" />
           <div className="v3boxbody">
             <ClarificationList
               clarifications={[]}
-              empty={{ title: "Keine Rückfragen.", hint: "Der Agent fragt nach, wenn ihm etwas fehlt — bis dahin bleibt dieser Reiter leer." }}
+              empty={{ title: "Keine Rückfragen und keine Notizen.", hint: "Der Agent fragt nach, wenn ihm etwas fehlt — bis dahin bleibt dieser Reiter leer." }}
             />
           </div>
         </Card>
@@ -182,21 +207,56 @@ function ClarificationsTab() {
         pattern="list-detail"
         list={
           <Card>
-            <CardHead title="Rückfragen" sub="1 offen · 1 beantwortet" />
+            <CardHead
+              title="Rückfragen und Notizen"
+              sub={clarificationSub(list)}
+              actions={
+                <Segmented
+                  ariaLabel="Welche Einträge"
+                  active={filter}
+                  onPick={(key) => setFilter(key as ClarificationFilter)}
+                  options={[
+                    { key: "open", label: "Offen", count: count("open") },
+                    { key: "all", label: "Alle", count: count("all") },
+                    { key: "notes", label: "Notizen", count: count("notes") },
+                  ]}
+                />
+              }
+            />
             <div className="v3boxbody">
-              <TodoList groups={[{ label: "Rückfragen", items }]} selectedId={selectedId} onSelect={setSelectedId} hotkeys={false} />
+              <ClarificationEditor
+                unfoldLabel="Rückfrage stellen oder Notiz anlegen"
+                onSubmit={async (d) => {
+                  const entry = fromDraft(d);
+                  setList((l) => [entry, ...l]);
+                  setSelectedId(entry.id);
+                }}
+              />
+              {shown.length ? (
+                <TodoList
+                  groups={[
+                    ...(questions.length ? [{ label: "Rückfragen", items: questions }] : []),
+                    ...(notes.length ? [{ label: "Notizen", items: notes }] : []),
+                  ]}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  hotkeys={false}
+                />
+              ) : (
+                <EmptyState inline title="Nichts offen." description="Jede Rückfrage an diesem Sachverhalt ist beantwortet." />
+              )}
             </div>
           </Card>
         }
         main={
-          selected ? (
-            <ClarificationCard
-              clarification={withDetail(selected)}
-              mode={selected.state === "open" ? "answer" : "read"}
-              onAnswer={async () => {}}
-            />
+          card ? (
+            <Card>
+              <div className="v3boxbody">
+                <ClarificationCard clarification={card} mode={cardMode(card)} onAnswer={async () => {}} />
+              </div>
+            </Card>
           ) : (
-            <EmptyState inline title="Keine Rückfrage gewählt." />
+            <EmptyState inline title="Nichts gewählt." />
           )
         }
       />
@@ -278,9 +338,10 @@ export const Documents: Story = { render: () => <DocumentsTab /> };
 
 /**
  * **Rückfragen** — Liste und Detail, wie die Rückfragen-Liste der Kanzlei
- * (Owner 2026-09-11: Reiter je Art wie die Hauptseiten). Links jede Rückfrage
- * mit ihrem Zustand, rechts die gewählte — die offene zum Beantworten, die
- * beantwortete zum Lesen. Leer: warum es keine gibt.
+ * (Owner 2026-09-11: Reiter je Art wie die Hauptseiten). Seit 2026-09-18 mit
+ * den Notizen: links Rückfragen und Notizen, oben der Filter (Offen, Alle,
+ * Notizen) und das Formular, rechts die gewählte als Karte — die offene zum
+ * Beantworten, der Rest zum Lesen. Leer: warum es keine gibt.
  */
 export const Clarifications: Story = { render: () => <ClarificationsTab /> };
 

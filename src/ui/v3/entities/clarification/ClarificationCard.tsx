@@ -241,6 +241,7 @@ function Block({ label, children }: { label: string; children: React.ReactNode }
 export function ClarificationCard({
   clarification: c,
   mode = "read",
+  showTitle = true,
   onAnswer,
   onResolve,
   onDefer,
@@ -251,6 +252,13 @@ export function ClarificationCard({
   clarification: ClarificationVM & ClarificationDetailVM;
   /** `answer` shows the answer area — the caller decides who is asked. */
   mode?: "read" | "answer";
+  /**
+   * `false` inside a `ClarificationRow` that folds open: the row already
+   * carries title and state, the card would repeat them right below. The
+   * meta line stays — it names the origin, which the row does not
+   * (owner 2026-09-18).
+   */
+  showTitle?: boolean;
   onAnswer?: (answer: ChoiceAnswer) => Promise<void>;
   /** The second exit. Without it, it does not appear. */
   onResolve?: (reason: string) => Promise<void>;
@@ -328,19 +336,23 @@ export function ClarificationCard({
   return (
     <article className="v2clc">
       <header className="v2clc__head">
-        <h3 className="v2clc__title">{c.title}</h3>
-        <div className="v2clc__badges">
-          {isComment ? (
-            <StatusBadge axis="clarification_type" status="comment" info={false} />
-          ) : (
-            <>
-              <StatusBadge axis="clarification" status={c.state} info={false} />
-              {c.state !== "answered" && c.severity === "required" ? (
-                <StatusBadge axis="clarification_severity" status="required" info={false} />
-              ) : null}
-            </>
-          )}
-        </div>
+        {showTitle ? (
+          <>
+            <h3 className="v2clc__title">{c.title}</h3>
+            <div className="v2clc__badges">
+              {isComment ? (
+                <StatusBadge axis="clarification_type" status="comment" info={false} />
+              ) : (
+                <>
+                  <StatusBadge axis="clarification" status={c.state} info={false} />
+                  {c.state !== "answered" && c.severity === "required" ? (
+                    <StatusBadge axis="clarification_severity" status="required" info={false} />
+                  ) : null}
+                </>
+              )}
+            </div>
+          </>
+        ) : null}
         <p className="v2clc__meta">
           {isComment ? "Notiz" : `Gefragt ist: ${AUDIENCE_LABEL[c.audience]}`}
           {questionWord ? ` · ${questionWord}` : ""}

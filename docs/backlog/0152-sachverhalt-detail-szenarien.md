@@ -474,3 +474,44 @@ Einträge geklickt, vier Flächen: „Erwartete Zahlung", „Rückfrage", „Rec
 93846778", „Gutschrift aus DATEV"; kein Querlauf. Die Übersichten unverändert:
 27 Stories, 139 Einträge, keiner ohne eigene Fläche.
 
+
+## Nachtrag 2026-09-18 — Rückfragen und Notizen sind eines (Owner)
+
+**Anlass.** Owner direkt: „ich glaube hier haben wir Klärungsfragen und
+Notizen voneinander getrennt, gerade ist es aber dasselbe." Stimmt: die Seite
+zog die Notizen aus `NoteFeed` mit eigenem Typ, die Fragen aus
+`ClarificationList` — zwei Karten für eine Tabelle
+(`client_accounting_case_clarification`, `type` question | comment).
+
+**Was sich an der Seite ändert.**
+
+| Stelle | vorher | jetzt |
+|---|---|---|
+| Randspalte | Karte „Notizen" (`NoteFeed`) **und** Karte „Rückfragen" | **eine** Karte „Rückfragen und Notizen": eine Liste in der Reihenfolge `sortForCase`, jede Zeile klappt zu ihrer Karte auf, darunter das eingeklappte Formular (`unfoldLabel`) |
+| Randspalte, oben | die beantwortbare Frage als eigene Karte über allem | entfällt — sie steht in „Zu tun" und in der Liste |
+| „Zu tun" | ein Punkt „Die Rückfrage … ist offen", Antwort woanders | jede für die Kanzlei offene Frage als eigene Zeile im Kasten „Offen" (`OpenPoints.extra`), aufgeklappt mit Antwortfläche |
+| Strang, gewählte Frage | Karte zum Lesen, Hinweis „Beantwortet wird rechts" | die große Ansicht in Spalte 2, samt Antwort |
+| Reiter „Rückfragen" | nur Fragen | Fragen **und** Notizen, Filter Offen · Alle · Notizen, Formular über der Liste; Liste und Detail bleiben (Owner 2026-09-11) |
+| Szenario-Daten | `notes: Note[]` und `answerable` | ein Feld: `clarificationList` trägt Fragen und Notizen, mit ihren Kartenfeldern |
+
+**Wer antworten darf.** Die Antwortfläche erscheint, wo die Kanzlei gefragt
+ist (`audience = "accounting"`) — so steht es im Profil („`answer`, wenn
+`audience` die Rolle der Betrachterin trifft"). Eine Frage an den Mandanten
+steht in der Randspalte zuoberst, aber ohne Formular: sie wartet auf ihn.
+**Das ist eine Änderung gegenüber dem Reiter von vorher**, der jede offene
+Frage beantworten ließ.
+
+**Abnahmekriterien (Nachtrag)**
+
+1. Keine Story der Seite rendert `.v3notes`; jede Notiz steht als Zeile in der
+   Karte „Rückfragen und Notizen".
+2. Untertitel der Karte zählt getrennt: „1 offen · 1 beantwortet · 2 Notizen".
+3. Auf der Übersicht steht dieselbe offene Frage **nicht** zweimal aufgeklappt
+   (Zu tun ja, Randspalte zu).
+4. „Notiz oder Rückfrage hinzufügen" klappt das Formular auf; gespeichert
+   steht der neue Eintrag oben in der Liste.
+5. Reiter „Rückfragen": Filter zeigt 1 offen · 4 alle · 2 Notizen; eine Notiz
+   ist wählbar und erscheint rechts als Karte.
+
+**Stand.** Gebaut 2026-09-18, im Browser nachgesehen (Kriterien 1–5).
+Fremde Abnahme steht aus.

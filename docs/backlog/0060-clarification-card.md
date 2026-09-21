@@ -278,3 +278,28 @@ Zwei Anmerkungen ohne Mangel:
 Gemessen in `Filled`: die Kopfzeile liest „Gefragt ist: Kanzlei · Rückfrage des
 Agenten · Buchungsvorschlag · 26.08.2026, 09:12". Der mittlere Teil kam vorher
 aus einem freien Prop-Text der Story, jetzt aus dem Katalog.
+
+## Nachtrag 2026-09-18 — die Karte in der aufgeklappten Zeile (Owner)
+
+**Anlass.** Fragen und Notizen stehen am Sachverhalt in **einer** Liste
+(Nachtrag 0059). Klappt eine Zeile auf, stand die Karte mit Titel, Badges und
+Meta direkt unter derselben Überschrift in der Zeile darüber.
+
+**Schnittstelle.** `showTitle?: boolean`, Vorgabe `true`. `false` lässt Titel
+und Badges weg; die Meta-Zeile bleibt — sie nennt die Herkunft
+(„Notiz · Kanzlei-Oberfläche · 02.08.2026, 16:30"), die die Zeile nicht trägt.
+
+**Die Notiz braucht nichts weiter.** Sie trägt ihren ganzen Inhalt im Text,
+und der läuft schon durch `Markdown`: keine der 30 Notizen auf Staging hat
+`context`, `facts_json` oder `recommendation` gesetzt (Erhebung des Owners
+2026-09-18). Die leeren Blöcke blendet die Karte seit 0060 weg — „zwei
+Herkünfte, eine Karte" gilt damit auch für Frage und Notiz.
+
+**Abnahmekriterien (Nachtrag)**
+
+1. Mit `showTitle={false}` rendert die Karte kein `.v2clc__title` und kein
+   `.v2clc__badges`, die Meta-Zeile aber schon.
+2. Eine Notiz in der aufgeklappten Zeile zeigt Meta und Text, keine
+   Antwortfläche und keinen zweiten Ausgang.
+
+**Stand.** Gebaut 2026-09-18, im Browser nachgesehen. Fremde Abnahme steht aus.
