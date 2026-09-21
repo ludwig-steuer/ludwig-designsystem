@@ -16,7 +16,15 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 Saldo-Stand eines Kontos im Sachverhalt: `must_clear` / `cleared` / `stays`
 . Liegt seit App **`50413850`** auf origin/staging (Deploy `145eba3d`).
 **Wartet nur noch auf die Owner-Ausnahme vom Freeze** (von `acto` angefragt);
-danach Spiegel-Lauf, damit `StatusBadge` die Achse kennt. Im Set ist bis dahin nichts zu tun — eine Achse, die der Spiegel nicht
+danach Spiegel-Lauf, damit `StatusBadge` die Achse kennt.
+
+**`docs/topics/web-ui.md` — Schritt 0 ohne „Abnahme beginnen"** (gemeldet von
+`a2`, 2026-09-21, App `31e60889`, beim Eintrag noch nicht auf origin/staging;
+der Owner entscheidet den Push). Der Satz ist in der Quelle der App schon
+geändert, nicht in der Kopie hier; neu: „Einen eigenen Start-Knopf gibt es
+nicht (Owner 2026-09-21): übernommen wird im Banner („Prüfung übernehmen"),
+weiter geht es über „Weiter" im Kopf." Kommt mit dem nächsten Lauf nach dem
+Push. Im Set ist nichts zu tun. Im Set ist bis dahin nichts zu tun — eine Achse, die der Spiegel nicht
 führt, erfindet das Set nicht.
 
 ## Erledigt mit dem zweiten Lauf vom 2026-09-21 (App `9048bce1`, F251)
