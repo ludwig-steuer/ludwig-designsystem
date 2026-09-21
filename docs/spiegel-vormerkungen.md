@@ -23,8 +23,10 @@ danach Spiegel-Lauf, damit `StatusBadge` die Achse kennt.
 `bank-transactions/domain/statement-line.ts` (L-340) und an
 `StatementLineVM` in `bank-transaction-vm.ts` die Felder `settled`,
 `counterpartyIban` und die Detailfelder. Liegt in drei Commits auf `staging`,
-beim Eintrag **lokal, nicht gepusht**. Wartet auf den Push und die
-Owner-Ausnahme vom Freeze. Im Set ist bis dahin nichts zu tun: die Formen
+beim Eintrag **lokal, nicht gepusht**. Owner-Ausnahme vom Freeze erteilt
+(Simon, 2026-09-21, „ok"; einmalig, zusammen mit `case_account_balance`);
+`acto` orchestriert — der Lauf folgt auf den Push, mit der App-Spitze, die
+`acto` nennt. Im Set ist bis dahin nichts zu tun: die Formen
 lesen `settled` und `counterpartyIban` schon als Props
 (`BankTransactionRowData`), der Lauf gleicht nur die Typen ab.
 
