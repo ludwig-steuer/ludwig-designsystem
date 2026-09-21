@@ -169,6 +169,15 @@ body { background: #FAFBFC; }
    negative margin on the band (which breaks sticky). */
 .app__main:has(> .ludwig-client-band:first-child) { padding-top: 0; }
 
+/* The boxes of a page keep a standard distance (owner 2026-09-21): no page has
+   to wrap itself in `.v2stack` any more to keep banner, callout, columns and
+   cards apart. A margin between siblings, not a flex gap — vertical margins
+   collapse, so the client band's own 24px bottom margin and this 16px make
+   24px, not 40, and a page that still has its one `.v2stack` wrapper gets the
+   same single distance. The sticky band is left alone; inline margins (the
+   experiment banner's negative top) still win. */
+.app__main > * + * { margin-top: var(--space-4); }
+
 .tb__crumb { font-size: 13px; color: var(--color-text-muted); }
 .tb__crumb strong { color: var(--color-text); font-weight: 500; }
 .tb__search { flex: 1; max-width: 480px; position: relative; }

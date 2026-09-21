@@ -67,9 +67,10 @@ export const StatementCoverage: Story = {
 };
 
 /**
- * Die Stapel eines Jahres: eine Zeile, je Monat der Stapel mit seiner Nummer.
- * Im Mai fehlt einer — ein Zeitraum ohne Stapel ist eine Lücke. Im Juli hängt
- * ein Nachtrag am Stapel (F200).
+ * Die Stapel eines Jahres: eine Zeile, je Monat **wie viele** Stapel es gibt —
+ * die Stapelnummer steht im `title` der Zelle (Owner 2026-09-21: jede Periode
+ * gleich breit, darum nur eine kleine Zahl). Im Mai fehlt einer — ein Zeitraum
+ * ohne Stapel ist eine Lücke. Im Juli hängt ein Nachtrag am Stapel (F200): zwei.
  */
 export const Batches: Story = {
   render: () => {
@@ -80,10 +81,10 @@ export const Batches: Story = {
         i === 4
           ? { state: "error", title: "Für Mai gibt es keinen Stapel." }
           : i === 6
-            ? { state: "done", label: `2026-${n} + Nachtrag`, title: `Stapel 2026-${n} ist in DATEV, dazu ein Nachtrag.`, href: `#stapel=2026-${n}` }
+            ? { state: "done", label: "2", title: `Stapel 2026-${n} ist in DATEV, dazu ein Nachtrag.`, href: `#stapel=2026-${n}` }
             : i === 7
-              ? { state: "open", label: `2026-${n}`, title: `Stapel 2026-${n} — die Kanzlei prüft.`, href: `#stapel=2026-${n}` }
-              : { state: "done", label: `2026-${n}`, title: `Stapel 2026-${n} ist in DATEV.`, href: `#stapel=2026-${n}` };
+              ? { state: "open", label: "1", title: `Stapel 2026-${n} — die Kanzlei prüft.`, href: `#stapel=2026-${n}` }
+              : { state: "done", label: "1", title: `Stapel 2026-${n} ist in DATEV.`, href: `#stapel=2026-${n}` };
     });
     return (
       <div style={{ maxWidth: 1180 }}>

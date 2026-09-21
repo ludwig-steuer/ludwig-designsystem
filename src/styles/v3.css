@@ -4048,6 +4048,15 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 .v3period__grid .is-current { background: var(--color-accent-50); }
 .v3period__grid thead th.is-current { color: var(--color-text); font-weight: 600; }
 .v3period__subject { position: sticky; left: 0; background: var(--color-surface); font-weight: 500; }
+/* Every period the same width (owner 2026-09-21): the months read as a scale,
+   not as columns that grow with their content. The label is a short value (a
+   count); anything longer belongs in the cell's `title`, and here it is cut
+   with an ellipsis rather than widening its month. 64px holds „Mär", „2026"
+   and an icon with a two-digit count. */
+.v3period__col {
+  width: var(--v3period-col, 64px); min-width: var(--v3period-col, 64px); max-width: var(--v3period-col, 64px);
+  overflow: hidden; text-overflow: ellipsis;
+}
 .v3period__cell { display: inline-flex; align-items: center; gap: var(--space-1); color: inherit; text-decoration: none; }
 a.v3period__cell:hover,
 a.v3period__cell:focus-visible { text-decoration: underline; }

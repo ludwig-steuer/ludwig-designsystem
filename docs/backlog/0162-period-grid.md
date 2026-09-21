@@ -176,3 +176,23 @@ eigener Commit, jetzt `v2vh`.
 
 Fremde Abnahme am 2026-09-11 durch die Prüfer-Session (Auftrag `ludwig-manager`), gegen 9ece0c3: **fertig.** Alle Zellen mit `title` und `aria-label`, die Lücke im Mai mit Satz, „nicht vorgesehen" nur als `v2vh`, `aria-current` am laufenden Zeitraum, Legende nur mit vorkommenden Zuständen, Gegenstandsspalte sticky, Links nur mit `href`; 6 × 2 Messungen ohne Querlauf, `Narrow` scrollt in der Karte. Der Fix 2ca2152 ist bestätigt: `seiten-konto-seite--loading-error-not-found` ohne sichtbaren Lade-Text (vorher viermal in 16 px) — sichtbar war er nur im Storybook des Sets; die App erzeugt `.sr-only` über Tailwind.
 
+
+## Nachtrag 2026-09-21 — jede Periode gleich breit (Owner über `a1`)
+
+**Anlass.** Die Breite einer Periodenspalte folgte ihrem Inhalt
+(`white-space: nowrap`, Tabelle `min-width: max-content`); mit Stapelnummern
+als Label waren die Monate verschieden breit. Der Owner will eine feste,
+gleiche Breite je Periode. Die App setzt als Label künftig nur eine kleine
+Zahl (Stapel je Monat), die Stapelnummer steht im `title`.
+
+**Änderung.** Kopf- und Datenzellen der Perioden tragen `.v3period__col`:
+`width`, `min-width` und `max-width` auf `var(--v3period-col, 64px)`. 64 px
+tragen „Mär", „2026" und ein Zeichen mit zweistelliger Zahl. Was länger ist,
+wird mit Auslassungspunkten gekürzt statt die Spalte zu verbreitern — der
+volle Text gehört in den `title` der Zelle. Gegenstand- und
+Zusammenfassungsspalte bleiben inhaltsbreit. Die Story `Batches` zeigt die
+neue Nutzung: Zahl als Label, Stapelnummer im `title`.
+
+**Abnahmekriterium.** `--batches`: alle acht Monatsspalten 64 px breit;
+Juli zeigt „2" mit dem Tooltip „Stapel 2026-0007 ist in DATEV, dazu ein
+Nachtrag." **Stand:** gebaut und gemessen, fremde Abnahme steht aus.

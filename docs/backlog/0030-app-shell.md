@@ -163,3 +163,33 @@ Zwei Beobachtungen ohne Handlungsbedarf: `Narrow` lädt `--in-use` in einem
 eine Fenster-Media-Query in Storybook zu zeigen, und der Rahmen sagt seine
 Breite im Text daneben. Und `{topbar}` steht roh im Raster: wer statt `TopBar`
 etwas anderes einlegt, bekommt die Zeile unformatiert — gewollt, es ist ein Slot.
+
+## Nachtrag 2026-09-21 — Standardabstand zwischen den Boxen einer Seite (Owner über `a1`)
+
+**Anlass.** `.app__main` stapelte seine Kinder ohne Abstand. Die
+Mandantenjahr-Startseite liefert ein Fragment aus Banner · StatusCallout ·
+Columns · PeriodGrid · Card · FieldList, und die Boxen klebten aneinander; der
+Owner hatte das auf mehreren Seiten gesehen und will einen Standard, damit
+sich keine Seite mehr selbst in `.v2stack` wickeln muss.
+
+**Entscheid (Set).** `.app__main > * + * { margin-top: var(--space-4) }` in
+`app-chrome.css` — ein Rand zwischen Geschwistern, **keine** Flex-Spalte:
+
+- Senkrechte Ränder fallen zusammen. Das Mandanten-Band bringt selbst
+  `marginBottom: 24` mit; mit den 16 px der Regel ergibt das 24 px, nicht 40.
+  Eine Seite, die noch genau einen `.v2stack`-Wrapper hat, bekommt denselben
+  einen Abstand und keinen doppelten.
+- Das Band bleibt `position: sticky`, sein Sonderfall
+  `.app__main:has(> .ludwig-client-band:first-child) { padding-top: 0 }`
+  bleibt unberührt — das erste Kind bekommt keinen Rand.
+- Inline gesetzte Ränder gewinnen weiter, etwa der negative obere Rand des
+  Experiment-Banners.
+
+Eine Flex-Spalte mit `gap` wäre die zweite Möglichkeit gewesen; sie hätte die
+Ränder am Zusammenfallen gehindert (Band + Wrapper = 40 px) und die Kinder zu
+Flex-Elementen gemacht, die in einem Behälter mit fester Höhe schrumpfen
+können.
+
+**Abnahmekriterium.** `v3-primitives-rahmen-appshell--in-use`: zwischen
+Seitenkopf und Karte 16 px (Kopf endet bei 189, Karte beginnt bei 205), das
+erste Kind ohne Rand. **Stand:** gebaut und gemessen, fremde Abnahme steht aus.

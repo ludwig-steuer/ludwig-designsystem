@@ -104,7 +104,7 @@ export function PeriodGrid({
                   <th
                     key={p.key}
                     scope="col"
-                    className={p.current ? "is-current" : undefined}
+                    className={p.current ? "v3period__col is-current" : "v3period__col"}
                     {...(p.current ? { "aria-current": "date" as const } : {})}
                   >
                     {p.label}
@@ -124,7 +124,7 @@ export function PeriodGrid({
                     {row.label}
                   </th>
                   {periods.map((p) => (
-                    <td key={p.key} className={p.current ? "is-current" : undefined}>
+                    <td key={p.key} className={p.current ? "v3period__col is-current" : "v3period__col"}>
                       <Cell cell={row.cells[p.key]} />
                     </td>
                   ))}
