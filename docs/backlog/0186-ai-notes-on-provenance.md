@@ -89,3 +89,14 @@ Begründung · Quellen, darunter die Einschätzung des Judge. Angesehen bei
 
 `pnpm typecheck`, `check:classes`, `check:language`, `check:when` und
 `pnpm build` grün. Abnahme durch einen anderen Agenten steht aus.
+
+## Nachtrag 2026-09-21 — der Judge in derselben Zeilenform (Owner über `a2`)
+
+`AiBookingNotesBody` gibt `judgeReasoning` jetzt als `assessment` („Einschätzung
+des Judge") an `ProvenanceRows` (Nachtrag 0163): eine Zeile direkt unter
+„Begründung", gleiche Schrift, gleiche Kürzung, gleiches Aufklappen. Der
+eigene Block mit Overline und vollem Text ist weg. Gilt für die Box
+(`AiBookingNotes`) und für den Aufklapper einer Buchungszeile (in der App
+`batch-review/ui/ProposalFoldout.tsx`) — beide lesen den Body. In der App ist
+nichts zu ändern. **Stand:** gebaut und im Browser nachgesehen, fremde Abnahme
+steht aus.

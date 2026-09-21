@@ -261,16 +261,16 @@ export function AiBookingNotesBody({
       <ProvenanceRows
         provenance={{
           ...(rationale ? { rationale } : {}),
+          // The judge's sentence is the same kind of text as the reason and
+          // looks exactly like it — cut, unfoldable, right under it (owner
+          // 2026-09-21). It used to be a block of its own with an overline and
+          // the full text, so the two read as two different things.
+          ...(judgeReasoning
+            ? { assessment: { label: "Einschätzung des Judge", text: judgeReasoning } }
+            : {}),
           ...(sources.length > 0 ? { sources: aiSourcesToProvenance(sources) } : {}),
         }}
       />
-
-      {judgeReasoning ? (
-        <div className="ki__block">
-          <div className="lw-overline">Einschätzung des Judge</div>
-          <p className="ki__text">{judgeReasoning}</p>
-        </div>
-      ) : null}
     </>
   );
 }

@@ -198,3 +198,22 @@ mehr. Die Zeilen der Herleitung sind ein eigener Export (`ProvenanceRows`), die
 KI-Hinweise nehmen ihn, und `ProvenanceNote` hält mit `extra` den Platz für das
 Urteil des Judge. Dazu: `origin` ist optional, wo der Rahmen sie schon nennt,
 und eine Quelle kann mit `onOpen` neben der Arbeit aufgehen.
+
+## Nachtrag 2026-09-21 — eine zweite Stimme zur Begründung (`assessment`)
+
+**Anlass.** Owner über `a2`: In den KI-Buchungshinweisen sollen „Begründung"
+und „Einschätzung des Judge" **gleich aussehen** — beide gekürzt und
+aufklappbar. Die Begründung war eine Zeile dieses Musters mit `LongText`, der
+Judge ein eigener Block mit Overline und vollem Text darunter.
+
+**Schnittstelle.** `Provenance.assessment?: { label: string; text: string } |
+null` — wie ein anderer die Entscheidung einschätzt. Die Zeile steht direkt
+unter „Begründung" und sieht genauso aus (`LongText`). Das **Wort** gibt der
+Aufrufer („Einschätzung des Judge"); das Muster kennt keinen Judge, wie
+bisher. `extra` bleibt für das, was keine Prosa ist — etwa ein blockierender
+Befund.
+
+**Abnahmekriterium.** `v3-patterns-prüfen-provenance--with-verdict`: die Zeile
+„Einschätzung des Judge" unter „Begründung", gekürzt mit „mehr", kein
+`.ki__block` mehr. **Stand:** gebaut und im Browser nachgesehen, fremde
+Abnahme steht aus.

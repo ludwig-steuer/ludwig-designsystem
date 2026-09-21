@@ -56,6 +56,14 @@ export interface Provenance {
   rule?: { code?: string | null; sentence: string } | null;
   confidence?: { level: ConfidenceLevel | null; value?: number } | null;
   rationale?: string | null;
+  /**
+   * A second voice on the reason: how someone else assessed the decision —
+   * the reviewing agent („Einschätzung des Judge"), a colleague. The **word**
+   * comes from the caller; the pattern knows no reviewer. It stands right
+   * under „Begründung" and looks exactly like it — cut and unfoldable — because
+   * both are prose about the same decision (owner 2026-09-21).
+   */
+  assessment?: { label: string; text: string } | null;
   sources?: readonly ProvenanceSource[];
   /** Set only when someone changed the value by hand. */
   corrected?: { by: ReactNode; at: string } | null;
@@ -210,6 +218,7 @@ export function ProvenanceRows({ provenance: p }: { provenance: Provenance }) {
     ]);
   }
   if (p.rationale) rows.push(["Begründung", <LongText key="b">{p.rationale}</LongText>]);
+  if (p.assessment) rows.push([p.assessment.label, <LongText key="a">{p.assessment.text}</LongText>]);
   if (p.sources && p.sources.length > 0) {
     rows.push([
       "Quellen",

@@ -235,20 +235,31 @@ export const Rows: Story = {
 };
 
 /**
- * `extra` hält den Platz für das, was **nur** der Aufrufer hat — am
- * Buchungssatz das Urteil des Judge. Das Pattern kennt keinen Judge; es lässt
- * ihm Raum unter den Zeilen.
+ * `assessment`: eine **zweite Stimme** zur Begründung — am Buchungssatz die
+ * Einschätzung des Judge. Sie steht direkt unter „Begründung" und sieht genauso
+ * aus: gekürzt und aufklappbar (Owner 2026-09-21). Das Wort gibt der
+ * Aufrufer, das Pattern kennt keinen Judge.
+ *
+ * `extra` hält darunter den Platz für das, was **nur** der Aufrufer hat — hier
+ * ein blockierender Befund des Judge, der keine Prosa ist, sondern eine
+ * Meldung.
  */
 export const WithVerdict: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
       <ProvenanceNote
         defaultOpen
-        provenance={PROPOSAL}
+        provenance={{
+          ...PROPOSAL,
+          assessment: {
+            label: "Einschätzung des Judge",
+            text:
+              "Konto und Steuerschlüssel passen zur Präzedenz: derselbe Kreditor wurde in den letzten sechs Monaten vierzehnmal auf 6815 gebucht, jedes Mal mit BU 9. Die Rechnung nennt Schreibwaren und Toner; nichts davon spricht für Anlagevermögen. Keine Beanstandung.",
+          },
+        }}
         extra={
-          <div className="ki__block">
-            <div className="lw-overline">Einschätzung des Judge</div>
-            <p className="ki__text">Konto und Steuerschlüssel passen zur Präzedenz; keine Beanstandung.</p>
+          <div className="v2msg v2msg--error" role="alert">
+            <span className="v2msg__body">Belegdatum liegt nach dem Buchungsdatum.</span>
           </div>
         }
       />
