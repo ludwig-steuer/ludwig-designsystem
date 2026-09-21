@@ -72,6 +72,12 @@ export interface BankTransactionRowData extends BankTransactionCellData {
   /** Rank 8 — open clarifications of the case, not of the line. */
   openClarificationsCount: number;
   /**
+   * Rank 10 — the counterparty's IBAN, where it is known (about 85 %). Here
+   * too, not only in the detail: the full statement shows it small under the
+   * name (owner 2026-09-21), because the name varies and the IBAN does not.
+   */
+  counterpartyIban?: string | null;
+  /**
    * Is this payment **done** — fully assigned (Z1/Z2) and every event
    * accepted, posted or „no booking required" (0193)? The answer comes from
    * the app's domain (`isSettled`, finding L-340), not from here: filter,
@@ -110,6 +116,13 @@ export interface BankTransactionDetailData extends BankTransactionRowData {
   /** Rank 18 — „for audit and debugging" per the column comment. */
   rawPayload: Record<string, unknown>;
 }
+
+/**
+ * What the facts and the fold-out of a line read: the line, plus whatever of
+ * the detail the caller has. The drawer passes all of it; a list passes the
+ * cheap columns and leaves out the raw payload.
+ */
+export type BankTransactionFactsData = BankTransactionRowData & Partial<BankTransactionDetailData>;
 
 /**
  * A case as a payment sees it: the link of 0095, plus the state of **this**

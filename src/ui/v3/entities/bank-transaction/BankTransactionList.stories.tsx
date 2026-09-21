@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BankTransactionList } from "./BankTransactionList";
+import { BankTransactionFoldout } from "./BankTransactionFacts";
 import { STATEMENT_004 } from "./fixtures";
 import type { BankTransactionRowData, CaseAssignment } from "./bank-transaction";
 import { Amount } from "../../primitives/Amount";
@@ -259,27 +260,38 @@ export const InUse: Story = {
       <PageHeader
         overline="Musterbau GmbH · Wirtschaftsjahr 2026"
         title="Commerzbank · 1210"
-        description="251 Positionen im August. Zwei gehören noch keinem Sachverhalt."
+        description="Auszug 004 · April 2026. Drei von sieben Zahlungen sind gebucht."
       />
+      {/* Search, the assignment filter and — since 0193 — „nicht gebucht": the
+          question the statement is read for. The filter belongs to the page
+          (URL); the list shows its result. */}
       <FilterBar resetHref="#alle">
         <Field label="Suche" htmlFor="q">
-          <Input id="q" type="search" placeholder="Zweck, Gegenpartei, Betrag, EREF" />
+          <Input id="q" type="search" placeholder="Zweck, IBAN, Betrag" />
         </Field>
-        <Field label="Zustand" htmlFor="z">
+        <Field label="Zuordnung" htmlFor="z">
           <Select id="z" defaultValue="alle">
             <option value="alle">alle</option>
             <option value="offen">nur offene</option>
           </Select>
         </Field>
+        <Field label="Buchung" htmlFor="b">
+          <Select id="b" defaultValue="alle">
+            <option value="alle">alle</option>
+            <option value="nicht-gebucht">nicht gebucht</option>
+          </Select>
+        </Field>
       </FilterBar>
       <BankTransactionList
-        transactions={ROWS}
+        transactions={STATEMENT_004}
         caseHref={caseHref}
         openHref="#zuordnen"
         listHref={listHref}
         sort={{ key: "postingDate", dir: "desc" }}
-        pager={PAGER}
-        head={HEAD}
+        pager={{ page: 1, pageSize: 25, totalItems: 7, totalPages: 1 }}
+        head={{ title: "Kontoauszug", sub: "Commerzbank · 1210 · 01.04. bis 30.04.2026" }}
+        booked={{ booked: 3, total: 7 }}
+        expand={(t) => <BankTransactionFoldout transaction={t} caseHref={caseHref} />}
       />
     </div>
   ),

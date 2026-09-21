@@ -20,6 +20,10 @@ const caseHref = (id: string) => `#fall-${id}`;
  * zugeordnet ist, sagt die Spalte Sachverhalt („offen", „Rest … offen").
  * Der interne Übertrag trägt den Haken auch; warum, steht im Tooltip: keine
  * Buchung nötig.
+ *
+ * **Jede Zeile klappt auf** (Owner 2026-09-21): Gegenpartei mit IBAN und BIC,
+ * der Zweck vollständig mit seinen Referenzen, die Zuordnung mit dem Stand je
+ * Sachverhalt, und woher die Zeile kam.
  */
 export const Filled: Story = {
   render: () => (
@@ -51,9 +55,9 @@ export const Settled: Story = {
 };
 
 /**
- * Der Split: eine Überweisung ans Finanzamt, zwei Sachverhalte. Im Ausschnitt
- * stehen die Teilbeträge gleich darunter — bei einer Handvoll Zeilen ist das
- * Auskunft, kein Rauschen.
+ * Der Split: eine Überweisung ans Finanzamt, zwei Sachverhalte. Aufgeklappt
+ * stehen die beiden Sachverhalte mit Teilbetrag und Stand — die Aufteilung ist
+ * Teil der Details, kein eigener Aufklapper.
  */
 export const Split: Story = {
   render: () => (
@@ -141,8 +145,8 @@ export const ManyPaymentsOneCase: Story = {
 
 /**
  * Eine Sammelzahlung über **sechs** Sachverhalte — so viele erlaubt der Kern
- * der App. Die Zeile nennt die Zahl, die Teilbeträge stehen aufgeklappt
- * darunter, je mit ihrem Stand.
+ * der App. Die Zeile nennt die Zahl und fasst die Stände zusammen; aufgeklappt
+ * steht jeder Sachverhalt mit Teilbetrag und Stand.
  */
 export const SixCases: Story = {
   render: () => (

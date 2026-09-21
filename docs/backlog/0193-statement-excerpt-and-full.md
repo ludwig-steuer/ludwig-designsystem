@@ -310,3 +310,42 @@ Stories `Filled` · `Empty` · `Loading`.
 **Stand.** Gebaut 2026-09-21, im Browser nachgesehen (`--many-payments-one-case`,
 `--six-cases`, `paymentaccountdrawer--filled`). Typecheck und Wächter grün.
 Fremde Abnahme steht aus.
+
+## Nachtrag 2026-09-21 (Runde 3) — Details im Aufklapper, IBAN unter dem Namen, „gebucht" als Badge (Owner direkt)
+
+1. **Jede Zeile klappt zu ihren Details auf.** `BankTransactionFoldout` zeigt
+   die Blöcke von `BankTransactionFacts` — Verwendungszweck vollständig mit
+   seinen Referenzen, Gegenpartei mit Name, IBAN und BIC, Zuordnung mit
+   DATEV-Historie, Sachverhalten samt Teilbetrag, Stand je Sachverhalt, Rest
+   und offenen Klärungen, dazu die Herkunft (Quelle, Import-Lauf). **Nicht**
+   noch einmal Betrag und Tag (die trägt die Zeile) und **nicht** die
+   Rohdaten (die stehen im Drawer). Dieselben Blöcke wie im Drawer — eine
+   Wahrheit über eine Zahlung. `BankTransactionFacts` nimmt dafür
+   `BankTransactionFactsData` (Zeile plus, was vom Detail da ist); fehlt die
+   Quelle, fällt der Block Herkunft weg, fehlen die Rohdaten, der Aufklapper
+   dazu.
+   - **Ausschnitt:** steht jetzt auf `DataTable` — Aufklapper, Leerzustand und
+     Mindestbreite kommen von dort. Der Split ist Teil der Details und kein
+     eigener, immer offener Aufklapper mehr.
+   - **Vollansicht:** über `expand={(t) => <BankTransactionFoldout … />}`.
+   - **Valuta** ist nicht im Aufklapper: sie stünde nur im Block „Zahlung",
+     und der wiederholt Betrag und Tag. Sie bleibt im Drawer.
+2. **IBAN klein und grau unter der Gegenpartei**, wo sie bekannt ist:
+   `BankTransactionRowData.counterpartyIban?` (bisher nur im Detail). Die
+   Spalte ist dafür 210 statt 180 px breit — eine deutsche IBAN mit Leerzeichen
+   misst in der kleinen Mono-Schrift rund 200 px und muss ganz stehen, denn
+   abgeschnitten fehlen genau die Ziffern, die zwei Konten unterscheiden.
+   Gemessen: sechs von sechs IBANs ungekürzt. Im Ausschnitt steht die IBAN im
+   Aufklapper (die Zelle „Zahlung" hat schon zwei Zeilen).
+3. **„gebucht" ist ein Badge** wie seine Nachbarn in der Spalte — Erfolgston,
+   Haken davor (`ActionIcon confirm`). Vorher Haken und Text ohne Rahmen; neben
+   den Badges sah das aus wie ein Fehler.
+4. **Blättern, Filter, Suche:** in der Vollansicht wie gehabt (Pager und
+   Sortierung in `DataTable`, Suche und Filter in der `FilterBar` darüber). In
+   `InUse` steht jetzt der Filter **„Buchung: nicht gebucht"** und die Zählung
+   im Kopf. Ausschnitt und Drawer haben bewusst keinen — sie haben den Weg zum
+   ganzen Auszug.
+
+**Stand.** Gebaut 2026-09-21; im Browser nachgesehen (`banktransactionlist--in-use`
+mit aufgeklappter Zeile, `banktransactionexcerpt--split` aufgeklappt). Typecheck
+und Wächter grün. Fremde Abnahme steht aus.

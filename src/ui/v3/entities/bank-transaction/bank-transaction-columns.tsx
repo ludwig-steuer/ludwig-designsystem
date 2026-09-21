@@ -8,7 +8,8 @@ import {
 import { caseIdentifier } from "../accounting-case/case-title";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { Link } from "../../primitives/Link";
-import { StateIcon } from "../../patterns/Review";
+import { ActionIcon } from "../../Icons";
+import { Badge } from "../../primitives/Badge";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { Amount } from "../../primitives/Amount";
@@ -185,7 +186,10 @@ export function bankTransactionColumns({
     counterparty: {
       key: "counterparty",
       header: "Gegenpartei",
-      width: "180px",
+      // 210 px, not 180: a German IBAN with its spaces (27 characters in the
+      // small mono) measures about 200 px, and under the name it has to stand
+      // whole — cut, it loses exactly the digits that tell two accounts apart.
+      width: "210px",
       sortable: true,
       // Rank 3 carries the row link. Where the name is missing (3 % of the
       // stock) the link takes the purpose instead — never a bare dash: a
@@ -200,7 +204,7 @@ export function bankTransactionColumns({
         // The 180-px track carries about 20 characters; the stock goes to 54.
         // Without clipping the cell wrapped and the row grew by 38 % at p90
         // — V1 asks for one row height (acceptance 0101, M2).
-        return (
+        const nameCell = (
           <span className="v2trunc" title={name}>
             {rowHref ? (
               <Link className="v2rowlink" href={rowHref(t)}>
@@ -210,6 +214,19 @@ export function bankTransactionColumns({
               body
             )}
           </span>
+        );
+        // The IBAN small and grey under the name, where it is known (owner
+        // 2026-09-21): the name varies from statement to statement, the IBAN
+        // is the identity that holds.
+        return t.counterpartyIban ? (
+          <span className="v3btxcp">
+            {nameCell}
+            <span className="v3btxcp__iban" title={t.counterpartyIban}>
+              {t.counterpartyIban}
+            </span>
+          </span>
+        ) : (
+          nameCell
         );
       },
     },
@@ -427,10 +444,15 @@ function BookedMark({ transaction }: { transaction: BankTransactionRowData }) {
       return transaction.cases.length > 1 ? `${caseIdentifier(c)}: ${word}` : word;
     })
     .join(" · ");
+  // A badge like its neighbours in the column, in the success tone, with the
+  // tick in front — it looked like a stray line of text next to the pills
+  // (owner 2026-09-21).
   return (
-    <span className="v3btxbooked" title={how}>
-      <StateIcon state="done" />
-      gebucht
+    <span title={how}>
+      <Badge tone="success" className="v3btxbooked">
+        <ActionIcon action="confirm" size={12} />
+        gebucht
+      </Badge>
     </span>
   );
 }

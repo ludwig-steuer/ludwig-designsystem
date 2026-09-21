@@ -104,6 +104,11 @@ export function BankTransactionList({
    * and the head „Verwendungszweck" (123 px) stood 39 px outside its own
    * cell. At 1400 the purpose has 234 px; below that `DataTable` scrolls
    * horizontally instead of cutting a column off.
+   *
+   * Since 0193 the counterparty track is 30 px wider (the IBAN under the
+   * name) and the DATEV history is switched on by the caller: the default set
+   * weighs 910 px, and with the history switched on the purpose keeps 204 px
+   * at 1400.
    */
   minWidth?: number;
   /**

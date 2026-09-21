@@ -10,7 +10,7 @@ import { RawRecord } from "../../primitives/RawRecord";
 import { Time } from "../../primitives/Time";
 import { CaseCell } from "../accounting-case/CaseCell";
 import { BankTransactionPurpose } from "./BankTransactionPurpose";
-import type { BankTransactionDetailData } from "./bank-transaction";
+import type { BankTransactionFactsData } from "./bank-transaction";
 
 /**
  * Everything that stands on a payment (0102) — eighteen points in five blocks.
@@ -48,7 +48,7 @@ export function BankTransactionFacts({
   blocks = ALL_BLOCKS,
   tone = "surface",
 }: {
-  transaction: BankTransactionDetailData;
+  transaction: BankTransactionFactsData;
   caseHref: (caseId: string) => string;
   /** Which blocks. The drawer leaves out „Import" — that is origin, not a core question. */
   blocks?: BankTransactionFactBlock[];
@@ -77,10 +77,10 @@ export function BankTransactionFacts({
             // `amount` (phase 1 is EUR only, `fx_rate` is always 1). A row
             // „Betrag (EUR): 89,90 €" next to „Betrag: 89,90 €" says nothing,
             // so it appears only when the two part ways.
-            ...(t.amountEur !== t.amount
+            ...(t.amountEur != null && t.amountEur !== t.amount
               ? [[
                   "Betrag in EUR",
-                  <Amount key="e" value={t.amountEur} currency="EUR" />,
+                  <Amount key="e" value={t.amountEur ?? null} currency="EUR" />,
                 ] as [React.ReactNode, React.ReactNode]]
               : []),
           ]}
@@ -124,7 +124,7 @@ export function BankTransactionFacts({
 
       {picked.has("assignment") ? <Assignment transaction={t} caseHref={caseHref} tone={tone} /> : null}
 
-      {picked.has("import") ? (
+      {picked.has("import") && t.source ? (
         <FieldList
           title="Import"
           tone={tone}
@@ -133,8 +133,13 @@ export function BankTransactionFacts({
             [
               "Import-Lauf",
               <span key="b">
-                {t.importBatchLabel ?? "ohne Bezeichnung"} ·{" "}
-                <Time value={t.importedAt} format="dateTime" />
+                {t.importBatchLabel ?? "ohne Bezeichnung"}
+                {t.importedAt ? (
+                  <>
+                    {" "}·{" "}
+                    <Time value={t.importedAt} format="dateTime" />
+                  </>
+                ) : null}
               </span>,
             ],
             ...(t.externalId
@@ -147,7 +152,7 @@ export function BankTransactionFacts({
         />
       ) : null}
 
-      {picked.has("import") ? (
+      {picked.has("import") && t.rawPayload ? (
         // **Not a field row.** A field list puts its value flush right and in
         // the right-hand column: measured, the raw table started at 257 px and
         // its mono keys stood right-aligned in 435 px — the opposite of what
@@ -163,7 +168,7 @@ export function BankTransactionFacts({
 }
 
 /** How the payment got here. Three values, and the set has no axis for them. */
-const SOURCE: Record<BankTransactionDetailData["source"], string> = {
+const SOURCE: Record<NonNullable<BankTransactionFactsData["source"]>, string> = {
   csv: "Datei-Import",
   qonto: "Qonto-Schnittstelle",
   manual: "von Hand erfasst",
@@ -181,7 +186,7 @@ function Assignment({
   caseHref,
   tone,
 }: {
-  transaction: BankTransactionDetailData;
+  transaction: BankTransactionFactsData;
   caseHref: (caseId: string) => string;
   tone: "surface" | "bare";
 }) {
@@ -257,4 +262,37 @@ function MatchStage({ stage }: { stage: string | null }) {
   // `bankMatchStage` turns NULL into `not_run`; the axis carries the word
   // since `c1e8e752` (L-218). Two files wrote it by hand before that.
   return <StatusBadge axis="bank_match_stage" status={bankMatchStage(stage)} />;
+}
+
+/**
+ * What a line of the statement shows when it is folded open (0193, owner
+ * 2026-09-21): the details the row has no room for — the counterparty with
+ * IBAN and BIC, the purpose in full with its references, the assignment with
+ * the state per case, the rest and the clarifications, and where the line
+ * came from. The same blocks as the facts, so there is one truth about a
+ * payment; not the amount and date again, the row carries them. The raw
+ * payload stays in the drawer.
+ *
+ * @when    The fold-out of a statement line — in the excerpt, in the list.
+ * @instead Everything, with amount, value date and raw data → the drawer
+ *          (BankTransactionFacts). One payment named elsewhere →
+ *          BankTransactionCell.
+ */
+export function BankTransactionFoldout({
+  transaction,
+  caseHref,
+}: {
+  transaction: BankTransactionFactsData;
+  caseHref: (caseId: string) => string;
+}) {
+  return (
+    <div className="v3btxfold">
+      <BankTransactionFacts
+        transaction={{ ...transaction, rawPayload: undefined }}
+        caseHref={caseHref}
+        blocks={["counterparty", "purpose", "assignment", "import"]}
+        tone="bare"
+      />
+    </div>
+  );
 }

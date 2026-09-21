@@ -1,4 +1,4 @@
-import type { BankTransactionRowData, CaseAssignment } from "./bank-transaction";
+import type { BankTransactionFactsData, CaseAssignment } from "./bank-transaction";
 
 /**
  * Seven lines of one statement (0193, owner's examples via acto): Commerzbank,
@@ -20,8 +20,11 @@ const assignment = (over: Partial<CaseAssignment> & Pick<CaseAssignment, "caseId
   ...over,
 });
 
-const line = (over: Partial<BankTransactionRowData> & Pick<BankTransactionRowData, "id" | "postingDate" | "amount">): BankTransactionRowData => ({
+const line = (over: Partial<BankTransactionFactsData> & Pick<BankTransactionFactsData, "id" | "postingDate" | "amount">): BankTransactionFactsData => ({
   currency: "EUR",
+  source: "csv",
+  importBatchLabel: "Commerzbank CAMT 004",
+  importedAt: "2026-05-02T06:14:00Z",
   counterpartyName: null,
   purpose: null,
   matchStage: null,
@@ -32,12 +35,15 @@ const line = (over: Partial<BankTransactionRowData> & Pick<BankTransactionRowDat
 });
 
 /** The owner's seven example lines of statement 004 — for the excerpt and the list stories. */
-export const STATEMENT_004: BankTransactionRowData[] = [
+export const STATEMENT_004: BankTransactionFactsData[] = [
   line({
     id: "l1",
     postingDate: "2026-04-01",
+    valueDate: "2026-04-02",
     amount: -129.51,
     counterpartyName: "GRENKE AG",
+    counterpartyIban: "DE54 3005 0110 1007 1450 07",
+    counterpartyBic: "DUSSDEDDXXX",
     purpose:
       "12002815849 01.04.26-30.04.26 Rechnungsnummer 0000600372 EREF+116260207778912 MREF+02815849 CRED+DE54ZZZ00000007145 SVWZ+SEPA-Basislastschrift wiederholend",
     matchStage: "exact",
@@ -50,6 +56,8 @@ export const STATEMENT_004: BankTransactionRowData[] = [
     postingDate: "2026-04-27",
     amount: 1800,
     counterpartyName: "Musterbau GmbH",
+    counterpartyIban: "DE12 5001 0517 0648 4898 90",
+    counterpartyBic: "INGDDEFFXXX",
     purpose: "EREF+RE-2026-0338 SVWZ+Zahlung Rechnung RE-2026-0338",
     matchStage: "beleg",
     cases: [assignment({ caseId: "c-0338", caseNumber: "2026-0338", title: "Ausgangsrechnung Musterbau", kind: "outgoing_invoice", amount: 1800, eventBookingState: "proposed" })],
@@ -61,6 +69,8 @@ export const STATEMENT_004: BankTransactionRowData[] = [
     postingDate: "2026-04-30",
     amount: -2480.55,
     counterpartyName: "Handwerk Schulz KG",
+    counterpartyIban: "DE68 2105 0170 0012 3456 78",
+    counterpartyBic: "NOLADE21KIE",
     purpose: "EREF+RE-8817 SVWZ+Sanierung Serverraum, Teilrechnung 2 von 3",
     matchStage: "near",
     cases: [assignment({ caseId: "c-0451", caseNumber: "2026-0451", title: "Sanierung Serverraum", amount: 2000, eventBookingState: null })],
@@ -81,6 +91,8 @@ export const STATEMENT_004: BankTransactionRowData[] = [
     postingDate: "2026-04-15",
     amount: -3570,
     counterpartyName: "Finanzamt München",
+    counterpartyIban: "DE44 7000 0000 0070 0015 20",
+    counterpartyBic: "MARKDEF1700",
     purpose: "SVWZ+USt-VA 03/2026 St.-Nr. 143/123/45678 + LSt 03/2026",
     matchStage: "exact",
     cases: [
@@ -95,6 +107,8 @@ export const STATEMENT_004: BankTransactionRowData[] = [
     postingDate: "2026-04-13",
     amount: 24989.27,
     counterpartyName: "Fakir Technology Consultants GmbH",
+    counterpartyIban: "DE91 1001 0123 4994 2504 19",
+    counterpartyBic: "QNTODEB2XXX",
     purpose: "TRANSFER / Interner Übertrag / DE91100101234994250419",
     matchStage: "exact",
     cases: [
@@ -116,6 +130,8 @@ export const STATEMENT_004: BankTransactionRowData[] = [
     postingDate: "2026-05-04",
     amount: -800,
     counterpartyName: "Max Mustermann Wohnung",
+    counterpartyIban: "DE89 3704 0044 0532 0130 00",
+    counterpartyBic: "COBADEFFXXX",
     purpose: "TRANSFER / Miete Arbeitszimmer / DE89370400440532013000",
     matchStage: null,
     cases: [assignment({ caseId: "c-0301", caseNumber: "2026-0301", title: "Miete Arbeitszimmer (Dauersachverhalt)", kind: "recurring_charge", amount: 800, eventBookingState: "planned" })],
@@ -129,12 +145,14 @@ export const STATEMENT_004: BankTransactionRowData[] = [
  * case** — an invoice of 2.480,55 € paid in two transfers. The same case
  * stands in both lines, each with its own event and its own booking state.
  */
-export const TWO_PAYMENTS_ONE_CASE: BankTransactionRowData[] = [
+export const TWO_PAYMENTS_ONE_CASE: BankTransactionFactsData[] = [
   line({
     id: "p1",
     postingDate: "2026-04-10",
     amount: -2000,
     counterpartyName: "Handwerk Schulz KG",
+    counterpartyIban: "DE68 2105 0170 0012 3456 78",
+    counterpartyBic: "NOLADE21KIE",
     purpose: "EREF+RE-8817 SVWZ+Sanierung Serverraum, Abschlag",
     matchStage: "near",
     cases: [assignment({ caseId: "c-0451", caseNumber: "2026-0451", title: "Sanierung Serverraum", amount: 2000, eventBookingState: "posted" })],
@@ -146,6 +164,8 @@ export const TWO_PAYMENTS_ONE_CASE: BankTransactionRowData[] = [
     postingDate: "2026-04-30",
     amount: -480.55,
     counterpartyName: "Handwerk Schulz KG",
+    counterpartyIban: "DE68 2105 0170 0012 3456 78",
+    counterpartyBic: "NOLADE21KIE",
     purpose: "EREF+RE-8817 SVWZ+Sanierung Serverraum, Rest",
     matchStage: "near",
     cases: [assignment({ caseId: "c-0451", caseNumber: "2026-0451", title: "Sanierung Serverraum", amount: 480.55, eventBookingState: "proposed" })],
@@ -159,11 +179,13 @@ export const TWO_PAYMENTS_ONE_CASE: BankTransactionRowData[] = [
  * core allows (0193, owner). The stock never had more than two; the cell has
  * to carry six anyway.
  */
-export const SIX_CASE_SPLIT: BankTransactionRowData = line({
+export const SIX_CASE_SPLIT: BankTransactionFactsData = line({
   id: "s6",
   postingDate: "2026-04-22",
   amount: -4312.4,
   counterpartyName: "Büro-Service Nord GmbH",
+    counterpartyIban: "DE02 2005 0550 1234 5678 90",
+    counterpartyBic: "HASPDEHHXXX",
   purpose: "EREF+SAMMEL-0422 SVWZ+Sammelzahlung RE-1101 RE-1102 RE-1103 RE-1104 RE-1105 RE-1106",
   matchStage: "exact",
   cases: [

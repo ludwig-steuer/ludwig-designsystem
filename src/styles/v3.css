@@ -2312,8 +2312,17 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* --- Statement excerpt and booking mark (0193) ------------------------------ */
 /* Counterparty over purpose in one cell — the excerpt has no room for two. */
 .v3btxpay { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-/* The mark of a finished line: tick and word, in the success tone (A7). */
-.v3btxbooked { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--fs-ui-sm); color: var(--color-success); }
+/* The mark of a finished line: a badge like its neighbours, tick in front (A7). */
+.v3btxbooked { display: inline-flex; align-items: center; gap: 3px; }
+/* The IBAN small and grey under the counterparty (owner 2026-09-21). */
+.v3btxcp { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.v3btxcp__iban {
+  font-family: var(--font-mono); font-size: var(--fs-ui-xs); color: var(--color-text-subtle);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* The fold-out of a line: the fact blocks side by side where there is room,
+   under each other where there is not — it spans the whole table. */
+.v3btxfold .v2btxf { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: start; }
 
 /* --- CaseAmount (0192) — the rest under the amount -------------------------- */
 .v3camt__rest { display: block; font-weight: 400; }
