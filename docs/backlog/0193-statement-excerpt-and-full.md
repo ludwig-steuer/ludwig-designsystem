@@ -349,3 +349,32 @@ Fremde Abnahme steht aus.
 **Stand.** Gebaut 2026-09-21; im Browser nachgesehen (`banktransactionlist--in-use`
 mit aufgeklappter Zeile, `banktransactionexcerpt--split` aufgeklappt). Typecheck
 und Wächter grün. Fremde Abnahme steht aus.
+
+## Nachtrag 2026-09-21 (4): eine Spalte des Ortes — `extraColumn`
+
+Owner-Entscheid, angefragt über `acto`, der beim Einbau vier Stellen bewusst
+nicht ersetzt hat: der Abnahmeschritt 4 („Umsätze ohne freigegebene
+Buchung") führt eine Spalte **Grund**, warum der Umsatz dort steht. Ohne sie
+ginge die Auskunft verloren. Owner auf die Frage nach einer Zusatzspalte: „ja".
+
+- `BankTransactionExcerpt` nimmt `extraColumn?: ColumnDef<T>` — **eine**
+  Spalte, kein Spaltensatz: mehr machte den Ausschnitt wieder zum Auszug. Sie
+  steht vor dem Betrag; der bleibt rechts außen (V3).
+- Das Excerpt ist dafür generisch: `transactions: readonly T[]` mit
+  `T extends BankTransactionFactsData`. Die Zeilen dürfen ein Feld mehr
+  tragen (`reason`), das die Spalte liest; Aufklapper, Leerzustand und die
+  festen Spalten bleiben unverändert.
+- Story `WithReason`: vier Zeilen aus Auszug 004 mit den Grund-Texten aus
+  `Step4.tsx`. Im Browser nachgesehen (1100 px): Grund zwischen Buchung und
+  Betrag, zweizeilig umbrechend, nichts abgeschnitten, kein Querscrollen.
+
+Die anderen drei Ausnahmen bleiben (acto, mitgetragen): Step3Single (schmale
+Zonenkarte), EventPane (Sachverhalt und Stand stehen schon in der Karte),
+DatevCoveragePanel (Spiegel-Legs ohne Auszugszeile).
+
+**Abnahmekriterien (Nachtrag 4):**
+
+7. Mit `extraColumn` steht die Spalte vor „Betrag", ohne sie ist das
+   Excerpt unverändert (`WithReason` gegen `Filled`).
+8. `cell` bekommt die Zeile mit ihren eigenen Feldern (`t.reason` ohne
+   Zusicherung typisiert).

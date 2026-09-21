@@ -122,6 +122,39 @@ export const InStep: Story = {
   ),
 };
 
+// Why a review step lists a line — worded by the step, not by the entity.
+const REASON: Record<string, string> = {
+  l2: "Sachverhalt 2026-0338, Vorschlag nicht freigegeben",
+  l3: "Sachverhalt 2026-0451, kein Buchungsvorschlag",
+  l4: "ohne Sachverhalt",
+  l7: "Sachverhalt 2026-0301, Vorschlag nicht freigegeben",
+};
+const UNBOOKED = STATEMENT_004.filter((t) => t.id in REASON).map((t) => ({ ...t, reason: REASON[t.id]! }));
+
+/**
+ * **Eine Spalte des Ortes** (`extraColumn`, Owner 2026-09-21): im
+ * Abnahmeschritt 4 die Umsätze ohne freigegebene Buchung, und warum jeder
+ * dort steht. Die Spalte steht vor dem Betrag, der rechts außen bleibt. Die
+ * Zeilen tragen dafür ein Feld mehr als eine Auszugszeile (`reason`) — das
+ * Excerpt reicht sie unverändert an die Spalte durch.
+ */
+export const WithReason: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1100 }}>
+      <BankTransactionExcerpt
+        title="Umsätze ohne freigegebene Buchung"
+        sub="Commerzbank · 1210 · April 2026"
+        transactions={UNBOOKED}
+        caseHref={caseHref}
+        openHref="#zuordnen"
+        rowHref={(t) => `#zahlung-${t.id}`}
+        statementHref="#kontoauszug"
+        extraColumn={{ key: "reason", header: "Grund", width: "minmax(200px,1.4fr)", cell: (t) => t.reason }}
+      />
+    </div>
+  ),
+};
+
 /**
  * Der Split in die **Gegenrichtung** (Owner): mehrere Zahlungen, **ein**
  * Sachverhalt — eine Rechnung über 2.480,55 € in zwei Überweisungen. Beide

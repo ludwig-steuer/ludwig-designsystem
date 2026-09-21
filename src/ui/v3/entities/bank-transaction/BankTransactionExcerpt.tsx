@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { DataTable } from "../../patterns/DataTable";
+import { DataTable, type ColumnDef } from "../../patterns/DataTable";
 import { TextButton } from "../../primitives/TextButton";
 import type { BankTransactionFactsData, BankTransactionRowData } from "./bank-transaction";
 import { COMPACT_COLUMNS, bankTransactionColumns } from "./bank-transaction-columns";
@@ -30,7 +30,7 @@ import { BankTransactionFoldout } from "./BankTransactionFacts";
  *          BankTransactionWorklist. One payment named in running text →
  *          BankTransactionCell.
  */
-export function BankTransactionExcerpt({
+export function BankTransactionExcerpt<T extends BankTransactionFactsData>({
   title,
   sub,
   transactions,
@@ -40,6 +40,7 @@ export function BankTransactionExcerpt({
   statementHref,
   actions,
   empty,
+  extraColumn,
 }: {
   title: ReactNode;
   sub?: ReactNode;
@@ -47,7 +48,7 @@ export function BankTransactionExcerpt({
    * The lines, in the caller's order — the excerpt does not sort. Whatever of
    * the detail they carry (IBAN, BIC, source, import) shows in the fold-out.
    */
-  transactions: readonly BankTransactionFactsData[];
+  transactions: readonly T[];
   caseHref: (caseId: string) => string;
   /** Where „offen" leads — the assignment. */
   openHref?: string;
@@ -65,13 +66,23 @@ export function BankTransactionExcerpt({
   actions?: ReactNode;
   /** An empty excerpt is a sentence with a reason, never an empty card. */
   empty?: { title: string; hint?: string };
+  /**
+   * **One** column of the place, before the amount — what only this place
+   * knows about the line, such as why a review step lists it („Grund", owner
+   * 2026-09-21). One, not a column set: more would make the excerpt the
+   * statement again. The lines may carry more than a statement line for it —
+   * `T` is whatever the caller passes.
+   */
+  extraColumn?: ColumnDef<T>;
 }) {
-  const columns = bankTransactionColumns({
+  const fixed: ColumnDef<T>[] = bankTransactionColumns({
     caseHref,
     columns: [...COMPACT_COLUMNS],
     ...(openHref ? { openHref } : {}),
     ...(rowHref ? { rowHref } : {}),
   });
+  // The amount stays the last column: a number column at the right edge (V3).
+  const columns = extraColumn ? [...fixed.slice(0, -1), extraColumn, ...fixed.slice(-1)] : fixed;
   const headActions =
     actions || statementHref ? (
       <>
@@ -85,7 +96,7 @@ export function BankTransactionExcerpt({
     ) : undefined;
 
   return (
-    <DataTable<BankTransactionRowData>
+    <DataTable<T>
       rows={[...transactions]}
       columns={columns}
       rowKey={(t) => t.id}
