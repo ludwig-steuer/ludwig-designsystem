@@ -269,6 +269,16 @@ export function CaseTimeline({
   }
 
   for (const ev of events) {
+    // **One state word per entry** (owner 2026-09-18). The two axes carry the
+    // same four words — `proposed` is „Vorschlag" in both — so an event with
+    // its booking said everything twice. The booking's badge stands only where
+    // it says something the event's does not: „Gebucht · Storniert", or a
+    // proposal under an event that is still blocked.
+    const eventStatus = ev.superseded ? "superseded" : ev.state;
+    const bookingWord = ev.bookingState
+      ? resolveStatus("journal_entry", ev.bookingState).label
+      : null;
+    const showBooking = bookingWord !== null && bookingWord !== resolveStatus("event_booking", eventStatus).label;
     // Axis first (`ereignis_art`, L-02), prop as override, raw value last — the
     // same order as in the strand below.
     const label =
@@ -293,14 +303,10 @@ export function CaseTimeline({
               decides whether anything can be done with it at all. As a word,
               not as a colour. */}
           {ev.source === "datev" ? <Badge tone="neutral">DATEV</Badge> : null}
-          <StatusBadge
-            axis="event_booking"
-            status={ev.superseded ? "superseded" : ev.state}
-            info={false}
-          />
-          {/* The booking is the second line of this event, not an entry of
-              its own — it stands beside it as a second badge. */}
-          {ev.bookingState ? (
+          <StatusBadge axis="event_booking" status={eventStatus} info={false} />
+          {/* The booking is the second line of this event, not an entry of its
+              own — where it differs, it stands beside it as a second badge. */}
+          {showBooking ? (
             <StatusBadge axis="journal_entry" status={ev.bookingState} info={false} />
           ) : null}
         </span>,

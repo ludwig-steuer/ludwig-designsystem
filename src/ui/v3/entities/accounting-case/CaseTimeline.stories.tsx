@@ -172,6 +172,28 @@ export const EntryKinds: Story = {
 };
 
 /**
+ * **Ein Zustandswort je Eintrag** (Owner 2026-09-18). Ereignis und Buchung
+ * haben zwei Achsen, die dieselben vier Wörter führen — `proposed` heißt in
+ * beiden „Vorschlag". Das Badge der Buchung steht deshalb nur, wo es etwas
+ * anderes sagt als das des Ereignisses: hier bei der zurückgezogenen und bei
+ * der blockierten Zeile, nicht bei der ersten.
+ */
+export const BookingState: Story = {
+  render: () => (
+    <div style={{ maxWidth: 620 }}>
+      <CaseTimeline
+        today={TODAY}
+        events={[
+          { id: "b1", kind: "document_received", date: "2026-08-20", title: "Rechnung RE-4471 · gebucht", amount: 1249.9, currency: "EUR", state: "posted", bookingState: "posted" },
+          { id: "b2", kind: "document_received", date: "2026-08-19", title: "Rechnung RE-4470 · Vorschlag zurückgezogen", amount: 318.5, currency: "EUR", state: "open", bookingState: "reversed" },
+          { id: "b3", kind: "payment_out", date: "2026-08-18", title: "Abbuchung Stadtwerke · Rückfrage offen", amount: 412, currency: "EUR", state: "blocked", bookingState: "proposed" },
+        ]}
+      />
+    </div>
+  ),
+};
+
+/**
  * Der Rundlauf: `onSelect` liefert den Eintrag mit seiner Art, `selectedId`
  * markiert ihn. Rechts daneben die Gegenprobe — ohne `onSelect` ist der Strang
  * Text und enthält keinen Knopf.

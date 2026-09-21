@@ -1017,3 +1017,31 @@ keine Lücke, Hover grau, geöffneter Eintrag blau). Fremde Abnahme steht aus.
 `sachverhalt/Timeline.tsx` (`SachverhaltScreen.tsx:176`), nicht diesen
 Strang — dort ändert sich erst etwas, wenn die App auf `CaseTimeline`
 umstellt (steht in „Ersetzt“ oben).
+
+## Nachtrag 2026-09-18 — ein Zustandswort je Eintrag (Owner)
+
+**Anlass.** Owner direkt: „bei Buchungsvorschlägen reicht ein Status-Badge,
+nicht 2". Am Ereignis standen zwei: die Achse `event_booking` und die Achse
+`journal_entry` der Buchung daran. Beide führen dieselben vier Wörter —
+`proposed` heißt in beiden „Vorschlag", `posted` in beiden „Gebucht" —, also
+sagte jeder gebuchte Eintrag alles doppelt.
+
+**Regel.** Das Badge der Buchung steht nur, wo es ein **anderes Wort** trägt
+als das des Ereignisses; verglichen werden die Wörter der Achsen, nicht die
+Schlüssel. Damit bleibt der Fall erhalten, für den die zweite Marke gebaut
+wurde (0152, offene Frage 1): „Buchung fehlt · Zurückgezogen" und
+„Benötigt Antwort · Vorschlag" stehen weiter nebeneinander, „Gebucht ·
+Gebucht" nicht mehr. Die Herkunft (`DATEV`) ist davon unberührt — sie sagt,
+woher der Eintrag kommt, nicht in welchem Zustand er ist.
+
+**Abnahmekriterien (Nachtrag)**
+
+1. Ereignis `posted` mit `bookingState: "posted"` rendert **ein** Badge.
+2. Ereignis `open` mit `bookingState: "reversed"` rendert zwei
+   („Buchung fehlt", „Zurückgezogen"), `blocked` mit `proposed` ebenso.
+3. Story `BookingState` zeigt alle drei Fälle untereinander.
+
+**Stand.** Gebaut 2026-09-18, im Browser nachgesehen (`--booking-state`:
+„Gebucht" / „Buchung fehlt · Zurückgezogen" / „Benötigt Antwort · Vorschlag";
+Reiter Ereignisse: je ein Wort). `bookingState` hatte bis dahin **keine**
+Story — jetzt hat es eine. Fremde Abnahme steht aus.
