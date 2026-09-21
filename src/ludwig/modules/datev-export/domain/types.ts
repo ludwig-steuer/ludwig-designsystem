@@ -136,6 +136,16 @@ export interface ExportableJournalEntry {
    * Fehlt (Unit-Tests, noch nicht vergeben) → Felder bleiben leer.
    */
   exportRef?: string | null;
+  /**
+   * F263: der Satz ist die Generalumkehr dieses Originals
+   * (`client_journal_entry.reverses_entry_id`). Der Export schreibt ihn auf
+   * die Seite des Originals mit GU-Kennzeichen (EXTF-Feld 118 bzw.
+   * `general_reversal`), der BU-Schlüssel bleibt. Fehlt (Unit-Tests) = kein
+   * Umkehrsatz.
+   */
+  reversesEntryId?: string | null;
+  /** F268: wie `reversesEntryId`, das Original ist ein Satz aus dem DATEV-Spiegel. */
+  reversesMirrorEntryId?: string | null;
   lines: ExportableJournalEntryLine[];
 }
 

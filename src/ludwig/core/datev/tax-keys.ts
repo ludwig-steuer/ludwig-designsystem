@@ -115,51 +115,77 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
     description:
       "Einkauf aus einem anderen EU-Land: der Erwerber versteuert selbst. Erwerbsteuer und Vorsteuer werden beide gebucht und heben sich auf.",
   },
+  {
+    key: "11",
+    label: "Steuerfreie innergem. Lieferung",
+    vatRate: 0,
+    direction: "output",
+    description:
+      "Ausgangsseite: steuerfreie innergemeinschaftliche Lieferung an einen Unternehmer im EU-Ausland (§ 4 Nr. 1 b UStG) — erscheint in der UStVA (Kz 41) und in der Zusammenfassenden Meldung.",
+  },
   // ---------------------------------------------------------------------
-  // Langform-Schlüssel (F81-T81.2). DATEV bietet seit WJ 2018 zusätzlich 3-
-  // und 4-stellige Steuerschlüssel an; sie kommen im Spiegel echter Mandanten
-  // vor (Erhebung 2026-08-15 über client_effective_journal_lines: 490 auf
-  // Aufwandskonten wie 4920, 401 auf dem VSt-Konto 1406, 231 im Anlagen-
-  // Umfeld). Bis F81 kannte der Katalog sie nicht — `list_tax_keys` zeigte
-  // dem Agenten den Schlüssel nie, den die Kanzlei auf demselben Konto
-  // durchgängig verwendet.
-  //
-  // Ihre genaue DATEV-Semantik ist hier bewusst NICHT behauptet: sie steht in
-  // der DATEV-Schlüsseltabelle (Dok. 1008613), nicht in unseren Daten. Was wir
-  // belegen können, steht in der description — mehr wäre geraten.
-  {
-    key: "231",
-    label: "DATEV-Langform-Schlüssel 231 (nur durchreichen)",
-    vatRate: null,
-    direction: "none",
-    description:
-      "Dreistelliger DATEV-Schlüssel (Langform seit WJ 2018). Ludwig rechnet damit keine Steuerzeile und leitet keinen Satz ab — nur übernehmen, wenn die Historie desselben Kontos ihn trägt (get_vendor_history → taxKey).",
-    passThrough: true,
-  },
-  {
-    key: "401",
-    label: "DATEV-Langform-Schlüssel 401 (nur durchreichen)",
-    vatRate: null,
-    direction: "none",
-    description:
-      "Dreistelliger DATEV-Schlüssel (Langform seit WJ 2018), im Spiegel u. a. auf dem Vorsteuerkonto 1406. Ludwig rechnet damit keine Steuerzeile — nur aus der Historie desselben Kontos übernehmen.",
-    passThrough: true,
-  },
+  // Aktuelle DATEV-Schlüssel (3-/4-stellig, seit WJ 2018): die Zuordnung zu
+  // den bisherigen steht unten (`CURRENT_TAX_KEY_BY_LEGACY`,
+  // `CURRENT_REVERSE_CHARGE_KEY`), die Bedeutung in
+  // docs/reference/datev-api/tax-keys-legacy-vs-current.md. `taxKeyEntry`
+  // führt einen aktuellen Schlüssel auf den bisherigen Eintrag zurück; nur
+  // `490` hat kein bisheriges Gegenstück und bleibt eigener Eintrag.
   {
     key: "490",
-    label: "DATEV-Langform-Schlüssel 490 (nur durchreichen)",
+    label: "Ohne Vorsteuerabzug (bewusst)",
     vatRate: null,
     direction: "none",
     description:
-      "Dreistelliger DATEV-Schlüssel (Langform seit WJ 2018). Kanzleien setzen ihn im Spiegel durchgängig auf bestimmten Aufwandskonten (z. B. 4920 Telefon) — wenn get_vendor_history für das Konto diesen Schlüssel als dominant meldet, gehört er an die Zeile. Ludwig rechnet damit keine Steuerzeile.",
+      "Kennzeichnet eine Buchung, für die bewusst kein Vorsteuerabzug erfolgt: der Beleg weist Steuer aus, sie wird nicht gezogen. Ludwig rechnet damit keine Steuerzeile.",
     passThrough: true,
   },
 ] as const;
 
-/** Katalog-Eintrag zu einem BU-Schlüssel, `null` wenn unbekannt. */
+/** bisheriger Schlüssel → aktueller Schlüssel, eindeutig ohne Sachverhalt. */
+export const CURRENT_TAX_KEY_BY_LEGACY: Readonly<Record<string, string>> = {
+  "1": "171", "2": "102", "3": "101", "8": "402", "9": "401",
+  "11": "231", "18": "702", "19": "701",
+};
+
+/** § 13b: bisheriger Schlüssel + Sachverhalt L+L → aktueller Schlüssel. */
+export const CURRENT_REVERSE_CHARGE_KEY: Readonly<Record<string, Readonly<Record<number, string>>>> = {
+  "94": { 7: "506", 1: "511", 4: "526" },
+  "91": { 7: "507", 1: "512", 4: "527" },
+  "95": { 7: "6506", 1: "6511", 4: "6526" },
+  "92": { 7: "6507", 1: "6512", 4: "6527" },
+};
+
+export interface CurrentTaxKey {
+  key: string;
+  /** Der aktuelle Schlüssel trägt den § 13b-Tatbestand — der Sachverhalt L+L entfällt. */
+  carriesReverseChargeCase: boolean;
+}
+
+/** Bisheriger Schlüssel (+ Sachverhalt L+L) → aktueller DATEV-Schlüssel; ohne Zuordnung unverändert. */
+export function toCurrentTaxKey(legacyKey: string, reverseChargeCase: number | null): CurrentTaxKey {
+  const rc = reverseChargeCase == null ? undefined : CURRENT_REVERSE_CHARGE_KEY[legacyKey]?.[reverseChargeCase];
+  if (rc) return { key: rc, carriesReverseChargeCase: true };
+  return { key: CURRENT_TAX_KEY_BY_LEGACY[legacyKey] ?? legacyKey, carriesReverseChargeCase: false };
+}
+
+/** Umkehrung beider Tabellen, einmal beim Modul-Load gebaut. */
+const LEGACY_BY_CURRENT: ReadonlyMap<string, string> = new Map([
+  ...Object.entries(CURRENT_TAX_KEY_BY_LEGACY).map(([legacy, current]) => [current, legacy] as const),
+  ...Object.entries(CURRENT_REVERSE_CHARGE_KEY).flatMap(([legacy, byCase]) =>
+    Object.values(byCase).map((current) => [current, legacy] as const),
+  ),
+]);
+
+/** Aktueller DATEV-Schlüssel → bisheriger (`401` → `9`, `506` → `94`); alles andere unverändert. */
+export function toLegacyTaxKey(key: string): string {
+  return LEGACY_BY_CURRENT.get(key) ?? key;
+}
+
+/** Katalog-Eintrag zu einem BU-Schlüssel (bisherige oder aktuelle Form), `null` wenn unbekannt. */
 export function taxKeyEntry(taxKey: string | null | undefined): TaxKeyEntry | null {
   if (!taxKey) return null;
-  return DATEV_TAX_KEYS.find((k) => k.key === taxKey) ?? null;
+  const legacy = toLegacyTaxKey(taxKey);
+  return DATEV_TAX_KEYS.find((k) => k.key === legacy) ?? null;
 }
 
 /** Schlüssel, aus dem Ludwig weder Satz noch Steuerzeile ableitet (F81-T81.2). */

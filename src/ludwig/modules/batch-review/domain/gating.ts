@@ -1,4 +1,4 @@
-import type { BookingCycleKind } from "@/ludwig/modules/datev-export";
+import { AGENT_STALL_MINUTES, type BookingCycleKind } from "@/ludwig/modules/datev-export";
 
 import { reviewStepApplies, LAST_REVIEW_STEP, NACHLESE_STEP, TRANSFER_STEP } from "./steps";
 
@@ -57,12 +57,41 @@ export function batchReleased(state: string): boolean {
   return IN_TRANSFER.has(state) || IN_DATEV.has(state);
 }
 
-export function reviewGating(state: string, at?: string | null): ReviewGating {
-  const g = gatingOhneZeit(state);
+/**
+ * `opts.agentIdleMinutes` (F253): wie lange der Agent still ist — nur im
+ * Zustand `agent` von Belang. Ohne `opts` bleibt alles wie zuvor; `null`
+ * heißt „nie geschrieben" und zählt als still.
+ */
+export function reviewGating(
+  state: string,
+  at?: string | null,
+  opts?: { agentIdleMinutes?: number | null },
+): ReviewGating {
+  const g = gatingOhneZeit(state, opts);
   return g.banner ? { ...g, banner: { ...g.banner, at: at ?? null } } : g;
 }
 
-function gatingOhneZeit(state: string): ReviewGating {
+function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null }): ReviewGating {
+  // F253: ein hängender Agent lässt den Stapel sonst ohne Ausweg stehen.
+  // Übernommen wird mit demselben Knopf und Kern wie aus `prepared`.
+  if (
+    state === "agent" &&
+    opts &&
+    (opts.agentIdleMinutes === null ||
+      (opts.agentIdleMinutes !== undefined && opts.agentIdleMinutes >= AGENT_STALL_MINUTES))
+  ) {
+    return {
+      writable: false,
+      entryStep: 0,
+      banner: {
+        tone: "warning",
+        text:
+          "Der Agent hat seit über zwei Stunden nichts mehr an diesem Stapel getan. " +
+          "Sie können die Prüfung übernehmen — sein Lauf wird dabei beendet.",
+        action: "take_over",
+      },
+    };
+  }
   if (state === "agent") {
     return {
       writable: false,

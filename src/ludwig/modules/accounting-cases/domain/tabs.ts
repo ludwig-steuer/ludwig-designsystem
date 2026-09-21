@@ -1,27 +1,32 @@
+/**
+ * Die Reiter der Sachverhalts-Detailseite (F257, DS-Vorlage
+ * `showcase/case/fixtures.ts` `FALL_TABS`): erst die der Sachbearbeitung, dann
+ * einer für Prüfung und Support. `rules` gibt es nur am Dauersachverhalt.
+ */
 export const CASE_TABS = [
   "overview",
+  "events",
   "documents",
-  "datev",
+  "clarifications",
   "plausibility",
   "rules",
-  "assignment",
-  "raw",
-  "history",
+  "master_data",
+  "technical",
 ] as const;
 export type CaseTab = (typeof CASE_TABS)[number];
 
 export const CASE_TAB_LABEL: Record<CaseTab, string> = {
   overview: "Übersicht",
-  documents: "Verbundene Belege",
-  /** F85: verlinkte DATEV-Spiegel-Buchungen + offener Posten des Sachverhalts. */
-  datev: "DATEV-Wahrheit",
-  /** F85-T85.10: deterministische Checks P1–P5 gegen die DATEV-Wahrheit. */
+  events: "Ereignisse",
+  documents: "Belege",
+  clarifications: "Rückfragen",
+  /** Prüfpunkte, Belegnummern-Register, Saldo & Konten, offene Posten. */
   plausibility: "Plausibilität",
-  rules: "Regelwerk",
-  /** Zuordnung Zahlung → Sachverhalt (DATEV-Analogon: Lerndatei). Nur Dauersachverhalt. */
-  assignment: "Zuordnung",
-  raw: "Rohdaten",
-  history: "Historie",
+  /** Regel und Zuordnung in einem Reiter — nur Dauersachverhalt. */
+  rules: "Wiederkehr",
+  master_data: "Stammdaten",
+  /** DATEV-Wahrheit, Protokoll, Herkunft, Rohdaten. */
+  technical: "Technik",
 };
 
 export function parseCaseTab(value: string | string[] | undefined): CaseTab {

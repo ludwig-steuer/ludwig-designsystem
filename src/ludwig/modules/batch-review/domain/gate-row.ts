@@ -178,7 +178,7 @@ export function findingHref(step: number, z: GateRow): string | null {
   return null;
 }
 
-/** Die Befunde von Gate 4d, wie Schritt 4 sie als Prüfpunkte zeigt (F245). */
+/** Die Befunde von Gate 4d, wie das Prüfprotokoll (Schritt 8) sie als Prüfpunkte zeigt (F245; seit F255 nur dort). */
 export interface ReconciliationChecks {
   /** Geld ist geflossen, eine freigegebene Buchung fehlt — „Jede Auszugszeile ist gebucht". */
   booked: GateRow[];

@@ -86,6 +86,8 @@ export interface JournalEntryVM {
    * Rückverweis nicht, er steht auf `status='reversed'`.
    */
   reversesEntryId?: string | null;
+  /** F268: wie `reversesEntryId`, aber das Original ist ein Satz aus dem DATEV-Spiegel. */
+  reversesMirrorEntryId?: string | null;
   /** Wie freigegeben: `ai_unmodified` | `ai_edited` | `manual_only` | `imported`. */
   acceptanceQuality?: string | null;
   /** Raw `0..1` confidence, or NULL for non-AI bookings. */

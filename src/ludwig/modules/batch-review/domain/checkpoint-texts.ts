@@ -18,7 +18,7 @@ export interface CheckpointText {
   jumpHref: string;
 }
 
-/** Die Bank-Prüfpunkte, wortgleich in Schritt 4 und Schritt 8. */
+/** Die Bank-Prüfpunkte — sie stehen nur noch in Schritt 8 (F255). */
 export const BANK_CHECK_LABELS = {
   assigned: "Jede Auszugszeile ist zugeordnet",
   booked: "Jede Auszugszeile ist gebucht",

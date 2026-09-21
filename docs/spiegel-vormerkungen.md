@@ -12,32 +12,26 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-**Achse `case_account_balance`** (gemeldet von `acto`, 2026-09-21, F257) — der
-Saldo-Stand eines Kontos im Sachverhalt: `must_clear` / `cleared` / `stays`
-. Liegt seit App **`50413850`** auf origin/staging (Deploy `145eba3d`).
-**Wartet nur noch auf die Owner-Ausnahme vom Freeze** (von `acto` angefragt);
-danach Spiegel-Lauf, damit `StatusBadge` die Achse kennt.
+Nichts offen.
 
-**`isSettled` und die neuen Felder der Auszugszeile** (gemeldet von `acto`,
-2026-09-21, 0193/0194) — `isSettled` in
-`bank-transactions/domain/statement-line.ts` (L-340) und an
-`StatementLineVM` in `bank-transaction-vm.ts` die Felder `settled`,
-`counterpartyIban` und die Detailfelder. Liegt in drei Commits auf `staging`,
-beim Eintrag **lokal, nicht gepusht**. Owner-Ausnahme vom Freeze erteilt
-(Simon, 2026-09-21, „ok"; einmalig, zusammen mit `case_account_balance`);
-`acto` orchestriert — der Lauf folgt auf den Push, mit der App-Spitze, die
-`acto` nennt. Im Set ist bis dahin nichts zu tun: die Formen
-lesen `settled` und `counterpartyIban` schon als Props
-(`BankTransactionRowData`), der Lauf gleicht nur die Typen ab.
+## Erledigt mit dem dritten Lauf vom 2026-09-21 (App `7f82c7fd`)
 
-**`docs/topics/web-ui.md` — Schritt 0 ohne „Abnahme beginnen"** (gemeldet von
-`a2`, 2026-09-21, App `31e60889`, beim Eintrag noch nicht auf origin/staging;
-der Owner entscheidet den Push). Der Satz ist in der Quelle der App schon
-geändert, nicht in der Kopie hier; neu: „Einen eigenen Start-Knopf gibt es
-nicht (Owner 2026-09-21): übernommen wird im Banner („Prüfung übernehmen"),
-weiter geht es über „Weiter" im Kopf." Kommt mit dem nächsten Lauf nach dem
-Push. Im Set ist nichts zu tun. Im Set ist bis dahin nichts zu tun — eine Achse, die der Spiegel nicht
-führt, erfindet das Set nicht.
+Owner-Ausnahme (Simon, 2026-09-21, „ok"), einmalig, danach wieder
+eingefroren; `acto` hat den Push von `staging` orchestriert. Gespiegelt aus
+der Spitze von origin/staging `7f82c7fd`. Angekommen:
+
+- **Achse `case_account_balance`** (F257, App `50413850`) — `StatusBadge`
+  kennt sie jetzt; dazu kamen `vat_treatment` und `vat_assessment_status`.
+- **`isSettled`** in `bank-transactions/domain/statement-line.ts` und an
+  `StatementLineVM` `settled`, `counterpartyIban` und die Detailfelder
+  (0193/0194, App `5f41943f`) — die Namen decken sich mit
+  `BankTransactionRowData`/`BankTransactionFactsData`; L-340 gestrichen.
+- **`docs/ludwig/web-ui.md`** — Schritt 0 ohne „Abnahme beginnen" (App
+  `31e60889`).
+
+Nebenbei mitgekommen, was drüben seit `9048bce1` an den gespiegelten Pfaden
+entstand (u. a. `reversal-lines.ts`, `vat-treatment.ts`, `admin/domain/mailbox.ts`,
+`datev-export/domain/agent-stall.ts`). `pnpm typecheck` und alle Wächter grün.
 
 ## Erledigt mit dem zweiten Lauf vom 2026-09-21 (App `9048bce1`, F251)
 

@@ -98,4 +98,33 @@ export function restOf(row: { amount: string | number; allocatedSum: number }): 
   return Math.abs(Number(row.amount)) - row.allocatedSum;
 }
 
+/* ---- „gebucht" (L-340) --------------------------------------------------- */
+
+const SETTLED_BOOKING_STATES: ReadonlySet<string> = new Set(["accepted", "posted"]);
+
+/**
+ * Ist die Zeile fertig — der Haken „gebucht" im Kontoauszug?
+ *
+ * Fertig heißt: der Betrag ist vollständig erklärt (Z1/Z2) **und** jedes
+ * Ereignis der Zeile ist freigegeben, gebucht oder braucht keine Buchung.
+ * Ein bloßer Vorschlag zählt nicht (Owner 2026-09-21: `accepted` zählt).
+ *
+ * Ersetzte Ereignisse kennt die Zeile nicht als eigenen Zustand — die
+ * Zuordnungs-Query liefert sie wie jedes andere; ohne Buchung halten sie den
+ * Haken auf.
+ */
+export function isSettled(row: {
+  amount: string | number;
+  allocatedSum: number;
+  cases: readonly { eventBookingState: string | null; noBookingRequiredReason: string | null }[];
+}): boolean {
+  const z = deriveZ({ amount: row.amount, allocatedSum: row.allocatedSum, cases: [...row.cases] });
+  if (z !== "Z1" && z !== "Z2") return false;
+  return row.cases.every(
+    (c) =>
+      c.noBookingRequiredReason != null ||
+      (c.eventBookingState != null && SETTLED_BOOKING_STATES.has(c.eventBookingState)),
+  );
+}
+
 export type { SepaTags };

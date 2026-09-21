@@ -189,7 +189,7 @@ export type ClarificationType = (typeof CLARIFICATION_TYPES)[number];
  * `text NOT NULL` **ohne** DB-CHECK: die Werte entstehen im Code, nicht im
  * Schema. Wer einen neuen einführt, trägt ihn hier ein — sonst zeigt die
  * Oberfläche den Slug mit Unterstrichen, was sie bis 2026-09-07 tat
- * (`humanizeType()` in `ClarificationsBanner`, L-10).
+ * (`humanizeType()` im alten Rückfragen-Banner, L-10).
  *
  * Die `opos_*`-Typen sind Wächter-Fragen: sie entstehen automatisch aus dem
  * Abgleich mit dem DATEV-Bestand und tragen deshalb einen Sperrindex gegen
@@ -229,7 +229,7 @@ export function clarificationQuestionTypeLabel(questionType: string): string {
 /**
  * Woher eine maschinelle Rückfrage kommt — der schreibende Dienst.
  *
- * Lag bis 2026-09-07 als lokale Map in `ClarificationsBanner.tsx` und kannte
+ * Lag bis 2026-09-07 als lokale Map im alten Rückfragen-Banner und kannte
  * `agent`, `web` und `datev-mirror` nicht — zusammen 78 % des Bestands, die
  * deshalb ihren technischen Slug zeigten (L-11).
  */
@@ -273,6 +273,24 @@ export function expectationMaturity(e: {
   if (e.escalationLevel > 0) return "escalated";
   const today = e.today ?? new Date().toISOString().slice(0, 10);
   return e.dueDate < today ? "due" : "pending";
+}
+
+/**
+ * Was ein Konto im Sachverhalt tun muss (F257, Achse `case_account_balance`):
+ * ein Bestands- oder Durchlaufkonto geht auf 0, ein Erfolgs- oder Geldkonto
+ * bleibt stehen. ABGELEITET aus der gate/stay-Einstufung und dem Saldo des
+ * Kontos im Fall — keine Spalte.
+ */
+export const CASE_ACCOUNT_BALANCE = ["must_clear", "cleared", "stays"] as const;
+export type CaseAccountBalance = (typeof CASE_ACCOUNT_BALANCE)[number];
+
+/** Der Stand eines Kontos im Fall — eine Regel für Anzeige und Prüfung. */
+export function caseAccountBalance(a: {
+  type: "gate" | "stay";
+  gate: "ok" | "open" | null;
+}): CaseAccountBalance {
+  if (a.type === "stay") return "stays";
+  return a.gate === "ok" ? "cleared" : "must_clear";
 }
 
 export interface CaseListItem {

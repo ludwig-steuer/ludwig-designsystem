@@ -12,7 +12,7 @@
  *
  * `counterpartyNameExpr` oben ist der SQL-Weg; diese Funktion ist der Weg für
  * die Anzeige. Bis 2026-09-07 gab es dafür drei Wege nebeneinander:
- * `PartnerCell` rechnete aus Richtung und vendor/customer, `BelegeTab` nahm
+ * `PartnerCell` rechnete aus Richtung und vendor/customer, der alte Belege-Reiter nahm
  * `class_counterparty_name`, der v3-Drawer beschriftete das Feld schlicht
  * „Lieferant" (L-36). Bei einer Ausgangsrechnung ist der „Lieferant" aber der
  * Mandant selbst.

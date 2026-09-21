@@ -6,12 +6,14 @@
  * damit sie testbar ist und Server wie Client sie importieren können.
  */
 import type {
+  AiSource,
   CaseTimelineClarification,
   CaseTimelineEvent,
   CaseTimelineExpectation,
   ClarificationDetailVM,
   ClarificationSource,
   ClarificationVM,
+  JournalLine,
 } from "@ludwig/designsystem";
 
 import { asCurrency } from "@/ludwig/shared/money";
@@ -53,6 +55,9 @@ export function toCaseTimelineEvent(ev: TimelineEventVM): CaseTimelineEvent {
     allocatedAmount: ev.allocatedAmount,
     note: ev.note,
     accrualPeriod: ev.accrualPeriod,
+    // Etiketten statt Ids (F251): der Strang nennt die Regel und die Bankzeile.
+    recurringRuleLabel: ev.recurringRuleLabel,
+    passThroughBankTransaction: ev.passThroughBankTransaction,
     currency: asCurrency(ev.currency),
     state: ev.state,
     superseded: ev.superseded,
@@ -129,4 +134,51 @@ export function toClarificationEntry(
     deferredCount: c.deferredCount,
     answeredBy: c.authorName,
   };
+}
+
+/**
+ * Die Zeilen der Buchung eines Ereignisses in der Form von `JournalEntryCard`
+ * (F257). Ein Ereignis ohne Buchung hat keine Zeilen — die Karte zeigt dann
+ * den Satz, warum.
+ */
+export function toJournalLines(ev: TimelineEventVM): JournalLine[] {
+  return (ev.booking?.lines ?? []).map((l) => ({
+    side: l.side,
+    accountNumber: l.accountNumber,
+    accountName: l.accountName,
+    amount: l.amount,
+    text: l.lineText ?? null,
+    taxKey: l.taxKey,
+    taxRatePercent: l.taxRatePercent,
+  }));
+}
+
+/** Quellart der Begründung → Symbol der KI-Notizen. Vertrag ist ein Beleg, die Kontohistorie Historie. */
+const AI_SOURCE_KIND: Record<RationaleSourceKind, AiSource["art"]> = {
+  source_doc: "document",
+  contract: "document",
+  bank_transaction: "bank",
+  clarification: "clarification",
+  vendor_history: "history",
+  ledger_account: "history",
+  rule: "rule",
+  law: "law",
+  web: "web",
+};
+
+/** Die Quellen einer Buchungsbegründung für `AiBookingNotes`; unbekannte Arten fallen weg. */
+export function toAiSources(
+  sources: ReadonlyArray<{ kind: string; citation?: string; quote?: string; url?: string; accountNumber?: string | null }>,
+): AiSource[] {
+  return sources
+    .filter((s): s is typeof s & { kind: RationaleSourceKind } =>
+      (RATIONALE_SOURCE_KINDS as readonly string[]).includes(s.kind),
+    )
+    .map((s, i) => ({
+      key: `${s.kind}-${i}`,
+      art: AI_SOURCE_KIND[s.kind],
+      label: s.citation ?? s.accountNumber ?? null,
+      quote: s.quote ?? null,
+      href: s.url ?? null,
+    }));
 }

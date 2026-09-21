@@ -78,6 +78,7 @@ export type StatusAxis =
   | "clarification_type"
   | "expectation_maturity"
   | "expectation_kind"
+  | "case_account_balance"
   | "review_tab"
   // — Buchung & Export —
   | "journal_entry"
@@ -132,6 +133,8 @@ export type StatusAxis =
   | "bridge_datev"
   | "input_tax_fact"
   | "input_tax_rule"
+  | "vat_treatment"
+  | "vat_assessment_status"
   | "log_level"
   | "health"
   | "readiness";
@@ -965,6 +968,21 @@ const EXPECTATION_MATURITY: Record<string, StatusDescriptor> = {
   due: { label: "Fällig", kind: "warning", description: "Die Frist ist verstrichen. Der Sachverhalt zählt wieder als offene Arbeit." },
   escalated: { label: "Eskaliert", kind: "danger", description: "Mehrfach überfällig — ein Vorbereitungslauf hat sie hochgestuft." },
   resolved: { label: "Erledigt", kind: "success", description: "Durch ein Ereignis aufgelöst: der Beleg kam an bzw. die Zahlung ging ein." },
+};
+
+/**
+ * Was ein Konto im Sachverhalt tun muss (F257) — Reiter Plausibilität, Karte
+ * „Saldo & Konten". **Berechnet, nicht gespeichert**: gate/stay-Einstufung
+ * des Kontos und sein Saldo im Fall (`caseAccountBalance` in `domain/case.ts`).
+ *
+ * Fallstrick: die gate/stay-Einstufung ist heuristisch, bis
+ * `client_ledger_accounts.role` bzw. das SKR-Mapping steht
+ * (`domain/overview-vm.ts`, bewusste Lücken).
+ */
+const CASE_ACCOUNT_BALANCE: Record<string, StatusDescriptor> = {
+  must_clear: { label: "Muss auf 0", kind: "warning", description: "Bestands- oder Durchlaufkonto mit Saldo — der Sachverhalt schließt erst, wenn es auf 0 steht." },
+  cleared: { label: "Auf 0", kind: "success", description: "Bestands- oder Durchlaufkonto, das im Fall aufgeht." },
+  stays: { label: "Bleibt", kind: "neutral", description: "Erfolgs- oder Geldkonto — sein Saldo bleibt stehen und muss nicht aufgehen." },
 };
 
 /**
@@ -1856,10 +1874,11 @@ const BRIDGE_DATEV: Record<string, StatusDescriptor> = {
 };
 
 /**
- * Einzelfakt der Vorsteuer-Beurteilung — **berechnet, ephemer**
- * (`VatFact.value`, `getInvoiceVatAssessment` in
- * `modules/accounting-cases/application/agent-reads-core.ts`), aus den
- * persistierten Belegdaten je Abruf neu abgeleitet.
+ * Einzelfakt der Vorsteuer-Beurteilung — **am Beleg persistiert
+ * (`client_source_docs.vat_facts`)** seit F264, geschrieben von
+ * `refreshSourceDocVatAssessment` (`vat-assessment-core.ts`). Die Karte
+ * „Einzelfakten" im Reiter „Vorsteuer" rechnet `VatFact.value` weiter je
+ * Abruf aus den Belegdaten (`getInvoiceVatAssessment`).
  *
  * Fallstrick: `unknown` und `not_applicable` sehen beide harmlos aus, meinen
  * aber Gegenteiliges — „noch nicht ermittelt" ist eine offene Aufgabe,
@@ -1872,6 +1891,45 @@ const INPUT_TAX_FACT: Record<string, StatusDescriptor> = {
   uncertain: { label: "Unsicher", kind: "warning", description: "Widersprüchliche Signale — ein Mensch klärt." },
   unknown: { label: "Unbekannt", kind: "neutral", description: "Noch nicht ermittelt." },
   not_applicable: { label: "Nicht relevant", kind: "info", description: "Für diesen Beleg ohne Bedeutung." },
+};
+
+/**
+ * `client_source_docs.vat_treatment` (F264) — die umsatzsteuerliche
+ * Behandlung eines Belegs, maßgeblich für die Buchung. NULL = nicht
+ * entschieden; gesetzt genau dann, wenn `vat_assessment_status = 'decided'`
+ * (DB-CHECK). Wertebereich `VAT_TREATMENTS`
+ * (`modules/accounting-cases/domain/vat-treatment.ts`).
+ *
+ * Schreiber: `refreshSourceDocVatAssessment` (Worker `doc_partner_link`,
+ * Extraktions-Korrektur, Backfill). Ein von Agent oder Mensch gesetzter Wert
+ * wird vom Server nie überschrieben.
+ *
+ * Keine Schwere: die Behandlung ist eine Einordnung, kein Befund — alle Werte
+ * tragen `info` (Farbe bleibt der Kritikalität vorbehalten, V6).
+ */
+const VAT_TREATMENT: Record<string, StatusDescriptor> = {
+  domestic_taxed: { label: "Inland mit USt", kind: "info", description: "Aussteller im Inland, Umsatzsteuer ausgewiesen — Vorsteuer nach den Regeln der Vorsteuer-Beurteilung." },
+  domestic_no_vat: { label: "Inland ohne USt", kind: "info", description: "Aussteller im Inland, keine Umsatzsteuer ausgewiesen (z. B. Kleinunternehmer, steuerfreie Leistung)." },
+  reverse_charge: { label: "§ 13b Reverse Charge", kind: "info", description: "Sonstige Leistung eines ausländischen Unternehmers ohne ausgewiesene Steuer — der Mandant schuldet die Steuer (§ 13b UStG)." },
+  intra_eu_acquisition: { label: "Innergem. Erwerb", kind: "info", description: "Warenlieferung aus dem EU-Ausland ohne ausgewiesene Steuer — innergemeinschaftlicher Erwerb (§ 1a UStG)." },
+};
+
+/**
+ * `client_source_docs.vat_assessment_status` (F264) — Stand der
+ * USt-Einschätzung. NOT NULL, DB-CHECK `not_assessed · decided ·
+ * needs_agent`; Wertebereich `VAT_ASSESSMENT_STATUSES`.
+ *
+ * Übergänge: `not_assessed` → (Worker nach dem Partner-Link bzw. Korrektur
+ * der Extraktion) → `decided` oder `needs_agent`. Ausgangsbelege und
+ * `internal` bleiben `not_assessed`.
+ *
+ * Fallstrick: `needs_agent` ist kein Fehler — die Signale (Sitzland,
+ * Steuerausweis, Ware/Leistung) reichen nur nicht für eine sichere Ableitung.
+ */
+const VAT_ASSESSMENT_STATUS: Record<string, StatusDescriptor> = {
+  not_assessed: { label: "Nicht eingeschätzt", kind: "neutral", description: "Noch nicht eingeschätzt — oder kein Eingangsbeleg." },
+  decided: { label: "Entschieden", kind: "success", description: "Die Behandlung steht fest und gilt für die Buchung." },
+  needs_agent: { label: "Agent prüft", kind: "warning", description: "Die Signale reichen nicht für eine sichere Ableitung — der Agent prüft den Beleg." },
 };
 
 /**
@@ -2263,6 +2321,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   clarification: CLARIFICATION_STATUS,
   clarification_type: CLARIFICATION_TYPE,
   expectation_maturity: EXPECTATION_MATURITY,
+  case_account_balance: CASE_ACCOUNT_BALANCE,
   expectation_kind: EXPECTATION_KIND,
   review_tab: REVIEW_TAB,
   journal_entry: JOURNAL_ENTRY_STATUS,
@@ -2312,6 +2371,8 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   bridge_datev: BRIDGE_DATEV,
   input_tax_fact: INPUT_TAX_FACT,
   input_tax_rule: INPUT_TAX_RULE,
+  vat_treatment: VAT_TREATMENT,
+  vat_assessment_status: VAT_ASSESSMENT_STATUS,
   log_level: LOG_LEVEL,
   health: HEALTH,
   readiness: READINESS,
@@ -2829,6 +2890,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   clarification: "Stand",
   clarification_type: "Art",
   expectation_maturity: "Reife",
+  case_account_balance: "Kontostand",
   expectation_kind: "Erwartet",
   review_tab: "Prüfbedarf",
   journal_entry: "Buchung",
@@ -2878,6 +2940,8 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   bridge_datev: "Bridge",
   input_tax_fact: "Vorsteuer-Fakt",
   input_tax_rule: "Vorsteuer-Regel",
+  vat_treatment: "USt-Behandlung",
+  vat_assessment_status: "Stand der USt-Einschätzung",
   log_level: "Level",
   health: "Systemcheck",
   readiness: "Konfiguration",
@@ -2914,6 +2978,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   clarification: "berechnet aus client_accounting_case_clarification.answered_at / deferred_until",
   clarification_type: "client_accounting_case_clarification.type",
   expectation_maturity: "berechnet aus client_accounting_case_expectation.due_date / escalation_level / resolved_at",
+  case_account_balance: "abgeleitet — gate/stay-Einstufung des Kontos und sein Saldo im Sachverhalt (domain/case.ts caseAccountBalance, keine Spalte)",
   expectation_kind: "client_accounting_case_expectation.kind",
   review_tab: "abgeleitet — Summe aus Tragweite, Judge-Urteil, Konfidenz, schlechtestem Prüfpunkt und Präzedenz; ab 50 bitte anschauen (domain/review-score.ts, keine Spalte)",
   journal_entry: "client_journal_entry.status",
@@ -2963,6 +3028,8 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   bridge_datev: "berechnet — DatevApiStatus, von der on-prem Bridge gemeldet (ephemer)",
   input_tax_fact: "berechnet — VatFact.value aus den Belegdaten (ephemer)",
   input_tax_rule: "berechnet — Katalog-Regel über den Vorsteuer-Fakten (ephemer)",
+  vat_treatment: "client_source_docs.vat_treatment (NULL = nicht entschieden)",
+  vat_assessment_status: "client_source_docs.vat_assessment_status",
   log_level: "client_invoice_traces.level",
   health: "berechnet — modules/health/aggregate.ts (ephemer)",
   readiness: "berechnet — Onboarding-Aggregat (ephemer)",

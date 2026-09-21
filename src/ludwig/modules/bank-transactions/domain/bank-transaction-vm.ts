@@ -18,6 +18,8 @@
 import type { CaseKind, CaseLifecycle } from "@/ludwig/modules/accounting-cases";
 import type { Currency } from "@/ludwig/shared/money";
 import type { SepaTags } from "./sepa-tags";
+import { isSettled } from "./statement-line";
+import type { BankTransactionSource } from "./types";
 
 /**
  * Der Zustand des DATEV-Abgleichs einer Zeile, als **Wert der Achse**.
@@ -81,6 +83,15 @@ export interface StatementLineVM {
   allocatedSum: number;
   /** Offene Rückfragen am Sachverhalt, nicht an der Zeile. */
   openClarificationsCount: number;
+  /** Der Haken „gebucht" — `isSettled` (L-340), einmal an der Grenze gerechnet. */
+  settled: boolean;
+  counterpartyIban: string | null;
+  /** Detailfelder für den Aufklapper (0193); die Arbeitsliste lädt sie nicht. */
+  counterpartyBic?: string | null;
+  valueDate?: string | null;
+  source?: BankTransactionSource;
+  importBatchLabel?: string | null;
+  importedAt?: string;
 }
 
 /**
@@ -100,6 +111,12 @@ export function statementLineFromAssignmentRow(row: {
   matchStage: string | null;
   allocatedSum: number;
   openClarificationsCount: number;
+  counterpartyIban?: string | null;
+  counterpartyBic?: string | null;
+  valueDate?: string | null;
+  source?: string;
+  importBatchLabel?: string | null;
+  importedAt?: string;
   cases: readonly {
     caseId: string;
     caseNumber: string | null;
@@ -113,7 +130,7 @@ export function statementLineFromAssignmentRow(row: {
     noBookingRequiredReason: string | null;
   }[];
 }): StatementLineVM {
-  return {
+  const line = {
     id: row.id,
     postingDate: row.postingDate,
     amount: Number(row.amount),
@@ -124,6 +141,12 @@ export function statementLineFromAssignmentRow(row: {
     matchStage: bankMatchStage(row.matchStage),
     allocatedSum: row.allocatedSum,
     openClarificationsCount: row.openClarificationsCount,
+    counterpartyIban: row.counterpartyIban ?? null,
+    ...(row.counterpartyBic !== undefined ? { counterpartyBic: row.counterpartyBic } : {}),
+    ...(row.valueDate !== undefined ? { valueDate: row.valueDate } : {}),
+    ...(row.source !== undefined ? { source: row.source as BankTransactionSource } : {}),
+    ...(row.importBatchLabel !== undefined ? { importBatchLabel: row.importBatchLabel } : {}),
+    ...(row.importedAt !== undefined ? { importedAt: row.importedAt } : {}),
     cases: row.cases.map((c) => ({
       caseId: c.caseId,
       caseNumber: c.caseNumber,
@@ -141,6 +164,7 @@ export function statementLineFromAssignmentRow(row: {
       noBookingRequiredReason: c.noBookingRequiredReason,
     })),
   };
+  return { ...line, settled: isSettled(line) };
 }
 
 /**
@@ -157,6 +181,7 @@ export function statementLineFromOpenRow(row: {
   currency: string;
   counterpartyName: string | null;
   purpose: string | null;
+  counterpartyIban?: string | null;
 }): StatementLineVM {
   return {
     id: row.id,
@@ -170,5 +195,8 @@ export function statementLineFromOpenRow(row: {
     cases: [],
     allocatedSum: 0,
     openClarificationsCount: 0,
+    // Ohne Sachverhalt ist nichts gebucht — das ist die Definition der Liste.
+    settled: false,
+    counterpartyIban: row.counterpartyIban ?? null,
   };
 }

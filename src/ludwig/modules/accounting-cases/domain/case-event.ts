@@ -38,6 +38,8 @@ export interface CaseEventBooking {
   origin: string;
   /** Der Satz, den dieser storniert (`reverses_entry_id`); NULL = kein Storno. */
   reversesEntryId: string | null;
+  /** F268: der DATEV-Spiegel-Satz, den dieser storniert (`reverses_mirror_entry_id`). */
+  reversesMirrorEntryId: string | null;
   bookingDate: string;
   isLocked: boolean;
   proposalConfidence: number | null;

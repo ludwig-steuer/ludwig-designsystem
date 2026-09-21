@@ -16,8 +16,13 @@ import { rowSettled, type ChecklistRow, type ChecklistRowKey } from "./checklist
  * beantworten, Konventionen entscheiden. Offen heißen sie „Sie sind dran" —
  * vor der Abnahme sind sie es immer, und „der Agent ist nicht fertig" wäre
  * dann nie wahr gewesen.
+ *
+ * `statements_complete` gehört dazu: einen fehlenden Auszug kann der Agent
+ * nicht beschaffen — die Lücke ist Vollständigkeit (Schritt 1 / Freigabe),
+ * keine Agentenarbeit (Owner 2026-09-21).
  */
 const REVIEWER_ROWS: ReadonlySet<ChecklistRowKey> = new Set<ChecklistRowKey>([
+  "statements_complete",
   "entries_accepted",
   "questions_answered",
   "conventions_decided",
@@ -37,10 +42,4 @@ export function agentSettled(row: ChecklistRow): boolean {
 
 export function unfinishedRows(rows: readonly ChecklistRow[]): ChecklistRow[] {
   return agentRows(rows).filter((r) => !agentSettled(r));
-}
-
-/** Der Schritt, an dem die Abnahme beginnt: der erste offene, sonst Schritt 1. */
-export function firstOpenStep(rows: readonly ChecklistRow[]): number {
-  const steps = unfinishedRows(rows).map((r) => r.jumpStep!);
-  return steps.length === 0 ? 1 : Math.min(...steps);
 }

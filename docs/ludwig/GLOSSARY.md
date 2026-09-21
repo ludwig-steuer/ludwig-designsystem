@@ -138,6 +138,14 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Example: `{ tenant_id: …, user_id: …, role: "owner", status: "active" }`
 - Notes: Was previously called just „User" / „Mitarbeiter". The classifier on `platform_users.kind` makes the type explicit; the trigger `enforce_tenant_user_kind` blocks Client-Users from being inserted here. The tenant role `role` ∈ `owner | admin | member` (`TENANT_ROLES`, `modules/auth/domain/role.ts`) is **display-only today**: no guard evaluates it and it grants no permission (F148 decision 7) — there is no tenant self-service yet. A later spec adds a `minTenantRole` to the permission catalog; staff rights never come from a membership.
 
+### Locked account
+
+- English: `locked account`
+- German: `Account sperren`, `gesperrter Account`
+- Definition: A platform user who may not sign in: `platform_users.status = 'disabled'` **plus** a Supabase ban (`ban_duration`), so running sessions end too. Responsibilities and memberships stay.
+- Data type: state (`platform_users.status`) + Supabase-Auth ban.
+- Notes: Write core `setUserLocked` (F262, permission `user.manage`, card „Account" on the user page). Unlocking only turns `disabled` back into `active`; an invited user stays `invited`. Not the same as deleting (`deleteUserAccount`: login and platform rows gone, the audit log stays).
+
 ### Client user
 
 - English: `client user`, `Mandanten-User`
@@ -661,11 +669,11 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Data type: abgeleitet, keine Spalte — `apps/web/src/modules/accounting-cases/domain/review-score.ts`; alle Gewichte und die Schwelle stehen in `REVIEW_SCORING`. Server-Kern `scoreCasesForReview` (`application/review-scoring.ts`), Status-Achse `review_tab`.
 - Notes: Ersetzt seit F232 (2026-09-18) die Abnahme-Triage mit ihren vier Buckets. **Bewusst nicht gejudgt ist nicht ungeprüft**: ein Regel-Satz hat nie ein Verdikt und zahlt dafür nichts. Die Herleitung (Summanden, Summe, Schwelle) steht im Aufklapper der Abnahme-Liste. Regel: `docs/topics/buchung.md` R17.
 
-### Review tab (Reiter der Abnahme: Bitte anschauen / Wahrscheinlich richtig / Mandantenstapel)
+### Review tab (Reiter der Abnahme: Bitte anschauen / Wahrscheinlich richtig / Mandantenstapel / Freigegeben)
 
 - English: `review tab` — `needs_review` · `likely_correct` · `client_batch`
 - German: Reiter „Bitte anschauen" · „Wahrscheinlich richtig" · „Mandantenstapel"
-- Definition: Die drei Reiter von Schritt 3 der Stapelabnahme und die drei Gruppen der Sachverhalts-Seite, geteilt nach *Prüfbedarf*: ab der Schwelle „Bitte anschauen", darunter „Wahrscheinlich richtig" (dort auch das schon Entschiedene), importierte Mandantenbuchungen (`origin='client_import'`) im eigenen Reiter „Mandantenstapel", der nur erscheint, wenn er etwas enthält.
+- Definition: Die drei Reiter von Schritt 3 der Stapelabnahme und die drei Gruppen der Sachverhalts-Seite, geteilt nach *Prüfbedarf*: ab der Schwelle „Bitte anschauen", darunter „Wahrscheinlich richtig", importierte Mandantenbuchungen (`origin='client_import'`) im eigenen Reiter „Mandantenstapel", der nur erscheint, wenn er etwas enthält. Schritt 3 hat dahinter den Reiter „Freigegeben" (`released`) für alles Entschiedene — kein Prüfbedarf, deshalb nicht in `REVIEW_TABS`, sondern `Step3Tab` (`batch-review/domain/review-tabs.ts`).
 - Data type: `ReviewTab` / `REVIEW_TABS` (`accounting-cases/domain/review-score.ts`); Labels in der Status-Registry, Achse `review_tab`.
 - Notes: „Alle übernehmen" (Schritt 3) und „Alle Vorschläge übernehmen" (Sachverhalts-Seite) nehmen alles außerhalb von „Bitte anschauen"; die Rot-Sperre im Kern bleibt das Netz (R17a). Bis F232 hießen die Reiter „Wiederkehrende" / „Einzelfälle" (nach Herkunft) und die Gruppen „Prüfen" / „Kurz ansehen" / „Durchwinker" / „Übernehmen".
 
@@ -787,6 +795,15 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Data type: string constant (catalog-validated, like `rule code` — new rules ship as one catalog entry, no enum migration)
 - Example: `VST-DOC-3` (Kleinbetragsrechnung ≤ 250 €, §§ 33/35 UStDV)
 - Notes: Groups: `CL` client-level, `USE` business use, `DOC` invoice form, `DUE` tax legally owed, `XB` cross-border, `BAN` deduction bans, `TIME` timing, `ADJ` adjustments (§ 17/§ 15a). Law changes are edited in the catalog first, then propagated to the enforcing artifacts (see `enforcement-map.md`).
+
+### VAT assessment (USt-Einschätzung)
+
+- English: `VAT assessment` (columns `client_source_docs.vat_*`)
+- German: `USt-Einschätzung`
+- Definition: Die umsatzsteuerliche Behandlung eines Belegs, früh und einmal am Beleg festgehalten (F264) — maßgeblich für die Buchung. `vat_treatment`: `domestic_taxed` (Inland mit USt) · `domestic_no_vat` (Inland ohne USt) · `reverse_charge` (§ 13b) · `intra_eu_acquisition` (innergemeinschaftlicher Erwerb); NULL = nicht entschieden. `vat_assessment_status`: `not_assessed` · `decided` · `needs_agent`. Abgeleitet von `deriveVatTreatment`, geschrieben von `refreshSourceDocVatAssessment`; Vorrang human > agent > derived. `docs/topics/buchung.md` R11.
+- Data type: text columns with DB-CHECK + `vat_facts` jsonb (VatFact-Array)
+- Example: EU-Lieferant ohne ausgewiesene Steuer, Positionen als Leistung erkannt → `reverse_charge` / `decided`
+- Notes: Nicht zu verwechseln mit der Vorsteuer-Beurteilung (`evaluateVatDeduction`, Verdikt `allowed`/`forbidden`/`needs_facts`), die weiter je Abruf rechnet, und mit den Rohsignalen des Interpreters (`client_source_docs_invoices.vat_profile`, `_invoice_lines.vat_special_case`).
 
 ### Answer option
 
@@ -1158,7 +1175,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - German: `Buchung`
 - Definition: One double-entry posting — the durable output of every bookkeeping workflow, whether imported from a historical DATEV journal, AI-proposed, or entered manually. Belongs to exactly one `FiscalYear`.
 - Data type: `ludwig.client_journal_entry` (Header) + `ludwig.client_journal_entry_line` (Side-Pattern). *(Vormals `client_bookkeeping_entries` — Refactor 2026-05-27.)*
-- Notes: Carries an explicit `origin` (`ai_proposed` | `manual` | `system_reversal` | `recurring_rule` | `client_import`) that audits where the row came from — `recurring_rule` = vom Regelwerk wiederkehrender Buchungen erzeugt, `client_import` = aus dem **Buchungsstapel des Mandanten** importiert (F69, seit 2026-08-11: der Mandant hat in seiner eigenen Software gebucht, Ludwig ist der Weg nach DATEV — eigener Zweig in `client_effective_journal_lines`, kein Judge-Pass, Löschschutz gegen `submit_booking_proposal`, Herkunfts-Label „Mandantenstapel"). Der frühere Wert `datev_import` ist mit K11 (2026-08-05) **entfallen**: `client_journal_entry` ist per Definition „bei uns", DATEV-Fremdbuchungen leben im Spiegel (`client_datev_mirror_entries`). Eine manuelle Korrektur eines Agent-/Regel-Vorschlags flippt auf `manual` und schreibt `created_by_user_id` (Ersteller/Korrigierer; NULL bei Agent/Regelwerk/Import). Plus a separate `status` lifecycle (`proposed` | `accepted` | `posted` | `reversed`). `business_partner_id` am Header (F76: ein Feld statt `creditor_id`/`debtor_id`) ist bewusste Denormalisierung für OPOS-Queries (Wahrheit: die Lines). See `docs/topics/konten.md`.
+- Notes: Carries an explicit `origin` (`ai_proposed` | `manual` | `system_reversal` | `recurring_rule` | `client_import`) that audits where the row came from — `system_reversal` = vom Server abgeleitete Generalumkehr eines exportierten Satzes (F263) oder eines Satzes aus dem DATEV-Spiegel (`reverses_mirror_entry_id`, F268), `recurring_rule` = vom Regelwerk wiederkehrender Buchungen erzeugt, `client_import` = aus dem **Buchungsstapel des Mandanten** importiert (F69, seit 2026-08-11: der Mandant hat in seiner eigenen Software gebucht, Ludwig ist der Weg nach DATEV — eigener Zweig in `client_effective_journal_lines`, kein Judge-Pass, Löschschutz gegen `submit_booking_proposal`, Herkunfts-Label „Mandantenstapel"). Der frühere Wert `datev_import` ist mit K11 (2026-08-05) **entfallen**: `client_journal_entry` ist per Definition „bei uns", DATEV-Fremdbuchungen leben im Spiegel (`client_datev_mirror_entries`). Eine manuelle Korrektur eines Agent-/Regel-Vorschlags flippt auf `manual` und schreibt `created_by_user_id` (Ersteller/Korrigierer; NULL bei Agent/Regelwerk/Import). Plus a separate `status` lifecycle (`proposed` | `accepted` | `posted` | `reversed`). `business_partner_id` am Header (F76: ein Feld statt `creditor_id`/`debtor_id`) ist bewusste Denormalisierung für OPOS-Queries (Wahrheit: die Lines). See `docs/topics/konten.md`.
 
 ### Bookkeeping invoice
 
@@ -1894,7 +1911,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 
 - English: `batch review`
 - German: **Stapelabnahme**; die Schritte: *Prüfschritt*, die Runden: *Abnahme-Runde*
-- Definition: Der elfstufige Prüfprozess (Schritte 0–10), mit dem die Kanzlei einen *Buchungszyklus / Stapel* abnimmt: Ergebnis · Vollständigkeit · Rückfragen · Buchungsvorschläge · Kontenausgleich · offene Posten · Plausibilität · Konventionen · Prüfprotokoll · Übergabe an DATEV · Nachlese. Sie beginnt mit „Prüfung übernehmen" (`prepared → review`) und endet mit „Freigeben" (`→ ready`) oder „Zurück an den Agenten" (`→ agent`). **„Zurück an den Agenten"** ist app-weit *das* Wort für den Rückweg — am Stapel, am Sachverhalt (Taste R in Schritt 3, Gruppe „Ohne Vorschlag") und am Beleg, der ohne Buchung erledigt wurde (Schritt 1, `?view=unbooked`, Beleg-Drawer-Fuß; belege.md R14d, F220).
+- Definition: Der elfstufige Prüfprozess (Schritte 0–10), mit dem die Kanzlei einen *Buchungszyklus / Stapel* abnimmt: Ergebnis · Vollständigkeit · Rückfragen · Buchungsvorschläge · Kontenausgleich · offene Posten · Plausibilität · Konventionen · Prüfprotokoll · Übergabe an DATEV · Nachlese. Sie beginnt mit „Prüfung übernehmen" (`prepared → review`) und endet mit „Freigeben" (`→ ready`) oder „Zurück an den Agenten" (`→ agent`). **„Zurück an den Agenten"** ist app-weit *das* Wort für den Rückweg — am Stapel, am Sachverhalt (Gruppe „Ohne Vorschlag") und am Beleg, der ohne Buchung erledigt wurde (Schritt 1, `?view=unbooked`, Beleg-Drawer-Fuß; belege.md R14d, F220). Einzige Ausnahme: am Buchungsvorschlag in Schritt 3 heißt der Rückweg *Zurück an KI* (F260).
   - Der **Rail ist ein Vorschlag, kein Zwang**: jeder Schritt ist jederzeit erreichbar; Schritt 8 sagt am Ende, was offen blieb.
   - **Geschrieben wird nur in `review`.** Vorher hat niemand übernommen, nachher sind die Sätze geclaimt. Jede Server Action prüft das selbst.
 - Data type: Routen `clients/[slug]/[year]/batches/[batchId]/review/[step]`; Modul `apps/web/src/modules/batch-review` (`domain/steps.ts`, `domain/gating.ts`).
@@ -1909,6 +1926,15 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Data type: Kern `accounting-cases/application/case-defer-core.ts` (`deferCaseToNextCycle`, `assignOrphanCasesToBatch`); Agent-Tool `defer_case_to_next_cycle`; Abnahme Schritt 3, Gruppe „Ohne Vorschlag" (`deferCaseToNextCycleAction`).
 - Example: „ADVICON-Rechnung vom 01.09. im August-Stapel — in den Folgemonat schieben, nicht mit verbogenem Datum buchen."
 - Notes: Nie ein Guard, nie der Server beim Lauf-Ende — die Entscheidung trifft der Agent (Tool) oder die Kanzlei (UI). Ein Fall mit lebendem Satz am Stapel lässt sich nicht schieben (erst `withdraw_proposal`). F217.
+
+### Zurück an KI
+
+- English: `return proposal to agent`
+- German: **Zurück an KI**
+- Definition: Einen Buchungsvorschlag in Schritt 3 der *Stapelabnahme* mit Notiz an den Agenten zurückgeben: der Satz wird zurückgezogen (`reversed`, Notiz unter `proposal_rationale.review_return_note`), der Sachverhalt bleibt offen beim Agenten, die Notiz geht als Agent-Frage (`question_type = 'proposal_returned'`, `accounting_event_id` = Ereignis) an ihn.
+- Data type: Kern `returnProposalToAgent` (`accounting-cases/application/booking-actions.ts`); Action `returnProposalToAgentAction`; Reiter `returned` in Schritt 3 (`listReturnedToAgent`).
+- Example: „Zurück an KI: 4980 statt 4970 — das ist Wartung, keine Nebenkosten."
+- Notes: Nicht *Ablehnen* — das schließt den Fall, sobald nichts mehr offen ist, und der Agent bucht ihn nie neu. Der Fall steht im Reiter „Zurück an KI", bis der Agent neu vorschlägt oder die Frage erledigt. F260.
 
 ### Technische Details (Schritt 2)
 
@@ -1982,7 +2008,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 
 - English: `export status report`
 - German: `Export-Statusbericht`
-- Definition: Macht die *Export marking* für einen Zeitraum sichtbar — welche Buchungen sind in DATEV, welche warten, was blockiert. Bucketet `client_journal_entry` (nach `booking_date`) in `exported` (`exported_at` gesetzt) · `exportable` (`accepted`, nie exportiert) · `pending` (`proposed`) · `reversed` (Storno bzw. `reverses_entry_id`) · `imported` (`posted`+`datev_import`, DATEV-Ist, informativ) mit Counts + Soll/Haben-Summen, plus die Batch-Historie (*export batch*).
+- Definition: Macht die *Export marking* für einen Zeitraum sichtbar — welche Buchungen sind in DATEV, welche warten, was blockiert. Bucketet `client_journal_entry` (nach `booking_date`) in `exported` (`exported_at` gesetzt) · `exportable` (`accepted`, nie exportiert) · `pending` (`proposed`) · `reversed` (Storno bzw. `reverses_entry_id`/`reverses_mirror_entry_id`) · `imported` (`posted`+`datev_import`, DATEV-Ist, informativ) mit Counts + Soll/Haben-Summen, plus die Batch-Historie (*export batch*).
 - Data type: request-freier Kern `getDatevExportStatus(clientId, {from, to})` + `bucketExportStatus` (pur) + `listDatevExportBatches` in `apps/web/src/modules/datev-export/application/export-status-core.ts`; Adapter: Web-Panel (Review „5 · Abschluss") + CLI `scripts/datev-export.ts --status | --list-batches [--json]`. Kein MCP-Tool (Export bleibt menschlich).
 - Notes: **Divergenz-Warnung** — ein Storno, dessen stornierte Buchung exportiert ist, der selbst aber noch nicht exportiert wurde, muss mit exportiert werden, sonst weicht Ludwig von DATEV ab. **Blockiert-Hinweis** — schlägt der Probe-Build (`previewDatevExport`) hart fehl (n:m-Split, WJ-Grenze), meldet der Bericht „blockiert" statt zu crashen.
 

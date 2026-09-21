@@ -71,7 +71,7 @@ export interface VatFact {
  * `getVatAssessment`, `getInvoiceVatAssessment`) — wer hier ein Feld
  * ergänzt, ergänzt es dort im SELECT mit.
  */
-const FACT_SOURCE_FIELDS: Record<string, readonly string[]> = {
+export const FACT_SOURCE_FIELDS: Record<string, readonly string[]> = {
   client_regular_taxation: ["platform_clients.is_kleinunternehmer"],
   invoice_present: ["client_source_docs_invoices.id", "client_source_docs_contracts.source_doc_id"],
   vat_shown: ["client_source_docs_invoices.tax_total_value"],
@@ -110,6 +110,21 @@ const FACT_SOURCE_FIELDS: Record<string, readonly string[]> = {
     "client_source_docs_invoices.vendor_tax_id",
     "client_source_docs_invoices.vendor_ust_id",
     "client_source_docs_invoices.markdown",
+  ],
+  // F264 — USt-Einschätzung am Beleg (`deriveVatTreatment`, vat-treatment.ts).
+  counterparty_domestic: [
+    "client_source_docs_invoices.vendor_ust_id",
+    "client_source_docs_invoices.vendor_country_code",
+    "client_business_partners.country_code",
+  ],
+  counterparty_in_eu: [
+    "client_source_docs_invoices.vendor_ust_id",
+    "client_source_docs_invoices.vendor_country_code",
+    "client_business_partners.country_code",
+  ],
+  supply_is_goods: [
+    "client_source_docs_invoice_lines.vat_special_case",
+    "client_source_docs_invoice_lines.fund_usage_nature",
   ],
 };
 
@@ -323,7 +338,7 @@ function isoCountry(raw: string | null | undefined): string | null {
   return code && code.length === 2 ? code : null;
 }
 
-function fact(
+export function fact(
   code: string,
   label: string,
   value: VatFactValue,
