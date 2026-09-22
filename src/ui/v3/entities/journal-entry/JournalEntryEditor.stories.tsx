@@ -373,6 +373,9 @@ export const S20_EditorOnly: Story = {
           // The way into the ledger, **read-only** too: it hung on no editor story
           // until 0113, since the eight reading stories moved into the grid.
           onOpenLedger={() => setLog((p) => [...p, "Kontenblatt"])}
+          // The same for the tax key (F271): the reading row had it as dead
+          // text while the note line under it was already a way.
+          onOpenTaxKey={(bu) => setLog((p) => [...p, `Schlüssel ${bu}`])}
         />
         <p className="v2muted">
           {log.length === 0 ? "Noch nichts ausgelöst." : log.join(" · ")}

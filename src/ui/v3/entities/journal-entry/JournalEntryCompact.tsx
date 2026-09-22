@@ -4,6 +4,7 @@ import { formatAmount } from "../../format";
 import { AmountCell } from "../../primitives/Cells";
 import { Badge } from "../../primitives/Badge";
 import { AccountCell } from "../account/Account";
+import { TaxKeyCell } from "./TaxKey";
 
 /**
  * Cell and card of a journal entry (0044) — the reading forms of the family,
@@ -32,8 +33,10 @@ export interface JournalLine {
   amount: number;
   /** Posting text of the line — column 3 of the batch. */
   text?: string | null;
-  /** DATEV tax key (BU) of the line, e.g. „9" — `BookingLineVM.taxKey`. */
+  /** DATEV tax key (BU) of the line **as stored**, e.g. „9" — `BookingLineVM.taxKey`. */
   taxKey?: string | null;
+  /** DATEV „Sachverhalt L+L" of the line — `BookingLineVM.reverseChargeCase`. */
+  reverseChargeCase?: number | null;
   /** Tax rate in percent where one was read — `BookingLineVM.taxRatePercent`. */
   taxRatePercent?: number | null;
   /**
@@ -102,11 +105,23 @@ function AccountRef({
  * both side by side where both are set: the conflict belongs on the line where
  * it happens, not only in a guard message above it.
  */
-function TaxCell({ line }: { line: JournalLine }) {
+function TaxCell({
+  line,
+  taxKeyHref,
+}: {
+  line: JournalLine;
+  taxKeyHref?: (taxKey: string) => string;
+}) {
   const key = line.taxKey?.trim();
   return (
     <span className="v2je__bu">
-      {key ? <span className="v2mono">{key}</span> : null}
+      {key ? (
+        <TaxKeyCell
+          taxKey={key}
+          reverseChargeCase={line.reverseChargeCase ?? null}
+          {...(taxKeyHref ? { taxKeyHref } : {})}
+        />
+      ) : null}
       {line.automaticRate !== null && line.automaticRate !== undefined ? (
         <Badge tone={key ? "warning" : "neutral"}>
           {`Automatik ${line.automaticRate} %`}
@@ -209,6 +224,7 @@ export function JournalEntryCard({
   caption,
   totals = true,
   accountHref,
+  taxKeyHref,
 }: {
   lines: readonly JournalLine[];
   currency: Currency;
@@ -221,6 +237,11 @@ export function JournalEntryCard({
    * leaving the entry they are checking.
    */
   accountHref?: (accountNumber: string) => string;
+  /**
+   * The way to the reference work of the tax keys, per stored key (F271).
+   * Without it the „BU" column stays text — the same rule as `accountHref`.
+   */
+  taxKeyHref?: (taxKey: string) => string;
   /** Σ debit / Σ credit below the lines; `false` when the caller already carries the sum. */
   totals?: boolean;
 }) {
@@ -266,7 +287,7 @@ export function JournalEntryCard({
               <span className="v2muted v2je__clip" title={line.accountName ?? undefined}>
                 {line.accountName ?? ""}
               </span>
-              {withTaxKey ? <TaxCell line={line} /> : null}
+              {withTaxKey ? <TaxCell line={line} {...(taxKeyHref ? { taxKeyHref } : {})} /> : null}
               <span className="v2je__clip" title={line.text ?? undefined}>
                 {line.text ?? ""}
               </span>

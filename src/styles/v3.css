@@ -2947,6 +2947,21 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 .v2je__empty { font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); }
 
+/* ── 0125 nachtrag · TaxKeyCell — the tax key as a way (F271) ─────────────
+   The same trap as the account cell: `.v2mono` sets `--color-text`, so a key
+   inside a link looked like plain bold text (measured 2026-09-22). The key is
+   the anchor and carries the link colour; the weight stays the mono one —
+   `.v2link` is 600, and a bold number in a dense column reads as a total. */
+
+.v2taxkey { text-decoration: none; }
+.v2taxkey .v2mono { color: var(--color-accent-700); }
+.v2taxkey:hover { text-decoration: underline; }
+.v2taxkey:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 /* ── 0066 · Account — cell and facts of an account ────────────────────────
    The cell stands in foreign rows and running text: no surface, no spacing of
    its own, only the promise not to wrap. With `href` it takes the set's link

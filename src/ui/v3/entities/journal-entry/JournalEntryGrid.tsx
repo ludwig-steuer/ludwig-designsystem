@@ -6,6 +6,7 @@ import { IconButton } from "../../primitives/IconButton";
 import { Link } from "../../primitives/Link";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { JournalEntryCard } from "./JournalEntryCompact";
+import { TaxKeyCell } from "./TaxKey";
 import { formatAmount } from "../../format";
 import {
   documentSideTotal,
@@ -50,6 +51,12 @@ export interface JournalEntryGridProps {
    */
   accountHref?: (accountNumber: string) => string;
   /**
+   * The way to the reference work of the tax keys, per stored key (F271).
+   * The rows carry no „Sachverhalt L+L" (`JournalRow`), so a § 13b key keeps
+   * its stored form.
+   */
+  taxKeyHref?: (taxKey: string) => string;
+  /**
    * The state chip in the head. `false` where the form around it already
    * shows the way to DATEV — the state twice in one view is D24 (nachtrag
    * 0113, found in 0176).
@@ -93,6 +100,7 @@ export function JournalEntryGrid({
   accountFramework,
   onOpenLedger,
   accountHref,
+  taxKeyHref,
   showStatus = true,
   messages,
 }: JournalEntryGridProps) {
@@ -169,6 +177,7 @@ export function JournalEntryGrid({
               full={full}
               {...(onOpenLedger ? { onOpenLedger } : {})}
               {...(accountHref ? { accountHref } : {})}
+              {...(taxKeyHref ? { taxKeyHref } : {})}
             />
           ))}
         </div>
@@ -205,11 +214,13 @@ function Row({
   full,
   onOpenLedger,
   accountHref,
+  taxKeyHref,
 }: {
   row: JournalRow;
   full: boolean;
   onOpenLedger?: (accountNumber: string) => void;
   accountHref?: (accountNumber: string) => string;
+  taxKeyHref?: (taxKey: string) => string;
 }) {
   const account = (
     <span className="bse__account-cell">
@@ -246,7 +257,9 @@ function Row({
         {full ? <span className="v2muted">{row.currency ?? "EUR"}</span> : null}
         <span className="v2num">{euro(rowAmount(row.amount))}</span>
         <span>{row.side}</span>
-        <span>{row.bu || <span className="v2muted">—</span>}</span>
+        <span>
+          <TaxKeyCell taxKey={row.bu} {...(taxKeyHref ? { taxKeyHref } : {})} />
+        </span>
         {full ? account : null}
         {full ? <span className="v2mono">{row.externalDocumentNumber}</span> : account}
         {full ? <span className="v2mono">{row.externalDocumentNumber2 ?? ""}</span> : null}

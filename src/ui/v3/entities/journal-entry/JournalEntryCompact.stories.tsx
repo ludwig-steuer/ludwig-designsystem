@@ -33,6 +33,7 @@ function Pair({
   caption,
   totals,
   accountHref,
+  taxKeyHref,
   wide: wide,
 }: {
   lines: JournalLine[];
@@ -40,6 +41,7 @@ function Pair({
   caption?: string;
   totals?: boolean;
   accountHref?: (n: string) => string;
+  taxKeyHref?: (taxKey: string) => string;
   /** For the tax key column: it costs 132 px the account name would otherwise get. */
   wide?: boolean;
 }) {
@@ -62,6 +64,7 @@ function Pair({
           caption={caption}
           totals={totals}
           {...(accountHref ? { accountHref } : {})}
+          {...(taxKeyHref ? { taxKeyHref } : {})}
         />
       </div>
     </div>
@@ -163,6 +166,31 @@ export const WithTaxKey: Story = {
         { side: "credit", accountNumber: "70044", accountName: "Beispielbau Handels GmbH", amount: 117.36, text: "Rechnung R-4471" },
       ]}
       accountHref={(n) => `?account=${n}`}
+    />
+  ),
+};
+
+/**
+ * Derselbe Stapel, **klickbar** und in der aktuellen DATEV-Form: „9" steht
+ * als 401 da, „3" als 101, und der Tooltip sagt „gespeichert als 9". Genau
+ * das war der Widerspruch auf Staging (F271) — in der Tabelle darüber stand
+ * 401 mit Weg ins Nachschlagewerk, in der Karte darunter eine tote 9.
+ *
+ * Die letzte Zeile ist § 13b **mit** Sachverhalt L+L (`reverseChargeCase`):
+ * erst er macht aus „94" die 506. Ohne ihn bliebe die 94 stehen.
+ */
+export const WithTaxKeyLink: Story = {
+  render: () => (
+    <Pair
+      wide
+      lines={[
+        { side: "debit", accountNumber: "6815", accountName: "Telefon", amount: 84, taxKey: "9", text: "Mobilfunk August" },
+        { side: "debit", accountNumber: "8400", accountName: "Erlöse 19 % USt", amount: 12, taxKey: "3", text: "Weiterberechnung" },
+        { side: "debit", accountNumber: "6300", accountName: "Fremdleistung", amount: 500, taxKey: "94", reverseChargeCase: 7, text: "Montage" },
+        { side: "credit", accountNumber: "70044", accountName: "Beispielbau Handels GmbH", amount: 596, text: "Rechnung R-4471" },
+      ]}
+      accountHref={(n) => `?account=${n}`}
+      taxKeyHref={(k) => `?taxKey=${k}`}
     />
   ),
 };

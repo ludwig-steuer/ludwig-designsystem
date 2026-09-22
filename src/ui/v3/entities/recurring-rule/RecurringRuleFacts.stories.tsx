@@ -25,6 +25,7 @@ export default meta;
 type Story = StoryObj<typeof RecurringRuleFacts>;
 
 const accountHref = (n: string) => `#konto-${n}`;
+const taxKeyHref = (taxKey: string) => `#taxKey-${taxKey}`;
 
 /** The caller knows the account names — the rule carries only numbers. */
 const NAMES: Record<string, string> = {
@@ -263,7 +264,7 @@ export const Edges: Story = {
     });
     return (
       <div style={{ maxWidth: 720 }}>
-        <RecurringRuleFacts {...facts(r)} all currency="CHF" />
+        <RecurringRuleFacts {...facts(r)} all currency="CHF" taxKeyHref={taxKeyHref} />
       </div>
     );
   },

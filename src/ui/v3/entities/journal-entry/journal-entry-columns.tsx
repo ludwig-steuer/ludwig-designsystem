@@ -10,6 +10,7 @@ import { AmountCell, MonoCell } from "../../primitives/Cells";
 import { Time } from "../../primitives/Time";
 import { CaseCell } from "../accounting-case/CaseCell";
 import { JournalEntryCell, type JournalLine } from "./JournalEntryCompact";
+import { TaxKeyCell } from "./TaxKey";
 import type { JournalEntryRowData } from "./journal-entry";
 
 /**
@@ -45,6 +46,8 @@ export interface JournalEntryColumnOptions {
   accountHref?: (accountNumber: string) => string;
   /** The way to the case. Without it the number stays text. */
   caseHref?: (caseId: string) => string;
+  /** The way to the reference work of the tax keys, per stored key (F271). */
+  taxKeyHref?: (taxKey: string) => string;
 }
 
 /** Everything the batch list shows; the case belongs to lists outside a case. */
@@ -100,7 +103,7 @@ function clip(text: string): { shown: string; title?: string } {
 export function journalEntryColumns(
   options: JournalEntryColumnOptions = {},
 ): ColumnDef<JournalEntryRowData>[] {
-  const { columns = DEFAULT_JOURNAL_ENTRY_COLUMNS, accountHref, caseHref } = options;
+  const { columns = DEFAULT_JOURNAL_ENTRY_COLUMNS, accountHref, caseHref, taxKeyHref } = options;
   const all: Record<JournalEntryColumn, ColumnDef<JournalEntryRowData>> = {
     bookingDate: {
       key: "bookingDate",
@@ -155,13 +158,10 @@ export function journalEntryColumns(
       key: "taxKey",
       header: "USt",
       width: "72px",
-      cell: (e) => (
-        <MonoCell
-          value={e.vatKey}
-          tone="muted"
-          {...(e.vatRatePercent !== null ? { title: `${e.vatRatePercent} %` } : {})}
-        />
-      ),
+      // The list item carries no „Sachverhalt L+L" (`JournalEntryListItem`),
+      // so a § 13b key keeps its stored form here — a guess would name a
+      // different key than DATEV.
+      cell: (e) => <TaxKeyCell taxKey={e.vatKey} {...(taxKeyHref ? { taxKeyHref } : {})} />,
     },
     amount: {
       key: "amount",

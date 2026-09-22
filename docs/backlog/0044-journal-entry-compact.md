@@ -608,3 +608,11 @@ geworden im Spaltensatz `journalEntryColumns()` (0175): „6815 an 70021 ·
 Gelöst mit einer Prop statt mit einer zweiten Zelle: `showAmount?: boolean`,
 Vorgabe `true`. Der Spaltensatz setzt sie auf `false`; bei mehr als zwei
 Teilbuchungen steht dort nur noch „n Zeilen".
+
+## Nachtrag 2026-09-22 — `taxKeyHref` an der Karte (F271)
+
+Die BU-Spalte zeigt den Schlüssel in der aktuellen DATEV-Form und, mit
+`taxKeyHref`, als Weg ins Nachschlagewerk; `JournalLine` trägt dafür
+`reverseChargeCase`. Beschrieben ist das **einmal**, im Nachtrag von
+`0125-tax-key-field.md` — hier steht nur der Zeiger, damit die nächste
+Abnahme die Prop nicht für unbelegt hält. Story `WithTaxKeyLink`.

@@ -20,6 +20,7 @@ import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/doma
 import { DocumentNumberField } from "../document-number/DocumentNumberField";
 import type { DocumentNumberSourceLabels } from "../document-number/document-number-labels";
 import { JournalEntryCard } from "./JournalEntryCompact";
+import { TaxKeyCell } from "./TaxKey";
 import { AiBookingNotes } from "./AiBookingNotes";
 
 // One currency, one formatter (T7, 0043). The editor computes in gross and
@@ -733,7 +734,18 @@ function EditorRow({
             {full ? <span>{row.currency ?? "EUR"}</span> : null}
             <span className="v2num">{row.amount}</span>
             <span>{row.side}</span>
-            <span>{row.bu || "—"}</span>
+            <span>
+              {onOpenTaxKey && row.bu ? (
+                // The same way as in the note line below: the reading row had
+                // the key as dead text while the line under it linked it
+                // (F271, owner on staging).
+                <button type="button" className="v2link v2taxkey" onClick={() => onOpenTaxKey(row.bu)}>
+                  <TaxKeyCell taxKey={row.bu} />
+                </button>
+              ) : (
+                <TaxKeyCell taxKey={row.bu} />
+              )}
+            </span>
             <span className="bse__account">
               {row.account} <span className="v2muted">{row.accountName}</span>
             </span>
@@ -759,11 +771,13 @@ function EditorRow({
         {tax ? (
           <span>
             {onOpenTaxKey ? (
-              <button type="button" className="v2link" onClick={() => onOpenTaxKey(row.bu)}>
-                BU {row.bu}
+              <button type="button" className="v2link v2taxkey" onClick={() => onOpenTaxKey(row.bu)}>
+                BU <TaxKeyCell taxKey={row.bu} />
               </button>
             ) : (
-              <>BU {row.bu}</>
+              <>
+                BU <TaxKeyCell taxKey={row.bu} />
+              </>
             )}
             {" · Netto "}
             {euro(tax.net)} · {tax.ratePercent} % {euro(tax.tax)} →{" "}

@@ -256,6 +256,7 @@ export const InAForm: Story = {
         documentNumber="RE-4471"
         documentAmount={1475.6}
         accountHref={(account) => `#account=${account}`}
+        taxKeyHref={(taxKey) => `#taxKey=${taxKey}`}
       />
     </Frame>
   ),

@@ -79,6 +79,7 @@ const BATCH: JournalEntryRowData[] = [
 
 const caseHref = (caseId: string) => `#case=${caseId}`;
 const accountHref = (number: string) => `#account=${number}`;
+const taxKeyHref = (taxKey: string) => `#taxKey=${taxKey}`;
 const entryHref = (entryId: string) => `#entry=${entryId}`;
 const listHref = () => "#list";
 
@@ -160,6 +161,7 @@ export const InBucket: Story = {
         rowActions={actions}
         caseHref={caseHref}
         accountHref={accountHref}
+        taxKeyHref={taxKeyHref}
       />
     );
   },

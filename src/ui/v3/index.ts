@@ -653,6 +653,7 @@ export {
   type Side,
 } from "./entities/journal-entry/JournalEntryEditor";
 export { TaxKeyField } from "./entities/journal-entry/TaxKeyField";
+export { TaxKeyCell } from "./entities/journal-entry/TaxKey";
 export { JournalEntryGrid, type JournalEntryGridProps, type JournalGridMessage } from "./entities/journal-entry/JournalEntryGrid";
 export {
   journalLines,

@@ -22,6 +22,7 @@ import { LongText } from "../../primitives/LongText";
 import { Time } from "../../primitives/Time";
 import { AccountCell } from "../account/Account";
 import { JournalEntryCard, type JournalLine } from "../journal-entry/JournalEntryCompact";
+import { TaxKeyCell } from "../journal-entry/TaxKey";
 import type { PaymentAccountOption } from "@/ludwig/modules/bank-transactions/domain/payment-account-options";
 import { PaymentAccountCell } from "../payment-account/PaymentAccount";
 
@@ -78,6 +79,7 @@ export function RecurringRuleFacts({
   all = false,
   explain = false,
   accountHref,
+  taxKeyHref,
   paymentAccounts,
   hints,
   currency = "EUR",
@@ -110,6 +112,12 @@ export function RecurringRuleFacts({
   explain?: boolean;
   /** The way to the account sheet. Without it both accounts are plain text. */
   accountHref?: (accountNumber: string) => string;
+  /**
+   * The way to the reference work of the tax keys, per stored key (F271).
+   * The template carries no „Sachverhalt L+L", so a § 13b key keeps its
+   * stored form.
+   */
+  taxKeyHref?: (taxKey: string) => string;
   /**
    * The client's payment accounts — the same list `RecurringRuleEditor` gets
    * (0174). The rule carries only `paymentAccountId`, so the account is looked
@@ -269,7 +277,12 @@ export function RecurringRuleFacts({
     if (t.lines?.length) {
       origin.push(["Split-Vorlage", say(`${t.lines.length} Gegenkonto-Zeilen`, "template")]);
     }
-    if (t.taxKey) origin.push(["Steuerschlüssel", <MonoCell key="tk" value={t.taxKey} />]);
+    if (t.taxKey) {
+      origin.push([
+        "Steuerschlüssel",
+        <TaxKeyCell key="tk" taxKey={t.taxKey} {...(taxKeyHref ? { taxKeyHref } : {})} />,
+      ]);
+    }
     if (t.taxRatePercent !== null) {
       origin.push([
         "USt-Satz",

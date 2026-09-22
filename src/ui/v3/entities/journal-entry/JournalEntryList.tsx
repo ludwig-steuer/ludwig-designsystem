@@ -52,6 +52,8 @@ export type JournalEntryListProps = Shape & {
   entryHref?: (entryId: string) => string;
   accountHref?: (accountNumber: string) => string;
   caseHref?: (caseId: string) => string;
+  /** The way to the reference work of the tax keys, per stored key (F271). */
+  taxKeyHref?: (taxKey: string) => string;
 };
 
 /** „1 Satz", „14 Sätze" — a section head that says „1 Sätze" reads like a bug. */
@@ -132,6 +134,7 @@ export function JournalEntryList(props: JournalEntryListProps): ReactNode {
     entryHref,
     accountHref,
     caseHref,
+    taxKeyHref,
   } = props;
 
   const shared = {
@@ -139,6 +142,7 @@ export function JournalEntryList(props: JournalEntryListProps): ReactNode {
       ...(columns ? { columns } : {}),
       ...(accountHref ? { accountHref } : {}),
       ...(caseHref ? { caseHref } : {}),
+      ...(taxKeyHref ? { taxKeyHref } : {}),
     }),
     // Always the entry id: a list that keys on the index loses its selection
     // and its fold-out on every sort (0106).
