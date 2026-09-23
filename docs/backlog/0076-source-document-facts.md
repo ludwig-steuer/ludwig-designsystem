@@ -725,3 +725,11 @@ Signaturen sind betroffen (`SourceDocumentPreview`, `-Card`, `-Drawer`,
 `-Facts`), alle im Set nachgezogen. Wer die Seitenangabe als String hat
 (`splitPageRange`), zerlegt sie einmal beim Bauen des Sichtmodells — dort, wo
 das Format bekannt ist, statt in der Darstellung.
+
+## Nachtrag 2026-09-23 — zwei Tage, zwei Zeilen (Zeiger)
+
+„Eingang" ist jetzt **„Ludwig-Eingang"** (`uploadedAt`), und wo `datevRefId`
+gesetzt ist, steht darunter **„Eingang lt. DATEV"** (`receivedDate`). Ohne
+DATEV-Ablage fehlt die zweite Zeile, weil das Eingangsdatum dann nur der
+Upload-Tag unter einem größeren Namen wäre. Begründung und Abnahme stehen im
+Nachtrag von `0070-source-document-columns.md`.

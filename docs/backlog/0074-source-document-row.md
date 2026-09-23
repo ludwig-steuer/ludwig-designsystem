@@ -617,3 +617,12 @@ Funktion, liegt aber in einer Datei mit einem Drizzle-SQL-Ausdruck. Der Spiegel
 nimmt aus einer Datei mit Infrastruktur-Import nichts, also fehlt sie hier.
 Solange die Familie nichts ableitet, ist das folgenlos; sollte sie je gebraucht
 werden, braucht sie drüben eine eigene Datei.
+
+## Nachtrag 2026-09-23 — Rang 7 ist der Ludwig-Eingang (Zeiger)
+
+Der siebte Rang der Zeile zeigt `uploadedAt` statt `receivedDate`: den Tag,
+an dem die Datei in Ludwig ankam. Warum die beiden nicht dasselbe sind und
+was sonst noch daran hängt, steht **einmal** im Nachtrag von
+`0070-source-document-columns.md`. Aufrufer, die `uploadedAt` nicht
+mitgeben, lassen den Rang leer — das ist die ehrliche Antwort, nicht der
+andere Tag in seinen Kleidern.

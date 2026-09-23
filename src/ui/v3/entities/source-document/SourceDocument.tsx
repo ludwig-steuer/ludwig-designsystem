@@ -64,6 +64,23 @@ export type { SourceDocCompletionVia };
  */
 export interface SourceDocumentVM extends MirrorDocument {
   /**
+   * When the file landed in Ludwig (`uploaded_at`, timestamptz as text) —
+   * **„Ludwig-Eingang"**, and a different thing from `receivedDate`.
+   *
+   * `receivedDate` is the receipt date at the client: it starts as the upload
+   * day and the DATEV meta import overwrites it (GLOSSARY „Receipt date").
+   * In a list the two are then indistinguishable, and that is what the owner
+   * found on staging (2026-09-23): the column „Eingang" said one thing on one
+   * row and another on the next.
+   *
+   * **Optional and defined here, not in the mirror**, because the mirror is
+   * frozen at app `7f82c7fd` and the app's own `uploadedAt` (commit
+   * `ee1b4aa5`) has not been pushed yet — the same shape as the three fields
+   * above. Registered in `docs/spiegel-vormerkungen.md`; when the next mirror
+   * run brings `SourceDocumentVM.uploadedAt`, this line falls away.
+   */
+  uploadedAt?: string | null;
+  /**
    * Whether the document already has an invoice row. Two booleans decide the
    * axis `beleg_haenger` — this one and which of the two stuck lists is shown
    * — and only the caller knows the first. Nothing else in this family reads
@@ -446,8 +463,13 @@ export function SourceDocumentRow({ document }: { document: SourceDocumentVM }) 
         ) : null}
       </span>
 
-      {/* Rank 7 — the sort key of the list. */}
-      <Time value={document.receivedDate} format="date" size="sm" />
+      {/* Rank 7 — **„Ludwig-Eingang"**, the day the file landed here. Not
+          `receivedDate`: that one is the receipt date at the client, which the
+          DATEV import overwrites, so the same place would show two different
+          things without saying which (owner, 2026-09-23). A caller that does
+          not carry `uploadedAt` leaves the rank empty — the honest answer,
+          and never the other date in its clothes. */}
+      <Time value={document.uploadedAt ?? null} format="date" size="sm" />
 
       {/* A carrier of its own, because `SourceDocumentClass` may return `null`:
           a missing grid cell would shift every column after it. */}

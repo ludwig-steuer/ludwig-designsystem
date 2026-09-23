@@ -33,6 +33,7 @@ export function documentFixture(over: Partial<SourceDocumentVM> = {}): SourceDoc
     counterparty: "Musterbau GmbH",
     documentDate: "2026-08-14",
     receivedDate: "2026-08-15",
+    uploadedAt: "2026-08-18T08:12:00Z",
     completedAt: "2026-08-20",
     completedVia: "booking",
     completedReason: null,

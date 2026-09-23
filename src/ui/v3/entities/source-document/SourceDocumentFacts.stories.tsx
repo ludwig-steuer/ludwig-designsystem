@@ -34,6 +34,7 @@ const INVOICE: SourceDocumentVM = {
   },
   documentDate: "2026-08-26",
   receivedDate: "2026-08-27",
+  uploadedAt: "2026-08-30T08:12:00Z",
   completedAt: "2026-08-30T09:12:00Z",
   completedVia: "booking",
   docCategory: "performance",
@@ -154,6 +155,7 @@ export const Kinds: Story = {
             },
             documentDate: "2026-01-15",
             receivedDate: "2026-08-20",
+            uploadedAt: "2026-08-23T08:12:00Z",
             docCategory: "foundation",
           }}
           tone="bare"
@@ -169,6 +171,7 @@ export const Kinds: Story = {
             counterparty: "Sparkasse Berlin",
             documentDate: "2026-08-31",
             receivedDate: "2026-09-01",
+            uploadedAt: "2026-09-04T08:12:00Z",
             docCategory: "payment",
           }}
           tone="bare"
@@ -184,6 +187,7 @@ export const Kinds: Story = {
             counterparty: "ACME GmbH",
             documentDate: "2026-08-24",
             receivedDate: "2026-08-27",
+            uploadedAt: "2026-08-30T08:12:00Z",
             docCategory: "performance",
           }}
           tone="bare"
@@ -197,6 +201,7 @@ export const Kinds: Story = {
             sourceDocType: null,
             documentDate: null,
             receivedDate: "2026-08-19",
+            uploadedAt: "2026-08-22T08:12:00Z",
           }}
           tone="bare"
         />
@@ -212,6 +217,7 @@ export const Kinds: Story = {
             detail: { kind: "invoice", number: "RE-9902", gross: 88.4, currency: "EUR", net: 74.29, vat: 14.11 },
             documentDate: "2026-08-31",
             receivedDate: "2026-09-01",
+            uploadedAt: "2026-09-04T08:12:00Z",
             docCategory: "payment",
           }}
           tone="bare"
@@ -242,6 +248,7 @@ export const Contract: Story = {
       counterparty: "Immobilien Ost KG",
       documentDate: "2026-01-15",
       receivedDate: "2026-08-20",
+      uploadedAt: "2026-08-23T08:12:00Z",
       docCategory: "foundation",
     };
     return (
@@ -333,6 +340,7 @@ export const Empty: Story = {
           sourceDocType: null,
           documentDate: null,
           receivedDate: "2026-08-19",
+          uploadedAt: "2026-08-22T08:12:00Z",
         }}
       />
     </div>
@@ -366,6 +374,7 @@ export const Group: Story = {
             classDocumentForm: "document_collection",
             documentDate: "2026-08-12",
             receivedDate: "2026-08-12",
+            uploadedAt: "2026-08-15T08:12:00Z",
           }}
           group={{ childCount: 9, completedChildCount: 4 }}
           tone="bare"
@@ -382,6 +391,7 @@ export const Group: Story = {
             collectionKind: "credit_card_statement",
             documentDate: "2026-08-28",
             receivedDate: "2026-08-29",
+            uploadedAt: "2026-09-01T08:12:00Z",
             docCategory: "payment",
           }}
           group={{ childCount: 14, completedChildCount: 14 }}
@@ -397,6 +407,7 @@ export const Group: Story = {
             classDocumentForm: "other",
             documentDate: "2026-08-09",
             receivedDate: "2026-08-12",
+            uploadedAt: "2026-08-15T08:12:00Z",
           }}
           group={{
             from: 5,
@@ -524,6 +535,7 @@ export const InUse: Story = {
               counterparty: "Sparkasse Berlin",
               documentDate: "2026-08-31",
               receivedDate: "2026-09-01",
+              uploadedAt: "2026-09-04T08:12:00Z",
               docCategory: "payment",
               href: "#beleg-auszug",
             }}

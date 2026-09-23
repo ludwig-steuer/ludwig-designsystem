@@ -64,6 +64,7 @@ const STATEMENT: SourceDocumentVM = {
   detail: null,
   documentDate: "2026-08-31",
   receivedDate: "2026-09-01",
+  uploadedAt: "2026-09-04T08:12:00Z",
   completedAt: null,
   completedVia: null,
   docCategory: "payment",

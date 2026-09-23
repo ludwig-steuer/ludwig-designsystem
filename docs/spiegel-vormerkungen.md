@@ -12,7 +12,18 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-Nichts offen.
+- **`SourceDocumentVM.uploadedAt`** (`modules/source-docs/domain/source-document-vm.ts`)
+  — der Upload-Zeitpunkt als `string | null`, drüben in App-Commit `ee1b4aa5`
+  (2026-09-23, noch nicht auf origin/staging). Das Set zeigt ihn seit dem
+  Owner-Entscheid vom 2026-09-23 als **„Ludwig-Eingang"** und führt ihn
+  solange als optionales Feld an seiner eigenen Erweiterung
+  (`entities/source-document/SourceDocument.tsx`, `SourceDocumentVM`). Kommt
+  er mit einem Lauf an, fällt die Zeile dort weg — sonst stehen zwei
+  Wahrheiten über demselben Feld.
+- **GLOSSARY „Receipt date"** — der Unterpunkt nennt `uploaded_at` „rein
+  technisch". Seit demselben Entscheid ist es eine angezeigte Größe mit
+  eigenem Namen („Ludwig-Eingang"); die Zeile wird drüben nachgeführt und
+  kommt mit dem nächsten Lauf mit. An `app-0b` gemeldet.
 
 ## Erledigt mit dem dritten Lauf vom 2026-09-21 (App `7f82c7fd`)
 

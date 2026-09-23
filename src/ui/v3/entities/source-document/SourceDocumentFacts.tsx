@@ -167,10 +167,11 @@ export function SourceDocumentFacts({
   const ident = sourceDocumentIdentifier(document);
   const kind = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
 
-  // The eight generic rows, in this order, for every kind of document. Two of
+  // The generic rows, in this order, for every kind of document. Three of
   // them can be absent — the measure, where the kind has none (a bank
-  // statement has no amount, and an em dash would claim it lost one), and the
-  // summary, which not every document carries.
+  // statement has no amount, and an em dash would claim it lost one), the
+  // summary, which not every document carries, and the receipt date, which
+  // is only DATEV's word where DATEV filed the document.
   const rows: [ReactNode, ReactNode][] = [
     ["Belegart", kind],
     [
@@ -191,18 +192,33 @@ export function SourceDocumentFacts({
       ),
     ],
     ["Belegdatum", <Time key="doc" value={document.documentDate ?? null} format="date" />],
-    ["Eingang", <Time key="rec" value={document.receivedDate} format="date" />],
-    [
-      "Kennung",
-      ident.mono ? (
-        <MonoCell key="id" value={ident.value} />
-      ) : (
-        <span key="id" title={ident.value}>
-          {clipMiddle(ident.value, MAX_FILENAME_CARD)}
-        </span>
-      ),
-    ],
+    // Two days, two rows (owner, 2026-09-23): the day the file landed in
+    // Ludwig, and the receipt date at the client. One row called „Eingang"
+    // carried both — `receivedDate` starts as the upload day and the DATEV
+    // meta import overwrites it, and nothing said which of the two was on
+    // screen.
+    ["Ludwig-Eingang", <Time key="up" value={document.uploadedAt ?? null} format="date" />],
   ];
+
+  // „lt. DATEV" only where DATEV really delivered it. Without `datevRefId`
+  // the receipt date is still the upload day, and a second row would say the
+  // same thing twice under a bigger name. It stands **next to** the other
+  // day, before the identifier — two dates that belong together are read
+  // together.
+  if (document.datevRefId) {
+    rows.push(["Eingang lt. DATEV", <Time key="rec" value={document.receivedDate} format="date" />]);
+  }
+
+  rows.push([
+    "Kennung",
+    ident.mono ? (
+      <MonoCell key="id" value={ident.value} />
+    ) : (
+      <span key="id" title={ident.value}>
+        {clipMiddle(ident.value, MAX_FILENAME_CARD)}
+      </span>
+    ),
+  ]);
   if (detail?.measure) {
     rows.push([
       "Betrag",

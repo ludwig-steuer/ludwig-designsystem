@@ -275,6 +275,7 @@ const CASE_DOCUMENTS: SourceDocumentVM[] = [
     counterparty: "Musterbau Fahrzeugteile GmbH",
     documentDate: "2026-07-16",
     receivedDate: "2026-07-31",
+    uploadedAt: "2026-08-03T08:12:00Z",
     completedAt: null,
     completedVia: null,
     caseNumber: "2026-0334",

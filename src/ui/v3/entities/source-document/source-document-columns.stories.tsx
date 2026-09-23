@@ -34,6 +34,7 @@ const DOCS: SourceDocumentVM[] = [
     detail: { kind: "invoice", number: "RE-4471", gross: 1249.9, currency: "EUR" },
     documentDate: "2026-08-26",
     receivedDate: "2026-08-27",
+    uploadedAt: "2026-08-30T08:12:00Z",
     completedAt: "2026-08-30T09:12:00Z",
     completedVia: "booking",
     docCategory: "performance",
@@ -53,6 +54,7 @@ const DOCS: SourceDocumentVM[] = [
     counterparty: "Commerzbank",
     documentDate: "2026-08-31",
     receivedDate: "2026-09-01",
+    uploadedAt: "2026-09-04T08:12:00Z",
     completedAt: null,
     docCategory: "payment",
     processingStatus: "in_progress",
@@ -70,6 +72,7 @@ const DOCS: SourceDocumentVM[] = [
     detail: { kind: "contract", subject: "Büroflächen Erdgeschoss" },
     documentDate: "2026-01-15",
     receivedDate: "2026-08-20",
+    uploadedAt: "2026-08-23T08:12:00Z",
     completedAt: null,
     docCategory: "foundation",
     processingStatus: "review_needed",
@@ -86,6 +89,7 @@ const DOCS: SourceDocumentVM[] = [
     counterparty: null,
     documentDate: null,
     receivedDate: "2026-09-01",
+    uploadedAt: "2026-09-04T08:12:00Z",
     completedAt: null,
     processingStatus: "failed",
     inboxStatus: "pending_classification",
@@ -132,8 +136,15 @@ const STUCK_PAIR: SourceDocumentVM[] = [DOCS[3]!, { ...DOCS[2]!, hasInvoiceRow: 
 
 /**
  * Der volle Satz der Belegliste des Jahres: zehn Punkte, der Gegenpart führt
- * und trägt den Zeilenlink, Eingang ist der Sortierschlüssel. Über `DataTable`,
- * damit die Sortierung, die der Katalog anbietet, auch stattfindet.
+ * und trägt den Zeilenlink, der **Ludwig-Eingang** ist der Sortierschlüssel.
+ * Über `DataTable`, damit die Sortierung, die der Katalog anbietet, auch
+ * stattfindet.
+ *
+ * „Ludwig-Eingang" ist der Tag, an dem die Datei hier ankam (Owner-Entscheid
+ * 2026-09-23). Das **Eingangsdatum** (`receivedDate`) ist etwas anderes: der
+ * Eingang beim Mandanten, anfangs der Upload-Tag und vom DATEV-Import
+ * überschrieben. Eine Spalte trug beides, und niemand sah, welches von beiden
+ * gerade dasteht.
  */
 export const DocumentList: Story = {
   render: () => {
@@ -144,12 +155,41 @@ export const DocumentList: Story = {
           rows={DOCS}
           columns={cols}
           rowKey={(d) => d.id}
-          head={{ title: "Belege 2026", sub: "Musterbau GmbH · nach Eingang" }}
+          head={{ title: "Belege 2026", sub: "Musterbau GmbH · nach Ludwig-Eingang" }}
           minWidth={sourceDocumentMinWidth(cols)}
-          sort={{ key: "receivedDate", dir: "desc" }}
+          sort={{ key: "uploadedAt", dir: "desc" }}
           href={listHref}
           pager={PAGER}
           empty={{ title: "In dieser Periode ist kein Beleg eingegangen." }}
+        />
+      </div>
+    );
+  },
+};
+
+/**
+ * **Beide Tage nebeneinander** — für eine Liste, die nach der Periode
+ * sortiert und zeigen will, woher das Datum kommt. `receivedDate` steht in
+ * keinem Satz mehr, bleibt aber im Katalog: die Perioden-Achse hängt daran
+ * (Filter und „Offen"), und wer danach sortiert, soll die Spalte auch zeigen
+ * dürfen. Hier stehen die Belege aus DATEV drei Tage nach ihrem Eingang beim
+ * Mandanten in Ludwig.
+ */
+export const BothDates: Story = {
+  render: () => {
+    const cols = sourceDocumentColumns({
+      href,
+      columns: ["counterparty", "kind", "uploadedAt", "receivedDate", "completed"],
+    });
+    return (
+      <div style={{ maxWidth: 1100 }}>
+        <DataTable<SourceDocumentVM>
+          rows={DOCS}
+          columns={cols}
+          rowKey={(d) => d.id}
+          head={{ title: "Belege 2026", sub: "nach Eingangsdatum" }}
+          minWidth={sourceDocumentMinWidth(cols)}
+          sort={{ key: "receivedDate", dir: "desc" }}
         />
       </div>
     );

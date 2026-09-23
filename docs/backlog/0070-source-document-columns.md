@@ -1344,3 +1344,73 @@ Die drei **Befunde am Set** bleiben stehen, sie gehören anderen Aufgaben: das
 Datum in `SourceDocumentCompletion` (0074, 0076, 0084 sollten es abnicken),
 die fehlende Kennung der Spiegel-VM (L-207 — Sch2 ist nur die erste Stelle,
 an der sie fehlt) und `StatusBadge.status` als `string` (L-81).
+
+## Nachtrag 2026-09-23 — „Ludwig-Eingang" und Eingangsdatum sind zwei Tage
+
+**Der Befund des Owners auf Staging:** die Spalte „Eingang" zeigt
+`receivedDate`, und dort steht mal der Upload-Tag, mal das Eingangsdatum aus
+DATEV — der Meta-Import (`Belege_Meta_*.csv`, Spalte „Eingangsdatum")
+überschreibt den Vorgabewert. In der Liste ist nicht zu erkennen, welches von
+beiden gerade dasteht. Der GLOSSARY hält die zwei Felder längst auseinander
+(„Receipt date": Eingang **beim Mandanten**, Vorgabe Upload-Tag, von DATEV
+überschrieben; `uploaded_at`: wann die Datei in Ludwig landete) — nur die
+Oberfläche tat es nicht.
+
+Owner-Entscheid 2026-09-23, überbracht von `app-0b`: beide zeigen, jeden mit
+seinem Namen.
+
+**Neue Katalog-Spalte `uploadedAt`**, Kopf **„Ludwig-Eingang"**, 150 px
+(bei 120 bräche die Überschrift um), sortierbar, `Time` im kurzen Datum. Sie
+ersetzt `receivedDate` in `DOCUMENT_LIST_COLUMNS` und in `STUCK_COLUMNS` —
+bei den Hängern geht es um die Datei, also um deren Tag.
+
+`receivedDate` **bleibt im Katalog** und heißt im Kopf jetzt
+„Eingangsdatum". Es steht in keinem Satz mehr, aber die Perioden-Achse hängt
+daran (Filter und die Sortierung „Offen"), und eine Liste, die danach
+sortiert, soll die Spalte zeigen dürfen. Der Zusatz „lt. DATEV" steht
+**nicht** im Kopf: er gilt je Zeile (nur wo `datevRefId` gesetzt ist), und
+eine Spaltenüberschrift kann das nicht je Zeile sagen.
+
+**Mitgezogen in der Familie:**
+
+| Ort | Was |
+|---|---|
+| `SourceDocument.tsx` (Rang 7 der Zeile) | zeigt `uploadedAt`; ohne den Wert bleibt der Rang leer — nie der andere Tag in seinen Kleidern |
+| `SourceDocumentFacts.tsx` | „Eingang" → **„Ludwig-Eingang"** (`uploadedAt`) und, nur mit `datevRefId`, **„Eingang lt. DATEV"** (`receivedDate`) direkt darunter |
+
+**Der Haken: `uploadedAt` fehlt im Spiegel.** Der ist auf App `7f82c7fd`
+eingefroren, und die App-Seite (`SourceDocumentVM.uploadedAt`, Commit
+`ee1b4aa5`) liegt noch nicht auf origin/staging. Das Feld steht deshalb
+vorerst als `uploadedAt?: string | null` an der Set-Erweiterung in
+`SourceDocument.tsx` — dieselbe Form wie `hasInvoiceRow`, `caseNumber` und
+`caseHref`, und dieselbe Begründung wie bei `JournalEntryRowData` (L-335):
+optional, weil die Zeile zeigt, was sie bekommt, und nichts behauptet, wo die
+App schweigt. Vorgemerkt in `docs/spiegel-vormerkungen.md`; mit dem nächsten
+Lauf fällt die Zeile weg.
+
+### Abnahmekriterien
+
+| Kriterium | Nachweis (Story) |
+|---|---|
+| Spalte „Ludwig-Eingang" im Satz der Belegliste | `DocumentList`: Köpfe Gegenpart · Belegart · Betrag · Belegdatum · Sachverhalt · **Ludwig-Eingang** · Einordnung · Verarbeitung · Erledigt |
+| Dieselbe Spalte bei den Hängern | `Stuck`: Datei · Einordnung · Gegenpart · **Ludwig-Eingang** · Sachverhalt · Beleg-Zustand |
+| `receivedDate` bleibt wählbar, Kopf „Eingangsdatum" | `BothDates`: beide Spalten nebeneinander, Sortierung auf `receivedDate` |
+| Fakten zeigen beide Tage, DATEV nur mit `datevRefId` | `SourceDocumentFacts/WithProvenance`: „Ludwig-Eingang 30.08.2026" über „Eingang lt. DATEV 27.08.2026"; `ProvenanceEmpty`: nur „Ludwig-Eingang" |
+| Die Zeile zeigt den Ludwig-Eingang | `SourceDocumentList/Filled`: 30.08.2026 (`uploadedAt`), nicht 27.08.2026 |
+
+**Gemessen 2026-09-23** im laufenden Storybook (Port 6107, über Playwright —
+`scripts/cdp.mjs` startet auf dieser Maschine nicht, siehe Nachtrag in 0125):
+sechs Stories, Köpfe und Zeilentexte wie oben, keine Konsolenmeldung außer
+einem 404 auf `favicon.ico`, den es vorher schon gab.
+
+Offen: **fremde Abnahme**.
+
+**Zwei Befunde für die App-Seite** (gemeldet an `app-0b`):
+
+1. Die Belegliste des Jahres sortiert nach der Perioden-Achse
+   (`receivedDate`), zeigt die Spalte aber nicht mehr — eine Sortierung auf
+   einer unsichtbaren Spalte. Entweder die Vorgabesortierung wird
+   `uploadedAt`, oder die Liste nimmt `receivedDate` sichtbar dazu.
+2. Der GLOSSARY nennt `uploaded_at` „rein technisch". Seit diesem Entscheid
+   ist es eine angezeigte Größe mit eigenem Namen; die Zeile gehört drüben
+   nachgeführt, der Spiegel bringt sie dann mit.

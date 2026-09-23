@@ -45,6 +45,7 @@ export type SourceDocumentColumn =
   | "documentDate"
   | "identifier"
   | "case"
+  | "uploadedAt"
   | "receivedDate"
   | "classification"
   | "processing"
@@ -64,6 +65,7 @@ const ORDER: SourceDocumentColumn[] = [
   "documentDate",
   "identifier",
   "case",
+  "uploadedAt",
   "receivedDate",
   "classification",
   "confidence",
@@ -91,7 +93,12 @@ export const DOCUMENT_LIST_COLUMNS: SourceDocumentColumn[] = [
   // `STUCK_COLUMNS` never carried it, it shows `fileName`, which for a stuck
   // document is the only identity there is. Frees 170 px.
   "case",
-  "receivedDate",
+  // **„Ludwig-Eingang", not „Eingang"** (owner, 2026-09-23): `receivedDate`
+  // is the receipt date at the client — it starts as the upload day and the
+  // DATEV meta import overwrites it, so one column showed two different
+  // things without saying which. The receipt date stays the period axis of
+  // the list (filter and „Offen"); it is only no longer what the row shows.
+  "uploadedAt",
   "classification",
   "processing",
   "completed",
@@ -138,7 +145,8 @@ export const STUCK_COLUMNS: SourceDocumentColumn[] = [
   "fileName",
   "classification",
   "counterparty",
-  "receivedDate",
+  // The file is the question here, so the file's own day answers it.
+  "uploadedAt",
   "case",
   "stuckState",
 ];
@@ -421,10 +429,25 @@ export function sourceDocumentColumns({
           <CaseCell cases={[]} href={caseHref ?? (() => "#")} />
         ),
     },
+    uploadedAt: {
+      key: "uploadedAt",
+      header: "Ludwig-Eingang",
+      // 150px: „Ludwig-Eingang" is 14 characters and would wrap at 120.
+      width: "150px",
+      sortable: true,
+      cell: (d) => <Time value={d.uploadedAt ?? null} format="date" length="short" size="sm" />,
+    },
+    /**
+     * The receipt date **at the client** — the period axis. It is in no set
+     * any more (2026-09-23); a list that sorts or filters by the period and
+     * wants to show it picks it explicitly. The word says „lt. DATEV" only
+     * where DATEV really delivered it, and that is per row (`datevRefId`),
+     * not per column — so the header stays the plain one.
+     */
     receivedDate: {
       key: "receivedDate",
-      header: "Eingang",
-      width: "120px",
+      header: "Eingangsdatum",
+      width: "132px",
       sortable: true,
       cell: (d) => <Time value={d.receivedDate} format="date" length="short" size="sm" />,
     },

@@ -41,6 +41,7 @@ const INVOICE: SourceDocumentVM = {
   },
   documentDate: "2026-08-26",
   receivedDate: "2026-08-27",
+  uploadedAt: "2026-08-30T08:12:00Z",
   completedAt: "2026-08-30T09:12:00Z",
   completedVia: "booking",
   docCategory: "performance",
@@ -57,6 +58,7 @@ const SCAN: SourceDocumentVM = {
   counterparty: null,
   documentDate: null,
   receivedDate: "2026-09-01",
+  uploadedAt: "2026-09-04T08:12:00Z",
   completedAt: null,
   inboxStatus: "pending_classification",
 };
