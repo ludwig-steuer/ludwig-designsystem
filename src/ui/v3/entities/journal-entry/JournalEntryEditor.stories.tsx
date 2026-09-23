@@ -133,6 +133,45 @@ export const S5_RemainderDoesNotBalance: Story = {
   ),
 };
 
+const REVERSE_CHARGE_ROW = (over: Partial<EditorRow> & { id: string }): EditorRow => ({
+  ...ROW,
+  externalDocumentNumber: "INV-2026-0400",
+  text: "OpenAI API",
+  candidates: undefined,
+  ...over,
+});
+
+const REVERSE_CHARGE_ROWS: EditorRow[] = [
+  REVERSE_CHARGE_ROW({ id: "rc1", amount: "8,66", bu: "94", account: "4806", accountName: "Wartungskosten Hard- und Software" }),
+  REVERSE_CHARGE_ROW({ id: "rc2", amount: "1,65", bu: "", account: "1577", accountName: "Abziehbare Vorsteuer § 13b UStG 19 %" }),
+  REVERSE_CHARGE_ROW({ id: "rc3", amount: "1,65", bu: "", side: "H", account: "1787", accountName: "Umsatzsteuer § 13b UStG 19 %" }),
+  REVERSE_CHARGE_ROW({ id: "rc4", amount: "8,66", bu: "", side: "H", account: "1618", accountName: "Kreditkarte" }),
+];
+
+/**
+ * § 13b — der Kern legt das Steuerpaar selbst an (VSt 1577 Soll, USt 1787
+ * Haben). Der Beleg ist netto: die VSt-Zeile auf der Belegseite zählt **nicht**
+ * in den Rest, sonst stünde „Rest −1,65 €" rot an einem richtigen Satz (P50).
+ * Alle vier Zeilen bleiben sichtbar; nur die Summe im Kopf lässt sie weg.
+ */
+export const ReverseCharge13b: Story = {
+  render: () => (
+    <Frame>
+      <JournalEntryEditor
+        {...BASE}
+        contraAccount={null}
+        documentNumber="INV-2026-0400"
+        documentAmount={8.66}
+        accountFramework="skr03"
+        rows={REVERSE_CHARGE_ROWS}
+        editable
+        onCancel={() => {}}
+        onSave={() => {}}
+      />
+    </Frame>
+  ),
+};
+
 /** S12 — mehrere Fehler: Speichern bleibt gesperrt, jeder Fehler nennt sich. */
 export const S12_MultipleErrors: Story = {
   render: () => (

@@ -4,6 +4,7 @@ import { Trash2, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { deriveTax } from "./tax-assist";
+import { REVERSE_CHARGE_TAX_ACCOUNTS } from "./journal-entry";
 // Direct import, not the barrel: `@/ui/status` also exports `FlowModal` and
 // pulls `@/modules/invoices` with the DB driver into the bundle (P22).
 import { ActionIcon } from "../../Icons";
@@ -156,10 +157,13 @@ export interface JournalEntryEditorProps {
 }
 
 
-/** The total of the lines on the document side — the remainder follows from it. */
+/**
+ * The total of the lines on the document side — the remainder follows from it.
+ * § 13b tax lines stay out: the document is net (P50).
+ */
 function documentSideTotal(rows: readonly EditorRow[], documentSide: Side): number {
   return rows
-    .filter((r) => !r.removed && r.side === documentSide)
+    .filter((r) => !r.removed && r.side === documentSide && !REVERSE_CHARGE_TAX_ACCOUNTS.has(r.account))
     .reduce((s, r) => s + toNumber(r.amount), 0);
 }
 

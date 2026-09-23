@@ -605,3 +605,13 @@ den drei Aufträgen dieser Spec, jeder von ihnen ist eine echte Abweichung.
   - M16 — die deutschen Bezeichner der Altteile (`contraAccount`, `Kopf`,
     `Zeile`, `documentSideTotal`) → **0113**, wenn die Datei ohnehin geteilt
     wird.
+
+### Nachtrag P50 (2026-09-23, app-0c): § 13b-Steuerzeilen nicht im Rest
+
+`documentSideTotal` (Editor und `journal-entry.ts`, damit Grid, Facts und
+Gegenkonto im Journal) lässt Zeilen auf den § 13b-/igE-Konten weg
+(`REVERSE_CHARGE_TAX_ACCOUNTS` = `TAX_ACCOUNT_NUMBERS` ohne
+`STANDARD_TAX_ACCOUNT_NUMBERS`: 1577/1787/1574/1774, SKR04 1407/3837/1404/3804).
+Der Beleg ist dort netto; das Steuerpaar legt der Kern an. Standard-VSt bleibt
+drin — netto + 1576 ist das Brutto des Belegs. Die Zeilen bleiben sichtbar.
+Story `ReverseCharge13b`: vier Zeilen, Beleg 8,66 → Rest 0,00 ✓.

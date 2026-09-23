@@ -69,6 +69,30 @@ export const Simple: Story = {
 };
 
 /**
+ * § 13b — vier Zeilen, der Beleg ist netto. Die VSt-Zeile 1577 steht auf der
+ * Belegseite, zählt aber nicht in den Rest: 8,66 gegen 8,66 → Rest 0,00 ✓ (P50).
+ */
+export const ReverseCharge13b: Story = {
+  render: () => (
+    <Frame>
+      <JournalEntryGrid
+        rows={[
+          ROW({ id: "rc1", amount: "8,66", bu: "94", account: "4806", accountName: "Wartungskosten Hard- und Software", externalDocumentNumber: "INV-2026-0400", text: "OpenAI API" }),
+          ROW({ id: "rc2", amount: "1,65", bu: "", account: "1577", accountName: "Abziehbare Vorsteuer § 13b UStG 19 %", externalDocumentNumber: "INV-2026-0400", text: "OpenAI API" }),
+          ROW({ id: "rc3", amount: "1,65", bu: "", side: "H", account: "1787", accountName: "Umsatzsteuer § 13b UStG 19 %", externalDocumentNumber: "INV-2026-0400", text: "OpenAI API" }),
+          ROW({ id: "rc4", amount: "8,66", bu: "", side: "H", account: "1618", accountName: "Kreditkarte", externalDocumentNumber: "INV-2026-0400", text: "OpenAI API" }),
+        ]}
+        status="posted"
+        documentNumber="INV-2026-0400"
+        documentAmount={8.66}
+        accountFramework="skr03"
+        journal
+      />
+    </Frame>
+  ),
+};
+
+/**
  * `mode="full"` — zehn Spalten, und der Umschalter ist ein **Link**: der Modus
  * gehört zur Adresse, nicht zum Zustand. Ohne `modeHref` gibt es ihn nicht,
  * und damit auch keine gedruckte Taste ohne Wirkung (V14).

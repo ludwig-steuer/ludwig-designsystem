@@ -5,6 +5,10 @@ import type { JournalEntryListItem } from "@/ludwig/modules/entries/domain/entry
 import { formatAmount } from "../../format";
 import { parseAmount } from "../../primitives/AmountInput";
 import { deriveTax } from "./tax-assist";
+import {
+  STANDARD_TAX_ACCOUNT_NUMBERS,
+  TAX_ACCOUNT_NUMBERS,
+} from "@/ludwig/modules/accounting-cases/domain/tax-keys";
 
 /**
  * What the reading grid and the editor share — the data, not the markup.
@@ -68,8 +72,21 @@ export function rowAmount(value: string | number | null | undefined): number {
  *          journalTotals. One row's own amount → rowAmount.
  */
 export function documentSideTotal(rows: readonly JournalRow[], side: Side): number {
-  return rows.filter((r) => r.side === side).reduce((sum, r) => sum + rowAmount(r.amount), 0);
+  return rows
+    .filter((r) => r.side === side && !REVERSE_CHARGE_TAX_ACCOUNTS.has(r.account))
+    .reduce((sum, r) => sum + rowAmount(r.amount), 0);
 }
+
+/**
+ * The § 13b / intra-EU tax accounts (1577/1787/1574/1774, SKR04 1407/3837/
+ * 1404/3804). The core books that tax pair itself; the document is net, so
+ * the input-tax line on the document side is **not** part of its amount (P50).
+ * Standard input tax (1576, …) stays in: net + tax there is the gross on the
+ * document.
+ */
+export const REVERSE_CHARGE_TAX_ACCOUNTS: ReadonlySet<string> = new Set(
+  [...TAX_ACCOUNT_NUMBERS].filter((a) => !STANDARD_TAX_ACCOUNT_NUMBERS.has(a)),
+);
 
 /**
  * One line of the DATEV batch — **not** the same as `JournalLine` in
