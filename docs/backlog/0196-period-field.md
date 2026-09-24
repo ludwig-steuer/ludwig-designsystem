@@ -240,3 +240,13 @@ Selbst angesehen (nicht die Abnahme): alle zehn Stories bei 1400 px, keine
 Konsolenfehler; Öffnen fokussiert den gewählten Monat, → ↓ gehen um 1 / 4,
 Bild↓ blättert das Jahr bei gehaltener Spalte, Enter wählt und schließt;
 Februar 2028 endet am 29.
+
+## Nachtrag 2026-09-24 — unkontrollierter Modus (Befund ll-dev4, F296)
+
+Derselbe Fehler wie bei `MultiSelectFilter` (Nachtrag 0195): `from`/`to` waren nur gesteuert. Neu:
+
+- `PeriodField.from`/`to` sind optional, dazu kommen `defaultFrom`/`defaultTo`. Fehlen beide gesteuerten Props, hält das Feld den Zeitraum selbst.
+- `PeriodPanel` bleibt gesteuert. Es steht inline, und sein Aufrufer ist immer ein Client.
+- Nachweis: Story `FilterBar` → `AutoSubmit`. Monat Juli → `periodFrom=2026-07-01&periodTo=2026-07-31`.
+
+- [ ] Ohne `from`/`to`/`onChange` wirkt die Wahl, und die versteckten Felder tragen sie (Story `AutoSubmit`)

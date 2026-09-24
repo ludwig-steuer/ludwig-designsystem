@@ -352,6 +352,10 @@ export function PeriodPanel({
 /* ── Field ──────────────────────────────────────────────────────────────── */
 
 /**
+ * Controlled with `from`/`to` + `onChange`, or uncontrolled with
+ * `defaultFrom`/`defaultTo` + `name` — the mode for a server page, which
+ * cannot hand over a function (see `MultiSelectFilter`).
+ *
  * @when    Filtering a list by month, span of months, quarter or fiscal year —
  *          above the card in a FilterBar.
  * @instead Days → DateRangeField. Inline without a trigger → PeriodPanel.
@@ -363,14 +367,35 @@ export function PeriodField({
   name,
   disabled,
   onChange,
-  ...panel
-}: PanelProps & {
+  from: controlledFrom,
+  to: controlledTo,
+  defaultFrom = null,
+  defaultTo = null,
+  ...rest
+}: Omit<PanelProps, "from" | "to"> & {
+  /** First day, ISO. Leave `from`/`to` out for the uncontrolled mode. */
+  from?: string | null;
+  to?: string | null;
+  /** Uncontrolled: the period to start with, e.g. from the query string of a server page. */
+  defaultFrom?: string | null;
+  defaultTo?: string | null;
   /** The word on the trigger. */
   label?: string;
   /** Server form: two hidden fields `${name}From` and `${name}To`. */
   name?: string;
   disabled?: boolean;
 }) {
+  const [own, setOwn] = useState({ from: defaultFrom, to: defaultTo });
+  const controlled = controlledFrom !== undefined || controlledTo !== undefined;
+  const panel = {
+    ...rest,
+    from: controlled ? (controlledFrom ?? null) : own.from,
+    to: controlled ? (controlledTo ?? null) : own.to,
+  };
+  const change = (from: string | null, to: string | null) => {
+    if (!controlled) setOwn({ from, to });
+    onChange?.(from, to);
+  };
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDivElement>(null);
@@ -440,7 +465,7 @@ export function PeriodField({
             <PeriodPanel
               {...panel}
               onChange={(f, t) => {
-                onChange?.(f, t);
+                change(f, t);
                 close();
               }}
             />

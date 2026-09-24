@@ -288,12 +288,14 @@ export const Live: Story = {
  * The same on a server page: a GET form **without** a button. `autoSubmit`
  * sends it on every change — a status in the select, a tick in the dropdown,
  * a month, text after a pause. Here the sent query string is shown instead
- * of loading.
+ * of loading. The dropdown and the period run **uncontrolled**
+ * (`defaultSelected`, `defaultFrom`/`defaultTo`) — no function crosses from
+ * the page, exactly as a server page renders them (ll-dev4, 2026-09-24).
  */
 export const AutoSubmit: Story = {
   render: function Render() {
-    const [types, setTypes] = useState<string[]>(["invoice"]);
-    const [span, setSpan] = useState<{ from: string | null; to: string | null }>({ from: "2026-08-01", to: "2026-08-31" });
+    // No state and no handler for the fields: this is what a server page
+    // renders — the start values from its query string, the rest in the fields.
     const [sent, setSent] = useState<string[]>([]);
     return (
       <div style={{ maxWidth: 900, minHeight: 460 }}>
@@ -320,10 +322,9 @@ export const AutoSubmit: Story = {
               label="Belegart"
               name="type"
               options={Object.keys(TYPE_LABEL).map((k) => ({ key: k, label: TYPE_LABEL[k]! }))}
-              selected={types}
-              onChange={setTypes}
+              defaultSelected={["invoice"]}
             />
-            <PeriodField name="period" from={span.from} to={span.to} onChange={(from, to) => setSpan({ from, to })} />
+            <PeriodField name="period" defaultFrom="2026-08-01" defaultTo="2026-08-31" />
           </FilterBar>
         </form>
         <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>Abgeschickt (neueste oben):</p>

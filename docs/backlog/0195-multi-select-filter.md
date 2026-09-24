@@ -220,3 +220,14 @@ Abgenommen von / am: … · Offene Punkte: …
 Selbst angesehen (nicht die Abnahme): alle neun Stories im Messbrowser bei
 1100 px, keine Konsolenfehler; Tastatur ↓ öffnet → Fokus in der Liste,
 Leertaste/Enter haken an, Esc → Fokus zurück auf den Auslöser.
+
+## Nachtrag 2026-09-24 — unkontrollierter Modus (Befund ll-dev4, F296)
+
+Mit `name` versprach die Komponente ein Server-Formular („one hidden field per ticked key"). `selected` war aber nur gesteuert, und ohne `onChange` änderte ein Klick nichts. Eine Server-Seite kann keine Funktion übergeben. Neu:
+
+- `selected` ist optional, dazu kommt `defaultSelected?: readonly string[]`. Fehlt `selected`, hält die Komponente die Häkchen selbst, wie `<input defaultValue>`. `onChange` meldet weiter, falls gesetzt.
+- Kein zweiter Baustein für Server und Client: Die Komponente ist Client, die Server-Seite rendert sie unkontrolliert.
+- Nachweis: Story `FilterBar` → `AutoSubmit`, jetzt ohne State und Handler an den Feldern. Häkchen „Quittung" → `?type=invoice&type=receipt`.
+
+- [ ] Ohne `selected`/`onChange` wirkt ein Häkchen, und „Alle anzeigen" leert (Story `AutoSubmit`)
+- [ ] Gesteuert unverändert (Story `Live`, `ChipsOrDropdown`)

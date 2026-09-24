@@ -38,6 +38,12 @@ export interface MultiSelectOption {
 const SEARCH_FROM = 8;
 
 /**
+ * Two modes, like `<input>`: **controlled** with `selected` + `onChange` (a
+ * client page holds the state), or **uncontrolled** with `defaultSelected` +
+ * `name` — what a server page renders, since it cannot hand over a function:
+ * the ticks live here, the hidden fields carry them into the GET form, and
+ * `FilterBar autoSubmit` sends it.
+ *
  * @when    Narrowing a list by one dimension with several values at once —
  *          document types, accounts —, above the card in a FilterBar.
  * @instead One of a handful of exclusive values → FilterChips. One value out
@@ -46,7 +52,8 @@ const SEARCH_FROM = 8;
 export function MultiSelectFilter({
   label,
   options,
-  selected,
+  selected: controlled,
+  defaultSelected,
   onChange,
   name,
   searchPlaceholder = "Suchen …",
@@ -55,8 +62,10 @@ export function MultiSelectFilter({
   /** The word on the trigger and the name of the list („Belegart"). */
   label: string;
   options: readonly MultiSelectOption[];
-  /** The ticked keys; empty means no filter. */
-  selected: readonly string[];
+  /** The ticked keys; empty means no filter. Leave it out for the uncontrolled mode. */
+  selected?: readonly string[];
+  /** Uncontrolled: the ticks to start with, e.g. from the query string of a server page. */
+  defaultSelected?: readonly string[];
   /** On every tick, with the new set in the order of `options`. */
   onChange?: (keys: string[]) => void;
   /** Server form: one hidden field per ticked key — `?name=a&name=b`. */
@@ -65,6 +74,8 @@ export function MultiSelectFilter({
   disabled?: boolean;
 }) {
   const id = useId();
+  const [own, setOwn] = useState<readonly string[]>(defaultSelected ?? []);
+  const selected = controlled ?? own;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -127,7 +138,12 @@ export function MultiSelectFilter({
   function toggle(key: string) {
     const next = chosen.has(key) ? selected.filter((k) => k !== key) : [...selected, key];
     const set = new Set(next);
-    onChange?.(options.filter((o) => set.has(o.key)).map((o) => o.key));
+    change(options.filter((o) => set.has(o.key)).map((o) => o.key));
+  }
+
+  function change(keys: string[]) {
+    if (controlled === undefined) setOwn(keys);
+    onChange?.(keys);
   }
 
   function onListKey(e: KeyboardEvent) {
@@ -279,7 +295,7 @@ export function MultiSelectFilter({
           </div>
           {selected.length > 0 ? (
             <div className="v3msel__foot">
-              <TextButton tone="quiet" onClick={() => onChange?.([])}>
+              <TextButton tone="quiet" onClick={() => change([])}>
                 Alle anzeigen
               </TextButton>
             </div>
