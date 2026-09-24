@@ -2,13 +2,16 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useMemo, useState } from "react";
 import { AmountCell } from "./Cells";
 import { EmptyState } from "./EmptyState";
-import { FilterBar } from "./FilterBar";
+import { FilterBar, matchPreset, type FilterPreset } from "./FilterBar";
 import { DateField, DateRangeField } from "./DateField";
-import { Field, Input, Select } from "./Form";
+import { Checkbox, Field, Input, Select } from "./Form";
 import { MultiSelectFilter, type MultiSelectOption } from "./MultiSelectFilter";
 import { FilterChips, SearchInput } from "./Nav";
 import { PeriodField } from "./PeriodField";
 import { Badge } from "./Badge";
+import { STATUS_REGISTRY } from "@/ludwig/ui/status/status-registry";
+import type { SourceDocStatus } from "@/ludwig/modules/source-docs/domain/source-doc-status";
+import { StatusBadge } from "../patterns/StatusBadge";
 import { Card, CardHead, HeadRow, Row, Table } from "./Table";
 
 const meta: Meta<typeof FilterBar> = {
@@ -398,6 +401,104 @@ export const ChipsOrDropdown: Story = {
             <MultiSelectFilter label="Gesperrt" options={ACCOUNTS} selected={[]} disabled />
           </div>,
         )}
+      </div>
+    );
+  },
+};
+
+/* ── 0201: quick filters instead of tabs that overlap ──────────────────── */
+
+type QueueDoc = { id: string; name: string; status: SourceDocStatus; clarification: boolean };
+const QUEUE: QueueDoc[] = [
+  { id: "1", name: "RE-4471 Bürobedarf Meier", status: "pending", clarification: false },
+  { id: "2", name: "Quittung Tankstelle Nord", status: "extracting", clarification: false },
+  { id: "3", name: "GS-0193 Werbeagentur Nord", status: "agent_review", clarification: false },
+  { id: "4", name: "RE-2026-0815 Stadtwerke", status: "human_review", clarification: true },
+  { id: "5", name: "Mietvertrag Musterstraße", status: "bookable", clarification: false },
+  { id: "6", name: "RE-88213 Kfz Berger", status: "bookable", clarification: true },
+  { id: "7", name: "Quittung Hotel Adler", status: "done", clarification: false },
+  { id: "8", name: "Kontoauszug Sparkasse 08/2026", status: "done", clarification: false },
+  { id: "9", name: "RE-3310 Druckerei Weiß", status: "human_review", clarification: false },
+];
+
+type QueueFilter = { status: readonly SourceDocStatus[]; clarification: boolean };
+const NO_FILTER: QueueFilter = { status: [], clarification: false };
+
+/** Mirrors what the Belege page offers today (ll-dev4, 2026-09-24), one set per preset. */
+const QUEUE_PRESETS: FilterPreset<QueueFilter>[] = [
+  { key: "all", label: "Alle", filters: {} },
+  { key: "open", label: "Offen", filters: { status: ["pending", "extracting", "agent_review", "human_review", "bookable"] } },
+  { key: "processing", label: "In Verarbeitung", filters: { status: ["pending", "extracting"] } },
+  { key: "problems", label: "Problematisch", filters: { status: ["agent_review", "human_review"] } },
+  { key: "clarification", label: "Offene Klärung", filters: { clarification: true } },
+  { key: "bookable", label: "Buchbar", filters: { status: ["bookable"] } },
+];
+
+/** One predicate for the list **and** for every count (I12). */
+const passes = (f: QueueFilter, d: QueueDoc) =>
+  (f.status.length === 0 || f.status.includes(d.status)) && (!f.clarification || d.clarification);
+
+/**
+ * Quick filters (F8): the six views of the Belege page overlap — Offen
+ * contains In Verarbeitung and Problematisch — so they are not tabs but named
+ * filter states. A preset fills the fields below; ticking a field by hand
+ * leaves no preset marked, and ticking back to a preset's values marks it
+ * again. Every count is the list with that preset, with the same predicate.
+ */
+export const Presets: Story = {
+  render: function Render() {
+    const [filter, setFilter] = useState<QueueFilter>(NO_FILTER);
+    const rows = QUEUE.filter((d) => passes(filter, d));
+    const active = (filter.status.length ? 1 : 0) + (filter.clarification ? 1 : 0);
+    const labels = STATUS_REGISTRY.document_status;
+    const statusOptions = (Object.keys(labels) as SourceDocStatus[])
+      .filter((k) => k !== "deleted")
+      .map((k) => ({ key: k, label: labels[k]!.label, count: QUEUE.filter((d) => d.status === k).length }));
+    return (
+      <div style={{ maxWidth: 900, minHeight: 520 }}>
+        <FilterBar
+          activeCount={active}
+          result={{ shown: rows.length, total: QUEUE.length, unit: ["Beleg", "Belege"] }}
+          onReset={() => setFilter(NO_FILTER)}
+          presets={
+            <FilterChips
+              label="Schnellfilter"
+              active={matchPreset(QUEUE_PRESETS, filter) ?? ""}
+              onPick={(key) => setFilter({ ...NO_FILTER, ...QUEUE_PRESETS.find((p) => p.key === key)!.filters })}
+              options={QUEUE_PRESETS.map((p) => ({
+                key: p.key,
+                label: p.label,
+                count: QUEUE.filter((d) => passes({ ...NO_FILTER, ...p.filters }, d)).length,
+              }))}
+            />
+          }
+        >
+          <MultiSelectFilter
+            label="Status"
+            options={statusOptions}
+            selected={[...filter.status]}
+            onChange={(status) => setFilter({ ...filter, status: status as SourceDocStatus[] })}
+          />
+          <Checkbox
+            label="Offene Klärung"
+            checked={filter.clarification}
+            onChange={(e) => setFilter({ ...filter, clarification: e.target.checked })}
+          />
+        </FilterBar>
+        <Card>
+          <Table cols="1fr 200px">
+            <HeadRow>
+              <span>Beleg</span>
+              <span>Status</span>
+            </HeadRow>
+            {rows.map((d) => (
+              <Row key={d.id}>
+                <span>{d.name}</span>
+                <StatusBadge axis="document_status" status={d.status} info={false} />
+              </Row>
+            ))}
+          </Table>
+        </Card>
       </div>
     );
   },

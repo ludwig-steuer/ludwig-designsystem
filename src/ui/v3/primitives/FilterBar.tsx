@@ -41,6 +41,7 @@ export function FilterBar({
   submitLabel,
   result,
   autoSubmit,
+  presets,
 }: {
   children: ReactNode;
   /** How many filters are set — said as a word, not only as a colour (V7). */
@@ -65,6 +66,12 @@ export function FilterBar({
    * page filters on the click too (F1). Text waits for a short pause.
    */
   autoSubmit?: boolean;
+  /**
+   * Named filters (F8), a line of its own above the fields: usually
+   * `FilterChips label="Schnellfilter"` with `active={matchPreset(…) ?? ""}`.
+   * A preset only sets the fields below; it is not a second filter.
+   */
+  presets?: ReactNode;
 }) {
   const active = activeCount ?? 0;
   const count = result
@@ -81,6 +88,7 @@ export function FilterBar({
   return (
     <div className="v2fbar">
       {autoSubmit ? <FilterAutoSubmit /> : null}
+      {presets ? <div className="v2fbar__presets">{presets}</div> : null}
       {children}
       <div className="v2fbar__end">
         {submitLabel ? (
@@ -106,5 +114,43 @@ export function FilterBar({
         ) : null}
       </div>
     </div>
+  );
+}
+
+export type FilterValue = string | boolean | readonly string[] | null | undefined;
+
+export interface FilterPreset<S extends Record<string, FilterValue>> {
+  key: string;
+  label: string;
+  /** The fields this preset sets; every field it leaves out must be empty. */
+  filters: Partial<S>;
+}
+
+const isEmpty = (v: FilterValue) => v == null || v === "" || v === false || (Array.isArray(v) && v.length === 0);
+
+function sameValue(a: FilterValue, b: FilterValue): boolean {
+  if (isEmpty(a) || isEmpty(b)) return isEmpty(a) && isEmpty(b);
+  if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((x) => b.includes(x));
+  return a === b;
+}
+
+/**
+ * Which preset the current filter state **is** (F8) — exactly, field by
+ * field, lists as sets. Changing one field by hand therefore leaves every
+ * preset unmarked; setting the fields to a preset's values marks it, no
+ * matter how one got there. The first match wins.
+ *
+ * @when    Marking the active quick filter above a list.
+ * @instead A single exclusive value → FilterChips without presets.
+ */
+export function matchPreset<S extends Record<string, FilterValue>>(
+  presets: readonly FilterPreset<S>[],
+  state: S,
+): string | null {
+  return (
+    presets.find((p) => {
+      const keys = new Set([...Object.keys(state), ...Object.keys(p.filters)]);
+      return [...keys].every((k) => sameValue(state[k], p.filters[k]));
+    })?.key ?? null
   );
 }

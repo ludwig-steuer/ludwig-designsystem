@@ -67,7 +67,7 @@ export {
   type SegmentOption,
   type TabItem,
 } from "./primitives/Nav";
-export { FilterBar } from "./primitives/FilterBar";
+export { FilterBar, matchPreset, type FilterPreset, type FilterValue } from "./primitives/FilterBar";
 export {
   NavList,
   activeHref,

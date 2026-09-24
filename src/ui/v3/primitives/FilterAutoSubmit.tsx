@@ -15,6 +15,9 @@ const TYPING_PAUSE = 400;
  * bubbling `change` — without that this listener would never hear them.
  *
  * Internal to FilterBar; not exported from the barrel.
+ *
+ * @when    Only through `FilterBar autoSubmit`.
+ * @instead Anywhere else → `FilterBar autoSubmit`, not this directly.
  */
 export function FilterAutoSubmit() {
   const probe = useRef<HTMLSpanElement>(null);
