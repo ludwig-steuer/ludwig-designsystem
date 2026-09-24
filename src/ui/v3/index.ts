@@ -299,6 +299,7 @@ export {
 /* Prozess */
 export {
   StateMachine,
+  machineForAxis,
   type StateTransition,
 } from "./patterns/StateMachine";
 export { LogList, type LogEntry, type LogLevel } from "./patterns/Log";

@@ -15,3 +15,5 @@ export const Case: Story = { args: { axis: "accounting_case", current: "needs_cl
 export const Document: Story = { args: { axis: "document_status", current: "extracting" } };
 /** Ohne aktuellen Wert — reine Nachschlage-Ansicht aus dem Spaltenkopf. */
 export const LegendOnly: Story = { args: { axis: "event_booking" } };
+/** Die längste Kette (elf Zustände): trägt der breite Dialog samt horizontalem Scroll? */
+export const Cycle: Story = { args: { axis: "export_batch", current: "review" } };

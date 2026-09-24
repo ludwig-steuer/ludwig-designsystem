@@ -5,6 +5,7 @@ import {
   STATE_MACHINES,
   STATUS_REGISTRY,
   resolveStatus,
+  type StateMachine as StateMachineDefinition,
   type StateTransition,
   type StatusAxis,
 } from "@/ludwig/ui/status/status-registry";
@@ -13,10 +14,8 @@ import {
  * The map of a status axis (0069).
  *
  * The reviewer sees „Kanzlei prüft" on a batch and asks: what came before,
- * what comes after, and where can I send it back to? Today she gets the list
- * in `StatusInfoDialog` — eleven rows in registry order, without an arrow.
- * Whether `failed` goes back to `ready` or to `review` stands in a markdown
- * table that only developers read.
+ * what comes after, and where can I send it back to? Since F293 the
+ * `StatusInfoDialog` answers with this picture, the list one click away.
  *
  * This is the fourth step of Z3 (label → hover → list → **picture**): boxes
  * with the words of the registry, arrows for the transitions, the current
@@ -204,6 +203,20 @@ function edgePath(a: Box, b: Box, height: number): string {
 }
 
 /**
+ * The machine that writes this axis: keyed by process, so it is searched, not indexed (see 2026-09-07).
+ *
+ * The key in `STATE_MACHINES` is the **process** (`export_batch`,
+ * `document_status`), not the axis — the registry says so explicitly since
+ * the mirror pull of 2026-09-07. Before that the four machines were named
+ * after their axes and the direct lookup hit; after it hit nothing, silently.
+ * A process may write several axes, so the machine's default axis is what
+ * counts.
+ */
+export function machineForAxis(axis: StatusAxis): StateMachineDefinition | undefined {
+  return STATE_MACHINES[axis] ?? Object.values(STATE_MACHINES).find((m) => m.axis === axis);
+}
+
+/**
  * @when    „What are the ways out of this state?" — the map of one axis, in
  *          the status explanation or beside a detail.
  * @instead Where **this** object stands → ProcessStepper (Z7). What happened
@@ -223,14 +236,7 @@ export function StateMachine({
   current?: string | null;
   description?: string;
 }) {
-  // **Searched, not indexed.** The key in `STATE_MACHINES` is the **process**
-  // (`export_batch`, `document_status`), not the axis — the registry says
-  // so explicitly since the mirror pull of 2026-09-07. Before that the four
-  // machines were named after their axes and the direct lookup hit; after it
-  // hit nothing, silently. A process may write several axes, so the machine's
-  // default axis is what counts.
-  const machine =
-    STATE_MACHINES[axis] ?? Object.values(STATE_MACHINES).find((m) => m.axis === axis);
+  const machine = machineForAxis(axis);
 
   // A process may also write a sub-axis (`document_status` carries the stages
   // of `document_stage` inside `extracting`). Those transitions belong to the
