@@ -154,6 +154,10 @@ export {
 } from "./primitives/Table";
 export {
   AmountCell,
+  CountCell,
+  DateRangeCell,
+  ValueHint,
+  type CellHint,
   DotStatus,
   Timestamp,
   DeviationCell,
@@ -238,6 +242,8 @@ export {
 export {
   EntityIcon,
   ActionIcon,
+  LEVEL_ICON,
+  type HintLevel,
   ENTITY_ICON,
   ACTION_ICON,
   type EntityKey,

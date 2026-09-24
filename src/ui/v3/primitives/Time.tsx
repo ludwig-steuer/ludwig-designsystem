@@ -7,6 +7,7 @@ import {
   type TimeLength,
   type TimeRangeFormat,
 } from "../format";
+import { ValueHint, type CellHint } from "./Cells";
 
 /**
  * One point in time, six ways to say it — a duration, and a span (0033, 0189).
@@ -34,6 +35,7 @@ export function Time({
   length = "medium",
   size = "md",
   prefix,
+  hint,
 }: {
   value: string | Date | null;
   format?: TimeFormat;
@@ -41,11 +43,20 @@ export function Time({
   size?: TimeSize;
   /** A word in front — „zuletzt", „seit". */
   prefix?: string;
+  /** A note on the point in time — the same sign as in a table cell (0197). */
+  hint?: CellHint;
 }) {
-  if (!value) return <span className="v2muted">—</span>;
+  const mark = hint ? <ValueHint hint={hint} side="after" /> : null;
+  if (!value) {
+    return (
+      <span className="v2muted">
+        —{mark}
+      </span>
+    );
+  }
   const d = value instanceof Date ? value : new Date(value);
   const text = formatTime(value, format, length);
-  return (
+  const out = (
     <time
       className={`v2time v2time--${size}`}
       dateTime={Number.isNaN(d.getTime()) ? undefined : d.toISOString()}
@@ -56,6 +67,14 @@ export function Time({
       {prefix ? `${prefix} ` : ""}
       {text}
     </time>
+  );
+  return mark ? (
+    <span>
+      {out}
+      {mark}
+    </span>
+  ) : (
+    out
   );
 }
 

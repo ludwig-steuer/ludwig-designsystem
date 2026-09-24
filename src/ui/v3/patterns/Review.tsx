@@ -1,16 +1,13 @@
 import {
-  AlertTriangle,
   CheckCircle2,
   Circle,
   CircleSlash,
   HelpCircle,
-  Info,
   PencilLine,
   Undo2,
-  XCircle,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { ActionIcon } from "../Icons";
+import { ActionIcon, LEVEL_ICON } from "../Icons";
 import { HeadRow, Table, rowCells } from "../primitives/Table";
 import { TableLoading } from "../primitives/Cells";
 import { Disclosure } from "../primitives/Disclosure";
@@ -50,9 +47,10 @@ const ICONS = {
   returned: { Icon: Undo2, tone: "warning", label: "zurückgegeben" },
   question: { Icon: HelpCircle, tone: "warning", label: "Frage offen" },
   skipped: { Icon: CircleSlash, tone: "muted", label: "übersprungen" },
-  warning: { Icon: AlertTriangle, tone: "warning", label: "Warnung" },
-  error: { Icon: XCircle, tone: "danger", label: "Fehler" },
-  info: { Icon: Info, tone: "info", label: "Hinweis" },
+  // The three steps of the scale come from the shared table (0197).
+  warning: { Icon: LEVEL_ICON.warning.icon, tone: "warning", label: LEVEL_ICON.warning.label },
+  error: { Icon: LEVEL_ICON.error.icon, tone: "danger", label: LEVEL_ICON.error.label },
+  info: { Icon: LEVEL_ICON.info.icon, tone: "info", label: LEVEL_ICON.info.label },
 } as const satisfies Record<StateKind, { Icon: typeof Circle; tone: string; label: string }>;
 
 const TONE_VAR: Record<string, string> = {

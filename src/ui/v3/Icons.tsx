@@ -53,6 +53,8 @@ import {
   UserRound,
   X,
   type LucideIcon,
+  CircleX,
+  TriangleAlert,
 } from "lucide-react";
 
 /**
@@ -479,3 +481,23 @@ export function ActionIcon({
   const Icon = ACTION_ICON[action].icon;
   return <Icon size={size} strokeWidth={1.5} className={className} aria-hidden="true" />;
 }
+
+/* ── Criticality ─────────────────────────────────────────────────────────── */
+
+/** The four steps of the scale (A7, guidelines §3) — technical and business alike. */
+export type HintLevel = "error" | "warning" | "info" | "debug";
+
+/**
+ * One sign and one colour per step of the scale. `StateIcon` (Review.tsx) and
+ * the hint beside a value (`CellHint`, Cells.tsx) both read this table, so a
+ * warning looks the same in a review list and in a table cell.
+ *
+ * `debug` shares the sign of `info` in the subtle colour: it has no
+ * criticality, the word says what it is.
+ */
+export const LEVEL_ICON = {
+  error: { icon: CircleX, color: "var(--color-danger)", label: "Fehler" },
+  warning: { icon: TriangleAlert, color: "var(--color-warning)", label: "Warnung" },
+  info: { icon: Info, color: "var(--color-accent-700)", label: "Hinweis" },
+  debug: { icon: Info, color: "var(--color-text-subtle)", label: "Debug" },
+} as const satisfies Record<HintLevel, { icon: typeof Info; color: string; label: string }>;

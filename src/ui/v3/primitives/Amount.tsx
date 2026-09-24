@@ -1,6 +1,6 @@
 import type { Currency, Money } from "@/ludwig/shared/money";
 import { formatAmount } from "../format";
-import type { CellTone } from "./Cells";
+import { ValueHint, type CellHint, type CellTone } from "./Cells";
 
 /**
  * One amount, three sizes, one rule (0032, P24).
@@ -21,6 +21,8 @@ type Common = {
   signed?: boolean;
   /** The calculation behind it, as a tooltip. */
   title?: string;
+  /** A note on the value — the same sign as in a table cell (0197). */
+  hint?: CellHint;
 };
 
 /**
@@ -41,7 +43,7 @@ export type AmountProps = Common &
  *          DeviationCell.
  */
 export function Amount(props: AmountProps) {
-  const { size = "md", tone = "neutral", signed, title } = props;
+  const { size = "md", tone = "neutral", signed, title, hint } = props;
   const text = formatAmount(props.value, props.currency, signed);
   const classes = [
     "v2amount",
@@ -53,6 +55,7 @@ export function Amount(props: AmountProps) {
     .join(" ");
   return (
     <span className={classes} title={title}>
+      {hint ? <ValueHint hint={hint} /> : null}
       {text}
     </span>
   );

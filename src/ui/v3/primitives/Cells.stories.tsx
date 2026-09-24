@@ -2,13 +2,18 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   DeviationCell,
   AmountCell,
+  CountCell,
+  DateRangeCell,
+  type CellHint,
   DotStatus,
   ErrorRow,
   MonoCell,
   TableLoading,
   Timestamp,
 } from "./Cells";
+import { Amount } from "./Amount";
 import { Progress } from "./Progress";
+import { Time } from "./Time";
 import { Card, CardHead, EmptyRow, HeadRow, Row, Table } from "./Table";
 
 const meta: Meta<typeof AmountCell> = { title: "v3/Primitives/Tabelle/Zellen", component: AmountCell };
@@ -233,3 +238,250 @@ export const Mono: Story = {
   ),
 };
 
+
+/* ── 0197: value cells ──────────────────────────────────────────────────── */
+
+const Grid = ({ cols, head, children }: { cols: string; head: React.ReactNode; children: React.ReactNode }) => (
+  <div style={{ maxWidth: 820 }}>
+    <Card>
+      <Table cols={cols}>
+        <HeadRow>{head}</HeadRow>
+        {children}
+      </Table>
+    </Card>
+  </div>
+);
+
+/** Whole numbers: no decimals, right, `null` as a dash; with `unit` the word follows. */
+export const Counts: Story = {
+  render: () => (
+    <Grid
+      cols="1fr 140px 160px"
+      head={
+        <>
+          <span>Fall</span>
+          <span className="v2num">Anzahl</span>
+          <span className="v2num">Mit Einheit</span>
+        </>
+      }
+    >
+      {([0, 1, 3400, 1_234_567, null] as const).map((n) => (
+        <Row key={String(n)}>
+          <span>{n === null ? "unbekannt" : String(n)}</span>
+          <CountCell value={n} />
+          <CountCell value={n} unit={["Seite", "Seiten"]} />
+        </Row>
+      ))}
+    </Grid>
+  ),
+};
+
+/** `Timestamp` as day, day and time, month; `DateRangeCell` folded, across the year, open ends. */
+export const Dates: Story = {
+  render: () => (
+    <Grid
+      cols="1fr 1fr 1fr 1.4fr"
+      head={
+        <>
+          <span>Tag</span>
+          <span>Tag und Uhrzeit</span>
+          <span>Monat</span>
+          <span>Spanne</span>
+        </>
+      }
+    >
+      <Row>
+        <Timestamp iso="2026-03-31T09:12:00Z" format="date" />
+        <Timestamp iso="2026-03-31T09:12:00Z" />
+        <Timestamp iso="2026-03-31T09:12:00Z" format="month" />
+        <DateRangeCell from="2026-03-01" to="2026-03-31" />
+      </Row>
+      <Row>
+        <Timestamp iso="2025-12-28T16:40:00Z" format="date" />
+        <Timestamp iso="2025-12-28T16:40:00Z" />
+        <Timestamp iso="2025-12-28T16:40:00Z" format="month" length="long" />
+        <DateRangeCell from="2025-12-28" to="2026-01-04" />
+      </Row>
+      <Row>
+        <Timestamp iso={null} format="date" />
+        <Timestamp iso={null} />
+        <Timestamp iso={null} format="month" />
+        <DateRangeCell from="2026-08-01" to={null} />
+      </Row>
+      <Row>
+        <span />
+        <span />
+        <span />
+        <DateRangeCell from={null} to={null} />
+      </Row>
+    </Grid>
+  ),
+};
+
+/** Four currencies on one units edge; `signed`; unknown. */
+export const Currencies: Story = {
+  render: () => (
+    <Grid
+      cols="1fr 160px 160px"
+      head={
+        <>
+          <span>Konto</span>
+          <span className="v2num">Saldo</span>
+          <span className="v2num">Veränderung</span>
+        </>
+      }
+    >
+      <Row>
+        <span>Geschäftskonto Sparkasse</span>
+        <AmountCell value={12480.17} currency="EUR" />
+        <AmountCell value={-2609.15} currency="EUR" signed />
+      </Row>
+      <Row>
+        <span>USD-Konto Commerzbank</span>
+        <AmountCell value={3250} currency="USD" />
+        <AmountCell value={420.5} currency="USD" signed />
+      </Row>
+      <Row>
+        <span>Postfinance CHF</span>
+        <AmountCell value={918.4} currency="CHF" />
+        <AmountCell value={0} currency="CHF" signed />
+      </Row>
+      <Row>
+        <span>Barclays GBP</span>
+        <AmountCell value={1_204_880.02} currency="GBP" />
+        <AmountCell value={null} currency="GBP" signed />
+      </Row>
+    </Grid>
+  ),
+};
+
+const HINTS: CellHint[] = [
+  { level: "error", text: "Endsaldo weicht um 54,00 € vom Anfangssaldo des Folgemonats ab." },
+  { level: "warning", text: "Saldensprung: Anfangssaldo passt nicht zum Endsaldo des Vormonats." },
+  { level: "info", text: "Kurs vom Vortag, der Tageskurs lag noch nicht vor." },
+  { level: "debug", text: "Aus dem MT940-Feld :62F: gelesen." },
+];
+
+/**
+ * Every step on every value type — the sign carries the colour, the value
+ * stays as it is. Last row: the retired `warning-strong` looks like `warning`.
+ */
+export const Hints: Story = {
+  render: () => (
+    <Grid
+      cols="200px 160px 110px 130px 1fr"
+      head={
+        <>
+          <span>Stufe</span>
+          <span className="v2num">Betrag</span>
+          <span className="v2num">Anzahl</span>
+          <span>Datum</span>
+          <span>Spanne</span>
+        </>
+      }
+    >
+      {HINTS.map((h) => (
+        <Row key={h.level}>
+          <span>{h.level}</span>
+          <AmountCell value={-1249.9} hint={h} />
+          <CountCell value={214} hint={h} />
+          <Timestamp iso="2026-08-31" format="date" hint={h} />
+          <DateRangeCell from="2026-08-01" to="2026-08-31" hint={h} />
+        </Row>
+      ))}
+      <Row>
+        <span>ohne</span>
+        <AmountCell value={-1249.9} />
+        <CountCell value={214} />
+        <Timestamp iso="2026-08-31" format="date" />
+        <DateRangeCell from="2026-08-01" to="2026-08-31" />
+      </Row>
+      <Row>
+        <span>tone warning</span>
+        <AmountCell value={348} tone="warning" />
+        <span />
+        <span />
+        <span />
+      </Row>
+      <Row>
+        <span>tone warning-strong (Alias)</span>
+        <AmountCell value={348} tone="warning-strong" />
+        <span />
+        <span />
+        <span />
+      </Row>
+    </Grid>
+  ),
+};
+
+/** The same sign outside a table: a header line with `Amount` and `Time`. */
+export const OutsideCells: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: "var(--space-6)", alignItems: "baseline", fontSize: 13.5 }}>
+      <span>
+        Anfangssaldo{" "}
+        <Amount
+          value={1249.9}
+          currency="EUR"
+          hint={{ level: "warning", text: "Passt nicht zum Endsaldo des Vorauszugs (1.195,90 €)." }}
+        />
+      </span>
+      <span>
+        Letzter Import{" "}
+        <Time value="2026-09-02T07:40:00Z" hint={{ level: "info", text: "Der nächste Abruf läuft heute um 18:00." }} />
+      </span>
+      <span>
+        Endsaldo <Amount value={null} currency="EUR" hint={{ level: "debug", text: "Ohne Anfangssaldo nicht berechenbar." }} />
+      </span>
+    </div>
+  ),
+};
+
+/**
+ * A small month overview as on the account's reporting tab: the sign of
+ * „Saldensprung" does not move the units edge of its column; an end balance
+ * without an opening balance is a dash.
+ */
+export const InUse: Story = {
+  render: () => {
+    const rows = [
+      { m: "2026-06-01", n: 38, in_: 14250, out: -12880.4, end: null as number | null },
+      { m: "2026-07-01", n: 41, in_: 15010.5, out: -16020.3, end: 8370.1 },
+      { m: "2026-08-01", n: 36, in_: 12990, out: -11489.08, end: 9871.02 },
+    ];
+    return (
+      <div style={{ maxWidth: 820 }}>
+        <Card>
+          <CardHead title="Saldo je Monat" sub="Geschäftskonto Sparkasse · 2026" />
+          <Table cols="120px 90px 1fr 1fr 1fr">
+            <HeadRow>
+              <span>Monat</span>
+              <span className="v2num">Umsätze</span>
+              <span className="v2num">Zufluss</span>
+              <span className="v2num">Abfluss</span>
+              <span className="v2num">Endsaldo</span>
+            </HeadRow>
+            {rows.map((r, i) => (
+              <Row key={r.m}>
+                <Timestamp iso={r.m} format="month" />
+                <CountCell value={r.n} />
+                <AmountCell value={r.in_} />
+                <AmountCell value={r.out} />
+                <AmountCell
+                  value={r.end}
+                  hint={
+                    i === 0
+                      ? { level: "debug", text: "Kein Anfangssaldo — der Endsaldo lässt sich nicht rechnen." }
+                      : i === 2
+                        ? { level: "warning", text: "Saldensprung: Anfangssaldo August 8.316,10 € statt 8.370,10 €." }
+                        : undefined
+                  }
+                />
+              </Row>
+            ))}
+          </Table>
+        </Card>
+      </div>
+    );
+  },
+};

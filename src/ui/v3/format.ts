@@ -76,12 +76,17 @@ const COUNT = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 });
  * of 0063). A number that looks different twice in one line is not a detail —
  * it makes the reader work out whether it is the same size.
  *
+ * `unit` puts the word behind it, singular only for exactly one:
+ * `formatCount(3, ["Seite", "Seiten"])` → „3 Seiten".
+ *
  * @when    A count becomes text — pager, counter, stock figure.
  * @instead An amount of money → formatAmount. A file size → formatBytes. A
  *          share of something → Progress.
  */
-export function formatCount(value: number): string {
-  return COUNT.format(value);
+export function formatCount(value: number, unit?: readonly [one: string, other: string]): string {
+  const n = COUNT.format(value);
+  // Singular only for exactly one — „0 Seiten", like the language says it.
+  return unit ? `${n} ${value === 1 ? unit[0] : unit[1]}` : n;
 }
 
 /* ── Zeitpunkte ─────────────────────────────────────────────────────────── */

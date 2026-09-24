@@ -16,6 +16,7 @@ import { FilterBar } from "../primitives/FilterBar";
 import { FilterChips, SearchInput } from "../primitives/Nav";
 import { TextButton } from "../primitives/TextButton";
 import { formatAmount } from "../format";
+import { asCurrency } from "@/ludwig/shared/money";
 import {
   DataTable,
   type AnyBulkAction,
@@ -133,7 +134,7 @@ const AMOUNT: ColumnDef<CaseListItem> = {
   width: "130px",
   align: "end",
   sortable: true,
-  cell: (c) => <AmountCell value={c.totalAmount} currency={c.currency} />,
+  cell: (c) => <AmountCell value={c.totalAmount} currency={asCurrency(c.currency)} />,
 };
 
 /** Z4: no "Status" head — the axis is called Bearbeitung here. */

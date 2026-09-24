@@ -1,5 +1,16 @@
 import type { ReactNode } from "react";
-import { formatAmount, formatTime, formatTimeFull } from "../format";
+import type { Currency } from "@/ludwig/shared/money";
+import { LEVEL_ICON, type HintLevel } from "../Icons";
+import {
+  formatAmount,
+  formatCount,
+  formatTime,
+  formatTimeFull,
+  formatTimeRange,
+  type TimeLength,
+  type TimeRangeFormat,
+} from "../format";
+import { Tooltip } from "./Popover";
 
 /**
  * v2 cell building blocks (F123 T123.1, Baukasten §9) — the types a table
@@ -10,7 +21,54 @@ import { formatAmount, formatTime, formatTimeFull } from "../format";
  * stands next to it (V6/V7).
  */
 
-export type CellTone = "neutral" | "muted" | "success" | "warning" | "warning-strong" | "danger";
+export type CellTone =
+  | "neutral"
+  | "muted"
+  | "success"
+  | "warning"
+  /**
+   * @deprecated A second colour for one step breaks A7 (A9). It now looks
+   * exactly like `warning`; it stays until `deviationTone()` in the app
+   * returns the four steps (0197).
+   */
+  | "warning-strong"
+  | "danger";
+
+/**
+ * A note on one value — „Saldensprung", „Kurs vom Vortag" (0197).
+ *
+ * `level` is the step of the scale (A7), not a colour of the value: the value
+ * stays as it is, the sign beside it carries the step.
+ */
+export interface CellHint {
+  level: HintLevel;
+  /** One sentence; shown on hover **and** focus. */
+  text: string;
+}
+
+/**
+ * The sign of a hint beside a value: a button without a frame, named by its
+ * step („Warnung"), the sentence in a `Tooltip`. Not `title` — that reaches
+ * neither the keyboard nor a finger.
+ *
+ * `side` is where it stands: away from the edge the value aligns to, so a
+ * column of numbers keeps its units edge and a column of dates its left one.
+ *
+ * @when    A value in a cell, a header or a sentence carries a note — through
+ *          the `hint` prop of the value, not by hand.
+ * @instead The state of a whole row → StatusBadge / DotStatus. A result in a
+ *          review list → StateIcon.
+ */
+export function ValueHint({ hint, side = "before" }: { hint: CellHint; side?: "before" | "after" }) {
+  const { icon: Icon, color, label } = LEVEL_ICON[hint.level];
+  return (
+    <Tooltip label={hint.text}>
+      <button type="button" className={`v3hint v3hint--${side}`} aria-label={label} style={{ color }}>
+        <Icon size={14} strokeWidth={1.5} aria-hidden="true" />
+      </button>
+    </Tooltip>
+  );
+}
 
 /**
  * Amount, right-aligned, digits at fixed width.
@@ -35,24 +93,71 @@ export function AmountCell({
   currency = "EUR",
   tone = "neutral",
   title,
+  signed,
+  hint,
 }: {
   /** `null` means unknown — rendered as „—", never as zero. */
   value: number | string | null;
-  currency?: string | null;
+  /**
+   * `null` is a decimal without a currency. Narrowed from `string` in 0197:
+   * the app narrows its raw value with `asCurrency` at the call site.
+   */
+  currency?: Currency | null;
   tone?: CellTone;
   title?: string;
+  /** `+` in front of positive values — without colour (A7). */
+  signed?: boolean;
+  hint?: CellHint;
 }) {
   // Explicitly against null, not falsy: 0 is an amount, and „0,00 €" is a
   // statement — „nothing was booked" is not the same as „we do not know".
   // The em dash keeps the column's geometry: `v2num` first, `v2muted` after.
   // Without it the unknown value stands left in a right-aligned column — found
   // in the acceptance of 0072, and it hits every table with unknown amounts.
-  if (value === null) return <span className="v2num v2muted">—</span>;
+  const mark = hint ? <ValueHint hint={hint} /> : null;
+  if (value === null) {
+    return (
+      <span className="v2num v2muted">
+        {mark}—
+      </span>
+    );
+  }
   // One formatter for the whole house (P24): the cell only adds its geometry.
-  const text = typeof value === "number" ? formatAmount(value, currency as never) : value;
+  const text = typeof value === "number" ? formatAmount(value, currency, signed) : value;
   return (
     <span className={`v2num${tone === "neutral" ? "" : ` v2num--${tone}`}`} title={title}>
+      {mark}
       {text}
+    </span>
+  );
+}
+
+/**
+ * A whole number, right-aligned — „3.400", not „3.400,00" (0197).
+ *
+ * `AmountCell` with `currency: null` is a decimal with two places; a count of
+ * transactions has none.
+ *
+ * @when    A count in a table cell — transactions, pages, lines; with `unit`
+ *          when the word belongs beside the number.
+ * @instead Money → AmountCell. A share → PercentCell. A deviation → DeviationCell.
+ */
+export function CountCell({
+  value,
+  unit,
+  hint,
+}: {
+  /** `null` means unknown — „—", never zero. */
+  value: number | null;
+  /** „Seite", „Seiten" — singular only for exactly one. */
+  unit?: readonly [one: string, other: string];
+  hint?: CellHint;
+}) {
+  const mark = hint ? <ValueHint hint={hint} /> : null;
+  return (
+    <span className={value === null ? "v2num v2muted" : "v2num"}>
+      {mark}
+      {value === null ? "—" : formatCount(value, unit)}
     </span>
   );
 }
@@ -86,16 +191,72 @@ export function DotStatus({
  * @when    A point in time inside a table cell.
  * @instead A date outside a table → Time. A span of seconds → formatDuration.
  */
-export function Timestamp({ iso, prefix }: { iso: string | Date | null; prefix?: string }) {
-  if (!iso) return <span className="v2muted">—</span>;
-  const d = typeof iso === "string" ? new Date(iso) : iso;
-  if (Number.isNaN(d.getTime())) return <span className="v2muted">—</span>;
+export function Timestamp({
+  iso,
+  prefix,
+  format = "dateTime",
+  length = "short",
+  hint,
+}: {
+  iso: string | Date | null;
+  prefix?: string;
+  /** Day only, day and time (default), or the month — 0197. */
+  format?: "date" | "dateTime" | "month";
+  length?: TimeLength;
+  hint?: CellHint;
+}) {
+  const mark = hint ? <ValueHint hint={hint} side="after" /> : null;
+  const d = !iso ? null : typeof iso === "string" ? new Date(iso) : iso;
+  if (!d || Number.isNaN(d.getTime())) {
+    return (
+      <span className="v2muted">
+        —{mark}
+      </span>
+    );
+  }
   // The short form of `Time` (P24) — this cell is its table-shaped variant.
   return (
-    <time dateTime={d.toISOString()} title={formatTimeFull(iso)}>
-      {prefix ? `${prefix} ` : ""}
-      {formatTime(iso, "dateTime", "short")}
-    </time>
+    <span>
+      <time dateTime={d.toISOString()} title={formatTimeFull(d)}>
+        {prefix ? `${prefix} ` : ""}
+        {formatTime(d, format, length)}
+      </time>
+      {mark}
+    </span>
+  );
+}
+
+/**
+ * A span in a cell — „01.–31.03.2026", the shared part said once (0197).
+ *
+ * @when    Coverage, period or run time of a row — an import, a statement, a batch.
+ * @instead Outside a table → DateRange. One point → Timestamp. Elapsed seconds →
+ *          formatDuration.
+ */
+export function DateRangeCell({
+  from,
+  to,
+  format = "date",
+  hint,
+}: {
+  from: string | Date | null;
+  to: string | Date | null;
+  format?: TimeRangeFormat;
+  hint?: CellHint;
+}) {
+  const mark = hint ? <ValueHint hint={hint} side="after" /> : null;
+  if (!from && !to) {
+    return (
+      <span className="v2muted">
+        —{mark}
+      </span>
+    );
+  }
+  return (
+    <span>
+      <span title={formatTimeRange(from, to, format, "long")}>{formatTimeRange(from, to, format)}</span>
+      {mark}
+    </span>
   );
 }
 

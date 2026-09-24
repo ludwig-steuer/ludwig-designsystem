@@ -1123,7 +1123,9 @@ select.v2in { padding-right: 26px; }
 /* --- Zell-Bausteine (Baukasten §9) --------------------------------------- */
 .v2num--danger { color: var(--color-danger); }
 .v2num--warning { color: var(--color-warning); }
-.v2num--warning-strong { color: var(--color-warning-strong); }
+/* Retired (A7/A9, 0197): a second colour for one step. Looks like `warning`
+   until the app stops sending it. */
+.v2num--warning-strong { color: var(--color-warning); }
 .v2num--success { color: var(--color-success); }
 .v2num--muted { color: var(--color-text-muted); }
 
@@ -4290,3 +4292,15 @@ a.v3prov:focus-visible { text-decoration: underline; }
 .v3pfld__fy.is-end { background: var(--color-accent-50); border-color: var(--color-primary-700); }
 .v3pfld__foot { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); border-top: var(--border-1-subtle); padding-top: var(--space-2); }
 .v3pfld__foot:empty { display: none; }
+
+/* --- Hint beside a value (0197) ------------------------------------------ */
+/* A frameless button: named by its step, the sentence in a Tooltip. It sits
+   on the side away from the value's alignment edge. */
+.v3hint {
+  display: inline-flex; vertical-align: -2px;
+  padding: 0; border: none; background: none; cursor: help;
+  border-radius: var(--radius-sm);
+}
+.v3hint--before { margin-right: var(--space-1); }
+.v3hint--after { margin-left: var(--space-1); }
+.v3hint:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
