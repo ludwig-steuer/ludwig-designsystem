@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme — gebaut 2026-09-24, fremde Abnahme steht aus |
 | Stufe | `primitives/` (Gruppe Formular) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: Schadensarten, Sparten, Sachbearbeiter als Filter über einer Liste |
 | Quelle | Owner 2026-09-24: „erweitertes Dropdown … 1) Mehrfachauswahl 2) Gruppierungen 3) Suchfeld 4) links Text, rechts Badge oder andere Infos, z. B. Anzahl" · Nachsatz: „brauchen wir als Filter von Listen in der DataTable hauptsächlich", rechts „je nachdem beides möglich" · App-Anfrage app-6a 2026-09-24 (Belegart-Filter im Eingang, App a71a14c4) |
@@ -140,7 +140,7 @@ Titel `v3/Primitives/Formular/MultiSelectFilter`.
 | `Empty` | keine Optionen → gesperrt; daneben `disabled` mit Werten |
 | `Groups` | 40 Konten in drei Gruppen (Bank, Kasse, Kreditkarte) mit Nummer als `hint`, Suchfeld sichtbar |
 | `NoMatch` | Suche „zzz" ohne Treffer → Leertext |
-| `Meta` | nebeneinander: nur `count`, nur `badge`, beides, keins; `count` 0 und 12.345 |
+| `RightSide` | nebeneinander: nur `count`, nur `badge`, beides, keins; `count` 0 und 12.345 |
 | `Interactive` | Rundlauf mit `useState`, gewählte Keys darunter ausgegeben, Auslöser-Text für 0/1/n |
 | `ServerForm` | in `<form method="get">` mit `FilterBar.submitLabel`, der Query-String wird nach dem Absenden angezeigt |
 | `InUse` | FilterBar mit `SearchInput`, `FilterChips` (Status) und `MultiSelectFilter` (Belegart) über einer `DataTable` mit Eingangsdaten, die Zeilen filtern live |
@@ -173,8 +173,8 @@ Fest (gilt immer):
 Variabel (aus dieser Spec):
 
 - [ ] Auslöser zeigt „Alle" / den einen Wert / „n gewählt" (Story `Interactive`)
-- [ ] `count` steht rechtsbündig untereinander, `0` gedämpft, 12.345 mit Punkt (Story `Meta`)
-- [ ] `badge` steht vor `count`, beide zusammen in einer Zeile ohne Umbruch (Story `Meta`)
+- [ ] `count` steht rechtsbündig untereinander, `0` gedämpft, 12.345 mit Punkt (Story `RightSide`)
+- [ ] `badge` steht vor `count`, beide zusammen in einer Zeile ohne Umbruch (Story `RightSide`)
 - [ ] Suchfeld erst ab 8 Optionen; filtert über `label` und `hint`; leere Gruppen fallen weg (Story `Groups`)
 - [ ] Suche ohne Treffer zeigt den Leertext mit dem Suchwort (Story `NoMatch`)
 - [ ] Tastatur: öffnen mit ↓, Häkchen mit Leertaste, Liste bleibt offen, Esc gibt den Fokus an den Auslöser zurück (Story `Filled`)
@@ -199,3 +199,24 @@ Abgenommen von / am: … · Offene Punkte: …
 2. **Wo steht der Knopf zum Leeren?** Ohne Antwort: im Fuß der Liste als
    „Alle anzeigen". Kein × am Auslöser, denn das wäre ein zweites Ziel auf
    einem Knopf.
+
+## Bau (2026-09-24) — Abweichungen von der Spec
+
+- **Kein `cmdk`.** `cmdk` sortiert Treffer nach Score um und belegt
+  `aria-selected` mit der hervorgehobenen Zeile; beides widerspricht dieser
+  Spec (Reihenfolge des Aufrufers, `aria-selected` = angehakt). Gebaut als
+  `listbox` mit `aria-activedescendant`, wie `Combobox`.
+- **Leertaste hakt nur ohne Suchfeld an.** Mit Suchfeld tippt sie ein
+  Leerzeichen; dort hakt Enter an. Das Kriterium „Häkchen mit Leertaste" gilt
+  für `Filled` (6 Optionen, kein Suchfeld).
+- **`InUse` mit `Card`/`Table` statt `DataTable`.** Eine Primitive-Story
+  importiert kein Pattern; die Liste filtert live wie im Eingang.
+- **Zählspalte bleibt stehen**, wenn irgendeine Option `count` hat — sonst
+  rutscht ein Badge ohne Zahl nach rechts aus der Reihe (Story `RightSide`).
+- Story `Meta` heißt `RightSide` (`Meta` ist der Storybook-Typ).
+- Auslöser und Liste sind höchstens `--v3-menu-max` (20 rem) breit; ein langer
+  Wert wird im Auslöser gekürzt (Story `Edge`).
+
+Selbst angesehen (nicht die Abnahme): alle neun Stories im Messbrowser bei
+1100 px, keine Konsolenfehler; Tastatur ↓ öffnet → Fokus in der Liste,
+Leertaste/Enter haken an, Esc → Fokus zurück auf den Auslöser.

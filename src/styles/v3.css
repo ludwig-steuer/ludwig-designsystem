@@ -4189,3 +4189,46 @@ a.v3prov:focus-visible { text-decoration: underline; }
   border-radius: var(--radius-pill);
 }
 
+
+/* --- MultiSelectFilter (0195) — several values of one filter ------------- */
+.v3msel__trigger {
+  display: inline-flex; align-items: center; gap: 6px;
+  max-width: var(--v3-menu-max, 20rem); cursor: pointer; text-align: left;
+}
+.v3msel__trigger:disabled { cursor: not-allowed; color: var(--color-text-subtle); }
+/* Set is said by the word („3 gewählt"), the border only repeats it (V7). */
+.v3msel__trigger.is-set { border-color: var(--color-primary-700); }
+.v3msel__label { color: var(--color-text-muted); }
+.v3msel__value { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v3msel__chevron { flex: 0 0 auto; color: var(--color-text-subtle); }
+/* The panel brings its own padding; the list, not the page, scrolls. */
+.v2pop:has(> .v3msel) { padding: 0; max-width: min(92vw, var(--v3-menu-max, 20rem)); }
+.v3msel {
+  display: flex; flex-direction: column; max-height: min(60vh, 360px);
+  min-width: min(var(--v3msel-min, 0px), var(--v3-menu-max, 20rem));
+}
+.v3msel__search { margin: var(--space-2); box-sizing: border-box; width: calc(100% - 2 * var(--space-2)); font-size: 12.5px; }
+.v3msel__list { overflow-y: auto; padding: var(--space-1); outline: none; }
+.v3msel__list:focus-visible { box-shadow: inset 0 0 0 2px var(--color-focus); }
+.v3msel__group { padding: 6px 8px 2px; font-size: 11px; font-weight: 600; color: var(--color-text-subtle); }
+.v3msel__opt {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: var(--radius-sm);
+  font-size: 13px; cursor: pointer;
+}
+.v3msel__opt.is-active { background: var(--color-bg-soft); }
+.v3msel__opt .v2check { pointer-events: none; flex: 0 0 auto; }
+/* One line per row: a list read top to bottom has no two heights (0084). */
+.v3msel__text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.v3msel__name, .v3msel__hint { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v3msel__hint { font-size: 11.5px; color: var(--color-text-subtle); }
+.v3msel__badge { flex: 0 0 auto; display: inline-flex; }
+/* Counts stand under each other: fixed width, right-aligned, tabular (V3). */
+.v3msel__count {
+  flex: 0 0 auto; min-width: 5ch; text-align: right;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-size: 12px; color: var(--color-text-muted);
+}
+.v3msel__count.is-zero { color: var(--color-text-subtle); }
+.v3msel__empty { padding: 14px 10px; font-size: 13px; color: var(--color-text-subtle); }
+.v3msel__foot { border-top: 1px solid var(--color-border-subtle); padding: var(--space-2) var(--space-3); }
