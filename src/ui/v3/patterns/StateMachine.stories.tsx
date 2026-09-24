@@ -53,12 +53,34 @@ export const Filled: Story = {
 };
 
 /**
- * Der Beleg: eine Verzweigung und ein Paar in beide Richtungen
- * (`bookable ⇄ agent_review`) — die zwei Wege decken sich nicht, einer geht
- * durch die Mitte, einer unten herum. Ohne `current`: keine Box ist farbig.
+ * Der Beleg, angeordnet wie besprochen (Owner 2026-09-24): Der normale Weg
+ * „Wird eingeordnet → Wird ausgelesen → Bereit zur Buchung → Erledigt" steht
+ * oben als Linie. Er ist aus den Farben geschätzt, weil die Registry ihn noch
+ * nicht trägt (L-344). „Agent prüft" und „Kanzlei prüft" stehen darunter,
+ * „Erledigt" und „Gelöscht" rechts untereinander. Neu anstoßen, Erledigen und
+ * Löschen gehen von jedem offenen Zustand aus und stehen als Zeilen unter dem
+ * Bild. Ohne `current` ist keine Box farbig.
  */
 export const Branching: Story = {
   render: () => <StateMachine axis="document_status" />,
+};
+
+/**
+ * Der normale Weg ausdrücklich angegeben (Owner 2026-09-24): Beim
+ * Buchungszyklus findet die Schätzung keinen Weg, weil „Kanzlei prüft" und
+ * „DATEV-Prüfung" warning tragen. Mit `happyPath` steht der Weg als eine Linie
+ * oben, „abgeschlossen" und „abgebrochen" rechts untereinander, „fehlgeschlagen"
+ * darunter. „Verwerfen" geht von jedem frühen Zustand aus, betrifft aber nicht
+ * jeden offenen und bleibt deshalb ein Pfeil.
+ */
+export const HappyPath: Story = {
+  render: () => (
+    <StateMachine
+      axis="export_batch"
+      happyPath={["prepared", "agent", "review", "ready", "exporting", "inspection", "confirmed", "mirrored", "closed"]}
+      current="inspection"
+    />
+  ),
 };
 
 /**

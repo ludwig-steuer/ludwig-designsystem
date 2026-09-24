@@ -1143,3 +1143,28 @@ Der lokale `StateTransition` ist der gespiegelte; `label` heißt jetzt
 (`typecheck`, `build`, `check:icons`, `check:contrast` grün über den
 Exit-Code) und ändert kein Kriterium — aber gebaut hat ihn, wer auch hier
 schreibt. Eine kurze Bestätigung steht aus.
+
+## Nachtrag 2026-09-24 — normaler Weg oben, Endzustände rechts (Owner)
+
+Anlass: Beim Belegstatus (F289) stand alles in einer Reihe, und alle Rückwege liefen auf einer Sammelschiene unter dem Bild. Owner: „idealerweise wäre der Happy Case immer eine horizontale Linie, die Ausnahmen zwischen States unten, rechts am Ende immer die Endstates vertikal untereinander".
+
+- **Normaler Weg:** Kommt aus der neuen Prop `happyPath?: readonly string[]`, sonst aus einer Schätzung: der längste Weg vom Eintritt zu einem `success`-Zustand über Zustände ohne `warning`/`danger`. Die Registry trägt den Weg noch nicht, das ist Befund **L-344**. Findet die Schätzung nichts, bleibt die bisherige Anordnung nach Rang.
+- **Anordnung:**
+  - Der normale Weg liegt als Zeile 0 oben.
+  - Die Endzustände stehen in der letzten Spalte untereinander. Endzustand ist der letzte Schritt des Wegs und jeder Zustand ohne Ausgang.
+  - Jeder andere Zustand steht unter der Spalte seiner Nachbarn auf dem Weg (Mittelwert, nie in der Endspalte).
+- **Übergänge aus jedem offenen Zustand** (mindestens drei, z. B. Löschen, Erledigen, Neu anstoßen) werden nicht gezeichnet, sondern stehen als Zeile unter dem Bild: „Aus jedem offenen Zustand → Erledigt · …". Ein Schritt des normalen Wegs bleibt ein Pfeil. Das Popover listet weiter alle Wege.
+- **Linien:**
+  - Zwischen Nachbarspalten laufen Linien in beide Richtungen durch die Lücke. Ihre Enden sind über die Boxkante verteilt, der Schritt des Wegs bleibt in der Mitte.
+  - In einer Spalte laufen sie senkrecht. Ein Paar steht links und rechts nebeneinander.
+  - Sprünge über Spalten laufen wie bisher oben (vor) bzw. unten (zurück) herum.
+- **Stories:** `Branching` zeigt den Beleg in der neuen Anordnung mit geschätztem Weg. `HappyPath` ist neu: Buchungszyklus mit ausdrücklichem `happyPath`, weil die Schätzung dort nichts findet. `Filled` bleibt in der alten Anordnung (ohne Weg).
+
+Abnahmekriterien (Nachtrag):
+
+- [ ] Belegstatus: der Weg Wird eingeordnet → Wird ausgelesen → Bereit zur Buchung → Erledigt oben als gerade Linie, Erledigt und Gelöscht rechts untereinander, Agent prüft und Kanzlei prüft darunter (Story `Branching`)
+- [ ] Drei Zeilen „Aus jedem …" unter dem Bild statt Pfeilbündeln, und im Popover stehen die Wege weiter (Story `Branching`, `Explain`)
+- [ ] `happyPath` überstimmt die Schätzung (Story `HappyPath`)
+- [ ] Ohne Weg bleibt die Anordnung nach Rang (Story `Filled`, `Sequence`)
+- [ ] L-344 steht im Register
+

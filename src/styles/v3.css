@@ -3365,6 +3365,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2fsm__state--raw .v2fsm__label { font-family: var(--font-mono); font-size: var(--fs-ui-xs); }
 
 .v2fsm__note { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+/* Ways out of every open state, said once instead of drawn five times (Owner 2026-09-24) */
+.v2fsm__any { margin: 0; padding: 0; list-style: none; font-size: var(--fs-ui-sm); color: var(--color-text-muted); display: grid; gap: var(--space-1); }
 
 .v2fsm__pop { display: flex; flex-direction: column; gap: var(--space-2); max-width: 34ch; }
 .v2fsm__pophead { display: flex; align-items: center; gap: var(--space-2); }
