@@ -9,7 +9,19 @@ import {
   type ConfirmSpec,
 } from "../primitives/ActionButton";
 import { Button, type ButtonVariant } from "../primitives/Button";
-import { ErrorRow, TableLoading } from "../primitives/Cells";
+import type { Currency } from "@/ludwig/shared/money";
+import {
+  AmountCell,
+  CountCell,
+  DateRangeCell,
+  ErrorRow,
+  PercentCell,
+  TableLoading,
+  Timestamp,
+  type CellHint,
+  type CellTone,
+} from "../primitives/Cells";
+import type { TimeLength, TimeRangeFormat } from "../format";
 import { EmptyState } from "../primitives/EmptyState";
 import { ExpandableRow } from "../primitives/ExpandableRow";
 import { Link } from "../primitives/Link";
@@ -142,6 +154,124 @@ export interface ColumnDef<T> {
   align?: "start" | "end";
   /** Opt-in; without it no arrow and no link. */
   sortable?: boolean;
+}
+
+/* ── Value columns (0198) ────────────────────────────────────────────────── */
+
+/**
+ * What every value column shares with a hand-built one. The factories set
+ * `align` and `cell` themselves — a number column cannot end up with its head
+ * on the left and its values on the right, which is what `align` by hand did.
+ */
+type ValueColumnBase = Pick<ColumnDef<never>, "key" | "header" | "headerAside" | "width" | "sortable">;
+type Hint<T> = { hint?: (row: T) => CellHint | undefined };
+
+/**
+ * @when    A column of money — `AmountCell`, right, head right too.
+ * @instead A count → countColumn. A share → percentColumn. Anything else →
+ *          a plain `ColumnDef` with `cell`.
+ */
+export function amountColumn<T>(
+  o: ValueColumnBase &
+    Hint<T> & {
+      value: (row: T) => number | null;
+      /** One currency for the column, or one per row; default EUR. */
+      currency?: Currency | null | ((row: T) => Currency | null);
+      signed?: boolean;
+      /** Only where the number itself is the alarm (A7). */
+      tone?: (row: T) => CellTone;
+    },
+): ColumnDef<T> {
+  const { value, currency = "EUR", signed, tone, hint, ...col } = o;
+  return {
+    width: "140px",
+    ...col,
+    align: "end",
+    cell: (r) => (
+      <AmountCell
+        value={value(r)}
+        currency={typeof currency === "function" ? currency(r) : currency}
+        signed={signed}
+        tone={tone?.(r)}
+        hint={hint?.(r)}
+      />
+    ),
+  };
+}
+
+/**
+ * @when    A column of whole numbers — transactions, pages, lines.
+ * @instead Money → amountColumn. A share → percentColumn.
+ */
+export function countColumn<T>(
+  o: ValueColumnBase & Hint<T> & { value: (row: T) => number | null; unit?: readonly [string, string] },
+): ColumnDef<T> {
+  const { value, unit, hint, ...col } = o;
+  return {
+    width: "100px",
+    ...col,
+    align: "end",
+    cell: (r) => <CountCell value={value(r)} unit={unit} hint={hint?.(r)} />,
+  };
+}
+
+/**
+ * @when    A column of shares or rates, in percentage points.
+ * @instead A deviation with sign and step → a column with DeviationCell. How
+ *          sure a machine is → Confidence.
+ */
+export function percentColumn<T>(
+  o: ValueColumnBase & Hint<T> & { value: (row: T) => number | null; digits?: number },
+): ColumnDef<T> {
+  const { value, digits, hint, ...col } = o;
+  return {
+    width: "100px",
+    ...col,
+    align: "end",
+    cell: (r) => <PercentCell value={value(r)} digits={digits} hint={hint?.(r)} />,
+  };
+}
+
+/**
+ * @when    A column of points in time — day, day and time, month.
+ * @instead A span → dateRangeColumn.
+ */
+export function dateColumn<T>(
+  o: ValueColumnBase &
+    Hint<T> & {
+      value: (row: T) => string | Date | null;
+      format?: "date" | "dateTime" | "month";
+      length?: TimeLength;
+    },
+): ColumnDef<T> {
+  const { value, format = "date", length, hint, ...col } = o;
+  return {
+    width: format === "dateTime" ? "140px" : format === "month" ? "130px" : "120px",
+    ...col,
+    align: "start",
+    cell: (r) => <Timestamp iso={value(r)} format={format} length={length} hint={hint?.(r)} />,
+  };
+}
+
+/**
+ * @when    A column of spans — coverage of a statement, period of a batch.
+ * @instead One point → dateColumn.
+ */
+export function dateRangeColumn<T>(
+  o: ValueColumnBase &
+    Hint<T> & {
+      from: (row: T) => string | Date | null;
+      to: (row: T) => string | Date | null;
+      format?: TimeRangeFormat;
+    },
+): ColumnDef<T> {
+  const { from, to, format, hint, ...col } = o;
+  return {
+    width: "minmax(160px, 1fr)",
+    ...col,
+    align: "start",
+    cell: (r) => <DateRangeCell from={from(r)} to={to(r)} format={format} hint={hint?.(r)} />,
+  };
 }
 
 /** One action on one row. Either a jump (`href`) or a Server Action (`action`). */

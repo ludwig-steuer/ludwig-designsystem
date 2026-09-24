@@ -16,7 +16,7 @@ import { FilterBar } from "../primitives/FilterBar";
 import { FilterChips, SearchInput } from "../primitives/Nav";
 import { TextButton } from "../primitives/TextButton";
 import { formatAmount } from "../format";
-import { asCurrency } from "@/ludwig/shared/money";
+import { asCurrency, type Currency } from "@/ludwig/shared/money";
 import {
   DataTable,
   type AnyBulkAction,
@@ -29,6 +29,13 @@ import {
 } from "./DataTable";
 import { bulkAction } from "../primitives/Selection";
 import { StatusBadge } from "./StatusBadge";
+import {
+  amountColumn,
+  countColumn,
+  dateColumn,
+  dateRangeColumn,
+  percentColumn,
+} from "./DataTable";
 import { StatusInfoButton } from "./StatusInfoButton";
 
 const meta: Meta<typeof DataTable> = {
@@ -1007,6 +1014,111 @@ export const GroupsInUse: Story = {
         actions: <Button variant="primary" size="sm">Stapel festschreiben</Button>,
       }}
       next={<TextButton href="#datev">Als DATEV-Datei ausgeben</TextButton>}
+    />
+  ),
+};
+
+/* ── 0198: value columns — the reporting tab of a bank account ─────────── */
+
+type MonthRow = {
+  month: string;
+  count: number;
+  inflow: number;
+  outflow: number;
+  net: number;
+  closing: number | null;
+  jump: string | null;
+};
+
+const MONTHS: MonthRow[] = [
+  { month: "2026-05-01", count: 0, inflow: 0, outflow: 0, net: 0, closing: null, jump: null },
+  { month: "2026-06-01", count: 38, inflow: 14250, outflow: -12880.4, net: 1369.6, closing: null, jump: null },
+  { month: "2026-07-01", count: 41, inflow: 15010.5, outflow: -16020.3, net: -1009.8, closing: 8370.1, jump: null },
+  {
+    month: "2026-08-01",
+    count: 3400,
+    inflow: 12990,
+    outflow: -11489.08,
+    net: 1500.92,
+    closing: 9871.02,
+    jump: "Saldensprung: Anfangssaldo August 8.316,10 € statt 8.370,10 € (Endsaldo Juli).",
+  },
+];
+
+/**
+ * Month overview: no `align` anywhere in the column list — the factories set
+ * head and cell. June has no opening balance, so no closing one; August
+ * carries the „Saldensprung" as a warning at the closing balance.
+ */
+export const ReportMonths: Story = {
+  render: () => (
+    <DataTable<MonthRow>
+      rows={MONTHS}
+      rowKey={(r) => r.month}
+      head={{ title: "Saldo je Monat", sub: "Geschäftskonto Sparkasse · 2026" }}
+      columns={[
+        dateColumn({ key: "month", header: "Monat", value: (r) => r.month, format: "month", width: "1fr" }),
+        countColumn({ key: "count", header: "Umsätze", value: (r) => r.count }),
+        amountColumn({ key: "inflow", header: "Zufluss", value: (r) => r.inflow }),
+        amountColumn({ key: "outflow", header: "Abfluss", value: (r) => r.outflow }),
+        amountColumn({ key: "net", header: "Saldo", value: (r) => r.net, signed: true }),
+        amountColumn({
+          key: "closing",
+          header: "Endsaldo",
+          value: (r) => r.closing,
+          hint: (r) =>
+            r.jump
+              ? { level: "warning", text: r.jump }
+              : r.closing === null && r.count > 0
+                ? { level: "debug", text: "Kein Anfangssaldo — der Endsaldo lässt sich nicht rechnen." }
+                : undefined,
+        }),
+      ]}
+    />
+  ),
+};
+
+type ImportRow = {
+  id: string;
+  importedAt: string;
+  from: string;
+  to: string;
+  count: number;
+  assigned: number;
+  currency: Currency;
+  opening: number | null;
+  closing: number | null;
+};
+
+const IMPORTS: ImportRow[] = [
+  { id: "imp-3", importedAt: "2026-09-02T07:40:00Z", from: "2026-08-01", to: "2026-08-31", count: 36, assigned: 91.7, currency: "EUR", opening: 8316.1, closing: 9871.02 },
+  { id: "imp-2", importedAt: "2026-08-03T08:12:00Z", from: "2026-07-01", to: "2026-07-31", count: 41, assigned: 100, currency: "EUR", opening: 9379.9, closing: 8370.1 },
+  { id: "imp-1", importedAt: "2026-07-01T06:55:00Z", from: "2026-05-28", to: "2026-06-30", count: 38, assigned: 76.3, currency: "EUR", opening: null, closing: null },
+  { id: "imp-usd", importedAt: "2026-09-01T10:00:00Z", from: "2026-08-01", to: "2026-08-31", count: 4, assigned: 50, currency: "USD", opening: 3250, closing: 2829.5 },
+];
+
+/** Import list: time stamp, span, count, share assigned, balances per row currency, link. */
+export const ReportImports: Story = {
+  render: () => (
+    <DataTable<ImportRow>
+      rows={IMPORTS}
+      rowKey={(r) => r.id}
+      head={{ title: "Importe", sub: "4 Kontoauszüge" }}
+      rowHref={(r) => `#auszug-${r.id}`}
+      columns={[
+        dateColumn({ key: "importedAt", header: "Importiert", value: (r) => r.importedAt, format: "dateTime" }),
+        dateRangeColumn({ key: "span", header: "Zeitraum", from: (r) => r.from, to: (r) => r.to }),
+        countColumn({ key: "count", header: "Umsätze", value: (r) => r.count }),
+        percentColumn({
+          key: "assigned",
+          header: "Zugeordnet",
+          value: (r) => r.assigned,
+          digits: 1,
+          hint: (r) => (r.assigned < 80 ? { level: "info", text: "Weniger als 80 % der Umsätze sind einem Sachverhalt zugeordnet." } : undefined),
+        }),
+        amountColumn({ key: "opening", header: "Anfangssaldo", value: (r) => r.opening, currency: (r) => r.currency }),
+        amountColumn({ key: "closing", header: "Endsaldo", value: (r) => r.closing, currency: (r) => r.currency }),
+      ]}
     />
   ),
 };
