@@ -89,6 +89,55 @@ export function formatCount(value: number, unit?: readonly [one: string, other: 
   return unit ? `${n} ${value === 1 ? unit[0] : unit[1]}` : n;
 }
 
+/* ── Ja/Nein, Prozent, IBAN (0199) ─────────────────────────────────────── */
+
+/**
+ * `Ja` · `Nein` · `—` — the word, not a tick: a word reads without a legend (V7).
+ *
+ * @when    A yes/no becomes text — a sentence, a `title`, an export.
+ * @instead In a table cell → BooleanCell. A state with more than two values →
+ *          StatusBadge.
+ */
+export function formatBoolean(value: boolean | null): string {
+  return value === null ? "—" : value ? "Ja" : "Nein";
+}
+
+const PERCENT = new Map<number, Intl.NumberFormat>();
+
+/**
+ * `19 %` · `7,5 %` — `value` in **percentage points** (19, not 0,19), like
+ * the tax rates and shares the data model carries. The space before `%` does
+ * not break.
+ *
+ * @when    A share or a rate becomes text.
+ * @instead In a cell → PercentCell. A deviation with a sign and a step →
+ *          DeviationCell. How sure a machine is → Confidence.
+ */
+export function formatPercent(value: number | null, digits = 0): string {
+  if (value === null) return "—";
+  let f = PERCENT.get(digits);
+  if (!f) {
+    f = new Intl.NumberFormat(LOCALE, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    PERCENT.set(digits, f);
+  }
+  return `${f.format(value)}\u00a0%`;
+}
+
+/**
+ * `DE12 2505 0000 0123 4567 89` — spaces out, upper case, groups of four.
+ * It formats, it does not check (`validateIban` does).
+ *
+ * @when    An IBAN becomes text.
+ * @instead In a cell → IbanCell.
+ */
+export function formatIban(raw: string | null): string {
+  if (!raw) return "—";
+  return raw
+    .replace(/\s+/g, "")
+    .toUpperCase()
+    .replace(/(.{4})(?=.)/g, "$1 ");
+}
+
 /* ── Zeitpunkte ─────────────────────────────────────────────────────────── */
 
 export type TimeFormat = "date" | "dateTime" | "time" | "relative" | "age" | "month";

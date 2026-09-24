@@ -4,6 +4,9 @@ import {
   AmountCell,
   CountCell,
   DateRangeCell,
+  BooleanCell,
+  PercentCell,
+  IbanCell,
   type CellHint,
   DotStatus,
   ErrorRow,
@@ -484,4 +487,42 @@ export const InUse: Story = {
       </div>
     );
   },
+};
+
+/* ── 0199: yes/no, percent, IBAN ────────────────────────────────────────── */
+
+/** One column per type: filled, edge case, unknown. */
+export const MoreValues: Story = {
+  render: () => (
+    <Grid
+      cols="160px 110px 110px 1fr"
+      head={
+        <>
+          <span>Fall</span>
+          <span>Vorsteuerabzug</span>
+          <span className="v2num">Steuersatz</span>
+          <span>IBAN</span>
+        </>
+      }
+    >
+      <Row>
+        <span>gefüllt</span>
+        <BooleanCell value />
+        <PercentCell value={19} />
+        <IbanCell value="DE12250500000123456789" />
+      </Row>
+      <Row>
+        <span>Grenzfall</span>
+        <BooleanCell value={false} />
+        <PercentCell value={7.5} digits={1} hint={{ level: "info", text: "Ermäßigter Satz aus der Belegzeile." }} />
+        <IbanCell value="ch93 0076 2011 6238 5295 7" />
+      </Row>
+      <Row>
+        <span>unbekannt</span>
+        <BooleanCell value={null} />
+        <PercentCell value={null} />
+        <IbanCell value={null} />
+      </Row>
+    </Grid>
+  ),
 };

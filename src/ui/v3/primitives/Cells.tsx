@@ -3,7 +3,10 @@ import type { Currency } from "@/ludwig/shared/money";
 import { LEVEL_ICON, type HintLevel } from "../Icons";
 import {
   formatAmount,
+  formatBoolean,
   formatCount,
+  formatIban,
+  formatPercent,
   formatTime,
   formatTimeFull,
   formatTimeRange,
@@ -158,6 +161,59 @@ export function CountCell({
     <span className={value === null ? "v2num v2muted" : "v2num"}>
       {mark}
       {value === null ? "—" : formatCount(value, unit)}
+    </span>
+  );
+}
+
+/**
+ * Yes or no as a word, left — no tick (0199).
+ *
+ * @when    A yes/no property in a table column.
+ * @instead Done or failed as a sign → an icon cell with a word. A state with
+ *          more than two values → StatusBadge.
+ */
+export function BooleanCell({ value }: { value: boolean | null }) {
+  return <span className={value === null ? "v2muted" : undefined}>{formatBoolean(value)}</span>;
+}
+
+/**
+ * A share or a rate, right-aligned — „19 %" (0199). `value` in percentage points.
+ *
+ * @when    A tax rate, a share, a quota in a table column.
+ * @instead A deviation with sign and step → DeviationCell. How sure a machine
+ *          is → Confidence.
+ */
+export function PercentCell({
+  value,
+  digits = 0,
+  hint,
+}: {
+  value: number | null;
+  /** Decimal places, default none. */
+  digits?: number;
+  hint?: CellHint;
+}) {
+  return (
+    <span className={value === null ? "v2num v2muted" : "v2num"}>
+      {hint ? <ValueHint hint={hint} /> : null}
+      {formatPercent(value, digits)}
+    </span>
+  );
+}
+
+/**
+ * An IBAN in groups of four, mono, left; the `title` carries it ungrouped
+ * for copying (0199).
+ *
+ * @when    An IBAN in a table cell or a fact row.
+ * @instead Another key of digits → MonoCell. The account behind it →
+ *          PaymentAccountCell.
+ */
+export function IbanCell({ value }: { value: string | null }) {
+  if (!value) return <span className="v2muted">—</span>;
+  return (
+    <span className="v2mono" title={value.replace(/\s+/g, "").toUpperCase()}>
+      {formatIban(value)}
     </span>
   );
 }

@@ -6,7 +6,7 @@ import { PAYMENT_ACCOUNT_KIND_LABEL } from "@/ludwig/core/accounting/payment-acc
 
 import { Drawer, DrawerFullView } from "../../primitives/Drawer";
 import { FieldList } from "../../primitives/FieldList";
-import { MonoCell } from "../../primitives/Cells";
+import { IbanCell } from "../../primitives/Cells";
 import { Skeleton } from "../../primitives/Skeleton";
 import { AccountCell } from "../account/Account";
 import type { BankTransactionRowData } from "../bank-transaction/bank-transaction";
@@ -88,7 +88,7 @@ export function PaymentAccountDrawer({
             tone="bare"
             // The kind stands in the head already (`meta`) — not a second time here.
             rows={[
-              ["IBAN", account.iban ? <MonoCell key="i" value={account.iban} /> : account.externalAccountId ?? "—"],
+              ["IBAN", account.iban ? <IbanCell key="i" value={account.iban} /> : account.externalAccountId ?? "—"],
               [
                 "Sachkonto",
                 account.ledgerAccountNumber ? (

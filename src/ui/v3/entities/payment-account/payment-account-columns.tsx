@@ -6,7 +6,7 @@ import { Link } from "../../primitives/Link";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
-import { AmountCell, MonoCell } from "../../primitives/Cells";
+import { AmountCell, IbanCell, MonoCell } from "../../primitives/Cells";
 import { DateRange } from "../../primitives/Time";
 import { AccountCell } from "../account/Account";
 import { PaymentAccountCell } from "./PaymentAccount";
@@ -117,7 +117,7 @@ export function paymentAccountColumns(
       width: "minmax(0, 1fr)",
       // The IBAN where there is one, else the card identifier — an account
       // without either is a ledger account that never sees a statement.
-      cell: (a) => <MonoCell value={a.iban ?? a.externalAccountId ?? null} />,
+      cell: (a) => (a.iban ? <IbanCell value={a.iban} /> : <MonoCell value={a.externalAccountId ?? null} />),
     },
     ledgerAccount: {
       key: "ledgerAccount",
