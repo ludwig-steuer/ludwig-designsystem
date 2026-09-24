@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme — gebaut 2026-09-24, fremde Abnahme steht aus |
 | Stufe | `primitives/` (Gruppe Formular) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: Beitragsmonat, Schadenquartal, Geschäftsjahr als Filter über einer Liste. „Wirtschaftsjahr" ist das Label, der Code sagt `fiscalYear` (GLOSSARY „Fiscal year") und bekommt die Jahre vom Aufrufer |
 | Quelle | Owner 2026-09-24: „Datum/Uhrzeit, aber auch Zeitraum (von–bis), jeweils auch nur Monatsperioden oder Monate einzeln" · Nachsatz: „hauptsächlich Filter; Uhrzeit brauchen wir eigentlich nie zum Eintragen, wenn dann zum Lesen" · „Quartal und WJ brauchen wir sicher später, gerne schon mitdesignen" |
@@ -215,3 +215,28 @@ Abgenommen von / am: … · Offene Punkte: …
    `["month", "months"]`, bis ein Screen mehr verlangt.
 2. **Wie heißt die Einheit „Zeitraum"?** Ohne Antwort: „Zeitraum" im
    `Segmented`, weil „Monate" neben „Monat" zu leicht zu verwechseln ist.
+
+## Bau (2026-09-24) — Abweichungen von der Spec
+
+- **Umschalter sagt „WJ", nicht „Wirtschaftsjahr".** Mit vier Einheiten passt
+  das ganze Wort nicht in das Panel (gemessen: der Reiter lief aus dem Rand);
+  „WJ" steht ohnehin auf dem Auslöser („WJ 2025/26"). Offene Frage 2 blieb beim
+  Default: „Zeitraum".
+- **Monatsnamen auf dem Auslöser lang:** „November 2025 – Februar 2026",
+  „Januar–Juni 2026" — so, wie `formatTimeRange(…, "month")` für `DateRange`
+  schon spricht; die Tabelle „Wert" oben nannte Kurzformen.
+- **Exporte:** `PeriodField`, `PeriodPanel`, `periodOf` (mit eigenem
+  `@when`: den gefilterten Zeitraum außerhalb des Feldes nennen),
+  `PeriodUnit`, `FiscalYearSpan` (= `Pick<FiscalYearListItem, "year" |
+  "startDate" | "endDate">`).
+- **Auslöser** ist derselbe wie bei `MultiSelectFilter` (`.v3msel__trigger`) —
+  eine Optik für jeden Filter, der in einen Knopf gefaltet ist.
+- Esc wirkt in zwei Stufen: mit gesetztem Anker verwirft es den Anker, sonst
+  schließt es und gibt den Fokus an den Auslöser.
+- `InUse` mit `Card`/`Table` statt `DataTable` (Primitive-Story importiert kein
+  Pattern).
+
+Selbst angesehen (nicht die Abnahme): alle zehn Stories bei 1400 px, keine
+Konsolenfehler; Öffnen fokussiert den gewählten Monat, → ↓ gehen um 1 / 4,
+Bild↓ blättert das Jahr bei gehaltener Spalte, Enter wählt und schließt;
+Februar 2028 endet am 29.

@@ -4246,3 +4246,47 @@ a.v3prov:focus-visible { text-decoration: underline; }
 .v3msel__count.is-zero { color: var(--color-text-subtle); }
 .v3msel__empty { padding: 14px 10px; font-size: 13px; color: var(--color-text-subtle); }
 .v3msel__foot { border-top: 1px solid var(--color-border-subtle); padding: var(--space-2) var(--space-3); }
+
+/* --- PeriodField / PeriodPanel (0196) — month, span, quarter, fiscal year --
+   The trigger is MultiSelectFilter's (`.v3msel__trigger`): one look for every
+   filter that folds into a button. */
+.v2pop:has(> [role="dialog"] > .v3pfld) { padding: var(--space-3); max-width: none; }
+.v3pfld { display: grid; gap: var(--space-3); width: 19rem; font-size: var(--fs-ui); }
+.v3pfld .v2seg { justify-self: start; }
+.v3pfld__year { display: flex; align-items: center; justify-content: space-between; font-weight: 600; }
+.v3pfld__step {
+  display: inline-flex; padding: var(--space-1); border: none; background: none;
+  border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;
+}
+.v3pfld__step:hover:not(:disabled) { background: var(--color-bg-soft); }
+.v3pfld__step:disabled { color: var(--color-text-subtle); opacity: 0.4; cursor: not-allowed; }
+.v3pfld__grid { display: grid; gap: var(--space-1); }
+.v3pfld__row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-1); }
+.v3pfld__cell {
+  padding: var(--space-2) 0; border: 1px solid transparent; border-radius: var(--radius-md);
+  background: none; font: inherit; color: var(--color-text); cursor: pointer;
+}
+.v3pfld__cell:hover:not(:disabled) { background: var(--color-bg-soft); }
+.v3pfld__cell:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+.v3pfld__cell:disabled { color: var(--color-text-subtle); opacity: 0.45; cursor: not-allowed; }
+.v3pfld__cell.is-today { border-color: var(--color-border-strong); }
+/* In the span: soft; its ends: full — the word („März–Mai 2026") is on the
+   trigger, the colour only repeats it (V7). */
+.v3pfld__cell.is-in { background: var(--color-accent-50); color: var(--color-primary-700); }
+.v3pfld__cell.is-end { background: var(--color-primary-700); color: var(--color-text-on-dark); font-weight: 600; }
+.v3pfld__note { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v3pfld__quarters { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
+.v3pfld__quarter { display: grid; gap: 2px; padding: var(--space-2) var(--space-3); text-align: left; border-color: var(--color-border); }
+.v3pfld__quarter span { font-size: var(--fs-ui-sm); opacity: 0.8; }
+.v3pfld__fys { display: grid; gap: var(--space-1); max-height: 16rem; overflow-y: auto; }
+.v3pfld__fy {
+  display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3);
+  padding: var(--space-2) var(--space-3); border: 1px solid transparent; border-radius: var(--radius-md);
+  background: none; font: inherit; color: var(--color-text); text-align: left; cursor: pointer;
+}
+.v3pfld__fy:hover { background: var(--color-bg-soft); }
+.v3pfld__fy strong { white-space: nowrap; }
+.v3pfld__fy:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+.v3pfld__fy.is-end { background: var(--color-accent-50); border-color: var(--color-primary-700); }
+.v3pfld__foot { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); border-top: var(--border-1-subtle); padding-top: var(--space-2); }
+.v3pfld__foot:empty { display: none; }

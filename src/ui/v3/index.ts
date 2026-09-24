@@ -87,6 +87,13 @@ export { InlineEdit, type InlineEditInputProps } from "./primitives/InlineEdit";
 export { Combobox, type ComboboxOption } from "./primitives/Combobox";
 export { MultiSelectFilter, type MultiSelectOption } from "./primitives/MultiSelectFilter";
 export { DateField, DateRangeField, type DatePreset } from "./primitives/DateField";
+export {
+  PeriodField,
+  PeriodPanel,
+  periodOf,
+  type PeriodUnit,
+  type FiscalYearSpan,
+} from "./primitives/PeriodField";
 export { FileDrop, type DroppedFile } from "./primitives/FileDrop";
 
 /* Dialog */
