@@ -354,6 +354,57 @@ export const StatementWithoutAccount: Story = {
 };
 
 /**
+ * The same `awaiting_input`, a second cause (F288): the account is set, but
+ * the check chain found that the balances do not add up, and the office has
+ * to decide. The kind stays `payment_account`; the sentence comes from the
+ * caller through `wording`.
+ */
+export const StatementDoesNotBalance: Story = {
+  render: () => {
+    const doc = documentFixture({
+      sourceDocType: "bank_statement_pdf",
+      fileName: "Kontoauszug-2026-08.pdf",
+      counterparty: null,
+      completedAt: null,
+      completedVia: null,
+      detail: null,
+      hasInvoiceRow: false,
+      inboxStatus: "awaiting_input",
+    });
+    return (
+      <DocumentPage document={doc} actions={menu}>
+        <SourceDocumentCard
+          document={doc}
+          previewUrl={MUSTER_PDF}
+          summary={null}
+          defects={
+            <SourceDocumentDefects
+              defects={documentDefects({ inboxStatus: "awaiting_input" })}
+              wording={{
+                payment_account: {
+                  title: "Kontoauszug geht nicht auf: Endsaldo 9.871,02 € erwartet, 9.817,02 € errechnet.",
+                  hint: "Die Buchungen werden erst übernommen, wenn die Kanzlei den Auszug freigibt.",
+                },
+              }}
+              actions={{
+                payment_account: (
+                  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <Button variant="secondary" size="sm">
+                      Trotzdem importieren
+                    </Button>
+                    <TextButton href="?tab=original">Original ansehen →</TextButton>
+                  </div>
+                ),
+              }}
+            />
+          }
+        />
+      </DocumentPage>
+    );
+  },
+};
+
+/**
  * **A5b — Kontoauszug, falsch zugeordnet.** Die Rolle erkennt, dass der Auszug
  * am falschen Konto hängt. Die Korrektur läuft über die Faktenzeile, mit einem
  * Hinweis, was sie am Bestand tut: **die Buchungen bleiben, akzeptierte

@@ -78,6 +78,14 @@ export interface SourceDocumentDefectsProps {
    */
   actions?: Partial<Record<DocDefectKind, ReactNode>>;
   /**
+   * The caller's sentence for a kind, where one kind has more than one cause.
+   * A statement on `awaiting_input` either lacks its payment account or its
+   * balances do not add up (F288) — the same kind, a different sentence:
+   * `{ payment_account: { title: "Kontoauszug geht nicht auf: …", hint: "…" } }`.
+   * What is left out keeps the house sentence.
+   */
+  wording?: Partial<Record<DocDefectKind, { title?: string; hint?: string }>>;
+  /**
    * The open clarifications of this document, drawn by their own family
    * (`ClarificationCard`) — the box only provides the place and the heading.
    *
@@ -102,6 +110,7 @@ export interface SourceDocumentDefectsProps {
 export function SourceDocumentDefects({
   defects,
   actions,
+  wording,
   clarifications,
   clarificationCount,
   moreHref,
@@ -115,8 +124,8 @@ export function SourceDocumentDefects({
       emptyText="An diesem Beleg ist nichts offen."
       points={defects.map((defect, i) => ({
         key: `${defect.kind}-${defect.code ?? i}`,
-        title: defectTitle(defect),
-        hint: DEFECT_HINT[defect.kind],
+        title: wording?.[defect.kind]?.title ?? defectTitle(defect),
+        hint: wording?.[defect.kind]?.hint ?? DEFECT_HINT[defect.kind],
         ...(defect.message && defect.kind === "extraction" ? { raw: defect.message } : {}),
         ...(actions?.[defect.kind] ? { action: actions[defect.kind] } : {}),
       }))}

@@ -180,3 +180,20 @@ Böden dieser Abnahme leben als benannte Schritte weiter: `document` 560 für da
 Original, `record` 384 für die Belegdaten — samt der Begründung, warum 384 und
 nicht 400. Was sich ändert: bei 1136 px Kartenbreite teilen sich die Hälften
 den Platz gleichmäßig (646 / 470 statt 560 / 560). Messung in 0185.
+
+## Nachtrag 2026-09-24 — Satz des Mangels vom Aufrufer (F288)
+
+Quelle: ll-cto für ll-dev2 (App b3206dc1). Ein Kontoauszug auf
+`awaiting_input` hat seit F288 zwei Ursachen: Zahlungskonto fehlt, oder die
+Prüfkette findet, dass die Salden nicht aufgehen. Beides ist `DocDefectKind`
+`payment_account`; der feste Satz „Das Zahlungskonto fehlt." war im zweiten
+Fall falsch.
+
+- Neue Prop `SourceDocumentDefects.wording?: Partial<Record<DocDefectKind, { title?; hint? }>>`
+  — der Satz und die Folgezeile je Art vom Aufrufer; was fehlt, bleibt der
+  Haussatz (Default unverändert).
+- Nachweis: `Seiten/Beleg/Andere Belegarten` → `StatementDoesNotBalance`
+  (neu) neben `StatementWithoutAccount` (unverändert „Das Zahlungskonto fehlt.").
+
+- [ ] `wording.payment_account.title`/`hint` ersetzen Satz und Folgezeile (Story `StatementDoesNotBalance`)
+- [ ] Ohne `wording` unverändert (Story `StatementWithoutAccount`)
