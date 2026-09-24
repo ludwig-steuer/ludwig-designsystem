@@ -19,6 +19,8 @@ export const SOURCE_DOC_TYPE_LABELS: Record<string, string> = {
   travel_expense_report: "Reisekostenabrechnung",
   declaration: "Erklärung",
   other: "Sonstiger Beleg",
+  extf_booking_batch: "Buchungsstapel (EXTF)",
+  extf_account_list: "Debitoren-/Kreditorenliste (EXTF)",
 };
 
 /**

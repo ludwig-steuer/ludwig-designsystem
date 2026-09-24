@@ -1414,3 +1414,21 @@ Offen: **fremde Abnahme**.
 2. Der GLOSSARY nennt `uploaded_at` „rein technisch". Seit diesem Entscheid
    ist es eine angezeigte Größe mit eigenem Namen; die Zeile gehört drüben
    nachgeführt, der Spiegel bringt sie dann mit.
+
+## Nachtrag 2026-09-24 — eine Statusspalte (F289)
+
+Mit F289 trägt ein Beleg **einen** Status (`document_status`, App `770cbbf0`).
+Die Spalten `processing` („Verarbeitung", Achse `document_processing`),
+`inboxState` („Erkennung", `document_inbox`) und `completed` („Erledigt",
+`document_completion`) sind durch **eine** Spalte `status` („Status", (i) der
+Achse `document_status`) ersetzt. Sie zeigt `SourceDocumentCompletion`:
+erledigt → `document_done_via` mit Datum, sonst `document_status`, in
+`agent_review`/`human_review` mit dem Prüfgrund im Tooltip. `DOCUMENT_LIST_COLUMNS`,
+`INBOX_COLUMNS`, `SUBMIT_COLUMNS` führen sie; die Nachbesserungs-Spalte gibt es
+nicht mehr (App ebenso).
+
+**Für die App (Bruch):** Aufrufer mit den Spaltenschlüsseln `processing`,
+`inboxState` oder `completed` bekommen einen Typfehler → `status`.
+
+- [ ] `DocumentList` zeigt eine Spalte „Status" mit „Gebucht 30.08.2026", „Wird ausgelesen", „Agent prüft" (Story `DocumentList`)
+- [ ] Keine Spalte „Verarbeitung", „Erkennung" oder „Erledigt" mehr in den drei Listen

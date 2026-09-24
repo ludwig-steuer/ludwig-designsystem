@@ -26,6 +26,19 @@ export const BANK_CHECK_LABELS = {
   centralSettlement: "Zentralregulierung ausgeglichen",
 } as const;
 
+/**
+ * Was im Mandantenstapel anders heißt: dort gibt es keine Vorschläge, sondern
+ * die Sätze des Mandanten — übernommen werden sie in Schritt 11 auf einmal.
+ */
+export const CLIENT_BATCH_CHECKPOINT_TEXTS: Partial<Record<ChecklistRowKey, CheckpointText>> = {
+  entries_accepted: {
+    label: "Buchungen übernommen",
+    todo: "Die Sätze des Mandanten je Konto ansehen und alle übernehmen – erst dann gehen sie an DATEV.",
+    jumpLabel: "Buchungen ansehen",
+    jumpHref: "11",
+  },
+};
+
 export const CHECKPOINT_TEXTS: Record<Exclude<ChecklistRowKey, "not_checked">, CheckpointText> = {
   statements_complete: {
     label: "Kontoauszüge lückenlos",

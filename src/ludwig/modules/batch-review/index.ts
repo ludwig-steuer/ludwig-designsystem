@@ -1,13 +1,13 @@
 /* Generiert von scripts/sync-ludwig.sh — nicht von Hand bearbeiten. */
 export * from "./domain/account-findings";
 export * from "./domain/agent-done";
-export * from "./domain/batch-contribution";
 export * from "./domain/check-kinds";
 export * from "./domain/checklist";
 export * from "./domain/checkpoint-texts";
 export * from "./domain/clearing-state";
 export * from "./domain/comparison";
 export * from "./domain/coverage-gap";
+export * from "./domain/displayed-entry";
 export * from "./domain/gate-row";
 export * from "./domain/gating";
 export * from "./domain/open-entry-totals";

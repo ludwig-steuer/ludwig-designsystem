@@ -16,19 +16,14 @@
  * Spiegelung im Web, damit neue Werte ohne Web-Deploy durchschlagen.
  */
 
-import { formQualifiesForInvoiceFlow } from "@/ludwig/modules/source-docs";
+import {
+  formQualifiesForInvoiceFlow,
+  type SourceDocReviewReason,
+  type SourceDocStatus,
+} from "@/ludwig/modules/source-docs";
 import type { CollectionKind } from "@/ludwig/core/documents/collection-kind";
 
-export const INBOX_STATUS = [
-  "pending_classification",
-  "classified",
-  "classification_failed",
-  "deleted",
-  /** F170: erkannt, aber eine Angabe von außen fehlt — heute das Bankkonto
-   *  eines Kontoauszugs. Nichts läuft, bis sie kommt. */
-  "awaiting_input",
-] as const;
-export type InboxStatus = (typeof INBOX_STATUS)[number];
+
 
 /**
  * F71 — Split-Plan eines Sammel-PDFs, wie ihn der Classifier nach eigener
@@ -52,7 +47,12 @@ export interface InboxEntry {
   id: string;
   clientId: string;
   storedFileId: string;
-  status: InboxStatus;
+  /** Belegstatus (F289, belege.md R14). */
+  status: SourceDocStatus;
+  /** Gesetzt genau in `agent_review`/`human_review`. */
+  reviewReason: SourceDocReviewReason | null;
+  /** Übergabe-/Rückgabegrund, Prüfketten-Befund (F288). */
+  reviewNote: string | null;
   classDocumentForm: string | null;
   docDirection: string | null;
   classDocumentKind: string | null;
@@ -86,7 +86,6 @@ export interface InboxEntry {
    *  einen Beleg eingereicht wurde. NULL solange noch nichts registriert
    *  ist. Nur Ingest-Marke — verlinkt wird die Basis-Id (``id``). */
   ingestedInvoiceId: string | null;
-  ingestedInvoiceStatus: string | null;
   /** ``client_accounting_case.id`` falls bereits ein Sachverhalt aus
    *  diesem Beleg erstellt wurde. NULL solange der Beleg keinem Case
    *  zugeordnet ist (über ein document_received-Event). */
@@ -99,7 +98,8 @@ export interface InboxEntry {
 export function qualifiesForInvoiceFlow(
   entry: Pick<InboxEntry, "status" | "classDocumentForm">,
 ): boolean {
-  if (entry.status !== "classified") return false;
+  // Einordnung durch (F289: alles außer pending/deleted).
+  if (entry.status === "pending" || entry.status === "deleted") return false;
   return formQualifiesForInvoiceFlow(entry.classDocumentForm);
 }
 
@@ -174,7 +174,7 @@ export interface PreparedUpload {
  * Damit entfällt auch `classification_trigger_failed`: es gibt keinen
  * synchronen Trigger mehr, der wegen eines Caller-Timeouts verloren gehen
  * könnte. Scheitert der Job, steht der Fehler am Beleg
- * (`classification_failed`) und in `/admin/jobs`.
+ * (`agent_review/job_failed` bzw. `classification_error`) und in `/admin/jobs`.
  */
 export type FinalizeUploadOutcome =
   | {
@@ -197,14 +197,18 @@ export type FinalizeUploadOutcome =
       importedCount: number;
       rejectedCount: number;
       alreadyExists: boolean;
+      /** F279: das source_doc der Datei — die Upload-Zeile springt dorthin. */
+      inboxEntryId: string | null;
     }
   | {
       kind: "client_batch_masterdata";
       directoryEntries: number;
       renamedPlaceholders: number;
       nameConflicts: number;
+      /** F279: das source_doc der Datei — die Upload-Zeile springt dorthin. */
+      inboxEntryId: string | null;
     }
-  /** Kontoauszug erkannt, Zahlungskonto fehlt — die Zeile steht auf `awaiting_input`. */
+  /** Kontoauszug erkannt, Zahlungskonto fehlt — `human_review/statement_account_missing`. */
   | { kind: "awaiting_payment_account"; inboxEntryId: string; format: string }
   /** Kontoauszug erkannt UND zugeordnet (CAMT trägt die IBAN) — schon importiert. */
   | {
@@ -217,8 +221,13 @@ export type FinalizeUploadOutcome =
       ignored: number;
       warnings: string[];
     }
-  /** Weder Beleg noch bekannter Auszug noch Stapel: abgewiesen, nicht geraten. */
-  | { kind: "unsupported"; reason: string };
+  /**
+   * F286: weder Beleg noch lesbarer Auszug noch Stapel — liegt als Beleg auf
+   * „Einordnung fehlgeschlagen" mit dem Grund, per Reprocess neu lesbar.
+   */
+  | { kind: "classification_failed"; inboxEntryId: string; reason: string }
+  /** F288: Auszug gelesen, Prüfkette geht nicht auf — liegt zur Prüfung bei der Kanzlei. */
+  | { kind: "statement_inconsistent"; inboxEntryId: string; format: string; reason: string };
 
 export type DeleteInboxOutcome =
   | { kind: "deleted" }
@@ -228,3 +237,12 @@ export interface SubmittedInbox {
   invoiceId: string;
   duplicate: boolean;
 }
+
+/**
+ * Die Kanzlei hat „Trotzdem importieren" gewählt — Import nur `rows_only`.
+ * Präfix in `review_note` am Beleg (`human_review/statement_account_missing`, F289).
+ */
+export const STATEMENT_OVERRIDDEN_PREFIX = "Prüfkette übersteuert: ";
+
+/** Die drei Handlungen der Kanzlei an einem nicht aufgehenden Auszug (T288.3). */
+export type InconsistentStatementDecision = "request_new_file" | "import_anyway" | "reject";

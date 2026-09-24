@@ -144,9 +144,28 @@ export class BankImportError extends Error {
   }
 }
 
+/**
+ * F288: die Datei ist gelesen, aber die Prüfkette geht nicht auf (V2/V3/V4/V5
+ * mit Referenz/V7). Trägt Befund und Parse-Ergebnis — die Upload-Weiche legt
+ * den Beleg damit zur menschlichen Prüfung ab, statt ihn abzuweisen.
+ */
+export class StatementInconsistentError extends BankImportError {
+  constructor(
+    message: string,
+    readonly findings: string[],
+    readonly format: { id: BankFileFormatId; label: string; container: "csv" | "xlsx" | "xml" },
+    readonly statementAccount: StatementAccountRef | null,
+  ) {
+    super("statement_inconsistent", message);
+    this.name = "StatementInconsistentError";
+  }
+}
+
 export type BankImportErrorCode =
   | "configuration_missing"
   | "invalid_currency"
   | "parser_error"
+  /** F288: gelesen, aber Prüfkette nicht aufgegangen — `StatementInconsistentError`. */
+  | "statement_inconsistent"
   | "storage_error"
   | "qonto_api_error";

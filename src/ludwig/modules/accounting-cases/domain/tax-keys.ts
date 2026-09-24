@@ -193,6 +193,21 @@ export const VAT_OVERRIDE_REQUIRED_MARKER = "Vorsteuer ohne Beleg erfordert eine
 
 /** Alle bekannten VSt/USt-Kontonummern (framework-übergreifend, inkl. §13b/igE)
  *  — zur Erkennung von Steuerzeilen bei der Explizit-Validierung. */
+/**
+ * Nur die § 13b-/igE-Konten (1577/1787, 1574/1774, SKR04 1407/3837, 1404/3804):
+ * Zeilen darauf legt der Kern an, sie sind Folge der Sachzeile und kein Betrag.
+ * Eine ausdrücklich gebuchte Standard-VSt (1576) gehört dagegen zum Brutto des
+ * Belegs — Prüfpunkte und Summen lassen nur diese Menge weg (P50).
+ */
+export const REVERSE_CHARGE_TAX_ACCOUNT_NUMBERS: ReadonlySet<string> = new Set(
+  Object.values(REVERSE_CHARGE_ACCOUNTS_BY_FRAMEWORK).flatMap((byKey) =>
+    Object.values(byKey).flatMap((rc) => [
+      ...(rc.input ? [rc.input.accountNumber] : []),
+      rc.output.accountNumber,
+    ]),
+  ),
+);
+
 export const TAX_ACCOUNT_NUMBERS: ReadonlySet<string> = new Set([
   ...Object.values(TAX_ACCOUNTS_BY_FRAMEWORK).flatMap((byKey) =>
     Object.values(byKey).map((a) => a.accountNumber),

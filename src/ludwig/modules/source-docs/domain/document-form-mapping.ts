@@ -62,11 +62,14 @@ export type SourceDocType =
   | "bank_statement_pdf"
   | "credit_card_statement"
   | "travel_expense_report"
-  | "other";
+  | "other"
+  // F279: EXTF-Lieferungen des Mandanten — nie aus dem Classifier, nie in `DOCUMENT_FORM_ROUTING`.
+  | "extf_booking_batch"
+  | "extf_account_list";
 
 /**
  * Fester Erledigungs-Grund für Eigenauswertungen (O7). Wörtlich in
- * `client_source_docs.completed_reason` — die UI zeigt ihn als Tooltip.
+ * `client_source_docs.done_reason` — die UI zeigt ihn als Tooltip.
  */
 export const REPORT_COMPLETED_REASON =
   "Auswertung — kein Beleg; Inhalt liegt im DATEV-Spiegel";

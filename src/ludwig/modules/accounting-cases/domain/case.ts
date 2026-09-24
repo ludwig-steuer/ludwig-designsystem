@@ -70,6 +70,16 @@ export const CASE_KIND_LABEL: Record<CaseKind, string> = {
 
 /** Label für Aufrufer, die den Wert nur als ``string`` haben (Query-Ergebnisse,
  *  Formularwerte). Unbekanntes fällt auf den Rohwert zurück statt zu leeren. */
+/**
+ * Anzeige der Sachverhaltsnummer (F280): `2026-0012` → `SV-2026-0012`. Reine
+ * Anzeige — `case_number` bleibt in der DB `YYYY-NNNN`, die Suche nimmt beides.
+ */
+export function formatCaseNumber(n: string): string;
+export function formatCaseNumber(n: string | null | undefined): string | null;
+export function formatCaseNumber(n: string | null | undefined): string | null {
+  return n ? `SV-${n}` : null;
+}
+
 export function caseKindLabel(kind: string | null | undefined): string {
   if (!kind) return "—";
   return CASE_KIND_LABEL[kind as CaseKind] ?? kind;

@@ -5,8 +5,9 @@
  * gegen diese Form — sie müssen sich weder um Encoding noch um
  * Excel-Quirks (Zellen-Typen, Date-Serial, etc.) kümmern.
  *
- * `headerRow` enthält die erste, als Header interpretierte Zeile.
- * `dataRows` sind alle nachfolgenden Daten-Zeilen. Beide werden auf
+ * `headerRow` enthält die erste Zeile, `dataRows` alle nachfolgenden. Ob die
+ * erste Zeile wirklich der Kopf ist, entscheidet erst der Katalog-Eintrag
+ * (F286-T286.2: Kopfzeilen-Suche hinter Vorspann-Zeilen). Beide werden auf
  * Strings normalisiert; Excel-`Date`-Zellen werden vom xlsx-Decoder
  * in ISO-Strings (`YYYY-MM-DD`) konvertiert, damit Profile-Code
  * type-stabil bleibt.
@@ -14,8 +15,8 @@
 export interface RawSheet {
   /** Spalten-Header, getrimmt. */
   headerRow: string[];
-  /** Daten-Zeilen, jede mit derselben Länge wie `headerRow` (kürzere
-   * Zeilen werden mit Leerstrings aufgefüllt, längere abgeschnitten). */
+  /** Daten-Zeilen, jede mit derselben Länge wie `headerRow` (alle Zeilen
+   * werden auf die breiteste Zeile mit Leerstrings aufgefüllt). */
   dataRows: string[][];
   /** Quelle (Sheet-Name bei xlsx, "csv" bei CSV) — nur Diagnostik. */
   sourceLabel: string;
@@ -37,6 +38,8 @@ export type DecodedSource =
       /** Dekodiertes File ohne BOM, in Zeilen aufgesplittet (leere Zeilen verworfen). */
       lines: string[];
       encoding: "utf-8" | "windows-1252";
+      /** F286: die Roh-Bytes — Katalog-Einträge deklarieren ihr Encoding selbst. */
+      bytes: Uint8Array;
     }
   | { kind: "xlsx"; sheet: RawSheet }
   | { kind: "xml"; text: string };

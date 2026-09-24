@@ -18,7 +18,7 @@ type Story = StoryObj<typeof StateMachine>;
   to a maintained one again.
 */
 const CYCLE = STATE_MACHINES.export_batch!.transitions;
-const INBOX = STATE_MACHINES.document_processing!.transitions;
+const DOCUMENT = STATE_MACHINES.document_status!.transitions;
 
 /* The **column order** stays the story's: it is a statement about the picture
    ("`review` stands next to `agent` because it draws its rank from that
@@ -54,11 +54,11 @@ export const Filled: Story = {
 
 /**
  * Der Beleg: eine Verzweigung und ein Paar in beide Richtungen
- * (`processed ⇄ review_needed`) — die zwei Wege decken sich nicht, einer geht
+ * (`bookable ⇄ agent_review`) — die zwei Wege decken sich nicht, einer geht
  * durch die Mitte, einer unten herum. Ohne `current`: keine Box ist farbig.
  */
 export const Branching: Story = {
-  render: () => <StateMachine axis="document_processing" />,
+  render: () => <StateMachine axis="document_status" />,
 };
 
 /**
@@ -91,7 +91,7 @@ export const Sequence: Story = {
  * Escape schließt, Tab läuft die Boxen in Spaltenordnung ab.
  */
 export const Explain: Story = {
-  render: () => <StateMachine axis="document_processing" current="review_needed" />,
+  render: () => <StateMachine axis="document_status" current="agent_review" />,
 };
 
 /**
@@ -104,14 +104,14 @@ export const Edge: Story = {
   render: () => (
     <div style={{ maxWidth: 360, border: "var(--border-1)", borderRadius: "var(--radius-lg)", padding: "var(--space-4)" }}>
       <StateMachine
-        axis="document_inbox"
+        axis="document_status"
         transitions={[
-          ...INBOX,
+          ...DOCUMENT,
           // Two transitions the registry does **not** have — exactly the edge this
           // story shows: a target outside the axis and a self-loop. They carry
           // `trigger` and `label` like every other transition.
-          { from: "classification_failed", to: "quarantined", trigger: "quarantined", label: "Aussortiert" },
-          { from: "pending_classification", to: "pending_classification", trigger: "reprocess", label: "Erneut anstoßen" },
+          { from: "agent_review", to: "quarantined", trigger: "quarantined", label: "Aussortiert" },
+          { from: "pending", to: "pending", trigger: "reprocess", label: "Erneut anstoßen" },
         ]}
         current="on_hold"
       />

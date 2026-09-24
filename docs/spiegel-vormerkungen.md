@@ -12,18 +12,26 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 ## Offen
 
-- **`SourceDocumentVM.uploadedAt`** (`modules/source-docs/domain/source-document-vm.ts`)
-  — der Upload-Zeitpunkt als `string | null`, drüben in App-Commit `ee1b4aa5`
-  (2026-09-23, noch nicht auf origin/staging). Das Set zeigt ihn seit dem
-  Owner-Entscheid vom 2026-09-23 als **„Ludwig-Eingang"** und führt ihn
-  solange als optionales Feld an seiner eigenen Erweiterung
-  (`entities/source-document/SourceDocument.tsx`, `SourceDocumentVM`). Kommt
-  er mit einem Lauf an, fällt die Zeile dort weg — sonst stehen zwei
-  Wahrheiten über demselben Feld.
-- **GLOSSARY „Receipt date"** — der Unterpunkt nennt `uploaded_at` „rein
-  technisch". Seit demselben Entscheid ist es eine angezeigte Größe mit
-  eigenem Namen („Ludwig-Eingang"); die Zeile wird drüben nachgeführt und
-  kommt mit dem nächsten Lauf mit. An `app-0b` gemeldet.
+Nichts.
+
+## Erledigt mit dem Lauf vom 2026-09-24 (App `770cbbf0`, F289)
+
+Owner-Ausnahme (Simon, 2026-09-24: „ja bitte spiegeln, dann pushen, dann soll
+ll-cto den Zeiger heben"). Gespiegelt aus dem **lokalen** App-Commit
+`770cbbf0` auf `staging` — zum Zeitpunkt des Laufs noch nicht auf
+origin/staging (ll-dev3 pusht nicht; den Push entscheiden app-d6/Owner).
+
+- **F289 — Belegstatus als eine State-Machine.** Achsen `document_inbox`,
+  `document_processing`, `agent_repair` → `document_status` +
+  `document_review_reason`; `document_completion` → `document_done_via`. Am
+  `SourceDocumentVM`: `status`, `reviewReason`, `doneAt/doneVia/doneReason`;
+  `processingStatus` und `inboxStatus` fallen weg. Im Set:
+  `SourceDocumentCompletion` zeigt jetzt den einen Status (erledigt: wie und
+  wann; sonst `document_status`, in Prüfung mit Grund); die Belegspalten
+  `processing`, `inboxState`, `completed` sind **eine** Spalte `status`.
+- **`SourceDocumentVM.uploadedAt`** kam mit — die lokale Erweiterung in
+  `SourceDocument.tsx` ist entfallen.
+- **GLOSSARY** „Document status (Belegstatus)" und Nachbarn kamen mit.
 
 ## Erledigt mit dem dritten Lauf vom 2026-09-21 (App `7f82c7fd`)
 

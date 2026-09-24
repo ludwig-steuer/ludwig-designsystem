@@ -51,11 +51,11 @@ export const BeingClassified: Story = {
       fileName: "Scan-2026-09-09-14-32-08.pdf",
       counterparty: null,
       documentDate: null,
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
-      inboxStatus: "pending_classification",
+      status: "pending",
       classConfidence: null,
       datevRefSystem: null,
       datevRefFolder: null,
@@ -78,7 +78,7 @@ export const BeingClassified: Story = {
         </DocumentPage>
 
         <DocumentPage
-          document={{ ...open, inboxStatus: "classification_failed" }}
+          document={{ ...open, status: "agent_review", reviewReason: "classification_error" }}
           signal={
             <Banner tone="danger" title="Einordnen fehlgeschlagen: das PDF ist verschlüsselt.">
               Ludwig konnte die Datei nicht öffnen. Über das Menü stoßen Sie das Einordnen
@@ -88,7 +88,7 @@ export const BeingClassified: Story = {
           actions={menu}
         >
           <SourceDocumentCard
-            document={{ ...open, inboxStatus: "classification_failed" }}
+            document={{ ...open, status: "agent_review", reviewReason: "classification_error" }}
             previewUrl={null}
             previewUnavailableReason="Die Datei ist verschlüsselt und lässt sich nicht anzeigen."
             summary={null}

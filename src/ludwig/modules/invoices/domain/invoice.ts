@@ -4,10 +4,12 @@ import type { RawSearchParams } from "@/ludwig/shared";
 import {
   DOC_CATEGORIES,
   type DocCategory,
-  type SourceDocCompletionVia,
+  type SourceDocDoneVia,
+  type SourceDocReviewReason,
+  type SourceDocStatus,
 } from "@/ludwig/modules/source-docs";
 
-// Fachliche Reviewer-Achse (orthogonal zur technischen `processingStatus`).
+// Fachliche Reviewer-Achse (orthogonal zum Belegstatus `documentStatus`).
 // Seit dem btx-Refactor lebt der Wert am Sachverhalt
 // (`client_accounting_case.lifecycle_status`); seit Migration
 // `20260705113000` (F11-T11.5) ist der Wertebereich auf die aktive
@@ -35,7 +37,7 @@ export interface InvoiceFilter {
    *  Event) mind. eine offene Klärungsfrage trägt. Bedient den „Klärungs-
    *  fragen"-Tab auf der Belege-Liste. */
   hasOpenClarification?: boolean;
-  /** Wenn `true`: nur unerledigte Belege (`completed_at is null`) — die
+  /** Wenn `true`: nur unerledigte Belege (`status <> 'done'`) — die
    *  eigentliche Todo-Liste. Erledigte sind gebucht, als nicht relevant
    *  eingestuft oder durch andere Belege ersetzt. */
   openOnly?: boolean;
@@ -43,8 +45,7 @@ export interface InvoiceFilter {
    *  `beleg_kategorie`) — was mit dem Beleg als Nächstes passiert. */
   docCategory?: DocCategory[];
   /** Nur Belege, die dieser Buchungsstapel angefasst hat: ein Ereignis mit
-   *  seinem Stempel (`client_accounting_event.export_batch_id`) oder in ihm
-   *  mit Grund erledigt (`client_source_docs.completed_batch_id`). Kommt aus
+   *  seinem Stempel (`client_accounting_event.export_batch_id`). Kommt aus
    *  dem Pfad der Stapel-Detailsicht, nicht aus dem Filterformular. */
   exportBatchId?: string;
 }
@@ -248,12 +249,17 @@ export interface InvoiceListItem {
   invoiceDate: string | null;
   /** Eingangsdatum — Perioden-Achse von Liste und Dashboard. */
   receivedDate: string | null;
+  /** Ludwig-Eingang (Upload-Zeitpunkt). */
+  uploadedAt: string | null;
   dueDate: string | null;
   totalValue: number | null;
   currency: string | null;
   lifecycleStatus: InvoiceLifecycle | null;
   processingStage: string | null;
-  processingStatus: string | null;
+  /** Belegstatus (F289, belege.md R14). */
+  documentStatus: SourceDocStatus;
+  /** In agent_review/human_review: woran es hängt. */
+  reviewReason: SourceDocReviewReason | null;
   docDirection: string | null;
   /**
    * Belegkategorie am Supertyp (F87): `performance` | `payment` |
@@ -265,19 +271,15 @@ export interface InvoiceListItem {
   documentForm: string | null;
   documentKind: string | null;
   documentSummary: string | null;
-  /** Beleg-Review-Loop: wer korrigiert — NULL/'agent' = Agent still am
-   *  Zug, 'accounting' = vom Agenten an die Kanzlei eskaliert. */
-  reviewDisposition: string | null;
   createdAt: string;
 
-  // ── Fachlicher Abschluss (client_source_docs, Migration 20260720130000) ──
-  /** Zeitpunkt der fachlichen Erledigung. NULL = Beleg steht noch offen. */
-  completedAt: string | null;
+  // ── Erledigung (client_source_docs.done_*, F289) ──
+  /** Zeitpunkt der Erledigung — gesetzt genau bei `documentStatus='done'`. */
+  doneAt: string | null;
   /** Kurze Begründung der Erledigung — Tooltip am Status-Badge. */
-  completedReason: string | null;
-  /** Wodurch er erledigt wurde (Achse `beleg_erledigung`). `null` bei
-   *  gesetztem `completedAt` heißt „erledigt, Grund nicht festgehalten". */
-  completedVia: SourceDocCompletionVia | null;
+  doneReason: string | null;
+  /** Wodurch er erledigt wurde (Achse `document_done_via`). */
+  doneVia: SourceDocDoneVia | null;
 
   // ── Sachverhalt (client_accounting_case via document_received event) ──
   /** ID des Sachverhalts, dem dieser Beleg angehängt ist (NULL, wenn der
@@ -289,6 +291,8 @@ export interface InvoiceListItem {
   /** Fiscal Year des Sachverhalts — gebraucht, um die Case-Detail-URL
    *  (`/clients/[slug]/[year]/cases/[caseId]`) zu bauen. */
   caseFiscalYear: number | null;
+  /** Der Stapel, dem der Beleg über seinen Satz zugeordnet ist (jüngster gewinnt); NULL ohne Buchung. */
+  batch: { batchId: string; year: number; description: string | null } | null;
 }
 
 export interface InvoiceLineItem {
@@ -391,14 +395,14 @@ export interface InvoiceDetail extends InvoiceListItem {
   datevRefFolder: string | null;
   datevRefId: string | null;
 
-  /** Begründung des Buchungs-Agenten für die Eskalation an die Kanzlei
-   *  (``review_disposition_reason``). NULL solange keine Eskalation. */
-  reviewDispositionReason: string | null;
+  /** Übergabe-/Rückgabegrund bzw. Befund in `agent_review`/`human_review`
+   *  (``client_source_docs.review_note``, F289). */
+  reviewNote: string | null;
 
   /**
    * F18: offene, reparierbare Befunde der Interpretation
    * (`missing_required_field`, `line_totals_mismatch`). Nicht leer ⟺
-   * `processing_status = 'review_needed'` (Migration 20260720090000). Sie
+   * `review_reason = 'open_findings'` (F289). Sie
    * stehen als Mangel mit Weg in der Zone „Zu klären" (L-269) und
    * verschwinden mit `updateInvoiceExtraction`, das synchron re-validiert.
    */

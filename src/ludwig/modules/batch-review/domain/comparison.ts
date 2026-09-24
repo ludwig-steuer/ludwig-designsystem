@@ -130,7 +130,7 @@ export function sortByAuffaelligkeit<T extends { vergleich: Comparison }>(rows: 
  * 100 % deutlich, darüber ist es ein anderer Monat. Die Schwellen stehen hier
  * und nirgends sonst; das CSS kennt nur Tonnamen, nicht die Prozentwerte.
  */
-export type AbweichungsTon = "neutral" | "warning" | "warning-strong" | "danger";
+export type AbweichungsTon = "neutral" | "warning" | "danger";
 
 export const ABWEICHUNGS_STUFEN = [15, 50, 100] as const;
 
@@ -138,8 +138,9 @@ export function deviationTone(deviationPct: number | null): AbweichungsTon {
   if (deviationPct === null) return "neutral";
   const abs = Math.abs(deviationPct);
   if (abs <= ABWEICHUNGS_STUFEN[0]) return "neutral";
-  if (abs <= ABWEICHUNGS_STUFEN[1]) return "warning";
-  if (abs <= ABWEICHUNGS_STUFEN[2]) return "warning-strong";
+  // A7/L-341: eine Farbe je Stufe, „warning-strong" gibt es nicht mehr —
+  // 15–100 % ist eine Warnung, darüber ein Fehler.
+  if (abs <= ABWEICHUNGS_STUFEN[2]) return "warning";
   return "danger";
 }
 

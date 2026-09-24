@@ -79,7 +79,7 @@ export interface SourceDocumentDefectsProps {
   actions?: Partial<Record<DocDefectKind, ReactNode>>;
   /**
    * The caller's sentence for a kind, where one kind has more than one cause.
-   * A statement on `awaiting_input` either lacks its payment account or its
+   * A statement in `human_review` either lacks its payment account or its
    * balances do not add up (F288) — the same kind, a different sentence:
    * `{ payment_account: { title: "Kontoauszug geht nicht auf: …", hint: "…" } }`.
    * What is left out keeps the house sentence.

@@ -26,8 +26,8 @@
  *   `queued`    → durable Job wartet (job) vs. Browser-Upload wartet (upload)
  *   `proposed`  → Buchungsvorschlag (buchung) vs. Pipeline-Stufe (beleg_stage)
  *                 vs. Geschäftspartner-Vorschlag (partner)
- *   `classified`→ Inbox-Klassifikation durch (beleg_inbox) vs. Pipeline-Stufe
- *   `pending`   → Beleg wartet (beleg) — NICHT `pending_classification`
+ *   `pending`   → Beleg wird eingeordnet (document_status) vs. Ablage steht aus
+ *                 (document_filing)
  * Ein flacher Lookup würde diese Werte stillschweigend vermischen.
  *
  * ## Sprache
@@ -47,20 +47,26 @@
  * 4. Test in `__tests__/status-registry.test.ts` ergänzen, wenn ein
  *    Domain-Enum existiert.
  */
+// Relativ statt `@/…`: das Design-System spiegelt diese Datei. Die Domain-
+// Datei ist selbst importfrei (F289: die Übergänge stehen dort EINMAL).
+import { SOURCE_DOC_STATUS_TRANSITIONS } from "../../modules/source-docs/domain/source-doc-status";
+
 /**
  * Status-Achsen der App. Namensschema: Entität, bei mehreren Achsen an
- * derselben Entität mit Suffix (`document_processing` / `document_stage` / `document_inbox`).
+ * derselben Entität mit Suffix (`document_status` / `document_stage` / `document_filing`).
  */
 export type StatusAxis =
   // — Beleg & Pipeline —
-  | "document_processing"
+  | "document_status"
+  | "document_review_reason"
   | "document_stage"
   | "document_character"
-  | "document_completion"
+  | "document_done_via"
   | "document_filing"
   | "document_booking"
   | "document_stuck"
-  | "document_inbox"
+  | "file_basket"
+  | "file_basket_warning"
   | "document_category"
   | "collection_kind"
   | "document_direction"
@@ -91,6 +97,7 @@ export type StatusAxis =
   | "export_bucket"
   // — Buchungslauf —
   | "run_outcome"
+  | "agent_run_outcome"
   | "run_gate"
   // — Stammdaten —
   | "business_partner"
@@ -144,7 +151,7 @@ export type StatusAxis =
  * Buchung). Nur sie haben ein Icon und ein Flow-Modal. Bleibt als eigener
  * Typ erhalten, weil `EntityStatusBadgeButton` genau diese drei bedient.
  */
-export type EntityType = "document_processing" | "accounting_case" | "journal_entry";
+export type EntityType = "document_status" | "accounting_case" | "journal_entry";
 
 /**
  * Die fünf Farbrollen, die ein Status tragen kann. Hier definiert und nicht
@@ -176,55 +183,61 @@ export interface StatusDescriptor {
 // ══════════════════════════════════════════════════════════════════════
 
 /**
- * `client_source_docs_invoices.processing_status` — rein TECHNISCHE
- * Pipeline-Position. NULL erlaubt (Legacy-Zeilen ohne Status).
+ * `client_source_docs.status` — der Belegstatus, EINE State-Machine für jede
+ * Belegart (F289, belege.md R14). Wertebereich: DB-CHECK
+ * `client_source_docs_status_check`, gespiegelt in `SOURCE_DOC_STATUSES`
+ * (`modules/source-docs/domain/source-doc-status.ts`) und
+ * `buchassi_shared.source_doc_status.SourceDocStatus`.
  *
- * Abgrenzung: der **fachliche** Abschluss eines Belegs steht nicht hier,
- * sondern in der Spalte „Erledigt" der Belegliste. Ein `processed` heißt nur
- * „die Pipeline ist durch", nicht „der Beleg ist fertig bearbeitet" — die
- * beiden Spalten stehen deshalb nebeneinander und widersprechen sich
- * regelmäßig, ohne dass eine falsch wäre.
- *
- * Wertebereich: DB-CHECK `client_invoices_processing_status_check`
- * (Migration `20260720090000_processing_status_review_needed.sql`; der
- * Constraint trägt noch den alten Tabellennamen). Es gibt KEIN TS-Enum —
- * diese Map ist der einzige TS-seitige Wertebereich.
- *
- * Schreiber (alle Python, `invoice_ingest_workflow.py`):
- *   `pending`       ← FastAPI-Ingest legt den Stub an, bevor die Pipeline läuft
- *   `in_progress`   ← Workflow beim Aufgreifen
- *   `processed` /
- *   `review_needed` ← Endprojektion, je nachdem ob offene Findings bleiben;
- *                     zusätzlich `invoice_revalidation_service` (flippt in
- *                     BEIDE Richtungen)
- *   `failed`        ← `_mark_pipeline_failed` (Crash, Timeout, FX-Fehler)
- *
- * Übergänge:
- *   NULL/pending → in_progress → processed | review_needed | failed
- *   review_needed ⇄ processed  (Revalidierung, synchron)
- *   failed → in_progress       (Retry / force-Reprocess)
+ * Schreiber: TS nur über `transitionSourceDoc` (Routing nach der Einordnung,
+ * Eingang, Retry, Erledigung, Reopen, Eskalation/Rückgabe, Korb-Freigabe,
+ * Job-Endfehler), Python über `begin/finish/fail_extraction` und
+ * `revalidated`, dazu die Erledigungs-Trigger (Buchung, Verzicht,
+ * Case-Close, Supersede). Der DB-Wächter `zz_guard_source_doc_status` weist
+ * jeden Übergang außerhalb der Paarmenge ab.
  *
  * Fallstricke:
- *  - **`review_needed` ist KEIN Abbruch.** Die Pipeline lief komplett durch,
- *    es bleiben nur reparierbare Findings (z.B. fehlendes Pflichtfeld). Ein
- *    Retry ist der FALSCHE Fix — richtig ist `update_invoice_extraction`,
- *    das synchron re-validiert und den Status selbst zurückflippt.
- *  - `archived` existiert hier nicht mehr (seit Migration `20260519120000`
- *    in die Lifecycle-Achse gewandert). Ein Insert damit bricht am CHECK.
- *  - Diese Achse ist bewusst getrennt von `lifecycle_status` (Reviewer-Sicht).
- *    Die Pipeline fasst den Lifecycle nie an und umgekehrt.
- *  - Die dritte, orthogonale Achse ist `client_source_docs.completed_at`
- *    (NULL = offen) — fachlich erledigt, bewusst kein weiterer Statuswert.
- *    Sie folgt der BUCHUNG, nicht der Pipeline und nicht dem Case-Close:
- *    erledigt, solange am Beleg-Ereignis eine lebende Buchung hängt
- *    (Trigger aus `20260820170000`).
+ *  - **Zwei Prüfstufen.** Scheitern unsere Verfahren, ist zuerst immer der
+ *    Agent dran (`agent_review`); an die Kanzlei (`human_review`) gibt nur der
+ *    Agent — oder ein benannter System-Sonderfall (`statement_*`).
+ *  - `review_reason` ist gesetzt genau in `agent_review`/`human_review`.
+ *  - **Kein Retry an `done`.** Zurück in die Arbeit geht es nur über
+ *    `reopened` (done → bookable).
+ *  - `processing_stage` (Achse `document_stage`) ist die technische
+ *    Unterstufe von `extracting` und der Resume-Anker der Rechnungs-Pipeline.
  */
-const DOCUMENT_PROCESSING: Record<string, StatusDescriptor> = {
-  pending: { label: "Wartet", kind: "neutral", description: "Beleg liegt vor, die Verarbeitung hat noch nicht begonnen." },
-  in_progress: { label: "In Bearbeitung", kind: "info", description: "Die Pipeline verarbeitet den Beleg gerade." },
-  processed: { label: "Prozessiert", kind: "success", description: "Pipeline vollständig durchlaufen — klassifiziert, interpretiert, bereit für den Sachverhalt." },
-  review_needed: { label: "Prüfung nötig", kind: "warning", description: "Verarbeitet, aber es fehlt noch etwas Reparierbares (z.B. ein Pflichtfeld). Wert nachtragen — das System prüft dann automatisch nach. Kein Neustart nötig." },
-  failed: { label: "Fehlgeschlagen", kind: "danger", description: "Die Pipeline ist abgebrochen (Crash, Timeout oder kritischer Befund). Erst ein Neustart bringt den Beleg weiter." },
+const DOCUMENT_STATUS: Record<string, StatusDescriptor> = {
+  pending: { label: "Wird eingeordnet", kind: "neutral", description: "Der Beleg ist angelegt; die Einordnung läuft oder steht an. Das System ist dran." },
+  extracting: { label: "Wird ausgelesen", kind: "info", description: "Die Auslese läuft (Rechnungs-Pipeline oder Zerlegung eines Sammel-PDFs). Das System ist dran." },
+  agent_review: { label: "Agent prüft", kind: "warning", description: "Unsere Verfahren sind an diesem Beleg gescheitert — der Agent bessert nach. Woran es hängt, sagt der Prüfgrund." },
+  human_review: { label: "Kanzlei prüft", kind: "warning", description: "Der Agent kann den Beleg nicht lösen, oder ein Sonderfall braucht einen Menschen (z. B. das Bankkonto eines Kontoauszugs). Die Kanzlei ist dran." },
+  bookable: { label: "Bereit zur Buchung", kind: "info", description: "Fertig verarbeitet — der Agent ordnet ihn einem Sachverhalt zu und bucht." },
+  done: { label: "Erledigt", kind: "success", description: "An diesem Beleg ist nichts mehr zu tun. Wodurch er erledigt wurde, steht daneben." },
+  deleted: { label: "Gelöscht", kind: "neutral", description: "Aus der Liste entfernt. Datei und Historie bleiben erhalten." },
+};
+
+/**
+ * `client_source_docs.review_reason` — woran unsere Verfahren gescheitert
+ * sind (F289, belege.md R14). Gesetzt genau dann, wenn der Beleg auf
+ * `agent_review` oder `human_review` steht. Wertebereich: DB-CHECK
+ * `client_source_docs_review_reason_check`, gespiegelt in
+ * `SOURCE_DOC_REVIEW_REASONS`.
+ *
+ * `statement_account_missing` und `statement_check_failed` sind die benannten
+ * System-Sonderfälle, die direkt an die Kanzlei gehen; alle anderen landen
+ * zuerst beim Agenten.
+ */
+const DOCUMENT_REVIEW_REASON: Record<string, StatusDescriptor> = {
+  classification_error: { label: "Einordnung gescheitert", kind: "danger", description: "Der Klassifikator ist gescheitert oder die Datei ist nicht lesbar. Der Agent korrigiert die Belegform oder stößt die Einordnung neu an." },
+  unknown_form: { label: "Belegart unbekannt", kind: "warning", description: "Ludwig weiß nicht, was das für ein Dokument ist. Der Agent ordnet es ein oder erledigt es mit Grund." },
+  unsplit_collection: { label: "Sammel-PDF nicht zerlegt", kind: "warning", description: "Ein Sammel-PDF, das die automatische Zerlegung nicht schneidet. Der Agent zerlegt es in Teilbelege." },
+  manual_extraction: { label: "Keine automatische Auslese", kind: "warning", description: "Für diese Belegart gibt es keine automatische Auslese (z. B. Kontoauszug als PDF). Der Agent verarbeitet ihn von Hand." },
+  extraction_error: { label: "Auslese abgebrochen", kind: "danger", description: "Die Rechnungs-Pipeline ist abgebrochen (Crash, Timeout, kritischer Befund). Der Agent stößt sie neu an oder trägt die Werte nach." },
+  open_findings: { label: "Werte fehlen", kind: "warning", description: "Ausgelesen, aber reparierbare Befunde sind offen (z. B. ein Pflichtfeld). Der Agent trägt die Werte nach — das System prüft dann selbst nach, kein Neustart nötig." },
+  job_failed: { label: "Verarbeitung gescheitert", kind: "danger", description: "Der Verarbeitungs-Auftrag ist endgültig gescheitert. Der Agent stößt ihn neu an." },
+  processing_stuck: { label: "Verarbeitung hing", kind: "warning", description: "Beim Freigeben des Dateikorbs war der Beleg noch nicht durch. Der Agent bessert nach." },
+  statement_account_missing: { label: "Bankkonto fehlt", kind: "warning", description: "Ein Kontoauszug, dessen Bankkonto nicht in der Datei steht. Die Kanzlei wählt das Konto am Beleg." },
+  statement_check_failed: { label: "Kontoauszug geht nicht auf", kind: "danger", description: "Die Salden des Kontoauszugs gehen nicht auf. Die Kanzlei entscheidet: neue Datei anfordern, trotzdem importieren oder ablehnen." },
 };
 
 /**
@@ -258,36 +271,61 @@ const DOCUMENT_STAGE: Record<string, StatusDescriptor> = {
 };
 
 /**
- * `client_source_docs.status` — Klassifizierungs-Status jedes eingehenden
- * Dokuments (früher `client_document_inbox`). NOT NULL, Default
- * `pending_classification`. Wertebereich: `INBOX_STATUS`
- * (`modules/document-inbox/domain/inbox.ts`) + Python-Enum
- * `domain/document_inbox.py`, Spiegel des DB-CHECK.
+ * `client_file_baskets.state` — der Dateikorb (F280, belege.md R38): die
+ * Anlieferungsmenge eines Mandanten zwischen zwei Freigaben. Genau ein offener
+ * Korb je Mandant; jeder neue Beleg landet bei Anlage darin (DB-Trigger
+ * `assign_open_file_basket`). Wertebereich: DB-CHECK, gespiegelt in
+ * `FILE_BASKET_STATE` (`modules/document-inbox/domain/file-basket.ts`).
  *
- * Schreiber: Web-Upload setzt `pending_classification`, der Python-Classifier
- * setzt `classified` bzw. `classification_failed`, Reprocess setzt zurück auf
- * `pending_classification`, Soft-Delete setzt `deleted`. Der Web-Upload setzt
- * zusätzlich `awaiting_input` für erkannte Kontoauszüge (F170); hinaus führt
- * `importStatementForInboxEntry` — es setzt `classified` +
- * `completed_via='import'`.
+ * Schreiber: `submitFileBasket` (open → submitted), `tryReleaseFileBasket`
+ * (submitted → released, sofort oder im Job `file_basket_release`), der
+ * DB-Trigger `complete_file_basket_if_done` (released → completed).
  *
- * Fallstricke:
- *  - **`classified` heißt NICHT „Belegform erkannt".** `class_document_form`
- *    darf legitim NULL sein (gescanntes PDF ohne OCR-Fallback). Wer auf die
- *    Belegart angewiesen ist, muss beides prüfen (`qualifiesForInvoiceFlow`).
- *  - **Kein Retry, kein Timeout.** Bewusste Entscheidung: ein Beleg bleibt in
- *    `classification_failed` bzw. bei totem Classifier-Prozess unbegrenzt in
- *    `pending_classification` liegen, bis jemand aktiv neu anstößt.
- *  - `deleted` ist reiner Soft-Delete (Datei + Zeile bleiben, sonst bräche die
- *    verknüpfte Historie). JEDE Listen-Query muss `status <> 'deleted'`
- *    filtern — das wird nicht zentral erzwungen.
+ * Der Korb ist die Anlieferung, der Stapel der Buchungszeitraum — nicht
+ * verwechseln mit dem F265-„Korb" im Buchungslauf.
  */
-const DOCUMENT_INBOX: Record<string, StatusDescriptor> = {
-  pending_classification: { label: "Wird eingeordnet", kind: "neutral", description: "Dokument ist hochgeladen und wartet auf die Klassifizierung." },
-  classified: { label: "Eingeordnet", kind: "success", description: "Dokumentart erkannt — der Beleg kann weiterverarbeitet werden." },
-  classification_failed: { label: "Einordnung fehlgeschlagen", kind: "danger", description: "Die Dokumentart konnte nicht bestimmt werden. Es gibt keinen automatischen Wiederholungslauf — bitte manuell neu anstoßen." },
-  awaiting_input: { label: "Angabe nötig", kind: "warning", description: "Die Datei ist erkannt, aber eine Angabe fehlt — zum Beispiel das Bankkonto eines Kontoauszugs. Ohne sie wird nichts verarbeitet." },
-  deleted: { label: "Gelöscht", kind: "neutral", description: "Aus der Liste entfernt. Datei und Historie bleiben erhalten." },
+const FILE_BASKET: Record<string, StatusDescriptor> = {
+  open: {
+    label: "Offen — sammelt",
+    kind: "info",
+    description:
+      "Neue Belege landen in diesem Korb. „Korb verarbeiten\" schickt ihn ab. Der Korb ist die Anlieferung, der Stapel der Buchungszeitraum.",
+  },
+  submitted: {
+    label: "Abgeschickt — wird verarbeitet",
+    kind: "info",
+    description:
+      "Die Anlieferung ist komplett; die Pipeline arbeitet die letzten Belege ab. Danach gehen die Stapel von selbst an den Agenten. Der Korb ist die Anlieferung, der Stapel der Buchungszeitraum.",
+  },
+  released: {
+    label: "Freigegeben — beim Agenten/der Kanzlei",
+    kind: "info",
+    description:
+      "Die Stapel sind freigegeben. Belege, die dabei nicht fertig waren, bessert der Agent nach. Der Korb ist die Anlieferung, der Stapel der Buchungszeitraum.",
+  },
+  completed: {
+    label: "Erledigt",
+    kind: "success",
+    description: "Jeder Beleg dieses Korbs ist erledigt. Der Korb ist die Anlieferung, der Stapel der Buchungszeitraum.",
+  },
+};
+
+/**
+ * Hinweise beim Abschicken eines Dateikorbs (F280) — ephemer, als Snapshot in
+ * `client_file_baskets.warnings` (jsonb). Wertebereich:
+ * `FILE_BASKET_WARNING_CODE`. Keiner blockiert; der Korb wird trotzdem
+ * verarbeitet.
+ */
+const FILE_BASKET_WARNING: Record<string, StatusDescriptor> = {
+  processing_pending: { label: "Noch in Verarbeitung", kind: "warning", description: "Die Pipeline arbeitet noch an diesen Belegen — die Freigabe wartet auf sie." },
+  classification_failed: { label: "Einordnung gescheitert", kind: "warning", description: "Die Dokumentart ist nicht erkannt. Der Agent bessert nach." },
+  extraction_failed: { label: "Auslesen gescheitert", kind: "warning", description: "Die Extraktion ist abgebrochen. Der Agent bessert nach." },
+  review_needed: { label: "Prüfung nötig", kind: "warning", description: "Ausgelesen, aber es fehlt ein Wert — der Agent ergänzt ihn." },
+  awaiting_input: { label: "Angabe fehlt", kind: "warning", description: "Zum Beispiel das Bankkonto eines Kontoauszugs — ohne sie wird nichts importiert." },
+  unsplit_collection: { label: "Sammel-PDF nicht zerlegt", kind: "warning", description: "Ein Sammel-PDF hat noch keine Teilbelege." },
+  partner_not_found: { label: "Partner unbekannt", kind: "warning", description: "Zum Absender oder Empfänger gibt es noch keinen Geschäftspartner." },
+  date_outside_open_batch: { label: "Datum außerhalb des Stapels", kind: "warning", description: "Das Belegdatum liegt außerhalb des offenen Buchungszeitraums." },
+  client_batch_ambiguous: { label: "Zuordnung zum Mandantenstapel offen", kind: "warning", description: "Der Beleg passt zu mehreren Sätzen des Mandantenstapels, oder die Summe geht nicht auf — der Agent ordnet zu." },
 };
 
 /**
@@ -315,8 +353,8 @@ const DOCUMENT_INBOX: Record<string, StatusDescriptor> = {
  *  - **`performance` heißt nicht „hat eine Rechnungszeile".** Lieferschein und
  *    Mahnung sind Leistungsbelege ohne Invoice-Subtyp. Wer die Rechnungs-
  *    daten braucht, prüft den Subtyp, nicht die Kategorie.
- *  - `report`-Belege sind bei der Anzeige bereits `completed_at` — die
- *    „Erledigt"-Spalte schlägt den Pipeline-Status.
+ *  - `report`-Belege gehen nach der Einordnung auf `bookable`; erledigt
+ *    werden sie per `complete_doc` (F144).
  */
 /**
  * `client_source_docs.collection_kind` — der Typ einer **Dokumentgruppe**
@@ -446,8 +484,8 @@ const DOCUMENT_DIRECTION: Record<string, StatusDescriptor> = {
  *
  * Fallstricke:
  *  - **Job-Erfolg ≠ Beleg-Erfolg.** Der Ingest-Handler wirft nicht; der Job
- *    wird `succeeded`, auch wenn der Beleg intern auf `failed` landete. Diese
- *    Achse und `document_processing` sind entkoppelt.
+ *    wird `succeeded`, auch wenn der Beleg intern auf `agent_review` landete.
+ *    Diese Achse und `document_status` sind entkoppelt.
  *  - `attempts` zählt beim Claim hoch, nicht beim Fehler — `max_attempts=3`
  *    bedeutet 3 Läufe, nicht 4.
  *  - Der Reaper schreibt beim Requeue eine `error`-Message. Ein Job in
@@ -542,52 +580,21 @@ const DOCUMENT_CHARACTER: Record<string, StatusDescriptor> = {
 };
 
 /**
- * Erledigung eines Belegs — `client_source_docs.completed_via`, plus zwei
- * Werte, die keine Spaltenwerte sind.
+ * Wodurch ein Beleg erledigt wurde — `client_source_docs.done_via` (F289,
+ * belege.md R14). Gesetzt genau bei `status='done'`, zusammen mit `done_at`
+ * (Trigger-Stempel) und `done_reason` (Freitext, Tooltip daneben).
+ * Wertebereich: DB-CHECK `client_source_docs_done_via_check`, gespiegelt in
+ * `SOURCE_DOC_DONE_VIA`.
  *
- * Sie ist der Zustand, den **jede** Belegart trägt: die Achse `document_processing`
- * (Verarbeitung) lebt am Rechnungs-Subtyp und hat für 16 % der Belege nie
- * einen Wert, `document_inbox` steht im Bestand bei 383 von 384 Belegen auf
- * demselben Wert. „Ist der Beleg durch?" beantwortet nur diese Achse.
+ * Schreiber: `complete_doc`/`DocCompletionControl` (`manual`), die Trigger
+ * (`booking`, `no_booking_required`, `case_closed`, `superseded`), der Import
+ * (`import`), die Entscheidung über einen nicht aufgehenden Kontoauszug
+ * (`replaced`, `rejected`, F288).
  *
- * Wertebereich: DB-CHECK `client_source_docs_completed_via_check`
- * (`20260829140000`, um `no_booking_required` erweitert in `20260903120000`).
- * Ein TS-Enum gibt es nicht — die Spalte steht ungetypt als `completedVia` im
- * generierten Schema; der Registry-Test spiegelt den CHECK.
- *
- * Zwei Schlüssel stehen **nicht** in der Spalte, sondern sagen etwas über
- * `completed_at`:
- *   `open`      ← `completed_at IS NULL` — der Beleg steht noch in der
- *                 Todo-Liste (41 von 384)
- *   `completed` ← `completed_at` gesetzt, `completed_via` NULL: erledigt,
- *                 Grund unbekannt (61 von 384). **Nicht** „offen".
- *
- * Schreiber: `DocCompletionControl` (Hand), der Buchungslauf (`booking`), der
- * Sachverhalts-Abschluss (`case_closed`), der DATEV-Import (`import`), die
- * Ersetzung eines Belegs (`superseded`).
- *
- * Fallstricke:
- *  - **Orthogonal zum Pipeline-Status** (GLOSSARY): „Pipeline durchgelaufen"
- *    heißt nicht „fertig", und ein erledigter Beleg kann eine abgebrochene
- *    Pipeline haben.
- *  - Der Freitext `completed_reason` ist der Tooltip daneben, kein eigener
- *    Zustand — er trägt bei `manual` die Begründung des Menschen.
- *  - Bestand (2026-09-04): booking 171 · manual 77 · no_booking_required 26 ·
- *    superseded 7 · case_closed 1 · import 0.
+ * Fallstrick: `booking`/`no_booking_required` nimmt der jeweilige Trigger
+ * selbst zurück (done → bookable), wenn die Ursache fällt.
  */
-const DOCUMENT_COMPLETION: Record<string, StatusDescriptor> = {
-  open: {
-    label: "Offen",
-    kind: "info",
-    description:
-      "An diesem Beleg ist noch etwas zu tun — er steht in der Todo-Liste der Periode. Unabhängig davon, wie weit die Verarbeitung ist.",
-  },
-  completed: {
-    label: "Erledigt",
-    kind: "success",
-    description:
-      "Der Beleg ist durch; woran er erledigt wurde, ist nicht festgehalten. Altbestand — seit F87 schreibt jeder Weg seinen Grund mit.",
-  },
+const DOCUMENT_DONE_VIA: Record<string, StatusDescriptor> = {
   booking: {
     label: "Gebucht",
     kind: "success",
@@ -622,6 +629,18 @@ const DOCUMENT_COMPLETION: Record<string, StatusDescriptor> = {
     kind: "success",
     description:
       "Der Beleg wird nicht gebucht — Auswertung, Doppel oder ein Dokument ohne Geldfluss. Er ist damit fertig, nicht übersprungen.",
+  },
+  replaced: {
+    label: "Neue Datei angefordert",
+    kind: "neutral",
+    description:
+      "Ein Kontoauszug, dessen Prüfkette nicht aufging: die Kanzlei hat eine neue Datei angefordert. Nichts wurde importiert; die korrigierte Datei kommt als eigener Beleg.",
+  },
+  rejected: {
+    label: "Abgelehnt",
+    kind: "neutral",
+    description:
+      "Ein Kontoauszug, dessen Prüfkette nicht aufging, wurde von der Kanzlei abgelehnt. Nichts wurde importiert; der Grund steht daneben.",
   },
 };
 
@@ -668,11 +687,11 @@ const DOCUMENT_FILING: Record<string, StatusDescriptor> = {
  * Hängt am Beleg ein lebender Buchungssatz? — **berechnet**, keine Spalte
  * (F236). `booked`, wenn ein Satz mit `status <> 'reversed'` am Beleg hängt,
  * über sein Ereignis oder über `journal_entry.source_doc_id` (F163); sonst
- * `unbooked`, wenn `completed_at` gesetzt ist; sonst `open`. Das ist das
+ * `unbooked`, wenn der Beleg `done` ist; sonst `open`. Das ist das
  * Prädikat von `listUnbookedDocuments`, nur dreiwertig. Schreiber: keiner —
  * der Wert folgt aus Buchung und Erledigung.
  *
- * Fallstrick: nicht `document_completion`. Die spiegelt `completed_via`, den
+ * Fallstrick: nicht `document_done_via`. Die spiegelt `done_via`, den
  * Weg der Erledigung; ein erledigter Beleg kann ohne Buchung sein.
  */
 const DOCUMENT_BOOKING: Record<string, StatusDescriptor> = {
@@ -1229,6 +1248,23 @@ const RUN_OUTCOME: Record<string, StatusDescriptor> = {
   blocked: { label: "Steckengeblieben", kind: "danger", description: "Der letzte Übergangsversuch scheiterte an einem roten Gate. Sobald die offenen Posten aufgelöst sind, geht es genau dort weiter." },
   running: { label: "Läuft", kind: "info", description: "Offen und vor Kurzem noch aktiv." },
   abandoned: { label: "Abgebrochen", kind: "warning", description: "Offen und seit über 30 Minuten ohne Schritt-Aktivität — die Agent-Session ist vermutlich weg. Ein neuer Lauf steigt am letzten Schritt wieder ein." },
+};
+
+/**
+ * `client_agent_runs.outcome` (F284) — wie ein Lauf endete, gespeichert statt
+ * abgeleitet. NULL = offen oder Altbestand vor F284. Wertebereich:
+ * `AGENT_RUN_ENDS` (`accounting-cases/domain/agent-run-end.ts`), DB-CHECK
+ * `client_agent_runs_outcome_check`.
+ *
+ * Schreiber: `finish_agent_run` (complete | incomplete), das Auto-Ende nach
+ * Stille `closeStalledAgentRuns` (incomplete), `takeOverBatchReview`
+ * (taken_over), der Start eines Folgelaufs (superseded).
+ */
+const AGENT_RUN_OUTCOME: Record<string, StatusDescriptor> = {
+  complete: { label: "Abgeschlossen", kind: "success", description: "Der Agent hat den Lauf regulär mit finish_agent_run beendet; der Stapel ist bereit für die Kanzlei." },
+  incomplete: { label: "Unvollständig beendet", kind: "warning", description: "Der Agent hat abgebrochen (technisches Hindernis, mit Begründung) oder war zwei Stunden still. Der Stapel liegt zur Prüfung bei der Kanzlei: übernehmen oder mit Notiz zurück an den Agenten." },
+  taken_over: { label: "Von der Kanzlei übernommen", kind: "warning", description: "Die Kanzlei hat die Prüfung vom stillen Agenten übernommen; sein Lauf wurde dabei beendet." },
+  superseded: { label: "Vom Folgelauf geschlossen", kind: "neutral", description: "Nie abgeschlossen; der Start des nächsten Laufs am Mandanten hat ihn geschlossen." },
 };
 
 /**
@@ -2172,8 +2208,9 @@ const RECONCILIATION_RUN: Record<string, StatusDescriptor> = {
  * des Agenten und die Arbeit der Kanzlei, wird freigegeben und endet, wenn er
  * in DATEV wiedergefunden ist. Wer gerade dran ist, IST der Zustand.
  *
- * Der Übergang zum Agenten ist eine **menschliche Freigabe** (F177): „Belege
- * vollständig" übergibt den Zyklus, kein Lauf greift ihn von selbst auf.
+ * Der Übergang zum Agenten ist eine **Freigabe** (F177): seit F280 die Freigabe
+ * des Dateikorbs, sobald die Pipeline ihn durch hat — kein Lauf greift den
+ * Zyklus von selbst auf.
  */
 const EXPORT_BATCH: Record<string, StatusDescriptor> = {
   agent: {
@@ -2188,9 +2225,10 @@ const EXPORT_BATCH: Record<string, StatusDescriptor> = {
     kind: "info",
     description:
       "Eröffnet, aber noch nicht freigegeben: Belege dürfen weiter kommen, der Agent sieht den " +
-      "Zyklus nicht. „Belege vollständig\" auf der Eingangsseite (oder die Intake-API) übergibt " +
-      "ihn an den Agenten; die Kanzlei kann stattdessen die Prüfung übernehmen. Mit offenen " +
-      "Nachforderungen heißt das „wartet auf Mandant\".",
+      "Zyklus nicht. Die Freigabe des Dateikorbs („Korb verarbeiten\" auf der Eingangsseite oder die " +
+      "Intake-API) übergibt ihn an den Agenten; die Kanzlei kann stattdessen die Prüfung übernehmen. " +
+      "Ein neuer Dateikorb hebt ihn nicht — erst dessen Freigabe. Mit offenen Nachforderungen heißt " +
+      "das „wartet auf Mandant\".",
   },
   review: {
     label: "Kanzlei prüft",
@@ -2298,14 +2336,16 @@ const DATEV_CHECK: Record<string, StatusDescriptor> = {
 };
 
 export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor>> = {
-  document_processing: DOCUMENT_PROCESSING,
+  document_status: DOCUMENT_STATUS,
+  document_review_reason: DOCUMENT_REVIEW_REASON,
   document_stage: DOCUMENT_STAGE,
   document_character: DOCUMENT_CHARACTER,
-  document_completion: DOCUMENT_COMPLETION,
+  document_done_via: DOCUMENT_DONE_VIA,
   document_filing: DOCUMENT_FILING,
   document_booking: DOCUMENT_BOOKING,
   document_stuck: DOCUMENT_STUCK,
-  document_inbox: DOCUMENT_INBOX,
+  file_basket: FILE_BASKET,
+  file_basket_warning: FILE_BASKET_WARNING,
   document_category: DOCUMENT_CATEGORY,
   collection_kind: COLLECTION_KIND,
   document_direction: DOCUMENT_DIRECTION,
@@ -2333,6 +2373,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   export_bucket: EXPORT_BUCKET,
   export_batch: EXPORT_BATCH,
   run_outcome: RUN_OUTCOME,
+  agent_run_outcome: AGENT_RUN_OUTCOME,
   run_gate: RUN_GATE,
   business_partner: BUSINESS_PARTNER_STATE,
   ledger_account: LEDGER_ACCOUNT_STATUS,
@@ -2449,39 +2490,6 @@ export function reachedStageIndex(stage: string | null | undefined): number {
   return (BELEG_STAGE_FLOW as readonly string[]).indexOf(stage);
 }
 
-/**
- * Ein Beleg trägt ZWEI Status gleichzeitig: die technische Pipeline-Position
- * (`processing_status`) und — sobald ein Sachverhalt existiert — die fachliche
- * Reviewer-Achse (`lifecycle_status`). Wer nur EINEN Chip zeigen kann (Banner,
- * Listenzeile), braucht eine Vorrangregel. Die steht hier, damit nicht jede
- * Ansicht ihre eigene erfindet:
- *
- *   1. `failed` schlägt alles — ein Pipeline-Abbruch ist die relevanteste
- *      Information, auch wenn fachlich schon ein Sachverhalt offen ist.
- *   2. sonst der Lifecycle, sobald gesetzt — der Reviewer interessiert sich
- *      für „was ist zu tun", nicht für „welche Pipeline-Stufe".
- *   3. sonst der Processing-Status — der Beleg ist noch in der Pipeline.
- *
- * `value` kommt mit zurück, weil Aufrufer daran Detailtexte verzweigen (z.B.
- * Fehlermeldung nur bei `failed`). Achtung: `value` stammt je nach Zweig aus
- * einem ANDEREN Wertebereich — nicht gegen nur ein Enum prüfen.
- */
-export function resolveEffectiveBelegStatus(
-  processingStatus: string | null | undefined,
-  lifecycleStatus: string | null | undefined,
-): (StatusDescriptor & { value: string }) | null {
-  if (processingStatus === "failed") {
-    return { value: "failed", ...resolveStatus("document_processing", "failed") };
-  }
-  if (lifecycleStatus) {
-    return { value: lifecycleStatus, ...resolveStatus("accounting_case", lifecycleStatus) };
-  }
-  if (processingStatus) {
-    return { value: processingStatus, ...resolveStatus("document_processing", processingStatus) };
-  }
-  return null;
-}
-
 /** Eingangsgrößen der Ereignis-Ableitung — alles, was am Event persistiert ist. */
 export interface EventBookingStateInput {
   /** Status des jüngsten journal_entry an DIESEM Event, null = kein Satz. */
@@ -2548,7 +2556,7 @@ export interface StateTransition {
   /**
    * Nur setzen, wenn der Übergang **nicht** auf der Standardachse der Maschine
    * liegt. Ein Prozess darf mehrere Achsen schreiben (siehe
-   * `document_processing`), ohne dass die Achsen ihren eigenen Wertebereich
+   * `document_status`), ohne dass die Achsen ihren eigenen Wertebereich
    * und ihren Deckungstest verlieren.
    */
   axis?: StatusAxis;
@@ -2607,40 +2615,18 @@ export interface StateMachine {
 export const STATE_MACHINES: Record<string, StateMachine> = {
   /* ── Beleg ──────────────────────────────────────────────────────────── */
 
-  document_processing: {
-    axis: "document_processing",
+  document_status: {
+    axis: "document_status",
     description:
-      "Der Weg eines Belegs durch die Verarbeitung — EIN Prozess über drei Spalten. " +
-      "`document_inbox` (Supertyp, jede Belegart) läuft zuerst, `document_processing` (Rechnungs-Subtyp) danach, " +
-      "und `document_stage` ist die Position *innerhalb* von `in_progress`, kein eigener Weg. " +
-      "Dass die Aufteilung künstlich ist, zeigt `resolveEffectiveBelegStatus`: die Funktion " +
-      "existiert nur, um zwei Achsen für einen einzigen Chip wieder zusammenzurechnen (F151).",
+      "Der Weg eines Belegs bis „erledigt\" — EINE State-Machine am Beleg (F289, belege.md R14). " +
+      "Übergänge aus `SOURCE_DOC_STATUS_TRANSITIONS` (dieselbe Paarmenge erzwingt die DB); " +
+      "`document_stage` ist die Position *innerhalb* von `extracting`, kein eigener Weg.",
     transitions: [
-      // — Eingang, Supertyp `client_source_docs.status` —
-      { axis: "document_inbox", from: null, to: "pending_classification", trigger: "document_uploaded", label: "Datei hochgeladen", by: "user" },
-      { axis: "document_inbox", from: "pending_classification", to: "classified", trigger: "classification_succeeded", label: "Klassifikator hat die Dokumentart erkannt", by: "system" },
-      { axis: "document_inbox", from: "pending_classification", to: "classification_failed", trigger: "classification_failed", label: "Dokumentart nicht bestimmbar — es gibt keinen automatischen Wiederholungslauf", by: "system" },
-      { axis: "document_inbox", from: "classification_failed", to: "pending_classification", trigger: "classification_restarted", label: "von Hand neu angestoßen", by: "user" },
-      { axis: "document_inbox", from: "classified", to: "pending_classification", trigger: "document_reprocessed", label: "Neuverarbeitung angestoßen", by: "user" },
-      { axis: "document_inbox", from: "classified", to: "deleted", trigger: "document_soft_deleted", label: "aus der Liste entfernt — Datei und Historie bleiben", by: "user" },
-      // F170: ein erkannter Kontoauszug nimmt den Eingang, aber nicht die
-      // Klassifikation — er wartet auf das Bankkonto und geht danach als
-      // erledigt heraus (`completed_via='import'`).
-      { axis: "document_inbox", from: null, to: "awaiting_input", trigger: "statement_detected", label: "Kontoauszug erkannt — das Bankkonto steht nicht in der Datei", by: "system" },
-      { axis: "document_inbox", from: "awaiting_input", to: "classified", trigger: "statement_imported", label: "Bankkonto gewählt, Auszug importiert", by: "user" },
-      { axis: "document_inbox", from: "awaiting_input", to: "deleted", trigger: "document_soft_deleted", label: "aus der Liste entfernt, ohne importiert zu werden", by: "user" },
+      ...SOURCE_DOC_STATUS_TRANSITIONS.flatMap((t) =>
+        (t.from ?? [null]).map((from) => ({ from, to: t.to, trigger: t.trigger, label: t.by })),
+      ),
 
-      // — Pipeline, Subtyp `client_source_docs_invoices.processing_status` —
-      { from: null, to: "pending", trigger: "invoice_row_created", label: "Rechnungs-Stub angelegt, bevor die Pipeline läuft", by: "api" },
-      { from: "pending", to: "in_progress", trigger: "pipeline_started", label: "Workflow greift den Beleg auf", by: "system" },
-      { from: "in_progress", to: "processed", trigger: "pipeline_completed", label: "ohne offene Findings fertig", by: "system" },
-      { from: "in_progress", to: "review_needed", trigger: "pipeline_completed_with_findings", label: "reparierbare Findings bleiben — kein Abbruch", by: "system" },
-      { from: "in_progress", to: "failed", trigger: "pipeline_aborted", label: "Crash, Timeout oder kritischer Befund", by: "system" },
-      { from: "review_needed", to: "processed", trigger: "extraction_corrected", label: "Extraktion korrigiert, synchron neu geprüft", by: "user" },
-      { from: "processed", to: "review_needed", trigger: "revalidation_found_findings", label: "Revalidierung findet doch etwas", by: "system" },
-      { from: "failed", to: "in_progress", trigger: "pipeline_restarted", label: "Neuverarbeitung angestoßen", by: "user" },
-
-      // — Stufen innerhalb von `in_progress`, `…invoices.processing_stage`.
+      // — Stufen innerhalb von `extracting`, `…invoices.processing_stage`.
       //   Resume-Anker des Workflows, nicht nur Anzeige: ein von Hand
       //   gesetzter Wert kann Belege dauerhaft überspringen lassen. —
       { axis: "document_stage", from: null, to: "classified", trigger: "stage_classified", label: "Belegart erkannt (Cheap-Classifier)", by: "system" },
@@ -2648,26 +2634,6 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       { axis: "document_stage", from: "classified", to: "preprocessed", trigger: "stage_preprocessed", label: "OCR und Strukturierung durch", by: "system" },
       { axis: "document_stage", from: "preprocessed", to: "interpreted", trigger: "stage_interpreted", label: "fachliche Bedeutung ermittelt (Rolle, Positionen, Lieferant)", by: "system" },
       { axis: "document_stage", from: "interpreted", to: "proposed", trigger: "stage_proposed", label: "historisch — seit 2026-07-06 entstehen Vorschläge am Sachverhalt", by: "system" },
-    ],
-  },
-
-  document_completion: {
-    axis: "document_completion",
-    description:
-      "Ob der Beleg fachlich durch ist — die zweite, parallele Achse des Belegs. Sie folgt der " +
-      "BUCHUNG, nicht der Pipeline: „Pipeline durchgelaufen\" heißt nicht „fertig\", und ein " +
-      "erledigter Beleg kann eine abgebrochene Pipeline haben. Deshalb eine eigene Maschine und " +
-      "nicht in `document_processing` gefaltet — beide Zustände dürfen gleichzeitig gelten.",
-    transitions: [
-      { from: null, to: "open", trigger: "document_created", label: "Beleg angelegt, `completed_at` ist NULL", by: "system" },
-      { from: "open", to: "booking", trigger: "completed_by_booking", label: "die Buchung hat ihn beim Abschluss miterledigt", by: "system" },
-      { from: "open", to: "manual", trigger: "completed_by_hand", label: "von Hand abgehakt, mit Begründung", by: "user" },
-      { from: "open", to: "no_booking_required", trigger: "marked_no_booking_required", label: "kein Buchungsbedarf — der Beleg bleibt liegen, ohne offen zu sein", by: "user" },
-      { from: "open", to: "case_closed", trigger: "completed_by_case_close", label: "der Sachverhalt wurde geschlossen, der Beleg nicht einzeln abgehakt", by: "user" },
-      { from: "open", to: "import", trigger: "completed_by_datev_import", label: "kam aus DATEV und war dort bereits gebucht", by: "system" },
-      { from: "open", to: "superseded", trigger: "superseded_by_document", label: "ein neuer Beleg hat diesen abgelöst (Korrektur, zweiter Scan)", by: "user" },
-      { from: "open", to: "completed", trigger: "completed_without_reason", label: "Altbestand — erledigt, Grund nicht festgehalten; seit F87 schreibt jeder Weg seinen Grund mit", by: "system" },
-      { from: "booking", to: "open", trigger: "reopened_by_reversal", label: "die Buchung wurde storniert — der Trigger nimmt den Stempel zurück", by: "system" },
     ],
   },
 
@@ -2732,12 +2698,17 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       "zum Wiederfinden in DATEV. Wer gerade dran ist, IST der Zustand. Die längste Kette im " +
       "System — elf Zustände über Agent, Kanzlei, Bridge und DATEV.",
     transitions: [
-      { from: null, to: "prepared", trigger: "cycle_opened", label: "Zyklus eröffnet", by: "user" },
-      { from: "prepared", to: "agent", trigger: "released_to_agent", label: "Belege vollständig — der Zyklus ist an den Agenten übergeben", by: "user" },
-      { from: "agent", to: "prepared", trigger: "agent_run_finished", label: "Durchgang beendet — der Zyklus liegt wieder bereit", by: "agent" },
-      { from: "prepared", to: "review", trigger: "review_started", label: "die Kanzlei übernimmt die Abnahme statt des nächsten Durchgangs", by: "user" },
-      { from: "review", to: "prepared", trigger: "returned_to_agent", label: "die Kanzlei gibt an den Agenten zurück", by: "user" },
+      { from: null, to: "prepared", trigger: "cycle_opened", label: "Zyklus eröffnet — von Hand (Kanzlei) oder über Kette, Onboarding und Freigabe (System)", by: "system" },
+      { from: "prepared", to: "agent", trigger: "released_to_agent", label: "Dateikorb freigegeben (sofort beim Abschicken oder nach der Pipeline) — der Zyklus ist beim Agenten. Dieselbe Kante nimmt die Rückgabe durch die Kanzlei (returned_to_agent)", by: "system" },
+      { from: "agent", to: "prepared", trigger: "agent_run_finished", label: "Durchgang beendet — der Zyklus liegt wieder bereit. Dieselbe Kante nimmt das Zurücksetzen durch die Kanzlei (reset)", by: "agent" },
+      { from: "agent", to: "review", trigger: "taken_over_after_idle", label: "die Kanzlei übernimmt, weil der Agent seit zwei Stunden still ist", by: "user" },
+      { from: "agent", to: "ready", trigger: "export_created", label: "freigegeben und geschnitten, ohne dass die Kanzlei vorher übernahm", by: "user" },
+      { from: "prepared", to: "review", trigger: "review_started", label: "nur manuell buchen — die Kanzlei übernimmt die Abnahme statt des nächsten Durchgangs", by: "user" },
+      { from: "review", to: "agent", trigger: "returned_to_agent", label: "die Kanzlei gibt an den Agenten zurück", by: "user" },
+      { from: "prepared", to: "prepared", trigger: "reset", label: "Zyklus zurückgesetzt", by: "user" },
+      { from: "review", to: "prepared", trigger: "reset", label: "Zyklus zurückgesetzt", by: "user" },
       { from: "review", to: "ready", trigger: "batch_released", label: "abgenommen und geschnitten — die Sätze sind geclaimt und gesperrt", by: "user" },
+      { from: "ready", to: "review", trigger: "export_cancelled", label: "Export zurückgenommen, bevor die Bridge ihn holte", by: "user" },
       { from: "ready", to: "exporting", trigger: "bridge_picked_up", label: "die Bridge holt den Stapel beim nächsten Poll", by: "system" },
       { from: "exporting", to: "inspection", trigger: "datev_received", label: "übertragen — DATEV prüft, noch keine Quittung", by: "system" },
       { from: "inspection", to: "confirmed", trigger: "datev_acknowledged", label: "DATEV hat quittiert; der Folge-Zyklus ist eröffnet", by: "system" },
@@ -2746,7 +2717,22 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       { from: "failed", to: "review", trigger: "release_withdrawn", label: "Freigabe zurückgenommen", by: "user" },
       { from: "confirmed", to: "mirrored", trigger: "found_in_mirror", label: "im DATEV-Spiegel wiedergefunden (ID-Kante) — die Nachlese steht aus", by: "system" },
       { from: "mirrored", to: "closed", trigger: "reconciled", label: "abgeglichen — es gibt nichts mehr zu tun", by: "system" },
-      { from: "prepared", to: "cancelled", trigger: "cycle_cancelled", label: "Altbestand: terminal abgebrochen, die Buchungen sind wieder frei — ein lebender Zyklus geht stattdessen zurück in die Prüfung", by: "user" },
+      { from: "prepared", to: "cancelled", trigger: "discarded", label: "verworfen — die Buchungen sind wieder frei", by: "user" },
+      { from: "agent", to: "cancelled", trigger: "discarded", label: "verworfen — die Buchungen sind wieder frei", by: "user" },
+      { from: "review", to: "cancelled", trigger: "discarded", label: "verworfen — die Buchungen sind wieder frei", by: "user" },
+    ],
+  },
+
+  file_basket: {
+    axis: "file_basket",
+    description:
+      "Der Dateikorb (F280): die Anlieferung eines Mandanten zwischen zwei Freigaben. Der Korb ist " +
+      "die Anlieferung, der Stapel der Buchungszeitraum.",
+    transitions: [
+      { from: null, to: "open", trigger: "basket_opened", label: "erster Beleg ohne offenen Korb — der Korb entsteht", by: "system" },
+      { from: "open", to: "submitted", trigger: "basket_submitted", label: "„Korb verarbeiten\" auf der Eingangsseite oder POST /release der Intake-API", by: "user" },
+      { from: "submitted", to: "released", trigger: "basket_released", label: "die Pipeline ist durch (oder 24 h vorbei) — die Stapel gehen an den Agenten", by: "system" },
+      { from: "released", to: "completed", trigger: "basket_completed", label: "der letzte Beleg ist erledigt", by: "system" },
     ],
   },
 
@@ -2867,14 +2853,16 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
  * Farbe bedeutet je nach Achse etwas anderes.
  */
 export const AXIS_LABEL: Record<StatusAxis, string> = {
-  document_processing: "Beleg",
+  document_status: "Belegstatus",
+  document_review_reason: "Prüfgrund",
   document_stage: "Verarbeitungsstufe",
   document_character: "Beleg-Charakter",
-  document_completion: "Erledigung",
+  document_done_via: "Erledigt durch",
   document_filing: "DUO-Ablage",
   document_booking: "Buchung am Beleg",
   document_stuck: "Beleg-Zustand",
-  document_inbox: "Dokument",
+  file_basket: "Dateikorb",
+  file_basket_warning: "Hinweis",
   document_category: "Belegkategorie",
   collection_kind: "Art der Dokumentgruppe",
   document_direction: "Belegrichtung",
@@ -2901,6 +2889,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   export_case: "DATEV-Export",
   export_bucket: "DATEV-Export",
   run_outcome: "Buchungslauf",
+  agent_run_outcome: "Lauf-Ende",
   run_gate: "Gate",
   business_partner: "Geschäftspartner",
   ledger_account: "Konto",
@@ -2955,14 +2944,16 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
  * bewusst der DB-Bezeichner, nicht die Übersetzung.
  */
 export const AXIS_SOURCE: Record<StatusAxis, string> = {
-  document_processing: "client_source_docs_invoices.processing_status",
+  document_status: "client_source_docs.status",
+  document_review_reason: "client_source_docs.review_reason (nur in agent_review/human_review)",
   document_stage: "client_source_docs_invoices.processing_stage",
   document_character: "client_source_docs.class_document_kind",
-  document_completion: "client_source_docs.completed_via (+ completed_at)",
+  document_done_via: "client_source_docs.done_via (+ done_at, done_reason)",
   document_filing: "client_source_docs.filed_at / filing_failed_at (F216)",
-  document_booking: "berechnet — lebender Satz über Ereignis oder journal_entry.source_doc_id, sonst completed_at (F236)",
+  document_booking: "berechnet — lebender Satz über Ereignis oder journal_entry.source_doc_id, sonst status done (F236)",
   document_stuck: "berechnet — hasInvoiceRow + Listen-Variante (ephemer)",
-  document_inbox: "client_source_docs.status",
+  file_basket: "client_file_baskets.state",
+  file_basket_warning: "client_file_baskets.warnings[].code (Snapshot beim Abschicken)",
   document_category: "client_source_docs.doc_category",
   collection_kind: "client_source_docs.collection_kind",
   document_direction: "client_source_docs_invoices.doc_direction",
@@ -2989,6 +2980,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   export_case: "abgeleitet — deriveCaseExportStatus (keine Spalte)",
   export_bucket: "abgeleitet — bucketOf in export-status-core.ts",
   run_outcome: "abgeleitet — runOutcome in agent-runs-view.ts (keine Spalte)",
+  agent_run_outcome: "client_agent_runs.outcome (NULL = offen/Altbestand)",
   run_gate: "client_agent_run_steps.gate_result (NULL = Schritt noch offen)",
   business_partner: "client_business_partners.onboarding_state",
   ledger_account: "client_ledger_accounts.status",

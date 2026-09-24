@@ -50,7 +50,7 @@ export const AllAxes: Story = {
 export const CoreAxes: Story = {
   render: () => (
     <div>
-      <AxisBlock axis="document_processing" />
+      <AxisBlock axis="document_status" />
       <AxisBlock axis="accounting_case" />
       <AxisBlock axis="journal_entry" />
     </div>
@@ -62,7 +62,7 @@ export const WithInfoDialog: Story = { args: { axis: "journal_entry", status: "p
 
 /** Nur beim Beleg: die erreichte Pipeline-Stufe als Detail am Chip. */
 export const DocumentWithStage: Story = {
-  args: { axis: "document_processing", status: "processing", stage: "preprocessed", info: false },
+  args: { axis: "document_status", status: "extracting", stage: "preprocessed", info: false },
 };
 
 /** Unbekannter DB-Wert — die Registry fällt sichtbar zurück, statt zu lügen. */

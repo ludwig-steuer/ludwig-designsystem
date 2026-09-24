@@ -224,7 +224,7 @@ export function StateMachine({
   description?: string;
 }) {
   // **Searched, not indexed.** The key in `STATE_MACHINES` is the **process**
-  // (`export_batch`, `document_processing`), not the axis — the registry says
+  // (`export_batch`, `document_status`), not the axis — the registry says
   // so explicitly since the mirror pull of 2026-09-07. Before that the four
   // machines were named after their axes and the direct lookup hit; after it
   // hit nothing, silently. A process may write several axes, so the machine's
@@ -232,7 +232,10 @@ export function StateMachine({
   const machine =
     STATE_MACHINES[axis] ?? Object.values(STATE_MACHINES).find((m) => m.axis === axis);
 
-  const all = transitions ?? machine?.transitions ?? [];
+  // A process may also write a sub-axis (`document_status` carries the stages
+  // of `document_stage` inside `extracting`). Those transitions belong to the
+  // other axis: drawn here they were a second row of nameless boxes.
+  const all = (transitions ?? machine?.transitions ?? []).filter((t) => !t.axis || t.axis === axis);
   const lead = description ?? machine?.description;
   // The entry into the axis has no source box; it is not an edge.
   const edges = all.filter(isEdge);

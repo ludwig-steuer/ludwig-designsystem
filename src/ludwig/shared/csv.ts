@@ -1,10 +1,10 @@
 /**
- * Minimal-CSV-Tokenizer für ';'-Trennzeichen mit '"'-Quotes
- * (Verdoppelung '""' = literales "). Reicht für DATEV- und Qonto-Exports;
- * ausgereiftere Bibliotheken bringen für diese Spezifika keinen Mehrwert
- * und mehr Dependency-Oberfläche.
+ * Minimal-CSV-Tokenizer mit '"'-Quotes (Verdoppelung '""' = literales ").
+ * Trennzeichen per Default ';' (DATEV, Qonto); der Kontoauszug-Formatkatalog
+ * (F286) deklariert es je Eintrag. Ausgereiftere Bibliotheken bringen für
+ * diese Spezifika keinen Mehrwert und mehr Dependency-Oberfläche.
  */
-export function tokenizeRow(line: string): string[] {
+export function tokenizeRow(line: string, delimiter = ";"): string[] {
   const cells: string[] = [];
   let current = "";
   let inQuotes = false;
@@ -25,7 +25,7 @@ export function tokenizeRow(line: string): string[] {
       inQuotes = true;
       continue;
     }
-    if (ch === ";") {
+    if (ch === delimiter) {
       cells.push(current);
       current = "";
       continue;

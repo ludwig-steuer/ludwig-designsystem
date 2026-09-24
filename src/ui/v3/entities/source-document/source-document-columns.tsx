@@ -48,9 +48,7 @@ export type SourceDocumentColumn =
   | "uploadedAt"
   | "receivedDate"
   | "classification"
-  | "processing"
-  | "completed"
-  | "inboxState"
+  | "status"
   | "confidence"
   | "size"
   | "stuckState";
@@ -70,10 +68,8 @@ const ORDER: SourceDocumentColumn[] = [
   "classification",
   "confidence",
   "size",
-  "processing",
   "stuckState",
-  "inboxState",
-  "completed",
+  "status",
 ];
 
 /**
@@ -100,8 +96,10 @@ export const DOCUMENT_LIST_COLUMNS: SourceDocumentColumn[] = [
   // the list (filter and „Offen"); it is only no longer what the row shows.
   "uploadedAt",
   "classification",
-  "processing",
-  "completed",
+  // One column for where the document stands (F289): the state machine
+  // `document_status`, done with its „how" and date. Until F289 these were
+  // „Verarbeitung" and „Erledigt" side by side.
+  "status",
 ];
 
 /**
@@ -113,7 +111,7 @@ export const INBOX_COLUMNS: SourceDocumentColumn[] = [
   "fileName",
   "classification",
   "confidence",
-  "inboxState",
+  "status",
 ];
 
 /**
@@ -128,7 +126,7 @@ export const SUBMIT_COLUMNS: SourceDocumentColumn[] = [
   "fileName",
   "form",
   "size",
-  "inboxState",
+  "status",
 ];
 
 /**
@@ -469,28 +467,15 @@ export function sourceDocumentColumns({
       width: "232px",
       cell: (d) => <SourceDocumentClass document={d} />,
     },
-    processing: {
-      key: "processing",
-      header: "Verarbeitung",
+    status: {
+      key: "status",
+      header: "Status",
       // Z4: a status column carries its (i) — and it belongs **here**, not in
       // `header`: a button inside the sort link would be invalid HTML. The
-      // badges below carry none: the head already explains the axis, and the
-      // same button in every row said the same thing four times over
+      // badges below carry none: the head already explains the axis
       // (acceptance 0070, M3).
-      headerAside: <StatusInfoButton axis="document_processing" />,
-      width: "160px",
-      cell: (d) =>
-        d.processingStatus ? (
-          <StatusBadge axis="document_processing" status={d.processingStatus} info={false} />
-        ) : (
-          <span className="v2muted">—</span>
-        ),
-    },
-    completed: {
-      key: "completed",
-      header: "Erledigt",
-      headerAside: <StatusInfoButton axis="document_completion" />,
-      width: "170px",
+      headerAside: <StatusInfoButton axis="document_status" />,
+      width: "190px",
       cell: (d) => <SourceDocumentCompletion document={d} />,
     },
     stuckState: {
@@ -499,20 +484,6 @@ export function sourceDocumentColumns({
       headerAside: <StatusInfoButton axis="document_stuck" />,
       width: "170px",
       cell: (d) => <StatusBadge axis="document_stuck" status={stuckState(d.hasInvoiceRow, stuckVariant)} info={false} />,
-    },
-    inboxState: {
-      key: "inboxState",
-      // **Not** „Zustand": Z4 forbids the empty word, and this column says
-      // one specific thing — how far the classification of this document got.
-      header: "Erkennung",
-      headerAside: <StatusInfoButton axis="document_inbox" />,
-      width: "190px",
-      cell: (d) =>
-        d.inboxStatus ? (
-          <StatusBadge axis="document_inbox" status={d.inboxStatus} info={false} />
-        ) : (
-          <span className="v2muted">—</span>
-        ),
     },
     confidence: {
       key: "confidence",

@@ -80,7 +80,7 @@ export const Clean: Story = {
 export const DateMissing: Story = {
   render: function Datum() {
     const [date, setDate] = useState<string | null>(null);
-    const doc = documentFixture({ documentDate: date, completedAt: null, completedVia: null });
+    const doc = documentFixture({ documentDate: date, doneAt: null, doneVia: null });
     return (
       <DocumentPage document={doc} actions={menu}>
         {date ? null : (
@@ -141,7 +141,7 @@ export const DateMissing: Story = {
  */
 export const AwaitingReview: Story = {
   render: () => {
-    const doc = documentFixture({ completedAt: null, completedVia: null });
+    const doc = documentFixture({ doneAt: null, doneVia: null });
     return (
       <DocumentPage
         document={doc}
@@ -174,9 +174,9 @@ export const AwaitingReview: Story = {
 export const ExtractionRunning: Story = {
   render: () => {
     const doc = documentFixture({
-      processingStatus: "in_progress",
-      completedAt: null,
-      completedVia: null,
+      status: "extracting",
+      doneAt: null,
+      doneVia: null,
       documentDate: null,
       counterparty: null,
       classConfidence: null,
@@ -211,9 +211,9 @@ export const ExtractionRunning: Story = {
 export const ExtractionStuck: Story = {
   render: () => {
     const doc = documentFixture({
-      processingStatus: "in_progress",
-      completedAt: null,
-      completedVia: null,
+      status: "extracting",
+      doneAt: null,
+      doneVia: null,
       documentDate: null,
       counterparty: null,
       classConfidence: null,
@@ -245,9 +245,9 @@ export const ExtractionStuck: Story = {
 export const Failed: Story = {
   render: () => {
     const doc = documentFixture({
-      processingStatus: "failed",
-      completedAt: null,
-      completedVia: null,
+      status: "agent_review", reviewReason: "extraction_error",
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
     });
@@ -282,7 +282,7 @@ export const Failed: Story = {
  */
 export const WithFirm: Story = {
   render: () => {
-    const doc = documentFixture({ completedAt: null, completedVia: null });
+    const doc = documentFixture({ doneAt: null, doneVia: null });
     return (
       <DocumentPage
         document={doc}
@@ -376,8 +376,8 @@ export const CorrectedValues: Story = {
 export const WithFindings: Story = {
   render: () => {
     const doc = documentFixture({
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       documentDate: null,
       counterparty: "Musterbau GmbH",
     });
@@ -424,12 +424,12 @@ export const WithFindings: Story = {
 export const Done: Story = {
   render: () => {
     const doc = documentFixture({
-      completedVia: "no_booking_required",
-      completedReason: "Privatentnahme, gehört nicht in die Buchführung.",
+      doneVia: "no_booking_required",
+      doneReason: "Privatentnahme, gehört nicht in die Buchführung.",
     });
     const replaced = documentFixture({
-      completedVia: "superseded",
-      completedReason: "Ersetzt durch R-2026-0058 — der Lieferant hat storniert und neu gestellt.",
+      doneVia: "superseded",
+      doneReason: "Ersetzt durch R-2026-0058 — der Lieferant hat storniert und neu gestellt.",
     });
     return (
       <div style={{ display: "grid", gap: 40 }}>

@@ -342,7 +342,9 @@ export {
   SourceDocumentCompletion,
   sourceDocumentIdentifier,
   type SourceDocumentVM,
-  type SourceDocCompletionVia,
+  type SourceDocDoneVia,
+  type SourceDocReviewReason,
+  type SourceDocStatus,
 } from "./entities/source-document/SourceDocument";
 
 export { SourceDocumentList, type SourceDocumentEmptyKind } from "./entities/source-document/SourceDocumentList";

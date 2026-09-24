@@ -9,8 +9,12 @@
  * `1` (steuerfrei) ist Standard. §13b (Reverse-Charge, 91/92/94/95) und
  * innergemeinschaftlicher Erwerb (18/19) hängen am konkreten Sachverhalt.
  */
+/** F271: Gruppe im Nachschlagewerk (`tax-key-reference.ts`). */
+export type TaxKeyGroup = "input_tax" | "output_tax" | "intra_community" | "reverse_charge" | "tax_free";
+
 export interface TaxKeyEntry {
   key: string;
+  group: TaxKeyGroup;
   label: string;
   /** USt-Satz in Prozent, null wenn steuerfrei/nicht anwendbar. */
   vatRate: number | null;
@@ -29,6 +33,7 @@ export interface TaxKeyEntry {
 export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   {
     key: "1",
+    group: "tax_free",
     label: "Umsatzsteuerfrei (mit Vorsteuerabzug)",
     vatRate: 0,
     direction: "none",
@@ -37,6 +42,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "2",
+    group: "output_tax",
     label: "Umsatzsteuer 7 %",
     vatRate: 7,
     direction: "output",
@@ -45,6 +51,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "3",
+    group: "output_tax",
     label: "Umsatzsteuer 19 %",
     vatRate: 19,
     direction: "output",
@@ -53,6 +60,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "8",
+    group: "input_tax",
     label: "Vorsteuer 7 %",
     vatRate: 7,
     direction: "input",
@@ -61,6 +69,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "9",
+    group: "input_tax",
     label: "Vorsteuer 19 %",
     vatRate: 19,
     direction: "input",
@@ -69,6 +78,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "91",
+    group: "reverse_charge",
     label: "§ 13b 7 % (mit Vorsteuerabzug)",
     vatRate: 7,
     direction: "input",
@@ -77,6 +87,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "92",
+    group: "reverse_charge",
     label: "§ 13b 7 % (ohne Vorsteuerabzug)",
     vatRate: 7,
     direction: "input",
@@ -85,6 +96,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "94",
+    group: "reverse_charge",
     label: "§ 13b 19 % (mit Vorsteuerabzug)",
     vatRate: 19,
     direction: "input",
@@ -93,6 +105,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "95",
+    group: "reverse_charge",
     label: "§ 13b 19 % (ohne Vorsteuerabzug)",
     vatRate: 19,
     direction: "input",
@@ -101,6 +114,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "18",
+    group: "intra_community",
     label: "Innergemeinschaftlicher Erwerb 7 %",
     vatRate: 7,
     direction: "input",
@@ -109,6 +123,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "19",
+    group: "intra_community",
     label: "Innergemeinschaftlicher Erwerb 19 %",
     vatRate: 19,
     direction: "input",
@@ -117,6 +132,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   },
   {
     key: "11",
+    group: "intra_community",
     label: "Steuerfreie innergem. Lieferung",
     vatRate: 0,
     direction: "output",
@@ -132,6 +148,7 @@ export const DATEV_TAX_KEYS: readonly TaxKeyEntry[] = [
   // `490` hat kein bisheriges Gegenstück und bleibt eigener Eintrag.
   {
     key: "490",
+    group: "tax_free",
     label: "Ohne Vorsteuerabzug (bewusst)",
     vatRate: null,
     direction: "none",
@@ -153,6 +170,13 @@ export const CURRENT_REVERSE_CHARGE_KEY: Readonly<Record<string, Readonly<Record
   "91": { 7: "507", 1: "512", 4: "527" },
   "95": { 7: "6506", 1: "6511", 4: "6526" },
   "92": { 7: "6507", 1: "6512", 4: "6527" },
+};
+
+/** Sachverhalt L+L (§ 13b) → Bezeichnung im Nachschlagewerk; jeder Sachverhalt aus `CURRENT_REVERSE_CHARGE_KEY` steht hier. */
+export const REVERSE_CHARGE_CASE_LABEL: Readonly<Record<number, string>> = {
+  7: "Sonstige Leistung eines EU-Unternehmers (§ 13b Abs. 1, UStVA Kz 46/47)",
+  1: "Leistung eines ausländischen Unternehmers (§ 13b Abs. 2 Nr. 1, UStVA Kz 84/85)",
+  4: "Bauleistung (§ 13b Abs. 2 Nr. 4, UStVA Kz 84/85)",
 };
 
 export interface CurrentTaxKey {

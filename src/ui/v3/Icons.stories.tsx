@@ -529,7 +529,7 @@ export const InUse: Story = {
         }
       >
         <div style={{ display: "flex", gap: "var(--space-5)", alignItems: "center" }}>
-          <StatusBadge axis="document_processing" status="in_progress" info={false} />
+          <StatusBadge axis="document_status" status="extracting" info={false} />
           <StatusBadge axis="accounting_case" status="needs_clarification" info={false} />
           <IconButton label="Schließen" icon={<ActionIcon action="close" size={14} />} />
         </div>

@@ -26,9 +26,9 @@ const INVOICE: SourceDocumentVM = {
   documentDate: "2026-08-26",
   receivedDate: "2026-08-27",
   uploadedAt: "2026-08-30T08:12:00Z",
-  completedAt: "2026-08-30T09:12:00Z",
-  completedVia: "booking",
-  completedReason: null,
+  doneAt: "2026-08-30T09:12:00Z",
+  doneVia: "booking",
+  doneReason: null,
   docCategory: "performance",
   docDirection: "inbound",
   classDocumentKind: "original",
@@ -152,8 +152,8 @@ export const Kinds: Story = {
           documentDate: "2026-08-10",
           receivedDate: "2026-08-11",
           uploadedAt: "2026-08-14T08:12:00Z",
-          completedAt: "2026-08-12T08:00:00Z",
-          completedVia: "no_booking_required",
+          doneAt: "2026-08-12T08:00:00Z",
+          doneVia: "no_booking_required",
           href: "#beleg-erklaerung",
         },
         {
@@ -191,8 +191,8 @@ export const Kinds: Story = {
           documentDate: "2026-07-30",
           receivedDate: "2026-07-31",
           uploadedAt: "2026-08-03T08:12:00Z",
-          completedAt: "2026-07-31T16:20:00Z",
-          completedVia: "import",
+          doneAt: "2026-07-31T16:20:00Z",
+          doneVia: "import",
           href: "#beleg-b9-a",
         },
         {
@@ -269,40 +269,40 @@ export const States: Story = {
       title="Erledigung"
       sub="Sechs Gründe, dazu offen und erledigt ohne Grund"
       documents={[
-        { ...INVOICE, id: "s0", completedAt: null, completedVia: null, caseNumber: null },
+        { ...INVOICE, id: "s0", doneAt: null, doneVia: null, caseNumber: null },
         {
           ...INVOICE,
           id: "s1",
-          completedVia: "booking",
-          completedReason: "Gebucht im Zyklus 2026-08, Stapel 41.",
+          doneVia: "booking",
+          doneReason: "Gebucht im Zyklus 2026-08, Stapel 41.",
         },
         {
           ...INVOICE,
           id: "s2",
-          completedVia: "case_closed",
-          completedReason: "Sachverhalt SV-118 geschlossen — der Beleg war Beiwerk.",
+          doneVia: "case_closed",
+          doneReason: "Sachverhalt SV-118 geschlossen — der Beleg war Beiwerk.",
         },
-        { ...INVOICE, id: "s3", completedVia: "import" },
+        { ...INVOICE, id: "s3", doneVia: "import" },
         {
           ...INVOICE,
           id: "s4",
-          completedVia: "superseded",
-          completedReason: "Ersetzt durch RE-4471-korrigiert.pdf (falscher Steuersatz).",
+          doneVia: "superseded",
+          doneReason: "Ersetzt durch RE-4471-korrigiert.pdf (falscher Steuersatz).",
         },
         {
           ...INVOICE,
           id: "s5",
-          completedVia: "manual",
-          completedReason:
+          doneVia: "manual",
+          doneReason:
             "Doppelt hochgeladen; das Original liegt am selben Sachverhalt und ist gebucht.",
         },
         {
           ...INVOICE,
           id: "s6",
-          completedVia: "no_booking_required",
-          completedReason: "Auswertung — kein Beleg; Inhalt liegt im DATEV-Spiegel",
+          doneVia: "no_booking_required",
+          doneReason: "Auswertung — kein Beleg; Inhalt liegt im DATEV-Spiegel",
         },
-        { ...INVOICE, id: "s7", completedVia: null },
+        { ...INVOICE, id: "s7", doneVia: null },
       ]}
     />
   ),
@@ -337,7 +337,7 @@ export const Cell: Story = {
             counterparty: "Sparkasse Berlin",
             receivedDate: "2026-09-01",
             uploadedAt: "2026-09-04T08:12:00Z",
-            completedAt: null,
+            doneAt: null,
             href: "#beleg-auszug",
           }}
         />
@@ -413,8 +413,8 @@ export const InUse: Story = {
           docCategory: "performance",
           caseNumber: "SV-118",
           caseHref: "#sv-118",
-          completedAt: "2026-08-30T09:12:00Z",
-          completedVia: "case_closed",
+          doneAt: "2026-08-30T09:12:00Z",
+          doneVia: "case_closed",
           href: "#beleg-lieferschein",
         },
         {
@@ -450,8 +450,8 @@ export const InUse: Story = {
           docCategory: "foundation",
           caseNumber: "SV-118",
           caseHref: "#sv-118",
-          completedAt: "2026-08-21T10:00:00Z",
-          completedVia: "no_booking_required",
+          doneAt: "2026-08-21T10:00:00Z",
+          doneVia: "no_booking_required",
           href: "#beleg-vertrag",
         },
         {
@@ -469,8 +469,8 @@ export const InUse: Story = {
           classDocumentKind: "credit_note",
           caseNumber: "SV-118",
           caseHref: "#sv-118",
-          completedAt: "2026-08-31T11:00:00Z",
-          completedVia: "booking",
+          doneAt: "2026-08-31T11:00:00Z",
+          doneVia: "booking",
           href: "#beleg-gutschrift",
         },
         {

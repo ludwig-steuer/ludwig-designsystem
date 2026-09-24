@@ -35,8 +35,8 @@ const INVOICE: SourceDocumentVM = {
   documentDate: "2026-08-26",
   receivedDate: "2026-08-27",
   uploadedAt: "2026-08-30T08:12:00Z",
-  completedAt: "2026-08-30T09:12:00Z",
-  completedVia: "booking",
+  doneAt: "2026-08-30T09:12:00Z",
+  doneVia: "booking",
   docCategory: "performance",
   docDirection: "inbound",
   classDocumentKind: "original",
@@ -324,7 +324,7 @@ export const Contract: Story = {
 
 /**
  * A document nothing is known about but its file and its arrival — it exists
- * in the data (the one document with `classification_failed`). What stands
+ * in the data (the one document with review reason `classification_error`). What stands
  * there: the kind („Beleg", never „Rechnung"), the file name as identifier,
  * the arrival, „Offen". What deliberately does not: no amount, no block, no
  * „unbekannt" anywhere.
@@ -466,8 +466,8 @@ export const Edges: Story = {
           fileName:
             "Rechnung-2026-08-26-ACME-GmbH-Bueromaterial-und-Bewirtung-Sammelbeleg-Standort-Berlin-Mitte-Abteilung-Verwaltung-Kostenstelle-1200-4471.pdf",
           detail: { kind: "invoice", number: null, gross: 1249.9, currency: "EUR", net: 908.7, vat: 341.2 },
-          completedVia: "manual",
-          completedReason:
+          doneVia: "manual",
+          doneReason:
             "Der Beleg wurde doppelt hochgeladen. Das Original liegt am selben Sachverhalt und ist im Zyklus 2026-08 gebucht; dieser hier ist der zweite Scan aus dem Posteingang vom 27.08., den die Kanzlei nach Rücksprache mit dem Mandanten nicht noch einmal verarbeitet hat. Die Extraktion war zu diesem Zeitpunkt bereits durchgelaufen, weshalb Nummer und Brutto identisch sind; ein Storno war nicht nötig, weil keine Buchung entstanden ist. Sollte sich später herausstellen, dass die beiden Belege doch verschiedene Vorgänge betreffen, ist der zweite Scan über die Historie wiederzufinden und kann neu angestoßen werden. Bis dahin gilt er als erledigt, ohne dass ihm eine Buchung, ein Sachverhalt oder eine DATEV-Ablage zugeordnet ist, und er erscheint in keiner der offenen Listen mehr. Der Vorgang ist im Import-Protokoll vom 27.08. mit der Kennung des zweiten Scans festgehalten.",
         }}
         summary={

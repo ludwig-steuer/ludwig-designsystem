@@ -16,10 +16,7 @@
  * | Werte der Extraktion | `open_findings` (F18) |
  * | Gegenpart mehrdeutig | `partner_match_outcome = 'ambiguous'` |
  * | Empfänger passt nicht | `recipient_match = 'mismatch'` |
- * | Zahlungskonto fehlt | `client_source_docs.status = 'awaiting_input'` (F170) |
- *
- * `awaiting_input` stand hier bis 2026-09-10 als „bewusst nicht dabei" — es ist
- * jetzt die fünfte Zeile, mit ihrem Weg.
+ * | Zahlungskonto fehlt | `human_review/statement_account_missing` bzw. `statement_check_failed` (F170, F288, F289) |
  *
  * **Nicht dabei:** `partner_match_outcome = 'not_found'`. Das trifft 162 der
  * 428 Rechnungszeilen auf Staging — ein Drittel des Bestands, für das es
@@ -55,14 +52,13 @@ export interface DocDefect {
 export interface DocDefectFacts {
   /** Der Perioden-Anker am Supertyp. */
   documentDate: string | null;
-  /** `client_source_docs.status` — `awaiting_input` wartet auf eine Angabe. */
-  inboxStatus: string | null;
+  /** Belegstatus + Prüfgrund — `human_review/statement_account_missing` wartet aufs Konto. */
+  status: string | null;
+  reviewReason: string | null;
   openFindings: readonly OpenFindingRead[];
   partnerMatchOutcome: string | null;
   recipientMatch: string | null;
   recipientMatchReason: string | null;
-  /** Fachlich erledigt — dann ist nichts mehr zu klären. */
-  completedAt: string | null;
 }
 
 /** Der Befund, der dasselbe sagt wie „Belegdatum fehlt". */
@@ -77,7 +73,7 @@ function meintDasBelegdatum(f: OpenFindingRead): boolean {
  * entscheiden nur noch, gegen wen.
  */
 export function docDefects(facts: DocDefectFacts): DocDefect[] {
-  if (facts.completedAt) return [];
+  if (facts.status === "done") return [];
   const defects: DocDefect[] = [];
 
   const datumsBefund = facts.openFindings.find(meintDasBelegdatum) ?? null;
@@ -106,7 +102,11 @@ export function docDefects(facts: DocDefectFacts): DocDefect[] {
   // F170: der erkannte Kontoauszug wartet auf sein Bankkonto. Ohne das Konto
   // wird nichts verarbeitet — und bis heute gab es den Weg nur im Eingang, nicht
   // am Beleg (L-268, `bank-offen` P1).
-  if (facts.inboxStatus === "awaiting_input") {
+  // F288: der nicht aufgehende Auszug steht in derselben Zeile (eigener Wortlaut).
+  if (
+    facts.status === "human_review" &&
+    (facts.reviewReason === "statement_account_missing" || facts.reviewReason === "statement_check_failed")
+  ) {
     defects.push({ kind: "payment_account", code: null, field: null, message: null });
   }
   if (facts.recipientMatch === "mismatch") {

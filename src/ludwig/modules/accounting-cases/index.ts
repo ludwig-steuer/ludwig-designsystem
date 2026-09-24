@@ -1,5 +1,6 @@
 /* Generiert von scripts/sync-ludwig.sh — nicht von Hand bearbeiten. */
 export * from "./domain/acceptance-quality";
+export * from "./domain/agent-run-end";
 export * from "./domain/case-detail-ds-mapping";
 export * from "./domain/case-detail";
 export * from "./domain/case-event";

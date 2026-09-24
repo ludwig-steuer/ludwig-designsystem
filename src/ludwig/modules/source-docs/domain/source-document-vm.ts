@@ -15,7 +15,7 @@
  */
 import type { ContractBookingFact } from "@/ludwig/modules/contracts";
 import type { Currency } from "@/ludwig/shared/money";
-import type { SourceDocCompletionVia } from "./document-form-labels";
+import type { SourceDocDoneVia, SourceDocReviewReason, SourceDocStatus } from "./source-doc-status";
 import type { DocCategory, DocDirection, SourceDocType } from "./document-form-mapping";
 
 /* ── Die Fakten der Ausprägung ────────────────────────────────────────────
@@ -43,8 +43,6 @@ export type SourceDocumentDetail =
       /** `invoice_total_value` — rank 3. */
       gross?: number | null;
       currency?: Currency | null;
-      /** `processing_status`, registry axis `beleg`. */
-      processingStatus?: string | null;
       /* Only the block of the specialization shows these (0076). */
       /** `subtotal_value` and `tax_total_value`. */
       net?: number | null;
@@ -105,18 +103,22 @@ export interface SourceDocumentVM {
   detail?: SourceDocumentDetail | null;
   /** ISO-Tag. NULL bleibt NULL — nie der Upload-Tag (GLOSSARY). */
   documentDate?: string | null;
-  /** NOT NULL. Der Sortierschlüssel der Belegliste. */
-  receivedDate: string;
-  /** `null` = noch offen. */
-  completedAt?: string | null;
   /**
-   * Warum er erledigt ist. `null` **bei gesetztem `completedAt`** heißt
-   * „erledigt, Grund nicht festgehalten" — nicht „offen". Achse
-   * `beleg_erledigung`; sechs Werte, im selben Modul (L-215).
+   * NOT NULL. Eingang beim Mandanten — Perioden-Achse der Belegliste. Default
+   * ist der Upload-Tag; der DATEV-Metadaten-Import überschreibt ihn.
    */
-  completedVia?: SourceDocCompletionVia | null;
+  receivedDate: string;
+  /**
+   * „Ludwig-Eingang": wann die Datei in Ludwig hochgeladen wurde. Setzt nur
+   * Ludwig, nichts überschreibt ihn — getrennt vom `receivedDate`.
+   */
+  uploadedAt?: string | null;
+  /** Gesetzt genau bei `status='done'` (F289). */
+  doneAt?: string | null;
+  /** Warum er erledigt ist — Achse `document_done_via` (F289). */
+  doneVia?: SourceDocDoneVia | null;
   /** Freitext neben dem Abzeichen, in dessen Tooltip. */
-  completedReason?: string | null;
+  doneReason?: string | null;
   /** Achse `beleg_kategorie`. NULL zeigt **nichts**, nie „unklassifiziert". */
   docCategory?: DocCategory | null;
   /** Achse `beleg_richtung`. NULL heißt „nicht anwendbar" — kein Abzeichen. */
@@ -126,16 +128,12 @@ export interface SourceDocumentVM {
   /** Achse `dokumentgruppe`, nur an einem Sammelbeleg gesetzt. */
   collectionKind?: string | null;
   /**
-   * Verarbeitung der Rechnung, Achse `beleg`. Ein Zustand der
-   * **Spezialisierung**, nicht jedes Belegs — ein Vertrag hat keinen.
+   * `client_source_docs.status`, Achse `document_status` — der eine Zustand,
+   * den **jede** Belegart trägt (F289, belege.md R14).
    */
-  processingStatus?: string | null;
-  /**
-   * `client_source_docs.status`, Achse `beleg_inbox` — der eine Zustand, den
-   * **jede** Belegart trägt. Im Bestand fast konstant (99,7 % `classified`),
-   * weshalb ihn die Liste zeigt und die Zeile nicht.
-   */
-  inboxStatus?: string | null;
+  status?: SourceDocStatus | null;
+  /** In `agent_review`/`human_review`: woran es hängt (Achse `document_review_reason`). */
+  reviewReason?: SourceDocReviewReason | null;
   /**
    * Wie sicher die Einordnung ist: `class_confidence`, ein Anteil zwischen 0
    * und 1 — **eine Zahl, kein Achsenwert**. Die Achse `konfidenz` sieht
@@ -236,14 +234,16 @@ export function sourceDocumentFromListRow(row: {
   counterparty: string | null;
   invoiceDate: string | null;
   receivedDate: string | null;
+  uploadedAt?: string | null;
   docCategory?: string | null;
   docDirection?: string | null;
   documentForm?: string | null;
   documentKind?: string | null;
-  processingStatus?: string | null;
-  completedAt?: string | null;
-  completedReason?: string | null;
-  completedVia?: SourceDocCompletionVia | null;
+  documentStatus?: SourceDocStatus | null;
+  reviewReason?: SourceDocReviewReason | null;
+  doneAt?: string | null;
+  doneReason?: string | null;
+  doneVia?: SourceDocDoneVia | null;
 }): Omit<SourceDocumentVM, "detail"> {
   return {
     id: row.sourceDocId ?? row.invoiceId ?? "",
@@ -258,13 +258,15 @@ export function sourceDocumentFromListRow(row: {
     // Der Perioden-Anker. Fehlt er, gehört der Beleg in einen der beiden
     // Hänger-Reiter — dort führt ohnehin die Datei.
     receivedDate: row.receivedDate ?? "",
-    completedAt: row.completedAt ?? null,
-    completedReason: row.completedReason ?? null,
-    completedVia: row.completedVia ?? null,
+    uploadedAt: row.uploadedAt ?? null,
+    doneAt: row.doneAt ?? null,
+    doneReason: row.doneReason ?? null,
+    doneVia: row.doneVia ?? null,
     docCategory: (row.docCategory as SourceDocumentVM["docCategory"]) ?? null,
     docDirection: (row.docDirection as SourceDocumentVM["docDirection"]) ?? null,
     classDocumentKind: row.documentKind ?? null,
-    processingStatus: row.processingStatus ?? null,
+    status: row.documentStatus ?? null,
+    reviewReason: row.reviewReason ?? null,
   };
 }
 
@@ -290,7 +292,7 @@ export function sourceDocumentFromStuckRow(row: {
     counterparty: row.counterparty,
     documentDate: row.documentDate,
     receivedDate: row.receivedDate,
-    inboxStatus: row.status,
+    status: row.status as SourceDocStatus,
   };
 }
 
@@ -313,10 +315,12 @@ export function sourceDocumentFromDispatch(doc: {
   counterparty: string | null;
   documentDate: string | null;
   receivedDate: string;
-  completedAt: string | null;
-  completedReason: string | null;
-  completedVia: SourceDocCompletionVia | null;
-  status: string;
+  uploadedAt: string | null;
+  doneAt: string | null;
+  doneReason: string | null;
+  doneVia: SourceDocDoneVia | null;
+  status: SourceDocStatus;
+  reviewReason: SourceDocReviewReason | null;
   classConfidence: number | null;
   classOverriddenAt: string | null;
   parentSourceDocId: string | null;
@@ -335,10 +339,12 @@ export function sourceDocumentFromDispatch(doc: {
     counterparty: doc.counterparty,
     documentDate: doc.documentDate,
     receivedDate: doc.receivedDate,
-    completedAt: doc.completedAt,
-    completedReason: doc.completedReason,
-    completedVia: doc.completedVia,
-    inboxStatus: doc.status,
+    uploadedAt: doc.uploadedAt,
+    doneAt: doc.doneAt,
+    doneReason: doc.doneReason,
+    doneVia: doc.doneVia,
+    status: doc.status,
+    reviewReason: doc.reviewReason,
     classConfidence: doc.classConfidence,
     classOverriddenAt: doc.classOverriddenAt,
     parentSourceDocId: doc.parentSourceDocId,

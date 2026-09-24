@@ -1,8 +1,9 @@
 /**
  * Läuft an diesem Beleg gerade etwas — und seit wann? (L-82)
  *
- * Der Fortschritt hing an der Rechnungszeile: `processing_status`,
- * `processing_stage` und die beiden Zeitstempel gibt es nur dort. Ein Vertrag,
+ * Der Fortschritt hing an der Rechnungszeile: `processing_stage` und die
+ * beiden Zeitstempel gibt es nur dort; „läuft" sagt seit F289 der
+ * Belegstatus `extracting`. Ein Vertrag,
  * der in der Extraktion hängt, zeigte deshalb **keinen** Fortschritt, sondern
  * einen leeren Fakten-Block — und ein Kontoauszug ebenso. Gefragt ist aber der
  * Beleg, nicht seine Ausprägung.
@@ -21,9 +22,10 @@
  */
 
 export interface DocProcessingFacts {
+  /** Belegstatus (F289) — `extracting` heißt: die Auslese läuft. */
+  status: string | null;
   /** Die Verarbeitung der Rechnungszeile, wo es eine gibt. */
   invoice?: {
-    processingStatus: string | null;
     processingStage: string | null;
     startedAt: string | null;
     lastActivityAt: string | null;
@@ -55,7 +57,7 @@ const OFFEN = new Set(["queued", "running"]);
 
 export function docProcessing(facts: DocProcessingFacts): DocProcessing | null {
   const invoice = facts.invoice ?? null;
-  if (invoice?.processingStatus === "in_progress") {
+  if (invoice && facts.status === "extracting") {
     return {
       stage: invoice.processingStage,
       startedAt: invoice.startedAt,

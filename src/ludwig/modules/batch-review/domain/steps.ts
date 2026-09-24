@@ -31,7 +31,15 @@ export const REVIEW_STEPS: readonly ReviewStep[] = [
   { n: 8, label: "Prüfprotokoll", description: "Alle Prüfpunkte auf einen Blick – dann den Stapel freigeben oder an den Agenten zurückgeben." },
   { n: 9, label: "Übergabe an DATEV", description: "Den freigegebenen Stapel an DATEV übertragen und sehen, ob er angekommen ist." },
   { n: 10, label: "Nachlese", description: "Vergleichen, was DATEV aus den übertragenen Sätzen gemacht hat." },
+  // Nur im Mandantenstapel (Owner 2026-09-23): die Sätze hat der Mandant
+  // gebucht — hier sieht die Kanzlei sie je Konto und übernimmt sie in einem
+  // Zug. Im Rail steht der Schritt hinter 2 (`reviewStepsFor`); die Nummer 11
+  // bleibt, damit die Indizes 0–10 der anderen Schritte stabil sind.
+  { n: 11, label: "Buchungen des Mandanten", description: "Die gelieferten Sätze je Konto sehen und alle in einem Zug übernehmen – gebucht hat sie der Mandant." },
 ];
+
+/** Der Übernahme-Schritt des Mandantenstapels. */
+export const CLIENT_BATCH_ENTRIES_STEP = 11;
 
 /**
  * Welche Prüfschritte in welcher Stapelart gelten.
@@ -40,8 +48,9 @@ export const REVIEW_STEPS: readonly ReviewStep[] = [
  * nicht umgekehrt; `__tests__/stapelarten-katalog.test.ts` hält beides
  * zusammen (F179).
  *
- * Beim Mandantenstapel bleiben `0 · 2 · 8 · 9 · 10`: der Mandant hat gebucht,
- * Ludwig ordnet Belege zu und übergibt. Was Ludwigs eigene Arbeit prüft —
+ * Beim Mandantenstapel bleiben `0 · 2 · 11 · 8 · 9 · 10`: der Mandant hat gebucht,
+ * Ludwig ordnet Belege zu, die Kanzlei übernimmt die Sätze (11) und übergibt.
+ * Was Ludwigs eigene Arbeit prüft —
  * Vollständigkeit, Vorschläge, Bank, Offene Posten, Plausibilität,
  * Konventionen — gibt es dort nicht.
  */
@@ -57,6 +66,7 @@ export const REVIEW_STEP_SCOPE: Record<number, { regular: boolean; clientBatch: 
   8: { regular: true, clientBatch: true },
   9: { regular: true, clientBatch: true },
   10: { regular: true, clientBatch: true },
+  11: { regular: false, clientBatch: true },
 };
 
 /**
@@ -70,6 +80,17 @@ export function reviewStepApplies(step: number, kind: BookingCycleKind): boolean
   const scope = REVIEW_STEP_SCOPE[step];
   if (!scope) return false;
   return kind === "client_batch" ? scope.clientBatch : scope.regular;
+}
+
+/**
+ * Die Schritte einer Stapelart in Rail-Reihenfolge. Schritt 11 steht beim
+ * Mandantenstapel zwischen Rückfragen (2) und Prüfprotokoll (8).
+ */
+export function reviewStepsFor(kind: BookingCycleKind): ReviewStep[] {
+  const rank = (n: number) => (n === CLIENT_BATCH_ENTRIES_STEP ? 2.5 : n);
+  return REVIEW_STEPS.filter((s) => reviewStepApplies(s.n, kind)).sort(
+    (a, b) => rank(a.n) - rank(b.n),
+  );
 }
 
 export const FIRST_STEP = 0;

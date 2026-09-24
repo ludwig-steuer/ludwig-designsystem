@@ -91,8 +91,12 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 **Naming-Trennung am Source-Doc:**
 
 - `source_doc_type` (neu) sagt was das Dokument IST: `invoice` /
-  `contract` / `bank_statement_pdf` / `travel_expense_report` /
-  `declaration` / `other`.
+  `contract` / `bank_statement_pdf` / `credit_card_statement` /
+  `travel_expense_report` / `declaration` / `other` /
+  `extf_booking_batch` (Buchungsstapel des Mandanten, EXTF Kategorie 21) /
+  `extf_account_list` (Debitoren-/Kreditorenliste des Mandanten, EXTF
+  Kategorie 16). Die beiden EXTF-Werte schreibt nur der Import (F279), nie der
+  Classifier; sie sind bei Anlage erledigt (`done/import`).
 - `doc_direction` (ex `accounting_role`) lebt nur noch am Invoice-Subtyp und sagt nur noch
   `inbound` / `outbound` / `internal` (Werte-Migration F87: `incoming → inbound`, `outgoing → outbound`).
 
@@ -101,9 +105,8 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 | Achse | Wohnort | Werte |
 |---|---|---|
 | Fachlich (Reviewer) | `client_accounting_case.lifecycle_status` | `open` / `needs_clarification` / `closed_accepted` / `closed_rejected` / `closed_superseded` |
-| Technisch (Pipeline) | `client_source_docs.status` + `client_source_docs_invoices.processing_status` | `received` / `classifying` / `extracting` / `interpreting` / `proposing` / `ready` / `failed` / `superseded` |
+| Beleg (bis erledigt) | `client_source_docs.status` (+ `review_reason`, `done_*`) | `pending` / `extracting` / `agent_review` / `human_review` / `bookable` / `done` / `deleted` (siehe *Belegstatus*) |
 | Buchung (Audit) | `client_journal_entry.status` | `proposed` / `accepted` / `posted` / `reversed` |
-| Abschluss (Beleg) | `client_source_docs.completed_at` + `completed_reason` | Timestamp + Freitext; `NULL` = noch offen |
 
 **Bewusst NICHT in Phase 1:**
 
@@ -309,6 +312,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Notes:
   - Phase-1-Pipeline: 1 Belegeingang → 1 Case (über ein `document_received`-Event). Recurring-Auto-Merging ist Phase-2-Backlog.
   - Reviewer-Status (`lifecycle_status` ∈ {open, needs_clarification, closed_accepted, closed_rejected, closed_superseded}) lebt am Case.
+  - UI-Präfix `SV-` (F280): `case_number` bleibt `YYYY-NNNN`, angezeigt wird `SV-2026-0012` (`formatCaseNumber`); die Suche findet beide Schreibweisen.
   - Buchungs-Vorschlag ist **kein JSON-Blob mehr** am Case, sondern ein eigenständiger `client_journal_entry` mit `status='proposed'` (siehe „Journal entry").
   - Klärungsfragen (`client_accounting_case_clarification`) hängen am Case; Blocking läuft über `severity='required'` (+ `audience`/`disposition`), nicht mehr über die 20260705113000 gedroppten `blocks_*`-Spalten.
   - Vorgänger-Modell `btx`/`btx_belege`/`btx_bank_transactions` (Migration 20260519160000) ist mit Migration 20260527140000 ersetzt.
@@ -611,7 +615,23 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Bank-Import-Lauf`
 - Definition: Protokoll-Zeile eines Bank-Transaktions-Imports (CSV/Qonto): Konto, Quelle, Datei/Label, Anzahl eingefügter Zeilen, Auslöser. Transaktionen referenzieren ihren Batch.
 - Data type: `ludwig.client_bank_import_batches`; FK `client_bank_transactions.import_batch_id`.
-- Notes: Muster-Zwilling von `client_datev_export_batches` (Export-Seite). Ersetzt seit 2026-07-11 den früheren FK `import_audit_event_id` auf `platform_audit_events` — das Audit-Log ist Seitenkanal, kein Datenanker, und bleibt dadurch archivierbar/purgebar. Der Import schreibt weiterhin zusätzlich ein Audit-Event (ohne FK).
+- Notes: `verification_level` (F286) sagt, wie der Datei-Import geprüft ist: `balance_chain` = Salden der Quelle aufgegangen (Prüfkette V2/V3, `bank.md` R3), `rows_only` = die Quelle liefert keine Salden. NULL = Abtipp-Weg/API oder Altbestand. Muster-Zwilling von `client_datev_export_batches` (Export-Seite). Ersetzt seit 2026-07-11 den früheren FK `import_audit_event_id` auf `platform_audit_events` — das Audit-Log ist Seitenkanal, kein Datenanker, und bleibt dadurch archivierbar/purgebar. Der Import schreibt weiterhin zusätzlich ein Audit-Event (ohne FK).
+
+### Bank format catalog (Formatkatalog)
+
+- English: `bank format catalog`, `table profile`
+- German: `Formatkatalog (Kontoauszug)`
+- Definition: Die deklarative Liste der Tabellen-Dialekte (CSV/XLSX), die der Bank-Import lesen kann — je Eintrag Kopfzeilen-Signatur, Spaltenzuordnung, Datums- und Betragsformat, optional Salden- und Vorspann-Angaben. Ein generischer Parser führt alle Einträge aus; neuer Dialekt = Eintrag + echte anonymisierte Fixture + Golden-Datei, kein Parser-Code.
+- Data type: Code, `apps/web/src/modules/bank-transactions/infrastructure/profiles/catalog/*.ts` (`TableProfileSpec`), Parser `profiles/table-profile.ts`; Korpus `__tests__/fixtures/bank-formats/<id>/`.
+- Notes: Kein Nutzer-Mapping, keine Heuristik über Spaltennamen — was kein Eintrag exakt beansprucht oder die Prüfkette V1–V7 reißt, landet als Beleg auf `agent_review/classification_error` mit der fehlenden Kopfzeile im Grund (`bank.md` R3, `belege.md` R1). Nicht-Tabellen (CAMT, MT940, Qonto, DATEV-Stapel) bleiben Code-Profile. Introduced 2026-09-24 (F286).
+
+### Verification level (Prüfniveau)
+
+- English: `verification level`, `verification_level`
+- German: `Prüfniveau`
+- Definition: Wie gründlich ein Datei-Import geprüft ist. `balance_chain` = die Salden der Quelle sind aufgegangen (Prüfkette V2/V3, `bank.md` R3) — ein falsch gelesener Betrag wäre aufgefallen; `rows_only` = nur Zeilenprüfungen, weil die Quelle keine Salden liefert oder die Kanzlei eine nicht aufgehende Datei bewusst übersteuert hat (F288, Audit `bank_import.verification_overridden`).
+- Data type: `ludwig.client_bank_import_batches.verification_level` ∈ `balance_chain | rows_only`, NULL = kein Datei-Import oder vor F286.
+- Notes: Abzugrenzen von den zwei Fehlerklassen der Prüfkette: *nicht lesbar* (V1, V6 → `agent_review/classification_error`) und *nicht aufgehend* (V2–V5, V7 → Beleg zur Prüfung durch die Kanzlei, kein Import bis zur Entscheidung).
 
 ### Bank reconciliation (Bankabgleich)
 
@@ -633,8 +653,8 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `agent run`, `pass`
 - German: `Agent-Durchgang` (kurz: **Durchgang**)
-- Definition: EINE protokollierte Session des Buchungs-Agenten **innerhalb eines Buchungszyklus** — von `start_agent_run` bis `finish_agent_run`. Ein Zyklus (*Buchungszyklus / Stapel*) hat n Durchgänge: jeder Rücklauf aus der Kanzlei-Prüfung startet einen neuen im selben Stapel. Der Abschluss rechnet die Handover-Statistik serverseitig, vergleicht sie mit dem Vorgänger (`handover_changed`) und **stellt den Zyklus bereit** (Stapel → `prepared`, F117): bis die Kanzlei die Prüfung übernimmt, holt ihn ein nachgereichter Beleg oder eine beantwortete Klärung zurück zum Agenten.
-- Data type: `ludwig.client_agent_runs` (trigger manual/cron/routine, stats jsonb, handover_changed, summary, `export_batch_id` = der Zyklus); Audit-Event `agent_run.completed`.
+- Definition: EINE protokollierte Session des Buchungs-Agenten **innerhalb eines Buchungszyklus** — von `start_agent_run` bis `finish_agent_run`. Ein Zyklus (*Buchungszyklus / Stapel*) hat n Durchgänge: jeder Rücklauf aus der Kanzlei-Prüfung startet einen neuen im selben Stapel. Der Abschluss rechnet die Handover-Statistik serverseitig, vergleicht sie mit dem Vorgänger (`handover_changed`) und **stellt den Zyklus bereit** (Stapel → `prepared`, F117): ein weiterer Durchgang braucht ein neues Signal — die Freigabe des nächsten *Dateikorbs* oder „Zurück an den Agenten".
+- Data type: `ludwig.client_agent_runs` (trigger manual/cron/routine, stats jsonb, handover_changed, summary, `export_batch_id` = der Zyklus, `agent_token_id` = das haltende Agent-Token, `outcome` = wie er endete: `complete` · `incomplete` · `taken_over` · `superseded`, NULL = offen/Altbestand, F284); Audit-Events `agent_run.completed` / `agent_run.finished_incomplete`; Aufrufprotokoll je Tool-Call `ludwig.ops_mcp_call_logs.agent_run_id` (F211).
 - Notes: Der Durchgang wählt seinen Zeitraum nicht — er nimmt den ersten Stapel aus der Queue (`get_agent_work_queue`) und übernimmt dessen. Statistik kommt NIE vom LLM (deterministische Queries). `handover_changed=false` ⇒ keine Benachrichtigung (kein Event-Spam bei Leerläufen). **Nicht** „Buchungslauf" sagen, wenn der Zyklus gemeint ist: der Lauf ist die Session, der Zyklus die Klammer. Gegenstück auf der Kanzlei-Seite ist die *Abnahme-Runde* — der Agent fährt Durchgänge, die Kanzlei Runden.
 
 ### Notification subscription
@@ -895,7 +915,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Definition: Tag, an dem der Beleg **beim Mandanten eingegangen** ist — die Perioden-Achse der Belegliste und der Dashboard-Kennzahlen. Default ist der Upload-Tag; der DATEV-Metadaten-Import (`Belege_Meta_*.csv`, Spalte „Eingangsdatum") überschreibt ihn mit dem Wert aus DATEV Unternehmen Online.
 - **Abgrenzung zu den beiden anderen Datums-Achsen am Beleg:**
   - **Belegdatum** (`client_source_docs.document_date`, bei Rechnungen `client_source_docs_invoices.invoice_date`) — das Datum, das **auf dem Beleg steht**. Nullable: unbekannt bleibt unbekannt, es wird **nicht** ersatzweise mit dem Upload-Tag gefüllt.
-  - **Upload-Zeitpunkt** (`uploaded_at`, timestamptz) — rein technisch, wann die Datei in Ludwig landete.
+  - **Ludwig-Eingang** (`uploaded_at`, timestamptz, VM-Feld `uploadedAt`) — wann die Datei in Ludwig landete. Setzt nur Ludwig, nichts überschreibt ihn. Die Belegliste zeigt ihn als Spalte „Ludwig-Eingang"; das Eingangsdatum bleibt die Perioden-Achse und steht in der Detailansicht als „Eingang lt. DATEV", wo der DATEV-Import es gesetzt hat. Die UI zeigt die beiden nie unter demselben Label.
 - Notes: Bis 2026-07-20 filterte die Belegliste über `invoice_date` und die UI zeigte `coalesce(document_date, uploaded_at)` als „Belegdatum" an — ein Upload-Tag, der als Belegdatum gelesen wurde. Beide Fallbacks sind entfernt; die Perioden-Zuordnung hängt jetzt am Eingangsdatum.
 
 ### Source document supertype & specializations (Beleg-Supertyp)
@@ -903,7 +923,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - English: `source document` (supertype) / `invoice`, `contract`, … (specializations)
 - German: `Beleg` (Oberbegriff) / `Rechnung`, `Vertrag`, … (Spezialisierungen)
 - Definition: **`Beleg` ist der generische Oberbegriff für jedes eingehende Quell-Dokument; `Rechnung` ist nur EINE fachliche Ausprägung davon.** `client_source_docs` ist die Supertyp-Tabelle (trägt die gemeinsamen Felder: `stored_file_id`, `status`, der Diskriminator `source_doc_type`, sowie die Klassifikations-Ergebnisse `class_case_summary` / `class_counterparty_name` / `class_summary` …). Jede fachliche Ausprägung wird als 1:1-Subtyp-Tabelle modelliert — `client_source_docs_invoices` heute, `client_source_docs_contracts` o. Ä. künftig **gleichartig**. Das ist Class-Table-Inheritance, kein Sonderfall pro Typ.
-- Data type: Supertyp-Tabelle (`ludwig.client_source_docs`) + N Subtyp-Tabellen; Diskriminator `source_doc_type ∈ {invoice, contract, bank_statement_pdf, travel_expense_report, declaration, other}`.
+- Data type: Supertyp-Tabelle (`ludwig.client_source_docs`) + N Subtyp-Tabellen; Diskriminator `source_doc_type ∈ {invoice, contract, bank_statement_pdf, credit_card_statement, travel_expense_report, declaration, other, extf_booking_batch, extf_account_list}`.
 - Example: Eine Rechnung = **eine** `client_source_docs`-Zeile (`source_doc_type='invoice'`) **plus** eine `client_source_docs_invoices`-Subtyp-Zeile mit den Rechnungs-Details (vendor, invoice_number, Brutto/Netto/USt, Leistungszeitraum …).
 - **Entscheidungsgrundlage (gilt für künftige Modell-/UI-Entscheidungen):**
   1. **Gemeinsame Felder gehören an den Supertyp** (Gegenpartei, Summary, Datum, Status, Datei) und müssen dort verlässlich befüllt sein — nicht nur am Subtyp. (Heute verletzt: CLI-Ingest legt nur die Invoice-Subtyp-Row an, die Base-Row bleibt leer → Cases ohne Summary; Quickfix liest ersatzweise vom Subtyp. Siehe Memory `project_source_docs_base_row_missing`.)
@@ -912,43 +932,57 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
   4. **Nicht jede Belegart bekommt einen Subtyp.** Container-Belegarten — Kontoauszug (`bank_statement_pdf`), Kreditkartenabrechnung (`credit_card_statement`), Reisekostenabrechnung (`travel_expense_report`) — tragen keine eigenen Fachfelder, sondern klammern andere: ihre Struktur liegt am Import-Batch (`client_bank_import_batches`: Zeitraum, Anfangs-/Endsaldo, Auszugsnummer, Zeilenzahl) bzw. an den Kind-Belegen der Dokumentgruppe (`parent_source_doc_id` + `collection_kind`, `belege.md` R25). Für sie ist eine Subtyp-Tabelle ausdrücklich nicht vorgesehen. Der Renderer-Registry-Eintrag „Container/Deckblatt" hängt an der Gruppen-Relation, nicht an der Belegart — die Registry je Belegart führt nur Rechnung und Vertrag. (Owner-Rückfrage Design-System B2, 2026-09-04.)
 - Notes: Konkretisiert die „Datenmodell-Schichten"-Tabelle oben (Zeile „Quelle (Dokument)" / „Quelle (Subtyp Rechnung)"). Owner-Entscheidung 2026-06-03: Beleg ↔ Rechnung sprachlich/UI-seitig sauber als Oberbegriff ↔ Ausprägung führen.
 
+### Document status (Belegstatus)
+
+- English: `document status`
+- German: `Belegstatus`
+- Table/column: `ludwig.client_source_docs.status` (+ `review_reason`, `review_note`, `done_at`, `done_via`, `done_reason`)
+- Definition: **Eine** State-Machine am Beleg bis „erledigt" (F289, belege.md R14): `pending` (Einordnung läuft/steht an) → `extracting` (Auslese läuft; bei Rechnungen ist `processing_stage` die Unterstufe) → `bookable` (fertig, bereit für Sachverhalt und Buchung) → `done` (erledigt); dazu die Prüfstufen `agent_review` und `human_review` und `deleted` (Soft-Delete). Die DB erzwingt die erlaubten Übergänge (Trigger `zz_guard_source_doc_status`); TS schreibt nur über `transitionSourceDoc`.
+- Data type: text CHECK (7 Werte), Default `pending` (Migration 20260925100000).
+- Notes: Ersetzt seit F289 den Inbox-Status (`classified` …), den Pipeline-Status am Invoice-Subtyp, die Review-Disposition und die Nachbesserungsspalte am Beleg. Kein Retry an `done` — zurück nur über `reopened` (done → bookable, `reopen_doc`). Registry-Achse `document_status`. Nach außen (Intake-API v3) weiter als `verdict`/`docStatus` abgebildet (`intake/domain/legacy-doc-verdict.ts`).
+
+### Agent review (Agent-Prüfung)
+
+- English: `agent review`
+- German: `Agent-Prüfung` / „Agent prüft"
+- Table/column: `client_source_docs.status='agent_review'` + `review_reason`
+- Definition: Unsere Verfahren sind an diesem Beleg gescheitert — **immer zuerst der Agent** ist dran. `review_reason` sagt woran: `classification_error`, `unknown_form`, `unsplit_collection`, `manual_extraction`, `extraction_error`, `open_findings`, `job_failed`, `processing_stuck`. Die Menge ist `list_docs(bucket='repair')`, die Nachbesserungsliste des Agenten; Gate 1b zählt sie mit.
+- Notes: Hinaus: lösen/korrigieren → `bookable`, erledigen → `done`, Retry → `pending`/`extracting`, nicht lösbar → `escalate_doc_review` (→ *Kanzlei-Prüfung*). Registry-Achse `document_review_reason`.
+
+### Human review (Kanzlei-Prüfung)
+
+- English: `human review`
+- German: `Kanzlei-Prüfung` / „Kanzlei prüft"
+- Table/column: `client_source_docs.status='human_review'` + `review_reason` + `review_note`
+- Definition: Der Beleg liegt bei der Kanzlei. Hinein führt nur der Agent (`escalate_doc_review`, Pflicht-Grund in `review_note`) oder ein **benannter System-Sonderfall** direkt aus `pending`: `statement_account_missing` (Bankkonto eines Kontoauszugs fehlt) und `statement_check_failed` (Prüfkette des Auszugs gerissen, Befund in `review_note`). Aus `extracting` oder `bookable` führt kein Weg dorthin.
+- Notes: Zurück an den Agenten nur mit Pflicht-Grund (`returnSourceDocToAgent`). Ein neuer Sonderfall ist ein neuer `review_reason`-Code.
+
 ### Document completion (Beleg-Erledigung)
 
 - English: `document completion`
 - German: `Beleg-Erledigung` / `erledigt`
-- Table/column: `ludwig.client_source_docs.completed_at` (+ `completed_reason`)
-- Definition: Der Beleg ist **fachlich durch** — es ist nichts mehr an ihm zu tun. Vier Anlässe: (1) die Buchung ist erfolgt, (2) aus dem Sachverhalt entsteht keine Buchung, (3) das PDF wurde durch andere ersetzt (Dokumententeilung), (4) der Beleg ist gar nicht buchungsrelevant (Bescheid, Ankündigung einer Abbuchung). `completed_at IS NULL` = der Beleg steht noch in der Todo-Liste. Bewusst am **Supertyp**, nicht am Invoice-Subtyp: Fall (4) betrifft typischerweise Belege ganz ohne Invoice-Zeile.
-- Data type: `timestamptz` (nullable) + `text` (nullable), Migration 20260720130000
+- Table/column: `ludwig.client_source_docs.status='done'` + `done_at` (Trigger-Stempel) + `done_via` + `done_reason`
+- Definition: Der Beleg ist **fachlich durch** — es ist nichts mehr an ihm zu tun. `done_via` sagt wodurch: `booking` (lebende Buchung), `no_booking_required` (Verzicht an jedem Beleg-Ereignis), `case_closed` (Sachverhalt ohne Buchung geschlossen), `superseded` (durch andere Belege ersetzt), `import` (EXTF-Lieferung, Kontoauszug-Import), `manual` (`complete_doc` / von Hand, Pflicht-Begründung; auch Textdublette R36), `replaced` / `rejected` (nicht aufgehender Kontoauszug, F288). Bewusst am **Supertyp**: auch Belege ohne Invoice-Zeile werden erledigt.
 - Notes:
-  - Grenzt sich scharf von `processing_status='processed'` ab: das heißt nur „Pipeline durchgelaufen", nicht „fertig". Der 2026-05-19-Refactor (20260519120000) hat fachliche Werte aus der technischen Achse entfernt — deshalb hier eine eigene Spalte statt eines neuen `processing_status`-Werts.
-  - Die Fälle (1)–(3) setzen **DB-Trigger** automatisch (`ludwig_private.complete_source_docs_on_case_close` am Sachverhalt, `…_on_supersede` am Beleg). Nicht an den Callsites: Cases werden heute an sieben Stellen geschlossen, teils aus Python/CLI an Next.js vorbei.
-  - Fall (4) ist per Definition nicht ableitbar (kein Case, nichts ersetzt) — dafür die Server Action `completeSourceDoc` mit Pflicht-Begründung, auditiert als `document.completed_manually`.
-  - UI: „Erledigt"-Badge mit der Begründung als Tooltip in der Belegliste (schlägt den Pipeline-Status), Erledigen/Wieder-öffnen auf der Beleg-Detailansicht, Filter „Nur unerledigte" (`?open=1`).
-  - Fall (5), deterministisch durch den Worker: **Textdublette** (belege.md R36) — ein älterer Beleg des Mandanten trägt denselben Volltext (`ops_document_text.text_md5`, generierte Spalte, Migration 20260915220000). Der jüngere wird erledigt und zeigt per `client_source_docs.duplicate_of_source_doc_id` auf den Zwilling; gesetzt + `completed_at IS NULL` = ein Mensch hat wieder geöffnet, nie wieder automatisch.
-
-### Review disposition (Beleg-Review-Zuständigkeit)
-
-- English: `review disposition`
-- German: `Review-Disposition` / `Korrektur-Zuständigkeit`
-- Table/column: `ludwig.client_source_docs_invoices.review_disposition` (+ `review_disposition_reason`, `review_disposition_changed_at`)
-- Definition: Wer bearbeitet die Nacharbeit eines fehlgeschlagenen oder review-pflichtigen Belegs (Pipeline-Crash oder Extraktions-Befund wie `line_totals_mismatch`): `agent` (lokaler MCP-Agent) oder `accounting` (Kanzlei). **Konvention „Agent zuerst": NULL wird von allen Queries als `agent` behandelt** — die Pipeline muss nichts setzen; erst die Eskalation des Agenten (`escalate_doc_review`) schreibt `accounting`, ein Mensch kann zurück auf `agent` stellen. Jede Korrektur/Umdisposition wird in `platform_audit_events` protokolliert (`actor_kind='agent'` bzw. `user`).
-- Data type: text CHECK (`agent` | `accounting`), NULLable (Migration 20260706120000)
-- Notes: Beleg-Achse — orthogonal zur `disposition` am Sachverhalt (wer buchst) und zum `lifecycle_status` (Reviewer-Status). Hier geht es um Extraktions-/Pipeline-Qualität der Quelle, nicht um die Buchung. Agent-Tools: `list_docs(bucket='for_review')`, `get_invoice_extraction`, `update_invoice_extraction`, `escalate_doc_review`, `override_classification`.
+  - `booking`, `no_booking_required`, `case_closed`, `superseded` setzen **DB-Trigger**; `booking`/`no_booking_required` nehmen sie auch zurück (done → bookable), wenn die Ursache fällt.
+  - Zurück in die Arbeit nur über `reopened` (done → bookable): Kanzlei („Wieder öffnen", „Zurück an den Agenten") oder Agent (`reopen_doc`), ein Kern `reopenSourceDocCompletion` (belege.md R14d).
+  - Textdublette (belege.md R36): `duplicate_of_source_doc_id` gesetzt + nicht `done` = ein Mensch hat wieder geöffnet, nie wieder automatisch.
+  - Registry-Achse `document_done_via`.
 
 ### Open finding (Offener Befund)
 
 - English: `open finding`
 - German: `Offener Befund`
 - Table/column: `ludwig.client_source_docs_invoices.open_findings` (jsonb, `[{code, field?, severity, message, source_module, detail}]`)
-- Definition: Reparierbarer Interpreter-Befund (F18: `missing_required_field`, `summary_line_mismatch`), der den Ingest NICHT mehr auf `failed` blockiert — der Beleg läuft durch und trägt den expliziten Status `processing_status='review_needed'` (Stage `interpreted`); das Offene steht strukturiert am Beleg. Agent/Mensch trägt gezielt nach (`update_invoice_extraction`, inkl. `currency`); die Korrektur wird SYNCHRON OCR-/LLM-frei re-validiert (`POST …/invoices/{id}/revalidate` → `InvoiceRevalidationService`, nur `check_integrity`) — aufgelöste Befunde verschwinden sofort, bei leerer Liste flippt der Status auf `processed`. Seit F167 gilt das auch aus `failed`/`pending` heraus — die Prüfung entscheidet, nicht der alte Status. Korrigierte Kopfwerte tragen ihre Herkunft in `client_source_docs_invoices.field_overrides` und überstehen jeden Re-Extract (`user` schlägt `agent`); Positionen nicht (belege.md R31). Leer = nichts nachzutragen.
-- Notes: Severity bleibt `error` (Audit-Wahrheit); recoverable-Marker in `detail.recoverable`. Nicht-reparierbare Criticals (`no_open_cycle_for_date`, `totals_mismatch`, `validity_*`) failen weiterhin hart. `list_docs(bucket='for_review')` und die Agent-Inbox filtern auf `processing_status in ('failed','review_needed')`; `attach_source_doc_to_case` verlangt Datum/Brutto/Währung auch bei `review_needed`. CLI: `revalidate-invoice <id>`. Siehe decision-log 2026-07-17 + 2026-07-20.
+- Definition: Reparierbarer Interpreter-Befund (F18: `missing_required_field`, `summary_line_mismatch`), der den Ingest NICHT mehr auf `failed` blockiert — der Beleg läuft durch und steht auf `agent_review/open_findings` (Stage `interpreted`); das Offene steht strukturiert am Beleg. Agent/Mensch trägt gezielt nach (`update_invoice_extraction`, inkl. `currency`); die Korrektur wird SYNCHRON OCR-/LLM-frei re-validiert (`POST …/invoices/{id}/revalidate` → `InvoiceRevalidationService`, nur `check_integrity`) — aufgelöste Befunde verschwinden sofort, bei leerer Liste geht der Beleg auf `bookable` (Antwort `documentStatusAfter`). Seit F167 gilt das auch aus `extraction_error`/`extracting` heraus — die Prüfung entscheidet, nicht der alte Status. Korrigierte Kopfwerte tragen ihre Herkunft in `client_source_docs_invoices.field_overrides` und überstehen jeden Re-Extract (`user` schlägt `agent`); Positionen nicht (belege.md R31). Leer = nichts nachzutragen.
+- Notes: Severity bleibt `error` (Audit-Wahrheit); recoverable-Marker in `detail.recoverable`. Nicht-reparierbare Criticals (`no_open_cycle_for_date`, `totals_mismatch`, `validity_*`) failen weiterhin hart. `list_docs(bucket='repair')` zeigt sie mit `reviewReason='open_findings'`; `attach_source_doc_to_case` verlangt Datum/Brutto/Währung auch dann. CLI: `revalidate-invoice <id>`. Siehe decision-log 2026-07-17 + 2026-07-20.
 
 ### Pipeline supervision (Pipeline-Supervision)
 
 - English: `pipeline supervision`
 - German: `Pipeline-Supervision`
-- Definition: Der MCP-Agent überwacht die Beleg-Pipeline und sorgt dafür, dass kein Beleg still liegen bleibt: `list_docs(bucket='in_pipeline')` liefert die Verarbeitungs-Übersicht mit Buckets `in_flight` (arbeitet), `stuck` (keine Bewegung seit >30 min — Zombie-Verdacht), `failed`, `classification_failed`; `retry_doc_processing` stößt gezielt einen Neu-Lauf an (ohne Invoice-Zeile → Klassifizierung, mit → `run-flow?force`). Bleibt der Beleg kaputt, schließt der Agent ihn selbst ab: PDF via `get_download_url` lesen, Extraktion korrigieren, Case anlegen/anhängen — der Case-Attach setzt einen failed-Beleg als **Seiteneffekt** auf `processing_status='processed'` (Audit `doc.completed_manually_by_agent`). Kein freies `set_status`-Tool.
-- Notes: Der Retry-Counter ist das Audit-Event `doc.pipeline_retried_by_agent` (max. 3 ohne `force`). Ablauf: Playbook „Pipeline-Supervision" (`agent-playbooks.md`); Entscheidung: decision-log 2026-07-06. Orthogonal zur `Review disposition` (wer korrigiert Extraktionswerte) — hier geht es um Pipeline-Durchsatz, nicht um Werte-Qualität.
+- Definition: Der MCP-Agent überwacht die Beleg-Pipeline und sorgt dafür, dass kein Beleg still liegen bleibt: `list_docs(bucket='in_pipeline')` liefert die Belege auf `pending`/`extracting` mit Buckets `in_flight` (arbeitet) und `stuck` (keine Bewegung seit >30 min — Zombie-Verdacht), Gescheitertes steht auf `agent_review` (`list_docs(bucket='repair')`); `retry_doc_processing` stößt gezielt einen Neu-Lauf an (ohne Invoice-Zeile → Klassifizierung, mit → `run-flow?force`). Bleibt der Beleg kaputt, schließt der Agent ihn selbst ab: PDF via `get_download_url` lesen, Extraktion korrigieren, Case anlegen/anhängen — der Case-Attach setzt einen gescheiterten Beleg mit vollständigen Kopfdaten als **Seiteneffekt** auf `bookable` (Audit `doc.completed_manually_by_agent`). Kein freies `set_status`-Tool.
+- Notes: Der Retry-Counter ist das Audit-Event `doc.pipeline_retried_by_agent` (max. 3 ohne `force`). Ablauf: Playbook „Pipeline-Supervision" (`agent-playbooks.md`); Entscheidung: decision-log 2026-07-06. Orthogonal zur *Kanzlei-Prüfung* (wer korrigiert, wenn der Agent nicht weiterkommt) — hier geht es um Pipeline-Durchsatz, nicht um Werte-Qualität.
 
 ### Document axes guard (REQ-004 #3)
 
@@ -1029,7 +1063,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
   | `payment` | Zahlungsbeleg | tatsächlicher Geldfluss auf einem Geldkonto | kein Subtyp, Agent-Bucket |
   | `foundation` | Nachweisbeleg | rechtliche Nachweis-/Berechnungsgrundlage ohne eigene Rechnungsstellung | Kontext-Zweig; Contract-Extract nur bei Form `contract` |
   | `internal` | Interner Beleg | selbst erstellt (GoBD-Eigenbelegprinzip) | Agent-Bucket |
-  | `report` | Auswertung | **kein Beleg** — Bericht über bereits gebuchte Vorgänge | auto-`completed_at` mit festem `completed_reason` |
+  | `report` | Auswertung | **kein Beleg** — Bericht über bereits gebuchte Vorgänge | `bookable` + Hinweis; der Agent quittiert per `complete_doc` mit festem Grund |
   | NULL | Unklassifiziert | Auffang (`other`/`unknown`), Container (`document_collection`) oder noch nicht klassifiziert | Agent-Bucket — nie stilles Raten |
 
 - Data type: text, CHECK `client_source_docs_doc_category_check` (Migration `20260820160000`)
@@ -1046,7 +1080,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Definition: `Document form`-Wert (`document_collection`) für ein PDF, das **mehrere eigenständige Teildokumente** enthält (z. B. Kreditkartenabrechnung + dahinter die Einzelbelege). Abgrenzung: eine mehrseitige Einzelrechnung (eine Rechnungsnummer, fortlaufende Seiten) ist KEIN `document_collection`.
 - Data type: enum value (Python `DocumentForm`; eingeführt mit F16)
 - Example: 24-Seiten-PDF: Seiten 1–4 American-Express-Abrechnung, Seiten 5–24 Einzelbelege.
-- Notes: Qualifiziert nie für den Invoice-Flow; mappt auf `source_doc_type='other'`. Seit F71 (decision-log 2026-08-12) zerlegt der **Server** das PDF: der Classifier liefert den Split-Plan maschinenlesbar als `Page segments`, ein `source_doc_split`-Job schneidet und speist jeden Teil regulär ein. Nur wenn das Gate nicht greift (Konfidenz < 0.8, kein/verworfener Plan), landet das Original in `list_docs(bucket='unprocessable')` beim lokalen Agenten (Playbook „Sammel-PDF zerlegen"). Die Kette Original → Teilbelege trägt `parent_source_doc_id` + `split_page_range`; das zerlegte Original wird per `supersede_source_doc` abgehakt (superseded, nicht deleted — Spur bleibt).
+- Notes: Qualifiziert nie für den Invoice-Flow; mappt auf `source_doc_type='other'`. Seit F71 (decision-log 2026-08-12) zerlegt der **Server** das PDF: der Classifier liefert den Split-Plan maschinenlesbar als `Page segments`, ein `source_doc_split`-Job schneidet und speist jeden Teil regulär ein. Nur wenn das Gate nicht greift (Konfidenz < 0.8, kein/verworfener Plan), landet das Original auf `agent_review/unsplit_collection` (`list_docs(bucket='repair')`) beim lokalen Agenten (Playbook „Sammel-PDF zerlegen"). Die Kette Original → Teilbelege trägt `parent_source_doc_id` + `split_page_range`; das zerlegte Original wird per `supersede_source_doc` abgehakt (superseded, nicht deleted — Spur bleibt).
 
 ### Page segments
 
@@ -1672,10 +1706,10 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - German: `Beleg-Status-Feld`
 - Definition: A `*_status`-suffixed column on `ludwig.client_invoices` that names a state machine — *where* the invoice currently is. **Drei orthogonale Achsen** (Stand DB-Migrationen `20260502190000`, `20260511100000`, `20260519120000`, `20260519130000`):
   - **`processing_stage`** ∈ `classified | extracted | preprocessed | interpreted | proposed` (oder NULL) — **Pipeline-Fortschritt**: welche Pipeline-Stufen sind durchgelaufen. `classified` = nach Cheap-Classifier; `extracted` = nach BEDI-Sampling-Light-Pass (Classifier+Preprocessor ohne Interpreter, Cutoff für Onboarding); `preprocessed` = nach Azure-OCR + OpenAI-Strukturierung; `interpreted` = nach Interpreter; `proposed` = Booking-Modul hat einen `BookingProposal` erzeugt.
-  - **`processing_status`** ∈ `pending | in_progress | processed | failed` (oder NULL) — **technisch / Pipeline-Run-Status**. `pending` = Upload akzeptiert, Pipeline noch nicht gestartet; `in_progress` = aktiv in Bearbeitung; `processed` = Pipeline durchgelaufen (Reviewer ist jetzt am Zug, fachliche Wertung läuft über `lifecycle_status`); `failed` = harter Pipeline-Fehler, Eingriff erforderlich.
-  - **`lifecycle_status`** ∈ `pending_review | needs_clarification | accepted | rejected | superseded | archived` (oder NULL) — **fachlich / Reviewer-Sicht**. NULL solange die Pipeline noch nicht durch ist; sobald `processing_status='processed'` erreicht ist, hat der Reviewer eine Aufgabe (`pending_review` oder `needs_clarification`). Terminale Reviewer-Entscheidungen: `accepted` / `rejected` / `archived`. `superseded` markiert ein älteres Proposal, das durch einen neuen Lauf ersetzt wurde.
+  - Der **Pipeline-Run-Status** steht seit F289 nicht mehr am Invoice-Subtyp, sondern als *Belegstatus* am Supertyp (`extracting` / `agent_review` mit `extraction_error`/`open_findings` / `bookable`).
+  - **`lifecycle_status`** ∈ `pending_review | needs_clarification | accepted | rejected | superseded | archived` (oder NULL) — **fachlich / Reviewer-Sicht**. NULL solange die Pipeline noch nicht durch ist; sobald der Beleg `bookable` ist, hat der Reviewer eine Aufgabe (`pending_review` oder `needs_clarification`). Terminale Reviewer-Entscheidungen: `accepted` / `rejected` / `archived`. `superseded` markiert ein älteres Proposal, das durch einen neuen Lauf ersetzt wurde.
 - Data type: text columns on `ludwig.client_invoices` with `check` constraints (siehe oben genannte Migrationen).
-- Notes: Reserve the `_status` suffix for state machines. Step outcomes use the `_result` suffix instead — see *Invoice step result fields*. **Status-Refactor 2026-05-19:** Die früheren Werte `review_needed`/`booked`/`archived` von `processing_status` sind in die `lifecycle_status`-Achse gewandert (`pending_review` / `accepted` / `archived`); die alte Spalte `booking_proposal_status` ist weg — Vorschlag-Existenz lebt jetzt im `booking_proposal_payload_json`-Snapshot. The Technik-Tab in `apps/web/src/modules/invoices/ui/tabs/TechnicalTab.tsx` renders the axes as separate tables. See `docs/topics/architektur.md` 2026-05-02 "Status vs. step result on client_invoices" und Migration `20260519120000`.
+- Notes: Reserve the `_status` suffix for state machines. Step outcomes use the `_result` suffix instead — see *Invoice step result fields*. **Status-Refactor 2026-05-19:** Die früheren Werte `review_needed`/`booked`/`archived` der damaligen Pipeline-Status-Spalte sind in die `lifecycle_status`-Achse gewandert (`pending_review` / `accepted` / `archived`); die alte Spalte `booking_proposal_status` ist weg — Vorschlag-Existenz lebt jetzt im `booking_proposal_payload_json`-Snapshot. The Technik-Tab in `apps/web/src/modules/invoices/ui/tabs/TechnicalTab.tsx` renders the axes as separate tables. See `docs/topics/architektur.md` 2026-05-02 "Status vs. step result on client_invoices" und Migration `20260519120000`.
 
 ### Invoice step result fields (`*_result`)
 
@@ -1687,7 +1721,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
   - `booking_result` — does not exist yet. Booking module is currently a scaffold; add this column when it goes live.
   - `preproc_result` — not projected onto `client_invoices`. The preprocessor's outcome lives on `ops_invoice_extractions.pipeline_status` and stays there; project to `client_invoices` only when the UI needs it per-invoice.
 - Data type: text columns on `ludwig.client_invoices` with `check` constraints (codomain pinned to the three values above).
-- Example: invoice finished classification + interpretation but has an open clarification → `processing_stage = 'interpreted'`, `processing_status = 'processed'`, `class_result = 'succeeded'`, `interp_result = 'partially_succeeded'`, `lifecycle_status = 'needs_clarification'`.
+- Example: invoice finished classification + interpretation but has an open clarification → `processing_stage = 'interpreted'`, Belegstatus `bookable`, `class_result = 'succeeded'`, `interp_result = 'partially_succeeded'`, `lifecycle_status = 'needs_clarification'`.
 - Notes: *Previously:* `class_status`, `interp_status` (renamed 2026-05-02 — the `_status` suffix incorrectly suggested state machines). The `_status` vs. `_result` split is a naming convention to apply to any future per-step outcome on `client_invoices`. See `docs/topics/architektur.md` 2026-05-02.
 
 ### Stored file
@@ -1808,7 +1842,25 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Definition: Optional pointer, set at upload/ingest, saying a Beleg already lives in a DATEV filing system — **BEDI** (Belege digital) or **DDMS** (DATEV DMS). There is always exactly **one** id plus the folder it belongs to. Only relevant at export time: id present → reference the existing DATEV document; id absent → attach the file itself. May be unknown at upload and supplied later.
 - Data type: `ludwig.client_source_docs.datev_ref_system` (`text`, `∈ {bedi, ddms}`), `.datev_ref_folder` (`text`), `.datev_ref_id` (`text`) — all nullable. DB-CHECK `client_source_docs_datev_ref_complete`: either all three NULL, or `system` + `id` set together (folder optional).
 - Example: `datev_ref_system = 'ddms'`, `datev_ref_folder = 'Eingangsrechnungen 2026'`, `datev_ref_id = '4711'`.
-- Notes: **External reference, not a DB foreign key** — DATEV is an external system. Distinct from the *BEDI hash* (import Beleglink, DATEV → us); this is the reverse direction (export, us → DATEV). Ingest carriers: Web `finalizeDocumentUpload` (`datevRef`) → `insertInboxEntry`, CLI `upload-document --datev-ref-{system,folder,id}`, und MCP `ingest_uploaded_file` (`datevRef` direkt am Upload, seit 2026-07-22). **Nachtragen an bestehenden Belegen**: MCP-Tool `update_source_doc` (`updateSourceDoc` in `agent-ingest-core.ts`; `datevRef=null` entfernt die Referenz) — ein Tool für alle Beleg-Metadaten statt eines pro Feld, siehe *Beleg-Metadaten (Agent)*. **Anzeige**: generischer `SourceDocView` (Belegdaten, „DATEV-Ablage") und Rechnungs-`PipelineTab` (Sektion „DATEV-Ablage", via `getInvoice`-Join auf den Supertyp). **Export-Pfad** (F24-T24.1): `loadExportableJournalEntries` löst die Referenz über den Sachverhalt auf (journal_entry → accounting_event.case_id → source_docs mit `datev_ref_id`) und der EXTF-Writer schreibt sie als Feld 20 „Beleglink" (`BEDI "<id>"`/`DDMS "<id>"`); genau ein referenzierter Beleg füllt das Feld, keiner bleibt still leer, mehrere → leer + Warnung (siehe *Buchungsstapel (EXTF)*). Introduced 2026-07-10.
+- Notes: **External reference, not a DB foreign key** — DATEV is an external system. Distinct from the *BEDI hash* (import Beleglink, DATEV → us); this is the reverse direction (export, us → DATEV). Ingest carriers: Web `finalizeDocumentUpload` (`datevRef`) → `insertInboxEntry`, Intake-API `PATCH /documents/{id}` (`applyIntakeMetadata`), und MCP `ingest_uploaded_file` (`datevRef` direkt am Upload, seit 2026-07-22). **Nachtragen an bestehenden Belegen**: MCP-Tool `update_source_doc` (`updateSourceDoc` in `agent-ingest-core.ts`; `datevRef=null` entfernt die Referenz) — ein Tool für alle Beleg-Metadaten statt eines pro Feld, siehe *Beleg-Metadaten (Agent)*. **Anzeige**: generischer `SourceDocView` (Belegdaten, „DATEV-Ablage") und Rechnungs-`PipelineTab` (Sektion „DATEV-Ablage", via `getInvoice`-Join auf den Supertyp). **Export-Pfad** (F24-T24.1): `loadExportableJournalEntries` löst die Referenz über den Sachverhalt auf (journal_entry → accounting_event.case_id → source_docs mit `datev_ref_id`) und der EXTF-Writer schreibt sie als Feld 20 „Beleglink" (`BEDI "<id>"`/`DDMS "<id>"`); genau ein referenzierter Beleg füllt das Feld, keiner bleibt still leer, mehrere → leer + Warnung (siehe *Buchungsstapel (EXTF)*). Introduced 2026-07-10.
+
+### Agent repair (Nachbesserung)
+
+- English: `agent repair`
+- German: `Nachbesserung` (durch den Agenten)
+- Table: `client_source_docs.status='agent_review'` (seit F289; die frühere eigene Spalte ist entfallen)
+- Definition: Die Nachbesserungsliste des Agenten = alle Belege auf *Agent-Prüfung* (`list_docs(bucket='repair')`, Gate 1b `repairOpen`). Belege, die beim Freigeben ihres *Dateikorbs* noch in `pending`/`extracting` hingen, kommen als `agent_review/processing_stuck` hinzu (`markRepairRequired`, belege.md R38).
+- Example: Ein Scan hängt in der Auslese; der Korb `K-2026-0003` gibt nach 24 h trotzdem frei, der Beleg steht auf `agent_review/processing_stuck`. Der Agent stößt ihn neu an und bucht ihn.
+
+### File basket (Dateikorb)
+
+- English: `file basket`
+- German: `Dateikorb` (kurz: **Korb**)
+- Table: `ludwig.client_file_baskets`; FK `client_source_docs.file_basket_id`; `basket_number` `YYYY-NNNN` (je Mandant und Jahr fortlaufend), UI `K-YYYY-NNNN` (`formatFileBasketNumber`)
+- Definition: Die Anlieferungsmenge eines Mandanten zwischen zwei Freigaben. Genau ein Korb ist je Mandant offen; jeder neue Beleg landet bei Anlage darin (DB-Trigger, gleich wer schreibt) und wechselt ihn nie. „Korb verarbeiten" schickt ihn ab (`open → submitted`), die Freigabe der Stapel an den Agenten folgt, sobald die Pipeline durch ist (`submitted → released`), und mit dem letzten erledigten Beleg ist er `completed` (belege.md R38).
+- Data type: table / state machine (`state ∈ open|submitted|released|completed`, `period_from/to` lückenlos, `warnings` jsonb als Snapshot beim Abschicken, `release_result` jsonb); Registry-Achsen `file_basket`, `file_basket_warning`.
+- Example: `K-2026-0003` · 01.09.2026 – 23.09.2026 · „Abgeschickt — wird verarbeitet": zwei Belege laufen noch durch die Pipeline, danach gehen die Stapel an den Agenten.
+- Notes: Der Korb ist **nicht** der Stapel — Stapel = Buchungszeitraum (wo gebucht wird, *Buchungszyklus / Stapel*), Korb = Anlieferung (wann es kam). Ein Beleg trägt beides: `file_basket_id` (bei Anlage) und `export_batch_id` (bei Entscheidung, *Source doc batch*). Nicht verwechseln mit dem F265-„Korb" im Buchungslauf (offene Menge je Teilschritt) und mit der EXTF-*Lieferung* (die EXTF-Datei ist selbst ein Beleg im Korb). Split-Kinder erben den Korb ihres Sammel-PDFs.
 
 ### Source doc batch (Stapel des Belegs)
 
@@ -1897,7 +1949,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - German: **Buchungszyklus**, `(Buchungs-)Stapel`; veraltet: `Exportvorgang`
 - Definition: **Zyklus, Stapel und Exportvorgang sind dieselbe Zeile** in `client_datev_export_batches` — seit F114 aber gedacht als Klammer um die *Bearbeitung eines Zeitraums*, nicht als Hülle um einen Export. Der Zyklus entsteht, BEVOR jemand darin arbeitet (Server: Kette nach der DATEV-Quittung + Onboarding-Review; Kanzlei: „Stapel anlegen"; **nie** der Agent), trägt n *Agent-Durchgänge* und die Arbeit der Kanzlei, wird freigegeben und endet, wenn er im DATEV-Spiegel wiedergefunden ist. `stapelnummer` (`YYYY-NNNN`, je Mandant) und Bezeichnung (`description`, z. B. `08-2026-Ludwig`) fallen bei der **Eröffnung**.
   - **Wer dran ist, IST der Zustand**: `agent` (beim Agenten — freigegeben) → `prepared` (vorbereitet, wartet auf Freigabe) → `review` (Kanzlei prüft) → `ready` (freigegeben, geschnitten) → `exporting` → `inspection` → `confirmed` (DATEV quittiert) → `mirrored` (im Spiegel wiedergefunden, Nachlese offen) → `closed`. Daneben `failed` (human-hold) und `cancelled` (nur Bestand ohne Zyklus).
-  - **Freigabe an den Agenten** (`release to agent`, F177): das fachliche Signal „Belege vollständig", das einen Zyklus von `prepared` auf `agent` hebt — Knopf im Beleg-Eingang oder `POST /api/intake/v1/clients/{clientId}/release`, beide über `releaseBatchesToAgent`. Ein Mensch bzw. das einspielende Werkzeug gibt es, nie der Agent (kein MCP-Tool); freigegeben wird **pro Mandant**, also alles, was `prepared` ist. Ohne Freigabe steht der Zyklus nicht in der Agent-Queue: er sammelt noch Belege. Nach jedem Durchgang fällt er auf `prepared` zurück und braucht ein neues Signal.
+  - **Freigabe an den Agenten** (`release to agent`, F177/F280): hebt einen Zyklus von `prepared` auf `agent` — ausgelöst durch die Freigabe des *Dateikorbs* (`tryReleaseFileBasket` → `releaseBatchesToAgent`), sobald die Pipeline den abgeschickten Korb durch hat. Abgeschickt wird der Korb mit „Korb verarbeiten" im Beleg-Eingang oder `POST /api/intake/v1/clients/{clientId}/release`. Ein Mensch bzw. das einspielende Werkzeug gibt das Signal, nie der Agent (kein MCP-Tool); freigegeben wird **pro Mandant**, also alles, was `prepared` ist. Ohne Freigabe steht der Zyklus nicht in der Agent-Queue: er sammelt noch Belege. Nach jedem Durchgang fällt er auf `prepared` zurück und braucht ein neues Signal.
   - **Zwei Arten** (`kind`, F163): `regular` = Ludwig bearbeitet den Zeitraum; `client_batch` = ein vom Mandanten gelieferter EXTF-Stapel (*Mandantenstapel*), der nur dessen Sätze trägt. Er steht **neben** dem offenen regulären, geht in der Agent-Queue vor Nachtrag und regulärem Stapel durch, wird ohne Schnitt freigegeben und schreibt `booking_closed_until` nicht fort.
   - **Je Mandant genau ein offener regulärer Zyklus**, je Zeitraum genau ein offener — beide Eindeutigkeiten gelten nur für `kind='regular'`. Ein zweiter Zyklus für einen schon freigegebenen Zeitraum ist ein **Nachtrag** (`supplements_batch_id`): steht in der Agent-Queue vor dem regulären und schreibt `booking_closed_until` nicht fort. Die Freigabe legt ihn für offene Vorschläge automatisch an (F200, `prepared`).
   - **CSV** (`runDatevExport` → `markBatchExported`) bleibt der Altweg: EXTF-Datei-Download, `state='confirmed'`, `exported_at` sofort gesetzt — kein Zyklus, nur Transport.
@@ -1905,7 +1957,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Data type: table `ludwig.client_datev_export_batches` (`stapelnummer`, `description`, `kind ∈ regular|client_batch`, `state ∈ agent|prepared|review|ready|exporting|inspection|confirmed|mirrored|closed|failed|cancelled`, `period_from/to`, `entry_count`, `supplements_batch_id`, `datev_sequence_id`); Stapelnummer-Vergabe geteilt via `nextStapelnummer(tx, clientId, year)`. Status-Achse `export_batch` in der Registry.
 - Example: Der Zyklus `2026-0007` / `08-2026-Ludwig` steht auf `review`; die Kanzlei gibt ihn zurück an den Agenten, der einen zweiten Durchgang darin fährt.
 - **Nachzügler / carry-over entries**: Buchungen, die **vor** dem gewählten Stapel-Zeitraum liegen und noch keinem Stapel zugeordnet sind — typisch die Rechnung, die erst nach dem Monatsexport hereinkam und nachgebucht wurde. Sie gehen standardmäßig mit (`includeEarlierUnbatched`, Wizard-Schritt 1, default an, mit Zähler + separater Auflistung in der Vorschau), weil sie sonst bis zum nächsten Export desselben Alt-Zeitraums liegen bleiben — für die Umsatzsteuer-Meldung müssen sie raus. Der Stapel-**Beginn** wird dafür auf das älteste Nachzügler-Datum vorgezogen (Dateiname, `period_from`, EXTF-Header, DATEV-`date_from` ziehen mit); der gewählte Zeitraum bleibt im Audit als `requestedFrom` + `carryOverCount`. Grenze: nur dasselbe Wirtschaftsjahr (`carryOverRange`) — ein EXTF-Stapel umfasst genau eines.
-- Notes: Der **Stempel** `export_batch_id` auf Buchung, Sachverhalt, Ereignis, Klärung, Notiz und Regel ist **Herkunft, keine Zugehörigkeit** — nur `client_journal_entry` gehört ab `ready` genau einem Zyklus. Belege tragen keinen (ihre Erledigung ist abgeleitet, `completed_via`). Die Sperre hängt am Zustand, nicht am Stempel: ein Satz in `agent`/`review` bleibt editierbar. Der **Reset** gilt dem Zyklus (`resetBatchAction`, nur `agent|review`) und nimmt Agenten- wie Kanzlei-Arbeit mit. UI (F118/F119): `Mandant → Jahr → Buchungsstapel` — Liste mit *Prozessbild* und *Staffelstab* je Zeile und der DATEV-Seite daneben, Stapel-Detail mit sechs Tabs (Übersicht · Durchgänge · Buchungen · Artefakte · DATEV · Log), und von dort die *Stapelabnahme*. Angelegt wird im Dialog „Stapel anlegen" mit Server-Vorschau (`planManualBatch`); „nur manuell buchen" startet den Zyklus per Übergang direkt in `review`. Einen eigenen Ort „DATEV-Export" gibt es nicht mehr; freigegeben wird in der Abnahme (Schritt 8/9), `/export` bleibt Archiv.
+- Notes: Der **Stempel** `export_batch_id` auf Buchung, Sachverhalt, Ereignis, Klärung, Notiz und Regel ist **Herkunft, keine Zugehörigkeit** — nur `client_journal_entry` gehört ab `ready` genau einem Zyklus. Belege tragen ihn seit F216 bei der Entscheidung (*Source doc batch*); ihre Erledigung bleibt abgeleitet (`done_via`). Die Sperre hängt am Zustand, nicht am Stempel: ein Satz in `agent`/`review` bleibt editierbar. Der **Reset** gilt dem Zyklus (`resetBatchAction`, aus `agent|prepared|review` → `prepared`) und nimmt Agenten- wie Kanzlei-Arbeit mit. UI (F118/F119): `Mandant → Jahr → Buchungsstapel` — Liste mit *Prozessbild* und *Staffelstab* je Zeile und der DATEV-Seite daneben, Stapel-Detail mit sechs Tabs (Übersicht · Durchgänge · Buchungen · Artefakte · DATEV · Log), und von dort die *Stapelabnahme*. Angelegt wird im Dialog „Stapel anlegen" mit Server-Vorschau (`planManualBatch`); „nur manuell buchen" startet den Zyklus per Übergang direkt in `review`. Einen eigenen Ort „DATEV-Export" gibt es nicht mehr; freigegeben wird in der Abnahme (Schritt 8/9), `/export` bleibt Archiv.
 
 ### Stapelabnahme
 
@@ -2229,7 +2281,7 @@ Spalten mit DB-`CHECK`-Constraints, die kein eigenständiges Geschäftskonzept r
 
 - English: `pipeline status`
 - German: `Pipeline-Status`
-- Definition: Laufzeitstatus *eines einzelnen Preprocessing-Laufs* auf `ops_invoice_extractions`. **Nicht** zu verwechseln mit dem belegseitigen `processing_status` auf `client_invoices` (Pipeline-Run-Achse für den Beleg als Ganzes — siehe *Invoice status fields*). Beide Spalten existieren parallel: `ops_invoice_extractions.pipeline_status` beschreibt den letzten OCR-Lauf, `client_invoices.processing_status` den Pipeline-Run für den Beleg insgesamt.
+- Definition: Laufzeitstatus *eines einzelnen Preprocessing-Laufs* auf `ops_invoice_extractions`. **Nicht** zu verwechseln mit dem *Belegstatus* (`client_source_docs.status`, der Beleg als Ganzes): `ops_invoice_extractions.pipeline_status` beschreibt nur den letzten OCR-Lauf.
 - Data type: `ludwig.ops_invoice_extractions.pipeline_status` — text enum (`'processing' | 'succeeded' | 'failed'`).
 - Example: Azure Content Understanding läuft noch → `'processing'`; OCR + Strukturierung fertig → `'succeeded'`; OpenAI-Call timed out → `'failed'`.
 

@@ -1,6 +1,6 @@
 import { AGENT_STALL_MINUTES, type BookingCycleKind } from "@/ludwig/modules/datev-export";
 
-import { reviewStepApplies, LAST_REVIEW_STEP, NACHLESE_STEP, TRANSFER_STEP } from "./steps";
+import { reviewStepApplies, NACHLESE_STEP, TRANSFER_STEP } from "./steps";
 
 /**
  * Wer darf in der Abnahme was — abgeleitet aus dem Stapel-Zustand
@@ -180,6 +180,6 @@ export function stepAccess(state: string, step: number, kind: BookingCycleKind):
   // Der Transportschritt ist immer lesbar: „was ginge jetzt raus?" ist auch vor
   // der Prüfung eine sinnvolle Frage (F178).
   if (step === TRANSFER_STEP) return IN_TRANSFER.has(state) ? "active" : "readonly";
-  if (step > LAST_REVIEW_STEP) return "dimmed";
+  // Alles andere (0–8 und der Mandantenstapel-Schritt 11) folgt dem Zustand.
   return gating.writable ? "active" : "readonly";
 }

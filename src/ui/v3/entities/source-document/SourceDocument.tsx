@@ -1,7 +1,11 @@
 import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
 // The record, under a name that does not collide with the component family.
 import type { SourceDocumentVM as MirrorDocument } from "@/ludwig/modules/source-docs/domain/source-document-vm";
-import type { SourceDocCompletionVia } from "@/ludwig/modules/source-docs/domain/document-form-labels";
+import type {
+  SourceDocDoneVia,
+  SourceDocReviewReason,
+  SourceDocStatus,
+} from "@/ludwig/modules/source-docs/domain/source-doc-status";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 import { Amount } from "../../primitives/Amount";
@@ -35,11 +39,10 @@ import { resolveSourceDocumentDetail } from "./source-document-detail";
  */
 
 /**
- * The six ways a document gets completed — **from the domain**
- * (`SOURCE_DOC_COMPLETION_VIA`, finding L-47); the re-export keeps callers'
- * imports.
+ * The document's one state machine (F289) and its two companions — **from the
+ * domain** (`source-doc-status.ts`); re-exported so callers import one place.
  */
-export type { SourceDocCompletionVia };
+export type { SourceDocDoneVia, SourceDocReviewReason, SourceDocStatus };
 
 /**
  * A source document, as this family shows it — **from the mirror**.
@@ -57,29 +60,12 @@ export type { SourceDocCompletionVia };
  *
  * `detail` is **not** the mirror's. Over there it is the four core facts of an
  * invoice; here it is a union over the kinds of document, and it carries what
- * the specialization block shows (`net`, `vat`, `processingStatus`, and the
+ * the specialization block shows (`net`, `vat`, and the
  * contract's own fields). The richer one wins, because dropping it would lose
  * what 0076 draws — finding **L-208**: the app should lift this union, not the
  * invoice half of it.
  */
 export interface SourceDocumentVM extends MirrorDocument {
-  /**
-   * When the file landed in Ludwig (`uploaded_at`, timestamptz as text) —
-   * **„Ludwig-Eingang"**, and a different thing from `receivedDate`.
-   *
-   * `receivedDate` is the receipt date at the client: it starts as the upload
-   * day and the DATEV meta import overwrites it (GLOSSARY „Receipt date").
-   * In a list the two are then indistinguishable, and that is what the owner
-   * found on staging (2026-09-23): the column „Eingang" said one thing on one
-   * row and another on the next.
-   *
-   * **Optional and defined here, not in the mirror**, because the mirror is
-   * frozen at app `7f82c7fd` and the app's own `uploadedAt` (commit
-   * `ee1b4aa5`) has not been pushed yet — the same shape as the three fields
-   * above. Registered in `docs/spiegel-vormerkungen.md`; when the next mirror
-   * run brings `SourceDocumentVM.uploadedAt`, this line falls away.
-   */
-  uploadedAt?: string | null;
   /**
    * Whether the document already has an invoice row. Two booleans decide the
    * axis `beleg_haenger` — this one and which of the two stuck lists is shown
@@ -209,16 +195,20 @@ export function sourceDocumentIdentifier(document: SourceDocumentVM): {
 }
 
 /**
- * The state every kind of document carries. `completedAt` set without a reason
- * is „Erledigt", never „Offen"; the axis carries both keys next to the six of
- * `completed_via` (see `status-registry.ts`).
+ * Where a document stands — its **one** state machine (F289, belege.md R14).
+ *
+ * Done, it says **how** and **when**: the chip of `document_done_via`
+ * („Gebucht", „Keine Buchung nötig") and the date. Not done, it says the state
+ * of `document_status` („Wird ausgelesen", „Agent prüft", „Bereit zur
+ * Buchung"), and in review the reason (`document_review_reason`) beside it.
+ * Until F289 these were three axes and a completion stamp next to them.
  *
  * It is its own export because four forms need the same decision — row, cell,
- * facts, drawer head — and „is it done?" must not be answered twice.
+ * facts, drawer head — and „where does it stand?" must not be answered twice.
  *
- * @when    Whether a document is done, wherever that state is shown.
- * @instead The processing of an invoice → StatusBadge with axis `beleg`. The
- *          classification of the document → SourceDocumentClass.
+ * @when    Where a document stands, wherever that state is shown.
+ * @instead The classification of the document → SourceDocumentClass. The
+ *          stage of the extraction → StatusBadge `document_stage`.
  */
 export function SourceDocumentCompletion({
   document,
@@ -250,50 +240,75 @@ export function SourceDocumentCompletion({
    */
   href?: string | null;
 }) {
-  const status = document.completedAt ? (document.completedVia ?? "completed") : "open";
-  const reason = document.completedReason
-    ? clipEnd(document.completedReason, MAX_REASON)
-    : null;
+  const state = documentState(document);
+  if (!state) return <span className="v2muted">—</span>;
+  const reason = state.note ? clipEnd(state.note, MAX_REASON) : null;
   // The chip carries the state; the click carries the question „what else
   // could it be?" — the same dialog the (i) opens, only with the whole chip as
   // its target (0150). `info={false}` because the wrapper **is** the trigger:
   // an (i) inside a button would be a button inside a button.
-  const chip = (
-    <StatusBadge axis="document_completion" status={status} info={false} note={reason} />
-  );
+  const chip = <StatusBadge axis={state.axis} status={state.status} info={false} note={reason} />;
   return (
     <span className={explain ? "v2doccompl v2doccompl--explain" : "v2doccompl"}>
       <span className="v2doccompl__state">
-        <StatusInfoButton axis="document_completion" current={status}>
+        <StatusInfoButton axis={state.axis} current={state.status}>
           {chip}
         </StatusInfoButton>
         {/* „Done" means **when and how** (catalogue table of the spec).
             The way stood there, the date did not — and „done" without a date is
             the half of the answer one cannot check (acceptance 0070, M5). */}
-        {document.completedAt ? <Time value={document.completedAt} format="date" /> : null}
-        {href ? (
+        {state.done && document.doneAt ? <Time value={document.doneAt} format="date" /> : null}
+        {state.done && href ? (
           <a className="v2link" href={href}>
             Zum Buchungsstapel
           </a>
         ) : null}
       </span>
-      {explain ? <span className="v2doccompl__why">{completionReason(document)}</span> : null}
+      {explain ? <span className="v2doccompl__why">{state.sentence}</span> : null}
     </span>
   );
 }
 
 /**
- * The sentence under the state: the free text of this document where there is
- * one, otherwise the description of its state from the registry.
+ * The one decision behind `SourceDocumentCompletion`: which axis, which key,
+ * which sentence. `null` when the record carries no state at all.
  *
- * Never both — the free text of a person answers the same question better
- * than the general sentence, and two answers to one question read as a
- * contradiction even when they agree.
+ * Done without a `doneVia` is „Erledigt" of `document_status`, never nothing —
+ * the reason was not recorded, the state was. In review the reason is the
+ * note: „Agent prüft" alone does not say what is being checked.
+ *
+ * The sentence under the state: the free text of this document where there is
+ * one (a person wrote it — never both, two answers to one question read as a
+ * contradiction), else the registry's description of the reason or the state.
  */
-function completionReason(document: SourceDocumentVM): string {
-  if (document.completedReason) return document.completedReason;
-  const status = document.completedAt ? (document.completedVia ?? "completed") : "open";
-  return resolveStatus("document_completion", status).description ?? "";
+function documentState(document: SourceDocumentVM): {
+  axis: "document_status" | "document_done_via";
+  status: string;
+  done: boolean;
+  note: string | null;
+  sentence: string;
+} | null {
+  const done = document.status === "done" || (!document.status && Boolean(document.doneAt));
+  if (done) {
+    const axis = document.doneVia ? "document_done_via" : "document_status";
+    const status = document.doneVia ?? "done";
+    return {
+      axis,
+      status,
+      done,
+      note: document.doneReason ?? null,
+      sentence: document.doneReason ?? resolveStatus(axis, status).description ?? "",
+    };
+  }
+  if (!document.status) return null;
+  const review = document.reviewReason ? resolveStatus("document_review_reason", document.reviewReason) : null;
+  return {
+    axis: "document_status",
+    status: document.status,
+    done,
+    note: review?.label ?? null,
+    sentence: review?.description ?? resolveStatus("document_status", document.status).description ?? "",
+  };
 }
 
 /**

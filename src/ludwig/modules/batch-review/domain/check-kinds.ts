@@ -35,6 +35,8 @@ export const CHECK_KINDS = [
   "volume_row",
   "docs_complete_in_period",
   "docs_complete_before_period",
+  // Mandantenstapel (Owner 2026-09-23): „zu wie vielen Buchungen haben wir Belege?"
+  "client_batch_documents",
 ] as const;
 
 export type CheckKind = (typeof CHECK_KINDS)[number];

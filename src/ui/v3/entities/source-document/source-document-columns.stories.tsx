@@ -35,13 +35,12 @@ const DOCS: SourceDocumentVM[] = [
     documentDate: "2026-08-26",
     receivedDate: "2026-08-27",
     uploadedAt: "2026-08-30T08:12:00Z",
-    completedAt: "2026-08-30T09:12:00Z",
-    completedVia: "booking",
+    doneAt: "2026-08-30T09:12:00Z",
+    doneVia: "booking",
     docCategory: "performance",
     docDirection: "inbound",
     caseNumber: "2026-0412",
-    processingStatus: "processed",
-    inboxStatus: "classified",
+    status: "done",
     classConfidence: 0.94,
     byteSize: 412_000,
     hasInvoiceRow: true,
@@ -55,10 +54,9 @@ const DOCS: SourceDocumentVM[] = [
     documentDate: "2026-08-31",
     receivedDate: "2026-09-01",
     uploadedAt: "2026-09-04T08:12:00Z",
-    completedAt: null,
+    doneAt: null,
     docCategory: "payment",
-    processingStatus: "in_progress",
-    inboxStatus: "classified",
+    status: "extracting",
     classConfidence: 0.71,
     byteSize: 2_400_000,
     hasInvoiceRow: true,
@@ -73,10 +71,10 @@ const DOCS: SourceDocumentVM[] = [
     documentDate: "2026-01-15",
     receivedDate: "2026-08-20",
     uploadedAt: "2026-08-23T08:12:00Z",
-    completedAt: null,
+    doneAt: null,
     docCategory: "foundation",
-    processingStatus: "review_needed",
-    inboxStatus: "classified",
+    status: "agent_review",
+    reviewReason: "open_findings",
     classConfidence: 0.88,
     byteSize: 8_100_000,
     hasInvoiceRow: false,
@@ -90,9 +88,9 @@ const DOCS: SourceDocumentVM[] = [
     documentDate: null,
     receivedDate: "2026-09-01",
     uploadedAt: "2026-09-04T08:12:00Z",
-    completedAt: null,
-    processingStatus: "failed",
-    inboxStatus: "pending_classification",
+    doneAt: null,
+    status: "agent_review",
+    reviewReason: "classification_error",
     classConfidence: null,
     byteSize: 19_800_000,
     hasInvoiceRow: false,
@@ -107,7 +105,7 @@ const DOCS: SourceDocumentVM[] = [
  */
 const SUBMITTABLE: SourceDocumentVM[] = [
   ...DOCS.filter(
-    (d) => d.inboxStatus === "classified" && formQualifiesForInvoiceFlow(d.classDocumentForm),
+    (d) => (d.status === "bookable" || d.status === "done") && formQualifiesForInvoiceFlow(d.classDocumentForm),
   ),
   {
     ...DOCS[0]!,
@@ -179,7 +177,7 @@ export const BothDates: Story = {
   render: () => {
     const cols = sourceDocumentColumns({
       href,
-      columns: ["counterparty", "kind", "uploadedAt", "receivedDate", "completed"],
+      columns: ["counterparty", "kind", "uploadedAt", "receivedDate", "status"],
     });
     return (
       <div style={{ maxWidth: 1100 }}>
@@ -257,7 +255,7 @@ export const RowAndPeek: Story = {
  */
 export const Inbox: Story = {
   render: () => {
-    const picked: SourceDocumentColumn[] = ["inboxState", "confidence", "classification", "fileName"];
+    const picked: SourceDocumentColumn[] = ["status", "confidence", "classification", "fileName"];
     const cols = sourceDocumentColumns({ href, columns: picked });
     return (
       <div style={{ maxWidth: 1100 }}>

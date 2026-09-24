@@ -10,6 +10,7 @@ export * from "./domain/document-filing";
 export * from "./domain/document-form-labels";
 export * from "./domain/document-form-mapping";
 export * from "./domain/reopen-completion";
+export * from "./domain/source-doc-status";
 export * from "./domain/source-doc-type";
 export * from "./domain/source-document-vm";
 export * from "./domain/tabs";

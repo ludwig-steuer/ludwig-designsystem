@@ -34,8 +34,8 @@ const INVOICE: SourceDocumentVM = {
   documentDate: "2026-08-26",
   receivedDate: "2026-08-27",
   uploadedAt: "2026-08-30T08:12:00Z",
-  completedAt: "2026-08-30T09:12:00Z",
-  completedVia: "booking",
+  doneAt: "2026-08-30T09:12:00Z",
+  doneVia: "booking",
   docCategory: "performance",
   docDirection: "inbound",
   classDocumentKind: "original",
@@ -63,8 +63,8 @@ const SCAN: SourceDocumentVM = {
   documentDate: null,
   receivedDate: "2026-09-01",
   uploadedAt: "2026-09-04T08:12:00Z",
-  completedAt: null,
-  inboxStatus: "pending_classification",
+  doneAt: null,
+  status: "pending",
 };
 
 const PART = (n: number): SourceDocumentVM => ({
@@ -77,7 +77,7 @@ const PART = (n: number): SourceDocumentVM => ({
   documentDate: "2026-08-26",
   receivedDate: "2026-08-27",
   uploadedAt: "2026-08-30T08:12:00Z",
-  completedAt: null,
+  doneAt: null,
 });
 
 /**

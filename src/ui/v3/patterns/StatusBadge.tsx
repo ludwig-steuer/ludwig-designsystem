@@ -8,7 +8,7 @@ export interface StatusBadgeProps {
   /** Which status axis — decides label, colour and explanation. */
   axis: StatusAxis;
   status: string | null | undefined;
-  /** Only `document_processing`: the pipeline stage reached (`processing_stage`) as detail. */
+  /** Only `document_status` (while `extracting`): the pipeline stage reached (`processing_stage`) as detail. */
   stage?: string | null;
   /** Show the icon if the axis has one (default true). */
   showIcon?: boolean;
@@ -41,7 +41,7 @@ export interface StatusBadgeProps {
  * meaning — no client JS), and the (i) with every value of the axis. The chip
  * stays server-renderable; only the (i) is a client island.
  *
- * @when    A state from a status axis (document_processing, accounting_case,
+ * @when    A state from a status axis (document_status, accounting_case,
  *          journal_entry, job …). The one allowed status display (R1).
  * @instead A property without an axis — kind, role, counter → Badge.
  *          A state with an explanation and an action → StatusCallout.
@@ -57,7 +57,7 @@ export function StatusBadge({
   className,
 }: StatusBadgeProps) {
   const desc = resolveStatus(axis, status);
-  const stageDesc = axis === "document_processing" ? resolveStage(stage) : null;
+  const stageDesc = axis === "document_status" ? resolveStage(stage) : null;
   const entity = AXIS_ENTITY[axis];
   const raw = typeof status === "string" ? status.trim() : "";
   const title = [

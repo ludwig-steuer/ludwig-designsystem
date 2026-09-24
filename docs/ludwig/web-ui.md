@@ -135,12 +135,14 @@ PDF, Kontoauszüge (CSV/XLSX/CAMT-XML/MT940-STA) und DATEV-Stapel (EXTF) — was
 ist, entscheidet der Server an den Bytes (`routeUploadedBytes`, belege.md R1),
 nicht der MIME-Typ des Browsers. Drei Ausgänge stehen in der Liste:
 
-- **Beleg** → Eingangszeile wie bisher (`pending_classification`).
-- **Kontoauszug** → Eingangszeile mit „Angabe nötig" (`awaiting_input`) und
+- **Beleg** → Eingangszeile wie bisher (`pending`, belege.md R14).
+- **Kontoauszug** → Eingangszeile „Kanzlei prüft" (`human_review/statement_account_missing`) mit
   einer Kontoauswahl in der Spalte „Einordnung"; ein Klick importiert und
   erledigt die Zeile. CAMT trägt die eigene IBAN und importiert sofort.
-- **DATEV-Stapel** → keine Eingangszeile (der Stapel hat seine eigene Seite),
-  sondern eine Meldung unter der Ablagefläche, was importiert wurde.
+- **DATEV-Stapel / Debitoren-/Kreditorenliste** → eine erledigte Eingangszeile
+  (`done/import`, F279) und eine Meldung unter der Ablagefläche, was
+  importiert wurde; die Upload-Zeile springt zum Beleg, dessen Ansicht zeigt,
+  was aus der Datei wurde.
 
 Was keinem davon entspricht, bleibt als Upload-Zeile mit dem Grund stehen und
 legt nichts an. *Warum:* der Weg, den ein Mensch benutzt, war der ärmere von
@@ -166,6 +168,8 @@ eine Server-Component — `partner`, `entry`, `document`) öffnen weich mit
 `scroll: false`. Durchgesetzt an **einer** Stelle, dem `DrawerLinkInterceptor`
 im Jahres-Layout (`ui/drawers/shallow-url.ts`); ein neuer Drawer-Parameter
 wird dort eingetragen.
+Der BU-Schlüssel-Drawer (`?taxKey=`, F271) ist ein Client-Drawer mit
+statischem Katalog — jeder `TaxKeyRef` schlägt ihn auf (`apps/web/AGENTS.md` §7).
 Der Rahmen dafür ist `UrlDrawer` (`@/ui/components`); wo es für die Entität
 schon einen einbindbaren Drawer gibt, nimmt man den statt Rahmen + Inhalt
 selbst zusammenzusetzen (Drawer-Katalog: `apps/web/AGENTS.md` §7, Klassen und Aufbau im Design-System-Repo, `docs/design-system.md`). Für Buchungen gibt es bewusst zwei Inhalte
@@ -478,7 +482,10 @@ bis vier Wochen und soll nichts auswendig können müssen.
 „3 Blocker"). Beides zusammen, weil Farbe allein kein Signal ist. Gerechnet
 wird das **einmal je Request** (`application/rail-status.ts`, `React.cache`)
 aus denselben Quellen, die die Schritte selbst zeigen — „6 von 58" heißt im
-Rail und in Schritt 8 dasselbe.
+Rail und in Schritt 8 dasselbe. Der Rahmen rendert Kopf, Banner und
+Schritt-Inhalt, ohne auf den Rail zu warten; Rail und Fortschritt streamen nach
+(`Suspense` in `ReviewFrame`), Zurück/Weiter rechnet aus `stepAccess`, nicht
+aus dem Rail.
 
 **Der Rail zählt, er prüft nicht teuer.** Der Probe-Export rechnet die
 DATEV-Zerlegung *aller* noch nicht exportierten Sätze des Mandanten und kostet
@@ -911,3 +918,12 @@ ab. Zähler und Blocker zählen nur Fragen (F249). Wer am Fall weiterarbeitet
 Saldo & Konten, Prüfpunkte, Belegnummern-Register und der offene Posten
 stehen im Reiter Plausibilität; DATEV-Wahrheit, Protokoll, Herkunft und
 Rohdaten im Reiter Technik.
+
+### R24 — Kontonummern sortieren numerisch
+Kontonummern liegen als `text`, sind aber Zahlen: jede Sortierung nach Konto
+sortiert numerisch (1200 vor 4000 vor 10000). Im Client
+`compareAccountNumbers`, in SQL `order by ${orderByAccountNumber("col")}`
+(`@/shared/account-number-order`: erst Länge, dann Text — kein Cast, der an
+einer Nicht-Ziffer zur Laufzeit würfe). Prüffrage bei jeder neuen Liste (F290).
+*Warum:* Textsortierung stellt 10000 vor 4000 — in jeder Kontenliste sichtbar
+falsch, und an 20 Stellen einzeln nachgebaut.

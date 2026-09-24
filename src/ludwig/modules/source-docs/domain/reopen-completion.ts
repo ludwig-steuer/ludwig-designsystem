@@ -8,7 +8,8 @@
  */
 
 export interface ReopenFacts {
-  completedAt: string | null;
+  /** Belegstatus — zurück geht nur `done` (F289: `reopened`, done → bookable). */
+  status: string;
   supersededAt: string | null;
   /** Lebende Buchung über das Beleg-Ereignis ODER über `source_doc_id` am Satz (F163). */
   hasLiveBooking: boolean;
@@ -18,7 +19,7 @@ export interface ReopenFacts {
 
 /** Warum der Beleg nicht zurück darf — `null` heißt: er darf. */
 export function reopenBlocker(f: ReopenFacts): string | null {
-  if (f.completedAt === null) return "Der Beleg ist nicht erledigt — es gibt nichts zurückzusetzen.";
+  if (f.status !== "done") return "Der Beleg ist nicht erledigt — es gibt nichts zurückzusetzen.";
   if (f.supersededAt !== null) {
     return "Der Beleg ist durch andere Belege ersetzt — fachlich gibt es ihn nicht mehr.";
   }

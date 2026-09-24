@@ -74,21 +74,3 @@ export function formatDocumentKind(kind: string | null | undefined): string {
   return DOCUMENT_KIND_LABEL[kind] ?? kind.replace(/_/g, " ");
 }
 
-/**
- * Woran ein Beleg erledigt wurde — `client_source_docs.completed_via`.
- * DB-CHECK `client_source_docs_completed_via_check` (`20260829140000`, um
- * `no_booking_required` erweitert in `20260903120000`).
- *
- * Hatte bis 2026-09-07 keinen TS-Typ (L-47). Die Achse `beleg_erledigung`
- * führt zusätzlich zwei Werte, die keine Spaltenwerte sind (`open`,
- * `completed`) — die stehen dort und nicht hier.
- */
-export const SOURCE_DOC_COMPLETION_VIA = [
-  "booking",
-  "case_closed",
-  "import",
-  "superseded",
-  "manual",
-  "no_booking_required",
-] as const;
-export type SourceDocCompletionVia = (typeof SOURCE_DOC_COMPLETION_VIA)[number];

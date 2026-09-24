@@ -69,8 +69,8 @@ export const Contract: Story = {
       sourceDocType: "contract",
       fileName: "Mietvertrag-Musterstrasse-12.pdf",
       counterparty: "Musterfirma Immobilien GmbH",
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
     });
@@ -119,8 +119,8 @@ export const SammelPdf: Story = {
       collectionKind: "mixed",
       fileName: "Sammel-August-2026.pdf",
       counterparty: null,
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
       documentDate: null,
@@ -188,8 +188,8 @@ export const StatementAssigned: Story = {
       sourceDocType: "bank_statement_pdf",
       fileName: "Kontoauszug-2026-08.pdf",
       counterparty: "Testbank eG",
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
       // Since the mirror run of 2026-09-10 the document carries its payment
@@ -257,12 +257,13 @@ export const StatementChooseAccount: Story = {
       sourceDocType: "bank_statement_pdf",
       fileName: "Kontoauszug-2026-08.pdf",
       counterparty: null,
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
       // F170: the statement is recognised, its account is not in the file.
-      inboxStatus: imported ? "classified" : "awaiting_input",
+      status: imported ? "bookable" : "human_review",
+      reviewReason: imported ? null : "statement_account_missing",
     });
     return (
       <DocumentPage document={doc} actions={menu}>
@@ -277,7 +278,7 @@ export const StatementChooseAccount: Story = {
             : {
                 defects: (
                   <SourceDocumentDefects
-                    defects={documentDefects({ inboxStatus: "awaiting_input" })}
+                    defects={documentDefects({ status: "human_review", reviewReason: "statement_account_missing" })}
                     actions={{
                       payment_account: (
                         <div style={{ display: "grid", gap: 8, minWidth: 320 }}>
@@ -317,11 +318,11 @@ export const StatementWithoutAccount: Story = {
       sourceDocType: "bank_statement_pdf",
       fileName: "Kontoauszug-2026-08.pdf",
       counterparty: null,
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
-      inboxStatus: "awaiting_input",
+      status: "human_review", reviewReason: "statement_account_missing",
     });
     return (
       <DocumentPage document={doc} actions={menu}>
@@ -331,7 +332,7 @@ export const StatementWithoutAccount: Story = {
           summary={null}
           defects={
             <SourceDocumentDefects
-              defects={documentDefects({ inboxStatus: "awaiting_input" })}
+              defects={documentDefects({ status: "human_review", reviewReason: "statement_account_missing" })}
               actions={{
                 payment_account: (
                   <div style={{ display: "grid", gap: 8, minWidth: 320 }}>
@@ -354,7 +355,7 @@ export const StatementWithoutAccount: Story = {
 };
 
 /**
- * The same `awaiting_input`, a second cause (F288): the account is set, but
+ * The same `human_review`, a second cause (F288, reason `statement_check_failed`): the account is set, but
  * the check chain found that the balances do not add up, and the office has
  * to decide. The kind stays `payment_account`; the sentence comes from the
  * caller through `wording`.
@@ -365,11 +366,11 @@ export const StatementDoesNotBalance: Story = {
       sourceDocType: "bank_statement_pdf",
       fileName: "Kontoauszug-2026-08.pdf",
       counterparty: null,
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
-      inboxStatus: "awaiting_input",
+      status: "human_review", reviewReason: "statement_check_failed",
     });
     return (
       <DocumentPage document={doc} actions={menu}>
@@ -379,7 +380,7 @@ export const StatementDoesNotBalance: Story = {
           summary={null}
           defects={
             <SourceDocumentDefects
-              defects={documentDefects({ inboxStatus: "awaiting_input" })}
+              defects={documentDefects({ status: "human_review", reviewReason: "statement_check_failed" })}
               wording={{
                 payment_account: {
                   title: "Kontoauszug geht nicht auf: Endsaldo 9.871,02 € erwartet, 9.817,02 € errechnet.",
@@ -417,8 +418,8 @@ export const StatementWronglyAssigned: Story = {
       sourceDocType: "bank_statement_pdf",
       fileName: "Kontoauszug-2026-08.pdf",
       counterparty: "Testbank eG",
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
     });
@@ -458,8 +459,8 @@ export const CreditCardTravel: Story = {
       sourceDocType: "travel_expense_report",
       fileName: "Reisekosten-2026-08.pdf",
       counterparty: null,
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
     });
@@ -467,8 +468,8 @@ export const CreditCardTravel: Story = {
       sourceDocType: "credit_card_statement",
       fileName: "Kreditkarte-2026-08.pdf",
       counterparty: "Testbank eG",
-      completedAt: null,
-      completedVia: null,
+      doneAt: null,
+      doneVia: null,
       detail: null,
       hasInvoiceRow: false,
     });
@@ -548,8 +549,8 @@ export const WithoutSubtype: Story = {
           classDocumentForm: "payment_reminder",
           fileName: "Mahnung-Musterbau.pdf",
           counterparty: "Musterbau GmbH",
-          completedAt: null,
-          completedVia: null,
+          doneAt: null,
+          doneVia: null,
           detail: null,
           hasInvoiceRow: false,
         })}
@@ -580,8 +581,8 @@ export const WithoutSubtype: Story = {
           classDocumentForm: "payment_reminder",
             fileName: "Mahnung-Musterbau.pdf",
             counterparty: "Musterbau GmbH",
-            completedAt: null,
-            completedVia: null,
+            doneAt: null,
+            doneVia: null,
             detail: null,
             hasInvoiceRow: false,
           })}

@@ -19,7 +19,7 @@ import type { StatusAxis } from "@/ludwig/ui/status/status-registry";
 
 /** Which axis names which entity — the key into the icon registry. */
 export const AXIS_ENTITY: Partial<Record<StatusAxis, EntityKey>> = {
-  document_processing: "source-document",
+  document_status: "source-document",
   accounting_case: "accounting-case",
   journal_entry: "journal-entry",
 };

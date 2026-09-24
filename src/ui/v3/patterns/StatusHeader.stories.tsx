@@ -16,9 +16,9 @@ type Story = StoryObj<typeof StatusHeader>;
 /* ── Data: three documents of a booking run ──────────────────────────────── */
 
 const DOCUMENTS = [
-  { id: "BEL-2026-0412", partner: "Musterfirma GmbH", amount: 1800, doc: "in_progress", match: "matched_ludwig" },
-  { id: "BEL-2026-0413", partner: "Werbeagentur Nord", amount: 420, doc: "review_needed", match: "unreconciled" },
-  { id: "BEL-2026-0414", partner: "Bürobedarf GmbH", amount: 64.9, doc: "processed", match: "matched_ludwig" },
+  { id: "BEL-2026-0412", partner: "Musterfirma GmbH", amount: 1800, doc: "extracting", match: "matched_ludwig" },
+  { id: "BEL-2026-0413", partner: "Werbeagentur Nord", amount: 420, doc: "agent_review", match: "unreconciled" },
+  { id: "BEL-2026-0414", partner: "Bürobedarf GmbH", amount: 64.9, doc: "bookable", match: "matched_ludwig" },
 ];
 
 /**
@@ -60,13 +60,13 @@ export const Axes: Story = {
       <Table cols="1fr 1fr 1fr 1fr">
         <HeadRow>
           <StatusHeader axis="mirror_match" label="Abgleich" />
-          <StatusHeader axis="document_processing" label="Verarbeitung" />
+          <StatusHeader axis="document_status" label="Belegstatus" />
           <StatusHeader axis="clarification_severity" label="Rückfrage" />
           <StatusHeader axis="run_outcome" label="Lauf" />
         </HeadRow>
         <Row>
           <StatusBadge axis="mirror_match" status="matched_ludwig" info={false} />
-          <StatusBadge axis="document_processing" status="in_progress" info={false} />
+          <StatusBadge axis="document_status" status="extracting" info={false} />
           <StatusBadge axis="clarification_severity" status="required" info={false} />
           <StatusBadge axis="run_outcome" status="running" info={false} />
         </Row>
@@ -129,7 +129,7 @@ export const InUse: Story = {
           <span>Beleg</span>
           <span>Gegenpartei</span>
           <span className="v2num">Betrag</span>
-          <StatusHeader axis="document_processing" label="Verarbeitung" />
+          <StatusHeader axis="document_status" label="Belegstatus" />
           <StatusHeader axis="mirror_match" label="Abgleich" />
         </HeadRow>
         {DOCUMENTS.map((d) => (
@@ -137,7 +137,7 @@ export const InUse: Story = {
             <MonoCell value={d.id} />
             <span className="v2main">{d.partner}</span>
             <AmountCell value={d.amount} />
-            <StatusBadge axis="document_processing" status={d.doc} info={false} />
+            <StatusBadge axis="document_status" status={d.doc} info={false} />
             <StatusBadge axis="mirror_match" status={d.match} info={false} />
           </Row>
         ))}
