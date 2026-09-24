@@ -374,6 +374,17 @@ export function PeriodField({
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDivElement>(null);
+  const fields = useRef<HTMLSpanElement>(null);
+  const key = `${panel.from ?? ""}|${panel.to ?? ""}`;
+  const firstKey = useRef(key);
+
+  // Heard by `FilterBar autoSubmit` (0200): hidden fields fire no `change` of
+  // their own. Not on the first render.
+  useEffect(() => {
+    if (key === firstKey.current) return;
+    firstKey.current = key;
+    fields.current?.dispatchEvent(new Event("change", { bubbles: true }));
+  }, [key]);
   const current = periodOf(panel.from, panel.to, panel.fiscalYears);
 
   // Into the field once it is shown: the month in reach, else the first button.
@@ -391,10 +402,10 @@ export function PeriodField({
   return (
     <>
       {name ? (
-        <>
+        <span ref={fields} hidden>
           <input type="hidden" name={`${name}From`} value={panel.from ?? ""} />
           <input type="hidden" name={`${name}To`} value={panel.to ?? ""} />
-        </>
+        </span>
       ) : null}
       <Popover
         open={open}

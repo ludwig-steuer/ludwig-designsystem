@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import { MultiSelectFilter } from "../primitives/MultiSelectFilter";
+import { PeriodField } from "../primitives/PeriodField";
 
 import {
   caseKindLabel,
@@ -1121,4 +1123,83 @@ export const ReportImports: Story = {
       ]}
     />
   ),
+};
+
+/* ── 0200: template — a filtered table in its box ───────────────────────── */
+
+/**
+ * **The template** for a list page: the filter bar above the box (§6, never
+ * in its head), the box with title, sub-line and action, the rows filtered
+ * live. „Gefiltert: x von y" in the bar, „Zurücksetzen" always there; with no
+ * hit the table says which filter and offers the way back (F6).
+ */
+export const FilteredListTemplate: Story = {
+  render: function Render() {
+    const all = PAGE.slice(0, 24);
+    const [q, setQ] = useState("");
+    const [state, setState] = useState("all");
+    const [kinds, setKinds] = useState<string[]>([]);
+    const [span, setSpan] = useState<{ from: string | null; to: string | null }>({ from: null, to: null });
+    const rows = all.filter(
+      (c) =>
+        (state === "all" || c.lifecycleStatus === state) &&
+        (kinds.length === 0 || kinds.includes(c.kind)) &&
+        (!span.from || c.openedAt.slice(0, 10) >= span.from) &&
+        (!span.to || c.openedAt.slice(0, 10) <= span.to) &&
+        (c.title ?? "").toLowerCase().includes(q.toLowerCase()),
+    );
+    const active = (q ? 1 : 0) + (state !== "all" ? 1 : 0) + (kinds.length ? 1 : 0) + (span.from ? 1 : 0);
+    const reset = () => {
+      setQ("");
+      setState("all");
+      setKinds([]);
+      setSpan({ from: null, to: null });
+    };
+    const count = (f: (c: CaseListItem) => boolean) => all.filter(f).length;
+    return (
+      <div style={{ minHeight: 560 }}>
+        <FilterBar
+          activeCount={active}
+          onReset={reset}
+          result={{ shown: rows.length, total: all.length, unit: ["Sachverhalt", "Sachverhalte"] }}
+        >
+          <SearchInput placeholder="Sachverhalt suchen" value={q} onChange={setQ} />
+          <FilterChips
+            label="Bearbeitung"
+            active={state}
+            onPick={setState}
+            options={[
+              { key: "all", label: "Alle", count: all.length },
+              { key: "open", label: "Offen", count: count((c) => c.lifecycleStatus === "open") },
+              { key: "needs_clarification", label: "In Klärung", count: count((c) => c.lifecycleStatus === "needs_clarification") },
+            ]}
+          />
+          <MultiSelectFilter
+            label="Art"
+            selected={kinds}
+            onChange={setKinds}
+            options={[
+              { key: "incoming_invoice", label: "Eingangsrechnung", count: count((c) => c.kind === "incoming_invoice") },
+              { key: "recurring_charge", label: "Dauersachverhalt", count: count((c) => c.kind === "recurring_charge") },
+              { key: "expense_report", label: "Auslagen", count: count((c) => c.kind === "expense_report") },
+            ]}
+          />
+          <PeriodField label="Eröffnet" from={span.from} to={span.to} onChange={(from, to) => setSpan({ from, to })} />
+        </FilterBar>
+        <DataTable<CaseListItem>
+          rows={rows}
+          columns={COLUMNS}
+          rowKey={rowKey}
+          head={{
+            title: "Sachverhalte 2026",
+            sub: "Musterfirma GmbH",
+            actions: <TextButton href="#neu">Sachverhalt anlegen</TextButton>,
+          }}
+          empty={{ title: "Noch keine Sachverhalte für 2026." }}
+          filtered={active > 0 ? { summary: "diese Filter", resetHref: "#" } : undefined}
+          rowHref={(c) => `#sachverhalt-${rowKey(c)}`}
+        />
+      </div>
+    );
+  },
 };

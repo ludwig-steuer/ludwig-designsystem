@@ -4304,3 +4304,6 @@ a.v3prov:focus-visible { text-decoration: underline; }
 .v3hint--before { margin-right: var(--space-1); }
 .v3hint--after { margin-left: var(--space-1); }
 .v3hint:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+/* In the filter bar the trigger sits beside a search field and chips: the
+   field's height and type size, not a form field's (0200, measured 35 vs 33). */
+.v2fbar .v3msel__trigger { font-size: 12.5px; padding-block: 6px; }

@@ -72,6 +72,17 @@ export function MultiSelectFilter({
   const trigger = useRef<HTMLButtonElement>(null);
   const search = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLDivElement>(null);
+  const fields = useRef<HTMLSpanElement>(null);
+  const key = selected.join("\u0000");
+  const firstKey = useRef(key);
+
+  // A form with `FilterBar autoSubmit` hears hidden fields only through a
+  // bubbling `change` (0200) — not on the first render, only on a change.
+  useEffect(() => {
+    if (key === firstKey.current) return;
+    firstKey.current = key;
+    fields.current?.dispatchEvent(new Event("change", { bubbles: true }));
+  }, [key]);
 
   const chosen = useMemo(() => new Set(selected), [selected]);
   const withSearch = options.length >= SEARCH_FROM;
@@ -147,7 +158,13 @@ export function MultiSelectFilter({
 
   return (
     <>
-      {name ? selected.map((k) => <input key={k} type="hidden" name={name} value={k} />) : null}
+      {name ? (
+        <span ref={fields} hidden>
+          {selected.map((k) => (
+            <input key={k} type="hidden" name={name} value={k} />
+          ))}
+        </span>
+      ) : null}
       <Popover
         open={open}
         onOpenChange={setOpenState}
