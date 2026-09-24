@@ -2688,6 +2688,20 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    head and height as the loaded original. `.v2skel` brings `display: block`
    itself (0086). */
 .v2doc__origskel { width: 100%; }
+/* A data file as its rows (F285): the frame keeps its height, the table
+   scrolls inside it, the head line and the notes scroll with it. */
+.v2doc__rows { overflow: auto; background: var(--color-surface); box-sizing: border-box; }
+.v2doc__rows .v2tbl { font-variant-numeric: tabular-nums lining-nums; }
+.v2doc__rowshead {
+  display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5);
+  margin: 0; padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-1-subtle);
+  font-size: var(--fs-ui-sm);
+}
+.v2doc__rowshead dt { color: var(--color-text-subtle); }
+.v2doc__rowshead dd { margin: 0; font-variant-numeric: tabular-nums lining-nums; }
+.v2doc__rowsnote { margin: 0; padding: var(--space-3) var(--space-4); font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v2doc__warnings { margin: 0; padding-left: var(--space-4); }
 /* As tall as the card title next to it (15 px font, 1.45 lines). A fixed width,
    not a percentage: the title holder does not grow, and 42 % of zero is zero. */
 .v2doc__headskel { width: 180px; height: 22px; }

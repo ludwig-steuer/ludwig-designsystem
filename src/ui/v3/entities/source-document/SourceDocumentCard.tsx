@@ -9,7 +9,7 @@ import {
 } from "./SourceDocumentFacts";
 import { Columns } from "../../patterns/Columns";
 import { SourceDocumentList } from "./SourceDocumentList";
-import { SourceDocumentPreview } from "./SourceDocumentPreview";
+import { SourceDocumentPreview, type SourceDocumentOriginal } from "./SourceDocumentPreview";
 import type { SourceDocumentVM } from "./SourceDocument";
 
 /**
@@ -32,9 +32,19 @@ export interface SourceDocumentCardProps {
   document: SourceDocumentVM;
   /** The caller picks which of the two summaries this is (0076). */
   summary?: string | null;
-  /** Signed URL of the preview; `null` means there is none. */
+  /** The original by kind — PDF, read rows or only the file (F285). Wins over `previewUrl`. */
+  original?: SourceDocumentOriginal | null;
+  /**
+   * Signed URL of the preview; `null` means there is none.
+   *
+   * @deprecated Use `original: { kind: "pdf", url }`. Stays for one release.
+   */
   previewUrl?: string | null;
-  /** Why there is no preview — said in a sentence, not left blank. */
+  /**
+   * Why there is no preview — said in a sentence, not left blank.
+   *
+   * @deprecated Use `original: { kind: "file", reason, … }`. Stays for one release.
+   */
   previewUnavailableReason?: string | null;
   /** „Seiten 5–7 aus …" for a document cut out of a collection PDF. */
   excerpt?: { from: number; to?: number; parentTitle?: string; parentHref?: string } | null;
@@ -103,6 +113,7 @@ export interface SourceDocumentCardProps {
 export function SourceDocumentCard({
   document,
   summary,
+  original,
   previewUrl,
   previewUnavailableReason,
   excerpt,
@@ -135,6 +146,7 @@ export function SourceDocumentCard({
              whoever is here brought a doubt, and the original is what settles
              it (page profile, rank 2). */
           <SourceDocumentPreview
+            original={original}
             url={previewUrl ?? null}
             unavailableReason={previewUnavailableReason}
             title={kind}

@@ -221,3 +221,159 @@ export const InUse: Story = {
     );
   },
 };
+
+/* ── F285: the original by file format ─────────────────────────────────── */
+
+const DL = "data:application/octet-stream;base64,";
+const PURPOSES = [
+  "Miete Geschäftsräume Oktober",
+  "RE-4471 Bürobedarf Meier",
+  "Stadtwerke Abschlag 10/2026",
+  "Kartenzahlung Tankstelle Nord",
+  "Gehalt September M. Muster",
+  "SEPA-Lastschrift Telekom Mobilfunk",
+];
+const COUNTERPARTIES = [
+  "Vermieter Musterstraße",
+  "Bürobedarf Meier GmbH",
+  "Stadtwerke Musterstadt",
+  "Tankstelle Nord",
+  "Max Muster",
+  "Telekom Deutschland GmbH",
+];
+const STATEMENT_ROWS = Array.from({ length: 200 }, (_, i) => {
+  const day = 31 - Math.floor(i / 7);
+  const amount = [-1450, -64.9, -213.4, -72.4, -3120, -89.99][i % 6]! + (i % 2 === 0 ? 0 : 2400 + i);
+  return [
+    `${String(Math.max(day, 1)).padStart(2, "0")}.08.2026`,
+    COUNTERPARTIES[i % 6]!,
+    PURPOSES[i % 6]!,
+    amount.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+  ];
+});
+
+/**
+ * A statement from an XLSX: the rows its reader returns, capped at 200 of
+ * 251, with the head line of the statement and one warning of the parser.
+ */
+export const Rows: Story = {
+  name: "Tabelle",
+  render: () => (
+    <div style={{ maxWidth: 820 }}>
+      <SourceDocumentPreview
+        title="Kontoauszug"
+        fileName="Bank_2026_08.xlsx"
+        original={{
+          kind: "rows",
+          formatLabel: "VR-Bank MT940-XLSX",
+          head: [
+            ["Konto", "DE12 2505 0000 0123 4567 89"],
+            ["Zeitraum", "01.08.–31.08.2026"],
+            ["Anfangssaldo", "12.480,17 €"],
+            ["Endsaldo", "9.871,02 €"],
+            ["Buchungen", "251"],
+          ],
+          columns: [
+            { label: "Datum" },
+            { label: "Gegenpartei" },
+            { label: "Verwendungszweck" },
+            { label: "Betrag", numeric: true },
+          ],
+          rows: STATEMENT_ROWS,
+          total: 251,
+          warnings: ["Zeile 118: Valutadatum fehlt, Buchungsdatum übernommen."],
+          downloadUrl: DL,
+          fileName: "Bank_2026_08.xlsx",
+        }}
+      />
+    </div>
+  ),
+};
+
+/** An EXTF batch: date, amount, account, contra account, text — all rows, no cap. */
+export const Batch: Story = {
+  name: "Stapel",
+  render: () => (
+    <div style={{ maxWidth: 820 }}>
+      <SourceDocumentPreview
+        title="DATEV-Buchungsstapel"
+        fileName="EXTF_Buchungsstapel_2026_08.csv"
+        original={{
+          kind: "rows",
+          formatLabel: "DATEV-Buchungsstapel",
+          head: [
+            ["Berater", "29098"],
+            ["Mandant", "10412"],
+            ["WJ-Beginn", "01.01.2026"],
+          ],
+          columns: [
+            { label: "Datum" },
+            { label: "Betrag", numeric: true },
+            { label: "Konto", numeric: true },
+            { label: "Gegenkonto", numeric: true },
+            { label: "Buchungstext" },
+          ],
+          rows: [
+            ["03.08.2026", "1.450,00", "4210", "1200", "Miete August"],
+            ["05.08.2026", "64,90", "4930", "70004", "RE-4471 Bürobedarf Meier"],
+            ["12.08.2026", "213,40", "4240", "1200", "Stadtwerke Abschlag"],
+            ["19.08.2026", "1.276,55", "4540", "70012", "RE-88213 Kfz Berger"],
+            ["28.08.2026", "3.120,00", "4120", "1200", "Gehalt August"],
+          ],
+          total: 5,
+          warnings: [],
+          downloadUrl: DL,
+          fileName: "EXTF_Buchungsstapel_2026_08.csv",
+        }}
+      />
+    </div>
+  ),
+};
+
+/** A format Ludwig has no reader for: a sentence and the file, no grey box. */
+export const FileOnly: Story = {
+  name: "NurDatei",
+  render: () => (
+    <div style={{ maxWidth: 720 }}>
+      <SourceDocumentPreview
+        title="Kontoauszug"
+        fileName="umsaetze.ods"
+        original={{
+          kind: "file",
+          reason: "Für ODS-Dateien gibt es keine Vorschau.",
+          downloadUrl: DL,
+          fileName: "umsaetze.ods",
+        }}
+      />
+    </div>
+  ),
+};
+
+/** The reader threw: the reason in its words; below, the same without a file to hand out. */
+export const Unreadable: Story = {
+  name: "NichtLesbar",
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-5)", maxWidth: 720 }}>
+      <SourceDocumentPreview
+        title="Kontoauszug"
+        fileName="Bank_2026_07.xlsx"
+        original={{
+          kind: "file",
+          reason: "Ludwig kann diese Datei nicht lesen: Die Kopfzeile nennt keine Spalte „Betrag“.",
+          downloadUrl: DL,
+          fileName: "Bank_2026_07.xlsx",
+        }}
+      />
+      <SourceDocumentPreview
+        title="Kontoauszug"
+        fileName="auszug.sta"
+        original={{
+          kind: "file",
+          reason: "Ludwig kann diese Datei nicht lesen: Die Datei ist leer.",
+          downloadUrl: null,
+          fileName: "auszug.sta",
+        }}
+      />
+    </div>
+  ),
+};

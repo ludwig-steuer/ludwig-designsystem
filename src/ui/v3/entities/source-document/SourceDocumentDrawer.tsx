@@ -17,6 +17,7 @@ import {
   type SourceDocumentVM,
 } from "./SourceDocument";
 import { SourceDocumentCard } from "./SourceDocumentCard";
+import type { SourceDocumentOriginal } from "./SourceDocumentPreview";
 import { type SourceDocumentGroup } from "./SourceDocumentFacts";
 
 /**
@@ -45,9 +46,19 @@ export interface SourceDocumentQuickView {
   document: SourceDocumentVM;
   /** The caller picks which of the two summaries this is (0076). */
   summary?: string | null;
-  /** Signed URL of the preview; `null` means there is none. */
+  /** The original by kind — PDF, read rows or only the file (F285). Wins over `previewUrl`. */
+  original?: SourceDocumentOriginal | null;
+  /**
+   * Signed URL of the preview; `null` means there is none.
+   *
+   * @deprecated Use `original: { kind: "pdf", url }`. Stays for one release.
+   */
   previewUrl?: string | null;
-  /** Why there is no preview — said in a sentence, not left blank. */
+  /**
+   * Why there is no preview — said in a sentence, not left blank.
+   *
+   * @deprecated Use `original: { kind: "file", reason, … }`. Stays for one release.
+   */
   previewUnavailableReason?: string | null;
   /** „Seiten 5–7 aus …" for a document cut out of a collection PDF. */
   excerpt?: { from: number; to?: number; parentTitle?: string; parentHref?: string } | null;
@@ -209,6 +220,7 @@ function DrawerBody({
       // would say it a second time (0150).
       factsTitle={null}
       summary={record.summary}
+      original={record.original}
       previewUrl={record.previewUrl}
       previewUnavailableReason={record.previewUnavailableReason}
       excerpt={record.excerpt}

@@ -328,3 +328,65 @@ und gehört der App.
 Abnahme.** Er ist gebaut, `height` ist `@deprecated` und wird ignoriert, und
 die Wirkung ist an allen vier Stellen gemessen (Tabelle oben) — aber gemessen
 hat sie, wer sie gebaut hat. Eine kurze Bestätigung steht aus.
+
+## Nachtrag 2026-09-24 — das Original je Dateiformat (F285, T285.1)
+
+Quelle: ll-cto, Konzept `ludwig/app` `docs/backlog/F285-original-je-dateiformat.md`
+(Abschnitt „Darstellung je Format", T285.1). Befund: jede Datei stak im
+`<iframe>`; XLSX und STA lösten beim Seitenaufruf einen Download aus, CSV und
+CAMT erschienen als Rohtext.
+
+**Schnittstelle:** neue Prop `original?: SourceDocumentOriginal`, exportiert
+aus dem Barrel; `url` und `unavailableReason` sind `@deprecated` und bleiben ein
+Release als Alias (`url` → `pdf`, `null` → `file` ohne Download).
+`SourceDocumentCard.original` und `SourceDocumentQuickView.original` reichen
+sie durch (`previewUrl`/`previewUnavailableReason` dort ebenso `@deprecated`).
+
+```ts
+type SourceDocumentOriginal =
+  | { kind: "pdf"; url: string }
+  | { kind: "rows"; formatLabel: string; head: [label, value][];
+      columns: { label: string; numeric?: boolean }[]; rows: string[][];
+      total: number; warnings: string[]; downloadUrl: string; fileName: string }
+  | { kind: "file"; reason: string; downloadUrl: string | null; fileName: string };
+```
+
+Abweichung vom Konzept, mit ll-cto abgestimmt: `columns` trägt `numeric`, weil
+`rows` fertige Strings sind und die Komponente sonst nicht weiß, welche Spalte
+rechtsbündig gehört.
+
+**Darstellung:**
+
+- `pdf` — wie bisher; Kopf-Meta „n Seiten".
+- `rows` — Kopf-Meta ist `formatLabel`, rechts „Datei herunterladen"
+  (`download` mit `fileName`). Im Rahmen (dieselbe Höhe
+  `clamp(320px, 62vh, 900px)`, scrollt innen): eine Zeile `head` als `dl`, die
+  Tabelle (`Table`, `density="compact"`; Spurbreiten aus der längsten Zeichenkette
+  je Spalte in `ch`, weil jede Zeile ihr eigenes Grid ist), bei
+  `total > rows.length` „… n weitere Zeilen — Datei herunterladen", darunter
+  `warnings` als `Callout` `soft`. Werte bleiben Strings — das Original zeigt,
+  was gelesen wurde, kein `Amount`.
+- `file` — `EmptyState` „Keine Vorschau" mit `reason`; Download im Kopf, wenn
+  `downloadUrl` gesetzt ist.
+
+**Stories (neu, 6 → 10):** `Rows` („Tabelle", Kontoauszug XLSX, 200 von 251,
+eine Warnung) · `Batch` („Stapel", EXTF, Konto-Spalten numerisch) ·
+`FileOnly` („NurDatei", ODS) · `Unreadable` („NichtLesbar", mit und ohne
+Download).
+
+**Kriterien dieses Nachtrags:**
+
+- [ ] `original` hat Vorrang vor `url`; ohne `original` rendern alle bisherigen Stories unverändert (`Filled`, `OhneVorschau`, `Bounds`)
+- [ ] `numeric`-Spalten stehen rechtsbündig mit tabellarischen Ziffern, Kopf und Zellen auf derselben Kante (Stories `Rows`, `Batch`)
+- [ ] Rahmen hält die Höhe, die Tabelle scrollt innen (Story `Rows`)
+- [ ] Deckel-Zeile nur bei `total > rows.length` (Story `Rows` ja, `Batch` nein)
+- [ ] Warnungen als Hinweis unter der Tabelle, nur wenn vorhanden (`Rows` ja, `Batch` nein)
+- [ ] `file` ohne `downloadUrl` zeigt keinen Download (Story `Unreadable`, zweite Karte)
+- [ ] `SourceDocumentCard` und Drawer reichen `original` durch
+
+**Ausbau:** Tabellenkopf beim Scrollen stehen lassen (`sticky` am `HeadRow`)
+— wenn die Belegseite zeigt, dass man in 200 Zeilen die Spalten verliert.
+
+Selbst angesehen (nicht die Abnahme): die vier neuen und zwei alte Stories bei
+1100 px, keine Konsolenfehler; Rahmen 558 px hoch, Tabelle scrollt
+(scrollHeight 7080); Zellkanten je Spalte in drei Zeilen gleich.

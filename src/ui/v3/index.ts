@@ -334,7 +334,10 @@ export {
   type SourceDocumentColumnOptions,
   type StuckVariant,
 } from "./entities/source-document/source-document-columns";
-export { SourceDocumentPreview } from "./entities/source-document/SourceDocumentPreview";
+export {
+  SourceDocumentPreview,
+  type SourceDocumentOriginal,
+} from "./entities/source-document/SourceDocumentPreview";
 export {
   SourceDocumentCard,
   type SourceDocumentCardProps,
