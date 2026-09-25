@@ -22,6 +22,10 @@ for (const [name, c] of Object.entries(allComparisons)) {
   for (const mode of ["released", "withProposals"]) {
     const t = c.ledger[mode];
     expect(adds(t.old.amount, t.movement, t.new.amount), name, `ledger.${mode}: old + movement ≠ new`);
+    if (t.oldParts) {
+      const parts = cents(t.oldParts.reduce((sum, part) => sum + part.amount, 0));
+      expect(parts === cents(t.old.amount), name, `ledger.${mode}: parts ${parts} ≠ old ${t.old.amount}`);
+    }
   }
   const { old, movement, new: next } = c.statement;
   if (old && movement && next) {

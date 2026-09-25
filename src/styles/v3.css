@@ -4311,3 +4311,102 @@ a.v3prov:focus-visible { text-decoration: underline; }
 /* In the filter bar the trigger sits beside a search field and chips: the
    field's height and type size, not a form field's (0200, measured 35 vs 33). */
 .v2fbar .v3msel__trigger { font-size: 12.5px; padding-block: 6px; }
+
+/* --- 0202 Saldenabgleich: Quellen als Spalten, Zeitpunkte als Zeilen ------
+   Owner 2026-09-25: the sources stand side by side, time runs downward
+   (Alt · Bewegung · Neu); lines, a head and a difference column lead the eye;
+   a row that does not add up is tinted whole. Every cell carries exactly one
+   line under its figure, so the rows stay level; details live in the tooltip. */
+.v3bbr {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface);
+  font-size: var(--fs-ui);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+/* Child combinators only: the table sits inside a `.v2tbl` (whose reset makes
+   cells blocks) and holds one again in its popover (which must stay a grid). */
+.v3bbr > * > tr > th,
+.v3bbr > * > tr > td {
+  display: table-cell;
+  padding: var(--space-2) var(--space-3);
+  text-align: right;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border-subtle);
+  border-left: 1px solid var(--color-border-subtle);
+}
+.v3bbr > * > tr > :first-child { border-left: none; text-align: left; }
+.v3bbr > tbody > tr:last-child > * { border-bottom: none; }
+.v3bbr > thead > tr > th {
+  background: var(--color-surface-head);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--fs-ui-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.v3bbr > tbody > tr > th { font-weight: 600; color: var(--color-text); white-space: nowrap; }
+/* A share of the old balance: indented, one step quieter. */
+.v3bbr > tbody > tr > th.v3bbr__part { font-weight: 400; padding-left: var(--space-6); color: var(--color-text-muted); }
+/* The difference column: its own ground and a stronger line before it. */
+.v3bbr > * > tr > .v3bbr__diff { background: var(--color-bg-soft); border-left: 2px solid var(--color-border); }
+.v3bbr > thead > tr > .v3bbr__diff { background: var(--color-bg-sunken); color: var(--color-text); }
+/* A row that does not add up: the whole row carries the step (alarmed, V6). */
+.v3bbr > tbody > tr.v3bbr__row--warning > * { background: var(--color-warning-bg); }
+.v3bbr > tbody > tr.v3bbr__row--danger > * { background: var(--color-danger-bg); }
+.v3bbr__row--warning > .v3bbr__diff,
+.v3bbr__row--danger > .v3bbr__diff { font-weight: 600; }
+/* Exactly one line under every figure — cut, the whole text is in the tooltip. */
+.v3bbr__sub {
+  display: block;
+  max-width: 28ch;
+  margin-left: auto;
+  font-size: var(--fs-ui-xs);
+  color: var(--color-text-muted);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v3bbr > * > tr > :first-child .v3bbr__sub { margin-left: 0; }
+/* A figure with a source behind it: dashed, the tooltip names the source. */
+.v3bbr__val {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 24px;
+  color: inherit;
+  text-decoration: underline dashed var(--color-border-control);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+a.v3bbr__val { cursor: pointer; }
+a.v3bbr__val:hover { text-decoration-color: currentColor; }
+.v3bbr__val:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+/* Includes proposals: the step „Hinweis", like `proposed` in the registry. */
+.v3bbr__val--proposed { color: var(--color-accent-700); text-decoration-color: var(--color-accent-700); }
+.v3bbr__val--warning { color: var(--color-warning); }
+.v3bbr__val--danger { color: var(--color-danger); }
+/* A difference that explains itself on click: button, not a label. */
+.v3bbr__explain {
+  display: inline-block;
+  padding: 0 var(--space-1);
+  margin: 0 calc(-1 * var(--space-1));
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  font: inherit;
+  text-align: right;
+  cursor: pointer;
+}
+.v3bbr__explain:hover { background: var(--color-surface); box-shadow: inset 0 0 0 1px var(--color-border); }
+.v3bbr__explain:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.v3bbr__explain .v3bbr__val { cursor: pointer; }
+.v3bbr__edit { margin-left: var(--space-1); vertical-align: middle; }
+.v2pop:has(> .v3bbr-explain) { max-width: min(92vw, 46rem); }
+.v3bbr-explain { display: flex; flex-direction: column; gap: var(--space-2); min-width: 36rem; font-weight: 400; text-align: left; }

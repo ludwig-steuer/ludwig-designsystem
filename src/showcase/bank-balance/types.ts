@@ -29,8 +29,17 @@ export interface SourcedAmount {
   href: string | null;
 }
 
+/** One share of a ledger balance — DATEV, a batch DATEV does not have yet, a client batch. */
+export interface LedgerPart {
+  label: string;
+  amount: number;
+  detail: string | null;
+}
+
 export interface LedgerTriple {
   old: SourcedAmount;
+  /** What the old balance is made of, when more than DATEV stands in it (0202, owner 2026-09-25). */
+  oldParts?: LedgerPart[];
   movement: number;
   movementCount: number;
   new: SourcedAmount;

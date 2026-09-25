@@ -46,7 +46,7 @@ export const S2ProposalsOff: Story = {
 /** **S2 an** — derselbe Fall mitgezählt: passt, und der Satz sagt, was ohne Vorschläge fehlt. */
 export const S2ProposalsOn: Story = {
   name: "S2 · nur Vorschläge, Schalter an",
-  args: { accounts: [s2ProposalsOnly], withProposals: true },
+  args: { accounts: [s2ProposalsOnly], withProposals: true, openAll: true },
 };
 
 /**
@@ -67,7 +67,7 @@ export const S4NoBalancesInFile: Story = {
 /** **S5** — S4 mit Papierauszug zum 31.08.: Neu ist wieder prüfbar. */
 export const S5ManualBalance: Story = {
   name: "S5 · eigene Angabe",
-  args: { accounts: [s5ManualBalance] },
+  args: { accounts: [s5ManualBalance], openAll: true },
 };
 
 /** **S6** — die eigene Angabe weicht ab; zwei Umsätze ohne Buchung erklären alles. */

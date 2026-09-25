@@ -151,6 +151,14 @@ export const s3ProposalFromLastMonth: BankBalanceComparison = {
     released: s2ProposalsOnly.ledger.released,
     withProposals: {
       old: at(41201.8, "2026-07-31", "DATEV bis 31.07. inkl. Vorschläge", "inkl. 1 Vorschlag vom 21.07."),
+      oldParts: [
+        { label: "DATEV bis 31.07.", amount: 41250, detail: "Abruf 14.09.2026 21:42" },
+        {
+          label: "Vorschlag 21.07. · Tankstelle Nord",
+          amount: -48.2,
+          detail: "Sachverhalt 2026-0497 — steckt schon im DATEV-Stand",
+        },
+      ],
       movement: -5380.4,
       movementCount: 64,
       new: at(35821.4, "2026-08-31", "inkl. 65 Vorschläge"),
@@ -387,7 +395,7 @@ export const s8NotCheckable: BankBalanceComparison = {
       level: "notice",
       amount: null,
       count: null,
-      text: "Für August liegt kein Kontoauszug vor",
+      text: "Für 01.–31.08.2026 liegt kein Kontoauszug vor",
       action: requestStatement,
     },
   ],
@@ -447,6 +455,11 @@ const OTHER_BATCHES = "DATEV bis 31.07. + Stapel 2026-0003, noch nicht in DATEV 
 
 const s10Ledger = {
   old: at(112345.67, "2026-07-31", OTHER_BATCHES, "Abruf 14.09.2026 21:42"),
+  oldParts: [
+    { label: "DATEV bis 31.07.", amount: 109870.12, detail: "Abruf 14.09.2026 21:42" },
+    { label: "Stapel 2026-0003", amount: 1985.3, detail: "freigegeben 18.08.2026, noch nicht in DATEV" },
+    { label: "Mandantenstapel Kasse", amount: 490.25, detail: "Kassenbuch Juli, vom Mandanten erfasst" },
+  ],
   movement: 18765.43,
   movementCount: 214,
   new: at(131111.1, "2026-08-31", `${OTHER_BATCHES} + Ludwig freigegeben`, "Abruf 14.09.2026 21:42"),

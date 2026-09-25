@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 
-import { formatAmount, formatCount, formatTime } from "@/ui/v3/format";
+import { formatAmount, formatCount, formatTime, formatTimeRange } from "@/ui/v3/format";
+import { ActionIcon } from "@/ui/v3/Icons";
 import { StateIcon, stateLabel, type StateKind } from "@/ui/v3/patterns/Review";
 import { AmountInput } from "@/ui/v3/primitives/AmountInput";
 import { Banner, type BannerTone } from "@/ui/v3/primitives/Banner";
 import { Button } from "@/ui/v3/primitives/Button";
-import { AmountCell, CountCell, type CellHint, type CellTone } from "@/ui/v3/primitives/Cells";
+import { AmountCell, CountCell, ValueHint, type CellHint, type CellTone } from "@/ui/v3/primitives/Cells";
 import { DateField } from "@/ui/v3/primitives/DateField";
+import { Dialog } from "@/ui/v3/primitives/Dialog";
 import { ExpandableRow } from "@/ui/v3/primitives/ExpandableRow";
 import { Checkbox, Field, Input, Select } from "@/ui/v3/primitives/Form";
+import { IconButton } from "@/ui/v3/primitives/IconButton";
+import { Popover, Tooltip } from "@/ui/v3/primitives/Popover";
 import { Card, CardHead, HeadRow, Row, Table } from "@/ui/v3/primitives/Table";
 import { TextButton } from "@/ui/v3/primitives/TextButton";
 
@@ -130,9 +134,14 @@ export function summarize(
   return { tone, text: `${parts.join(" · ")}.` };
 }
 
-/* ── Matrix ─────────────────────────────────────────────────────────── */
+/* ── Matrix: sources side by side, time downward ────────────────────── */
+/* Owner 2026-09-25: Alt on top, Neu below — a short history per source; the
+   difference is its own column; every figure is a figure only, the source in
+   the tooltip; exactly one line under each. */
 
-/** The balance holds for another day than the column's cut-off — it has to show (J4). */
+const BLANK = " ";
+
+/** The balance holds for another day than the row's cut-off — it has to show (J4). */
 function dateHint(c: BankBalanceComparison, side: Side, value: SourcedAmount, coveredFrom: string | null = null): CellHint | undefined {
   const expected = cutOff(c, side);
   if (value.asOf === expected) return undefined;
@@ -144,234 +153,352 @@ function dateHint(c: BankBalanceComparison, side: Side, value: SourcedAmount, co
     : { level: "warning", text: `Stand vom ${day(value.asOf)}, nicht vom ${day(expected)} — kein Vergleich möglich.` };
 }
 
-function Source({ value }: { value: SourcedAmount }) {
-  const label = value.href ? (
-    <TextButton href={value.href} tone="quiet">
-      {value.sourceLabel}
-    </TextButton>
-  ) : (
-    value.sourceLabel
-  );
+function sourceTip(value: SourcedAmount, extra?: string): string {
+  return [value.sourceLabel, value.sourceDetail, `Stand ${day(value.asOf)}`, extra].filter(Boolean).join(" · ");
+}
+
+function proposalTip(count: number): string | undefined {
+  return count ? `enthält ${formatCount(count, ["Buchungsvorschlag", "Buchungsvorschläge"])}, noch nicht freigegeben` : undefined;
+}
+
+type ValTone = "proposed" | "warning" | "danger";
+
+/** A figure with its source behind it: dashed underline, the source in the tooltip. */
+function Val({
+  amount,
+  tip,
+  href,
+  hint,
+  tone,
+}: {
+  amount: number;
+  tip: string;
+  href?: string | null;
+  hint?: CellHint;
+  tone?: ValTone;
+}) {
+  const cls = `v3bbr__val${tone ? ` v3bbr__val--${tone}` : ""}`;
+  const text = formatAmount(amount, "EUR");
   return (
-    <div className="v2sub">
-      {label}
-      {value.sourceDetail ? <div>{value.sourceDetail}</div> : null}
-    </div>
+    <>
+      {hint ? <ValueHint hint={hint} /> : null}
+      <Tooltip label={tip}>
+        {href ? (
+          <a className={cls} href={href}>
+            {text}
+          </a>
+        ) : (
+          <span className={cls} tabIndex={0}>
+            {text}
+          </span>
+        )}
+      </Tooltip>
+    </>
   );
 }
 
-function Figure({ value, hint }: { value: SourcedAmount; hint?: CellHint }) {
+function Sub({ children }: { children?: ReactNode }) {
+  return <span className="v3bbr__sub">{children || BLANK}</span>;
+}
+
+function Empty({ why }: { why?: string }) {
   return (
-    <div className="v2num">
-      <AmountCell value={value.amount} hint={hint} />
-      <Source value={value} />
-    </div>
+    <>
+      <span className="v2muted">—</span>
+      <Sub>{why}</Sub>
+    </>
   );
 }
 
-function Missing({ why, children }: { why: string; children?: ReactNode }) {
-  return (
-    <div className="v2num">
-      {children ?? <span className="v2muted">—</span>}
-      <div className="v2sub">{why}</div>
-    </div>
-  );
+type Line = "old" | "movement" | "new";
+
+const ROWS: { key: Line; label: string }[] = [
+  { key: "old", label: "Alt" },
+  { key: "movement", label: "Bewegung" },
+  { key: "new", label: "Neu" },
+];
+
+function rowDate(c: BankBalanceComparison, row: Line): string {
+  if (row === "old") return day(c.period.from);
+  if (row === "new") return day(c.period.to);
+  return formatTimeRange(c.period.from, c.period.to);
 }
-
-function Difference({ value, tone, why }: { value: number | null; tone: CellTone; why?: string }) {
-  if (value === null) return <Missing why={why ?? "kein Vergleich"} />;
-  const ok = value === 0;
-  return (
-    <div className="v2num">
-      <span style={{ display: "inline-flex", gap: "var(--space-2)", alignItems: "center" }}>
-        <StateIcon state={ok ? "done" : VERDICT_STATE_BY_TONE[tone]} title={ok ? "stimmt" : "weicht ab"} />
-        <AmountCell value={value} tone={ok ? "neutral" : tone} />
-      </span>
-      <div className="v2sub">{ok ? "stimmt" : "weicht ab"}</div>
-    </div>
-  );
-}
-
-const VERDICT_STATE_BY_TONE: Record<CellTone, StateKind> = {
-  neutral: "info",
-  muted: "info",
-  success: "done",
-  warning: "warning",
-  "warning-strong": "warning",
-  danger: "error",
-};
-
-const MATRIX_COLS = "minmax(190px, 1.1fr) repeat(3, minmax(170px, 1fr))";
 
 function Matrix({
   c,
   mode,
   manual,
-  onRecord,
+  onEdit,
 }: {
   c: BankBalanceComparison;
   mode: Mode;
   manual: BankBalanceComparison["manual"];
-  onRecord: (side: Side) => void;
+  onEdit: (side: Side) => void;
 }) {
   const t = c.ledger[mode];
   const { statement } = c;
-  const tone = VERDICT[c.verdict[mode]].tone;
-  const hasStatement = statement.movement !== null || statement.old !== null || statement.new !== null;
-  const withoutBalances = statement.movement !== null ? "Datei ohne Salden" : "kein Auszug";
+  const verdictTone = VERDICT[c.verdict[mode]].tone;
+  const rowTone: "warning" | "danger" = verdictTone === "danger" ? "danger" : "warning";
   const cashLike = c.kind === "cash" || c.kind === "money_transit";
-
-  const statementDiff = (side: Side): number | null => {
-    const value = statement[side];
-    if (!value || !comparable(c, side, value, statement.coveredFrom)) return null;
-    return cents(t[side].amount - value.amount);
-  };
-  const manualDiff = (side: Side): number | null => {
-    const value = manual[side];
-    if (!value || !comparable(c, side, value)) return null;
-    return cents(t[side].amount - value.amount);
-  };
+  const hasStatement = !cashLike && (statement.movement !== null || statement.old !== null || statement.new !== null);
+  const hasManual = manual.old !== null || manual.new !== null;
+  const withoutBalances = statement.movement !== null ? "Datei ohne Salden" : "kein Auszug";
   const moveOk = movementComparable(c);
+  const explains = c.explanation.length > 0 && c.remainder !== null;
 
-  const ownCell = (side: Side) => {
-    const value = manual[side];
-    if (!value)
+  // How many proposals stand in a ledger figure — only with the switch on.
+  const earlier = c.proposalsOutsidePeriod.filter((p) => p.bookingDate < c.period.from).length;
+  const proposals: Record<Line, number> =
+    mode === "withProposals"
+      ? { old: earlier, movement: c.coverage.proposedOnly, new: earlier + c.coverage.proposedOnly }
+      : { old: 0, movement: 0, new: 0 };
+
+  const ledgerCell = (row: Line) => {
+    const n = proposals[row];
+    const tone = n ? "proposed" : undefined;
+    if (row === "movement")
       return (
-        <div className="v2num">
-          <TextButton onClick={() => onRecord(side)}>Kontostand hinterlegen</TextButton>
-        </div>
+        <>
+          <Val
+            amount={t.movement}
+            tone={tone}
+            tip={[`Summe der Buchungen ${rowDate(c, row)}`, proposalTip(n)].filter(Boolean).join(" · ")}
+          />
+          <Sub>{formatCount(t.movementCount, ["Buchung", "Buchungen"])}{n ? `, davon ${formatCount(n)} Vorschläge` : ""}</Sub>
+        </>
       );
+    const value = t[row];
     return (
-      <div className="v2num">
-        {/* a7: the amount itself opens the same form, filled in. */}
-        <TextButton onClick={() => onRecord(side)} aria-label={`Kontostand ${formatAmount(value.amount, "EUR")} ändern`}>
-          <AmountCell value={value.amount} hint={dateHint(c, side, value)} />
-        </TextButton>
-        <Source value={value} />
-      </div>
+      <>
+        <Val amount={value.amount} tone={tone} tip={sourceTip(value, proposalTip(n))} />
+        <Sub>
+          {n
+            ? `inkl. ${formatCount(n, ["Vorschlag", "Vorschläge"])}`
+            : row === "old" && t.oldParts
+              ? `Summe aus ${formatCount(t.oldParts.length)} Teilen`
+              : value.sourceLabel}
+        </Sub>
+      </>
     );
   };
 
-  return (
-    <Table cols={MATRIX_COLS}>
-      <HeadRow>
-        <span>Quelle</span>
-        <span className="v2num">Alt {day(cutOff(c, "old"))}</span>
-        <span className="v2num">Bewegung {formatTime(c.period.from, "month")}</span>
-        <span className="v2num">Neu {day(cutOff(c, "new"))}</span>
-      </HeadRow>
-
-      <Row>
-        <span>{mode === "withProposals" ? "Buchungen inkl. Vorschläge" : "Buchungen"}</span>
-        <Figure value={t.old} />
-        <div className="v2num">
-          <AmountCell value={t.movement} />
-          <div className="v2sub">{formatCount(t.movementCount, ["Buchung", "Buchungen"])}</div>
-        </div>
-        <Figure value={t.new} />
-      </Row>
-
-      {cashLike ? null : (
+  const statementCell = (row: Line) => {
+    if (row === "movement") {
+      if (!statement.movement) return <Empty why="kein Auszug" />;
+      return (
         <>
-          <Row>
-            <span>Kontoauszug</span>
-            {statement.old ? (
-              <Figure value={statement.old} hint={dateHint(c, "old", statement.old, statement.coveredFrom)} />
-            ) : (
-              <Missing why={withoutBalances} />
-            )}
-            {statement.movement ? (
-              <div className="v2num">
-                <AmountCell
-                  value={statement.movement.amount}
-                  hint={
-                    moveOk || !statement.coveredTo
-                      ? undefined
-                      : { level: "warning", text: `Umsätze nur bis ${day(statement.coveredTo)}.` }
-                  }
-                />
-                <div className="v2sub">{formatCount(statement.movement.count, ["Umsatz", "Umsätze"])}</div>
-              </div>
-            ) : (
-              <Missing why="kein Auszug" />
-            )}
-            {statement.new ? (
-              <Figure value={statement.new} hint={dateHint(c, "new", statement.new)} />
-            ) : (
-              <Missing why={withoutBalances} />
-            )}
-          </Row>
-
-          <Row>
-            <span>Eigene Angabe</span>
-            {ownCell("old")}
-            <span />
-            {ownCell("new")}
-          </Row>
-
-          {hasStatement ? (
-            <Row>
-              <strong>Differenz Buchungen − Auszug</strong>
-              <Difference value={statementDiff("old")} tone={tone} why={statement.old ? "anderer Stichtag" : withoutBalances} />
-              <Difference
-                value={moveOk && statement.movement ? cents(t.movement - statement.movement.amount) : null}
-                tone={tone}
-                why={statement.movement ? "Auszug unvollständig" : "kein Auszug"}
-              />
-              <Difference value={statementDiff("new")} tone={tone} why={statement.new ? "anderer Stichtag" : withoutBalances} />
-            </Row>
-          ) : null}
-          {manual.old || manual.new ? (
-            <Row>
-              <strong>Differenz Buchungen − eigene Angabe</strong>
-              <Difference value={manualDiff("old")} tone={tone} why={manual.old ? "anderer Stichtag" : "keine Angabe"} />
-              <span />
-              <Difference value={manualDiff("new")} tone={tone} why={manual.new ? "anderer Stichtag" : "keine Angabe"} />
-            </Row>
-          ) : null}
+          <Val
+            amount={statement.movement.amount}
+            tip={`Summe der Umsätze${statement.coveredFrom ? ` ${formatTimeRange(statement.coveredFrom, statement.coveredTo)}` : ""}`}
+            hint={moveOk || !statement.coveredTo ? undefined : { level: "warning", text: `Umsätze nur bis ${day(statement.coveredTo)}.` }}
+          />
+          <Sub>{formatCount(statement.movement.count, ["Umsatz", "Umsätze"])}</Sub>
         </>
-      )}
-    </Table>
+      );
+    }
+    const value = statement[row];
+    if (!value) return <Empty why={withoutBalances} />;
+    return (
+      <>
+        <Val
+          amount={value.amount}
+          href={value.href}
+          tip={sourceTip(value, value.href ? "öffnet den Auszug" : undefined)}
+          hint={dateHint(c, row, value, row === "old" ? statement.coveredFrom : null)}
+        />
+        <Sub>{value.sourceLabel}</Sub>
+      </>
+    );
+  };
+
+  const manualCell = (row: Line) => {
+    if (row === "movement") return <Sub />;
+    const value = manual[row];
+    if (!value) return <Empty why="keine Angabe" />;
+    return (
+      <>
+        <Val amount={value.amount} tip={sourceTip(value, value.note ?? undefined)} hint={dateHint(c, row, value)} />
+        <IconButton
+          className="v3bbr__edit"
+          size="sm"
+          label="Kontostand bearbeiten"
+          icon={<ActionIcon action="edit" size={14} />}
+          onClick={() => onEdit(row)}
+        />
+        <Sub>{value.sourceLabel}</Sub>
+      </>
+    );
+  };
+
+  /** Ledger minus the other source; `null` with the reason when they cannot stand side by side. */
+  const difference = (against: "statement" | "manual", row: Line): { value: number | null; why: string } => {
+    if (row === "movement") {
+      if (against === "manual") return { value: null, why: "" };
+      if (!statement.movement) return { value: null, why: "kein Auszug" };
+      if (!moveOk) return { value: null, why: "Auszug unvollständig" };
+      return { value: cents(t.movement - statement.movement.amount), why: "" };
+    }
+    const value = against === "statement" ? statement[row] : manual[row];
+    if (!value) return { value: null, why: against === "statement" ? withoutBalances : "keine Angabe" };
+    if (!comparable(c, row, value, against === "statement" && row === "old" ? statement.coveredFrom : null))
+      return { value: null, why: "anderer Stichtag" };
+    return { value: cents(t[row].amount - value.amount), why: "" };
+  };
+
+  const diffCell = (against: "statement" | "manual", row: Line) => {
+    const { value, why } = difference(against, row);
+    if (value === null) return row === "movement" && against === "manual" ? <Sub /> : <Empty why={why} />;
+    if (value === 0)
+      return (
+        <>
+          <span className="v3bbr__val" style={{ textDecoration: "none", cursor: "default" }}>
+            <StateIcon state="done" title="stimmt" />
+            {formatAmount(0, "EUR")}
+          </span>
+          <Sub>stimmt</Sub>
+        </>
+      );
+    const shown = (
+      <>
+        <span className={`v3bbr__val v3bbr__val--${rowTone}`}>
+          <StateIcon state={rowTone === "danger" ? "error" : "warning"} title="weicht ab" />
+          {formatAmount(value, "EUR")}
+        </span>
+        <Sub>{explains ? "weicht ab · Erklärung" : "weicht ab"}</Sub>
+      </>
+    );
+    if (!explains) return shown;
+    // The explanation hangs at the figure it explains (owner 2026-09-25) —
+    // not under the table, where it is hard to see what it belongs to.
+    return (
+      <Popover
+        align="end"
+        trigger={
+          <button type="button" className="v3bbr__explain" aria-label={`Differenz ${formatAmount(value, "EUR")} — Erklärung öffnen`}>
+            {shown}
+          </button>
+        }
+      >
+        <Explanation c={c} mode={mode} />
+      </Popover>
+    );
+  };
+
+  const sources: { key: string; head: string; cell: (row: Line) => ReactNode }[] = [
+    { key: "ledger", head: mode === "withProposals" ? "Buchungen inkl. Vorschläge" : "Buchungen", cell: ledgerCell },
+    ...(hasStatement ? [{ key: "statement", head: "Kontoauszug", cell: statementCell }] : []),
+    ...(hasManual ? [{ key: "manual", head: "Eigene Angabe", cell: manualCell }] : []),
+  ];
+  const diffs: { key: "statement" | "manual"; head: string }[] = [
+    ...(hasStatement ? [{ key: "statement" as const, head: "Differenz zum Auszug" }] : []),
+    ...(hasManual ? [{ key: "manual" as const, head: "Differenz zur eigenen Angabe" }] : []),
+  ];
+  const tinted = (row: Line) => diffs.some((d) => (difference(d.key, row).value ?? 0) !== 0);
+
+  return (
+    <table className="v3bbr">
+      <thead>
+        <tr>
+          <th scope="col">Zeitpunkt</th>
+          {sources.map((s) => (
+            <th scope="col" key={s.key}>
+              {s.head}
+            </th>
+          ))}
+          {diffs.map((d) => (
+            <th scope="col" key={d.key} className="v3bbr__diff">
+              {d.head}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {ROWS.map(({ key, label }) => (
+          <Fragment key={key}>
+            <tr className={tinted(key) ? `v3bbr__row--${rowTone}` : undefined}>
+              <th scope="row">
+                {label}
+                <Sub>{rowDate(c, key)}</Sub>
+              </th>
+              {sources.map((s) => (
+                <td key={s.key}>{s.cell(key)}</td>
+              ))}
+              {diffs.map((d) => (
+                <td key={d.key} className="v3bbr__diff">
+                  {diffCell(d.key, key)}
+                </td>
+              ))}
+            </tr>
+            {/* Owner 2026-09-25: other batches in the old balance get a line of their own. */}
+            {key === "old"
+              ? t.oldParts?.map((part) => (
+                  <tr key={part.label}>
+                    <th scope="row" className="v3bbr__part">
+                      davon {part.label}
+                      <Sub>{part.detail}</Sub>
+                    </th>
+                    {sources.map((s) => (
+                      <td key={s.key}>
+                        {s.key === "ledger" ? (
+                          <>
+                            <Val
+                              amount={part.amount}
+                              tone={part.label.startsWith("Vorschlag") ? "proposed" : undefined}
+                              tip={[part.label, part.detail].filter(Boolean).join(" · ")}
+                            />
+                            <Sub />
+                          </>
+                        ) : (
+                          <Sub />
+                        )}
+                      </td>
+                    ))}
+                    {diffs.map((d) => (
+                      <td key={d.key} className="v3bbr__diff">
+                        <Sub />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              : null}
+          </Fragment>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
-/* ── Explanation ────────────────────────────────────────────────────── */
+/* ── Explanation, in the popover at the difference ──────────────────── */
 
-const EXPLAIN_COLS = "20px minmax(260px, 1fr) minmax(200px, auto) 150px";
-// Notes without a calculation carry no amount: the column would stay empty.
-const NOTE_COLS = "20px minmax(260px, 1fr) minmax(200px, auto)";
+const EXPLAIN_COLS = "20px minmax(240px, 1fr) minmax(180px, auto) 130px";
 
 function Explanation({ c, mode }: { c: BankBalanceComparison; mode: Mode }) {
-  if (!c.explanation.length) return null;
-  const calculation = c.remainder !== null;
   const difference = releasedDifferenceNew(c);
   const rest = c.explanation.find((line) => line.key === "remainder");
   const against = c.statement.new && comparable(c, "new", c.statement.new) ? "Auszug" : "eigene Angabe";
 
   return (
-    <section className="v2stack" style={{ gap: "var(--space-2)" }}>
-      <div className="lw-overline">{calculation ? "Wie sich die Differenz erklärt" : "Hinweise"}</div>
-      <Table cols={calculation ? EXPLAIN_COLS : NOTE_COLS}>
+    <div className="v3bbr-explain">
+      <div className="lw-overline">Wie sich die Differenz erklärt</div>
+      <Table cols={EXPLAIN_COLS} density="compact">
         <HeadRow>
           <span />
-          <span>{calculation ? "Posten" : "Hinweis"}</span>
+          <span>Posten</span>
           <span>Nächster Schritt</span>
-          {calculation ? <span className="v2num">Beitrag</span> : null}
+          <span className="v2num">Beitrag</span>
         </HeadRow>
-        {calculation ? (
-          <Row>
-            <span />
-            <span>
-              <strong>Differenz Neu</strong>
-              <div className="v2sub">
-                freigegebene Buchungen − {against} {day(c.period.to)}
-                {mode === "withProposals" ? " · gerechnet ohne Vorschläge" : ""}
-              </div>
-            </span>
-            <span />
-            <AmountCell value={difference} />
-          </Row>
-        ) : null}
+        <Row>
+          <span />
+          <span>
+            <strong>Differenz Neu</strong>
+            <div className="v2sub">
+              freigegebene Buchungen − {against} {day(c.period.to)}
+              {mode === "withProposals" ? " · gerechnet ohne Vorschläge" : ""}
+            </div>
+          </span>
+          <span />
+          <AmountCell value={difference} />
+        </Row>
         {c.explanation
           .filter((line) => line.key !== "remainder")
           .map((line) => (
@@ -379,29 +506,44 @@ function Explanation({ c, mode }: { c: BankBalanceComparison; mode: Mode }) {
               <StateIcon state={LEVEL_STATE[line.level]} />
               <span>
                 {line.text}.
-                {calculation && line.amount === null ? <div className="v2sub">nicht Teil der Rechnung</div> : null}
+                {line.amount === null ? <div className="v2sub">nicht Teil der Rechnung</div> : null}
               </span>
               {line.action ? <TextButton href={line.action.href}>{line.action.label}</TextButton> : <span />}
-              {calculation ? <AmountCell value={line.amount} /> : null}
+              <AmountCell value={line.amount} />
             </Row>
           ))}
-        {calculation ? (
-          <Row>
-            <StateIcon state={c.remainder === 0 ? "done" : "error"} />
-            <span>
-              <strong>Rest</strong>
-              <div>{rest ? `${rest.text}.` : "Vollständig erklärt."}</div>
-            </span>
-            {rest?.action ? <TextButton href={rest.action.href}>{rest.action.label}</TextButton> : <span />}
-            <AmountCell value={c.remainder} tone={c.remainder === 0 ? "neutral" : "danger"} />
-          </Row>
-        ) : null}
+        <Row>
+          <StateIcon state={c.remainder === 0 ? "done" : "error"} />
+          <span>
+            <strong>Rest</strong>
+            <div>{rest ? `${rest.text}.` : "Vollständig erklärt."}</div>
+          </span>
+          {rest?.action ? <TextButton href={rest.action.href}>{rest.action.label}</TextButton> : <span />}
+          <AmountCell value={c.remainder} tone={c.remainder === 0 ? "neutral" : "danger"} />
+        </Row>
       </Table>
-    </section>
+    </div>
   );
 }
 
-/* ── Form: a balance of one's own (J6, a6/a7) ───────────────────────── */
+/** Notes without a calculation (no statement, statement ends early): one line each, under the table. */
+function Notes({ c }: { c: BankBalanceComparison }) {
+  if (c.remainder !== null || !c.explanation.length) return null;
+  return (
+    <div className="v2stack" style={{ gap: "var(--space-1)" }}>
+      {c.explanation.map((line) => (
+        <Verdict key={line.key} state={LEVEL_STATE[line.level]}>
+          {line.text}.{" "}
+          {line.action ? <TextButton href={line.action.href}>{line.action.label}</TextButton> : null}
+        </Verdict>
+      ))}
+    </div>
+  );
+}
+
+/* ── Dialog: a balance of one's own (J6, a6/a7) ─────────────────────── */
+/* Owner 2026-09-25: its own button, a dialog to enter it, then a pencil to
+   change it — the column „Eigene Angabe" only exists once there is one. */
 
 export interface FormStart {
   accountId: string;
@@ -413,6 +555,7 @@ export interface FormStart {
 }
 
 interface Draft {
+  side: Side;
   amount: number | null;
   date: string | null;
   source: ManualBalanceSource;
@@ -428,49 +571,49 @@ function check(draft: Draft): { amount?: string; date?: string; banner?: string 
   return errors;
 }
 
-function BalanceForm({
+function BalanceDialog({
   c,
   start,
-  existing,
+  manual,
   onSave,
-  onCancel,
+  onClose,
 }: {
   c: BankBalanceComparison;
   start: FormStart;
-  existing: ManualAmount | null;
-  onSave: (value: ManualAmount) => void;
-  onCancel: () => void;
+  manual: BankBalanceComparison["manual"];
+  onSave: (side: Side, value: ManualAmount) => void;
+  onClose: () => void;
 }) {
-  const { side } = start;
-  const [draft, setDraft] = useState<Draft>({
-    amount: start.amount ?? existing?.amount ?? null,
-    date: start.date ?? existing?.asOf ?? cutOff(c, side),
-    source: existing?.source ?? "paper_statement",
-    note: existing?.note ?? "",
-  });
-  const [errors, setErrors] = useState(() => (start.submitted ? check(draft) : {}));
-  const id = `${c.paymentAccountId}-${side}`;
-  const formRef = useRef<HTMLFormElement>(null);
-  // Focus into the first field, and back to where it came from when the form
-  // goes — otherwise a keyboard user starts over at the top of the page.
-  useEffect(() => {
-    const from = document.activeElement as HTMLElement | null;
-    formRef.current?.querySelector<HTMLElement>("input")?.focus();
-    return () => {
-      if (from?.isConnected) from.focus();
+  const fill = (side: Side, from?: Partial<Draft>): Draft => {
+    const existing = manual[side];
+    return {
+      side,
+      amount: existing?.amount ?? null,
+      date: existing?.asOf ?? cutOff(c, side),
+      source: existing?.source ?? "paper_statement",
+      note: existing?.note ?? "",
+      ...from,
     };
-  }, []);
+  };
+  const [draft, setDraft] = useState<Draft>(() =>
+    fill(start.side, {
+      ...(start.amount !== undefined ? { amount: start.amount } : {}),
+      ...(start.date ? { date: start.date } : {}),
+    }),
+  );
+  const [errors, setErrors] = useState(() => (start.submitted ? check(draft) : {}));
+  const id = `${c.paymentAccountId}-balance`;
+  const ledger = c.ledger.released[draft.side];
 
   const save = (next: Draft) => {
     const found = check(next);
     setErrors(found);
     if (Object.keys(found).length || next.amount === null || !next.date) return;
-    const saved = formatTime(TODAY, "date");
-    onSave({
+    onSave(next.side, {
       amount: next.amount,
       asOf: next.date,
       sourceLabel: MANUAL_SOURCE[next.source],
-      sourceDetail: `${CURRENT_USER}, ${saved}`,
+      sourceDetail: `${CURRENT_USER}, ${day(TODAY)}`,
       href: null,
       source: next.source,
       by: CURRENT_USER,
@@ -478,94 +621,97 @@ function BalanceForm({
       note: next.note || null,
     });
   };
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    save(draft);
-  };
-  const escape = (e: KeyboardEvent) => {
-    if (e.key === "Escape") onCancel();
-  };
-  const ledger = c.ledger.released[side];
 
   return (
-    <form ref={formRef} className="v2stack" onSubmit={submit} onKeyDown={escape} aria-label="Kontostand hinterlegen">
-      <div className="lw-overline">
-        Kontostand {side === "old" ? "Alt" : "Neu"} zum {day(cutOff(c, side))} hinterlegen
-      </div>
-      {errors.banner ? (
-        <Banner tone="danger" title="Nicht gespeichert">
-          {errors.banner}
-        </Banner>
-      ) : null}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-          gap: "var(--space-3)",
-          alignItems: "start",
-        }}
-      >
-        <AmountInput
-          label="Kontostand"
-          value={draft.amount}
-          onChange={(amount) => setDraft({ ...draft, amount })}
-          allowNegative
-          error={errors.amount}
-        />
-        <Field label="Stichtag" htmlFor={`${id}-date`} error={errors.date}>
-          <DateField
-            id={`${id}-date`}
-            value={draft.date}
-            onChange={(date) => setDraft({ ...draft, date })}
-            invalid={Boolean(errors.date || errors.banner)}
-          />
-        </Field>
-        <Field label="Quelle" htmlFor={`${id}-source`}>
-          <Select
-            id={`${id}-source`}
-            value={draft.source}
-            onChange={(e) => setDraft({ ...draft, source: e.target.value as ManualBalanceSource })}
+    <Dialog
+      open
+      onClose={onClose}
+      onConfirm={() => save(draft)}
+      title="Kontostand hinterlegen"
+      kicker={c.label}
+      footer={
+        <>
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            Abbrechen
+          </Button>
+          <Button variant="primary" size="sm" onClick={() => save(draft)}>
+            Kontostand speichern
+          </Button>
+        </>
+      }
+    >
+      <div className="v2stack">
+        {errors.banner ? (
+          <Banner tone="danger" title="Nicht gespeichert">
+            {errors.banner}
+          </Banner>
+        ) : null}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "var(--space-3)" }}>
+          <Field label="Zeitpunkt" htmlFor={`${id}-side`}>
+            <Select
+              id={`${id}-side`}
+              value={draft.side}
+              onChange={(e) => setDraft(fill(e.target.value as Side))}
+            >
+              <option value="old">Alt · {day(c.period.from)}</option>
+              <option value="new">Neu · {day(c.period.to)}</option>
+            </Select>
+          </Field>
+          <div>
+            <AmountInput
+              label="Kontostand"
+              value={draft.amount}
+              onChange={(amount) => setDraft({ ...draft, amount })}
+              allowNegative
+              error={errors.amount}
+            />
+            {/* The brief's „Stimmt": fills in, does not save — the person still presses „Speichern". */}
+            <TextButton onClick={() => setDraft({ ...draft, amount: ledger.amount, date: cutOff(c, draft.side) })}>
+              Stand der Buchungen einsetzen ({formatAmount(ledger.amount, "EUR")})
+            </TextButton>
+          </div>
+          <Field
+            label="Stichtag"
+            htmlFor={`${id}-date`}
+            error={errors.date}
+            hint={draft.side === "old" ? `Tagesende ${day(cutOff(c, "old"))} = Stand zu Beginn des ${day(c.period.from)}` : undefined}
           >
-            {Object.entries(MANUAL_SOURCE).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </Select>
-        </Field>
+            <DateField
+              id={`${id}-date`}
+              value={draft.date}
+              onChange={(date) => setDraft({ ...draft, date })}
+              invalid={Boolean(errors.date || errors.banner)}
+            />
+          </Field>
+          <Field label="Quelle" htmlFor={`${id}-source`}>
+            <Select
+              id={`${id}-source`}
+              value={draft.source}
+              onChange={(e) => setDraft({ ...draft, source: e.target.value as ManualBalanceSource })}
+            >
+              {Object.entries(MANUAL_SOURCE).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
         <Field label="Notiz" htmlFor={`${id}-note`} hint="z. B. Auszugsnummer">
           <Input id={`${id}-note`} value={draft.note} onChange={(e) => setDraft({ ...draft, note: e.target.value })} />
         </Field>
       </div>
-      <div style={{ display: "flex", gap: "var(--space-2)" }}>
-        <Button type="submit" variant="primary" size="sm">
-          Kontostand speichern
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          onClick={() => save({ ...draft, amount: ledger.amount, date: cutOff(c, side) })}
-        >
-          Stand der Buchungen übernehmen ({formatAmount(ledger.amount, "EUR")})
-        </Button>
-        <Button type="button" variant="tertiary" size="sm" onClick={onCancel}>
-          Abbrechen
-        </Button>
-      </div>
-    </form>
+    </Dialog>
   );
 }
 
 /* ── Account row ────────────────────────────────────────────────────── */
 
 function coverageLine(c: BankBalanceComparison): string {
-  const month = formatTime(c.period.from, "month");
   const { coverage: k } = c;
+  const span = formatTimeRange(c.period.from, c.period.to);
   const parts = [
-    k.transactionCount
-      ? `${formatCount(k.transactionCount, ["Umsatz", "Umsätze"])} im ${month}`
-      : `Keine Umsätze im ${month}`,
+    k.transactionCount ? `${formatCount(k.transactionCount, ["Umsatz", "Umsätze"])} ${span}` : `Keine Umsätze ${span}`,
   ];
   if (k.booked) parts.push(`${formatCount(k.booked)} gebucht`);
   if (k.proposedOnly) parts.push(`${formatCount(k.proposedOnly)} nur vorgeschlagen`);
@@ -589,8 +735,13 @@ function AccountRow({
 }) {
   const verdict = c.verdict[mode];
   const [manual, setManual] = useState(c.manual);
-  const [form, setForm] = useState<FormStart | null>(formStart);
+  const [dialog, setDialog] = useState<FormStart | null>(formStart);
   const [saved, setSaved] = useState<string | null>(null);
+  const cashLike = c.kind === "cash" || c.kind === "money_transit";
+  const openDialog = (side: Side) => {
+    setSaved(null);
+    setDialog({ accountId: c.paymentAccountId, side });
+  };
 
   return (
     <ExpandableRow
@@ -602,32 +753,30 @@ function AccountRow({
             {c.headline[mode]}
           </Verdict>
           {/* Cash and transit have no bank transactions — „0" would claim there were none. */}
-          <CountCell value={c.kind === "cash" || c.kind === "money_transit" ? null : c.coverage.transactionCount} />
+          <CountCell value={cashLike ? null : c.coverage.transactionCount} />
         </>
       }
     >
       <div className="v2stack">
-        <div className="v2sub">{coverageLine(c)}</div>
-        <Matrix
-          c={c}
-          mode={mode}
-          manual={manual}
-          onRecord={(side) => {
-            setSaved(null);
-            setForm({ accountId: c.paymentAccountId, side });
-          }}
-        />
-        <Explanation c={c} mode={mode} />
-        {form ? (
-          <BalanceForm
-            key={form.side}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--space-3)" }}>
+          <span className="v2sub">{cashLike ? `Stand ${formatTimeRange(c.period.from, c.period.to)}` : coverageLine(c)}</span>
+          {cashLike ? null : (
+            <Button variant="secondary" size="sm" onClick={() => openDialog("new")}>
+              Kontostand hinterlegen
+            </Button>
+          )}
+        </div>
+        <Matrix c={c} mode={mode} manual={manual} onEdit={openDialog} />
+        <Notes c={c} />
+        {dialog ? (
+          <BalanceDialog
             c={c}
-            start={form}
-            existing={manual[form.side]}
-            onCancel={() => setForm(null)}
-            onSave={(value) => {
-              setManual({ ...manual, [form.side]: value });
-              setForm(null);
+            start={dialog}
+            manual={manual}
+            onClose={() => setDialog(null)}
+            onSave={(side, value) => {
+              setManual({ ...manual, [side]: value });
+              setDialog(null);
               setSaved(`Kontostand zum ${day(value.asOf)} gespeichert.`);
             }}
           />
@@ -640,7 +789,7 @@ function AccountRow({
   );
 }
 
-function DormantRow({ accounts, month }: { accounts: readonly DormantAccount[]; month: string }) {
+function DormantRow({ accounts, span }: { accounts: readonly DormantAccount[]; span: string }) {
   const quiet = accounts.filter((a) => a.wentQuiet);
   return (
     <ExpandableRow
@@ -648,7 +797,7 @@ function DormantRow({ accounts, month }: { accounts: readonly DormantAccount[]; 
         <>
           <span>{formatCount(accounts.length, ["ruhendes Konto", "ruhende Konten"])}</span>
           <Verdict state={quiet.length ? "warning" : "skipped"} title={quiet.length ? "Warnung" : "ruhend"}>
-            Keine Umsätze im {month}.
+            Keine Umsätze {span}.
             {quiet.length
               ? ` ${quiet.map((a) => a.label).join(", ")} ${quiet.length === 1 ? "hatte" : "hatten"} im Vormonat noch Umsätze.`
               : null}
@@ -707,7 +856,7 @@ export function BankAccountsCard({
       <Card>
         <CardHead
           title="Bankkonten"
-          sub={`${formatTime(period.from, "month")} · Stichtag ${day(period.to)}`}
+          sub={`${formatTimeRange(period.from, period.to)} · Stichtag ${day(period.to)}`}
           actions={
             <>
               <Checkbox
@@ -735,7 +884,7 @@ export function BankAccountsCard({
               open={openAll}
             />
           ))}
-          {dormant.length ? <DormantRow accounts={dormant} month={formatTime(period.from, "month")} /> : null}
+          {dormant.length ? <DormantRow accounts={dormant} span={formatTimeRange(period.from, period.to)} /> : null}
         </Table>
       </Card>
     </div>
