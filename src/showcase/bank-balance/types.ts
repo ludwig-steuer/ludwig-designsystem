@@ -46,8 +46,9 @@ export interface LedgerTriple {
 }
 
 export type ManualAmount = SourcedAmount & {
-  source: ManualBalanceSource;
-  by: string;
+  /** `null` for balances saved before F298 — they have no source. */
+  source: ManualBalanceSource | null;
+  by: string | null;
   at: string;
   note: string | null;
 };

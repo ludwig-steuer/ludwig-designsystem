@@ -817,7 +817,7 @@ function DormantRow({ accounts, span }: { accounts: readonly DormantAccount[]; s
           <Verdict state={quiet.length ? "warning" : "skipped"} title={quiet.length ? "Warnung" : "ruhend"}>
             Keine Umsätze {span}.
             {quiet.length
-              ? ` ${quiet.map((a) => a.label).join(", ")} ${quiet.length === 1 ? "hatte" : "hatten"} im Vormonat noch Umsätze.`
+              ? ` ${quiet.map((a) => a.label).join(", ")} ${quiet.length === 1 ? "hatte" : "hatten"} im Vormonat noch Umsätze — fehlt ein Auszug?`
               : null}
           </Verdict>
           <CountCell value={0} />

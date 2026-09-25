@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | App umgesetzt (60187496), DS-Abnahme 2026-09-25 mit Auflagen |
 | Stufe | Seite (`src/showcase/bank-balance/`), keine neue Komponente |
 | Klassen-Test | entfällt — Seiten-Story, kein Baustein |
 | Quelle | Design-Brief **F298** (`app/docs/backlog/F298-bank-balance-reconciliation-scenarios-design-brief.md`, App 44803437, Owner-abgestimmt 2026-09-25), übergeben von ll-dev5 |
@@ -47,6 +47,7 @@ Ende, der Owner nimmt es ab, danach baut die App.
 | A5 | Formular-Button „Stimmt" | „Stand der Buchungen einsetzen (Betrag)", setzt ein, speichert nicht | T-Regel: Imperativ mit Objekt; „Stimmt" sagt nicht, was geschieht |
 | A6 | ruhende Konten ohne Typ | story-lokal `DormantAccount` | die Sammelzeile (R15d) braucht Konto, letzten Umsatz, Vormonat |
 | A7 | Beleg am eigenen Kontostand „optional" | nicht in den Stories | eigener Baustein-Weg (`FileDrop`), ändert an der Seite nichts |
+| A8 | Kartenkopf „Anderer Stichtag" | App: „Zu den Konten" (`/banks`) | der Reporting-Reiter braucht ein Konto, im Kartenkopf gibt es keins (ll-dev5, 2026-09-25) — angenommen; die Story behält den Link als Vorbild |
 
 ## Aufbau (Owner-Überarbeitung 2026-09-25)
 
@@ -161,3 +162,34 @@ Nicht anwendbare Zustände: lädt / Fehler beim Laden gehören zur App-Seite
 |---|---|---|
 | ein echter Schalter-Baustein | `primitives/` | eine zweite Seite braucht Ein/Aus mit sofortiger Wirkung außerhalb eines Formulars |
 | `BankBalanceComparison` aus der App | `src/ludwig/` | Folge-Spec F298 §8 gebaut; dann story-lokalen Typ löschen |
+
+## Abnahme der App-Umsetzung (2026-09-25, Claude/DS)
+
+App **60187496** (`batch-review/ui/BankBalanceCard.tsx`, `Step4.tsx`,
+`domain/bank-balance-comparison.ts`), geprüft als Code-Diff gegen
+`BankAccountsCard.tsx` (63e1bec). Nicht im Browser gemessen — die Karte ist
+eine Zeile-für-Zeile-Portierung der gemessenen Story; die Drawer sind neu und
+ungemessen.
+
+**Angenommen:** Tabelle `.v3bbr`, Zeilen und Spalten, Tooltips, „davon"-Zeilen,
+Popover-Erklärung, Dialog mit Stift, „Stand der Buchungen einsetzen" füllt nur
+ein, Stichtag nach heute → Banner, Speichern über `recordReviewBalanceAction` +
+`router.refresh()`, Schalter in `?with_proposals=1`, Banner-Satz
+(`summarizeBankBalances`), Drawer-Query `drawer`/`drawer_account`, A8.
+Übernommen ins Showcase: Satz der ruhenden Konten „… — fehlt ein Auszug?",
+`ManualAmount.source`/`by` nullable.
+
+**Auflagen an die App (vor Schließen von F298):**
+
+| # | Wo | Befund | Regel |
+|---|---|---|---|
+| B1 | `Step4.tsx` BuchungenDrawer | Betrag über `formatAmount` als Text, Datum über lokales `tag()` — ohne `tnum`, zweite Quelle | Zahlen nur über Wertzellen (`AmountCell`, `DateCell`) |
+| B2 | beide Drawer, `meta` | `${n} Buchungen` / `${n} Umsätze` ohne `formatCount` → „1 Buchungen"; „davon 0 ohne freigegebene Buchung" steht auch bei 0 | Zahl mit Wort über `formatCount`; Nebensatz nur bei > 0 |
+| B3 | `BankBalanceCard` Umsatzdeckung vs. Domain-Erklärung | „n ohne Buchung geschlossen" und „als ‚keine Buchung nötig' geschlossen" für dieselbe Sache | ein Wort für eine Sache — die Domain-Fassung nehmen |
+| B4 | `Explanation` | Differenz = Σ Beiträge + Rest, also tautologisch; ein Rechenfehler der Domain verschwindet | Differenz aus Buchungen − Vergleichsquelle rechnen (wie `releasedDifferenceNew` im Showcase) |
+
+**Offen auf beiden Seiten:** Ton der „davon"-Zeile hängt am Label
+(`startsWith("Vorschl")`) — `LedgerPart` bekommt ein Feld (`proposed: boolean`),
+App zuerst, DS zieht beim Spiegel nach. Lokale Wortlisten `MANUAL_SOURCE_LABEL`,
+`HERKUNFT`, `GRUND` gehören in die Status-Registry — beim nächsten Spiegel-Lauf
+(über acto), dann fällt `types.ts` hier.
