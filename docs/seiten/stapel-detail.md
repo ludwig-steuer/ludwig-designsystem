@@ -38,7 +38,7 @@ Ludwig vergessen hat, muss den einen Knopf ohne Suchen finden.
 |---|---|---|---|
 | 1 | „Welcher Stapel ist das?" | Kopf: Stapelnummer, Bezeichnung, Zeitraum, Art (Mandantenstapel, Nachtrag zu …) | `EntityHeader` `overline` · `title` · `meta` (Nachtrag als `BatchCell`, sobald gebaut) |
 | 2 | „Wo steht er, und wer ist dran?" | **ein** Zustand + das Prozessbild mit Staffelstab | `StatusBadge` (`export_batch`) · `EntityHeader process` = `ProcessStepper` (kompakt, 0203) |
-| 3 | „Was ist mein nächster Schritt?" | Signal mit **einem** Knopf oder einem Satz, warum keiner da ist | `StatusCallout` — Knopf und Satz aus `batchActions()` |
+| 3 | „Was ist mein nächster Schritt?" | Signal mit **einem** Knopf; ist keiner da, sagt der Staffelstab, wer dran ist (D22) | `StatusCallout` — Knopf aus `batchActions()` |
 | 4 | „Hakt etwas?" | Zone 2: Soll ≠ Haben · Personenkonten fehlen (nur Mandantenstapel) · DATEV-Fehler · offene Klärungen der Kanzlei · offene Nachforderungen | `StatusCallout` je Zeile; leer = Haken + Satz mit Zahl |
 | 5 | „Was ist drin?" | Kopf-Fakten (Buchungen, Klärungen, Belege) · Abrisse Buchungen, Belege · Reiter | `EntityHeader facts` · `Card` + `DataTable` |
 | 6 | „Was ist bisher passiert?" | Zone 5 Verlauf mit Staffelstab · Reiter Durchgänge, Verlauf | `BatonBar` · `LogList` · `LogBrowser` |
@@ -50,7 +50,7 @@ Ludwig vergessen hat, muss den einen Knopf ohne Suchen finden.
 |---|---|
 | Pager | `RecordPager` ohne Menge, `back` = „Stapel" (die Liste nennen, nie „Zurück", V14). Ersetzt „← Zurück zur Liste" |
 | Kopf | `overline` „Stapel 2026-0009" · `title` Bezeichnung · `status` `StatusBadge` · `meta` Zeitraum · Mandantenstapel · Nachtrag zu … · Runde n · `process` Prozessbild **mit** Staffelstab (der Baton rechts oben fällt weg, L-346) · `facts` höchstens vier: Buchungen (freigegeben / Vorschlag), Klärungen offen, Belege erledigt, Durchgänge · `actions` nach der Tabelle unten |
-| Signal | `StatusCallout`, Ton aus dem Zustand; der Knopf ist `batchActions().primary`, der Satz `batchActions().info`. `datevError` steht hier als `danger` mit dem Wortlaut von DATEV |
+| Signal | nur, wenn die Kanzlei dran ist oder ein Fehler vorliegt: `StatusCallout`, der Titel nennt den Stand in einem Satz („Der Stapel wartet auf Ihre Prüfung"), der Knopf ist `batchActions().primary`; `datevError` als `danger` mit dem Wortlaut von DATEV. Wartet der Stapel auf Agent oder DATEV oder ist er zu Ende, gibt es kein Signal und keinen Satz im Kopf (D22, §3.2) — die Sätze aus `batchActions().info` stehen hinter dem (i) des Zustands |
 | Reiter | sechs, siehe unten |
 | Körper | D-L1; Übersicht in den fünf Zonen |
 
@@ -63,15 +63,15 @@ sie stehen.
 
 | Zustand | Signal (ein Knopf) | Kopf sichtbar | Menü „Weitere Aktionen" |
 |---|---|---|---|
-| `agent` | Satz: der Agent arbeitet | Ansehen | Verwerfen (danger) |
-| `prepared` | Prüfung übernehmen | Ansehen | An Agenten zurückgeben · Zurücksetzen (danger) · Verwerfen (danger) |
+| `agent` | — (wartet auf den Agenten, D22) | Ansehen | Verwerfen (danger) |
+| `prepared` | Prüfung übernehmen — auch bei offenen Nachforderungen (Staffelstab „Mandant (wartet)"), weil die Kanzlei trotzdem übernehmen kann | Ansehen | An Agenten zurückgeben · Zurücksetzen (danger) · Verwerfen (danger) |
 | `review` | Zur Abnahme | — | An Agenten zurückgeben · Zurücksetzen (danger) · Verwerfen (danger) |
 | `ready` | Zur Übergabe | Freigabe zurücknehmen | — |
-| `exporting`, `exported`, `inspection` | Satz: unterwegs | Transport ansehen | — |
+| `exporting`, `exported`, `inspection` | — (wartet auf DATEV, D22) | Transport ansehen | — |
 | `failed` | Erneut übertragen + Fehlertext | Protokoll ansehen · Freigabe zurücknehmen | — |
 | `confirmed`, `mirrored` | Zur Nachlese | — | — |
-| `closed` | Satz: abgeschlossen | Nachlese ansehen | — |
-| `cancelled` | Satz: abgebrochen | Ansehen | — |
+| `closed` | — (Endzustand) | Nachlese ansehen | — |
+| `cancelled` | — (Endzustand) | Ansehen | — |
 
 „Freigabe zurücknehmen" führt zurück nach `review` und ist damit umkehrbar,
 also sichtbar erlaubt. „Zurücksetzen" entfernt die Artefakte des Stapels und
