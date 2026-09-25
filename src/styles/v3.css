@@ -463,8 +463,11 @@
 .pz-owner svg { flex: 0 0 auto; }
 
 /* --- Stepper: vier Phasen im Detail-Kopf -------------------------------- */
-.pz-stepper { display: flex; align-items: stretch; gap: 0; }
-.pz-stepper > div { flex: 1; border-top: 3px solid var(--color-border); padding-top: 10px; padding-right: 12px; }
+/* 0203: each phase a fixed column, the picture ends where its phases end; it
+   wraps instead of squeezing (200 % zoom). A component-local width, like
+   --v3period-col (0162). */
+.pz-stepper { --pz-phase: 10rem; display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--space-3) 0; }
+.pz-stepper > div { flex: 0 0 var(--pz-phase); border-top: 3px solid var(--color-border); padding-top: 10px; padding-right: 12px; }
 .pz-stepper > div.is-done,
 .pz-stepper > div.is-active { border-top-color: var(--color-primary); }
 .pz-stepper > div.is-failed { border-top-color: var(--color-danger); }
@@ -476,7 +479,6 @@
 .pz-stepper > div.is-active .phase { color: var(--color-primary); }
 .pz-stepper > div.is-failed .phase { color: var(--color-danger); }
 .pz-stepper .who { font-size: 12px; color: var(--color-text-subtle); margin-top: 2px; }
-.pz-stepper .raw { font-size: 11px; color: var(--color-text-subtle); margin-top: 3px; font-family: var(--font-mono); }
 .pz-stepper .now { margin-top: 4px; }
 
 /* Loops are counted, not hidden. */

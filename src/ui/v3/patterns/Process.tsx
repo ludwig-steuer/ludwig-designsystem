@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
  * there is room.
  *
  *  - `ProcessMini` in the list row — four segments, the active one filled.
- *  - `ProcessStepper` in the detail header — with raw states, owner, loops.
+ *  - `ProcessStepper` in the detail header — with owner and loops.
  *  - `BatonBar` in the log — the timeline, colored by owner.
  *
  * The **baton** is icon *and* word, never color alone: „Kanzlei" as a blue
@@ -35,7 +35,7 @@ export interface ProcessPhase {
   label: string;
   /** Who works in this phase. */
   sub: string;
-  /** The raw states behind it — the sub-line in the stepper. */
+  /** The raw states behind it. The stepper does not show them (0203); the caller keeps them for its own derivations. */
   states: readonly string[];
   status: ProcessPhaseStatus;
 }
@@ -174,7 +174,9 @@ export interface ProcessLoops {
  * a batch that went back four times looks different from one that ran
  * straight through.
  *
- * @when    Process state in the detail header with raw states and loops.
+ * @when    Process state in the detail header — phases, owner, loops. Raw
+ *          states stay out: they are database values (T4, 0203); the
+ *          state badge and its (i) carry them.
  * @instead Steps of a review → StepRail. Which ways exist between the
  *          states — the map instead of the position → StateMachine (Z7).
  */
@@ -219,7 +221,6 @@ export function ProcessStepper({
           <div key={p.key} className={p.status === "pending" ? undefined : `is-${p.status}`}>
             <div className="phase">{p.label}</div>
             <div className="who">{p.sub}</div>
-            <div className="raw">{p.states.join(" · ")}</div>
             {p.status === "active" || p.status === "failed" ? (
               <div className="now">
                 <Baton owner={owner} alarm={alarm} />

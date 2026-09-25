@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | Abnahme — gebaut 2026-09-25, eigene Messung unten; fremde Abnahme steht aus |
 | Stufe | `patterns/` (Änderung an `Process.tsx`, Familie Process) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: ein Vorgang mit Phasen, dessen Kopf zeigt, wo er steht (wie 0137) |
 | Quelle | Owner-Befund zur Stapel-Detailseite über ll-cto2 (2026-09-25): „der Balken muss nicht die volle Breite einnehmen, technische Zwischenzustände nicht anzeigen" · Seitenprofil `docs/seiten/stapel-detail.md` (Zweifel 3) |
@@ -118,8 +118,16 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+Eigene Messung (Bauer, keine fremde Abnahme), 2026-09-25:
+
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
-| … | … | |
+| kein `.raw` im DOM | `v3-patterns-rahmen-entityheader--with-process`: `querySelectorAll('.pz-stepper .raw').length` = 0 | ✓ |
+| Breite je Phase = `--pz-phase` | bei 1280 px: 160 · 160 · 160 · 160 px; die Linie endet nach 640 px, Kopf 940 px | ✓ |
+| Umbruch statt Stauchen | Viewport 640 px (entspricht 200 % Zoom bei 1280): drei Phasen in Zeile 1, die vierte in Zeile 2, je 160 px; keine waagrechte Scrollleiste | ✓ |
+| `@when` und Kopfkommentar ohne Rohzustände | `Process.tsx` | ✓ |
+| Staffelstab und Schleifen-Link unverändert | `WithProcess`: Baton „Kanzlei" in „Prüfen", „2× zurück an den Agenten · 1× neuer Beleg" | ✓ |
+| `pnpm typecheck`, `pnpm build` | grün | ✓ |
 
-Abgenommen von / am: … · Offene Punkte: …
+Offene Fragen mit Default entschieden: feste 160 px (`10rem`), `sub` bleibt (L-347 an die App).
+Abgenommen von / am: … (fremd) · Offene Punkte: L-347 in der App

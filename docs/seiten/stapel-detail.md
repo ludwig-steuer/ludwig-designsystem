@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Entwurf — ungeprüft |
+| Status | Entwurf — Reiter-Neuschnitt vom Owner freigegeben (2026-09-25); fremde Prüfung steht aus |
 | Route | `ludwig/app`: `app/(app)/clients/[clientSlug]/[year]/batches/[batchId]/page.tsx` (Stand App `1947c8d2`, 2026-09-25) |
 | Heute gebaut in | `modules/datev-export/ui/StapelDetailScreen.tsx` (1.106 Z.): `Kopf` (`:248`), `Aktionen` (`:318`), acht Reiter (`:75–84`); Knöpfe `BatchActions.tsx` (`TakeOverReviewButton`, `ReturnToAgentButton`, `DiscardBatchButton`), `ResetBatchButton.tsx`; Zustandstabelle `domain/batch-process.ts` (`BATCH_PHASES`, `batchPhaseProgress()`, `batchOwner()`, `batchActions()`) |
 | Entitäten | Stapel (`docs/entitaeten/export-batch.md`, geprüft) · Buchungssatz · Beleg · Klärung · Buchungslauf · Audit-Ereignis |

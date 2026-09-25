@@ -31,7 +31,7 @@ const PHASES: ProcessPhase[] = [
 const withStatus = (status: Record<string, ProcessPhase["status"]>) =>
   PHASES.map((p) => ({ ...p, status: status[p.key] ?? p.status }));
 
-/** Im Detail-Header: vier Phasen, Rohzustände darunter, der Baton in der aktiven. */
+/** In the detail header: four phases, one fixed column each, the baton in the active one — no raw states (0203). */
 export const InHeader: Story = {
   render: () => (
     <ProcessStepper
