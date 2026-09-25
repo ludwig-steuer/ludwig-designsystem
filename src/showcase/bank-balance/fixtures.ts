@@ -81,8 +81,8 @@ export const s1Fits: BankBalanceComparison = {
   explanation: [],
   remainder: 0,
   headline: {
-    released: "Passt — Alt, Bewegung und Neu stimmen mit dem Auszug überein.",
-    withProposals: "Passt — Alt, Bewegung und Neu stimmen mit dem Auszug überein.",
+    released: "Passt — vor Periode, Bewegung und Periodenende stimmen mit dem Auszug überein.",
+    withProposals: "Passt — vor Periode, Bewegung und Periodenende stimmen mit dem Auszug überein.",
   },
 };
 
@@ -231,9 +231,9 @@ export const s4NoBalancesInFile: BankBalanceComparison = {
   explanation: [],
   remainder: null,
   headline: {
-    released: "Bewegung passt. Alt und Neu nicht prüfbar — die Auszugsdatei trägt keine Salden. Kontostand hinterlegen.",
+    released: "Bewegung passt. Stand vor Periode und Periodenende nicht prüfbar — die Auszugsdatei trägt keine Salden. Kontostand hinterlegen.",
     withProposals:
-      "Bewegung passt. Alt und Neu nicht prüfbar — die Auszugsdatei trägt keine Salden. Kontostand hinterlegen.",
+      "Bewegung passt. Stand vor Periode und Periodenende nicht prüfbar — die Auszugsdatei trägt keine Salden. Kontostand hinterlegen.",
   },
 };
 
@@ -251,8 +251,8 @@ export const s5ManualBalance: BankBalanceComparison = {
   verdict: { released: "fits", withProposals: "fits" },
   remainder: 0,
   headline: {
-    released: "Passt — Bewegung stimmt mit den Umsätzen, Neu mit Ihrem Papierauszug.",
-    withProposals: "Passt — Bewegung stimmt mit den Umsätzen, Neu mit Ihrem Papierauszug.",
+    released: "Passt — Bewegung stimmt mit den Umsätzen, Periodenende mit Ihrem Papierauszug.",
+    withProposals: "Passt — Bewegung stimmt mit den Umsätzen, Periodenende mit Ihrem Papierauszug.",
   },
 };
 
@@ -444,8 +444,8 @@ export const s9StatementEndsEarly: BankBalanceComparison = {
   ],
   remainder: null,
   headline: {
-    released: "Alt passt. Neu nicht prüfbar — der Auszug endet am 22.08.2026. Auszug bis 31.08. nachfordern.",
-    withProposals: "Alt passt. Neu nicht prüfbar — der Auszug endet am 22.08.2026. Auszug bis 31.08. nachfordern.",
+    released: "Stand vor Periode passt. Periodenende nicht prüfbar — der Auszug endet am 22.08.2026. Auszug bis 31.08. nachfordern.",
+    withProposals: "Stand vor Periode passt. Periodenende nicht prüfbar — der Auszug endet am 22.08.2026. Auszug bis 31.08. nachfordern.",
   },
 };
 
@@ -485,8 +485,8 @@ export const s10OtherBatches: BankBalanceComparison = {
   explanation: [],
   remainder: 0,
   headline: {
-    released: "Passt — Alt, Bewegung und Neu stimmen mit dem Auszug überein.",
-    withProposals: "Passt — Alt, Bewegung und Neu stimmen mit dem Auszug überein.",
+    released: "Passt — vor Periode, Bewegung und Periodenende stimmen mit dem Auszug überein.",
+    withProposals: "Passt — vor Periode, Bewegung und Periodenende stimmen mit dem Auszug überein.",
   },
 };
 

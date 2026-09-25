@@ -64,7 +64,7 @@ export const S4NoBalancesInFile: Story = {
   args: { accounts: [s4NoBalancesInFile] },
 };
 
-/** **S5** — S4 mit Papierauszug zum 31.08.: Neu ist wieder prüfbar. */
+/** **S5** — S4 mit Papierauszug zum 31.08.: das Periodenende ist wieder prüfbar. */
 export const S5ManualBalance: Story = {
   name: "S5 · eigene Angabe",
   args: { accounts: [s5ManualBalance], openAll: true },
@@ -88,7 +88,7 @@ export const S8NotCheckable: Story = {
   args: { accounts: [s8NotCheckable] },
 };
 
-/** **S9** — der Auszug endet am 22.08.: Neu trägt das Datum sichtbar, kein Vergleich. */
+/** **S9** — der Auszug endet am 22.08.: das Periodenende trägt das Datum sichtbar, kein Vergleich. */
 export const S9StatementEndsEarly: Story = {
   name: "S9 · Auszug endet früher",
   args: { accounts: [s9StatementEndsEarly] },

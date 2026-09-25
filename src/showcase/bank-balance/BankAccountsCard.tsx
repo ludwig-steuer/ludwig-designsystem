@@ -135,7 +135,7 @@ export function summarize(
 }
 
 /* ── Matrix: sources side by side, time downward ────────────────────── */
-/* Owner 2026-09-25: Alt on top, Neu below — a short history per source; the
+/* Owner 2026-09-25: before the period on top, period end below — a short history per source; the
    difference is its own column; every figure is a figure only, the source in
    the tooltip; exactly one line under each. */
 
@@ -162,6 +162,15 @@ function proposalTip(count: number): string | undefined {
 }
 
 type ValTone = "proposed" | "warning" | "danger";
+
+/**
+ * The bookings or transactions of the account in the period open in a drawer
+ * (owner 2026-09-25). The drawer is the app's — list, filter, row drawer
+ * (a4) — so the story only writes where it would open.
+ */
+function drawerHref(c: BankBalanceComparison, list: "bookings" | "transactions"): string {
+  return `#drawer=${list}&account=${c.paymentAccountId}&from=${c.period.from}&to=${c.period.to}`;
+}
 
 /** A figure with its source behind it: dashed underline, the source in the tooltip. */
 function Val({
@@ -213,9 +222,9 @@ function Empty({ why }: { why?: string }) {
 type Line = "old" | "movement" | "new";
 
 const ROWS: { key: Line; label: string }[] = [
-  { key: "old", label: "Alt" },
+  { key: "old", label: "Vor Periode" },
   { key: "movement", label: "Bewegung" },
-  { key: "new", label: "Neu" },
+  { key: "new", label: "Periodenende" },
 ];
 
 function rowDate(c: BankBalanceComparison, row: Line): string {
@@ -264,7 +273,12 @@ function Matrix({
             tone={tone}
             tip={[`Summe der Buchungen ${rowDate(c, row)}`, proposalTip(n)].filter(Boolean).join(" · ")}
           />
-          <Sub>{formatCount(t.movementCount, ["Buchung", "Buchungen"])}{n ? `, davon ${formatCount(n)} Vorschläge` : ""}</Sub>
+          <Sub>
+            <TextButton href={drawerHref(c, "bookings")}>
+              {formatCount(t.movementCount, ["Buchung", "Buchungen"])}
+              {n ? `, davon ${formatCount(n)} Vorschläge` : ""}
+            </TextButton>
+          </Sub>
         </>
       );
     const value = t[row];
@@ -292,7 +306,11 @@ function Matrix({
             tip={`Summe der Umsätze${statement.coveredFrom ? ` ${formatTimeRange(statement.coveredFrom, statement.coveredTo)}` : ""}`}
             hint={moveOk || !statement.coveredTo ? undefined : { level: "warning", text: `Umsätze nur bis ${day(statement.coveredTo)}.` }}
           />
-          <Sub>{formatCount(statement.movement.count, ["Umsatz", "Umsätze"])}</Sub>
+          <Sub>
+            <TextButton href={drawerHref(c, "transactions")}>
+              {formatCount(statement.movement.count, ["Umsatz", "Umsätze"])}
+            </TextButton>
+          </Sub>
         </>
       );
     }
@@ -490,7 +508,7 @@ function Explanation({ c, mode }: { c: BankBalanceComparison; mode: Mode }) {
         <Row>
           <span />
           <span>
-            <strong>Differenz Neu</strong>
+            <strong>Differenz Periodenende</strong>
             <div className="v2sub">
               freigegebene Buchungen − {against} {day(c.period.to)}
               {mode === "withProposals" ? " · gerechnet ohne Vorschläge" : ""}
@@ -653,8 +671,8 @@ function BalanceDialog({
               value={draft.side}
               onChange={(e) => setDraft(fill(e.target.value as Side))}
             >
-              <option value="old">Alt · {day(c.period.from)}</option>
-              <option value="new">Neu · {day(c.period.to)}</option>
+              <option value="old">Vor Periode · {day(c.period.from)}</option>
+              <option value="new">Periodenende · {day(c.period.to)}</option>
             </Select>
           </Field>
           <div>

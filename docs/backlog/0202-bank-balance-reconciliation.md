@@ -58,8 +58,9 @@ Ende, der Owner nimmt es ab, danach baut die App.
 3. **Kontozeile** (zu, solange sie passt; offen sonst), sortiert nach Stufe:
    Konto · Urteil (`StateIcon` + `headline`) · Umsätze. Aufgeklappt:
    Umsatzdeckung + Knopf „Kontostand hinterlegen" → Tabelle → Hinweise.
-4. **Tabelle: Quellen als Spalten, Zeit nach unten.** Zeilen Alt
-   (`01.08.2026`) · Bewegung (`01.–31.08.2026`) · Neu (`31.08.2026`) — ein
+4. **Tabelle: Quellen als Spalten, Zeit nach unten.** Zeilen Vor Periode
+   (`01.08.2026`) · Bewegung (`01.–31.08.2026`) · Periodenende (`31.08.2026`)
+   — Owner 2026-09-25 statt „Alt/Neu", auch in Sätzen und Dialog — ein
    kurzer Verlauf je Quelle. Spalten Buchungen (bzw. „inkl. Vorschläge") ·
    Kontoauszug · Eigene Angabe (**nur, wenn eine hinterlegt ist**) · Differenz
    je Vergleichsquelle. Kopf mit Fläche, Spaltenlinien, die Differenzspalte
@@ -73,6 +74,12 @@ Ende, der Owner nimmt es ab, danach baut die App.
 6. **Werte mit Vorschlägen** (Schalter an) stehen in der Stufe Hinweis (blau,
    wie `proposed` in der Registry), die Unterzeile sagt „inkl. 64 Vorschläge",
    der Tooltip „enthält 64 Buchungsvorschläge, noch nicht freigegeben".
+6a. **Die Zahlen unter der Bewegung sind Links** („22 Buchungen", „64
+   Umsätze"): sie öffnen einen Drawer mit den Buchungen bzw. Umsätzen des
+   Kontos im Zeitraum (Owner 2026-09-25). Den Drawer baut die App (Liste,
+   Filter, Zeilen-Drawer, a4); die Story schreibt nur
+   `#drawer=bookings|transactions&account=…&from=…&to=…` in den Hash — die App
+   setzt ihre Query dafür ein.
 7. **Teile des alten Stands** (`LedgerTriple.oldParts`): andere Stapel,
    Mandantenstapel, ein Vorschlag aus dem Vormonat stehen als eigene
    „davon"-Zeilen unter Alt. Die Prüfung rechnet: Teile = Alt.
