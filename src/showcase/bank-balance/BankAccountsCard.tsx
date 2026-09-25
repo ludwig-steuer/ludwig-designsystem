@@ -461,7 +461,7 @@ function Matrix({
                           <>
                             <Val
                               amount={part.amount}
-                              tone={part.label.startsWith("Vorschlag") ? "proposed" : undefined}
+                              tone={part.proposed ? "proposed" : undefined}
                               tip={[part.label, part.detail].filter(Boolean).join(" · ")}
                             />
                             <Sub />

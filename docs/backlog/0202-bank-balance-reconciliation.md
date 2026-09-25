@@ -188,8 +188,10 @@ ein, Stichtag nach heute → Banner, Speichern über `recordReviewBalanceAction`
 | B3 | `BankBalanceCard` Umsatzdeckung vs. Domain-Erklärung | „n ohne Buchung geschlossen" und „als ‚keine Buchung nötig' geschlossen" für dieselbe Sache | ein Wort für eine Sache — die Domain-Fassung nehmen |
 | B4 | `Explanation` | Differenz = Σ Beiträge + Rest, also tautologisch; ein Rechenfehler der Domain verschwindet | Differenz aus Buchungen − Vergleichsquelle rechnen (wie `releasedDifferenceNew` im Showcase) |
 
-**Offen auf beiden Seiten:** Ton der „davon"-Zeile hängt am Label
-(`startsWith("Vorschl")`) — `LedgerPart` bekommt ein Feld (`proposed: boolean`),
-App zuerst, DS zieht beim Spiegel nach. Lokale Wortlisten `MANUAL_SOURCE_LABEL`,
+**Erledigt 2026-09-25:** B1–B4 in App **1947c8d2** (Code geprüft; B1 über
+`dateColumn`/`amountColumn`). `LedgerPart.proposed: boolean` statt Label-Präfix
+— App 1947c8d2, Showcase nachgezogen. Drawer im Browser weiter ungemessen.
+
+**Offen:** Lokale Wortlisten `MANUAL_SOURCE_LABEL`,
 `HERKUNFT`, `GRUND` gehören in die Status-Registry — beim nächsten Spiegel-Lauf
 (über acto), dann fällt `types.ts` hier.

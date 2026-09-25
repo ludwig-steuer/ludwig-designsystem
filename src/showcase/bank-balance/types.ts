@@ -34,6 +34,8 @@ export interface LedgerPart {
   label: string;
   amount: number;
   detail: string | null;
+  /** An unreleased proposal — the line stands in the step „notice". */
+  proposed: boolean;
 }
 
 export interface LedgerTriple {
