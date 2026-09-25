@@ -22,6 +22,7 @@
     "check:classes": "node scripts/check-classes.mjs",
     "check:language": "node scripts/check-language.mjs",
     "check:jobs": "node scripts/check-jobs.mjs",
+    "check:bank-balance": "node --no-warnings scripts/check-bank-balance.mjs",
     "cdp:clean": "node scripts/cdp.mjs --clean"
   },
   "dependencies": {
