@@ -5,7 +5,7 @@
 | Status | App umgesetzt (60187496), DS-Abnahme 2026-09-25 mit Auflagen |
 | Stufe | Seite (`src/showcase/bank-balance/`), keine neue Komponente |
 | Klassen-Test | entfällt — Seiten-Story, kein Baustein |
-| Quelle | Design-Brief **F298** (`app/docs/backlog/F298-bank-balance-reconciliation-scenarios-design-brief.md`, App 44803437, Owner-abgestimmt 2026-09-25), übergeben von ll-dev5 |
+| Quelle | Design-Brief **F298** (`app/docs/backlog/F298-…-design-brief.md` — historisch, mit F298 gelöscht (App f121c6bc); die Regeln stehen jetzt in `app/docs/topics/bank.md` R8 und im GLOSSARY („Bank reconciliation", „Balance confirmation"), App 44803437, Owner-abgestimmt 2026-09-25), übergeben von ll-dev5 |
 | Ersetzt | vorerst nichts — Vorbild für `batch-review/ui/Step4.tsx` (`AbgleichZeile`) und `bank-transactions/ui/BalanceConfirmationCard.tsx`; die App zieht mit einer eigenen Folge-Spec nach (F298 §8) |
 | Blockiert | die Folge-Spec der App (View-Model `BankBalanceComparison`) |
 | Spec von / am | Claude, 2026-09-25 |
