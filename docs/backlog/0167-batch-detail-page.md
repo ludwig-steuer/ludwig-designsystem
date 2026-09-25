@@ -9,6 +9,7 @@
 | Auftrag | Die Detailseite eines Stapels (Route `stapel/[batchId]`): Kopf mit Zustand, wer dran ist und `ProcessStepper`; Reiter für die Buchungssätze, die Durchgänge, die DATEV-Quittung und den Verlauf. Ersetzt `StapelDetailScreen.tsx` (1.090 Z.) |
 | Warum nicht so lassen | eine Datei mit 1.090 Zeilen und acht Reitern (Übersicht · Durchgänge · Belege · Buchungen · Artefakte · DATEV · Log · Experiment — der letzte nur bei Experiment-Mandanten) — die Reiter sind nach Datenquelle geschnitten, nicht nach Zielgruppe |
 | Vertagt, weil | eine eigene Route zuerst ein Seitenprofil braucht (`docs/seiten/stapel-detail.md`: Job, Fragen in Reihenfolge, was hier nicht hingehört); ohne es sind die Reiter geraten. Das Seitenprofil schließt **die Stapelabnahme** ein (Route `stapel/[id]/abnahme/[schritt]`, Modul `stapelabnahme` → `batch-review` mit F210) — die größte Ansicht auf einen Stapel, heute ohne Seitenprofil (Rückfrage, Manager 2026-09-11) |
+| Nachtrag 2026-09-25 | Seitenprofil `docs/seiten/stapel-detail.md` liegt als Entwurf vor (Job, sieben Fragen, sechs Reiter, Aktionen je Zustand); die Stapelabnahme bekommt ein eigenes Profil. Prozessbild im Kopf → 0203 |
 | Setzt voraus | `BatchFacts`, `BatchCell` (Profil, Marke „jetzt") · `JournalEntryList` (Profil `journal-entry`) · `LogBrowser` ✓ · `BatonBar` ✓ · Seitenprofil |
 | Blockiert | nichts im Set. In der App die Ablösung von `StapelDetailScreen` |
 | Angelegt von / am | Claude, 2026-09-11 (Skill `entitaet-analysieren` §9) |
