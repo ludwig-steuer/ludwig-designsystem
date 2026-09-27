@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — fremde Abnahme 2026-09-27 nicht bestanden (M1–M4 unten) |
+| Status | Abnahme — Nachprüfung 2026-09-27: M1–M3 behoben, M4 offen (Ausnahme nicht in der Guideline) |
 | Stufe | `patterns/Review.tsx` (Erweiterung `CheckItem`/`CheckItems`, neu `checkSummary`) · Seiten-Komposition `src/showcase/document/InputTaxTab.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: Prüfregeln mit Ergebnis, Fakten mit Antwort und Herkunft — nichts USt-Spezifisches im Baustein |
 | Quelle | Owner über ll-cto2, 2026-09-27: „nichts Spezielles für die USt-Prüfung, Prüfpunkte generell mit Ausprägungen/Größen" · App F310 (`modules/invoices/ui/tabs/VorsteuerTab.tsx`, `FactRows` als Platzhalter für diese Aufgabe) |
@@ -162,3 +162,14 @@ M1 — das Leerzeichen zwischen Frage und Code ist zurück (`<> <span …>`); `k
 M2 — `checkSummary` trägt `@when`/`@instead`.
 M3 — **kein Mangel des Sets, sondern ein offener App-Befund:** „Agent prüft" ist das Registry-Label von `vat_assessment_status.needs_agent`; die Umbenennung „Agent" → „Ludwig" hat der Owner am 2026-09-27 entschieden (Guideline T1), sie läuft als App-F307 (Befund L-355) und kommt mit dem nächsten Spiegel-Lauf ins Set. Das Set schreibt Registry-Labels nicht lokal um (keine zweite Quelle).
 M4 — **benannte Ausnahme** (Claude, 2026-09-27, bis zum Spiegel-Lauf nach F310): Die Wörter von `input_tax_verdict` stehen im Showcase (`InputTaxTab.tsx`, `VERDICT`) ausgeschrieben, weil die Achse erst mit App-F310 entsteht. Sie ist Showcase, kein Baustein; beim Spiegel-Lauf ersetzt `resolveStatus("input_tax_verdict", …)` die Map und die Ausnahme fällt.
+
+**Nachprüfung 2026-09-27 (fremder Abnahme-Agent), Stand `fe0b47e`:**
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M1 | `CheckItemsMixed` bei 1280: Abstand Frage → Code **7,5 px** in allen 7 Zeilen (wie vor 0206), `textContent` „Passt der Steuerschlüssel zum Beleg? P07" | ✓ |
+| M2 | `pnpm check:when` → „in Ordnung" | ✓ |
+| M3 | trägt: Guideline T1 (Owner 2026-09-27) und Befund L-355 in `docs/befunde-app.md` sind vorhanden; die Registry ist der Spiegel der App, das Set schreibt ihre Labels nicht lokal um. Hinweis: L-355 nennt `document_status.agent_review`, aber `vat_assessment_status.needs_agent` nicht ausdrücklich; „F307" ist im Repo nirgends belegt. Beides beim nächsten Pflegen von L-355 nachtragen | ✓ |
+| M4 | inhaltlich trägt die Begründung: `input_tax_verdict` kam mit App-F310 (`91a441fa`), die drei Wörter in `VERDICT` stimmen Zeichen für Zeichen mit `INPUT_TAX_VERDICT` der App überein, und der Spiegel läuft erst im Integrationszug (Owner 2026-09-07). **Formal fehlt:** CLAUDE.md §3 verlangt die Ausnahme **in der Guideline** mit Owner und Datum; sie steht nur hier in der Spec, und als Owner ist „Claude" eingetragen, nicht der Owner (oder eine Freigabe über den Manager). Eintrag in `docs/design-guidelines.md` (wie die Ausnahmen zu A5 und T8) mit Owner-Freigabe | ✗ |
+
+Ergebnis: nicht bestanden, nur noch M4 als Doku-Nachtrag. Code ist abgenommen.
