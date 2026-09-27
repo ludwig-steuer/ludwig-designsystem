@@ -4582,3 +4582,22 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v2pp__result { flex: 0 0 auto; align-self: flex-start; }
 .v2pp__origin { display: block; margin-top: 2px; font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
 .v2pp__origin code { font-family: var(--font-mono); }
+
+/* ── Client year start page (0207, F312) ──────────────────────────────────
+   The task list: the practice's own tasks with a button, then what lies with
+   others, quieter, with a way to it. */
+.cy-tasks { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4) var(--space-4); }
+.cy-tasks__head { margin: var(--space-2) 0 0; font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-subtle); }
+.cy-tasks__list { list-style: none; margin: 0; padding: 0; }
+.cy-tasks__empty { display: flex; align-items: center; gap: var(--space-2); margin: 0; }
+.cy-task, .cy-else {
+  display: grid; grid-template-columns: 20px minmax(0, 1fr) max-content; gap: var(--space-3);
+  align-items: center; padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border-subtle);
+}
+.cy-task:last-child, .cy-else:last-child { border-bottom: 0; }
+.cy-else { grid-template-columns: 8rem minmax(0, 1fr) max-content; color: var(--color-text-muted); font-size: var(--fs-ui-sm); }
+.cy-task__text { display: grid; min-width: 0; }
+.cy-task__title { font-weight: 500; }
+.cy-task__sub { font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
+.cy-batch__link { margin: var(--space-2) 0 0; font-size: var(--fs-ui-sm); }
+.cy-counts { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--fs-ui-sm); }
