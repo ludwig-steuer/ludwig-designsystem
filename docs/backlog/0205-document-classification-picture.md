@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-27; fremde Abnahme 2026-09-27 nicht bestanden (4 Mängel, siehe „Abnahme") |
+| Status | fertig — gebaut 2026-09-27; fremde Abnahme 2026-09-27 bestanden nach Nacharbeit `a465ca1` (M1–M4 nachgeprüft) |
 | Stufe | `entities/source-document/` (`Classification.tsx`) · Zeichen-Vokabular `CATEGORY_ICON` in `Icons.tsx` · Showcase `src/showcase/document-classification/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Belegkategorie, Richtung × Charakter, Sammel-PDF — Entitäts-Form des Belegs |
 | Quelle | Design-Brief **F308** (`app/docs/backlog/F308-document-classification-picture-design-brief.md`, Owner 2026-09-27 über ll-senior) · Bauart 0204 |
@@ -207,3 +207,16 @@ M2 — keine stille Vorbelegung: ist die aktuelle Form nicht in der Liste (unbek
 M3 — `AllCells` ist jetzt die echte Liste (`DataTable`, `DOCUMENT_LIST_COLUMNS`, `classificationPicture`); `CellList` die einfache; `AllDialogs` je Fall ein Knopf; neu `DialogWithoutCorrection`. **Zustände:** gefüllt = alle Stories; lädt und Fehler gehören der Liste (`DataTable` zeigt Skelett bzw. Fehlerzeile) und dem Kopf der Seite — das Bild wird mit der Zeile abgeleitet, es lädt nicht selbst; leer gibt es nicht (jeder Beleg hat eine Identität, notfalls „Unbekannt"); leer nach Filter gehört der Liste.
 M4 — Spec = Code: `CategoryIcon size?`; „jede zutreffende Frage".
 Nebenbefunde: JSDoc `SUBMIT_COLUMNS` nachgezogen. Offen und benannt: das (i) im Spaltenkopf erklärt die Kategorie-Achse, nicht den Aufbau des Bildes (Ausbau: eigener Erklär-Popover, wenn die Kanzlei danach fragt); `TextButton` 21 px (Primitive, set-weit).
+
+### Nachprüfung 2026-09-27 (fremder Abnahme-Agent, Stand `a465ca1`, 1280 px)
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M1 Zeilenhöhe | `seiten-beleg-einordnung--all-cells` (echte `DataTable`, `DOCUMENT_LIST_COLUMNS`): 19 Zeilen 62,0 px, letzte 61,0 px (ohne untere Linie); jede Zelle 37,0 px; `cell-list` ebenso 62,0/61,0 | ✓ |
+| M2 Stille Vorbelegung | `dialog-unknown-form` (Fall 19) und Fall 15 aus `all-cells`: Feld zeigt „Belegform wählen" (Option gesperrt, Wert leer), „Einordnung speichern" gesperrt; nach Wahl (`other`) frei | ✓ |
+| M3 Story-Deckung | `all-cells` mit `classificationPicture`: Köpfe Gegenpart · Betrag · Belegdatum · Sachverhalt · Ludwig-Eingang · Einordnung · Status, kein „Belegart"/„Belegform", ein (i); Klick auf die Zelle öffnet den Dialog, URL bleibt; `cell-list` 20 Zellen; `all-dialogs` 20 Knöpfe („1 · Normale Eingangsrechnung" …), ≥ 30 px, öffnen den Dialog; `dialog-without-correction` (Fall 8): drei Abschnitte, kein „Korrigieren", „Technisch" da; Zustände in der Spec begründet | ✓ |
+| M4 Spec = Code | Spec: `CategoryIcon` `category`, `size?`; „jede **zutreffende** Frage" (F308 §3); Code stimmt | ✓ |
+| Wächter | `pnpm typecheck` Exit 0, `check:language` ok, `check:icons` in Ordnung | ✓ |
+
+Ergebnis: alle Kriterien bestanden — Status `fertig`. Offen und benannt
+bleiben die Nebenbefunde (i) im Spaltenkopf und `TextButton` 21 px.
