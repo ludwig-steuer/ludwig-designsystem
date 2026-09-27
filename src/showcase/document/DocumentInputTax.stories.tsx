@@ -27,7 +27,7 @@ const EXTRACTION: InputTaxVM["extraction"] = [
 ];
 
 const NEEDS_FACTS: InputTaxVM = {
-  verdict: "needs_facts",
+  verdict: { label: "Fakten klären", tone: "warning" },
   blockedTaxKeys: [],
   rules: [
     { code: "VST-03", title: "Ist der Leistungszeitraum angegeben?", result: "unknown", reason: "Auf der Rechnung steht kein Leistungsdatum; ohne es ist offen, in welchem Monat die Vorsteuer entsteht." },
@@ -55,7 +55,7 @@ const NEEDS_FACTS: InputTaxVM = {
 
 const ALLOWED: InputTaxVM = {
   ...NEEDS_FACTS,
-  verdict: "allowed",
+  verdict: { label: "Abzug möglich", tone: "success" },
   rules: NEEDS_FACTS.rules.map((r) => ({ ...r, result: "pass" as const, reason: r.result === "unknown" ? "Geklärt durch die Kanzlei am 14.09.2026." : r.reason })),
   facts: NEEDS_FACTS.facts.map((f) =>
     f.value === "uncertain" || f.value === "unknown" ? { ...f, value: "yes" as const, source: "human" as const, rationale: "Von der Kanzlei bestätigt." } : f,
@@ -65,7 +65,7 @@ const ALLOWED: InputTaxVM = {
 
 const FORBIDDEN: InputTaxVM = {
   ...NEEDS_FACTS,
-  verdict: "forbidden",
+  verdict: { label: "Abzug gesperrt", tone: "danger" },
   blockedTaxKeys: ["9", "19"],
   rules: [
     { code: "VST-06", title: "Liegt ein Abzugsverbot vor?", result: "fail", reason: "Geschenk an einen Geschäftspartner über 50 € (§ 4 Abs. 5 Nr. 1 EStG) — die Vorsteuer ist nicht abziehbar." },

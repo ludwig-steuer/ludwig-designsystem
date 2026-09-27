@@ -18,11 +18,19 @@ import { Card, CardFoot, CardHead } from "@/ui/v3/primitives/Table";
  * facts as `CheckItems kind="fact"`, the raw values folded.
  *
  * The view model mirrors `InvoiceVatAssessment` of the app (F264/F310); the
- * verdict's words come from the app axis `input_tax_verdict` (F310), written
- * out here until the mirror carries it.
+ * verdict arrives resolved (word + step), as the app reads it from its axis
+ * `input_tax_verdict`.
  */
 
-export type Verdict = "allowed" | "needs_facts" | "forbidden";
+/**
+ * The verdict as the app resolves it from its axis `input_tax_verdict` (F310):
+ * the word and its step. It comes as data — the tab keeps no word list of its
+ * own (no second source).
+ */
+export interface Verdict {
+  label: string;
+  tone: "success" | "warning" | "danger";
+}
 
 export interface InputTaxRule {
   code: string;
@@ -56,13 +64,6 @@ export interface InputTaxVM {
   };
   extraction: readonly [string, ReactNode][];
 }
-
-/** Axis `input_tax_verdict` (app, F310) — word and step. */
-const VERDICT: Record<Verdict, { label: string; tone: "success" | "warning" | "danger" }> = {
-  allowed: { label: "Abzug möglich", tone: "success" },
-  needs_facts: { label: "Fakten klären", tone: "warning" },
-  forbidden: { label: "Abzug gesperrt", tone: "danger" },
-};
 
 /** Who set a value — Ludwig is the AI (T1), the practice is the person. */
 const ACTOR: Record<InputTaxFact["source"], string> = {
@@ -139,7 +140,7 @@ export function InputTaxTab({
     result: <StatusBadge axis="input_tax_fact" status={f.value} info={false} />,
     origin: { actor: ACTOR[f.source], fields: f.sourceFields },
   }));
-  const v = VERDICT[vm.verdict];
+  const v = vm.verdict;
 
   return (
     <div className="v2stack">
