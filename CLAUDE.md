@@ -136,7 +136,8 @@ Designer-Blick, jedes Mal:
    Hauptweg ohne Hotkey, Farbe oder Icon finden?
 5. **Die Spec stimmt mit dem Code überein** — Prop-Tabelle Zeichen für
    Zeichen, und die Sätze daneben.
-6. `pnpm typecheck` und `pnpm build` grün.
+6. `pnpm typecheck`, `pnpm build` und `pnpm check:type` grün — Schriftgröße,
+   -gewicht und -familie nur aus der Skala (Owner 2026-09-27).
 
 ## 5 Die drei Arbeitsregeln
 

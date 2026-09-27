@@ -218,6 +218,7 @@ Registry-Entscheid im Handoff, nicht still im Screen (F123 §2.4).
 - [ ] Jedes klickbare Element antwortet auf Hover; Listenzeile mit Detail ist ganz klickbar (§2, I11)
 - [ ] **Trefferfläche 24 × 24 px**, auch wo das Zeichen kleiner ist: das Polster wächst nach außen, ein negativer Rand hält die Zeilenhöhe (WCAG 2.5.8). Ein Knopf, dessen Fläche seine Glyphe ist, misst 12 × 12 — gemessen, nicht geschätzt. Vier Abnahmen an einem Tag haben dasselbe (i) gemeldet, weil die Regel nirgends stand (0099, 0100, 0103, 0105; Hausmaß aus 0113)
 - [ ] Icons Lucide 1.5 px, Maß aus der Leiter des Registers (A8); keine Emoji/Unicode-Icons, keine Versalien (§2, T9, A2)
+- [ ] **Schrift aus der Skala** (Owner 2026-09-27): Größe nur `var(--fs-…)`, Gewicht nur 400/500/600/700, Familie nur `var(--font-…)` — `pnpm check:type` grün. Im Browser: dieselbe Rolle hat dieselbe Stufe wie beim Nachbarbaustein (Zeilentitel `--fs-ui`, Unterzeile `--fs-ui-sm`, Beischrift `--fs-ui-xs`, Kartentitel `--fs-ui-lg`); gemessen mit `getComputedStyle(...).fontSize`, nicht geschätzt. Anlass: 12 px und 13,5 px von Hand in 0207, die neben 12,5 px der Skala unruhig wirkten
 - [ ] Karte: Rand **oder** Schatten; linksbündig; kein Modal, wo Detail oder Drawer geht (L2–L4)
 - [ ] Ein Baustein mit `minWidth` oder innerem Scrollen steht in einem Raster- oder Flex-Kind nur mit `min-width: 0` bzw. `minmax(0, …)` — sonst schneidet das Kind ab, statt zu scrollen; gemessen bei der Breite, die der Baustein auf der Seite hat (vier Fälle in einer Abnahme-Welle: 0014, 0029, 0063, 0069; Owner-Regel 2026-09-07)
 - [ ] Ein Scroll-Container (`overflow: auto`) ist Bezugsrahmen (`position: relative`), sobald in ihm absolut positionierte Elemente stehen — auch Texte nur für die Vorlesehilfe (`.v2vh`). Sonst entkommen sie dem Scrollbereich und verbreitern die Seite (gemessen an `PeriodGrid`, 0162: 744 px Querlauf bei 1024).
@@ -243,6 +244,7 @@ Vor der Migration und bei der Abnahme jeder Route aus §11.4:
 - [ ] Texte: Sie, Imperativ-Buttons, GLOSSARY/DATEV-Begriffe, kein interner Name, Fehler = Was · Ursache · Schritt (T1–T5)
 - [ ] Beträge über `fmtMoney`, Zeiten absolut in Europe/Berlin (T7)
 - [ ] Kein Hex, kein px/`fontSize` in TSX, kein `text-align: center`, kein Emoji/Unicode-Icon, keine Versalien (V3, V13, T9, A2)
+- [ ] **Schrift der Seite:** höchstens drei Stufen im Lesetext einer Karte (Titel · Zeile · Unterzeile), alle aus der Skala; gleiche Rolle über die Karten hinweg gleich groß — `pnpm check:type` grün, im Browser je Rolle einmal gemessen
 - [ ] Nächster Schritt benannt; Leeres sagt, was fehlt (I10)
 - [ ] Nach vier Wochen Pause bedienbar: nichts nur per Hotkey, Farbe oder Icon (V14)
 - [ ] Alt-Komponenten `@deprecated`; `grep "@/ui/components"` sinkt; Stories `v2/…`; §11.4 Häkchen; `ui-repraesentationen.md` nachgezogen

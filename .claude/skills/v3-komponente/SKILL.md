@@ -87,6 +87,12 @@ Kein Hex, kein Pixelmaß in der Komponente. Farben und Maße sind Tokens
 (`var(--…)` aus `tokens.css`) oder Klassen aus `v3.css`. Braucht die
 Komponente einen Wert, den es nicht gibt: Token ergänzen, nicht hart schreiben.
 
+**Schrift ebenso** (Owner 2026-09-27): `font-size` nur `var(--fs-…)` — im
+produktiven Register `--fs-ui` (Zeile), `--fs-ui-sm` (Unterzeile), `--fs-ui-xs`
+(Beischrift), `--fs-ui-lg` (Kartentitel) —, `font-weight` nur 400/500/600/700,
+`font-family` nur `var(--font-…)`. `pnpm check:type` wacht darüber (Sperrklinke
+wie `check:language`: Altbestand darf nur weniger werden).
+
 Status **nur** über die Registry (`src/ui/v3/patterns/status-registry.ts`) — keine
 lokale Label-Map, kein eigener Status-Text.
 
@@ -216,6 +222,7 @@ Die Punkte, die am häufigsten reißen:
 
 ```bash
 pnpm typecheck        # muss grün sein
+pnpm check:type       # Schrift nur aus der Skala
 pnpm storybook        # Port 6107
 ```
 

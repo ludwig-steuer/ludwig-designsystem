@@ -4522,7 +4522,7 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 }
 .v3stlegend__row + .v3stlegend__row { border-top: 1px solid var(--color-border-subtle); }
 .v3stlegend__row.is-active { background: var(--color-bg-soft); outline: 1px solid var(--color-border); }
-.v3stlegend__text { font-size: 12.5px; line-height: 1.45; }
+.v3stlegend__text { font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); }
 .v3stlegend__muted { color: var(--color-text-muted); }
 .v3stlegend__tech { margin-top: 2px; font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
 .v3stlegend__tech code { font-family: var(--font-mono); }
@@ -4586,7 +4586,7 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* ── Client year start page (0207, F312) ──────────────────────────────────
    „Zu tun" in the shape of the calmer old „Arbeitsvorrat" (`.v2lp`, owner
    2026-09-27): a bar per group with the count right, full-width rows,
-   13.5-px title, 12-px line under it. */
+   the title at --fs-ui, the line under it at --fs-ui-sm (check:type). */
 .cy-grp {
   display: flex; justify-content: space-between; align-items: center; gap: var(--space-3);
   padding: 12px 16px; background: var(--color-surface-head);
@@ -4606,8 +4606,8 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .cy-row--else > a { font-size: var(--fs-ui-sm); }
 .cy-row--empty { grid-template-columns: 16px minmax(0, 1fr); }
 .cy-row__text { display: grid; min-width: 0; }
-.cy-row__title { font-size: 13.5px; font-weight: 600; color: var(--color-text); }
-.cy-row__sub { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+.cy-row__title { font-size: var(--fs-ui); font-weight: 600; color: var(--color-text); }
+.cy-row__sub { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-top: 2px; }
 .cy-more { padding: 10px 16px; border-top: 1px solid var(--color-border-subtle); font-size: var(--fs-ui-sm); }
 .cy-counts { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--fs-ui-sm); }
 /* Batch history: open ones on their own, the finished months in one quiet line with a tick. */
