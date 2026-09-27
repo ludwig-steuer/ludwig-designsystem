@@ -225,7 +225,10 @@ export function ProcessStepper({
             {/* The failed phase says so in a word — red alone is not enough (V7, 0203). */}
             {p.status === "failed" ? (
               <div className="who is-failed">
-                <StateIcon state="error" />
+                {/* The word is read aloud; the sign beside it would say it twice. */}
+                <span aria-hidden="true">
+                  <StateIcon state="error" />
+                </span>
                 {stateLabel("error")}
               </div>
             ) : null}
