@@ -48,7 +48,7 @@ Vier Varianten mit allen 20 Fixtures nebeneinander — Showcase
 | C | Wirkung vorn, Form darunter | stuft auch „Tankquittung", „Bewirtungsbeleg" zurück — die Formen, die steuerlich zählen |
 | **D** | **das aussagekräftigste Wort vorn**: die Wirkung, wo die Form nur die schlichte „Rechnung" ist, sonst die Form; darunter der Rest (Wirkung, Verbund) | Rechnungen einzeilig („Eingangsrechnung"), Sonderformen behalten ihr Wort („Tankquittung / Eingangsrechnung"), kein Wort doppelt |
 
-~~Entschieden vom Set: D.~~ **Entschieden vom Owner (2026-09-27): A** — Form in Zeile 1, Wirkung · Verbund in Zeile 2. Der Vergleich (Story `CellVariants`) ist danach entfernt, `identity.generic` entfällt. Höchstens zwei Zeilen; `narrow`: nur Zeile 1, der Rest im zugänglichen Namen. Box und Dialog zeigen immer alle drei Fragen.
+~~Entschieden vom Set: D.~~ **Entschieden vom Owner (2026-09-27): A** — Form in Zeile 1, Wirkung · Verbund in Zeile 2. Der Vergleich (Story `CellVariants`) ist danach entfernt, `identity.generic` entfällt. Höchstens zwei Zeilen; `narrow`: nur Zeile 1, der Rest im zugänglichen Namen. Box und Dialog zeigen jede **zutreffende** Frage; eine fehlende Zeile heißt „nicht anwendbar" (F308 §3).
 
 ## Schnittstelle
 
@@ -78,7 +78,7 @@ Vier Varianten mit allen 20 Fixtures nebeneinander — Showcase
 | `ClassificationBox` | `picture`, `onOpen?` | Showcase `AllBoxes`, `HeadWithBoth` |
 | `ClassificationDialog` | `open`, `onClose`, `picture`, `detail` | Showcase `AllDialogs`, `DialogCorrection`, `DialogBlocked`, `DialogSaveError`, `DialogWarning` |
 | `ClassificationTrigger` | `picture`, `detail`, `size`, `density?` | Showcase `AllCells`, `AllBoxes` |
-| `CategoryIcon` / `CATEGORY_ICON` | `category` | `Grundlagen/Icons › Categories` |
+| `CategoryIcon` / `CATEGORY_ICON` | `category`, `size?` (Icon-Leiter, Vorgabe 16) | `Grundlagen/Icons › Categories` |
 | `sourceDocumentColumns({ classificationPicture })` | `(d) => { picture; detail } \| null` | Showcase `AllCells` (Tabelle) |
 
 **Nicht (bewusst):** leitet nichts ab (Wörter, Rolle, Warnung kommen von der
@@ -104,7 +104,7 @@ Verbund nicht selbst — sie ist ein Knopf, der Link steht im Dialog.
 
 ## Stories
 
-Showcase `Seiten/Beleg-Einordnung`: `AllCells`, `CellNarrow`, `AllBoxes`, `HeadWithBoth` (Kopf mit Prozess- und Einordnungs-Box), `AllDialogs`, `DialogCorrection` (Speichern läuft ~1 s, dann Satz), `DialogBlocked`, `DialogSaveError`, `DialogWarning`. `Grundlagen/Icons › Categories`.
+Showcase `Seiten/Beleg-Einordnung`: `AllCells` (echte Liste: `DataTable` + `sourceDocumentColumns({ classificationPicture })`), `CellList`, `DialogWithoutCorrection`, `DialogUnknownForm`,, `CellNarrow`, `AllBoxes`, `HeadWithBoth` (Kopf mit Prozess- und Einordnungs-Box), `AllDialogs`, `DialogCorrection` (Speichern läuft ~1 s, dann Satz), `DialogBlocked`, `DialogSaveError`, `DialogWarning`. `Grundlagen/Icons › Categories`.
 
 ## Offene Fragen (Owner)
 
@@ -200,3 +200,10 @@ Owner-Entscheid A gegenstandslos.
   Dialogbreite.
 - Box-Beschriftung 4,51:1 liegt auf der Kante; eine dunklere Stufe gäbe
   Reserve.
+
+**Nacharbeit 2026-09-27 (Bauer), zur Nachprüfung:**
+M1 — Zeile 2 hält in `regular` immer ihre Höhe (leer = geschütztes Leerzeichen, `aria-hidden`); alle Zeilen der Liste gleich hoch.
+M2 — keine stille Vorbelegung: ist die aktuelle Form nicht in der Liste (unbekannt, neuer Schlüssel), startet das Feld leer mit „Belegform wählen", Speichern erst nach einer Wahl (Story `DialogUnknownForm`).
+M3 — `AllCells` ist jetzt die echte Liste (`DataTable`, `DOCUMENT_LIST_COLUMNS`, `classificationPicture`); `CellList` die einfache; `AllDialogs` je Fall ein Knopf; neu `DialogWithoutCorrection`. **Zustände:** gefüllt = alle Stories; lädt und Fehler gehören der Liste (`DataTable` zeigt Skelett bzw. Fehlerzeile) und dem Kopf der Seite — das Bild wird mit der Zeile abgeleitet, es lädt nicht selbst; leer gibt es nicht (jeder Beleg hat eine Identität, notfalls „Unbekannt"); leer nach Filter gehört der Liste.
+M4 — Spec = Code: `CategoryIcon size?`; „jede zutreffende Frage".
+Nebenbefunde: JSDoc `SUBMIT_COLUMNS` nachgezogen. Offen und benannt: das (i) im Spaltenkopf erklärt die Kategorie-Achse, nicht den Aufbau des Bildes (Ausbau: eigener Erklär-Popover, wenn die Kanzlei danach fragt); `TextButton` 21 px (Primitive, set-weit).

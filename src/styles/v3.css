@@ -4541,7 +4541,9 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   background: none; border: 0; padding: 0; text-align: left;
 }
 .cl-cell__sign { grid-column: 1; grid-row: 1; line-height: 0; color: var(--color-text-muted); }
-.cl-cell__word { grid-column: 2; display: flex; align-items: center; gap: var(--space-1); min-width: 0; }
+.cl-cell__word { grid-column: 2; display: flex; align-items: center; gap: var(--space-1); min-width: 0; height: 20px; }
+/* Fixed line heights: a warning sign or the pencil must not make a row 1 px taller (0205 M1). */
+.cl-cell__second { height: 16px; line-height: 16px; }
 .cl-cell__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cl-cell__second {
   grid-column: 2; grid-row: 2; min-width: 0; font-size: var(--fs-ui-xs); color: var(--color-text-muted);

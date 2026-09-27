@@ -123,10 +123,9 @@ export const INBOX_COLUMNS: SourceDocumentColumn[] = [
 /**
  * Submitting: the size stands **only** here — 25 MB is where it fails.
  *
- * The second column is the **form**, not the kind. The population of this
- * list is „`status='classified'` **and** a qualifying document form" — the
- * form is the criterion someone checks here, and the two are different axes
- * that the GLOSSARY keeps apart on purpose (profile „Listen").
+ * The second column is the classification picture (0205): its first line is
+ * the **form**, which is the criterion of this list's population —
+ * „`status='classified'` **and** a qualifying document form".
  */
 export const SUBMIT_COLUMNS: SourceDocumentColumn[] = [
   "fileName",
@@ -469,7 +468,6 @@ export function sourceDocumentColumns({
     classification: {
       key: "classification",
       header: "Einordnung",
-      // Four axes stand in this cell; one (i) would explain one of them.
       // One (i) — the picture is one answer, not four axes side by side (0205).
       headerAside: <StatusInfoButton axis="document_category" />,
       // 232 px, not 220: at 220 the two badges of the classification

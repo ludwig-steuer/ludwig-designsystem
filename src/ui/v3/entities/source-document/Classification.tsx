@@ -160,7 +160,13 @@ export function ClassificationCell({
         <span className="cl-cell__text">{picture.identity.word}</span>
         <Pencil corrected={picture.corrected} />
       </span>
-      {second ? <span className="cl-cell__second">{second}</span> : null}
+      {/* Line 2 always keeps its height in a regular list, so every row is as
+          high as the ones with an effect (V1, 0070 M1). */}
+      {density === "regular" ? (
+        <span className="cl-cell__second" aria-hidden={second ? undefined : true}>
+          {second || "\u00a0"}
+        </span>
+      ) : null}
     </Target>
   );
 }
@@ -202,7 +208,10 @@ export function ClassificationBox({ picture, onOpen }: { picture: Classification
 function Correction({ c }: { c: ClassificationCorrection }) {
   const id = useId();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState(c.current.form ?? "");
+  // Nothing preselected silently: an unknown or new form key is no choice in
+  // the list, so the field starts empty and asks (0205 acceptance M2).
+  const known = c.forms.some((f) => f.value === c.current.form);
+  const [form, setForm] = useState(known ? (c.current.form ?? "") : "");
   const [direction, setDirection] = useState(c.current.direction ?? "");
   const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
@@ -240,6 +249,9 @@ function Correction({ c }: { c: ClassificationCorrection }) {
       <div className="cl-fix__fields">
         <Field label="Belegform" htmlFor={`${id}-form`}>
           <Select id={`${id}-form`} value={form} onChange={(e) => setForm(e.target.value)} disabled={state === "saving" || state === "saved"}>
+            <option value="" disabled>
+              Belegform wählen
+            </option>
             {categories.map((cat) => (
               <optgroup key={cat} label={CATEGORY_ICON[cat].label}>
                 {c.forms
@@ -265,7 +277,7 @@ function Correction({ c }: { c: ClassificationCorrection }) {
         </Field>
       </div>
       <div className="cl-fix__actions">
-        <Button variant="primary" size="sm" onClick={save} disabled={state === "saving" || state === "saved"}>
+        <Button variant="primary" size="sm" onClick={save} disabled={!form || state === "saving" || state === "saved"}>
           {state === "saving" ? "Wird gespeichert …" : "Einordnung speichern"}
         </Button>
         {state === "idle" || state === "error" ? (

@@ -5,6 +5,14 @@ import { ClassificationDialog, ClassificationTrigger } from "@/ui/v3/entities/so
 import { EntityHeader } from "@/ui/v3/patterns/EntityHeader";
 import { ProcessPictureTrigger } from "@/ui/v3/patterns/ProcessPicture";
 import { StatusInfoButton } from "@/ui/v3/patterns/StatusInfoButton";
+import { DataTable } from "@/ui/v3/patterns/DataTable";
+import {
+  DOCUMENT_LIST_COLUMNS,
+  sourceDocumentColumns,
+  sourceDocumentMinWidth,
+} from "@/ui/v3/entities/source-document/source-document-columns";
+import type { SourceDocumentVM } from "@/ui/v3/entities/source-document/SourceDocument";
+import { documentFixture } from "../document/fixtures";
 import { Button } from "@/ui/v3/primitives/Button";
 import { Card, CardHead, HeadRow, Row, Table } from "@/ui/v3/primitives/Table";
 import { byId as processById } from "../document-process/fixtures";
@@ -43,8 +51,39 @@ function List({ scenarios, density }: { scenarios: ClassificationScenario[]; den
   );
 }
 
-/** Every scenario as the cell in a list with one column „Einordnung" and one (i). Each cell opens its dialog. */
-export const AllCells: Story = { render: () => <List scenarios={CLASSIFICATION_SCENARIOS} /> };
+/**
+ * Every scenario as the cell — in the real list: `DataTable` with
+ * `DOCUMENT_LIST_COLUMNS` and `sourceDocumentColumns({ classificationPicture })`,
+ * one column „Einordnung" with one (i), no „Belegart" any more. Each cell opens
+ * its dialog. Every row is as high as the others (two lines kept).
+ */
+export const AllCells: Story = {
+  render: () => {
+    const rows = CLASSIFICATION_SCENARIOS.map((s) =>
+      documentFixture({ id: `c-${s.id}`, counterparty: s.title.split(" · ")[1] ?? s.title, fileName: `${s.title}.pdf` }),
+    );
+    const byRow = new Map(rows.map((d, i) => [d.id, CLASSIFICATION_SCENARIOS[i]!]));
+    const cols = sourceDocumentColumns({
+      columns: DOCUMENT_LIST_COLUMNS,
+      classificationPicture: (d) => {
+        const s = byRow.get(d.id);
+        return s ? { picture: s.picture, detail: s.detail } : null;
+      },
+    });
+    return (
+      <DataTable<SourceDocumentVM>
+        rows={rows}
+        columns={cols}
+        rowKey={(d) => d.id}
+        head={{ title: "Belege 2026", sub: "20 Fälle aus F308 §7" }}
+        minWidth={sourceDocumentMinWidth(cols)}
+      />
+    );
+  },
+};
+
+/** The cells alone, as a plain list — for comparing the words side by side. */
+export const CellList: Story = { render: () => <List scenarios={CLASSIFICATION_SCENARIOS} /> };
 
 /** Dense lists: line 1 only; the rest is in the accessible name and the dialog. */
 export const CellNarrow: Story = { render: () => <List scenarios={CLASSIFICATION_SCENARIOS} density="narrow" /> };
@@ -111,19 +150,44 @@ export const HeadWithBoth: Story = {
   ),
 };
 
-/** Every scenario: a cell each, which opens its dialog with sections, correction and „Technisch". */
-export const AllDialogs: Story = { render: () => <List scenarios={CLASSIFICATION_SCENARIOS} /> };
+/**
+ * Every scenario's dialog, one button each — sections, correction, „Technisch".
+ * Unlike the list, the button names the case, so any of the 20 is one click away.
+ */
+export const AllDialogs: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-3)" }}>
+      {CLASSIFICATION_SCENARIOS.map((s) => (
+        <Open key={s.id} id={s.id} startClosed label={`${s.id} · ${s.name}`} />
+      ))}
+    </div>
+  ),
+};
 
-function Open({ id, saveFails = false }: { id: string; saveFails?: boolean }) {
+function Open({
+  id,
+  saveFails = false,
+  withoutCorrection = false,
+  startClosed = false,
+  label = "Dialog öffnen",
+}: {
+  id: string;
+  saveFails?: boolean;
+  withoutCorrection?: boolean;
+  startClosed?: boolean;
+  label?: string;
+}) {
   const s = byNumber(id);
-  const [open, setOpen] = useState(true);
-  const detail = saveFails && s.detail.correction
-    ? { ...s.detail, correction: { ...s.detail.correction, onSave: () => Promise.reject(new Error("offline")) } }
-    : s.detail;
+  const [open, setOpen] = useState(!startClosed);
+  const detail = withoutCorrection
+    ? { title: s.detail.title, sections: s.detail.sections, technical: s.detail.technical }
+    : saveFails && s.detail.correction
+      ? { ...s.detail, correction: { ...s.detail.correction, onSave: () => Promise.reject(new Error("offline")) } }
+      : s.detail;
   return (
     <>
       <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
-        Dialog öffnen
+        {label}
       </Button>
       <ClassificationDialog open={open} onClose={() => setOpen(false)} picture={s.picture} detail={detail} />
     </>
@@ -141,3 +205,9 @@ export const DialogSaveError: Story = { render: () => <Open id="1" saveFails /> 
 
 /** The warning case: the banner on top, the sign before the word. */
 export const DialogWarning: Story = { render: () => <Open id="20" /> };
+
+/** Without the correction (a reader without the right to classify): no section „Korrigieren". */
+export const DialogWithoutCorrection: Story = { render: () => <Open id="8" withoutCorrection /> };
+
+/** An unknown form key (case 19): the form field starts empty and asks — nothing is preselected silently. */
+export const DialogUnknownForm: Story = { render: () => <Open id="19" /> };

@@ -274,9 +274,10 @@ export const Inbox: Story = {
 
 /**
  * Beleg einreichen: die Größe steht **nur** hier — 25 MB ist die Grenze — und
- * die zweite Spalte ist die **Belegform**, nicht die Belegart. Die
- * Grundgesamtheit ist „eingeordnet **und** qualifizierende Belegform"; die
- * Form ist also das Kriterium, das hier geprüft wird.
+ * die zweite Spalte ist die **Einordnung** (0205), deren erste Zeile die
+ * Belegform nennt. Die Grundgesamtheit ist „eingeordnet **und**
+ * qualifizierende Belegform"; die Form ist also das Kriterium, das hier
+ * geprüft wird.
  */
 export const Submit: Story = {
   render: () => {
