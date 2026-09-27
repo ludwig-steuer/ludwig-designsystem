@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — fremde Abnahme 2026-09-27 nicht bestanden: vier Mängel (M1–M4 unter „Abnahme"), Nacharbeit offen |
+| Status | fertig — fremde Abnahme 2026-09-27 bestanden nach Nacharbeit M1–M4 (`7dd5d35`) |
 | Stufe | `patterns/` (Familie Process, `patterns/Process.tsx` + `patterns/ProcessPicture.tsx`) · Showcase `src/showcase/document-process/` für die Szenarien |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: ein Vorgang mit Phasen, einem Träger und einem nächsten Schritt; Phasen, Wörter und Wege kommen als Daten |
 | Quelle | Design-Brief **F305** (`app/docs/backlog/F305-document-process-picture-design-brief.md`, Owner 2026-09-27 über ll-cto2) · Präzedenz 0137, 0203 |
@@ -223,7 +223,7 @@ Eigene Messung (Bauer, 2026-09-27, Storybook 6107, 1280 px) — zählt nicht als
 | `typecheck`, `build`, `check:language` | grün | ✓ |
 
 Offen für die fremde Abnahme: `BoxZoom`, Kontraste, `DialogHistory` (drei Fälle), `NotInteractive`, Vergleich jedes Szenarios mit F305 §7.
-Abgenommen von / am: fremder Abnahme-Agent, 2026-09-27 · Offene Punkte: M1–M4 unten
+Abgenommen von / am: fremder Abnahme-Agent, 2026-09-27 · Offene Punkte: keine (M1–M4 nachgeprüft, siehe unten)
 
 ### Fremde Abnahme (2026-09-27)
 
@@ -305,3 +305,20 @@ M3 — `DialogFull` mit `technicalOpen`; `BoxZoom` zeigt den Kopf in 40rem mit B
 M4 — S03 heißt „Verarbeitung hängt" (F305 §6a).
 Nebenbefunde: aktiver Schritt heißt „aktuell"; Stufe wird auch in der nicht klickbaren Zelle vorgelesen; kein `role="alert"` in der Fehlerzelle; `Process › Held` mit `--color-accent-700`.
 Nicht geändert: Höhe der `Link`-Primitive im Dialogfuß (19 px / 14 px, gilt set-weit — eigener Befund für `Link`); Box-Rand 1,5:1 wie jede Karte, die Box erkennt man an Text und Cursor, nicht am Rand.
+
+**Nachprüfung (fremder Abnahme-Agent, 2026-09-27, Stand `7dd5d35`, Storybook 6107):**
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| M1 Box S16 hält die Höhe | `AllBoxes`: alle 24 Boxen 96,3 px, S16 eingeschlossen; „—" 4,88:1; `BoxStart` 3 × 96 px | ✓ |
+| M2 Spec = Code | `axis?: ReactNode`, `links?` optional, `--pz-box: 24rem` (`v3.css`), `technicalOpen?` am `ProcessDialog` → `Disclosure defaultOpen` — Spec-Tabellen und Verhaltenstext stimmen Zeichen für Zeichen | ✓ |
+| M3 `DialogFull` Technik offen | `details.open = true`, Technik 83 px hoch, kein Text unter 4,5:1 | ✓ |
+| M3 `BoxZoom` Kopf in 40rem | Viewport 640 und 1280: Kopf 640 px, Box 384 × 96 unter dem Titel (y 82 > Titelunterkante 66), kein Kind über den Kopfrand, keine Zeile gekürzt außer gewollt; Kopf `scrollWidth = clientWidth`. Das Dokument misst bei 640 px 656 px — das ist das 16-px-Polster des Story-Rahmens um die 40rem, nicht der Baustein | ✓ |
+| M4 S03 | Box-Name „Fortschritt: Warnung: Verarbeitung hängt · Ludwig" | ✓ |
+| Aktiver Schritt | S07-Dialog: Zeichen des aktiven Schritts heißt „aktuell", offene „offen", gehaltene „Warnung" | ✓ |
+| Stufe vorgelesen | `LevelSign` trägt `.v2vh` „Warnung:"/„Fehler:" auch ohne Knopf; im Knopf überdeckt der `aria-label` (kein Doppel); im Dialog „Jetzt" vorhanden; Wortspalte fluchtet weiter (x 988 in allen 29 Zellen) | ✓ |
+| Fehlerzelle ohne `role="alert"` | `CellStates`: `role` bei beiden Zellen `null` | ✓ |
+| `Process › Held` ≥ 4,5:1 | kleinster Text 4,51:1 (vorher „Agent" 3,28), Träger-Zeichen 5,03:1 | ✓ |
+| typecheck, `check:language` | Exit 0; keine Konsolenfehler in den geprüften Stories | ✓ |
+
+Nicht geändert und mit Begründung angenommen: Höhe der `Link`-Primitive im Dialogfuß (set-weit, eigener Befund für `Link`), Box-Rand 1,5:1 wie jede Karte.
