@@ -12,7 +12,7 @@ const meta: Meta<typeof ProcessStepper> = { title: "v3/Patterns/Prozess/Process"
 export default meta;
 type Story = StoryObj<typeof ProcessStepper>;
 
-const AGENT: BatonMeta = { key: "agent", label: "Agent", color: "var(--color-accent)" };
+const AGENT: BatonMeta = { key: "agent", label: "Agent", color: "var(--color-accent-700)" };
 const CLIENT: BatonMeta = { key: "mandant", label: "Mandant", color: "var(--color-warning)" };
 const FIRM: BatonMeta = { key: "kanzlei", label: "Kanzlei", color: "var(--color-primary)" };
 const BRIDGE: BatonMeta = { key: "bridge", label: "Übertragung", color: "var(--color-info)" };

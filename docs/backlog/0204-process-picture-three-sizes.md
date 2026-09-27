@@ -93,8 +93,8 @@ liest sie dafür bis zu sieben Achsen.
 | `history` | `LogEntry[] \| "error"` | gefüllt · leer · Ladefehler |
 | `historyHref` | `string?` | „Zum Verlauf" |
 | `technical` | `[string, string][]` | Rohwerte, nur hier (T4) |
-| `axisHref` / `onAxis` | `ReactNode?` | Verweis auf die Achse (`StatusInfoButton`) |
-| `links` | `{ label: string; href: string }[]` | Wege hinaus |
+| `axis` | `ReactNode?` | Verweis auf die Achse — der Aufrufer setzt `StatusInfoButton` ein |
+| `links` | `{ label: string; href: string }[]?` | Wege hinaus; ohne sie kein Fuß |
 | `onRetryHistory` | `() => void?` | Retry beim Ladefehler |
 
 ### Komponenten
@@ -103,7 +103,7 @@ liest sie dafür bis zu sieben Achsen.
 |---|---|---|
 | `ProcessCell` | `picture`, `density?: "regular" \| "narrow"`, `onOpen?` (fehlt = nicht klickbar), `loading?`, `error?: string` | `ProcessPicture › Cells`, `CellNarrow`, `CellStates`, `NotInteractive` |
 | `ProcessBox` | `picture`, `onOpen?` | `ProcessPicture › Boxes`, Showcase `BoxStart`/`BoxEnd` |
-| `ProcessDialog` | `open`, `onClose`, `picture`, `detail` | `ProcessPicture › Dialog*`, Showcase `AllDialogs` |
+| `ProcessDialog` | `open`, `onClose`, `picture`, `detail`, `technicalOpen?` (Technik von Beginn an offen, für den Support) | `ProcessPicture › Dialog*`, Showcase `AllDialogs` |
 | `ProcessPictureTrigger` | `picture`, `detail`, `size: "cell" \| "box"`, `density?` — Zelle oder Box mit ihrem Dialog, hält den offenen Zustand | Showcase `AllCells`, `AllBoxes`, `Keyboard` |
 | `EntityHeader.processPlacement` | `"row" \| "start" \| "end"` | Showcase `BoxStart`, `BoxEnd` |
 
@@ -125,7 +125,7 @@ animiert nichts (ein laufender Job ist ein Wort mit Zeit, keine Bewegung —
   leer, der Kopf springt nicht). Zeile 1 Phasen mit Wort (kompakter Stepper,
   jede Phase gleich breit), Zeile 2 Zeichen · Stand-Wort · Träger · „seit …"
   (`aria-live="polite"`, wenn `running.live`), Zeile 3 „Danach: …" einzeilig
-  gekürzt. Breite `--pz-box` (30 % des Kopfs, min 22rem, max 26rem). Klick
+  gekürzt. Breite `--pz-box` = `24rem` (384 px, ≈ 30 % des Kopfs bei 1280 px); rechts schrumpft sie mit, bei zu wenig Platz rutscht sie unter den Titel. Klick
   wie Zelle.
 - **Dialog:** `Dialog size="lg"`, Titel = Belegname, Kicker = `pathLabel`.
   Bereiche in dieser Reihenfolge: Phasen (`ProcessStepper`) · Jetzt (Stand,
@@ -148,7 +148,7 @@ Pattern-Stories (`v3/Patterns/Prozess/ProcessPicture`, generische Daten):
 | `CellStates` | lädt (Skelett in Zeilenhöhe) · Fehler mit Wort |
 | `NotInteractive` | ohne `onOpen`: kein Hover, kein Fokus |
 | `Boxes` | zwei- und dreizeilig, gleiche Höhe; läuft mit „seit" |
-| `BoxZoom` | 200 % (Rahmen 640 px): bricht um, nichts läuft über |
+| `BoxZoom` | 200 % (Kopf in 40rem = 640 px) mit Box rechts: sie rutscht unter den Titel, nichts läuft über |
 | `DialogFull` | längste Texte: Notiz 300 Zeichen, langer Name, fünf Phasen, Technik offen |
 | `DialogHistory` | Verlauf gefüllt · leer · Ladefehler (drei Dialoge per Knopf) |
 
@@ -297,3 +297,11 @@ gerechnet. Vergleich „unverändert" gegen einen Storybook-Build von `5928cc4`
 - S13: „Keine Buchung nötig" steht im Dialog dreimal (Stand, Ende, Headline).
 - Story-Layout-Hilfen mit px: `ProcessPicture.stories.tsx` `BoxZoom`
   (`1px dashed`); `Process.stories.tsx` `InRow` `80px` (Bestand).
+
+**Nacharbeit 2026-09-27 (Bauer), zur Nachprüfung:**
+M1 — gelöschte Box hält die Höhe der Phasenzeile (`.is-empty` mit unsichtbarer Linie).
+M2 — Spec an den Code angeglichen: `axis`, `links` optional, `--pz-box` 24rem, `technicalOpen`.
+M3 — `DialogFull` mit `technicalOpen`; `BoxZoom` zeigt den Kopf in 40rem mit Box rechts.
+M4 — S03 heißt „Verarbeitung hängt" (F305 §6a).
+Nebenbefunde: aktiver Schritt heißt „aktuell"; Stufe wird auch in der nicht klickbaren Zelle vorgelesen; kein `role="alert"` in der Fehlerzelle; `Process › Held` mit `--color-accent-700`.
+Nicht geändert: Höhe der `Link`-Primitive im Dialogfuß (19 px / 14 px, gilt set-weit — eigener Befund für `Link`); Box-Rand 1,5:1 wie jede Karte, die Box erkennt man an Text und Cursor, nicht am Rand.

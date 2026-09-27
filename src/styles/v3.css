@@ -532,6 +532,7 @@
 .pz-box__phases > .is-done, .pz-box__phases > .is-active { border-top-color: var(--color-primary); color: var(--color-primary); }
 .pz-box__phases > .is-held { border-top-color: var(--color-warning); color: var(--color-warning); }
 .pz-box__phases > .is-failed { border-top-color: var(--color-danger); color: var(--color-danger); }
+.pz-box__phases > .is-empty { border-top-color: transparent; }
 /* The phase where it stands carries weight, not only colour. */
 .pz-box__phases > .is-active, .pz-box__phases > .is-held, .pz-box__phases > .is-failed { text-decoration: underline; text-underline-offset: 3px; }
 .pz-box__line { display: flex; align-items: center; gap: var(--space-2); min-width: 0; white-space: nowrap; overflow: hidden; }

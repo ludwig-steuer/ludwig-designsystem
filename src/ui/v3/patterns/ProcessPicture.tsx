@@ -97,8 +97,9 @@ const STEP_STATE: Record<ProcessPhaseStatus, StateKind> = {
 function LevelSign({ level }: { level: ProcessLevel }) {
   const state = LEVEL_STATE[level];
   return (
-    <span aria-hidden="true" className="pz-sign">
-      {state ? <StateIcon state={state} /> : null}
+    <span className="pz-sign">
+      <span aria-hidden="true">{state ? <StateIcon state={state} /> : null}</span>
+      {state ? <span className="v2vh">{stateLabel(state)}:</span> : null}
     </span>
   );
 }
@@ -171,7 +172,7 @@ export function ProcessCell({
   }
   if (error) {
     return (
-      <span className="pz-cell is-error" role="alert">
+      <span className="pz-cell is-error">
         <span aria-hidden="true" className="pz-sign">
           <StateIcon state="error" />
         </span>
@@ -218,7 +219,14 @@ function CompactPhases({ phases }: { phases: readonly ProcessPhase[] }) {
 export function ProcessBox({ picture, onOpen }: { picture: ProcessPicture; onOpen?: () => void }) {
   return (
     <Target onOpen={onOpen} label={`Fortschritt: ${accessibleName(picture, true)}`} className="pz-box">
-      {picture.phases.length ? <CompactPhases phases={picture.phases} /> : <span className="pz-box__line">—</span>}
+      {picture.phases.length ? (
+        <CompactPhases phases={picture.phases} />
+      ) : (
+        // No picture (deleted): the line keeps the height of a phase line, the head does not jump.
+        <span className="pz-box__phases">
+          <span className="is-empty">—</span>
+        </span>
+      )}
       <span className="pz-box__line" aria-live={picture.running?.live ? "polite" : undefined}>
         <LevelSign level={picture.level} />
         <span className="pz-box__word">{picture.headline}</span>
@@ -239,7 +247,8 @@ function Steps({ steps, phases }: { steps: readonly ProcessStep[]; phases: reado
           .map((s, i) => (
             <li key={`${phase.key}-${i}`} className={`is-${s.status}`}>
               <span className="pz-steps__sign">
-                <StateIcon state={STEP_STATE[s.status]} />
+                {/* The active step is drawn filled; its name says so, not „offen". */}
+                <StateIcon state={STEP_STATE[s.status]} title={s.status === "active" ? "aktuell" : undefined} />
               </span>
               <span className="pz-steps__label">
                 {s.label}
@@ -308,11 +317,14 @@ export function ProcessDialog({
   onClose,
   picture,
   detail,
+  technicalOpen = false,
 }: {
   open: boolean;
   onClose: () => void;
   picture: ProcessPicture;
   detail: ProcessDialogDetail;
+  /** „Technik" open from the start — for support, who come for the raw values. */
+  technicalOpen?: boolean;
 }) {
   const heldOrFailed = picture.level === "warning" || picture.level === "error";
   return (
@@ -397,7 +409,7 @@ export function ProcessDialog({
           <History detail={detail} />
         </section>
 
-        <Disclosure summary="Technik">
+        <Disclosure summary="Technik" defaultOpen={technicalOpen}>
           <dl className="pz-dlg__tech">
             {detail.technical.map(([k, v]) => (
               <div key={k}>

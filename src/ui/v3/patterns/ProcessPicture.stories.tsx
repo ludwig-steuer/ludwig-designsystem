@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState, type ReactNode } from "react";
 import { Button } from "../primitives/Button";
+import { EntityHeader } from "./EntityHeader";
 import type { BatonMeta, ProcessPhase, ProcessPhaseStatus } from "./Process";
 import {
   ProcessBox,
@@ -123,11 +124,20 @@ export const Boxes: Story = {
   ),
 };
 
-/** 200 % zoom: a 640-px frame at 1280 — the box shrinks with it, nothing runs out. */
+/**
+ * 200 % zoom: a 1280 screen is 640 CSS px wide. The head with the box at the
+ * right wraps it under the title; nothing runs out.
+ */
 export const BoxZoom: Story = {
   render: () => (
-    <div style={{ width: "20rem", border: "1px dashed var(--color-border)" }}>
-      <ProcessBox picture={BOX_RUNNING} onOpen={() => {}} />
+    <div style={{ width: "40rem" }}>
+      <EntityHeader
+        overline="Rechnung · RE-2026-0815"
+        title="Musterbau Schneider Bauunternehmung GmbH & Co. KG"
+        metric={{ label: "Gesamtbetrag", value: "18.450,20 €" }}
+        process={<ProcessBox picture={BOX_RUNNING} onOpen={() => {}} />}
+        processPlacement="end"
+      />
     </div>
   ),
 };
@@ -201,9 +211,9 @@ function Opener({ label, d }: { label: string; d: ProcessDialogDetail }) {
   );
 }
 
-/** Longest texts: note of 300 characters, a long name, five phases, loops. Open from the start. */
+/** Longest texts: note of 300 characters, a long name, five phases, loops; „Technik" open — raw values only there. */
 export const DialogFull: Story = {
-  render: () => <ProcessDialog open onClose={() => {}} picture={HELD} detail={detail([])} />,
+  render: () => <ProcessDialog open onClose={() => {}} picture={HELD} detail={detail([])} technicalOpen />,
 };
 
 /** The three cases of the history: filled · empty with a way to the tab · failed with retry. */
