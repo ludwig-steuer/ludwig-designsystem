@@ -179,10 +179,8 @@ Verlauf im Dialog; die Box lädt mit dem Kopf.
 
 ## Offene Fragen
 
-1. **Box links oder rechts?** (Owner O4) Ohne Antwort: beide als Story, die
-   App nimmt `end` (Empfehlung des Briefs).
-2. **„Ludwig" als Träger-Wort?** Ohne Antwort: ja (Sprachregel: Ludwig in der
-   dritten Person).
+1. ~~Box links oder rechts?~~ **Entschieden (Owner 2026-09-27): rechts** — links, was es ist; rechts Stand und Aktionen, für alle Entitäten (Standard §3). Die App nimmt `processPlacement="end"`.
+2. **„Ludwig" als Träger-Wort?** Owner 2026-09-27: „gute Idee" — offen ist nur die Abgrenzung Ludwig (KI) · Agent · Verarbeitung, siehe Rückfrage.
 
 ## Abnahmekriterien
 
