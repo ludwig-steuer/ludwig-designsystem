@@ -76,53 +76,67 @@ export interface ClientYearVM {
 /** At most this many tasks stand open; the rest behind „alle n anzeigen" (F312 scenario 5). */
 const TASK_CAP = 5;
 
+/**
+ * „Zu tun" in the shape of the list the owner found calmer (the old
+ * „Arbeitsvorrat", `TodoList` without folding): group heads as a bar with the
+ * count on the right, rows full-width, a 13.5-px title with a 12-px line under
+ * it (owner 2026-09-27).
+ */
 function Tasks({ vm }: { vm: ClientYearVM }) {
   const shown = vm.tasks.slice(0, TASK_CAP);
   return (
     <Card>
-      <CardHead title="Zu tun" {...(vm.tasks.length ? { meta: String(vm.tasks.length) } : {})} />
-      <div className="cy-tasks">
-        <h3 className="cy-tasks__head">Sie sind dran</h3>
-        {vm.tasks.length === 0 ? (
-          <p className="cy-tasks__empty">
-            <StateIcon state="done" />
-            Nichts zu tun{vm.nextUp ? ` — ${vm.nextUp}` : "."}
-          </p>
-        ) : (
-          <ul className="cy-tasks__list">
-            {shown.map((t, i) => (
-              <li key={t.key} className="cy-task">
-                <StateIcon state={t.level} />
-                <span className="cy-task__text">
-                  <span className="cy-task__title">{t.title}</span>
-                  {t.sub ? <span className="cy-task__sub">{t.sub}</span> : null}
+      <CardHead title="Zu tun" />
+      <div className="cy-grp">
+        <span>Sie sind dran</span>
+        <span>{vm.tasks.length}</span>
+      </div>
+      {vm.tasks.length === 0 ? (
+        <p className="cy-row cy-row--empty">
+          <StateIcon state="done" />
+          <span className="cy-row__title">Nichts zu tun{vm.nextUp ? ` — ${vm.nextUp}` : "."}</span>
+        </p>
+      ) : (
+        <ul className="cy-list">
+          {shown.map((t, i) => (
+            <li key={t.key} className="cy-row">
+              <StateIcon state={t.level} />
+              <span className="cy-row__text">
+                <span className="cy-row__title">{t.title}</span>
+                {t.sub ? <span className="cy-row__sub">{t.sub}</span> : null}
+              </span>
+              <Button variant={i === 0 ? "primary" : "secondary"} size="sm" href={t.action.href}>
+                {t.action.label}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {vm.tasks.length > TASK_CAP ? (
+        <div className="cy-more">
+          <Link href="#tasks=all">Alle {vm.tasks.length} Aufgaben anzeigen</Link>
+        </div>
+      ) : null}
+      {vm.elsewhere.length ? (
+        <>
+          <div className="cy-grp">
+            <span>Liegt bei anderen</span>
+            <span>{vm.elsewhere.length}</span>
+          </div>
+          <ul className="cy-list">
+            {vm.elsewhere.map((e) => (
+              <li key={e.holder.key + e.text} className="cy-row cy-row--else">
+                <span className="cy-row__text">
+                  <span className="cy-row__title">{e.text}</span>
+                  <span className="cy-row__sub">
+                    <Baton owner={e.holder} />
+                  </span>
                 </span>
-                <Button variant={i === 0 ? "primary" : "secondary"} size="sm" href={t.action.href}>
-                  {t.action.label}
-                </Button>
+                <Link href={e.href}>anzeigen</Link>
               </li>
             ))}
           </ul>
-        )}
-        {vm.elsewhere.length ? (
-          <>
-            <h3 className="cy-tasks__head">Liegt bei anderen</h3>
-            <ul className="cy-tasks__list">
-              {vm.elsewhere.map((e) => (
-                <li key={e.holder.key + e.text} className="cy-else">
-                  <Baton owner={e.holder} />
-                  <span className="cy-else__text">{e.text}</span>
-                  <Link href={e.href}>anzeigen</Link>
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : null}
-      </div>
-      {vm.tasks.length > TASK_CAP ? (
-        <CardFoot>
-          <Link href="#tasks=all">Alle {vm.tasks.length} Aufgaben anzeigen</Link>
-        </CardFoot>
+        </>
       ) : null}
     </Card>
   );

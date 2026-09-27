@@ -72,3 +72,8 @@ haben ihre eigenen.
 
 Rang 4 heißt damit „Ist das Jahr in Ordnung?" und steht in der Historie.
 Frage 3 (UStVA-Frist jetzt oder mit Server-Signal) bleibt offen für die App.
+
+**Owner 2026-09-27 (2):** „Zu tun" bekommt die Form des alten „Arbeitsvorrats"
+(`.v2lp`/`TodoList` ohne Falten): je Abschnitt eine Leiste mit Zahl rechts,
+Zeilen über die volle Breite, Titel 13,5 px halbfett, Unterzeile 12 px.
+„Liegt bei anderen": der Satz als Titel, der Träger darunter.
