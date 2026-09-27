@@ -1178,3 +1178,11 @@ Owner: „die Texte bündig, eher wie eine Tabelle Status und Inhalte; die techn
 - Die Inline-Styles der Liste sind in `v3.css` gewandert.
 
 Gemessen 2026-09-27 (Story `LegendOnly`, 1280 px): acht Zeilen, Beschreibungen fluchten; kein Rohwert zwischen den Badges.
+
+## Nachtrag 2026-09-27 (2) — Technik raus aus dem Lesetext (Owner, T4)
+
+Owner: „Diese Angaben sind alle nicht enduser-kompatibel … alles Technische in extra Tabs oder hinter etwas Aufklappbarem, oder explizit mit ‚technisch'."
+
+- `StatusInfoDialog`: „Woher der Wert kommt" und die Beschreibung der Maschine (Entwicklertext) stehen nicht mehr über dem Bild, sondern im Aufklapper **„Technisch"** am Fuß des Dialogs. `StateMachine` bekommt dafür `description=""`.
+- `StateMachine`: die Kästchen zeigen keinen Datenbankwert mehr, nur Wort und „aktuell"; der Wert steht im Popover als „Technisch: `x`".
+- Offen bei der App (L-356): Klartext-Satz je Maschine, Übergangs-Labels in Kanzleisprache.

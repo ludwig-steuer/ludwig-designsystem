@@ -629,8 +629,8 @@ function StateBox({
             {box.label}
           </span>
           <span className="v2fsm__meta">
-            {/* For a raw value the key already stands above — no need to repeat it. */}
-            {box.raw ? null : <code className="v2fsm__value">{box.value}</code>}
+            {/* No database value in the box (T4, owner 2026-09-27): the picture is
+                read by the clerk; the value stands under „Technisch" in the popover. */}
             {/* Colour never alone (V7): the word stands **next to** the value, not in
                 a third line, which squeezed the current box's label to nothing. */}
             {current ? <span className="v2fsm__now">aktuell</span> : null}
@@ -641,11 +641,13 @@ function StateBox({
       <div className="v2fsm__pop">
         <div className="v2fsm__pophead">
           <Badge tone={box.raw ? "neutral" : (box.kind as never)}>{box.label}</Badge>
-          <code>{box.value}</code>
         </div>
         <p className="v2fsm__meaning">
           {box.meaning || (box.raw ? "Diesen Wert kennt die Registry nicht." : "—")}
         </p>
+        <div className="v3stlegend__tech">
+          Technisch: <code>{box.value}</code>
+        </div>
         <Ways title="Eintritt durch" items={entering.map(wayText)} />
         {hasEdges ? (
           <>

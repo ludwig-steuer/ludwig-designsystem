@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "../primitives/Badge";
 import { Dialog } from "../primitives/Dialog";
+import { Disclosure } from "../primitives/Disclosure";
 import { Segmented } from "../primitives/Nav";
 import { AXIS_LABEL, AXIS_SOURCE } from "./entity-icons";
 import { StateMachine, machineForAxis } from "./StateMachine";
@@ -26,9 +27,11 @@ const VIEWS = [
 ];
 
 /**
- * THE status dialog — one for every axis. Explains what kind of status it is
- * (axis + technical origin) and lists **all** values with badge, text, DB
- * value and meaning; the current one is highlighted. Every word comes from
+ * THE status dialog — one for every axis. Lists **all** values with badge and
+ * meaning in plain words; the current one is highlighted. The DB value of each
+ * state, the column it lives in and the developers' description of the
+ * machine are technical and stay folded under „Technisch" (T4, owner
+ * 2026-09-27). Every word comes from
  * `status-registry.ts`, so a new value appears without touching this file.
  *
  * An axis with an entry in `STATE_MACHINES` opens as the picture of its
@@ -55,11 +58,6 @@ export function StatusInfoDialog({ axis, current, open, onClose }: StatusInfoDia
       {/* minmax(0, …): without it the grid cell grows to the diagram's width
           and the dialog clips it instead of the diagram scrolling. */}
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 14 }}>
-        <div style={{ fontSize: 12.5, color: "var(--color-text-muted)", lineHeight: 1.45 }}>
-          Woher der Wert kommt:{" "}
-          <code style={{ fontSize: 11.5, opacity: 0.9 }}>{AXIS_SOURCE[axis]}</code>
-        </div>
-
         {machine ? (
           <div>
             <Segmented options={VIEWS} active={view} ariaLabel="Darstellung" onPick={setView} />
@@ -67,7 +65,10 @@ export function StatusInfoDialog({ axis, current, open, onClose }: StatusInfoDia
         ) : null}
 
         {machine && view === "diagram" ? (
-          <StateMachine axis={axis} current={current ?? null} />
+          // The machine's own description is written for developers (spec and rule
+          // numbers, code names) — it goes under „Technisch", not above the picture
+          // (owner 2026-09-27, T4). An empty string switches the lead off.
+          <StateMachine axis={axis} current={current ?? null} description="" />
         ) : (
           // One table: the states in the first column, their meaning in the
           // second — every description starts at the same edge, whatever the
@@ -93,6 +94,17 @@ export function StatusInfoDialog({ axis, current, open, onClose }: StatusInfoDia
             })}
           </div>
         )}
+
+        {/* Everything technical in one place, folded: where the value is stored
+            and how the machine is described for developers (T4, owner 2026-09-27). */}
+        <Disclosure summary="Technisch">
+          <div className="v3stlegend__techblock">
+            <div>
+              Woher der Wert kommt: <code>{AXIS_SOURCE[axis]}</code>
+            </div>
+            {machine?.description ? <p>{machine.description}</p> : null}
+          </div>
+        </Disclosure>
       </div>
     </Dialog>
   );

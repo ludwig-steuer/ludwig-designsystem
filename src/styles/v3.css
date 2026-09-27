@@ -495,33 +495,38 @@
 /* --- Process picture in three sizes (0204) ------------------------------ */
 :root { --pz-box: 24rem; }
 .pz-sign { display: inline-flex; flex: 0 0 15px; }
-/* Cell: one line, fixed parts, the words shorten — the column never flutters. */
+/* Cell: segments · sign · state word in the first line; the holder under the
+   word in the second (owner 2026-09-27). Fixed parts, the words shorten. */
 .pz-cell {
-  display: inline-flex; align-items: center; gap: var(--space-2);
+  display: inline-grid; grid-template-columns: 64px 15px minmax(0, auto);
+  column-gap: var(--space-2); row-gap: 1px; align-items: center;
   min-height: 24px; max-width: 100%; min-width: 0;
   font: inherit; font-size: var(--fs-ui-sm); color: var(--color-text);
   background: none; border: 0; padding: 0; text-align: left;
 }
-.pz-cell .pz-mini { flex: 0 0 auto; }
-.pz-cell__none { flex: 0 0 64px; color: var(--color-text-subtle); }
-.pz-cell__word { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pz-cell__holder { flex: 0 0 auto; color: var(--color-text-muted); white-space: nowrap; }
-.pz-cell__holder::before { content: "·"; margin-right: var(--space-2); color: var(--color-border-strong); }
-.pz-cell__skel { width: 160px; height: 10px; }
-.pz-cell.is-error .pz-cell__word { color: var(--color-danger); }
+.pz-cell .pz-mini { grid-column: 1; }
+.pz-cell__none { grid-column: 1; color: var(--color-text-subtle); }
+.pz-cell > .pz-sign { grid-column: 2; grid-row: 1; }
+.pz-cell.is-error > .pz-sign { grid-column: 1; }
+.pz-cell__word { grid-column: 3; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pz-cell__holder { grid-column: 3; grid-row: 2; min-width: 0; white-space: nowrap; font-size: var(--fs-ui-xs); }
+.pz-cell__skel { grid-column: 1 / -1; width: 160px; height: 10px; }
+.pz-cell.is-error { grid-template-columns: 15px minmax(0, auto); }
+.pz-cell.is-error .pz-cell__word { grid-column: 2; color: var(--color-danger); }
 .pz-cell.is-interactive, .pz-box.is-interactive { cursor: pointer; border-radius: var(--radius-sm); }
 .pz-cell.is-interactive:hover .pz-cell__word { text-decoration: underline; }
 .pz-cell.is-interactive:focus-visible, .pz-box.is-interactive:focus-visible {
   outline: 2px solid var(--color-focus); outline-offset: 2px;
 }
-/* Box: always three lines — a box without „next" keeps the line, the head does not jump. */
+/* Box: only the phases with their words — no frame. A warning or an error adds
+   one line; everything else is in the dialog (owner 2026-09-27). */
 .pz-box {
-  display: grid; grid-template-rows: auto 1.5em 1.5em; row-gap: var(--space-1);
-  width: 100%; min-width: 0; padding: var(--space-3);
+  display: grid; row-gap: var(--space-1);
+  width: 100%; min-width: 0; padding: var(--space-1);
   font: inherit; font-size: var(--fs-ui-sm); color: var(--color-text); text-align: left;
-  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  background: none; border: 0;
 }
-.pz-box.is-interactive:hover { border-color: var(--color-border-strong); }
+.pz-box.is-interactive:hover { background: var(--color-bg-soft); }
 .pz-box__phases { display: flex; gap: var(--space-1); min-width: 0; }
 .pz-box__phases > span {
   flex: 1 1 0; min-width: 0; padding-top: var(--space-1);
@@ -538,7 +543,6 @@
 .pz-box__line { display: flex; align-items: center; gap: var(--space-2); min-width: 0; white-space: nowrap; overflow: hidden; }
 .pz-box__word { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .pz-box__since { color: var(--color-text-muted); }
-.pz-box__next { display: block; color: var(--color-text-muted); text-overflow: ellipsis; }
 /* Dialog */
 .pz-dlg { display: flex; flex-direction: column; gap: var(--space-5); }
 /* In the dialog the phases share its width — five fit without wrapping. */
@@ -4522,3 +4526,6 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3stlegend__muted { color: var(--color-text-muted); }
 .v3stlegend__tech { margin-top: 2px; font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
 .v3stlegend__tech code { font-family: var(--font-mono); }
+.v3stlegend__techblock { display: grid; gap: var(--space-2); font-size: var(--fs-ui-xs); color: var(--color-text-muted); line-height: 1.45; }
+.v3stlegend__techblock p { margin: 0; }
+.v3stlegend__techblock code { font-family: var(--font-mono); }

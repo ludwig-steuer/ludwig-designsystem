@@ -320,3 +320,10 @@ Nicht geändert: Höhe der `Link`-Primitive im Dialogfuß (19 px / 14 px, gilt s
 | typecheck, `check:language` | Exit 0; keine Konsolenfehler in den geprüften Stories | ✓ |
 
 Nicht geändert und mit Begründung angenommen: Höhe der `Link`-Primitive im Dialogfuß (set-weit, eigener Befund für `Link`), Box-Rand 1,5:1 wie jede Karte.
+
+## Nachtrag 2026-09-27 — Box nur Phasen, Zelle mit Träger darunter (Owner)
+
+Owner am Bild (`BoxEnd`, `AllCells`):
+- **Box:** nur noch die Phasenzeile, **ohne Rahmen**. Stand-Wort, Träger und „Danach" stehen im Dialog (ein Klick). Nur **Warnung und Fehler** bleiben sichtbar: eine zweite Zeile mit Zeichen und Wort. Die Box ist damit eine oder zwei Zeilen hoch — sie wechselt nicht, während man hinsieht, nur von Beleg zu Beleg. Hover: Fläche `--color-bg-soft`.
+- **Zelle:** Stand-Wort in Zeile 1, darunter der Träger **mit Zeichen** (`Baton`). `narrow` bleibt einzeilig ohne Träger.
+- Die Abnahmekriterien „Box drei Zeilen gleich hoch" und „Danach in der Box" gelten nicht mehr.

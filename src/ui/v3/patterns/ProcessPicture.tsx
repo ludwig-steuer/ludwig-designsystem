@@ -139,8 +139,9 @@ function Target({
 }
 
 /**
- * The picture in a table cell: segments of one fixed width, the word of the
- * state and who holds it. One line; the whole cell is one target.
+ * The picture in a table cell: segments of one fixed width and the word of the
+ * state; under the word, who holds it, with its sign. `narrow` keeps it to one
+ * line. The whole cell is one target.
  *
  * @when    Progress of a record in a list row, with a way to the explanation.
  * @instead The head of the detail page → ProcessBox. Only the segments,
@@ -186,8 +187,12 @@ export function ProcessCell({
       {picture.phases.length ? <ProcessMini phases={picture.phases} /> : <span className="pz-cell__none">—</span>}
       <LevelSign level={picture.level} />
       <span className="pz-cell__word">{picture.headline}</span>
+      {/* The holder stands in a line of its own under the state word, with its
+          sign (owner 2026-09-27) — who is on it is read as a second fact. */}
       {withHolder && picture.holder.key !== "niemand" ? (
-        <span className="pz-cell__holder">{picture.holder.label}</span>
+        <span className="pz-cell__holder">
+          <Baton owner={picture.holder} />
+        </span>
       ) : null}
     </Target>
   );
@@ -207,33 +212,34 @@ function CompactPhases({ phases }: { phases: readonly ProcessPhase[] }) {
 }
 
 /**
- * The picture in the head of a detail page: phases with words, the state and
- * its holder, what follows. Always three lines high — a box without a „next"
- * keeps the line empty, the head does not jump.
+ * The picture in the head of a detail page: the phases with their words, and
+ * nothing else — the state word, the holder and what follows are one click
+ * away in the dialog (owner 2026-09-27). Only a warning or an error stands
+ * here too, with sign and word: that is the one thing that must not wait for
+ * a click. No frame; the phases are the shape.
  *
  * @when    Progress of the record in its detail head (`EntityHeader` with
- *          `processPlacement` "start" or "end"), opens the explanation.
+ *          `processPlacement="end"`), opens the explanation.
  * @instead A list row → ProcessCell. The full chain with loops and owner in
  *          the head of a batch → ProcessStepper.
  */
 export function ProcessBox({ picture, onOpen }: { picture: ProcessPicture; onOpen?: () => void }) {
+  const alarm = picture.level === "warning" || picture.level === "error";
   return (
     <Target onOpen={onOpen} label={`Fortschritt: ${accessibleName(picture, true)}`} className="pz-box">
       {picture.phases.length ? (
         <CompactPhases phases={picture.phases} />
       ) : (
-        // No picture (deleted): the line keeps the height of a phase line, the head does not jump.
         <span className="pz-box__phases">
-          <span className="is-empty">—</span>
+          <span className="is-empty">{picture.headline}</span>
         </span>
       )}
-      <span className="pz-box__line" aria-live={picture.running?.live ? "polite" : undefined}>
-        <LevelSign level={picture.level} />
-        <span className="pz-box__word">{picture.headline}</span>
-        {picture.holder.key !== "niemand" ? <Baton owner={picture.holder} /> : null}
-        {picture.running ? <span className="pz-box__since">{picture.running.since}</span> : null}
-      </span>
-      <span className="pz-box__line pz-box__next">{picture.next ? `Danach: ${picture.next}` : ""}</span>
+      {alarm ? (
+        <span className="pz-box__line">
+          <LevelSign level={picture.level} />
+          <span className="pz-box__word">{picture.headline}</span>
+        </span>
+      ) : null}
     </Target>
   );
 }
