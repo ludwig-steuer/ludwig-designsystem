@@ -69,36 +69,24 @@ export function StatusInfoDialog({ axis, current, open, onClose }: StatusInfoDia
         {machine && view === "diagram" ? (
           <StateMachine axis={axis} current={current ?? null} />
         ) : (
-          <div style={{ display: "grid", gap: 2 }}>
+          // One table: the states in the first column, their meaning in the
+          // second — every description starts at the same edge, whatever the
+          // badge's width (owner 2026-09-27). The database value is not a column
+          // to scan; it sits under the meaning, marked as technical.
+          <div className="v3stlegend">
             {items.map((it) => {
               const active = current != null && it.value === current;
               return (
-                <div
-                  key={it.value}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "minmax(0, auto) 1fr",
-                    gap: 12,
-                    alignItems: "baseline",
-                    padding: "9px 11px",
-                    borderRadius: 8,
-                    background: active ? "var(--color-surface-raised, rgba(127,127,127,0.09))" : "transparent",
-                    outline: active ? "1px solid var(--color-border)" : "none",
-                  }}
-                >
-                  <div style={{ display: "grid", gap: 3, justifyItems: "start" }}>
+                <div key={it.value} className={`v3stlegend__row${active ? " is-active" : ""}`}>
+                  <div>
                     <Badge tone={it.kind}>{it.label}</Badge>
-                    <code style={{ fontSize: 11, color: "var(--color-text-muted)", opacity: 0.75 }}>
-                      {it.value}
-                    </code>
                   </div>
-                  <div style={{ fontSize: 12.5, lineHeight: 1.45 }}>
-                    {it.meaning || <span style={{ color: "var(--color-text-muted)" }}>—</span>}
-                    {active ? (
-                      <span style={{ marginLeft: 6, fontSize: 11.5, color: "var(--color-text-muted)" }}>
-                        · aktuell
-                      </span>
-                    ) : null}
+                  <div className="v3stlegend__text">
+                    {it.meaning || <span className="v3stlegend__muted">—</span>}
+                    {active ? <span className="v3stlegend__muted"> · aktuell</span> : null}
+                    <div className="v3stlegend__tech">
+                      Technisch: <code>{it.value}</code>
+                    </div>
                   </div>
                 </div>
               );

@@ -1168,3 +1168,13 @@ Abnahmekriterien (Nachtrag):
 - [ ] Ohne Weg bleibt die Anordnung nach Rang (Story `Filled`, `Sequence`)
 - [ ] L-344 steht im Register
 
+
+## Nachtrag 2026-09-27 — Legende als Tabelle, Technik unter der Beschreibung (Owner)
+
+Owner: „die Texte bündig, eher wie eine Tabelle Status und Inhalte; die technischen Begriffe lenken ab — unter die Beschreibung, ‚technisch: …', damit es sich leicht scannen lässt."
+
+- Die Liste von `StatusInfoDialog` ist eine Tabelle: `.v3stlegend` mit zwei Spalten (`max-content` für die Badges, Rest für die Bedeutung), jede Zeile `subgrid` — alle Beschreibungen beginnen an derselben Kante, egal wie breit die Badge ist. Eine Trennlinie `--color-border-subtle` zwischen den Zeilen; der aktuelle Zustand behält Fläche und Rand.
+- Der Datenbankwert steht nicht mehr unter der Badge, sondern klein unter der Bedeutung: „Technisch: `open`" (T4 bleibt: er ist als Technik markiert).
+- Die Inline-Styles der Liste sind in `v3.css` gewandert.
+
+Gemessen 2026-09-27 (Story `LegendOnly`, 1280 px): acht Zeilen, Beschreibungen fluchten; kein Rohwert zwischen den Badges.

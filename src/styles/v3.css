@@ -4502,3 +4502,23 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3bbr__edit { margin-left: var(--space-1); vertical-align: middle; }
 .v2pop:has(> .v3bbr-explain) { max-width: min(92vw, 46rem); }
 .v3bbr-explain { display: flex; flex-direction: column; gap: var(--space-2); min-width: 36rem; font-weight: 400; text-align: left; }
+
+/* ── StatusInfoDialog legend (owner 2026-09-27) ────────────────────────────
+   A table, not a list of pairs: the badge column is as wide as the widest
+   badge, so every meaning starts at the same edge. Rows are subgrid so the
+   current state can still carry its own background. */
+.v3stlegend {
+  display: grid; grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: var(--space-4);
+}
+.v3stlegend__row {
+  grid-column: 1 / -1; display: grid; grid-template-columns: subgrid;
+  align-items: baseline; padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+}
+.v3stlegend__row + .v3stlegend__row { border-top: 1px solid var(--color-border-subtle); }
+.v3stlegend__row.is-active { background: var(--color-bg-soft); outline: 1px solid var(--color-border); }
+.v3stlegend__text { font-size: 12.5px; line-height: 1.45; }
+.v3stlegend__muted { color: var(--color-text-muted); }
+.v3stlegend__tech { margin-top: 2px; font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
+.v3stlegend__tech code { font-family: var(--font-mono); }
