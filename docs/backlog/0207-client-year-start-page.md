@@ -56,3 +56,19 @@ haben ihre eigenen.
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
 | … | … | |
+
+## Owner-Runde 2026-09-27 (am Bild)
+
+1. **Steckbrief kleiner:** keine Faktenzeile mehr; Kontenrahmen, Versteuerung,
+   Rhythmus, zuständig, Stand DATEV-Spiegel stehen als Wörter in der Meta-Zeile.
+   Frage 1 (Kopf oder Box) damit entschieden: Kopf, kompakt. Frage 2 (Zahlenzeile)
+   bleibt so, wie gebaut.
+2. **„Zu tun" bleibt** wie gebaut.
+3. **Rechts eine Stapelhistorie statt Prozessbild** — „ein ‚alles gut'-Gefühl,
+   gar nicht zu viele Infos": Offenes und Hängendes je eine Zeile (Zeichen ·
+   Monat · Wort · Segmente), alles in DATEV Erledigte in **einer** Zeile mit
+   Haken („Januar bis Juli · 7 Stapel in DATEV"), darunter „Alle Stapel".
+4. **Das Monatsraster entfällt.**
+
+Rang 4 heißt damit „Ist das Jahr in Ordnung?" und steht in der Historie.
+Frage 3 (UStVA-Frist jetzt oder mit Server-Signal) bleibt offen für die App.

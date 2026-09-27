@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { PeriodCell, PeriodColumn } from "@/ui/v3/patterns/PeriodGrid";
 import type { BatonMeta, ProcessPhase } from "@/ui/v3/patterns/Process";
-import type { ProcessDialogDetail, ProcessPicture } from "@/ui/v3/patterns/ProcessPicture";
-import { ClientYearPage, type ClientYearVM, type Task } from "./ClientYearPage";
+import { ClientYearPage, type BatchEntry, type ClientYearVM, type Task } from "./ClientYearPage";
 
 /**
  * The start page of a client's year (0207, brief F312) in the six scenarios of
@@ -20,35 +18,32 @@ const HOLDER = {
   firm: { key: "kanzlei", label: "Kanzlei", color: "var(--color-primary)" },
 } satisfies Record<string, BatonMeta>;
 
-const MONTHS: PeriodColumn[] = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"].map(
-  (label, i) => ({ key: String(i + 1), label, current: i === 8 }),
-);
-
-function cells(done: number, open: number[] = []): Partial<Record<string, PeriodCell>> {
-  const out: Partial<Record<string, PeriodCell>> = {};
-  for (let m = 1; m <= done; m++) out[String(m)] = { state: "done", label: "1", title: `Stapel ${m}/2026 ist in DATEV.`, href: `#stapel=${m}` };
-  for (const m of open) out[String(m)] = { state: "open", label: "1", title: `Stapel ${m}/2026 ist in Arbeit.`, href: `#stapel=${m}` };
-  return out;
-}
-
+const MONTH = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const PHASES = ["Buchen", "Prüfen", "Übertragen", "Angekommen"];
-function batchPicture(at: number, holder: BatonMeta, headline: string, status: ProcessPhase["status"] = "active"): ProcessPicture {
-  return {
-    phases: PHASES.map((label, i) => ({ key: label, label, sub: "", states: [], status: i < at ? "done" : i === at ? status : "pending" })),
-    headline,
-    level: status === "failed" ? "error" : "none",
-    holder,
-    next: null,
-  };
+
+function phases(at: number, status: ProcessPhase["status"] = "active"): ProcessPhase[] {
+  return PHASES.map((label, i) => ({ key: label, label, sub: "", states: [], status: i < at ? "done" : i === at ? status : "pending" }));
 }
-const BATCH_DETAIL: ProcessDialogDetail = {
-  title: "Stapel 2026-0009 · August 2026",
-  pathLabel: "Weg eines Stapels",
-  explanation: "Ludwig hat gebucht; die Kanzlei prüft die Vorschläge in der Abnahme.",
-  steps: [],
-  history: [],
-  technical: [["state", "review"]],
-};
+
+/** Months 1..done in DATEV, then the open ones — newest first, as the history lists them. */
+function history(done: number, open: { month: number; word: string; at: number; failed?: boolean }[] = []): BatchEntry[] {
+  const entries: BatchEntry[] = [];
+  for (let m = 1; m <= done; m++) {
+    entries.push({ key: `b${m}`, period: MONTH[m - 1]!, number: `2026-000${m}`, state: "done", word: "in DATEV", phases: phases(4), href: `#stapel=${m}` });
+  }
+  for (const o of open) {
+    entries.push({
+      key: `b${o.month}`,
+      period: MONTH[o.month - 1]!,
+      number: `2026-000${o.month}`,
+      state: o.failed ? "failed" : "open",
+      word: o.word,
+      phases: phases(o.at, o.failed ? "failed" : "active"),
+      href: `#stapel=${o.month}`,
+    });
+  }
+  return entries.reverse();
+}
 
 const PROFILE = {
   name: "Musterbau Schneider GmbH & Co. KG",
@@ -75,9 +70,7 @@ const NORMAL: ClientYearVM = {
     { holder: HOLDER.ludwig, text: "2 Stapel werden gebucht", href: "#stapel" },
     { holder: HOLDER.client, text: "1 Nachforderung offen, Frist 30.09.2026", href: "#nachforderungen" },
   ],
-  currentBatch: { label: "2026-0009 · August", href: "#stapel=9", picture: batchPicture(1, HOLDER.firm, "Kanzlei prüft"), detail: BATCH_DETAIL },
-  months: MONTHS,
-  batchCells: cells(7, [8]),
+  batches: history(7, [{ month: 8, word: "Kanzlei prüft", at: 1 }]),
 };
 
 /** 1 — the usual case: three tasks of the practice, work with Ludwig and the client, the year at 7 of 12. */
@@ -95,7 +88,7 @@ export const NothingToDo: Story = {
           { holder: HOLDER.ludwig, text: "Stapel 2026-0009 wird gebucht", href: "#stapel=9" },
           { holder: HOLDER.datev, text: "Stapel 2026-0008 wartet auf die Bestätigung", href: "#stapel=8" },
         ],
-        currentBatch: { ...NORMAL.currentBatch!, picture: batchPicture(0, HOLDER.ludwig, "Beim Agenten") },
+        batches: history(7, [{ month: 8, word: "Ludwig bucht", at: 0 }]),
       }}
     />
   ),
@@ -112,8 +105,10 @@ export const Stuck: Story = {
           { key: "overdue", level: "warning", title: "Stapel August ist überfällig", sub: "die UStVA ist am 10.10.2026 fällig; der Stapel ist noch nicht freigegeben", action: { label: "Zur Abnahme", href: "#abnahme" } },
           { key: "docs", level: "warning", title: "12 Belege prüfen", sub: "Ludwig konnte sie nicht allein einordnen", action: { label: "Belege öffnen", href: "#belege" } },
         ],
-        currentBatch: { ...NORMAL.currentBatch!, label: "2026-0008 · Juli", picture: batchPicture(2, HOLDER.firm, "Übertragung gescheitert", "failed") },
-        batchCells: cells(6, [7, 8]),
+        batches: history(6, [
+          { month: 7, word: "Übertragung gescheitert", at: 2, failed: true },
+          { month: 8, word: "Kanzlei prüft", at: 1 },
+        ]),
       }}
     />
   ),
@@ -129,8 +124,7 @@ export const NewClient: Story = {
         counts: { documents: 0, openCases: 0, inDatevUntil: null },
         tasks: [{ key: "onboarding", level: "warning", title: "Einrichtung freigeben", sub: "Ludwig hat Kontenrahmen und Konten vorbereitet", action: { label: "Zur Einrichtung", href: "#onboarding" } }],
         elsewhere: [],
-        currentBatch: null,
-        batchCells: {},
+        batches: [],
       }}
     />
   ),
@@ -152,13 +146,16 @@ export const Dense: Story = {
           { key: "d5", level: "info", title: "Belegart für 3 Scans festlegen", sub: "unbekanntes Formular", action: { label: "Festlegen", href: "#s" } },
           { key: "d6", level: "info", title: "Kreditkartenabrechnung zerlegen", sub: "9 Belege im Sammel-PDF", action: { label: "Öffnen", href: "#z" } },
         ],
-        batchCells: cells(6, [7, 8]),
+        batches: history(6, [
+          { month: 7, word: "freigegeben, wird übertragen", at: 2 },
+          { month: 8, word: "Kanzlei prüft", at: 1 },
+        ]),
       }}
     />
   ),
 };
 
-/** 6 — narrow (tablet): profile → tasks → current batch → year, stacked in this order. */
+/** 6 — narrow (tablet): profile → tasks → batch history, stacked in this order. */
 export const Narrow: Story = {
   render: () => (
     <div style={{ width: "48rem" }}>

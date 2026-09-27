@@ -4601,3 +4601,15 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .cy-task__sub { font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
 .cy-batch__link { margin: var(--space-2) 0 0; font-size: var(--fs-ui-sm); }
 .cy-counts { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--fs-ui-sm); }
+/* Batch history: open ones on their own, the finished months in one quiet line with a tick. */
+.cy-hist { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4); }
+.cy-hist__row {
+  display: grid; grid-template-columns: 20px 6rem minmax(0, 1fr) max-content; gap: var(--space-2);
+  align-items: center; min-height: 32px; padding: 0 var(--space-1); border-radius: var(--radius-sm);
+  color: var(--color-text); text-decoration: none; font-size: var(--fs-ui-sm);
+}
+.cy-hist__row:hover { background: var(--color-bg-soft); }
+.cy-hist__row:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.cy-hist__period { font-weight: 500; }
+.cy-hist__word { color: var(--color-text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cy-hist__done { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-1) 0 0; padding: 0 var(--space-1); font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
