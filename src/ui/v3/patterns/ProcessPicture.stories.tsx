@@ -91,11 +91,13 @@ export const CellStates: Story = {
   ),
 };
 
-/** Without `onOpen` (print, nested drawer): no hover, no focus, no target. */
+/** Without `onOpen` (print, nested drawer): no hover, no focus, no target — warning and error are still read aloud. */
 export const NotInteractive: Story = {
   render: () => (
     <Column>
       <ProcessCell picture={c(0)} />
+      <ProcessCell picture={c(2)} />
+      <ProcessCell picture={c(3)} />
       <ProcessBox picture={{ ...c(0), next: "Die Kanzlei prüft die Buchung." }} />
     </Column>
   ),
