@@ -101,6 +101,11 @@ export interface SourceDocumentCardProps {
   counterpartyHref?: string | null;
   /** The batch that booked the document — passed to the facts. */
   batchHref?: string | null;
+  /**
+   * The row „Erledigung" in the facts. `false` on the detail page, whose head
+   * shows the state as the process box (0204, D7); the drawer keeps it.
+   */
+  completion?: boolean;
 }
 
 /**
@@ -130,6 +135,7 @@ export function SourceDocumentCard({
   factsTitle,
   counterpartyHref,
   batchHref,
+  completion = true,
 }: SourceDocumentCardProps) {
   const kind = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
   return (
@@ -170,6 +176,7 @@ export function SourceDocumentCard({
             {...(factsTitle !== undefined ? { title: factsTitle } : {})}
             {...(counterpartyHref ? { counterpartyHref } : {})}
             {...(batchHref ? { batchHref } : {})}
+            completion={completion}
             // In the card there is room for the sentence under the state; in a
             // row there is not, and that is where the tooltip stays.
             explainCompletion

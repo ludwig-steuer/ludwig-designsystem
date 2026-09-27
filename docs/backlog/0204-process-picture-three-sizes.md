@@ -327,3 +327,7 @@ Owner am Bild (`BoxEnd`, `AllCells`):
 - **Box:** nur noch die Phasenzeile, **ohne Rahmen**. Stand-Wort, Träger und „Danach" stehen im Dialog (ein Klick). Nur **Warnung und Fehler** bleiben sichtbar: eine zweite Zeile mit Zeichen und Wort. Die Box ist damit eine oder zwei Zeilen hoch — sie wechselt nicht, während man hinsieht, nur von Beleg zu Beleg. Hover: Fläche `--color-bg-soft`.
 - **Zelle:** Stand-Wort in Zeile 1, darunter der Träger **mit Zeichen** (`Baton`). `narrow` bleibt einzeilig ohne Träger.
 - Die Abnahmekriterien „Box drei Zeilen gleich hoch" und „Danach in der Box" gelten nicht mehr.
+
+## Nachtrag 2026-09-27 (2) — „Erledigung" nicht doppelt (Owner über ll-dev)
+
+Auf der Beleg-Detailseite steht der Stand jetzt als Box im Kopf; die Zeile „Erledigung" in „Belegdaten" wiederholte ihn (D7). `SourceDocumentFacts` und `SourceDocumentCard` bekommen `completion?: boolean` (Vorgabe `true`): die Detailseite setzt `completion={false}`, der Drawer ohne Kopf behält die Zeile. `batchHref` wirkt nur mit der Zeile; auf der Seite führen Kopf-Knopf „Zum Stapel" und die Stapel-Box dorthin. Story `SourceDocumentFacts › WithoutCompletion`.

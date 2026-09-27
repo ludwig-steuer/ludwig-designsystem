@@ -110,6 +110,7 @@ export function SourceDocumentFacts({
   counterpartyHref,
   explainCompletion,
   batchHref,
+  completion = true,
 }: {
   /** The same row the list gets — kind, counterparty, both dates, completion, `detail`. */
   document: SourceDocumentVM;
@@ -162,6 +163,12 @@ export function SourceDocumentFacts({
   explainCompletion?: boolean;
   /** The batch that booked it — passed through to the completion. */
   batchHref?: string | null;
+  /**
+   * The row „Erledigung". `false` where the head of the page already shows the
+   * state — the process box at the right (0204, D7): the same answer twice is
+   * none. The drawer has no such head and keeps it (default).
+   */
+  completion?: boolean;
 }) {
   const detail = resolveSourceDocumentDetail(document.sourceDocType, document.detail);
   const ident = sourceDocumentIdentifier(document);
@@ -236,15 +243,17 @@ export function SourceDocumentFacts({
       <PaymentAccountCell key="pa" account={document.paymentAccount} />,
     ]);
   }
-  rows.push([
-    "Erledigung",
-    <SourceDocumentCompletion
-      key="done"
-      document={document}
-      {...(explainCompletion ? { explain: true } : {})}
-      {...(batchHref ? { href: batchHref } : {})}
-    />,
-  ]);
+  if (completion) {
+    rows.push([
+      "Erledigung",
+      <SourceDocumentCompletion
+        key="done"
+        document={document}
+        {...(explainCompletion ? { explain: true } : {})}
+        {...(batchHref ? { href: batchHref } : {})}
+      />,
+    ]);
+  }
   if (summary) {
     // A summary is a paragraph, not a value: it keeps its row, but the text
     // runs left and without `tnum` — the field column aligns numbers right (V3).

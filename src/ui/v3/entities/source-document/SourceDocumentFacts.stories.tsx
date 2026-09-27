@@ -110,6 +110,20 @@ export const Filled: Story = {
 };
 
 /**
+ * On the detail page the head shows the state as the process box (0204), so
+ * the row „Erledigung" is left out — the same answer twice is none (D7). The
+ * drawer keeps it.
+ */
+export const WithoutCompletion: Story = {
+  name: "Ohne Erledigung (Detailseite)",
+  render: () => (
+    <div style={{ maxWidth: 560 }}>
+      <SourceDocumentFacts document={INVOICE} summary={SUMMARY} completion={false} />
+    </div>
+  ),
+};
+
+/**
  * **The core story.** Invoice, contract, bank statement, other document and a
  * document without a kind, side by side: the same rows on top in the same
  * order, a different block underneath — and for the last three **no block at
