@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-27, eigene Messung unten; fremde Abnahme steht aus |
+| Status | Abnahme — fremde Abnahme 2026-09-27 nicht bestanden: vier Mängel (M1–M4 unter „Abnahme"), Nacharbeit offen |
 | Stufe | `patterns/` (Familie Process, `patterns/Process.tsx` + `patterns/ProcessPicture.tsx`) · Showcase `src/showcase/document-process/` für die Szenarien |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: ein Vorgang mit Phasen, einem Träger und einem nächsten Schritt; Phasen, Wörter und Wege kommen als Daten |
 | Quelle | Design-Brief **F305** (`app/docs/backlog/F305-document-process-picture-design-brief.md`, Owner 2026-09-27 über ll-cto2) · Präzedenz 0137, 0203 |
@@ -223,4 +223,77 @@ Eigene Messung (Bauer, 2026-09-27, Storybook 6107, 1280 px) — zählt nicht als
 | `typecheck`, `build`, `check:language` | grün | ✓ |
 
 Offen für die fremde Abnahme: `BoxZoom`, Kontraste, `DialogHistory` (drei Fälle), `NotInteractive`, Vergleich jedes Szenarios mit F305 §7.
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: fremder Abnahme-Agent, 2026-09-27 · Offene Punkte: M1–M4 unten
+
+### Fremde Abnahme (2026-09-27)
+
+Gemessen mit Playwright gegen Storybook 6107 bei 1280 px (BoxZoom/Kopf zusätzlich
+640 px), Kontraste aus `getComputedStyle` gegen den ersten deckenden Hintergrund
+gerechnet. Vergleich „unverändert" gegen einen Storybook-Build von `5928cc4`
+(Vorgänger) und einen von `66cdb48`, beide in eigenen Worktrees gebaut.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `pnpm typecheck`, `pnpm build` grün | typecheck Exit 0; `storybook build` im Worktree `66cdb48` Exit 0; dazu `check:icons`, `check:contrast`, `check:when`, `check:classes`, `check:language` je Exit 0 | ✓ |
+| Datei nach der Familie, Story daneben, Titel richtig | `patterns/ProcessPicture.tsx` neben `Process.tsx`, Story daneben, Titel `v3/Patterns/Prozess/ProcessPicture`; Showcase `Seiten/Beleg-Prozessbild` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | Bezeichner, Kommentare, Story-Namen, CSS-Klassen englisch; `ProcessCell`, `ProcessBox`, `ProcessDialog`, `ProcessPictureTrigger` je mit `@when`/`@instead`; `check:language` 0 | ✓ |
+| Kein Hex, kein px in TSX, keine lokale Label-Map | grep über die neuen TSX: kein Hex; px nur als Story-Layout-Hilfe (`BoxZoom`: `1px dashed` am Rahmen); Maps `LEVEL_STATE`/`STEP_STATE` bilden auf `StateKind` ab, Wörter aus `stateLabel` | ✓ |
+| Alle Stories vorhanden; Ausschlüsse begründet | alle 8 Pattern-Stories, `Held`, `Holders` + Ludwig, 7 Showcase-Stories (+ `AllCellsNarrow`) im Index; „leer nach Filter" begründet. Aber zwei Stories beweisen nicht, was die Spec sagt → **M3** | ✗ |
+| Prüfliste `design-guidelines.md` §9 | Text links, nichts zentriert; Zelle 24 px ≤ Tabellenzeile; Farbe nur Stufe (held Warnung, failed Rot); jeder farbige Zustand mit Zeichen und Wort; Hover nur an Klickzielen; Fokusring; Trefferfläche; `min-width: 0` an Zelle/Box/Kopf gemessen; keine Konsolenfehler in 33 Dialogen. Fünf Zustände: gefüllt/leer(gelöscht)/lädt/Fehler an der Zelle, Verlauf mit drei Fällen — aber Box „gelöscht" springt → **M1** | ✗ |
+| Im Browser angesehen | alle 22 Stories der Familie und des Showcase geladen und vermessen | ✓ |
+| Balkenbreite 64 px bei 1–5 Segmenten | `Cells`: 9 Zellen mit 5/5/5/5/5/3/2/1/0 Segmenten, Balken bzw. „—" je 64 px; `AllCells`: 29 Zellen, Balken 64 px, x = 893 und Wortanfang x = 988 in jeder Zeile | ✓ |
+| `held`/`failed` ≠ `active` durch Zeichen und Wort | Zelle: Zeichen „Warnung"/„Fehler" + Stand-Wort, Name „Warnung: Werte fehlen · Agent"; Box: Zeichen + unterstrichene Phase in Stufenfarbe; Stepper: Zeichen + `note` („Werte fehlen") bzw. „Warnung" ohne `note` (`Process › Held`) | ✓ |
+| Zelle/Box ein Ziel ≥ 24 px, Tab, Enter, Esc, Fokus zurück | `Keyboard`: Tab → Zelle (24 px hoch, 320 px breit), Enter → Dialog, Fokus im Dialog; Esc → zu, Fokus auf der Zelle; Tab → Box (384 × 96), Leertaste → Dialog, Esc → Fokus auf der Box; die nicht klickbare Box wird übersprungen. Fokusring 2 px solid, 3,28:1; in `AllCells` bei 500 px Höhe verdeckt kein Sticky-Element den Ring | ✓ |
+| Zugänglicher Name nennt Stand und Träger | `AllCells`: 29 Namen, z. B. „Fehler: Kontoauszug geht nicht auf · Kanzlei"; ohne Träger nur bei „niemand"; `narrow` ohne Träger | ✓ |
+| Box zwei- und dreizeilig gleich hoch; Breite ≈ 30 % | `Boxes`: 96,3 px bei drei, zwei und laufend; `BoxStart`/`BoxEnd`: 384 px von 1248 px Kopf = 31 %, kein `StatusBadge`. Aber `AllBoxes` S16 (gelöscht) 91 px → **M1** | ✗ |
+| Box bei 640 px ohne Überlauf | Viewport 640: `BoxEnd` Box 384 px bei x 37–421, `BoxStart` 213 px, `BoxZoom` 318 px; Dokument 640 px breit, keine Box mit `scrollWidth > clientWidth`, nur Zeile 3 kürzt mit Ellipse (gewollt) | ✓ |
+| Dialog: Technik zu, Rohwerte nur dort; Verlauf drei Fälle | 33 Dialoge aus `AllDialogs`: `details` zu, kein Rohwert (`human_review`, `open_findings`, `extract`, …) außerhalb der Technik; offen in Mono. `DialogHistory`: gefüllt (LogList), leer („Für diesen Beleg sind noch keine Zustandswechsel aufgezeichnet." + „Zum Verlauf"), Fehler (`role="alert"`, Was · Ursache · „Verlauf erneut laden" 142 × 25 px); Fokus nach Esc je auf dem Knopf | ✓ |
+| `EntityHeader` start/end; `row` unverändert | `BoxStart`: Box unter dem Titelblock (x 69); `BoxEnd`: rechts vor Kennzahl (x 538, Kennzahl x 938). Screenshots alt/neu gleich für `EntityHeader` Filled, Minimal, WithoutMetric, Editable, WithProcess, `Process` InHeader, Failed, InRow, InLog, Empty, `Seiten/Stapelabnahme` Bookings; OtherEntity und InUse mit gleichem DOM und gleicher Geometrie (OtherEntity rauscht auch alt gegen alt); `Holders` anders nur um „Ludwig" | ✓ |
+| Jedes Szenario aus F305 §7 in jeder seiner Größen | Größen je Fixture gegen §7 verglichen: alle 33 (S33 als a/b) stimmen; 29 Zellen, 24 Boxen, 33 Dialoge. Abweichungen S31/S32 (invoice) und S33a/b in §6a begründet. Aber S03 folgt nicht §6a → **M4** | ✗ |
+| Kontraste Text ≥ 4,5:1, Zeichen ≥ 3:1 | Zelle: Wort 13,77, Träger 6,69, Fehlerwort 5,6; Box: Phasen 11,64 (erledigt/aktiv) / 5,52 (held) / 4,88 (offen), Stand 13,77, „seit"/„Danach" 6,69; Dialog (33 + DialogFull): kleinster Text 4,71; Zeichen Warnung 5,09–5,52, Fehler 5,6–6,06, erledigt 5,07, offen 4,88, Baton 5,45–11,64 | ✓ |
+| Spec stimmt mit dem Code (CLAUDE.md §4.5) | Abweichungen in der Schnittstelle → **M2** | ✗ |
+| Hover / NotInteractive | Zelle: Wort unterstrichen, `cursor: pointer`; Box: Rand dunkler; `NotInteractive`: `<span>`, `tabIndex -1`, kein Hover (Unterstreichung und Rand bleiben), Tab erreicht nichts | ✓ |
+
+**Mängel**
+
+- **M1 · Box „gelöscht" springt.** `AllBoxes` S16: 91 px statt 96 px. Ohne
+  Phasen rendert `ProcessBox` „—" als `.pz-box__line`; die erste Grid-Zeile
+  (`grid-template-rows: auto …`) ist dann ohne den 3-px-Balken und das Polster
+  der Phasenzeile. Verstößt gegen „Mindesthöhe immer 3 Zeilen … der Kopf springt
+  nicht" (`ProcessPicture.tsx` `ProcessBox`, `v3.css` `.pz-box`).
+- **M2 · Spec ≠ Code.** `ProcessDialogDetail`: die Spec nennt `axisHref` /
+  `onAxis`, der Code hat `axis?: ReactNode`; `links` ist in der Spec Pflicht,
+  im Code optional. Box-Breite: Spec „`--pz-box` (30 % des Kopfs, min 22rem,
+  max 26rem)", `v3.css` setzt fest `--pz-box: 24rem`. Eine Seite angleichen.
+- **M3 · Zwei Stories beweisen nicht, was die Spec sagt.** `DialogFull` soll
+  „Technik offen" zeigen (auch F305 §7.3 „Dialog Technik aufgeklappt") — die
+  Technik ist zu. `BoxZoom` soll den 640-px-Rahmen zeigen und sagt es im
+  Kommentar — der Rahmen ist `20rem` = 320 px. (640 px selbst ist bestanden,
+  gemessen über den Viewport.)
+- **M4 · S03 widerspricht §6a.** §6a: „`stalled` rechnet die App: Phase `held`
+  plus `headline` („Verarbeitung hängt")". Die Fixture S03 hat `headline`
+  „Wird ausgelesen" mit Stufe Warnung — Box und Dialog sagen „Warnung: Wird
+  ausgelesen". Die Fixtures sind das Vorbild für `document-process.ts`
+  (`src/showcase/document-process/fixtures.ts`, S03).
+
+**Nebenbefunde (kein Mangel von 0204)**
+
+- S07 und S08 sind als Box gleich (Unterschied nur im Dialog: Schritt, Link);
+  S14 zeigt in der Box nichts vom Wiederöffnen. Folgt aus dem Brief, der die
+  Unterschiede dort in den Dialog legt.
+- In der Schrittliste tragen aktiver und offener Schritt dasselbe Zeichen
+  „offen" (`STEP_STATE active → open`); sichtbar trennt sie nur Füllung und
+  Fettung, vorgelesen gar nicht.
+- Nicht klickbare Zelle: das Stufen-Zeichen ist `aria-hidden`, einen Namen gibt
+  es nur als `title` — „Warnung"/„Fehler" wird dann nicht vorgelesen.
+- Zelle im Fehler hat `role="alert"`; in einer Liste mit vielen Fehlzeilen
+  würde jede angesagt.
+- Links im Dialogfuß 19 px, „Zum Verlauf" 14 px hoch (`Link`-Primitive,
+  Inline- bzw. Abstands-Ausnahme von 2.5.8, aber unter dem Hausmaß §9).
+- Box-Rand 1,5:1 (`--color-border`, set-weit); `ProcessMini` offenes Segment
+  1,2:1 (seit 0137).
+- `Process › Held` nutzt die alte Story-Konstante `AGENT` (`--color-accent`):
+  Träger-Wort 3,28:1.
+- S13: „Keine Buchung nötig" steht im Dialog dreimal (Stand, Ende, Headline).
+- Story-Layout-Hilfen mit px: `ProcessPicture.stories.tsx` `BoxZoom`
+  (`1px dashed`); `Process.stories.tsx` `InRow` `80px` (Bestand).
