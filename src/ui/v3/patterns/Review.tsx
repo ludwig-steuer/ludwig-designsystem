@@ -231,6 +231,42 @@ export interface CheckItem {
   jump?: ReactNode;
   /** The gate: a red or yellow item has to be checked off. */
   gate?: ReactNode;
+  /**
+   * The shape „fact" (0206): the check's answer is a **word**, not pass/fail —
+   * „Ja", „Nein", „Unsicher", as a `StatusBadge` from the caller. It stands
+   * right of the question.
+   */
+  result?: ReactNode;
+  /**
+   * Who set it, and — technical, small, marked — which fields it was read
+   * from (T4). „System · Technisch: client_invoices.vendor_country_code".
+   */
+  origin?: { actor: string; fields?: readonly string[] };
+}
+
+/**
+ * What the items are — decides the words of the groups and of `checkSummary`.
+ * `rule`: passed / violated / not checkable. `fact`: settled / to clarify.
+ */
+export type CheckKind = "rule" | "fact";
+
+const SUMMARY_WORD: Record<CheckKind, Record<CheckItem["state"], string>> = {
+  rule: { red: "verletzt", yellow: "offen", open: "nicht prüfbar", green: "bestanden" },
+  fact: { red: "widersprüchlich", yellow: "zu klären", open: "nicht erhoben", green: "geklärt" },
+};
+
+/**
+ * The counts of a set of checks in one line — the XS size (0206): „1 verletzt
+ * · 2 offen · 9 bestanden". Worst first, empty groups left out. For the head
+ * of a report (`StatusCallout` title) or an overview.
+ */
+export function checkSummary(items: readonly CheckItem[], kind: CheckKind = "rule"): string {
+  const order: CheckItem["state"][] = ["red", "yellow", "open", "green"];
+  const parts = order
+    .map((state) => [items.filter((i) => i.state === state).length, SUMMARY_WORD[kind][state]] as const)
+    .filter(([n]) => n > 0)
+    .map(([n, word]) => `${n} ${word}`);
+  return parts.length ? parts.join(" · ") : kind === "fact" ? "keine Fakten" : "keine Prüfpunkte";
 }
 
 const PP_ICON: Record<CheckItem["state"], StateKind> = {
@@ -249,16 +285,35 @@ const PP_ICON: Record<CheckItem["state"], StateKind> = {
  * finding, and grey type made it look like an aside. The row therefore hands
  * its state down to the sentence.
  */
-function CheckRow({ item }: { item: CheckItem }) {
+/** The technical line of a check: a fact's key and the fields it was read from. */
+function technical(item: CheckItem, kind: CheckKind): string {
+  return [kind === "fact" ? item.code : null, ...(item.origin?.fields ?? [])].filter(Boolean).join(", ");
+}
+
+function CheckRow({ item, kind = "rule" }: { item: CheckItem; kind?: CheckKind }) {
   return (
     <div className={`v2pp__row v2pp__row--${item.state}`}>
       <StateIcon state={PP_ICON[item.state]} />
       <span style={{ flex: "1 1 auto", minWidth: 0 }}>
         <span className="v2pp__q">
-          {item.question} <span className="v2pp__code">{item.code}</span>
+          {item.question}
+          {/* A rule's code is what somebody quotes (VST-03); a fact's key is
+              technical and stands under „Technisch" (T4, 0206). */}
+          {kind === "rule" ? <span className="v2pp__code">{item.code}</span> : null}
         </span>
         <span className="v2pp__why">{item.reason}</span>
+        {item.origin ? (
+          <span className="v2pp__origin">
+            {item.origin.actor}
+            {technical(item, kind) ? (
+              <>
+                {" · "}Technisch: <code>{technical(item, kind)}</code>
+              </>
+            ) : null}
+          </span>
+        ) : null}
       </span>
+      {item.result ? <span className="v2pp__result">{item.result}</span> : null}
       {item.gate}
       {item.jump}
     </div>
@@ -280,10 +335,12 @@ function CheckGroup({
   state,
   summary,
   items,
+  kind,
 }: {
   state: StateKind;
   summary: string;
   items: CheckItem[];
+  kind: CheckKind;
 }) {
   return (
     <Disclosure
@@ -292,12 +349,12 @@ function CheckGroup({
         <span className="v2pp__sum">
           <StateIcon state={state} />
           {summary}
-          <span className="v2pp__code">{items.map((i) => i.code).join(" ")}</span>
+          {kind === "rule" ? <span className="v2pp__code">{items.map((i) => i.code).join(" ")}</span> : null}
         </span>
       }
     >
       {items.map((i) => (
-        <CheckRow item={i} key={i.code} />
+        <CheckRow item={i} key={i.code} kind={kind} />
       ))}
     </Disclosure>
   );
@@ -321,10 +378,21 @@ function CheckGroup({
  * unremarkable one is the mistake the data itself warns about: one of those
  * checks says in its own reason that unchecked is not the same as unremarkable.
  *
- * @when    Individual checks of a journal entry with reasons; passed and unrunnable ones each in a single line.
- * @instead Error that blocks saving → Messages.
+ * Two shapes (0206): `kind="rule"` — pass/fail with a reason (the journal
+ * entry, the plausibility tab, the input-tax rules); `kind="fact"` — each item
+ * answers with a word (`result`) and says who set it (`origin`). Settled facts
+ * fold into one line like passed rules; open ones stand alone. A rule whose
+ * result could not be determined but *has* to be (input tax) is `yellow`, not
+ * `open`: „not checkable" (0148) is a statement about the data, „to clarify" is
+ * work.
+ *
+ * @when    Individual checks with reasons — rules (pass/fail) or facts (a word
+ *          each); passed/settled and unrunnable ones each in a single line.
+ * @instead Error that blocks saving → Messages. The count alone → checkSummary.
  */
-export function CheckItems({ items }: { items: CheckItem[] }) {
+export function CheckItems({ items, kind = "rule" }: { items: CheckItem[]; kind?: CheckKind }) {
+  const words = SUMMARY_WORD[kind];
+  const noun = kind === "fact" ? "Fakten" : "Prüfpunkten";
   const passed = items.filter((i) => i.state === "green");
   const notRun = items.filter((i) => i.state === "open");
   // Red and yellow keep their own row. A finding that can hide is not a
@@ -333,27 +401,33 @@ export function CheckItems({ items }: { items: CheckItem[] }) {
   return (
     <div className="v2pp">
       {findings.map((i) => (
-        <CheckRow item={i} key={i.code} />
+        <CheckRow item={i} key={i.code} kind={kind} />
       ))}
       {passed.length > 0 ? (
         <CheckGroup
           state="done"
-          summary={`${passed.length} von ${items.length} Prüfpunkten bestanden`}
+          kind={kind}
+          summary={`${passed.length} von ${items.length} ${noun} ${words.green}`}
           items={passed}
         />
       ) : null}
       {notRun.length > 0 ? (
         <CheckGroup
           state="open"
+          kind={kind}
           summary={
-            notRun.length === 1
-              ? "1 Prüfpunkt nicht prüfbar"
-              : `${notRun.length} Prüfpunkte nicht prüfbar`
+            kind === "fact"
+              ? `${notRun.length} ${notRun.length === 1 ? "Fakt" : "Fakten"} ${words.open}`
+              : notRun.length === 1
+                ? "1 Prüfpunkt nicht prüfbar"
+                : `${notRun.length} Prüfpunkte nicht prüfbar`
           }
           items={notRun}
         />
       ) : null}
-      {items.length === 0 ? <div className="v2pp__ok">Keine Prüfpunkte für diesen Fall.</div> : null}
+      {items.length === 0 ? (
+        <div className="v2pp__ok">{kind === "fact" ? "Keine Fakten für diesen Fall." : "Keine Prüfpunkte für diesen Fall."}</div>
+      ) : null}
     </div>
   );
 }

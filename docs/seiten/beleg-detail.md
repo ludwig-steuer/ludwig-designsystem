@@ -133,6 +133,21 @@ Reiter" von 2026-09-07 gilt insoweit nicht mehr; der Befund für die App
 (`DOC_TABS`, `parseDocTab`) bleibt, mit L-260 als Zusatz zum Namen des ersten
 Reiters.
 
+## Reiter „Vorsteuer" (Nachtrag 2026-09-27, 0206)
+
+**Frage:** Darf aus diesem Beleg Vorsteuer gezogen werden — und wie wird er
+umsatzsteuerlich behandelt? Nur bei Rechnungen (J-14).
+
+| # | Block | Baustein |
+|---|---|---|
+| 1 | Verdikt: Wort der Achse `input_tax_verdict` als Kicker, die Zählzeile der Regeln als Titel, die Folge (gesperrte Steuerschlüssel) darunter | `StatusCallout` + `checkSummary` |
+| 2 | Umsatzsteuerliche Behandlung: Behandlung, Stand, wer/wann/warum | `FieldList` + `ProvenanceRows` |
+| 3 | Regeln: Befunde einzeln, Bestandenes in einer Zeile; Fuß „Nicht von Ludwig geprüft — bitte selbst beurteilen" | `CheckItems kind="rule"` |
+| 4 | Fakten: je Frage die Antwort (Wort) und Herkunft; Schlüssel und Quellfelder als „Technisch" | `CheckItems kind="fact"` |
+| 5 | Auf der Rechnung erkannt (zu) | `Disclosure` + `FieldList` |
+
+Zustände und Vorbild: Showcase `Seiten/Beleg/Reiter Vorsteuer` (sechs Stories).
+
 ## Abweichung vom Detailseiten-Standard
 
 - **D1/D9 (die Übersicht schreibt nicht):** Belegdatum, Einordnung, Erledigung

@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Button } from "../primitives/Button";
 import { DetailPane, MasterDetail } from "./MasterDetail";
-import { Checklist, Messages, CheckItems, StateIcon, type CheckItem, type ChecklistRow } from "./Review";
+import { Checklist, Messages, CheckItems, StateIcon, checkSummary, type CheckItem, type ChecklistRow } from "./Review";
+import { StatusBadge } from "./StatusBadge";
 
 const meta: Meta<typeof Checklist> = { title: "v3/Patterns/Prüfen/Checklist", component: Checklist };
 export default meta;
@@ -220,6 +221,74 @@ export const CheckItemsEmpty: Story = {
   render: () => (
     <div className="v2card">
       <CheckItems items={[]} />
+    </div>
+  ),
+};
+
+const FACTS: CheckItem[] = [
+  {
+    code: "business_use",
+    question: "Leistung für das Unternehmen",
+    reason: "Lieferadresse privat, Leistungsbeschreibung betrieblich — Ludwig ist unsicher.",
+    state: "yellow",
+    result: <StatusBadge axis="input_tax_fact" status="uncertain" info={false} />,
+    origin: { actor: "Ludwig", fields: ["client_invoices.delivery_address"] },
+  },
+  {
+    code: "service_date",
+    question: "Leistungsdatum",
+    reason: "Kein Datum auf der Rechnung gefunden.",
+    state: "yellow",
+    result: <StatusBadge axis="input_tax_fact" status="unknown" info={false} />,
+    origin: { actor: "abgeleitet", fields: ["client_invoices.service_date"] },
+  },
+  {
+    code: "reverse_charge",
+    question: "Steuerschuldnerschaft des Empfängers (§ 13b)",
+    reason: "Kein Hinweis auf § 13b, Lieferant im Inland.",
+    state: "green",
+    result: <StatusBadge axis="input_tax_fact" status="no" info={false} />,
+    origin: { actor: "abgeleitet", fields: ["client_invoices.reverse_charge"] },
+  },
+  {
+    code: "hospitality",
+    question: "Bewirtung",
+    reason: "Bauleistung, keine Bewirtung.",
+    state: "green",
+    result: <StatusBadge axis="input_tax_fact" status="not_applicable" info={false} />,
+    origin: { actor: "Kanzlei" },
+  },
+];
+
+/**
+ * Size M — the shape „fact" (0206): each item answers with a word and says who
+ * set it; its key and source fields stand under „Technisch" (T4). Settled facts
+ * fold into one line, open ones stand alone.
+ */
+export const CheckItemsFacts: Story = {
+  render: () => (
+    <div style={{ maxWidth: 760 }}>
+      <CheckItems items={FACTS} kind="fact" />
+    </div>
+  ),
+};
+
+/**
+ * Size XS — `checkSummary`: the counts in one line, worst first, per kind. For
+ * the head of a report (the verdict's title) or an overview.
+ */
+export const CheckSummaryLine: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-2)" }}>
+      <span>{checkSummary(FACTS, "fact")}</span>
+      <span>
+        {checkSummary([
+          { code: "VST-06", question: "", reason: "", state: "red" },
+          { code: "VST-03", question: "", reason: "", state: "yellow" },
+          { code: "VST-01", question: "", reason: "", state: "green" },
+          { code: "VST-02", question: "", reason: "", state: "green" },
+        ])}
+      </span>
     </div>
   ),
 };

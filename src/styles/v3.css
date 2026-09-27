@@ -4575,3 +4575,8 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .cl-fix { display: grid; gap: var(--space-3); }
 .cl-fix__fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
 .cl-fix__actions { display: flex; align-items: center; gap: var(--space-3); }
+
+/* 0206: a check in the shape „fact" — the word right of the question, the origin under the reason. */
+.v2pp__result { flex: 0 0 auto; align-self: flex-start; }
+.v2pp__origin { display: block; margin-top: 2px; font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
+.v2pp__origin code { font-family: var(--font-mono); }

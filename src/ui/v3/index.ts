@@ -271,6 +271,8 @@ export {
   StateIcon,
   stateLabel,
   STATE_SIGNS,
+  checkSummary,
+  type CheckKind,
   Checklist,
   CheckItems,
   Messages,
