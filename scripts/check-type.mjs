@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Guard: type comes from the scale (owner 2026-09-27, „ein Review-Step für
- * Schriften und Schriftgrößen").
+ * Guard: type comes from the scale (owner 2026-09-27: a review step for
+ * fonts and font sizes).
  *
  * A font size, weight or family written by hand drifts: 12 px next to the
  * scale's 12.5, 13 next to 13.5, and the page looks restless without anyone
