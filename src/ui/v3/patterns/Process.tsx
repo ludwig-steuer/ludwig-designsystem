@@ -1,5 +1,6 @@
 import { ActionIcon, EntityIcon } from "../Icons";
 import { Link } from "../primitives/Link";
+import { StateIcon, stateLabel } from "./Review";
 import type { ReactNode } from "react";
 
 /**
@@ -221,6 +222,13 @@ export function ProcessStepper({
           <div key={p.key} className={p.status === "pending" ? undefined : `is-${p.status}`}>
             <div className="phase">{p.label}</div>
             <div className="who">{p.sub}</div>
+            {/* The failed phase says so in a word — red alone is not enough (V7, 0203). */}
+            {p.status === "failed" ? (
+              <div className="who is-failed">
+                <StateIcon state="error" />
+                {stateLabel("error")}
+              </div>
+            ) : null}
             {p.status === "active" || p.status === "failed" ? (
               <div className="now">
                 <Baton owner={owner} alarm={alarm} />

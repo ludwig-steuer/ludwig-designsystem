@@ -169,3 +169,5 @@ dann `Failed` neu messen.
   jetzt die festen 160-px-Spalten. Befund für die App, nicht für das Set.
 
 Abgenommen von / am: fremder Abnahme-Agent, 2026-09-27 · Ergebnis: nicht bestanden (Mangel 1) · Offene Punkte: Mangel 1; L-347 in der App
+
+**Nacharbeit 2026-09-27 (Bauer), zur Nachprüfung:** V7 — die fehlgeschlagene Phase trägt jetzt eine eigene Zeile `StateIcon error` + „Fehler" (Wort aus `LEVEL_ICON`, keine neue Vokabel), Farbe `--color-danger`, gemessen 5,6:1 auf dem Seitengrund (Story `Failed`). Nebenbefunde des Abnehmers: Schleifen-Link 14,5 px hoch (älter als 0203, Hausregel 24 px) → offen im Set; App `batch-review/ui/Step9.tsx` nutzt `.pz-stepper` direkt mit Rohzuständen → L-348.
