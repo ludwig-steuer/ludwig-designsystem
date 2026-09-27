@@ -28,7 +28,11 @@ import type { ReactNode } from "react";
  * own domain logic is no longer a primitive.
  */
 
-export type ProcessPhaseStatus = "done" | "active" | "pending" | "failed";
+/**
+ * `held` (0204): the record stands in this phase and hangs — someone has to
+ * act, but nothing has failed. Step „warning", never red.
+ */
+export type ProcessPhaseStatus = "done" | "active" | "held" | "pending" | "failed";
 
 export interface ProcessPhase {
   key: string;
@@ -39,6 +43,11 @@ export interface ProcessPhase {
   /** The raw states behind it. The stepper does not show them (0203); the caller keeps them for its own derivations. */
   states: readonly string[];
   status: ProcessPhaseStatus;
+  /**
+   * The word under a phase that is `held` or `failed` („Werte fehlen"). Without
+   * it the word of the step stands („Warnung", „Fehler").
+   */
+  note?: string;
 }
 
 export type BatonKey =
@@ -49,6 +58,7 @@ export type BatonKey =
   | "bridge"
   | "datev"
   | "spiegel"
+  | "ludwig"
   | "niemand";
 
 export interface BatonMeta {
@@ -90,6 +100,9 @@ function OwnerSign({ owner }: { owner: BatonMeta }) {
     case "datev":
     case "spiegel":
       return <EntityIcon entity="datev-mirror" />;
+    // Ludwig itself at work (reading, importing) — the sign of processing (0204).
+    case "ludwig":
+      return <EntityIcon entity="job" />;
     case "niemand":
       // **No sign, but the space.** The absence of a holder has no picture;
       // an empty box in the first grid column keeps the word column straight,
@@ -222,17 +235,18 @@ export function ProcessStepper({
           <div key={p.key} className={p.status === "pending" ? undefined : `is-${p.status}`}>
             <div className="phase">{p.label}</div>
             <div className="who">{p.sub}</div>
-            {/* The failed phase says so in a word — red alone is not enough (V7, 0203). */}
-            {p.status === "failed" ? (
-              <div className="who is-failed">
+            {/* A failed or held phase says so in a word — colour alone is not
+                enough (V7, 0203, 0204). */}
+            {p.status === "failed" || p.status === "held" ? (
+              <div className={`who is-${p.status}`}>
                 {/* The word is read aloud; the sign beside it would say it twice. */}
                 <span aria-hidden="true">
-                  <StateIcon state="error" />
+                  <StateIcon state={p.status === "failed" ? "error" : "warning"} />
                 </span>
-                {stateLabel("error")}
+                {p.note ?? stateLabel(p.status === "failed" ? "error" : "warning")}
               </div>
             ) : null}
-            {p.status === "active" || p.status === "failed" ? (
+            {p.status === "active" || p.status === "held" || p.status === "failed" ? (
               <div className="now">
                 <Baton owner={owner} alarm={alarm} />
               </div>

@@ -31,6 +31,7 @@ export function EntityHeader({
   meta,
   metric,
   process,
+  processPlacement = "row",
   summary,
   facts,
   actions,
@@ -71,6 +72,13 @@ export function EntityHeader({
    * in here would be exactly that.
    */
   process?: ReactNode;
+  /**
+   * Where `process` stands (0204). `row` is the line of 0137. `start` puts a
+   * box under the title block, `end` puts it at the right, before metric and
+   * actions — for a `ProcessBox`, which answers the same question as the
+   * status badge, so `status` stays empty then (D7).
+   */
+  processPlacement?: "row" | "start" | "end";
   /** One line, only when there is text — no placeholder for an empty summary. */
   summary?: ReactNode;
   /** The facts line — goes through `FieldList layout="row"` (0049). */
@@ -79,7 +87,7 @@ export function EntityHeader({
 }) {
   return (
     <div className="v2ehead">
-      <div className="v2ehead__top">
+      <div className={`v2ehead__top${process && processPlacement === "end" ? " has-side" : ""}`}>
         {icon ? <span className="v2ehead__ico">{icon}</span> : null}
         <div className="v2ehead__id">
           {overline ? <div className="v2ehead__over">{overline}</div> : null}
@@ -88,7 +96,9 @@ export function EntityHeader({
             {status}
           </div>
           {meta ? <div className="v2ehead__meta">{meta}</div> : null}
+          {process && processPlacement === "start" ? <div className="v2ehead__box">{process}</div> : null}
         </div>
+        {process && processPlacement === "end" ? <div className="v2ehead__side">{process}</div> : null}
         {metric ? (
           <div className="v2ehead__metric">
             <div className="v2ehead__metric__label">{metric.label}</div>
@@ -97,7 +107,7 @@ export function EntityHeader({
         ) : null}
         {actions ? <div className="v2ehead__actions">{actions}</div> : null}
       </div>
-      {process ? <div className="v2ehead__process">{process}</div> : null}
+      {process && processPlacement === "row" ? <div className="v2ehead__process">{process}</div> : null}
       {summary ? <div className="v2ehead__summary">{summary}</div> : null}
       {facts && facts.length > 0 ? (
         <div className="v2ehead__facts">

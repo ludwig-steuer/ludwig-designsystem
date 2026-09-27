@@ -450,6 +450,7 @@
 .pz-mini span.is-done { background: var(--color-primary); }
 .pz-mini span.is-active { background: var(--color-accent); }
 .pz-mini span.is-failed { background: var(--color-danger); }
+.pz-mini span.is-held { background: var(--color-warning); }
 
 /* --- Baton: who holds the batch — icon AND word ------------------------- */
 /* A grid, not flex: "nobody" gets no sign (0088), and without a fixed first
@@ -471,6 +472,7 @@
 .pz-stepper > div.is-done,
 .pz-stepper > div.is-active { border-top-color: var(--color-primary); }
 .pz-stepper > div.is-failed { border-top-color: var(--color-danger); }
+.pz-stepper > div.is-held { border-top-color: var(--color-warning); }
 
 .pz-stepper .phase {
   font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-subtle);
@@ -478,14 +480,93 @@
 .pz-stepper > div.is-done .phase,
 .pz-stepper > div.is-active .phase { color: var(--color-primary); }
 .pz-stepper > div.is-failed .phase { color: var(--color-danger); }
+.pz-stepper > div.is-held .phase { color: var(--color-warning); }
 .pz-stepper .who { font-size: 12px; color: var(--color-text-subtle); margin-top: 2px; }
 .pz-stepper .now { margin-top: 4px; }
-.pz-stepper .who.is-failed { display: flex; align-items: center; gap: var(--space-1); color: var(--color-danger); }
+.pz-stepper .who.is-failed,
+.pz-stepper .who.is-held { display: flex; align-items: center; gap: var(--space-1); color: var(--color-danger); }
+.pz-stepper .who.is-held { color: var(--color-warning); }
 
 /* Loops are counted, not hidden. */
 .pz-loops { font-size: 12px; color: var(--color-text-muted); margin-top: 8px; }
 .pz-loops a { color: var(--color-accent-700); text-decoration: none; }
 .pz-loops a:hover { text-decoration: underline; }
+
+/* --- Process picture in three sizes (0204) ------------------------------ */
+:root { --pz-box: 24rem; }
+.pz-sign { display: inline-flex; flex: 0 0 15px; }
+/* Cell: one line, fixed parts, the words shorten — the column never flutters. */
+.pz-cell {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  min-height: 24px; max-width: 100%; min-width: 0;
+  font: inherit; font-size: var(--fs-ui-sm); color: var(--color-text);
+  background: none; border: 0; padding: 0; text-align: left;
+}
+.pz-cell .pz-mini { flex: 0 0 auto; }
+.pz-cell__none { flex: 0 0 64px; color: var(--color-text-subtle); }
+.pz-cell__word { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pz-cell__holder { flex: 0 0 auto; color: var(--color-text-muted); white-space: nowrap; }
+.pz-cell__holder::before { content: "·"; margin-right: var(--space-2); color: var(--color-border-strong); }
+.pz-cell__skel { width: 160px; height: 10px; }
+.pz-cell.is-error .pz-cell__word { color: var(--color-danger); }
+.pz-cell.is-interactive, .pz-box.is-interactive { cursor: pointer; border-radius: var(--radius-sm); }
+.pz-cell.is-interactive:hover .pz-cell__word { text-decoration: underline; }
+.pz-cell.is-interactive:focus-visible, .pz-box.is-interactive:focus-visible {
+  outline: 2px solid var(--color-focus); outline-offset: 2px;
+}
+/* Box: always three lines — a box without „next" keeps the line, the head does not jump. */
+.pz-box {
+  display: grid; grid-template-rows: auto 1.5em 1.5em; row-gap: var(--space-1);
+  width: 100%; min-width: 0; padding: var(--space-3);
+  font: inherit; font-size: var(--fs-ui-sm); color: var(--color-text); text-align: left;
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+}
+.pz-box.is-interactive:hover { border-color: var(--color-border-strong); }
+.pz-box__phases { display: flex; gap: var(--space-1); min-width: 0; }
+.pz-box__phases > span {
+  flex: 1 1 0; min-width: 0; padding-top: var(--space-1);
+  border-top: 3px solid var(--color-border);
+  font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-subtle);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pz-box__phases > .is-done, .pz-box__phases > .is-active { border-top-color: var(--color-primary); color: var(--color-primary); }
+.pz-box__phases > .is-held { border-top-color: var(--color-warning); color: var(--color-warning); }
+.pz-box__phases > .is-failed { border-top-color: var(--color-danger); color: var(--color-danger); }
+/* The phase where it stands carries weight, not only colour. */
+.pz-box__phases > .is-active, .pz-box__phases > .is-held, .pz-box__phases > .is-failed { text-decoration: underline; text-underline-offset: 3px; }
+.pz-box__line { display: flex; align-items: center; gap: var(--space-2); min-width: 0; white-space: nowrap; overflow: hidden; }
+.pz-box__word { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.pz-box__since { color: var(--color-text-muted); }
+.pz-box__next { display: block; color: var(--color-text-muted); text-overflow: ellipsis; }
+/* Dialog */
+.pz-dlg { display: flex; flex-direction: column; gap: var(--space-5); }
+/* In the dialog the phases share its width — five fit without wrapping. */
+.pz-dlg .pz-stepper > div { flex: 1 1 0; min-width: 0; }
+.pz-dlg__head { font-size: var(--fs-ui-sm); font-weight: 600; margin: 0 0 var(--space-2); }
+.pz-dlg__now { display: grid; grid-template-columns: 5rem 1fr; gap: var(--space-2) var(--space-4); margin: 0; }
+.pz-dlg__now dt { font-weight: 600; color: var(--color-text-subtle); font-size: var(--fs-ui-sm); }
+.pz-dlg__now dd { margin: 0; }
+.pz-dlg__now p { margin: var(--space-1) 0 0; }
+.pz-dlg__note { color: var(--color-text-muted); white-space: pre-line; }
+.pz-dlg__tech { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-1) var(--space-4); margin: 0 0 var(--space-2); font-family: var(--font-mono); font-size: var(--fs-ui-xs); }
+.pz-dlg__tech > div { display: contents; }
+.pz-dlg__tech dt { color: var(--color-text-subtle); }
+.pz-dlg__tech dd { margin: 0; }
+.pz-dlg__links { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-right: auto; font-size: var(--fs-ui-sm); }
+.pz-steps, .pz-steps__sub { list-style: none; margin: 0; padding: 0; }
+.pz-steps > li {
+  display: grid; grid-template-columns: 1.25rem 1fr 9rem 6rem; gap: var(--space-2);
+  align-items: start; padding: var(--space-1) 0; border-bottom: 1px solid var(--color-border-subtle);
+  font-size: var(--fs-ui-sm);
+}
+.pz-steps__sign { line-height: 0; padding-top: 2px; }
+.pz-steps li.is-active > .pz-steps__sign svg { fill: currentColor; }
+.pz-steps li.is-active > .pz-steps__label { font-weight: 600; }
+.pz-steps li.is-pending { color: var(--color-text-muted); }
+.pz-steps__label .v2sub { display: block; }
+.pz-steps__at, .pz-steps__actor { color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.pz-steps__sub { margin-top: var(--space-1); }
+.pz-steps__sub > li { display: flex; gap: var(--space-2); align-items: center; font-weight: 400; color: var(--color-text-muted); }
 
 /* --- Baton bar: where did the time go ---------------------------------- */
 .pz-staffel { display: flex; height: 20px; border-radius: var(--radius-sm); overflow: hidden; }
@@ -2629,6 +2710,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* The process picture (0137) — its own row between title block and summary.
    Empty means gone, spacing included — like every slot of the head. */
 .v2ehead__process { margin-top: var(--space-4); }
+/* 0204: the process box beside the title (end) or under it (start). With a
+   side box the row may wrap — the title keeps 20rem before the box drops
+   below it (200 % zoom); without one nothing changes. */
+.v2ehead__top.has-side { flex-wrap: wrap; }
+.v2ehead__top.has-side > .v2ehead__id { flex: 1 1 20rem; }
+.v2ehead__side { flex: 0 1 var(--pz-box); min-width: 0; }
+.v2ehead__box { margin-top: var(--space-3); width: min(100%, var(--pz-box)); }
 .v2ehead__summary {
   margin-top: var(--space-4);
   font-size: 13.5px; line-height: 1.5; color: var(--color-text-muted);

@@ -20,6 +20,7 @@ const DATEV: BatonMeta = { key: "datev", label: "DATEV", color: "var(--color-suc
 const READY: BatonMeta = { key: "bereit", label: "Bereit", color: "var(--color-text-subtle)" };
 const SPIEGEL: BatonMeta = { key: "spiegel", label: "Spiegel", color: "var(--color-success)" };
 const NOBODY: BatonMeta = { key: "niemand", label: "Niemand", color: "var(--color-text-subtle)" };
+const LUDWIG: BatonMeta = { key: "ludwig", label: "Ludwig", color: "var(--color-text-muted)" };
 
 const PHASES: ProcessPhase[] = [
   { key: "book", label: "Buchen", sub: "Agent", states: ["queued", "running", "proposed"], status: "done" },
@@ -53,6 +54,21 @@ export const Failed: Story = {
       alarm
       phaseSince={{ book: "26.08.", review: "29.08." }}
     />
+  ),
+};
+
+/** A phase that hangs (0204): warning, never red — sign, word from `note`, and the baton. */
+export const Held: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-6)" }}>
+      <ProcessStepper
+        phases={withStatus({ review: "held" }).map((p) => (p.key === "review" ? { ...p, note: "Werte fehlen" } : p))}
+        owner={AGENT}
+        phaseSince={{ book: "26.08." }}
+      />
+      <ProcessStepper phases={withStatus({ review: "held" })} owner={AGENT} phaseSince={{ book: "26.08." }} />
+      <ProcessMini phases={withStatus({ review: "held" })} />
+    </div>
   ),
 };
 
@@ -107,7 +123,7 @@ export const Empty: Story = {
 export const Holders: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-3)", padding: "var(--space-6)" }}>
-      {[AGENT, READY, CLIENT, FIRM, BRIDGE, DATEV, SPIEGEL, NOBODY].map((o) => (
+      {[AGENT, LUDWIG, READY, CLIENT, FIRM, BRIDGE, DATEV, SPIEGEL, NOBODY].map((o) => (
         <Baton key={o.key} owner={o} />
       ))}
     </div>

@@ -316,6 +316,16 @@ export {
   type BatonKey,
   type BatonMeta,
 } from "./patterns/Process";
+export {
+  ProcessCell,
+  ProcessBox,
+  ProcessDialog,
+  ProcessPictureTrigger,
+  type ProcessPicture,
+  type ProcessLevel,
+  type ProcessStep,
+  type ProcessDialogDetail,
+} from "./patterns/ProcessPicture";
 
 /* ── Entitäten ── Konto */
 export {
