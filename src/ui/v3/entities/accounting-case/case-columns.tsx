@@ -25,8 +25,8 @@ import { asCurrency } from "@/ludwig/shared/money";
  *   row link would wrap it — `<a>` inside `<a>`. Both share `case-title.ts`
  *   instead, which is where the naming rule actually lives.
  * - **It does not colour the kind.** `CASE_KIND_LABEL` says in its own comment
- *   that it is not a status; the app colours `recurring_charge` anyway
- *   (finding L-53). Until an axis decides, the kind is a badge without tone.
+ *   that it is not a status; the app no longer colours `recurring_charge`
+ *   either (L-53, done in 8eb506ee). The kind is a badge without tone.
  */
 
 export type CaseColumn =
