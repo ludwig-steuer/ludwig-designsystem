@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — Nachprüfung 2026-09-27: M1–M3 behoben, M4 offen (Ausnahme nicht in der Guideline) |
+| Status | fertig — fremde Abnahme bestanden 2026-09-27 nach Nacharbeit `fe0b47e` und `4a8a112` |
 | Stufe | `patterns/Review.tsx` (Erweiterung `CheckItem`/`CheckItems`, neu `checkSummary`) · Seiten-Komposition `src/showcase/document/InputTaxTab.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: Prüfregeln mit Ergebnis, Fakten mit Antwort und Herkunft — nichts USt-Spezifisches im Baustein |
 | Quelle | Owner über ll-cto2, 2026-09-27: „nichts Spezielles für die USt-Prüfung, Prüfpunkte generell mit Ausprägungen/Größen" · App F310 (`modules/invoices/ui/tabs/VorsteuerTab.tsx`, `FactRows` als Platzhalter für diese Aufgabe) |
@@ -175,3 +175,7 @@ M4 — **benannte Ausnahme** (Claude, 2026-09-27, bis zum Spiegel-Lauf nach F310
 Ergebnis: nicht bestanden, nur noch M4 als Doku-Nachtrag. Code ist abgenommen.
 
 **Nacharbeit 2 (2026-09-27):** M4 ist **keine Ausnahme mehr** — die lokale Wortliste `VERDICT` ist entfernt. Das Urteil kommt als Daten (`verdict: { label, tone }`), so wie die App es aus `input_tax_verdict` auflöst; die drei Wörter stehen nur noch in den Story-Fixtures (Beispieldaten, wie Regeltitel und Begründungen). Damit entfällt die benannte Ausnahme oben. Zu M3: `vat_assessment_status.needs_agent` („Agent prüft") ist ab jetzt ausdrücklich in L-355 genannt; die App-Spec dazu heißt F307 im App-Repo (`app/docs/backlog/F307-*`), nicht in diesem.
+
+**Nachprüfung M4 2026-09-27 (fremder Abnahme-Agent), Stand `4a8a112`:** `InputTaxTab.tsx` hat keine Wortliste `VERDICT` mehr; das Urteil kommt als Daten (`verdict: { label, tone }`), wie die App es aus `input_tax_verdict` auflöst. Die Wörter stehen nur noch als Beispieldaten in den Story-Fixtures. Im Browser: NeedsFacts `v2callout--warning` „Fakten klären", Allowed `--success` „Abzug möglich", Forbidden `--danger` „Abzug gesperrt". `pnpm typecheck` grün. Damit gibt es keine Ausnahme mehr → M4 ✓. L-355 nennt jetzt `vat_assessment_status.needs_agent`, F307 liegt im App-Repo (`app/docs/backlog/F307-ludwig-is-the-ai-ui-wording.md`).
+
+Ergebnis: **bestanden.**
