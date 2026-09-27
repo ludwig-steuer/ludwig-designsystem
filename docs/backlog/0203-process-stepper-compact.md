@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-25, eigene Messung unten; fremde Abnahme steht aus |
+| Status | Abnahme — gebaut 2026-09-25; fremde Abnahme 2026-09-27 nicht bestanden (ein Mangel: fehlgeschlagene Phase nur über Farbe, siehe unten) |
 | Stufe | `patterns/` (Änderung an `Process.tsx`, Familie Process) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: ein Vorgang mit Phasen, dessen Kopf zeigt, wo er steht (wie 0137) |
 | Quelle | Owner-Befund zur Stapel-Detailseite über ll-cto2 (2026-09-25): „der Balken muss nicht die volle Breite einnehmen, technische Zwischenzustände nicht anzeigen" · Seitenprofil `docs/seiten/stapel-detail.md` (Zweifel 3) |
@@ -130,4 +130,42 @@ Eigene Messung (Bauer, keine fremde Abnahme), 2026-09-25:
 | `pnpm typecheck`, `pnpm build` | grün | ✓ |
 
 Offene Fragen mit Default entschieden: feste 160 px (`10rem`), `sub` bleibt (L-347 an die App).
-Abgenommen von / am: … (fremd) · Offene Punkte: L-347 in der App
+Fremde Abnahme, 2026-09-27 (Storybook :6107, Playwright, Viewport 1280 × 900 und 640 × 900; Kontrast aus `getComputedStyle` gegen den ersten deckenden Hintergrund):
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck`, `pnpm build` | beide am Stand `2063c21` ausgeführt: tsc ohne Fehler, „Storybook build completed successfully" | ✓ |
+| Datei nach Familie, Story daneben, Titel | `patterns/Process.tsx` + `Process.stories.tsx`, Titel `v3/Patterns/Prozess/Process` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `git show 5ba915c`: alle angefassten Kommentare, JSDoc und die Story-Beschreibung von `InHeader` englisch; `@when`/`@instead` an `ProcessStepper` vorhanden, stimmt mit dem Code (keine `.raw`-Zeile mehr). Unberührt deutsch geblieben: Abschnittskopf `v3.css` „Stepper: vier Phasen im Detail-Kopf", Story-Kommentare „Im Detail-Header…"/„In der Listenzeile…" und Literal-Schlüssel `mandant`, `bereit`, `spiegel`, `niemand` in `Process.stories.tsx` — nicht Teil von 0203, Nebenbefund | ✓ |
+| Kein Hex, kein px, keine Label-Map | Diff: kein Hex; neue Werte `10rem`, `var(--space-3)`; px nur in `v3.css` (erlaubt) und dort unverändert | ✓ |
+| Alle Stories vorhanden, Ausschlüsse begründet | `…process--in-header`, `…--failed`, `…--empty`, `v3-patterns-rahmen-entityheader--with-process` rendern; lädt/Fehler/leer nach Filter in der Spec begründet | ✓ |
+| Prüfliste §9 | V7 „jeder farbige Zustand hat Wort oder Icon" verletzt, siehe Mangel 1 | ✗ |
+| Im Browser angesehen | Screenshots `.playwright-mcp/0203-inheader-1280.png`, `0203-failed-1280.png`, `0203-entityheader-640.png` | ✓ |
+| Kein `.raw` im DOM | `querySelectorAll('.pz-stepper .raw').length` = 0 in `in-header`, `failed`, `empty`, `with-process`; kein Rohwert (`queued`, `review`, `exporting` …) als Text im Stepper | ✓ |
+| Breite je Phase = `--pz-phase`, Bild füllt den Kopf nicht | 1280: `--pz-phase` = `10rem`, Phasen 160 · 160 · 160 · 160 px; `with-process`: Linie endet bei 640 px, Kopf (`.v2ehead__process`) 898 px | ✓ |
+| Umbruch bei 200 % Zoom | Viewport 640: `in-header` und `with-process` je Phasen bei x = 0/160/320 in Zeile 1, vierte bei (0, 92), alle 160 px, kein Inhalt läuft über; `scrollWidth` = 640, kein Element mit waagrechtem Scroll | ✓ |
+| `@when` und Kopfkommentar ohne Rohzustände | `Process.tsx:14` „with owner and loops"; `@when` „phases, owner, loops. Raw states stay out …" | ✓ |
+| Staffelstab und Schleifen-Link unverändert | `in-header`: Baton „Kanzlei" in „Prüfen", Link `href="#"` „2× zurück an den Agenten · 1× neuer Beleg"; `with-process`: dieselben Texte (ohne `logHref`, kein Link); Code dieser Zeilen im Diff unberührt | ✓ |
+| Kontrast der Phasentexte | `in-header`: `.phase` aktiv/erledigt 10,75:1, ausstehend 4,51:1, `.who` 4,51:1; `failed`: `.phase` 5,60:1; `with-process` (weiße Karte): 11,64 / 4,88 / 4,88 | ✓ (ausstehend knapp über 4,5) |
+| Kein anderer Aufrufer erwartet Rohzustände | `grep` `\.raw`, `pz-stepper` in `src/`: nur `Process.tsx` und `v3.css`; `StateMachine.stories.tsx` (`InUse`) übergibt `states`, liest sie nicht | ✓ |
+
+**Mangel 1 (blockiert):** In `…--failed` unterscheidet sich die fehlgeschlagene
+Phase von der aktiven nur durch Farbe: roter Balken, rotes Phasenwort
+„Übergeben", roter Staffelstab. Der Staffelstab trägt das Owner-Icon
+(`lucide-share-2`) und das Owner-Wort „Übertragung", kein Wort und kein Zeichen
+für „fehlgeschlagen"; `aria-label`/`title` fehlen. Die Spec verspricht für
+`Failed` „rot, mit Wort" (§ Stories), §9 V7 und CLAUDE.md („Farbe niemals
+allein") verlangen es. In der App trug bisher die Rohzeile (`… · failed`) als
+einziges Element das Wort — mit ihrem Wegfall bleibt dort nur die Farbe.
+Vorschlag an den Bauer: in der Phase mit `status="failed"` eine Zeile mit dem
+Wort aus der Registry (oder dem Alarm-Icon aus `ACTION_ICON`/Registry plus Wort),
+dann `Failed` neu messen.
+
+**Nebenbefunde (blockieren 0203 nicht, gehören nicht zu dieser Änderung):**
+- Schleifen-Link in `in-header` ist 275 × 14,5 px hoch — unter der Hausregel
+  24 × 24 (§9, WCAG 2.5.8 wäre durch den Abstand erfüllt, da einziges Ziel). Vorbestehend.
+- App `batch-review/ui/Step9.tsx` nutzt die Klasse `.pz-stepper` direkt, ohne
+  `ProcessStepper`, und schreibt dort Rohzustände als Phasenwort (T4). Sie erbt
+  jetzt die festen 160-px-Spalten. Befund für die App, nicht für das Set.
+
+Abgenommen von / am: fremder Abnahme-Agent, 2026-09-27 · Ergebnis: nicht bestanden (Mangel 1) · Offene Punkte: Mangel 1; L-347 in der App
