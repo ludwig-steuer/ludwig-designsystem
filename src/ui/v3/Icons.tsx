@@ -438,7 +438,7 @@ export type EntityKey = keyof typeof ENTITY_ICON;
  * nothing (A7). Keys are the registry values of `document_category`, plus
  * `none` for a container or a document not (yet) classified.
  *
- * Owner question open (F308 §8): the five signs are a proposal.
+ * Approved by the owner on 2026-09-27 (F308 §8).
  */
 export const CATEGORY_ICON = {
   performance: {

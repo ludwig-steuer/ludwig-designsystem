@@ -605,7 +605,7 @@ export const Holders: Story = {
 /**
  * Welches Zeichen welche Belegkategorie meint (0205). Ein zweites, kleineres
  * Vokabular neben dem Beleg selbst (`Receipt`); die Farbe sagt nichts (A7).
- * Die fünf Zeichen sind ein Vorschlag an den Owner (F308 §8).
+ * Vom Owner freigegeben am 2026-09-27 (F308 §8).
  */
 export const Categories: Story = {
   render: () => (

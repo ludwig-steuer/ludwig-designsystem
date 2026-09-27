@@ -28,8 +28,7 @@ sein können, und lässt sie korrigieren.
   keinen Träger, keinen Stand; gemeinsam ist nur die Bauart.
 - **Neues Vokabular:** `CATEGORY_ICON` — fünf Kategorien + „ohne", je
   Zeichen, Wort, Bedeutung; kein Zeichen, das schon etwas anderes meint
-  (`Receipt` ist der Beleg selbst). **Owner-Frage** (F308 §8), gebaut mit
-  Vorschlag: Leistungsbeleg `FileText` · Zahlungsbeleg `Banknote` ·
+  (`Receipt` ist der Beleg selbst). Vom Owner freigegeben 2026-09-27: Leistungsbeleg `FileText` · Zahlungsbeleg `Banknote` ·
   Nachweisbeleg `ScrollText` · Interner Beleg `FileUser` · Auswertung
   `ChartColumn` · ohne Kategorie `File`.
 - **Spaltensets:** `kind` und `form` fallen aus allen Sets; die eine Spalte
@@ -108,7 +107,7 @@ Showcase `Seiten/Beleg-Einordnung`: `AllCells` (echte Liste: `DataTable` + `sour
 
 ## Offene Fragen (Owner)
 
-1. **Zeichen der fünf Kategorien** — Vorschlag oben. Ohne Antwort: so.
+1. ~~Zeichen der fünf Kategorien~~ **Entschieden (Owner 2026-09-27): wie vorgeschlagen** — FileText · Banknote · ScrollText · FileUser · ChartColumn · File.
 2. **Box neben oder unter der Prozess-Box?** Ohne Antwort: darunter.
 3. ~~Zeile 2 bei `narrow`?~~ **Entschieden (Owner 2026-09-27, über ll-senior):** entfällt, wie gebaut.
 
