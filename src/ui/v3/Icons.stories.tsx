@@ -18,6 +18,8 @@ import { IconButton } from "./primitives/IconButton";
 import { TextButton } from "./primitives/TextButton";
 import { EntityHeader } from "./patterns/EntityHeader";
 import { StatusBadge } from "./patterns/StatusBadge";
+import { Baton, HOLDER_MEANING, type BatonKey } from "./patterns/Process";
+import { STATE_SIGNS, StateIcon } from "./patterns/Review";
 import { AXIS_ENTITY, AXIS_LABEL } from "./patterns/entity-icons";
 import {
   ACTION_ICON,
@@ -533,6 +535,67 @@ export const InUse: Story = {
           <StatusBadge axis="accounting_case" status="needs_clarification" info={false} />
           <IconButton label="Schließen" icon={<ActionIcon action="close" size={14} />} />
         </div>
+      </Section>
+    </div>
+  ),
+};
+
+/** Sign · word · meaning, one row each — the shape shared by the two tables below. */
+function MeaningTable({ rows }: { rows: { key: string; sign: ReactNode; word?: string; meaning: string }[] }) {
+  return (
+    <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: "var(--container-wide)", fontSize: "var(--fs-ui-sm)" }}>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.key} style={{ borderTop: "1px solid var(--color-border-subtle)" }}>
+            <td style={{ padding: "var(--space-2) var(--space-3)", width: "12rem" }}>{r.sign}</td>
+            {r.word ? <td style={{ padding: "var(--space-2) var(--space-3)", width: "10rem", fontWeight: 600 }}>{r.word}</td> : null}
+            <td style={{ padding: "var(--space-2) var(--space-3)" }}>{r.meaning}</td>
+            <td style={{ padding: "var(--space-2) var(--space-3)", ...note }}>
+              Technisch: <code className="lw-mono">{r.key}</code>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+/**
+ * Welches Zeichen welchen Zustand meint (Owner 2026-09-27: „eine Definition,
+ * was welches Icon bedeutet, zentral"). Aus `STATE_SIGNS` gerendert — dieselbe
+ * Tabelle, aus der `StateIcon` zeichnet.
+ */
+export const States: Story = {
+  render: () => (
+    <div style={page}>
+      <Section
+        title="Zustand"
+        lead="Zeichen für den Stand eines Eintrags — in Listen, Schritten und im Prozessbild. Nie ohne Wort daneben; Farbe allein trägt nichts."
+      >
+        <MeaningTable rows={STATE_SIGNS.map((s) => ({ key: s.kind, sign: <StateIcon state={s.kind} />, word: s.label, meaning: s.meaning }))} />
+      </Section>
+    </div>
+  ),
+};
+
+/**
+ * Wer den Staffelstab hält — Zeichen und Wort je Träger, aus `HOLDER_MEANING`.
+ * Dieselbe Abbildung zeichnet `Baton` in Zelle, Box, Dialog und Stapelkopf.
+ */
+export const Holders: Story = {
+  render: () => (
+    <div style={page}>
+      <Section
+        title="Wer ist dran"
+        lead="Der Träger eines Vorgangs, immer als Zeichen und Wort. „Ludwig“ ist die KI (Guideline T1); die automatische Verarbeitung heißt „Verarbeitung“."
+      >
+        <MeaningTable
+          rows={(Object.keys(HOLDER_MEANING) as BatonKey[]).map((key) => ({
+            key,
+            sign: <Baton owner={{ key, label: HOLDER_MEANING[key].word, color: "var(--color-text)" }} />,
+            meaning: HOLDER_MEANING[key].meaning,
+          }))}
+        />
       </Section>
     </div>
   ),

@@ -41,17 +41,20 @@ export type StateKind =
   | "info";
 
 const ICONS = {
-  open: { Icon: Circle, tone: "muted", label: "offen" },
-  done: { Icon: CheckCircle2, tone: "success", label: "erledigt" },
-  edited: { Icon: PencilLine, tone: "info", label: "bearbeitet" },
-  returned: { Icon: Undo2, tone: "warning", label: "zurückgegeben" },
-  question: { Icon: HelpCircle, tone: "warning", label: "Frage offen" },
-  skipped: { Icon: CircleSlash, tone: "muted", label: "übersprungen" },
+  open: { Icon: Circle, tone: "muted", label: "offen", meaning: "Noch nicht angefangen oder noch nicht erreicht. Gefüllt: hier steht der Vorgang gerade." },
+  done: { Icon: CheckCircle2, tone: "success", label: "erledigt", meaning: "Abgeschlossen, nichts mehr zu tun." },
+  edited: { Icon: PencilLine, tone: "info", label: "bearbeitet", meaning: "Von Hand geändert — der Wert stammt nicht mehr aus dem Vorschlag." },
+  returned: { Icon: Undo2, tone: "warning", label: "zurückgegeben", meaning: "An den Vorgänger zurückgeschickt, er muss nachbessern." },
+  question: { Icon: HelpCircle, tone: "warning", label: "Frage offen", meaning: "Eine Rückfrage ist gestellt und noch nicht beantwortet." },
+  skipped: { Icon: CircleSlash, tone: "muted", label: "übersprungen", meaning: "Bewusst ausgelassen; für diesen Vorgang nicht nötig." },
   // The three steps of the scale come from the shared table (0197).
-  warning: { Icon: LEVEL_ICON.warning.icon, tone: "warning", label: LEVEL_ICON.warning.label },
-  error: { Icon: LEVEL_ICON.error.icon, tone: "danger", label: LEVEL_ICON.error.label },
-  info: { Icon: LEVEL_ICON.info.icon, tone: "info", label: LEVEL_ICON.info.label },
-} as const satisfies Record<StateKind, { Icon: typeof Circle; tone: string; label: string }>;
+  warning: { Icon: LEVEL_ICON.warning.icon, tone: "warning", label: LEVEL_ICON.warning.label, meaning: "Hängt: jemand muss handeln, aber nichts ist gescheitert." },
+  error: { Icon: LEVEL_ICON.error.icon, tone: "danger", label: LEVEL_ICON.error.label, meaning: "Gescheitert: so geht es nicht weiter." },
+  info: { Icon: LEVEL_ICON.info.icon, tone: "info", label: LEVEL_ICON.info.label, meaning: "Zur Kenntnis; es ist nichts zu tun." },
+} as const satisfies Record<StateKind, { Icon: typeof Circle; tone: string; label: string; meaning: string }>;
+
+/** Every state sign with its word and meaning — the one definition (owner 2026-09-27), rendered on „Grundlagen/Icons". */
+export const STATE_SIGNS = (Object.keys(ICONS) as StateKind[]).map((kind) => ({ kind, label: ICONS[kind].label, meaning: ICONS[kind].meaning }));
 
 const TONE_VAR: Record<string, string> = {
   muted: "var(--color-text-subtle)",

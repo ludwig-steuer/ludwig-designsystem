@@ -61,6 +61,23 @@ export type BatonKey =
   | "processing"
   | "niemand";
 
+/**
+ * What each holder of the baton is — the one definition (owner 2026-09-27),
+ * rendered on „Grundlagen/Icons". The word on screen comes from the caller;
+ * this says what the sign stands for.
+ */
+export const HOLDER_MEANING: Record<BatonKey, { word: string; meaning: string }> = {
+  agent: { word: "Ludwig", meaning: "Die KI arbeitet: ordnet zu, schlägt Buchungen vor, prüft." },
+  processing: { word: "Verarbeitung", meaning: "Automatische Verarbeitung: auslesen, zerlegen, importieren." },
+  bereit: { word: "bereit", meaning: "Liegt bereit, niemand arbeitet gerade daran." },
+  mandant: { word: "Mandant", meaning: "Wartet auf den Mandanten, z. B. auf eine Unterlage." },
+  kanzlei: { word: "Kanzlei", meaning: "Die Kanzlei ist dran: prüfen, entscheiden, freigeben." },
+  bridge: { word: "Übertragung", meaning: "Wird an DATEV übertragen." },
+  datev: { word: "DATEV", meaning: "Liegt bei DATEV: Prüfung oder Bestätigung steht aus." },
+  spiegel: { word: "Spiegel", meaning: "Wird im DATEV-Spiegel wiedergefunden und abgeglichen." },
+  niemand: { word: "niemand", meaning: "Niemand ist dran — der Vorgang ist zu Ende. Ohne Zeichen." },
+};
+
 export interface BatonMeta {
   key: BatonKey;
   label: string;
