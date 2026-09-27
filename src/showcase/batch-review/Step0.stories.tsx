@@ -77,7 +77,7 @@ export const DoneReportedIncomplete: Story = {
   ),
 };
 
-/** 4 — not finished in three places: warning, the three open ones first with count, example and jump; the period gap is one of them. */
+/** 4 — not finished in two places: warning, the two open ones first with count, example and jump; the period gap stands in its own group „Vollständigkeit" — the practice's work, not Ludwig's. */
 export const OpenPlaces: Story = {
   render: () => (
     <Step0Result
@@ -152,4 +152,9 @@ export const HandedOver: Story = {
       }}
     />
   ),
+};
+
+/** 9b — handed over although places stayed open (released „trotz offener Punkte"): the past tense names them, no button. */
+export const HandedOverWithOpen: Story = {
+  render: () => <Step0Result vm={{ ...BASE, ...THREE_OPEN, handedOver: true }} />,
 };

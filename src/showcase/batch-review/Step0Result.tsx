@@ -82,7 +82,13 @@ function Verdict({ vm }: { vm: Step0VM }) {
     return <StatusCallout tone="neutral" kicker="Ergebnis" title={`Ludwig arbeitet noch — seit ${vm.run.from}`} sub={<span className="s0-run">{runLine(vm)} · die Liste unten ist vorläufig</span>} />;
   }
   if (vm.handedOver) {
-    return <StatusCallout tone="neutral" kicker="Ergebnis" title="Ludwig war fertig — der Stapel ist übergeben" sub={quote} />;
+    // The practice may release despite open places (HandoverActions) — then the
+    // past tense says what stayed open. Neutral, no button either way.
+    const n = vm.open.length;
+    const title = n
+      ? `Der Stapel ist übergeben — ${n} ${n === 1 ? "Stelle blieb" : "Stellen blieben"} offen`
+      : "Ludwig war fertig — der Stapel ist übergeben";
+    return <StatusCallout tone="neutral" kicker="Ergebnis" title={title} sub={quote} />;
   }
   if (vm.open.length > 0) {
     return (
@@ -137,7 +143,11 @@ function Tasks({ vm }: { vm: Step0VM }) {
         ...(cov.step ? { right: <Link href={cov.step.href}>{cov.step.label}</Link> } : {}),
       }
     : null;
-  const open = [...(coverageRow && !cov!.complete ? [coverageRow] : []), ...vm.open.map((t) => row(t, true))];
+  // The period gap is the practice's work (a missing statement), not Ludwig's
+  // unfinished work: it gets a group of its own before „Offen", so the number
+  // in the verdict equals the rows under „Offen" (F314 feedback).
+  const gap = coverageRow && !cov!.complete ? [coverageRow] : [];
+  const open = vm.open.map((t) => row(t, true));
   const done = [...vm.done.map((t) => row(t, false)), ...(coverageRow && cov!.complete ? [coverageRow] : [])];
   const running = vm.run.state === "running";
   return (
@@ -147,6 +157,7 @@ function Tasks({ vm }: { vm: Step0VM }) {
       <div>
         <TaskList
           groups={[
+            { key: "coverage", label: "Vollständigkeit", rows: gap },
             // Nothing open: no empty „Offen" bar — the one folded line says it all.
             { key: "open", label: "Offen", rows: open },
             {
@@ -154,7 +165,10 @@ function Tasks({ vm }: { vm: Step0VM }) {
               label: "Erledigt",
               rows: done,
               folded: {
-                summary: open.length ? `${done.length} von ${done.length + open.length} erledigt` : `Alle ${done.length} Aufgaben erledigt`,
+                summary:
+                  open.length + gap.length
+                    ? `${done.length} von ${done.length + open.length + gap.length} erledigt`
+                    : `Alle ${done.length} Aufgaben erledigt`,
               },
             },
           ]}

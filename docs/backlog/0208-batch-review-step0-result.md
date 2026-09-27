@@ -62,3 +62,16 @@ Auffälligkeit (P52 später), keine „seit Rückgabe erledigt"-Markierung.
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
 | … | … | |
+
+## Nachtrag 2026-09-27 (Feedback ll-cto)
+
+1. **Zahl im Urteil = Zeilen unter „Offen".** Die Lücke im Zeitraum (bzw.
+   offene Personenkonten) ist Arbeit der Kanzlei, nicht Ludwigs Unfertigkeit:
+   sie steht in einer eigenen Gruppe **„Vollständigkeit"** vor „Offen", solange
+   sie offen ist; ist der Zeitraum voll, liegt sie in der Faltzeile „Erledigt".
+   Das Urteil zählt nur Ludwigs offene Zeilen.
+2. **Übergeben mit offenen Stellen** (Freigabe „trotz offener Punkte"): „Der
+   Stapel ist übergeben — 2 Stellen blieben offen", neutral, ohne Knopf, Liste
+   wie gehabt. Story `HandedOverWithOpen`.
+3. Zur Kenntnis: Altberichte mit „Was jetzt zu tun ist" zeigt die App unter der
+   Faltzeile „Was Ludwig gemacht hat" (alles außer Auffälligkeiten).
