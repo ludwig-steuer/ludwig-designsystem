@@ -12,7 +12,7 @@ const meta: Meta<typeof ProcessStepper> = { title: "v3/Patterns/Prozess/Process"
 export default meta;
 type Story = StoryObj<typeof ProcessStepper>;
 
-const AGENT: BatonMeta = { key: "agent", label: "Agent", color: "var(--color-accent-700)" };
+const AGENT: BatonMeta = { key: "agent", label: "Ludwig", color: "var(--color-accent-700)" };
 const CLIENT: BatonMeta = { key: "mandant", label: "Mandant", color: "var(--color-warning)" };
 const FIRM: BatonMeta = { key: "kanzlei", label: "Kanzlei", color: "var(--color-primary)" };
 const BRIDGE: BatonMeta = { key: "bridge", label: "Übertragung", color: "var(--color-info)" };
@@ -20,10 +20,10 @@ const DATEV: BatonMeta = { key: "datev", label: "DATEV", color: "var(--color-suc
 const READY: BatonMeta = { key: "bereit", label: "Bereit", color: "var(--color-text-subtle)" };
 const SPIEGEL: BatonMeta = { key: "spiegel", label: "Spiegel", color: "var(--color-success)" };
 const NOBODY: BatonMeta = { key: "niemand", label: "Niemand", color: "var(--color-text-subtle)" };
-const LUDWIG: BatonMeta = { key: "ludwig", label: "Ludwig", color: "var(--color-text-muted)" };
+const PROCESSING: BatonMeta = { key: "processing", label: "Verarbeitung", color: "var(--color-text-muted)" };
 
 const PHASES: ProcessPhase[] = [
-  { key: "book", label: "Buchen", sub: "Agent", states: ["queued", "running", "proposed"], status: "done" },
+  { key: "book", label: "Buchen", sub: "Ludwig", states: ["queued", "running", "proposed"], status: "done" },
   { key: "review", label: "Prüfen", sub: "Kanzlei", states: ["review", "returned", "approved"], status: "active" },
   { key: "handover", label: "Übergeben", sub: "Übertragung", states: ["exporting", "exported"], status: "pending" },
   { key: "lookup", label: "Nachlesen", sub: "DATEV", states: ["mirrored", "reconciled"], status: "pending" },
@@ -93,9 +93,9 @@ export const InLog: Story = {
   render: () => (
     <BatonBar
       segments={[
-        { owner: AGENT, share: 0.1, title: "Agent · 26.08.–27.08. · 2 Tage" },
+        { owner: AGENT, share: 0.1, title: "Ludwig · 26.08.–27.08. · 2 Tage" },
         { owner: CLIENT, share: 0.55, title: "Mandant · 27.08.–05.09. · 9 Tage" },
-        { owner: AGENT, share: 0.05, title: "Agent · 05.09. · 4 Stunden" },
+        { owner: AGENT, share: 0.05, title: "Ludwig · 05.09. · 4 Stunden" },
         { owner: FIRM, share: 0.3, title: "Kanzlei · 05.09.–10.09. · 5 Tage" },
       ]}
     />
@@ -123,7 +123,7 @@ export const Empty: Story = {
 export const Holders: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-3)", padding: "var(--space-6)" }}>
-      {[AGENT, LUDWIG, READY, CLIENT, FIRM, BRIDGE, DATEV, SPIEGEL, NOBODY].map((o) => (
+      {[AGENT, PROCESSING, READY, CLIENT, FIRM, BRIDGE, DATEV, SPIEGEL, NOBODY].map((o) => (
         <Baton key={o.key} owner={o} />
       ))}
     </div>

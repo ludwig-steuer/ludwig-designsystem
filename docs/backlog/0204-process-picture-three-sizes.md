@@ -31,7 +31,7 @@ liest sie dafür bis zu sieben Achsen.
   2. `ProcessPhase.note?: string` — das Wort unter einer Phase, die hängt oder
      gescheitert ist („Werte fehlen"). Ohne `note` steht das Wort der Stufe
      („Warnung", „Fehler") wie seit 0203.
-  3. `BatonKey` + **`ludwig`** — das System als Träger, Zeichen `job`
+  3. `BatonKey` + **`processing`** (zuerst `ludwig`, umbenannt nach Owner-Entscheid 2026-09-27) — das System als Träger, Zeichen `job`
      (Verarbeitung). Wort „Ludwig": Ludwig spricht in der dritten Person
      (CLAUDE.md, Sprache), also ist Ludwig auch der, der arbeitet.
   4. `EntityHeader.processPlacement?: "row" | "start" | "end"` — die Box
@@ -180,7 +180,7 @@ Verlauf im Dialog; die Box lädt mit dem Kopf.
 ## Offene Fragen
 
 1. ~~Box links oder rechts?~~ **Entschieden (Owner 2026-09-27): rechts** — links, was es ist; rechts Stand und Aktionen, für alle Entitäten (Standard §3). Die App nimmt `processPlacement="end"`.
-2. **„Ludwig" als Träger-Wort?** Owner 2026-09-27: „gute Idee" — offen ist nur die Abgrenzung Ludwig (KI) · Agent · Verarbeitung, siehe Rückfrage.
+2. ~~„Ludwig" als Träger-Wort?~~ **Entschieden (Owner 2026-09-27): Ludwig ist die KI.** Der Träger `agent` heißt „Ludwig"; die automatische Verarbeitung ist der Träger `processing` mit dem Wort „Verarbeitung" (Zeichen `job`). Der Schlüssel `ludwig` aus dem ersten Bau heißt jetzt `processing` (Guideline T1).
 
 ## Abnahmekriterien
 

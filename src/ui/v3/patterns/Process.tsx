@@ -58,7 +58,7 @@ export type BatonKey =
   | "bridge"
   | "datev"
   | "spiegel"
-  | "ludwig"
+  | "processing"
   | "niemand";
 
 export interface BatonMeta {
@@ -100,8 +100,9 @@ function OwnerSign({ owner }: { owner: BatonMeta }) {
     case "datev":
     case "spiegel":
       return <EntityIcon entity="datev-mirror" />;
-    // Ludwig itself at work (reading, importing) — the sign of processing (0204).
-    case "ludwig":
+    // Automatic processing at work (reading, importing) — the sign of a job (0204).
+    // Ludwig is the AI and holds the baton as `agent` (owner 2026-09-27).
+    case "processing":
       return <EntityIcon entity="job" />;
     case "niemand":
       // **No sign, but the space.** The absence of a holder has no picture;
@@ -217,7 +218,7 @@ export function ProcessStepper({
     loops?.returned ? (
       <span className="pz-loop" key="returned">
         <ActionIcon action="retry" size={12} />
-        {loops.returned}× zurück an den Agenten
+        {loops.returned}× zurück an Ludwig
       </span>
     ) : null,
     loops?.reopened ? (

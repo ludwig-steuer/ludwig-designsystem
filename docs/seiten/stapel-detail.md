@@ -22,7 +22,7 @@
 
 - **Fertig ist sie, wenn** sie den nächsten Schritt gedrückt hat (Prüfung
   übernehmen, zur Abnahme, zur Übergabe, erneut übertragen, zur Nachlese) oder
-  gesehen hat, dass jemand anderes dran ist (Agent, Mandant, DATEV).
+  gesehen hat, dass jemand anderes dran ist (Ludwig, Mandant, DATEV).
 - **Misslungen ist die Seite, wenn** sie zwischen fünf gleich lauten Knöpfen
   den falschen drückt — „Zurücksetzen" statt „Zur Abnahme" — oder wenn der
   nächste Schritt fehlt, weil der Zustand ihn nicht zeigen kann (heute bei
@@ -50,7 +50,7 @@ Ludwig vergessen hat, muss den einen Knopf ohne Suchen finden.
 |---|---|
 | Pager | `RecordPager` ohne Menge, `back` = „Stapel" (die Liste nennen, nie „Zurück", V14). Ersetzt „← Zurück zur Liste" |
 | Kopf | `overline` „Stapel 2026-0009" · `title` Bezeichnung · `status` `StatusBadge` · `meta` Zeitraum · Mandantenstapel · Nachtrag zu … · Runde n · `process` Prozessbild **mit** Staffelstab (der Baton rechts oben fällt weg, L-346) · `facts` höchstens vier: Buchungen (freigegeben / Vorschlag), Klärungen offen, Belege erledigt, Durchgänge · `actions` nach der Tabelle unten |
-| Signal | nur, wenn die Kanzlei dran ist oder ein Fehler vorliegt: `StatusCallout`, der Titel nennt den Stand in einem Satz („Der Stapel wartet auf Ihre Prüfung"), der Knopf ist `batchActions().primary`; `failed` immer als `danger` — mit dem Wortlaut von DATEV aus `datevError`, ohne ihn mit „DATEV hat den Stapel abgelehnt". Wartet der Stapel auf Agent oder DATEV oder ist er zu Ende, gibt es kein Signal und keinen Satz im Kopf (D22, §3.2) — die Sätze aus `batchActions().info` stehen hinter dem (i) des Zustands |
+| Signal | nur, wenn die Kanzlei dran ist oder ein Fehler vorliegt: `StatusCallout`, der Titel nennt den Stand in einem Satz („Der Stapel wartet auf Ihre Prüfung"), der Knopf ist `batchActions().primary`; `failed` immer als `danger` — mit dem Wortlaut von DATEV aus `datevError`, ohne ihn mit „DATEV hat den Stapel abgelehnt". Wartet der Stapel auf Ludwig oder DATEV oder ist er zu Ende, gibt es kein Signal und keinen Satz im Kopf (D22, §3.2) — die Sätze aus `batchActions().info` stehen hinter dem (i) des Zustands |
 | Reiter | sechs, siehe unten |
 | Körper | D-L1; Übersicht in den fünf Zonen |
 
@@ -63,15 +63,15 @@ sie stehen.
 
 | Zustand | Signal (ein Knopf) | Kopf sichtbar | Menü „Weitere Aktionen" |
 |---|---|---|---|
-| `agent` | — (wartet auf den Agenten, D22) | Ansehen | Verwerfen (danger) |
-| `prepared` | Prüfung übernehmen — auch bei offenen Nachforderungen (Staffelstab „Mandant (wartet)"), weil die Kanzlei trotzdem übernehmen kann | Ansehen | An Agenten zurückgeben · Zurücksetzen (danger) · Verwerfen (danger) |
-| `review` | Zur Abnahme | — | An Agenten zurückgeben · Zurücksetzen (danger) · Verwerfen (danger) |
+| `agent` | — (wartet auf Ludwig, D22) | Ansehen | Verwerfen (danger) |
+| `prepared` | Prüfung übernehmen — auch bei offenen Nachforderungen (Staffelstab „Mandant (wartet)"), weil die Kanzlei trotzdem übernehmen kann | Ansehen | An Ludwig zurückgeben · Zurücksetzen (danger) · Verwerfen (danger) |
+| `review` | Zur Abnahme | — | An Ludwig zurückgeben · Zurücksetzen (danger) · Verwerfen (danger) |
 | `ready`, Übergabeweg CSV (Staffelstab Kanzlei) | Zur Übergabe | Freigabe zurücknehmen | — |
 | `ready`, Übergabeweg Bridge (Staffelstab Bridge) | — (wartet auf die Bridge, D22) | Transport ansehen · Freigabe zurücknehmen | — |
 | `exporting`, `inspection` | — (wartet auf Bridge bzw. DATEV, D22) | Transport ansehen | — |
 | `failed` | Erneut übertragen + Fehlertext (`danger`) | Protokoll ansehen · Freigabe zurücknehmen | — |
 | `confirmed` (Staffelstab Spiegel) | — (wartet auf den Spiegel, D22) | Transport ansehen | — |
-| `mirrored` (Staffelstab Agent) | — (der Agent macht die Nachlese, D22) | Nachlese ansehen | — |
+| `mirrored` (Staffelstab Ludwig) | — (Ludwig macht die Nachlese, D22) | Nachlese ansehen | — |
 | `closed` | — (Endzustand) | Nachlese ansehen | — |
 | `cancelled` | — (Endzustand) | Ansehen | — |
 
@@ -112,11 +112,11 @@ Entitätsprofils „entstanden in" und steht in der Technik; der Dialog von
 
 | Nebenjob | Wie oft (geschätzt) | Darf kosten |
 |---|---|---|
-| Stapel an den Agenten zurückgeben | selten, je Stapel höchstens einmal | Menü + Dialog |
+| Stapel an Ludwig zurückgeben | selten, je Stapel höchstens einmal | Menü + Dialog |
 | Zurücksetzen, Verwerfen | sehr selten | Menü + Dialog mit Folge im Knopf |
 | Freigabe zurücknehmen | selten | ein sichtbarer Knopf in `ready`/`failed` |
 | Export-Historie ansehen | selten, nach der Übertragung | einen Reiter (Technik) und einen Klick |
-| Übergabebericht des Agenten lesen | je Durchgang | einen Reiter (Durchgänge) |
+| Übergabebericht von Ludwig lesen | je Durchgang | einen Reiter (Durchgänge) |
 
 ## Was hier nicht hingehört
 
@@ -157,6 +157,8 @@ Entitätsprofils „entstanden in" und steht in der Technik; der Dialog von
 | §2.4 / D15 „p50 ≤ 1 → Zeile in Zone 3" | die Zahl der Durchgänge (p50 1,5, zwischen den Stufen) steht als Kopf-Fakt „Durchgänge", nicht als Zeile in Zone 3; der Weg ist der Reiter mit Zähler | Die vier Zähler des Stapels stehen zusammen in der Faktenzeile; dieselbe Zahl in Zone 3 wäre sie zweimal auf dem ersten Bildschirm (D24). Eingetragen bei der fremden Prüfung 2026-09-27; Owner-Bestätigung offen |
 
 **Nachtrag 2026-09-27 (L-349, entschieden von ll-cto nach `app/docs/topics/datev.md`, gebaut in F304 `a16f89bd`):** Staffelstab und Signal sagen in jedem Zustand dasselbe — ein Hauptknopf steht genau dann, wenn die Kanzlei dran ist. `ready` hängt am Übergabeweg (`platform_clients.datev_export_method`).
+
+**Nachtrag 2026-09-27 (Owner):** Ludwig ist die KI — wo die Seite den Buchungsagenten nennt, steht „Ludwig" (Guideline T1, Befund L-355).
 
 ## Prüfung
 

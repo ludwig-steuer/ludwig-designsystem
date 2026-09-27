@@ -15,8 +15,8 @@ const meta: Meta<typeof ProcessCell> = { title: "v3/Patterns/Prozess/ProcessPict
 export default meta;
 type Story = StoryObj<typeof ProcessCell>;
 
-const AGENT: BatonMeta = { key: "agent", label: "Agent", color: "var(--color-accent-700)" };
-const LUDWIG: BatonMeta = { key: "ludwig", label: "Ludwig", color: "var(--color-text-muted)" };
+const AGENT: BatonMeta = { key: "agent", label: "Ludwig", color: "var(--color-accent-700)" };
+const PROCESSING: BatonMeta = { key: "processing", label: "Verarbeitung", color: "var(--color-text-muted)" };
 const FIRM: BatonMeta = { key: "kanzlei", label: "Kanzlei", color: "var(--color-primary)" };
 const NOBODY: BatonMeta = { key: "niemand", label: "niemand", color: "var(--color-text-subtle)" };
 
@@ -48,7 +48,7 @@ const CELLS: ProcessPicture[] = [
   pic({ phases: phases(5, 1, "failed", "Auslese abgebrochen"), headline: "Auslese abgebrochen", level: "error" }),
   pic({ phases: phases(5, 5), headline: "In DATEV", holder: NOBODY }),
   pic({ phases: phases(3, 3), headline: "Keine Buchung nötig", holder: NOBODY }),
-  pic({ phases: phases(2, 1), headline: "Wird ausgelesen", level: "info", holder: LUDWIG }),
+  pic({ phases: phases(2, 1), headline: "Wird ausgelesen", level: "info", holder: PROCESSING }),
   pic({ phases: phases(1, 1), headline: "Über Import erledigt", holder: NOBODY }),
   pic({ phases: [], headline: "Gelöscht", holder: NOBODY }),
 ];
@@ -107,9 +107,9 @@ const BOX_RUNNING = pic({
   phases: phases(5, 1),
   headline: "Wird ausgelesen",
   level: "info",
-  holder: LUDWIG,
+  holder: PROCESSING,
   running: { since: "seit 40 s", live: true },
-  next: "Der Agent ordnet den Beleg einem Sachverhalt zu.",
+  next: "Ludwig ordnet den Beleg einem Sachverhalt zu.",
 });
 
 /** Three lines and two lines at the same height; running with its time; held with sign and word. */
@@ -145,33 +145,33 @@ export const BoxZoom: Story = {
 };
 
 const LONG_NOTE =
-  "Der Agent hat die Rechnung an die Kanzlei gegeben: Der Leistungszeitraum fehlt, die USt-IdNr. des Lieferanten ist nicht lesbar, und der Betrag weicht um 0,12 € von der Summe der Positionen ab. Bitte prüfen Sie, ob eine Teillieferung vorliegt, und ergänzen Sie die fehlenden Angaben am Beleg, damit gebucht werden kann.";
+  "Ludwig hat die Rechnung an die Kanzlei gegeben: Der Leistungszeitraum fehlt, die USt-IdNr. des Lieferanten ist nicht lesbar, und der Betrag weicht um 0,12 € von der Summe der Positionen ab. Bitte prüfen Sie, ob eine Teillieferung vorliegt, und ergänzen Sie die fehlenden Angaben am Beleg, damit gebucht werden kann.";
 
 const HELD = pic({
   phases: phases(5, 1, "held", "Kanzlei prüft"),
   headline: "Kanzlei prüft",
   level: "warning",
   holder: FIRM,
-  next: "Nach Ihrer Entscheidung bucht der Agent.",
+  next: "Nach Ihrer Entscheidung bucht Ludwig.",
 });
 
 const detail = (history: ProcessDialogDetail["history"]): ProcessDialogDetail => ({
   title: "RE-2026-0815 · Musterbau Schneider Bauunternehmung GmbH & Co. KG, Niederlassung Süd",
   pathLabel: "Weg einer Rechnung",
-  explanation: "Der Agent konnte den Beleg nicht allein klären.",
-  reason: "Vom Agenten übergeben",
+  explanation: "Ludwig konnte den Beleg nicht allein klären.",
+  reason: "Von Ludwig übergeben",
   note: LONG_NOTE,
   phaseSince: { Eingang: "12.09." },
   steps: [
     { phase: "Eingang", label: "Datei angekommen", status: "done", at: "12.09.2026 09:14", actor: "Mandant" },
     { phase: "Eingang", label: "Dateikorb freigegeben", status: "done", at: "12.09.2026 09:14", actor: "Mandant" },
-    { phase: "Auslesen", label: "Einordnen", status: "done", at: "12.09.2026 09:15", actor: "Ludwig" },
+    { phase: "Auslesen", label: "Einordnen", status: "done", at: "12.09.2026 09:15", actor: "Verarbeitung" },
     {
       phase: "Auslesen",
       label: "Auslesen",
       status: "done",
       at: "12.09.2026 09:16",
-      actor: "Ludwig",
+      actor: "Verarbeitung",
       sub: [
         { label: "Eingeordnet", status: "done" },
         { label: "Ausgelesen", status: "done" },
@@ -180,8 +180,8 @@ const detail = (history: ProcessDialogDetail["history"]): ProcessDialogDetail =>
       ],
     },
     { phase: "Auslesen", label: "Werte prüfen", status: "held", actor: "Kanzlei", note: "Leistungszeitraum fehlt" },
-    { phase: "Buchen", label: "Sachverhalt zuordnen", status: "pending", actor: "Agent" },
-    { phase: "Buchen", label: "Buchung vorschlagen", status: "pending", actor: "Agent" },
+    { phase: "Buchen", label: "Sachverhalt zuordnen", status: "pending", actor: "Ludwig" },
+    { phase: "Buchen", label: "Buchung vorschlagen", status: "pending", actor: "Ludwig" },
     { phase: "Prüfen", label: "Buchung prüfen", status: "pending", actor: "Kanzlei" },
     { phase: "DATEV", label: "An DATEV übergeben", status: "pending" },
     { phase: "DATEV", label: "In DATEV bestätigt", status: "pending" },
@@ -226,7 +226,7 @@ export const DialogHistory: Story = {
         label="Verlauf gefüllt"
         d={detail([
           { id: "1", at: "2026-09-12T09:14:00+02:00", message: "Datei angekommen", level: "info", actor: { kind: "user", label: "Mandant" } },
-          { id: "2", at: "2026-09-13T08:02:00+02:00", message: "An die Kanzlei übergeben: Werte fehlen", level: "warning", actor: { kind: "agent", label: "Agent" } },
+          { id: "2", at: "2026-09-13T08:02:00+02:00", message: "An die Kanzlei übergeben: Werte fehlen", level: "warning", actor: { kind: "agent", label: "Ludwig" } },
         ])}
       />
       <Opener label="Verlauf leer" d={detail([])} />
