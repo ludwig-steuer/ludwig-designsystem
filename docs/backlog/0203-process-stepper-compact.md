@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-25; fremde Abnahme 2026-09-27 nicht bestanden (ein Mangel: fehlgeschlagene Phase nur über Farbe, siehe unten) |
+| Status | fertig — gebaut 2026-09-25, fremd abgenommen 2026-09-27 nach Nacharbeit V7 (`ef22a97`) |
 | Stufe | `patterns/` (Änderung an `Process.tsx`, Familie Process) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: ein Vorgang mit Phasen, dessen Kopf zeigt, wo er steht (wie 0137) |
 | Quelle | Owner-Befund zur Stapel-Detailseite über ll-cto2 (2026-09-25): „der Balken muss nicht die volle Breite einnehmen, technische Zwischenzustände nicht anzeigen" · Seitenprofil `docs/seiten/stapel-detail.md` (Zweifel 3) |
@@ -139,7 +139,7 @@ Fremde Abnahme, 2026-09-27 (Storybook :6107, Playwright, Viewport 1280 × 900 un
 | Code englisch; `@when`/`@instead` an jedem Export | `git show 5ba915c`: alle angefassten Kommentare, JSDoc und die Story-Beschreibung von `InHeader` englisch; `@when`/`@instead` an `ProcessStepper` vorhanden, stimmt mit dem Code (keine `.raw`-Zeile mehr). Unberührt deutsch geblieben: Abschnittskopf `v3.css` „Stepper: vier Phasen im Detail-Kopf", Story-Kommentare „Im Detail-Header…"/„In der Listenzeile…" und Literal-Schlüssel `mandant`, `bereit`, `spiegel`, `niemand` in `Process.stories.tsx` — nicht Teil von 0203, Nebenbefund | ✓ |
 | Kein Hex, kein px, keine Label-Map | Diff: kein Hex; neue Werte `10rem`, `var(--space-3)`; px nur in `v3.css` (erlaubt) und dort unverändert | ✓ |
 | Alle Stories vorhanden, Ausschlüsse begründet | `…process--in-header`, `…--failed`, `…--empty`, `v3-patterns-rahmen-entityheader--with-process` rendern; lädt/Fehler/leer nach Filter in der Spec begründet | ✓ |
-| Prüfliste §9 | V7 „jeder farbige Zustand hat Wort oder Icon" verletzt, siehe Mangel 1 | ✗ |
+| Prüfliste §9 | erste Prüfung: V7 verletzt (Mangel 1); Nachprüfung nach `ef22a97` siehe unten | ✓ |
 | Im Browser angesehen | Screenshots `.playwright-mcp/0203-inheader-1280.png`, `0203-failed-1280.png`, `0203-entityheader-640.png` | ✓ |
 | Kein `.raw` im DOM | `querySelectorAll('.pz-stepper .raw').length` = 0 in `in-header`, `failed`, `empty`, `with-process`; kein Rohwert (`queued`, `review`, `exporting` …) als Text im Stepper | ✓ |
 | Breite je Phase = `--pz-phase`, Bild füllt den Kopf nicht | 1280: `--pz-phase` = `10rem`, Phasen 160 · 160 · 160 · 160 px; `with-process`: Linie endet bei 640 px, Kopf (`.v2ehead__process`) 898 px | ✓ |
@@ -168,6 +168,19 @@ dann `Failed` neu messen.
   `ProcessStepper`, und schreibt dort Rohzustände als Phasenwort (T4). Sie erbt
   jetzt die festen 160-px-Spalten. Befund für die App, nicht für das Set.
 
-Abgenommen von / am: fremder Abnahme-Agent, 2026-09-27 · Ergebnis: nicht bestanden (Mangel 1) · Offene Punkte: Mangel 1; L-347 in der App
+Erste Prüfung: nicht bestanden (Mangel 1).
 
 **Nacharbeit 2026-09-27 (Bauer), zur Nachprüfung:** V7 — die fehlgeschlagene Phase trägt jetzt eine eigene Zeile `StateIcon error` + „Fehler" (Wort aus `LEVEL_ICON`, keine neue Vokabel), Farbe `--color-danger`, gemessen 5,6:1 auf dem Seitengrund (Story `Failed`). Nebenbefunde des Abnehmers: Schleifen-Link 14,5 px hoch (älter als 0203, Hausregel 24 px) → offen im Set; App `batch-review/ui/Step9.tsx` nutzt `.pz-stepper` direkt mit Rohzuständen → L-348.
+
+**Nachprüfung Mangel 1 (fremder Abnahme-Agent, 2026-09-27, Stand `ef22a97`), Story `v3-patterns-prozess-process--failed`, Viewport 1280:**
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Wort sichtbar | `.pz-stepper .who.is-failed` vorhanden, `innerText` „Fehler", Höhe 18,6 px, `visibility: visible`; nur in der Phase mit `status="failed"` | ✓ |
+| Icon mit Namen | `svg.lucide-circle-x`, 15 × 15 px, `role="img"`, `aria-label="Fehler"`, Strich 1,5 | ✓ |
+| Kontrast ≥ 4,5:1 | Text `rgb(168, 64, 60)` (`--color-danger`) 5,60:1, Icon-Strich 5,60:1 gegen den Seitengrund | ✓ |
+| Nichts springt | alle vier Phasen 160 × 100,8 px, gleiche Oberkante (y = 16); kein waagrechter Scroll | ✓ |
+
+Hinweis, blockiert nicht: Icon (`aria-label`) und Text nennen beide „Fehler" — eine Vorlesehilfe sagt es zweimal. Wo das Wort daneben steht, könnte das Icon `aria-hidden` sein (`StateIcon`, betrifft alle Aufrufer, nicht 0203).
+
+Abgenommen von / am: fremder Abnahme-Agent, 2026-09-27 · Ergebnis: bestanden nach Nacharbeit · Offene Punkte: Schleifen-Link 24 px (offen im Set), L-347/L-348 in der App
