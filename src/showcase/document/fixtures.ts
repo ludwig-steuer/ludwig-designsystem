@@ -143,7 +143,6 @@ export const HISTORY = [
 export const inputTaxHref = tabHref("input_tax");
 export const historyHref = tabHref("timeline");
 export const partnerHref = "?geschaeftspartner=bp-880";
-export const batchHref = "?stapel=2026-08";
 
 /**
  * An open clarification on this document — in the clarification family's view

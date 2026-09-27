@@ -10,7 +10,7 @@ import { InlineEdit } from "@/ui/v3/primitives/InlineEdit";
 import { MenuItem, OverflowMenu } from "@/ui/v3/primitives/OverflowMenu";
 
 import { DocumentPage, overviewBoxes } from "./DocumentPage";
-import { documentFixture, documentDefects, CLARIFICATION, MUSTER_PDF, caseHref, batchHref } from "./fixtures";
+import { documentFixture, documentDefects, CLARIFICATION, MUSTER_PDF, caseHref } from "./fixtures";
 
 /**
  * Die Rechnung — neun Zustände derselben Seite (0144, R1–R9).
@@ -62,7 +62,6 @@ export const Clean: Story = {
         document={documentFixture()}
         previewUrl={MUSTER_PDF}
         summary="Miete Musterstraße 12, August 2026"
-        batchHref={batchHref}
         {...overviewBoxes()}
       />
     </DocumentPage>

@@ -9,7 +9,6 @@ import { Time } from "../../primitives/Time";
 import { StateIcon } from "../../patterns/Review";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import {
-  SourceDocumentCompletion,
   clipEnd,
   clipMiddle,
   sourceDocumentIdentifier,
@@ -108,11 +107,8 @@ export function SourceDocumentFacts({
   provenance,
   title = "Belegdaten",
   counterpartyHref,
-  explainCompletion,
-  batchHref,
-  completion = true,
 }: {
-  /** The same row the list gets — kind, counterparty, both dates, completion, `detail`. */
+  /** The same row the list gets — kind, counterparty, both dates, `detail`. */
   document: SourceDocumentVM;
   /**
    * The summary. The caller picks between `classCaseSummary` (what it means
@@ -159,16 +155,6 @@ export function SourceDocumentFacts({
    * plain text, exactly as before.
    */
   counterpartyHref?: string | null;
-  /** The reason of the completion as text, not only in the hover. */
-  explainCompletion?: boolean;
-  /** The batch that booked it — passed through to the completion. */
-  batchHref?: string | null;
-  /**
-   * The row „Erledigung". `false` where the head of the page already shows the
-   * state — the process box at the right (0204, D7): the same answer twice is
-   * none. The drawer has no such head and keeps it (default).
-   */
-  completion?: boolean;
 }) {
   const detail = resolveSourceDocumentDetail(document.sourceDocType, document.detail);
   const ident = sourceDocumentIdentifier(document);
@@ -243,17 +229,8 @@ export function SourceDocumentFacts({
       <PaymentAccountCell key="pa" account={document.paymentAccount} />,
     ]);
   }
-  if (completion) {
-    rows.push([
-      "Erledigung",
-      <SourceDocumentCompletion
-        key="done"
-        document={document}
-        {...(explainCompletion ? { explain: true } : {})}
-        {...(batchHref ? { href: batchHref } : {})}
-      />,
-    ]);
-  }
+  // No row „Erledigung" (owner 2026-09-27): the state stands in the head —
+  // the process box on the page, the status in the drawer's head (D7).
   if (summary) {
     // A summary is a paragraph, not a value: it keeps its row, but the text
     // runs left and without `tnum` — the field column aligns numbers right (V3).

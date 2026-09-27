@@ -330,4 +330,4 @@ Owner am Bild (`BoxEnd`, `AllCells`):
 
 ## Nachtrag 2026-09-27 (2) — „Erledigung" nicht doppelt (Owner über ll-dev)
 
-Auf der Beleg-Detailseite steht der Stand jetzt als Box im Kopf; die Zeile „Erledigung" in „Belegdaten" wiederholte ihn (D7). `SourceDocumentFacts` und `SourceDocumentCard` bekommen `completion?: boolean` (Vorgabe `true`): die Detailseite setzt `completion={false}`, der Drawer ohne Kopf behält die Zeile. `batchHref` wirkt nur mit der Zeile; auf der Seite führen Kopf-Knopf „Zum Stapel" und die Stapel-Box dorthin. Story `SourceDocumentFacts › WithoutCompletion`.
+Der Stand steht im Kopf — auf der Seite als Prozess-Box, im Drawer als Status im Drawer-Kopf. Die Zeile „Erledigung" in „Belegdaten" wiederholte ihn (D7) und ist **ganz** entfallen (Owner, zweite Runde; die erste Fassung `completion={false}` aus 3f02af2 ist wieder zurückgenommen). Mit ihr fallen die Props `explainCompletion` und `batchHref` an `SourceDocumentFacts` und `SourceDocumentCard`; zum Stapel führen Kopf-Knopf „Zum Stapel" und die Stapel-Box.
