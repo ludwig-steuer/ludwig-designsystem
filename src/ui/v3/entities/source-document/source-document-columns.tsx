@@ -18,6 +18,11 @@ import {
   type SourceDocumentVM,
 } from "./SourceDocument";
 import { resolveSourceDocumentDetail } from "./source-document-detail";
+import {
+  ClassificationTrigger,
+  type ClassificationDialogDetail,
+  type ClassificationPicture,
+} from "./Classification";
 
 /**
  * The points of a document as cells — **one catalogue for four lists** (0070).
@@ -78,7 +83,8 @@ const ORDER: SourceDocumentColumn[] = [
  */
 export const DOCUMENT_LIST_COLUMNS: SourceDocumentColumn[] = [
   "counterparty",
-  "kind",
+  // No `kind` any more (0205, owner 2026-09-27): what the document is stands in
+  // the one column „Einordnung" — form, effect and bundle in one picture.
   "amount",
   "documentDate",
   // **No `identifier`** (owner decision 2026-09-09, seen on 165 real rows):
@@ -124,7 +130,8 @@ export const INBOX_COLUMNS: SourceDocumentColumn[] = [
  */
 export const SUBMIT_COLUMNS: SourceDocumentColumn[] = [
   "fileName",
-  "form",
+  // The form is the criterion here — it leads the classification picture (0205).
+  "classification",
   "size",
   "status",
 ];
@@ -174,6 +181,15 @@ export interface SourceDocumentColumnOptions {
    * says about the same document. Only read by the column `stuckState`.
    */
   stuckVariant?: StuckVariant;
+  /**
+   * The classification picture of a row (0205) — derived by the app, like the
+   * process picture. With it the column „Einordnung" shows the cell that opens
+   * the explanation; without it the old badge chain stands until the app
+   * derives the picture (F309).
+   */
+  classificationPicture?: (
+    document: SourceDocumentVM,
+  ) => { picture: ClassificationPicture; detail: ClassificationDialogDetail } | null;
 }
 
 export type StuckVariant = "stuck" | "inflight";
@@ -201,6 +217,7 @@ export function sourceDocumentColumns({
   columns = DOCUMENT_LIST_COLUMNS,
   lead: leadColumn,
   stuckVariant = "stuck",
+  classificationPicture,
 }: SourceDocumentColumnOptions = {}): ColumnDef<SourceDocumentVM>[] {
   const picked = new Set(columns);
   // Whichever of the two identity points comes first carries the row link —
@@ -453,19 +470,21 @@ export function sourceDocumentColumns({
       key: "classification",
       header: "Einordnung",
       // Four axes stand in this cell; one (i) would explain one of them.
-      headerAside: (
-        <>
-          <StatusInfoButton axis="document_category" />
-          <StatusInfoButton axis="document_direction" />
-          <StatusInfoButton axis="collection_kind" />
-        </>
-      ),
+      // One (i) — the picture is one answer, not four axes side by side (0205).
+      headerAside: <StatusInfoButton axis="document_category" />,
       // 232 px, not 220: at 220 the two badges of the classification
       // (102.1 + 121.0 px plus a 4-px gutter = 227.1) did not fit side by
       // side, the cell wrapped and the row grew to 73.2 px against the 47–48
       // of its neighbours — V1 asks for one row height (acceptance 0070, M1).
       width: "232px",
-      cell: (d) => <SourceDocumentClass document={d} />,
+      cell: (d) => {
+        const c = classificationPicture?.(d);
+        return c ? (
+          <ClassificationTrigger picture={c.picture} detail={c.detail} size="cell" />
+        ) : (
+          <SourceDocumentClass document={d} />
+        );
+      },
     },
     status: {
       key: "status",

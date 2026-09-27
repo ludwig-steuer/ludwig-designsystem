@@ -20,6 +20,7 @@ import { EntityHeader } from "./patterns/EntityHeader";
 import { StatusBadge } from "./patterns/StatusBadge";
 import { Baton, HOLDER_MEANING, type BatonKey } from "./patterns/Process";
 import { STATE_SIGNS, StateIcon } from "./patterns/Review";
+import { CATEGORY_ICON, CategoryIcon, type DocCategoryKey } from "./Icons";
 import { AXIS_ENTITY, AXIS_LABEL } from "./patterns/entity-icons";
 import {
   ACTION_ICON,
@@ -594,6 +595,31 @@ export const Holders: Story = {
             key,
             sign: <Baton owner={{ key, label: HOLDER_MEANING[key].word, color: "var(--color-text)" }} />,
             meaning: HOLDER_MEANING[key].meaning,
+          }))}
+        />
+      </Section>
+    </div>
+  ),
+};
+
+/**
+ * Welches Zeichen welche Belegkategorie meint (0205). Ein zweites, kleineres
+ * Vokabular neben dem Beleg selbst (`Receipt`); die Farbe sagt nichts (A7).
+ * Die fünf Zeichen sind ein Vorschlag an den Owner (F308 §8).
+ */
+export const Categories: Story = {
+  render: () => (
+    <div style={page}>
+      <Section
+        title="Belegkategorie"
+        lead="Das Zeichen vor der Einordnung eines Belegs — auf welchem Ast er steht. Nie ohne das Wort der Belegform daneben."
+      >
+        <MeaningTable
+          rows={(Object.keys(CATEGORY_ICON) as DocCategoryKey[]).map((key) => ({
+            key,
+            sign: <CategoryIcon category={key} />,
+            word: CATEGORY_ICON[key].label,
+            meaning: CATEGORY_ICON[key].meaning,
           }))}
         />
       </Section>

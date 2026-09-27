@@ -1,5 +1,11 @@
 import {
   ArrowDown,
+  Banknote,
+  ChartColumn,
+  File,
+  FileText,
+  FileUser,
+  ScrollText,
   ArrowLeftRight,
   ArrowUp,
   ArrowUpRight,
@@ -424,6 +430,59 @@ export const ACTION_ICON = {
 } satisfies Record<string, IconEntry>;
 
 export type EntityKey = keyof typeof ENTITY_ICON;
+
+/**
+ * The category of a document (0205, F308) — a second, smaller vocabulary
+ * beside the entity sign `Receipt`, which means „document" itself. The sign
+ * says which branch of the classification the document is on; its colour says
+ * nothing (A7). Keys are the registry values of `document_category`, plus
+ * `none` for a container or a document not (yet) classified.
+ *
+ * Owner question open (F308 §8): the five signs are a proposal.
+ */
+export const CATEGORY_ICON = {
+  performance: {
+    icon: FileText,
+    label: "Leistungsbeleg",
+    meaning: "Rechnung, Quittung, Bon, Lieferschein — ein Beleg über eine Leistung.",
+  },
+  payment: {
+    icon: Banknote,
+    label: "Zahlungsbeleg",
+    meaning: "Kontoauszug, Kreditkartenabrechnung, Kassenabschluss — zeigt, dass Geld geflossen ist.",
+  },
+  foundation: {
+    icon: ScrollText,
+    label: "Nachweisbeleg",
+    meaning: "Vertrag, Steuerbescheid, Steuererklärung — die Grundlage, auf die sich Buchungen stützen.",
+  },
+  internal: {
+    icon: FileUser,
+    label: "Interner Beleg",
+    meaning: "Lohnabrechnung, Reisekosten — im Haus des Mandanten entstanden.",
+  },
+  report: {
+    icon: ChartColumn,
+    label: "Auswertung",
+    meaning: "Summen- und Saldenliste, BWA — eine Auswertung, kein Beleg zum Buchen.",
+  },
+  none: {
+    icon: File,
+    label: "ohne Kategorie",
+    meaning: "Sammel-PDF, Sonstiges oder noch nicht eingeordnet.",
+  },
+} satisfies Record<string, IconEntry>;
+
+export type DocCategoryKey = keyof typeof CATEGORY_ICON;
+
+/**
+ * @when    The category of a document in its classification picture.
+ * @instead The document as a thing → EntityIcon "source-document".
+ */
+export function CategoryIcon({ category, size = 16 }: { category: DocCategoryKey; size?: IconSize }) {
+  const Icon = CATEGORY_ICON[category].icon;
+  return <Icon size={size} strokeWidth={1.5} aria-hidden="true" />;
+}
 export type ActionKey = keyof typeof ACTION_ICON;
 
 /**

@@ -257,6 +257,9 @@ export {
   type HintLevel,
   ENTITY_ICON,
   ACTION_ICON,
+  CATEGORY_ICON,
+  CategoryIcon,
+  type DocCategoryKey,
   type EntityKey,
   type ActionKey,
   type IconEntry,
@@ -347,6 +350,17 @@ export {
 export { AccountDrawer } from "./entities/account/AccountDrawer";
 
 /* Beleg — the reading family, preview, facts per kind, lookup (0052, 0074–0076) */
+export {
+  ClassificationCell,
+  ClassificationBox,
+  ClassificationDialog,
+  ClassificationTrigger,
+  type ClassificationPicture,
+  type ClassificationDialogDetail,
+  type ClassificationSection,
+  type ClassificationCorrection,
+  type BundleRole,
+} from "./entities/source-document/Classification";
 export {
   FileName,
   SourceDocumentCell,
