@@ -27,15 +27,24 @@ deshalb Lücken; sie werden nicht neu vergeben.
   Die **Pipeline** ist seit 2026-09-09 kein Reiter mehr, sondern aufklappbare
   Tiefe im Verlauf; `?tab=pipeline` leitet dorthin (wie `?tab=buchung` und
   `?tab=beleg` auf die Übersicht). Was über dem Inhalt steht, regelt
-  `belege.md` R33.
-  Der Reiter **Vorsteuer** trennt oben nach Quelle (F264): Card
-  „USt-Einschätzung — maßgeblich für die Buchung" (`client_source_docs.vat_*`:
-  Behandlung, Stand, eingeschätzt von/wann, Begründung, die drei Fakten der
-  Einschätzung; bei `not_assessed` nur ein Satz) und Card „Auf der Rechnung
-  erkannt — Rohwerte der Extraktion" (Invoice-Subtyp: Land, USt-IdNr.,
-  Steuerbetrag, § 13b-Hinweis, USt-Profil + Herkunft, Sonderfälle, Positionen
-  mit Satz, Sonderfall und Schlüssel-Kandidaten des Interpreters). Darunter
-  unverändert Verdikt, Einzelfakten und Regelprüfung (`buchung.md` R11).
+  `belege.md` R33. **Original je Format** (F285, `belege.md` R40): die Karte
+  der Übersicht zeigt das Original über `loadSourceDocOriginal` — PDF im
+  Viewer, Kontoauszug- und EXTF-Dateien als gelesene Zeilen (Deckel 200),
+  alles andere als Satz mit Download; der Beleg-Drawer nutzt denselben Loader.
+  Der Reiter **Vorsteuer** (F310) besteht aus fünf Blöcken des
+  Designsystems: (1) Verdikt als `StatusCallout` — Achse `input_tax_verdict`
+  (Abzug möglich · Fakten klären · Abzug gesperrt), Zählerzeile der
+  anwendbaren Regeln, gesperrte Schlüssel; ohne Rechnungs-Extraktion „Keine
+  Prüfung möglich". (2) Card „USt-Einschätzung" (`client_source_docs.vat_*`,
+  maßgeblich für die Buchung): Behandlung, Stand, Herkunft und Begründung als
+  `ProvenanceRows`; bei `not_assessed` nur Stand und ein Satz. (3)
+  „Regelprüfung" als `CheckItems` — Verletztes und Nicht-Ermittelbares
+  einzeln, Bestandenes gesammelt, im Fuß die nicht maschinell geprüften Codes.
+  (4) „Fakten" aus genau einer Quelle: die persistierten `vat_facts` (Vorrang
+  Mensch/Agent), sonst die ephemer berechneten. (5) „Auf der Rechnung erkannt
+  — Rohwerte der Extraktion", eingeklappt (Land, USt-IdNr., Steuerbetrag,
+  § 13b-Hinweis, USt-Profil + Herkunft, Sonderfälle, Positionen mit Satz,
+  Sonderfall und Schlüssel-Kandidaten). Regeln: `buchung.md` R11.
 - Geschäftspartner `clients/[clientSlug]/[year]/partners` (+ Detail
   `/partners/[partnerId]`) — die Liste ALLER Partner, nicht nur der
   Kreditoren (R14).
@@ -123,9 +132,14 @@ leer. Wo die Extraktion nichts liefert, trägt die Klassifizierung den Wert
 (`class_counterparty_name` als Gegenpart, `class_document_form` als
 Belegform, Dateiname als Kennung ohne Belegnummer).
 `listInvoiceIdsForClient` (Prev/Next) liest dieselbe Menge in derselben
-Sortierung. Die verbleibenden Tabs sind Filter auf diese eine Quelle, kein
-zweiter Datenpfad — eine eigene Tabelle für „die anderen" Belege kommt
-nicht zurück. *Warum:* zwei Listen neben zwei ID-Räumen waren derselbe
+Sortierung. Die Sichten Offen · In Verarbeitung · Problematisch · Offene
+Klärung · Buchbar sind **Schnellfilter** (DS 0201, F8): feste Kombinationen
+der sichtbaren Filter, in der URL wie jeder Filter (`status`, `open`,
+`clarification`, `period=all`, `sort`). Ein Zähler je Schnellfilter zählt mit
+dem Listenfilter (`countInvoicesForClient`). Reiter gibt es auf der Belegliste
+nicht mehr; eine eigene Tabelle für „die anderen" Belege kommt nicht zurück.
+„Problematisch" = `status ∈ {agent_review, human_review}` — die Definition der
+Statusmaschine (belege.md R14), nicht „ohne Rechnungszeile/Datum". *Warum:* zwei Listen neben zwei ID-Räumen waren derselbe
 Fehlerzustand wie zwei Detail-Shells (R5); ein Beleg, der in keiner Sicht
 auftaucht, ist ein verlorener Beleg.
 
@@ -297,25 +311,27 @@ in dieser Reihenfolge: **Bankkonten → Verrechnungskonten** — die
 Bank ist die wichtigste Aussage des Schritts. **„Bankkonten"** zeigt je
 Zahlungskonto (`batch-review/domain/bank-reconciliation.ts`) fünf Zahlen ohne
 Aufklappen: **DATEV-Stand** · **Dieser Stapel** (grau, wenn DATEV ihn schon
-hat) · **Saldo neu** · **Saldo laut Auszug** · **Differenz**. Saldo laut
-Auszug ist der Endsaldo des **jüngsten Auszugs nach Auszugsende** (nicht nach
-Importzeit — ein nachgereichter älterer Auszug schlägt ihn nicht), darunter
-sein Datum; ist die Auszugsdatei ein Quelldokument (gleiche `stored_file_id`),
-öffnet der Betrag den Beleg-Drawer über `?document=`. Ohne Saldo steht „kein
-Auszugssaldo". Saldo neu ist eine Brücke: DATEV-Stand ab
-Wirtschaftsjahresbeginn, dazu die freigegebenen Zeilen jedes Ludwig-Stapels,
-den DATEV noch nicht hat (der aktuelle gesondert), und freigegebene Sätze ohne
-Stapel, die einzeln nicht im DATEV-Bestand stehen — Vorschläge zählen nie. Ein
-Stapel hat DATEV, sobald ein lebender Spiegel-Satz zu ihm gehört (ID-Kante oder
-`export_ref`); dann zählt der ganze Stapel nur über DATEV, nie nach Datum, weil
-DATEV und Ludwig denselben Monat parallel buchen. **Aufgeklappt** steht nur die
+hat) · **Saldo neu** · **Laut Auszug (abgeleitet)** · **Differenz**. Seit F292
+(`bank.md` R8) ist **Saldo neu = L zum Stapelende**, die Summe der Buchungen
+auf dem Sachkonto aus der Effektiv-Sicht; die Brücke (DATEV-Stand ab
+Wirtschaftsjahresbeginn + Stapel, die DATEV noch nicht hat + freigegeben ohne
+Stapel) ist nur noch ihre Zerlegung — weicht sie ab, sagt der Stand „Brücke
+weicht um … vom Ledger ab". „Laut Auszug" ist B zum Stapelende: aus dem Auszug
+mit Saldenkette abgeleitet, der das Stapelende deckt (Endsaldo minus die Zeilen
+danach); ist die Auszugsdatei ein Quelldokument (gleiche `stored_file_id`),
+öffnet der Betrag den Beleg-Drawer über `?document=`. Ohne solchen Auszug steht
+„kein Auszugssaldo zum Stapelende". **Aufgeklappt** steht die
 Brücke in drei Zeilen — letzter Stand DATEV · ± dieser Stapel · = neuer Saldo;
 „Frühere Stapel, in DATEV noch nicht angekommen" und „Freigegeben ohne Stapel"
 kommen je als eine Zeile dazu, **nur wenn ≠ 0**, sonst wiche der neue Saldo
 still von der Zeile ab. Darunter der Rest-Satz, wenn offene Umsätze die
 Differenz nicht erklären (Buchung ohne Auszugszeile, falscher Monat, Auszug
 unvollständig), und ohne Eröffnungswert aus DATEV der Hinweis, dass der Saldo
-ohne Anfang läuft — ohne ihn ist ein stimmender Saldo gelb. **„Buchungen
+ohne Anfang läuft — ohne ihn ist ein stimmender Saldo gelb. Dann die Zeile
+**„Zuletzt bestätigt am …: stimmt / Abweichung …"** bzw. „Noch nie bestätigt"
+mit dem Link **„Kontostand bestätigen ↗"** auf den Reporting-Reiter des Kontos
+(`banks/[accountId]?tab=report&as_of=<Stapelende>`) — bestätigt wird nur
+dort, Schritt 4 ist Sicht (F292). **„Buchungen
 anzeigen"** setzt `?bookings=<Konto>` und zeigt die freigegebenen Sätze dieses
 Stapels auf dem Konto als Tabelle (`loadBankAccountBatchLines`, dieselbe Menge
 wie „dieser Stapel"), darunter die Umsätze ohne freigegebene Buchung als
@@ -371,7 +387,7 @@ Vormonats** als Plausibilität, Stand nach A7 — rot bei Gate-1a-Blocker oder
 Deckungslücke (F141) oder wenn ein Konto still geworden ist (0 Umsätze,
 Vormonat > 0), gelb bei mehr als fünf umsatzlosen Tagen vor Periodenende,
 sonst grün. Bei der Stufe „Sollte kommen" ist rot ohne Gate-1a-Blocker gelb
-(Lücke, still geworden); ein Blocker wie der Saldenanschluss bleibt rot.
+(Lücke, still geworden); ein Blocker wie der ganz fehlende Auszug bleibt rot.
 Eine **Kreditkarte** folgt `bank.md` R15f: ohne Abbuchung auf der Bank grün
 („Kartenabrechnung kommt im Folgemonat"), mit Abbuchung und ungedecktem Vormonat
 gelb, nachgefordert wird der Vormonat; Ruhe und Lücke gelten für sie nicht.
@@ -458,8 +474,8 @@ Antwort-Knöpfe.
 **Wer antwortet, sagt auch wohin**: In Schritt 2 speichert die Kanzlei eine
 Rückfrage-Antwort über einen von zwei Knöpfen — „Antwort speichern und selbst
 korrigieren" (der Sachverhalt bleibt auf `disposition='accounting'`) oder
-„Antwort speichern und zurück an KI" (`disposition='agent'`, er landet im
-Agenten-Korb). Beide rufen denselben Klärungs-Kern und routen danach über
+„Antwort speichern und zurück an Ludwig" (`disposition='agent'`, er landet
+bei Ludwig). Beide rufen denselben Klärungs-Kern und routen danach über
 `routeCaseAction`; die Wahl des Menschen sticht das aus dem Fragesteller
 abgeleitete Routing. Ein Fall, der mit der Antwort geschlossen wurde, bleibt
 geschlossen.
@@ -594,7 +610,7 @@ springt auf dieser Seite dorthin, nicht nach Schritt 9). **Freigeben** schreibt
 seit F228 hier, über denselben Kern und dieselbe Komponente wie Schritt 9
 (`releaseBatchAction`, `HandoverActions mode="release"` inkl. Override-
 Checkbox); ist der Stapel freigegeben, steht dort der Link zu Schritt 9 (F123
-T123.7 „der Knopf navigiert nur" ist zurückgenommen). **Zurück an den Agenten**
+T123.7 „der Knopf navigiert nur" ist zurückgenommen). **Zurück an Ludwig**
 ist ein Kasten mit dem ausklappbaren Rücklauf-Korb (eine Query,
 `application/return-basket.ts`): abgelehnte Sätze · beantwortete Fragen an
 Kanzlei/Mandant · offene Fragen an den Agenten · verworfene Konventionen ·
@@ -711,7 +727,7 @@ aber, wo er hinschauen muss.
 lebenden Satz — Schritt 8 zählt sie als „ohne Buchungsvorschlag" und springt
 mit `#without-proposal` genau hierher; je Zeile „In den Folgemonat"
 (`deferCaseToNextCycle`, derselbe Kern wie das Agent-Tool
-`defer_case_to_next_cycle`) und „Zurück an den Agenten". Leer wird sie nicht
+`defer_case_to_next_cycle`) und „Zurück an Ludwig". Leer wird sie nicht
 gerendert.
 
 Alle Reiter sind **eine** Komponente (`Step3Single` mit `tab`), die Wörter
@@ -764,10 +780,10 @@ regelgebuchten Fällen, die Kontext-Zone „Regel & Periode". Darunter zwei
 Knopfzeilen (Owner 2026-09-21), entscheiden, ohne den Fall zu öffnen — erst
 **Kontext**: **Beleg anzeigen** (Beleg-Drawer neben der Liste) · **Sachverhalt
 anzeigen** (Fall-Vollbild) · **Gegenpartei: Name** (Partner-Drawer; ohne
-Stammsatz nur Text); dann die **Antworten**: **Freigeben** · **Zurück an KI mit
+Stammsatz nur Text); dann die **Antworten**: **Freigeben** · **Zurück an Ludwig mit
 Notiz** (Feld unter der Leiste, Notiz Pflicht — `returnProposalToAgentAction`,
-derselbe Kern wie „Zurück an KI" im Vollbild, dort ohne Ereignis für alle
-offenen Sätze des Falls; ohne offenen Satz stellt „Zurück an KI" nur die Frage)
+derselbe Kern wie „Zurück an Ludwig" im Vollbild, dort ohne Ereignis für alle
+offenen Sätze des Falls; ohne offenen Satz stellt „Zurück an Ludwig" nur die Frage)
 · **Ablehnen** (Dialog, Grund Pflicht, lehnt den gezeigten Satz ab —
 `rejectEntryAction`, derselbe Kern wie „Diesen Satz ablehnen" im Vollbild).
 Antworten nur bei offenem Fall und schreibbarem Stapel; an einem freigegebenen
@@ -780,7 +796,7 @@ was an einem roten Prüfpunkt hängt, benennt die Meldung danach. Ganz unten,
 zugeklappt, „(?) Prüfbedarf n — Reiter": je Summand eine Zeile mit Vorzeichen,
 Summe und Schwelle, bei hartem Grund die Zeile „Harter Grund — zählt
 unabhängig von der Summe" (natives `<details>`, F232-T232.4b). Zurückgegebene Fälle, zu denen der Agent noch nicht
-neu vorgeschlagen hat, stehen im Reiter **„Zurück an KI"** (`returned`, nur
+neu vorgeschlagen hat, stehen im Reiter **„Zurück an Ludwig"** (`returned`, nur
 sichtbar mit Inhalt, vor „Freigegeben", nie von selbst gewählt): aufgeklappt
 Datum und Notiz über dem zurückgezogenen Satz. Die Sichten:
 
@@ -872,6 +888,12 @@ Regeln:
 - Anwender-Sprache: Zielgruppe sind Buchhalter und Steuerberater — keine
   internen Codes, keine Systembegriffe („Gate", „Spiegel", „Payload"), keine
   Ticketnummern.
+- **Ludwig ist die KI** (Owner 2026-09-27, DS-Guideline T1, F307): wo die
+  Oberfläche den Buchungsagenten als Handelnden oder Träger nennt, steht
+  „Ludwig" — nie „Agent" oder „KI" („Ludwig prüft", „Bei Ludwig", „Zurück an
+  Ludwig", Verlauf „Ludwig hat …"). „Agent" bleibt Technikwort (Agent-Token,
+  Agent-Verbindung, Admin, MCP-Meldungen an den Agenten); Schlüssel wie
+  `disposition='agent'` bleiben.
 - Handlungen stehen auf Buttons.
 - Titel haben höchstens drei Wörter.
 - Leerzustand: der Titel bleibt, der Untertext sagt den Zustand.

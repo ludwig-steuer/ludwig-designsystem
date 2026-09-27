@@ -145,7 +145,7 @@ function defectPoints(s: AccountScenario, href: Hash["href"]): OpenPoint[] {
           key: d.kind,
           state,
           title: "Kein LLM-Profil.",
-          hint: "Der Agent findet dieses Konto nicht über Belegbegriffe.",
+          hint: "Ludwig findet dieses Konto nicht über Belegbegriffe.",
           action: way("Beschreibung schreiben", { tab: "details" }),
         };
     }

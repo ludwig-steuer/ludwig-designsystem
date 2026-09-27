@@ -50,14 +50,14 @@ import { Todo } from "./Todo";
  */
 
 const STEPS: { label: string; sub: string; open: number; total: number }[] = [
-  { label: "Ergebnis des Stapels", sub: "Was der Agent geschafft hat", open: 0, total: 0 },
+  { label: "Ergebnis des Stapels", sub: "Was Ludwig geschafft hat", open: 0, total: 0 },
   { label: "Vollständigkeit", sub: "Belege, Bank, Salden", open: 0, total: 4 },
   { label: "Rückfragen", sub: "Fragen, Overrides", open: 6, total: 7 },
   { label: "Buchungen", sub: "Sachverhalt für Sachverhalt", open: 6, total: 6 },
   { label: "Bank", sub: "Verrechnung, Ausgleich", open: 2, total: 2 },
   { label: "Offene Posten", sub: "OPOS je Gegenpartei", open: 2, total: 2 },
   { label: "Plausibilität", sub: "Konten-Vergleich", open: 7, total: 7 },
-  { label: "Konventionen", sub: "Was der Agent gelernt hat", open: 1, total: 3 },
+  { label: "Konventionen", sub: "Was Ludwig gelernt hat", open: 1, total: 3 },
   { label: "Prüfprotokoll", sub: "Was geprüft wurde", open: 0, total: 0 },
   { label: "Übergabe an DATEV", sub: "Stapel anlegen", open: 1, total: 1 },
   { label: "Nachlese", sub: "Was zurückkam", open: 0, total: 0 },
@@ -150,7 +150,7 @@ function AcceptancePage() {
             <OverflowMenu size="sm">
               <MenuItem href="#">Lauf-Protokoll ansehen</MenuItem>
               <MenuItem href="#">Stapel als CSV laden</MenuItem>
-              <MenuItem tone="danger">Stapel zurück an den Agenten</MenuItem>
+              <MenuItem tone="danger">Stapel zurück an Ludwig</MenuItem>
             </OverflowMenu>
           }
         />

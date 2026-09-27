@@ -21,7 +21,7 @@ const GROUPS: ListGroup[] = [
     ],
   },
   {
-    title: "Overrides des Agenten",
+    title: "Overrides von Ludwig",
     count: 1,
     items: [{ key: "c", title: "S07 · Kontenzuordnung überschrieben", sub: "6815 statt 6820" }],
   },
@@ -40,8 +40,8 @@ const TEXTS: Record<string, { title: string; sub: string; body: string }> = {
   },
   c: {
     title: "S07 · Kontenzuordnung überschrieben",
-    sub: "6815 statt 6820 · vom Agenten gesetzt",
-    body: "Der Agent hat die Konvention „Porto auf 6820“ für diesen Beleg übergangen, weil die Position „Druckerpatronen“ lautet.",
+    sub: "6815 statt 6820 · von Ludwig gesetzt",
+    body: "Ludwig hat die Konvention „Porto auf 6820“ für diesen Beleg übergangen, weil die Position „Druckerpatronen“ lautet.",
   },
 };
 

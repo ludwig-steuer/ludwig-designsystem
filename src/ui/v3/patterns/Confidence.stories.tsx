@@ -91,7 +91,7 @@ export const NoSignal: Story = {
     <FieldList
       title="Zwei Sätze"
       rows={[
-        ["Vorschlag des Agenten", <Confidence key="a" level="yellow" value={0.62} />],
+        ["Vorschlag von Ludwig", <Confidence key="a" level="yellow" value={0.62} />],
         ["Import aus DATEV", <Confidence key="b" level={null} />],
       ]}
     />

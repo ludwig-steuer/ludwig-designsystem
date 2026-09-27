@@ -140,6 +140,7 @@ export type StatusAxis =
   | "bridge_datev"
   | "input_tax_fact"
   | "input_tax_rule"
+  | "input_tax_verdict"
   | "vat_treatment"
   | "vat_assessment_status"
   | "log_level"
@@ -209,9 +210,9 @@ export interface StatusDescriptor {
 const DOCUMENT_STATUS: Record<string, StatusDescriptor> = {
   pending: { label: "Wird eingeordnet", kind: "neutral", description: "Der Beleg ist angelegt; die Einordnung läuft oder steht an. Das System ist dran." },
   extracting: { label: "Wird ausgelesen", kind: "info", description: "Die Auslese läuft (Rechnungs-Pipeline oder Zerlegung eines Sammel-PDFs). Das System ist dran." },
-  agent_review: { label: "Agent prüft", kind: "warning", description: "Unsere Verfahren sind an diesem Beleg gescheitert — der Agent bessert nach. Woran es hängt, sagt der Prüfgrund." },
-  human_review: { label: "Kanzlei prüft", kind: "warning", description: "Der Agent kann den Beleg nicht lösen, oder ein Sonderfall braucht einen Menschen (z. B. das Bankkonto eines Kontoauszugs). Die Kanzlei ist dran." },
-  bookable: { label: "Bereit zur Buchung", kind: "info", description: "Fertig verarbeitet — der Agent ordnet ihn einem Sachverhalt zu und bucht." },
+  agent_review: { label: "Ludwig prüft", kind: "warning", description: "Unsere Verfahren sind an diesem Beleg gescheitert — Ludwig bessert nach. Woran es hängt, sagt der Prüfgrund." },
+  human_review: { label: "Kanzlei prüft", kind: "warning", description: "Ludwig kann den Beleg nicht lösen, oder ein Sonderfall braucht einen Menschen (z. B. das Bankkonto eines Kontoauszugs). Die Kanzlei ist dran." },
+  bookable: { label: "Bereit zur Buchung", kind: "info", description: "Fertig verarbeitet — Ludwig ordnet ihn einem Sachverhalt zu und bucht." },
   done: { label: "Erledigt", kind: "success", description: "An diesem Beleg ist nichts mehr zu tun. Wodurch er erledigt wurde, steht daneben." },
   deleted: { label: "Gelöscht", kind: "neutral", description: "Aus der Liste entfernt. Datei und Historie bleiben erhalten." },
 };
@@ -228,14 +229,14 @@ const DOCUMENT_STATUS: Record<string, StatusDescriptor> = {
  * zuerst beim Agenten.
  */
 const DOCUMENT_REVIEW_REASON: Record<string, StatusDescriptor> = {
-  classification_error: { label: "Einordnung gescheitert", kind: "danger", description: "Der Klassifikator ist gescheitert oder die Datei ist nicht lesbar. Der Agent korrigiert die Belegform oder stößt die Einordnung neu an." },
-  unknown_form: { label: "Belegart unbekannt", kind: "warning", description: "Ludwig weiß nicht, was das für ein Dokument ist. Der Agent ordnet es ein oder erledigt es mit Grund." },
-  unsplit_collection: { label: "Sammel-PDF nicht zerlegt", kind: "warning", description: "Ein Sammel-PDF, das die automatische Zerlegung nicht schneidet. Der Agent zerlegt es in Teilbelege." },
-  manual_extraction: { label: "Keine automatische Auslese", kind: "warning", description: "Für diese Belegart gibt es keine automatische Auslese (z. B. Kontoauszug als PDF). Der Agent verarbeitet ihn von Hand." },
-  extraction_error: { label: "Auslese abgebrochen", kind: "danger", description: "Die Rechnungs-Pipeline ist abgebrochen (Crash, Timeout, kritischer Befund). Der Agent stößt sie neu an oder trägt die Werte nach." },
-  open_findings: { label: "Werte fehlen", kind: "warning", description: "Ausgelesen, aber reparierbare Befunde sind offen (z. B. ein Pflichtfeld). Der Agent trägt die Werte nach — das System prüft dann selbst nach, kein Neustart nötig." },
-  job_failed: { label: "Verarbeitung gescheitert", kind: "danger", description: "Der Verarbeitungs-Auftrag ist endgültig gescheitert. Der Agent stößt ihn neu an." },
-  processing_stuck: { label: "Verarbeitung hing", kind: "warning", description: "Beim Freigeben des Dateikorbs war der Beleg noch nicht durch. Der Agent bessert nach." },
+  classification_error: { label: "Einordnung gescheitert", kind: "danger", description: "Der Klassifikator ist gescheitert oder die Datei ist nicht lesbar. Ludwig korrigiert die Belegform oder stößt die Einordnung neu an." },
+  unknown_form: { label: "Belegart unbekannt", kind: "warning", description: "Die Verarbeitung erkennt nicht, was das für ein Dokument ist. Ludwig ordnet es ein oder erledigt es mit Grund." },
+  unsplit_collection: { label: "Sammel-PDF nicht zerlegt", kind: "warning", description: "Ein Sammel-PDF, das die automatische Zerlegung nicht schneidet. Ludwig zerlegt es in Teilbelege." },
+  manual_extraction: { label: "Keine automatische Auslese", kind: "warning", description: "Für diese Belegart gibt es keine automatische Auslese (z. B. Kontoauszug als PDF). Ludwig verarbeitet ihn von Hand." },
+  extraction_error: { label: "Auslese abgebrochen", kind: "danger", description: "Die Rechnungs-Pipeline ist abgebrochen (Crash, Timeout, kritischer Befund). Ludwig stößt sie neu an oder trägt die Werte nach." },
+  open_findings: { label: "Werte fehlen", kind: "warning", description: "Ausgelesen, aber reparierbare Befunde sind offen (z. B. ein Pflichtfeld). Ludwig trägt die Werte nach — das System prüft dann selbst nach, kein Neustart nötig." },
+  job_failed: { label: "Verarbeitung gescheitert", kind: "danger", description: "Der Verarbeitungs-Auftrag ist endgültig gescheitert. Ludwig stößt ihn neu an." },
+  processing_stuck: { label: "Verarbeitung hing", kind: "warning", description: "Beim Freigeben des Dateikorbs war der Beleg noch nicht durch. Ludwig bessert nach." },
   statement_account_missing: { label: "Bankkonto fehlt", kind: "warning", description: "Ein Kontoauszug, dessen Bankkonto nicht in der Datei steht. Die Kanzlei wählt das Konto am Beleg." },
   statement_check_failed: { label: "Kontoauszug geht nicht auf", kind: "danger", description: "Die Salden des Kontoauszugs gehen nicht auf. Die Kanzlei entscheidet: neue Datei anfordern, trotzdem importieren oder ablehnen." },
 };
@@ -295,13 +296,13 @@ const FILE_BASKET: Record<string, StatusDescriptor> = {
     label: "Abgeschickt — wird verarbeitet",
     kind: "info",
     description:
-      "Die Anlieferung ist komplett; die Pipeline arbeitet die letzten Belege ab. Danach gehen die Stapel von selbst an den Agenten. Der Korb ist die Anlieferung, der Stapel der Buchungszeitraum.",
+      "Die Anlieferung ist komplett; die Pipeline arbeitet die letzten Belege ab. Danach gehen die Stapel von selbst an Ludwig. Der Korb ist die Anlieferung, der Stapel der Buchungszeitraum.",
   },
   released: {
-    label: "Freigegeben — beim Agenten/der Kanzlei",
+    label: "Freigegeben — bei Ludwig/der Kanzlei",
     kind: "info",
     description:
-      "Die Stapel sind freigegeben. Belege, die dabei nicht fertig waren, bessert der Agent nach. Der Korb ist die Anlieferung, der Stapel der Buchungszeitraum.",
+      "Die Stapel sind freigegeben. Belege, die dabei nicht fertig waren, bessert Ludwig nach. Der Korb ist die Anlieferung, der Stapel der Buchungszeitraum.",
   },
   completed: {
     label: "Erledigt",
@@ -318,14 +319,14 @@ const FILE_BASKET: Record<string, StatusDescriptor> = {
  */
 const FILE_BASKET_WARNING: Record<string, StatusDescriptor> = {
   processing_pending: { label: "Noch in Verarbeitung", kind: "warning", description: "Die Pipeline arbeitet noch an diesen Belegen — die Freigabe wartet auf sie." },
-  classification_failed: { label: "Einordnung gescheitert", kind: "warning", description: "Die Dokumentart ist nicht erkannt. Der Agent bessert nach." },
-  extraction_failed: { label: "Auslesen gescheitert", kind: "warning", description: "Die Extraktion ist abgebrochen. Der Agent bessert nach." },
-  review_needed: { label: "Prüfung nötig", kind: "warning", description: "Ausgelesen, aber es fehlt ein Wert — der Agent ergänzt ihn." },
+  classification_failed: { label: "Einordnung gescheitert", kind: "warning", description: "Die Dokumentart ist nicht erkannt. Ludwig bessert nach." },
+  extraction_failed: { label: "Auslesen gescheitert", kind: "warning", description: "Die Extraktion ist abgebrochen. Ludwig bessert nach." },
+  review_needed: { label: "Prüfung nötig", kind: "warning", description: "Ausgelesen, aber es fehlt ein Wert — Ludwig ergänzt ihn." },
   awaiting_input: { label: "Angabe fehlt", kind: "warning", description: "Zum Beispiel das Bankkonto eines Kontoauszugs — ohne sie wird nichts importiert." },
   unsplit_collection: { label: "Sammel-PDF nicht zerlegt", kind: "warning", description: "Ein Sammel-PDF hat noch keine Teilbelege." },
   partner_not_found: { label: "Partner unbekannt", kind: "warning", description: "Zum Absender oder Empfänger gibt es noch keinen Geschäftspartner." },
   date_outside_open_batch: { label: "Datum außerhalb des Stapels", kind: "warning", description: "Das Belegdatum liegt außerhalb des offenen Buchungszeitraums." },
-  client_batch_ambiguous: { label: "Zuordnung zum Mandantenstapel offen", kind: "warning", description: "Der Beleg passt zu mehreren Sätzen des Mandantenstapels, oder die Summe geht nicht auf — der Agent ordnet zu." },
+  client_batch_ambiguous: { label: "Zuordnung zum Mandantenstapel offen", kind: "warning", description: "Der Beleg passt zu mehreren Sätzen des Mandantenstapels, oder die Summe geht nicht auf — Ludwig ordnet zu." },
 };
 
 /**
@@ -774,6 +775,10 @@ const ACCOUNTING_CASE_LIFECYCLE: Record<string, StatusDescriptor> = {
   needs_clarification: { label: "Klärung offen", kind: "warning", description: "Eine Rückfrage muss beantwortet werden, bevor gebucht werden kann." },
   waiting_for_documents: { label: "Wartet auf Unterlagen", kind: "neutral", description: "Es fehlt eine Unterlage. Welche, bis wann und wer sie besorgt, steht an der Beleg-Erwartung des Sachverhalts." },
   closed_accepted: { label: "Verbucht", kind: "success", description: "Vorschlag angenommen und abgeschlossen." },
+  // Pseudowert, KEIN DB-Wert (P18): `closed_accepted` ohne angenommenen Satz —
+  // jedes Ereignis wurde begründet ohne Buchung erledigt. Abgeleitet an der
+  // Anzeigestelle (`caseLifecycleDisplayStatus`), keine eigene Achse.
+  closed_without_booking: { label: "Erledigt ohne Buchung", kind: "success", description: "Abgeschlossen, ohne dass eine Buchung entstand: jedes Ereignis wurde begründet als „keine Buchung nötig“ erledigt." },
   closed_rejected: { label: "Abgelehnt", kind: "neutral", description: "Vorschlag abgelehnt, Sachverhalt abgeschlossen." },
   closed_superseded: { label: "Veraltet", kind: "neutral", description: "Durch einen anderen Sachverhalt ersetzt (z.B. beim Zusammenführen)." },
 };
@@ -807,7 +812,7 @@ const ACCOUNTING_CASE_LIFECYCLE: Record<string, StatusDescriptor> = {
 const DOCUMENT_NUMBER_MODE: Record<string, StatusDescriptor> = {
   single: { label: "Eine Belegnummer", kind: "info", description: "Genau EINE Nummer über den ganzen Vorgang — Einzelrechnung oder Dauersachverhalt mit Dauerrechnung. Ein zweiter Beleg mit abweichender Nummer wird abgelehnt." },
   per_period: { label: "Je Periode eine", kind: "info", description: "Dauersachverhalt ohne Dauerrechnung: jede Periode bringt eine eigene Rechnung mit eigener Nummer. Jede Zahlung braucht die entschiedene Nummer ihrer Periode." },
-  multiple: { label: "Mehrere Belegnummern", kind: "warning", description: "Sammelzahlung, OPOS-Pool oder Mandantenstapel — mehrere Nummern nebeneinander. Ziel ist der Split in Einzelsachverhalte; ohne ausgeglichene Klammer schließt der Fall nicht." },
+  multiple: { label: "Mehrere Belegnummern", kind: "warning", description: "Sammelzahlung oder OPOS-Pool — mehrere Nummern nebeneinander, Ziel ist der Split in Einzelsachverhalte. Beim Mandantenstapel (Art „Mandantenstapel“) ist das der Dauerzustand: die Sätze sind fertig gebucht, es wird nicht gesplittet." },
   none: { label: "Ohne Beleg", kind: "neutral", description: "Umbuchung oder reine Korrektur — kein Beleg, keine Nummer. Ludwig vergibt beim Buchen ein synthetisches Belegfeld; das ist hier richtig, nicht auffällig." },
 };
 
@@ -905,9 +910,9 @@ const EVENT_BOOKING: Record<string, StatusDescriptor> = {
  * in der Arbeitsliste auf.
  */
 const DISPOSITION: Record<string, StatusDescriptor> = {
-  agent: { label: "Agent", kind: "info", description: "Der Agent ist am Zug und arbeitet den Sachverhalt auf." },
+  agent: { label: "Ludwig", kind: "info", description: "Ludwig ist am Zug und arbeitet den Sachverhalt auf." },
   accounting: { label: "Kanzlei", kind: "warning", description: "Die Kanzlei ist am Zug — hier wartet Arbeit." },
-  client: { label: "Mandant", kind: "neutral", description: "Der Mandant ist am Zug (Rückfrage oder fehlende Unterlage) — derzeit stillgelegt: kein Portal-Betrieb; Fälle liegen bei Agent oder Kanzlei." },
+  client: { label: "Mandant", kind: "neutral", description: "Der Mandant ist am Zug (Rückfrage oder fehlende Unterlage) — derzeit stillgelegt: kein Portal-Betrieb; Fälle liegen bei Ludwig oder der Kanzlei." },
 };
 
 /**
@@ -1034,7 +1039,7 @@ const EXPECTATION_KIND: Record<string, StatusDescriptor> = {
 const REVIEW_TAB: Record<string, StatusDescriptor> = {
   needs_review: { label: "Bitte anschauen", kind: "warning", description: "Score ab 50: beanstandet, unsicher oder steuerlich heikel." },
   likely_correct: { label: "Wahrscheinlich richtig", kind: "success", description: "Bestätigt, unauffällig oder schon mehrfach so gebucht." },
-  client_batch: { label: "Mandantenstapel", kind: "info", description: "Vom Mandanten selbst gebucht (Stapel-Import) — nicht vom Agenten vorgeschlagen, kein Judge-Verdikt." },
+  client_batch: { label: "Mandantenstapel", kind: "info", description: "Vom Mandanten selbst gebucht (Stapel-Import) — nicht von Ludwig vorgeschlagen, kein Judge-Verdikt." },
 };
 
 /**
@@ -1090,10 +1095,10 @@ const EVENT_KIND: Record<string, StatusDescriptor> = {
  * `origin` (woher kam die Zeile) — eigene Achsen an derselben Tabelle.
  */
 const JOURNAL_ENTRY_STATUS: Record<string, StatusDescriptor> = {
-  proposed: { label: "Vorschlag", kind: "info", description: "Buchungsvorschlag des Agenten — wartet auf Freigabe, geht so noch nicht nach DATEV." },
+  proposed: { label: "Vorschlag", kind: "info", description: "Buchungsvorschlag von Ludwig — wartet auf Freigabe, geht so noch nicht nach DATEV." },
   accepted: { label: "Freigegeben", kind: "success", description: "Vom Reviewer freigegeben und bereit für den DATEV-Export." },
   posted: { label: "Gebucht", kind: "success", description: "In DATEV festgeschrieben — nur noch stornierbar, nicht mehr änderbar." },
-  reversed: { label: "Zurückgezogen", kind: "neutral", description: "Gilt nicht mehr. Meist hat der Agent den Vorschlag zurückgezogen oder die Kanzlei ihn abgelehnt; seltener wurde eine freigegebene Buchung vor der Festschreibung storniert." },
+  reversed: { label: "Zurückgezogen", kind: "neutral", description: "Gilt nicht mehr. Meist hat Ludwig den Vorschlag zurückgezogen oder die Kanzlei ihn abgelehnt; seltener wurde eine freigegebene Buchung vor der Festschreibung storniert." },
 };
 
 /**
@@ -1133,11 +1138,11 @@ const JOURNAL_ENTRY_DATEV_STAGE: Record<string, StatusDescriptor> = {
  *  - `system_reversal` ist vorgesehen, der Flow existiert noch nicht.
  */
 const JOURNAL_ENTRY_ORIGIN: Record<string, StatusDescriptor> = {
-  ai_proposed: { label: "KI-Vorschlag", kind: "info", description: "Vom Agenten vorgeschlagen und unverändert übernommen." },
+  ai_proposed: { label: "Vorschlag von Ludwig", kind: "info", description: "Von Ludwig vorgeschlagen und unverändert übernommen." },
   manual: { label: "Manuell", kind: "neutral", description: "Von Hand erfasst — oder ein Vorschlag, den jemand korrigiert hat." },
   recurring_rule: { label: "Regelwerk", kind: "info", description: "Vom Regelwerk wiederkehrender Buchungen erzeugt. Wird nicht nach DATEV exportiert." },
   system_reversal: { label: "Storno", kind: "neutral", description: "Automatische Gegenbuchung zu einer stornierten Buchung." },
-  client_import: { label: "Mandantenstapel", kind: "info", description: "Aus dem Buchungsstapel des Mandanten importiert (F69) — er hat in seiner eigenen Software gebucht, die Kanzlei nimmt ab. Kein Agent-Vorschlag, kein Judge-Verdikt." },
+  client_import: { label: "Mandantenstapel", kind: "info", description: "Aus dem Buchungsstapel des Mandanten importiert (F69) — er hat in seiner eigenen Software gebucht, die Kanzlei nimmt ab. Kein Vorschlag von Ludwig, kein Judge-Verdikt." },
 };
 
 /**
@@ -1261,9 +1266,9 @@ const RUN_OUTCOME: Record<string, StatusDescriptor> = {
  * (taken_over), der Start eines Folgelaufs (superseded).
  */
 const AGENT_RUN_OUTCOME: Record<string, StatusDescriptor> = {
-  complete: { label: "Abgeschlossen", kind: "success", description: "Der Agent hat den Lauf regulär mit finish_agent_run beendet; der Stapel ist bereit für die Kanzlei." },
-  incomplete: { label: "Unvollständig beendet", kind: "warning", description: "Der Agent hat abgebrochen (technisches Hindernis, mit Begründung) oder war zwei Stunden still. Der Stapel liegt zur Prüfung bei der Kanzlei: übernehmen oder mit Notiz zurück an den Agenten." },
-  taken_over: { label: "Von der Kanzlei übernommen", kind: "warning", description: "Die Kanzlei hat die Prüfung vom stillen Agenten übernommen; sein Lauf wurde dabei beendet." },
+  complete: { label: "Abgeschlossen", kind: "success", description: "Ludwig hat den Lauf regulär mit finish_agent_run beendet; der Stapel ist bereit für die Kanzlei." },
+  incomplete: { label: "Unvollständig beendet", kind: "warning", description: "Ludwig hat abgebrochen (technisches Hindernis, mit Begründung) oder war zwei Stunden still. Der Stapel liegt zur Prüfung bei der Kanzlei: übernehmen oder mit Notiz zurück an Ludwig." },
+  taken_over: { label: "Von der Kanzlei übernommen", kind: "warning", description: "Die Kanzlei hat die Prüfung übernommen, weil Ludwig still war; sein Lauf wurde dabei beendet." },
   superseded: { label: "Vom Folgelauf geschlossen", kind: "neutral", description: "Nie abgeschlossen; der Start des nächsten Laufs am Mandanten hat ihn geschlossen." },
 };
 
@@ -1285,7 +1290,7 @@ const AGENT_RUN_OUTCOME: Record<string, StatusDescriptor> = {
  *  - `running` ist ein Pseudowert der UI für die offene Zeile — kein DB-Wert.
  */
 const RUN_GATE: Record<string, StatusDescriptor> = {
-  passed: { label: "Bestanden", kind: "success", description: "Der Agent hat im Schritt gearbeitet und ihn grün verlassen." },
+  passed: { label: "Bestanden", kind: "success", description: "Ludwig hat im Schritt gearbeitet und ihn grün verlassen." },
   auto_passed: { label: "Automatisch grün", kind: "success", description: "Nichts zu tun: der Server hat das Gate aus den Daten heraus als erfüllt gerechnet. Erledigt, nicht übersprungen." },
   blocked: { label: "Blockiert", kind: "danger", description: "Übergang abgelehnt — das Gate war zu diesem Zeitpunkt rot. Zweimal dasselbe Gate = Eskalation an den Menschen. Kein Endzustand: wird das Gate grün, geht es weiter." },
   overridden: { label: "Ausnahme", kind: "warning", description: "Mit begründeter Ausnahme passiert; jeder offene Fall musste exakt benannt werden." },
@@ -1585,9 +1590,9 @@ const RULE_MODE: Record<string, StatusDescriptor> = {
  *    `active`, aber nur die neue ist die gültige.
  */
 const CONVENTION_STATUS: Record<string, StatusDescriptor> = {
-  pending_approval: { label: "Wartet auf Freigabe", kind: "warning", description: "Kanzlei-Konvention: gilt für alle Mandanten der Kanzlei und wirkt erst, wenn ein Mensch sie freigibt. Der Agent sieht sie, wendet sie aber nicht an." },
+  pending_approval: { label: "Wartet auf Freigabe", kind: "warning", description: "Kanzlei-Konvention: gilt für alle Mandanten der Kanzlei und wirkt erst, wenn ein Mensch sie freigibt. Ludwig sieht sie, wendet sie aber nicht an." },
   active: { label: "Gilt", kind: "success", description: "Wird beim Buchen angewendet — es sei denn, eine Mandantenregel zum selben Thema sticht sie." },
-  archived: { label: "Archiviert", kind: "neutral", description: "Erledigt: auffindbar, aber außerhalb dessen, was der Agent beim Buchen liest." },
+  archived: { label: "Archiviert", kind: "neutral", description: "Erledigt: auffindbar, aber außerhalb dessen, was Ludwig beim Buchen liest." },
 };
 
 /**
@@ -1607,7 +1612,7 @@ const CONVENTION_ORIGIN: Record<string, StatusDescriptor> = {
   onboarding: { label: "Im Onboarding erfasst", kind: "success", description: "Ein Mensch hat die Frage im Onboarding beantwortet — der primäre Erfassungsort." },
   tenant_confirmed: { label: "Von der Kanzlei bestätigt", kind: "success", description: "Aus einer beantworteten Klärung destilliert oder ausdrücklich freigegeben." },
   derived_from_bookings: { label: "Aus Buchungen abgeleitet", kind: "info", description: "Aus einer Menge gleichartiger Buchungen erschlossen; die Anzahl steht daneben." },
-  agent_observed: { label: "Vom Agenten beobachtet", kind: "warning", description: "Vermutung, bis ein Mensch sie bestätigt. Gilt trotzdem — der Status ist eine Qualitätsangabe, kein Gate." },
+  agent_observed: { label: "Von Ludwig beobachtet", kind: "warning", description: "Vermutung, bis ein Mensch sie bestätigt. Gilt trotzdem — der Status ist eine Qualitätsangabe, kein Gate." },
 };
 
 /**
@@ -1734,8 +1739,8 @@ const PAYMENT_METHOD: Record<string, StatusDescriptor> = {
  * Stichtag, Export gesperrt.
  */
 const CLIENT_OPERATION: Record<string, StatusDescriptor> = {
-  aktiv: { label: "aktiv", kind: "success", description: "Agent und Bridge-Sync laufen normal." },
-  stillgelegt: { label: "stillgelegt", kind: "neutral", description: "Daten bleiben erhalten, aber kein Agentenzugriff und kein Sync." },
+  aktiv: { label: "aktiv", kind: "success", description: "Ludwig und Bridge-Sync laufen normal." },
+  stillgelegt: { label: "stillgelegt", kind: "neutral", description: "Daten bleiben erhalten, aber Ludwig arbeitet nicht und die Bridge synchronisiert nicht." },
   replay: { label: "Replay", kind: "info", description: "Experiment-Stand desselben DATEV-Mandanten mit Stichtag — Export gesperrt." },
 };
 
@@ -1965,7 +1970,7 @@ const VAT_TREATMENT: Record<string, StatusDescriptor> = {
 const VAT_ASSESSMENT_STATUS: Record<string, StatusDescriptor> = {
   not_assessed: { label: "Nicht eingeschätzt", kind: "neutral", description: "Noch nicht eingeschätzt — oder kein Eingangsbeleg." },
   decided: { label: "Entschieden", kind: "success", description: "Die Behandlung steht fest und gilt für die Buchung." },
-  needs_agent: { label: "Agent prüft", kind: "warning", description: "Die Signale reichen nicht für eine sichere Ableitung — der Agent prüft den Beleg." },
+  needs_agent: { label: "Ludwig prüft", kind: "warning", description: "Die Signale reichen nicht für eine sichere Ableitung — Ludwig prüft den Beleg." },
 };
 
 /**
@@ -1980,6 +1985,20 @@ const INPUT_TAX_RULE: Record<string, StatusDescriptor> = {
   pass: { label: "Bestanden", kind: "success", description: "Regel erfüllt — kein Hindernis." },
   fail: { label: "Verletzt", kind: "danger", description: "Vorsteuer-Schlüssel gesperrt, der Submit blockt." },
   unknown: { label: "Nicht ermittelbar", kind: "warning", description: "Ein Pflicht-Fakt fehlt — vor dem Vorsteuerabzug klären." },
+};
+
+/**
+ * Verdikt der Vorsteuer-Beurteilung eines Belegs — **berechnet, ephemer**,
+ * die Summe der Regelergebnisse (`INPUT_TAX_RULE`). Wertebereich `VatVerdict`
+ * (`modules/accounting-cases/domain/vat-rules.ts`).
+ *
+ * Fallstrick: `allowed` heißt nur „maschinell nichts dagegen" — betriebliche
+ * Veranlassung und Pflichtangaben im Detail prüft keine Regel.
+ */
+const INPUT_TAX_VERDICT: Record<string, StatusDescriptor> = {
+  allowed: { label: "Abzug möglich", kind: "success", description: "Alle aus den Belegdaten prüfbaren Regeln sind bestanden; betriebliche Veranlassung und Pflichtangaben im Detail bleiben Sache von Playbook, Judge und Abnahme." },
+  needs_facts: { label: "Fakten klären", kind: "warning", description: "Mindestens ein Pflicht-Fakt ist nicht ermittelbar; vor einer Vorsteuer-Zeile klären, im Zweifel keine Vorsteuer ziehen." },
+  forbidden: { label: "Abzug gesperrt", kind: "danger", description: "Mindestens eine Regel ist verletzt; der Buchungs-Submit blockt vorsteuerwirksame Schlüssel für diesen Beleg." },
 };
 
 /**
@@ -1999,7 +2018,7 @@ const ACTOR_KIND: Record<string, StatusDescriptor> = {
   system: { label: "System", kind: "neutral", description: "Ein Hintergrundprozess ohne Auftraggeber: Zeitplan, Trigger, Aufräumlauf." },
   api: { label: "API", kind: "neutral", description: "Ein Aufruf von außen über die Schnittstelle." },
   cli: { label: "CLI", kind: "neutral", description: "Ein Kommandozeilen-Aufruf, meist mit Dienstkonto." },
-  agent: { label: "Agent", kind: "neutral", description: "Der Buchungsagent hat gehandelt — kein Mensch hat es entschieden." },
+  agent: { label: "Ludwig", kind: "neutral", description: "Ludwig hat gehandelt — kein Mensch hat es entschieden." },
 };
 
 /**
@@ -2214,27 +2233,28 @@ const RECONCILIATION_RUN: Record<string, StatusDescriptor> = {
  */
 const EXPORT_BATCH: Record<string, StatusDescriptor> = {
   agent: {
-    label: "Beim Agenten",
+    label: "Bei Ludwig",
     kind: "info",
     description:
-      "Freigegeben — der Agent ist dran. Ob gerade ein Durchgang läuft, sagt der offene Lauf, " +
+      "Freigegeben — Ludwig ist dran. Ob gerade ein Durchgang läuft, sagt der offene Lauf, " +
       "nicht dieser Zustand.",
   },
   prepared: {
     label: "Vorbereitet",
     kind: "info",
     description:
-      "Eröffnet, aber noch nicht freigegeben: Belege dürfen weiter kommen, der Agent sieht den " +
+      "Eröffnet, aber noch nicht freigegeben: Belege dürfen weiter kommen, Ludwig sieht den " +
       "Zyklus nicht. Die Freigabe des Dateikorbs („Korb verarbeiten\" auf der Eingangsseite oder die " +
-      "Intake-API) übergibt ihn an den Agenten; die Kanzlei kann stattdessen die Prüfung übernehmen. " +
+      "Intake-API) übergibt ihn an Ludwig; die Kanzlei kann stattdessen die Prüfung übernehmen. " +
       "Ein neuer Dateikorb hebt ihn nicht — erst dessen Freigabe. Mit offenen Nachforderungen heißt " +
-      "das „wartet auf Mandant\".",
+      "das „wartet auf Mandant\". Bis zur Übernahme landen nachgereichte Belege im selben Stapel — " +
+      "der nächste Durchgang von Ludwig nimmt sie mit.",
   },
   review: {
     label: "Kanzlei prüft",
     kind: "warning",
     description:
-      "Der Durchgang ist abgeschlossen, die Kanzlei nimmt ab. Sie gibt frei oder gibt zurück an den Agenten.",
+      "Der Durchgang ist abgeschlossen, die Kanzlei nimmt ab. Sie gibt frei oder gibt zurück an Ludwig.",
   },
   ready: {
     label: "freigegeben (Bridge)",
@@ -2267,7 +2287,9 @@ const EXPORT_BATCH: Record<string, StatusDescriptor> = {
   closed: {
     label: "abgeschlossen",
     kind: "neutral",
-    description: "Wiedergefunden und abgeglichen — der Zyklus ist zu Ende, es gibt nichts mehr zu tun.",
+    description:
+      "Wiedergefunden und abgeglichen — der Zyklus ist zu Ende, es gibt nichts mehr zu tun. " +
+      "Änderungen gehen nur noch über Storno im Folgestapel.",
   },
   failed: {
     label: "fehlgeschlagen",
@@ -2412,6 +2434,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   bridge_datev: BRIDGE_DATEV,
   input_tax_fact: INPUT_TAX_FACT,
   input_tax_rule: INPUT_TAX_RULE,
+  input_tax_verdict: INPUT_TAX_VERDICT,
   vat_treatment: VAT_TREATMENT,
   vat_assessment_status: VAT_ASSESSMENT_STATUS,
   log_level: LOG_LEVEL,
@@ -2668,6 +2691,8 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       { from: "open", to: "waiting_for_documents", trigger: "document_expected", label: "eine Unterlage wird erwartet — fehlender Beleg ist keine Frage", by: "agent" },
       { from: "waiting_for_documents", to: "open", trigger: "expected_document_arrived", label: "die erwartete Unterlage ist da", by: "system" },
       { from: "open", to: "closed_accepted", trigger: "case_accepted", label: "abgenommen — der Trigger stempelt die Quelldokumente auf „erledigt\"", by: "user" },
+      // P18: DB-Wert bleibt closed_accepted, angezeigt wird der abgeleitete Pseudowert.
+      { from: "open", to: "closed_without_booking", trigger: "all_events_waived", label: "letztes Ereignis „keine Buchung nötig“ — schließt als closed_accepted ohne Satz", by: "agent" },
       { from: "open", to: "closed_rejected", trigger: "case_rejected", label: "verworfen", by: "user" },
       { from: "open", to: "closed_superseded", trigger: "case_merged", label: "durch einen anderen Sachverhalt abgelöst (Zusammenführung)", by: "agent" },
       { from: "closed_accepted", to: "open", trigger: "case_reopened", label: "wieder geöffnet — die Erledigt-Stempel an den Belegen bleiben bewusst stehen", by: "user" },
@@ -2682,7 +2707,7 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       "eigene Festschreibung reserviert und entsteht heute nur über den DATEV-Import.",
     transitions: [
       { from: null, to: "proposed", trigger: "booking_proposed", label: "Vorschlag am Sachverhalt entstanden", by: "agent" },
-      { from: "proposed", to: "reversed", trigger: "proposal_withdrawn", label: "zurückgezogen — meist vom Agenten (proposal_rationale.withdrawn_by_agent), sonst von der Kanzlei abgelehnt (review_reject_reason)", by: "agent" },
+      { from: "proposed", to: "reversed", trigger: "proposal_withdrawn", label: "zurückgezogen — meist von Ludwig (proposal_rationale.withdrawn_by_agent), sonst von der Kanzlei abgelehnt (review_reject_reason)", by: "agent" },
       { from: "proposed", to: "accepted", trigger: "booking_released", label: "für DATEV freigegeben", by: "user" },
       { from: "accepted", to: "proposed", trigger: "release_withdrawn", label: "Freigabe zurückgenommen — nur solange nicht exportiert", by: "user" },
       { from: "accepted", to: "posted", trigger: "found_posted_in_datev", label: "der DATEV-Import meldet den Satz als dort bereits Ist", by: "system" },
@@ -2699,12 +2724,12 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       "System — elf Zustände über Agent, Kanzlei, Bridge und DATEV.",
     transitions: [
       { from: null, to: "prepared", trigger: "cycle_opened", label: "Zyklus eröffnet — von Hand (Kanzlei) oder über Kette, Onboarding und Freigabe (System)", by: "system" },
-      { from: "prepared", to: "agent", trigger: "released_to_agent", label: "Dateikorb freigegeben (sofort beim Abschicken oder nach der Pipeline) — der Zyklus ist beim Agenten. Dieselbe Kante nimmt die Rückgabe durch die Kanzlei (returned_to_agent)", by: "system" },
+      { from: "prepared", to: "agent", trigger: "released_to_agent", label: "Dateikorb freigegeben (sofort beim Abschicken oder nach der Pipeline) — der Zyklus ist bei Ludwig. Dieselbe Kante nimmt die Rückgabe durch die Kanzlei (returned_to_agent)", by: "system" },
       { from: "agent", to: "prepared", trigger: "agent_run_finished", label: "Durchgang beendet — der Zyklus liegt wieder bereit. Dieselbe Kante nimmt das Zurücksetzen durch die Kanzlei (reset)", by: "agent" },
-      { from: "agent", to: "review", trigger: "taken_over_after_idle", label: "die Kanzlei übernimmt, weil der Agent seit zwei Stunden still ist", by: "user" },
+      { from: "agent", to: "review", trigger: "taken_over_after_idle", label: "die Kanzlei übernimmt, weil Ludwig seit zwei Stunden still ist", by: "user" },
       { from: "agent", to: "ready", trigger: "export_created", label: "freigegeben und geschnitten, ohne dass die Kanzlei vorher übernahm", by: "user" },
       { from: "prepared", to: "review", trigger: "review_started", label: "nur manuell buchen — die Kanzlei übernimmt die Abnahme statt des nächsten Durchgangs", by: "user" },
-      { from: "review", to: "agent", trigger: "returned_to_agent", label: "die Kanzlei gibt an den Agenten zurück", by: "user" },
+      { from: "review", to: "agent", trigger: "returned_to_agent", label: "die Kanzlei gibt an Ludwig zurück", by: "user" },
       { from: "prepared", to: "prepared", trigger: "reset", label: "Zyklus zurückgesetzt", by: "user" },
       { from: "review", to: "prepared", trigger: "reset", label: "Zyklus zurückgesetzt", by: "user" },
       { from: "review", to: "ready", trigger: "batch_released", label: "abgenommen und geschnitten — die Sätze sind geclaimt und gesperrt", by: "user" },
@@ -2731,7 +2756,7 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
     transitions: [
       { from: null, to: "open", trigger: "basket_opened", label: "erster Beleg ohne offenen Korb — der Korb entsteht", by: "system" },
       { from: "open", to: "submitted", trigger: "basket_submitted", label: "„Korb verarbeiten\" auf der Eingangsseite oder POST /release der Intake-API", by: "user" },
-      { from: "submitted", to: "released", trigger: "basket_released", label: "die Pipeline ist durch (oder 24 h vorbei) — die Stapel gehen an den Agenten", by: "system" },
+      { from: "submitted", to: "released", trigger: "basket_released", label: "die Pipeline ist durch (oder 24 h vorbei) — die Stapel gehen an Ludwig", by: "system" },
       { from: "released", to: "completed", trigger: "basket_completed", label: "der letzte Beleg ist erledigt", by: "system" },
     ],
   },
@@ -2744,9 +2769,9 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       "Wer am Zug ist. Kurze Kette, hohe Sichtbarkeit — sie beantwortet „warum liegt der Fall\". " +
       "`client` ist derzeit stillgelegt: ohne Portal-Betrieb liegen Fälle bei Agent oder Kanzlei.",
     transitions: [
-      { from: null, to: "agent", trigger: "case_created", label: "ein neuer Sachverhalt landet beim Agenten", by: "system" },
-      { from: "agent", to: "accounting", trigger: "handed_to_accounting", label: "der Agent kommt nicht weiter — die Kanzlei ist am Zug", by: "agent" },
-      { from: "accounting", to: "agent", trigger: "handed_back_to_agent", label: "die Kanzlei gibt zurück an den Agenten", by: "user" },
+      { from: null, to: "agent", trigger: "case_created", label: "ein neuer Sachverhalt landet bei Ludwig", by: "system" },
+      { from: "agent", to: "accounting", trigger: "handed_to_accounting", label: "Ludwig kommt nicht weiter — die Kanzlei ist am Zug", by: "agent" },
+      { from: "accounting", to: "agent", trigger: "handed_back_to_agent", label: "die Kanzlei gibt zurück an Ludwig", by: "user" },
       { from: "agent", to: "client", trigger: "question_to_client", label: "Rückfrage an den Mandanten", by: "agent" },
       { from: "client", to: "accounting", trigger: "client_answered", label: "der Mandant hat geantwortet", by: "user" },
     ],
@@ -2792,7 +2817,7 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
       "zweimal dasselbe Gate eskaliert an den Menschen.",
     transitions: [
       { from: null, to: "running", trigger: "step_entered", label: "Schritt betreten, Gate noch offen", by: "agent" },
-      { from: "running", to: "passed", trigger: "gate_passed", label: "der Agent hat im Schritt gearbeitet und ihn grün verlassen", by: "agent" },
+      { from: "running", to: "passed", trigger: "gate_passed", label: "Ludwig hat im Schritt gearbeitet und ihn grün verlassen", by: "agent" },
       { from: "running", to: "auto_passed", trigger: "gate_auto_passed", label: "der Server hat das Gate aus den Daten heraus als erfüllt gerechnet — erledigt, nicht übersprungen", by: "system" },
       { from: "running", to: "blocked", trigger: "gate_blocked", label: "Übergang abgelehnt, das Gate war rot", by: "system" },
       { from: "blocked", to: "running", trigger: "gate_retried", label: "erneuter Anlauf, nachdem sich etwas geändert hat", by: "agent" },
@@ -2929,6 +2954,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   bridge_datev: "Bridge",
   input_tax_fact: "Vorsteuer-Fakt",
   input_tax_rule: "Vorsteuer-Regel",
+  input_tax_verdict: "Vorsteuer-Verdikt",
   vat_treatment: "USt-Behandlung",
   vat_assessment_status: "Stand der USt-Einschätzung",
   log_level: "Level",
@@ -3020,6 +3046,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   bridge_datev: "berechnet — DatevApiStatus, von der on-prem Bridge gemeldet (ephemer)",
   input_tax_fact: "berechnet — VatFact.value aus den Belegdaten (ephemer)",
   input_tax_rule: "berechnet — Katalog-Regel über den Vorsteuer-Fakten (ephemer)",
+  input_tax_verdict: "berechnet — VatVerdict über den Regelergebnissen (ephemer)",
   vat_treatment: "client_source_docs.vat_treatment (NULL = nicht entschieden)",
   vat_assessment_status: "client_source_docs.vat_assessment_status",
   log_level: "client_invoice_traces.level",

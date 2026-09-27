@@ -208,7 +208,7 @@ export const ENTITY_ICON = {
     icon: Cog,
     label: "Auftrag",
     meaning: "Ein Hintergrundprozess, den das System abarbeitet.",
-    instead: "Der Agent, der etwas entschieden hat, ist `agent`.",
+    instead: "Ludwig, wenn er etwas entschieden hat, ist `agent`.",
   },
   "fiscal-year": {
     icon: CalendarRange,
@@ -419,8 +419,8 @@ export const ACTION_ICON = {
   },
   agent: {
     icon: Bot,
-    label: "Agent",
-    meaning: "Kommt vom Agenten — nicht von einem Menschen.",
+    label: "Ludwig",
+    meaning: "Kommt von Ludwig — nicht von einem Menschen.",
   },
   person: {
     icon: UserCircle,

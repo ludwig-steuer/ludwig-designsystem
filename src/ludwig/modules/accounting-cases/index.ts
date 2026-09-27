@@ -5,6 +5,7 @@ export * from "./domain/case-detail-ds-mapping";
 export * from "./domain/case-detail";
 export * from "./domain/case-event";
 export * from "./domain/case";
+export * from "./domain/collective-account";
 export * from "./domain/convention";
 export * from "./domain/document-number";
 export * from "./domain/expectation-labels";

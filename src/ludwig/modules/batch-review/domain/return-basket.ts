@@ -25,10 +25,10 @@ export interface KorbItem {
 const KIND_LABEL: Record<KorbKind, string> = {
   rejected_entry: "Abgelehnter Satz",
   answered_question: "Beantwortete Frage",
-  open_agent_question: "Frage an den Agenten",
+  open_agent_question: "Frage an Ludwig",
   discarded_convention: "Verworfene Konvention",
   reopened_doc: "Zurückgesetzter Beleg",
-  return_note: "Auftrag an den Agenten",
+  return_note: "Auftrag an Ludwig",
 };
 
 export function korbKindLabel(kind: KorbKind): string {

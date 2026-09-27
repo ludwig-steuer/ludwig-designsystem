@@ -432,7 +432,7 @@ function historyOf(c: CaseListItem): TimelineItem[] {
       id: `${c.caseId}-proposal`,
       at: "2026-08-30T09:12:00Z",
       kind: "booking_proposed",
-      actor: "Agent",
+      actor: "Ludwig",
       title: "Buchungsvorschlag erstellt",
       state: "edited",
       right: <Amount value={c.totalAmount} currency="EUR" size="sm" />,

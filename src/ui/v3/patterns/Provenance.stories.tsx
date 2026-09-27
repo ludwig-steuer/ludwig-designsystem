@@ -198,7 +198,7 @@ export const Edges: Story = {
         provenance={{
           ...PROPOSAL,
           rule: { code: "S3.expense.vendor_precedent.split_by_tax_rate.fallback_manual_review", sentence: "Aufteilung nach Steuersatz, sonst Prüfung von Hand." },
-          rationale: `${"Die Rechnung enthält Positionen mit 7 % und 19 % Umsatzsteuer; der Agent teilt nach Steuersatz auf und bucht die Leergutpfand-Position gesondert. ".repeat(5)}Die Präzedenz des Lieferanten deckt diese Aufteilung.`,
+          rationale: `${"Die Rechnung enthält Positionen mit 7 % und 19 % Umsatzsteuer; Ludwig teilt nach Steuersatz auf und bucht die Leergutpfand-Position gesondert. ".repeat(5)}Die Präzedenz des Lieferanten deckt diese Aufteilung.`,
           sources: Array.from({ length: 12 }, (_, i) => ({
             key: `e-${i}`,
             kind: kind("journal-entry", "Bisherige Buchungen"),

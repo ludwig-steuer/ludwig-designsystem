@@ -154,7 +154,7 @@ export const Split: Story = {
 };
 
 const DERIVATION: [string, string][] = [
-  ["Herkunft", "Vom Agenten vorgeschlagen, 31.07.2026"],
+  ["Herkunft", "Von Ludwig vorgeschlagen, 31.07.2026"],
   ["Regel", "Konto nach der Präzedenz dieses Lieferanten."],
   [
     "Begründung",

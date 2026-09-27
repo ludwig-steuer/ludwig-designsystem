@@ -1,4 +1,4 @@
-import { batchOwner, type BatchOwnerMeta } from "./batch-process";
+import { batchOwner, type BatchExportMethod, type BatchOwnerMeta } from "./batch-process";
 
 /**
  * Die Staffel-Leiste (F114 §4.1, F119 §6): wo ist die Zeit hingegangen?
@@ -62,6 +62,7 @@ export function staffelSegmente(
   wechsel: readonly ZustandsWechsel[],
   until: string,
   openDocumentRequests = 0,
+  exportMethod: BatchExportMethod = null,
 ): StaffelSegment[] {
   if (wechsel.length === 0) return [];
   const sorted = [...wechsel].sort((a, b) => a.at.localeCompare(b.at));
@@ -78,7 +79,7 @@ export function staffelSegmente(
     // Sprung — sie würden die Leiste mit Haarlinien zumüllen.
     if (durationMs === 0 && next) continue;
     raw.push({
-      owner: batchOwner(cur.state, cur.state === "prepared" ? openDocumentRequests : 0),
+      owner: batchOwner(cur.state, cur.state === "prepared" ? openDocumentRequests : 0, exportMethod),
       state: cur.state,
       from: cur.at,
       to: next?.at ?? until,

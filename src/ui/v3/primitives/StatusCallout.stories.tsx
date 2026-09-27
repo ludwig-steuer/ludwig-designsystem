@@ -58,7 +58,7 @@ export const Failed: Story = {
   ),
 };
 
-/** Erfolg (0187): grüner Rahmen, und das Wort im Kicker sagt es — Schritt 0 der Abnahme, wenn der Agent durch ist. */
+/** Erfolg (0187): grüner Rahmen, und das Wort im Kicker sagt es — Schritt 0 der Abnahme, wenn Ludwig durch ist. */
 export const Done: Story = {
   render: () => (
     <StatusCallout
@@ -150,12 +150,12 @@ function TaskTable({ tasks }: { tasks: typeof TASKS }) {
 /**
  * **Eine Box statt zwei** (Owner 2026-09-21, Schritt 0 der Stapelabnahme):
  * der Kopf sagt das Ergebnis, darunter klappt im **selben Rahmen** auf, was
- * der Agent erledigt hat. Zu ist der Standard — der Kopf ist schon die
+ * Ludwig erledigt hat. Zu ist der Standard — der Kopf ist schon die
  * Antwort, die Tabelle der Beleg dafür. Der Knopf steht im Kopf, nicht in der
  * aufklappbaren Zeile: ein Klick auf ihn klappt nichts auf. Der Ton färbt den
  * ganzen Rahmen, auch um die aufgeklappte Tabelle.
  *
- * Darunter derselbe Kopf, wenn der Agent durch ist, und einmal offen
+ * Darunter derselbe Kopf, wenn Ludwig durch ist, und einmal offen
  * (`defaultOpen`).
  */
 export const WithDetails: Story = {
@@ -164,14 +164,14 @@ export const WithDetails: Story = {
       <StatusCallout
         tone="warning"
         kicker="Ergebnis"
-        title="Der Agent ist an 2 Stellen nicht fertig"
+        title="Ludwig ist an 2 Stellen nicht fertig"
         sub="Zwei Rückfragen sind offen, die Umsatzsteuer weicht um 12,40 € ab."
         actions={<Button variant="primary">Abnahme beginnen</Button>}
         details={{ summary: "5 von 7 Aufgaben erledigt", children: <TaskTable tasks={TASKS} /> }}
       />
       <StatusCallout
         kicker="Ergebnis"
-        title="Der Agent ist fertig"
+        title="Ludwig ist fertig"
         sub="Alle sieben Aufgaben sind erledigt."
         actions={<Button variant="primary">Abnahme beginnen</Button>}
         details={{
@@ -182,7 +182,7 @@ export const WithDetails: Story = {
       <StatusCallout
         tone="warning"
         kicker="Ergebnis"
-        title="Der Agent ist an 2 Stellen nicht fertig"
+        title="Ludwig ist an 2 Stellen nicht fertig"
         actions={<Button variant="primary">Abnahme beginnen</Button>}
         details={{ summary: "5 von 7 Aufgaben erledigt", children: <TaskTable tasks={TASKS} />, defaultOpen: true }}
       />

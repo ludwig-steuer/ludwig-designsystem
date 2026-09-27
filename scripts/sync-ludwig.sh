@@ -69,7 +69,8 @@ node "$(dirname "$0")/mirror-filter.mjs" "$DST" | xargs -r rm -f
 find "$DST" -name '*.ts' -exec sed -i '' \
   -e 's|from "@/core/|from "@/ludwig/core/|g' \
   -e 's|from "@/shared|from "@/ludwig/shared|g' \
-  -e 's|from "@/modules/|from "@/ludwig/modules/|g' {} +
+  -e 's|from "@/modules/|from "@/ludwig/modules/|g' \
+  -e 's|from "@/ui/status/|from "@/ludwig/ui/status/|g' {} +
 
 # Regenerate module barrels: the app's barrel also exports infrastructure;
 # here it shows only the domain types.

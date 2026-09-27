@@ -134,7 +134,7 @@ export const VAT_MIXED = {
  */
 export const HISTORY = [
   { id: "e-5", at: "2026-08-20T09:12:00Z", title: "Gebucht im Stapel 08/2026", kind: "Buchung", actor: "Kanzlei" },
-  { id: "e-4", at: "2026-08-16T07:40:00Z", title: "Dem Sachverhalt 2026-0413 zugeordnet", kind: "Zuordnung", actor: "Agent" },
+  { id: "e-4", at: "2026-08-16T07:40:00Z", title: "Dem Sachverhalt 2026-0413 zugeordnet", kind: "Zuordnung", actor: "Ludwig" },
   { id: "e-3", at: "2026-08-15T18:22:00Z", title: "Werte extrahiert", kind: "Extraktion", actor: "System" },
   { id: "e-2", at: "2026-08-15T18:20:00Z", title: "Als Eingangsrechnung eingeordnet", kind: "Einordnung", actor: "System" },
   { id: "e-1", at: "2026-08-15T18:19:00Z", title: "Eingegangen aus dem Postfach", kind: "Eingang", actor: "System" },

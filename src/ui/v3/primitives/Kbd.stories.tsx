@@ -35,7 +35,7 @@ export const InUse: Story = {
             Stapel abnehmen
           </Button>
         }
-        secondary={<Button hotkey="R">Zurück an den Agenten</Button>}
+        secondary={<Button hotkey="R">Zurück an Ludwig</Button>}
         tertiary={
           <Button variant="tertiary" hotkey="?">
             Tasten zeigen
@@ -57,7 +57,7 @@ export const InUse: Story = {
             title: "Handlung",
             keys: [
               { key: "A", label: "Stapel abnehmen" },
-              { key: "R", label: "Zurück an den Agenten" },
+              { key: "R", label: "Zurück an Ludwig" },
             ],
           },
         ]}

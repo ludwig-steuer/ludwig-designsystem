@@ -31,7 +31,8 @@ export type ChecklistLevel = "blocked" | "warn" | "info";
  * sind Einzel-Quittungen an ihrem Gegenstand (F123). Umgekehrt ist
  * `not_checked` reiner Kontext und `client_batch_masterdata` (F165) sowie
  * `central_settlement_zero` (F246) bewusst kein `CheckKind` — rot, nicht
- * quittierbar, nichts zu speichern.
+ * quittierbar, nichts zu speichern; ebenso `already_booked_in_datev` und
+ * `booking_date_outside_batch` (F297, der Freigabe-Guard des Servers).
  */
 export const CHECKLIST_ROW_KEYS = [
   "statements_complete",
@@ -40,6 +41,8 @@ export const CHECKLIST_ROW_KEYS = [
   "cases_proposed",
   "entries_accepted",
   "export_simulation",
+  "already_booked_in_datev",
+  "booking_date_outside_batch",
   "bank_transactions_booked",
   "bank_transactions_proposed",
   "clearing_accounts_zero",
@@ -52,6 +55,8 @@ export const CHECKLIST_ROW_KEYS = [
   | "not_checked"
   | "client_batch_masterdata"
   | "central_settlement_zero"
+  | "already_booked_in_datev"
+  | "booking_date_outside_batch"
 )[];
 
 export type ChecklistRowKey = (typeof CHECKLIST_ROW_KEYS)[number];
@@ -76,6 +81,8 @@ export const CHECKLIST_ROW_SCOPE: Record<
   cases_proposed: { regular: true, clientBatch: false },
   entries_accepted: { regular: true, clientBatch: true },
   export_simulation: { regular: true, clientBatch: true },
+  already_booked_in_datev: { regular: true, clientBatch: true },
+  booking_date_outside_batch: { regular: true, clientBatch: false },
   bank_transactions_booked: { regular: true, clientBatch: false },
   bank_transactions_proposed: { regular: true, clientBatch: false },
   clearing_accounts_zero: { regular: true, clientBatch: false },

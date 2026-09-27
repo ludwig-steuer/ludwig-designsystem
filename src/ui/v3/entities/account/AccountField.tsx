@@ -35,7 +35,7 @@ export type AccountGroup = "agent" | "partner" | "similar" | "documentLine" | "a
 
 /** The words of the four candidate groups — where a suggestion came from. */
 export const ACCOUNT_GROUP_LABEL: Record<AccountGroup, string> = {
-  agent: "Vorschlag des Agenten",
+  agent: "Vorschlag von Ludwig",
   partner: "Zuletzt bei dieser Gegenpartei",
   similar: "Ähnliche Belege",
   documentLine: "Aus der Beleg-Position",

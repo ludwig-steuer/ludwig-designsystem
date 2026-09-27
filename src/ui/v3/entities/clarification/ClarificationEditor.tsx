@@ -35,7 +35,7 @@ const TITLE_MAX = 140;
 const AUDIENCE_OPTIONS: { value: ClarificationAudience; label: string; hint: string }[] = [
   { value: "client", label: "Mandant", hint: "Er sieht die Frage im Portal und antwortet dort." },
   { value: "accounting", label: "Kanzlei", hint: "Bleibt im Haus — für Rückfragen an Kolleginnen." },
-  { value: "agent", label: "Agent", hint: "Der Buchungsagent greift sie im nächsten Lauf auf." },
+  { value: "agent", label: "Ludwig", hint: "Ludwig greift sie im nächsten Lauf auf." },
 ];
 
 /** What the editor produces; the caller writes it. */

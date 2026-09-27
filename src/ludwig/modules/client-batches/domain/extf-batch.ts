@@ -203,6 +203,14 @@ function parseHeader(cells: string[]): ExtfBatchHeader {
   };
 }
 
+/**
+ * Nur der Kopfsatz — für wen die Datei die Sachkontenlänge braucht, bevor er
+ * sie liest (die Personenkontenliste, F285). Dieselbe Kette wie `parseExtfBatch`.
+ */
+export function parseExtfHeader(bytes: Uint8Array): ExtfBatchHeader {
+  return parseHeader(tokenizeRow(decode(bytes)[0] ?? "").map(stripQuotes));
+}
+
 /** Spaltenname → Index. Fehlt eine Pflichtspalte, ist die Datei unbrauchbar. */
 function mapColumns(headerCells: string[]): Partial<Record<ColumnKey, number>> {
   const index: Partial<Record<ColumnKey, number>> = {};

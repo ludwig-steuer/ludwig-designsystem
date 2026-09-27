@@ -18,11 +18,11 @@ const GROUPS: TodoGroup[] = [
     ],
   },
   {
-    label: "Overrides des Agenten",
+    label: "Overrides von Ludwig",
     items: [
       { id: "d", state: "warning", title: "S07 · Kontenzuordnung überschrieben", sub: "6815 statt 6820" },
       { id: "e", state: "edited", title: "S12 · Steuerschlüssel korrigiert", sub: "BU 9 statt BU 8" },
-      { id: "f", state: "returned", title: "S03 · Beleg an den Agenten zurück", sub: "am 28.08. zurückgegeben" },
+      { id: "f", state: "returned", title: "S03 · Beleg an Ludwig zurück", sub: "am 28.08. zurückgegeben" },
     ],
   },
 ];
@@ -135,7 +135,7 @@ export const Empty: Story = {
       groups={[]}
       selectedId={null}
       onSelect={() => {}}
-      emptyText="Keine offenen Fragen — der Agent ist ohne Rückfrage durchgekommen."
+      emptyText="Keine offenen Fragen — Ludwig ist ohne Rückfrage durchgekommen."
     />
   ),
 };

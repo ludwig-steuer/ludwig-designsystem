@@ -199,7 +199,7 @@ export function sourceDocumentIdentifier(document: SourceDocumentVM): {
  *
  * Done, it says **how** and **when**: the chip of `document_done_via`
  * („Gebucht", „Keine Buchung nötig") and the date. Not done, it says the state
- * of `document_status` („Wird ausgelesen", „Agent prüft", „Bereit zur
+ * of `document_status` („Wird ausgelesen", „Ludwig prüft", „Bereit zur
  * Buchung"), and in review the reason (`document_review_reason`) beside it.
  * Until F289 these were three axes and a completion stamp next to them.
  *
@@ -275,7 +275,7 @@ export function SourceDocumentCompletion({
  *
  * Done without a `doneVia` is „Erledigt" of `document_status`, never nothing —
  * the reason was not recorded, the state was. In review the reason is the
- * note: „Agent prüft" alone does not say what is being checked.
+ * note: „Ludwig prüft" alone does not say what is being checked.
  *
  * The sentence under the state: the free text of this document where there is
  * one (a person wrote it — never both, two answers to one question read as a

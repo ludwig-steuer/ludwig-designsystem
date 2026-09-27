@@ -197,7 +197,7 @@ function ClarificationsTab() {
           <div className="v3boxbody">
             <ClarificationList
               clarifications={[]}
-              empty={{ title: "Keine Rückfragen und keine Notizen.", hint: "Der Agent fragt nach, wenn ihm etwas fehlt — bis dahin bleibt dieser Reiter leer." }}
+              empty={{ title: "Keine Rückfragen und keine Notizen.", hint: "Ludwig fragt nach, wenn ihm etwas fehlt — bis dahin bleibt dieser Reiter leer." }}
             />
           </div>
         </Card>
@@ -496,11 +496,11 @@ const PAID = bracket(1, "93846778 · Musterbau Fahrzeugteile GmbH", "noch keine 
 });
 
 const LOG: LogEntry[] = [
-  { id: "l1", at: "2026-07-31T16:02:00Z", message: "Sachverhalt aus dem Beleg eröffnet", actor: { kind: "agent", label: "Agent" }, depth: 1, level: "info" },
-  { id: "l2", at: "2026-07-31T16:03:00Z", message: "Beleg 93846778 angehängt", actor: { kind: "agent", label: "Agent" }, depth: 1, level: "info" },
-  { id: "l3", at: "2026-07-31T16:05:00Z", message: "Buchung vorgeschlagen: 5404 an 71202", actor: { kind: "agent", label: "Agent" }, depth: 2, level: "info", code: "booking.proposed" },
+  { id: "l1", at: "2026-07-31T16:02:00Z", message: "Sachverhalt aus dem Beleg eröffnet", actor: { kind: "agent", label: "Ludwig" }, depth: 1, level: "info" },
+  { id: "l2", at: "2026-07-31T16:03:00Z", message: "Beleg 93846778 angehängt", actor: { kind: "agent", label: "Ludwig" }, depth: 1, level: "info" },
+  { id: "l3", at: "2026-07-31T16:05:00Z", message: "Buchung vorgeschlagen: 5404 an 71202", actor: { kind: "agent", label: "Ludwig" }, depth: 2, level: "info", code: "booking.proposed" },
   { id: "l4", at: "2026-07-31T16:05:30Z", message: "Judge: bestätigt, keine Dublette", actor: { kind: "agent", label: "Judge" }, depth: 2, level: "info", code: "booking.judged_by_agent" },
-  { id: "l5", at: "2026-08-01T09:12:00Z", message: "Rückfrage an den Mandanten gestellt", actor: { kind: "agent", label: "Agent" }, depth: 1, level: "info" },
+  { id: "l5", at: "2026-08-01T09:12:00Z", message: "Rückfrage an den Mandanten gestellt", actor: { kind: "agent", label: "Ludwig" }, depth: 1, level: "info" },
   { id: "l6", at: "2026-08-02T14:30:00Z", message: "Rückfrage beantwortet", actor: { kind: "user", label: "Mandant" }, depth: 1, level: "info" },
   { id: "l7", at: "2026-07-31T16:04:10Z", message: "Schritt classify → propose", actor: { kind: "system", label: "System" }, depth: 3, level: "debug", code: "step.edge" },
 ];
@@ -602,7 +602,7 @@ function RuleOffer() {
     <EmptyState
       inline
       title="Noch keine Regel."
-      description="Bis dahin schlägt der Agent jede Lastschrift einzeln vor. Aus der letzten angelegt, bucht das Regelwerk monatlich auf 4240 — die Felder sind vorbefüllt."
+      description="Bis dahin schlägt Ludwig jede Lastschrift einzeln vor. Aus der letzten angelegt, bucht das Regelwerk monatlich auf 4240 — die Felder sind vorbefüllt."
       action={
         <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
           Regel aus der Lastschrift vom 04.08. anlegen

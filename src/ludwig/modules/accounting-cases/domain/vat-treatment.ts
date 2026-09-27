@@ -133,7 +133,7 @@ export function deriveVatTreatment(input: VatTreatmentInput): VatTreatmentResult
       null,
       "needs_agent",
       reverseChargeNotice === "yes"
-        ? "Aussteller im Inland, aber § 13b-Hinweis am Beleg — Inlands-§ 13b (z. B. Bauleistung) prüft der Agent"
+        ? "Aussteller im Inland, aber § 13b-Hinweis am Beleg — Inlands-§ 13b (z. B. Bauleistung) prüft Ludwig"
         : "Aussteller im Inland, Steuerausweis nicht ermittelbar",
     );
   }
@@ -144,7 +144,7 @@ export function deriveVatTreatment(input: VatTreatmentInput): VatTreatmentResult
       null,
       "needs_agent",
       vatShown === "yes"
-        ? `Aussteller im ${abroad}, aber USt ausgewiesen — ausländische Steuer oder Fehler, der Agent prüft`
+        ? `Aussteller im ${abroad}, aber USt ausgewiesen — ausländische Steuer oder Fehler, Ludwig prüft`
         : `Aussteller im ${abroad}, Steuerausweis nicht ermittelbar`,
     );
   }
@@ -169,7 +169,7 @@ export function deriveVatTreatment(input: VatTreatmentInput): VatTreatmentResult
     null,
     "needs_agent",
     goods === "yes"
-      ? `Aussteller im ${abroad}, Lieferung von Ware — Einfuhr prüft der Agent`
-      : `Aussteller im ${abroad}, Ware oder Leistung nicht eindeutig — der Agent prüft`,
+      ? `Aussteller im ${abroad}, Lieferung von Ware — Einfuhr prüft Ludwig`
+      : `Aussteller im ${abroad}, Ware oder Leistung nicht eindeutig — Ludwig prüft`,
   );
 }

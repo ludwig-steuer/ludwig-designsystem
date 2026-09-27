@@ -15,11 +15,11 @@ export const Open: Story = {
       onClose={nothing}
       onConfirm={nothing}
       kicker="Rückgabe"
-      title="Zurück an den Agenten"
+      title="Zurück an Ludwig"
       confirmLabel="Zurückgeben"
       chips={["Beleg fehlt", "Konto falsch", "Betrag weicht ab"]}
     >
-      Der Agent bekommt den Stapel mit diesem Grund zurück und arbeitet ihn neu auf.
+      Ludwig bekommt den Stapel mit diesem Grund zurück und arbeitet ihn neu auf.
     </ReasonDialog>
   ),
 };
@@ -52,7 +52,7 @@ export const Pending: Story = {
       onClose={nothing}
       onConfirm={nothing}
       kicker="Rückgabe"
-      title="Zurück an den Agenten"
+      title="Zurück an Ludwig"
       confirmLabel="Zurückgeben"
     >
       Wird übertragen …

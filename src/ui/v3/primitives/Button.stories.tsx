@@ -16,7 +16,7 @@ export const Variants: Story = {
   render: () => (
     <Cluster>
       <Button variant="primary">Freigeben</Button>
-      <Button variant="secondary">Zurück an Agenten</Button>
+      <Button variant="secondary">Zurück an Ludwigen</Button>
       <Button variant="tertiary">Kontenblatt öffnen</Button>
       <Button variant="danger">Stornieren</Button>
     </Cluster>

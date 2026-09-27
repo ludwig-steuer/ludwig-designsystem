@@ -1,8 +1,11 @@
 import { z } from "zod";
+import type { FilterPreset, FilterValue } from "@ludwig/designsystem";
 import type { RawSearchParams } from "@/ludwig/shared";
+import type { EntryDatevStage } from "@/ludwig/modules/entries";
 // Kategorie-Werteraum aus der EINEN Mapping-Quelle — keine zweite Liste.
 import {
   DOC_CATEGORIES,
+  SOURCE_DOC_STATUSES,
   type DocCategory,
   type SourceDocDoneVia,
   type SourceDocReviewReason,
@@ -48,45 +51,27 @@ export interface InvoiceFilter {
    *  seinem Stempel (`client_accounting_event.export_batch_id`). Kommt aus
    *  dem Pfad der Stapel-Detailsicht, nicht aus dem Filterformular. */
   exportBatchId?: string;
+  /** Belegstatus (F289). `deleted` wird nie gefiltert — die Liste schließt
+   *  es immer aus. */
+  documentStatus?: SourceDocStatus[];
+  /** Der Zeitraum des Jahres fällt weg; nur die Seite setzt daraus
+   *  `receivedFrom/To = undefined`. */
+  allYears?: boolean;
 }
 
 /**
- * Die Reiter der Belegliste — **vier**, seit der Rückstand einen eigenen hat.
- *
- * „Alle Belege" liest die Rechnungsliste, „In Verarbeitung" und
- * „Problematisch" lesen die Beleg-Basistabelle mit eigenen Bedingungen.
- * „Klärungsfragen" tat nichts davon — es filterte dieselbe Liste nach einem
- * Feld und ist deshalb heute ein Filter.
- *
- * „Offen" ist die Ausnahme, die die Regel bestätigt: derselbe Filter
- * (`openOnly`), aber eine andere **Frage** — nicht „was ist in dieser Periode
- * passiert", sondern „was liegt noch da, quer über alle Jahre, und seit
- * wann". Deshalb lässt er den Jahres-Zeitraum fallen, dreht die Sortierung
- * auf „ältester zuerst" und trägt eine Spalte, die sonst keine Liste hat.
+ * Spalten, nach denen die Belegliste sortiert werden darf. Die Whitelist ist
+ * die Grenze zwischen URL und ORDER BY — `?sort=` liefert nur einen dieser
+ * Schlüssel, alles andere fällt auf die Standard-Sortierung zurück.
  */
-export const INVOICE_LIST_TABS = [
-  "all",
-  "open",
-  "processing",
-  "problems",
+export const INVOICE_SORT_KEYS = [
+  "received_date",
+  "uploaded_at",
+  "vendor",
+  "document_number",
+  "total_amount",
 ] as const;
-export type InvoiceListTab = (typeof INVOICE_LIST_TABS)[number];
-
-export const INVOICE_LIST_TAB_LABEL: Record<InvoiceListTab, string> = {
-  all: "Alle Belege",
-  open: "Offen",
-  processing: "In Verarbeitung",
-  problems: "Problematische Belege",
-};
-
-export function parseInvoiceListTab(
-  value: string | string[] | undefined,
-): InvoiceListTab {
-  const v = Array.isArray(value) ? value[0] : value;
-  return (INVOICE_LIST_TABS as readonly string[]).includes(v ?? "")
-    ? (v as InvoiceListTab)
-    : "all";
-}
+export type InvoiceSortKey = (typeof INVOICE_SORT_KEYS)[number];
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const InvoiceFilterRawSchema = z.object({
@@ -96,17 +81,87 @@ const InvoiceFilterRawSchema = z.object({
   lifecycle: z.string().optional(),
   open: z.string().optional(),
   cat: z.string().optional(),
+  /** Belegstatus, Kommaliste wie `cat`. */
+  status: z.string().optional(),
+  /** `all` = über alle Jahre (Schnellfilter „Offen"). */
+  period: z.string().optional(),
   /** Geschäftspartner — kommt aus einem Klick auf den Kreditor in der Zeile. */
   partner: z.string().uuid().optional(),
   /**
    * Offene Klärung. War bis 2026-09-08 ein **Reiter** („Klärungsfragen"),
    * obwohl er dieselbe Liste nach einem Feld filterte — ein Reiter
    * verspricht eine andere Ansicht und lieferte dieselbe (Owner-Entscheid
-   * „Reiter sind keine Filter"). Die zwei verbliebenen Reiter sind echte
-   * andere Listen: sie fragen andere Tabellen ab.
+   * „Reiter sind keine Filter"). Seit F296 gibt es auf der Belegliste gar
+   * keine Reiter mehr, nur Schnellfilter (`DOCUMENT_LIST_PRESETS`).
    */
   clarification: z.string().optional(),
 });
+
+/** Kommaliste oder Array → Kommaliste (Checkbox-Gruppen kommen als Array). */
+const joined = (v: string | string[] | undefined): string | undefined =>
+  Array.isArray(v) ? v.join(",") : typeof v === "string" ? v : undefined;
+
+/** Der Filterstand der Belegliste, wie ihn die URL trägt — Eingabe für `matchPreset` (DS 0201, F8). */
+export interface DocumentListState extends Record<string, FilterValue> {
+  q: string;
+  from: string;
+  to: string;
+  open: boolean;
+  period: string;
+  clarification: boolean;
+  cat: readonly string[];
+  lifecycle: readonly string[];
+  partner: string;
+  status: readonly string[];
+  sort: string;
+  dir: string;
+}
+
+export function documentListState(raw: RawSearchParams): DocumentListState {
+  const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? v[0] : v) ?? "";
+  const many = (v: string | string[] | undefined): readonly string[] =>
+    Array.isArray(v) ? v : typeof v === "string" && v.length > 0 ? [v] : [];
+  return {
+    q: one(raw.q),
+    from: one(raw.from),
+    to: one(raw.to),
+    open: one(raw.open) === "1",
+    period: one(raw.period),
+    clarification: one(raw.clarification) === "1",
+    cat: many(raw.cat),
+    lifecycle: many(raw.lifecycle),
+    partner: one(raw.partner),
+    status: many(raw.status),
+    sort: one(raw.sort),
+    dir: one(raw.dir),
+  };
+}
+
+/**
+ * Die Schnellfilter der Belegliste (DS 0201, F8): feste Kombinationen der
+ * sichtbaren Filter, kein zweiter Datenpfad. „Problematisch" ist die
+ * Definition der Statusmaschine (F289: Review-Gründe werden genau dort
+ * gesetzt); `bookable` ist nicht problematisch, sondern fertig.
+ */
+export const DOCUMENT_LIST_PRESETS: readonly FilterPreset<DocumentListState>[] = [
+  { key: "all", label: "Alle", filters: {} },
+  { key: "open", label: "Offen", filters: { open: true, period: "all", sort: "received_date", dir: "asc" } },
+  { key: "processing", label: "In Verarbeitung", filters: { status: ["pending", "extracting"] } },
+  { key: "problems", label: "Problematisch", filters: { status: ["agent_review", "human_review"] } },
+  { key: "clarification", label: "Offene Klärung", filters: { clarification: true } },
+  { key: "bookable", label: "Buchbar", filters: { status: ["bookable"] } },
+];
+
+/** URL-Query eines Schnellfilters: alle Felder aus `filters`, sonst nichts — kein `page`. */
+export function presetQuery(preset: FilterPreset<DocumentListState>): URLSearchParams {
+  const p = new URLSearchParams();
+  for (const [k, v] of Object.entries(preset.filters)) {
+    if (v === true) p.set(k, "1");
+    else if (typeof v === "string" && v.length > 0) p.set(k, v);
+    else if (Array.isArray(v)) for (const x of v) p.append(k, x);
+  }
+  return p;
+}
 
 /**
  * Serialisiert die Listen-Kontext-Parameter, die die Beleg-Detailseite
@@ -114,7 +169,10 @@ const InvoiceFilterRawSchema = z.object({
  * sie nicht mit Detail-Tabs (``tab``) oder anderen Detail-Params
  * kollidieren.
  */
-export function listContextToParams(filter: InvoiceFilter): URLSearchParams {
+export function listContextToParams(
+  filter: InvoiceFilter,
+  sort?: { key: InvoiceSortKey; dir: "asc" | "desc" },
+): URLSearchParams {
   const p = new URLSearchParams();
   if (filter.searchQuery) p.set("listQ", filter.searchQuery);
   if (filter.receivedFrom) p.set("listFrom", filter.receivedFrom);
@@ -127,6 +185,15 @@ export function listContextToParams(filter: InvoiceFilter): URLSearchParams {
   if (filter.docCategory && filter.docCategory.length > 0) {
     p.set("listCat", filter.docCategory.join(","));
   }
+  if (filter.documentStatus && filter.documentStatus.length > 0) {
+    p.set("listStatus", filter.documentStatus.join(","));
+  }
+  if (filter.hasOpenClarification) p.set("listClar", "1");
+  if (filter.allYears) p.set("listAll", "1");
+  if (sort) {
+    p.set("listSort", sort.key);
+    p.set("listDir", sort.dir);
+  }
   return p;
 }
 
@@ -136,7 +203,9 @@ export function listContextToParams(filter: InvoiceFilter): URLSearchParams {
  * Liefert ``null``, wenn kein Listen-Kontext mitgegeben wurde — dann
  * wird keine Prev/Next-Navigation angeboten.
  */
-export function parseListContext(raw: RawSearchParams): InvoiceFilter | null {
+export function parseListContext(
+  raw: RawSearchParams,
+): { filter: InvoiceFilter; sort?: { key: InvoiceSortKey; dir: "asc" | "desc" } } | null {
   const filter: InvoiceFilter = {};
   let touched = false;
   if (typeof raw.listQ === "string" && raw.listQ.length > 0) {
@@ -178,7 +247,31 @@ export function parseListContext(raw: RawSearchParams): InvoiceFilter | null {
       touched = true;
     }
   }
-  return touched ? filter : null;
+  if (typeof raw.listStatus === "string" && raw.listStatus.length > 0) {
+    const statuses = parseDocumentStatuses(raw.listStatus);
+    if (statuses) {
+      filter.documentStatus = statuses;
+      touched = true;
+    }
+  }
+  if (raw.listClar === "1") {
+    filter.hasOpenClarification = true;
+    touched = true;
+  }
+  if (raw.listAll === "1") {
+    filter.allYears = true;
+    touched = true;
+  }
+  let sort: { key: InvoiceSortKey; dir: "asc" | "desc" } | undefined;
+  if (
+    typeof raw.listSort === "string" &&
+    (INVOICE_SORT_KEYS as readonly string[]).includes(raw.listSort) &&
+    (raw.listDir === "asc" || raw.listDir === "desc")
+  ) {
+    sort = { key: raw.listSort as InvoiceSortKey, dir: raw.listDir };
+    touched = true;
+  }
+  return touched ? (sort ? { filter, sort } : { filter }) : null;
 }
 
 export function parseInvoiceFilter(raw: RawSearchParams): InvoiceFilter {
@@ -186,10 +279,12 @@ export function parseInvoiceFilter(raw: RawSearchParams): InvoiceFilter {
     q: typeof raw.q === "string" ? raw.q : undefined,
     from: typeof raw.from === "string" ? raw.from : undefined,
     to: typeof raw.to === "string" ? raw.to : undefined,
-    lifecycle: typeof raw.lifecycle === "string" ? raw.lifecycle : undefined,
+    // Checkbox-Gruppen: mehrere Werte kommen als Array an.
+    lifecycle: joined(raw.lifecycle),
     open: typeof raw.open === "string" ? raw.open : undefined,
-    // Checkbox-Gruppe: mehrere `cat`-Werte kommen als Array an.
-    cat: Array.isArray(raw.cat) ? raw.cat.join(",") : typeof raw.cat === "string" ? raw.cat : undefined,
+    cat: joined(raw.cat),
+    status: joined(raw.status),
+    period: typeof raw.period === "string" ? raw.period : undefined,
     partner: typeof raw.partner === "string" ? raw.partner : undefined,
     clarification: typeof raw.clarification === "string" ? raw.clarification : undefined,
   });
@@ -211,7 +306,21 @@ export function parseInvoiceFilter(raw: RawSearchParams): InvoiceFilter {
     docCategory: parsed.data.cat ? (parseDocCategories(parsed.data.cat) ?? undefined) : undefined,
     businessPartnerId: parsed.data.partner,
     hasOpenClarification: parsed.data.clarification === "1" ? true : undefined,
+    documentStatus: parsed.data.status ? (parseDocumentStatuses(parsed.data.status) ?? undefined) : undefined,
+    allYears: parsed.data.period === "all" ? true : undefined,
   };
+}
+
+/** Kommaliste → bekannte Belegstatus ohne `deleted`; Unbekanntes fällt still weg. */
+function parseDocumentStatuses(raw: string): SourceDocStatus[] | null {
+  const values = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(
+      (s): s is SourceDocStatus =>
+        s !== "deleted" && (SOURCE_DOC_STATUSES as readonly string[]).includes(s),
+    );
+  return values.length > 0 ? values : null;
 }
 
 /** Kommaliste → bekannte Kategorien; unbekannte Werte fallen still weg
@@ -293,6 +402,17 @@ export interface InvoiceListItem {
   caseFiscalYear: number | null;
   /** Der Stapel, dem der Beleg über seinen Satz zugeordnet ist (jüngster gewinnt); NULL ohne Buchung. */
   batch: { batchId: string; year: number; description: string | null } | null;
+  /** F306: Fakten des Prozessbilds (Spalte „Fortschritt"). */
+  reviewNote: string | null;
+  classifiedAt: string | null;
+  /** Stufe des schwächsten lebenden Satzes; NULL ohne Buchung. */
+  entryStage: EntryDatevStage | null;
+  /** Teilbelege, nur beim Sammel-PDF. */
+  children: { total: number; done: number } | null;
+  /** Jüngster offener Job am Beleg. */
+  openJob: { jobType: string; status: string; startedAt: string | null; createdAt: string } | null;
+  /** Wie oft der Beleg wieder geöffnet wurde. */
+  reopenedCount: number;
 }
 
 export interface InvoiceLineItem {

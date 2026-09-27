@@ -158,7 +158,7 @@ export const NOTES: ScenarioClarification[] = [
     "2026-07-31T16:05:00Z",
     "agent",
     "Fall eröffnet und Vorschlag gebucht",
-    "Beleg ohne Sachverhalt eingegangen; der Agent hat den Fall eröffnet und den Vorschlag gebucht.",
+    "Beleg ohne Sachverhalt eingegangen; Ludwig hat den Fall eröffnet und den Vorschlag gebucht.",
   ),
 ];
 

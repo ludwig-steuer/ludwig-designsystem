@@ -288,7 +288,7 @@ export const WithFirm: Story = {
         tab="details"
         signal={
           <Banner tone="warning" title="An die Kanzlei übergeben.">
-            Der Agent ist sich beim Steuerschlüssel nicht sicher: die Rechnung nennt keinen
+            Ludwig ist sich beim Steuerschlüssel nicht sicher: die Rechnung nennt keinen
             Steuersatz, und der Lieferant hat zwei verschiedene im Vorjahr.
           </Banner>
         }

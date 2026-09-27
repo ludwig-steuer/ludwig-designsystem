@@ -117,7 +117,7 @@ export const ClarificationOpenFirm: Story = { render: () => <ScenarioPage scenar
  * **An die Kanzlei übergeben** (E6; 27 offene Fälle mit `disposition =
  * accounting` ohne Rückfrage).
  *
- * Der Agent fragt nicht, er gibt ab: zwei offene Rechnungen passen gleich gut,
+ * Ludwig fragt nicht, er gibt ab: zwei offene Rechnungen passen gleich gut,
  * und raten wäre schlechter als übergeben. Das Signal nennt den Grund, die
  * Mängel-Zone die zwei Wege — selbst zuordnen oder mit Hinweis zurückgeben.
  */
@@ -128,7 +128,7 @@ export const HandedToFirm: Story = { render: () => <ScenarioPage scenario={S.han
  *
  * Was in den Daten „storniert" heißt, ist fast immer ein zurückgezogener
  * Vorschlag — Storno-Buchungen gibt es keine. Der Fall hat danach keinen
- * gültigen Vorschlag, und zu tun ist trotzdem nichts: der Agent bucht neu.
+ * gültigen Vorschlag, und zu tun ist trotzdem nichts: Ludwig bucht neu.
  * Deshalb kein Signal, und der alte Vorschlag bleibt zum Nachlesen stehen.
  */
 export const ProposalWithdrawn: Story = { render: () => <ScenarioPage scenario={S.proposalWithdrawn} /> };

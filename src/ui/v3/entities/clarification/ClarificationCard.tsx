@@ -52,7 +52,7 @@ import type { ClarificationVM } from "./Clarification";
 const AUDIENCE_LABEL: Record<ClarificationVM["audience"], string> = {
   accounting: "Kanzlei",
   client: "Mandant",
-  agent: "Agent",
+  agent: "Ludwig",
 };
 
 /** What each history entry is; the four `case.clarification_*` audit actions. */
@@ -437,7 +437,7 @@ export function ClarificationCard({
                 <span className="v2clc__histHead">
                   <strong>{EVENT_LABEL[e.kind]}</strong>
                   {" von "}
-                  {actorName(e.by, e.kind === "raised" ? "Agent" : "System")}
+                  {actorName(e.by, e.kind === "raised" ? "Ludwig" : "System")}
                   {" · "}
                   <Time value={e.at} format="dateTime" size="sm" />
                 </span>

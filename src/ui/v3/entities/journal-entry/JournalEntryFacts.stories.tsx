@@ -211,7 +211,7 @@ export const Edges: Story = {
       <JournalEntryFacts
         entry={entry({
           rationale:
-            "Die Rechnung enthält Positionen mit 7 % und 19 % Umsatzsteuer; der Agent teilt nach Steuersatz auf und bucht die Leergutpfand-Position gesondert. Die Präzedenz des Lieferanten deckt diese Aufteilung, und die Sammelrechnung des Vormonats war ebenso geteilt — die Kanzlei hatte sie unverändert übernommen.",
+            "Die Rechnung enthält Positionen mit 7 % und 19 % Umsatzsteuer; Ludwig teilt nach Steuersatz auf und bucht die Leergutpfand-Position gesondert. Die Präzedenz des Lieferanten deckt diese Aufteilung, und die Sammelrechnung des Vormonats war ebenso geteilt — die Kanzlei hatte sie unverändert übernommen.",
           lines: [
             ...Array.from({ length: 11 }, (_, i) => ({
               side: "debit" as const,

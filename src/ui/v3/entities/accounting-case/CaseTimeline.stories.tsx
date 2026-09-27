@@ -353,7 +353,7 @@ function EntryDetail({ entry }: { entry: CaseTimelineEntry | null }) {
       <DetailPane title={c.title} sub={`Rückfrage · gestellt am ${formatTime(c.raisedAt, "date")}`}>
         <FieldList
           rows={[
-            ["Adressat", c.audience === "accounting" ? "Kanzlei" : "Agent"],
+            ["Adressat", c.audience === "accounting" ? "Kanzlei" : "Ludwig"],
             ["Schwere", c.severity === "required" ? "Blockierend" : "Optional"],
             ["Antwort", c.answeredAt ? "Auf 6815, wie in den Vormonaten." : "— steht aus"],
           ]}

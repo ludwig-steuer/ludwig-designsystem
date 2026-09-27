@@ -17,7 +17,7 @@ const ago = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOSt
 const NOTES: Note[] = [
   { id: "n1", at: ago(60 * 3), author: "Kanzlei", text: "Rechnung liegt vor, die Zahlung ist für Freitag angekündigt." },
   { id: "n2", at: ago(60 * 24 * 3), author: "Mandant", text: "Die Ersatzteile gehören zum Firmenwagen, nicht zum Werkstattbestand." },
-  { id: "n3", at: ago(60 * 24 * 9), author: "Agent", text: "Beleg ohne Sachverhalt eingegangen, Fall eröffnet und Vorschlag gebucht." },
+  { id: "n3", at: ago(60 * 24 * 9), author: "Ludwig", text: "Beleg ohne Sachverhalt eingegangen, Fall eröffnet und Vorschlag gebucht." },
 ];
 
 /**

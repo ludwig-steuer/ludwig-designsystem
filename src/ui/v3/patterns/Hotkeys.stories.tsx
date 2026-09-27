@@ -21,7 +21,7 @@ const GROUPS = [
     title: "Handlung",
     keys: [
       { key: "A", label: "Bestätigen" },
-      { key: "R", label: "Zurück an den Agenten" },
+      { key: "R", label: "Zurück an Ludwig" },
     ],
   },
   {

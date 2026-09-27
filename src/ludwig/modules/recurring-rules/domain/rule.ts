@@ -110,7 +110,7 @@ export type RuleProfileSource = "derived" | "agent" | "human" | "onboarding";
  */
 export const RULE_PROFILE_SOURCE_LABEL: Record<RuleProfileSource, string> = {
   derived: "aus vorhandenen Buchungen abgeleitet",
-  agent: "vom Agenten angelegt",
+  agent: "von Ludwig angelegt",
   human: "von Hand angelegt",
   onboarding: "beim Onboarding übernommen",
 };
@@ -169,7 +169,7 @@ export const RULE_SETTING_HELP: Partial<Record<keyof RecurringRule, RuleSettingH
   },
   matchContractNumber: { group: "match", help: ALSO_MATCHES_DOCUMENTS, imported: false },
   matchDocumentTextRegex: { group: "match", help: ALSO_MATCHES_DOCUMENTS, imported: false },
-  matchingNote: { group: "match", help: "Für Menschen und den Agenten — kein Kriterium.", imported: false },
+  matchingNote: { group: "match", help: "Für Menschen und Ludwig — kein Kriterium.", imported: false },
   datevDocumentNumber: {
     group: "book",
     help: "Belegfeld 1 jeder Sollstellung — daran hängt der Ausgleich des offenen Postens.",

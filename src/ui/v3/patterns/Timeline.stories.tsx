@@ -16,7 +16,7 @@ const CASE: TimelineItem[] = [
     id: "e3",
     at: "2026-08-30T09:12:00Z",
     kind: "Buchungsvorschlag",
-    actor: "Agent",
+    actor: "Ludwig",
     title: "6815 an 70021 · 1.249,90 € vorgeschlagen",
     state: "edited",
     right: <AmountCell value={1249.9} />,
@@ -290,7 +290,7 @@ export const DayOnly: Story = {
         groupBy="none"
         entries={[
           { id: "d1", at: "2026-08-28", title: "Rechnung RE-4471 · Bürobedarf Meier GmbH", kind: "Beleg" },
-          { id: "d2", at: "2026-08-26T14:12:00Z", title: "Buchungsvorschlag angelegt", kind: "Vorschlag", actor: "Agent" },
+          { id: "d2", at: "2026-08-26T14:12:00Z", title: "Buchungsvorschlag angelegt", kind: "Vorschlag", actor: "Ludwig" },
         ]}
       />
     </div>
@@ -330,7 +330,7 @@ export const IconsAndDimmed: Story = {
             id: "i1",
             at: "2026-08-31T14:02:00Z",
             kind: "Buchungsvorschlag",
-            actor: "Agent",
+            actor: "Ludwig",
             icon: <EntityIcon entity="journal-entry" size={14} />,
             title: "6815 an 70021 · 1.249,90 € vorgeschlagen",
             state: "edited",
@@ -340,7 +340,7 @@ export const IconsAndDimmed: Story = {
             id: "i2",
             at: "2026-08-30T09:12:00Z",
             kind: "Buchungsvorschlag · zurückgezogen",
-            actor: "Agent",
+            actor: "Ludwig",
             icon: <EntityIcon entity="journal-entry" size={14} />,
             title: "6810 an 70021 · 1.249,90 € vorgeschlagen",
             dim: true,

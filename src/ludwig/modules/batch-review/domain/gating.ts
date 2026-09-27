@@ -86,7 +86,7 @@ function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null
       banner: {
         tone: "warning",
         text:
-          "Der Agent hat seit über zwei Stunden nichts mehr an diesem Stapel getan. " +
+          "Ludwig hat seit über zwei Stunden nichts mehr an diesem Stapel getan. " +
           "Sie können die Prüfung übernehmen — sein Lauf wird dabei beendet.",
         action: "take_over",
       },
@@ -98,7 +98,7 @@ function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null
       entryStep: 0,
       banner: {
         tone: "info",
-        text: "Der Agent arbeitet an diesem Stapel — alles sichtbar, nichts quittierbar.",
+        text: "Ludwig arbeitet an diesem Stapel — alles sichtbar, nichts quittierbar.",
         action: null,
       },
     };
@@ -111,7 +111,7 @@ function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null
         tone: "warning",
         text:
           "Der Stapel ist bereit, aber niemand arbeitet darin. Bis zur Übernahme " +
-          "landen nachgereichte Belege im selben Zyklus — der nächste Agentenlauf nimmt sie mit.",
+          "landen nachgereichte Belege im selben Zyklus — der nächste Durchgang von Ludwig nimmt sie mit.",
         action: "take_over",
       },
     };

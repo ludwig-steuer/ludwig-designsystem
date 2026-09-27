@@ -53,6 +53,13 @@ export interface DocProcessing {
   waiting: boolean;
 }
 
+/**
+ * Die Hänge-Schwelle in Minuten — eine Quelle für Korb (`in_flight`/`stuck`,
+ * F280), Belegliste und Belegseite (F306). Ein Azure-OCR-Schritt schweigt
+ * regelmäßig länger als eine Minute; 30 Minuten ohne Lebenszeichen heißt hängt.
+ */
+export const DOC_STUCK_MINUTES = 30;
+
 const OFFEN = new Set(["queued", "running"]);
 
 export function docProcessing(facts: DocProcessingFacts): DocProcessing | null {

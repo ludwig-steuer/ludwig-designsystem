@@ -179,7 +179,7 @@ export const SOURCE_DOCUMENT_DETAILS: {
 function provenance(fact: { source: ProvenanceSource; confidence: number | null }): string {
   if (fact.source === "manual") return "geprüft";
   const pct = fact.confidence === null ? null : Math.round(fact.confidence * 100);
-  return pct === null ? "KI" : `KI · ${pct} %`;
+  return pct === null ? "Ludwig" : `Ludwig · ${pct} %`;
 }
 
 /**

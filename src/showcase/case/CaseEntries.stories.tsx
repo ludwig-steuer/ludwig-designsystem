@@ -134,7 +134,7 @@ function Pane({ title, sub, children }: { title: string; sub?: string; children:
 
 /**
  * **1 · Eingangsrechnung eingegangen.** Der Normalfall: ein Beleg kommt an,
- * der Agent schlägt die Buchung vor. Die Zeile nennt Tag, Art, Titel und
+ * Ludwig schlägt die Buchung vor. Die Zeile nennt Tag, Art, Titel und
  * Betrag; der Beleg selbst steht in der Fläche.
  */
 export const IncomingInvoice: Story = {
@@ -1091,7 +1091,7 @@ const PROPOSAL: JournalLine[] = [
 ];
 
 /**
- * **28 · Buchungsvorschlag des Agenten.** Der Satz und der Grund dafür: die
+ * **28 · Buchungsvorschlag von Ludwig.** Der Satz und der Grund dafür: die
  * Präzedenz („sechs Buchungen auf 6815") steht nicht in der Buchung, sondern
  * daneben — ein Vorschlag ohne Begründung ist eine Behauptung.
  */

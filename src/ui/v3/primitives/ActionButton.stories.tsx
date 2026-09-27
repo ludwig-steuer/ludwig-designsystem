@@ -250,7 +250,7 @@ export const Variants: Story = {
       <ActionButton variant="primary" action={async () => wait(400)}>
         Freigeben
       </ActionButton>
-      <ActionButton action={async () => wait(400)}>Zurück an Agenten</ActionButton>
+      <ActionButton action={async () => wait(400)}>Zurück an Ludwigen</ActionButton>
       <ActionButton variant="tertiary" size="sm" action={async () => wait(400)}>
         Kontenblatt öffnen
       </ActionButton>
@@ -295,7 +295,7 @@ export const InUse: Story = {
       <ActionBar
         secondary={
           <ActionButton size="sm" action={async () => wait(500)}>
-            Zurück an Agenten
+            Zurück an Ludwigen
           </ActionButton>
         }
         primary={

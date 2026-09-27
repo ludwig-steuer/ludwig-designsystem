@@ -271,32 +271,6 @@ export function sourceDocumentFromListRow(row: {
 }
 
 /**
- * Eine Zeile der beiden Hänger-Reiter.
- *
- * Sie trägt weniger: kein Betrag, keine Richtung, keine Verarbeitung der
- * Rechnung — ein Beleg, der hier steht, hat die Extraktion oft nie erreicht.
- */
-export function sourceDocumentFromStuckRow(row: {
-  sourceDocId: string;
-  fileName: string | null;
-  documentForm: string | null;
-  counterparty: string | null;
-  documentDate: string | null;
-  receivedDate: string;
-  status: string;
-}): Omit<SourceDocumentVM, "detail"> {
-  return {
-    id: row.sourceDocId,
-    fileName: row.fileName ?? "",
-    classDocumentForm: row.documentForm,
-    counterparty: row.counterparty,
-    documentDate: row.documentDate,
-    receivedDate: row.receivedDate,
-    status: row.status as SourceDocStatus,
-  };
-}
-
-/**
  * Der Beleg der Detailseite (Basis-Datensatz des Typ-Dispatch).
  *
  * Er trägt mehr als eine Listenzeile: die Zusammenfassungen des Classifiers,

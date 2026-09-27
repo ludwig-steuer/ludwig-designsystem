@@ -14,6 +14,25 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 Nichts.
 
+## Erledigt mit dem Lauf vom 2026-09-27 (App `20d5fce4`, F307)
+
+Owner-Ausnahme (Simon, 2026-09-27, im Chat: „Ja, jetzt spiegeln"). Gespiegelt
+aus dem **lokalen** App-Commit `20d5fce4` auf `staging` (noch nicht auf
+origin/staging; den Push macht ll-cto/ll-dev).
+
+- **F307 — Ludwig ist die KI** (L-355): Registry-Labels „Ludwig prüft",
+  „Bei Ludwig", „Vorschlag von Ludwig", Akteur „Ludwig", Übergangs-Labels ohne
+  „Agent". Im Set dazu nachgezogen: `ACTION_ICON.agent`, die Wortlisten in
+  `Clarification*`, die Konfidenz-Herkunft „Ludwig · 94 %", und alle Stories
+  und Showcase-Fixtures, die „Agent"/„KI" als Handelnden zeigten.
+- **Mitgekommen** seit `770cbbf0`: F304 (`batchOwner`/`batchActions` mit
+  Übergabeweg, `batch-head.ts`, `batch-defects.ts`), F306
+  (`document-process.ts`), F310/F311 (`input_tax_verdict`), F303.
+- **Skript:** `sync-ludwig.sh` schreibt jetzt auch `@/ui/status/` auf den
+  Spiegel um — `document-process.ts` ist die erste gespiegelte Datei, die die
+  Registry so importiert.
+- Offen bleibt L-356 (Klartext-`summary` je Maschine, F307 T307.7).
+
 ## Erledigt mit dem Lauf vom 2026-09-24 (App `770cbbf0`, F289)
 
 Owner-Ausnahme (Simon, 2026-09-24: „ja bitte spiegeln, dann pushen, dann soll

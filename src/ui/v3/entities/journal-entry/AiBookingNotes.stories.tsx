@@ -16,7 +16,7 @@ import {
 import type { ConfidenceLevel } from "../../patterns/Confidence";
 
 /**
- * Was der Agent sich gedacht hat — in drei Größen (F123, 0151).
+ * Was Ludwig sich gedacht hat — in drei Größen (F123, 0151).
  *
  * Der Kasten steht am einzelnen Satz, die Zelle in einer Liste von Sätzen, und
  * der Rumpf ist das, was beide zeigen. Drei Formen, **ein** Vokabular: das
@@ -51,7 +51,7 @@ const SOURCES_WITHOUT_NAMES: AiSource[] = [
 /**
  * Die vier Urteile nebeneinander, jedes mit seiner Konfidenz. **Erst die
  * Konfidenz, dann das Urteil** (Owner 2026-09-10): das ist die Reihenfolge der
- * Arbeit — der Agent schlägt vor und sagt, wie sicher er war, dann urteilt der
+ * Arbeit — Ludwig schlägt vor und sagt, wie sicher er war, dann urteilt der
  * Judge darüber. Der Kasten hat es immer schon so gehalten; die Zelle war der
  * Ausreißer.
  *

@@ -39,8 +39,9 @@ export type CaseLifecycle = (typeof CASE_LIFECYCLE)[number];
 
 // EINZIGE TS-Quelle der Case-Arten (F11-T11.2). Spiegel des DB-CHECK
 // ``client_accounting_case_kind_check`` in Migration
-// ``supabase/migrations/20260617140000_client_source_docs_contracts.sql``
-// — bei Änderung BEIDE anfassen. Keine lokalen z.enum-Duplikate mehr;
+// ``supabase/migrations/20260925120000_case_kind_client_batch.sql`` (vorher
+// ``20260617140000_client_source_docs_contracts.sql``) — bei Änderung BEIDE
+// anfassen. Keine lokalen z.enum-Duplikate mehr;
 // bewusste Einschränkungen als ``CaseKindSchema.exclude([...])`` mit
 // Kommentar am Konsumenten.
 export const CASE_KIND = [
@@ -51,6 +52,9 @@ export const CASE_KIND = [
   "expense_report",
   "adjustment_only",
   "contract",
+  // F295: der Sammel-Sachverhalt eines importierten Mandantenstapels — ohne
+  // Gegenpartei, vergibt nur der Import.
+  "client_batch",
 ] as const;
 export type CaseKind = (typeof CASE_KIND)[number];
 
@@ -66,6 +70,7 @@ export const CASE_KIND_LABEL: Record<CaseKind, string> = {
   expense_report: "Auslagen",
   adjustment_only: "Korrektur",
   contract: "Vertrag",
+  client_batch: "Mandantenstapel",
 };
 
 /** Label für Aufrufer, die den Wert nur als ``string`` haben (Query-Ergebnisse,
@@ -136,6 +141,9 @@ export function isDocumentNumberModeDowngrade(
 /** Zod-Schema über ``CASE_KIND`` — für alle Input-Validierungen (Agent-Kerne,
  *  MCP-Tool-Defs, Server-Actions) importieren statt Listen duplizieren. */
 export const CaseKindSchema = z.enum(CASE_KIND);
+/** F295: Arten, die Agent und Kanzlei anlegen oder setzen dürfen —
+ *  ``client_batch`` vergibt nur der Mandantenstapel-Import. */
+export const AssignableCaseKindSchema = CaseKindSchema.exclude(["client_batch"]);
 
 // Zuständigkeits-Achse (agentic booking loop): wer ist am Zug? Orthogonal zur
 // lifecycle-Achse. NULL = in Pipeline-Bearbeitung oder abgeschlossen.
@@ -151,7 +159,7 @@ export type CaseDisposition = (typeof CASE_DISPOSITION)[number];
 export const CASE_DISPOSITION_WRITABLE = ["agent", "accounting"] as const;
 export type CaseDispositionWritable = (typeof CASE_DISPOSITION_WRITABLE)[number];
 export const CASE_DISPOSITION_LABEL: Record<CaseDisposition, string> = {
-  agent: "Agent",
+  agent: "Ludwig",
   accounting: "Kanzlei",
   client: "Mandant",
 };
@@ -206,7 +214,7 @@ export type ClarificationType = (typeof CLARIFICATION_TYPES)[number];
  * Dubletten je Sachverhalt.
  */
 export const CLARIFICATION_QUESTION_TYPE_LABEL: Record<string, string> = {
-  agent_clarification: "Rückfrage des Agenten",
+  agent_clarification: "Rückfrage von Ludwig",
   human_clarification: "Rückfrage der Kanzlei",
   document_missing: "Beleg fehlt",
   creditor_mismatch: "Kreditor passt nicht",
@@ -244,7 +252,7 @@ export function clarificationQuestionTypeLabel(questionType: string): string {
  * deshalb ihren technischen Slug zeigten (L-11).
  */
 export const CLARIFICATION_MODULE_LABEL: Record<string, string> = {
-  agent: "Buchungsagent",
+  agent: "Ludwig",
   web: "Kanzlei-Oberfläche",
   "datev-mirror": "DATEV-Abgleich",
   "booking-module": "Buchungsvorschlag",
@@ -376,6 +384,18 @@ export type CaseExportStatus = "exported" | "partial" | "open";
  * (`accepted`/`posted`; `exported_at` gesetzt = exportiert). `null`, wenn noch
  * nichts abgenommen ist — dann gibt es nichts zu exportieren.
  */
+/**
+ * P18: Anzeige-Status des Lebenszyklus. `closed_accepted` ohne angenommenen
+ * Satz (`exportStatus === null` ⇔ kein `accepted`/`posted`-Satz) heißt
+ * „Erledigt ohne Buchung" statt „Verbucht" — abgeleitet, kein DB-Wert.
+ */
+export function caseLifecycleDisplayStatus(
+  lifecycle: CaseLifecycle,
+  exportStatus: string | null,
+): string {
+  return lifecycle === "closed_accepted" && exportStatus === null ? "closed_without_booking" : lifecycle;
+}
+
 export function deriveCaseExportStatus(
   acceptedCount: number,
   exportedCount: number,

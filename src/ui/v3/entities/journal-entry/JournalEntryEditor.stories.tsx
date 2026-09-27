@@ -18,7 +18,7 @@ type Story = StoryObj<typeof JournalEntryEditor>;
  */
 
 const CANDIDATES = {
-  agent: [{ number: "6815", name: "Bürobedarf", reason: "Vorschlag des Agenten" }],
+  agent: [{ number: "6815", name: "Bürobedarf", reason: "Vorschlag von Ludwig" }],
   partner: [{ number: "6820", name: "Porto", reason: "zuletzt 12× bei dieser Gegenpartei" }],
 };
 

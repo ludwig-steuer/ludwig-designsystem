@@ -58,13 +58,13 @@ export const CHECKPOINT_TEXTS: Record<Exclude<ChecklistRowKey, "not_checked">, C
   questions_answered: {
     label: "Rückfragen beantwortet",
     todo:
-      "Offene Fragen des Agenten beantworten – oder quittieren, wenn sie diesen Stapel nicht aufhalten sollen.",
+      "Offene Fragen von Ludwig beantworten – oder quittieren, wenn sie diesen Stapel nicht aufhalten sollen.",
     jumpLabel: "Rückfragen öffnen",
     jumpHref: "2",
   },
   cases_proposed: {
     label: "Sachverhalte mit Buchungsvorschlag",
-    todo: "Diese Sachverhalte haben noch keinen Vorschlag: selbst buchen oder an den Agenten zurückgeben.",
+    todo: "Diese Sachverhalte haben noch keinen Vorschlag: selbst buchen oder an Ludwig zurückgeben.",
     jumpLabel: "Sachverhalte ohne Vorschlag öffnen",
     jumpHref: "3#without-proposal",
   },
@@ -80,6 +80,22 @@ export const CHECKPOINT_TEXTS: Record<Exclude<ChecklistRowKey, "not_checked">, C
     label: "Probe-Export fehlerfrei",
     todo: "Diese Buchungen würde DATEV ablehnen. Buchung öffnen und den genannten Fehler beheben.",
     jumpLabel: "Buchung öffnen",
+    jumpHref: "3",
+  },
+  already_booked_in_datev: {
+    label: "Bereits in DATEV gebucht",
+    todo:
+      "Diese Sätze stehen in DATEV schon – ein Export wäre eine Doppelbuchung. Satz ablehnen oder " +
+      "gegen das Zwischenkonto der Kanzleibuchung umbuchen.",
+    jumpLabel: "Buchungen öffnen",
+    jumpHref: "3",
+  },
+  booking_date_outside_batch: {
+    label: "Buchungsdatum außerhalb des Stapels",
+    todo:
+      "Diese Sätze kämen in DATEV in einem anderen Monat an. Buchungsdatum in den Stapelzeitraum legen " +
+      "oder den Satz ablehnen.",
+    jumpLabel: "Buchungen öffnen",
     jumpHref: "3",
   },
   bank_transactions_booked: {
@@ -113,7 +129,7 @@ export const CHECKPOINT_TEXTS: Record<Exclude<ChecklistRowKey, "not_checked">, C
   },
   conventions_decided: {
     label: "Neue Konventionen entschieden",
-    todo: "Die neuen Regeln des Agenten bestätigen oder verwerfen – oder quittieren.",
+    todo: "Die neuen Regeln von Ludwig bestätigen oder verwerfen – oder quittieren.",
     jumpLabel: "Konventionen öffnen",
     jumpHref: "7",
   },
@@ -130,10 +146,6 @@ export const CHECKPOINT_TEXTS: Record<Exclude<ChecklistRowKey, "not_checked">, C
 const FINDING_NOTES: Record<string, string> = {
   statement_missing: "Kein Auszug für diesen Zeitraum.",
   statement_unprocessed: "Der Auszug liegt als Beleg vor, ist aber noch nicht eingelesen.",
-  statement_balance_chain:
-    "Der Anfangssaldo passt nicht zum Endsaldo des vorigen Auszugs – es fehlt ein Auszug dazwischen.",
-  statement_sum_mismatch:
-    "Anfangssaldo plus Umsätze ergibt nicht den Endsaldo – der Auszug ist unvollständig eingelesen.",
   waived_but_paid: "Als ‚keine Buchung nötig' geschlossen, aber das Geld ist geflossen.",
   bank_line_proposed_only: "Vorschlag liegt vor, ist aber nicht freigegeben.",
   case_remainder: "Rest auf dem Personenkonto.",
@@ -147,7 +159,7 @@ export function findingNote(kind: string | null): string | null {
 export function coverageNote(reason: string, clarificationSince: string | null): string {
   if (reason === "no_case") return "Ohne Sachverhalt.";
   if (reason === "clarification_pending") return `Klärung offen seit ${clarificationSince ?? "—"}.`;
-  return "Beim Agenten offen.";
+  return "Bei Ludwig offen.";
 }
 
 /** Alle Befund-Sätze — für den Test gegen Codes und Kennungen. */

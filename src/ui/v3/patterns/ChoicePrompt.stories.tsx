@@ -22,7 +22,7 @@ const OPTIONS = [
 
 /**
  * Drei Antworten, eine schon gewählt: `defaultOptionId` trägt den Vorschlag
- * des Agenten hinein, damit die häufigste Antwort ein Klick weniger ist.
+ * von Ludwig hinein, damit die häufigste Antwort ein Klick weniger ist.
  */
 export const Filled: Story = {
   render: () => (

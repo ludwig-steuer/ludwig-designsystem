@@ -56,7 +56,7 @@ export const Filled: Story = {
  * Der Beleg, angeordnet wie besprochen (Owner 2026-09-24): Der normale Weg
  * „Wird eingeordnet → Wird ausgelesen → Bereit zur Buchung → Erledigt" steht
  * oben als Linie. Er ist aus den Farben geschätzt, weil die Registry ihn noch
- * nicht trägt (L-344). „Agent prüft" und „Kanzlei prüft" stehen darunter,
+ * nicht trägt (L-344). „Ludwig prüft" und „Kanzlei prüft" stehen darunter,
  * „Erledigt" und „Gelöscht" rechts untereinander. Neu anstoßen, Erledigen und
  * Löschen gehen von jedem offenen Zustand aus und stehen als Zeilen unter dem
  * Bild. Ohne `current` ist keine Box farbig.
@@ -156,7 +156,7 @@ export const InUse: Story = {
             owner={{ key: "kanzlei", label: "Kanzlei", color: "var(--color-primary)" }}
             phases={[
               { key: "sammeln", label: "Sammeln", sub: "Mandant", states: ["prepared"], status: "done" },
-              { key: "buchen", label: "Buchen", sub: "Agent", states: ["agent"], status: "done" },
+              { key: "buchen", label: "Buchen", sub: "Ludwig", states: ["agent"], status: "done" },
               { key: "pruefen", label: "Prüfen", sub: "Kanzlei", states: ["review"], status: "active" },
               {
                 key: "exportieren",

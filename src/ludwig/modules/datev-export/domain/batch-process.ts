@@ -22,18 +22,18 @@ export interface BatchPhase {
 }
 
 export const BATCH_PHASES: readonly BatchPhase[] = [
-  { key: "buchen", label: "Buchen", sub: "Agent ⇄ bereit", states: ["agent", "prepared"] },
+  { key: "buchen", label: "Buchen", sub: "Ludwig", states: ["agent", "prepared"] },
   { key: "pruefen", label: "Prüfen", sub: "Kanzlei", states: ["review"] },
   {
     key: "uebertragen",
     label: "Übertragen",
-    sub: "Bridge → DATEV",
+    sub: "DATEV",
     states: ["ready", "exporting", "inspection", "failed"],
   },
   {
     key: "angekommen",
     label: "Angekommen",
-    sub: "Spiegel → Nachlese → zu",
+    sub: "Spiegel und Nachlese",
     states: ["confirmed", "mirrored", "closed"],
   },
 ];
@@ -75,7 +75,7 @@ export interface BatchOwnerMeta {
 }
 
 const OWNER_META: Record<BatchOwner, BatchOwnerMeta> = {
-  agent: { key: "agent", label: "Agent", color: "var(--color-accent-500)" },
+  agent: { key: "agent", label: "Ludwig", color: "var(--color-accent-500)" },
   bereit: { key: "bereit", label: "bereit — niemand", color: "var(--color-border-strong)" },
   mandant: { key: "mandant", label: "Mandant (wartet)", color: "var(--color-warning)" },
   kanzlei: { key: "kanzlei", label: "Kanzlei", color: "var(--color-primary)" },
@@ -85,15 +85,25 @@ const OWNER_META: Record<BatchOwner, BatchOwnerMeta> = {
   niemand: { key: "niemand", label: "—", color: "var(--color-border-strong)" },
 };
 
+/** Übergabeweg des Mandanten (`platform_clients.datev_export_method`). */
+export type BatchExportMethod = "csv" | "bridge" | null;
+
 /**
- * Wer ist dran. Einziger Sonderfall: ein `prepared`-Stapel mit offenen
- * Nachforderungen wartet nicht auf die Kanzlei, sondern auf den Mandanten
- * (F117) — deshalb der zweite Parameter.
+ * Wer ist dran — nach der Zustandstabelle in `docs/topics/datev.md` (Spalte
+ * „Dran ist"). Sonderfälle: ein `prepared`-Stapel mit offenen Nachforderungen
+ * wartet auf den Mandanten (F117); in `ready` lädt beim Übergabeweg CSV die
+ * Kanzlei die Datei, sonst holt die Bridge (F304, L-349).
  *
  * `failed` liegt bei der Kanzlei: DATEV hat abgelehnt, der Claim bleibt, und
  * jemand muss entscheiden (erneut übertragen oder Freigabe zurücknehmen).
+ * `confirmed` wartet auf den Spiegel, `mirrored` auf die Nachlese des Agenten
+ * (F115) — in beiden ist die Kanzlei nicht dran.
  */
-export function batchOwner(state: string, openDocumentRequests = 0): BatchOwnerMeta {
+export function batchOwner(
+  state: string,
+  openDocumentRequests = 0,
+  exportMethod: BatchExportMethod = null,
+): BatchOwnerMeta {
   switch (state) {
     case "agent":
       return OWNER_META.agent;
@@ -103,13 +113,15 @@ export function batchOwner(state: string, openDocumentRequests = 0): BatchOwnerM
     case "failed":
       return OWNER_META.kanzlei;
     case "ready":
+      return exportMethod === "csv" ? OWNER_META.kanzlei : OWNER_META.bridge;
     case "exporting":
       return OWNER_META.bridge;
     case "inspection":
-    case "confirmed":
       return OWNER_META.datev;
-    case "mirrored":
+    case "confirmed":
       return OWNER_META.spiegel;
+    case "mirrored":
+      return OWNER_META.agent;
     default:
       // closed, cancelled und alles Unbekannte: niemand ist dran.
       return OWNER_META.niemand;
@@ -205,7 +217,7 @@ export interface BatchActionSet {
  * Ein Knopf, der immer gleich aussieht, sagt nichts; die Zustandstabelle
  * steht deshalb hier und nicht als Ternär im Screen.
  */
-export function batchActions(state: string): BatchActionSet {
+export function batchActions(state: string, exportMethod: BatchExportMethod = null): BatchActionSet {
   const leer: BatchActionSet = { primary: null, secondary: null, tertiary: null, info: null };
 
   switch (state) {
@@ -213,14 +225,15 @@ export function batchActions(state: string): BatchActionSet {
       return {
         ...leer,
         secondary: { key: "zur_abnahme", label: "Ansehen", variant: "secondary" },
-        info: "Der Agent arbeitet — quittieren lässt sich erst nach dem Durchgang, ansehen jederzeit.",
+        info: "Ludwig arbeitet — quittieren lässt sich erst nach dem Durchgang, ansehen jederzeit.",
       };
     case "prepared":
       return {
         primary: { key: "uebernehmen", label: "Prüfung übernehmen", variant: "primary" },
         secondary: { key: "zur_abnahme", label: "Ansehen", variant: "secondary" },
         tertiary: null,
-        info: "Bis zur Übernahme landen nachgereichte Belege im selben Stapel — der nächste Agentenlauf nimmt sie mit.",
+        // F304 (L-351): der Nebensatz steht in der Registry-description von `prepared` (hinter dem (i)).
+        info: null,
       };
     case "review":
       return {
@@ -230,14 +243,22 @@ export function batchActions(state: string): BatchActionSet {
         info: null,
       };
     case "ready":
-      return {
-        primary: { key: "zur_uebergabe", label: "Zur Übergabe", variant: "primary" },
-        secondary: null,
-        tertiary: { key: "abbrechen", label: "Freigabe zurücknehmen", variant: "tertiary" },
-        info: null,
-      };
+      // F304 (L-349): nur beim Übergabeweg CSV lädt die Kanzlei die Datei;
+      // sonst holt die Bridge, und die Kanzlei sieht nur zu.
+      return exportMethod === "csv"
+        ? {
+            primary: { key: "zur_uebergabe", label: "Zur Übergabe", variant: "primary" },
+            secondary: null,
+            tertiary: { key: "abbrechen", label: "Freigabe zurücknehmen", variant: "tertiary" },
+            info: null,
+          }
+        : {
+            primary: null,
+            secondary: { key: "zur_uebergabe", label: "Transport ansehen", variant: "secondary" },
+            tertiary: { key: "abbrechen", label: "Freigabe zurücknehmen", variant: "tertiary" },
+            info: "Freigegeben — die Bridge holt den Stapel beim nächsten Poll.",
+          };
     case "exporting":
-    case "exported":
     case "inspection":
       return {
         ...leer,
@@ -252,12 +273,16 @@ export function batchActions(state: string): BatchActionSet {
         info: null,
       };
     case "confirmed":
+      return {
+        ...leer,
+        secondary: { key: "zur_uebergabe", label: "Transport ansehen", variant: "secondary" },
+        info: "Von DATEV bestätigt — wartet auf den Spiegel.",
+      };
     case "mirrored":
       return {
-        primary: { key: "zur_nachlese", label: "Zur Nachlese", variant: "primary" },
-        secondary: null,
-        tertiary: null,
-        info: null,
+        ...leer,
+        secondary: { key: "zur_nachlese", label: "Nachlese ansehen", variant: "secondary" },
+        info: "Im Spiegel angekommen — Ludwig macht die Nachlese.",
       };
     case "closed":
       return {
@@ -273,5 +298,62 @@ export function batchActions(state: string): BatchActionSet {
       };
     default:
       return leer;
+  }
+}
+
+/**
+ * F302 — wohin ein Aktions-Knopf führt. Vollständig über alle Keys: ein Key
+ * ohne Ziel ließ den Knopf still verschwinden (L-345, „Erneut übertragen" und
+ * „Freigabe zurücknehmen" fehlten). `uebernehmen` schreibt über
+ * `TakeOverReviewButton`; sein Ziel ist die Abnahme, die danach offen steht.
+ */
+export function batchActionHref(base: string, batchId: string, key: BatchAction["key"]): string {
+  const batch = `${base}/batches/${batchId}`;
+  switch (key) {
+    case "zur_abnahme":
+    case "uebernehmen":
+      return `${batch}/review`;
+    case "zur_uebergabe":
+    case "erneut_uebertragen":
+    case "abbrechen":
+      return `${batch}/review/9`;
+    case "zur_nachlese":
+      return `${batch}/review/10`;
+    case "protokoll":
+      return `${batch}?tab=timeline`;
+    default:
+      throw new Error(`batch action without target: ${String(key)}`);
+  }
+}
+
+export type BatchMenuEntry = "return" | "reset" | "discard";
+
+/** F302 — die Einträge unter „Weitere Aktionen" je Zustand, in fester Reihenfolge. */
+export function batchMenuEntries(state: string): BatchMenuEntry[] {
+  const open = state === "prepared" || state === "review";
+  // F303: die Export-Historie steht in der Technik (Sendenachweis), nicht im Menü.
+  return [
+    ...(open ? (["return", "reset"] as const) : []),
+    ...(open || state === "agent" ? (["discard"] as const) : []),
+  ];
+}
+
+/**
+ * F302-T302.6 — der Titel des Signals nennt den **Stand**, der Knopf die
+ * Handlung (0049). `null`, wo der Zustand keine Hauptaktion hat — dort trägt
+ * `batchActions(state).info` die Meldung.
+ */
+export function batchSignalTitle(state: string, exportMethod: BatchExportMethod = null): string | null {
+  switch (state) {
+    case "prepared":
+      return "Ludwig ist fertig — die Prüfung wartet auf Übernahme";
+    case "review":
+      return "Der Stapel wartet auf Ihre Prüfung";
+    case "ready":
+      return exportMethod === "csv" ? "Freigegeben — die Datei wartet auf die Übergabe an DATEV" : null;
+    case "failed":
+      return "DATEV hat den Stapel abgelehnt";
+    default:
+      return null;
   }
 }

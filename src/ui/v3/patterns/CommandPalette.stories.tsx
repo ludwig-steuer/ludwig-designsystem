@@ -75,7 +75,7 @@ const GROUPS: CommandGroup[] = [
     title: "Handlungen",
     items: [
       { id: "approve", label: "Stapel abnehmen", hint: "142 Sätze, 38 ungeprüft", key: "A" },
-      { id: "return", label: "Zurück an den Agenten", hint: "mit Begründung", key: "R" },
+      { id: "return", label: "Zurück an Ludwig", hint: "mit Begründung", key: "R" },
       { id: "export", label: "Als CSV laden", hint: "der aktuelle Stapel" },
     ],
   },
@@ -139,7 +139,7 @@ export const Interactive: Story = {
               title: "Handlungen",
               items: [
                 { id: "approve", label: "Stapel abnehmen", key: "A", onSelect: () => setLast("Stapel abnehmen") },
-                { id: "return", label: "Zurück an den Agenten", key: "R", onSelect: () => setLast("Zurück an den Agenten") },
+                { id: "return", label: "Zurück an Ludwig", key: "R", onSelect: () => setLast("Zurück an Ludwig") },
                 { id: "export", label: "Als CSV laden", onSelect: () => setLast("Als CSV laden") },
               ],
             },

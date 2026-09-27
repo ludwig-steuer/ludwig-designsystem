@@ -34,7 +34,7 @@ export type ClarificationAudience = "accounting" | "client" | "agent";
 const AUDIENCE_LABEL: Record<ClarificationAudience, string> = {
   accounting: "Kanzlei",
   client: "Mandant",
-  agent: "Agent",
+  agent: "Ludwig",
 };
 
 /** Group order of the batch review: the firm's own work first. */

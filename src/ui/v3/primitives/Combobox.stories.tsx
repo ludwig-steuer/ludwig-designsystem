@@ -13,8 +13,8 @@ type Story = StoryObj<typeof Combobox>;
 const ACCOUNTS: ComboboxOption[] = [
   { value: "6815", label: "6815 · Bürobedarf", hint: "14× in sechs Monaten", group: "Zuletzt gebucht" },
   { value: "6805", label: "6805 · Telefon", hint: "6× in sechs Monaten", group: "Zuletzt gebucht" },
-  { value: "6320", label: "6320 · Miete Geschäftsräume", group: "Vorschlag des Agenten" },
-  { value: "4980", label: "4980 · Sonstiger Betriebsbedarf", group: "Vorschlag des Agenten" },
+  { value: "6320", label: "6320 · Miete Geschäftsräume", group: "Vorschlag von Ludwig" },
+  { value: "4980", label: "4980 · Sonstiger Betriebsbedarf", group: "Vorschlag von Ludwig" },
   { value: "1200", label: "1200 · Bank", group: "Alle Konten" },
   { value: "1600", label: "1600 · Verbindlichkeiten", group: "Alle Konten" },
   { value: "1371", label: "1371 · Klärungskonto", group: "Alle Konten" },

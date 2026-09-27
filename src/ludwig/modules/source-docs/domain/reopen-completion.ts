@@ -29,7 +29,7 @@ export function reopenBlocker(f: ReopenFacts): string | null {
     return "Am Beleg hängt eine Buchung. Erst den Satz ablehnen — dann öffnet der Beleg von selbst.";
   }
   if (f.closedCaseNumber !== null) {
-    return `Der Sachverhalt ${f.closedCaseNumber} ist geschlossen — an ihm kann der Agent nicht mehr arbeiten.`;
+    return `Der Sachverhalt ${f.closedCaseNumber} ist geschlossen — an ihm kann Ludwig nicht mehr arbeiten.`;
   }
   return null;
 }

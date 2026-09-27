@@ -81,7 +81,7 @@ export const SOURCE_DOC_STATUS_TRANSITIONS: readonly SourceDocStatusTransition[]
     by: "Revalidierung sauber, Korrektur, Anhängen mit Daten",
   },
   { trigger: "findings_reappeared", from: ["bookable"], to: "agent_review", by: "Revalidierung findet Befunde" },
-  { trigger: "escalated_to_accounting", from: ["agent_review"], to: "human_review", by: "Agent (escalate_doc_review, Pflicht-Grund)" },
+  { trigger: "escalated_to_accounting", from: ["agent_review"], to: "human_review", by: "Ludwig (escalate_doc_review, Pflicht-Grund)" },
   { trigger: "returned_to_agent", from: ["human_review"], to: "agent_review", by: "Kanzlei (Pflicht-Grund)" },
   {
     trigger: "reprocess_requested",
@@ -95,7 +95,7 @@ export const SOURCE_DOC_STATUS_TRANSITIONS: readonly SourceDocStatusTransition[]
     to: "done",
     by: "Trigger (Buchung, Verzicht, Case-Close, Supersede), complete_doc, Import, Textdublette",
   },
-  { trigger: "reopened", from: ["done"], to: "bookable", by: "Agent (reopen_doc), Kanzlei (R14d), Trigger (letzte Buchung weg)" },
+  { trigger: "reopened", from: ["done"], to: "bookable", by: "Ludwig (reopen_doc), Kanzlei (R14d), Trigger (letzte Buchung weg)" },
   { trigger: "soft_deleted", from: ALL_BUT_DELETED, to: "deleted", by: "Löschen" },
 ];
 

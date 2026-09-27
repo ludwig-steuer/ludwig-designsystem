@@ -140,7 +140,7 @@ export const Unsafe: Story = {
 export const InUse: Story = {
   render: () => (
     <div style={{ maxWidth: 560 }}>
-      <ProseCard title="Begründung des Agenten">
+      <ProseCard title="Begründung von Ludwig">
         <Markdown text={REPORT} />
       </ProseCard>
     </div>

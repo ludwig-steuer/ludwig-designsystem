@@ -66,7 +66,7 @@ export const Scale: Story = {
         <h3 className="lw-h3">Sachverhalt RE-4471 · Bürobedarf Meier GmbH</h3>
       </Row>
       <Row name="Überschrift 4" cls="h4 · .lw-h4" note="Unterabschnitt, Feldgruppe">
-        <h4 className="lw-h4">Buchungsvorschlag des Agenten</h4>
+        <h4 className="lw-h4">Buchungsvorschlag von Ludwig</h4>
       </Row>
       <Row name="Fließtext" cls="p · .lw-body" note="lesendes Register, 16 px">
         <p className="lw-body">
@@ -197,7 +197,7 @@ export const Registers: Story = {
 export const InUse: Story = {
   render: () => (
     <div style={{ maxWidth: 560 }}>
-      <ProseCard title="Begründung des Agenten">
+      <ProseCard title="Begründung von Ludwig">
         <div className="lw-overline">Sachverhalt · Wirtschaftsjahr 2026</div>
         <h3 className="lw-h3" style={{ margin: "var(--space-2) 0" }}>RE-4471 · Bürobedarf Meier GmbH</h3>
         <div className="lw-body-sm">

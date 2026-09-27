@@ -51,8 +51,8 @@ export const Confirmation: Story = {
 export const WithReason: Story = {
   render: () => (
     <Demo
-      label="Zurück an den Agenten"
-      title="Zurück an den Agenten"
+      label="Zurück an Ludwig"
+      title="Zurück an Ludwig"
       size="md"
       footer={
         <>
@@ -62,7 +62,7 @@ export const WithReason: Story = {
       }
     >
       <Field label="Grund" hint="Steht später im Protokoll des Durchgangs." htmlFor="grund">
-        <Textarea id="grund" placeholder="Was soll der Agent anders machen?" />
+        <Textarea id="grund" placeholder="Was soll Ludwig anders machen?" />
       </Field>
     </Demo>
   ),

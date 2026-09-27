@@ -79,7 +79,7 @@ export const Audiences: Story = {
         <Card key={a}>
           <CardHead
             title={
-              a === "client" ? "An den Mandanten" : a === "accounting" ? "An die Kanzlei" : "An den Agenten"
+              a === "client" ? "An den Mandanten" : a === "accounting" ? "An die Kanzlei" : "An Ludwig"
             }
             sub="Vorbelegung über defaultAudience"
           />
@@ -103,7 +103,7 @@ export const LimitedAudiences: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)" }}>
       <Card>
-        <CardHead title="Kanzlei oder Agent" sub="audiences = accounting, agent" />
+        <CardHead title="Kanzlei oder Ludwig" sub="audiences = accounting, agent" />
         <div style={{ padding: "var(--space-4)" }}>
           <ClarificationEditor audiences={["accounting", "agent"]} onSubmit={async () => {}} />
         </div>

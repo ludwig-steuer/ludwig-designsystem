@@ -202,6 +202,21 @@ function skeletonOf(value: string): string {
 }
 
 /**
+ * F299 — dieselbe Belegnummern-**Serie**: gleiches Skelett (Ziffern → `d`)
+ * nach Normalisierung. `RE0412` ~ `RE0977`, `20250182` ~ `20260003`; `0`
+ * (DATEVs „kein Beleg") gehört zu keiner Serie.
+ */
+export function sameDocumentNumberSeries(
+  a: string | null | undefined,
+  b: string | null | undefined,
+): boolean {
+  const x = a == null ? "" : normalizeForAcceptance(a);
+  const y = b == null ? "" : normalizeForAcceptance(b);
+  if (!x || !y || x === "0" || y === "0") return false;
+  return skeletonOf(x) === skeletonOf(y);
+}
+
+/**
  * Das dominante Belegnummern-Format eines Kontos — oder null, wenn keins
  * dominiert. Eingabe sind die in DATEV auf diesem Konto beobachteten Nummern.
  */

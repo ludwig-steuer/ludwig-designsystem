@@ -128,7 +128,7 @@ function umsatzPunkt(r: CoverageEingang["rows"][number]): ReadinessItem {
       : r.reason === "clarification_pending"
         ? `Klärung offen an Kanzlei/Mandant seit ${fmtDay(r.clarificationSince)}` +
           `${r.caseNumber ? `, Sachverhalt ${r.caseNumber}` : ""}.`
-        : `Beim Agenten offen${r.caseNumber ? ` (${r.caseNumber})` : ""}.`;
+        : `Bei Ludwig offen${r.caseNumber ? ` (${r.caseNumber})` : ""}.`;
   return {
     key: `tx-${r.bankTransactionId}`,
     sourceDocId: null,

@@ -236,7 +236,7 @@ export const LongContent: Story = {
         >
           {Array.from({ length: 40 }, (_, i) => (
             <div key={i}>
-              Eintrag {i + 1} — der Agent hat eine Zeile geprüft und das Ergebnis vermerkt.
+              Eintrag {i + 1} — Ludwig hat eine Zeile geprüft und das Ergebnis vermerkt.
             </div>
           ))}
         </Drawer>

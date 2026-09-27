@@ -195,7 +195,7 @@ export const InUse: Story = {
         <Timeline
           entries={[
             { id: "e1", at: "2026-08-26", title: "Beleg eingegangen", kind: "Beleg", actor: "Mandant" },
-            { id: "e2", at: MOMENT, title: "Buchung vorgeschlagen", kind: "Buchung", actor: "Agent" },
+            { id: "e2", at: MOMENT, title: "Buchung vorgeschlagen", kind: "Buchung", actor: "Ludwig" },
             { id: "e3", at: threeDaysAgo, title: "Rückfrage gestellt", kind: "Rückfrage", actor: "Kanzlei" },
           ]}
         />

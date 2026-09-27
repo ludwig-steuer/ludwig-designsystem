@@ -275,7 +275,7 @@ export const InUse: Story = {
 export const WithProcess: Story = {
   render: () => {
     const phases = [
-      { key: "book", label: "Buchen", sub: "Agent", states: ["queued", "running", "proposed"], status: "done" as const },
+      { key: "book", label: "Buchen", sub: "Ludwig", states: ["queued", "running", "proposed"], status: "done" as const },
       { key: "pruefen", label: "Prüfen", sub: "Kanzlei", states: ["review", "returned", "approved"], status: "active" as const },
       { key: "uebergeben", label: "Übergeben", sub: "Übertragung", states: ["exporting", "exported"], status: "pending" as const },
       { key: "nachlesen", label: "Nachlesen", sub: "DATEV", states: ["mirrored", "reconciled"], status: "pending" as const },

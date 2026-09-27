@@ -171,7 +171,7 @@ export const openItemCarryover: CaseScenario = {
   todo: {
     sub: "nichts offen",
     points: [],
-    emptyText: "Nichts zu tun: Ludwig wartet auf die Zahlung des Kunden. Kommt sie, gleicht der Agent den Posten aus.",
+    emptyText: "Nichts zu tun: Ludwig wartet auf die Zahlung des Kunden. Kommt sie, gleicht Ludwig den Posten aus.",
     facts: {
       title: "Herkunft",
       rows: [
@@ -516,7 +516,7 @@ export const clarificationOpenFirm: CaseScenario = {
       title: "Rechnung WZ-2026-118",
       sub: "28.07.2026 · wartet auf die Antwort",
       origin: "none",
-      note: "Noch kein Vorschlag: der Agent bucht, sobald die Rückfrage beantwortet ist.",
+      note: "Noch kein Vorschlag: Ludwig bucht, sobald die Rückfrage beantwortet ist.",
     },
   },
   clarificationList: [
@@ -552,7 +552,7 @@ export const proposalWithdrawn: CaseScenario = {
   events: [
     event("ev-w-doc", "document_received", "2026-07-24", "Rechnung BL-55120 eingegangen", 318.5, "open", {
       bookingState: "reversed",
-      stateNote: "Der Agent hat seinen Vorschlag am 25.07. zurückgezogen und bucht neu, sobald die Gutschrift zugeordnet ist.",
+      stateNote: "Ludwig hat seinen Vorschlag am 25.07. zurückgezogen und bucht neu, sobald die Gutschrift zugeordnet ist.",
     }),
   ],
   todo: {
@@ -561,7 +561,7 @@ export const proposalWithdrawn: CaseScenario = {
       {
         key: "withdrawn",
         title: "Es gibt keinen gültigen Vorschlag.",
-        hint: "Der Agent hat seinen Vorschlag vom 24.07. am 25.07. zurückgezogen. Er bucht neu, sobald die Gutschrift GS-2231 zugeordnet ist — zu tun ist hier nichts.",
+        hint: "Ludwig hat seinen Vorschlag vom 24.07. am 25.07. zurückgezogen. Er bucht neu, sobald die Gutschrift GS-2231 zugeordnet ist — zu tun ist hier nichts.",
         state: "returned",
       },
     ],
@@ -579,7 +579,7 @@ export const proposalWithdrawn: CaseScenario = {
     },
   },
   clarificationList: [
-    note("n-w", "2026-07-25T08:10:00Z", "agent", "Vorschlag zurückgezogen", "Zur Rechnung gehört die Gutschrift GS-2231. Der Agent bucht neu, sobald sie zugeordnet ist."),
+    note("n-w", "2026-07-25T08:10:00Z", "agent", "Vorschlag zurückgezogen", "Zur Rechnung gehört die Gutschrift GS-2231. Ludwig bucht neu, sobald sie zugeordnet ist."),
   ],
 };
 
@@ -623,7 +623,7 @@ export const superseded: CaseScenario = {
             href={(id) => `?fall=${id}`}
           />,
         ],
-        ["Zusammengeführt", "20.07.2026 vom Agenten"],
+        ["Zusammengeführt", "20.07.2026 von Ludwig"],
       ],
     },
   },
@@ -766,13 +766,13 @@ export const handedToFirm: CaseScenario = {
   today: TODAY,
   signal: {
     kicker: "Nächster Schritt",
-    title: "Der Agent hat den Fall an die Kanzlei übergeben: welche Rechnung ist bezahlt?",
+    title: "Ludwig hat den Fall an die Kanzlei übergeben: welche Rechnung ist bezahlt?",
     action: "Selbst zuordnen",
   },
   timelineSub: "eine Abbuchung",
   events: [
     event("ev-h-pay", "payment_out", "2026-07-29", "Abbuchung Beispiel-Versand GmbH", -734.8, "blocked", {
-      stateNote: "Nicht gebucht: der Agent hat an die Kanzlei übergeben.",
+      stateNote: "Nicht gebucht: Ludwig hat an die Kanzlei übergeben.",
     }),
   ],
   todo: {
@@ -781,9 +781,9 @@ export const handedToFirm: CaseScenario = {
       {
         key: "handed",
         title: "Zwei offene Rechnungen passen zur Abbuchung.",
-        hint: "RE-4410 und RE-4471 lauten auf denselben Betrag, die Abbuchung nennt keine Nummer. Ordnen Sie selbst zu, oder geben Sie den Fall mit einem Hinweis an den Agenten zurück.",
+        hint: "RE-4410 und RE-4471 lauten auf denselben Betrag, die Abbuchung nennt keine Nummer. Ordnen Sie selbst zu, oder geben Sie den Fall mit einem Hinweis an Ludwig zurück.",
         state: "returned",
-        ways: ["Selbst zuordnen", "An den Agenten zurückgeben"],
+        ways: ["Selbst zuordnen", "An Ludwig zurückgeben"],
       },
     ],
   },
@@ -792,7 +792,7 @@ export const handedToFirm: CaseScenario = {
       title: "Abbuchung Beispiel-Versand GmbH",
       sub: "29.07.2026 · nicht gebucht",
       origin: "none",
-      note: "Kein Vorschlag: statt zwischen zwei gleich guten offenen Posten zu raten, hat der Agent an die Kanzlei übergeben.",
+      note: "Kein Vorschlag: statt zwischen zwei gleich guten offenen Posten zu raten, hat Ludwig an die Kanzlei übergeben.",
     },
   },
   clarificationList: [
@@ -830,7 +830,7 @@ export const newWithoutCounterparty: CaseScenario = {
       {
         key: "booking",
         title: "Die Abbuchung ist nicht gebucht.",
-        hint: "Der Agent schlägt vor, sobald der Gegenpart feststeht.",
+        hint: "Ludwig schlägt vor, sobald der Gegenpart feststeht.",
         state: "open",
       },
     ],
@@ -840,7 +840,7 @@ export const newWithoutCounterparty: CaseScenario = {
       title: "SEPA-Lastschrift ohne Namen",
       sub: "04.08.2026 · nicht gebucht",
       origin: "none",
-      note: "Noch kein Vorschlag: ohne Gegenpart kennt der Agent das Konto nicht.",
+      note: "Noch kein Vorschlag: ohne Gegenpart kennt Ludwig das Konto nicht.",
     },
   },
   clarificationList: [],

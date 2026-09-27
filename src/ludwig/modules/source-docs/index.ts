@@ -9,6 +9,7 @@ export * from "./domain/document-counterparty";
 export * from "./domain/document-filing";
 export * from "./domain/document-form-labels";
 export * from "./domain/document-form-mapping";
+export * from "./domain/document-process";
 export * from "./domain/reopen-completion";
 export * from "./domain/source-doc-status";
 export * from "./domain/source-doc-type";

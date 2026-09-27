@@ -588,7 +588,7 @@ export const noEvents: CaseScenario = {
       {
         key: "empty",
         title: "Diesem Sachverhalt ist noch kein Ereignis zugeordnet.",
-        hint: "Angelegt aus dem Onboarding-Import; ein Beleg oder eine Zahlung kommt, sobald der Agent sie findet.",
+        hint: "Angelegt aus dem Onboarding-Import; ein Beleg oder eine Zahlung kommt, sobald Ludwig sie findet.",
         state: "info",
         ways: ["Beleg zuordnen", "Zahlung zuordnen"],
       },

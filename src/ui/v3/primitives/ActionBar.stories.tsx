@@ -11,7 +11,7 @@ export const FullyStaffed: Story = {
   render: () => (
     <ActionBar
       primary={<Button variant="primary" hotkey="A">Freigeben</Button>}
-      secondary={<Button variant="secondary" hotkey="R">Zurück an Agenten</Button>}
+      secondary={<Button variant="secondary" hotkey="R">Zurück an Ludwigen</Button>}
       tertiary={<Button variant="tertiary" size="sm">Abbrechen</Button>}
       info="Nach der Freigabe geht der Stapel an DATEV."
     />
@@ -20,7 +20,7 @@ export const FullyStaffed: Story = {
 
 /** Zustand ohne Handlung: nur der Hinweis, warum gerade nichts zu tun ist. */
 export const InfoOnly: Story = {
-  render: () => <ActionBar info="Der Agent arbeitet — Aktionen sind so lange gesperrt." />,
+  render: () => <ActionBar info="Ludwig arbeitet — Aktionen sind so lange gesperrt." />,
 };
 
 /** Erneut übertragen ist die einzige sinnvolle Handlung nach einem Fehlschlag. */

@@ -19,16 +19,16 @@ export interface ReviewStep {
 }
 
 export const REVIEW_STEPS: readonly ReviewStep[] = [
-  { n: 0, label: "Ergebnis des Stapels", description: "Sehen, was der Agent erledigt hat und wo er nicht fertig wurde – danach beginnt die Abnahme." },
+  { n: 0, label: "Ergebnis des Stapels", description: "Sehen, was Ludwig erledigt hat und wo er nicht fertig wurde – danach beginnt die Abnahme." },
   { n: 1, label: "Vollständigkeit", description: "Prüfen, ob alle Kontoauszüge und Belege des Zeitraums da sind – und ob es so viele sind wie sonst." },
-  { n: 2, label: "Rückfragen", description: "Die Fragen des Agenten beantworten, damit er die betroffenen Sachverhalte fertig buchen kann." },
-  { n: 3, label: "Buchungsvorschläge", description: "Jeden Vorschlag prüfen und übernehmen, ändern oder an den Agenten zurückgeben." },
+  { n: 2, label: "Rückfragen", description: "Die Fragen von Ludwig beantworten, damit er die betroffenen Sachverhalte fertig buchen kann." },
+  { n: 3, label: "Buchungsvorschläge", description: "Jeden Vorschlag prüfen und übernehmen, ändern oder an Ludwig zurückgeben." },
   // F220: „Kontenausgleich" — Banken, Verrechnungskonten, ruhende Zahlungskonten (Owner 2026-09-15).
   { n: 4, label: "Kontenausgleich", description: "Prüfen, ob Bank- und Verrechnungskonten zum Periodenende aufgehen." },
   { n: 5, label: "Offene Posten", description: "Sehen, wer zum Periodenende wem wie viel schuldet – und ob das zu DATEV passt." },
   { n: 6, label: "Plausibilität", description: "Die Konten des Monats mit den letzten drei Monaten vergleichen und Ausreißer klären." },
-  { n: 7, label: "Konventionen", description: "Bestätigen oder verwerfen, was der Agent in diesem Stapel als Regel gelernt hat." },
-  { n: 8, label: "Prüfprotokoll", description: "Alle Prüfpunkte auf einen Blick – dann den Stapel freigeben oder an den Agenten zurückgeben." },
+  { n: 7, label: "Konventionen", description: "Bestätigen oder verwerfen, was Ludwig in diesem Stapel als Regel gelernt hat." },
+  { n: 8, label: "Prüfprotokoll", description: "Alle Prüfpunkte auf einen Blick – dann den Stapel freigeben oder an Ludwig zurückgeben." },
   { n: 9, label: "Übergabe an DATEV", description: "Den freigegebenen Stapel an DATEV übertragen und sehen, ob er angekommen ist." },
   { n: 10, label: "Nachlese", description: "Vergleichen, was DATEV aus den übertragenen Sätzen gemacht hat." },
   // Nur im Mandantenstapel (Owner 2026-09-23): die Sätze hat der Mandant
