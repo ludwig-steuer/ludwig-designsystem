@@ -82,10 +82,10 @@ export const Interactive: Story = {
     return (
       <div style={{ display: "grid", gap: "var(--space-5)", maxWidth: 420 }}>
         <AmountInput label="Bruttobetrag" value={v} onChange={setV} />
-        <div style={{ fontSize: 13 }}>
+        <div style={{ fontSize: "var(--fs-ui)" }}>
           Gespeicherter Wert: <strong>{v === null ? "null (leer)" : v}</strong>
         </div>
-        <table style={{ fontSize: 12.5, borderCollapse: "collapse" }}>
+        <table style={{ fontSize: "var(--fs-ui-sm)", borderCollapse: "collapse" }}>
           <tbody>
             {cases.map((c) => {
               const r = parseAmount(c);

@@ -54,7 +54,7 @@ export const Disabled: Story = {
   render: () => (
     <Cluster>
       <Button variant="primary" disabled>Freigeben</Button>
-      <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+      <span style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
         Erst wenn Schritt 8 abgehakt ist.
       </span>
     </Cluster>

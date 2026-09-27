@@ -11,7 +11,7 @@ export default meta;
 type Story = StoryObj<typeof Amount>;
 
 const L = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>{children}</div>
+  <div style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>{children}</div>
 );
 
 /** Dieselbe Zahl, drei Rollen: Zelle, Zeile, Kachel. Die Ziffern fluchten. */
@@ -139,7 +139,7 @@ export const InUse: Story = {
           </Row>
         </Table>
       </Card>
-      <p style={{ fontSize: 13.5, margin: 0 }}>
+      <p style={{ fontSize: "var(--fs-ui)", margin: 0 }}>
         Der Stapel enthält 142 Sätze über <Amount value={42108.55} currency="EUR" size="sm" />,
         davon <Amount value={1249.9} currency="EUR" size="sm" /> ohne Beleg.
       </p>

@@ -70,7 +70,7 @@ export const Interactive: Story = {
             onChange={(from, to) => setRange({ from, to })}
           />
         </Field>
-        <pre style={{ fontSize: 12.5, margin: 0, fontFamily: "var(--font-mono)" }}>
+        <pre style={{ fontSize: "var(--fs-ui-sm)", margin: 0, fontFamily: "var(--font-mono)" }}>
           {JSON.stringify({ datum: d, ...range }, null, 2)}
         </pre>
       </div>
@@ -95,7 +95,7 @@ export const WithPresets: Story = {
             onChange={(from, to) => setRange({ from, to })}
           />
         </Field>
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           {range.from ? `${range.from} bis ${range.to}` : "kein Zeitraum gewählt"}
         </div>
       </div>
@@ -130,7 +130,7 @@ export const Edges: Story = {
             onChange={(from, to) => setRange({ from, to })}
           />
         </Field>
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           von {range.from ?? "—"} bis {range.to ?? "—"}
         </div>
         <Field label="Jahreswechsel und Schaltjahr" htmlFor="jahreswechsel-und-schaltjahr">

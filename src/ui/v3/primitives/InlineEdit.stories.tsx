@@ -57,7 +57,7 @@ export const Pending: Story = {
               setV(n);
             }}
           />
-          <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
+          <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>
             Bearbeiten, ändern, Enter — das Speichern dauert hier drei Sekunden.
           </p>
         </div>
@@ -107,7 +107,7 @@ export const Interactive: Story = {
             setSaves((s) => s + 1);
           }}
         />
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           {saves === 0 ? "noch nicht gespeichert" : `${saves}× gespeichert`}
         </div>
       </div>

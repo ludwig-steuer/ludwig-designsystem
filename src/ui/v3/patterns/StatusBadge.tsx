@@ -89,7 +89,7 @@ export function StatusBadge({
         ) : null}
       </Badge>
       {stageDesc ? (
-        <span style={{ fontSize: 11.5, color: "var(--color-text-muted)" }}>
+        <span style={{ fontSize: "var(--fs-ui-xs)", color: "var(--color-text-muted)" }}>
           · {stageDesc.label}
         </span>
       ) : null}

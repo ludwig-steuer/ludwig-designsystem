@@ -16,7 +16,7 @@ type Story = StoryObj<typeof TextButton>;
  *  Hover unterstreicht er, er färbt keine Fläche (§2). */
 export const Filled: Story = {
   render: () => (
-    <p style={{ maxWidth: 460, fontSize: 13, lineHeight: 1.7 }}>
+    <p style={{ maxWidth: 460, fontSize: "var(--fs-ui)", lineHeight: 1.7 }}>
       Der Stapel enthält 14 Buchungen ohne Beleg. Sie können sie{" "}
       <TextButton>zurückstellen</TextButton> oder das{" "}
       <TextButton>Kontenblatt öffnen</TextButton> und einzeln nachtragen.
@@ -36,7 +36,7 @@ export const Tones: Story = {
       <TextButton tone="quiet" disabled>
         Zurückstellen
       </TextButton>
-      <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+      <span style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
         Gesperrt, bis der Stapel abgeschlossen ist.
       </span>
     </div>
@@ -74,7 +74,7 @@ export const Interactive: Story = {
     const [deferred, setDeferred] = useState(false);
     return (
       <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-        <span style={{ fontSize: 13 }}>
+        <span style={{ fontSize: "var(--fs-ui)" }}>
           RE-4471 · {deferred ? "zurückgestellt" : "offen"}
         </span>
         <TextButton

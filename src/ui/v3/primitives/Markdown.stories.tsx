@@ -51,7 +51,7 @@ export const Empty: Story = {
       <div style={{ border: "1px dashed var(--color-border)", padding: 10 }}>
         <Markdown text="   " />
       </div>
-      <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
+      <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>
         Beide Kästen sind leer — die Komponente rendert nichts.
       </p>
     </div>
@@ -65,12 +65,12 @@ export const Variants: Story = {
     return (
       <div style={{ maxWidth: 560, display: "grid", gap: "var(--space-4)" }}>
         <div>
-          <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>full</div>
+          <div style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>full</div>
           <Markdown text={t} />
         </div>
         <div>
-          <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>inline, in einer Zeile</div>
-          <span style={{ fontSize: 13.5 }}>
+          <div style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>inline, in einer Zeile</div>
+          <span style={{ fontSize: "var(--fs-ui)" }}>
             RE-4471 · <Markdown text={t} variant="inline" />
           </span>
         </div>
@@ -92,11 +92,11 @@ Schreibwaren und zwei Druckerpatronen.`;
     return (
       <div style={{ display: "grid", gap: "var(--space-5)", maxWidth: 460 }}>
         <div>
-          <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>ohne flow</div>
+          <div style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>ohne flow</div>
           <Markdown text={wrapped} />
         </div>
         <div>
-          <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>mit flow</div>
+          <div style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>mit flow</div>
           <Markdown text={wrapped} flow />
         </div>
       </div>

@@ -31,7 +31,7 @@ export const Filled: Story = {
         >
           Stapel abnehmen
         </ActionButton>
-        <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <span style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           {done === 0 ? "noch nicht abgenommen" : `${done}× abgenommen`}
         </span>
       </div>

@@ -133,7 +133,7 @@ export const InCard: Story = {
       <Card>
         <CardHead title="Fehlende Belege" sub="3 Nachforderungen, fällig 12.09.2026" />
         <div style={{ padding: "var(--space-5)" }}>
-          <p style={{ fontSize: 13.5, marginTop: 0 }}>
+          <p style={{ fontSize: "var(--fs-ui)", marginTop: 0 }}>
             Für diese Buchungen fehlt noch ein Beleg: Tankstelle Nord (84,50 €), o2 (23,80 €),
             Bürobedarf Meier (1.249,90 €).
           </p>

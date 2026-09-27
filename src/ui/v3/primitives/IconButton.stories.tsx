@@ -73,7 +73,7 @@ export const AsLink: Story = {
   render: () => (
     <Row>
       <IconButton label="Vorherige Seite" href="#" icon={<ChevronLeft size={16} strokeWidth={1.5} />} />
-      <span style={{ fontSize: 13 }}>Seite 3 von 12</span>
+      <span style={{ fontSize: "var(--fs-ui)" }}>Seite 3 von 12</span>
       <IconButton label="Nächste Seite" href="#" icon={<ChevronRight size={16} strokeWidth={1.5} />} />
     </Row>
   ),
@@ -91,7 +91,7 @@ export const Interactive: Story = {
           disabled={n === 1}
           onClick={() => setN((v) => Math.max(1, v - 1))}
         />
-        <span style={{ fontSize: 13 }}>Seite {n} von 12</span>
+        <span style={{ fontSize: "var(--fs-ui)" }}>Seite {n} von 12</span>
         <IconButton
           label="Nächste Seite"
           icon={<ChevronRight size={16} strokeWidth={1.5} />}
@@ -128,10 +128,10 @@ export const InUse: Story = {
           background: "var(--color-surface-head)",
         }}
       >
-        <span style={{ fontSize: 15, fontWeight: 600 }}>Buchung stornieren</span>
+        <span style={{ fontSize: "var(--fs-ui-lg)", fontWeight: 600 }}>Buchung stornieren</span>
         <IconButton label="Dialog schließen" icon={<X size={16} strokeWidth={1.5} />} />
       </div>
-      <div style={{ padding: 14, fontSize: 13.5 }}>
+      <div style={{ padding: 14, fontSize: "var(--fs-ui)" }}>
         Die Buchung wird mit einem Storno-Satz aufgehoben. Der ursprüngliche Satz bleibt sichtbar.
       </div>
       <div

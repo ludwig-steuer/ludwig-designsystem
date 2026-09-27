@@ -420,7 +420,7 @@ export const Hints: Story = {
 /** The same sign outside a table: a header line with `Amount` and `Time`. */
 export const OutsideCells: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: "var(--space-6)", alignItems: "baseline", fontSize: 13.5 }}>
+    <div style={{ display: "flex", gap: "var(--space-6)", alignItems: "baseline", fontSize: "var(--fs-ui)" }}>
       <span>
         Anfangssaldo{" "}
         <Amount

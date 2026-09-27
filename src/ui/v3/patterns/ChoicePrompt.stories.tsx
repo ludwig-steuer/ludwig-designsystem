@@ -67,7 +67,7 @@ export const WithFreeText: Story = {
             setLast(a);
           }}
         />
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           Gesendet: {last ? `${last.optionId ?? "—"} · ${last.text ?? "ohne Text"}` : "nichts"}
         </div>
       </div>
@@ -95,7 +95,7 @@ export const FreeTextOnly: Story = {
             setLast(a);
           }}
         />
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           Gesendet: {last ? (last.text ?? "ohne Text") : "nichts"}
         </div>
       </div>

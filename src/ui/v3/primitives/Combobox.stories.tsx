@@ -145,7 +145,7 @@ export const Loading: Story = {
           loading
           onSearch={() => {}}
         />
-        <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
+        <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>
           Ins Feld klicken — die Liste zeigt „Suche läuft …".
         </p>
       </div>
@@ -184,7 +184,7 @@ export const Interactive: Story = {
     return (
       <div style={{ maxWidth: 420, display: "grid", gap: "var(--space-4)" }}>
         <Combobox label="Gegenkonto" name="konto7" value={v} onChange={setV} options={ACCOUNTS} />
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           Gewählt: {v ?? "nichts"}
         </div>
       </div>

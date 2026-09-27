@@ -84,7 +84,7 @@ export const Interactive: Story = {
     return (
       <div style={{ maxWidth: 420, display: "grid", gap: "var(--space-4)" }}>
         <RadioGroup name="scope4" label="Umfang des Exports" options={SCOPE} value={v} onChange={setV} />
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           Gewählt: {v ?? "noch nichts"}
         </div>
       </div>

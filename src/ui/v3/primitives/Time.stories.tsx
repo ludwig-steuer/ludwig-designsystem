@@ -10,7 +10,7 @@ export default meta;
 type Story = StoryObj<typeof Time>;
 
 const L = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>{children}</div>
+  <div style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>{children}</div>
 );
 
 const MOMENT = "2026-08-26T09:12:00+02:00";
@@ -74,7 +74,7 @@ export const Durations: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-2)", maxWidth: 220 }}>
       {[0, 4.2, 42, 59.9, 60, 840, 3600, 7505, null].map((s, i) => (
-        <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+        <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--fs-ui)" }}>
           <span style={{ color: "var(--color-text-muted)" }}>
             {s === null ? "null" : `${s} s`}
           </span>
@@ -293,7 +293,7 @@ export const Relative: Story = {
         ] as const
       ).map(([label, value]) => (
         <Fragment key={label}>
-          <span style={{ color: "var(--color-text-muted)", fontSize: 13 }}>{label}</span>
+          <span style={{ color: "var(--color-text-muted)", fontSize: "var(--fs-ui)" }}>{label}</span>
           <Time value={value} format="relative" />
           <Time value={value} format="age" />
         </Fragment>
@@ -321,7 +321,7 @@ export const Matrix: Story = {
       {FORMATS.map((f) =>
         SIZES.map((sz) => (
           <Fragment key={`${f}-${sz}`}>
-            <span style={{ color: "var(--color-text-muted)", fontSize: 13 }}>
+            <span style={{ color: "var(--color-text-muted)", fontSize: "var(--fs-ui)" }}>
               {f} · {sz}
             </span>
             {LENGTHS.map((l) => (

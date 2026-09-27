@@ -86,7 +86,7 @@ export const Interactive: Story = {
           onPrev={pos > 1 ? () => setPos((p) => p - 1) : null}
           onNext={pos < total ? () => setPos((p) => p + 1) : null}
         />
-        <p style={{ fontSize: 12.5, color: "var(--color-text-muted)", margin: 0 }}>
+        <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)", margin: 0 }}>
           Am Anfang und am Ende tut die Taste nichts — wie der Pfeil.
         </p>
       </div>

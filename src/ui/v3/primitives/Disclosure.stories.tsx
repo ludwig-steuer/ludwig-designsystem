@@ -60,7 +60,7 @@ export const Variants: Story = {
         Regel „Bürobedarf" trifft auf den Kreditor zu.
       </Disclosure>
       <Disclosure summary="Rohdaten der Extraktion" tone="quiet">
-        <pre style={{ margin: 0, fontSize: 12, fontFamily: "var(--font-mono)" }}>
+        <pre style={{ margin: 0, fontSize: "var(--fs-ui-sm)", fontFamily: "var(--font-mono)" }}>
           {`{ "belegnummer": "RE-4471", "brutto": 1249.90, "ust": 19 }`}
         </pre>
       </Disclosure>
@@ -75,14 +75,14 @@ export const InUse: Story = {
       <Card>
         <CardHead title="RE-4471 · Bürobedarf Meier GmbH" sub="Vorschlag vom 30.08.2026" />
         <div style={{ padding: "var(--space-5)" }}>
-          <div style={{ fontSize: 13.5, marginBottom: "var(--space-4)" }}>
+          <div style={{ fontSize: "var(--fs-ui)", marginBottom: "var(--space-4)" }}>
             6815 an 70000 · 1.249,90 € · BU 9
           </div>
           <Disclosure summary="Warum dieses Konto" count={2}>
             14 gleichartige Buchungen in sechs Monaten; die Rechnung nennt Schreibwaren.
           </Disclosure>
           <Disclosure summary="Rohzeile aus dem DATEV-Spiegel" tone="quiet">
-            <pre style={{ margin: 0, fontSize: 12, fontFamily: "var(--font-mono)" }}>
+            <pre style={{ margin: 0, fontSize: "var(--fs-ui-sm)", fontFamily: "var(--font-mono)" }}>
               {`1249,90;S;6815;70000;9;2608;"RE-4471";"Bürobedarf"`}
             </pre>
           </Disclosure>

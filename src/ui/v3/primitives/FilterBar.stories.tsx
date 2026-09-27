@@ -81,7 +81,7 @@ export const Active: Story = {
             <Input id="suche-2" type="search" defaultValue="Bürobedarf" />
           </Field>
         </FilterBar>
-        <p style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <p style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           {n === 0 ? "Alles sichtbar." : `${n} Filter wirken.`}
         </p>
       </div>
@@ -167,7 +167,7 @@ export const InUse: Story = {
           />
         </div>
       </Card>
-      <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
+      <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>
         Zum Vergleich, wie eine gefüllte Liste aussähe:
       </p>
       <Card>
@@ -327,8 +327,8 @@ export const AutoSubmit: Story = {
             <PeriodField name="period" defaultFrom="2026-08-01" defaultTo="2026-08-31" />
           </FilterBar>
         </form>
-        <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>Abgeschickt (neueste oben):</p>
-        <ol style={{ fontSize: 12.5, fontFamily: "var(--font-mono)" }}>
+        <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>Abgeschickt (neueste oben):</p>
+        <ol style={{ fontSize: "var(--fs-ui-sm)", fontFamily: "var(--font-mono)" }}>
           {sent.length === 0 ? <li>— noch nichts —</li> : sent.map((q, i) => <li key={i}>{q}</li>)}
         </ol>
       </div>
@@ -354,8 +354,8 @@ export const ChipsOrDropdown: Story = {
     const [accounts, setAccounts] = useState<string[]>(["1200"]);
     const cell = (title: string, rule: string, children: React.ReactNode) => (
       <div style={{ display: "grid", gap: "var(--space-2)", alignContent: "start" }}>
-        <strong style={{ fontSize: 13 }}>{title}</strong>
-        <span style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>{rule}</span>
+        <strong style={{ fontSize: "var(--fs-ui)" }}>{title}</strong>
+        <span style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>{rule}</span>
         {children}
       </div>
     );

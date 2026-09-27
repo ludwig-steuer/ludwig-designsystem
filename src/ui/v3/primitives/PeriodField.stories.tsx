@@ -23,7 +23,7 @@ const Frame = ({ children }: { children: ReactNode }) => (
 );
 
 const Out = ({ from, to }: { from: string | null; to: string | null }) => (
-  <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
+  <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>
     from = {from ?? "null"} · to = {to ?? "null"}
   </p>
 );
@@ -89,7 +89,7 @@ export const Units: Story = {
     const none = useSpan(null, null);
     const box = (title: string, children: ReactNode) => (
       <div style={{ display: "grid", gap: "var(--space-2)", alignContent: "start" }}>
-        <strong style={{ fontSize: 12.5 }}>{title}</strong>
+        <strong style={{ fontSize: "var(--fs-ui-sm)" }}>{title}</strong>
         <div style={{ border: "var(--border-1)", borderRadius: "var(--radius-md)", padding: "var(--space-3)", background: "var(--color-surface)" }}>
           {children}
         </div>
@@ -241,7 +241,7 @@ export const InUse: Story = {
             />
           </FilterBar>
         </form>
-        <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>{sent === null ? "Noch nicht abgesendet." : `?${sent}`}</p>
+        <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>{sent === null ? "Noch nicht abgesendet." : `?${sent}`}</p>
         <Card>
           <CardHead title="Belege" sub={`${rows.length} von ${LINES.length}`} />
           <Table cols="120px 1fr 140px">

@@ -113,11 +113,11 @@ export const Order: Story = {
   render: () => (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-6)" }}>
       <div>
-        <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>newest (Default)</div>
+        <div style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>newest (Default)</div>
         <Timeline entries={CASE} />
       </div>
       <div>
-        <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>oldest</div>
+        <div style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>oldest</div>
         <Timeline entries={CASE} order="oldest" />
       </div>
     </div>
@@ -162,7 +162,7 @@ export const Interactive: Story = {
     return (
       <div style={{ maxWidth: 620, display: "grid", gap: "var(--space-4)" }}>
         <Timeline entries={CASE} onOpen={setOpen} />
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           Geöffnet: {open ?? "nichts"}
         </div>
       </div>
@@ -258,7 +258,7 @@ export const WithoutTime: Story = {
           selectedId={open}
           onOpen={setOpen}
         />
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           Geöffnet: {open ?? "nichts"}
         </div>
       </div>

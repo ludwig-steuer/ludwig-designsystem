@@ -30,8 +30,8 @@
    one go. **The head, not the bar inside it**: sticky never leaves its parent.
    The background is set, so the head covers what passes beneath. */
 .v2card__h--sticky { position: sticky; top: 0; z-index: 5; }
-.v2card__h .title { font-size: 14px; font-weight: 600; color: var(--color-text); }
-.v2card__h .sub { font-size: 12px; color: var(--color-text-subtle); margin-top: 1px; }
+.v2card__h .title { font-size: var(--fs-ui-md); font-weight: 600; color: var(--color-text); }
+.v2card__h .sub { font-size: var(--fs-ui-sm); color: var(--color-text-subtle); margin-top: 1px; }
 /* Buttons bring their size; a text link inherits it (`.v2link` says `inherit`
    so it can sit in running text). Before 2026-09-10 it inherited the body's
    16 px here and stood larger than the title. */
@@ -42,7 +42,7 @@
   padding: 12px 18px;
   border-top: 1px solid var(--color-border);
   background: var(--color-surface-head);
-  font-size: 12.5px;
+  font-size: var(--fs-ui-sm);
   color: var(--color-text-muted);
 }
 
@@ -68,7 +68,7 @@
 .v2tbl {
   --v2-cols: 1fr;
   --v2-row-y: 12px;
-  --v2-row-fs: 13.5px;
+  --v2-row-fs: var(--fs-ui);
   --v2-head-y: 9px;
   --v2-detail-y: 14px;
   /* Width of the handle columns before the data: selection and chevron (0057).
@@ -81,13 +81,13 @@
 }
 .v2tbl[data-density="compact"] {
   --v2-row-y: 7px;
-  --v2-row-fs: 12.5px;
+  --v2-row-fs: var(--fs-ui-sm);
   --v2-head-y: 6px;
   --v2-detail-y: 10px;
 }
 .v2tbl[data-density="wide"] {
   --v2-row-y: 18px;
-  --v2-row-fs: 13.5px;
+  --v2-row-fs: var(--fs-ui);
   --v2-head-y: 11px;
   --v2-detail-y: 18px;
 }
@@ -124,7 +124,7 @@
 
 .v2tbl__row {
   border-bottom: 1px solid var(--color-border-subtle);
-  font-size: var(--v2-row-fs, 13.5px);
+  font-size: var(--v2-row-fs, var(--fs-ui));
   color: var(--color-text);
 }
 /* Last row without a divider (rule 1). An `ExpandableRow` wraps its row, hence
@@ -200,7 +200,7 @@
   padding: var(--v2-detail-y, 14px) 18px calc(var(--v2-detail-y, 14px) + 2px) 46px;
   background: var(--color-bg-soft);
   border-bottom: 1px solid var(--color-border-subtle);
-  font-size: 13px;
+  font-size: var(--fs-ui);
   color: var(--color-text-muted);
   line-height: 1.6;
 }
@@ -210,13 +210,13 @@
 .v2tbl__empty {
   padding: 30px 18px;
   color: var(--color-text-subtle);
-  font-size: 13px;
+  font-size: var(--fs-ui);
 }
 
 /* --- Zellen-Bausteine (Baukasten §9) ----------------------------------- */
 .v2num { text-align: right; font-variant-numeric: tabular-nums lining-nums; }
 .v2main { font-weight: 600; color: var(--color-text); }
-.v2sub { font-size: 11.5px; color: var(--color-text-subtle); }
+.v2sub { font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
 .v2muted { color: var(--color-text-muted); }
 
 /* Chevron for expandable rows (45°, 180 ms). */
@@ -323,7 +323,7 @@
 
 .review__step .count {
   display: block; margin-top: 3px;
-  font-size: 11px; font-variant-numeric: tabular-nums lining-nums;
+  font-size: var(--fs-ui-2xs); font-variant-numeric: tabular-nums lining-nums;
   color: var(--color-text-subtle);
 }
 .review__step--open .count { color: var(--color-accent-700); }
@@ -332,7 +332,7 @@
 
 .review__step .label {
   display: block;
-  font-size: 13px; line-height: 1.35; color: var(--color-text);
+  font-size: var(--fs-ui); line-height: 1.35; color: var(--color-text);
 }
 .review__step.is-current .label { font-weight: 600; color: var(--color-primary); }
 
@@ -354,7 +354,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 9px 12px;
-  font-size: 13px; color: var(--color-text); text-decoration: none;
+  font-size: var(--fs-ui); color: var(--color-text); text-decoration: none;
 }
 .review__basket a:hover { background: var(--color-bg-soft); }
 .review__basket .count { font-weight: 700; color: var(--color-text-subtle); }
@@ -378,10 +378,10 @@
 }
 .review__head .nr {
   font-family: var(--font-mono); font-weight: 700;
-  color: var(--color-primary); font-size: 15px;
+  color: var(--color-primary); font-size: var(--fs-ui-lg);
 }
 .review__head .line2 {
-  font-size: 12.5px; color: var(--color-text-subtle); margin-top: 6px;
+  font-size: var(--fs-ui-sm); color: var(--color-text-subtle); margin-top: 6px;
 }
 
 /* Screen too small — a real limit, not a preview artefact: sidebar (240) +
@@ -403,8 +403,8 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
   }
-  .review__toosmall .t { font-size: 16px; font-weight: 600; color: var(--color-text); }
-  .review__toosmall .s { font-size: 13.5px; color: var(--color-text-muted); max-width: 46ch; }
+  .review__toosmall .t { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); }
+  .review__toosmall .s { font-size: var(--fs-ui); color: var(--color-text-muted); max-width: 46ch; }
   .review { display: none; }
 }
 
@@ -418,7 +418,7 @@
 .chk__bar.is-warn span { background: var(--color-warning); }
 .chk__bar.is-ok span { background: var(--color-success); }
 
-.chk__mark { font-weight: 700; font-size: 14px; }
+.chk__mark { font-weight: 700; font-size: var(--fs-ui-md); }
 .chk__mark.is-blocked { color: var(--color-danger); }
 .chk__mark.is-warn { color: var(--color-warning); }
 .chk__mark.is-ok { color: var(--color-success); }
@@ -458,7 +458,7 @@
 .pz-owner {
   display: inline-grid; grid-template-columns: 14px auto; align-items: center;
   gap: 5px;
-  font-size: 11.5px; color: var(--color-text-muted);
+  font-size: var(--fs-ui-xs); color: var(--color-text-muted);
 }
 .pz-owner.is-alarm { color: var(--color-danger); font-weight: 600; }
 .pz-owner svg { flex: 0 0 auto; }
@@ -481,14 +481,14 @@
 .pz-stepper > div.is-active .phase { color: var(--color-primary); }
 .pz-stepper > div.is-failed .phase { color: var(--color-danger); }
 .pz-stepper > div.is-held .phase { color: var(--color-warning); }
-.pz-stepper .who { font-size: 12px; color: var(--color-text-subtle); margin-top: 2px; }
+.pz-stepper .who { font-size: var(--fs-ui-sm); color: var(--color-text-subtle); margin-top: 2px; }
 .pz-stepper .now { margin-top: 4px; }
 .pz-stepper .who.is-failed,
 .pz-stepper .who.is-held { display: flex; align-items: center; gap: var(--space-1); color: var(--color-danger); }
 .pz-stepper .who.is-held { color: var(--color-warning); }
 
 /* Loops are counted, not hidden. */
-.pz-loops { font-size: 12px; color: var(--color-text-muted); margin-top: 8px; }
+.pz-loops { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-top: 8px; }
 .pz-loops a { color: var(--color-accent-700); text-decoration: none; }
 .pz-loops a:hover { text-decoration: underline; }
 
@@ -577,7 +577,7 @@
 .pz-staffel { display: flex; height: 20px; border-radius: var(--radius-sm); overflow: hidden; }
 .pz-staffel > span { display: block; border-right: 1px solid var(--color-surface); min-width: 2px; }
 .pz-staffel-legend { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
-.pz-staffel-legend > span { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--color-text-muted); }
+.pz-staffel-legend > span { display: inline-flex; align-items: center; gap: 5px; font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
 .pz-staffel-legend i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
 
 /* ── Input fields ──────────────────────────────────────────────────────────
@@ -590,7 +590,7 @@
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-size: 13.5px;
+  font-size: var(--fs-ui);
   padding: 6px 10px;
 }
 .v2in:focus {
@@ -688,7 +688,7 @@
   border-radius: var(--radius-sm);
   background: var(--color-bg-soft);
   color: var(--color-text-muted);
-  font-size: 11.5px;
+  font-size: var(--fs-ui-xs);
   line-height: 18px;
   font-weight: 500;
   white-space: nowrap;
@@ -706,14 +706,14 @@
 
 /* --- Aktionsleiste: feste Reihenfolge primär → sekundär → tertiär → Info */
 .v2actionbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.v2actionbar__info { font-size: 13px; color: var(--color-text-muted); }
+.v2actionbar__info { font-size: var(--fs-ui); color: var(--color-text-muted); }
 
 /* --- Reiter (Unterstrich) ---------------------------------------------- */
 .v2tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--color-border); }
 .v2tab {
   background: none; border: none; cursor: pointer; text-decoration: none;
   padding: 10px 16px;
-  font-family: var(--font-sans); font-size: 13.5px; font-weight: 500;
+  font-family: var(--font-sans); font-size: var(--fs-ui); font-weight: 500;
   color: var(--color-text-muted);
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -741,7 +741,7 @@
   background: none; border: none; cursor: pointer; text-decoration: none;
   border-radius: var(--radius-sm);
   padding: 6px 12px;
-  font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;
+  font-family: var(--font-sans); font-size: var(--fs-ui-sm); font-weight: 600;
   color: var(--color-text-muted);
 }
 .v2seg__btn .n {
@@ -763,7 +763,7 @@
   color: var(--color-text-muted);
   border-radius: var(--radius-pill);
   padding: 4px 11px;
-  font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+  font-family: var(--font-sans); font-size: var(--fs-ui-sm); font-weight: 600;
   cursor: pointer; text-decoration: none;
   display: inline-flex; align-items: center; gap: 5px;
 }
@@ -799,10 +799,10 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
   margin-bottom: 6px;
 }
 .v2kpi__val {
-  font-size: 19px; font-weight: 600; color: var(--color-primary);
+  font-size: var(--fs-ui-xl); font-weight: 600; color: var(--color-primary);
   font-variant-numeric: tabular-nums lining-nums;
 }
-.v2kpi__sub { font-size: 11.5px; color: var(--color-text-subtle); margin-top: 2px; }
+.v2kpi__sub { font-size: var(--fs-ui-xs); color: var(--color-text-subtle); margin-top: 2px; }
 
 /* --- Feldliste ---------------------------------------------------------- */
 .v2fields {
@@ -821,11 +821,11 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2fields--soft .v2fields__h { border-bottom-color: var(--color-border-strong); }
 .v2fields__row {
   display: flex; justify-content: space-between; gap: var(--space-4);
-  font-size: 13.5px; padding: 5px 0;
+  font-size: var(--fs-ui); padding: 5px 0;
 }
 .v2fields__row > span:first-child { color: var(--color-text-muted); }
 .v2fields__row > span:last-child { font-weight: 500; font-variant-numeric: tabular-nums lining-nums; text-align: right; }
-.v2fields__empty { font-size: 13.5px; color: var(--color-text-subtle); }
+.v2fields__empty { font-size: var(--fs-ui); color: var(--color-text-subtle); }
 /* Two columns of pairs once the list itself is wide enough (0152, owner
    2026-09-10). **CSS columns, no container query**: `columns: 2 300px` splits
    only when each column gets 300 px — the condition hangs on the list, not the
@@ -856,7 +856,7 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v3bal__row {
   display: grid; grid-template-columns: minmax(0, 1fr) max-content;
   gap: var(--space-4); align-items: baseline;
-  font-size: 13.5px; padding: 3px 0;
+  font-size: var(--fs-ui); padding: 3px 0;
 }
 .v3bal__row--target {
   border-top: 1px solid var(--color-border-subtle);
@@ -870,7 +870,7 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v3bal__result {
   display: grid; grid-template-columns: max-content minmax(0, 1fr);
   gap: var(--space-2); align-items: baseline;
-  margin: var(--space-2) 0 0; font-size: 13.5px;
+  margin: var(--space-2) 0 0; font-size: var(--fs-ui);
 }
 .v3bal__result svg { position: relative; top: 2px; }
 .v3bal__says .v2amount { margin-right: var(--space-2); }
@@ -905,13 +905,13 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 }
 .v3diff__head .v2sub { display: block; font-weight: 400; }
 .v3diff__rows { display: grid; gap: var(--space-2); }
-.v3diff__row { font-size: 13.5px; padding: 5px 0; }
+.v3diff__row { font-size: var(--fs-ui); padding: 5px 0; }
 .v3diff__label { color: var(--color-text-muted); }
 .v3diff__before { color: var(--color-text-muted); overflow-wrap: anywhere; }
 .v3diff__after { overflow-wrap: anywhere; }
 .v3diff__word { display: none; }
-.v3diff__equal { margin: 0; font-size: 13.5px; }
-.v3diff__fold { display: inline-flex; flex-wrap: wrap; gap: var(--space-2); align-items: baseline; font-size: 13.5px; }
+.v3diff__equal { margin: 0; font-size: var(--fs-ui); }
+.v3diff__fold { display: inline-flex; flex-wrap: wrap; gap: var(--space-2); align-items: baseline; font-size: var(--fs-ui); }
 @container (max-width: 560px) {
   .v3diff__head { display: none; }
   .v3diff__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
@@ -938,7 +938,7 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
   font-size: var(--fs-ui-sm); font-weight: 700;
   color: var(--color-text-muted); margin-bottom: 10px;
 }
-.v2prose__body { font-size: 13.5px; line-height: 1.6; color: var(--color-text); }
+.v2prose__body { font-size: var(--fs-ui); line-height: 1.6; color: var(--color-text); }
 
 /* --- State header card --------------------------------------------------
  * Exception to "border OR shadow": the coloured border carries the state, the
@@ -962,8 +962,8 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2callout--success .v2callout__kicker { color: var(--color-success); }
 .v2callout--warning .v2callout__kicker { color: var(--color-warning); }
 .v2callout--danger .v2callout__kicker { color: var(--color-danger); }
-.v2callout__title { font-size: 17px; font-weight: 600; color: var(--color-primary); margin-bottom: 4px; }
-.v2callout__sub { font-size: 13.5px; color: var(--color-text-muted); }
+.v2callout__title { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-primary); margin-bottom: 4px; }
+.v2callout__sub { font-size: var(--fs-ui); color: var(--color-text-muted); }
 .v2callout--success .v2callout__sub { color: var(--color-success); }
 .v2callout--warning .v2callout__sub { color: var(--color-warning); }
 .v2callout--danger .v2callout__sub { color: var(--color-danger); }
@@ -983,7 +983,7 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2note {
   border-radius: var(--radius-md);
   padding: 10px 14px;
-  font-size: 13px;
+  font-size: var(--fs-ui);
   line-height: 1.55;
   background: var(--color-accent-50);
   color: var(--color-text);
@@ -1027,9 +1027,9 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
   font-size: var(--fs-ui-xs); font-weight: 600;
   color: var(--color-text-subtle); margin-bottom: 3px;
 }
-.v2dlg__title { font-size: 15px; font-weight: 600; color: var(--color-text); }
+.v2dlg__title { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); }
 /* `.v2dlg__close` is gone since 0092: the cross is an `IconButton`. */
-.v2dlg__body { padding: 18px; overflow-y: auto; font-size: 13.5px; line-height: 1.55; color: var(--color-text); }
+.v2dlg__body { padding: 18px; overflow-y: auto; font-size: var(--fs-ui); line-height: 1.55; color: var(--color-text); }
 .v2dlg__foot {
   padding: 12px 18px;
   border-top: 1px solid var(--color-border);
@@ -1119,8 +1119,8 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
   font-size: var(--fs-ui-sm); font-weight: 600;
   color: var(--color-text-muted);
 }
-.v2field__hint { font-size: 12px; color: var(--color-text-subtle); }
-.v2field__err { font-size: 12px; color: var(--color-danger); font-weight: 500; }
+.v2field__hint { font-size: var(--fs-ui-sm); color: var(--color-text-subtle); }
+.v2field__err { font-size: var(--fs-ui-sm); color: var(--color-danger); font-weight: 500; }
 .v2in--invalid { border-color: var(--color-danger); }
 .v2in--invalid:focus { border-color: var(--color-danger); box-shadow: 0 0 0 3px var(--color-danger-bg); }
 textarea.v2in { min-height: 64px; resize: vertical; line-height: 1.5; }
@@ -1131,8 +1131,8 @@ select.v2in { padding-right: 26px; }
   border: 1px solid var(--color-border-control);
   cursor: pointer;
 }
-.v2checkline { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--color-text); cursor: pointer; }
-.v2search { min-width: 220px; font-size: 12.5px; }
+.v2checkline { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-ui); color: var(--color-text); cursor: pointer; }
+.v2search { min-width: 220px; font-size: var(--fs-ui-sm); }
 
 /* --- Field with addon (0036) --------------------------------------------
    The border sits on the group, the field gives up its own — otherwise two
@@ -1147,7 +1147,7 @@ select.v2in { padding-right: 26px; }
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text-muted);
-  font-size: 12.5px;
+  font-size: var(--fs-ui-sm);
   cursor: text;
 }
 .v2ing:focus-within {
@@ -1179,8 +1179,8 @@ select.v2in { padding-right: 26px; }
 /* --- Page size next to the page numbers (0057) --------------------------
    `.pag` itself lives in `components.css`; only the addon is here. */
 .pag__size { display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; }
-.pag__size label { font-size: 12px; color: var(--color-text-muted); }
-.pag__size .v2in { padding: 3px 24px 3px 7px; font-size: 12px; }
+.pag__size label { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.pag__size .v2in { padding: 3px 24px 3px 7px; font-size: var(--fs-ui-sm); }
 
 /* --- Selection bar above the column head --------------------------------- */
 .v2selbar {
@@ -1198,7 +1198,7 @@ select.v2in { padding-right: 26px; }
   position: sticky; top: 0; z-index: 5;
   background: var(--color-accent-50);
 }
-.v2selbar__count { font-size: 12.5px; font-weight: 600; color: var(--color-accent-700); }
+.v2selbar__count { font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-accent-700); }
 .v2selbar__actions { display: flex; gap: 12px; margin-left: auto; align-items: center; }
 /* In the card head, where the card actions sit (0057 E5): no second bar, no own
    background — here the bar is just a row. */
@@ -1226,7 +1226,7 @@ select.v2in { padding-right: 26px; }
 /* Keeps its style inside a group head (`.v2lp__grp`): a status is a value, not
    a heading — no capitals since 0089, but the weight stays. */
 .v2bar__label {
-  display: block; font-size: 11px; color: var(--color-text-subtle); margin-top: 3px;
+  display: block; font-size: var(--fs-ui-2xs); color: var(--color-text-subtle); margin-top: 3px;
   font-weight: 400;
 }
 .v2bar--sm { height: 4px; }
@@ -1242,7 +1242,7 @@ select.v2in { padding-right: 26px; }
   font-variant-numeric: tabular-nums lining-nums;
 }
 
-.v2dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.v2dot { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-ui-sm); font-weight: 600; }
 .v2dot i { width: 6px; height: 6px; border-radius: var(--radius-pill); flex: 0 0 auto; background: currentColor; }
 .v2dot--neutral { color: var(--color-text-muted); }
 .v2dot--info { color: var(--color-accent-700); }
@@ -1268,7 +1268,7 @@ select.v2in { padding-right: 26px; }
   padding: 24px 18px;
   background: var(--color-danger-bg);
   color: var(--color-danger);
-  font-size: 13px;
+  font-size: var(--fs-ui);
   display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);
 }
 
@@ -1352,16 +1352,16 @@ select.v2in { padding-right: 26px; }
   padding: 10px 14px;
   background: var(--color-surface-head);
   border: none; border-bottom: 1px solid var(--color-border);
-  font: inherit; font-size: 13px; font-weight: 600; color: var(--color-text);
+  font: inherit; font-size: var(--fs-ui); font-weight: 600; color: var(--color-text);
   text-align: left; cursor: pointer;
 }
 .v2grpbtn:hover { background: var(--color-bg-soft); }
 /* Collapsed, a divider without content would hang below. */
 .v2grpbtn[aria-expanded="false"] { border-bottom: none; }
 .v2grpbtn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
-.v2grpbtn__chev { display: inline-block; width: 12px; font-size: 11px; color: var(--color-text-subtle); }
-.v2grpbtn__n { font-size: 12px; font-weight: 400; color: var(--color-text-subtle); }
-.v2grpbtn__flag { font-size: 11px; font-weight: 600; color: var(--color-danger); }
+.v2grpbtn__chev { display: inline-block; width: 12px; font-size: var(--fs-ui-2xs); color: var(--color-text-subtle); }
+.v2grpbtn__n { font-size: var(--fs-ui-sm); font-weight: 400; color: var(--color-text-subtle); }
+.v2grpbtn__flag { font-size: var(--fs-ui-2xs); font-weight: 600; color: var(--color-danger); }
 
 /* --- Trend bars ---------------------------------------------------------
  * Four months as bars next to the same four numbers: the number says how much,
@@ -1370,7 +1370,7 @@ select.v2in { padding-right: 26px; }
 .v2spark { display: flex; align-items: flex-end; gap: 3px; height: 56px; }
 .v2spark__b { flex: 1; min-height: 2px; border-radius: 2px 2px 0 0; background: var(--color-border-strong); }
 .v2spark__b.is-now { background: var(--color-accent-600); }
-.v2spark__ax { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--color-text-subtle); margin-top: 4px; }
+.v2spark__ax { display: flex; justify-content: space-between; font-size: var(--fs-ui-2xs); color: var(--color-text-subtle); margin-top: 4px; }
 
 /* --- Proposed action ----------------------------------------------------
  * Rule S13: where the options are clear, Ludwig proposes the actions instead
@@ -1383,7 +1383,7 @@ select.v2in { padding-right: 26px; }
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
   padding: 9px 12px;
-  font: inherit; font-size: 13px; color: var(--color-text);
+  font: inherit; font-size: var(--fs-ui); color: var(--color-text);
   cursor: pointer;
 }
 .v2opt + .v2opt { margin-top: 8px; }
@@ -1429,10 +1429,10 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
 .v2lp__item:hover { background: var(--color-bg-soft); }
 .v2lp__item.is-active { border-left-color: var(--color-accent); background: var(--color-accent-50); }
 .v2lp__item:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
-.v2lp__title { font-size: 13.5px; font-weight: 600; color: var(--color-text); display: flex; gap: 8px; align-items: center; }
-.v2lp__sub { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+.v2lp__title { font-size: var(--fs-ui); font-weight: 600; color: var(--color-text); display: flex; gap: 8px; align-items: center; }
+.v2lp__sub { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-top: 2px; }
 .v2lp__badges { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; flex-shrink: 0; }
-.v2lp__empty { padding: 30px 16px; font-size: 13px; color: var(--color-text-subtle); }
+.v2lp__empty { padding: 30px 16px; font-size: var(--fs-ui); color: var(--color-text-subtle); }
 
 .v2dp {
   background: var(--color-surface);
@@ -1441,15 +1441,15 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
   padding: 22px 24px;
   min-height: 220px;
 }
-.v2dp__title { font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 4px; }
-.v2dp__sub { font-size: 12.5px; color: var(--color-text-muted); margin-bottom: var(--space-4); }
-.v2dp__empty { font-size: 13px; color: var(--color-text-subtle); }
+.v2dp__title { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); margin-bottom: 4px; }
+.v2dp__sub { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-bottom: var(--space-4); }
+.v2dp__empty { font-size: var(--fs-ui); color: var(--color-text-subtle); }
 
 /* --- Prüf-Checkliste ----------------------------------------------------- */
 .v2chk__icon { display: flex; justify-content: center; }
 /* "106 von 118" must not wrap — the column is tight. */
 .v2chk__stand { white-space: nowrap; }
-.v2chk__jump { font-size: 11.5px; color: var(--color-accent-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2chk__jump { font-size: var(--fs-ui-xs); color: var(--color-accent-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2chk__label { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* --- Checks (accordion) -------------------------------------------------
@@ -1459,7 +1459,7 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
 .v2pp { display: flex; flex-direction: column; }
 .v2pp__ok {
   padding: 10px 16px;
-  font-size: 12.5px; color: var(--color-success);
+  font-size: var(--fs-ui-sm); color: var(--color-success);
   border-bottom: 1px solid var(--color-border-subtle);
   display: flex; align-items: center; gap: 8px;
 }
@@ -1467,14 +1467,14 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
   display: flex; align-items: flex-start; gap: 10px;
   padding: 11px 16px;
   border-bottom: 1px solid var(--color-border-subtle);
-  font-size: 13px;
+  font-size: var(--fs-ui);
 }
 .v2pp__row:last-child { border-bottom: none; }
 .v2pp__q { font-weight: 500; color: var(--color-text); }
 /* **A row of its own.** The block was a `span` without `display`, so inline —
    the reason stuck to the check code ("P-KONTOSonst 5401, hier —"), and
    `margin-top` did nothing (owner, 2026-09-10). */
-.v2pp__why { display: block; font-size: 12px; color: var(--color-text-muted); margin-top: 2px; line-height: 1.5; }
+.v2pp__why { display: block; font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-top: 2px; line-height: 1.5; }
 /* With a finding the reason **is** the row's message, not its footnote: yellow,
    red and open carry it in the text tone. Green stays quiet — the tick says it
    all, and a hundred black sentences would all claim importance. */
@@ -1482,10 +1482,10 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
 .v2pp__row--red > span > .v2pp__why,
 .v2pp__row--open > span > .v2pp__why { color: var(--color-text); }
 /* Room before the check code: it stands after the question, not on it. */
-.v2pp__code { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-subtle); margin-left: var(--space-1); }
+.v2pp__code { font-family: var(--font-mono); font-size: var(--fs-ui-2xs); color: var(--color-text-subtle); margin-left: var(--space-1); }
 
 /* --- Messages: errors block, warnings need an acknowledgement ------------- */
-.v2msg { display: flex; align-items: flex-start; gap: 8px; padding: 9px 12px; font-size: 12.5px; line-height: 1.5; border-radius: var(--radius-md); }
+.v2msg { display: flex; align-items: flex-start; gap: 8px; padding: 9px 12px; font-size: var(--fs-ui-sm); line-height: 1.5; border-radius: var(--radius-md); }
 .v2msg + .v2msg { margin-top: 6px; }
 .v2msg--error { background: var(--color-danger-bg); color: var(--color-danger); }
 .v2msg--warning { background: var(--color-warning-bg); color: var(--color-warning); }
@@ -1526,11 +1526,11 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
 .v2chart__zero { stroke: var(--color-border-strong); stroke-width: 0.4; }
 .v2chart__ax {
   display: flex; margin-top: 4px;
-  font-size: 10.5px; color: var(--color-text-subtle);
+  font-size: var(--fs-ui-2xs); color: var(--color-text-subtle);
 }
 .v2chart__tick { flex: 1 1 0; min-width: 0; text-align: center; }
 .v2chart__tick.is-now { color: var(--color-text); font-weight: 600; }
-.v2chart__empty { margin: 0; font-size: 13px; color: var(--color-text-subtle); }
+.v2chart__empty { margin: 0; font-size: var(--fs-ui); color: var(--color-text-subtle); }
 
 /* PeriodJump (0194) — one column per month, each a link to its page. The hit
    area is the whole column, not the bar: a month with one row would be a
@@ -1552,7 +1552,7 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
 }
 .v3jump__bar { display: block; width: 100%; min-height: 2px; background: var(--color-text-subtle); border-radius: 2px 2px 0 0; }
 .v3jump__col.is-now .v3jump__bar { background: var(--color-primary); }
-.v3jump__tick { font-size: 10.5px; line-height: 1.25; text-align: center; white-space: nowrap; overflow: hidden; }
+.v3jump__tick { font-size: var(--fs-ui-2xs); line-height: 1.25; text-align: center; white-space: nowrap; overflow: hidden; }
 .v3jump__col.is-now .v3jump__tick { color: var(--color-text); font-weight: 600; }
 .v3jump__year { display: block; }
 .v3jump__form { display: flex; align-items: flex-end; gap: var(--space-2); }
@@ -1570,7 +1570,7 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2cmd { display: flex; flex-direction: column; gap: var(--space-3); min-height: 280px; }
 .v2cmd__in { width: 100%; box-sizing: border-box; }
 .v2cmd__list { max-height: 320px; overflow-y: auto; }
-.v2cmd__empty { padding: var(--space-4) var(--space-2); font-size: 13px; color: var(--color-text-subtle); }
+.v2cmd__empty { padding: var(--space-4) var(--space-2); font-size: var(--fs-ui); color: var(--color-text-subtle); }
 .v2cmd__grp [cmdk-group-heading] {
   padding: var(--space-2) var(--space-2) var(--space-1);
   font-size: var(--fs-ui-sm); font-weight: 600;
@@ -1580,7 +1580,7 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
   display: flex; align-items: center; gap: var(--space-2);
   padding: 6px var(--space-2);
   border-radius: var(--radius-sm);
-  font-size: 13.5px; color: var(--color-text);
+  font-size: var(--fs-ui); color: var(--color-text);
   cursor: pointer;
 }
 .v2cmd__item[data-selected="true"] { background: var(--color-bg-soft); }
@@ -1590,7 +1590,7 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
   width: 100%; color: inherit; text-decoration: none;
 }
 .v2cmd__label { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
-.v2cmd__hint { font-size: 12px; color: var(--color-text-subtle); }
+.v2cmd__hint { font-size: var(--fs-ui-sm); color: var(--color-text-subtle); }
 
 /* --- Popover family (0038): Popover, Tooltip, HoverCard -----------------
    No z-order needed — the panel lives in the browser's top layer. `inset: auto`
@@ -1607,14 +1607,14 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  font-size: 13.5px;
+  font-size: var(--fs-ui);
   line-height: 1.55;
 }
 /* One sentence, not a paragraph: anything wider is a HoverCard. */
 .v2pop--tip {
   max-width: 32ch;
   padding: var(--space-1) var(--space-2);
-  font-size: 12.5px;
+  font-size: var(--fs-ui-sm);
   color: var(--color-text-muted);
 }
 /* The card brings its own padding (FieldList, Card). */
@@ -1645,14 +1645,14 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
   background: none; border: none; cursor: pointer;
   padding: 8px 12px;
   border-bottom: 1px solid var(--color-border-subtle);
-  font-family: var(--font-sans); font-size: 13px; color: var(--color-text);
+  font-family: var(--font-sans); font-size: var(--fs-ui); color: var(--color-text);
 }
 .v2kf__opt:hover { background: var(--color-bg-soft); }
 .v2kf__opt.is-active { background: var(--color-accent-50); }
 .v2kf__opt:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
 .v2kf__num { font-variant-numeric: tabular-nums lining-nums; font-weight: 600; }
-.v2kf__why { grid-column: 2; font-size: 11.5px; color: var(--color-text-subtle); }
-.v2kf__empty { padding: 18px 12px; font-size: 13px; color: var(--color-text-subtle); }
+.v2kf__why { grid-column: 2; font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
+.v2kf__empty { padding: 18px 12px; font-size: var(--fs-ui); color: var(--color-text-subtle); }
 
 /* At rest the field shows number and name (0013): the value is the number, the
    choice is checked by the name. The field's text turns transparent, the layer
@@ -1683,7 +1683,7 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
  * amounts stay comparable. */
 .v2todo__right {
   margin-left: auto; flex: 0 0 auto; text-align: right;
-  font-size: 13.5px; font-weight: 600; color: var(--color-text);
+  font-size: var(--fs-ui); font-weight: 600; color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1695,7 +1695,7 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
   display: inline-flex; align-items: center; white-space: nowrap;
   border-radius: var(--radius-pill);
   padding: 2px 8px;
-  font-size: 10.5px; font-weight: 700;
+  font-size: var(--fs-ui-2xs); font-weight: 700;
   background: var(--color-bg-sunken); color: var(--color-text-subtle);
 }
 .v2pill--info { background: var(--color-accent-50); color: var(--color-accent-700); }
@@ -1713,7 +1713,7 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
   display: flex; align-items: center; gap: 8px; width: 100%;
   background: none; border: none; cursor: pointer;
   padding: 9px 12px;
-  font-family: var(--font-sans); font-size: 12.5px; color: var(--color-text);
+  font-family: var(--font-sans); font-size: var(--fs-ui-sm); color: var(--color-text);
   text-align: left;
 }
 .ki__h:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
@@ -1722,13 +1722,13 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .ki__block + .ki__block { margin-top: var(--space-3); }
 .ki__text {
   margin: 4px 0 0;
-  font-size: 13px; line-height: 1.55; color: var(--color-text);
+  font-size: var(--fs-ui); line-height: 1.55; color: var(--color-text);
   max-height: 6.4em; overflow-y: auto;
 }
 .ki__src {
   display: flex; align-items: baseline; gap: 6px;
   padding: 4px 0;
-  font-size: 12.5px; color: var(--color-text-muted); text-decoration: none;
+  font-size: var(--fs-ui-sm); color: var(--color-text-muted); text-decoration: none;
 }
 a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .ki__art {
@@ -1758,7 +1758,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    reviewer does not search again when correcting.
    ========================================================================== */
 
-.bse { font-size: 13px; }
+.bse { font-size: var(--fs-ui); }
 
 .bse__head {
   display: flex; align-items: center; gap: 10px;
@@ -1767,7 +1767,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .bse__doc { font-weight: 600; color: var(--color-text); }
 .bse__rest {
-  font-family: var(--font-mono); font-size: 12.5px; font-weight: 600;
+  font-family: var(--font-mono); font-size: var(--fs-ui-sm); font-weight: 600;
   font-variant-numeric: tabular-nums lining-nums;
 }
 .bse__rest.is-ok { color: var(--color-success); }
@@ -1793,7 +1793,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   border-bottom: 1px solid var(--color-border-subtle);
 }
 .bse__row { padding: 6px 0; border-bottom: 1px solid var(--color-border-subtle); }
-.bse__row .v2in { padding: 4px 7px; font-size: 12.5px; width: 100%; box-sizing: border-box; }
+.bse__row .v2in { padding: 4px 7px; font-size: var(--fs-ui-sm); width: 100%; box-sizing: border-box; }
 .bse__account { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bse__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -1803,7 +1803,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   background: var(--color-surface);
   border-radius: var(--radius-md);
   padding: 4px 0;
-  font-family: var(--font-sans); font-size: 12.5px; font-weight: 700;
+  font-family: var(--font-sans); font-size: var(--fs-ui-sm); font-weight: 700;
   color: var(--color-primary); cursor: pointer;
 }
 .bse__sh:hover { background: var(--color-bg-soft); }
@@ -1813,14 +1813,14 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .bse__note {
   display: flex; gap: 14px; flex-wrap: wrap;
   margin-top: 3px;
-  font-size: 11.5px; color: var(--color-text-subtle);
+  font-size: var(--fs-ui-xs); color: var(--color-text-subtle);
 }
 
 .bse__removed {
   display: flex; align-items: center; gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid var(--color-border-subtle);
-  font-size: 12.5px; color: var(--color-text-subtle);
+  font-size: var(--fs-ui-sm); color: var(--color-text-subtle);
 }
 .bse__removed .v2link { display: inline-flex; align-items: center; gap: 4px; }
 
@@ -1832,7 +1832,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .bse__contra__label { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .bse__tag {
-  font-size: 11px; color: var(--color-accent-700);
+  font-size: var(--fs-ui-2xs); color: var(--color-accent-700);
   background: var(--color-accent-50); border-radius: var(--radius-pill);
   padding: 1px 8px;
 }
@@ -1844,7 +1844,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   display: flex; align-items: center; gap: 8px; width: 100%;
   background: none; border: none; cursor: pointer;
   padding: 7px 0;
-  font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;
+  font-family: var(--font-sans); font-size: var(--fs-ui-sm); font-weight: 600;
   color: var(--color-text-muted); text-align: left;
 }
 .bse__journal__body { border-top: 1px solid var(--color-border-subtle); }
@@ -1873,8 +1873,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 /* --- The case head: number, title, amount, profile chips ---------------- */
 .s3case { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-5); }
-.s3case__title { font-size: 24px; font-weight: 600; color: var(--color-text); }
-.s3case__sub { font-size: 14.5px; color: var(--color-text-muted); margin-top: 4px; }
+.s3case__title { font-size: var(--fs-h3); font-weight: 600; color: var(--color-text); }
+.s3case__sub { font-size: var(--fs-ui-md); color: var(--color-text-muted); margin-top: 4px; }
 .s3case__chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 420px; }
 
 /* --- Two zones: the entry left, its context right ------------------------
@@ -1894,13 +1894,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   gap: 8px; margin-bottom: var(--space-3);
 }
 .s3zone__h__acts { display: flex; gap: 8px; flex-shrink: 0; }
-.s3zone__name { font-size: 15px; font-weight: 600; color: var(--color-text); }
+.s3zone__name { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); }
 /* The running text of a zone — the case summary. One step below the body
    register; a bare `<p>` inherited 16 px and outgrew its neighbours (0187). */
 .s3zone__text { font-size: var(--fs-body-sm); line-height: var(--lh-body-sm); margin: 0 0 var(--space-4); }
-.s3zone__line { font-size: 12.5px; color: var(--color-text-muted); margin-top: 2px; }
+.s3zone__line { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-top: 2px; }
 .s3zone__grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: 12.5px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: var(--fs-ui-sm);
 }
 .s3zone__grid > span:nth-child(odd) { color: var(--color-text-muted); }
 
@@ -1910,15 +1910,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   width: 7px; height: 7px; border-radius: var(--radius-pill);
   margin-top: 5px; flex: 0 0 auto; background: currentColor;
 }
-.s3vat__label { font-size: 12.5px; color: var(--color-text-muted); }
-.s3vat__result { font-size: 12.5px; color: var(--color-text); font-weight: 600; }
+.s3vat__label { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.s3vat__result { font-size: var(--fs-ui-sm); color: var(--color-text); font-weight: 600; }
 
 /* A note entry in the "Notizen" zone. */
 .s3note { border-top: 1px solid var(--color-border-subtle); padding: 10px 0; }
 .s3note__h { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
-.s3note__who { font-size: 12px; font-weight: 600; color: var(--color-text); }
-.s3note__when { font-size: 11.5px; color: var(--color-text-subtle); }
-.s3note__body { font-size: 12.5px; color: var(--color-text-muted); line-height: 1.5; }
+.s3note__who { font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text); }
+.s3note__when { font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
+.s3note__body { font-size: var(--fs-ui-sm); color: var(--color-text-muted); line-height: 1.5; }
 
 /* --- The decision bar: stays at the bottom edge --------------------------
    It stays in view while the top scrolls — whoever accepts 118 entries should
@@ -1933,15 +1933,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .s3bar__row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap; }
 .s3bar__acts { display: flex; gap: 10px; flex-wrap: wrap; }
-.s3bar__info { font-size: 12px; color: var(--color-text-subtle); }
-.s3bar__sums { display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; font-size: 12px; color: var(--color-text-subtle); }
+.s3bar__info { font-size: var(--fs-ui-sm); color: var(--color-text-subtle); }
+.s3bar__sums { display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; font-size: var(--fs-ui-sm); color: var(--color-text-subtle); }
 
 /* The unfolded comment field above the bar — chips, text, confirm. */
 .s3form {
   border: 1px solid var(--color-accent-600); background: var(--color-accent-50);
   border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5);
 }
-.s3form__title { font-size: 13.5px; font-weight: 600; margin-bottom: var(--space-3); }
+.s3form__title { font-size: var(--fs-ui); font-weight: 600; margin-bottom: var(--space-3); }
 
 /* --- Check with acknowledgement: the tick belongs to the finding --------- */
 .s3cp {
@@ -1953,12 +1953,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .s3cp--warning { border-color: var(--color-warning); background: var(--color-warning-bg); }
 .s3cp--danger { border-color: var(--color-danger); background: var(--color-danger-bg); }
 .s3cp--open { border-color: var(--color-border-strong); background: var(--color-bg-soft); }
-.s3cp__code { font-size: 12.5px; font-weight: 700; font-family: var(--font-mono); }
+.s3cp__code { font-size: var(--fs-ui-sm); font-weight: 700; font-family: var(--font-mono); }
 .s3cp--warning .s3cp__code { color: var(--color-warning); }
 .s3cp--danger .s3cp__code { color: var(--color-danger); }
 .s3cp--open .s3cp__code { color: var(--color-text-subtle); }
 .s3cp__q { font-weight: 400; color: var(--color-text); }
-.s3cp__why { font-size: 12.5px; color: var(--color-text-muted); margin-top: 3px; }
+.s3cp__why { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-top: 3px; }
 
 /* --- Recurring: the rule block next to the entries ---------------------- */
 .s3wk__detail { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
@@ -1966,7 +1966,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* `.s3wk__acts` is gone since F202: the "Wiederkehrende" tab uses the same
    `DataTable` as the single cases, with bulk actions in the selection bar.
    `.s3wk__detail` (ProposalFoldout) and `.s3bar*` stay — the app still uses them. */
-.s3wk__light { text-align: center; font-size: 13px; line-height: 1; }
+.s3wk__light { text-align: center; font-size: var(--fs-ui); line-height: 1; }
 
 /* ---------------------------------------------------------------- Plakette */
 /* Dot colour per tone — replaces the v1 badge's hex map `KIND_DOT_COLOR`:
@@ -2083,7 +2083,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2disc__sum {
   display: flex; align-items: center; gap: var(--space-2);
   padding: var(--space-2);
-  font-size: 13.5px; font-weight: 500; color: var(--color-text);
+  font-size: var(--fs-ui); font-weight: 500; color: var(--color-text);
   cursor: pointer; list-style: none;
   border-radius: var(--radius-sm);
 }
@@ -2101,7 +2101,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    the rule lives here (0093 e); `count` moves to the right edge with it. */
 .v2disc__label { flex: 1 1 auto; min-width: 0; }
 .v2disc__count { color: var(--color-text-muted); font-weight: 400; }
-.v2disc__body { padding: 0 var(--space-2) var(--space-3); font-size: 13.5px; line-height: 1.55; }
+.v2disc__body { padding: 0 var(--space-2) var(--space-3); font-size: var(--fs-ui); line-height: 1.55; }
 .v2disc--quiet > .v2disc__sum { color: var(--color-text-muted); font-weight: 400; }
 
 /* --- RadioGroup (0017) — one of a few options --------------------------- */
@@ -2114,7 +2114,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2radioline {
   display: flex; align-items: flex-start; gap: 8px;
   padding: 6px 8px; border-radius: var(--radius-sm);
-  font-size: 13.5px; color: var(--color-text); cursor: pointer;
+  font-size: var(--fs-ui); color: var(--color-text); cursor: pointer;
 }
 .v2radioline:hover { background: var(--color-bg-soft); }
 .v2radioline--disabled { opacity: 0.5; cursor: not-allowed; }
@@ -2124,11 +2124,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   accent-color: var(--color-primary-700);
   cursor: pointer;
 }
-.v2radioline__hint { display: block; font-size: 12px; color: var(--color-text-subtle); margin-top: 1px; }
+.v2radioline__hint { display: block; font-size: var(--fs-ui-sm); color: var(--color-text-subtle); margin-top: 1px; }
 
 /* --- AmountInput (0019) — Ziffern rechts, tabellarisch -------------------- */
 /* `sm` is the editor density — the same measures as the booking editor's row. */
-.v2in--sm { padding: 4px 7px; font-size: 12.5px; }
+.v2in--sm { padding: 4px 7px; font-size: var(--fs-ui-sm); }
 .v2in--amount {
   text-align: right;
   font-variant-numeric: tabular-nums lining-nums;
@@ -2138,7 +2138,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2phead { display: grid; gap: var(--space-2); padding-bottom: var(--space-4); }
 .v2phead__back {
   display: inline-flex; align-items: center; gap: 4px;
-  font-size: 12.5px; color: var(--color-text-muted); text-decoration: none;
+  font-size: var(--fs-ui-sm); color: var(--color-text-muted); text-decoration: none;
   width: fit-content; border-radius: var(--radius-sm);
 }
 .v2phead__back:hover { color: var(--color-text); text-decoration: underline; }
@@ -2148,12 +2148,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   gap: var(--space-4); flex-wrap: wrap;
 }
 .v2phead__over {
-  font-size: 11px; font-weight: 600;
+  font-size: var(--fs-ui-2xs); font-weight: 600;
   color: var(--color-text-subtle); margin-bottom: 2px;
 }
 .v2phead__titlerow { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
-.v2phead__title { font-size: 20px; font-weight: 600; color: var(--color-text); margin: 0; line-height: 1.25; }
-.v2phead__desc { font-size: 13.5px; color: var(--color-text-muted); margin: 4px 0 0; max-width: 68ch; }
+.v2phead__title { font-size: var(--fs-ui-xl); font-weight: 600; color: var(--color-text); margin: 0; line-height: 1.25; }
+.v2phead__desc { font-size: var(--fs-ui); color: var(--color-text-muted); margin: 4px 0 0; max-width: 68ch; }
 .v2phead__acts { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 
 /* --- FieldList tone="bare" (0006) — the value list without a surface ------ */
@@ -2175,7 +2175,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   border-left: 3px solid var(--color-success);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  font-size: 13.5px; line-height: 1.45; color: var(--color-text);
+  font-size: var(--fs-ui); line-height: 1.45; color: var(--color-text);
   animation: v2toastin var(--duration-base) var(--ease-standard);
 }
 .v2toast--warning { border-left-color: var(--color-warning); }
@@ -2203,7 +2203,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2menu__item {
   display: flex; align-items: center; gap: 8px; width: 100%;
   padding: 6px 8px; border: none; background: none;
-  font: inherit; font-size: 13.5px; color: var(--color-text);
+  font: inherit; font-size: var(--fs-ui); color: var(--color-text);
   text-align: left; text-decoration: none; cursor: pointer;
   border-radius: var(--radius-sm);
 }
@@ -2221,7 +2221,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   border: none;
   background: none;
   box-shadow: none;
-  font-size: 13.5px;
+  font-size: var(--fs-ui);
   font-weight: 400;
   color: var(--color-text);
 }
@@ -2232,15 +2232,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 /* --- ActionButton (0004) — Handlung, Pending, Fehler ---------------------- */
 .v2act { display: inline-flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
-.v2act__err { font-size: 12.5px; color: var(--color-danger); font-weight: 500; }
+.v2act__err { font-size: var(--fs-ui-sm); color: var(--color-danger); font-weight: 500; }
 
 /* --- InlineEdit (0020) — Anzeige, Feld, Speichern ------------------------- */
 .v2iedit { display: flex; flex-direction: column; gap: 4px; }
 .v2iedit__show { display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; }
-.v2iedit__value { font-size: 13.5px; color: var(--color-text); }
+.v2iedit__value { font-size: var(--fs-ui); color: var(--color-text); }
 .v2iedit__value--empty { color: var(--color-text-subtle); }
 .v2iedit__acts { display: flex; align-items: center; gap: var(--space-2); margin-top: 4px; }
-.v2iedit__keys { font-size: 12px; color: var(--color-text-subtle); }
+.v2iedit__keys { font-size: var(--fs-ui-sm); color: var(--color-text-subtle); }
 
 /* --- Combobox (0009) — search and choose -------------------------------- */
 .v2cmb { position: relative; }
@@ -2256,13 +2256,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2cmb__grp {
   padding: 6px 8px 2px;
-  font-size: 11px; font-weight: 600;
+  font-size: var(--fs-ui-2xs); font-weight: 600;
   color: var(--color-text-subtle);
 }
 .v2cmb__opt {
   display: flex; align-items: baseline; gap: 8px; width: 100%;
   padding: 6px 8px; border: none; background: none;
-  font: inherit; font-size: 13.5px; color: var(--color-text);
+  font: inherit; font-size: var(--fs-ui); color: var(--color-text);
   text-align: left; cursor: pointer; border-radius: var(--radius-sm);
 }
 .v2cmb__opt:hover { background: var(--color-bg-soft); }
@@ -2274,8 +2274,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    (52 of 191 hits wrapped in `CasePicker --edges`, 0084). The full value sits in
    the button's `title`. */
 .v2cmb__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.v2cmb__hint { font-size: 11.5px; color: var(--color-text-subtle); }
-.v2cmb__empty { padding: 14px 10px; font-size: 13px; color: var(--color-text-subtle); }
+.v2cmb__hint { font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
+.v2cmb__empty { padding: 14px 10px; font-size: var(--fs-ui); color: var(--color-text-subtle); }
 
 /* --- FilterBar (0003) — the filter row above the card -------------------- */
 .v2fbar {
@@ -2284,7 +2284,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   font-size: var(--fs-ui);
 }
 .v2fbar__end { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
-.v2fbar__count { font-size: 12.5px; color: var(--color-text-muted); }
+.v2fbar__count { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 /* 0201: named filters on a line of their own, above the fields */
 .v2fbar__presets { flex-basis: 100%; }
 
@@ -2295,32 +2295,32 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   background: var(--color-surface);
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius-md);
-  font: inherit; font-size: 13.5px; color: var(--color-text);
+  font: inherit; font-size: var(--fs-ui); color: var(--color-text);
   text-align: left; cursor: pointer;
 }
 .v2drop:hover:not(:disabled), .v2drop.is-over { background: var(--color-bg-soft); }
 .v2drop:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .v2drop:disabled { opacity: 0.5; cursor: not-allowed; }
-.v2drop__hint { font-size: 12px; color: var(--color-text-subtle); }
+.v2drop__hint { font-size: var(--fs-ui-sm); color: var(--color-text-subtle); }
 .v2droplist { display: grid; gap: 2px; margin-top: var(--space-3); }
 .v2dropfile {
   display: grid; grid-template-columns: 1fr auto auto; align-items: center;
   gap: var(--space-3); padding: 6px 0;
   border-bottom: 1px solid var(--color-border-subtle);
-  font-size: 13px;
+  font-size: var(--fs-ui);
 }
-.v2dropfile__size { font-variant-numeric: tabular-nums lining-nums; color: var(--color-text-muted); font-size: 12.5px; }
-.v2dropfile__err { grid-column: 1 / -1; font-size: 12px; color: var(--color-danger); font-weight: 500; }
+.v2dropfile__size { font-variant-numeric: tabular-nums lining-nums; color: var(--color-text-muted); font-size: var(--fs-ui-sm); }
+.v2dropfile__err { grid-column: 1 / -1; font-size: var(--fs-ui-sm); color: var(--color-danger); font-weight: 500; }
 
 /* --- DateField / DateRangeField (0024) ----------------------------------- */
 .v2date { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
-.v2date__sep { font-size: 13px; color: var(--color-text-muted); }
+.v2date__sep { font-size: var(--fs-ui); color: var(--color-text-muted); }
 .v2date__presets { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 
 /* --- Timeline (0023) — the history ---------------------------------------- */
 .v2tl { display: grid; gap: 2px; }
 .v2tl__day {
-  font-size: 11px; font-weight: 600;
+  font-size: var(--fs-ui-2xs); font-weight: 600;
   color: var(--color-text-subtle);
   padding: var(--space-3) 0 4px;
 }
@@ -2335,7 +2335,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 /* Without the time column the entry starts at the edge (owner 2026-09-18). */
 .v2tl--notime .v2tl__item { grid-template-columns: 1fr; }
 .v2tl__when { color: var(--color-text-muted); font-variant-numeric: tabular-nums lining-nums; }
-.v2tl__who { color: var(--color-text-muted); font-size: 12.5px; }
+.v2tl__who { color: var(--color-text-muted); font-size: var(--fs-ui-sm); }
 .v2tl__title { color: var(--color-text); }
 /* A surface — hover on a clickable entry, the open one — needs its own inset,
    otherwise it starts right at the digit; the negative margin keeps the text
@@ -2362,7 +2362,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    otherwise badges of rows without one would start where the others' numbers end. */
 .v2ct__amt { min-width: 96px; display: inline-flex; justify-content: flex-end; }
 .v2ct__state { min-width: 140px; display: inline-flex; align-items: center; gap: var(--space-2); }
-.v2tl__detail { margin-top: 2px; color: var(--color-text-muted); font-size: 12.5px; }
+.v2tl__detail { margin-top: 2px; color: var(--color-text-muted); font-size: var(--fs-ui-sm); }
 
 /* --- Notes on a record (0158) ----------------------------------------------
  * Two lines per note: caption above the text, not beside it. In a 320 px side
@@ -2411,10 +2411,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 /* --- ChoicePrompt (0028) — Frage mit Antwortoptionen ---------------------- */
 .v2ask { display: grid; gap: var(--space-4); }
-.v2ask__q { font-size: 14px; font-weight: 600; color: var(--color-text); }
-.v2ask__ctx { font-size: 12.5px; color: var(--color-text-muted); }
+.v2ask__q { font-size: var(--fs-ui-md); font-weight: 600; color: var(--color-text); }
+.v2ask__ctx { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 .v2ask__foot { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
-.v2ask__why { font-size: 12.5px; color: var(--color-text-muted); }
+.v2ask__why { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 /* The gap keeps its dashed line: it **is** the statement ("nothing happened
    here for two weeks"), not decoration. */
 .v2tl__gap {
@@ -2541,7 +2541,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    the document: hence mono, left. */
 .v2mono {
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: var(--fs-ui-sm);
   font-variant-numeric: tabular-nums lining-nums;
   color: var(--color-text);
 }
@@ -2552,13 +2552,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   font-variant-numeric: tabular-nums lining-nums;
   white-space: nowrap;
 }
-.v2amount--sm { font-size: 12.5px; }
-.v2amount--md { font-size: 13.5px; }
+.v2amount--sm { font-size: var(--fs-ui-sm); }
+.v2amount--md { font-size: var(--fs-ui); }
 /* The tile size: a number, not a heading — hence semibold. */
-.v2amount--lg { font-size: 20px; font-weight: 600; line-height: 1.2; }
+.v2amount--lg { font-size: var(--fs-ui-xl); font-weight: 600; line-height: 1.2; }
 .v2time { font-variant-numeric: tabular-nums lining-nums; }
-.v2time--sm { font-size: 12.5px; }
-.v2time--md { font-size: 13.5px; }
+.v2time--sm { font-size: var(--fs-ui-sm); }
+.v2time--md { font-size: var(--fs-ui); }
 
 /* ── Raw data (0051) ─────────────────────────────────────────────────────
    Key in mono on the left, value on the right: one column read top to bottom.
@@ -2568,7 +2568,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    by character, and `E3A1C07F` is not the same value. */
 .v2raw__label {
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: var(--fs-ui-xs);
   color: var(--color-text-subtle);
   padding-bottom: var(--space-2);
 }
@@ -2583,12 +2583,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2raw__key {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-ui-sm);
   color: var(--color-text-muted);
   padding: 5px 0;
   overflow-wrap: anywhere;
 }
-.v2raw__val { margin: 0; padding: 5px 0; min-width: 0; font-size: 12.5px; }
+.v2raw__val { margin: 0; padding: 5px 0; min-width: 0; font-size: var(--fs-ui-sm); }
 /* A fine line per pair — the first row needs none. */
 .v2raw__list > * { border-top: var(--border-1-subtle); }
 .v2raw__list > *:nth-child(-n + 2) { border-top: none; }
@@ -2598,13 +2598,13 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   max-height: 480px;
   overflow: auto;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-ui-sm);
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   color: var(--color-text);
 }
-.v2raw__empty { margin: 0; font-size: 12.5px; color: var(--color-text-muted); }
+.v2raw__empty { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 
 /* ── Five gaps at the detail head (0049) ─────────────────────────────────
    All extensions of existing blocks, none new. */
@@ -2641,7 +2641,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    BEFORE the actions — the action stays outside, where the hand looks for it. */
 .v2card__ico { flex: 0 0 auto; line-height: 0; color: var(--color-text-subtle); }
 .v2card__h > div:not(.actions):not(.v2card__meta) { margin-right: auto; min-width: 0; }
-.v2card__meta { font-size: 12px; color: var(--color-text-subtle); flex-shrink: 0; }
+.v2card__meta { font-size: var(--fs-ui-sm); color: var(--color-text-subtle); flex-shrink: 0; }
 
 /* ── RecordPager (0047) ───────────────────────────────────────────────────
    Way back, arrow, count, arrow — a line that does not move while paging:
@@ -2650,10 +2650,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2pager { display: inline-flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
 .v2pager__back {
   display: inline-flex; align-items: center; gap: 2px;
-  font-size: 12.5px; margin-right: var(--space-2);
+  font-size: var(--fs-ui-sm); margin-right: var(--space-2);
 }
 .v2pager__count {
-  font-size: 12.5px; color: var(--color-text-muted); white-space: nowrap;
+  font-size: var(--fs-ui-sm); color: var(--color-text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums lining-nums;
   min-width: 6ch; text-align: center;
 }
@@ -2691,7 +2691,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2ehead__title {
   display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
-  font-size: 19px; font-weight: 600; color: var(--color-text); line-height: 1.25;
+  font-size: var(--fs-ui-xl); font-weight: 600; color: var(--color-text); line-height: 1.25;
 }
 /* The meta line is layout, not a component: a wrapping row with separators the
    caller fills with Badge, Link and InlineEdit. */
@@ -2699,7 +2699,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   display: flex; align-items: center; flex-wrap: wrap;
   gap: 5px var(--space-3);
   margin-top: 7px;
-  font-size: 12.5px; color: var(--color-text-muted);
+  font-size: var(--fs-ui-sm); color: var(--color-text-muted);
 }
 .v2ehead__meta > * + *::before {
   content: "·";
@@ -2710,7 +2710,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2ehead__metric__label {
   font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text-subtle);
 }
-.v2ehead__metric__value { font-size: 20px; font-weight: 600; line-height: 1.2; margin-top: 2px; }
+.v2ehead__metric__value { font-size: var(--fs-ui-xl); font-weight: 600; line-height: 1.2; margin-top: 2px; }
 .v2ehead__actions { flex: 0 0 auto; display: flex; align-items: center; gap: var(--space-3); }
 /* The process picture (0137) — its own row between title block and summary.
    Empty means gone, spacing included — like every slot of the head. */
@@ -2724,7 +2724,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2ehead__box { margin-top: var(--space-3); width: min(100%, var(--pz-box)); }
 .v2ehead__summary {
   margin-top: var(--space-4);
-  font-size: 13.5px; line-height: 1.5; color: var(--color-text-muted);
+  font-size: var(--fs-ui); line-height: 1.5; color: var(--color-text-muted);
 }
 .v2ehead__facts {
   margin-top: var(--space-4);
@@ -3332,7 +3332,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: var(--radius-pill);
   background: var(--color-bg-sunken); color: var(--color-text-muted);
-  font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;
+  font-size: var(--fs-ui-sm); font-weight: 600; font-variant-numeric: tabular-nums;
 }
 .v2wiz__step[data-state="done"] .v2wiz__num {
   background: var(--color-success); color: var(--color-text-on-dark);
@@ -3345,9 +3345,9 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 
 .v2wiz__lbl { display: flex; flex-direction: column; min-width: 0; }
-.v2wiz__n { font-size: 11px; font-weight: 600; color: var(--color-text-subtle); }
+.v2wiz__n { font-size: var(--fs-ui-2xs); font-weight: 600; color: var(--color-text-subtle); }
 .v2wiz__name {
-  font-size: 13px; font-weight: 500; color: var(--color-text-muted);
+  font-size: var(--fs-ui); font-weight: 500; color: var(--color-text-muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 /* On the danger surface "Schritt n" takes the danger tone too: the subtle tone
@@ -3380,7 +3380,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   /* Exactly the line height of the text next to it (1.5 × font size), border
      inside with `border-box`. Smaller is allowed, larger not: the row must not
      grow. `vertical-align: top` keeps the box at the top of the line box. */
-  min-height: calc(var(--v2-row-fs, 13.5px) * 1.5);
+  min-height: calc(var(--v2-row-fs, var(--fs-ui)) * 1.5);
   vertical-align: top;
 }
 
@@ -4010,7 +4010,7 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
    with what Ludwig made of the position. No second table row, no grid of its
    own — the table runs with `density="wide"`, exactly the case for that step. */
 .v2ilrow__name { display: block; font-weight: 600; }
-.v2ilrow__desc { display: block; color: var(--color-text-subtle); font-size: 12px; }
+.v2ilrow__desc { display: block; color: var(--color-text-subtle); font-size: var(--fs-ui-sm); }
 .v2ilrow__strip {
   display: flex;
   flex-wrap: wrap;
@@ -4323,30 +4323,30 @@ a.v3prov:focus-visible { text-decoration: underline; }
   display: flex; flex-direction: column; max-height: min(60vh, 360px);
   min-width: min(var(--v3msel-min, 0px), var(--v3-menu-max, 20rem));
 }
-.v3msel__search { margin: var(--space-2); box-sizing: border-box; width: calc(100% - 2 * var(--space-2)); font-size: 12.5px; }
+.v3msel__search { margin: var(--space-2); box-sizing: border-box; width: calc(100% - 2 * var(--space-2)); font-size: var(--fs-ui-sm); }
 .v3msel__list { overflow-y: auto; padding: var(--space-1); outline: none; }
 .v3msel__list:focus-visible { box-shadow: inset 0 0 0 2px var(--color-focus); }
-.v3msel__group { padding: 6px 8px 2px; font-size: 11px; font-weight: 600; color: var(--color-text-subtle); }
+.v3msel__group { padding: 6px 8px 2px; font-size: var(--fs-ui-2xs); font-weight: 600; color: var(--color-text-subtle); }
 .v3msel__opt {
   display: flex; align-items: center; gap: 8px;
   padding: 5px 8px; border-radius: var(--radius-sm);
-  font-size: 13px; cursor: pointer;
+  font-size: var(--fs-ui); cursor: pointer;
 }
 .v3msel__opt.is-active { background: var(--color-bg-soft); }
 .v3msel__opt .v2check { pointer-events: none; flex: 0 0 auto; }
 /* One line per row: a list read top to bottom has no two heights (0084). */
 .v3msel__text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
 .v3msel__name, .v3msel__hint { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.v3msel__hint { font-size: 11.5px; color: var(--color-text-subtle); }
+.v3msel__hint { font-size: var(--fs-ui-xs); color: var(--color-text-subtle); }
 .v3msel__badge { flex: 0 0 auto; display: inline-flex; }
 /* Counts stand under each other: fixed width, right-aligned, tabular (V3). */
 .v3msel__count {
   flex: 0 0 auto; min-width: 5ch; text-align: right;
   font-variant-numeric: tabular-nums lining-nums;
-  font-size: 12px; color: var(--color-text-muted);
+  font-size: var(--fs-ui-sm); color: var(--color-text-muted);
 }
 .v3msel__count.is-zero { color: var(--color-text-subtle); }
-.v3msel__empty { padding: 14px 10px; font-size: 13px; color: var(--color-text-subtle); }
+.v3msel__empty { padding: 14px 10px; font-size: var(--fs-ui); color: var(--color-text-subtle); }
 .v3msel__foot { border-top: 1px solid var(--color-border-subtle); padding: var(--space-2) var(--space-3); }
 
 /* --- PeriodField / PeriodPanel (0196) — month, span, quarter, fiscal year --
@@ -4406,7 +4406,7 @@ a.v3prov:focus-visible { text-decoration: underline; }
 .v3hint:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
 /* In the filter bar the trigger sits beside a search field and chips: the
    field's height and type size, not a form field's (0200, measured 35 vs 33). */
-.v2fbar .v3msel__trigger { font-size: 12.5px; padding-block: 6px; }
+.v2fbar .v3msel__trigger { font-size: var(--fs-ui-sm); padding-block: 6px; }
 
 /* --- 0202 Saldenabgleich: Quellen als Spalten, Zeitpunkte als Zeilen ------
    Owner 2026-09-25: the sources stand side by side, time runs downward

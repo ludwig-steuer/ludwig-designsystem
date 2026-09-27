@@ -26,7 +26,10 @@ const ROOTS = ["src"];
 const SKIP = ["src/ludwig/", "src/styles/tokens.css"];
 const BASELINE = "scripts/type-baseline.json";
 
-const SIZE_OK = /^(var\(--fs-[a-z0-9-]+\)|inherit|1em|100%)$/;
+// A token, a relative size (`0.92em` keeps code in step with its sentence), or
+// a component's own size variable that is itself set from the scale
+// (`--v2-row-fs` for the table density).
+const SIZE_OK = /^(var\(--fs-[a-z0-9-]+\)|var\(--[a-z0-9-]*-fs\b[^)]*\)\)?|inherit|[0-9.]+em|100%)$/;
 const WEIGHT_OK = /^(400|500|600|700|inherit|normal)$/;
 const FAMILY_OK = /^(var\(--font-[a-z0-9-]+\)|inherit)$/;
 

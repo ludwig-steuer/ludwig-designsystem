@@ -150,7 +150,7 @@ export const Inline: Story = {
           <span>Fragen an die Kanzlei</span>
           <Progress done={1} total={3} size="sm" inline />
         </div>
-        <div style={{ padding: "12px 16px", fontSize: 12.5, color: "var(--color-text-muted)" }}>
+        <div style={{ padding: "12px 16px", fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>
           Ohne Breitenangabe am Aufrufer — der Balken nimmt, was die Zeile lässt.
         </div>
       </Card>

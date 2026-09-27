@@ -271,7 +271,7 @@ function CasePage() {
                 />
               </Disclosure>
               <Disclosure summary="Rohdaten des Classifiers" tone="quiet">
-                <pre style={{ margin: 0, fontSize: 12, fontFamily: "var(--font-mono)" }}>
+                <pre style={{ margin: 0, fontSize: "var(--fs-ui-sm)", fontFamily: "var(--font-mono)" }}>
                   {JSON.stringify(
                     { kind: current.kind, counterparty: current.counterpartyName, total: current.totalAmount },
                     null,

@@ -190,10 +190,10 @@ function OldBlock() {
         <Landmark size={18} strokeWidth={1.5} />
       </div>
       <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontSize: 13.5, fontWeight: 500 }}>Bürobedarf Meier GmbH</div>
+        <div style={{ fontSize: "var(--fs-ui)", fontWeight: 500 }}>Bürobedarf Meier GmbH</div>
         <div
           style={{
-            fontSize: 11.5,
+            fontSize: "var(--fs-ui-xs)",
             color: "var(--color-text-muted)",
             display: "flex",
             gap: 8,
@@ -203,7 +203,7 @@ function OldBlock() {
           <span>Commerzbank · 1210</span>
           <span>26.08.</span>
         </div>
-        <div style={{ fontSize: 12, color: "var(--color-text-muted)", marginTop: 4 }}>
+        <div style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)", marginTop: 4 }}>
           Wartung Klimaanlage, Leistung 08/2026, Rechnung RE-4471
         </div>
       </div>

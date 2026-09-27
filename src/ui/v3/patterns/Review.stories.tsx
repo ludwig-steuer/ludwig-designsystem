@@ -47,7 +47,7 @@ export const Filled: Story = {
           <DetailPane title={row?.label} sub={row?.counter}>
             {row ? (
               <>
-                <p style={{ fontSize: 13, lineHeight: 1.6, margin: "0 0 14px" }}>
+                <p style={{ fontSize: "var(--fs-ui)", lineHeight: 1.6, margin: "0 0 14px" }}>
                   Auszug 8 vom 29.08. weicht um 12,40 € vom gebuchten Saldo ab.
                 </p>
                 <Button variant="primary" size="sm" hotkey="A">
@@ -102,7 +102,7 @@ export const LoadingEmpty: Story = {
 /** Die neun Zustands-Icons — Lucide statt Sonderzeichen (V7). */
 export const StateIcons: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 20, flexWrap: "wrap", fontSize: 12 }}>
+    <div style={{ display: "flex", gap: 20, flexWrap: "wrap", fontSize: "var(--fs-ui-sm)" }}>
       {(["open", "done", "edited", "returned", "question", "skipped", "warning", "error", "info"] as const).map(
         (s) => (
           <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>

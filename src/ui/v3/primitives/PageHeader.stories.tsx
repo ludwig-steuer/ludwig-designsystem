@@ -34,7 +34,7 @@ export const WithMeta: Story = {
       meta={
         <>
           <StatusBadge axis="journal_entry" status="proposed" />
-          <span style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
+          <span style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>
             zuletzt <Timestamp iso="2026-08-31T09:12:00Z" />
           </span>
         </>

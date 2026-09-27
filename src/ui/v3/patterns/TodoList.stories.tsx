@@ -49,7 +49,7 @@ export const Filled: Story = {
             >
               Erledigt
             </Button>
-            <p style={{ fontSize: 12.5, color: "var(--color-text-muted)", marginBottom: 0 }}>
+            <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)", marginBottom: 0 }}>
               Nach der Aktion springt die Auswahl auf den nächsten offenen Punkt.
             </p>
           </DetailPane>

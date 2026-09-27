@@ -79,7 +79,7 @@ export const Interactive: Story = {
             Vorschlag verwerfen
           </MenuItem>
         </OverflowMenu>
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           Zuletzt: {last ?? "nichts"}
         </div>
       </div>

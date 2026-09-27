@@ -155,7 +155,7 @@ export const Interactive: Story = {
     return (
       <Frame>
         <MultiSelectFilter label="Belegart" options={DOCUMENT_TYPES} selected={keys} onChange={setKeys} />
-        <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
+        <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>
           selected = [{keys.map((k) => `"${k}"`).join(", ")}]
         </p>
       </Frame>
@@ -188,7 +188,7 @@ export const ServerForm: Story = {
             />
           </FilterBar>
         </form>
-        <p style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
+        <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>
           {sent === null ? "Noch nicht abgesendet." : `?${sent}`}
         </p>
       </Frame>

@@ -119,7 +119,7 @@ export const Interactive: Story = {
 export const Narrow: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
-      <span style={{ fontSize: 12.5, color: "var(--color-text-muted)" }}>
+      <span style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)" }}>
         900 px breit — darunter liegen Rail, Liste und Detail übereinander.
       </span>
       <iframe

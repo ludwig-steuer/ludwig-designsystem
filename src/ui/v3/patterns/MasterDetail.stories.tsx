@@ -61,7 +61,7 @@ export const Filled: Story = {
           <DetailPane title={d?.title} sub={d?.sub}>
             {d ? (
               <>
-                <p style={{ fontSize: 14, lineHeight: 1.6, margin: "0 0 16px" }}>{d.body}</p>
+                <p style={{ fontSize: "var(--fs-ui-md)", lineHeight: 1.6, margin: "0 0 16px" }}>{d.body}</p>
                 <Button variant="primary" size="sm" hotkey="A">
                   Erledigt
                 </Button>

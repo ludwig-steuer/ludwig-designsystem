@@ -187,7 +187,7 @@ export const InUse: Story = {
 /** `RawValue` allein — so zeigt die DATEV-Seite einzelne Rohwerte in Zellen. */
 export const SingleValues: Story = {
   render: () => (
-    <div style={{ maxWidth: 420, display: "grid", gap: 6, fontSize: 12.5 }}>
+    <div style={{ maxWidth: 420, display: "grid", gap: 6, fontSize: "var(--fs-ui-sm)" }}>
       <RawValue value={null} />
       <RawValue value={true} />
       <RawValue value={1234567} />

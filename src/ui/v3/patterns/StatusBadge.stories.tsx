@@ -18,7 +18,7 @@ const AXES = Object.keys(STATUS_REGISTRY) as StatusAxis[];
 function AxisBlock({ axis, info }: { axis: StatusAxis; info?: boolean }) {
   return (
     <div style={{ marginBottom: 18 }}>
-      <div style={{ fontSize: 13, color: "var(--color-text-subtle)", marginBottom: 6 }}>
+      <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-subtle)", marginBottom: 6 }}>
         <code>{axis}</code> — {AXIS_LABEL[axis]}
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -117,7 +117,7 @@ export const StatusMenu: Story = {
             ))}
           </div>
         </Popover>
-        <p style={{ fontSize: 12.5, color: "var(--color-text-muted)", margin: 0 }}>
+        <p style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)", margin: 0 }}>
           Gewählt: <code>{status}</code>
         </p>
       </div>

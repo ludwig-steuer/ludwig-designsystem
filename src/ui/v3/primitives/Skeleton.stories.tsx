@@ -57,6 +57,6 @@ export const InCard: Story = {
 
 function Legend({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: 12, color: "var(--color-text-muted)", marginBottom: 6 }}>{children}</div>
+    <div style={{ fontSize: "var(--fs-ui-sm)", color: "var(--color-text-muted)", marginBottom: 6 }}>{children}</div>
   );
 }

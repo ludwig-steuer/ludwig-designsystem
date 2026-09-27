@@ -265,7 +265,7 @@ export const Interactive: Story = {
             />
           ))}
         </div>
-        <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "var(--fs-ui)", color: "var(--color-text-muted)" }}>
           {rows.length === 0 ? "Nichts offen." : `${rows.length} offen`} ·
           Geöffnet: {opened ?? "nichts"}
         </div>

@@ -320,7 +320,7 @@ function Roundtrip() {
         paymentAccounts={PAYMENT_ACCOUNTS}
       />
       {saved ? (
-        <pre style={{ fontSize: 12, overflow: "auto" }}>{JSON.stringify(saved, null, 2)}</pre>
+        <pre style={{ fontSize: "var(--fs-ui-sm)", overflow: "auto" }}>{JSON.stringify(saved, null, 2)}</pre>
       ) : null}
     </div>
   );
