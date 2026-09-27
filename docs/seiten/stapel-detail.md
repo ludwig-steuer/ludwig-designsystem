@@ -66,10 +66,12 @@ sie stehen.
 | `agent` | — (wartet auf den Agenten, D22) | Ansehen | Verwerfen (danger) |
 | `prepared` | Prüfung übernehmen — auch bei offenen Nachforderungen (Staffelstab „Mandant (wartet)"), weil die Kanzlei trotzdem übernehmen kann | Ansehen | An Agenten zurückgeben · Zurücksetzen (danger) · Verwerfen (danger) |
 | `review` | Zur Abnahme | — | An Agenten zurückgeben · Zurücksetzen (danger) · Verwerfen (danger) |
-| `ready` | Zur Übergabe | Freigabe zurücknehmen | — |
+| `ready`, Übergabeweg CSV (Staffelstab Kanzlei) | Zur Übergabe | Freigabe zurücknehmen | — |
+| `ready`, Übergabeweg Bridge (Staffelstab Bridge) | — (wartet auf die Bridge, D22) | Transport ansehen · Freigabe zurücknehmen | — |
 | `exporting`, `inspection` | — (wartet auf Bridge bzw. DATEV, D22) | Transport ansehen | — |
 | `failed` | Erneut übertragen + Fehlertext (`danger`) | Protokoll ansehen · Freigabe zurücknehmen | — |
-| `confirmed`, `mirrored` | Zur Nachlese | — | — |
+| `confirmed` (Staffelstab Spiegel) | — (wartet auf den Spiegel, D22) | Transport ansehen | — |
+| `mirrored` (Staffelstab Agent) | — (der Agent macht die Nachlese, D22) | Nachlese ansehen | — |
 | `closed` | — (Endzustand) | Nachlese ansehen | — |
 | `cancelled` | — (Endzustand) | Ansehen | — |
 
@@ -153,6 +155,8 @@ Entitätsprofils „entstanden in" und steht in der Technik; der Dialog von
 | D8 / §11.2 „kein Menü bei einer Aktion" | in `agent` steht ein Menü mit dem einen Eintrag „Verwerfen" | §4.1 verlangt Zerstörendes immer im Menü; von zwei Regeln gewinnt die, die vor dem Fehlgriff schützt |
 | D22 „kein Signal, wenn der Datensatz auf jemand anderen wartet" | in `prepared` mit offenen Nachforderungen (Staffelstab „Mandant (wartet)") steht trotzdem das Signal „Prüfung übernehmen" | Die Kanzlei kann die Prüfung jederzeit übernehmen (Registry `prepared`), und ohne das Signal fehlte ihr der einzige nächste Schritt. Eingetragen bei der fremden Prüfung 2026-09-27; Owner-Bestätigung offen |
 | §2.4 / D15 „p50 ≤ 1 → Zeile in Zone 3" | die Zahl der Durchgänge (p50 1,5, zwischen den Stufen) steht als Kopf-Fakt „Durchgänge", nicht als Zeile in Zone 3; der Weg ist der Reiter mit Zähler | Die vier Zähler des Stapels stehen zusammen in der Faktenzeile; dieselbe Zahl in Zone 3 wäre sie zweimal auf dem ersten Bildschirm (D24). Eingetragen bei der fremden Prüfung 2026-09-27; Owner-Bestätigung offen |
+
+**Nachtrag 2026-09-27 (L-349, entschieden von ll-cto nach `app/docs/topics/datev.md`, gebaut in F304 `a16f89bd`):** Staffelstab und Signal sagen in jedem Zustand dasselbe — ein Hauptknopf steht genau dann, wenn die Kanzlei dran ist. `ready` hängt am Übergabeweg (`platform_clients.datev_export_method`).
 
 ## Prüfung
 
