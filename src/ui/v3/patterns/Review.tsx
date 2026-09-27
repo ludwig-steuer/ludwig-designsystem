@@ -257,8 +257,11 @@ const SUMMARY_WORD: Record<CheckKind, Record<CheckItem["state"], string>> = {
 
 /**
  * The counts of a set of checks in one line — the XS size (0206): „1 verletzt
- * · 2 offen · 9 bestanden". Worst first, empty groups left out. For the head
- * of a report (`StatusCallout` title) or an overview.
+ * · 2 offen · 9 bestanden". Worst first, empty groups left out.
+ *
+ * @when    The result of a set of checks in one line — the title of a report's
+ *          verdict (`StatusCallout`) or an overview.
+ * @instead The checks themselves → CheckItems.
  */
 export function checkSummary(items: readonly CheckItem[], kind: CheckKind = "rule"): string {
   const order: CheckItem["state"][] = ["red", "yellow", "open", "green"];
@@ -299,7 +302,7 @@ function CheckRow({ item, kind = "rule" }: { item: CheckItem; kind?: CheckKind }
           {item.question}
           {/* A rule's code is what somebody quotes (VST-03); a fact's key is
               technical and stands under „Technisch" (T4, 0206). */}
-          {kind === "rule" ? <span className="v2pp__code">{item.code}</span> : null}
+          {kind === "rule" ? <> <span className="v2pp__code">{item.code}</span></> : null}
         </span>
         <span className="v2pp__why">{item.reason}</span>
         {item.origin ? (

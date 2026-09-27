@@ -156,3 +156,9 @@ Leerzeichen; dieser Textknoten ist im Browser nachgestellt und vermessen.
 - **M4** `InputTaxTab.tsx` `VERDICT`: lokale Label-Map für `input_tax_verdict` ohne Registry-Achse und ohne benannte Ausnahme (Owner, Datum).
 
 Nebenbei, kein Mangel: Karte „Fakten" nennt die Zählung doppelt (Kopf „2 zu klären · 4 geklärt", Gruppe „4 von 6 Fakten geklärt"); `Steuerbetrag` in der Fixture als fertiger String statt über `formatAmount`.
+
+**Nacharbeit 2026-09-27 (Bauer), zur Nachprüfung:**
+M1 — das Leerzeichen zwischen Frage und Code ist zurück (`<> <span …>`); `kind="rule"` wieder wie vor 0206.
+M2 — `checkSummary` trägt `@when`/`@instead`.
+M3 — **kein Mangel des Sets, sondern ein offener App-Befund:** „Agent prüft" ist das Registry-Label von `vat_assessment_status.needs_agent`; die Umbenennung „Agent" → „Ludwig" hat der Owner am 2026-09-27 entschieden (Guideline T1), sie läuft als App-F307 (Befund L-355) und kommt mit dem nächsten Spiegel-Lauf ins Set. Das Set schreibt Registry-Labels nicht lokal um (keine zweite Quelle).
+M4 — **benannte Ausnahme** (Claude, 2026-09-27, bis zum Spiegel-Lauf nach F310): Die Wörter von `input_tax_verdict` stehen im Showcase (`InputTaxTab.tsx`, `VERDICT`) ausgeschrieben, weil die Achse erst mit App-F310 entsteht. Sie ist Showcase, kein Baustein; beim Spiegel-Lauf ersetzt `resolveStatus("input_tax_verdict", …)` die Map und die Ausnahme fällt.
