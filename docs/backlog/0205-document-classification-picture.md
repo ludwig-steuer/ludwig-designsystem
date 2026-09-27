@@ -2,13 +2,14 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-27; fremde Abnahme steht aus |
+| Status | Abnahme — gebaut 2026-09-27; fremde Abnahme 2026-09-27 nicht bestanden (4 Mängel, siehe „Abnahme") |
 | Stufe | `entities/source-document/` (`Classification.tsx`) · Zeichen-Vokabular `CATEGORY_ICON` in `Icons.tsx` · Showcase `src/showcase/document-classification/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Belegkategorie, Richtung × Charakter, Sammel-PDF — Entitäts-Form des Belegs |
 | Quelle | Design-Brief **F308** (`app/docs/backlog/F308-document-classification-picture-design-brief.md`, Owner 2026-09-27 über ll-senior) · Bauart 0204 |
 | Ersetzt | `SourceDocumentClass` (Badge-Kette) in der Spalte „Einordnung" und im Kopf der Belegseite · Spalten `kind`, `form` in den Spaltensets · `ClassificationEditor` im Eingang (App) |
 | Blockiert | App F309 (Ableitung `ClassificationPicture`, Spaltensets, Belegseite, `overrideInboxClassification`) |
 | Spec von / am | Claude, 2026-09-27 |
+| Abgenommen von / am | fremder Abnahme-Agent, 2026-09-27 |
 
 ## Ziel
 
@@ -126,6 +127,76 @@ Variabel:
 
 ## Abnahme
 
+Gemessene Abnahme am Stand `0e33672` (Variante A), Playwright bei 1280 px,
+Storybook :6107. Punkte zu Variante D und `CellVariants` sind mit dem
+Owner-Entscheid A gegenstandslos.
+
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| … | … | |
+| typecheck | `pnpm typecheck` Exit 0 | ✓ |
+| build | `pnpm build` (Storybook, Ausgabe außerhalb des Repos) Exit 0 | ✓ |
+| Englischer Code | `pnpm check:language` „0 German comment lines"; Bezeichner, CSS-Klassen `cl-*`, Story-Exporte englisch; Deutsch nur in Strings und Story-Beschreibungen | ✓ |
+| `@when`/`@instead` | an `ClassificationCell`, `ClassificationBox`, `ClassificationDialog`, `ClassificationTrigger`, `CategoryIcon`; `pnpm check:when` Exit 0 | ✓ |
+| Kein Hex/px in TSX | `Classification.tsx`, Showcase: kein Hex, kein px; Maße über `var(--space-*)`; Icon-Größen 12/14/16 aus der Leiter; `pnpm check:icons`, `check:classes`, `check:contrast` Exit 0 | ✓ |
+| Stories | 9 Stories `seiten-beleg-einordnung--*` + `v3-grundlagen-icons--categories` rendern, keine Konsolenfehler aus den Bausteinen; **aber** Story-Deckung lückenhaft, siehe M3 | ✗ |
+| §9 Prüfliste | Text links ✓, Farbe nur Stufe ✓, Icon nie ohne Wort ✓, Hover (Unterstreichung Zelle, Fläche Box) ✓, Karte ✓, `min-width: 0` ✓; **Zeilenhöhe (V1) ✗** (M1); fünf Zustände weder gezeigt noch begründet (M3) | ✗ |
+| Im Browser angesehen | alle Stories bei 1280 px; Screenshot Kopf mit Prozess- und Einordnungs-Box: Box unter der Prozess-Box, rechts | ✓ |
+| Jedes Fixture aus F308 §7 in Zelle, Box und Dialog | `all-cells`: 20 Zellen; `all-boxes`: 20 Boxen; alle 20 Dialoge per Klick geöffnet und gelesen | ✓ |
+| Unbekannter Form-Schlüssel als Rohwort (Fixture 19) | Zelle, Box, Dialog zeigen `psp_settlement`; einziges Rohwort außerhalb „Technisch" | ✓ |
+| Keine Farbe außer Warnung; Stift bei korrigiert (18) | Text 45/45/45, Zeile 2 und Zeichen 92/92/92, Warnzeichen nur in 15 und 20 (Stroke 140/96/30); Stift in 18 grau mit Wort „korrigiert" (v2vh) und `title`; Blau nur an Link/TextButton (Interaktion), Rot nur im Fehlerbanner (Stufe Fehler) | ✓ |
+| Kontraste | Text 13,77:1; Zeile 2 6,69:1; Kategoriezeichen 6,69:1; Warnzeichen 5,52:1; Box-Beschriftung 4,51:1 (knapp, auf `--color-bg-soft`); Fokusring 3,28:1 | ✓ |
+| Trefferflächen | Zelle 24 px hoch (68–192 px breit); Box ≥ 27 px hoch, 403 px breit; Selects 32,5 px; „Einordnung speichern" 30,2 px | ✓ |
+| Tastatur | Tab erreicht die Zelle, Fokusring 2 px sichtbar (`:focus-visible`); Enter öffnet den Dialog, Fokus im Dialog; Esc schließt, Fokus zurück auf der Zelle | ✓ |
+| Zelle höchstens zwei Zeilen | Zelle 24,0 px (eine Zeile) oder 38,2 px (zwei Zeilen), nie mehr; `cell-narrow` alle 24,0 px, Rest im zugänglichen Namen | ✓ |
+| Zeilenhöhe der Liste einheitlich | `all-cells`: Zeilen **50,9 px** (Fälle 10–16, 19) neben **63,2 px** (1–9, 17, 18, 20) — zwei Höhen in einer Liste | ✗ M1 |
+| Korrektur: offen | `dialog-correction`: „Einordnung korrigieren" klappt auf; Belegform in 6 Gruppen nach Kategorie, Richtung mit „nicht anwendbar" | ✓ |
+| Korrektur: gesperrt (Fall 10) | `dialog-blocked`: „**Korrektur hier nicht möglich.** Die Umsätze …", kein Formular, kein Knopf | ✓ |
+| Korrektur: speichert (Fall 18) | Knopf „Wird gespeichert …" gesperrt, beide Selects gesperrt, „Abbrechen" weg; Dauer gemessen 916 ms | ✓ |
+| Korrektur: Fehler | `dialog-save-error`: Banner „Nicht gespeichert" mit Satz, Auswahl (`fuel_receipt`) erhalten, Speichern wieder frei, „Abbrechen" da | ✓ |
+| Korrektur: Erfolg | `role=status`: „Gespeichert. Ludwig liest den Beleg mit der neuen Einordnung noch einmal." | ✓ |
+| Korrektur: Vorbelegung | Fall 15 (`unknown`) und 19 (`psp_settlement`): Belegform zeigt still „Rechnung" als gewählt, der Zustand hält den Rohschlüssel | ✗ M2 |
+| Technik nur im Aufklapper | alle 20 Dialoge: `<details>` zu; außerhalb kein Rohwert (`snake_case`) außer dem gewollten Rohwort in 19; aufgeklappt stehen die neun Rohwerte | ✓ |
+| Spaltensets ohne `kind`/`form`, eine Spalte „Einordnung" mit einem (i) | Code: `DOCUMENT_LIST_COLUMNS`, `INBOX_COLUMNS`, `SUBMIT_COLUMNS`, `STUCK_COLUMNS` ohne `kind`/`form`; `headerAside` nur `document_category`. **Keine Story** zeigt `sourceDocumentColumns({ classificationPicture })` — `AllCells` baut eine eigene `Table` | ✗ M3 |
+| Aufrufer der Spaltensets | Repo: nur `source-document-columns.stories.tsx` (bricht nicht). App: `documents/page.tsx`, `StapelDetailScreen.tsx` nutzen `DOCUMENT_LIST_COLUMNS` — kompiliert weiter, verliert die Spalte „Belegart" | ✓ |
+| Spec = Code | Schnittstellen `ClassificationPicture`, `ClassificationDialogDetail`, Komponenten-Props stimmen; Abweichungen siehe M4 | ✗ M4 |
+
+### Mängel
+
+- **M1 · Zeilenhöhe** — `src/styles/v3.css` `.cl-cell` (kein Mindestmaß für
+  zwei Zeilen). In einer Liste stehen Zeilen mit 50,9 und 63,2 px (V1, 0070
+  M1); mit Variante A haben 12 der 20 Fälle zwei Zeilen, der Rest eine.
+  Die Zelle muss im `regular`-Modus zwei Zeilen reservieren (oder die Spec
+  benennt die Ausnahme mit Owner und Datum).
+- **M2 · Stille Vorbelegung in der Korrektur** — `Classification.tsx`,
+  `Correction`: `<Select value={form}>` ohne Option für einen Schlüssel, den
+  `forms` nicht kennt. Bei „Unbekannt" (15) und einer kommenden Form (19)
+  zeigt das Feld „Rechnung", obwohl nichts gewählt ist — gerade dort, wo
+  korrigiert werden soll. Es braucht eine leere Wahl („Bitte wählen") oder
+  den Rohschlüssel als eigene Option; Speichern erst nach einer Wahl.
+- **M3 · Story-Deckung** — `DocumentClassification.stories.tsx`: keine Story
+  für `sourceDocumentColumns({ classificationPicture })` (die Spec nennt
+  `AllCells` als Nachweis, die nutzt die Spaltenoption nicht); keine Story
+  für den Dialog **ohne** `correction` (F308 §7 „mit/ohne Korrektur");
+  `AllDialogs` ist dieselbe Darstellung wie `AllCells`; die fünf Zustände
+  (leer, lädt, Fehler der Zelle) sind weder gezeigt noch als ausgeschlossen
+  begründet.
+- **M4 · Spec ≠ Code** — Spec-Tabelle „Komponenten": `CategoryIcon` hat im
+  Code zusätzlich `size?`. Satz „Box und Dialog zeigen immer alle drei
+  Fragen" widerspricht Code und F308 §3 (fehlende Zeile = nicht anwendbar;
+  die Box lässt „Wirkung"/„Verbund" weg, der Dialog zeigt nur Abschnitte aus
+  `sections`).
+
+### Nebenbefunde (kein Abnahmegrund)
+
+- `source-document-columns.tsx`: veraltete Kommentare — „Four axes stand in
+  this cell; one (i) would explain one of them" und die 232-px-Begründung mit
+  zwei Badges; JSDoc über `SUBMIT_COLUMNS` und die Story `Submit` sagen noch
+  „die zweite Spalte ist die Belegform", jetzt ist es „Einordnung" (ohne
+  `classificationPicture` die alte Badge-Kette).
+- Das eine (i) im Spaltenkopf erklärt nur die Achse `document_category`,
+  nicht den Aufbau des Bildes (F308 §4.1).
+- `TextButton` „Einordnung korrigieren" misst 724 × 21 px — unter 24 px hoch
+  (Primitive, Abstandsausnahme WCAG 2.5.8 greift); und er spannt die ganze
+  Dialogbreite.
+- Box-Beschriftung 4,51:1 liegt auf der Kante; eine dunklere Stufe gäbe
+  Reserve.
