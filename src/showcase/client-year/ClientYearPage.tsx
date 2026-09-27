@@ -5,6 +5,7 @@ import { Columns } from "@/ui/v3/patterns/Columns";
 import { EntityHeader } from "@/ui/v3/patterns/EntityHeader";
 import { Baton, ProcessMini, type BatonMeta, type ProcessPhase } from "@/ui/v3/patterns/Process";
 import { StateIcon } from "@/ui/v3/patterns/Review";
+import { TaskList } from "@/ui/v3/patterns/TaskList";
 import { EntityIcon } from "@/ui/v3/Icons";
 import { Button } from "@/ui/v3/primitives/Button";
 import { Link } from "@/ui/v3/primitives/Link";
@@ -77,66 +78,48 @@ export interface ClientYearVM {
 const TASK_CAP = 5;
 
 /**
- * „Zu tun" in the shape of the list the owner found calmer (the old
- * „Arbeitsvorrat", `TodoList` without folding): group heads as a bar with the
- * count on the right, rows full-width, a 13.5-px title with a 12-px line under
- * it (owner 2026-09-27).
+ * „Zu tun" as a `TaskList` (0208): the practice's own tasks with a button,
+ * then what lies with others, the sentence as title and the holder under it.
  */
 function Tasks({ vm }: { vm: ClientYearVM }) {
-  const shown = vm.tasks.slice(0, TASK_CAP);
   return (
     <Card>
       <CardHead title="Zu tun" />
-      <div className="cy-grp">
-        <span>Sie sind dran</span>
-        <span>{vm.tasks.length}</span>
-      </div>
-      {vm.tasks.length === 0 ? (
-        <p className="cy-row cy-row--empty">
-          <StateIcon state="done" />
-          <span className="cy-row__title">Nichts zu tun{vm.nextUp ? ` — ${vm.nextUp}` : "."}</span>
-        </p>
-      ) : (
-        <ul className="cy-list">
-          {shown.map((t, i) => (
-            <li key={t.key} className="cy-row">
-              <StateIcon state={t.level} />
-              <span className="cy-row__text">
-                <span className="cy-row__title">{t.title}</span>
-                {t.sub ? <span className="cy-row__sub">{t.sub}</span> : null}
-              </span>
-              <Button variant={i === 0 ? "primary" : "secondary"} size="sm" href={t.action.href}>
-                {t.action.label}
-              </Button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <TaskList
+        groups={[
+          {
+            key: "mine",
+            label: "Sie sind dran",
+            rows: vm.tasks.slice(0, TASK_CAP).map((t, i) => ({
+              key: t.key,
+              state: t.level,
+              title: t.title,
+              ...(t.sub ? { sub: t.sub } : {}),
+              right: (
+                <Button variant={i === 0 ? "primary" : "secondary"} size="sm" href={t.action.href}>
+                  {t.action.label}
+                </Button>
+              ),
+            })),
+            count: vm.tasks.length,
+            empty: `Nichts zu tun${vm.nextUp ? ` — ${vm.nextUp}` : "."}`,
+          },
+          {
+            key: "others",
+            label: "Liegt bei anderen",
+            rows: vm.elsewhere.map((e) => ({
+              key: e.holder.key + e.text,
+              title: e.text,
+              sub: <Baton owner={e.holder} />,
+              right: <Link href={e.href}>anzeigen</Link>,
+            })),
+          },
+        ]}
+      />
       {vm.tasks.length > TASK_CAP ? (
         <div className="cy-more">
           <Link href="#tasks=all">Alle {vm.tasks.length} Aufgaben anzeigen</Link>
         </div>
-      ) : null}
-      {vm.elsewhere.length ? (
-        <>
-          <div className="cy-grp">
-            <span>Liegt bei anderen</span>
-            <span>{vm.elsewhere.length}</span>
-          </div>
-          <ul className="cy-list">
-            {vm.elsewhere.map((e) => (
-              <li key={e.holder.key + e.text} className="cy-row cy-row--else">
-                <span className="cy-row__text">
-                  <span className="cy-row__title">{e.text}</span>
-                  <span className="cy-row__sub">
-                    <Baton owner={e.holder} />
-                  </span>
-                </span>
-                <Link href={e.href}>anzeigen</Link>
-              </li>
-            ))}
-          </ul>
-        </>
       ) : null}
     </Card>
   );

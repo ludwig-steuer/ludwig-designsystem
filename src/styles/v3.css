@@ -4583,31 +4583,31 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v2pp__origin { display: block; margin-top: 2px; font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
 .v2pp__origin code { font-family: var(--font-mono); }
 
-/* ── Client year start page (0207, F312) ──────────────────────────────────
-   „Zu tun" in the shape of the calmer old „Arbeitsvorrat" (`.v2lp`, owner
-   2026-09-27): a bar per group with the count right, full-width rows,
-   the title at --fs-ui, the line under it at --fs-ui-sm (check:type). */
-.cy-grp {
+/* ── TaskList (0208) — „what is there to do" in one shape ─────────────────
+   The calm list of the old „Arbeitsvorrat" (owner 2026-09-27): a bar per
+   group with the count right, full-width rows, title --fs-ui, line under it
+   --fs-ui-sm. */
+.v3task__grp {
   display: flex; justify-content: space-between; align-items: center; gap: var(--space-3);
   padding: 12px 16px; background: var(--color-surface-head);
-  border-bottom: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);
   font-size: var(--fs-ui-sm); font-weight: 700;
 }
-.cy-grp + .cy-list, .cy-list + .cy-grp, .cy-more + .cy-grp { border-top: 0; }
-.cy-list + .cy-grp, .cy-more + .cy-grp, .cy-row--empty + .cy-grp { border-top: 1px solid var(--color-border); }
-.cy-list { list-style: none; margin: 0; padding: 0; }
-.cy-row {
+.v3task > section:first-child > .v3task__grp { border-top: 0; }
+.v3task__list { list-style: none; margin: 0; padding: 0; }
+.v3task__row {
   display: grid; grid-template-columns: 16px minmax(0, 1fr) max-content; gap: 10px;
-  align-items: center; margin: 0; padding: 13px 16px;
-  border-bottom: 1px solid var(--color-border-subtle);
+  align-items: center; padding: 13px 16px; border-bottom: 1px solid var(--color-border-subtle);
 }
-.cy-row:last-child { border-bottom: 0; }
-.cy-row--else { grid-template-columns: minmax(0, 1fr) max-content; }
-.cy-row--else > a { font-size: var(--fs-ui-sm); }
-.cy-row--empty { grid-template-columns: 16px minmax(0, 1fr); }
-.cy-row__text { display: grid; min-width: 0; }
-.cy-row__title { font-size: var(--fs-ui); font-weight: 600; color: var(--color-text); }
-.cy-row__sub { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-top: 2px; }
+.v3task__row:last-child { border-bottom: 0; }
+.v3task__row.is-plain { grid-template-columns: minmax(0, 1fr) max-content; }
+.v3task__text { display: grid; min-width: 0; }
+.v3task__title { font-size: var(--fs-ui); font-weight: 600; color: var(--color-text); }
+.v3task__sub { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-top: 2px; }
+.v3task__right { display: inline-flex; align-items: center; gap: var(--space-3); font-size: var(--fs-ui-sm); }
+.v3task__empty { margin: 0; padding: 13px 16px; font-size: var(--fs-ui); color: var(--color-text-muted); }
+.v3task__fold { padding: var(--space-2) var(--space-4); border-top: 1px solid var(--color-border); }
+.v3task > section:first-child > .v3task__fold { border-top: 0; }
 .cy-more { padding: 10px 16px; border-top: 1px solid var(--color-border-subtle); font-size: var(--fs-ui-sm); }
 .cy-counts { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--fs-ui-sm); }
 /* Batch history: open ones on their own, the finished months in one quiet line with a tick. */
@@ -4622,3 +4622,10 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .cy-hist__period { font-weight: 500; }
 .cy-hist__word { color: var(--color-text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cy-hist__done { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-1) 0 0; padding: 0 var(--space-1); font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+
+/* ── Batch review step 0 (0208, F314) ───────────────────────────────────── */
+.s0-quote { display: block; font-style: italic; }
+.s0-run { display: block; margin-top: var(--space-1); font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.s0-report { display: grid; gap: var(--space-3); }
+.s0-report__head { margin: 0; font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text-subtle); }
+.s0-report__list { margin: 0; padding-left: var(--space-5); list-style: disc; font-size: var(--fs-ui); display: grid; gap: var(--space-1); }
