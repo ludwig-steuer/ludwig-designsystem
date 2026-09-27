@@ -110,7 +110,7 @@ Showcase `Seiten/Beleg-Einordnung`: `AllCells` (echte Liste: `DataTable` + `sour
 
 1. **Zeichen der fünf Kategorien** — Vorschlag oben. Ohne Antwort: so.
 2. **Box neben oder unter der Prozess-Box?** Ohne Antwort: darunter.
-3. **Zeile 2 bei `narrow`?** Ohne Antwort: entfällt, steht im zugänglichen Namen.
+3. ~~Zeile 2 bei `narrow`?~~ **Entschieden (Owner 2026-09-27, über ll-senior):** entfällt, wie gebaut.
 
 ## Abnahmekriterien
 
