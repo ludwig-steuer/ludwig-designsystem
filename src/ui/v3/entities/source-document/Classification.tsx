@@ -29,13 +29,6 @@ export interface ClassificationPicture {
     word: string;
     /** Ludwig could not classify it, or the values contradict each other. */
     warning?: string;
-    /**
-     * The form says no more than its effect — the plain „Rechnung". Then the
-     * cell leads with the effect („Eingangsrechnung") and drops the form, which
-     * would only repeat it (0205, variant D). The app sets it; the cell only
-     * reads it.
-     */
-    generic?: boolean;
   };
   /** Direction × character in one word („Eingangsrechnung"). Missing = not applicable. */
   effect?: { word: string };
@@ -100,24 +93,15 @@ function Warn({ warning }: { warning?: string }) {
   ) : null;
 }
 
-/** A generic form with an effect leads with the effect — „Eingangsrechnung", not „Rechnung". */
-function leadsWithEffect(p: ClassificationPicture): boolean {
-  return Boolean(p.identity.generic && p.effect);
-}
-
-function firstLine(p: ClassificationPicture): string {
-  return leadsWithEffect(p) ? p.effect!.word : p.identity.word;
-}
-
-/** The second line of the cell: effect (unless it leads) and bundle, joined — so the row keeps two lines. */
+/** The second line of the cell: effect and bundle, joined — so the row keeps two lines. */
 function secondLine(p: ClassificationPicture): string {
-  return [leadsWithEffect(p) ? null : p.effect?.word, p.bundle?.word].filter(Boolean).join(" · ");
+  return [p.effect?.word, p.bundle?.word].filter(Boolean).join(" · ");
 }
 
 function accessibleName(p: ClassificationPicture): string {
   return [
     p.identity.warning ? "Warnung:" : null,
-    firstLine(p),
+    p.identity.word,
     p.corrected ? "(korrigiert)" : null,
     secondLine(p) ? `· ${secondLine(p)}` : null,
   ]
@@ -148,10 +132,9 @@ function Target({
 }
 
 /**
- * The classification in a table cell: the category's sign, the most telling
- * word — the form („Tankquittung"), or the effect where the form is only the
- * plain „Rechnung" („Eingangsrechnung") — and under it the rest: effect and
- * bundle. At most two lines; `narrow` keeps one. The whole cell is one target.
+ * The classification in a table cell: the category's sign, the document form
+ * in line 1, effect and bundle in line 2 (variant A, owner 2026-09-27). At most
+ * two lines; `narrow` keeps one. The whole cell is one target.
  *
  * @when    What a document is, in a list row, with the way to the explanation.
  * @instead The head of the document page → ClassificationBox. Where the
@@ -174,7 +157,7 @@ export function ClassificationCell({
       </span>
       <span className="cl-cell__word">
         <Warn warning={picture.identity.warning} />
-        <span className="cl-cell__text">{firstLine(picture)}</span>
+        <span className="cl-cell__text">{picture.identity.word}</span>
         <Pencil corrected={picture.corrected} />
       </span>
       {second ? <span className="cl-cell__second">{second}</span> : null}

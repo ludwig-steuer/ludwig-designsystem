@@ -134,8 +134,6 @@ function build(s: Spec): ClassificationScenario {
       category: s.category,
       word: s.word,
       ...(s.warning ? { warning: s.warning } : {}),
-      // The plain invoice says no more than its effect (0205, variant D).
-      ...(s.formKey === "invoice" ? { generic: true } : {}),
     },
     ...(s.effect ? { effect: { word: s.effect } } : {}),
     ...(s.bundle ? { bundle: s.bundle } : {}),

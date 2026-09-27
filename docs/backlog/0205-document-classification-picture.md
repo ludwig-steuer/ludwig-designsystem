@@ -47,9 +47,7 @@ Vier Varianten mit allen 20 Fixtures nebeneinander — Showcase
 | C | Wirkung vorn, Form darunter | stuft auch „Tankquittung", „Bewirtungsbeleg" zurück — die Formen, die steuerlich zählen |
 | **D** | **das aussagekräftigste Wort vorn**: die Wirkung, wo die Form nur die schlichte „Rechnung" ist, sonst die Form; darunter der Rest (Wirkung, Verbund) | Rechnungen einzeilig („Eingangsrechnung"), Sonderformen behalten ihr Wort („Tankquittung / Eingangsrechnung"), kein Wort doppelt |
 
-**Entschieden: D.** Die App setzt dafür `identity.generic` (heute: Form
-`invoice`); die Zelle liest es nur. Höchstens zwei Zeilen; `narrow`: nur Zeile 1,
-der Rest im zugänglichen Namen. Box und Dialog zeigen immer alle drei Fragen.
+~~Entschieden vom Set: D.~~ **Entschieden vom Owner (2026-09-27): A** — Form in Zeile 1, Wirkung · Verbund in Zeile 2. Der Vergleich (Story `CellVariants`) ist danach entfernt, `identity.generic` entfällt. Höchstens zwei Zeilen; `narrow`: nur Zeile 1, der Rest im zugänglichen Namen. Box und Dialog zeigen immer alle drei Fragen.
 
 ## Schnittstelle
 
@@ -57,7 +55,7 @@ der Rest im zugänglichen Namen. Box und Dialog zeigen immer alle drei Fragen.
 
 | Feld | Typ | Bedeutung |
 |---|---|---|
-| `identity` | `{ category: DocCategoryKey; word: string; warning?: string; generic?: boolean }` — `generic`: die Form sagt nicht mehr als ihre Wirkung, die Zelle führt mit der Wirkung (D) | Wort der Belegform (unbekannter Schlüssel als Rohwort, von der App); `warning` = Satz, wenn Ludwig nicht einordnen konnte oder die Werte sich widersprechen |
+| `identity` | `{ category: DocCategoryKey; word: string; warning?: string }` | Wort der Belegform (unbekannter Schlüssel als Rohwort, von der App); `warning` = Satz, wenn Ludwig nicht einordnen konnte oder die Werte sich widersprechen |
 | `effect` | `{ word: string }?` | fehlt = nicht anwendbar |
 | `bundle` | `{ role: "part" \| "cover" \| "bundle" \| "superseded" \| "attachment"; word: string; href?: string }?` | fehlt = kein Verbund |
 | `corrected` | `{ at: string; by: string \| null }?` | ein Mensch hat entschieden — Stift nach dem Wort |
@@ -75,7 +73,7 @@ der Rest im zugänglichen Namen. Box und Dialog zeigen immer alle drei Fragen.
 
 | Export | Props | Nachweis |
 |---|---|---|
-| `ClassificationCell` | `picture`, `density?`, `onOpen?` | Showcase `AllCells`, `CellVariants`, `CellNarrow` |
+| `ClassificationCell` | `picture`, `density?`, `onOpen?` | Showcase `AllCells`, `CellNarrow` |
 | `ClassificationBox` | `picture`, `onOpen?` | Showcase `AllBoxes`, `HeadWithBoth` |
 | `ClassificationDialog` | `open`, `onClose`, `picture`, `detail` | Showcase `AllDialogs`, `DialogCorrection`, `DialogBlocked`, `DialogSaveError`, `DialogWarning` |
 | `ClassificationTrigger` | `picture`, `detail`, `size`, `density?` | Showcase `AllCells`, `AllBoxes` |
@@ -105,7 +103,7 @@ Verbund nicht selbst — sie ist ein Knopf, der Link steht im Dialog.
 
 ## Stories
 
-Showcase `Seiten/Beleg-Einordnung`: `CellVariants` (D/A/B/C), `AllCells`, `CellNarrow`, `AllBoxes`, `HeadWithBoth` (Kopf mit Prozess- und Einordnungs-Box), `AllDialogs`, `DialogCorrection` (Speichern läuft ~1 s, dann Satz), `DialogBlocked`, `DialogSaveError`, `DialogWarning`. `Grundlagen/Icons › Categories`.
+Showcase `Seiten/Beleg-Einordnung`: `AllCells`, `CellNarrow`, `AllBoxes`, `HeadWithBoth` (Kopf mit Prozess- und Einordnungs-Box), `AllDialogs`, `DialogCorrection` (Speichern läuft ~1 s, dann Satz), `DialogBlocked`, `DialogSaveError`, `DialogWarning`. `Grundlagen/Icons › Categories`.
 
 ## Offene Fragen (Owner)
 
