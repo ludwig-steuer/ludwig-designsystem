@@ -310,6 +310,7 @@ export {
 } from "./patterns/StateMachine";
 export { LogList, type LogEntry, type LogLevel } from "./patterns/Log";
 export { TaskList, type TaskGroup, type TaskRow } from "./patterns/TaskList";
+export { ActiveFilters, type ActiveFilter } from "./primitives/ActiveFilters";
 export { LogBrowser, type LogFilterState } from "./patterns/LogBrowser";
 export {
   ProcessMini,

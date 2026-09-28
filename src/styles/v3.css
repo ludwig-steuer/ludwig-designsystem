@@ -775,6 +775,7 @@
 }
 .v2chip:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .v2chip .n { font-variant-numeric: tabular-nums lining-nums; opacity: 0.75; }
+.v2chip__icon { display: inline-flex; line-height: 0; margin-right: var(--space-1); }
 
 /* --- Kennzahl-Kachel ---------------------------------------------------- */
 .v2kpigrid { display: grid; grid-template-columns: repeat(var(--v2-kpi-cols, 6), minmax(0, 1fr)); gap: var(--space-4); }
@@ -4629,3 +4630,27 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .s0-report { display: grid; gap: var(--space-3); }
 .s0-report__head { margin: 0; font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text-subtle); }
 .s0-report__list { margin: 0; padding-left: var(--space-5); list-style: disc; font-size: var(--fs-ui); display: grid; gap: var(--space-1); }
+
+/* ── ActiveFilters (0209) — what the list shows right now ────────────────── */
+.v3actf { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--fs-ui-sm); }
+.v3actf__count { color: var(--color-text-muted); margin-right: var(--space-1); font-variant-numeric: tabular-nums; }
+.v3actf__chip {
+  display: inline-flex; align-items: center; gap: var(--space-1); min-height: 24px;
+  padding: 0 var(--space-2); border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm);
+  background: var(--color-surface); color: var(--color-text); font: inherit; cursor: pointer; text-decoration: none;
+}
+.v3actf__chip:hover { background: var(--color-bg-soft); }
+.v3actf__chip:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+/* ── Document list filters (0209, F329) — showcase composition ─────────── */
+.dlf { display: grid; gap: var(--space-3); }
+.dlf-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-3); }
+.dlf-tools { display: flex; align-items: center; gap: var(--space-2); }
+.dlf-more { display: grid; gap: var(--space-3); width: min(22rem, calc(100vw - 2rem)); padding: var(--space-3); }
+.dlf-stack { display: grid; gap: var(--space-2); }
+.dlf-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); align-items: end; }
+.dlf-label { font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text-subtle); margin-bottom: var(--space-1); }
+.dlf-hint { margin: calc(-1 * var(--space-2)) 0 0; font-size: var(--fs-ui-xs); color: var(--color-text-muted); }
+.dlf-status { border: 0; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-1) var(--space-3); }
+.dlf-status > legend { grid-column: 1 / -1; padding: 0; }
+.dlf-actions { display: flex; gap: var(--space-2); justify-content: flex-end; }

@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { Select } from "./Form";
 import { Link } from "./Link";
 
@@ -175,14 +177,21 @@ export interface ChipOption {
   label: string;
   count?: number;
   href?: string;
+  /** A sign before the word — the same sign the column shows (0205 categories). Never without the word. */
+  icon?: ReactNode;
 }
 
 /**
  * Filter chips grouped by dimension — above the card, never in its head (§6).
  * The group heading says what is filtered by.
  *
+ * `active` as a list makes the chips **toggles** (0209): several at once, each
+ * pressed on its own — for a dimension whose values are not exclusive
+ * (document categories). A string keeps the one-of-many behaviour.
+ *
  * @when    Narrowing down by dimension, above the card.
- * @instead In the card header. Full text → SearchInput.
+ * @instead In the card header. Full text → SearchInput. Everything else that
+ *          is set → ActiveFilters.
  */
 export function FilterChips({
   label,
@@ -192,22 +201,24 @@ export function FilterChips({
 }: {
   label: string;
   options: ChipOption[];
-  active: string;
+  active: string | readonly string[];
   onPick?: (key: string) => void;
 }) {
+  const isOn = (key: string) => (typeof active === "string" ? key === active : active.includes(key));
   return (
-    <div className="v2chips">
+    <div className="v2chips" role={typeof active === "string" ? undefined : "group"} aria-label={label}>
       <span className="v2chips__label">{label}</span>
       {options.map((o) => {
-        const cls = `v2chip${o.key === active ? " is-active" : ""}`;
+        const cls = `v2chip${isOn(o.key) ? " is-active" : ""}`;
         const body = (
           <>
+            {o.icon ? <span className="v2chip__icon">{o.icon}</span> : null}
             {o.label}
             {o.count === undefined ? null : <span className="n">{o.count}</span>}
           </>
         );
         return o.href ? (
-          <Link key={o.key} href={o.href} className={cls} aria-current={o.key === active}>
+          <Link key={o.key} href={o.href} className={cls} aria-current={isOn(o.key)}>
             {body}
           </Link>
         ) : (
@@ -215,7 +226,7 @@ export function FilterChips({
             key={o.key}
             type="button"
             className={cls}
-            aria-pressed={o.key === active}
+            aria-pressed={isOn(o.key)}
             onClick={() => onPick?.(o.key)}
           >
             {body}
