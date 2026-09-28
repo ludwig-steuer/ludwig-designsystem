@@ -1432,3 +1432,14 @@ nicht mehr (App ebenso).
 
 - [ ] `DocumentList` zeigt eine Spalte „Status" mit „Gebucht 30.08.2026", „Wird ausgelesen", „Agent prüft" (Story `DocumentList`)
 - [ ] Keine Spalte „Verarbeitung", „Erkennung" oder „Erledigt" mehr in den drei Listen
+
+## Nachtrag 2026-09-28 — die Reihenfolge des Aufrufers gilt (F328, Owner)
+
+`sourceDocumentColumns()` gibt die Spalten jetzt **in der Reihenfolge des
+übergebenen Arrays** zurück; das interne `ORDER`, das jede Menge umsortierte,
+ist entfernt (die App musste danach ein zweites Mal sortieren).
+`DOCUMENT_LIST_COLUMNS` folgt der Owner-Reihenfolge vom 2026-09-28: Gegenpart ·
+Einordnung · Betrag · Belegdatum · Ludwig-Eingang · Status · Sachverhalt; die
+App setzt „Stapel" und „liegt seit" an ihre Stellen. Die übrigen Sets standen
+schon in Lese-Reihenfolge und zeigen jetzt genau so (Hänger-Liste beginnt mit
+der Datei).

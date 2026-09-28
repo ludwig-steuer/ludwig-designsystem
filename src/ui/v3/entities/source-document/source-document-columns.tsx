@@ -58,54 +58,25 @@ export type SourceDocumentColumn =
   | "size"
   | "stuckState";
 
-/** Ranks 1–7 of the profile, then the states. One order for every form. */
-const ORDER: SourceDocumentColumn[] = [
-  "counterparty",
-  "fileName",
-  "kind",
-  "form",
-  "amount",
-  "documentDate",
-  "identifier",
-  "case",
-  "uploadedAt",
-  "receivedDate",
-  "classification",
-  "confidence",
-  "size",
-  "stuckState",
-  "status",
-];
-
 /**
  * The year's list: „no unfinished document is left behind in the year." The
  * completion is the question, everything before it is the identity.
  */
 export const DOCUMENT_LIST_COLUMNS: SourceDocumentColumn[] = [
+  // Owner order 2026-09-28 (F328): who · what · how much · when · where it
+  // stands · what it belongs to. The app inserts „Stapel" and „liegt seit"
+  // at its places; „status" is where the app's progress column stands.
   "counterparty",
-  // No `kind` any more (0205, owner 2026-09-27): what the document is stands in
-  // the one column „Einordnung" — form, effect and bundle in one picture.
+  "classification",
   "amount",
   "documentDate",
-  // **No `identifier`** (owner decision 2026-09-09, seen on 165 real rows):
-  // in the majority of them it is a GUID file name — „40B503E7-AFD0-64… .pdf",
-  // nothing anybody reads. Where a real invoice number stands, it is not the
-  // question *this* list answers: „is there anything left to do with this
-  // document", not „what is it called". It stays in the **catalogue** —
-  // `STUCK_COLUMNS` never carried it, it shows `fileName`, which for a stuck
-  // document is the only identity there is. Frees 170 px.
-  "case",
-  // **„Ludwig-Eingang", not „Eingang"** (owner, 2026-09-23): `receivedDate`
-  // is the receipt date at the client — it starts as the upload day and the
-  // DATEV meta import overwrites it, so one column showed two different
-  // things without saying which. The receipt date stays the period axis of
-  // the list (filter and „Offen"); it is only no longer what the row shows.
+  // **„Ludwig-Eingang", not „Eingang"** (owner, 2026-09-23): `receivedDate` is
+  // the receipt date at the client and the period axis of the list; the row
+  // shows the upload day. **No `identifier`** (owner 2026-09-09): mostly a GUID
+  // file name; it stays in the catalogue.
   "uploadedAt",
-  "classification",
-  // One column for where the document stands (F289): the state machine
-  // `document_status`, done with its „how" and date. Until F289 these were
-  // „Verarbeitung" and „Erledigt" side by side.
   "status",
+  "case",
 ];
 
 /**
@@ -533,7 +504,10 @@ export function sourceDocumentColumns({
         ),
     },
   };
-  return ORDER.filter((c) => picked.has(c)).map((c) => defs[c]);
+  // The caller's order is the order (F328, owner 2026-09-28): a set lists its
+  // columns the way the page reads them; until then an internal ORDER re-sorted
+  // them and the app had to sort a second time.
+  return [...picked].map((c) => defs[c]);
 }
 
 /**
