@@ -4728,3 +4728,7 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3docrow__date { display: grid; }
 .v3docrow__entry { color: inherit; text-decoration: none; }
 .v3docrow__entry:hover { text-decoration: underline; }
+/* 0164 · proposals to review */
+.v3prop__who { display: grid; min-width: 0; }
+.v3prop__accs { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v3prop__reasons { display: grid; min-width: 0; color: var(--color-text-muted); }

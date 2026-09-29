@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **offen — aus dem Backlog geholt 2026-09-29** (F334 T3, Owner-Auftrag über ll-dev; ersetzt den Default „bis `export-batch` steht"). Gebaut nach Abnahme von 0211, ohne Sortierung nach Aufmerksamkeit (L-295) und ohne `DiffView` |
+| Status | **Abnahme — gebaut 2026-09-29**; aus dem Backlog geholt 2026-09-29 (F334 T3, Owner-Auftrag über ll-dev; ersetzt den Default „bis `export-batch` steht"). Gebaut nach Abnahme von 0211, ohne Sortierung nach Aufmerksamkeit (L-295) und ohne `DiffView` |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungsvorschlag, Judge-Verdikt, Stapel, Herkunft Mandantenstapel |
 | Quelle | Entitätsprofil `docs/entitaeten/journal-entry.md`, Abschnitte „Listen" (dritte Zeile), „Formen" (Zeile `JournalEntryReviewList`) und „Zuschnitt" |
@@ -29,3 +29,30 @@ Aus dem Entitätsprofil, damit die Spec es nicht neu erheben muss:
   Aufmerksamkeit.
 - **Die Spalten** sind die der `JournalEntryRow` (Ränge 1–7) plus die
   KI-Prüfung (`AiBookingNotesCell`).
+
+
+## Gebaut 2026-09-29 (T3 aus Brief F334)
+
+`JournalEntryReviewList` + `proposalReviewColumns` in
+`entities/journal-entry/JournalEntryReviewList.tsx`, Zeile `ProposalRow`.
+
+| Ausprägung | Spalten |
+|---|---|
+| `full` | Nr. · Datum · Gegenpartei (+ „erstmals") · Soll · Haben (nur Nummern, „n Zeilen") · Betrag · BU · Prüfung durch Ludwig · Satzart (nicht in Gruppen nach Satzart) · Prüfbedarf („entschieden") |
+| `compact` | Datum · Gegenpartei · Konten („4930 an 70021") · Betrag · Prüfung durch Ludwig |
+
+Rahmen: `expand` (Aufklapper der App: Satz, Begründung, Aktionen) · `rowActions`
+· `bulkActions` → Auswahl mit stehender Leiste · Gruppen oder flach · Leerfall
+als Erfolg (`done`) ≠ leer nach Filter · lädt · Fehler.
+
+**Abweichung vom Brief F334:** keine Beleg-Spalte im Standard — der Owner hat
+sie am 2026-09-21 aus Schritt 3 genommen (Laptop mit Seitenleiste, der Beleg
+steht im Aufklapper). Sie ist über `include: ["document"]` zu haben.
+Gemessen bei 1280 px: `full` gruppiert mit Auswahl, Aufklapper und Aktionen
+1246 px in der Karte, kein Querscroll.
+
+**Ausbau:** Sortierung nach Aufmerksamkeit (L-295), `DiffView` für bearbeitete
+Vorschläge, Reiter nach Herkunft.
+
+Stories `v3/Entitäten/Buchungssatz/JournalEntryReviewList`: `Grouped` · `Flat` ·
+`Compact` · `States`.

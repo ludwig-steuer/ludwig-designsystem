@@ -596,6 +596,13 @@ export {
   type JournalEntryColumnOptions,
 } from "./entities/journal-entry/journal-entry-columns";
 export { SourceDocumentRefCell } from "./entities/source-document/SourceDocumentRefCell";
+export {
+  JournalEntryReviewList,
+  proposalReviewColumns,
+  type ProposalRow,
+  type ProposalColumn,
+  type ProposalColumnOptions,
+} from "./entities/journal-entry/JournalEntryReviewList";
 export type { JournalEntryRowData } from "./entities/journal-entry/journal-entry";
 export {
   businessPartnerColumns,

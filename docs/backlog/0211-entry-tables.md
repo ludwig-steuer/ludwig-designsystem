@@ -7,7 +7,7 @@
 | Klassen-Test | T1/T2/Zelle: nein — Buchungssatz, Konto, Beleg. `DataTable.totals`: ja (Summenzeile gibt es in jeder Tabelle mit Beträgen) |
 | Quelle | Design-Brief **F334** (`app/docs/backlog/F334-journal-entry-tables-design-brief.md`, Owner 2026-09-29 über ll-dev): „zig Anzeigen für die gleiche Entität … 2–3 Tabellen, kompakt und breit" |
 | Regel (spec-schreiben §3) | 2 — erweitern: `JournalEntryList`/`journalEntryColumns` (0178/0175) und `accountEntryColumns`/`AccountEntryList` (0067) tragen den Fall zu vier Fünfteln; die Beleg-Zelle ist neu (5), weil keine Form „Belegfeld 1 + ob ein Beleg dahinter hängt" trägt |
-| Ersetzt (App, per App-Spec danach) | A1, A2, A5 durch T1 (App-Spec F336); A3/A4 (Kontenblatt-Karten) und B1–B7 durch T2 kompakt (F337) — Nachtrag 2026-09-29 auf Hinweis ll-dev: auf dem Kontenblatt sind es Bewegungen eines Kontos, und der Betrag gehört dem Konto, nicht dem ganzen Satz; A6/A7, C3/C4 übernehmen Beleg-Zelle und Klickziele |
+| Ersetzt (App, per App-Spec danach) | A1, A2, A5 durch T1 (App-Spec F336); A3/A4 (Kontenblatt-Karten) und B1–B6 durch T2 kompakt (F337 Abnahme B4–B6, F338 Kontenblatt, Karten, Konto-Drawer B1–B3) — Nachtrag 2026-09-29 auf Hinweis ll-dev: auf dem Kontenblatt sind es Bewegungen eines Kontos, der Betrag gehört dem Konto. **B7 bleibt** (Sachverhalt, Reiter Plausibilität): offene Posten der Klammer mit Zeilenart, keine Kontobewegung. A6/A7, C3/C4 übernehmen Beleg-Zelle und Klickziele |
 | Spec von / am | Claude, 2026-09-29 |
 
 ## Entscheide zu F334 §7
