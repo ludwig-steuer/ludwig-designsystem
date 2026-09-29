@@ -82,13 +82,13 @@ geschehen." · lädt (`Loading`, drei Zeilen Skelett) · Fehler (`Error`, mit
 
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| Jede Station in ihrer Form nach der Tabelle „Aufbau" | Stories `Done`, `Mixed` | |
-| Nichts erreicht → Weg-Name + ausstehende Stationen, Hinweis mit Stufe und Wort | `NotStarted` | |
-| Ablage gescheitert: Fehlerzeichen, Meldung, kein Rot ohne Wort | `FilingFailed` | |
-| Ab 4 Buchungen drei + „n weitere" | `ManyEntries` | |
-| Lädt / Fehler mit Retry, Kopf bleibt | `Loading`, `Error` | |
-| Kein Rohwert im Lesetext (T4) | alle | |
-| 1280 px, rechte Spalte: keine Zeile bricht das Datum weg | Showcase Belegseite | |
+| Jede Station in ihrer Form nach der Tabelle „Aufbau" | Stories `Done`, `Mixed` | ✓ `Done`: Erledigt (Badge + Begründung) · Sachverhalt (`CaseCell` gestapelt mit Zustand „Verbucht") · Gebucht (Konten mit Namen, Betrag, Datum, Stufe) · Im Stapel (Link + „Kanzlei prüft"); `Mixed` mit „Danach"; Zahlungsbelege in `Statement` ✓ |
+| Nichts erreicht → Weg-Name + ausstehende Stationen, Hinweis mit Stufe und Wort | `NotStarted` | ✓ „Weg einer Rechnung", vier Stationen mit offenem Kreis; Hinweis mit Zeichen „Warnung" und Text 5,52:1 |
+| Ablage gescheitert: Fehlerzeichen, Meldung, kein Rot ohne Wort | `FilingFailed` | ✓ Zeichen `error`, Badge „Ablage gescheitert", Meldung, Pfad klein darunter |
+| Ab 4 Buchungen drei + „n weitere" | `ManyEntries` | ✓ mit Auflage — 5 Buchungen → 3 + „2 weitere Buchungen"; bei genau 4 zeigt der Code alle vier → M1 |
+| Lädt / Fehler mit Retry, Kopf bleibt | `Loading`, `Error` | ✓ Kopf „Weg des Belegs" + „Ganzer Verlauf" bleibt; Skelett; Fehler „**Der Weg des Belegs ließ sich nicht laden.** … Erneut laden" |
+| Kein Rohwert im Lesetext (T4) | alle | ✓ alle Stories: Wörter der Registry; Ablagepfad als technische Beischrift klein darunter (Spec) |
+| 1280 px, rechte Spalte: keine Zeile bricht das Datum weg | Showcase Belegseite | ✓ rechte Spalte der Belegseite 542 px; Stories bei 380 px: Datum je Zeile auf der Wortzeile, 21 px hoch, innerhalb der Karte (378 = 378); Showcase selbst zeigt nur `NotStarted` → M3 |
 
 ## Nachtrag 2026-09-29 — Zahlungsbelege (Anfrage ll-dev, Owner)
 
@@ -106,3 +106,58 @@ Stories `Statement` (17a577a8, Münchner Bank), `StatementOverridden`
 (`rows_only`, zwei Stapel), `StatementNotStarted` (Weg eines Kontoauszugs,
 Hinweis an „Zahlungskonto bestimmen"). Befund **L-358**: `verification_level`
 hat keine Achse in der Registry; bis dahin liefert die App das Wort.
+
+## Fremde Abnahme 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung, nicht der Bauende). Grundlage: Code
+(`SourceDocumentMilestones.tsx`, `v3.css` Block `.v3ms`), Storybook 6107 bei
+1280 × 900 mit Playwright gemessen (`Done`, `Mixed`, `NotStarted`,
+`FilingFailed`, `ManyEntries`, `Statement`, `StatementOverridden`, `Empty`,
+`Loading`, `Error`), `pnpm typecheck` · `check:language` · `check:when` ·
+`check:type` · `check:contrast` grün (Exit 0). Exporte
+`SourceDocumentMilestones`, `DocumentMilestone`, `MilestoneEntry`,
+`UpcomingMilestone` ✓. Kontrast `.v3ms__warn` (`--color-warning`) 5,52:1,
+immer mit Zeichen `StateIcon warning` ✓.
+
+### Mängel
+
+**M1 — nicht blockierend.** Grenze der Buchungsliste weicht von der Spec ab:
+`SourceDocumentMilestones.tsx:213` kürzt erst ab **fünf** Buchungen
+(`length > ENTRIES_MAX + 1`); die Spec sagt „ab 4 Buchungen drei + n weitere".
+Entweder Spec auf „ab 5" (kein „1 weitere") oder Code angleichen. Außerdem
+fallen die übrigen Buchungen ohne `moreHref` still weg (Zeile 226) — dann
+wenigstens „n weitere" als Text.
+
+**M2 — nicht blockierend.** Schnittstelle stimmt nicht Zeichen für Zeichen:
+die Tabelle nennt `batch {at?, label, status, href?}`, der Code hat
+`batches[]` mit `count?`; `import` und `transactions` fehlen in der
+Prop-Tabelle (nur im Nachtrag). Tabelle nachziehen.
+
+**M3 — nicht blockierend.** Der Nachweis „Showcase Belegseite" trägt nicht:
+`DocumentPage.tsx:145` zeigt nur den Stand „nichts erreicht", ohne Datum.
+Gemessen wurde deshalb an den Stories (380 px, schmaler als die 542 px der
+rechten Spalte) — dort bricht kein Datum weg. Die Belegseite sollte einen
+erreichten Stand zeigen.
+
+**M4 — nicht blockierend.** `WORD` (`SourceDocumentMilestones.tsx:86`) ist
+eine lokale Wortliste der Stationen; solange es keine Registry-Achse für
+Stationen gibt, als benannte Ausnahme führen. Die Fehlermeldung behauptet
+eine Ursache („Die Verbindung ist abgebrochen."), die der Baustein nicht kennt
+— besser die Ursache vom Aufrufer (`error.cause`) oder neutral.
+
+Trefferflächen: „Ganzer Verlauf" 90 × 19,4 px, Stapel- und Konto-Links
+19,4 px bzw. 15 px — Links in einer Fakten-Zeile, Abstände nach oben/unten
+≥ 4 px zu keinem weiteren Ziel; set-weiter offener Punkt, nicht diesem
+Baustein angelastet.
+
+Vier Linsen: **Sprache** — Stationen als Wörter der Kanzlei, ausstehende als
+Aufgabe („Stapel zuordnen"), keine Versalien, kein Ausrufezeichen ✓.
+**Bedienung** — Links und „Erneut laden" per Tastatur erreichbar ✓. **Logik**
+— gefüllt, leer mit Ablauf, leer ohne Ablauf, lädt, Fehler ✓; ordnet und
+rechnet nichts (E2) ✓. **Darstellung** — Zeichen erreicht/offen/Fehler als
+Form, Farbe nur als Stufe, Rot nur bei „Ablage gescheitert" mit Wort ✓.
+
+### Urteil
+
+**Abgenommen mit Auflagen**: M1 und M2 (Spec und Code angleichen) vor der
+App-Spec; M3 und M4 im nächsten Schritt.

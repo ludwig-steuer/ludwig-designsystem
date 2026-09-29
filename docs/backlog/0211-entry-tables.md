@@ -99,12 +99,12 @@ zwei Breiten.
 
 | Kriterium | Nachweis | Ergebnis |
 |---|---|---|
-| Beleg-Zelle: drei Zustände, kompakt und breit, Link führt `?document=` | Story Zelle | |
-| T1 kompakt bei 600 px ohne horizontalen Scroll | `Compact` gemessen | |
-| T1 breit: Soll/Haben mit Namen, „+n" bei mehreren Konten | `InBatch` | |
-| T1 DATEV: Kopf „DATEV-Abgleich", keine Herkunft | `Mirror` | |
-| T2 kompakt im Aufklapper mit Summenzeile, Summe fett unter Soll/Haben | `InExpander` | |
-| Zustände nur über `StatusBadge` + Registry | alle | |
+| Beleg-Zelle: drei Zustände, kompakt und breit, Link führt `?document=` | Story Zelle | ✓ `SourceDocumentRefCell/States`: drei Zustände × zwei Breiten; Link `#document=doc-4471`, Titel „Beleg RE-4471 ansehen"; ohne Beleg `<span>` mit Titel „Kein Beleg zugeordnet", breit „ohne Beleg" darunter |
+| T1 kompakt bei 600 px ohne horizontalen Scroll | `Compact` gemessen | ✓ scrollWidth 598 = clientWidth 598; Zeilen 52–54 px |
+| T1 breit: Soll/Haben mit Namen, „+n" bei mehreren Konten | `InBatch` | ✓ mit Auflage — Namen ✓ (`InBatch` 1246 = 1246, „6815 Bürobedarf" 85 px); „+n" in `InBatch` nicht nachweisbar (kein Satz mit mehreren Konten einer Seite), nachgewiesen in `Mirror` („6020 Gehälter +1") → M5 |
+| T1 DATEV: Kopf „DATEV-Abgleich", keine Herkunft | `Mirror` | ✓ Köpfe Datum · Beleg · Buchungstext · Soll · Haben · USt · Betrag · DATEV-Abgleich · Sachverhalt · Stapel; keine Herkunft |
+| T2 kompakt im Aufklapper mit Summenzeile, Summe fett unter Soll/Haben | `InExpander` | ✓ 640 = 640, 12 Zeilen, 3 ohne Beleg; „Summe" 600, Soll-Summe x 436 = Kopf „Soll" x 436, Haben x 542 = 542 |
+| Zustände nur über `StatusBadge` + Registry | alle | ✓ Code: `state`, `origin`, `status`, `mirrorMatch` nur `StatusBadge` + `StatusInfoButton` im Kopf; keine eigene Label-Map für Zustände |
 
 ## Gemessen 2026-09-29
 
@@ -135,3 +135,83 @@ die Standardformen bleiben schlank.
 Stories: `JournalEntryList/WithRunAndDatevId`, `AccountEntries/InDrawerWithAll`.
 | T1 | `EntryRow.documentName` — Dateiname bzw. Belegform im Titel der Beleg-Zelle (Hinweis ll-dev 10) | Stapel-Liste, Spalte „Beleg" |
 | T2 | `AccountEntry.counterparty` — Gegenpartei als zweite Zeile unter dem Buchungstext (Hinweis ll-dev 11) | Konto-Drawer „Nur in Ludwig", Karte „Neueste Vorschläge" |
+
+## Fremde Abnahme 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung, nicht der Bauende). Grundlage: Code
+(`journal-entry-columns.tsx`, `JournalEntryList.tsx`, `AccountEntries.tsx`,
+`SourceDocumentRefCell.tsx`, `DataTable.tsx`), Storybook 6107 bei 1280 × 900
+mit Playwright gemessen, `pnpm typecheck` · `check:language` · `check:when` ·
+`check:type` · `check:contrast` grün (Exit 0).
+
+Nachträglich geprüft (Abnehmer ergänzt, Nachtrag „nichts verlieren"):
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| T1 mit `include: ["run", "exportRef"]` bei 1280 px lesbar | `WithRunAndDatevId` | ✗ kein Querscroll (1246 = 1246), aber Buchungstext 52 px, Soll 26 px, Haben 26 px; Köpfe „Buchungstext"/„Soll" überlagern sich → M1 |
+| T2 mit allem Zuschaltbaren lesbar | `InDrawerWithAll` (960 px) | ✗ Buchungstext **0 px**, Gegenkonto **0 px**, Querscroll 966 > 960 → M2 |
+| Gegenpartei unter dem Buchungstext, `documentName` im Titel | `InDrawerWithAll`, `InBatch` | Titel ✓ („Beleg AR-2026-118 ansehen⏎Rechnung-RE-4471-Meier.pdf" — Daten s. M6); Gegenpartei in `InDrawerWithAll` wegen M2 unsichtbar |
+
+### Mängel
+
+**M1 — blockierend.** T1 mit zugeschalteten Spalten bricht bei 1280 px.
+`JournalEntryList.tsx:184`: `minWidth` bleibt 1180, auch wenn `include` 216 px
+(Durchgang 88 + DATEV-ID 128) hinzufügt. Gemessen in `WithRunAndDatevId`:
+Buchungstext 52 px, Soll/Haben je 26 px (Konten nur „…"), Kopf „Buchungstext"
+und „Soll" überlagert. Die Mindestbreite muss den zugeschalteten Spalten folgen
+(dann scrollt die Karte, wie bei 0212 zugelassen) — sonst ist die Spalte
+„zuschaltbar", aber die Buchung nicht mehr lesbar.
+
+**M2 — blockierend.** T2 mit allem Zuschaltbaren verliert zwei Spalten.
+`AccountEntries.tsx:488`: `minWidth={620}` fest. In `InDrawerWithAll` (960 px,
+elf Spalten, feste Spuren 848 px) messen Buchungstext und Gegenkonto **0 px**,
+dazu 6 px Querscroll (966 > 960). Genau die Spalten, deretwegen der Nachtrag
+geschrieben wurde (Gegenpartei, Gegenkonto-Name), sind unsichtbar. Mindestbreite
+aus den Spuren berechnen oder Buchungstext/Gegenkonto mit Boden
+(`minmax(120px, …)`).
+
+**M3 — nicht blockierend.** Trefferflächen unter 24 px Höhe an eigenständigen
+Zielen in der Zeile: Beleg-Link 19,4 px, Konto-Link 20,9 px (breit) / 14 px
+(kompakt), BU 22,5 × 16,5 px, Sachverhalt 20,9 px. Keine Inline-Links im Satz,
+die Ausnahme „inline" aus WCAG 2.5.8 greift nicht; die Abstands-Ausnahme hält
+gegen Nachbarzellen (Zeilenabstand ≥ 35 px), nicht aber gegen das Overlay des
+Zeilenlinks darunter. Set-weiter offener Punkt (TextButton/Link), hier schon
+benannt — bleibt offen, kein neuer Mangel dieses Bausteins.
+
+**M4 — nicht blockierend.** Spec und Code weichen ab: (a) `DataTable.totals`
+ist `Partial<Record<string, ReactNode>>` (`DataTable.tsx:432`), die Spec sagt
+`Record<columnKey, ReactNode>`; (b) T2 `full` hat im Code zusätzlich die Spalte
+„DATEV" (`markOfOrigin`, `AccountEntries.tsx:201`), die Tabelle T2 `full` nennt
+sie nicht; (c) die Summenzeile steht auch über „leer", wenn der Aufrufer weder
+`empty` noch `filtered` gibt (`DataTable.tsx:601/638`: `state` ist dann `null`)
+— die Spec sagt „nicht bei leer".
+
+**M5 — nicht blockierend.** Story `InBatch` erfüllt die eigene Beschreibung
+nicht: kein Filter „ohne Beleg" und kein Satz mit mehreren Konten einer Seite
+(„+n" nur in `Mirror` sichtbar).
+
+**M6 — nicht blockierend.** Beispieldaten: Satz b4 „AR-2026-118" hängt an
+`doc-4471` mit Titel „Rechnung-RE-4471-Meier.pdf"
+(`JournalEntryList.stories.tsx:50–75`); jede Zeile trägt denselben Dateinamen.
+Realistisch wäre je Beleg sein Name.
+
+Tastatur (gemessen, `InBatch`): je Zeile sechs Fokus-Halte (Zeilenlink auf dem
+Datum · Beleg · Soll · Haben · BU · Sachverhalt), Fokusring 2 px
+`--color-focus` mit 2 px Abstand, `:focus-visible` ✓. Kontrast Beleg-Link
+`--color-accent-700` 5,45:1 ✓.
+
+Vier Linsen: **Sprache** — Köpfe und Leertexte in Kanzleiwörtern, „ohne Beleg"
+statt Leerstelle, keine Versalien, kein Ausrufezeichen ✓. **Bedienung** — ganze
+Zeile führt in den Satz, Fokus sichtbar; M3 offen. **Logik** — fünf Zustände in
+`Empty`/`Filtered`/`LoadingAndError`, Summenzeile nicht bei Laden/Fehler ✓
+(Randfall M4c). **Darstellung** — Zustände nur als `StatusBadge`, Vorzeichen
+und Beträge grau, Beleg-Link durch Zeichen **und** Farbe ✓; Breiten als
+px-Spuren in `ColumnDef` sind die Konvention aller Kataloge, kein neuer Verstoß.
+
+### Urteil
+
+**Nicht abgenommen.** Die sechs Kriterien der ursprünglichen Abnahme sind
+erfüllt (eines mit Auflage M5); der Nachtrag „nichts verlieren" ist es nicht:
+M1 und M2 machen die zugeschalteten Spalten bei der Zielbreite unlesbar.
+Nach Behebung von M1/M2 genügt eine Nachmessung von `WithRunAndDatevId` und
+`InDrawerWithAll`.

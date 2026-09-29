@@ -62,3 +62,75 @@ und Haben zeigen in `full` wieder Nummer **und Name** („6805 Telefon / 1576
 Vorsteuer 19 %"), die Zelle bricht um statt zu kürzen — wie Schritt 3 heute.
 `accountNames: false` für einen schmalen Rahmen. Gemessen bei 1280 px: 1246 px,
 kein Querscroll; Zeilen mit langen Namen 88 px hoch.
+
+## Abnahme
+
+Die Spec hatte keine Abnahmetabelle; der Abnehmer leitet sie aus „Gebaut
+2026-09-29" und dem Nachtrag ab.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `full`: Nr. · Datum · Gegenpartei (+ „erstmals") · Soll · Haben · Betrag · BU · Prüfung durch Ludwig · Satzart · Prüfbedarf („entschieden") | `Flat` | ✓ Köpfe in dieser Reihenfolge; „erstmals" (Hartje KG), „3 Zeilen", „entschieden" sichtbar |
+| Satzart nicht in Gruppen nach Satzart | `Grouped` | ✓ keine Spalte Satzart; Hinweis M3 |
+| `compact`: Datum · Gegenpartei · Konten · Betrag · Prüfung durch Ludwig | `Compact` | ✓ „4930 an 70021", 678 = 678, Zeilen 35–36 px |
+| Keine Beleg-Spalte im Standard, über `include: ["document"]` | Code | ✓ `OPTIONAL` filtert `document` ohne `include` |
+| Auswahl mit stehender Leiste, Aufklapper, Aktionen | `Grouped` | ✓ Auswahl-, Aufklapp- und Aktionsspalte; Aktionen rechts bei 1245 px |
+| Leerfall als Erfolg ≠ leer nach Filter · lädt · Fehler | `States` | ✓ „Alles abgenommen." mit Zahl 40 und Haken · „Keine Treffer für „Satzart: Zahlung"." + „Filter zurücksetzen" · Skelett · Fehlerzeile; Spaltenkopf bleibt |
+| 1280 px, `full` gruppiert, kein Querscroll | `Grouped` | ✓ 1246 = 1246 |
+| 1280 px, `full` flach (Reiter „Bitte anschauen") | `Flat` | ✗ 1348 > 1246 — 102 px Querscroll, Aktionen rechts außerhalb → M1 |
+| Nachtrag: Soll/Haben mit Nummer und Name, Zelle bricht um | `Grouped`, `Flat` | ✓ „1800 Bank / 1360 Geldtransit", Zeilen 88 px |
+
+## Fremde Abnahme 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung, nicht der Bauende). Grundlage: Code
+(`JournalEntryReviewList.tsx`), Storybook 6107 bei 1280 × 900 mit Playwright
+gemessen, `pnpm typecheck` · `check:language` · `check:when` · `check:type` ·
+`check:contrast` grün (Exit 0). Exporte `JournalEntryReviewList`,
+`proposalReviewColumns`, `ProposalRow`, `ProposalColumn`,
+`ProposalColumnOptions` ✓.
+
+### Mängel
+
+**M1 — blockierend.** Die flache Ansicht scrollt bei 1280 px quer.
+In `Flat` misst `.v2tbl__scroll` 1348 > 1246 px: die Spalte Satzart (96 px)
+kommt zur gruppierten Breite hinzu, die Aktionsspalte mit „Freigeben" liegt
+102 px rechts außerhalb. Die flache Liste ist der Reiter „Bitte anschauen",
+also der Hauptweg der Prüfung — die Handlung darf nicht hinter dem Querscroll
+stehen. Gemessen wurde laut Spec nur die gruppierte Form. Abhilfe z. B.
+Prüfbedarf 160 → 128 px und Gegenpartei-Boden 120 → 104 px, oder Satzart als
+Unterzeile der Gegenpartei; danach `Flat` bei 1280 nachmessen.
+
+**M2 — nicht blockierend.** Trefferflächen: Kontonummern als Links 30 × 17 px,
+BU 22,5 × 16,5 px, (i) der Prüfung durch Ludwig 15 × 15 px je Zeile,
+Aufklappknopf 32 × 20,9 px, „Öffnen" 60,9 × 20,3 px. Die Kontonummern stehen
+in einer Liste mit „ / " — kein Satz, Ausnahme „inline" greift nicht. Das
+(i) mit 15 × 15 px ist das Muster aus §9 („ein Knopf, dessen Fläche seine
+Glyphe ist") — gehört an `AiBookingNotesCell`, nicht an diese Liste, bleibt
+aber offen.
+
+**M3 — nicht blockierend.** `without: ["kind"]` greift bei **jeder**
+Gruppierung (`JournalEntryReviewList.tsx:295`), die Spec sagt „nicht in
+Gruppen nach Satzart". Eine Gruppierung nach etwas anderem verlöre die Satzart.
+
+**M4 — nicht blockierend.** `Side` baut Konto-Links als rohes `<a>`
+(`JournalEntryReviewList.tsx:123`) statt über `Link` wie alle Nachbarzellen —
+zweite Quelle für das Verhalten eines Links.
+
+**M5 — nicht blockierend.** Beispieldaten: Kontonamen passen nicht zu den
+Nummern („70021 Bürobedarf", „1800 Muster Bürobedarf GmbH",
+`JournalEntryReviewList.stories.tsx`) — der Nachtrag „Nummer und Name" ist so
+nicht glaubhaft zu prüfen.
+
+Vier Linsen: **Sprache** — „Prüfung durch Ludwig", „Prüfbedarf",
+„entschieden", „erstmals", „Alles abgenommen." — Kanzleiwörter, ohne Versalien und
+Ausrufezeichen ✓; der Kopf „Prüfung durch Ludwig" bricht in 112 px zweizeilig
+(Kopf 58 px). **Bedienung** — Auswahl + Sammelaktion, Aufklapper; M1, M2.
+**Logik** — fünf Zustände, Erfolg ≠ Filter-leer ✓; rechnet nichts (E2) ✓.
+**Darstellung** — Satzart als graues Badge, Farbe nur in der Prüfung durch
+Ludwig mit Wort ✓.
+
+### Urteil
+
+**Nicht abgenommen** wegen M1. Alles Übrige ist erfüllt; nach Behebung genügt
+die Nachmessung von `Flat` bei 1280 px.
+
