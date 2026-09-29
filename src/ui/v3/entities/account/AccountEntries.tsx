@@ -11,6 +11,9 @@ import { Time } from "../../primitives/Time";
 import { EntityIcon } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import type { ColumnDef } from "../../patterns/DataTable";
+import { Link } from "../../primitives/Link";
+import { SourceDocumentRefCell } from "../source-document/SourceDocumentRefCell";
+import { TaxKeyCell } from "../journal-entry/TaxKey";
 import { AccountCell } from "./Account";
 
 /**
@@ -60,6 +63,12 @@ export interface AccountEntry {
   caseNumber?: string | null;
   /** Balance after this movement, within its own source — shown only with `balance`. */
   runningBalance?: number | null;
+  /** The linked document (`source_doc_id`, F331) — the column „Beleg" (0211). */
+  documentId?: string | null;
+  /** The case behind the movement, for `caseHref`; `caseNumber` is its text. */
+  caseId?: string | null;
+  /** DATEV tax key (BU) as stored — `full` only. */
+  taxKey?: string | null;
 }
 
 /**
@@ -109,9 +118,12 @@ function OriginMark({ origin }: { origin: AccountEntryOrigin }) {
 function ContraAccounts({
   entry,
   accountHref,
+  showName = true,
 }: {
   entry: AccountEntry;
   accountHref?: (number: string) => string;
+  /** `false` in `compact`: the number alone, the name in the title (0211, measured at 640 px). */
+  showName?: boolean;
 }) {
   const [first, ...rest] = entry.contraAccounts;
   if (!first) return <span className="v2muted">—</span>;
@@ -124,7 +136,7 @@ function ContraAccounts({
     <span className="v2ae__contra" title={all}>
       <AccountCell
         number={first.number}
-        name={first.name}
+        name={showName ? first.name : null}
         href={accountHref?.(first.number)}
       />
       {rest.length > 0 ? (
@@ -156,6 +168,12 @@ export interface AccountEntryColumnOptions {
    * DATEV side or the Ludwig side alone (0157).
    */
   balance?: boolean;
+  /** The way into the document drawer (`?document=`, 0211). */
+  documentHref?: (documentId: string) => string;
+  /** The way to the case — `full` only. */
+  caseHref?: (caseId: string) => string;
+  /** The way to the reference work of the tax keys — `full` only. */
+  taxKeyHref?: (taxKey: string) => string;
 }
 
 /**
@@ -167,6 +185,9 @@ export function accountEntryColumns({
   variant = "compact",
   accountHref,
   balance = false,
+  documentHref,
+  caseHref,
+  taxKeyHref,
 }: AccountEntryColumnOptions): ColumnDef<AccountEntry>[] {
   const columns: ColumnDef<AccountEntry>[] = [
     {
@@ -187,11 +208,15 @@ export function accountEntryColumns({
     {
       key: "documentNumber",
       header: "Beleg",
-      width: "96px",
+      width: variant === "compact" ? "88px" : "112px",
+      // The one document cell of every booking table (0211): number, and
+      // whether a document hangs behind it.
       cell: (e) => (
-        <MonoCell
-          value={e.documentNumber}
-          title={e.caseNumber ? `Sachverhalt ${e.caseNumber}` : undefined}
+        <SourceDocumentRefCell
+          number={e.documentNumber}
+          documentId={e.documentId ?? null}
+          variant={variant}
+          {...(documentHref ? { documentHref } : {})}
         />
       ),
     },
@@ -216,13 +241,15 @@ export function accountEntryColumns({
     {
       key: "contraAccounts",
       header: "Gegenkonto",
-      width: "minmax(0, 1.1fr)",
-      cell: (e) => <ContraAccounts entry={e} accountHref={accountHref} />,
+      // Compact: the number alone in a fixed track — at 640 px the text kept 83 px
+      // next to a name nobody could read (0211). The name stays in the title.
+      width: variant === "compact" ? "minmax(56px, 0.6fr)" : "minmax(0, 1.1fr)",
+      cell: (e) => <ContraAccounts entry={e} accountHref={accountHref} showName={variant !== "compact"} />,
     },
     {
       key: "debit",
       header: "Soll",
-      width: "104px",
+      width: "96px",
       align: "end",
       sortable: true,
       // Empty stays empty: which side a movement is on is told by *which*
@@ -233,7 +260,7 @@ export function accountEntryColumns({
     {
       key: "credit",
       header: "Haben",
-      width: "104px",
+      width: "96px",
       align: "end",
       sortable: true,
       cell: (e) => (e.credit === null ? null : <AmountCell value={e.credit} currency={currency} />),
@@ -279,6 +306,27 @@ export function accountEntryColumns({
     status,
     ...rest,
     {
+      key: "taxKey",
+      header: "BU",
+      width: "56px",
+      cell: (e) => <TaxKeyCell taxKey={e.taxKey ?? null} {...(taxKeyHref ? { taxKeyHref } : {})} />,
+    },
+    {
+      key: "case",
+      header: "Sachverhalt",
+      width: "112px",
+      cell: (e) =>
+        !e.caseNumber ? (
+          <span className="v2muted">—</span>
+        ) : caseHref && e.caseId ? (
+          <Link href={caseHref(e.caseId)} className="v2link v2mono">
+            {e.caseNumber}
+          </Link>
+        ) : (
+          <MonoCell value={e.caseNumber} />
+        ),
+    },
+    {
       key: "batchId",
       header: "Stapel",
       width: "88px",
@@ -314,6 +362,9 @@ export function AccountEntryList({
   total,
   more,
   accountHref,
+  documentHref,
+  entryHref,
+  totals,
   loading,
   error,
   empty,
@@ -330,6 +381,16 @@ export function AccountEntryList({
    */
   more?: ReactNode;
   accountHref?: (number: string) => string;
+  documentHref?: (documentId: string) => string;
+  /** The whole row leads into the entry — its drawer (`?entry=`). */
+  entryHref?: (entry: AccountEntry) => string | undefined;
+  /**
+   * The totals row: debit and credit (and the closing balance where the list
+   * shows `balance`). The caller sums over the **whole** stock, not over the
+   * rows loaded so far (E2) — a fold-out of twelve rows and a drawer of 2.937
+   * say the same thing.
+   */
+  totals?: { debit: number; credit: number; balance?: number | null };
   loading?: boolean;
   error?: { message: string; retry?: ReactNode };
   /**
@@ -338,7 +399,12 @@ export function AccountEntryList({
    */
   empty?: { title: string; description?: ReactNode };
 }) {
-  const columns = accountEntryColumns({ currency, variant: "compact", accountHref });
+  const columns = accountEntryColumns({
+    currency,
+    variant: "compact",
+    ...(accountHref ? { accountHref } : {}),
+    ...(documentHref ? { documentHref } : {}),
+  });
   const cols = trackList(columns);
   const stock = total ?? entries.length;
 
@@ -373,6 +439,7 @@ export function AccountEntryList({
               // Only „nur in Ludwig" is dimmed: it has not reached DATEV yet,
               // so it ranks below what has. Hierarchy, not criticality (A7).
               className={entry.origin === "ludwig" ? "v2ae__row--draft" : undefined}
+              {...(entryHref?.(entry) ? { href: entryHref(entry)! } : {})}
             >
               {columns.map((c) => (
                 <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
@@ -382,6 +449,23 @@ export function AccountEntryList({
             </Row>
           ))
         )}
+        {totals && !loading && !error && entries.length > 0 ? (
+          <Row className="v2tbl__totals">
+            {columns.map((c, i) => (
+              <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
+                {c.key === "debit" ? (
+                  <AmountCell value={totals.debit} currency={currency} />
+                ) : c.key === "credit" ? (
+                  <AmountCell value={totals.credit} currency={currency} />
+                ) : c.key === "runningBalance" && totals.balance != null ? (
+                  <AmountCell value={totals.balance} currency={currency} />
+                ) : i === 0 ? (
+                  "Summe"
+                ) : null}
+              </span>
+            ))}
+          </Row>
+        ) : null}
       </Table>
       {!loading && !error && entries.length > 0 && stock > entries.length ? (
         <div className="v2ae__more">

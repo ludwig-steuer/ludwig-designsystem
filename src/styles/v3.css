@@ -4689,3 +4689,23 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* In the narrow right column the entry wraps between its parts instead of
    running out of the card (measured 2026-09-29 at 380 px: amount cut off). */
 .v3ms__entry .v2je__cell { white-space: normal; }
+
+/* ==========================================================================
+   0211 · booking tables — the document cell and the totals row.
+   ========================================================================== */
+/* Sign and number side by side; the number is cut, never the sign. */
+.v3docref { display: inline-flex; align-items: center; gap: var(--space-1); min-width: 0; max-width: 100%; }
+.v3docref > svg { flex: none; }
+.v3docref > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Linked: sign and number in the link colour, like an account link (0066) — not bold. */
+.v3docref--link { text-decoration: none; color: var(--color-accent-700); }
+.v3docref--link .v2mono { color: var(--color-accent-700); }
+.v3docref--link:hover > span { text-decoration: underline; }
+.v3docref--link:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+/* Number without document: the number, and in `full` the word under it. */
+.v3docref--none { display: inline-grid; gap: 0; }
+/* The totals row: bold, one hairline above — the same line as between rows. */
+.v2tbl__totals { font-weight: 600; border-top: 1px solid var(--color-border-subtle); }
+/* T1 compact: text over accounts in one column. */
+.v3entry__booking { display: grid; min-width: 0; }
+.v3entry__booking .v2je__cell { white-space: nowrap; }

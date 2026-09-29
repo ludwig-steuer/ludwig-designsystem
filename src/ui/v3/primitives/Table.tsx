@@ -115,6 +115,7 @@ export function Table({
   sections,
   minWidth,
   density = "default",
+  foot,
   children,
 }: {
   cols: string;
@@ -130,6 +131,8 @@ export function Table({
   minWidth?: number;
   /** `compact` one line per row, `wide` room for a title plus a sub-line. */
   density?: TableDensity;
+  /** Rows under all data and sections — the totals row (0211). */
+  foot?: ReactNode;
   children: ReactNode;
 }) {
   const body = (
@@ -149,6 +152,7 @@ export function Table({
           {s.children}
         </tbody>
       ))}
+      {foot ? <tfoot className="v2tbl__body v2tbl__foot">{foot}</tfoot> : null}
     </table>
   );
   if (!minWidth) return body;

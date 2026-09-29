@@ -107,6 +107,44 @@ const ENTRIES: AccountEntry[] = [
  * entry behind them do, and the one that was exported but never arrived gets
  * the real chip.
  */
+// Step 11 of the batch review, account 1800: twelve movements, three without a document.
+const TEXTS = ["Hartje KG Rechnung", "Zahlung Miete", "Telekom August", "Aral Tankstelle", "Bürobedarf Meier", "Gehalt Weber", "Zahlung Musterbau", "Porto Deutsche Post", "Versicherung Allianz", "Zahlung Hartje", "Kontoführung", "Umbuchung Kasse"];
+const BANK: AccountEntry[] = TEXTS.map((text, i) => ({
+  id: `bk-${i}`,
+  postingDate: `2026-08-${String(28 - i * 2).padStart(2, "0")}`,
+  documentNumber: i === 10 ? null : `${8810 + i}`,
+  documentId: i === 4 || i === 7 || i === 10 ? null : `doc-${i}`,
+  text,
+  contraAccounts: [{ number: i % 2 ? "70021" : "4400", name: i % 2 ? "Bürobedarf Meier GmbH" : "Erlöse 19 % USt" }],
+  debit: i % 3 === 0 ? 1000 + i * 125.5 : null,
+  credit: i % 3 === 0 ? null : 80 + i * 37.25,
+  origin: "ludwig",
+}));
+
+/**
+ * In a fold-out (step 11 of the batch review, account 1800): compact, twelve
+ * movements, three of them without a document — the number muted or
+ * „ohne Beleg" —, and the totals row under Soll and Haben. The whole row
+ * leads into the entry, the document into its drawer.
+ */
+export const InExpander: Story = {
+  render: () => (
+    <div style={{ width: 640 }}>
+      <AccountEntryList
+        entries={BANK}
+        currency="EUR"
+        accountHref={(n) => `#account=${n}`}
+        documentHref={(id) => `#document=${id}`}
+        entryHref={(e) => `#entry=${e.id}`}
+        totals={{
+          debit: BANK.reduce((sum, e) => sum + (e.debit ?? 0), 0),
+          credit: BANK.reduce((sum, e) => sum + (e.credit ?? 0), 0),
+        }}
+      />
+    </div>
+  ),
+};
+
 export const Filled: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>

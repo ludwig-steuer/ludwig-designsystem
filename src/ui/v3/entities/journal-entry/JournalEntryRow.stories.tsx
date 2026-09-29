@@ -4,9 +4,11 @@ import { DataTable } from "../../patterns/DataTable";
 import { Card, CardHead, HeadRow, Table } from "../../primitives/Table";
 import { JournalEntryRow } from "./JournalEntryRow";
 import {
+  entryRowFromJournalEntry,
   journalEntryColumns,
   journalEntryTracks,
-  type JournalEntryColumn,
+  type EntryRow,
+  type JournalEntryColumnOptions,
 } from "./journal-entry-columns";
 import type { JournalEntryRowData } from "./journal-entry";
 
@@ -17,7 +19,7 @@ const meta: Meta<typeof JournalEntryRow> = {
 export default meta;
 type Story = StoryObj<typeof JournalEntryRow>;
 
-const entry = (over: Partial<JournalEntryRowData> = {}): JournalEntryRowData => ({
+const source = (over: Partial<JournalEntryRowData> = {}): JournalEntryRowData => ({
   entryId: "je-4471",
   clientId: "c-1",
   cycleId: "cy-2026-08",
@@ -45,6 +47,8 @@ const entry = (over: Partial<JournalEntryRowData> = {}): JournalEntryRowData => 
   documentGroup: "incoming_invoices",
   ...over,
 });
+const entry = (over: Partial<JournalEntryRowData> & { sourceDocId?: string | null } = {}): EntryRow =>
+  entryRowFromJournalEntry({ sourceDocId: "doc-4471", ...source(over) });
 
 const accountHref = (number: string) => `#account=${number}`;
 const caseHref = (caseId: string) => `#case=${caseId}`;
@@ -52,23 +56,21 @@ const entryHref = (entryId: string) => `#entry=${entryId}`;
 
 function ShortList({
   rows,
-  columns,
   title,
   sub,
-  ...ways
-}: {
-  rows: readonly JournalEntryRowData[];
-  columns?: readonly JournalEntryColumn[];
+  entryHref: toEntry,
+  ...options
+}: JournalEntryColumnOptions & {
+  rows: readonly EntryRow[];
   title: string;
   sub?: string;
-  accountHref?: (n: string) => string;
   entryHref?: (id: string) => string;
 }) {
-  const cols = journalEntryColumns(columns ? { columns } : {});
+  const cols = journalEntryColumns({ without: ["batch"], ...options });
   return (
     <Card>
       <CardHead title={title} {...(sub ? { sub } : {})} />
-      <Table cols={journalEntryTracks(columns)} minWidth={1180}>
+      <Table cols={journalEntryTracks({ without: ["batch"], ...options })} minWidth={options.variant === "compact" ? 0 : 1180}>
         <HeadRow>
           {cols.map((c) => (
             <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
@@ -79,10 +81,11 @@ function ShortList({
         </HeadRow>
         {rows.map((row) => (
           <JournalEntryRow
-            key={row.entryId}
+            key={row.id}
             entry={row}
-            {...(columns ? { columns } : {})}
-            {...ways}
+            without={["batch"]}
+            {...options}
+            {...(toEntry ? { entryHref: toEntry } : {})}
           />
         ))}
       </Table>
@@ -145,22 +148,9 @@ export const Origins: Story = {
 export const Columns: Story = {
   render: () => (
     <DataTable
-      columns={journalEntryColumns({
-        columns: [
-          "bookingDate",
-          "belegfeld1",
-          "bookingText",
-          "accounts",
-          "amount",
-          "datevStage",
-          "origin",
-          "case",
-        ],
-        accountHref,
-        caseHref,
-      })}
-      rows={[entry(), entry({ entryId: "je-4472", caseId: null, caseNumber: null, origin: "client_import", confidence: null })]}
-      rowKey={(e) => e.entryId}
+      columns={journalEntryColumns({ without: ["batch"], accountHref, caseHref })}
+      rows={[entry(), entry({ entryId: "je-4472", caseId: null, caseNumber: null, origin: "client_import", confidence: null, sourceDocId: null })]}
+      rowKey={(e) => e.id}
       head={{ title: "Inhalt des Stapels", sub: "Eingangsrechnungen" }}
       empty={{ title: "Der Stapel ist leer." }}
       minWidth={1180}
@@ -183,7 +173,14 @@ export const Edges: Story = {
           buchungstext:
             "Wartung und Instandhaltung der Produktionsanlage Halle 2 einschließlich Ersatzteilen laut Rahmenvertrag, Abrechnung August",
         }),
-        entry({ entryId: "e2", lineCount: 5, belegfeld1: null, amount: 1234567.89 }),
+        {
+          ...entry({ entryId: "e2", belegfeld1: null, amount: 1234567.89, sourceDocId: null }),
+          debit: [
+            { number: "6020", name: "Gehälter" },
+            { number: "6110", name: "Gesetzliche soziale Aufwendungen" },
+            { number: "6130", name: "Freiwillige soziale Aufwendungen" },
+          ],
+        },
       ]}
     />
   ),
@@ -199,7 +196,7 @@ export const InUse: Story = {
       <ShortList
         title="Buchungen"
         sub="zu diesem Sachverhalt"
-        columns={["bookingDate", "belegfeld1", "bookingText", "accounts", "amount", "datevStage", "origin"]}
+        without={["case", "batch"]}
         rows={[
           entry(),
           entry({ entryId: "je-4473", bookingDate: "2026-08-30", amount: 1249.9, origin: "manual", confidence: null, status: "accepted", debitAccountNumber: "70021", debitAccountName: "Bürobedarf Meier GmbH", creditAccountNumber: "1200", creditAccountName: "Bank", buchungstext: "Zahlung Meier August", belegfeld1: "RE-4471", vatKey: null, vatRatePercent: null }),

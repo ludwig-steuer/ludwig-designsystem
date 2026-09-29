@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import type { RowAction } from "../../patterns/DataTable";
+import type { MirrorEntryVM } from "../datev-mirror-entry/MirrorEntry";
 import { JournalEntryList, journalEntriesByDocumentGroup } from "./JournalEntryList";
+import { entryRowFromJournalEntry, entryRowFromMirror, type EntryRow } from "./journal-entry-columns";
 import type { JournalEntryRowData } from "./journal-entry";
 
 const meta: Meta<typeof JournalEntryList> = {
@@ -11,7 +13,9 @@ const meta: Meta<typeof JournalEntryList> = {
 export default meta;
 type Story = StoryObj<typeof JournalEntryList>;
 
-const entry = (over: Partial<JournalEntryRowData> & { entryId: string }): JournalEntryRowData => ({
+type Source = JournalEntryRowData & { sourceDocId?: string | null; batch?: EntryRow["batch"] };
+
+const source = (over: Partial<Source> & { entryId: string }): Source => ({
   clientId: "c-1",
   cycleId: "cy-2026-08",
   bookingDate: "2026-08-26",
@@ -37,12 +41,15 @@ const entry = (over: Partial<JournalEntryRowData> & { entryId: string }): Journa
   confidence: 0.92,
   lineCount: 2,
   documentGroup: "incoming_invoices",
+  sourceDocId: "doc-4471",
+  batch: { id: "2026-0009", label: "08-2026-Ludwig" },
   ...over,
 });
+const entry = (over: Partial<Source> & { entryId: string }): EntryRow => entryRowFromJournalEntry(source(over));
 
-const BATCH: JournalEntryRowData[] = [
+const BATCH: EntryRow[] = [
   entry({ entryId: "b1" }),
-  entry({ entryId: "b2", documentGroup: "incoming_invoices", belegfeld1: "RE-4472", amount: 89.9 }),
+  entry({ entryId: "b2", documentGroup: "incoming_invoices", belegfeld1: "RE-4472", amount: 89.9, sourceDocId: null }),
   entry({
     entryId: "b3",
     documentGroup: "bank",
@@ -74,6 +81,7 @@ const BATCH: JournalEntryRowData[] = [
     status: "accepted",
     caseId: null,
     caseNumber: null,
+    sourceDocId: null,
   }),
 ];
 
@@ -81,17 +89,10 @@ const caseHref = (caseId: string) => `#case=${caseId}`;
 const accountHref = (number: string) => `#account=${number}`;
 const taxKeyHref = (taxKey: string) => `#taxKey=${taxKey}`;
 const entryHref = (entryId: string) => `#entry=${entryId}`;
+const documentHref = (documentId: string) => `#document=${documentId}`;
+const batchHref = (batchId: string) => `#batch=${batchId}`;
 const listHref = () => "#list";
-
-const CASE_COLUMNS = [
-  "bookingDate",
-  "belegfeld1",
-  "bookingText",
-  "accounts",
-  "amount",
-  "datevStage",
-  "origin",
-] as const;
+const HREFS = { caseHref, accountHref, taxKeyHref, entryHref, documentHref, batchHref };
 
 /**
  * Job 1 — the content of a batch: one section per document group, in the order
@@ -103,19 +104,64 @@ export const InBatch: Story = {
     <JournalEntryList
       groups={journalEntriesByDocumentGroup(BATCH)}
       head={{ title: "Inhalt des Stapels", sub: "2026-08-001", meta: "5 Sätze" }}
-      columns={[
-        "bookingDate",
-        "belegfeld1",
-        "bookingText",
-        "accounts",
-        "amount",
-        "datevStage",
-        "origin",
-        "case",
+      without={["batch"]}
+      totals={{ amount: "8.428,70 €" }}
+      {...HREFS}
+    />
+  ),
+};
+
+/**
+ * Compact — the account card „Neueste Buchungen": five rows, no pager, at
+ * 600 px. Soll and Haben collapse into „Konten", the document is sign and
+ * number; everything else is one click away in the entry drawer.
+ */
+export const Compact: Story = {
+  render: () => (
+    <div style={{ width: 600 }}>
+      <JournalEntryList entries={BATCH} variant="compact" head={{ title: "Neueste Buchungen", sub: "auf 6815" }} {...HREFS} />
+    </div>
+  ),
+};
+
+const mirror = (over: Partial<MirrorEntryVM> & { id: string }): EntryRow =>
+  entryRowFromMirror({
+    description: "Meier Bürobedarf August 2026",
+    amount: 1249.9,
+    currency: "EUR",
+    postingDate: "2026-08-26",
+    matchState: "matched_ludwig",
+    externalDocumentNumber: "RE-4471",
+    sequenceId: "2026-08-003",
+    lines: [
+      { side: "debit", accountNumber: "6815", accountName: "Bürobedarf", amount: 1249.9, contraAccountNumber: "70021" },
+      { side: "credit", accountNumber: "70021", accountName: "Bürobedarf Meier GmbH", amount: 1249.9 },
+    ],
+    ...over,
+  });
+
+/** DATEV's records in the same table: the state is „DATEV-Abgleich", there is no origin column. */
+export const Mirror: Story = {
+  render: () => (
+    <JournalEntryList
+      entries={[
+        mirror({ id: "m1", sourceDocId: "doc-4471" } as Partial<MirrorEntryVM> & { id: string }),
+        mirror({ id: "m2", matchState: "new_unprocessed", externalDocumentNumber: "8812", description: "Tankstelle Aral" }),
+        mirror({
+          id: "m3",
+          matchState: "unclear",
+          externalDocumentNumber: null,
+          description: "Sammelbuchung Lohn August",
+          amount: 18422.5,
+          lines: [
+            { side: "debit", accountNumber: "6020", accountName: "Gehälter", amount: 15200, contraAccountNumber: "3720" },
+            { side: "debit", accountNumber: "6110", accountName: "Gesetzliche soziale Aufwendungen", amount: 3222.5, contraAccountNumber: "3740" },
+          ],
+        }),
       ]}
-      caseHref={caseHref}
-      accountHref={accountHref}
-      entryHref={entryHref}
+      source="datev"
+      head={{ title: "Buchungen in DATEV", sub: "August 2026" }}
+      {...HREFS}
     />
   ),
 };
@@ -126,9 +172,8 @@ export const AtCase: Story = {
     <JournalEntryList
       entries={[BATCH[0]!, BATCH[2]!]}
       head={{ title: "Buchungen", sub: "zu diesem Sachverhalt" }}
-      columns={CASE_COLUMNS}
-      accountHref={accountHref}
-      entryHref={entryHref}
+      without={["case"]}
+      {...HREFS}
     />
   ),
 };
@@ -139,13 +184,13 @@ export const AtCase: Story = {
  */
 export const InBucket: Story = {
   render: () => {
-    const actions = (row: JournalEntryRowData): RowAction[] => [
+    const actions = (row: EntryRow): RowAction[] => [
       {
         label: "Stornieren",
         tone: "danger",
         action: async () => {},
         confirm: {
-          title: `Buchung ${row.belegfeld1 ?? row.entryId} stornieren?`,
+          title: `Buchung ${row.documentNumber ?? row.id} stornieren?`,
           body: "Die Buchung bleibt im Stapel stehen und bekommt einen Gegensatz. DATEV zeigt beide.",
           confirmLabel: "Stornieren",
         },
@@ -153,15 +198,14 @@ export const InBucket: Story = {
     ];
     return (
       <JournalEntryList
-        entries={BATCH.map((e) => ({ ...e, status: "accepted", exportedAt: "2026-09-01T08:00:00Z" }))}
+        entries={BATCH.map((e) => ({ ...e, state: "exported" }))}
         pager={{ page: 1, pageSize: 25, totalItems: 343, totalPages: 14 }}
-        sort={{ key: "bookingDate", dir: "desc" }}
+        sort={{ key: "date", dir: "desc" }}
         href={listHref}
         head={{ title: "Exportiert", sub: "August 2026", meta: "343 Sätze" }}
         rowActions={actions}
-        caseHref={caseHref}
-        accountHref={accountHref}
-        taxKeyHref={taxKeyHref}
+        without={["batch"]}
+        {...HREFS}
       />
     );
   },
@@ -183,7 +227,7 @@ export const Empty: Story = {
       <JournalEntryList
         entries={[]}
         head={{ title: "Buchungen", sub: "zu diesem Sachverhalt" }}
-        columns={CASE_COLUMNS}
+        without={["case"]}
         empty={{ title: "Noch keine Buchung." }}
       />
       <JournalEntryList

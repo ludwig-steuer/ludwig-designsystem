@@ -587,10 +587,15 @@ export {
 export {
   journalEntryColumns,
   journalEntryTracks,
-  DEFAULT_JOURNAL_ENTRY_COLUMNS,
+  entryRowFromJournalEntry,
+  entryRowFromMirror,
+  type EntryRow,
+  type EntryAccount,
+  type EntrySource,
   type JournalEntryColumn,
   type JournalEntryColumnOptions,
 } from "./entities/journal-entry/journal-entry-columns";
+export { SourceDocumentRefCell } from "./entities/source-document/SourceDocumentRefCell";
 export type { JournalEntryRowData } from "./entities/journal-entry/journal-entry";
 export {
   businessPartnerColumns,

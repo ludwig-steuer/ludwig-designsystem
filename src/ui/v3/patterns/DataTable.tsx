@@ -423,6 +423,13 @@ interface DataTableBase<T> {
   error?: { message: string; retry?: ReactNode };
   /** Zone 6 — the next step with its number (I10). */
   next?: ReactNode;
+  /**
+   * The totals row under the data (0211): the word in the first column, each
+   * value under its column. The caller computes the sums over the **whole**
+   * stock, not over the page it loaded (E2). Not shown while loading, on an
+   * error or when empty.
+   */
+  totals?: { label: string; cells: Partial<Record<string, ReactNode>> };
 }
 
 /**
@@ -530,6 +537,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
     loading,
     error,
     next,
+    totals,
     // `expand` is read here; `rowHref` is **not** — `bodyRow` takes that from
     // `props` itself, and here it stood twice and unused (0096 A3, found by
     // `noUnusedLocals`).
@@ -626,6 +634,20 @@ export function DataTable<T>(props: DataTableProps<T>) {
   // second statement about the same emptiness.
   const showPager = !loading && !error && all.length > 0 && pager && href;
 
+  const foot =
+    totals && !state ? (
+      <Row className="v2tbl__totals">
+        {selection ? <span /> : null}
+        {expand ? <span /> : null}
+        {columns.map((c, i) => (
+          <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
+            {totals.cells[c.key] ?? (i === 0 ? totals.label : null)}
+          </span>
+        ))}
+        {rowActions ? <span /> : null}
+      </Row>
+    ) : null;
+
   const card = (
     <Card>
       <CardHead
@@ -658,6 +680,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
         }
         density={density}
         {...(sections ? { sections } : {})}
+        {...(foot ? { foot } : {})}
       >
         {headRow}
         {body}

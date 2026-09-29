@@ -10,8 +10,7 @@ import {
   type TableGroup,
   type TablePager,
 } from "../../patterns/DataTable";
-import { journalEntryColumns, type JournalEntryColumn } from "./journal-entry-columns";
-import type { JournalEntryRowData } from "./journal-entry";
+import { journalEntryColumns, type EntryRow, type JournalEntryColumnOptions } from "./journal-entry-columns";
 
 /**
  * The entries of a list — the batch, the case, the export bucket (0178).
@@ -23,15 +22,20 @@ import type { JournalEntryRowData } from "./journal-entry";
  * groups, and that a section may not be paged.
  */
 
-type Table = DataTableProps<JournalEntryRowData>;
+type Table = DataTableProps<EntryRow>;
 
 type Shape =
-  | { entries: readonly JournalEntryRowData[]; pager?: TablePager; groups?: never }
-  | { groups: readonly TableGroup<JournalEntryRowData>[]; entries?: never; pager?: never };
+  | { entries: readonly EntryRow[]; pager?: TablePager; groups?: never }
+  | { groups: readonly TableGroup<EntryRow>[]; entries?: never; pager?: never };
 
 export type JournalEntryListProps = Shape & {
   head: Table["head"];
-  columns?: readonly JournalEntryColumn[];
+  /** Ludwig's entries or DATEV's records — one stock has one source (0211). */
+  source?: JournalEntryColumnOptions["source"];
+  /** `compact` in a drawer, fold-out or side card; `full` on a page. */
+  variant?: JournalEntryColumnOptions["variant"];
+  /** Columns that would be empty here — the case inside a case, the batch inside a batch. */
+  without?: JournalEntryColumnOptions["without"];
   sort?: Table["sort"];
   href?: (patch: ListPatch) => string;
   filtered?: Table["filtered"];
@@ -40,6 +44,8 @@ export type JournalEntryListProps = Shape & {
   error?: Table["error"];
   rowActions?: Table["rowActions"];
   density?: Table["density"];
+  /** Σ under the amount column — the caller's sum over the whole stock (E2). */
+  totals?: { amount: ReactNode };
   /**
    * The width below which the table scrolls instead of squeezing.
    *
@@ -54,6 +60,9 @@ export type JournalEntryListProps = Shape & {
   caseHref?: (caseId: string) => string;
   /** The way to the reference work of the tax keys, per stored key (F271). */
   taxKeyHref?: (taxKey: string) => string;
+  /** The way into the document drawer (`?document=`). */
+  documentHref?: (documentId: string) => string;
+  batchHref?: (batchId: string) => string;
 };
 
 /** „1 Satz", „14 Sätze" — a section head that says „1 Sätze" reads like a bug. */
@@ -74,11 +83,11 @@ function countLabel(n: number): string {
  * @instead A flat page with a pager → hand `entries` in instead.
  */
 export function journalEntriesByDocumentGroup(
-  entries: readonly JournalEntryRowData[],
-): TableGroup<JournalEntryRowData>[] {
+  entries: readonly EntryRow[],
+): TableGroup<EntryRow>[] {
   const order = Object.keys(DOCUMENT_GROUP_LABEL);
-  const byKey = new Map<string, JournalEntryRowData[]>();
-  const rest: JournalEntryRowData[] = [];
+  const byKey = new Map<string, EntryRow[]>();
+  const rest: EntryRow[] = [];
   for (const entry of entries) {
     const key = entry.documentGroup ?? null;
     if (key !== null && order.includes(key)) {
@@ -89,7 +98,7 @@ export function journalEntriesByDocumentGroup(
       rest.push(entry);
     }
   }
-  const sections: TableGroup<JournalEntryRowData>[] = order
+  const sections: TableGroup<EntryRow>[] = order
     .filter((key) => byKey.has(key))
     .map((key) => {
       const rows = byKey.get(key)!;
@@ -121,7 +130,9 @@ export function journalEntriesByDocumentGroup(
 export function JournalEntryList(props: JournalEntryListProps): ReactNode {
   const {
     head,
-    columns,
+    source,
+    variant = "full",
+    without,
     sort,
     href,
     filtered,
@@ -130,23 +141,30 @@ export function JournalEntryList(props: JournalEntryListProps): ReactNode {
     error,
     rowActions,
     density,
-    minWidth = 1180,
+    totals,
+    minWidth,
     entryHref,
     accountHref,
     caseHref,
     taxKeyHref,
+    documentHref,
+    batchHref,
   } = props;
 
   const shared = {
     columns: journalEntryColumns({
-      ...(columns ? { columns } : {}),
+      variant,
+      ...(source ? { source } : {}),
+      ...(without ? { without } : {}),
       ...(accountHref ? { accountHref } : {}),
       ...(caseHref ? { caseHref } : {}),
       ...(taxKeyHref ? { taxKeyHref } : {}),
+      ...(documentHref ? { documentHref } : {}),
+      ...(batchHref ? { batchHref } : {}),
     }),
     // Always the entry id: a list that keys on the index loses its selection
     // and its fold-out on every sort (0106).
-    rowKey: (entry: JournalEntryRowData) => entry.entryId,
+    rowKey: (entry: EntryRow) => entry.id,
     head,
     ...(sort ? { sort } : {}),
     ...(href ? { href } : {}),
@@ -155,14 +173,18 @@ export function JournalEntryList(props: JournalEntryListProps): ReactNode {
     ...(loading ? { loading } : {}),
     ...(error ? { error } : {}),
     ...(rowActions ? { rowActions } : {}),
-    ...(density ? { density } : {}),
-    minWidth,
-    ...(entryHref ? { rowHref: (entry: JournalEntryRowData) => entryHref(entry.entryId) } : {}),
+    density: density ?? (variant === "compact" ? "compact" : "default"),
+    // The full form has `fr` tracks whose computed floor would be zero —
+    // measured at 1000 px the names broke one character per line (0178). The
+    // compact form must fit a drawer and never scrolls sideways.
+    minWidth: minWidth ?? (variant === "compact" ? 0 : 1180),
+    ...(totals ? { totals: { label: "Summe", cells: { amount: totals.amount } } } : {}),
+    ...(entryHref ? { rowHref: (entry: EntryRow) => entryHref(entry.id) } : {}),
   };
 
-  if (props.groups) return <DataTable<JournalEntryRowData> {...shared} groups={props.groups} />;
+  if (props.groups) return <DataTable<EntryRow> {...shared} groups={props.groups} />;
   return (
-    <DataTable<JournalEntryRowData>
+    <DataTable<EntryRow>
       {...shared}
       rows={[...props.entries]}
       {...(props.pager ? { pager: props.pager } : {})}

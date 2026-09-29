@@ -1,10 +1,5 @@
 import { Row } from "../../primitives/Table";
-import {
-  journalEntryColumns,
-  type JournalEntryColumn,
-  type JournalEntryColumnOptions,
-} from "./journal-entry-columns";
-import type { JournalEntryRowData } from "./journal-entry";
+import { journalEntryColumns, type EntryRow, type JournalEntryColumnOptions } from "./journal-entry-columns";
 
 /**
  * One entry as a row of a short list (0175) — the cells come from
@@ -17,15 +12,10 @@ import type { JournalEntryRowData } from "./journal-entry";
  */
 export function JournalEntryRow({
   entry,
-  columns,
-  accountHref,
-  caseHref,
   entryHref,
-}: {
-  entry: JournalEntryRowData;
-  columns?: readonly JournalEntryColumn[];
-  accountHref?: JournalEntryColumnOptions["accountHref"];
-  caseHref?: JournalEntryColumnOptions["caseHref"];
+  ...options
+}: JournalEntryColumnOptions & {
+  entry: EntryRow;
   /**
    * The way into the entry — the drawer. With it the **whole row** is the
    * link; the account number and the case keep their own ways, and where both
@@ -33,14 +23,10 @@ export function JournalEntryRow({
    */
   entryHref?: (entryId: string) => string;
 }) {
-  const cells = journalEntryColumns({
-    ...(columns ? { columns } : {}),
-    ...(accountHref ? { accountHref } : {}),
-    ...(caseHref ? { caseHref } : {}),
-  }).map((column) => (
+  const cells = journalEntryColumns(options).map((column) => (
     <span key={column.key} className={column.align === "end" ? "v2num" : undefined}>
       {column.cell(entry)}
     </span>
   ));
-  return entryHref ? <Row href={entryHref(entry.entryId)}>{cells}</Row> : <Row>{cells}</Row>;
+  return entryHref ? <Row href={entryHref(entry.id)}>{cells}</Row> : <Row>{cells}</Row>;
 }
