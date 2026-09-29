@@ -351,6 +351,7 @@ export {
   type AccountEntry,
   type AccountEntryOrigin,
   type AccountEntryColumnOptions,
+  type AccountEntryColumn,
 } from "./entities/account/AccountEntries";
 export { AccountDrawer } from "./entities/account/AccountDrawer";
 

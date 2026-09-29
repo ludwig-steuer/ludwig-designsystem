@@ -114,3 +114,22 @@ zwei Breiten.
 | T1 breit, 1280 px (Karte 1246) | kein Querscroll; Buchungstext 170, Soll/Haben je 85 px; unter 1180 px scrollt die Karte |
 | T2 kompakt, 640 px | kein Querscroll; Buchungstext 100, Gegenkonto 56 px; Summenzeile unter Soll/Haben |
 | Beleg-Link | 48 × 19 px — unter 24 px Höhe wie alle Text-Links des Sets (offener Punkt TextButton/Link) |
+
+## Nachtrag 2026-09-29 — nichts verlieren, was die Daten hergeben
+
+Owner-Regel über ll-cto (2026-09-29): „Kein Feature weglassen, das die Daten
+hergeben. Ein DS-Entscheid ist kein Nachweis." ll-dev hat F336–F338 gegen die
+heutigen Tabellen abgeglichen; was dabei wegfiel, ist jetzt **zuschaltbar** —
+die Standardformen bleiben schlank.
+
+| Tabelle | Zuschalten | Heute gezeigt in |
+|---|---|---|
+| T1 | `include: ["run"]` Durchgang („D2") · `include: ["exportRef"]` DATEV-ID | Stapel-Seite, Schritt 9, Schritt 11 „Sätze" |
+| T2 | `balance` Saldo + `totals.balance` Endsaldo | Konto-Drawer „Nur in Ludwig" |
+| T2 | `include: ["case"]` Sachverhalt als Link (`caseHref`) | Schritt 4 (zwei Stellen), Schritt 11, Konto-Drawer „DATEV" |
+| T2 | `include: ["status"]` Buchungszustand — trennt Vorschlag, freigegeben, Mandantenstapel (`entryOrigin`) | Konto-Drawer, Schritt 4 |
+| T2 | `include: ["batchId"]` Stapel | Konto-Drawer „DATEV" |
+| T2 | `include: ["mirrorMatch"]` DATEV-Abgleich (Achse `mirror_match`) | Kontenblatt-Karte „Neueste Buchungen in DATEV" |
+| T2 | `contraNames` Name des Gegenkontos sichtbar (F255) | Verrechnungskonten Schritt 4 |
+
+Stories: `JournalEntryList/WithRunAndDatevId`, `AccountEntries/InDrawerWithAll`.

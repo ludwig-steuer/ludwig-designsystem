@@ -56,3 +56,9 @@ Vorschläge, Reiter nach Herkunft.
 
 Stories `v3/Entitäten/Buchungssatz/JournalEntryReviewList`: `Grouped` · `Flat` ·
 `Compact` · `States`.
+
+**Nachtrag 2026-09-29 (Hinweis ll-dev, Owner-Regel „nichts verlieren"):** Soll
+und Haben zeigen in `full` wieder Nummer **und Name** („6805 Telefon / 1576
+Vorsteuer 19 %"), die Zelle bricht um statt zu kürzen — wie Schritt 3 heute.
+`accountNames: false` für einen schmalen Rahmen. Gemessen bei 1280 px: 1246 px,
+kein Querscroll; Zeilen mit langen Namen 88 px hoch.

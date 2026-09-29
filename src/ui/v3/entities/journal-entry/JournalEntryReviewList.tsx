@@ -91,15 +91,31 @@ export interface ProposalColumnOptions {
   without?: readonly ProposalColumn[];
   /** Optional columns this frame has room for — today only `document`. */
   include?: readonly ProposalColumn[];
+  /**
+   * The account names beside the numbers in Soll and Haben — on by default in
+   * `full`, as step 3 shows them today (hint ll-dev 2026-09-29, owner rule
+   * „drop no feature the data carries"). `false` for a frame that must stay narrow.
+   */
+  accountNames?: boolean;
   accountHref?: (accountNumber: string) => string;
   documentHref?: (documentId: string) => string;
   taxKeyHref?: (taxKey: string) => string;
 }
 
-function Side({ accounts, accountHref }: { accounts: readonly EntryAccount[]; accountHref?: ((n: string) => string) | undefined }) {
-  // Numbers only, one per account — the column is read down the accounts (owner 2026-09-10).
+function Side({
+  accounts,
+  accountHref,
+  names,
+}: {
+  accounts: readonly EntryAccount[];
+  accountHref?: ((n: string) => string) | undefined;
+  names: boolean;
+}) {
+  // Number and name per account, „ / " between them — as step 3 reads today
+  // (`kontoText`, owner acceptance 2026-09-21); the cell wraps instead of
+  // cutting. Without names the numbers alone, the names in the title.
   return (
-    <span className="v3prop__accs" title={accounts.map((a) => `${a.number} ${a.name ?? ""}`.trim()).join(", ")}>
+    <span className={names ? "v3prop__accs v3prop__accs--wrap" : "v3prop__accs"} title={accounts.map((a) => `${a.number} ${a.name ?? ""}`.trim()).join(", ")}>
       {accounts.map((a, i) => (
         <span key={a.number}>
           {i > 0 ? " / " : null}
@@ -110,6 +126,7 @@ function Side({ accounts, accountHref }: { accounts: readonly EntryAccount[]; ac
           ) : (
             <span className="v2mono">{a.number}</span>
           )}
+          {names && a.name ? ` ${a.name}` : null}
         </span>
       ))}
     </span>
@@ -123,7 +140,7 @@ function Side({ accounts, accountHref }: { accounts: readonly EntryAccount[]; ac
  *          The entries of a stock without a decision → journalEntryColumns.
  */
 export function proposalReviewColumns(options: ProposalColumnOptions = {}): ColumnDef<ProposalRow>[] {
-  const { variant = "full", without = [], include = [], accountHref, documentHref, taxKeyHref } = options;
+  const { variant = "full", without = [], include = [], accountNames = variant === "full", accountHref, documentHref, taxKeyHref } = options;
   const all: Record<ProposalColumn, ColumnDef<ProposalRow>> = {
     number: { key: "number", header: "Nr.", width: "44px", align: "end", cell: (p) => p.number },
     date: {
@@ -165,7 +182,7 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
       cell: (p) =>
         p.accounts ? (
           <span className="v3prop__who">
-            <Side accounts={p.accounts.debit} accountHref={accountHref} />
+            <Side accounts={p.accounts.debit} accountHref={accountHref} names={accountNames} />
             {p.accounts.lineCount && p.accounts.lineCount > 2 ? <span className="v2sub">{p.accounts.lineCount} Zeilen</span> : null}
           </span>
         ) : (
@@ -176,7 +193,7 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
       key: "credit",
       header: "Haben",
       width: "minmax(88px, 1fr)",
-      cell: (p) => (p.accounts ? <Side accounts={p.accounts.credit} accountHref={accountHref} /> : null),
+      cell: (p) => (p.accounts ? <Side accounts={p.accounts.credit} accountHref={accountHref} names={accountNames} /> : null),
     },
     amount: {
       key: "amount",
@@ -273,6 +290,7 @@ export function JournalEntryReviewList(
     columns: proposalReviewColumns({
       ...(options.variant ? { variant: options.variant } : {}),
       ...(options.include ? { include: options.include } : {}),
+      ...(options.accountNames !== undefined ? { accountNames: options.accountNames } : {}),
       // Inside groups by kind the kind column repeats the group head.
       without: [...(options.without ?? []), ...(props.groups ? (["kind"] as const) : [])],
       ...(options.accountHref ? { accountHref: options.accountHref } : {}),

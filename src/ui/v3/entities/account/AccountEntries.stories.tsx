@@ -145,6 +145,42 @@ export const InExpander: Story = {
   ),
 };
 
+/**
+ * The same compact list with what the drawer and the fold-outs show today
+ * switched on (0211, owner rule „Kein Feature weglassen"): booking state,
+ * case, batch, contra names, running balance and the closing balance.
+ */
+export const InDrawerWithAll: Story = {
+  render: () => (
+    <div style={{ width: 960 }}>
+      <AccountEntryList
+        entries={BANK.map((e, i) => ({
+          ...e,
+          status: i % 3 === 0 ? "proposed" : "accepted",
+          entryOrigin: i === 5 ? "client_import" : "ai_proposed",
+          caseNumber: i % 2 ? `2026-0${140 + i}` : null,
+          caseId: i % 2 ? `c-${i}` : null,
+          batchId: "2026-0009",
+          runningBalance: 10000 - i * 250.5,
+        }))}
+        currency="EUR"
+        include={["status", "case", "batchId"]}
+        contraNames
+        balance
+        accountHref={(n) => `#account=${n}`}
+        documentHref={(id) => `#document=${id}`}
+        caseHref={(id) => `#case=${id}`}
+        entryHref={(e) => `#entry=${e.id}`}
+        totals={{
+          debit: BANK.reduce((sum, e) => sum + (e.debit ?? 0), 0),
+          credit: BANK.reduce((sum, e) => sum + (e.credit ?? 0), 0),
+          balance: 10000 - 11 * 250.5,
+        }}
+      />
+    </div>
+  ),
+};
+
 export const Filled: Story = {
   render: () => (
     <div style={{ maxWidth: 720 }}>

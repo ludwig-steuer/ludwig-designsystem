@@ -36,6 +36,8 @@ export type JournalEntryListProps = Shape & {
   variant?: JournalEntryColumnOptions["variant"];
   /** Columns that would be empty here — the case inside a case, the batch inside a batch. */
   without?: JournalEntryColumnOptions["without"];
+  /** Columns beyond the defaults — `run` (Durchgang), `exportRef` (DATEV-ID) and the like. */
+  include?: JournalEntryColumnOptions["include"];
   sort?: Table["sort"];
   href?: (patch: ListPatch) => string;
   filtered?: Table["filtered"];
@@ -133,6 +135,7 @@ export function JournalEntryList(props: JournalEntryListProps): ReactNode {
     source,
     variant = "full",
     without,
+    include,
     sort,
     href,
     filtered,
@@ -156,6 +159,7 @@ export function JournalEntryList(props: JournalEntryListProps): ReactNode {
       variant,
       ...(source ? { source } : {}),
       ...(without ? { without } : {}),
+      ...(include ? { include } : {}),
       ...(accountHref ? { accountHref } : {}),
       ...(caseHref ? { caseHref } : {}),
       ...(taxKeyHref ? { taxKeyHref } : {}),

@@ -10,6 +10,7 @@ import { HeadRow, Row, Table, EmptyRow } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
 import { EntityIcon } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { Link } from "../../primitives/Link";
 import { SourceDocumentRefCell } from "../source-document/SourceDocumentRefCell";
@@ -63,6 +64,10 @@ export interface AccountEntry {
   caseNumber?: string | null;
   /** Balance after this movement, within its own source — shown only with `balance`. */
   runningBalance?: number | null;
+  /** Axis `journal_entry_origin` of a Ludwig entry — tells the client's batch from a proposal. */
+  entryOrigin?: string | null;
+  /** Axis `mirror_match` of a mirror entry — more than „found again or not". */
+  mirrorMatch?: string | null;
   /** The linked document (`source_doc_id`, F331) — the column „Beleg" (0211). */
   documentId?: string | null;
   /** The case behind the movement, for `caseHref`; `caseNumber` is its text. */
@@ -152,13 +157,66 @@ function ContraAccounts({
   );
 }
 
+/** Every column of T2 by key — `include` switches the optional ones on (0211). */
+export type AccountEntryColumn =
+  | "postingDate"
+  | "origin"
+  | "status"
+  | "mirrorMatch"
+  | "documentNumber"
+  | "text"
+  | "contraAccounts"
+  | "debit"
+  | "credit"
+  | "runningBalance"
+  | "taxKey"
+  | "case"
+  | "batchId"
+  | "markOfOrigin";
+
+/**
+ * The one order of T2. The state comes early, not last (acceptance 0063): it
+ * answers the same question as the origin mark beside it — „do Ludwig and
+ * DATEV agree?" — and at the right edge it sat behind the horizontal scroll.
+ */
+const ORDER: readonly AccountEntryColumn[] = [
+  "postingDate",
+  "origin",
+  "status",
+  "mirrorMatch",
+  "documentNumber",
+  "text",
+  "contraAccounts",
+  "debit",
+  "credit",
+  "runningBalance",
+  "taxKey",
+  "case",
+  "batchId",
+  "markOfOrigin",
+];
+const COMPACT: readonly AccountEntryColumn[] = ["postingDate", "origin", "documentNumber", "text", "contraAccounts", "debit", "credit"];
+const FULL: readonly AccountEntryColumn[] = [...COMPACT, "status", "taxKey", "case", "batchId", "markOfOrigin"];
+
 export interface AccountEntryColumnOptions {
   currency: Currency;
   /**
-   * `compact` = ranks 1–6, the seven columns the drawer shows.
-   * `full` = plus batch, booking state and mark of origin, for the page.
+   * `compact` = the seven columns the drawer and the fold-outs show.
+   * `full` = plus booking state, BU, case, batch and mark of origin, for the page.
    */
   variant?: "compact" | "full";
+  /**
+   * Columns beyond the form's defaults (owner rule 2026-09-29 via ll-cto: drop
+   * no feature the data carries): `case`, `status`,
+   * `batchId`, `mirrorMatch` in a drawer or a fold-out that shows them today.
+   */
+  include?: readonly AccountEntryColumn[];
+  /**
+   * The contra account's name visible beside its number even in `compact` —
+   * where a bare number does not tell the reader what to look at (F255,
+   * clearing accounts).
+   */
+  contraNames?: boolean;
   /** Makes the contra accounts clickable — switching accounts in the drawer. */
   accountHref?: (number: string) => string;
   /**
@@ -170,9 +228,9 @@ export interface AccountEntryColumnOptions {
   balance?: boolean;
   /** The way into the document drawer (`?document=`, 0211). */
   documentHref?: (documentId: string) => string;
-  /** The way to the case — `full` only. */
+  /** The way to the case. */
   caseHref?: (caseId: string) => string;
-  /** The way to the reference work of the tax keys — `full` only. */
+  /** The way to the reference work of the tax keys. */
   taxKeyHref?: (taxKey: string) => string;
 }
 
@@ -183,21 +241,24 @@ export interface AccountEntryColumnOptions {
 export function accountEntryColumns({
   currency,
   variant = "compact",
+  include = [],
+  contraNames = false,
   accountHref,
   balance = false,
   documentHref,
   caseHref,
   taxKeyHref,
 }: AccountEntryColumnOptions): ColumnDef<AccountEntry>[] {
-  const columns: ColumnDef<AccountEntry>[] = [
-    {
+  const showStatus = variant === "full" || include.includes("status");
+  const all: Record<AccountEntryColumn, ColumnDef<AccountEntry>> = {
+    postingDate: {
       key: "postingDate",
       header: "Datum",
       width: "84px",
       sortable: true,
       cell: (e) => <Time value={e.postingDate} format="date" />,
     },
-    {
+    origin: {
       // No header: the mark is a sign, and a column head above it would
       // promise a value the 98 % normal case does not have.
       key: "origin",
@@ -205,7 +266,33 @@ export function accountEntryColumns({
       width: "24px",
       cell: (e) => <OriginMark origin={e.origin} />,
     },
-    {
+    status: {
+      key: "status",
+      header: "Buchungszustand",
+      // 148, not 132: the widest chip of the axis needs 144,3 px in the cell,
+      // measured with an unbound clone — at 132 it was clipped at every width.
+      width: "148px",
+      // What the origin mark cannot tell apart: a proposal, a released entry,
+      // the client's own batch (hint ll-dev 2026-09-29).
+      cell: (e) =>
+        e.origin === "exported" ? (
+          <StatusBadge axis="journal_entry_datev_stage" status="exported" info={false} />
+        ) : e.entryOrigin === "client_import" ? (
+          <StatusBadge axis="journal_entry_origin" status="client_import" info={false} />
+        ) : e.status ? (
+          <StatusBadge axis="journal_entry" status={e.status} info={false} />
+        ) : (
+          <span className="v2muted">—</span>
+        ),
+    },
+    mirrorMatch: {
+      key: "mirrorMatch",
+      header: "DATEV-Abgleich",
+      headerAside: <StatusInfoButton axis="mirror_match" />,
+      width: "150px",
+      cell: (e) => (e.mirrorMatch ? <StatusBadge axis="mirror_match" status={e.mirrorMatch} info={false} /> : <span className="v2muted">—</span>),
+    },
+    documentNumber: {
       key: "documentNumber",
       header: "Beleg",
       width: variant === "compact" ? "88px" : "112px",
@@ -220,16 +307,16 @@ export function accountEntryColumns({
         />
       ),
     },
-    {
+    text: {
       key: "text",
       header: "Buchungstext",
       width: "minmax(0, 1.6fr)",
       cell: (e) => (
         <span className="v2ae__text" title={e.text ?? undefined}>
           <span className="v2ae__textline">{e.text ?? <span className="v2muted">—</span>}</span>
-          {/* In `compact` there is no state column, and 111 of 42.153 entries
-              do not earn one for everybody — the chip rides along here. */}
-          {variant === "compact" && e.origin === "exported" ? (
+          {/* Without a state column, 111 of 42.153 entries do not earn one for
+              everybody — the chip rides along here. */}
+          {!showStatus && e.origin === "exported" ? (
             <>
               {" "}
               <StatusBadge axis="journal_entry_datev_stage" status="exported" info={false} />
@@ -238,15 +325,15 @@ export function accountEntryColumns({
         </span>
       ),
     },
-    {
+    contraAccounts: {
       key: "contraAccounts",
       header: "Gegenkonto",
       // Compact: the number alone in a fixed track — at 640 px the text kept 83 px
-      // next to a name nobody could read (0211). The name stays in the title.
-      width: variant === "compact" ? "minmax(56px, 0.6fr)" : "minmax(0, 1.1fr)",
-      cell: (e) => <ContraAccounts entry={e} accountHref={accountHref} showName={variant !== "compact"} />,
+      // next to a name nobody could read (0211). `contraNames` brings it back.
+      width: variant === "compact" && !contraNames ? "minmax(56px, 0.6fr)" : "minmax(0, 1.1fr)",
+      cell: (e) => <ContraAccounts entry={e} accountHref={accountHref} showName={variant !== "compact" || contraNames} />,
     },
-    {
+    debit: {
       key: "debit",
       header: "Soll",
       width: "96px",
@@ -257,7 +344,7 @@ export function accountEntryColumns({
       // the value is unknown (`AmountCell`'s meaning for `null`).
       cell: (e) => (e.debit === null ? null : <AmountCell value={e.debit} currency={currency} />),
     },
-    {
+    credit: {
       key: "credit",
       header: "Haben",
       width: "96px",
@@ -265,53 +352,20 @@ export function accountEntryColumns({
       sortable: true,
       cell: (e) => (e.credit === null ? null : <AmountCell value={e.credit} currency={currency} />),
     },
-  ];
-
-  if (balance) {
-    columns.push({
+    runningBalance: {
       key: "runningBalance",
       header: "Saldo",
       width: "112px",
       align: "end",
-      cell: (e) =>
-        e.runningBalance == null ? null : <AmountCell value={e.runningBalance} currency={currency} />,
-    });
-  }
-
-  if (variant === "compact") return columns;
-
-  const status: ColumnDef<AccountEntry> = {
-    key: "status",
-    header: "Buchungszustand",
-    // 148, not 132: the widest chip of the axis needs 144,3 px in the cell,
-    // measured with an unbound clone — at 132 it was clipped at every width.
-    width: "148px",
-    cell: (e) =>
-      e.origin === "exported" ? (
-        <StatusBadge axis="journal_entry_datev_stage" status="exported" info={false} />
-      ) : e.status ? (
-        <StatusBadge axis="journal_entry" status={e.status} info={false} />
-      ) : (
-        <span className="v2muted">—</span>
-      ),
-  };
-
-  // **The state comes first, not last** (acceptance 0063): it answers the same
-  // question as the origin mark two columns left — "do Ludwig and DATEV agree?"
-  // — and at the right edge it sat behind the horizontal scroll.
-  const [datum, origin, ...rest] = columns;
-  return [
-    datum!,
-    origin!,
-    status,
-    ...rest,
-    {
+      cell: (e) => (e.runningBalance == null ? null : <AmountCell value={e.runningBalance} currency={currency} />),
+    },
+    taxKey: {
       key: "taxKey",
       header: "BU",
       width: "56px",
       cell: (e) => <TaxKeyCell taxKey={e.taxKey ?? null} {...(taxKeyHref ? { taxKeyHref } : {})} />,
     },
-    {
+    case: {
       key: "case",
       header: "Sachverhalt",
       width: "112px",
@@ -326,19 +380,22 @@ export function accountEntryColumns({
           <MonoCell value={e.caseNumber} />
         ),
     },
-    {
+    batchId: {
       key: "batchId",
       header: "Stapel",
       width: "88px",
       cell: (e) => <MonoCell value={e.batchId ?? null} />,
     },
-    {
+    markOfOrigin: {
       key: "markOfOrigin",
       header: "DATEV",
       width: "64px",
       cell: (e) => <MonoCell value={e.markOfOrigin ?? null} tone="muted" />,
     },
-  ];
+  };
+  const picked = new Set<AccountEntryColumn>([...(variant === "compact" ? COMPACT : FULL), ...include]);
+  if (balance) picked.add("runningBalance");
+  return ORDER.filter((k) => picked.has(k)).map((k) => all[k]);
 }
 
 /**
@@ -363,7 +420,11 @@ export function AccountEntryList({
   more,
   accountHref,
   documentHref,
+  caseHref,
   entryHref,
+  include,
+  contraNames,
+  balance,
   totals,
   loading,
   error,
@@ -382,6 +443,13 @@ export function AccountEntryList({
   more?: ReactNode;
   accountHref?: (number: string) => string;
   documentHref?: (documentId: string) => string;
+  caseHref?: (caseId: string) => string;
+  /** Columns beyond the compact defaults — `case`, `status`, `batchId`, `mirrorMatch`. */
+  include?: AccountEntryColumnOptions["include"];
+  /** The contra account's name visible, not only in the title (F255). */
+  contraNames?: boolean;
+  /** The running balance column — for one source only (0157). */
+  balance?: boolean;
   /** The whole row leads into the entry — its drawer (`?entry=`). */
   entryHref?: (entry: AccountEntry) => string | undefined;
   /**
@@ -404,6 +472,10 @@ export function AccountEntryList({
     variant: "compact",
     ...(accountHref ? { accountHref } : {}),
     ...(documentHref ? { documentHref } : {}),
+    ...(caseHref ? { caseHref } : {}),
+    ...(include ? { include } : {}),
+    ...(contraNames ? { contraNames } : {}),
+    ...(balance ? { balance } : {}),
   });
   const cols = trackList(columns);
   const stock = total ?? entries.length;

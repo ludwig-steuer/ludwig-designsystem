@@ -111,6 +111,19 @@ export const InBatch: Story = {
   ),
 };
 
+/** Durchgang and DATEV-ID switched on — the batch page, step 9, step 11 „Sätze" show them today. */
+export const WithRunAndDatevId: Story = {
+  render: () => (
+    <JournalEntryList
+      entries={BATCH.map((e, i) => ({ ...e, run: (i % 2) + 1, exportRef: `LW-2026-0009-${String(i + 1).padStart(4, "0")}` }))}
+      head={{ title: "Inhalt des Stapels", sub: "2026-08-001" }}
+      include={["run", "exportRef"]}
+      without={["batch"]}
+      {...HREFS}
+    />
+  ),
+};
+
 /**
  * Compact — the account card „Neueste Buchungen": five rows, no pager, at
  * 600 px. Soll and Haben collapse into „Konten", the document is sign and

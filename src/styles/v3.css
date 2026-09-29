@@ -4731,4 +4731,6 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* 0164 · proposals to review */
 .v3prop__who { display: grid; min-width: 0; }
 .v3prop__accs { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* With names the cell wraps instead of cutting (step 3, owner acceptance 2026-09-21). */
+.v3prop__accs--wrap { white-space: normal; overflow-wrap: anywhere; }
 .v3prop__reasons { display: grid; min-width: 0; color: var(--color-text-muted); }

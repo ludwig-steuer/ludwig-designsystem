@@ -6,7 +6,7 @@ import type { ColumnDef } from "../../patterns/DataTable";
 import { ProvenanceMark } from "../../patterns/Provenance";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
-import { AmountCell } from "../../primitives/Cells";
+import { AmountCell, MonoCell } from "../../primitives/Cells";
 import { Link } from "../../primitives/Link";
 import { Time } from "../../primitives/Time";
 import { CaseCell } from "../accounting-case/CaseCell";
@@ -70,6 +70,10 @@ export interface EntryRow {
   batch?: { id: string; label: string } | null;
   /** The document group the batch list sections by (0149). */
   documentGroup?: string | null;
+  /** The agent run that wrote the entry — „D2" answers „that was different last week". Optional column `run`. */
+  run?: number | null;
+  /** The DATEV-ID (`export_ref`, „LW-…") — the key to find the entry in DATEV. Optional column `exportRef`. */
+  exportRef?: string | null;
 }
 
 /**
@@ -138,7 +142,9 @@ export type JournalEntryColumn =
   | "state"
   | "origin"
   | "case"
-  | "batch";
+  | "batch"
+  | "run"
+  | "exportRef";
 
 /** The reading order — `without` takes columns out, nothing reorders. */
 /**
@@ -147,6 +153,28 @@ export type JournalEntryColumn =
  * one line each.
  */
 const COMPACT: readonly JournalEntryColumn[] = ["date", "document", "booking", "amount", "state"];
+/**
+ * Every column in its one place — the defaults of both forms and what a caller
+ * switches on with `include` (owner rule 2026-09-29 via ll-cto: drop no
+ * feature the data carries). Nothing reorders.
+ */
+const ALL_ORDER: readonly JournalEntryColumn[] = [
+  "date",
+  "document",
+  "text",
+  "booking",
+  "accounts",
+  "debit",
+  "credit",
+  "taxKey",
+  "amount",
+  "state",
+  "origin",
+  "run",
+  "case",
+  "batch",
+  "exportRef",
+];
 const FULL: readonly JournalEntryColumn[] = [
   "date",
   "document",
@@ -166,6 +194,8 @@ export interface JournalEntryColumnOptions {
   variant?: "compact" | "full";
   /** Columns that would be empty in this frame — the case inside a case, the batch inside a batch. */
   without?: readonly JournalEntryColumn[];
+  /** Columns switched on beyond the form's defaults — `run` and `exportRef` above all, any other in `compact`. */
+  include?: readonly JournalEntryColumn[];
   accountHref?: (accountNumber: string) => string;
   documentHref?: (documentId: string) => string;
   caseHref?: (caseId: string) => string;
@@ -198,7 +228,7 @@ function SideAccounts({ accounts, accountHref }: { accounts: readonly EntryAccou
  *          with debit and credit apart → accountEntryColumns.
  */
 export function journalEntryColumns(options: JournalEntryColumnOptions = {}): ColumnDef<EntryRow>[] {
-  const { source = "ludwig", variant = "full", without = [], accountHref, documentHref, caseHref, taxKeyHref, batchHref } = options;
+  const { source = "ludwig", variant = "full", without = [], include = [], accountHref, documentHref, caseHref, taxKeyHref, batchHref } = options;
   const axis = source === "ludwig" ? "journal_entry_datev_stage" : "mirror_match";
   const all: Record<JournalEntryColumn, ColumnDef<EntryRow>> = {
     date: {
@@ -380,9 +410,21 @@ export function journalEntryColumns(options: JournalEntryColumnOptions = {}): Co
           <span className="v2trunc">{e.batch.label}</span>
         ),
     },
+    run: {
+      key: "run",
+      header: "Durchgang",
+      width: "88px",
+      cell: (e) => (e.run == null ? <span className="v2muted">—</span> : <span>{`D${e.run}`}</span>),
+    },
+    exportRef: {
+      key: "exportRef",
+      header: "DATEV-ID",
+      width: "128px",
+      cell: (e) => <MonoCell value={e.exportRef ?? null} />,
+    },
   };
-  const order = variant === "compact" ? COMPACT : FULL;
-  return order
+  const picked = new Set([...(variant === "compact" ? COMPACT : FULL), ...include]);
+  return ALL_ORDER.filter((key) => picked.has(key))
     .filter((key) => !without.includes(key))
     .filter((key) => !(key === "origin" && source === "datev"))
     .map((key) => all[key]);
