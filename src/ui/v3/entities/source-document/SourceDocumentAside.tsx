@@ -269,9 +269,10 @@ export interface SourceDocumentHistoryProps {
 }
 
 /**
- * @when    The overview of a document: the last steps of its processing, with
- *          the way to the whole run.
- * @instead The whole history → Timeline in the tab. Rows with severity and
+ * @when    A short technical log of the last steps, where no milestones are
+ *          derived yet.
+ * @instead The overview of a document → SourceDocumentMilestones (0210,
+ *          replaces this box there). The whole history → Timeline in the tab. Rows with severity and
  *          payload → LogBrowser. What is still to do → SourceDocumentDefects.
  */
 export function SourceDocumentHistory({

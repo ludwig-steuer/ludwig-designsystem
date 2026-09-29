@@ -408,6 +408,12 @@ export {
   type SourceDocumentHistoryProps,
   type SourceDocumentVatProps,
 } from "./entities/source-document/SourceDocumentAside";
+export {
+  SourceDocumentMilestones,
+  type DocumentMilestone,
+  type MilestoneEntry,
+  type UpcomingMilestone,
+} from "./entities/source-document/SourceDocumentMilestones";
 export { SourceDocumentView } from "./entities/source-document/SourceDocumentView";
 export {
   SOURCE_DOCUMENT_DETAILS,

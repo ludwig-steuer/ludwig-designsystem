@@ -13,10 +13,10 @@ import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-d
 import { ClarificationList } from "@/ui/v3/entities/clarification/Clarification";
 import {
   SourceDocumentDefects,
-  SourceDocumentHistory,
   SourceDocumentVat,
 } from "@/ui/v3/entities/source-document/SourceDocumentAside";
 import { TextButton } from "@/ui/v3/primitives/TextButton";
+import { SourceDocumentMilestones } from "@/ui/v3/entities/source-document/SourceDocumentMilestones";
 
 import {
   DOCUMENT_TABS,
@@ -27,7 +27,6 @@ import {
   partnerHref,
   tabHref,
   VAT_MIXED,
-  HISTORY,
   historyHref,
   inputTaxHref,
 } from "./fixtures";
@@ -142,6 +141,18 @@ export function overviewBoxes({
       />
     ),
     vat: <SourceDocumentVat {...VAT_MIXED} href={inputTaxHref} />,
-    history: <SourceDocumentHistory entries={HISTORY} total={HISTORY.length} href={historyHref} />,
+    history: (
+      <SourceDocumentMilestones
+        milestones={[]}
+        pathLabel="Weg einer Rechnung"
+        upcoming={[
+          { key: "case", label: "Sachverhalt zuordnen" },
+          { key: "entries", label: "Buchen" },
+          { key: "batch", label: "Stapel zuordnen" },
+          { key: "export", label: "An DATEV übergeben" },
+        ]}
+        href={historyHref}
+      />
+    ),
   };
 }

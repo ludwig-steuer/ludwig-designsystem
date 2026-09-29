@@ -4662,3 +4662,28 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .dlf-status { border: 0; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-1) var(--space-3); }
 .dlf-status > legend { grid-column: 1 / -1; padding: 0; }
 .dlf-actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
+
+/* ==========================================================================
+   SourceDocumentMilestones (0210): the stations a document has reached, and
+   those ahead. Sign · word · date on line 1, the facts under the word.
+   ========================================================================== */
+.v3ms { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.v3ms__row { display: grid; grid-template-columns: 15px minmax(0, 1fr) auto; column-gap: var(--space-2); row-gap: var(--space-1); align-items: baseline; }
+.v3ms__row > svg { align-self: center; }
+.v3ms__word { font-weight: 600; min-width: 0; }
+.v3ms__at { color: var(--color-text-muted); white-space: nowrap; }
+.v3ms__facts { grid-column: 2 / -1; min-width: 0; display: grid; gap: var(--space-1); font-size: var(--fs-ui-sm); }
+.v3ms__line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); min-width: 0; }
+.v3ms__entries { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.v3ms__entry { display: grid; gap: 2px; min-width: 0; }
+.v3ms__path { font-family: var(--font-mono); font-size: var(--fs-ui-xs); color: var(--color-text-muted); overflow-wrap: anywhere; }
+/* „Danach": the stations ahead read quieter — the word, not the colour, says they are ahead. */
+.v3ms__then { margin: var(--space-4) 0 var(--space-2); font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-muted); }
+.v3ms__then:first-child { margin-top: 0; }
+.v3ms--ahead .v3ms__word { font-weight: 400; color: var(--color-text-muted); }
+.v3ms__warn { color: var(--color-warning); }
+.v3ms__empty { margin: 0; color: var(--color-text-muted); }
+.v3ms__error { margin: 0; }
+/* In the narrow right column the entry wraps between its parts instead of
+   running out of the card (measured 2026-09-29 at 380 px: amount cut off). */
+.v3ms__entry .v2je__cell { white-space: normal; }
