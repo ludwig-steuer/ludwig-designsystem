@@ -1280,6 +1280,9 @@ select.v2in { padding-right: 26px; }
   font-size: var(--fs-ui);
   display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);
 }
+/* The message is the „what" of T5 — bold, like every error sentence of the set
+   (acceptance 0212, hint: ErrorRow was the one exception). */
+.v2tbl__error > span:first-child { font-weight: 600; }
 
 /* --- Master-detail -------------------------------------------------------
  * The replacement for the modal (L2): list left, detail right, the detail stays
