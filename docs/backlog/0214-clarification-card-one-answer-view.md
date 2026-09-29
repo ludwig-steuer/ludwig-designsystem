@@ -159,3 +159,35 @@ rechts mit `AmountCell`, Stand als `StatusBadge`, Markierung durch Rand
 | M5 | Story `RadioGroup/Rows`; die gebauten Karten-Stories heißen `InBatchReview`, `AtCaseFreeText`, `DeferredWithUndo` |
 | Hinweis | Eine zurückgestellte Frage mit `onUndefer` bietet nicht zugleich „Zurückstellen" an |
 | M4 | offen, setweit — Backlog 0213 |
+
+## Nachprüfung 2026-09-29 (Stand 184f2e7)
+
+Abnehmer: Claude (fremde Sitzung). Storybook 6107 bei 1280 × 900 mit
+Playwright.
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M1 ganze Zeile ruft `onSelect`, jede ihren Eintrag | `InBatchReview`, alle Aufklapper offen; Klick in die zweite und in die letzte Zelle jeder Zeile | ✓ 7 von 7 Zeilen, je beide Zellen: doc-4471, doc-4470, account 4670, account 4650, payment bt-1, entry je-1, entry je-2 — jede Zeile ihr eigener Eintrag; Hover färbt die Zeile (`--color-bg-soft`), Cursor `pointer` |
+| M1 „Weitere Quellen" überdeckt die Karte nicht | `InBatchReview` | ✓ ein Klick rechts neben dem Eintrag löst nichts aus; ein Klick auf den Eintrag löst `other:cl-7` aus. Trefferprobe (`elementFromPoint`) in der Mitte von Antwortfeld, Optionszeile, Hauptknopf, Ausweg, Sachverhalt-Link und Aufklapper trifft jeweils das Element selbst |
+| Tastatur und Fokus an den Pick-Knöpfen | `InBatchReview` | ✓ ein Fokus-Halt je Zeile (Tab: 21.08.2026 → 14.08.2026); `:focus-visible` mit 2 px `--color-focus` am Knopf (72 × 37 px), sichtbar über dem Overlay (Bildschirmfoto); Enter löst `document:doc-4471` aus |
+| M2 eine Wortliste der Adressaten | `grep` | ✓ nur noch `AUDIENCE_LABEL` in `Clarification.tsx:37`, exportiert; Karte und Faden importieren sie |
+| M3 Ludwig nicht doppelt | `InBatchReview` (`raisedBy: null`) | ✓ „Gefragt ist: Kanzlei · Rückfrage von Ludwig · Buchungsvorschlag · 26.08.2026, 09:12" |
+| M3, Gegenprobe | `People` (`raisedBy: { kind: "agent" }`) | ✗ weiter „Gefragt ist: Kanzlei · **gefragt von Ludwig** · **Rückfrage von Ludwig** · …" → M6 |
+| Hinweis: kein „Zurückstellen" bei zurückgestellter Frage mit `onUndefer` | `DeferredWithUndo` | ✓ Auswege nur „Anderweitig geklärt" und „Zurückstellung aufheben"; in `Deferred` ohne `onUndefer` bleibt „Zurückstellen" (so gewollt) |
+| M5 Story `RadioGroup/Rows` | `v3/Primitives/Formular/RadioGroup/Rows` | ✓ drei Zeilen je 560 × 41 px, Legende „Antwortoptionen", Pfeil runter wählt die nächste, Fokusring 2 px |
+
+**M6 — nicht blockierend (Rest von M3).** Die Bedingung in
+`ClarificationCard.tsx` fragt nur `c.raisedBy ? …`. Ist `raisedBy` Ludwig selbst
+(`kind: "agent"`), steht Ludwig weiter doppelt da (Story `People`). Auflage: Die
+Angabe entfällt auch, wenn der Fragende der Agent ist und das Herkunftswort ihn
+schon nennt.
+
+Offen bleibt aus der Abnahme M4 (setweit, Trefferflächen der Auswege). Von M5
+ist die ChoicePrompt-Story und die Story-Liste der Spec nicht Teil dieser
+Nachbesserung.
+
+### Urteil (neu)
+
+**Abgenommen mit Auflagen**: M6 (Rest von M3); M4 setweit; M5 zur Hälfte
+(ChoicePrompt-Story, Story-Namen in der Spec).
+
