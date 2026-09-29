@@ -331,3 +331,5 @@ Owner am Bild (`BoxEnd`, `AllCells`):
 ## Nachtrag 2026-09-27 (2) — „Erledigung" nicht doppelt (Owner über ll-dev)
 
 Der Stand steht im Kopf — auf der Seite als Prozess-Box, im Drawer als Status im Drawer-Kopf. Die Zeile „Erledigung" in „Belegdaten" wiederholte ihn (D7) und ist **ganz** entfallen (Owner, zweite Runde; die erste Fassung `completion={false}` aus 3f02af2 ist wieder zurückgenommen). Mit ihr fallen die Props `explainCompletion` und `batchHref` an `SourceDocumentFacts` und `SourceDocumentCard`; zum Stapel führen Kopf-Knopf „Zum Stapel" und die Stapel-Box.
+
+**Nachtrag 2026-09-29 (Owner):** Ist ein Beleg ganz durchgelaufen, ist der Balken grün **und** eine durchgehende Linie statt vier Segmente (Zelle und Box) — am Ende ist nichts mehr zu zählen. Gemessen: Zelle 64 px ohne Lücke, laufende Balken behalten ihre 3-px-Lücken.
