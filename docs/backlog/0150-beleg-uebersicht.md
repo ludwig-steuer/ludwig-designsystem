@@ -211,3 +211,48 @@ nur 522 px breit ist, zeigt die Box die schmale Kompaktzeile
 Datum" darunter, Betrag, Fortschritt — nichts fällt weg. Gemessen: Box 520 =
 520, kein Querscroll, kein Stand-Wort gekürzt. Die Props der Karte bleiben
 gleich; im Drawer (`tone="bare"`) wandern die Teilbelege mit.
+
+## Fremde Abnahme Nachtrag 2026-09-29 (Stand 004d2d3)
+
+Abnehmer: Claude (fremde Sitzung). Code `SourceDocumentCard.tsx`,
+`SourceDocumentList.tsx`, `source-document-columns.tsx` (`NARROW_VIEW`),
+Storybook 6107 bei 1280 × 900 mit Playwright.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Reihenfolge rechte Spalte | `Seiten/Beleg/Rechnung/Clean` | ✓ Belegdaten (y 240) → Weg des Belegs (757) → Befunde und Klärungen (1003) → Umsatzsteuer (1131); keine Teilbelege, weil Einzelrechnung; Seite 1280 = 1280 |
+| Teilbelege als Box in der Spalte, `id="parts"` | `SourceDocumentCard/WithParts` | ✓ Box „Teilbelege" mit Anzahl in der rechten Spalte (x 739, unter Belegdaten/Dokumentgruppe), `#parts` genau einmal im DOM |
+| Box ohne Querscroll | `WithParts` | ✓ Box 522 px, Tabelle 520 = 520; Spuren Beleg 190 · Betrag 104 · Fortschritt 170 px |
+| „Belegart · Datum" unter dem Namen | `WithParts` | ✓ „Bürobedarf Meier GmbH / Rechnung · 26.08.2026", Zeilen 64–65 px |
+| kein gekürztes Stand-Wort | `WithParts`; Sonde | ✗ nicht nachweisbar in der Story: sie gibt kein `partProcessPicture`, die Spalte zeigt „—". Sonde mit der Fortschritt-Spur 170 px (Dichte `narrow`): Platz für das Wort 75 px; „Vorgeschlagen" 88, „Bereit zur Buchung" 113, „Keine Buchung nötig" 122 px → gekürzt → M1 |
+| Sprung auf `#parts` | `WithParts`, Link `#parts` geklickt | ✓ Hash gesetzt, Seite scrollt (262 px), Box im Blick (oben bei 632 px, Rest der Seite zu kurz, um sie ganz nach oben zu holen) |
+| Drawer-Form (`tone="bare"`): Teilbelege wandern mit | `SourceDocumentCard/Bare`; Code | ✓ im Code: die Box hängt am selben Zweig wie die übrigen Boxen, unabhängig von `tone`. ✗ in der Story nicht zu sehen: `Bare` hat keine `parts` → M2 |
+| Gegenprobe K | `Seiten/Belegzeile/Compact` | ✓ 720 = 720 |
+
+**M1 — blockierend.** Die schmale Kompaktzeile kürzt das Stand-Wort. Die Box
+misst 520 px; `NARROW_VIEW` verteilt Beleg `minmax(130px, 1.4fr)` · Betrag 104 ·
+Fortschritt `minmax(170px, 1fr)`, und die Fortschritt-Spur bleibt auf ihrem
+Boden von 170 px (gemessen). Darin hat das Wort neben dem Balken 75 px. Die
+Stand-Wörter der Dokumentachse brauchen 88–122 px („Vorgeschlagen",
+„Bereit zur Buchung", „Keine Buchung nötig"). Die Spec-Messung „kein Stand-Wort
+gekürzt" beruht auf einer Story ohne Prozessbild. Auflage: der Fortschritt
+bekommt den größeren Anteil (z. B. Boden 220 px, Beleg `minmax(120px, 1fr)`),
+und `WithParts` gibt `partProcessPicture` mit den langen Wörtern; danach bei
+1280 nachmessen.
+
+**M2 — nicht blockierend.** Keine Story zeigt die Teilbelege in der
+Drawer-Form. `Bare` hat keine `parts`, und der Kommentar über `WithParts`
+(`SourceDocumentCard.stories.tsx:170–174`) sagt noch „die Liste steht **unter**
+den zwei Spalten". Das ist falsch und steht dazu auf Deutsch im Quellcode.
+Auflage: `Bare` mit Teilbelegen und den Kommentar auf Englisch nachziehen.
+
+**Hinweis.** Die schmale Zeile ersetzt das Einordnungsbild durch das Wort der
+Belegart. Warnung, Korrektur-Stift und Verbund-Wort aus 0205 fallen damit in
+der Box weg. Fehlt das Belegdatum, steht nur die Belegart, ohne den
+gedämpft-kursiven Rückfall aus 0212 (E5). „Nichts fällt weg" stimmt für die
+Spalten, nicht für diese beiden Angaben.
+
+### Urteil
+
+**Nicht abgenommen** wegen M1. Reihenfolge, Box, `#parts` und Breite stimmen;
+nach Behebung genügt die Nachmessung von `WithParts` mit Prozessbild.

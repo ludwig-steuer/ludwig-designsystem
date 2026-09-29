@@ -194,3 +194,17 @@ Nachbesserung.
 
 
 **Nachbesserung 2 (M5, M6):** Story `ChoicePrompt/OptionRows`, Story-Liste der Spec nachgezogen; „gefragt von" auch nicht, wenn `raisedBy` Ludwig selbst ist (`kind: "agent"`).
+
+## Nachprüfung 2 2026-09-29 (Stand 004d2d3)
+
+Abnehmer: Claude (fremde Sitzung). Storybook 6107 bei 1280 × 900.
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M5 Story `ChoicePrompt/OptionRows` | `v3/Patterns/Prüfen/ChoicePrompt/OptionRows` | ✓ Legende „Antwortoptionen", Frage ausgeblendet (`hideQuestion`), zwei Zeilen je 41 px, „Reisekosten (4670)" vorgewählt, „Oder selbst formulieren", Knopf „Antwort speichern" |
+| M5 Story-Liste der Spec | Abschnitt „Stories" | ✓ nennt `InBatchReview`, `AtCaseFreeText`, `DeferredWithUndo`, `Thread`, `Single`, `RadioGroup/Rows`, `ChoicePrompt/OptionRows` — wie gebaut |
+| M6 Ludwig nicht doppelt bei `raisedBy.kind: "agent"` | `People`, `InBatchReview` | ✓ je „Gefragt ist: Kanzlei · Rückfrage von Ludwig · Buchungsvorschlag · 26.08.2026, 09:12" |
+
+### Urteil (neu)
+
+**Abgenommen mit Auflage** M4 (Trefferflächen der Auswege, setweit).
