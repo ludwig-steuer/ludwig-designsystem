@@ -311,3 +311,9 @@ und M9 (volle Standardform benennen oder messen); M5/M6 bei Gelegenheit.
 
 - **M8:** Die Begründung zu `InBucket` war falsch — die Zeilenaktion ist die Handlung des Buckets, keine Zusatzspalte. Die Story nimmt jetzt `without: ["batch", "origin"]`; das unumkehrbare „Stornieren" steht in der Karte. Regel für Aufrufer: **eine Zeilenaktion muss bei 1280 px in der Karte stehen** — dafür weicht eine Spalte (`without`).
 - **M9:** T1 `full` für Ludwig mit allen elf Standardspalten (Sachverhalt **und** Stapel) braucht ~1312 px und scrollt bei 1280 px in der Karte. Jeder heutige Rahmen hat eine der beiden leer und nimmt sie mit `without` heraus (Stapel-Seite: `batch`, Sachverhalt: `case`); wo beide nötig sind (Spiegel über mehrere Stapel), ist der Querscroll in der Karte die Regel des Sets.
+
+## Nachtrag 2026-09-29 — Review F338 (ll-dev)
+
+- **Mehrere Gegenkonten:** jede Nummer ist ein eigener Link ins Konto (erste mit Namen, weitere als Nummer, durch Komma); die Zelle bricht um statt „+n" im Titel zu verstecken. Gemessen: Spiegelsatz „6300, 1800" → zwei Links `#account=6300`, `#account=1800`.
+- **Herkunft einer Ludwig-Zeile:** neue zuschaltbare Spalte `include: ["entryOrigin"]` „Herkunft" (Achse `journal_entry_origin`, (i) am Kopf): Vorschlag von Ludwig · Manuell · Regelwerk · Storno · Mandantenstapel. „Dauersachverhalt" hat kein Registry-Wort → Befund **L-360**.
+- Gemessen `InDrawerWithAll` (960 px, mit Herkunft): scrollt in der Karte (1364), keine Spalte unter ihrem Mindestwert.

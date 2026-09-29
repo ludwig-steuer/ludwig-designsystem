@@ -4755,3 +4755,6 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3docrow__sorthead .v2menu__sum:hover { text-decoration: underline; }
 /* The reason is what V5 judges: two lines before the cut — the rows carry two lines anyway (0212, acceptance hint). */
 .v3docrow__reason { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; min-width: 0; }
+/* T2: every contra account its own link; the cell wraps instead of hiding them (review F338). */
+.v2ae__contra--all { white-space: normal; }
+.v2ae__contra--all .v2acc { white-space: nowrap; }

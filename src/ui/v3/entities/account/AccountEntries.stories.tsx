@@ -157,15 +157,16 @@ export const InDrawerWithAll: Story = {
         entries={BANK.map((e, i) => ({
           ...e,
           status: i % 3 === 0 ? "proposed" : "accepted",
-          entryOrigin: i === 5 ? "client_import" : "ai_proposed",
           counterparty: i % 2 ? "Bürobedarf Meier GmbH" : "Hartje KG",
+          entryOrigin: i === 5 ? "client_import" : i === 7 ? "manual" : i === 9 ? "system_reversal" : "ai_proposed",
+          contraAccounts: i === 2 ? [{ number: "6300", name: "Sonstige Aufwendungen" }, { number: "1800", name: "Bank" }] : e.contraAccounts,
           caseNumber: i % 2 ? `2026-0${140 + i}` : null,
           caseId: i % 2 ? `c-${i}` : null,
           batchId: "2026-0009",
           runningBalance: 10000 - i * 250.5,
         }))}
         currency="EUR"
-        include={["status", "case", "batchId"]}
+        include={["status", "entryOrigin", "case", "batchId"]}
         contraNames
         balance
         accountHref={(n) => `#account=${n}`}

@@ -121,7 +121,12 @@ function OriginMark({ origin }: { origin: AccountEntryOrigin }) {
   );
 }
 
-/** Contra accounts: the first one is named, the rest counted. */
+/**
+ * Contra accounts: the first one with its name, the others as numbers — **each
+ * its own way** into the account (review F338: the drawer opened every number
+ * before; „+n" in a title left only the first clickable). The cell wraps
+ * instead of hiding them (p90 2, max 4).
+ */
 function ContraAccounts({
   entry,
   accountHref,
@@ -129,41 +134,30 @@ function ContraAccounts({
 }: {
   entry: AccountEntry;
   accountHref?: (number: string) => string;
-  /** `false` in `compact`: the number alone, the name in the title (0211, measured at 640 px). */
+  /** `false` in `compact`: the first number without its name, the names in the title (0211). */
   showName?: boolean;
 }) {
   const [first, ...rest] = entry.contraAccounts;
   if (!first) return <span className="v2muted">—</span>;
-  // The whole box is clipped by CSS once the track gets narrow (measured 169,5
-  // px against 229 px of need at 1280 in the full set), and a clipped value
-  // without a way to read it is no value. `AccountCell` only titles the *name*
-  // it shortened itself, so the full list belongs on the box.
   const all = entry.contraAccounts.map((a) => `${a.number} ${a.name ?? ""}`.trim()).join(", ");
   return (
-    <span className="v2ae__contra" title={all}>
-      <AccountCell
-        number={first.number}
-        name={showName ? first.name : null}
-        href={accountHref?.(first.number)}
-      />
-      {rest.length > 0 ? (
-        <span
-          className="v2muted"
-          title={rest.map((a) => `${a.number} ${a.name ?? ""}`.trim()).join(", ")}
-        >
-          {" "}
-          +{rest.length}
+    <span className="v2ae__contra v2ae__contra--all" title={all}>
+      <AccountCell number={first.number} name={showName ? first.name : null} href={accountHref?.(first.number)} />
+      {rest.map((a) => (
+        <span key={a.number}>
+          {", "}
+          <AccountCell number={a.number} name={null} href={accountHref?.(a.number)} />
         </span>
-      ) : null}
+      ))}
     </span>
   );
 }
 
-/** Every column of T2 by key — `include` switches the optional ones on (0211). */
 export type AccountEntryColumn =
   | "postingDate"
   | "origin"
   | "status"
+  | "entryOrigin"
   | "mirrorMatch"
   | "documentNumber"
   | "text"
@@ -185,6 +179,7 @@ const ORDER: readonly AccountEntryColumn[] = [
   "postingDate",
   "origin",
   "status",
+  "entryOrigin",
   "mirrorMatch",
   "documentNumber",
   "text",
@@ -209,7 +204,7 @@ export interface AccountEntryColumnOptions {
   variant?: "compact" | "full";
   /**
    * Columns beyond the form's defaults (owner rule 2026-09-29 via ll-cto: drop
-   * no feature the data carries): `case`, `status`,
+   * no feature the data carries): `case`, `status`, `entryOrigin`,
    * `batchId`, `mirrorMatch` in a drawer or a fold-out that shows them today.
    */
   include?: readonly AccountEntryColumn[];
@@ -286,6 +281,16 @@ export function accountEntryColumns({
         ) : (
           <span className="v2muted">—</span>
         ),
+    },
+    entryOrigin: {
+      // Where a Ludwig entry comes from — proposal, manual, rule, reversal,
+      // client batch (review F338: the old drawer showed it per row). Words
+      // from the registry; DATEV rows have none.
+      key: "entryOrigin",
+      header: "Herkunft",
+      headerAside: <StatusInfoButton axis="journal_entry_origin" />,
+      width: "150px",
+      cell: (e) => (e.entryOrigin ? <StatusBadge axis="journal_entry_origin" status={e.entryOrigin} info={false} /> : <span className="v2muted">—</span>),
     },
     mirrorMatch: {
       key: "mirrorMatch",
