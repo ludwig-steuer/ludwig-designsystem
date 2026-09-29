@@ -37,6 +37,12 @@ export interface ProcessPicture {
   holder: BatonMeta;
   /** Something is running right now; `since` comes formatted („seit 40 s"). */
   running?: { since: string; live?: boolean } | null;
+  /**
+   * How long the record has stood in its current phase, formatted by the app
+   * („seit 14 T", 0212, owner E6 of F335). The cell puts it after the holder;
+   * it replaces the column „liegt seit".
+   */
+  since?: string | null;
   /** What follows, one sentence without „Danach". `null` at the end of the path. */
   next?: string | null;
 }
@@ -115,6 +121,7 @@ function accessibleName(p: ProcessPicture, withHolder: boolean): string {
     level ? `${stateLabel(level)}:` : null,
     p.headline,
     withHolder && p.holder.key !== "niemand" ? `· ${p.holder.label}` : null,
+    withHolder && p.since ? `· ${p.since}` : null,
   ]
     .filter(Boolean)
     .join(" ");
@@ -196,7 +203,7 @@ export function ProcessCell({
           sign (owner 2026-09-27) — who is on it is read as a second fact. */}
       {withHolder && picture.holder.key !== "niemand" ? (
         <span className="pz-cell__holder">
-          <Baton owner={picture.holder} />
+          <Baton owner={picture.holder} {...(picture.since ? { detail: picture.since } : {})} />
         </span>
       ) : null}
     </Target>

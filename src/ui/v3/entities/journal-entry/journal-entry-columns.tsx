@@ -65,7 +65,8 @@ export interface EntryRow {
   /** Axis `journal_entry_origin`; Ludwig only. */
   origin?: string | null;
   confidence?: number | null;
-  case?: { id: string; number: string | null; fiscalYear?: number | null; title?: string | null } | null;
+  /** `id` is `null` where only the number is known (DATEV's records) — then the number stays text, never a route built on it. */
+  case?: { id: string | null; number: string | null; fiscalYear?: number | null; title?: string | null } | null;
   batch?: { id: string; label: string } | null;
   /** The document group the batch list sections by (0149). */
   documentGroup?: string | null;
@@ -117,7 +118,9 @@ export function entryRowFromMirror(m: MirrorEntryVM & { sourceDocId?: string | n
     currency: m.currency,
     taxKey: m.taxKey ?? null,
     state: m.matchState,
-    case: m.caseNumber ? { id: m.caseNumber, number: m.caseNumber } : null,
+    // The mirror knows the case number, not its id — a route built on the
+    // number would lead into the void (hint ll-dev 2026-09-29).
+    case: m.caseNumber ? { id: null, number: m.caseNumber } : null,
     batch: m.sequenceId ? { id: m.sequenceId, label: m.sequenceId } : null,
   };
 }
@@ -341,7 +344,7 @@ export function journalEntryColumns(options: JournalEntryColumnOptions = {}): Co
       width: "104px",
       cell: (e) => {
         if (!e.case) return <span className="v2muted">—</span>;
-        if (!caseHref) return <span>{e.case.number ?? "—"}</span>;
+        if (!caseHref || !e.case.id) return <span className="v2mono">{e.case.number ?? "—"}</span>;
         return (
           <CaseCell
             cases={[
@@ -370,7 +373,7 @@ export function journalEntryColumns(options: JournalEntryColumnOptions = {}): Co
         !e.batch ? (
           <span className="v2muted">—</span>
         ) : batchHref ? (
-          <Link href={batchHref(e.batch.id)} className="v2link v2trunc">
+          <Link href={batchHref(e.batch.id)} className="v3cell-link v2trunc">
             {e.batch.label}
           </Link>
         ) : (

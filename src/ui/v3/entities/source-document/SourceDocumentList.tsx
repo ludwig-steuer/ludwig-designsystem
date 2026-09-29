@@ -1,7 +1,13 @@
 import { StateIcon } from "../../patterns/Review";
 import { EmptyState } from "../../primitives/EmptyState";
-import { Table } from "../../primitives/Table";
-import { SourceDocumentRow, type SourceDocumentVM } from "./SourceDocument";
+import { Row, Table } from "../../primitives/Table";
+import type { SourceDocumentVM } from "./SourceDocument";
+import {
+  COMPACT_VIEW,
+  sourceDocumentColumns,
+  sourceDocumentTracks,
+  type SourceDocumentColumnOptions,
+} from "./source-document-columns";
 
 /**
  * A handful of documents beside other work (0070).
@@ -28,6 +34,8 @@ export function SourceDocumentList({
   emptyKind = "none",
   reason,
   href,
+  processPicture,
+  classificationPicture,
 }: {
   documents: readonly SourceDocumentVM[];
   /** Which of the two empty cases holds. Defaults to the gap, not the success. */
@@ -35,7 +43,18 @@ export function SourceDocumentList({
   /** Only with `not-expected`: **why** none is expected. Without it the success is a claim. */
   reason?: string;
   href?: (document: SourceDocumentVM) => string;
+  /** The progress of each row (0204) — without it the old completion stands. */
+  processPicture?: SourceDocumentColumnOptions["processPicture"];
+  classificationPicture?: SourceDocumentColumnOptions["classificationPicture"];
 }) {
+  const columns = sourceDocumentColumns({
+    columns: COMPACT_VIEW,
+    variant: "compact",
+    // Only rows that lead somewhere are links: no `#` for a document without a way.
+    ...(href ? { href } : documents.some((d) => d.href) ? { href: (d: SourceDocumentVM) => d.href ?? "#" } : {}),
+    ...(processPicture ? { processPicture } : {}),
+    ...(classificationPicture ? { classificationPicture } : {}),
+  });
   if (documents.length === 0) {
     return emptyKind === "not-expected" ? (
       <EmptyState
@@ -58,12 +77,18 @@ export function SourceDocumentList({
     // The row brings its own track list (`.v2doc__row`); `cols` only feeds the
     // fallback. A `Table` it needs regardless — a `<tr>` without one is not
     // valid markup (0106).
-    <Table cols="minmax(0, 1fr)">
+    // The compact row K of the catalogue (0212): the same cells as every
+    // document table, one line each, no head — the list stands in foreign
+    // context, where a column head would be a second heading.
+    <Table cols={sourceDocumentTracks(columns)}>
       {documents.map((d) => (
-        <SourceDocumentRow
-          key={d.id}
-          document={href ? { ...d, href: href(d) } : d}
-        />
+        <Row key={d.id}>
+          {columns.map((c) => (
+            <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
+              {c.cell(d)}
+            </span>
+          ))}
+        </Row>
       ))}
     </Table>
   );

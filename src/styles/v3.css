@@ -4709,3 +4709,22 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* T1 compact: text over accounts in one column. */
 .v3entry__booking { display: grid; min-width: 0; }
 .v3entry__booking .v2je__cell { white-space: nowrap; }
+
+/* ==========================================================================
+   0212 · the document row (brief F335)
+   ========================================================================== */
+.v3docrow { display: grid; min-width: 0; }
+/* The number under the name (owner E4): small and quiet, never the lead's weight. */
+.v3docrow > .v2sub { font-weight: 400; color: var(--color-text-muted); font-size: var(--fs-ui-xs); }
+/* A link inside a table cell: link colour, regular weight — like the account and document links (0066, 0211). */
+.v3cell-link { color: var(--color-accent-700); font-weight: 400; text-decoration: none; }
+.v3cell-link:hover { text-decoration: underline; }
+.v3cell-link:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+.v3docrow__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The fallback date: muted **and** italic — the form, not only the colour, says it is not the document date. */
+.v3docrow__fallback { color: var(--color-text-muted); font-style: italic; }
+/* Above the row link's overlay, so the date card opens; the click still leads where the row leads. */
+.v3docrow__when { position: relative; z-index: 2; color: inherit; text-decoration: none; }
+.v3docrow__date { display: grid; }
+.v3docrow__entry { color: inherit; text-decoration: none; }
+.v3docrow__entry:hover { text-decoration: underline; }

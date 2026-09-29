@@ -65,6 +65,12 @@ export type { SourceDocDoneVia, SourceDocReviewReason, SourceDocStatus };
  * invoice half of it.
  */
 export interface SourceDocumentVM extends MirrorDocument {
+  /** Pages of the file — the early warning for a split PDF in the inbox (F335 V1; finding L-359). */
+  pageCount?: number | null;
+  /** The file basket it arrived in, „K-2026-0012" (finding L-359). */
+  basketNumber?: string | null;
+  /** The name of the split PDF this document was cut out of (finding L-359). */
+  parentName?: string | null;
   caseHref?: string | null;
   /** Without it the row is not a link. */
   href?: string | null;

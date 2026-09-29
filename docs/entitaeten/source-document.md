@@ -562,3 +562,14 @@ Spec. Die Abnahme prüft beides — das Neue und dass 0052 weiter erfüllt ist.
 pnpm typecheck muss grün sein, jede Story im Browser angesehen (pnpm storybook, Port 6107).
 Abgenommen wird von einem anderen Agenten gegen die Spec; wer baut, nimmt nicht selbst ab.
 ```
+
+
+## Nachtrag 2026-09-29 — Belegzeile als Standard (0212, Brief F335)
+
+§Listen und §Formen sind hier überholt. Es gilt: **ein Katalog** mit fester
+Reihenfolge (Owner E2), die Listen sind Ansichten daraus — V1 Eingang, V2
+Belege, V3 Stapel → Belege, V4 Geschäftspartner → Belege, V5 Abnahme „ohne
+Buchung" — und **eine Kompaktzeile K** für Belege in fremdem Kontext
+(`SourceDocumentList`). Status ist überall das Prozessbild (E1), ein Datum je
+Zeile (E5), die Belegnummer als zweite Zeile unter dem Namen (E4). Einzelheiten
+und Spalten: `docs/backlog/0212-document-row-standard.md`.

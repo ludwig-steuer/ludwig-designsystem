@@ -319,7 +319,7 @@ export function accountEntryColumns({
         !e.caseNumber ? (
           <span className="v2muted">—</span>
         ) : caseHref && e.caseId ? (
-          <Link href={caseHref(e.caseId)} className="v2link v2mono">
+          <Link href={caseHref(e.caseId)} className="v3cell-link v2mono">
             {e.caseNumber}
           </Link>
         ) : (

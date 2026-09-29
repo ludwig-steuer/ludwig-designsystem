@@ -8,7 +8,12 @@ import { Amount } from "../../primitives/Amount";
 import { MonoCell } from "../../primitives/Cells";
 import { Link } from "../../primitives/Link";
 import { Time } from "../../primitives/Time";
+import { FieldList } from "../../primitives/FieldList";
+import { HoverCard } from "../../primitives/Popover";
+import { ProcessPictureTrigger, type ProcessDialogDetail, type ProcessPicture } from "../../patterns/ProcessPicture";
 import { CaseCell } from "../accounting-case/CaseCell";
+import { JournalEntryCell, type JournalLine } from "../journal-entry/JournalEntryCompact";
+import type { Currency } from "@/ludwig/shared/money";
 import { formatBytes } from "../../format";
 import {
   FileName,
@@ -42,6 +47,16 @@ import {
  */
 
 export type SourceDocumentColumn =
+  // — the catalogue of 0212 (brief F335) —
+  | "document"
+  | "progress"
+  | "batch"
+  | "booking"
+  | "pages"
+  | "reason"
+  // — 0070; `counterparty`, `fileName`, `kind`, `form`, `identifier`,
+  //   `uploadedAt`, `receivedDate`, `status`, `stuckState` and `size` stay
+  //   until the app has moved to the views below, then they go (0212).
   | "counterparty"
   | "fileName"
   | "kind"
@@ -59,8 +74,52 @@ export type SourceDocumentColumn =
   | "stuckState";
 
 /**
+ * **The catalogue order** (owner E2, F335, 2026-09-29): one order for every
+ * view; a view selects, it never reorders. It supersedes the caller's order of
+ * F328 (2026-09-28). The legacy keys stand at the places they held.
+ */
+const CATALOG_ORDER: SourceDocumentColumn[] = [
+  "document",
+  "counterparty",
+  "fileName",
+  "classification",
+  "kind",
+  "form",
+  "pages",
+  "confidence",
+  "size",
+  "amount",
+  "documentDate",
+  "identifier",
+  "uploadedAt",
+  "receivedDate",
+  "progress",
+  "status",
+  "stuckState",
+  "reason",
+  "case",
+  "batch",
+  "booking",
+];
+
+/** V1 · Eingang — is every file there and recognised right, before the basket is released? */
+export const INBOX_VIEW: SourceDocumentColumn[] = ["document", "classification", "pages", "confidence", "documentDate", "progress"];
+/** V2 · Belege — find a document, see where it stands, without opening it. */
+export const DOCUMENT_LIST_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress", "case", "batch"];
+/** V3 · Stapel → Belege — which documents this batch processed and on which entry each is booked. */
+export const BATCH_DOCUMENTS_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress", "case", "booking"];
+/** V4 · Geschäftspartner → Belege — hold a new case against the old ones. */
+export const PARTNER_DOCUMENTS_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress", "case", "batch"];
+/** V5 · Abnahme „ohne Buchung" — the reason is the object of the review, so it is a column. */
+export const UNBOOKED_VIEW: SourceDocumentColumn[] = ["document", "classification", "documentDate", "progress", "reason", "case"];
+/** K · the compact row, a document named in foreign context — no head, one line each. */
+export const COMPACT_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress"];
+
+/**
  * The year's list: „no unfinished document is left behind in the year." The
  * completion is the question, everything before it is the identity.
+ *
+ * Legacy (0070) — the app moves to DOCUMENT_LIST_VIEW (0212).
  */
 export const DOCUMENT_LIST_COLUMNS: SourceDocumentColumn[] = [
   // Owner order 2026-09-28 (F328): who · what · how much · when · where it
@@ -160,6 +219,17 @@ export interface SourceDocumentColumnOptions {
   classificationPicture?: (
     document: SourceDocumentVM,
   ) => { picture: ClassificationPicture; detail: ClassificationDialogDetail } | null;
+  /** The process picture of a row (0204) — the column „Fortschritt" (owner E1, F335). */
+  processPicture?: (document: SourceDocumentVM) => { picture: ProcessPicture; detail: ProcessDialogDetail } | null;
+  /** The batch a document is in — label and way. */
+  batch?: (document: SourceDocumentVM) => { label: string; href?: string } | null;
+  /** The entries a document is booked on (V3, owner E7) — each opens the entry drawer. */
+  bookings?: (document: SourceDocumentVM) => {
+    entries: readonly { id: string; lines: readonly JournalLine[]; currency: Currency }[];
+    entryHref?: (entryId: string) => string;
+  } | null;
+  /** `compact` = the row K: classification as a word, progress on one line without holder. */
+  variant?: "full" | "compact";
 }
 
 export type StuckVariant = "stuck" | "inflight";
@@ -177,6 +247,64 @@ function stuckState(hasInvoiceRow: boolean | undefined, variant: StuckVariant): 
 }
 
 /**
+ * The head of the name (R32, owner E3): the counterparty, else the form the
+ * classifier read, else the file. The amount and the date of the name stand in
+ * their own columns.
+ */
+function documentHead(d: SourceDocumentVM): { text: string; file: boolean } {
+  if (d.counterparty?.trim()) return { text: d.counterparty.trim(), file: false };
+  const form = d.classDocumentForm && d.classDocumentForm !== "unknown" && d.classDocumentForm !== "other" ? formatDocumentForm(d.classDocumentForm) : null;
+  if (form) return { text: form, file: false };
+  return { text: d.fileName, file: true };
+}
+
+/** The document number of the specialization — never the file name. */
+function documentNumber(d: SourceDocumentVM): string | null {
+  const ident = sourceDocumentIdentifier(d);
+  return ident.mono && !ident.isFileName ? ident.value : null;
+}
+
+/** What the name does not say: file and pages, number, basket, the split PDF it came from. */
+function documentTitle(d: SourceDocumentVM, number: string | null): string {
+  return [
+    `Datei: ${d.fileName}${d.pageCount ? ` (${d.pageCount} ${d.pageCount === 1 ? "Seite" : "Seiten"})` : ""}`,
+    number ? `Belegnummer: ${number}` : null,
+    d.basketNumber ? `Dateikorb: ${d.basketNumber}` : null,
+    d.parentName ? `Teil von ${d.parentName}${d.splitPageRange ? `, Seiten ${d.splitPageRange}` : ""}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** The dates of a document, each with what it means (F335 §6). Only the ones with a value. */
+function dateRows(d: SourceDocumentVM): [ReactNode, ReactNode][] {
+  const detail = d.detail as { dueDate?: string | null; servicePeriod?: string | null } | null | undefined;
+  const line = (value: ReactNode, sentence: string) => (
+    <span className="v3docrow__date">
+      <span>{value}</span>
+      <span className="v2sub">{sentence}</span>
+    </span>
+  );
+  const rows: [ReactNode, ReactNode][] = [
+    d.documentDate
+      ? ["Belegdatum", line(<Time value={d.documentDate} format="date" size="sm" />, "steht auf dem Beleg")]
+      : ["Belegdatum", line("nicht erkannt", "die Zeile zeigt den Eingang beim Mandanten")],
+  ];
+  if (detail?.servicePeriod) rows.push(["Leistung", line(detail.servicePeriod, "wann die Leistung erbracht wurde, laut Beleg")]);
+  if (detail?.dueDate) rows.push(["Fällig", line(<Time value={detail.dueDate} format="date" size="sm" />, "Zahlungsziel laut Beleg")]);
+  rows.push([
+    "Beim Mandanten",
+    line(<Time value={d.receivedDate} format="date" size="sm" />, "Eingang beim Mandanten — bestimmt, in welcher Periode der Beleg steht"),
+  ]);
+  if (d.uploadedAt)
+    rows.push([
+      "Bei Ludwig",
+      line(<Time value={d.uploadedAt} format="dateTime" size="sm" />, d.basketNumber ? `hochgeladen, Dateikorb ${d.basketNumber}` : "hochgeladen"),
+    ]);
+  return rows;
+}
+
+/**
  * @when    One of the four long document lists is built with `DataTable`.
  * @instead A handful of documents beside other work → SourceDocumentList. One
  *          document mentioned elsewhere → SourceDocumentCell.
@@ -188,12 +316,16 @@ export function sourceDocumentColumns({
   lead: leadColumn,
   stuckVariant = "stuck",
   classificationPicture,
+  processPicture,
+  batch,
+  bookings,
+  variant = "full",
 }: SourceDocumentColumnOptions = {}): ColumnDef<SourceDocumentVM>[] {
   const picked = new Set(columns);
   // Whichever of the two identity points comes first carries the row link —
   // unless the caller says otherwise (the stuck list leads with the file).
   const lead: SourceDocumentColumn =
-    leadColumn ?? (picked.has("counterparty") ? "counterparty" : "fileName");
+    leadColumn ?? (picked.has("document") ? "document" : picked.has("counterparty") ? "counterparty" : "fileName");
 
   /** Does some other column of this set already print the file name? */
   const showsFileName = (d: SourceDocumentVM) =>
@@ -209,6 +341,117 @@ export function sourceDocumentColumns({
     );
 
   const defs: Record<SourceDocumentColumn, ColumnDef<SourceDocumentVM>> = {
+    document: {
+      key: "document",
+      header: "Beleg",
+      width: variant === "compact" ? "minmax(160px, 1.4fr)" : "minmax(200px, 1.4fr)",
+      sortable: variant !== "compact",
+      cell: (d) => {
+        const head = documentHead(d);
+        const number = documentNumber(d);
+        const body = head.file ? (
+          <span className="v2mono">
+            <FileName value={head.text} max={48} />
+          </span>
+        ) : (
+          <span className="v2doc__keyname">{head.text}</span>
+        );
+        // The card of what the name does not say, as a `title` on the name:
+        // a hover card here would open over the whole row — the row link's
+        // overlay belongs to this very anchor.
+        const named = <span title={documentTitle(d, number)}>{body}</span>;
+        return (
+          <span className="v2doccol__lead v3docrow">
+            <span className="v3docrow__name">{lead === "document" ? leading(d, named) : named}</span>
+            {/* The number as a small second line (owner E4) — for the match with
+                Belegfeld 1; no second line where there is none. Compact keeps
+                one line: the number goes into the card. */}
+            {number && variant !== "compact" ? <span className="v2sub v2mono">{number}</span> : null}
+          </span>
+        );
+      },
+    },
+    progress: {
+      key: "progress",
+      header: "Fortschritt",
+      headerAside: <StatusInfoButton axis="document_status" />,
+      width: variant === "compact" ? "minmax(160px, 1fr)" : "minmax(220px, 1fr)",
+      cell: (d) => {
+        const p = processPicture?.(d);
+        // Without a picture the old completion stands until the app derives it
+        // (F306) — never an empty cell.
+        return p ? (
+          <ProcessPictureTrigger picture={p.picture} detail={p.detail} size="cell" density={variant === "compact" ? "narrow" : "regular"} />
+        ) : (
+          <SourceDocumentCompletion document={d} />
+        );
+      },
+    },
+    batch: {
+      key: "batch",
+      header: "Stapel",
+      width: "120px",
+      cell: (d) => {
+        const b = batch?.(d);
+        if (!b) return <span className="v2muted">—</span>;
+        return b.href ? (
+          <Link href={b.href} className="v3cell-link v2trunc">
+            {b.label}
+          </Link>
+        ) : (
+          <span className="v2trunc">{b.label}</span>
+        );
+      },
+    },
+    booking: {
+      key: "booking",
+      header: "Buchung",
+      width: "minmax(140px, 0.8fr)",
+      cell: (d) => {
+        const b = bookings?.(d);
+        const entries = b?.entries ?? [];
+        if (entries.length === 0) return <span className="v2muted">—</span>;
+        if (entries.length > 1) {
+          const word = `${entries.length} Buchungen`;
+          return b?.entryHref ? (
+            <Link href={b.entryHref(entries[0]!.id)} className="v3cell-link">
+              {word}
+            </Link>
+          ) : (
+            <span>{word}</span>
+          );
+        }
+        const e = entries[0]!;
+        const cell = <JournalEntryCell lines={e.lines} currency={e.currency} showNames={false} showAmount={false} />;
+        return b?.entryHref ? (
+          <Link href={b.entryHref(e.id)} className="v3docrow__entry" title="Buchungssatz ansehen">
+            {cell}
+          </Link>
+        ) : (
+          cell
+        );
+      },
+    },
+    pages: {
+      key: "pages",
+      header: "Seiten",
+      width: "72px",
+      align: "end",
+      cell: (d) => (d.pageCount == null ? <span className="v2muted">—</span> : <span className="v2num">{d.pageCount}</span>),
+    },
+    reason: {
+      key: "reason",
+      header: "Begründung",
+      width: "minmax(180px, 1.2fr)",
+      cell: (d) =>
+        d.doneReason ? (
+          <span className="v2trunc" title={d.doneReason}>
+            {d.doneReason}
+          </span>
+        ) : (
+          <span className="v2muted">—</span>
+        ),
+    },
     counterparty: {
       key: "counterparty",
       header: "Gegenpart",
@@ -319,8 +562,32 @@ export function sourceDocumentColumns({
       header: "Belegdatum",
       width: "120px",
       sortable: true,
-      // NULL stays NULL — never the upload day (GLOSSARY).
-      cell: (d) => <Time value={d.documentDate ?? null} format="date" length="short" size="sm" />,
+      // One date per row (owner E5, F335): the document date. Without one the
+      // receipt at the client stands in — muted and italic, so the fallback
+      // shows; it is never passed off as the document date. Every other date
+      // sits in the card, each with its sentence.
+      cell: (d) => {
+        const own = d.documentDate ?? null;
+        const shown = own ? (
+          <Time value={own} format="date" length="short" size="sm" />
+        ) : (
+          <span className="v3docrow__fallback">
+            <Time value={d.receivedDate} format="date" length="short" size="sm" />
+          </span>
+        );
+        // The anchor lies above the row link's overlay, or the card would never
+        // open; a click on it still leads where the row leads (tabindex -1:
+        // one focus stop per row stays, I11). The same dates stand in the
+        // document's facts for keyboard and touch.
+        const anchor = href ? (
+          <Link href={href(d)} tabIndex={-1} className="v3docrow__when">
+            {shown}
+          </Link>
+        ) : (
+          <span className="v3docrow__when">{shown}</span>
+        );
+        return <HoverCard content={<FieldList tone="bare" rows={dateRows(d)} />}>{anchor}</HoverCard>;
+      },
     },
     identifier: {
       key: "identifier",
@@ -449,7 +716,7 @@ export function sourceDocumentColumns({
       cell: (d) => {
         const c = classificationPicture?.(d);
         return c ? (
-          <ClassificationTrigger picture={c.picture} detail={c.detail} size="cell" />
+          <ClassificationTrigger picture={c.picture} detail={c.detail} size="cell" density={variant === "compact" ? "narrow" : "regular"} />
         ) : (
           <SourceDocumentClass document={d} />
         );
@@ -475,7 +742,9 @@ export function sourceDocumentColumns({
     },
     confidence: {
       key: "confidence",
-      header: "Konfidenz",
+      // „Sicherheit" (F335 §4): how sure the classifier was — the word the
+      // inbox reads, not the machine's.
+      header: "Sicherheit",
       width: "140px",
       align: "end",
       // A **number**, not a badge. `class_confidence` is a share between 0
@@ -504,10 +773,9 @@ export function sourceDocumentColumns({
         ),
     },
   };
-  // The caller's order is the order (F328, owner 2026-09-28): a set lists its
-  // columns the way the page reads them; until then an internal ORDER re-sorted
-  // them and the app had to sort a second time.
-  return [...picked].map((c) => defs[c]);
+  // The catalogue's order is the order (owner E2, F335, 2026-09-29) — a view
+  // selects, it does not reorder. This supersedes the caller's order of F328.
+  return CATALOG_ORDER.filter((c) => picked.has(c)).map((c) => defs[c]);
 }
 
 /**
