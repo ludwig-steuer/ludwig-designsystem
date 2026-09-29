@@ -54,6 +54,8 @@ export interface EntryRow {
   documentNumber: string | null;
   /** The linked document (`source_doc_id`, F331); `null` = none. */
   documentId?: string | null;
+  /** Its file name or form — readable on hover at the document cell. */
+  documentName?: string | null;
   text: string | null;
   debit: readonly EntryAccount[];
   credit: readonly EntryAccount[];
@@ -246,6 +248,7 @@ export function journalEntryColumns(options: JournalEntryColumnOptions = {}): Co
         <SourceDocumentRefCell
           number={e.documentNumber}
           documentId={e.documentId ?? null}
+          name={e.documentName ?? null}
           variant={variant}
           {...(documentHref ? { documentHref } : {})}
         />

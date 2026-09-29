@@ -133,3 +133,5 @@ die Standardformen bleiben schlank.
 | T2 | `contraNames` Name des Gegenkontos sichtbar (F255) | Verrechnungskonten Schritt 4 |
 
 Stories: `JournalEntryList/WithRunAndDatevId`, `AccountEntries/InDrawerWithAll`.
+| T1 | `EntryRow.documentName` — Dateiname bzw. Belegform im Titel der Beleg-Zelle (Hinweis ll-dev 10) | Stapel-Liste, Spalte „Beleg" |
+| T2 | `AccountEntry.counterparty` — Gegenpartei als zweite Zeile unter dem Buchungstext (Hinweis ll-dev 11) | Konto-Drawer „Nur in Ludwig", Karte „Neueste Vorschläge" |

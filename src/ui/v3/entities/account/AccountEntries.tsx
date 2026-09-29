@@ -64,6 +64,8 @@ export interface AccountEntry {
   caseNumber?: string | null;
   /** Balance after this movement, within its own source — shown only with `balance`. */
   runningBalance?: number | null;
+  /** The counterparty as a second line under the text (hint ll-dev 11). */
+  counterparty?: string | null;
   /** Axis `journal_entry_origin` of a Ludwig entry — tells the client's batch from a proposal. */
   entryOrigin?: string | null;
   /** Axis `mirror_match` of a mirror entry — more than „found again or not". */
@@ -322,6 +324,7 @@ export function accountEntryColumns({
               <StatusBadge axis="journal_entry_datev_stage" status="exported" info={false} />
             </>
           ) : null}
+          {e.counterparty ? <span className="v2sub v2ae__who">{e.counterparty}</span> : null}
         </span>
       ),
     },

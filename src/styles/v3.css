@@ -4734,3 +4734,9 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* With names the cell wraps instead of cutting (step 3, owner acceptance 2026-09-21). */
 .v3prop__accs--wrap { white-space: normal; overflow-wrap: anywhere; }
 .v3prop__reasons { display: grid; min-width: 0; color: var(--color-text-muted); }
+/* T2: the counterparty under the booking text (hint ll-dev 11) — the text cell becomes two lines. */
+.v2ae__text:has(.v2ae__who) { flex-wrap: wrap; row-gap: 0; }
+.v2ae__who { flex-basis: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The date head as a menu (0212 G1): it reads like a column head, not like a button. */
+.v3docrow__sorthead .v2menu__sum { border: 0; background: none; box-shadow: none; padding: 0; height: auto; min-height: 24px; font: inherit; color: inherit; gap: var(--space-1); }
+.v3docrow__sorthead .v2menu__sum:hover { text-decoration: underline; }

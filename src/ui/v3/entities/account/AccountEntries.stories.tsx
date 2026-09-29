@@ -158,6 +158,7 @@ export const InDrawerWithAll: Story = {
           ...e,
           status: i % 3 === 0 ? "proposed" : "accepted",
           entryOrigin: i === 5 ? "client_import" : "ai_proposed",
+          counterparty: i % 2 ? "Bürobedarf Meier GmbH" : "Hartje KG",
           caseNumber: i % 2 ? `2026-0${140 + i}` : null,
           caseId: i % 2 ? `c-${i}` : null,
           batchId: "2026-0009",

@@ -27,7 +27,7 @@ const meta: Meta = { title: "Seiten/Belegzeile", parameters: { layout: "padded" 
 export default meta;
 type Story = StoryObj;
 
-type Row = { doc: SourceDocumentVM; process: string; since?: string; classification: string; batch?: string; entries?: number };
+type Row = { doc: SourceDocumentVM; process: string; since?: string; reason?: string; classification: string; batch?: string; entries?: number };
 
 const ROWS: Row[] = [
   {
@@ -43,6 +43,7 @@ const ROWS: Row[] = [
     doc: documentFixture({ id: "r2", counterparty: null, classDocumentForm: null, fileName: "3f2a9c1e-77b0-4c1a-9d1e-0b6a51f2c9a4.pdf", detail: null, documentDate: null, receivedDate: "2026-09-29", pageCount: 1, caseNumber: null }),
     process: "S04",
     since: "seit 6 T",
+    reason: "Leistungszeitraum und Steuersatz fehlen",
     classification: "2",
   },
   {
@@ -81,7 +82,8 @@ function options(): SourceDocumentColumnOptions {
       const r = by.get(d.id);
       if (!r) return null;
       const s = byId(r.process);
-      return { picture: withSince(s.picture, r.since), detail: s.detail };
+      const picture = withSince(s.picture, r.since);
+      return { picture: r.reason ? { ...picture, reason: r.reason } : picture, detail: s.detail };
     },
     classificationPicture: (d) => {
       const r = by.get(d.id);
@@ -110,8 +112,20 @@ function options(): SourceDocumentColumnOptions {
   };
 }
 
-function View({ title, columns, rows = ROWS, width }: { title: string; columns: SourceDocumentColumn[]; rows?: Row[]; width?: number }) {
-  const cols = sourceDocumentColumns({ ...options(), columns });
+function View({
+  title,
+  columns,
+  rows = ROWS,
+  width,
+  dateSort,
+}: {
+  title: string;
+  columns: SourceDocumentColumn[];
+  rows?: Row[];
+  width?: number;
+  dateSort?: SourceDocumentColumnOptions["dateSort"];
+}) {
+  const cols = sourceDocumentColumns({ ...options(), columns, ...(dateSort ? { dateSort } : {}) });
   return (
     <div style={width ? { width } : undefined}>
       <DataTable
@@ -126,8 +140,16 @@ function View({ title, columns, rows = ROWS, width }: { title: string; columns: 
   );
 }
 
-/** V2 · Belege — Beleg · Einordnung · Betrag · Belegdatum · Fortschritt · Sachverhalt · Stapel. */
-export const DocumentList: Story = { render: () => <View title="Belege 2026" columns={DOCUMENT_LIST_VIEW} /> };
+/**
+ * V2 · Belege — Beleg · Einordnung · Betrag · Belegdatum · Fortschritt ·
+ * Sachverhalt · Stapel. The date column chooses the sort axis (G1); the rows
+ * keep showing the document date.
+ */
+export const DocumentList: Story = {
+  render: () => (
+    <View title="Belege 2026" columns={DOCUMENT_LIST_VIEW} dateSort={{ current: "received", href: (axis) => `#sort=${axis}` }} />
+  ),
+};
 
 /** V3 · Stapel → Belege — no grouping; the progress says what became of each, the booking where it went (E7). */
 export const BatchDocuments: Story = {

@@ -10,6 +10,7 @@ import { Link } from "../../primitives/Link";
 import { Time } from "../../primitives/Time";
 import { FieldList } from "../../primitives/FieldList";
 import { HoverCard } from "../../primitives/Popover";
+import { MenuItem, OverflowMenu } from "../../primitives/OverflowMenu";
 import { ProcessPictureTrigger, type ProcessDialogDetail, type ProcessPicture } from "../../patterns/ProcessPicture";
 import { CaseCell } from "../accounting-case/CaseCell";
 import { JournalEntryCell, type JournalLine } from "../journal-entry/JournalEntryCompact";
@@ -230,7 +231,21 @@ export interface SourceDocumentColumnOptions {
   } | null;
   /** `compact` = the row K: classification as a word, progress on one line without holder. */
   variant?: "full" | "compact";
+  /**
+   * Which date the list is sorted by — the row always shows the document date
+   * (owner E5), the axis is chosen at the column head (brief F335 §3 V2, hint
+   * ll-dev2 G1). `href` builds the page for an axis; the page keeps the
+   * direction.
+   */
+  dateSort?: { current: DateSortAxis; href: (axis: DateSortAxis) => string };
 }
+
+export type DateSortAxis = "document" | "received" | "uploaded";
+const DATE_AXIS_WORD: Record<DateSortAxis, string> = {
+  document: "Belegdatum",
+  received: "Eingang beim Mandanten",
+  uploaded: "Eingang bei Ludwig",
+};
 
 export type StuckVariant = "stuck" | "inflight";
 
@@ -267,6 +282,8 @@ function documentNumber(d: SourceDocumentVM): string | null {
 /** What the name does not say: file and pages, number, basket, the split PDF it came from. */
 function documentTitle(d: SourceDocumentVM, number: string | null): string {
   return [
+    // The head in full first — the cell cuts it with an ellipsis (hint ll-dev2 G2).
+    documentHead(d).text,
     `Datei: ${d.fileName}${d.pageCount ? ` (${d.pageCount} ${d.pageCount === 1 ? "Seite" : "Seiten"})` : ""}`,
     number ? `Belegnummer: ${number}` : null,
     d.basketNumber ? `Dateikorb: ${d.basketNumber}` : null,
@@ -320,6 +337,7 @@ export function sourceDocumentColumns({
   batch,
   bookings,
   variant = "full",
+  dateSort,
 }: SourceDocumentColumnOptions = {}): ColumnDef<SourceDocumentVM>[] {
   const picked = new Set(columns);
   // Whichever of the two identity points comes first carries the row link —
@@ -559,9 +577,25 @@ export function sourceDocumentColumns({
     },
     documentDate: {
       key: "documentDate",
-      header: "Belegdatum",
-      width: "120px",
-      sortable: true,
+      // With an axis choice the head **is** the menu (hint ll-dev2 G1): its
+      // word stays „Belegdatum", because that is what the rows show; the menu
+      // says by which date the list is sorted. A button beside the head broke
+      // the grid (measured 2026-09-29).
+      header: dateSort ? (
+        <span className="v3docrow__sorthead" title={`Sortiert nach ${DATE_AXIS_WORD[dateSort.current]}`}>
+          <OverflowMenu label="Belegdatum" size="sm" align="start">
+            {(Object.keys(DATE_AXIS_WORD) as DateSortAxis[]).map((axis) => (
+              <MenuItem key={axis} href={dateSort.href(axis)}>
+                {`nach ${DATE_AXIS_WORD[axis]} sortieren${axis === dateSort.current ? " · gewählt" : ""}`}
+              </MenuItem>
+            ))}
+          </OverflowMenu>
+        </span>
+      ) : (
+        "Belegdatum"
+      ),
+      ...(dateSort ? {} : { sortable: true }),
+      width: dateSort ? "136px" : "120px",
       // One date per row (owner E5, F335): the document date. Without one the
       // receipt at the client stands in — muted and italic, so the fallback
       // shows; it is never passed off as the document date. Every other date

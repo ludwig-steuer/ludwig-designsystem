@@ -43,6 +43,12 @@ export interface ProcessPicture {
    * it replaces the column „liegt seit".
    */
   since?: string | null;
+  /**
+   * The free reason, cut by the app — `done_reason`, or the review reason
+   * with its note. It stands on hover at the cell (hint ll-dev2 G3); the
+   * dialog carries it whole.
+   */
+  reason?: string | null;
   /** What follows, one sentence without „Danach". `null` at the end of the path. */
   next?: string | null;
 }
@@ -131,20 +137,24 @@ function accessibleName(p: ProcessPicture, withHolder: boolean): string {
 function Target({
   onOpen,
   label,
+  hint,
   className,
   children,
 }: {
   onOpen?: () => void;
   label: string;
+  /** A second line for the hover — the free reason. */
+  hint?: string | null | undefined;
   className: string;
   children: ReactNode;
 }) {
+  const title = hint ? `${label}\n${hint}` : label;
   return onOpen ? (
-    <button type="button" className={`${className} is-interactive`} onClick={onOpen} aria-label={label} title={label}>
+    <button type="button" className={`${className} is-interactive`} onClick={onOpen} aria-label={label} title={title}>
       {children}
     </button>
   ) : (
-    <span className={className} title={label}>
+    <span className={className} title={title}>
       {children}
     </span>
   );
@@ -195,7 +205,7 @@ export function ProcessCell({
   }
   const withHolder = density === "regular";
   return (
-    <Target onOpen={onOpen} label={accessibleName(picture, withHolder)} className="pz-cell">
+    <Target onOpen={onOpen} label={accessibleName(picture, withHolder)} hint={picture.reason} className="pz-cell">
       {picture.phases.length ? <ProcessMini phases={picture.phases} /> : <span className="pz-cell__none">—</span>}
       <LevelSign level={picture.level} />
       <span className="pz-cell__word">{picture.headline}</span>

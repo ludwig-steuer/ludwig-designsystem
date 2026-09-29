@@ -45,7 +45,10 @@ const source = (over: Partial<Source> & { entryId: string }): Source => ({
   batch: { id: "2026-0009", label: "08-2026-Ludwig" },
   ...over,
 });
-const entry = (over: Partial<Source> & { entryId: string }): EntryRow => entryRowFromJournalEntry(source(over));
+const entry = (over: Partial<Source> & { entryId: string }): EntryRow => ({
+  ...entryRowFromJournalEntry(source(over)),
+  documentName: "Rechnung-RE-4471-Meier.pdf",
+});
 
 const BATCH: EntryRow[] = [
   entry({ entryId: "b1" }),

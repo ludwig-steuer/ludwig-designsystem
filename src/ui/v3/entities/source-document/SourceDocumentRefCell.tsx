@@ -26,6 +26,7 @@ export function SourceDocumentRefCell({
   number,
   documentId,
   documentHref,
+  name,
   variant = "full",
 }: {
   /** Belegfeld 1 as stored — the DATEV document number. */
@@ -35,6 +36,8 @@ export function SourceDocumentRefCell({
   /** The way into the document drawer (`?document=`). Without it the linked state stays text. */
   documentHref?: (documentId: string) => string;
   variant?: "compact" | "full";
+  /** The document's own name — file or form — readable on hover beside Belegfeld 1 (0211, hint ll-dev 10). */
+  name?: string | null;
 }) {
   const text = number?.trim() || null;
   if (documentId) {
@@ -45,11 +48,11 @@ export function SourceDocumentRefCell({
       </>
     );
     return documentHref ? (
-      <Link href={documentHref(documentId)} className="v3docref v3docref--link" title={text ? `Beleg ${text} ansehen` : "Beleg ansehen"}>
+      <Link href={documentHref(documentId)} className="v3docref v3docref--link" title={[text ? `Beleg ${text} ansehen` : "Beleg ansehen", name].filter(Boolean).join("\n")}>
         {body}
       </Link>
     ) : (
-      <span className="v3docref">{body}</span>
+      <span className="v3docref" title={name ?? undefined}>{body}</span>
     );
   }
   if (!text) return <span className="v2muted">ohne Beleg</span>;

@@ -84,3 +84,11 @@ keine Buchung) · `Inbox` (V1) · `Unbooked` (V5) · `Compact` (K) · `Narrow`
 | Reihenfolge fest: dieselbe Spalte steht in jeder Ansicht an derselben Stelle | alle Ansichten | |
 | V3 Buchung: ein Satz als Konten, zwei als „2 Buchungen", keiner „—" | `BatchDocuments` | |
 | K ohne Kopf, einzeilig | `Compact` | |
+
+## Nachtrag 2026-09-29 — nichts verlieren (Hinweise ll-dev2 G1–G3)
+
+| # | Lücke | Lösung |
+|---|---|---|
+| G1 | Sortieren nach Upload-Zeit fiel mit der Spalte „Ludwig-Eingang" weg | Option `dateSort: { current, href }`: der Kopf „Belegdatum ▾" ist das Menü — nach Belegdatum · Eingang beim Mandanten · Eingang bei Ludwig sortieren; die Zeilen zeigen weiter das Belegdatum (E5). Gemessen: Kopf 90 × 24 px, V2 1246 px, kein Querscroll |
+| G2 | Der gekürzte Gegenpart war beim Überfahren nicht mehr ganz lesbar | `documentTitle()` beginnt mit dem vollen Kopf des Namens |
+| G3 | Der freie Grund stand nicht mehr an der Zelle | `ProcessPicture.reason` (von der App gekürzt) steht als zweite Zeile im Titel der Fortschritt-Zelle |
