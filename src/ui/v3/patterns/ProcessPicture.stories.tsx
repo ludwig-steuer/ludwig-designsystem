@@ -190,10 +190,10 @@ const detail = (history: ProcessDialogDetail["history"]): ProcessDialogDetail =>
   history,
   historyHref: "#tab=history",
   technical: [
-    ["status", "human_review"],
-    ["review_reason", "open_findings"],
-    ["processing_stage", "interpreted"],
-    ["job", "—"],
+    { label: "status", value: "human_review", meaning: "Stand des Belegs; aus ihm leitet sich das Prozessbild ab." },
+    { label: "review_reason", value: "open_findings", meaning: "Warum der Beleg zur Prüfung liegt." },
+    { label: "processing_stage", value: "interpreted", meaning: "Wie weit die Auslese gekommen ist: aufbereitet, ausgelesen, gedeutet." },
+    { label: "job", value: "—", meaning: "Der Hintergrundauftrag, der gerade am Beleg arbeitet, und sein Stand." },
   ],
   links: [
     { label: "Zum Sachverhalt 2026-0334", href: "#case" },

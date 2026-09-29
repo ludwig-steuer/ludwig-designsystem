@@ -112,6 +112,7 @@ export { EmptyState, type EmptyStateProps } from "./primitives/EmptyState";
 export { Callout } from "./primitives/Callout";
 export { Banner, type BannerTone } from "./primitives/Banner";
 export { Disclosure, type DisclosureTone } from "./primitives/Disclosure";
+export { TechnicalFields, type TechnicalField } from "./primitives/TechnicalFields";
 export { PageHeader } from "./primitives/PageHeader";
 export { ToastHost, useToast, type Toast, type ToastTone } from "./primitives/Toast";
 export { Skeleton, type SkeletonVariant } from "./primitives/Skeleton";

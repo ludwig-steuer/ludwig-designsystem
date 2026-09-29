@@ -6,7 +6,7 @@ import { StateIcon } from "../../patterns/Review";
 import { Banner } from "../../primitives/Banner";
 import { Button } from "../../primitives/Button";
 import { Dialog } from "../../primitives/Dialog";
-import { Disclosure } from "../../primitives/Disclosure";
+import { TechnicalFields, type TechnicalField } from "../../primitives/TechnicalFields";
 import { Field, Select } from "../../primitives/Form";
 import { Link } from "../../primitives/Link";
 import { TextButton } from "../../primitives/TextButton";
@@ -62,7 +62,7 @@ export interface ClassificationDialogDetail {
   sections: readonly ClassificationSection[];
   correction?: ClassificationCorrection;
   /** Raw values — only under „Technisch" (T4). */
-  technical: readonly { label: string; value: string }[];
+  technical: readonly TechnicalField[];
 }
 
 const SECTION_TITLE: Record<ClassificationSection["key"], string> = {
@@ -352,16 +352,7 @@ export function ClassificationDialog({
             <Correction c={detail.correction} />
           </section>
         ) : null}
-        <Disclosure summary="Technisch">
-          <dl className="pz-dlg__tech">
-            {detail.technical.map((t) => (
-              <div key={t.label}>
-                <dt>{t.label}</dt>
-                <dd>{t.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </Disclosure>
+        <TechnicalFields fields={detail.technical} />
       </div>
     </Dialog>
   );

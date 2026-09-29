@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import { Banner } from "../primitives/Banner";
 import { Button } from "../primitives/Button";
 import { Dialog } from "../primitives/Dialog";
-import { Disclosure } from "../primitives/Disclosure";
+import { TechnicalFields, type TechnicalField } from "../primitives/TechnicalFields";
 import { Link } from "../primitives/Link";
 import { LogList, type LogEntry } from "./Log";
 import {
@@ -74,8 +74,12 @@ export interface ProcessDialogDetail {
   history: LogEntry[] | "error";
   historyHref?: string;
   onRetryHistory?: () => void;
-  /** Raw values — the only place database words may stand (T4). */
-  technical: readonly [string, string][];
+  /**
+   * Raw values — the only place database words may stand (T4), each with its
+   * meaning. ponytail: the pair form is the app's `document-process.ts` until
+   * it hands in `TechnicalField` with `meaning` (L-357); then drop it.
+   */
+  technical: readonly (TechnicalField | readonly [string, string])[];
   /** The way to the explanation of the axis — `StatusInfoButton` from the caller. */
   axis?: ReactNode;
   links?: readonly { label: string; href: string }[];
@@ -416,17 +420,12 @@ export function ProcessDialog({
           <History detail={detail} />
         </section>
 
-        <Disclosure summary="Technik" defaultOpen={technicalOpen}>
-          <dl className="pz-dlg__tech">
-            {detail.technical.map(([k, v]) => (
-              <div key={k}>
-                <dt>{k}</dt>
-                <dd>{v}</dd>
-              </div>
-            ))}
-          </dl>
+        <TechnicalFields
+          fields={detail.technical.map((t) => ("label" in t ? t : { label: t[0], value: t[1] }))}
+          defaultOpen={technicalOpen}
+        >
           {detail.axis}
-        </Disclosure>
+        </TechnicalFields>
       </div>
     </Dialog>
   );

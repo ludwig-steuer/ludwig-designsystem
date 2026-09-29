@@ -557,10 +557,14 @@
 .pz-dlg__now dd { margin: 0; }
 .pz-dlg__now p { margin: var(--space-1) 0 0; }
 .pz-dlg__note { color: var(--color-text-muted); white-space: pre-line; }
-.pz-dlg__tech { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-1) var(--space-4); margin: 0 0 var(--space-2); font-family: var(--font-mono); font-size: var(--fs-ui-xs); }
-.pz-dlg__tech > div { display: contents; }
-.pz-dlg__tech dt { color: var(--color-text-subtle); }
-.pz-dlg__tech dd { margin: 0; }
+/* TechnicalFields: field · value · meaning (owner 2026-09-29). Codes mono, the
+   meaning plain text; one hairline between rows, no grid (§2). */
+.v3tech { width: 100%; border-collapse: collapse; margin: 0 0 var(--space-2); font-size: var(--fs-ui-sm); }
+.v3tech th { text-align: left; font-weight: 600; font-size: var(--fs-ui-xs); color: var(--color-text-muted); padding: 0 var(--space-4) var(--space-1) 0; }
+.v3tech td { padding: var(--space-1) var(--space-4) var(--space-1) 0; border-top: 1px solid var(--color-border-subtle); vertical-align: baseline; }
+.v3tech th:last-child, .v3tech td:last-child { padding-right: 0; }
+.v3tech__code { font-family: var(--font-mono); font-size: var(--fs-ui-xs); white-space: nowrap; }
+.v3tech td.v3tech__code:first-child { color: var(--color-text-subtle); }
 .pz-dlg__links { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-right: auto; font-size: var(--fs-ui-sm); }
 .pz-steps, .pz-steps__sub { list-style: none; margin: 0; padding: 0; }
 .pz-steps > li {

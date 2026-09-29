@@ -235,11 +235,23 @@ function build(s: Spec): Scenario {
       loops: s.loops,
       history: s.history ?? [],
       historyHref: "#tab=history",
-      technical: Object.entries(s.technical),
+      technical: Object.entries(s.technical).map(([label, value]) => ({ label, value, meaning: FIELD_MEANING[label] })),
       links: s.links,
     },
   };
 }
+
+/** What each raw field means — in the app this comes with the field, not from the page. */
+const FIELD_MEANING: Record<string, string> = {
+  status: "Stand des Belegs; aus ihm leitet sich das Prozessbild ab.",
+  review_reason: "Warum der Beleg zur Prüfung liegt.",
+  processing_stage: "Wie weit die Auslese gekommen ist: aufbereitet, ausgelesen, gedeutet.",
+  job: "Der Hintergrundauftrag, der gerade am Beleg arbeitet, und sein Stand.",
+  done_via: "Auf welchem Weg der Beleg erledigt wurde: Buchung, Import oder von Hand.",
+  entry: "Stand der Buchung auf dem Weg nach DATEV.",
+  parent: "Die Sammel-PDF, aus der dieser Beleg herausgelöst wurde.",
+  children: "Die Belege, die aus dieser Sammel-PDF entstanden sind.",
+};
 
 const T = (status: string, extra: Record<string, string> = {}) => ({
   status,
