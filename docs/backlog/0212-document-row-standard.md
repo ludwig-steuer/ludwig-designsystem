@@ -198,3 +198,68 @@ nächsten Schritt.
 | G8 | Seitenbereich des Teils | `pages` zeigt `splitPageRange` („4–5", absolut, von der App gesetzt), sonst die Seitenzahl; neue Ansicht `UNBOOKED_GROUPED_VIEW`. „Seiten" steht an der **Katalogstelle** nach der Einordnung, nicht vorn — eine Ansicht wählt aus, sie ordnet nicht um (E2) |
 
 Breiten danach neu gesetzt: Beleg ≥ 190, Einordnung 200 (das zweizeilige Bild von 0205 braucht die 232 der alten Badge-Kette nicht), Betrag 112, Fortschritt ≥ 236, Begründung ≥ 100. Gemessen bei 1280 px: V1, V2, V3, V5 und V5 gruppiert je 1246 = 1246, kein Stand-Wort gekürzt, keine Einordnung gekürzt; K in 720 px passt.
+
+## Abnahme Welle 2 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung, nicht der Bauende). Stand ba133b3, Code
+(`SourceDocumentCard.tsx`, `source-document-columns.tsx`, `index.ts`),
+Storybook 6107 `Seiten/Belegzeile` bei 1280 × 900 mit Playwright gemessen.
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| G4 | `SourceDocumentCard.tsx` | ✓ `partProcessPicture`, `partClassificationPicture` als Props, an `SourceDocumentList` durchgereicht (nur wenn gesetzt) |
+| G5 | `SourceDocumentCard.tsx` | ✓ Block „Teilbelege" `<div className="v2doccard__parts" id="parts">` |
+| G6 | `UNBOOKED_VIEW`, Story `Unbooked` | ✓ `amount` an der Katalogstelle nach der Einordnung; Köpfe Beleg · Einordnung · Betrag · Belegdatum · Fortschritt · Begründung · Sachverhalt |
+| G7 | Story `UnbookedGrouped` | ✓ „Ohne hinterlegte Begründung." gedämpft (`v2muted`, 6,69:1), mit Titel |
+| G8 | `pages`, Story `UnbookedGrouped` | ✓ „5–7", „8–9" aus `splitPageRange`; `UNBOOKED_GROUPED_VIEW` = Beleg · Einordnung · Seiten · Betrag · Belegdatum · Fortschritt · Begründung · Sachverhalt, Seiten an der Katalogstelle; Export in `src/ui/v3/index.ts:397` ✓ |
+| `DocumentList` (V2) | 1280 | ✓ 1246 = 1246; kein Stand-Wort, keine Einordnung gekürzt |
+| `BatchDocuments` (V3) | 1280 | ✓ 1246 = 1246; nichts gekürzt |
+| `Inbox` (V1) | 1280 | ✓ 1246 = 1246; nichts gekürzt; Hinweis M7 |
+| `Unbooked` (V5) | 1280 | ✓ 1246 = 1246; nichts gekürzt |
+| `UnbookedGrouped` | 1280 | ✓ 1246 = 1246; nichts gekürzt |
+| `Compact` (K) | 720 | ✓ 720 = 720; nichts gekürzt, Zeilen 50–51 px |
+| Gegenprobe Einordnung 200 statt 232 px: Zeilenhöhe | alle Ansichten | ✓ unverändert gegenüber der ersten Abnahme (V2/V1 69 · 69 · 64 · 69 · 61 px); Einordnung überall 37 px, zweizeilig |
+| Gegenprobe: zweite Zeile gekürzt | Stories; Sonde mit den Wörtern der Fixtures | ✓ in den Stories nichts gekürzt; ✗ mit echten Verbund-Wörtern → M6 |
+
+Nachgemessen per Sonde in der Einordnungs-Zelle von `DocumentList` (200 px,
+Platz für Zeile 2: 176 px; Zeile 1 „Kreditkartenabrechnung" passt mit 143 px):
+
+| Zeile 2 | Bedarf | bei 232 px (Platz 208) | bei 200 px (Platz 176) |
+|---|---|---|---|
+| „Eingangsrechnung · zerlegt in 5 Teile" | 201 px | passte | gekürzt |
+| „Ausgangsgutschrift · Deckblatt · 9 Belege" | 225 px | gekürzt | gekürzt |
+| „Eingangsrechnung · Teil 3 von 9 · Seiten 4–5" | 241 px | gekürzt | gekürzt |
+
+### Mängel Welle 2
+
+**M6 — nicht blockierend.** Die Einordnung mit 200 px kürzt die zweite Zeile,
+sobald ein Verbund-Wort dazukommt: „Eingangsrechnung · zerlegt in 5 Teile"
+braucht 201 px und hat 176 px (`source-document-columns.tsx`, Breite
+`classification` 200 px). Bei 232 px passte es. Die Zeilenhöhe steigt nicht
+(nowrap), der Titel trägt den vollen Text. Kein Story-Beleg zeigt ein
+Verbund-Wort, obwohl die Ansicht „V5 gruppiert" genau Teilbelege zeigt.
+Auflage: eine Story mit Teil, Deckblatt und zerlegtem Beleg in V2 und V5
+gruppiert; dann entscheiden, ob Zeile 2 in der gruppierten Ansicht den
+Verbund weglässt (die Spalte Seiten trägt den Bereich schon) oder ob die
+Einordnung breiter wird.
+
+**M7 — nicht blockierend.** G8 wirkt in **jeder** Ansicht mit „Seiten", nicht
+nur in der gruppierten: In `Inbox` (V1) steht bei Aral „5–7" zwischen „1" und
+„—". In V1 fragt die Spalte „ist jede Datei da" — dort liest man eine
+Seitenzahl, keinen Bereich im Original. Entweder der Bereich nur in
+`UNBOOKED_GROUPED_VIEW` (Option), oder die Zelle sagt es („S. 5–7") und der
+Titel nennt das Original.
+
+Vier Linsen: **Sprache** — „Ohne hinterlegte Begründung." benennt die Lücke
+als Befund, Kanzleiwörter, keine Versalien ✓. **Bedienung** — `#parts`
+erreicht sein Ziel; keine neuen Ziele ✓. **Logik** — Ansichten wählen aus, die
+Reihenfolge bleibt die des Katalogs (Seiten nach Einordnung) ✓; M7.
+**Darstellung** — keine neue Farbe, nichts gekürzt bei 1280 in den Stories ✓;
+M6.
+
+### Urteil Welle 2
+
+**Abgenommen mit Auflagen**: M6 (Story mit Verbund-Wörtern, dann Breite oder
+Zeile 2 entscheiden) und M7 (Seitenbereich nur, wo er gemeint ist). Die
+Auflagen aus der Nachprüfung (M3, M5) bleiben bestehen.
+
