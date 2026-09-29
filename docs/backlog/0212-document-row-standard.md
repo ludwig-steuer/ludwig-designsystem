@@ -267,3 +267,32 @@ Auflagen aus der Nachprüfung (M3, M5) bleiben bestehen.
 **Nachbesserung Welle 2 (M7):** Der Seitenbereich trägt den Titel „Seiten 5–7 im Original"; der Strich unterscheidet ihn von der Seitenzahl. **M6** bleibt Auflage: die zweite Zeile der Einordnung eines zerlegten Belegs („Eingangsrechnung · zerlegt in 5 Teile", 201 px) wird in 176 px gekürzt, der volle Text steht im Titel — Entscheid, ob sie in der gruppierten Ansicht entfällt, mit der ersten echten Story.
 
 **Entscheid zu M6 (2026-09-29, nach Hinweis ll-dev2):** „zerlegt in n Teile" steht nur am **Original** (V1, V2), nicht in V5 gruppiert — dort sind die Zeilen die Teile, das Original ist der Gruppenkopf. (1) Die Einordnung ist `minmax(200px, 232px)`: sie wächst, wo die Ansicht Platz hat (V2, V1), und gibt in V5 gruppiert nach. (2) In einer Ansicht **mit** der Spalte „Seiten" lässt die App den Seitenbereich aus dem Teil-Wort weg („Eingangsrechnung · Teil 3 von 12" statt „… · 5–7") — er stünde sonst doppelt. Das Teil-Wort baut die App (`document-classification.ts`), das Set zeigt es.
+
+## Nachprüfung M6 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung). Stand b251a5a, Storybook 6107, 1280 × 900,
+Playwright. Einordnung `minmax(200px, 232px)`.
+
+| Ansicht | Querscroll | Einordnung | gekürzt (Stand, Einordnung) | Zeilenhöhen |
+|---|---|---|---|---|
+| `DocumentList` (V2) | 1246 = 1246 | 232 px | nichts | 69 · 69 · 64 · 69 · 61 |
+| `Inbox` (V1) | 1246 = 1246 | 232 px | nichts | 69 · 69 · 64 · 69 · 61 |
+| `BatchDocuments` (V3) | 1246 = 1246 | 232 px | nichts | 69 · 64 · 61 |
+| `Unbooked` (V5) | 1246 = 1246 | 232 px | nichts | 61 |
+| `UnbookedGrouped` | 1246 = 1246 | 200 px | nichts | 69 · 61 |
+| `Compact` (K, 720 px) | 720 = 720 | 96 px (unverändert) | nichts | 51 · 51 · 50 |
+
+Sonde: „Eingangsrechnung · zerlegt in 5 Teile" als Zeile 2 eingesetzt — in V1,
+V2, V3 und V5 passt sie (201 px Bedarf, 201 px sichtbar, Platz 208 px). In V5
+gruppiert wäre sie gekürzt (201 > 176); dort steht sie nach dem Entscheid nicht,
+weil die Zeilen die Teile sind und das Original der Gruppenkopf ist. Das
+Teil-Wort ohne Seitenbereich („… · Teil 3 von 12") ist Sache der App
+(`document-classification.ts`) und hier nicht messbar; es passt, solange es
+kürzer bleibt als 176 px.
+
+### Urteil
+
+**M6 erledigt.** 0212 Welle 2 bleibt **abgenommen mit Auflagen**, jetzt nur
+noch die älteren M3 und M5 (M7 ist mit fd5402b angegangen und hier nicht
+nachgeprüft).
+
