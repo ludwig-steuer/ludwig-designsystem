@@ -220,7 +220,9 @@ export const InBucket: Story = {
         href={listHref}
         head={{ title: "Exportiert", sub: "August 2026", meta: "343 Sätze" }}
         rowActions={actions}
-        without={["batch"]}
+        // The action is the bucket's own deed, not an extra column: it must
+        // stand inside the card at 1280 px — the origin gives way (acceptance 0211, M8).
+        without={["batch", "origin"]}
         {...HREFS}
       />
     );

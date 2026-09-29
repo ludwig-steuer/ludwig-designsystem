@@ -306,3 +306,8 @@ Offen, nicht blockierend: M3 (setweit), M5, M6, M8, M9.
 
 **Abgenommen mit Auflagen**: M8 (Story `InBucket` ohne Querscroll der Aktion)
 und M9 (volle Standardform benennen oder messen); M5/M6 bei Gelegenheit.
+
+## Nachbesserung 3 (2026-09-29, Auflagen M8/M9)
+
+- **M8:** Die Begründung zu `InBucket` war falsch — die Zeilenaktion ist die Handlung des Buckets, keine Zusatzspalte. Die Story nimmt jetzt `without: ["batch", "origin"]`; das unumkehrbare „Stornieren" steht in der Karte. Regel für Aufrufer: **eine Zeilenaktion muss bei 1280 px in der Karte stehen** — dafür weicht eine Spalte (`without`).
+- **M9:** T1 `full` für Ludwig mit allen elf Standardspalten (Sachverhalt **und** Stapel) braucht ~1312 px und scrollt bei 1280 px in der Karte. Jeder heutige Rahmen hat eine der beiden leer und nimmt sie mit `without` heraus (Stapel-Seite: `batch`, Sachverhalt: `case`); wo beide nötig sind (Spiegel über mehrere Stapel), ist der Querscroll in der Karte die Regel des Sets.
