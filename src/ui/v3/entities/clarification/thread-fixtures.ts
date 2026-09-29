@@ -3,7 +3,7 @@ import type { ThreadItem } from "./ClarificationThread";
 const WEBER = "Anna Weber";
 const KRAUSE = "Tom Krause";
 
-// Case 2026-0042, Musterfirma GmbH: four questions and a note, oldest first.
+/** The thread of case 2026-0042 (Musterfirma GmbH) for stories: four questions and a note, oldest first. */
 export const ITEMS: ThreadItem[] = [
   {
     id: "q1",
