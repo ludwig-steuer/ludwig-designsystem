@@ -47,7 +47,7 @@ const DONE: DocumentMilestone[] = [
   { kind: "done", at: "2026-09-24", via: "booking", reason: "Buchung erzeugt" },
   CASE,
   { kind: "entries", at: "2026-09-24", entries: [MAGURA_ENTRY] },
-  { kind: "batch", at: "2026-09-25", label: "08-2026-Ludwig", status: "review", href: "#batch=2026-0004" },
+  { kind: "batch", at: "2026-09-25", batches: [{ key: "2026-0004", label: "08-2026-Ludwig", status: "review", href: "#batch=2026-0004" }] },
 ];
 
 const AHEAD_EXPORT: UpcomingMilestone[] = [{ key: "export", label: "An DATEV übergeben" }];
@@ -91,7 +91,7 @@ export const FilingFailed: Story = {
   args: {
     milestones: [
       ...DONE.slice(0, 3),
-      { kind: "batch", at: "2026-09-25", label: "08-2026-Ludwig", status: "mirrored", href: "#batch=2026-0004" },
+      { kind: "batch", at: "2026-09-25", batches: [{ key: "2026-0004", label: "08-2026-Ludwig", status: "mirrored", href: "#batch=2026-0004" }] },
       {
         kind: "export",
         at: "2026-09-26",
@@ -124,6 +124,65 @@ export const ManyEntries: Story = {
     ],
     href: "#tab=history",
     accountHref,
+  },
+};
+
+// Staging, Willems 10160 — statement 17a577a8, Münchner Bank.
+const STATEMENT_IMPORT: DocumentMilestone = {
+  kind: "import",
+  at: "2026-09-09",
+  account: { name: "Münchner Bank 107555539", iban: "DE30701900000107555539", href: "#payment-account=107555539" },
+  period: { from: "2026-07-01", to: "2026-07-31" },
+  balance: { opening: 53125.09, closing: 56666.67, currency: "EUR" },
+  count: 145,
+};
+
+/** A statement: done by import, 144 of 145 transactions booked, all in one batch — counts, not entry lines. */
+export const Statement: Story = {
+  args: {
+    milestones: [
+      { kind: "done", at: "2026-09-09", via: "import", reason: null },
+      STATEMENT_IMPORT,
+      { kind: "transactions", booked: 144, total: 145, openHref: "#transactions=open" },
+      { kind: "batch", batches: [{ key: "2026-0003", label: "07-2026-Ludwig", status: "confirmed", href: "#batch=2026-0003", count: 144 }] },
+    ],
+    upcoming: [{ key: "export", label: "An DATEV übergeben" }],
+    href: "#tab=history",
+  },
+};
+
+/** A statement imported with the check overridden, transactions in two batches. */
+export const StatementOverridden: Story = {
+  args: {
+    milestones: [
+      { ...STATEMENT_IMPORT, verification: { label: "Nur zeilengeprüft — die Saldenkette wurde übersteuert", level: "warning" } } as DocumentMilestone,
+      { kind: "transactions", booked: 145, total: 145 },
+      {
+        kind: "batch",
+        batches: [
+          { key: "2026-0003", label: "07-2026-Ludwig", status: "confirmed", href: "#batch=2026-0003", count: 131 },
+          { key: "2026-0004", label: "08-2026-Ludwig", status: "review", href: "#batch=2026-0004", count: 14 },
+        ],
+      },
+    ],
+    href: "#tab=history",
+  },
+};
+
+/** A statement nothing has happened to — the way of a statement, the account missing. */
+export const StatementNotStarted: Story = {
+  args: {
+    milestones: [],
+    pathLabel: "Weg eines Kontoauszugs",
+    href: "#tab=history",
+    upcoming: [
+      { key: "account", label: "Zahlungskonto bestimmen", note: { level: "warning", text: "Zu dieser IBAN ist kein Zahlungskonto angelegt." } },
+      { key: "check", label: "Prüfen" },
+      { key: "import", label: "Umsätze einlesen" },
+      { key: "transactions", label: "Umsätze buchen" },
+      { key: "batch", label: "Stapel zuordnen" },
+      { key: "export", label: "An DATEV übergeben" },
+    ],
   },
 };
 

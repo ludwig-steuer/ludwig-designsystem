@@ -5,6 +5,9 @@ import type { Currency } from "@/ludwig/shared/money";
 
 import { StateIcon, type StateKind } from "../../patterns/Review";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { formatCount } from "../../format";
+import { Amount } from "../../primitives/Amount";
+import { IbanCell } from "../../primitives/Cells";
 import { Card, CardHead } from "../../primitives/Table";
 import { Link } from "../../primitives/Link";
 import { Skeleton } from "../../primitives/Skeleton";
@@ -37,7 +40,32 @@ export type DocumentMilestone =
   | { kind: "done"; at: string; via: string; reason?: string | null }
   | { kind: "case"; at?: string; case: CaseLink; href: string }
   | { kind: "entries"; at?: string; entries: readonly MilestoneEntry[]; moreHref?: string }
-  | { kind: "batch"; at?: string; label: string; status: string; href?: string }
+  | {
+      kind: "batch";
+      at?: string;
+      /** One batch for a document; a statement's transactions may land in several, each with its count. */
+      batches: readonly { key: string; label: string; status: string; href?: string; count?: number }[];
+    }
+  | {
+      /** A statement (payment documents, 0210 addendum): what the import read. */
+      kind: "import";
+      at: string;
+      account: { name: string; iban?: string | null; href?: string };
+      period: { from: string; to: string };
+      balance: { opening: number; closing: number; currency: Currency };
+      count: number;
+      /** The check the import passed, in words from the app; `warning` where it was overridden. Absent for old imports. */
+      verification?: { label: string; level?: "warning" } | null;
+    }
+  | {
+      /** A statement's transactions and how many of them are booked. */
+      kind: "transactions";
+      at?: string;
+      booked: number;
+      total: number;
+      /** The transactions of this statement, filtered to the open ones. */
+      openHref?: string;
+    }
   | {
       kind: "export";
       at: string;
@@ -60,6 +88,8 @@ const WORD: Record<DocumentMilestone["kind"], string> = {
   case: "Sachverhalt zugeordnet",
   entries: "Gebucht",
   batch: "Im Stapel",
+  import: "Importiert",
+  transactions: "Umsätze gebucht",
   export: "An DATEV übergeben",
 };
 
@@ -112,7 +142,7 @@ export function SourceDocumentMilestones({
         {milestones.length > 0 ? (
           <ol className="v3ms">
             {milestones.map((m) => (
-              <Row key={m.kind} sign={m.kind === "export" && m.filing?.status === "failed" ? "error" : "done"} word={wordOf(m)} at={m.at}>
+              <Row key={m.kind} sign={signOf(m)} word={wordOf(m)} at={m.at}>
                 <Facts m={m} accountHref={accountHref} />
               </Row>
             ))}
@@ -139,6 +169,13 @@ export function SourceDocumentMilestones({
       <div className="v3boxbody">{body}</div>
     </Card>
   );
+}
+
+function signOf(m: DocumentMilestone): StateKind {
+  if (m.kind === "export" && m.filing?.status === "failed") return "error";
+  // Reached, but not all through: the station stands, the rest is still open.
+  if (m.kind === "transactions" && m.booked < m.total) return "open";
+  return "done";
 }
 
 function wordOf(m: DocumentMilestone): string {
@@ -196,11 +233,61 @@ function Facts({ m, accountHref }: { m: DocumentMilestone; accountHref?: ((n: st
     }
     case "batch":
       return (
+        <>
+          {m.batches.map((b) => (
+            <span key={b.key} className="v3ms__line">
+              {b.href ? <Link href={b.href}>{b.label}</Link> : <span>{b.label}</span>}
+              {b.count !== undefined ? <span className="v3ms__count">{formatCount(b.count, ["Umsatz", "Umsätze"])}</span> : null}
+              <StatusBadge axis="export_batch" status={b.status} info={false} />
+            </span>
+          ))}
+        </>
+      );
+    case "import":
+      return (
+        <>
+          <span className="v3ms__line">
+            {m.account.href ? <Link href={m.account.href}>{m.account.name}</Link> : <span>{m.account.name}</span>}
+            {m.account.iban ? <IbanCell value={m.account.iban} /> : null}
+          </span>
+          <span className="v3ms__line">
+            <span>
+              <Time value={m.period.from} format="date" size="sm" /> – <Time value={m.period.to} format="date" size="sm" /> ·{" "}
+              {formatCount(m.count, ["Umsatz", "Umsätze"])}
+            </span>
+          </span>
+          <span className="v3ms__line">
+            <span>
+              Saldo <Amount value={m.balance.opening} currency={m.balance.currency} size="sm" /> →{" "}
+              <Amount value={m.balance.closing} currency={m.balance.currency} size="sm" />
+            </span>
+          </span>
+          {m.verification ? (
+            m.verification.level === "warning" ? (
+              <span className="v3ms__note">
+                <StateIcon state="warning" />
+                <span className="v3ms__warn">{m.verification.label}</span>
+              </span>
+            ) : (
+              <span>{m.verification.label}</span>
+            )
+          ) : null}
+        </>
+      );
+    case "transactions": {
+      const open = m.total - m.booked;
+      return (
         <span className="v3ms__line">
-          {m.href ? <Link href={m.href}>{m.label}</Link> : <span>{m.label}</span>}
-          <StatusBadge axis="export_batch" status={m.status} info={false} />
+          <span>{`${formatCount(m.booked)} von ${formatCount(m.total)} gebucht`}</span>
+          {open > 0 ? (
+            <>
+              <span>·</span>
+              {m.openHref ? <Link href={m.openHref}>{`${formatCount(open)} offen`}</Link> : <span>{`${formatCount(open)} offen`}</span>}
+            </>
+          ) : null}
         </span>
       );
+    }
     case "export":
       if (!m.filing) return null;
       return (

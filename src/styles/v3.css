@@ -4682,6 +4682,8 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3ms__then:first-child { margin-top: 0; }
 .v3ms--ahead .v3ms__word { font-weight: 400; color: var(--color-text-muted); }
 .v3ms__warn { color: var(--color-warning); }
+.v3ms__note { display: grid; grid-template-columns: 15px minmax(0, 1fr); gap: var(--space-2); align-items: start; }
+.v3ms__count { color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
 .v3ms__empty { margin: 0; color: var(--color-text-muted); }
 .v3ms__error { margin: 0; }
 /* In the narrow right column the entry wraps between its parts instead of

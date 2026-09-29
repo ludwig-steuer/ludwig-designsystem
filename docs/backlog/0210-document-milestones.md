@@ -89,3 +89,20 @@ geschehen." · lädt (`Loading`, drei Zeilen Skelett) · Fehler (`Error`, mit
 | Lädt / Fehler mit Retry, Kopf bleibt | `Loading`, `Error` | |
 | Kein Rohwert im Lesetext (T4) | alle | |
 | 1280 px, rechte Spalte: keine Zeile bricht das Datum weg | Showcase Belegseite | |
+
+## Nachtrag 2026-09-29 — Zahlungsbelege (Anfrage ll-dev, Owner)
+
+Kontoauszug, Kreditkartenabrechnung, Kassenabschluss: am Beleg hängen weder
+Sachverhalt noch Buchung, sondern Umsätze, oft über 100 Stück. Deshalb gibt es
+hier Mengen und Fortschritt statt Soll-an-Haben-Zeilen.
+
+| Station (`kind`) | Wort | Zeile 2 |
+|---|---|---|
+| `import` | „Importiert" | Zahlungskonto (Link) · IBAN · Zeitraum · Anzahl · „Saldo 53.125,09 € → 56.666,67 €" · Prüfkette als Wort der App, bei übersteuerter Prüfung als Warnung mit Zeichen; fehlt bei Altbestand |
+| `transactions` | „Umsätze gebucht" | „144 von 145 gebucht · 1 offen" — „offen" führt auf die gefilterte Umsatzliste; Zeichen offener Kreis, solange nicht alle gebucht sind |
+| `batch` | „Im Stapel" | **geändert:** `batches[]` — je Stapel Name · Anzahl (optional) · Status; ein Beleg hat einen Eintrag |
+
+Stories `Statement` (17a577a8, Münchner Bank), `StatementOverridden`
+(`rows_only`, zwei Stapel), `StatementNotStarted` (Weg eines Kontoauszugs,
+Hinweis an „Zahlungskonto bestimmen"). Befund **L-358**: `verification_level`
+hat keine Achse in der Registry; bis dahin liefert die App das Wort.
