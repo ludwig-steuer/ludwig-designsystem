@@ -398,6 +398,7 @@ export {
   type SourceDocumentColumn,
   type SourceDocumentColumnOptions,
   type StuckVariant,
+  type DateSortAxis,
 } from "./entities/source-document/source-document-columns";
 export {
   SourceDocumentPreview,
