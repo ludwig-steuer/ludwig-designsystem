@@ -287,7 +287,7 @@ export function journalEntryColumns(options: JournalEntryColumnOptions = {}): Co
       header: "Buchungstext",
       // The text leads the free width: at 1280 it had 130 px next to two
       // account names cut to three letters (0211, measured).
-      width: "minmax(160px, 2fr)",
+      width: "minmax(120px, 2fr)",
       cell: (e) => {
         if (e.text === null) return <span className="v2muted">—</span>;
         const { shown, title } = clip(e.text);

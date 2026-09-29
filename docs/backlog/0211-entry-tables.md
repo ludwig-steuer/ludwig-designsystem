@@ -73,7 +73,7 @@ DATEV-ID als Spalte — Technik, gehört in den Satz-Drawer (T4).
 | Ausprägung | Spalten |
 |---|---|
 | `compact` | Datum · Zeichen · Beleg · Buchungstext · Gegenkonto (nur Nummer, Name im Titel) · Soll · Haben (· Saldo) — bei 640 px Buchungstext 100 px |
-| `full` | Datum · Zeichen · Buchungszustand · Beleg · Buchungstext · Gegenkonto · Soll · Haben (· Saldo) · BU · Sachverhalt · Stapel |
+| `full` | Datum · Zeichen · Buchungszustand · Beleg · Buchungstext · Gegenkonto · Soll · Haben (· Saldo) · BU · Sachverhalt · Stapel · DATEV (Herkunftskennzeichen) |
 
 Neu: Beleg-Zelle statt `MonoCell`, `documentHref`, `caseHref`, `taxKeyHref`,
 `AccountEntryList` mit `entryHref` (ganze Zeile) und **Summenzeile**
@@ -82,7 +82,7 @@ ganzen Bestand, nicht über die geladene Seite (E2).
 
 ## `DataTable.totals`
 
-`totals?: { label: string; cells: Record<columnKey, ReactNode> }` — eine
+`totals?: { label: string; cells: Partial<Record<string, ReactNode>> }` (Schlüssel = Spaltenschlüssel des Aufrufers) — eine
 Zeile unter den Daten, im selben Raster, Wort in der ersten Spalte, Werte unter
 ihren Spalten, fett, Trennlinie darüber. Nicht bei Laden, Fehler, leer.
 
@@ -257,3 +257,12 @@ Offen, nicht blockierend: M3 (setweit), M4 (a, b) in der Spec, M5, M6.
 
 **Nicht abgenommen.** M1 und M2 sind behoben, aber die Nachbesserung hat M7
 erzeugt: Die Standardform scrollt bei der Zielbreite.
+
+## Nachbesserung 2 (2026-09-29, nach der Nachprüfung)
+
+| Mangel | Behoben |
+|---|---|
+| M7 (blockierend) | Mindestwert des Buchungstexts in T1 `full` von 160 auf 120 px — die Standardform passt wieder in 1246 px, mit Zusatzspalten scrollt die Karte weiter statt zu quetschen |
+| M4a, M4b | Spec-Tabellen nachgezogen: T2 `full` mit „DATEV", `totals.cells` als `Partial<Record<string, …>>` |
+
+Gemessen nach Nachbesserung 2, 1280 px: `InBatch` 1246 = 1246 (Buchungstext 148 px), `AtCase` 1246 = 1246 (132 px), `Mirror` 1246 = 1246 (194 px). `InBucket` scrollt (1408 in 1246): die Zeilenaktion „Stornieren" ist eine Zusatzspalte (Aktionsspur ~190 px) und zählt wie `include` — der Aufrufer kann dort `without: ["origin"]` setzen, wenn der Export-Bucket ohne Querscroll stehen soll.

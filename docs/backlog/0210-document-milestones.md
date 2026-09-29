@@ -47,7 +47,7 @@ das Automatische (T1); der Titel heißt deshalb nicht mehr „Verarbeitung".
 
 | Prop | Typ | Story |
 |---|---|---|
-| `milestones` | `DocumentMilestone[]` — Union über `kind`: `done {at, via, reason?}` · `case {at?, case: CaseLink, href}` · `entries {at?, entries: {key, date, lines: JournalLine[], currency, stage}[], moreHref?}` · `batch {at?, label, status, href?}` · `export {at, filing?: {status, message?, path?}}` | `Done`, `Mixed` |
+| `milestones` | `DocumentMilestone[]` — Union über `kind`: `done {at, via, reason?}` · `case {at?, case: CaseLink, href}` · `entries {at?, entries: {key, date, lines: JournalLine[], currency, stage}[], moreHref?}` · `batch {at?, batches: {key, label, status, href?, count?}[]}` · `export {at, filing?: {status, message?, path?}}` · `import {at, account: {name, iban?, href?}, period: {from, to}, balance: {opening, closing, currency}, count, verification?: {label, level?}}` · `transactions {at?, booked, total, openHref?}` | `Done`, `Mixed`, `Statement` |
 | `upcoming` | `{ key; label; note?: { level: "info" \| "warning"; text } }[]` | `NotStarted`, `Mixed` |
 | `pathLabel` | `string?` — „Weg einer Rechnung" | `NotStarted` |
 | `href` | `string?` — Reiter „Verlauf" | alle |
@@ -187,3 +187,7 @@ Offen, nicht blockierend: M2, M3.
 
 **Abgenommen mit Auflagen**: die Prop-Tabelle (M2) und die Belegseite mit einem
 erreichten Stand (M3) nachziehen.
+
+## Nachbesserung 2 (2026-09-29)
+
+M2: die Prop-Tabelle unter „Schnittstelle" selbst ist nachgezogen (`batch` mit `batches[]`, `import`, `transactions`).
