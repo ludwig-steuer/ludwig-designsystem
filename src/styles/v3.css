@@ -1470,7 +1470,7 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
 .v2chk__icon { display: flex; justify-content: center; }
 /* "106 von 118" must not wrap — the column is tight. */
 .v2chk__stand { white-space: nowrap; }
-.v2chk__jump { font-size: var(--fs-ui-xs); color: var(--color-accent-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2chk__jump { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--fs-ui-xs); color: var(--color-accent-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2chk__label { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* --- Checks (accordion) -------------------------------------------------

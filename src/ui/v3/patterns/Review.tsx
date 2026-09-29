@@ -132,7 +132,8 @@ export function Checklist({
    */
   loading?: boolean;
 }) {
-  const cols = "20px minmax(0, 1fr) 76px 100px 150px";
+  // 96: „231 von 231" needs 86 px — at 76 the counter ran into the bar (measured 2026-09-29).
+  const cols = "20px minmax(0, 1fr) 96px 100px 150px";
   return (
     <div className="v2card">
       {/* A real `<table>` like every other list of the set (0106): the
