@@ -480,7 +480,7 @@ export function sourceDocumentColumns({
     reason: {
       key: "reason",
       header: "Begründung",
-      width: "minmax(100px, 1.2fr)",
+      width: "minmax(88px, 1.2fr)",
       cell: (d) =>
         d.doneReason ? (
           <span className="v2trunc" title={d.doneReason}>
@@ -776,7 +776,10 @@ export function sourceDocumentColumns({
       // 200–232: the track grows to 232 where the view has room (V2, V1: an
       // original's „Eingangsrechnung · zerlegt in 5 Teile" needs 201 px of
       // text) and gives way to 200 where it has not (V5 grouped).
-      width: variant === "compact" ? "minmax(96px, 0.8fr)" : "minmax(200px, 232px)",
+      // Floor 212: a part's second line „Eingangsrechnung · Teil 12 von 23"
+      // measures 186 px of text (Inter 11.5) — at 200 the cell had 176
+      // (measured 2026-09-29, hint ll-dev2).
+      width: variant === "compact" ? "minmax(96px, 0.8fr)" : "minmax(212px, 232px)",
       cell: (d) => {
         const c = classificationPicture?.(d);
         return c ? (

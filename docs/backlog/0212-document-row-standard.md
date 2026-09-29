@@ -298,3 +298,5 @@ nachgeprüft).
 
 
 **Nachprüfung M7 2026-09-29** (Claude, fremde Sitzung): `source-document-columns.tsx:471` setzt an der Seiten-Zelle eines Teils den Titel „Seiten {Bereich} im Original“; im DOM von `Seiten/Belegzeile/Inbox`, Zeile Aral, trägt die Zelle „5–7“ den Titel „Seiten 5–7 im Original“ — M7 erledigt; offen bleiben M3 und M5.
+
+**Nachtrag M6 (2026-09-29, gemessen statt geschätzt):** Das längste Teil-Wort ohne Seitenbereich, „Eingangsrechnung · Teil 12 von 23" (Profil: bis 23 Teile), braucht 186 px Text in Inter 11,5 — in 200 px Einordnung standen 176 zur Verfügung. Untergrenze der Einordnung jetzt **212 px** (`minmax(212px, 232px)`), die Begründung gibt 12 px ab (`minmax(88px, …)`). Gemessen bei 1280 px: V5 gruppiert Einordnung 212, Teil-Wort ungekürzt, 1246 = 1246; V2 und V5 unverändert 232.
