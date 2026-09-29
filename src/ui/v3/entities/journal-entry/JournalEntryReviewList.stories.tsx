@@ -10,7 +10,7 @@ const meta: Meta<typeof JournalEntryReviewList> = {
 export default meta;
 type Story = StoryObj<typeof JournalEntryReviewList>;
 
-const PARTNERS = ["Muster Bürobedarf GmbH", "Stadtwerke Beispielstadt", "Aral Tankstelle", "Beispiel Leasing AG", "Hartje KG", "Telekom Deutschland GmbH", "Deutsche Post AG", "Allianz Versicherungs-AG"];
+const PARTNERS = ["Deutsche Telekom Geschäftskunden GmbH", "Stadtwerke Beispielstadt", "Aral Tankstelle", "Beispiel Leasing AG", "Hartje KG", "Telekom Deutschland GmbH", "Deutsche Post AG", "Allianz Versicherungs-AG"];
 const KINDS = [
   { key: "invoice", label: "Rechnung" },
   { key: "payment", label: "Zahlung" },

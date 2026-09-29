@@ -165,3 +165,5 @@ Offen, nicht blockierend: M2 (setweit), M5.
 
 **Abgenommen mit Auflagen**: M5 (Beispieldaten) nachziehen; M2 bleibt beim
 setweiten Auftrag.
+
+**Nachtrag 2026-09-29 (Review F340, Owner-Regel „nichts verlieren"):** Die Gegenpartei bricht auf bis zu **drei Zeilen** um statt einzeilig zu kürzen — Schritt 3 zeigte bisher bis 40 Zeichen („Deutsche Telekom Geschäftskunden GmbH"). Spuren: Gegenpartei `minmax(120px, 1.4fr)`, Soll/Haben `minmax(68px, …)`, Prüfbedarf 124. Gemessen bei 1280: `Grouped` und `Flat` je 1246 = 1246, kein Name gekürzt (Telekom 63 px, drei Zeilen); Zeilen mit langen Kontonamen in `Flat` bis 109 px.

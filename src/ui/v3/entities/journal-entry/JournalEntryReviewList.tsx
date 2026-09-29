@@ -153,10 +153,15 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     counterparty: {
       key: "counterparty",
       header: "Gegenpartei",
-      width: "minmax(104px, 1.2fr)",
+      // 120 + up to three lines: „Deutsche Telekom Geschäftskunden GmbH" stands
+      // whole, as in step 3 before (review F340); Soll/Haben give way — their
+      // names wrap anyway.
+      width: "minmax(120px, 1.4fr)",
       cell: (p) => (
         <span className="v3prop__who">
-          <span className="v2trunc" title={p.counterparty ?? p.title}>
+          {/* Three lines before the cut — the list step 3 showed up to 40 characters
+              and wrapped (review F340, owner rule „drop nothing"). */}
+          <span className="v3prop__name" title={p.counterparty ?? p.title}>
             {p.counterparty ?? p.title}
           </span>
           {p.firstTime ? <span className="v2sub">erstmals</span> : null}
@@ -179,7 +184,7 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     debit: {
       key: "debit",
       header: "Soll",
-      width: "minmax(72px, 1fr)",
+      width: "minmax(68px, 1fr)",
       cell: (p) =>
         p.accounts ? (
           <span className="v3prop__who">
@@ -193,7 +198,7 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     credit: {
       key: "credit",
       header: "Haben",
-      width: "minmax(72px, 1fr)",
+      width: "minmax(68px, 1fr)",
       cell: (p) => (p.accounts ? <Side accounts={p.accounts.credit} accountHref={accountHref} names={accountNames} /> : null),
     },
     amount: {
@@ -238,7 +243,7 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     reasons: {
       key: "reasons",
       header: <StatusHeader axis="review_tab" label="Prüfbedarf" />,
-      width: "132px",
+      width: "124px",
       // One line per reason; what does not fit is cut, the title carries it.
       cell: (p) =>
         p.decided ? (
