@@ -497,6 +497,8 @@ export function AccountEntryList({
           {columns.map((c) => (
             <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>
               {c.header}
+              {/* The (i) of a status column stands at its head here too (Z4, acceptance 0211 M10). */}
+              {c.headerAside}
             </span>
           ))}
         </HeadRow>
