@@ -178,10 +178,11 @@ export function JournalEntryList(props: JournalEntryListProps): ReactNode {
     ...(error ? { error } : {}),
     ...(rowActions ? { rowActions } : {}),
     density: density ?? (variant === "compact" ? "compact" : "default"),
-    // The full form has `fr` tracks whose computed floor would be zero —
-    // measured at 1000 px the names broke one character per line (0178). The
-    // compact form must fit a drawer and never scrolls sideways.
-    minWidth: minWidth ?? (variant === "compact" ? 0 : 1180),
+    // The full form computes its floor from the tracks — text and accounts
+    // carry px floors since the acceptance of 0211 (M1: a fixed 1180 left the
+    // text 52 px once `include` added columns). The compact form must fit a
+    // drawer and never scrolls sideways.
+    ...(minWidth !== undefined ? { minWidth } : variant === "compact" ? { minWidth: 0 } : {}),
     ...(totals ? { totals: { label: "Summe", cells: { amount: totals.amount } } } : {}),
     ...(entryHref ? { rowHref: (entry: EntryRow) => entryHref(entry.id) } : {}),
   };

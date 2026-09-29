@@ -634,8 +634,10 @@ export function DataTable<T>(props: DataTableProps<T>) {
   // second statement about the same emptiness.
   const showPager = !loading && !error && all.length > 0 && pager && href;
 
+  // Only under rows: without an `empty` the state is null on an empty list,
+  // and a sum over nothing is a statement about nothing (acceptance 0211, M4).
   const foot =
-    totals && !state ? (
+    totals && !state && all.length > 0 ? (
       <Row className="v2tbl__totals">
         {selection ? <span /> : null}
         {expand ? <span /> : null}

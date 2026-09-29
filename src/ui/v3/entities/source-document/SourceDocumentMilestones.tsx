@@ -128,7 +128,7 @@ export function SourceDocumentMilestones({
   if (error) {
     body = (
       <p className="v3ms__error" role="alert">
-        <strong>Der Weg des Belegs ließ sich nicht laden.</strong> Die Verbindung ist abgebrochen.{" "}
+        <strong>Der Weg des Belegs ließ sich nicht laden.</strong> Laden Sie ihn erneut; der ganze Verlauf steht im Reiter.{" "}
         {error.onRetry ? <TextButton onClick={error.onRetry}>Erneut laden</TextButton> : null}
       </p>
     );
@@ -210,7 +210,10 @@ function Facts({ m, accountHref }: { m: DocumentMilestone; accountHref?: ((n: st
     case "case":
       return <CaseCell cases={[m.case]} href={() => m.href} layout="stacked" />;
     case "entries": {
-      const shown = m.entries.slice(0, m.entries.length > ENTRIES_MAX + 1 ? ENTRIES_MAX : undefined);
+      // From four entries three stand and the rest is a way (0210, acceptance
+      // M1); without a way nothing is dropped silently — then all stand.
+      const cut = m.entries.length > ENTRIES_MAX && Boolean(m.moreHref);
+      const shown = cut ? m.entries.slice(0, ENTRIES_MAX) : m.entries;
       const rest = m.entries.length - shown.length;
       return (
         <ul className="v3ms__entries">
@@ -225,7 +228,7 @@ function Facts({ m, accountHref }: { m: DocumentMilestone; accountHref?: ((n: st
           ))}
           {rest > 0 && m.moreHref ? (
             <li>
-              <TextButton href={m.moreHref}>{`${rest} weitere Buchungen`}</TextButton>
+              <TextButton href={m.moreHref}>{rest === 1 ? "1 weitere Buchung" : `${rest} weitere Buchungen`}</TextButton>
             </li>
           ) : null}
         </ul>

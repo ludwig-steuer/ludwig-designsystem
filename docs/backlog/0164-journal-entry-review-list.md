@@ -134,3 +134,12 @@ Ludwig mit Wort ✓.
 **Nicht abgenommen** wegen M1. Alles Übrige ist erfüllt; nach Behebung genügt
 die Nachmessung von `Flat` bei 1280 px.
 
+
+## Nachbesserung 2026-09-29 (Claude, nach der fremden Abnahme)
+
+| Mangel | Behoben |
+|---|---|
+| M1 (blockierend) | Spuren enger (Datum 84, Gegenpartei `minmax(104px)`, Soll/Haben `minmax(72px)`, Betrag 100, BU 40, Satzart 84, Prüfbedarf 132). Gemessen `Flat` bei 1280: 1246 = 1246, kein Querscroll; `Grouped` 1246 |
+| M3 | Die Satzart fällt nicht mehr bei jeder Gruppierung weg; der Aufrufer nimmt sie mit `without: ["kind"]` heraus, wenn seine Gruppen nach Satzart sind |
+| M4 | Konto-Links über `Link` |
+| M2, M5 | offen: Trefferflächen setweit; Beispieldaten |

@@ -161,3 +161,12 @@ Form, Farbe nur als Stufe, Rot nur bei „Ablage gescheitert" mit Wort ✓.
 
 **Abgenommen mit Auflagen**: M1 und M2 (Spec und Code angleichen) vor der
 App-Spec; M3 und M4 im nächsten Schritt.
+
+## Nachbesserung 2026-09-29 (Claude, nach der fremden Abnahme)
+
+| Mangel | Behoben |
+|---|---|
+| M1 | Ab **vier** Buchungen drei und „n weitere" (bei einer: „1 weitere Buchung"); ohne `moreHref` stehen alle — nichts fällt still weg |
+| M2 | Prop-Tabelle: `batch` heißt `{ kind: "batch"; at?; batches: { key; label; status; href?; count? }[] }`; dazu `import` und `transactions` wie im Nachtrag Zahlungsbelege |
+| M4 | Fehlertext ohne erfundene Ursache: „**Der Weg des Belegs ließ sich nicht laden.** Laden Sie ihn erneut; der ganze Verlauf steht im Reiter." `WORD` ist keine zweite Quelle: die Stationswörter sind Wörter dieser Box, keine Werte einer Registry-Achse |
+| M3 | offen: die Showcase-Belegseite zeigt nur „nichts erreicht" |

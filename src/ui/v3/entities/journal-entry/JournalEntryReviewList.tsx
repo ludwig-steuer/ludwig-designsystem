@@ -12,6 +12,7 @@ import {
 } from "../../patterns/DataTable";
 import { StatusHeader } from "../../patterns/StatusHeader";
 import { Badge } from "../../primitives/Badge";
+import { Link } from "../../primitives/Link";
 import { AmountCell } from "../../primitives/Cells";
 import { Time } from "../../primitives/Time";
 import { SourceDocumentRefCell } from "../source-document/SourceDocumentRefCell";
@@ -120,9 +121,9 @@ function Side({
         <span key={a.number}>
           {i > 0 ? " / " : null}
           {accountHref ? (
-            <a className="v3cell-link v2mono" href={accountHref(a.number)}>
+            <Link className="v3cell-link v2mono" href={accountHref(a.number)}>
               {a.number}
-            </a>
+            </Link>
           ) : (
             <span className="v2mono">{a.number}</span>
           )}
@@ -146,13 +147,13 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     date: {
       key: "date",
       header: "Datum",
-      width: "88px",
+      width: "84px",
       cell: (p) => (p.date ? <Time value={p.date} format="date" size="sm" /> : <span className="v2muted">—</span>),
     },
     counterparty: {
       key: "counterparty",
       header: "Gegenpartei",
-      width: "minmax(120px, 1.2fr)",
+      width: "minmax(104px, 1.2fr)",
       cell: (p) => (
         <span className="v3prop__who">
           <span className="v2trunc" title={p.counterparty ?? p.title}>
@@ -178,7 +179,7 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     debit: {
       key: "debit",
       header: "Soll",
-      width: "minmax(88px, 1fr)",
+      width: "minmax(72px, 1fr)",
       cell: (p) =>
         p.accounts ? (
           <span className="v3prop__who">
@@ -192,20 +193,20 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     credit: {
       key: "credit",
       header: "Haben",
-      width: "minmax(88px, 1fr)",
+      width: "minmax(72px, 1fr)",
       cell: (p) => (p.accounts ? <Side accounts={p.accounts.credit} accountHref={accountHref} names={accountNames} /> : null),
     },
     amount: {
       key: "amount",
       header: "Betrag",
-      width: "108px",
+      width: "100px",
       align: "end",
       cell: (p) => <AmountCell value={p.amount} currency={p.currency} />,
     },
     taxKey: {
       key: "taxKey",
       header: "BU",
-      width: "44px",
+      width: "40px",
       cell: (p) => (p.taxKey ? <TaxKeyCell taxKey={p.taxKey} {...(taxKeyHref ? { taxKeyHref } : {})} /> : null),
     },
     document: {
@@ -231,13 +232,13 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     kind: {
       key: "kind",
       header: "Satzart",
-      width: "96px",
+      width: "84px",
       cell: (p) => (p.kindLabel ? <Badge tone="neutral">{p.kindLabel}</Badge> : <span className="v2muted">—</span>),
     },
     reasons: {
       key: "reasons",
       header: <StatusHeader axis="review_tab" label="Prüfbedarf" />,
-      width: "160px",
+      width: "132px",
       // One line per reason; what does not fit is cut, the title carries it.
       cell: (p) =>
         p.decided ? (
@@ -291,8 +292,9 @@ export function JournalEntryReviewList(
       ...(options.variant ? { variant: options.variant } : {}),
       ...(options.include ? { include: options.include } : {}),
       ...(options.accountNames !== undefined ? { accountNames: options.accountNames } : {}),
-      // Inside groups by kind the kind column repeats the group head.
-      without: [...(options.without ?? []), ...(props.groups ? (["kind"] as const) : [])],
+      // The caller takes the kind out when its groups are by kind — a
+      // grouping by anything else keeps it (acceptance 0164, M3).
+      ...(options.without ? { without: options.without } : {}),
       ...(options.accountHref ? { accountHref: options.accountHref } : {}),
       ...(options.documentHref ? { documentHref: options.documentHref } : {}),
       ...(options.taxKeyHref ? { taxKeyHref: options.taxKeyHref } : {}),

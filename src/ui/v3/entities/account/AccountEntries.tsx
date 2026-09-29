@@ -11,7 +11,7 @@ import { Time } from "../../primitives/Time";
 import { EntityIcon } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
-import type { ColumnDef } from "../../patterns/DataTable";
+import { columnsMinWidth, type ColumnDef } from "../../patterns/DataTable";
 import { Link } from "../../primitives/Link";
 import { SourceDocumentRefCell } from "../source-document/SourceDocumentRefCell";
 import { TaxKeyCell } from "../journal-entry/TaxKey";
@@ -312,7 +312,7 @@ export function accountEntryColumns({
     text: {
       key: "text",
       header: "Buchungstext",
-      width: "minmax(0, 1.6fr)",
+      width: "minmax(100px, 1.6fr)",
       cell: (e) => (
         <span className="v2ae__text" title={e.text ?? undefined}>
           <span className="v2ae__textline">{e.text ?? <span className="v2muted">—</span>}</span>
@@ -333,7 +333,7 @@ export function accountEntryColumns({
       header: "Gegenkonto",
       // Compact: the number alone in a fixed track — at 640 px the text kept 83 px
       // next to a name nobody could read (0211). `contraNames` brings it back.
-      width: variant === "compact" && !contraNames ? "minmax(56px, 0.6fr)" : "minmax(0, 1.1fr)",
+      width: variant === "compact" && !contraNames ? "minmax(56px, 0.6fr)" : "minmax(120px, 1.1fr)",
       cell: (e) => <ContraAccounts entry={e} accountHref={accountHref} showName={variant !== "compact" || contraNames} />,
     },
     debit: {
@@ -485,7 +485,9 @@ export function AccountEntryList({
 
   return (
     <div className="v2ae">
-      <Table cols={cols} minWidth={620} density="compact">
+      {/* The floor from the tracks — a fixed 620 left text and contra 0 px once
+          `include` added columns (acceptance 0211, M2). */}
+      <Table cols={cols} minWidth={columnsMinWidth(columns)} density="compact">
         <HeadRow>
           {columns.map((c) => (
             <span key={c.key} className={c.align === "end" ? "v2num" : undefined}>

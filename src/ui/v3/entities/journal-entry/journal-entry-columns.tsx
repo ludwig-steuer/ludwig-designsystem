@@ -287,7 +287,7 @@ export function journalEntryColumns(options: JournalEntryColumnOptions = {}): Co
       header: "Buchungstext",
       // The text leads the free width: at 1280 it had 130 px next to two
       // account names cut to three letters (0211, measured).
-      width: "minmax(0, 2fr)",
+      width: "minmax(160px, 2fr)",
       cell: (e) => {
         if (e.text === null) return <span className="v2muted">—</span>;
         const { shown, title } = clip(e.text);
@@ -321,13 +321,13 @@ export function journalEntryColumns(options: JournalEntryColumnOptions = {}): Co
     debit: {
       key: "debit",
       header: "Soll",
-      width: "minmax(0, 1fr)",
+      width: "minmax(96px, 1fr)",
       cell: (e) => <SideAccounts accounts={e.debit} accountHref={accountHref} />,
     },
     credit: {
       key: "credit",
       header: "Haben",
-      width: "minmax(0, 1fr)",
+      width: "minmax(96px, 1fr)",
       cell: (e) => <SideAccounts accounts={e.credit} accountHref={accountHref} />,
     },
     taxKey: {

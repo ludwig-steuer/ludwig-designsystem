@@ -5,6 +5,7 @@ import type { SourceDocumentVM } from "./SourceDocument";
 import {
   COMPACT_VIEW,
   sourceDocumentColumns,
+  sourceDocumentMinWidth,
   sourceDocumentTracks,
   type SourceDocumentColumnOptions,
 } from "./source-document-columns";
@@ -80,7 +81,9 @@ export function SourceDocumentList({
     // The compact row K of the catalogue (0212): the same cells as every
     // document table, one line each, no head — the list stands in foreign
     // context, where a column head would be a second heading.
-    <Table cols={sourceDocumentTracks(columns)}>
+    // With its floor, so a frame narrower than the row scrolls instead of
+    // cutting the progress (acceptance 0212, M1).
+    <Table cols={sourceDocumentTracks(columns)} minWidth={sourceDocumentMinWidth(columns)}>
       {documents.map((d) => (
         <Row key={d.id}>
           {columns.map((c) => (

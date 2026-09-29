@@ -79,7 +79,7 @@ const actions = (p: ProposalRow) =>
 
 const BULK = [{ label: "Ausgewählte freigeben", action: async () => {} }];
 
-/** Step 3, grouped by entry kind: selection, fold-out, row actions; the kind column falls away inside its group. */
+/** Step 3, grouped by entry kind: selection, fold-out, row actions; the caller takes the kind column out inside its groups. */
 export const Grouped: Story = {
   render: () => (
     <JournalEntryReviewList
@@ -90,6 +90,7 @@ export const Grouped: Story = {
         aside: `${ROWS.filter((r) => r.kindLabel === k.label).length} Sätze`,
       }))}
       head={{ title: "Buchungsvorschläge nach Satzart", sub: "40 von 40 Sachverhalten" }}
+      without={["kind"]}
       expand={expand}
       rowActions={actions}
       bulkActions={BULK}

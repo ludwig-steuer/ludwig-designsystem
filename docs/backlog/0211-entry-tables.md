@@ -215,3 +215,13 @@ erfüllt (eines mit Auflage M5); der Nachtrag „nichts verlieren" ist es nicht:
 M1 und M2 machen die zugeschalteten Spalten bei der Zielbreite unlesbar.
 Nach Behebung von M1/M2 genügt eine Nachmessung von `WithRunAndDatevId` und
 `InDrawerWithAll`.
+
+## Nachbesserung 2026-09-29 (Claude, nach der fremden Abnahme)
+
+| Mangel | Behoben |
+|---|---|
+| M1 (blockierend) | T1 `full` rechnet die Mindestbreite aus den Spuren (Buchungstext `minmax(160px, 2fr)`, Soll/Haben `minmax(96px, 1fr)`) statt fest 1180. Gemessen `WithRunAndDatevId` bei 1280: Buchungstext 160, Soll/Haben je 96 px, die Karte scrollt (1494 in 1246) statt zu quetschen |
+| M2 (blockierend) | T2 `AccountEntryList` nimmt `columnsMinWidth(columns)`; Buchungstext `minmax(100px, …)`, Gegenkonto mit Namen `minmax(120px, …)`. Gemessen `InDrawerWithAll` bei 960: Buchungstext 100, Gegenkonto 120 px, Scroll in der Karte (1204) |
+| M4 | Summenzeile nur unter Zeilen (`all.length > 0`), nie über einem Leerfall. Spec-Tabelle T2 `full`: die Spalte „DATEV" (Herkunftskennzeichen) gehört dazu. `totals.cells` bleibt `Partial<Record<string, …>>`: Schlüssel sind die Spaltenschlüssel des Aufrufers |
+| M3 | offen, setweiter Punkt (Text-Links unter 24 px) — eigener Auftrag |
+| M5, M6 | Story- und Beispieldaten, nicht nachgezogen |

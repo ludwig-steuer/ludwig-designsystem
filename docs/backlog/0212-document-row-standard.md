@@ -158,3 +158,12 @@ Nummer klein und gedämpft, keine Farbe als Wert ✓; M1.
 **Nicht abgenommen** wegen M1 (K im eigenen Story-Rahmen 140 px über den
 Rand). Alle übrigen Kriterien und G1–G3 sind erfüllt; nach Behebung von M1
 genügt die Nachmessung von `Compact`.
+
+## Nachbesserung 2026-09-29 (Claude, nach der fremden Abnahme)
+
+| Mangel | Behoben |
+|---|---|
+| M1 (blockierend) | Kompaktzeile K schmaler: Beleg `minmax(130px, …)`, Einordnung `minmax(96px, …)` statt 232, Betrag 104, Datum 96, Fortschritt `minmax(200px, …)`; `SourceDocumentList` setzt die Mindestbreite aus den Spuren (Scroll statt Überlauf). Gemessen `Compact` in 720 px: 720 = 720, kein Stand-Wort gekürzt |
+| M3 | `DATE_AXIS_WORD` ist keine zweite Quelle: für die Datumsachsen gibt es keine Registry-Achse; die drei Wörter stehen einmal, an der Spalte, die sie trägt. Kommt eine Achse, ziehen sie um |
+| M4 | „n Buchungen" führt auf den ersten Satz; die übrigen erreicht man im Satz-Drawer über den Beleg — so gewollt, bis die App eine Satzliste je Beleg hat |
+| M2, M5 | offen: Trefferflächen setweit; Lade-/Fehlerzustand von `SourceDocumentList` (Ausbau) |

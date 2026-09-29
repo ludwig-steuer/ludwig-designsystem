@@ -362,7 +362,7 @@ export function sourceDocumentColumns({
     document: {
       key: "document",
       header: "Beleg",
-      width: variant === "compact" ? "minmax(160px, 1.4fr)" : "minmax(200px, 1.4fr)",
+      width: variant === "compact" ? "minmax(130px, 1.4fr)" : "minmax(200px, 1.4fr)",
       sortable: variant !== "compact",
       cell: (d) => {
         const head = documentHead(d);
@@ -393,7 +393,7 @@ export function sourceDocumentColumns({
       key: "progress",
       header: "Fortschritt",
       headerAside: <StatusInfoButton axis="document_status" />,
-      width: variant === "compact" ? "minmax(160px, 1fr)" : "minmax(220px, 1fr)",
+      width: variant === "compact" ? "minmax(200px, 1fr)" : "minmax(220px, 1fr)",
       cell: (d) => {
         const p = processPicture?.(d);
         // Without a picture the old completion stands until the app derives it
@@ -562,7 +562,7 @@ export function sourceDocumentColumns({
     amount: {
       key: "amount",
       header: "Betrag",
-      width: "130px",
+      width: variant === "compact" ? "104px" : "130px",
       align: "end",
       sortable: true,
       // Empty, not an em dash, where the kind of document has no measure: a
@@ -595,7 +595,7 @@ export function sourceDocumentColumns({
         "Belegdatum"
       ),
       ...(dateSort ? {} : { sortable: true }),
-      width: dateSort ? "136px" : "120px",
+      width: dateSort ? "136px" : variant === "compact" ? "96px" : "120px",
       // One date per row (owner E5, F335): the document date. Without one the
       // receipt at the client stands in — muted and italic, so the fallback
       // shows; it is never passed off as the document date. Every other date
@@ -746,7 +746,9 @@ export function sourceDocumentColumns({
       // (102.1 + 121.0 px plus a 4-px gutter = 227.1) did not fit side by
       // side, the cell wrapped and the row grew to 73.2 px against the 47–48
       // of its neighbours — V1 asks for one row height (acceptance 0070, M1).
-      width: "232px",
+      // Compact: one line, the form word only — 232 px made the row K 860 px
+      // wide in a 720 px frame (acceptance 0212, M1).
+      width: variant === "compact" ? "minmax(96px, 0.8fr)" : "232px",
       cell: (d) => {
         const c = classificationPicture?.(d);
         return c ? (
