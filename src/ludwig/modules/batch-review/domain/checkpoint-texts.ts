@@ -37,6 +37,14 @@ export const CLIENT_BATCH_CHECKPOINT_TEXTS: Partial<Record<ChecklistRowKey, Chec
     jumpLabel: "Buchungen ansehen",
     jumpHref: "11",
   },
+  already_booked_in_datev: {
+    label: "Bereits in DATEV gebucht",
+    todo:
+      "Diese Sätze des Mandanten stehen in DATEV schon – ein Export wäre eine Doppelbuchung. Satz am " +
+      "Sachverhalt ablehnen, danach die übrigen übernehmen.",
+    jumpLabel: "Buchungen ansehen",
+    jumpHref: "11",
+  },
 };
 
 export const CHECKPOINT_TEXTS: Record<Exclude<ChecklistRowKey, "not_checked">, CheckpointText> = {

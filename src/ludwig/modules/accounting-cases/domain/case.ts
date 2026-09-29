@@ -276,9 +276,19 @@ export type ExpectationKind = (typeof EXPECTATION_KINDS)[number];
  * ABGELEITET, nicht gespeichert: `due_date` gegen heute, dazu
  * `escalation_level` und `resolved_at`. Eine Spalte dafür wäre eine zweite
  * Wahrheit, die zwischen zwei Läufen altert, ohne dass jemand sie fortschreibt.
+ * `escalated` heißt: ein Lauf hat hochgestuft ODER die Frist ist seit
+ * `EXPECTATION_ESCALATION_DAYS` Kalendertagen verstrichen.
  */
 export const EXPECTATION_MATURITY = ["pending", "due", "escalated", "resolved"] as const;
 export type ExpectationMaturity = (typeof EXPECTATION_MATURITY)[number];
+
+/**
+ * Ab so vielen Kalendertagen Überfälligkeit gilt eine Erwartung als
+ * eskaliert — auch ohne dass ein Vorbereitungslauf die Stufe hochgesetzt hat
+ * (F318, `sachverhalt.md` S8). Bewusst gleich DATE_WINDOW_DAYS
+ * (expectation-core.ts): ab da ordnet Ludwig die Zahlung nicht mehr selbst zu.
+ */
+export const EXPECTATION_ESCALATION_DAYS = 30;
 
 /** Die Reife aus den gespeicherten Feldern — eine Regel, alle Leser. */
 export function expectationMaturity(e: {
@@ -290,7 +300,18 @@ export function expectationMaturity(e: {
   if (e.resolvedAt) return "resolved";
   if (e.escalationLevel > 0) return "escalated";
   const today = e.today ?? new Date().toISOString().slice(0, 10);
-  return e.dueDate < today ? "due" : "pending";
+  // Beide als UTC-Mitternacht → ganze Kalendertage ohne Sommerzeit-Verschiebung.
+  const dueMs = Date.parse(`${e.dueDate}T00:00:00Z`);
+  if (Number.isNaN(dueMs)) {
+    throw new Error(`expectationMaturity: ungültiges dueDate "${e.dueDate}"`);
+  }
+  const todayMs = Date.parse(`${today}T00:00:00Z`);
+  if (Number.isNaN(todayMs)) {
+    throw new Error(`expectationMaturity: ungültiges today "${today}"`);
+  }
+  const overdueDays = Math.round((todayMs - dueMs) / 86_400_000);
+  if (overdueDays >= EXPECTATION_ESCALATION_DAYS) return "escalated";
+  return overdueDays > 0 ? "due" : "pending";
 }
 
 /**
@@ -559,7 +580,7 @@ export const CASE_STATE_FILTER_LABEL: Record<CaseStateFilter, string> = {
 /**
  * Der Arbeitsvorrat: was noch läuft **und bei der Kanzlei liegt**.
  *
- * Das ist der Stand der **Kacheln** (Mandanten-Startseite, Dashboard) — die
+ * Das ist der Stand der **Kacheln** (Dashboard, „Zu tun" der Startseite) — die
  * Liste selbst zeigt seit 2026-09-09 ungefiltert alle Sachverhalte des
  * Jahres. Wer eine Kachel verlinkt, hängt diesen Stand deshalb **sichtbar**
  * an die URL (`?state=active&disposition=accounting`), sonst tischt der Klick mehr

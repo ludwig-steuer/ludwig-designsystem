@@ -53,10 +53,9 @@ export type { SourceDocDoneVia, SourceDocReviewReason, SourceDocStatus };
  * `source-docs/domain/source-document-vm.ts`, and this interface is what the
  * **display** adds on top of it.
  *
- * Four fields stay here, and each for its own reason: `href` and `caseHref`
- * are routes — the caller owns them, they are no part of the record;
- * `caseNumber` and `hasInvoiceRow` are data the record does not carry yet
- * (finding **L-207**), and the row needs both.
+ * Two fields stay here: `href` and `caseHref` are routes — the caller owns
+ * them, they are no part of the record. `caseNumber` („SV-…") and
+ * `hasInvoiceRow` come from the mirror since F324 (L-207 done 2026-09-29).
  *
  * `detail` is **not** the mirror's. Over there it is the four core facts of an
  * invoice; here it is a union over the kinds of document, and it carries what
@@ -66,15 +65,6 @@ export type { SourceDocDoneVia, SourceDocReviewReason, SourceDocStatus };
  * invoice half of it.
  */
 export interface SourceDocumentVM extends MirrorDocument {
-  /**
-   * Whether the document already has an invoice row. Two booleans decide the
-   * axis `beleg_haenger` — this one and which of the two stuck lists is shown
-   * — and only the caller knows the first. Nothing else in this family reads
-   * it.
-   */
-  hasInvoiceRow?: boolean;
-  /** Rank 6 — the case, as an inline mention. */
-  caseNumber?: string | null;
   caseHref?: string | null;
   /** Without it the row is not a link. */
   href?: string | null;

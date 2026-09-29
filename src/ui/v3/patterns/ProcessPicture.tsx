@@ -10,6 +10,7 @@ import { LogList, type LogEntry } from "./Log";
 import {
   Baton,
   ProcessMini,
+  processComplete,
   ProcessStepper,
   type BatonMeta,
   type ProcessPhase,
@@ -201,7 +202,7 @@ export function ProcessCell({
 /** Phases with their words in one line, each the same width — the stepper, compact. */
 function CompactPhases({ phases }: { phases: readonly ProcessPhase[] }) {
   return (
-    <span className="pz-box__phases">
+    <span className={processComplete(phases) ? "pz-box__phases is-complete" : "pz-box__phases"}>
       {phases.map((p) => (
         <span key={p.key} className={p.status === "pending" ? undefined : `is-${p.status}`}>
           {p.label}

@@ -133,6 +133,13 @@ export function toClarificationEntry(
     deferredReason: c.deferredReason,
     deferredCount: c.deferredCount,
     answeredBy: c.authorName,
+    // F322: die Karte leitet das Wort über die Achse `actor_kind` ab.
+    raisedBy:
+      c.raisedByKind === null
+        ? null
+        : c.raisedByKind === "user"
+          ? (c.raisedByName ?? { kind: "user", id: null, label: null })
+          : { kind: c.raisedByKind, id: null, label: null },
   };
 }
 

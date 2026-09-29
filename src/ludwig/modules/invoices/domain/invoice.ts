@@ -101,6 +101,11 @@ const InvoiceFilterRawSchema = z.object({
 const joined = (v: string | string[] | undefined): string | undefined =>
   Array.isArray(v) ? v.join(",") : typeof v === "string" ? v : undefined;
 
+/** Leeres Formularfeld = kein Filter. Die Filterleiste schickt `q=` immer mit —
+ *  als `""` scheiterte das Schema daran und ließ den ganzen Filter fallen (F328). */
+const filled = (v: string | string[] | undefined): string | undefined =>
+  typeof v === "string" && v.length > 0 ? v : undefined;
+
 /** Der Filterstand der Belegliste, wie ihn die URL trägt — Eingabe für `matchPreset` (DS 0201, F8). */
 export interface DocumentListState extends Record<string, FilterValue> {
   q: string;
@@ -276,17 +281,17 @@ export function parseListContext(
 
 export function parseInvoiceFilter(raw: RawSearchParams): InvoiceFilter {
   const parsed = InvoiceFilterRawSchema.safeParse({
-    q: typeof raw.q === "string" ? raw.q : undefined,
-    from: typeof raw.from === "string" ? raw.from : undefined,
-    to: typeof raw.to === "string" ? raw.to : undefined,
+    q: filled(raw.q),
+    from: filled(raw.from),
+    to: filled(raw.to),
     // Checkbox-Gruppen: mehrere Werte kommen als Array an.
     lifecycle: joined(raw.lifecycle),
-    open: typeof raw.open === "string" ? raw.open : undefined,
+    open: filled(raw.open),
     cat: joined(raw.cat),
     status: joined(raw.status),
-    period: typeof raw.period === "string" ? raw.period : undefined,
-    partner: typeof raw.partner === "string" ? raw.partner : undefined,
-    clarification: typeof raw.clarification === "string" ? raw.clarification : undefined,
+    period: filled(raw.period),
+    partner: filled(raw.partner),
+    clarification: filled(raw.clarification),
   });
   if (!parsed.success) return {};
   const lifecycleStatus = parsed.data.lifecycle
@@ -413,6 +418,16 @@ export interface InvoiceListItem {
   openJob: { jobType: string; status: string; startedAt: string | null; createdAt: string } | null;
   /** Wie oft der Beleg wieder geöffnet wurde. */
   reopenedCount: number;
+  /** F309: Fakten des Einordnungsbilds (Spalte „Einordnung"). */
+  parentSourceDocId: string | null;
+  parentCollectionKind: string | null;
+  splitPageRange: string | null;
+  collectionKind: string | null;
+  classOverriddenAt: string | null;
+  classConfidence: number | null;
+  classificationError: string | null;
+  /** Position unter den Geschwistern; NULL ohne Eltern. */
+  bundlePosition: { index: number; total: number } | null;
 }
 
 export interface InvoiceLineItem {

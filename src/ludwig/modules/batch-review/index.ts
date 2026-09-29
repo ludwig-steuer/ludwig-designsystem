@@ -18,5 +18,6 @@ export * from "./domain/return-basket";
 export * from "./domain/review-tabs";
 export * from "./domain/rule-booked";
 export * from "./domain/rules-without-proposal";
+export * from "./domain/step0-view";
 export * from "./domain/step3-view";
 export * from "./domain/steps";

@@ -22,21 +22,24 @@ export type EntryStatus = (typeof ENTRY_STATUS)[number];
  * Abgeleitete Anzeige-Stufe „Weg nach DATEV" (2026-08-14) — KEINE Spalte.
  * Kombiniert `status` mit den Export-/Spiegel-Fakten am Journal-Entry:
  * `exported_at` (an DATEV übergeben — eine Behauptung, Push-204 ≠ angekommen)
- * und `datev_mirror_entry_id` (im DATEV-Spiegel wiedergefunden — der Beweis).
+ * und `mirrored` (im DATEV-Spiegel wiedergefunden, 1:1 oder als Aufteilung —
+ * `entryMirroredSql` — der Beweis).
  * Deshalb bleiben das getrennte Signale und werden nur fürs UI linearisiert.
  */
 export const ENTRY_DATEV_STAGE = ["proposed", "accepted", "exported", "in_datev", "reversed"] as const;
 export type EntryDatevStage = (typeof ENTRY_DATEV_STAGE)[number];
 
+// ponytail: datevMirrorEntryId bleibt nur für die zwei DS-Aufrufer (journal-entry-columns.tsx, JournalEntryFacts.tsx), bis designsystem auf mirrored umstellt; danach entfernen.
 export function deriveEntryDatevStage(e: {
   status: EntryStatus;
   exportedAt: string | null;
-  datevMirrorEntryId: string | null;
+  mirrored?: boolean;
+  datevMirrorEntryId?: string | null;
 }): EntryDatevStage {
   if (e.status === "reversed") return "reversed";
   // `posted` heißt heute „ist in DATEV bereits Ist" (Status-Registry) — gleiche
   // Endstufe wie ein Spiegel-Match.
-  if (e.datevMirrorEntryId !== null || e.status === "posted") return "in_datev";
+  if (e.mirrored === true || (e.datevMirrorEntryId ?? null) !== null || e.status === "posted") return "in_datev";
   if (e.exportedAt !== null) return "exported";
   return e.status === "accepted" ? "accepted" : "proposed";
 }

@@ -141,7 +141,19 @@ function joined(parts: ReactNode[]): ReactNode {
 }
 
 /**
- * Four segments for the list row.
+ * Every phase done — the run is through (booked in DATEV, or ended otherwise).
+ *
+ * @when    Deciding whether a process picture shows the green "through" strip.
+ * @instead The state of one phase → ProcessPhase.status.
+ */
+export function processComplete(phases: readonly ProcessPhase[]): boolean {
+  return phases.length > 0 && phases.every((p) => p.status === "done");
+}
+
+/**
+ * Four segments for the list row. A run that is through turns the whole strip
+ * green (`success`, the exit "erledigt"; owner 2026-09-29): at the end of a
+ * batch the list shows only green strips.
  *
  * @when    Process state in the list row.
  * @instead The whole run with its phases → Process. One phase as a
@@ -149,7 +161,7 @@ function joined(parts: ReactNode[]): ReactNode {
  */
 export function ProcessMini({ phases }: { phases: readonly ProcessPhase[] }) {
   return (
-    <span className="pz-mini" title={phases.map((p) => p.label).join(" → ")}>
+    <span className={processComplete(phases) ? "pz-mini is-complete" : "pz-mini"} title={phases.map((p) => p.label).join(" → ")}>
       {phases.map((p) => (
         <span key={p.key} className={p.status === "pending" ? undefined : `is-${p.status}`} />
       ))}

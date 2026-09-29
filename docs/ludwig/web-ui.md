@@ -31,18 +31,26 @@ deshalb Lücken; sie werden nicht neu vergeben.
   der Übersicht zeigt das Original über `loadSourceDocOriginal` — PDF im
   Viewer, Kontoauszug- und EXTF-Dateien als gelesene Zeilen (Deckel 200),
   alles andere als Satz mit Download; der Beleg-Drawer nutzt denselben Loader.
-  Der Reiter **Vorsteuer** (F310) besteht aus fünf Blöcken des
-  Designsystems: (1) Verdikt als `StatusCallout` — Achse `input_tax_verdict`
-  (Abzug möglich · Fakten klären · Abzug gesperrt), Zählerzeile der
-  anwendbaren Regeln, gesperrte Schlüssel; ohne Rechnungs-Extraktion „Keine
-  Prüfung möglich". (2) Card „USt-Einschätzung" (`client_source_docs.vat_*`,
-  maßgeblich für die Buchung): Behandlung, Stand, Herkunft und Begründung als
-  `ProvenanceRows`; bei `not_assessed` nur Stand und ein Satz. (3)
-  „Regelprüfung" als `CheckItems` — Verletztes und Nicht-Ermittelbares
-  einzeln, Bestandenes gesammelt, im Fuß die nicht maschinell geprüften Codes.
-  (4) „Fakten" aus genau einer Quelle: die persistierten `vat_facts` (Vorrang
-  Mensch/Agent), sonst die ephemer berechneten. (5) „Auf der Rechnung erkannt
-  — Rohwerte der Extraktion", eingeklappt (Land, USt-IdNr., Steuerbetrag,
+  Der Reiter **Vorsteuer** (F310, F311) besteht aus fünf Blöcken des
+  Designsystems, Vorlage ist der DS-Showcase `InputTaxTab` (0206): (1) Verdikt
+  als `StatusCallout` — Achse `input_tax_verdict` (Abzug möglich · Fakten
+  klären · Abzug gesperrt), Titel = `checkSummary` der anwendbaren Regeln
+  („1 verletzt · 2 bestanden"), darunter „Nicht verwendbar für diesen Beleg:
+  Steuerschlüssel …"; ohne Rechnungsdaten „Noch keine Prüfung möglich" mit
+  einem Satz, was fehlt. (2) Card „Umsatzsteuerliche Behandlung"
+  (`client_source_docs.vat_*`, maßgeblich für die Buchung): Behandlung, Stand,
+  Herkunft und Begründung als `ProvenanceRows`; bei `not_assessed` nur Stand
+  und ein Satz. (3) „Regeln" als `CheckItems kind="rule"` — Verletztes und
+  Offenes einzeln, Bestandenes gesammelt, im Fuß „Nicht von Ludwig geprüft —
+  bitte selbst beurteilen:" mit den Regel-Titeln (`getVatRuleDetails`), nicht
+  den Codes. (4) „Fakten" als Prüfpunkte in der Ausprägung Fakt
+  (`CheckItems kind="fact"`): je Fakt die Antwort als Badge (Achse
+  `input_tax_fact`) und die Herkunft in Worten — „abgeleitet", „Ludwig",
+  „Kanzlei" — mit den Quellfeldern unter „Technisch"; unbekannt/unsicher
+  steht gelb einzeln, Geklärtes gesammelt, Zählzeile als `sub`
+  („1 zu klären · 3 geklärt"). Genau eine Quelle: die persistierten
+  `vat_facts` (Vorrang Kanzlei/Ludwig), sonst die ephemer berechneten.
+  (5) „Auf der Rechnung erkannt", eingeklappt (Land, USt-IdNr., Steuerbetrag,
   § 13b-Hinweis, USt-Profil + Herkunft, Sonderfälle, Positionen mit Satz,
   Sonderfall und Schlüssel-Kandidaten). Regeln: `buchung.md` R11.
 - Geschäftspartner `clients/[clientSlug]/[year]/partners` (+ Detail
@@ -117,8 +125,10 @@ in `modules/source-docs/domain/tabs.ts`: overview · e_invoice · details ·
 lines · input_tax · timeline · raw). Die Belegart bestimmt nur, welche Tabs
 sichtbar sind (`availableDocTabs`) und wie der erste heißt — nicht, welche
 Ansicht gemountet wird. URL-Identität ist die `source_doc_id` (Supertyp);
-`DocCompletionControl` (Erledigt-Steuerung) und `DocActionsMenu`
-(technische Aktionen) gelten für jede Belegart, PDF-Anzeige über
+`DocActionsMenu` (Überlauf-Menü: zuerst „Als erledigt markieren"/„Wieder
+öffnen" aus `DocCompletionActions`, dann die technischen Aktionen) gilt für
+jede Belegart; einen Erledigt-Stand oder ein Sachverhalts-Badge trägt der
+Kopf nicht, der Belegstand steht im Prozessbild (F306, F327). PDF-Anzeige über
 `BelegPreview`. Neue Belegart = Subtyp-Dispatch andocken, keine zweite
 Shell. *Warum:* zwei konkurrierende Shells sind der dokumentierte
 Fehlerzustand, aus dem dieser Merge kam.
@@ -176,9 +186,10 @@ ließen Werte im Editor fehlen, die es gab.
 App-weit öffnen Detail-Ansichten über einen Search-Param: er trägt die Id,
 Schließen nimmt ihn wieder aus der URL. Öffnen und Schließen kosten keine
 Server-Runde, wo keine nötig ist (F261): **Client-Drawer** (Inhalt lädt der
-Client — `account`, `transactionId`) öffnen per `window.history.pushState`,
+Client — `account`, `transactionId`, `document`, in Schritt 4 der Abnahme
+`drawer`/`drawer_account`) öffnen per `window.history.pushState`,
 ohne Neu-Rendern, Scroll oder Zustandsverlust; **Server-Drawer** (Inhalt ist
-eine Server-Component — `partner`, `entry`, `document`) öffnen weich mit
+eine Server-Component — `partner`, `entry`) öffnen weich mit
 `scroll: false`. Durchgesetzt an **einer** Stelle, dem `DrawerLinkInterceptor`
 im Jahres-Layout (`ui/drawers/shallow-url.ts`); ein neuer Drawer-Parameter
 wird dort eingetragen.
@@ -515,37 +526,35 @@ und die Abnahme zeigt seine Warnungen gar nicht — **der Agent behält ihn
 überall**, denn er soll die Doppelbuchung sehen, bevor er bucht.
 *Warum:* die Abnahme lud sonst ~6 s je Schritt (Owner 09.09.2026).
 
-**Schritt 0 trägt eine Botschaft** (F219, Owner-Durchgang 2026-09-15): „Der
-Agent ist fertig" — oder „an n Stellen nicht fertig". **Fertig heißt: jeder
-Posten ist gebucht oder hat eine Rückfrage** (Owner 2026-09-18). Darunter
-klappt die Checkliste seiner Aufgaben auf — erledigte (✓) und offene, je mit
-Sprung (`cases_proposed` springt in die Gruppe „Ohne Vorschlag" von Schritt 3).
-Gelesen wird **dieselbe** Freigabe-Checkliste wie in Schritt 8
-(`getRailChecklist`, einmal je Request; `domain/agent-done.ts`): Agentenarbeit
-sind die Zeilen mit Sprung auf 0–7 ohne die vier Kanzlei-Zeilen (Kontoauszüge
-lückenlos, Buchungen freigegeben, Rückfragen beantwortet, Konventionen
-entschieden) — Übergabe und Nachlese sind es ebenfalls nicht. Einen fehlenden
-Auszug kann der Agent nicht beschaffen: die Lücke ist Vollständigkeit
-(Schritt 1 / Freigabe), keine Agentenarbeit (Owner 2026-09-21). Wo die Freigabe strenger rechnet, trägt die
-Zeile `agentDone`: Umsätze mit offener Rückfrage statt Vorschlag zählen als
-erledigt (`asked`, „davon n mit Rückfrage"), und in 4d wartet ein Umsatz, der
-nur einen Vorschlag trägt (F201), auf die Kanzlei, nicht auf den Agenten.
-Einen eigenen Start-Knopf gibt es nicht (Owner 2026-09-21): übernommen wird im
-Banner („Prüfung übernehmen"), weiter geht es über „Weiter" im Kopf. Darunter drei
-Fakten (`application/batch-facts.ts`): **Belege verarbeitet** x von y
-(`docsInPeriod` minus Gate 3f), **Bank-Transaktionen zugeordnet** x von y
-(`loadBankBookingCoverage`), **Bank gebucht** dd.mm. – dd.mm.yyyy (min/max
-`booking_date` der Sätze des Stapels ohne Storno; „noch nichts gebucht" ohne
-Satz). Beim Mandantenstapel entfallen die drei Fakten (Schritte 1/3/4 gelten
-dort nicht) und es steht „Personenkonten vollständig" (F165). Die frühere
-Prüfung-Tabelle (eine Zeile je Rail-Schritt) und die sechs Kennzahl-Kacheln
-sind weg — sie beantworteten „wie viel", nicht „bin ich dran". Ebenso die
-Tabelle „Durchgänge" und der Diff-Block „Seit Ihrer letzten Abnahme-Runde"
-(Owner 2026-09-21): die Durchgänge stehen am Stapel (Tab „Durchgänge"). Es
-bleibt der Übergabebericht des letzten Durchgangs. Er ist
-Agent-Markdown mit fester Struktur — drei Abschnitte „Was gemacht wurde",
-„Auffälligkeiten", „Was jetzt zu tun ist", ohne Schritt-Kürzel und Tool-Namen;
-die Vorlage steht im Playbook (`agent-playbooks.md` „5a — Bericht").
+**Schritt 0 trägt eine Botschaft** (F219, F314/F315, DS 0208): drei Ränge in
+einer Spalte, nichts steht zweimal (`ui/Step0.tsx`, `domain/step0-view.ts`).
+(1) **Urteil**, ein `StatusCallout` „Ergebnis", genau ein Fall: arbeitet noch
+(Liste vorläufig) · übergeben (Vergangenheit, „n Stellen blieben offen", kein
+Knopf) · an n Stellen nicht fertig · fertig, aber selbst als unvollständig
+gemeldet (Hinweis; Ludwigs Meldung als Zitat im Urteil statt zweiter Callout,
+F284; „Zurück an Ludwig" nur dann und vor der Übergabe) · fertig. **Fertig
+heißt: jeder Posten ist gebucht oder hat eine Rückfrage** (Owner 2026-09-18).
+Die Durchgangszeile nennt Nummer, Zeit und die vorangegangene Rückgabe
+(`loops.lastReturnedAt`, Ereignis `export_batch.returned_to_agent`).
+(2) **Aufgaben**, `TaskList`: Vollständigkeit als eigene Gruppe, solange sie
+fehlt („Bank gebucht bis … — n Tage fehlen" → Schritt 1; Mandantenstapel „n
+Personenkonten ohne Namen" → Stammdaten, F165), dann „Offen", Erledigtes in
+**einer** Faltzeile („6 von 8 erledigt"); die Zahl im Urteil = Zeilen unter
+„Offen", jede Zeile mit Zähler und Sprung (`jumpHref`). Gelesen wird
+**dieselbe** Freigabe-Checkliste wie in Schritt 8 (`getRailChecklist`,
+`domain/agent-done.ts`): Agentenarbeit sind die Zeilen mit Sprung auf 0–7 ohne
+die vier Kanzlei-Zeilen (Kontoauszüge lückenlos, Buchungen freigegeben,
+Rückfragen beantwortet, Konventionen entschieden); Übergabe und Nachlese sind
+es nicht. Wo die Freigabe strenger rechnet, trägt die Zeile `agentDone`
+(Rückfrage statt Vorschlag zählt als erledigt, „davon n mit Rückfrage statt
+Buchung"; ein Umsatz in 4d, der nur einen Vorschlag trägt, wartet auf die
+Kanzlei, F201). (3) **Was Ludwig meldet**: der Übergabebericht umgedreht —
+Auffälligkeiten als Punkte vorn, „Was Ludwig gemacht hat" gefaltet, kein
+Scrollfenster; Auffälligkeiten noch ohne Sprung (P52). Der Bericht hat **zwei**
+Abschnitte, „Was gemacht wurde" und „Auffälligkeiten" (`agent-playbooks.md`
+„5a — Bericht"); was zu tun ist, trägt die Aufgabenliste. Kein Start-Knopf
+(Owner 2026-09-21): übernommen wird im Banner, weiter über „Weiter" im Kopf;
+die Durchgänge stehen am Stapel (Tab „Durchgänge").
 
 **Schritt 5** beginnt mit der **OPOS-Gesamtübersicht** (F221, Owner
 2026-09-15: Achse Kreditoren / Debitoren, beide Quellen): zwei Zeilen
@@ -902,7 +911,8 @@ Regeln:
 Stand: angewandt in der Stapelabnahme (F244) — Schritt-Texte in
 `modules/batch-review/domain/steps.ts` (`label` = Rail-Eintrag und H1,
 `description` = Lead), Overline nur „Schritt n", der Stapel-Kopf nennt den
-Stapel in einer Zeile. Die Rückgabe an den Agenten hat **einen** Ort: die Seite
+Stapel in einer Zeile über Rail und Inhalt und trägt den einen Weg „Zum Stapel"
+(Owner 2026-09-27). Die Rückgabe an den Agenten hat **einen** Ort: die Seite
 `review/return` am Rücklauf-Korb, Overline „Rücklauf-Korb", mit „Im Korb" und
 „Was dann passiert" (F253); Schritt 8 behält seine Karte und verweist dorthin.
 App-weit offen → `web-ui-offen.md` P46.

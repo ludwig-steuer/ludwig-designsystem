@@ -21,6 +21,7 @@
  *  - Die Saldo-Klassifikation (gate/stay) ist heuristisch, bis
  *    `client_ledger_accounts.role` bzw. das SKR-Mapping steht.
  */
+import type { ActorKind } from "@/ludwig/modules/audit-log";
 import type { JournalEntryVM } from "@/ludwig/modules/entries";
 import { CASE_KIND_LABEL } from "./case";
 import type { VatWithoutDocumentApproval } from "./case-detail";
@@ -196,6 +197,10 @@ export interface CaseClarificationEntry {
   deferredCount: number;
   /** Anzeigename des Antwortenden; null = Agent/System. */
   authorName: string | null;
+  /** F322: wer gefragt hat (Achse `actor_kind`); null = Altbestand ohne Fragesteller. */
+  raisedByKind: ActorKind | null;
+  /** Anzeigename des Fragestellers, wenn ein Kanzlei-User fragte. */
+  raisedByName: string | null;
   sources: ClarificationSourceVM[];
 }
 

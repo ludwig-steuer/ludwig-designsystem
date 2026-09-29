@@ -451,6 +451,8 @@
 .pz-mini span.is-active { background: var(--color-accent); }
 .pz-mini span.is-failed { background: var(--color-danger); }
 .pz-mini span.is-held { background: var(--color-warning); }
+/* Through: the whole strip green — success is the exit "erledigt" (owner 2026-09-29). */
+.pz-mini.is-complete span { background: var(--color-success); }
 
 /* --- Baton: who holds the batch — icon AND word ------------------------- */
 /* A grid, not flex: "nobody" gets no sign (0088), and without a fixed first
@@ -538,6 +540,8 @@
 .pz-box__phases > .is-held { border-top-color: var(--color-warning); color: var(--color-warning); }
 .pz-box__phases > .is-failed { border-top-color: var(--color-danger); color: var(--color-danger); }
 .pz-box__phases > .is-empty { border-top-color: transparent; }
+/* success on white 5,3:1 — text and bar. */
+.pz-box__phases.is-complete > span { border-top-color: var(--color-success); color: var(--color-success); }
 /* The phase where it stands carries weight, not only colour. */
 .pz-box__phases > .is-active, .pz-box__phases > .is-held, .pz-box__phases > .is-failed { text-decoration: underline; text-underline-offset: 3px; }
 .pz-box__line { display: flex; align-items: center; gap: var(--space-2); min-width: 0; white-space: nowrap; overflow: hidden; }

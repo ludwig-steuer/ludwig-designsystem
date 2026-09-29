@@ -84,6 +84,8 @@ export const InRow: Story = {
       <Baton owner={BRIDGE} alarm detail="seit 09:40" />
       <ProcessMini phases={withStatus({ book: "pending", review: "pending" })} />
       <Baton owner={NOBODY} />
+      <ProcessMini phases={withStatus({ review: "done", handover: "done", lookup: "done" })} />
+      <Baton owner={NOBODY} />
     </div>
   ),
 };

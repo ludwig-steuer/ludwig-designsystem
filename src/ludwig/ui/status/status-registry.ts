@@ -587,7 +587,7 @@ const DOCUMENT_CHARACTER: Record<string, StatusDescriptor> = {
  * Wertebereich: DB-CHECK `client_source_docs_done_via_check`, gespiegelt in
  * `SOURCE_DOC_DONE_VIA`.
  *
- * Schreiber: `complete_doc`/`DocCompletionControl` (`manual`), die Trigger
+ * Schreiber: `complete_doc`/`DocCompletionActions` im ⋯-Menü der Belegseite (`manual`), die Trigger
  * (`booking`, `no_booking_required`, `case_closed`, `superseded`), der Import
  * (`import`), die Entscheidung über einen nicht aufgehenden Kontoauszug
  * (`replaced`, `rejected`, F288).
@@ -982,15 +982,15 @@ const CLARIFICATION_SEVERITY: Record<string, StatusDescriptor> = {
  *  - `escalated` ist LUDWIGS Reife, nicht die DATEV-Mahnstufe. Das Mahnwesen
  *    führt DATEV (205 Mahnstufen, alle auf Debitoren); hier wird nur gelesen.
  *    Eine zweite Wahrheit wäre ab Tag eins widersprüchlich.
- *  - Hochgestuft wird im Vorbereitungslauf, nicht per Cron — die Frist wird
- *    faktisch in LÄUFEN gemessen. Ein Mandant ohne Lauf im Monat bekommt
- *    keine Eskalation (bewusstes Restrisiko, im Code vermerkt).
+ *  - Eskaliert heißt: ein Vorbereitungslauf hat hochgestuft ODER die Frist ist
+ *    seit 30 Kalendertagen verstrichen (`EXPECTATION_ESCALATION_DAYS`, F318).
+ *    Die gespeicherte Stufe zählt weiter Läufe.
  *  - `pending` entlastet das Buch-Gate, `due` und `escalated` nicht mehr.
  */
 const EXPECTATION_MATURITY: Record<string, StatusDescriptor> = {
   pending: { label: "Läuft", kind: "neutral", description: "Die Frist läuft noch — normaler Lauf der Dinge, keine Arbeit." },
   due: { label: "Fällig", kind: "warning", description: "Die Frist ist verstrichen. Der Sachverhalt zählt wieder als offene Arbeit." },
-  escalated: { label: "Eskaliert", kind: "danger", description: "Mehrfach überfällig — ein Vorbereitungslauf hat sie hochgestuft." },
+  escalated: { label: "Eskaliert", kind: "danger", description: "Seit 30 Tagen oder länger überfällig — oder von einem Vorbereitungslauf hochgestuft." },
   resolved: { label: "Erledigt", kind: "success", description: "Durch ein Ereignis aufgelöst: der Beleg kam an bzw. die Zahlung ging ein." },
 };
 
@@ -1104,14 +1104,15 @@ const JOURNAL_ENTRY_STATUS: Record<string, StatusDescriptor> = {
 /**
  * Abgeleitete Achse „Weg nach DATEV" (2026-08-14) — **keine Spalte**, sondern
  * `deriveEntryDatevStage` (`modules/entries/domain/entry.ts`) aus `status` +
- * `exported_at` + `datev_mirror_entry_id`. Linearisiert den eindeutigen Weg
+ * `exported_at` + Spiegel-Kante (`entryMirroredSql`: 1:1 oder Rückkante bei
+ * Aufteilung). Linearisiert den eindeutigen Weg
  * Vorschlag → Freigegeben → Exportiert → In DATEV bestätigt fürs UI.
  * Seit F158 liefert `get_case` die Stufe je Satz als `datevStage`.
  *
  * Fallstricke:
  *  - **Exportiert ≠ angekommen** (Live-Learning: DATEV-Push antwortet 204,
  *    ohne dass der Stapel ankommt). Erst der Spiegel-Match
- *    (`datev_mirror_entry_id`) ist der Beweis — deshalb zwei Stufen.
+ *    (Spiegel-Kante, `entryMirroredSql`) ist der Beweis — deshalb zwei Stufen.
  *  - `posted` (Status-Achse) zählt als `in_datev`: der Wert entsteht heute
  *    nur über den DATEV-Import und heißt „ist in DATEV bereits Ist".
  */

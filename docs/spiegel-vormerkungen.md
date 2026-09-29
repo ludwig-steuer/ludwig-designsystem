@@ -14,6 +14,24 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 Nichts.
 
+## Erledigt mit dem Lauf vom 2026-09-29 (App `d7ac1f39`, F316–F326)
+
+Owner-Ausnahme (Simon, 2026-09-29, im Chat: „Ja, jetzt spiegeln"). Gespiegelt
+aus dem **lokalen** App-Commit `d7ac1f39` auf `staging` (noch nicht auf
+origin/staging).
+
+- **F318 — Eskalation** (L-331): `EXPECTATION_ESCALATION_DAYS` in `case.ts`,
+  die Beschreibung in der Status-Registry.
+- **F316 — `mirrored`** (L-298): `deriveEntryDatevStage` nimmt `mirrored`;
+  `journal-entry-columns.tsx` und `JournalEntryFacts.tsx` rufen es so auf.
+  Der Übergang `datevMirrorEntryId` in der App kann fallen.
+- **F324** (L-207): `SourceDocumentVM.caseNumber` („SV-…") und
+  `hasInvoiceRow` kommen aus dem Spiegel; die Erweiterung in
+  `SourceDocument.tsx` ist gestrichen.
+- **Mitgekommen:** F321, F322 (`raisedByKind`/`raisedByName` an der Klärung),
+  F323, F325, F326, `step0-view.ts`, `line-special-type.ts`,
+  `document-classification.ts`.
+
 ## Erledigt mit dem Lauf vom 2026-09-27 (App `20d5fce4`, F307)
 
 Owner-Ausnahme (Simon, 2026-09-27, im Chat: „Ja, jetzt spiegeln"). Gespiegelt

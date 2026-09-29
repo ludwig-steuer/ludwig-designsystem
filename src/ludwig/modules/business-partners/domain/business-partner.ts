@@ -190,7 +190,9 @@ const BusinessPartnerFilterRawSchema = z.object({
 
 export function parseBusinessPartnerFilter(raw: RawSearchParams): BusinessPartnerFilter {
   const parsed = BusinessPartnerFilterRawSchema.safeParse({
-    q: typeof raw.q === "string" ? raw.q : undefined,
+    // Leeres Suchfeld = keine Suche: das Formular schickt `q=` immer mit, und
+    // `min(1)` ließ sonst den ganzen Filter fallen (F328-T4).
+    q: typeof raw.q === "string" && raw.q.length > 0 ? raw.q : undefined,
     state: typeof raw.state === "string" ? raw.state : undefined,
     vat: typeof raw.vat === "string" ? raw.vat : undefined,
     role: typeof raw.role === "string" ? raw.role : undefined,

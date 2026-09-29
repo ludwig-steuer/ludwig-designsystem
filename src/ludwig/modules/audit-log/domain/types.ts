@@ -71,6 +71,8 @@ export interface AuditEventFilter {
   resourceKind?: string;
   /** Filtert auf eine konkrete Ressourcen-ID (z.B. eine Case-UUID). */
   resourceId?: string;
+  /** F323: Filtert auf `payload.caseId` (Regel-Ereignisse eines Falls). */
+  payloadCaseId?: string;
   /** Schreibender Prozess (F49 WP8). */
   source?: AuditSource;
   /** `outcome`-Filter für die Admin-UI. */

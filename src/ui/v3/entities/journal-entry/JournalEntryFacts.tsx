@@ -100,7 +100,7 @@ export function JournalEntryFacts({
     exportedAt: entry.exportedAt ?? null,
     // The detail view carries no mirror id (L-336); the mirror entry the caller
     // hands in is the same statement: found again in DATEV.
-    datevMirrorEntryId: context.mirrorEntry ? context.mirrorEntry.label : null,
+    mirrored: context.mirrorEntry != null,
   });
 
   const facts: [ReactNode, ReactNode][] = [

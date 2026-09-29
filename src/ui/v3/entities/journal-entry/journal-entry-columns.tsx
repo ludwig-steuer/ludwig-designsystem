@@ -180,7 +180,11 @@ export function journalEntryColumns(
       cell: (e) => (
         <StatusBadge
           axis="journal_entry_datev_stage"
-          status={deriveEntryDatevStage(e)}
+          status={deriveEntryDatevStage({
+            status: e.status,
+            exportedAt: e.exportedAt,
+            mirrored: e.datevMirrorEntryId !== null,
+          })}
           info={false}
         />
       ),

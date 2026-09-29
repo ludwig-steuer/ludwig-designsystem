@@ -167,9 +167,9 @@ export interface SourceDocumentVM {
    * abrechnung, Reisekostenabrechnung) haben keine eigenen Felder; **das** ist
    * ihr Fakt, und ohne ihn blieb ihre Fakten-Spalte leer.
    *
-   * `null` heißt „nicht importiert", nicht „kein Konto": die Verbindung hängt
-   * an der Datei (`stored_file_id`), und wo kein Import ist, ist auch kein
-   * Konto. Auf Staging trifft das 15 von 16 Auszugs-Belegen.
+   * `null` heißt „nicht importiert", nicht „kein Konto": die Verbindung ist
+   * die Kante `client_bank_import_batches.source_doc_id` (F324), und wo kein
+   * Import ist, ist auch kein Konto.
    */
   paymentAccount?: {
     id: string;
@@ -198,6 +198,16 @@ export interface SourceDocumentVM {
   datevRefSystem?: string | null;
   datevRefFolder?: string | null;
   datevRefId?: string | null;
+
+  // — 2026-09-28 ergänzt (L-207, F324) —
+
+  /**
+   * Ob die Rechnungszeile existiert — entscheidet mit der Hänger-Liste die
+   * Achse `document_stuck`.
+   */
+  hasInvoiceRow?: boolean;
+  /** Anzeigeform `SV-…`, vom Aufrufer über `formatCaseNumber()` aufgelöst. */
+  caseNumber?: string | null;
 }
 
 /* ── Vom Datensatz zum Anzeigemodell ──────────────────────────────────────
@@ -210,12 +220,12 @@ export interface SourceDocumentVM {
    `modules/invoices` bzw. `infrastructure/` importiert: die Datei bleibt so
    ohne Modul-Abhängigkeit und damit spiegelbar.
 
-   Was die Mapper NICHT setzen: `href`, `caseHref`, `caseNumber`,
-   `hasInvoiceRow` und `detail`. Die ersten beiden sind Wege durch die
-   Oberfläche und haben in einem Domänenmodell nichts verloren, die nächsten
-   zwei erklärt das Set an seiner Erweiterung des Modells — und `detail`
-   kennt nur der Aufrufer: ob die Subtyp-Zeile existiert, steht nicht im
-   Supertyp. Er legt sie beim Übergeben dazu. */
+   Die Mapper setzen `caseNumber` (fertig formatiert hereingereicht) und
+   `hasInvoiceRow` (aus `invoiceId`). Was sie NICHT setzen: `href`,
+   `caseHref` und `detail`. Die ersten beiden sind Wege durch die Oberfläche
+   und haben in einem Domänenmodell nichts verloren — und `detail` kennt nur
+   der Aufrufer: ob die Subtyp-Zeile existiert, steht nicht im Supertyp. Er
+   legt sie beim Übergeben dazu. */
 
 /**
  * Eine Zeile der Belegliste des Jahres.
@@ -232,6 +242,8 @@ export function sourceDocumentFromListRow(row: {
   fileName: string | null;
   /** Fertig aufgelöst — `documentCounterparty()` beim Aufrufer. */
   counterparty: string | null;
+  /** Fertig formatiert — `formatCaseNumber()` beim Aufrufer. */
+  caseNumber: string | null;
   invoiceDate: string | null;
   receivedDate: string | null;
   uploadedAt?: string | null;
@@ -267,6 +279,8 @@ export function sourceDocumentFromListRow(row: {
     classDocumentKind: row.documentKind ?? null,
     status: row.documentStatus ?? null,
     reviewReason: row.reviewReason ?? null,
+    caseNumber: row.caseNumber,
+    hasInvoiceRow: row.invoiceId != null,
   };
 }
 
