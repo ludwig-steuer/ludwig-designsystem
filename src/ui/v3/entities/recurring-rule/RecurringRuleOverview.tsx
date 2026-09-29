@@ -112,7 +112,7 @@ export function RecurringRuleOverview({
       rowKey={(rule) => rule.id}
       rowHref={ruleHref}
       head={{
-        title: "Regelwerk des Mandanten",
+        title: "Wiederkehrende Buchungen des Mandanten",
         meta: <span className="v2muted">{counter(rules.length, total)}</span>,
       }}
       minWidth={MIN_WIDTH}

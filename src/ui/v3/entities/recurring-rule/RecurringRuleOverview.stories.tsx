@@ -131,7 +131,7 @@ const EIGHT: RecurringRuleListRow[] = [
 
 /**
  * Der Normalfall: acht von 30 Regeln, sortiert nach Gültigkeit (der Pfeil
- * steht am aktiven Kopf), die ganze Zeile führt in den Regelwerk-Reiter ihres
+ * steht am aktiven Kopf), die ganze Zeile führt in den Reiter „Wiederkehrende Buchung“ ihres
  * Sachverhalts, beide Konten führen ins Kontenblatt. Im Fuß steht die größere
  * Zahl: **15 Dauersachverhalte haben noch keine Regel** — mit ihrem Weg
  * dorthin.
@@ -231,7 +231,7 @@ export const Error: Story = {
         ruleHref={ruleHref}
         total={30}
         error={{
-          message: "Das Regelwerk konnte nicht geladen werden.",
+          message: "Die wiederkehrenden Buchungen konnten nicht geladen werden.",
           retry: <TextButton href="#neu-laden">Erneut laden</TextButton>,
         }}
       />

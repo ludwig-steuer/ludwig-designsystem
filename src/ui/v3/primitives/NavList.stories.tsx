@@ -101,7 +101,7 @@ export const Edges: Story = {
           {
             label: "Rand",
             items: [
-              { href: "/a", label: "Wiederkehrende Buchungen und Regelwerk", icon: ico(Repeat), count: 128 },
+              { href: "/a", label: "Wiederkehrende Buchungen", icon: ico(Repeat), count: 128 },
               { href: "/b", label: "Ohne Icon" },
               { href: "/c", label: "Bald verfügbar", icon: ico(BarChart3), future: true },
             ],
