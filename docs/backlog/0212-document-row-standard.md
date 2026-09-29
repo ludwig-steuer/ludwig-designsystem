@@ -265,3 +265,5 @@ Auflagen aus der Nachprüfung (M3, M5) bleiben bestehen.
 
 
 **Nachbesserung Welle 2 (M7):** Der Seitenbereich trägt den Titel „Seiten 5–7 im Original"; der Strich unterscheidet ihn von der Seitenzahl. **M6** bleibt Auflage: die zweite Zeile der Einordnung eines zerlegten Belegs („Eingangsrechnung · zerlegt in 5 Teile", 201 px) wird in 176 px gekürzt, der volle Text steht im Titel — Entscheid, ob sie in der gruppierten Ansicht entfällt, mit der ersten echten Story.
+
+**Entscheid zu M6 (2026-09-29, nach Hinweis ll-dev2):** „zerlegt in n Teile" steht nur am **Original** (V1, V2), nicht in V5 gruppiert — dort sind die Zeilen die Teile, das Original ist der Gruppenkopf. (1) Die Einordnung ist `minmax(200px, 232px)`: sie wächst, wo die Ansicht Platz hat (V2, V1), und gibt in V5 gruppiert nach. (2) In einer Ansicht **mit** der Spalte „Seiten" lässt die App den Seitenbereich aus dem Teil-Wort weg („Eingangsrechnung · Teil 3 von 12" statt „… · 5–7") — er stünde sonst doppelt. Das Teil-Wort baut die App (`document-classification.ts`), das Set zeigt es.

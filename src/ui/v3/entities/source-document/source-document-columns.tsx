@@ -773,7 +773,10 @@ export function sourceDocumentColumns({
       // wide in a 720 px frame (acceptance 0212, M1).
       // 200 px: the picture of 0205 is two lines (form, effect) — the 232 px of
       // the old badge chain (0070 M1) went to the progress word (G6/G8).
-      width: variant === "compact" ? "minmax(96px, 0.8fr)" : "200px",
+      // 200–232: the track grows to 232 where the view has room (V2, V1: an
+      // original's „Eingangsrechnung · zerlegt in 5 Teile" needs 201 px of
+      // text) and gives way to 200 where it has not (V5 grouped).
+      width: variant === "compact" ? "minmax(96px, 0.8fr)" : "minmax(200px, 232px)",
       cell: (d) => {
         const c = classificationPicture?.(d);
         return c ? (
