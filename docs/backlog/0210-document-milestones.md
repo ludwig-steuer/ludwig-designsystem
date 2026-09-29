@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-29; Owner-Blick (Titel) und fremde Abnahme stehen aus |
+| Status | Abnahme — gebaut 2026-09-29; Titel vom Owner bestätigt 2026-09-29 (über ll-dev); fremde Abnahme steht aus |
 | Stufe | neu `entities/source-document/SourceDocumentMilestones.tsx` · Seite im Showcase `src/showcase/document/` |
 | Klassen-Test | nein — kennt Sachverhalt, Buchung, Stapel, DUO: Entität Beleg, Form M (Karte) |
 | Quelle | Anfrage ll-dev 2026-09-29 (Owner-Wunsch): Box „Verarbeitung" zeigt Traces statt Meilensteine; Beispiel `f5d0155c` (MAGURA) erledigt, gebucht, im Stapel — die Box sagt nichts davon |
@@ -17,7 +17,7 @@ geschehen ist und was noch kommt** — in Wörtern der Kanzlei, ohne Protokoll.
 
 ## Aufbau
 
-Eine Karte, Kopf „Weg des Belegs" (Annahme, s. Fragen), rechts „Ganzer
+Eine Karte, Kopf „Weg des Belegs" (Owner 2026-09-29), rechts „Ganzer
 Verlauf" (Reiter mit den Traces). Darunter eine Liste von Stationen, je Zeile:
 
 | Spalte | Inhalt |
@@ -73,8 +73,8 @@ geschehen." · lädt (`Loading`, drei Zeilen Skelett) · Fehler (`Error`, mit
 
 ## Offene Fragen
 
-1. Titel „Weg des Belegs" statt „Verarbeitung" — neues Label. Ohne Antwort:
-   „Weg des Belegs" (passt zu „Weg einer Rechnung" im Prozessbild-Dialog).
+1. ~~Titel „Weg des Belegs" statt „Verarbeitung"~~ — **bestätigt** vom Owner
+   2026-09-29 (über ll-dev).
 2. Buchungen aufklappbar oder als Verweis? Gebaut: bis drei offen in der Box,
    darüber „n weitere" als Verweis in den Reiter Buchungen.
 
