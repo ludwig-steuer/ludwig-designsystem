@@ -208,3 +208,27 @@ Abnehmer: Claude (fremde Sitzung). Storybook 6107 bei 1280 × 900.
 ### Urteil (neu)
 
 **Abgenommen mit Auflage** M4 (Trefferflächen der Auswege, setweit).
+
+## Nachprüfung 3 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung). Stand 72a10d3. Storybook 6107 bei
+1280 × 900 mit Playwright, neu gemessen. Geprüft: „Nachbesserung 2 (M5, M6)".
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| Story `ChoicePrompt/OptionRows` | Storybook-Index | ✓ `v3-patterns-prüfen-choiceprompt--option-rows` vorhanden |
+| Story-Liste der Spec = gebaute Stories | Abschnitt „Stories"; Storybook-Index | `ClarificationCard`: `InBatchReview`, `AtCaseFreeText`, `DeferredWithUndo` + bestehende ✓. `RadioGroup/Rows` ✓. `ChoicePrompt/OptionRows` ✓. `ClarificationThread`: Spec nennt `Thread` · `Single` — der Index zeigt zusätzlich eine dritte Story „ITEMS" (`v3-entitäten-klärung-clarificationthread--items`). Das ist kein echter Zustand, sondern der modulweite Export `export const ITEMS: ThreadItem[]` in `ClarificationThread.stories.tsx:17`, den CSF als Story einliest, weil er groß geschrieben ist. Vorbestehend, nicht Teil von M5/M6, nicht blockierend — aber die Story-Liste der Spec und der tatsächliche Index stimmen an dieser Stelle nicht überein |
+| M6: kein doppeltes „Ludwig" bei `raisedBy.kind === "agent"` | `ClarificationCard/People` (`raisedBy: { kind: "agent", id: null, label: null }`) | ✓ Meta-Zeile: „Gefragt ist: Kanzlei · Rückfrage von Ludwig · Buchungsvorschlag · 26.08.2026, 09:12" — genau ein „Ludwig" in der Meta-Zeile; die zwei weiteren Erwähnungen im Seitentext stammen aus dem Antwortverlauf, nicht aus der Meta-Zeile |
+| `pnpm typecheck` · `check:language` · `check:when` · `check:type` | CLI | ✓ alle vier Exit 0 |
+
+**Hinweis (neu, nicht blockierend).** Die „ITEMS"-Story von
+`ClarificationThread` ist ein Werkzeug-Artefakt (CSF liest jeden groß
+geschriebenen Export als Story), keine echte Zustandsstory. Auflage bei
+Gelegenheit: `ITEMS` klein schreiben oder aus der gemeinsamen Fixture-Datei
+auslagern, damit der Storybook-Index der Spec-Story-Liste wieder entspricht.
+
+### Urteil
+
+**Abgenommen.** M5 und M6 sind, wie in der „Nachbesserung 2" behauptet,
+gebaut und wirksam. M4 bleibt offen (setweit, Backlog 0213, unverändert aus
+der vorigen Nachprüfung).

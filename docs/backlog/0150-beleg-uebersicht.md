@@ -256,3 +256,46 @@ Spalten, nicht für diese beiden Angaben.
 
 **Nicht abgenommen** wegen M1. Reihenfolge, Box, `#parts` und Breite stimmen;
 nach Behebung genügt die Nachmessung von `WithParts` mit Prozessbild.
+
+## Fremde Abnahme 2026-09-29 (Nachtrag)
+
+Abnehmer: Claude (fremde Sitzung, unabhängig von der vorigen). Stand 72a10d3
+(`git diff 004d2d3..HEAD -- src/ui/v3/entities/source-document/` ist leer —
+Code seit der letzten Prüfung unverändert). Code `SourceDocumentCard.tsx`,
+`SourceDocumentList.tsx`, `source-document-columns.tsx` (`NARROW_VIEW`),
+`document-classification.ts`, `Classification.tsx`; Storybook 6107 bei
+1280 × 900 mit Playwright neu gemessen, nicht aus dem Vorbefund übernommen.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Reihenfolge rechte Spalte | `Seiten/Beleg/Rechnung/Clean`, `.v2doccard__facts` Kinder | ✓ Belegdaten (y 219) → Weg des Belegs (756) → Befunde und Klärungen (1002) → Umsatzsteuer (1130); Seite `scrollWidth` 1280 = 1280 |
+| Teilbelege als Box, `id="parts"` einmal im DOM | `SourceDocumentCard/WithParts` | ✓ `document.querySelectorAll('#parts').length === 1`; Box bei x 738, direkt unter Belegdaten (die anderen drei Boxen sind Slots und in dieser Story nicht befüllt) |
+| Box ohne Querscroll | `WithParts`, `.v2tbl__scroll` | ✓ 520 = 520; Spuren Beleg 190 · Betrag 104 · Fortschritt 170 px (per `getBoundingClientRect` der `<td>`, nicht geschätzt) |
+| „Belegart · Datum" unter dem Namen | `WithParts` | ✓ „Bürobedarf Meier GmbH" / „Rechnung · 26.08.2026"; Zeilen 65, 65, 64 px |
+| kein gekürztes Stand-Wort | Sonde: reales `.pz-cell`/`.pz-cell__word`-Markup in die lebende Fortschritt-Zelle der Box eingefügt (170 px Spur, wie gemessen), `scrollWidth` vs. `clientWidth` gelesen, wieder entfernt | ✗ Wortplatz 75 px; „Vorgeschlagen" 88 px, „Bereit zur Buchung" 113 px, „Keine Buchung nötig" 122 px — alle drei `scrollWidth > clientWidth` → **M1 weiterhin offen**, unverändert zum Vorbefund |
+| Drawer-Form (`tone="bare"`): Teilbelege wandern mit | `SourceDocumentCard/Bare` | ✗ `document.getElementById('parts')` → `null`, `Bare` übergibt weiterhin keine `parts` → **M2 weiterhin offen**; der JSDoc-Kommentar über `WithParts` (Zeile 171–174) behauptet noch „die Liste steht **unter** den zwei Spalten" — sachlich falsch (sie steht seit dem Owner-Nachtrag als Box **in** der Spalte). Deutsch im Kommentar selbst ist nach `check-language.mjs` zulässig (Story-Beschreibungen sind laut Regel 0098 M10 ausgenommen) — der Mangel ist der veraltete Inhalt, nicht die Sprache |
+| Sprung auf `#parts` | Code-Grep, `WithParts` | Kein Story und keine Produktzeile ruft `href="#parts"` derzeit auf — weder `WithParts` noch eine Seiten-Story verlinkt dorthin; die einzige Fundstelle mit dem Text „Zu den n Teilbelegen" ist ein Kommentar in `SourceDocumentCard.tsx:188`. Die Mechanik selbst ist verkabelt (`document-classification.ts:141` baut `${links.self}#parts` für `bundle.href`, `Classification.tsx:324–326` rendert ihn als `<Link>`) und wurde direkt geprüft: `location.hash = "parts"` auf `WithParts` gesetzt → Box springt von y 869 auf y 632 (Rest der Seite zu kurz, um sie ganz nach oben zu holen) — der native Anker-Sprung funktioniert. Es gibt aber **keine** Storybook-Story, die einen echten Klick auf einen solchen Link bis zur Box durchspielt; der frühere Nachweis „Link `#parts` geklickt" lässt sich in dieser Form nicht reproduzieren |
+| Gegenprobe K | `Seiten/Belegzeile/Compact` | ✓ 720 = 720 |
+| `pnpm typecheck` · `check:language` · `check:when` · `check:type` | CLI | ✓ alle vier Exit 0 |
+
+**M1 — weiterhin blockierend**, unverändert (siehe Vorbefund für die
+vorgeschlagene Auflage: Fortschritt-Spur vergrößern, `WithParts` mit
+`partProcessPicture` ausstatten, danach bei 1280 nachmessen).
+
+**M2 — weiterhin nicht blockierend**, unverändert.
+
+**Hinweis (neu).** Der Sprung auf `#parts` ist als Mechanik in Ordnung, aber
+in keiner Story von Anfang bis Ende (Klick auf einen echten Link) belegt. Wer
+das für die nächste Abnahme prüfbar machen will, braucht eine Story, die
+`classificationPicture` mit einem `bundle.href` aus der echten Domänenfunktion
+(oder einem äquivalenten Fixture mit `href: "#parts"`) an dieselbe Karte
+übergibt, die auch die `parts` zeigt — heute liegen beide in getrennten
+Stories (`DocumentClassification`-Fixtures nutzen `#children`/`#parent`, nicht
+`#parts`).
+
+### Urteil
+
+**Nicht abgenommen** — unverändert wegen M1. Der Code ist seit dem letzten
+Prüfstand (004d2d3) nicht angefasst worden; diese Sitzung bestätigt den
+Befund unabhängig und mit einer direkten Messung der Wortbreite (statt einer
+Schätzung).
