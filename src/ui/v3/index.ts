@@ -396,6 +396,7 @@ export {
   UNBOOKED_VIEW,
   UNBOOKED_GROUPED_VIEW,
   COMPACT_VIEW,
+  NARROW_VIEW,
   type SourceDocumentColumn,
   type SourceDocumentColumnOptions,
   type StuckVariant,
