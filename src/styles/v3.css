@@ -4740,3 +4740,5 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* The date head as a menu (0212 G1): it reads like a column head, not like a button. */
 .v3docrow__sorthead .v2menu__sum { border: 0; background: none; box-shadow: none; padding: 0; height: auto; min-height: 24px; font: inherit; color: inherit; gap: var(--space-1); }
 .v3docrow__sorthead .v2menu__sum:hover { text-decoration: underline; }
+/* The reason is what V5 judges: two lines before the cut — the rows carry two lines anyway (0212, acceptance hint). */
+.v3docrow__reason { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; min-width: 0; }

@@ -368,7 +368,7 @@ export function sourceDocumentColumns({
     document: {
       key: "document",
       header: "Beleg",
-      width: variant === "compact" ? "minmax(130px, 1.4fr)" : "minmax(190px, 1.4fr)",
+      width: variant === "compact" ? "minmax(130px, 1.4fr)" : "minmax(170px, 1.4fr)",
       sortable: variant !== "compact",
       cell: (d) => {
         const head = documentHead(d);
@@ -480,15 +480,16 @@ export function sourceDocumentColumns({
     reason: {
       key: "reason",
       header: "Begründung",
-      width: "minmax(88px, 1.2fr)",
+      // 108: „Ohne hinterlegte" (106 px, Inter 13.5) must fit one line of two (0212, measured).
+      width: "minmax(108px, 1.2fr)",
       cell: (d) =>
         d.doneReason ? (
-          <span className="v2trunc" title={d.doneReason}>
+          <span className="v3docrow__reason" title={d.doneReason}>
             {d.doneReason}
           </span>
         ) : (
           // A missing reason is itself a finding here — it is what gets judged (G7).
-          <span className="v2muted v2trunc" title="Ohne hinterlegte Begründung.">
+          <span className="v2muted v3docrow__reason" title="Ohne hinterlegte Begründung.">
             Ohne hinterlegte Begründung.
           </span>
         ),
