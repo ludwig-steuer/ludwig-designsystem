@@ -724,6 +724,12 @@ export {
   type ClarificationEvent,
   type ClarificationEventKind,
   type ClarificationSource,
+  type ClarificationEvidence,
+  type EvidenceDocument,
+  type EvidenceAccount,
+  type EvidencePayment,
+  type EvidenceEntry,
+  type EvidenceKind,
 } from "./entities/clarification/ClarificationCard";
 
 export {
