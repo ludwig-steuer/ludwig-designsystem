@@ -1,5 +1,7 @@
 import { StateIcon } from "../../patterns/Review";
 import { EmptyState } from "../../primitives/EmptyState";
+import type { ReactNode } from "react";
+import { ErrorRow, TableLoading } from "../../primitives/Cells";
 import { Row, Table } from "../../primitives/Table";
 import type { SourceDocumentVM } from "./SourceDocument";
 import {
@@ -37,6 +39,8 @@ export function SourceDocumentList({
   href,
   processPicture,
   classificationPicture,
+  loading,
+  error,
 }: {
   documents: readonly SourceDocumentVM[];
   /** Which of the two empty cases holds. Defaults to the gap, not the success. */
@@ -47,6 +51,10 @@ export function SourceDocumentList({
   /** The progress of each row (0204) — without it the old completion stands. */
   processPicture?: SourceDocumentColumnOptions["processPicture"];
   classificationPicture?: SourceDocumentColumnOptions["classificationPicture"];
+  /** Still loading — skeleton rows in the same tracks (acceptance 0212, M5). */
+  loading?: boolean;
+  /** Loading failed: what failed, and the way to try again (T5, I7). */
+  error?: { message: string; retry?: ReactNode };
 }) {
   const columns = sourceDocumentColumns({
     columns: COMPACT_VIEW,
@@ -56,6 +64,13 @@ export function SourceDocumentList({
     ...(processPicture ? { processPicture } : {}),
     ...(classificationPicture ? { classificationPicture } : {}),
   });
+  if (loading || error) {
+    return (
+      <Table cols={sourceDocumentTracks(columns)} minWidth={sourceDocumentMinWidth(columns)}>
+        {loading ? <TableLoading rows={2} cols={columns.length} /> : <ErrorRow message={error!.message} action={error!.retry} />}
+      </Table>
+    );
+  }
   if (documents.length === 0) {
     return emptyKind === "not-expected" ? (
       <EmptyState

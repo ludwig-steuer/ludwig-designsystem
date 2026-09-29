@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { TextButton } from "../../primitives/TextButton";
 import { SourceDocumentList } from "./SourceDocumentList";
 import type { SourceDocumentVM } from "./SourceDocument";
 import { Card, CardHead } from "../../primitives/Table";
@@ -74,6 +75,23 @@ export const Empty: Story = {
     <Frame title="Belege" sub="Sachverhalt 2026-0415">
       <SourceDocumentList documents={[]} />
     </Frame>
+  ),
+};
+
+/** Loading keeps the tracks; the error says what failed and offers a retry (0212, M5). */
+export const LoadingAndError: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 24 }}>
+      <Frame title="Belege" sub="Sachverhalt 2026-0415">
+        <SourceDocumentList documents={[]} loading />
+      </Frame>
+      <Frame title="Belege" sub="Sachverhalt 2026-0415">
+        <SourceDocumentList
+          documents={[]}
+          error={{ message: "Die Belege dieses Sachverhalts ließen sich nicht laden.", retry: <TextButton onClick={() => {}}>Erneut laden</TextButton> }}
+        />
+      </Frame>
+    </div>
   ),
 };
 
