@@ -143,3 +143,25 @@ die Nachmessung von `Flat` bei 1280 px.
 | M3 | Die Satzart fällt nicht mehr bei jeder Gruppierung weg; der Aufrufer nimmt sie mit `without: ["kind"]` heraus, wenn seine Gruppen nach Satzart sind |
 | M4 | Konto-Links über `Link` |
 | M2, M5 | offen: Trefferflächen setweit; Beispieldaten |
+
+## Nachprüfung 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung). Stand 0efe1df, Storybook 6107, 1280 × 900,
+Playwright.
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M1 | `Flat` | ✓ `.v2tbl__scroll` 1246 = 1246, kein Querscroll; Aktionen innerhalb der Karte; Spalten auf oder über dem Boden (Gegenpartei 104, Soll/Haben je 73 bei Boden 72, Prüfbedarf 132 px) |
+| Gegenprobe | `Grouped` | ✓ 1246 = 1246; keine Spalte Satzart; Gegenpartei 129, Soll/Haben je 107,5 px |
+| M3 | Code `JournalEntryReviewList.tsx:297`, Story `Grouped` | ✓ `kind` fällt nur über `without` des Aufrufers; `Grouped` gibt `without={["kind"]}` |
+| M4 | Code `JournalEntryReviewList.tsx:124` | ✓ Konto-Links über `Link` |
+
+Hinweis: Soll/Haben mit 73 px tragen „Nummer und Name" nur noch umgebrochen
+(Zeilen 88 px wie vorher) — innerhalb des Nachtrags, kein Mangel.
+
+Offen, nicht blockierend: M2 (setweit), M5.
+
+### Urteil (neu)
+
+**Abgenommen mit Auflagen**: M5 (Beispieldaten) nachziehen; M2 bleibt beim
+setweiten Auftrag.

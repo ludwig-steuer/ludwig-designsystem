@@ -167,3 +167,22 @@ genügt die Nachmessung von `Compact`.
 | M3 | `DATE_AXIS_WORD` ist keine zweite Quelle: für die Datumsachsen gibt es keine Registry-Achse; die drei Wörter stehen einmal, an der Spalte, die sie trägt. Kommt eine Achse, ziehen sie um |
 | M4 | „n Buchungen" führt auf den ersten Satz; die übrigen erreicht man im Satz-Drawer über den Beleg — so gewollt, bis die App eine Satzliste je Beleg hat |
 | M2, M5 | offen: Trefferflächen setweit; Lade-/Fehlerzustand von `SourceDocumentList` (Ausbau) |
+
+## Nachprüfung 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung). Stand 0efe1df, Storybook 6107, 1280 × 900,
+Playwright.
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M1 | `Compact` (Rahmen 720 px) | ✓ `.v2tbl__scroll` 720 = 720, kein Überlauf; Spuren Beleg 148 (Boden 130), Einordnung 96, Betrag 104, Datum 96, Fortschritt 200 px; kein Stand-Wort gekürzt („Vorgeschlagen", „Werte fehlen", „In DATEV"); Zeilen 50–51 px; `SourceDocumentList` setzt jetzt `sourceDocumentMinWidth` |
+| Kriterium „K ohne Kopf, einzeilig" | `Compact` | ✓ (vorher ✗) |
+| M3 `DATE_AXIS_WORD` | Spec | ✗ nicht behoben: begründet, aber nicht als benannte Ausnahme mit Owner und Datum in der Guideline (CLAUDE.md §3) |
+| M4 „n Buchungen" | Spec | als Entscheid angenommen („so gewollt, bis die App eine Satzliste je Beleg hat"); der Linktitel sagt es noch nicht |
+
+Offen, nicht blockierend: M2 (setweit), M3, M5.
+
+### Urteil (neu)
+
+**Abgenommen mit Auflagen**: M3 als benannte Ausnahme in die Guideline; M5 im
+nächsten Schritt.

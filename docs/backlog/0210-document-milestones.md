@@ -170,3 +170,20 @@ App-Spec; M3 und M4 im nächsten Schritt.
 | M2 | Prop-Tabelle: `batch` heißt `{ kind: "batch"; at?; batches: { key; label; status; href?; count? }[] }`; dazu `import` und `transactions` wie im Nachtrag Zahlungsbelege |
 | M4 | Fehlertext ohne erfundene Ursache: „**Der Weg des Belegs ließ sich nicht laden.** Laden Sie ihn erneut; der ganze Verlauf steht im Reiter." `WORD` ist keine zweite Quelle: die Stationswörter sind Wörter dieser Box, keine Werte einer Registry-Achse |
 | M3 | offen: die Showcase-Belegseite zeigt nur „nichts erreicht" |
+
+## Nachprüfung 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung). Stand 0efe1df.
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M1 | Code `SourceDocumentMilestones.tsx:215–232` | ✓ ab vier Buchungen mit `moreHref` drei und „1 weitere Buchung" bzw. „n weitere Buchungen"; ohne `moreHref` stehen alle |
+| M2 | Spec, Abschnitt „Schnittstelle" | ✗ nicht behoben: die Prop-Tabelle (Zeile `milestones`) sagt weiter `batch {at?, label, status, href?}` und nennt `import`/`transactions` nicht; die richtige Form steht nur in der Nachbesserung. Die Tabelle selbst muss stimmen |
+| M4 | Code `:131` | ✓ Fehlertext ohne behauptete Ursache: „**Der Weg des Belegs ließ sich nicht laden.** Laden Sie ihn erneut; der ganze Verlauf steht im Reiter." `WORD` als Wörter der Box angenommen |
+
+Offen, nicht blockierend: M2, M3.
+
+### Urteil (neu)
+
+**Abgenommen mit Auflagen**: die Prop-Tabelle (M2) und die Belegseite mit einem
+erreichten Stand (M3) nachziehen.

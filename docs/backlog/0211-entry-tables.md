@@ -225,3 +225,35 @@ Nach Behebung von M1/M2 genügt eine Nachmessung von `WithRunAndDatevId` und
 | M4 | Summenzeile nur unter Zeilen (`all.length > 0`), nie über einem Leerfall. Spec-Tabelle T2 `full`: die Spalte „DATEV" (Herkunftskennzeichen) gehört dazu. `totals.cells` bleibt `Partial<Record<string, …>>`: Schlüssel sind die Spaltenschlüssel des Aufrufers |
 | M3 | offen, setweiter Punkt (Text-Links unter 24 px) — eigener Auftrag |
 | M5, M6 | Story- und Beispieldaten, nicht nachgezogen |
+
+## Nachprüfung 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung). Stand 0efe1df, Storybook 6107, 1280 × 900,
+Playwright. Maßstab: Mit zugeschalteten Spalten darf die Karte quer scrollen,
+solange keine Spalte unter ihren Mindestwert fällt.
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M1 | `WithRunAndDatevId` | ✓ `.v2tbl__scroll` 1494 in 1246, scrollt in der Karte, Seite 1280 = 1280; jede Spalte auf ihrem Boden: Buchungstext 160, Soll 96, Haben 96 px, keine unter dem Mindestwert |
+| M2 | `InDrawerWithAll` | ✓ 1204 in 960, scrollt in der Karte; Buchungstext 100, Gegenkonto 120 px, keine Spalte unter dem Mindestwert; Gegenpartei „Hartje KG" sichtbar |
+| M4 (c) Summenzeile über leer | Code `DataTable.tsx:640` | ✓ `totals && !state && all.length > 0` |
+| M4 (a, b) | Spec | ✗ nicht nachgezogen: Z. 76 (T2 `full`) nennt „DATEV" weiter nicht, Z. 85 sagt weiter `Record<columnKey, …>` — die Nachbesserung erklärt es nur |
+
+**M7 — blockierend, neu.** Die Standardform T1 `full` (Ludwig) passt bei 1280 px
+nicht mehr in die Karte. Mit den neuen Böden (Buchungstext 160, Soll/Haben je
+96 px) ist die aus den Spuren gerechnete Mindestbreite größer als 1246 px.
+Gemessen ohne jede Zusatzspalte: `InBatch` (ohne Stapel) 1258 in 1246,
+`AtCase` (ohne Sachverhalt) 1274 in 1246 — die letzte Spalte liegt 12 bzw.
+28 px hinter dem Querscroll. Mit allen elf Standardspalten wäre es noch mehr.
+Das widerspricht der eigenen Messung oben („T1 breit, 1280 px: kein
+Querscroll") und dem Maßstab, der Querscroll nur für zugeschaltete Spalten
+erlaubt. `Mirror` (DATEV, ohne Herkunft) 1246 = 1246 ✓. Abhilfe z. B.
+Buchungstext-Boden 160 → 120 px oder Herkunft 168 → 152 px; danach `InBatch`,
+`AtCase` und einen Stapel mit allen elf Standardspalten bei 1280 messen.
+
+Offen, nicht blockierend: M3 (setweit), M4 (a, b) in der Spec, M5, M6.
+
+### Urteil (neu)
+
+**Nicht abgenommen.** M1 und M2 sind behoben, aber die Nachbesserung hat M7
+erzeugt: Die Standardform scrollt bei der Zielbreite.
