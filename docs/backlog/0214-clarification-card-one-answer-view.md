@@ -72,3 +72,79 @@ vier Gruppen mit genannten Einträgen, Antwortoptionen, Knopfzeile) ·
 **B · Akteure:** die Meta-Zeile der Karte sagt jetzt auch „gefragt von …" (`raisedBy`, sonst „Ludwig"). Der Block der Karte heißt „**Verlauf dieser Frage**" — der Verlauf des Sachverhalts ist der Faden darunter; zwei Blöcke tragen nicht denselben Namen. `actorName` ist exportiert.
 
 Gemessen: alle Zeilen des Fadens bündig (54 px), keine Zeile bricht.
+
+## Fremde Abnahme 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung, nicht der Bauende). Stand 8b62f80, Code
+(`ClarificationCard.tsx`, `ClarificationThread.tsx`, `ChoicePrompt.tsx`,
+`RadioGroup.tsx`, `v3.css`), Storybook 6107 bei 1280 × 900 mit Playwright
+gemessen. `pnpm typecheck` · `check:language` · `check:when` · `check:type` ·
+`check:contrast` grün (Exit 0).
+
+| Kriterium (Aufbau) | Nachweis | Ergebnis |
+|---|---|---|
+| 1 `caseLink` im Kopf, auf der Sachverhaltsseite weg | `InBatchReview`, `AtCaseFreeText` | ✓ „Sachverhalt 2026-0042 · Bewirtung Musterfirma" als Link; in `AtCaseFreeText` fehlt er |
+| 3/4 Empfehlung vor Grundlage | `InBatchReview`, DOM-Reihenfolge | ✓ Empfehlung · Grundlage · Quellen und Kontext · Antwortoptionen · Oder selbst formulieren |
+| 5 Ein Block, je Art ein Aufklapper mit Anzahl, „genannt" oben | `InBatchReview` | ✓ Belege 2 · Konten 2 · Zahlungen 1 · Buchungen 2 · Weitere Quellen 1; genannte Einträge zuerst mit „genannt" |
+| 6 tabellarisch, Beträge rechts; kein Querscroll bei 760 px | `InBatchReview`, `AtCaseFreeText` | ✓ alle vier Tabellen 744 = 744 |
+| 6 Klick ruft `onSelect`, navigiert nicht | `InBatchReview` | ✓ am Schlüssel: Enter auf „21.08.2026 genannt" → „Drawer öffnet: document:doc-4471", URL unverändert; ✗ an der Zeile → M1 |
+| 8 „Antwortoptionen" als ganze Zeilen, Empfehlung vorgewählt, Freitext immer | `InBatchReview`, `AtCaseFreeText`, `InPortal` | ✓ zwei Zeilen je 760 × 41 px, „Reisekosten (4670)" vorgewählt, fett; „Oder selbst formulieren" daneben; ohne Optionen nur „Antwort" |
+| 9 ein Hauptknopf mit `submitLabel`, Auswege klein | `InBatchReview`, `DeferredWithUndo` | ✓ „Antwort speichern und zurück an Ludwig" (34 px, mit Taste Strg+Enter); „Woanders geklärt? Anderweitig geklärt", „Jetzt nicht zu klären? Zurückstellen", „Doch jetzt klären? Zurückstellung aufheben" als Textzeilen |
+| B „gefragt von", „Verlauf dieser Frage" | `InBatchReview`, Code | ✓ „gefragt von Ludwig"; Block heißt „Verlauf dieser Frage" (Code); siehe M3 |
+| A Faden: bündig, Notiz klappt nicht auf, aktuell markiert, nicht doppelt | `ClarificationThread/Thread`, `Single`, `InBatchReview` | ✓ fünf Zeilen, alle Zeilen links bei 54 px, 36–40 px hoch; Notiz ohne `details`/Knopf; aktuelle Frage zuletzt, Hintergrund `--color-accent-50`, „aktuell" 5,04:1, Titel genau einmal; `Single` „Verlauf 1"; in der Karte zu, mit Anzahl 5 |
+| Tastatur Radio-Zeilen | `InBatchReview` | ✓ Pfeil hoch wählt und fokussiert die erste Zeile; Fokusring 2 px `--color-focus` an der Zeile (`:focus-visible`); Klick irgendwo in der Zeile wählt |
+| Tastatur `onSelect`-Knöpfe, Aufklapper | `InBatchReview` | ✓ Tab-Reihe: Aufklapper · deren Knöpfe · nächster Aufklapper … · Radio; Enter öffnet den Aufklapper (Kopf 37 px) und löst `onSelect` aus |
+| Trefferflächen | `InBatchReview` | ✓ Optionszeile 41 px, Pick-Knöpfe 24–37 px hoch („4650" 30 × 24), Aufklapper 37 px; ✗ Auswege 19 px, Sachverhalt-Link 15 px → M4 |
+| Kontrast | gemessen | ✓ `.v2clc__cited` 6,17:1 (11,5 px); `.v3clt__current` 5,04:1; markierte Zeile Text 12,75:1, Rand 3,55:1; Rand der unmarkierten Zeile 1,5:1 (Radio und Wort tragen die Form, Hinweis) |
+| Keine Regression | `Filled`, `Answering`, `WithRecommendation`, `People`, `History`, `ByHand`, `InPortal`, `Deferred`, `Loading`, `ErrorState`; `ChoicePrompt` (4), `RadioGroup` (3) | ✓ kein Fehler, kein Querscroll; ChoicePrompt und RadioGroup unverändert (Legende „Antwort", Frage sichtbar, keine Zeilenform) |
+
+### Mängel
+
+**M1 — nicht blockierend.** In den Evidenz-Tabellen ist nur die erste Zelle ein
+Ziel. Die Spec sagt „Ein Klick auf eine **Zeile** ruft `onSelect`", und §9
+verlangt eine ganz klickbare Listenzeile (I11). Gemessen: Ein Klick auf
+„Hotel am Markt GmbH & Co. KG" (Aussteller-Zelle) löst nichts aus, der Cursor
+auf der Zeile ist `auto` (`ClarificationCard.tsx`, `Pick` sitzt nur auf der
+Schlüsselzelle). Auflage: Die ganze Zeile löst aus (Overlay wie
+`.v2rowlink`), mit einem Fokus-Halt je Zeile.
+
+**M2 — nicht blockierend.** Die Wortliste der Adressaten gibt es jetzt dreimal
+im Set: `AUDIENCE_WORD` in `ClarificationThread.tsx:17`, dazu
+`Clarification.tsx:35` und `ClarificationCard.tsx:58` (und
+`src/ludwig/.../case.ts:163`). Das ist eine zweite Quelle. Auflage: eine
+exportierte Liste nutzen oder als benannte Ausnahme führen.
+
+**M3 — nicht blockierend (Sprache).** Die Meta-Zeile sagt dasselbe zweimal:
+„Gefragt ist: Kanzlei · **gefragt von Ludwig** · **Rückfrage von Ludwig** ·
+Buchungsvorschlag · 26.08.2026, 09:12". Eine der beiden Angaben soll
+entfallen.
+
+**M4 — nicht blockierend (setweit).** Auswege „Anderweitig geklärt" 119 × 19,
+„Zurückstellen" 83 × 19, „Zurückstellung aufheben" 152 × 19 px; Sachverhalt-Link
+15 px hoch. Die TextButtons stehen allein in ihrer Zeile, die Ausnahme „inline"
+greift nicht. Das gehört zum offenen Punkt TextButton/Link des Sets (0211 M3).
+
+**M5 — nicht blockierend.** `RadioGroup variant="rows"` und die neuen
+`ChoicePrompt`-Props (`optionsLabel`, `optionStyle`, `hideQuestion`) haben keine
+eigene Story; sie sind nur in der Karte zu sehen. Die Stories heißen außerdem
+`AtCaseFreeText`/`DeferredWithUndo`, die Spec nennt `AtCase`, `Deferred`,
+`FreeTextOnly`. Auflage: je eine Story an RadioGroup und ChoicePrompt; die
+Story-Liste der Spec nachziehen.
+
+**Hinweis.** Eine zurückgestellte Frage zeigt zugleich „Zurückstellen" und
+„Zurückstellung aufheben" (`DeferredWithUndo`). Für die Leserin ist das
+widersprüchlich; hier gehört „Neu zurückstellen" hin oder der Ausweg entfällt.
+
+Vier Linsen: **Sprache** — Auswege als Frage und Handlung, „Antwortoptionen",
+„Oder selbst formulieren", keine Versalien und kein Ausrufezeichen ✓; M3.
+**Bedienung** — Radio per Pfeiltasten, Fokusring sichtbar, `onSelect` ohne
+Navigation, Aufklapper per Enter ✓; M1, M4. **Logik** — Empfehlung vor
+Grundlage, genannte Einträge zuerst, die App ordnet (E2); der Faden ist
+chronologisch und zeigt die aktuelle Frage einmal ✓. **Darstellung** — Beträge
+rechts mit `AmountCell`, Stand als `StatusBadge`, Markierung durch Rand
+**und** Gewicht ✓.
+
+### Urteil
+
+**Abgenommen mit Auflagen**: M1, M2, M3, M5; M4 bleibt beim setweiten Auftrag.
+
