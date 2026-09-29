@@ -263,3 +263,5 @@ M6.
 Zeile 2 entscheiden) und M7 (Seitenbereich nur, wo er gemeint ist). Die
 Auflagen aus der Nachprüfung (M3, M5) bleiben bestehen.
 
+
+**Nachbesserung Welle 2 (M7):** Der Seitenbereich trägt den Titel „Seiten 5–7 im Original"; der Strich unterscheidet ihn von der Seitenzahl. **M6** bleibt Auflage: die zweite Zeile der Einordnung eines zerlegten Belegs („Eingangsrechnung · zerlegt in 5 Teile", 201 px) wird in 176 px gekürzt, der volle Text steht im Titel — Entscheid, ob sie in der gruppierten Ansicht entfällt, mit der ersten echten Story.

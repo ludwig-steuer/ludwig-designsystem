@@ -467,7 +467,10 @@ export function sourceDocumentColumns({
       // splits — the app sets it); a whole file its page count (G8).
       cell: (d) =>
         d.splitPageRange ? (
-          <span className="v2num">{d.splitPageRange}</span>
+          // The dash says „range", the title says of what (acceptance wave 2, M7).
+          <span className="v2num" title={`Seiten ${d.splitPageRange} im Original`}>
+            {d.splitPageRange}
+          </span>
         ) : d.pageCount == null ? (
           <span className="v2muted">—</span>
         ) : (
