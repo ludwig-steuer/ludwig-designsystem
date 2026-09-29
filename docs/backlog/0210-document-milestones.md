@@ -191,3 +191,17 @@ erreichten Stand (M3) nachziehen.
 ## Nachbesserung 2 (2026-09-29)
 
 M2: die Prop-Tabelle unter „Schnittstelle" selbst ist nachgezogen (`batch` mit `batches[]`, `import`, `transactions`).
+
+## Nachprüfung 2 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung). Stand 0ce6cff.
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M2 | Spec „Schnittstelle", Zeile `milestones` | ✓ stimmt jetzt Zeichen für Zeichen mit `SourceDocumentMilestones.tsx:39–74`: `batch {at?, batches: {key, label, status, href?, count?}[]}`, `import {at, account: {name, iban?, href?}, period: {from, to}, balance: {opening, closing, currency}, count, verification?: {label, level?}}`, `transactions {at?, booked, total, openHref?}` |
+
+Offen, nicht blockierend: M3 (Belegseite im Showcase nur „nichts erreicht").
+
+### Urteil (neu)
+
+**Abgenommen mit Auflagen**: nur noch M3.

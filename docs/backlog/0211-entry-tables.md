@@ -266,3 +266,43 @@ erzeugt: Die Standardform scrollt bei der Zielbreite.
 | M4a, M4b | Spec-Tabellen nachgezogen: T2 `full` mit „DATEV", `totals.cells` als `Partial<Record<string, …>>` |
 
 Gemessen nach Nachbesserung 2, 1280 px: `InBatch` 1246 = 1246 (Buchungstext 148 px), `AtCase` 1246 = 1246 (132 px), `Mirror` 1246 = 1246 (194 px). `InBucket` scrollt (1408 in 1246): die Zeilenaktion „Stornieren" ist eine Zusatzspalte (Aktionsspur ~190 px) und zählt wie `include` — der Aufrufer kann dort `without: ["origin"]` setzen, wenn der Export-Bucket ohne Querscroll stehen soll.
+
+## Nachprüfung 2 2026-09-29
+
+Abnehmer: Claude (fremde Sitzung). Stand 0ce6cff, Storybook 6107, 1280 × 900,
+Playwright.
+
+| Mangel | Nachweis | Ergebnis |
+|---|---|---|
+| M7 | `InBatch` | ✓ 1246 = 1246, Buchungstext 148 px, Soll/Haben 96 px |
+| M7 | `AtCase` | ✓ 1246 = 1246, Buchungstext 132 px |
+| M7 | `Mirror` | ✓ 1246 = 1246, Buchungstext 194 px |
+| Gegenprobe | `WithRunAndDatevId` | ✓ scrollt in der Karte (1454 in 1246), keine Spalte unter ihrem Mindestwert (Buchungstext 120 = Boden, Soll/Haben 96) |
+| M4a, M4b | Spec Z. 76, Z. 85 | ✓ T2 `full` mit „DATEV (Herkunftskennzeichen)"; `totals.cells` als `Partial<Record<string, ReactNode>>` |
+
+**M8 — nicht blockierend (Begründung zu `InBucket`).** Die Begründung „die
+Zeilenaktion zählt wie `include`" trägt nicht. `rowActions` ist keine
+zuschaltbare Spalte, sondern die Handlung des Jobs 3 (Export-Bucket). Gemessen
+scrollt `InBucket` 1408 in 1246, und die Aktionsspalte mit dem unumkehrbaren
+„Stornieren" endet bei 1407 px, 143 px hinter dem Kartenrand (1264). Dieselbe
+Lage (Aktion hinter dem Querscroll) war in 0164 M1 blockierend. Hier ist es
+nicht blockierend, weil Stornieren selten ist und kein Hauptweg; Tastatur und
+Scroll erreichen es. Auflage: Die Story zeigt den Bucket so, wie die Spec es
+empfiehlt (`without: ["origin"]` oder eine schmalere Aktionsspur), und bei
+1280 px steht die Aktion ohne Querscroll.
+
+**M9 — nicht blockierend (berechnet, nicht gemessen).** Keine Story zeigt T1
+`full` (Ludwig) mit **allen** elf Standardspalten, also mit Sachverhalt **und**
+Stapel. Aus den Spuren gerechnet (feste Spuren 900 px, Böden 120 + 96 + 96,
+zehn Abstände à 10 px) braucht diese Form rund 1312 px bei 1210 px Platz in
+der Karte: Sie scrollt bei 1280 px um etwa 100 px. Alle drei genannten Rahmen
+(Stapel, Sachverhalt, Bucket) nehmen eine der beiden Spalten heraus. Auflage:
+Die Spec sagt, dass die volle Ludwig-Form nur mit `without` in 1280 px passt,
+oder eine Story misst sie.
+
+Offen, nicht blockierend: M3 (setweit), M5, M6, M8, M9.
+
+### Urteil (neu)
+
+**Abgenommen mit Auflagen**: M8 (Story `InBucket` ohne Querscroll der Aktion)
+und M9 (volle Standardform benennen oder messen); M5/M6 bei Gelegenheit.
