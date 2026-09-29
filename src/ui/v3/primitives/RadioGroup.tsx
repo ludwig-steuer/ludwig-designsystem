@@ -34,6 +34,7 @@ export function RadioGroup({
   value,
   onChange,
   orientation = "vertical",
+  variant = "list",
   error,
   required,
   disabled,
@@ -44,6 +45,13 @@ export function RadioGroup({
   value: string | null;
   onChange: (value: string) => void;
   orientation?: "vertical" | "horizontal";
+  /**
+   * `rows`: every option a full-width row with a frame, the whole row the
+   * target — the proposed answers of rule S13, as the batch review shows them
+   * (0214). The native radio stays: arrow keys and the tab stop remain the
+   * browser's.
+   */
+  variant?: "list" | "rows";
   error?: string;
   required?: boolean;
   disabled?: boolean;
@@ -51,7 +59,7 @@ export function RadioGroup({
   return (
     <div className="v2field">
       <fieldset
-        className={`v2radiogrp${orientation === "horizontal" ? " v2radiogrp--horizontal" : ""}`}
+        className={`v2radiogrp${orientation === "horizontal" ? " v2radiogrp--horizontal" : ""}${variant === "rows" ? " v2radiogrp--rows" : ""}`}
         aria-invalid={error ? true : undefined}
         disabled={disabled}
       >

@@ -11,7 +11,12 @@ import {
 import type { RationaleSourceKind } from "@/ludwig/modules/accounting-cases/domain/rationale-source";
 import type { Actor } from "@/ludwig/modules/audit-log/domain/types";
 
+import type { Currency } from "@/ludwig/shared/money";
+import { AmountCell } from "../../primitives/Cells";
 import { Callout } from "../../primitives/Callout";
+import { Disclosure } from "../../primitives/Disclosure";
+import { Link } from "../../primitives/Link";
+import { HeadRow, Row, Table } from "../../primitives/Table";
 import { DateField } from "../../primitives/DateField";
 import { Field } from "../../primitives/Form";
 import { FieldList } from "../../primitives/FieldList";
@@ -99,7 +104,61 @@ export interface ClarificationSource {
   kind: RationaleSourceKind;
   label: string;
   href?: string;
+  /** For `onSelect` (0214); without it the label is the key. */
+  id?: string;
+  cited?: boolean;
 }
+
+/**
+ * What the question rests on, by kind (0214): documents, accounts, payments,
+ * entries — plus the sources that fit none. The app puts the cited sources
+ * into their group (E2); `cited` marks what Ludwig named, and those stand first.
+ */
+export interface EvidenceRow {
+  id: string;
+  /** Ludwig named it in the rationale. */
+  cited?: boolean;
+  /** Without `onSelect` on the card the row links here. */
+  href?: string;
+}
+export interface EvidenceDocument extends EvidenceRow {
+  date: string | null;
+  issuer: string | null;
+  number: string | null;
+  amount: number | null;
+  currency: Currency | null;
+}
+export interface EvidenceAccount extends EvidenceRow {
+  number: string;
+  name: string | null;
+}
+export interface EvidencePayment extends EvidenceRow {
+  date: string;
+  amount: number;
+  currency: Currency;
+  /** Counterparty or purpose — what the statement line says. */
+  text: string | null;
+  paymentAccount: string | null;
+}
+export interface EvidenceEntry extends EvidenceRow {
+  date: string;
+  debit: string | null;
+  credit: string | null;
+  amount: number;
+  currency: Currency;
+  taxKey?: string | null;
+  /** Axis `journal_entry` — a proposal carries its state. */
+  state?: string | null;
+}
+export interface ClarificationEvidence {
+  documents?: readonly EvidenceDocument[];
+  accounts?: readonly EvidenceAccount[];
+  payments?: readonly EvidencePayment[];
+  entries?: readonly EvidenceEntry[];
+  /** Contract, rule, clarification, law, web … — what fits no group. */
+  other?: readonly ClarificationSource[];
+}
+export type EvidenceKind = "document" | "account" | "payment" | "entry" | "other";
 
 /** What only the card shows — ranks 8–19 of the entity profile. */
 export interface ClarificationDetailVM {
@@ -165,6 +224,8 @@ export interface ClarificationDetailVM {
    * question lives; a clarification has no view of its own.
    */
   deferredBy?: { id: string; title: string; href?: string } | null;
+  /** What the question rests on, by kind (0214). Given, it replaces the flat `sources` list. */
+  evidence?: ClarificationEvidence | null;
 }
 
 /**
@@ -222,6 +283,153 @@ function clampDeferralDay(value: string | null): string {
   return value;
 }
 
+/** Cited first, the order of the app otherwise. */
+function citedFirst<T extends { cited?: boolean }>(rows: readonly T[]): T[] {
+  return [...rows.filter((r) => r.cited), ...rows.filter((r) => !r.cited)];
+}
+
+type Select = ((item: { kind: EvidenceKind; id: string }) => void) | undefined;
+
+/** The key cell of an evidence row: a button when the caller opens a drawer, a link when it navigates. */
+function Pick({ kind, row, select, children }: { kind: EvidenceKind; row: EvidenceRow; select: Select; children: React.ReactNode }) {
+  const body = (
+    <>
+      {children}
+      {row.cited ? <span className="v2sub v2clc__cited">genannt</span> : null}
+    </>
+  );
+  if (select)
+    return (
+      <button type="button" className="v3cell-link v2clc__pick" onClick={() => select({ kind, id: row.id })}>
+        {body}
+      </button>
+    );
+  if (row.href)
+    return (
+      <Link href={row.href} className="v3cell-link">
+        {body}
+      </Link>
+    );
+  return <span>{body}</span>;
+}
+
+function EvidenceTable({ cols, head, children }: { cols: string; head: string[]; children: React.ReactNode }) {
+  return (
+    <Table cols={cols} density="compact">
+      <HeadRow>
+        {head.map((h, i) => (
+          <span key={h || i} className={h === "Betrag" ? "v2num" : undefined}>
+            {h}
+          </span>
+        ))}
+      </HeadRow>
+      {children}
+    </Table>
+  );
+}
+
+/**
+ * Sources and context in one block (owner 2026-09-29): one fold-out per kind,
+ * its count in the head, the rows in columns — amounts right, digits of one
+ * width. A click calls `onSelect` and does not navigate: the answer half
+ * typed stays, the caller opens a drawer.
+ */
+function Evidence({ e, select }: { e: ClarificationEvidence; select: Select }) {
+  const docs = citedFirst(e.documents ?? []);
+  const accs = citedFirst(e.accounts ?? []);
+  const pays = citedFirst(e.payments ?? []);
+  const ents = citedFirst(e.entries ?? []);
+  const other = citedFirst(e.other ?? []);
+  if (docs.length + accs.length + pays.length + ents.length + other.length === 0) return null;
+  return (
+    <Block label="Quellen und Kontext">
+      <div className="v2clc__evidence">
+        {docs.length ? (
+          <Disclosure summary="Belege" count={docs.length}>
+            <EvidenceTable cols="88px minmax(0, 1.4fr) minmax(0, 1fr) 112px" head={["Datum", "Aussteller", "Beleg-Nr.", "Betrag"]}>
+              {docs.map((d) => (
+                <Row key={d.id}>
+                  <Pick kind="document" row={d} select={select}>
+                    {d.date ? <Time value={d.date} format="date" size="sm" /> : "—"}
+                  </Pick>
+                  <span className="v2trunc" title={d.issuer ?? undefined}>{d.issuer ?? "—"}</span>
+                  <span className="v2mono v2trunc">{d.number ?? "—"}</span>
+                  <span className="v2num">{d.amount === null ? "—" : <AmountCell value={d.amount} currency={d.currency} />}</span>
+                </Row>
+              ))}
+            </EvidenceTable>
+          </Disclosure>
+        ) : null}
+        {accs.length ? (
+          <Disclosure summary="Konten" count={accs.length}>
+            <EvidenceTable cols="96px minmax(0, 1fr)" head={["Konto", "Name"]}>
+              {accs.map((a) => (
+                <Row key={a.id}>
+                  <Pick kind="account" row={a} select={select}>
+                    <span className="v2mono">{a.number}</span>
+                  </Pick>
+                  <span className="v2trunc">{a.name ?? "—"}</span>
+                </Row>
+              ))}
+            </EvidenceTable>
+          </Disclosure>
+        ) : null}
+        {pays.length ? (
+          <Disclosure summary="Zahlungen" count={pays.length}>
+            <EvidenceTable cols="88px 112px minmax(0, 1.4fr) minmax(0, 1fr)" head={["Datum", "Betrag", "Gegenpartei / Zweck", "Zahlungskonto"]}>
+              {pays.map((p) => (
+                <Row key={p.id}>
+                  <Pick kind="payment" row={p} select={select}>
+                    <Time value={p.date} format="date" size="sm" />
+                  </Pick>
+                  <span className="v2num">
+                    <AmountCell value={p.amount} currency={p.currency} />
+                  </span>
+                  <span className="v2trunc" title={p.text ?? undefined}>{p.text ?? "—"}</span>
+                  <span className="v2trunc">{p.paymentAccount ?? "—"}</span>
+                </Row>
+              ))}
+            </EvidenceTable>
+          </Disclosure>
+        ) : null}
+        {ents.length ? (
+          <Disclosure summary="Buchungen" count={ents.length}>
+            <EvidenceTable cols="88px 72px 72px 112px 48px minmax(0, 1fr)" head={["Datum", "Soll", "Haben", "Betrag", "BU", "Stand"]}>
+              {ents.map((x) => (
+                <Row key={x.id}>
+                  <Pick kind="entry" row={x} select={select}>
+                    <Time value={x.date} format="date" size="sm" />
+                  </Pick>
+                  <span className="v2mono">{x.debit ?? "—"}</span>
+                  <span className="v2mono">{x.credit ?? "—"}</span>
+                  <span className="v2num">
+                    <AmountCell value={x.amount} currency={x.currency} />
+                  </span>
+                  <span className="v2mono">{x.taxKey ?? ""}</span>
+                  <span>{x.state ? <StatusBadge axis="journal_entry" status={x.state} info={false} /> : null}</span>
+                </Row>
+              ))}
+            </EvidenceTable>
+          </Disclosure>
+        ) : null}
+        {other.length ? (
+          <Disclosure summary="Weitere Quellen" count={other.length}>
+            <ul className="v2clc__sources">
+              {other.map((o) => (
+                <li key={`${o.kind}:${o.id ?? o.label}`}>
+                  <Pick kind="other" row={{ id: o.id ?? o.label, cited: o.cited, href: o.href }} select={select}>
+                    {o.label}
+                  </Pick>
+                </li>
+              ))}
+            </ul>
+          </Disclosure>
+        ) : null}
+      </div>
+    </Block>
+  );
+}
+
 function Block({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <section className="v2clc__block">
@@ -248,6 +456,10 @@ export function ClarificationCard({
   deferLockedReason,
   pending,
   error,
+  caseLink,
+  onSelect,
+  submitLabel = "Antwort speichern",
+  onUndefer,
 }: {
   clarification: ClarificationVM & ClarificationDetailVM;
   /** `answer` shows the answer area — the caller decides who is asked. */
@@ -277,6 +489,14 @@ export function ClarificationCard({
   deferLockedReason?: string;
   pending?: boolean;
   error?: string;
+  /** „Sachverhalt 2026-0042 · Titel" — in the batch review; on the case page it is left out (0214). */
+  caseLink?: { label: string; href: string };
+  /** A click on an evidence row: the caller opens a drawer, nothing navigates (0214). */
+  onSelect?: (item: { kind: EvidenceKind; id: string }) => void;
+  /** The words of the main button — the batch review says „… und zurück an Ludwig". */
+  submitLabel?: string;
+  /** Lift the deferral — a small line like the other exits, not below the card (0214). */
+  onUndefer?: () => Promise<void>;
 }) {
   const [resolving, setResolving] = useState(false);
   const [deferring, setDeferring] = useState(false);
@@ -353,6 +573,13 @@ export function ClarificationCard({
             </div>
           </>
         ) : null}
+        {caseLink ? (
+          <p className="v2clc__case">
+            <Link href={caseLink.href} className="v3cell-link">
+              {caseLink.label}
+            </Link>
+          </p>
+        ) : null}
         <p className="v2clc__meta">
           {isComment ? "Notiz" : `Gefragt ist: ${AUDIENCE_LABEL[c.audience]}`}
           {questionWord ? ` · ${questionWord}` : ""}
@@ -399,34 +626,23 @@ export function ClarificationCard({
       {c.context ? <Markdown text={c.context} className="v2clc__prose" /> : null}
       <Markdown text={c.text} className="v2clc__prose" />
 
+      {/* Recommendation first, then what it rests on (owner 2026-09-29, 0214). */}
+      {c.recommendation ? (
+        <Callout tone="soft">
+          <strong>Empfehlung:</strong> {c.recommendation}
+        </Callout>
+      ) : null}
+
       {c.facts && c.facts.length > 0 ? (
         <Block label="Grundlage">
           <FieldList tone="soft" rows={c.facts.map((f) => [f.label, f.value])} />
         </Block>
       ) : null}
 
-      {c.sources && c.sources.length > 0 ? (
-        <Block label="Quellen">
-          <ul className="v2clc__sources">
-            {c.sources.map((s) => (
-              <li key={`${s.kind}:${s.label}`}>
-                {s.href ? (
-                  <a className="v2link" href={s.href}>
-                    {s.label}
-                  </a>
-                ) : (
-                  s.label
-                )}
-              </li>
-            ))}
-          </ul>
-        </Block>
-      ) : null}
-
-      {c.recommendation ? (
-        <Callout tone="soft">
-          <strong>Empfehlung:</strong> {c.recommendation}
-        </Callout>
+      {c.evidence ? (
+        <Evidence e={c.evidence} select={onSelect} />
+      ) : c.sources && c.sources.length > 0 ? (
+        <Evidence e={{ other: c.sources }} select={onSelect} />
       ) : null}
 
       {history.length > 0 ? (
@@ -461,12 +677,16 @@ export function ClarificationCard({
             question={c.question ?? c.title}
             options={options}
             defaultOptionId={recommended}
+            // With options: „Antwortoptionen" as whole rows, and the free text
+            // always beside them (rule S13 — 0214, ll-cto); without: no heading,
+            // only the field.
+            optionsLabel="Antwortoptionen"
+            optionStyle="rows"
+            submitLabel={submitLabel}
             freeText={
               options.length === 0
                 ? { label: "Antwort", placeholder: "Antwort oder Anweisung für die Buchung" }
-                : c.allowFreeText
-                  ? { label: "Ergänzung (optional)" }
-                  : undefined
+                : { label: "Oder selbst formulieren" }
             }
             onSubmit={async (answer) => {
               await onAnswer?.(answer);
@@ -481,7 +701,7 @@ export function ClarificationCard({
         <p className="v2clc__exit">
           <ActionIcon action="help" size={14} />
           Woanders geklärt?{" "}
-          <TextButton onClick={() => setResolving(true)}>Ohne Antwort auflösen</TextButton>
+          <TextButton onClick={() => setResolving(true)}>Anderweitig geklärt</TextButton>
         </p>
       ) : null}
       {canExit && onDefer ? (
@@ -500,6 +720,16 @@ export function ClarificationCard({
               {deferLockedReason}
             </span>
           ) : null}
+        </p>
+      ) : null}
+
+      {canExit && onUndefer && c.state === "deferred" ? (
+        <p className="v2clc__exit">
+          <ActionIcon action="time" size={14} />
+          Doch jetzt klären?{" "}
+          <TextButton onClick={() => void onUndefer()} disabled={pending}>
+            Zurückstellung aufheben
+          </TextButton>
         </p>
       ) : null}
 

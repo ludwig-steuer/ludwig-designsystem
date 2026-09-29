@@ -52,6 +52,81 @@ const AGENT_DETAIL: ClarificationDetailVM = {
   allowFreeText: true,
 };
 
+const EVIDENCE: ClarificationDetailVM["evidence"] = {
+  documents: [
+    { id: "doc-4471", cited: true, date: "2026-08-21", issuer: "Musterfirma GmbH", number: "RE-2026-4471", amount: 240.4, currency: "EUR" },
+    { id: "doc-4470", date: "2026-08-14", issuer: "Hotel am Markt GmbH & Co. KG", number: "HM-88213", amount: 172, currency: "EUR" },
+  ],
+  accounts: [
+    { id: "4650", number: "4650", name: "Bewirtungskosten" },
+    { id: "4670", cited: true, number: "4670", name: "Reisekosten Arbeitnehmer" },
+  ],
+  payments: [{ id: "bt-1", date: "2026-08-23", amount: -240.4, currency: "EUR", text: "Musterfirma GmbH RE-2026-4471", paymentAccount: "Sparkasse Musterstadt" }],
+  entries: [
+    { id: "je-1", date: "2026-08-21", debit: "4670", credit: "70021", amount: 240.4, currency: "EUR", taxKey: "9", state: "proposed" },
+    { id: "je-2", date: "2026-07-18", debit: "4650", credit: "70021", amount: 118.2, currency: "EUR", taxKey: "9", state: "posted" },
+  ],
+  other: [{ kind: "clarification", id: "cl-7", label: "Rückfrage vom 12.07.2026: Bewirtung mit Übernachtung" }],
+};
+
+/**
+ * In the batch review (0214): the link to the case, recommendation and basis,
+ * sources and context in one block — every kind a fold-out with its count,
+ * named entries first —, the options as whole rows, the free text beside
+ * them, the small exits under the main button.
+ */
+export const InBatchReview: Story = {
+  render: () => {
+    const [picked, setPicked] = useState<string | null>(null);
+    return (
+      <div style={{ maxWidth: 760 }}>
+        <ClarificationCard
+          clarification={{ ...BASE, ...AGENT_DETAIL, evidence: EVIDENCE }}
+          mode="answer"
+          caseLink={{ label: "Sachverhalt 2026-0042 · Bewirtung Musterfirma", href: "#case=2026-0042" }}
+          onSelect={(item) => setPicked(`${item.kind}:${item.id}`)}
+          submitLabel="Antwort speichern und zurück an Ludwig"
+          onAnswer={async () => {}}
+          onResolve={async () => {}}
+          onDefer={async () => {}}
+        />
+        <p className="v2sub">{picked ? `Drawer öffnet: ${picked}` : "Klick auf eine Zeile öffnet einen Drawer."}</p>
+      </div>
+    );
+  },
+};
+
+/** At the case: the same card without the case link; without options only the answer field. */
+export const AtCaseFreeText: Story = {
+  render: () => (
+    <div style={{ maxWidth: 760 }}>
+      <ClarificationCard
+        clarification={{ ...BASE, ...AGENT_DETAIL, answerOptions: [], answerKind: "free_text", evidence: { accounts: EVIDENCE!.accounts ?? [] } }}
+        mode="answer"
+        onAnswer={async () => {}}
+        onResolve={async () => {}}
+        onDefer={async () => {}}
+      />
+    </div>
+  ),
+};
+
+/** Deferred: lifting it is a small line like the other exits, not a button below the card. */
+export const DeferredWithUndo: Story = {
+  render: () => (
+    <div style={{ maxWidth: 760 }}>
+      <ClarificationCard
+        clarification={{ ...BASE, ...AGENT_DETAIL, state: "deferred", deferredUntil: "2026-10-12", deferredReason: "wartet auf Unterlagen" }}
+        mode="answer"
+        onAnswer={async () => {}}
+        onResolve={async () => {}}
+        onDefer={async () => {}}
+        onUndefer={async () => {}}
+      />
+    </div>
+  ),
+};
+
 export const Filled: Story = {
   render: () => (
     <Card>

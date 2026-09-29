@@ -4760,3 +4760,23 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v2ae__contra--all .v2acc { white-space: nowrap; }
 .v3entry__keys { white-space: normal; }
 .v3entry__keys > span { white-space: nowrap; }
+
+/* RadioGroup `rows` (0214): every option a framed row, the whole row the target —
+   the look of `.v2opt`, with the native radio kept for keys and focus. */
+.v2radiogrp--rows { display: grid; gap: var(--space-2); }
+.v2radiogrp--rows .v2radioline {
+  display: flex; align-items: flex-start; gap: var(--space-2);
+  border: 1px solid var(--color-border-strong); border-radius: var(--radius-md);
+  padding: 9px 12px; background: var(--color-surface); cursor: pointer; min-height: 40px;
+}
+.v2radiogrp--rows .v2radioline:hover { background: var(--color-bg-soft); }
+.v2radiogrp--rows .v2radioline:has(input:checked) { border-color: var(--color-accent); background: var(--color-accent-50); font-weight: 600; }
+.v2radiogrp--rows .v2radioline:has(input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+
+/* 0214 · clarification card */
+.v2clc__case { margin: 0; font-size: var(--fs-ui-sm); }
+.v2clc__evidence { display: grid; gap: var(--space-2); }
+.v2clc__pick { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-align: left; min-height: 24px; }
+/* The key in link colour, mono or not; „genannt" as a quiet second line, not glued to the date. */
+.v2clc__pick .v2mono { color: inherit; }
+.v2clc__cited { display: block; color: var(--color-text-muted); }

@@ -43,6 +43,9 @@ export function ChoicePrompt({
   onSubmit,
   pending,
   error,
+  optionsLabel = "Antwort",
+  optionStyle = "list",
+  hideQuestion = false,
 }: {
   question: string;
   /** What this is about — document, amount, row. */
@@ -56,6 +59,12 @@ export function ChoicePrompt({
   onSubmit: (answer: ChoiceAnswer) => Promise<void> | void;
   pending?: boolean;
   error?: string;
+  /** The legend over the options — „Antwortoptionen" in a clarification (0214). */
+  optionsLabel?: string;
+  /** `rows`: the options as full-width rows (RadioGroup `variant="rows"`). */
+  optionStyle?: "list" | "rows";
+  /** The question stands above already (a card that shows it) — not twice. */
+  hideQuestion?: boolean;
 }) {
   const [choice, setChoice] = useState<string | null>(defaultOptionId);
   const [text, setText] = useState("");
@@ -99,10 +108,12 @@ export function ChoicePrompt({
         }
       }}
     >
-      <div>
-        <div className="v2ask__q">{question}</div>
-        {context ? <div className="v2ask__ctx">{context}</div> : null}
-      </div>
+      {hideQuestion && !context ? null : (
+        <div>
+          {hideQuestion ? null : <div className="v2ask__q">{question}</div>}
+          {context ? <div className="v2ask__ctx">{context}</div> : null}
+        </div>
+      )}
       {/* No group without a subject: on a pure free-text question (60 % of the
           stock) there would otherwise be an empty `<fieldset>` with the legend
           „Antwort" above a field that carries the same label — the same word
@@ -110,7 +121,8 @@ export function ChoicePrompt({
       {options.length === 0 ? null : (
       <RadioGroup
         name={groupName}
-        label="Antwort"
+        label={optionsLabel}
+        variant={optionStyle === "rows" ? "rows" : "list"}
         options={options.map<RadioOption>((o) => ({ value: o.id, label: o.label, hint: o.hint }))}
         value={choice}
         onChange={setChoice}
