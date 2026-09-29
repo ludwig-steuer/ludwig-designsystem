@@ -351,3 +351,52 @@ und der Hinweis zu „Buchungszustand".
 
 - **„Buchungszustand" (T2) hat eine Legende:** neuer Baustein `StatusLegendButton({ title, parts })` neben `StatusInfoButton` — ein (i), das eine Legende aus mehreren Achsen öffnet, jedes Wort aus der Registry: `journal_entry` (alle), `journal_entry_datev_stage` (nur „Exportiert"), `journal_entry_origin` (nur „Mandantenstapel"). Owner 2026-09-29 („bitte eine machen"). Gemessen: (i) 24 × 24 px, Dialog mit sechs Zuständen.
 - **Mehrere BU-Schlüssel (T1, Hinweis ll-dev4):** `EntryRow.taxKeys?: string[]` in Zeilenreihenfolge; die USt-Zelle zeigt jeden als eigenen Link, durch Komma, und bricht um. Ohne `taxKeys` steht `taxKey` allein. Story `WithRunAndDatevId`, erste Zeile.
+
+## Nachprüfung 2026-09-29 (Stand 3265a46) — Legende „Buchungszustand", mehrere BU
+
+Abnehmer: Claude (fremde Sitzung). Storybook 6107 bei 1280 × 900 mit
+Playwright; Code `patterns/StatusInfoButton.tsx`, `AccountEntries.tsx`,
+`journal-entry-columns.tsx`.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| (i) am Kopf „Buchungszustand" ≥ 24 × 24 px | `AccountEntries/InDrawerWithAll` | ✓ 24 × 24 px, `aria-label` „Buchungszustand: Zustände erklären" |
+| Dialog: Wörter und Beschreibungen nur aus der Registry | Code `StatusLegendButton` (`axisLegend`); Dialog gemessen | ✓ sechs Zeilen: Vorschlag · Freigegeben · Gebucht · Zurückgezogen (`journal_entry`), Exportiert (`journal_entry_datev_stage`, nur `exported`), Mandantenstapel (`journal_entry_origin`, nur `client_import`) — genau die Werte, die die Zelle zeigen kann; Wort und Satz aus der Registry, kein eigener Text; Rohwert nur als „Technisch: …" darunter (T4 c) |
+| Tastatur: Enter öffnet, Fokus im Dialog, Esc schließt, Fokus kehrt zurück | `InDrawerWithAll` | ✓ Fokus nach dem Öffnen im Dialog; nach Esc Dialog zu, Fokus wieder auf dem (i) |
+| T1 `taxKeys`: zwei BU als eigene Links | `JournalEntryList/WithRunAndDatevId`, Zeile 1 | ✓ „401, 94": zwei Links `#taxKey=9` und `#taxKey=94`; „9" erscheint in der heutigen Form 401, „94" bleibt ohne § 13b-Fall gespeichert (Regel von `TaxKeyCell`) |
+| kein Überlauf | Zeile 1, Spalte USt 48 px | ✓ zweiter Link endet bei 642 px, Zelle bei 645 px; Zelle ohne Überlauf; Zeilenhöhe 48 px wie die Nachbarzeilen |
+| kein zusätzlicher Querscroll | `WithRunAndDatevId` | ✓ 1454 in 1246, derselbe Wert wie vor 3265a46 |
+
+Hinweis: Die BU-Links messen 23 × 17 bzw. 15 × 17 px; das gehört zu M3
+(setweit).
+
+### Urteil
+
+**Abgenommen** (Legende und `taxKeys`); die offenen Auflagen der Spec (M3, M5,
+M6) bleiben.
+
+## Nachprüfung 2026-09-29 (Stand bf0a6fa) — „Wiederkehrende Buchung"
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Regelübersicht heißt „Wiederkehrende Buchungen des Mandanten" | `RecurringRuleOverview.tsx:115` | ✓; Fehlertext „Die wiederkehrenden Buchungen konnten nicht geladen werden." ✓; Navigation „Wiederkehrende Buchungen" (`NavList.stories.tsx`) ✓ |
+| Guideline T4 mit dem Owner-Entscheid | `design-guidelines.md` T4 | ✓ „**Owner 2026-09-29:** … heißen wie in DATEV „Wiederkehrende Buchung" — nicht „Regelwerk", nicht „Dauersachverhalt" (das bleibt der Sachverhalts-Typ, L-360)" |
+| „Dauersachverhalt" nur als Sachverhalts-Typ | `grep` in `src/` | ✓ in sichtbaren Texten nur als Typ des Sachverhalts (`status-registry.ts:813/814/1763/1849`) |
+
+**M11 — nicht blockierend.** Das Wort „Regelwerk" steht weiter als
+Registry-Wort sichtbar: `journal_entry_origin.recurring_rule` hat das Label
+„Regelwerk" und den Satz „Vom Regelwerk wiederkehrender Buchungen erzeugt."
+(`src/ludwig/ui/status/status-registry.ts:1144`). Es erscheint als Chip in der
+Spalte „Herkunft" von T1 (Story `InBatch`, Satz b3) und T2. Das widerspricht
+dem Owner-Entscheid in T4 („nicht Regelwerk"). Auflage: Label und Satz in der
+Registry auf „Wiederkehrende Buchung" ändern (Systementscheid, mit Datum); als
+Datenmodell der App zusätzlich in `befunde-app.md`.
+
+Hinweis: In `RecurringRuleOverview.stories.tsx:132–136` steht ein deutscher
+JSDoc-Kommentar — ein Verstoß gegen „Nie Deutsch im Quellcode" (auch
+Stories). Er ist nicht neu aus bf0a6fa (nur eine Zeile geändert), und
+`pnpm check:language` erkennt ihn nicht.
+
+### Urteil
+
+**Abgenommen mit Auflagen**: M11.

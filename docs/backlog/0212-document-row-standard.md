@@ -312,3 +312,13 @@ nachgeprüft).
 **Nachprüfung M5 2026-09-29** (Claude, fremde Sitzung, Stand 88d24a4): `SourceDocumentList.tsx` rendert bei `loading` zwei Skelettzeilen und bei `error` die `ErrorRow`, beide in derselben `Table` mit denselben Spuren und Mindestbreite wie die Zeilen; in `v3/Entitäten/Beleg/SourceDocumentList/LoadingAndError` gemessen: Skelettzeile mit fünf Zellen in den fünf Spuren der Kompaktzeile, Fehler mit `role="alert"`, Was-Satz „Die Belege dieses Sachverhalts ließen sich nicht laden.“ und „Erneut laden“ — M5 erledigt. Hinweis, nicht diesem Baustein angelastet: `ErrorRow` (`Cells.tsx:408`, `.v2tbl__error`) setzt den Was-Satz nicht fett, wie T5 es verlangt; das gilt für jede Tabelle des Sets. 0212 bleibt abgenommen mit Auflage M3 (setweit).
 
 **M3 erledigt (Owner 2026-09-29):** `DATE_AXIS_WORD` steht als benannte Ausnahme mit Owner und Datum in `docs/design-guidelines.md` (T4).
+
+**Nachprüfung M3 (`DATE_AXIS_WORD`) 2026-09-29** (Claude, fremde Sitzung,
+Stand 3265a46): Guideline T4 (`docs/design-guidelines.md`) führt jetzt die
+„**Benannte Ausnahme (Owner, 2026-09-29):**" für die drei Wörter der
+Datumsachsen in `source-document-columns.tsx` (`DATE_AXIS_WORD`: Belegdatum ·
+Eingang beim Mandanten · Eingang bei Ludwig), mit Grund (keine Registry-Achse)
+und Ausweg (Umzug, sobald es eine gibt). Owner und Datum stehen, die Ausnahme
+ist benannt; der Teil „lokale Label-Map" dieses M3 ist erledigt. Offen bleibt
+von 0212 nur M2 (Trefferflächen, setweit). Urteil: **abgenommen mit Auflage
+M2**.
