@@ -301,3 +301,30 @@ Befund unabhängig und mit einer direkten Messung der Wortbreite (statt einer
 Schätzung).
 
 **Nachbesserung 2026-09-29 (nach der fremden Abnahme):** M1 — Fortschritt in der schmalen Kompaktzeile `minmax(224px, …)` statt 170: Strip + Zeichen + das längste Stand-Wort („Keine Buchung nötig", 122 px). Gemessen: Wort 122 von 122 px, Box 520 = 520. M2 — der Story-Kommentar über `WithParts` beschreibt die Box in der Spalte. Die Story „ITEMS" im Faden war ein Fixture-Export; er liegt jetzt in `clarification/thread-fixtures.ts`.
+
+## Nachprüfung 2026-09-29 (M1)
+
+Abnehmer: Claude (fremde Sitzung). Stand a3c41bc. Storybook 6107 bei
+1280 × 900 mit Playwright, dieselbe Sonde wie in der vorigen Nachtrags-Abnahme
+(echtes `.pz-cell`/`.pz-cell__word`-Markup in die lebende Fortschritt-Zelle
+von `SourceDocumentCard/WithParts` eingefügt, `scrollWidth` gegen
+`clientWidth` gelesen, wieder entfernt — die Story liefert weiterhin kein
+`partProcessPicture`, also kein echtes Stand-Wort von sich aus).
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Fortschritt-Spur 224 px | `WithParts`, `<td>` der dritten Spalte | ✓ 224 px (`--v2-cols: minmax(130px, 1.4fr) 104px minmax(224px, 1fr)`); Beleg-Spalte dafür auf 136 px geschrumpft |
+| „Vorgeschlagen" ungekürzt | Sonde | ✓ 88 = 88 px |
+| „Bereit zur Buchung" ungekürzt | Sonde | ✓ 113 = 113 px |
+| „Keine Buchung nötig" ungekürzt | Sonde | ✓ 122 = 122 px (Zelle 217 px, Spur 224 px) |
+| Box ohne Querscroll | `.v2tbl__scroll` | ✓ 520 = 520, unverändert vor und nach der Sonde |
+| M2: Story-Kommentar korrigiert | `SourceDocumentCard.stories.tsx:170–173` | ✓ „eine eigene Box als letzte in der rechten Spalte … in der schmalen Kompaktzeile" — die falsche Behauptung „unter den zwei Spalten" ist weg |
+| `pnpm typecheck` · `check:language` · `check:when` · `check:type` | CLI | ✓ alle vier Exit 0 |
+
+M1 und M2 sind behoben. Der Hinweis zum `#parts`-Sprung aus dem letzten
+Nachtrag (keine Story spielt einen echten Klick von einem Klassifikations-Link
+bis zur Box durch) ist unverändert und war nicht Teil dieses Auftrags.
+
+### Urteil (neu)
+
+**Abgenommen.**

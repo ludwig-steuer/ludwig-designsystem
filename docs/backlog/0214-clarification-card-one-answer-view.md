@@ -232,3 +232,9 @@ auslagern, damit der Storybook-Index der Spec-Story-Liste wieder entspricht.
 **Abgenommen.** M5 und M6 sind, wie in der „Nachbesserung 2" behauptet,
 gebaut und wirksam. M4 bleibt offen (setweit, Backlog 0213, unverändert aus
 der vorigen Nachprüfung).
+
+**Nachtrag 2026-09-29 (Stand a3c41bc):** Der Hinweis oben ist erledigt — die
+Fixture `ITEMS` liegt jetzt in `clarification/thread-fixtures.ts`, die
+Story-„ITEMS" ist aus dem Storybook-Index verschwunden, und
+`ClarificationCard/InBatchReview` zeigt den Verlauf weiter unverändert
+(„Verlauf" mit Anzahl 5, aus derselben Fixture importiert).
