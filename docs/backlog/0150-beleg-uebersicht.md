@@ -299,3 +299,5 @@ Stories (`DocumentClassification`-Fixtures nutzen `#children`/`#parent`, nicht
 Prüfstand (004d2d3) nicht angefasst worden; diese Sitzung bestätigt den
 Befund unabhängig und mit einer direkten Messung der Wortbreite (statt einer
 Schätzung).
+
+**Nachbesserung 2026-09-29 (nach der fremden Abnahme):** M1 — Fortschritt in der schmalen Kompaktzeile `minmax(224px, …)` statt 170: Strip + Zeichen + das längste Stand-Wort („Keine Buchung nötig", 122 px). Gemessen: Wort 122 von 122 px, Box 520 = 520. M2 — der Story-Kommentar über `WithParts` beschreibt die Box in der Spalte. Die Story „ITEMS" im Faden war ein Fixture-Export; er liegt jetzt in `clarification/thread-fixtures.ts`.

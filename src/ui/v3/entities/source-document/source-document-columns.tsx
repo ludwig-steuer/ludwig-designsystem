@@ -419,7 +419,9 @@ export function sourceDocumentColumns({
       headerAside: <StatusInfoButton axis="document_status" />,
       // Room for the longest state word („Keine Buchung nötig") beside the
       // strip; with it V5 grouped (amount, pages) stands in 1246 px (G6, G8).
-      width: variant === "narrow" ? "minmax(170px, 1fr)" : variant === "compact" ? "minmax(200px, 1fr)" : "minmax(236px, 1fr)",
+      // Narrow 224: strip (64) + sign + the longest state word („Keine Buchung
+      // nötig", 122 px) — at 170 the word kept 75 px (acceptance 0150, M1).
+      width: variant === "narrow" ? "minmax(224px, 1fr)" : variant === "compact" ? "minmax(200px, 1fr)" : "minmax(236px, 1fr)",
       cell: (d) => {
         const p = processPicture?.(d);
         // Without a picture the old completion stands until the app derives it

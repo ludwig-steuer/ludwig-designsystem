@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardHead } from "../../primitives/Table";
 import { ClarificationCard, type ClarificationDetailVM } from "./ClarificationCard";
 import { ClarificationThread } from "./ClarificationThread";
-import { ITEMS as THREAD } from "./ClarificationThread.stories";
+import { ITEMS as THREAD } from "./thread-fixtures";
 import type { ClarificationVM } from "./Clarification";
 
 const meta: Meta<typeof ClarificationCard> = {

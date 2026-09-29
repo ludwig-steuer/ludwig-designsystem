@@ -168,9 +168,9 @@ export const WithoutPreview: Story = {
 };
 
 /**
- * Ein Sammel-PDF mit seinen Teilbelegen: die Liste steht **unter** den zwei
- * Spalten, nicht in der Faktenspalte — sie ist eine eigene Entität in ihrer
- * eigenen Form.
+ * Ein Sammel-PDF mit seinen Teilbelegen: eine eigene Box als letzte in der
+ * rechten Spalte (Owner 2026-09-29), in der schmalen Kompaktzeile — Belegart
+ * und Datum unter dem Namen.
  */
 export const WithParts: Story = {
   render: () => (
