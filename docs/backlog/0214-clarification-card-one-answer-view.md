@@ -54,9 +54,10 @@
 ## Stories
 
 `ClarificationCard`: `InBatchReview` (Sachverhalt-Link, Empfehlung, Grundlage,
-vier Gruppen mit genannten Einträgen, Antwortoptionen, Knopfzeile) ·
-`AtCase` (ohne Link) · `Deferred` (Aufheben in der Knopfzeile) · `FreeTextOnly`
-· bestehende Stories bleiben.
+vier Gruppen mit genannten Einträgen, Antwortoptionen, Auswege, Verlauf
+darunter) · `AtCaseFreeText` (ohne Link, nur Antwortfeld) · `DeferredWithUndo`
+(Aufheben als kleine Zeile) · bestehende Stories bleiben. `ClarificationThread`:
+`Thread` · `Single`. `RadioGroup/Rows` · `ChoicePrompt/OptionRows`.
 
 ## Gebaut 2026-09-29
 
@@ -191,3 +192,5 @@ Nachbesserung.
 **Abgenommen mit Auflagen**: M6 (Rest von M3); M4 setweit; M5 zur Hälfte
 (ChoicePrompt-Story, Story-Namen in der Spec).
 
+
+**Nachbesserung 2 (M5, M6):** Story `ChoicePrompt/OptionRows`, Story-Liste der Spec nachgezogen; „gefragt von" auch nicht, wenn `raisedBy` Ludwig selbst ist (`kind: "agent"`).

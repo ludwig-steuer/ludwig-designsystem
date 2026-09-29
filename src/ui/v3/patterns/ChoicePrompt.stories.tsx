@@ -159,3 +159,25 @@ export const InCase: Story = {
     </div>
   ),
 };
+
+/** A clarification's answer (0214): „Antwortoptionen" as whole rows, the question above it in the card (`hideQuestion`), the free text beside the options. */
+export const OptionRows: Story = {
+  render: () => (
+    <div style={{ maxWidth: 560 }}>
+      <ChoicePrompt
+        question="Soll der Beleg als Bewirtung oder als Reisekosten gebucht werden?"
+        hideQuestion
+        optionsLabel="Antwortoptionen"
+        optionStyle="rows"
+        options={[
+          { id: "a", label: "Bewirtung (4650)" },
+          { id: "b", label: "Reisekosten (4670)" },
+        ]}
+        defaultOptionId="b"
+        freeText={{ label: "Oder selbst formulieren" }}
+        submitLabel="Antwort speichern"
+        onSubmit={async () => wait(600)}
+      />
+    </div>
+  ),
+};

@@ -6,6 +6,7 @@ import { Row, Table } from "../../primitives/Table";
 import type { SourceDocumentVM } from "./SourceDocument";
 import {
   COMPACT_VIEW,
+  NARROW_VIEW,
   sourceDocumentColumns,
   sourceDocumentMinWidth,
   sourceDocumentTracks,
@@ -41,6 +42,7 @@ export function SourceDocumentList({
   classificationPicture,
   loading,
   error,
+  variant = "compact",
 }: {
   documents: readonly SourceDocumentVM[];
   /** Which of the two empty cases holds. Defaults to the gap, not the success. */
@@ -55,10 +57,12 @@ export function SourceDocumentList({
   loading?: boolean;
   /** Loading failed: what failed, and the way to try again (T5, I7). */
   error?: { message: string; retry?: ReactNode };
+  /** `narrow` for a side column of ~500 px: kind and date under the name (the parts box). */
+  variant?: "compact" | "narrow";
 }) {
   const columns = sourceDocumentColumns({
-    columns: COMPACT_VIEW,
-    variant: "compact",
+    columns: variant === "narrow" ? NARROW_VIEW : COMPACT_VIEW,
+    variant,
     // Only rows that lead somewhere are links: no `#` for a document without a way.
     ...(href ? { href } : documents.some((d) => d.href) ? { href: (d: SourceDocumentVM) => d.href ?? "#" } : {}),
     ...(processPicture ? { processPicture } : {}),

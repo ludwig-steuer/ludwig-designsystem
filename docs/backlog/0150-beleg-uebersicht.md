@@ -197,3 +197,17 @@ Fall falsch.
 
 - [ ] `wording.payment_account.title`/`hint` ersetzen Satz und Folgezeile (Story `StatementDoesNotBalance`)
 - [ ] Ohne `wording` unverändert (Story `StatementWithoutAccount`)
+
+
+## Nachtrag 2026-09-29 (Owner, über ll-dev)
+
+Die rechte Spalte hat eine neue feste Reihenfolge: **Belegdaten → Weg des
+Belegs (`history`, 0210) → Befunde und Klärungen → Umsatzsteuer →
+Teilbelege**. Die Teilbelege stehen nicht mehr unter beiden Spalten, sondern
+als eigene Box mit Kopf in der Spalte (`id="parts"` bleibt für den
+Prozess-Dialog und den Bündel-Link der Einordnung). Weil die Spalte bei 1280 px
+nur 522 px breit ist, zeigt die Box die schmale Kompaktzeile
+(`SourceDocumentList variant="narrow"`, `NARROW_VIEW`): Beleg mit „Belegart ·
+Datum" darunter, Betrag, Fortschritt — nichts fällt weg. Gemessen: Box 520 =
+520, kein Querscroll, kein Stand-Wort gekürzt. Die Props der Karte bleiben
+gleich; im Drawer (`tone="bare"`) wandern die Teilbelege mit.

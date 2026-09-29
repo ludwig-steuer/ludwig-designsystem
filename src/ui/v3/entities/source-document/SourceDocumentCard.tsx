@@ -8,6 +8,7 @@ import {
   type SourceDocumentGroup,
 } from "./SourceDocumentFacts";
 import { Columns } from "../../patterns/Columns";
+import { Card, CardHead } from "../../primitives/Table";
 import { SourceDocumentList } from "./SourceDocumentList";
 import type { SourceDocumentColumnOptions } from "./source-document-columns";
 import { SourceDocumentPreview, type SourceDocumentOriginal } from "./SourceDocumentPreview";
@@ -90,9 +91,11 @@ export interface SourceDocumentCardProps {
    * the defects from the domain, the VAT from the invoice line, the events
    * from the audit log — and the card loads nothing (E2).
    *
-   * The order is fixed: facts, then what somebody has to do, then the two
-   * previews. A box that moves depending on what is in it makes the page
-   * unreadable for whoever works through fifty of them in a row.
+   * The order is fixed: facts, then the way of the document (`history`), then
+   * what somebody has to do, then the VAT, then the parts (owner 2026-09-29 —
+   * until then the way came last and the parts stood below both columns). A
+   * box that moves depending on what is in it makes the page unreadable for
+   * whoever works through fifty of them in a row.
    */
   defects?: ReactNode;
   vat?: ReactNode;
@@ -174,26 +177,34 @@ export function SourceDocumentCard({
             {...(factsTitle !== undefined ? { title: factsTitle } : {})}
             {...(counterpartyHref ? { counterpartyHref } : {})}
           />
+          {/* Owner 2026-09-29: the way of the document comes second, right
+              under its facts — what happened to it is the next question after
+              what it is. Then defects, VAT, and the parts as a box of their
+              own. The order stays fixed. */}
+          {history}
           {defects}
           {vat}
-          {history}
+          {parts && parts.length > 0 ? (
+            // `id="parts"`: the process dialog („Zu den n Teilbelegen") and the
+            // classification's bundle link point here (G5). A box in the side
+            // column like the others (owner 2026-09-29); the narrow row keeps
+            // kind and date under the name.
+            <div id="parts">
+              <Card>
+                <CardHead title="Teilbelege" meta={<span className="v2muted">{parts.length}</span>} />
+                <SourceDocumentList
+                  documents={parts}
+                  variant="narrow"
+                  {...(partHref ? { href: partHref } : {})}
+                  {...(partProcessPicture ? { processPicture: partProcessPicture } : {})}
+                  {...(partClassificationPicture ? { classificationPicture: partClassificationPicture } : {})}
+                />
+              </Card>
+            </div>
+          ) : null}
           </div>
         }
       />
-
-      {parts && parts.length > 0 ? (
-        // `id="parts"`: the process dialog („Zu den n Teilbelegen") and the
-        // classification's bundle link point here (G5).
-        <div className="v2doccard__parts" id="parts">
-          <div className="v2doc__h">Teilbelege</div>
-          <SourceDocumentList
-            documents={parts}
-            {...(partHref ? { href: partHref } : {})}
-            {...(partProcessPicture ? { processPicture: partProcessPicture } : {})}
-            {...(partClassificationPicture ? { classificationPicture: partClassificationPicture } : {})}
-          />
-        </div>
-      ) : null}
 
       {children}
     </div>

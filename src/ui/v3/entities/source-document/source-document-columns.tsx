@@ -121,6 +121,12 @@ export const UNBOOKED_VIEW: SourceDocumentColumn[] = ["document", "classificatio
 export const UNBOOKED_GROUPED_VIEW: SourceDocumentColumn[] = ["document", "classification", "pages", "amount", "documentDate", "progress", "reason", "case"];
 /** K · the compact row, a document named in foreign context — no head, one line each. */
 export const COMPACT_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress"];
+/**
+ * K narrow — for a side column of ~500 px (the parts box of the document
+ * page, owner 2026-09-29): kind and date move under the name, nothing is
+ * dropped. Use with `variant: "narrow"`.
+ */
+export const NARROW_VIEW: SourceDocumentColumn[] = ["document", "amount", "progress"];
 
 /**
  * The year's list: „no unfinished document is left behind in the year." The
@@ -236,7 +242,7 @@ export interface SourceDocumentColumnOptions {
     entryHref?: (entryId: string) => string;
   } | null;
   /** `compact` = the row K: classification as a word, progress on one line without holder. */
-  variant?: "full" | "compact";
+  variant?: "full" | "compact" | "narrow";
   /**
    * Which date the list is sorted by — the row always shows the document date
    * (owner E5), the axis is chosen at the column head (brief F335 §3 V2, hint
@@ -368,8 +374,8 @@ export function sourceDocumentColumns({
     document: {
       key: "document",
       header: "Beleg",
-      width: variant === "compact" ? "minmax(130px, 1.4fr)" : "minmax(170px, 1.4fr)",
-      sortable: variant !== "compact",
+      width: variant !== "full" ? "minmax(130px, 1.4fr)" : "minmax(170px, 1.4fr)",
+      sortable: variant === "full",
       cell: (d) => {
         const head = documentHead(d);
         const number = documentNumber(d);
@@ -390,7 +396,19 @@ export function sourceDocumentColumns({
             {/* The number as a small second line (owner E4) — for the match with
                 Belegfeld 1; no second line where there is none. Compact keeps
                 one line: the number goes into the card. */}
-            {number && variant !== "compact" ? <span className="v2sub v2mono">{number}</span> : null}
+            {number && variant === "full" ? <span className="v2sub v2mono">{number}</span> : null}
+            {/* Narrow: kind and date under the name — the columns they had do not fit (owner 2026-09-29). */}
+            {variant === "narrow" ? (
+              <span className="v2sub">
+                {sourceDocTypeLabel(d.sourceDocType, d.classDocumentForm)}
+                {d.documentDate ? (
+                  <>
+                    {" · "}
+                    <Time value={d.documentDate} format="date" size="sm" />
+                  </>
+                ) : null}
+              </span>
+            ) : null}
           </span>
         );
       },
@@ -401,13 +419,13 @@ export function sourceDocumentColumns({
       headerAside: <StatusInfoButton axis="document_status" />,
       // Room for the longest state word („Keine Buchung nötig") beside the
       // strip; with it V5 grouped (amount, pages) stands in 1246 px (G6, G8).
-      width: variant === "compact" ? "minmax(200px, 1fr)" : "minmax(236px, 1fr)",
+      width: variant === "narrow" ? "minmax(170px, 1fr)" : variant === "compact" ? "minmax(200px, 1fr)" : "minmax(236px, 1fr)",
       cell: (d) => {
         const p = processPicture?.(d);
         // Without a picture the old completion stands until the app derives it
         // (F306) — never an empty cell.
         return p ? (
-          <ProcessPictureTrigger picture={p.picture} detail={p.detail} size="cell" density={variant === "compact" ? "narrow" : "regular"} />
+          <ProcessPictureTrigger picture={p.picture} detail={p.detail} size="cell" density={variant === "full" ? "regular" : "narrow"} />
         ) : (
           <SourceDocumentCompletion document={d} />
         );
@@ -586,7 +604,7 @@ export function sourceDocumentColumns({
     amount: {
       key: "amount",
       header: "Betrag",
-      width: variant === "compact" ? "104px" : "112px",
+      width: variant !== "full" ? "104px" : "112px",
       align: "end",
       sortable: true,
       // Empty, not an em dash, where the kind of document has no measure: a
@@ -784,7 +802,7 @@ export function sourceDocumentColumns({
       cell: (d) => {
         const c = classificationPicture?.(d);
         return c ? (
-          <ClassificationTrigger picture={c.picture} detail={c.detail} size="cell" density={variant === "compact" ? "narrow" : "regular"} />
+          <ClassificationTrigger picture={c.picture} detail={c.detail} size="cell" density={variant === "full" ? "regular" : "narrow"} />
         ) : (
           <SourceDocumentClass document={d} />
         );

@@ -598,9 +598,11 @@ export function ClarificationCard({
         <p className="v2clc__meta">
           {isComment ? "Notiz" : `Gefragt ist: ${AUDIENCE_LABEL[c.audience]}`}
           {/* Who asked — several people work on one case (owner 2026-09-29, 0214). */}
-          {/* Only when a person or the system is known — without it the origin
-              word already says „von Ludwig" (acceptance 0214, M3). */}
-          {c.raisedBy ? ` · ${isComment ? "von" : "gefragt von"} ${actorName(c.raisedBy, "Ludwig")}` : ""}
+          {/* Only when a person or the system asked — for Ludwig the origin word
+              already says „von Ludwig" (acceptance 0214, M3/M6). */}
+          {c.raisedBy && !(typeof c.raisedBy !== "string" && c.raisedBy.kind === "agent")
+            ? ` · ${isComment ? "von" : "gefragt von"} ${actorName(c.raisedBy, "Ludwig")}`
+            : ""}
           {questionWord ? ` · ${questionWord}` : ""}
           {originWord ? ` · ${originWord}` : ""}
           {" · "}
